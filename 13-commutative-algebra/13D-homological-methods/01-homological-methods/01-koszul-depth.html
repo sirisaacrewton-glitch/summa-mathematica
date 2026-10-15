@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>コシュル複体と深さ | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="13-commutative-algebra/13D-homological-methods/01-homological-methods/01-koszul-depth.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# コシュル複体と深さ {#ring:page-koszul-depth keywords="Koszul complex, mapping cone, Koszul homology, depth via Koszul homology, regular sequence acyclic, depth sensitivity"}
+
+元 $x_{1},\dots,x_{n}\in A$ と加群 $M$ から作る**コシュル複体** $K(x_{1},\dots,x_{n};M)$ は、「$x_{1},\dots,x_{n}$ で $M$ を割る」操作をホモロジー代数的に行う有限な複体である。$0$ 次のホモロジーは $M/(x_{1},\dots,x_{n})M$、$n$ 次のホモロジーは $(x_{1},\dots,x_{n})$ で消される元の全体で、その間のホモロジーは「割り方がどれだけ正則列から外れているか」を測る。このページでは、コシュル複体を「$x_{n}$ 倍の写像錐」として帰納的に定義し、正則列ならホモロジーが $0$ 次以外で消えること（\ref{ring:koszul-regular-acyclic}）、深さが「消えないホモロジーの最高次数」で計算できること（\ref{ring:koszul-depth-sensitivity}）、局所環では $H_{1}=0$ だけで正則列が判定できること（\ref{ring:koszul-h1-local}）を示す。正則局所環の剰余体の自由分解を与えるのもこの複体で、次のページ以降の基本的な道具になる。
+
+> 松村『可換環論』§16 の内容を参考にした。外積代数による定義ではなく写像錐による帰納的な定義を採り、証明はそれに合わせて組み立て直した。
+
+## 記法と定義の確認 {#ring:sec-kz-notation}
+
+::: notation
+- 環は可換、$A$ は環、$M$ は $A$ 加群。鎖複体・ホモロジー・長完全列は \ref{ha:chain-complex}, \ref{ha:homology}, \ref{ha:long-exact-sequence}、連結射のジグザグの公式は \ref{ha:connecting-natural}、鎖ホモトピーとホモトピー不変性は \ref{ha:chain-homotopy}, \ref{ha:homotopy-invariance}。鎖複体の微分は $d$ と書き、次数を下げる（$d\colon C_{p}\to C_{p-1}$）。
+- 正則列・深さ $\operatorname{depth}_{I}M$ は \ref{ring:regular-sequence}, \ref{ring:depth-ext}、零因子からなるイデアルは \ref{ring:ideal-of-zero-divisors}、中山の補題は \ref{ring:nakayama}。
+- $(0:_{M}J)\defeq\{m\in M : Jm=0\}$（$J\subset A$ はイデアル）。$\boldsymbol{x}=(x_{1},\dots,x_{n})$ と略記し、$(\boldsymbol{x})$ はそれらが生成するイデアル。
+- 鎖複体 $C$ と $a\in A$ について、各次数での $a$ 倍の写像 $a\colon C\to C$ は鎖写像（微分が $A$ 線形なので $d(ac)=a\,dc$）で、$H_{p}(a)$ は $H_{p}(C)$ 上の $a$ 倍である。
+- **選択公理**：コシュル複体の構成と、正則列なら非輪状であること（\ref{ring:koszul-regular-acyclic}）には使わない。深さとの関係（\ref{ring:koszul-depth-sensitivity}）では、\ref{ring:ideal-of-zero-divisors} と \ref{ring:depth-ext} を通して使う。局所環での判定（\ref{ring:koszul-h1-local}）では中山の補題を通して使う。
+:::
+
+## 写像錐とコシュル複体 {#ring:sec-kz-definition}
+
+::: definition 写像錐 {#ring:mapping-cone keywords="mapping cone of a chain map f: C -> C" index="写像錐|しゃぞうすい"}
+$A$ 加群の鎖複体 $C$ と鎖写像 $f\colon C\to C$ について、**写像錐** $\operatorname{Cone}(f)$ を
+$$
+\operatorname{Cone}(f)_{p}\defeq C_{p-1}\oplus C_{p},\qquad d(a,b)\defeq(-da,\ f(a)+db)
+$$
+で定める（$a\in C_{p-1}$, $b\in C_{p}$）。
+:::
+
+::: lemma 写像錐の長完全列 {#ring:cone-long-exact keywords="long exact sequence of the mapping cone, connecting map equals H(f)" index="写像錐の長完全列|しゃぞうすいのちょうかんぜんれつ"}
+$\operatorname{Cone}(f)$ は鎖複体で、完全列
+$$
+\cdots\to H_{p}(C)\xrightarrow{H_{p}(f)}H_{p}(C)\to H_{p}(\operatorname{Cone}(f))\to H_{p-1}(C)\xrightarrow{H_{p-1}(f)}H_{p-1}(C)\to\cdots
+$$
+がある。特に、各 $p$ について短完全列
+$$
+0\to H_{p}(C)/\operatorname{Im}H_{p}(f)\to H_{p}(\operatorname{Cone}(f))\to\operatorname{Ker}H_{p-1}(f)\to 0
+$$
+がある。
+:::
+
+::: proof
+**Step 1（$d^{2}=0$）.** $d(d(a,b))=d(-da,\ f(a)+db)=(d^{2}a,\ -f(da)+d(f(a))+d^{2}b)=(0,\ -f(da)+d(f(a)))$。$f$ は鎖写像なので $d(f(a))=f(da)$ で、これは $0$。
+
+**Step 2（短完全列）.** $C[-1]$ を $C[-1]_{p}\defeq C_{p-1}$、微分 $-d$ の鎖複体とする（微分の符号を変えてもサイクルと境界は変わらないので $H_{p}(C[-1])=H_{p-1}(C)$）。$i(b)\defeq(0,b)$, $q(a,b)\defeq a$ とすると、$d(0,b)=(0,db)$, $q(d(a,b))=-da$ なので $i,q$ は鎖写像で、各次数で $0\to C_{p}\xrightarrow{i}\operatorname{Cone}(f)_{p}\xrightarrow{q}C_{p-1}\to 0$ は完全（直和の包含と射影）。\ref{ha:long-exact-sequence} から長完全列
+$$
+\cdots\to H_{p}(C)\xrightarrow{H_{p}(i)}H_{p}(\operatorname{Cone}(f))\xrightarrow{H_{p}(q)}H_{p-1}(C)\xrightarrow{\ \delta\ }H_{p-1}(C)\to\cdots
+$$
+を得る。
+
+**Step 3（連結射は $H(f)$）.** サイクル $a\in C_{p-1}$（$da=0$）を $q$ で持ち上げると $(a,0)$ で、$d(a,0)=(-da,f(a))=(0,f(a))=i(f(a))$。ジグザグの公式（\ref{ha:connecting-natural} の 1）から $\delta[a]=[f(a)]=H_{p-1}(f)[a]$。
+
+**Step 4（短完全列）.** 長完全列で $H_{p}(\operatorname{Cone}(f))$ に入る写像の核は $\operatorname{Im}H_{p}(f)$、出る写像の像は $\operatorname{Ker}H_{p-1}(f)$ なので、短完全列が従う。
+:::
+
+::: definition コシュル複体 {#ring:koszul-complex keywords="Koszul complex K(x_1,...,x_n;M) defined inductively as an iterated mapping cone" index="コシュル複体|こしゅるふくたい, コシュルホモロジー|こしゅるほもろじー"}
+$x_{1},\dots,x_{n}\in A$ と $A$ 加群 $M$ について、**コシュル複体** $K(\boldsymbol{x};M)=K(x_{1},\dots,x_{n};M)$ を $n$ についての帰納法で定める。
+1. $K(\varnothing;M)$ は $0$ 次に $M$ を置き、他は $0$ の複体。
+2. $n\ge 1$ のとき、$K'\defeq K(x_{1},\dots,x_{n-1};M)$ として $K(\boldsymbol{x};M)\defeq\operatorname{Cone}(x_{n}\colon K'\to K')$。
+
+$H_{p}(\boldsymbol{x};M)\defeq H_{p}(K(\boldsymbol{x};M))$ を**コシュルホモロジー**という。
+:::
+
+::: example 小さい $n$
+1. $n=1$：$K(x;M)$ は $0\to M\xrightarrow{x}M\to 0$（$1$ 次と $0$ 次）。実際、$K_{1}=M\oplus 0$, $K_{0}=0\oplus M$, $d(a,0)=(0,xa)$。よって $H_{0}=M/xM$, $H_{1}=(0:_{M}x)$。
+2. $n=2$：$K(x,y;M)$ は
+$$
+0\to M\xrightarrow{\ \begin{pmatrix}-x\\ y\end{pmatrix}\ }M^{2}\xrightarrow{\ (y\ \ x)\ }M\to 0.
+$$
+実際、$K'=K(x;M)$ について $K_{2}=K'_{1}\oplus K'_{2}=M\oplus 0$、$K_{1}=K'_{0}\oplus K'_{1}=M\oplus M$、$K_{0}=0\oplus K'_{0}=M$ で、$d(a,0)=(-xa,\ ya)$（$K_{2}\to K_{1}$）、$d(a,b)=(0,\ ya+xb)$（$K_{1}\to K_{0}$、$K'_{0}$ 上の $d'$ は $0$）。
+:::
+
+::: proposition コシュル複体の基本性質 {#ring:koszul-basic keywords="K_p is M^binom(n,p), H_0 = M/(x)M, H_n = (0:_M (x)), functoriality and exactness in M" index="コシュル複体の基本性質|こしゅるふくたいのきほんせいしつ"}
+1. $K_{p}(\boldsymbol{x};M)\cong M^{\binom{n}{p}}$（$0\le p\le n$）、$K_{p}=0$（$p<0$ または $p>n$）。微分の成分は $0$ か $\pm x_{i}$ 倍である。
+2. $H_{0}(\boldsymbol{x};M)\cong M/(\boldsymbol{x})M$、$H_{n}(\boldsymbol{x};M)\cong(0:_{M}(\boldsymbol{x}))$。
+3. $A$ 準同型 $\varphi\colon M\to N$ は鎖写像 $K(\boldsymbol{x};\varphi)\colon K(\boldsymbol{x};M)\to K(\boldsymbol{x};N)$ を誘導し（各成分で $\varphi$ を施す）、$A$ 加群の短完全列 $0\to M'\to M\to M''\to 0$ は鎖複体の短完全列 $0\to K(\boldsymbol{x};M')\to K(\boldsymbol{x};M)\to K(\boldsymbol{x};M'')\to 0$ を誘導する。
+:::
+
+::: proof
+いずれも $n$ についての帰納法。$n=0$ では明らか（$H_{0}=M$、$(0:_{M}(\varnothing))=M$）。$n\ge 1$ とし、$K'=K(x_{1},\dots,x_{n-1};M)$ について成り立つとする。
+
+**Step 1（1）.** $K_{p}=K'_{p-1}\oplus K'_{p}\cong M^{\binom{n-1}{p-1}}\oplus M^{\binom{n-1}{p}}=M^{\binom{n}{p}}$（パスカルの関係）。$p<0$ や $p>n$ では両方の成分が $0$。微分 $d(a,b)=(-d'a,\ x_{n}a+d'b)$ の成分は $-d'$, $d'$ の成分か $x_{n}$ 倍。
+
+**Step 2（$H_{0}$）.** \ref{ring:cone-long-exact} の $p=0$ の短完全列で $H_{-1}(K')=0$ なので、$H_{0}(K)\cong H_{0}(K')/x_{n}H_{0}(K')\cong(M/(x_{1},\dots,x_{n-1})M)/x_{n}(\cdots)\cong M/(\boldsymbol{x})M$。
+
+**Step 3（$H_{n}$）.** $p=n$ の短完全列で $H_{n}(K')=0$（$K'_{n}=0$）なので、$H_{n}(K)\cong\operatorname{Ker}(x_{n}\colon H_{n-1}(K')\to H_{n-1}(K'))$。帰納法の仮定から $H_{n-1}(K')\cong(0:_{M}(x_{1},\dots,x_{n-1}))$ で、その中で $x_{n}$ に消される元の全体は $(0:_{M}(\boldsymbol{x}))$。（この同型は $A$ 線形なので $x_{n}$ 倍と可換。）
+
+**Step 4（3）.** $K(\boldsymbol{x};\varphi)$ を $K(\boldsymbol{x};\varphi)_{p}\defeq K(x_{1},\dots,x_{n-1};\varphi)_{p-1}\oplus K(x_{1},\dots,x_{n-1};\varphi)_{p}$ で定める。帰納法の仮定から $\varphi'\defeq K(x_{1},\dots,x_{n-1};\varphi)$ は $d'$ と可換で、$A$ 線形なので $x_{n}$ 倍とも可換。よって $\varphi'\oplus\varphi'$ は $d(a,b)=(-d'a,x_{n}a+d'b)$ と可換。短完全列については、各次数で $K_{p}(\boldsymbol{x};-)$ は $M\mapsto M^{\binom{n}{p}}$ と同一視でき（1 の同型は $\varphi$ と可換になるように取れる）、短完全列の直和は短完全列。
+:::
+
+## ホモロジーを消す元 {#ring:sec-kz-annihilation}
+
+::: proposition コシュルホモロジーは $(\boldsymbol{x})$ で消える {#ring:koszul-annihilated keywords="each x_i acts as zero on Koszul homology; null-homotopy of multiplication by x_i" index="コシュルホモロジーの零化|こしゅるほもろじーのれいか"}
+各 $i$ について、$x_{i}$ 倍の写像 $K(\boldsymbol{x};M)\to K(\boldsymbol{x};M)$ は $0$ と鎖ホモトピックである。したがって $(\boldsymbol{x})H_{p}(\boldsymbol{x};M)=0$（すべての $p$）。
+:::
+
+::: proof
+$n$ についての帰納法で、各 $i\le n$ について $ds+sd=x_{i}$ となる $A$ 線形な $s\colon K_{p}\to K_{p+1}$ を作る。$n=0$ では示すことがない。$K=\operatorname{Cone}(x_{n}\colon K'\to K')$ とする。
+
+**Step 1（$i=n$）.** $s(a,b)\defeq(b,0)$（$(a,b)\in K'_{p-1}\oplus K'_{p}$ を $K'_{p}\oplus K'_{p+1}$ へ）とおく。
+$$
+ds(a,b)=d(b,0)=(-d'b,\ x_{n}b),\qquad sd(a,b)=s(-d'a,\ x_{n}a+d'b)=(x_{n}a+d'b,\ 0).
+$$
+和は $(x_{n}a,\ x_{n}b)$。
+
+**Step 2（$i<n$）.** 帰納法の仮定から $K'$ 上に $d'h+hd'=x_{i}$ となる $A$ 線形な $h$ がある。$S(a,b)\defeq(-ha,\ hb)$ とおくと、
+$$
+dS(a,b)=d(-ha,\ hb)=(d'ha,\ -x_{n}ha+d'hb),
+$$
+$$
+Sd(a,b)=S(-d'a,\ x_{n}a+d'b)=(hd'a,\ x_{n}ha+hd'b)
+$$
+（$h$ は $A$ 線形なので $h(x_{n}a)=x_{n}ha$）。和は $((d'h+hd')a,\ (d'h+hd')b)=(x_{i}a,\ x_{i}b)$。
+
+**Step 3（ホモロジー）.** \ref{ha:homotopy-invariance} から $H_{p}(x_{i})=H_{p}(0)=0$。$H_{p}(x_{i})$ は $H_{p}$ 上の $x_{i}$ 倍（記法の欄）なので、$x_{i}H_{p}=0$。
+:::
+
+::: remark
+特に $(\boldsymbol{x})=A$（たとえば $x_{1}$ が単元）なら、$1\in(\boldsymbol{x})$ が $H_{p}$ を消すので、すべての $H_{p}(\boldsymbol{x};M)$ が $0$ である。
+:::
+
+## 正則列と非輪状性 {#ring:sec-kz-regular}
+
+::: theorem 正則列のコシュル複体は非輪状 {#ring:koszul-regular-acyclic keywords="if x is an M-regular sequence then H_p(x;M)=0 for p>0; Koszul complex is a free resolution of A/(x)" index="コシュル複体の非輪状性|こしゅるふくたいのひりんじょうせい"}
+$x_{1},\dots,x_{n}$ が $M$ 正則列の条件 1（各 $x_{i}$ が $M/(x_{1},\dots,x_{i-1})M$ の非零因子）をみたせば、$H_{p}(\boldsymbol{x};M)=0$（$p\ge 1$）。特に $x_{1},\dots,x_{n}$ が $A$ 正則列なら、$K(\boldsymbol{x};A)$ は $A/(\boldsymbol{x})$ の長さ $n$ の自由分解
+$$
+0\to A^{\binom{n}{n}}\to\cdots\to A^{\binom{n}{1}}\to A\to A/(\boldsymbol{x})\to 0
+$$
+を与える。
+:::
+
+::: proof
+$n$ についての帰納法。$n=0$ では $K=M$（$0$ 次のみ）で明らか。$n\ge 1$ とし、$K'=K(x_{1},\dots,x_{n-1};M)$ では $H_{p}(K')=0$（$p\ge 1$）、$H_{0}(K')=M/(x_{1},\dots,x_{n-1})M$ とする（\ref{ring:koszul-basic} の 2）。\ref{ring:cone-long-exact} の短完全列
+$$
+0\to H_{p}(K')/x_{n}H_{p}(K')\to H_{p}(K)\to\operatorname{Ker}(x_{n}|H_{p-1}(K'))\to 0
+$$
+を見る。
+
+**Step 1（$p\ge 2$）.** 両端は $H_{p}(K')=0$, $H_{p-1}(K')=0$ から $0$。よって $H_{p}(K)=0$。
+
+**Step 2（$p=1$）.** 左端は $H_{1}(K')=0$ から $0$。右端は $x_{n}$ 倍 $M/(x_{1},\dots,x_{n-1})M\to M/(x_{1},\dots,x_{n-1})M$ の核で、$x_{n}$ が非零因子なので $0$。よって $H_{1}(K)=0$。
+
+**Step 3（自由分解）.** $M=A$ とすると、\ref{ring:koszul-basic} の 1 から $K_{p}\cong A^{\binom{n}{p}}$ は自由で、$H_{p}=0$（$p\ge 1$）と $H_{0}=A/(\boldsymbol{x})$ から、$K\to A/(\boldsymbol{x})$（$K_{0}=A$ からの商写像）を付け加えた列は完全。
+:::
+
+::: hypcheck
+- **前提「正則列の条件 1」**：Step 2 だけで、最後の元 $x_{n}$ の非零因子性を使った（$x_{1},\dots,x_{n-1}$ については帰納法の仮定として）。条件 2（$M/(\boldsymbol{x})M\neq 0$）は使っていない。$(\boldsymbol{x})=A$ のときは注意のとおりすべて $0$ になり、主張と矛盾しない。
+- **ネーター性・有限生成性・局所性**：使っていない。
+- **選択公理**：使っていない。
+- 逆は一般には成り立たない（\ref{ring:koszul-h1-local} の後の注意）。
+:::
+
+## 深さとコシュルホモロジー {#ring:sec-kz-depth}
+
+::: lemma 正則元による変化 {#ring:koszul-regular-element keywords="for y in (x) regular on M, short exact sequences 0 -> H_p(x;M) -> H_p(x;M/yM) -> H_{p-1}(x;M) -> 0" index="コシュルホモロジーと正則元|こしゅるほもろじーとせいそくげん"}
+$y\in(\boldsymbol{x})$ が $M$ の非零因子なら、各 $p$ について短完全列
+$$
+0\to H_{p}(\boldsymbol{x};M)\to H_{p}(\boldsymbol{x};M/yM)\to H_{p-1}(\boldsymbol{x};M)\to 0
+$$
+がある。
+:::
+
+::: proof
+**Step 1.** $0\to M\xrightarrow{y}M\to M/yM\to 0$ は完全なので、\ref{ring:koszul-basic} の 3 から鎖複体の短完全列 $0\to K(\boldsymbol{x};M)\xrightarrow{y}K(\boldsymbol{x};M)\to K(\boldsymbol{x};M/yM)\to 0$ を得る（$K(\boldsymbol{x};y\cdot)$ は各成分の $y$ 倍、すなわち複体の $y$ 倍）。
+
+**Step 2.** 長完全列（\ref{ha:long-exact-sequence}）
+$$
+H_{p}(\boldsymbol{x};M)\xrightarrow{y}H_{p}(\boldsymbol{x};M)\to H_{p}(\boldsymbol{x};M/yM)\to H_{p-1}(\boldsymbol{x};M)\xrightarrow{y}H_{p-1}(\boldsymbol{x};M)
+$$
+で、$y\in(\boldsymbol{x})$ なので $y$ 倍は $0$（\ref{ring:koszul-annihilated}）。よって中央の三項が短完全列をなす。
+:::
+
+::: theorem 深さのコシュルホモロジーによる計算 {#ring:koszul-depth-sensitivity keywords="depth_I M = n - max{p : H_p(x;M) != 0} where I = (x_1,...,x_n); depth sensitivity of the Koszul complex" index="深さとコシュルホモロジー|ふかさとこしゅるほもろじー"}
+（AC）$A$ をネーター環、$M$ を有限生成 $A$ 加群、$I=(x_{1},\dots,x_{n})$ を $IM\neq M$ となるイデアルとする。$h\defeq\max\{p : H_{p}(\boldsymbol{x};M)\neq 0\}$ とおくと
+$$
+\operatorname{depth}_{I}M=n-h.
+$$
+特に $\operatorname{depth}_{I}M\le n$ で、$n-h$ は $I$ の生成元の取り方によらない。
+:::
+
+::: proof
+$H_{0}=M/IM\neq 0$ なので $h$ は定義され、$0\le h\le n$（\ref{ring:koszul-basic}）。$d\defeq\operatorname{depth}_{I}M$（\ref{ring:depth-ext}）についての帰納法で、「$p>n-d$ なら $H_{p}(\boldsymbol{x};M)=0$、かつ $H_{n-d}(\boldsymbol{x};M)\neq 0$」を示す。これは $h=n-d$ と同じことである。
+
+**Step 1（$d=0$）.** $I$ の元はすべて $M$ の零因子なので、\ref{ring:ideal-of-zero-divisors} から $Im=0$ となる $m\neq 0$ がある。よって $H_{n}(\boldsymbol{x};M)\cong(0:_{M}I)\neq 0$（\ref{ring:koszul-basic} の 2）。$p>n$ では $K_{p}=0$。
+
+**Step 2（$d\ge 1$：$M/yM$ への帰着）.** $I$ の中の極大な $M$ 正則列の最初の元 $y\in I$ をとる。$y$ は $M$ の非零因子で、$I(M/yM)\neq M/yM$（$yM\subset IM\neq M$ なので $M/yM\to M/IM\neq 0$ が全射）。\ref{ring:depth-ext} の Step 2 と同じ議論（$y\in I$ が $\operatorname{Ext}^{i}(A/I,-)$ を消すことから得られる短完全列 $0\to\operatorname{Ext}^{i}(A/I,M)\to\operatorname{Ext}^{i}(A/I,M/yM)\to\operatorname{Ext}^{i+1}(A/I,M)\to 0$）から $\operatorname{depth}_{I}(M/yM)=d-1$。$M/yM$ も有限生成なので、帰納法の仮定から $H_{p}(\boldsymbol{x};M/yM)=0$（$p>n-d+1$）、$H_{n-d+1}(\boldsymbol{x};M/yM)\neq 0$。
+
+**Step 3（消える部分）.** $p>n-d$ とする。\ref{ring:koszul-regular-element} の $p+1$ での短完全列
+$$
+0\to H_{p+1}(\boldsymbol{x};M)\to H_{p+1}(\boldsymbol{x};M/yM)\to H_{p}(\boldsymbol{x};M)\to 0
+$$
+で $p+1>n-d+1$ なので中央が $0$、よって $H_{p}(\boldsymbol{x};M)=0$。
+
+**Step 4（消えない部分）.** $p=n-d+1$ での短完全列
+$$
+0\to H_{n-d+1}(\boldsymbol{x};M)\to H_{n-d+1}(\boldsymbol{x};M/yM)\to H_{n-d}(\boldsymbol{x};M)\to 0
+$$
+で、左端は Step 3 から $0$、中央は $0$ でないので、$H_{n-d}(\boldsymbol{x};M)\cong H_{n-d+1}(\boldsymbol{x};M/yM)\neq 0$。
+
+**Step 5（特に）.** $h\ge 0$ から $d=n-h\le n$。左辺 $\operatorname{depth}_{I}M$ は $I$ だけで決まるので、$n-h$ も生成元の取り方によらない。
+:::
+
+::: hypcheck
+- **前提「ネーター環・有限生成」**：Step 1 の \ref{ring:ideal-of-zero-divisors}（随伴素イデアルの有限性と素イデアルの回避）と、深さの定義（\ref{ring:depth-ext}：極大な正則列の長さが一定であること）に使った。コシュル複体の部分（\ref{ring:koszul-regular-element}）には使っていない。
+- **前提「$IM\neq M$」**：$h$ が定義されること（$H_{0}\neq 0$）と、深さの定義に使った。$IM=M$ なら、有限生成性と中山の補題の一般形から $(1+a)M=0$ となる $a\in I$ があり、$1+a$ と $a$ はともに $H_{p}$ を $0$ 倍で作用する（\ref{ring:koszul-annihilated}）ので $1$ も $0$ 倍で作用し、すべての $H_{p}$ が $0$ になる。
+- **選択公理**：\ref{ring:ideal-of-zero-divisors} と \ref{ring:depth-ext}（従属選択公理）を通して使った。
+- 反例の確認：$A=k[x,y]_{(x,y)}/(xy)$, $M=A$, $I=(x,y)$ では深さ $1$（\ref{ring:depth-ext} の後の例 3 と同様）、$n=2$ なので $H_{1}\neq 0=H_{2}$ のはずで、\ref{ring:prob-koszul-node} で直接確かめる。
+:::
+
+::: theorem 局所環での正則列の判定 {#ring:koszul-h1-local keywords="over a noetherian local ring, x in m is M-regular iff H_1(x;M)=0" index="正則列の判定（コシュル）|せいそくれつのはんていこしゅる"}
+（AC）$(A,\mathfrak{m})$ をネーター局所環、$M\neq 0$ を有限生成加群、$x_{1},\dots,x_{n}\in\mathfrak{m}$ とする。次は同値。
+1. $x_{1},\dots,x_{n}$ は $M$ 正則列。
+2. $H_{p}(\boldsymbol{x};M)=0$（すべての $p\ge 1$）。
+3. $H_{1}(\boldsymbol{x};M)=0$。
+:::
+
+::: proof
+1⇒2 は \ref{ring:koszul-regular-acyclic}、2⇒3 は明らか。3⇒1 を $n$ についての帰納法で示す。$n=0$ では空の列で、$M\neq 0$ なので正則列。
+
+**Step 1（$H_{1}(K')=0$）.** $K'=K(x_{1},\dots,x_{n-1};M)$ とする。\ref{ring:cone-long-exact} の $p=1$ の短完全列の左端 $H_{1}(K')/x_{n}H_{1}(K')$ は $H_{1}(K)=0$ に埋め込まれるので $0$：$H_{1}(K')=x_{n}H_{1}(K')$。$H_{1}(K')$ は有限生成加群 $K'_{1}\cong M^{n-1}$ の部分商で、$A$ はネーターなので有限生成。$x_{n}\in\mathfrak{m}$ なので、中山の補題（\ref{ring:nakayama}）から $H_{1}(K')=0$。
+
+**Step 2（帰納法）.** 帰納法の仮定から $x_{1},\dots,x_{n-1}$ は $M$ 正則列。
+
+**Step 3（$x_{n}$）.** $p=1$ の短完全列の右端 $\operatorname{Ker}(x_{n}|H_{0}(K'))$ も $0$。$H_{0}(K')=M/(x_{1},\dots,x_{n-1})M$ なので、$x_{n}$ はその非零因子。
+
+**Step 4（条件 2）.** $M\neq 0$ は有限生成で $(\boldsymbol{x})\subset\mathfrak{m}$ なので、中山の補題から $M/(\boldsymbol{x})M\neq 0$。
+:::
+
+::: hypcheck
+- **前提「局所環、$x_{i}\in\mathfrak{m}$」**：Step 1 と Step 4 の中山の補題に使った。外すと 3⇒1 は偽になる：$A=k[x,y,z]$ で $x,\ y(1-x),\ z(1-x)$ は $A$ 正則列だが、並べ替えた $y(1-x),\ z(1-x),\ x$ は正則列でない（\ref{ring:regular-sequence} の後の例 3）。一方、コシュルホモロジーは元の並べ方によらない（下の事実）ので、並べ替えた列でも $H_{1}=0$。
+- **前提「ネーター」**：Step 1 で $H_{1}(K')$ の有限生成性に使った。
+- **前提「$M$ 有限生成、$M\neq 0$」**：中山の補題と、正則列の条件 2 に使った。
+- **選択公理**：中山の補題（\ref{ring:nakayama}）を通して使った。
+:::
+
+::: fact 並べ方によらないこと {#ring:koszul-order-independent keywords="Koszul complex is independent of the order of x_i up to isomorphism; tensor product of K(x_i;A)" index="コシュル複体の対称性|こしゅるふくたいのたいしょうせい"}
+$K(\boldsymbol{x};M)$ は鎖複体の同型を除いて $x_{1},\dots,x_{n}$ の並べ方によらない。実際、$K(\boldsymbol{x};A)$ は外積代数 $\bigwedge^{\bullet}A^{n}$ に $d(e_{i_{1}}\wedge\cdots\wedge e_{i_{p}})=\sum_{j}(-1)^{j+1}x_{i_{j}}e_{i_{1}}\wedge\cdots\widehat{e_{i_{j}}}\cdots\wedge e_{i_{p}}$ を入れた複体と同型で（符号の流儀は本によって異なる）、$K(\boldsymbol{x};M)\cong K(\boldsymbol{x};A)\otimes_{A}M\cong K(x_{1};A)\otimes\cdots\otimes K(x_{n};A)\otimes M$ である（松村『可換環論』§16）。このページでは証明していない。
+:::
+
+## 問題 {#ring:sec-kz-problems}
+
+::: problem {#ring:prob-koszul-node}
+$A=k[x,y]_{(x,y)}/(xy)$ について、$K(x,y;A)$ のホモロジーを求め、\ref{ring:koszul-depth-sensitivity} と $\operatorname{depth}A=1$ が整合することを確かめよ。
+:::
+
+::: solution
+$R=k[x,y]_{(x,y)}$（整域）とし、$A=R/(xy)$ の元を $R$ の元の像で表す。$K$ は $0\to A\xrightarrow{(-x,\,y)^{T}}A^{2}\xrightarrow{(y\ x)}A\to 0$（例 2）。
+
+**Step 1（$H_{2}$）.** $H_{2}=(0:_{A}(x,y))$。$f\in R$ について $xf,yf\in(xy)$ なら、$R$ が一意分解環（局所化した多項式環）で $x,y$ が素元なので $y\mid f$ かつ $x\mid f$、$xy\mid f$、すなわち $\bar f=0$。よって $H_{2}=0$。
+
+**Step 2（$H_{1}\neq 0$）.** $(\bar x,0)\in A^{2}$ は $y\bar x+x\cdot 0=0$ なのでサイクル。境界 $(-\bar x\bar c,\ \bar y\bar c)$ に等しいとすると $\bar y\bar c=0$ から $c\in(x)$（Step 1 と同様）、$c=xc'$ とおけて $x\equiv-x^{2}c'\pmod{xy}$、すなわち $x(1+xc'-yg)=0$（$g\in R$）が $R$ で成り立つ。$R$ は整域で $x\neq 0$ なので $1+xc'-yg=0$ だが、$xc'-yg\in(x,y)R$ なので $1+xc'-yg$ は単元で矛盾。よって $H_{1}\neq 0$。
+
+**Step 3（整合）.** $h=1$、$n=2$ なので $\operatorname{depth}A=2-1=1$。これは $\bar x+\bar y$ が非零因子で $\dim A=1$ であること（\ref{ring:depth-ext} の後の例 3 と同じ議論）と一致する。
+:::
+
+::: problem {#ring:prob-koszul-unit}
+$x_{1}$ が単元なら $K(\boldsymbol{x};M)$ には可縮ホモトピーがあることを示せ。
+:::
+
+::: solution
+\ref{ring:koszul-annihilated} の $i=1$ のホモトピー $s$（$ds+sd=x_{1}$）について、$s'\defeq x_{1}^{-1}s$ は $A$ 線形で $ds'+s'd=1$。
+:::
+
+::: supplement
+**次のページへ.** $(A,\mathfrak{m},k)$ が正則局所環で $x_{1},\dots,x_{d}$ が正則なパラメーター系なら、これは $A$ 正則列（\ref{ring:regular-sequence} の後の例 2）なので、$K(\boldsymbol{x};A)$ は $k=A/\mathfrak{m}$ の長さ $d$ の自由分解になる（\ref{ring:koszul-regular-acyclic}）。これが「正則局所環の大域次元は有限」という\ref[セールの正則性判定法]{ring:page-serre-regularity}の出発点である。
+
+**高い視点：導来的な零点集合.** 知られている事実として、$\mathbb{Z}[t_{1},\dots,t_{n}]\to A$ を $t_{i}\mapsto x_{i}$ で定めると、$H_{p}(\boldsymbol{x};A)\cong\operatorname{Tor}_{p}^{\mathbb{Z}[t_{1},\dots,t_{n}]}(A,\mathbb{Z})$（$\mathbb{Z}=\mathbb{Z}[\boldsymbol{t}]/(\boldsymbol{t})$）である。$K(\boldsymbol{t};\mathbb{Z}[\boldsymbol{t}])$ が $\mathbb{Z}$ の自由分解（\ref{ring:koszul-regular-acyclic}）で、$A$ とのテンソル積が $K(\boldsymbol{x};A)$ になるからである。幾何的には、写像 $\operatorname{Spec}A\to\mathbb{A}^{n}$ の原点上のファイバー $\{x_{1}=\cdots=x_{n}=0\}$ を「導来的に」とったものがコシュル複体で、$H_{0}$ が通常のファイバー、高次の $H_{p}$ は「方程式が独立でない分の補正」である。正則列は「方程式が独立で、ファイバーの次元がちょうど $n$ 下がる」場合で、補正が消える。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
