@@ -273,6 +273,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | CR-09 | 13A/02/09-principal-ideal-theorem | クルルの単項イデアル定理と応用 | 単項イデアル定理・高度定理、多項式環の次元、鎖状環（発展） | 松村 | 完了 |
 | CR-10 | 13A/02/10-integral-closure-finiteness | 整閉包の構造と有限性 | 分母を払う、トレース・ノルム、分離拡大での有限性と PID 上の自由性、ネーターの有限性定理、シュヴァレーの延長定理、整閉包 = 付値環の共通部分 | 松村 §9–10（2026-10-15 ユーザー指示で追加） | 完了 |
 | CR-11 | 13A/02/11-krull-akizuki-normality | クルル＝秋月の定理と正規性の判定 | クルル＝秋月、デデキント環の拡大、単項イデアルの随伴素イデアル、A = ∩ A_p、セールの判定法 R1+S2 | 松村 §11（同上） | 完了 |
+| CR-12 | 13A/02/12-operations-commute | 操作の可換性と反例 | 局所化と直和・多項式環・根基・Hom（有限表示）・零化イデアル（有限生成）、直積・冪級数・完備化との非可換、テンソル積と直積、平坦な拡大と共通部分・商イデアル、(A/I)[[x]] と I[[x]]=IA[[x]]、まとめの表 | 資料なし（2026-10-15 ユーザー指示） | 完了 |
 | LR-01 | 13H-local-rings/01-regular-cm/01-regular-local-rings | 正則局所環 | 埋め込み次元、正則局所環の定義と整域性、正則巴系 | 松村 | 完了 |
 | LR-02 | 13H/01/02-depth | 正則列と深さ | 正則列、深さ、深さ ≤ 次元 | 松村 | 完了 |
 | LR-03 | 13H/01/03-cohen-macaulay | コーエン＝マコーレー環 | 定義、非混合性定理、局所化での保存、例（正則局所環・次元 0・1 次元被約）と非例 | 松村 | 完了 |
@@ -517,6 +518,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 - 2026-10-15 GT-02 ガロアの基本定理（fld:page-fundamental-theorem）。対応・次数と指数・共役・正規部分群、中間体の束、推進定理と合成体、x³−2 の例。
 - 2026-10-15 GT-03 円分体（fld:page-cyclotomic）。1 の冪根、Φ_n の既約性（p で還元）、Gal ≅ (Z/n)^×、ζ_5・ζ_7 の部分体。クロネッカー＝ウェーバーは補足で「知られている（未収録）」。
 - 2026-10-15（ユーザー指示）20C 表現論の割り当て表（RT-01〜05）と系列 rep-finite を作成、16D/02/05 から参照。ID-03 に GCD 整域のガウスの補題（マッコイの補題）と A[x]・S⁻¹A の GCD 性。LR-01 のヤコビアンの判定法を完全体上の閉点に一般化。NC-06 稠密性定理とジェイコブソンの可換性定理、NC-07 ウェダーバーンの主定理。
+- 2026-10-15 CR-12 操作の可換性と反例（ring:page-operations-commute）。ring:localization-commutes / localization-hom / localization-annihilator / localization-hom-counterexamples（有限生成だが有限表示でない例 k[x,y_1,…]/(x^n y_n)）/ localization-noncommutes、ring:tensor-product-commutes、ring:flat-extension-intersection（予約ラベルを回収）、ring:polynomial-quotient-commutes、表 ring:table-operations-commute。
 - 2026-10-15 RB-06 イデアルの演算法則と反例（ring:page-ideal-arithmetic）。ring:ideal-lattice-laws、ring:ideal-nondistributive、ring:radical-sum-counterexample、ring:colon-ideal / colon-laws / colon-counterexamples、ring:extension-contraction-laws / -counterexamples。13F/06 プリューファーに「整域のイデアル束が分配的 ⇔ プリューファー」（ring:prufer-distributive、算術環の補足）を追加。平坦な拡大と共通部分・商イデアルは予約ラベル ring:flat-extension-intersection（次の操作の可換性のページで回収）。
 - 2026-10-15 CR-01 に行列式のトリックの一般性の注意（任意の自己準同型・ケイリー＝ハミルトン）、ヴァスコンセロスの定理（ring:vasconcelos。旧問題を定理に格上げ）と系（n 個の生成元は基底、M≅M⊕N ⇒ N=0、選択公理なしの有限階数の一意性）。CR-03 に「整拡大で上下に伝わる性質」の節（ring:integral-transfer：単元・冪零根基・IB∩A⊂√I・ジャコブソン根基・局所性・有限拡大のファイバーの個数）と、逆向きが伝わらない例、Spec の対応のまとめ。11R の割り当て表をユーザー承認済みにした。
 - 2026-10-15 整拡大の監査：CR-03 の範囲（整の特徴付け・整閉包・推移律・正規・局所化・上昇・横たわり・比較不能・下降・A[x] の整閉性・次元）に加え、CR-10・CR-11 を新設。
