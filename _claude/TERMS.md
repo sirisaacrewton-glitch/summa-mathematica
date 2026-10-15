@@ -520,3 +520,4 @@
 | regular sequence / depth / grade | 正則列 / 深さ / グレード | 深度 | 本で正則列 17・深さ 75。ring:page-depth |
 | Cohen–Macaulay ring / unmixedness theorem / equidimensional | コーエン＝マコーレー環 / 非混合性定理 / 等次元 | CM 環 | 仮（OCR で用例を拾えず）。ring:page-cohen-macaulay |
 | Gorenstein ring / complete intersection / socle / type / injective dimension / canonical module | ゴレンシュタイン環 / 完全交叉 / ソークル / 型 / 入射次元 / 標準加群 | 台座 | 仮。ring:page-gorenstein |
+| Koszul complex / Koszul homology / mapping cone / acyclic | コシュル複体 / コシュルホモロジー / 写像錐 / 非輪状 | コズール複体 | 仮（本棚にコシュルの用例なし、写像錐・非輪状は各 1 冊）。ring:page-koszul-depth |
