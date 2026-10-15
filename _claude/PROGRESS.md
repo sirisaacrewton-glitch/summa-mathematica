@@ -328,20 +328,20 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | RT-04 | 20C/01/04-induced | 誘導表現 | 誘導表現、フロベニウスの相互律、マッキーの判定法 | 雪江 §5.4 | 予定 |
 | RT-05 | 20C/01/05-integrality | 次元の整除性とバーンサイドの定理 | 指標値は代数的整数（ring:page-integral-extensions を参照）、既約表現の次元は #G の約数、バーンサイドの p^a q^b 定理 | — | 予定 |
 
-## 代数的整数論の割り当て（案。2026-10-15 作成、ユーザー承認待ち）
+## 代数的整数論の割り当て（2026-10-15 ユーザー承認。ガロア理論の系列の後に書く）
 
 方針（2026-10-15 ユーザーの問いへの回答として提案）：代数的整数環の理論は数論（11R）に置き、環論（整閉包・デデキント環・クルル＝秋月・下降定理）とガロア理論（基本定理・円分体・有限体）を \ref で参照して、重複して証明しない。接頭辞 `nt`。資料：雪江『整数論 1』第 8 章（代数的整数）・第 9 章（p 進数）、『整数論 2』第 1 章（分岐と完備化）・第 2 章（整数環と判別式の例）・第 3 章（ミンコフスキー）・第 4 章（円分体）・第 6 章（2 次体）。初等整数論（11A：合同・平方剰余）の系列が先に要る部分は NT-05 で必要最小限を参照する。
 
 | ID | フォルダ / ファイル | 題（案） | 主な内容 | 参照する既存ページ | 状態 |
 |---|---|---|---|---|---|
-| NT-01 | 11R/01-number-fields/01-rings-of-integers | 代数体と整数環 | 代数体、整数環、整基底、判別式、2 次体・円分体の整数環 | ring:page-integral-closure-finiteness, fld:page-cyclotomic | 案 |
-| NT-02 | 11R/01/02-prime-decomposition | 素イデアルの分解 | 整数環はデデキント環、イデアルのノルム、Σ e_i f_i = n、クンマー＝デデキントの判定法 | ring:page-krull-akizuki-normality, ring:page-dedekind | 案 |
-| NT-03 | 11R/01/03-decomposition-inertia | 分解群と惰性群 | ガロア群の推移的作用、分解群・惰性群、フロベニウス元、efg = n | ring:going-up, fld:page-fundamental-theorem, fld:page-finite-fields | 案 |
-| NT-04 | 11R/01/04-ramification-discriminant | 分岐と判別式 | 差積、分岐する素数は判別式を割り切る | ring:trace-conjugates | 案 |
-| NT-05 | 11R/01/05-quadratic-cyclotomic | 2 次体・円分体の素数分解と平方剰余の相互法則 | ℚ(√d)・ℚ(ζ_n) での分解、ガウス和、相互法則 | fld:page-cyclotomic | 案 |
-| NT-06 | 11R/01/06-class-group | ミンコフスキーの定理とイデアル類群 | 格子と凸体定理、類群の有限性、判別式の評価、ℤ[√−5] の類数 2 | ring:page-dedekind | 案 |
-| NT-07 | 11R/01/07-units | ディリクレの単数定理 | 対数写像、単数群の構造、ペル方程式 | — | 案 |
-| NT-08 | 11R/01/08-p-adic | p 進数と完備化 | p 進付値、完備化、ヘンゼルの補題、局所体での分解 | ring:page-completion, ring:page-valuation-rings | 案 |
+| NT-01 | 11R/01-number-fields/01-rings-of-integers | 代数体と整数環 | 代数体、整数環、整基底、判別式、2 次体・円分体の整数環 | ring:page-integral-closure-finiteness, fld:page-cyclotomic | 予定 |
+| NT-02 | 11R/01/02-prime-decomposition | 素イデアルの分解 | 整数環はデデキント環、イデアルのノルム、Σ e_i f_i = n、クンマー＝デデキントの判定法 | ring:page-krull-akizuki-normality, ring:page-dedekind | 予定 |
+| NT-03 | 11R/01/03-decomposition-inertia | 分解群と惰性群 | ガロア群の推移的作用、分解群・惰性群、フロベニウス元、efg = n | ring:going-up, fld:page-fundamental-theorem, fld:page-finite-fields | 予定 |
+| NT-04 | 11R/01/04-ramification-discriminant | 分岐と判別式 | 差積、分岐する素数は判別式を割り切る | ring:trace-conjugates | 予定 |
+| NT-05 | 11R/01/05-quadratic-cyclotomic | 2 次体・円分体の素数分解と平方剰余の相互法則 | ℚ(√d)・ℚ(ζ_n) での分解、ガウス和、相互法則 | fld:page-cyclotomic | 予定 |
+| NT-06 | 11R/01/06-class-group | ミンコフスキーの定理とイデアル類群 | 格子と凸体定理、類群の有限性、判別式の評価、ℤ[√−5] の類数 2 | ring:page-dedekind | 予定 |
+| NT-07 | 11R/01/07-units | ディリクレの単数定理 | 対数写像、単数群の構造、ペル方程式 | — | 予定 |
+| NT-08 | 11R/01/08-p-adic | p 進数と完備化 | p 進付値、完備化、ヘンゼルの補題、局所体での分解 | ring:page-completion, ring:page-valuation-rings | 予定 |
 
 ## 順序数解析の割り当て（2026-10-02 追加。資料：新井『数学基礎論』第 8 章 §8.4）
 
@@ -516,6 +516,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 - 2026-10-15 GT-02 ガロアの基本定理（fld:page-fundamental-theorem）。対応・次数と指数・共役・正規部分群、中間体の束、推進定理と合成体、x³−2 の例。
 - 2026-10-15 GT-03 円分体（fld:page-cyclotomic）。1 の冪根、Φ_n の既約性（p で還元）、Gal ≅ (Z/n)^×、ζ_5・ζ_7 の部分体。クロネッカー＝ウェーバーは補足で「知られている（未収録）」。
 - 2026-10-15（ユーザー指示）20C 表現論の割り当て表（RT-01〜05）と系列 rep-finite を作成、16D/02/05 から参照。ID-03 に GCD 整域のガウスの補題（マッコイの補題）と A[x]・S⁻¹A の GCD 性。LR-01 のヤコビアンの判定法を完全体上の閉点に一般化。NC-06 稠密性定理とジェイコブソンの可換性定理、NC-07 ウェダーバーンの主定理。
+- 2026-10-15 CR-01 に行列式のトリックの一般性の注意（任意の自己準同型・ケイリー＝ハミルトン）、ヴァスコンセロスの定理（ring:vasconcelos。旧問題を定理に格上げ）と系（n 個の生成元は基底、M≅M⊕N ⇒ N=0、選択公理なしの有限階数の一意性）。CR-03 に「整拡大で上下に伝わる性質」の節（ring:integral-transfer：単元・冪零根基・IB∩A⊂√I・ジャコブソン根基・局所性・有限拡大のファイバーの個数）と、逆向きが伝わらない例、Spec の対応のまとめ。11R の割り当て表をユーザー承認済みにした。
 - 2026-10-15 整拡大の監査：CR-03 の範囲（整の特徴付け・整閉包・推移律・正規・局所化・上昇・横たわり・比較不能・下降・A[x] の整閉性・次元）に加え、CR-10・CR-11 を新設。
 - 2026-10-15 LR-03 コーエン＝マコーレー環（ring:page-cohen-macaulay）。定義と例（正則・0 次元・被約 1 次元、CM でない例）、随伴素イデアルの次元の一致、非零因子での剰余、パラメーター系＝正則列、マコーレーの非混合性定理。局所化・鎖状性は fact（松村 §17）。
 - 2026-10-15 LR-02 正則列と深さ（ring:page-depth）。正則列、局所環での並べ替え、零因子からなるイデアル、深さの Ext による特徴付け（リース。極大列の長さの一意性）、depth ≤ dim A/p（p ∈ Ass）。予約ラベル ring:page-depth を回収。
