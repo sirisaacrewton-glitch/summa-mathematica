@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>次元論 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="13-commutative-algebra/13A-general-commutative-ring-theory/02-commutative-algebra/08-dimension-theory.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 次元論 {#ring:page-dimension-theory keywords="Krull dimension, height, length of a module, composition series, Hilbert polynomial, Hilbert-Samuel function, system of parameters, dimension theorem, dim = d = delta, embedding dimension"}
+
+環の「次元」を素イデアルの鎖の長さで定義したものが**クルル次元**である（\ref{ring:krull-dimension}）。体は $0$ 次元、$\Z$ や $k[x]$ は $1$ 次元で、多項式環 $k[x_{1},\dots,x_{n}]$ は $n$ 次元になると期待される。ネーター局所環 $(A,\mathfrak{m})$ では、この次元が他の二つの量と一致する：剰余環の長さ $\ell(A/\mathfrak{m}^{n})$ の多項式としての次数 $d(A)$（**ヒルベルト＝サミュエル関数**、\ref{ring:hilbert-samuel}）と、$\mathfrak{m}$ 準素イデアルを生成するのに必要な元の最小個数 $\delta(A)$ である。この**次元定理** $\dim A=d(A)=\delta(A)$（\ref{ring:dimension-theorem}）がこのページの目標で、系としてネーター局所環の次元は有限で、埋め込み次元 $\dim_{k}\mathfrak{m}/\mathfrak{m}^{2}$ 以下であることがわかる。準備として、加群の**長さ**（\ref{ring:length}）と次数加群の**ヒルベルト多項式**（\ref{ring:hilbert-polynomial}）を扱う。
+
+> Atiyah–Macdonald 第 6・11 章の流れを参考にした。
+
+## 記法と定義の確認 {#ring:sec-dm-notation}
+
+::: notation
+- 環は可換、加群は $A$ 加群。アルティン環と秋月＝ホプキンスの定理は \ref{ring:akizuki-hopkins}、随伴次数環・安定なフィルトレーション・アルティン＝リースの補題は \ref{ring:page-filtrations}、素イデアルの回避は \ref{ring:prime-avoidance}、ネーター環の極小素イデアルの有限性は \ref{ring:noetherian-prime-product}、整拡大の上昇・比較不能定理は \ref{ring:going-up}, \ref{ring:incomparability}、中山の補題は \ref{ring:nakayama}。
+- $\Q[t]$ の多項式 $P$ と関数 $f:\N\to\Z$ について、「十分大きな $n$ で $f(n)=P(n)$」を $f\sim P$ と書く。零多項式の次数は $-1$ とする。
+- **選択公理**：ネーター性から有限生成性・極大元を引くところで従属選択公理、素イデアルの存在で選択公理を使う。
+:::
+
+## クルル次元 {#ring:sec-dm-krull}
+
+::: definition クルル次元・高さ {#ring:krull-dimension keywords="Krull dimension, height of a prime ideal, chain of prime ideals" index="クルル次元|くるるじげん, 次元|じげん, 高さ|たかさ, 素イデアルの鎖|そいであるのくさり"}
+環 $A$ の素イデアルの鎖 $\mathfrak{p}_{0}\subsetneq\mathfrak{p}_{1}\subsetneq\dots\subsetneq\mathfrak{p}_{r}$ の長さを $r$ とする。長さの上限を $A$ の**クルル次元** $\dim A$（$\in\N\cup\{\infty\}$、零環は $-\infty$）という。素イデアル $\mathfrak{p}$ について、$\mathfrak{p}$ で終わる鎖の長さの上限を $\mathfrak{p}$ の**高さ** $\operatorname{ht}\mathfrak{p}$ という。$\operatorname{ht}\mathfrak{p}=\dim A_{\mathfrak{p}}$（\ref{ring:localization-at-prime} の 2）。
+:::
+
+::: example
+1. 体、アルティン環は $0$ 次元（\ref{ring:akizuki-hopkins} の 1）。
+2. 体でない PID とデデキント環は $1$ 次元。DVR は $1$ 次元の局所環。
+3. $k[x_{1},\dots,x_{n}]$ には鎖 $0\subsetneq(x_{1})\subsetneq(x_{1},x_{2})\subsetneq\dots\subsetneq(x_{1},\dots,x_{n})$ があり、$\dim\ge n$。等号は \ref[多項式環の次元]{ring:polynomial-dimension} で示す。
+4. 有理数冪の環 $V$（\ref{ring:rational-exponent-ring}）は素イデアルが $0,\mathfrak{m}V$ だけで $1$ 次元だがネーターでない。
+:::
+
+::: proposition 整拡大と次元 {#ring:integral-dimension keywords="integral extensions preserve Krull dimension" index="整拡大と次元|せいかくだいとじげん"}
+（AC）$A\subset B$ が整拡大なら $\dim A=\dim B$。
+:::
+
+::: proof
+**Step 1（$\le$）.** $A$ の鎖 $\mathfrak{p}_{0}\subsetneq\dots\subsetneq\mathfrak{p}_{r}$ は、横たわり・上昇定理（\ref{ring:lying-over}, \ref{ring:going-up}）で $B$ の鎖 $\mathfrak{q}_{0}\subset\dots\subset\mathfrak{q}_{r}$（$\mathfrak{q}_{i}\cap A=\mathfrak{p}_{i}$）に持ち上がり、$\mathfrak{p}_{i}$ が異なるので $\mathfrak{q}_{i}$ も異なる。
+
+**Step 2（$\ge$）.** $B$ の鎖 $\mathfrak{q}_{0}\subsetneq\dots\subsetneq\mathfrak{q}_{r}$ を $A$ に縮約すると、比較不能定理（\ref{ring:incomparability}）から $\mathfrak{q}_{i}\cap A$ も真の鎖。
+:::
+
+## 加群の長さ {#ring:sec-dm-length}
+
+::: definition 組成列と長さ {#ring:length keywords="simple module, composition series, length of a module" index="組成列|そせいれつ, 長さ|ながさ, 単純加群|たんじゅんかぐん"}
+$0$ でなく、$0$ と自身以外に部分加群をもたない加群を**単純**という（可換環上の単純加群は $A/\mathfrak{m}$、$\mathfrak{m}$ は極大イデアル。\ref{mod:cyclic-module}）。部分加群の列 $M=M_{0}\supsetneq M_{1}\supsetneq\dots\supsetneq M_{n}=0$ で各 $M_{i-1}/M_{i}$ が単純なものを長さ $n$ の**組成列**という。組成列をもつ加群を**長さ有限**といい、組成列の長さの最小値を $\ell(M)$ と書く（組成列がなければ $\ell(M)=\infty$）。
+:::
+
+::: theorem 長さの基本性質（ジョルダン＝ヘルダー） {#ring:length-properties keywords="Jordan-Holder for modules, length is well-defined and additive, finite length iff Noetherian and Artinian" index="長さの加法性|ながさのかほうせい, ジョルダン＝ヘルダーの定理（加群）|じょるだんへるだーのていりかぐん"}
+（DC）
+1. $\ell(M)<\infty$ なら、$M$ の部分加群の真の鎖の長さはすべて $\ell(M)$ 以下で、どの組成列の長さも $\ell(M)$ に等しい。
+2. $M$ が長さ有限であることと、$M$ がネーターかつアルティンであることは同値。
+3. 短完全列 $0\to M'\to M\to M''\to 0$ について $\ell(M)=\ell(M')+\ell(M'')$（$\infty$ を含めて）。
+4. 体上のベクトル空間 $V$ について $\ell(V)=\dim V$。
+:::
+
+::: proof
+**Step 1（部分加群の長さ）.** $\ell(M)=n$ を与える組成列 $(M_{i})$ をとる。真の部分加群 $N\subsetneq M$ について $\ell(N)<\ell(M)$ を示す。$N_{i}\defeq N\cap M_{i}$ とすると $N_{i-1}/N_{i}\hookrightarrow M_{i-1}/M_{i}$ なので $N_{i-1}/N_{i}$ は $0$ か単純。重複を除けば $N$ の組成列で $\ell(N)\le n$。等号なら各 $N_{i-1}/N_{i}\cong M_{i-1}/M_{i}$ で、下から帰納的に $N_{i}=M_{i}$ となり $N=M$ に反する。
+
+**Step 2（1）.** 真の鎖 $M=L_{0}\supsetneq L_{1}\supsetneq\dots\supsetneq L_{k}$ について、Step 1 から $\ell(L_{0})>\ell(L_{1})>\dots\ge 0$ なので $k\le\ell(M)$。組成列は真の鎖なので長さ $\le\ell(M)$、最小値の定義から $\ge\ell(M)$。
+
+**Step 3（2）.** 長さ有限なら 1 から鎖の長さが有界で、両鎖条件をみたす。逆にネーターかつアルティンなら、極大条件で $M$ の極大な真の部分加群 $M_{1}$ をとり（$M/M_{1}$ は単純）、$M_{1}$ について同様に続けると、降鎖条件から有限回で $0$ に達し組成列を得る。
+
+**Step 4（3）.** $M'$ と $M''$ の組成列を並べる（$M''$ の部分加群は $M$ の部分加群 $\supset M'$ に対応）と $M$ の組成列になる。片方が無限なら 2 と \ref{ring:noetherian-exact} から $M$ も無限。
+
+**Step 5（4）.** 基底 $e_{1},\dots,e_{n}$ について $\langle e_{1},\dots,e_{k}\rangle$ は組成列。無限次元なら 2 と \ref{ring:product-of-maximals-zero} の Step 2 から長さ無限。
+:::
+
+::: lemma 差分と多項式 {#ring:difference-lemma keywords="if the difference function is eventually polynomial of degree e then the function is eventually polynomial of degree e+1" index="差分|さぶん"}
+$f:\N\to\Z$ について、$\Delta f(n)\defeq f(n+1)-f(n)\sim Q$（$Q\in\Q[t]$、$\deg Q\le e$）なら、$f\sim P$ となる $P\in\Q[t]$（$\deg P\le e+1$）がある。$Q$ の最高次の係数が $c\neq 0$（次数 $e$）なら、$P$ は次数 $e+1$ で最高次の係数 $c/(e+1)$。
+:::
+
+::: proof
+二項係数多項式 $\binom{t}{k}\defeq t(t-1)\cdots(t-k+1)/k!$ は次数 $k$ なので、$\deg\le e$ の多項式の基底をなし、$Q=\sum_{k\le e}c_{k}\binom{t}{k}$ と書ける。$P_{0}\defeq\sum_{k}c_{k}\binom{t}{k+1}$ とおくと、パスカルの規則 $\binom{t+1}{k+1}-\binom{t}{k+1}=\binom{t}{k}$ から $\Delta P_{0}=Q$。すると $\Delta(f-P_{0})(n)=0$（$n\ge N_{0}$）なので $f-P_{0}$ は $n\ge N_{0}$ で定数 $c'$ で、$P\defeq P_{0}+c'$。最高次の係数は $c_{e}/(e+1)!$ で、$c=c_{e}/e!$ なので $c/(e+1)$。
+:::
+
+## ヒルベルト多項式とヒルベルト＝サミュエル関数 {#ring:sec-dm-hilbert}
+
+::: theorem ヒルベルト多項式 {#ring:hilbert-polynomial keywords="Hilbert polynomial of a graded module, Hilbert-Serre theorem" index="ヒルベルト多項式|ひるべるとたこうしき"}
+（DC）$B=B_{0}[x_{1},\dots,x_{s}]$ を、$B_{0}$ がアルティン環で $x_{i}$ が次数 $1$ の斉次元であるネーター次数環とする。有限生成次数 $B$ 加群 $M=\bigoplus_{n\ge 0}M_{n}$ について、各 $M_{n}$ は長さ有限の $B_{0}$ 加群で、$\ell(M_{n})\sim P_{M}$ となる $P_{M}\in\Q[t]$（$\deg P_{M}\le s-1$）がある。
+:::
+
+::: proof
+**Step 1（$M_{n}$ の長さ）.** $M$ の斉次生成元 $m_{j}$（次数 $d_{j}$）について、$M_{n}$ は $x$ の単項式（次数 $n-d_{j}$）と $m_{j}$ の積で $B_{0}$ 加群として生成され、有限生成。$B_{0}$ はアルティン（したがってネーター）なので、$M_{n}$ はアルティンかつネーター（\ref{ring:noetherian-exact} の 2）、長さ有限（\ref{ring:length-properties} の 2）。
+
+**Step 2（$s$ の帰納法）.** $s=0$ なら $B=B_{0}$ で、$M_{n}=0$（$n>\max d_{j}$）なので $\ell(M_{n})\sim 0$（次数 $-1$）。$s\ge 1$ とし、$x_{s}$ 倍で次の完全列を作る：
+$$
+0\to K_{n}\to M_{n}\xrightarrow{x_{s}}M_{n+1}\to L_{n+1}\to 0.
+$$
+$K=\bigoplus K_{n}$, $L=\bigoplus L_{n}$ は $x_{s}$ で消える有限生成次数 $B$ 加群（$K$ は $M$ の部分、$L$ は剰余。ネーター性から有限生成）なので、$B_{0}[x_{1},\dots,x_{s-1}]$ 上の加群で、帰納法の仮定から $\ell(K_{n})$, $\ell(L_{n})$ は次数 $\le s-2$ の多項式に $\sim$。長さの加法性（\ref{ring:length-properties} の 3）から $\Delta\ell(M_{n})=\ell(L_{n+1})-\ell(K_{n})$ も次数 $\le s-2$ の多項式に $\sim$。\ref{ring:difference-lemma} から主張を得る。
+:::
+
+::: theorem ヒルベルト＝サミュエル関数 {#ring:hilbert-samuel keywords="Hilbert-Samuel function, Hilbert-Samuel polynomial, degree independent of the m-primary ideal" index="ヒルベルト＝サミュエル関数|ひるべるとさみゅえるかんすう, ヒルベルト＝サミュエル多項式|ひるべるとさみゅえるたこうしき"}
+（DC）$(A,\mathfrak{m})$ をネーター局所環、$\mathfrak{q}$ を $s$ 個の元で生成される $\mathfrak{m}$ 準素イデアル、$M$ を有限生成加群とする。
+1. $\chi_{\mathfrak{q}}^{M}(n)\defeq\ell(M/\mathfrak{q}^{n}M)$ は有限で、$\chi_{\mathfrak{q}}^{M}\sim P$ となる次数 $\le s$ の $P\in\Q[t]$ がある。
+2. その次数は $\mathfrak{q}$ によらない。これを $d(M)$ と書き、$d(A)$ を特に考える。
+3. より一般に、安定な $\mathfrak{q}$ フィルトレーション $(M_{n})$ について $\ell(M/M_{n})$ は多項式に $\sim$ で、その次数と最高次の係数は $\chi_{\mathfrak{q}}^{M}$ と同じ。
+:::
+
+::: proof
+**Step 1（1）.** $A/\mathfrak{q}$ はネーターで、素イデアルは $\mathfrak{m}/\mathfrak{q}$ だけ（$\sqrt{\mathfrak{q}}=\mathfrak{m}$。\ref{ring:primary-ideal-classical}）なので、秋月＝ホプキンスの定理（\ref{ring:akizuki-hopkins} の 4）からアルティン。$\mathfrak{q}=(x_{1},\dots,x_{s})$ について $\operatorname{gr}_{\mathfrak{q}}(A)=(A/\mathfrak{q})[\bar x_{1},\dots,\bar x_{s}]$（$\bar x_{i}\in\mathfrak{q}/\mathfrak{q}^{2}$）で、$\operatorname{gr}_{\mathfrak{q}}(M)$ は有限生成次数加群（\ref{ring:associated-graded}）。\ref{ring:hilbert-polynomial} から $\ell(\mathfrak{q}^{n}M/\mathfrak{q}^{n+1}M)$ は次数 $\le s-1$ の多項式に $\sim$（$A/\mathfrak{q}$ 加群としての長さは $A$ 加群としての長さと同じ）。$\chi_{\mathfrak{q}}^{M}(n+1)-\chi_{\mathfrak{q}}^{M}(n)=\ell(\mathfrak{q}^{n}M/\mathfrak{q}^{n+1}M)$（加法性）なので、\ref{ring:difference-lemma} から次数 $\le s$ の多項式に $\sim$。
+
+**Step 2（3）.** 安定なフィルトレーションでは、リース加群が有限生成（\ref{ring:stable-rees}）なので $\operatorname{gr}(M)=\bigoplus M_{n}/M_{n+1}$ も $\operatorname{gr}_{\mathfrak{q}}(A)$ 上有限生成で、Step 1 と同じ議論で $\ell(M/M_{n})$ は多項式 $\tilde P$ に $\sim$。\ref{ring:stable-same-topology} の 1 から $\mathfrak{q}^{n}M\subset M_{n}$, $M_{n+n_{0}}\subset\mathfrak{q}^{n}M$ なので $\tilde P(n)\le P(n)\le\tilde P(n+n_{0})$（十分大きな $n$）。多項式の比較から、次数と最高次の係数が一致する。
+
+**Step 3（2）.** $\mathfrak{m}\supset\mathfrak{q}\supset\mathfrak{m}^{r}$ となる $r$ がある（\ref{ring:prob-primary-power-maximal}）。$\mathfrak{m}^{n}M\supset\mathfrak{q}^{n}M\supset\mathfrak{m}^{rn}M$ から $\chi_{\mathfrak{m}}^{M}(n)\le\chi_{\mathfrak{q}}^{M}(n)\le\chi_{\mathfrak{m}}^{M}(rn)$ で、次数は一致する。
+:::
+
+::: proposition 非零因子による次数の低下 {#ring:samuel-nonzerodivisor keywords="d(M/xM) <= d(M) - 1 for a non-zero-divisor x" index="非零因子と次元|ひれいいんしとじげん"}
+（DC）ネーター局所環 $(A,\mathfrak{m})$、有限生成加群 $M$、$M$ の非零因子 $x\in\mathfrak{m}$（$xm=0\Rightarrow m=0$）について $d(M/xM)\le d(M)-1$。
+:::
+
+::: proof
+**Step 1.** $\mathfrak{q}=\mathfrak{m}$ とし、$N\defeq xM$、$M'\defeq M/xM$ とする。長さの加法性から
+$$
+\ell(M'/\mathfrak{m}^{n}M')=\ell(M/(xM+\mathfrak{m}^{n}M))=\chi^{M}(n)-\ell(N/(N\cap\mathfrak{m}^{n}M)).
+$$
+
+**Step 2.** アルティン＝リースの補題から $(N\cap\mathfrak{m}^{n}M)$ は $N$ の安定な $\mathfrak{m}$ フィルトレーション。$x$ は非零因子なので $M\cong N$（$m\mapsto xm$）で、このフィルトレーションは $M$ の安定なフィルトレーションに移る。\ref{ring:hilbert-samuel} の 3 から $\ell(N/(N\cap\mathfrak{m}^{n}M))$ は $\chi^{M}$ と同じ次数・同じ最高次の係数の多項式に $\sim$。Step 1 の差は次数が真に下がる。
+:::
+
+## 次元定理 {#ring:sec-dm-theorem}
+
+::: definition 巴系 {#ring:system-of-parameters keywords="system of parameters, delta(A)" index="巴系|ともえけい, パラメータ系|ぱらめーたけい"}
+ネーター局所環 $(A,\mathfrak{m})$ で、$\mathfrak{m}$ 準素イデアルを生成する元の個数の最小値を $\delta(A)$ と書く。$\dim A$ 個の元で $\mathfrak{m}$ 準素イデアルを生成するもの（次元定理によりこれが最小個数）を**巴系**（**パラメータ系**）という。
+:::
+
+::: theorem 次元定理 {#ring:dimension-theorem keywords="dimension theorem for Noetherian local rings, dim A = d(A) = delta(A)" index="次元定理|じげんていり"}
+（AC）ネーター局所環 $(A,\mathfrak{m})$ について $\dim A=d(A)=\delta(A)$。特に $\dim A$ は有限である。
+:::
+
+::: proof
+**Step 1（$\delta\ge d$）.** $\delta$ 個の元で生成される $\mathfrak{m}$ 準素イデアル $\mathfrak{q}$ について、\ref{ring:hilbert-samuel} の 1・2 から $d(A)=\deg\chi_{\mathfrak{q}}^{A}\le\delta$。
+
+**Step 2（$d\ge\dim$）.** $d=d(A)$ についての帰納法で、任意の素イデアルの鎖 $\mathfrak{p}_{0}\subsetneq\dots\subsetneq\mathfrak{p}_{r}$ について $r\le d$ を示す。$d=0$ なら $\ell(A/\mathfrak{m}^{n})$ は定数なので $\mathfrak{m}^{n}=\mathfrak{m}^{n+1}$、中山の補題から $\mathfrak{m}^{n}=0$。すると素イデアルは $\mathfrak{m}^{n}=0$ を含むので $\mathfrak{m}$ を含み、$\mathfrak{m}$ に等しい：$r=0$。$d>0$, $r\ge 1$ とする。$x\in\mathfrak{p}_{1}\setminus\mathfrak{p}_{0}$ をとり、$A'\defeq A/\mathfrak{p}_{0}$（整域）、$x'$ をその像とすると $x'\neq 0$ は $A'$ の非零因子。$d(A')\le d(A)$（$\ell(A'/\mathfrak{m}^{n}A')\le\ell(A/\mathfrak{m}^{n})$）、\ref{ring:samuel-nonzerodivisor} から $d(A'/x'A')\le d(A')-1\le d-1$。$A'/x'A'$ には鎖 $\mathfrak{p}_{1}/(\mathfrak{p}_{0}+(x))\subsetneq\dots\subsetneq\mathfrak{p}_{r}/(\mathfrak{p}_{0}+(x))$（長さ $r-1$）があるので、帰納法の仮定から $r-1\le d-1$。
+
+**Step 3（$\dim\ge\delta$）.** $n\defeq\dim A$（Step 1・2 から有限）とする。$x_{1},\dots,x_{i}\in\mathfrak{m}$ を、「$(x_{1},\dots,x_{i})$ を含むすべての素イデアルの高さが $i$ 以上」となるように帰納的に選ぶ（$i\le n$）。$i-1$ 個まで選んだとき、$(x_{1},\dots,x_{i-1})$ を含む極小素イデアルで高さがちょうど $i-1$ のものは有限個（\ref{ring:noetherian-prime-product} の 2）で、$i-1<n=\operatorname{ht}\mathfrak{m}$ なのでどれも $\mathfrak{m}$ ではない。素イデアルの回避（\ref{ring:prime-avoidance}）から、それらのどれにも属さない $x_{i}\in\mathfrak{m}$ がある。$(x_{1},\dots,x_{i})$ を含む素イデアル $\mathfrak{p}$ は、$(x_{1},\dots,x_{i-1})$ を含む極小素イデアル $\mathfrak{q}\subset\mathfrak{p}$ を含み、$\operatorname{ht}\mathfrak{q}\ge i-1$。$\operatorname{ht}\mathfrak{q}\ge i$ なら $\operatorname{ht}\mathfrak{p}\ge i$。$\operatorname{ht}\mathfrak{q}=i-1$ なら $x_{i}\notin\mathfrak{q}$ なので $\mathfrak{q}\subsetneq\mathfrak{p}$ で $\operatorname{ht}\mathfrak{p}\ge i$。$i=n$ まで選ぶと、$(x_{1},\dots,x_{n})$ を含む素イデアルは高さ $\ge n$、すなわち $\mathfrak{m}$ だけで、$\sqrt{(x_{1},\dots,x_{n})}=\mathfrak{m}$、$\mathfrak{m}$ 準素（\ref{ring:primary-ideal-classical} の後の例 3）。よって $\delta\le n$。
+
+::: hypcheck
+- **前提「ネーター」**：Step 1 でヒルベルト＝サミュエル関数の存在、Step 2 でアルティン＝リース、Step 3 で極小素イデアルの有限性に使った。外すと偽：有理数冪の環 $V$（\ref{ring:rational-exponent-ring}）は局所環で $\dim V=1$ だが、極大イデアル $\mathfrak{m}V$ は $(\mathfrak{m}V)^{2}=\mathfrak{m}V$ をみたすので $\ell(V/(\mathfrak{m}V)^{n})=1$（定数）となり、「$d(V)=0$」と $\dim V=1$ が食い違う。
+- **選択公理**：素イデアルの回避の前提となる素イデアルの存在などで使う。
+:::
+:::
+
+::: corollary 次元の基本的な帰結 {#ring:dimension-corollaries keywords="dimension of Noetherian local ring is at most embedding dimension, heights in Noetherian rings are finite, dim A/xA >= dim A - 1" index="埋め込み次元|うめこみじげん"}
+（AC）$(A,\mathfrak{m},k)$ をネーター局所環とする。
+1. $\dim A\le\dim_{k}\mathfrak{m}/\mathfrak{m}^{2}$（右辺を**埋め込み次元**という）。
+2. ネーター環の素イデアルの高さは有限で、素イデアルは降鎖条件をみたす。
+3. $x\in\mathfrak{m}$ について $\dim A/xA\ge\dim A-1$。$x$ が非零因子なら等号が成り立つ。
+:::
+
+::: proof
+**Step 1（1）.** $\mathfrak{m}$ は $\dim_{k}\mathfrak{m}/\mathfrak{m}^{2}$ 個の元で生成される（\ref{ring:nakayama-generators}）ので、$\delta(A)\le\dim_{k}\mathfrak{m}/\mathfrak{m}^{2}$。
+
+**Step 2（2）.** $\operatorname{ht}\mathfrak{p}=\dim A_{\mathfrak{p}}$ は次元定理から有限。降鎖 $\mathfrak{p}_{0}\supsetneq\mathfrak{p}_{1}\supsetneq\cdots$ の長さは $\operatorname{ht}\mathfrak{p}_{0}$ 以下。
+
+**Step 3（3）.** $\bar A=A/xA$ の巴系 $\bar y_{1},\dots,\bar y_{e}$（$e=\dim\bar A$）をとると、$(x,y_{1},\dots,y_{e})$ は $A$ の $\mathfrak{m}$ 準素イデアルなので $\dim A=\delta(A)\le e+1$。非零因子なら \ref{ring:samuel-nonzerodivisor} と次元定理から $\dim\bar A=d(\bar A)\le d(A)-1=\dim A-1$。
+:::
+
+::: supplement
+**多項式環の次元.** 体 $k$ 上の $k[x_{1},\dots,x_{n}]$ の次元は $n$ である。これはクルルの主イデアル定理（\ref[クルルの主イデアル定理]{ring:page-principal-ideal-theorem}）か、ネーターの正規化と超越次数を使って示す。
+
+**正則局所環への道.** 1 の等号 $\dim A=\dim_{k}\mathfrak{m}/\mathfrak{m}^{2}$ が成り立つ局所環が**正則局所環**であり（\ref[正則局所環]{ring:page-regular-local-rings}）、幾何的には非特異点の局所環にあたる。
+:::
+
+## 問題 {#ring:sec-dm-problems}
+
+::: problem {#ring:prob-hilbert-samuel-power-series}
+体 $k$ 上の $A=k[[x_{1},\dots,x_{n}]]$（局所環、極大イデアル $\mathfrak{m}=(x_{1},\dots,x_{n})$）について、$\ell(A/\mathfrak{m}^{r})=\binom{n+r-1}{n}$ を示し、$d(A)=n$、したがって $\dim A=n$ を導け。
+:::
+
+::: solution
+$\mathfrak{m}^{j}/\mathfrak{m}^{j+1}$ は次数 $j$ の単項式で張られる $k$ ベクトル空間で、次元は $\binom{n+j-1}{n-1}$（$n$ 個の変数から重複を許して $j$ 個選ぶ）。$\ell(A/\mathfrak{m}^{r})=\sum_{j<r}\binom{n+j-1}{n-1}=\binom{n+r-1}{n}$（ホッケースティック恒等式）。これは $r$ の $n$ 次多項式なので $d(A)=n$、次元定理から $\dim A=n$。
+:::
+
+::: problem {#ring:prob-dimension-quotient-example}
+$A=k[[x,y]]/(xy)$ の次元は $1$ であり、$x+y$ が巴系であることを示せ。
+:::
+
+::: solution
+$A/(x+y)\cong k[[x,y]]/(xy,x+y)\cong k[[x]]/(x^{2})$（$y=-x$ を代入）は長さ $2$ のアルティン環なので、$(x+y)$ は $\mathfrak{m}$ 準素で $\delta(A)\le 1$。$A$ は体でない（$\mathfrak{m}\neq 0$）し、鎖 $(x)\subsetneq(x,y)$（$A/(x)\cong k[[y]]$ は整域）があるので $\dim A\ge 1$。次元定理から $\dim A=1$ で、$x+y$ は巴系。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
