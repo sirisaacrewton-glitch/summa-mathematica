@@ -179,7 +179,10 @@
 * 表の中では `|` の代わりに `\vert`, `\mid`, `\lVert` を使う。
 * 共通マクロ（`config.js`）：`\R \N \Z \Q \C \F`、`\Hom \End \Aut \Gal \Ker \Coker \im \Spec \Frac \id \colim \sgn \Stab \Sym \GL \chr` など、
   圏 `\Set \Grp \Ab \Ring \CRing \Top \Mod \Vect \Cat \Ch \CW`、`\op`（= ${}^{\mathrm{op}}$）、`\defeq`（$:=$）、`\incl`、`\surj`、`\restr{A}`、`\abs{x}` など。
-  可換図式は `\begin{CD} … \end{CD}` か `\xrightarrow{f}` で。
+  可換図式は **`\begin{CD} … \end{CD}` で書く**（`\begin{array}` に `\downarrow` を並べない。ラベルの位置と矢印の長さが揃わない）。
+  横の矢印は `@>{f}>>`（ラベルなしは `@>>>`）、縦の矢印は左ラベル `@V{f}VV`・右ラベル `@VV{f}V`、等号は `@|`、空きのマスは `@.`。
+  行の長さは揃える（例：`0 @>>> a @>{m}>> b @>>> 0 \\ @. @V{f}VV @V{g}VV @. \\ …`）。斜めの矢印は書けないので、三角形は等号 `@|` を使った四角形にする。
+  一行の列だけなら `\xrightarrow{f}` でよい。
 * 通貨記号などの `$` は `\$` と書く。
 
 ### 3.5 用語索引
