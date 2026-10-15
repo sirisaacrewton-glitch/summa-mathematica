@@ -518,3 +518,4 @@
 | Krull dimension / height / length / composition series / Hilbert polynomial / Hilbert–Samuel function / system of parameters / embedding dimension | クルル次元 / 高さ / 長さ / 組成列 / ヒルベルト多項式 / ヒルベルト＝サミュエル関数 / パラメーター系 / 埋め込み次元 | 巴系 | 松村（パラメーター系 65）。ring:page-dimension-theory |
 | regular local ring / regular system of parameters / embedding dimension / Zariski tangent space | 正則局所環 / 正則なパラメーター系 / 埋め込み次元 / ザリスキ接空間 | | 本で正則局所環 212。ring:page-regular-local-rings |
 | regular sequence / depth / grade | 正則列 / 深さ / グレード | 深度 | 本で正則列 17・深さ 75。ring:page-depth |
+| Cohen–Macaulay ring / unmixedness theorem / equidimensional | コーエン＝マコーレー環 / 非混合性定理 / 等次元 | CM 環 | 仮（OCR で用例を拾えず）。ring:page-cohen-macaulay |
