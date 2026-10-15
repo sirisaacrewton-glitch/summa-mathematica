@@ -524,3 +524,4 @@
 | minimal free resolution / Betti number / Auslander–Buchsbaum formula / global dimension | 極小自由分解 / ベッチ数 / アウスランダー＝ブクスバウムの公式 / 大域次元 | — | 仮（本棚に用例なし）。ring:page-auslander-buchsbaum |
 | left/right/two-sided ideal / simple ring / quaternions / opposite ring / matrix unit / cyclotomic polynomial | 左イデアル / 右イデアル / 両側イデアル / 単純環 / 四元数体 / 反対環 / 行列単位 / 円分多項式 | 四元数環, 逆環 | 本棚：四元数体 3・四元数環 1、両側イデアル 2、円分多項式 2、反対環・逆環 0（反対環を採用、仮）。mod:page-noncommutative-rings |
 | simple module / semisimple module / completely reducible / Schur's lemma / semisimple ring | 単純加群 / 半単純加群 / 完全可約 / シューアの補題 / 半単純環 | 既約加群 | 本棚：半単純環 1（単純加群・シューアの補題は用例なし、仮）。mod:page-semisimple-modules |
+| Wedderburn–Artin theorem / simple artinian ring / Jacobson radical (noncommutative) / Hopkins–Levitzki | ウェダーバーン＝アルティンの定理 / 単純アルティン環 / ジャコブソン根基 J(R) / ホプキンス＝レヴィツキの定理 | — | 本棚：ジャコブソン根基 1、他は用例なし（仮）。可換環のページでは rad(A) と書いている。mod:page-wedderburn-artin, mod:page-jacobson-radical |
