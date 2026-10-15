@@ -28,6 +28,8 @@
 
 11. **（2026-10-09 ユーザー確認）新しい分野は `_claude/SCOPE.md` の順で始める**：群論 → 環論（保存表と性質ごとの深掘り）→ 体論・ガロア理論 → 圏論の残り → 実解析 → 微分幾何 → 代数的位相幾何。進行中の系列を区切りのよい所まで終えたら、群論の準備（START.md §10）から始める。到達目標は下限で、足りないのは不可。並行して、SCOPE.md の「現状」に挙げた抜け（実閉体（2026-10-09 RC-01〜03 で完了）、ウォシュ–ヴォートの判定法（2026-10-09 完了）、フレイド＝ミッチェル（2026-10-09 HA-05 で主張と使い方を完了））を埋める。
 
+* **（2026-10-15 ユーザー要望）アルゴリズムが出てきたら、その計算量・計算可能性のクラス（多項式時間・原始再帰的・計算可能・決定不能など）を補足（supplement の「計算の観点」）に書く。** 確かでない文献・結果は「知られている（未収録）」とし、自作の構成はそう明記する。
+
 ## ユーザーの判断待ち（作業前に確認する）
 - （2026-10-15 ユーザー指示、時期は未定）初学者・工学部向けのイメージ記事、物理数学（理論のみ・厳密）の新分野。SCOPE.md 末尾「今後の方針」。始める時期と範囲は割り当て表を作って確認する。
 - 圏論の訳語：codomain を「余域」とした（レンスター訳の「値域」は集合論の range と紛れるため）。基礎は ZFC＋宇宙一つ（Mac Lane 流）。圏論の割り当て表（ページの分け方）も未確認。
@@ -520,6 +522,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 - 2026-10-15 GT-02 ガロアの基本定理（fld:page-fundamental-theorem）。対応・次数と指数・共役・正規部分群、中間体の束、推進定理と合成体、x³−2 の例。
 - 2026-10-15 GT-03 円分体（fld:page-cyclotomic）。1 の冪根、Φ_n の既約性（p で還元）、Gal ≅ (Z/n)^×、ζ_5・ζ_7 の部分体。クロネッカー＝ウェーバーは補足で「知られている（未収録）」。
 - 2026-10-15（ユーザー指示）20C 表現論の割り当て表（RT-01〜05）と系列 rep-finite を作成、16D/02/05 から参照。ID-03 に GCD 整域のガウスの補題（マッコイの補題）と A[x]・S⁻¹A の GCD 性。LR-01 のヤコビアンの判定法を完全体上の閉点に一般化。NC-06 稠密性定理とジェイコブソンの可換性定理、NC-07 ウェダーバーンの主定理。
+- 2026-10-15 MD-06 にスミス標準形の計算可能性の節（mod:sec-pm-computability：環の表示、ユークリッド環で原始再帰的 mod:smith-pr-euclidean、計算可能な PID で計算可能 mod:smith-computable-pid、割り算が原始再帰的でない Q の表示（自作の構成）mod:smith-not-pr-example）。ユーザーの「PID で原始再帰的でない例」は確かな文献を確認できず、境目は ED/PID ではなく表示と割り算の原始再帰性だと説明した。互除法・有限アーベル群・分解体・有限体・ガロア群・零点定理・準素分解のページに「計算の観点」を追加。
 - 2026-10-15 CR-13 局所的な性質と局所的でない性質（ring:page-local-global：local-properties-list, unit-ideal-powers, local-on-cover, non-local-properties）。LR-05 操作で保たれる性質（ring:page-operations-invariance：regular-ring, polynomial-fiber-primes, polynomial-invariance, completion-invariance, completion-not-domain, regular-element-quotient(-counterexamples), faithfully-flat-descent, 表 table-operations-invariance）。未収録として明記：完備化で被約・正規が失われる永田の例、A/xA 正規 ⇒ A 正規、CM・ゴレンシュタインの忠実平坦降下、一般の A[[t]] での保存。
 - 2026-10-15 CR-12 操作の可換性と反例（ring:page-operations-commute）。ring:localization-commutes / localization-hom / localization-annihilator / localization-hom-counterexamples（有限生成だが有限表示でない例 k[x,y_1,…]/(x^n y_n)）/ localization-noncommutes、ring:tensor-product-commutes、ring:flat-extension-intersection（予約ラベルを回収）、ring:polynomial-quotient-commutes、表 ring:table-operations-commute。
 - 2026-10-15 RB-06 イデアルの演算法則と反例（ring:page-ideal-arithmetic）。ring:ideal-lattice-laws、ring:ideal-nondistributive、ring:radical-sum-counterexample、ring:colon-ideal / colon-laws / colon-counterexamples、ring:extension-contraction-laws / -counterexamples。13F/06 プリューファーに「整域のイデアル束が分配的 ⇔ プリューファー」（ring:prufer-distributive、算術環の補足）を追加。平坦な拡大と共通部分・商イデアルは予約ラベル ring:flat-extension-intersection（次の操作の可換性のページで回収）。
