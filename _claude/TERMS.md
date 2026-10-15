@@ -510,3 +510,4 @@
 | GCD domain / Bezout domain / ACCP / atomic domain / monoid ring | GCD 整域 / ベズー整域 / 単項イデアルの昇鎖条件 / 原子的 / モノイド環 | | 仮（用例を未確認）。ring:page-gcd-bezout |
 | valuation ring / valuation / value group / discrete valuation ring / uniformizer | 付値環 / 付値 / 値群 / 離散付値環 / 一意化元 | 賦値環、素元 | 本で付値環 245・離散付値環 107。ring:page-valuation-rings |
 | Dedekind domain / fractional ideal / ideal class group | デデキント環 / 分数イデアル / イデアル類群 | デデキント整域 | 本でデデキント環 123・デデキント整域 0、分数イデアル 95、イデアル類群 68。ring:page-dedekind |
+| Prüfer domain / invertible ideal | プリューファー整域 / 可逆イデアル | | 仮（日本語の本に用例なし）。ring:page-prufer |
