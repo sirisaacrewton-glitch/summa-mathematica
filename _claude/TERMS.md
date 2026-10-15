@@ -493,3 +493,4 @@
 | characteristic / Frobenius map | 標数 / フロベニウス写像 | | 雪江（標数 185）。ring:char-domain |
 | ideal / principal ideal / generated ideal / associate | イデアル / 単項イデアル / 生成されたイデアル / 同伴 | 主イデアル | 雪江（単項イデアル 208・主イデアル 2）。ring:page-rings-ideals |
 | quotient ring / natural projection / direct product / idempotent / Chinese remainder theorem / prime subring | 剰余環 / 自然な射影 / 直積環 / 冪等元 / 中国剰余定理 / 素部分環 | 商環、剰余類環 | 雪江（剰余環）。「冪等元」は冪零元に合わせた。ring:page-quotient-rings |
+| prime ideal / maximal ideal / local ring / residue field / nilradical / radical / Jacobson radical / multiplicative set / reduced ring / prime avoidance | 素イデアル / 極大イデアル / 局所環 / 剰余体 / 冪零元根基 / 根基 / ジャコブソン根基 / 積閉集合 / 被約環 / 素イデアルの回避 | 乗法的集合（雪江）、冪零根基 | 松村・雪江。ring:page-prime-maximal |
