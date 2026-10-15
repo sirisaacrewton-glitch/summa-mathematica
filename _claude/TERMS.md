@@ -507,3 +507,4 @@
 | module of fractions / local property / support / Nakayama's lemma / determinant trick / locally free | 分数加群 / 局所的性質 / 台 / 中山の補題 / 行列式のトリック / 局所自由 | サポート | 松村。ring:page-local-properties |
 | Noetherian / Artinian / ascending (descending) chain condition / Noetherian induction / Hilbert basis theorem / Akizuki–Hopkins theorem | ネーター / アルティン / 昇鎖（降鎖）条件 / ネーター帰納法 / ヒルベルトの基底定理 / 秋月＝ホプキンスの定理 | | 松村。ring:page-noetherian-artinian |
 | integral / integral closure / integrally closed / normal domain / lying over / going up / going down / incomparability | 整 / 整閉包 / 整閉 / 正規環 / 横たわり / 上昇 / 下降 / 比較不能 | 整閉整域 | 松村。ring:page-integral-extensions |
+| GCD domain / Bezout domain / ACCP / atomic domain / monoid ring | GCD 整域 / ベズー整域 / 単項イデアルの昇鎖条件 / 原子的 / モノイド環 | | 仮（用例を未確認）。ring:page-gcd-bezout |
