@@ -486,3 +486,4 @@
 | primary decomposition / elementary divisors / invariant factors / elementary abelian p-group / rank (of a f.g. abelian group) | 準素分解 / 初等因子 / 単因子 / 初等アーベル p 群 / 階数 | | 標準的。grp:page-finite-abelian |
 | free group / reduced word / rank / van der Waerden's trick / Nielsen-Schreier theorem / cyclically reduced | 自由群 / 簡約語 / 階数 / ファン・デル・ヴェルデンの方法 / ニールセン–シュライアーの定理 / 巡回簡約 | | 雪江は「語の縮約」。簡約語は仮。grp:page-free-groups |
 | presentation / generators and relations / relator / von Dyck's theorem / word problem / Tietze transformation | 群の表示 / 生成元と関係式 / 関係子 / フォン・ディックの定理 / 語の問題 / ティーツェ変換 | | 雪江（生成元と関係式）。関係子は仮。grp:page-presentations |
+| extension / central extension / split extension / section / complement / Schur-Zassenhaus theorem | 拡大 / 中心拡大 / 分裂する拡大 / 切断 / 補群 / シューア–ツァッセンハウスの定理 | | 標準的。切断は仮。grp:page-extensions |
