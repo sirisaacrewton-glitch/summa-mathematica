@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>射影次元とアウスランダー＝ブクスバウムの公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="13-commutative-algebra/13D-homological-methods/01-homological-methods/02-projective-dimension.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 射影次元とアウスランダー＝ブクスバウムの公式 {#ring:page-auslander-buchsbaum keywords="minimal free resolution, Betti numbers, projective dimension over a local ring via Tor(M,k), Auslander-Buchsbaum formula pd M + depth M = depth A"}
+
+ネーター局所環 $(A,\mathfrak{m},k)$ 上の有限生成加群には、各段で生成元の個数が最小になる**極小自由分解**がある（\ref{ring:minimal-free-resolution}）。その各項の階数（**ベッチ数**）は $\operatorname{Tor}^{A}_{i}(M,k)$ の次元として分解によらずに決まり、射影次元は「$\operatorname{Tor}_{i}(M,k)\neq 0$ となる最大の $i$」になる（\ref{ring:pd-tor-k}）。このページの主定理は、射影次元が有限な加群について
+$$
+\operatorname{pd}M+\operatorname{depth}M=\operatorname{depth}A
+$$
+が成り立つという**アウスランダー＝ブクスバウムの公式**（\ref{ring:auslander-buchsbaum}）である。「自由分解を一段延ばすごとに深さが一つ減る」という保存則で、射影次元が有限なら深さ（正則列の長さ）を超えられないことを意味する。
+
+> 松村『可換環論』§19 の内容を参考にした。射影次元・大域次元の定義とシャヌエルの補題は \ref{ha:page-projective-dimension} にあり、ここでは局所環に特有の部分だけを扱う。
+
+## 記法と定義の確認 {#ring:sec-ab-notation}
+
+::: notation
+- $(A,\mathfrak{m},k)$ はネーター局所環、$k=A/\mathfrak{m}$。加群は有限生成とする。
+- 射影分解・射影次元 $\operatorname{pd}M$・大域次元は \ref{ha:projective-resolution}, \ref{ha:projective-dimension}、射影次元の $\operatorname{Ext}$ による特徴付けは \ref{ha:pd-characterization}。$\operatorname{Tor}$ とその基本性質は \ref{ha:tor}, \ref{ha:tor-basic}、可換環上で $\operatorname{Tor}$ をどちらの変数の射影分解でも計算できること（$\operatorname{Tor}_{i}(M,N)\cong H_{i}(P\otimes N)$, $P\to M$ は射影分解）は \ref{ha:tor-balanced}。
+- 中山の補題とその系（極小生成系の個数 $\mu(M)\defeq\dim_{k}M/\mathfrak{m}M$）は \ref{ring:nakayama}, \ref{ring:nakayama-generators}、局所環上の有限生成射影加群が自由であることは \ref{ring:local-projective-free}。
+- 深さは \ref{ring:depth-ext} で、$M\neq 0$ について $\operatorname{depth}M=\min\{i : \operatorname{Ext}^{i}_{A}(k,M)\neq 0\}$（$\mathfrak{m}M\neq M$ は中山の補題から）。$a\in\mathfrak{m}$ の $\operatorname{Ext}^{i}_{A}(k,N)$ への作用は $0$（$a$ 倍が第 1 変数 $k$ を消すので。\ref{ring:page-depth} の記法の欄）。
+- **選択公理**：中山の補題と深さの理論（\ref{ring:depth-ext}）を通して使う。
+:::
+
+## 極小自由分解とベッチ数 {#ring:sec-ab-minimal}
+
+::: definition 極小自由分解 {#ring:minimal-free-resolution keywords="minimal free resolution over a local ring, d(F_{i+1}) in m F_i" index="極小自由分解|きょくしょうじゆうぶんかい"}
+有限生成 $A$ 加群 $M$ の自由分解 $\cdots\to F_{1}\xrightarrow{d_{1}}F_{0}\to M\to 0$ で、各 $F_{i}$ が有限階数の自由加群で $d_{i+1}(F_{i+1})\subset\mathfrak{m}F_{i}$（すべての $i\ge 0$）となるものを**極小自由分解**という。
+:::
+
+::: proposition 極小自由分解の存在 {#ring:minimal-free-resolution-exists keywords="existence of minimal free resolutions over a noetherian local ring" index="極小自由分解の存在|きょくしょうじゆうぶんかいのそんざい"}
+（AC）有限生成 $A$ 加群は極小自由分解をもつ。
+:::
+
+::: proof
+**Step 1（一段）.** 有限生成加群 $N$ について、$r=\mu(N)$ とし、$N/\mathfrak{m}N$ の基底を持ち上げた $n_{1},\dots,n_{r}\in N$ は $N$ を生成する（\ref{ring:nakayama-generators}）。$\pi\colon A^{r}\to N$, $e_{j}\mapsto n_{j}$ は全射。$\sum a_{j}e_{j}\in\operatorname{Ker}\pi$ なら $\sum a_{j}n_{j}=0$ で、$N/\mathfrak{m}N$ で $\sum\bar a_{j}\bar n_{j}=0$。$\bar n_{j}$ は一次独立なので $\bar a_{j}=0$、すなわち $a_{j}\in\mathfrak{m}$。よって $\operatorname{Ker}\pi\subset\mathfrak{m}A^{r}$。$A$ はネーターなので $\operatorname{Ker}\pi$ は有限生成。
+
+**Step 2（繰り返し）.** $K_{0}\defeq M$ から始め、Step 1 で $F_{i}\to K_{i}$ を作り $K_{i+1}\defeq\operatorname{Ker}(F_{i}\to K_{i})$ とする（従属選択公理で各段の選択を並べる）。$d_{i+1}\colon F_{i+1}\to K_{i+1}\subset F_{i}$ の像は $K_{i+1}\subset\mathfrak{m}F_{i}$ に入り、列は各段で完全。
+:::
+
+::: theorem ベッチ数 {#ring:betti-numbers keywords="rank F_i = dim_k Tor_i(M,k) for a minimal free resolution; Betti numbers" index="ベッチ数（加群）|べっちすうかぐん"}
+$F$ を $M$ の極小自由分解とすると、$\operatorname{rank}F_{i}=\dim_{k}\operatorname{Tor}^{A}_{i}(M,k)$（すべての $i$）。特に階数は極小自由分解の取り方によらない。この数 $\beta_{i}(M)$ を $M$ の第 $i$ **ベッチ数**という。
+:::
+
+::: proof
+**Step 1.** \ref{ha:tor-balanced} から $\operatorname{Tor}_{i}(M,k)\cong H_{i}(F\otimes_{A}k)$。
+
+**Step 2.** $F_{i}\otimes_{A}k\cong F_{i}/\mathfrak{m}F_{i}\cong k^{\operatorname{rank}F_{i}}$ で、微分 $d_{i+1}\otimes 1$ は $\bar f\mapsto\overline{d_{i+1}f}$。$d_{i+1}f\in\mathfrak{m}F_{i}$ なので $0$。よって $H_{i}(F\otimes k)=F_{i}\otimes k\cong k^{\operatorname{rank}F_{i}}$。
+:::
+
+::: proposition 局所環上の射影次元 {#ring:pd-tor-k keywords="pd M <= n iff Tor_{n+1}(M,k)=0; pd M = length of minimal free resolution; pd M <= pd k" index="射影次元（局所環）|しゃえいじげんきょくしょかん"}
+（AC）有限生成 $A$ 加群 $M$ と $n\ge 0$ について、
+1. $\operatorname{pd}M\le n\iff\operatorname{Tor}^{A}_{n+1}(M,k)=0$。したがって $\operatorname{pd}M=\sup\{i : \operatorname{Tor}^{A}_{i}(M,k)\neq 0\}$（$M\neq 0$ のとき）で、これは極小自由分解の長さに等しい。
+2. $\operatorname{pd}M\le\operatorname{pd}_{A}k$。
+:::
+
+::: proof
+**Step 1（1：⇒）.** 長さ $n$ 以下の射影分解 $P\to M$ で計算すると（\ref{ha:tor-balanced}）、$P_{n+1}=0$ から $\operatorname{Tor}_{n+1}(M,k)=H_{n+1}(P\otimes k)=0$。
+
+**Step 2（1：⇐）.** 極小自由分解 $F$（\ref{ring:minimal-free-resolution-exists}）をとると、\ref{ring:betti-numbers} から $\operatorname{rank}F_{n+1}=0$、すなわち $F_{n+1}=0$。$d_{n}$ の核は $d_{n+1}$ の像 $=0$ なので、$0\to F_{n}\to\cdots\to F_{0}\to M\to 0$ は完全で、長さ $n$ 以下の射影分解。よって $\operatorname{pd}M\le n$。
+
+**Step 3（1：後半）.** 前半から $\operatorname{pd}M=\min\{n : \operatorname{Tor}_{n+1}(M,k)=0\}$ で、$\operatorname{Tor}_{n+1}=0$ なら Step 2 の切り詰めで以降もすべて $0$（長さ $n$ の分解で計算）。よって $\operatorname{pd}M=\sup\{i:\operatorname{Tor}_{i}(M,k)\neq 0\}$。極小自由分解では $\operatorname{rank}F_{i}=\dim\operatorname{Tor}_{i}$ なので、$F_{i}\neq 0$ となる最大の $i$ もこれに等しい。
+
+**Step 4（2）.** $\operatorname{pd}_{A}k=n<\infty$ のときを示せばよい。\ref{ha:tor-balanced} の対称性から $\operatorname{Tor}_{n+1}(M,k)\cong\operatorname{Tor}_{n+1}(k,M)$ で、右辺は $k$ の長さ $n$ の射影分解で計算すると $0$。1 から $\operatorname{pd}M\le n$。
+:::
+
+::: fact 大域次元と剰余体 {#ring:global-dimension-residue-field keywords="global dimension of a noetherian local ring equals pd k" index="大域次元と剰余体|たいいきじげんとじょうよたい"}
+ネーター局所環 $A$ の大域次元（すべての加群の射影次元の上限。\ref{ha:projective-dimension}）は $\operatorname{pd}_{A}k$ に等しい。有限生成加群に限った上限が $\operatorname{pd}_{A}k$ であることは \ref{ring:pd-tor-k} の 2 で示した。すべての加群に広げるには、大域次元が巡回加群 $A/I$ の射影次元の上限に等しいこと（アウスランダー）を使う（松村『可換環論』§19）。このページでは証明していない。
+:::
+
+::: example 剰余体の射影次元が無限
+$A=k[x]/(x^{2})$（$\mathfrak{m}=(x)$）では、$k$ の極小自由分解は
+$$
+\cdots\xrightarrow{x}A\xrightarrow{x}A\xrightarrow{x}A\to k\to 0
+$$
+で、どこでも止まらない（$x$ 倍の核は $(x)$ で、それは $x$ 倍の像）。よって $\beta_{i}(k)=1$（すべての $i$）、$\operatorname{pd}_{A}k=\infty$。
+:::
+
+## アウスランダー＝ブクスバウムの公式 {#ring:sec-ab-formula}
+
+::: lemma 自由加群の深さと m を係数とする写像 {#ring:ext-k-free-matrix keywords="depth of a free module equals depth A; a map of free modules with entries in m induces zero on Ext(k,-)" index="自由加群の深さ|じゆうかぐんのふかさ"}
+1. $r\ge 1$ について $\operatorname{Ext}^{i}_{A}(k,A^{r})\cong\operatorname{Ext}^{i}_{A}(k,A)^{r}$。特に $\operatorname{depth}A^{r}=\operatorname{depth}A$。
+2. $\varphi\colon A^{s}\to A^{r}$ の像が $\mathfrak{m}A^{r}$ に含まれるなら、$\operatorname{Ext}^{i}_{A}(k,\varphi)=0$（すべての $i$）。
+:::
+
+::: proof
+**Step 1（1）.** $k$ の射影分解 $P$ をとると $\Hom(P_{j},A^{r})\cong\Hom(P_{j},A)^{r}$ で、この同型は微分と可換なので、コホモロジーをとって $\operatorname{Ext}^{i}(k,A^{r})\cong\operatorname{Ext}^{i}(k,A)^{r}$。$r\ge 1$ なので消えるかどうかは一致する。
+
+**Step 2（2）.** $\varphi(e_{l})=\sum_{j}a_{jl}e_{j}$ と書くと、像が $\mathfrak{m}A^{r}=\mathfrak{m}^{\oplus r}$ に入るので $a_{jl}\in\mathfrak{m}$。1 の同型のもとで $\operatorname{Ext}^{i}(k,\varphi)$ は、成分 $\operatorname{Ext}^{i}(k,a_{jl}\cdot)$ からなる行列で、$\operatorname{Ext}^{i}(k,a_{jl}\cdot)$ は $\operatorname{Ext}^{i}(k,A)$ 上の $a_{jl}$ 倍だから $0$（記法の欄）。
+:::
+
+::: theorem アウスランダー＝ブクスバウムの公式 {#ring:auslander-buchsbaum keywords="Auslander-Buchsbaum formula: pd M + depth M = depth A for M of finite projective dimension over a noetherian local ring" index="アウスランダー＝ブクスバウムの公式|あうすらんだーぶくすばうむのこうしき"}
+（AC）$(A,\mathfrak{m},k)$ をネーター局所環、$M\neq 0$ を有限生成加群で $\operatorname{pd}M<\infty$ とする。このとき
+$$
+\operatorname{pd}M+\operatorname{depth}M=\operatorname{depth}A.
+$$
+:::
+
+::: proof
+$t\defeq\operatorname{depth}A$、$n\defeq\operatorname{pd}M$ とし、$n$ についての帰納法。$\operatorname{Ext}^{i}$ はすべて $\operatorname{Ext}^{i}_{A}(k,-)$ とする。$M$ の極小自由分解 $0\to F_{n}\to\cdots\to F_{0}\to M\to 0$（長さ $n$。\ref{ring:pd-tor-k} の 1）をとる。
+
+**Step 1（$n=0$）.** $M$ は有限生成射影加群なので自由（\ref{ring:local-projective-free}）：$M\cong A^{r}$, $r\ge 1$。\ref{ring:ext-k-free-matrix} の 1 から $\operatorname{depth}M=t$。
+
+**Step 2（$n=1$：短完全列）.** $0\to F_{1}\xrightarrow{\varphi}F_{0}\to M\to 0$ で $F_{1}\neq 0$、$\varphi(F_{1})\subset\mathfrak{m}F_{0}$。$\operatorname{Ext}$ の第 2 変数の長完全列（\ref{ha:ext-long-exact}）
+$$
+\operatorname{Ext}^{i}(F_{1})\xrightarrow{\varphi_{*}}\operatorname{Ext}^{i}(F_{0})\to\operatorname{Ext}^{i}(M)\to\operatorname{Ext}^{i+1}(F_{1})\xrightarrow{\varphi_{*}}\operatorname{Ext}^{i+1}(F_{0})
+$$
+で、$\varphi_{*}=0$（\ref{ring:ext-k-free-matrix} の 2）。よって各 $i\ge 0$ で短完全列
+$$
+0\to\operatorname{Ext}^{i}(F_{0})\to\operatorname{Ext}^{i}(M)\to\operatorname{Ext}^{i+1}(F_{1})\to 0
+$$
+がある。また長完全列の左端 $0\to\Hom(k,F_{1})\xrightarrow{\varphi_{*}}\Hom(k,F_{0})$ は単射かつ $0$ なので $\Hom(k,F_{1})=0$、すなわち $t\ge 1$（\ref{ring:ext-k-free-matrix} の 1）。
+
+**Step 3（$n=1$：深さ）.** \ref{ring:ext-k-free-matrix} の 1 から $\operatorname{Ext}^{i}(F_{0})$, $\operatorname{Ext}^{i}(F_{1})$ は $i<t$ で $0$、$i=t$ で $0$ でない。Step 2 の短完全列から、$\operatorname{Ext}^{i}(M)=0\iff(i<t$ かつ $i+1<t)\iff i<t-1$。よって $\operatorname{depth}M=t-1$。
+
+**Step 4（$n\ge 2$：シジジー）.** $K\defeq\operatorname{Im}(F_{1}\to F_{0})$ とすると $0\to K\to F_{0}\to M\to 0$ は完全で、$0\to F_{n}\to\cdots\to F_{1}\to K\to 0$ は $K$ の長さ $n-1$ の極小自由分解。\ref{ring:pd-tor-k} の 1（極小自由分解の長さ $=\operatorname{pd}$）から $\operatorname{pd}K=n-1\ge 1$、特に $K\neq 0$。帰納法の仮定から $s\defeq\operatorname{depth}K=t-n+1\le t-1<t$。
+
+**Step 5（$n\ge 2$：深さ）.** 長完全列
+$$
+\operatorname{Ext}^{i}(F_{0})\to\operatorname{Ext}^{i}(M)\to\operatorname{Ext}^{i+1}(K)\to\operatorname{Ext}^{i+1}(F_{0})
+$$
+を見る。まず左端 $0\to\Hom(k,K)\to\Hom(k,F_{0})$ と、$t>s\ge 0$ から $\Hom(k,F_{0})=0$ なので $\Hom(k,K)=0$、すなわち $s\ge 1$。
+- $i\le s-2$：$\operatorname{Ext}^{i}(F_{0})=0$（$i<t$）、$\operatorname{Ext}^{i+1}(K)=0$（$i+1<s$）なので $\operatorname{Ext}^{i}(M)=0$。
+- $i=s-1$：$\operatorname{Ext}^{s-1}(F_{0})=0$、$\operatorname{Ext}^{s}(F_{0})=0$（$s<t$）なので $\operatorname{Ext}^{s-1}(M)\cong\operatorname{Ext}^{s}(K)\neq 0$。
+
+よって $\operatorname{depth}M=s-1=t-n$。
+:::
+
+::: hypcheck
+- **前提「局所環」**：極小自由分解（中山の補題）、射影加群が自由であること（Step 1）、$\mathfrak{m}$ が $\operatorname{Ext}(k,-)$ を消すこと（Step 2）に使った。
+- **前提「$\operatorname{pd}M<\infty$」**：$n$ についての帰納法と、有限な極小自由分解の存在に使った。外すと偽：$A=k[x]/(x^{2})$, $M=k$ では $\operatorname{depth}A=0=\operatorname{depth}k$ だが $\operatorname{pd}k=\infty$（上の例）。
+- **前提「ネーター・有限生成」**：極小自由分解の各項が有限階数であること（シジジーが有限生成）、深さの理論に使った。
+- **$n=1$ と $n\ge 2$ を分けた理由**：$n=1$ では $K=F_{1}$ が自由で $\operatorname{depth}K=t$ となり、Step 5 の「$s<t$」が使えない。代わりに $\varphi$ の係数が $\mathfrak{m}$ に入ること（極小性）を使った。
+- **選択公理**：中山の補題・極小自由分解の構成（従属選択公理）・深さの理論を通して使った。
+:::
+
+::: corollary 公式の帰結 {#ring:auslander-buchsbaum-corollaries keywords="pd M <= depth A; pd k = depth A if finite; over depth zero rings finite pd implies free" index="アウスランダー＝ブクスバウムの公式の帰結|あうすらんだーぶくすばうむのこうしきのきけつ"}
+（AC）$(A,\mathfrak{m},k)$ をネーター局所環、$M\neq 0$ を有限生成加群で $\operatorname{pd}M<\infty$ とする。
+1. $\operatorname{pd}M\le\operatorname{depth}A\le\dim A$。
+2. $\operatorname{pd}_{A}k<\infty$ なら $\operatorname{pd}_{A}k=\operatorname{depth}A$。
+3. $\operatorname{depth}A=0$（例えば $A$ がアルティン局所環）なら $M$ は自由。
+:::
+
+::: proof
+**Step 1（1）.** 公式と $\operatorname{depth}M\ge 0$、および $\operatorname{depth}A\le\dim A$（\ref{ring:depth-le-dim}）。
+
+**Step 2（2）.** $\Hom(k,k)\neq 0$ なので $\operatorname{depth}k=0$。公式から $\operatorname{pd}k=\operatorname{depth}A$。
+
+**Step 3（3）.** 1 から $\operatorname{pd}M=0$、すなわち $M$ は射影的で、\ref{ring:local-projective-free} から自由。アルティン局所環では $\dim A=0$ なので $\operatorname{depth}A=0$。
+:::
+
+::: example 正則局所環の剰余
+$(A,\mathfrak{m})$ を $d$ 次元の正則局所環、$x_{1},\dots,x_{d}$ を正則なパラメーター系、$0\le i\le d$、$M=A/(x_{1},\dots,x_{i})$ とする。
+- $x_{1},\dots,x_{i}$ は $A$ 正則列（\ref{ring:regular-sequence} の後の例 2）なので、コシュル複体 $K(x_{1},\dots,x_{i};A)$ は $M$ の自由分解で（\ref{ring:koszul-regular-acyclic}）、微分の成分は $0$ か $\pm x_{j}\in\mathfrak{m}$（\ref{ring:koszul-basic}）なので極小。$K_{i}=A\neq 0$ なので $\operatorname{pd}M=i$。
+- $x_{i+1},\dots,x_{d}$ は $M$ 正則列（$x_{1},\dots,x_{d}$ が $A$ 正則列であることの言い換え）で、$\dim M=\dim A/(x_{1},\dots,x_{i})=d-i$（\ref{ring:regular-quotient} を $i$ 回）。$\operatorname{depth}M\le\dim M$（\ref{ring:depth-le-dim}）と合わせて $\operatorname{depth}M=d-i$。
+- $\operatorname{pd}M+\operatorname{depth}M=d=\operatorname{depth}A$ で、公式と整合する。$i=d$ のとき $M=k$ で、$\operatorname{pd}_{A}k=d$。
+:::
+
+## 問題 {#ring:sec-ab-problems}
+
+::: problem {#ring:prob-ab-maximal-ideal}
+$A=k[x,y]_{(x,y)}$ とその極大イデアル $\mathfrak{m}=(x,y)$ について、$\operatorname{pd}\mathfrak{m}=1$ と $\operatorname{depth}\mathfrak{m}=1$ を示せ。
+:::
+
+::: solution
+**Step 1（pd）.** $K(x,y;A)$：$0\to A\xrightarrow{(-x,\,y)^{T}}A^{2}\xrightarrow{(y\ x)}A\to 0$ は $H_{1}=H_{2}=0$（\ref{ring:koszul-regular-acyclic}）で、$A^{2}\to A$ の像は $(x,y)=\mathfrak{m}$。よって $0\to A\to A^{2}\to\mathfrak{m}\to 0$ は完全で、係数が $\mathfrak{m}$ に入るので極小自由分解。$F_{1}=A\neq 0$ なので $\operatorname{pd}\mathfrak{m}=1$（\ref{ring:pd-tor-k}）。
+
+**Step 2（depth）.** $\operatorname{depth}A=2$（\ref{ring:prob-depth-polynomial}）なので、公式から $\operatorname{depth}\mathfrak{m}=2-1=1$。直接には、$x$ は整域 $A$ の部分加群 $\mathfrak{m}$ の非零因子なので深さ $\ge 1$。
+:::
+
+::: problem {#ring:prob-ab-artinian}
+$A=k[x,y]/(x^{2},xy,y^{2})$ について、$k$ の極小自由分解の最初の三項の階数 $\beta_{0},\beta_{1},\beta_{2}$ を求め、$\operatorname{pd}_{A}k=\infty$ を示せ。
+:::
+
+::: solution
+$A$ は $1,x,y$ を基底とし、$\mathfrak{m}=kx\oplus ky$ で $\mathfrak{m}^{2}=0$。
+**Step 1.** $\beta_{0}=\mu(k)=1$、$F_{0}=A\to k$ の核は $\mathfrak{m}$。
+**Step 2.** $\beta_{1}=\mu(\mathfrak{m})=\dim\mathfrak{m}/\mathfrak{m}^{2}=2$、$F_{1}=A^{2}\to\mathfrak{m}$, $(a,b)\mapsto ax+by$。核は $\{(a,b) : ax+by=0\}$ で、$a=a_{0}+a_{1}x+a_{2}y$ などと書くと $ax+by=a_{0}x+b_{0}y$ なので、核は $\mathfrak{m}\oplus\mathfrak{m}$。
+**Step 3.** $\beta_{2}=\mu(\mathfrak{m}\oplus\mathfrak{m})=4$。
+**Step 4.** 一般に、第 $i$ シジジーが $\mathfrak{m}^{\oplus c}$（$c\ge 1$）なら次のシジジーは $\mathfrak{m}^{\oplus 2c}$ で、決して $0$ にならない。よって $\beta_{i}=2^{i}$、$\operatorname{pd}k=\infty$。（\ref{ring:auslander-buchsbaum-corollaries} の 3 からも：$\operatorname{depth}A=0$ で $k$ は自由でないので $\operatorname{pd}k=\infty$。）
+:::
+
+::: supplement
+**ヒルベルトのシジジー定理.** 体 $k$ 上の多項式環 $k[x_{1},\dots,x_{n}]$ 上の有限生成次数付き加群は、長さ $n$ 以下の次数付き自由分解をもつ（ヒルベルト）。これは「$\operatorname{pd}_{A}k=n$（例 $i=d$）と \ref{ring:pd-tor-k} の 2」の次数付き版で、局所環の極小自由分解と同じ議論が次数付き加群でも使える。
+
+**高い視点：保存則.** 公式は「深さ（$\mathfrak{m}$ の中で独立に方程式を課せる余地）」と「射影次元（自由加群から $M$ を作るまでに必要な関係の階層の数）」が足して一定になることを言う。幾何的には、$\operatorname{Spec}A$ の閉点の近傍で $M$ が「どれだけ特異か」を、自由分解の長さと正則列の長さの二通りに測っていて、両者が互いに補い合う。射影次元が有限な加群の存在そのものが環に制約を与えることもあり、例えば \ref{ring:auslander-buchsbaum-corollaries} の 2 から、$k$ の射影次元が有限なら $\operatorname{depth}A$ はそれに等しく、次のページでは「$\operatorname{pd}k<\infty\iff A$ が正則」を示す（\ref[セールの正則性判定法]{ring:page-serre-regularity}）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
