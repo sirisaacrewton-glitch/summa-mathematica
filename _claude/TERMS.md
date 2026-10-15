@@ -512,3 +512,4 @@
 | Dedekind domain / fractional ideal / ideal class group | デデキント環 / 分数イデアル / イデアル類群 | デデキント整域 | 本でデデキント環 123・デデキント整域 0、分数イデアル 95、イデアル類群 68。ring:page-dedekind |
 | Prüfer domain / invertible ideal | プリューファー整域 / 可逆イデアル | | 仮（日本語の本に用例なし）。ring:page-prufer |
 | associated prime / primary ideal / primary decomposition / embedded prime / irreducible submodule | 随伴素イデアル / 準素イデアル / 準素分解 / 埋没素因子 / 既約部分加群 | 素因子、埋没素イデアル | 新妻（随伴素イデアル 6、埋没素因子）・雪江（埋没素因子）。準素イデアル 458・準素分解 130。ring:page-primary-decomposition |
+| Nullstellensatz / Noether normalization / Zariski's lemma / algebraically independent / Jacobson ring | 零点定理 / ネーターの正規化定理 / ザリスキの補題 / 代数的に独立 / ジャコブソン環 | 正規化定理 | 本で零点定理 25・正規化定理 24。ring:page-nullstellensatz |
