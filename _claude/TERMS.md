@@ -476,3 +476,4 @@
 | direct product (external / internal) / semidirect product / complement / least common multiple / Chinese remainder theorem | 直積（外部直積・内部直積） / 半直積 / 補群 / 最小公倍数 / 中国剰余定理 | 中国式剰余定理（雪江） | サイトの pt:chinese-remainder に合わせて「中国剰余定理」。grp:page-products |
 | group action / permutation representation / orbit / stabilizer / faithful / transitive / homogeneous space / normalizer / centralizer / Cayley's theorem / normal core | 群の作用 / 置換表現 / 軌道 / 安定化群 / 忠実 / 推移的 / 等質空間 / 正規化群 / 中心化群 / ケイリーの定理 / 正規核 | 固定部分群・等方部分群（安定化群の別訳） | 雪江（安定化群 63 回）。正規核は仮。grp:page-group-actions |
 | conjugacy class / class equation / p-group / Cauchy's theorem | 共役類 / 類等式 / p 群 / コーシーの定理 | | 雪江。grp:page-class-equation |
+| Burnside's lemma (Cauchy-Frobenius lemma) / necklace / bracelet / Jordan's theorem (derangements) / commuting probability | バーンサイドの補題（コーシー–フロベニウスの補題） / ネックレス / ブレスレット / ジョルダンの定理 / 可換になる確率 | | 標準的（カタカナ）。可換になる確率は仮。grp:page-burnside-counting |

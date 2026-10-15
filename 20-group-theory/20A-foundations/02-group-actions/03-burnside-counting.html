@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>軌道の数え上げ | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=68bc478e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="20-group-theory/20A-foundations/02-group-actions/03-burnside-counting.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 軌道の数え上げ {#grp:page-burnside-counting keywords="Burnside's lemma, Cauchy-Frobenius lemma, orbit counting, necklaces, bracelets, Jordan's theorem on derangements, commuting probability"}
+
+「回して重なるものは同じとみなすと、何通りあるか」という数え上げは、群の作用の**軌道の個数**を数える問題である。**バーンサイドの補題**（\ref{grp:burnside-lemma}）は、軌道の個数が「各元が動かさない点の個数」の平均に等しいことを主張する。このページではこれを証明し、ネックレス（回転で同一視）とブレスレット（回転と裏返しで同一視）の個数を求める（\ref{grp:necklace-count}, \ref{grp:bracelet-count}）。また、推移的な作用には固定点のない元があるという**ジョルダンの定理**（\ref{grp:jordan-derangement}）と、群の二元が可換になる確率を共役類の個数で表す式（\ref{grp:commuting-probability}）を導く。
+
+> 資料によらず書いた。この補題はバーンサイドの名で呼ばれることが多いが、コーシーやフロベニウスがすでに知っていたことから、コーシー–フロベニウスの補題とも呼ばれる。
+
+## 記法と定義の確認 {#grp:sec-bc-notation}
+
+::: notation
+- 作用・軌道・安定化群・軌道による分割・軌道と安定化群の関係は \ref{grp:group-action}, \ref{grp:orbit-stabilizer-def}, \ref{grp:orbits-partition}, \ref{grp:orbit-stabilizer}。推移的は \ref{grp:faithful-transitive}。共役類・中心化群は \ref{grp:conjugacy-class}, \ref{grp:normalizer-centralizer}, \ref{grp:class-equation}。
+- 冪の位数 $\ord(a^{k})=d/\gcd(d,k)$ は \ref{grp:order-of-power}、$\Z/n\Z$ と余り $r_{n}$ は \ref{grp:integers-mod-n}, \ref{grp:division}、オイラー関数 $\varphi$ は \ref{grp:units-mod-n}。二面体群 $D_{n}$ の元 $r^{j}$, $r^{j}s$ と $r^{j}(i)=r_{n}(i+j)$, $r^{j}s(i)=r_{n}(j-i)$ は \ref{grp:dihedral-group} と \ref{grp:dihedral-order} の証明の Step 1。
+- 作用 $G\times X\to X$ と $g\in G$ について、$g$ の**固定点**全体を $X^{g}\defeq\{x\in X : g\cdot x=x\}$ と書く。軌道全体の集合を $X/G$ と書く。
+- $\ZFC$ の中で議論し、選択公理は使わない。
+:::
+
+## バーンサイドの補題 {#grp:sec-bc-lemma}
+
+::: theorem バーンサイドの補題 {#grp:burnside-lemma keywords="Burnside's lemma, Cauchy-Frobenius lemma, orbit-counting theorem, not Burnside's lemma" index="バーンサイドの補題|ばーんさいどのほだい, コーシー–フロベニウスの補題|こーしーふろべにうすのほだい, 軌道の個数|きどうのこすう"}
+有限群 $G$ が有限集合 $X$ に作用するとき、軌道の個数は
+$$
+\abs{X/G}=\frac{1}{\abs{G}}\sum_{g\in G}\abs{X^{g}}.
+$$
+:::
+
+::: intuition
+$g\cdot x=x$ となる組 $(g,x)$ を、$g$ ごとに数えると $\sum_{g}\abs{X^{g}}$、$x$ ごとに数えると $\sum_{x}\abs{G_{x}}$ になる。軌道の大きさは $\abs{G}/\abs{G_{x}}$ なので、一つの軌道に属する点の $\abs{G_{x}}$ を足すとちょうど $\abs{G}$ になる。
+:::
+
+::: proof
+**Step 1（二通りに数える）.** $F\defeq\{(g,x)\in G\times X : g\cdot x=x\}$ とおく。$g$ を固定して数えると $\abs{F}=\sum_{g\in G}\abs{X^{g}}$。$x$ を固定して数えると $\abs{F}=\sum_{x\in X}\abs{G_{x}}$。
+
+**Step 2（一つの軌道の寄与）.** 軌道 $O$ と $x\in O$ について、\ref{grp:orbit-stabilizer} より $\abs{G_{x}}=\abs{G}/\abs{G\cdot x}=\abs{G}/\abs{O}$。よって $\sum_{x\in O}\abs{G_{x}}=\abs{O}\cdot\abs{G}/\abs{O}=\abs{G}$。
+
+**Step 3（足し合わせる）.** $X$ は軌道に分割される（\ref{grp:orbits-partition}）ので
+$$
+\sum_{x\in X}\abs{G_{x}}=\sum_{O\in X/G}\ \sum_{x\in O}\abs{G_{x}}=\abs{X/G}\cdot\abs{G}.
+$$
+Step 1 と合わせて $\abs{G}\abs{X/G}=\sum_{g}\abs{X^{g}}$。
+
+::: hypcheck
+- **$G$, $X$ が有限**：Step 1 の有限和と Step 2 の割り算に使った。
+- 作用が忠実である必要はない（核の元はすべての点を固定し、その分だけ和と $\abs{G}$ が同じ倍率で増える）。
+:::
+:::
+
+::: corollary 固定点の個数が共役で不変 {#grp:fixed-points-class-function}
+$\abs{X^{g}}$ は $g$ の共役類だけで決まる：$\abs{X^{hgh^{-1}}}=\abs{X^{g}}$。したがって \ref{grp:burnside-lemma} の和は、共役類ごとに（類の大きさ）×（代表元の固定点の個数）を足せばよい。
+:::
+
+::: proof
+$x\in X^{g}\iff g\cdot x=x\iff hgh^{-1}\cdot(h\cdot x)=h\cdot x\iff h\cdot x\in X^{hgh^{-1}}$。よって $x\mapsto h\cdot x$ は $X^{g}$ から $X^{hgh^{-1}}$ への全単射（逆は $h^{-1}$ を作用させる）。
+:::
+
+## ネックレスとブレスレット {#grp:sec-bc-necklaces}
+
+::: definition ネックレスとブレスレット {#grp:necklace-def keywords="necklace, bracelet, colorings up to symmetry" index="ネックレス|ねっくれす, ブレスレット|ぶれすれっと"}
+$n\ge 1$, $k\ge 1$ とし、$C\defeq\{1,\dots,k\}$（色の集合）、$X\defeq C^{\Z/n\Z}$（$n$ 個の玉の位置 $\Z/n\Z$ への色の塗り方全体、$\abs{X}=k^{n}$）とする。巡回群 $\ang{r}$（$r(i)=r_{n}(i+1)$ で生成される $\Sym(\Z/n\Z)$ の部分群、位数 $n$）は $X$ に
+$$
+(\sigma\cdot c)(i)\defeq c(\sigma^{-1}(i))\qquad(\sigma\in\ang{r},\ c\in X)
+$$
+で作用する。この作用の軌道を（$k$ 色、$n$ 玉の）**ネックレス**という。$n\ge 3$ で $D_{n}$ を同じ式で作用させたときの軌道を**ブレスレット**という。
+:::
+
+::: intuition
+$\sigma\cdot c$ は「塗り方 $c$ を $\sigma$ で玉ごと動かした塗り方」である（位置 $i$ に来る玉は、もとは位置 $\sigma^{-1}(i)$ にあった）。$\sigma^{-1}$ にしたのは、作用の条件 $\sigma\cdot(\tau\cdot c)=(\sigma\tau)\cdot c$ をみたすためである：$(\sigma\cdot(\tau\cdot c))(i)=(\tau\cdot c)(\sigma^{-1}(i))=c(\tau^{-1}\sigma^{-1}(i))=c((\sigma\tau)^{-1}(i))$。ネックレスは回転だけ、ブレスレットは裏返しも許して同一視する。
+:::
+
+::: lemma 置換の固定する塗り方 {#grp:fixed-colorings}
+$\sigma\in\Sym(\Z/n\Z)$ について、$\ang{\sigma}$ の $\Z/n\Z$ への自然な作用の軌道の個数を $c(\sigma)$ とすると、$\sigma$ が固定する塗り方の個数は $k^{c(\sigma)}$ である。
+:::
+
+::: proof
+$\sigma\cdot c=c\iff$ すべての $i$ で $c(\sigma^{-1}(i))=c(i)$ $\iff$ すべての $i$ で $c(\sigma(i))=c(i)$（$i$ を $\sigma(i)$ に置き換える）$\iff c$ は $\ang{\sigma}$ の各軌道の上で一定（$c(\sigma^{m}(i))=c(i)$ が $m\ge 0$ の帰納法と、有限群なので $\sigma^{-1}$ も $\sigma$ の正の冪であることから従う。\ref{grp:finite-group-finite-order}）。軌道ごとに色を一つ選ぶので $k^{c(\sigma)}$ 通り。
+:::
+
+::: theorem ネックレスの個数 {#grp:necklace-count keywords="number of necklaces, sum over divisors of phi(d) k^{n/d}" index="ネックレスの個数|ねっくれすのこすう"}
+$k$ 色、$n$ 玉のネックレスの個数は
+$$
+\frac{1}{n}\sum_{j=0}^{n-1}k^{\gcd(n,j)}=\frac{1}{n}\sum_{d\mid n}\varphi(d)\,k^{n/d}
+$$
+（右辺の和は $n$ の正の約数 $d$ にわたる）。
+:::
+
+::: proof
+**Step 1（回転の軌道の個数）.** $r^{j}$（$0\le j\le n-1$）は $i\mapsto r_{n}(i+j)$。$\Z/n\Z$ を加法群とみると、$\ang{r^{j}}$ の作用による $i$ の軌道は $i+\ang{j}$（$j$ が生成する部分群の剰余類）である。$\ang{j}$ の位数は、$1$ の位数が $n$ なので \ref{grp:order-of-power} より $n/\gcd(n,j)$（$j=0$ なら $\gcd(n,0)=n$ で位数 $1$）。軌道（剰余類）の個数は指数 $n/(n/\gcd(n,j))=\gcd(n,j)$。よって $c(r^{j})=\gcd(n,j)$。
+
+**Step 2（バーンサイドの補題）.** \ref{grp:fixed-colorings} と \ref{grp:burnside-lemma} より、ネックレスの個数は $\frac{1}{n}\sum_{j=0}^{n-1}k^{\gcd(n,j)}$。
+
+**Step 3（約数ごとにまとめる）.** $g\mid n$ について、$\gcd(n,j)=g$ となる $j\in\{0,\dots,n-1\}$ は $j=gj'$（$0\le j'<n/g$）で $\gcd(n/g,j')=1$ となるもの（$\gcd(gn',gj')=g\gcd(n',j')$ による。これは $g(n'\Z+j'\Z)=gn'\Z+gj'\Z$ から \ref{grp:gcd} の定義で従う）。その個数は $\varphi(n/g)$。よって $\sum_{j}k^{\gcd(n,j)}=\sum_{g\mid n}\varphi(n/g)k^{g}$ で、$d=n/g$ と置き換えると右辺の形になる。
+
+::: hypcheck
+- Step 3 で $n/g=1$ のとき $\varphi(1)=1$（$j'=0$ だけ、$\gcd(1,0)=1$）で、$j=0$ の項 $k^{n}$ にあたる。
+:::
+:::
+
+::: corollary {#grp:sum-phi-divisors keywords="sum of phi over divisors equals n" index="オイラー関数の約数和|おいらーかんすうのやくすうわ"}
+$n\ge 1$ について $\sum_{d\mid n}\varphi(d)=n$。
+:::
+
+::: proof
+\ref{grp:necklace-count} で $k=1$ とすると、塗り方はただ一つなのでネックレスは $1$ 個：$1=\frac{1}{n}\sum_{d\mid n}\varphi(d)$。
+:::
+
+::: theorem ブレスレットの個数 {#grp:bracelet-count keywords="number of bracelets, dihedral group action on colorings" index="ブレスレットの個数|ぶれすれっとのこすう"}
+$n\ge 3$ とし、$N(n,k)$ を \ref{grp:necklace-count} のネックレスの個数とする。$k$ 色、$n$ 玉のブレスレットの個数は
+$$
+\begin{cases}
+\dfrac{1}{2}N(n,k)+\dfrac{1}{2}k^{(n+1)/2} & (n\text{ 奇数}),\\[2mm]
+\dfrac{1}{2}N(n,k)+\dfrac{1}{4}\bigl(k^{n/2+1}+k^{n/2}\bigr) & (n\text{ 偶数}).
+\end{cases}
+$$
+:::
+
+::: proof
+**Step 1（裏返しの軌道の個数）.** $\sigma=r^{j}s$ は $i\mapsto r_{n}(j-i)$ で、$\sigma^{2}=e$（\ref{grp:dihedral-order} より $(r^{j}s)^{2}=r^{j}sr^{j}s=r^{j}r^{-j}=e$）。よって $\ang{\sigma}$ の軌道は、固定点 $\{i\}$ か、二点 $\{i,\sigma(i)\}$ のどちらか。固定点の個数を $f$ とすると $c(\sigma)=f+(n-f)/2$。$i$ が固定点 $\iff 2i\equiv j\pmod n$。
+- $n$ が奇数：$\gcd(2,n)=1$ なので $2u\equiv 1\pmod n$ となる $u$ があり（ベズーの等式）、$2i\equiv j\iff i\equiv uj$。$f=1$、$c(\sigma)=1+(n-1)/2=(n+1)/2$。
+- $n$ が偶数：$2i\equiv j\pmod n$ なら $j=2i-nt$ は偶数。$j$ が偶数なら $2i\equiv j\iff i\equiv j/2\pmod{n/2}$（$n\mid 2i-j\iff n/2\mid i-j/2$）で、$\Z/n\Z$ にちょうど二つ。よって $j$ が偶数なら $f=2$、$c=2+(n-2)/2=n/2+1$；奇数なら $f=0$、$c=n/2$。$0\le j\le n-1$ で偶数・奇数の $j$ はそれぞれ $n/2$ 個。
+
+**Step 2（バーンサイドの補題）.** $\abs{D_{n}}=2n$ で、回転 $r^{j}$ の寄与の和は \ref{grp:necklace-count} の証明の Step 2 より $nN(n,k)$。裏返しの寄与の和は、奇数なら $n\cdot k^{(n+1)/2}$、偶数なら $\frac{n}{2}k^{n/2+1}+\frac{n}{2}k^{n/2}$。$2n$ で割って主張を得る。
+:::
+
+::: example
+$n=6$, $k=2$（白黒 $6$ 玉）。ネックレスは
+$$
+N(6,2)=\frac{1}{6}\bigl(\varphi(1)2^{6}+\varphi(2)2^{3}+\varphi(3)2^{2}+\varphi(6)2^{1}\bigr)=\frac{64+8+8+4}{6}=14.
+$$
+ブレスレットは $\frac{14}{2}+\frac{1}{4}(2^{4}+2^{3})=7+6=13$。差の $1$ は、ネックレスとしては異なるが裏返すと重なる鏡像の組がちょうど一組あることを意味する（白白黒白黒黒 と、それを裏返した 白白黒黒白黒。後者は前者のどの回転とも一致しない）。
+:::
+
+## 推移的な作用と可換になる確率 {#grp:sec-bc-applications}
+
+::: theorem ジョルダンの定理（固定点のない元） {#grp:jordan-derangement keywords="Jordan's theorem, transitive action has a fixed-point-free element, derangement" index="ジョルダンの定理|じょるだんのていり, 固定点のない置換|こていてんのないちかん"}
+有限群 $G$ が $\abs{X}\ge 2$ の有限集合 $X$ に推移的に作用するなら、固定点をもたない $g\in G$（$X^{g}=\emptyset$）がある。
+:::
+
+::: proof
+推移的なので軌道は一つで、\ref{grp:burnside-lemma} より $\frac{1}{\abs{G}}\sum_{g}\abs{X^{g}}=1$、すなわち $\sum_{g}\abs{X^{g}}=\abs{G}$。$g=e$ の項は $\abs{X}\ge 2$。もしすべての $g$ で $\abs{X^{g}}\ge 1$ なら、和は $\ge\abs{X}+(\abs{G}-1)\ge\abs{G}+1$ となり矛盾。よって $\abs{X^{g}}=0$ となる $g$ がある。
+
+::: hypcheck
+- **推移的**：軌道が一つであることに使った。外すと偽：自明な作用（すべての点が固定点）。
+- **有限**：無限群・無限集合では偽になりうる（ここでは扱わない）。
+:::
+:::
+
+::: corollary {#grp:conjugates-cover-again}
+有限群 $G$ の真部分群 $H$ について、$H$ のどの共役にも属さない元がある。
+:::
+
+::: proof
+$G$ の $G/H$ への作用は推移的で、$(G:H)\ge 2$。\ref{grp:jordan-derangement} の $g$ は、どの $xH$ も固定しない。$gxH=xH\iff x^{-1}gx\in H\iff g\in xHx^{-1}$ なので、$g$ はどの共役 $xHx^{-1}$ にも属さない。（GA-01 の問題 \ref{grp:prob-conjugates-not-cover} の別証明。）
+:::
+
+::: proposition 二元が可換になる確率 {#grp:commuting-probability keywords="commuting probability, number of conjugacy classes, k(G)/|G|" index="可換になる確率|かかんになるかくりつ, 共役類の個数|きょうやくるいのこすう"}
+有限群 $G$ の共役類の個数を $k(G)$ とすると
+$$
+\abs{\{(x,y)\in G\times G : xy=yx\}}=k(G)\,\abs{G}.
+$$
+すなわち、$G$ から独立に一様に選んだ二元が可換である確率は $k(G)/\abs{G}$ である。
+:::
+
+::: proof
+共役による作用 $g\cdot x=gxg^{-1}$ に \ref{grp:burnside-lemma} を使う。$X^{g}=\{x : gxg^{-1}=x\}=Z_{G}(g)$ なので、$\sum_{g}\abs{Z_{G}(g)}=\abs{G}\,k(G)$。左辺は $gx=xg$ となる組 $(g,x)$ の個数である。
+:::
+
+::: example
+$D_{3}$ は共役類が三つ（\ref{grp:class-equation} の例）なので、可換になる確率は $3/6=1/2$。$D_{4}$ は五つなので $5/8$。
+:::
+
+## 問題 {#grp:sec-bc-problems}
+
+::: problem {#grp:prob-five-eighths}
+$G$ が非可換な有限群なら、二元が可換になる確率は $5/8$ 以下であることを示せ（$D_{4}$ で等号）。
+:::
+
+::: solution
+**Step 1（中心の大きさ）.** $G/Z(G)$ は巡回群でない（\ref{grp:center-quotient-cyclic}。巡回群なら $G$ は可換）。位数 $1$ や素数位数の群は巡回群（\ref{grp:lagrange-corollaries}）なので、$(G:Z(G))$ は $1$ でも素数でもなく、$\ge 4$。よって $\abs{Z(G)}\le\abs{G}/4$。
+
+**Step 2（中心化群の大きさ）.** $g\notin Z(G)$ なら $Z_{G}(g)\neq G$ なので $\abs{Z_{G}(g)}\le\abs{G}/2$（ラグランジュの定理）。$g\in Z(G)$ なら $Z_{G}(g)=G$。
+
+**Step 3.** \ref{grp:commuting-probability} の証明より可換な組の個数は
+$$
+\begin{aligned}
+\sum_{g}\abs{Z_{G}(g)}&\le\abs{Z(G)}\abs{G}+(\abs{G}-\abs{Z(G)})\frac{\abs{G}}{2}\\
+&=\frac{\abs{G}}{2}\bigl(\abs{G}+\abs{Z(G)}\bigr)\le\frac{\abs{G}}{2}\cdot\frac{5\abs{G}}{4}=\frac{5}{8}\abs{G}^{2}.
+\end{aligned}
+$$
+$\abs{G}^{2}$ で割ればよい。$D_{4}$ では上の例のとおり $5/8$。
+:::
+
+::: problem {#grp:prob-cube-colorings}
+立方体の 6 面を 2 色で塗る方法は、回転で重なるものを同じとみなすと何通りか。立方体の回転群（位数 $24$）の元は、恒等（$1$ 個）、向かい合う面を通る軸のまわりの $\pm 90^{\circ}$（$6$ 個）と $180^{\circ}$（$3$ 個）、向かい合う頂点を通る軸のまわりの $\pm 120^{\circ}$（$8$ 個）、向かい合う辺の中点を通る軸のまわりの $180^{\circ}$（$6$ 個）からなることを使ってよい。
+:::
+
+::: solution
+各回転が 6 面に引き起こす置換の軌道の個数 $c$ を数え、\ref{grp:fixed-colorings} と \ref{grp:burnside-lemma} を使う。恒等：$c=6$。面軸 $90^{\circ}$：軸上の 2 面は固定、側面 4 面が一つの軌道なので $c=3$。面軸 $180^{\circ}$：軸上 2 面と、側面が 2 面ずつ 2 組で $c=4$。頂点軸 $120^{\circ}$：頂点に集まる 3 面と反対側の 3 面で $c=2$。辺軸 $180^{\circ}$：6 面が 2 面ずつ 3 組で $c=3$。よって
+$$
+\frac{1}{24}\bigl(2^{6}+6\cdot 2^{3}+3\cdot 2^{4}+8\cdot 2^{2}+6\cdot 2^{3}\bigr)=\frac{64+48+48+32+48}{24}=\frac{240}{24}=10.
+$$
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=bf1e7588"></script>
+</body>
+</html>
