@@ -473,3 +473,4 @@
 | group of units mod n / Euler's totient function / Fermat's little theorem | 既約剰余類群 (ℤ/nℤ)^× / オイラー関数 φ / フェルマーの小定理 | | 雪江（オイラー関数 11 回）。grp:units-mod-n |
 | normal subgroup / quotient group (factor group) / natural projection / center / commutator / commutator subgroup (derived subgroup) / normal closure / abelianization | 正規部分群 / 剰余群（商群） / 自然な射影 / 中心 / 交換子 / 交換子部分群（導来部分群） / 正規閉包 / 可換化 | | 雪江（剰余群・商群の両方）。grp:page-normal-quotient |
 | homomorphism / isomorphism / kernel / image / automorphism / inner automorphism / first (second, third) isomorphism theorem / correspondence theorem | 準同型 / 同型 / 核 / 像 / 自己同型 / 内部自己同型 / 準同型定理（第一同型定理）・第二・第三同型定理 / 対応定理 | 準同型定理（部分群の対応）（雪江） | 雪江。grp:page-homomorphism-theorems |
+| direct product (external / internal) / semidirect product / complement / least common multiple / Chinese remainder theorem | 直積（外部直積・内部直積） / 半直積 / 補群 / 最小公倍数 / 中国剰余定理 | 中国式剰余定理（雪江） | サイトの pt:chinese-remainder に合わせて「中国剰余定理」。grp:page-products |
