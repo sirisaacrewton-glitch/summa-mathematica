@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ガウスの補題と多項式環の一意分解性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="13-commutative-algebra/13F-arithmetic-rings/01-integral-domains/02-gauss-lemma.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ガウスの補題と多項式環の一意分解性 {#ring:page-gauss-lemma keywords="Gauss's lemma, content of a polynomial, primitive polynomial, polynomial ring over a UFD is a UFD, Eisenstein criterion, rational root theorem, cyclotomic polynomial"}
+
+整数係数の多項式が有理数係数で因数分解できるなら、実は整数係数で因数分解できる。これが**ガウスの補題**の帰結（\ref{ring:gauss-irreducible}）であり、その核心は「原始多項式の積は原始的」（\ref{ring:gauss-lemma}）という主張である。このページでは、一意分解環 $A$ について多項式の内容と原始多項式を定義してガウスの補題を証明し、**$A$ が一意分解環なら $A[x]$ も一意分解環**であること（\ref{ring:polynomial-ufd}）を導く。系として $\Z[x_{1},\dots,x_{n}]$, $K[x_{1},\dots,x_{n}]$ は一意分解環である。応用として、アイゼンシュタインの判定法（\ref{ring:eisenstein}）と有理根定理を示し、円分多項式 $\Phi_{p}$ の既約性を確かめる。
+
+> 雪江明彦『代数学 2』第 1 章 §1.11 後半（補題 1.11.33 以降）の流れを参考にした。
+
+## 記法と定義の確認 {#ring:sec-gl-notation}
+
+::: notation
+- 環は可換。一意分解環・既約元・素元・最大公約元は \ref{ring:ufd}, \ref{ring:irreducible-prime-def}, \ref{ring:ufd-gcd}。素元の剰余環は整域（\ref{ring:prime-maximal-quotient} の 1）。多項式環の次数と整域性・単元は \ref{ring:degree}, \ref{ring:polynomial-domain}。商体は \ref{ring:fraction-field}。
+- このページでは $A$ を一意分解環、$K=\Frac A$ とし、$A\subset A[x]\subset K[x]$ とみなす。最大公約元は同伴を除いて定まるので、「$\gcd=1$」は「単元」の意味である。
+- 選択公理は、一意分解環の既約元分解をそのまま使う範囲でしか関わらない（新たには使わない）。
+:::
+
+## 内容と原始多項式 {#ring:sec-gl-content}
+
+::: definition 内容・原始多項式 {#ring:content-primitive keywords="content of a polynomial, primitive polynomial" index="内容|ないよう, 原始多項式|げんしたこうしき"}
+$0$ でない $f=\sum a_{k}x^{k}\in A[x]$ について、係数の最大公約元 $c(f)\defeq\gcd(a_{0},\dots,a_{d})$（同伴を除いて定まる）を $f$ の**内容**という。$c(f)$ が単元のとき、$f$ を**原始多項式**という。
+:::
+
+::: lemma $K[x]$ の元の表示 {#ring:primitive-representation keywords="every nonzero polynomial over K is a scalar times a primitive polynomial" index="原始多項式による表示|げんしたこうしきによるひょうじ"}
+$0$ でない $g\in K[x]$ は、$c\in K^{\times}$ と原始多項式 $g_{0}\in A[x]$ によって $g=cg_{0}$ と書け、$c$ と $g_{0}$ は $A$ の単元倍を除いて一意である。$g\in A[x]$ なら $c\in A$ で、$c$ は $c(g)$ と同伴。
+:::
+
+::: proof
+**Step 1（存在）.** $g$ の係数の分母を払う：$0\neq b\in A$ で $bg\in A[x]$ となるものがある（係数 $a_{k}/s_{k}$ の分母の積）。$bg=c(bg)\,g_{0}$ と書くと、$g_{0}$ は係数を $c(bg)$ で割った多項式で、係数の最大公約元は $1$（\ref{ring:ufd-gcd} の指数の計算）、すなわち原始的。$c\defeq c(bg)/b$。
+
+**Step 2（一意性）.** $cg_{0}=c'g'_{0}$（$g_{0},g'_{0}$ 原始的）とし、$c'/c=u/v$（$u,v\in A$, $\gcd(u,v)=1$）と書く。$vg_{0}=ug'_{0}$ の係数の最大公約元をとると、$g_{0},g'_{0}$ は原始的なので $v$ と $u$ は同伴（\ref{ring:ufd-gcd}：$\gcd(va_{k})=v\gcd(a_{k})$）。$\gcd(u,v)=1$ と合わせて $u,v$ は単元、すなわち $c'/c\in A^{\times}$。
+
+**Step 3（$g\in A[x]$ の場合）.** $b=1$ でよく、$c=c(g)$。
+:::
+
+::: theorem ガウスの補題 {#ring:gauss-lemma keywords="Gauss's lemma, product of primitive polynomials is primitive, c(fg) = c(f)c(g)" index="ガウスの補題|がうすのほだい"}
+$A$ を一意分解環とする。原始多項式の積は原始多項式である。したがって $0$ でない $f,g\in A[x]$ について $c(fg)=c(f)c(g)$（同伴を除いて）。
+:::
+
+::: proof
+**Step 1（素元を法とする還元）.** $f,g$ を原始的とし、$fg$ が原始的でないとする。$c(fg)$ は単元でないので、ある既約元 $p$（一意分解環では素元。\ref{ring:ufd-criterion}）で割り切れる。$\pi:A\to A/(p)$ と、係数ごとの還元 $\bar\pi:A[x]\to(A/(p))[x]$ を考える（多項式環の普遍性 \ref{ring:polynomial-universal} から環準同型）。
+
+**Step 2（矛盾）.** $p$ は $fg$ のすべての係数を割り切るので $\bar\pi(f)\bar\pi(g)=\bar\pi(fg)=0$。$A/(p)$ は整域なので $(A/(p))[x]$ も整域（\ref{ring:polynomial-domain} の 3）で、$\bar\pi(f)=0$ または $\bar\pi(g)=0$、すなわち $p$ が $f$ または $g$ のすべての係数を割り切る。これは原始的であることに反する。
+
+**Step 3（内容の乗法性）.** $f=c(f)f_{0}$, $g=c(g)g_{0}$（$f_{0},g_{0}$ 原始的）と書くと $fg=c(f)c(g)f_{0}g_{0}$ で、$f_{0}g_{0}$ は原始的なので、\ref{ring:primitive-representation} の一意性から $c(fg)$ は $c(f)c(g)$ と同伴。
+
+::: hypcheck
+- **前提「一意分解環」**：Step 1 で既約元が素元であること（$A/(p)$ が整域）と、内容（最大公約元）の存在に使った。
+:::
+:::
+
+::: theorem 既約性の比較 {#ring:gauss-irreducible keywords="primitive polynomial is irreducible over A iff irreducible over K, factorization over K can be done over A" index="ガウスの補題の帰結|がうすのほだいのきけつ"}
+$A$ を一意分解環、$K=\Frac A$ とする。
+1. $f\in A[x]$ が $K[x]$ で $f=gh$ と分解すれば、$a\in K^{\times}$ で $ag,a^{-1}h\in A[x]$ となるものがある。特に、$A[x]$ でも次数を変えずに分解できる。
+2. 次数 $1$ 以上の原始多項式 $f\in A[x]$ について、$f$ が $A[x]$ で既約であることと、$K[x]$ で既約であることは同値である。
+:::
+
+::: proof
+**Step 1（1）.** $g=c_{1}g_{0}$, $h=c_{2}h_{0}$（$c_{i}\in K^{\times}$, $g_{0},h_{0}$ 原始的）と書く（\ref{ring:primitive-representation}）。$f=c_{1}c_{2}g_{0}h_{0}$ で $g_{0}h_{0}$ は原始的（\ref{ring:gauss-lemma}）なので、一意性（同補題、$f\in A[x]$ の場合）から $c_{1}c_{2}\in A$。$a\defeq c_{1}^{-1}$ とすると $ag=g_{0}\in A[x]$, $a^{-1}h=c_{1}c_{2}h_{0}\in A[x]$。
+
+**Step 2（2、⇐）.** $f$ が $A[x]$ で $f=gh$ と分解したとする。$f$ は原始的なので $g,h$ のどちらも次数 $0$ の非単元（$A$ の非単元）ではない（$g=a\in A$ なら $a\mid c(f)$ で $a$ は単元）。$K[x]$ で既約なので $g$ か $h$ は $K[x]$ の単元、すなわち次数 $0$（\ref{ring:polynomial-domain} の 3）で、上の注意から $A$ の単元。よって $A[x]$ で既約。
+
+**Step 3（2、⇒）.** $f$ が $K[x]$ で既約でなければ、次数 $1$ 以上の $g,h\in K[x]$ で $f=gh$。1 から $A[x]$ で次数 $1$ 以上の二つの多項式の積に分解し、それらは単元でない。よって $A[x]$ で既約でない。
+
+::: hypcheck
+- **前提「一意分解環」**：外すと 2 は偽：$A=\Z[2i]=\{a+2bi\}$（整域だが一意分解環でない）で $f=x^{2}+1$ は原始的（係数 $1$）。$K=\Q(i)$ では $(x-i)(x+i)$ と分解するが、$A[x]$ では、分解するなら一次式の積で $A$ に根をもつはずだが $\pm i\notin A$ なので既約である。
+- **前提「原始的」（2）**：$2x+2=2(x+1)$ は $\Q[x]$ で既約（一次式）だが、$\Z[x]$ では $2$ と $x+1$ という二つの非単元の積で既約でない。
+:::
+:::
+
+## 多項式環の一意分解性 {#ring:sec-gl-ufd}
+
+::: proposition $A[x]$ の素元 {#ring:polynomial-primes keywords="prime elements of A[x]: primes of A and primitive irreducibles" index="多項式環の素元|たこうしきかんのそげん"}
+$A$ を一意分解環とする。
+1. $A$ の素元 $p$ は $A[x]$ でも素元である。
+2. 次数 $1$ 以上の原始多項式で $K[x]$ において既約なものは、$A[x]$ の素元である。
+:::
+
+::: proof
+**Step 1（1）.** $\bar\pi:A[x]\to(A/(p))[x]$（係数の還元）は全射で、核は係数がすべて $p$ で割り切れる多項式全体 $pA[x]$。$(A/(p))[x]$ は整域なので、$pA[x]$ は素イデアル（\ref{ring:prime-maximal-quotient} の 1）。
+
+**Step 2（2）.** $f\mid gh$（$g,h\in A[x]$）とする。$K[x]$ は PID（\ref{ring:euclidean-examples}）で $f$ は既約なので素元（\ref{ring:pid-basic} の 2）、例えば $K[x]$ で $f\mid g$：$g=fq$, $q\in K[x]$。$q=cq_{0}$（$c\in K^{\times}$, $q_{0}$ 原始的）と書くと $g=c\,fq_{0}$ で $fq_{0}$ は原始的（ガウスの補題）なので、\ref{ring:primitive-representation} の一意性から $c\in A$。よって $q\in A[x]$ で、$A[x]$ で $f\mid g$。
+:::
+
+::: theorem 多項式環の一意分解性 {#ring:polynomial-ufd keywords="if A is a UFD then A[x] is a UFD, polynomial rings over a field are UFDs" index="多項式環の一意分解性|たこうしきかんのいちいぶんかいせい"}
+$A$ が一意分解環なら $A[x]$ も一意分解環である。$A[x]$ の既約元は、$A$ の既約元と、$K[x]$ で既約な次数 $1$ 以上の原始多項式（の単元倍）ですべてである。したがって、$\Z[x_{1},\dots,x_{n}]$ と、体 $K$ 上の $K[x_{1},\dots,x_{n}]$ は一意分解環である。
+:::
+
+::: proof
+**Step 1（分解の存在）.** $0$ でも単元でもない $f\in A[x]$ を $f=c(f)f_{0}$（$f_{0}$ 原始的）と書く。$c(f)$ は $A$ で既約元の積に分解する（$A$ は UFD。単元なら何もしない）。$f_{0}$ は次数についての帰納法で原始的で $K[x]$ において既約な多項式の積に分解する：$f_{0}$ が $K[x]$ で既約でなければ、\ref{ring:gauss-irreducible} の 1 から $f_{0}=gh$（$g,h\in A[x]$, 次数 $\ge 1$）で、$g,h$ は原始的（内容の積が $c(f_{0})=1$）かつ次数が真に小さい。
+
+**Step 2（既約元は素元）.** Step 1 の因子は \ref{ring:polynomial-primes} から素元である。$A[x]$ の任意の既約元 $q$ についても、Step 1 で $q$ 自身を分解すると因子は一つで、$q$ はそのどちらかの型の素元の単元倍。よって既約元はすべて素元で、\ref{ring:ufd-criterion} から $A[x]$ は一意分解環。
+
+**Step 3（多変数）.** $A[x_{1},\dots,x_{n}]=A[x_{1},\dots,x_{n-1}][x_{n}]$（\ref{ring:multivariate-polynomial}）なので帰納法。$\Z$ と体は一意分解環（\ref{ring:euclidean-examples}、体は既約元をもたないので自明）。
+:::
+
+::: supplement
+**冪級数環では.** $A$ が一意分解環でも $A[[x]]$ は一意分解環とは限らないことが知られている（サミュエル）。一方、体 $K$ 上の $K[[x_{1},\dots,x_{n}]]$ は一意分解環である（ヴァイエルシュトラスの準備定理による）。PID 上の $A[[x]]$ も一意分解環である。これらは \ref[性質の保存表]{ring:page-preservation-table} の「冪級数環」の列に入る。
+
+**高い視点.** ガウスの補題の証明は「$p$ を法とする還元 $A[x]\to(A/p)[x]$ が整域への準同型である」ことだけを使っている。これは「$pA[x]$ は素イデアル」、すなわち素イデアル $(p)$ の $A[x]$ への拡大が素であることにほかならない。幾何的には、$\Spec A[x]\to\Spec A$ の点 $(p)$ 上のファイバーが既約な直線 $\mathbb{A}^{1}_{A/p}$ であることにあたる。
+:::
+
+## 既約性の判定 {#ring:sec-gl-criteria}
+
+::: theorem アイゼンシュタインの判定法 {#ring:eisenstein keywords="Eisenstein's criterion for irreducibility" index="アイゼンシュタインの判定法|あいぜんしゅたいんのはんていほう"}
+$A$ を一意分解環、$K=\Frac A$、$f=a_{n}x^{n}+\dots+a_{1}x+a_{0}\in A[x]$（$n\ge 1$）とする。素元 $p$ が
+$$
+p\nmid a_{n},\qquad p\mid a_{i}\ (0\le i<n),\qquad p^{2}\nmid a_{0}
+$$
+をみたせば、$f$ は $K[x]$ で既約である。$f$ が原始的なら $A[x]$ でも既約。
+:::
+
+::: proof
+**Step 1.** $K[x]$ で可約なら、\ref{ring:gauss-irreducible} の 1 から $A[x]$ で $f=gh$, $g=\sum b_{i}x^{i}$（次数 $r\ge 1$）, $h=\sum c_{j}x^{j}$（次数 $s\ge 1$）, $r+s=n$ と分解する。
+
+**Step 2（$p$ を法として還元）.** $\bar\pi(f)=\bar a_{n}x^{n}$（$\bar a_{n}\neq 0$）。$\bar\pi(g)\bar\pi(h)=\bar a_{n}x^{n}$ で、$A/(p)$ は整域なので、その商体上の多項式環（UFD）で $x$ は素元。したがって $\bar\pi(g)=\bar b_{r}x^{r}$, $\bar\pi(h)=\bar c_{s}x^{s}$（次数は $\bar b_{r}\bar c_{s}=\bar a_{n}\neq 0$ から $r$, $s$ のまま）。特に $r,s\ge 1$ なので $\bar b_{0}=\bar c_{0}=0$、すなわち $p\mid b_{0}$, $p\mid c_{0}$。
+
+**Step 3（矛盾）.** $a_{0}=b_{0}c_{0}$ は $p^{2}$ で割り切れ、仮定に反する。よって $K[x]$ で既約。原始的なら \ref{ring:gauss-irreducible} の 2 から $A[x]$ でも既約。
+
+::: hypcheck
+- **前提 $p^{2}\nmid a_{0}$**：Step 3 で使った。外すと偽：$x^{2}-4=(x-2)(x+2)$（$p=2$ で $2\mid -4$ だが $4\mid -4$）。
+- **前提 $p\nmid a_{n}$**：Step 2 で $\bar\pi(f)$ の次数が $n$ であることに使った。外すと偽：$2x^{2}+2x=2x(x+1)$ では次数が下がる。
+:::
+:::
+
+::: example
+1. 素数 $p$ と $n\ge 1$ について $x^{n}-p$ は $\Q[x]$ で既約。特に $\sqrt[n]{p}$ は次数 $n$ の代数的数で、$n\ge 2$ なら無理数。
+2. **円分多項式.** 素数 $p$ について $\Phi_{p}(x)\defeq x^{p-1}+x^{p-2}+\dots+1=\frac{x^{p}-1}{x-1}$ は $\Q[x]$ で既約。$x\mapsto x+1$ は $\Q[x]$ の自己同型（普遍性から作れ、逆は $x\mapsto x-1$）なので、$\Phi_{p}(x+1)$ の既約性を示せばよい。
+$$
+\Phi_{p}(x+1)=\frac{(x+1)^{p}-1}{x}=\sum_{k=1}^{p}\binom{p}{k}x^{k-1}
+$$
+で、最高次係数は $1$、他の係数 $\binom{p}{k}$（$1\le k\le p-1$）は $p$ で割り切れ（\ref{ring:char-domain} の証明の Step 3）、定数項 $\binom{p}{1}=p$ は $p^{2}$ で割り切れない。アイゼンシュタインの判定法から既約。
+:::
+
+::: proposition 有理根定理 {#ring:rational-root keywords="rational root theorem" index="有理根定理|ゆうりこんていり"}
+$A$ を一意分解環、$f=a_{n}x^{n}+\dots+a_{0}\in A[x]$（$a_{n}\neq 0$）とする。$f$ の $K$ での根 $r/s$（$r,s\in A$, $\gcd(r,s)=1$）について、$s\mid a_{n}$ かつ $r\mid a_{0}$。特に $f$ がモニックなら、$K$ での根は $A$ に属する。
+:::
+
+::: proof
+$f(r/s)=0$ に $s^{n}$ を掛けると $a_{n}r^{n}+a_{n-1}r^{n-1}s+\dots+a_{0}s^{n}=0$。$a_{0}s^{n}$ 以外の項は $r$ で割り切れるので $r\mid a_{0}s^{n}$、$\gcd(r,s)=1$ から $r\mid a_{0}$（一意分解環で、素因子が共通しないことから。\ref{ring:ufd-gcd} の 1）。同様に $s\mid a_{n}r^{n}$ から $s\mid a_{n}$。モニックなら $s$ は単元で $r/s\in A$。
+:::
+
+::: supplement
+**整閉性.** 有理根定理の最後の主張「モニックな $A$ 係数多項式の $K$ での根は $A$ に属する」は、一意分解環が**整閉**（正規）であることを言っている（\ref[整拡大と正規環]{ring:page-integral-extensions}）。$\Z[2i]$ や $\Z[\sqrt{-3}]$ はこれが成り立たない（$i$ や $\frac{1+\sqrt{-3}}{2}$ はモニック多項式 $x^{2}+1$, $x^{2}-x+1$ の根）ので一意分解環でない。
+:::
+
+## 問題 {#ring:sec-gl-problems}
+
+::: problem {#ring:prob-irreducible-cubic}
+$x^{3}-3x-1$ は $\Q[x]$ で既約であることを示せ。
+:::
+
+::: solution
+三次式が $\Q[x]$ で可約なら一次因子、すなわち $\Q$ の根をもつ。有理根定理（\ref{ring:rational-root}）から根は $\pm1$ に限られるが、$1-3-1=-3\neq 0$、$-1+3-1=1\neq 0$。よって既約。
+:::
+
+::: problem {#ring:prob-eisenstein-shift}
+$f(x)=x^{4}+1$ は $\Q[x]$ で既約であることを、$x\mapsto x+1$ と $p=2$ のアイゼンシュタインの判定法で示せ。
+:::
+
+::: solution
+$f(x+1)=x^{4}+4x^{3}+6x^{2}+4x+2$。最高次係数 $1$ は $2$ で割り切れず、他の係数 $4,6,4,2$ は $2$ で割り切れ、定数項 $2$ は $4$ で割り切れない。よって $f(x+1)$ は既約で、自己同型 $x\mapsto x+1$ で移る $f$ も既約。（$x^{4}+1$ はすべての素数 $p$ を法として可約になることが知られており、既約性を「ある $p$ を法とした還元」で示すことはできない例でもある。）
+:::
+
+::: problem {#ring:prob-content-counterexample}
+$A=\Z[\sqrt{-3}]$ で、$f=2x+(1+\sqrt{-3})$ と $g=2x-(1-\sqrt{-3})$ はどちらも係数が共通の非単元で割り切れないが、積 $fg$ の係数はすべて $2$ で割り切れることを確かめよ（一意分解環でないとガウスの補題が成り立たない例）。
+:::
+
+::: solution
+$fg=4x^{2}+2x\bigl((1+\sqrt{-3})-(1-\sqrt{-3})\bigr)-(1+\sqrt{-3})(1-\sqrt{-3})=4x^{2}+4\sqrt{-3}\,x-4$。すべての係数は $2$（さらに $4$）で割り切れる。一方 $f$ の係数 $2$ と $1+\sqrt{-3}$ を割り切る非単元はない：$N(2)=4$, $N(1+\sqrt{-3})=4$ で、共通の約元 $d$ は $N(d)\mid 4$、$N(d)=2$ となる元はない（$a^{2}+3b^{2}=2$ は解なし）ので $N(d)\in\{1,4\}$。$N(d)=4$ なら $d$ は $\pm2$ か $\pm1\pm\sqrt{-3}$ で、$2\nmid 1+\sqrt{-3}$（$\frac{1+\sqrt{-3}}{2}\notin A$）、$1+\sqrt{-3}\nmid 2$（$\frac{2}{1+\sqrt{-3}}=\frac{1-\sqrt{-3}}{2}\notin A$）、他も同様。よって $d$ は単元（$N(d)=1$）。$g$ も同様。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
