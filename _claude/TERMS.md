@@ -505,3 +505,4 @@
 | Smith normal form / invariant factors / elementary divisors / Jordan normal form / rational canonical form | スミス標準形 / 単因子 / 初等因子 / ジョルダン標準形 / 有理標準形 | | 雪江（単因子論）。mod:page-pid-modules |
 | content / primitive polynomial / Gauss's lemma / Eisenstein's criterion / rational root theorem | 内容 / 原始多項式 / ガウスの補題 / アイゼンシュタインの判定法 / 有理根定理 | | 雪江。ring:page-gauss-lemma |
 | module of fractions / local property / support / Nakayama's lemma / determinant trick / locally free | 分数加群 / 局所的性質 / 台 / 中山の補題 / 行列式のトリック / 局所自由 | サポート | 松村。ring:page-local-properties |
+| Noetherian / Artinian / ascending (descending) chain condition / Noetherian induction / Hilbert basis theorem / Akizuki–Hopkins theorem | ネーター / アルティン / 昇鎖（降鎖）条件 / ネーター帰納法 / ヒルベルトの基底定理 / 秋月＝ホプキンスの定理 | | 松村。ring:page-noetherian-artinian |
