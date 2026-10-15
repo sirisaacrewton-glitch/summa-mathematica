@@ -516,3 +516,4 @@
 | graded ring / homogeneous / filtration / stable / Rees algebra / Artin–Rees lemma / associated graded ring / tangent cone / I-adic topology | 次数環 / 斉次 / フィルトレーション / 安定 / リース代数 / アルティン＝リースの補題 / 随伴次数環 / 接錐 / I 進位相 | 付随次数環、斉次＝同次 | 松村。ring:page-filtrations |
 | completion / inverse limit / complete / separated / Krull intersection theorem / Hensel's lemma | 完備化 / 逆極限 / 完備 / 分離的 / クルルの交叉定理 / ヘンゼルの補題 | 射影極限 | 松村。ring:page-completion |
 | Krull dimension / height / length / composition series / Hilbert polynomial / Hilbert–Samuel function / system of parameters / embedding dimension | クルル次元 / 高さ / 長さ / 組成列 / ヒルベルト多項式 / ヒルベルト＝サミュエル関数 / パラメーター系 / 埋め込み次元 | 巴系 | 松村（パラメーター系 65）。ring:page-dimension-theory |
+| regular local ring / regular system of parameters / embedding dimension / Zariski tangent space | 正則局所環 / 正則なパラメーター系 / 埋め込み次元 / ザリスキ接空間 | | 本で正則局所環 212。ring:page-regular-local-rings |
