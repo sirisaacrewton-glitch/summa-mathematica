@@ -480,3 +480,4 @@
 | cycle / transposition / support / disjoint / cycle decomposition / cycle type / partition / Young diagram | 巡回置換 / 互換 / 台 / 互いに素 / 巡回置換分解 / 型 / 分割 / ヤング図形 | | 雪江（型・ヤング図形）。grp:page-symmetric-groups |
 | sign (signature) / even permutation / odd permutation / inversion / difference product / alternating group | 符号 / 偶置換 / 奇置換 / 転倒数 / 差積 / 交代群 | | 標準的（雪江）。grp:page-sign-alternating |
 | simple group / classification of finite simple groups / sporadic group | 単純群 / 有限単純群の分類（定理） / 散在群 | | 標準的。grp:page-simplicity-an |
+| Sylow p-subgroup / Sylow theorems / Frattini argument | シロー p 部分群 / シローの定理 / フラッティーニの論法 | | 雪江（シロー p 部分群）。フラッティーニの論法は仮。grp:page-sylow |
