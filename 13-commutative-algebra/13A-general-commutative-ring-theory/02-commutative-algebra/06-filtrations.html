@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>次数環とフィルトレーション | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="13-commutative-algebra/13A-general-commutative-ring-theory/02-commutative-algebra/06-filtrations.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 次数環とフィルトレーション {#ring:page-filtrations keywords="graded ring, graded module, homogeneous ideal, filtration, I-filtration, stable filtration, Rees algebra, blow-up algebra, Artin-Rees lemma, associated graded ring, I-adic topology"}
+
+多項式を次数ごとに分けるように、環を次数ごとの部分の直和に分けたものが**次数環**である（\ref{ring:graded-ring}）。一方、イデアル $I$ の冪の列 $A\supset I\supset I^{2}\supset\cdots$ は、環を「$I$ でどれだけ割り切れるか」で層別する**フィルトレーション**を与える（\ref{ring:filtration}）。両者を結ぶのが**リース代数** $\bigoplus I^{n}$ と**随伴次数環** $\bigoplus I^{n}/I^{n+1}$ であり、局所環を「接錐」という次数環で近似する手段になる。このページの中心は**アルティン＝リースの補題**（\ref{ring:artin-rees}）で、部分加群に制限した $I$ 進フィルトレーションが元のものと「ほぼ同じ」であることを述べる。これは次のページの完備化とクルルの交叉定理、さらに次元論の基礎となる。
+
+> Atiyah–Macdonald 第 10 章と松村『可換環論』§8 の流れを参考にした。
+
+## 記法と定義の確認 {#ring:sec-fi-notation}
+
+::: notation
+- 環は可換、加群は $A$ 加群。ネーター環・ヒルベルトの基底定理は \ref{ring:noetherian-module}, \ref{ring:hilbert-basis}, \ref{ring:noetherian-exact}、イデアルの積と冪は \ref{ring:ideal-sum-product}、$IM$ は \ref{mod:tensor-quotient}。
+- 選択公理：ネーター性から有限生成性を引くところで従属選択公理を使う（\ref{ring:noetherian-module}）。
+:::
+
+## 次数環 {#ring:sec-fi-graded}
+
+::: definition 次数環・次数加群 {#ring:graded-ring keywords="graded ring, graded module, homogeneous element, homogeneous component, homogeneous ideal" index="次数環|じすうかん, 次数加群|じすうかぐん, 斉次元|せいじげん, 斉次イデアル|せいじいである, 斉次成分|せいじせいぶん"}
+1. 環 $A$ の加法部分群の族 $(A_{n})_{n\ge 0}$ で、$A=\bigoplus_{n\ge 0}A_{n}$（内部直和）かつ $A_{m}A_{n}\subset A_{m+n}$ をみたすものを与えたとき、$A$ を**次数環**という。$A_{0}$ は部分環で、各 $A_{n}$ は $A_{0}$ 加群。$A_{+}\defeq\bigoplus_{n>0}A_{n}$ はイデアル。
+2. 次数環 $A$ 上の加群 $M$ と部分群の族 $(M_{n})_{n\ge 0}$（あるいは $n\in\Z$）で $M=\bigoplus M_{n}$, $A_{m}M_{n}\subset M_{m+n}$ をみたすものを**次数加群**という。
+3. $A_{n}$（$M_{n}$）の元を次数 $n$ の**斉次元**、$x=\sum x_{n}$ の $x_{n}$ を**斉次成分**という。斉次元で生成される部分加群（イデアル）を**斉次**という。
+:::
+
+::: example
+1. 多項式環 $A_{0}[x_{1},\dots,x_{r}]$ は、次数 $n$ の単項式で張られる部分を $A_{n}$ として次数環。
+2. 次数環の斉次イデアル $I$ による剰余 $A/I$ は $\bigoplus A_{n}/(I\cap A_{n})$ として次数環（例：$k[x,y,z]/(xy-z^{2})$）。
+:::
+
+::: proposition 斉次部分加群の判定 {#ring:homogeneous-criterion keywords="a submodule is homogeneous iff it contains the homogeneous components of its elements" index="斉次部分加群の判定|せいじぶぶんかぐんのはんてい"}
+次数加群 $M$ の部分加群 $N$ について、$N$ が斉次であることと、「$x\in N$ の斉次成分がすべて $N$ に属する」ことは同値である。
+:::
+
+::: proof
+**Step 1（⇐）.** $N$ はその元の斉次成分、すなわち斉次元で生成される。
+
+**Step 2（⇒）.** $N$ が斉次元 $(y_{j})$ で生成されるとし、$x=\sum_{j}a_{j}y_{j}\in N$（有限和）とする。$a_{j}$ を斉次成分に分けて $a_{j}=\sum_{m}a_{j,m}$ とすると、$x$ の次数 $n$ の成分は $\sum_{j}a_{j,n-\deg y_{j}}y_{j}$（直和の一意性から）で、$N$ に属する。
+:::
+
+::: theorem 次数環のネーター性 {#ring:graded-noetherian keywords="a graded ring is Noetherian iff A_0 is Noetherian and A is a finitely generated A_0-algebra" index="次数環のネーター性|じすうかんのねーたーせい"}
+（DC）次数環 $A$ について、$A$ がネーター環であることと、$A_{0}$ がネーター環で $A$ が有限生成 $A_{0}$ 代数であることは同値である。このとき、$A$ は $A_{+}$ の有限個の斉次な生成元 $x_{1},\dots,x_{s}$ によって $A=A_{0}[x_{1},\dots,x_{s}]$ と書ける。
+:::
+
+::: proof
+**Step 1（⇐）.** ヒルベルトの基底定理（\ref{ring:hilbert-basis}）。
+
+**Step 2（⇒：$A_{0}$）.** $A_{0}\cong A/A_{+}$ なのでネーター（\ref{ring:noetherian-exact} の 3）。
+
+**Step 3（⇒：生成元）.** $A_{+}$ は有限生成で、生成元の斉次成分をとれば、斉次な生成元 $x_{1},\dots,x_{s}$（次数 $d_{i}>0$）がとれる（\ref{ring:homogeneous-criterion}）。$B\defeq A_{0}[x_{1},\dots,x_{s}]$ とし、$A_{n}\subset B$ を $n$ の帰納法で示す。$n=0$ は明らか。$y\in A_{n}$, $n>0$ なら $y\in A_{+}$ なので $y=\sum a_{i}x_{i}$ で、両辺の次数 $n$ の成分をとって $a_{i}\in A_{n-d_{i}}$ としてよい。$n-d_{i}<n$ なので帰納法の仮定から $a_{i}\in B$、よって $y\in B$。
+:::
+
+## フィルトレーション {#ring:sec-fi-filtrations}
+
+::: definition フィルトレーション・安定 {#ring:filtration keywords="I-filtration, stable I-filtration, I-adic filtration" index="フィルトレーション|ふぃるとれーしょん, 安定なフィルトレーション|あんていなふぃるとれーしょん, I 進フィルトレーション|あいしんふぃるとれーしょん"}
+$I$ を $A$ のイデアル、$M$ を加群とする。部分加群の降鎖 $M=M_{0}\supset M_{1}\supset M_{2}\supset\cdots$ で、すべての $n$ について $IM_{n}\subset M_{n+1}$ をみたすものを **$I$ フィルトレーション**という。ある $n_{0}$ 以上のすべての $n$ で $IM_{n}=M_{n+1}$ となるとき、**安定**という。$M_{n}=I^{n}M$ は安定な $I$ フィルトレーションで、**$I$ 進フィルトレーション**という。
+:::
+
+::: definition リース代数 {#ring:rees-algebra keywords="Rees algebra, blow-up algebra, A* = direct sum of I^n" index="リース代数|りーすだいすう, 爆発代数|ばくはつだいすう"}
+イデアル $I$ について、$A^{*}\defeq\bigoplus_{n\ge 0}I^{n}$（$I^{0}=A$）に、$I^{m}\times I^{n}\to I^{m+n}$ の積で環構造を入れた次数環を**リース代数**という。$I$ フィルトレーション $(M_{n})$ について $M^{*}\defeq\bigoplus_{n}M_{n}$ は次数 $A^{*}$ 加群になる（$I^{m}M_{n}\subset M_{m+n}$）。$A$ がネーターなら、$I=(a_{1},\dots,a_{s})$ について $A^{*}=A[a_{1}t,\dots,a_{s}t]\subset A[t]$（$I^{n}$ を $I^{n}t^{n}$ と同一視）は有限生成 $A$ 代数なので、ネーター環である（\ref{ring:hilbert-basis}）。
+:::
+
+::: lemma 安定性とリース加群 {#ring:stable-rees keywords="a filtration with finitely generated terms is stable iff the Rees module is finitely generated" index="安定性の判定|あんていせいのはんてい"}
+$A$ をネーター環、$M$ を有限生成加群、$(M_{n})$ を各 $M_{n}$ が有限生成な $I$ フィルトレーションとする。$(M_{n})$ が安定であることと、$M^{*}$ が有限生成 $A^{*}$ 加群であることは同値である。
+:::
+
+::: proof
+**Step 1（⇒）.** $n\ge n_{0}$ で $M_{n+1}=IM_{n}$ なら、$M_{n_{0}+k}=I^{k}M_{n_{0}}$。$M^{*}$ は $M_{0}\oplus\dots\oplus M_{n_{0}}$ の生成元（有限個）で $A^{*}$ 加群として生成される：次数 $n_{0}+k$ の部分は $I^{k}M_{n_{0}}=A^{*}_{k}M_{n_{0}}$。
+
+**Step 2（⇐）.** $M^{*}$ が有限個の斉次元（次数 $\le n_{0}$ のものとしてよい）で生成されるなら、$n\ge n_{0}$ の次数 $n$ の部分は $M_{n}=\sum_{j\le n_{0}}I^{n-j}M_{j}$。よって $M_{n+1}=\sum I^{n+1-j}M_{j}=I\sum I^{n-j}M_{j}=IM_{n}$。
+:::
+
+::: theorem アルティン＝リースの補題 {#ring:artin-rees keywords="Artin-Rees lemma" index="アルティン＝リースの補題|あるてぃんりーすのほだい"}
+（DC）$A$ をネーター環、$I$ をイデアル、$M$ を有限生成加群、$N\subset M$ を部分加群とする。ある $k$ があって、すべての $n\ge k$ について
+$$
+I^{n}M\cap N=I^{n-k}(I^{k}M\cap N).
+$$
+すなわち、$N$ 上のフィルトレーション $(I^{n}M\cap N)_{n}$ は安定である。
+:::
+
+::: proof
+**Step 1.** $N_{n}\defeq I^{n}M\cap N$ は $N$ の $I$ フィルトレーション（$IN_{n}\subset I^{n+1}M\cap N$）。$N^{*}=\bigoplus N_{n}$ は $M^{*}=\bigoplus I^{n}M$ の次数部分 $A^{*}$ 加群である。
+
+**Step 2.** $(I^{n}M)$ は安定なので、\ref{ring:stable-rees} から $M^{*}$ は有限生成 $A^{*}$ 加群。$A^{*}$ はネーター（\ref{ring:rees-algebra}）なので、部分加群 $N^{*}$ も有限生成（\ref{ring:noetherian-exact} の 2）。各 $N_{n}$ はネーター加群 $M$ の部分加群なので有限生成。\ref{ring:stable-rees} から $(N_{n})$ は安定：ある $k$ 以上で $N_{n+1}=IN_{n}$、すなわち $N_{n}=I^{n-k}N_{k}$。
+
+::: hypcheck
+- **前提「ネーター」**：Step 2 で $A^{*}$ がネーターであることと有限生成性に使った。
+- **前提「有限生成」**：$M^{*}$ が有限生成であることに使った。
+:::
+:::
+
+::: definition 随伴次数環 {#ring:associated-graded keywords="associated graded ring, tangent cone, gr_I(A)" index="随伴次数環|ずいはんじすうかん, 付随次数環|ふずいじすうかん, 接錐|せっすい"}
+イデアル $I$ について、$\operatorname{gr}_{I}(A)\defeq\bigoplus_{n\ge 0}I^{n}/I^{n+1}$ に、$(a+I^{m+1})(b+I^{n+1})\defeq ab+I^{m+n+1}$（$a\in I^{m}$, $b\in I^{n}$）で積を入れた次数環を**随伴次数環**という。加群について $\operatorname{gr}_{I}(M)\defeq\bigoplus I^{n}M/I^{n+1}M$ は次数 $\operatorname{gr}_{I}(A)$ 加群。$A$ がネーターなら、$\operatorname{gr}_{I}(A)\cong A^{*}/IA^{*}$ はネーター環で、有限生成 $M$ について $\operatorname{gr}_{I}(M)$ は有限生成である（$\operatorname{gr}_{I}(M)\cong M^{*}/IM^{*}$）。
+:::
+
+::: example
+1. 体 $k$ 上の $A=k[x_{1},\dots,x_{n}]$ と $I=(x_{1},\dots,x_{n})$ について $\operatorname{gr}_{I}(A)\cong A$（$I^{d}/I^{d+1}$ は次数 $d$ の斉次多項式の空間）。
+2. $A=k[x,y]/(y^{2}-x^{2}-x^{3})$（結節点のある曲線）と $\mathfrak{m}=(x,y)$ について、$\operatorname{gr}_{\mathfrak{m}}(A)\cong k[X,Y]/(Y^{2}-X^{2})$。最低次の部分 $y^{2}-x^{2}$ だけが残り、原点での曲線の接線 $y=\pm x$（**接錐**）を表す。
+:::
+
+## $I$ 進位相 {#ring:sec-fi-topology}
+
+::: definition $I$ 進位相 {#ring:adic-topology keywords="I-adic topology" index="I 進位相|あいしんいそう"}
+イデアル $I$ と加群 $M$ について、$x+I^{n}M$（$x\in M$, $n\ge 0$）の全体を開基とする $M$ の位相を **$I$ 進位相**という。加法・スカラー倍は連続で、$M$ は位相群になる。$I$ 進位相がハウスドルフであることと $\bigcap_{n}I^{n}M=0$ は同値である。
+:::
+
+::: proposition 安定なフィルトレーションの定める位相 {#ring:stable-same-topology keywords="stable filtrations define the I-adic topology, subspace topology on a submodule is I-adic" index="安定なフィルトレーションと位相|あんていなふぃるとれーしょんといそう"}
+1. 安定な $I$ フィルトレーション $(M_{n})$ について、ある $n_{0}$ があって、すべての $n$ で $I^{n}M\subset M_{n}$ かつ $M_{n+n_{0}}\subset I^{n}M$。したがって $(M_{n})$ を開基の基本系とする位相は $I$ 進位相と一致する。
+2. （DC）$A$ がネーター、$M$ が有限生成なら、部分加群 $N$ の $I$ 進位相は、$M$ の $I$ 進位相から誘導される相対位相と一致する。
+:::
+
+::: proof
+**Step 1（1）.** $M_{0}=M$ と $IM_{n}\subset M_{n+1}$ から帰納的に $I^{n}M\subset M_{n}$。安定性から $n\ge n_{0}$ で $M_{n_{0}+k}=I^{k}M_{n_{0}}\subset I^{k}M$。よって二つの開近傍の基本系は互いに他を含み、同じ位相を定める。
+
+**Step 2（2）.** 相対位相の基本近傍は $I^{n}M\cap N$ で、アルティン＝リースの補題（\ref{ring:artin-rees}）から $(I^{n}M\cap N)$ は $N$ の安定な $I$ フィルトレーション。1 から $N$ の $I$ 進位相と一致する。
+:::
+
+::: supplement
+**幾何的な意味.** リース代数 $\bigoplus I^{n}$ の $\operatorname{Proj}$ は、$\Spec A$ を閉部分スキーム $V(I)$ に沿って**ブローアップ**したものであり、随伴次数環 $\operatorname{gr}_{I}(A)$ は例外因子（$V(I)$ の法錐）に対応する。局所環 $(A,\mathfrak{m})$ の $\operatorname{gr}_{\mathfrak{m}}(A)$ は点での**接錐**で、$A$ が正則局所環（\ref[正則局所環]{ring:page-regular-local-rings}）であることは $\operatorname{gr}_{\mathfrak{m}}(A)$ が剰余体上の多項式環であることと同値になる。
+:::
+
+## 問題 {#ring:sec-fi-problems}
+
+::: problem {#ring:prob-artin-rees-krull}
+$(A,\mathfrak{m})$ をネーター局所環、$M$ を有限生成加群とする。$N\defeq\bigcap_{n}\mathfrak{m}^{n}M$ について $\mathfrak{m}N=N$ を、アルティン＝リースの補題から示せ。さらに中山の補題から $N=0$ を導け（クルルの交叉定理。\ref[完備化とクルルの交叉定理]{ring:page-completion} で一般化する）。
+:::
+
+::: solution
+アルティン＝リースの補題から、$n\ge k$ で $\mathfrak{m}^{n}M\cap N=\mathfrak{m}^{n-k}(\mathfrak{m}^{k}M\cap N)$。$N\subset\mathfrak{m}^{n}M$ なので左辺は $N$、右辺は $\mathfrak{m}^{n-k}N$。$n=k+1$ として $N=\mathfrak{m}N$。$N$ は有限生成（ネーター加群の部分加群）なので、中山の補題（\ref{ring:nakayama} の 2）から $N=0$。
+:::
+
+::: problem {#ring:prob-gr-domain}
+ネーター局所環 $(A,\mathfrak{m})$ について、$\operatorname{gr}_{\mathfrak{m}}(A)$ が整域なら $A$ も整域であることを示せ（ヒント：前問のクルルの交叉定理を使い、$0$ でない元に「最初に現れる次数」の成分を対応させる）。
+:::
+
+::: solution
+$0\neq a\in A$ について、前問から $a\notin\bigcap_{n}\mathfrak{m}^{n}$ なので、$a\in\mathfrak{m}^{n}\setminus\mathfrak{m}^{n+1}$ となる $n=v(a)$ がただ一つあり、$a^{*}\defeq a+\mathfrak{m}^{n+1}\in\mathfrak{m}^{n}/\mathfrak{m}^{n+1}$ は $0$ でない。$a,b\neq 0$ について $a^{*}b^{*}=ab+\mathfrak{m}^{v(a)+v(b)+1}$ は、$\operatorname{gr}$ が整域なので $0$ でなく、$ab\notin\mathfrak{m}^{v(a)+v(b)+1}$、特に $ab\neq 0$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
