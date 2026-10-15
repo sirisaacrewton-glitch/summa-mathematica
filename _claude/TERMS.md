@@ -522,3 +522,4 @@
 | Gorenstein ring / complete intersection / socle / type / injective dimension / canonical module | ゴレンシュタイン環 / 完全交叉 / ソークル / 型 / 入射次元 / 標準加群 | 台座 | 仮。ring:page-gorenstein |
 | Koszul complex / Koszul homology / mapping cone / acyclic | コシュル複体 / コシュルホモロジー / 写像錐 / 非輪状 | コズール複体 | 仮（本棚にコシュルの用例なし、写像錐・非輪状は各 1 冊）。ring:page-koszul-depth |
 | minimal free resolution / Betti number / Auslander–Buchsbaum formula / global dimension | 極小自由分解 / ベッチ数 / アウスランダー＝ブクスバウムの公式 / 大域次元 | — | 仮（本棚に用例なし）。ring:page-auslander-buchsbaum |
+| left/right/two-sided ideal / simple ring / quaternions / opposite ring / matrix unit / cyclotomic polynomial | 左イデアル / 右イデアル / 両側イデアル / 単純環 / 四元数体 / 反対環 / 行列単位 / 円分多項式 | 四元数環, 逆環 | 本棚：四元数体 3・四元数環 1、両側イデアル 2、円分多項式 2、反対環・逆環 0（反対環を採用、仮）。mod:page-noncommutative-rings |
