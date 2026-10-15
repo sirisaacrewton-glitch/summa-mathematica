@@ -519,3 +519,4 @@
 | regular local ring / regular system of parameters / embedding dimension / Zariski tangent space | 正則局所環 / 正則なパラメーター系 / 埋め込み次元 / ザリスキ接空間 | | 本で正則局所環 212。ring:page-regular-local-rings |
 | regular sequence / depth / grade | 正則列 / 深さ / グレード | 深度 | 本で正則列 17・深さ 75。ring:page-depth |
 | Cohen–Macaulay ring / unmixedness theorem / equidimensional | コーエン＝マコーレー環 / 非混合性定理 / 等次元 | CM 環 | 仮（OCR で用例を拾えず）。ring:page-cohen-macaulay |
+| Gorenstein ring / complete intersection / socle / type / injective dimension / canonical module | ゴレンシュタイン環 / 完全交叉 / ソークル / 型 / 入射次元 / 標準加群 | 台座 | 仮。ring:page-gorenstein |
