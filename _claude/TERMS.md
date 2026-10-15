@@ -482,3 +482,4 @@
 | simple group / classification of finite simple groups / sporadic group | 単純群 / 有限単純群の分類（定理） / 散在群 | | 標準的。grp:page-simplicity-an |
 | Sylow p-subgroup / Sylow theorems / Frattini argument | シロー p 部分群 / シローの定理 / フラッティーニの論法 | | 雪江（シロー p 部分群）。フラッティーニの論法は仮。grp:page-sylow |
 | subnormal series / composition series / composition factor / maximal normal subgroup / Jordan-Hölder theorem | 正規列 / 組成列 / 組成因子 / 極大正規部分群 / ジョルダン–ヘルダーの定理 | | 標準的。subnormal series を「正規列」とした（normal series と区別しない）。grp:page-jordan-holder |
+| derived series / solvable group / lower (upper) central series / nilpotent group / nilpotency class / Burnside's p^a q^b theorem / Feit-Thompson theorem | 導来列 / 可解群 / 降中心列・昇中心列 / 冪零群 / 冪零類 / バーンサイドの定理 / ファイト–トンプソンの定理 | 可解群（雪江） | 標準的。grp:page-solvable-nilpotent |
