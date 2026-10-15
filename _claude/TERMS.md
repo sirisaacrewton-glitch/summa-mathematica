@@ -514,3 +514,4 @@
 | associated prime / primary ideal / primary decomposition / embedded prime / irreducible submodule | 随伴素イデアル / 準素イデアル / 準素分解 / 埋没素因子 / 既約部分加群 | 素因子、埋没素イデアル | 新妻（随伴素イデアル 6、埋没素因子）・雪江（埋没素因子）。準素イデアル 458・準素分解 130。ring:page-primary-decomposition |
 | Nullstellensatz / Noether normalization / Zariski's lemma / algebraically independent / Jacobson ring | 零点定理 / ネーターの正規化定理 / ザリスキの補題 / 代数的に独立 / ジャコブソン環 | 正規化定理 | 本で零点定理 25・正規化定理 24。ring:page-nullstellensatz |
 | graded ring / homogeneous / filtration / stable / Rees algebra / Artin–Rees lemma / associated graded ring / tangent cone / I-adic topology | 次数環 / 斉次 / フィルトレーション / 安定 / リース代数 / アルティン＝リースの補題 / 随伴次数環 / 接錐 / I 進位相 | 付随次数環、斉次＝同次 | 松村。ring:page-filtrations |
+| completion / inverse limit / complete / separated / Krull intersection theorem / Hensel's lemma | 完備化 / 逆極限 / 完備 / 分離的 / クルルの交叉定理 / ヘンゼルの補題 | 射影極限 | 松村。ring:page-completion |
