@@ -487,3 +487,8 @@
 | free group / reduced word / rank / van der Waerden's trick / Nielsen-Schreier theorem / cyclically reduced | 自由群 / 簡約語 / 階数 / ファン・デル・ヴェルデンの方法 / ニールセン–シュライアーの定理 / 巡回簡約 | | 雪江は「語の縮約」。簡約語は仮。grp:page-free-groups |
 | presentation / generators and relations / relator / von Dyck's theorem / word problem / Tietze transformation | 群の表示 / 生成元と関係式 / 関係子 / フォン・ディックの定理 / 語の問題 / ティーツェ変換 | | 雪江（生成元と関係式）。関係子は仮。grp:page-presentations |
 | extension / central extension / split extension / section / complement / Schur-Zassenhaus theorem | 拡大 / 中心拡大 / 分裂する拡大 / 切断 / 補群 / シューア–ツァッセンハウスの定理 | | 標準的。切断は仮。grp:page-extensions |
+| ring / commutative ring / zero ring | 環 / 可換環 / 零環 | 自明な環 | 雪江（零環 19・自明な環 18）。ring:page-rings-ideals |
+| unit / group of units / zero divisor / nilpotent element | 単元 / 単元群 / 零因子 / 冪零元 | 可逆元、乗法群、べき零元 | 雪江（単元 269・零因子 81）。「冪零」は群論の冪零群に合わせた（本では「べき零」44）。ring:page-rings-ideals |
+| integral domain / field / division ring / skew field | 整域 / 体 / 可除環 / 斜体 | | 雪江。ring:page-rings-ideals |
+| characteristic / Frobenius map | 標数 / フロベニウス写像 | | 雪江（標数 185）。ring:char-domain |
+| ideal / principal ideal / generated ideal / associate | イデアル / 単項イデアル / 生成されたイデアル / 同伴 | 主イデアル | 雪江（単項イデアル 208・主イデアル 2）。ring:page-rings-ideals |

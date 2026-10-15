@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>環とイデアル | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="13-commutative-algebra/13A-general-commutative-ring-theory/01-basics/01-rings-ideals.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 環とイデアル {#ring:page-rings-ideals keywords="ring, commutative ring, unit, zero divisor, nilpotent element, integral domain, field, subring, ring homomorphism, characteristic, ideal, principal ideal, generated ideal, sum and product of ideals"}
+
+**環**は、足し算・引き算・掛け算ができ、分配法則で二つの演算が結び付いた集合である（\ref{ring:ring}）。整数・有理数・多項式・関数・行列など、数学に現れる多くの対象が環になる。このページでは、環の定義と基本的な計算規則（\ref{ring:ring-basic}, \ref{ring:binomial}）から始めて、単元・零因子・冪零元という元の種類、整域と体（\ref{ring:domain-field}）、部分環と準同型、整数環からのただ一つの準同型と標数（\ref{ring:characteristic}）を調べる。後半では**イデアル**（\ref{ring:ideal}）を導入し、生成されたイデアルの具体的な形（\ref{ring:generated-ideal}）、イデアルの和・共通部分・積（\ref{ring:ideal-operations}）を述べる。イデアルは群論の正規部分群にあたるもので、次のページ（\ref[剰余環と準同型定理]{ring:page-quotient-rings}）で剰余環を作るのに使う。
+
+> 雪江明彦『代数学 2 環と体とガロア理論』第 1 章 §1.1–1.3 の流れを参考にした。本が「明らか」「証明は略」とした主張（分配法則の一般形、整数環からの準同型が環準同型であること、生成されたイデアルの形など）はすべて証明した。本と違い、零環も環に含める（理由は \ref{ring:ring} の後の注意）。
+
+## 記法と定義の確認 {#ring:sec-ri-notation}
+
+::: notation
+- 群論から次を使う：可換群と加法的記法（\ref{grp:abelian-group}）、部分群とその判定法（\ref{grp:subgroup}, \ref{grp:subgroup-criterion}）、冪と指数法則（\ref{grp:power}, \ref{grp:power-laws}）、群の準同型とその基本性質（\ref{grp:homomorphism}, \ref{grp:homomorphism-basic}）、$\Z$ の部分群は $d\Z$ の形であること（\ref{grp:subgroups-of-z}）、最大公約数とユークリッドの補題（\ref{grp:gcd}, \ref{grp:bezout-euclid}）。
+- 加法群 $(A,+)$ の元 $a$ と $n\in\Z$ について、$a$ の $n$ 倍（加法的記法での冪）を $n\cdot a$ または $na$ と書く。$n\ge 1$ なら $n\cdot a=a+\dots+a$（$n$ 個）、$0\cdot a=0$、$(-n)\cdot a=-(n\cdot a)$ である。指数法則（\ref{grp:power-laws}）は加法的記法では $(m+n)\cdot a=m\cdot a+n\cdot a$、$(mn)\cdot a=m\cdot(n\cdot a)$ と読む。
+- 乗法の冪：$a\in A$ と $n\in\N$ について $a^{0}\defeq 1$, $a^{n+1}\defeq a^{n}a$。乗法は結合的なので、一般結合法則（\ref{grp:general-associativity}。半群で成り立つ）により積は括弧の付け方によらず、$a^{m+n}=a^{m}a^{n}$、$(a^{m})^{n}=a^{mn}$（$m,n\in\N$）が成り立つ（\ref{grp:semigroup-monoid}）。
+- 二項係数 $\binom{n}{k}$（$0\le k\le n$）は整数で、$\binom{n}{0}=\binom{n}{n}=1$ とパスカルの規則 $\binom{n+1}{k}=\binom{n}{k}+\binom{n}{k-1}$（$1\le k\le n$）をみたす。$k<0$ や $k>n$ のときは $\binom{n}{k}\defeq 0$ とする。
+- 議論は $\ZFC$ で行うが、このページでは選択公理を使わない。
+:::
+
+## 環 {#ring:sec-ri-rings}
+
+::: definition 環・可換環 {#ring:ring keywords="ring, commutative ring, ring with identity, unital ring, zero ring" index="環|かん, 可換環|かかんかん, 零環|れいかん, 自明な環|じめいなかん, 単位元|たんいげん"}
+集合 $A$ に二つの演算 $+$（**加法**）と $\cdot$（**乗法**。$a\cdot b$ を $ab$ と書く）が与えられ、次をみたすとき、$A$ を**環**という。
+1. $(A,+)$ は可換群である。その単位元を $0$、$a$ の逆元を $-a$ と書き、$a-b\defeq a+(-b)$ とする。
+2. （乗法の結合法則）すべての $a,b,c\in A$ について $(ab)c=a(bc)$。
+3. （分配法則）すべての $a,b,c\in A$ について $a(b+c)=ab+ac$, $(a+b)c=ac+bc$。
+4. （乗法の単位元）すべての $a\in A$ について $1a=a1=a$ となる元 $1\in A$ がある。
+
+すべての $a,b\in A$ について $ab=ba$ のとき、$A$ を**可換環**という。$A=\{0\}$（一元集合）に $0+0=0$, $00=0$ を入れたものは環であり（$1=0$）、**零環**という。
+:::
+
+::: intuition
+環は「足し算・引き算・掛け算ができる数の体系」を抽象化したものである。割り算は要求しない。乗法の単位元 $1$ はただ一つである（$1,1'$ が単位元なら $1=11'=1'$）。複数の環を考えるときは $0_{A}$, $1_{A}$ と書いて区別する。
+:::
+
+::: remark 規約について {#ring:convention}
+1. 本サイトでは**環は乗法の単位元をもつ**とする。単位元を要求しない流儀（その場合、本サイトの環を「単位的環」と呼ぶ）もある。
+2. 本サイトでは**零環も環に含める**。雪江『代数学 2』のように $1\neq 0$ を環の定義に入れる流儀もあるが、零環を除くと、剰余環 $A/A$（\ref[剰余環]{ring:quotient-ring}）や局所化 $S^{-1}A$（$0\in S$ のとき。\ref[局所化]{ring:localization}）のような自然な構成の結果が環でなくなってしまう。$1\neq 0$ が要る主張（整域・体）では、その都度仮定する。
+3. 13（可換環論）の系列では、とくに断らない限り**環は可換**とする。この節と次の節の計算規則・単元・部分環・準同型は非可換環でもそのまま成り立つので、一般の環で述べる。非可換環は \ref[非可換環論]{mod:page-noncommutative-rings} で扱う。
+:::
+
+::: example
+1. 整数 $\Z$、有理数 $\Q$、実数 $\R$、複素数 $\C$ は、ふつうの加法と乗法で可換環である。
+2. 集合 $X$ と環 $A$ について、写像 $X\to A$ 全体 $A^{X}$ は、各点ごとの和と積 $(f+g)(x)\defeq f(x)+g(x)$, $(fg)(x)\defeq f(x)g(x)$ で環になる。単位元は定数関数 $1$ である。$A$ が可換なら $A^{X}$ も可換。位相空間 $X$ 上の実数値連続関数全体 $C(X)$ も、同じ演算で可換環になる（連続関数の和と積は連続）。
+3. 可換環 $A$ と $n\ge 1$ について、$A$ の元を成分とする $n$ 次正方行列全体 $M_{n}(A)$ は、行列の和と積で環になる。$n\ge 2$ なら非可換である：行列単位 $E_{12}$, $E_{21}$（$(i,j)$ 成分だけが $1$ の行列を $E_{ij}$ と書く）について $E_{12}E_{21}=E_{11}\neq E_{22}=E_{21}E_{12}$。
+4. 可換群 $M$ について、群準同型 $M\to M$ 全体 $\End(M)$ は、和 $(f+g)(x)\defeq f(x)+g(x)$ と積 $fg\defeq f\circ g$（合成）で環になる。単位元は恒等写像。分配法則 $f\circ(g+h)=f\circ g+f\circ h$ には $f$ が準同型であることを使い、$(g+h)\circ f=g\circ f+h\circ f$ は和の定義からしたがう。一般に非可換である（$M=\Z\times\Z$ なら $\End(M)\cong M_{2}(\Z)$）。
+:::
+
+::: proposition 環の計算規則 {#ring:ring-basic keywords="basic properties of rings, zero times a, sign rules, generalized distributive law" index="環の計算規則|かんのけいさんきそく, 分配法則|ぶんぱいほうそく"}
+$A$ を環、$a,b,c\in A$ とする。
+1. $0a=a0=0$。
+2. $(-a)b=-(ab)=a(-b)$、$(-a)(-b)=ab$、$(a-b)c=ac-bc$、$c(a-b)=ca-cb$。
+3. $1=0$ であることと $A=\{0\}$ であることは同値である。
+4. （一般の分配法則）$a_{1},\dots,a_{m},b_{1},\dots,b_{n}\in A$ について
+$$
+\Bigl(\sum_{i=1}^{m}a_{i}\Bigr)\Bigl(\sum_{j=1}^{n}b_{j}\Bigr)=\sum_{i=1}^{m}\sum_{j=1}^{n}a_{i}b_{j}.
+$$
+5. $m,n\in\Z$ について $(m\cdot a)(n\cdot b)=(mn)\cdot(ab)$。特に $(m\cdot 1)a=m\cdot a=a(m\cdot 1)$。
+:::
+
+::: proof
+**Step 1（1）.** 分配法則から $0a=(0+0)a=0a+0a$。加法群 $(A,+)$ で両辺に $-(0a)$ を加えると $0=0a$。同様に $a0=a(0+0)=a0+a0$ から $a0=0$。
+
+**Step 2（2）.** 分配法則と Step 1 から $ab+(-a)b=(a+(-a))b=0b=0$。加法群で逆元はただ一つなので $(-a)b=-(ab)$。同様に $ab+a(-b)=a(b+(-b))=a0=0$ から $a(-b)=-(ab)$。これを二回使うと $(-a)(-b)=-(a(-b))=-(-(ab))=ab$。最後に $(a-b)c=(a+(-b))c=ac+(-b)c=ac-bc$、$c(a-b)=ca+c(-b)=ca-cb$。
+
+**Step 3（3）.** $1=0$ なら、任意の $a\in A$ について Step 1 から $a=a1=a0=0$ なので $A=\{0\}$。逆に $A=\{0\}$ なら $1\in A$ なので $1=0$。
+
+**Step 4（4）.** まず $n=1$ の場合、すなわち $(a_{1}+\dots+a_{m})b=a_{1}b+\dots+a_{m}b$ を $m$ についての帰納法で示す。$m=1$ は自明。$m$ で成り立てば、$s=a_{1}+\dots+a_{m}$ とおいて分配法則から $(s+a_{m+1})b=sb+a_{m+1}b=a_{1}b+\dots+a_{m}b+a_{m+1}b$。同様に $a(b_{1}+\dots+b_{n})=ab_{1}+\dots+ab_{n}$ も $n$ についての帰納法で示せる。この二つを順に使うと
+$$
+\Bigl(\sum_{i}a_{i}\Bigr)\Bigl(\sum_{j}b_{j}\Bigr)=\sum_{i}a_{i}\Bigl(\sum_{j}b_{j}\Bigr)=\sum_{i}\sum_{j}a_{i}b_{j}.
+$$
+（$(A,+)$ は可換群なので、有限和は順序と括弧によらない。\ref{grp:general-associativity} と可換性による。）
+
+**Step 5（5）.** まず $m,n\ge 1$ の場合。$m\cdot a$ は $a$ を $m$ 個、$n\cdot b$ は $b$ を $n$ 個足したものなので、Step 4 から $(m\cdot a)(n\cdot b)$ は $ab$ を $mn$ 個足したもの、すなわち $(mn)\cdot(ab)$ である。$m=0$ または $n=0$ なら両辺とも $0$（Step 1）。符号については、Step 2 から $((-m)\cdot a)(n\cdot b)=(-(m\cdot a))(n\cdot b)=-((m\cdot a)(n\cdot b))$ であり、加法的記法の指数法則（\ref{grp:power-laws} の 2）から $-((mn)\cdot(ab))=(-mn)\cdot(ab)$ となる。$n$ の符号についても同様なので、すべての $m,n\in\Z$ で成り立つ。特に $a=1$, $n=1$ とすると $(m\cdot 1)b=m\cdot b$、$b=1$, $m=1$ とすると $a(n\cdot 1)=n\cdot a$。
+
+::: hypcheck
+- **分配法則**：Step 1・2・4・5 のすべてで使った。分配法則がなければ加法と乗法は無関係で、$0a=0$ すら導けない。
+- **乗法の結合法則・可換性**：使わなかった。この命題は非可換環でも、乗法が結合的でない「非結合的環」でも成り立つ。
+- **単位元**：Step 3 と 5 の「特に」の部分だけで使った。
+:::
+:::
+
+::: theorem 二項定理 {#ring:binomial keywords="binomial theorem in a ring, commuting elements" index="二項定理|にこうていり"}
+環 $A$ の元 $x,y$ が $xy=yx$ をみたすなら、すべての $n\in\N$ について
+$$
+(x+y)^{n}=\sum_{k=0}^{n}\binom{n}{k}\cdot x^{k}y^{n-k}.
+\label{ring:eq-binomial}
+$$
+特に可換環ではすべての $x,y$ について成り立つ。
+:::
+
+::: proof
+**Step 1（$y$ の冪と $x$ は可換）.** $j\in\N$ について $xy^{j}=y^{j}x$ を $j$ の帰納法で示す。$j=0$ は $x1=x=1x$。$j$ で成り立てば $xy^{j+1}=(xy^{j})y=(y^{j}x)y=y^{j}(xy)=y^{j}(yx)=y^{j+1}x$。ここで仮定 $xy=yx$ を使った。
+
+**Step 2（$n$ の帰納法）.** $n=0$ では両辺とも $1$。$n$ で \eqref{ring:eq-binomial} が成り立つとする。分配法則（\ref{ring:ring-basic} の 4・5）から
+$$
+\begin{aligned}
+(x+y)^{n+1}&=(x+y)^{n}x+(x+y)^{n}y\\
+&=\sum_{k=0}^{n}\binom{n}{k}\cdot x^{k}y^{n-k}x+\sum_{k=0}^{n}\binom{n}{k}\cdot x^{k}y^{n+1-k}.
+\end{aligned}
+$$
+Step 1 から $x^{k}y^{n-k}x=x^{k}xy^{n-k}=x^{k+1}y^{n-k}$ なので、第 1 の和で $k+1$ を $k$ と書き直すと $\sum_{k=1}^{n+1}\binom{n}{k-1}\cdot x^{k}y^{n+1-k}$ になる。二つの和を $x^{k}y^{n+1-k}$ ごとにまとめると、加法的記法の指数法則 $(p+q)\cdot z=p\cdot z+q\cdot z$ とパスカルの規則から係数は $\binom{n}{k-1}+\binom{n}{k}=\binom{n+1}{k}$（$0\le k\le n+1$。端では一方が $0$）となり、$n+1$ のときの \eqref{ring:eq-binomial} を得る。
+
+::: hypcheck
+- **前提 $xy=yx$**：Step 1 でだけ使った。外すと偽：$M_{2}(\Z)$ で $x=E_{12}$, $y=E_{21}$ とすると $(x+y)^{2}=E_{11}+E_{22}$ だが、右辺は $x^{2}+2xy+y^{2}=2E_{11}$ で一致しない（$x^{2}=y^{2}=0$）。
+:::
+:::
+
+## 単元・零因子・冪零元 {#ring:sec-ri-elements}
+
+::: definition 単元と単元群 {#ring:unit keywords="unit, invertible element, group of units, multiplicative group" index="単元|たんげん, 可逆元|かぎゃくげん, 単元群|たんげんぐん, 乗法群|じょうほうぐん"}
+環 $A$ の元 $a$ について、$ab=ba=1$ となる $b\in A$ があるとき、$a$ を**単元**（**可逆元**）という。このような $b$ はただ一つであり（下の命題）、$a^{-1}$ と書く。単元全体を $A^{\times}$ と書き、$A$ の**単元群**（**乗法群**）という。
+:::
+
+::: proposition 単元群は群 {#ring:unit-group keywords="group of units is a group" index="単元群|たんげんぐん"}
+$A$ を環とする。
+1. $a\in A$ について、$ba=1$ かつ $ac=1$ となる $b,c$ があれば $b=c$ である。特に単元の逆元はただ一つ。
+2. $A^{\times}$ は乗法について群である。
+:::
+
+::: proof
+**Step 1（1）.** 乗法の結合法則から $b=b1=b(ac)=(ba)c=1c=c$。
+
+**Step 2（2）.** $1\cdot 1=1$ なので $1\in A^{\times}$。$u,v\in A^{\times}$ なら $(uv)(v^{-1}u^{-1})=u(vv^{-1})u^{-1}=uu^{-1}=1$、同様に $(v^{-1}u^{-1})(uv)=1$ なので $uv\in A^{\times}$。よって乗法は $A^{\times}$ 上の演算で、結合法則は $A$ から受け継ぎ、単位元は $1$、$u$ の逆元は $u^{-1}$（$u^{-1}u=uu^{-1}=1$ から $u^{-1}\in A^{\times}$）。
+
+::: hypcheck
+- **乗法の結合法則**：Step 1・2 で使った。
+- **両側の逆元**：1 は、片側だけの逆元が両側にあれば一致するという主張。片側の逆元だけでは一意性も可逆性も言えない：可算無限次元の数列空間 $V$ の $\End(V)$ で、右シフト $s$ と左シフト $t$ は $ts=1$ だが $st\neq 1$ である。可換環ではこの区別は起きない。
+:::
+:::
+
+::: definition 零因子・冪零元・整域・体 {#ring:domain-field-def keywords="zero divisor, nilpotent element, integral domain, field, division ring, skew field" index="零因子|れいいんし, 冪零元|べきれいげん, べき零元|べきれいげん, 整域|せいいき, 体|たい, 可除環|かじょかん, 斜体|しゃたい"}
+$A$ を可換環とする。
+1. $a\in A$ について、$ab=0$ となる $b\neq 0$ があるとき、$a$ を**零因子**という。
+2. $a^{n}=0$ となる $n\ge 1$ があるとき、$a$ を**冪零元**という。
+3. $1\neq 0$ で、$0$ でない零因子をもたない可換環を**整域**という。すなわち、$ab=0$ なら $a=0$ または $b=0$。
+4. $1\neq 0$ で、$0$ でない元がすべて単元である可換環を**体**という。すなわち $A^{\times}=A\setminus\{0\}$。
+
+（非可換環で、$1\neq 0$ かつ $0$ でない元がすべて単元であるものを**可除環**、可換でない可除環を**斜体**という。）
+:::
+
+::: intuition
+零因子は「掛けると $0$ になる相手がいる元」、冪零元は「何回か掛けると消えてしまう元」である。整数や実数ではこうしたことは $0$ でしか起きないが、関数の環や行列の環ではよく起きる。整域は「積が $0$ なら因子のどれかが $0$」という、方程式を解くときに使う性質をもつ環である。
+
+零因子の定義で $a\neq 0$ を要求する流儀もある。本サイトの定義では、零環でない環の $0$ は零因子である（$0\cdot 1=0$ で $1\neq 0$）。
+:::
+
+::: example
+1. $\Z$ は整域で体でない（$\Z^{\times}=\{1,-1\}$：$ab=1$ なら $\abs{a}\abs{b}=1$ で $\abs{a}=1$）。$\Q,\R,\C$ は体。
+2. $C(\R)$ は整域でない：$f(x)=\max(x,0)$, $g(x)=\max(-x,0)$ はどちらも $0$ でない連続関数だが $fg=0$。
+3. 可換環 $A$ で $1\neq 0$ なら、$M_{2}(A)$ の $E_{12}$ は $E_{12}^{2}=0$ をみたす（$M_{2}(A)$ は非可換なので上の定義の外だが、冪零の考え方はそのまま使える）。
+4. 零環は整域でも体でもない（$1\neq 0$ を要求しているため）。
+:::
+
+::: proposition 整域と体の基本性質 {#ring:domain-field keywords="cancellation in integral domains, field is integral domain, finite integral domain is a field" index="簡約法則|かんやくほうそく, 有限整域|ゆうげんせいいき"}
+$A$ を可換環とする。
+1. $A$ が整域で $a\neq 0$, $ab=ac$ なら $b=c$（**簡約法則**）。
+2. 体は整域である。
+3. 有限な整域は体である。
+:::
+
+::: proof
+**Step 1（1）.** \ref{ring:ring-basic} の 2 から $a(b-c)=ab-ac=0$。整域で $a\neq 0$ なので $b-c=0$、すなわち $b=c$。
+
+**Step 2（2）.** $A$ を体とし、$ab=0$, $a\neq 0$ とする。$a$ は単元なので $b=1b=(a^{-1}a)b=a^{-1}(ab)=a^{-1}0=0$（\ref{ring:ring-basic} の 1）。$1\neq 0$ は体の定義に含まれる。
+
+**Step 3（3）.** $A$ を有限な整域、$a\neq 0$ とする。写像 $\lambda_{a}:A\to A$, $x\mapsto ax$ は Step 1 から単射である。$A$ は有限集合なので、有限集合からそれ自身への単射は全射である（鳩の巣原理）。よって $ax=1$ となる $x$ があり、$A$ は可換なので $xa=1$ でもある。ゆえに $a\in A^{\times}$。
+
+::: hypcheck
+- **前提「有限」（3）**：Step 3 で単射から全射を導くのに使った。外すと偽：$\Z$ は整域だが体でない。
+- **前提「可換」（3）**：Step 3 の最後で $xa=1$ を得るのに使った。非可換の場合でも、有限で零因子のない環では $\lambda_{a}$ と右からの積 $x\mapsto xa$ がともに全射になるので、可除環であることは同じ議論で言える。
+- **前提「整域」（1）**：Step 1 で使った。外すと偽：$C(\R)$ で上の例の $f,g$ について $fg=f\cdot 0$ だが $g\neq 0$。
+:::
+:::
+
+::: supplement
+**ウェダーバーンの小定理.** 有限な可除環は可換、すなわち体である。したがって「有限で零因子のない環は体」が非可換の場合も成り立つ。証明は円分多項式を使うもので、\ref[非可換環論]{mod:page-noncommutative-rings} の系列で扱う予定である。
+:::
+
+::: proposition 冪零元と単元 {#ring:nilpotent-unit keywords="nilpotent plus unit is a unit, sum of nilpotents is nilpotent" index="冪零元|べきれいげん"}
+$A$ を可換環とする。
+1. $1\neq 0$ なら、冪零元は零因子である。特に整域の冪零元は $0$ だけである。
+2. $x$ が冪零元なら $1+x$ は単元である。より一般に、$u\in A^{\times}$ で $x$ が冪零元なら $u+x\in A^{\times}$。
+3. $x,y$ が冪零元なら $x+y$ も冪零元であり、任意の $r\in A$ について $rx$ も冪零元である。
+:::
+
+::: proof
+**Step 1（1）.** $x^{n}=0$ となる最小の $n\ge 1$ をとる。$n=1$ なら $x=0$ で、$0\cdot 1=0$, $1\neq 0$ なので $x$ は零因子。$n\ge 2$ なら $x\cdot x^{n-1}=x^{n}=0$ で、$n$ の最小性から $x^{n-1}\neq 0$ なので $x$ は零因子。整域では $0$ でない零因子がないので、冪零元は $0$ だけ。
+
+**Step 2（2）.** $x^{n}=0$（$n\ge 1$）とし、$v\defeq\sum_{k=0}^{n-1}(-1)^{k}x^{k}$ とおく。分配法則から
+$$
+\begin{aligned}
+(1+x)v&=\sum_{k=0}^{n-1}(-1)^{k}x^{k}+\sum_{k=0}^{n-1}(-1)^{k}x^{k+1}\\
+&=\sum_{k=0}^{n-1}(-1)^{k}x^{k}-\sum_{k=1}^{n}(-1)^{k}x^{k}=1-(-1)^{n}x^{n}=1.
+\end{aligned}
+$$
+（2 行目は第 2 の和で $k+1$ を $k$ と書き直し、$(-1)^{k-1}=-(-1)^{k}$ を使った。第 1 の和の $k=0$ の項と第 2 の和の $k=n$ の項だけが残る。）$A$ は可換なので $v(1+x)=1$ でもあり、$1+x\in A^{\times}$。一般の場合は $u+x=u(1+u^{-1}x)$ で、$(u^{-1}x)^{n}=u^{-n}x^{n}=0$（可換性を使った）なので $1+u^{-1}x\in A^{\times}$、よって単元の積として $u+x\in A^{\times}$（\ref{ring:unit-group}）。
+
+**Step 3（3）.** $x^{m}=0$, $y^{n}=0$（$m,n\ge 1$）とする。二項定理（\ref{ring:binomial}）から
+$$
+(x+y)^{m+n-1}=\sum_{k=0}^{m+n-1}\binom{m+n-1}{k}\cdot x^{k}y^{m+n-1-k}.
+$$
+各項で、$k\ge m$ なら $x^{k}=x^{m}x^{k-m}=0$、$k\le m-1$ なら $m+n-1-k\ge n$ なので $y^{m+n-1-k}=0$。よってすべての項が $0$ で、$(x+y)^{m+n-1}=0$。また可換性から $(rx)^{m}=r^{m}x^{m}=0$。
+
+::: hypcheck
+- **前提 $1\neq 0$（1）**：Step 1 の $n=1$ の場合に使った。零環では $0$ は冪零元だが、$b\neq 0$ となる $b$ がないので零因子ではない。
+- **前提「可換」（2・3）**：Step 2 で $v(1+x)=1$ と $(u^{-1}x)^{n}=u^{-n}x^{n}$ に、Step 3 で二項定理と $(rx)^{m}=r^{m}x^{m}$ に使った。2 の前半は非可換でも成り立つ（$v$ は $x$ の多項式なので $x$ と可換）が、3 は外すと偽：$M_{2}(\Z)$ で $E_{12}$, $E_{21}$ は冪零だが、和 $E_{12}+E_{21}$ の平方は単位行列なので冪零でない。
+:::
+:::
+
+::: example 二次の整数環の単元 {#ring:quadratic-units keywords="units of Gaussian integers, units of Z[sqrt 2], norm" index="ガウスの整数環|がうすのせいすうかん"}
+整数 $d$ について $\sqrt{d}\in\C$ を一つ固定し（$d<0$ なら $i\sqrt{\abs{d}}$）、$\Z[\sqrt{d}]\defeq\{x+y\sqrt{d} : x,y\in\Z\}$ とおく。これは $\C$ の部分環である（\ref{ring:subring} の後の例）。
+1. **ガウスの整数環** $\Z[i]$（$d=-1$）の単元は $\pm 1,\pm i$ の 4 つである。実際、$\alpha\beta=1$ なら複素数の絶対値の積から $\abs{\alpha}^{2}\abs{\beta}^{2}=1$ で、$\abs{x+yi}^{2}=x^{2}+y^{2}$ は正の整数なので $x^{2}+y^{2}=1$、すなわち $(x,y)=(\pm1,0),(0,\pm1)$。逆にこの 4 つは $i\cdot(-i)=1$ などから単元。
+2. $\Z[\sqrt{2}]$ には無限個の単元がある。$(1+\sqrt{2})(-1+\sqrt{2})=2-1=1$ なので $1+\sqrt{2}$ は単元で、その冪 $(1+\sqrt{2})^{n}$（$n\ge 1$）はすべて単元である。$1+\sqrt{2}>1$ なので、これらは実数として狭義に増加し、互いに異なる。
+:::
+
+## 部分環と準同型 {#ring:sec-ri-subrings-homs}
+
+::: definition 部分環 {#ring:subring keywords="subring" index="部分環|ぶぶんかん"}
+環 $A$ の部分集合 $B$ が、$1\in B$ をみたし、加法・減法・乗法について閉じている（$a,b\in B$ なら $a+b,a-b,ab\in B$）とき、$B$ を $A$ の**部分環**という。
+:::
+
+::: proposition 部分環の基本性質 {#ring:subring-basic keywords="subring criterion, intersection of subrings, generated subring" index="部分環の判定|ぶぶんかんのはんてい, 生成された部分環|せいせいされたぶぶんかん"}
+$A$ を環とする。
+1. 部分集合 $B\subset A$ が部分環であることと、「$1\in B$ かつ、$a,b\in B$ なら $a-b\in B$, $ab\in B$」は同値である。部分環は $A$ の演算を制限して環になる。
+2. 部分環の族 $(B_{\lambda})_{\lambda\in\Lambda}$（$\Lambda\neq\emptyset$）の共通部分は部分環である。
+3. 部分集合 $S\subset A$ について、$S$ を含む部分環全体の共通部分 $\Z[S]$ は、$S$ を含む最小の部分環である（$S$ で**生成された部分環**）。$A$ が可換なら、$\Z[S]$ は $S$ の元の有限個の積（空の積は $1$）の、整数係数の有限和全体である。
+:::
+
+::: proof
+**Step 1（1）.** 部分環なら条件をみたすのは定義から。逆に条件をみたすとき、$1\in B$ から $B\neq\emptyset$ で、$a-b\in B$ から部分群の判定法（\ref{grp:subgroup-criterion}、加法的記法）により $(B,+)$ は $(A,+)$ の部分群。特に $-b=0-b\in B$ なので $a+b=a-(-b)\in B$。よって $B$ は部分環。環の公理のうち、加法群であることは部分群であることから、結合法則・分配法則・$1$ の性質は $A$ の元についての等式なので $B$ の元についても成り立つ。
+
+**Step 2（2）.** $C=\bigcap_{\lambda}B_{\lambda}$ とする。$1$ はすべての $B_{\lambda}$ に属するので $1\in C$。$a,b\in C$ なら各 $\lambda$ で $a-b,ab\in B_{\lambda}$ なので $a-b,ab\in C$。1 から $C$ は部分環。
+
+**Step 3（3）.** $A$ 自身が $S$ を含む部分環なので、共通部分をとる族は空でなく、2 から $\Z[S]$ は部分環で、$S$ を含むどの部分環にも含まれる。可換な場合、$T$ を「$S$ の元の有限個の積の整数係数の有限和」全体とする。$T$ は $1$（空の積）を含み、差について閉じ、\ref{ring:ring-basic} の 4・5 から積について閉じる（単項式の積は単項式）ので部分環で、$S\subset T$。また $S$ を含む部分環は $S$ の元の積と、その整数倍の和を含むので $T$ を含む。よって $T=\Z[S]$。
+
+::: hypcheck
+- **前提 $\Lambda\neq\emptyset$（2）**：空の族の共通部分は（$A$ の中で考えるなら）$A$ とみなすのが普通で、その場合も主張は成り立つ。集合論的には空の族の共通部分は定義されないので、外しておいた。
+- **前提「可換」（3 の後半）**：単項式の積が単項式であることに使った。非可換なら、$S$ の元の語（積の順序を区別したもの）の整数係数の和になる。
+:::
+:::
+
+::: example
+1. 整数 $d$ について $\Z[\sqrt{d}]=\{x+y\sqrt{d}\}\subset\C$ は部分環である：$1=1+0\sqrt{d}$、差は成分ごと、積は
+$$
+(x+y\sqrt{d})(x'+y'\sqrt{d})=(xx'+dyy')+(xy'+x'y)\sqrt{d}
+$$
+だからである。これは \ref{ring:subring-basic} の 3 の記法と一致する（$\sqrt{d}^{2}=d\in\Z$ なので、$\sqrt{d}$ の冪の整数係数の和は $x+y\sqrt{d}$ の形になる）。
+2. $2\Z$ は加法・減法・乗法について閉じているが、$1\notin 2\Z$ なので本サイトの意味では $\Z$ の部分環ではない。
+3. 環 $A$ の**中心** $Z(A)\defeq\{a\in A : \text{すべての }x\in A\text{ で }ax=xa\}$ は部分環である。$A$ が可換であることと $Z(A)=A$ は同値。
+:::
+
+::: definition 環準同型・同型 {#ring:homomorphism keywords="ring homomorphism, ring isomorphism, isomorphic rings, endomorphism, automorphism" index="環準同型|かんじゅんどうけい, 準同型|じゅんどうけい, 同型|どうけい, 自己同型|じこどうけい"}
+環 $A,B$ の間の写像 $f:A\to B$ が、すべての $a,b\in A$ について
+$$
+f(a+b)=f(a)+f(b),\quad f(ab)=f(a)f(b),\quad f(1_{A})=1_{B}
+$$
+をみたすとき、$f$ を（環の）**準同型**という。全単射な準同型を**同型**といい、$A$ から $B$ への同型があるとき $A$ と $B$ は**同型**であるといって $A\cong B$ と書く。$f$ の**核**を $\Ker f\defeq\{a\in A : f(a)=0\}$、**像**を $\im f\defeq f(A)$ とする。$A=B$ のとき準同型・同型を**自己準同型**・**自己同型**という。
+:::
+
+::: intuition
+準同型は「和と積と $1$ を保つ写像」である。$f(1)=1$ は和と積を保つことからは出ない：零写像 $A\to B$, $a\mapsto 0$ は和と積を保つが、$B$ が零環でない限り $1$ を保たない。単位元を保たない写像まで準同型に含めると、例えば準同型の像が部分環にならない。
+:::
+
+::: proposition 準同型の基本性質 {#ring:homomorphism-basic keywords="properties of ring homomorphisms, composite of homomorphisms, inverse of isomorphism, homomorphism maps units to units" index="環準同型の基本性質|かんじゅんどうけいのきほんせいしつ"}
+$f:A\to B$ を環準同型とする。
+1. $f(0)=0$、$f(-a)=-f(a)$、$f(n\cdot a)=n\cdot f(a)$（$n\in\Z$）、$f(a^{n})=f(a)^{n}$（$n\in\N$）。
+2. 準同型の合成は準同型である。全単射な準同型の逆写像は準同型であり、したがって同型の逆写像・合成は同型である。
+3. $A$ の部分環の像は $B$ の部分環、$B$ の部分環の逆像は $A$ の部分環である。特に $\im f$ は $B$ の部分環。
+4. $f(A^{\times})\subset B^{\times}$ で、$f(a^{-1})=f(a)^{-1}$。$f$ を制限した $A^{\times}\to B^{\times}$ は群準同型である。
+5. $f$ が単射であることと $\Ker f=\{0\}$ は同値である。
+:::
+
+::: proof
+**Step 1（1）.** $f$ は加法群の準同型なので、前の三つは群の準同型の基本性質（\ref{grp:homomorphism-basic} の 1、加法的記法）による。最後は $n$ の帰納法：$f(a^{0})=f(1)=1=f(a)^{0}$、$f(a^{n+1})=f(a^{n}a)=f(a^{n})f(a)=f(a)^{n}f(a)=f(a)^{n+1}$。
+
+**Step 2（2）.** $g:B\to C$ も準同型なら、$(g\circ f)(a+b)=g(f(a)+f(b))=g(f(a))+g(f(b))$、積も同様で、$(g\circ f)(1)=g(1)=1$。$f$ が全単射のとき $f^{-1}$ を考える。$x,y\in B$ について $f(f^{-1}(x)+f^{-1}(y))=x+y=f(f^{-1}(x+y))$ で $f$ は単射なので $f^{-1}(x+y)=f^{-1}(x)+f^{-1}(y)$。積も同様で、$f(1)=1$ から $f^{-1}(1)=1$。
+
+**Step 3（3）.** $C\subset A$ を部分環とする。$1=f(1)\in f(C)$ で、$f(a)-f(b)=f(a-b)$, $f(a)f(b)=f(ab)$ は $a,b\in C$ なら $f(C)$ に属する。\ref{ring:subring-basic} の 1 から $f(C)$ は部分環。$D\subset B$ を部分環とすると、$f(1)=1\in D$ から $1\in f^{-1}(D)$ で、$a,b\in f^{-1}(D)$ なら $f(a-b)=f(a)-f(b)\in D$, $f(ab)=f(a)f(b)\in D$。
+
+**Step 4（4）.** $a\in A^{\times}$ なら $f(a)f(a^{-1})=f(aa^{-1})=f(1)=1$、同様に $f(a^{-1})f(a)=1$ なので $f(a)\in B^{\times}$ で $f(a)^{-1}=f(a^{-1})$。制限が積を保つのは $f$ が積を保つから。
+
+**Step 5（5）.** 加法群の準同型としての主張なので、\ref{grp:homomorphism-basic} の 3 による。
+
+::: hypcheck
+- **前提 $f(1)=1$**：Step 1 の $n=0$、Step 3 の $1\in f(C)$、Step 4 で使った。外すと 3・4 は偽になる：$\Z\to\Z\times\Z$, $n\mapsto(n,0)$ は和と積を保つが（直積環は \ref[剰余環と準同型定理]{ring:page-quotient-rings} で定義する）、像は $(1,1)$ を含まないので部分環でなく、単元 $1$ は単元でない $(1,0)$ に移る。
+:::
+:::
+
+::: proposition 整数環からの準同型 {#ring:z-initial keywords="unique homomorphism from Z, Z is initial in the category of rings" index="整数環からの準同型|せいすうかんからのじゅんどうけい"}
+任意の環 $A$ について、$A$ への環準同型 $\Z\to A$ はただ一つあり、それは $n\mapsto n\cdot 1_{A}$ である。
+:::
+
+::: proof
+**Step 1（存在）.** $\iota(n)\defeq n\cdot 1_{A}$ とおく。加法的記法の指数法則（\ref{grp:power-laws} の 1）から $\iota(m+n)=(m+n)\cdot 1=m\cdot 1+n\cdot 1=\iota(m)+\iota(n)$。\ref{ring:ring-basic} の 5 から $\iota(m)\iota(n)=(m\cdot 1)(n\cdot 1)=(mn)\cdot(1\cdot 1)=\iota(mn)$。$\iota(1)=1\cdot 1_{A}=1_{A}$。よって $\iota$ は準同型。
+
+**Step 2（一意性）.** $\psi:\Z\to A$ を準同型とする。\ref{ring:homomorphism-basic} の 1 から $\psi(n)=\psi(n\cdot 1)=n\cdot\psi(1)=n\cdot 1_{A}=\iota(n)$。
+
+::: hypcheck
+- **前提 $\psi(1)=1$**：Step 2 で使った。単位元を保つことを準同型に要求しなければ、零写像も $\Z\to A$ の「準同型」になり、一意性が崩れる。
+:::
+:::
+
+::: definition 標数 {#ring:characteristic keywords="characteristic of a ring" index="標数|ひょうすう"}
+環 $A$ について、\ref{ring:z-initial} の準同型 $\iota:\Z\to A$ の核は $\Z$ の部分群なので、\ref{grp:subgroups-of-z} により $\Ker\iota=n\Z$ となる $n\in\N$ がただ一つある。この $n$ を $A$ の**標数**といい $\chr A$ と書く。すなわち、$n\cdot 1=0$ となる $n\ge 1$ があればその最小のものが標数で、なければ標数は $0$ である。
+:::
+
+::: proposition 整域の標数とフロベニウス写像 {#ring:char-domain keywords="characteristic of an integral domain is zero or prime, Frobenius endomorphism, freshman's dream" index="フロベニウス写像|ふろべにうすしゃぞう, 標数|ひょうすう"}
+1. 環 $A$ の標数が $1$ であることと、$A$ が零環であることは同値である。
+2. 整域の標数は $0$ または素数である。
+3. $p$ を素数、$A$ を標数 $p$ の可換環とする。すべての $a,b\in A$ について $(a+b)^{p}=a^{p}+b^{p}$ であり、$F(a)\defeq a^{p}$ は環準同型 $F:A\to A$ である（**フロベニウス写像**）。
+:::
+
+::: proof
+**Step 1（1）.** $\chr A=1$ は $1\cdot 1_{A}=0$、すなわち $1_{A}=0$ を意味し、\ref{ring:ring-basic} の 3 からこれは $A=\{0\}$ と同値。
+
+**Step 2（2）.** $A$ を整域、$n=\chr A>0$ とする。$1\neq 0$ なので 1 から $n\neq 1$、よって $n\ge 2$。$n$ が素数でないと仮定し、$n=ab$, $1<a,b<n$ と書く。\ref{ring:ring-basic} の 5 から $(a\cdot 1)(b\cdot 1)=(ab)\cdot 1=n\cdot 1=0$。整域なので $a\cdot 1=0$ または $b\cdot 1=0$、すなわち $a\in n\Z$ または $b\in n\Z$。しかし $0<a,b<n$ なのでどちらも起きない。矛盾。
+
+**Step 3（3：二項係数）.** $0<k<p$ について $p\mid\binom{p}{k}$ を示す。$k!\,(p-k)!\binom{p}{k}=p!$ で、右辺は $p$ で割り切れる。一方 $k!\,(p-k)!$ は $p$ より小さい正の整数の積で、$p$ は素数なので各因子と互いに素であり、ユークリッドの補題（\ref{grp:bezout-euclid} の 4）を因子の個数についての帰納法で使うと $\gcd(p,k!\,(p-k)!)=1$。再びユークリッドの補題から $p\mid\binom{p}{k}$。
+
+**Step 4（3：結論）.** 二項定理（\ref{ring:binomial}）から $(a+b)^{p}=\sum_{k=0}^{p}\binom{p}{k}\cdot a^{k}b^{p-k}$。$0<k<p$ では Step 3 から $\binom{p}{k}=pm$（$m\in\Z$）と書け、\ref{ring:ring-basic} の 5 から $\binom{p}{k}\cdot x=((pm)\cdot 1)x=((p\cdot 1)(m\cdot 1))x=0$（$p\cdot 1=0$ は標数が $p$ だから）。残るのは $k=0,p$ の項で、$(a+b)^{p}=a^{p}+b^{p}$。また $F(ab)=(ab)^{p}=a^{p}b^{p}$（可換性）、$F(1)=1$ なので $F$ は準同型。
+
+::: hypcheck
+- **前提「整域」（2）**：Step 2 で $(a\cdot 1)(b\cdot 1)=0$ から因子が $0$ であることを導くのに使った。外すと偽：剰余環 $\Z/6\Z$（\ref[剰余環]{ring:quotient-ring}）の標数は $6$。
+- **前提「$p$ は素数」（3）**：Step 3 で使った。外すと偽：$\Z/4\Z$ で $(1+1)^{4}=16\cdot 1=0$ だが $1^{4}+1^{4}=2\neq 0$。さらに $(1+1)^{2}=4\cdot 1=0$ と $1^{2}+1^{2}=2$ も一致しない。
+- **前提「可換」（3）**：二項定理と $F(ab)=F(a)F(b)$ に使った。
+- フロベニウス写像は単射とも全射とも限らない。整域なら $F(a)=0\Rightarrow a=0$（\ref{ring:nilpotent-unit} の 1）なので単射。有限な整域（すなわち有限体）なら全射でもある。
+:::
+:::
+
+## イデアル {#ring:sec-ri-ideals}
+
+この節から、環はすべて**可換**とする。
+
+::: definition イデアル {#ring:ideal keywords="ideal, proper ideal, zero ideal, unit ideal" index="イデアル|いである, 真のイデアル|しんのいである, 零イデアル|れいいである, 単位イデアル|たんいいである"}
+可換環 $A$ の部分集合 $I$ が、加法群 $(A,+)$ の部分群であり、すべての $r\in A$, $a\in I$ について $ra\in I$ をみたすとき、$I$ を $A$ の**イデアル**という。$\{0\}$（$0$ と書く）と $A$ はイデアルである。$I\neq A$ であるイデアルを**真のイデアル**という。
+:::
+
+::: intuition
+イデアルは「何を掛けても外に出ない部分群」である。$\Z$ の $n\Z$ がその典型で、「$n$ の倍数全体」は足しても何を掛けても $n$ の倍数のまま。剰余環 $A/I$ で「$I$ の元を $0$ とみなす」とき、積がうまく定義されるための条件がちょうどこれである（\ref[剰余環]{ring:quotient-ring}）。群の正規部分群が準同型の核として現れるのと同じく、イデアルは環準同型の核として現れる（\ref{ring:ideal-basic} の 1）。
+:::
+
+::: proposition イデアルの基本性質 {#ring:ideal-basic keywords="kernel is an ideal, ideal containing a unit, ideal criterion" index="イデアルの判定|いであるのはんてい"}
+$A$ を可換環とする。
+1. 準同型 $f:A\to B$ の核 $\Ker f$ は $A$ のイデアルである。
+2. 部分集合 $I\subset A$ がイデアルであることと、「$0\in I$、$a,b\in I$ なら $a+b\in I$、$r\in A$, $a\in I$ なら $ra\in I$」は同値である。
+3. イデアル $I$ について、次は同値である：(a) $I=A$、(b) $1\in I$、(c) $I$ は単元を含む。
+:::
+
+::: proof
+**Step 1（1）.** $\Ker f$ は加法群の準同型の核なので部分群（\ref{grp:homomorphism-basic} の 2）。$r\in A$, $a\in\Ker f$ なら $f(ra)=f(r)f(a)=f(r)0=0$。
+
+**Step 2（2）.** イデアルなら条件をみたすのは定義から。逆に条件をみたすとき、$a\in I$ なら $-a=(-1)a\in I$（\ref{ring:ring-basic} の 2 と 5）なので、$a,b\in I$ なら $a-b=a+(-b)\in I$。$0\in I$ から $I\neq\emptyset$ なので、\ref{grp:subgroup-criterion} から $I$ は部分群で、イデアルである。
+
+**Step 3（3）.** (a)⇒(b)⇒(c) は明らか（$1$ は単元）。(c)⇒(a)：$u\in I$ が単元なら $1=u^{-1}u\in I$ で、任意の $a\in A$ について $a=a1\in I$。
+
+::: hypcheck
+- **2 の条件「$ra\in I$」**：Step 2 で $-a\in I$ を導くのにも使った（加法の逆元についての閉性を別に要求しなくてよい理由）。
+:::
+:::
+
+::: proposition 体のイデアル {#ring:field-ideals keywords="a ring is a field iff it has exactly two ideals, homomorphism from a field is injective" index="体のイデアル|たいのいである"}
+1. 可換環 $A$ が体であることと、$A$ のイデアルがちょうど二つ（$0$ と $A$）であることは同値である。
+2. 体 $K$ から零環でない環 $B$ への準同型は単射である。
+:::
+
+::: proof
+**Step 1（1、⇒）.** $A$ が体なら $1\neq 0$ なので $0\neq A$。$I\neq 0$ をイデアルとすると、$I$ は $0$ でない元、すなわち単元を含むので \ref{ring:ideal-basic} の 3 から $I=A$。よってイデアルは $0$ と $A$ のちょうど二つ。
+
+**Step 2（1、⇐）.** イデアルがちょうど二つなら $0\neq A$ なので $1\neq 0$。$a\neq 0$ とすると $aA\defeq\{ab : b\in A\}$ は $a=a1$ を含むイデアル（\ref{ring:ideal-basic} の 2 で確かめられる：$0=a0$、$ab+ab'=a(b+b')$、$r(ab)=a(rb)$）で $0$ でないので $aA=A$。よって $ab=1$ となる $b$ があり、$a\in A^{\times}$。
+
+**Step 3（2）.** $\Ker f$ は $K$ のイデアル（\ref{ring:ideal-basic} の 1）。$f(1)=1\neq 0$ なので $1\notin\Ker f$、すなわち $\Ker f\neq K$。1 から $\Ker f=0$ で、\ref{ring:homomorphism-basic} の 5 から $f$ は単射。
+
+::: hypcheck
+- **前提「$B$ は零環でない」（2）**：Step 3 の $1\neq 0$ に使った。零環への写像は必ず存在し、$K$ が二元以上なら単射でない。
+- **「ちょうど二つ」**：零環のイデアルは $0=A$ の一つだけなので、「イデアルが $0$ と $A$ だけ」では零環を除外できない。そのため「ちょうど二つ」と述べた。
+:::
+:::
+
+::: definition 生成されたイデアル・単項イデアル {#ring:generated-ideal-def keywords="ideal generated by a set, principal ideal, finitely generated ideal" index="生成されたイデアル|せいせいされたいである, 単項イデアル|たんこういである, 有限生成イデアル|ゆうげんせいせいいである"}
+可換環 $A$ の部分集合 $S$ について、$S$ を含むイデアル全体の共通部分を $(S)$ と書き、$S$ で**生成されたイデアル**という。$S=\{a_{1},\dots,a_{n}\}$ のとき $(a_{1},\dots,a_{n})$ と書く。有限集合で生成されるイデアルを**有限生成**、一つの元で生成されるイデアル $(a)$ を**単項イデアル**という。
+:::
+
+::: proposition 生成されたイデアルの形 {#ring:generated-ideal keywords="description of generated ideal, finite linear combinations" index="生成されたイデアル|せいせいされたいである"}
+$A$ を可換環、$S\subset A$ とする。
+1. イデアルの族（空でない）の共通部分はイデアルである。したがって $(S)$ は $S$ を含む最小のイデアルである。
+2. $(S)$ は、$S$ の元の $A$ 係数の有限一次結合全体
+$$
+\Bigl\{\sum_{i=1}^{n}r_{i}s_{i} : n\in\N,\ r_{i}\in A,\ s_{i}\in S\Bigr\}
+$$
+に等しい（$n=0$ の空の和は $0$）。特に $(\emptyset)=0$、$(a)=aA$、$(a_{1},\dots,a_{n})=a_{1}A+\dots+a_{n}A$。
+:::
+
+::: proof
+**Step 1（1）.** $(I_{\lambda})_{\lambda}$ をイデアルの族とし、$I=\bigcap_{\lambda}I_{\lambda}$ とする。$0\in I$ で、$a,b\in I$, $r\in A$ なら各 $\lambda$ で $a+b,ra\in I_{\lambda}$ なので $a+b,ra\in I$。\ref{ring:ideal-basic} の 2 から $I$ はイデアル。$A$ は $S$ を含むイデアルなので族は空でなく、$(S)$ はイデアルで、$S$ を含むどのイデアルにも含まれる。
+
+**Step 2（2）.** 一次結合全体を $T$ とする。$T$ は空の和 $0$ を含み、二つの一次結合の和は一次結合で、$r\sum r_{i}s_{i}=\sum(rr_{i})s_{i}$（\ref{ring:ring-basic} の 4 と結合法則）も一次結合なので、$T$ はイデアル。$s\in S$ は $1s\in T$ なので $S\subset T$。1 から $(S)\subset T$。逆に、$S$ を含むイデアル $I$ は $r_{i}s_{i}$ を含み、その和も含むので $T\subset I$。よって $T\subset(S)$。
+
+::: hypcheck
+- **前提「可換」**：イデアルを「左から掛けて閉じる」という片側の条件だけで定義してよいことに使っている（可換なら左右の区別がない）。Step 2 自体は結合法則と分配法則だけを使う。非可換環の両側イデアルでは、$(S)$ は $\sum_{i}r_{i}s_{i}r'_{i}$ の形の有限和全体になる。
+:::
+:::
+
+::: proposition 整数環のイデアル {#ring:ideals-of-z keywords="ideals of Z are principal" index="整数環のイデアル|せいすうかんのいである"}
+$\Z$ のイデアルは $n\Z=(n)$（$n\in\N$）の形のものですべてであり、$n$ はイデアルから一意に決まる。
+:::
+
+::: proof
+**Step 1.** イデアル $I\subset\Z$ は加法群の部分群なので、\ref{grp:subgroups-of-z} から $I=n\Z$ となる $n\in\N$ がただ一つある。
+
+**Step 2.** 逆に $n\Z=(n)$ は単項イデアルとしてイデアルである（\ref{ring:generated-ideal}）。
+
+::: hypcheck
+- 鍵は「$\Z$ の部分群は自動的にイデアル」という点（$r\in\Z$ を掛けることは $r$ 回足すことなので）。一般の環ではイデアルは部分群より強い条件である：$\Z$ は $\Q$ の部分群だが $\Q$ のイデアルでない。
+:::
+:::
+
+::: proposition 単項イデアルと同伴 {#ring:associates keywords="associate elements, principal ideals in a domain" index="同伴|どうはん, 同伴な元|どうはんなげん"}
+$A$ を整域、$a,b\in A$ とする。$(a)=(b)$ であることと、$a=ub$ となる単元 $u$ があることは同値である。このとき $a$ と $b$ は**同伴**であるという。
+:::
+
+::: proof
+**Step 1（⇐）.** $a=ub$ なら $a\in(b)$ なので $(a)\subset(b)$。$b=u^{-1}a$ なので $(b)\subset(a)$。
+
+**Step 2（⇒）.** $(a)=(b)$ なら $a\in(b)=bA$, $b\in aA$ なので、$a=bu$, $b=av$ となる $u,v\in A$ がある。$b=0$ なら $a=0=1\cdot b$ で終わり。$b\neq 0$ なら $b=av=buv$ から $b(1-uv)=0$ で、整域なので $uv=1$。よって $u$ は単元で $a=ub$。
+
+::: hypcheck
+- **前提「整域」**：Step 2 で $b(1-uv)=0$ から $uv=1$ を導くのに使った。整域でない可換環では、$(a)=(b)$ でも $a,b$ が単元倍で移り合わない例があることが知られている（構成はここでは扱わない）。
+:::
+:::
+
+::: definition イデアルの和・積 {#ring:ideal-sum-product keywords="sum of ideals, product of ideals, intersection of ideals, comaximal ideals, coprime ideals" index="イデアルの和|いであるのわ, イデアルの積|いであるのせき, 互いに素なイデアル|たがいにそないである"}
+$A$ を可換環、$I,J$ をイデアルとする。
+1. **和** $I+J\defeq\{a+b : a\in I,\ b\in J\}$。
+2. **積** $IJ\defeq(\{ab : a\in I,\ b\in J\})$。\ref{ring:generated-ideal} から、$IJ$ は有限和 $\sum_{k}a_{k}b_{k}$（$a_{k}\in I$, $b_{k}\in J$）全体である。
+3. $I+J=A$ のとき、$I$ と $J$ は**互いに素**であるという。
+:::
+
+::: proposition イデアルの演算 {#ring:ideal-operations keywords="properties of ideal operations, product equals intersection for coprime ideals" index="イデアルの演算|いであるのえんざん"}
+$A$ を可換環、$I,J,K$ をイデアルとする。
+1. $I+J$, $I\cap J$, $IJ$ はイデアルで、$I+J$ は $I\cup J$ を含む最小のイデアル、$IJ\subset I\cap J$。
+2. $I(J+K)=IJ+IK$。
+3. $I+J=A$ なら $I\cap J=IJ$。
+4. $\Z$ では、$m,n\in\Z$ について $(m)+(n)=(\gcd(m,n))$、$(m)(n)=(mn)$。
+:::
+
+::: proof
+**Step 1（1）.** $I+J$：$0=0+0$、$(a+b)+(a'+b')=(a+a')+(b+b')$、$r(a+b)=ra+rb$ なので \ref{ring:ideal-basic} の 2 からイデアル。$I\cup J\subset I+J$（$a=a+0$, $b=0+b$）で、$I\cup J$ を含むイデアルは和 $a+b$ を含むので、$I+J$ は最小。$I\cap J$ は \ref{ring:generated-ideal} の 1 からイデアル。$IJ$ は生成されたイデアルなのでイデアル。$a\in I$, $b\in J$ なら $ab\in I$（$I$ はイデアル）かつ $ab=ba\in J$ なので $ab\in I\cap J$。$I\cap J$ はイデアルなので生成元を含めば $IJ\subset I\cap J$。
+
+**Step 2（2）.** $IJ+IK\subset I(J+K)$：$J\subset J+K$ なので生成元 $ab$（$a\in I$, $b\in J$）は $I(J+K)$ の生成元で、$IJ\subset I(J+K)$。$IK$ も同様で、1 から和も含まれる。逆に $I(J+K)$ の生成元 $a(b+c)=ab+ac$（$b\in J$, $c\in K$）は $IJ+IK$ に属し、$IJ+IK$ はイデアルなので $I(J+K)\subset IJ+IK$。
+
+**Step 3（3）.** 1 から $IJ\subset I\cap J$。逆に $I+J=A$ から $1=a+b$（$a\in I$, $b\in J$）と書ける。$c\in I\cap J$ について $c=c1=ca+cb$。$ca=ac$ は $a\in I$, $c\in J$ の積なので $IJ$ に属し、$cb$ は $c\in I$, $b\in J$ の積なので $IJ$ に属する。よって $c\in IJ$。
+
+**Step 4（4）.** $(m)+(n)=m\Z+n\Z$ で、最大公約数の定義（\ref{grp:gcd}）から $m\Z+n\Z=\gcd(m,n)\Z$。積：生成元 $(mx)(ny)=mn(xy)$ は $(mn)$ に属するので $(m)(n)\subset(mn)$、逆に $mn$ は $m\in(m)$, $n\in(n)$ の積なので $(mn)\subset(m)(n)$。
+
+::: hypcheck
+- **前提 $I+J=A$（3）**：Step 3 で $1=a+b$ と書くのに使った。外すと偽：$\Z$ で $I=J=(2)$ なら $I\cap J=(2)$ だが $IJ=(4)$。
+- **前提「可換」**：Step 1 で $ab\in J$、Step 3 で $ca\in IJ$ に使った。
+:::
+:::
+
+::: proposition 準同型とイデアル {#ring:ideal-image-preimage keywords="preimage of an ideal is an ideal, image of an ideal under a surjection" index="イデアルの逆像|いであるのぎゃくぞう"}
+$f:A\to B$ を可換環の準同型とする。
+1. $B$ のイデアル $J$ の逆像 $f^{-1}(J)$ は $A$ のイデアルであり、$\Ker f\subset f^{-1}(J)$。
+2. $f$ が全射なら、$A$ のイデアル $I$ の像 $f(I)$ は $B$ のイデアルである。
+:::
+
+::: proof
+**Step 1（1）.** $f(0)=0\in J$ から $0\in f^{-1}(J)$。$a,b\in f^{-1}(J)$, $r\in A$ なら $f(a+b)=f(a)+f(b)\in J$, $f(ra)=f(r)f(a)\in J$。\ref{ring:ideal-basic} の 2 からイデアル。$0\in J$ なので $\Ker f=f^{-1}(0)\subset f^{-1}(J)$。
+
+**Step 2（2）.** $f(I)$ は加法群の部分群の像なので部分群（\ref{grp:homomorphism-basic} の 2）。$s\in B$, $f(a)\in f(I)$ について、全射なので $s=f(r)$ となる $r\in A$ があり、$sf(a)=f(ra)\in f(I)$。
+
+::: hypcheck
+- **前提「全射」（2）**：Step 2 で $s=f(r)$ と書くのに使った。外すと偽：包含写像 $\Z\to\Q$ による $\Z$ の像 $\Z$ は $\Q$ のイデアルでない（$\Q$ は体なのでイデアルは $0$ と $\Q$ だけ。\ref{ring:field-ideals}）。一般には $f(I)$ で生成されるイデアル $f(I)B$ を考える。
+:::
+:::
+
+::: supplement
+**非可換環のイデアル.** 非可換環では、左から掛けて閉じる**左イデアル**、右から掛けて閉じる**右イデアル**、両方の**両側イデアル**を区別する。準同型の核は両側イデアルであり、剰余環を作れるのも両側イデアルである。$M_{n}(K)$（$K$ は体）は $0$ と全体以外に両側イデアルをもたないが、体ではない。\ref{ring:field-ideals} の非可換版が「可除環 ⇔ 左イデアルが二つ」になるのはこのためである（詳しくは \ref[非可換環論]{mod:page-noncommutative-rings}）。
+
+**高い視点.** 環と準同型のなす圏を考えると、\ref{ring:z-initial} は「$\Z$ が環の圏の**始対象**である」（\ref{cat:initial-terminal}）と言い換えられる。標数はこの唯一の射 $\Z\to A$ の核を測る量である。また、環 $A$ の元 $a$ に左からの積 $\lambda_{a}(x)=ax$ を対応させると、単射な環準同型 $A\to\End(A,+)$ が得られる（$\lambda_{a}(1)=a$ から単射）。これは群のケイリーの定理（\ref{grp:cayley}）の環版で、「どんな環も、可換群の自己準同型のなす環の部分環として実現できる」ことを意味する。環の定義が分配法則を含むのは、まさに $\End(M)$ の和と合成がみたす法則を抜き出したからだと見ることができる。
+:::
+
+## 問題 {#ring:sec-ri-problems}
+
+::: problem {#ring:prob-boolean-ring}
+環 $A$ のすべての元 $x$ が $x^{2}=x$ をみたすとき（**ブール環**）、$A$ は可換で、すべての $x$ について $x+x=0$ であることを示せ。
+:::
+
+::: solution
+**Step 1.** $(x+x)^{2}=x+x$ を分配法則で展開すると $x^{2}+x^{2}+x^{2}+x^{2}=x+x+x+x$。仮定からこれが $x+x$ に等しいので、両辺から $x+x$ を引いて $x+x=0$。したがって $-x=x$。
+
+**Step 2.** $(x+y)^{2}=x+y$ を展開すると $x^{2}+xy+yx+y^{2}=x+y$、すなわち $x+xy+yx+y=x+y$ で、$xy+yx=0$。Step 1 から $xy=-yx=yx$。
+:::
+
+::: problem {#ring:prob-nilpotent-ideal}
+可換環 $A$ の冪零元全体 $N$ はイデアルであることを示せ。また、$A$ が可換でないとこの主張が偽になる例を挙げよ。
+:::
+
+::: solution
+$0$ は冪零元なので $0\in N$。\ref{ring:nilpotent-unit} の 3 から、冪零元の和と、冪零元の $A$ の元倍は冪零元。\ref{ring:ideal-basic} の 2 から $N$ はイデアル。非可換の例：$M_{2}(\Z)$ では $E_{12},E_{21}$ が冪零だが $E_{12}+E_{21}$ は冪零でない（\ref{ring:nilpotent-unit} の証明の hypcheck）ので、冪零元全体は加法で閉じない。（$N$ は**冪零元根基**と呼ばれ、\ref[素イデアルと極大イデアル]{ring:page-prime-maximal} で素イデアルの共通部分として特徴付ける。）
+:::
+
+::: problem {#ring:prob-quadratic-units-negative}
+$d\le -2$ を整数とするとき、$\Z[\sqrt{d}]^{\times}=\{1,-1\}$ であることを示せ。
+:::
+
+::: solution
+$\alpha=x+y\sqrt{d}$ について $\abs{\alpha}^{2}=x^{2}+\abs{d}y^{2}$（$\sqrt{d}=i\sqrt{\abs{d}}$ だから）は非負整数である。$\alpha\beta=1$ なら $\abs{\alpha}^{2}\abs{\beta}^{2}=1$ なので $x^{2}+\abs{d}y^{2}=1$。$\abs{d}\ge 2$ なので $y\neq 0$ なら左辺は $2$ 以上。よって $y=0$, $x=\pm 1$。逆に $\pm1$ は単元。
+:::
+
+::: problem {#ring:prob-chain-of-ideals}
+可換環 $A$ のイデアルの族 $(I_{\lambda})_{\lambda\in\Lambda}$（$\Lambda\neq\emptyset$）が包含について全順序（任意の $\lambda,\mu$ について $I_{\lambda}\subset I_{\mu}$ または $I_{\mu}\subset I_{\lambda}$）であるとき、和集合 $I=\bigcup_{\lambda}I_{\lambda}$ はイデアルであることを示せ。さらに、各 $I_{\lambda}$ が真のイデアルなら $I$ も真のイデアルであることを示せ。（この事実は、ツォルンの補題で極大イデアルの存在を示すときに使う。）
+:::
+
+::: solution
+**Step 1.** $\Lambda\neq\emptyset$ なので $0\in I$。$a,b\in I$ なら $a\in I_{\lambda}$, $b\in I_{\mu}$ となる $\lambda,\mu$ があり、全順序なので例えば $I_{\lambda}\subset I_{\mu}$。すると $a,b\in I_{\mu}$ で $a+b\in I_{\mu}\subset I$。$r\in A$ なら $ra\in I_{\lambda}\subset I$。\ref{ring:ideal-basic} の 2 から $I$ はイデアル。
+
+**Step 2.** $I=A$ なら $1\in I$ なので $1\in I_{\lambda}$ となる $\lambda$ があり、\ref{ring:ideal-basic} の 3 から $I_{\lambda}=A$。これは $I_{\lambda}$ が真のイデアルであることに反する。
+
+全順序の仮定は Step 1 で $a,b$ を一つの $I_{\mu}$ に入れるのに使った。外すと偽：$\Z$ で $(2)\cup(3)$ は $2+3=5$ を含まないのでイデアルでない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>

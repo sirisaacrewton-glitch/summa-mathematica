@@ -152,7 +152,7 @@
 | `pt` | 証明論（カット除去・不完全性定理・証明可能性論理） 03/03F-proof-theory | `cx` | 複素関数 30-complex-variable/30A |
 | `nt` | 数論 11-number-theory/11A・11M・11R | `four` | 調和解析 42-harmonic-analysis/42A |
 | `fld` | 体論 12-field-theory/12F | `fa` | 関数解析 46-functional-analysis/46B |
-| `ring` | 可換環 13-commutative-algebra/13A・13F | `ode` / `pde` | 34-…/34A ／ 35-…/35A |
+| `ring` | 可換環 13-commutative-algebra/13A・13F・13H・13D | `ode` / `pde` | 34-…/34A ／ 35-…/35A |
 | `ag` | 代数幾何 14-algebraic-geometry/14A | `surf` | 曲線と曲面 53-differential-geometry/53A |
 | `lin` | 線形代数 15-linear-algebra/15A | `riem` | リーマン幾何 53/53C |
 | `mod` | 加群・非可換環 16-associative-rings/16D | `top` | 一般位相 54-general-topology/54D |
