@@ -501,3 +501,4 @@
 | projective module / injective module / Baer's criterion / divisible group / injective hull | 射影加群 / 入射加群 / ベールの判定法 / 可除群 / 入射包絡 | 単射加群、可除加群 | 本では射影加群 2・入射加群 1・可除加群 10。mod:page-projective-injective |
 | bilinear map / pure tensor / extension of scalars / tensor product of algebras / complexification | 双線形写像 / 純テンソル / スカラーの拡大 / 代数のテンソル積 / 複素化 | 係数拡大、基底変換 | mod:page-tensor-products |
 | flat / faithfully flat / character module / torsion-free | 平坦 / 忠実平坦 / 指標加群 / ねじれのない | | 松村。mod:page-flatness |
+| Euclidean domain / principal ideal domain / unique factorization domain / irreducible element / prime element / greatest common divisor | ユークリッド環 / 単項イデアル整域 / 一意分解環 / 既約元 / 素元 / 最大公約元 | ユークリッド整域、PID、一意分解整域・UFD・素元分解整域 | 本でユークリッド環 48・ユークリッド整域 0、一意分解環 147・一意分解整域 7、単項イデアル整域 132。ring:page-euclid-pid-ufd |

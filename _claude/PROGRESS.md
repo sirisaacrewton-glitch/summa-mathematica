@@ -237,7 +237,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 接頭辞：可換環 `ring`（13A・13F・13H・13D）、加群 `mod`（16D）。主な資料：雪江『代数学 2』第 1・2 章（`<和書>/_text/yukie-algebra-ja.txt`。行番号は下の表）、松村『可換環論』（`matsumura-kakankan-ja`）、Zariski–Samuel（`zariski-samuel-ca1`・`-ca2`）、新妻『可換環論の様相』（反例）、Anderson–Fuller（加群）。環は単位元をもつ可換環を基本とし（16D/01 の加群論は一般の環上で、必要なところだけ可換を仮定）、非可換環は 16D/02 の系列で扱う（当面。内容が増えたら 16K・16N・16P に分ける）。
 **配置の決定（2026-10-15）**：加群の一般論と PID 上の構造定理は 16D/01-module-theory（20K からは \ref で参照。START.md §8.1 により `also` は使わない）。零点定理の証明は 13A/02 に置き、14A からは参照する。予約ラベル：ring:euclidean-pid（ID-01）、ring:fraction-field（RB-05）、ring:hilbert-basis（CR-02）、ring:localization（RB-05）、ring:polynomial-ufd（ID-02）、ring:page-noetherian-artinian（CR-02）、ring:nullstellensatz（CR-05）、ring:page-dimension-theory（CR-08）、ring:page-polynomial-rings（RB-04）、mod:page-noncommutative-rings（16D/02 の最初のページ）、ag:zariski-topology（14A）。
 
-書く順：RB-01〜05 → MD-01〜06 → ID-01〜02 → CR-01〜03 → ID-03〜09 → CR-04〜09 → LR-01〜04 → HL-01〜03。
+書く順：RB-01〜05 → MD-01〜05 → ID-01（MD-06 が PID を使うため先に）→ MD-06 → ID-02 → CR-01〜03 → ID-03〜09 → CR-04〜09 → LR-01〜04 → HL-01〜03。
 
 | ID | フォルダ / ファイル | 題（案） | 主な内容 | 資料 | 状態 |
 |---|---|---|---|---|---|
@@ -252,7 +252,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | MD-04 | 16D/01/04-tensor-products | テンソル積の計算 | （定義・普遍性・右完全性・hom との随伴は ha:page-tensor-tor にあるので参照する）可換環上のテンソル積の A 加群構造、結合・交換・直和・A^m⊗A^n、スカラーの拡大 B⊗_A M、A/I⊗M≅M/IM、代数のテンソル積（可換 A 代数の余積）、多項式環のテンソル積、ℚ⊗ねじれ群=0 などの計算例 | 雪江 §2.10（32161–） | 完了 |
 | MD-05 | 16D/01/05-flatness | 平坦性の判定 | （平坦の定義・Tor による判定・射影⇒平坦は ha:page-tensor-tor にある）イデアルによる判定法（指標加群 Hom(M,ℚ/ℤ) を使う）、PID（当面は ℤ）上で平坦＝ねじれなし、忠実平坦 | 雪江 §2.13（33895–）、松村 | 完了 |
 | MD-06 | 16D/01/06-pid-modules | PID 上の有限生成加群 | 単因子論（行列の基本変形・スミス標準形）、構造定理（単因子形と素因子形）、有限生成アーベル群の構造定理（AB-01 の予告を回収。自由アーベル群の部分群が自由であることは ha:pd-z にもある） | 雪江 §2.12（32964–） | 予定 |
-| ID-01 | 13F/01-integral-domains/01-euclid-pid-ufd | ユークリッド整域・PID・UFD | ED ⇒ PID ⇒ UFD、既約元と素元、包含が真であることの反例（ℤ[(1+√−19)/2]、ℤ[x]） | 雪江 §1.11（24111–） | 予定 |
+| ID-01 | 13F/01-integral-domains/01-euclid-pid-ufd | ユークリッド環・単項イデアル整域・一意分解環 | ED ⇒ PID ⇒ UFD、既約元と素元、包含が真であることの反例（ℤ[(1+√−19)/2]、ℤ[x]） | 雪江 §1.11（24111–） | 完了 |
 | ID-02 | 13F/01/02-gauss-lemma | ガウスの補題と多項式環の UFD 性 | 内容・原始多項式、R が UFD なら R[x] も UFD、アイゼンシュタインの判定法 | 雪江 §1.12 | 予定 |
 | CR-01 | 13A/02-commutative-algebra/01-local-properties | 分数加群と局所的性質 | 加群の局所化、S^{-1}A⊗M≅S^{-1}M、局所化の完全性と S^{-1}A の平坦性、局所的性質（零・単射・全射・平坦）、台 | 松村 | 予定 |
 | CR-02 | 13A/02/02-noetherian-artinian | ネーター環とアルティン環 | 昇鎖条件・ネーター加群、ヒルベルトの基底定理、冪級数環のネーター性、アルティン環の構造（次元 0・ネーター） | 雪江 §1.13, 2.7, 2.9 | 予定 |
@@ -433,6 +433,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | TP-02 | 54H/01/02-group-uniformities | 左一様構造・完全正則性・一様連続な準同型・バーコフ–角谷の定理 | — | 完了 |
 
 ## 完了ログ（新しいものを上に。1 行ずつ）
+- 2026-10-15 ID-01 ユークリッド環・単項イデアル整域・一意分解環（ring:page-euclid-pid-ufd）。13F が初めて公開（§8.2 確認済み）。既約元と素元、UFD の判定、PID ⇒ UFD（DC）、ED ⇒ PID（予約ラベル ring:euclidean-pid・ring:pid を回収）、Z[√−5]、Z[(1+√−19)/2] がユークリッド環でないこと（剰余環が F_2・F_3 にならない議論で証明。PID であることは Dummit–Foote を出典に fact）、Z[x]・K[x,y] は PID でない。訳語は本の多数派「ユークリッド環」（48）「一意分解環」（147）を採用、群論ページの表記も直した。
 - 2026-10-15 MD-05 平坦性の判定（mod:page-flatness）。指標加群と完全性、平坦⇔指標加群が入射、イデアルによる判定法（AC）、Z 上で平坦⇔ねじれなし、忠実平坦の 3 条件。局所化の平坦性は CR-01 に移した。
 - 2026-10-15 MD-04 テンソル積の計算（mod:page-tensor-products）。定義・右完全性は ha:page-tensor-tor を参照し、可換環上の A 加群構造、交換・結合・直和・自由加群の基底、A/I⊗M≅M/IM、スカラーの拡大と随伴、代数のテンソル積と余積、C⊗_R C≅C×C などの計算例。
 - 2026-10-15 MD-03 を修正：ホモロジー代数の系列（ha:page-injective-modules・ha:page-projective-resolutions・ha:page-tensor-tor）に、ベールの判定法・可除群・十分な入射対象・射影対象・テンソル積・平坦加群がすでにあったので、MD-03 の重複した証明を外して参照に置き換えた（START §10.5）。MD-04・MD-05 の内容も、ha にない部分（可換環上の計算、平坦性の判定）に絞った。**教訓：新しい系列の割り当て前に `labels.js find` で他分野の既存ページを確かめる。**
