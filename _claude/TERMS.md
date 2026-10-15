@@ -495,3 +495,4 @@
 | quotient ring / natural projection / direct product / idempotent / Chinese remainder theorem / prime subring | 剰余環 / 自然な射影 / 直積環 / 冪等元 / 中国剰余定理 / 素部分環 | 商環、剰余類環 | 雪江（剰余環）。「冪等元」は冪零元に合わせた。ring:page-quotient-rings |
 | prime ideal / maximal ideal / local ring / residue field / nilradical / radical / Jacobson radical / multiplicative set / reduced ring / prime avoidance | 素イデアル / 極大イデアル / 局所環 / 剰余体 / 冪零根基 / 根基 / ジャコブソン根基 / 積閉集合 / 被約環 / 素イデアルの回避 | 乗法的集合（雪江）、冪零元根基、ベキ零根基 | 積閉集合 63・乗法的集合 62、ベキ零根基 7（表記は冪零に統一）。ring:page-prime-maximal |
 | algebra over A / polynomial ring / formal power series ring / monic / degree / leading coefficient / formal derivative | A 代数（A 上の代数） / 多項式環 / 形式的冪級数環 / モニック / 次数 / 最高次係数 / 形式的微分 | 多元環 | 雪江・松村。ring:page-polynomial-rings |
+| localization / field of fractions / total ring of fractions / extension / contraction / rational function field | 局所化 / 商体 / 全商環 / 拡大 / 縮約 / 有理関数体 | 分数環、分数体 | 雪江（全商環）・松村。ring:page-localization |
