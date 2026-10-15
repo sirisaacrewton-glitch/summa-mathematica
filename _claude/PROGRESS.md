@@ -277,6 +277,13 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | HL-01 | 13D-homological-methods/01-homological-methods/01-koszul-depth | コシュル複体と深さ | コシュル複体、コシュル複体による深さの特徴付け（Ext による特徴付けは LR-02 で済み） | 松村 | 完了 |
 | HL-02 | 13D/01/02-projective-dimension | 射影次元とアウスランダー＝ブクスバウムの公式 | （射影次元・大域次元の定義とシャヌエルの補題は ha:page-projective-dimension にあるので参照）局所環上の極小自由分解、アウスランダー＝ブクスバウムの公式 | 松村 | 完了 |
 | HL-03 | 13D/01/03-serre-regularity | セールの正則性判定法 | 正則 ⇔ 大域次元有限、正則局所環の局所化は正則 | 松村 | 完了（UFD は fact） |
+| NC-01 | 16D/02-noncommutative-rings/01-noncommutative-rings | 非可換環の基本 | 左・右・両側イデアル、行列環の両側イデアル、単純環、四元数体、反対環と End(R) ≅ R^op、ウェダーバーンの小定理 | Anderson–Fuller 第 1 章 | 予定 |
+| NC-02 | 16D/02/02-semisimple-modules | 単純加群と半単純加群 | シューアの補題、半単純加群の同値条件（ツォルン） | Anderson–Fuller §9 | 予定 |
+| NC-03 | 16D/02/03-wedderburn-artin | ウェダーバーン＝アルティンの定理 | 半単純環 ≅ ∏ M_n(D)、一意性 | Anderson–Fuller 第 4 章 | 予定 |
+| NC-04 | 16D/02/04-jacobson-radical | ジャコブソン根基（非可換） | 特徴付け、中山の補題、アルティン環の根基は冪零で R/J は半単純 | Anderson–Fuller 第 4 章 | 予定 |
+| NC-05 | 16D/02/05-maschke | 群環とマシュケの定理 | k[G] が半単純 ⇔ char k ∤ #G、Σ n_i² = #G | （本棚になし。標準的な内容） | 予定 |
+
+非可換環（NC）の表は 2026-10-15 に、ユーザーが承認した配置（非可換環は 16D/02）に沿って追加した。
 
 ## 順序数解析の割り当て（2026-10-02 追加。資料：新井『数学基礎論』第 8 章 §8.4）
 
