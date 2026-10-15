@@ -478,3 +478,4 @@
 | conjugacy class / class equation / p-group / Cauchy's theorem | 共役類 / 類等式 / p 群 / コーシーの定理 | | 雪江。grp:page-class-equation |
 | Burnside's lemma (Cauchy-Frobenius lemma) / necklace / bracelet / Jordan's theorem (derangements) / commuting probability | バーンサイドの補題（コーシー–フロベニウスの補題） / ネックレス / ブレスレット / ジョルダンの定理 / 可換になる確率 | | 標準的（カタカナ）。可換になる確率は仮。grp:page-burnside-counting |
 | cycle / transposition / support / disjoint / cycle decomposition / cycle type / partition / Young diagram | 巡回置換 / 互換 / 台 / 互いに素 / 巡回置換分解 / 型 / 分割 / ヤング図形 | | 雪江（型・ヤング図形）。grp:page-symmetric-groups |
+| sign (signature) / even permutation / odd permutation / inversion / difference product / alternating group | 符号 / 偶置換 / 奇置換 / 転倒数 / 差積 / 交代群 | | 標準的（雪江）。grp:page-sign-alternating |

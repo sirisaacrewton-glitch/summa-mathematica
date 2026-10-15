@@ -24,7 +24,7 @@
 
 9. **（2026-10-07）一般位相の割り当て表（TS・TC・TD・TE）はすべて完了。型理論の系列にランベック対応を追加した（TT-04 04-ccc-semantics、TT-05 05-lambek。2026-10-07 完了）。HoTT の入口 TT-06〜08（依存型・恒等型・一価性公理）を資料なしで書いた（2026-10-07）。Rijke のテキストが入ったら、高次帰納型・切り詰め・円周の基本群などを続ける。参考書 Rijke『Introduction to Homotopy Type Theory』は `math_books` にテキストがないので、まずテキスト化をユーザーに頼むか、資料なしで依存型理論（Π・Σ・恒等型）の基礎から書くかを確認する。予約ラベル logic:page-hott（01-simply-typed から参照）。一般位相の予定ラベルはすべて定義済み（2026-10-08）。** （以前の記述） その後の候補：圏論の続き（モナド、アーベル圏、カン拡張）、（03D/03 の 05・06 は完了）Halmos『Algebraic Logic』の補足（未着手）、または他分野（位相・代数など）の開始。どれにするかはユーザーに確認する。
 
-12. **（2026-10-10）群論を開始**：`math_books` に雪江『代数学』などのテキストが入った（2026-10-10）ので、下の「群論の割り当て」の順に書く。GB-01〜GB-06・GA-01〜GA-04 完了。**次は GA-05（置換の符号と交代群。雪江 §2.5 例 2.5.10 と §4.3 あたり。符号の well-definedness は差積か転倒数で自力で証明）**。系列 02-group-actions（id grp-actions、表示名「群の作用と対称群」）を 2026-10-15 に作成し §8.2 の 6 か所を確認済み。予約ラベル：grp:page-group-actions（GA-01）、grp:page-sylow（SY-01）、grp:page-class-equation（GA-02）、grp:page-solvable-nilpotent（SY-04）。GB-05 が予約：grp:page-free-groups（FP-01）。GB-01 が予約したラベル：grp:lagrange（GB-03）、grp:page-normal-quotient（GB-04）、grp:page-homomorphism-theorems（GB-05）、grp:page-symmetric-groups（GA-04）、grp:page-sign-alternating（GA-05）、ring:euclidean-pid（環論）。系列 01-groups の `_meta.json` の id は grp-basics。
+12. **（2026-10-10）群論を開始**：`math_books` に雪江『代数学』などのテキストが入った（2026-10-10）ので、下の「群論の割り当て」の順に書く。GB-01〜GB-06・GA-01〜GA-05 完了。**次は GA-06（交代群の単純性。到達目標。予約ラベル grp:page-simplicity-an。雪江 §4.3 あたり）**。系列 02-group-actions（id grp-actions、表示名「群の作用と対称群」）を 2026-10-15 に作成し §8.2 の 6 か所を確認済み。予約ラベル：grp:page-group-actions（GA-01）、grp:page-sylow（SY-01）、grp:page-class-equation（GA-02）、grp:page-solvable-nilpotent（SY-04）。GB-05 が予約：grp:page-free-groups（FP-01）。GB-01 が予約したラベル：grp:lagrange（GB-03）、grp:page-normal-quotient（GB-04）、grp:page-homomorphism-theorems（GB-05）、grp:page-symmetric-groups（GA-04）、grp:page-sign-alternating（GA-05）、ring:euclidean-pid（環論）。系列 01-groups の `_meta.json` の id は grp-basics。
 
 11. **（2026-10-09 ユーザー確認）新しい分野は `_claude/SCOPE.md` の順で始める**：群論 → 環論（保存表と性質ごとの深掘り）→ 体論・ガロア理論 → 圏論の残り → 実解析 → 微分幾何 → 代数的位相幾何。進行中の系列を区切りのよい所まで終えたら、群論の準備（START.md §10）から始める。到達目標は下限で、足りないのは不可。並行して、SCOPE.md の「現状」に挙げた抜け（実閉体（2026-10-09 RC-01〜03 で完了）、ウォシュ–ヴォートの判定法（2026-10-09 完了）、フレイド＝ミッチェル（2026-10-09 HA-05 で主張と使い方を完了））を埋める。
 
@@ -219,7 +219,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | GA-02 | 20A/02/02-class-equation | 類等式と p 群 | 共役類・類等式、p 群の中心、位数 p² の群 | 完了 |
 | GA-03 | 20A/02/03-burnside-counting | 軌道の数え上げ | バーンサイドの補題と応用 | 完了 |
 | GA-04 | 20A/02/04-symmetric-groups | 対称群と巡回置換 | 巡回置換分解、互換による生成、共役類と型 | 完了 |
-| GA-05 | 20A/02/05-sign-alternating | 置換の符号と交代群 | 符号の well-definedness、Aₙ、3 巡回置換による生成 | 予定 |
+| GA-05 | 20A/02/05-sign-alternating | 置換の符号と交代群 | 符号の well-definedness、Aₙ、3 巡回置換による生成 | 完了 |
 | GA-06 | 20A/02/06-simplicity-an | 交代群の単純性 | Aₙ（n ≥ 5）の単純性、A₄ は単純でない、Sₙ の正規部分群 | 予定（到達目標） |
 | SY-01 | 20D/01-sylow/01-sylow-theorems | シローの定理 | 存在・共役・個数の条件 | 予定 |
 | SY-02 | 20D/01/02-sylow-applications | シローの定理の応用 | 位数 pq の群、位数 60 未満の非可換単純群は無い、A₅ の特徴づけ | 予定 |
@@ -384,6 +384,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | TP-02 | 54H/01/02-group-uniformities | 左一様構造・完全正則性・一様連続な準同型・バーコフ–角谷の定理 | — | 完了 |
 
 ## 完了ログ（新しいものを上に。1 行ずつ）
+- 2026-10-15 群論 GA-05（20A/02-group-actions/05-sign-alternating, grp:page-sign-alternating：差積で符号を定義、転倒数との関係、準同型であることを二元集合の関数として証明、互換・k 巡回・型からの符号、互換の個数の偶奇の不変性、A_n（指数 2・位数 n!/2）、3 巡回置換で生成、n≥5 で 3 巡回置換は A_n で共役（n=4 では 2 類）、A_4 は位数 6 の部分群をもたない（GB-02/GB-03/GA-02 の予告を回収）。問題 3（S_n の指数 2 は A_n だけ、位数 2m（m 奇数）は指数 2 の正規部分群、A_5 の 5 巡回置換は 2 類））。資料：雪江（符号は自力で証明）。
 - 2026-10-15 群論 GA-04（20A/02-group-actions/04-symmetric-groups, grp:page-symmetric-groups：巡回置換・互換・台、互いに素なら可換、巡回置換分解の存在と一意性（⟨σ⟩ の軌道で）、型と位数＝lcm、共役の公式、共役⇔型が同じ、型ごとの個数 n!/Πk^{m_k}m_k!、S_4 の類等式と V⊴S_4、生成元（互換・隣接互換・(1 2) と n 巡回置換）。問題 3（Z(S_n)={e}、S_5・S_7 の最大位数、S_4 の σ²=e の個数））。資料：雪江 §4.2。
 - 2026-10-15 群論 GA-03（20A/02-group-actions/03-burnside-counting, grp:page-burnside-counting：バーンサイドの補題（コーシー–フロベニウスの補題）、固定点の個数は共役で不変、ネックレスの個数 (1/n)Σφ(d)k^{n/d} と Σ_{d|n}φ(d)=n、ブレスレットの個数（n 奇偶）、6 玉 2 色で 14/13、ジョルダンの定理（推移的なら固定点のない元）、可換になる確率 k(G)/|G|。問題 2（非可換なら ≤5/8、立方体の面の塗り分け 10 通り））。資料なし。
 - 2026-10-15 群論 GA-02（20A/02-group-actions/02-class-equation, grp:page-class-equation：p 群、固定点の合同式 |X|≡|X^G| (mod p)、共役類と類等式（D₃, D₄ の計算）、p 群の中心は非自明、位数 p² の群の分類、コーシーの定理（McKay の巡回シフトによる証明）、p 群⇔元の位数が p 冪、p 群は各位数 p^k の正規部分群をもつ。問題 3（正規部分群と中心の交わり、位数 6 の群の分類、類等式でない式））。資料：雪江 §4.1, §4.4（コーシーは資料なし）。
