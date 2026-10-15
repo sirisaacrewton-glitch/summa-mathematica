@@ -24,7 +24,7 @@
 
 9. **（2026-10-07）一般位相の割り当て表（TS・TC・TD・TE）はすべて完了。型理論の系列にランベック対応を追加した（TT-04 04-ccc-semantics、TT-05 05-lambek。2026-10-07 完了）。HoTT の入口 TT-06〜08（依存型・恒等型・一価性公理）を資料なしで書いた（2026-10-07）。Rijke のテキストが入ったら、高次帰納型・切り詰め・円周の基本群などを続ける。参考書 Rijke『Introduction to Homotopy Type Theory』は `math_books` にテキストがないので、まずテキスト化をユーザーに頼むか、資料なしで依存型理論（Π・Σ・恒等型）の基礎から書くかを確認する。予約ラベル logic:page-hott（01-simply-typed から参照）。一般位相の予定ラベルはすべて定義済み（2026-10-08）。** （以前の記述） その後の候補：圏論の続き（モナド、アーベル圏、カン拡張）、（03D/03 の 05・06 は完了）Halmos『Algebraic Logic』の補足（未着手）、または他分野（位相・代数など）の開始。どれにするかはユーザーに確認する。
 
-12. **（2026-10-10）群論を開始**：`math_books` に雪江『代数学』などのテキストが入った（2026-10-10）ので、下の「群論の割り当て」の順に書く。GB-01〜GB-06・GA-01〜GA-06 完了（2026-10-15、到達目標の Aₙ の単純性まで到達）。SY-01 完了（新系列 20D/01-sylow、id grp-sylow、§8.2 確認済み）。SY-01〜SY-04 完了（群論の割り当て表の「予定」は AB-01・FP-01・FP-02（発展）だけ）。**次は AB-01（有限生成アーベル群の構造定理。20K に新フォルダ。単因子は環論の PID が要るので、まず有限アーベル群（p 群の巡回群の直積への分解、初等因子の一意性）を群論だけで書く案）**。予約ラベル：grp:page-sylow（SY-01）、grp:page-sylow-applications（SY-02）、grp:page-solvable-nilpotent（SY-04）、grp:page-free-groups（FP-01）。系列 02-group-actions（id grp-actions、表示名「群の作用と対称群」）を 2026-10-15 に作成し §8.2 の 6 か所を確認済み。予約ラベル：grp:page-group-actions（GA-01）、grp:page-sylow（SY-01）、grp:page-class-equation（GA-02）、grp:page-solvable-nilpotent（SY-04）。GB-05 が予約：grp:page-free-groups（FP-01）。GB-01 が予約したラベル：grp:lagrange（GB-03）、grp:page-normal-quotient（GB-04）、grp:page-homomorphism-theorems（GB-05）、grp:page-symmetric-groups（GA-04）、grp:page-sign-alternating（GA-05）、ring:euclidean-pid（環論）。系列 01-groups の `_meta.json` の id は grp-basics。
+12. **（2026-10-10 開始）群論**：下の「群論の割り当て」の順に書く。GB-01〜06（20A/01-groups, id grp-basics）、GA-01〜06（20A/02-group-actions, id grp-actions。到達目標の Aₙ の単純性は 2026-10-15 に到達）、SY-01〜04（20D/01-sylow, id grp-sylow）、AB-01（20K/01-finite-abelian, id grp-abelian）は完了。**次は FP-01（自由群。20F/01-presentations を新設。予約ラベル grp:page-free-groups）→ FP-02（群の表示）**。その後は SCOPE.md の順で環論へ（予約ラベル ring:euclidean-pid）。新系列を作ったら §8.2 の 6 か所を確認する（02-group-actions・01-sylow・01-finite-abelian は確認済み）。
 
 11. **（2026-10-09 ユーザー確認）新しい分野は `_claude/SCOPE.md` の順で始める**：群論 → 環論（保存表と性質ごとの深掘り）→ 体論・ガロア理論 → 圏論の残り → 実解析 → 微分幾何 → 代数的位相幾何。進行中の系列を区切りのよい所まで終えたら、群論の準備（START.md §10）から始める。到達目標は下限で、足りないのは不可。並行して、SCOPE.md の「現状」に挙げた抜け（実閉体（2026-10-09 RC-01〜03 で完了）、ウォシュ–ヴォートの判定法（2026-10-09 完了）、フレイド＝ミッチェル（2026-10-09 HA-05 で主張と使い方を完了））を埋める。
 
@@ -225,7 +225,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | SY-02 | 20D/01/02-sylow-applications | シローの定理の応用 | 位数 pq の群、位数 60 未満の非可換単純群は無い、A₅ の特徴づけ | 完了 |
 | SY-03 | 20D/01/03-jordan-holder | 組成列とジョルダン–ヘルダーの定理 | 組成列・組成因子の一意性 | 完了 |
 | SY-04 | 20D/01/04-solvable-nilpotent | 可解群と冪零群 | 導来列・中心列、Sₙ（n ≥ 5）は可解でない | 完了 |
-| AB-01 | 20K/01-finite-abelian/01-structure | 有限生成アーベル群の構造定理 | 単因子・初等因子 | 予定（発展） |
+| AB-01 | 20K/01-finite-abelian/01-structure | 有限アーベル群の構造定理 | 単因子・初等因子（有限生成の場合は環論で） | 完了 |
 | FP-01 | 20F/01-presentations/01-free-groups | 自由群 | 構成と普遍性 | 予定（発展） |
 | FP-02 | 20F/01/02-presentations | 群の表示 | 生成元と関係式、二面体群の表示 | 予定（発展） |
 
@@ -384,6 +384,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | TP-02 | 54H/01/02-group-uniformities | 左一様構造・完全正則性・一様連続な準同型・バーコフ–角谷の定理 | — | 完了 |
 
 ## 完了ログ（新しいものを上に。1 行ずつ）
+- 2026-10-15 群論 AB-01（新系列 20K/01-finite-abelian/01-structure, grp:page-finite-abelian：準素分解（冪零群の特徴づけから）、位数最大の元の巡回部分群は直和因子、アーベル p 群は巡回群の直和、|p^kG/p^{k+1}G| による型の一意性、構造定理（初等因子）、単因子、位数 n のアーベル群の個数 Πp(a_i)。問題 3（平方因子なしなら巡回、G[p] の位数、(ℤ/15)^× の単因子））。環論なし・資料なし。§8.2 確認済み（20K の系列は solo）。
 - 2026-10-15 群論 SY-04（20D/01-sylow/04-solvable-nilpotent, grp:page-solvable-nilpotent：導来列と可解群、可換因子の正規列・組成因子が素数位数⇔可解、部分群・剰余群・拡大・直積で閉じる、S_4 は可解（A_4′=V を検算）、S_n（n≥5）は可解でない、バーンサイド・ファイト–トンプソンは fact、降中心列・昇中心列とその同値性、p 群は冪零、冪零⇒可解（S_3 は逆の反例）、有限冪零⇔正規化群が真に大きい⇔シロー部分群が正規⇔シロー部分群の直積。問題 3（位数 pq・p²q は可解、Q₈・D₄ は類 2、冪零群の極大部分群は正規で素数指数））。資料：雪江 §4.3（可解群）、冪零群は資料なし。
 - 2026-10-15 群論 SY-03（20D/01-sylow/03-jordan-holder, grp:page-jordan-holder：正規列・組成列・組成因子、極大正規部分群⇔商が単純、有限群の組成列の存在（ℤ にはない）、ジョルダン–ヘルダーの定理（有限群、位数の帰納法と第二同型定理）、系として素因数分解の一意性（循環しないことを hypcheck で確認）。問題 3（D_n の組成因子、N を通る組成列、長さ≤素因数の個数））。資料なし。
 - 2026-10-15 群論 SY-02（20D/01-sylow/02-sylow-applications, grp:page-sylow-applications：単純群は指数 k の部分群があれば A_k に入る、mod q の多項式の根は次数以下、(ℤ/qℤ)^× の位数 p の部分群は高々一つ、位数 pq の分類（非可換は一意。巡回性は使わない）、位数 p²q は単純でない、位数 60 未満の単純群は素数位数のみ（合成数 4〜59 の全ケースを Python で網羅確認）、位数 60 の単純群≅A_5（A_6 への埋め込みと点の安定化群）。問題 3（位数 132、2p、35））。資料なし。
