@@ -504,3 +504,4 @@
 | Euclidean domain / principal ideal domain / unique factorization domain / irreducible element / prime element / greatest common divisor | ユークリッド環 / 単項イデアル整域 / 一意分解環 / 既約元 / 素元 / 最大公約元 | ユークリッド整域、PID、一意分解整域・UFD・素元分解整域 | 本でユークリッド環 48・ユークリッド整域 0、一意分解環 147・一意分解整域 7、単項イデアル整域 132。ring:page-euclid-pid-ufd |
 | Smith normal form / invariant factors / elementary divisors / Jordan normal form / rational canonical form | スミス標準形 / 単因子 / 初等因子 / ジョルダン標準形 / 有理標準形 | | 雪江（単因子論）。mod:page-pid-modules |
 | content / primitive polynomial / Gauss's lemma / Eisenstein's criterion / rational root theorem | 内容 / 原始多項式 / ガウスの補題 / アイゼンシュタインの判定法 / 有理根定理 | | 雪江。ring:page-gauss-lemma |
+| module of fractions / local property / support / Nakayama's lemma / determinant trick / locally free | 分数加群 / 局所的性質 / 台 / 中山の補題 / 行列式のトリック / 局所自由 | サポート | 松村。ring:page-local-properties |
