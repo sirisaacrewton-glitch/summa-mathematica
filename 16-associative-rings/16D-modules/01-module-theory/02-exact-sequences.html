@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>完全列と Hom | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="16-associative-rings/16D-modules/01-module-theory/02-exact-sequences.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 完全列と Hom {#mod:page-exact-sequences keywords="exact sequence, short exact sequence, split exact sequence, splitting lemma, left exactness of Hom, five lemma, Hom and direct sums"}
+
+加群の間の準同型を一列に並べ、「一つ前の像がちょうど次の核になる」ものを**完全列**という（\ref{mod:exact-sequence}）。完全列は、部分加群と剰余加群の関係（$0\to L\to M\to M/L\to 0$）を準同型の言葉で表したもので、ホモロジー代数の基本言語である。このページでは、分裂する短完全列の特徴付け（\ref{mod:splitting-lemma}）、$\Hom$ が左完全であって右完全でないこと（\ref{mod:hom-left-exact}）、$\Hom$ と直和・直積の関係（\ref{mod:hom-sum-product}）、五項補題（\ref{mod:five-lemma}）を、元を使って直接示す。一般のアーベル圏での同じ結果は \ref{ha:page-abelian}, \ref{ha:page-diagram-lemmas} にある。
+
+> Anderson–Fuller 第 3 章 §3 の流れを参考にした。証明はすべて元を追う形で書き直した。
+
+## 記法と定義の確認 {#mod:sec-ex-notation}
+
+::: notation
+- $R$ は環（可換とは限らない）、加群は左 $R$ 加群（\ref{mod:module}）。準同型・核・像・余核・$\Hom_{R}$ は \ref{mod:submodule-homomorphism}、同型定理は \ref{mod:isomorphism-theorems}、直和・直積とその普遍性は \ref{mod:direct-sum}, \ref{mod:direct-sum-universal}。
+- 準同型 $f:M\to N$ と加群 $X$ について、$f_{*}\defeq\Hom_{R}(X,f):\Hom_{R}(X,M)\to\Hom_{R}(X,N)$, $\alpha\mapsto f\circ\alpha$、$f^{*}\defeq\Hom_{R}(f,X):\Hom_{R}(N,X)\to\Hom_{R}(M,X)$, $\beta\mapsto\beta\circ f$ と書く。どちらも可換群の準同型である。
+- 選択公理は使わない。
+:::
+
+## 完全列 {#mod:sec-ex-exact}
+
+::: definition 完全列 {#mod:exact-sequence keywords="exact sequence of modules, short exact sequence" index="完全列|かんぜんれつ, 完全系列|かんぜんけいれつ, 短完全列|たんかんぜんれつ"}
+加群と準同型の列 $\cdots\to M_{k-1}\xrightarrow{f_{k-1}}M_{k}\xrightarrow{f_{k}}M_{k+1}\to\cdots$ が $M_{k}$ で**完全**であるとは、$\im f_{k-1}=\Ker f_{k}$ であることをいう。途中のすべての項で完全な列を**完全列**という。
+$$
+0\to L\xrightarrow{f}M\xrightarrow{g}N\to 0
+$$
+の形の完全列を**短完全列**という。
+:::
+
+::: intuition
+$0\to L\xrightarrow{f}M$ が完全 $\iff f$ は単射（$\Ker f=\im(0\to L)=0$）、$M\xrightarrow{g}N\to 0$ が完全 $\iff g$ は全射（$\im g=\Ker(N\to 0)=N$）。したがって短完全列は「$f$ は単射、$g$ は全射、$\im f=\Ker g$」のことで、準同型定理から $N\cong M/f(L)$。つまり $M$ は、部分加群 $L$（と同型なもの）と剰余加群 $N$ に「分解」される。ただし $M\cong L\oplus N$ とは限らない（\ref{mod:splitting-lemma} の後の例）。
+:::
+
+::: example
+1. 部分加群 $L\subset M$ について、包含と自然な射影で $0\to L\to M\to M/L\to 0$ は短完全列。
+2. 準同型 $f:M\to N$ について $0\to\Ker f\to M\xrightarrow{f}N\to\operatorname{Coker}f\to 0$ は完全列。
+3. $n\ge 1$ について $0\to\Z\xrightarrow{n}\Z\to\Z/n\Z\to 0$（最初の写像は $n$ 倍）は $\Z$ 加群の短完全列。
+:::
+
+::: theorem 分裂補題 {#mod:splitting-lemma keywords="splitting lemma, split exact sequence, section, retraction, direct summand" index="分裂補題|ぶんれつほだい, 分裂する完全列|ぶんれつするかんぜんれつ, 直和因子|ちょくわいんし, 切断|せつだん, 引き込み|ひきこみ"}
+短完全列 $0\to L\xrightarrow{f}M\xrightarrow{g}N\to 0$ について、次は同値である。
+1. $r\circ f=\id_{L}$ となる準同型 $r:M\to L$（**引き込み**）がある。
+2. $g\circ s=\id_{N}$ となる準同型 $s:N\to M$（**切断**）がある。
+3. 同型 $\phi:M\to L\oplus N$ で、$\phi\circ f=\iota_{1}$, $p_{2}\circ\phi=g$ をみたすものがある（$\iota_{1}(l)=(l,0)$, $p_{2}(l,n)=n$）。
+
+このとき短完全列は**分裂する**という。また 2 のとき $M=f(L)\oplus s(N)$（内部直和）であり、$f(L)$ は $M$ の**直和因子**である。
+:::
+
+::: proof
+**Step 1（1⇒3）.** $\phi(m)\defeq(r(m),g(m))$ とおく。準同型で、$\phi(f(l))=(rf(l),gf(l))=(l,0)$（$gf=0$ は完全性 $\im f\subset\Ker g$ から）、$p_{2}\phi=g$。単射：$\phi(m)=0$ なら $g(m)=0$ なので $m=f(l)$（$\Ker g=\im f$）と書け、$0=r(m)=rf(l)=l$ から $m=0$。全射：$(l,n)$ について $g$ の全射性から $g(m)=n$ となる $m$ をとり、$m'\defeq m+f(l-r(m))$ とおくと $r(m')=r(m)+l-r(m)=l$, $g(m')=g(m)=n$。
+
+**Step 2（3⇒1, 3⇒2）.** $r\defeq p_{1}\circ\phi$ とすると $rf=p_{1}\iota_{1}=\id_{L}$。$s\defeq\phi^{-1}\circ\iota_{2}$ とすると $gs=p_{2}\phi\phi^{-1}\iota_{2}=p_{2}\iota_{2}=\id_{N}$。
+
+**Step 3（2⇒1）.** $m\in M$ について $g(m-sg(m))=g(m)-g(m)=0$ なので、$m-sg(m)=f(l)$ となる $l\in L$ がただ一つある（$f$ は単射）。$r(m)\defeq l$ とおくと、$f$ の単射性から $r$ は準同型で、$m=f(l)$ なら $sg(m)=0$ なので $r(f(l))=l$。
+
+**Step 4（内部直和）.** 2 のとき、$m=f(r(m))+s(g(m))$（Step 3 の式）なので $M=f(L)+s(N)$。$f(l)=s(n)$ なら $n=gs(n)=gf(l)=0$ で、共通部分は $0$。\ref{mod:direct-sum-universal} の 3 から内部直和。
+
+::: hypcheck
+- **完全性**：Step 1 で $gf=0$ と $\Ker g\subset\im f$ を、Step 3 で $\Ker g\subset\im f$ と $f$ の単射性を使った。
+:::
+:::
+
+::: example 分裂しない短完全列 {#mod:non-split-example}
+1. $0\to\Z\xrightarrow{2}\Z\to\Z/2\Z\to 0$ は分裂しない。切断 $s:\Z/2\Z\to\Z$ があれば $2s(1)=s(2\cdot 1)=s(0)=0$ なので $s(1)=0$ で、$gs=\id$ に反する。実際 $\Z\not\cong\Z\oplus\Z/2\Z$（右辺は位数 2 の元をもつ）。
+2. $0\to\Z/2\Z\xrightarrow{2}\Z/4\Z\to\Z/2\Z\to 0$ も分裂しない：$\Z/4\Z$ は位数 4 の元をもつが、$\Z/2\Z\oplus\Z/2\Z$ はもたない。
+3. 体上のベクトル空間の短完全列は常に分裂する（$N$ の基底の各元に $g$ による逆像を一つずつ選び、自由加群の普遍性 \ref{mod:free-module-universal} で $s$ を作る。無限次元では基底の存在に選択公理を使う）。より一般に、$N$ が自由加群なら短完全列は分裂する。
+:::
+
+## Hom の左完全性 {#mod:sec-ex-hom}
+
+::: theorem Hom の左完全性 {#mod:hom-left-exact keywords="left exactness of Hom, Hom(X,-) is left exact, Hom(-,X) is left exact" index="Hom の左完全性|ほむのひだりかんぜんせい, 左完全|ひだりかんぜん"}
+$X$ を左 $R$ 加群とする。
+1. $0\to L\xrightarrow{f}M\xrightarrow{g}N$ が完全なら、
+$$
+0\to\Hom_{R}(X,L)\xrightarrow{f_{*}}\Hom_{R}(X,M)\xrightarrow{g_{*}}\Hom_{R}(X,N)
+$$
+は完全である。
+2. $L\xrightarrow{f}M\xrightarrow{g}N\to 0$ が完全なら、
+$$
+0\to\Hom_{R}(N,X)\xrightarrow{g^{*}}\Hom_{R}(M,X)\xrightarrow{f^{*}}\Hom_{R}(L,X)
+$$
+は完全である。
+:::
+
+::: proof
+**Step 1（1：$f_{*}$ は単射）.** $f\circ\alpha=0$ なら、$f$ は単射なので各 $x$ で $\alpha(x)=0$、すなわち $\alpha=0$。
+
+**Step 2（1：$\im f_{*}\subset\Ker g_{*}$）.** $g_{*}f_{*}(\alpha)=g\circ f\circ\alpha=0$（$gf=0$）。
+
+**Step 3（1：$\Ker g_{*}\subset\im f_{*}$）.** $g\circ\beta=0$ とする（$\beta:X\to M$）。各 $x$ で $\beta(x)\in\Ker g=\im f$ なので、$\beta(x)=f(l)$ となる $l\in L$ がただ一つある（$f$ は単射）。$\alpha(x)\defeq l$ とおくと、$f$ の単射性から $\alpha$ は準同型（$f(\alpha(rx+y))=\beta(rx+y)=r\beta(x)+\beta(y)=f(r\alpha(x)+\alpha(y))$）で、$f\circ\alpha=\beta$。
+
+**Step 4（2：$g^{*}$ は単射）.** $\gamma\circ g=0$ なら、$g$ は全射なので $\gamma=0$。
+
+**Step 5（2：$\im g^{*}\subset\Ker f^{*}$）.** $f^{*}g^{*}(\gamma)=\gamma\circ g\circ f=0$。
+
+**Step 6（2：$\Ker f^{*}\subset\im g^{*}$）.** $\delta:M\to X$ が $\delta\circ f=0$ をみたすとする。$\Ker g=\im f\subset\Ker\delta$ なので、剰余加群の普遍性（\ref{mod:isomorphism-theorems} の 1）と準同型定理 $M/\Ker g\cong N$（$g$ は全射）から、$\delta=\gamma\circ g$ となる $\gamma:N\to X$ がある。
+
+::: hypcheck
+- **1 で $L\to M$ の単射性**：Step 1 と Step 3（$\alpha$ が矛盾なく定まり準同型になること）に使った。
+- **2 で $g$ の全射性**：Step 4 と Step 6（$N\cong M/\Ker g$）に使った。
+:::
+:::
+
+::: example Hom は右完全でない {#mod:hom-not-right-exact}
+短完全列 $0\to\Z\xrightarrow{2}\Z\xrightarrow{\pi}\Z/2\Z\to 0$ を考える。
+1. $\Hom_{\Z}(\Z/2\Z,-)$ を施すと $\pi_{*}:\Hom(\Z/2\Z,\Z)\to\Hom(\Z/2\Z,\Z/2\Z)$ は全射でない：左辺は $0$（$\Z$ に位数 2 の元がないので、$\Z/2\Z\to\Z$ は零写像だけ）、右辺は $\id$ を含む。
+2. $\Hom_{\Z}(-,\Z)$ を施すと $(2)^{*}:\Hom(\Z,\Z)\to\Hom(\Z,\Z)$ は全射でない：$\Hom(\Z,\Z)\cong\Z$（$\alpha\mapsto\alpha(1)$）のもとで $(2)^{*}$ は $2$ 倍写像で、像は $2\Z$。
+
+$\Hom$ が完全性を壊す度合いを測るのが Ext 関手である（\ref{ha:page-derived-functors}）。$\Hom_{R}(X,-)$ が完全になる $X$ を**射影加群**、$\Hom_{R}(-,X)$ が完全になる $X$ を**入射加群**という（\ref[射影加群と入射加群]{mod:page-projective-injective}）。
+:::
+
+::: proposition Hom と直和・直積 {#mod:hom-sum-product keywords="Hom of a direct sum, Hom into a direct product" index="Hom と直和|ほむとちょくわ"}
+左 $R$ 加群の族 $(M_{i})_{i\in I}$ と加群 $X$ について、可換群の同型
+$$
+\Hom_{R}\Bigl(\bigoplus_{i}M_{i},X\Bigr)\cong\prod_{i}\Hom_{R}(M_{i},X),\quad\Hom_{R}\Bigl(X,\prod_{i}M_{i}\Bigr)\cong\prod_{i}\Hom_{R}(X,M_{i})
+$$
+がある。前者は $f\mapsto(f\circ\iota_{i})_{i}$、後者は $g\mapsto(p_{i}\circ g)_{i}$ で与えられる。$R$ が可換なら $R$ 加群の同型である。
+:::
+
+::: proof
+二つの写像が全単射であることは、直和と直積の普遍性（\ref{mod:direct-sum-universal} の 1・2）の「ただ一つ存在する」をそのまま言い換えたものである。和を保つのは $(f+f')\circ\iota_{i}=f\circ\iota_{i}+f'\circ\iota_{i}$ などから。
+
+::: hypcheck
+- **直和と直積の組み合わせ**：前者で $\bigoplus$ を $\prod$ に替えると一般に偽である。例えば $\Hom_{\Z}(\prod_{n\ge 1}\Z,\Z)$ は $\prod_{n}\Hom(\Z,\Z)=\Z^{\N}$ とは異なる（$\bigoplus_{n}\Z$ に同型になることが知られている：スペッカーの定理）。後者で $\prod$ を $\bigoplus$ に替えると、$X$ が有限生成なら成り立つが一般には偽。
+:::
+:::
+
+## 五項補題 {#mod:sec-ex-five}
+
+::: theorem 五項補題（加群版） {#mod:five-lemma keywords="five lemma for modules, short five lemma" index="五項補題|ごこうほだい, 短五項補題|たんごこうほだい"}
+左 $R$ 加群の可換図式
+$$
+\begin{CD}
+M_{1} @>{g_{1}}>> M_{2} @>{g_{2}}>> M_{3} @>{g_{3}}>> M_{4} @>{g_{4}}>> M_{5}\\
+@V{f_{1}}VV @V{f_{2}}VV @V{f_{3}}VV @V{f_{4}}VV @V{f_{5}}VV\\
+N_{1} @>{h_{1}}>> N_{2} @>{h_{2}}>> N_{3} @>{h_{3}}>> N_{4} @>{h_{4}}>> N_{5}
+\end{CD}
+$$
+で、二つの行が完全であるとする。
+1. $f_{2},f_{4}$ が単射で $f_{1}$ が全射なら、$f_{3}$ は単射。
+2. $f_{2},f_{4}$ が全射で $f_{5}$ が単射なら、$f_{3}$ は全射。
+3. 特に $f_{1},f_{2},f_{4},f_{5}$ が同型なら $f_{3}$ は同型。
+:::
+
+::: proof
+**Step 1（1）.** $f_{3}(m)=0$（$m\in M_{3}$）とする。$f_{4}g_{3}(m)=h_{3}f_{3}(m)=0$ で $f_{4}$ は単射なので $g_{3}(m)=0$。上の行の $M_{3}$ での完全性から $m=g_{2}(m_{2})$。$h_{2}f_{2}(m_{2})=f_{3}g_{2}(m_{2})=0$ なので、下の行の $N_{2}$ での完全性から $f_{2}(m_{2})=h_{1}(n_{1})$。$f_{1}$ は全射なので $n_{1}=f_{1}(m_{1})$。すると $f_{2}(g_{1}(m_{1}))=h_{1}f_{1}(m_{1})=f_{2}(m_{2})$ で、$f_{2}$ は単射なので $m_{2}=g_{1}(m_{1})$。よって $m=g_{2}g_{1}(m_{1})=0$。
+
+**Step 2（2）.** $n\in N_{3}$ とする。$f_{4}$ は全射なので $h_{3}(n)=f_{4}(m_{4})$。$f_{5}g_{4}(m_{4})=h_{4}f_{4}(m_{4})=h_{4}h_{3}(n)=0$ で $f_{5}$ は単射なので $g_{4}(m_{4})=0$、上の行の完全性から $m_{4}=g_{3}(m_{3})$。$h_{3}(n-f_{3}(m_{3}))=f_{4}(m_{4})-f_{4}g_{3}(m_{3})=0$ なので、下の行の完全性から $n-f_{3}(m_{3})=h_{2}(n_{2})$。$f_{2}$ は全射なので $n_{2}=f_{2}(m_{2})$。よって $n=f_{3}(m_{3})+h_{2}f_{2}(m_{2})=f_{3}(m_{3}+g_{2}(m_{2}))$。
+
+**Step 3（3）.** 1・2 と、全単射な準同型は同型であること（\ref{mod:submodule-basic} の 3）。
+
+::: hypcheck
+- **1 の各前提**：$f_{4}$ の単射性は Step 1 の最初、$f_{1}$ の全射性は $m_{1}$ を見つけるところ、$f_{2}$ の単射性は $m_{2}=g_{1}(m_{1})$ に使った。$f_{5}$ は使わない。$f_{1}$ の全射性を外すと偽：上の行を $0\to\Z\xrightarrow{\id}\Z\to 0\to 0$、下の行を $\Z\xrightarrow{2}\Z\xrightarrow{\pi}\Z/2\Z\to 0\to 0$ とし、$f_{1}=0$（全射でない）、$f_{2}=\id$、$f_{3}=\pi$、$f_{4}=f_{5}=0$ とすると、図式は可換で行は完全、$f_{2},f_{4}$ は単射だが $f_{3}=\pi$ は単射でない。
+- **2 の各前提**：$f_{4}$ の全射性、$f_{5}$ の単射性、$f_{2}$ の全射性を Step 2 で使った。$f_{1}$ は使わない。
+:::
+:::
+
+::: supplement
+**一般のアーベル圏では.** 上の元を追う証明は、アーベル圏では「元」が使えないので、そのままでは使えない。\ref{ha:five-lemma} では一般化された元（メンバー）を使って同じ論法を正当化している。フレイド＝ミッチェルの埋め込み定理（\ref{ha:freyd-mitchell}）を使えば、小さなアーベル圏の図式についての完全性の主張は加群の場合に帰着できる。蛇の補題（\ref{ha:snake-lemma}）も、加群の場合は元を追って直接証明できる。
+
+**短五項補題.** 短完全列の間の可換図式で両端が同型なら真ん中も同型である（$M_{1}=M_{5}=N_{1}=N_{5}=0$ の場合）。分裂補題の 3 の同型 $\phi$ が同型であることも、これから直ちに出る（$\phi$ は $L\oplus N$ の標準的な短完全列との間の図式を作る）。
+:::
+
+## 問題 {#mod:sec-ex-problems}
+
+::: problem {#mod:prob-split-direct-summand}
+部分加群 $L\subset M$ が直和因子である（$M=L\oplus L'$ となる部分加群 $L'$ がある）ことと、$r|_{L}=\id_{L}$ となる準同型 $r:M\to L$ があることは同値であることを示せ。また、$\Z$ の部分加群 $2\Z$ は直和因子でないことを示せ。
+:::
+
+::: solution
+**Step 1.** 短完全列 $0\to L\to M\to M/L\to 0$ に分裂補題（\ref{mod:splitting-lemma}）を使うと、引き込み $r$ の存在は、切断 $s:M/L\to M$ の存在、すなわち $M=L\oplus s(M/L)$ と同値。逆に $M=L\oplus L'$ なら、$r(l+l')\defeq l$（$l\in L$, $l'\in L'$。表し方は一意）が引き込み。
+
+**Step 2.** $\Z=2\Z\oplus L'$ なら、第二同型定理（\ref{mod:isomorphism-theorems} の 3）から $L'\cong L'/(L'\cap 2\Z)\cong(L'+2\Z)/2\Z=\Z/2\Z$ だが、$\Z$ には位数 2 の元がないので $L'$ は $0$ でなければならず、$2\Z=\Z$ となって矛盾。
+:::
+
+::: problem {#mod:prob-hom-exact-criterion}
+加群の列 $L\xrightarrow{f}M\xrightarrow{g}N\to 0$ について、すべての加群 $X$ で $0\to\Hom(N,X)\to\Hom(M,X)\to\Hom(L,X)$ が完全なら、元の列も完全であることを示せ。
+:::
+
+::: solution
+**Step 1（$g$ は全射）.** $X=N/\im g$ と射影 $\pi:N\to X$ をとる。$g^{*}(\pi)=\pi\circ g=0$ で $g^{*}$ は単射なので $\pi=0$、すなわち $\im g=N$。
+
+**Step 2（$gf=0$）.** $X=N$, $\id_{N}$ をとると、$f^{*}g^{*}(\id_{N})=g\circ f$ で、$\im g^{*}\subset\Ker f^{*}$ から $gf=0$。
+
+**Step 3（$\Ker g\subset\im f$）.** $X=M/\im f$ と射影 $\rho:M\to X$ をとる。$f^{*}(\rho)=\rho\circ f=0$ なので、完全性から $\rho=\gamma\circ g$ となる $\gamma$ がある。$m\in\Ker g$ なら $\rho(m)=\gamma(g(m))=0$、すなわち $m\in\im f$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>

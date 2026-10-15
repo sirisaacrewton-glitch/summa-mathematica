@@ -497,3 +497,4 @@
 | algebra over A / polynomial ring / formal power series ring / monic / degree / leading coefficient / formal derivative | A 代数（A 上の代数） / 多項式環 / 形式的冪級数環 / モニック / 次数 / 最高次係数 / 形式的微分 | 多元環 | 雪江・松村。ring:page-polynomial-rings |
 | localization / field of fractions / total ring of fractions / extension / contraction / rational function field | 局所化 / 商体 / 全商環 / 拡大 / 縮約 / 有理関数体 | 分数環、分数体 | 雪江（全商環）・松村。ring:page-localization |
 | module / submodule / quotient module / annihilator / cyclic module / free module / basis / rank / direct sum / direct product | 加群 / 部分加群 / 剰余加群 / 零化イデアル / 巡回加群 / 自由加群 / 基底 / 階数 / 直和 / 直積 | 零化域、剰余加群＝商加群 | 雪江・松村。mod:page-modules |
+| split exact sequence / splitting lemma / section / retraction / direct summand | 分裂する完全列 / 分裂補題 / 切断 / 引き込み / 直和因子 | 完全系列（本では 531 回。サイトは完全列で統一済み） | mod:page-exact-sequences |
