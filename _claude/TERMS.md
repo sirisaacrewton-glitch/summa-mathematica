@@ -481,3 +481,4 @@
 | sign (signature) / even permutation / odd permutation / inversion / difference product / alternating group | 符号 / 偶置換 / 奇置換 / 転倒数 / 差積 / 交代群 | | 標準的（雪江）。grp:page-sign-alternating |
 | simple group / classification of finite simple groups / sporadic group | 単純群 / 有限単純群の分類（定理） / 散在群 | | 標準的。grp:page-simplicity-an |
 | Sylow p-subgroup / Sylow theorems / Frattini argument | シロー p 部分群 / シローの定理 / フラッティーニの論法 | | 雪江（シロー p 部分群）。フラッティーニの論法は仮。grp:page-sylow |
+| subnormal series / composition series / composition factor / maximal normal subgroup / Jordan-Hölder theorem | 正規列 / 組成列 / 組成因子 / 極大正規部分群 / ジョルダン–ヘルダーの定理 | | 標準的。subnormal series を「正規列」とした（normal series と区別しない）。grp:page-jordan-holder |

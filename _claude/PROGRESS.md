@@ -24,7 +24,7 @@
 
 9. **（2026-10-07）一般位相の割り当て表（TS・TC・TD・TE）はすべて完了。型理論の系列にランベック対応を追加した（TT-04 04-ccc-semantics、TT-05 05-lambek。2026-10-07 完了）。HoTT の入口 TT-06〜08（依存型・恒等型・一価性公理）を資料なしで書いた（2026-10-07）。Rijke のテキストが入ったら、高次帰納型・切り詰め・円周の基本群などを続ける。参考書 Rijke『Introduction to Homotopy Type Theory』は `math_books` にテキストがないので、まずテキスト化をユーザーに頼むか、資料なしで依存型理論（Π・Σ・恒等型）の基礎から書くかを確認する。予約ラベル logic:page-hott（01-simply-typed から参照）。一般位相の予定ラベルはすべて定義済み（2026-10-08）。** （以前の記述） その後の候補：圏論の続き（モナド、アーベル圏、カン拡張）、（03D/03 の 05・06 は完了）Halmos『Algebraic Logic』の補足（未着手）、または他分野（位相・代数など）の開始。どれにするかはユーザーに確認する。
 
-12. **（2026-10-10）群論を開始**：`math_books` に雪江『代数学』などのテキストが入った（2026-10-10）ので、下の「群論の割り当て」の順に書く。GB-01〜GB-06・GA-01〜GA-06 完了（2026-10-15、到達目標の Aₙ の単純性まで到達）。SY-01 完了（新系列 20D/01-sylow、id grp-sylow、§8.2 確認済み）。SY-02 完了。**次は SY-03（組成列とジョルダン–ヘルダーの定理。資料：雪江 §4.3 あたり、Robinson も可）**。予約ラベル：grp:page-sylow（SY-01）、grp:page-sylow-applications（SY-02）、grp:page-solvable-nilpotent（SY-04）、grp:page-free-groups（FP-01）。系列 02-group-actions（id grp-actions、表示名「群の作用と対称群」）を 2026-10-15 に作成し §8.2 の 6 か所を確認済み。予約ラベル：grp:page-group-actions（GA-01）、grp:page-sylow（SY-01）、grp:page-class-equation（GA-02）、grp:page-solvable-nilpotent（SY-04）。GB-05 が予約：grp:page-free-groups（FP-01）。GB-01 が予約したラベル：grp:lagrange（GB-03）、grp:page-normal-quotient（GB-04）、grp:page-homomorphism-theorems（GB-05）、grp:page-symmetric-groups（GA-04）、grp:page-sign-alternating（GA-05）、ring:euclidean-pid（環論）。系列 01-groups の `_meta.json` の id は grp-basics。
+12. **（2026-10-10）群論を開始**：`math_books` に雪江『代数学』などのテキストが入った（2026-10-10）ので、下の「群論の割り当て」の順に書く。GB-01〜GB-06・GA-01〜GA-06 完了（2026-10-15、到達目標の Aₙ の単純性まで到達）。SY-01 完了（新系列 20D/01-sylow、id grp-sylow、§8.2 確認済み）。SY-01〜SY-03 完了。**次は SY-04（可解群と冪零群。雪江 §4.3 交換子群と可解群は 10099 行）**。予約ラベル：grp:page-sylow（SY-01）、grp:page-sylow-applications（SY-02）、grp:page-solvable-nilpotent（SY-04）、grp:page-free-groups（FP-01）。系列 02-group-actions（id grp-actions、表示名「群の作用と対称群」）を 2026-10-15 に作成し §8.2 の 6 か所を確認済み。予約ラベル：grp:page-group-actions（GA-01）、grp:page-sylow（SY-01）、grp:page-class-equation（GA-02）、grp:page-solvable-nilpotent（SY-04）。GB-05 が予約：grp:page-free-groups（FP-01）。GB-01 が予約したラベル：grp:lagrange（GB-03）、grp:page-normal-quotient（GB-04）、grp:page-homomorphism-theorems（GB-05）、grp:page-symmetric-groups（GA-04）、grp:page-sign-alternating（GA-05）、ring:euclidean-pid（環論）。系列 01-groups の `_meta.json` の id は grp-basics。
 
 11. **（2026-10-09 ユーザー確認）新しい分野は `_claude/SCOPE.md` の順で始める**：群論 → 環論（保存表と性質ごとの深掘り）→ 体論・ガロア理論 → 圏論の残り → 実解析 → 微分幾何 → 代数的位相幾何。進行中の系列を区切りのよい所まで終えたら、群論の準備（START.md §10）から始める。到達目標は下限で、足りないのは不可。並行して、SCOPE.md の「現状」に挙げた抜け（実閉体（2026-10-09 RC-01〜03 で完了）、ウォシュ–ヴォートの判定法（2026-10-09 完了）、フレイド＝ミッチェル（2026-10-09 HA-05 で主張と使い方を完了））を埋める。
 
@@ -223,7 +223,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | GA-06 | 20A/02/06-simplicity-an | 交代群の単純性 | Aₙ（n ≥ 5）の単純性、A₄ は単純でない、Sₙ の正規部分群 | 完了（到達目標に到達） |
 | SY-01 | 20D/01-sylow/01-sylow-theorems | シローの定理 | 存在・共役・個数の条件 | 完了 |
 | SY-02 | 20D/01/02-sylow-applications | シローの定理の応用 | 位数 pq の群、位数 60 未満の非可換単純群は無い、A₅ の特徴づけ | 完了 |
-| SY-03 | 20D/01/03-jordan-holder | 組成列とジョルダン–ヘルダーの定理 | 組成列・組成因子の一意性 | 予定 |
+| SY-03 | 20D/01/03-jordan-holder | 組成列とジョルダン–ヘルダーの定理 | 組成列・組成因子の一意性 | 完了 |
 | SY-04 | 20D/01/04-solvable-nilpotent | 可解群と冪零群 | 導来列・中心列、Sₙ（n ≥ 5）は可解でない | 予定 |
 | AB-01 | 20K/01-finite-abelian/01-structure | 有限生成アーベル群の構造定理 | 単因子・初等因子 | 予定（発展） |
 | FP-01 | 20F/01-presentations/01-free-groups | 自由群 | 構成と普遍性 | 予定（発展） |
@@ -384,6 +384,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | TP-02 | 54H/01/02-group-uniformities | 左一様構造・完全正則性・一様連続な準同型・バーコフ–角谷の定理 | — | 完了 |
 
 ## 完了ログ（新しいものを上に。1 行ずつ）
+- 2026-10-15 群論 SY-03（20D/01-sylow/03-jordan-holder, grp:page-jordan-holder：正規列・組成列・組成因子、極大正規部分群⇔商が単純、有限群の組成列の存在（ℤ にはない）、ジョルダン–ヘルダーの定理（有限群、位数の帰納法と第二同型定理）、系として素因数分解の一意性（循環しないことを hypcheck で確認）。問題 3（D_n の組成因子、N を通る組成列、長さ≤素因数の個数））。資料なし。
 - 2026-10-15 群論 SY-02（20D/01-sylow/02-sylow-applications, grp:page-sylow-applications：単純群は指数 k の部分群があれば A_k に入る、mod q の多項式の根は次数以下、(ℤ/qℤ)^× の位数 p の部分群は高々一つ、位数 pq の分類（非可換は一意。巡回性は使わない）、位数 p²q は単純でない、位数 60 未満の単純群は素数位数のみ（合成数 4〜59 の全ケースを Python で網羅確認）、位数 60 の単純群≅A_5（A_6 への埋め込みと点の安定化群）。問題 3（位数 132、2p、35））。資料なし。
 - 2026-10-15 群論 SY-01（新系列 20D/01-sylow/01-sylow-theorems, grp:page-sylow：シロー p 部分群、存在（類等式とコーシーで帰納法。雪江の部分集合作用の証明は使わず）、共役と包含（Q を G/P に作用させ固定点の合同式）、個数 n_p=(G:N(P))|m と n_p≡1（P を Syl_p に作用させ、固定点は P だけを PQ の位数で）、正規⇔n_p=1、S_3・S_4・A_5 の例、フラッティーニの論法。問題 3（位数 15 は巡回、N(N(P))=N(P)、剰余群・正規部分群のシロー））。資料：雪江 §4.5（主張のみ）。§8.2 確認済み（20D の系列は solo）。
 - 2026-10-15 群論 GA-06（20A/02-group-actions/06-simplicity-an, grp:page-simplicity-an：単純群、可換な単純群は素数位数、A_n（n≥5）の自明でない正規部分群は 3 巡回置換を含む（型で 4 通りに場合分けし交換子を計算。計算は Python で検算）、A_n の単純性、S_n の正規部分群は {e}, A_n, S_n。問題 3（A_5 の単純性を類の大きさで、[S_n,S_n]=A_n、A_n に指数 2 なし））。資料なし（雪江にも証明はあるが写さず自力）。群論の到達目標に到達。
