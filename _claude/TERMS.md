@@ -564,3 +564,4 @@
 | cap product / compactly supported cohomology / Poincare duality / intersection form / signature / Lefschetz duality | キャップ積 / コンパクト台コホモロジー / ポアンカレ双対性 / 交叉形式 / 符号数 / ルフシェッツ双対性 | | 標準的。at:page-poincare-duality |
 | homotopy group / relative homotopy group / compression criterion / cellular approximation | ホモトピー群 / 相対ホモトピー群 / 圧縮の基準 / 胞体近似定理 | | 標準的（圧縮の基準は仮）。at:page-homotopy-groups |
 | Serre fibration / homotopy lifting property / fiber bundle / local trivialization / Hopf map (Hopf fibration) | セールファイブレーション / ホモトピー持ち上げ性質 / ファイバー束 / 局所自明化 / ホップ写像（ホップ・ファイブレーション） | ファイバー空間（小松） | 小松・中岡・菅原は「ファイバー空間」。at:page-fibrations |
+| Hurewicz theorem / Eilenberg subcomplex / homotopy extension property / weak homotopy equivalence / Whitehead theorem / compression lemma / mapping cylinder / CW approximation | フレヴィッツの定理 / アイレンバーグの部分複体 / ホモトピー拡張性質 / 弱ホモトピー同値 / ホワイトヘッドの定理 / 圧縮補題 / 写像柱 / CW 近似 | | 小松・中岡・菅原（Hurewicz の定理）。at:page-hurewicz-whitehead |
