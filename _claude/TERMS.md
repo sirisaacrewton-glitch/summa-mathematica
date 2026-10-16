@@ -539,3 +539,7 @@
 | enriched category / Day convolution / string diagram / rigid (autonomous) / pivotal / ribbon | 豊穣圏 / デイ畳み込み / ストリング図式 / 剛性（自律的） / ピボタル / リボン圏 | | 豊穣圏は既存の cat:closed-category に合わせた。18M |
 | Hopf algebra / antipode / quasitriangular / R-matrix / Tannaka duality | ホップ代数 / 対合射（アンチポード） / 準三角 / R 行列 / 淡中双対性 | | antipode は「対合射」を主に、括弧でアンチポードを併記 |
 | operad / little cubes (disks) operad / E_n / Eckmann-Hilton / group completion | オペラッド / 小立方体（小円板）オペラッド / Eₙ / エックマン–ヒルトン / 群完備化 | | エックマン–ヒルトンは既存の cat:eckmann-hilton に合わせた |
+| scheme / locally ringed space / separated / proper / universally closed / quasi-coherent / coherent | スキーム / 局所環付き空間 / 分離的（分離射） / 固有（固有射） / 普遍的に閉 / 準連接 / 連接 | | 標準的。14A/02-schemes（資料なし） |
+| Weil divisor / Cartier divisor / divisor class group / Picard group / twisting sheaf | ヴェイユ因子 / カルティエ因子 / 因子類群 / ピカール群 / ねじれ層 | | 標準的。ag:page-divisors・ag:page-proj |
+| ring of integers / integral basis / ramification index / residue degree / inert / split completely | 整数環 / 整数環の基底（整基底） / 分岐指数 / 相対次数 / 惰性的 / 完全分解 | | 雪江『整数論』（整数環の基底 14 回、相対次数 50 回、整基底は 0 回なので括弧で併記）。11R |
+| decomposition group / inertia group / Frobenius element / different / regulator / fundamental unit | 分解群 / 惰性群 / フロベニウス元（置換） / 共役差積 / 単数基準 / 基本単数 | 差積（different） | 雪江（共役差積 7 回、単数基準 9 回）。差積は置換の差積（grp）と衝突するので共役差積を採用 |
