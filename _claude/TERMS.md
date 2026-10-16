@@ -555,3 +555,4 @@
 | CW complex / cell / skeleton / characteristic map / attaching map / cellular chain complex / cellular approximation | CW 複体 / 胞体 / 骨格 / 特性写像 / 貼り付け写像 / 胞体鎖複体 / 胞体近似定理 | 胞体複体、接着写像（一般位相のページでは「接着」） | 標準的。at:page-cellular-homology |
 | simplicial approximation / Euler's polyhedron formula | 単体近似（単体近似定理） / オイラーの多面体定理 | | 小松・中岡・菅原（単体近似 35）。at:page-simplicial-singular |
 | Eilenberg-Steenrod axioms / homology theory / dimension axiom / additivity / coefficient group / universal coefficient theorem / extraordinary homology theory | アイレンバーグ–スティーンロッドの公理 / ホモロジー理論 / 次元公理 / 加法性公理 / 係数群 / 普遍係数定理 / 一般ホモロジー理論 | | 標準的。at:page-homology-axioms |
+| acyclic models / Eilenberg-Zilber theorem / Kunneth theorem / cross product / Alexander-Whitney map / shuffle map | 非輪状モデル / アイレンバーグ–ジルバーの定理 / キュネットの定理 / クロス積 / アレクサンダー–ホイットニー写像 / シャッフル写像 | | 標準的（非輪状は仮。小松では「非輪状」の用例を未確認）。at:page-kunneth |
