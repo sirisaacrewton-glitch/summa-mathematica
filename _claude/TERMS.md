@@ -527,3 +527,6 @@
 | Wedderburn–Artin theorem / simple artinian ring / Jacobson radical (noncommutative) / Hopkins–Levitzki | ウェダーバーン＝アルティンの定理 / 単純アルティン環 / ジャコブソン根基 J(R) / ホプキンス＝レヴィツキの定理 | — | 本棚：ジャコブソン根基 1、他は用例なし（仮）。可換環のページでは rad(A) と書いている。mod:page-wedderburn-artin, mod:page-jacobson-radical |
 | group ring / group algebra / representation / irreducible representation / Maschke's theorem / class sum | 群環 / 群環（k 代数として） / 表現 / 既約表現 / マシュケの定理 / 類和 | 群多元環 | 本棚：群環 3、群多元環 0。mod:page-maschke |
 | dual group (character group) / annihilator | 指標群 / 零化群 | 双対群 | 雪江（指標群 19, 双対群 1）。grp:dual-group |
+| Kummer extension / Kummer theory / Kummer pairing | クンマー拡大 / クンマー理論 / クンマー対 | | 雪江（クンマー理論 33）。fld:page-norm-kummer |
+| Hilbert's theorem 90 / 1-cocycle / coboundary | ヒルベルトの定理 90 / 1 コサイクル / 1 コバウンダリー | | 雪江（コサイクル 51） |
+| Artin-Schreier extension / inseparable degree | アルティン＝シュライアー拡大 / 非分離次数 | | 人名の区切りは既存の「＝」に合わせた。非分離次数は雪江・松村 |
