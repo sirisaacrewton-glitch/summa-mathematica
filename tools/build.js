@@ -554,15 +554,16 @@ function dirSource(node) {
   var subdirs = node.children.filter(function (c) { return c.kind === 'dir'; });
   var leaves = node.children.filter(function (c) { return c.kind === 'page'; });
   // 子が solo（ページのある子フォルダが一つだけ）なら、その中身を直接並べる（メニュー・パンくずと同じく一段飛ばす）
-  var pre = '';
+  var pre = '', soloChain = [];
   while (node.path && !leaves.length) {
     var soloKid = subdirs.filter(function (c) { return c.solo; })[0];
     if (!soloKid) break;
     pre += soloKid.name + '/';
-    s += '<p class="mn-also">この分野の内容はすべて「<a href="' + pre + 'index.html">' + Core.escapeHtml(soloKid.title) + '</a>」にあり、その中身を以下に直接示します。</p>\n\n';
+    soloChain.push('<a href="' + pre + 'index.html">' + Core.escapeHtml(soloKid.title) + '</a>');
     subdirs = soloKid.children.filter(function (c) { return c.kind === 'dir'; });
     leaves = soloKid.children.filter(function (c) { return c.kind === 'page'; });
   }
+  if (soloChain.length) s += '<p class="mn-also">この分野の内容はすべて「' + soloChain.join(' › ') + '」にあり、その中身を以下に直接示します。</p>\n\n';
   function card(d) {
     return '<a class="mn-card" href="' + d.name + '/index.html"><span class="mn-card-title">' + Core.escapeHtml(d.title) +
       '</span>' + (d.en ? '<span class="mn-card-en">' + Core.escapeHtml(d.en) + '</span>' : '') +
