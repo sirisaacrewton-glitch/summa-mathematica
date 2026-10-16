@@ -551,3 +551,4 @@
 | singular simplex / singular chain / singular homology / prism operator / relative homology / Hurewicz homomorphism | 特異単体 / 特異鎖 / 特異ホモロジー / プリズム作用素 / 相対ホモロジー / フレヴィッツ準同型 | 特異チェイン | 小松・中岡・菅原（特異単体 20、特異チェイン 30、特異ホモロジー 21、プリズム 9）。鎖はホモロジー代数のページの「鎖複体」に合わせた。at:page-singular-homology |
 | barycentric subdivision / excision / Mayer-Vietoris sequence / good pair / local homology | 重心細分 / 切除 / マイヤー–ヴィートリス完全列 / 良い対 / 局所ホモロジー | | 標準的。at:page-excision |
 | Jordan-Brouwer separation theorem / Jordan curve theorem / invariance of domain / Alexander duality | ジョルダン–ブラウワーの分離定理 / ジョルダンの曲線定理 / 領域不変性 / アレクサンダー双対性 | 領域の不変性 | 標準的。at:page-jordan-brouwer |
+| degree (of a map of spheres) / antipodal map / hairy ball theorem / suspension | 写像度 / 対蹠写像 / 毛の生えた球面の定理 / 懸垂 | | 小松・中岡・菅原（写像度 12）。at:page-degree |
