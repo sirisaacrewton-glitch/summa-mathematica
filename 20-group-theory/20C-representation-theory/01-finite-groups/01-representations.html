@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>表現 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="20-group-theory/20C-representation-theory/01-finite-groups/01-representations.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 表現 {#rep:page-representations keywords="linear representation of a finite group, subrepresentation, irreducible representation, intertwining map, regular representation, permutation module, direct sum, tensor product, dual representation, Hom representation, invariants, Schur's lemma"}
+
+群 $G$ の**表現**とは、$G$ の元を可逆な線形写像（行列）として実現すること、すなわち群準同型 $\rho:G\to\GL(V)$ である。表現は群環 $k[G]$ 上の加群と同じもので（\ref{mod:group-ring-modules}）、マシュケの定理（\ref{mod:maschke}）により、$\operatorname{char}k\nmid\lvert G\rvert$ ならすべての表現は既約表現の直和に分かれる。このページでは表現の基本的な例と、直和・テンソル積・双対・$\Hom$ という構成を定義し、シューアの補題を表現の言葉で述べ直す。次のページ（\ref{rep:page-characters}）では、表現を「トレースの関数」である指標で調べる。
+
+> 雪江『代数学 3』第 5 章 §5.1 の前半を参考にした。環論的な部分（マシュケの定理・ウェダーバーン＝アルティン）は非可換環論の系列を参照し、重複して証明しない。
+
+## 記法と定義の確認 {#rep:sec-re-notation}
+
+::: notation
+- $G$ は有限群、$k$ は体、表現の空間 $V$ は $k$ 上有限次元とする。$\GL(V)$ は $V$ の可逆な $k$ 線形写像全体。
+- 群環 $k[G]$、表現と $k[G]$ 加群の対応、マシュケの定理、複素群環の構造（既約表現の個数＝共役類の個数、$\lvert G\rvert=\sum n_{i}^{2}$）は \ref{mod:group-ring}, \ref{mod:group-ring-modules}, \ref{mod:maschke}, \ref{mod:group-algebra-structure}。
+- 単純加群・シューアの補題・半単純加群の重複度は \ref{mod:simple-module}, \ref{mod:schur-lemma}, \ref{mod:schur-algebraically-closed}, \ref{mod:semisimple-multiplicity}。
+- 群の作用と共役類は \ref{grp:group-action}, \ref{grp:conjugacy-class}、置換の符号は \ref{grp:sign}、交換子部分群と可換化は \ref{grp:commutator-subgroup}, \ref{grp:abelianization-universal}。
+- **選択公理**：使わない（有限次元の線形代数と有限群だけを扱う）。
+:::
+
+## 表現と準同型 {#rep:sec-re-definition}
+
+::: definition 表現 {#rep:representation keywords="linear representation, degree of a representation, intertwiner, equivalent representations, subrepresentation, irreducible representation" index="表現|ひょうげん, 既約表現|きやくひょうげん, 部分表現|ぶぶんひょうげん, 表現の次数|ひょうげんのじすう"}
+1. 群準同型 $\rho:G\to\GL(V)$ を $G$ の（$k$ 上の）**表現**、$\dim_{k}V$ をその**次数**（次元）という。$\rho(g)v$ を $gv$ と略す。
+2. 表現 $V,W$ の間の $k$ 線形写像 $f$ で $f(gv)=gf(v)$（すべての $g,v$）をみたすものを**表現の準同型**（$G$ 準同型）といい、その全体を $\Hom_{G}(V,W)$ と書く。同型な準同型があるとき $V$ と $W$ は**同値**（同型）であるという。
+3. $G$ の作用で閉じた部分空間 $W\subset V$ を**部分表現**という。$V\neq0$ で、部分表現が $0$ と $V$ だけのとき $V$ は**既約**であるという。
+:::
+
+::: remark
+表現 $V$ は $k[G]$ 加群で（\ref{mod:group-ring-modules}）、表現の準同型・部分表現・既約表現は、それぞれ $k[G]$ 準同型・部分加群・単純加群のことである。したがって環と加群の一般論がそのまま使える。$V$ の基底をとれば $\rho(g)$ は行列になり、表現は群準同型 $G\to\GL_{n}(k)$ である（基底の取り替えは同値な表現を与える）。
+:::
+
+::: example 表現の例 {#rep:representation-examples}
+1. **自明な表現**：$V=k$, $gv=v$。1 次元で既約。
+2. **1 次元の表現**：$V=k$ の表現は群準同型 $\chi:G\to k^{\times}$ と同じである。$k^{\times}$ は可換なので $\chi$ は交換子部分群 $[G,G]$ 上で $1$ で、可換化 $G/[G,G]$ を経由する（\ref{grp:abelianization-universal}）。例えば $S_{n}$ の**符号表現** $\operatorname{sgn}:S_{n}\to\{\pm1\}\subset k^{\times}$（\ref{grp:sign}）。
+3. **置換表現の線形化**：$G$ が有限集合 $X$ に作用するとき、$X$ を基底とする $k$ ベクトル空間 $k[X]$ に $g\cdot\sum_{x}a_{x}x\defeq\sum_{x}a_{x}(gx)$ と作用させる。$X=\{1,\dots,n\}$, $G=S_{n}$ のものを $S_{n}$ の**置換加群**という。
+4. **正則表現**：$G$ が左からの積で自分自身に作用するときの 3 の表現 $k[G]$。$k[G]$ 加群としては $k[G]$ 自身である。
+5. **二面体群の回転**：$D_{n}=\langle r,s\mid r^{n}=s^{2}=1,\ srs^{-1}=r^{-1}\rangle$ は $\mathbb{R}^{2}$（または $\mathbb{C}^{2}$）に、$r$ を角 $2\pi/n$ の回転、$s$ を $x$ 軸に関する折り返しとして作用する（$s r s^{-1}$ は角 $-2\pi/n$ の回転なので関係式をみたす）。$n\ge3$ ならこの 2 次元表現は $\mathbb{C}$ 上でも既約：1 次元の部分表現は $r$ と $s$ の共通の固有ベクトルだが、$r$ の固有ベクトル $(1,\pm i)$ は $s$ で互いに入れ替わり（$s(1,i)=(1,-i)$）、$e^{\pm2\pi i/n}$ は $n\ge3$ で相異なるので共通の固有ベクトルはない。
+:::
+
+::: proposition 置換加群の分解 {#rep:permutation-module-decomposition keywords="the permutation module of S_n splits as trivial plus standard representation" index="標準表現|ひょうじゅんひょうげん"}
+$\operatorname{char}k\nmid n$ とし、$V=k^{n}$ を $S_{n}$ の置換加群とする。
+$$
+V=k\cdot(1,\dots,1)\oplus V_{0},\qquad V_{0}\defeq\{(a_{1},\dots,a_{n}) : a_{1}+\dots+a_{n}=0\}
+$$
+は部分表現の直和で、$n\ge2$ なら $V_{0}$（**標準表現**、次数 $n-1$）は既約である。
+:::
+
+::: proof
+**Step 1（直和）.** どちらの部分空間も座標の並べ替えで保たれる。$(c,\dots,c)\in V_{0}$ なら $nc=0$ で、$\operatorname{char}k\nmid n$ から $c=0$。次元は $1+(n-1)=n$ なので直和。
+
+**Step 2（既約性）.** $0\neq W\subset V_{0}$ を部分表現とし、$0\neq w=(a_{i})\in W$ をとる。$w$ は定数ベクトルでないので（定数なら Step 1 から $0$）、$a_{i}\neq a_{j}$ となる $i,j$ がある。互換 $\tau=(i\,j)$ について $w-\tau w=(a_{i}-a_{j})(e_{i}-e_{j})\in W$ なので $e_{i}-e_{j}\in W$。任意の $l\neq m$ について、$\sigma(i)=l$, $\sigma(j)=m$ となる置換 $\sigma$ で移せば $e_{l}-e_{m}\in W$。これらは $V_{0}$ を張るので $W=V_{0}$。
+:::
+
+## 表現の構成 {#rep:sec-re-constructions}
+
+::: definition 直和・テンソル積・Hom・双対 {#rep:constructions keywords="direct sum, tensor product, Hom representation, dual representation, contragredient, invariants V^G" index="テンソル積表現|てんそるせきひょうげん, 双対表現|そうついひょうげん, 反傾表現|はんけいひょうげん, 不変部分|ふへんぶぶん"}
+表現 $V,W$ に対し、次の作用で表現を定める。
+1. **直和** $V\oplus W$：$g(v,w)\defeq(gv,gw)$。
+2. **テンソル積** $V\otimes_{k}W$：$g(v\otimes w)\defeq gv\otimes gw$。
+3. $\Hom_{k}(V,W)$：$(gf)(v)\defeq g\,f(g^{-1}v)$。
+4. **双対表現**（反傾表現）$V^{*}\defeq\Hom_{k}(V,k)$（$W=k$ は自明な表現）：$(g\lambda)(v)=\lambda(g^{-1}v)$。
+
+また $V^{G}\defeq\{v\in V : gv=v\ (g\in G)\}$ を $V$ の**不変部分**という。
+:::
+
+::: proposition 構成の基本性質 {#rep:constructions-basic keywords="Hom_G(V,W) = Hom(V,W)^G, Hom(V,W) = V* tensor W" index="不変部分と準同型|ふへんぶぶんとじゅんどうけい"}
+1. 定義の作用はどれも表現である。
+2. $\Hom_{k}(V,W)^{G}=\Hom_{G}(V,W)$。
+3. $V^{*}\otimes_{k}W\to\Hom_{k}(V,W)$, $\lambda\otimes w\mapsto(v\mapsto\lambda(v)w)$ は表現の同型である。
+:::
+
+::: proof
+**Step 1（1）.** 直和は明らか。テンソル積：$g$ ごとに $v\otimes w\mapsto gv\otimes gw$ は双線形写像 $(v,w)\mapsto gv\otimes gw$ から得られる線形写像 $\rho(g)\otimes\sigma(g)$ で、$(\rho(g)\otimes\sigma(g))(\rho(h)\otimes\sigma(h))=\rho(gh)\otimes\sigma(gh)$（生成元で確かめる）、$g=1$ で恒等写像。$\Hom$：$(g(hf))(v)=g\,(hf)(g^{-1}v)=gh\,f(h^{-1}g^{-1}v)=((gh)f)(v)$。
+
+**Step 2（2）.** $gf=f$ がすべての $g$ で成り立つ $\iff g\,f(g^{-1}v)=f(v)$（すべての $g,v$）$\iff f(g^{-1}v)=g^{-1}f(v)$。
+
+**Step 3（3）.** 線形写像としての同型は有限次元の線形代数（基底 $\lambda_{i}\otimes w_{j}$ が行列単位に移る）。$G$ と可換なこと：$g(\lambda\otimes w)=g\lambda\otimes gw$ は $v\mapsto\lambda(g^{-1}v)gw$ に移り、これは $g\cdot(v\mapsto\lambda(v)w)$ に等しい。
+:::
+
+## 完全可約性とシューアの補題 {#rep:sec-re-schur}
+
+::: theorem 既約分解とシューアの補題 {#rep:schur-and-decomposition keywords="complete reducibility, Schur's lemma for representations, multiplicity of irreducible constituents, irreducible representations of abelian groups are one-dimensional" index="完全可約|かんぜんかやく, シューアの補題（表現）|しゅーあのほだいひょうげん"}
+$k$ を代数閉体で $\operatorname{char}k\nmid\lvert G\rvert$ とし、$V_{1},\dots,V_{r}$ を既約表現の同型類の代表とする。
+1. （完全可約性）すべての表現 $V$ は既約表現の直和 $V\cong V_{1}^{m_{1}}\oplus\dots\oplus V_{r}^{m_{r}}$ で、$m_{i}=\dim_{k}\Hom_{G}(V_{i},V)$。特に $m_{i}$ は $V$ で決まる。
+2. （シューアの補題）$\dim_{k}\Hom_{G}(V_{i},V_{j})=\delta_{ij}$。
+3. $G$ の中心 $Z(G)$ の元は既約表現の上でスカラー倍として作用する。
+4. $G$ が可換なら、既約表現はすべて 1 次元で、その個数は $\lvert G\rvert$。
+:::
+
+::: proof
+**Step 1（1）.** マシュケの定理（\ref{mod:maschke}）から $V$ は既約表現の直和。重複度の式は \ref{mod:semisimple-multiplicity} で $D=\End_{G}(V_{i})=k$（\ref{mod:schur-algebraically-closed}）とした場合。
+
+**Step 2（2）.** $i\neq j$ なら \ref{mod:schur-lemma} の 1 から $0$。$i=j$ なら \ref{mod:schur-algebraically-closed}。
+
+**Step 3（3）.** $z\in Z(G)$ の作用 $\rho_{i}(z)$ は $G$ と可換なので $\End_{G}(V_{i})=k$ に属する。
+
+**Step 4（4）.** $G$ が可換ならすべての元が中心に属し、3 から既約表現 $V_{i}$ のすべての部分空間が部分表現になる。既約なので $\dim V_{i}=1$。個数は $\lvert G\rvert=\sum n_{i}^{2}=r$（\ref{mod:group-algebra-structure}）。
+
+::: hypcheck
+- **前提「代数閉体」**：Step 2・3 で $\End_{G}(V_{i})=k$ を使った。外すと 4 は偽：$\Z/4\Z$ の $\mathbb{R}$ 上の表現 $1\mapsto\begin{pmatrix}0&-1\\1&0\end{pmatrix}$（90 度回転）は、実の固有ベクトルをもたないので既約で、2 次元。
+- **前提「$\operatorname{char}k\nmid\lvert G\rvert$」**：Step 1 のマシュケの定理と Step 4 の $\sum n_{i}^{2}$ に使った。外すと 1 は偽：$k=\mathbb{F}_{p}$, $G=\Z/p\Z$ の表現 $1\mapsto\begin{pmatrix}1&1\\0&1\end{pmatrix}$ は不変な直線 $ke_{1}$ をもつが、補空間となる部分表現はない（$e_{1}$ 以外の固有ベクトルがない）。
+:::
+:::
+
+::: example 正則表現の分解
+$k$ が代数閉体で $\operatorname{char}k\nmid\lvert G\rvert$ なら、正則表現は $k[G]\cong V_{1}^{n_{1}}\oplus\dots\oplus V_{r}^{n_{r}}$（$n_{i}=\dim V_{i}$）。実際、$k[G]\cong\bigoplus_{j}V_{j}^{m_{j}}$ と分解すると、シューアの補題（2）から $\dim\Hom_{G}(k[G],V_{i})=m_{i}$。一方 $k[G]$ は階数 $1$ の自由 $k[G]$ 加群なので $\Hom_{G}(k[G],V_{i})\cong V_{i}$（$f\mapsto f(1)$）で、次元は $n_{i}$。よって $m_{i}=n_{i}$。次元を比べて $\lvert G\rvert=\sum_{i}n_{i}^{2}$（\ref{mod:group-algebra-structure} の 2 の別証）。
+:::
+
+::: example $S_{3}$ の既約表現
+$\mathbb{C}$ 上、$S_{3}$ の共役類は 3 個（恒等元・互換・3 巡回置換）なので既約表現も 3 個（\ref{mod:group-algebra-structure} の 3）。自明な表現・符号表現・標準表現 $V_{0}$（\ref{rep:permutation-module-decomposition}、2 次元）は互いに同値でない既約表現で、$1^{2}+1^{2}+2^{2}=6=\lvert S_{3}\rvert$ なので、これで全部である。
+:::
+
+::: supplement
+**表現論の基本問題.** 既約表現の同型類をすべて求め、任意の表現の重複度 $m_{i}$ を計算することが目標である。次のページの指標は、$m_{i}$ を「トレースの平均」で計算する道具である（\ref{rep:page-characters}）。
+
+**高い視点.** 表現の圏は $k[G]$ 加群の圏で、テンソル積と双対をもつ（対称モノイダル圏で、剛的）。逆に、この圏をテンソル積つきで知れば $G$ を復元できる（森田同値より強い情報。淡中＝クラインの双対性として知られている。本サイト未収録）。一方、$k[G]$ 加群の圏だけ（テンソル積を忘れたもの）からは $G$ は復元できない：$D_{4}$ と $Q_{8}$ の複素群環はともに $\mathbb{C}^{4}\times M_{2}(\mathbb{C})$ と同型である（\ref{mod:group-algebra-structure} と次数 $1,1,1,1,2$）。
+:::
+
+## 問題 {#rep:sec-re-problems}
+
+::: problem {#rep:prob-one-dim-count}
+$\mathbb{C}$ 上の $G$ の 1 次元表現の同型類の個数は $\lvert G/[G,G]\rvert$ であることを示せ。$S_{n}$（$n\ge2$）の 1 次元表現を求めよ。
+:::
+
+::: solution
+1 次元表現は準同型 $G\to\mathbb{C}^{\times}$ で、同値なものは等しい（$1\times1$ 行列の共役は同じ）。これは $G/[G,G]$ からの準同型と 1 対 1 に対応し（\ref{grp:abelianization-universal}）、有限可換群 $A=G/[G,G]$ の準同型 $A\to\mathbb{C}^{\times}$ は指標群 $\hat A$（\ref{grp:dual-group} の後の注意）の元で、$\lvert\hat A\rvert=\lvert A\rvert$（\ref{grp:dual-group-basic} の 3）。$S_{n}$ では $[S_{n},S_{n}]=A_{n}$（\ref{grp:prob-commutator-sn}）なので 1 次元表現は 2 個：自明な表現と符号表現。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
