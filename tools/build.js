@@ -78,7 +78,9 @@ var tree = walkDir(ROOT, '', 0);
 (function markSolo(node, isRoot) {
   var subs = node.children.filter(function (c) { return c.kind === 'dir'; });
   var hasLeaf = node.children.some(function (c) { return c.kind === 'page'; });
-  if (!isRoot && subs.length === 1 && !hasLeaf) subs[0].solo = true;
+  // ページのない（空の）子フォルダは数えない（メニュー・検索の分野選択でも出さないため）
+  var full = subs.filter(function (c) { return countPages(c) > 0; });
+  if (!isRoot && full.length === 1 && !hasLeaf) full[0].solo = true;
   subs.forEach(function (c) { markSolo(c, false); });
 })(tree, true);
 
@@ -551,6 +553,16 @@ function dirSource(node) {
   s += prereqSource(node);
   var subdirs = node.children.filter(function (c) { return c.kind === 'dir'; });
   var leaves = node.children.filter(function (c) { return c.kind === 'page'; });
+  // 子が solo（ページのある子フォルダが一つだけ）なら、その中身を直接並べる（メニュー・パンくずと同じく一段飛ばす）
+  var pre = '';
+  while (node.path && !leaves.length) {
+    var soloKid = subdirs.filter(function (c) { return c.solo; })[0];
+    if (!soloKid) break;
+    pre += soloKid.name + '/';
+    s += '<p class="mn-also">この分野の内容はすべて「<a href="' + pre + 'index.html">' + Core.escapeHtml(soloKid.title) + '</a>」にあり、その中身を以下に直接示します。</p>\n\n';
+    subdirs = soloKid.children.filter(function (c) { return c.kind === 'dir'; });
+    leaves = soloKid.children.filter(function (c) { return c.kind === 'page'; });
+  }
   function card(d) {
     return '<a class="mn-card" href="' + d.name + '/index.html"><span class="mn-card-title">' + Core.escapeHtml(d.title) +
       '</span>' + (d.en ? '<span class="mn-card-en">' + Core.escapeHtml(d.en) + '</span>' : '') +
@@ -581,7 +593,7 @@ function dirSource(node) {
     s += '## 分野\n\n<div class="mn-cards">\n';
     subdirs.forEach(function (d) {
       var n = countPages(d);
-      s += '<a class="mn-card" href="' + d.name + '/index.html"><span class="mn-card-title">' + Core.escapeHtml(d.title) +
+      s += '<a class="mn-card" href="' + pre + d.name + '/index.html"><span class="mn-card-title">' + Core.escapeHtml(d.title) +
         '</span>' + (d.en ? '<span class="mn-card-en">' + Core.escapeHtml(d.en) + '</span>' : '') +
         '<span class="mn-card-desc">' + Core.escapeHtml(d.description || '') + '</span><span class="mn-card-count">' + n + ' ページ</span></a>\n';
     });
@@ -603,7 +615,7 @@ function dirSource(node) {
       var main = entries.filter(function (e) {
         return e.p === pg.idx && e.l && e.ti && /^(theorem|proposition|definition|lemma|corollary)$/.test(e.t);
       }).slice(0, 12);
-      s += '<li value="' + pg.sec + '"><a href="' + path.basename(pg.path) + '">§' + pg.sec + ' ' + Core.escapeHtml(pg.title) + '</a>';
+      s += '<li value="' + pg.sec + '"><a href="' + pre + path.basename(pg.path) + '">§' + pg.sec + ' ' + Core.escapeHtml(pg.title) + '</a>';
       if (main.length) {
         s += '<ul class="mn-dirtoc-items">' + main.map(function (e) {
           return '<li><span class="mn-dirtoc-kind">' + typeName(e.t) + ' ' + e.n + '</span> ' +
