@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>曲線のリーマン–ロッホの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="14-algebraic-geometry/14A-foundations/02-schemes/09-riemann-roch.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 曲線のリーマン–ロッホの定理 {#ag:page-riemann-roch keywords="nonsingular projective curve, degree of a divisor, L(D), H^0(X, L(D)) = {f : div f + D >= 0}, skyscraper sheaf, exact sequence 0 -> L(D-P) -> L(D) -> k(P) -> 0, Euler characteristic, arithmetic genus g = dim H^1(O_X), Riemann-Roch chi(L(D)) = deg D + 1 - g, degree of principal divisors is zero, Riemann inequality, Serre duality, canonical divisor, genus of P^1, genus of plane curves"}
+
+代数的閉体上の非特異射影曲線 $X$ の因子 $D$ について、$\ell(D)\defeq\dim_{k}H^{0}(X,\mathcal{L}(D))$（$D$ で許される極をもつ有理関数の空間の次元）は、次数 $\deg D$ と**種数** $g\defeq\dim_{k}H^{1}(X,\mathcal{O}_{X})$ から
+$$
+\ell(D)-\dim_{k}H^{1}(X,\mathcal{L}(D))=\deg D+1-g
+$$
+で決まる（**リーマン–ロッホの定理**）。証明は、因子を 1 点ずつ動かす短完全列と、オイラー標数の加法性による。系として、主因子の次数が $0$ であることやリーマンの不等式を導く。セール双対性 $H^{1}(\mathcal{L}(D))\cong H^{0}(\mathcal{L}(K-D))^{\vee}$ を加えると古典的な形になる（双対性は本サイト未収録）。
+
+> 資料によらず、標準的な議論で書いた。証明に使う有限性・消滅の事実のうち本サイトで証明していないものは、記法の確認で明示する。
+
+## 記法と定義の確認 {#ag:sec-rr-notation}
+
+::: notation
+- $k$ は代数的閉体。**非特異射影曲線**とは、$k$ 上の整スキーム $X$ で、ある $\mathbb{P}^{n}_{k}$ の閉部分スキームと同型、次元 1（閉点の局所環が 1 次元）、すべての閉点の局所環が離散付値環であるものとする。生成点 $\eta$ の局所環は関数体 $K=K(X)$（\ref{ag:reduced-integral} の 4）。
+- $X$ はネーター（\ref{ag:finite-type-noetherian}）、正規（局所環は DVR か体）、局所分解的（DVR は一意分解環）なので、\ref{ag:page-divisors} の理論が使える：素因子は閉点 $P$ で、$v_{P}$ は $\mathcal{O}_{X,P}$ の付値、$\operatorname{Div}X=\bigoplus_{P}\mathbb{Z}P$、カルティエ因子・可逆層 $\mathcal{L}(D)\subset\mathcal{K}$ との対応は \ref{ag:cartier-weil}, \ref{ag:cacl-pic}。閉点 $P$ の剰余体は $k$（$k$ 上有限型で $k$ は代数的閉：零点定理）。
+- 長完全列は \ref{cat:sheaf-cohomology-basic}、閉埋め込みとコホモロジーは \ref{ag:cohomology-closed-immersion}、アフィン上の消滅は \ref{ag:serre-vanishing-affine}、$\mathbb{P}^{1}$ のコホモロジーは \ref{ag:cohomology-p1}。
+- **本サイトで証明していない事実**（「知られている」として使う）：
+  - (F1) 有限性：射影的なスキーム上の連接層 $\mathcal{F}$ について $H^{q}(X,\mathcal{F})$ は有限次元の $k$ ベクトル空間（セールの有限性定理）。
+  - (F2) 消滅：$X$ は 1 次元のネーター空間なので $q\ge2$ で $H^{q}(X,\mathcal{F})=0$（グロタンディークの消滅定理）。
+  - (F3) $H^{0}(X,\mathcal{O}_{X})=k$（射影多様体上の正則関数は定数：古典的な場合は \ref{ag:projective-regular-constant} で示した。スキーム $X$ の大域切断がその閉点の多様体の正則関数と一致することは本サイトでは示していない）。
+- **選択公理**：層コホモロジーの定義と、因子の理論を通して使う。
+:::
+
+## 因子の次数と $\mathcal{L}(D)$ の切断 {#ag:sec-rr-degree}
+
+::: definition 次数と $\ell(D)$ {#ag:degree-divisor keywords="degree of a divisor on a curve; l(D) = dim H^0(L(D)); h^i; Euler characteristic" index="因子の次数|いんしのじすう, オイラー標数|おいらーひょうすう"}
+$D=\sum n_{P}P$ について $\deg D\defeq\sum n_{P}$。(F1) のもとで $h^{q}(D)\defeq\dim_{k}H^{q}(X,\mathcal{L}(D))$、$\ell(D)\defeq h^{0}(D)$、$\chi(D)\defeq h^{0}(D)-h^{1}(D)$（(F2) から高次の項はない）。**種数**を $g\defeq h^{1}(0)=\dim_{k}H^{1}(X,\mathcal{O}_{X})$ とする。
+:::
+
+::: proposition $\mathcal{L}(D)$ の切断 {#ag:sections-l-d keywords="H^0(X, L(D)) is the space of rational functions f with div f + D >= 0, together with 0" index="L(D) の切断|えるでぃーのせつだん"}
+$H^{0}(X,\mathcal{L}(D))=\{f\in K^{\times} : \operatorname{div}(f)+D\ge0\}\cup\{0\}$（$K$ の中で）。
+:::
+
+::: proof
+$D$ の局所方程式を $\{(U_{i},f_{i})\}$ とすると（\ref{ag:cartier-weil}）、$U_{i}$ の閉点 $P$ で $v_{P}(f_{i})=n_{P}$。$\mathcal{L}(D)|_{U_{i}}=f_{i}^{-1}\mathcal{O}_{U_{i}}$ なので、$f\in K$ が $H^{0}$ に入る $\iff$ 各 $i$ で $ff_{i}\in\mathcal{O}(U_{i})$ $\iff$（\ref{ag:integral-sections}）$U_{i}$ のすべての点 $x$ で $ff_{i}\in\mathcal{O}_{X,x}$。生成点では $\mathcal{O}_{X,\eta}=K$ なので常に成り立ち、閉点 $P$ では $v_{P}(f)+n_{P}\ge0$（$f\neq0$）と同値。よって $\operatorname{div}(f)+D\ge0$。
+:::
+
+::: lemma 1 点ずつの完全列 {#ag:point-exact-sequence keywords="0 -> L(D - P) -> L(D) -> k(P) -> 0 with k(P) the skyscraper sheaf at P" index="摩天楼層の完全列|まてんろうそうのかんぜんれつ"}
+（AC）閉点 $P$ について、$i_{P}:\operatorname{Spec}k\to X$ を $P$ への閉埋め込みとし、$k(P)\defeq(i_{P})_{*}k$（**摩天楼層**）とする。
+1. 短完全列 $0\to\mathcal{L}(D-P)\to\mathcal{L}(D)\to k(P)\to0$ がある。
+2. $H^{0}(X,k(P))=k$、$q\ge1$ で $H^{q}(X,k(P))=0$。
+3. (F1)(F2) のもとで $\chi(D)=\chi(D-P)+1$。
+:::
+
+::: proof
+**Step 1（包含）.** $\mathcal{L}(D-P)\subset\mathcal{L}(D)$（$\mathcal{K}$ の中で）：$P$ を含まない開集合では等しく、$P$ の近傍 $U$ で $D$ の局所方程式を $f$、$P$ での一意化元を $t$ とすると $D-P$ の局所方程式は $f/t$ で、$\mathcal{L}(D-P)|_{U}=tf^{-1}\mathcal{O}\subset f^{-1}\mathcal{O}$。
+
+**Step 2（商）.** 茎で比べると、$x\neq P$ では $\mathcal{L}(D-P)_{x}=\mathcal{L}(D)_{x}$。$P$ では $\mathcal{L}(D)_{P}/\mathcal{L}(D-P)_{P}=f^{-1}\mathcal{O}_{P}/tf^{-1}\mathcal{O}_{P}\cong\mathcal{O}_{P}/t\mathcal{O}_{P}=k$。$k(P)$ の茎も $P$ で $k$、他で $0$（\ref{ag:cohomology-closed-immersion} の Step 1）。写像 $\mathcal{L}(D)\to k(P)$ を、$P$ を含む開集合 $V$ 上の切断 $s$ に対して $(fs)(P)\in\mathcal{O}_{P}/\mathfrak{m}_{P}=k$（$fs\in\mathcal{O}_{P}$ の値）、$P$ を含まない $V$ では $0$ と定めると、層の射で、茎で上の商写像になる。よって完全列（核と余核は茎で判定）。
+
+**Step 3（2）.** \ref{ag:cohomology-closed-immersion} から $H^{q}(X,k(P))\cong H^{q}(\operatorname{Spec}k,k)$ で、$\operatorname{Spec}k$ はアフィンなので \ref{ag:serre-vanishing-affine} から $q\ge1$ で $0$、$q=0$ で $k$。
+
+**Step 4（3）.** 長完全列 $0\to H^{0}(D-P)\to H^{0}(D)\to k\to H^{1}(D-P)\to H^{1}(D)\to0$（$H^{1}(k(P))=0$、(F2) から $H^{2}(D-P)=0$）で、有限次元の空間の完全列の交代和は $0$ なので $h^{0}(D-P)-h^{0}(D)+1-h^{1}(D-P)+h^{1}(D)=0$。
+:::
+
+## リーマン–ロッホの定理 {#ag:sec-rr-theorem}
+
+::: theorem リーマン–ロッホの定理 {#ag:riemann-roch keywords="Riemann-Roch for curves: chi(L(D)) = deg D + 1 - g" index="リーマン–ロッホの定理|りーまんろっほのていり"}
+（AC、(F1)〜(F3) を仮定）非特異射影曲線 $X$ の任意の因子 $D$ について
+$$
+\ell(D)-h^{1}(D)=\deg D+1-g.
+$$
+:::
+
+::: proof
+**Step 1（$D=0$）.** (F3) から $\ell(0)=1$、定義から $h^{1}(0)=g$ なので $\chi(0)=1-g=\deg0+1-g$。
+
+**Step 2（1 点ずつ）.** \ref{ag:point-exact-sequence} の 3 から $\chi(D)=\chi(D-P)+1$、すなわち $\chi(D)-\deg D$ は $D$ を $D\pm P$ に替えても変わらない（$D+P$ には $D+P$ に対して同じ式を使う）。任意の $D$ は $0$ から有限回 $\pm P$ を加えて得られるので、$\chi(D)-\deg D=\chi(0)-0=1-g$。
+:::
+
+::: corollary 主因子の次数 {#ag:degree-principal keywords="principal divisors on a nonsingular projective curve have degree zero; degree is well defined on Pic" index="主因子の次数|しゅいんしのじすう"}
+（AC、(F1)〜(F3) を仮定）$f\in K^{\times}$ について $\deg\operatorname{div}(f)=0$。したがって $\deg:\operatorname{Pic}X\cong\operatorname{Cl}X\to\mathbb{Z}$ が定まる。
+:::
+
+::: proof
+$D\sim D'$ なら $\mathcal{L}(D)\cong\mathcal{L}(D')$（\ref{ag:cacl-pic}）なので $\chi(D)=\chi(D')$（コホモロジーは同型な層で等しい）。\ref{ag:riemann-roch} から $\deg D=\deg D'$。$D=\operatorname{div}(f)$, $D'=0$ とすればよい。
+:::
+
+::: corollary リーマンの不等式と $\ell(D)$ の評価 {#ag:riemann-inequality keywords="l(D) = 0 if deg D < 0; l(D) <= deg D + 1 for D >= 0; Riemann inequality l(D) >= deg D + 1 - g" index="リーマンの不等式|りーまんのふとうしき"}
+（AC、(F1)〜(F3) を仮定）
+1. $\deg D<0$ なら $\ell(D)=0$。
+2. $D\ge0$ なら $\ell(D)\le\deg D+1$。
+3. （**リーマンの不等式**）$\ell(D)\ge\deg D+1-g$。
+:::
+
+::: proof
+**Step 1（1）.** $f\neq0$ で $\operatorname{div}(f)+D\ge0$ なら、\ref{ag:degree-principal} から $0\le\deg(\operatorname{div}f+D)=\deg D$。
+
+**Step 2（2）.** \ref{ag:point-exact-sequence} の長完全列の最初の部分 $0\to H^{0}(D-P)\to H^{0}(D)\to k$ から $\ell(D)\le\ell(D-P)+1$（これは (F1)〜(F3) なしでも、$H^{0}$ の部分だけで成り立つ）。$D\ge0$ から $\deg D$ 回 1 点ずつ引いて $0$ に至り、$\ell(0)=1$。
+
+**Step 3（3）.** \ref{ag:riemann-roch} と $h^{1}(D)\ge0$。
+:::
+
+::: example 射影直線 {#ag:rr-projective-line}
+$X=\mathbb{P}^{1}_{k}$ では \ref{ag:cohomology-p1} の 2 から $g=h^{1}(\mathcal{O})=0$。$\infty=V_{+}(x_{0})$ とすると $\mathcal{L}(m\infty)\cong\mathcal{O}(m)$（\ref{ag:pic-projective-space}）で、$\ell(m\infty)=m+1$（$m\ge0$）は \ref{ag:riemann-roch} の右辺 $m+1-0$ と一致し、$h^{1}(m\infty)=0$。$H^{0}(\mathcal{L}(m\infty))$ は $\infty$ で高々 $m$ 位の極をもつ有理関数、すなわち $t=x_{1}/x_{0}$ の $m$ 次以下の多項式である（\ref{ag:sections-l-d}）。
+:::
+
+::: remark セール双対性と古典的な形
+**セール双対性**：$X$ 上の**標準因子** $K_{X}$（微分形式 $\omega$ の因子 $\operatorname{div}(\omega)$。微分形式の層 $\Omega_{X}$ は可逆層で、その因子類）について、$H^{1}(X,\mathcal{L}(D))\cong H^{0}(X,\mathcal{L}(K_{X}-D))^{\vee}$ が成り立つことが知られている（本サイト未収録）。これを使うと
+$$
+\ell(D)-\ell(K_{X}-D)=\deg D+1-g
+$$
+（古典的なリーマン–ロッホ）となり、$D=0$ で $\ell(K_{X})=g$（$g$ は正則微分形式の次元）、$D=K_{X}$ で $\deg K_{X}=2g-2$ が従う。$\mathbb{P}^{1}$ では $\omega=dt$ の因子は $-2\infty$ で、$\deg K=-2=2\cdot0-2$。
+
+**歴史**：$\ell(D)\ge\deg D+1-g$ はリーマン（1857 年）、等号を与える補正項 $\ell(K-D)$ はその弟子ロッホ（1865 年）による。グロタンディークは 1957 年に、射 $f:X\to Y$ に沿った一般化（**グロタンディーク–リーマン–ロッホの定理**、$K$ 理論とチャーン指標を使う）を与えたことが知られている（本サイト未収録）。
+:::
+
+::: remark 平面曲線の種数と非特異射影モデル
+1. $d$ 次の非特異平面曲線 $C\subset\mathbb{P}^{2}_{k}$ では、$0\to\mathcal{O}_{\mathbb{P}^{2}}(-d)\to\mathcal{O}_{\mathbb{P}^{2}}\to i_{*}\mathcal{O}_{C}\to0$ と $\mathbb{P}^{2}$ のコホモロジー（\ref{ag:page-scheme-cohomology} の射影空間のコホモロジーの注意）から $g=h^{1}(\mathcal{O}_{C})=h^{2}(\mathcal{O}_{\mathbb{P}^{2}}(-d))=(d-1)(d-2)/2$ となることが知られている（$H^{2}(\mathbb{P}^{2},\mathcal{O}(-d))$ の基底 $x_{0}^{a_{0}}x_{1}^{a_{1}}x_{2}^{a_{2}}$（$a_{i}\le-1$, $\sum a_{i}=-d$）の個数を数える）。$d=3$（楕円曲線）で $g=1$、$d=1,2$ で $g=0$。
+2. $k=\mathbb{C}$ では、$g$ はリーマン面としての位相的な種数（穴の数）と一致することが知られている（GAGA とホッジ理論）。
+3. **非特異射影モデルの存在**：$k$ 上 1 変数の関数体 $K$（超越次数 1 の有限生成拡大）には、それを関数体とする非特異射影曲線が同型を除いてただ一つある（一意性は \ref{ag:birational-curves-isomorphic}、存在は \ref{ag:page-curves} で未証明とした）。存在の標準的な証明は、$K$ の $k$ 上自明な離散付値全体に位相と層を入れて曲線を作り、それが射影的であることを示すもので、本サイト未収録。したがってリーマン–ロッホの定理は「関数体 $K$ の定理」としても読める：$\ell(D)$ は付値の条件で定まる $K$ の部分空間の次元である。
+:::
+
+::: hypcheck
+- **(F1) 有限性**：$\chi$ を定義し、\ref{ag:point-exact-sequence} の 3 で交代和をとるのに本質的（無限次元なら差が定義できない）。射影性はここで使う。
+- **(F2) 消滅**：長完全列を $H^{1}$ で止めるのに使う。曲線は 1 次元なので成り立つ。
+- **(F3) $H^{0}(\mathcal{O})=k$**：\ref{ag:riemann-roch} の Step 1 で $\ell(0)=1$ に使う。射影的（固有）でないと成り立たない（$\mathbb{A}^{1}$ では $H^{0}(\mathcal{O})=k[t]$ は無限次元）。
+- **非特異性**：閉点の局所環が DVR であることを、素因子が閉点であること・$\mathcal{L}(D-P)\subset\mathcal{L}(D)$ の商が $k$ であること（一意化元 $t$ の存在）に使う。特異曲線ではヴェイユ因子とカルティエ因子がずれ、カルティエ因子について同様の式（算術種数 $p_{a}=h^{1}(\mathcal{O})$ で）が成り立つことが知られている。
+- **$k$ が代数的閉体**：閉点の剰余体が $k$ であること（$\dim_{k}k(P)=1$）に使う。一般の体では $\deg P\defeq[\kappa(P):k]$ とおけば同じ形の定理が成り立つ。
+- **選択公理**：層コホモロジーの定義と因子の理論を通して使う。
+:::
+
+::: supplement
+**前提を弱めると.** 証明は「$\chi$ が 1 点ずつの変化で 1 ずつ変わる」ことだけを使うので、可逆層 $\mathcal{L}$ について $\chi(\mathcal{L})=\deg\mathcal{L}+1-g$ と書いても同じ。高次元では、曲面のリーマン–ロッホ $\chi(D)=\tfrac12D\cdot(D-K)+\chi(\mathcal{O})$、一般にはヒルツェブルフ–リーマン–ロッホ（$\chi=\int\operatorname{ch}\cdot\operatorname{td}$）が知られている。
+
+**似た定理.** 数論の側では、代数体の整数環 $\mathcal{O}_{K}$ の「無限素点を含めた因子」について、テイトの論文やワイルの数論の基礎で、リーマン–ロッホの類似（ポアソンの和公式による）が知られている。これは関数体と代数体の類似の典型例である。
+
+**計算の観点.** $\ell(D)$ は、$K$ の基底をとって極の位数の条件を線形方程式として書けば計算できる（ブリル–ネーターのアルゴリズムなど）。代数曲線の符号（ゴッパ符号）の次元と最小距離の評価は、リーマン–ロッホの定理から直接得られる。
+:::
+
+## 高い視点 {#ag:sec-rr-viewpoint}
+
+::: remark オイラー標数は加法的な不変量
+証明の本質は、$\chi$ が短完全列について加法的で、摩天楼層 $k(P)$ が「1 点ぶんの寄与 1」をもつことにある。圏論的には、$\chi$ は連接層のアーベル圏のグロタンディーク群 $K_{0}(X)$ から $\mathbb{Z}$ への準同型で、曲線では $K_{0}(X)$ の元は階数と次数（行列式の因子類）で決まるので、$\chi=\deg+\operatorname{rank}\cdot(1-g)$ という一次式になる。グロタンディーク–リーマン–ロッホはこの見方を射の圏へ持ち上げたものである。比喩で言えば、$\ell(D)$ は「許した極の数だけ自由度が増える」が、曲線の大域的な形（種数）だけ自由度が失われ、失われた分は $H^{1}$ という「帳簿」に記録されている。
+:::
+
+## 問題 {#ag:sec-rr-problems}
+
+::: problem {#ag:prob-rr-genus-zero}
+$g=0$ の非特異射影曲線 $X$ と閉点 $P$ について、$\ell(P)=2$ を示し、$P$ だけに 1 位の極をもつ有理関数 $f$ が存在することを示せ。
+:::
+
+::: solution
+\ref{ag:riemann-roch} から $\ell(P)-h^{1}(P)=1+1-0=2$、よって $\ell(P)\ge2$。\ref{ag:riemann-inequality} の 2 から $\ell(P)\le2$。$H^{0}(\mathcal{L}(P))$ は定数を含む 2 次元の空間なので、定数でない $f$ がある。$\operatorname{div}(f)+P\ge0$ で、$f$ が極をもたなければ $f\in H^{0}(\mathcal{O})=k$（(F3)）となり矛盾なので、$P$ でちょうど 1 位の極をもつ。（この $f$ が定める射 $X\to\mathbb{P}^{1}$ は同型であることが知られている。）
+:::
+
+::: problem {#ag:prob-rr-large-degree}
+$\deg D>2g-2$ なら $h^{1}(D)=0$ であることを、セール双対性（知られている事実）と \ref{ag:riemann-inequality} の 1 から示し、そのとき $\ell(D)=\deg D+1-g$ となることを確かめよ。
+:::
+
+::: solution
+セール双対性から $h^{1}(D)=\ell(K_{X}-D)$。$\deg(K_{X}-D)=2g-2-\deg D<0$ なので \ref{ag:riemann-inequality} の 1 から $\ell(K_{X}-D)=0$。\ref{ag:riemann-roch} に代入して $\ell(D)=\deg D+1-g$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
