@@ -552,3 +552,4 @@
 | barycentric subdivision / excision / Mayer-Vietoris sequence / good pair / local homology | 重心細分 / 切除 / マイヤー–ヴィートリス完全列 / 良い対 / 局所ホモロジー | | 標準的。at:page-excision |
 | Jordan-Brouwer separation theorem / Jordan curve theorem / invariance of domain / Alexander duality | ジョルダン–ブラウワーの分離定理 / ジョルダンの曲線定理 / 領域不変性 / アレクサンダー双対性 | 領域の不変性 | 標準的。at:page-jordan-brouwer |
 | degree (of a map of spheres) / antipodal map / hairy ball theorem / suspension | 写像度 / 対蹠写像 / 毛の生えた球面の定理 / 懸垂 | | 小松・中岡・菅原（写像度 12）。at:page-degree |
+| CW complex / cell / skeleton / characteristic map / attaching map / cellular chain complex / cellular approximation | CW 複体 / 胞体 / 骨格 / 特性写像 / 貼り付け写像 / 胞体鎖複体 / 胞体近似定理 | 胞体複体、接着写像（一般位相のページでは「接着」） | 標準的。at:page-cellular-homology |
