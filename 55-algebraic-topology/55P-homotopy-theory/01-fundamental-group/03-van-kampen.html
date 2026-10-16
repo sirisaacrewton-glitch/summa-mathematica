@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ファン・カンペンの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="55-algebraic-topology/55P-homotopy-theory/01-fundamental-group/03-van-kampen.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ファン・カンペンの定理 {#at:page-van-kampen keywords="Seifert-van Kampen theorem, free product of groups, amalgamated free product, pushout of groups, fundamental group of a wedge of circles, free group, attaching a 2-cell, attaching cells of dimension at least 3, presentation complex, every finitely presented group is a fundamental group, closed surfaces, fundamental group of surfaces, abelianization"}
+
+空間を二つの開集合 $U,V$ で覆ったとき、$X$ の基本群は $U$ と $V$ の基本群を、$U\cap V$ の基本群に沿って「貼り合わせた」群（融合積）になる。これが**ファン・カンペンの定理**で、群の表示（\ref{grp:presentation}）を通して基本群を計算する主要な道具である。応用として、円周の束（ブーケ）の基本群が自由群であること、2 次元の胞体を貼ると基本群が貼り付け写像の正規閉包で割られること、3 次元以上の胞体は基本群を変えないこと、任意の有限表示群が 2 次元の複体の基本群になること、閉曲面の基本群を示す。
+
+> 資料：ファン・カンペンの定理は標準的な内容で、Massey『Algebraic Topology: An Introduction』第 IV 章などにある。単射性の証明は、ホモトピーの正方形を格子に分けて辺ごとの元を比べる標準的な議論を、開集合が二つの場合に合わせて自分で書き下ろした。
+
+## 記法と定義の確認 {#at:sec-vk-notation}
+
+::: notation
+- 基本群・道の積の性質・基点の取り替え・誘導準同型・ホモトピー不変性は \ref{at:fundamental-group}, \ref{at:path-groupoid}, \ref{at:change-of-basepoint}, \ref{at:induced-homomorphism}, \ref{at:pi1-homotopy-invariance}。道の分割 \ref{at:path-subdivision}、正方形の補題 \ref{at:square-lemma}、変位レトラクトと基本群 \ref{at:retract-injective}、円周と球面 \ref{at:fundamental-group-circle}, \ref{at:sphere-simply-connected}。
+- 自由群とその普遍性 \ref{grp:free-group}, \ref{grp:free-group-universal}、群の表示 $\langle X\mid R\rangle$ とフォン・ディックの定理 \ref{grp:presentation}, \ref{grp:von-dyck}。部分集合 $S$ の**正規閉包**（$S$ を含む最小の正規部分群）を $\langle\!\langle S\rangle\!\rangle$ と書く。交換子部分群 \ref{grp:commutator-subgroup}。
+- 商位相の普遍性 \ref{top:quotient-universal}、商写像の判定 \ref{top:quotient-saturated}, \ref{top:quotient-map-criteria}、商空間の上のホモトピー \ref{top:homotopy-on-quotient}。
+- **選択公理**：使わない（有限個の道を選ぶだけ）。
+:::
+
+## 自由積と融合積 {#at:sec-vk-amalgam}
+
+::: definition 自由積・融合積 {#at:amalgamated-product keywords="free product G_1 * G_2, amalgamated free product G_1 *_K G_2, pushout in the category of groups" index="自由積|じゆうせき, 融合積|ゆうごうせき, 融合自由積|ゆうごうじゆうせき"}
+群 $G_{1},G_{2}$ について、集合 $G_{1}\sqcup G_{2}$ 上の自由群を、各 $G_{i}$ の積の規則で割った群
+$$
+G_{1}*G_{2}\defeq\bigl\langle G_{1}\sqcup G_{2}\bigm| g\,h\,(gh)^{-1}\ (g,h\in G_{i},\ i=1,2)\bigr\rangle
+$$
+を**自由積**という（$g\,h$ は生成元 $g$, $h$ の語、$(gh)^{-1}$ は $G_{i}$ での積 $gh$ という生成元の逆元）。さらに準同型 $j_{1}\colon K\to G_{1}$, $j_{2}\colon K\to G_{2}$ について
+$$
+G_{1}*_{K}G_{2}\defeq(G_{1}*G_{2})/\bigl\langle\!\bigl\langle j_{1}(k)j_{2}(k)^{-1}\ (k\in K)\bigr\rangle\!\bigr\rangle
+$$
+を**融合積**という。$\iota_{i}\colon G_{i}\to G_{1}*_{K}G_{2}$ を生成元の像で定まる写像とする。
+:::
+
+::: proposition 融合積の普遍性 {#at:amalgam-universal keywords="the amalgamated product is the pushout of groups; free product is the coproduct; free product of free groups is free" index="融合積の普遍性|ゆうごうせきのふへんせい"}
+1. $\iota_{i}$ は準同型で $\iota_{1}j_{1}=\iota_{2}j_{2}$。群 $H$ と準同型 $\psi_{i}\colon G_{i}\to H$ で $\psi_{1}j_{1}=\psi_{2}j_{2}$ となるものについて、$\psi\iota_{i}=\psi_{i}$ となる準同型 $\psi\colon G_{1}*_{K}G_{2}\to H$ がただ一つある（融合積は群の圏の押し出し、\ref{cat:coequalizer}）。$G_{1}*_{K}G_{2}$ は $\iota_{1}(G_{1})\cup\iota_{2}(G_{2})$ で生成される。
+2. $K=1$ のとき（自由積）、$\iota_{i}$ は単射。$F(X)*F(Y)\cong F(X\sqcup Y)$。
+3. $G_{2}=1$ なら $G_{1}*_{K}1\cong G_{1}/\langle\!\langle j_{1}(K)\rangle\!\rangle$。
+:::
+
+::: proof
+**Step 1（1）.** $\iota_{i}(gh)=\iota_{i}(g)\iota_{i}(h)$ は関係子 $gh(gh)^{-1}$ が $1$ になることそのもの。$\iota_{1}j_{1}(k)=\iota_{2}j_{2}(k)$ は 2 段目の関係子。$\psi$ の存在：写像 $G_{1}\sqcup G_{2}\to H$（$G_{i}$ では $\psi_{i}$）は、$\psi_{i}$ が準同型なので最初の関係子を $1$ に送り、フォン・ディックの定理（\ref{grp:von-dyck}）で $G_{1}*G_{2}\to H$ を誘導する。これは $j_{1}(k)j_{2}(k)^{-1}$ を $\psi_{1}j_{1}(k)\psi_{2}j_{2}(k)^{-1}=1$ に送るので、その正規閉包を核に含み、商に降りる。一意性と生成は、生成元 $G_{1}\sqcup G_{2}$ の像が生成することから。
+
+**Step 2（2）.** $\psi_{1}=1_{G_{1}}$, $\psi_{2}=$ 自明な準同型として 1 を使うと $\psi\iota_{1}=1_{G_{1}}$ なので $\iota_{1}$ は単射。$F(X)*F(Y)$ と $F(X\sqcup Y)$ はどちらも「$X\sqcup Y$ からの写像を準同型に一意に延ばす」普遍性をもつ（1 と \ref{grp:free-group-universal}）ので同型。
+
+**Step 3（3）.** $1$ の元の生成元は関係子 $1\cdot1\cdot1^{-1}$ で消え、$G_{1}*1\cong G_{1}$。2 段目の関係子は $j_{1}(k)$ になる。
+:::
+
+## ファン・カンペンの定理 {#at:sec-vk-theorem}
+
+::: theorem ファン・カンペンの定理 {#at:van-kampen keywords="Seifert-van Kampen theorem for two open sets: pi_1(U) *_{pi_1(U cap V)} pi_1(V) -> pi_1(X) is an isomorphism" index="ファン・カンペンの定理|ふぁんかんぺんのていり, ザイフェルト–ファン・カンペンの定理|ざいふぇるとふぁんかんぺんのていり"}
+$X=U\cup V$ で、$U,V$ は開集合、$U$, $V$, $U\cap V$ は弧状連結、$x_{0}\in U\cap V$ とする。包含写像の誘導準同型 $j_{U}\colon\pi_{1}(U\cap V,x_{0})\to\pi_{1}(U,x_{0})$, $j_{V}$ と、$i_{U}\colon\pi_{1}(U,x_{0})\to\pi_{1}(X,x_{0})$, $i_{V}$ について、$i_{U}j_{U}=i_{V}j_{V}$ から誘導される準同型
+$$
+\Phi\colon\pi_{1}(U,x_{0})*_{\pi_{1}(U\cap V,x_{0})}\pi_{1}(V,x_{0})\to\pi_{1}(X,x_{0})
+$$
+は同型である。
+:::
+
+::: intuition
+$X$ の閉道は、$U$ の中の閉道と $V$ の中の閉道をつないだものに変形できる（全射）。そのような分解の仕方の違いは、「同じ集合の中の閉道をまとめる」と「$U\cap V$ の中の閉道を $U$ のものと見るか $V$ のものと見るか」の 2 種類の操作だけで説明できる（単射）。前者が自由積の積、後者が融合の関係式である。
+:::
+
+::: proof
+$G\defeq\pi_{1}(U,x_{0})*_{\pi_{1}(U\cap V,x_{0})}\pi_{1}(V,x_{0})$ とおく。$\Phi$ は \ref{at:amalgam-universal} の 1 で定まる。$L\in\{U,V,U\cap V\}$ の中の閉道 $\ell$ について、その類の $G$ での像（$L=U\cap V$ なら $j_{U}$ と $j_{V}$ のどちらで送っても同じ）を $\langle\ell\rangle_{L}$ と書く。$L\subset L'$ なら $\langle\ell\rangle_{L}=\langle\ell\rangle_{L'}$。
+
+**Step 1（全射）.** \ref{at:union-simply-connected} の証明の Step 2・3 は $U,V$ の単連結性を使わずに、$x_{0}$ を基点とする任意の閉道 $\gamma$ について $[\gamma]=\prod_{k}[\ell_{k}]$（$\ell_{k}$ は $U$ または $V$ の中の閉道）を与える。右辺は $\Phi(\prod_{k}\langle\ell_{k}\rangle_{L_{k}})$。
+
+**Step 2（単射のための設定）.** $G$ の元は $\langle f_{1}\rangle_{L_{1}}\cdots\langle f_{k}\rangle_{L_{k}}$（$f_{i}$ は $L_{i}\in\{U,V\}$ の中の閉道）の形に書ける（生成）。これが $\Phi$ で $1$ に送られるとする。$k$ 個の閉道の等間隔の積 $f\defeq f_{1}\cdots f_{k}$（$[\frac{i-1}{k},\frac{i}{k}]$ で $f_{i}$ を走る。\ref{at:path-subdivision} と \ref{at:path-groupoid} の 1 から任意の括弧の付け方の積とホモトープ）は定値道とホモトープなので、道のホモトピー $F\colon I\times I\to X$, $F(s,0)=f(s)$, $F(s,1)=x_{0}$, $F(0,t)=F(1,t)=x_{0}$ がある。
+
+**Step 3（格子と記号）.** ルベーグ数（\ref{top:lebesgue-number}）から、$k$ の倍数 $N$ を十分大きくとると、各正方形 $R_{ij}\defeq[\frac{i-1}{N},\frac{i}{N}]\times[\frac{j-1}{N},\frac{j}{N}]$ は $U$ か $V$ に写る。そのような集合を 1 つ固定し $L_{ij}$ とする。下辺 $t=0$ の格子線分 $[\frac{i-1}{N},\frac{i}{N}]\times\{0\}$ は、$N$ が $k$ の倍数なのでちょうど 1 つの $f_{m}$ の区間に含まれ、その集合 $L_{m}$ にも写る。
+- 格子点 $v$ について、$S_{v}$ を「$v$ を含む正方形の $L_{ij}$ と、$v$ が下辺にあればそれを含む $f_{m}$ の区間の $L_{m}$」すべての共通部分とする。$S_{v}\in\{U,V,U\cap V\}$ は弧状連結で $F(v)$ と $x_{0}$ を含む。$x_{0}$ から $F(v)$ への $S_{v}$ の中の道 $g_{v}$ をとる。ただし $F(v)=x_{0}$ となる左右の辺・上辺の点と、$f_{m}$ の区間の端点 $(\frac{m}{k},0)$ では $g_{v}\defeq c_{x_{0}}$ とする。
+- 格子の辺 $e$（左から右、または下から上に向ける）が $v$ から $w$ へ向かうとき、$F\restriction e$ を $I$ で径数付けた道を $F_{e}$、$\ell_{e}\defeq g_{v}\cdot F_{e}\cdot\bar g_{w}$（$x_{0}$ を基点とする閉道）とする。$S_{e}$ を「$e$ を含む正方形の $L_{ij}$ と、下辺の辺ならその $f_{m}$ の $L_{m}$」の共通部分とすると $S_{v},S_{w}\subset S_{e}$ で $F(e)\subset S_{e}$ なので、$\ell_{e}$ は $S_{e}$ の中にある。$\langle e\rangle\defeq\langle\ell_{e}\rangle_{S_{e}}\in G$ とおく。
+
+**Step 4（正方形ごとの関係）.** 正方形 $R=R_{ij}$ の下辺 $b$、右辺 $r$、上辺 $u$、左辺 $l$ について、$G$ で $\langle b\rangle\langle r\rangle=\langle l\rangle\langle u\rangle$。実際、4 辺の $S_{e}$ と 4 頂点の $S_{v}$ はすべて $L\defeq L_{ij}$ に含まれるので、$\pi_{1}(L,x_{0})$ で計算できる。\ref{at:square-lemma} を $F\restriction R$（$L$ に値をとる）に使うと $F_{b}\cdot F_{r}\simeq F_{l}\cdot F_{u}$（$L$ の中で）。両辺に左から $g_{v_{0}}$、右から $\bar g_{v_{2}}$（$v_{0}$ は左下、$v_{2}$ は右上の頂点）を付け、中間の頂点で $\bar g\cdot g\simeq c$ を挟むと、$\pi_{1}(L,x_{0})$ で $[\ell_{b}][\ell_{r}]=[\ell_{l}][\ell_{u}]$。$G$ に送って主張を得る。
+
+**Step 5（行を上へ移す）.** 水平線 $t=\frac{j}{N}$ の $N$ 本の辺の $\langle e\rangle$ を左から掛けた積を $W_{j}$ とする。$W_{j-1}=W_{j}$ を示す。$m=0,\dots,N$ について、$Q_{m}\defeq$（線 $t=\frac{j-1}{N}$ の左から $m$ 本の辺の積）$\cdot$（$s=\frac{m}{N}$ の縦の辺 $[\frac{j-1}{N},\frac{j}{N}]$ の元）$\cdot$（線 $t=\frac{j}{N}$ の残りの $N-m$ 本の辺の積）とおく。左右の辺の上では $F$ は定値 $x_{0}$ で $g$ も定値なので、$s=0,1$ の縦の辺の元は $1$。よって $Q_{0}=W_{j}$, $Q_{N}=W_{j-1}$。Step 4 を $R_{mj}$ に使うと $Q_{m-1}=Q_{m}$（$\langle l\rangle\langle u\rangle$ を $\langle b\rangle\langle r\rangle$ に替える）。
+
+**Step 6（下辺と上辺）.** 上辺 $t=1$ では $F$ も $g$ も定値なので $W_{N}=1$。下辺：$f_{m}$ の区間に含まれる $N/k$ 本の辺 $e_{1},\dots,e_{N/k}$ の $\ell_{e}$ はすべて $L_{m}$ の中にあり、$\pi_{1}(L_{m},x_{0})$ で、中間の $\bar g\cdot g\simeq c$ を消し、区間の両端で $g=c$ なので
+$$
+[\ell_{e_{1}}]\cdots[\ell_{e_{N/k}}]=[F_{e_{1}}\cdots F_{e_{N/k}}]=[f_{m}]
+$$
+（最後は \ref{at:path-subdivision}：$F_{e_{r}}$ は $f_{m}$ を $N/k$ 等分した各片）。よって $W_{0}=\langle f_{1}\rangle_{L_{1}}\cdots\langle f_{k}\rangle_{L_{k}}$。
+
+**Step 7.** Step 5 から $W_{0}=W_{N}=1$。よって $\Phi$ の核は自明。
+
+::: hypcheck
+- **$U,V$ が開**：Step 1 と Step 3 のルベーグ数に使った。開でない場合も、$U$, $V$, $U\cap V$ がそれぞれある開近傍（共通部分の条件を満たすもの）の変位レトラクトなら、開近傍に置き換えて同じ結論が得られる。
+- **$U\cap V$ が弧状連結**：Step 3 で $g_{v}$ をとるのに使った（$S_{v}=U\cap V$ の場合）。外すと偽：$S^{1}$ を 2 つの開弧で覆うと、$U,V$ は可縮で融合積は自明だが $\pi_{1}(S^{1})\cong\mathbb{Z}$。
+- **$U,V$ が弧状連結**：$S_{v}=U$ または $V$ の場合の $g_{v}$ に使った。
+- 開集合が 3 つ以上の場合は、三重の共通部分の弧状連結性を仮定すれば同様の結論が成り立つ（格子の頂点で 4 つの正方形が出会わないように正方形をずらす必要がある。知られている）。開集合が 2 つの場合は、頂点の周りの集合の共通部分がつねに $U$, $V$, $U\cap V$ のどれかになるので、格子のままでよい。
+:::
+:::
+
+::: supplement
+**高い視点.** \ref{at:amalgam-universal} の 1 と合わせると、ファン・カンペンの定理は「$\pi_{1}$ は、$U\cap V\to U,V$ の押し出しの図式 $X=U\cup_{U\cap V}V$ を群の押し出しに移す」と言い換えられる。基本亜群 $\Pi_{1}$（\ref{at:sec-fg-viewpoint}）を使うと、$U\cap V$ の弧状連結性を外した形（亜群の押し出し）で成り立つことが知られており（ブラウンのファン・カンペンの定理。本サイト未収録）、上の $S^{1}$ の反例も亜群の言葉なら正しく $\mathbb{Z}$ を与える。層の言葉では、「被覆空間全体が開被覆に関して層（正確にはスタック）をなす」ことの基本群側の表現と見ることもできる（知られている）。
+:::
+
+## 応用 {#at:sec-vk-applications}
+
+::: definition ブーケと胞体の貼り付け {#at:wedge-attaching keywords="wedge (bouquet) of circles, attaching a cell along a map, X cup_phi D^n" index="ブーケ|ぶーけ, 円周の束|えんしゅうのたば, 胞体の貼り付け|ほうたいのはりつけ, 貼り付け写像|はりつけしゃぞう"}
+1. 円周 $C_{1},\dots,C_{n}$（各 $C_{i}\cong S^{1}$、基点 $1$）の非交和で基点をすべて 1 点に同一視した商空間を**ブーケ**（円周の束）$\bigvee_{i=1}^{n}S^{1}$ という（ウェッジ和、\ref{cat:smash-product}）。
+2. 空間 $X$ と連続写像 $\varphi\colon S^{n-1}\to X$ について、$X\sqcup D^{n}$ で $z\in S^{n-1}$ と $\varphi(z)$ を同一視した商空間を $X\cup_{\varphi}D^{n}$ と書き、**$\varphi$ に沿って $n$ 胞体を貼り付けた空間**という。$\varphi$ を**貼り付け写像**という。商写像を $q$ とする。$S^{1}$ の閉道 $\varphi$ と $I$ の閉道 $\varphi\circ p\restriction I$（$p(s)=e^{2\pi is}$）を同一視する（$p\restriction I$ はコンパクトからハウスドルフへの連続全射なので商写像で、$I$ の閉道は $S^{1}$ からの写像と 1 対 1 に対応する）。
+:::
+
+::: lemma 胞体の貼り付けの近傍 {#at:attaching-neighborhoods keywords="X is a deformation retract of (X cup_phi D^n) minus the center; the open cell is an open subset homeomorphic to the open disk" index="胞体の貼り付けの近傍|ほうたいのはりつけのきんぼう"}
+$Y\defeq X\cup_{\varphi}D^{n}$（$n\ge1$）とし、$o\defeq q(0)$ とする。
+1. $q$ は開円板 $\mathring D^{n}\defeq\{|x|<1\}$ を $Y$ の開集合 $q(\mathring D^{n})$ に同相に移す。
+2. $q(X)$ は $X$ と同相な閉集合で、$Y\setminus\{o\}$ の変位レトラクト。レトラクションは $q(x)\mapsto q(x)$（$x\in X$）、$q(rz)\mapsto q(\varphi(z))$（$0<r\le1$, $z\in S^{n-1}$）。
+:::
+
+::: proof
+**Step 1（1）.** $\mathring D^{n}$ は $X\sqcup D^{n}$ の飽和した開集合で、$q$ はその上で単射。$\mathring D^{n}$ の開部分集合も飽和した開集合なので、像は開（\ref{top:quotient-saturated}）。よって $q\restriction\mathring D^{n}$ は連続な開単射で、像への同相写像。
+
+**Step 2（$q(X)$）.** $X$ は飽和していない（$\varphi(S^{n-1})$ の点の逆像は $D^{n}$ の点も含む）ので、$X$ の閉集合 $C$ の飽和化 $C\cup\varphi^{-1}(C)$（$\varphi^{-1}(C)\subset S^{n-1}\subset D^{n}$ は閉）を考える。これは閉で、像 $q(C)$ は閉（\ref{top:quotient-saturated}）。$q\restriction X$ は単射なので、$X\to q(X)$ は連続な閉単射で同相、$q(X)$ は閉。
+
+**Step 3（レトラクションとホモトピー）.** $W\defeq X\sqcup(D^{n}\setminus\{0\})$ は飽和した開集合で、$q\restriction W\colon W\to Y\setminus\{o\}$ は商写像（$W$ の飽和した開部分集合は $X\sqcup D^{n}$ でも飽和した開集合なので、像は開）。$H\colon W\times I\to W$ を $X$ の上では恒等、$H(rz,t)\defeq((1-t)r+t)z$（$0<r\le1$, $z\in S^{n-1}$）とすると連続で、$q\circ H$ は $q\restriction W$ のファイバーの上で一定（同一視される点は $X$ の点と $S^{n-1}$ の点で、$S^{n-1}$ の点は $H$ で動かない）。\ref{top:homotopy-on-quotient} から $Y\setminus\{o\}$ のホモトピー $\bar H$ が得られ、$\bar H_{0}=1$, $\bar H_{1}$ は $q(S^{n-1}\cup X)=q(X)$ への写像で、$q(X)$ の上では恒等。$\bar H_{1}$ がレトラクションで、$\bar H$ は rel $q(X)$。
+:::
+
+::: theorem 2 胞体の貼り付けと基本群 {#at:attaching-2-cell keywords="attaching a 2-cell kills the attaching loop: pi_1(X cup_phi D^2) = pi_1(X)/<<[phi]>>; attaching n-cells for n >= 3 does not change pi_1" index="2 胞体の貼り付けと基本群|にほうたいのはりつけときほんぐん"}
+$X$ を弧状連結、$\varphi\colon S^{1}\to X$, $x_{1}\defeq\varphi(1)$ とする。包含写像 $X\to Y\defeq X\cup_{\varphi}D^{2}$ は全射
+$$
+\pi_{1}(X,x_{1})\to\pi_{1}(Y,x_{1})
+$$
+を誘導し、核は閉道 $\varphi$ の類 $[\varphi]$ の正規閉包 $\langle\!\langle[\varphi]\rangle\!\rangle$。$n\ge3$ なら $X\to X\cup_{\varphi}D^{n}$ は $\pi_{1}$ の同型を誘導する。
+:::
+
+::: proof
+**Step 1（被覆）.** $U\defeq Y\setminus\{o\}$, $V\defeq q(\mathring D^{2})$ は開集合（$\{o\}=q(\{0\})$ は閉：$\{0\}$ は飽和した閉集合）で、$U\cup V=Y$。$V\cong\mathring D^{2}$ は可縮、$U\cap V\cong\mathring D^{2}\setminus\{0\}$ は弧状連結で、$S_{1/2}\defeq\{|x|=\frac12\}$ を変位レトラクトにもつ（$x\mapsto x/(2|x|)$ への直線ホモトピー）。$U$ は $q(X)\cong X$ を変位レトラクトにもち（\ref{at:attaching-neighborhoods}）、$X$ は弧状連結なので $U$ も弧状連結（$U$ の各点は $\bar H$ で $q(X)$ の点と結ばれる）。
+
+**Step 2（基点）.** $x_{0}\defeq q(\frac12)\in U\cap V$、$\delta(t)\defeq q(\frac{1+t}{2})$（$x_{0}$ から $x_{1}$ への $U$ の道）、$\ell(s)\defeq q(\frac12e^{2\pi is})$ とする。$\pi_{1}(U\cap V,x_{0})\cong\mathbb{Z}$ は $[\ell]$ で生成される（\ref{at:fundamental-group-circle} と \ref{at:retract-injective}）。レトラクション $\rho\defeq\bar H_{1}\colon U\to q(X)$ はホモトピー同値で、$\rho(x_{0})=x_{1}$、$\rho\circ\ell=\varphi$（$X$ と $q(X)$ を同一視）。よって $\rho_{*}\colon\pi_{1}(U,x_{0})\to\pi_{1}(X,x_{1})$ は同型（\ref{at:pi1-homotopy-invariance}）で、$\rho_{*}[\ell]=[\varphi]$。
+
+**Step 3（ファン・カンペン）.** \ref{at:van-kampen} と \ref{at:amalgam-universal} の 3（$\pi_{1}(V)=1$）から、$\pi_{1}(Y,x_{0})\cong\pi_{1}(U,x_{0})/\langle\!\langle[\ell]\rangle\!\rangle$ で、この同型は包含 $U\to Y$ の誘導準同型。$\rho_{*}$ で移すと $\pi_{1}(X,x_{1})/\langle\!\langle[\varphi]\rangle\!\rangle$。
+
+**Step 4（包含写像との関係）.** 包含 $\iota\colon q(X)\to Y$ と包含 $\kappa\colon U\to Y$ について、$\iota\circ\rho\simeq\kappa$（$\bar H$ を $Y$ で見たもの、道 $h(t)=\bar H(x_{0},t)=\delta(t)$）なので、\ref{at:pi1-homotopy-invariance} から $\iota_{*}\rho_{*}=\beta_{\bar\delta}\circ\kappa_{*}$（$\beta_{\bar\delta}\colon\pi_{1}(Y,x_{0})\to\pi_{1}(Y,x_{1})$ は同型）。Step 3 から $\kappa_{*}$ は全射で核 $\langle\!\langle[\ell]\rangle\!\rangle$ なので、$\iota_{*}$ は全射で核 $\rho_{*}\langle\!\langle[\ell]\rangle\!\rangle=\langle\!\langle[\varphi]\rangle\!\rangle$。
+
+**Step 5（$n\ge3$）.** 同じ議論で $U\cap V\cong\mathring D^{n}\setminus\{0\}$ は $S^{n-1}$ と同じホモトピー型で単連結（\ref{at:sphere-simply-connected}。$n-1\ge2$）。よって融合積は $\pi_{1}(U)*_{1}1\cong\pi_{1}(U)$ で、$\iota_{*}$ は同型。
+
+::: hypcheck
+- **$X$ の弧状連結性**：Step 1（$U$ の弧状連結性）に使った。外すと、貼り付けに関係しない成分は影響を受けないだけで、基点の成分について同じ結論が成り立つ。
+- Step 5 で $n\ge3$ を使った。$n=2$ で $U\cap V$ の基本群が $\mathbb{Z}$ になることが、関係式 $[\varphi]=1$ の源である。$n=1$ では $U\cap V\cong\mathring D^{1}\setminus\{0\}$ が弧状連結でなく、この定理の形では使えない（1 胞体の貼り付けは、典型的には自由群の生成元を 1 つ増やす）。
+:::
+:::
+
+::: theorem ブーケの基本群 {#at:wedge-circles-free keywords="the fundamental group of a wedge of n circles is the free group of rank n" index="ブーケの基本群|ぶーけのきほんぐん"}
+$\pi_{1}(\bigvee_{i=1}^{n}S^{1},\ast)$ は、$i$ 番目の円周を一周する閉道の類 $a_{i}$ を基底とする階数 $n$ の自由群 $F(a_{1},\dots,a_{n})$ である。
+:::
+
+::: proof
+**Step 1（$n=1$）.** \ref{at:fundamental-group-circle}。
+
+**Step 2（被覆）.** $n\ge2$ とし、$X\defeq\bigvee_{i=1}^{n}C_{i}$、$C_{i}$ の点 $-1$ の像を $p_{i}$ とする。$U\defeq X\setminus\{p_{n}\}$, $V\defeq X\setminus\{p_{1},\dots,p_{n-1}\}$ は開集合で（1 点は閉）、$U\cap V=X\setminus\{p_{1},\dots,p_{n}\}$。
+
+**Step 3（変位レトラクト）.** $C_{i}\setminus\{-1\}$ は $\theta\mapsto e^{2\pi i\theta}$（$|\theta|<\frac12$）で開区間と同相で、基点は $\theta=0$。$K(e^{2\pi i\theta},t)\defeq e^{2\pi i(1-t)\theta}$ は $C_{i}\setminus\{-1\}$ を基点に縮める（基点は固定）。$U$ の上で、$C_{n}\setminus\{p_{n}\}$ では $K$、他の $C_{i}$ では恒等とするホモトピーは、有限個の閉集合 $U\cap C_{i}$ の上で連続で基点で一致するので連続（貼り合わせ補題。$U$ は商空間だが、各 $C_{i}$ は $X$ の閉集合で $X$ の位相は $C_{i}$ たちで決まる：$A\subset X$ が閉 $\iff$ 各 $A\cap C_{i}$ が閉）。よって $U$ は $\bigvee_{i<n}C_{i}$ を変位レトラクトにもつ。同様に $V$ は $C_{n}$ を、$U\cap V$ は基点を変位レトラクトにもつ。
+
+**Step 4（帰納法）.** \ref{at:van-kampen} と帰納法の仮定、\ref{at:retract-injective} から
+$$
+\pi_{1}(X)\cong\pi_{1}(U)*_{1}\pi_{1}(V)\cong F(a_{1},\dots,a_{n-1})*F(a_{n})\cong F(a_{1},\dots,a_{n})
+$$
+（最後は \ref{at:amalgam-universal} の 2）。同型は $a_{i}$ をそれぞれの円周を一周する閉道に送る。
+
+::: hypcheck
+- $n$ は有限とした（貼り合わせ補題が有限個の閉集合に対するものなので）。無限個の円周のブーケ（商位相）でも基本群は自由群になることが知られているが、各閉道がコンパクト性により有限個の円周にしか入らないことを示す議論が要る（本サイト未収録）。ハワイの耳飾り（\ref{at:universal-necessary}）は可算個の円周の和だが位相が違い、基本群は自由群でない（知られている）。
+:::
+:::
+
+::: corollary 有限表示群は 2 次元の複体の基本群 {#at:presentation-complex keywords="every finitely presented group is the fundamental group of a 2-dimensional cell complex (presentation complex)" index="表示複体|ひょうじふくたい"}
+有限表示 $G=\langle a_{1},\dots,a_{n}\mid r_{1},\dots,r_{m}\rangle$ について、ブーケ $\bigvee_{i=1}^{n}S^{1}$ に、語 $r_{k}$ を読む閉道 $\varphi_{k}$ に沿って 2 胞体を $m$ 個貼った空間 $X_{G}$ は $\pi_{1}(X_{G})\cong G$ を満たす。
+:::
+
+::: proof
+$X_{0}\defeq\bigvee S^{1}$、$X_{k}\defeq X_{k-1}\cup_{\varphi_{k}}D^{2}$（$\varphi_{k}$ は $X_{0}\subset X_{k-1}$ への写像と見る）とする。各 $X_{k}$ は弧状連結（$X_{k-1}$ と $D^{2}$ の像が交わる）。\ref{at:attaching-2-cell} を繰り返すと、$\pi_{1}(X_{k})\cong\pi_{1}(X_{k-1})/\langle\!\langle[\varphi_{k}]\rangle\!\rangle$ で、帰納的に $\pi_{1}(X_{m})\cong F(a_{1},\dots,a_{n})/\langle\!\langle r_{1},\dots,r_{m}\rangle\!\rangle$（正規閉包を順に割ることは、全体の正規閉包で割ることと同じ：$N_{1}\subset N$ について $(F/N_{1})/(N/N_{1})\cong F/N$）。基点はすべて $X_{0}$ の基点で、$[\varphi_{k}]=r_{k}$（\ref{at:wedge-circles-free} の同型で）。
+:::
+
+::: example 閉曲面の基本群
+1. **トーラス**：$\bigvee_{i=1}^{2}S^{1}$ に語 $aba^{-1}b^{-1}$ で 2 胞体を貼ったもの $T$ について $\pi_{1}(T)\cong\langle a,b\mid aba^{-1}b^{-1}\rangle\cong\mathbb{Z}^{2}$。$T$ は $S^{1}\times S^{1}$ と同相で、問題 \ref{at:prob-product} の結果と一致する（同相であることは、正方形の対辺を貼り合わせた商空間を経由して示せる。ここでは証明しない）。
+2. **種数 $g$ の向き付け可能な閉曲面** $M_{g}$：$2g$ 個の円周のブーケに語 $[a_{1},b_{1}]\cdots[a_{g},b_{g}]$（$[a,b]=aba^{-1}b^{-1}$）で 2 胞体を貼ったもの。$\pi_{1}(M_{g})=\langle a_{1},b_{1},\dots,a_{g},b_{g}\mid\prod[a_{i},b_{i}]\rangle$。
+3. **実射影平面**：$S^{1}$ に語 $a^{2}$（$z\mapsto z^{2}$）で 2 胞体を貼ったものの基本群は $\langle a\mid a^{2}\rangle\cong\mathbb{Z}/2\mathbb{Z}$ で、\ref{at:fundamental-group-rpn} と一致する。
+4. **種数 $h$ の向き付け不可能な閉曲面** $N_{h}$：$h$ 個の円周のブーケに語 $a_{1}^{2}\cdots a_{h}^{2}$ で貼ったもの。
+
+これらの空間が通常の多角形の辺の貼り合わせで得られる閉曲面と同相であることは、閉曲面の分類理論の一部として知られている（本サイト未収録）。ここでは上の貼り付けで定義した空間として扱う。
+:::
+
+::: corollary 閉曲面の区別 {#at:surfaces-distinguished keywords="abelianizations Z^{2g} and Z^{h-1} + Z/2 distinguish the surfaces M_g and N_h up to homotopy equivalence" index="閉曲面の区別|へいきょくめんのくべつ"}
+$\pi_{1}$ のアーベル化は $\pi_{1}(M_{g})^{\mathrm{ab}}\cong\mathbb{Z}^{2g}$, $\pi_{1}(N_{h})^{\mathrm{ab}}\cong\mathbb{Z}^{h-1}\oplus\mathbb{Z}/2\mathbb{Z}$。したがって $M_{g}$（$g\ge0$）と $N_{h}$（$h\ge1$）はどの 2 つもホモトピー同値でない。
+:::
+
+::: proof
+**Step 1（表示のアーベル化）.** $\langle X\mid R\rangle^{\mathrm{ab}}$ は、$X$ 上の自由アーベル群 $\mathbb{Z}^{X}$ を $R$ の像（各生成元の指数の和を並べたベクトル）の生成する部分群で割ったものに同型：両者はともに「$X$ からアーベル群 $A$ への写像で $R$ の像が $0$ になるものと、準同型が 1 対 1 に対応する」普遍性をもつ（\ref{grp:von-dyck} と、アーベル群への準同型は交換子部分群を経由すること \ref{grp:commutator-properties}）。
+
+**Step 2（$M_{g}$）.** $\prod[a_{i},b_{i}]$ の像は $0$ なので $\mathbb{Z}^{2g}$。
+
+**Step 3（$N_{h}$）.** $a_{1}^{2}\cdots a_{h}^{2}$ の像は $2(a_{1}+\dots+a_{h})$。基底を $a_{1},\dots,a_{h-1},c\defeq a_{1}+\dots+a_{h}$ に取り替える（変換行列は上三角で対角成分 $1$、可逆）と、商は $\mathbb{Z}^{h-1}\oplus\mathbb{Z}/2\mathbb{Z}$。
+
+**Step 4.** ホモトピー同値は $\pi_{1}$ の同型（\ref{at:pi1-homotopy-invariance}）、したがってアーベル化の同型を誘導する。$\mathbb{Z}^{2g}$ と $\mathbb{Z}^{h-1}\oplus\mathbb{Z}/2$ は、ねじれ部分（$0$ か $\mathbb{Z}/2$）と、ねじれで割った自由部分の階数（$2g$ か $h-1$）で区別される（自由アーベル群の階数の一意性）。$M_{g}$ どうしは $2g$、$N_{h}$ どうしは $h-1$ で、$M$ と $N$ はねじれで区別される。
+:::
+
+::: supplement
+**高い視点.** \ref{at:presentation-complex} により、「群」と「2 次元までの空間のホモトピー論の一部」が対応する。群の表示の書き換え（ティーツェ変換）は、複体の基本的な変形（胞体の追加・削除）に対応する。被覆空間の理論（\ref{at:page-covering-spaces}）と合わせると、自由群の部分群が自由群であること（ニールセン–シュライアーの定理 \ref{grp:nielsen-schreier}）は「グラフの被覆はグラフで、連結なグラフの基本群は自由群」という形の位相的な証明をもつことが知られている（本サイト未収録：連結なグラフが極大木をもつこと（無限グラフでは選択公理を使う）と、極大木を 1 点に潰す操作がホモトピー同値であることを使う）。
+:::
+
+::: supplement 計算の観点
+有限表示群の語の問題（与えられた語が $1$ か）は一般に決定不能（ノヴィコフ–ブーンの定理として知られている）なので、\ref{at:presentation-complex} を通して「有限 2 次元複体の閉道が定値道とホモトープか」も一般には決定不能である。さらに、有限表示群が自明かどうかも決定不能（アディアン–ラビンの定理として知られている）なので、有限 2 次元複体が単連結かどうかを判定するアルゴリズムは存在しない（いずれも本サイト未収録）。対照的に、閉曲面は \ref{at:surfaces-distinguished} の不変量で完全に（ホモトピー型まで）判定できる。
+:::
+
+## 問題 {#at:sec-vk-problems}
+
+::: problem {#at:prob-punctured-torus}
+トーラス $T$（\ref{at:presentation-complex} の後の例 1 の空間）から 1 点 $o$（2 胞体の中心）を除いた空間の基本群は、階数 2 の自由群であることを示せ。
+:::
+
+::: solution
+\ref{at:attaching-neighborhoods} の 2 から、$T\setminus\{o\}$ は 1 次元部分 $q(S^{1}\vee S^{1})\cong S^{1}\vee S^{1}$ を変位レトラクトにもつ。\ref{at:retract-injective} と \ref{at:wedge-circles-free} から $\pi_{1}(T\setminus\{o\})\cong F(a,b)$。（$T$ では関係式 $aba^{-1}b^{-1}=1$ が加わり $\mathbb{Z}^{2}$ になる：1 点を除くと関係式が消える。）
+:::
+
+::: problem {#at:prob-figure-eight-nonabelian}
+8 の字形 $S^{1}\vee S^{1}$ は、トーラス $S^{1}\times S^{1}$ とも $S^{1}$ ともホモトピー同値でないことを示せ。
+:::
+
+::: solution
+$\pi_{1}(S^{1}\vee S^{1})\cong F(a,b)$ は非可換（簡約語 $ab\ne ba$、\ref{grp:free-group}）。$\pi_{1}(S^{1}\times S^{1})\cong\mathbb{Z}^{2}$ と $\pi_{1}(S^{1})\cong\mathbb{Z}$ は可換。ホモトピー同値は $\pi_{1}$ の同型を誘導する。
+:::
+
+::: problem {#at:prob-knot-complement-trefoil}
+$G=\langle x,y\mid x^{2}=y^{3}\rangle$ は非可換であることを示せ（これは 3 葉結び目の補空間の基本群として知られる群である）。
+:::
+
+::: solution
+$x\mapsto(1\,2)$, $y\mapsto(1\,2\,3)$ は $x^{2}=1=y^{3}$ を満たすので、フォン・ディックの定理で準同型 $G\to\mathfrak{S}_{3}$ が定まり、像は $\mathfrak{S}_{3}$ 全体（互換と 3 巡回置換が生成）。$\mathfrak{S}_{3}$ は非可換なので $G$ も非可換。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
