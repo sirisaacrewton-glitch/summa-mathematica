@@ -558,3 +558,4 @@
 | acyclic models / Eilenberg-Zilber theorem / Kunneth theorem / cross product / Alexander-Whitney map / shuffle map | 非輪状モデル / アイレンバーグ–ジルバーの定理 / キュネットの定理 / クロス積 / アレクサンダー–ホイットニー写像 / シャッフル写像 | | 標準的（非輪状は仮。小松では「非輪状」の用例を未確認）。at:page-kunneth |
 | singular cohomology / cochain / coboundary / Kronecker pairing / transfer / odd map / Borsuk-Ulam theorem | 特異コホモロジー / コチェイン / 余境界作用素 / クロネッカー積 / 転送 / 奇写像 / ボルスク–ウラムの定理 | コサイクル・コバウンダリー（雪江） | 標準的。at:page-singular-cohomology |
 | cup product / cohomology ring / graded commutative / front face / back face | カップ積 / コホモロジー環 / 次数付き可換 / 前面 / 後面 | | 標準的（前面・後面は仮）。at:page-cup-product |
+| Cech cohomology / good cover / nerve / double complex / total complex / Alexander-Spanier cohomology | チェックコホモロジー / 良い被覆 / 脈体 / 二重複体 / 全複体 / アレクサンダー–スパニエのコホモロジー | 神経（脈体の別訳） | 標準的（脈体は小松の用語を未確認、仮）。at:page-cech-comparison |
