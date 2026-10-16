@@ -533,3 +533,9 @@
 | algebraic integer / central character / induced representation / class function / character table | 代数的整数 / 中心指標 / 誘導表現 / 類関数 / 指標表 | | 雪江（誘導表現 27、類関数 7、指標表 2）。rep: |
 | transcendence basis / transcendence degree / algebraically independent / purely transcendental | 超越基底 / 超越次数 / 代数的独立 / 純超越拡大 | | 雪江（超越基底 36、代数的独立 35）。fld:page-transcendence-basis |
 | presheaf / sheaf / stalk / germ / skyscraper sheaf / separated presheaf | 前層 / 層 / 茎 / 芽 / 摩天楼層 / 分離前層 | | 標準的。cat:page-presheaves-sheaves |
+| sheafification / etale space / direct image / inverse image / extension by zero | 層化 / エタール空間 / 順像 / 逆像 / 0 拡張 | | 標準的。cat:page-sheafification, cat:page-direct-inverse-image |
+| flasque (flabby) sheaf / soft sheaf / fine sheaf / Godement resolution / Čech cohomology | 脆弱層 / 軟層 / 細層 / ゴドマン分解 / チェックコホモロジー | | 標準的（脆弱層は「散布層」とも）。cat:page-flasque-cech |
+| site / Grothendieck topology / covering sieve / Grothendieck topos / Giraud's theorem | サイト / グロタンディーク位相 / 被覆ふるい / グロタンディーク・トポス / ジローの定理 | | ふるいは既存の cat:sieve に合わせた |
+| enriched category / Day convolution / string diagram / rigid (autonomous) / pivotal / ribbon | 豊穣圏 / デイ畳み込み / ストリング図式 / 剛性（自律的） / ピボタル / リボン圏 | | 豊穣圏は既存の cat:closed-category に合わせた。18M |
+| Hopf algebra / antipode / quasitriangular / R-matrix / Tannaka duality | ホップ代数 / 対合射（アンチポード） / 準三角 / R 行列 / 淡中双対性 | | antipode は「対合射」を主に、括弧でアンチポードを併記 |
+| operad / little cubes (disks) operad / E_n / Eckmann-Hilton / group completion | オペラッド / 小立方体（小円板）オペラッド / Eₙ / エックマン–ヒルトン / 群完備化 | | エックマン–ヒルトンは既存の cat:eckmann-hilton に合わせた |
