@@ -560,3 +560,4 @@
 | cup product / cohomology ring / graded commutative / front face / back face | カップ積 / コホモロジー環 / 次数付き可換 / 前面 / 後面 | | 標準的（前面・後面は仮）。at:page-cup-product |
 | Cech cohomology / good cover / nerve / double complex / total complex / Alexander-Spanier cohomology | チェックコホモロジー / 良い被覆 / 脈体 / 二重複体 / 全複体 / アレクサンダー–スパニエのコホモロジー | 神経（脈体の別訳） | 標準的（脈体は小松の用語を未確認、仮）。at:page-cech-comparison |
 | Warsaw circle / quasi-circle / Hawaiian earring / exponential sheaf sequence / continuity (of Cech cohomology) | ワルシャワの円 / 擬円周 / ハワイの耳飾り / 指数層の完全列 / 連続性 | | 標準的（仮）。at:page-homology-counterexamples |
+| topological manifold / closed manifold / orientation / orientable / orientation double cover / fundamental class | 位相多様体 / 閉多様体 / 向き / 向き付け可能 / 向きの二重被覆 / 基本類 | 向き付けられる | 標準的。at:page-orientation |
