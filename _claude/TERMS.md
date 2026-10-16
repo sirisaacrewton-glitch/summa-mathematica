@@ -562,3 +562,4 @@
 | Warsaw circle / quasi-circle / Hawaiian earring / exponential sheaf sequence / continuity (of Cech cohomology) | ワルシャワの円 / 擬円周 / ハワイの耳飾り / 指数層の完全列 / 連続性 | | 標準的（仮）。at:page-homology-counterexamples |
 | topological manifold / closed manifold / orientation / orientable / orientation double cover / fundamental class | 位相多様体 / 閉多様体 / 向き / 向き付け可能 / 向きの二重被覆 / 基本類 | 向き付けられる | 標準的。at:page-orientation |
 | cap product / compactly supported cohomology / Poincare duality / intersection form / signature / Lefschetz duality | キャップ積 / コンパクト台コホモロジー / ポアンカレ双対性 / 交叉形式 / 符号数 / ルフシェッツ双対性 | | 標準的。at:page-poincare-duality |
+| homotopy group / relative homotopy group / compression criterion / cellular approximation | ホモトピー群 / 相対ホモトピー群 / 圧縮の基準 / 胞体近似定理 | | 標準的（圧縮の基準は仮）。at:page-homotopy-groups |
