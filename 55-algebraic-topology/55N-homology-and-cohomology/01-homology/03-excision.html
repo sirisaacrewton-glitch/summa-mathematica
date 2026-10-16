@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>切除とマイヤー–ヴィートリス | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="55-algebraic-topology/55N-homology-and-cohomology/01-homology/03-excision.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 切除とマイヤー–ヴィートリス {#at:page-excision keywords="barycentric subdivision, small simplices theorem, U-small chains, excision theorem, Mayer-Vietoris sequence, good pair, homology of quotient X/A, homology of spheres, homology of disks relative to boundary, no retraction theorem, Brouwer fixed point theorem, local homology, invariance of dimension"}
+
+特異ホモロジーを計算可能にする鍵は**切除**である：相対ホモロジー $H_{n}(X,A)$ は $A$ の内部の深いところを切り取っても変わらない。その証明の中心は、特異鎖を重心細分で細かくしても、ホモロジーが変わらないこと（**小さい単体の定理**）である。そこから**マイヤー–ヴィートリス完全列**が得られ、球面のホモロジー
+$$
+\tilde H_{k}(S^{n})\cong\begin{cases}\mathbb{Z}&(k=n)\\0&(k\ne n)\end{cases}
+$$
+が計算できる。応用としてすべての次元のブラウワーの不動点定理と、次元の位相不変性を示す。層の理論のページ（\ref{cat:page-singular-comparison}）で「55N で証明予定」とした (S) は、ここで示す小さい単体の定理のコチェイン版である。
+
+> 資料：Massey『Singular Homology Theory』第 III 章、Fulton『Algebraic Topology』第 10 章などの標準的な内容。重心細分の作用素の構成と評価は自分で書き下ろした。
+
+## 記法と定義の確認 {#at:sec-ex-notation}
+
+::: notation
+- 特異鎖複体・相対ホモロジー・長完全列・ホモトピー不変性は \ref{at:singular-homology}, \ref{at:relative-homology}, \ref{at:pair-long-exact}, \ref{at:singular-homotopy-invariance}, \ref{at:relative-homotopy-invariance}。1 点のホモロジー \ref{at:singular-h0-point}。
+- アフィン単体 $[p_{0},\dots,p_{k}]$ は \ref{at:sec-si-notation}。$\iota_{n}\defeq[e_{0},\dots,e_{n}]=1_{\Delta^{n}}$。特異単体 $\sigma\colon\Delta^{n}\to X$ について $\sigma_{\#}\colon S(\Delta^{n})\to S(X)$ は誘導鎖写像で、$\sigma=\sigma_{\#}\iota_{n}$。
+- ルベーグ数 \ref{top:lebesgue-number}、五項補題 \ref{ha:five-lemma}、立体射影 \ref{at:sphere-simply-connected}（の Step 1）。
+- $X$ の部分集合族 $\mathcal{U}$ で内部 $\{\operatorname{int}U\}$ が $X$ を覆うものについて、像がある $U\in\mathcal{U}$ に含まれる特異単体を **$\mathcal{U}$ 小**といい、それらが生成する部分鎖複体を $S^{\mathcal{U}}(X)$ と書く（面も $\mathcal{U}$ 小なので部分鎖複体）。
+- **選択公理**：使わない。
+:::
+
+## 重心細分と小さい単体の定理 {#at:sec-ex-subdivision}
+
+凸集合 $Y\subset\mathbb{R}^{N}$ のアフィン単体が生成する $S_{n}(Y)$ の部分群を $LC_{n}(Y)$（線形鎖）とし、$LC_{-1}(Y)\defeq\mathbb{Z}$（生成元 $[\varnothing]$）、$\partial[w_{0}]\defeq[\varnothing]$ とする（添加写像）。$\partial$ は $LC$ を保つ（アフィン単体の面はアフィン単体）。
+
+::: definition 錐作用素と重心細分 {#at:barycentric-subdivision keywords="cone operator b.lambda on linear chains, barycenter, barycentric subdivision operator S, chain homotopy T between 1 and S" index="重心細分|じゅうしんさいぶん, 重心|じゅうしん, 錐作用素|すいさようそ"}
+1. $b\in Y$ について、**錐作用素** $b\colon LC_{n}(Y)\to LC_{n+1}(Y)$ を $b[w_{0},\dots,w_{n}]\defeq[b,w_{0},\dots,w_{n}]$（$n=-1$ では $b[\varnothing]\defeq[b]$）で定める。
+2. アフィン単体 $\lambda=[w_{0},\dots,w_{n}]$ の**重心**を $b_{\lambda}\defeq\frac{1}{n+1}\sum_{i}w_{i}$ とする。$S\colon LC_{n}(Y)\to LC_{n}(Y)$ を、$n\le0$ では恒等写像、$n\ge1$ では $S\lambda\defeq b_{\lambda}(S\partial\lambda)$ で帰納的に定める（**重心細分**）。
+3. $T\colon LC_{n}(Y)\to LC_{n+1}(Y)$ を、$n=-1$ では $0$、$n\ge0$ では $T\lambda\defeq b_{\lambda}(\lambda-T\partial\lambda)$ で帰納的に定める。
+:::
+
+::: example
+$n=1$：$S[w_{0},w_{1}]=b([w_{1}]-[w_{0}])=[b,w_{1}]-[b,w_{0}]$（$b$ は中点）。線分を中点で 2 つに分けたもの（向き込み）。$n=2$：三角形を重心と各辺の中点で 6 つの三角形に分ける。
+:::
+
+::: lemma 細分の代数的性質 {#at:subdivision-algebra keywords="partial(b c) = c - b partial c; S is a chain map; partial T + T partial = 1 - S; naturality under affine maps" index="細分の代数的性質|さいぶんのだいすうてきせいしつ"}
+$LC(Y)$ 上で次が成り立つ（$n\ge0$）。
+1. $\partial(bc)=c-b\,\partial c$（$c\in LC_{n}(Y)$）。
+2. $\partial S=S\partial$。
+3. $\partial T+T\partial=1-S$。
+4. アフィン写像 $\alpha\colon Y\to Y'$（凸集合の間）について $\alpha_{\#}S=S\alpha_{\#}$, $\alpha_{\#}T=T\alpha_{\#}$。
+:::
+
+::: proof
+**Step 1（1）.** $\partial[b,w_{0},\dots,w_{n}]=[w_{0},\dots,w_{n}]+\sum_{i}(-1)^{i+1}[b,w_{0},\dots,\widehat{w_{i}},\dots,w_{n}]$。$n=0$ では $\partial[b,w_{0}]=[w_{0}]-[b]=[w_{0}]-b[\varnothing]$ で、$\partial[w_{0}]=[\varnothing]$ と合う。線形に延ばす。
+
+**Step 2（2）.** $n$ についての帰納法。$n\le0$ では $S=1$。$n=1$：$\partial S\lambda=\partial(b_{\lambda}S\partial\lambda)=S\partial\lambda-b_{\lambda}\partial S\partial\lambda$ で、$\partial S\partial\lambda=\partial\partial\lambda=0$（次数 $0$ で $S=1$）。$n\ge2$：同じ式で、帰納法の仮定 $\partial S=S\partial$（次数 $n-1$）から $\partial S\partial\lambda=S\partial\partial\lambda=0$。
+
+**Step 3（3）.** 帰納法。$n=0$：$T\lambda=b_{\lambda}\lambda=[w_{0},w_{0}]$ で $\partial T\lambda=[w_{0}]-[w_{0}]=0$、$\lambda-S\lambda-T\partial\lambda=\lambda-\lambda-0=0$。$n\ge1$：1 から
+$$
+\partial T\lambda=(\lambda-T\partial\lambda)-b_{\lambda}\bigl(\partial\lambda-\partial T\partial\lambda\bigr)
+$$
+で、帰納法の仮定から $\partial T\partial\lambda=\partial\lambda-S\partial\lambda-T\partial\partial\lambda=\partial\lambda-S\partial\lambda$。よって $\partial\lambda-\partial T\partial\lambda=S\partial\lambda$ で、$\partial T\lambda=\lambda-T\partial\lambda-S\lambda$。
+
+**Step 4（4）.** アフィン写像は重心を重心に移し（$\alpha(\frac{1}{n+1}\sum w_{i})=\frac{1}{n+1}\sum\alpha(w_{i})$）、$\alpha_{\#}(b\,c)=\alpha(b)\,\alpha_{\#}c$。帰納法で定義式に代入すればよい。
+:::
+
+::: lemma 細分の直径 {#at:subdivision-diameter keywords="each simplex of S lambda has diameter at most n/(n+1) diam lambda" index="細分の直径|さいぶんのちょっけい"}
+$n$ 単体 $\lambda$ について、$S\lambda$ を定義式どおりに展開したときに現れるアフィン単体の像の直径は $\frac{n}{n+1}\operatorname{diam}\lambda$ 以下。したがって $S^{m}\lambda$ に現れる単体の直径は $(\frac{n}{n+1})^{m}\operatorname{diam}\lambda$ 以下。
+:::
+
+::: proof
+**Step 1（凸性）.** アフィン単体 $[p_{0},\dots,p_{k}]$ の像は $p_{j}$ の凸包で、点 $x$ からの距離 $|x-\cdot|$ は凸関数なので、凸包上の最大値は頂点でとる。よって直径は $\max_{j,l}|p_{j}-p_{l}|$ で、$x$ から凸包の点までの距離は $\max_{j}|x-p_{j}|$ 以下。
+
+**Step 2（重心と点の距離）.** $d\defeq\operatorname{diam}\lambda=\max|w_{i}-w_{j}|$。$|b_{\lambda}-w_{i}|=\frac{1}{n+1}\bigl|\sum_{j}(w_{j}-w_{i})\bigr|\le\frac{n}{n+1}d$。Step 1 から、$\lambda$ の像の任意の点 $x$ について $|b_{\lambda}-x|\le\frac{n}{n+1}d$。
+
+**Step 3（帰納法）.** $n=0$ は自明。$S\lambda=b_{\lambda}(S\partial\lambda)$ に現れる単体は $[b_{\lambda},u_{0},\dots,u_{n-1}]$（$[u_{0},\dots,u_{n-1}]$ は $\lambda$ のある面 $\mu$ の $S\mu$ に現れる単体）の形。$|u_{j}-u_{l}|\le\frac{n-1}{n}\operatorname{diam}\mu\le\frac{n}{n+1}d$（帰納法の仮定）、$|b_{\lambda}-u_{j}|\le\frac{n}{n+1}d$（$u_{j}$ は $\lambda$ の像の点、Step 2）。Step 1 で結論。
+:::
+
+::: theorem 小さい単体の定理 {#at:small-simplices keywords="the inclusion of U-small singular chains into all singular chains induces an isomorphism on homology; relative version" index="小さい単体の定理|ちいさいたんたいのていり"}
+$\{\operatorname{int}U\}_{U\in\mathcal{U}}$ が $X$ を覆うとき、包含 $S^{\mathcal{U}}(X)\to S(X)$ はホモロジーの同型を誘導する。$A\subset X$ について、$\mathcal{U}$ の各元と $A$ の共通部分の族 $\mathcal{U}_{A}$ を使った $S^{\mathcal{U}}(X)/S^{\mathcal{U}_{A}}(A)\to S(X,A)$ もホモロジーの同型を誘導する。
+:::
+
+::: proof
+**Step 1（特異鎖への拡張）.** 特異単体 $\sigma\colon\Delta^{n}\to X$ について $S\sigma\defeq\sigma_{\#}(S\iota_{n})$, $T\sigma\defeq\sigma_{\#}(T\iota_{n})$ とおき線形に延ばす。$\sigma\circ\delta^{i}=\sigma_{\#}(\delta^{i})_{\#}\iota_{n-1}$ と $(\delta^{i})_{\#}S\iota_{n-1}=S(\delta^{i})_{\#}\iota_{n-1}=S[e_{0},\dots,\widehat{e_{i}},\dots,e_{n}]$（\ref{at:subdivision-algebra} の 4）から
+$$
+S\partial\sigma=\sum_{i}(-1)^{i}\sigma_{\#}S(\partial_{i}\iota_{n})=\sigma_{\#}S\partial\iota_{n}=\sigma_{\#}\partial S\iota_{n}=\partial S\sigma
+$$
+（$\partial_{i}\iota_{n}$ は $\iota_{n}$ の第 $i$ 面）。同様に $\partial T\sigma+T\partial\sigma=\sigma-S\sigma$。また連続写像 $f$ について $f_{\#}S=Sf_{\#}$, $f_{\#}T=Tf_{\#}$（$(f\sigma)_{\#}=f_{\#}\sigma_{\#}$）。
+
+**Step 2（反復）.** $D_{m}\defeq\sum_{i=0}^{m-1}TS^{i}$ とおくと、$S$ が鎖写像なので $\partial D_{m}+D_{m}\partial=\sum_{i}(1-S)S^{i}=1-S^{m}$。$S\sigma$, $T\sigma$ に現れる単体の像は $\sigma$ の像に含まれるので、$S$, $T$, $D_{m}$ は $S^{\mathcal{U}}(X)$ と $S(A)$ を保つ。
+
+**Step 3（十分細かくすると小さくなる）.** 特異単体 $\sigma$ について、$\{\sigma^{-1}(\operatorname{int}U)\}$ はコンパクト距離空間 $\Delta^{n}$ の開被覆なのでルベーグ数 $\delta$ がある。\ref{at:subdivision-diameter} から、$(\frac{n}{n+1})^{m}\operatorname{diam}\Delta^{n}<\delta$ なら $S^{m}\iota_{n}$ の各単体はある $\sigma^{-1}(\operatorname{int}U)$ に入り、$S^{m}\sigma=\sigma_{\#}S^{m}\iota_{n}$ は $\mathcal{U}$ 小。鎖 $c$ は有限個の単体の和なので、十分大きい $m$ で $S^{m}c\in S^{\mathcal{U}}(X)$。
+
+**Step 4（全射）.** $z\in S_{n}(X)$ をサイクルとし、$S^{m}z\in S^{\mathcal{U}}$ となる $m$ をとる。$z-S^{m}z=\partial D_{m}z+D_{m}\partial z=\partial D_{m}z$ なので $[z]=[S^{m}z]$ は $S^{\mathcal{U}}$ のサイクルの類の像。
+
+**Step 5（単射）.** $z\in S^{\mathcal{U}}_{n}(X)$ がサイクルで $z=\partial c$（$c\in S_{n+1}(X)$）とする。$S^{m}c\in S^{\mathcal{U}}$ となる $m$ をとると、$z-S^{m}z=\partial D_{m}z$ で $D_{m}z\in S^{\mathcal{U}}$（Step 2）、$S^{m}z=S^{m}\partial c=\partial S^{m}c$。よって $z=\partial(D_{m}z+S^{m}c)$ は $S^{\mathcal{U}}$ の中の境界。
+
+**Step 6（相対版）.** $\mathcal{U}_{A}$ の内部（$A$ での相対位相）は $A$ を覆う（$\operatorname{int}_{X}U\cap A\subset\operatorname{int}_{A}(U\cap A)$）ので、$S^{\mathcal{U}_{A}}(A)\to S(A)$ もホモロジーの同型。$S^{\mathcal{U}_{A}}(A)=S^{\mathcal{U}}(X)\cap S(A)$ で、2 つの対の長完全列の間の写像に五項補題（\ref{ha:five-lemma}）を使う。
+
+::: hypcheck
+- **内部が覆う**こと：Step 3 で $\sigma^{-1}(\operatorname{int}U)$ が開被覆になることに使った。$\mathcal{U}$ の元が覆うだけ（内部は覆わない）では偽：$X=\mathbb{R}$, $\mathcal{U}=\{(-\infty,0],[0,\infty)\}$ では $0$ をまたぐ 1 単体は $\mathcal{U}$ 小な鎖に細分できない（ただしこの例では、$S^{\mathcal{U}}$ のホモロジーも $H_{*}(\mathbb{R})$ と一致する。定理が主張する同型は、内部が覆う場合にしか一般には保証されない）。
+- 選択公理は使わない（$m$ は自然数の最小元としてとれる）。
+:::
+:::
+
+::: supplement
+**層の理論との関係.** \ref{cat:page-singular-comparison} の (S)（$S^{\bullet}(U)\to S^{\bullet}_{\mathcal{V}}(U)$ はコホモロジーの同型）は、この証明の $S$, $D_{m}$ が自然な鎖写像・鎖ホモトピーであることから得られる。ただし、ここで示したのは「各鎖ごとに $m$ を選ぶ」形の同型で、コチェインに双対化するには、$S^{\mathcal{U}}\to S$ が鎖ホモトピー同値であること（ホモトピー逆 $\rho\colon S\to S^{\mathcal{U}}$ を、単体ごとに必要な最小の $m(\sigma)$ を使って作る）を示しておく必要がある。これは \ref[特異コホモロジーとカップ積]{at:page-singular-cohomology} で補う。
+:::
+
+## 切除とマイヤー–ヴィートリス完全列 {#at:sec-ex-excision}
+
+::: theorem 切除定理 {#at:excision keywords="excision theorem: if cl Z is contained in int A then H(X-Z, A-Z) -> H(X,A) is an isomorphism; equivalently for int A cup int B = X, H(B, A cap B) -> H(X,A) is an isomorphism" index="切除定理|せつじょていり, 切除|せつじょ"}
+1. $A,B\subset X$ で $\operatorname{int}A\cup\operatorname{int}B=X$ なら、包含 $(B,A\cap B)\to(X,A)$ はすべての $n$ で同型 $H_{n}(B,A\cap B)\cong H_{n}(X,A)$ を誘導する。
+2. 同値な形：$Z\subset A\subset X$ で $\overline{Z}\subset\operatorname{int}A$ なら、包含 $(X\setminus Z,A\setminus Z)\to(X,A)$ は同型を誘導する。
+:::
+
+::: proof
+**Step 1（1）.** $\mathcal{U}=\{A,B\}$ とすると $S^{\mathcal{U}}(X)=S(A)+S(B)$。$S(A)\cap S(B)=S(A\cap B)$（単体の像が $A$ と $B$ の両方に入る）なので、第二同型定理から $S(B)/S(A\cap B)\to(S(A)+S(B))/S(A)$ は鎖複体の同型。さらに $(S(A)+S(B))/S(A)=S^{\mathcal{U}}(X)/S^{\mathcal{U}_{A}}(A)$（$\mathcal{U}_{A}=\{A,A\cap B\}$ で $S^{\mathcal{U}_{A}}(A)=S(A)$）から $S(X)/S(A)$ への写像は、\ref{at:small-simplices} の相対版でホモロジーの同型。合成が包含の誘導写像。
+
+**Step 2（2）.** $B\defeq X\setminus Z$ とすると $\operatorname{int}B=X\setminus\overline{Z}\supset X\setminus\operatorname{int}A$ なので $\operatorname{int}A\cup\operatorname{int}B=X$、$A\cap B=A\setminus Z$。1 に帰着。逆に 1 は $Z\defeq X\setminus B$ とした 2 である。
+
+::: hypcheck
+- $\overline{Z}\subset\operatorname{int}A$ は Step 2 で内部が覆うことに使った。外すと偽：$X=[0,1]$, $A=Z=[0,\frac12]$ では $H_{*}(X\setminus Z,A\setminus Z)=H_{*}((\frac12,1],\varnothing)$ の $H_{0}=\mathbb{Z}$、$H_{0}(X,A)=0$。
+:::
+:::
+
+::: theorem マイヤー–ヴィートリス完全列 {#at:mayer-vietoris keywords="Mayer-Vietoris long exact sequence for X = int A cup int B, reduced version" index="マイヤー–ヴィートリス完全列|まいやーびーとりすかんぜんれつ"}
+$\operatorname{int}A\cup\operatorname{int}B=X$ なら、自然な長完全列
+$$
+\cdots\to H_{n}(A\cap B)\xrightarrow{(i_{*},-j_{*})}H_{n}(A)\oplus H_{n}(B)\xrightarrow{k_{*}+l_{*}}H_{n}(X)\xrightarrow{\partial_{*}}H_{n-1}(A\cap B)\to\cdots
+$$
+がある（$i,j,k,l$ は包含）。$A\cap B\ne\varnothing$ なら被約ホモロジーでも成り立つ。
+:::
+
+::: proof
+$0\to S(A\cap B)\xrightarrow{c\mapsto(c,-c)}S(A)\oplus S(B)\xrightarrow{(a,b)\mapsto a+b}S(A)+S(B)\to0$ は鎖複体の短完全列（核：$a+b=0$ なら $a=-b\in S(A)\cap S(B)=S(A\cap B)$）。長完全列（\ref{ha:long-exact-sequence}）と、$S(A)+S(B)=S^{\mathcal{U}}(X)\to S(X)$ がホモロジーの同型（\ref{at:small-simplices}）から。被約版は各複体に次数 $-1$ の $\mathbb{Z}$（$A\cap B$）、$\mathbb{Z}\oplus\mathbb{Z}$、$\mathbb{Z}$ を足しても完全（$A\cap B\ne\varnothing$ なので添加写像は全射）であることから。
+:::
+
+::: proposition 良い対と商空間 {#at:good-pair keywords="good pair: A closed nonempty and a deformation retract of an open neighborhood; then H_n(X,A) = reduced H_n(X/A)" index="良い対|よいつい, 商空間のホモロジー|しょうくうかんのほもろじー"}
+$A\subset X$ が空でない閉集合で、ある開近傍 $V$ の変位レトラクトである（**良い対**）とする。商写像 $q\colon(X,A)\to(X/A,\ast)$ は同型 $H_{n}(X,A)\cong H_{n}(X/A,\ast)\cong\tilde H_{n}(X/A)$ を誘導する。
+:::
+
+::: proof
+**Step 1（$V$ への取り替え）.** $V$ は $A$ を変位レトラクトにもつので $H_{n}(V,A)=0$（問題 \ref{at:prob-deformation-retract-relative}）。三つ組 $A\subset V\subset X$ の長完全列から $H_{n}(X,A)\to H_{n}(X,V)$ は同型。同様に $q(V)$ は $\ast$ を変位レトラクトにもつ（$V$ の変位ホモトピーは $A$ を各時刻で $A$ に写すので、\ref{top:homotopy-on-quotient} から $q(V)=V/A$ のホモトピーに降りる。$V$ は開で飽和しているので $q\restriction V$ は商写像）。よって $H_{n}(X/A,\ast)\to H_{n}(X/A,q(V))$ も同型。
+
+**Step 2（切除）.** $\overline{A}=A\subset V=\operatorname{int}V$ なので、切除（\ref{at:excision} の 2、$Z=A$）で $H_{n}(X\setminus A,V\setminus A)\to H_{n}(X,V)$ は同型。同様に $H_{n}(X/A\setminus\ast,q(V)\setminus\ast)\to H_{n}(X/A,q(V))$ も同型（$\{\ast\}=q(A)$ は閉、$q(V)$ は開）。
+
+**Step 3（同相）.** $q$ は $X\setminus A$（開で飽和）を $X/A\setminus\ast$ に同相に移し、$V\setminus A$ を $q(V)\setminus\ast$ に移す。よって対の同相 $(X\setminus A,V\setminus A)\cong(X/A\setminus\ast,q(V)\setminus\ast)$。
+
+**Step 4.** $q$ の誘導写像は Step 1〜3 の同型と可換な図式をなす（すべて包含か $q$ の制限）ので同型。$H_{n}(X/A,\ast)\cong\tilde H_{n}(X/A)$ は \ref{at:relative-homotopy-invariance}。
+
+::: hypcheck
+- **$V$ への変位レトラクト**：Step 1 で使った。外すと偽：$X=[0,1]$, $A=\{0\}\cup\{1/k:k\ge1\}$ では $X/A$ は無限個の円周のつながったもの（ハワイの耳飾りと同相であることが知られている）で、$H_{1}(X,A)$ は可算階数の自由アーベル群だが $H_{1}(X/A)$ は非可算であることが知られている（本サイト未収録）。
+- **$A$ が閉**：Step 2 の切除（$\overline{A}\subset\operatorname{int}V$）に使った。
+:::
+:::
+
+## 球面のホモロジーと応用 {#at:sec-ex-spheres}
+
+::: theorem 球面のホモロジー {#at:sphere-homology keywords="reduced homology of S^n is Z in degree n and zero otherwise; H_k(D^n, S^{n-1}) = Z for k = n" index="球面のホモロジー|きゅうめんのほもろじー"}
+$n\ge0$ について $\tilde H_{k}(S^{n})\cong\mathbb{Z}$（$k=n$）、$0$（$k\ne n$）。また $H_{k}(D^{n},S^{n-1})\cong\tilde H_{k-1}(S^{n-1})$ で、$k=n$ のときだけ $\mathbb{Z}$（$n\ge1$）。
+:::
+
+::: proof
+**Step 1（$n=0$）.** $S^{0}=\{\pm1\}$ の $H_{0}=\mathbb{Z}^{2}$（\ref{at:singular-h0-point}）、被約で $\mathbb{Z}$、他は $0$。
+
+**Step 2（被覆）.** $n\ge1$ とし、$U\defeq S^{n}\setminus\{N\}$, $V\defeq S^{n}\setminus\{S\}$（$N=e_{n+1}$, $S=-e_{n+1}$）。開集合で、立体射影で $\mathbb{R}^{n}$ と同相なので可縮、被約ホモロジーは $0$（\ref{at:singular-homotopy-invariance}）。$U\cap V\cong\mathbb{R}^{n}\setminus\{0\}$ は $S^{n-1}$ を変位レトラクトにもつ（\ref{at:homotopy-equivalent} の例 2）。
+
+**Step 3（マイヤー–ヴィートリス）.** 被約版（$U\cap V\ne\varnothing$）で $\tilde H_{k}(U)\oplus\tilde H_{k}(V)=0$ なので、$\partial_{*}\colon\tilde H_{k}(S^{n})\to\tilde H_{k-1}(U\cap V)\cong\tilde H_{k-1}(S^{n-1})$ は同型。帰納法で結論。
+
+**Step 4（円板）.** $D^{n}$ は可縮なので被約の長完全列で $\partial_{*}\colon H_{k}(D^{n},S^{n-1})\cong\tilde H_{k-1}(S^{n-1})$。
+:::
+
+::: corollary 円板はその境界にレトラクトしない {#at:no-retraction-sphere keywords="there is no retraction D^n -> S^{n-1}" index="レトラクションの非存在（一般次元）|れとらくしょんのひそんざいいっぱんじげん"}
+$n\ge1$ なら $S^{n-1}$ は $D^{n}$ のレトラクトでない。
+:::
+
+::: proof
+$r\circ i=1$ なら $\tilde H_{n-1}(S^{n-1})\xrightarrow{i_{*}}\tilde H_{n-1}(D^{n})\xrightarrow{r_{*}}\tilde H_{n-1}(S^{n-1})$ の合成が恒等。中央は $0$、両端は $\mathbb{Z}$（\ref{at:sphere-homology}）。矛盾。
+:::
+
+::: theorem ブラウワーの不動点定理 {#at:brouwer-fixed-point keywords="every continuous self-map of the closed n-disk has a fixed point" index="ブラウワーの不動点定理|ぶらうわーのふどうてんていり"}
+$n\ge1$ について、連続写像 $f\colon D^{n}\to D^{n}$ は不動点をもつ。
+:::
+
+::: proof
+\ref{at:brouwer-2} の証明は $\mathbb{R}^{2}$ の内積の性質だけを使っており、$\mathbb{R}^{n}$ でそのまま成り立つ：不動点がなければ $r(x)\defeq x+\lambda(x)(x-f(x))$（$\lambda$ は同じ式）は連続なレトラクション $D^{n}\to S^{n-1}$ で、\ref{at:no-retraction-sphere} に反する。
+:::
+
+::: theorem 局所ホモロジーと次元の不変性 {#at:invariance-of-dimension keywords="local homology H_k(U, U - x) of an open subset of R^n is Z in degree n; nonempty open subsets of R^m and R^n are homeomorphic only if m = n" index="局所ホモロジー|きょくしょほもろじー, 次元の位相不変性|じげんのいそうふへんせい"}
+$U\subset\mathbb{R}^{n}$ が開で $x\in U$ なら、$H_{k}(U,U\setminus\{x\})\cong\mathbb{Z}$（$k=n$）、$0$（$k\ne n$）。したがって、空でない開集合 $U\subset\mathbb{R}^{m}$ と $V\subset\mathbb{R}^{n}$ が同相なら $m=n$。とくに $\mathbb{R}^{m}\cong\mathbb{R}^{n}$ なら $m=n$。
+:::
+
+::: proof
+**Step 1（切除）.** $Z\defeq\mathbb{R}^{n}\setminus U$ は閉で、$\mathbb{R}^{n}\setminus\{x\}$（開）に含まれるので、切除で $H_{k}(U,U\setminus\{x\})\cong H_{k}(\mathbb{R}^{n},\mathbb{R}^{n}\setminus\{x\})$。
+
+**Step 2（長完全列）.** $\mathbb{R}^{n}$ は可縮なので $H_{k}(\mathbb{R}^{n},\mathbb{R}^{n}\setminus\{x\})\cong\tilde H_{k-1}(\mathbb{R}^{n}\setminus\{x\})\cong\tilde H_{k-1}(S^{n-1})$（平行移動と変位レトラクト）。\ref{at:sphere-homology} で結論（$n=0$ のときは $U=\{x\}$ で $H_{0}(\{x\},\varnothing)=\mathbb{Z}$）。
+
+**Step 3.** 同相写像 $h\colon U\to V$ は $(U,U\setminus\{x\})\cong(V,V\setminus\{h(x)\})$ を与えるので、局所ホモロジーが一致し、$\mathbb{Z}$ となる次数 $m$ と $n$ が等しい。
+:::
+
+::: supplement
+**一般化.** 局所ホモロジーは多様体の次元と向きの定義に使われる（\ref[ポアンカレ双対性]{at:page-poincare-duality}）。埋め込まれた球面と円板の補集合のホモロジーから、ジョルダン–ブラウワーの分離定理と領域不変性が得られる（\ref[ジョルダン–ブラウワーの分離定理と領域不変性]{at:page-jordan-brouwer}）。
+
+**高い視点.** 切除とマイヤー–ヴィートリスは「ホモロジーは局所的な情報から貼り合わせで決まる」ことを表し、層の理論のチェック複体（\ref{cat:page-flasque-cech}）と同じ形の貼り合わせの完全列である。比喩で言えば、ホモロジーは「地図帳」で、切除は「各ページの端の余白（$A$ の深い内部）は切り取ってよい」、マイヤー–ヴィートリスは「2 ページの重なりを手がかりに全体の地図をつなぐ」規則にあたる。小さい単体の定理は「地図の縮尺をいくら細かくしても内容は変わらない」ことを保証している。
+:::
+
+::: supplement 計算の観点
+\ref{at:subdivision-diameter} の評価は、$S^{m}\iota_{n}$ が $((n+1)!)^{m}$ 個の単体からなる（各段で $(n+1)!$ 倍）ことと引き換えに直径を $(\frac{n}{n+1})^{m}$ 倍にする。ルベーグ数 $\delta$ に必要な $m$ は $\log(\operatorname{diam}/\delta)/\log(1+\frac1n)\approx n\log(\operatorname{diam}/\delta)$ 程度で、単体の数は $1/\delta$ について多項式的に増えるが、その次数（およそ $n\log((n+1)!)$）は次元について超線形に増える。実際の計算（数値的な位相データ解析など）では、細分ではなく被覆の脈体や胞体分割を使う。
+:::
+
+## 問題 {#at:sec-ex-problems}
+
+::: problem {#at:prob-wedge-spheres}
+$\tilde H_{k}(S^{n}\vee S^{m})$ を求めよ（基点はそれぞれの点 $e_{1}$）。
+:::
+
+::: solution
+ウェッジ点の開近傍（各球面の小さな開円板の和）は基点を変位レトラクトにもつので、$A=S^{n}\cup V_{m}$, $B=V_{n}\cup S^{m}$（$V$ は基点の近傍）とするとマイヤー–ヴィートリス（被約）で $A\cap B=V_{n}\vee V_{m}$ は可縮、$A\simeq S^{n}$, $B\simeq S^{m}$。よって $\tilde H_{k}(S^{n}\vee S^{m})\cong\tilde H_{k}(S^{n})\oplus\tilde H_{k}(S^{m})$。$n\ne m$ なら次数 $n$, $m$ で $\mathbb{Z}$、$n=m$ なら次数 $n$ で $\mathbb{Z}^{2}$。
+:::
+
+::: problem {#at:prob-sphere-not-retract-of-ball-boundary}
+$S^{n}$ は可縮でないこと、および $n\ne m$ なら $S^{n}$ と $S^{m}$ はホモトピー同値でないことを示せ。
+:::
+
+::: solution
+$\tilde H_{n}(S^{n})\cong\mathbb{Z}\ne0$ なので、可縮なら被約ホモロジーが $0$（\ref{at:singular-homotopy-invariance}）であることに反する。$S^{n}\simeq S^{m}$ なら $\tilde H_{n}$ が同型だが、$\tilde H_{n}(S^{m})=0$（$n\ne m$）。
+:::
+
+::: problem {#at:prob-suspension}
+$X$ の（非被約）懸垂 $\Sigma X\defeq X\times[-1,1]/(X\times\{1\},X\times\{-1\}\text{ をそれぞれ 1 点に})$ について、$\tilde H_{k+1}(\Sigma X)\cong\tilde H_{k}(X)$ を示せ（$X\ne\varnothing$）。
+:::
+
+::: solution
+$U\defeq\Sigma X\setminus$（下の頂点）、$V\defeq\Sigma X\setminus$（上の頂点）は開で、それぞれ頂点に縮む（錐 $X\times(-1,1]/X\times\{1\}$ を $t\mapsto(1-s)t+s$ で縮める。商空間上のホモトピーは \ref{top:homotopy-on-quotient}）ので可縮。$U\cap V\cong X\times(-1,1)\simeq X$。被約マイヤー–ヴィートリスで $\partial_{*}\colon\tilde H_{k+1}(\Sigma X)\cong\tilde H_{k}(X)$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
