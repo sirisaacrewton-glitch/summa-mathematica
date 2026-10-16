@@ -526,3 +526,4 @@
 | simple module / semisimple module / completely reducible / Schur's lemma / semisimple ring | 単純加群 / 半単純加群 / 完全可約 / シューアの補題 / 半単純環 | 既約加群 | 本棚：半単純環 1（単純加群・シューアの補題は用例なし、仮）。mod:page-semisimple-modules |
 | Wedderburn–Artin theorem / simple artinian ring / Jacobson radical (noncommutative) / Hopkins–Levitzki | ウェダーバーン＝アルティンの定理 / 単純アルティン環 / ジャコブソン根基 J(R) / ホプキンス＝レヴィツキの定理 | — | 本棚：ジャコブソン根基 1、他は用例なし（仮）。可換環のページでは rad(A) と書いている。mod:page-wedderburn-artin, mod:page-jacobson-radical |
 | group ring / group algebra / representation / irreducible representation / Maschke's theorem / class sum | 群環 / 群環（k 代数として） / 表現 / 既約表現 / マシュケの定理 / 類和 | 群多元環 | 本棚：群環 3、群多元環 0。mod:page-maschke |
+| dual group (character group) / annihilator | 指標群 / 零化群 | 双対群 | 雪江（指標群 19, 双対群 1）。grp:dual-group |
