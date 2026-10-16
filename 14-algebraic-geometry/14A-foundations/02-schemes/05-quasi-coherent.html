@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>準連接層 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="14-algebraic-geometry/14A-foundations/02-schemes/05-quasi-coherent.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 準連接層 {#ag:page-quasi-coherent keywords="sheaf of O_X-modules, M tilde, stalk M_p, sections over D(f) are M_f, quasi-coherent sheaf, coherent sheaf, extension lemma f^n s, quasi-coherent sheaves on Spec A are M tilde, equivalence A-Mod and QCoh(Spec A), global sections exact on affine schemes, closed subschemes of an affine scheme correspond to ideals, closed subscheme of affine is affine, intersection of affine opens in a separated scheme, extension by zero is not quasi-coherent"}
+
+アフィンスキーム $\operatorname{Spec}A$ 上で、$A$ 加群 $M$ から構造層と同じ作り方で $\mathcal{O}$ 加群の層 $\widetilde{M}$ を作る。局所的にこの形をした $\mathcal{O}_{X}$ 加群を**準連接層**という。中心となる定理は、アフィンスキーム上では**すべての**準連接層が $\Gamma(X,\mathcal{F})^{\sim}$ と同型で、$A$ 加群の圏と準連接層の圏が同値になることである。系として、アフィンスキームの閉部分スキームはイデアルと一対一に対応し（\ref{ag:closed-immersion-affine} の注意で予告）、分離スキームのアフィン開集合の交わりはアフィンである（\ref{ag:separated-criterion} の注意で予告）。
+
+> 資料によらず、標準的な議論で書いた。
+
+## 記法と定義の確認 {#ag:sec-qc-notation}
+
+::: notation
+- 層の核・余核とその茎は \ref{cat:sheaf-kernel-cokernel}。層の射が同型であることは茎で判定できる。開基の上で与えられた層の射は一意に層の射に延びる（\ref{ag:morphisms-to-affine} の Step 3 と同じ）。0 拡張 $j_{!}$ は \ref{cat:extension-by-zero}, \ref{cat:extension-by-zero-properties}。
+- 分数加群 $M_{\mathfrak{p}}$, $M_{f}$ は \ref{ring:module-localization}、局所化の完全性は \ref{ring:localization-exact}、局所的性質（$M=0$、単射・全射は局所的）は \ref{ring:local-properties}、台は \ref{ring:support-properties}。
+- スペクトル・構造層は \ref{ag:spec-topology}, \ref{ag:structure-sheaf}, \ref{ag:structure-sheaf-properties}。単元の開集合 $X_{f}$ は \ref{ag:invertible-locus}（アフィンでは $X_{f}=D(f)$）。閉埋め込みは \ref{ag:immersions}, \ref{ag:closed-immersion-affine}、分離射は \ref{ag:separated}, \ref{ag:diagonal-immersion}。
+- **選択公理**：\ref{ag:spec-topology}, \ref{ag:structure-sheaf-properties}, \ref{ring:local-properties} を通して使う。
+:::
+
+## $\mathcal{O}_{X}$ 加群と $\widetilde{M}$ {#ag:sec-qc-tilde}
+
+::: definition $\mathcal{O}_{X}$ 加群 {#ag:o-module keywords="sheaf of O_X-modules, morphism of O_X-modules, kernel and cokernel" index="O_X 加群|おーえっくすかぐん"}
+環付き空間 $(X,\mathcal{O}_{X})$ 上の **$\mathcal{O}_{X}$ 加群**とは、アーベル群の層 $\mathcal{F}$ と、各開集合 $U$ での $\mathcal{O}_{X}(U)$ 加群の構造で、制限と両立する（$(as)|_{V}=a|_{V}s|_{V}$）ものをいう。射は、各 $U$ で $\mathcal{O}_{X}(U)$ 線形な層の射。$\mathcal{O}_{X}$ 加群の射の核と余核（\ref{cat:sheaf-kernel-cokernel}）は再び $\mathcal{O}_{X}$ 加群（核は切断ごと、余核は前層の余核の層化で、層化は茎ごとの構成なので加群の構造を保つ）で、茎 $\mathcal{F}_{x}$ は $\mathcal{O}_{X,x}$ 加群。
+:::
+
+::: definition 加群に付随する層 {#ag:tilde keywords="M tilde: sections are locally fractions m/f" index="加群に付随する層|かぐんにふずいするそう"}
+$A$ 加群 $M$ と開集合 $U\subset\operatorname{Spec}A$ について、$\widetilde{M}(U)$ を、写像 $s:U\to\coprod_{\mathfrak{p}\in U}M_{\mathfrak{p}}$（$s(\mathfrak{p})\in M_{\mathfrak{p}}$）で、各点の近傍 $V$ と $m\in M$, $f\in A$ で、$V$ の各点 $\mathfrak{q}$ で $f\notin\mathfrak{q}$ かつ $s(\mathfrak{q})=m/f$ となるものの集合とする（\ref{ag:structure-sheaf} で $A$ を $M$ に替えたもの）。
+:::
+
+::: theorem $\widetilde{M}$ の基本性質 {#ag:tilde-properties keywords="M tilde is an O-module; stalk at p is M_p; sections over D(f) are M_f; global sections M; restriction to D(g) is (M_g) tilde; tilde is exact and fully faithful" index="加群に付随する層の性質|かぐんにふずいするそうのせいしつ"}
+$X=\operatorname{Spec}A$, $\mathcal{O}=\mathcal{O}_{X}$ とする。
+1. $\widetilde{M}$ は $\mathcal{O}$ 加群。
+2. 茎 $\widetilde{M}_{\mathfrak{p}}\cong M_{\mathfrak{p}}$。
+3. （AC）$M_{f}\to\widetilde{M}(D(f))$, $m/f^{n}\mapsto(\mathfrak{p}\mapsto m/f^{n})$ は $A_{f}$ 加群の同型。とくに $\Gamma(X,\widetilde{M})\cong M$。
+4. $D(g)\cong\operatorname{Spec}A_{g}$ のもとで $\widetilde{M}|_{D(g)}\cong(M_{g})^{\sim}$。
+5. （AC）$M\mapsto\widetilde{M}$ は完全な関手で、$\operatorname{Hom}_{A}(M,N)\to\operatorname{Hom}_{\mathcal{O}}(\widetilde{M},\widetilde{N})$, $\varphi\mapsto\widetilde{\varphi}$ は全単射（逆は $\Gamma$）。
+:::
+
+::: proof
+**Step 1（1・2）.** 条件は局所的なので層。$\mathcal{O}(U)$ の元 $a$（局所的に $b/g$）と $s$（局所的に $m/f$）の積 $as$ は局所的に $bm/(gf)$ なので $\widetilde{M}(U)$ に入り、加群になる。茎：芽 $s_{\mathfrak{p}}\mapsto s(\mathfrak{p})$ が同型であることは \ref{ag:structure-sheaf-properties} の Step 2 と同じ（全射：$m/f$ は $D(f)$ 上の切断 $\mathfrak{q}\mapsto m/f$ の芽の像。単射：$m/f=m'/f'$ in $M_{\mathfrak{p}}$ なら $h\notin\mathfrak{p}$ で $h(f'm-fm')=0$ で、$D(ff'h)$ の上で二つの切断は一致）。
+
+**Step 2（3：単射）.** $m/f^{n}$ が $D(f)$ のすべての点で $0$ とする。各 $\mathfrak{p}\in D(f)$ で $u\notin\mathfrak{p}$, $um=0$ となる $u$ があり、$\operatorname{Ann}(m)\not\subset\mathfrak{p}$。よって $V(\operatorname{Ann}m)\subset V(f)$、（AC）$f\in\sqrt{\operatorname{Ann}m}$、$f^{k}m=0$、$m/f^{n}=0$ in $M_{f}$。
+
+**Step 3（3：被覆と分母の調整）.** $s\in\widetilde{M}(D(f))$ をとる。\ref{ag:structure-sheaf-properties} の Step 4 と同じく、$D(f)$ は有限個の $D(h_{i})$ で覆え、$D(h_{i})$ 上 $s=m_{i}/h_{i}$ と書ける。$D(h_{i}h_{j})$ 上で $m_{i}/h_{i}=m_{j}/h_{j}$ なので、Step 2（元 $h_{i}h_{j}$、加群 $M$）から $(h_{i}h_{j})^{n}(h_{j}m_{i}-h_{i}m_{j})=0$。$m_{i}$ を $h_{i}^{n}m_{i}$、$h_{i}$ を $h_{i}^{n+1}$ に替えて $h_{j}m_{i}=h_{i}m_{j}$ とできる。
+
+**Step 4（3：貼り合わせ）.** （AC）$f^{l}=\sum b_{i}h_{i}$ と書け、$m\defeq\sum b_{i}m_{i}$ とおくと $h_{j}m=\sum b_{i}h_{i}m_{j}=f^{l}m_{j}$。よって $D(h_{j})$ 上 $m/f^{l}=m_{j}/h_{j}=s$。$A_{f}$ 線形性は定義から。
+
+**Step 5（4）.** $\mathfrak{p}\in D(g)$ と $A_{g}$ の素イデアル $\mathfrak{p}A_{g}$ について $(M_{g})_{\mathfrak{p}A_{g}}\cong M_{\mathfrak{p}}$（分数の分数：$g$ はすでに単元）。この同一視のもとで、二つの層の切断の定義（局所的に $m/f$ の形）は一致する（$m/(g^{k}f)$ は $(m/g^{k})/f$）。
+
+**Step 6（5：完全性）.** 茎で見ると $\widetilde{\varphi}_{\mathfrak{p}}=\varphi_{\mathfrak{p}}$ で、局所化は完全（\ref{ring:localization-exact}）、層の列の完全性は茎で判定できる（\ref{cat:sheaf-kernel-cokernel}）。
+
+**Step 7（5：全単射）.** $\Gamma(\widetilde{\varphi})=\varphi$（3）なので単射の逆写像の候補は $\Gamma$。$\psi:\widetilde{M}\to\widetilde{N}$ について $\varphi\defeq\Gamma(\psi)$ とすると、$D(f)$ 上 $\psi_{D(f)}:M_{f}\to N_{f}$ は $A_{f}$ 線形で、制限との両立から $m/1\mapsto\varphi(m)/1$、よって $\psi_{D(f)}=\varphi_{f}=\widetilde{\varphi}_{D(f)}$。開基の上で一致する層の射は等しいので $\psi=\widetilde{\varphi}$。
+:::
+
+## 準連接層 {#ag:sec-qc-quasi-coherent}
+
+::: definition 準連接層と連接層 {#ag:quasi-coherent keywords="quasi-coherent sheaf: locally M tilde; coherent sheaf on a noetherian scheme: locally M tilde with M finitely generated" index="準連接層|じゅんれんせつそう, 連接層|れんせつそう"}
+スキーム $X$ 上の $\mathcal{O}_{X}$ 加群 $\mathcal{F}$ が**準連接**であるとは、$X$ のアフィン開被覆 $U_{i}=\operatorname{Spec}A_{i}$ と $A_{i}$ 加群 $M_{i}$ で $\mathcal{F}|_{U_{i}}\cong\widetilde{M_{i}}$ となるものがあることをいう。$X$ がネーターで、$M_{i}$ をすべて有限生成にとれるとき**連接**という。
+:::
+
+::: lemma 切断の延長 {#ag:qc-extension keywords="for a quasi-coherent sheaf on a suitable quasi-compact scheme: a global section vanishing on X_f is killed by a power of f; f^n times a section on X_f extends" index="切断の延長|せつだんのえんちょう"}
+（AC）スキーム $X$ が有限個のアフィン開集合 $U_{k}=\operatorname{Spec}A_{k}$（$k=1,\dots,r$）で覆われ、$\mathcal{F}|_{U_{k}}\cong\widetilde{M_{k}}$ とする。$f\in\Gamma(X,\mathcal{O}_{X})$ とする。
+1. $s\in\Gamma(X,\mathcal{F})$ が $s|_{X_{f}}=0$ をみたせば、ある $n$ で $f^{n}s=0$。
+2. さらに各 $U_{k}\cap U_{l}$ が準コンパクトなら、任意の $t\in\mathcal{F}(X_{f})$ について、ある $n$ で $f^{n}t$ は $\Gamma(X,\mathcal{F})$ の元の制限になる。
+:::
+
+::: proof
+**Step 1（1）.** $f_{k}\defeq f|_{U_{k}}\in A_{k}$ とすると $X_{f}\cap U_{k}=D(f_{k})$。$s|_{U_{k}}\in M_{k}$（\ref{ag:tilde-properties} の 3）の $(M_{k})_{f_{k}}$ での像は $0$ なので、$f_{k}^{n_{k}}s|_{U_{k}}=0$。$n\defeq\max n_{k}$ とすれば、$f^{n}s$ はすべての $U_{k}$ で $0$、層の条件から $0$。
+
+**Step 2（2：各片で延長）.** $t|_{D(f_{k})}\in(M_{k})_{f_{k}}$ なので、$t|_{D(f_{k})}=t_{k}/f_{k}^{n}$（$t_{k}\in M_{k}=\mathcal{F}(U_{k})$、$n$ は共通にとる）、すなわち $f^{n}t$ と $t_{k}$ は $X_{f}\cap U_{k}$ 上で一致する。
+
+**Step 3（2：重なりでの調整）.** $t_{k}-t_{l}\in\mathcal{F}(U_{k}\cap U_{l})$ は $X_{f}\cap U_{k}\cap U_{l}$ 上で $f^{n}t-f^{n}t=0$。$U_{k}\cap U_{l}$ は準コンパクトなので $U_{k}$ の主開集合の有限個で覆え、それぞれの上で $\mathcal{F}$ は $\widetilde{\ \ }$ の形（\ref{ag:tilde-properties} の 4）なので、1 を $U_{k}\cap U_{l}$ に使えて、$f^{m}(t_{k}-t_{l})=0$（$m$ は共通にとる）。
+
+**Step 4（2：貼り合わせ）.** $f^{m}t_{k}$ は重なりで一致するので、層の条件から $s\in\Gamma(X,\mathcal{F})$ に貼り合わさり、$X_{f}\cap U_{k}$ 上で $s=f^{m}t_{k}=f^{m+n}t$。よって $s|_{X_{f}}=f^{m+n}t$。
+:::
+
+::: theorem アフィンスキーム上の準連接層 {#ag:qc-affine keywords="on Spec A every quasi-coherent sheaf is Gamma tilde; QCoh(Spec A) equivalent to A-Mod; on any scheme F is quasi-coherent iff F|_U = F(U) tilde for all affine U" index="準連接層（アフィン）|じゅんれんせつそうあふぃん"}
+（AC）
+1. $X=\operatorname{Spec}A$ 上の準連接層 $\mathcal{F}$ について、$M\defeq\Gamma(X,\mathcal{F})$ とすると $\widetilde{M}\cong\mathcal{F}$。
+2. $\widetilde{\ \ }$ と $\Gamma$ は、$A$ 加群の圏と $X$ 上の準連接層の圏の間の互いに逆な圏同値。
+3. スキーム $X$ 上の $\mathcal{O}_{X}$ 加群 $\mathcal{F}$ が準連接 $\iff$ 任意のアフィン開集合 $U$ について $\mathcal{F}|_{U}\cong\mathcal{F}(U)^{\sim}$。準連接層の射の核・余核は準連接。
+:::
+
+::: proof
+**Step 1（有限被覆）.** $\mathcal{F}|_{V_{i}}\cong\widetilde{N_{i}}$ となるアフィン開被覆 $V_{i}$ をとる。各点 $x$ について $x\in D(g)\subset V_{i}$ となる $g\in A$ をとると、$D(g)$ は $V_{i}$ の中で $g|_{V_{i}}$ の単元の開集合、すなわち $V_{i}$ の主開集合なので、\ref{ag:tilde-properties} の 4 から $\mathcal{F}|_{D(g)}$ は $\widetilde{\ \ }$ の形。$X$ は準コンパクトなので有限個の $D(g_{1}),\dots,D(g_{r})$ で覆え、$D(g_{k})\cap D(g_{l})=D(g_{k}g_{l})$ はアフィンで準コンパクト。よって \ref{ag:qc-extension} が $X$ に使える。
+
+**Step 2（1：写像の構成）.** $f\in A$ について、$\alpha_{f}:M_{f}\to\mathcal{F}(D(f))$, $m/f^{n}\mapsto(f|_{D(f)})^{-n}\cdot m|_{D(f)}$ を定める（$\mathcal{F}(D(f))$ は $\mathcal{O}(D(f))=A_{f}$ 加群で $f$ は単元）。well-defined で $A_{f}$ 線形、制限と両立する。
+
+**Step 3（1：同型）.** 単射：$\alpha_{f}(m/f^{n})=0$ なら $m|_{D(f)}=0$、\ref{ag:qc-extension} の 1 から $f^{k}m=0$、よって $m/f^{n}=0$。全射：$t\in\mathcal{F}(D(f))$ について \ref{ag:qc-extension} の 2 から $f^{n}t=m|_{D(f)}$（$m\in M$）、$t=\alpha_{f}(m/f^{n})$。こうして主開集合の開基の上で同型 $\widetilde{M}(D(f))=M_{f}\cong\mathcal{F}(D(f))$ が得られ、層の同型 $\widetilde{M}\cong\mathcal{F}$ に延びる（茎は開基の上の余極限なので茎ごとに同型）。
+
+**Step 4（2）.** 1 から $\widetilde{\Gamma(\mathcal{F})}\cong\mathcal{F}$、\ref{ag:tilde-properties} の 3 から $\Gamma(\widetilde{M})\cong M$、射については \ref{ag:tilde-properties} の 5。
+
+**Step 5（3）.** ⇐ は定義。⇒：アフィン開集合 $U$ の上で $\mathcal{F}|_{U}$ は準連接（$U$ を $V_{i}$ の主開集合で覆えばよい：Step 1 と同じ）なので、1 を $U$ に使う。核・余核：アフィン開集合 $U$ 上で、準連接層の射は 2 から $\widetilde{\varphi}$（$\varphi:M\to N$）の形で、$\widetilde{\ \ }$ は完全なので $\ker\widetilde{\varphi}\cong(\ker\varphi)^{\sim}$、余核も同様。
+:::
+
+::: corollary アフィン上の大域切断の完全性 {#ag:gamma-exact-affine keywords="global sections functor is exact on quasi-coherent sheaves on an affine scheme" index="大域切断の完全性|たいいきせつだんのかんぜんせい"}
+（AC）$X=\operatorname{Spec}A$ 上の準連接層の完全列 $0\to\mathcal{F}'\to\mathcal{F}\to\mathcal{F}''\to0$ について、$0\to\Gamma(\mathcal{F}')\to\Gamma(\mathcal{F})\to\Gamma(\mathcal{F}'')\to0$ は完全。
+:::
+
+::: proof
+\ref{ag:qc-affine} の 2 から、列は $A$ 加群の列 $0\to M'\to M\to M''\to0$ の $\widetilde{\ \ }$ と同型。茎で完全なので、すべての $\mathfrak{p}$ で $0\to M'_{\mathfrak{p}}\to M_{\mathfrak{p}}\to M''_{\mathfrak{p}}\to0$ は完全。各位置のホモロジー（核/像）は局所化と交換する（\ref{ring:localization-exact}）ので、ホモロジー加群 $H$ はすべての $\mathfrak{p}$ で $H_{\mathfrak{p}}=0$、\ref{ring:local-properties} の 1 から $H=0$。
+:::
+
+::: remark 準連接でないと何が起こるか
+一般の $\mathcal{O}_{X}$ 加群では、\ref{ag:gamma-exact-affine} は成り立たない。この「アフィン上では準連接層の大域切断が完全」が、層コホモロジーの消滅定理（セールの定理）の出発点になる（\ref[スキームのコホモロジー]{ag:page-scheme-cohomology}）。
+:::
+
+::: example 準連接層の例と反例 {#ag:qc-examples}
+1. $\mathcal{O}_{X}$ は準連接（$\widetilde{A}=\mathcal{O}$）。ネーターな $X$ では連接。
+2. **0 拡張は準連接でない**：DVR $R$（商体 $K$）、$X=\operatorname{Spec}R=\{\mathfrak{m},\xi\}$、$U=\{\xi\}=D(t)$ とし、$\mathcal{F}\defeq j_{!}(\mathcal{O}_{X}|_{U})$ とする。茎は $\mathcal{F}_{\xi}=K\neq0$, $\mathcal{F}_{\mathfrak{m}}=0$（\ref{cat:extension-by-zero-properties} の 1）。大域切断 $s$ は $\mathfrak{m}$ での芽が $0$ なので $\mathfrak{m}$ のある近傍で $0$ だが、$\mathfrak{m}$ を含む開集合は $X$ だけなので $s=0$。準連接なら $\mathcal{F}\cong\Gamma(\mathcal{F})^{\sim}=0$ で矛盾。
+3. **準連接だが連接でない**：$A=k[x]$, $M=k(x)$ とすると、$\widetilde{M}$ は準連接だが、$k(x)$ は有限生成 $k[x]$ 加群でない（有限個の生成元 $p_{i}/q_{i}$ で生成されるなら、すべての元の分母は $\prod q_{i}$ を割り切るが、$\prod q_{i}$ と互いに素な既約多項式 $r$ について $1/r$ はそうならない）ので連接でない（\ref{ag:coherent-affine}）。
+:::
+
+::: proposition アフィン上の連接層 {#ag:coherent-affine keywords="on Spec A, a quasi-coherent sheaf is locally of the form M tilde with M finitely generated iff Gamma is finitely generated" index="連接層（アフィン）|れんせつそうあふぃん"}
+（AC）$X=\operatorname{Spec}A$ 上の準連接層 $\mathcal{F}$ について、アフィン開被覆 $\{V_{i}\}$ で $\mathcal{F}|_{V_{i}}\cong\widetilde{N_{i}}$（$N_{i}$ は有限生成 $\mathcal{O}(V_{i})$ 加群）となるものがある $\iff$ $\Gamma(X,\mathcal{F})$ が有限生成 $A$ 加群。とくに $A$ がネーターなら、$\mathcal{F}$ が連接 $\iff$ $\Gamma(X,\mathcal{F})$ が有限生成。
+:::
+
+::: proof
+**Step 1（⇐）.** $\mathcal{F}\cong\widetilde{M}$（\ref{ag:qc-affine}）で被覆 $\{X\}$ をとればよい。
+
+**Step 2（⇒：局所的に有限生成）.** $M\defeq\Gamma(\mathcal{F})$、$\mathcal{F}\cong\widetilde{M}$。\ref{ag:qc-affine} の Step 1 と同じく、$D(g)\subset V_{i}$ をとると、$\mathcal{F}|_{D(g)}$ は $(N_{i})_{g|}$（有限生成 $A_{g}$ 加群：生成元の像で生成される）の $\widetilde{\ \ }$ で、一方 $(M_{g})^{\sim}$ でもあるので、\ref{ag:tilde-properties} の 5（$\operatorname{Spec}A_{g}$ 上）から $M_{g}$ は有限生成 $A_{g}$ 加群。
+
+**Step 3（⇒：有限個の生成元）.** 有限個の $g_{1},\dots,g_{r}$ で $X$ を覆い（準コンパクト）、$M_{g_{j}}$ の生成元を $m_{jk}/g_{j}^{e}$ とする。$M'\subset M$ を $m_{jk}$ 全体で生成される部分加群とすると、$M'_{g_{j}}=M_{g_{j}}$（$1/g_{j}^{e}$ は単元）なので $(M/M')_{g_{j}}=0$（\ref{ring:localization-exact}）。各素イデアル $\mathfrak{p}$ はある $D(g_{j})$ に入り、$(M/M')_{\mathfrak{p}}$ は $(M/M')_{g_{j}}=0$ のさらなる局所化なので $0$。\ref{ring:local-properties} の 1 から $M=M'$、有限生成。
+:::
+
+## 閉部分スキームとイデアル {#ag:sec-qc-closed}
+
+::: theorem アフィンスキームの閉部分スキーム {#ag:closed-subschemes-affine keywords="every closed subscheme of Spec A is Spec A/I for a unique ideal I; closed subschemes of affine schemes are affine" index="閉部分スキーム（アフィン）|へいぶぶんすきーむあふぃん"}
+（AC）$i:Z\to X=\operatorname{Spec}A$ を閉埋め込みとすると、ただ一つのイデアル $I$ と同型 $Z\cong\operatorname{Spec}A/I$ で、$i$ が $\operatorname{Spec}A/I\to\operatorname{Spec}A$ と一致するものがある。とくに $Z$ はアフィン。
+:::
+
+::: proof
+**Step 1（$Z$ のよい被覆）.** $z\in Z$ について、アフィン開近傍 $V\ni z$ をとる。$i(V)$ は $i(Z)$ の開集合（$i$ は像への同相）なので $i(V)=i(Z)\cap W$（$W$ は $X$ の開集合）と書け、$i(z)\in D(g)\subset W$ をとる。$i^{-1}(D(g))$ は $g$ の引き戻し $\bar{g}\in\Gamma(Z,\mathcal{O}_{Z})$ の単元の開集合 $Z_{\bar{g}}$ で、$V$ に含まれ、$V$ の主開集合 $D_{V}(\bar{g}|_{V})$ に等しいのでアフィン。$i(Z)$ は準コンパクトな $X$ の閉集合で準コンパクトなので、$Z$ は有限個の $Z_{\bar{g}_{k}}$（アフィン）で覆え、$Z_{\bar{g}_{k}}\cap Z_{\bar{g}_{l}}=Z_{\bar{g}_{k}\bar{g}_{l}}$ は $Z_{\bar{g}_{k}}$ の主開集合でアフィン。
+
+**Step 2（$i_{*}\mathcal{O}_{Z}$ は準連接）.** $B\defeq\Gamma(Z,\mathcal{O}_{Z})$ とおく。$f\in A$ について $(i_{*}\mathcal{O}_{Z})(D(f))=\mathcal{O}_{Z}(Z_{\bar{f}})$。Step 1 の被覆について \ref{ag:qc-extension} を $Z$ と $\mathcal{O}_{Z}$ に使うと、\ref{ag:qc-affine} の Step 2・3 と同じ議論で $B_{f}\cong\mathcal{O}_{Z}(Z_{\bar{f}})$（$\bar{f}$ は $f$ の $B$ での像で、$B_{f}=B_{\bar{f}}$）。よって $i_{*}\mathcal{O}_{Z}\cong\widetilde{B}$（$B$ を $A$ 加群とみる）。
+
+**Step 3（$A\to B$ は全射）.** $i^{\#}:\mathcal{O}_{X}=\widetilde{A}\to i_{*}\mathcal{O}_{Z}=\widetilde{B}$ は、\ref{ag:tilde-properties} の 5 から $\Gamma$ をとった $\theta:A\to B$ の $\widetilde{\ \ }$。$i^{\#}$ は茎で全射なので、すべての $\mathfrak{p}$ で $\theta_{\mathfrak{p}}$ は全射、\ref{ring:local-properties} の 2 から $\theta$ は全射。$I\defeq\ker\theta$ とおくと $B\cong A/I$。
+
+**Step 4（$Z\cong\operatorname{Spec}B$）.** \ref{ag:morphisms-to-affine} から、$\mathrm{id}_{B}$ に対応する射 $\rho:Z\to\operatorname{Spec}B$ があり、$\operatorname{Spec}B\to\operatorname{Spec}A$ との合成は $\theta$ に対応するので $i$ に等しい。位相：$i_{*}\mathcal{O}_{Z}$ の茎は $i(Z)$ の点で $\mathcal{O}_{Z,z}\neq0$、外で $0$ なので、$i(Z)=\operatorname{Supp}\widetilde{B}=\operatorname{Supp}(A/I)=V(I)$（\ref{ring:support-properties} の 1）。$i:Z\to V(I)$ と $\operatorname{Spec}B\to V(I)$ はともに同相なので $\rho$ も同相。層：$\rho^{\#}:\mathcal{O}_{\operatorname{Spec}B}\to\rho_{*}\mathcal{O}_{Z}$ を $X$ に順像で送ると $\widetilde{B}\to i_{*}\mathcal{O}_{Z}$ の同型（$\Gamma$ で恒等）になり、閉集合への同相による順像は茎を変えないので、$\rho^{\#}$ は茎で同型。よって $\rho$ は同型。
+
+**Step 5（一意性）.** $I$ は $A\to\Gamma(Z,\mathcal{O}_{Z})$ の核として $i$ から決まる。
+:::
+
+::: corollary 分離スキームのアフィン開集合の交わり {#ag:separated-affine-intersection keywords="in a scheme separated over an affine scheme, the intersection of two affine opens is affine and O(U) tensor O(V) -> O(U cap V) is surjective" index="アフィン開集合の交わり|あふぃんかいしゅうごうのまじわり"}
+（AC）$X$ が $S=\operatorname{Spec}R$ 上分離的なら、任意のアフィン開集合 $U,V\subset X$ について $U\cap V$ はアフィンで、$\mathcal{O}(U)\otimes_{R}\mathcal{O}(V)\to\mathcal{O}(U\cap V)$ は全射。すなわち \ref{ag:separated-criterion} の逆が成り立つ。
+:::
+
+::: proof
+$\Delta$ は閉埋め込みで、$\Delta^{-1}(U\times_{S}V)=U\cap V$（\ref{ag:separated-criterion} の Step 2）。閉埋め込みを開集合の逆像に制限したもの $U\cap V\to U\times_{S}V=\operatorname{Spec}(\mathcal{O}(U)\otimes_{R}\mathcal{O}(V))$ は閉埋め込み（定義の条件は局所的）。\ref{ag:closed-subschemes-affine} から $U\cap V$ はアフィンで、対応する環準同型（仮定の写像：\ref{ag:separated-criterion} の Step 3）は全射。
+:::
+
+::: remark 一般のスキームでの閉部分スキーム
+一般のスキーム $X$ では、閉部分スキームと**準連接なイデアル層** $\mathcal{I}\subset\mathcal{O}_{X}$ が一対一に対応することが知られている（$Z\mapsto\ker(\mathcal{O}_{X}\to i_{*}\mathcal{O}_{Z})$。アフィン開集合ごとに上の定理を使い、貼り合わせる。本サイトでは詳細を省く）。
+:::
+
+::: remark セールとグロタンディーク：なぜ「準」連接か
+1. **セール（FAC, 1955 年）**は、代数多様体上の**連接層**とそのコホモロジーを導入し、複素解析幾何の連接層（岡潔・カルタン）の代数版を作った。
+2. **グロタンディーク**は、連接性の代わりに**準連接性**を基本にした。理由は（a）有限性のない加群（$k[x]$ の分数体、$\mathbb{A}^{1}\to\operatorname{Spec}k$ の順像 $k[x]$ など）を扱うため、（b）準連接層の圏は任意の直和・帰納極限で閉じたアーベル圏（グロタンディーク圏）で、移入的分解などの道具が使えるため、（c）ネーターでないスキームでは「連接」が扱いにくい（有限生成加群の核が有限生成と限らない）ため、である。連接性はネーターな場合に有限性を保証する追加条件として残された。
+3. **ガブリエルの再構成定理**（1962 年）：ネータースキーム $X$ は、準連接層のアーベル圏 $\mathbf{QCoh}(X)$ から同型を除いて復元できることが知られている（本サイト未収録）。「空間とは、その上の加群の圏である」という見方の出発点である。
+:::
+
+::: hypcheck
+- **選択公理**：\ref{ag:tilde-properties} の 3（$\sqrt{\operatorname{Ann}m}$ と $f^{l}=\sum b_{i}h_{i}$）、\ref{ring:local-properties} を通して使う。
+- **準コンパクト性**：\ref{ag:qc-extension} の Step 1（$n$ の最大値）と Step 3 で本質的。2 では重なり $U_{k}\cap U_{l}$ の準コンパクト性が要る（アフィンスキームでは $D(g_{k}g_{l})$ なので自動的）。
+- **準連接性**：\ref{ag:qc-extension} で $\mathcal{F}|_{U_{k}}\cong\widetilde{M_{k}}$ を使い、これがないと \ref{ag:qc-examples} の 2 のように $\Gamma$ が層を決めない。
+- **ネーター性**：\ref{ag:coherent-affine} の同値の証明には使わない（「局所的に有限生成な $\widetilde{M}$」と「$M$ が有限生成」の同値は任意の環で成り立つ）。連接層の定義でネーターを仮定するのは、核が再び連接になるため（有限生成加群の部分加群が有限生成）。
+- **閉埋め込みであること**：\ref{ag:closed-subschemes-affine} の Step 3 で茎の全射性、Step 4 で像への同相を使う。
+:::
+
+::: supplement
+**前提を弱めると.** \ref{ag:qc-affine} の 1 は「準コンパクトかつ準分離（アフィン開集合の交わりが準コンパクト）」なスキーム上の準連接層 $\mathcal{F}$ と $f\in\Gamma(X,\mathcal{O}_{X})$ について $\mathcal{F}(X_{f})\cong\Gamma(X,\mathcal{F})_{f}$ という形に一般化される（\ref{ag:qc-extension} そのもの）。同じ条件のもとで、準連接層の順像は準連接であることが知られている（本サイトでは閉埋め込みの場合のみ：\ref{ag:closed-subschemes-affine} の Step 2）。
+
+**似た定理.** 位相空間の側では、コンパクトハウスドルフ空間 $X$ 上の有限階数のベクトル束と、連続関数環 $C(X)$ 上の有限生成射影加群が対応する（スワンの定理）。アフィンスキーム上の局所自由層と有限生成射影 $A$ 加群の対応（\ref{ring:locally-free-projective} が関係する）はその代数版である。
+
+**計算の観点.** アフィン上の準連接層は加群そのものなので、有限表示の加群（生成元と関係式の行列）で表せ、切断・茎・制限はすべて局所化の計算になる。
+:::
+
+## 高い視点 {#ag:sec-qc-viewpoint}
+
+::: remark 加群を貼り合わせたもの
+\ref{ag:qc-affine} は、$\operatorname{Spec}$ が環の圏の反対と同値であったこと（\ref{ag:morphisms-to-affine}）の加群版である：アフィンスキーム上では「層」と「加群」の区別がなくなる。一般のスキーム上の準連接層は、アフィン開集合ごとの加群を局所化で貼り合わせたもの、すなわち「加群の圏という関手 $A\mapsto A\text{-}\mathbf{Mod}$ をザリスキ位相で貼り合わせた」ものである（加群の圏はザリスキ位相についてスタックをなす）。比喩で言えば、スキームが環の地図帳なら、準連接層はその各ページに書き込まれた加群で、ページの重なりでは局所化を通して書き込みが一致している。
+:::
+
+## 問題 {#ag:sec-qc-problems}
+
+::: problem {#ag:prob-qc-ideal-sheaf}
+$X=\mathbb{A}^{2}_{k}=\operatorname{Spec}k[x,y]$ と閉部分スキーム $Z=V(x)=\operatorname{Spec}k[x,y]/(x)$ について、イデアル層 $\mathcal{I}=\ker(\mathcal{O}_{X}\to i_{*}\mathcal{O}_{Z})$ が $(x)^{\sim}$ で、$\mathcal{I}\cong\mathcal{O}_{X}$（$\mathcal{O}_{X}$ 加群として）であることを示せ。
+:::
+
+::: solution
+\ref{ag:closed-subschemes-affine} の Step 2・3 から $i_{*}\mathcal{O}_{Z}\cong(k[x,y]/(x))^{\sim}$ で、$\mathcal{O}_{X}\to i_{*}\mathcal{O}_{Z}$ は剰余写像の $\widetilde{\ \ }$。$\widetilde{\ \ }$ は完全（\ref{ag:tilde-properties} の 5）なので $\mathcal{I}\cong(x)^{\sim}$。$k[x,y]$ は整域なので $k[x,y]\to(x)$, $a\mapsto xa$ は $A$ 加群の同型で、$\widetilde{\ \ }$ をとれば $\mathcal{O}_{X}\cong\mathcal{I}$。
+:::
+
+::: problem {#ag:prob-qc-generic-stalk}
+$A=\mathbb{Z}$, $M=\mathbb{Q}/\mathbb{Z}$ とする。$\widetilde{M}$ の茎を、各点 $(p)$ と生成点 $(0)$ で求めよ。
+:::
+
+::: solution
+茎は $M_{\mathfrak{p}}$（\ref{ag:tilde-properties} の 2）。生成点では $\mathbb{Q}\otimes\mathbb{Q}/\mathbb{Z}$ に等しい $(\mathbb{Q}/\mathbb{Z})_{(0)}$ で、各元は有限位数 $n$（$n\neq0$ は単元）なので $m/s=nm/(ns)=0$、茎は $0$。$(p)$ では、$p$ と互いに素な位数の元は同様に $0$ になり、$p$ 冪位数の部分 $\mathbb{Z}[1/p]/\mathbb{Z}$ はそのまま残る（$p$ と互いに素な整数は $\mathbb{Z}[1/p]/\mathbb{Z}$ に可逆に作用する）ので、$M_{(p)}\cong\mathbb{Z}[1/p]/\mathbb{Z}$（プリューファー群）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
