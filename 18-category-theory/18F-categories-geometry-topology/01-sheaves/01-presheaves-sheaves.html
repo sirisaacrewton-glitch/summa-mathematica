@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>前層と層 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="18-category-theory/18F-categories-geometry-topology/01-sheaves/01-presheaves-sheaves.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 前層と層 {#cat:page-presheaves-sheaves keywords="presheaf on a topological space, sheaf, separated presheaf, stalk, germ, constant presheaf, skyscraper sheaf, sheaf of sections, morphisms of sheaves are determined on stalks"}
+
+位相空間 $X$ の各開集合 $U$ に「$U$ 上の関数（切断）」の集合 $F(U)$ を、小さい開集合への制限と両立するように対応させたものが**前層**で、局所的に与えられた切断が一意に貼り合わさるものが**層**である（定義は \ref{cat:sheaf-space}）。層は「局所的な情報から大域的な情報を組み立てる」ための言葉で、点 $x$ の近くだけを見る**茎** $F_{x}$ が局所的な情報を表す。このページでは基本的な例を挙げ、層の射が茎の上で単射・同型かどうかで判定できることを示す。一方、茎の上で全射でも切断の上で全射とは限らない。このずれが層コホモロジー（\ref[アーベル群の層]{cat:page-abelian-sheaves}）の出発点である。
+
+> 資料によらず、標準的な議論で書いた。層の圏がトポスであることは \ref{cat:page-sheaf-topos} で示した。
+
+## 記法と定義の確認 {#cat:sec-ps-notation}
+
+::: notation
+- $X$ は位相空間、$\mathcal{O}(X)$ は開集合の圏（$V\subset U$ のとき射 $V\to U$ がただ一つ）。**前層**は関手 $F:\mathcal{O}(X)^{\mathrm{op}}\to\mathbf{Set}$、その射は自然変換。制限 $s|_{V}$、開被覆 $U=\bigcup U_{i}$, $U_{ij}=U_{i}\cap U_{j}$、両立する族と**層**の定義は \ref{cat:sheaf-space}。層の圏 $\mathbf{Sh}(X)$ は前層の圏 $\widehat{\mathcal{O}(X)}$ の充満部分圏。
+- 値を群・アーベル群・環にとる前層（$F(U)$ が群で制限が準同型）も同様に定義し、層の条件は台集合について課す。
+- フィルター付き余極限（集合では明示的な記述ができ、群の忘却関手はそれを作る）は \ref{cat:filtered-colimit-set}, \ref{cat:grp-filtered-colimits}。
+- **選択公理**：使わない。
+:::
+
+## 前層と層の例 {#cat:sec-ps-examples}
+
+::: definition 分離前層 {#cat:separated-presheaf keywords="separated presheaf, locality axiom" index="分離前層|ぶんりぜんそう, 局所性（層）|きょくしょせいそう"}
+前層 $F$ が**分離的**であるとは、開被覆 $U=\bigcup U_{i}$ と $s,t\in F(U)$ について、すべての $i$ で $s|_{U_{i}}=t|_{U_{i}}$ なら $s=t$ となることをいう。層は分離的（層の条件の一意性の部分）。
+:::
+
+::: example 前層と層 {#cat:presheaf-examples}
+1. **連続関数**：位相空間 $Y$ について $C(U,Y)$（$U$ から $Y$ への連続写像）は層。連続性は局所的で、両立する写像は一意に貼り合わさる（\ref{cat:sheaf-space} の後の注意）。
+2. **切断の層**：連続写像 $p:E\to X$ について、$\Gamma(U,E)\defeq\{s:U\to E\text{ 連続},\ p\circ s=\mathrm{id}_{U}\}$ は層。1 は $E=X\times Y$ の場合。
+3. **定数前層**：集合 $A$（2 元以上）について $F(U)=A$（制限は恒等写像）は層でない：$F(\emptyset)=A$ は 1 点でない（空の被覆の条件に反する）。$\emptyset$ を除いて考えても、交わらない空でない開集合 $U_{1},U_{2}$ があれば、$a\neq b$ を $U_{1},U_{2}$ に置いた族は（共通部分 $\emptyset$ 上で）両立するのに、$U_{1}\cup U_{2}$ 上の切断に貼り合わない。
+4. **定数層**：$A$ に離散位相を入れた 1 の層 $\underline{A}(U)\defeq C(U,A)$（局所定数関数）は層で、$U$ が連結なら $\underline{A}(U)=A$。
+5. **摩天楼層**：点 $x\in X$ と集合 $A$ について、$x\in U$ なら $A$、そうでなければ 1 点集合 $\{*\}$ とする前層 $x_{*}A$ は層。
+6. **分離的だが層でない**：$\mathbb{R}$ 上の有界な連続関数の前層は分離的だが、層でない（$f(x)=x$ は局所的に有界だが有界でない）。
+:::
+
+## 茎と芽 {#cat:sec-ps-stalks}
+
+::: definition 茎と芽 {#cat:stalk keywords="stalk of a presheaf at a point, germ of a section" index="茎|くき, 芽|め"}
+前層 $F$ と点 $x\in X$ について、$x$ を含む開集合の族は包含の逆で有向なので、フィルター付き余極限
+$$
+F_{x}\defeq\operatorname*{colim}_{x\in U}F(U)
+$$
+が定まる。具体的には（\ref{cat:filtered-colimit-set}）、$x\in U$ と $s\in F(U)$ の組 $(U,s)$ を、$x\in W\subset U\cap U'$ で $s|_{W}=s'|_{W}$ となる開集合 $W$ があるとき同一視したもの。$(U,s)$ の類を $s$ の $x$ での**芽** $s_{x}$ といい、$F_{x}$ を**茎**という。前層の射 $\varphi$ は $\varphi_{x}:F_{x}\to G_{x}$, $s_{x}\mapsto\varphi(s)_{x}$ を誘導する。群の前層の茎は群（\ref{cat:grp-filtered-colimits}）。
+:::
+
+::: example
+連続関数の層 $C(-,\mathbb{R})$ の茎 $C_{x}$ は、$x$ の近くで定義された連続関数の芽の環。摩天楼層 $x_{*}A$ の茎は、点 $x$ で $A$、$x$ の閉包に入らない点 $y$（$x$ を含まない近傍がある）で 1 点集合。定数層の茎はどの点でも $A$。
+:::
+
+::: proposition 芽による切断の判定 {#cat:germs-determine-sections keywords="a presheaf is separated iff sections are determined by their germs" index="芽と切断|めとせつだん"}
+前層 $F$ が分離的 $\iff$ すべての開集合 $U$ と $s,t\in F(U)$ について「すべての $x\in U$ で $s_{x}=t_{x}$ なら $s=t$」。
+:::
+
+::: proof
+$\Rightarrow$：各 $x\in U$ で $s_{x}=t_{x}$ なので、$x\in W_{x}\subset U$ で $s|_{W_{x}}=t|_{W_{x}}$ となる開集合がある。$\{W_{x}\}$ は $U$ の開被覆なので $s=t$。$\Leftarrow$：$s|_{U_{i}}=t|_{U_{i}}$（すべての $i$）なら、各 $x\in U_{i}$ で $s_{x}=(s|_{U_{i}})_{x}=(t|_{U_{i}})_{x}=t_{x}$。
+:::
+
+## 層の射と茎 {#cat:sec-ps-morphisms}
+
+::: theorem 茎による判定 {#cat:stalkwise-criteria keywords="a morphism of sheaves is injective (an isomorphism) iff it is injective (bijective) on all stalks" index="茎による判定|くきによるはんてい"}
+$\varphi:F\to G$ を層の射とする。
+1. すべての $U$ で $\varphi_{U}$ が単射 $\iff$ すべての $x$ で $\varphi_{x}$ が単射。
+2. $\varphi$ が同型 $\iff$ すべての $x$ で $\varphi_{x}$ が全単射。
+:::
+
+::: proof
+**Step 1（1、$\Rightarrow$）.** $\varphi_{x}(s_{x})=\varphi_{x}(t_{x})$（$s\in F(U)$, $t\in F(U')$）なら、$x\in W\subset U\cap U'$ で $\varphi(s)|_{W}=\varphi(t)|_{W}$、すなわち $\varphi_{W}(s|_{W})=\varphi_{W}(t|_{W})$。$\varphi_{W}$ は単射なので $s|_{W}=t|_{W}$、$s_{x}=t_{x}$。
+
+**Step 2（1、$\Leftarrow$）.** $\varphi_{U}(s)=\varphi_{U}(t)$ なら、各 $x\in U$ で $\varphi_{x}(s_{x})=\varphi_{x}(t_{x})$、単射性から $s_{x}=t_{x}$。$F$ は分離的なので \ref{cat:germs-determine-sections} から $s=t$。
+
+**Step 3（2、$\Leftarrow$：全射）.** 1 から $\varphi_{U}$ は単射。$t\in G(U)$ をとる。各 $x\in U$ で $t_{x}=\varphi_{x}(\sigma)$ となる芽 $\sigma=(V,s)$ があり、$V$ を小さくして $x\in V_{x}\subset U$, $s^{x}\in F(V_{x})$, $\varphi(s^{x})=t|_{V_{x}}$ とできる。$V_{x}\cap V_{y}$ 上では $\varphi(s^{x})=t=\varphi(s^{y})$ なので、単射性から $s^{x}=s^{y}$。$F$ は層なので、$s^{x}$ は $s\in F(U)$ に貼り合わさり、$\varphi(s)|_{V_{x}}=t|_{V_{x}}$ がすべての $x$ で成り立つ。$G$ は分離的なので $\varphi(s)=t$。
+
+**Step 4（2：結論）.** 各 $\varphi_{U}$ が全単射なので、逆写像の族は自然変換（自然性は $\varphi$ の自然性から）で、$\varphi$ は前層の、したがって層の同型。逆は明らか（同型は茎の同型を誘導する）。
+
+::: hypcheck
+- **前提「$F$ が層」**：Step 2 では $F$ の分離性だけ、Step 3 では $F$ の貼り合わせを使った。**前提「$G$ が分離的」**：Step 3 の最後に使った。前層では偽：定数前層 $F(U)=A$ と定数層 $\underline{A}$ の自然な射は、すべての茎で全単射（どちらの茎も $A$）だが、$F(\emptyset)=A\to\underline{A}(\emptyset)=\{*\}$ は単射でない。
+:::
+:::
+
+::: example 茎の上で全射でも切断の上で全射でない
+$X=\mathbb{C}^{\times}$ 上の、$\mathbb{C}^{\times}$ に値をとる連続関数の層 $F$ と、2 乗写像 $\varphi:F\to F$, $f\mapsto f^{2}$ を考える。茎の上では全射：$f(x)\neq0$ なら、$x$ の近傍 $U$ で $f(U)$ が $f(x)$ を中心とし原点を含まない円板に入るようにとり、その円板上の連続な平方根を合成すればよい。一方、大域切断 $z\mapsto z$ は $\varphi$ の像に入らない：連続な $g$ で $g(z)^{2}=z$ とすると、$h(\theta)\defeq g(e^{i\theta})e^{-i\theta/2}$ は $[0,2\pi]$ 上の連続関数で値は $\pm1$、中間値の定理（\ref{top:intermediate-value}）から定数だが、$h(2\pi)=g(1)e^{-i\pi}=-h(0)$ となり矛盾。
+:::
+
+::: supplement
+**局所的な性質と大域的な性質.** \ref{cat:stalkwise-criteria} は「単射性・同型性は局所的（茎で判定できる）」ことを、上の例は「全射性は局所的でない」ことを述べている。可換環論の局所化（\ref{ring:local-properties}：$M=0$・単射・全射が素イデアルでの局所化で判定できる）と比べると、加群の場合は全射性も局所的だったが、層の切断では局所的な全射が大域的な全射を与えない。この違いを測るのが層コホモロジー $H^{1}$ である。
+
+**高い視点.** 茎をとる関手 $F\mapsto F_{x}$ は、点 $x\colon\{*\}\to X$ に沿った逆像（\ref[順像と逆像]{cat:page-direct-inverse-image}）で、有限の極限と任意の余極限を保つ。トポスの言葉では、点はこのような「茎の関手」として定義される。
+:::
+
+## 問題 {#cat:sec-ps-problems}
+
+::: problem {#cat:prob-ps-skyscraper}
+摩天楼層 $x_{*}A$ が層であることを示し、閉点 $x$（$\{x\}$ が閉集合）の場合にすべての点での茎を求めよ。
+:::
+
+::: solution
+開被覆 $U=\bigcup U_{i}$ と両立する族 $(s_{i})$ について、$x\notin U$ なら $x_{*}A(U)=\{*\}$ で、貼り合わせは唯一の元。$x\in U$ なら $x\in U_{i_{0}}$ となる $i_{0}$ があり、$s\defeq s_{i_{0}}\in A$ とおく。$x\in U_{i}$ なら $U_{i_{0}i}\ni x$ 上で両立性から $s_{i}=s$（制限は恒等写像）、$x\notin U_{i}$ なら制限は $\{*\}$ への写像なので条件はない。よって $s$ が唯一の貼り合わせ。茎：$y=x$ なら $A$。$y\neq x$ なら、$\{x\}$ が閉なので $y\in X\setminus\{x\}$ は $x$ を含まない開近傍で、茎は $\{*\}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>

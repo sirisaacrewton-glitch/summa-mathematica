@@ -532,3 +532,4 @@
 | Artin-Schreier extension / inseparable degree | アルティン＝シュライアー拡大 / 非分離次数 | | 人名の区切りは既存の「＝」に合わせた。非分離次数は雪江・松村 |
 | algebraic integer / central character / induced representation / class function / character table | 代数的整数 / 中心指標 / 誘導表現 / 類関数 / 指標表 | | 雪江（誘導表現 27、類関数 7、指標表 2）。rep: |
 | transcendence basis / transcendence degree / algebraically independent / purely transcendental | 超越基底 / 超越次数 / 代数的独立 / 純超越拡大 | | 雪江（超越基底 36、代数的独立 35）。fld:page-transcendence-basis |
+| presheaf / sheaf / stalk / germ / skyscraper sheaf / separated presheaf | 前層 / 層 / 茎 / 芽 / 摩天楼層 / 分離前層 | | 標準的。cat:page-presheaves-sheaves |
