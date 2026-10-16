@@ -557,3 +557,4 @@
 | Eilenberg-Steenrod axioms / homology theory / dimension axiom / additivity / coefficient group / universal coefficient theorem / extraordinary homology theory | アイレンバーグ–スティーンロッドの公理 / ホモロジー理論 / 次元公理 / 加法性公理 / 係数群 / 普遍係数定理 / 一般ホモロジー理論 | | 標準的。at:page-homology-axioms |
 | acyclic models / Eilenberg-Zilber theorem / Kunneth theorem / cross product / Alexander-Whitney map / shuffle map | 非輪状モデル / アイレンバーグ–ジルバーの定理 / キュネットの定理 / クロス積 / アレクサンダー–ホイットニー写像 / シャッフル写像 | | 標準的（非輪状は仮。小松では「非輪状」の用例を未確認）。at:page-kunneth |
 | singular cohomology / cochain / coboundary / Kronecker pairing / transfer / odd map / Borsuk-Ulam theorem | 特異コホモロジー / コチェイン / 余境界作用素 / クロネッカー積 / 転送 / 奇写像 / ボルスク–ウラムの定理 | コサイクル・コバウンダリー（雪江） | 標準的。at:page-singular-cohomology |
+| cup product / cohomology ring / graded commutative / front face / back face | カップ積 / コホモロジー環 / 次数付き可換 / 前面 / 後面 | | 標準的（前面・後面は仮）。at:page-cup-product |
