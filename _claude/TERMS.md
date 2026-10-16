@@ -530,3 +530,4 @@
 | Kummer extension / Kummer theory / Kummer pairing | クンマー拡大 / クンマー理論 / クンマー対 | | 雪江（クンマー理論 33）。fld:page-norm-kummer |
 | Hilbert's theorem 90 / 1-cocycle / coboundary | ヒルベルトの定理 90 / 1 コサイクル / 1 コバウンダリー | | 雪江（コサイクル 51） |
 | Artin-Schreier extension / inseparable degree | アルティン＝シュライアー拡大 / 非分離次数 | | 人名の区切りは既存の「＝」に合わせた。非分離次数は雪江・松村 |
+| algebraic integer / central character / induced representation / class function / character table | 代数的整数 / 中心指標 / 誘導表現 / 類関数 / 指標表 | | 雪江（誘導表現 27、類関数 7、指標表 2）。rep: |
