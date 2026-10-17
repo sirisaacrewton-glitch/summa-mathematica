@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>連続関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="26-real-functions/26A-functions-of-one-variable/03-differentiation/01-continuity.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 連続関数 {#calc:page-continuity keywords="limit of a function, one-sided limits, epsilon-delta continuity, sequential continuity and countable choice, continuity of sums products quotients compositions, intermediate value theorem, extreme value theorem, uniform continuity, Heine-Cantor, monotone functions, jump discontinuities, countably many discontinuities, inverse function continuity, semicontinuity, Dirichlet function, Thomae function"}
+
+実数の区間の上の関数の極限と連続性を扱う。$\varepsilon$-$\delta$ による定義と点列による定義の関係（同値性には可算選択公理が要ること）、連続関数の演算、区間の上の連続関数の大域的な性質（中間値・最大値・一様連続性）、単調関数の不連続点と逆関数の連続性、半連続関数を述べる。大域的な性質は一般位相の結果（連結性・コンパクト性）を \ref{calc:page-continuity-axioms} の (HB)・(Conn) と合わせて使う。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 4 章、杉浦光夫『解析入門 I』第 I 章 §4〜§6 の内容に相当する標準的な事項。選択公理についての注意は自分で付け加えた。
+
+## 記法と定義の確認 {#calc:sec-co-notation}
+
+::: notation
+- $\mathbb{R}$ は完備順序体（\ref{calc:complete-ordered-field}）。$d(x,y)\defeq|x-y|$ は距離で、その位相は順序位相に一致する（開球は開区間）。数列の極限・上極限は \ref{calc:page-sequences}。
+- 有界閉区間はコンパクト (HB)、$\mathbb{R}$ と区間は連結 (Conn)（\ref{calc:continuity-axioms-equivalent}, \ref{calc:reals-basic}）。連結空間・コンパクト空間の連続像（中間値の定理 \ref{top:intermediate-value}、最大値の定理 \ref{top:extreme-value}）、ハイネ–カントールの定理 \ref{top:heine-cantor}。
+- $D\subset\mathbb{R}$、$a$ が $D$ の**集積点**とは、任意の $\delta>0$ で $(a-\delta,a+\delta)\cap D\setminus\{a\}\neq\varnothing$ となること。
+- \ref{calc:page-real-construction} で固定した単射 $e\colon\mathbb{Q}\to\omega$ を使う（「最初の有理数」は $e$ の値が最小のもの）。
+- **公理系**：$\ZF$ で行う。可算選択公理を使う箇所は明記する。
+:::
+
+## 関数の極限と連続性 {#calc:sec-co-limits}
+
+::: definition 関数の極限と連続性 {#calc:function-limit keywords="limit of f(x) as x -> a (epsilon-delta), one-sided limits, limits at infinity, continuity at a point, continuous function" index="関数の極限|かんすうのきょくげん, 片側極限|かたがわきょくげん, 連続|れんぞく"}
+$f\colon D\to\mathbb{R}$, $a$ を $D$ の集積点とする。
+1. $\lim_{x\to a}f(x)=L$ とは、任意の $\varepsilon>0$ に $\delta>0$ があって、$x\in D$, $0<|x-a|<\delta$ なら $|f(x)-L|<\varepsilon$ となることをいう。$x>a$ に限ったものを右極限 $f(a+)$、$x<a$ に限ったものを左極限 $f(a-)$ という。$x\to\pm\infty$ の極限も同様（$|x|$ が十分大きいとき）。
+2. $a\in D$ で、任意の $\varepsilon>0$ に $\delta>0$ があって、$x\in D$, $|x-a|<\delta$ なら $|f(x)-f(a)|<\varepsilon$ となるとき、$f$ は $a$ で**連続**という。$D$ のすべての点で連続なとき**連続関数**という。
+:::
+
+::: proposition 点列による特徴づけ {#calc:function-limit-sequences keywords="epsilon-delta limits imply sequential limits; the converse uses countable choice" index="点列連続|てんれつれんぞく"}
+$f\colon D\to\mathbb{R}$, $a$ を $D$ の集積点とする。
+1. $\lim_{x\to a}f(x)=L$ なら、$a$ と異なる点からなり $a$ に収束する任意の列 $(x_{n})\subset D$ について $f(x_{n})\to L$。
+2. 可算選択公理のもとで逆が成り立つ。
+3. $f$ が $a\in D$ で連続 $\iff$（可算選択公理のもとで）$x_{n}\to a$ となる任意の $(x_{n})\subset D$ で $f(x_{n})\to f(a)$。（⇒ は $\ZF$ で成り立つ。）
+:::
+
+::: proof
+**1.** $\varepsilon$ に対する $\delta$ をとり、$|x_{n}-a|<\delta$ となる $N$ をとれば、$n\ge N$ で $|f(x_{n})-L|<\varepsilon$。
+
+**2.** 逆が成り立たないとすると、ある $\varepsilon>0$ について、各 $n$ で $A_{n}\defeq\{x\in D\mid0<|x-a|<\frac1n,\ |f(x)-L|\ge\varepsilon\}$ が空でない。可算選択公理で $x_{n}\in A_{n}$ を選ぶと、$x_{n}\to a$ だが $|f(x_{n})-L|\ge\varepsilon$。
+
+**3.** $a$ が孤立点なら両側とも自明に成り立つ。集積点なら 1・2 と同じ議論（$x_{n}=a$ の項は $f(x_{n})=f(a)$）。
+
+::: hypcheck
+- **可算選択公理**：2 で $x_{n}\in A_{n}$ を選ぶのに使った。$\ZF$ だけでは、「すべての実関数で点列連続と連続が同値」を証明できないことが知られている（この同値性は、実数の部分集合の可算族についての選択公理と同値になることが知られている。Herrlich『Axiom of Choice』などにある）。
+- 1 は選択公理を使わない。
+:::
+:::
+
+::: proposition 連続関数の演算 {#calc:continuous-operations keywords="sums, products, quotients and compositions of continuous functions are continuous; polynomials and rational functions are continuous" index="連続関数の演算|れんぞくかんすうのえんざん"}
+$f,g$ が $a$ で連続なら、$f+g$, $fg$, $|f|$, $\max(f,g)$, $\min(f,g)$ は $a$ で連続で、$g(a)\neq0$ なら $\frac fg$ も（$g\neq0$ となる点の上で）$a$ で連続。$f$ が $a$ で、$h$ が $f(a)$ で連続なら $h\circ f$ は $a$ で連続。とくに多項式関数と有理関数は定義域の上で連続。
+:::
+
+::: proof
+\ref{calc:limit-laws} の証明の $\varepsilon$ の評価を、数列の代わりに $|x-a|<\delta$ の上で同じように行う（積では $a$ の近くで $|g|\le|g(a)|+1$ とする）。$\max(f,g)=\frac{f+g+|f-g|}{2}$。合成：$\varepsilon$ に対し $h$ の $\eta$、$\eta$ に対し $f$ の $\delta$ をとる。多項式は定数関数と $x\mapsto x$ から和と積で作れる。
+:::
+
+## 区間の上の連続関数 {#calc:sec-co-intervals}
+
+::: theorem 区間の上の連続関数の基本定理 {#calc:interval-theorems keywords="intermediate value theorem, image of an interval is an interval, extreme value theorem on closed bounded intervals, uniform continuity on closed bounded intervals (Heine-Cantor)" index="中間値の定理|ちゅうかんちのていり, 最大値の定理|さいだいちのていり, 一様連続|いちようれんぞく"}
+$I\subset\mathbb{R}$ を区間、$f\colon I\to\mathbb{R}$ を連続とする。
+1. **（中間値の定理）** $f(I)$ は区間である。
+2. **（最大値・最小値の定理）** $I=[a,b]$ なら、$f$ は最大値と最小値をとる。
+3. **（ハイネ–カントール）** $I=[a,b]$ なら、$f$ は**一様連続**：任意の $\varepsilon>0$ に $\delta>0$ があって、$x,y\in I$, $|x-y|<\delta$ なら $|f(x)-f(y)|<\varepsilon$。
+
+いずれも選択公理を使わない。
+:::
+
+::: proof
+1：区間は連結（\ref{calc:continuity-axioms-equivalent} の Step 14 の議論は区間でそのまま通る）で、連結空間の連続像は連結（\ref{top:intermediate-value}）、$\mathbb{R}$ の連結部分集合は区間（$y_{1}<y<y_{2}$ で $y\notin S$ なら $S\cap(-\infty,y)$ と $S\cap(y,\infty)$ が $S$ を分ける）。2：$[a,b]$ はコンパクト (HB) で、\ref{top:extreme-value}。3：\ref{top:heine-cantor}（コンパクト距離空間 $[a,b]$）。
+:::
+
+::: example
+1. 開区間では 2・3 は成り立たない：$\frac1x$ は $(0,1]$ で連続だが有界でなく、一様連続でない。$x$ は $(0,1)$ で最大値をとらない。
+2. **ディリクレ関数** $\mathbf{1}_{\mathbb{Q}}$ はどの点でも連続でない（どの区間にも有理数と無理数がある）。
+3. **トマエ関数**：$x=\frac pq$（既約、$q\ge1$）で $f(x)=\frac1q$、無理数で $f(x)=0$。$f$ は無理数で連続、有理数で不連続（問題 \ref{calc:prob-co-thomae}）。
+:::
+
+## 単調関数と逆関数 {#calc:sec-co-monotone}
+
+::: proposition 単調関数の片側極限 {#calc:monotone-function-limits keywords="a monotone function has one-sided limits everywhere; f(a-) = sup of f on the left; discontinuities are jumps and form a countable set" index="単調関数|たんちょうかんすう, 跳躍不連続|ちょうやくふれんぞく"}
+$f\colon(a,b)\to\mathbb{R}$ を単調増加とする。
+1. 各 $c\in(a,b)$ で $f(c-)=\sup_{x<c}f(x)$ と $f(c+)=\inf_{x>c}f(x)$ が存在し、$f(c-)\le f(c)\le f(c+)$。$f$ が $c$ で連続 $\iff$ $f(c-)=f(c+)$。
+2. $f$ の不連続点の集合は可算（$\ZF$）。
+:::
+
+::: proof
+**1.** $\{f(x)\mid x<c\}$ は $f(c)$ で上に有界なので上限 $s$ がある。$\varepsilon>0$ について $f(x_{0})>s-\varepsilon$ となる $x_{0}<c$ があり、$x_{0}<x<c$ なら $s-\varepsilon<f(x_{0})\le f(x)\le s$。よって $f(c-)=s\le f(c)$。右も同様。連続性は、両側の極限が $f(c)$ に一致することと同値。
+
+**2.** 不連続点 $c$ では $f(c-)<f(c+)$。開区間 $(f(c-),f(c+))$ の中の最初の有理数（$e$ の値が最小のもの）を $r(c)$ とする。$c<c'$ なら、$c<x<c'$ となる $x$ について $f(c+)\le f(x)\le f(c'-)$ なので区間は交わらず、$r$ は単射。よって不連続点の集合は $\mathbb{Q}$ に単射され、可算。
+:::
+
+::: theorem 単調性と逆関数の連続性 {#calc:continuous-inverse keywords="a continuous injective function on an interval is strictly monotone; a monotone function whose image is an interval is continuous; the inverse of a continuous strictly monotone function is continuous" index="逆関数の連続性|ぎゃくかんすうのれんぞくせい"}
+$I$ を区間とする。
+1. 連続な単射 $f\colon I\to\mathbb{R}$ は狭義単調。
+2. 単調な $f\colon I\to\mathbb{R}$ で $f(I)$ が区間なら、$f$ は連続。
+3. 連続な狭義単調関数 $f\colon I\to\mathbb{R}$ について、$J\defeq f(I)$ は区間で、逆関数 $f^{-1}\colon J\to I$ は連続で狭義単調。
+:::
+
+::: proof
+**1.** 狭義単調でないとすると、$x<y<z$ で $f(y)$ が $f(x)$, $f(z)$ の間にない（たとえば $f(y)>\max(f(x),f(z))$）ものがある。$\max(f(x),f(z))<c<f(y)$ をとると、中間値の定理で $(x,y)$ と $(y,z)$ のそれぞれに $f=c$ となる点があり、単射性に反する。
+
+**2.** $f$ を増加とし、$c$ で不連続とすると、\ref{calc:monotone-function-limits} から $f(c-)<f(c+)$（端点では片側だけ）で、$f(I)$ は $(f(c-),f(c))$ か $(f(c),f(c+))$ のうち空でない方の点を、$f(c)$ 以外には含まない。$f(I)$ は区間なので矛盾。
+
+**3.** 中間値の定理で $J$ は区間。$f^{-1}$ は狭義単調で、その像 $I$ は区間なので、2 から連続。
+:::
+
+## 半連続関数 {#calc:sec-co-semicontinuous}
+
+::: definition 半連続関数 {#calc:semicontinuous keywords="upper semicontinuous: limsup f(x) <= f(a); lower semicontinuous; equivalently {f < c} open" index="上半連続|じょうはんれんぞく, 下半連続|かはんれんぞく, 半連続|はんれんぞく"}
+$f\colon D\to\mathbb{R}$ が $a\in D$ で**上半連続**とは、任意の $\varepsilon>0$ に $\delta>0$ があって、$x\in D$, $|x-a|<\delta$ なら $f(x)<f(a)+\varepsilon$ となることをいう。$-f$ が上半連続なとき $f$ は**下半連続**という。
+:::
+
+::: proposition 半連続関数の性質 {#calc:semicontinuous-properties keywords="f is upper semicontinuous iff all sets {f < c} are relatively open; an upper semicontinuous function on [a,b] attains its maximum; f is continuous iff upper and lower semicontinuous" index="半連続関数の性質|はんれんぞくかんすうのせいしつ"}
+1. $f$ が $D$ の各点で上半連続 $\iff$ すべての $c$ で $\{x\in D\mid f(x)<c\}$ は $D$ の開集合。
+2. $f$ が $a$ で連続 $\iff$ $a$ で上半連続かつ下半連続。
+3. $[a,b]$ の上の上半連続関数は上に有界で、最大値をとる（$\ZF$）。
+:::
+
+::: proof
+1：(⇒) $f(a)<c$ なら $\varepsilon\defeq c-f(a)$ の $\delta$ について $(a-\delta,a+\delta)\cap D\subset\{f<c\}$。(⇐) $c\defeq f(a)+\varepsilon$ とする。2：定義の組み合わせ。3：$M\defeq\sup f\in(-\infty,+\infty]$ とし、最大値をとらないとする。すると $[a,b]=\bigcup_{c<M}\{f<c\}$（$c$ は実数）で、1 からこれは開被覆。(HB) から有限個 $\{f<c_{1}\},\dots,\{f<c_{k}\}$ で覆え、$f<\max c_{i}<M$ となり $M$ が上限であることに反する（$M=+\infty$ でも同じ）。
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- 中間値の定理・最大値の定理・ハイネ–カントールの定理は、それぞれ連結性・コンパクト性・コンパクト距離空間についての一般的な定理の特別な場合である（\ref{top:intermediate-value}, \ref{top:extreme-value}, \ref{top:heine-cantor}）。
+- 連続関数の不連続点の集合ではなく、一般の関数の連続点の集合は必ず $G_{\delta}$ 集合（可算個の開集合の共通部分）になる。とくに、有理数の上でちょうど連続で無理数の上で不連続な関数は存在しない（ベールのカテゴリー定理による。知られている）。トマエ関数はその逆の状況を実現する。
+- 単調関数はほとんど至る所微分可能である（ルベーグの定理、\ref[測度論]{meas:lebesgue-measure} の後で扱える。知られている）。
+
+**前提を変えると.** 可算選択公理のない $\ZF$ のモデルでは、点列連続だが連続でない実関数が存在しうる（知られている）。一方、このページの大域的な定理（中間値・最大値・一様連続性・不連続点の可算性）はすべて $\ZF$ で証明できた。$\varepsilon$-$\delta$ の定義は、点列の定義より選択公理に対して頑健である。
+
+**高い視点.** 連続性は「入力の小さな揺れが出力の小さな揺れにしかならない」という局所的な性質で、区間の上の大域的な定理は、区間の連結性（すき間がない）とコンパクト性（有限個で覆える）という実数の連続性の帰結を、関数を通して運んだものである。比喩で言えば、連続関数は「紙を破らずに伸び縮みさせる変形」で、一本につながった紙（区間）は一本につながったまま、端を含む紙（閉区間）は端を含んだままに写る。
+:::
+
+## 問題 {#calc:sec-co-problems}
+
+::: problem {#calc:prob-co-thomae}
+トマエ関数 $f$（有理数 $\frac pq$（既約、$q\ge1$）で $\frac1q$、無理数で $0$）は、無理数の点で連続、有理数の点で不連続であることを示せ。
+:::
+
+::: solution
+有理数 $a=\frac pq$ では $f(a)=\frac1q>0$ だが、$a$ のどの近傍にも無理数があり、そこで $f=0$ なので不連続。無理数 $a$ と $\varepsilon>0$ について、$\frac1q\ge\varepsilon$ となる $q$（$q\le\frac1\varepsilon$）は有限個で、各 $q$ について $(a-1,a+1)$ に入る $\frac pq$ は有限個。それらと $a$ の距離の最小値を $\delta$（$a$ は無理数なので $\delta>0$）とすると、$|x-a|<\delta$ なら $x$ は無理数か分母 $>\frac1\varepsilon$ の有理数で、$|f(x)-f(a)|=f(x)<\varepsilon$。
+:::
+
+::: problem {#calc:prob-co-fixed-point}
+連続関数 $f\colon[0,1]\to[0,1]$ は不動点（$f(x)=x$）をもつことを示せ。
+:::
+
+::: solution
+$g(x)\defeq f(x)-x$ は連続で、$g(0)=f(0)\ge0$, $g(1)=f(1)-1\le0$。中間値の定理（\ref{calc:interval-theorems} の 1）から $g(x)=0$ となる $x$ がある。
+:::
+
+::: problem {#calc:prob-co-uniform-sqrt}
+$\sqrt{x}$ は $[0,\infty)$ で一様連続であるが、$x^{2}$ は $\mathbb{R}$ で一様連続でないことを示せ。
+:::
+
+::: solution
+$x,y\ge0$ について $|\sqrt x-\sqrt y|\le\sqrt{|x-y|}$（$x\ge y$ なら $(\sqrt y+\sqrt{x-y})^{2}\ge x$ から）なので、$\delta\defeq\varepsilon^{2}$ でよい。$x^{2}$ については、$x=n$, $y=n+\frac1n$ で $|x-y|\to0$ だが $|x^{2}-y^{2}|=2+\frac{1}{n^{2}}>2$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
