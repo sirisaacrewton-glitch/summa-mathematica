@@ -575,3 +575,4 @@
 | Schwarz theorem / multi-index / Hessian matrix / critical point / saddle point | シュワルツの定理 / 多重指数 / ヘッセ行列 / 臨界点 / 鞍点 | クレローの定理、停留点 | 標準的（杉浦）。calc:page-higher-derivatives |
 | inverse function theorem / implicit function theorem / constant rank theorem / submersion / immersion / diffeomorphism / Lagrange multipliers | 逆関数定理 / 陰関数定理 / 階数定理 / 沈め込み / はめ込み / 微分同相写像 / ラグランジュの未定乗数法 | | 標準的（杉浦）。calc:page-inverse-implicit |
 | box / Jordan measurable set (set with volume) / Jordan content / oscillation | 直方体 / ジョルダン可測集合（体積確定集合） / ジョルダン測度（体積） / 振動 | 面積確定（杉浦）、ジョルダン容量 | 杉浦『解析入門 I』の「体積確定」を別訳として併記。calc:page-multiple-integrals |
+| Fubini's theorem / iterated integral / normal domain (region between graphs) | フビニの定理 / 累次積分 / 縦線集合 | 逐次積分、縦線領域 | 杉浦『解析入門 I』（縦線集合・累次積分）。calc:page-fubini |
