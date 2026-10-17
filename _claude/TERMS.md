@@ -554,6 +554,9 @@
 | degree (of a map of spheres) / antipodal map / hairy ball theorem / suspension | 写像度 / 対蹠写像 / 毛の生えた球面の定理 / 懸垂 | | 小松・中岡・菅原（写像度 12）。at:page-degree |
 | CW complex / cell / skeleton / characteristic map / attaching map / cellular chain complex / cellular approximation | CW 複体 / 胞体 / 骨格 / 特性写像 / 貼り付け写像 / 胞体鎖複体 / 胞体近似定理 | 胞体複体、接着写像（一般位相のページでは「接着」） | 標準的。at:page-cellular-homology |
 | simplicial approximation / Euler's polyhedron formula | 単体近似（単体近似定理） / オイラーの多面体定理 | | 小松・中岡・菅原（単体近似 35）。at:page-simplicial-singular |
+| subcomplex / CW pair / partition of unity on a CW complex / locally contractible | 部分複体 / CW 対 / 1 の分割 / 局所可縮 | | 小松・中岡・菅原（部分複体 222）。at:page-cw-topology |
+| open star / barycentric subdivision of a complex / cellular map / pinch map | 開星状体 / 重心細分 / 胞体写像 / つぶし写像 | 開星状、胞体的写像（2026-10-17 以前の一部のページ。和書の多数派に合わせて置換） | 小松・中岡・菅原（開星状体 10、胞体写像 56、胞体的写像 0）。つぶし写像は仮。at:page-approximation, at:page-sphere-maps |
+| box map / normal form of sphere maps / Hopf degree theorem | 箱写像 / 標準形 / ホップの定理 | | 箱写像・標準形は本サイトの仮の用語（定義はページ内）。at:page-sphere-maps |
 | Eilenberg-Steenrod axioms / homology theory / dimension axiom / additivity / coefficient group / universal coefficient theorem / extraordinary homology theory | アイレンバーグ–スティーンロッドの公理 / ホモロジー理論 / 次元公理 / 加法性公理 / 係数群 / 普遍係数定理 / 一般ホモロジー理論 | | 標準的。at:page-homology-axioms |
 | acyclic models / Eilenberg-Zilber theorem / Kunneth theorem / cross product / Alexander-Whitney map / shuffle map | 非輪状モデル / アイレンバーグ–ジルバーの定理 / キュネットの定理 / クロス積 / アレクサンダー–ホイットニー写像 / シャッフル写像 | | 標準的（非輪状は仮。小松では「非輪状」の用例を未確認）。at:page-kunneth |
 | singular cohomology / cochain / coboundary / Kronecker pairing / transfer / odd map / Borsuk-Ulam theorem | 特異コホモロジー / コチェイン / 余境界作用素 / クロネッカー積 / 転送 / 奇写像 / ボルスク–ウラムの定理 | コサイクル・コバウンダリー（雪江） | 標準的。at:page-singular-cohomology |
