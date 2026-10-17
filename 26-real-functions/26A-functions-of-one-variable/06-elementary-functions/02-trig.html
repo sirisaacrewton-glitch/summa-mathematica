@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三角関数と円周率 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="26-real-functions/26A-functions-of-one-variable/06-elementary-functions/02-trig.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 三角関数と円周率 {#calc:page-trig keywords="complex exponential, Euler's formula, cosine and sine as power series, addition formulas, definition of pi as twice the first positive zero of cosine, periodicity of exp(iz), parametrization of the unit circle t -> e^{2 pi i t}, kernel 2 pi Z, tangent and arctangent, Leibniz series for pi, polar form, argument, roots of unity, irrationality of pi"}
+
+指数関数を複素数に延ばし、$e^{ix}$ の実部と虚部として余弦・正弦を定義する。三角関数の性質（微分、加法定理、$\cos^{2}+\sin^{2}=1$）はすべて指数関数の性質から従う。円周率 $\pi$ は「$\cos$ の最初の正の零点の 2 倍」として**解析的に定義**し、$t\mapsto e^{2\pi it}$ が実数直線から単位円への連続な全射で、$e^{2\pi it}=1\iff t\in\mathbb{Z}$ となることを示す（これは基本群 $\pi_{1}(S^{1})\cong\mathbb{Z}$ の計算 \ref{at:fundamental-group-circle} で使った事実である）。さらに逆正接、$\pi$ のライプニッツ級数、複素数の極形式、$\pi$ の無理性を扱う。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 8 章（8.6〜8.7）、杉浦光夫『解析入門 I』第 II 章 §4 の内容に相当する標準的な事項。$\pi$ の無理性はニーヴンの証明（1947）の筋に沿って自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-tr-notation}
+
+::: notation
+- 複素数体 $\mathbb{C}=\mathbb{R}^{2}$（\ref{set:number-systems-construction}）、$z=x+iy$, $\bar z=x-iy$, $|z|=\sqrt{x^{2}+y^{2}}$。$|zw|=|z||w|$、$|z+w|\le|z|+|w|$、$\max(|x|,|y|)\le|z|\le|x|+|y|$。複素数列の収束・コーシー列・級数の絶対収束は実部と虚部ごとの収束と同値で、$\mathbb{C}$ は完備。
+- 実数の級数についての結果（絶対収束 \ref{calc:absolute-rearrangement}、コーシー積 \ref{calc:cauchy-product}、根判定法 \ref{calc:root-ratio-tests}）は、絶対値の性質と完備性だけを使って証明したので、複素数の級数でも同じ証明で成り立つ。
+- 指数関数・対数関数、冪級数の項別微分は \ref{calc:page-exp-log}, \ref{calc:page-power-series}。中間値の定理 \ref{calc:interval-theorems}、逆関数 \ref{calc:continuous-inverse}, \ref{calc:chain-rule}、アーベルの定理 \ref{calc:abel-theorem}、部分積分 \ref{calc:substitution-parts}。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 複素指数関数と三角関数 {#calc:sec-tr-functions}
+
+::: theorem 複素指数関数 {#calc:complex-exp keywords="E(z) = sum z^n/n! converges absolutely for all complex z; E(z+w) = E(z)E(w); conj E(z) = E(conj z); |E(ix)| = 1 for real x" index="複素指数関数|ふくそしすうかんすう"}
+$E(z)\defeq\sum_{n\ge0}\frac{z^{n}}{n!}$（$z\in\mathbb{C}$）はすべての $z$ で絶対収束し、
+1. $E(z+w)=E(z)E(w)$、$E(x)=e^{x}$（$x\in\mathbb{R}$）。
+2. $\overline{E(z)}=E(\bar z)$。とくに $x\in\mathbb{R}$ なら $|E(ix)|=1$。
+以下 $e^{z}\defeq E(z)$ と書く。
+:::
+
+::: proof
+絶対収束は $\sum\frac{|z|^{n}}{n!}=e^{|z|}<\infty$。1：コーシー積と二項定理（\ref{calc:exp} の Step 2 と同じ計算）。2：部分和で共役をとり、共役の連続性。$|E(ix)|^{2}=E(ix)\overline{E(ix)}=E(ix)E(-ix)=E(0)=1$。
+:::
+
+::: definition 余弦と正弦 {#calc:trig-functions keywords="cos x = Re e^{ix}, sin x = Im e^{ix}; Euler's formula; power series of cos and sin" index="余弦|よげん, 正弦|せいげん, 三角関数|さんかくかんすう, オイラーの公式|おいらーのこうしき"}
+$x\in\mathbb{R}$ について $\cos x\defeq\operatorname{Re}e^{ix}$, $\sin x\defeq\operatorname{Im}e^{ix}$ とする。すなわち $e^{ix}=\cos x+i\sin x$（**オイラーの公式**）で、$i^{2n}=(-1)^{n}$ から
+$$
+\cos x=\sum_{n\ge0}\frac{(-1)^{n}x^{2n}}{(2n)!},\qquad\sin x=\sum_{n\ge0}\frac{(-1)^{n}x^{2n+1}}{(2n+1)!}.
+$$
+:::
+
+::: proposition 三角関数の基本性質 {#calc:trig-properties keywords="cos^2 + sin^2 = 1, cos' = -sin, sin' = cos, addition formulas, parity" index="三角関数の基本性質|さんかくかんすうのきほんせいしつ, 加法定理（三角関数）|かほうていりさんかくかんすう"}
+1. $\cos^{2}x+\sin^{2}x=1$、$\cos$ は偶関数、$\sin$ は奇関数、$\cos0=1$, $\sin0=0$。
+2. $\cos'=-\sin$、$\sin'=\cos$。
+3. $\cos(x+y)=\cos x\cos y-\sin x\sin y$、$\sin(x+y)=\sin x\cos y+\cos x\sin y$。
+:::
+
+::: proof
+1：$|e^{ix}|=1$（\ref{calc:complex-exp} の 2）と、級数の偶奇。2：上の実冪級数を項別微分（\ref{calc:power-series-differentiation}、収束半径 $\infty$）。3：$e^{i(x+y)}=e^{ix}e^{iy}$ の実部と虚部。
+:::
+
+## 円周率 {#calc:sec-tr-pi}
+
+::: theorem 円周率の定義 {#calc:pi-definition keywords="cos has a smallest positive zero; pi is defined as twice this zero; 2 < pi/2 < ... ; sin is increasing on [0, pi/2]; e^{i pi/2} = i" index="円周率|えんしゅうりつ, π の定義|ぱいのていぎ"}
+$\cos$ は $(0,2)$ に零点をもち、正の零点の中に最小のもの $x_{0}$ がある。$\pi\defeq2x_{0}$ と定める。$[0,\frac\pi2]$ で $\cos$ は $1$ から $0$ へ狭義減少、$\sin$ は $0$ から $1$ へ狭義増加し、$e^{i\pi/2}=i$。
+:::
+
+::: proof
+**Step 1（$\cos2<0$）.** $\cos2=1-2+\frac{2^{4}}{4!}-\sum_{n\ge3}(\cdots)$ で、$n\ge3$ からの部分は $\frac{2^{2n}}{(2n)!}$ が減少する交代級数なので、和は第 1 項 $-\frac{2^{6}}{6!}$ と同符号で絶対値はそれ以下（ライプニッツの判定法 \ref{calc:dirichlet-abel-tests} の 2 の誤差評価）。よって $\cos2\le1-2+\frac23<0$。
+
+**Step 2（最小の正の零点）.** $\cos0=1>0>\cos2$ なので中間値の定理で $(0,2)$ に零点がある。$Z\defeq\{x\in[0,2]\mid\cos x=0\}$ は閉集合（連続関数の零点）で空でなく、$x_{0}\defeq\inf Z\in Z$。$\cos0=1$ なので $x_{0}>0$。
+
+**Step 3（単調性）.** $(0,x_{0})$ で $\cos>0$（中間値の定理と $x_{0}$ の最小性）なので、$\sin'=\cos>0$ で $\sin$ は $[0,x_{0}]$ で狭義増加、$\sin0=0$ から $(0,x_{0}]$ で $\sin>0$。$\cos'=-\sin<0$ で $\cos$ は狭義減少。$\sin^{2}x_{0}=1-\cos^{2}x_{0}=1$ と $\sin x_{0}>0$ から $\sin x_{0}=1$。$e^{ix_{0}}=\cos x_{0}+i\sin x_{0}=i$。
+:::
+
+::: theorem 指数関数の周期と単位円 {#calc:circle-parametrization keywords="e^{z + 2 pi i} = e^z; e^{ix} = 1 iff x in 2 pi Z; p(t) = e^{2 pi i t} is a continuous surjective homomorphism R -> S^1 with kernel Z" index="指数関数の周期|しすうかんすうのしゅうき, 単位円のパラメータ表示|たんいえんのぱらめーたひょうじ"}
+1. $e^{i\pi}=-1$、$e^{2\pi i}=1$、$e^{z+2\pi i}=e^{z}$。$\cos$, $\sin$ は周期 $2\pi$ をもつ。
+2. $x\in\mathbb{R}$ について $e^{ix}=1\iff x\in2\pi\mathbb{Z}$。
+3. $p(t)\defeq e^{2\pi it}$ は連続な全射 $\mathbb{R}\to S^{1}\defeq\{z\mid|z|=1\}$ で、$p(a+b)=p(a)p(b)$、$p(a)=p(b)\iff a-b\in\mathbb{Z}$。
+:::
+
+::: proof
+**Step 1（1）.** $e^{i\pi}=(e^{i\pi/2})^{2}=i^{2}=-1$、$e^{2\pi i}=1$、加法定理。
+
+**Step 2（2）.** $\Leftarrow$ は 1。$\Rightarrow$：$x$ を $2\pi$ の整数倍だけずらして $0\le x<2\pi$ としてよい（$x-2\pi\lfloor\frac{x}{2\pi}\rfloor$）。$0<x<2\pi$ で $e^{ix}=1$ とすると、$e^{ix/4}=u+iv$ は $0<\frac x4<\frac\pi2$ なので $u,v>0$（\ref{calc:pi-definition}）。$(u+iv)^{4}=u^{4}-6u^{2}v^{2}+v^{4}+4iuv(u^{2}-v^{2})=1$ の虚部から $u^{2}=v^{2}$、$u^{2}+v^{2}=1$ から $u^{2}=v^{2}=\frac12$、実部は $\frac14-\frac64+\frac14=-1\neq1$。矛盾。よって $x=0$。
+
+**Step 3（3）.** 連続性は冪級数の連続性（実部と虚部）、準同型は加法定理、$|p(t)|=1$ は \ref{calc:complex-exp} の 2。$p(a)=p(b)\iff e^{2\pi i(a-b)}=1\iff a-b\in\mathbb{Z}$（2）。全射：$u+iv\in S^{1}$ で $u,v\ge0$ なら、$\cos$ は $[0,\frac\pi2]$ で $1$ から $0$ へ連続に減少するので $\cos x=u$ となる $x\in[0,\frac\pi2]$ があり、$\sin x\ge0$ と $\sin^{2}x=1-u^{2}=v^{2}$ から $\sin x=v$。他の象限の点は $i^{k}w$（$w$ は第 1 象限、$i=e^{i\pi/2}$）と書けるので、$e^{i(x+k\pi/2)}$ で表せる。$t=\frac{x}{2\pi}$ とする。
+:::
+
+::: theorem 逆正接とライプニッツの級数 {#calc:arctan keywords="tan is a strictly increasing bijection (-pi/2, pi/2) -> R; arctan is continuous with derivative 1/(1+x^2); arctan series; Leibniz formula pi/4 = 1 - 1/3 + 1/5 - ..." index="正接|せいせつ, 逆正接|ぎゃくせいせつ, ライプニッツの級数|らいぷにっつのきゅうすう"}
+1. $\tan x\defeq\frac{\sin x}{\cos x}$ は $(-\frac\pi2,\frac\pi2)$ から $\mathbb{R}$ への狭義増加な全単射で、逆関数 $\arctan\colon\mathbb{R}\to(-\frac\pi2,\frac\pi2)$ は連続、$\arctan'x=\frac{1}{1+x^{2}}$。
+2. $|x|\le1$ で $\arctan x=\sum_{n\ge0}\frac{(-1)^{n}x^{2n+1}}{2n+1}$。とくに $\frac\pi4=1-\frac13+\frac15-\frac17+\cdots$。
+:::
+
+::: proof
+**1.** $\cos>0$ on $(-\frac\pi2,\frac\pi2)$（偶関数と \ref{calc:pi-definition}）なので $\tan$ は定義され、$\tan'=\frac{\cos^{2}+\sin^{2}}{\cos^{2}}=\frac{1}{\cos^{2}}>0$。$x\to\frac\pi2-$ で $\sin\to1$, $\cos\to0+$ なので $\tan\to+\infty$、奇関数なので $-\infty$ へも。中間値の定理で全単射、逆関数は連続で（\ref{calc:continuous-inverse}）、逆関数の微分で $\arctan'y=\cos^{2}(\arctan y)=\frac{1}{1+y^{2}}$（$1+\tan^{2}=\frac1{\cos^{2}}$）。
+
+**2.** $|x|<1$ で右辺の級数を項別微分すると $\sum(-1)^{n}x^{2n}=\frac{1}{1+x^{2}}$。$x=0$ で両辺 $0$ なので一致（\ref{calc:mvt-consequences}）。$x=\pm1$ では級数は交代級数として収束し、アーベルの定理と $\arctan$ の連続性から一致。$\tan\frac\pi4=1$（$\cos\frac\pi4=\sin\frac\pi4$：$e^{i\pi/4}$ の 2 乗が $i$ であることから $u^{2}-v^{2}=0$）なので $\arctan1=\frac\pi4$。
+:::
+
+::: corollary 極形式 {#calc:polar-form keywords="every nonzero complex number is r e^{i theta} with r = |z| > 0 and theta unique modulo 2 pi; de Moivre; n-th roots of unity" index="極形式|きょくけいしき, 偏角|へんかく, 1 の n 乗根|いちのえぬじょうこん"}
+$z\in\mathbb{C}\setminus\{0\}$ は $z=re^{i\theta}$（$r=|z|$）と書け、$\theta$（**偏角**）は $2\pi$ の整数倍を除いて一意。$(re^{i\theta})^{n}=r^{n}e^{in\theta}$。$z^{n}=1$ の解はちょうど $e^{2\pi ik/n}$（$k=0,\dots,n-1$）の $n$ 個。
+:::
+
+::: proof
+$\frac{z}{|z|}\in S^{1}$ に \ref{calc:circle-parametrization} の 3。一意性は 2。$z^{n}=1$ なら $|z|=1$, $z=e^{i\theta}$ で $e^{in\theta}=1$、$n\theta\in2\pi\mathbb{Z}$。
+:::
+
+::: theorem $\pi$ の無理性 {#calc:pi-irrational keywords="pi is irrational (Niven's proof using f(x) = x^n (a - bx)^n / n!)" index="π の無理性|ぱいのむりせい"}
+$\pi$ は無理数である。
+:::
+
+::: proof
+**Step 1（設定）.** $\pi=\frac ab$（$a,b$ は正の整数）とし、$n\ge1$ について $f(x)\defeq\frac{x^{n}(a-bx)^{n}}{n!}$, $F\defeq f-f''+f^{(4)}-\cdots+(-1)^{n}f^{(2n)}$ とおく。
+
+**Step 2（整数値）.** $n!f(x)$ は整数係数の多項式で、$x^{n}$ 未満の次数の項をもたないので、$j<n$ で $f^{(j)}(0)=0$、$j\ge n$ で $f^{(j)}(0)=\frac{j!}{n!}\times$（整数）は整数。$f(\pi-x)=f(x)$（$a-b(\frac ab-x)=bx$）なので $f^{(j)}(\pi)=(-1)^{j}f^{(j)}(0)$ も整数。よって $F(0)$, $F(\pi)$ は整数。
+
+**Step 3（積分）.** $f^{(2n+2)}=0$ なので $F''+F=f$。$(F'\sin-F\cos)'=F''\sin+F\sin=f\sin$ から、基本定理で $\int_{0}^{\pi}f(x)\sin x\,dx=F(\pi)+F(0)$ は整数。
+
+**Step 4（評価）.** $0<x<\pi$ で $0<f(x)\sin x\le\frac{\pi^{n}a^{n}}{n!}$ なので、積分は $0$ より大きく $\frac{\pi^{n+1}a^{n}}{n!}$ 以下。$\frac{(\pi a)^{n}}{n!}\to0$（\ref{calc:standard-limits} の 5）なので、十分大きい $n$ で積分は $0$ と $1$ の間の整数となり矛盾。
+:::
+
+::: example 導関数についての反例
+1. $g(x)\defeq x^{2}\sin\frac1x$（$x\neq0$）、$g(0)\defeq0$ は $\mathbb{R}$ で微分可能で $g'(0)=0$（$|g(x)/x|\le|x|$）だが、$x\neq0$ で $g'(x)=2x\sin\frac1x-\cos\frac1x$ は $x\to0$ で極限をもたない。導関数は連続とは限らない（ダルブーの定理 \ref{calc:darboux} は成り立つ）。
+2. $h(x)\defeq x^{2}\sin\frac{1}{x^{2}}$（$h(0)\defeq0$）は微分可能だが、$h'(x)=2x\sin\frac{1}{x^{2}}-\frac2x\cos\frac{1}{x^{2}}$ は $0$ の近くで有界でなく、$[-1,1]$ でリーマン積分可能でない（\ref{calc:fundamental-theorem} の hypcheck の例）。
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- $\pi$ は単位円の周長の半分、単位円板の面積に等しい（曲線の長さ $\int_{0}^{2\pi}|p'(t)|\,dt/2\pi$ と面積の積分で確かめられる）。ここでは長さ・面積の概念を使わずに $\pi$ を定義した。
+- $\pi$ は超越数である（リンデマン、1882。知られている。本サイト未収録）。これから、定規とコンパスによる円積問題の不可能性が従う（\ref{fld:page-constructions}）。
+- 複素指数関数は、加法群 $\mathbb{C}$ から乗法群 $\mathbb{C}^{\times}$ への全射準同型で、核は $2\pi i\mathbb{Z}$。これは $\mathbb{C}^{\times}$ の普遍被覆であり（\ref{at:page-covering-spaces}）、対数関数が $\mathbb{C}^{\times}$ 全体で一価に定まらない理由である。
+
+**前提を変えると.** $\pi$ を「$\cos$ の最初の正の零点の 2 倍」と定義したのは、角度や長さの概念を前提にしないためである。幾何学的な定義（円周の長さ）から始めると、弧長の理論（積分）と三角関数の微分公式の循環を避ける工夫が要る。
+
+**高い視点.** 三角関数は、指数関数を「虚軸の方向」に回したもので、$e^{ix}$ は単位円の上を一定の速さで回る点である。$\mathbb{R}\to S^{1}$, $t\mapsto e^{2\pi it}$ は位相群の準同型で、核 $\mathbb{Z}$ による商 $\mathbb{R}/\mathbb{Z}\cong S^{1}$ を与える。比喩で言えば、指数関数は「実軸方向には増殖、虚軸方向には回転」をする機械で、円周率はその回転が一周してもとに戻るまでの「時間」である。
+:::
+
+## 問題 {#calc:sec-tr-problems}
+
+::: problem {#calc:prob-tr-double-angle}
+$\cos2x=\cos^{2}x-\sin^{2}x$、$\sin2x=2\sin x\cos x$ を示し、$\cos\frac\pi4=\sin\frac\pi4=\frac{1}{\sqrt2}$ を導け。
+:::
+
+::: solution
+加法定理で $y=x$。$x=\frac\pi4$ では $\cos\frac\pi2=0$ から $\cos^{2}\frac\pi4=\sin^{2}\frac\pi4$、$\cos^{2}+\sin^{2}=1$ から $\frac12$ ずつ。$\frac\pi4\in(0,\frac\pi2)$ で $\cos,\sin>0$ なので $\frac{1}{\sqrt2}$。
+:::
+
+::: problem {#calc:prob-tr-sin-bound}
+$x>0$ で $\sin x<x$、$0<x<\frac\pi2$ で $\sin x>\frac{2}{\pi}x$ を示せ。
+:::
+
+::: solution
+$g(x)=x-\sin x$ は $g'=1-\cos x\ge0$（等号は孤立した点だけ）で $g(0)=0$ なので $x>0$ で $g(x)>0$。後半：$(0,\pi)$ で $\sin''=-\sin<0$ なので $\sin$ は $[0,\frac\pi2]$ で凹、$0$ と $\frac\pi2$ を結ぶ弦 $\frac2\pi x$ より上にある（凹関数は弦の上、狭義の凹性から狭義）。
+:::
+
+::: problem {#calc:prob-tr-roots-of-unity-sum}
+$n\ge2$ について、$1$ の $n$ 乗根の和は $0$ であることを示せ。
+:::
+
+::: solution
+$\omega=e^{2\pi i/n}\neq1$ について $\sum_{k=0}^{n-1}\omega^{k}=\frac{\omega^{n}-1}{\omega-1}=0$。\ref{calc:polar-form} から根は $\omega^{k}$ で尽くされる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
