@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一様収束 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="26-real-functions/26A-functions-of-one-variable/05-function-sequences/01-uniform-convergence.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 一様収束 {#calc:page-uniform-convergence keywords="pointwise and uniform convergence, sup norm, Cauchy criterion for uniform convergence, uniform limits of continuous functions, Weierstrass M-test, interchange of limits and integrals, termwise differentiation, Dini's theorem, Takagi function, continuous nowhere differentiable function, Bernstein polynomials, Weierstrass approximation theorem"}
+
+関数列 $f_{n}\to f$ の極限で、連続性・積分・微分が保たれるかどうかは、収束の仕方による。各点ごとの収束（**各点収束**）では一般に保たれないが、全体で一斉に近づく**一様収束**なら、連続性と積分は保たれ、導関数の一様収束があれば微分も交換できる。このページではこれらの交換定理、関数項級数の **ワイエルシュトラスの M 判定法**、単調な収束が一様になるための**ディニの定理**を示し、応用として、至る所で微分できない連続関数（**高木関数**）と、連続関数を多項式で一様に近似する**ベルンシュタイン多項式**を構成する。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 7 章、杉浦光夫『解析入門 I』第 V 章 §13（一様収束、ディニの定理）の内容に相当する標準的な事項。高木関数とベルンシュタイン多項式の証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-uc-notation}
+
+::: notation
+- 数列・級数の収束は \ref{calc:page-sequences}, \ref{calc:page-series}。連続関数と区間の上の基本定理は \ref{calc:page-continuity}、微分と平均値の定理は \ref{calc:page-derivatives}、リーマン積分と基本定理は \ref{calc:page-riemann-integral}, \ref{calc:page-fundamental-theorem}。
+- 集合 $E$ 上の有界関数 $g$ について $\|g\|_{E}\defeq\sup_{x\in E}|g(x)|$（**一様ノルム**）。
+- 一般位相の側では、一様収束の位相（\ref{top:uniform-topology}）、その完備性（\ref{top:uniform-space-complete}）、ストーン–ワイエルシュトラスの定理（\ref{top:stone-weierstrass}, \ref{top:weierstrass-approximation}）、アスコリ–アルツェラの定理（\ref{top:ascoli}）を扱った。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 一様収束と交換定理 {#calc:sec-uc-uniform}
+
+::: definition 各点収束と一様収束 {#calc:uniform-convergence keywords="pointwise convergence, uniform convergence: sup_E |f_n - f| -> 0" index="一様収束|いちようしゅうそく, 各点収束|かくてんしゅうそく"}
+$E$ 上の関数列 $(f_{n})$ が $f$ に**各点収束**するとは、各 $x\in E$ で $f_{n}(x)\to f(x)$ となることをいう。**一様収束**するとは、任意の $\varepsilon>0$ に $N$ があって、$n\ge N$ ならすべての $x\in E$ で $|f_{n}(x)-f(x)|<\varepsilon$ となること（$\|f_{n}-f\|_{E}\to0$）をいう。関数項級数 $\sum f_{n}$ の一様収束は部分和の一様収束で定める。
+:::
+
+::: theorem 一様収束の基本定理 {#calc:uniform-limit-theorems keywords="Cauchy criterion for uniform convergence; uniform limits of continuous functions are continuous; Weierstrass M-test; uniform convergence commutes with integration" index="ワイエルシュトラスの M 判定法|わいえるしゅとらすのえむはんていほう, 一様収束と積分|いちようしゅうそくとせきぶん"}
+1. **（コーシーの判定法）** $(f_{n})$ が $E$ で一様収束 $\iff$ 任意の $\varepsilon>0$ に $N$ があって、$m,n\ge N$ なら $\|f_{m}-f_{n}\|_{E}<\varepsilon$。
+2. 連続関数の一様収束極限は連続。
+3. **（M 判定法）** $\|f_{n}\|_{E}\le M_{n}$ で $\sum M_{n}$ が収束すれば、$\sum f_{n}$ は $E$ で一様かつ絶対収束する。
+4. $f_{n}$ が $[a,b]$ で積分可能で $f$ に一様収束すれば、$f$ は積分可能で $\int_{a}^{b}f_{n}\to\int_{a}^{b}f$。
+:::
+
+::: proof
+**1.** (⇒) 三角不等式。(⇐) 各点でコーシー列なので (C) から極限 $f(x)$ がある。$|f_{m}(x)-f_{n}(x)|<\varepsilon$ で $m\to\infty$ とすると、$n\ge N$ ですべての $x$ について $|f(x)-f_{n}(x)|\le\varepsilon$。
+
+**2.** $a\in E$, $\varepsilon>0$。$\|f_{N}-f\|<\frac\varepsilon3$ となる $N$ と、$|x-a|<\delta$ で $|f_{N}(x)-f_{N}(a)|<\frac\varepsilon3$ となる $\delta$ をとると、$|f(x)-f(a)|\le|f(x)-f_{N}(x)|+|f_{N}(x)-f_{N}(a)|+|f_{N}(a)-f(a)|<\varepsilon$。
+
+**3.** $\bigl\|\sum_{k=m}^{n}f_{k}\bigr\|\le\sum_{k=m}^{n}M_{k}$ と 1。絶対収束は各点での比較判定法。
+
+**4.** $\varepsilon_{n}\defeq\|f_{n}-f\|$ とすると $f_{n}-\varepsilon_{n}\le f\le f_{n}+\varepsilon_{n}$ なので、任意の分割で $U(f,P)-L(f,P)\le U(f_{n},P)-L(f_{n},P)+2\varepsilon_{n}(b-a)$。$n$ を固定して $f_{n}$ の判定条件から右辺を小さくでき、$f$ は積分可能。$\bigl|\int f_{n}-\int f\bigr|\le\varepsilon_{n}(b-a)\to0$。
+:::
+
+::: example
+1. $f_{n}(x)=x^{n}$ は $[0,1]$ で、$x<1$ で $0$、$x=1$ で $1$ の関数に各点収束するが、極限が不連続なので一様収束しない（2 の対偶）。
+2. $f_{n}(x)=nx(1-x^{2})^{n}$ は $[0,1]$ で $0$ に各点収束するが、$\int_{0}^{1}f_{n}=\frac{n}{2n+2}\to\frac12\neq0$。積分の交換には一様性などの仮定が要る。
+:::
+
+::: theorem 項別微分 {#calc:uniform-derivative keywords="if f_n' converge uniformly and f_n converges at one point, then f_n converges uniformly on bounded intervals and the limit is differentiable with derivative lim f_n'" index="項別微分|こうべつびぶん"}
+$f_{n}$ が $[a,b]$ で微分可能、$(f_{n}')$ が $[a,b]$ で一様収束し、ある $x_{0}\in[a,b]$ で $(f_{n}(x_{0}))$ が収束するとする。このとき $(f_{n})$ はある $f$ に $[a,b]$ で一様収束し、$f$ は微分可能で $f'=\lim f_{n}'$。
+:::
+
+::: proof
+**Step 1（一様収束）.** 平均値の定理を $f_{m}-f_{n}$ に使うと
+$$
+|(f_{m}-f_{n})(x)-(f_{m}-f_{n})(x_{0})|\le\|f_{m}'-f_{n}'\|\,|x-x_{0}|\le\|f_{m}'-f_{n}'\|(b-a)
+$$
+なので、$\|f_{m}-f_{n}\|\le|(f_{m}-f_{n})(x_{0})|+(b-a)\|f'_{m}-f'_{n}\|$ で、\ref{calc:uniform-limit-theorems} の 1 から一様収束。
+
+**Step 2（微分）.** $x\in[a,b]$ を固定し、$\phi_{n}(t)\defeq\frac{f_{n}(t)-f_{n}(x)}{t-x}$, $\phi(t)\defeq\frac{f(t)-f(x)}{t-x}$（$t\neq x$）とする。Step 1 と同じ評価で $|\phi_{m}(t)-\phi_{n}(t)|\le\|f_{m}'-f_{n}'\|$ なので、$\phi_{n}\to\phi$ は $t\neq x$ の上で一様。$g\defeq\lim f_{n}'$ とし、$\varepsilon>0$ について、$\|\phi_{N}-\phi\|<\frac\varepsilon3$ かつ $|f_{N}'(x)-g(x)|<\frac\varepsilon3$ となる $N$、さらに $0<|t-x|<\delta$ で $|\phi_{N}(t)-f_{N}'(x)|<\frac\varepsilon3$ となる $\delta$ をとると、$|\phi(t)-g(x)|<\varepsilon$。よって $f'(x)=g(x)$。
+
+::: hypcheck
+- **導関数の一様収束**：Step 1・2 の評価の要。$f_{n}$ の一様収束だけでは足りない：$f_{n}(x)=\frac{x^{n+1}}{n+1}$ は $[0,1]$ で $0$ に一様収束するが、$f_{n}'(1)=1\not\to0$。
+- 導関数の連続性は仮定していない（平均値の定理だけを使った）。
+:::
+:::
+
+::: theorem ディニの定理 {#calc:dini keywords="Dini's theorem: a monotone sequence of continuous functions converging pointwise to a continuous function on a compact set converges uniformly" index="ディニの定理|でぃにのていり"}
+$K\subset\mathbb{R}$ をコンパクト集合、$f_{n},f$ を $K$ 上の連続関数とし、各 $x$ で $f_{n}(x)$ が単調減少して $f(x)$ に収束するとする。このとき $f_{n}\to f$ は $K$ で一様。（単調増加でも同じ。）
+:::
+
+::: proof
+$g_{n}\defeq f_{n}-f\ge0$ は連続で単調減少、各点で $0$ に収束する。$\varepsilon>0$ について $U_{n}\defeq\{x\in K\mid g_{n}(x)<\varepsilon\}$ は $K$ の開集合で、$U_{1}\subset U_{2}\subset\cdots$、和は $K$。コンパクト性から有限個、したがって単調性から 1 つの $U_{N}$ で $K=U_{N}$。$n\ge N$ なら $0\le g_{n}\le g_{N}<\varepsilon$。
+:::
+
+## 高木関数 {#calc:sec-uc-takagi}
+
+::: theorem 高木関数 {#calc:takagi keywords="Takagi function: T(x) = sum phi(2^n x)/2^n with phi the distance to the nearest integer; continuous and nowhere differentiable" index="高木関数|たかぎかんすう, 至る所微分不可能な連続関数|いたるところびぶんふかのうなれんぞくかんすう"}
+$\phi(x)\defeq\min_{k\in\mathbb{Z}}|x-k|$（最も近い整数までの距離）とし、$T(x)\defeq\sum_{n=0}^{\infty}\frac{\phi(2^{n}x)}{2^{n}}$ とおく。$T$ は $\mathbb{R}$ 上の連続関数で、どの点でも微分可能でない。
+:::
+
+::: proof
+**Step 1（連続性）.** $\phi$ は連続で $0\le\phi\le\frac12$。M 判定法（$M_{n}=2^{-n-1}$）と \ref{calc:uniform-limit-theorems} の 2・3。
+
+**Step 2（はさむ差商の補題）.** $f$ が $x$ で微分可能で、$a_{m}\le x\le b_{m}$, $a_{m}<b_{m}$, $b_{m}-a_{m}\to0$ なら、$\frac{f(b_{m})-f(a_{m})}{b_{m}-a_{m}}\to f'(x)$。実際、この差商は $\frac{f(b_{m})-f(x)}{b_{m}-x}$ と $\frac{f(x)-f(a_{m})}{x-a_{m}}$ の、重み $\frac{b_{m}-x}{b_{m}-a_{m}}$, $\frac{x-a_{m}}{b_{m}-a_{m}}$ による平均（端点が $x$ に一致する項は除く）で、どちらも $f'(x)$ に近づく。
+
+**Step 3（二進区間での差商）.** $x$ を固定し、各 $m$ について $k\defeq\lfloor2^{m}x\rfloor$, $a_{m}\defeq\frac{k}{2^{m}}$, $b_{m}\defeq\frac{k+1}{2^{m}}$ とする（$a_{m}\le x<b_{m}$）。$n<m$ なら、$2^{n}t$（$t\in[a_{m},b_{m}]$）は端点が $2^{n-m}$ の整数倍の、長さ $2^{n-m}\le\frac12$ の区間を動き、その内部に半整数（$\phi$ の折れ曲がる点 $\frac j2$）を含まないので、$\frac{\phi(2^{n}t)}{2^{n}}$ はこの区間で傾き $\pm1$ の一次関数。$n\ge m$ なら $2^{n}a_{m}$, $2^{n}b_{m}$ は整数で $\phi=0$。よって
+$$
+D_{m}\defeq\frac{T(b_{m})-T(a_{m})}{b_{m}-a_{m}}=\sum_{n=0}^{m-1}(\pm1)
+$$
+は整数で、$D_{m+1}-D_{m}=\pm1$。
+
+**Step 4.** $T$ が $x$ で微分可能なら、Step 2 から $D_{m}\to T'(x)$ となるが、$|D_{m+1}-D_{m}|=1$ なのでコーシー列でなく矛盾。
+:::
+
+## ベルンシュタイン多項式 {#calc:sec-uc-bernstein}
+
+::: theorem ベルンシュタイン多項式による近似 {#calc:bernstein keywords="Bernstein polynomials B_n f(x) = sum f(k/n) binom(n,k) x^k (1-x)^{n-k} converge uniformly to f on [0,1] for continuous f; constructive Weierstrass approximation" index="ベルンシュタイン多項式|べるんしゅたいんたこうしき, ワイエルシュトラスの近似定理|わいえるしゅとらすのきんじていり"}
+$f\colon[0,1]\to\mathbb{R}$ を連続とし、
+$$
+B_{n}f(x)\defeq\sum_{k=0}^{n}f\Bigl(\frac kn\Bigr)\binom nkx^{k}(1-x)^{n-k}
+$$
+とおく。$B_{n}f\to f$ は $[0,1]$ で一様。とくに $[a,b]$ 上の連続関数は多項式で一様に近似できる（**ワイエルシュトラスの近似定理**）。
+:::
+
+::: proof
+**Step 1（三つの恒等式）.** $p_{k}(x)\defeq\binom nkx^{k}(1-x)^{n-k}\ge0$ とする。二項定理から $\sum_{k}p_{k}=1$。$\frac kn\binom nk=\binom{n-1}{k-1}$ から $\sum_{k}\frac knp_{k}=x$。同様に $\frac{k(k-1)}{n(n-1)}\binom nk=\binom{n-2}{k-2}$ から $\sum\frac{k(k-1)}{n^{2}}p_{k}=\frac{n-1}{n}x^{2}$、よって
+$$
+\sum_{k}\Bigl(\frac kn-x\Bigr)^{2}p_{k}=\Bigl(\frac{n-1}{n}x^{2}+\frac xn\Bigr)-2x^{2}+x^{2}=\frac{x(1-x)}{n}\le\frac{1}{4n}.
+$$
+
+**Step 2（評価）.** $\varepsilon>0$ について、一様連続性から $|s-t|<\delta$ なら $|f(s)-f(t)|<\varepsilon$ となる $\delta$ をとり、$\|f\|\le B$ とする。
+$$
+|B_{n}f(x)-f(x)|\le\sum_{k}\Bigl|f\Bigl(\frac kn\Bigr)-f(x)\Bigr|p_{k}\le\varepsilon\sum_{|k/n-x|<\delta}p_{k}+2B\sum_{|k/n-x|\ge\delta}p_{k}.
+$$
+第 2 の和では $1\le\frac{(k/n-x)^{2}}{\delta^{2}}$ なので、Step 1 から $\le\frac{1}{4n\delta^{2}}$。よって $\|B_{n}f-f\|\le\varepsilon+\frac{2B}{4n\delta^{2}}$ で、$n$ が十分大きければ $2\varepsilon$ 未満。
+
+**Step 3.** $[a,b]$ へは一次関数 $x\mapsto a+(b-a)x$ で移す。
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- ワイエルシュトラスの近似定理は、コンパクト・ハウスドルフ空間上の連続関数の部分代数についての**ストーン–ワイエルシュトラスの定理**（\ref{top:stone-weierstrass}）に一般化される。ベルンシュタイン多項式の証明は、確率論的には「二項分布の大数の弱法則」と同じ計算（Step 1 の分散の評価）である。
+- 一様有界で同程度連続な関数列は一様収束する部分列をもつ（アスコリ–アルツェラ、\ref{top:ascoli}）。
+- 至る所微分不可能な連続関数は、連続関数の空間の中で「ほとんどすべて」である（ベールのカテゴリー定理による。知られている）。ワイエルシュトラスの例 $\sum a^{n}\cos(b^{n}\pi x)$ も有名である。
+
+**前提を変えると.** ディニの定理でコンパクト性を外すと偽：$f_{n}(x)=x^{n}$ は $[0,1)$ で単調減少して $0$ に収束するが一様でない。極限の連続性を外しても偽（$[0,1]$ 上の $x^{n}$）。
+
+**高い視点.** 一様収束は、関数の空間 $C([a,b])$ を一様ノルムで距離空間（バナッハ空間）とみたときの収束であり、交換定理は「積分は連続な線形汎関数」「極限をとる操作が連続関数の空間を閉じた部分空間として保つ」という関数解析的な事実である。比喩で言えば、各点収束は「生徒一人ひとりがいつかは合格点に達する」こと、一様収束は「クラス全員が同じ日までに合格点に達する」ことで、後者でなければクラス全体の成績（積分）や、成績の滑らかさ（連続性）は保証されない。
+:::
+
+## 問題 {#calc:sec-uc-problems}
+
+::: problem {#calc:prob-uc-integral-counter}
+$f_{n}(x)=nx(1-x^{2})^{n}$ について $\int_{0}^{1}f_{n}=\frac{n}{2n+2}$ を示し、$(f_{n})$ が $[0,1]$ で一様収束しないことを確かめよ。
+:::
+
+::: solution
+置換 $u=1-x^{2}$（\ref{calc:substitution-parts}）で $\int_{0}^{1}nx(1-x^{2})^{n}dx=\frac n2\int_{0}^{1}u^{n}du=\frac{n}{2(n+1)}$。各点では $x\in(0,1]$ で $(1-x^{2})^{n}$ が幾何的に減衰し $nx(1-x^{2})^{n}\to0$（\ref{calc:standard-limits} の 4）、$x=0$ で $0$。一様収束なら積分も $0$ に収束するはず（\ref{calc:uniform-limit-theorems} の 4）なので、一様収束しない。
+:::
+
+::: problem {#calc:prob-uc-bernstein-linear}
+1 次関数 $f(x)=\alpha+\beta x$ について $B_{n}f=f$、$f(x)=x^{2}$ について $B_{n}f(x)=x^{2}+\frac{x(1-x)}{n}$ を確かめよ。
+:::
+
+::: solution
+\ref{calc:bernstein} の Step 1 の恒等式から、$\sum p_{k}=1$, $\sum\frac knp_{k}=x$ で $B_{n}f=\alpha+\beta x$。$\sum\frac{k^{2}}{n^{2}}p_{k}=\sum\frac{k(k-1)}{n^{2}}p_{k}+\frac1n\sum\frac knp_{k}=\frac{n-1}{n}x^{2}+\frac xn=x^{2}+\frac{x(1-x)}{n}$。
+:::
+
+::: problem {#calc:prob-uc-dini-noncompact}
+ディニの定理の結論は、$K=[0,1)$, $f_{n}(x)=x^{n}$ では成り立たないことを示せ。
+:::
+
+::: solution
+$f_{n}$ は連続で、各点で単調減少して $0$（連続）に収束するが、$\sup_{[0,1)}x^{n}=1$ なので一様収束しない。$[0,1)$ はコンパクトでなく、証明の有限部分被覆がとれない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
