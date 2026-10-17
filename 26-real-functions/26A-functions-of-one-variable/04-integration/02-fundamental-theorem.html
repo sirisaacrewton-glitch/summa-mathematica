@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>微分積分学の基本定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="26-real-functions/26A-functions-of-one-variable/04-integration/02-fundamental-theorem.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 微分積分学の基本定理 {#calc:page-fundamental-theorem keywords="fundamental theorem of calculus, indefinite integral, antiderivative, integration by substitution, integration by parts, integral form of the Taylor remainder, improper integral, absolute convergence of integrals, integral test for series, Riemann-Stieltjes integral"}
+
+積分と微分は互いに逆の操作である（**微分積分学の基本定理**）。このページでは、その二つの形（積分の上端についての微分と、導関数の積分）を証明し、置換積分・部分積分・テイラーの定理の積分形の剰余項を導く。さらに、区間の端で関数が有界でない場合や区間が無限の場合の**広義積分**と、級数との比較（**積分判定法**）、積分の「重み」を増加関数で与える**リーマン–スティルチェス積分**の基本を扱う。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 6 章（6.20〜6.22, 6.17）、杉浦光夫『解析入門 I』第 III 章・第 IV 章（広義積分）の内容に相当する標準的な事項。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-ft-notation}
+
+::: notation
+- リーマン積分とその性質は \ref{calc:page-riemann-integral}（\ref{calc:riemann-criterion}, \ref{calc:integrable-classes}, \ref{calc:integral-properties}）。平均値の定理・連鎖律は \ref{calc:page-derivatives}（\ref{calc:mean-value-theorem}, \ref{calc:chain-rule}）。テイラー多項式は \ref{calc:taylor-polynomial}。
+- 区間 $I$ 上の $F$ が $f$ の**原始関数**とは、$I$ で $F'=f$ となること。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 基本定理 {#calc:sec-ft-ftc}
+
+::: theorem 微分積分学の基本定理 {#calc:fundamental-theorem keywords="fundamental theorem of calculus: the indefinite integral is Lipschitz and differentiable where f is continuous; the integral of an integrable derivative is the increment of the function" index="微分積分学の基本定理|びぶんせきぶんがくのきほんていり, 不定積分|ふていせきぶん, 原始関数|げんしかんすう"}
+1. $f$ が $[a,b]$ で積分可能なら、$F(x)\defeq\int_{a}^{x}f$ は $[a,b]$ で（リプシッツ）連続で、$f$ が $c$ で連続なら $F'(c)=f(c)$。とくに連続関数は原始関数をもつ。
+2. $F$ が $[a,b]$ で微分可能（端点では片側）で、$F'$ が積分可能なら、$\int_{a}^{b}F'=F(b)-F(a)$。
+:::
+
+::: proof
+**Step 1（1 の連続性）.** $|f|\le B$ なら $|F(y)-F(x)|=\bigl|\int_{x}^{y}f\bigr|\le B|y-x|$（\ref{calc:integral-properties} の 2・3）。
+
+**Step 2（1 の微分）.** $\varepsilon>0$ について、$|t-c|<\delta$ なら $|f(t)-f(c)|<\varepsilon$ となる $\delta$ をとる。$0<|h|<\delta$ なら
+$$
+\Bigl|\frac{F(c+h)-F(c)}{h}-f(c)\Bigr|=\Bigl|\frac1h\int_{c}^{c+h}(f(t)-f(c))\,dt\Bigr|\le\varepsilon.
+$$
+
+**Step 3（2）.** 任意の分割 $P$ について、各小区間に平均値の定理を使うと $F(x_{i})-F(x_{i-1})=F'(t_{i})\Delta x_{i}$（$t_{i}\in(x_{i-1},x_{i})$）なので、$F(b)-F(a)=\sum F'(t_{i})\Delta x_{i}$ はリーマン和で、$L(F',P)\le F(b)-F(a)\le U(F',P)$。$P$ は任意なので $F(b)-F(a)=\int F'$。
+
+::: hypcheck
+- **2 で $F'$ の積分可能性**：外すと偽。微分可能だが導関数が有界でない関数（$x^{2}\sin\frac{1}{x^{2}}$ 型、\ref[三角関数と円周率]{calc:page-trig} の後で構成できる）では、$F'$ はリーマン積分可能でない。
+- **2 で $F'$ の連続性は要らない**：Step 3 は平均値の定理だけを使った。
+- **1 の $c$ での連続性**：外すと偽。$f=\mathbf{1}_{[0,1]}$ の不定積分は $0$ で微分可能でない（左微分係数 $0$、右微分係数 $1$）。
+:::
+:::
+
+::: corollary 置換積分と部分積分 {#calc:substitution-parts keywords="integration by substitution, integration by parts" index="置換積分|ちかんせきぶん, 部分積分|ぶぶんせきぶん"}
+1. **（置換積分）** $\varphi\colon[\alpha,\beta]\to\mathbb{R}$ が $C^{1}$ 級、$f$ が $\varphi([\alpha,\beta])$ で連続なら
+$$
+\int_{\varphi(\alpha)}^{\varphi(\beta)}f(x)\,dx=\int_{\alpha}^{\beta}f(\varphi(t))\varphi'(t)\,dt.
+$$
+2. **（部分積分）** $F,G$ が $[a,b]$ で微分可能で、$F'=f$, $G'=g$ が積分可能なら
+$$
+\int_{a}^{b}F g=F(b)G(b)-F(a)G(a)-\int_{a}^{b}fG.
+$$
+:::
+
+::: proof
+1：$\varphi([\alpha,\beta])$ は区間で（中間値の定理）、$f$ はそこで原始関数 $\Phi$ をもつ（基本定理の 1）。連鎖律から $(\Phi\circ\varphi)'=f(\varphi)\varphi'$ で、これは連続なので基本定理の 2 から右辺 $=\Phi(\varphi(\beta))-\Phi(\varphi(\alpha))$、これは左辺。2：$(FG)'=fG+Fg$ は積分可能（積と和、\ref{calc:integrable-classes} の 4）なので、基本定理の 2。
+:::
+
+::: theorem テイラーの定理（積分形の剰余項） {#calc:taylor-integral keywords="Taylor's theorem with integral remainder (1/n!) int_a^x f^{(n+1)}(t)(x-t)^n dt" index="積分形の剰余項|せきぶんけいのじょうよこう"}
+$f$ が $a,x$ を含む区間で $C^{n+1}$ 級なら
+$$
+f(x)=\sum_{k=0}^{n}\frac{f^{(k)}(a)}{k!}(x-a)^{k}+\frac{1}{n!}\int_{a}^{x}f^{(n+1)}(t)(x-t)^{n}\,dt.
+$$
+:::
+
+::: proof
+$n$ についての帰納法。$n=0$ は基本定理の 2。$n-1$ で成り立つとすると、剰余項 $\frac{1}{(n-1)!}\int_{a}^{x}f^{(n)}(t)(x-t)^{n-1}dt$ に部分積分（$G(t)=-\frac{(x-t)^{n}}{n}$）を使うと
+$$
+\begin{aligned}&\frac{1}{(n-1)!}\Bigl[-f^{(n)}(t)\frac{(x-t)^{n}}{n}\Bigr]_{a}^{x}+\frac{1}{n!}\int_{a}^{x}f^{(n+1)}(t)(x-t)^{n}dt\\ &\quad=\frac{f^{(n)}(a)}{n!}(x-a)^{n}+\frac{1}{n!}\int_{a}^{x}f^{(n+1)}(t)(x-t)^{n}dt.\end{aligned}
+$$
+:::
+
+## 広義積分 {#calc:sec-ft-improper}
+
+::: definition 広義積分 {#calc:improper-integral keywords="improper integral as a limit of integrals over compact subintervals; absolutely convergent improper integral" index="広義積分|こうぎせきぶん, 絶対収束（積分）|ぜったいしゅうそくせきぶん"}
+$f\colon[a,b)\to\mathbb{R}$（$b\le+\infty$）がすべての $[a,c]$（$c<b$）で積分可能なとき、極限 $\int_{a}^{b}f\defeq\lim_{c\to b-}\int_{a}^{c}f$ が存在すれば**広義積分**は収束するという。$(a,b]$ や両端も同様（両端では内部の 1 点で分け、両方が収束するとき）。$\int|f|$ が収束するとき**絶対収束**という。
+:::
+
+::: proposition 広義積分の判定 {#calc:improper-tests keywords="Cauchy criterion, comparison test, absolute convergence implies convergence, integral test for series" index="広義積分の判定|こうぎせきぶんのはんてい, 積分判定法|せきぶんはんていほう"}
+$f,g\colon[a,b)\to\mathbb{R}$ を各 $[a,c]$ で積分可能とする。
+1. **（コーシー）** $\int_{a}^{b}f$ が収束 $\iff$ 任意の $\varepsilon>0$ に $c_{0}<b$ があって、$c_{0}<c<c'<b$ なら $\bigl|\int_{c}^{c'}f\bigr|<\varepsilon$。
+2. **（比較）** $|f|\le g$ で $\int g$ が収束すれば、$\int f$ は（絶対）収束する。とくに絶対収束すれば収束する。
+3. **（積分判定法）** $f\colon[1,\infty)\to[0,\infty)$ が単調減少なら、$\sum_{n\ge1}f(n)$ が収束 $\iff$ $\int_{1}^{\infty}f$ が収束。
+:::
+
+::: proof
+1：$c\mapsto\int_{a}^{c}f$ の $c\to b-$ での極限の存在は、コーシーの条件と同値（単調な列 $c_{n}\to b$ に沿ってコーシー列となり (C) で収束、極限は列によらない）。2：$\bigl|\int_{c}^{c'}f\bigr|\le\int_{c}^{c'}g$ と 1。3：単調なので積分可能（\ref{calc:integrable-classes} の 2）で、$f(n+1)\le\int_{n}^{n+1}f\le f(n)$。足すと $\sum_{n=2}^{N}f(n)\le\int_{1}^{N}f\le\sum_{n=1}^{N-1}f(n)$。$\int_{1}^{c}f$ は $c$ について増加なので、収束は $N\to\infty$ での有界性と同値。
+:::
+
+::: example
+1. $\int_{0}^{1}x^{-p}\,dx$（$p$ は正の有理数）は $p<1$ で収束し $\frac{1}{1-p}$、$p\ge1$ で発散する。$\int_{1}^{\infty}x^{-p}\,dx$ は $p>1$ で収束、$p\le1$ で発散する（原始関数 $\frac{x^{1-p}}{1-p}$。$p=1$ は対数が要り、\ref[指数関数と対数関数]{calc:page-exp-log} で扱うが、積分判定法と調和級数の発散 \ref{calc:series-basic} から $\int_{1}^{\infty}\frac{dx}{x}$ は発散）。
+2. $\int_{1}^{\infty}\frac{(-1)^{\lfloor x\rfloor}}{x}\,dx$ は収束するが絶対収束しない（交代級数 $\sum\frac{(-1)^{n}}{n}$ との比較）。
+:::
+
+## リーマン–スティルチェス積分 {#calc:sec-ft-stieltjes}
+
+::: definition リーマン–スティルチェス積分 {#calc:riemann-stieltjes keywords="Riemann-Stieltjes integral with respect to an increasing integrator alpha" index="リーマン–スティルチェス積分|りーまんすてぃるちぇすせきぶん"}
+$\alpha$ を $[a,b]$ 上の単調増加関数、$f$ を有界とする。分割 $P$ について $\Delta\alpha_{i}\defeq\alpha(x_{i})-\alpha(x_{i-1})$、$U(f,P,\alpha)\defeq\sum M_{i}\Delta\alpha_{i}$, $L(f,P,\alpha)\defeq\sum m_{i}\Delta\alpha_{i}$ とし、$\inf_{P}U=\sup_{P}L$ のとき $f$ は $\alpha$ について積分可能といい、その値を $\int_{a}^{b}f\,d\alpha$ と書く。$\alpha(x)=x$ ではリーマン積分。
+:::
+
+::: theorem リーマン–スティルチェス積分の基本性質 {#calc:riemann-stieltjes-properties keywords="continuous functions are integrable with respect to increasing alpha; if alpha is differentiable with integrable derivative then int f d alpha = int f alpha'; unit step integrators give point evaluations" index="リーマン–スティルチェス積分の性質|りーまんすてぃるちぇすせきぶんのせいしつ"}
+1. 細分と判定条件（\ref{calc:refinement}, \ref{calc:riemann-criterion} の 1 ⇔ 2）は $\Delta x_{i}$ を $\Delta\alpha_{i}$ に替えてそのまま成り立つ。
+2. 連続関数 $f$ は任意の増加関数 $\alpha$ について積分可能。
+3. $\alpha$ が微分可能で $\alpha'$ が積分可能なら、有界な $f$ について、$f\in\mathcal{R}(\alpha)\iff f\alpha'$ がリーマン積分可能で、$\int f\,d\alpha=\int f\alpha'$。
+4. $s\in(a,b)$ と $\alpha=\mathbf{1}_{(s,b]}$（$s$ で $0$ から $1$ に跳ぶ）について、$f$ が $s$ で連続なら $\int_{a}^{b}f\,d\alpha=f(s)$。
+:::
+
+::: proof
+**1.** 証明で $\Delta x_{i}\ge0$ だけを使ったので、$\Delta\alpha_{i}\ge0$ でも同じ。
+
+**2.** 一様連続性から、$|P|<\delta$ なら $M_{i}-m_{i}<\varepsilon$ で、$U-L<\varepsilon(\alpha(b)-\alpha(a))$。
+
+**3.** $\varepsilon>0$ について、$\alpha'$ の積分可能性から $U(\alpha',P)-L(\alpha',P)<\varepsilon$ となる $P$ をとる（細分しても成り立つ）。平均値の定理で $\Delta\alpha_{i}=\alpha'(t_{i})\Delta x_{i}$。任意の $s_{i}\in[x_{i-1},x_{i}]$ について $|\alpha'(s_{i})-\alpha'(t_{i})|\le$（その小区間での $\alpha'$ の振れ幅）なので
+$$
+\Bigl|\sum f(s_{i})\Delta\alpha_{i}-\sum f(s_{i})\alpha'(s_{i})\Delta x_{i}\Bigr|\le B\varepsilon\qquad(|f|\le B).
+$$
+$s_{i}$ を動かして上限をとると $|U(f,P,\alpha)-U(f\alpha',P)|\le B\varepsilon$、下和も同様。$P$ をさらに細分しても成り立つので、上積分どうし・下積分どうしの差は $B\varepsilon$ 以下で、$\varepsilon$ は任意。
+
+**4.** $s$ を分点 $x_{j}$ の小区間 $(x_{j-1},x_{j}]$ の内部に含む分割では、$\Delta\alpha_{i}$ は $i=j$ で $1$、他は $0$ なので $U=M_{j}$, $L=m_{j}$。$|P|\to0$ で $f$ の $s$ での連続性から $M_{j},m_{j}\to f(s)$。
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- 基本定理の 2 は、$F$ が絶対連続ならルベーグ積分で $\int F'=F(b)-F(a)$ という形に一般化される（\ref[測度論]{meas:lebesgue-measure} の後で扱う予定。知られている）。微分可能でも $F'$ がルベーグ積分可能でない例もある。
+- リーマン–スティルチェス積分は、確率論の分布関数に関する期待値 $E[f(X)]=\int f\,dF_{X}$ や、和と積分を統一的に扱う記法（$\sum_{n\le x}a_{n}=\int\,dA$）として使われる。有界変動関数 $\alpha$ についても、増加関数の差に分けて定義できる。
+- 積分判定法は、$\sum\frac{1}{n^{p}}$ や $\sum\frac{1}{n\log n}$ の収束判定に使う（実数の指数・対数は \ref[指数関数と対数関数]{calc:page-exp-log}）。
+
+**前提を変えると.** 置換積分で $\varphi$ の単調性は要らない（原始関数を使う証明なので）。しかし $f$ が連続でなく積分可能なだけの場合は、$\varphi$ に単調性などの追加の条件が要る。
+
+**高い視点.** 基本定理は、微分 $d$ と積分 $\int$ が互いに逆であるという、一次元のストークスの定理 $\int_{[a,b]}dF=\int_{\partial[a,b]}F=F(b)-F(a)$ であり、多様体の上のストークスの定理に一般化される（多様体論で扱う予定）。比喩で言えば、積分は「各瞬間の速度を足し合わせて全体の移動距離を出す」操作で、基本定理は「移動距離は出発点と到着点の位置の差だけで決まる」という当たり前のことを、厳密な言葉で言い直したものである。
+:::
+
+## 問題 {#calc:sec-ft-problems}
+
+::: problem {#calc:prob-ft-wallis-integral}
+$I_{n}\defeq\int_{0}^{1}(1-x^{2})^{n}\,dx$ について、部分積分で $I_{n}=\frac{2n}{2n+1}I_{n-1}$ を示し、$I_{n}=\frac{2^{2n}(n!)^{2}}{(2n+1)!}$ を導け。
+:::
+
+::: solution
+$(1-x^{2})^{n}=(1-x^{2})^{n-1}-x^{2}(1-x^{2})^{n-1}$ なので $I_{n}=I_{n-1}-\int_{0}^{1}x\cdot x(1-x^{2})^{n-1}dx$。部分積分（$F=x$, $G=-\frac{(1-x^{2})^{n}}{2n}$）で $\int_{0}^{1}x\cdot x(1-x^{2})^{n-1}dx=\Bigl[-\frac{x(1-x^{2})^{n}}{2n}\Bigr]_{0}^{1}+\frac{1}{2n}I_{n}=\frac{1}{2n}I_{n}$。よって $I_{n}(1+\frac1{2n})=I_{n-1}$。$I_{0}=1$ から帰納法で $I_{n}=\prod_{k=1}^{n}\frac{2k}{2k+1}=\frac{2^{n}n!\cdot2^{n}n!}{(2n+1)!}$。
+:::
+
+::: problem {#calc:prob-ft-integral-test-p}
+積分判定法を使い、正の有理数 $p$ について $\sum\frac{1}{n^{p}}$ が $p>1$ で収束、$p<1$ で発散することを確かめよ（\ref{calc:comparison-condensation} の 3 とは別の証明）。
+:::
+
+::: solution
+$f(x)=x^{-p}$ は $[1,\infty)$ で正で減少。$p\neq1$ なら $\frac{x^{1-p}}{1-p}$ が原始関数（$x^{q}$ の微分は有理数 $q$ について $qx^{q-1}$：$x^{1/m}$ は逆関数の微分、整数冪は連鎖律）で、$\int_{1}^{c}x^{-p}dx=\frac{c^{1-p}-1}{1-p}$。$p>1$ なら $c\to\infty$ で $\frac{1}{p-1}$ に収束、$p<1$ なら発散。\ref{calc:improper-tests} の 3。
+:::
+
+::: problem {#calc:prob-ft-not-continuous-derivative}
+$f=\mathbf{1}_{[0,1]}$（$[-1,1]$ 上）の不定積分 $F(x)=\int_{-1}^{x}f$ を求め、$F$ は $0$ で微分可能でないことを確かめよ。
+:::
+
+::: solution
+$F(x)=0$（$x\le0$）、$F(x)=x$（$0\le x\le1$）。$0$ での右微分係数は $1$、左微分係数は $0$ なので微分可能でない。$f$ は $0$ で不連続で、基本定理の 1 の仮定を満たさない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
