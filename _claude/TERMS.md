@@ -572,3 +572,4 @@
 | mapping telescope / Milnor's lemma (additivity) / contraction (of an augmented complex) | 写像望遠鏡 / ミルナーの補題 / 縮約 | 写像テレスコープ | 和書の用例を確認できず（terms.py で 0 件）。直訳を仮採用し、別訳を index に入れた。at:page-uniqueness-infinite, at:page-kunneth |
 | norm / equivalent norms / operator norm / Neumann series | ノルム / ノルムの同値 / 作用素ノルム / ノイマン級数 | | 標準的（杉浦・関数解析の和書で一般的）。calc:page-euclidean-space |
 | total derivative (differentiable) / partial derivative / directional derivative / Jacobian matrix / gradient / C^1 / mean value inequality | 全微分（全微分可能・微分可能） / 偏微分係数 / 方向微分係数 / ヤコビ行列 / 勾配 / C¹ 級 / 平均値の不等式 | フレシェ微分、グラディエント | 標準的（杉浦『解析入門 I』）。和書テキストでは用例を確認できず（terms.py 0 件）。calc:page-differentiability |
+| Schwarz theorem / multi-index / Hessian matrix / critical point / saddle point | シュワルツの定理 / 多重指数 / ヘッセ行列 / 臨界点 / 鞍点 | クレローの定理、停留点 | 標準的（杉浦）。calc:page-higher-derivatives |
