@@ -48,7 +48,7 @@
     if (!linker.size) return;
     var deps = linker.pageDeps(IDX.backrefs, pageIdx, 2).set;
     var prose = article.querySelector('.mn-prose'); if (!prose) return;
-    var SKIP = 'a, code, pre, .katex, h1, h2, h3, h4, h5, h6, .mn-env-head, summary, .mn-label, .mn-backrefs, .mn-toc-inline, .mn-learn-x, .mn-qed';
+    var SKIP = 'a, code, pre, .katex, svg, h1, h2, h3, h4, h5, h6, .mn-env-head, summary, .mn-label, .mn-backrefs, .mn-toc-inline, .mn-learn-x, .mn-qed';   // 図（svg）の中の文字はリンクにできない
     // 地の文の「節」：直前の h2 を鍵にする
     var sectionOf = new Map(), cur = null;
     [].forEach.call(prose.children, function (c) { if (c.tagName === 'H2') cur = c; sectionOf.set(c, cur || prose); });
