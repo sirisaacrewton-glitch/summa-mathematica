@@ -249,7 +249,8 @@
     return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '">' +
       '<button type="button" class="mn-pin-del" data-unpin aria-label="固定を外す" title="固定を外す"></button>' +
       '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで最小化／展開・長押しで並べ替え">' +
-        '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span></div>' +
+        '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
+        '<button type="button" class="mn-pin-x" data-unpin aria-label="固定を外す" title="固定を外す"></button></div>' +
       '<div class="mn-pin-mini">' + firstMath(p.htmlContent) + '</div>' +
       '<div class="mn-pin-body mn-prose">' + p.htmlContent +
         '<a class="mn-pin-where" href="' + esc(p.url) + '">' + esc(p.sectionPath) + ' へ →</a></div></div>';
@@ -292,18 +293,27 @@
   }
   function wireReorder() {
     var list = dock.querySelector('.mn-dock-list');
-    var press = null, drag = null;
+    var press = null, drag = null, pending = null, swipe = null;
     function cards() { return [].slice.call(list.querySelectorAll('.mn-pin-card')); }
     function startDrag(card, ev) {
       var all = cards(), lr = list.getBoundingClientRect();
-      drag = { card: card, id: card.getAttribute('data-pin-id'), y0: ev.clientY, scroll0: list.scrollTop, from: all.indexOf(card), to: all.indexOf(card),
+      drag = { card: card, id: card.getAttribute('data-pin-id'), y0: ev.clientY, scroll0: list.scrollTop, from: all.indexOf(card), to: all.indexOf(card), mouse: ev.pointerType === 'mouse', dockLeft: dock.getBoundingClientRect().left,
         slots: all.map(function (c) { return { el: c, top: c.offsetTop, h: c.offsetHeight }; }), lr: lr, pid: ev.pointerId };
       card.classList.add('is-drag');
       try { card.setPointerCapture(ev.pointerId); } catch (e) {}
       if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
     }
     function moveDrag(ev) {
-      var d = drag, dy = ev.clientY - d.y0 + (list.scrollTop - d.scroll0);
+      var d = drag;
+      // マウスで並べ替え中にドックの外へ出たら、並べ替えをやめてその位置に浮かせる
+      if (d.float) { placeFloat(d.float, ev.clientX - 60, ev.clientY - 18); return; }
+      if (d.mouse && ev.clientX < d.dockLeft - 12) {
+        cards().forEach(function (c) { c.style.translate = ''; });
+        d.card.classList.remove('is-drag');
+        d.float = floatCard(d.id, { x: ev.clientX - 60, y: ev.clientY - 18 });
+        return;
+      }
+      var dy = ev.clientY - d.y0 + (list.scrollTop - d.scroll0);
       d.card.style.translate = '0 ' + dy + 'px';
       // 端に近づいたら一覧をスクロールする
       if (ev.clientY < d.lr.top + 36) list.scrollTop -= 8;
@@ -321,6 +331,7 @@
     }
     function endDrag() {
       var d = drag; drag = null;
+      if (d.float) { saveFloats(); setEditing(false); closeDock(); return; }
       d.card.classList.remove('is-drag');
       cards().forEach(function (c) { c.style.translate = ''; });
       if (d.to !== d.from) {
@@ -330,9 +341,18 @@
     }
     list.addEventListener('pointerdown', function (ev) {
       var card = ev.target.closest('.mn-pin-card');
-      if (!card || ev.button > 0 || ev.target.closest('[data-unpin], a')) return;
-      if (editing) { ev.preventDefault(); startDrag(card, ev); return; }
-      if (ev.pointerType === 'mouse') watchPull(card, ev);
+      if (!card || ev.button > 0 || ev.target.closest('[data-unpin]')) return;
+      // 本文の中のリンク（用語など）から押しても、マウスならカードごとドラッグできる。タッチではリンクを優先
+      if (ev.target.closest('a') && ev.pointerType !== 'mouse') return;
+      // 編集モード：最初に動いた向きで決める。横（スマホは主に左）へのスワイプで外す、縦のドラッグで並べ替え
+      if (editing) {
+        ev.preventDefault();
+        if (ev.pointerType === 'mouse') startDrag(card, ev);   // マウス：すぐ並べ替え（ドックの外へ出せば浮かせる）
+        else pending = { card: card, ev: ev };                  // タッチ：向きで決める
+        return;
+      }
+      // マウス：押してそのまま本文側へドラッグすると浮かせる（長押しの待ちはしない。編集は「編集」ボタンで）
+      if (ev.pointerType === 'mouse') { watchPull(card, ev); return; }
       // 長押し（0.45 秒）で編集モードに入り、そのままドラッグできる
       press = { card: card, x: ev.clientX, y: ev.clientY, t: setTimeout(function () {
         var e = press; press = null; if (!e) return;
@@ -341,14 +361,50 @@
     });
     list.addEventListener('pointermove', function (ev) {
       if (press && (Math.abs(ev.clientX - press.x) > 8 || Math.abs(ev.clientY - press.y) > 8)) { clearTimeout(press.t); press = null; }
+      if (pending) {
+        var dx = ev.clientX - pending.ev.clientX, dy = ev.clientY - pending.ev.clientY;
+        if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;
+        var c = pending.card, e0 = pending.ev; pending = null;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          swipe = { card: c, x0: e0.clientX, w: c.offsetWidth };
+          c.classList.add('is-swipe');
+          try { c.setPointerCapture(ev.pointerId); } catch (e) {}
+        } else startDrag(c, e0);
+      }
+      if (swipe) {
+        ev.preventDefault();
+        var sx = ev.clientX - swipe.x0;
+        swipe.dx = sx;
+        swipe.card.style.translate = sx + 'px 0';
+        swipe.card.style.opacity = String(Math.max(0.25, 1 - Math.abs(sx) / swipe.w));
+        swipe.card.classList.toggle('is-armed', Math.abs(sx) > swipe.w * 0.3);
+        return;
+      }
       if (drag) { ev.preventDefault(); moveDrag(ev); }
     });
-    function up() { if (press) { clearTimeout(press.t); press = null; } if (drag) endDrag(); }
+    function endSwipe() {
+      var sw = swipe; swipe = null;
+      var c = sw.card, dx = sw.dx || 0;
+      c.classList.remove('is-swipe', 'is-armed');
+      if (Math.abs(dx) > sw.w * 0.3) {
+        // 外す：その向きへ滑らせて消し、あとを詰める
+        var id = c.getAttribute('data-pin-id');
+        animOut(c, [{ translate: dx + 'px 0', opacity: c.style.opacity || 1 }, { translate: (dx < 0 ? -1 : 1) * (sw.w + 40) + 'px 0', opacity: 0 }], 180, function () {
+          c.style.translate = ''; c.style.opacity = ''; c.style.visibility = 'hidden'; unpin(id);
+        });
+      } else {
+        var from = c.style.translate; c.style.translate = ''; c.style.opacity = '';
+        anim(c, [{ translate: from }, { translate: '0 0' }], 180);
+      }
+    }
+    function up() { pending = null; if (press) { clearTimeout(press.t); press = null; } if (swipe) endSwipe(); if (drag) endDrag(); }
     list.addEventListener('pointerup', up);
     list.addEventListener('pointercancel', up);
     // ドラッグ中はページがスクロールしないように（iOS は touchmove を止める必要がある）
-    list.addEventListener('touchmove', function (ev) { if (drag && ev.cancelable) ev.preventDefault(); }, { passive: false });
+    list.addEventListener('touchmove', function (ev) { if ((drag || swipe || pending) && ev.cancelable) ev.preventDefault(); }, { passive: false });
     list.addEventListener('contextmenu', function (ev) { if (ev.target.closest('.mn-pin-card')) ev.preventDefault(); });
+    // ブラウザ標準のドラッグ（リンクや文字を引っぱる動作）は使わない（浮かせる操作とぶつかるため）
+    list.addEventListener('dragstart', function (ev) { if (ev.target.closest && ev.target.closest('.mn-pin-card')) ev.preventDefault(); });
     /* PC：カードをドックの外（本文側）へドラッグすると、その位置に浮かせる */
     function watchPull(card, ev0) {
       var dr = dock.getBoundingClientRect(), moved = false, fw = null, off = null;
@@ -450,6 +506,7 @@
     var count = lim === Infinity ? p.length + ' 件' : p.length + '/' + lim;
     dock.querySelector('.mn-dock-head').innerHTML = editing
       ? '<span class="mn-dock-title">並べ替え・外す</span><span class="mn-dock-tools">' +
+          '<button type="button" class="mn-textbtn mn-clear-all" data-clear-all>すべて外す</button>' +
           '<button type="button" class="mn-textbtn' + (isPro() ? '' : ' is-locked') + '" data-sets>' + (isPro() ? 'セット' : '🔒 セット') + '</button>' +
           '<button type="button" class="mn-btn" data-edit-done>完了</button></span>'
       : '<span class="mn-dock-title">📌 ピン留め中 <span class="mn-dock-count">(' + count + ')</span></span><span class="mn-dock-tools">' +
@@ -465,8 +522,8 @@
     renderDockHead();
     var list = dock.querySelector('.mn-dock-list');
     list.innerHTML = p.length ? p.map(function (x) { return cardHtml(x, mins[x.id]); }).join('') +
-      '<p class="mn-dock-hint">' + (PHONE.matches ? 'カードの見出しをタップすると、本文の上に浮かせて見比べられます。長押しで並べ替え・外す。'
-        : 'カードを本文側へドラッグすると、浮かせて本文と見比べられます。長押しで並べ替え・外す。') + '</p>' :
+      '<p class="mn-dock-hint">' + (PHONE.matches ? 'カードの見出しをタップすると、本文の上に浮かせて見比べられます。長押しで編集（上下に動かして並べ替え、横にスワイプで外す）。'
+        : 'カードを本文側へドラッグすると、浮かせて本文と見比べられます。× で外す。長押しで並べ替え。') + '</p>' :
       '<p class="mn-dock-empty">定義や定理の見出しの <span aria-hidden="true">📌</span> ボタン、または参照プレビューの「📌 固定」で、項目をここに並べておけます。ページを移動しても残ります。</p>' +
       (isPro() ? '' : '<p class="mn-dock-empty">無料プランでは 1 件まで。<button type="button" class="mn-textbtn" data-see-pro>Pro なら無制限</button></p>');
     dockTab.innerHTML = '<span aria-hidden="true">📌</span><span class="mn-dock-tab-n">' + (p.length ? p.length : '') + '</span><span class="mn-dock-tab-text">ピン留め' + (p.length ? ' (' + p.length + ')' : '') + '</span>';
@@ -477,6 +534,20 @@
     if (ev.target.closest('[data-close-dock]')) { closeDock(); return; }
     if (ev.target.closest('[data-see-pro]')) { proModal('付箋ドックは Pro プランで無制限に使えます。'); return; }
     if (ev.target.closest('[data-edit]')) { setEditing(true); return; }
+    var ca = ev.target.closest('[data-clear-all]');
+    if (ca) {
+      // 一括で外す：誤操作を防ぐため 2 回押しで確定（3 秒で元に戻る）
+      if (!ca.classList.contains('is-confirm')) {
+        ca.classList.add('is-confirm'); ca.textContent = 'もう一度押すと全部外す';
+        clearTimeout(ca._t); ca._t = setTimeout(function () { ca.classList.remove('is-confirm'); ca.textContent = 'すべて外す'; }, 3000);
+        return;
+      }
+      var n = pins().length;
+      floats.slice().forEach(function (w) { closeFloat(w, true); });
+      setEditing(false); savePins([]);
+      toast('📌 ' + n + ' 件の固定を外しました');
+      return;
+    }
     if (ev.target.closest('[data-edit-done]')) { setEditing(false); return; }
     if (ev.target.closest('[data-sets]')) { if (isPro()) setsModal(); else proModal('付箋のセット（分野ごとの組み合わせ）の保存は Pro プランの機能です。'); return; }
     if (!card) return;
