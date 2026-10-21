@@ -1051,8 +1051,8 @@
       var slot = el('<div class="mn-interactive-slot mn-learn-x" data-target-id="' + esc(it.target) + '" data-item="' + esc(it.id) + '"></div>');
       var free = it.access === 'free';
       slot.innerHTML = '<div class="mn-ia-bar"><button type="button" class="mn-ia-open" aria-expanded="false">' +
-        (it.type === 'puzzle' ? '🧩 自分で証明を組み立ててみる' : '🎮 ' + S.renderer.renderInline(it.label || '体感ミニゲーム')) + '</button>' +
-        (free ? '<span class="mn-free-badge">無料お試し</span>' : (isPro() ? '' : '<span class="mn-pro-badge">Pro</span>')) +
+        (it.type === 'puzzle' ? '🧩 自分で証明を組み立ててみる' : it.type === 'quiz' ? '⭕ ' + S.renderer.renderInline(it.label || '○× ゲーム') : '🎮 ' + S.renderer.renderInline(it.label || '体感ミニゲーム')) + '</button>' +
+        (it.type === 'quiz' ? '' : free ? '<span class="mn-free-badge">無料お試し</span>' : (isPro() ? '' : '<span class="mn-pro-badge">Pro</span>')) +
         '<span class="mn-ia-sub">' + esc(it.summary || '') + '</span></div><div class="mn-ia-body" hidden></div>';
       end.parentNode.insertBefore(slot, end.nextSibling);
       slot.querySelector('.mn-ia-open').addEventListener('click', function () { toggleInteractive(slot, it); });
@@ -1079,6 +1079,11 @@
     }
     cancelOut(body);
     body.hidden = false;
+    if (it.type === 'quiz') {   // ○× ゲームはページの表から問題を作るので、教材データを読み込まない
+      renderQuiz(body, it);
+      animHeight(body, 0, body.offsetHeight);
+      return;
+    }
     body.innerHTML = '<div class="mn-ia-skeleton" role="status"><span class="mn-sr-only">読み込み中…</span><div class="mn-skel-line" style="width:70%"></div><div class="mn-skel-line"></div><div class="mn-skel-line" style="width:56%"></div></div>';
     var start = 0;   // 閉じた状態（高さ 0）から、読み込み後の高さまで伸ばす
     withContent(function (data) {
@@ -1200,6 +1205,121 @@
   }
 
   /* ---------- 体感ミニゲーム：開被覆と有限部分被覆 ---------- */
+  /* ---------- ○× ゲーム ----------
+   * 問題はページに描かれた表から作る（表を直せばゲームも直る）。manifest の項目：
+   *   tables: [{ label: 表のラベル, mode: 'grid' | 'rows', q: '「{row}」は「{col}」で保たれる？', notes: 備考のラベル, why: 説明の列 }]
+   *     grid：1 列目が行の名前、2 列目以降の各欄の ○×△ が答え（△ は「いつもとは限らない」ので ×）。欄の「(n)」は notes の n 番目の項目を説明に使う。
+   *     rows：各行の mark 列（既定 1）の ○×△ が答え（印のない表は answer: 'yes' | 'no' で一律）、why 列（既定 2）が説明。q の {row} は 1 列目、{c1}・{c2}… は 2 列目以降。skip に合う行は出さない。
+   *   items: [{ q: 問題（Markdown）, a: 'yes' | 'no', why: 説明（Markdown） }]（表にない問題を足す）
+   *   yes / no：○・× のボタンの説明、count：1 回の問題数 */
+  function quizPool(it) {
+    var pool = [];
+    (it.tables || []).forEach(function (t) {
+      var env = document.getElementById(t.label), table = env && env.querySelector('table');
+      if (!table) return;
+      var heads = [].map.call(table.querySelectorAll('thead th'), function (th) { return th.innerHTML; });
+      var notes = t.notes && document.getElementById(t.notes);
+      var items = notes ? notes.querySelectorAll('ol > li') : [];
+      table.querySelectorAll('tbody tr').forEach(function (tr) {
+        var cells = tr.children; if (!cells.length) return;
+        var rowHtml = cells[0].innerHTML;
+        function add(cell, qHtml, whyHtml) {
+          var m = cell.querySelector('.mn-yes, .mn-no, .mn-partial'); if (!m) return;
+          var t2 = m.getAttribute('title') || '';
+          if (t2 === '未解決') return;   // 「?」の欄は出題しない
+          var a = m.classList.contains('mn-yes') ? 'yes' : 'no';
+          pool.push({ q: qHtml, a: a, partial: m.classList.contains('mn-partial'), why: whyHtml });
+        }
+        if ((t.mode || 'grid') === 'grid') {
+          for (var c = 1; c < cells.length; c++) {
+            var n = /\((\d+)\)/.exec(cells[c].textContent), why = n && items[+n[1] - 1] ? items[+n[1] - 1].innerHTML : '';
+            add(cells[c], (t.q || '「{row}」は「{col}」で保たれる？').replace('{row}', rowHtml).replace('{col}', heads[c] || ''), why);
+          }
+        } else {
+          if (t.skip && new RegExp(t.skip).test(cells[0].textContent)) return;
+          var mc = t.mark || 1, wc = t.why || 2, q = (t.q || '{row}').replace('{row}', rowHtml);
+          for (var i = 1; i < cells.length; i++) q = q.replace('{c' + i + '}', cells[i].innerHTML);
+          var why = cells[wc] ? cells[wc].innerHTML : '';
+          if (t.answer) pool.push({ q: q, a: t.answer, partial: false, why: why });   // 印のない表（すべて成り立つ・すべて成り立たない）
+          else if (cells[mc]) add(cells[mc], q, why);
+        }
+      });
+    });
+    (it.items || []).forEach(function (x) {
+      pool.push({ q: S.renderer.renderInline(x.q), a: x.a === 'yes' ? 'yes' : 'no', partial: false, why: S.renderer.renderInline(x.why || '') });
+    });
+    return pool;
+  }
+  function shuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+  function renderQuiz(body, it) {
+    var pool = quizPool(it);
+    if (!pool.length) { body.innerHTML = '<p class="mn-muted">問題を作れませんでした。</p>'; return; }
+    var N = Math.min(it.count || 10, pool.length), yesLab = it.yes || 'いつも成り立つ', noLab = it.no || '成り立たない例がある';
+    var best = getJSON('sm_quiz_best', {}), round, k, score, wrong;
+    function start(list) { round = list; k = 0; score = 0; wrong = []; show(); }
+    function fresh() { start(shuffle(pool.slice()).slice(0, N)); }
+    function show() {
+      var x = round[k];
+      body.innerHTML = '<div class="mn-qz" tabindex="-1">' +
+        '<div class="mn-qz-head"><span class="mn-qz-num">第 ' + (k + 1) + ' 問 / ' + round.length + '</span><span class="mn-qz-score">正解 ' + score + '</span></div>' +
+        '<div class="mn-qz-bar"><i style="width:' + (100 * k / round.length) + '%"></i></div>' +
+        '<div class="mn-qz-card"><div class="mn-qz-q">' + x.q + '</div>' +
+        '<div class="mn-qz-btns"><button type="button" class="mn-qz-ans" data-a="yes"><b>○</b><small>' + esc(yesLab) + '</small></button>' +
+        '<button type="button" class="mn-qz-ans" data-a="no"><b>×</b><small>' + esc(noLab) + '</small></button></div>' +
+        '<div class="mn-qz-fb" hidden></div></div><p class="mn-qz-keys">キー操作：O で ○、X で ×、Enter で次へ</p></div>';
+      var card = body.querySelector('.mn-qz-card');
+      anim(card, [{ opacity: 0, transform: 'translateY(8px)' }, { opacity: 1, transform: 'none' }], 240);
+      body.querySelectorAll('.mn-qz-ans').forEach(function (b) { b.addEventListener('click', function () { answer(b.getAttribute('data-a')); }); });
+      var box = body.querySelector('.mn-qz'); box.addEventListener('keydown', onKey);
+      if (k > 0) box.focus({ preventScroll: true });
+    }
+    function onKey(e) {
+      if (e.altKey || e.ctrlKey || e.metaKey) return;
+      var key = e.key.toLowerCase(), fb = body.querySelector('.mn-qz-fb');
+      if (fb && fb.hidden && (key === 'o' || key === 'x')) { e.preventDefault(); e.stopPropagation(); answer(key === 'o' ? 'yes' : 'no'); }
+      else if (fb && !fb.hidden && key === 'enter') { e.preventDefault(); next(); }
+    }
+    function answer(a) {
+      var x = round[k], ok = a === x.a, fb = body.querySelector('.mn-qz-fb');
+      if (!fb.hidden) return;
+      if (ok) score++; else wrong.push(x);
+      body.querySelectorAll('.mn-qz-ans').forEach(function (b) {
+        b.disabled = true;
+        var v = b.getAttribute('data-a');
+        if (v === x.a) b.classList.add('is-correct');
+        if (v === a && !ok) b.classList.add('is-wrong');
+      });
+      body.querySelector('.mn-qz-score').textContent = '正解 ' + score;
+      fb.innerHTML = '<p class="mn-qz-verdict ' + (ok ? 'is-ok' : 'is-ng') + '">' + (ok ? '正解' : '不正解') + '：答えは ' + (x.a === 'yes' ? '○' : '×') +
+        (x.partial ? '（△：条件付きでだけ成り立つ）' : '') + '</p>' + (x.why ? '<div class="mn-qz-why">' + x.why + '</div>' : '') +
+        '<button type="button" class="mn-btn mn-qz-next">' + (k + 1 < round.length ? '次の問題 →' : '結果を見る') + '</button>';
+      fb.hidden = false;
+      var h0 = body.offsetHeight;
+      anim(fb, [{ opacity: 0 }, { opacity: 1 }], 220);
+      animHeight(body, h0 - fb.offsetHeight, body.offsetHeight, 240);
+      var nb = fb.querySelector('.mn-qz-next'); nb.addEventListener('click', next); nb.focus({ preventScroll: true });
+    }
+    function next() {
+      k++;
+      var h0 = body.offsetHeight;
+      if (k < round.length) show(); else finish();
+      animHeight(body, h0, body.offsetHeight, 240);
+    }
+    function finish() {
+      var prev = best[it.id] || 0;
+      if (round.length === N && score > prev) { best[it.id] = score; setJSON('sm_quiz_best', best); }
+      var msg = score === round.length ? '全問正解！' : score >= round.length * 0.7 ? 'よくできました。' : '表をもう一度眺めてから挑戦してみよう。';
+      body.innerHTML = '<div class="mn-qz mn-qz-end"><p class="mn-qz-result"><b>' + score + '</b> / ' + round.length + '</p><p>' + msg +
+        (round.length === N ? '（これまでの最高 ' + Math.max(prev, score) + ' / ' + N + '）' : '') + '</p>' +
+        '<div class="mn-qz-endbtns">' + (wrong.length ? '<button type="button" class="mn-btn" data-retry>間違えた ' + wrong.length + ' 問をもう一度</button>' : '') +
+        '<button type="button" class="mn-btn" data-again>新しい ' + N + ' 問</button></div></div>';
+      anim(body.querySelector('.mn-qz-result'), [{ transform: 'scale(.8)', opacity: 0 }, { transform: 'none', opacity: 1 }], 320);
+      var r = body.querySelector('[data-retry]'); if (r) r.addEventListener('click', function () { var h0 = body.offsetHeight; start(shuffle(wrong.slice())); animHeight(body, h0, body.offsetHeight, 240); });
+      body.querySelector('[data-again]').addEventListener('click', function () { var h0 = body.offsetHeight; fresh(); animHeight(body, h0, body.offsetHeight, 240); });
+    }
+    fresh();
+  }
+
   function renderMinigame(body, item) {
     if (item.locked) { body.innerHTML = '<p>このミニゲームは Pro プランで遊べます。 <button type="button" class="mn-textbtn" data-see-pro>Pro について</button></p>'; body.querySelector('[data-see-pro]').addEventListener('click', function () { proModal(); }); return; }
     if (item.game !== 'cover-interval') { body.innerHTML = '<p class="mn-muted">未対応のミニゲームです。</p>'; return; }

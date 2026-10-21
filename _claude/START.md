@@ -293,6 +293,7 @@
 │                           用語のリンク：本文の主要な用語は自動で定義へのリンクになる（規則は site-core.js の createTermLinker。一般的すぎて誤爆する語は TERM_STOP に足す）。記事では用語に \ref を書かなくてよい
 │                           学習ルート：項目は「主張の前提（自動）＋証明の前提（＋で広げる）」、ページは「記法と定義の確認」の下に「ここまでのロードマップ」。前提は build.js が site-index.js の backrefs の 5 番目（role）に記録する参照の位置から決める
 ├── learn/manifest.js     ← ページごとの直感イメージの本文と、演習（パズル・ミニゲーム）の差し込み位置。キーはページのパス
+│                           ○× ゲーム（type: 'quiz'、2026-10-21）：問題はページに描かれた表（::: table）から作る。grid は 1 列目×見出しの各欄の ○×△（△ は ×、? は出題しない、欄の「(n)」は notes の表の備考 n 番を説明に）、rows は行ごとの印か answer で一律。表にない問題は items に書く。表を直せばゲームも直る。書き方は learn.js の quizPool の注釈
 ├── api/pro-content/      ← 演習の中身（<ページのラベルの : を -- に>.json）。手順 steps は text・uses（使うラベル）・needs（前提となる手順の番号）・hint。判定は needs の順序だけを見る
 ├── tools/build.js        ← ビルド＆検査
 ├── tools/labels.js       ← ラベル管理（status / find / planned / uses / rename / activate）

@@ -3,6 +3,62 @@
  * 演習の中身（パズルの手順など）は api/pro-content/<ページのラベル>.json に置き、開いたときに読む。
  * access: 'free' は無料お試し（各分野の最初の 1 つ）、'pro' は Pro プランで全体が開く。 */
 window.SM_LEARN_MANIFEST = {
+  // 一般位相の一覧表：○× ゲーム（問題は表から作る）
+  '54-general-topology/54D-general-properties/02-property-tables/01-preservation.html': {
+    interactive: [
+      { id: 'qz-preservation', type: 'quiz', target: 'top:preservation-table-maps', access: 'free', label: '○× ゲーム：その性質は保たれる？',
+        summary: '2 つの表から 10 問', yes: 'いつも保たれる', no: '保たれない例がある',
+        tables: [
+          { label: 'top:preservation-table-constructions', mode: 'grid', q: '「{row}」は「{col}」で保たれる？', notes: 'top:preservation-notes' },
+          { label: 'top:preservation-table-maps', mode: 'grid', q: '「{row}」は「{col}」で保たれる？', notes: 'top:preservation-notes' }
+        ] }
+    ]
+  },
+  '54-general-topology/54D-general-properties/02-property-tables/02-operations-commute.html': {
+    interactive: [
+      { id: 'qz-commute', type: 'quiz', target: 'top:commute-table-constructions', access: 'free', label: '○× ゲーム：入れ替えてよい？',
+        summary: '2 つの表から 10 問', yes: 'いつも成り立つ', no: '成り立たない例がある',
+        tables: [
+          { label: 'top:commute-table-closure', mode: 'rows', q: '{row}（等号はいつも成り立つ？）' },
+          { label: 'top:commute-table-constructions', mode: 'rows', q: '{row}（いつも成り立つ？）' }
+        ] }
+    ]
+  },
+  '54-general-topology/54D-general-properties/02-property-tables/03-implication-map.html': {
+    interactive: [
+      { id: 'qz-implication', type: 'quiz', target: 'top:non-implication-table', access: 'free', label: '○× ゲーム：その含意は正しい？',
+        summary: '含意とその逆から 10 問', yes: '正しい', no: '反例がある',
+        tables: [
+          { label: 'top:implication-table', mode: 'rows', q: '「{row}」をみたす空間は「{c1}」をみたす？', answer: 'yes', why: 2 }
+        ],
+        items: [
+          { q: '「T₀」をみたす空間は「T₁」をみたす？', a: 'no', why: 'シェルピンスキー空間は $T_{0}$ だが $T_{1}$ でない。' },
+          { q: '「T₁」をみたす空間は「ハウスドルフ」をみたす？', a: 'no', why: '無限集合上の補有限位相は $T_{1}$ だがハウスドルフでない。' },
+          { q: '「ハウスドルフ」をみたす空間は「T₃」をみたす？', a: 'no', why: '$K$ 位相の $\\R$ はハウスドルフだが正則でない。' },
+          { q: '「T₃」をみたす空間は「チコノフ」をみたす？', a: 'no', why: '正則 $T_{1}$ だが完全正則でない空間がある（構成はこのサイトでは扱わない）。' },
+          { q: '「チコノフ」をみたす空間は「T₄」をみたす？', a: 'no', why: 'ニェミツキ平面・ゾルゲンフライ平面はチコノフ空間だが正規でない。' },
+          { q: '「T₄」をみたす空間は「パラコンパクト」をみたす？', a: 'no', why: '$[0,\\omega_{1})$ は $T_{4}$ だが、可算コンパクトでコンパクトでないのでパラコンパクトでない。' },
+          { q: '「パラコンパクト」をみたす空間は「距離化可能」をみたす？', a: 'no', why: 'ゾルゲンフライ直線はパラコンパクトだが、可分で第二可算でないので距離化可能でない。' },
+          { q: '「パラコンパクト」をみたす空間は「リンデレーフ」をみたす？', a: 'no', why: '非可算な離散空間は距離化可能（したがってパラコンパクト）だが、リンデレーフでない。' },
+          { q: '「可算コンパクト」をみたす空間は「コンパクト」をみたす？', a: 'no', why: '$[0,\\omega_{1})$ は可算コンパクトだがコンパクトでない。' },
+          { q: '「コンパクト」をみたす空間は「点列コンパクト」をみたす？', a: 'no', why: '$\\{0,1\\}^{\\mathcal{P}(\\N)}$ はコンパクトだが点列コンパクトでない。' },
+          { q: '「擬コンパクト」をみたす空間は「可算コンパクト」をみたす？', a: 'no', why: 'Ψ 空間は擬コンパクトだが可算コンパクトでない。' },
+          { q: '「リンデレーフ」をみたす空間は「第二可算」をみたす？', a: 'no', why: 'ゾルゲンフライ直線はリンデレーフだが第二可算でない。' },
+          { q: '「第一可算 ＋ 可分」をみたす空間は「第二可算」をみたす？', a: 'no', why: 'ゾルゲンフライ直線は第一可算で可分だが第二可算でない。' },
+          { q: '「可分」をみたす空間は「リンデレーフ」をみたす？', a: 'no', why: 'ゾルゲンフライ平面は可分だがリンデレーフでない。' },
+          { q: '「コンパクト ＋ ハウスドルフ」をみたす空間は「可分」をみたす？', a: 'no', why: '非可算な離散空間の一点コンパクト化はコンパクトハウスドルフだが可分でない。' },
+          { q: '「連結」をみたす空間は「弧状連結」をみたす？', a: 'no', why: '位相幾何学者のサイン曲線は連結だが弧状連結でない。' },
+          { q: '「弧状連結」をみたす空間は「局所連結」をみたす？', a: 'no', why: '櫛形空間は弧状連結だが局所連結でない。' },
+          { q: '「T₃ ＋ リンデレーフ」をみたす空間は「距離化可能」をみたす？', a: 'no', why: 'ゾルゲンフライ直線は $T_{3}$ でリンデレーフだが距離化可能でない。' },
+          { q: '「コンパクト ＋ T₁」をみたす空間は「T₄」をみたす？', a: 'no', why: '補有限位相はコンパクトで $T_{1}$ だが正規でない。ハウスドルフ性が要る。' },
+          { q: '「LCH」をみたす空間は「σ コンパクト」をみたす？', a: 'no', why: '$[0,\\omega_{1})$ は LCH だがリンデレーフでないので σ コンパクトでない。' },
+          { q: '「コンパクト ＋ ハウスドルフ ＋ 第一可算」をみたす空間は「距離化可能」をみたす？', a: 'no', why: '二重矢印空間はコンパクトハウスドルフで第一可算だが、第二可算でないので距離化可能でない。' },
+          { q: '「距離化可能」をみたす空間は「完備距離化可能」をみたす？', a: 'no', why: '$\\mathbb{Q}$ は距離化可能だが完備距離化可能でない（孤立点のない可算空間）。' },
+          { q: '「ベール空間」をみたす空間は「距離化可能」をみたす？', a: 'no', why: '$[0,\\omega_{1}]$ はコンパクトハウスドルフなのでベール空間だが、第一可算でないので距離化可能でない。' },
+          { q: '「可分 ＋ 距離化可能」をみたす空間は「リンデレーフ」をみたす？', a: 'yes', why: '距離化可能空間では、第二可算・可分・リンデレーフは同値。' }
+        ] }
+    ]
+  },
   // 分野の概要ページ（index.html）：「この分野で学ぶこと」と分野全体の動画の枠
   '54-general-topology/index.html': {
     intuition: {
