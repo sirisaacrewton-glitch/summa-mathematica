@@ -52,6 +52,20 @@
       if (d) anim(n, [{ transform: 'translateY(' + d + 'px)' }, { transform: 'none' }], 240);
     });
   }
+  /* ---------- 表示の設定（学習向けの補助を最初から開くか、たたんでおくか） ----------
+   * intro：ページ冒頭の直感イメージ（と動画）、roadmap：ここまでのロードマップ、intuition：定理ごとの「意図・直感」。
+   * たたんでも見出しの 1 行は残るので、研究者が新しい分野を学ぶときなどはその場で開ける。 */
+  var PREF_DEFAULT = { intro: 'open', roadmap: 'open', intuition: 'closed' };
+  function prefs() { var p = getJSON('sm_prefs', {}); var o = {}; Object.keys(PREF_DEFAULT).forEach(function (k) { o[k] = p[k] === 'open' || p[k] === 'closed' ? p[k] : PREF_DEFAULT[k]; }); return o; }
+  function setPref(k, v) { var p = prefs(); p[k] = v; setJSON('sm_prefs', p); applyPrefs(); }
+  function applyPrefs() {
+    if (!S || !S.article) return;
+    var P = prefs();
+    var intro = S.article.querySelector('details.mn-intuition-slot'); if (intro) intro.open = P.intro === 'open';
+    var pm = S.article.querySelector('details.mn-pagemap'); if (pm && pm.open !== (P.roadmap === 'open')) pm.open = P.roadmap === 'open';
+    var all = S.store && S.store('mn-open-folds') === '1';
+    S.article.querySelectorAll('.mn-prose details.mn-env[data-env="intuition"]').forEach(function (d) { d.open = all || P.intuition === 'open'; });
+  }
   function typing(t) { return t && (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || t.isContentEditable); }
 
   /* ---------- 参照の向きを逆にした表（前提＝この項目が参照している項目） ----------
@@ -892,11 +906,11 @@
     // 重み（参照の数）の多い順に、段ごと最大 PER 件
     function top(list) { return list.sort(function (a, b) { return ((PF[me] || {})[b] || 0) - ((PF[me] || {})[a] || 0); }); }
     top(direct).slice(0, PER).forEach(function (i) { shown[i] = 1; });
-    var open = getJSON('sm_pagemap_open', true);
+    var open = prefs().roadmap === 'open';   // 既定は表示の設定（⚙）。ページ上で開閉しても設定は変えない
     var box = el('<details class="mn-pagemap mn-learn-x"' + (open ? ' open' : '') + '><summary><span class="mn-pagemap-k">🗺️ ここまでのロードマップ</span>' +
       '<span class="mn-pagemap-sub">このページが前提にするページ ' + direct.length + ' 件</span></summary><div class="mn-pagemap-body"></div></details>');
     anchor.parentNode.insertBefore(box, anchor.nextSibling);
-    box.addEventListener('toggle', function () { setJSON('sm_pagemap_open', box.open); if (box.open) render(); });
+    box.addEventListener('toggle', function () { if (box.open) render(); });
     var bodyEl = box.querySelector('.mn-pagemap-body'), ro = null;
     function frontierHidden() {
       var n = 0;
@@ -948,11 +962,11 @@
   function mountIntuition(mf) {
     if (!mf || !mf.intuition) return;
     var I = mf.intuition;
-    var slot = el('<section class="mn-intuition-slot mn-learn-x" data-page-id="' + esc(pageLabel()) + '" aria-label="直感イメージ"></section>');
-    slot.innerHTML = '<div class="mn-intu-text"><div class="mn-intu-k">💡 直感イメージ<span class="mn-intu-sub">（' + esc(I.question || 'なぜこの概念が必要か？') + '）</span></div>' +
-      '<div class="mn-prose">' + S.renderer.renderMarkdown(I.text || '') + '</div></div>' +
+    var slot = el('<details class="mn-intuition-slot mn-learn-x" data-page-id="' + esc(pageLabel()) + '" aria-label="直感イメージ"' + (prefs().intro === 'open' ? ' open' : '') + '></details>');
+    slot.innerHTML = '<summary class="mn-intu-k">💡 直感イメージ<span class="mn-intu-sub">（' + esc(I.question || 'なぜこの概念が必要か？') + '）</span></summary>' +
+      '<div class="mn-intu-grid"><div class="mn-intu-text"><div class="mn-prose">' + S.renderer.renderMarkdown(I.text || '') + '</div></div>' +
       '<div class="mn-intu-video" data-video-state="loading"><div class="mn-video-frame"><div class="mn-video-skeleton"></div></div>' +
-      '<div class="mn-video-cap">🎬 ' + esc(I.videoTitle || '1 分イメージ動画') + '</div></div>';
+      '<div class="mn-video-cap">🎬 ' + esc(I.videoTitle || '1 分イメージ動画') + '</div></div></div>';
     var head = S.article.querySelector('.mn-page-head');
     head.parentNode.insertBefore(slot, head.nextSibling);
   }
@@ -1245,6 +1259,52 @@
   /* =====================================================================
    * 開発用の Free / Pro 切替（テーマ切替の隣）
    * ===================================================================== */
+  /* ⚙ 表示の設定（テーマ切替の隣） */
+  var setPanel = null;
+  function mountSettings() {
+    var theme = S.app.querySelector('.mn-theme-toggle');
+    if (!theme || S.app.querySelector('.mn-settings-btn')) return;
+    var b = el('<button type="button" class="mn-iconbtn mn-settings-btn" aria-haspopup="dialog" aria-expanded="false" title="表示の設定" aria-label="表示の設定">⚙</button>');
+    theme.parentNode.insertBefore(b, theme);
+    b.addEventListener('click', function (ev) { ev.stopPropagation(); if (setPanel) closeSettings(); else openSettings(b); });
+  }
+  function settingsHtml() {
+    var P = prefs();
+    function row(k, label, sub) {
+      return '<div class="mn-set-row"><div><div class="mn-set-label">' + label + '</div><div class="mn-set-sub">' + sub + '</div></div>' +
+        '<div class="mn-seg" role="radiogroup" aria-label="' + esc(label) + '">' +
+        '<button type="button" role="radio" aria-checked="' + (P[k] === 'open') + '" data-pref="' + k + '" data-v="open">開く</button>' +
+        '<button type="button" role="radio" aria-checked="' + (P[k] === 'closed') + '" data-pref="' + k + '" data-v="closed">たたむ</button></div></div>';
+    }
+    return '<div class="mn-set-title">表示の設定</div>' +
+      row('intro', '直感イメージ・動画', 'ページ冒頭の「なぜこの概念が必要か」') +
+      row('roadmap', 'ここまでのロードマップ', '記法と定義の確認の下の地図') +
+      row('intuition', '意図・直感', '定義・定理ごとの直感の説明と図') +
+      '<div class="mn-set-presets"><button type="button" class="mn-textbtn" data-preset="learn">学習向け：すべて開く</button><button type="button" class="mn-textbtn" data-preset="research">研究向け：すべてたたむ</button></div>' +
+      '<p class="mn-set-note">たたんでも見出しの 1 行は残るので、必要なときはその場で開けます。設定はこのブラウザに保存されます。</p>';
+  }
+  function openSettings(btn) {
+    setPanel = el('<div class="mn-settings" role="dialog" aria-label="表示の設定">' + settingsHtml() + '</div>');
+    document.body.appendChild(setPanel);
+    var r = btn.getBoundingClientRect();
+    setPanel.style.top = (r.bottom + 8) + 'px';
+    setPanel.style.right = Math.max(8, window.innerWidth - r.right) + 'px';
+    btn.setAttribute('aria-expanded', 'true');
+    anim(setPanel, [{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], 180);
+    setPanel.addEventListener('click', function (ev) {
+      var t = ev.target.closest('[data-pref]'), pr = ev.target.closest('[data-preset]');
+      if (t) setPref(t.getAttribute('data-pref'), t.getAttribute('data-v'));
+      else if (pr) { var v = pr.getAttribute('data-preset') === 'learn' ? 'open' : 'closed'; setJSON('sm_prefs', { intro: v, roadmap: v, intuition: v }); applyPrefs(); }
+      else return;
+      setPanel.innerHTML = settingsHtml();
+    });
+  }
+  function closeSettings() {
+    if (!setPanel) return;
+    var p = setPanel; setPanel = null;
+    var b = S.app.querySelector('.mn-settings-btn'); if (b) b.setAttribute('aria-expanded', 'false');
+    animOut(p, [{ opacity: 1 }, { opacity: 0 }], 140, function () { p.remove(); });
+  }
   function mountPlanSwitch() {
     var theme = S.app.querySelector('.mn-theme-toggle');
     if (!theme || S.app.querySelector('.mn-plan-switch')) return;
@@ -1271,6 +1331,7 @@
       mountInteractiveSlots(mf);
       decorateProofs();
       if (mf && mf.intuition) withContent(renderVideo);
+      applyPrefs();
     }
     renderDock();
   }
@@ -1278,7 +1339,9 @@
     S = ev.detail || window.MathSite;
     if (!S || !S.article) return;
     mountPlanSwitch();
+    mountSettings();
     mountAll();
+    document.addEventListener('pointerdown', function (e) { if (setPanel && !e.target.closest('.mn-settings, .mn-settings-btn')) closeSettings(); });
     restoreFloats();
     // ドックは本文と重ならない（PC は本文を左へ寄せる、スマホは下に高さを決めて出す）ので、外をクリックしても閉じない。閉じるのは ✕・p・スマホは下へ下げる
     // クリック：見出しのボタン・プレビューの「📌 固定」
@@ -1292,6 +1355,7 @@
     // p：ドックの開閉（入力中・修飾キー付きは除く）。Esc：モーダルを閉じる
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && modalEl) { e.preventDefault(); closeModal(); return; }
+      if (e.key === 'Escape' && setPanel) { e.preventDefault(); closeSettings(); return; }
       if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey && !typing(e.target) && !modalEl) { e.preventDefault(); toggleDock(); }
     });
     // 別のタブでピン留め・理解済みを変えたときも反映する
