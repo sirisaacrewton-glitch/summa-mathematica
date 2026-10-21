@@ -3,6 +3,14 @@
  * 演習の中身（パズルの手順など）は api/pro-content/<ページのラベル>.json に置き、開いたときに読む。
  * access: 'free' は無料お試し（各分野の最初の 1 つ）、'pro' は Pro プランで全体が開く。 */
 window.SM_LEARN_MANIFEST = {
+  // 可換環論の保存表：○× ゲーム
+  '13-commutative-algebra/13F-arithmetic-rings/01-integral-domains/08-preservation-table.html': {
+    interactive: [
+      { id: 'qz-ring-preservation', type: 'quiz', target: 'ring:preservation-table', access: 'free', label: '○× ゲーム：環の性質は保たれる？',
+        summary: '保存表から 10 問', yes: 'いつも保たれる', no: '保たれない例がある',
+        tables: [ { label: 'ring:preservation-table', mode: 'grid', q: '「{row}」は {col} で保たれる？', notes: 'ring:preservation-notes' } ] }
+    ]
+  },
   // 群論の保存表と、極限の交換の一覧：○× ゲーム
   '20-group-theory/20D-abstract-finite-groups/01-sylow/06-preservation-table.html': {
     interactive: [
