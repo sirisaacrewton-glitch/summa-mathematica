@@ -581,3 +581,4 @@
 | differential form / wedge product / exterior derivative / pullback / closed form / exact form / Poincare lemma / singular cube / chain | 微分形式 / 外積（ウェッジ積） / 外微分 / 引き戻し / 閉形式 / 完全形式 / ポアンカレの補題 / 特異立方体 / 鎖 | | 標準的（『解析入門 II』・多様体の和書）。特異立方体は仮。calc:page-differential-forms |
 | rectifiable curve / arc length / line integral / conservative field / potential / gradient field | 求長可能な曲線 / 弧長 / 線積分 / 保存場（保存力場） / ポテンシャル / 勾配場 | 長さをもつ曲線 | 杉浦『解析入門 II』。vec:page-curves-line-integrals |
 | parametrized surface / surface area / Gram determinant / surface integral / flux / unit normal | パラメータ曲面 / 曲面積 / グラム行列式 / 面積分 / 流束 / 単位法線 | フラックス、曲面の面積 | 杉浦『解析入門 II』。vec:page-surface-integrals |
+| curl (rotation) / divergence / Laplacian / Green's theorem / divergence theorem / vector potential / Helmholtz decomposition | 回転 / 発散 / ラプラシアン / グリーンの定理 / ガウスの発散定理 / ベクトルポテンシャル / ヘルムホルツ分解 | ローテーション、ダイバージェンス | 杉浦『解析入門 II』。vec:page-integral-theorems |

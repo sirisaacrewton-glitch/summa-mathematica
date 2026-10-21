@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>グリーン・ガウス・ストークスの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=81f38a36">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="26-real-functions/26B-functions-of-several-variables/02-vector-analysis/03-integral-theorems.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# グリーン・ガウス・ストークスの定理 {#vec:page-integral-theorems keywords="gradient, curl, divergence as exterior derivatives, curl grad = 0, div curl = 0, Green's theorem, area formula, Gauss divergence theorem, classical Stokes theorem, regions decomposed into images of cubes, vector identities, Laplacian, solenoidal and irrotational fields on star-shaped sets, Helmholtz decomposition"}
+
+ベクトル解析の 3 つの積分定理
+$$
+\begin{gathered}
+\int_{E}(Q_{x}-P_{y})=\oint_{\partial E}P\,dx+Q\,dy,\qquad\int_{E}\operatorname{div}F=\int_{\partial E}F\cdot n\,dA,\\
+\int_{S}\operatorname{rot}F\cdot n\,dA=\oint_{\partial S}F\cdot dx
+\end{gathered}
+$$
+（グリーン・ガウス・ストークス）を、鎖の上のストークスの定理（\ref{calc:stokes-chains}）の系として示す。鍵は、勾配・回転・発散が、ベクトル場と微分形式の対応（\ref{vec:flux-two-form} とその後の注意）のもとで外微分 $d$ になることである。領域や曲面は、立方体の像の和（鎖）で表せるものを扱う。これで球・円柱・トーラス体・縦線集合など実用上の領域はすべて扱えるが、滑らかな境界をもつ一般の領域での定理は多様体論に回す。
+
+> 資料：杉浦光夫『解析入門 II』、Spivak『Calculus on Manifolds』第 4・5 章と同じ標準的な内容。鎖の系としての定式化と証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#vec:sec-it-notation}
+
+::: notation
+- 微分形式・外微分・引き戻し \ref{calc:differential-form}, \ref{calc:exterior-derivative}, \ref{calc:exterior-derivative-properties}, \ref{calc:pullback-properties}、特異立方体と鎖・境界・積分 \ref{calc:singular-cube-chain}, \ref{calc:chain-integral}、ストークスの定理 \ref{calc:stokes-chains}、ポアンカレの補題 \ref{calc:poincare-lemma}。
+- 変数変換公式（境界での退化を許す形）\ref{calc:change-of-variables-boundary}、ジョルダン可測集合と領域の加法性 \ref{calc:jordan-measurable-criterion}, \ref{calc:jordan-additivity}。
+- 線積分 \ref{vec:line-integral}、流束と 2 形式 \ref{vec:surface-integral}, \ref{vec:flux-two-form}。
+- $\mathbb{R}^{3}$ のベクトル場 $F=(F_{1},F_{2},F_{3})$ に、1 形式 $\omega^{1}_{F}\defeq F_{1}dx+F_{2}dy+F_{3}dz$、2 形式 $\omega^{2}_{F}\defeq F_{1}dy\wedge dz+F_{2}dz\wedge dx+F_{3}dx\wedge dy$ を対応させ、関数 $f$ に 3 形式 $\omega^{3}_{f}\defeq f\,dx\wedge dy\wedge dz$ を対応させる。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## 勾配・回転・発散と外微分 {#vec:sec-it-dictionary}
+
+::: definition 勾配・回転・発散 {#vec:grad-curl-div keywords="gradient, curl (rotation), divergence of vector fields in R^3; Laplacian" index="回転|かいてん, ローテーション|ろーてーしょん, 発散|はっさん, ダイバージェンス|だいばーじぇんす, ラプラシアン|らぷらしあん"}
+$U\subset\mathbb{R}^{3}$ 上の $C^{1}$ 級の関数 $f$ とベクトル場 $F$ について
+$$
+\begin{aligned}
+\nabla f&\defeq(f_{x},f_{y},f_{z}),\\
+\operatorname{rot}F&\defeq(\partial_{y}F_{3}-\partial_{z}F_{2},\ \partial_{z}F_{1}-\partial_{x}F_{3},\ \partial_{x}F_{2}-\partial_{y}F_{1}),\\
+\operatorname{div}F&\defeq\partial_{x}F_{1}+\partial_{y}F_{2}+\partial_{z}F_{3}
+\end{aligned}
+$$
+（**勾配・回転・発散**。$\operatorname{rot}F$ は $\operatorname{curl}F$, $\nabla\times F$ とも書く）。$C^{2}$ 級の $f$ について $\Delta f\defeq\operatorname{div}\nabla f=f_{xx}+f_{yy}+f_{zz}$（**ラプラシアン**）。
+:::
+
+::: proposition 外微分との対応 {#vec:d-grad-curl-div keywords="d f = omega^1_{grad f}, d omega^1_F = omega^2_{curl F}, d omega^2_F = omega^3_{div F}; curl grad = 0 and div curl = 0" index="外微分とベクトル解析|がいびぶんとべくとるかいせき"}
+1. $df=\omega^{1}_{\nabla f}$、$d\omega^{1}_{F}=\omega^{2}_{\operatorname{rot}F}$、$d\omega^{2}_{F}=\omega^{3}_{\operatorname{div}F}$。
+2. $C^{2}$ 級なら $\operatorname{rot}\nabla f=0$、$\operatorname{div}\operatorname{rot}F=0$。
+3. $\mathbb{R}^{2}$ では $d(P\,dx+Q\,dy)=(Q_{x}-P_{y})\,dx\wedge dy$。
+:::
+
+::: proof
+**Step 1（1）.** $df=f_{x}dx+f_{y}dy+f_{z}dz$ は定義。$d\omega^{1}_{F}=\sum_{i}dF_{i}\wedge dx_{i}$（\ref{calc:exterior-derivative-properties} の 1）で、$dF_{1}\wedge dx=\partial_{y}F_{1}dy\wedge dx+\partial_{z}F_{1}dz\wedge dx$ などを集め、$dy\wedge dx=-dx\wedge dy$ を使うと、$dy\wedge dz$ の係数は $\partial_{y}F_{3}-\partial_{z}F_{2}$、$dz\wedge dx$ の係数は $\partial_{z}F_{1}-\partial_{x}F_{3}$、$dx\wedge dy$ の係数は $\partial_{x}F_{2}-\partial_{y}F_{1}$。$d\omega^{2}_{F}=dF_{1}\wedge dy\wedge dz+\cdots$ では、$dF_{1}$ のうち $dx$ の項だけが残り（$dy\wedge dy=0$ など）、$dx\wedge dy\wedge dz=dy\wedge dz\wedge dx=dz\wedge dx\wedge dy$（巡回置換は偶置換）から $\operatorname{div}F\,dx\wedge dy\wedge dz$。
+
+**Step 2（2）.** $d(d\eta)=0$（\ref{calc:exterior-derivative-properties} の 3）と 1。$\omega^{2}$, $\omega^{3}$ の対応は単射（\ref{calc:dx-properties} の 4）。
+
+**Step 3（3）.** $dP\wedge dx+dQ\wedge dy=P_{y}dy\wedge dx+Q_{x}dx\wedge dy$。
+:::
+
+::: proposition ベクトル恒等式 {#vec:vector-identities keywords="product rules for div and curl, div(F x G), curl curl F = grad div F - Laplacian F" index="ベクトル恒等式|べくとるこうとうしき"}
+$C^{1}$ 級（最後は $C^{2}$ 級）の $f$, $F$, $G$ について
+1. $\nabla(fg)=f\nabla g+g\nabla f$、$\operatorname{div}(fF)=\langle\nabla f,F\rangle+f\operatorname{div}F$、$\operatorname{rot}(fF)=\nabla f\times F+f\operatorname{rot}F$。
+2. $\operatorname{div}(F\times G)=\langle G,\operatorname{rot}F\rangle-\langle F,\operatorname{rot}G\rangle$。
+3. $\operatorname{rot}\operatorname{rot}F=\nabla\operatorname{div}F-\Delta F$（$\Delta F$ は成分ごと）。
+:::
+
+::: proof
+**Step 1（1）.** 積の微分を成分ごとに使う。$\operatorname{rot}(fF)$ の第 1 成分は $\partial_{y}(fF_{3})-\partial_{z}(fF_{2})=(f_{y}F_{3}-f_{z}F_{2})+f(\partial_{y}F_{3}-\partial_{z}F_{2})$ で、第 1 項は $(\nabla f\times F)_{1}$。他の成分も同様。
+
+**Step 2（2）.** $\operatorname{div}(F\times G)=\sum_{\text{巡回}}\partial_{x}(F_{2}G_{3}-F_{3}G_{2})$ を積の微分で展開し、$G$ が微分されない項を集めると $\langle G,\operatorname{rot}F\rangle$、$F$ が微分されない項を集めると $-\langle F,\operatorname{rot}G\rangle$（項を書き出して照合する）。
+
+**Step 3（3）.** 第 1 成分：$\partial_{y}(\partial_{x}F_{2}-\partial_{y}F_{1})-\partial_{z}(\partial_{z}F_{1}-\partial_{x}F_{3})=\partial_{x}(\partial_{x}F_{1}+\partial_{y}F_{2}+\partial_{z}F_{3})-(\partial_{x}^{2}+\partial_{y}^{2}+\partial_{z}^{2})F_{1}$（シュワルツの定理で $\partial_{y}\partial_{x}=\partial_{x}\partial_{y}$ などを使い、$\partial_{x}^{2}F_{1}$ を足して引く）。
+:::
+
+## 鎖で表される領域 {#vec:sec-it-regions}
+
+::: definition 立方体の像で分割される領域 {#vec:cube-decomposed-region keywords="a compact Jordan measurable set E in R^n decomposed by a chain of C^2 singular n-cubes, each injective with positive Jacobian on the open cube, images overlapping in null sets" index="鎖で表される領域|さであらわされるりょういき"}
+$U\subset\mathbb{R}^{n}$ を開集合、$E\subset U$ をコンパクトなジョルダン可測集合とする。特異 $n$ 立方体 $c_{1},\dots,c_{m}$（\ref{calc:singular-cube-chain}）が次を満たすとき、$n$ 鎖 $c=\sum_{j}c_{j}$ は **$E$ を分割する**という。
+1. 各 $c_{j}$ は $\operatorname{int}I^{n}$ の上で単射で $\det Dc_{j}>0$。
+2. $E=\bigcup_{j}c_{j}(I^{n})$ で、$j\neq l$ なら $c_{j}(I^{n})\cap c_{l}(I^{n})$ は測度 $0$。
+:::
+
+::: lemma 分割する鎖の上の積分 {#vec:chain-integral-region keywords="if a chain c decomposes E then int_c f dx_1 ^ ... ^ dx_n = int_E f" index="鎖の上の積分と重積分|さのうえのせきぶんとじゅうせきぶん"}
+$c$ が $E$ を分割するなら、$E$ の近傍で連続な $f$ について $\int_{c}f\,dx_{1}\wedge\cdots\wedge dx_{n}=\int_{E}f$。
+:::
+
+::: proof
+\ref{calc:pullback-properties} の 5 から $c_{j}^{*}(f\,dx_{1}\wedge\cdots\wedge dx_{n})=(f\circ c_{j})\det Dc_{j}\,du_{1}\wedge\cdots\wedge du_{n}$。$\det Dc_{j}=|\det Dc_{j}|$（$\operatorname{int}I^{n}$ 上。境界は測度 $0$ で積分に影響しない）なので、変数変換公式（\ref{calc:change-of-variables-boundary}）から $\int_{c_{j}}f\,dx=\int_{c_{j}(I^{n})}f$。$c_{j}(I^{n})$ はジョルダン可測（同じ系）で、重なりは測度 $0$ なので、領域の加法性（\ref{calc:jordan-additivity}）から和は $\int_{E}f$。
+:::
+
+::: remark
+定理を使うときは、境界 $\partial c$ を具体的に計算し、内部の辺（面）が逆向きに 2 回現れて打ち消し合うこと、退化した面（1 点や線分に潰れる面）の上の積分が $0$ になること（引き戻しの係数に階数の足りない行列の小行列式が現れる）を確かめる。そうして残った面が $E$ の境界を「外向き」にたどることは、例ごとに確認する。一般の滑らかな境界をもつ領域で、これを一般論として示すには多様体の言葉が要る。
+:::
+
+## 3 つの積分定理 {#vec:sec-it-theorems}
+
+::: theorem グリーンの定理 {#vec:green-theorem keywords="Green's theorem for regions in the plane decomposed by a chain: int_E (Q_x - P_y) = int_{partial c} P dx + Q dy; area formula" index="グリーンの定理|ぐりーんのていり, 面積公式|めんせきこうしき"}
+$U\subset\mathbb{R}^{2}$ を開集合、2 鎖 $c$ がコンパクト集合 $E\subset U$ を分割するとし、$P,Q$ を $U$ 上の $C^{1}$ 級関数とする。
+$$
+\int_{E}(Q_{x}-P_{y})\,dx\,dy=\int_{\partial c}P\,dx+Q\,dy.
+$$
+とくに $E$ の面積は $\frac12\int_{\partial c}(x\,dy-y\,dx)=\int_{\partial c}x\,dy$。
+:::
+
+::: proof
+鎖の上のストークスの定理（\ref{calc:stokes-chains}）を 1 形式 $\omega=P\,dx+Q\,dy$ に使い、$d\omega=(Q_{x}-P_{y})dx\wedge dy$（\ref{vec:d-grad-curl-div} の 3）と \ref{vec:chain-integral-region} を合わせる。面積：$\omega=\frac12(x\,dy-y\,dx)$ や $x\,dy$ では $d\omega=dx\wedge dy$。
+:::
+
+::: example 円板
+$c(r,\theta)\defeq(Rr\cos2\pi\theta,\,Rr\sin2\pi\theta)$（$(r,\theta)\in I^{2}$）は閉円板 $\bar B(0,R)$ を分割する（$\det Dc=2\pi R^{2}r>0$、$\operatorname{int}I^{2}$ で単射）。境界の 4 項：
+- $c_{(1,0)}$：$r=0$ で 1 点に潰れ、$c_{(1,0)}^{*}\omega=0$。
+- $c_{(1,1)}$（符号 $+$）：$\theta\mapsto R(\cos2\pi\theta,\sin2\pi\theta)$、円周を反時計回りに 1 周。
+- $c_{(2,0)}$（符号 $+$）と $c_{(2,1)}$（符号 $-$）：どちらも $r\mapsto(Rr,0)$ で、打ち消し合う。
+
+よって $\int_{\partial c}\omega$ は円周を反時計回りに 1 周する線積分で、面積公式から $\int_{0}^{1}R\cos2\pi\theta\cdot2\pi R\cos2\pi\theta\,d\theta=\pi R^{2}$。
+:::
+
+::: theorem ガウスの発散定理 {#vec:gauss-divergence keywords="Gauss divergence theorem for regions in R^3 decomposed by a chain: int_E div F = int_{partial c} omega^2_F (outward flux)" index="ガウスの発散定理|がうすのはっさんていり, 発散定理|はっさんていり"}
+$U\subset\mathbb{R}^{3}$ を開集合、3 鎖 $c$ がコンパクト集合 $E\subset U$ を分割するとし、$F$ を $U$ 上の $C^{1}$ 級のベクトル場とする。
+$$
+\int_{E}\operatorname{div}F\,dx\,dy\,dz=\int_{\partial c}\omega^{2}_{F}.
+$$
+右辺は、$\partial c$ の各面（パラメータ曲面）を通る流束の符号付きの和である（\ref{vec:flux-two-form}）。
+:::
+
+::: proof
+ストークスの定理を $\omega^{2}_{F}$ に使い、$d\omega^{2}_{F}=\omega^{3}_{\operatorname{div}F}$（\ref{vec:d-grad-curl-div}）と \ref{vec:chain-integral-region}。
+:::
+
+::: example 球
+$c(r,\theta,\phi)\defeq Rr(\sin\pi\theta\cos2\pi\phi,\ \sin\pi\theta\sin2\pi\phi,\ \cos\pi\theta)$ は閉球 $\bar B(0,R)$ を分割する（$\det Dc=2\pi^{2}R^{3}r^{2}\sin\pi\theta>0$、$\operatorname{int}I^{3}$ で単射）。境界の 6 項のうち、$r=0$（1 点）、$\theta=0,1$（$z$ 軸上の線分）の面は階数が 2 未満で 2 形式の引き戻しは $0$。$\phi=0$ と $\phi=1$ の面は同じ写像で符号が逆なので打ち消し合う。残る $c_{(1,1)}$（符号 $+$）は球面のパラメータ表示で、$\partial_{\theta}c_{(1,1)}\times\partial_{\phi}c_{(1,1)}$ は外向き（\ref{vec:k-area} の後の例 1 と同じ計算）。よって
+$$
+\int_{\bar B(0,R)}\operatorname{div}F=\int_{\text{球面}}F\cdot n\,dA\quad(n\text{ は外向き単位法線}).
+$$
+$F(x)=x$ では左辺 $3\cdot\frac43\pi R^{3}$、右辺 $4\pi R^{3}$（\ref{vec:flux-two-form} の後の例）で一致する。
+:::
+
+::: theorem ストークスの定理（古典版） {#vec:classical-stokes keywords="classical Stokes theorem: flux of curl F through a surface given by a 2-chain equals the circulation of F along its boundary chain" index="ストークスの定理（古典版）|すとーくすのていりこてんばん"}
+$U\subset\mathbb{R}^{3}$ を開集合、$c$ を $U$ の 2 鎖、$F$ を $U$ 上の $C^{1}$ 級のベクトル場とすると
+$$
+\int_{c}\omega^{2}_{\operatorname{rot}F}=\int_{\partial c}\omega^{1}_{F},
+$$
+すなわち、$c$ の各面を通る $\operatorname{rot}F$ の流束の和は、境界 $\partial c$ に沿った $F$ の線積分（**循環**）に等しい。
+:::
+
+::: proof
+ストークスの定理を $\omega^{1}_{F}$ に使い、$d\omega^{1}_{F}=\omega^{2}_{\operatorname{rot}F}$（\ref{vec:d-grad-curl-div}）。
+:::
+
+::: example 半球面
+上半球面を 2 鎖 $c(\theta,\phi)\defeq(\sin\frac{\pi\theta}{2}\cos2\pi\phi,\sin\frac{\pi\theta}{2}\sin2\pi\phi,\cos\frac{\pi\theta}{2})$ で表すと、$\theta=0$ の面は北極の 1 点、$\phi=0,1$ の面は打ち消し合い、$\theta=1$ の面（符号 $+$）は赤道を $\phi$ の増える向き（上から見て反時計回り）に 1 周する。$F=(-y,x,0)$ では $\operatorname{rot}F=(0,0,2)$ で、流束（$\partial_{\theta}c\times\partial_{\phi}c$ は外向き）$=2\times$（上半球面の $xy$ 平面への射影面積 $\pi$）$=2\pi$、赤道に沿った循環 $=2\pi$（\ref{vec:line-integral} の後の例 1）で一致する。
+:::
+
+## 渦なし・湧き出しなしの場とヘルムホルツ分解 {#vec:sec-it-helmholtz}
+
+::: theorem 渦なし場・湧き出しなし場 {#vec:irrotational-solenoidal keywords="on a star-shaped open set in R^3: curl F = 0 iff F = grad f; div F = 0 iff F = curl A" index="渦なし|うずなし, 湧き出しなし|わきだしなし, ベクトルポテンシャル|べくとるぽてんしゃる"}
+$U\subset\mathbb{R}^{3}$ を星形の開集合、$F$ を $U$ 上の $C^{1}$ 級のベクトル場とする。
+1. $\operatorname{rot}F=0$ $\iff$ $C^{1}$ 級の $f$ で $F=\nabla f$（$\Leftarrow$ は $f$ が $C^{2}$ 級のとき）。
+2. $\operatorname{div}F=0$ $\iff$ $C^{1}$ 級のベクトル場 $A$（**ベクトルポテンシャル**）で $F=\operatorname{rot}A$（$\Leftarrow$ は $A$ が $C^{2}$ 級のとき）。
+:::
+
+::: proof
+(⇒) $\operatorname{rot}F=0$ は $d\omega^{1}_{F}=0$、$\operatorname{div}F=0$ は $d\omega^{2}_{F}=0$（\ref{vec:d-grad-curl-div}）。ポアンカレの補題（\ref{calc:poincare-lemma}）から $\omega^{1}_{F}=df$, $\omega^{2}_{F}=d\eta$（$\eta$ は $C^{1}$ 級の 1 形式 $=\omega^{1}_{A}$）で、対応の単射性から $F=\nabla f$, $F=\operatorname{rot}A$。(⇐) は \ref{vec:d-grad-curl-div} の 2。
+:::
+
+::: theorem ヘルムホルツ分解 {#vec:helmholtz-decomposition keywords="Helmholtz decomposition F = grad phi + curl A on a star-shaped set, given a C^2 solution of the Poisson equation Laplacian phi = div F" index="ヘルムホルツ分解|へるむほるつぶんかい"}
+$U\subset\mathbb{R}^{3}$ を星形の開集合、$F$ を $U$ 上の $C^{1}$ 級のベクトル場とし、ポアソン方程式 $\Delta\varphi=\operatorname{div}F$ が $U$ 上に $C^{2}$ 級の解 $\varphi$ をもつとする。このとき $C^{1}$ 級のベクトル場 $A$ があって
+$$
+F=\nabla\varphi+\operatorname{rot}A.
+$$
+:::
+
+::: proof
+$G\defeq F-\nabla\varphi$ は $C^{1}$ 級で $\operatorname{div}G=\operatorname{div}F-\Delta\varphi=0$。\ref{vec:irrotational-solenoidal} の 2 から $G=\operatorname{rot}A$。
+:::
+
+::: remark
+ポアソン方程式の解の存在は、たとえば $\operatorname{div}F$ がコンパクトな台をもつ $C^{1}$ 級関数なら、ニュートンポテンシャル $\varphi(x)=-\frac{1}{4\pi}\int\frac{\operatorname{div}F(y)}{|x-y|}dy$ が $C^{2}$ 級の解を与えることが知られている（本サイト未収録。偏微分方程式論で扱う予定）。この場合、分解は $\mathbb{R}^{3}$ 全体で成り立つ。分解は一意でない（$\nabla h$ を $\Delta h=0$ となる $h$ について入れ替えられる）。
+:::
+
+::: supplement
+**一般化.** 3 つの定理は、向き付けられた境界付きの多様体 $M$ の上のストークスの定理 $\int_{M}d\omega=\int_{\partial M}\omega$ の特別な場合で、そこでは $\partial c$ の打ち消しの確認（\ref{vec:cube-decomposed-region} の後の注意）が、境界の向きの一般論に置き換わる。$\mathbb{R}^{n}$ でのガウスの定理は $\int_{E}\operatorname{div}F=\int_{\partial E}\langle F,n\rangle dA$ で、$(n-1)$ 形式 $\sum_{i}(-1)^{i-1}F_{i}\,dx_{1}\wedge\cdots\wedge\widehat{dx_{i}}\wedge\cdots\wedge dx_{n}$ の外微分が $\operatorname{div}F\,dx_{1}\wedge\cdots\wedge dx_{n}$ であることから同じように得られる。
+
+**前提を変えると.** 星形の仮定を外すと、\ref{vec:irrotational-solenoidal} は成り立たない：$\mathbb{R}^{3}\setminus\{z\text{ 軸}\}$ 上の $F=\frac{(-y,x,0)}{x^{2}+y^{2}}$ は渦なしだが勾配場でない（$z$ 軸の周りの循環が $2\pi$）。$\mathbb{R}^{3}\setminus\{0\}$ 上の $F=\frac{x}{|x|^{3}}$ は湧き出しなしだが、単位球面を通る流束が $4\pi\neq0$ なので、ガウスの定理（の 2 鎖 $\partial c$ 版：$\int_{\partial c}\omega^{2}_{\operatorname{rot}A}=\int_{\partial\partial c}\omega^{1}_{A}=0$）から回転場でない。
+
+**高い視点.** $\mathbb{R}^{3}$ のベクトル解析の 3 つの微分 $\nabla$, $\operatorname{rot}$, $\operatorname{div}$ は、微分形式の外微分 $d$ を 0, 1, 2 形式に施したもので、$\operatorname{rot}\nabla=0$, $\operatorname{div}\operatorname{rot}=0$ はどちらも $dd=0$ である。3 つの積分定理も 1 つのストークスの定理にまとまる。比喩で言えば、勾配・回転・発散は「同じ機械（外微分）を、点・線・面の量に使ったもの」で、積分定理は「内側の変化を全部足すと、外周での出入りに等しい」という 1 つの収支の式を、次元ごとに書いたものである。
+:::
+
+## 問題 {#vec:sec-it-problems}
+
+::: problem {#vec:prob-it-ellipse-area}
+楕円 $\{x^{2}/a^{2}+y^{2}/b^{2}\le1\}$ の面積を、グリーンの定理の面積公式で求めよ（円板の例の鎖を $(x,y)\mapsto(ax/R,by/R)$ で写す）。
+:::
+
+::: solution
+鎖 $c'(r,\theta)=(ar\cos2\pi\theta,br\sin2\pi\theta)$ は楕円を分割し（$\det=2\pi abr>0$）、境界は円板の例と同様に $\theta\mapsto(a\cos2\pi\theta,b\sin2\pi\theta)$ に帰着する。$\frac12\int(x\,dy-y\,dx)=\frac12\int_{0}^{1}2\pi ab(\cos^{2}+\sin^{2})\,d\theta=\pi ab$。
+:::
+
+::: problem {#vec:prob-it-cube-flux}
+単位立方体 $I^{3}$（鎖は恒等写像 $\iota_{3}$）について、ガウスの定理の右辺 $\int_{\partial\iota_{3}}\omega^{2}_{F}$ が、6 つの面を外向きの法線で測った流束の和であることを確かめ、$F=(x^{2},y^{2},z^{2})$ の場合に両辺を計算せよ。
+:::
+
+::: solution
+面 $\iota_{3(i,\alpha)}$ の符号 $(-1)^{i+\alpha}$ と、その面のパラメータ曲面の法線 $\partial_{1}\times\partial_{2}$ の向きを掛けると、たとえば $i=1$, $\alpha=1$（$x=1$ の面、$(u,v)\mapsto(1,u,v)$、法線 $e_{1}$、符号 $+$）は外向き、$\alpha=0$（法線 $e_{1}$、符号 $-$）も外向き（$-e_{1}$）。$i=2$ では面 $(u,1,v)$ の法線 $e_{1}\times e_{3}=-e_{2}$ に符号 $(-1)^{3}=-1$ が掛かって $+e_{2}$（外向き）、他も同様。$F=(x^{2},y^{2},z^{2})$：$\operatorname{div}F=2(x+y+z)$ で左辺 $=2\cdot\frac32=3$。右辺：$x=1$ の面で $1$、$x=0$ で $0$、3 方向で計 $3$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../site-core.js?v=461c7786"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=35df239d"></script>
+<script src="../../../site.js?v=1834c383"></script>
+</body>
+</html>
