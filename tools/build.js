@@ -40,7 +40,9 @@ function walkDir(absDir, relDir, depth) {
     title: meta.title || (relDir ? stripPrefix(path.basename(absDir)) : CONFIG.SITE_TITLE),
     abbr: meta.abbr || meta.title || stripPrefix(path.basename(absDir)),
     en: meta.en || '', description: meta.description || '', intro: meta.intro || '',
-    msc: meta.msc || '', id: meta.id || '', prereq: meta.prereq || [], groups: meta.groups || null, also: meta.also || [], alsoKids: [], alsoIn: [], children: []
+    msc: meta.msc || '', id: meta.id || '', prereq: meta.prereq || [], groups: meta.groups || null, also: meta.also || [], alsoKids: [], alsoIn: [], children: [],
+    // transparent：表示上この階層を飛ばし、子を親の直下に並べる（住所は MSC のまま）。order：兄弟フォルダの表示順（小さいほど先。省略は名前順の後）
+    transparent: !!meta.transparent, order: typeof meta.order === 'number' ? meta.order : null
   };
   var entries = fs.readdirSync(absDir, { withFileTypes: true })
     .filter(function (e) { return e.name.charAt(0) !== '.' && e.name.charAt(0) !== '_'; })
@@ -62,6 +64,14 @@ function walkDir(absDir, relDir, depth) {
       node.children.push({ kind: 'page', idx: pg.idx });
     }
   });
+  // order の指定があるフォルダは表示順を変える（指定のないものは名前順のまま後ろに）
+  if (node.children.some(function (c) { return c.kind === 'dir' && c.order !== null; })) {
+    var dirs = node.children.filter(function (c) { return c.kind === 'dir'; });
+    var ord = function (c) { return c.order === null ? Infinity : c.order; };
+    dirs = dirs.map(function (c, i) { return [c, i]; }).sort(function (a, b) { return (ord(a[0]) - ord(b[0])) || (a[1] - b[1]); }).map(function (x) { return x[0]; });
+    var di = 0;
+    node.children = node.children.map(function (c) { return c.kind === 'dir' ? dirs[di++] : c; });
+  }
   return node;
 }
 
@@ -81,6 +91,8 @@ var tree = walkDir(ROOT, '', 0);
   // ページのない（空の）子フォルダは数えない（メニュー・検索の分野選択でも出さないため）
   var full = subs.filter(function (c) { return countPages(c) > 0; });
   if (!isRoot && full.length === 1 && !hasLeaf) full[0].solo = true;
+  // _meta.json の "transparent": true のフォルダも同じ仕組みで飛ばす（子が複数あっても、子をすべて親の直下に並べる）
+  full.forEach(function (c) { if (c.transparent) c.solo = true; });
   subs.forEach(function (c) { markSolo(c, false); });
 })(tree, true);
 
@@ -88,7 +100,7 @@ var tree = walkDir(ROOT, '', 0);
 (function attach(node, crumbs) {
   node.crumbs = crumbs;
   node.children.forEach(function (c) {
-    if (c.kind === 'dir') attach(c, crumbs.concat([c.solo ? { title: c.title, path: c.path, s: 1 } : { title: c.title, path: c.path }]));
+    if (c.kind === 'dir') attach(c, crumbs.concat([c.solo ? { title: c.title, path: c.path, s: 1, t: c.transparent ? 1 : undefined } : { title: c.title, path: c.path }]));
     else pages[c.idx].crumbs = crumbs;
   });
 })(tree, []);
@@ -453,7 +465,7 @@ function prereqSource(node) {
   var s = '## 前提知識\n\n';
   node.prereq.forEach(function (it) {
     var d = dirById[it.dir]; if (!d) return;
-    var names = d.crumbs.slice(-2).map(function (c) { return c.title; }).join(' › ');
+    var names = d.crumbs.filter(function (c) { return !c.t; }).slice(-2).map(function (c) { return c.title; }).join(' › ');
     var line = '- [' + names + '](' + r + d.path + 'index.html)';
     var a = resolveSec(d, it.from), b = resolveSec(d, it.to);
     var secLink = function (x) { return x.pg ? '[§' + x.sec + '](' + r + x.pg.path + ')' : '§' + x.sec; };
@@ -560,13 +572,17 @@ function dirSource(node) {
   // 子が solo（ページのある子フォルダが一つだけ）なら、その中身を直接並べる（メニュー・パンくずと同じく一段飛ばす）
   var pre = '', soloChain = [];
   while (node.path && !leaves.length) {
-    var soloKid = subdirs.filter(function (c) { return c.solo; })[0];
+    var soloKid = subdirs.filter(function (c) { return c.solo && !c.transparent; })[0];
     if (!soloKid) break;
     pre += soloKid.name + '/';
     soloChain.push('<a href="' + pre + 'index.html">' + Core.escapeHtml(soloKid.title) + '</a>');
     subdirs = soloKid.children.filter(function (c) { return c.kind === 'dir'; });
     leaves = soloKid.children.filter(function (c) { return c.kind === 'page'; });
   }
+  // transparent の子は、その子（孫）を直接並べる
+  subdirs = [].concat.apply([], subdirs.map(function (c) {
+    return c.transparent ? c.children.filter(function (k) { return k.kind === 'dir'; }) : [c];
+  }));
   if (soloChain.length) s += '<p class="mn-also">この分野の内容はすべて「' + soloChain.join(' › ') + '」にあり、その中身を以下に直接示します。</p>\n\n';
   function card(d) {
     return '<a class="mn-card" href="' + d.name + '/index.html"><span class="mn-card-title">' + Core.escapeHtml(d.title) +
@@ -598,7 +614,7 @@ function dirSource(node) {
     s += '## 分野\n\n<div class="mn-cards">\n';
     subdirs.forEach(function (d) {
       var n = countPages(d);
-      s += '<a class="mn-card" href="' + pre + d.name + '/index.html"><span class="mn-card-title">' + Core.escapeHtml(d.title) +
+      s += '<a class="mn-card" href="' + d.path.slice(node.path.length) + 'index.html"><span class="mn-card-title">' + Core.escapeHtml(d.title) +
         '</span>' + (d.en ? '<span class="mn-card-en">' + Core.escapeHtml(d.en) + '</span>' : '') +
         '<span class="mn-card-desc">' + Core.escapeHtml(d.description || '') + '</span><span class="mn-card-count">' + n + ' ページ</span></a>\n';
     });
