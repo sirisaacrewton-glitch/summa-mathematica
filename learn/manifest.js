@@ -3,6 +3,48 @@
  * 演習の中身（パズルの手順など）は api/pro-content/<ページのラベル>.json に置き、開いたときに読む。
  * access: 'free' は無料お試し（各分野の最初の 1 つ）、'pro' は Pro プランで全体が開く。 */
 window.SM_LEARN_MANIFEST = {
+  // 群論の保存表と、極限の交換の一覧：○× ゲーム
+  '20-group-theory/20D-abstract-finite-groups/01-sylow/06-preservation-table.html': {
+    interactive: [
+      { id: 'qz-group-preservation', type: 'quiz', target: 'grp:operations-table', access: 'free', label: '○× ゲーム：群の性質は保たれる？',
+        summary: '2 つの表から 10 問', yes: 'いつも成り立つ', no: '成り立たない例がある',
+        tables: [
+          { label: 'grp:preservation-table', mode: 'grid', q: '「{row}」は「{col}」で保たれる？', notes: 'grp:preservation-notes' },
+          { label: 'grp:operations-table', mode: 'rows', q: '{row}（いつも成り立つ？）' }
+        ] }
+    ]
+  },
+  '26-real-functions/26B-functions-of-several-variables/01-multivariable-calculus/10-limit-interchange.html': {
+    interactive: [
+      { id: 'qz-limit-interchange', type: 'quiz', target: 'calc:interchange-table', access: 'free', label: '○× ゲーム：その交換は正しい？',
+        summary: '交換定理と反例から 10 問', yes: '正しい', no: '反例がある',
+        items: [
+          { q: '$[0,1]$ 上で各点収束する連続関数列の極限は連続？', a: 'no', why: '$x^{n}$ は $[0,1]$ で各点収束するが、極限は $x=1$ で不連続。' },
+          { q: '$[0,1]$ 上で一様収束する連続関数列の極限は連続？', a: 'yes', why: '一様収束極限は連続（極限の順序を入れ替えられる）。' },
+          { q: '$[0,1]$ 上で各点収束する積分可能な関数列について $\\lim\\int f_{n}=\\int\\lim f_{n}$？', a: 'no', why: '$n\\chi_{(0,1/n]}$ は $0$ に各点収束するが、積分はいつも $1$。' },
+          { q: '$[a,b]$ 上で一様収束すれば $\\lim\\int_{a}^{b}f_{n}=\\int_{a}^{b}\\lim f_{n}$？', a: 'yes', why: '有界閉区間では $\\lvert\\int(f_{n}-f)\\rvert\\le(b-a)\\|f_{n}-f\\|\\to0$。' },
+          { q: '$[0,\\infty)$ 上で一様収束すれば $\\lim\\int_{0}^{\\infty}f_{n}=\\int_{0}^{\\infty}\\lim f_{n}$？', a: 'no', why: '$\\frac1n\\chi_{[0,n]}$ は一様に $0$ に収束するが積分は $1$。面積が無限遠に逃げる。' },
+          { q: '有界閉区間ごとの一様収束と可積分な優関数があれば、広義積分と極限は交換できる？', a: 'yes', why: '無限遠の部分を優関数で $n$ によらず小さくできる。' },
+          { q: '一様収束する微分可能な関数列の極限は微分可能で、導関数は $\\lim f_{n}\'$？', a: 'no', why: '$\\frac{\\sin nx}{n}$ は一様に $0$ に収束するが、導関数 $\\cos nx$ は収束しない。' },
+          { q: '$f_{n}\'$ が一様収束し、一点で $f_{n}$ が収束すれば $(\\lim f_{n})\'=\\lim f_{n}\'$？', a: 'yes', why: '項別微分の定理。' },
+          { q: '収束する級数は、項を並べ替えても和が変わらない？', a: 'no', why: '条件収束する級数は、並べ替えで任意の値に収束させられる（リーマンの再配列定理）。' },
+          { q: '絶対収束する級数は、項を並べ替えても和が変わらない？', a: 'yes', why: '絶対収束級数のすべての再配列は同じ和をもつ。' },
+          { q: '二重級数で、行ごとの和の和と列ごとの和の和はいつも等しい？', a: 'no', why: '$a_{mm}=1$, $a_{m,m+1}=-1$ では $0$ と $1$。絶対収束なら等しい。' },
+          { q: '二つの収束級数のコーシー積はいつも収束する？', a: 'no', why: '$\\sum\\frac{(-1)^{n}}{\\sqrt{n+1}}$ の自分自身とのコーシー積は、項が $0$ に収束しない。一方が絶対収束なら収束する（メルテンス）。' },
+          { q: '$\\sum c_{n}$ が収束すれば $\\lim_{x\\to1-}\\sum c_{n}x^{n}=\\sum c_{n}$？', a: 'yes', why: 'アーベルの定理。' },
+          { q: '$\\lim_{x\\to1-}\\sum c_{n}x^{n}$ が存在すれば $\\sum c_{n}$ は収束する？', a: 'no', why: '$c_{n}=(-1)^{n}$ では左辺は $\\frac12$ だが $\\sum(-1)^{n}$ は発散。' },
+          { q: '長方形上の連続関数の二つの累次積分は等しい？', a: 'yes', why: 'フビニの定理（連続関数は積分可能で、内側の積分も存在する）。' },
+          { q: '二つの累次積分がどちらも存在すれば等しい？', a: 'no', why: '$\\frac{x^{2}-y^{2}}{(x^{2}+y^{2})^{2}}$ で $\\frac{\\pi}{4}$ と $-\\frac{\\pi}{4}$（有界でない）。' },
+          { q: '2 階の偏導関数がすべて存在すれば $\\partial_{1}\\partial_{2}f=\\partial_{2}\\partial_{1}f$？', a: 'no', why: '$\\frac{xy(x^{2}-y^{2})}{x^{2}+y^{2}}$ は原点で $1$ と $-1$。連続性（シュワルツ）が要る。' },
+          { q: '$C^{2}$ 級の関数では偏微分の順序を入れ替えてよい？', a: 'yes', why: 'シュワルツの定理。' },
+          { q: '$f$ と $\\partial_{x}f$ が連続なら、有界閉区間上の積分を積分記号の下で微分できる？', a: 'yes', why: '積分記号下の微分の定理。' },
+          { q: '$\\partial_{x}f(x,y)$ がすべての点で存在すれば $\\frac{d}{dx}\\int_{0}^{1}f\\,dy=\\int_{0}^{1}\\partial_{x}f\\,dy$？', a: 'no', why: '$\\frac{x^{3}}{y^{2}}e^{-x^{2}/y}$ では $x=0$ で左辺 $1$、右辺 $0$。' },
+          { q: '至るところ微分可能な $F$ について、いつも $\\int_{a}^{b}F\'=F(b)-F(a)$（リーマン積分）？', a: 'no', why: '$x^{2}\\sin(1/x^{2})$ の導関数は有界でなく、リーマン積分可能でない。$F\'$ が積分可能なら成り立つ。' },
+          { q: 'コンパクト集合上で、連続関数の単調な列が連続関数に各点収束すれば一様収束？', a: 'yes', why: 'ディニの定理。' },
+          { q: '二重数列で $\\lim_{m}\\lim_{n}a_{mn}$ と $\\lim_{n}\\lim_{m}a_{mn}$ がどちらも存在すれば等しい？', a: 'no', why: '$\\frac{m}{m+n}$ では $0$ と $1$。一方の極限が一様なら等しい（ムーア–オズグッド）。' }
+        ] }
+    ]
+  },
   // 一般位相の一覧表：○× ゲーム（問題は表から作る）
   '54-general-topology/54D-general-properties/02-property-tables/01-preservation.html': {
     interactive: [
