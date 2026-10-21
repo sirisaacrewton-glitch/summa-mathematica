@@ -192,7 +192,7 @@
   /* =====================================================================
    * 機能 A：付箋ドック（Free 1 件 / Pro 無制限）
    * ===================================================================== */
-  var dock = null, dockTab = null, editing = false, floats = [];
+  var dock = null, dockTab = null, floats = [];
   function pins() { return getJSON('sm_pinned_items', []); }
   function savePins(p) { setJSON('sm_pinned_items', p); renderDock(); refreshPinButtons(); }
   function isPinned(id) { return pins().some(function (p) { return p.id === id; }); }
@@ -215,7 +215,7 @@
         m.querySelector('[data-see-pro]').addEventListener('click', function () { proModal('付箋ドックは Pro プランで無制限に使えます。'); });
         return;
       }
-      p.push(item); savePins(p);
+      p.unshift(item); savePins(p);   // 新しく固定したものを一番上に
       if (PHONE.matches && dock.hidden) {   // スマホは画面を覆わないよう、下のボタンを弾ませて知らせるだけ
         anim(dockTab, [{ transform: 'translateX(-50%) scale(1)' }, { transform: 'translateX(-50%) scale(1.14)' }, { transform: 'translateX(-50%) scale(1)' }], 420);
         toast('📌 ' + esc(item.kind) + ' を固定しました（下の「ピン留め」で表示）');
@@ -246,8 +246,7 @@
    * 外す・並べ替えるは「編集」（長押しでも入る。iPhone のホーム画面と同じ操作）で行う。所在の行がその項目へのリンク。 */
   function cardHtml(p, collapsed) {
     return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '">' +
-      '<button type="button" class="mn-pin-del" data-unpin aria-label="固定を外す" title="固定を外す"></button>' +
-      '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで最小化／展開・長押しで並べ替え">' +
+      '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで畳む／広げる・長押しで並べ替え">' +
         '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
         '<button type="button" class="mn-pin-x" data-unpin aria-label="固定を外す" title="固定を外す"></button></div>' +
       '<div class="mn-pin-body mn-prose">' + p.htmlContent +
@@ -255,86 +254,92 @@
   }
   function ensureDock() {
     if (dock) return;
-    dock = el('<aside class="mn-dock" aria-label="付箋ドック" hidden><div class="mn-dock-head"></div><div class="mn-dock-list"></div></aside>');
+    dock = el('<aside class="mn-dock" aria-label="付箋ドック" hidden><div class="mn-dock-resize" role="separator" aria-orientation="vertical" aria-label="ドックの幅を変える" title="ドラッグで幅を変える・ダブルクリックで元の幅"></div><div class="mn-dock-head"></div><div class="mn-dock-list"></div></aside>');
     dockTab = el('<button type="button" class="mn-dock-tab" aria-label="付箋ドックを開く（p）" title="付箋ドック（p）・ドラッグで移動・ダブルクリックで元の位置"></button>');
     document.body.appendChild(dock); document.body.appendChild(dockTab);
     dockTab.addEventListener('click', function () { if (dockTab._moved) { dockTab._moved = false; return; } toggleDock(); });
     wireTabDrag();
+    wireDockResize();
     dock.addEventListener('click', onDockClick);
-    // スマホ：見出し（上端のつまみ）を上下にドラッグして高さを変える。3 段階（3 割・半分・ほぼ全画面）に吸い付き、下まで下げると閉じる
-    var y0 = null, h0 = 0, hNow = 0;
+    // スマホ：見出し（上端のつまみ）を上下にドラッグすると、指に合わせて高さが連続的に変わる（段階なし）。
+    // 指を離した位置の高さで止まる。勢いよく下へ払うと閉じ、上へ払うといちばん高くなる。かなり下げても閉じる
+    var y0 = null, h0 = 0, hNow = 0, vel = 0, lastY = 0, lastT = 0;
     dock.addEventListener('touchstart', function (ev) {
-      if (!PHONE.matches || !ev.target.closest('.mn-dock-head') || ev.target.closest('button')) { y0 = null; return; }
-      y0 = ev.touches[0].clientY; h0 = hNow = dock.offsetHeight;
+      if (!PHONE.matches || !ev.target.closest('.mn-dock-head') || ev.target.closest('button, .mn-dock-menu')) { y0 = null; return; }
+      y0 = lastY = ev.touches[0].clientY; lastT = Date.now(); vel = 0; h0 = hNow = dock.offsetHeight;
       dock.classList.add('is-resizing');
     }, { passive: true });
     dock.addEventListener('touchmove', function (ev) {
       if (y0 === null) return;
-      hNow = Math.max(60, Math.min(window.innerHeight * 0.92, h0 - (ev.touches[0].clientY - y0)));
+      var y = ev.touches[0].clientY, t = Date.now();
+      if (t > lastT) vel = 0.7 * vel + 0.3 * ((y - lastY) / (t - lastT));   // px/ms、下向きが正（なめらかにした速度）
+      lastY = y; lastT = t;
+      hNow = Math.max(56, Math.min(window.innerHeight * SHEET_MAX, h0 - (y - y0)));
       dock.style.height = hNow + 'px';
+      document.documentElement.style.setProperty('--mn-sheet-h', hNow + 'px');
       if (ev.cancelable) ev.preventDefault();
     }, { passive: false });
     dock.addEventListener('touchend', function () {
       if (y0 === null) return;
       y0 = null; dock.classList.remove('is-resizing');
       var vh = window.innerHeight, frac = hNow / vh;
-      if (frac < 0.18) { dock.style.height = ''; closeDock(); return; }
-      var snap = SHEET_SNAPS.reduce(function (a, b) { return Math.abs(b - frac) < Math.abs(a - frac) ? b : a; });
-      setSheetHeight(snap, hNow);
+      if (vel > 0.9 || frac < 0.14) { closeDock(); return; }   // 下へ払う・ほとんど下げた：閉じる
+      if (vel < -0.9) frac = SHEET_MAX;                           // 上へ払う：いちばん高く
+      setSheetHeight(Math.max(SHEET_MIN, Math.min(SHEET_MAX, frac)), hNow);
     });
     dock.addEventListener('keydown', function (ev) {
       if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('mn-pin-head')) { ev.preventDefault(); toggleMin(ev.target.parentNode); }
     });
-    wireReorder();
+    wireCards();
   }
-  /* ---------- 編集モード：長押しで入り、カードが揺れ、⊖ で外し、ドラッグで並べ替える ---------- */
-  function setEditing(on) {
-    editing = !!on;
-    if (!dock) return;
-    dock.classList.toggle('is-editing', editing);
-    renderDockHead();
-  }
-  function wireReorder() {
+  /* ---------- 付箋カードの操作（編集モードはなく、カードはそのままの大きさで）----------
+   *   長押し（0.4 秒）       → カードが持ち上がり、上下にドラッグして並べ替え。一覧の端に近づくと自動でスクロールする
+   *   横にスワイプ（タッチ）  → 外す（縦の動きは一覧のスクロールのまま）
+   *   すぐにドラッグ（マウス）→ 本文側へ出すと浮かせる（並べ替え中でもドックの外へ出せば浮かせる）
+   *   クリック・タップ       → 見出しなら畳む／広げる。PC は見出しの × で外す */
+  function wireCards() {
     var list = dock.querySelector('.mn-dock-list');
-    var press = null, drag = null, pending = null, swipe = null;
+    var g = null;   // いまの操作
     function cards() { return [].slice.call(list.querySelectorAll('.mn-pin-card')); }
-    function startDrag(card, ev) {
-      var all = cards(), lr = list.getBoundingClientRect();
-      drag = { card: card, id: card.getAttribute('data-pin-id'), y0: ev.clientY, scroll0: list.scrollTop, from: all.indexOf(card), to: all.indexOf(card), mouse: ev.pointerType === 'mouse', dockLeft: dock.getBoundingClientRect().left,
-        slots: all.map(function (c) { return { el: c, top: c.offsetTop, h: c.offsetHeight }; }), lr: lr, pid: ev.pointerId };
+    function startDrag() {
+      var all = cards(), card = g.card;
+      g.mode = 'drag';
+      g.from = g.to = all.indexOf(card);
+      g.scroll0 = list.scrollTop; g.yStart = g.lastY;
+      g.slots = all.map(function (c) { return { el: c, top: c.offsetTop, h: c.offsetHeight }; });
+      g.dockLeft = dock.getBoundingClientRect().left;
+      list.classList.add('is-sorting');
       card.classList.add('is-drag');
-      try { card.setPointerCapture(ev.pointerId); } catch (e) {}
+      card._noClick = true;
       if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
+      requestAnimationFrame(autoScroll);
     }
-    function moveDrag(ev) {
-      var d = drag;
-      // マウスで並べ替え中にドックの外へ出たら、並べ替えをやめてその位置に浮かせる
-      if (d.float) { placeFloat(d.float, ev.clientX - 60, ev.clientY - 18); return; }
-      if (d.mouse && ev.clientX < d.dockLeft - 12) {
-        cards().forEach(function (c) { c.style.translate = ''; });
-        d.card.classList.remove('is-drag');
-        d.float = floatCard(d.id, { x: ev.clientX - 60, y: ev.clientY - 18 });
-        return;
-      }
-      var dy = ev.clientY - d.y0 + (list.scrollTop - d.scroll0);
+    function layoutDrag() {
+      var d = g, dy = d.lastY - d.yStart + (list.scrollTop - d.scroll0);
       d.card.style.translate = '0 ' + dy + 'px';
-      // 端に近づいたら一覧をスクロールする
-      if (ev.clientY < d.lr.top + 36) list.scrollTop -= 8;
-      else if (ev.clientY > d.lr.bottom - 36) list.scrollTop += 8;
       var me = d.slots[d.from], center = me.top + me.h / 2 + dy, to = 0;
-      d.slots.forEach(function (s, i) { if (i !== d.from && center > s.top + s.h / 2) to++; });
+      d.slots.forEach(function (sl, i) { if (i !== d.from && center > sl.top + sl.h / 2) to++; });
       if (to === d.to) return;
       d.to = to;
       var gap = me.h + 8;
-      d.slots.forEach(function (s, i) {
+      d.slots.forEach(function (sl, i) {
         if (i === d.from) return;
         var shift = (d.from < to && i > d.from && i <= to) ? -gap : (d.from > to && i >= to && i < d.from) ? gap : 0;
-        s.el.style.translate = shift ? '0 ' + shift + 'px' : '';
+        sl.el.style.translate = shift ? '0 ' + shift + 'px' : '';
       });
     }
-    function endDrag() {
-      var d = drag; drag = null;
-      if (d.float) { saveFloats(); setEditing(false); closeDock(); return; }
+    // 一覧の上端・下端に近いあいだ、なめらかにスクロールし続ける（近いほど速く）
+    function autoScroll() {
+      if (!g || g.mode !== 'drag') return;
+      var r = list.getBoundingClientRect(), y = g.lastY, edge = 56, v = 0;
+      if (y < r.top + edge) v = -Math.min(18, (r.top + edge - y) / 3);
+      else if (y > r.bottom - edge) v = Math.min(18, (y - (r.bottom - edge)) / 3);
+      if (v) { var before = list.scrollTop; list.scrollTop += v; if (list.scrollTop !== before) layoutDrag(); }
+      requestAnimationFrame(autoScroll);
+    }
+    function finishDrag() {
+      var d = g;
+      list.classList.remove('is-sorting');
       d.card.classList.remove('is-drag');
       cards().forEach(function (c) { c.style.translate = ''; });
       if (d.to !== d.from) {
@@ -342,98 +347,78 @@
         if (i >= 0) { var it = p.splice(i, 1)[0]; p.splice(d.to, 0, it); savePins(p); }
       }
     }
+    function toFloat(ev) {
+      // マウスでドックの外（本文側）へ出したら浮かせる
+      cards().forEach(function (c) { c.style.translate = ''; });
+      list.classList.remove('is-sorting'); g.card.classList.remove('is-drag');
+      g.mode = 'float';
+      g.float = floatCard(g.id, { x: ev.clientX - 60, y: ev.clientY - 18 });
+      if (!g.float) g.mode = 'none';
+    }
+    function onMove(ev) {
+      if (!g || ev.pointerId !== g.pid) return;
+      var dx = ev.clientX - g.x0, dy = ev.clientY - g.y0;
+      g.lastX = ev.clientX; g.lastY = ev.clientY;
+      if (g.mode === 'press') {
+        if (Math.abs(dx) + Math.abs(dy) < 8) return;
+        clearTimeout(g.timer);
+        if (g.type === 'mouse') { g.mode = 'pull'; g.card._noClick = true; }
+        else if (Math.abs(dx) > Math.abs(dy) * 1.2) { g.mode = 'swipe'; g.w = g.card.offsetWidth; g.card.classList.add('is-swipe'); g.card._noClick = true; }
+        else { g = null; return; }   // 縦の動き：一覧のスクロールに任せる
+      }
+      if (g.mode === 'swipe') {
+        g.card.style.translate = dx + 'px 0';
+        g.card.style.opacity = String(Math.max(0.3, 1 - Math.abs(dx) / g.w));
+        g.card.classList.toggle('is-armed', Math.abs(dx) > g.w * 0.3);
+        g.dx = dx;
+      } else if (g.mode === 'pull') {
+        g.card.style.translate = Math.min(0, dx) + 'px ' + dy * 0.2 + 'px';
+        if (ev.clientX < dock.getBoundingClientRect().left - 12) { g.card.style.translate = ''; toFloat(ev); }
+      } else if (g.mode === 'drag') {
+        if (g.type === 'mouse' && ev.clientX < g.dockLeft - 12) { toFloat(ev); return; }
+        layoutDrag();
+      } else if (g.mode === 'float' && g.float) placeFloat(g.float, ev.clientX - 60, ev.clientY - 18);
+      if (ev.cancelable) ev.preventDefault();
+    }
+    function onUp(ev) {
+      if (!g || (ev && ev.pointerId !== g.pid)) return;
+      var cur = g; clearTimeout(cur.timer);
+      window.removeEventListener('pointermove', onMove); window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onCancel);
+      if (cur.mode === 'drag') finishDrag();
+      else if (cur.mode === 'swipe') {
+        var c = cur.card, dx = cur.dx || 0;
+        c.classList.remove('is-swipe', 'is-armed');
+        if (Math.abs(dx) > cur.w * 0.3) {
+          animOut(c, [{ translate: dx + 'px 0', opacity: c.style.opacity || 1 }, { translate: (dx < 0 ? -1 : 1) * (cur.w + 40) + 'px 0', opacity: 0 }], 180, function () {
+            c.style.translate = ''; c.style.opacity = ''; c.style.visibility = 'hidden'; unpin(cur.id);
+          });
+        } else {
+          var from = c.style.translate; c.style.translate = ''; c.style.opacity = '';
+          anim(c, [{ translate: from }, { translate: '0 0' }], 180);
+        }
+      } else if (cur.mode === 'pull') { cur.card.style.translate = ''; }
+      else if (cur.mode === 'float') { saveFloats(); closeDock(); }
+      g = null;
+    }
+    function onCancel(ev) {   // ブラウザがスクロールを始めたときなど：元に戻す
+      if (!g) return;
+      if (g.mode === 'swipe') { g.dx = 0; }
+      onUp(ev);
+    }
     list.addEventListener('pointerdown', function (ev) {
       var card = ev.target.closest('.mn-pin-card');
-      if (!card || ev.button > 0 || ev.target.closest('[data-unpin]')) return;
-      // 本文の中のリンク（用語など）から押しても、マウスならカードごとドラッグできる。タッチではリンクを優先
-      if (ev.target.closest('a') && ev.pointerType !== 'mouse') return;
-      // 編集モード：最初に動いた向きで決める。横（スマホは主に左）へのスワイプで外す、縦のドラッグで並べ替え
-      if (editing) {
-        ev.preventDefault();
-        if (ev.pointerType === 'mouse') startDrag(card, ev);   // マウス：すぐ並べ替え（ドックの外へ出せば浮かせる）
-        else pending = { card: card, ev: ev };                  // タッチ：向きで決める
-        return;
-      }
-      // マウス：押してそのまま本文側へドラッグすると浮かせる（長押しの待ちはしない。編集は「編集」ボタンで）
-      if (ev.pointerType === 'mouse') { watchPull(card, ev); return; }
-      // 長押し（0.45 秒）で編集モードに入り、そのままドラッグできる
-      press = { card: card, x: ev.clientX, y: ev.clientY, t: setTimeout(function () {
-        var e = press; press = null; if (!e) return;
-        setEditing(true); startDrag(e.card, ev); e.card._noClick = true;
-      }, 450) };
+      if (!card || ev.button > 0 || ev.target.closest('[data-unpin]') || g) return;
+      g = { card: card, id: card.getAttribute('data-pin-id'), pid: ev.pointerId, type: ev.pointerType, x0: ev.clientX, y0: ev.clientY, lastX: ev.clientX, lastY: ev.clientY, mode: 'press' };
+      g.timer = setTimeout(function () { if (g && g.mode === 'press') startDrag(); }, 400);
+      window.addEventListener('pointermove', onMove, { passive: false });
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onCancel);
     });
-    list.addEventListener('pointermove', function (ev) {
-      if (press && (Math.abs(ev.clientX - press.x) > 8 || Math.abs(ev.clientY - press.y) > 8)) { clearTimeout(press.t); press = null; }
-      if (pending) {
-        var dx = ev.clientX - pending.ev.clientX, dy = ev.clientY - pending.ev.clientY;
-        if (Math.max(Math.abs(dx), Math.abs(dy)) < 8) return;
-        var c = pending.card, e0 = pending.ev; pending = null;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          swipe = { card: c, x0: e0.clientX, w: c.offsetWidth };
-          c.classList.add('is-swipe');
-          try { c.setPointerCapture(ev.pointerId); } catch (e) {}
-        } else startDrag(c, e0);
-      }
-      if (swipe) {
-        ev.preventDefault();
-        var sx = ev.clientX - swipe.x0;
-        swipe.dx = sx;
-        swipe.card.style.translate = sx + 'px 0';
-        swipe.card.style.opacity = String(Math.max(0.25, 1 - Math.abs(sx) / swipe.w));
-        swipe.card.classList.toggle('is-armed', Math.abs(sx) > swipe.w * 0.3);
-        return;
-      }
-      if (drag) { ev.preventDefault(); moveDrag(ev); }
-    });
-    function endSwipe() {
-      var sw = swipe; swipe = null;
-      var c = sw.card, dx = sw.dx || 0;
-      c.classList.remove('is-swipe', 'is-armed');
-      if (Math.abs(dx) > sw.w * 0.3) {
-        // 外す：その向きへ滑らせて消し、あとを詰める
-        var id = c.getAttribute('data-pin-id');
-        animOut(c, [{ translate: dx + 'px 0', opacity: c.style.opacity || 1 }, { translate: (dx < 0 ? -1 : 1) * (sw.w + 40) + 'px 0', opacity: 0 }], 180, function () {
-          c.style.translate = ''; c.style.opacity = ''; c.style.visibility = 'hidden'; unpin(id);
-        });
-      } else {
-        var from = c.style.translate; c.style.translate = ''; c.style.opacity = '';
-        anim(c, [{ translate: from }, { translate: '0 0' }], 180);
-      }
-    }
-    function up() { pending = null; if (press) { clearTimeout(press.t); press = null; } if (swipe) endSwipe(); if (drag) endDrag(); }
-    list.addEventListener('pointerup', up);
-    list.addEventListener('pointercancel', up);
-    // ドラッグ中はページがスクロールしないように（iOS は touchmove を止める必要がある）
-    list.addEventListener('touchmove', function (ev) { if ((drag || swipe || pending) && ev.cancelable) ev.preventDefault(); }, { passive: false });
+    // 並べ替え・スワイプ中は一覧やページがスクロールしないように（iOS は touchmove を止める必要がある）
+    list.addEventListener('touchmove', function (ev) { if (g && (g.mode === 'drag' || g.mode === 'swipe') && ev.cancelable) ev.preventDefault(); }, { passive: false });
     list.addEventListener('contextmenu', function (ev) { if (ev.target.closest('.mn-pin-card')) ev.preventDefault(); });
-    // ブラウザ標準のドラッグ（リンクや文字を引っぱる動作）は使わない（浮かせる操作とぶつかるため）
+    // ブラウザ標準のドラッグ（リンクや文字を引っぱる動作）は使わない
     list.addEventListener('dragstart', function (ev) { if (ev.target.closest && ev.target.closest('.mn-pin-card')) ev.preventDefault(); });
-    /* PC：カードをドックの外（本文側）へドラッグすると、その位置に浮かせる */
-    function watchPull(card, ev0) {
-      var dr = dock.getBoundingClientRect(), moved = false, fw = null, off = null;
-      function mv(ev) {
-        var dx = ev.clientX - ev0.clientX, dy = ev.clientY - ev0.clientY;
-        if (!moved && Math.abs(dx) + Math.abs(dy) < 6) return;
-        moved = true;
-        if (press) { clearTimeout(press.t); press = null; }
-        if (!fw) {
-          card.style.translate = Math.min(0, dx) + 'px ' + dy * 0.2 + 'px';
-          if (ev.clientX < dr.left - 12) {
-            card.style.translate = '';
-            fw = floatCard(card.getAttribute('data-pin-id'), { x: ev.clientX - 60, y: ev.clientY - 18 });
-            off = { x: 60, y: 18 };
-          }
-        } else placeFloat(fw, ev.clientX - off.x, ev.clientY - off.y);
-        ev.preventDefault();
-      }
-      function done() {
-        window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', done);
-        card.style.translate = '';
-        if (moved) card._noClick = true;
-        if (fw) { saveFloats(); closeDock(); }
-      }
-      window.addEventListener('pointermove', mv); window.addEventListener('pointerup', done);
-    }
   }
 
   /* ---------- 浮かせた付箋（本文と見比べるため） ----------
@@ -517,15 +502,38 @@
   function renderDockHead() {
     var p = pins(), lim = A.limit('pins');
     var count = lim === Infinity ? p.length + ' 件' : p.length + '/' + lim;
-    dock.querySelector('.mn-dock-head').innerHTML = editing
-      ? '<span class="mn-dock-title">並べ替え・外す</span><span class="mn-dock-tools">' +
-          '<button type="button" class="mn-textbtn mn-clear-all" data-clear-all>すべて外す</button>' +
-          '<button type="button" class="mn-textbtn' + (isPro() ? '' : ' is-locked') + '" data-sets>' + (isPro() ? 'セット' : '🔒 セット') + '</button>' +
-          '<button type="button" class="mn-btn" data-edit-done>完了</button></span>'
-      : '<span class="mn-dock-title">📌 ピン留め <span class="mn-dock-count">(' + count + ')</span></span><span class="mn-dock-tools">' +
-          (p.length ? '<button type="button" class="mn-textbtn" data-min-toggle>' + (allMin() ? '全文表示' : '見出しだけ') + '</button>' : '') +
-          (p.length ? '<button type="button" class="mn-textbtn" data-edit>編集</button>' : '') +
-          '<button type="button" class="mn-iconbtn" data-close-dock aria-label="ドックを閉じる">✕</button></span>';
+    dock.querySelector('.mn-dock-head').innerHTML =
+      '<span class="mn-dock-title">📌 ピン留め <span class="mn-dock-count">(' + count + ')</span></span><span class="mn-dock-tools">' +
+        (p.length ? '<button type="button" class="mn-textbtn" data-min-toggle>' + (allMin() ? '全文表示' : '見出しだけ') + '</button>' : '') +
+        '<button type="button" class="mn-iconbtn mn-dock-more" data-menu aria-haspopup="true" aria-expanded="false" aria-label="そのほかの操作" title="そのほかの操作">⋯</button>' +
+        '<button type="button" class="mn-iconbtn" data-close-dock aria-label="ドックを閉じる">✕</button></span>' +
+      '<div class="mn-dock-menu" role="menu" hidden>' +
+        '<button type="button" role="menuitem" data-sets>' + (isPro() ? 'セットの保存・呼び出し' : '🔒 セットの保存・呼び出し（Pro）') + '</button>' +
+        (p.length ? '<button type="button" role="menuitem" class="mn-clear-all" data-clear-all>すべて外す</button>' : '') + '</div>';
+  }
+  /* PC：ドックの左端をドラッグして幅を変える（260px〜画面の 6 割。保存する。ダブルクリックで既定の幅） */
+  function applyDockWidth() {
+    var w = getJSON('sm_dock_w', null), root = document.documentElement;
+    if (PHONE.matches || !w) { root.style.removeProperty('--mn-dock-w'); return; }
+    root.style.setProperty('--mn-dock-w', Math.round(Math.max(260, Math.min(window.innerWidth * 0.6, w))) + 'px');
+  }
+  function wireDockResize() {
+    var h = dock.querySelector('.mn-dock-resize'), st = null;
+    h.addEventListener('pointerdown', function (ev) {
+      if (PHONE.matches || ev.button > 0) return;
+      st = { x: ev.clientX, w: dock.offsetWidth };
+      h.setPointerCapture(ev.pointerId); ev.preventDefault();
+      document.documentElement.classList.add('mn-dock-resizing');
+    });
+    h.addEventListener('pointermove', function (ev) {
+      if (!st) return;
+      setJSON('sm_dock_w', st.w + (st.x - ev.clientX));
+      applyDockWidth();
+    });
+    h.addEventListener('pointerup', function () { st = null; document.documentElement.classList.remove('mn-dock-resizing'); });
+    h.addEventListener('dblclick', function () { localStorage.removeItem('sm_dock_w'); applyDockWidth(); });
+    window.addEventListener('resize', applyDockWidth);
+    applyDockWidth();
   }
   /* PC：開くボタンはドラッグで好きな位置へ動かせる（位置はブラウザに保存。既定はドックの ✕ と同じ右上） */
   function placeTab() {
@@ -557,28 +565,26 @@
     requestAnimationFrame(placeTab);
   }
   /* スマホのドックの高さ（画面の高さに対する割合）。本文の下側にも同じだけ余白を足し、最後まで読めるようにする */
-  var SHEET_SNAPS = [0.3, 0.55, 0.9];
-  function sheetFrac() { var f = getJSON('sm_sheet_h', 0.55); return SHEET_SNAPS.indexOf(f) >= 0 ? f : 0.55; }
+  var SHEET_MIN = 0.2, SHEET_MAX = 0.92;
+  function sheetFrac() { var f = +getJSON('sm_sheet_h', 0.55); return f >= SHEET_MIN && f <= SHEET_MAX ? f : 0.55; }
   function setSheetHeight(frac, fromPx) {
     setJSON('sm_sheet_h', frac);
     var px = Math.round(window.innerHeight * frac);
     document.documentElement.style.setProperty('--mn-sheet-h', px + 'px');
     if (dock) {
       dock.style.height = '';
-      if (fromPx != null) anim(dock, [{ height: fromPx + 'px' }, { height: px + 'px' }], 220);
+      if (fromPx != null && Math.abs(fromPx - px) > 2) anim(dock, [{ height: fromPx + 'px' }, { height: px + 'px' }], 240);
     }
   }
   function renderDock() {
     ensureDock();
     var p = pins();
     var mins = getJSON('sm_pin_min', {});
-    if (!p.length) editing = false;
-    dock.classList.toggle('is-editing', editing);
     renderDockHead();
     var list = dock.querySelector('.mn-dock-list');
     list.innerHTML = p.length ? p.map(function (x) { return cardHtml(x, mins[x.id]); }).join('') +
-      '<p class="mn-dock-hint">' + (PHONE.matches ? '上端のつまみを上下に動かすと高さを変えられます。見出しのタップで畳む。長押しで編集（上下で並べ替え、横にスワイプで外す）。'
-        : '本文と並べて見比べられます。カードを本文側へドラッグすると、好きな位置に浮かせることもできます。見出しのクリックで畳む。× で外す。') + '</p>' :
+      '<p class="mn-dock-hint">' + (PHONE.matches ? '上端のつまみで高さを変えられます。見出しのタップで畳む。横にスワイプで外す。長押しして上下に動かすと並べ替え。'
+        : '見出しのクリックで畳む。× で外す。長押ししてから上下に動かすと並べ替え。すぐに本文側へドラッグすると、好きな位置に浮かせられます。') + '</p>' :
       '<p class="mn-dock-empty">定義や定理の見出しの <span aria-hidden="true">📌</span> ボタン、または参照プレビューの「📌 固定」で、項目をここに並べておけます。ページを移動しても残ります。</p>' +
       (isPro() ? '' : '<p class="mn-dock-empty">無料プランでは 1 件まで。<button type="button" class="mn-textbtn" data-see-pro>Pro なら無制限</button></p>');
     dockTab.innerHTML = '<span aria-hidden="true">📌</span><span class="mn-dock-tab-n">' + (p.length ? p.length : '') + '</span><span class="mn-dock-tab-text">ピン留め' + (p.length ? ' (' + p.length + ')' : '') + '</span>';
@@ -588,7 +594,9 @@
     var card = ev.target.closest('.mn-pin-card'), id = card && card.getAttribute('data-pin-id');
     if (ev.target.closest('[data-close-dock]')) { closeDock(); return; }
     if (ev.target.closest('[data-see-pro]')) { proModal('付箋ドックは Pro プランで無制限に使えます。'); return; }
-    if (ev.target.closest('[data-edit]')) { setEditing(true); return; }
+    var mb = ev.target.closest('[data-menu]');
+    if (mb) { var menu = dock.querySelector('.mn-dock-menu'); menu.hidden = !menu.hidden; mb.setAttribute('aria-expanded', !menu.hidden); return; }
+    if (!ev.target.closest('.mn-dock-menu')) { var mn = dock.querySelector('.mn-dock-menu'); if (mn && !mn.hidden) mn.hidden = true; }
     if (ev.target.closest('[data-min-toggle]')) { toggleAllMin(); return; }
     var ca = ev.target.closest('[data-clear-all]');
     if (ca) {
@@ -600,17 +608,15 @@
       }
       var n = pins().length;
       floats.slice().forEach(function (w) { closeFloat(w, true); });
-      setEditing(false); savePins([]);
+      savePins([]);
       toast('📌 ' + n + ' 件の固定を外しました');
       return;
     }
-    if (ev.target.closest('[data-edit-done]')) { setEditing(false); return; }
     if (ev.target.closest('[data-sets]')) { if (isPro()) setsModal(); else proModal('付箋のセット（分野ごとの組み合わせ）の保存は Pro プランの機能です。'); return; }
     if (!card) return;
     if (ev.target.closest('[data-unpin]')) { unpin(id); return; }
-    if (ev.target.closest('a')) { if (editing) ev.preventDefault(); return; }
-    if (card._noClick) { card._noClick = false; return; }   // 長押しの直後のクリックは無視
-    if (editing) return;
+    if (card._noClick) { card._noClick = false; ev.preventDefault(); return; }   // 並べ替え・スワイプ・引き出しの直後のクリックは無視
+    if (ev.target.closest('a')) return;
     if (ev.target.closest('.mn-pin-head')) {
       var m = getJSON('sm_pin_min', {}); if (m[id]) delete m[id]; else m[id] = 1; setJSON('sm_pin_min', m);
       toggleMin(card); renderDockHead();
@@ -655,7 +661,7 @@
   }
   function closeDock() {
     if (!dock || dock.hidden || dock._out) return;
-    if (editing) setEditing(false);
+    var menu = dock.querySelector('.mn-dock-menu'); if (menu) menu.hidden = true;
     dockTab.setAttribute('aria-expanded', 'false');
     var cur = getComputedStyle(dock).transform, f = dockFrames().reverse();
     if (cur && cur !== 'none') f[0] = { transform: cur };   // スワイプで途中まで下げた位置から続ける
@@ -1286,7 +1292,6 @@
     // p：ドックの開閉（入力中・修飾キー付きは除く）。Esc：モーダルを閉じる
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && modalEl) { e.preventDefault(); closeModal(); return; }
-      if (e.key === 'Escape' && editing) { e.preventDefault(); setEditing(false); return; }
       if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey && !typing(e.target) && !modalEl) { e.preventDefault(); toggleDock(); }
     });
     // 別のタブでピン留め・理解済みを変えたときも反映する
