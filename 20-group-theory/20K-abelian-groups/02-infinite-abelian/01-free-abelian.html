@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自由アーベル群と有限生成アーベル群 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=4bd24fc9">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="20-group-theory/20K-abelian-groups/02-infinite-abelian/01-free-abelian.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 自由アーベル群と有限生成アーベル群 {#grp:page-free-abelian keywords="free abelian group, basis, rank, subgroups of free abelian groups are free (Dedekind), projective abelian groups are free, splitting of free quotients, torsion subgroup, primary decomposition of torsion groups, finitely generated abelian groups"}
+
+前の系列（\ref{grp:page-finite-abelian}, \ref{grp:page-minimal-cyclic-decomposition}）では有限アーベル群を扱った。この系列では無限アーベル群を扱う。最初に、すべてのアーベル群の「材料」となる**自由アーベル群**を導入し、その部分群がまた自由であること（\ref{grp:subgroup-of-free-abelian}）を、基底を整列させる超限帰納法で示す。これは有限階数の場合（PID 上の加群の結果 \ref{mod:pid-submodule-free}）の、任意の階数への一般化である。帰結として、射影的なアーベル群は自由であり（\ref{grp:projective-abelian-free}）、自由な剰余群をもつ部分群は直和因子になる（\ref{grp:free-quotient-splits}）。後半では、任意のアーベル群の**捩れ部分群**を準素成分に分解し（\ref{grp:torsion-primary-decomposition}）、有限生成アーベル群の構造定理を群論の側から証明し直す（\ref{grp:fg-abelian-structure}）。
+
+> 資料：D. J. S. Robinson, *A Course in the Theory of Groups* §4.1–§4.2 を参考にした（証明は自分の言葉で書き、超限帰納法の部分を詳しくした）。
+
+## 記法と定義の確認 {#grp:sec-fab-notation}
+
+::: notation
+- アーベル群は加法的に書く。$nG$, $G[n]$, 内部直和は \ref{grp:sec-fa-notation} の記法に従う。無限個の部分群 $(H_{i})_{i\in I}$ についても、$G=\sum_{i}H_{i}$ で、有限個を除いて $0$ の $h_{i}\in H_{i}$ について $\sum_{i}h_{i}=0$ なら $h_{i}=0$ となるとき、$G$ は $H_{i}$ の**内部直和** $G=\bigoplus_{i}H_{i}$ であるという。
+- **直和**（外部直和）$\bigoplus_{i\in I}G_{i}$ は、直積 $\prod_{i}G_{i}$ のうち有限個を除く成分が $0$ の元の全体。集合 $X$ について $\Z^{(X)}\defeq\bigoplus_{x\in X}\Z$。
+- アーベル群は $\Z$ 加群と同じものである（\ref{mod:page-modules}）。射影加群は \ref{mod:projective}。
+- 元の位数は \ref{grp:element-order}。位数有限の元を**捩れ元**という。
+- $\ZFC$ の中で議論する。選択公理を使う箇所（整列可能定理 \ref{set:well-ordering-theorem}、ツォルンの補題 \ref{set:zorn}）は明記する。
+:::
+
+## 自由アーベル群 {#grp:sec-fab-free}
+
+::: definition 自由アーベル群 {#grp:free-abelian keywords="free abelian group, basis of an abelian group, Z^(X)" index="自由アーベル群|じゆうあーべるぐん, 基底（アーベル群）|きていあーべるぐん"}
+アーベル群 $F$ の部分集合 $X$ が**基底**であるとは、$F$ の各元が、有限個を除いて $0$ の整数 $(m_{x})_{x\in X}$ によって $\sum_{x}m_{x}x$ と**ただ一通りに**書けることをいう。基底をもつアーベル群を**自由アーベル群**という。
+:::
+
+::: intuition
+基底は「座標系」である。ベクトル空間との違いは係数が整数であることで、たとえば $\Z$ の基底は $\{1\}$ と $\{-1\}$ だけで、$\{2\}$ は基底でない（$1$ が $2$ の整数倍で書けない）。$\Z^{(X)}$ は「$X$ の元を文字とする、整数係数の形式的な一次結合」の全体である。
+:::
+
+::: proposition 自由アーベル群の基本性質 {#grp:free-abelian-basic keywords="universal property of free abelian groups; every abelian group is a quotient of a free abelian group; free abelian groups are torsion-free" index="自由アーベル群の普遍性|じゆうあーべるぐんのふへんせい"}
+1. $X$ が $F$ の基底なら、$(m_{x})\mapsto\sum m_{x}x$ は同型 $\Z^{(X)}\to F$ である。逆に $\Z^{(X)}$ の標準的な元 $e_{x}$（$x$ 成分だけ $1$）の全体は基底である。
+2. （**普遍性**）$X$ を $F$ の基底とする。アーベル群 $G$ と写像 $f\colon X\to G$ について、$f$ を延長する準同型 $\bar{f}\colon F\to G$ がただ一つある。
+3. 任意のアーベル群 $G$ は自由アーベル群の剰余群と同型である。
+4. 自由アーベル群は捩れのない群である。
+5. （AC）$\Z^{(X)}\cong\Z^{(Y)}$ なら $\lvert X\rvert=\lvert Y\rvert$。この濃度を**階数**という。$X$ が有限なら選択公理は要らない。
+:::
+
+::: proof
+**Step 1（1）.** 写像 $(m_{x})\mapsto\sum m_{x}x$ は準同型で、基底の定義の「書ける」が全射、「ただ一通り」が単射を意味する。逆向きは $\sum m_{x}e_{x}=(m_{x})$ から。
+
+**Step 2（2）.** $\bar{f}(\sum m_{x}x)\defeq\sum m_{x}f(x)$ は表示の一意性から well-defined で、準同型。準同型は $X$ 上の値で決まる（$F$ は $X$ で生成される）ので一意。
+
+**Step 3（3）.** $X\defeq G$（集合として）とし、$F\defeq\Z^{(G)}$ から $e_{g}\mapsto g$ の延長 $\pi\colon F\to G$（Step 2）をとる。全射なので $G\cong F/\Ker\pi$（\ref{grp:first-isomorphism}）。
+
+**Step 4（4）.** $n\neq0$ と $\sum m_{x}x\neq0$ について $n\sum m_{x}x=\sum(nm_{x})x$ で、$m_{x}\neq0$ となる $x$ について $nm_{x}\neq0$ なので、表示の一意性から $0$ でない。
+
+**Step 5（5）.** \ref{mod:rank-invariance}（零環でない可換環 $\Z$ 上の自由加群の階数）。$X$ が有限なら直接示せる：$F\defeq\Z^{(X)}$ について $F/2F\cong(\Z/2)^{X}$ は $2^{\lvert X\rvert}$ 個の元をもち、これは $F$ の同型類だけで決まる。
+:::
+
+::: example
+1. $\Z^{n}$ は階数 $n$ の自由アーベル群。
+2. $\mathbb{Q}$ は自由アーベル群でない：基底 $X$ があれば、$x\in X$ について $x/2=\sum m_{y}y$ で、$x=\sum2m_{y}y$ と表示の一意性から $2m_{x}=1$ となり矛盾。
+3. $\Z/n$（$n\ge2$）は捩れ元をもつので自由でない（基本性質 4）。
+:::
+
+## 自由アーベル群の部分群 {#grp:sec-fab-subgroups}
+
+::: theorem 自由アーベル群の部分群は自由 {#grp:subgroup-of-free-abelian keywords="Dedekind's theorem: every subgroup of a free abelian group is free abelian of rank at most the rank of the group" index="自由アーベル群の部分群|じゆうあーべるぐんのぶぶんぐん, デデキントの定理|ででききんとのていり"}
+（AC）$F$ を基底 $X$ をもつ自由アーベル群、$H\le F$ を部分群とする。$H$ は自由アーベル群で、基底 $Y$ を $\lvert Y\rvert\le\lvert X\rvert$ となるようにとれる。
+:::
+
+::: intuition
+有限階数なら、$\Z^{n}$ の部分群を「最後の座標への射影」で切って帰納法を使える：射影の像は $\Z$ の部分群なので $d\Z$ の形で、$d\neq0$ なら一つの元 $y$ を加えるだけで済む。無限階数では、座標を整列させて同じことを**超限帰納法**で繰り返す。各段階で加える元は高々一つなので、基底の大きさは $\lvert X\rvert$ を超えない。
+:::
+
+::: proof
+**Step 1（整列と段階）.** 整列可能定理（\ref{set:well-ordering-theorem}。AC）により $X=\{x_{\alpha}:\alpha<\beta\}$（$\beta$ は順序数、$\alpha\mapsto x_{\alpha}$ は単射）と並べる。$\alpha\le\beta$ について $F_{\alpha}\defeq\ang{x_{\gamma}:\gamma<\alpha}$、$H_{\alpha}\defeq H\cap F_{\alpha}$ とおく。$F_{0}=0$, $F_{\beta}=F$ で、$\alpha<\alpha'$ なら $F_{\alpha}\subseteq F_{\alpha'}$。$\alpha$ が極限順序数なら $F_{\alpha}=\bigcup_{\gamma<\alpha}F_{\gamma}$（$F_{\alpha}$ の元は有限個の $x_{\gamma}$ の一次結合で、その添字の最大値 $\gamma_{0}<\alpha$ について $F_{\gamma_{0}+1}$ に入る）、したがって $H_{\alpha}=\bigcup_{\gamma<\alpha}H_{\gamma}$。
+
+**Step 2（一段ずつの拡大）.** $\alpha<\beta$ とし、$\pi_{\alpha}\colon F_{\alpha+1}\to\Z$ を $x_{\alpha}$ の係数をとる写像とする（$F_{\alpha+1}$ の元は $\sum_{\gamma\le\alpha}m_{\gamma}x_{\gamma}$ と一意に書ける）。$\pi_{\alpha}$ は準同型で、$\Ker\pi_{\alpha}=F_{\alpha}$。$\pi_{\alpha}[H_{\alpha+1}]$ は $\Z$ の部分群なので $d_{\alpha}\Z$（$d_{\alpha}\ge0$）の形（\ref{grp:subgroups-of-z}）。$d_{\alpha}>0$ なら、$\pi_{\alpha}(y_{\alpha})=d_{\alpha}$ となる $y_{\alpha}\in H_{\alpha+1}$ を選ぶ（すべての $\alpha$ で一斉に選ぶのに AC を使う）。このとき
+$$
+H_{\alpha+1}=H_{\alpha}\oplus\ang{y_{\alpha}}\quad(d_{\alpha}>0),\qquad H_{\alpha+1}=H_{\alpha}\quad(d_{\alpha}=0).
+$$
+実際、$h\in H_{\alpha+1}$ について $\pi_{\alpha}(h)=kd_{\alpha}$ なら $h-ky_{\alpha}\in H_{\alpha+1}\cap\Ker\pi_{\alpha}=H\cap F_{\alpha}=H_{\alpha}$。また $ky_{\alpha}\in H_{\alpha}$ なら $kd_{\alpha}=\pi_{\alpha}(ky_{\alpha})=0$ で $k=0$。$d_{\alpha}=0$ なら $H_{\alpha+1}\subseteq\Ker\pi_{\alpha}$ で $H_{\alpha+1}=H_{\alpha}$。
+
+**Step 3（生成）.** $Y\defeq\{y_{\alpha}:d_{\alpha}>0\}$ とし、$\alpha\le\beta$ に関する超限帰納法で $H_{\alpha}\subseteq\ang{y_{\gamma}:\gamma<\alpha,\ d_{\gamma}>0}$ を示す。$\alpha=0$ は $H_{0}=0$。後続順序数は Step 2。極限順序数は Step 1 の $H_{\alpha}=\bigcup_{\gamma<\alpha}H_{\gamma}$ から。$\alpha=\beta$ として $H=\ang{Y}$。
+
+**Step 4（一次独立）.** $Y$ の相異なる有限個の元の関係 $\sum_{i=1}^{k}m_{i}y_{\gamma_{i}}=0$（$\gamma_{1}<\cdots<\gamma_{k}$）があるとする。$i<k$ では $y_{\gamma_{i}}\in F_{\gamma_{i}+1}\subseteq F_{\gamma_{k}}=\Ker\pi_{\gamma_{k}}$ なので、$\pi_{\gamma_{k}}$ を施すと $m_{k}d_{\gamma_{k}}=0$、したがって $m_{k}=0$。$k$ に関する帰納法ですべての $m_{i}=0$。よって $Y$ は基底（一次独立で生成する集合の一次結合の表示は一意）。
+
+**Step 5（濃度）.** $\alpha\mapsto y_{\alpha}$ は $\{\alpha<\beta:d_{\alpha}>0\}$ から $Y$ への全射なので、$\lvert Y\rvert\le\lvert\beta\rvert=\lvert X\rvert$。
+
+::: hypcheck
+- **選択公理**：Step 1 の整列と Step 2 の $y_{\alpha}$ の選択で使った。$X$ が可算なら整列は不要で、$y_{\alpha}$ の選択も「$\pi_{\alpha}(y)=d_{\alpha}$ となる $y$ のうち、ある固定した数え上げで最初のもの」とすれば選択公理は要らない。
+- **「自由」**：外すと偽：$\mathbb{Q}$ の部分群 $\Z[1/2]$ は自由でない（例と同じ議論）。また自由アーベル群の剰余群は一般の群になりうる（基本性質 3）。
+- **アーベル群であること**：自由群（非可換）の部分群も自由群である（ニールセン–シュライアー、\ref{grp:nielsen-schreier}）が、階数は大きくなりうる。アーベル群では階数が増えない。
+:::
+:::
+
+::: corollary 有限生成アーベル群の部分群 {#grp:fg-abelian-subgroups keywords="subgroups of finitely generated abelian groups are finitely generated" index="有限生成アーベル群の部分群|ゆうげんせいせいあーべるぐんのぶぶんぐん"}
+$n$ 個の元で生成されるアーベル群の部分群は、$n$ 個以下の元で生成される。
+:::
+
+::: proof
+$G=\ang{g_{1},\dots,g_{n}}$ とし、$\pi\colon\Z^{n}\to G$ を $e_{i}\mapsto g_{i}$ とする（\ref{grp:free-abelian-basic} の 2）。$H\le G$ について $\pi^{-1}(H)\le\Z^{n}$ は、\ref{grp:subgroup-of-free-abelian}（有限階数なので選択公理は不要）から $n$ 個以下の元 $y_{1},\dots,y_{k}$ を基底とする自由アーベル群。$\pi$ は全射なので $H=\pi[\pi^{-1}(H)]=\ang{\pi(y_{1}),\dots,\pi(y_{k})}$。
+:::
+
+## 射影性と分裂 {#grp:sec-fab-projective}
+
+::: theorem 射影的なアーベル群は自由 {#grp:projective-abelian-free keywords="an abelian group is projective iff it is free abelian (Mac Lane)" index="射影的なアーベル群|しゃえいてきなあーべるぐん"}
+（AC）アーベル群 $P$ について、$P$ が射影的（射影 $\Z$ 加群、\ref{mod:projective}）であることと、自由アーベル群であることは同値である。
+:::
+
+::: proof
+**Step 1（自由 ⇒ 射影）.** 全射準同型 $\varepsilon\colon K\to M$ と準同型 $\alpha\colon F\to M$ をとる。$F$ の基底 $X$ の各元 $x$ について $\varepsilon(k_{x})=\alpha(x)$ となる $k_{x}\in K$ を選び（AC）、普遍性（\ref{grp:free-abelian-basic} の 2）で $\beta(x)\defeq k_{x}$ を延長すると、$\varepsilon\circ\beta$ と $\alpha$ は $X$ 上で一致するので等しい。
+
+**Step 2（射影 ⇒ 自由）.** $P$ を射影的とし、全射 $\pi\colon F\to P$（$F$ 自由、\ref{grp:free-abelian-basic} の 3）をとる。射影性を $\varepsilon=\pi$, $\alpha=1_{P}$ に適用して $\pi\circ s=1_{P}$ となる $s\colon P\to F$ を得る。$s$ は単射なので $P\cong s[P]\le F$ で、\ref{grp:subgroup-of-free-abelian} から自由。
+:::
+
+::: proposition 自由な剰余群は分裂する {#grp:free-quotient-splits keywords="if G/H is free abelian then H is a direct summand of G" index="自由な剰余群と直和因子|じゆうなじょうよぐんとちょくわいんし"}
+（AC）$H\le G$ で $G/H$ が自由アーベル群なら、$G=H\oplus K$（$K\cong G/H$）となる部分群 $K$ がある。
+:::
+
+::: proof
+$q\colon G\to G/H$ を射影とする。$G/H$ は射影的（\ref{grp:projective-abelian-free} の Step 1）なので、$q\circ s=1$ となる準同型 $s\colon G/H\to G$ がある。$K\defeq s[G/H]$ とする。$g\in G$ について $g-s(q(g))\in\Ker q=H$ なので $G=H+K$。$k=s(c)\in H\cap K$ なら $c=q(s(c))=q(k)=0$ で $k=0$。$s$ は単射なので $K\cong G/H$。
+:::
+
+::: example
+$G/H$ が自由でないと成り立たない：$\Z\supseteq2\Z$ で $\Z/2\Z$ は自由でなく、$2\Z$ は $\Z$ の直和因子でない（$\Z$ の部分群は $n\Z$ の形で、$2\Z\cap n\Z\neq0$）。
+:::
+
+## 捩れ部分群と準素分解 {#grp:sec-fab-torsion}
+
+::: proposition 捩れ部分群 {#grp:torsion-subgroup keywords="torsion subgroup of an abelian group; G/T is torsion-free; p-primary components" index="捩れ部分群|ねじれぶぶんぐん, 準素成分|じゅんそせいぶん"}
+アーベル群 $G$ について、
+1. 捩れ元の全体 $T(G)$ は部分群（**捩れ部分群**）で、$G/T(G)$ は捩れのない群である。
+2. 素数 $p$ について、位数が $p$ の冪の元の全体 $G_{p}$ は部分群（**$p$ 準素成分**）である。
+3. 準同型 $f\colon G\to G'$ について $f[T(G)]\subseteq T(G')$, $f[G_{p}]\subseteq G'_{p}$。
+:::
+
+::: proof
+**Step 1（1）.** $mx=0$, $ny=0$（$m,n\ge1$）なら $mn(x-y)=n(mx)-m(ny)=0$。$0\in T(G)$。よって部分群（\ref{grp:subgroup-criterion}）。$m(x+T(G))=T(G)$（$m\ge1$）なら $mx\in T(G)$ で $k(mx)=0$ となる $k\ge1$ があり、$x\in T(G)$。
+
+**Step 2（2）.** $p^{a}x=0$, $p^{b}y=0$ なら $p^{\max(a,b)}(x-y)=0$。
+
+**Step 3（3）.** $nx=0$ なら $nf(x)=0$。
+:::
+
+::: theorem 捩れ群の準素分解 {#grp:torsion-primary-decomposition keywords="primary decomposition of torsion abelian groups: T is the direct sum of its p-primary components" index="捩れ群の準素分解|ねじれぐんのじゅんそぶんかい"}
+アーベル群 $G$ の捩れ部分群は、準素成分の内部直和である：
+$$
+T(G)=\bigoplus_{p}G_{p}.
+$$
+:::
+
+::: proof
+**Step 1（和）.** $x\in T(G)$ の位数を $m=p_{1}^{a_{1}}\cdots p_{k}^{a_{k}}$（相異なる素数）とし、$m_{i}\defeq m/p_{i}^{a_{i}}$ とおく。$\gcd(m_{1},\dots,m_{k})=1$ なので $\sum_{i}l_{i}m_{i}=1$ となる整数 $l_{i}$ がある（ベズーの等式を繰り返す：\ref{grp:bezout-euclid}）。$x=\sum_{i}l_{i}m_{i}x$ で、$p_{i}^{a_{i}}(l_{i}m_{i}x)=l_{i}mx=0$ なので $l_{i}m_{i}x\in G_{p_{i}}$。
+
+**Step 2（直和）.** 相異なる素数 $p_{1},\dots,p_{k}$ と $x_{i}\in G_{p_{i}}$ について $x_{1}+\cdots+x_{k}=0$ とする。$p_{i}^{a_{i}}x_{i}=0$ とし、$n_{1}\defeq\prod_{i\ge2}p_{i}^{a_{i}}$ とおくと $n_{1}x_{1}=-\sum_{i\ge2}n_{1}x_{i}=0$。$\gcd(n_{1},p_{1}^{a_{1}})=1$ なので $un_{1}+vp_{1}^{a_{1}}=1$ として $x_{1}=un_{1}x_{1}+vp_{1}^{a_{1}}x_{1}=0$。他の $i$ も同じ。
+:::
+
+::: remark
+有限アーベル群の場合（\ref{grp:primary-decomposition}）はこの定理の特別な場合で、$G_{p}$ はシロー $p$ 部分群である。準素分解によって、捩れアーベル群の研究はアーベル $p$ 群の研究に帰着される。一方、$G$ そのものは $T(G)$ と捩れのない部分の直和になるとは限らない（\ref{grp:torsion-not-summand}）。
+:::
+
+## 有限生成アーベル群 {#grp:sec-fab-fg}
+
+::: theorem 有限生成アーベル群の構造定理 {#grp:fg-abelian-structure keywords="structure theorem for finitely generated abelian groups: finitely generated torsion-free abelian groups are free; G = T + free" index="有限生成アーベル群の構造定理|ゆうげんせいせいあーべるぐんのこうぞうていり"}
+1. 有限生成な捩れのないアーベル群は自由アーベル群（有限階数）である。
+2. 有限生成アーベル群 $G$ について、$T(G)$ は有限群で、$G=T(G)\oplus F$（$F$ は有限階数の自由アーベル群）。
+3. したがって、有限生成アーベル群は、有限個の無限巡回群と素数冪位数の巡回群の直和と同型であり、その個数は同型類だけで決まる。
+:::
+
+::: proof
+**Step 1（1）.** $G=\ang{g_{1},\dots,g_{n}}$ を捩れのない群とし、$n$ に関する帰納法で示す。$n=0$ は $G=0$。$n\ge1$ で $g_{1}\neq0$ としてよい。$C\defeq\{x\in G:\ mx\in\ang{g_{1}}\text{ となる }m\ge1\text{ がある}\}$ は部分群で（$mx,m'x'\in\ang{g_{1}}$ なら $mm'(x-x')\in\ang{g_{1}}$）、$G/C$ は捩れがない（$k(x+C)=C$ なら $kx\in C$ で $mkx\in\ang{g_{1}}$）。$G/C$ は $n-1$ 個の元 $g_{2}+C,\dots,g_{n}+C$ で生成されるので、帰納法の仮定から自由。\ref{grp:free-quotient-splits}（有限階数なので選択公理は不要）から $G=C\oplus K$, $K\cong G/C$。$C$ は有限生成（\ref{grp:fg-abelian-subgroups}）：$C=\ang{c_{1},\dots,c_{r}}$ で、$m_{j}c_{j}\in\ang{g_{1}}$（$m_{j}\ge1$）とし $m\defeq m_{1}\cdots m_{r}$ とおくと $mC\subseteq\ang{g_{1}}$。$x\mapsto mx$ は捩れがないので単射準同型 $C\to\ang{g_{1}}\cong\Z$ で、$C$ は $\Z$ の部分群と同型、すなわち $0$ か $\Z$（\ref{grp:subgroups-of-z}）。$C\ni g_{1}\neq0$ なので $C\cong\Z$。よって $G=C\oplus K$ は自由。
+
+**Step 2（2）.** $G/T(G)$ は捩れがなく（\ref{grp:torsion-subgroup} の 1）、有限生成なので Step 1 から自由。\ref{grp:free-quotient-splits} から $G=T(G)\oplus F$。$T(G)\cong G/F$ は有限生成な捩れ群で、生成元 $t_{1},\dots,t_{s}$ の位数を $n_{i}$ とすると、元は $\sum c_{i}t_{i}$（$0\le c_{i}<n_{i}$）の形なので有限群。
+
+**Step 3（3）.** $F\cong\Z^{r}$、$T(G)$ は有限アーベル群の構造定理（\ref{grp:finite-abelian-structure}）による。一意性：$r$ は $G/T(G)\cong\Z^{r}$ の階数（\ref{grp:free-abelian-basic} の 5）で、$T(G)$ は $G$ で決まる部分群なので、その初等因子は一意（\ref{grp:abelian-p-group-unique}）。
+
+::: hypcheck
+- **有限生成**：Step 1 で $C$ が有限生成であることに使った。外すと偽：$\mathbb{Q}$ は捩れがないが自由でない。$\Z^{\N}$ も自由でない（\ref{grp:baer-specker}）。
+- **2 の分解**：一般の群では捩れ部分群は直和因子とは限らない（\ref{grp:torsion-not-summand}）。
+- 加群論による別証明（スミス標準形）は \ref{mod:page-pid-modules}。
+:::
+:::
+
+::: supplement
+**類似の定理.** \ref{grp:subgroup-of-free-abelian} は「PID 上の自由加群の部分加群は自由」（任意の階数）に一般化され、証明も同じである（$\Z$ の部分群が $d\Z$ であることを、PID のイデアルが単項であることに置き換える）。一方、可換環上の射影加群が自由であるか（セール予想、クイレン–ススリンの定理）は、PID よりずっと難しい問題である。
+
+**高い視点.** 自由アーベル群は、忘却関手 $\mathbf{Ab}\to\mathbf{Set}$ の左随伴 $X\mapsto\Z^{(X)}$ の値である（普遍性 2）。射影対象は「全射に沿って持ち上がる」対象で、\ref{grp:projective-abelian-free} は $\mathbf{Ab}$ では射影対象と自由対象が一致することを言っている。双対的に、入射対象は可除群である（次ページ \ref{grp:page-divisible}）。
+:::
+
+## 問題 {#grp:sec-fab-problems}
+
+::: problem {#grp:prob-fab-generators}
+$\Z^{n}$ は $n$ 個より少ない元では生成されないことを示せ。
+:::
+
+::: solution
+$\Z^{n}=\ang{g_{1},\dots,g_{k}}$ なら、$\Z^{n}/2\Z^{n}\cong(\Z/2)^{n}$ は $\Z/2$ 上のベクトル空間として $g_{i}+2\Z^{n}$ で生成されるので、次元 $n\le k$。
+:::
+
+::: problem {#grp:prob-fab-index}
+$H\le\Z^{n}$ が有限指数であることと、$H$ の階数が $n$ であることは同値であることを示せ。
+:::
+
+::: solution
+$H$ は自由で階数 $k\le n$（\ref{grp:subgroup-of-free-abelian}）。$\Z^{n}/H$ は有限生成なので、$\cong T\oplus\Z^{r}$（\ref{grp:fg-abelian-structure}）で、有限 $\iff r=0$。$\mathbb{Q}$ 上で考える（$\Z^{n}\subseteq\mathbb{Q}^{n}$）と、$H$ の基底は一次独立なので $H$ が張る $\mathbb{Q}$ 部分空間の次元は $k$ で、$r=0$（$\Z^{n}/H$ が捩れ群）$\iff$ 各 $e_{i}$ のある倍数が $H$ に入る $\iff$ $H$ の張る空間が $\mathbb{Q}^{n}$ $\iff$ $k=n$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=6cc21e5d"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=4d4405c9"></script>
+<script src="../../../site.js?v=adb37c39"></script>
+<script src="../../../learn/manifest.js?v=91bfecee"></script>
+<script src="../../../learn.js?v=5a9e174b"></script>
+</body>
+</html>
