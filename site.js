@@ -364,6 +364,7 @@
   function initAds(article) {
     var A = C.ADS || {};
     if (!A.enabled) return;
+    if (window.SMAuth && window.SMAuth.isPro()) return;   // Pro プランは広告なし
     var slots = A.slots || {}, mh = A.minHeight || {};
     ['top', 'bottom', 'rail'].forEach(function (k) {
       var el = app.querySelector('[data-ad-slot="' + k + '"]');
@@ -381,8 +382,28 @@
     }
   }
 
-  /* ---------- 参照プレビュー ---------- */
-  var pop, popTimer, hideTimer, popFor = null;
+  /* ---------- 参照プレビュー ----------
+   * 他ページの項目の本文は search-index.js（大きい）から作るので、一度描画した本文を Map と sessionStorage に
+   * 保存し、同じセッションの 2 回目以降は「読み込み中」を出さずに表示する（キーは索引の更新時刻ごと）。 */
+  var pop, popTimer, hideTimer, popFor = null, popLabel = null, popStack = [];
+  var PV_KEY = 'sm_pv_cache', PV_MAX = 300, pvMem = new Map();
+  (function loadPvCache() {
+    try {
+      var o = JSON.parse(sessionStorage.getItem(PV_KEY) || 'null');
+      if (o && o.b === IDX.built && o.m) Object.keys(o.m).forEach(function (k) { pvMem.set(k, o.m[k]); });
+    } catch (e) {}
+  })();
+  var pvSaveTimer = null;
+  function pvPut(label, html) {
+    if (!html || /mn-pv-loading/.test(html)) return;
+    pvMem.delete(label); pvMem.set(label, html);
+    while (pvMem.size > PV_MAX) pvMem.delete(pvMem.keys().next().value);
+    clearTimeout(pvSaveTimer);
+    pvSaveTimer = setTimeout(function () {
+      var m = {}; pvMem.forEach(function (v, k) { m[k] = v; });
+      try { sessionStorage.setItem(PV_KEY, JSON.stringify({ b: IDX.built, m: m })); } catch (e) {}
+    }, 300);
+  }
   function previewHtml(label) {
     var L = localLabels[label], G = IDX.labels[label];
     var info = resolveRef(label);
@@ -401,6 +422,10 @@
           while (sib && n < 2 && !/^H[1-6]$/.test(sib.tagName)) { bodyHtml += sib.outerHTML; sib = sib.nextElementSibling; n++; }
         } else { var b = target.querySelector('.mn-env-body'); bodyHtml = b ? b.innerHTML : ''; }
       }
+    } else if (G && pvMem.has(label)) {
+      var pgc = IDX.pages[G.p];
+      bodyHtml = pvMem.get(label);
+      head = head.replace('</div>', '<div class="mn-pv-where">' + esc(pgc.subj) + ' §' + pgc.sec + ' ' + esc(pgc.title) + '</div></div>');
     } else if (G) {
       var pg = IDX.pages[G.p];
       if (G.t === 'equation') bodyHtml = renderer.renderTex({ tex: G.tex, display: true, num: G.n });
@@ -408,7 +433,7 @@
         // 本文の索引がまだ読み込まれていない：読み込み後に表示し直す
         bodyHtml = '<p class="mn-pv-loading">読み込み中…</p>';
         var want = label;
-        window.MathEntries.load(function () { if (popFor && popFor.getAttribute('data-label') === want) showPop(popFor); });
+        window.MathEntries.load(function () { if (popFor && popLabel === want) { if (popStack.length) setPopContent(want); else showPop(popFor); } });
       }
       else if (G.e != null && IDX.entries[G.e]) bodyHtml = renderer.renderNodes(Core.parseBlocks(IDX.entries[G.e].x || '').children);
       else if (isNamed) {
@@ -418,13 +443,39 @@
         }
       }
       head = head.replace('</div>', '<div class="mn-pv-where">' + esc(pg.subj) + ' §' + pg.sec + ' ' + esc(pg.title) + '</div></div>');
+      pvPut(label, bodyHtml);
+    }
+    // 固定（ピン留め）ボタンは「開く →」の左隣。学習機能（learn.js）が読み込まれているときだけ出す
+    if (window.SMLearn && info.type !== 'equation' && info.type !== 'section') {
+      head = head.replace('<a class="mn-pv-go"', '<button type="button" class="mn-pv-pin" data-pin-label="' + esc(label) + '" title="この項目を付箋ドックに固定">📌 固定</button><a class="mn-pv-go"');
     }
     return head + '<div class="mn-pv-body mn-prose">' + bodyHtml + '</div>';
   }
-  function showPop(a) {
-    var html = previewHtml(a.getAttribute('data-label'));
+  /* プレビューの中身（ピン留め・学習機能で使う） */
+  function previewData(label) {
+    var info = resolveRef(label);
+    if (!info || info.planned) return null;
+    var html = previewHtml(label) || '';
+    var tmp = document.createElement('div'); tmp.innerHTML = html;
+    var b = tmp.querySelector('.mn-pv-body'), w = tmp.querySelector('.mn-pv-where');
+    tmp.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
+    var G = IDX.labels[label], pg = G ? IDX.pages[G.p] : PG;
+    return {
+      id: label, kind: info.typeName + (info.num ? ' ' + info.num : ''), title: info.title || '',
+      url: info.href.charAt(0) === '#' ? ROOT + (PG ? PG.path : '') + info.href : info.href,
+      sectionPath: pg ? pg.subj + ' §' + pg.sec + ' ' + pg.title : (w ? w.textContent : ''),
+      htmlContent: b ? b.innerHTML : '', loading: !!(b && b.querySelector('.mn-pv-loading'))
+    };
+  }
+  function labelOf(a) { return a.getAttribute('data-label') || a.getAttribute('data-pv-label'); }
+  function showPop(a, keepStack) {
+    var label = typeof a === 'string' ? a : labelOf(a);
+    var html = previewHtml(label);
     if (!html) return;
-    popFor = a;
+    if (typeof a !== 'string') popFor = a;
+    if (!keepStack) popStack = [];
+    popLabel = label;
+    if (popStack.length) html = '<button type="button" class="mn-pv-back" title="前のプレビューに戻る">← 戻る</button>' + html;
     pop.innerHTML = html;
     pop.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
     pop.removeAttribute('hidden');
@@ -438,25 +489,47 @@
     if (top + ph > window.innerHeight - 8 && r.top - ph - 8 > 8) top = r.top - ph - 8;
     pop.style.top = Math.max(8, top) + 'px';
   }
-  function hidePop() { pop.setAttribute('hidden', ''); popFor = null; }
+  function hidePop() { pop.setAttribute('hidden', ''); popFor = null; popLabel = null; popStack = []; }
+  /* プレビューの中の参照をクリックすると、プレビュー自体をその項目に切り替える（1 段階のネスト。戻るボタン付き） */
+  function setPopContent(label) {
+    var html = previewHtml(label);
+    if (!html) return false;
+    popLabel = label;
+    pop.innerHTML = (popStack.length ? '<button type="button" class="mn-pv-back" title="前のプレビューに戻る">← 戻る</button>' : '') + html;
+    pop.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
+    return true;
+  }
+  function drillTo(label) {
+    if (!popFor || !label || label === popLabel) return;
+    popStack = [popLabel];   // ネストは 1 段階まで：戻り先は常に最初の項目
+    if (!setPopContent(label)) popStack = [];
+  }
   function initPopovers() {
     pop = app.querySelector('.mn-popover');
     var touch = false;
     document.addEventListener('touchstart', function () { touch = true; }, { passive: true });
+    var PV_SEL = 'a.mn-xref[data-label], [data-pv-label]';
     document.addEventListener('mouseover', function (ev) {
       if (touch || !ev.target.closest) return;
-      var a = ev.target.closest('a.mn-xref[data-label]');
+      var a = ev.target.closest(PV_SEL);
       if (a && !pop.contains(a)) { clearTimeout(hideTimer); clearTimeout(popTimer); popTimer = setTimeout(function () { showPop(a); }, 220); }
       else if (ev.target.closest('.mn-popover')) clearTimeout(hideTimer);
     });
     document.addEventListener('mouseout', function (ev) {
       if (touch || !ev.target.closest) return;
-      if (ev.target.closest('a.mn-xref[data-label]') || ev.target.closest('.mn-popover')) { clearTimeout(popTimer); hideTimer = setTimeout(hidePop, 260); }
+      if (ev.target.closest(PV_SEL) || ev.target.closest('.mn-popover')) { clearTimeout(popTimer); hideTimer = setTimeout(hidePop, 260); }
     });
     // タッチ端末：1 回目のタップでプレビュー、「開く」で移動
     document.addEventListener('click', function (ev) {
       if (!ev.target.closest) return;
+      if (ev.target.closest('.mn-pv-back')) {
+        ev.preventDefault();
+        var back = popStack.pop();
+        if (back) setPopContent(back);
+        return;
+      }
       var a = ev.target.closest('a.mn-xref[data-label]');
+      if (a && pop.contains(a)) { ev.preventDefault(); drillTo(a.getAttribute('data-label')); return; }
       if (a && touch && popFor !== a && !pop.contains(a)) { ev.preventDefault(); showPop(a); return; }
       if (!ev.target.closest('.mn-popover') && !a) hidePop();
     });
@@ -624,6 +697,11 @@
     // 同じページ内の結果へ移動したとき（ハッシュが変わらない場合を含む）に search.js から呼ばれる
     window.MathSiteRefresh = function () { applySearchHighlight(article); flashTarget(); };
     setTimeout(function () { applySearchHighlight(article); flashTarget(); }, 0);
+    window.MathSite = {
+      root: ROOT, page: PAGE, kind: KIND, pageInfo: PG, pageIndex: pageIdx, index: IDX, app: app, article: article,
+      renderer: renderer, resolveRef: resolveRef, typeName: typeName, previewData: previewData, store: store
+    };
+    try { document.dispatchEvent(new CustomEvent('mn:ready', { detail: window.MathSite })); } catch (e) {}
     if (!window.MATH_INDEX) article.insertAdjacentHTML('afterbegin', '<div class="mn-warn">site-index.js が見つかりません。<code>node tools/build.js</code> を実行してください。</div>');
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', main); else main();

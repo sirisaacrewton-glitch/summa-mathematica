@@ -414,7 +414,7 @@
     var crumb = Core.escapeHtml(pg.subj || '') + ' › §' + pg.sec + ' ' + renderInlineTitle(pg.title || '', { terms: [] });
     return '<a class="mn-result' + (active ? ' is-active' : '') + '" href="' + Core.escapeHtml(resultHref(r, root)) + '">' +
       '<div class="mn-result-top"><span class="mn-badge" data-type="' + e.t + '">' + Core.escapeHtml(badge) + '</span>' +
-      '<span class="mn-result-title">' + title + '</span>' + (item.here ? '<span class="mn-here">このページ</span>' : '') +
+      '<span class="mn-result-title"' + (e.l && e.t !== 'page' && e.t !== 'section' && IDX.labels[e.l] ? ' data-pv-label="' + Core.escapeHtml(e.l) + '"' : '') + '>' + title + '</span>' + (item.here ? '<span class="mn-here">このページ</span>' : '') +
       (e.l ? '<span class="mn-result-label">' + Core.escapeHtml(e.l) + '</span>' : '') + '</div>' +
       '<div class="mn-result-where">' + crumb + '</div>' +
       '<div class="mn-result-snip">' + snippet(r, pq) + '</div></a>';

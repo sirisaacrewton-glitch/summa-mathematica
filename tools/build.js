@@ -24,7 +24,7 @@ var CHECK_ONLY = args.indexOf('--check') >= 0;
 var QUIET = args.indexOf('--quiet') >= 0;
 var ONLY = (function () { var i = args.indexOf('--only'); return i >= 0 ? args[i + 1] : null; })();
 
-var SKIP_DIRS = { vendor: 1, tools: 1, node_modules: 1, assets: 1 };
+var SKIP_DIRS = { vendor: 1, tools: 1, node_modules: 1, assets: 1, learn: 1, api: 1 };
 var SOURCE_RE = /<script type="text\/markdown" id="source">([\s\S]*?)<\/script>/;
 
 function readJSON(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return null; } }
@@ -516,10 +516,14 @@ function pageHtml(opts) {
     '<script src="' + asset(r, 'vendor/katex/katex.min.js') + '"></script>\n' +
     '<script src="' + asset(r, 'vendor/marked.min.js') + '"></script>\n' +
     '<script src="' + asset(r, 'config.js') + '"></script>\n' +
+    '<script src="' + asset(r, 'auth-state.js') + '"></script>\n' +
     '<script src="' + asset(r, 'site-core.js') + '"></script>\n' +
     '<script src="' + r + 'site-index.js"></script>\n' +
     '<script src="' + asset(r, 'search.js') + '"></script>\n' +
     '<script src="' + asset(r, 'site.js') + '"></script>\n' +
+    // 学習機能（ピン留め・直感イメージ・ロードマップ・証明パズル）。manifest はページごとの差し込み設定
+    '<script src="' + asset(r, 'learn/manifest.js') + '"></script>\n' +
+    '<script src="' + asset(r, 'learn.js') + '"></script>\n' +
     '</body>\n</html>\n';
 }
 
