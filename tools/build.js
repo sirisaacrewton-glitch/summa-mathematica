@@ -578,6 +578,8 @@ function pageHtml(opts) {
     '<script src="' + asset(r, 'site.js') + '"></script>\n' +
     // 学習機能（ピン留め・直感イメージ・ロードマップ・証明パズル）。manifest はページごとの差し込み設定
     '<script src="' + asset(r, 'learn/manifest.js') + '"></script>\n' +
+    // 概要ページだけ：分野の紹介と系列の目標
+    (opts.kind === 'dir' ? '<script src="' + asset(r, 'learn/guides.js') + '"></script>\n' : '') +
     '<script src="' + asset(r, 'learn.js') + '"></script>\n' +
     '</body>\n</html>\n';
 }

@@ -1000,16 +1000,44 @@
     return S && M[S.page] || null;
   }
   function pageLabel() { var h = S.article.querySelector('.mn-page-head h1[id]'); return h ? h.id : ''; }
-  function mountIntuition(mf) {
-    if (!mf || !mf.intuition) return;
-    var I = mf.intuition, field = I.kind === 'field';
-    var slot = el('<details class="mn-intuition-slot mn-learn-x' + (field ? ' mn-intu-field' : '') + '" data-page-id="' + esc(pageLabel()) + '" aria-label="' + (field ? 'この分野で学ぶこと' : '直感イメージ') + '"' + (prefs().intro === 'open' ? ' open' : '') + '></details>');
-    slot.innerHTML = '<summary class="mn-intu-k">' + (field ? '🧭 この分野で学ぶこと' : '💡 直感イメージ<span class="mn-intu-sub">（' + esc(I.question || 'なぜこの概念が必要か？') + '）</span>') + '</summary>' +
+  function mountIntuition(mf, after) {
+    if (!mf || !mf.intuition) return null;
+    var I = mf.intuition, field = I.kind === 'field', series = I.kind === 'series';
+    var aria = field ? 'この分野で学ぶこと' : series ? 'この系列の目標' : '直感イメージ';
+    var slot = el('<details class="mn-intuition-slot mn-learn-x' + (field ? ' mn-intu-field' : '') + (series ? ' mn-intu-series' : '') + '" data-page-id="' + esc(pageLabel()) + '" aria-label="' + aria + '"' + (prefs().intro === 'open' ? ' open' : '') + '></details>');
+    var head = field ? '🧭 この分野で学ぶこと' : series ? '🎯 この系列の目標' + (I.title ? '<span class="mn-intu-sub">（' + esc(I.title) + '）</span>' : '') :
+      '💡 直感イメージ<span class="mn-intu-sub">（' + esc(I.question || 'なぜこの概念が必要か？') + '）</span>';
+    slot.innerHTML = '<summary class="mn-intu-k">' + head + '</summary>' +
       '<div class="mn-intu-grid"><div class="mn-intu-text"><div class="mn-prose">' + S.renderer.renderMarkdown(I.text || '') + '</div></div>' +
-      '<div class="mn-intu-video" data-video-state="loading"><div class="mn-video-frame"><div class="mn-video-skeleton"></div></div>' +
-      '<div class="mn-video-cap">🎬 ' + esc(I.videoTitle || '1 分イメージ動画') + '</div></div></div>';
-    var head = S.article.querySelector('.mn-page-head');
-    head.parentNode.insertBefore(slot, head.nextSibling);
+      (series ? '' : '<div class="mn-intu-video" data-video-state="loading"><div class="mn-video-frame"><div class="mn-video-skeleton"></div></div>' +
+      '<div class="mn-video-cap">🎬 ' + esc(I.videoTitle || '1 分イメージ動画') + '</div></div>') + '</div>';
+    var ref = after || S.article.querySelector('.mn-page-head');
+    ref.parentNode.insertBefore(slot, ref.nextSibling);
+    return slot;
+  }
+  /* 概要ページ（フォルダの index.html）の案内：learn/guides.js（概要ページだけで読む）の分野の紹介と系列の目標。
+   * 子が一つしかなく一段飛ばして中身を直接並べるフォルダ（solo）では、飛ばした先の系列の目標も続けて出す */
+  function guidesFor() {
+    var G = window.SM_LEARN_GUIDES || {}, M = window.SM_LEARN_MANIFEST || {}, out = [];
+    var own = (M[S.page] && M[S.page].intuition) || G[S.page];
+    if (own) out.push(own);
+    function count(n) { return n.k === 'p' ? 1 : (n.c || []).reduce(function (a, c) { return a + (c.x ? 0 : count(c)); }, 0); }
+    function find(n, path) {
+      if (n.k !== 'd') return null;
+      if (n.path === path) return n;
+      for (var i = 0; i < (n.c || []).length; i++) { var r = find(n.c[i], path); if (r) return r; }
+      return null;
+    }
+    var node = S.index && find(S.index.tree, S.page.replace(/index\.html$/, ''));
+    while (node && node.path) {
+      if ((node.c || []).some(function (c) { return c.k === 'p'; })) break;
+      var kids = (node.c || []).filter(function (c) { return c.k === 'd' && !c.x && count(c) > 0; });
+      if (kids.length !== 1) break;
+      node = kids[0];
+      var g = G[node.path + 'index.html'];
+      if (g && out.indexOf(g) < 0) out.push(g);
+    }
+    return out;
   }
   function renderVideo(data) {
     var box = S.article.querySelector('.mn-intu-video'); if (!box) return;
@@ -1513,9 +1541,10 @@
       decorateProofs();
       if (mf && mf.intuition) withContent(renderVideo);
       applyPrefs();
-    } else if (S.kind === 'dir' && (mf = manifestFor()) && mf.intuition) {
-      // 分野の概要ページ：「この分野で学ぶこと」と分野全体の動画の枠（動画は未制作）
-      mountIntuition(mf);
+    } else if (S.kind === 'dir') {
+      // 分野の概要ページ：「この分野で学ぶこと」と分野全体の動画の枠（動画は未制作）。系列の概要ページ：「この系列の目標」
+      var prev = null;
+      guidesFor().forEach(function (g) { prev = mountIntuition({ intuition: g }, prev) || prev; });
       renderVideo({ video: {} });
     }
     renderDock();
