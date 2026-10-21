@@ -24,6 +24,34 @@
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function el(html) { var t = document.createElement('div'); t.innerHTML = html.trim(); return t.firstChild; }
   function isPro() { return A.isPro(); }
+  /* ---------- 動き（すべて Web Animations。動きを減らす設定では一瞬で切り替える） ---------- */
+  var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var PHONE = window.matchMedia ? matchMedia('(max-width: 768px)') : { matches: false };   // ドックが下からのシートになる幅
+  var EASE = 'cubic-bezier(.22,.61,.36,1)';
+  function anim(node, frames, dur) { if (REDUCED || !node || !node.animate) return null; return node.animate(frames, { duration: dur, easing: EASE }); }
+  // 出ていく動き：終わってから done（途中で入り直したら node._out を cancel する）
+  function animOut(node, frames, dur, done) {
+    var a = anim(node, frames, dur);
+    if (!a) { done(); return; }
+    node._out = a;
+    a.onfinish = function () { if (node._out === a) { node._out = null; done(); } };
+  }
+  function cancelOut(node) { if (node && node._out) { node._out.cancel(); node._out = null; return true; } return false; }
+  // 高さを補間して開閉する（折りたたみ・付箋の最小化・演習の本体）
+  function animHeight(node, from, to, dur) {
+    var a = anim(node, [{ height: from + 'px', overflow: 'hidden' }, { height: to + 'px', overflow: 'hidden' }], dur || Math.min(380, 200 + Math.abs(to - from) * 0.25));
+    return a;
+  }
+  // 並べ替えの前後で要素の位置を補間する（FLIP）
+  function flip(nodes, mutate) {
+    var first = new Map(); nodes.forEach(function (n) { first.set(n, n.getBoundingClientRect().top); });
+    mutate();
+    if (REDUCED) return;
+    nodes.forEach(function (n) {
+      var d = first.get(n) - n.getBoundingClientRect().top;
+      if (d) anim(n, [{ transform: 'translateY(' + d + 'px)' }, { transform: 'none' }], 240);
+    });
+  }
   function typing(t) { return t && (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || t.isContentEditable); }
 
   /* ---------- 参照の向きを逆にした表（前提＝この項目が参照している項目） ---------- */
@@ -68,14 +96,19 @@
 
   /* ---------- モーダル・トースト ---------- */
   var modalEl = null, lastFocus = null;
-  function closeModal() {
+  function closeModal(instant) {
     if (!modalEl) return;
-    modalEl.remove(); modalEl = null;
+    var m = modalEl; modalEl = null;
     document.documentElement.classList.remove('mn-modal-open');
     if (lastFocus && lastFocus.focus) lastFocus.focus();
+    if (instant) { m.remove(); return; }
+    m.style.pointerEvents = 'none';
+    anim(m.querySelector('.mn-learn-modal-scrim'), [{ opacity: 1 }, { opacity: 0 }], 180);
+    animOut(m.querySelector('.mn-learn-modal-box'), [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: 'translateY(8px) scale(.985)' }], 180, function () { m.remove(); });
   }
   function openModal(title, bodyHtml, opts) {
-    closeModal();
+    var again = !!modalEl;
+    closeModal(true);
     lastFocus = document.activeElement;
     opts = opts || {};
     modalEl = el('<div class="mn-learn-modal' + (opts.wide ? ' is-wide' : '') + '" role="dialog" aria-modal="true" aria-label="' + esc(title) + '">' +
@@ -85,15 +118,24 @@
       '<div class="mn-learn-modal-body">' + bodyHtml + '</div></div></div>');
     document.body.appendChild(modalEl);
     document.documentElement.classList.add('mn-modal-open');
+    if (!again) {   // 開き直し（セット画面の更新など）では動かさない
+      anim(modalEl.querySelector('.mn-learn-modal-scrim'), [{ opacity: 0 }, { opacity: 1 }], 220);
+      anim(modalEl.querySelector('.mn-learn-modal-box'), [{ opacity: 0, transform: 'translateY(14px) scale(.98)' }, { opacity: 1, transform: 'none' }], 280);
+    }
     modalEl.addEventListener('click', function (ev) { if (ev.target.closest('[data-close]')) closeModal(); });
     var f = modalEl.querySelector('.mn-learn-modal-body button, .mn-learn-modal-close'); if (f) f.focus();
     return modalEl;
   }
+  var toastEl = null;
   function toast(msg) {
-    var t = el('<div class="mn-toast" role="status">' + msg + '</div>');
+    // 前の通知は下へ引っ込めて、新しい通知を下から滑らかに出す
+    if (toastEl) { var old = toastEl; clearTimeout(old._t); animOut(old, [{ opacity: 1, transform: 'translate(-50%, 0)' }, { opacity: 0, transform: 'translate(-50%, 16px)' }], 180, function () { old.remove(); }); }
+    var t = toastEl = el('<div class="mn-toast" role="status">' + msg + '</div>');
     document.body.appendChild(t);
-    setTimeout(function () { t.classList.add('is-out'); }, 2600);
-    setTimeout(function () { t.remove(); }, 3200);
+    anim(t, [{ opacity: 0, transform: 'translate(-50%, 28px) scale(.97)' }, { opacity: 1, transform: 'translate(-50%, 0) scale(1)' }], 360);
+    t._t = setTimeout(function () {
+      animOut(t, [{ opacity: 1, transform: 'translate(-50%, 0)' }, { opacity: 0, transform: 'translate(-50%, 24px)' }], 320, function () { t.remove(); if (toastEl === t) toastEl = null; });
+    }, 2600);
   }
   /* Pro の案内（派手な広告にせず、何が使えるようになるかを淡々と示す） */
   var PRO_FEATURES = [
@@ -135,15 +177,28 @@
         var m = openModal('ピン留めの上限', '<p><strong>無料プランでは 1 件までピン留めできます。</strong> いまの付箋を入れ替えるか、Pro プランで複数の定義を並べて証明を読みましょう。</p>' +
           '<div class="mn-pin-swap"><div><span class="mn-pin-swap-k">いまの付箋</span>' + esc(p[0].kind) + ' ' + esc(p[0].title) + '</div><div><span class="mn-pin-swap-k">新しい付箋</span>' + esc(item.kind) + ' ' + esc(item.title) + '</div></div>' +
           '<div class="mn-learn-actions"><button type="button" class="mn-btn" data-swap>いまピン留めを入れ替える</button><button type="button" class="mn-btn mn-btn-quiet" data-see-pro>Pro プランを見る</button></div>');
-        m.querySelector('[data-swap]').addEventListener('click', function () { closeModal(); savePins([item]); openDock(true); toast('📌 付箋を入れ替えました'); });
+        m.querySelector('[data-swap]').addEventListener('click', function () { closeModal(); savePins([item]); if (!PHONE.matches) openDock(true); toast('📌 付箋を入れ替えました'); });
         m.querySelector('[data-see-pro]').addEventListener('click', function () { proModal('付箋ドックは Pro プランで無制限に使えます。'); });
         return;
       }
-      p.push(item); savePins(p); openDock(true); highlightCard(label);
-      toast('📌 ' + esc(item.kind) + ' を付箋ドックに固定しました（<kbd>p</kbd> で開閉）');
+      p.push(item); savePins(p);
+      if (PHONE.matches && dock.hidden) {   // スマホは画面を覆わないよう、下のボタンを弾ませて知らせるだけ
+        anim(dockTab, [{ transform: 'translateX(-50%) scale(1)' }, { transform: 'translateX(-50%) scale(1.14)' }, { transform: 'translateX(-50%) scale(1)' }], 420);
+        toast('📌 ' + esc(item.kind) + ' を固定しました（下の「ピン留め」で表示）');
+      } else {
+        openDock(true); highlightCard(label);
+        toast('📌 ' + esc(item.kind) + ' を付箋ドックに固定しました（<kbd>p</kbd> で開閉）');
+      }
     });
   }
-  function unpin(id) { savePins(pins().filter(function (p) { return p.id !== id; })); }
+  function unpin(id) {
+    var done = function () { savePins(pins().filter(function (p) { return p.id !== id; })); };
+    var c = dock && !dock.hidden && dock.querySelector('.mn-pin-card[data-pin-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
+    if (!c || REDUCED) { done(); return; }
+    var h = c.offsetHeight;
+    c.style.pointerEvents = 'none';
+    animOut(c, [{ opacity: 1, height: h + 'px', marginBottom: '8px', overflow: 'hidden' }, { opacity: 0, height: '0px', marginBottom: '0px', overflow: 'hidden', transform: 'translateX(24px)' }], 240, done);
+  }
 
   function firstMath(html) {
     var t = document.createElement('div'); t.innerHTML = html;
@@ -153,6 +208,7 @@
     return esc(tx.length > 60 ? tx.slice(0, 60) + '…' : tx);
   }
   function cardHtml(p, collapsed) {
+    if (PHONE.matches) collapsed = false;   // スマホは「全文」と「閉じた（ピンのボタンだけ）」の 2 段階
     return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '"' + (isPro() ? ' draggable="true"' : '') + '>' +
       '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで最小化／展開">' +
         (isPro() ? '<span class="mn-pin-grip" aria-hidden="true" title="ドラッグで並べ替え">⠿</span>' : '') +
@@ -172,8 +228,25 @@
     document.body.appendChild(dock); document.body.appendChild(dockTab);
     dockTab.addEventListener('click', function () { toggleDock(); });
     dock.addEventListener('click', onDockClick);
+    // スマホ：見出し部分を下へスワイプして閉じる
+    var y0 = null, dy = 0;
+    dock.addEventListener('touchstart', function (ev) {
+      if (!PHONE.matches || !ev.target.closest('.mn-dock-head') || ev.target.closest('button')) { y0 = null; return; }
+      y0 = ev.touches[0].clientY; dy = 0;
+    }, { passive: true });
+    dock.addEventListener('touchmove', function (ev) {
+      if (y0 === null) return;
+      dy = Math.max(0, ev.touches[0].clientY - y0);
+      dock.style.transform = 'translateY(' + dy + 'px)'; if (ev.cancelable) ev.preventDefault();
+    }, { passive: false });
+    dock.addEventListener('touchend', function () {
+      if (y0 === null) return;
+      y0 = null;
+      if (dy > 70) closeDock();
+      else { var from = dock.style.transform; dock.style.transform = ''; if (dy) anim(dock, [{ transform: from }, { transform: 'translateY(0)' }], 200); }
+    });
     dock.addEventListener('keydown', function (ev) {
-      if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('mn-pin-head')) { ev.preventDefault(); ev.target.parentNode.classList.toggle('is-min'); }
+      if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('mn-pin-head') && !PHONE.matches) { ev.preventDefault(); toggleMin(ev.target.parentNode); }
     });
     // Pro：ドラッグで並べ替え
     var dragId = null;
@@ -216,7 +289,8 @@
     if (ev.target.closest('[data-close-dock]')) { closeDock(); return; }
     if (ev.target.closest('[data-see-pro]')) { proModal('付箋ドックは Pro プランで無制限に使えます。'); return; }
     if (ev.target.closest('[data-min-all]')) {
-      var mins = {}; pins().forEach(function (x) { mins[x.id] = 1; }); setJSON('sm_pin_min', mins); renderDock(); return;
+      var mins = {}; pins().forEach(function (x) { mins[x.id] = 1; }); setJSON('sm_pin_min', mins);
+      dock.querySelectorAll('.mn-pin-card:not(.is-min)').forEach(function (c) { toggleMin(c); }); return;
     }
     if (ev.target.closest('[data-sets]')) { if (isPro()) setsModal(); else proModal('付箋のセット（分野ごとの組み合わせ）の保存は Pro プランの機能です。'); return; }
     if (!card) return;
@@ -224,9 +298,17 @@
     if (ev.target.closest('[data-float]')) { floatCard(id); return; }
     if (ev.target.closest('a')) return;
     if (ev.target.closest('.mn-pin-head')) {
+      if (PHONE.matches) return;
       var m = getJSON('sm_pin_min', {}); if (m[id]) delete m[id]; else m[id] = 1; setJSON('sm_pin_min', m);
-      card.classList.toggle('is-min');
+      toggleMin(card);
     }
+  }
+  // 付箋の最小化・展開（高さを補間）
+  function toggleMin(card) {
+    var from = card.offsetHeight;
+    card.classList.toggle('is-min');
+    var to = card.offsetHeight;
+    animHeight(card, from, to, 260);
   }
   function setsModal() {
     var sets = getJSON('sm_pin_sets', {});
@@ -245,18 +327,32 @@
       else if ((b = ev.target.closest('[data-del]'))) { delete sets[b.getAttribute('data-del')]; setJSON('sm_pin_sets', sets); setsModal(); }
     });
   }
+  function dockFrames() {
+    return PHONE.matches ? [{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }]
+      : [{ opacity: 0, transform: 'translateX(28px)' }, { opacity: 1, transform: 'translateX(0)' }];
+  }
   function openDock(focusless) {
-    renderDock(); dock.hidden = false; dockTab.hidden = false; dockTab.setAttribute('aria-expanded', 'true');
+    var wasHidden = dock ? dock.hidden || !!dock._out : true;
+    renderDock(); cancelOut(dock);
+    dock.hidden = false; dockTab.hidden = false; dockTab.setAttribute('aria-expanded', 'true');
     document.documentElement.classList.add('mn-dock-open');
+    if (wasHidden) anim(dock, dockFrames(), PHONE.matches ? 340 : 280);
     if (!focusless) { var h = dock.querySelector('.mn-pin-head, [data-close-dock]'); if (h) h.focus(); }
   }
   function closeDock() {
-    if (!dock) return;
-    dock.hidden = true; dockTab.setAttribute('aria-expanded', 'false');
-    document.documentElement.classList.remove('mn-dock-open');
-    dockTab.hidden = !pins().length;
+    if (!dock || dock.hidden || dock._out) return;
+    dockTab.setAttribute('aria-expanded', 'false');
+    var cur = getComputedStyle(dock).transform, f = dockFrames().reverse();
+    if (cur && cur !== 'none') f[0] = { transform: cur };   // スワイプで途中まで下げた位置から続ける
+    dock.style.transform = '';
+    animOut(dock, f, PHONE.matches ? 260 : 200, function () {
+      dock.hidden = true;
+      document.documentElement.classList.remove('mn-dock-open');
+      dockTab.hidden = !pins().length;
+      if (!dockTab.hidden) anim(dockTab, [{ opacity: 0, transform: PHONE.matches ? 'translate(-50%, 12px)' : 'translateY(12px)' }, { opacity: 1, transform: PHONE.matches ? 'translate(-50%, 0)' : 'translateY(0)' }], 220);
+    });
   }
-  function toggleDock() { ensureDock(); if (dock.hidden) openDock(); else closeDock(); }
+  function toggleDock() { ensureDock(); if (dock.hidden || dock._out) openDock(); else closeDock(); }
   function highlightCard(id) {
     var c = dock && dock.querySelector('.mn-pin-card[data-pin-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
     if (!c) return;
@@ -271,6 +367,7 @@
     w.style.left = Math.max(8, window.innerWidth - 460 - 24 * n) + 'px';
     w.style.top = (90 + 24 * n) + 'px';
     document.body.appendChild(w); floats.push(w);
+    anim(w, [{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], 220);
     w.querySelector('[data-float]').remove();
     w.querySelector('[data-unpin]').setAttribute('title', '閉じる（ドックには残ります）');
     w.addEventListener('click', function (ev) {
@@ -512,17 +609,32 @@
   }
   function toggleInteractive(slot, it) {
     var body = slot.querySelector('.mn-ia-body'), btn = slot.querySelector('.mn-ia-open');
-    var open = body.hidden;
-    body.hidden = !open; btn.setAttribute('aria-expanded', open);
+    var open = body.hidden || !!body._out;
+    btn.setAttribute('aria-expanded', open);
     var proof = proofOf(it.target);
-    if (!open) { if (proof) proof.classList.remove('mn-puzzle-hidden'); return; }
+    if (!open) {
+      animOut(body, [{ height: body.offsetHeight + 'px', opacity: 1, overflow: 'hidden' }, { height: '0px', opacity: 0, overflow: 'hidden' }], 260, function () { body.hidden = true; });
+      if (proof) proof.classList.remove('mn-puzzle-hidden');
+      return;
+    }
+    cancelOut(body);
+    body.hidden = false;
     body.innerHTML = '<div class="mn-ia-skeleton">読み込み中…</div>';
+    var start = 0;   // 閉じた状態（高さ 0）から、読み込み後の高さまで伸ばす
     withContent(function (data) {
+      if (body.hidden) return;
+      var running = body.getAnimations ? body.getAnimations()[0] : null;
+      if (running) { start = body.offsetHeight; running.cancel(); }
+      fill(data);
+      animHeight(body, start, body.offsetHeight);
+    });
+    if (body.innerHTML.indexOf('mn-ia-skeleton') >= 0) animHeight(body, 0, body.offsetHeight, 200);
+    function fill(data) {
       var item = data && (data.items || []).find(function (x) { return x.id === it.id; });
       if (!item) { body.innerHTML = '<p class="mn-muted">教材データを読み込めませんでした。</p>'; return; }
       if (item.type === 'puzzle') { if (proof && !item.locked) proof.classList.add('mn-puzzle-hidden'); renderPuzzle(body, item, it); }
       else if (item.type === 'minigame') renderMinigame(body, item);
-    });
+    }
   }
 
   /* ---------- 証明パズル ---------- */
@@ -598,8 +710,11 @@
     list.addEventListener('dragover', function (ev) {
       if (!drag) return; ev.preventDefault();
       var over = ev.target.closest('.mn-pz-card'); if (!over || over === drag) return;
-      var r = over.getBoundingClientRect();
-      list.insertBefore(drag, ev.clientY < r.top + r.height / 2 ? over : over.nextSibling);
+      var r = over.getBoundingClientRect(), ref = ev.clientY < r.top + r.height / 2 ? over : over.nextSibling;
+      if (ref === drag || ref === drag.nextSibling || list._flipping) return;
+      list._flipping = true;
+      flip([].slice.call(list.children), function () { list.insertBefore(drag, ref); });
+      setTimeout(function () { list._flipping = false; }, 120);
     });
     list.addEventListener('dragend', function () { if (drag) drag.classList.remove('is-drag'); drag = null; });
     list.addEventListener('click', function (ev) {
@@ -608,15 +723,17 @@
       if (!card || ev.target.closest('a')) return;
       if (mv) {
         var d = +mv.getAttribute('data-mv');
-        if (d < 0 && card.previousElementSibling) list.insertBefore(card, card.previousElementSibling);
-        if (d > 0 && card.nextElementSibling) list.insertBefore(card.nextElementSibling, card);
+        flip([].slice.call(list.children), function () {
+          if (d < 0 && card.previousElementSibling) list.insertBefore(card, card.previousElementSibling);
+          if (d > 0 && card.nextElementSibling) list.insertBefore(card.nextElementSibling, card);
+        });
         card.querySelector('[data-mv="' + d + '"]').focus();
         return;
       }
       if (!tapSel) { tapSel = card; card.classList.add('is-sel'); return; }
       if (tapSel !== card) {
         var a = tapSel, b = card, an = a.nextSibling === b ? a : a.nextSibling;
-        list.insertBefore(a, b); list.insertBefore(b, an);
+        flip([].slice.call(list.children), function () { list.insertBefore(a, b); list.insertBefore(b, an); });
       }
       tapSel.classList.remove('is-sel'); tapSel = null;
     });

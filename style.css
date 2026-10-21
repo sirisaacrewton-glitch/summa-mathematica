@@ -475,6 +475,13 @@ mark.mn-hl.is-fading, .katex.mn-hl-math.is-fading { background: transparent; box
   width: 100%; min-width: 0; font: inherit; font-size: 16px; color: var(--mn-fg); background: var(--mn-bg); border: 1px solid var(--mn-line); border-radius: 8px; padding: 8px 10px; outline: none; }
 .mn-sform-main { display: flex; gap: 6px; align-items: stretch; }
 .mn-sform-main .mn-sform-q { flex: 1; min-width: 0; }
+.mn-sform-qwrap { position: relative; flex: 1; min-width: 0; display: flex; }
+.mn-sform-qwrap .mn-sform-q { flex: 1; padding-right: 38px !important; }
+.mn-sform-q::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+.mn-sform-clear { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); display: grid; place-items: center; width: 28px; height: 28px; padding: 0;
+  border: 0; border-radius: 50%; background: var(--mn-bg-soft); color: var(--mn-fg-soft); cursor: pointer; transition: background-color .15s, color .15s; }
+.mn-sform-clear:hover { background: var(--mn-line); color: var(--mn-fg); }
+.mn-sform-clear[hidden] { display: none; }
 .mn-sform-go { flex: none; padding: 0 16px; border: 1px solid var(--mn-accent); border-radius: 8px; background: var(--mn-accent); color: var(--mn-bg-elev); font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; }
 .mn-sform-go:hover { filter: brightness(1.08); }
 .mn-sform-hint { margin-top: 4px; font-size: 11.5px; color: var(--mn-fg-faint); }
@@ -803,7 +810,7 @@ button.mn-search-showmore:hover { background: var(--mn-accent-soft); }
 .mn-pro-table th, .mn-pro-table td { padding: 5px 8px; border-bottom: 1px solid var(--mn-line); text-align: left; vertical-align: top; }
 .mn-pro-table thead th { color: var(--mn-fg-soft); font-weight: 700; }
 .mn-pro-note { font-size: 12.5px; color: var(--mn-fg-faint); }
-.mn-toast { position: fixed; z-index: var(--mn-z-toast); left: 50%; bottom: 70px; transform: translateX(-50%); max-width: calc(100vw - 32px); padding: 8px 16px; border-radius: 20px;
+.mn-toast { position: fixed; z-index: var(--mn-z-toast); left: 50%; bottom: 70px; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px); padding: 8px 16px; border-radius: 20px;
   background: var(--mn-fg); color: var(--mn-bg); font-size: 13.5px; box-shadow: var(--mn-shadow); transition: opacity .4s; }
 .mn-toast.is-out { opacity: 0; }
 
@@ -827,3 +834,33 @@ button.mn-search-showmore:hover { background: var(--mn-accent-soft); }
 .mn-rm-node.is-goal { border-color: var(--mn-c-thm); background: var(--mn-c-thm-bg); }
 .mn-rm-node.is-done { border-color: var(--mn-c-ex); background: var(--mn-c-ex-bg); }
 .mn-rm-node.is-unmet { border-color: var(--mn-c-cex); border-style: dashed; }
+
+/* ---------- 動きの調整（2026-10-21）：状態の変化はすべて補間し、急に切り替わらないようにする ---------- */
+.mn-btn, .mn-textbtn, .mn-iconbtn, .mn-ltool, .mn-pv-pin, .mn-plan-switch, .mn-dock-tab, .mn-pin-act, .mn-pz-mv, .mn-ia-open,
+.mn-pz-card, .mn-pin-card, .mn-rm-node, .mn-sform-go, .mn-xref {
+  transition: border-color .18s var(--mn-ease), color .18s var(--mn-ease), background-color .18s var(--mn-ease), box-shadow .22s var(--mn-ease), opacity .18s var(--mn-ease), filter .18s var(--mn-ease); }
+.mn-env { transition: box-shadow .3s var(--mn-ease); }
+.mn-btn, .mn-textbtn, .mn-ltool, .mn-pz-mv { transition-property: border-color, color, background-color, box-shadow, opacity, filter, transform; transition-duration: .18s, .18s, .18s, .22s, .18s, .18s, .12s; }
+.mn-btn:active, .mn-textbtn:active, .mn-ltool:active, .mn-pz-mv:active { transform: scale(.96); }
+.mn-pz-card:hover { box-shadow: 0 2px 10px rgba(20, 20, 30, .08); }
+.mn-pz-card.is-drag { box-shadow: var(--mn-shadow); }
+.mn-dock-tab:hover { box-shadow: 0 12px 30px rgba(20, 20, 30, .18), 0 2px 6px rgba(20, 20, 30, .08); }
+.mn-toast { transition: none; }
+/* スマホの下からのシート（参照プレビュー・付箋ドック）：上端のつまみ。下へスワイプで閉じる */
+.mn-popover.is-sheet { padding-top: 22px; will-change: transform; }
+.mn-popover.is-sheet::before, .mn-dock::before { content: ""; position: absolute; top: 8px; left: 50%; width: 38px; height: 4px; margin-left: -19px; border-radius: 2px; background: var(--mn-line); }
+.mn-dock::before { display: none; }
+@media (max-width: 768px) {
+  .mn-dock::before { display: block; }
+  .mn-dock-head { padding-top: 18px; touch-action: none; }
+  /* スマホの付箋は 2 段階：閉じる（下のボタンだけ）／開く（全文）。最小化はしない */
+  .mn-pin-mini { display: none !important; }
+  .mn-pin-card.is-min .mn-pin-body { display: block; }
+  .mn-dock [data-min-all] { display: none; }
+  .mn-pin-head { cursor: default; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mn-btn, .mn-textbtn, .mn-iconbtn, .mn-ltool, .mn-pv-pin, .mn-plan-switch, .mn-dock-tab, .mn-pin-act, .mn-pz-mv, .mn-ia-open,
+  .mn-pz-card, .mn-pin-card, .mn-rm-node, .mn-sform-go, .mn-xref, .mn-env { transition: none; }
+  .mn-video-skeleton { animation: none; }
+}

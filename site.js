@@ -476,11 +476,20 @@
     if (!keepStack) popStack = [];
     popLabel = label;
     if (popStack.length) html = '<button type="button" class="mn-pv-back" title="前のプレビューに戻る">← 戻る</button>' + html;
+    var wasHidden = pop.hasAttribute('hidden') || !!pop._out;
+    if (pop._out) { pop._out.cancel(); pop._out = null; }
     pop.innerHTML = html;
     pop.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
     pop.removeAttribute('hidden');
-    if (PHONE.matches) { pop.classList.add('is-sheet'); pop.style.cssText = ''; return; }
+    if (PHONE.matches) {
+      pop.classList.add('is-sheet'); pop.style.cssText = '';
+      if (wasHidden) popAnim([{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }], 340);
+      else popAnim([{ opacity: .4 }, { opacity: 1 }], 160);
+      return;
+    }
     pop.classList.remove('is-sheet');
+    if (wasHidden) popAnim([{ opacity: 0, transform: 'translateY(6px) scale(.985)' }, { opacity: 1, transform: 'none' }], 200);
+    else popAnim([{ opacity: .5 }, { opacity: 1 }], 140);
     var r = a.getBoundingClientRect();
     var pw = Math.min(560, window.innerWidth - 24);
     pop.style.width = pw + 'px';
@@ -489,14 +498,58 @@
     if (top + ph > window.innerHeight - 8 && r.top - ph - 8 > 8) top = r.top - ph - 8;
     pop.style.top = Math.max(8, top) + 'px';
   }
-  function hidePop() { pop.setAttribute('hidden', ''); popFor = null; popLabel = null; popStack = []; }
+  /* プレビューの出入りのアニメーション：スマホは下から滑らかにせり上がるシート、PC は小さく浮き上がる。
+   * 閉じるときも逆向きに動かしてから隠す（動きを減らす設定では一瞬で切り替える）。 */
+  var POP_EASE = 'cubic-bezier(.22,.61,.36,1)';
+  function popAnim(frames, dur) { if (REDUCED || !pop.animate) return null; return pop.animate(frames, { duration: dur, easing: POP_EASE }); }
+  function hidePop() {
+    popFor = null; popLabel = null; popStack = [];
+    if (pop.hasAttribute('hidden') || pop._out) return;
+    var sheet = pop.classList.contains('is-sheet');
+    var cur = getComputedStyle(pop).transform;   // スワイプで途中まで下げた位置から続ける
+    var a = popAnim(sheet ? [{ transform: cur === 'none' ? 'translateY(0)' : cur }, { transform: 'translateY(100%)' }]
+      : [{ opacity: 1 }, { opacity: 0, transform: 'translateY(4px)' }], sheet ? 260 : 140);
+    pop.style.transform = '';
+    if (!a) { pop.setAttribute('hidden', ''); return; }
+    pop._out = a;
+    a.onfinish = function () { if (pop._out === a) { pop._out = null; pop.setAttribute('hidden', ''); } };
+  }
+  /* スマホのシートは下へスワイプして閉じられる（中身が一番上までスクロールされているときだけ） */
+  function initSheetSwipe() {
+    var y0 = null, dy = 0;
+    pop.addEventListener('touchstart', function (ev) {
+      if (!pop.classList.contains('is-sheet') || pop.scrollTop > 0) { y0 = null; return; }
+      y0 = ev.touches[0].clientY; dy = 0;
+    }, { passive: true });
+    pop.addEventListener('touchmove', function (ev) {
+      if (y0 === null) return;
+      dy = ev.touches[0].clientY - y0;
+      if (dy > 0) { pop.style.transform = 'translateY(' + dy + 'px)'; if (ev.cancelable) ev.preventDefault(); }
+      else { pop.style.transform = ''; y0 = null; }
+    }, { passive: false });
+    pop.addEventListener('touchend', function () {
+      if (y0 === null) return;
+      y0 = null;
+      if (dy > 80) hidePop();
+      else if (dy > 0) {
+        var from = pop.style.transform; pop.style.transform = '';
+        popAnim([{ transform: from }, { transform: 'translateY(0)' }], 200);
+      }
+    });
+  }
   /* プレビューの中の参照をクリックすると、プレビュー自体をその項目に切り替える（1 段階のネスト。戻るボタン付き） */
   function setPopContent(label) {
     var html = previewHtml(label);
     if (!html) return false;
+    var forward = popStack.length > 0 && popStack[popStack.length - 1] !== label;
     popLabel = label;
     pop.innerHTML = (popStack.length ? '<button type="button" class="mn-pv-back" title="前のプレビューに戻る">← 戻る</button>' : '') + html;
     pop.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
+    pop.scrollTop = 0;
+    // 入れ子に進むときは右から、戻るときは左から中身が入ってくる
+    if (!REDUCED && pop.firstElementChild && pop.animate) [].forEach.call(pop.children, function (c) {
+      c.animate([{ opacity: 0, transform: 'translateX(' + (forward ? 14 : -14) + 'px)' }, { opacity: 1, transform: 'none' }], { duration: 200, easing: POP_EASE });
+    });
     return true;
   }
   function drillTo(label) {
@@ -506,6 +559,7 @@
   }
   function initPopovers() {
     pop = app.querySelector('.mn-popover');
+    initSheetSwipe();
     var touch = false;
     document.addEventListener('touchstart', function () { touch = true; }, { passive: true });
     var PV_SEL = 'a.mn-xref[data-label], [data-pv-label]';

@@ -763,7 +763,8 @@
     return '<form class="mn-sform" role="search" autocomplete="off" onsubmit="return false">' +
       '<div class="mn-sform-main">' +
         '<span class="mn-sform-icon"><svg class="mn-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg></span>' +
-        '<input class="mn-sform-q" type="search" name="q" placeholder="キーワード（例：コンパクト、べきしゅうごう、Tychonoff）" aria-label="キーワード" spellcheck="false">' +
+        '<span class="mn-sform-qwrap"><input class="mn-sform-q" type="search" name="q" placeholder="キーワード（例：コンパクト、べきしゅうごう、Tychonoff）" aria-label="キーワード" spellcheck="false">' +
+        '<button type="button" class="mn-sform-clear" title="入力を全部消す" aria-label="入力を全部消す" hidden><svg class="mn-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></span>' +
         '<button type="button" class="mn-sform-go" title="検索する（Enter）">検索</button>' +
       '</div>' +
       '<div class="mn-sform-hint"><kbd>Enter</kbd> か「検索」で検索。↑↓ で結果を選び <kbd>Shift</kbd>+<kbd>Enter</kbd> でその項目を開く</div>' +
@@ -819,6 +820,12 @@
       });
     });
     // 数式のプレビューは入力が少し途切れてから描く（検索はしない）
+    // 検索窓の × ：入力を全部消す（検索はしない。Enter で検索し直す）
+    var clr = form.querySelector('.mn-sform-clear');
+    function syncClear() { clr.hidden = !q.value; }
+    q.addEventListener('input', syncClear);
+    clr.addEventListener('mousedown', function (ev) { ev.preventDefault(); });   // 入力欄のフォーカスを外さない
+    clr.addEventListener('click', function () { q.value = ''; syncClear(); q.focus(); });
     var pvTimer = null;
     tex.addEventListener('input', function () { clearTimeout(pvTimer); pvTimer = setTimeout(preview, 200); });
     more.addEventListener('toggle', function () { store(moreKey(more.getAttribute('data-kind')), more.open ? '1' : '0'); });
@@ -838,7 +845,7 @@
         setMode(v.mode);
         var ts = v.types || [];
         chips.forEach(function (x) { var t = x.getAttribute('data-type'); x.classList.toggle('is-on', t ? ts.indexOf(t) >= 0 : !ts.length); });
-        preview();
+        preview(); syncClear();
       },
       isEmpty: function (v) { return !(v.q.trim() || v.tex.trim() || v.types.length || v.dirs.length); }
     };
