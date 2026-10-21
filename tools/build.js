@@ -593,7 +593,9 @@ function jsTree(node, isAlso) {
   if (!isAlso) node.alsoKids.forEach(function (a) { var t = jsTree(a, true); t.x = 1; c.push(t); });
   return {
     k: 'd', path: node.path, title: node.title, abbr: node.abbr, en: node.en, d: node.description,
-    s: node.solo ? 1 : undefined, c: c
+    s: node.solo ? 1 : undefined, c: c,
+    // 系列の id と前提知識（_meta.json の prereq の dir）。ページのロードマップで、ほかの系列を系列単位でたどるのに使う
+    id: node.id || undefined, pre: node.prereq && node.prereq.length ? node.prereq.map(function (q) { return q.dir; }) : undefined
   };
 }
 

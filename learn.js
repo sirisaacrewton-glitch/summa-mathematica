@@ -891,62 +891,103 @@
     render();
   }
 
-  /* ---------- ページ単位の「ここまでのロードマップ」（記法と定義の確認の下） ---------- */
+  /* ---------- ページ単位の「ここまでのロードマップ」（記法と定義の確認の下） ----------
+   * 同じ系列の中は、このページがたどる前提のページを 1 ページずつ並べる（参照関係から）。
+   * ほかの系列は 1 つの点にまとめ、系列の前提知識（_meta.json の prereq）にそって系列単位でさかのぼる。
+   * （ページ単位でほかの分野までたどると、量が多く、証明の選び方に引きずられるため。2026-10-21 ユーザー判断） */
+  var DIRS = null;
+  function dirIndex() {
+    if (DIRS) return DIRS;
+    DIRS = { byPath: {}, byId: {} };
+    (function walk(n, parents) {
+      if (n.k !== 'd') return;
+      var label = parents.filter(function (x) { return x && !x.s; }).map(function (x) { return x.title; });
+      if (n.path) {
+        var d = { path: n.path, title: n.title, abbr: n.abbr, id: n.id, pre: n.pre || [], field: label.slice(-1)[0] || '' };
+        DIRS.byPath[n.path] = d; if (n.id) DIRS.byId[n.id] = d;
+      }
+      (n.c || []).forEach(function (c) { if (c.k === 'd' && !c.x) walk(c, n.path ? parents.concat([n]) : parents); });
+    })(S.index.tree, []);
+    return DIRS;
+  }
   function mountPageMap() {
     var IDX = S.index, me = S.pageIndex;
-    if (me == null || me < 0) return;
+    if (me == null || me < 0 || !IDX.pages[me]) return;
     var anchor = S.article.querySelector('.mn-prose .mn-env[data-env="notation"]');
     if (!anchor) return;
-    var PF = pageForward();
+    var PF = pageForward(), D = dirIndex(), mySeries = IDX.pages[me].dir;
     var depsOf = function (i) { return Object.keys(PF[i] || {}).map(Number); };
-    var direct = depsOf(me);
-    if (!direct.length) return;
-    var PER = 8, shown = {}, depth = 1;
-    shown[me] = 1;
-    // 重み（参照の数）の多い順に、段ごと最大 PER 件
-    function top(list) { return list.sort(function (a, b) { return ((PF[me] || {})[b] || 0) - ((PF[me] || {})[a] || 0); }); }
-    top(direct).slice(0, PER).forEach(function (i) { shown[i] = 1; });
+    // 1. 同じ系列の中で、このページがたどる前提のページ（推移的に）
+    var inSeries = {}, q = [me]; inSeries[me] = 1;
+    while (q.length) {
+      var x = q.shift();
+      depsOf(x).forEach(function (j) { if (!inSeries[j] && IDX.pages[j] && IDX.pages[j].dir === mySeries) { inSeries[j] = 1; q.push(j); } });
+    }
+    var pageIds = Object.keys(inSeries).map(Number);
+    // 2. それらのページが参照するほかの系列（参照の数を数える）、と自分の系列の前提知識
+    var seriesRef = {}, pageToSeries = {};
+    pageIds.forEach(function (i) {
+      depsOf(i).forEach(function (j) {
+        var P = IDX.pages[j]; if (!P || P.dir === mySeries || !D.byPath[P.dir]) return;
+        seriesRef[P.dir] = (seriesRef[P.dir] || 0) + (PF[i][j] || 1);
+        (pageToSeries[i] = pageToSeries[i] || {})[P.dir] = 1;
+      });
+    });
+    var mine = D.byPath[mySeries];
+    (mine && mine.pre || []).forEach(function (id) { var d = D.byId[id]; if (d && d.path !== mySeries && !seriesRef[d.path]) seriesRef[d.path] = 0; });
+    var totalOther = Object.keys(seriesRef).length;
+    if (pageIds.length < 2 && !totalOther) return;
+    var shownSeries = {}; Object.keys(seriesRef).forEach(function (p) { shownSeries[p] = 1; });
+    var depth = 1;
+    // 系列内の「最初の」ページ（系列内に前提がないページ）：自分の系列の前提知識とつなぐ
+    var roots = pageIds.filter(function (i) { return !depsOf(i).some(function (j) { return inSeries[j] && j !== i; }); });
+    function deps(id) {
+      if (id.charAt(0) === 'p') {
+        var i = +id.slice(1), out = depsOf(i).filter(function (j) { return inSeries[j] && j !== i; }).map(function (j) { return 'p' + j; });
+        Object.keys(pageToSeries[i] || {}).forEach(function (d) { if (shownSeries[d]) out.push('d' + d); });
+        if (roots.indexOf(i) >= 0 && mine) mine.pre.forEach(function (pid) { var d = D.byId[pid]; if (d && shownSeries[d.path] && out.indexOf('d' + d.path) < 0) out.push('d' + d.path); });
+        return out;
+      }
+      var dd = D.byPath[id.slice(1)];
+      return (dd && dd.pre || []).map(function (pid) { var d = D.byId[pid]; return d && shownSeries[d.path] ? 'd' + d.path : null; }).filter(Boolean);
+    }
+    function hiddenPre() {
+      var n = {};
+      Object.keys(shownSeries).forEach(function (p) { (D.byPath[p].pre || []).forEach(function (pid) { var d = D.byId[pid]; if (d && !shownSeries[d.path] && d.path !== mySeries) n[d.path] = 1; }); });
+      return Object.keys(n);
+    }
     var open = prefs().roadmap === 'open';   // 既定は表示の設定（⚙）。ページ上で開閉しても設定は変えない
     var box = el('<details class="mn-pagemap mn-learn-x"' + (open ? ' open' : '') + '><summary><span class="mn-pagemap-k">🗺️ ここまでのロードマップ</span>' +
-      '<span class="mn-pagemap-sub">このページが前提にするページ ' + direct.length + ' 件</span></summary><div class="mn-pagemap-body"></div></details>');
+      '<span class="mn-pagemap-sub">この系列のページ ' + (pageIds.length - 1) + ' 件・ほかの系列 ' + totalOther + ' 件</span></summary><div class="mn-pagemap-body"></div></details>');
     anchor.parentNode.insertBefore(box, anchor.nextSibling);
     box.addEventListener('toggle', function () { if (box.open) render(); });
     var bodyEl = box.querySelector('.mn-pagemap-body'), ro = null;
-    function frontierHidden() {
-      var n = 0;
-      Object.keys(shown).forEach(function (i) { depsOf(+i).forEach(function (j) { if (!shown[j]) n++; }); });
-      return n;
-    }
     function render() {
       if (!box.open) return;
-      var ids = Object.keys(shown).map(Number);
-      var g = layers(ids, depsOf);
-      var more = frontierHidden();
-      bodyEl.innerHTML = '<p class="mn-muted mn-pagemap-note">このページの主張・証明・記法の欄が参照しているページを、参照関係から自動で並べました（上ほど基礎）。' +
-        (direct.length > PER ? '前提のページが多いので、参照の多い ' + PER + ' 件を表示しています。' : '') + '</p>' +
-        '<div class="mn-map-wrap">' + layeredHtml(g.rows, function (i) {
-          var P = IDX.pages[i]; if (!P) return '';
-          var here = i === me;
-          return '<div class="mn-rm-node mn-pm-node' + (here ? ' is-goal' : '') + '" data-node="' + i + '"><a class="mn-rm-link" href="' + esc(S.root + P.path) + '"' + (here ? ' aria-current="page"' : '') + '>' +
-            '<span class="mn-rm-k">' + esc((P.subj || '') + (P.sec ? ' §' + P.sec : '')) + '</span><span class="mn-rm-t">' + S.renderer.renderInline(P.title || '') + '</span></a></div>';
+      var ids = pageIds.map(function (i) { return 'p' + i; }).concat(Object.keys(shownSeries).map(function (p) { return 'd' + p; }));
+      var g = layers(ids, deps), more = hiddenPre();
+      bodyEl.innerHTML = '<p class="mn-muted mn-pagemap-note">この系列の中は、このページが参照をたどって使うページを 1 ページずつ並べました。ほかの系列は 1 つの点にまとめ、各系列の「前提知識」にそってさかのぼれます（上ほど基礎）。</p>' +
+        '<div class="mn-map-wrap">' + layeredHtml(g.rows, function (id) {
+          if (id.charAt(0) === 'p') {
+            var i = +id.slice(1), P = IDX.pages[i]; if (!P) return '';
+            var here = i === me;
+            return '<div class="mn-rm-node mn-pm-node' + (here ? ' is-goal' : '') + '" data-node="' + id + '"><a class="mn-rm-link" href="' + esc(S.root + P.path) + '"' + (here ? ' aria-current="page"' : '') + '>' +
+              '<span class="mn-rm-k">' + esc((P.subj || '') + (P.sec ? ' §' + P.sec : '')) + '</span><span class="mn-rm-t">' + S.renderer.renderInline(P.title || '') + '</span></a></div>';
+          }
+          var d = D.byPath[id.slice(1)], n = seriesRef[d.path];
+          return '<div class="mn-rm-node mn-pm-node mn-pm-series" data-node="' + esc(id) + '"><a class="mn-rm-link" href="' + esc(S.root + d.path + 'index.html') + '"' +
+            (n ? ' title="このページの系列から ' + n + ' 回参照"' : ' title="系列の前提知識"') + '>' +
+            '<span class="mn-rm-k">' + esc(d.field || '系列') + '</span><span class="mn-rm-t">' + esc(d.title) + '</span></a></div>';
         }, function (i, n) { return i === n - 1 ? '現在地' : (n - 1 - i) + ' 段前'; }) + '</div>' +
-        '<div class="mn-learn-actions">' + (more ? '<button type="button" class="mn-textbtn" data-pm-more>さらにさかのぼる（＋' + more + '）</button>' : '') +
-        (depth > 1 ? '<button type="button" class="mn-textbtn" data-pm-reset>直前の前提だけに戻す</button>' : '') + '</div>';
+        '<div class="mn-learn-actions">' + (more.length ? '<button type="button" class="mn-textbtn" data-pm-more>系列の前提知識をさらにさかのぼる（＋' + more.length + '）</button>' : '') +
+        (depth > 1 ? '<button type="button" class="mn-textbtn" data-pm-reset>最初の表示に戻す</button>' : '') + '</div>';
       var graph = bodyEl.querySelector('.mn-rm-graph');
       if (ro && ro.disconnect) ro.disconnect();
       ro = watchEdges(graph, function () { drawEdges(graph, g.edges); });
     }
     box.addEventListener('click', function (ev) {
-      if (ev.target.closest('[data-pm-more]')) {
-        // 表示中のページの前提を 1 段ずつ足す（各ページ PER 件まで）
-        Object.keys(shown).map(Number).forEach(function (i) {
-          depsOf(i).sort(function (a, b) { return (PF[i][b] || 0) - (PF[i][a] || 0); }).slice(0, PER).forEach(function (j) { shown[j] = 1; });
-        });
-        depth++; render(); return;
-      }
-      if (ev.target.closest('[data-pm-reset]')) {
-        shown = {}; shown[me] = 1; top(direct).slice(0, PER).forEach(function (i) { shown[i] = 1; }); depth = 1; render();
-      }
+      if (ev.target.closest('[data-pm-more]')) { hiddenPre().forEach(function (p) { shownSeries[p] = 1; }); depth++; render(); return; }
+      if (ev.target.closest('[data-pm-reset]')) { shownSeries = {}; Object.keys(seriesRef).forEach(function (p) { shownSeries[p] = 1; }); depth = 1; render(); }
     });
     render();
   }
