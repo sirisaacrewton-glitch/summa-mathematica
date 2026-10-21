@@ -245,42 +245,45 @@
   /* 付箋のカード：見出し（種類と題）と本文だけ。ボタンは置かない。
    * 外す・並べ替えるは「編集」（長押しでも入る。iPhone のホーム画面と同じ操作）で行う。所在の行がその項目へのリンク。 */
   function cardHtml(p, collapsed) {
-    if (PHONE.matches) collapsed = false;   // スマホは「全文」と「閉じた（ピンのボタンだけ）」の 2 段階
     return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '">' +
       '<button type="button" class="mn-pin-del" data-unpin aria-label="固定を外す" title="固定を外す"></button>' +
       '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで最小化／展開・長押しで並べ替え">' +
         '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
         '<button type="button" class="mn-pin-x" data-unpin aria-label="固定を外す" title="固定を外す"></button></div>' +
-      '<div class="mn-pin-mini">' + firstMath(p.htmlContent) + '</div>' +
       '<div class="mn-pin-body mn-prose">' + p.htmlContent +
         '<a class="mn-pin-where" href="' + esc(p.url) + '">' + esc(p.sectionPath) + ' へ →</a></div></div>';
   }
   function ensureDock() {
     if (dock) return;
     dock = el('<aside class="mn-dock" aria-label="付箋ドック" hidden><div class="mn-dock-head"></div><div class="mn-dock-list"></div></aside>');
-    dockTab = el('<button type="button" class="mn-dock-tab" aria-label="付箋ドックを開く（p）" title="付箋ドック（p）"></button>');
+    dockTab = el('<button type="button" class="mn-dock-tab" aria-label="付箋ドックを開く（p）" title="付箋ドック（p）・ドラッグで移動・ダブルクリックで元の位置"></button>');
     document.body.appendChild(dock); document.body.appendChild(dockTab);
-    dockTab.addEventListener('click', function () { toggleDock(); });
+    dockTab.addEventListener('click', function () { if (dockTab._moved) { dockTab._moved = false; return; } toggleDock(); });
+    wireTabDrag();
     dock.addEventListener('click', onDockClick);
-    // スマホ：見出し部分を下へスワイプして閉じる
-    var y0 = null, dy = 0;
+    // スマホ：見出し（上端のつまみ）を上下にドラッグして高さを変える。3 段階（3 割・半分・ほぼ全画面）に吸い付き、下まで下げると閉じる
+    var y0 = null, h0 = 0, hNow = 0;
     dock.addEventListener('touchstart', function (ev) {
       if (!PHONE.matches || !ev.target.closest('.mn-dock-head') || ev.target.closest('button')) { y0 = null; return; }
-      y0 = ev.touches[0].clientY; dy = 0;
+      y0 = ev.touches[0].clientY; h0 = hNow = dock.offsetHeight;
+      dock.classList.add('is-resizing');
     }, { passive: true });
     dock.addEventListener('touchmove', function (ev) {
       if (y0 === null) return;
-      dy = Math.max(0, ev.touches[0].clientY - y0);
-      dock.style.transform = 'translateY(' + dy + 'px)'; if (ev.cancelable) ev.preventDefault();
+      hNow = Math.max(60, Math.min(window.innerHeight * 0.92, h0 - (ev.touches[0].clientY - y0)));
+      dock.style.height = hNow + 'px';
+      if (ev.cancelable) ev.preventDefault();
     }, { passive: false });
     dock.addEventListener('touchend', function () {
       if (y0 === null) return;
-      y0 = null;
-      if (dy > 70) closeDock();
-      else { var from = dock.style.transform; dock.style.transform = ''; if (dy) anim(dock, [{ transform: from }, { transform: 'translateY(0)' }], 200); }
+      y0 = null; dock.classList.remove('is-resizing');
+      var vh = window.innerHeight, frac = hNow / vh;
+      if (frac < 0.18) { dock.style.height = ''; closeDock(); return; }
+      var snap = SHEET_SNAPS.reduce(function (a, b) { return Math.abs(b - frac) < Math.abs(a - frac) ? b : a; });
+      setSheetHeight(snap, hNow);
     });
     dock.addEventListener('keydown', function (ev) {
-      if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('mn-pin-head') && !PHONE.matches) { ev.preventDefault(); toggleMin(ev.target.parentNode); }
+      if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('mn-pin-head')) { ev.preventDefault(); toggleMin(ev.target.parentNode); }
     });
     wireReorder();
   }
@@ -450,8 +453,8 @@
     var p = pins().find(function (x) { return x.id === id; }); if (!p) return null;
     var old = floats.filter(function (w) { return w._pid === id; })[0];
     if (old) { if (pos && !PHONE.matches) placeFloat(old, pos.x, pos.y); anim(old, [{ scale: 1.04 }, { scale: 1 }], 220); return old; }
-    if (PHONE.matches) floats.slice().forEach(function (w) { closeFloat(w, true); });   // スマホは 1 枚だけ
-    else if (!isPro() && floats.length >= 1) floats.slice().forEach(function (w) { closeFloat(w, true); });
+    if (PHONE.matches) return null;   // 小さい画面では浮かせない
+    if (!isPro() && floats.length >= 1) floats.slice().forEach(function (w) { closeFloat(w, true); });
     var w = el('<div class="mn-float" role="dialog" aria-label="' + esc(p.kind + ' ' + (p.title || '')) + '">' +
       '<div class="mn-float-head" title="ドラッグで移動・クリックで畳む"><span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
       '<button type="button" class="mn-float-close" aria-label="閉じる（付箋ドックには残ります）" title="閉じる（付箋ドックには残ります）"></button></div>' +
@@ -498,8 +501,18 @@
   }
   function restoreFloats() {
     floats.slice().forEach(function (w) { w.remove(); }); floats = [];
+    if (PHONE.matches) return;   // 小さい画面では浮かせない（ドックの高さ調整で見比べる）
     var ids = pins().map(function (p) { return p.id; });
     getJSON('sm_floats', []).forEach(function (f) { if (ids.indexOf(f.id) >= 0) floatCard(f.id, f); });
+  }
+  function allMin() { var m = getJSON('sm_pin_min', {}), p = pins(); return p.length > 0 && p.every(function (x) { return m[x.id]; }); }
+  // すべての付箋を「見出しだけ」と「全文」で一斉に切り替える
+  function toggleAllMin() {
+    var toMin = !allMin(), m = {};
+    pins().forEach(function (x) { if (toMin) m[x.id] = 1; });
+    setJSON('sm_pin_min', m);
+    dock.querySelectorAll('.mn-pin-card').forEach(function (c) { if (c.classList.contains('is-min') !== toMin) toggleMin(c); });
+    renderDockHead();
   }
   function renderDockHead() {
     var p = pins(), lim = A.limit('pins');
@@ -509,9 +522,51 @@
           '<button type="button" class="mn-textbtn mn-clear-all" data-clear-all>すべて外す</button>' +
           '<button type="button" class="mn-textbtn' + (isPro() ? '' : ' is-locked') + '" data-sets>' + (isPro() ? 'セット' : '🔒 セット') + '</button>' +
           '<button type="button" class="mn-btn" data-edit-done>完了</button></span>'
-      : '<span class="mn-dock-title">📌 ピン留め中 <span class="mn-dock-count">(' + count + ')</span></span><span class="mn-dock-tools">' +
+      : '<span class="mn-dock-title">📌 ピン留め <span class="mn-dock-count">(' + count + ')</span></span><span class="mn-dock-tools">' +
+          (p.length ? '<button type="button" class="mn-textbtn" data-min-toggle>' + (allMin() ? '全文表示' : '見出しだけ') + '</button>' : '') +
           (p.length ? '<button type="button" class="mn-textbtn" data-edit>編集</button>' : '') +
           '<button type="button" class="mn-iconbtn" data-close-dock aria-label="ドックを閉じる">✕</button></span>';
+  }
+  /* PC：開くボタンはドラッグで好きな位置へ動かせる（位置はブラウザに保存。既定はドックの ✕ と同じ右上） */
+  function placeTab() {
+    var pos = getJSON('sm_tab_pos', null);
+    if (PHONE.matches || !pos) { dockTab.style.left = dockTab.style.top = dockTab.style.right = ''; return; }
+    dockTab.style.left = Math.max(4, Math.min(window.innerWidth - dockTab.offsetWidth - 4, pos.x)) + 'px';
+    dockTab.style.top = Math.max(4, Math.min(window.innerHeight - dockTab.offsetHeight - 4, pos.y)) + 'px';
+    dockTab.style.right = 'auto';
+  }
+  function wireTabDrag() {
+    var st = null;
+    dockTab.addEventListener('pointerdown', function (ev) {
+      if (PHONE.matches || ev.button > 0) return;
+      var r = dockTab.getBoundingClientRect();
+      st = { x: ev.clientX, y: ev.clientY, ox: r.left, oy: r.top, moved: false };
+      dockTab.setPointerCapture(ev.pointerId);
+    });
+    dockTab.addEventListener('pointermove', function (ev) {
+      if (!st) return;
+      var dx = ev.clientX - st.x, dy = ev.clientY - st.y;
+      if (!st.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+      st.moved = true;
+      setJSON('sm_tab_pos', { x: st.ox + dx, y: st.oy + dy });
+      placeTab();
+    });
+    dockTab.addEventListener('pointerup', function () { if (st && st.moved) dockTab._moved = true; st = null; });
+    dockTab.addEventListener('dblclick', function () { localStorage.removeItem('sm_tab_pos'); placeTab(); });   // ダブルクリックで元の位置へ
+    window.addEventListener('resize', placeTab);
+    requestAnimationFrame(placeTab);
+  }
+  /* スマホのドックの高さ（画面の高さに対する割合）。本文の下側にも同じだけ余白を足し、最後まで読めるようにする */
+  var SHEET_SNAPS = [0.3, 0.55, 0.9];
+  function sheetFrac() { var f = getJSON('sm_sheet_h', 0.55); return SHEET_SNAPS.indexOf(f) >= 0 ? f : 0.55; }
+  function setSheetHeight(frac, fromPx) {
+    setJSON('sm_sheet_h', frac);
+    var px = Math.round(window.innerHeight * frac);
+    document.documentElement.style.setProperty('--mn-sheet-h', px + 'px');
+    if (dock) {
+      dock.style.height = '';
+      if (fromPx != null) anim(dock, [{ height: fromPx + 'px' }, { height: px + 'px' }], 220);
+    }
   }
   function renderDock() {
     ensureDock();
@@ -522,8 +577,8 @@
     renderDockHead();
     var list = dock.querySelector('.mn-dock-list');
     list.innerHTML = p.length ? p.map(function (x) { return cardHtml(x, mins[x.id]); }).join('') +
-      '<p class="mn-dock-hint">' + (PHONE.matches ? 'カードの見出しをタップすると、本文の上に浮かせて見比べられます。長押しで編集（上下に動かして並べ替え、横にスワイプで外す）。'
-        : 'カードを本文側へドラッグすると、浮かせて本文と見比べられます。× で外す。長押しで並べ替え。') + '</p>' :
+      '<p class="mn-dock-hint">' + (PHONE.matches ? '上端のつまみを上下に動かすと高さを変えられます。見出しのタップで畳む。長押しで編集（上下で並べ替え、横にスワイプで外す）。'
+        : '本文と並べて見比べられます。カードを本文側へドラッグすると、好きな位置に浮かせることもできます。見出しのクリックで畳む。× で外す。') + '</p>' :
       '<p class="mn-dock-empty">定義や定理の見出しの <span aria-hidden="true">📌</span> ボタン、または参照プレビューの「📌 固定」で、項目をここに並べておけます。ページを移動しても残ります。</p>' +
       (isPro() ? '' : '<p class="mn-dock-empty">無料プランでは 1 件まで。<button type="button" class="mn-textbtn" data-see-pro>Pro なら無制限</button></p>');
     dockTab.innerHTML = '<span aria-hidden="true">📌</span><span class="mn-dock-tab-n">' + (p.length ? p.length : '') + '</span><span class="mn-dock-tab-text">ピン留め' + (p.length ? ' (' + p.length + ')' : '') + '</span>';
@@ -534,6 +589,7 @@
     if (ev.target.closest('[data-close-dock]')) { closeDock(); return; }
     if (ev.target.closest('[data-see-pro]')) { proModal('付箋ドックは Pro プランで無制限に使えます。'); return; }
     if (ev.target.closest('[data-edit]')) { setEditing(true); return; }
+    if (ev.target.closest('[data-min-toggle]')) { toggleAllMin(); return; }
     var ca = ev.target.closest('[data-clear-all]');
     if (ca) {
       // 一括で外す：誤操作を防ぐため 2 回押しで確定（3 秒で元に戻る）
@@ -556,9 +612,8 @@
     if (card._noClick) { card._noClick = false; return; }   // 長押しの直後のクリックは無視
     if (editing) return;
     if (ev.target.closest('.mn-pin-head')) {
-      if (PHONE.matches) { floatCard(id); closeDock(); return; }   // スマホ：タップで本文の上に浮かせる
       var m = getJSON('sm_pin_min', {}); if (m[id]) delete m[id]; else m[id] = 1; setJSON('sm_pin_min', m);
-      toggleMin(card);
+      toggleMin(card); renderDockHead();
     }
   }
   // 付箋の最小化・展開（高さを補間）
@@ -591,6 +646,7 @@
   }
   function openDock(focusless) {
     var wasHidden = dock ? dock.hidden || !!dock._out : true;
+    if (PHONE.matches) setSheetHeight(sheetFrac());
     renderDock(); cancelOut(dock);
     dock.hidden = false; dockTab.hidden = false; dockTab.setAttribute('aria-expanded', 'true');
     document.documentElement.classList.add('mn-dock-open');
@@ -1218,12 +1274,7 @@
     mountPlanSwitch();
     mountAll();
     restoreFloats();
-    // ドックの外をクリック（タップ）したら閉じる。浮かせた付箋・プレビュー・モーダル・ピン留めの操作は除く
-    document.addEventListener('pointerdown', function (e) {
-      if (!dock || dock.hidden || dock._out || modalEl) return;
-      if (e.target.closest('.mn-dock, .mn-dock-tab, .mn-float, .mn-popover, .mn-learn-modal, [data-pin], [data-pin-label], .mn-toast')) return;
-      closeDock();
-    });
+    // ドックは本文と重ならない（PC は本文を左へ寄せる、スマホは下に高さを決めて出す）ので、外をクリックしても閉じない。閉じるのは ✕・p・スマホは下へ下げる
     // クリック：見出しのボタン・プレビューの「📌 固定」
     document.addEventListener('click', function (e) {
       var b;

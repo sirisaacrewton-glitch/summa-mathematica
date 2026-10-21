@@ -980,3 +980,32 @@ button.mn-search-showmore:hover { background: var(--mn-accent-soft); }
 
 /* PC：カードはつかんで本文側へドラッグすると浮かせられる */
 @media (hover: hover) and (min-width: 769px) { .mn-dock:not(.is-editing) .mn-pin-card { cursor: grab; } .mn-dock:not(.is-editing) .mn-pin-card:active { cursor: grabbing; } }
+
+/* ---------- 付箋ドックの配置（2026-10-21 改訂） ----------
+ * PC：本文と重ねず、右側に並べる（本文の欄を左へ寄せ、目次の欄は隠す）。幅は画面に合わせて 280〜380px。
+ *     開くボタンは、開いたときの ✕ と同じ右上に置く（開閉でカーソルを動かさなくてよい）。
+ * スマホ：下から出し、高さは上端のつまみで 3 段階（3 割・半分・ほぼ全画面）。本文の下に同じ高さの余白を足す。
+ * どちらも外をクリックしても閉じない（✕・p キー・スマホは下まで下げる）。 */
+@media (min-width: 769px) {
+  :root { --mn-dock-w: clamp(280px, 27vw, 380px); }
+  .mn-dock { top: var(--mn-topbar-h); right: 0; bottom: 0; width: var(--mn-dock-w); border-radius: 0; border-width: 0 0 0 1px; box-shadow: none; }
+  .mn-app { transition: padding-right .3s var(--mn-ease); }
+  .mn-dock-open .mn-app { padding-right: var(--mn-dock-w); }
+  .mn-dock-open .mn-layout { grid-template-columns: minmax(0, 1fr) !important; }
+  .mn-dock-open .mn-rail { display: none !important; }
+  .mn-dock-tab { top: calc(var(--mn-topbar-h) + 10px); bottom: auto; right: 10px; height: 34px; padding: 0 12px; }
+}
+@media (max-width: 768px) {
+  .mn-dock { height: var(--mn-sheet-h, 55vh); max-height: 92vh; transition: height .22s var(--mn-ease); }
+  .mn-dock.is-resizing { transition: none; }
+  .mn-dock-open .mn-app { padding-bottom: var(--mn-sheet-h, 55vh); }
+  .mn-dock-head { cursor: ns-resize; }
+  .mn-pin-card.is-min .mn-pin-body { display: none; }   /* スマホも見出しだけに畳める */
+}
+.mn-pin-mini { display: none !important; }   /* 畳んだときは見出しだけ */
+@media (min-width: 769px) { .mn-dock-tab { touch-action: none; cursor: grab; } }
+/* ドックの見出しは 1 行に収める（狭いときは題を省略） */
+.mn-dock-head { flex-wrap: nowrap; }
+.mn-dock-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mn-dock-head .mn-dock-tools { flex-wrap: nowrap; gap: 4px; }
+.mn-dock-head .mn-textbtn { padding: 2px 9px; font-size: 12px; white-space: nowrap; }
