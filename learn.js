@@ -1002,9 +1002,9 @@
   function pageLabel() { var h = S.article.querySelector('.mn-page-head h1[id]'); return h ? h.id : ''; }
   function mountIntuition(mf) {
     if (!mf || !mf.intuition) return;
-    var I = mf.intuition;
-    var slot = el('<details class="mn-intuition-slot mn-learn-x" data-page-id="' + esc(pageLabel()) + '" aria-label="直感イメージ"' + (prefs().intro === 'open' ? ' open' : '') + '></details>');
-    slot.innerHTML = '<summary class="mn-intu-k">💡 直感イメージ<span class="mn-intu-sub">（' + esc(I.question || 'なぜこの概念が必要か？') + '）</span></summary>' +
+    var I = mf.intuition, field = I.kind === 'field';
+    var slot = el('<details class="mn-intuition-slot mn-learn-x' + (field ? ' mn-intu-field' : '') + '" data-page-id="' + esc(pageLabel()) + '" aria-label="' + (field ? 'この分野で学ぶこと' : '直感イメージ') + '"' + (prefs().intro === 'open' ? ' open' : '') + '></details>');
+    slot.innerHTML = '<summary class="mn-intu-k">' + (field ? '🧭 この分野で学ぶこと' : '💡 直感イメージ<span class="mn-intu-sub">（' + esc(I.question || 'なぜこの概念が必要か？') + '）</span>') + '</summary>' +
       '<div class="mn-intu-grid"><div class="mn-intu-text"><div class="mn-prose">' + S.renderer.renderMarkdown(I.text || '') + '</div></div>' +
       '<div class="mn-intu-video" data-video-state="loading"><div class="mn-video-frame"><div class="mn-video-skeleton"></div></div>' +
       '<div class="mn-video-cap">🎬 ' + esc(I.videoTitle || '1 分イメージ動画') + '</div></div></div>';
@@ -1393,6 +1393,10 @@
       decorateProofs();
       if (mf && mf.intuition) withContent(renderVideo);
       applyPrefs();
+    } else if (S.kind === 'dir' && (mf = manifestFor()) && mf.intuition) {
+      // 分野の概要ページ：「この分野で学ぶこと」と分野全体の動画の枠（動画は未制作）
+      mountIntuition(mf);
+      renderVideo({ video: {} });
     }
     renderDock();
   }
