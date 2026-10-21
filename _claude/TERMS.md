@@ -577,3 +577,4 @@
 | box / Jordan measurable set (set with volume) / Jordan content / oscillation | 直方体 / ジョルダン可測集合（体積確定集合） / ジョルダン測度（体積） / 振動 | 面積確定（杉浦）、ジョルダン容量 | 杉浦『解析入門 I』の「体積確定」を別訳として併記。calc:page-multiple-integrals |
 | Fubini's theorem / iterated integral / normal domain (region between graphs) | フビニの定理 / 累次積分 / 縦線集合 | 逐次積分、縦線領域 | 杉浦『解析入門 I』（縦線集合・累次積分）。calc:page-fubini |
 | change of variables formula / Jacobian (determinant) / outer content / parallelepiped / polar coordinates / spherical coordinates | 変数変換公式 / ヤコビアン（ヤコビ行列式） / 外容量 / 平行体 / 極座標 / 球座標 | 関数行列式、外測度（ジョルダン） | 杉浦（変数変換公式）。外容量は仮の訳（ジョルダン外容量）。calc:page-change-of-variables |
+| improper multiple integral / exhaustion / absolutely integrable / dominating function / differentiation under the integral sign | 広義重積分 / 近似列 / 絶対可積分 / 優関数 / 積分記号下の微分 | 増加近似列 | 杉浦（広義積分の近似列）。calc:page-parameter-integrals |
