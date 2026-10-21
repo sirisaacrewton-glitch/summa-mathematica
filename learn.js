@@ -74,6 +74,14 @@
         if (!m[target] || RANK[role] > RANK[m[target]]) m[target] = role;
       });
     });
+    // 主張の中の用語（本文で定義へのリンクになる語）も「主張の前提」に数える
+    var TD = (S && S.index.tdeps) || {};
+    Object.keys(TD).forEach(function (from) {
+      TD[from].forEach(function (t) {
+        if (t === from || !L[t] || !CORE_TYPES[L[t].t]) return;
+        (FWD[from] = FWD[from] || {})[t] = 's';
+      });
+    });
     return FWD;
   }
   // kind：'s'（主張が使う）、'p'（証明だけが使う）、省略で両方
@@ -165,7 +173,7 @@
   }
   /* Pro の案内（派手な広告にせず、何が使えるようになるかを淡々と示す） */
   var PRO_FEATURES = [
-    ['付箋ドック', '1 件まで', '無制限・並べ替え・浮かせて比較・セットの保存'],
+    ['付箋ドック', '1 件まで', '無制限・セットの保存'],
     ['学習ルート', '樹形図の閲覧', '達成率・未習得の強調・目標の登録'],
     ['証明パズル・体感ゲーム', '各分野の最初の 1 問', 'すべての問題'],
     ['直感イメージ動画', '冒頭 15 秒', '全編'],
@@ -184,7 +192,7 @@
   /* =====================================================================
    * 機能 A：付箋ドック（Free 1 件 / Pro 無制限）
    * ===================================================================== */
-  var dock = null, dockTab = null, floats = [];
+  var dock = null, dockTab = null, editing = false;
   function pins() { return getJSON('sm_pinned_items', []); }
   function savePins(p) { setJSON('sm_pinned_items', p); renderDock(); refreshPinButtons(); }
   function isPinned(id) { return pins().some(function (p) { return p.id === id; }); }
@@ -233,19 +241,17 @@
     var tx = (t.textContent || '').trim();
     return esc(tx.length > 60 ? tx.slice(0, 60) + '…' : tx);
   }
+  /* 付箋のカード：見出し（種類と題）と本文だけ。ボタンは置かない。
+   * 外す・並べ替えるは「編集」（長押しでも入る。iPhone のホーム画面と同じ操作）で行う。所在の行がその項目へのリンク。 */
   function cardHtml(p, collapsed) {
     if (PHONE.matches) collapsed = false;   // スマホは「全文」と「閉じた（ピンのボタンだけ）」の 2 段階
-    return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '"' + (isPro() ? ' draggable="true"' : '') + '>' +
-      '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで最小化／展開">' +
-        (isPro() ? '<span class="mn-pin-grip" aria-hidden="true" title="ドラッグで並べ替え">⠿</span>' : '') +
-        '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
-        '<span class="mn-pin-acts">' +
-          '<a class="mn-pin-act" href="' + esc(p.url) + '" title="この項目へ移動">↗</a>' +
-          '<button type="button" class="mn-pin-act" data-float title="画面上に浮かせる（ドラッグで移動）">⧉</button>' +
-          '<button type="button" class="mn-pin-act" data-unpin title="固定を外す">✕</button>' +
-        '</span></div>' +
+    return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '">' +
+      '<button type="button" class="mn-pin-del" data-unpin aria-label="固定を外す" title="固定を外す"></button>' +
+      '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで最小化／展開・長押しで並べ替え">' +
+        '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span></div>' +
       '<div class="mn-pin-mini">' + firstMath(p.htmlContent) + '</div>' +
-      '<div class="mn-pin-body mn-prose">' + p.htmlContent + '<div class="mn-pin-where">' + esc(p.sectionPath) + '</div></div></div>';
+      '<div class="mn-pin-body mn-prose">' + p.htmlContent +
+        '<a class="mn-pin-where" href="' + esc(p.url) + '">' + esc(p.sectionPath) + ' へ →</a></div></div>';
   }
   function ensureDock() {
     if (dock) return;
@@ -274,35 +280,92 @@
     dock.addEventListener('keydown', function (ev) {
       if ((ev.key === 'Enter' || ev.key === ' ') && ev.target.classList.contains('mn-pin-head') && !PHONE.matches) { ev.preventDefault(); toggleMin(ev.target.parentNode); }
     });
-    // Pro：ドラッグで並べ替え
-    var dragId = null;
-    dock.addEventListener('dragstart', function (ev) {
-      var c = ev.target.closest && ev.target.closest('.mn-pin-card'); if (!c || !isPro()) return;
-      dragId = c.getAttribute('data-pin-id'); c.classList.add('is-drag');
-      try { ev.dataTransfer.setData('text/plain', dragId); ev.dataTransfer.effectAllowed = 'move'; } catch (e) {}
+    wireReorder();
+  }
+  /* ---------- 編集モード：長押しで入り、カードが揺れ、⊖ で外し、ドラッグで並べ替える ---------- */
+  function setEditing(on) {
+    editing = !!on;
+    if (!dock) return;
+    dock.classList.toggle('is-editing', editing);
+    renderDockHead();
+  }
+  function wireReorder() {
+    var list = dock.querySelector('.mn-dock-list');
+    var press = null, drag = null;
+    function cards() { return [].slice.call(list.querySelectorAll('.mn-pin-card')); }
+    function startDrag(card, ev) {
+      var all = cards(), lr = list.getBoundingClientRect();
+      drag = { card: card, id: card.getAttribute('data-pin-id'), y0: ev.clientY, scroll0: list.scrollTop, from: all.indexOf(card), to: all.indexOf(card),
+        slots: all.map(function (c) { return { el: c, top: c.offsetTop, h: c.offsetHeight }; }), lr: lr, pid: ev.pointerId };
+      card.classList.add('is-drag');
+      try { card.setPointerCapture(ev.pointerId); } catch (e) {}
+      if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
+    }
+    function moveDrag(ev) {
+      var d = drag, dy = ev.clientY - d.y0 + (list.scrollTop - d.scroll0);
+      d.card.style.translate = '0 ' + dy + 'px';
+      // 端に近づいたら一覧をスクロールする
+      if (ev.clientY < d.lr.top + 36) list.scrollTop -= 8;
+      else if (ev.clientY > d.lr.bottom - 36) list.scrollTop += 8;
+      var me = d.slots[d.from], center = me.top + me.h / 2 + dy, to = 0;
+      d.slots.forEach(function (s, i) { if (i !== d.from && center > s.top + s.h / 2) to++; });
+      if (to === d.to) return;
+      d.to = to;
+      var gap = me.h + 8;
+      d.slots.forEach(function (s, i) {
+        if (i === d.from) return;
+        var shift = (d.from < to && i > d.from && i <= to) ? -gap : (d.from > to && i >= to && i < d.from) ? gap : 0;
+        s.el.style.translate = shift ? '0 ' + shift + 'px' : '';
+      });
+    }
+    function endDrag() {
+      var d = drag; drag = null;
+      d.card.classList.remove('is-drag');
+      cards().forEach(function (c) { c.style.translate = ''; });
+      if (d.to !== d.from) {
+        var p = pins(), i = p.findIndex(function (x) { return x.id === d.id; });
+        if (i >= 0) { var it = p.splice(i, 1)[0]; p.splice(d.to, 0, it); savePins(p); }
+      }
+    }
+    list.addEventListener('pointerdown', function (ev) {
+      var card = ev.target.closest('.mn-pin-card');
+      if (!card || ev.button > 0 || ev.target.closest('[data-unpin], a')) return;
+      if (editing) { ev.preventDefault(); startDrag(card, ev); return; }
+      // 長押し（0.45 秒）で編集モードに入り、そのままドラッグできる
+      press = { card: card, x: ev.clientX, y: ev.clientY, t: setTimeout(function () {
+        var e = press; press = null; if (!e) return;
+        setEditing(true); startDrag(e.card, ev); e.card._noClick = true;
+      }, 450) };
     });
-    dock.addEventListener('dragover', function (ev) { if (dragId) ev.preventDefault(); });
-    dock.addEventListener('drop', function (ev) {
-      if (!dragId) return; ev.preventDefault();
-      var over = ev.target.closest('.mn-pin-card'), p = pins();
-      var from = p.findIndex(function (x) { return x.id === dragId; });
-      var to = over ? p.findIndex(function (x) { return x.id === over.getAttribute('data-pin-id'); }) : p.length - 1;
-      if (from >= 0 && to >= 0 && from !== to) { var it = p.splice(from, 1)[0]; p.splice(to, 0, it); savePins(p); }
-      dragId = null;
+    list.addEventListener('pointermove', function (ev) {
+      if (press && (Math.abs(ev.clientX - press.x) > 8 || Math.abs(ev.clientY - press.y) > 8)) { clearTimeout(press.t); press = null; }
+      if (drag) { ev.preventDefault(); moveDrag(ev); }
     });
-    dock.addEventListener('dragend', function () { dragId = null; dock.querySelectorAll('.is-drag').forEach(function (c) { c.classList.remove('is-drag'); }); });
+    function up() { if (press) { clearTimeout(press.t); press = null; } if (drag) endDrag(); }
+    list.addEventListener('pointerup', up);
+    list.addEventListener('pointercancel', up);
+    // ドラッグ中はページがスクロールしないように（iOS は touchmove を止める必要がある）
+    list.addEventListener('touchmove', function (ev) { if (drag && ev.cancelable) ev.preventDefault(); }, { passive: false });
+    list.addEventListener('contextmenu', function (ev) { if (ev.target.closest('.mn-pin-card')) ev.preventDefault(); });
+  }
+  function renderDockHead() {
+    var p = pins(), lim = A.limit('pins');
+    var count = lim === Infinity ? p.length + ' 件' : p.length + '/' + lim;
+    dock.querySelector('.mn-dock-head').innerHTML = editing
+      ? '<span class="mn-dock-title">並べ替え・外す</span><span class="mn-dock-tools">' +
+          '<button type="button" class="mn-textbtn' + (isPro() ? '' : ' is-locked') + '" data-sets>' + (isPro() ? 'セット' : '🔒 セット') + '</button>' +
+          '<button type="button" class="mn-btn" data-edit-done>完了</button></span>'
+      : '<span class="mn-dock-title">📌 ピン留め中 <span class="mn-dock-count">(' + count + ')</span></span><span class="mn-dock-tools">' +
+          (p.length ? '<button type="button" class="mn-textbtn" data-edit>編集</button>' : '') +
+          '<button type="button" class="mn-iconbtn" data-close-dock aria-label="ドックを閉じる">✕</button></span>';
   }
   function renderDock() {
     ensureDock();
-    var p = pins(), lim = A.limit('pins');
-    var count = lim === Infinity ? p.length + ' 件' : p.length + '/' + lim;
+    var p = pins();
     var mins = getJSON('sm_pin_min', {});
-    dock.querySelector('.mn-dock-head').innerHTML =
-      '<span class="mn-dock-title">📌 ピン留め中 <span class="mn-dock-count">(' + count + ')</span></span>' +
-      '<span class="mn-dock-tools">' +
-        (p.length > 1 ? '<button type="button" class="mn-textbtn" data-min-all>すべて最小化</button>' : '') +
-        '<button type="button" class="mn-textbtn' + (isPro() ? '' : ' is-locked') + '" data-sets>' + (isPro() ? 'セット' : '🔒 セット') + '</button>' +
-        '<button type="button" class="mn-iconbtn" data-close-dock aria-label="ドックを閉じる">✕</button></span>';
+    if (!p.length) editing = false;
+    dock.classList.toggle('is-editing', editing);
+    renderDockHead();
     var list = dock.querySelector('.mn-dock-list');
     list.innerHTML = p.length ? p.map(function (x) { return cardHtml(x, mins[x.id]); }).join('') :
       '<p class="mn-dock-empty">定義や定理の見出しの <span aria-hidden="true">📌</span> ボタン、または参照プレビューの「📌 固定」で、項目をここに並べておけます。ページを移動しても残ります。</p>' +
@@ -314,15 +377,14 @@
     var card = ev.target.closest('.mn-pin-card'), id = card && card.getAttribute('data-pin-id');
     if (ev.target.closest('[data-close-dock]')) { closeDock(); return; }
     if (ev.target.closest('[data-see-pro]')) { proModal('付箋ドックは Pro プランで無制限に使えます。'); return; }
-    if (ev.target.closest('[data-min-all]')) {
-      var mins = {}; pins().forEach(function (x) { mins[x.id] = 1; }); setJSON('sm_pin_min', mins);
-      dock.querySelectorAll('.mn-pin-card:not(.is-min)').forEach(function (c) { toggleMin(c); }); return;
-    }
+    if (ev.target.closest('[data-edit]')) { setEditing(true); return; }
+    if (ev.target.closest('[data-edit-done]')) { setEditing(false); return; }
     if (ev.target.closest('[data-sets]')) { if (isPro()) setsModal(); else proModal('付箋のセット（分野ごとの組み合わせ）の保存は Pro プランの機能です。'); return; }
     if (!card) return;
     if (ev.target.closest('[data-unpin]')) { unpin(id); return; }
-    if (ev.target.closest('[data-float]')) { floatCard(id); return; }
-    if (ev.target.closest('a')) return;
+    if (ev.target.closest('a')) { if (editing) ev.preventDefault(); return; }
+    if (card._noClick) { card._noClick = false; return; }   // 長押しの直後のクリックは無視
+    if (editing) return;
     if (ev.target.closest('.mn-pin-head')) {
       if (PHONE.matches) return;
       var m = getJSON('sm_pin_min', {}); if (m[id]) delete m[id]; else m[id] = 1; setJSON('sm_pin_min', m);
@@ -367,6 +429,7 @@
   }
   function closeDock() {
     if (!dock || dock.hidden || dock._out) return;
+    if (editing) setEditing(false);
     dockTab.setAttribute('aria-expanded', 'false');
     var cur = getComputedStyle(dock).transform, f = dockFrames().reverse();
     if (cur && cur !== 'none') f[0] = { transform: cur };   // スワイプで途中まで下げた位置から続ける
@@ -385,34 +448,6 @@
     c.classList.remove('is-min'); c.scrollIntoView({ block: 'nearest' });
     c.classList.remove('is-flash'); void c.offsetWidth; c.classList.add('is-flash');
   }
-  /* 付箋を画面上に浮かせる（ドラッグで移動。閉じるとドックに戻る） */
-  function floatCard(id) {
-    var p = pins().find(function (x) { return x.id === id; }); if (!p) return;
-    var w = el('<div class="mn-float" role="dialog" aria-label="' + esc(p.kind) + '">' + cardHtml(p, false) + '</div>');
-    var n = floats.length;
-    w.style.left = Math.max(8, window.innerWidth - 460 - 24 * n) + 'px';
-    w.style.top = (90 + 24 * n) + 'px';
-    document.body.appendChild(w); floats.push(w);
-    anim(w, [{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], 220);
-    w.querySelector('[data-float]').remove();
-    w.querySelector('[data-unpin]').setAttribute('title', '閉じる（ドックには残ります）');
-    w.addEventListener('click', function (ev) {
-      if (ev.target.closest('[data-unpin]')) { w.remove(); floats.splice(floats.indexOf(w), 1); }
-    });
-    var head = w.querySelector('.mn-pin-head'), sx, sy, ox, oy, moving = false;
-    head.addEventListener('pointerdown', function (ev) {
-      if (ev.target.closest('.mn-pin-acts')) return;
-      moving = true; sx = ev.clientX; sy = ev.clientY; ox = w.offsetLeft; oy = w.offsetTop;
-      head.setPointerCapture(ev.pointerId); ev.preventDefault();
-    });
-    head.addEventListener('pointermove', function (ev) {
-      if (!moving) return;
-      w.style.left = Math.min(window.innerWidth - 80, Math.max(0, ox + ev.clientX - sx)) + 'px';
-      w.style.top = Math.min(window.innerHeight - 40, Math.max(0, oy + ev.clientY - sy)) + 'px';
-    });
-    head.addEventListener('pointerup', function () { moving = false; });
-  }
-
   /* =====================================================================
    * 本文の見出しに付けるボタン（📌 固定・✓ 理解した・🗺️ 学習ルート）
    * ===================================================================== */
@@ -484,6 +519,7 @@
    *   ・証明で使う結果は 1 段だけ並べ、＋ボタンでその項目の前提を 1 段ずつ広げる
    *   ・「すべてさかのぼる」で従来の厳密な図（詳細表示）にもできる
    * ページの冒頭（記法と定義の確認の下）には、同じ描き方でページ単位の「ここまでのロードマップ」を出す。
+   * （立体表示は試したが、2026-10-21 ユーザー判断で平面に戻した）
    * ===================================================================== */
   function isCore(x) { var L = S.index.labels[x]; return !!(L && CORE_TYPES[L.t]); }
   /* 段に分けた図の共通部分：ids（表示する点）、deps(x)（表示中の前提）から段を決めて、上が遠い前提・下が目標になるよう並べる */
@@ -510,11 +546,11 @@
   function layeredHtml(rows, nodeHtml, stepName) {
     var n = rows.length;
     return '<div class="mn-rm-graph"><svg class="mn-rm-edges" aria-hidden="true"></svg>' + rows.map(function (xs, i) {
-      return '<div class="mn-rm-row" data-depth="' + (n - 1 - i) + '" style="--d:' + (n - 1 - i) + '"><div class="mn-rm-step">' + stepName(i, n) + '</div><div class="mn-rm-nodes">' +
+      return '<div class="mn-rm-row" data-depth="' + (n - 1 - i) + '"><div class="mn-rm-step">' + stepName(i, n) + '</div><div class="mn-rm-nodes">' +
         xs.map(nodeHtml).join('') + '</div></div>';
     }).join('') + '</div>';
   }
-  // 線を引く。立体表示（3D 変形）でもずれないよう、画面上の位置ではなくレイアウト上の位置（offset）で測る
+  // 線を引く。点の位置はレイアウト上の位置（offset）で測る（変形やスクロールの影響を受けない）
   function relPos(n, root) {
     var x = 0, y = 0;
     while (n && n !== root) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
@@ -535,36 +571,12 @@
       var cls = roleOf ? roleOf(e[0], e[1]) : '';
       return '<path' + (cls ? ' class="is-' + cls + '"' : '') + ' d="M' + a.x + ' ' + y1 + ' C ' + a.x + ' ' + my + ', ' + b.x + ' ' + my + ', ' + b.x + ' ' + y2 + '"/>';
     }).join('');
-    fitTilt(graph);
-  }
-  // 立体表示で奥へ傾けると、見た目の高さが縮んで上に空白ができる。その分だけ上に詰める
-  function fitTilt(graph) {
-    var wrap = graph.parentNode;
-    if (!wrap || !wrap.classList.contains('mn-map-wrap')) return;
-    if (!wrap.classList.contains('is-3d')) { wrap.style.marginTop = ''; return; }
-    var gap = graph.offsetHeight - graph.getBoundingClientRect().height;
-    wrap.style.marginTop = gap > 0 ? -Math.round(gap) + 'px' : '';
   }
   function watchEdges(box, draw) {
     requestAnimationFrame(draw);
     if (window.ResizeObserver) { var ro = new ResizeObserver(function () { draw(); }); ro.observe(box); return ro; }
     window.addEventListener('resize', draw);
   }
-  /* 立体表示：遠い前提ほど奥に傾いた「地図」として見せる（ホバー・フォーカスで平らに戻る）。設定はブラウザに保存 */
-  function tilt() { return getJSON('sm_map_tilt', true) && !REDUCED; }
-  function tiltButton() {
-    return '<button type="button" class="mn-textbtn mn-map-tilt" data-tilt aria-pressed="' + tilt() + '" title="遠い前提ほど奥に見える立体表示">' + (tilt() ? '◩ 立体表示：オン' : '◩ 立体表示：オフ') + '</button>';
-  }
-  function bindTilt(root, redraw) {
-    root.addEventListener('click', function (ev) {
-      var b = ev.target.closest('[data-tilt]'); if (!b) return;
-      setJSON('sm_map_tilt', !tilt());
-      document.querySelectorAll('.mn-map-wrap').forEach(function (w) { w.classList.toggle('is-3d', tilt()); var g = w.querySelector('.mn-rm-graph'); if (g) setTimeout(function () { fitTilt(g); }, 460); });
-      document.querySelectorAll('[data-tilt]').forEach(function (x) { x.outerHTML = tiltButton(); });
-      if (redraw) setTimeout(redraw, 420);
-    });
-  }
-
   /* ---------- 項目の学習ルート（モーダル） ---------- */
   function statementClosure(goal, cap) {
     var seen = {}, out = [], q = [goal];
@@ -595,10 +607,10 @@
           : '<span class="mn-rm-pct mn-muted">🔒 達成率・未習得の強調・目標の登録は Pro プランの機能です。</span><button type="button" class="mn-textbtn" data-see-pro>Pro について</button>') +
         '</div>' +
         '<div class="mn-rm-legend"><span class="mn-rm-lg is-s">主張を読むのに必要（自動でさかのぼる）</span><span class="mn-rm-lg is-p">証明で使う（＋で 1 段ずつ広げる）</span>' +
-        (full ? '' : '<button type="button" class="mn-textbtn" data-expand-all>すべてさかのぼる（詳細）</button>') + tiltButton() + '</div>' +
+        (full ? '' : '<button type="button" class="mn-textbtn" data-expand-all>すべてさかのぼる（詳細）</button>') + '</div>' +
         '<p class="mn-muted mn-rm-note">これはこのサイトが選んだ証明に沿った前提で、理解の道筋はほかにもありえます。主張を読むのに要るものだけを最後までたどり、証明で使うものは必要な分だけ広げてください。' +
         (ids.length >= CAP ? '項目が多いので ' + CAP + ' 件で打ち切りました。' : '') + '</p>' +
-        '<div class="mn-map-wrap' + (tilt() ? ' is-3d' : '') + '">' + layeredHtml(g.rows, function (x) {
+        '<div class="mn-map-wrap">' + layeredHtml(g.rows, function (x) {
           var r = S.resolveRef(x), hid = hidden(x).length;
           var cls = 'mn-rm-node is-' + how[x] + (pro && u[x] ? ' is-done' : '') + (pro && !u[x] && x !== goal ? ' is-unmet' : '');
           return '<div class="' + cls + '" data-node="' + esc(x) + '"><a class="mn-xref mn-rm-link" data-label="' + esc(x) + '" href="' + esc(r.href) + '">' +
@@ -630,7 +642,6 @@
         render();
       }
     });
-    bindTilt(m, function () { render(); });
     render();
   }
 
@@ -667,14 +678,14 @@
       var more = frontierHidden();
       bodyEl.innerHTML = '<p class="mn-muted mn-pagemap-note">このページの主張・証明・記法の欄が参照しているページを、参照関係から自動で並べました（上ほど基礎）。' +
         (direct.length > PER ? '前提のページが多いので、参照の多い ' + PER + ' 件を表示しています。' : '') + '</p>' +
-        '<div class="mn-map-wrap' + (tilt() ? ' is-3d' : '') + '">' + layeredHtml(g.rows, function (i) {
+        '<div class="mn-map-wrap">' + layeredHtml(g.rows, function (i) {
           var P = IDX.pages[i]; if (!P) return '';
           var here = i === me;
           return '<div class="mn-rm-node mn-pm-node' + (here ? ' is-goal' : '') + '" data-node="' + i + '"><a class="mn-rm-link" href="' + esc(S.root + P.path) + '"' + (here ? ' aria-current="page"' : '') + '>' +
             '<span class="mn-rm-k">' + esc((P.subj || '') + (P.sec ? ' §' + P.sec : '')) + '</span><span class="mn-rm-t">' + S.renderer.renderInline(P.title || '') + '</span></a></div>';
         }, function (i, n) { return i === n - 1 ? '現在地' : (n - 1 - i) + ' 段前'; }) + '</div>' +
         '<div class="mn-learn-actions">' + (more ? '<button type="button" class="mn-textbtn" data-pm-more>さらにさかのぼる（＋' + more + '）</button>' : '') +
-        (depth > 1 ? '<button type="button" class="mn-textbtn" data-pm-reset>直前の前提だけに戻す</button>' : '') + tiltButton() + '</div>';
+        (depth > 1 ? '<button type="button" class="mn-textbtn" data-pm-reset>直前の前提だけに戻す</button>' : '') + '</div>';
       var graph = bodyEl.querySelector('.mn-rm-graph');
       if (ro && ro.disconnect) ro.disconnect();
       ro = watchEdges(graph, function () { drawEdges(graph, g.edges); });
@@ -691,7 +702,6 @@
         shown = {}; shown[me] = 1; top(direct).slice(0, PER).forEach(function (i) { shown[i] = 1; }); depth = 1; render();
       }
     });
-    bindTilt(box, render);
     render();
   }
 
@@ -782,7 +792,7 @@
     }
     cancelOut(body);
     body.hidden = false;
-    body.innerHTML = '<div class="mn-ia-skeleton">読み込み中…</div>';
+    body.innerHTML = '<div class="mn-ia-skeleton" role="status"><span class="mn-sr-only">読み込み中…</span><div class="mn-skel-line" style="width:70%"></div><div class="mn-skel-line"></div><div class="mn-skel-line" style="width:56%"></div></div>';
     var start = 0;   // 閉じた状態（高さ 0）から、読み込み後の高さまで伸ばす
     withContent(function (data) {
       if (body.hidden) return;
@@ -1048,6 +1058,7 @@
     // p：ドックの開閉（入力中・修飾キー付きは除く）。Esc：モーダルを閉じる
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && modalEl) { e.preventDefault(); closeModal(); return; }
+      if (e.key === 'Escape' && editing) { e.preventDefault(); setEditing(false); return; }
       if ((e.key === 'p' || e.key === 'P') && !e.metaKey && !e.ctrlKey && !e.altKey && !typing(e.target) && !modalEl) { e.preventDefault(); toggleDock(); }
     });
     // 別のタブでピン留め・理解済みを変えたときも反映する
@@ -1055,7 +1066,7 @@
       if (e.key === 'sm_pinned_items') { renderDock(); refreshPinButtons(); }
       if (e.key === 'sm_understood') refreshUnderstoodUI();
     });
-    A.onChange(function () { closeModal(); floats.forEach(function (w) { w.remove(); }); floats = []; mountAll(); toast('表示を ' + (isPro() ? 'Pro' : 'Free') + ' に切り替えました（開発用）'); });
+    A.onChange(function () { closeModal(); mountAll(); toast('表示を ' + (isPro() ? 'Pro' : 'Free') + ' に切り替えました（開発用）'); });
   }
   window.SMLearn = { pin: pinLabel, openDock: openDock, openRoadmap: openRoadmap, proModal: proModal };
   if (window.MathSite) onReady({ detail: window.MathSite }); else document.addEventListener('mn:ready', onReady);

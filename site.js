@@ -37,6 +37,53 @@
 
   /* ---------- 参照の解決 ---------- */
   var localLabels = {};
+  /* ---------- 用語を定義へのリンクにする ----------
+   * 本文中の主要な用語（定義・構成・公理の太字の語）を、その定義へのリンクにする（表示は語そのまま。「定義 5.5」などは付けない）。
+   * ホバーで定義を確認でき、📌 で固定できる。どの定義に結ぶかは site-core.js の createTermLinker の規則。
+   * 同じ語は、各環境（定理・証明など）と各節の地の文で最初の 1 回だけ結ぶ（全部に付けるとうるさいため）。
+   * 数式・既存のリンク・見出し・環境の題・その語を定義している環境の中は対象外。 */
+  function linkTerms(article) {
+    if (!IDX.terms || KIND !== 'page' || !window.MathCore || !MathCore.createTermLinker) return;
+    var linker = MathCore.createTermLinker(IDX.terms, IDX.labels, IDX.pages);
+    if (!linker.size) return;
+    var deps = linker.pageDeps(IDX.backrefs, pageIdx, 2).set;
+    var prose = article.querySelector('.mn-prose'); if (!prose) return;
+    var SKIP = 'a, code, pre, .katex, h1, h2, h3, h4, h5, h6, .mn-env-head, summary, .mn-label, .mn-backrefs, .mn-toc-inline, .mn-learn-x, .mn-qed';
+    // 地の文の「節」：直前の h2 を鍵にする
+    var sectionOf = new Map(), cur = null;
+    [].forEach.call(prose.children, function (c) { if (c.tagName === 'H2') cur = c; sectionOf.set(c, cur || prose); });
+    var linked = new Map();   // 鍵（環境または節） -> {label: 1}
+    var pickCache = {};
+    var walker = document.createTreeWalker(prose, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) { return n.nodeValue.trim() && !(n.parentNode.closest && n.parentNode.closest(SKIP)) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
+    });
+    var nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function (tn) {
+      var hits = linker.scan(tn.nodeValue); if (!hits.length) return;
+      var env = tn.parentNode.closest('.mn-env');
+      var key = env;
+      if (!key) { var top = tn.parentNode; while (top && top.parentNode !== prose) top = top.parentNode; key = sectionOf.get(top) || prose; }
+      var seen = linked.get(key); if (!seen) linked.set(key, seen = {});
+      var frag = null, last = 0, text = tn.nodeValue;
+      hits.forEach(function (h) {
+        var l = h.term in pickCache ? pickCache[h.term] : (pickCache[h.term] = linker.pick(h.term, pageIdx, deps));
+        if (!l || seen[l]) return;
+        if (env && (env.id === l || env.closest('[id="' + l.replace(/"/g, '') + '"]'))) return;   // 定義している環境の中は結ばない
+        var info = resolveRef(l); if (!info || info.planned) return;
+        seen[l] = 1;
+        frag = frag || document.createDocumentFragment();
+        if (h.i > last) frag.appendChild(document.createTextNode(text.slice(last, h.i)));
+        var a = document.createElement('a');
+        a.className = 'mn-xref mn-term'; a.href = info.href; a.setAttribute('data-label', l);
+        a.textContent = text.substr(h.i, h.len);
+        frag.appendChild(a);
+        last = h.i + h.len;
+      });
+      if (!frag) return;
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      tn.parentNode.replaceChild(frag, tn);
+    });
+  }
   function resolveRef(label) {
     var L = localLabels[label];
     if (L) return { type: L.type, num: L.num, title: L.title, typeName: typeName(L.type), href: '#' + label, prefix: '', external: false };
@@ -431,7 +478,7 @@
       if (G.t === 'equation') bodyHtml = renderer.renderTex({ tex: G.tex, display: true, num: G.n });
       else if (G.e != null && !(IDX.entries && IDX.entries.length) && window.MathEntries) {
         // 本文の索引がまだ読み込まれていない：読み込み後に表示し直す
-        bodyHtml = '<p class="mn-pv-loading">読み込み中…</p>';
+        bodyHtml = '<div class="mn-pv-loading" role="status"><span class="mn-sr-only">読み込み中…</span><div class="mn-skel-line"></div><div class="mn-skel-line"></div><div class="mn-skel-line" style="width:64%"></div></div>';
         var want = label;
         window.MathEntries.load(function () { if (popFor && popLabel === want) { if (popStack.length) setPopContent(want); else showPop(popFor); } });
       }
@@ -734,6 +781,7 @@
     renderTree(app.querySelector('.mn-tree'));
     renderCrumbs(app.querySelector('.mn-crumbs'));
     fillBackrefs(article);
+    linkTerms(article);
     initFolds(article);
     buildToc(app.querySelector('.mn-toc'), article.querySelector('.mn-toc-inline'), article);
     buildPager(app.querySelector('.mn-pager'));

@@ -571,11 +571,83 @@
     };
   }
 
+  /* ---------- 用語のリンク ----------
+   * termDefs：用語 -> 定義のラベルの配列（build.js が定義・構成・公理の索引語から作る）。
+   * scan(text) は本文から用語の出現を左から最長一致で探し、pick(term, ページ番号) はどの定義に結ぶかを決める。
+   *   同じページ → 同じ系列 → 同じ第 2 階層 → 同じ分野（この 3 つはサイトの並びでこのページより前のページの定義だけ）
+   *   → このページが（2 段以内で）前提にしているページ。
+   *   どれにも当たらなければ結ばない（別分野の同名の語、例えば準同型の「グラフ」を圏論の「グラフ」に結ばないため）。
+   * 「定理」「仮定」のような一般的すぎる語は除く。 */
+  var TERM_STOP = {};
+  ('定理 公理 仮定 変数 言語 構造 解釈 同値 高さ 領域 否定 略記 項数 証拠 解消 矛盾 様相 定義 記号 演算 関係 写像 関数 集合 性質 条件 命題 補題 ' +
+   '自然 標準 自明 有限 無限 完全 分離 導出 妥当 充足 モデル 極大 極小 部分 全体 成分 次数 長さ 大きさ 個数 作用 生成 拡大 分解 表現 同型 順序 ' +
+   '証明 推論 計算 定数 関数記号 述語 理論 体系 対象 射 構成 拡張 制限 埋め込み 同一視 対応 等しい 一致 存在 一意 因子 分割 小さい 大きい 境界 閉じている 閉じた').split(' ').forEach(function (w) { TERM_STOP[w] = 1; });
+  function createTermLinker(termDefs, labels, pages) {
+    var keys = Object.keys(termDefs || {}).filter(function (t) { return !TERM_STOP[t] && !/^[(（]/.test(t); })
+      .sort(function (a, b) { return b.length - a.length; });
+    var re = keys.length ? new RegExp(keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'g') : null;
+    function second(dir) { return String(dir || '').split('/').slice(0, 2).join('/'); }
+    function field(dir) { return String(dir || '').split('/')[0]; }
+    function pick(term, pageIdx, depSet) {
+      var cands = termDefs[term]; if (!cands) return null;
+      var short = term.length <= 2, P = pages[pageIdx];
+      var info = cands.map(function (l) { return { l: l, p: labels[l] ? labels[l].p : null }; })
+        .filter(function (x) { return x.p != null && pages[x.p]; });
+      if (P) {
+        var tiers = [
+          function (x) { return x.p === pageIdx; },
+          function (x) { return x.p < pageIdx && pages[x.p].dir === P.dir; },
+          function (x) { return x.p < pageIdx && second(pages[x.p].dir) === second(P.dir); },
+          function (x) { return x.p < pageIdx && field(pages[x.p].dir) === field(P.dir); },
+          function (x) { return !short && !!(depSet && depSet[x.p]); }
+        ];
+        for (var i = 0; i < tiers.length; i++) {
+          var hit = info.filter(tiers[i]);
+          if (hit.length) return hit.sort(function (a, b) { return a.p - b.p; })[0].l;
+        }
+      }
+      return null;
+    }
+    // ページどうしの前提（backrefs のうち主張・証明・記法の欄からの参照）から、pageIdx が steps 段以内で前提にするページの集合を作る
+    var fwdCache = null, fwdOf = null;
+    function pageDeps(backrefs, pageIdx, steps) {
+      if (fwdOf !== backrefs) { fwdCache = pageFwd(backrefs); fwdOf = backrefs; }
+      var fwd = fwdCache;
+      var set = {}, frontier = [pageIdx];
+      for (var k = 0; k < (steps || 2); k++) {
+        var next = [];
+        frontier.forEach(function (i) { Object.keys(fwd[i] || {}).forEach(function (j) { j = +j; if (!set[j] && j !== pageIdx) { set[j] = 1; next.push(j); } }); });
+        frontier = next;
+      }
+      return { set: set, fwd: fwd };
+    }
+    function pageFwd(backrefs) {
+      var fwd = {};
+      Object.keys(backrefs || {}).forEach(function (target) {
+        var T = labels[target]; if (!T) return;
+        backrefs[target].forEach(function (b) {
+          var role = b[4] || '';
+          if ((role === 's' || role === 'p' || role === 'n') && b[0] !== T.p) (fwd[b[0]] = fwd[b[0]] || {})[T.p] = 1;
+        });
+      });
+      return fwd;
+    }
+    function scan(text) {
+      var out = [];
+      if (!re || !text) return out;
+      re.lastIndex = 0;
+      var m;
+      while ((m = re.exec(text))) out.push({ i: m.index, len: m[0].length, term: m[0] });
+      return out;
+    }
+    return { scan: scan, pick: pick, pageDeps: pageDeps, size: keys.length };
+  }
+
   return {
     parseBlocks: parseBlocks, extractMath: extractMath, numberTree: numberTree,
     createRenderer: createRenderer, splitForSearch: splitForSearch,
     normalizeText: normalizeText, normalizeTex: normalizeTex, stripMarkdown: stripMarkdown,
-    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS,
+    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS, createTermLinker: createTermLinker,
     MATH_OPEN: MATH_OPEN, MATH_CLOSE: MATH_CLOSE
   };
 });

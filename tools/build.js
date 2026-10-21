@@ -287,6 +287,25 @@ Object.keys(oldReg).forEach(function (k) {
   if (oldReg[k].status === 'planned' && !labels[k]) planned[k] = { ti: oldReg[k].title || '', from: {}, manual: !!oldReg[k].manual };
 });
 
+/* 用語のリンク：定義系の環境（定義・構成・公理）の索引語（太字の語と index 属性）→ その環境のラベル。
+ * 本文中の用語を定義へのリンクにする（site.js）のと、主張の中の用語を学習ルートの前提に数える（下の termDeps）のに使う。
+ * 1 文字の語・数式を含む語は、誤って他の語の一部に当たりやすいので除く。 */
+var TERM_DEF_TYPES = { definition: 1, construction: 1, axiom: 1 };
+var termDefs = {};   // term -> [label, ...]
+entries.forEach(function (e) {
+  if (!TERM_DEF_TYPES[e.t] || !e.l) return;
+  (e.ix || []).forEach(function (x) {
+    var t = String(x.term).normalize('NFKC').trim();
+    if (t.length < 2 || /[$\\{}^_\uE000-\uF8FF]/.test(t) || /^[0-9\s.()（）]+$/.test(t)) return;
+    var L = termDefs[t] || (termDefs[t] = []);
+    if (L.indexOf(e.l) < 0) L.push(e.l);
+  });
+});
+var pageInfo = pages.map(function (pg) { return { path: pg.path, dir: pg.dirPath }; });
+var termLinker = Core.createTermLinker(termDefs, labels, pageInfo);
+var tdeps = {};   // 主張（番号付き環境）のラベル -> その主張に現れる用語の定義のラベル（学習ルートの「主張の前提」に加える）
+var stmtTexts = [];   // 主張の本文（参照の検査のあとで用語を探す。ページどうしの前提が要るため）
+
 /* ---------------- 3. 参照の検査と被参照リスト ---------------- */
 var backrefs = {};   // label -> [[pageIdx, fromLabel, fromType, fromNum, role]]
 // role：参照がどこに書かれているか。's' 主張（番号付き環境の本文・題）、'p' 証明（proof・solution）、
@@ -332,7 +351,11 @@ pages.forEach(function (pg) {
   // 環境ごとに「どこから参照したか」を追跡しながら描画
   (function walk(nodes, fromEnv, role) {
     nodes.forEach(function (node) {
-      if (node.kind === 'md') { currentFrom = fromEnv; currentRole = role; renderer.renderMarkdown(node.text); return; }
+      if (node.kind === 'md') {
+        currentFrom = fromEnv; currentRole = role; renderer.renderMarkdown(node.text);
+        if (role === 's' && fromEnv && fromEnv.label) stmtTexts.push({ label: fromEnv.label, p: pg.idx, text: node.text });
+        return;
+      }
       if (node.kind !== 'env') return;
       var def = CONFIG.ENVIRONMENTS[node.type] || {};
       var from = def.num ? node : (node.of || fromEnv);
@@ -405,6 +428,19 @@ var backOut = {};
 Object.keys(backrefs).forEach(function (k) {
   if (backrefs[k].length) backOut[k] = backrefs[k].map(function (b) { return b.v; });
 });
+// 主張の中の用語 → 定義（site.js が本文で結ぶのと同じ規則）
+(function () {
+  var depCache = {};
+  stmtTexts.forEach(function (st) {
+    var deps = depCache[st.p] || (depCache[st.p] = termLinker.pageDeps(backOut, st.p, 2).set);
+    var mine = tdeps[st.label] || [];
+    termLinker.scan(Core.extractMath(st.text).text).forEach(function (h) {
+      var l = termLinker.pick(h.term, st.p, deps);
+      if (l && l !== st.label && mine.indexOf(l) < 0) mine.push(l);
+    });
+    if (mine.length) tdeps[st.label] = mine;
+  });
+})();
 
 /* ---------------- 3.4 表示用の大分野（ルートの _meta.json の groups） ---------------- */
 // codes の要素は第 1 階層の 2 桁（"03"）か、第 2 階層を束ねた表示用の見出し
@@ -700,6 +736,8 @@ if (!CHECK_ONLY) {
     labels: labels,
     planned: Object.keys(planned).reduce(function (o, k) { o[k] = { ti: planned[k].ti }; return o; }, {}),
     backrefs: backOut,
+    terms: termDefs,
+    tdeps: tdeps,
     entries: []   // 検索用の本文は search-index.js に分けた（必要になったときに読み込む）
   };
   write(path.join(ROOT, 'site-index.js'),

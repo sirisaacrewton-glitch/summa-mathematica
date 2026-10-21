@@ -451,7 +451,13 @@
   }
   function entriesReady() { return entriesState === 2; }
   window.MathEntries = { load: loadEntries, ready: entriesReady };
-  var LOADING_HTML = '<div class="mn-search-empty">検索用の索引を読み込んでいます…</div>';
+  // 索引の読み込み中は、結果の形をした灰色の枠に光の波を流して待たせる（スケルトン表示）
+  var LOADING_HTML = '<div class="mn-skel-list" role="status" aria-live="polite"><span class="mn-sr-only">検索用の索引を読み込んでいます…</span>' +
+    [0, 1, 2, 3, 4, 5].map(function (i) {
+      return '<div class="mn-skel-result" aria-hidden="true"><div class="mn-skel-line is-title" style="width:' + [46, 62, 38, 55, 41, 58][i] + '%"></div>' +
+        '<div class="mn-skel-line is-where" style="width:' + [28, 22, 33, 25, 30, 20][i] + '%"></div>' +
+        '<div class="mn-skel-line"></div><div class="mn-skel-line" style="width:' + [82, 74, 88, 69, 79, 85][i] + '%"></div></div>';
+    }).join('') + '</div>';
   // 日本語入力（IME）で変換を確定するための Enter かどうか。
   // isComposing（多くのブラウザ）、keyCode 229（Safari など）、変換確定の直後（compositionend から少しの間）を見る。
   var lastCompositionEnd = 0;
