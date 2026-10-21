@@ -456,9 +456,10 @@
     var info = resolveRef(label);
     if (!info) return null;
     var isNamed = info.type === 'section' || info.type === 'page';
-    var head = '<div class="mn-pv-head"><span class="mn-pv-kind">' + esc((info.prefix || '') + info.typeName + (info.num ? ' ' + info.num : '')) + '</span>' +
-      (info.title ? ' <span class="mn-pv-title">' + renderer.renderInline(info.title) + '</span>' : '') +
-      '<a class="mn-pv-go" href="' + esc(info.href) + '">開く →</a></div>';
+    // 見出し：左に種類と題、右に操作（📌 固定・開く）、下に所在。flex で並べ、題が長くても操作が下線に重ならないようにする
+    var head = '<div class="mn-pv-head"><div class="mn-pv-headline"><span class="mn-pv-kind">' + esc((info.prefix || '') + info.typeName + (info.num ? ' ' + info.num : '')) + '</span>' +
+      (info.title ? ' <span class="mn-pv-title">' + renderer.renderInline(info.title) + '</span>' : '') + '</div>' +
+      '<div class="mn-pv-actions"><a class="mn-pv-go" href="' + esc(info.href) + '">開く →</a></div><!--where--></div>';
     var bodyHtml = '';
     if (L && info.type !== 'page') {
       var target = document.getElementById(label);
@@ -472,7 +473,7 @@
     } else if (G && pvMem.has(label)) {
       var pgc = IDX.pages[G.p];
       bodyHtml = pvMem.get(label);
-      head = head.replace('</div>', '<div class="mn-pv-where">' + esc(pgc.subj) + ' §' + pgc.sec + ' ' + esc(pgc.title) + '</div></div>');
+      head = head.replace('<!--where-->', '<div class="mn-pv-where">' + esc(pgc.subj) + ' §' + pgc.sec + ' ' + esc(pgc.title) + '</div>');
     } else if (G) {
       var pg = IDX.pages[G.p];
       if (G.t === 'equation') bodyHtml = renderer.renderTex({ tex: G.tex, display: true, num: G.n });
@@ -489,7 +490,7 @@
           if (e.p === G.p && (G.t === 'page' ? e.t === 'page' : e.l === label)) { bodyHtml = renderer.renderMarkdown((e.x || '').slice(0, 900)); break; }
         }
       }
-      head = head.replace('</div>', '<div class="mn-pv-where">' + esc(pg.subj) + ' §' + pg.sec + ' ' + esc(pg.title) + '</div></div>');
+      head = head.replace('<!--where-->', '<div class="mn-pv-where">' + esc(pg.subj) + ' §' + pg.sec + ' ' + esc(pg.title) + '</div>');
       pvPut(label, bodyHtml);
     }
     // 固定（ピン留め）ボタンは「開く →」の左隣。学習機能（learn.js）が読み込まれているときだけ出す

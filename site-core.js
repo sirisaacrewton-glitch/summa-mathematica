@@ -582,6 +582,7 @@
   ('定理 公理 仮定 変数 言語 構造 解釈 同値 高さ 領域 否定 略記 項数 証拠 解消 矛盾 様相 定義 記号 演算 関係 写像 関数 集合 性質 条件 命題 補題 ' +
    '自然 標準 自明 有限 無限 完全 分離 導出 妥当 充足 モデル 極大 極小 部分 全体 成分 次数 長さ 大きさ 個数 作用 生成 拡大 分解 表現 同型 順序 ' +
    '証明 推論 計算 定数 関数記号 述語 理論 体系 対象 射 構成 拡張 制限 埋め込み 同一視 対応 等しい 一致 存在 一意 因子 分割 小さい 大きい 境界 閉じている 閉じた').split(' ').forEach(function (w) { TERM_STOP[w] = 1; });
+  var TERM_PREFIX = '冪非半準反余双逆単不無超亜擬';
   function createTermLinker(termDefs, labels, pages) {
     var keys = Object.keys(termDefs || {}).filter(function (t) { return !TERM_STOP[t] && !/^[(（]/.test(t); })
       .sort(function (a, b) { return b.length - a.length; });
@@ -637,7 +638,12 @@
       if (!re || !text) return out;
       re.lastIndex = 0;
       var m;
-      while ((m = re.exec(text))) out.push({ i: m.index, len: m[0].length, term: m[0] });
+      while ((m = re.exec(text))) {
+        // 直前が意味を変える接頭の字（冪零・非可換・半単純・準同型・単連結・余核・双対…）なら、語の一部なので結ばない
+        // （例：「冪零イデアル」の中の「零イデアル」、「非可換」の中の「可換」）
+        if (m.index > 0 && TERM_PREFIX.indexOf(text.charAt(m.index - 1)) >= 0) { re.lastIndex = m.index + 1; continue; }
+        out.push({ i: m.index, len: m[0].length, term: m[0] });
+      }
       return out;
     }
     return { scan: scan, pick: pick, pageDeps: pageDeps, size: keys.length };

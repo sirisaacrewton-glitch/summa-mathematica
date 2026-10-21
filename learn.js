@@ -173,7 +173,7 @@
   }
   /* Pro の案内（派手な広告にせず、何が使えるようになるかを淡々と示す） */
   var PRO_FEATURES = [
-    ['付箋ドック', '1 件まで', '無制限・セットの保存'],
+    ['付箋ドック', '1 件まで（浮かせて本文と比較できる）', '無制限・複数を浮かせて比較・セットの保存'],
     ['学習ルート', '樹形図の閲覧', '達成率・未習得の強調・目標の登録'],
     ['証明パズル・体感ゲーム', '各分野の最初の 1 問', 'すべての問題'],
     ['直感イメージ動画', '冒頭 15 秒', '全編'],
@@ -192,7 +192,7 @@
   /* =====================================================================
    * 機能 A：付箋ドック（Free 1 件 / Pro 無制限）
    * ===================================================================== */
-  var dock = null, dockTab = null, editing = false;
+  var dock = null, dockTab = null, editing = false, floats = [];
   function pins() { return getJSON('sm_pinned_items', []); }
   function savePins(p) { setJSON('sm_pinned_items', p); renderDock(); refreshPinButtons(); }
   function isPinned(id) { return pins().some(function (p) { return p.id === id; }); }
@@ -226,6 +226,7 @@
     });
   }
   function unpin(id) {
+    floats.filter(function (w) { return w._pid === id; }).forEach(function (w) { closeFloat(w, true); });
     var done = function () { savePins(pins().filter(function (p) { return p.id !== id; })); };
     var c = dock && !dock.hidden && dock.querySelector('.mn-pin-card[data-pin-id="' + (window.CSS && CSS.escape ? CSS.escape(id) : id) + '"]');
     if (!c || REDUCED) { done(); return; }
@@ -331,6 +332,7 @@
       var card = ev.target.closest('.mn-pin-card');
       if (!card || ev.button > 0 || ev.target.closest('[data-unpin], a')) return;
       if (editing) { ev.preventDefault(); startDrag(card, ev); return; }
+      if (ev.pointerType === 'mouse') watchPull(card, ev);
       // 長押し（0.45 秒）で編集モードに入り、そのままドラッグできる
       press = { card: card, x: ev.clientX, y: ev.clientY, t: setTimeout(function () {
         var e = press; press = null; if (!e) return;
@@ -347,6 +349,101 @@
     // ドラッグ中はページがスクロールしないように（iOS は touchmove を止める必要がある）
     list.addEventListener('touchmove', function (ev) { if (drag && ev.cancelable) ev.preventDefault(); }, { passive: false });
     list.addEventListener('contextmenu', function (ev) { if (ev.target.closest('.mn-pin-card')) ev.preventDefault(); });
+    /* PC：カードをドックの外（本文側）へドラッグすると、その位置に浮かせる */
+    function watchPull(card, ev0) {
+      var dr = dock.getBoundingClientRect(), moved = false, fw = null, off = null;
+      function mv(ev) {
+        var dx = ev.clientX - ev0.clientX, dy = ev.clientY - ev0.clientY;
+        if (!moved && Math.abs(dx) + Math.abs(dy) < 6) return;
+        moved = true;
+        if (press) { clearTimeout(press.t); press = null; }
+        if (!fw) {
+          card.style.translate = Math.min(0, dx) + 'px ' + dy * 0.2 + 'px';
+          if (ev.clientX < dr.left - 12) {
+            card.style.translate = '';
+            fw = floatCard(card.getAttribute('data-pin-id'), { x: ev.clientX - 60, y: ev.clientY - 18 });
+            off = { x: 60, y: 18 };
+          }
+        } else placeFloat(fw, ev.clientX - off.x, ev.clientY - off.y);
+        ev.preventDefault();
+      }
+      function done() {
+        window.removeEventListener('pointermove', mv); window.removeEventListener('pointerup', done);
+        card.style.translate = '';
+        if (moved) card._noClick = true;
+        if (fw) { saveFloats(); closeDock(); }
+      }
+      window.addEventListener('pointermove', mv); window.addEventListener('pointerup', done);
+    }
+  }
+
+  /* ---------- 浮かせた付箋（本文と見比べるため） ----------
+   * PC：カードをドックから本文側へドラッグすると、その位置に浮かぶ。見出しをドラッグで移動、右下で大きさを変えられる。
+   * スマホ：ドックのカードをタップすると、画面上部に浮かぶ（見出しのタップで畳む）。
+   * 浮かせた付箋はページを移っても残る（localStorage sm_floats）。 */
+  function placeFloat(w, x, y) {
+    w.style.left = Math.min(window.innerWidth - 120, Math.max(0, x)) + 'px';
+    w.style.top = Math.min(window.innerHeight - 44, Math.max(0, y)) + 'px';
+  }
+  function saveFloats() {
+    setJSON('sm_floats', floats.map(function (w) {
+      return { id: w._pid, x: w.offsetLeft, y: w.offsetTop, w: w.offsetWidth, h: w.style.height ? w.offsetHeight : 0, min: w.classList.contains('is-min') };
+    }));
+  }
+  function floatCard(id, pos) {
+    var p = pins().find(function (x) { return x.id === id; }); if (!p) return null;
+    var old = floats.filter(function (w) { return w._pid === id; })[0];
+    if (old) { if (pos && !PHONE.matches) placeFloat(old, pos.x, pos.y); anim(old, [{ scale: 1.04 }, { scale: 1 }], 220); return old; }
+    if (PHONE.matches) floats.slice().forEach(function (w) { closeFloat(w, true); });   // スマホは 1 枚だけ
+    else if (!isPro() && floats.length >= 1) floats.slice().forEach(function (w) { closeFloat(w, true); });
+    var w = el('<div class="mn-float" role="dialog" aria-label="' + esc(p.kind + ' ' + (p.title || '')) + '">' +
+      '<div class="mn-float-head" title="ドラッグで移動・クリックで畳む"><span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
+      '<button type="button" class="mn-float-close" aria-label="閉じる（付箋ドックには残ります）" title="閉じる（付箋ドックには残ります）"></button></div>' +
+      '<div class="mn-float-body mn-prose">' + p.htmlContent + '<a class="mn-pin-where" href="' + esc(p.url) + '">' + esc(p.sectionPath) + ' へ →</a></div></div>');
+    w._pid = id;
+    document.body.appendChild(w); floats.push(w);
+    if (!PHONE.matches) {
+      var n = floats.length - 1;
+      if (pos) placeFloat(w, pos.x, pos.y);
+      else placeFloat(w, window.innerWidth - 470 - 24 * n, 80 + 24 * n);
+      if (pos && pos.w) w.style.width = pos.w + 'px';
+      if (pos && pos.h) w.style.height = pos.h + 'px';
+    }
+    if (pos && pos.min) w.classList.add('is-min');
+    anim(w, PHONE.matches ? [{ transform: 'translateY(-16px)', opacity: 0 }, { transform: 'none', opacity: 1 }] : [{ opacity: 0, transform: 'scale(.96)' }, { opacity: 1, transform: 'none' }], 240);
+    var head = w.querySelector('.mn-float-head'), sx, sy, ox, oy, moving = false, movedF = false;
+    head.addEventListener('pointerdown', function (ev) {
+      if (ev.target.closest('.mn-float-close') || PHONE.matches) return;
+      moving = true; movedF = false; sx = ev.clientX; sy = ev.clientY; ox = w.offsetLeft; oy = w.offsetTop;
+      head.setPointerCapture(ev.pointerId); ev.preventDefault();
+    });
+    head.addEventListener('pointermove', function (ev) {
+      if (!moving) return;
+      if (Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) > 3) movedF = true;
+      placeFloat(w, ox + ev.clientX - sx, oy + ev.clientY - sy);
+    });
+    head.addEventListener('pointerup', function () { if (moving) { moving = false; saveFloats(); } });
+    w.addEventListener('click', function (ev) {
+      if (ev.target.closest('.mn-float-close')) { closeFloat(w); return; }
+      if (ev.target.closest('.mn-float-head') && !movedF) {
+        var from = w.offsetHeight; w.classList.toggle('is-min'); animHeight(w, from, w.offsetHeight, 220); saveFloats();
+      }
+    });
+    if (window.ResizeObserver && !PHONE.matches) {
+      var t = null; new ResizeObserver(function () { clearTimeout(t); t = setTimeout(saveFloats, 300); }).observe(w);
+    }
+    saveFloats();
+    return w;
+  }
+  function closeFloat(w, instant) {
+    floats.splice(floats.indexOf(w), 1); saveFloats();
+    if (instant) { w.remove(); return; }
+    animOut(w, [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: PHONE.matches ? 'translateY(-12px)' : 'scale(.96)' }], 180, function () { w.remove(); });
+  }
+  function restoreFloats() {
+    floats.slice().forEach(function (w) { w.remove(); }); floats = [];
+    var ids = pins().map(function (p) { return p.id; });
+    getJSON('sm_floats', []).forEach(function (f) { if (ids.indexOf(f.id) >= 0) floatCard(f.id, f); });
   }
   function renderDockHead() {
     var p = pins(), lim = A.limit('pins');
@@ -367,7 +464,9 @@
     dock.classList.toggle('is-editing', editing);
     renderDockHead();
     var list = dock.querySelector('.mn-dock-list');
-    list.innerHTML = p.length ? p.map(function (x) { return cardHtml(x, mins[x.id]); }).join('') :
+    list.innerHTML = p.length ? p.map(function (x) { return cardHtml(x, mins[x.id]); }).join('') +
+      '<p class="mn-dock-hint">' + (PHONE.matches ? 'カードの見出しをタップすると、本文の上に浮かせて見比べられます。長押しで並べ替え・外す。'
+        : 'カードを本文側へドラッグすると、浮かせて本文と見比べられます。長押しで並べ替え・外す。') + '</p>' :
       '<p class="mn-dock-empty">定義や定理の見出しの <span aria-hidden="true">📌</span> ボタン、または参照プレビューの「📌 固定」で、項目をここに並べておけます。ページを移動しても残ります。</p>' +
       (isPro() ? '' : '<p class="mn-dock-empty">無料プランでは 1 件まで。<button type="button" class="mn-textbtn" data-see-pro>Pro なら無制限</button></p>');
     dockTab.innerHTML = '<span aria-hidden="true">📌</span><span class="mn-dock-tab-n">' + (p.length ? p.length : '') + '</span><span class="mn-dock-tab-text">ピン留め' + (p.length ? ' (' + p.length + ')' : '') + '</span>';
@@ -386,7 +485,7 @@
     if (card._noClick) { card._noClick = false; return; }   // 長押しの直後のクリックは無視
     if (editing) return;
     if (ev.target.closest('.mn-pin-head')) {
-      if (PHONE.matches) return;
+      if (PHONE.matches) { floatCard(id); closeDock(); return; }   // スマホ：タップで本文の上に浮かせる
       var m = getJSON('sm_pin_min', {}); if (m[id]) delete m[id]; else m[id] = 1; setJSON('sm_pin_min', m);
       toggleMin(card);
     }
@@ -1047,6 +1146,13 @@
     if (!S || !S.article) return;
     mountPlanSwitch();
     mountAll();
+    restoreFloats();
+    // ドックの外をクリック（タップ）したら閉じる。浮かせた付箋・プレビュー・モーダル・ピン留めの操作は除く
+    document.addEventListener('pointerdown', function (e) {
+      if (!dock || dock.hidden || dock._out || modalEl) return;
+      if (e.target.closest('.mn-dock, .mn-dock-tab, .mn-float, .mn-popover, .mn-learn-modal, [data-pin], [data-pin-label], .mn-toast')) return;
+      closeDock();
+    });
     // クリック：見出しのボタン・プレビューの「📌 固定」
     document.addEventListener('click', function (e) {
       var b;
@@ -1063,10 +1169,10 @@
     });
     // 別のタブでピン留め・理解済みを変えたときも反映する
     window.addEventListener('storage', function (e) {
-      if (e.key === 'sm_pinned_items') { renderDock(); refreshPinButtons(); }
+      if (e.key === 'sm_pinned_items') { renderDock(); refreshPinButtons(); restoreFloats(); }
       if (e.key === 'sm_understood') refreshUnderstoodUI();
     });
-    A.onChange(function () { closeModal(); mountAll(); toast('表示を ' + (isPro() ? 'Pro' : 'Free') + ' に切り替えました（開発用）'); });
+    A.onChange(function () { closeModal(); mountAll(); restoreFloats(); toast('表示を ' + (isPro() ? 'Pro' : 'Free') + ' に切り替えました（開発用）'); });
   }
   window.SMLearn = { pin: pinLabel, openDock: openDock, openRoadmap: openRoadmap, proModal: proModal };
   if (window.MathSite) onReady({ detail: window.MathSite }); else document.addEventListener('mn:ready', onReady);
