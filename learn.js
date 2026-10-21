@@ -1264,7 +1264,10 @@
   function mountSettings() {
     var theme = S.app.querySelector('.mn-theme-toggle');
     if (!theme || S.app.querySelector('.mn-settings-btn')) return;
-    var b = el('<button type="button" class="mn-iconbtn mn-settings-btn" aria-haspopup="dialog" aria-expanded="false" title="表示の設定" aria-label="表示の設定">⚙</button>');
+    var b = el('<button type="button" class="mn-iconbtn mn-settings-btn" aria-haspopup="dialog" aria-expanded="false" title="設定" aria-label="設定">' +
+      // 歯車の形は Feather Icons（MIT ライセンス）の settings による
+      '<svg class="mn-ico" viewBox="0 0 24 24" width="21" height="21" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+      '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>');
     theme.parentNode.insertBefore(b, theme);
     b.addEventListener('click', function (ev) { ev.stopPropagation(); if (setPanel) closeSettings(); else openSettings(b); });
   }
@@ -1276,12 +1279,23 @@
         '<button type="button" role="radio" aria-checked="' + (P[k] === 'open') + '" data-pref="' + k + '" data-v="open">開く</button>' +
         '<button type="button" role="radio" aria-checked="' + (P[k] === 'closed') + '" data-pref="' + k + '" data-v="closed">たたむ</button></div></div>';
     }
-    return '<div class="mn-set-title">表示の設定</div>' +
+    var themeNow = document.documentElement.dataset.theme || 'auto';
+    function seg(attr, cur, opts) {
+      return '<div class="mn-seg" role="radiogroup">' + opts.map(function (o) {
+        return '<button type="button" role="radio" aria-checked="' + (cur === o[0]) + '" ' + attr + '="' + o[0] + '">' + o[1] + '</button>';
+      }).join('') + '</div>';
+    }
+    return '<div class="mn-set-title">設定</div>' +
+      '<div class="mn-set-row"><div><div class="mn-set-label">テーマ</div><div class="mn-set-sub">自動は端末の設定に合わせる</div></div>' +
+        seg('data-theme-set', themeNow, [['light', 'ライト'], ['dark', 'ダーク'], ['auto', '自動']]) + '</div>' +
+      '<div class="mn-set-sec">学習の補助を最初から</div>' +
       row('intro', '直感イメージ・動画', 'ページ冒頭の「なぜこの概念が必要か」') +
       row('roadmap', 'ここまでのロードマップ', '記法と定義の確認の下の地図') +
       row('intuition', '意図・直感', '定義・定理ごとの直感の説明と図') +
       '<div class="mn-set-presets"><button type="button" class="mn-textbtn" data-preset="learn">学習向け：すべて開く</button><button type="button" class="mn-textbtn" data-preset="research">研究向け：すべてたたむ</button></div>' +
-      '<p class="mn-set-note">たたんでも見出しの 1 行は残るので、必要なときはその場で開けます。設定はこのブラウザに保存されます。</p>';
+      '<p class="mn-set-note">たたんでも見出しの 1 行は残るので、必要なときはその場で開けます。設定はこのブラウザに保存されます。</p>' +
+      '<div class="mn-set-row mn-set-dev"><div><div class="mn-set-label">プラン（開発用）</div><div class="mn-set-sub">試作の表示確認用</div></div>' +
+        seg('data-plan-set', A.getPlan(), [['free', 'Free'], ['pro', 'Pro']]) + '</div>';
   }
   function openSettings(btn) {
     setPanel = el('<div class="mn-settings" role="dialog" aria-label="表示の設定">' + settingsHtml() + '</div>');
@@ -1292,8 +1306,14 @@
     btn.setAttribute('aria-expanded', 'true');
     anim(setPanel, [{ opacity: 0, transform: 'translateY(-6px)' }, { opacity: 1, transform: 'none' }], 180);
     setPanel.addEventListener('click', function (ev) {
-      var t = ev.target.closest('[data-pref]'), pr = ev.target.closest('[data-preset]');
-      if (t) setPref(t.getAttribute('data-pref'), t.getAttribute('data-v'));
+      var t = ev.target.closest('[data-pref]'), pr = ev.target.closest('[data-preset]'), th = ev.target.closest('[data-theme-set]'), pl = ev.target.closest('[data-plan-set]');
+      if (th) {
+        var v = th.getAttribute('data-theme-set');
+        if (v === 'auto') { delete document.documentElement.dataset.theme; try { localStorage.removeItem('mn-theme'); } catch (e) {} }
+        else { document.documentElement.dataset.theme = v; try { localStorage.setItem('mn-theme', v); } catch (e) {} }
+      }
+      else if (pl) { A.setPlan(pl.getAttribute('data-plan-set')); }
+      else if (t) setPref(t.getAttribute('data-pref'), t.getAttribute('data-v'));
       else if (pr) { var v = pr.getAttribute('data-preset') === 'learn' ? 'open' : 'closed'; setJSON('sm_prefs', { intro: v, roadmap: v, intuition: v }); applyPrefs(); }
       else return;
       setPanel.innerHTML = settingsHtml();
@@ -1338,8 +1358,7 @@
   function onReady(ev) {
     S = ev.detail || window.MathSite;
     if (!S || !S.article) return;
-    mountPlanSwitch();
-    mountSettings();
+    mountSettings();   // テーマ切替と Free/Pro（開発用）は設定の中に置く
     mountAll();
     document.addEventListener('pointerdown', function (e) { if (setPanel && !e.target.closest('.mn-settings, .mn-settings-btn')) closeSettings(); });
     restoreFloats();
@@ -1363,7 +1382,7 @@
       if (e.key === 'sm_pinned_items') { renderDock(); refreshPinButtons(); restoreFloats(); }
       if (e.key === 'sm_understood') refreshUnderstoodUI();
     });
-    A.onChange(function () { closeModal(); mountAll(); restoreFloats(); toast('表示を ' + (isPro() ? 'Pro' : 'Free') + ' に切り替えました（開発用）'); });
+    A.onChange(function () { if (setPanel) setPanel.innerHTML = settingsHtml(); closeModal(); mountAll(); restoreFloats(); toast('表示を ' + (isPro() ? 'Pro' : 'Free') + ' に切り替えました（開発用）'); });
   }
   window.SMLearn = { pin: pinLabel, openDock: openDock, openRoadmap: openRoadmap, proModal: proModal };
   if (window.MathSite) onReady({ detail: window.MathSite }); else document.addEventListener('mn:ready', onReady);
