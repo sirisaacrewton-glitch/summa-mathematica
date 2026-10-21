@@ -300,6 +300,7 @@
 ├── tools/labels.js       ← ラベル管理（status / find / planned / uses / rename / activate）
 ├── index.html, search.html, glossary.html, labels.json, site-index.js, search-index.js  ← 自動生成（手で編集しない）
 ├── 03-mathematical-logic/ … 60-probability/   ← MSC2020 に準拠した分類フォルダ（第 8.1 節）。各フォルダに _meta.json と自動生成の index.html
+│                           演習（2026-10-21 ユーザー指示）：各ページの「問題」はそのページの内容の確認だけにし、計算練習や複数ページを組み合わせる演習は系列の最後のページ `NN-exercises.html`（ラベル `<pre>:page-exercises-<系列 id の接頭辞以外>`、節はページごとに `<pre>:sec-<code>-exercises`、問題は `::: problem ★ 基本：題`／★★ 標準／★★★ 発展）にまとめる。元のページの末尾からその節へ 1 行で案内する。_meta.json の description に「資料なし」「〜を参考にする」のような編集用の注記を書かない（出典は「〜を参考」「〜に対応」と書く）
 │   └── 03E-set-theory/01-basics/NN-slug.html    ← 記事（葉）。中の <script type="text/markdown" id="source"> だけを編集する
 └── _to_delete/           ← 旧フォルダ構成（2026-09-28 の MSC 移行で退避。ビルド対象外。ユーザーが削除してよい）
 ```
