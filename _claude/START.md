@@ -290,6 +290,7 @@
 ├── assets/               ← サイトのアイコン（墨と金のメダル）。完全版 medal.svg（銘 SUMMA / MATHEMATICA・点線・内側の輪。トップページに表示）と保存用の medal-1024.png、簡約版 favicon.svg（金の縁と ∞ だけ。小さいと銘が潰れるため）・favicon-32.png、ホーム画面用 apple-touch-icon.png（完全版）。medal.svg は tools/medal.py で作る（文字は Cinzel〔SIL OFL〕の字形を輪郭にしたもの。フォントは @fontsource/cinzel の woff を引数で渡す）。build.js・labels.js は分野として扱わない
 ├── auth-state.js         ← プラン（Free/Pro）の判定。試作は ?plan=free|pro と localStorage sm_plan_tier（本番は Supabase 等に差し替える）
 ├── learn.js              ← 学習機能（📌 ピン留めドック・✓ 理解した・前提の確認・🗺️ 学習ルート・証明パズル・ミニゲーム・証明の段階表示・開発用 Free/Pro 切替）。2026-10-21 試作
+│                           学習ルート：項目は「主張の前提（自動）＋証明の前提（＋で広げる）」、ページは「記法と定義の確認」の下に「ここまでのロードマップ」。前提は build.js が site-index.js の backrefs の 5 番目（role）に記録する参照の位置から決める
 ├── learn/manifest.js     ← ページごとの直感イメージの本文と、演習（パズル・ミニゲーム）の差し込み位置。キーはページのパス
 ├── api/pro-content/      ← 演習の中身（<ページのラベルの : を -- に>.json）。手順 steps は text・uses（使うラベル）・needs（前提となる手順の番号）・hint。判定は needs の順序だけを見る
 ├── tools/build.js        ← ビルド＆検査

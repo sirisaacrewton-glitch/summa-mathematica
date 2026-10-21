@@ -288,7 +288,11 @@ Object.keys(oldReg).forEach(function (k) {
 });
 
 /* ---------------- 3. 参照の検査と被参照リスト ---------------- */
-var backrefs = {};   // label -> [[pageIdx, fromLabel, fromType, fromNum]]
+var backrefs = {};   // label -> [[pageIdx, fromLabel, fromType, fromNum, role]]
+// role：参照がどこに書かれているか。's' 主張（番号付き環境の本文・題）、'p' 証明（proof・solution）、
+// 'n' 記法と定義の確認（notation）、'm' 付属（intuition・example・supplement・hypcheck）、'' 環境の外の地の文。
+// 学習ルートでは、項目どうしは 's' と 'p'、ページどうしは 's'・'p'・'n' を前提として扱う。
+var ROLE_RANK = { s: 4, p: 3, n: 2, m: 1, '': 0 };
 var mathErrors = 0, unresolved = 0;
 
 function typeName(t) {
@@ -299,7 +303,7 @@ function typeName(t) {
 }
 
 pages.forEach(function (pg) {
-  var currentFrom = null;
+  var currentFrom = null, currentRole = '';
   var renderer = Core.createRenderer({
     marked: marked, katex: katex, macros: CONFIG.KATEX_MACROS, envs: CONFIG.ENVIRONMENTS,
     resolveRef: function (label, r) {
@@ -314,9 +318,9 @@ pages.forEach(function (pg) {
       if (!(from && from.label === label)) {
         var list = (backrefs[label] = backrefs[label] || []);
         var sig = pg.idx + '|' + (from ? (from.label || from.num || '') : '');
-        if (!list.some(function (b) { return b.sig === sig; })) {
-          list.push({ sig: sig, v: [pg.idx, from ? (from.label || '') : '', from ? from.type : '', from ? (from.num || '') : ''] });
-        }
+        var hit = list.filter(function (b) { return b.sig === sig; })[0];
+        if (!hit) list.push({ sig: sig, v: [pg.idx, from ? (from.label || '') : '', from ? from.type : '', from ? (from.num || '') : '', currentRole] });
+        else if (ROLE_RANK[currentRole] > ROLE_RANK[hit.v[4]]) hit.v[4] = currentRole;   // 主張と証明の両方にあれば主張を優先
       }
       return { type: L.t, num: L.n, title: L.ti, typeName: typeName(L.t), href: '#', prefix: '' };
     },
@@ -326,17 +330,20 @@ pages.forEach(function (pg) {
     }
   });
   // 環境ごとに「どこから参照したか」を追跡しながら描画
-  (function walk(nodes, fromEnv) {
+  (function walk(nodes, fromEnv, role) {
     nodes.forEach(function (node) {
-      if (node.kind === 'md') { currentFrom = fromEnv; renderer.renderMarkdown(node.text); return; }
+      if (node.kind === 'md') { currentFrom = fromEnv; currentRole = role; renderer.renderMarkdown(node.text); return; }
       if (node.kind !== 'env') return;
       var def = CONFIG.ENVIRONMENTS[node.type] || {};
       var from = def.num ? node : (node.of || fromEnv);
-      currentFrom = from;
+      // hypcheck（前提の使用箇所）の参照は主に反例への言及なので、前提ではなく付属として扱う
+      var r = def.num ? 's' : (def.minor || node.type === 'hypcheck') ? 'm' : def.attached ? 'p' : node.type === 'notation' ? 'n' : role;
+      if (role === 'm') r = 'm';   // 付属ブロックの中はずっと付属
+      currentFrom = from; currentRole = r;
       if (node.title) renderer.renderInline(node.title);
-      walk(node.children, from);
+      walk(node.children, from, r);
     });
-  })(pg.parsed.children, null);
+  })(pg.parsed.children, null, '');
 });
 
 Object.keys(planned).forEach(function (k) {

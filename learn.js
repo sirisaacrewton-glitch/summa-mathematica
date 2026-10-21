@@ -54,8 +54,12 @@
   }
   function typing(t) { return t && (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || t.isContentEditable); }
 
-  /* ---------- 参照の向きを逆にした表（前提＝この項目が参照している項目） ---------- */
-  var FWD = null;
+  /* ---------- 参照の向きを逆にした表（前提＝この項目が参照している項目） ----------
+   * build.js が参照ごとに「どこに書かれていたか」（role）を記録している：
+   *   's' 主張の中、'p' 証明の中、'n' 記法と定義の確認、'm' 例・補足など、'' 地の文。
+   * 項目の前提として使うのは 's' と 'p' だけ（例・補足での言及は前提ではない）。 */
+  var FWD = null, PFWD = null;
+  var RANK = { s: 2, p: 1 };
   function forward() {
     if (FWD) return FWD;
     FWD = {};
@@ -64,14 +68,36 @@
       var T = L[target];
       if (!T || !CORE_TYPES[T.t]) return;
       B[target].forEach(function (b) {
-        var from = b[1];
-        if (!from || from === target) return;
-        (FWD[from] = FWD[from] || []).indexOf(target) < 0 && FWD[from].push(target);
+        var from = b[1], role = b[4] || '';
+        if (!from || from === target || !RANK[role]) return;
+        var m = FWD[from] = FWD[from] || {};
+        if (!m[target] || RANK[role] > RANK[m[target]]) m[target] = role;
       });
     });
     return FWD;
   }
-  function prereqs(label) { return (forward()[label] || []).slice(); }
+  // kind：'s'（主張が使う）、'p'（証明だけが使う）、省略で両方
+  function prereqs(label, kind) {
+    var m = forward()[label] || {};
+    return Object.keys(m).filter(function (t) { return !kind || m[t] === kind; });
+  }
+  // ページどうしの前提：ページ A の主張・証明・記法の欄がページ B の項目を参照していれば、B は A の前提。重みは参照の数
+  function pageForward() {
+    if (PFWD) return PFWD;
+    PFWD = {};
+    var B = (S && S.index.backrefs) || {}, L = (S && S.index.labels) || {};
+    Object.keys(B).forEach(function (target) {
+      var T = L[target]; if (!T) return;
+      B[target].forEach(function (b) {
+        var role = b[4] || '';
+        if (role !== 's' && role !== 'p' && role !== 'n') return;
+        if (b[0] === T.p) return;
+        var m = PFWD[b[0]] = PFWD[b[0]] || {};
+        m[T.p] = (m[T.p] || 0) + 1;
+      });
+    });
+    return PFWD;
+  }
   function refText(label) {
     var r = S.resolveRef(label);
     if (!r || r.planned) return label;
@@ -452,84 +478,221 @@
   }
 
   /* =====================================================================
-   * 機能 D：学習ルート（前提の樹形図）
+   * 機能 D：学習ルート
+   * 参照関係をすべてさかのぼると量が膨れ、しかもそれは「このサイトが選んだ証明」に依存する。そこで
+   *   ・主張を読むのに要る前提（主張の中の参照）は最後までさかのぼって自動で並べる（証明の選び方によらない）
+   *   ・証明で使う結果は 1 段だけ並べ、＋ボタンでその項目の前提を 1 段ずつ広げる
+   *   ・「すべてさかのぼる」で従来の厳密な図（詳細表示）にもできる
+   * ページの冒頭（記法と定義の確認の下）には、同じ描き方でページ単位の「ここまでのロードマップ」を出す。
    * ===================================================================== */
-  function ancestry(goal, maxNodes) {
-    var L = S.index.labels, nodes = {}, order = [], queue = [goal];
-    nodes[goal] = true; order.push(goal);
-    while (queue.length && order.length < maxNodes) {
-      var x = queue.shift();
-      prereqs(x).forEach(function (y) {
-        if (nodes[y] || !L[y] || !CORE_TYPES[L[y].t] || order.length >= maxNodes) return;
-        nodes[y] = true; order.push(y); queue.push(y);
-      });
-    }
-    var level = {};
+  function isCore(x) { var L = S.index.labels[x]; return !!(L && CORE_TYPES[L.t]); }
+  /* 段に分けた図の共通部分：ids（表示する点）、deps(x)（表示中の前提）から段を決めて、上が遠い前提・下が目標になるよう並べる */
+  function layers(ids, deps) {
+    var set = {}, level = {};
+    ids.forEach(function (x) { set[x] = 1; });
     function lv(x, stack) {
       if (level[x] != null) return level[x];
-      if (stack[x]) return 0;      // 参照の輪（まれ）は切る
+      if (stack[x]) return 0;   // 参照の輪（まれ）は切る
       stack[x] = 1;
       var m = -1;
-      prereqs(x).forEach(function (y) { if (nodes[y]) m = Math.max(m, lv(y, stack)); });
+      deps(x).forEach(function (y) { if (set[y]) m = Math.max(m, lv(y, stack)); });
       delete stack[x];
       return (level[x] = m + 1);
     }
-    order.forEach(function (x) { lv(x, {}); });
+    ids.forEach(function (x) { lv(x, {}); });
+    var rows = [];
+    ids.forEach(function (x) { (rows[level[x]] = rows[level[x]] || []).push(x); });
     var edges = [];
-    order.forEach(function (x) { prereqs(x).forEach(function (y) { if (nodes[y]) edges.push([y, x]); }); });
-    return { order: order, level: level, edges: edges, truncated: order.length >= maxNodes };
+    ids.forEach(function (x) { deps(x).forEach(function (y) { if (set[y]) edges.push([y, x]); }); });
+    return { rows: rows.filter(Boolean), edges: edges };
   }
-  function openRoadmap(goal) {
-    var g = ancestry(goal, 60), u = understood(), pro = isPro();
-    var byLv = [];
-    g.order.forEach(function (x) { (byLv[g.level[x]] = byLv[g.level[x]] || []).push(x); });
-    var done = g.order.filter(function (x) { return u[x]; }).length;
-    var pct = Math.round(100 * done / g.order.length);
-    var goals = getJSON('sm_goals', []);
-    var reg = goals.indexOf(goal) >= 0;
-    var head = '<div class="mn-rm-bar">' +
-      (pro ? '<div class="mn-rm-progress" title="理解済み ' + done + ' / ' + g.order.length + '"><span style="width:' + pct + '%"></span></div><span class="mn-rm-pct">理解済み ' + done + ' / ' + g.order.length + '（' + pct + '%）</span>' +
-        '<button type="button" class="mn-btn mn-btn-quiet" data-goal>' + (reg ? '★ マイ・ロードマップに登録済み' : '☆ この目標をマイ・ロードマップに登録') + '</button>'
-        : '<span class="mn-rm-pct mn-muted">🔒 達成率・未習得の強調・目標の登録は Pro プランの機能です。</span><button type="button" class="mn-textbtn" data-see-pro>Pro について</button>') +
-      '</div>';
-    var rows = byLv.map(function (xs, i) {
-      return '<div class="mn-rm-row" data-lv="' + i + '"><div class="mn-rm-step">Step ' + (i + 1) + '</div><div class="mn-rm-nodes">' + xs.map(function (x) {
-        var r = S.resolveRef(x), cls = 'mn-rm-node' + (x === goal ? ' is-goal' : '') + (pro && u[x] ? ' is-done' : '') + (pro && !u[x] && x !== goal ? ' is-unmet' : '');
-        return '<a class="mn-xref ' + cls + '" data-label="' + esc(x) + '" data-node="' + esc(x) + '" href="' + esc(r.href) + '">' +
-          '<span class="mn-rm-k">' + S.renderer.renderInline(refText(x)) + (pro && u[x] ? ' ✓' : '') + '</span>' +
-          (r.title ? '<span class="mn-rm-t">' + S.renderer.renderInline(r.title) + '</span>' : '') + '</a>';
-      }).join('') + '</div></div>';
-    }).join('');
-    var m = openModal('学習ルート：' + refText(goal), head +
-      '<p class="mn-muted mn-rm-note">この項目に至るまでに使われている定義・定理を、参照関係から自動で並べました（上から順に読めば前提がそろいます）。' +
-      (g.truncated ? '項目が多いので、近いものから 60 件までを表示しています。' : '') + '</p>' +
-      '<div class="mn-rm-graph"><svg class="mn-rm-edges" aria-hidden="true"></svg>' + rows + '</div>', { wide: true });
-    m.addEventListener('click', function (ev) {
-      if (ev.target.closest('[data-see-pro]')) { proModal('学習ルートの進捗管理は Pro プランの機能です。'); return; }
-      if (ev.target.closest('[data-goal]')) {
-        var gs = getJSON('sm_goals', []), i = gs.indexOf(goal);
-        if (i >= 0) gs.splice(i, 1); else gs.push(goal);
-        setJSON('sm_goals', gs); openRoadmap(goal);
-      }
-    });
-    var draw = function () { drawEdges(m.querySelector('.mn-rm-graph'), g.edges); };
-    requestAnimationFrame(draw);
-    window.addEventListener('resize', draw, { once: true });
+  // 段の HTML。rows[0] が最も基礎、最後が目標。depth は目標からの段数（立体表示で奥行きに使う）
+  function layeredHtml(rows, nodeHtml, stepName) {
+    var n = rows.length;
+    return '<div class="mn-rm-graph"><svg class="mn-rm-edges" aria-hidden="true"></svg>' + rows.map(function (xs, i) {
+      return '<div class="mn-rm-row" data-depth="' + (n - 1 - i) + '" style="--d:' + (n - 1 - i) + '"><div class="mn-rm-step">' + stepName(i, n) + '</div><div class="mn-rm-nodes">' +
+        xs.map(nodeHtml).join('') + '</div></div>';
+    }).join('') + '</div>';
   }
-  function drawEdges(graph, edges) {
+  // 線を引く。立体表示（3D 変形）でもずれないよう、画面上の位置ではなくレイアウト上の位置（offset）で測る
+  function relPos(n, root) {
+    var x = 0, y = 0;
+    while (n && n !== root) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+    return { x: x, y: y };
+  }
+  function drawEdges(graph, edges, roleOf) {
     if (!graph) return;
-    var svg = graph.querySelector('.mn-rm-edges'), base = graph.getBoundingClientRect();
+    var svg = graph.querySelector('.mn-rm-edges');
     svg.setAttribute('width', graph.scrollWidth); svg.setAttribute('height', graph.scrollHeight);
     var pos = {};
     graph.querySelectorAll('[data-node]').forEach(function (n) {
-      var r = n.getBoundingClientRect();
-      pos[n.getAttribute('data-node')] = { x: r.left - base.left + r.width / 2, top: r.top - base.top, bottom: r.bottom - base.top };
+      var p = relPos(n, graph);
+      pos[n.getAttribute('data-node')] = { x: p.x + n.offsetWidth / 2, top: p.y, bottom: p.y + n.offsetHeight };
     });
     svg.innerHTML = edges.map(function (e) {
       var a = pos[e[0]], b = pos[e[1]]; if (!a || !b) return '';
       var y1 = a.bottom, y2 = b.top, my = (y1 + y2) / 2;
-      return '<path d="M' + a.x + ' ' + y1 + ' C ' + a.x + ' ' + my + ', ' + b.x + ' ' + my + ', ' + b.x + ' ' + y2 + '"/>';
+      var cls = roleOf ? roleOf(e[0], e[1]) : '';
+      return '<path' + (cls ? ' class="is-' + cls + '"' : '') + ' d="M' + a.x + ' ' + y1 + ' C ' + a.x + ' ' + my + ', ' + b.x + ' ' + my + ', ' + b.x + ' ' + y2 + '"/>';
     }).join('');
+    fitTilt(graph);
+  }
+  // 立体表示で奥へ傾けると、見た目の高さが縮んで上に空白ができる。その分だけ上に詰める
+  function fitTilt(graph) {
+    var wrap = graph.parentNode;
+    if (!wrap || !wrap.classList.contains('mn-map-wrap')) return;
+    if (!wrap.classList.contains('is-3d')) { wrap.style.marginTop = ''; return; }
+    var gap = graph.offsetHeight - graph.getBoundingClientRect().height;
+    wrap.style.marginTop = gap > 0 ? -Math.round(gap) + 'px' : '';
+  }
+  function watchEdges(box, draw) {
+    requestAnimationFrame(draw);
+    if (window.ResizeObserver) { var ro = new ResizeObserver(function () { draw(); }); ro.observe(box); return ro; }
+    window.addEventListener('resize', draw);
+  }
+  /* 立体表示：遠い前提ほど奥に傾いた「地図」として見せる（ホバー・フォーカスで平らに戻る）。設定はブラウザに保存 */
+  function tilt() { return getJSON('sm_map_tilt', true) && !REDUCED; }
+  function tiltButton() {
+    return '<button type="button" class="mn-textbtn mn-map-tilt" data-tilt aria-pressed="' + tilt() + '" title="遠い前提ほど奥に見える立体表示">' + (tilt() ? '◩ 立体表示：オン' : '◩ 立体表示：オフ') + '</button>';
+  }
+  function bindTilt(root, redraw) {
+    root.addEventListener('click', function (ev) {
+      var b = ev.target.closest('[data-tilt]'); if (!b) return;
+      setJSON('sm_map_tilt', !tilt());
+      document.querySelectorAll('.mn-map-wrap').forEach(function (w) { w.classList.toggle('is-3d', tilt()); var g = w.querySelector('.mn-rm-graph'); if (g) setTimeout(function () { fitTilt(g); }, 460); });
+      document.querySelectorAll('[data-tilt]').forEach(function (x) { x.outerHTML = tiltButton(); });
+      if (redraw) setTimeout(redraw, 420);
+    });
+  }
+
+  /* ---------- 項目の学習ルート（モーダル） ---------- */
+  function statementClosure(goal, cap) {
+    var seen = {}, out = [], q = [goal];
+    seen[goal] = 1;
+    while (q.length && out.length < cap) {
+      var x = q.shift();
+      prereqs(x, 's').forEach(function (y) { if (!seen[y] && isCore(y) && out.length < cap) { seen[y] = 1; out.push(y); q.push(y); } });
+    }
+    return out;
+  }
+  function openRoadmap(goal) {
+    var shown = {}, how = {}, CAP = 90;
+    shown[goal] = 1; how[goal] = 'goal';
+    statementClosure(goal, 40).forEach(function (y) { shown[y] = 1; how[y] = 's'; });
+    prereqs(goal, 'p').forEach(function (y) { if (isCore(y) && !shown[y]) { shown[y] = 1; how[y] = 'p'; } });
+    var m = openModal('学習ルート：' + refText(goal), '<div class="mn-rm-body"></div>', { wide: true });
+    var body = m.querySelector('.mn-rm-body'), ro = null;
+    function hidden(x) { return prereqs(x).filter(function (y) { return isCore(y) && !shown[y]; }); }
+    function render() {
+      var ids = Object.keys(shown), u = understood(), pro = isPro();
+      var g = layers(ids, function (x) { return prereqs(x); });
+      var done = ids.filter(function (x) { return u[x]; }).length, pct = Math.round(100 * done / ids.length);
+      var reg = getJSON('sm_goals', []).indexOf(goal) >= 0;
+      var full = ids.length >= CAP || !ids.some(function (x) { return hidden(x).length; });
+      body.innerHTML = '<div class="mn-rm-bar">' +
+        (pro ? '<div class="mn-rm-progress" title="理解済み ' + done + ' / ' + ids.length + '"><span style="width:' + pct + '%"></span></div><span class="mn-rm-pct">理解済み ' + done + ' / ' + ids.length + '（' + pct + '%）</span>' +
+          '<button type="button" class="mn-btn mn-btn-quiet" data-goal>' + (reg ? '★ マイ・ロードマップに登録済み' : '☆ この目標をマイ・ロードマップに登録') + '</button>'
+          : '<span class="mn-rm-pct mn-muted">🔒 達成率・未習得の強調・目標の登録は Pro プランの機能です。</span><button type="button" class="mn-textbtn" data-see-pro>Pro について</button>') +
+        '</div>' +
+        '<div class="mn-rm-legend"><span class="mn-rm-lg is-s">主張を読むのに必要（自動でさかのぼる）</span><span class="mn-rm-lg is-p">証明で使う（＋で 1 段ずつ広げる）</span>' +
+        (full ? '' : '<button type="button" class="mn-textbtn" data-expand-all>すべてさかのぼる（詳細）</button>') + tiltButton() + '</div>' +
+        '<p class="mn-muted mn-rm-note">これはこのサイトが選んだ証明に沿った前提で、理解の道筋はほかにもありえます。主張を読むのに要るものだけを最後までたどり、証明で使うものは必要な分だけ広げてください。' +
+        (ids.length >= CAP ? '項目が多いので ' + CAP + ' 件で打ち切りました。' : '') + '</p>' +
+        '<div class="mn-map-wrap' + (tilt() ? ' is-3d' : '') + '">' + layeredHtml(g.rows, function (x) {
+          var r = S.resolveRef(x), hid = hidden(x).length;
+          var cls = 'mn-rm-node is-' + how[x] + (pro && u[x] ? ' is-done' : '') + (pro && !u[x] && x !== goal ? ' is-unmet' : '');
+          return '<div class="' + cls + '" data-node="' + esc(x) + '"><a class="mn-xref mn-rm-link" data-label="' + esc(x) + '" href="' + esc(r.href) + '">' +
+            '<span class="mn-rm-k">' + S.renderer.renderInline(refText(x)) + (pro && u[x] ? ' ✓' : '') + '</span>' +
+            (r.title ? '<span class="mn-rm-t">' + S.renderer.renderInline(r.title) + '</span>' : '') + '</a>' +
+            (hid && ids.length < CAP ? '<button type="button" class="mn-rm-more" data-expand="' + esc(x) + '" title="この項目の前提を 1 段広げる">＋' + hid + '</button>' : '') + '</div>';
+        }, function (i, n) { return i === n - 1 ? '目標' : 'Step ' + (i + 1); }) + '</div>';
+      var graph = body.querySelector('.mn-rm-graph');
+      var draw = function () { drawEdges(graph, g.edges, function (y, x) { return (forward()[x] || {})[y] === 's' ? 's' : 'p'; }); };
+      if (ro && ro.disconnect) ro.disconnect();
+      ro = watchEdges(graph, draw);
+    }
+    function add(x) { hidden(x).forEach(function (y) { if (Object.keys(shown).length < CAP) { shown[y] = 1; how[y] = how[y] || 'p'; } }); }
+    m.addEventListener('click', function (ev) {
+      var b;
+      if (ev.target.closest('[data-see-pro]')) { proModal('学習ルートの進捗管理は Pro プランの機能です。'); return; }
+      if (ev.target.closest('[data-goal]')) {
+        var gs = getJSON('sm_goals', []), i = gs.indexOf(goal);
+        if (i >= 0) gs.splice(i, 1); else gs.push(goal);
+        setJSON('sm_goals', gs); render(); return;
+      }
+      if ((b = ev.target.closest('[data-expand]'))) { add(b.getAttribute('data-expand')); render(); return; }
+      if (ev.target.closest('[data-expand-all]')) {
+        for (var guard = 0; guard < 30; guard++) {
+          var before = Object.keys(shown).length;
+          Object.keys(shown).forEach(add);
+          if (Object.keys(shown).length === before || before >= CAP) break;
+        }
+        render();
+      }
+    });
+    bindTilt(m, function () { render(); });
+    render();
+  }
+
+  /* ---------- ページ単位の「ここまでのロードマップ」（記法と定義の確認の下） ---------- */
+  function mountPageMap() {
+    var IDX = S.index, me = S.pageIndex;
+    if (me == null || me < 0) return;
+    var anchor = S.article.querySelector('.mn-prose .mn-env[data-env="notation"]');
+    if (!anchor) return;
+    var PF = pageForward();
+    var depsOf = function (i) { return Object.keys(PF[i] || {}).map(Number); };
+    var direct = depsOf(me);
+    if (!direct.length) return;
+    var PER = 8, shown = {}, depth = 1;
+    shown[me] = 1;
+    // 重み（参照の数）の多い順に、段ごと最大 PER 件
+    function top(list) { return list.sort(function (a, b) { return ((PF[me] || {})[b] || 0) - ((PF[me] || {})[a] || 0); }); }
+    top(direct).slice(0, PER).forEach(function (i) { shown[i] = 1; });
+    var open = getJSON('sm_pagemap_open', true);
+    var box = el('<details class="mn-pagemap mn-learn-x"' + (open ? ' open' : '') + '><summary><span class="mn-pagemap-k">🗺️ ここまでのロードマップ</span>' +
+      '<span class="mn-pagemap-sub">このページが前提にするページ ' + direct.length + ' 件</span></summary><div class="mn-pagemap-body"></div></details>');
+    anchor.parentNode.insertBefore(box, anchor.nextSibling);
+    box.addEventListener('toggle', function () { setJSON('sm_pagemap_open', box.open); if (box.open) render(); });
+    var bodyEl = box.querySelector('.mn-pagemap-body'), ro = null;
+    function frontierHidden() {
+      var n = 0;
+      Object.keys(shown).forEach(function (i) { depsOf(+i).forEach(function (j) { if (!shown[j]) n++; }); });
+      return n;
+    }
+    function render() {
+      if (!box.open) return;
+      var ids = Object.keys(shown).map(Number);
+      var g = layers(ids, depsOf);
+      var more = frontierHidden();
+      bodyEl.innerHTML = '<p class="mn-muted mn-pagemap-note">このページの主張・証明・記法の欄が参照しているページを、参照関係から自動で並べました（上ほど基礎）。' +
+        (direct.length > PER ? '前提のページが多いので、参照の多い ' + PER + ' 件を表示しています。' : '') + '</p>' +
+        '<div class="mn-map-wrap' + (tilt() ? ' is-3d' : '') + '">' + layeredHtml(g.rows, function (i) {
+          var P = IDX.pages[i]; if (!P) return '';
+          var here = i === me;
+          return '<div class="mn-rm-node mn-pm-node' + (here ? ' is-goal' : '') + '" data-node="' + i + '"><a class="mn-rm-link" href="' + esc(S.root + P.path) + '"' + (here ? ' aria-current="page"' : '') + '>' +
+            '<span class="mn-rm-k">' + esc((P.subj || '') + (P.sec ? ' §' + P.sec : '')) + '</span><span class="mn-rm-t">' + S.renderer.renderInline(P.title || '') + '</span></a></div>';
+        }, function (i, n) { return i === n - 1 ? '現在地' : (n - 1 - i) + ' 段前'; }) + '</div>' +
+        '<div class="mn-learn-actions">' + (more ? '<button type="button" class="mn-textbtn" data-pm-more>さらにさかのぼる（＋' + more + '）</button>' : '') +
+        (depth > 1 ? '<button type="button" class="mn-textbtn" data-pm-reset>直前の前提だけに戻す</button>' : '') + tiltButton() + '</div>';
+      var graph = bodyEl.querySelector('.mn-rm-graph');
+      if (ro && ro.disconnect) ro.disconnect();
+      ro = watchEdges(graph, function () { drawEdges(graph, g.edges); });
+    }
+    box.addEventListener('click', function (ev) {
+      if (ev.target.closest('[data-pm-more]')) {
+        // 表示中のページの前提を 1 段ずつ足す（各ページ PER 件まで）
+        Object.keys(shown).map(Number).forEach(function (i) {
+          depsOf(i).sort(function (a, b) { return (PF[i][b] || 0) - (PF[i][a] || 0); }).slice(0, PER).forEach(function (j) { shown[j] = 1; });
+        });
+        depth++; render(); return;
+      }
+      if (ev.target.closest('[data-pm-reset]')) {
+        shown = {}; shown[me] = 1; top(direct).slice(0, PER).forEach(function (i) { shown[i] = 1; }); depth = 1; render();
+      }
+    });
+    bindTilt(box, render);
+    render();
   }
 
   /* =====================================================================
@@ -862,6 +1025,7 @@
     if (S.kind === 'page') {
       mountIntuition(mf);
       decorateEnvs();
+      mountPageMap();
       mountInteractiveSlots(mf);
       decorateProofs();
       if (mf && mf.intuition) withContent(renderVideo);
