@@ -1465,17 +1465,36 @@
         var k = 0; while (k + 1 < steps.length && all.indexOf(steps[k + 1]) <= i) k++;
         return k;
       });
-      var on = false, cur = 0;
+      var on = false, cur = 0, revealed = {};
+      // 各ステップの見出し（太字の「Step 2（…）.」）と主張（【主張：…】、なければ null）
+      var labels = steps.map(function (st) { var b = st.querySelector('strong'); return b ? b.innerHTML : ''; });
+      var claims = steps.map(function (st) { return st.querySelector('.mn-step-claim'); });
+      var past = el('<div class="mn-step-past mn-learn-x" hidden></div>'), quiz = el('<div class="mn-step-quiz mn-learn-x" hidden></div>');
+      body.insertBefore(past, bar.nextSibling);
+      function stepHead(k) { return '<span class="mn-step-label">' + labels[k] + '</span>' + (claims[k] ? ' <span class="mn-step-claim">' + claims[k].innerHTML + '</span>' : ''); }
       function render() {
         if (!on) {
           all.forEach(function (c) { c.classList.remove('mn-step-hidden'); });
+          past.hidden = quiz.hidden = true;
           bar.classList.remove('is-on');
           bar.innerHTML = isPro()
             ? '<button type="button" class="mn-textbtn" data-start>▶ 1 ステップずつ読む（全 ' + steps.length + ' ステップ）</button>'
             : '<button type="button" class="mn-textbtn" data-start>🔒 1 ステップずつ読む（Pro）</button>';
           return;
         }
-        all.forEach(function (c, i) { c.classList.toggle('mn-step-hidden', seg[i] >= 0 && seg[i] !== cur); });
+        // 主張のあるステップは、理由を伏せて主張だけを見せ、自分で確かめてから開く
+        var hideCur = !!claims[cur] && !revealed[cur];
+        all.forEach(function (c, i) { c.classList.toggle('mn-step-hidden', seg[i] >= 0 && (seg[i] !== cur || hideCur)); });
+        if (hideCur) {
+          quiz.innerHTML = '<p>' + stepHead(cur) + '</p><p class="mn-step-quiz-hint">この主張を、ここまでのステップと前提から自分で確かめてから開いてください。</p>' +
+            '<button type="button" class="mn-btn" data-reveal>確かめた・理由を開く</button>';
+          body.insertBefore(quiz, steps[cur]); quiz.hidden = false;
+        } else quiz.hidden = true;
+        // これまでのステップの主張（流れを見失わないように）
+        if (cur > 0) {
+          past.innerHTML = '<div class="mn-step-past-k">これまでのステップ</div><ol>' + steps.slice(0, cur).map(function (_, k) { return '<li>' + stepHead(k) + '</li>'; }).join('') + '</ol>';
+          past.hidden = false; body.insertBefore(past, steps[0]);
+        } else past.hidden = true;
         bar.classList.add('is-on');
         var dots = steps.map(function (_, k) { return '<button type="button" class="mn-step-dot' + (k === cur ? ' is-cur' : '') + '" data-go="' + k + '" aria-label="Step ' + (k + 1) + ' へ"></button>'; }).join('');
         bar.innerHTML =
@@ -1502,6 +1521,7 @@
         else if (t.hasAttribute('data-go')) go(+t.getAttribute('data-go'));
         else if (t.hasAttribute('data-all')) { on = false; activeStepper = null; render(); }
       });
+      quiz.addEventListener('click', function (ev) { if (ev.target.closest('[data-reveal]')) { revealed[cur] = true; activeStepper = api; render(); } });
       // スマホ：本文を左右にスワイプして前へ・次へ（縦のスクロールは邪魔しない）
       var sx = null, sy = 0;
       body.addEventListener('touchstart', function (ev) { if (!on) return; sx = ev.touches[0].clientX; sy = ev.touches[0].clientY; }, { passive: true });

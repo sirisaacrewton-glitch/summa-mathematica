@@ -294,6 +294,7 @@
    * ------------------------------------------------------------------ */
   function stripMarkdown(s) {
     return String(s)
+      .replace(/【主張：([\s\S]*?)】/g, '$1')
       .replace(/^\s{0,3}:{3,}.*$/gm, ' ')
       .replace(/```[\s\S]*?```/g, ' ')
       .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
@@ -503,9 +504,11 @@
         var d = SHORT[k]; return '<span class="' + d[0] + '" title="' + d[2] + '">' + d[1] + '</span>';
       });
     }
+    // 証明のステップの主張「【主張：…】」（段階表示で、理由を伏せて主張だけを見せるのに使う。2026-10-22 ユーザー指示）
+    function stepClaims(html) { return html.indexOf('【主張：') < 0 ? html : html.replace(/【主張：([\s\S]*?)】/g, '<span class="mn-step-claim">$1</span>'); }
     function renderMarkdown(text, ex) {
       ex = ex || extractMath(text);
-      return restore(mk.parse(shortcodes(ex.text)), ex);
+      return stepClaims(restore(mk.parse(shortcodes(ex.text)), ex));
     }
     function renderInline(text) {
       var ex = extractMath(text);
