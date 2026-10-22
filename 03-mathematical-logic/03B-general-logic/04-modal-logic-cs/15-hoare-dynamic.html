@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全正当性と動的論理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-mathematical-logic/03B-general-logic/04-modal-logic-cs/15-hoare-dynamic.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 全正当性と動的論理 {#logic:page-hoare-dynamic keywords="total correctness, termination, variant, while rule with counter, weakest precondition, relative completeness for total correctness, first-order dynamic logic, Hoare triples as dynamic logic formulas, while programs as PDL programs"}
+
+部分正当性（\ref{logic:page-hoare-logic}）は「止まれば正しい」だけを言い、止まることは保証しなかった。**全正当性** $[\varphi]P[\psi]$ は「$\varphi$ から実行すれば必ず止まり、止まった状態で $\psi$」を言う。このページでは自然数の標準構造 $\mathcal{N}$ の上で、ループが止まることを「残りの周回数」で示す while 規則をもつ体系を与え、その**健全性**と、最弱事前条件を使った**相対完全性**を証明する。次に、三つ組を論理式の中に取り込んだ**一階の動的論理**を定め、部分正当性・全正当性がその論理式 $\varphi\to[P]\psi$, $\varphi\to\langle P\rangle\psi$ で表されること、while プログラムが PDL のプログラム（\ref{logic:page-pdl}）として読めること、$\mathcal{N}$ では動的論理の論理式がすべて一階の論理式と同値になることを示す。
+
+> 参考：『コンピュータサイエンスにおける様相論理』（ユーザー指定の参考書。本文のテキストは未入手のため、構成は標準的な内容によった）。周回数を使う while 規則と算術的な完全性は Harel, *First-Order Dynamic Logic*, LNCS 68 (1979) の考え方による。
+
+## 記法と定義の確認 {#logic:sec-hd-notation}
+
+::: notation
+- while プログラム・操作的意味論・決定性と局所性・最弱事前条件 $\mathrm{wlp}$・表現性・帰結規則は \ref{logic:page-hoare-logic}、$\mathcal{N}$ の表現性の証明（L への翻訳と燃料）は \ref{logic:page-hoare-arithmetic} のとおり。
+- この節の前半では言語は $\mathcal{L}_{\mathrm{ar}}$、構造は $\mathcal{N}$。$\psi(n)$ と書いたときは、変数 $n$ が自由に現れうる論理式で、$\psi(S(n))\defeq\psi[S(n)/n]$、$\psi(0)\defeq\psi[0/n]$ とする（$n$ は $\psi$ の中で束縛されていないとし、$S(n)$, $0$ は代入可能）。
+- **公理系**：$\ZF$。
+:::
+
+## 全正当性 {#logic:sec-hd-total}
+
+::: definition 全正当性 {#logic:total-correctness keywords="total correctness triple [phi]P[psi]" index="全正当性|ぜんせいとうせい"}
+$\mathfrak{A}\models[\varphi]P[\psi]$ とは、$v\models\varphi$ となるすべての状態 $v$ について、$\langle P,v\rangle\Downarrow w$ となる $w$ があり、$w\models\psi$ となることをいう。**最弱事前条件** $\mathrm{wp}(P,\psi)\defeq\{v:\langle P,v\rangle\Downarrow w$ かつ $w\models\psi$ となる $w$ がある$\}$。
+:::
+
+::: definition 全正当性の規則 {#logic:total-rules keywords="rules for total correctness over N: while rule with an iteration counter" index="全正当性の規則|ぜんせいとうせいのきそく, 周回数の while 規則|しゅうかいすうのほわいるきそく"}
+$\vdash^{\mathrm{t}}[\varphi]P[\psi]$ を、\ref{logic:hoare-rules} の skip・代入・合成・条件分岐・帰結の規則（三つ組を $[\ ]$ に変えたもの、帰結の前提は $\mathcal{N}\models\cdots$）と、次の **while 規則**で導かれることとする。
+- $n$ が $P$, $B$ に現れない変数で、$[\varphi(S(n))]P[\varphi(n)]$、$\mathcal{N}\models\varphi(S(n))\to B$、$\mathcal{N}\models\varphi(0)\to\neg B$ から、$[\exists n\,\varphi(n)]\ \mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}\ [\varphi(0)]$。
+
+$\varphi(n)$ は「あと $n$ 周で止まり、その間ずっと不変条件が保たれる」と読む。
+:::
+
+::: theorem 全正当性の規則の健全性 {#logic:total-soundness keywords="soundness of the total correctness rules over N" index="健全性（全正当性）|けんぜんせいぜんせいとうせい" refname="全正当性の規則の健全性"}
+$\vdash^{\mathrm{t}}[\varphi]P[\psi]$ ならば $\mathcal{N}\models[\varphi]P[\psi]$。
+:::
+
+::: proof
+導出についての帰納法。skip・代入・合成・条件分岐・帰結は \ref{logic:hoare-soundness} と同じ（合成では、$P$ が止まった状態から $Q$ も止まることを帰納法の仮定から得る）。
+
+**Step 1.** 【主張：while 規則の結論で、残りの周回数 $k$ についての帰納法が回る】 $W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$ とし、「$v[n\mapsto k]\models\varphi(n)$ なら、$\langle W,v\rangle\Downarrow w$ となる $w$ があって $w\models\varphi(0)$」を $k$ についての帰納法で示す。$v'\defeq v[n\mapsto k]$ とおく。$k=0$：意味論的代入補題で $v'\models\varphi(0)$、仮定で $v'\models\neg B$、$n\notin\mathrm{FV}(B)$ なので $v\models\neg B$ で $\langle W,v\rangle\Downarrow v$。$\varphi(0)$ に $n$ は自由に現れないので $v\models\varphi(0)$。$k=j+1$：$v[n\mapsto j]\models\varphi(S(n))$（代入補題）なので $v\models B$（$n\notin\mathrm{FV}(B)$）。前提の三つ組で $\langle P,v[n\mapsto j]\rangle\Downarrow u'$ かつ $u'\models\varphi(n)$ となる $u'$ があり、$n\notin\mathrm{var}(P)$ なので $u'(n)=j$。局所性で $\langle P,v\rangle\Downarrow u$（$u$ は $n$ 以外で $u'$ と一致）。$u[n\mapsto j]=u'$ で、帰納法の仮定から $\langle W,u\rangle\Downarrow w$, $w\models\varphi(0)$。規則 4 の後半で $\langle W,v\rangle\Downarrow w$。
+
+**Step 2.** 【主張：結論の三つ組】 $v\models\exists n\,\varphi(n)$ なら $v[n\mapsto k]\models\varphi(n)$ となる $k$ があり、Step 1。
+
+::: hypcheck
+- **$\mathcal{N}$ を使った場所**：$k$ についての帰納法（自然数の整礎性）。一般の構造では、周回数を数える変数の値が自然数である保証がないので、この規則は健全とは限らない。
+- **$n$ が $P$, $B$ に現れないこと**：Step 1 で、周回数の値がプログラムの実行で変わらないことと、条件 $B$ の真理に影響しないことに使った。
+:::
+:::
+
+::: theorem 全正当性の相対完全性 {#logic:total-completeness keywords="relative completeness of total correctness over N" index="相対完全性（全正当性）|そうたいかんぜんせいぜんせいとうせい" refname="全正当性の相対完全性"}
+$\mathcal{N}\models[\varphi]P[\psi]$ ならば $\vdash^{\mathrm{t}}[\varphi]P[\psi]$。
+:::
+
+::: proof
+\ref{logic:cook-completeness} と同じく、各 $P,\psi$ について $\mathrm{wp}(P,\psi)$ を表す論理式 $\omega^{\mathrm{t}}_{P,\psi}$ をとり、$\vdash^{\mathrm{t}}[\omega^{\mathrm{t}}_{P,\psi}]P[\psi]$ を $P$ の構成についての帰納法で示せば、$\mathcal{N}\models\varphi\to\omega^{\mathrm{t}}_{P,\psi}$ と帰結規則で終わる。
+
+**Step 1.** 【主張：$\mathrm{wp}$ は論理式で書ける】 \ref{logic:n-expressive} の証明の $\rho$ を使い、$\omega^{\mathrm{t}}_{P,\psi}\defeq\exists\vec{y}\,\exists w\,(\rho(\vec{x},\vec{y},w)\wedge\psi[y_{0}/x_{0}]\cdots[y_{n}/x_{n}])$ とすると、同じ計算で $\llbracket\omega^{\mathrm{t}}_{P,\psi}\rrbracket=\mathrm{wp}(P,\psi)$（$\langle P,v\rangle\Downarrow w$ はただ一つなので「ある」で書ける）。
+
+**Step 2.** 【主張：while 以外】 skip・代入・合成・条件分岐は \ref{logic:cook-completeness} の Step 1・2 と同じ（$\mathrm{wp}(P;Q,\psi)=\{v:\langle P,v\rangle\Downarrow u$ となる $u$ があり $u\in\mathrm{wp}(Q,\psi)\}$ を使う）。
+
+**Step 3.** 【主張：while では「ちょうど $n$ 周で止まって $\psi$」を $\varphi(n)$ にとる】 $W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$、$c,n$ を新しい変数とし、$Q\defeq c:=0;\ \mathtt{while}\ B\ \mathtt{do}\ P;\ c:=S(c)\ \mathtt{od}$ とする。$\langle Q,v\rangle\Downarrow w\iff\langle W,v\rangle\Downarrow w'$ で、$w$ は $c$ 以外で $w'$ と一致し、$w(c)$ は周回数（導出についての帰納法）。$\mathrm{wp}(Q,\psi\wedge c=n)$ を表す論理式（Step 1）を $\varphi(n)$ とすると、$v[n\mapsto k]\models\varphi(n)\iff$ $W$ は $v$ からちょうど $k$ 周で止まり、止まった状態で $\psi$。すると $\mathcal{N}\models\varphi(S(n))\to B$（1 周以上回る）、$\mathcal{N}\models\varphi(0)\to\neg B\wedge\psi$（0 周で止まる）、$\mathcal{N}\models[\varphi(S(n))]P[\varphi(n)]$（1 周回るとあと $n$ 周）で、帰納法の仮定（$P$ と論理式 $\varphi(n)$）と帰結規則で $\vdash^{\mathrm{t}}[\varphi(S(n))]P[\varphi(n)]$。while 規則で $\vdash^{\mathrm{t}}[\exists n\,\varphi(n)]W[\varphi(0)]$。$\llbracket\exists n\,\varphi(n)\rrbracket=\mathrm{wp}(W,\psi)$ なので、帰結規則で $\vdash^{\mathrm{t}}[\omega^{\mathrm{t}}_{W,\psi}]W[\psi]$。
+:::
+
+## 一階の動的論理 {#logic:sec-hd-dl}
+
+::: definition 一階の動的論理 {#logic:first-order-dl keywords="first-order dynamic logic: formulas [P]phi and <P>phi for while programs" index="一階の動的論理|いっかいのどうてきろんり, 動的論理|どうてきろんり"}
+一階の言語について、**動的論理の論理式**を、一階の論理式の作り方に「$P$ が while プログラムで $\varphi$ が動的論理の論理式なら $[P]\varphi$ と $\langle P\rangle\varphi$ も論理式」を加えて帰納的に定める。構造 $\mathfrak{A}$ と状態 $v$ について、一階の部分は通常どおり、
+$$
+v\models[P]\varphi\iff\langle P,v\rangle\Downarrow w\text{ となるすべての }w\text{ で }w\models\varphi,\qquad v\models\langle P\rangle\varphi\iff\langle P,v\rangle\Downarrow w\text{ かつ }w\models\varphi\text{ となる }w\text{ がある}.
+$$
+:::
+
+::: proposition 三つ組と動的論理 {#logic:triples-as-dl keywords="Hoare triples as dynamic logic formulas; Hoare rules as valid DL principles" index="ホーアの三つ組と動的論理|ほーあのみつぐみとどうてきろんり"}
+1. $\mathfrak{A}\models\{\varphi\}P\{\psi\}\iff\mathfrak{A}\models\varphi\to[P]\psi$。$\mathfrak{A}\models[\varphi]P[\psi]\iff\mathfrak{A}\models\varphi\to\langle P\rangle\psi$。
+2. 次は $\mathfrak{A}$ で真：$[P;Q]\psi\leftrightarrow[P][Q]\psi$、$[\mathtt{if}\ B\ \mathtt{then}\ P\ \mathtt{else}\ Q\ \mathtt{fi}]\psi\leftrightarrow(B\to[P]\psi)\wedge(\neg B\to[Q]\psi)$、$[x:=t]\psi\leftrightarrow\exists y\,(y=t\wedge\psi[y/x])$（$y$ は新しい変数。$\psi$ は一階の論理式）、$\langle P\rangle\psi\to[P]\psi$。
+3. $W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$ について、$\mathfrak{A}\models\varphi\wedge B\to[P]\varphi$ ならば $\mathfrak{A}\models\varphi\to[W](\varphi\wedge\neg B)$。
+:::
+
+::: proof
+1 は定義の書き換え（全正当性は決定性で「ある $w$」と同じ）。2 の $;$ と $\mathtt{if}$ は意味論の規則 2・3 の言い換え（\ref{logic:wlp-props.2}）、代入は \ref{logic:hoare-assignment-pre}、最後は決定性（\ref{logic:while-determinism-locality.1}）。3 は 1 と while 規則の健全性（\ref{logic:hoare-soundness} の Step 2）。
+:::
+
+::: proposition while プログラムは PDL のプログラム {#logic:while-as-pdl keywords="while programs as regular programs: if and while via test, choice and iteration" index="while プログラムと PDL|ほわいるぷろぐらむとぴーでぃーえる"}
+状態の全体を $W_{\mathfrak{A}}$ とし、原子プログラム $x:=t$ に関係 $\{(v,v[x\mapsto t^{\mathfrak{A},v}])\}$ を、テスト $B?$ に $\{(v,v):v\models B\}$ を対応させる（PDL のモデル \ref{logic:pdl-semantics} の考え方）。while プログラムに PDL のプログラムを
+$$
+\mathtt{skip}^{\dagger}\defeq\top?,\quad(P;Q)^{\dagger}\defeq P^{\dagger};Q^{\dagger},\quad(\mathtt{if}\ B\ \mathtt{then}\ P\ \mathtt{else}\ Q\ \mathtt{fi})^{\dagger}\defeq(B?;P^{\dagger})\cup(\neg B?;Q^{\dagger}),\quad(\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od})^{\dagger}\defeq(B?;P^{\dagger})^{\ast};\neg B?
+$$
+で対応させると、$\langle P,v\rangle\Downarrow w\iff vR_{P^{\dagger}}w$。
+:::
+
+::: proof
+⇒ は $\Downarrow$ の導出についての帰納法：while の後半の規則では、$v\models B$、$vR_{P^{\dagger}}u$、$uR_{W^{\dagger}}w$ から、$R_{(B?;P^{\dagger})^{\ast}}$ の鎖を一つ延ばせばよい。⇐ は $P$ の構成についての帰納法で、while の場合は $vR_{(B?;P^{\dagger})}^{k}u$ かつ $u\models\neg B$ について $k$ の帰納法で $\langle W,v\rangle\Downarrow u$ を示す（$k=0$ は規則 4 の前半、$k+1$ は後半）。
+:::
+
+::: theorem N では動的論理は一階論理に還元される {#logic:dl-reduces-to-fol-over-n keywords="over N every first-order dynamic logic formula is equivalent to a first-order formula" index="動的論理の一階論理への還元|どうてきろんりのいっかいろんりへのかんげん" refname="N での動的論理の還元"}
+$\mathcal{L}_{\mathrm{ar}}$ の動的論理の論理式 $\Phi$ には、すべての状態で $\Phi$ と真理が一致する一階の論理式 $\Phi^{\flat}$ がある。
+:::
+
+::: proof
+$\Phi$ の構成についての帰納法。一階の結合子・量化子はそのまま。$[P]\varphi$：帰納法の仮定で $\varphi$ を一階の $\varphi^{\flat}$ に替え（$[P]$ の意味は $\varphi$ の真理集合だけで決まる）、\ref{logic:n-expressive} で $\mathrm{wlp}(P,\varphi^{\flat})$ を表す論理式をとる。$\langle P\rangle\varphi$ は \ref{logic:total-completeness} の Step 1 の $\mathrm{wp}$ の論理式。
+:::
+
+::: remark
+1. \ref{logic:dl-reduces-to-fol-over-n} から、$\mathcal{N}$ で真な動的論理の論理式の全体は、$\mathrm{Th}(\mathcal{N})$ を神託とすれば決定できる（Harel 1979 の「算術的完全性」はこの方向の結果で、動的論理の公理系が $\mathrm{Th}(\mathcal{N})$ を加えると完全であることを言う。このサイトでは公理系の完全性そのものは示していない）。
+2. 一方、一般の構造についての動的論理の妥当性は、一階論理よりはるかに複雑である（$\Pi^{1}_{1}$ 完全であることが知られている。Harel–Kozen–Tiuryn『Dynamic Logic』）。このサイトでは証明していない。
+:::
+
+::: intuition
+**部分正当性と全正当性は $\Box$ と $\Diamond$。** 三つ組 $\{\varphi\}P\{\psi\}$ は「$P$ のすべての実行の後で $\psi$」で様相 $[P]$、全正当性は「ある実行の後で $\psi$」で様相 $\langle P\rangle$ にあたる（プログラムが決定的なので「ある」は「ただ一つの実行が止まって」）。部分正当性の while 規則は不変条件（最大不動点、$\nu$）、全正当性の while 規則は周回数の減少（最小不動点、$\mu$、整礎性）を使う。ホーア論理・PDL・μ 計算は、同じ不動点の構造を、具体的なプログラム・抽象的なプログラム・一般の不動点の三つの段階で見たものである。
+
+**高い視点：述語変換子の双対性。** $\mathrm{wlp}$ と $\mathrm{wp}$ は状態の集合の上の写像で、決定的なプログラムでは $\mathrm{wp}(P,\psi)=\mathrm{wlp}(P,\psi)\cap\mathrm{wp}(P,\top)$（「正しい」かつ「止まる」）が成り立つ。$\mathrm{wlp}$ は交わりを保ち、$\mathrm{wp}$ は（決定的なら）和も交わりも保つ。これはダイクストラの最弱事前条件の計算の代数的な骨格で、様相論理では $[P]$ が交わりを、$\langle P\rangle$ が和を保つことにあたる。
+:::
+
+## 問題 {#logic:sec-hd-problems}
+
+::: problem {#logic:prob-hd-countdown}
+$\vdash^{\mathrm{t}}[\top]\ \mathtt{while}\ 0<x\ \mathtt{do}\ x:=y\ \mathtt{od}\ [x=0]$ は導けるか。導けないなら、その理由を意味論で述べよ（$y$ は $x$ と異なる変数）。
+:::
+
+::: solution
+導けない。健全性（\ref{logic:total-soundness}）から、導けるなら $\mathcal{N}$ で妥当なはずだが、$v(x)=1$, $v(y)=1$ の状態から始めると、$x:=y$ の後も $x=1$ で、ループは止まらない。よって $\mathcal{N}\not\models[\top]W[x=0]$。（$[y=0\vee x=0]W[x=0]$ なら妥当で、$\varphi(n)\defeq(n=0\wedge x=0)\vee(n=S(0)\wedge0<x\wedge y=0)$ で導ける。）
+:::
+
+::: problem {#logic:prob-hd-decrement}
+$P\defeq\mathtt{while}\ 0<x\ \mathtt{do}\ x:=x\mathbin{\dot{-}}1\ \mathtt{od}$ は $\mathcal{L}_{\mathrm{ar}}$ に $\mathbin{\dot{-}}$ がないので書けない。代わりに $Q\defeq\mathtt{while}\ 0<x\ \mathtt{do}\ x:=z;\ z:=0\ \mathtt{od}$ について、$[x=S(z)\vee x=0]\ Q\ [x=0]$ を while 規則で導け（$\varphi(n)$ を具体的に与えよ）。
+:::
+
+::: solution
+状態を見て周回数を決める：$x=0$ なら 0 周、$x=S(z)$ で $z=0$ なら 1 周（$x:=0$ で止まる）、$x=S(z)$ で $0<z$ なら 2 周（$x:=z$, $z:=0$ の後 $0<x$ で、次に $x:=0$）。よって $\varphi(n)\defeq(n=0\wedge x=0)\vee(n=S(0)\wedge0<x\wedge z=0)\vee(n=S(S(0))\wedge0<x\wedge0<z)$。確認：$\varphi(S(n))\to0<x$。$\varphi(0)\to\neg(0<x)$（$x=0$）。$[\varphi(S(n))]\ x:=z;\ z:=0\ [\varphi(n)]$：$\varphi(S(n))$ の第 2 項（$n=0$）なら実行後 $x=0$ で $\varphi(0)$、第 3 項（$n=S(0)$）なら実行後 $x=z_{\text{前}}>0$, $z=0$ で $\varphi(S(0))$ の第 2 項。三つ組は代入の公理二つと帰結規則で導ける。前提 $x=S(z)\vee x=0$ は $\mathcal{N}$ で $\exists n\,\varphi(n)$ を導く（$x=S(z)$ なら $0<x$ で、$z$ が $0$ かどうかで $n$ を選ぶ）。while 規則の後、$\mathcal{N}\models\varphi(0)\to x=0$ と帰結規則で結論。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=35dfde8c"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=23f6e3d6"></script>
+<script src="../../../site.js?v=f7713090"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
