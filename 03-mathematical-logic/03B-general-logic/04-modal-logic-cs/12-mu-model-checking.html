@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>μ 計算のモデル検査と評価ゲーム | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-mathematical-logic/03B-general-logic/04-modal-logic-cs/12-mu-model-checking.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# μ 計算のモデル検査と評価ゲーム {#logic:page-mu-model-checking keywords="model checking the modal mu-calculus, evaluation game, verifier, refuter, syntax tree, polarity, priority by height, correctness of the evaluation game, NP cap coNP"}
+
+有限のラベル付き遷移系と μ 計算の論理式（\ref{logic:page-mu-calculus}）が与えられたとき、論理式が真な状態の集合を求めるのが μ 計算の**モデル検査**である。このページでは、モデル検査を**評価ゲーム**というパリティゲーム（\ref{logic:page-parity-games}）の勝敗に翻訳する。二人のプレイヤー、**検証者**（論理式が真だと主張する側）と**反証者**が、論理式の構文木の上と状態の上で駒を動かし、$\wedge$ や $[a]$ では反証者が、$\vee$ や $\langle a\rangle$ では検証者が選ぶ。不動点の変数に戻ってくるループは、$\mu$ なら「いつまでも決着をつけない」検証者の負け、$\nu$ なら勝ちになるように優先度を与える。この翻訳の正しさを、近似列（\ref{logic:page-mu-approximants}）と位置決定性（\ref{logic:parity-positional-determinacy}）を使って証明し、系としてモデル検査が NP ∩ coNP に属することを導く。
+
+> 参考：『コンピュータサイエンスにおける様相論理』（ユーザー指定の参考書。本文のテキストは未入手のため、構成は標準的な内容によった）。評価ゲームは Emerson–Jutla 1991, Stirling 1995 などによる。ここでは否定標準形に直さず、否定を「役割の交換」として構文木の上で扱った。
+
+## 記法と定義の確認 {#logic:sec-mmc-notation}
+
+::: notation
+- 論理式・自由変数・正値性・意味論は \ref{logic:page-mu-calculus}、近似列は \ref{logic:mu-approximant}、パリティゲーム・位置戦略・勝利領域・アトラクタは \ref{logic:page-parity-games} のとおり。この節の遷移系 $\mathcal{M}=(S,\{R_{a}\})$ は有限で、論理式に現れる動作の関係だけを考える。
+- 論理式 $A$ の**構文木**：頂点は $A$ の部分の出現で、根は $A$ 自身。$\neg B$, $\langle a\rangle B$, $\mu X.B$ の頂点の子は $B$、$B\wedge C$ の子は $B,C$、変数の頂点は葉。頂点 $n$ の**高さ** $h(n)$ は $n$ の下の部分木の高さ（葉は $0$）。
+- 変数 $X$ の葉 $n$ について、$n$ の祖先のうち $\mu X$ の形で最も近いものがあれば、それを $n$ の**束縛子**といい、$n$ を束縛された出現という。なければ自由な出現という。
+- 頂点 $n$ の**極性** $\mathrm{pol}(n)\in\{+,-\}$：根から $n$ までの道で、$n$ より真に上にある $\neg$ の頂点の個数が偶数なら $+$、奇数なら $-$。
+- **公理系**：$\ZF$。選択公理は使わない（有限集合の中では順序で選ぶ）。
+:::
+
+::: lemma 極性と束縛子 {#logic:mmc-polarity keywords="a bound occurrence has the same polarity as its binder"}
+$A$ が論理式なら、束縛された出現 $n$ とその束縛子 $m$ は同じ極性をもつ。
+:::
+
+::: proof
+$m=\mu X.C$ とする。$C$ の構成についての帰納法で、「$\mathrm{pos}(X,C)$ なら、$C$ の中の $X$ の自由な出現の上にある（$C$ の中の）$\neg$ は偶数個、$\mathrm{neg}(X,C)$ なら奇数個」を示す（$\neg$ で pos と neg が入れ替わり、$\mu Y$（$Y\ne X$）では中身についての主張、$\mu X$ では $X$ の自由な出現がない）。$A$ は論理式なので $\mathrm{pos}(X,C)$ で、$n$ は $C$ の中で $X$ の自由な出現なので、$m$ と $n$ の間の $\neg$ は偶数個。
+:::
+
+## 評価ゲーム {#logic:sec-mmc-game}
+
+::: definition 評価ゲーム {#logic:evaluation-game keywords="evaluation game G(A,V): positions (s,n), ownership by polarity, priority 2h(m)+[effective mu]" index="評価ゲーム|ひょうかげーむ, 検証者|けんしょうしゃ, 反証者|はんしょうしゃ"}
+論理式 $A$ と付値 $V$ について、パリティゲーム $\mathcal{G}(A,V)$ を次で定める。プレイヤー $0$ を**検証者**、$1$ を**反証者**という。頂点は、組 $(s,n)$（$s\in S$, $n$ は構文木の頂点）と、二つの**行き止まり** $\top_{0},\top_{1}$ である。$\top_{j}$ は自分自身へのループだけをもち、優先度は $\Omega(\top_{0})=0$, $\Omega(\top_{1})=1$。$(s,n)$ の手と持ち主を、$n$ の形と極性で決める（「後続」は次に行ける頂点）。
+- $n=\neg B$：後続は $(s,B)$ だけ（持ち主はどちらでもよいので検証者とする）。
+- $n=B\wedge C$：後続は $(s,B)$, $(s,C)$。持ち主は、極性 $+$ なら反証者、$-$ なら検証者。
+- $n=\langle a\rangle B$：後続は $sR_{a}t$ となる $(t,B)$。持ち主は、極性 $+$ なら検証者、$-$ なら反証者。そのような $t$ がなければ、後続は持ち主の負けの行き止まり（持ち主が検証者なら $\top_{1}$、反証者なら $\top_{0}$）だけ。
+- $n=\mu X.B$：後続は $(s,B)$ だけ。
+- $n$ が束縛された出現で束縛子が $m$：後続は $(s,m)$ だけ。
+- $n$ が自由な変数 $X$ の出現：後続は、「$s\in V(X)$」と「極性が $+$」が一致すれば $\top_{0}$、一致しなければ $\top_{1}$ だけ。
+
+優先度は、$n=\mu X.B$ のとき $\Omega(s,n)\defeq2h(n)+1$（極性 $+$）、$2h(n)$（極性 $-$）、それ以外の $(s,n)$ では $0$ とする。極性が $+$ の $\mu$ を**実効的な $\mu$**、$-$ の $\mu$ を**実効的な $\nu$** という。
+:::
+
+::: remark
+極性 $-$ の頂点では、検証者は「その部分論理式が偽」であることを示そうとしている。$\neg(B\wedge C)=\neg B\vee\neg C$、$\neg\langle a\rangle B=[a]\neg B$、$\neg\mu X.B=\nu X.\neg B[\neg X/X]$（\ref{logic:mu-nu}）なので、極性 $-$ では $\wedge$ は検証者が選ぶ $\vee$ に、$\langle a\rangle$ は反証者が選ぶ $[a]$ に、$\mu$ は $\nu$ に変わる。これが持ち主と優先度の決め方の理由である。
+:::
+
+::: lemma プレイの勝者 {#logic:mmc-play-winner keywords="the winner of an infinite play is determined by the outermost binder visited infinitely often"}
+行き止まりに入らない $\mathcal{G}(A,V)$ のプレイ $\pi$ について、$\pi$ に無限回現れる構文木の頂点のうち、ほかのすべてを部分木に含む $\mu$ の頂点 $m$ がただ一つある。$\pi$ の勝者は、$m$ が実効的な $\nu$ なら検証者、実効的な $\mu$ なら反証者である。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mu$ の頂点が無限回現れる】 手は、構文木で子に進むか、束縛された出現から束縛子（祖先）に戻るかのどちらかで、構文木は有限なので、戻る手が無限回ある。戻った先は $\mu$ の頂点。
+
+**Step 2.** 【主張：最も上のものがすべてを含む】 無限回現れる $\mu$ の頂点のうち深さ最小のものを $m$ とする。ある時刻以降は無限回現れる頂点だけが現れる。$m$ の部分木の外の頂点 $n$ が無限回現れるとすると、$m$ から $n$ へ進むたびに $m$ の部分木を出る必要があり、出る手は束縛子への戻りで、行き先は $m$ の真の祖先の $\mu$ の頂点（部分木の中の束縛子は部分木の中）。それが無限回現れ、深さが $m$ より小さく矛盾。よって無限回現れる頂点は $m$ の部分木に含まれ、とくに $m$ はただ一つ。
+
+**Step 3.** 【主張：勝者】 $m$ の部分木の中の $m$ 以外の $\mu$ の頂点は高さが $h(m)-1$ 以下なので優先度は $2h(m)-1$ 以下、ほかの頂点は $0$。$h(m)\ge1$ なので、$\mathrm{Inf}(\pi)$ の優先度の最大は $m$ の優先度で、その偶奇は $m$ が実効的な $\nu$ か $\mu$ かで決まる。
+:::
+
+::: lemma 一般の戦略 {#logic:mmc-general-strategy keywords="if a player has a history-dependent winning strategy then the vertex is in its positional winning region"}
+有限のパリティゲームで、プレイヤー $j$ の**一般の戦略**を、$V_{j}$ の頂点で終わるプレイの有限の始まりに後続を対応させる写像とし、それに従うプレイ・勝つことを位置戦略と同じく定める。$j$ が一般の戦略で $v$ から勝つなら $v\in W_{j}$。
+:::
+
+::: proof
+$v\notin W_{j}$ なら \ref{logic:parity-positional-determinacy} で $v\in W_{\bar{j}}(\tau)$ となる $\bar{j}$ の位置戦略 $\tau$ がある。$v$ から一般の戦略と $\tau$ の両方に従うプレイが一つあり（各時刻で持ち主の戦略で進む）、両方の勝ちになって矛盾。
+:::
+
+## 評価ゲームの正しさ {#logic:sec-mmc-correctness}
+
+::: theorem 評価ゲームの正しさ {#logic:evaluation-game-correct keywords="correctness of the evaluation game: the verifier wins from (s, root) iff s satisfies A" index="評価ゲームの正しさ|ひょうかげーむのただしさ" refname="評価ゲームの正しさ"}
+有限の遷移系、論理式 $A$、付値 $V$ について、検証者が $\mathcal{G}(A,V)$ で $(s,\text{根})$ から勝つ $\iff s\in\lVert A\rVert_{V}$。
+:::
+
+::: proof
+$A$ の構成についての帰納法（すべての $V$ について同時に）。部分論理式 $B$ の構文木は $A$ の構文木の部分木で、高さは同じである。$\mathcal{G}(A,V)$ の中で $B$ の部分の頂点から出るプレイは、$B$ の自由な変数のうち $A$ の中で束縛されるものの出現に着くまで、$\mathcal{G}(B,\cdot)$ のプレイと同じ手・同じ持ち主・同じ優先度をもつ（極性は $A$ の根から $B$ の根までの $\neg$ の個数だけずれる。下の Step 2）。
+
+**Step 1（変数・$\wedge$・$\langle a\rangle$）.** 【主張：一歩目で場合を分ければよい】 変数：$(s,X)$ の後続は、$s\in V(X)$ なら $\top_{0}$、そうでなければ $\top_{1}$。$B\wedge C$：反証者は $(s,B)$, $(s,C)$ を選ぶ。$(s,B)$ から先の部分は自由な変数が $\mathcal{G}(B,V)$ と同じく行き止まりに行くので、そこから先のゲームは $\mathcal{G}(B,V)$ と同じ。検証者が $(s,B\wedge C)$ から勝つ $\iff$ $(s,B)$ と $(s,C)$ の両方から勝つ（⇒ は \ref{logic:pg-basic.3}、⇐ は二つの戦略を合わせる。部分木が交わらないので位置戦略として合わせられる）$\iff$ 帰納法の仮定で $s\in\lVert B\rVert_{V}\cap\lVert C\rVert_{V}$。$\langle a\rangle B$ も同様（検証者が後続 $t$ を選ぶ。後続がなければ $\top_{1}$ で、$s\notin\lVert\langle a\rangle B\rVert_{V}$ と合う。$(t,B)$ の部分は状態ごとに位置が違うので、各 $t$ の戦略は $\mathcal{G}(B,V)$ の一つの位置戦略で済む）。
+
+**Step 2（$\neg B$）.** 【主張：否定は役割の交換】 $(s,\neg B)$ の後続は $(s,B)$ だけ。$B$ の部分の頂点の極性はすべて $\mathcal{G}(B,V)$ と逆なので、持ち主が入れ替わり、自由な変数の出現の行き先 $\top_{0},\top_{1}$ も入れ替わり、$\langle a\rangle$ の行き止まりの行き先も入れ替わり、$\mu$ の頂点の実効的な種類も入れ替わる。\ref{logic:mmc-play-winner} で、行き止まりに入らないプレイの勝者も入れ替わる。$(s,B)$ から先の部分は、$\mathcal{G}(B,V)$ と同じアリーナで二人の役割と各プレイの勝者を入れ替えたものなので、位置戦略はそのまま移る。よって、検証者が $\mathcal{G}(\neg B,V)$ で $(s,\neg B)$ から勝つ $\iff$ $(s,B)$ から勝つ $\iff$ 反証者が $\mathcal{G}(B,V)$ で $(s,\text{根})$ から勝つ $\iff$（位置決定性）検証者が勝たない $\iff$（帰納法の仮定）$s\notin\lVert B\rVert_{V}$。
+
+**Step 3（$\mu X.B$、$\lVert\mu X.B\rVert_{V}\subset W$）.** 【主張：近似列の各段から検証者は勝つ】 根の極性は $+$ で、\ref{logic:mmc-polarity} から $X$ の束縛された出現の極性も $+$。$W\defeq\{s:$ 検証者が $\mathcal{G}(\mu X.B,V)$ で $(s,\text{根})$ から勝つ$\}$、$f(T)\defeq\lVert B\rVert_{V[X\mapsto T]}$ とし、近似列 $\mu^{k}$（$k\in\mathbb{N}$）について $\mu^{k}\subset W$ を $k$ の帰納法で示す。$s\in\mu^{k+1}=f(\mu^{k})$ なら、帰納法の仮定（論理式 $B$）で検証者は $\mathcal{G}(B,V[X\mapsto\mu^{k}])$ で $s$ から位置戦略 $\sigma$ で勝つ。一般の戦略を、「$X$ の出現に着くまでは $\sigma$、$X$ の出現 $(t,n)$ に着いたら、その後は $(t,\text{根})$ からの勝つ位置戦略」とする。$X$ の出現に着くなら、$\mathcal{G}(B,\cdot)$ では $(t,n)$ の次は行き止まりで、$\sigma$ が勝つので $\top_{0}$、すなわち $t\in\mu^{k}\subset W$（$k$ の帰納法の仮定）で、その後は勝つ。着かないなら、プレイは $\mathcal{G}(B,V[X\mapsto\mu^{k}])$ の $\sigma$ に従うプレイと同じで勝つ。\ref{logic:mmc-general-strategy} で $s\in W$。\ref{logic:mu-approximant-theorem.3} で $\lVert\mu X.B\rVert_{V}=\mu^{\lvert S\rvert}\subset W$。
+
+**Step 4（$\mu X.B$、$W\subset\lVert\mu X.B\rVert_{V}$）.** 【主張：最小不動点の外からは反証者が勝つ】 $L\defeq\lVert\mu X.B\rVert_{V}$ とすると $L=f(L)$。帰納法の仮定と位置決定性で、反証者は $\mathcal{G}(B,V[X\mapsto L])$ で、$L$ の外のすべての $t$ について $(t,\text{根})$ から一つの位置戦略 $\tau$ で勝つ。$\mathcal{G}(\mu X.B,V)$ の反証者の位置戦略を、$B$ の部分では $\tau$ とする。$s\notin L$ から $\tau$ に従うプレイは、$(t,\text{根})$（$t\notin L$）から始まる「回」に分かれる。ある回で $X$ の出現 $(t',n)$ に着くなら、$\mathcal{G}(B,\cdot)$ ではその次は行き止まりで、$\tau$ が勝つので $\top_{1}$、すなわち $t'\notin L$ で、次の回も $L$ の外から始まる。ある回が終わらなければ、その回以降は $\mathcal{G}(B,\cdot)$ の $\tau$ に従うプレイで反証者の勝ち（\ref{logic:pg-basic.1}）。回が無限にあれば根が無限回現れ、\ref{logic:mmc-play-winner} の $m$ は根で、実効的な $\mu$ なので反証者の勝ち。よって $s\notin W$（\ref{logic:pg-basic.2}）。
+
+::: hypcheck
+- **有限性**：Step 3 で、近似列が自然数の段で最小不動点に達すること（\ref{logic:mu-approximant-theorem.3}）を使った。無限の遷移系でも、近似列を順序数まで延ばし、戦略に「順序数の段」の記憶を持たせれば同じ議論ができることが知られているが、このサイトでは扱わない。
+- **Step 3 で一般の戦略を使った理由**：$X$ の出現に着いた後は、より低い段 $\mu^{k}$ のための戦略に切り替える必要があり、同じ頂点 $(t,n)$ で選ぶ手が「何段目か」によって変わりうる。位置戦略だけでは書けないが、\ref{logic:mmc-general-strategy} で位置戦略の勝利領域に戻せる。
+- **Step 4 で位置戦略で足りた理由**：最小不動点の外では、どの回も同じ $\tau$ で「$L$ の外にとどめる」だけでよい（一つの不変条件）。$\mu$ と $\nu$ のこの非対称が、最小不動点は「有限回で決着」、最大不動点は「不変条件」という違いにあたる。
+:::
+:::
+
+::: corollary μ 計算のモデル検査の計算量 {#logic:mu-model-checking-np-conp keywords="model checking the modal mu-calculus is in NP cap coNP" index="μ 計算のモデル検査|みゅーけいさんのもでるけんさ" refname="μ 計算のモデル検査の計算量"}
+有限の遷移系、付値、論理式 $A$、状態 $s$ が与えられたとき、「$s\in\lVert A\rVert_{V}$」かどうかの判定は NP ∩ coNP に属する。
+:::
+
+::: proof
+$\mathcal{G}(A,V)$ の頂点は $\lvert S\rvert\cdot\lvert A\rvert+2$ 個以下（$\lvert A\rvert$ は構文木の頂点の個数）、辺は $\lvert A\rvert\cdot(\lvert S\rvert+\sum_{a}\lvert R_{a}\rvert)+2$ 本以下、優先度は $2\lvert A\rvert+1$ 以下で、入力の多項式時間で作れる。\ref{logic:evaluation-game-correct} で問題は「$(s,\text{根})\in W_{0}$」に帰着し、\ref{logic:parity-np-conp} による。
+:::
+
+::: remark
+1. \ref{logic:mu-finite-evaluation} の素朴なくり返しの計算は、$\mu$・$\nu$ が $k$ 重に入れ子になっていると、内側のくり返しを外側の各段でやり直すので、$O(\lvert A\rvert\cdot\lvert S\rvert^{k}\cdot(\lvert S\rvert+\sum_{a}\lvert R_{a}\rvert))$ 程度かかる。交代のない入れ子では、前の段の結果から始め直すことで改善できることが知られている（Emerson–Lei 1986）。
+2. μ 計算のモデル検査が多項式時間でできるかは未解決で、パリティゲームの勝者の判定と多項式時間で互いに帰着できることが知られている。準多項式時間のパリティゲームのアルゴリズム（\ref{logic:page-parity-games} の注意）はモデル検査にもそのまま使える。
+:::
+
+::: intuition
+**評価ゲームは「論理式についての口論」である。** 検証者は「この状態でこの論理式は真だ」と主張し、反証者は反論する。$\vee$ や $\langle a\rangle$ では主張する側がどちらが真か・どの後続で真かを示し、$\wedge$ や $[a]$ では反論する側が怪しい方を指す。最小不動点 $\mu X.B$ は「有限回の展開で根拠が尽きる」主張なので、検証者が $X$ に戻り続けて決着を先送りすれば負けになる。最大不動点 $\nu$ は「破られない不変条件」なので、反証者がいつまでも反例を示せなければ検証者の勝ちになる。
+
+**高い視点：論理とゲームの双対性。** 否定は役割の交換で、パリティゲームの決定性は「論理式かその否定のどちらかが真」という排中律のゲーム版にあたる。位置決定性は、真理の「根拠」（勝つ戦略）が、過去を覚えない局所的な手の選び方で与えられることを言っている。
+:::
+
+## 問題 {#logic:sec-mmc-problems}
+
+::: problem {#logic:prob-mmc-ef}
+遷移系 $S=\{0,1\}$、$R_{a}=\{(0,1),(1,1)\}$、$V(p)=\{1\}$ と論理式 $\mu X.(p\vee\langle a\rangle X)$ について、評価ゲームの頂点と手を書き、状態 $0$ から検証者が勝つことを確かめよ（$\vee$ は $\neg(\neg\cdot\wedge\neg\cdot)$ の略記で、$\neg$ の下の $\wedge$ は検証者が選ぶ）。
+:::
+
+::: solution
+構文木：$m=\mu X.D$, $D=\neg(\neg p\wedge\neg\langle a\rangle X)$, $\wedge$ の頂点（極性 $-$、持ち主は検証者）、$\neg p$, $p$（極性 $+$）、$\neg\langle a\rangle X$, $\langle a\rangle X$（極性 $+$、検証者）、$X$（束縛子 $m$）。状態 $0$ から：$(0,m)\to(0,D)\to(0,\wedge)$ で検証者が $\neg\langle a\rangle X$ の側を選び、$(0,\langle a\rangle X)$ で後続 $1$ を選んで $(1,X)\to(1,m)\to(1,D)\to(1,\wedge)$、今度は $\neg p$ の側を選んで $(1,p)$、$1\in V(p)$ で極性 $+$ なので $\top_{0}$。検証者の勝ち。$\lVert\mu X.(p\vee\langle a\rangle X)\rVert=\{0,1\}$（\ref{logic:mu-examples} の 1）と合う。
+:::
+
+::: problem {#logic:prob-mmc-loop}
+同じ遷移系で $V(p)=\varnothing$ とし、$\mu X.\langle a\rangle X$ と $\nu X.\langle a\rangle X$ のそれぞれについて、状態 $0$ からの評価ゲームの勝者を求めよ。
+:::
+
+::: solution
+$\mu X.\langle a\rangle X$：構文木は $m=\mu X.\langle a\rangle X$（極性 $+$、実効的な $\mu$、高さ 2、優先度 5）、$\langle a\rangle X$（検証者）、$X$。プレイは $(0,m)\to(0,\langle a\rangle X)\to(1,X)\to(1,m)\to(1,\langle a\rangle X)\to(1,X)\to\cdots$ と一通りで、$m$ が無限回現れ優先度 5（奇数）、反証者の勝ち。$\lVert\mu X.\langle a\rangle X\rVert=\varnothing$ と合う（\ref{logic:prob-kozen-mu-bot}）。$\nu X.\langle a\rangle X=\neg\mu X.\neg\langle a\rangle\neg X$：根の $\neg$ の下で $\mu$ は極性 $-$（実効的な $\nu$、偶数の優先度）、その下の $\neg$ で $\langle a\rangle$ は極性 $+$（検証者）、$\neg X$ の $X$ は極性 $-$ で束縛子と同じ。プレイは同じくループし、最大の優先度は偶数で検証者の勝ち。$\nu X.\langle a\rangle X$ は「無限の $a$ の道が出る」で、$0$ から $0,1,1,\dots$ があるので真（\ref{logic:prob-kozen-nu-diamond}）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=35dfde8c"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=23f6e3d6"></script>
+<script src="../../../site.js?v=f7713090"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
