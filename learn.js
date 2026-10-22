@@ -279,7 +279,7 @@
     dock.addEventListener('click', onDockClick);
     // スマホ：見出し（上端のつまみ）を上下にドラッグすると、指に合わせて高さが連続的に変わる（段階なし）。
     // 指を離した位置の高さで止まる。勢いよく下へ払うと閉じ、上へ払うといちばん高くなる。かなり下げても閉じる
-    var y0 = null, h0 = 0, hNow = 0, vel = 0, lastY = 0, lastT = 0;
+    var y0 = null, h0 = 0, hNow = 0, vel = 0, lastY = 0, lastT = 0, rafH = 0;
     dock.addEventListener('touchstart', function (ev) {
       if (!PHONE.matches || !ev.target.closest('.mn-dock-head') || ev.target.closest('button, .mn-dock-menu')) { y0 = null; return; }
       y0 = lastY = ev.touches[0].clientY; lastT = Date.now(); vel = 0; h0 = hNow = dock.offsetHeight;
@@ -291,13 +291,15 @@
       if (t > lastT) vel = 0.7 * vel + 0.3 * ((y - lastY) / (t - lastT));   // px/ms、下向きが正（なめらかにした速度）
       lastY = y; lastT = t;
       hNow = Math.max(56, Math.min(window.innerHeight * SHEET_MAX, h0 - (y - y0)));
-      dock.style.height = hNow + 'px';
-      document.documentElement.style.setProperty('--mn-sheet-h', hNow + 'px');
+      // 動かしている間はドックの高さだけを変える（ページ全体の余白 --mn-sheet-h は離したときに 1 回だけ変える。
+      // 毎回変えると本文全体（KaTeX を含む）の再レイアウトが指の動きごとに起きて重い）。描画はフレームごとに 1 回
+      if (!rafH) rafH = requestAnimationFrame(function () { rafH = 0; dock.style.height = hNow + 'px'; });
       if (ev.cancelable) ev.preventDefault();
     }, { passive: false });
     dock.addEventListener('touchend', function () {
       if (y0 === null) return;
       y0 = null; dock.classList.remove('is-resizing');
+      if (rafH) { cancelAnimationFrame(rafH); rafH = 0; dock.style.height = hNow + 'px'; }
       var vh = window.innerHeight, frac = hNow / vh;
       if (vel > 0.9 || frac < 0.14) { closeDock(); return; }   // 下へ払う・ほとんど下げた：閉じる
       if (vel < -0.9) frac = SHEET_MAX;                           // 上へ払う：いちばん高く
@@ -541,12 +543,21 @@
       h.setPointerCapture(ev.pointerId); ev.preventDefault();
       document.documentElement.classList.add('mn-dock-resizing');
     });
+    // ドラッグ中はドックの幅だけを変え（フレームごとに 1 回）、本文側の余白（--mn-dock-w）と保存は離したときに 1 回だけ行う
+    var rafW = 0, wNow = 0;
+    function clampW(w) { return Math.round(Math.max(260, Math.min(window.innerWidth * 0.6, w))); }
     h.addEventListener('pointermove', function (ev) {
       if (!st) return;
-      setJSON('sm_dock_w', st.w + (st.x - ev.clientX));
-      applyDockWidth();
+      wNow = clampW(st.w + (st.x - ev.clientX));
+      if (!rafW) rafW = requestAnimationFrame(function () { rafW = 0; dock.style.width = wNow + 'px'; });
     });
-    h.addEventListener('pointerup', function () { st = null; document.documentElement.classList.remove('mn-dock-resizing'); });
+    h.addEventListener('pointerup', function () {
+      if (!st) return;
+      st = null; document.documentElement.classList.remove('mn-dock-resizing');
+      if (rafW) { cancelAnimationFrame(rafW); rafW = 0; }
+      if (wNow) { setJSON('sm_dock_w', wNow); wNow = 0; }
+      dock.style.width = ''; applyDockWidth();
+    });
     h.addEventListener('dblclick', function () { localStorage.removeItem('sm_dock_w'); applyDockWidth(); });
     window.addEventListener('resize', applyDockWidth);
     applyDockWidth();
