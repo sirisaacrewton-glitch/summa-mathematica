@@ -74,6 +74,7 @@
         rawT: st.text + ' ' + (e.k || ''), rawB: sb.text,
         rawI: (e.ix || []).map(function (x) { return x.term + (x.reading ? ' ' + x.reading : ''); }),
         nt: fold(st.text + ' ' + (e.k || '')),
+        ntt: fold(st.text).trim().replace(/[（(][^）)]*[）)]$/, '').trim(),   // 題だけ（末尾の括弧書きを除く）。完全一致の判定用
         ni: ni, nis: splitIx(ni),
         nl: (e.l || '').toLowerCase(),
         nb: fold(sb.text),
@@ -284,9 +285,22 @@
         if (d > 0.34) res.push({ r: r, s: d * (TYPE_WEIGHT[r.e.t] || 1) });
       });
     }
-    // 現在のページの結果を一番上に
-    res.forEach(function (x) { x.here = !!CUR_PAGE && x.r.pg.path === CUR_PAGE; });
-    res.sort(function (a, b) { return (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
+    // 検索語にぴったり一致する項目（題か索引語が検索語そのもの）を一番上に、次に現在のページの結果（2026-10-22 ユーザー指示）
+    var words = pq.terms.filter(function (t) { return t.kind === 'text' && t.txt; });
+    var whole = words.map(function (t) { return t.txt; }).join('');
+    var wholeAlts = words.length === 1 ? (words[0].alts || []).map(function (a) { return fold(a); }) : [];
+    function exactness(r) {
+      if (!whole) return 0;
+      var cand = [whole].concat(wholeAlts);
+      for (var i = 0; i < cand.length; i++) {
+        var w = cand[i];
+        if (r.ntt === w) return 2;
+        for (var k = 0; k < (r.nis || []).length; k++) if (r.nis[k][0] === w || r.ni[k] === w) return 2;
+      }
+      return 0;
+    }
+    res.forEach(function (x) { x.here = !!CUR_PAGE && x.r.pg.path === CUR_PAGE; x.ex = fuzzy ? 0 : exactness(x.r); });
+    res.sort(function (a, b) { return (b.ex - a.ex) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
     return { results: res.slice(0, opts.limit || 60), total: res.length, pq: pq, fuzzy: fuzzy };
   }
 

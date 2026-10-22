@@ -676,7 +676,7 @@
   };
   // 自動では結ばない語と分野：同じ分野の中で意味が文脈によって変わる語。原稿で出現ごとに \term[語]{ラベル} で指定する。
   // 値は分野番号の並び。'!' で始まるときは「その分野以外すべて」（2026-10-22 ユーザー指示：次元・部分空間はその都度確認）
-  var TERM_NO_AUTO = { '次元': '13 14', '部分空間': '!15 54' };
+  var TERM_NO_AUTO = { '次元': '13 14', '部分空間': '!15 54', '互いに素': '20', '位数': '30' };
   function noAuto(term, f) {
     var d = TERM_NO_AUTO[term]; if (!d) return false;
     var hit = (' ' + d.replace(/^!/, '') + ' ').indexOf(' ' + f + ' ') >= 0;
@@ -782,7 +782,7 @@
     parseBlocks: parseBlocks, extractMath: extractMath, numberTree: numberTree,
     createRenderer: createRenderer, splitForSearch: splitForSearch,
     normalizeText: normalizeText, normalizeTex: normalizeTex, stripMarkdown: stripMarkdown,
-    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS, createTermLinker: createTermLinker, ITEM_REF: ITEM_REF,
+    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS, createTermLinker: createTermLinker, ITEM_REF: ITEM_REF, TERM_NO_AUTO: TERM_NO_AUTO,
     MATH_OPEN: MATH_OPEN, MATH_CLOSE: MATH_CLOSE
   };
 });

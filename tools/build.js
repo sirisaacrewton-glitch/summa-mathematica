@@ -385,6 +385,25 @@ pages.forEach(function (pg) {
   })(pg.parsed.children, null, '', null);
 });
 
+// 文脈で意味が変わるかもしれない用語の検出（2026-10-22 ユーザー指示）：同じ語の定義が同じ分野に複数ある、または複数の分野にある語で、
+// まだ確認していないもの（tools/term-review.json の reviewed にも site-core.js の TERM_NO_AUTO にもないもの）を報告する。
+// 確認したら、同じページ・同じ系列の定義が選ばれれば正しい語は reviewed に足し、同じページの中でも意味が変わる語は TERM_NO_AUTO に足して
+// 原稿で出現ごとに \term[語]{ラベル} を付ける。
+(function checkAmbiguousTerms() {
+  var reviewed = {}; try { (JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'term-review.json'), 'utf8')).reviewed || []).forEach(function (k) { reviewed[k] = 1; }); } catch (e) {}
+  Object.keys(termDefs).forEach(function (t) {
+    if (Core.TERM_NO_AUTO[t]) return;
+    var fields = {};
+    termDefs[t].forEach(function (l) { var L = labels[l]; if (!L) return; var f = pages[L.p].path.split('/')[0].split('-')[0]; (fields[f] = fields[f] || []).push(l); });
+    var keys = Object.keys(fields), report = [];
+    keys.forEach(function (f) { if (fields[f].length > 1 && !reviewed[t + '@' + f]) report.push(t + '@' + f + '（' + fields[f].join(', ') + '）'); });
+    if (keys.length > 1 && !reviewed[t + '@*']) report.push(t + '@*（' + keys.join(', ') + ' の分野に定義）');
+    if (process.env.TERM_REVIEW_DUMP) report.forEach(function (r) { (global.__rev = global.__rev || []).push(r.split('（')[0]); });
+    report.forEach(function (r) { warn('tools/term-review.json', '文脈で意味が変わるかもしれない用語：' + r + '。確認して reviewed か TERM_NO_AUTO に足す'); });
+  });
+  if (process.env.TERM_REVIEW_DUMP) fs.writeFileSync(process.env.TERM_REVIEW_DUMP, JSON.stringify(global.__rev || []));
+})();
+
 itemRefs.forEach(function (x) {
   if (!labels[x.label]) return;   // ラベル自体の未定義は別に報告される
   if (!(itemKeys[x.label] || {})[x.n]) {
