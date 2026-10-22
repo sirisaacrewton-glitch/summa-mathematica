@@ -338,7 +338,7 @@ pages.forEach(function (pg) {
         return { planned: true, title: P.ti || (r && r.text) || '', type: 'planned' };
       }
       var from = currentFrom;
-      if (!(from && from.label === label)) {
+      if (!(r && r.cmd === 'term') && !(from && from.label === label)) {
         var list = (backrefs[label] = backrefs[label] || []);
         var sig = pg.idx + '|' + (from ? (from.label || from.num || '') : '');
         var hit = list.filter(function (b) { return b.sig === sig; })[0];

@@ -15,7 +15,7 @@
   var REF_OPEN = '', REF_CLOSE = '';
   var DISPLAY_ENVS = ['equation', 'equation*', 'align', 'align*', 'gather', 'gather*',
     'multline', 'multline*', 'eqnarray', 'eqnarray*', 'alignat', 'alignat*', 'CD'];
-  var REF_CMDS = ['ref', 'eqref', 'nameref', 'numref', 'fullref', 'tref'];
+  var REF_CMDS = ['ref', 'eqref', 'nameref', 'numref', 'fullref', 'tref', 'term'];
 
   function escapeHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -193,7 +193,7 @@
           index.push({ term: parts[0].trim(), reading: (parts[1] || '').trim() });
           i += im[0].length; continue;
         }
-        var rm = /^\\(ref|eqref|nameref|numref|fullref|tref)(?:\[([^\]]*)\])?\{([^{}]+)\}/.exec(s.slice(i, i + 300));
+        var rm = /^\\(ref|eqref|nameref|numref|fullref|tref|term)(?:\[([^\]]*)\])?\{([^{}]+)\}/.exec(s.slice(i, i + 300));
         if (rm) {
           refs.push({ cmd: rm[1], label: rm[3].trim(), text: rm[2] != null ? rm[2].trim() : null });
           out += REF_OPEN + (refs.length - 1) + REF_CLOSE;
@@ -448,6 +448,11 @@
         if (r.text) return '<span class="mn-xref-planned" data-label="' + escapeHtml(r.label) + '" title="未執筆（ラベル ' + escapeHtml(r.label) + '）">' + renderInline(r.text) + '</span>';
         return '<span class="mn-ref-missing" title="未定義のラベル">??' + escapeHtml(r.label) + '</span>';
       }
+      // \term[語]{ラベル}：用語リンク（自動の用語リンクと同じ見た目）。同じ語が文脈で別の意味になるとき（「次元」がクルル次元か
+      // ベクトル空間の次元か、など）に、出現ごとに定義を指定する。被参照リストには数えない
+      if (r.cmd === 'term' && !info.planned) {
+        return '<a class="mn-xref mn-term" href="' + escapeHtml(info.href) + '" data-label="' + escapeHtml(r.label) + '">' + renderInline(r.text || info.title || r.label) + '</a>';
+      }
       if (info.planned) {
         return '<span class="mn-xref-planned" data-label="' + escapeHtml(r.label) + '" title="未執筆（ラベル ' + escapeHtml(r.label) + '）。書かれると自動でリンクになります">' +
           renderInline(r.text || info.title || r.label) + '</span>';
@@ -669,6 +674,14 @@
     'cat:reflective-subcategory#反射的': '03 54', 'cat:category#結合律': '03 20', 'ag:weil-divisor#素因子': '*',
     'ag:divisor-class-group#主因子': '*', 'grp:direct-product#直積': '26 54 55', 'mod:direct-sum#直積': '26 54 55', 'grp:element-order#位数': '26 30'
   };
+  // 自動では結ばない語と分野：同じ分野の中で意味が文脈によって変わる語。原稿で出現ごとに \term[語]{ラベル} で指定する。
+  // 値は分野番号の並び。'!' で始まるときは「その分野以外すべて」（2026-10-22 ユーザー指示：次元・部分空間はその都度確認）
+  var TERM_NO_AUTO = { '次元': '13 14', '部分空間': '!15 54' };
+  function noAuto(term, f) {
+    var d = TERM_NO_AUTO[term]; if (!d) return false;
+    var hit = (' ' + d.replace(/^!/, '') + ' ').indexOf(' ' + f + ' ') >= 0;
+    return d.charAt(0) === '!' ? !hit : hit;
+  }
   function isBase(dir) { return TERM_BASE.some(function (b) { return String(dir || '').indexOf(b) === 0; }); }
   function createTermLinker(termDefs, labels, pages) {
     // 動詞・形容詞の形の語（「矛盾する」「自由である」「すべての」など）も地の文に紛れるので結ばない
@@ -690,6 +703,7 @@
     function pick(term, pageIdx, depSet) {
       var cands = termDefs[term]; if (!cands) return null;
       var short = term.length <= 2, P = pages[pageIdx];
+      if (P && noAuto(term, field(P.dir).split('-')[0])) return null;
       var info = candidates(term, pageIdx);
       if (P) {
         var tiers = [
