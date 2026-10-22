@@ -86,7 +86,7 @@
   }
   function resolveRef(label) {
     var L = localLabels[label];
-    if (L) return { type: L.type, num: L.num, title: L.title, refname: L.refname || '', typeName: typeName(L.type), href: '#' + label, prefix: '', external: false };
+    if (L) return { type: L.type, num: L.num, title: L.title, refname: L.refname || '', refscope: L.refscope || '', typeName: typeName(L.type), href: '#' + label, prefix: '', external: false };
     var G = IDX.labels[label];
     if (!G) {
       var P = IDX.planned && IDX.planned[label];
@@ -97,7 +97,8 @@
     return {
       type: G.t, num: G.n, title: G.t === 'page' ? pg.title : G.ti, refname: G.rn || '', typeName: typeName(G.t),
       href: same ? '#' + label : ROOT + pg.path + (G.t === 'page' ? '' : '#' + label),
-      prefix: (!PG || pg.dir !== PG.dir) ? pg.subj + ' ' : '', external: !same
+      prefix: (!PG || pg.dir !== PG.dir) ? pg.subj + ' ' : '', external: !same,
+      refscope: G.rs || '', otherField: !PG || pg.dir.split('/')[0] !== PG.dir.split('/')[0]
     };
   }
   var renderer = Core.createRenderer({

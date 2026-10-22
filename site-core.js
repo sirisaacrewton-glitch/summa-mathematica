@@ -278,7 +278,7 @@
           if (node.label) {
             byLabel[node.label] = node;
             labels.push({ label: node.label, type: node.type, num: node.num || '', title: node.title,
-              keywords: node.keywords, refname: (node.attrs && node.attrs.refname) || '', node: node });
+              keywords: node.keywords, refname: (node.attrs && node.attrs.refname) || '', refscope: (node.attrs && node.attrs.refscope) || '', node: node });
           }
           var nextParent = (def.num && !inAttached) ? node : (def.attached ? (node.of || parentEnv) : parentEnv);
           walk(node.children, nextParent, inAttached || !!def.attached);
@@ -460,7 +460,8 @@
       else if (r.cmd === 'fullref') text = (info.prefix || '') + tname + ' ' + info.num + (info.title ? '（' + info.title + '）' : '');
       else if (r.text) text = r.text;
       // 有名な定理・頻出の補題は番号でなく名前で表示する（属性 refname）。\tref は名前を持つ項目でも「種類 番号」で表示する（直前に名前を書いたとき用）
-      else if (info.refname && r.cmd !== 'tref') text = info.refname;
+      // refscope="field"（参照が多いだけで、名前が分野の文脈に頼るもの）は、他の分野からの参照では番号で表示する
+      else if (info.refname && r.cmd !== 'tref' && !(info.refscope === 'field' && info.otherField)) text = info.refname;
       else if (!info.num && info.type !== 'equation' && info.type !== 'section' && info.type !== 'page') text = info.title || tname;
       else {
         if (info.type === 'equation') text = '(' + info.num + ')';
@@ -470,7 +471,7 @@
       var href = info.href;
       if (item) {
         var key = /^\d+$/.test(item) ? item : '(' + item + ')';
-        if (!r.text && r.cmd !== 'eqref') text += (info.refname && r.cmd === 'ref' ? ' ' : ' の ') + key;
+        if (!r.text && r.cmd !== 'eqref') text += (text === info.refname ? ' ' : ' の ') + key;
         var hash = '#' + r.label;
         if (href.slice(-hash.length) === hash) href = href + '.' + item;
       }
