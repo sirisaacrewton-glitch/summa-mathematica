@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>パリティゲームと位置決定性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-mathematical-logic/03B-general-logic/04-modal-logic-cs/11-parity-games.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# パリティゲームと位置決定性 {#logic:page-parity-games keywords="parity games, arena, positional strategy, attractor, trap, Zielonka's algorithm, positional determinacy, NP cap coNP"}
+
+**パリティゲーム**は、有限のグラフの上で二人のプレイヤーが駒を動かし続け、無限回現れる最大の優先度の偶奇で勝敗を決めるゲームである。μ 計算のモデル検査は、このゲームの勝敗の判定と同じ問題になる（\see[μ 計算のモデル検査]{logic:page-mu-model-checking}）。このページでは、ゲームの基本的な道具である**アトラクタ**と**罠**を定義し、**ジーロンカのアルゴリズム**を構成的な証明として使って、有限のパリティゲームの**位置決定性**――すべての頂点はどちらかのプレイヤーの勝ちで、勝つ側は「今いる頂点だけで次の手を決める」戦略で勝てる――を示す。系として、勝者の判定が NP ∩ coNP に属することを導く。
+
+> 参考：『コンピュータサイエンスにおける様相論理』（ユーザー指定の参考書。本文のテキストは未入手のため、構成は標準的な内容によった）。証明は Zielonka, *Infinite games on finitely coloured graphs with applications to automata on infinite trees*, Theoret. Comput. Sci. 200 (1998) の方法による。
+
+## 記法と定義の確認 {#logic:sec-pg-notation}
+
+::: notation
+- プレイヤーを $0,1$ で表し、$j$ の相手を $\bar{j}\defeq1-j$ と書く。
+- 有限集合の上の写像・列は、有限集合に順序を一つ固定して「最初のもの」を選ぶことで、選択公理なしに定める。
+- 計算量の用語（多項式時間、NP、coNP）は \ref{comp:page-np} のとおり。
+- **公理系**：$\ZF$。
+:::
+
+## ゲームと戦略 {#logic:sec-pg-games}
+
+::: definition パリティゲーム {#logic:parity-game keywords="arena, parity game, play, priority, winning condition" index="パリティゲーム|ぱりてぃげーむ, 優先度|ゆうせんど, アリーナ|ありーな"}
+**アリーナ** $\mathcal{A}=(V,V_{0},V_{1},E)$ は、有限集合 $V=V_{0}\sqcup V_{1}$（頂点）と、どの頂点 $v$ にも $(v,w)\in E$ となる $w$（**後続**）があるような $E\subset V\times V$ からなる。$vE\defeq\{w:(v,w)\in E\}$。写像 $\Omega\colon V\to\mathbb{N}$（**優先度**）を加えた $\mathcal{G}=(\mathcal{A},\Omega)$ を**パリティゲーム**という。頂点 $v$ からの**プレイ**は、$\pi(0)=v$、$(\pi(k),\pi(k+1))\in E$ を満たす無限列 $\pi$ である（$\pi(k)\in V_{j}$ のとき次の頂点はプレイヤー $j$ が選ぶと考える）。$\mathrm{Inf}(\pi)$ を $\pi$ に無限回現れる頂点の集合とし（$V$ が有限なので空でない）、$\max\Omega(\mathrm{Inf}(\pi))$ が偶数ならプレイヤー $0$ が、奇数ならプレイヤー $1$ が $\pi$ に勝つという。
+:::
+
+::: definition 位置戦略 {#logic:positional-strategy keywords="positional (memoryless) strategy, consistent play, winning region" index="位置戦略|いちせんりゃく, 勝利領域|しょうりりょういき"}
+プレイヤー $j$ の**位置戦略**は、各 $v\in V_{j}$ に後続 $\sigma(v)\in vE$ を対応させる写像 $\sigma$ である。プレイ $\pi$ が $\sigma$ に**従う**とは、$\pi(k)\in V_{j}$ なら $\pi(k+1)=\sigma(\pi(k))$ となることをいう（相手の手は自由）。$v$ からの $\sigma$ に従うプレイがすべて $j$ の勝ちのとき、$\sigma$ は $v$ から勝つという。$W_{j}(\sigma)\defeq\{v:\sigma$ は $v$ から勝つ$\}$。ある位置戦略で $v$ から勝てるとき $j$ は $v$ から勝つといい、その全体を $j$ の**勝利領域** $W_{j}$ とする。
+:::
+
+::: lemma 勝敗の基本性質 {#logic:pg-basic keywords="prefix independence, winning regions are disjoint, winning region of a positional strategy is closed"}
+1. （接頭辞によらない）$\pi$ と、その有限個の項を取り除いた後半 $\pi'$（$\pi'(k)=\pi(k+n)$）は同じ勝者をもつ。
+2. $W_{0}\cap W_{1}=\varnothing$。
+3. $\sigma$ をプレイヤー $j$ の位置戦略とする。$v\in W_{j}(\sigma)\cap V_{j}$ なら $\sigma(v)\in W_{j}(\sigma)$。$v\in W_{j}(\sigma)\cap V_{\bar{j}}$ なら $vE\subset W_{j}(\sigma)$。
+:::
+
+::: proof
+**Step 1.** 【主張：勝者は後半だけで決まり、二人とも勝つ頂点はない】 1：$\mathrm{Inf}(\pi)=\mathrm{Inf}(\pi')$。2：$v\in W_{0}(\sigma)\cap W_{1}(\tau)$ なら、$v$ から両方に従うプレイ（各頂点で、持ち主の戦略に従って進む）が一つあり、両方の勝ちになって矛盾。
+
+**Step 2.** 【主張：勝てる頂点の集合は、自分の手でも相手の手でも出ない】 $w$ を $\sigma(v)$（$v\in V_{j}$ のとき）または $vE$ の元（$v\in V_{\bar{j}}$ のとき）とし、$\pi'$ を $w$ からの $\sigma$ に従うプレイとする。$v$ を先頭につけた $\pi$ は $v$ からの $\sigma$ に従うプレイなので $j$ の勝ち、1 で $\pi'$ も $j$ の勝ち。よって $w\in W_{j}(\sigma)$。
+:::
+
+## アトラクタと罠 {#logic:sec-pg-attractor}
+
+::: definition アトラクタと罠 {#logic:attractor keywords="attractor Attr_j(U), attractor strategy, rank, j-trap, subarena" index="アトラクタ|あとらくた, 罠（ゲーム）|わなげーむ"}
+アリーナ $\mathcal{A}$ と $U\subset V$ について、
+$A_{0}\defeq U$、
+$$
+A_{k+1}\defeq A_{k}\cup\{v\in V_{j}:vE\cap A_{k}\ne\varnothing\}\cup\{v\in V_{\bar{j}}:vE\subset A_{k}\}
+$$
+とする。$A_{k}$ は増加し、$V$ が有限なので $A_{K}=A_{K+1}$ となる $K$ がある（以後一定）。$\mathrm{Attr}_{j}(U)\defeq A_{K}$ をプレイヤー $j$ の $U$ への**アトラクタ**、$v\in A_{k}$ となる最小の $k$ を $v$ の**ランク**という。$Y\subset V$ が **$j$ の罠**であるとは、$v\in Y\cap V_{j}$ なら $vE\subset Y$、$v\in Y\cap V_{\bar{j}}$ なら $vE\cap Y\ne\varnothing$ となることをいう（$j$ は $Y$ から出られず、$\bar{j}$ は $Y$ にとどまれる）。$Y$ が罠なら、$E\cap(Y\times Y)$ で $Y$ はアリーナになり（**部分アリーナ**）、優先度を制限して部分ゲーム $\mathcal{G}\restr{Y}$ が得られる。
+:::
+
+::: lemma アトラクタの性質 {#logic:attractor-props keywords="attractor strategy forces a visit to U; complement of an attractor is a trap"}
+$A\defeq\mathrm{Attr}_{j}(U)$ とする。
+1. プレイヤー $j$ の位置戦略 $\alpha$ で、$A\setminus U$ の各頂点から、$\alpha$ に従うどのプレイも有限回で $U$ に入るもの（**アトラクタ戦略**）がある。とくにプレイは $U$ に入るまで $A$ の中にいる。
+2. $V\setminus A$ は $j$ の罠である。
+:::
+
+::: proof
+**Step 1.** 【主張：アトラクタ戦略ではランクが一歩ごとに下がる】 $v\in(A\setminus U)\cap V_{j}$ のランクを $r+1$ とすると、定義から $vE\cap A_{r}\ne\varnothing$ なので、その最初のものを $\alpha(v)$ とする（$V_{j}$ のほかの頂点では最初の後続）。$v\in(A\setminus U)\cap V_{\bar{j}}$ でランク $r+1$ なら $vE\subset A_{r}$、すなわち後続はすべてランク $r$ 以下。よって $A\setminus U$ からの $\alpha$ に従うプレイではランクが一歩ごとに真に下がり、ランク $0$ の元（$U$ の元）に有限回で着く。
+
+**Step 2.** 【主張：アトラクタの外は $j$ の罠】 $v\notin A=A_{K}$ なら $v\notin A_{K+1}$ なので、定義の右辺の条件を満たさない。$v\in V_{j}$ なら $vE\cap A=\varnothing$、すなわち $vE\subset V\setminus A$。$v\in V_{\bar{j}}$ なら $vE\not\subset A$、すなわち $vE\cap(V\setminus A)\ne\varnothing$。
+:::
+
+## 位置決定性 {#logic:sec-pg-determinacy}
+
+::: theorem パリティゲームの位置決定性 {#logic:parity-positional-determinacy keywords="positional determinacy of finite parity games (Zielonka): V = W_0 disjoint union W_1 with uniform positional winning strategies" index="位置決定性|いちけっていせい" refname="パリティゲームの位置決定性"}
+有限のパリティゲームについて、プレイヤー $0,1$ の位置戦略 $\sigma_{0},\sigma_{1}$ で $W_{0}(\sigma_{0})\cup W_{1}(\sigma_{1})=V$ となるものがある。とくに $V=W_{0}\sqcup W_{1}$ で、$W_{j}=W_{j}(\sigma_{j})$。
+:::
+
+::: proof
+$\lvert V\rvert$ についての帰納法で、より強く「$\sigma_{0},\sigma_{1}$ を具体的に構成する手続き」（**ジーロンカのアルゴリズム**）を与える。$V=\varnothing$ は自明として（空のアリーナも許す）、$d\defeq\max\Omega(V)$、$j\defeq d\bmod2$（$d$ を好むプレイヤー）、$U\defeq\Omega^{-1}(d)$、$A\defeq\mathrm{Attr}_{j}(U)$ とする。\ref{logic:attractor-props.2} で $V\setminus A$ は $j$ の罠なので、部分ゲーム $\mathcal{G}'\defeq\mathcal{G}\restr{V\setminus A}$ があり、$U\ne\varnothing$ なので頂点は少ない。帰納法の仮定で $\mathcal{G}'$ の位置戦略 $\sigma'_{0},\sigma'_{1}$ と勝利領域 $W'_{0},W'_{1}$（$V\setminus A=W'_{0}\sqcup W'_{1}$）がある。
+
+**Step 1（$W'_{\bar{j}}=\varnothing$ の場合）.** 【主張：$j$ はすべての頂点から勝つ】 $\sigma_{j}$ を、$V\setminus A$ では $\sigma'_{j}$、$A\setminus U$ ではアトラクタ戦略、$U\cap V_{j}$ では最初の後続、とする。$\sigma_{j}$ に従うプレイ $\pi$ をとる。(a) $\pi$ がある時刻以降ずっと $V\setminus A$ にいるなら、その後半は $\mathcal{G}'$ の $\sigma'_{j}$ に従うプレイで（$V\setminus A$ にいるあいだの $\bar{j}$ の手は $\mathcal{G}'$ の手でもある）、$W'_{j}=V\setminus A$ から始まるので $j$ の勝ち。\ref{logic:pg-basic.1} で $\pi$ も $j$ の勝ち。(b) $\pi$ が $A$ に無限回入るなら、入るたびに \ref{logic:attractor-props.1} で有限回で $U$ に着くので、$U$ の頂点が無限回現れ、$\max\Omega(\mathrm{Inf}(\pi))=d$ で $j$ の勝ち。$\sigma_{\bar{j}}$ は任意（最初の後続）でよい。
+
+**Step 2（$W'_{\bar{j}}\ne\varnothing$ の場合の準備）.** 【主張：$\bar{j}$ は $B\defeq\mathrm{Attr}_{\bar{j}}(W'_{\bar{j}})$（$\mathcal{G}$ の中で）のすべての頂点から勝つ】 $\tau$ を、$W'_{\bar{j}}$ では $\sigma'_{\bar{j}}$、$B\setminus W'_{\bar{j}}$ ではアトラクタ戦略とする。$W'_{\bar{j}}$ から $\tau$ に従うプレイは $W'_{\bar{j}}$ から出ない：$\bar{j}$ の手は \ref{logic:pg-basic.3}（$\mathcal{G}'$ の中で）で $W'_{\bar{j}}$ にとどまり、$j$ の頂点 $v\in W'_{\bar{j}}\cap V_{j}$ の後続は、$V\setminus A$ が $j$ の罠なので $\mathcal{G}$ でも $V\setminus A$ に入り、\ref{logic:pg-basic.3} で $W'_{\bar{j}}$ に入る。よってそのプレイは $\mathcal{G}'$ の $\sigma'_{\bar{j}}$ に従うプレイで $\bar{j}$ の勝ち。$B$ のほかの頂点からは、アトラクタ戦略で有限回で $W'_{\bar{j}}$ に入り、その後は今の議論で、\ref{logic:pg-basic.1} から $\bar{j}$ の勝ち。
+
+**Step 3（$W'_{\bar{j}}\ne\varnothing$ の場合）.** 【主張：$V\setminus B$ の部分ゲームの解と $B$ を合わせて解が得られる】 \ref{logic:attractor-props.2} で $V\setminus B$ は $\bar{j}$ の罠なので部分ゲーム $\mathcal{G}''\defeq\mathcal{G}\restr{V\setminus B}$ があり、$W'_{\bar{j}}\ne\varnothing$ なので頂点は少ない。帰納法の仮定で $\sigma''_{0},\sigma''_{1}$ と $W''_{0},W''_{1}$ がある。
+- $\sigma_{j}\defeq\sigma''_{j}$（$V\setminus B$ で。ほかでは最初の後続）は $W''_{j}$ から勝つ：$j$ の手は \ref{logic:pg-basic.3} で $W''_{j}$ にとどまり、$\bar{j}$ の頂点の後続は、$V\setminus B$ が $\bar{j}$ の罠なので $V\setminus B$ に入り、\ref{logic:pg-basic.3} で $W''_{j}$ に入る。よってプレイは $\mathcal{G}''$ の $\sigma''_{j}$ に従うプレイ。
+- $\sigma_{\bar{j}}$ を $V\setminus B$ では $\sigma''_{\bar{j}}$、$B$ では Step 2 の $\tau$ とすると、$W''_{\bar{j}}\cup B$ から勝つ：$W''_{\bar{j}}$ から出たプレイは、$\bar{j}$ の手では $W''_{\bar{j}}$ にとどまり、$j$ の手では $W''_{\bar{j}}$ か $B$ に入る（$\mathcal{G}$ の後続のうち $V\setminus B$ に入るものは \ref{logic:pg-basic.3} で $W''_{\bar{j}}$ に入る）。ずっと $W''_{\bar{j}}$ にいれば $\mathcal{G}''$ の $\sigma''_{\bar{j}}$ に従うプレイで $\bar{j}$ の勝ち、$B$ に入ればその後は $\tau$ に従い、Step 2 と \ref{logic:pg-basic.1} で $\bar{j}$ の勝ち。
+
+$V=W''_{j}\sqcup(W''_{\bar{j}}\cup B)$ なので、$W_{0}(\sigma_{0})\cup W_{1}(\sigma_{1})=V$。最後の主張は \ref{logic:pg-basic.2} から（$W_{j}(\sigma_{j})\subset W_{j}$ で、$W_{0},W_{1}$ は交わらないので等号）。
+
+::: hypcheck
+- **罠であることの使い方**：部分ゲームを作るには、残った頂点のどれにも残った頂点への後続が要る（$V\setminus A$ が $j$ の罠、$V\setminus B$ が $\bar{j}$ の罠）。さらに Step 2・3 で、部分ゲームの勝利領域が全体のゲームでも閉じていることに、「相手が罠から出られない」ことを使った。
+- **有限性**：$\mathrm{Inf}(\pi)\ne\varnothing$ と $\max\Omega$ の存在、アトラクタのくり返しが止まること、帰納法（頂点の個数）に使った。無限のアリーナでもパリティゲームは位置決定的であることが知られている（Emerson–Jutla 1991, Mostowski 1991）が、このサイトでは示していない。
+- **位置戦略で十分なこと**：ここでは勝つことを「位置戦略で、相手のどんな手にも勝つ」で定義した。相手が過去を覚えた戦略を使ってもよいので、この定義での決定性は、一般の戦略を許した決定性も含む。
+:::
+:::
+
+## 勝者の判定の計算量 {#logic:sec-pg-complexity}
+
+::: lemma 一人ゲームでの勝敗 {#logic:pg-one-player keywords="checking whether a positional strategy is winning: the opponent wins iff a reachable cycle has odd maximal priority"}
+プレイヤー $0$ の位置戦略 $\sigma$ を固定し、$E_{\sigma}\defeq\{(v,\sigma(v)):v\in V_{0}\}\cup(E\cap(V_{1}\times V))$ とする。$\sigma$ が $v$ から勝たない $\iff$ $E_{\sigma}$ で $v$ から到達できる閉路で、その上の優先度の最大値が奇数のものがある。この条件は $\lvert V\rvert$ と $\lvert E\rvert$ の多項式時間で判定できる。
+:::
+
+::: proof
+**Step 1.** 【主張：同値】 $\sigma$ に従うプレイは $E_{\sigma}$ の上の無限の道と同じ。⇐：閉路まで進んで回り続ける道は、$\mathrm{Inf}$ が閉路の頂点の集合で、プレイヤー $1$ の勝ち。⇒：$1$ の勝つ道 $\pi$ をとり、$p\defeq\max\Omega(\mathrm{Inf}(\pi))$（奇数）。ある時刻 $n$ 以降は $\mathrm{Inf}(\pi)$ の頂点だけが現れる。$\Omega(u)=p$ の $u\in\mathrm{Inf}(\pi)$ が $n$ 以降に二度現れる区間が閉路で、その頂点は $\mathrm{Inf}(\pi)$ に属するので優先度は $p$ 以下、$u$ で $p$。
+
+**Step 2.** 【主張：多項式時間】 各奇数 $p\in\Omega(V)$ と $\Omega(u)=p$ の各 $u$ について、「$v$ から $u$ に到達でき、かつ優先度 $p$ 以下の頂点だけを通って $u$ から $u$ に戻れる」かを、到達可能性の探索（\ref{logic:ctl-eu-eg-procedures} の CheckEU と同じ逆向き探索）で調べる。探索は $O(\lvert V\rvert+\lvert E\rvert)$ で、組は $\lvert V\rvert$ 個以下。
+:::
+
+::: corollary 勝者の判定は NP ∩ coNP {#logic:parity-np-conp keywords="deciding the winner of a finite parity game is in NP and coNP" index="パリティゲームの計算量|ぱりてぃげーむのけいさんりょう"}
+有限のパリティゲームと頂点 $v$ が与えられたとき、「$v\in W_{0}$」かどうかの判定問題は NP と coNP の両方に属する。
+:::
+
+::: proof
+NP：証拠としてプレイヤー $0$ の位置戦略 $\sigma$（大きさは $\lvert V\rvert$ の多項式）を推測し、\ref{logic:pg-one-player} で $v\in W_{0}(\sigma)$ を多項式時間で確かめる。$v\in W_{0}\iff$ そのような $\sigma$ がある（$W_{0}$ は位置戦略で定義した）。coNP：\ref{logic:parity-positional-determinacy} で $v\notin W_{0}\iff v\in W_{1}$ で、後者は同じ議論（プレイヤーを入れ替える）で NP。
+:::
+
+::: remark
+1. ジーロンカのアルゴリズムは再帰呼び出しが二つあるので、最悪の場合は頂点の数について指数時間かかる。パリティゲームが多項式時間で解けるかは未解決で、準多項式時間のアルゴリズムが知られている（Calude–Jain–Khoussainov–Li–Stephan, STOC 2017）。このサイトでは証明していない。
+2. 優先度の種類が $d$ 個のとき、頂点 $n$ 個・辺 $m$ 個のゲームを $O(m\cdot n^{d})$ 程度で解く方法（例えば Jurdziński の進捗測度 2000 は $O(d\,m\,(n/\lfloor d/2\rfloor)^{\lfloor d/2\rfloor})$）が知られている。このサイトでは証明していない。
+:::
+
+::: intuition
+**優先度は「重要さの順位」である。** 無限に続くゲームでは、最初の有限部分はどうでもよく、「何が無限回起きるか」だけが勝敗を決める。その中で最も重要な（優先度の高い）出来事の偶奇で勝者を決めるのがパリティ条件で、偶数は「よい出来事」（例：依頼が処理される）、奇数は「悪い出来事」（例：依頼が待たされる）と思える。ジーロンカのアルゴリズムは、「最も重要な出来事 $d$ を好む側が、$d$ を何度も見せられる範囲（アトラクタ）を切り取り、残りの小さいゲームを解いて、相手が勝てる部分を相手のアトラクタごと取り除く」ことをくり返す。
+
+**高い視点：入れ子の不動点としての勝利領域。** 勝利領域は、優先度ごとに最小・最大の不動点を交互に入れ子にした式で書けることが知られている（優先度 $d$ を好む側について、$d$ が偶数なら最大、奇数なら最小）。これがちょうど μ 計算の交代のある論理式の形で、次のページでは逆に、μ 計算の論理式の真理をパリティゲームの勝敗に翻訳する。
+:::
+
+## 問題 {#logic:sec-pg-problems}
+
+::: problem {#logic:prob-pg-attractor}
+頂点 $1,2,3,4$、$V_{0}=\{1,3\}$、$V_{1}=\{2,4\}$、$E=\{(1,2),(1,3),(2,1),(2,4),(3,3),(4,4)\}$ とする。$\mathrm{Attr}_{0}(\{4\})$ と $\mathrm{Attr}_{1}(\{4\})$ を求めよ。
+:::
+
+::: solution
+$\mathrm{Attr}_{0}(\{4\})$：$4$ のほか、プレイヤー $0$ の頂点で後続が集合に入るもの、プレイヤー $1$ の頂点で後続がすべて集合に入るもの。$2\in V_{1}$ の後続 $\{1,4\}$ は全部は入らず、$1\in V_{0}$ の後続 $\{2,3\}$ も入らない。よって $\{4\}$。$\mathrm{Attr}_{1}(\{4\})$：$2\in V_{1}$ は後続 $4$ があるので入る。次に $1\in V_{0}$ の後続 $\{2,3\}$ は全部は入らない（$3$）。$3$ の後続 $\{3\}$ も入らない。よって $\{2,4\}$。
+:::
+
+::: problem {#logic:prob-pg-solve}
+前問のアリーナに優先度 $\Omega(1)=1$, $\Omega(2)=2$, $\Omega(3)=1$, $\Omega(4)=0$ を与える。ジーロンカのアルゴリズムで勝利領域と位置戦略を求めよ。
+:::
+
+::: solution
+$d=2$、$j=0$、$U=\{2\}$、$A=\mathrm{Attr}_{0}(\{2\})=\{1,2\}$（$1\in V_{0}$ は後続 $2$ をもつ）。部分ゲーム $\{3,4\}$ では、$3$ は自分へのループ（優先度 $1$）だけなのでプレイヤー $1$ の勝ち、$4$ はループ（優先度 $0$）だけなのでプレイヤー $0$ の勝ち：$W'_{0}=\{4\}$, $W'_{1}=\{3\}$。$W'_{1}\ne\varnothing$ なので $B=\mathrm{Attr}_{1}(\{3\})=\{3\}$（$1\in V_{0}$ は $2$ にも行けるので入らない）。$\mathcal{G}\restr{\{1,2,4\}}$ を解く：$d=2$, $U=\{2\}$, $A=\mathrm{Attr}_{0}(\{2\})=\{1,2\}$、残り $\{4\}$ は $0$ の勝ちで $W'_{1}=\varnothing$、よって全体が $0$ の勝ち。答：$W_{0}=\{1,2,4\}$（$\sigma_{0}(1)=2$）、$W_{1}=\{3\}$。実際 $1$ から $2$ に行けば、プレイヤー $1$ は $2\to1$ を続ける（優先度 $2$ が無限回で $0$ の勝ち）か $4$ に行く（優先度 $0$ のループで $0$ の勝ち）しかない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=35dfde8c"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=23f6e3d6"></script>
+<script src="../../../site.js?v=f7713090"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
