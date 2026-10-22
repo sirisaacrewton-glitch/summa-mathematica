@@ -650,6 +650,25 @@
     '18-category-theory/18A-general-theory/01-basics/', '12-field-theory/12F-field-extensions/01-extensions/'];
   var TERM_BASE_SHORT = {};
   '単射 全射 関手 基底 次元 加群 連続 直積 直和 逆像 閉包 近傍 有界 上限 下限 上界 下界 可算 同相 距離 位数 整域 標数'.split(' ').forEach(function (w) { TERM_BASE_SHORT[w] = 1; });
+  // 他の分野の定義へ結ぶと意味が違うもの（2026-10-22 に分野をまたぐ用語リンク 628 組を確認して決めた）。
+  // 「ラベル#語」→ 結ばない分野（ディレクトリの第 1 階層の番号。'*' はその定義の分野以外すべて）。同じ分野の中では常に結ぶ。
+  var TERM_XF_DENY = {
+    'cat:graph#グラフ': '*', 'cat:subobject#共通部分': '*', 'cat:category#定義域': '*', 'cat:preserve-limits#連続': '*',
+    'calc:function-limit#連続': '*', 'calc:function-limit#連続関数': '13 14 18 30 54 55', 'set:transitive-set#推移的': '*',
+    'set:rank#ランク': '*', 'at:covering#ファイバー': '03 11 12 13 14 16 18 20 54', 'lin:inner-product#ノルム': '11 12 13 18 20',
+    'lin:eigen-def#トレース': '03 11 12', 'grp:gcd#互いに素': '18 54 55', 'ring:ideal-sum-product#互いに素': '03',
+    'ha:homology#サイクル': '12 16 20 26', 'mod:ring-presentation#コード': '*', 'calc:pullback#引き戻し': '*',
+    'cat:monoid-object#準同型': '*', 'set:finitary-closure#閉包': '*', 'set:cofinal-map#非有界': '*', 'set:order-isomorphism#自己同型': '*',
+    'set:order-isomorphism#同型写像': '*', 'ring:degree#位数': '*', 'grp:abelian-group#位数': '26 30', 'calc:differential-form#k 形式': '*',
+    'calc:differential-form#微分形式': '11 12 13 14 18', 'ag:algebraic-set#イデアル': '*', 'cat:etale-topology-ring#エタール': '*',
+    'lin:adjoint#エルミート': '03 11', 'calc:trig-functions#オイラーの公式': '*', 'set:class#クラス': '12 13 26 54',
+    'ag:scheme-properties-def#ネーター': '*', 'set:boolean-algebra#交わり': '*', 'ring:gcd-content#原始的': '*',
+    'grp:free-abelian#基底': '*', 'calc:cauchy-construction#完備化': '11 12 14 16 18', 'ring:formal-derivative#導関数': '*',
+    'ring:local-property-def#局所的': '*', 'calc:general-power#指数法則': '*', 'ring:normal-domain#正規化': '15',
+    'set:free-bound-variable#自由変数': '15', 'top:adjunction-space#貼り合わせ': '18', 'fld:separable-polynomial#分離的': '55',
+    'cat:reflective-subcategory#反射的': '03 54', 'cat:category#結合律': '03 20', 'ag:weil-divisor#素因子': '*',
+    'ag:divisor-class-group#主因子': '*', 'grp:direct-product#直積': '26 54 55', 'mod:direct-sum#直積': '26 54 55', 'grp:element-order#位数': '26 30'
+  };
   function isBase(dir) { return TERM_BASE.some(function (b) { return String(dir || '').indexOf(b) === 0; }); }
   function createTermLinker(termDefs, labels, pages) {
     // 動詞・形容詞の形の語（「矛盾する」「自由である」「すべての」など）も地の文に紛れるので結ばない
@@ -658,11 +677,20 @@
     var re = keys.length ? new RegExp(keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'g') : null;
     function second(dir) { return String(dir || '').split('/').slice(0, 2).join('/'); }
     function field(dir) { return String(dir || '').split('/')[0]; }
+    function denied(l, term, P, Q) {
+      var d = TERM_XF_DENY[l + '#' + term], f = field(P.dir);
+      return !!d && f !== field(Q.dir) && (d === '*' || (' ' + d + ' ').indexOf(' ' + f.split('-')[0] + ' ') >= 0);
+    }
+    // 候補（拒否されたものを除く）。プレビューで「ほかの分野の定義」として並べるのにも使う
+    function candidates(term, pageIdx) {
+      var P = pages[pageIdx];
+      return (termDefs[term] || []).map(function (l) { return { l: l, p: labels[l] ? labels[l].p : null }; })
+        .filter(function (x) { return x.p != null && pages[x.p] && !(P && denied(x.l, term, P, pages[x.p])); });
+    }
     function pick(term, pageIdx, depSet) {
       var cands = termDefs[term]; if (!cands) return null;
       var short = term.length <= 2, P = pages[pageIdx];
-      var info = cands.map(function (l) { return { l: l, p: labels[l] ? labels[l].p : null }; })
-        .filter(function (x) { return x.p != null && pages[x.p]; });
+      var info = candidates(term, pageIdx);
       if (P) {
         var tiers = [
           function (x) { return x.p === pageIdx; },
@@ -675,10 +703,13 @@
           var hit = info.filter(tiers[i]);
           if (hit.length) return hit.sort(function (a, b) { return a.p - b.p; })[0].l;
         }
-        // 基礎の系列の定義（分類番号の近い分野を優先）
+        // 基礎の系列の定義。候補が複数あれば、題にその語をそのまま含む定義（その語が主題の定義）を優先し、
+        // それでも複数あれば分類番号の近い分野を選ぶ
         if (!short || TERM_BASE_SHORT[term]) {
           var fn = parseInt(field(P.dir), 10) || 0;
           var base = info.filter(function (x) { return isBase(pages[x.p].dir); });
+          var titled = base.filter(function (x) { return String(labels[x.l].ti || '').indexOf(term) >= 0; });
+          if (titled.length) base = titled;
           if (base.length) return base.sort(function (a, b) {
             return Math.abs((parseInt(field(pages[a.p].dir), 10) || 0) - fn) - Math.abs((parseInt(field(pages[b.p].dir), 10) || 0) - fn) || a.p - b.p;
           })[0].l;
@@ -723,7 +754,14 @@
       }
       return out;
     }
-    return { scan: scan, pick: pick, pageDeps: pageDeps, size: keys.length };
+    // プレビューで選べる「ほかの定義」：同じ分野の定義と基礎の系列の定義だけ（遠い分野の同名の別概念は出さない）
+    function alternatives(term, pageIdx, chosen) {
+      var P = pages[pageIdx];
+      return candidates(term, pageIdx).filter(function (x) {
+        return x.l !== chosen && (field(pages[x.p].dir) === field(P.dir) || isBase(pages[x.p].dir));
+      }).map(function (x) { return x.l; });
+    }
+    return { scan: scan, pick: pick, candidates: candidates, alternatives: alternatives, pageDeps: pageDeps, size: keys.length };
   }
 
   return {

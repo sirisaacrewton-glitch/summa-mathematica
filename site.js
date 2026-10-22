@@ -75,6 +75,10 @@
         if (h.i > last) frag.appendChild(document.createTextNode(text.slice(last, h.i)));
         var a = document.createElement('a');
         a.className = 'mn-xref mn-term'; a.href = info.href; a.setAttribute('data-label', l);
+        // 同じ語の別の定義（意味が違うと分かっている他分野の定義は candidates の段階で除かれている）。プレビューで選べるようにする
+        var alt = linker.alternatives(h.term, pageIdx, l)
+          .filter(function (x) { var ai = resolveRef(x); return ai && !ai.planned; });
+        if (alt.length) a.setAttribute('data-alt', alt.slice(0, 6).join(' '));
         a.textContent = text.substr(h.i, h.len);
         frag.appendChild(a);
         last = h.i + h.len;
@@ -594,11 +598,21 @@
       htmlContent: b ? b.innerHTML : '', loading: !!(b && b.querySelector('.mn-pv-loading'))
     };
   }
+  /* 用語の別の定義（同じ語を定義している他の項目）へのリンク。クリックでプレビューがその定義に切り替わる */
+  function altHtml(ls) {
+    return '<div class="mn-pv-alt"><span class="mn-pv-alt-k">ほかの定義：</span>' + ls.map(function (l) {
+      var i = resolveRef(l); if (!i) return '';
+      return '<a class="mn-xref" data-label="' + esc(l) + '" href="' + esc(i.href) + '">' + esc((i.prefix || '') + i.typeName + (i.num ? ' ' + i.num : '')) +
+        (i.title ? '（' + renderer.renderInline(i.title) + '）' : '') + '</a>';
+    }).join('、') + '</div>';
+  }
   function labelOf(a) { return a.getAttribute('data-label') || a.getAttribute('data-pv-label'); }
   function showPop(a, keepStack) {
     var label = typeof a === 'string' ? a : labelOf(a);
     var it = typeof a === 'string' ? popItems : itemsFor(a);
     var html = previewHtml(label, it);
+    var alt = typeof a !== 'string' && a.getAttribute('data-alt');
+    if (html && alt) html += altHtml(alt.split(' '));
     if (!html) return;
     if (typeof a !== 'string') popFor = a;
     if (!keepStack) popStack = [];

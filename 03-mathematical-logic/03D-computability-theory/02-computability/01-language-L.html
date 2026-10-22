@@ -8,7 +8,7 @@
 <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
 <link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
-<link rel="stylesheet" href="../../../style.css?v=eecbc6b7">
+<link rel="stylesheet" href="../../../style.css?v=9af2cd98">
 <script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 </head>
 <body data-root="../../../" data-page="03-mathematical-logic/03D-computability-theory/02-computability/01-language-L.html" data-kind="page">
@@ -18,7 +18,7 @@
 
 本ページから、計算可能性を**プログラミング言語 L** によって定義する。L は、変数への代入（$0$ の代入、$1$ を足す、$1$ を引く、変数の写し）、逐次実行、回数を決めた繰り返し $\mathtt{for}$、条件つきの繰り返し $\mathtt{while}$ だけをもつ小さな言語である。チューリング機械（\ref{comp:turing-machine}）よりも、普段書くプログラムに近いので直感的にとらえやすい。L で計算できる部分関数を**計算可能**と呼び（\ref{comp:L-computable}）、後のページで、原始再帰関数（$\mathtt{while}$ を除いた L）、一般再帰関数、レジスタ機械、チューリング機械と比べる。
 
-本ページでは、L の構文（\ref{comp:L-syntax}）と意味（\ref{comp:L-semantics}）を定め、意味が一意に決まること（\ref{comp:L-determinism}）、現れない変数は書き換えられないこと（\ref{comp:L-locality}）、$\mathtt{for}$ だけのプログラムは必ず停止すること（\ref{comp:for-total}）を示し、よく使う命令の略記（\ref{comp:L-macros}）と合成についての閉包性（\ref{comp:L-composition}）を準備する。
+本ページでは、L の構文（\ref{comp:L-syntax}）と意味（\ref{comp:L-semantics}）を定め、意味が一意に決まること（\ref{comp:L-determinism}）、現れない変数は書き換えられないこと（\ref{comp:L-locality}）、$\mathtt{for}$ だけのプログラムは必ず停止すること（\ref{comp:for-total}）を示し、よく使う命令の略記（\tref{comp:L-macros}）と合成についての閉包性（\ref{comp:L-composition}）を準備する。
 
 > L のような言語（while プログラム、LOOP プログラム）による計算可能性の扱いは、Meyer–Ritchie (1967) の LOOP 言語などに由来する標準的な方法である。資料フォルダにこの形の教科書はないので、定義と証明は本サイトで組み立てた。基本命令の選び方は本によって異なるが、計算できる関数の範囲は変わらない（\ref{comp:L-macros} の後の注意）。
 
@@ -45,7 +45,7 @@
 :::
 
 ::: remark
-for ループの繰り返し回数は、**ループに入ったときの** $x$ の値で決まり、本体 $P$ の中で $x$ が書き換えられても変わらない（\ref{comp:L-semantics} の 5）。この約束によって、for ループは必ず有限回で終わる。while ループは、ループの頭で毎回 $x$ の値を調べ、$0$ なら終わる。
+for ループの繰り返し回数は、**ループに入ったときの** $x$ の値で決まり、本体 $P$ の中で $x$ が書き換えられても変わらない（\ref{comp:L-semantics.5}）。この約束によって、for ループは必ず有限回で終わる。while ループは、ループの頭で毎回 $x$ の値を調べ、$0$ なら終わる。
 :::
 
 ::: remark Python 風の表示 {#comp:L-python-display keywords="Python-like notation for L programs" index="Python 風の表示（L の）|ぱいそんふうのひょうじえるの"}
@@ -61,7 +61,7 @@ for ループの繰り返し回数は、**ループに入ったときの** $x$ �
 | $\mathtt{for}\ x\ \mathtt{do}\ P\ \mathtt{od}$ | `for _ in range(x):` の下に $P$ を字下げして書く |
 | $\mathtt{while}\ x\neq0\ \mathtt{do}\ P\ \mathtt{od}$ | `while x != 0:` の下に $P$ を字下げして書く |
 
-Python の `for _ in range(x):` も、繰り返しの回数をループに入ったときの `x` の値で決め、本体で `x` を書き換えても回数は変わらないので、L の for ループ（\ref{comp:L-semantics} の 5）と同じ意味になる。変数の値は常に自然数で、`x = max(x - 1, 0)` は $0$ から引いても $0$ のままであることを表す。後で導入する略記（\ref{comp:L-macros}）も、`x = y + z`、`if x != 0:`、`y = f(z1, z2)` などと Python の書き方で表示する。
+Python の `for _ in range(x):` も、繰り返しの回数をループに入ったときの `x` の値で決め、本体で `x` を書き換えても回数は変わらないので、L の for ループ（\ref{comp:L-semantics.5}）と同じ意味になる。変数の値は常に自然数で、`x = max(x - 1, 0)` は $0$ から引いても $0$ のままであることを表す。後で導入する略記（\ref{comp:L-macros}）も、`x = y + z`、`if x != 0:`、`y = f(z1, z2)` などと Python の書き方で表示する。
 :::
 
 ## 意味 {#comp:sec-L-semantics}
@@ -103,7 +103,7 @@ $\langle P,\sigma\rangle\Downarrow\tau$ の導出に関する帰納法で、「�
 - 規則 6：前半なら $\tau=\tau'=\sigma$。後半なら規則 4 と同じ議論。
 :::
 
-::: lemma 局所性 {#comp:L-locality keywords="locality, frame property" index="局所性（プログラムの）|きょくしょせいぷろぐらむの"}
+::: lemma 局所性 {#comp:L-locality keywords="locality, frame property" index="局所性（プログラムの）|きょくしょせいぷろぐらむの" refname="L プログラムの局所性" refscope="field"}
 $V\defeq\mathrm{var}(P)$ とする。
 1. $\langle P,\sigma\rangle\Downarrow\tau$ なら、$V$ に属さない変数 $z$ について $\tau(z)=\sigma(z)$。
 2. $\sigma$ と $\sigma'$ が $V$ 上で一致し、$\langle P,\sigma\rangle\Downarrow\tau$ なら、$\langle P,\sigma'\rangle\Downarrow\tau'$ となる $\tau'$ があり、$\tau'$ は $V$ 上で $\tau$ と、$V$ の外で $\sigma'$ と一致する。
@@ -143,7 +143,7 @@ $$
 
 ## 略記 {#comp:sec-L-macros}
 
-::: proposition よく使う命令の略記 {#comp:L-macros keywords="macros, derived instructions, conditional" index="略記（L の命令の）|りゃっきえるのめいれい"}
+::: proposition よく使う命令の略記 {#comp:L-macros keywords="macros, derived instructions, conditional" index="略記（L の命令の）|りゃっきえるのめいれい" refname="L でよく使う命令の略記" refscope="field"}
 以下で $x,y,z$ は変数、$u,v$ は他のどこにも現れない**新しい**変数とする。1〜5 では、左の略記を右の for プログラムの意味で使う。6 は二つのプログラムの意味が等しいという主張である。どの場合も、停止後の状態は、$x$（条件文では $P$ の変数）と新しい変数以外で入力の状態と一致する（\ref{comp:L-locality}）。
 1. $x:=y+z$ は次のプログラムの略記。実行後 $x=\sigma(y)+\sigma(z)$。
 ```python x = y + z
@@ -189,7 +189,7 @@ while u != 0:
 1. $u:=z$ の後 $u=\sigma(z)$、$x:=y$ の後 $x=\sigma(y)$（$x=z$ でも、$z$ の値は先に $u$ に写してある）。for ループは $\sigma(z)$ 回 $x$ に $1$ を足すので、$i$ に関する帰納法で $i$ 回目の後 $x=\sigma(y)+i$。2 も同じ。
 3. 2 行目までで $u=\sigma(y)$, $v=\sigma(z)$, $x=0$。本体 $x:=x+u$ は 1 の略記で、$u$ を書き換えない（1 の新しい変数は $u,v$ と別にとる）。$i$ 回目の後 $x=i\cdot\sigma(y)$。
 5. $v=1\mathbin{\dot{-}}\sigma(x)$ は $\sigma(x)=0$ なら $1$、そうでなければ $0$。$u=1\mathbin{\dot{-}}v$ はその逆で、for ループの回数になる。
-6. 右辺：$u$ の値は本体 $P$ で変わらない（\ref{comp:L-locality} の 1、$u\notin\mathrm{var}(P)$）ので、各周回の終わりに $1$ ずつ減り、ちょうど $\sigma(x)$ 周で $u=0$ になって止まる。各周回で $P$ が一度実行されるので、左辺の規則 5 の列 $\sigma_{0},\dots,\sigma_{n}$ と、$u$ 以外で一致する状態を順にたどる（$i$ に関する帰納法と \ref{comp:L-locality} の 2）。$P$ が停止しない段があれば、両辺とも停止しない。
+6. 右辺：$u$ の値は本体 $P$ で変わらない（\ref{comp:L-locality.1}、$u\notin\mathrm{var}(P)$）ので、各周回の終わりに $1$ ずつ減り、ちょうど $\sigma(x)$ 周で $u=0$ になって止まる。各周回で $P$ が一度実行されるので、左辺の規則 5 の列 $\sigma_{0},\dots,\sigma_{n}$ と、$u$ 以外で一致する状態を順にたどる（$i$ に関する帰納法と \ref{comp:L-locality.2}）。$P$ が停止しない段があれば、両辺とも停止しない。
 :::
 
 ::: remark
@@ -214,7 +214,7 @@ wp = zp
 R'               # R の変数 x_j を w_j に置き換えたプログラム
 y = w0
 ```
-最初の行で、$R'$ の変数は $R$ の入力状態 $\sigma_{\vec{n}}$（$\vec{n}=(\sigma(z_{1}),\dots,\sigma(z_{p}))$）と同じ値をもつ（変数の名前を付け替えただけなので、$R'$ の実行は $R$ の実行と同じ導出をたどる。\ref{comp:L-locality} の 2）。よって $R'$ は $\phi(\vec{n})\downarrow$ のときに限り停止し、そのとき $w_{0}=\phi(\vec{n})$。$R'$ の外の変数は変わらない（\ref{comp:L-locality} の 1）。
+最初の行で、$R'$ の変数は $R$ の入力状態 $\sigma_{\vec{n}}$（$\vec{n}=(\sigma(z_{1}),\dots,\sigma(z_{p}))$）と同じ値をもつ（変数の名前を付け替えただけなので、$R'$ の実行は $R$ の実行と同じ導出をたどる。\ref{comp:L-locality.2}）。よって $R'$ は $\phi(\vec{n})\downarrow$ のときに限り停止し、そのとき $w_{0}=\phi(\vec{n})$。$R'$ の外の変数は変わらない（\ref{comp:L-locality.1}）。
 
 **合成.** 新しい変数 $v_{1},\dots,v_{l}$ をとり、
 ```python 合成 f(x1, …, xk) = g(h1(…), …, hl(…))
@@ -304,7 +304,7 @@ while x2 != 0:
 ::: supplement
 **前提の検討.**
 - 変数の値を自然数に限ったので、L のプログラムは「無限に大きいメモリをもつ機械」の模型である。変数の値に上限 $N$ を設けると（$N$ を超える足し算は $N$ に止める、など）、状態は有限個しかなく、計算できるものは本質的に有限オートマトン（\ref{comp:dfa}）と同じ程度になる。
-- for ループを除くと、while と基本命令だけでも同じ部分関数が計算できる（\ref{comp:L-macros} の 6）。しかし、while を除くと計算できる範囲は真に狭くなる（\ref{comp:page-ackermann}）。
+- for ループを除くと、while と基本命令だけでも同じ部分関数が計算できる（\ref{comp:L-macros.6}）。しかし、while を除くと計算できる範囲は真に狭くなる（\ref{comp:page-ackermann}）。
 - 変数の個数を固定すると範囲が狭くなるかは自明でない。レジスタ機械では、レジスタ $2$ 個でも（入力と出力をうまくコード化すれば）すべての計算可能関数を計算できることが知られている（ミンスキー。\ref{comp:page-register-machines} で触れる）。
 
 **関連する結果.**
@@ -323,10 +323,10 @@ $$
 <script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
 <script src="../../../config.js?v=0cfb52e7"></script>
 <script src="../../../auth-state.js?v=2ff2f569"></script>
-<script src="../../../site-core.js?v=a1fa8c27"></script>
+<script src="../../../site-core.js?v=8255ed67"></script>
 <script src="../../../site-index.js"></script>
 <script src="../../../search.js?v=4d4405c9"></script>
-<script src="../../../site.js?v=452a65d4"></script>
+<script src="../../../site.js?v=cf537e25"></script>
 <script src="../../../learn/manifest.js?v=0c7eee76"></script>
 <script src="../../../learn.js?v=fb745ee3"></script>
 </body>
