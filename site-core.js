@@ -15,7 +15,7 @@
   var REF_OPEN = '', REF_CLOSE = '';
   var DISPLAY_ENVS = ['equation', 'equation*', 'align', 'align*', 'gather', 'gather*',
     'multline', 'multline*', 'eqnarray', 'eqnarray*', 'alignat', 'alignat*', 'CD'];
-  var REF_CMDS = ['ref', 'eqref', 'nameref', 'numref', 'fullref', 'tref', 'term'];
+  var REF_CMDS = ['ref', 'eqref', 'nameref', 'numref', 'fullref', 'tref', 'term', 'see'];
 
   function escapeHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -193,7 +193,7 @@
           index.push({ term: parts[0].trim(), reading: (parts[1] || '').trim() });
           i += im[0].length; continue;
         }
-        var rm = /^\\(ref|eqref|nameref|numref|fullref|tref|term)(?:\[([^\]]*)\])?\{([^{}]+)\}/.exec(s.slice(i, i + 300));
+        var rm = /^\\(ref|eqref|nameref|numref|fullref|tref|term|see)(?:\[([^\]]*)\])?\{([^{}]+)\}/.exec(s.slice(i, i + 300));
         if (rm) {
           refs.push({ cmd: rm[1], label: rm[3].trim(), text: rm[2] != null ? rm[2].trim() : null });
           out += REF_OPEN + (refs.length - 1) + REF_CLOSE;

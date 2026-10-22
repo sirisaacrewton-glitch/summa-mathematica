@@ -313,7 +313,7 @@ var backrefs = {};   // label -> [[pageIdx, fromLabel, fromType, fromNum, role]]
 // role：参照がどこに書かれているか。's' 主張（番号付き環境の本文・題）、'p' 証明（proof・solution）、
 // 'n' 記法と定義の確認（notation）、'm' 付属（intuition・example・supplement・hypcheck）、'' 環境の外の地の文。
 // 学習ルートでは、項目どうしは 's' と 'p'、ページどうしは 's'・'p'・'n' を前提として扱う。
-var ROLE_RANK = { s: 4, p: 3, n: 2, m: 1, '': 0 };
+var ROLE_RANK = { s: 4, p: 3, a: 2.5, n: 2, m: 1, '': 0, x: -1 };   // x：\see による案内（前提には数えない）
 var mathErrors = 0, unresolved = 0;
 // 項目参照（\ref{ラベル.キー}）の検査用：環境ごとの項目のキーの集合と、参照された項目
 var itemKeys = {}, itemRefs = [];
@@ -342,8 +342,10 @@ pages.forEach(function (pg) {
         var list = (backrefs[label] = backrefs[label] || []);
         var sig = pg.idx + '|' + (from ? (from.label || from.num || '') : '');
         var hit = list.filter(function (b) { return b.sig === sig; })[0];
-        if (!hit) list.push({ sig: sig, v: [pg.idx, from ? (from.label || '') : '', from ? from.type : '', from ? (from.num || '') : '', currentRole] });
-        else if (ROLE_RANK[currentRole] > ROLE_RANK[hit.v[4]]) hit.v[4] = currentRole;   // 主張と証明の両方にあれば主張を優先
+        // \see{L}：表示は \ref と同じだが、論理の依存ではない案内（「〜は後で扱う」「詳細は〜」）。役割 x として記録し、前提・ロードマップ・順序の点検に数えない
+        var role = r && r.cmd === 'see' ? 'x' : currentRole;
+        if (!hit) list.push({ sig: sig, v: [pg.idx, from ? (from.label || '') : '', from ? from.type : '', from ? (from.num || '') : '', role] });
+        else if (ROLE_RANK[role] > ROLE_RANK[hit.v[4]]) hit.v[4] = role;   // 主張と証明の両方にあれば主張を優先
       }
       return { type: L.t, num: L.n, title: L.ti, refname: L.rn || '', refscope: L.rs || '', typeName: typeName(L.t), href: '#', prefix: '', secName: pages[L.p] ? pages[L.p].subject + ' §' + pages[L.p].sec : '' };
     },
@@ -378,6 +380,8 @@ pages.forEach(function (pg) {
       // hypcheck（前提の使用箇所）の参照は主に反例への言及なので、前提ではなく付属として扱う
       var r = def.num ? 's' : (def.minor || node.type === 'hypcheck') ? 'm' : def.attached ? 'p' : node.type === 'notation' ? 'n' : role;
       if (role === 'm') r = 'm';   // 付属ブロックの中はずっと付属
+      // 題名が「別証明」で始まる証明（2026-10-22 ユーザー指示）：役割 a。主証明の前提には数えず、別のルートとして記録する
+      if (node.type === 'proof' && /^別証明/.test(node.title || '')) r = 'a';
       currentFrom = from; currentRole = r;
       if (node.title) renderer.renderInline(node.title);
       walk(node.children, from, r, node);
@@ -404,7 +408,7 @@ pages.forEach(function (pg) {
     return true;
   }
   pages.forEach(function (pg) {
-    var src = pg.src, re = /\\(ref|nameref)\{([^{}]+)\}/g, r;
+    var src = pg.src, re = /\\(ref|nameref|see)\{([^{}]+)\}/g, r;
     while ((r = re.exec(src))) {
       var lab = r[2].replace(/\.(\d+|[a-z]|[ivx]+)$/, ''), L = labels[lab]; if (!L) continue;
       var D = r[1] === 'nameref' ? L.ti : (L.rn || ((L.t === 'section' || L.t === 'page') ? (L.t === 'page' ? pages[L.p].title : L.ti) : ''));
