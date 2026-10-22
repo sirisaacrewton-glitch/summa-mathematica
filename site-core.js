@@ -438,7 +438,11 @@
       }
     }
 
+    // 項目参照：\ref{ラベル.N} は、ラベルの環境の中の番号つき箇条書きの N 番目（アンカー ラベル.N）を指す
+    var onItemRef = opts.onItemRef || function () {};
     function renderRef(r) {
+      var im = /^(.+)\.(\d+)$/.exec(r.label), item = null;
+      if (im) { item = im[2]; r = { cmd: r.cmd, label: im[1], text: r.text, item: item }; onItemRef(im[1], +item); }
       var info = resolve(r.label, r);
       if (!info) {
         if (r.text) return '<span class="mn-xref-planned" data-label="' + escapeHtml(r.label) + '" title="未執筆（ラベル ' + escapeHtml(r.label) + '）">' + renderInline(r.text) + '</span>';
@@ -461,9 +465,16 @@
         else if (info.type === 'section' || info.type === 'page') text = info.title;
         else text = (info.prefix || '') + tname + ' ' + info.num;
       }
+      var href = info.href;
+      if (item) {
+        if (!r.text) text += r.cmd === 'eqref' ? '' : ' の ' + item;
+        var hash = '#' + r.label;
+        if (href.slice(-hash.length) === hash) href = href + '.' + item;
+      }
       var titleHtml = /[$\\]/.test(text) ? renderInline(text) : escapeHtml(text);
       return '<a class="mn-xref' + (info.external ? ' mn-xref--ext' : '') +
-        '" data-type="' + escapeHtml(info.type) + '" href="' + escapeHtml(info.href) + '" data-label="' + escapeHtml(r.label) + '">' + titleHtml + '</a>';
+        '" data-type="' + escapeHtml(info.type) + '" href="' + escapeHtml(href) + '" data-label="' + escapeHtml(r.label) + '"' +
+        (item ? ' data-item="' + item + '"' : '') + '>' + titleHtml + '</a>';
     }
 
     function restore(html, ex) {
@@ -503,6 +514,27 @@
       return h;
     }
 
+    // 環境の直下の番号つき箇条書き（入れ子でないもの）の各項目に id「ラベル.N」を付ける（N は表示される番号）
+    function addItemIds(html, label, seen) {
+      var depth = 0, stack = [], out = '', last = 0, re = /<(\/?)(ol|ul|li)\b([^>]*)>/g, m;
+      while ((m = re.exec(html))) {
+        var close = m[1] === '/', tag = m[2];
+        if (tag === 'ol' || tag === 'ul') {
+          if (!close) { depth++; var st = /\bstart="(\d+)"/.exec(m[3]); stack.push({ tag: tag, n: st ? +st[1] - 1 : 0 }); }
+          else { depth--; stack.pop(); }
+          continue;
+        }
+        if (tag === 'li' && !close && depth === 1 && stack[0] && stack[0].tag === 'ol') {
+          var n = ++stack[0].n, id = label + '.' + n;
+          if (seen[id] || /\bid=/.test(m[3])) continue;
+          seen[id] = 1;
+          out += html.slice(last, m.index) + '<li id="' + escapeHtml(id) + '" class="mn-item"' + m[3] + '>';
+          last = re.lastIndex;
+        }
+      }
+      return last ? out + html.slice(last) : html;
+    }
+
     // 「意図・直感」は直前の定義・定理などの枠の中に入れて表示する
     function renderNodes(nodes) {
       var out = [];
@@ -519,7 +551,10 @@
     }
     function renderOne(node) {
       {
-        if (node.kind === 'md') return renderMarkdown(node.text, node._ex);
+        if (node.kind === 'md') {
+          var mdHtml = renderMarkdown(node.text, node._ex);
+          return node._itemOf ? addItemIds(mdHtml, node._itemOf.label, node._itemOf.seen) : mdHtml;
+        }
         var def = envs[node.type] || { name: node.type, num: false, kind: 'rem' };
         envCount++;
         if (node.type === 'restate') {
@@ -544,6 +579,10 @@
           while (kids.length && kids[kids.length - 1].kind === 'env' && kids[kids.length - 1].type === 'hypcheck') {
             tail.unshift(kids[kids.length - 1]); kids = kids.slice(0, -1);
           }
+        }
+        if (node.label) {
+          var itemOf = { label: node.label, seen: {} };
+          kids.forEach(function (k) { if (k.kind === 'md') k._itemOf = itemOf; });
         }
         var body = renderNodes(kids);
         if (node.type === 'proof') {

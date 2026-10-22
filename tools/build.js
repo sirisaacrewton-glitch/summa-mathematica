@@ -313,6 +313,8 @@ var backrefs = {};   // label -> [[pageIdx, fromLabel, fromType, fromNum, role]]
 // 学習ルートでは、項目どうしは 's' と 'p'、ページどうしは 's'・'p'・'n' を前提として扱う。
 var ROLE_RANK = { s: 4, p: 3, n: 2, m: 1, '': 0 };
 var mathErrors = 0, unresolved = 0;
+// 項目参照（\ref{ラベル.N}）の検査用：環境ごとの番号つき項目の最大番号と、参照された項目
+var itemMax = {}, itemRefs = [];
 
 function typeName(t) {
   if (t === 'equation') return '式';
@@ -343,15 +345,20 @@ pages.forEach(function (pg) {
       }
       return { type: L.t, num: L.n, title: L.ti, typeName: typeName(L.t), href: '#', prefix: '' };
     },
+    onItemRef: function (label, n) { itemRefs.push({ label: label, n: n, path: pg.path }); },
     onMathError: function (err, m) {
       mathErrors++;
       warn(pg.path, 'KaTeX エラー: ' + err.message.replace(/\s+/g, ' ').slice(0, 160) + '  ⟵  ' + m.tex.replace(/\s+/g, ' ').slice(0, 120));
     }
   });
   // 環境ごとに「どこから参照したか」を追跡しながら描画
-  (function walk(nodes, fromEnv, role) {
+  (function walk(nodes, fromEnv, role, parentEnv) {
     nodes.forEach(function (node) {
       if (node.kind === 'md') {
+        if (parentEnv && parentEnv.label) {
+          // 環境の直下の番号つき箇条書き（行頭の「N. 」）の最大番号
+          node.text.replace(/^(\d+)\. /gm, function (_, d) { itemMax[parentEnv.label] = Math.max(itemMax[parentEnv.label] || 0, +d); return _; });
+        }
         currentFrom = fromEnv; currentRole = role; renderer.renderMarkdown(node.text);
         if (role === 's' && fromEnv && fromEnv.label) stmtTexts.push({ label: fromEnv.label, p: pg.idx, text: node.text });
         return;
@@ -364,9 +371,16 @@ pages.forEach(function (pg) {
       if (role === 'm') r = 'm';   // 付属ブロックの中はずっと付属
       currentFrom = from; currentRole = r;
       if (node.title) renderer.renderInline(node.title);
-      walk(node.children, from, r);
+      walk(node.children, from, r, node);
     });
-  })(pg.parsed.children, null, '');
+  })(pg.parsed.children, null, '', null);
+});
+
+itemRefs.forEach(function (x) {
+  if (!labels[x.label]) return;   // ラベル自体の未定義は別に報告される
+  if (!itemMax[x.label] || x.n > itemMax[x.label]) {
+    warn(x.path, '項目参照 \\ref{' + x.label + '.' + x.n + '}：' + x.label + ' の直下に ' + x.n + ' 番目の番号つき項目がありません（最大 ' + (itemMax[x.label] || 0) + '）');
+  }
 });
 
 Object.keys(planned).forEach(function (k) {
