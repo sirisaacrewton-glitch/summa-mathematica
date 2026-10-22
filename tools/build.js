@@ -581,6 +581,76 @@ function resolveSec(dir, v) {
   node.children.forEach(function (c) { if (c.kind === 'dir') checkPrereq(c); });
 })(tree);
 
+/* ---------------- 3.6 依存関係の検査（2026-10-22 ユーザー指示：後ろの結果を使っている箇所・前提知識にない系列を使っている箇所を洗い出す） ----------------
+ * 依存に数えるのは、主張（s）と証明（p）からの参照で、注意・事実・問題・例・表・補足からの参照、\see（x）、別証明（a）は除く。
+ * 1. 定理単位の輪  2. ページ単位の輪  3. 同じ系列の後ろのページへの依存 は「問題」として報告する。
+ * 4. 前提知識（_meta.json の prereq を祖先も含めて推移的にたどったもの）にない系列への依存は件数だけ表示し、DEP_REPORT=1 で一覧を出す。 */
+(function checkDependencies() {
+  var NONESS = { remark: 1, fact: 1, problem: 1, table: 1, example: 1, supplement: 1, solution: 1, intuition: 1, exercise: 1 };
+  var RES = { theorem: 1, lemma: 1, proposition: 1, corollary: 1, definition: 1, construction: 1, counterexample: 1 };
+  var edges = [];   // {a: 参照元ページ, b: 参照先ページ, from, to, ft}
+  Object.keys(backrefs).forEach(function (t) {
+    var T = labels[t]; if (!T) return;
+    backrefs[t].forEach(function (b) {
+      var v = b.v, role = v[4];
+      if (role !== 's' && role !== 'p') return;
+      if (NONESS[v[2]] || NONESS[T.t]) return;   // 問題や注意への言及は依存に数えない
+      edges.push({ a: v[0], b: T.p, from: v[1], to: t, ft: v[2], tt: T.t });
+    });
+  });
+  function tarjan(nodes, succ) {
+    var idx = 0, st = [], on = {}, ix = {}, low = {}, out = [];
+    function sc(v) {
+      ix[v] = low[v] = idx++; st.push(v); on[v] = 1;
+      (succ[v] || []).forEach(function (w) {
+        if (ix[w] == null) { sc(w); low[v] = Math.min(low[v], low[w]); } else if (on[w]) low[v] = Math.min(low[v], ix[w]);
+      });
+      if (low[v] === ix[v]) { var c = [], w; do { w = st.pop(); delete on[w]; c.push(w); } while (w !== v); if (c.length > 1) out.push(c); }
+    }
+    nodes.forEach(function (v) { if (ix[v] == null) sc(v); });
+    return out;
+  }
+  // 1. 定理単位
+  var ls = {}, lnodes = {};
+  edges.forEach(function (e) { if (!e.from || !labels[e.from] || !RES[labels[e.from].t] || !RES[e.tt] || e.from === e.to) return; (ls[e.from] = ls[e.from] || []).push(e.to); lnodes[e.from] = lnodes[e.to] = 1; });
+  tarjan(Object.keys(lnodes), ls).forEach(function (c) { warn(pages[labels[c[0]].p].path, '定理の依存に輪があります：' + c.join(' ↔ ') + '（案内なら \\see、別の証明なら「別証明」に）'); });
+  // 2. ページ単位
+  var ps = {}, pnodes = {};
+  edges.forEach(function (e) { if (e.a === e.b) return; (ps[e.a] = ps[e.a] || []).push(String(e.b)); pnodes[e.a] = pnodes[e.b] = 1; });
+  tarjan(Object.keys(pnodes), ps).forEach(function (c) { warn(pages[+c[0]].path, 'ページの依存に輪があります：' + c.map(function (i) { return pages[+i].path; }).join(' ↔ ')); });
+  // 3. 同じ系列の後ろのページ
+  edges.forEach(function (e) {
+    var A = pages[e.a], B = pages[e.b];
+    if (A.dirNode === B.dirNode && B.sec > A.sec) warn(A.path, (e.from || '記法') + ' が後ろのページ（§' + B.sec + '）の ' + e.to + ' を使っています（案内なら \\see、問題なら「先取りしてよい」と明記、本当の依存なら順序を変える）');
+  });
+  // 4. 前提知識にない系列
+  function seriesOf(node) { var p = node.path; while (p) { var d = byPath[p]; if (d && d.id) return d; p = p.replace(/[^\/]+\/$/, ''); } return null; }
+  var byPath = {};
+  (function collect(n) { byPath[n.path] = n; n.children.forEach(function (c) { if (c.kind === 'dir') collect(c); }); })(tree);
+  var clo = {};
+  function closure(d) {
+    if (clo[d.id]) return clo[d.id];
+    var out = {}; clo[d.id] = out; out[d.id] = 1; var stack = [d];
+    while (stack.length) {
+      var x = stack.pop(), p = x.path;
+      while (p) { var n = byPath[p]; if (n) (n.prereq || []).forEach(function (it) { var y = dirById[it.dir]; if (y && !out[y.id]) { out[y.id] = 1; stack.push(y); } }); p = p.replace(/[^\/]+\/$/, ''); }
+    }
+    return out;
+  }
+  var missing = {};
+  edges.forEach(function (e) {
+    var A = seriesOf(pages[e.a].dirNode), B = seriesOf(pages[e.b].dirNode);
+    if (!A || !B || A === B || closure(A)[B.id]) return;
+    if (A.path.indexOf(B.path) === 0 || B.path.indexOf(A.path) === 0) return;
+    var k = A.id + ' → ' + B.id; (missing[k] = missing[k] || []).push(pages[e.a].path.split('/').pop() + ' ' + (e.from || '記法') + ' → ' + e.to);
+  });
+  var mk = Object.keys(missing);
+  if (mk.length) {
+    console.log('[前提知識にない系列への依存 ' + mk.length + ' 組（' + mk.reduce(function (s, k) { return s + missing[k].length; }, 0) + ' か所）— DEP_REPORT=1 で一覧。2 か所以上なら _meta.json の prereq に足すか、順序を見直す]');
+    if (process.env.DEP_REPORT) mk.sort().forEach(function (k) { console.log('  ' + k + '（' + missing[k].length + '）'); missing[k].forEach(function (x) { console.log('      ' + x); }); });
+  }
+})();
+
 function prereqSource(node) {
   if (!node.prereq || !node.prereq.length) return '';
   var r = relRoot(node.path + 'index.html');

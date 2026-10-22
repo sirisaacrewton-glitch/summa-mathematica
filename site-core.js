@@ -518,6 +518,8 @@
     }
 
     function envHead(node, def) {
+      // 別証明（題名が「別証明」で始まる証明）は「証明（別証明…）」と重ねず、題名をそのまま見出しにする
+      if (node.type === 'proof' && /^別証明/.test(node.title || '')) return '<span class="mn-env-name">' + renderInline(node.title) + '</span>';
       var h = '<span class="mn-env-name">' + escapeHtml(def.name) +
         (node.num ? ' <span class="mn-env-num">' + escapeHtml(node.num) + '</span>' : '') + '</span>';
       if (node.title) h += ' <span class="mn-env-title">（' + renderInline(node.title) + '）</span>';
