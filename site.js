@@ -102,7 +102,7 @@
       type: G.t, num: G.n, title: G.t === 'page' ? pg.title : G.ti, refname: G.rn || '', typeName: typeName(G.t),
       href: same ? '#' + label : ROOT + pg.path + (G.t === 'page' ? '' : '#' + label),
       prefix: (!PG || pg.dir !== PG.dir) ? pg.subj + ' ' : '', external: !same,
-      refscope: G.rs || '', otherField: !PG || pg.dir.split('/')[0] !== PG.dir.split('/')[0]
+      secName: pg.subj + ' §' + pg.sec, refscope: G.rs || '', otherField: !PG || pg.dir.split('/')[0] !== PG.dir.split('/')[0]
     };
   }
   var renderer = Core.createRenderer({

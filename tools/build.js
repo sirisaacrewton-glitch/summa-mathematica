@@ -345,7 +345,7 @@ pages.forEach(function (pg) {
         if (!hit) list.push({ sig: sig, v: [pg.idx, from ? (from.label || '') : '', from ? from.type : '', from ? (from.num || '') : '', currentRole] });
         else if (ROLE_RANK[currentRole] > ROLE_RANK[hit.v[4]]) hit.v[4] = currentRole;   // 主張と証明の両方にあれば主張を優先
       }
-      return { type: L.t, num: L.n, title: L.ti, refname: L.rn || '', refscope: L.rs || '', typeName: typeName(L.t), href: '#', prefix: '' };
+      return { type: L.t, num: L.n, title: L.ti, refname: L.rn || '', refscope: L.rs || '', typeName: typeName(L.t), href: '#', prefix: '', secName: pages[L.p] ? pages[L.p].subject + ' §' + pages[L.p].sec : '' };
     },
     onItemRef: function (label, n) { itemRefs.push({ label: label, n: n, path: pg.path }); },
     onMathError: function (err, m) {
@@ -389,6 +389,39 @@ pages.forEach(function (pg) {
 // まだ確認していないもの（tools/term-review.json の reviewed にも site-core.js の TERM_NO_AUTO にもないもの）を報告する。
 // 確認したら、同じページ・同じ系列の定義が選ばれれば正しい語は reviewed に足し、同じページの中でも意味が変わる語は TERM_NO_AUTO に足して
 // 原稿で出現ごとに \term[語]{ラベル} を付ける。
+// 参照リンクの表示名を、同じ文の中で本文にも書いていないかの検査（2026-10-22 ユーザー指示：「ヘネシー–ミルナーの定理（ヘネシー–ミルナーの定理）」のように
+// 二度出さない）。\ref が名前（refname）やページ・節の題で表示されるとき、同じ文（括弧の外の「。」で区切る）の前後にその名前があれば報告する。
+// 直し方：「名前（\ref{L}）」は \ref{L} だけにする。名前を本文に残したいときは \tref{L}（定理は「定理 1.9」、ページ・節は「分野 §n」で表示）にする。
+(function checkDuplicateRefNames() {
+  function sameSentence(seg) {
+    var dep = 0;
+    for (var i = 0; i < seg.length; i++) {
+      var ch = seg[i];
+      if (ch === '（' || ch === '(') dep++;
+      else if (ch === '）' || ch === ')') dep = Math.max(0, dep - 1);
+      else if ((ch === '。' || ch === '\n') && dep === 0) return false;
+    }
+    return true;
+  }
+  pages.forEach(function (pg) {
+    var src = pg.src, re = /\\(ref|nameref)\{([^{}]+)\}/g, r;
+    while ((r = re.exec(src))) {
+      var lab = r[2].replace(/\.(\d+|[a-z]|[ivx]+)$/, ''), L = labels[lab]; if (!L) continue;
+      var D = r[1] === 'nameref' ? L.ti : (L.rn || ((L.t === 'section' || L.t === 'page') ? (L.t === 'page' ? pages[L.p].title : L.ti) : ''));
+      if (!D || D.replace(/\s/g, '').length < 3) continue;
+      var rx = new RegExp(Array.from(D).filter(function (c) { return !/\s/.test(c); }).map(function (c) {
+        return /[–—−-]/.test(c) ? '[–—−-]' : c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      }).join('(?:\\*\\*|\\s|\\$|\\\\math[a-z]+\\{|\\})*'), 'g');
+      var hit = false, m, w0 = Math.max(0, r.index - 90), bw = src.slice(w0, r.index), aw = src.slice(r.index + r[0].length, r.index + r[0].length + 70);
+      var ok = function (str, idx) { var pc = idx > 0 ? str[idx - 1] : ''; return !/[一-鿿゠-ヿ]/.test(pc); };   // 「局所連結性」の中の「連結性」は数えない
+      while (!hit && (m = rx.exec(bw))) if (ok(bw, m.index) && sameSentence(bw.slice(m.index + m[0].length))) hit = true;
+      rx.lastIndex = 0;
+      while (!hit && (m = rx.exec(aw))) if (ok(aw, m.index) && sameSentence(aw.slice(0, m.index))) hit = true;
+      if (hit) warn(pg.path, '参照の表示名「' + D + '」が同じ文に二度出る：\\' + r[1] + '{' + r[2] + '}（名前（\\ref）なら \\ref だけに、名前を残すなら \\tref に）');
+    }
+  });
+})();
+
 (function checkAmbiguousTerms() {
   var reviewed = {}; try { (JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'term-review.json'), 'utf8')).reviewed || []).forEach(function (k) { reviewed[k] = 1; }); } catch (e) {}
   Object.keys(termDefs).forEach(function (t) {

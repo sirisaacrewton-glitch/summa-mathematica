@@ -465,6 +465,8 @@
       else if (r.cmd === 'nameref') text = info.title || (tname + ' ' + info.num);
       else if (r.cmd === 'fullref') text = (info.prefix || '') + tname + ' ' + info.num + (info.title ? '（' + info.title + '）' : '');
       else if (r.text) text = r.text;
+      // \tref でページ・節を指すときは、名前でなく「分野 §n」で表示する（直前に名前を書いたとき、二度出さないため。2026-10-22 ユーザー指示）
+      else if (r.cmd === 'tref' && (info.type === 'page' || info.type === 'section') && info.secName) text = info.secName;
       // 有名な定理・頻出の補題は番号でなく名前で表示する（属性 refname）。\tref は名前を持つ項目でも「種類 番号」で表示する（直前に名前を書いたとき用）
       // refscope="field"（参照が多いだけで、名前が分野の文脈に頼るもの）は、他の分野からの参照では番号で表示する
       // 参照が多いだけで名前を付けたもの（refscope="field"）は「定理：正規性」のように種類を前に付ける（種類は定義した環境による。2026-10-22 ユーザー指示）
