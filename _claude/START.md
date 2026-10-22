@@ -385,7 +385,7 @@
 * 同じステージングパスを使い回さない。
 * 本の文章を翻訳・転載しない。本のテキスト（`_text/`）をサイトのフォルダに入れない。
 * 作業エージェントを並列で大量に立てない。
-* 自動生成ファイル（index.html, search.html, glossary.html, labels.json, site-index.js, search-index.js）を手で直さない。
+* 自動生成ファイル（index.html, search.html, glossary.html, labels.json, site-index.js, search-index.js, pv/*.js（参照プレビュー用のページごとの本文））を手で直さない。
 
 ## 10. 新しい本・新しい分野を始めるとき
 

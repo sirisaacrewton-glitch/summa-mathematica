@@ -525,6 +525,23 @@
     });
     return { focus: n, list: Object.keys(set).sort(function (x, y) { return /^\d+$/.test(x) && /^\d+$/.test(y) ? x - y : x < y ? -1 : x > y ? 1 : 0; }) };
   }
+  /* 参照プレビュー用の本文をページ単位で読み込む（pv/<ページ番号>.js、数 KB〜数十 KB）。同じページは一度だけ */
+  var pvLoading = {};
+  function loadPv(p, cb) {
+    if (window.SM_PV && window.SM_PV[p]) { if (cb) cb(); return; }
+    var L = pvLoading[p];
+    if (L) { if (cb) L.push(cb); return; }
+    L = pvLoading[p] = cb ? [cb] : [];
+    var sc = document.createElement('script');
+    sc.src = ROOT + 'pv/' + p + '.js?v=' + encodeURIComponent(IDX.built || '');
+    sc.async = true;
+    sc.onload = sc.onerror = function () { var fs = pvLoading[p]; delete pvLoading[p]; window.SM_PV = window.SM_PV || {}; if (!window.SM_PV[p]) window.SM_PV[p] = {}; fs.forEach(function (f) { f(); }); };
+    document.head.appendChild(sc);
+  }
+  function prefetchPv(a) {
+    var G = IDX.labels[labelOf(a)];
+    if (G && G.p !== pageIdx && !pvMem.has(labelOf(a))) loadPv(G.p);
+  }
   function previewHtml(label, it) {
     var L = localLabels[label], G = IDX.labels[label];
     var info = resolveRef(label);
@@ -550,7 +567,18 @@
       head = head.replace('<!--where-->', '<div class="mn-pv-where">' + esc(pgc.subj) + ' §' + pgc.sec + ' ' + esc(pgc.title) + '</div>');
     } else if (G) {
       var pg = IDX.pages[G.p];
+      var chunk = window.SM_PV && window.SM_PV[G.p];
       if (G.t === 'equation') bodyHtml = renderer.renderTex({ tex: G.tex, display: true, num: G.n });
+      // ページごとの小さなプレビュー用ファイル（pv/<ページ番号>.js）から描く。未読み込みなら読み込んでから描き直す
+      else if (chunk && (G.t === 'page' ? '#page' in chunk : label in chunk)) {
+        var src = G.t === 'page' ? chunk['#page'] : chunk[label];
+        bodyHtml = isNamed ? renderer.renderMarkdown(src.slice(0, 900)) : renderer.renderNodes(Core.parseBlocks(src).children);
+      }
+      else if (!chunk && (G.e != null || isNamed)) {
+        bodyHtml = '<div class="mn-pv-loading" role="status"><span class="mn-sr-only">読み込み中…</span><div class="mn-skel-line"></div><div class="mn-skel-line"></div><div class="mn-skel-line" style="width:64%"></div></div>';
+        var want0 = label;
+        loadPv(G.p, function () { if (popFor && popLabel === want0) { if (popStack.length) setPopContent(want0, popItems); else showPop(popFor); } });
+      }
       else if (G.e != null && !(IDX.entries && IDX.entries.length) && window.MathEntries) {
         // 本文の索引がまだ読み込まれていない：読み込み後に表示し直す
         bodyHtml = '<div class="mn-pv-loading" role="status"><span class="mn-sr-only">読み込み中…</span><div class="mn-skel-line"></div><div class="mn-skel-line"></div><div class="mn-skel-line" style="width:64%"></div></div>';
@@ -728,7 +756,7 @@
     document.addEventListener('mouseover', function (ev) {
       if (touch || !ev.target.closest) return;
       var a = ev.target.closest(PV_SEL);
-      if (a && !pop.contains(a)) { clearTimeout(hideTimer); clearTimeout(popTimer); popTimer = setTimeout(function () { showPop(a); }, 220); }
+      if (a && !pop.contains(a)) { prefetchPv(a); clearTimeout(hideTimer); clearTimeout(popTimer); popTimer = setTimeout(function () { showPop(a); }, 220); }
       else if (ev.target.closest('.mn-popover')) clearTimeout(hideTimer);
     });
     document.addEventListener('mouseout', function (ev) {
@@ -923,7 +951,8 @@
     setTimeout(function () { applySearchHighlight(article); flashTarget(); }, 0);
     window.MathSite = {
       root: ROOT, page: PAGE, kind: KIND, pageInfo: PG, pageIndex: pageIdx, index: IDX, app: app, article: article,
-      renderer: renderer, resolveRef: resolveRef, typeName: typeName, previewData: previewData, store: store
+      renderer: renderer, resolveRef: resolveRef, typeName: typeName, previewData: previewData, store: store,
+      loadPreview: function (label, cb) { var G = IDX.labels[label]; if (G && !(window.SM_PV && window.SM_PV[G.p])) loadPv(G.p, cb); else cb(); }
     };
     try { document.dispatchEvent(new CustomEvent('mn:ready', { detail: window.MathSite })); } catch (e) {}
     if (!window.MATH_INDEX) article.insertAdjacentHTML('afterbegin', '<div class="mn-warn">site-index.js が見つかりません。<code>node tools/build.js</code> を実行してください。</div>');

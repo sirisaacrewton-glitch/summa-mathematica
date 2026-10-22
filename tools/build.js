@@ -786,6 +786,20 @@ if (!CHECK_ONLY) {
   };
   write(path.join(ROOT, 'site-index.js'),
     '/* 自動生成ファイル（tools/build.js）。編集しないでください。 */\nwindow.MATH_INDEX = ' + JSON.stringify(index) + ';\n');
+  // 参照プレビュー用の本文をページごとの小さなファイルに分ける（他ページのプレビューのために 16 MB の search-index.js を
+  // 読み込むと遅いため。2026-10-22 ユーザー指摘）。pv/<ページ番号>.js：{ ラベル: 本文, '#page': ページ冒頭の本文 }
+  if (!fs.existsSync(path.join(ROOT, 'pv'))) fs.mkdirSync(path.join(ROOT, 'pv'));
+  var pvByPage = {};
+  entries.forEach(function (e) {
+    var o = pvByPage[e.p] = pvByPage[e.p] || {};
+    if (e.t === 'page') o['#page'] = (e.x || '').slice(0, 900);
+    else if (e.l && labels[e.l] && labels[e.l].p === e.p && !(e.l in o)) o[e.l] = e.x || '';
+  });
+  pages.forEach(function (pg) {
+    write(path.join(ROOT, 'pv', pg.idx + '.js'),
+      '/* 自動生成ファイル（tools/build.js）。編集しないでください。 */\n' +
+      '(window.SM_PV = window.SM_PV || {})[' + pg.idx + '] = ' + JSON.stringify(pvByPage[pg.idx] || {}) + ';\n');
+  });
   // 検索用の本文（大きいので、検索を開いたときやページの表示後に遅れて読み込む）
   write(path.join(ROOT, 'search-index.js'),
     '/* 自動生成ファイル（tools/build.js）。編集しないでください。 */\n' +

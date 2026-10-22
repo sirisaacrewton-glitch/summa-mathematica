@@ -215,6 +215,7 @@
   function pinData(label, cb) {
     var d = S.previewData(label);
     if (!d) return;
+    if (d.loading && S.loadPreview && !pinData['_' + label]) { pinData['_' + label] = 1; S.loadPreview(label, function () { pinData(label, cb); }); return; }
     if (d.loading && window.MathEntries) { window.MathEntries.load(function () { pinData(label, cb); }); return; }
     cb(d);
   }
