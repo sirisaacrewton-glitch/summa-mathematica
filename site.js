@@ -432,7 +432,7 @@
   /* ---------- 参照プレビュー ----------
    * 他ページの項目の本文は search-index.js（大きい）から作るので、一度描画した本文を Map と sessionStorage に
    * 保存し、同じセッションの 2 回目以降は「読み込み中」を出さずに表示する（キーは索引の更新時刻ごと）。 */
-  var pop, popTimer, hideTimer, popFor = null, popLabel = null, popStack = [];
+  var pop, popTimer, hideTimer, popFor = null, popLabel = null, popItems = null, popStack = [];
   var PV_KEY = 'sm_pv_cache', PV_MAX = 300, pvMem = new Map();
   (function loadPvCache() {
     try {
@@ -451,7 +451,42 @@
       try { sessionStorage.setItem(PV_KEY, JSON.stringify({ b: IDX.built, m: m })); } catch (e) {}
     }, 300);
   }
-  function previewHtml(label) {
+  /* 項目参照のプレビュー：本文のうち、最初の番号つき箇条書きより前（共通の前提）と、指定した項目だけを残す。
+   * it = { list: [項目番号…], focus: 指している項目 }。指定した項目が見つからなければ null（全文を出す）。 */
+  function itemsOnly(html, it) {
+    var box = document.createElement('div'); box.innerHTML = html;
+    var nodes = [].slice.call(box.childNodes), want = {}, lastSel = -1, hidden = 0;
+    it.list.forEach(function (n) { want[n] = 1; });
+    nodes.forEach(function (n, i) {
+      if (n.nodeName !== 'OL') return;
+      var k = parseInt(n.getAttribute('start'), 10) || 1, any = false;
+      [].slice.call(n.children).forEach(function (li) {
+        if (li.tagName !== 'LI') return;
+        var num = k++;
+        if (want[num]) { any = true; li.value = num; if (num === it.focus && it.list.length > 1) li.classList.add('mn-item-focus'); }
+        else { li.remove(); hidden++; }
+      });
+      n._sel = any;
+      if (any) lastSel = i;
+    });
+    if (lastSel < 0) return null;
+    nodes.forEach(function (n, i) {
+      if (i > lastSel) { if (n.nodeType === 1) hidden++; n.remove(); }
+      else if (n.nodeName === 'OL' && !n._sel) n.remove();
+    });
+    return { html: box.innerHTML, hidden: hidden };
+  }
+  /* 参照 a が項目参照なら、同じカード（環境、なければ段落）の中にある同じラベルの項目参照をまとめる */
+  function itemsFor(a) {
+    var n = a && a.getAttribute && a.getAttribute('data-item');
+    if (!n) return null;
+    var label = a.getAttribute('data-label'), set = {};
+    set[n] = 1;
+    var scope = a.closest('.mn-env, .mn-pv-body') || a.closest('p, li, td') || a.parentNode;
+    scope.querySelectorAll('a.mn-xref[data-item]').forEach(function (b) { if (b.getAttribute('data-label') === label) set[b.getAttribute('data-item')] = 1; });
+    return { focus: +n, list: Object.keys(set).map(Number).sort(function (x, y) { return x - y; }) };
+  }
+  function previewHtml(label, it) {
     var L = localLabels[label], G = IDX.labels[label];
     var info = resolveRef(label);
     if (!info) return null;
@@ -481,7 +516,7 @@
         // 本文の索引がまだ読み込まれていない：読み込み後に表示し直す
         bodyHtml = '<div class="mn-pv-loading" role="status"><span class="mn-sr-only">読み込み中…</span><div class="mn-skel-line"></div><div class="mn-skel-line"></div><div class="mn-skel-line" style="width:64%"></div></div>';
         var want = label;
-        window.MathEntries.load(function () { if (popFor && popLabel === want) { if (popStack.length) setPopContent(want); else showPop(popFor); } });
+        window.MathEntries.load(function () { if (popFor && popLabel === want) { if (popStack.length) setPopContent(want, popItems); else showPop(popFor); } });
       }
       else if (G.e != null && IDX.entries[G.e]) bodyHtml = renderer.renderNodes(Core.parseBlocks(IDX.entries[G.e].x || '').children);
       else if (isNamed) {
@@ -497,8 +532,17 @@
     if (window.SMLearn && info.type !== 'equation' && info.type !== 'section') {
       head = head.replace('<a class="mn-pv-go"', '<button type="button" class="mn-pv-pin" data-pin-label="' + esc(label) + '" title="この項目を付箋ドックに固定">📌 固定</button><a class="mn-pv-go"');
     }
+    var part = it && bodyHtml && !/mn-pv-loading/.test(bodyHtml) ? itemsOnly(bodyHtml, it) : null;
+    if (part) {
+      head = head.replace('</span>', ' の ' + it.list.join(', ') + '</span>');
+      if (it.list.length === 1) head = head.replace('href="' + esc(info.href) + '"', 'href="' + esc(itemHref(info.href, label, it.list[0])) + '"');
+      return head + '<div class="mn-pv-body mn-prose mn-pv-part">' + part.html +
+        (part.hidden ? '<button type="button" class="mn-pv-all">全体を表示（ほかに ' + part.hidden + ' 項目・段落）</button>' : '') + '</div>' +
+        (part.hidden ? '<div class="mn-pv-body mn-prose mn-pv-full" hidden>' + bodyHtml + '</div>' : '');
+    }
     return head + '<div class="mn-pv-body mn-prose">' + bodyHtml + '</div>';
   }
+  function itemHref(href, label, n) { var h = '#' + label; return href.slice(-h.length) === h ? href + '.' + n : href; }
   /* プレビューの中身（ピン留め・学習機能で使う） */
   function previewData(label) {
     var info = resolveRef(label);
@@ -518,11 +562,12 @@
   function labelOf(a) { return a.getAttribute('data-label') || a.getAttribute('data-pv-label'); }
   function showPop(a, keepStack) {
     var label = typeof a === 'string' ? a : labelOf(a);
-    var html = previewHtml(label);
+    var it = typeof a === 'string' ? popItems : itemsFor(a);
+    var html = previewHtml(label, it);
     if (!html) return;
     if (typeof a !== 'string') popFor = a;
     if (!keepStack) popStack = [];
-    popLabel = label;
+    popLabel = label; popItems = it;
     if (popStack.length) html = '<button type="button" class="mn-pv-back" title="前のプレビューに戻る">← 戻る</button>' + html;
     var wasHidden = pop.hasAttribute('hidden') || !!pop._out;
     if (pop._out) { pop._out.cancel(); pop._out = null; }
@@ -586,11 +631,11 @@
     });
   }
   /* プレビューの中の参照をクリックすると、プレビュー自体をその項目に切り替える（1 段階のネスト。戻るボタン付き） */
-  function setPopContent(label) {
-    var html = previewHtml(label);
+  function setPopContent(label, it) {
+    var html = previewHtml(label, it);
     if (!html) return false;
-    var forward = popStack.length > 0 && popStack[popStack.length - 1] !== label;
-    popLabel = label;
+    var forward = popStack.length > 0 && popStack[popStack.length - 1].label !== label;
+    popLabel = label; popItems = it || null;
     pop.innerHTML = (popStack.length ? '<button type="button" class="mn-pv-back" title="前のプレビューに戻る">← 戻る</button>' : '') + html;
     pop.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
     pop.scrollTop = 0;
@@ -600,10 +645,10 @@
     });
     return true;
   }
-  function drillTo(label) {
-    if (!popFor || !label || label === popLabel) return;
-    popStack = [popLabel];   // ネストは 1 段階まで：戻り先は常に最初の項目
-    if (!setPopContent(label)) popStack = [];
+  function drillTo(label, it) {
+    if (!popFor || !label || (label === popLabel && !it)) return;
+    popStack = [{ label: popLabel, it: popItems }];   // ネストは 1 段階まで：戻り先は常に最初の項目
+    if (!setPopContent(label, it)) popStack = [];
   }
   function initPopovers() {
     pop = app.querySelector('.mn-popover');
@@ -627,11 +672,18 @@
       if (ev.target.closest('.mn-pv-back')) {
         ev.preventDefault();
         var back = popStack.pop();
-        if (back) setPopContent(back);
+        if (back) setPopContent(back.label, back.it);
+        return;
+      }
+      if (ev.target.closest('.mn-pv-all')) {
+        // 項目だけのプレビューを全文に切り替える
+        ev.preventDefault();
+        var full = pop.querySelector('.mn-pv-full'), part = pop.querySelector('.mn-pv-part');
+        if (full && part) { part.remove(); full.removeAttribute('hidden'); }
         return;
       }
       var a = ev.target.closest('a.mn-xref[data-label]');
-      if (a && pop.contains(a)) { ev.preventDefault(); drillTo(a.getAttribute('data-label')); return; }
+      if (a && pop.contains(a)) { ev.preventDefault(); drillTo(a.getAttribute('data-label'), itemsFor(a)); return; }
       if (a && touch && popFor !== a && !pop.contains(a)) { ev.preventDefault(); showPop(a); return; }
       if (!ev.target.closest('.mn-popover') && !a) hidePop();
     });
