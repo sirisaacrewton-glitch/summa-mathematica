@@ -505,7 +505,7 @@
       });
     }
     // 証明のステップの主張「【主張：…】」（段階表示で、理由を伏せて主張だけを見せるのに使う。2026-10-22 ユーザー指示）
-    function stepClaims(html) { return html.indexOf('【主張：') < 0 ? html : html.replace(/【主張：([\s\S]*?)】/g, '<span class="mn-step-claim">$1</span>'); }
+    function stepClaims(html) { return html.indexOf('【主張：') < 0 ? html : html.replace(/【主張：([\s\S]*?)】/g, '<span class="mn-step-claim">$1</span><span class="mn-step-why">理由</span>').replace(/<span class="mn-step-why">理由<\/span>\s*<\/p>/g, '</p>'); }
     function renderMarkdown(text, ex) {
       ex = ex || extractMath(text);
       return stepClaims(restore(mk.parse(shortcodes(ex.text)), ex));
