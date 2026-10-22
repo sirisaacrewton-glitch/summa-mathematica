@@ -584,3 +584,7 @@
 | curl (rotation) / divergence / Laplacian / Green's theorem / divergence theorem / vector potential / Helmholtz decomposition | 回転 / 発散 / ラプラシアン / グリーンの定理 / ガウスの発散定理 / ベクトルポテンシャル / ヘルムホルツ分解 | ローテーション、ダイバージェンス | 杉浦『解析入門 II』。vec:page-integral-theorems |
 | minimal number of generators d(G) / p-rank / cyclic decomposition / irredundant generating set | 生成元の最小個数 / p ランク / 巡回分解 / （減らせない生成系：訳語を立てず説明で書く） | | 標準的（仮）。grp:page-minimal-cyclic-decomposition |
 | Goursat's lemma / subdirect product / fibre product / section (subquotient) / diagonal subgroup | グルサの補題 / 部分直積 / ファイバー積 / 切片 / 対角部分群 | 亜直積 | 標準的（仮）。grp:page-subgroups-of-products |
+| holomorphic / complex differentiable / entire function / domain (open connected) | 正則 / 複素微分可能 / 整関数 / 領域 | 正則函数（杉浦の表記。サイトは「関数」） | 杉浦 II 第 IX 章（整函数 46、領域）。cx:page-power-series |
+| Cauchy–Riemann equations / conformal / Wirtinger derivative | コーシー–リーマンの方程式 / 等角 / ヴィルティンガー微分 | コーシー・リーマンの方程式（杉浦） | 人名の区切りはサイトの「–」に統一。cx:page-power-series |
+| principal value / principal argument / branch of the logarithm | 主値 / 偏角の主値 / 対数の分枝 | | 杉浦 主値 11・偏角 29。「分枝」は用例が少ない（杉浦 I に 1）。cx:page-power-series |
+| meromorphic / pole / essential singularity / removable singularity / residue / winding number / Laurent expansion | 有理型 / 極 / 真性特異点 / 除去可能な特異点 / 留数 / 回転数 / ローラン展開 | | 杉浦 II（有理型 36、真性特異点 24、除去可能 21、回転数 32、ローラン 22）。CX-05 以降で使う |

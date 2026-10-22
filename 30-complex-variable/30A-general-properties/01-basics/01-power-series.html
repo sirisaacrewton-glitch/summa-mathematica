@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>冪級数と正則関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=c03e73dc">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="30-complex-variable/30A-general-properties/01-basics/01-power-series.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 冪級数と正則関数 {#cx:page-power-series keywords="complex differentiability, holomorphic function, entire function, Cauchy-Riemann equations, conformality, Wirtinger derivatives, complex power series, radius of convergence, power series are holomorphic, termwise differentiation, analytic function, re-expansion, exponential function, complex sine and cosine, principal branch of the logarithm, complex powers, no continuous square root"}
+
+複素数の範囲で関数を微分するとき、差分商の分母 $h$ は実数ではなく複素数で、$0$ に平面のあらゆる方向から近づく。その極限が方向によらずに存在するという条件（**複素微分可能性**）は、実 2 変数の写像としての微分可能性よりずっと強く、実部と虚部が**コーシー–リーマンの方程式**で結びつくことと同値になる。このページでは、複素微分と正則関数を定義し、コーシー–リーマンの方程式による特徴づけと等角性を示す。次に、複素係数の冪級数が収束円の中で正則であること（項別に微分してよいこと）を、実数の場合（\ref{calc:power-series-differentiation}）の平均値の定理に頼らずに直接示し、冪級数で局所的に表される関数（解析関数）を定義する。最後に、指数関数・三角関数・対数関数を複素変数に延ばし、対数の主値が正則であること、平方根は $\mathbb{C}\setminus\{0\}$ 全体では連続に選べないことを示す。
+
+## 記法と定義の確認 {#cx:sec-ps-notation}
+
+::: notation
+- 複素数体 $\C=\R^{2}$、$z=x+iy$、$\bar z=x-iy$、$|z|=\sqrt{x^{2}+y^{2}}$、$\operatorname{Re}z=x$、$\operatorname{Im}z=y$。$|zw|=|z||w|$、$|z+w|\le|z|+|w|$。複素数列の収束・コーシー列・級数の絶対収束は実部と虚部ごとの収束と同値で、$\C$ は完備である（\ref{calc:page-trig} の記法）。
+- $\C$ の位相は $\R^{2}$ のユークリッド距離 $|z-w|$ による。$D(a,r)\defeq\{z\mid|z-a|<r\}$（開円板）、$\overline{D}(a,r)\defeq\{z\mid|z-a|\le r\}$。**領域**とは $\C$ の連結な開集合のことをいう。$\R^{n}$ の連結な開集合は弧状連結である（\ref{top:open-connected-path-connected}）。
+- 実数の級数についての結果のうち、絶対値の性質（三角不等式・乗法性）と完備性だけで証明したもの（根判定法 \ref{calc:root-ratio-tests}、絶対収束級数の並べ替え \ref{calc:absolute-rearrangement}、コーシー積 \ref{calc:cauchy-product}、二重級数 \ref{calc:double-series}、一様収束のコーシーの判定法と M 判定法 \ref{calc:uniform-limit-theorems} の 1・3、連続関数の一様収束極限の連続性 同 2）は、同じ証明で複素数値でも成り立つ。以下この意味で引用する。
+- 実 2 変数の写像の全微分 \ref{calc:total-derivative}、偏導関数が連続なら微分可能 \ref{calc:continuous-partials-differentiable}、連鎖律 \ref{calc:multivariable-chain-rule}、微分が $0$ なら定数 \ref{calc:zero-derivative-constant}。
+- 複素指数関数 $e^{z}\defeq\sum_{n\ge0}z^{n}/n!$ とその性質 \ref{calc:complex-exp}、三角関数 \ref{calc:trig-functions}, \ref{calc:trig-properties}、円周率 \ref{calc:pi-definition}、$e^{ix}=1\iff x\in2\pi\mathbb{Z}$ \ref{calc:circle-parametrization}、極形式 \ref{calc:polar-form}、逆正接 \ref{calc:arctan}、自然対数 \ref{calc:log}。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 複素微分 {#cx:sec-ps-derivative}
+
+::: definition 複素微分と正則関数 {#cx:holomorphic keywords="complex differentiable at a point, complex derivative f'(a), holomorphic on an open set, entire function" index="複素微分可能|ふくそびぶんかのう, 正則関数|せいそくかんすう, 整関数|せいかんすう"}
+$U\subset\C$ を開集合、$f\colon U\to\C$、$a\in U$ とする。
+1. 極限
+$$
+f'(a)\defeq\lim_{h\to0}\frac{f(a+h)-f(a)}{h}\qquad(h\in\C\setminus\{0\},\ a+h\in U)
+$$
+が存在するとき、$f$ は $a$ で**複素微分可能**であるといい、$f'(a)$ を**複素微分係数**という。
+2. $U$ のすべての点で複素微分可能なとき、$f$ は $U$ で**正則**であるという。$f'\colon U\to\C$ を**導関数**という。
+3. $\C$ 全体で正則な関数を**整関数**という。
+:::
+
+::: intuition
+実数の微分では $h$ は左右の 2 方向から $0$ に近づくだけだが、複素微分では平面のあらゆる方向（直線に沿ってでも、渦を巻いてでも）から近づく。そのすべてで差分商が同じ値に近づくことを要求するので、条件はずっと強い。$f(a+h)\approx f(a)+f'(a)h$ と書くと、$a$ の近くで $f$ は「複素数 $f'(a)$ を掛ける」写像、つまり回転と拡大の合成で近似される。この幾何的な制約が、後に見る正則関数の驚くべき性質（1 回微分できれば何回でも微分できる、など）の源である。
+:::
+
+::: proposition 複素微分の基本規則 {#cx:derivative-rules keywords="complex differentiable implies continuous; sum, product, quotient rules; chain rule; polynomials and rational functions are holomorphic" index="連鎖律（複素）|れんさりつふくそ"}
+$U\subset\C$ を開集合、$f,g\colon U\to\C$ が $a\in U$ で複素微分可能とする。
+1. $f$ は $a$ で連続である。
+2. $f+g$, $fg$ は $a$ で複素微分可能で、$(f+g)'(a)=f'(a)+g'(a)$、$(fg)'(a)=f'(a)g(a)+f(a)g'(a)$。$g(a)\neq0$ なら $f/g$ は（$a$ の近くで定義され）$a$ で複素微分可能で $(f/g)'(a)=\dfrac{f'(a)g(a)-f(a)g'(a)}{g(a)^{2}}$。
+3. （連鎖律）$V\subset\C$ を開集合、$f(U)\subset V$、$\varphi\colon V\to\C$ が $f(a)$ で複素微分可能なら、$\varphi\circ f$ は $a$ で複素微分可能で $(\varphi\circ f)'(a)=\varphi'(f(a))f'(a)$。
+4. 多項式は整関数で、$(z^{n})'=nz^{n-1}$。有理関数 $P/Q$（$P,Q$ は多項式、$Q\neq0$）は $\{z\mid Q(z)\neq0\}$ で正則である。
+:::
+
+::: proof
+**Step 1（連続性）.** $h\neq0$ について $f(a+h)-f(a)=\frac{f(a+h)-f(a)}{h}\cdot h$ で、右辺は $h\to0$ で $f'(a)\cdot0=0$ に収束する。
+
+**Step 2（和と積）.** 和は極限の線形性から。積は
+$$
+\frac{f(a+h)g(a+h)-f(a)g(a)}{h}=\frac{f(a+h)-f(a)}{h}g(a+h)+f(a)\frac{g(a+h)-g(a)}{h}
+$$
+と分け、Step 1 の $g(a+h)\to g(a)$ を使う。
+
+**Step 3（商）.** $g$ は $a$ で連続（Step 1）で $g(a)\neq0$ なので、$a$ のある近傍で $g\neq0$。$\frac{1}{g}$ について
+$$
+\frac{1}{h}\Bigl(\frac{1}{g(a+h)}-\frac{1}{g(a)}\Bigr)=-\frac{g(a+h)-g(a)}{h}\cdot\frac{1}{g(a+h)g(a)}\to-\frac{g'(a)}{g(a)^{2}}.
+$$
+$f/g=f\cdot\frac1g$ に Step 2 を使う。
+
+**Step 4（連鎖律）.** $b\defeq f(a)$ とし、$V$ 上の関数 $\Phi$ を $\Phi(w)\defeq\frac{\varphi(w)-\varphi(b)}{w-b}$（$w\neq b$）、$\Phi(b)\defeq\varphi'(b)$ と定めると、$\Phi$ は $b$ で連続で、すべての $w\in V$ で $\varphi(w)-\varphi(b)=\Phi(w)(w-b)$。$w=f(a+h)$ を代入して $h$ で割ると
+$$
+\frac{\varphi(f(a+h))-\varphi(f(a))}{h}=\Phi(f(a+h))\cdot\frac{f(a+h)-f(a)}{h}.
+$$
+$h\to0$ で $f(a+h)\to b$（Step 1）なので、右辺は $\varphi'(b)f'(a)$ に収束する。（$f(a+h)=b$ となる $h$ があっても、この書き方なら割り算をしないので問題ない。）
+
+**Step 5（多項式・有理関数）.** 定数の微分は $0$、$z$ の微分は $1$。$z^{n}$ は Step 2 と $n$ についての帰納法で $(z^{n})'=nz^{n-1}$。多項式は和、有理関数は Step 3 による。
+
+::: hypcheck
+- **前提「$U$ は開集合」**：$a$ の近くのすべての方向から $h\to0$ とするために使った（定義そのもの）。
+- **Step 4 の $\Phi$**：$f(a+h)=f(a)$ となる $h$ が $0$ のいくらでも近くにある場合（たとえば定数関数）にも通用するように、差分商ではなく $\Phi$ を使った。
+- 証明は実 1 変数の場合と同じで、体の演算と絶対値の性質しか使っていない。
+:::
+:::
+
+::: example
+1. $f(z)=\bar z$ はどの点でも複素微分可能でない。$h$ を実数に限ると差分商は $\bar h/h=1$、純虚数に限ると $-1$ になり、極限が存在しない。実 2 変数の写像 $(x,y)\mapsto(x,-y)$ としては線形で、何回でも微分できることに注意する。
+2. $f(z)=|z|^{2}$ は $z=0$ でだけ複素微分可能である。$a=0$ では $\frac{|h|^{2}}{h}=\bar h\to0$。$a\neq0$ では $\frac{|a+h|^{2}-|a|^{2}}{h}=\bar a\frac{\bar h}{h}+a+\bar h$ で、$\frac{\bar h}{h}$ が方向によって $\pm1$ をとるので極限がない。一点だけで複素微分可能でも、その点のまわりで正則とは限らない。
+:::
+
+## コーシー–リーマンの方程式 {#cx:sec-ps-cauchy-riemann}
+
+複素数 $c=\alpha+i\beta$ を掛ける写像 $h\mapsto ch$ は、$\R^{2}$ の線形写像として行列
+$$
+M_{c}\defeq\begin{pmatrix}\alpha&-\beta\\\beta&\alpha\end{pmatrix}
+$$
+で表される（$(\alpha+i\beta)(s+it)=(\alpha s-\beta t)+i(\beta s+\alpha t)$）。
+
+::: lemma 複素数倍となる実線形写像 {#cx:complex-linear-matrices keywords="a real 2x2 matrix is multiplication by a complex number iff it has the form [[a,-b],[b,a]], iff it commutes with J" index="複素線形|ふくそせんけい"}
+実 $2\times2$ 行列 $A=\begin{pmatrix}p&q\\r&s\end{pmatrix}$ について、次は同値である。
+1. ある $c\in\C$ について、すべての $h\in\C$ で $Ah=ch$（$h$ を列ベクトルとみる）。
+2. $p=s$ かつ $q=-r$。
+3. $AJ=JA$（$J\defeq M_{i}=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$ は $i$ 倍）。
+
+このとき $c=p+ir$ で、$\det A=p^{2}+r^{2}=|c|^{2}$。
+:::
+
+::: proof
+**1 ⇒ 2.** $h=1$ と $h=i$ を入れると、$A$ の第 1 列は $c=\alpha+i\beta$ の $(\alpha,\beta)$、第 2 列は $ci=-\beta+i\alpha$ の $(-\beta,\alpha)$。よって $A=M_{c}$ で、$p=s=\alpha$、$q=-r=-\beta$。
+
+**2 ⇒ 1.** $A=M_{p+ir}$ なので上の計算から $Ah=(p+ir)h$。
+
+**2 ⇔ 3.** $AJ=\begin{pmatrix}q&-p\\s&-r\end{pmatrix}$、$JA=\begin{pmatrix}-r&-s\\p&q\end{pmatrix}$。成分を比べると $AJ=JA\iff q=-r,\ p=s$。
+
+最後に $\det M_{c}=\alpha^{2}+\beta^{2}=|c|^{2}$。
+:::
+
+::: theorem コーシー–リーマンの方程式 {#cx:cauchy-riemann keywords="Cauchy-Riemann equations u_x = v_y, u_y = -v_x; complex differentiable iff real differentiable and CR hold; f'(a) = u_x + i v_x" index="コーシー–リーマンの方程式|こーしーりーまんのほうていしき"}
+$U\subset\C$ を開集合、$f=u+iv\colon U\to\C$（$u,v$ は実数値）、$a=x_{0}+iy_{0}\in U$ とし、$f$ を $U\subset\R^{2}$ から $\R^{2}$ への写像ともみる。次は同値である。
+1. $f$ は $a$ で複素微分可能である。
+2. $f$ は $a$ で（実 2 変数の写像として）全微分可能で、$a$ で
+$$
+\frac{\partial u}{\partial x}=\frac{\partial v}{\partial y},\qquad\frac{\partial u}{\partial y}=-\frac{\partial v}{\partial x}
+\label{cx:eq-cauchy-riemann}
+$$
+（**コーシー–リーマンの方程式**）が成り立つ。
+
+このとき
+$$
+f'(a)=u_{x}(a)+iv_{x}(a)=v_{y}(a)-iu_{y}(a),\qquad\det Df(a)=|f'(a)|^{2}.
+$$
+:::
+
+::: intuition
+全微分 $Df(a)$ は一般には任意の $2\times2$ 実行列で、平面を斜めに引き伸ばしたりつぶしたりできる。コーシー–リーマンの方程式は、その行列が「回転と拡大」（複素数倍）の形であるという条件にほかならない。4 個の偏微分係数のうち、自由なのは 2 個だけになる。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2）.** $c\defeq f'(a)$ とし、$A\defeq M_{c}$（実線形写像 $h\mapsto ch$ の行列）とおく。$h\neq0$ について
+$$
+\frac{|f(a+h)-f(a)-Ah|}{|h|}=\Bigl|\frac{f(a+h)-f(a)}{h}-c\Bigr|\to0
+$$
+（$|h|$ で割ることと、$h$ で割ってから絶対値をとることは同じ：$|w/h|=|w|/|h|$）。よって $f$ は $a$ で全微分可能で $Df(a)=M_{c}$。全微分の行列の成分は偏微分係数なので（\ref{calc:total-derivative-basic}）
+$$
+Df(a)=\begin{pmatrix}u_{x}&u_{y}\\v_{x}&v_{y}\end{pmatrix}(a)=\begin{pmatrix}\alpha&-\beta\\\beta&\alpha\end{pmatrix}\quad(c=\alpha+i\beta).
+$$
+成分を比べて $u_{x}=v_{y}=\alpha$、$u_{y}=-v_{x}=-\beta$。とくに $c=u_{x}+iv_{x}=v_{y}-iu_{y}$。
+
+**Step 2（2 ⇒ 1）.** $A\defeq Df(a)=\begin{pmatrix}u_{x}&u_{y}\\v_{x}&v_{y}\end{pmatrix}(a)$ はコーシー–リーマンの方程式から \ref{cx:complex-linear-matrices} の 2 を満たすので、$c\defeq u_{x}(a)+iv_{x}(a)$ について $Ah=ch$。全微分可能性から
+$$
+\Bigl|\frac{f(a+h)-f(a)}{h}-c\Bigr|=\frac{|f(a+h)-f(a)-Ah|}{|h|}\to0\quad(h\to0).
+$$
+よって $f'(a)=c$。
+
+**Step 3.** $\det Df(a)=|c|^{2}$ は \ref{cx:complex-linear-matrices} の最後の主張。
+
+::: hypcheck
+- **2 の「全微分可能」**：外せない。$f(x+iy)\defeq\sqrt{|xy|}$（実数値、$v=0$）は原点で $u_{x}=u_{y}=0$ でコーシー–リーマンの方程式を満たすが、直線 $y=x$ 上で $f(t+it)=|t|$ なので $\frac{f(h)}{h}$ は $h=t+it$（$t>0$）で $\frac{1}{1+i}$、$h=t>0$ で $0$ となり、複素微分可能でない。偏微分係数の存在とコーシー–リーマンの方程式だけでは足りない。
+- Step 1 で使ったのは「全微分の行列の成分は偏微分係数」だけである。
+:::
+:::
+
+::: corollary 正則性の判定と定数になる条件 {#cx:cr-consequences keywords="C^1 functions satisfying Cauchy-Riemann are holomorphic; f' = 0 on a domain implies constant; Re f, Im f, |f| constant implies f constant" index="正則性の判定|せいそくせいのはんてい"}
+$U\subset\C$ を開集合、$f=u+iv\colon U\to\C$ とする。
+1. $u,v$ の偏導関数が $U$ で存在して連続で、$U$ の各点でコーシー–リーマンの方程式を満たせば、$f$ は $U$ で正則である。
+2. $U$ が領域で、$f$ が $U$ で正則、$f'=0$ なら、$f$ は定数である。
+3. $U$ が領域で $f$ が $U$ で正則とする。$\operatorname{Re}f$, $\operatorname{Im}f$, $|f|$ のどれかが $U$ で定数なら、$f$ は定数である。
+:::
+
+::: proof
+**1.** \ref{calc:continuous-partials-differentiable} から $f$ は各点で全微分可能で、\ref{cx:cauchy-riemann} の 2 ⇒ 1 を使う。
+
+**2.** \ref{cx:cauchy-riemann} の Step 1 から $Df(z)=M_{f'(z)}=0$ がすべての $z\in U$ で成り立つ。$U$ は連結な開集合なので \ref{calc:zero-derivative-constant} から $f$ は定数。
+
+**3.** (a) $u$ が定数なら $u_{x}=u_{y}=0$ で、コーシー–リーマンの方程式から $v_{x}=-u_{y}=0$。$f'=u_{x}+iv_{x}=0$ なので 2 により定数。(b) $v$ が定数なら $-if=v-iu$ の実部が定数なので (a) を $-if$（正則）に使う。(c) $|f|^{2}=u^{2}+v^{2}=k$ が定数とする。$k=0$ なら $f=0$。$k>0$ とする。$x$, $y$ で偏微分して
+$$
+uu_{x}+vv_{x}=0,\qquad uu_{y}+vv_{y}=0.
+$$
+第 2 式にコーシー–リーマンの方程式 $u_{y}=-v_{x}$, $v_{y}=u_{x}$ を代入すると $-uv_{x}+vu_{x}=0$。第 1 式と合わせて、$(u_{x},v_{x})$ は行列 $\begin{pmatrix}u&v\\v&-u\end{pmatrix}$ の核に入る。この行列式は $-(u^{2}+v^{2})=-k\neq0$ なので $u_{x}=v_{x}=0$、すなわち $f'=0$。2 により定数。
+
+::: hypcheck
+- **2・3 の前提「$U$ は連結」**：外せない。$U=D(0,1)\cup D(3,1)$ で $f=0$（左の円板）、$f=1$（右の円板）とすると $f'=0$ だが定数でない。
+- **1 の前提「偏導関数が連続」**：全微分可能性を保証するために使った（\ref{cx:cauchy-riemann} の hypcheck の反例を参照）。連続性はルーマン–メンショフの定理によりかなり弱められることが知られている（未収録）。
+:::
+:::
+
+::: proposition 等角性 {#cx:conformal keywords="a holomorphic map with nonzero derivative preserves angles and orientation between curves; |f'(a)| is the local magnification" index="等角写像|とうかくしゃぞう, 等角性|とうかくせい"}
+$f$ が $a$ を含む開集合で正則で $f'(a)\neq0$ とする。$\gamma\colon(-\varepsilon,\varepsilon)\to U$ が $\gamma(0)=a$、$\gamma'(0)\neq0$ を満たす $C^{1}$ 曲線なら、$f\circ\gamma$ は $0$ で微分可能で
+$$
+(f\circ\gamma)'(0)=f'(a)\gamma'(0).
+$$
+したがって、$a$ を通る 2 本の曲線の接線のなす角（向きも込めて）は $f$ で保たれ、接ベクトルの長さは一律に $|f'(a)|$ 倍される。
+:::
+
+::: proof
+$\gamma$ を $\R\to\R^{2}$ とみると $D\gamma(0)$ は列ベクトル $\gamma'(0)$。連鎖律（\ref{calc:multivariable-chain-rule} の 2）と $Df(a)=M_{f'(a)}$（\ref{cx:cauchy-riemann} の Step 1）から $(f\circ\gamma)'(0)=M_{f'(a)}\gamma'(0)=f'(a)\gamma'(0)$。$f'(a)=re^{i\theta}$（$r>0$、\ref{calc:polar-form}）と書くと、接ベクトルはどの曲線についても角 $\theta$ だけ回転して $r$ 倍されるので、2 本の接ベクトルの偏角の差は変わらない。
+:::
+
+::: example
+$f(z)=z^{2}$ は $f'(0)=0$ で、原点では角を 2 倍にする（$re^{i\theta}\mapsto r^{2}e^{2i\theta}$）。$f'(a)\neq0$ の仮定は外せない。$\bar z$ は角の大きさを保つが向きを逆にし、正則でない。
+:::
+
+::: proposition ヴィルティンガー微分 {#cx:wirtinger keywords="Wirtinger derivatives d/dz = (d/dx - i d/dy)/2, d/dzbar = (d/dx + i d/dy)/2; f holomorphic iff df/dzbar = 0" index="ヴィルティンガー微分|ゔぃるてぃんがーびぶん"}
+$f=u+iv$ が $a$ で全微分可能なとき、
+$$
+\frac{\partial f}{\partial z}\defeq\frac12\Bigl(\frac{\partial f}{\partial x}-i\frac{\partial f}{\partial y}\Bigr),\qquad\frac{\partial f}{\partial\bar z}\defeq\frac12\Bigl(\frac{\partial f}{\partial x}+i\frac{\partial f}{\partial y}\Bigr)
+$$
+とおく（$\frac{\partial f}{\partial x}=u_{x}+iv_{x}$ など）。すると、すべての $h=s+it$ について
+$$
+f(a+h)=f(a)+\frac{\partial f}{\partial z}(a)\,h+\frac{\partial f}{\partial\bar z}(a)\,\bar h+o(|h|)
+$$
+で、$f$ が $a$ で複素微分可能 $\iff\frac{\partial f}{\partial\bar z}(a)=0$。このとき $f'(a)=\frac{\partial f}{\partial z}(a)$。
+:::
+
+::: proof
+全微分可能性から $f(a+h)=f(a)+sf_{x}+tf_{y}+o(|h|)$（$f_{x}\defeq\frac{\partial f}{\partial x}(a)$ など）。$s=\frac{h+\bar h}{2}$, $t=\frac{h-\bar h}{2i}$ を代入すると
+$$
+sf_{x}+tf_{y}=\tfrac12(f_{x}-if_{y})h+\tfrac12(f_{x}+if_{y})\bar h.
+$$
+これで展開式が出る。$\frac{\partial f}{\partial\bar z}=\frac12\bigl((u_{x}-v_{y})+i(v_{x}+u_{y})\bigr)$ なので、$\frac{\partial f}{\partial\bar z}(a)=0$ はコーシー–リーマンの方程式と同値で、\ref{cx:cauchy-riemann} により複素微分可能性と同値。このとき $\frac{\partial f}{\partial z}=\frac12(u_{x}+v_{y})+\frac i2(v_{x}-u_{y})=u_{x}+iv_{x}=f'(a)$。
+:::
+
+::: supplement
+**高い視点.** $\R^{2}$ に「$i$ 倍」という線形写像 $J$ を一つ指定したものが $\C$ である。\ref{cx:complex-linear-matrices} により、正則性は「各点の微分 $Df(a)$ が $J$ と可換」という条件で、$\R$ 線形写像のうち $\C$ 線形なものだけを許すことにあたる。この見方は多変数の複素解析や複素多様体（接空間に $J$ を指定した多様体）にそのまま延びる。
+
+**類似の定理.** コーシー–リーマンの方程式を満たす $C^{2}$ 級の $u,v$ はラプラス方程式 $u_{xx}+u_{yy}=0$ を満たす（$u_{xx}=v_{yx}=v_{xy}=-u_{yy}$）。正則関数の実部は自動的に $C^{\infty}$ であることが後で分かるので、この仮定は不要になる（調和関数の系列で扱う）。
+:::
+
+## 複素冪級数 {#cx:sec-ps-power-series}
+
+::: definition 複素冪級数と収束半径 {#cx:complex-power-series keywords="complex power series sum c_n (z-a)^n, radius of convergence R = 1/limsup |c_n|^{1/n}, disk of convergence" index="複素冪級数|ふくそべききゅうすう, 収束円|しゅうそくえん"}
+複素数列 $(c_{n})_{n\ge0}$ と $a\in\C$ について $\sum_{n\ge0}c_{n}(z-a)^{n}$ を $a$ を中心とする**冪級数**といい、$R\defeq1/\limsup_{n}|c_{n}|^{1/n}\in[0,+\infty]$（$1/0=+\infty$, $1/{+\infty}=0$）を**収束半径**、$D(a,R)$ を**収束円**という。
+:::
+
+::: theorem 複素冪級数の収束 {#cx:complex-cauchy-hadamard keywords="Cauchy-Hadamard for complex power series: absolute convergence in the open disk, divergence outside, uniform convergence on smaller closed disks" index="コーシー–アダマールの定理（複素）|こーしーあだまーるのていりふくそ"}
+冪級数 $\sum c_{n}(z-a)^{n}$ の収束半径を $R$ とする。
+1. $|z-a|<R$ なら絶対収束し、$|z-a|>R$ なら発散する。
+2. $0<r<R$ なら $\overline{D}(a,r)$ の上で一様収束する。和は $D(a,R)$ で連続である。
+:::
+
+::: proof
+**1.** $\limsup_{n}|c_{n}(z-a)^{n}|^{1/n}=|z-a|\limsup_{n}|c_{n}|^{1/n}=\frac{|z-a|}{R}$ で、根判定法（\ref{calc:root-ratio-tests} の 1、複素数でも同じ）を使う。
+
+**2.** $\limsup|c_{n}r^{n}|^{1/n}=r/R<1$ なので $\sum|c_{n}|r^{n}<\infty$。$\overline{D}(a,r)$ 上で $|c_{n}(z-a)^{n}|\le|c_{n}|r^{n}$ なので M 判定法で一様収束。各部分和は連続なので、和は $\overline{D}(a,r)$ で連続。$z\in D(a,R)$ は $|z-a|<r<R$ となる $r$ について $D(a,r)$ の内点なので、和は $D(a,R)$ の各点で連続。
+:::
+
+::: theorem 冪級数は正則 {#cx:power-series-holomorphic keywords="a power series is holomorphic in its disk of convergence; termwise differentiation; infinitely complex differentiable; c_k = f^(k)(a)/k!" index="冪級数の項別微分（複素）|べききゅうすうのこうべつびぶんふくそ"}
+冪級数 $f(z)\defeq\sum_{n\ge0}c_{n}(z-a)^{n}$ の収束半径 $R$ が正とする。
+1. 項別に微分した冪級数 $\sum_{n\ge1}nc_{n}(z-a)^{n-1}$ の収束半径も $R$ である。
+2. $f$ は $D(a,R)$ で正則で、$f'(z)=\sum_{n\ge1}nc_{n}(z-a)^{n-1}$。
+3. $f$ は $D(a,R)$ で何回でも複素微分でき、$f^{(k)}(z)=\sum_{n\ge k}\frac{n!}{(n-k)!}c_{n}(z-a)^{n-k}$、とくに $c_{k}=\dfrac{f^{(k)}(a)}{k!}$。
+:::
+
+::: intuition
+実数の場合（\ref{calc:power-series-differentiation}）は、導関数の列の一様収束から項別微分を導いた。その議論は実数直線上の平均値の定理に頼っていて、複素数ではそのまま使えない。ここでは $w^{n}-z^{n}=(w-z)(w^{n-1}+w^{n-2}z+\dots+z^{n-1})$ という因数分解で差分商を直接評価する。
+:::
+
+::: proof
+平行移動 $z\mapsto z-a$ で $a=0$ としてよい。
+
+**Step 1（項別微分の収束半径）.** $|nc_{n}|^{1/n}=n^{1/n}|c_{n}|^{1/n}$ で $n^{1/n}\to1$ なので $\limsup|nc_{n}|^{1/n}=\limsup|c_{n}|^{1/n}$。よって $\sum nc_{n}z^{n}$ の収束半径は $R$。$z\neq0$ では $\sum nc_{n}z^{n-1}=\frac1z\sum nc_{n}z^{n}$ なので、$\sum nc_{n}z^{n-1}$ の収束半径も $R$。
+
+**Step 2（差分商の分解）.** $z\in D(0,R)$ を固定し、$|z|<r<R$ となる $r$ をとる。$g(z)\defeq\sum_{n\ge1}nc_{n}z^{n-1}$（Step 1 により絶対収束）とおく。$w\in D(0,r)$, $w\neq z$ について
+$$
+\frac{f(w)-f(z)}{w-z}-g(z)=\sum_{n\ge1}c_{n}\,q_{n}(w),\qquad q_{n}(w)\defeq\frac{w^{n}-z^{n}}{w-z}-nz^{n-1}.
+$$
+（$f(w)$, $f(z)$, $g(z)$ の級数はどれも収束するので、項ごとの差をとってよい。）
+
+**Step 3（各項の評価）.** 因数分解 $\frac{w^{n}-z^{n}}{w-z}=\sum_{k=0}^{n-1}w^{k}z^{n-1-k}$ と $|w|,|z|<r$ から $\bigl|\frac{w^{n}-z^{n}}{w-z}\bigr|\le nr^{n-1}$、$|nz^{n-1}|\le nr^{n-1}$ なので
+$$
+|c_{n}q_{n}(w)|\le2n|c_{n}|r^{n-1}.
+$$
+Step 1 より $\sum n|c_{n}|r^{n-1}<\infty$（$r<R$）。
+
+**Step 4（極限）.** $\varepsilon>0$ をとる。Step 3 から、$N$ を十分大きくとれば、すべての $w\in D(0,r)\setminus\{z\}$ で $\bigl|\sum_{n>N}c_{n}q_{n}(w)\bigr|\le\sum_{n>N}2n|c_{n}|r^{n-1}<\frac\varepsilon2$。一方、有限和 $\sum_{n=1}^{N}c_{n}q_{n}(w)$ は $w$ の多項式 $\sum_{n=1}^{N}c_{n}\bigl(\sum_{k=0}^{n-1}w^{k}z^{n-1-k}-nz^{n-1}\bigr)$ に等しく、$w=z$ で値 $0$ をとるので、$w\to z$ で $0$ に収束する。よって $\delta>0$ があって、$0<|w-z|<\delta$, $w\in D(0,r)$ なら $\bigl|\sum_{n=1}^{N}c_{n}q_{n}(w)\bigr|<\frac\varepsilon2$。合わせて $\bigl|\frac{f(w)-f(z)}{w-z}-g(z)\bigr|<\varepsilon$。よって $f'(z)=g(z)$。
+
+**Step 5（高階微分）.** $f'$ は収束半径 $R$ の冪級数（Step 1）なので、Step 2–4 を $f'$ に適用でき、帰納法で $f^{(k)}(z)=\sum_{n\ge k}n(n-1)\cdots(n-k+1)c_{n}z^{n-k}$。$z=0$ を代入すると $n=k$ の項だけが残り $f^{(k)}(0)=k!\,c_{k}$。
+
+::: hypcheck
+- **前提「$R>0$」**：$R=0$ なら収束円が空で主張は空虚。
+- **Step 3 の $r<R$**：$\sum n|c_{n}|r^{n-1}$ の収束に使った。$r=R$ では一般に発散する（$\sum z^{n}$ で $n R^{n-1}=n$）。
+- **Step 4 の一様評価**：裾の評価が $w$ によらないことが本質で、これが「各項の極限の和＝和の極限」を保証する。
+- 平均値の定理は使っていない。複素数の世界には「中間の点」の平均値の定理はない（$e^{iz}$ は $0$ と $2\pi$ で同じ値だが、$(e^{iz})'=ie^{iz}$ は $0$ にならない）。
+:::
+:::
+
+::: corollary 冪級数の係数の一意性 {#cx:power-series-uniqueness keywords="if a power series vanishes on a sequence of nonzero points tending to the center then all coefficients vanish; uniqueness of power series expansion" index="係数の一意性|けいすうのいちいせい"}
+$f(z)=\sum c_{n}(z-a)^{n}$ の収束半径が正で、$a$ に収束する点列 $z_{k}\neq a$ のすべてで $f(z_{k})=0$ なら、すべての $c_{n}$ は $0$ である。とくに、収束半径が正の二つの冪級数が $a$ のある近傍で（あるいは $a$ に集積する点の集合の上で）一致すれば、係数はすべて等しい。
+:::
+
+::: proof
+$a=0$ とする。ある $c_{n}\neq0$ と仮定し、その最小の $n$ を $m$ とする。$h(z)\defeq\sum_{n\ge m}c_{n}z^{n-m}$ は同じ収束半径の冪級数（$z\neq0$ で $h(z)=f(z)/z^{m}$）で、\ref{cx:complex-cauchy-hadamard} の 2 から $0$ で連続、$h(0)=c_{m}\neq0$。よって $0$ のある近傍 $D(0,\delta)$ で $h\neq0$、したがって $D(0,\delta)\setminus\{0\}$ で $f(z)=z^{m}h(z)\neq0$。$z_{k}\to0$, $z_{k}\neq0$ なので十分大きい $k$ で $z_{k}\in D(0,\delta)\setminus\{0\}$ となり、$f(z_{k})=0$ に矛盾する。後半は差 $\sum(c_{n}-d_{n})(z-a)^{n}$ に適用する。
+:::
+
+::: theorem 冪級数の中心の取り替え {#cx:power-series-recentering keywords="a power series can be re-expanded around any point b of its disk of convergence, with radius at least R - |b-a|" index="中心の取り替え|ちゅうしんのとりかえ"}
+$f(z)=\sum_{n\ge0}c_{n}(z-a)^{n}$ の収束半径を $R>0$ とし、$b\in D(a,R)$、$\rho\defeq R-|b-a|$（$R=+\infty$ なら $\rho=+\infty$）とする。このとき $|z-b|<\rho$ なら
+$$
+f(z)=\sum_{k\ge0}\frac{f^{(k)}(b)}{k!}(z-b)^{k}
+$$
+で、右辺は絶対収束する。
+:::
+
+::: proof
+$a=0$ とする。$|z-b|<\rho$ とし、$w\defeq z-b$ とおく。
+
+**Step 1（二重級数）.** 二項定理で $z^{n}=(b+w)^{n}=\sum_{k=0}^{n}\binom nkb^{n-k}w^{k}$。$a_{nk}\defeq c_{n}\binom nkb^{n-k}w^{k}$（$k\le n$）、$a_{nk}\defeq0$（$k>n$）とおくと
+$$
+\sum_{n}\sum_{k}|a_{nk}|=\sum_{n}|c_{n}|\,(|b|+|w|)^{n}<\infty,
+$$
+なぜなら $|b|+|w|<|b|+\rho=R$ で、\ref{cx:complex-cauchy-hadamard} の 1 から $\sum|c_{n}|s^{n}$ は $0\le s<R$ で収束するから。
+
+**Step 2（和の順序の交換）.** 二重級数の定理（\ref{calc:double-series}、複素数でも同じ）により
+$$
+f(z)=\sum_{n}\sum_{k}a_{nk}=\sum_{k}\Bigl(\sum_{n\ge k}c_{n}\tbinom nkb^{n-k}\Bigr)w^{k}.
+$$
+
+**Step 3（係数の同定）.** \ref{cx:power-series-holomorphic} の 3 から $\frac{f^{(k)}(b)}{k!}=\sum_{n\ge k}\frac{n!}{k!(n-k)!}c_{n}b^{n-k}=\sum_{n\ge k}c_{n}\binom nkb^{n-k}$。これは Step 2 の $w^{k}$ の係数である。
+
+::: hypcheck
+- **$|z-b|<\rho=R-|b-a|$**：Step 1 の絶対収束 $|b|+|w|<R$ に使った。新しい冪級数の収束半径が $\rho$ より大きくなることはある。$\frac{1}{1-z}=\sum z^{n}$（$R=1$）を $b$ で展開すると $\sum_{k}\frac{(z-b)^{k}}{(1-b)^{k+1}}$ で収束半径は $|1-b|$。$b=\frac12$ なら $\frac12=\rho$ だが、$b=-\frac12$ なら $\frac32>\rho=\frac12$。
+:::
+:::
+
+::: definition 解析関数 {#cx:analytic keywords="analytic function: locally the sum of a convergent power series" index="解析関数|かいせきかんすう, 解析的|かいせきてき"}
+開集合 $U\subset\C$ 上の関数 $f$ が**解析的**であるとは、各 $b\in U$ について $r>0$ と冪級数 $\sum c_{n}(z-b)^{n}$ があって、$D(b,r)\subset U$ の上で $f(z)=\sum c_{n}(z-b)^{n}$ となることをいう。
+:::
+
+::: corollary 解析関数は正則 {#cx:analytic-holomorphic keywords="analytic functions are holomorphic and infinitely complex differentiable; a power series is analytic on its disk of convergence" index=""}
+1. 冪級数はその収束円の上で解析的である。
+2. 解析関数は正則で、何回でも複素微分でき、導関数もまた解析的である。
+:::
+
+::: proof
+1 は \ref{cx:power-series-recentering}。2：正則性と高階微分の存在は、各点の近傍で \ref{cx:power-series-holomorphic} を使う。$f'$ は各点の近傍で冪級数（項別微分したもの）で表されるので解析的。
+:::
+
+::: supplement
+**逆も成り立つ.** 正則関数は解析的である（コーシーの積分公式から従う。\ref[コーシーの積分公式と正則関数の性質]{cx:page-cauchy-formula} で示す）。実数の世界では $C^{\infty}$ でも解析的とは限らない（\ref{calc:non-analytic-smooth} の例）ので、「1 回複素微分できれば解析的」は複素数に特有の現象である。
+:::
+
+## 初等関数 {#cx:sec-ps-elementary}
+
+::: proposition 指数関数 {#cx:exp keywords="e^z is entire, (e^z)' = e^z, e^{x+iy} = e^x (cos y + i sin y), |e^z| = e^{Re z}, e^z never vanishes, e^z = 1 iff z in 2 pi i Z, image is C minus 0" index="指数関数（複素）|しすうかんすうふくそ"}
+1. $e^{z}$ は整関数で $(e^{z})'=e^{z}$。
+2. $z=x+iy$ について $e^{z}=e^{x}(\cos y+i\sin y)$、$|e^{z}|=e^{x}$。とくに $e^{z}\neq0$。
+3. $e^{z}=1\iff z\in2\pi i\mathbb{Z}$。したがって $e^{z}=e^{w}\iff z-w\in2\pi i\mathbb{Z}$。
+4. $e^{z}$ の像は $\C\setminus\{0\}$ である。
+:::
+
+::: proof
+**1.** $e^{z}=\sum z^{n}/n!$ は収束半径 $+\infty$ の冪級数（\ref{calc:complex-exp}）なので、\ref{cx:power-series-holomorphic} から整関数で、項別微分すると $\sum_{n\ge1}\frac{nz^{n-1}}{n!}=\sum_{m\ge0}\frac{z^{m}}{m!}$。
+
+**2.** 加法定理（\ref{calc:complex-exp} の 1）と定義 \ref{calc:trig-functions} から $e^{x+iy}=e^{x}e^{iy}=e^{x}(\cos y+i\sin y)$。$|e^{iy}|=1$ なので $|e^{z}|=e^{x}>0$。
+
+**3.** $e^{z}=1$ なら 2 から $e^{x}=1$、よって $x=0$（実指数関数は単射）で、$e^{iy}=1$。\ref{calc:circle-parametrization} の 2 から $y\in2\pi\mathbb{Z}$。逆は同じ定理の 1。後半は $e^{z}=e^{w}\iff e^{z-w}=1$。
+
+**4.** $w\neq0$ とする。極形式 $w=|w|e^{i\theta}$（\ref{calc:polar-form}）と書き、$z\defeq\log|w|+i\theta$ とおけば $e^{z}=|w|e^{i\theta}=w$。$0$ が像に入らないのは 2。
+:::
+
+::: definition 三角関数 {#cx:trig keywords="complex cosine and sine: cos z = (e^{iz}+e^{-iz})/2, sin z = (e^{iz}-e^{-iz})/(2i); entire, unbounded" index="三角関数（複素）|さんかくかんすうふくそ"}
+$z\in\C$ について $\cos z\defeq\dfrac{e^{iz}+e^{-iz}}{2}$、$\sin z\defeq\dfrac{e^{iz}-e^{-iz}}{2i}$ とする。実数 $z$ では \ref{calc:trig-functions} の定義と一致する（$\overline{e^{ix}}=e^{-ix}$ なので実部・虚部の公式になる）。
+:::
+
+::: proposition 複素三角関数の性質 {#cx:trig-properties keywords="cos and sin are entire, derivatives, addition formulas, cos^2+sin^2=1, zeros are real, unbounded on the imaginary axis" index=""}
+1. $\cos$, $\sin$ は整関数で、$\cos'=-\sin$、$\sin'=\cos$。冪級数 $\cos z=\sum\frac{(-1)^{n}z^{2n}}{(2n)!}$、$\sin z=\sum\frac{(-1)^{n}z^{2n+1}}{(2n+1)!}$ をもつ。
+2. 加法定理と $\cos^{2}z+\sin^{2}z=1$ がすべての複素数で成り立つ。
+3. $\cos(iy)=\cosh y\defeq\frac{e^{y}+e^{-y}}{2}$ で、$\cos$ は $\C$ で有界でない。
+4. $\sin z=0\iff z\in\pi\mathbb{Z}$、$\cos z=0\iff z\in\frac\pi2+\pi\mathbb{Z}$。
+:::
+
+::: proof
+**1.** $e^{\pm iz}$ は整関数の合成で正則、連鎖律（\ref{cx:derivative-rules} の 3）から $(e^{iz})'=ie^{iz}$。これから $\cos'=\frac{ie^{iz}-ie^{-iz}}{2}=-\sin$ など。冪級数は $e^{iz}$ と $e^{-iz}$ の冪級数の和・差をとり、$i^{n}+(-i)^{n}$ が $n$ 偶数で $2(-1)^{n/2}$、奇数で $0$ であることから。
+
+**2.** $\cos z+i\sin z=e^{iz}$、$\cos z-i\sin z=e^{-iz}$。掛けると $\cos^{2}z+\sin^{2}z=e^{0}=1$。加法定理：$e^{i(z+w)}=e^{iz}e^{iw}$ と $e^{-i(z+w)}=e^{-iz}e^{-iw}$ の両辺を $\cos$, $\sin$ で書いて、和と差をとる。
+
+**3.** 定義に $z=iy$ を入れる。$y\to\infty$ で $\cosh y\to\infty$。
+
+**4.** $\sin z=0\iff e^{iz}=e^{-iz}\iff e^{2iz}=1\iff2iz\in2\pi i\mathbb{Z}$（\ref{cx:exp} の 3）$\iff z\in\pi\mathbb{Z}$。$\cos z=\sin(z+\frac\pi2)$（加法定理と $\cos\frac\pi2=0$, $\sin\frac\pi2=1$、\ref{calc:pi-definition}）から後半。
+:::
+
+::: intuition
+実数の世界では $|\cos x|\le1$ だが、複素数では $\cos$ は虚軸方向に指数関数的に大きくなる。後で示すリウヴィルの定理（有界な整関数は定数）から、定数でない整関数が有界になることはありえない。
+:::
+
+### 対数と冪 {#cx:sec-ps-log}
+
+$e^{z}$ は周期 $2\pi i$ をもつので単射でなく、逆関数を $\C\setminus\{0\}$ 全体で一つに決めることはできない。そこで、偏角を $(-\pi,\pi)$ に制限する。
+
+::: definition 偏角の主値と対数の主値 {#cx:principal-log keywords="slit plane C minus (-infinity,0], principal argument Arg z in (-pi,pi), principal branch Log z = log|z| + i Arg z" index="偏角の主値|へんかくのしゅち, 対数の主値|たいすうのしゅち, 主値|しゅち"}
+$\C^{-}\defeq\C\setminus(-\infty,0]$ とする。$z=x+iy\in\C^{-}$ について $|z|+x>0$ なので
+$$
+\operatorname{Arg}z\defeq2\arctan\frac{y}{|z|+x}\in(-\pi,\pi),\qquad\operatorname{Log}z\defeq\log|z|+i\operatorname{Arg}z
+$$
+と定め、それぞれ**偏角の主値**、**対数の主値**という。
+:::
+
+::: lemma 主値の性質 {#cx:principal-log-properties keywords="e^{i Arg z} = z/|z|; e^{Log z} = z; Arg and Log are continuous on the slit plane" index=""}
+$z\in\C^{-}$ について $e^{i\operatorname{Arg}z}=\frac{z}{|z|}$、$e^{\operatorname{Log}z}=z$ で、$\operatorname{Arg}$, $\operatorname{Log}$ は $\C^{-}$ で連続である。
+:::
+
+::: proof
+**Step 1（倍角の公式）.** $\alpha\in(-\frac\pi2,\frac\pi2)$、$t\defeq\tan\alpha$ とする。$\cos\alpha>0$（\ref{calc:pi-definition} と偶関数性から $(-\frac\pi2,\frac\pi2)$ で $\cos>0$）で $1+t^{2}=\frac{\cos^{2}\alpha+\sin^{2}\alpha}{\cos^{2}\alpha}=\frac{1}{\cos^{2}\alpha}$。加法定理（\ref{calc:trig-properties} の 3）から
+$$
+\cos2\alpha=\cos^{2}\alpha-\sin^{2}\alpha=\frac{1-t^{2}}{1+t^{2}},\qquad\sin2\alpha=2\sin\alpha\cos\alpha=\frac{2t}{1+t^{2}}.
+$$
+
+**Step 2（$e^{i\operatorname{Arg}z}$ の計算）.** $z=x+iy\in\C^{-}$、$t\defeq\frac{y}{|z|+x}$、$\alpha\defeq\arctan t$（\ref{calc:arctan}）とすると $\operatorname{Arg}z=2\alpha$。$|z|^{2}=x^{2}+y^{2}$ を使うと
+$$
+\begin{aligned}
+(|z|+x)^{2}+y^{2}&=2|z|(|z|+x),\\
+(|z|+x)^{2}-y^{2}&=2x(|z|+x).
+\end{aligned}
+$$
+よって $1+t^{2}=\frac{2|z|}{|z|+x}$、$1-t^{2}=\frac{2x}{|z|+x}$ で、Step 1 から $\cos\operatorname{Arg}z=\frac{x}{|z|}$、$\sin\operatorname{Arg}z=\frac{2y}{|z|+x}\cdot\frac{|z|+x}{2|z|}=\frac{y}{|z|}$。すなわち $e^{i\operatorname{Arg}z}=\frac{z}{|z|}$。
+
+**Step 3.** $e^{\operatorname{Log}z}=e^{\log|z|}e^{i\operatorname{Arg}z}=|z|\cdot\frac{z}{|z|}=z$。
+
+**Step 4（連続性）.** $z\mapsto|z|$, $x$, $y$ は連続で、$\C^{-}$ 上 $|z|+x>0$ なので $\frac{y}{|z|+x}$ は連続。$\arctan$ と $\log$ は連続（\ref{calc:arctan}, \ref{calc:log}）なので、合成の $\operatorname{Arg}$, $\operatorname{Log}$ も連続。
+
+::: hypcheck
+- **$z\in\C^{-}$**：$|z|+x>0$ を保証するために使った。$z$ が負の実軸上なら $|z|+x=0$。
+:::
+:::
+
+::: theorem 対数の主値は正則 {#cx:log-holomorphic keywords="Log is holomorphic on the slit plane with derivative 1/z; power series of Log(1+z)" index="対数関数（複素）|たいすうかんすうふくそ"}
+$\operatorname{Log}$ は $\C^{-}$ で正則で、$(\operatorname{Log})'(z)=\dfrac1z$。また $|z|<1$ なら
+$$
+\operatorname{Log}(1+z)=\sum_{n\ge1}\frac{(-1)^{n-1}}{n}z^{n}.
+$$
+:::
+
+::: proof
+**Step 1（微分）.** $z\in\C^{-}$ を固定し、$Z\defeq\operatorname{Log}z$ とする。$w\in\C^{-}$, $w\neq z$ について $W\defeq\operatorname{Log}w$ とおくと、$e^{W}=w\neq z=e^{Z}$ なので $W\neq Z$ で
+$$
+\frac{\operatorname{Log}w-\operatorname{Log}z}{w-z}=\frac{W-Z}{e^{W}-e^{Z}}.
+$$
+$w\to z$ のとき、\ref{cx:principal-log-properties} の連続性から $W\to Z$。$e^{z}$ は $Z$ で複素微分可能で微分係数 $e^{Z}\neq0$ なので、$\frac{e^{W}-e^{Z}}{W-Z}\to e^{Z}$（$W\neq Z$ を保ったまま $W\to Z$）。逆数をとって極限は $\frac{1}{e^{Z}}=\frac1z$。
+
+**Step 2（級数）.** $|z|<1$ で $1+z\in\C^{-}$（実部 $>0$）。$L(z)\defeq\sum_{n\ge1}\frac{(-1)^{n-1}}{n}z^{n}$ は収束半径 $1$ で、\ref{cx:power-series-holomorphic} から $L'(z)=\sum_{n\ge1}(-1)^{n-1}z^{n-1}=\frac{1}{1+z}$。$F(z)\defeq\operatorname{Log}(1+z)-L(z)$ は $D(0,1)$ で正則で、Step 1 と連鎖律から $F'=\frac{1}{1+z}-\frac{1}{1+z}=0$。$D(0,1)$ は領域なので \ref{cx:cr-consequences} の 2 から $F$ は定数で、$F(0)=\operatorname{Log}1-0=0$。
+
+::: hypcheck
+- **Step 1 の連続性**：$W\to Z$ を保証するのに本質的に使った。逆関数の微分は、逆関数の連続性がなければ成り立たない。
+- **Step 2 の「領域」**：$F'=0$ から定数を結論するのに連結性を使った。
+:::
+:::
+
+::: definition 複素数の冪 {#cx:complex-power keywords="principal value of z^alpha = e^{alpha Log z} on the slit plane; holomorphic with derivative alpha z^{alpha-1}" index="冪（複素）|べきふくそ"}
+$z\in\C^{-}$, $\alpha\in\C$ について $z^{\alpha}\defeq e^{\alpha\operatorname{Log}z}$（**主値**）と定める。これは $\C^{-}$ で正則で、連鎖律から $(z^{\alpha})'=\alpha z^{\alpha}/z=\alpha z^{\alpha-1}$。$\alpha=n\in\mathbb{Z}$ なら $e^{n\operatorname{Log}z}=(e^{\operatorname{Log}z})^{n}=z^{n}$ で、通常の冪と一致する。
+:::
+
+::: proposition 平方根は連続に選べない {#cx:no-continuous-sqrt keywords="there is no continuous function g on the unit circle (hence on C minus 0) with g(z)^2 = z" index="平方根の分枝|へいほうこんのぶんし"}
+単位円 $S^{1}$ 上の連続関数 $g$ で、すべての $z\in S^{1}$ について $g(z)^{2}=z$ となるものは存在しない。とくに $\C\setminus\{0\}$ 上の連続な平方根も、連続な対数（$e^{L(z)}=z$ を満たす連続関数 $L$）も存在しない。
+:::
+
+::: proof
+**Step 1.** そのような $g$ があったとする。$t\in[0,2\pi]$ について $\varepsilon(t)\defeq g(e^{it})e^{-it/2}$ とおくと、$\varepsilon$ は連続で $\varepsilon(t)^{2}=e^{it}e^{-it}=1$、すなわち $\varepsilon(t)\in\{1,-1\}$。
+
+**Step 2.** $\varepsilon$ は実数値の連続関数（値が $\pm1$）なので、中間値の定理（\ref{calc:interval-theorems}）により $[0,2\pi]$ で定数。
+
+**Step 3.** $e^{i\cdot0}=e^{2\pi i}=1$ なので $g(1)=\varepsilon(0)=\varepsilon(2\pi)e^{i\pi}=-\varepsilon(2\pi)$。Step 2 から $\varepsilon(0)=\varepsilon(2\pi)$ なので $\varepsilon(0)=-\varepsilon(0)$、$\varepsilon(0)=0$ となり、$\varepsilon(0)\in\{\pm1\}$ に矛盾する。
+
+**Step 4.** 連続な対数 $L$ があれば $g(z)\defeq e^{L(z)/2}$ は連続な平方根になるので、これも存在しない。
+
+::: hypcheck
+- **$S^{1}$ 全体**：一周することが本質で、$S^{1}$ から一点を除けば連続な平方根はある（たとえば $\C^{-}$ 上の $z^{1/2}$）。
+- 使ったのは中間値の定理だけで、位相幾何の道具（基本群）は使っていない。
+:::
+:::
+
+::: supplement
+**高い視点.** 指数関数 $\C\to\C\setminus\{0\}$ は被覆写像で（\ref{at:page-covering-spaces}）、連続な対数が存在しないことは、$\C\setminus\{0\}$ の基本群が $\mathbb{Z}$ で自明でないことの表れである（円周の基本群 \ref{at:page-fundamental-group}）。どの開集合の上でなら対数が選べるかは、単連結性と結びつく（\ref[回転数と一般のコーシーの定理]{cx:page-winding-number} で扱う）。
+:::
+
+## 問題 {#cx:sec-ps-problems}
+
+::: problem {#cx:prob-ps-where-differentiable}
+$f(x+iy)\defeq x^{2}+iy^{2}$ が複素微分可能な点をすべて求めよ。$f$ が正則になる開集合はあるか。
+:::
+
+::: solution
+$u=x^{2}$, $v=y^{2}$ は $C^{1}$ なので全微分可能。コーシー–リーマンの方程式は $u_{x}=2x=v_{y}=2y$、$u_{y}=0=-v_{x}=0$。よって複素微分可能な点は直線 $y=x$ 上の点だけ（\ref{cx:cauchy-riemann}）。直線は内点をもたないので、$f$ が正則になる空でない開集合はない。
+:::
+
+::: problem {#cx:prob-ps-radius}
+次の冪級数の収束半径を求めよ。(a) $\sum_{n\ge0}2^{n}z^{3n}$　(b) $\sum_{n\ge1}z^{n!}$　(c) $\sum_{n\ge1}\frac{n!}{n^{n}}z^{n}$
+:::
+
+::: solution
+(a) 係数は $n=3m$ で $2^{m}$、それ以外で $0$。$|c_{3m}|^{1/(3m)}=2^{1/3}$ なので上極限は $2^{1/3}$、$R=2^{-1/3}$。
+(b) 係数は $n=k!$ で $1$、それ以外で $0$ なので上極限は $1$、$R=1$。
+(c) $c_{n+1}/c_{n}=\frac{(n+1)!\,n^{n}}{(n+1)^{n+1}n!}=\bigl(\frac{n}{n+1}\bigr)^{n}\to e^{-1}$。\ref{calc:root-ratio-tests} の 3 から $|c_{n}|^{1/n}\to e^{-1}$、$R=e$。
+:::
+
+::: problem {#cx:prob-ps-exp-equation}
+$e^{z}=-1$ と $e^{z}=1+i$ の解をすべて求めよ。また $\cos z=2$ の解をすべて求めよ。
+:::
+
+::: solution
+$e^{z}=-1=e^{i\pi}$（\ref{calc:circle-parametrization}）なので \ref{cx:exp} の 3 から $z\in i\pi+2\pi i\mathbb{Z}$。$1+i=\sqrt2e^{i\pi/4}$ なので $z\in\frac12\log2+\frac{\pi}{4}i+2\pi i\mathbb{Z}$。$\cos z=2$ は $w\defeq e^{iz}$ について $w+w^{-1}=4$、$w^{2}-4w+1=0$、$w=2\pm\sqrt3$（正の実数）。$iz\in\log(2\pm\sqrt3)+2\pi i\mathbb{Z}$ で、$\log(2-\sqrt3)=-\log(2+\sqrt3)$ なので $z\in2\pi\mathbb{Z}\pm i\log(2+\sqrt3)$。
+:::
+
+::: problem {#cx:prob-ps-log-not-additive}
+$\operatorname{Log}(zw)=\operatorname{Log}z+\operatorname{Log}w$ が成り立たない $z,w\in\C^{-}$（$zw\in\C^{-}$）の例を挙げよ。この等式はどんな条件のもとで成り立つか。
+:::
+
+::: solution
+$z=w=e^{3\pi i/4}$ とすると $zw=e^{3\pi i/2}=-i$ で $\operatorname{Log}(zw)=-\frac{\pi}{2}i$、一方 $\operatorname{Log}z+\operatorname{Log}w=\frac{3\pi}{2}i$。一般に $e^{\operatorname{Log}z+\operatorname{Log}w}=zw$ なので両辺の差は $2\pi i\mathbb{Z}$ に入り（\ref{cx:exp} の 3）、等式は $\operatorname{Arg}z+\operatorname{Arg}w\in(-\pi,\pi)$ のとき、そのときに限り成り立つ（右辺の虚部が $(-\pi,\pi)$ に入ることと、左辺の虚部が $(-\pi,\pi)$ に入ることを比べる）。とくに $\operatorname{Re}z,\operatorname{Re}w>0$ なら成り立つ。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=6cc21e5d"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=4d4405c9"></script>
+<script src="../../../site.js?v=adb37c39"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=87606379"></script>
+</body>
+</html>
