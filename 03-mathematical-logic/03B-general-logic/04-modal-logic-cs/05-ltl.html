@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>線形時相論理 LTL | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-mathematical-logic/03B-general-logic/04-modal-logic-cs/05-ltl.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 線形時相論理 LTL {#logic:page-ltl keywords="linear temporal logic, LTL, next, until, eventually, always, Hintikka sequence, completeness, ultimately periodic model, decidability, PSPACE"}
+
+プログラムの実行は状態の無限列と見なせる。**線形時相論理**（LTL、Pnueli 1977）は、その列の各時刻で「次の時刻に $A$」（$\mathbf{X}A$）、「$B$ になるまで $A$ が続き、いつか $B$ になる」（$A\,\mathbf{U}\,B$）といった性質を述べる論理である。「いつか $A$」$\mathbf{F}A$ と「ずっと $A$」$\mathbf{G}A$ は $\mathbf{U}$ から定義でき、「要求があればいつか応答がある」$\mathbf{G}(r\to\mathbf{F}s)$ のような性質が書ける。このページでは、LTL の公理系を与えて**健全性**と**完全性**を示し、充足可能な論理式は**最終的に周期的な**モデル（その長さは論理式から計算できる値以下にとれる）で充足されることから**決定可能性**を導く。証明の中心は、論理式の有限の閉包の部分集合の列で、真理を「局所的な条件」と「いつか満たされる約束」に分けて記述する**ヒンティッカ列**である。
+
+> 参考：『コンピュータサイエンスにおける様相論理』（ユーザー指定の参考書。本文のテキストは未入手のため、構成は標準的な内容によった）。$\mathbf{U}$ を含む LTL の完全性は Gabbay–Pnueli–Shelah–Stavi (1980) による。ここでは $\mathbf{U}$ を最小不動点として扱う形の公理系を採り、PDL の完全性（\ref{logic:page-pdl-completeness}）と同じ「極大な集合」の方法で証明する。公理系の形は文献によって少しずつ異なる。
+
+## 記法と定義の確認 {#logic:sec-ltl-notation}
+
+::: notation
+- $\mathbb{N}=\{0,1,2,\dots\}$。$\mathrm{PV}$ は命題変数の可算集合、$\mathcal{P}(\mathrm{PV})$ はその冪集合。
+- 恒真式・極大な集合の考え方、有限の連言・選言の記法 $\bigwedge X$, $\bigvee X$（空なら $\top,\bot$）は \ref{logic:page-pdl-completeness} のとおり。
+- 論理式の**大きさ** $\lvert A\rvert$ は下の定義の記号の個数（\ref{logic:ltl-size}）。
+- **公理系**：$\ZF$ で行う。選択公理は使わない（無限列を作るところでは、各段階で何を選ぶかを有限集合の決まった並べ方で指定する）。
+:::
+
+## 構文と意味論 {#logic:sec-ltl-syntax}
+
+::: definition LTL の論理式 {#logic:ltl-syntax keywords="LTL syntax: next X and until U" index="線形時相論理|せんけいじそうろんり, LTL|えるてぃーえる, ネクスト（LTL）|ねくすとえるてぃーえる, アンティル（LTL）|あんてぃるえるてぃーえる"}
+LTL の**論理式**を次の規則で帰納的に定める。命題変数と $\bot$ は論理式。$A,B$ が論理式なら $A\to B$、$\mathbf{X}A$、$A\,\mathbf{U}\,B$ は論理式。$\neg,\wedge,\vee,\top,\leftrightarrow$ は通常の略記とし、
+$$
+\mathbf{F}A\defeq\top\,\mathbf{U}\,A,\qquad\mathbf{G}A\defeq\neg\mathbf{F}\neg A
+$$
+とおく。
+:::
+
+::: definition LTL のモデルと真理 {#logic:ltl-semantics keywords="LTL semantics over infinite sequences of valuations" index="LTL のモデル|えるてぃーえるのもでる"}
+写像 $\sigma\colon\mathbb{N}\to\mathcal{P}(\mathrm{PV})$ を **LTL のモデル**という（時刻 $i$ で真な命題変数の集合を $\sigma(i)$ とする）。時刻 $i\in\mathbb{N}$ での真理 $\sigma,i\models A$ を論理式の構成についての再帰で定める：$\sigma,i\models p\iff p\in\sigma(i)$、$\sigma,i\not\models\bot$、$\to$ は通常どおり、
+$$
+\sigma,i\models\mathbf{X}A\iff\sigma,i+1\models A,
+$$
+$$
+\sigma,i\models A\,\mathbf{U}\,B\iff\text{ある }k\ge i\text{ で }\sigma,k\models B\text{ かつ、}i\le j<k\text{ のすべての }j\text{ で }\sigma,j\models A.
+$$
+すべての $\sigma$ とすべての $i$ で $\sigma,i\models A$ のとき $A$ は**妥当**、ある $\sigma$ とある $i$ で真のとき**充足可能**という。
+:::
+
+::: remark
+$\sigma,i\models A$ は $\sigma$ の $i$ 以降の部分 $\sigma^{(i)}(n)\defeq\sigma(i+n)$ だけで決まり、$\sigma,i\models A\iff\sigma^{(i)},0\models A$ である（論理式の構成についての帰納法）。したがって充足可能なら時刻 $0$ で充足でき、「妥当」は「すべての $\sigma$ で $\sigma,0\models A$」と同じである。$\mathbf{U}$ は $k=i$ を許すので、$B$ が今真なら $A\,\mathbf{U}\,B$ も真である。
+:::
+
+::: proposition LTL の基本的な妥当式 {#logic:ltl-valid keywords="valid LTL principles: X is self-dual, unfolding of until, until is the least solution, F and G" index="LTL の妥当式|えるてぃーえるのだとうしき"}
+1. $\sigma,i\models\mathbf{F}A\iff$ ある $k\ge i$ で $\sigma,k\models A$。$\sigma,i\models\mathbf{G}A\iff$ すべての $k\ge i$ で $\sigma,k\models A$。
+2. $\neg\mathbf{X}A\leftrightarrow\mathbf{X}\neg A$ と $\mathbf{X}(A\to B)\to(\mathbf{X}A\to\mathbf{X}B)$ は妥当。
+3. $A\,\mathbf{U}\,B\leftrightarrow B\vee(A\wedge\mathbf{X}(A\,\mathbf{U}\,B))$ は妥当。
+4. $B\vee(A\wedge\mathbf{X}C)\to C$ が妥当ならば、$A\,\mathbf{U}\,B\to C$ も妥当。
+:::
+
+::: proof
+1：$\mathbf{F}$ は $A$ を $\top$ とした $\mathbf{U}$ なので「$i\le j<k$ で $\top$」は無条件。$\mathbf{G}$ はその否定の双対。2：どちらも時刻 $i+1$ での真理に直せば命題論理の恒真式。
+
+3：⇒ $k$ を $\mathbf{U}$ の定義のものとする。$k=i$ なら $B$。$k>i$ なら $\sigma,i\models A$ で、同じ $k$ が時刻 $i+1$ の $A\,\mathbf{U}\,B$ を示す。⇐ $B$ が時刻 $i$ で真なら $k=i$。$A$ が時刻 $i$ で真で $A\,\mathbf{U}\,B$ が時刻 $i+1$ で真なら、その $k\ge i+1$ が時刻 $i$ でも使える。
+
+4：$\sigma,i\models A\,\mathbf{U}\,B$ とし、$k$ を定義のものとする。$j=k,k-1,\dots,i$ の順に $\sigma,j\models C$ を示す。$j=k$ では $B$ が真なので仮定から $C$。$i\le j<k$ で $\sigma,j+1\models C$ なら、$\sigma,j\models A\wedge\mathbf{X}C$ なので仮定から $C$。
+:::
+
+::: remark
+3 は $A\,\mathbf{U}\,B$ が「$Y\leftrightarrow B\vee(A\wedge\mathbf{X}Y)$」の解であること、4 はそれが**最小の解**であることを言う（$C$ がこの式の右辺から左辺への含意を満たせば、$A\,\mathbf{U}\,B$ はそれより強い）。$\mathbf{G}A$ は双対的に $Y\leftrightarrow A\wedge\mathbf{X}Y$ の最大の解である。PDL の $[\alpha^{\ast}]$ の場合（\ref{logic:pdl-valid}）と同じ形で、μ 計算で一般化される。
+:::
+
+::: example 典型的な性質 {#logic:ltl-examples keywords="typical LTL properties: response, infinitely often, eventually always"}
+1. $\mathbf{G}(r\to\mathbf{F}s)$：要求 $r$ があれば、その時刻以降にいつか応答 $s$ がある（応答性）。
+2. $\mathbf{G}\mathbf{F}p$：$p$ は無限回真になる。$\mathbf{F}\mathbf{G}p$：ある時刻以降 $p$ はずっと真。$\mathbf{F}\mathbf{G}p\to\mathbf{G}\mathbf{F}p$ は妥当だが逆は妥当でない（$\sigma(i)=\{p\}$（$i$ が偶数）、$\varnothing$（奇数）のモデル）。
+3. $\neg p\,\mathbf{U}\,q$：$q$ が起きるまで $p$ は起きず、$q$ はいつか起きる。
+:::
+
+::: remark
+LTL でも\term[コンパクト性]{logic:prop-compactness}は成り立たない：$\{\mathbf{F}p\}\cup\{\neg\mathbf{X}^{n}p:n\ge0\}$（$\mathbf{X}^{n}$ は $\mathbf{X}$ を $n$ 個並べたもの）は、有限部分集合はどれも充足可能だが全体は充足可能でない（\ref{logic:pdl-not-compact} と同じ議論）。したがって以下の完全性も「妥当な論理式は定理」という弱い形である。
+:::
+
+## 公理系と健全性 {#logic:sec-ltl-axioms}
+
+::: definition LTL の公理系 {#logic:ltl-axioms keywords="axiom system for LTL with next and until; until induction rule" index="LTL の公理系|えるてぃーえるのこうりけい, アンティルの帰納規則|あんてぃるのきのうきそく"}
+LTL の恒真式（\ref{logic:pdl-tautology} と同じく、$\mathbf{X}A$ と $A\,\mathbf{U}\,B$ の形の論理式を命題変数のように扱ったときの恒真式）と、次の論理式を**公理**とする。
+1. $\mathbf{X}(A\to B)\to(\mathbf{X}A\to\mathbf{X}B)$。
+2. $\neg\mathbf{X}A\leftrightarrow\mathbf{X}\neg A$。
+3. $A\,\mathbf{U}\,B\leftrightarrow B\vee(A\wedge\mathbf{X}(A\,\mathbf{U}\,B))$。
+
+推論規則は次の三つとする。
+- モーダスポネンス：$A$ と $A\to B$ から $B$。
+- $\mathbf{X}$ の必然化：$A$ から $\mathbf{X}A$。
+- **$\mathbf{U}$ の帰納規則**：$B\vee(A\wedge\mathbf{X}C)\to C$ から $A\,\mathbf{U}\,B\to C$。
+
+公理から推論規則で得られる論理式を**定理**といい $\vdash A$ と書く。$\vdash\neg\bigwedge X$ でない有限集合 $X$ を**無矛盾**という。
+:::
+
+::: theorem LTL の健全性 {#logic:ltl-soundness keywords="soundness of the LTL axiom system" index="健全性（LTL）|けんぜんせいえるてぃーえる" refname="LTL の健全性"}
+$\vdash A$ ならば $A$ は妥当である。
+:::
+
+::: proof
+恒真式は、各時刻で $\mathbf{X}A$, $A\,\mathbf{U}\,B$ の真理を命題的付値と見れば真（\ref{logic:pdl-soundness} の Step 1 と同じ）。公理 1〜3 は \ref{logic:ltl-valid.2}・\ref{logic:ltl-valid.3}。モーダスポネンスは各時刻で真理を保つ。$A$ が妥当なら、すべての $\sigma,i$ で $\sigma,i+1\models A$ なので $\mathbf{X}A$ も妥当。$\mathbf{U}$ の帰納規則は \ref{logic:ltl-valid.4}。導出の長さについての帰納法。
+:::
+
+::: lemma 導出の基本性質（LTL） {#logic:ltl-normality keywords="derived rules of LTL: tautological consequence, monotonicity of X, X distributes over disjunction"}
+1. $\vdash A_{1},\dots,\vdash A_{n}$ で $A_{1}\wedge\cdots\wedge A_{n}\to B$ が恒真式ならば $\vdash B$。
+2. $\vdash A\to B$ ならば $\vdash\mathbf{X}A\to\mathbf{X}B$。
+3. $n\ge0$ について $\vdash\mathbf{X}(A_{1}\vee\cdots\vee A_{n})\leftrightarrow\mathbf{X}A_{1}\vee\cdots\vee\mathbf{X}A_{n}$。とくに $\vdash\neg\mathbf{X}\bot$。
+:::
+
+::: proof
+1・2 は \ref{logic:pdl-normality.1}・\ref{logic:pdl-normality.2} と同じ（公理 1 と $\mathbf{X}$ の必然化を使う）。3：$\leftarrow$ は各 $A_{i}\to A_{1}\vee\cdots\vee A_{n}$ に 2。$\to$ は対偶を示す。公理 2 で $\neg\mathbf{X}A_{i}\to\mathbf{X}\neg A_{i}$、\ref{logic:pdl-normality} の Step 3 と同じく必然化と公理 1 で $\mathbf{X}\neg A_{1}\wedge\cdots\wedge\mathbf{X}\neg A_{n}\to\mathbf{X}(\neg A_{1}\wedge\cdots\wedge\neg A_{n})$、2 で $\to\mathbf{X}\neg(A_{1}\vee\cdots\vee A_{n})$、公理 2 で $\to\neg\mathbf{X}(A_{1}\vee\cdots\vee A_{n})$。$n=0$ のときは必然化で $\vdash\mathbf{X}\neg\bot$、公理 2 で $\vdash\neg\mathbf{X}\bot$。
+:::
+
+## 閉包とヒンティッカ列 {#logic:sec-ltl-hintikka}
+
+::: definition 大きさと閉包 {#logic:ltl-size keywords="size of an LTL formula; closure CL(A)" index="閉包（LTL）|へいほうえるてぃーえる"}
+$\lvert p\rvert=\lvert\bot\rvert\defeq1$、$\lvert A\to B\rvert=\lvert A\,\mathbf{U}\,B\rvert\defeq1+\lvert A\rvert+\lvert B\rvert$、$\lvert\mathbf{X}A\rvert\defeq1+\lvert A\rvert$。論理式 $A$ の**閉包** $\mathrm{CL}(A)$ を、$A$ の部分論理式全体に、各部分論理式 $C\,\mathbf{U}\,D$ について $\mathbf{X}(C\,\mathbf{U}\,D)$ を加えた集合とする。
+:::
+
+::: lemma 閉包の性質 {#logic:ltl-closure-props}
+$\mathrm{CL}(A)$ は部分論理式で閉じ、$C\,\mathbf{U}\,D\in\mathrm{CL}(A)$ なら $\mathbf{X}(C\,\mathbf{U}\,D)\in\mathrm{CL}(A)$。また $\lvert\mathrm{CL}(A)\rvert\le2\lvert A\rvert$。
+:::
+
+::: proof
+加えた $\mathbf{X}(C\,\mathbf{U}\,D)$ の部分論理式は自身と $C\,\mathbf{U}\,D$ の部分論理式で、すでに入っている。$\mathbf{U}$ の形の元はすべて $A$ の部分論理式なので後半の閉性が成り立つ。部分論理式の個数は記号の個数 $\lvert A\rvert$ 以下（各部分論理式に、その出現の一つの先頭の記号を対応させると単射）、加えるものはそれ以下。
+:::
+
+::: definition ヒンティッカ列 {#logic:ltl-hintikka keywords="Hintikka sequence for LTL: local conditions plus fulfilment of eventualities" index="ヒンティッカ列|ひんてぃっかれつ"}
+$\Sigma$ を部分論理式で閉じ、$C\,\mathbf{U}\,D\in\Sigma\Rightarrow\mathbf{X}(C\,\mathbf{U}\,D)\in\Sigma$ を満たす有限集合とする。$\Sigma$ の部分集合の列 $(T_{i})_{i\in\mathbb{N}}$ が次の H1〜H4 を満たすとき、$\Sigma$ 上の**ヒンティッカ列**という（H1〜H3 はすべての $i$ と、条件に現れる論理式が $\Sigma$ に属するすべての場合について）。
+- H1：$\bot\notin T_{i}$。$(C\to D)\in T_{i}\iff C\notin T_{i}$ または $D\in T_{i}$。
+- H2：$\mathbf{X}C\in T_{i}\iff C\in T_{i+1}$。
+- H3：$C\,\mathbf{U}\,D\in T_{i}\iff D\in T_{i}$、または $C\in T_{i}$ かつ $C\,\mathbf{U}\,D\in T_{i+1}$。
+- H4：$C\,\mathbf{U}\,D\in T_{i}$ ならば、ある $k\ge i$ で $D\in T_{k}$。
+
+H1〜H3 は隣り合う二つの集合だけで決まる**局所的な条件**、H4 は「$\mathbf{U}$ の約束がいつか果たされる」という**大域的な条件**である。
+:::
+
+::: lemma ヒンティッカの補題 {#logic:ltl-hintikka-lemma keywords="Hintikka lemma: a Hintikka sequence determines a model in which membership coincides with truth" index="ヒンティッカの補題（LTL）|ひんてぃっかのほだいえるてぃーえる" refname="ヒンティッカの補題（LTL）"}
+$(T_{i})$ を $\Sigma$ 上のヒンティッカ列とし、$\sigma_{T}(i)\defeq T_{i}\cap\mathrm{PV}$ とおく。すべての $C\in\Sigma$ と $i$ について $C\in T_{i}\iff\sigma_{T},i\models C$。
+:::
+
+::: proof
+$C$ の構成についての帰納法（$C$ の部分論理式も $\Sigma$ に属する）。命題変数は $\sigma_{T}$ の定義、$\bot$ と $\to$ は H1 と帰納法の仮定、$\mathbf{X}C$ は H2 と帰納法の仮定。$C\,\mathbf{U}\,D$ の場合：
+
+**Step 1.** 【主張：$C\,\mathbf{U}\,D\in T_{i}$ ならば $\sigma_{T},i\models C\,\mathbf{U}\,D$】 H4 で $D\in T_{k}$ となる $k\ge i$ があるので、その最小のものを $k$ とする。$j=i,i+1,\dots,k-1$ の順に「$C\,\mathbf{U}\,D\in T_{j}$ かつ $C\in T_{j}$」を示す：$C\,\mathbf{U}\,D\in T_{j}$ で $D\notin T_{j}$（$k$ の最小性）なので、H3 から $C\in T_{j}$ かつ $C\,\mathbf{U}\,D\in T_{j+1}$。帰納法の仮定で $\sigma_{T},k\models D$ と $\sigma_{T},j\models C$（$i\le j<k$）。
+
+**Step 2.** 【主張：$\sigma_{T},i\models C\,\mathbf{U}\,D$ ならば $C\,\mathbf{U}\,D\in T_{i}$】 定義の $k$ をとる。帰納法の仮定で $D\in T_{k}$、$C\in T_{j}$（$i\le j<k$）。H3 の ⇐ で $C\,\mathbf{U}\,D\in T_{k}$、さらに $j=k-1,\dots,i$ の順に $C\,\mathbf{U}\,D\in T_{j}$。
+
+::: hypcheck
+- **H4 が要る場所**：Step 1 だけである。H1〜H3 だけでは、$C\,\mathbf{U}\,D$ をずっと持ち越して $D$ が現れない列（「約束を先送りし続ける」列）を排除できない。例えば $\Sigma=\mathrm{CL}(p\,\mathbf{U}\,q)$ で、すべての $i$ で $T_{i}=\{p,\ p\,\mathbf{U}\,q,\ \mathbf{X}(p\,\mathbf{U}\,q)\}$ とすると H1〜H3 を満たすが、$\sigma_{T}$ では $q$ が一度も真にならない。
+:::
+:::
+
+::: lemma モデルの型の列 {#logic:ltl-type-sequence keywords="the sequence of types of a model is a Hintikka sequence"}
+LTL のモデル $\sigma$ と上の $\Sigma$ について、$T_{i}\defeq\{C\in\Sigma:\sigma,i\models C\}$ はヒンティッカ列である。
+:::
+
+::: proof
+H1 は真理の定義、H2 は $\mathbf{X}$ の定義、H3 は \ref{logic:ltl-valid.3}、H4 は $\mathbf{U}$ の定義から。
+:::
+
+## 完全性 {#logic:sec-ltl-completeness}
+
+以下この節では、論理式 $A$ を固定し、$\Sigma\defeq\mathrm{CL}(A)$、$\Phi\defeq\Sigma\cup\{\neg B:B\in\Sigma\}$ とする。$\Phi$ の**極大な集合**、その全体 $W$、$\widehat{w}$, $\widehat{Y}$ を \ref{logic:pdl-atoms} と同じく定める。\ref{logic:pdl-atom-properties} の 1〜5 は、その証明が「定理から恒真式で導けるものは定理」（\ref{logic:ltl-normality.1}）しか使わないので、ここでもそのまま成り立つ。
+
+::: definition 極大な集合の上の遷移 {#logic:ltl-atom-graph keywords="successor relation on maximal sets for LTL"}
+$w,v\in W$ について、$\widehat{w}\wedge\mathbf{X}\widehat{v}$ が無矛盾なとき $w\to v$ と書き、$v$ を $w$ の**後続**という。$w$ の後続全体を $\mathrm{succ}(w)$ とする。
+:::
+
+::: lemma 後続の性質 {#logic:ltl-successor keywords="properties of the successor relation: X-formulas, existence of successors, until step"}
+$w,v\in W$ とする。
+1. $w\to v$ かつ $\mathbf{X}C\in\Sigma$ ならば、$\mathbf{X}C\in w\iff C\in v$。
+2. $\vdash\widehat{w}\to\mathbf{X}\widehat{\mathrm{succ}(w)}$。とくに $\mathrm{succ}(w)\ne\varnothing$。
+3. $w\to v$ かつ $C\,\mathbf{U}\,D\in\Sigma$ ならば、$C\,\mathbf{U}\,D\in w\iff D\in w$、または $C\in w$ かつ $C\,\mathbf{U}\,D\in v$。
+:::
+
+::: proof
+**Step 1.** 【主張：1】 ⇒：$\mathbf{X}C\in w$、$C\notin v$ なら $\neg C\in v$ で $\vdash\widehat{v}\to\neg C$、\ref{logic:ltl-normality.2} と公理 2 で $\vdash\mathbf{X}\widehat{v}\to\neg\mathbf{X}C$。$\widehat{w}\wedge\mathbf{X}\widehat{v}$ が矛盾し $w\to v$ に反する。⇐：$\mathbf{X}C\notin w$ なら $\neg\mathbf{X}C\in w$。$C\in v$ なら $\vdash\mathbf{X}\widehat{v}\to\mathbf{X}C$ で同様に矛盾。
+
+**Step 2.** 【主張：2】 \ref{logic:pdl-atom-properties.4} の $\vdash\widehat{W}$ に $\mathbf{X}$ の必然化と \ref{logic:ltl-normality.3} を使うと $\vdash\bigvee_{v\in W}\mathbf{X}\widehat{v}$。$v\notin\mathrm{succ}(w)$ なら $\vdash\neg(\widehat{w}\wedge\mathbf{X}\widehat{v})$ なので、恒真式で $\vdash\widehat{w}\to\bigvee_{v\in\mathrm{succ}(w)}\mathbf{X}\widehat{v}$、もう一度 \ref{logic:ltl-normality.3} で右辺は $\mathbf{X}\widehat{\mathrm{succ}(w)}$。$\mathrm{succ}(w)=\varnothing$ なら $\vdash\widehat{w}\to\mathbf{X}\bot$ と $\vdash\neg\mathbf{X}\bot$ から $\vdash\neg\widehat{w}$ となり矛盾。
+
+**Step 3.** 【主張：3】 \ref{logic:ltl-closure-props} で $C,D,\mathbf{X}(C\,\mathbf{U}\,D)\in\Sigma$。公理 3 と \ref{logic:pdl-atom-properties.2} から $C\,\mathbf{U}\,D\in w\iff D\in w$、または $C\in w$ かつ $\mathbf{X}(C\,\mathbf{U}\,D)\in w$。1 で $\mathbf{X}(C\,\mathbf{U}\,D)\in w\iff C\,\mathbf{U}\,D\in v$。
+:::
+
+::: lemma 約束は果たせる {#logic:ltl-fulfil keywords="fulfilment lemma: from a maximal set containing C U D, a maximal set containing D is reachable" index="約束の補題（LTL）|やくそくのほだいえるてぃーえる"}
+$C\,\mathbf{U}\,D\in w$ ならば、$w=v_{0}\to v_{1}\to\cdots\to v_{n}$ で $D\in v_{n}$ となる列（$n\ge0$）がある。
+:::
+
+::: proof
+$Z$ を $w$ から $\to$ を有限回たどって着ける極大な集合の全体とする（$w\in Z$）。どの $z\in Z$ も $D$ を含まないと仮定して矛盾を導く。
+
+**Step 1.** 【主張：$\vdash\widehat{Z}\to\neg D\wedge\mathbf{X}\widehat{Z}$】 $z\in Z$ なら $D\notin z$ で $\neg D\in z$、$\vdash\widehat{z}\to\neg D$。また $\mathrm{succ}(z)\subset Z$ なので、\ref{logic:ltl-successor.2} と \ref{logic:ltl-normality.2} で $\vdash\widehat{z}\to\mathbf{X}\widehat{Z}$。$z\in Z$ についてまとめる。
+
+**Step 2.** 【主張：$\vdash C\,\mathbf{U}\,D\to\neg\widehat{Z}$】 $\mathbf{U}$ の帰納規則を論理式 $\neg\widehat{Z}$ に使う。前提 $D\vee(C\wedge\mathbf{X}\neg\widehat{Z})\to\neg\widehat{Z}$ は、公理 2（$\mathbf{X}\neg\widehat{Z}\leftrightarrow\neg\mathbf{X}\widehat{Z}$）のもとで Step 1 の対偶と恒真式で同値なので定理である。
+
+$w\in Z$ なので $\vdash\widehat{w}\to\widehat{Z}$、$C\,\mathbf{U}\,D\in w$ と Step 2 から $\vdash\neg\widehat{w}$ となり、$w$ の無矛盾性に反する。
+
+::: hypcheck
+- **帰納規則**：使ったのはここだけである。「$Z$ は $\neg D$ のまま一歩で閉じている」という有限の情報を、「$C\,\mathbf{U}\,D$ と両立しない」に変えるのに、$\mathbf{U}$ が最小の解であること（\ref{logic:ltl-valid.4} を公理系で言ったもの）が要る。
+- $\widehat{Z}$ は $\Sigma$ に属さない論理式だが、帰納規則は任意の論理式について使えるので問題ない。
+:::
+:::
+
+::: theorem LTL の完全性 {#logic:ltl-completeness keywords="completeness of LTL: valid formulas are theorems" index="完全性（LTL）|かんぜんせいえるてぃーえる" refname="LTL の完全性定理"}
+LTL の論理式 $A$ について、$\vdash A\iff A$ は妥当。
+:::
+
+::: proof
+⇒ は \ref{logic:ltl-soundness}。⇐ の対偶を示す。$\nvdash A$ とすると $\{\neg A\}$ は無矛盾で、\ref{logic:pdl-atom-properties.3} で $\neg A\in w_{0}$ となる $w_{0}\in W$ がある。
+
+**Step 1.** 【主張：$w_{0}$ から始まる無限列 $\pi(0)\to\pi(1)\to\cdots$ で、各 $C\,\mathbf{U}\,D\in\pi(i)$ についてある $k\ge i$ で $D\in\pi(k)$ となるものがある】 $\Sigma$ の $\mathbf{U}$ の形の元を $E_{1},\dots,E_{r}$（$E_{l}=C_{l}\,\mathbf{U}\,D_{l}$）と並べ、$W$ も並べておく。段階 $s=0,1,2,\dots$ で有限列を延ばす。段階 $s$ の初めの列の最後を $x$ とし、$l\defeq(s\bmod r)+1$ とする（$r=0$ なら何もしない）。$E_{l}\in x$ なら、\ref{logic:ltl-fulfil} の列のうち長さが最小で、そのうち（$W$ の並べ方による辞書式順序で）最初のものを $x$ の後につなぐ。最後に、\ref{logic:ltl-successor.2} で最後の元の後続のうち最初のものを一つつなぐ。各段階で列は 1 以上延びるので、極限として無限列 $\pi$ が得られる。
+
+$C\,\mathbf{U}\,D=E_{l}\in\pi(i)$ とし、$k\ge i$ で $D\in\pi(k)$ となるものがないとする。\ref{logic:ltl-successor.3} を $i$ から順に使うと、すべての $j\ge i$ で $E_{l}\in\pi(j)$。位置 $i$ 以降に始まる段階で $E_{l}$ を扱う最初のものの初めの元 $x=\pi(j)$ は $E_{l}$ を含むので、その段階でつないだ列の最後は $D$ を含み、仮定に反する。
+
+**Step 2.** 【主張：$T_{i}\defeq\pi(i)\cap\Sigma$ は $\Sigma$ 上のヒンティッカ列】 H1 は \ref{logic:pdl-atom-properties} の 1・2（$\bot\notin\pi(i)$ と $\to$ の性質。\ref{logic:pdl-kozen-parikh} の Step 1 と同じ）、H2 は \ref{logic:ltl-successor.1}、H3 は \ref{logic:ltl-successor.3}、H4 は Step 1。
+
+\ref{logic:ltl-hintikka-lemma} で $A\in T_{0}\iff\sigma_{T},0\models A$。$\neg A\in w_{0}$ なので $A\notin T_{0}$、よって $\sigma_{T},0\not\models A$ で、$A$ は妥当でない。
+:::
+
+## 有限モデル性と決定可能性 {#logic:sec-ltl-decidability}
+
+::: definition 最終的に周期的なモデル {#logic:ltl-ultimately-periodic keywords="ultimately periodic (lasso-shaped) LTL model" index="最終的に周期的なモデル|さいしゅうてきにしゅうきてきなもでる"}
+列 $(T_{i})$ が、ある $q\ge0$, $\ell\ge1$ について「$i\ge q$ なら $T_{i+\ell}=T_{i}$」を満たすとき、**最終的に周期的**であるといい、$q$ を前置部の長さ、$\ell$ を周期という。モデル $\sigma$ についても同様。
+:::
+
+::: lemma 切り取り {#logic:ltl-cut keywords="cutting a segment between two equal sets preserves local Hintikka conditions"}
+有限または無限の列 $(T_{i})$ が H1〜H3（各集合と、隣り合う組についての条件）を満たし、$a<b$ で $T_{a}=T_{b}$ ならば、$T_{a},\dots,T_{b-1}$ を取り除いた列 $T_{0},\dots,T_{a-1},T_{b},T_{b+1},\dots$ も H1〜H3 を満たす。
+:::
+
+::: proof
+H1 は各集合だけの条件、H2・H3 は隣り合う二つの集合の条件で、新しく隣り合うのは $(T_{a-1},T_{b})=(T_{a-1},T_{a})$ だけ（$a\ge1$ のとき）であり、これはもとの列で条件を満たしている。
+:::
+
+::: theorem LTL の周期的なモデルの性質 {#logic:ltl-periodic-model keywords="small model property of LTL: ultimately periodic model with bounded prefix and period" index="小モデル定理（LTL）|しょうもでるていりえるてぃーえる" refname="LTL の周期的モデル定理"}
+LTL の論理式 $A$ が充足可能ならば、$m\defeq\lvert\mathrm{CL}(A)\rvert$ として、前置部の長さ $q\le2^{m}$、周期 $\ell\le(m+1)\cdot2^{m}$ の最終的に周期的なモデル $\sigma$ で $\sigma,0\models A$ となる。
+:::
+
+::: proof
+$\sigma,0\models A$ とし、$\Sigma\defeq\mathrm{CL}(A)$、$(T_{i})$ を \ref{logic:ltl-type-sequence} の型の列とする。$A\in T_{0}$。
+
+$\Sigma$ の部分集合の有限列 $P=(P_{0},\dots,P_{q-1})$, $L=(L_{0},\dots,L_{\ell-1})$（$\ell\ge1$）について、次の条件を考える。(i) 列 $P\,L\,L\,L\cdots$（$P$ の後に $L$ を無限にくり返す）が H1〜H3 を満たす。(ii) その最初の集合が $A$ を含む。(iii) $L_{0}$ の各元 $C\,\mathbf{U}\,D$ について、ある $L_{r}$ が $D$ を含む。
+
+**Step 1.** 【主張：(i)〜(iii) を満たす $P,L$ があれば、前置部の長さ $q$、周期 $\ell$ の求めるモデルがある】 まず (i) は、有限列 $P\,L\,L_{0}$ の各集合が H1 を、隣り合う組が H2・H3 を満たすことと同値である（くり返した列の隣り合う組は、$P\,L$ の中の組と $(P_{q-1},L_{0})$, $(L_{\ell-1},L_{0})$ で尽きる）。さて、この無限列を $(T^{\ast}_{i})$ とし、$C\,\mathbf{U}\,D\in T^{\ast}_{n}$ で、$k\ge n$ のどの $T^{\ast}_{k}$ も $D$ を含まないとすると、H3 から $k\ge n$ のすべてで $C\,\mathbf{U}\,D\in T^{\ast}_{k}$。$k\ge n$ で $T^{\ast}_{k}=L_{0}$ となる $k$ をとれば、(iii) で $T^{\ast}_{k+r}=L_{r}$ が $D$ を含み矛盾。よって H4 も成り立ち、\ref{logic:ltl-hintikka-lemma} で $\sigma_{T^{\ast}},0\models A$。$\sigma_{T^{\ast}}$ は前置部の長さ $q$、周期 $\ell$ で最終的に周期的。
+
+**Step 2.** 【主張：そのような $P,L$ が型の列から取り出せる】 $\Sigma$ の部分集合は $2^{m}$ 個なので、無限回現れる集合 $t$ がある。$T_{i_{0}}=t$ となる $i_{0}$ を一つとる。各 $C\,\mathbf{U}\,D\in t$ について、H4 で $D\in T_{k}$ となる $k\ge i_{0}$ を一つとり、その最大値を $K$（$t$ に $\mathbf{U}$ の形の元がなければ $K\defeq i_{0}$）、$K$ より大きく $T_{j}=t$ となる $j$ を一つとる。$P\defeq(T_{0},\dots,T_{i_{0}-1})$、$L\defeq(T_{i_{0}},\dots,T_{j-1})$ とすると、(i) は $T_{j-1}$ の次が $T_{j}=t=L_{0}$ であることからつなぎ目でも成り立ち、(ii)(iii) は作り方から成り立つ。
+
+**Step 3.** 【主張：長さを $q\le2^{m}$、$\ell\le(m+1)2^{m}$ にできる】 有限列 $P\,L_{0}$ の中で、同じ集合が二度現れるかぎり \ref{logic:ltl-cut} で間を取り除く（最後の $L_{0}$ は残す）。取り除いても (i)〜(iii) は保たれ（$L$ は変わらない。先頭が取り除かれた場合も、同じ集合が先頭に来るので (ii) は保たれる）、最後には $P$ の集合はすべて異なるので $q\le2^{m}$。有限列 $L\,L_{0}$ では、(iii) の証人 $L_{r}$（$m$ 個以下）と両端を印とし、隣り合う印の間で同じ集合が二度現れるかぎり取り除く（印のついた集合は、同じ集合で置き換わるだけなので (iii) は保たれる）。区間は $m+1$ 個以下、各区間の集合は互いに異なるので、$\ell\le(m+1)2^{m}$。
+:::
+
+::: corollary LTL は決定可能 {#logic:ltl-decidable keywords="satisfiability and validity of LTL are decidable" index="決定可能性（LTL）|けっていかのうせいえるてぃーえる"}
+LTL の論理式が妥当かどうか（したがって定理かどうか）は決定可能である。
+:::
+
+::: proof
+$A$ が妥当でない $\iff\neg A$ が充足可能 $\iff$ \ref{logic:ltl-periodic-model} の評価以下の長さの $P,L$（$\Sigma\defeq\mathrm{CL}(\neg A)$ の部分集合の列）で、Step 1 の (i)〜(iii) を満たすものがある。⇐ は Step 1、⇒ は Step 2・3 による。候補は有限個で、(i) は $P\,L\,L_{0}$ の隣り合う組と各集合を調べれば決まり（$L$ をくり返しても新しい組は $(L_{\ell-1},L_{0})$ しか現れない）、(ii)(iii) も有限の検査である。定理であることとの同値は \ref{logic:ltl-completeness}。
+:::
+
+::: remark
+この手続きは候補の数が $2^{m}$ の指数乗で、二重指数時間かかる。実際には LTL の充足可能性は **PSPACE 完全**であることが知られている（Sistla–Clarke, *The complexity of propositional linear temporal logics*, J. ACM 32 (1985)）。また、LTL の論理式は同じ列を受理するビュッヒ・オートマトンに変換でき（Vardi–Wolper 1986）、モデル検査や充足可能性判定の実用的な方法はこれによることが多い。このサイトではこれらを証明していない。
+:::
+
+::: intuition
+**ヒンティッカ列は「整合的な予定表」である。** 各時刻の集合 $T_{i}$ は「この時刻に真だと宣言する論理式」で、H1〜H3 は隣り合う二日の予定が矛盾しないという局所的な検査、H4 は「いつかやる」と書いた約束が実際にどこかの日に果たされているという大域的な検査である。完全性の証明は、無矛盾性だけから局所的に正しい予定表を作り（後続の存在）、約束を順番に一つずつ果たしていく（\ref{logic:ltl-fulfil} と Step 1 の巡回）という手順になっている。
+
+**高い視点：最小不動点と最大不動点。** $A\,\mathbf{U}\,B$ は写像 $Y\mapsto B\vee(A\wedge\mathbf{X}Y)$ の**最小**不動点、$\mathbf{G}A$ は $Y\mapsto A\wedge\mathbf{X}Y$ の**最大**不動点である。局所的な条件 H1〜H3 は「不動点である」ことしか見ないので、最小と最大の区別がつかない。その区別を付けるのが H4（意味論）と $\mathbf{U}$ の帰納規則（公理系）である。\ref{logic:ltl-hintikka-lemma} の hypcheck の例は、$p\,\mathbf{U}\,q$ を最大不動点として読んでしまった列にあたる。最終的に周期的なモデルは、無限の列を「有限のグラフの上の無限ループ」として有限に表したもので、オートマトン理論の言葉ではビュッヒ受理条件（無限回訪れる状態）につながる。
+:::
+
+## 問題 {#logic:sec-ltl-problems}
+
+::: problem {#logic:prob-ltl-f-unfold}
+$\vdash\mathbf{F}A\leftrightarrow A\vee\mathbf{X}\mathbf{F}A$ と $\vdash\mathbf{G}A\leftrightarrow A\wedge\mathbf{X}\mathbf{G}A$ を示せ。
+:::
+
+::: solution
+公理 3 で $B$ を $A$、$A$ を $\top$ とすると $\vdash\mathbf{F}A\leftrightarrow A\vee(\top\wedge\mathbf{X}\mathbf{F}A)$、恒真式で前半。後半：前半の $A$ に $\neg A$ を入れて否定をとると $\vdash\neg\mathbf{F}\neg A\leftrightarrow A'\wedge\neg\mathbf{X}\mathbf{F}\neg A$（$A'$ は $\neg\neg A$、恒真式で $A$ に直す）。公理 2 で $\neg\mathbf{X}\mathbf{F}\neg A\leftrightarrow\mathbf{X}\neg\mathbf{F}\neg A=\mathbf{X}\mathbf{G}A$。
+:::
+
+::: problem {#logic:prob-ltl-g-induction}
+$\vdash C\to\mathbf{X}C$ ならば $\vdash C\to\mathbf{G}C$ であることを示せ（**$\mathbf{G}$ の帰納規則**）。
+:::
+
+::: solution
+$\mathbf{U}$ の帰納規則を $\top\,\mathbf{U}\,\neg C$ と論理式 $\neg C$ に使う。前提は $\neg C\vee(\top\wedge\mathbf{X}\neg C)\to\neg C$、恒真式で $\mathbf{X}\neg C\to\neg C$ と同値で、公理 2 で $\neg\mathbf{X}C\to\neg C$、つまり仮定 $C\to\mathbf{X}C$ の対偶。よって $\vdash\mathbf{F}\neg C\to\neg C$、対偶で $\vdash C\to\neg\mathbf{F}\neg C=\mathbf{G}C$。
+:::
+
+::: problem {#logic:prob-ltl-hintikka-needs-h4}
+$\Sigma=\mathrm{CL}(\mathbf{G}\mathbf{F}p)$ を書き出し、H1〜H3 を満たすが H4 を満たさない $\Sigma$ 上の列で、$\mathbf{G}\mathbf{F}p$ をすべての $T_{i}$ が含むものを作れ。
+:::
+
+::: solution
+$\mathbf{F}p=\top\,\mathbf{U}\,p$、$\mathbf{G}\mathbf{F}p=\neg\mathbf{F}\neg\mathbf{F}p=(\top\,\mathbf{U}\,(\mathbf{F}p\to\bot))\to\bot$。部分論理式は $p,\bot,\top=\bot\to\bot,\ \mathbf{F}p,\ \neg\mathbf{F}p,\ \mathbf{F}\neg\mathbf{F}p,\ \mathbf{G}\mathbf{F}p$ で、これに $\mathbf{X}\mathbf{F}p$ と $\mathbf{X}\mathbf{F}\neg\mathbf{F}p$ を加えたものが $\Sigma$。すべての $i$ で $T_{i}\defeq\{\top,\ \mathbf{F}p,\ \mathbf{X}\mathbf{F}p,\ \mathbf{G}\mathbf{F}p\}$ とする（$p$ は含まない）。H1：$\neg\mathbf{F}p\notin T_{i}$（$\mathbf{F}p\in T_{i}$ なので正しい）、$\mathbf{F}\neg\mathbf{F}p\notin T_{i}$ で $\mathbf{G}\mathbf{F}p=\neg\mathbf{F}\neg\mathbf{F}p\in T_{i}$ も正しい。H2：$\mathbf{X}\mathbf{F}p\in T_{i}$ と $\mathbf{F}p\in T_{i+1}$、$\mathbf{X}\mathbf{F}\neg\mathbf{F}p\notin T_{i}$ と $\mathbf{F}\neg\mathbf{F}p\notin T_{i+1}$ が対応する。H3：$\mathbf{F}p\in T_{i}$ は「$\top\in T_{i}$ かつ $\mathbf{F}p\in T_{i+1}$」で成り立ち、$\mathbf{F}\neg\mathbf{F}p\notin T_{i}$ は $\neg\mathbf{F}p\notin T_{i}$ かつ $\mathbf{F}\neg\mathbf{F}p\notin T_{i+1}$ と合う。H4 は $\mathbf{F}p$ の約束が果たされないので成り立たない。実際 $\sigma_{T}$ では $p$ は一度も真でなく、$\mathbf{G}\mathbf{F}p$ は偽である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=35dfde8c"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=23f6e3d6"></script>
+<script src="../../../site.js?v=f7713090"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
