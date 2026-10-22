@@ -988,7 +988,12 @@
     var anchor = S.article.querySelector('.mn-prose .mn-env[data-env="notation"]');
     if (!anchor) return;
     var PF = pageForward(), D = dirIndex(), mySeries = IDX.pages[me].dir;
-    var depsOf = function (i) { return Object.keys(PF[i] || {}).map(Number); };
+    // 同じ系列の中では、前のページ（§ 番号が小さいもの）だけを前提に数える。前のページが「次のページで扱う」と後ろを参照すると
+    // 参照の輪ができ、現在地が最後の段に来なくなる（2026-10-22 ユーザー報告：現在地が 3 段前に出る）
+    var depsOf = function (i) {
+      var Pi = IDX.pages[i];
+      return Object.keys(PF[i] || {}).map(Number).filter(function (j) { var Pj = IDX.pages[j]; return !(Pi && Pj && Pj.dir === Pi.dir && Pj.sec >= Pi.sec); });
+    };
     // 1. 同じ系列の中で、このページがたどる前提のページ（推移的に）
     var inSeries = {}, q = [me]; inSeries[me] = 1;
     while (q.length) {

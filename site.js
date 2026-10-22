@@ -58,6 +58,18 @@
       acceptNode: function (n) { return n.nodeValue.trim() && !(n.parentNode.closest && n.parentNode.closest(SKIP)) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; }
     });
     var nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+    function keyOf(n) {
+      var env = n.closest ? n.closest('.mn-env') : null;
+      if (env) return env;
+      var top = n; while (top && top.parentNode !== prose) top = top.parentNode;
+      return sectionOf.get(top) || prose;
+    }
+    // 原稿で \term[語]{ラベル} と意味を指定した語は、同じ環境・節の中では自動のリンクで別の意味に結ばない（2026-10-22）
+    var explicit = new Map();
+    [].forEach.call(prose.querySelectorAll('a.mn-term'), function (a) {
+      var k = keyOf(a), m = explicit.get(k); if (!m) explicit.set(k, m = {});
+      m[a.textContent] = 1;
+    });
     nodes.forEach(function (tn) {
       var hits = linker.scan(tn.nodeValue); if (!hits.length) return;
       var env = tn.parentNode.closest('.mn-env');
@@ -68,6 +80,7 @@
       hits.forEach(function (h) {
         var l = h.term in pickCache ? pickCache[h.term] : (pickCache[h.term] = linker.pick(h.term, pageIdx, deps));
         if (!l || seen[l]) return;
+        if ((explicit.get(key) || {})[h.term]) return;
         if (env && (env.id === l || env.closest('[id="' + l.replace(/"/g, '') + '"]'))) return;   // 定義している環境の中は結ばない
         var info = resolveRef(l); if (!info || info.planned) return;
         seen[l] = 1;

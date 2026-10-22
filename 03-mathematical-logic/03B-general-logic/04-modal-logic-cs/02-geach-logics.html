@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ギーチ論理とフレームの対応 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=bde0fbb4">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-mathematical-logic/03B-general-logic/04-modal-logic-cs/02-geach-logics.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ギーチ論理とフレームの対応 {#logic:page-geach-logics keywords="Geach axioms, Geach logics, (i,j,m,n)-convergence, frame correspondence, Kripke completeness, seriality, functionality, density, confluence, Church-Rosser property, first-order definability, Lob axiom not first-order definable, McKinsey axiom, Sahlqvist formulas, KD, KD4 decidability"}
+
+遷移系の性質の多くは、関係についての簡単な条件で書ける。「どの状態にも次の状態がある（止まらない）」「次の状態は高々一つ（決定的）」「二通りに進んでも、また合流できる」などである。これらは $(i,j,m,n)$-収束という一つの形にまとまり、対応する様相論理式（**ギーチの公理**）を加えた体系は、その条件を満たすフレームについて健全かつ完全になる（\ref{logic:geach-completeness}）。このページでは、まず逆向き、すなわち「ギーチの公理がフレームで妥当なら、そのフレームは収束的」を示し、ギーチの公理が**フレームの条件をちょうど定める**ことを確かめる。次に計算機科学で意味のある例を並べ、ギーチの形にならない公理（$\mathsf{GL}$ のレーブの公理など）がなぜ別扱いになるかを、\ref{logic:compactness}で説明する。最後に、フィルトレーションで決定可能性が示せる例を扱う。
+
+> 参考：『コンピュータサイエンスにおける様相論理』（ユーザー指定の参考書。本文のテキストは未入手のため、構成は標準的な内容によった）。対応理論とサールクヴィストの定理は Blackburn–de Rijke–Venema『Modal Logic』第 3・4 章を参照した。
+
+## 記法と定義の確認 {#logic:sec-geach-notation}
+
+::: notation
+- 様相論理式・クリプキフレーム $\mathcal{F}=(W,R)$・モデル・真理・妥当性は \ref{logic:page-kripke-semantics} のとおり。$R^{0}$ は恒等関係、$R^{k+1}\defeq R^{k}\circ R$（$wR^{k+1}x\iff wR^{k}y$ かつ $yRx$ となる $y$ がある）。$\Box^{k}$, $\Diamond^{k}$ は $\Box$, $\Diamond$ を $k$ 回並べたもので、$w\models\Box^{k}A\iff wR^{k}x$ となるすべての $x$ で $x\models A$、$w\models\Diamond^{k}A\iff wR^{k}x$ かつ $x\models A$ となる $x$ がある（\ref{logic:kripke-abbreviations}）。
+- **$(i,j,m,n)$-収束**と**ギーチの公理** $\Diamond^{i}\Box^{m}A\to\Box^{j}\Diamond^{n}A$ は \ref{logic:ijmn-convergent} のとおり。四つ組の集合 $\alpha$ について、$\mathsf{K}\alpha$ は $\mathsf{K}$ に $(i,j,m,n)\in\alpha$ のギーチの公理（すべての様相論理式 $A$ についての図式）を加えた体系、**$\alpha$-収束的**とはすべての $(i,j,m,n)\in\alpha$ について収束的であることをいう。このような体系を**ギーチ論理**とよぶ。
+- フレーム $\mathcal{F}$ が体系 $L$ を**妥当にする**（$\mathcal{F}\models L$）とは、$L$ のすべての定理が $\mathcal{F}$ で妥当なことをいう。フレームで妥当な様相論理式全体は一様代入で閉じた正規様相論理である（\ref{logic:kripke-k-sound}）。
+- **一階述語論理**：フレーム $(W,R)$ を、二項関係記号 $R$ だけをもつ言語の構造とみる（$W$ は空でない）。\term[論理式]{logic:formula}と充足は \ref{logic:page-semantics} のとおり。
+- 決定可能性・有限モデル性・フィルトレーションは \ref{logic:page-bisimulation} のとおり。
+- **公理系**：$\ZF$ で行う。\ref{logic:compactness} は可算な言語にだけ使い、その場合は選択公理なしに示せる（\ref{logic:page-completeness-alternative}）。
+:::
+
+## ギーチの公理とフレームの条件の対応 {#logic:sec-geach-correspondence}
+
+::: theorem ギーチの公理の対応 {#logic:geach-correspondence keywords="Geach axiom is valid on a frame iff the frame is (i,j,m,n)-convergent" index="ギーチの公理の対応|ぎーちのこうりのたいおう"}
+フレーム $\mathcal{F}=(W,R)$ と命題変数 $p$ について
+$$
+\mathcal{F}\models\Diamond^{i}\Box^{m}p\to\Box^{j}\Diamond^{n}p\iff R\text{ は }(i,j,m,n)\text{-収束的}.
+$$
+:::
+
+::: proof
+⇐ は \ref{logic:geach-sound}（$A=p$ の場合）。
+
+⇒：$wR^{i}x$, $wR^{j}y$ とする。\term[付値]{logic:kripke-model}を「$p$ は $xR^{m}u$ となる点 $u$ でちょうど真」と定める。すると $x$ から $R^{m}$ で行ける点はすべて $p$ を満たすので $x\models\Box^{m}p$、$wR^{i}x$ なので $w\models\Diamond^{i}\Box^{m}p$。仮定からこの付値でもギーチの公理は $w$ で真なので $w\models\Box^{j}\Diamond^{n}p$、$wR^{j}y$ から $y\models\Diamond^{n}p$。よって $yR^{n}z$ かつ $z\models p$、すなわち $xR^{m}z$ となる $z$ がある。
+
+::: hypcheck
+- **\term[付値]{logic:kripke-model}を自由に選べること**（フレームでの妥当性）：⇒ で、$p$ を「$x$ から $R^{m}$ で行ける点」にちょうど合わせるのに使った。一つのモデルで妥当なだけでは収束性は出ない（付値が $p$ をどこでも真にするモデルでは、どの関係でもギーチの公理が真）。
+- ⇒ の\term[付値]{logic:kripke-model}は $x$ に依存して選ぶ。$x,y$ ごとに別の付値を使ってよいのは、妥当性が「すべての付値で真」だからである。
+:::
+:::
+
+::: corollary ギーチ論理はフレームのクラスについて完全 {#logic:geach-frame-completeness keywords="Geach logics are Kripke complete; the class of frames of K alpha is the class of alpha-convergent frames"}
+$\alpha$ を四つ組の集合とする。
+1. フレーム $\mathcal{F}$ について、$\mathcal{F}\models\mathsf{K}\alpha\iff\mathcal{F}$ は $\alpha$-収束的。
+2. $\mathsf{K}\alpha\vdash A\iff A$ は $\mathsf{K}\alpha$ を妥当にするすべてのフレームで妥当。
+:::
+
+::: proof
+**1.** ⇒：$\mathcal{F}$ は各ギーチの公理の $A=p$ の場合を妥当にするので、\ref{logic:geach-correspondence} から収束的。⇐：収束的なら \ref{logic:geach-sound} から各ギーチの公理（すべての $A$）が妥当で、$\mathcal{F}$ で妥当な様相論理式全体は正規様相論理なので（\ref{logic:kripke-k-sound}）、それを含む最小の正規様相論理 $\mathsf{K}\alpha$（\ref{logic:modal-hilbert-normal}）も妥当。
+
+**2.** 1 と \ref{logic:geach-completeness}（$\alpha$-収束的なフレームの上のすべてのモデルで妥当 $\iff\mathsf{K}\alpha\vdash A$）。
+:::
+
+::: remark
+2 は「$\mathsf{K}\alpha$ はそれ自身を妥当にするフレームのクラスについて完全」と言い換えられる（**クリプキ完全**）。正規様相論理がいつもクリプキ完全とは限らないことは \ref{logic:page-incomplete-modal-logic} で見た。ギーチの公理は、公理を足したときに対応する条件がちょうど「かつ」で増えるので、いくつ組み合わせても完全性が崩れない。
+:::
+
+## 計算機科学での例 {#logic:sec-geach-examples}
+
+::: proposition ギーチの条件の例 {#logic:geach-more-examples keywords="seriality D, partial functionality, density, confluence .2, Church-Rosser"}
+次の左の性質は、右の四つ組の収束性と同値であり、対応するギーチの公理は右端のとおりである。
+1. **継続的**（すべての $w$ に $wRx$ となる $x$ がある）：$(0,0,1,1)$、$\Box A\to\Diamond A$（公理 $\mathrm{D}$）。
+2. **部分関数的**（$wRx$ かつ $wRy$ ならば $x=y$）：$(1,1,0,0)$、$\Diamond A\to\Box A$。
+3. **稠密**（$wRx$ ならば $wRz$ かつ $zRx$ となる $z$ がある）：$(1,0,0,2)$、$\Diamond A\to\Diamond\Diamond A$。
+4. **合流的**（$wRx$ かつ $wRy$ ならば $xRz$ かつ $yRz$ となる $z$ がある）：$(1,1,1,1)$、$\Diamond\Box A\to\Box\Diamond A$（公理 $.2$）。
+:::
+
+::: proof
+\ref{logic:ijmn-convergent} の「$wR^{i}x$ かつ $wR^{j}y$ ならば $xR^{m}z$ かつ $yR^{n}z$ となる $z$ がある」に当てはめ、$R^{0}$ が恒等関係であることを使う。ギーチの公理は $\Diamond^{i}\Box^{m}A\to\Box^{j}\Diamond^{n}A$ に当てはめる（$\Box^{0}A=\Diamond^{0}A=A$）。
+1. $i=j=0$ で $x=y=w$、条件は「$wRz$ となる $z$ がある」。
+2. $m=n=0$ で $z=x$ かつ $z=y$、条件は「$x=y$」。
+3. $j=0$, $m=0$ で $y=w$, $z=x$、条件は「$wRx$ ならば $wR^{2}x$」で、$R^{2}$ の定義から稠密性そのもの。
+4. 当てはめるだけで定義と一致する。
+:::
+
+::: remark
+計算機科学での読み方：$R$ をプログラムや遷移系の一歩とすると、1 は「どの状態でも止まらない（デッドロックがない）」、2 は「次の状態は高々一つ（決定的）」、4 は「二通りに進んでも一歩ずつで合流できる」。4 で $R$ を「0 歩以上何歩か進む」関係にとると、条件はラムダ計算の β 簡約の合流性（\tref{logic:church-rosser} の形）そのものになる。1 と 2 を合わせると「次の状態がちょうど一つ」で、$\mathsf{K}\{(0,0,1,1),(1,1,0,0)\}$ はそのようなフレームについて完全である（\ref{logic:geach-frame-completeness}）。3 は時間を稠密な順序として扱うときに使う。
+:::
+
+## ギーチの形にならない公理 {#logic:sec-geach-non-geach}
+
+ギーチの条件 $(i,j,m,n)$-収束は、$R^{k}$ を存在量化で書けば一階述語論理の文
+$$
+\forall w\,\forall x\,\forall y\,\bigl(wR^{i}x\wedge wR^{j}y\to\exists z\,(xR^{m}z\wedge yR^{n}z)\bigr)
+$$
+である。したがって、一階述語論理の文（の集合）で書けないフレームの条件は、どんなギーチの公理の組でも表せない。
+
+::: theorem 逆整礎性は一階の文の集合でも定義できない {#logic:cwf-not-first-order-set keywords="the class of transitive conversely well-founded frames is not first-order definable; compactness" index="逆整礎性の一階定義不可能性|ぎゃくせいそせいのいっかいていぎふかのうせい"}
+関係記号 $R$ だけの言語の文の集合 $\Gamma$ で、すべてのフレーム $\mathcal{F}=(W,R)$ について「$\mathcal{F}\models\Gamma\iff R$ は推移的かつ逆整礎」となるものはない。
+:::
+
+::: proof
+一つの文の場合は \ref{logic:cwf-not-first-order} で示した。ギーチの公理の組 $\alpha$ は無限でもよいので、ここでは文の**集合**の場合が要る（議論は同じ）。そのような $\Gamma$ があったとして矛盾を導く。定数記号 $c_{0},c_{1},c_{2},\dots$ を加えた言語で
+$$
+\Delta\defeq\Gamma\cup\{R(c_{k},c_{k+1}):k\in\mathbb{N}\}
+$$
+とおく（可算な言語）。
+
+**Step 1.** 【主張：$\Delta$ の有限部分集合はすべて\term[充足可能]{logic:model}】 有限部分集合 $\Delta_{0}$ に現れる添字より大きい $N$ をとり、$W\defeq\{0,1,\dots,N\}$、$R\defeq{<}$、$c_{k}\defeq k$（$k\le N$）、$c_{k}\defeq0$（$k>N$）とする。$\Delta_{0}$ の $R(c_{k},c_{k+1})$ では $k+1\le N$ なので $k<k+1$ で真。$<$ は推移的かつ非反射的で $W$ は有限なので、\ref{logic:finite-transitive-cwf} から逆整礎であり、仮定から $\Gamma$ を満たす。
+
+**Step 2.** 【主張：$\Delta$ のモデルの関係は逆整礎でない】 \ref{logic:compactness} から $\Delta$ はモデル $\mathfrak{A}$ をもつ。$X\defeq\{c_{k}^{\mathfrak{A}}:k\in\mathbb{N}\}$ は空でなく、各元 $c_{k}^{\mathfrak{A}}$ には $X$ の元 $c_{k+1}^{\mathfrak{A}}$ で $c_{k}^{\mathfrak{A}}\,R\,c_{k+1}^{\mathfrak{A}}$ となるものがあるので、$X$ に極大元はない。
+
+$\mathfrak{A}$ から定数記号を忘れたフレームは $\Gamma$ を満たすので、仮定から推移的かつ逆整礎になり、Step 2 に矛盾する。
+
+::: hypcheck
+- \ref{logic:compactness}：Step 2 で、有限の鎖しか作れない有限フレームから「無限に上る鎖」をもつモデルを得るのに使った。言語は可算なので選択公理は要らない。
+- **有限な推移的フレームの逆整礎性**：Step 1 で、作った有限の順序が $\Gamma$ を満たすことの確認に使った。
+- 「逆整礎」は「空でない部分集合に極大元がある」の意味（\ref{logic:frame-correspondence.5} の証明と同じ）。$X$ の元が互いに等しくなっても（$c_{k}^{\mathfrak{A}}=c_{l}^{\mathfrak{A}}$）議論は変わらない。
+:::
+:::
+
+::: corollary GL はギーチ論理でない {#logic:gl-not-geach keywords="GL is not axiomatizable by Geach axioms; Lob axiom is not first-order"}
+どんな四つ組の集合 $\alpha$ についても $\mathsf{GL}\neq\mathsf{K}\alpha$。
+:::
+
+::: proof
+$\mathsf{GL}=\mathsf{K}\alpha$ とする。フレーム $\mathcal{F}$ で妥当な様相論理式全体は一様代入で閉じた正規様相論理なので、$\mathcal{F}\models\mathsf{GL}\iff\mathcal{F}\models\Box(\Box p\to p)\to\Box p$（\ref{logic:modal-hilbert-normal}）$\iff R$ は推移的かつ逆整礎（\ref{logic:frame-correspondence.5}）。一方 \ref{logic:geach-frame-completeness.1} から $\mathcal{F}\models\mathsf{K}\alpha\iff\mathcal{F}$ は $\alpha$-収束的で、これは上の一階の文の集合 $\Gamma_{\alpha}$ で書ける。よって $\Gamma_{\alpha}$ が推移的かつ逆整礎なフレームをちょうど定め、\ref{logic:cwf-not-first-order-set} に矛盾する。
+:::
+
+::: fact マッキンゼーの公理 {#logic:mckinsey-fact keywords="McKinsey axiom is not first-order definable (Goldblatt, van Benthem)" index="マッキンゼーの公理|まっきんぜーのこうり"}
+$\Box\Diamond p\to\Diamond\Box p$（**マッキンゼーの公理**）が妥当になるフレームのクラスは、一階述語論理の文の集合で定義できないことが知られている（Goldblatt と van Benthem が 1975 年ごろに独立に示したとされる。Blackburn–de Rijke–Venema 第 3 章）。したがって $\Box\Diamond p\to\Diamond\Box p$ もギーチの公理の組では表せない。本サイトでは証明を扱わない。
+:::
+
+::: fact 単純なサールクヴィスト式の対応と完全性 {#logic:sahlqvist-fact keywords="Sahlqvist correspondence and canonicity for simple Sahlqvist formulas" index="サールクヴィストの定理|さーるくゔぃすとのていり"}
+命題変数、$\top$, $\bot$ から $\wedge$, $\vee$, $\Box$, $\Diamond$ だけで作った様相論理式を**正**であるという。$\top$, $\bot$ と $\Box^{k}p$（$k\ge0$）から $\wedge$ と $\Diamond$ だけで作った様相論理式 $A$ と、正の論理式 $B$ による $A\to B$ を**単純なサールクヴィスト式**という。次が知られている（サールクヴィストの定理。Blackburn–de Rijke–Venema 第 3・4 章）。
+1. 単純なサールクヴィスト式 $S$ ごとに、一階述語論理の文 $\sigma_{S}$ が機械的に計算でき、すべてのフレームで「$\mathcal{F}\models S\iff\mathcal{F}\models\sigma_{S}$」。
+2. 単純なサールクヴィスト式の集合 $\Sigma$ について、$\mathsf{K}\oplus\Sigma$ は $\{\sigma_{S}:S\in\Sigma\}$ を満たすフレームのクラスについて完全である。
+
+ギーチの公理（$A=p$）は $\Diamond^{i}\Box^{m}p$ が前件の形、$\Box^{j}\Diamond^{n}p$ が正なので単純なサールクヴィスト式であり、\ref{logic:geach-correspondence}, \ref{logic:geach-frame-completeness} はこの事実の特別な場合にあたる。レーブの公理（前件 $\Box(\Box p\to p)$ が $\to$ を含む）とマッキンゼーの公理（前件 $\Box\Diamond p$ が $\Box$ の下に $\Diamond$ をもつ）はこの形でない。
+:::
+
+## フィルトレーションによる決定可能性 {#logic:sec-geach-decidability}
+
+::: proposition KD と KD4 の決定可能性 {#logic:kd-kd4-decidable keywords="KD and KD4 have the finite model property via filtration and are decidable"}
+$\mathsf{KD}\defeq\mathsf{K}\{(0,0,1,1)\}$（継続的なフレーム）、$\mathsf{KD4}\defeq\mathsf{K}\{(0,0,1,1),(0,2,1,0)\}$（継続的かつ推移的なフレーム）とする。$L$ をこのどちらかとすると、様相論理式 $A$ について次は同値である。
+1. $L\vdash A$。
+2. $A$ は、$L$ を妥当にし世界の数が $2^{\lvert\mathrm{Sub}(A)\rvert}$ 以下のすべてのフレームで妥当。
+
+とくに $L$ は決定可能である。
+:::
+
+::: proof
+1 ⇒ 2 は \ref{logic:geach-frame-completeness.2}。
+
+2 ⇒ 1：$L\nvdash A$ とすると、\ref{logic:geach-frame-completeness.2} から $L$ を妥当にするフレームの上のモデル $\mathcal{M}$ と世界 $w$ で $\mathcal{M},w\not\models A$。$\Sigma\defeq\mathrm{Sub}(A)$ でフィルトレーションすると、\ref{logic:filtration-lemma} から $\mathcal{M}^{f},[w]\not\models A$ で、世界は $2^{\lvert\Sigma\rvert}$ 個以下。$\mathsf{KD}$ では $R^{s}$、$\mathsf{KD4}$ では $R^{t}$（\ref{logic:filtration-relations.2} で推移的）を使う。どちらも条件 2（$wRv\Rightarrow[w]R^{f}[v]$）を満たすので、$R$ が継続的なら各 $[w]$ に $wRv$ となる $v$ をとって $[w]R^{f}[v]$、すなわち $R^{f}$ も継続的である。よって $\mathcal{M}^{f}$ のフレームは $L$ を妥当にし（\ref{logic:geach-frame-completeness.1}）、2 が成り立たない。
+
+判定：世界の数が $2^{\lvert\mathrm{Sub}(A)\rvert}$ 以下のフレーム（$\{1,\dots,k\}$ 上の関係）と、$A$ に現れる命題変数への\term[付値]{logic:kripke-model}は有限個で、継続性・推移性の確認と $A$ の真偽の計算はどれも有限の手続きである。
+:::
+
+::: remark
+フィルトレーションの条件 2 は「矢を消さない」ことなので、継続性や反射性のように「矢があること」を要求する条件は、どのフィルトレーションでも保たれる。一方、部分関数性（\ref{logic:geach-more-examples.2}）は崩れうる：同じ同値類の二点 $w,w'$ がそれぞれ別の類に属する後続 $v,v'$ をもつと、$[w]$ は $[v]$ と $[v']$ の二つの後続をもつ。稠密性（\ref{logic:geach-more-examples.3}）のように「途中の点がある」ことを要求する条件も、条件 2 だけからは出ないので、同じ議論はそのままでは使えない。有限個のギーチの公理による $\mathsf{K}\alpha$ がすべて決定可能かどうかについて、本サイトでは確かな文献を確認できていない（分からない）。個々の体系ごとに、保つべき条件に合わせたフィルトレーションや別の方法を探す必要がある。
+:::
+
+## 問題 {#logic:sec-geach-problems}
+
+::: problem {#logic:prob-geach-density-box}
+$\Box\Box p\to\Box p$ が妥当になるフレームは、ちょうど稠密なフレームであることを示せ。
+:::
+
+::: solution
+$\mathsf{K}$ で $\Box\Box p\to\Box p$ と $\Diamond\neg p\to\Diamond\Diamond\neg p$ は同値である（対偶をとり、\ref{logic:normality.10} の $\neg\Box B\leftrightarrow\Diamond\neg B$ を二回使う）。フレームで妥当な様相論理式は一様代入と $\mathsf{K}$ での同値で閉じているので（\ref{logic:kripke-k-sound}）、$\Box\Box p\to\Box p$ が妥当 $\iff$ $\Diamond\neg p\to\Diamond\Diamond\neg p$ が妥当 $\iff$ $\Diamond p\to\Diamond\Diamond p$ が妥当（$p$ と $\neg p$ を一様代入で入れ替える）。\ref{logic:geach-correspondence} と \ref{logic:geach-more-examples.3} から、これは稠密性と同値である。
+:::
+
+::: problem {#logic:prob-geach-exactly-one}
+$\mathsf{K}\oplus\{\Box A\leftrightarrow\Diamond A\}$ は「どの世界にも後続がちょうど一つある」フレームについて完全であることを示せ。
+:::
+
+::: solution
+$\Box A\leftrightarrow\Diamond A$ は $\Box A\to\Diamond A$（$(0,0,1,1)$）と $\Diamond A\to\Box A$（$(1,1,0,0)$）の連言と恒真式で同値なので、この体系は $\mathsf{K}\{(0,0,1,1),(1,1,0,0)\}$ と同じ定理をもつ。\ref{logic:geach-more-examples} の 1, 2 から、$\alpha$-収束的なフレームは「後続があり、かつ高々一つ」、すなわちちょうど一つのフレームである。\ref{logic:geach-frame-completeness} による。
+:::
+
+::: problem {#logic:prob-geach-morphic-image}
+$\mathcal{F}$ が $(i,j,m,n)$-収束的で、$f\colon\mathcal{F}\to\mathcal{G}$ が全射な有界射なら、$\mathcal{G}$ も $(i,j,m,n)$-収束的であることを示せ。これを使って、非反射性はどんな $\alpha$-収束性とも同値でないことを示せ。
+:::
+
+::: solution
+$\mathcal{F}\models\Diamond^{i}\Box^{m}p\to\Box^{j}\Diamond^{n}p$（\ref{logic:geach-correspondence}）なので、\ref{logic:bounded-morphic-image-validity} から $\mathcal{G}$ でも妥当、再び \ref{logic:geach-correspondence} から $\mathcal{G}$ は収束的。後半：$(\mathbb{N},<)$ は非反射的で、定数写像は反射的な一点への全射な有界射である（\ref{logic:irreflexivity-undefinable} の証明）。非反射性が $\alpha$-収束性と同値なら、前半から一点の反射的なフレームも $\alpha$-収束的、したがって非反射的になり矛盾する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=93ff5f97"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=36cb635c"></script>
+<script src="../../../site.js?v=1c9fc028"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=cafe12ae"></script>
+</body>
+</html>

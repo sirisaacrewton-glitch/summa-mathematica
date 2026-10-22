@@ -770,6 +770,8 @@
         // 直前が意味を変える接頭の字（冪零・非可換・半単純・準同型・単連結・余核・双対…）なら、語の一部なので結ばない
         // （例：「冪零イデアル」の中の「零イデアル」、「非可換」の中の「可換」）
         if (m.index > 0 && TERM_PREFIX.indexOf(text.charAt(m.index - 1)) >= 0) { re.lastIndex = m.index + 1; continue; }
+        // 直後が「性定理」なら定理の名前の一部（「コンパクト性定理」の「コンパクト」は位相のコンパクトではない。2026-10-22）
+        if (text.substr(m.index + m[0].length, 3) === '性定理') { re.lastIndex = m.index + 1; continue; }
         out.push({ i: m.index, len: m[0].length, term: m[0] });
       }
       return out;
