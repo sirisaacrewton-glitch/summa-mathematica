@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>複素線積分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=c03e73dc">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="30-complex-variable/30A-general-properties/01-basics/02-line-integrals.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 複素線積分 {#cx:page-line-integrals keywords="complex line integral, contour integral, piecewise C^1 curve, reparametrization, reverse curve, concatenation, ML inequality, estimate by length, uniform convergence and integration, Riemann sums, integral of (z-a)^n over a circle, fundamental theorem for contour integrals, primitive, existence of primitives, path independence, axis-parallel polygonal paths"}
+
+正則関数の理論では、積分は面積を測るためではなく、**原始関数を作る**ため、そして関数の値を積分で表すために使う。このページでは、区分的 $C^{1}$ 級の曲線に沿った複素線積分を定義し、実の線積分（\ref{vec:line-integral}）との関係、長さによる評価、極限との交換を整える。そのうえで、連続関数が原始関数をもつことと、閉曲線に沿った積分がすべて $0$ になることが同値であることを示す。円周に沿った $\frac{1}{z-a}$ の積分が $2\pi i$ になることから、$\frac1z$ は $\C\setminus\{0\}$ で原始関数をもたない。これが、次のページ以降の「領域の形」と積分の関係の出発点になる。
+
+## 記法と定義の確認 {#cx:sec-li-notation}
+
+::: notation
+- 曲線・長さ \ref{vec:curve-length}、長さの基本性質 \ref{vec:length-basic}、$C^{1}$ 級曲線の長さ $L(\gamma)=\int_{a}^{b}|\gamma'|$ \ref{vec:c1-curve-length}、区分的 $C^{1}$ 級曲線と実の線積分・弧長に関する積分 $\int_{\gamma}f\,ds$ \ref{vec:line-integral}、パラメータの取り替え \ref{vec:line-integral-reparametrization}、ベクトル値積分の不等式 \ref{vec:vector-integral-inequality}、連結な開集合は座標軸に平行な折れ線で結べる \ref{vec:polygonal-connected}。
+- 曲線 $\gamma\colon[a,b]\to\C$ の**像**（跡）を $\gamma^{*}\defeq\gamma([a,b])$ と書く。$\gamma^{*}$ はコンパクトである。$\gamma(a)$ を始点、$\gamma(b)$ を終点といい、始点と終点が一致する曲線を**閉曲線**という。以下、曲線はすべて区分的 $C^{1}$ 級とする。
+- 複素数値関数 $g=g_{1}+ig_{2}\colon[a,b]\to\C$ の積分は $\int_{a}^{b}g\defeq\int_{a}^{b}g_{1}+i\int_{a}^{b}g_{2}$。微分積分学の基本定理（\ref{calc:fundamental-theorem}）・積分の線形性は実部と虚部ごとに成り立ち、複素数の定数 $c$ について $\int cg=c\int g$（$c$ と $g$ を実部・虚部に分けて展開する）。
+- 正則関数・コーシー–リーマンの方程式・ヴィルティンガー微分は \ref{cx:holomorphic}, \ref{cx:cauchy-riemann}, \ref{cx:wirtinger}、正則性の判定 \ref{cx:cr-consequences}、指数関数 \ref{cx:exp}、対数の主値 \ref{cx:principal-log}, \ref{cx:log-holomorphic}、連続な対数が存在しないこと \ref{cx:no-continuous-sqrt}。
+- 区間上の連続関数の一様連続性 \ref{calc:interval-theorems} の 3。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 定義と基本性質 {#cx:sec-li-definition}
+
+::: definition 複素線積分 {#cx:contour-integral keywords="complex line integral int_gamma f(z) dz = int_a^b f(gamma(t)) gamma'(t) dt over a piecewise C^1 curve; integral with respect to |dz|; circle C(a,r)" index="複素線積分|ふくそせんせきぶん, 線積分（複素）|せんせきぶんふくそ"}
+$\gamma\colon[a,b]\to\C$ を区分的 $C^{1}$ 級（分割 $a=\tau_{0}<\cdots<\tau_{m}=b$ があって各 $[\tau_{l-1},\tau_{l}]$ 上で $C^{1}$ 級）、$f$ を $\gamma^{*}$ 上の連続関数とする。
+$$
+\int_{\gamma}f(z)\,dz\defeq\sum_{l=1}^{m}\int_{\tau_{l-1}}^{\tau_{l}}f(\gamma(t))\,\gamma'(t)\,dt
+$$
+を $f$ の $\gamma$ に沿った**複素線積分**という（分割の選び方によらないことは、積分の区間に関する加法性から分かる）。また $\int_{\gamma}f\,|dz|\defeq\int_{\gamma}f\,ds=\sum_{l}\int_{\tau_{l-1}}^{\tau_{l}}f(\gamma(t))|\gamma'(t)|\,dt$ と書く。
+中心 $a$、半径 $r>0$ の円周を正の向きに一周する曲線 $t\mapsto a+re^{it}$（$t\in[0,2\pi]$）を $C(a,r)$ と書き、その積分を $\oint_{|z-a|=r}f(z)\,dz$ とも書く。
+:::
+
+::: intuition
+$\gamma$ を細かく区切って $f(\gamma(s_{k}))\,(\gamma(t_{k})-\gamma(t_{k-1}))$ を足し合わせたものの極限である（\ref{cx:riemann-sums}）。実の線積分と違い、「微小な変位 $dz$」との積は複素数の積なので、向きによって回転が入る。
+:::
+
+::: proposition 実の線積分による表示 {#cx:contour-integral-real keywords="int f dz = int (u dx - v dy) + i int (v dx + u dy)" index=""}
+$f=u+iv$ とすると
+$$
+\int_{\gamma}f\,dz=\int_{\gamma}(u\,dx-v\,dy)+i\int_{\gamma}(v\,dx+u\,dy).
+$$
+右辺は \ref{vec:line-integral} の意味の実の線積分（1 形式 $u\,dx-v\,dy$ と $v\,dx+u\,dy$ の積分）である。
+:::
+
+::: proof
+$\gamma=x+iy$ と書くと、各 $C^{1}$ 区間で $f(\gamma)\gamma'=(u+iv)(x'+iy')=(ux'-vy')+i(vx'+uy')$。実部と虚部を積分すると右辺の各線積分の定義になる。
+:::
+
+::: proposition 線積分の基本性質 {#cx:contour-integral-basic keywords="linearity; invariance under orientation preserving reparametrization; reverse curve changes sign; additivity under concatenation" index="逆向きの曲線|ぎゃくむきのきょくせん, 曲線のつなぎ合わせ|きょくせんのつなぎあわせ"}
+$\gamma\colon[a,b]\to\C$、$f,g$ を $\gamma^{*}$ 上の連続関数、$\lambda,\mu\in\C$ とする。
+1. （線形性）$\int_{\gamma}(\lambda f+\mu g)\,dz=\lambda\int_{\gamma}f\,dz+\mu\int_{\gamma}g\,dz$。
+2. （パラメータの取り替え）$h\colon[c,d]\to[a,b]$ が $C^{1}$ 級の全単射で $h'>0$ なら $\int_{\gamma\circ h}f\,dz=\int_{\gamma}f\,dz$。
+3. （逆向き）$\gamma^{-}(t)\defeq\gamma(a+b-t)$ について $\int_{\gamma^{-}}f\,dz=-\int_{\gamma}f\,dz$。
+4. （つなぎ合わせ）$\delta\colon[b,c]\to\C$ が $\delta(b)=\gamma(b)$ を満たすとき、$\gamma$ と $\delta$ をつないだ曲線 $\gamma+\delta\colon[a,c]\to\C$ について $\int_{\gamma+\delta}f\,dz=\int_{\gamma}f\,dz+\int_{\delta}f\,dz$。
+:::
+
+::: proof
+**1.** 被積分関数 $(\lambda f+\mu g)(\gamma)\gamma'$ について積分の線形性。
+
+**2・3.** \ref{cx:contour-integral-real} で実の線積分に直し、\ref{vec:line-integral-reparametrization} を使う（区分的 $C^{1}$ 級の場合は、分割の各区間ごとに適用して足す）。3 は $h(t)=a+b-t$（$h'=-1$）の場合。
+
+**4.** $\gamma+\delta$ の $C^{1}$ 区間の分割として、$\gamma$ と $\delta$ の分割を合わせたものをとれば、定義の和がそのまま分かれる。
+:::
+
+## 積分の評価と極限 {#cx:sec-li-estimates}
+
+::: lemma 複素数値積分の不等式 {#cx:complex-integral-inequality keywords="|int_a^b g| <= int_a^b |g| for complex valued continuous g" index=""}
+$g\colon[a,b]\to\C$ が連続なら $\bigl|\int_{a}^{b}g\bigr|\le\int_{a}^{b}|g|$。区分的に連続でも同じ。
+:::
+
+::: proof
+$\C=\R^{2}$ とみると、複素数の絶対値はユークリッドのノルムで、複素数値の積分は $\R^{2}$ 値の積分と同じものである。\ref{vec:vector-integral-inequality} を使う（区分的に連続なら区間ごとに使い、三角不等式で足す）。
+:::
+
+::: proposition 長さによる評価 {#cx:ml-inequality keywords="ML inequality: |int_gamma f dz| <= int_gamma |f| |dz| <= max |f| times length of gamma" index="長さによる評価|ながさによるひょうか, ML 不等式|えむえるふとうしき"}
+$\gamma$ と $\gamma^{*}$ 上の連続関数 $f$ について
+$$
+\Bigl|\int_{\gamma}f\,dz\Bigr|\le\int_{\gamma}|f|\,|dz|\le\Bigl(\max_{\gamma^{*}}|f|\Bigr)\cdot L(\gamma).
+$$
+:::
+
+::: proof
+\ref{cx:complex-integral-inequality} と $|f(\gamma)\gamma'|=|f(\gamma)||\gamma'|$ から最初の不等式。$|f(\gamma(t))|\le\max_{\gamma^{*}}|f|$（$\gamma^{*}$ はコンパクトで $|f|$ は連続なので最大値がある）と積分の単調性、$\sum_{l}\int|\gamma'|=L(\gamma)$（\ref{vec:c1-curve-length} と \ref{vec:length-basic} の 2）から 2 番目の不等式。
+:::
+
+::: proposition 一様収束と線積分 {#cx:uniform-limit-integral keywords="if f_n -> f uniformly on the trace then the integrals converge; termwise integration of uniformly convergent series" index="項別積分（線積分）|こうべつせきぶんせんせきぶん"}
+$\gamma^{*}$ 上の連続関数の列 $f_{n}$ が $f$ に一様収束するなら $\int_{\gamma}f_{n}\,dz\to\int_{\gamma}f\,dz$。とくに $\sum f_{n}$ が $\gamma^{*}$ 上で一様収束すれば $\int_{\gamma}\sum_{n}f_{n}\,dz=\sum_{n}\int_{\gamma}f_{n}\,dz$。
+:::
+
+::: proof
+$f$ は連続（一様収束極限）で、\ref{cx:ml-inequality} から $\bigl|\int_{\gamma}f_{n}\,dz-\int_{\gamma}f\,dz\bigr|\le\sup_{\gamma^{*}}|f_{n}-f|\cdot L(\gamma)\to0$。級数は部分和に適用する。
+:::
+
+::: proposition リーマン和による表示 {#cx:riemann-sums keywords="the contour integral is the limit of sums f(gamma(s_k)) (gamma(t_k) - gamma(t_{k-1})) as the mesh tends to zero" index="リーマン和（線積分）|りーまんわせんせきぶん"}
+$\gamma\colon[a,b]\to\C$ と $\gamma^{*}$ 上の連続関数 $f$ について、分割 $P\colon a=t_{0}<\cdots<t_{N}=b$ と代表点 $s_{k}\in[t_{k-1},t_{k}]$ をとり
+$$
+S(P)\defeq\sum_{k=1}^{N}f(\gamma(s_{k}))\bigl(\gamma(t_{k})-\gamma(t_{k-1})\bigr)
+$$
+とおく。分割の幅 $\max_{k}(t_{k}-t_{k-1})\to0$ のとき $S(P)\to\int_{\gamma}f\,dz$。
+:::
+
+::: proof
+**Step 1.** $\gamma$ は連続で区分的 $C^{1}$ なので、分点 $\tau_{l}$ で区間を分けて微分積分学の基本定理（\ref{calc:fundamental-theorem} の 2）を使うと、各 $k$ で $\gamma(t_{k})-\gamma(t_{k-1})=\int_{t_{k-1}}^{t_{k}}\gamma'$。よって
+$$
+S(P)-\int_{\gamma}f\,dz=\sum_{k}\int_{t_{k-1}}^{t_{k}}\bigl(f(\gamma(s_{k}))-f(\gamma(t))\bigr)\gamma'(t)\,dt.
+$$
+
+**Step 2.** $f\circ\gamma$ は $[a,b]$ で連続なので一様連続（\ref{calc:interval-theorems} の 3、実部と虚部ごと）。$\varepsilon>0$ に対し $\delta>0$ を、$|t-s|<\delta$ なら $|f(\gamma(t))-f(\gamma(s))|<\varepsilon$ となるようにとる。幅が $\delta$ 未満なら、Step 1 の右辺は \ref{cx:complex-integral-inequality} から絶対値が $\varepsilon\int_{a}^{b}|\gamma'|=\varepsilon L(\gamma)$ 以下。
+:::
+
+## 円周に沿った積分 {#cx:sec-li-circle}
+
+::: lemma 曲線との合成の微分 {#cx:chain-rule-curve keywords="(f o gamma)'(t) = f'(gamma(t)) gamma'(t) for holomorphic f and differentiable curve gamma" index=""}
+$U\subset\C$ を開集合、$F$ を $U$ で正則、$\gamma\colon[a,b]\to U$ が $t$ で微分可能なら、$F\circ\gamma$ は $t$ で微分可能で $(F\circ\gamma)'(t)=F'(\gamma(t))\gamma'(t)$。
+:::
+
+::: proof
+\ref{cx:derivative-rules} の Step 4 と同じく、$b\defeq\gamma(t)$、$\Phi(w)\defeq\frac{F(w)-F(b)}{w-b}$（$w\neq b$）、$\Phi(b)\defeq F'(b)$ とおくと、$\Phi$ は $b$ で連続で $F(w)-F(b)=\Phi(w)(w-b)$。$w=\gamma(t+s)$（$s$ は実数）を代入して $s$ で割ると
+$$
+\frac{F(\gamma(t+s))-F(\gamma(t))}{s}=\Phi(\gamma(t+s))\,\frac{\gamma(t+s)-\gamma(t)}{s}\to F'(b)\gamma'(t).
+$$
+:::
+
+::: proposition 円周に沿った冪の積分 {#cx:circle-integral-powers keywords="integral of (z-a)^n over the circle |z-a| = r is 2 pi i for n = -1 and 0 otherwise" index=""}
+$a\in\C$, $r>0$, $n\in\mathbb{Z}$ について
+$$
+\oint_{|z-a|=r}(z-a)^{n}\,dz=\begin{cases}2\pi i&(n=-1)\\0&(n\neq-1).\end{cases}
+$$
+:::
+
+::: proof
+$\gamma(t)=a+re^{it}$ について、$t\mapsto e^{it}$ に \ref{cx:chain-rule-curve} を使うと $\gamma'(t)=ire^{it}$。よって
+$$
+\oint_{|z-a|=r}(z-a)^{n}\,dz=\int_{0}^{2\pi}r^{n}e^{int}\cdot ire^{it}\,dt=ir^{n+1}\int_{0}^{2\pi}e^{i(n+1)t}\,dt.
+$$
+$m\defeq n+1=0$ なら積分は $2\pi$ で、値は $2\pi i$。$m\neq0$ なら、$G(t)\defeq\frac{e^{imt}}{im}$ は \ref{cx:chain-rule-curve} から $G'(t)=e^{imt}$ で、微分積分学の基本定理（実部・虚部ごと）から $\int_{0}^{2\pi}e^{imt}\,dt=G(2\pi)-G(0)=0$（$e^{2\pi im}=1$、\ref{cx:exp} の 3）。
+:::
+
+::: intuition
+$\frac{1}{z-a}$ の積分だけが生き残るのは、$z-a=re^{it}$ と書いたとき $\frac{dz}{z-a}=i\,dt$ となり、「偏角の増分」を測っているからである。円周を一周すると偏角はちょうど $2\pi$ 増える。他の冪は、円周の上で回転しながら打ち消し合う。
+:::
+
+## 原始関数 {#cx:sec-li-primitives}
+
+::: definition 原始関数 {#cx:primitive keywords="primitive (antiderivative) of a continuous function on an open set: holomorphic F with F' = f" index="原始関数（複素）|げんしかんすうふくそ"}
+開集合 $U\subset\C$ 上の連続関数 $f$ について、$U$ で正則な関数 $F$ で $F'=f$ となるものを、$f$ の $U$ における**原始関数**という。
+:::
+
+::: theorem 線積分の基本定理 {#cx:fundamental-theorem-contour keywords="if F is a primitive of f then int_gamma f dz = F(end) - F(start); integrals over closed curves vanish" index="線積分の基本定理|せんせきぶんのきほんていり"}
+$f$ が開集合 $U$ で原始関数 $F$ をもてば、$U$ 内の任意の曲線 $\gamma\colon[a,b]\to U$ について
+$$
+\int_{\gamma}f\,dz=F(\gamma(b))-F(\gamma(a)).
+$$
+とくに、$U$ 内の閉曲線に沿った $f$ の積分は $0$ である。
+:::
+
+::: proof
+各 $C^{1}$ 区間 $[\tau_{l-1},\tau_{l}]$ で、\ref{cx:chain-rule-curve} から $(F\circ\gamma)'=f(\gamma)\gamma'$ で、右辺は連続。微分積分学の基本定理（\ref{calc:fundamental-theorem} の 2、実部・虚部ごと）から $\int_{\tau_{l-1}}^{\tau_{l}}f(\gamma)\gamma'=F(\gamma(\tau_{l}))-F(\gamma(\tau_{l-1}))$。$l$ について足すと和が畳み込まれる。
+:::
+
+::: corollary $\frac1z$ は原始関数をもたない {#cx:one-over-z-no-primitive keywords="1/z has no primitive on C minus 0; (z-a)^n has a primitive for n != -1" index=""}
+1. $n\neq-1$ なら $(z-a)^{n}$ は $\C\setminus\{a\}$（$n\ge0$ なら $\C$）で原始関数 $\frac{(z-a)^{n+1}}{n+1}$ をもつ。
+2. $\frac{1}{z-a}$ は $\C\setminus\{a\}$ で原始関数をもたない。しかし $a+\C^{-}$（$a$ から左へ延びる半直線を除いた平面）では原始関数 $\operatorname{Log}(z-a)$ をもつ。
+:::
+
+::: proof
+1 は \ref{cx:derivative-rules} の 4 と商の微分。2：原始関数があれば \ref{cx:fundamental-theorem-contour} から円周 $|z-a|=1$ に沿った積分は $0$ だが、\ref{cx:circle-integral-powers} から $2\pi i$。後半は \ref{cx:log-holomorphic} と連鎖律。
+:::
+
+::: theorem 原始関数の存在 {#cx:primitive-existence keywords="for continuous f on a domain: f has a primitive iff integrals along curves depend only on endpoints iff integrals over closed curves vanish iff integrals over closed axis-parallel polygonal curves vanish" index="原始関数の存在|げんしかんすうのそんざい, 経路によらない|けいろによらない"}
+$D\subset\C$ を領域、$f$ を $D$ 上の連続関数とする。次は同値である。
+1. $f$ は $D$ で原始関数をもつ。
+2. （経路によらない）始点と終点が同じ $D$ 内の曲線 $\gamma_{1},\gamma_{2}$ について $\int_{\gamma_{1}}f\,dz=\int_{\gamma_{2}}f\,dz$。
+3. $D$ 内の任意の閉曲線 $\gamma$ について $\int_{\gamma}f\,dz=0$。
+4. 各辺が座標軸に平行な $D$ 内の閉じた折れ線 $\gamma$ について $\int_{\gamma}f\,dz=0$。
+
+このとき原始関数は定数の差を除いて一意である。
+:::
+
+::: intuition
+3 ⇒ 1 は、基準点 $z_{0}$ から $z$ までの積分で $F(z)$ を定めるという、実 1 変数の不定積分と同じ発想である。積分が道によらないので $F$ が well-defined になり、$z$ を横に動かしたときと縦に動かしたときの変化率を比べると、コーシー–リーマンの方程式が出てくる。条件 4 は、確かめるべき閉曲線を「縦横の折れ線」まで減らしてよいという意味で、次のページで長方形・三角形の場合に積分が $0$ になることを示すときに効いてくる。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2 ⇒ 3 ⇒ 4）.** 1 ⇒ 2 は \ref{cx:fundamental-theorem-contour}。2 ⇒ 3：閉曲線 $\gamma$ と、始点に止まっている定値曲線（積分 $0$）を比べる。3 ⇒ 4 は折れ線が閉曲線の特別な場合だから。
+
+**Step 2（4 ⇒ 1：$F$ の定義）.** $z_{0}\in D$ を固定する。各 $z\in D$ について、$z_{0}$ から $z$ への、各辺が座標軸に平行な $D$ 内の折れ線 $\sigma$ が存在する（\ref{vec:polygonal-connected}）。$F(z)\defeq\int_{\sigma}f\,dz$ と定める。別の折れ線 $\sigma'$ をとっても、$\sigma$ のあとに $\sigma'$ を逆向きにたどった曲線は縦横の閉じた折れ線なので、4 と \ref{cx:contour-integral-basic} の 3・4 から $\int_{\sigma}f\,dz-\int_{\sigma'}f\,dz=0$。よって $F$ は折れ線の選び方によらない。
+
+**Step 3（$x$ 方向の偏微分）.** $z\in D$ と、$\overline{D}(z,r)\subset D$ となる $r>0$ をとる。実数 $0<|s|<r$ について、$z$ への折れ線 $\sigma$ に線分 $[z,z+s]$（$t\mapsto z+t$、$t$ は $0$ から $s$ まで）をつなげたものは $z+s$ への縦横の折れ線なので、
+$$
+F(z+s)-F(z)=\int_{[z,z+s]}f\,dz=\int_{0}^{s}f(z+t)\,dt.
+$$
+（$s<0$ のときは向きに注意して \ref{cx:contour-integral-basic} の 3 を使うと同じ式になる。）よって
+$$
+\Bigl|\frac{F(z+s)-F(z)}{s}-f(z)\Bigr|=\Bigl|\frac1s\int_{0}^{s}\bigl(f(z+t)-f(z)\bigr)dt\Bigr|\le\max_{|t|\le|s|}|f(z+t)-f(z)|,
+$$
+右辺は $f$ の連続性から $s\to0$ で $0$。すなわち $\frac{\partial F}{\partial x}(z)=f(z)$。
+
+**Step 4（$y$ 方向の偏微分）.** 同様に線分 $t\mapsto z+it$（$t$ は $0$ から $s$ まで、微分は $i$）をつなげると $F(z+is)-F(z)=\int_{0}^{s}f(z+it)\,i\,dt$ で、Step 3 と同じ評価から $\frac{\partial F}{\partial y}(z)=if(z)$。
+
+**Step 5（正則性）.** $F=P+iQ$ と書くと、Step 3・4 から $P,Q$ の偏導関数はすべて存在して連続（$f$ の実部・虚部とその符号違い）。よって $F$ は全微分可能（\ref{calc:continuous-partials-differentiable}）で、
+$$
+\frac{\partial F}{\partial\bar z}=\frac12\Bigl(\frac{\partial F}{\partial x}+i\frac{\partial F}{\partial y}\Bigr)=\frac12\bigl(f+i\cdot if\bigr)=0.
+$$
+\ref{cx:wirtinger} から $F$ は正則で $F'=\frac{\partial F}{\partial z}=\frac12(f-i\cdot if)=f$。
+
+**Step 6（一意性）.** $F_{1},F_{2}$ が原始関数なら $(F_{1}-F_{2})'=0$ で、$D$ は領域なので \ref{cx:cr-consequences} の 2 から $F_{1}-F_{2}$ は定数。
+
+::: hypcheck
+- **前提「$D$ は連結」**：Step 2 で、すべての点を $z_{0}$ から折れ線で結ぶために使った。連結でなければ連結成分ごとに同じ議論をすればよく、1–4 の同値性自体は開集合で成り立つ（Step 6 の一意性だけが崩れ、「成分ごとに定数」になる）。
+- **前提「$f$ は連続」**：Step 3・4 の評価と、線積分が定義されるために使った。
+- **Step 3 の $\overline{D}(z,r)\subset D$**：つなげた線分が $D$ に入るために使った。
+- 正則性は、偏導関数の連続性とヴィルティンガー微分で確かめた。
+:::
+:::
+
+::: example
+$f(z)=\operatorname{Re}z$ を $0$ から $1+i$ まで、(a) 線分 $t\mapsto t(1+i)$ と (b) $0\to1\to1+i$ の折れ線に沿って積分する。(a) $\int_{0}^{1}t(1+i)\,dt=\frac{1+i}{2}$。(b) $\int_{0}^{1}t\,dt+\int_{0}^{1}1\cdot i\,dt=\frac12+i$。値が違うので、\ref{cx:primitive-existence} から $\operatorname{Re}z$ は $\C$ で原始関数をもたない。
+:::
+
+::: supplement
+**前提を変えると.** 3 ⇒ 1 の証明は、$f$ が正則であることを使っていない。逆に、$f$ が正則でも 3 が成り立つとは限らない（$\C\setminus\{0\}$ 上の $\frac1z$）。成り立つかどうかは領域の形（穴があるかどうか）で決まり、それが次のページ以降の主題である。星形の領域ではつねに成り立ち（\ref[コーシーの積分定理]{cx:page-cauchy-theorem}）、一般には単連結な領域で成り立つ（\ref[回転数と一般のコーシーの定理]{cx:page-winding-number}）。
+
+**類似の定理.** 実の線積分の保存場の特徴づけ（\ref{vec:conservative-field}）と同じ形である。実際、\ref{cx:contour-integral-real} から、$f$ が原始関数をもつことは、二つの実のベクトル場 $(u,-v)$ と $(v,u)$ がともに勾配場であることと同値になる。
+
+**高い視点.** 1 形式 $f\,dz$ が完全形式（ある関数の微分）であることと、閉曲線上の積分が消えることが同値、という形で、ド・ラームのコホモロジーの最初の例になっている。$\C\setminus\{0\}$ 上の $\frac{dz}{z}$ は閉形式だが完全形式でない代表例である。
+:::
+
+## 問題 {#cx:sec-li-problems}
+
+::: problem {#cx:prob-li-conj-circle}
+$\oint_{|z|=r}\bar z\,dz$ と $\oint_{|z|=1}|z-1|\,|dz|$ を計算せよ。前者から、$\bar z$ がどの領域でも原始関数をもたないことを導け（円周を囲む領域を考えよ）。
+:::
+
+::: solution
+$z=re^{it}$ で $\bar z\,dz=re^{-it}\cdot ire^{it}dt=ir^{2}dt$ なので $2\pi ir^{2}$。$|z-1|$：$|e^{it}-1|=2|\sin\frac t2|$ で $|dz|=dt$ なので $\int_{0}^{2\pi}2\sin\frac t2\,dt=8$。前者：ある円板 $D(a,\rho)$ で $\bar z$ が原始関数をもてば、その中の小円周 $|z-a|=r$ に沿った積分は $0$ のはずだが、$z=a+re^{it}$ として計算すると $\int(\bar a+re^{-it})ire^{it}dt=2\pi ir^{2}\neq0$。よってどんな円板でも原始関数をもたない。
+:::
+
+::: problem {#cx:prob-li-ml-estimate}
+$R>1$ について $\Bigl|\oint_{|z|=R}\dfrac{dz}{z^{2}+1}\Bigr|\le\dfrac{2\pi R}{R^{2}-1}$ を示し、$R\to\infty$ で積分が $0$ に収束することを示せ。
+:::
+
+::: solution
+$|z|=R$ なら $|z^{2}+1|\ge|z|^{2}-1=R^{2}-1>0$（三角不等式）。$L=2\pi R$ なので \ref{cx:ml-inequality} から主張の評価。右辺は $R\to\infty$ で $0$。
+:::
+
+::: problem {#cx:prob-li-path-compare}
+$f(z)=z^{2}$ と $g(z)=|z|^{2}$ を、$0$ から $1+i$ まで (a) 線分、(b) $0\to1\to1+i$ の折れ線に沿って積分せよ。結果を \ref{cx:primitive-existence} と比べよ。
+:::
+
+::: solution
+$z^{2}$：原始関数 $z^{3}/3$ があるので両方とも $\frac{(1+i)^{3}}{3}=\frac{-2+2i}{3}$。$|z|^{2}$：(a) $\int_{0}^{1}2t^{2}(1+i)\,dt=\frac{2(1+i)}{3}$。(b) $\int_{0}^{1}t^{2}dt+\int_{0}^{1}(1+t^{2})i\,dt=\frac13+\frac43i$。値が違うので $|z|^{2}$ は $\C$ で原始関数をもたない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=6cc21e5d"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=4d4405c9"></script>
+<script src="../../../site.js?v=adb37c39"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=87606379"></script>
+</body>
+</html>
