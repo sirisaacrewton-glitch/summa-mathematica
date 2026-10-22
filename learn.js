@@ -6,7 +6,8 @@
  *   - learn/manifest.js（window.SM_LEARN_MANIFEST。ページごとの直感テキストと差し込み位置。同期で読むので画面がずれない）
  *   - api/pro-content/<ページのラベル>.json（パズルの手順など。SMAuth.fetchProContent で取得）
  * から読む。ブラウザに保存するもの（localStorage）：
- *   sm_pinned_items（付箋）, sm_pin_sets（付箋のセット。Pro）, sm_understood（理解済み）, sm_goals（目標。Pro）, sm_plan_tier（プラン）
+ *   sm_pinned_items（付箋）, sm_pin_sets（付箋のセット。Pro）, sm_understood（理解済み）, sm_goals（目標。Pro）, sm_plan_tier（プラン）,
+ *   sm_step_progress（証明のステップを自力で確かめたか。形式は下の StepLog）
  * クラス名はサイトの決まりに合わせて mn- 接頭辞を使う。
  */
 (function () {
@@ -21,6 +22,29 @@
   /* ---------- 保存 ---------- */
   function getJSON(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
   function setJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+  /* ---------- 証明のステップの記録（2026-10-22 ユーザー指示。ログインの仕組みが変わっても移しやすいように一か所にまとめる） ----------
+   * 形式（localStorage の sm_step_progress、版 1）：
+   *   { v: 1, items: { "<定理のラベル>#<ステップ番号（1 から）>": { s: "self" | "unsure", t: <記録した時刻（ミリ秒）>, h: "<ステップの見出し>" } } }
+   *   s：self＝自力で確かめた、unsure＝わからなかった（要復習）。h は原稿が書き換わってステップがずれたときに古い記録を無視するため。
+   * 読み書きはすべて StepLog を通す。サーバーに保存するときは load / save の中身だけを差し替えればよい。
+   * 移行用に window.SMLearn.stepLog.export() / import(obj) で丸ごと取り出し・取り込みができる。 */
+  var StepLog = {
+    load: function () { var o = getJSON('sm_step_progress', null); return o && o.v === 1 && o.items ? o : { v: 1, items: {} }; },
+    save: function (o) { setJSON('sm_step_progress', o); },
+    get: function (key, k, h) { var r = this.load().items[key + '#' + (k + 1)]; return r && (!h || r.h === h) ? r : null; },
+    set: function (key, k, h, st) {
+      var o = this.load(), id = key + '#' + (k + 1);
+      if (st) o.items[id] = { s: st, t: Date.now(), h: h }; else delete o.items[id];
+      this.save(o);
+    },
+    unsureByProof: function () {
+      var o = this.load(), out = {};
+      Object.keys(o.items).forEach(function (id) { if (o.items[id].s === 'unsure') { var key = id.replace(/#\d+$/, ''); out[key] = (out[key] || 0) + 1; } });
+      return out;
+    },
+    'export': function () { return this.load(); },
+    'import': function (obj) { if (obj && obj.v === 1 && obj.items) this.save(obj); }
+  };
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function el(html) { var t = document.createElement('div'); t.innerHTML = html.trim(); return t.firstChild; }
   function isPro() { return A.isPro(); }
@@ -219,6 +243,22 @@
     if (d.loading && window.MathEntries) { window.MathEntries.load(function () { pinData(label, cb); }); return; }
     cb(d);
   }
+  /* 「わからなかった」ステップのある定理を、まだ固定していないものだけ付箋に集める（順に読み込んで固定する） */
+  function collectReview() {
+    var keys = Object.keys(StepLog.unsureByProof()).filter(function (k) { return S.index && S.index.labels[k] && !isPinned(k); });
+    if (!keys.length) { toast('📌 集める定理はありません（すべて固定済み）'); return; }
+    var lim = A.limit('pins');
+    if (pins().length + keys.length > lim) { proModal('「わからなかった」ステップのある定理をまとめて付箋に集めるには、付箋の枠が足りません（無料プランは 1 件まで）。'); return; }
+    var added = 0;
+    (function next(i) {
+      if (i >= keys.length) { toast('📌 要復習の定理を ' + added + ' 件集めました'); openDock(true); return; }
+      pinData(keys[i], function (d) {
+        var p = pins();
+        if (!p.some(function (x) { return x.id === d.id; })) { p.push({ id: d.id, kind: d.kind, title: d.title, sectionPath: d.sectionPath, url: d.url, htmlContent: d.htmlContent, t: Date.now() }); savePins(p); added++; }
+        next(i + 1);
+      });
+    })(0);
+  }
   function pinLabel(label) {
     if (isPinned(label)) { openDock(true); highlightCard(label); return; }
     pinData(label, function (d) {
@@ -279,6 +319,7 @@
     return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '">' +
       '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで畳む／広げる・長押しで並べ替え">' +
         '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
+        (StepLog.unsureByProof()[p.id] ? '<span class="mn-pin-review" title="証明に「わからなかった」ステップがある">要復習 ' + StepLog.unsureByProof()[p.id] + '</span>' : '') +
         '<button type="button" class="mn-pin-x" data-unpin aria-label="固定を外す" title="固定を外す"></button></div>' +
       '<div class="mn-pin-body mn-prose">' + p.htmlContent +
         whereHtml(p) + '</div></div>';
@@ -542,6 +583,7 @@
         '<button type="button" class="mn-iconbtn" data-close-dock aria-label="ドックを閉じる">✕</button></span>' +
       '<div class="mn-dock-menu" role="menu" hidden>' +
         '<button type="button" role="menuitem" data-sets>' + (isPro() ? 'セットの保存・呼び出し' : '🔒 セットの保存・呼び出し（Pro）') + '</button>' +
+        (function () { var n = Object.keys(StepLog.unsureByProof()).length; return n ? '<button type="button" role="menuitem" data-collect-review>「わからなかった」ステップのある定理を集める（' + n + ' 件）</button>' : ''; })() +
         (p.length ? '<button type="button" role="menuitem" class="mn-clear-all" data-clear-all>すべて外す</button>' : '') + '</div>';
   }
   /* PC：ドックの左端をドラッグして幅を変える（260px〜画面の 6 割。保存する。ダブルクリックで既定の幅） */
@@ -655,6 +697,7 @@
       toast('📌 ' + n + ' 件の固定を外しました');
       return;
     }
+    if (ev.target.closest('[data-collect-review]')) { collectReview(); return; }
     if (ev.target.closest('[data-sets]')) { if (isPro()) setsModal(); else proModal('付箋のセット（分野ごとの組み合わせ）の保存は Pro プランの機能です。'); return; }
     if (!card) return;
     if (ev.target.closest('[data-unpin]')) { unpin(id); return; }
@@ -1467,7 +1510,16 @@
         var k = 0; while (k + 1 < steps.length && all.indexOf(steps[k + 1]) <= i) k++;
         return k;
       });
-      var on = false, cur = 0, revealed = {}, showHyp = false;
+      var on = false, cur = 0, revealed = {}, showHyp = false, reviewOnly = false;
+      // 記録の鍵：この証明が属する定理のラベル（直前の、ラベルのある環境）
+      var key = (function () {
+        var e = d.previousElementSibling;
+        while (e && !(e.classList.contains('mn-env') && e.id && e.getAttribute('data-env') !== 'proof')) e = e.previousElementSibling;
+        return e ? e.id.replace(/^restate-/, '') : (location.pathname + '#proof' + [].indexOf.call(S.article.querySelectorAll('details.mn-env[data-env="proof"]'), d));
+      })();
+      var heads0 = steps.map(function (st) { var sg = st.querySelector('strong'); if (!sg) return ''; sg = sg.cloneNode(true); sg.querySelectorAll('.katex-mathml').forEach(function (m) { m.remove(); }); return sg.textContent.replace(/\s+/g, ' ').trim(); });
+      function rec(k) { return StepLog.get(key, k, heads0[k]); }
+      function unsureList() { var a = []; steps.forEach(function (_, k) { var r = rec(k); if (r && r.s === 'unsure') a.push(k); }); return a; }
       // 各ステップの見出し（太字の「Step 2（…）.」）と主張（【主張：…】、なければ null）
       var labels = steps.map(function (st) { var b = st.querySelector('strong'); return b ? b.innerHTML : ''; });
       var claims = steps.map(function (st) { return st.querySelector('.mn-step-claim'); });
@@ -1501,14 +1553,17 @@
         all.forEach(function (c, i) { c.classList.toggle('mn-step-hidden', seg[i] >= 0 && (seg[i] !== cur || hideCur)); });
         // 主張のあるステップは、準備と主張だけを見せ、理由は自分で確かめてから開く
         if (hideCur) {
-          quiz.innerHTML = '<p>' + heads[cur] + '</p><p class="mn-step-quiz-hint">自分で確かめてから理由を開いてください。</p>' +
-            '<button type="button" class="mn-textbtn" data-reveal>理由を開く</button>';
+          var r0 = rec(cur);
+          quiz.innerHTML = '<p>' + heads[cur] + '</p><p class="mn-step-quiz-hint">自分で確かめてから理由を開いてください。' +
+            (r0 ? '（前回：' + (r0.s === 'self' ? '自力で確かめた' : 'わからなかった') + '）' : '') + '</p>' +
+            '<button type="button" class="mn-textbtn" data-reveal="self">確かめた・理由を見る</button> ' +
+            '<button type="button" class="mn-textbtn" data-reveal="unsure">わからなかった・理由を見る</button>';
           body.insertBefore(quiz, steps[cur]); quiz.hidden = false;
         } else quiz.hidden = true;
         // このステップで使った前提（理由を見た後に）
         var hs = hideCur ? [] : hypFor(cur);
         if (hs.length) {
-          stepHyp.innerHTML = '<div class="mn-step-hyp-k">このステップで使う前提</div><ul>' + hs.map(function (li) { return '<li>' + li.innerHTML + '</li>'; }).join('') + '</ul>';
+          stepHyp.innerHTML = '<div class="mn-step-hyp-k">このステップで使った前提</div><ul>' + hs.map(function (li) { return '<li>' + li.innerHTML + '</li>'; }).join('') + '</ul>';
           var lb = lastBlock(cur); body.insertBefore(stepHyp, lb ? lb.nextSibling : null); stepHyp.hidden = false;
         } else stepHyp.hidden = true;
         // 前提の使用箇所の全体：最後のステップの理由まで見たとき、またはバーから開いたとき
@@ -1520,12 +1575,18 @@
           body.insertBefore(past, steps[0]); past.hidden = false;
         } else past.hidden = true;
         bar.classList.add('is-on');
-        var dots = steps.map(function (_, k) { return '<button type="button" class="mn-step-dot' + (k === cur ? ' is-cur' : '') + (revealed[k] || !claims[k] ? ' is-done' : '') + '" data-go="' + k + '" aria-label="Step ' + (k + 1) + ' へ"></button>'; }).join('');
+        var dots = steps.map(function (_, k) {
+          var r = rec(k);
+          return '<button type="button" class="mn-step-dot' + (k === cur ? ' is-cur' : '') + (r ? ' is-' + r.s : (revealed[k] || !claims[k] ? ' is-done' : '')) + '" data-go="' + k + '" aria-label="Step ' + (k + 1) + ' へ' + (r ? (r.s === 'self' ? '（自力で確かめた）' : '（わからなかった）') : '') + '"></button>';
+        }).join('');
+        var rc = rec(cur), nUnsure = unsureList().length;
         bar.innerHTML =
           '<button type="button" class="mn-textbtn" data-prev' + (cur === 0 ? ' disabled' : '') + ' aria-label="前のステップ">◀</button>' +
           '<span class="mn-step-pos">' + (cur + 1) + ' / ' + steps.length + '</span>' +
           '<button type="button" class="mn-textbtn" data-next' + (cur === steps.length - 1 ? ' disabled' : '') + ' aria-label="次のステップ">▶</button>' +
           '<span class="mn-step-dots">' + dots + '</span>' +
+          (claims[cur] && revealed[cur] ? '<button type="button" class="mn-textbtn" data-mark title="押すと記録を切り替える">' + (rc ? (rc.s === 'self' ? '✓ 自力' : '？ 要復習') : '記録なし') + '</button>' : '') +
+          (nUnsure ? '<button type="button" class="mn-textbtn' + (reviewOnly ? ' is-on' : '') + '" data-review>要復習 ' + nUnsure + (reviewOnly ? '（だけ表示中）' : '') + '</button>' : '') +
           (claims[cur] && revealed[cur] ? '<button type="button" class="mn-textbtn" data-hide>理由を隠す</button>' : '') +
           (hyp && !atEnd ? '<button type="button" class="mn-textbtn" data-hyp>' + (showHyp ? '前提を閉じる' : '前提') + '</button>' : '') +
           '<button type="button" class="mn-textbtn" data-all>全体表示</button>';
@@ -1533,23 +1594,36 @@
         var r = bar.getBoundingClientRect();
         if (r.top < 0 || r.top > window.innerHeight - 60) bar.scrollIntoView({ block: 'nearest', behavior: REDUCED_L ? 'auto' : 'smooth' });
       }
-      function go(k) { cur = Math.max(0, Math.min(steps.length - 1, k)); activeStepper = api; render(); }
+      function go(k, dir) {
+        if (reviewOnly && dir) {   // 要復習だけをたどる
+          var u = unsureList(), nx = dir > 0 ? u.filter(function (x) { return x > cur; })[0] : u.filter(function (x) { return x < cur; }).pop();
+          if (nx == null) return;
+          k = nx;
+        }
+        cur = Math.max(0, Math.min(steps.length - 1, k)); activeStepper = api; render();
+      }
       function start() {
         if (!isPro()) { proModal('証明を 1 ステップずつ表示する読み方は Pro プランの機能です。'); return; }
         d.open = true; on = true; go(0);
       }
-      var api = { prev: function () { if (on) go(cur - 1); }, next: function () { if (on) go(cur + 1); }, el: d };
+      var api = { prev: function () { if (on) go(cur - 1, -1); }, next: function () { if (on) go(cur + 1, 1); }, el: d };
       bar.addEventListener('click', function (ev) {
         var t = ev.target.closest('button'); if (!t || t.disabled) return;
         if (t.hasAttribute('data-start')) start();
-        else if (t.hasAttribute('data-prev')) go(cur - 1);
-        else if (t.hasAttribute('data-next')) go(cur + 1);
+        else if (t.hasAttribute('data-prev')) go(cur - 1, -1);
+        else if (t.hasAttribute('data-next')) go(cur + 1, 1);
+        else if (t.hasAttribute('data-mark')) { var r1 = rec(cur); StepLog.set(key, cur, heads0[cur], !r1 ? 'self' : r1.s === 'self' ? 'unsure' : null); render(); }
+        else if (t.hasAttribute('data-review')) { reviewOnly = !reviewOnly; if (reviewOnly) { var u0 = unsureList(); if (u0.length && u0.indexOf(cur) < 0) cur = u0[0]; revealed = {}; } render(); }
         else if (t.hasAttribute('data-go')) go(+t.getAttribute('data-go'));
         else if (t.hasAttribute('data-hide')) { revealed[cur] = false; render(); }
         else if (t.hasAttribute('data-hyp')) { showHyp = !showHyp; render(); }
         else if (t.hasAttribute('data-all')) { on = false; activeStepper = null; render(); }
       });
-      quiz.addEventListener('click', function (ev) { if (ev.target.closest('[data-reveal]')) { revealed[cur] = true; activeStepper = api; render(); } });
+      quiz.addEventListener('click', function (ev) {
+        var b = ev.target.closest('[data-reveal]'); if (!b) return;
+        StepLog.set(key, cur, heads0[cur], b.getAttribute('data-reveal'));
+        revealed[cur] = true; activeStepper = api; render();
+      });
       // 証明の見出しの横に「1 ステップずつ」：閉じた証明から直接段階表示で開く
       var sum = d.querySelector(':scope > summary');
       if (sum) {
@@ -1564,7 +1638,7 @@
       body.addEventListener('touchend', function (ev) {
         if (!on || sx === null) return;
         var t = ev.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; sx = null;
-        if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+        if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
       });
       render();
     });
@@ -1715,6 +1789,6 @@
     });
     A.onChange(function () { if (setPanel) setPanel.innerHTML = settingsHtml(); closeModal(); mountAll(); restoreFloats(); toast('表示を ' + (isPro() ? 'Pro' : 'Free') + ' に切り替えました（開発用）'); });
   }
-  window.SMLearn = { pin: pinLabel, openDock: openDock, openRoadmap: openRoadmap, proModal: proModal };
+  window.SMLearn = { pin: pinLabel, openDock: openDock, openRoadmap: openRoadmap, proModal: proModal, stepLog: StepLog };
   if (window.MathSite) onReady({ detail: window.MathSite }); else document.addEventListener('mn:ready', onReady);
 })();
