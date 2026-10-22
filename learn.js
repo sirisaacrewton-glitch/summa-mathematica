@@ -54,8 +54,9 @@
   }
   /* ---------- 表示の設定（学習向けの補助を最初から開くか、たたんでおくか） ----------
    * intro：ページ冒頭の直感イメージ（と動画）、roadmap：ここまでのロードマップ、intuition：定理ごとの「意図・直感」。
-   * たたんでも見出しの 1 行は残るので、研究者が新しい分野を学ぶときなどはその場で開ける。 */
-  var PREF_DEFAULT = { intro: 'open', roadmap: 'open', intuition: 'closed' };
+   * たたんでも見出しの 1 行は残るので、研究者が新しい分野を学ぶときなどはその場で開ける。
+   * prereq：定理の上の「この定理が使う未チェックの項目」（'open' 表示／'closed' 非表示。2026-10-22 ユーザー指示で追加）。 */
+  var PREF_DEFAULT = { intro: 'open', roadmap: 'open', intuition: 'closed', prereq: 'open' };
   function prefs() { var p = getJSON('sm_prefs', {}); var o = {}; Object.keys(PREF_DEFAULT).forEach(function (k) { o[k] = p[k] === 'open' || p[k] === 'closed' ? p[k] : PREF_DEFAULT[k]; }); return o; }
   function setPref(k, v) { var p = prefs(); p[k] = v; setJSON('sm_prefs', p); applyPrefs(); }
   function applyPrefs() {
@@ -65,6 +66,7 @@
     var pm = S.article.querySelector('details.mn-pagemap'); if (pm && pm.open !== (P.roadmap === 'open')) pm.open = P.roadmap === 'open';
     var all = S.store && S.store('mn-open-folds') === '1';
     S.article.querySelectorAll('.mn-prose details.mn-env[data-env="intuition"]').forEach(function (d) { d.open = all || P.intuition === 'open'; });
+    renderPrereqAlerts();
   }
   function typing(t) { return t && (/INPUT|TEXTAREA|SELECT/.test(t.tagName) || t.isContentEditable); }
 
@@ -745,7 +747,7 @@
     if (!S || !S.article) return;
     S.article.querySelectorAll('.mn-prereq-alert').forEach(function (x) { x.remove(); });
     var u = understood();
-    if (!Object.keys(u).length) return;
+    if (!Object.keys(u).length || prefs().prereq === 'closed') return;
     S.article.querySelectorAll('.mn-prose .mn-env[data-kind="thm"][id]').forEach(function (env) {
       var label = envLabel(env); if (!label || u[label]) return;
       var miss = prereqs(label).filter(function (l) { return !u[l]; });
@@ -1483,6 +1485,11 @@
       row('intuition', '意図・直感', '定義・定理ごとの直感の説明と図') +
       '<div class="mn-set-presets"><button type="button" class="mn-textbtn" data-preset="learn">学習向け：すべて開く</button><button type="button" class="mn-textbtn" data-preset="research">研究向け：すべてたたむ</button></div>' +
       '<p class="mn-set-note">たたんでも見出しの 1 行は残るので、必要なときはその場で開けます。設定はこのブラウザに保存されます。</p>' +
+      '<div class="mn-set-sec">前提の確認</div>' +
+      '<div class="mn-set-row"><div><div class="mn-set-label">未チェックの項目</div><div class="mn-set-sub">定理の上の「この定理が使う未チェックの項目」</div></div>' +
+        '<div class="mn-seg" role="radiogroup" aria-label="未チェックの項目">' +
+        '<button type="button" role="radio" aria-checked="' + (P.prereq === 'open') + '" data-pref="prereq" data-v="open">表示</button>' +
+        '<button type="button" role="radio" aria-checked="' + (P.prereq === 'closed') + '" data-pref="prereq" data-v="closed">非表示</button></div></div>' +
       '<div class="mn-set-row mn-set-dev"><div><div class="mn-set-label">プラン（開発用）</div><div class="mn-set-sub">試作の表示確認用</div></div>' +
         seg('data-plan-set', A.getPlan(), [['free', 'Free'], ['pro', 'Pro']]) + '</div>';
   }
@@ -1503,7 +1510,7 @@
       }
       else if (pl) { A.setPlan(pl.getAttribute('data-plan-set')); }
       else if (t) setPref(t.getAttribute('data-pref'), t.getAttribute('data-v'));
-      else if (pr) { var v = pr.getAttribute('data-preset') === 'learn' ? 'open' : 'closed'; setJSON('sm_prefs', { intro: v, roadmap: v, intuition: v }); applyPrefs(); }
+      else if (pr) { var v = pr.getAttribute('data-preset') === 'learn' ? 'open' : 'closed'; var q = prefs(); q.intro = q.roadmap = q.intuition = v; setJSON('sm_prefs', q); applyPrefs(); }
       else return;
       setPanel.innerHTML = settingsHtml();
     });

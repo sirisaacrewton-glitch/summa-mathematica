@@ -313,8 +313,8 @@ var backrefs = {};   // label -> [[pageIdx, fromLabel, fromType, fromNum, role]]
 // 学習ルートでは、項目どうしは 's' と 'p'、ページどうしは 's'・'p'・'n' を前提として扱う。
 var ROLE_RANK = { s: 4, p: 3, n: 2, m: 1, '': 0 };
 var mathErrors = 0, unresolved = 0;
-// 項目参照（\ref{ラベル.N}）の検査用：環境ごとの番号つき項目の最大番号と、参照された項目
-var itemMax = {}, itemRefs = [];
+// 項目参照（\ref{ラベル.キー}）の検査用：環境ごとの項目のキーの集合と、参照された項目
+var itemKeys = {}, itemRefs = [];
 
 function typeName(t) {
   if (t === 'equation') return '式';
@@ -356,8 +356,15 @@ pages.forEach(function (pg) {
     nodes.forEach(function (node) {
       if (node.kind === 'md') {
         if (parentEnv && parentEnv.label) {
-          // 環境の直下の番号つき箇条書き（行頭の「N. 」）の最大番号
-          node.text.replace(/^(\d+)\. /gm, function (_, d) { itemMax[parentEnv.label] = Math.max(itemMax[parentEnv.label] || 0, +d); return _; });
+          // 環境の直下の項目：番号つき箇条書き（行頭の「N. 」。番号は start から数え直す）、箇条書き「- (a) 」、段落の頭の「(1) 」「**(a) 」
+          var K = itemKeys[parentEnv.label] = itemKeys[parentEnv.label] || {}, cnt = null;
+          node.text.split('\n').forEach(function (ln, i, all) {
+            var om = /^(\d+)\. /.exec(ln);
+            if (om) { cnt = cnt === null ? +om[1] : cnt + 1; K[cnt] = 1; return; }
+            if (/^\S/.test(ln) && !/^[-*] /.test(ln) && (i === 0 || !all[i - 1].trim())) cnt = null;   // 箇条書きの外の段落で番号が切れる
+            var pm = /^(?:[-*] |\*\*)?\s*[(（](\d+|[a-z]|[ivx]+)[)）]/.exec(ln);
+            if (pm && (/^[-*] /.test(ln) || i === 0 || !all[i - 1].trim())) K[pm[1]] = 1;
+          });
         }
         currentFrom = fromEnv; currentRole = role; renderer.renderMarkdown(node.text);
         if (role === 's' && fromEnv && fromEnv.label) stmtTexts.push({ label: fromEnv.label, p: pg.idx, text: node.text });
@@ -378,8 +385,8 @@ pages.forEach(function (pg) {
 
 itemRefs.forEach(function (x) {
   if (!labels[x.label]) return;   // ラベル自体の未定義は別に報告される
-  if (!itemMax[x.label] || x.n > itemMax[x.label]) {
-    warn(x.path, '項目参照 \\ref{' + x.label + '.' + x.n + '}：' + x.label + ' の直下に ' + x.n + ' 番目の番号つき項目がありません（最大 ' + (itemMax[x.label] || 0) + '）');
+  if (!(itemKeys[x.label] || {})[x.n]) {
+    warn(x.path, '項目参照 \\ref{' + x.label + '.' + x.n + '}：' + x.label + ' の直下に項目 ' + x.n + ' がありません（ある項目：' + (Object.keys(itemKeys[x.label] || {}).join(', ') || 'なし') + '）');
   }
 });
 

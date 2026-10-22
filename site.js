@@ -454,37 +454,71 @@
   /* 項目参照のプレビュー：本文のうち、最初の番号つき箇条書きより前（共通の前提）と、指定した項目だけを残す。
    * it = { list: [項目番号…], focus: 指している項目 }。指定した項目が見つからなければ null（全文を出す）。 */
   function itemsOnly(html, it) {
+    // 項目の書き方は 3 通り（site-core.js の addItemIds と同じ）：番号つき箇条書き、箇条書き「- (a) …」、段落の頭の「(1) …」。
+    // 段落型の項目では、次の項目の段落までの数式・段落もその項目に含める。
+    var KEY = /^\s*[(（](\d+|[a-z]|[ivx]+)[)）]/;
     var box = document.createElement('div'); box.innerHTML = html;
-    var nodes = [].slice.call(box.childNodes), want = {}, lastSel = -1, hidden = 0;
+    var nodes = [].slice.call(box.childNodes), want = {}, lastSel = -1, hidden = 0, owner = null, drop = [];
     it.list.forEach(function (n) { want[n] = 1; });
+    function mark(el, key) { if (String(it.focus) === key && it.list.length > 1) el.classList.add('mn-item-focus'); }
     nodes.forEach(function (n, i) {
-      if (n.nodeName !== 'OL') return;
-      var k = parseInt(n.getAttribute('start'), 10) || 1, any = false;
-      [].slice.call(n.children).forEach(function (li) {
-        if (li.tagName !== 'LI') return;
-        var num = k++;
-        if (want[num]) { any = true; li.value = num; if (num === it.focus && it.list.length > 1) li.classList.add('mn-item-focus'); }
-        else { li.remove(); hidden++; }
-      });
-      n._sel = any;
-      if (any) lastSel = i;
+      if (n.nodeType !== 1) { if (owner && !owner.sel) drop.push(n); return; }
+      if (n.tagName === 'OL' || n.tagName === 'UL') {
+        var k = parseInt(n.getAttribute('start'), 10) || 1, any = false, has = false;
+        [].slice.call(n.children).forEach(function (li) {
+          if (li.tagName !== 'LI') return;
+          var km = n.tagName === 'OL' ? null : KEY.exec(li.textContent);
+          var key = n.tagName === 'OL' ? String(k++) : km && km[1];
+          if (!key) return;
+          has = true;
+          if (want[key]) { any = true; if (n.tagName === 'OL') li.value = +key; mark(li, key); }
+          else { li.remove(); hidden++; }
+        });
+        if (has) { owner = null; if (any) lastSel = i; else drop.push(n); return; }
+      } else if (n.tagName === 'P' && KEY.test(n.textContent)) {
+        var key2 = KEY.exec(n.textContent)[1];
+        owner = { sel: !!want[key2] };
+        if (owner.sel) { lastSel = i; mark(n, key2); } else { drop.push(n); hidden++; }
+        return;
+      }
+      if (owner) { if (owner.sel) lastSel = i; else drop.push(n); }
     });
     if (lastSel < 0) return null;
-    nodes.forEach(function (n, i) {
-      if (i > lastSel) { if (n.nodeType === 1) hidden++; n.remove(); }
-      else if (n.nodeName === 'OL' && !n._sel) n.remove();
-    });
+    nodes.forEach(function (n, i) { if (i > lastSel) { if (n.nodeType === 1 && drop.indexOf(n) < 0) hidden++; n.remove(); } });
+    drop.forEach(function (n) { if (n.parentNode) n.remove(); });
     return { html: box.innerHTML, hidden: hidden };
   }
-  /* 参照 a が項目参照なら、同じカード（環境、なければ段落）の中にある同じラベルの項目参照をまとめる */
+  /* 参照 a が項目参照なら、同じカード（環境、なければ段落）の中にある同じラベルの項目参照をまとめる。
+   * 証明のように本文が「**Step 1.** …」「**(2)** …」などの太字で始まる段落で区切られているときは、その区切り（ステップ）の中だけでまとめる
+   * （別のステップで参照するときは、プレビューを一度閉じて開き直すので、まとめても画面を占めるだけ）。 */
+  function isStepStart(el) {
+    if (el.tagName !== 'P') return false;
+    var f = el.firstChild;
+    while (f && f.nodeType === 3 && !f.nodeValue.trim()) f = f.nextSibling;
+    return !!f && f.nodeName === 'STRONG';
+  }
+  function itemScope(a) {
+    var card = a.closest('.mn-env, .mn-pv-body');
+    if (!card) return [a.closest('p, li, td') || a.parentNode];
+    var body = card.classList.contains('mn-env') ? card.querySelector(':scope > .mn-env-body') : card;
+    if (!body || !body.contains(a)) return [card];
+    var top = a; while (top.parentNode !== body) top = top.parentNode;
+    var blocks = [].slice.call(body.children);
+    if (!blocks.some(isStepStart)) return [card];
+    var i = blocks.indexOf(top), s = i, e = i + 1;
+    while (s > 0 && !isStepStart(blocks[s])) s--;
+    while (e < blocks.length && !isStepStart(blocks[e])) e++;
+    return blocks.slice(s, e);
+  }
   function itemsFor(a) {
     var n = a && a.getAttribute && a.getAttribute('data-item');
     if (!n) return null;
     var label = a.getAttribute('data-label'), set = {};
     set[n] = 1;
-    var scope = a.closest('.mn-env, .mn-pv-body') || a.closest('p, li, td') || a.parentNode;
-    scope.querySelectorAll('a.mn-xref[data-item]').forEach(function (b) { if (b.getAttribute('data-label') === label) set[b.getAttribute('data-item')] = 1; });
-    return { focus: +n, list: Object.keys(set).map(Number).sort(function (x, y) { return x - y; }) };
+    itemScope(a).forEach(function (sc) {
+      sc.querySelectorAll('a.mn-xref[data-item]').forEach(function (b) { if (b.getAttribute('data-label') === label) set[b.getAttribute('data-item')] = 1; });
+    });
+    return { focus: n, list: Object.keys(set).sort(function (x, y) { return /^\d+$/.test(x) && /^\d+$/.test(y) ? x - y : x < y ? -1 : x > y ? 1 : 0; }) };
   }
   function previewHtml(label, it) {
     var L = localLabels[label], G = IDX.labels[label];
@@ -534,7 +568,7 @@
     }
     var part = it && bodyHtml && !/mn-pv-loading/.test(bodyHtml) ? itemsOnly(bodyHtml, it) : null;
     if (part) {
-      head = head.replace('</span>', ' の ' + it.list.join(', ') + '</span>');
+      head = head.replace('</span>', ' の ' + it.list.map(function (k) { return /^\d+$/.test(k) ? k : '(' + k + ')'; }).join(', ') + '</span>');
       if (it.list.length === 1) head = head.replace('href="' + esc(info.href) + '"', 'href="' + esc(itemHref(info.href, label, it.list[0])) + '"');
       return head + '<div class="mn-pv-body mn-prose mn-pv-part">' + part.html +
         (part.hidden ? '<button type="button" class="mn-pv-all">全体を表示（ほかに ' + part.hidden + ' 項目・段落）</button>' : '') + '</div>' +
@@ -575,12 +609,12 @@
     pop.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
     pop.removeAttribute('hidden');
     if (PHONE.matches) {
-      pop.classList.add('is-sheet'); pop.style.cssText = '';
+      pop.classList.add('is-sheet'); pop.style.cssText = ''; applySheetHeight();
       if (wasHidden) popAnim([{ transform: 'translateY(100%)' }, { transform: 'translateY(0)' }], 340);
       else popAnim([{ opacity: .4 }, { opacity: 1 }], 160);
       return;
     }
-    pop.classList.remove('is-sheet');
+    pop.classList.remove('is-sheet'); pop.style.height = ''; pop.style.maxHeight = '';
     if (wasHidden) popAnim([{ opacity: 0, transform: 'translateY(6px) scale(.985)' }, { opacity: 1, transform: 'none' }], 200);
     else popAnim([{ opacity: .5 }, { opacity: 1 }], 140);
     var r = a.getBoundingClientRect();
@@ -607,20 +641,40 @@
     pop._out = a;
     a.onfinish = function () { if (pop._out === a) { pop._out = null; pop.setAttribute('hidden', ''); } };
   }
-  /* スマホのシートは下へスワイプして閉じられる（中身が一番上までスクロールされているときだけ） */
+  /* スマホのシートは下へスワイプして閉じられる（中身が一番上までスクロールされているときだけ）。
+   * 上端のつまみ（上 28px）をドラッグすると高さを連続に変えられ、変えた高さは次のプレビューにも引き継ぐ。小さくしすぎると閉じる。 */
+  var sheetH = null, SHEET_MIN = 140;
+  function applySheetHeight() { if (sheetH) { pop.style.maxHeight = 'none'; pop.style.height = sheetH + 'px'; } }
   function initSheetSwipe() {
-    var y0 = null, dy = 0;
+    var y0 = null, dy = 0, rs = null;
     pop.addEventListener('touchstart', function (ev) {
-      if (!pop.classList.contains('is-sheet') || pop.scrollTop > 0) { y0 = null; return; }
-      y0 = ev.touches[0].clientY; dy = 0;
+      if (!pop.classList.contains('is-sheet')) { y0 = null; rs = null; return; }
+      var t = ev.touches[0];
+      if (t.clientY - pop.getBoundingClientRect().top < 28) { rs = { y: t.clientY, h: pop.offsetHeight }; y0 = null; return; }
+      rs = null;
+      if (pop.scrollTop > 0) { y0 = null; return; }
+      y0 = t.clientY; dy = 0;
     }, { passive: true });
     pop.addEventListener('touchmove', function (ev) {
+      if (rs) {
+        var h = Math.min(window.innerHeight * 0.92, rs.h - (ev.touches[0].clientY - rs.y));
+        pop.style.maxHeight = 'none'; pop.style.height = Math.max(60, h) + 'px';
+        if (ev.cancelable) ev.preventDefault();
+        return;
+      }
       if (y0 === null) return;
       dy = ev.touches[0].clientY - y0;
       if (dy > 0) { pop.style.transform = 'translateY(' + dy + 'px)'; if (ev.cancelable) ev.preventDefault(); }
       else { pop.style.transform = ''; y0 = null; }
     }, { passive: false });
     pop.addEventListener('touchend', function () {
+      if (rs) {
+        rs = null;
+        var h = pop.offsetHeight;
+        if (h < SHEET_MIN) { hidePop(); return; }
+        sheetH = h;
+        return;
+      }
       if (y0 === null) return;
       y0 = null;
       if (dy > 80) hidePop();

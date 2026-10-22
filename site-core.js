@@ -441,8 +441,8 @@
     // 項目参照：\ref{ラベル.N} は、ラベルの環境の中の番号つき箇条書きの N 番目（アンカー ラベル.N）を指す
     var onItemRef = opts.onItemRef || function () {};
     function renderRef(r) {
-      var im = /^(.+)\.(\d+)$/.exec(r.label), item = null;
-      if (im) { item = im[2]; r = { cmd: r.cmd, label: im[1], text: r.text, item: item }; onItemRef(im[1], +item); }
+      var im = ITEM_REF.exec(r.label), item = null;
+      if (im) { item = im[2]; r = { cmd: r.cmd, label: im[1], text: r.text, item: item }; onItemRef(im[1], item); }
       var info = resolve(r.label, r);
       if (!info) {
         if (r.text) return '<span class="mn-xref-planned" data-label="' + escapeHtml(r.label) + '" title="未執筆（ラベル ' + escapeHtml(r.label) + '）">' + renderInline(r.text) + '</span>';
@@ -467,7 +467,7 @@
       }
       var href = info.href;
       if (item) {
-        if (!r.text) text += r.cmd === 'eqref' ? '' : ' の ' + item;
+        if (!r.text) text += r.cmd === 'eqref' ? '' : ' の ' + (/^\d+$/.test(item) ? item : '(' + item + ')');
         var hash = '#' + r.label;
         if (href.slice(-hash.length) === hash) href = href + '.' + item;
       }
@@ -515,8 +515,17 @@
     }
 
     // 環境の直下の番号つき箇条書き（入れ子でないもの）の各項目に id「ラベル.N」を付ける（N は表示される番号）
+    // 項目は 3 つの書き方を認める：番号つき箇条書き「1. …」（キーは番号）、箇条書き「- (a) …」、段落の頭の「(1) …」「**(a) …**」
+    // （キーは括弧の中：数字・英小文字 1 字・ローマ数字）。
     function addItemIds(html, label, seen) {
-      var depth = 0, stack = [], out = '', last = 0, re = /<(\/?)(ol|ul|li)\b([^>]*)>/g, m;
+      var depth = 0, stack = [], out = '', last = 0, re = /<(\/?)(ol|ul|li|p)\b([^>]*)>/g, m;
+      function put(tag, key, attrs) {
+        var id = label + '.' + key;
+        if (seen[id] || /\bid=/.test(attrs)) return;
+        seen[id] = 1;
+        out += html.slice(last, m.index) + '<' + tag + ' id="' + escapeHtml(id) + '" class="mn-item"' + attrs + '>';
+        last = re.lastIndex;
+      }
       while ((m = re.exec(html))) {
         var close = m[1] === '/', tag = m[2];
         if (tag === 'ol' || tag === 'ul') {
@@ -524,13 +533,11 @@
           else { depth--; stack.pop(); }
           continue;
         }
-        if (tag === 'li' && !close && depth === 1 && stack[0] && stack[0].tag === 'ol') {
-          var n = ++stack[0].n, id = label + '.' + n;
-          if (seen[id] || /\bid=/.test(m[3])) continue;
-          seen[id] = 1;
-          out += html.slice(last, m.index) + '<li id="' + escapeHtml(id) + '" class="mn-item"' + m[3] + '>';
-          last = re.lastIndex;
-        }
+        if (close) continue;
+        var km = ITEM_HEAD.exec(html.slice(re.lastIndex, re.lastIndex + 40));
+        if (tag === 'li' && depth === 1 && stack[0] && stack[0].tag === 'ol') put('li', ++stack[0].n, m[3]);
+        else if (tag === 'li' && depth === 1 && stack[0] && km) put('li', km[1], m[3]);
+        else if (tag === 'p' && depth === 0 && km) put('p', km[1], m[3]);
       }
       return last ? out + html.slice(last) : html;
     }
@@ -617,13 +624,32 @@
    *   → このページが（2 段以内で）前提にしているページ。
    *   どれにも当たらなければ結ばない（別分野の同名の語、例えば準同型の「グラフ」を圏論の「グラフ」に結ばないため）。
    * 「定理」「仮定」のような一般的すぎる語は除く。 */
+  // 項目参照 \ref{ラベル.キー}（キーは番号・英小文字 1 字・ローマ数字）と、HTML の段落・項目の頭の「(キー)」
+  var ITEM_REF = /^(.+)\.(\d+|[a-z]|[ivx]+)$/;
+  var ITEM_HEAD = /^\s*(?:<strong>)?\s*[(（](\d+|[a-z]|[ivx]+)[)）]/;
   var TERM_STOP = {};
   ('定理 公理 仮定 変数 言語 構造 解釈 同値 高さ 領域 否定 略記 項数 証拠 解消 矛盾 様相 定義 記号 演算 関係 写像 関数 集合 性質 条件 命題 補題 ' +
    '自然 標準 自明 有限 無限 完全 分離 導出 妥当 充足 モデル 極大 極小 部分 全体 成分 次数 長さ 大きさ 個数 作用 生成 拡大 分解 表現 同型 順序 ' +
-   '証明 推論 計算 定数 関数記号 述語 理論 体系 対象 射 構成 拡張 制限 埋め込み 同一視 対応 等しい 一致 存在 一意 因子 分割 小さい 大きい 境界 閉じている 閉じた 規則').split(' ').forEach(function (w) { TERM_STOP[w] = 1; });
+   '証明 推論 計算 定数 関数記号 述語 理論 体系 対象 射 構成 拡張 制限 埋め込み 同一視 対応 等しい 一致 存在 一意 因子 分割 小さい 大きい 境界 閉じている 閉じた 規則 ' +
+   // 日常語として地の文に頻出し、リンクにすると邪魔な語（2026-10-22 ユーザー指摘）
+   'すべての 満たす 存在する 交わる 交わらない 内容 符号 記述 適用 表示 内部 外部 強い 弱い 粗い 名前 計算する 定義する 最小 最小の 最大 最大の ' +
+   'ちょうど一つ 一対一 等式 単位 近似 独立 状態 覆う 張る 勝つ 死ぬ 移動 並び 適切 有効 深さ 判断 形成 候補 翻訳 実現 文脈 サイト 包含 世界 真理 ' +
+   '実数 素数 剰余 後者 前者 指数 中心 代数 置換 向き 双対 図式 一様 単純 特性 年齢 宇宙 燃料 命令 走行 受理 拒否 停止 収穫 整除 正しい 導ける ただ一通りに パラメータ 代数的 持ち上げ').split(' ').forEach(function (w) { TERM_STOP[w] = 1; });
   var TERM_PREFIX = '冪非半準反余双逆単不無超亜擬';
+  // 基礎の系列：ここで定義された語（単射・部分集合・選択公理・コンパクト・関手など）は、どの分野のページからでも結ぶ。
+  // 2 文字の語は語の一部に当たりやすいので、TERM_BASE_SHORT にあるものだけ。候補が複数あれば分類番号の近い分野を選ぶ。
+  var TERM_BASE = ['03-mathematical-logic/03E-set-theory/01-basics/', '54-general-topology/54A-generalities/',
+    '54-general-topology/54D-general-properties/01-separation-compactness/', '26-real-functions/26A-functions-of-one-variable/',
+    '15-linear-algebra/15A-basic-linear-algebra/', '26-real-functions/26B-functions-of-several-variables/01-multivariable-calculus/',
+    '55-algebraic-topology/55P-homotopy-theory/01-fundamental-group/', '18-category-theory/18G-homological-algebra/01-abelian-categories/', '20-group-theory/20K-abelian-groups/', '20-group-theory/20A-foundations/01-groups/',
+    '13-commutative-algebra/13A-general-commutative-ring-theory/01-basics/', '16-associative-rings/16D-modules/01-module-theory/',
+    '18-category-theory/18A-general-theory/01-basics/', '12-field-theory/12F-field-extensions/01-extensions/'];
+  var TERM_BASE_SHORT = {};
+  '単射 全射 関手 基底 次元 加群 連続 直積 直和 逆像 閉包 近傍 有界 上限 下限 上界 下界 可算 同相 距離 位数 整域 標数'.split(' ').forEach(function (w) { TERM_BASE_SHORT[w] = 1; });
+  function isBase(dir) { return TERM_BASE.some(function (b) { return String(dir || '').indexOf(b) === 0; }); }
   function createTermLinker(termDefs, labels, pages) {
-    var keys = Object.keys(termDefs || {}).filter(function (t) { return !TERM_STOP[t] && !/^[(（]/.test(t); })
+    // 動詞・形容詞の形の語（「矛盾する」「自由である」「すべての」など）も地の文に紛れるので結ばない
+    var keys = Object.keys(termDefs || {}).filter(function (t) { return !TERM_STOP[t] && !/^[(（]/.test(t) && !/(する|である|ない|の|な)$/.test(t); })
       .sort(function (a, b) { return b.length - a.length; });
     var re = keys.length ? new RegExp(keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'g') : null;
     function second(dir) { return String(dir || '').split('/').slice(0, 2).join('/'); }
@@ -644,6 +670,14 @@
         for (var i = 0; i < tiers.length; i++) {
           var hit = info.filter(tiers[i]);
           if (hit.length) return hit.sort(function (a, b) { return a.p - b.p; })[0].l;
+        }
+        // 基礎の系列の定義（分類番号の近い分野を優先）
+        if (!short || TERM_BASE_SHORT[term]) {
+          var fn = parseInt(field(P.dir), 10) || 0;
+          var base = info.filter(function (x) { return isBase(pages[x.p].dir); });
+          if (base.length) return base.sort(function (a, b) {
+            return Math.abs((parseInt(field(pages[a.p].dir), 10) || 0) - fn) - Math.abs((parseInt(field(pages[b.p].dir), 10) || 0) - fn) || a.p - b.p;
+          })[0].l;
         }
       }
       return null;
@@ -692,7 +726,7 @@
     parseBlocks: parseBlocks, extractMath: extractMath, numberTree: numberTree,
     createRenderer: createRenderer, splitForSearch: splitForSearch,
     normalizeText: normalizeText, normalizeTex: normalizeTex, stripMarkdown: stripMarkdown,
-    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS, createTermLinker: createTermLinker,
+    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS, createTermLinker: createTermLinker, ITEM_REF: ITEM_REF,
     MATH_OPEN: MATH_OPEN, MATH_CLOSE: MATH_CLOSE
   };
 });
