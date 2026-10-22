@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：計算機科学の様相論理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-mathematical-logic/03B-general-logic/04-modal-logic-cs/16-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：計算機科学の様相論理 {#logic:page-exercises-modal-cs keywords="exercises, modal logic in computer science, bisimulation, PDL, LTL, CTL, mu-calculus, parity games, Hoare logic"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習と、いくつかのページの結果を組み合わせる問題である。各節の中は、★（基本）・★★（標準）・★★★（発展）の順に並べた。
+
+## 記法と定義の確認 {#logic:sec-exmcs-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。
+:::
+
+## 双模倣とギーチ論理 {#logic:sec-exmcs-bisim}
+
+対応するページ：\ref{logic:page-bisimulation}, \ref{logic:page-geach-logics}
+
+::: problem ★ 基本：双模倣を見つける {#logic:ex-mcs-bisim-1}
+$\mathcal{M}$：世界 $a,b,c$、$R=\{(a,b),(a,c)\}$、$p$ は $b,c$ で真。$\mathcal{M}'$：世界 $a',b'$、$R'=\{(a',b')\}$、$p$ は $b'$ で真。$(\mathcal{M},a)$ と $(\mathcal{M}',a')$ は双模倣的であることを示せ。
+:::
+
+::: solution
+$Z\defeq\{(a,a'),(b,b'),(c,b')\}$。命題変数：$a,a'$ で偽、$b,c,b'$ で真。行き：$aRb$ に $a'R'b'$（$bZb'$）、$aRc$ にも $a'R'b'$（$cZb'$）。$b,c$ には後続がない。戻り：$a'R'b'$ に $aRb$。$b'$ には後続がない。よって $Z$ は双模倣（\ref{logic:bisimulation}）。
+:::
+
+::: problem ★★ 標準：後続の個数は書けない {#logic:ex-mcs-bisim-2}
+「後続が 2 つ以上ある」という世界の性質を表す様相論理式はないことを示せ。
+:::
+
+::: solution
+前問の $a$ は後続を 2 つもち、$a'$ は 1 つしかもたない。そのような論理式 $A$ があれば $a\models A$, $a'\not\models A$ だが、双模倣不変性（\ref{logic:bisimulation-invariance}）から $a\models A\iff a'\models A$ で矛盾。
+:::
+
+::: problem ★★ 標準：ギーチの公理の読み方 {#logic:ex-mcs-geach}
+\ref{logic:ijmn-convergent} の記法で、公理 $\mathrm{4}$：$\Box p\to\Box\Box p$ と公理 $\mathrm{B}$：$p\to\Box\Diamond p$ がそれぞれ $(i,j,m,n)$ のギーチの公理であるような $(i,j,m,n)$ を求め、収束条件がそれぞれ推移性・対称性になることを確かめよ。
+:::
+
+::: solution
+$\Diamond^{i}\Box^{m}A\to\Box^{j}\Diamond^{n}A$ の形に合わせる。4：$i=0$, $m=1$, $j=2$, $n=0$。条件は「$wR^{0}x$（$x=w$）かつ $wR^{2}y$ なら、$wRz$ かつ $y=z$ となる $z$」すなわち $wR^{2}y\Rightarrow wRy$（推移性）。B：$i=0$, $m=0$, $j=1$, $n=1$。条件は「$x=w$、$wRy$ なら、$w=z$ かつ $yRz$」すなわち $wRy\Rightarrow yRw$（対称性）。
+:::
+
+## PDL {#logic:sec-exmcs-pdl}
+
+対応するページ：\ref{logic:page-pdl}, \ref{logic:page-pdl-completeness}
+
+::: problem ★ 基本：反復の反復 {#logic:ex-mcs-pdl-1}
+$[\alpha^{\ast}]A\leftrightarrow[\alpha^{\ast};\alpha^{\ast}]A$ と $[\alpha^{\ast}]A\leftrightarrow[(\alpha^{\ast})^{\ast}]A$ が妥当であることを、関係の計算で示せ。
+:::
+
+::: solution
+$R\defeq R_{\alpha}$。$R^{\ast}\circ R^{\ast}=R^{\ast}$：$\supset$ は恒等関係を後ろに合成して、$\subset$ は $R^{m}\circ R^{n}=R^{m+n}$ から。$(R^{\ast})^{\ast}=R^{\ast}$：$\supset$ は $1$ 回の反復、$\subset$ は $(R^{\ast})^{k}=R^{\ast}$（前半を $k$ 回）から。関係が等しいので $[\cdot]A$ の意味も等しい。
+:::
+
+::: problem ★★ 標準：フィッシャー–ラドナー閉包の計算 {#logic:ex-mcs-pdl-2}
+$A\defeq[(a\cup b)^{\ast}]p$ の $\mathrm{FL}(A)$ を書き出し、$\lvert\mathrm{FL}(A)\rvert\le\lvert A\rvert$ を確かめよ。
+:::
+
+::: solution
+$\gamma\defeq a\cup b$。$[\gamma^{\ast}]p\Rightarrow[\gamma][\gamma^{\ast}]p,\ p$。$[\gamma][\gamma^{\ast}]p\Rightarrow[a][\gamma^{\ast}]p,\ [b][\gamma^{\ast}]p,\ [\gamma^{\ast}]p$。$[a][\gamma^{\ast}]p,[b][\gamma^{\ast}]p\Rightarrow[\gamma^{\ast}]p$。よって $\mathrm{FL}(A)=\{[\gamma^{\ast}]p,\ [\gamma][\gamma^{\ast}]p,\ [a][\gamma^{\ast}]p,\ [b][\gamma^{\ast}]p,\ p\}$ で 5 個。$\lvert A\rvert=\lvert\gamma^{\ast}\rvert+1=(1+(1+1+1))+1=5$（\ref{logic:pdl-size}）。
+:::
+
+::: problem ★★★ 発展：公理系での導出 {#logic:ex-mcs-pdl-3}
+セガーバーグの公理系（\ref{logic:pdl-axioms}）で $\vdash[\alpha^{\ast}]A\to[\alpha]A$ と $\vdash[\alpha^{\ast}]A\to[\alpha^{\ast}][\alpha]A$ を導け。
+:::
+
+::: solution
+前半：公理 6 で $\vdash[\alpha^{\ast}]A\to A\wedge[\alpha][\alpha^{\ast}]A$。とくに $\vdash[\alpha^{\ast}]A\to A$ なので、\ref{logic:pdl-normality.2} で $\vdash[\alpha][\alpha^{\ast}]A\to[\alpha]A$。合わせて $\vdash[\alpha^{\ast}]A\to[\alpha]A$。後半：\ref{logic:prob-pdl-star-star} で $\vdash[\alpha^{\ast}]A\to[\alpha^{\ast}][\alpha^{\ast}]A$、前半に \ref{logic:pdl-normality.2}（$[\alpha^{\ast}]$ について）を使って $\vdash[\alpha^{\ast}][\alpha^{\ast}]A\to[\alpha^{\ast}][\alpha]A$。
+:::
+
+## LTL と CTL {#logic:sec-exmcs-temporal}
+
+対応するページ：\ref{logic:page-ltl}, \ref{logic:page-ctl}, \ref{logic:page-ctl-model-checking}
+
+::: problem ★ 基本：応答性の帰結 {#logic:ex-mcs-ltl-1}
+LTL の論理式 $\mathbf{G}\mathbf{F}p\wedge\mathbf{G}(p\to\mathbf{X}q)\to\mathbf{G}\mathbf{F}q$ が妥当であることを示せ。
+:::
+
+::: solution
+$\sigma,i$ で前提が真とし、$k\ge i$ をとる。$\mathbf{G}\mathbf{F}p$ から $j\ge k$ で $\sigma,j\models p$ となる $j$ があり、$\mathbf{G}(p\to\mathbf{X}q)$ から $\sigma,j+1\models q$。よってすべての $k\ge i$ に $q$ が真な $j+1\ge k$ があり、$\sigma,i\models\mathbf{G}\mathbf{F}q$（\ref{logic:ltl-valid.1}）。
+:::
+
+::: problem ★★★ 発展：G の帰納の公理 {#logic:ex-mcs-ltl-2}
+LTL の公理系（\ref{logic:ltl-axioms}）で $\vdash\mathbf{G}(A\to\mathbf{X}A)\to(A\to\mathbf{G}A)$ を導け。$\mathbf{G}$ の帰納規則（\ref{logic:prob-ltl-g-induction}）と、$\mathbf{G}$ の展開（\ref{logic:prob-ltl-f-unfold}）を使ってよい。
+:::
+
+::: solution
+**Step 1.** $\mathbf{X}$ は連言と可換：$\vdash\mathbf{X}C\wedge\mathbf{X}D\to\mathbf{X}(C\wedge D)$。恒真式 $C\to(D\to C\wedge D)$ に $\mathbf{X}$ の必然化と公理 1 を 2 回。
+
+**Step 2.** $\mathbf{F}$, $\mathbf{G}$ は単調：$\vdash C\to D$ なら $\vdash\mathbf{F}C\to\mathbf{F}D$。$\mathbf{U}$ の\term[帰納規則]{logic:ltl-axioms}を $\top\,\mathbf{U}\,C$ と論理式 $\mathbf{F}D$ に使う。前提 $C\vee(\top\wedge\mathbf{X}\mathbf{F}D)\to\mathbf{F}D$ は、$C\to D\to\mathbf{F}D$（公理 3）と $\mathbf{X}\mathbf{F}D\to\mathbf{F}D$（公理 3）から。$\mathbf{G}$ は対偶で。
+
+**Step 3.** $J\defeq\mathbf{G}(A\to\mathbf{X}A)$、$C\defeq A\wedge J$ とおく。展開で $\vdash J\to(A\to\mathbf{X}A)\wedge\mathbf{X}J$。よって $\vdash C\to\mathbf{X}A\wedge\mathbf{X}J$、Step 1 で $\vdash C\to\mathbf{X}C$。$\mathbf{G}$ の\term[帰納規則]{logic:prob-ltl-g-induction}で $\vdash C\to\mathbf{G}C$、Step 2 で $\vdash\mathbf{G}C\to\mathbf{G}A$。まとめて $\vdash J\wedge A\to\mathbf{G}A$。
+:::
+
+::: problem ★ 基本：CTL のモデル検査の計算 {#logic:ex-mcs-ctl-1}
+状態 $0,1,2,3$、$R=\{(0,1),(0,2),(1,1),(1,3),(2,2),(3,3)\}$、$p$ は $0,1,2$ で真、$q$ は $3$ で真とする。$\llbracket\mathbf{EG}p\rrbracket$, $\llbracket\mathbf{E}(p\,\mathbf{U}\,q)\rrbracket$, $\llbracket\mathbf{A}(p\,\mathbf{U}\,q)\rrbracket$ を求めよ。
+:::
+
+::: solution
+$\mathbf{EG}p$：CheckEG で $Z=\{0,1,2\}$、$c(0)=2$, $c(1)=1$（後続 $1$）, $c(2)=1$。$0$ になるものはなく $\{0,1,2\}$。$\mathbf{E}(p\,\mathbf{U}\,q)$：CheckEU で $Z=\{3\}$ から前者 $1$（$p$ が真）、$3$ 自身、$1$ の前者 $0$（$p$）と $1$。結果 $\{0,1,3\}$。$\mathbf{A}(p\,\mathbf{U}\,q)$：\ref{logic:ctl-adequate} で $\neg\mathbf{E}(\neg q\,\mathbf{U}\,(\neg p\wedge\neg q))\wedge\neg\mathbf{EG}\neg q$。$\neg p\wedge\neg q$ はどこでも偽なので前者は空。$\mathbf{EG}\neg q$ は $\{0,1,2\}$（$0\to2\to2\to\cdots$, $1\to1\to\cdots$）。よって $\{3\}$。実際 $1$ からは $1$ にとどまり続ける経路があり $q$ に着かない。
+:::
+
+::: problem ★★ 標準：EF の冪等性 {#logic:ex-mcs-ctl-2}
+CTL の $\mathbf{EF}\,\mathbf{EF}\,p\leftrightarrow\mathbf{EF}p$ と $\mathbf{AG}\,\mathbf{AG}\,p\leftrightarrow\mathbf{AG}p$ が妥当であることを示せ。
+:::
+
+::: solution
+$s\models\mathbf{EF}C\iff s$ から有限回の遷移で $C$ が真な状態に着ける（\ref{logic:ctl-semantics} の後の注意）。$\mathbf{EF}\,\mathbf{EF}\,p$ は「着いた先からさらに着ける」で、有限の列をつなげば有限の列なので $\mathbf{EF}p$ と同値（逆は 0 歩をつける）。後半は否定をとって前半と同じ（$\mathbf{AG}=\neg\mathbf{EF}\neg$）。
+:::
+
+## μ 計算とパリティゲーム {#logic:sec-exmcs-mu}
+
+対応するページ：\ref{logic:page-mu-calculus}, \ref{logic:page-mu-approximants}, \ref{logic:page-mu-calculus-logic}, \ref{logic:page-parity-games}, \ref{logic:page-mu-model-checking}
+
+::: problem ★ 基本：捕獲を避ける代入の計算 {#logic:ex-mcs-mu-1}
+$(\mu Y.(X\wedge[a]Y))[\langle a\rangle Y/X]$ を定義（\ref{logic:mu-substitution}）に従って求めよ。
+:::
+
+::: solution
+$X\in\mathrm{FV}(\mu Y.(X\wedge[a]Y))$、$Y\in\mathrm{FV}(\langle a\rangle Y)$ なので (iii)。$\{Y,X\}$ に対する新しい変数 $Z$ をとり、$(X\wedge[a]Y)[Z/Y]=X\wedge[a]Z$、さらに $[\langle a\rangle Y/X]$ で $\langle a\rangle Y\wedge[a]Z$。答は $\mu Z.(\langle a\rangle Y\wedge[a]Z)$。
+:::
+
+::: problem ★★ 標準：論理式かどうかと意味 {#logic:ex-mcs-mu-2}
+前論理式 $\mu X.\neg(\neg X\wedge p)$ は論理式か。論理式なら、その真理集合を求めよ。
+:::
+
+::: solution
+$\mathrm{pos}(X,\neg(\neg X\wedge p))=\mathrm{neg}(X,\neg X\wedge p)=\mathrm{neg}(X,\neg X)\wedge\mathrm{neg}(X,p)=\mathrm{pos}(X,X)\wedge(X\ne p)$ で真（$X\ne p$ とする）。よって論理式。写像は $f(T)=S\setminus((S\setminus T)\cap V(p))=T\cup(S\setminus V(p))$。$S\setminus V(p)$ は前不動点で、どの前不動点も $S\setminus V(p)$ を含むので、最小不動点は $S\setminus V(p)$、すなわち $\neg p$ と同じ意味。
+:::
+
+::: problem ★★ 標準：ν の計算 {#logic:ex-mcs-mu-3}
+状態 $0,1,2$、$R_{a}=\{(0,1),(1,0),(1,2)\}$、$V(p)=\{0,1\}$ について、$\lVert\nu X.(p\wedge\langle a\rangle X)\rVert$ を近似列で求めよ。
+:::
+
+::: solution
+$f(T)=V(p)\cap\langle R_{a}\rangle T$。$\nu^{0}=\{0,1,2\}$、$\nu^{1}=\{0,1\}\cap\{0,1\}=\{0,1\}$（$0,1$ は後続をもつ、$2$ はもたない）、$\nu^{2}=\{0,1\}\cap\langle R_{a}\rangle\{0,1\}=\{0,1\}$（$0\to1$, $1\to0$）。止まったので $\{0,1\}$。「$p$ がずっと真な無限の $a$ の道が出る」状態で、$0\to1\to0\to\cdots$ と合う。
+:::
+
+::: problem ★★ 標準：パリティゲームを解く {#logic:ex-mcs-parity}
+頂点 $1,2,3$、$V_{0}=\{1\}$, $V_{1}=\{2,3\}$、$E=\{(1,2),(1,3),(2,1),(3,3)\}$、$\Omega(1)=2$, $\Omega(2)=1$, $\Omega(3)=3$ のパリティゲームを解け。
+:::
+
+::: solution
+$d=3$, $j=1$, $U=\{3\}$, $A=\mathrm{Attr}_{1}(\{3\})$：$1\in V_{0}$ は後続 $2$ もあるので入らない、$2\in V_{1}$ は後続 $1$ だけで入らない。$A=\{3\}$。部分ゲーム $\{1,2\}$：$1\to2\to1\to\cdots$ だけで、無限回現れる優先度の最大は $2$（偶数）、プレイヤー $0$ の勝ち。したがって $W'_{0}=\{1,2\}$, $W'_{1}=\varnothing$ で、$\bar{j}=0$ について $W'_{\bar{j}}\ne\varnothing$ なので、\ref{logic:parity-positional-determinacy} の証明の Step 2・3 の場合になる。$B=\mathrm{Attr}_{0}(\{1,2\})=\{1,2\}$（$3$ は自分にしか行けない）。$\mathcal{G}\restr{\{3\}}$ は $3$ のループで優先度 $3$、プレイヤー $1$ の勝ち。答：$W_{0}=\{1,2\}$（$\sigma_{0}(1)=2$）、$W_{1}=\{3\}$。
+:::
+
+## ホーア論理と動的論理 {#logic:sec-exmcs-hoare}
+
+対応するページ：\ref{logic:page-hoare-logic}, \ref{logic:page-hoare-arithmetic}, \ref{logic:page-hoare-dynamic}
+
+::: problem ★ 基本：入れ替え {#logic:ex-mcs-hoare-1}
+$\mathcal{N}$ で $\{x=a\wedge y=b\}\ t:=x;\ x:=y;\ y:=t\ \{x=b\wedge y=a\}$ が妥当であることを、最弱事前条件を後ろから計算して確かめよ（$a,b,t,x,y$ は相異なる変数）。
+:::
+
+::: solution
+\ref{logic:hoare-assignment-pre} から、代入 $z:=s$ の最弱事前条件は「$z$ を $s$ の値にしてから事後条件」。$y:=t$ の前：$x=b\wedge t=a$。$x:=y$ の前：$y=b\wedge t=a$。$t:=x$ の前：$y=b\wedge x=a$。これは事前条件と同値なので妥当（\ref{logic:wlp-props.1}）。相対完全性（\ref{logic:cook-completeness}）から導くこともできる。
+:::
+
+::: problem ★★ 標準：全正当性の分解 {#logic:ex-mcs-hoare-2}
+$\mathfrak{A}\models\{\varphi\}P\{\psi\}$ かつ $\mathfrak{A}\models[\varphi]P[\top]$ $\iff$ $\mathfrak{A}\models[\varphi]P[\psi]$ を示せ。
+:::
+
+::: solution
+⇒：$v\models\varphi$ なら、後者から $\langle P,v\rangle\Downarrow w$ となる $w$ があり、前者から $w\models\psi$。⇐：$[\varphi]P[\psi]$ から止まることと、止まった状態（決定性でただ一つ）で $\psi$ が従う。
+:::
+
+::: problem ★★ 標準：while の展開 {#logic:ex-mcs-hoare-3}
+動的論理で $[W]\psi\leftrightarrow(\neg B\to\psi)\wedge(B\to[P][W]\psi)$ が妥当であることを示せ（$W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$）。PDL の何に対応するか。
+:::
+
+::: solution
+$\langle W,v\rangle\Downarrow w$ の導出の最後の規則で場合分け：$v\models\neg B$ なら $w=v$、$v\models B$ なら $\langle P,v\rangle\Downarrow u$, $\langle W,u\rangle\Downarrow w$。よって $v\models[W]\psi\iff$（$v\models\neg B$ なら $v\models\psi$）かつ（$v\models B$ なら、$P$ の後のすべての $u$ で $u\models[W]\psi$）。PDL では \ref{logic:while-as-pdl} の $W^{\dagger}=(B?;P^{\dagger})^{\ast};\neg B?$ について、\ref{logic:prob-pdl-while-fixpoint} の等式にあたる。
+:::
+
+::: problem ★★★ 発展：部分正当性の不変条件は最弱事前条件で尽きる {#logic:ex-mcs-hoare-4}
+$W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$ と $\psi$ について、$\mathfrak{A}\models\{I\wedge B\}P\{I\}$ かつ $\mathfrak{A}\models I\wedge\neg B\to\psi$ となる論理式 $I$ はどれも $\llbracket I\rrbracket\subset\mathrm{wlp}(W,\psi)$ を満たし、$\mathrm{wlp}(W,\psi)$ を表す論理式があればそれもこの条件を満たすことを示せ（最弱事前条件は「最大の」ループ不変条件）。
+:::
+
+::: solution
+前半：while 規則と帰結規則の健全性から $\mathfrak{A}\models\{I\}W\{\psi\}$、\ref{logic:wlp-props.1} で $\llbracket I\rrbracket\subset\mathrm{wlp}(W,\psi)$。後半：\ref{logic:wlp-props.3}。最大不動点の言葉では、$\mathrm{wlp}(W,\psi)$ は写像 $T\mapsto(\llbracket\neg B\rrbracket\Rightarrow\llbracket\psi\rrbracket)\cap(\llbracket B\rrbracket\Rightarrow\mathrm{wlp}(P,T))$ の最大不動点で（$\Rightarrow$ は補集合との和）、ループ不変条件はその後不動点である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=35dfde8c"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=23f6e3d6"></script>
+<script src="../../../site.js?v=f7713090"></script>
+<script src="../../../learn/manifest.js?v=0c7eee76"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
