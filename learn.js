@@ -1457,71 +1457,106 @@
       if (steps.length < 3 || body.querySelector('.mn-stepper')) return;
       var bar = el('<div class="mn-stepper mn-learn-x" role="group" aria-label="証明の段階表示"></div>');
       body.insertBefore(bar, body.firstChild);
-      var all = [].slice.call(body.children).filter(function (c) { return c !== bar; });
+      // 前提条件の使用箇所（hypcheck）はステップに含めず、別に扱う
+      var hyp = body.querySelector(':scope > [data-env="hypcheck"]');
+      var all = [].slice.call(body.children).filter(function (c) { return c !== bar && c !== hyp; });
       var first = all.indexOf(steps[0]);
-      // ブロックごとに、どのステップに属するか（-1 は Step 1 より前）
       var seg = all.map(function (c, i) {
         if (i < first) return -1;
         var k = 0; while (k + 1 < steps.length && all.indexOf(steps[k + 1]) <= i) k++;
         return k;
       });
-      var on = false, cur = 0, revealed = {};
+      var on = false, cur = 0, revealed = {}, showHyp = false;
       // 各ステップの見出し（太字の「Step 2（…）.」）と主張（【主張：…】、なければ null）
       var labels = steps.map(function (st) { var b = st.querySelector('strong'); return b ? b.innerHTML : ''; });
       var claims = steps.map(function (st) { return st.querySelector('.mn-step-claim'); });
+      // 理由を見る前に見せる部分：段落の頭から主張の終わりまで（記号の導入などの準備を主張の前に書けば、それも見える）
+      var heads = steps.map(function (st, k) {
+        if (!claims[k]) return '';
+        var c = st.cloneNode(true), cl = c.querySelector('.mn-step-claim'), n = cl;
+        while (n && n !== c) { while (n.nextSibling) n.parentNode.removeChild(n.nextSibling); n = n.parentNode; }
+        return c.innerHTML;
+      });
+      // hypcheck の項目のうち、そのステップの番号に触れているもの（「Step 3」「Step 3・4」など）
+      var hypItems = hyp ? [].slice.call(hyp.querySelectorAll('li')) : [];
+      function hypFor(k) {
+        var re = new RegExp('Step\\s*(?:[0-9]+\\s*[・,、]\\s*)*' + (k + 1) + '(?![0-9])');
+        return hypItems.filter(function (li) { return re.test(li.textContent); });
+      }
       var past = el('<div class="mn-step-past mn-learn-x" hidden></div>'), quiz = el('<div class="mn-step-quiz mn-learn-x" hidden></div>');
-      body.insertBefore(past, bar.nextSibling);
-      function stepHead(k) { return '<span class="mn-step-label">' + labels[k] + '</span>' + (claims[k] ? ' <span class="mn-step-claim">' + claims[k].innerHTML + '</span>' : ''); }
+      var stepHyp = el('<div class="mn-step-hyp mn-learn-x" hidden></div>');
+      function pastItem(k) { return '<span class="mn-step-label">' + labels[k] + '</span>' + (claims[k] ? ' <span class="mn-step-claim">' + claims[k].innerHTML + '</span>' : ''); }
+      function lastBlock(k) { var lb = null; all.forEach(function (c, i) { if (seg[i] === k) lb = c; }); return lb; }
       function render() {
         if (!on) {
           all.forEach(function (c) { c.classList.remove('mn-step-hidden'); });
-          past.hidden = quiz.hidden = true;
+          if (hyp) hyp.classList.remove('mn-step-hidden');
+          past.hidden = quiz.hidden = stepHyp.hidden = true;
           bar.classList.remove('is-on');
-          bar.innerHTML = isPro()
-            ? '<button type="button" class="mn-textbtn" data-start>▶ 1 ステップずつ読む（全 ' + steps.length + ' ステップ）</button>'
-            : '<button type="button" class="mn-textbtn" data-start>🔒 1 ステップずつ読む（Pro）</button>';
+          bar.innerHTML = '<button type="button" class="mn-textbtn mn-step-start" data-start>' + (isPro() ? '1 ステップずつ読む' : '🔒 1 ステップずつ読む（Pro）') + '</button>';
           return;
         }
-        // 主張のあるステップは、理由を伏せて主張だけを見せ、自分で確かめてから開く
         var hideCur = !!claims[cur] && !revealed[cur];
         all.forEach(function (c, i) { c.classList.toggle('mn-step-hidden', seg[i] >= 0 && (seg[i] !== cur || hideCur)); });
+        // 主張のあるステップは、準備と主張だけを見せ、理由は自分で確かめてから開く
         if (hideCur) {
-          quiz.innerHTML = '<p>' + stepHead(cur) + '</p><p class="mn-step-quiz-hint">この主張を、ここまでのステップと前提から自分で確かめてから開いてください。</p>' +
-            '<button type="button" class="mn-btn" data-reveal>確かめた・理由を開く</button>';
+          quiz.innerHTML = '<p>' + heads[cur] + '</p><p class="mn-step-quiz-hint">自分で確かめてから理由を開いてください。</p>' +
+            '<button type="button" class="mn-textbtn" data-reveal>理由を開く</button>';
           body.insertBefore(quiz, steps[cur]); quiz.hidden = false;
         } else quiz.hidden = true;
-        // これまでのステップの主張（流れを見失わないように）
+        // このステップで使った前提（理由を見た後に）
+        var hs = hideCur ? [] : hypFor(cur);
+        if (hs.length) {
+          stepHyp.innerHTML = '<div class="mn-step-hyp-k">このステップで使う前提</div><ul>' + hs.map(function (li) { return '<li>' + li.innerHTML + '</li>'; }).join('') + '</ul>';
+          var lb = lastBlock(cur); body.insertBefore(stepHyp, lb ? lb.nextSibling : null); stepHyp.hidden = false;
+        } else stepHyp.hidden = true;
+        // 前提の使用箇所の全体：最後のステップの理由まで見たとき、またはバーから開いたとき
+        var atEnd = cur === steps.length - 1 && !hideCur;
+        if (hyp) hyp.classList.toggle('mn-step-hidden', !(atEnd || showHyp));
+        // これまでのステップの見出しと主張（流れを見失わないように）
         if (cur > 0) {
-          past.innerHTML = '<div class="mn-step-past-k">これまでのステップ</div><ol>' + steps.slice(0, cur).map(function (_, k) { return '<li>' + stepHead(k) + '</li>'; }).join('') + '</ol>';
-          past.hidden = false; body.insertBefore(past, steps[0]);
+          past.innerHTML = '<div class="mn-step-past-k">これまで</div><ol>' + steps.slice(0, cur).map(function (_, k) { return '<li>' + pastItem(k) + '</li>'; }).join('') + '</ol>';
+          body.insertBefore(past, steps[0]); past.hidden = false;
         } else past.hidden = true;
         bar.classList.add('is-on');
-        var dots = steps.map(function (_, k) { return '<button type="button" class="mn-step-dot' + (k === cur ? ' is-cur' : '') + '" data-go="' + k + '" aria-label="Step ' + (k + 1) + ' へ"></button>'; }).join('');
+        var dots = steps.map(function (_, k) { return '<button type="button" class="mn-step-dot' + (k === cur ? ' is-cur' : '') + (revealed[k] || !claims[k] ? ' is-done' : '') + '" data-go="' + k + '" aria-label="Step ' + (k + 1) + ' へ"></button>'; }).join('');
         bar.innerHTML =
-          '<button type="button" class="mn-btn mn-step-prev" data-prev' + (cur === 0 ? ' disabled' : '') + ' aria-label="前のステップ">◀ 前へ</button>' +
-          '<span class="mn-step-pos">ステップ ' + (cur + 1) + ' / ' + steps.length + '</span>' +
-          '<button type="button" class="mn-btn mn-step-next" data-next' + (cur === steps.length - 1 ? ' disabled' : '') + ' aria-label="次のステップ">次へ ▶</button>' +
+          '<button type="button" class="mn-textbtn" data-prev' + (cur === 0 ? ' disabled' : '') + ' aria-label="前のステップ">◀</button>' +
+          '<span class="mn-step-pos">' + (cur + 1) + ' / ' + steps.length + '</span>' +
+          '<button type="button" class="mn-textbtn" data-next' + (cur === steps.length - 1 ? ' disabled' : '') + ' aria-label="次のステップ">▶</button>' +
           '<span class="mn-step-dots">' + dots + '</span>' +
+          (claims[cur] && revealed[cur] ? '<button type="button" class="mn-textbtn" data-hide>理由を隠す</button>' : '') +
+          (hyp && !atEnd ? '<button type="button" class="mn-textbtn" data-hyp>' + (showHyp ? '前提を閉じる' : '前提') + '</button>' : '') +
           '<button type="button" class="mn-textbtn" data-all>全体表示</button>';
-        var c = steps[cur];
-        if (c && c.animate && !REDUCED_L) all.forEach(function (x, i) { if (seg[i] === cur) x.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'ease-out' }); });
+        if (!REDUCED_L) all.forEach(function (x, i) { if (seg[i] === cur && x.animate && !x.classList.contains('mn-step-hidden')) x.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160, easing: 'ease-out' }); });
         var r = bar.getBoundingClientRect();
         if (r.top < 0 || r.top > window.innerHeight - 60) bar.scrollIntoView({ block: 'nearest', behavior: REDUCED_L ? 'auto' : 'smooth' });
       }
       function go(k) { cur = Math.max(0, Math.min(steps.length - 1, k)); activeStepper = api; render(); }
+      function start() {
+        if (!isPro()) { proModal('証明を 1 ステップずつ表示する読み方は Pro プランの機能です。'); return; }
+        d.open = true; on = true; go(0);
+      }
       var api = { prev: function () { if (on) go(cur - 1); }, next: function () { if (on) go(cur + 1); }, el: d };
       bar.addEventListener('click', function (ev) {
-        var t = ev.target.closest('button'); if (!t) return;
-        if (t.hasAttribute('data-start')) {
-          if (!isPro()) { proModal('証明を 1 ステップずつ表示する読み方は Pro プランの機能です。'); return; }
-          on = true; go(0); return;
-        }
-        if (t.hasAttribute('data-prev')) go(cur - 1);
+        var t = ev.target.closest('button'); if (!t || t.disabled) return;
+        if (t.hasAttribute('data-start')) start();
+        else if (t.hasAttribute('data-prev')) go(cur - 1);
         else if (t.hasAttribute('data-next')) go(cur + 1);
         else if (t.hasAttribute('data-go')) go(+t.getAttribute('data-go'));
+        else if (t.hasAttribute('data-hide')) { revealed[cur] = false; render(); }
+        else if (t.hasAttribute('data-hyp')) { showHyp = !showHyp; render(); }
         else if (t.hasAttribute('data-all')) { on = false; activeStepper = null; render(); }
       });
       quiz.addEventListener('click', function (ev) { if (ev.target.closest('[data-reveal]')) { revealed[cur] = true; activeStepper = api; render(); } });
+      // 証明の見出しの横に「1 ステップずつ」：閉じた証明から直接段階表示で開く
+      var sum = d.querySelector(':scope > summary');
+      if (sum) {
+        var qb = el('<button type="button" class="mn-step-quick mn-learn-x" title="この証明を 1 ステップずつ読む">' + (isPro() ? '1 ステップずつ' : '🔒 1 ステップずつ') + '</button>');
+        var hint = sum.querySelector('.mn-fold-hint');
+        sum.insertBefore(qb, hint ? hint.nextSibling : null);
+        qb.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); start(); });
+      }
       // スマホ：本文を左右にスワイプして前へ・次へ（縦のスクロールは邪魔しない）
       var sx = null, sy = 0;
       body.addEventListener('touchstart', function (ev) { if (!on) return; sx = ev.touches[0].clientX; sy = ev.touches[0].clientY; }, { passive: true });
