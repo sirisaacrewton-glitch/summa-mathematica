@@ -260,13 +260,27 @@
   }
   /* 付箋のカード：見出し（種類と題）と本文だけ。ボタンは置かない。
    * 外す・並べ替えるは「編集」（長押しでも入る。iPhone のホーム画面と同じ操作）で行う。所在の行がその項目へのリンク。 */
+  /* 付箋の中のリンク：固定したページからの相対パスで保存されているので、別のページ（トップページなど）で開くと 404 になる。
+   * 表示するたびに、ラベルから今のページ基準のリンクを作り直す（2026-10-22 ユーザー指摘）。下の「開く →」も同じ */
+  function pinHref(p) { var i = S.resolveRef && S.resolveRef(p.id); return i && !i.planned ? i.href : p.url; }
+  function whereHtml(p) { return '<a class="mn-pin-where" href="' + esc(pinHref(p)) + '" title="' + esc(p.sectionPath || '') + '">開く →</a>'; }
+  function fixPinLinks(root) {
+    if (!S.resolveRef) return;
+    root.querySelectorAll('a[data-label]').forEach(function (a) {
+      var l = a.getAttribute('data-label'), i = S.resolveRef(l);
+      if (!i || i.planned) return;
+      var href = i.href, item = a.getAttribute('data-item'), hash = '#' + l;
+      if (item && href.slice(-hash.length) === hash) href += '.' + item;
+      a.setAttribute('href', href);
+    });
+  }
   function cardHtml(p, collapsed) {
     return '<div class="mn-pin-card' + (collapsed ? ' is-min' : '') + '" data-pin-id="' + esc(p.id) + '">' +
       '<div class="mn-pin-head" role="button" tabindex="0" title="クリックで畳む／広げる・長押しで並べ替え">' +
         '<span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
         '<button type="button" class="mn-pin-x" data-unpin aria-label="固定を外す" title="固定を外す"></button></div>' +
       '<div class="mn-pin-body mn-prose">' + p.htmlContent +
-        '<a class="mn-pin-where" href="' + esc(p.url) + '">' + esc(p.sectionPath) + ' へ →</a></div></div>';
+        whereHtml(p) + '</div></div>';
   }
   function ensureDock() {
     if (dock) return;
@@ -461,8 +475,8 @@
     var w = el('<div class="mn-float" role="dialog" aria-label="' + esc(p.kind + ' ' + (p.title || '')) + '">' +
       '<div class="mn-float-head" title="ドラッグで移動・クリックで畳む"><span class="mn-pin-kind">' + esc(p.kind) + '</span><span class="mn-pin-title">' + (p.title ? S.renderer.renderInline(p.title) : '') + '</span>' +
       '<button type="button" class="mn-float-close" aria-label="閉じる（付箋ドックには残ります）" title="閉じる（付箋ドックには残ります）"></button></div>' +
-      '<div class="mn-float-body mn-prose">' + p.htmlContent + '<a class="mn-pin-where" href="' + esc(p.url) + '">' + esc(p.sectionPath) + ' へ →</a></div></div>');
-    w._pid = id;
+      '<div class="mn-float-body mn-prose">' + p.htmlContent + whereHtml(p) + '</div></div>');
+    w._pid = id; fixPinLinks(w);
     document.body.appendChild(w); floats.push(w);
     if (!PHONE.matches) {
       var n = floats.length - 1;
@@ -614,6 +628,7 @@
         : '見出しのクリックで畳む。× で外す。長押ししてから上下に動かすと並べ替え。すぐに本文側へドラッグすると、好きな位置に浮かせられます。') + '</p>' :
       '<p class="mn-dock-empty">定義や定理の見出しの <span aria-hidden="true">📌</span> ボタン、または参照プレビューの「📌 固定」で、項目をここに並べておけます。ページを移動しても残ります。</p>' +
       (isPro() ? '' : '<p class="mn-dock-empty">無料プランでは 1 件まで。<button type="button" class="mn-textbtn" data-see-pro>Pro なら無制限</button></p>');
+    fixPinLinks(list);
     dockTab.innerHTML = '<span aria-hidden="true">📌</span><span class="mn-dock-tab-n">' + (p.length ? p.length : '') + '</span><span class="mn-dock-tab-text">ピン留め' + (p.length ? ' (' + p.length + ')' : '') + '</span>';
     dockTab.hidden = !p.length && dock.hidden;
   }
