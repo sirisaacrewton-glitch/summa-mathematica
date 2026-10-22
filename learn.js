@@ -907,15 +907,32 @@
   }
   function openRoadmap(goal) {
     var shown = {}, how = {}, CAP = 90;
-    shown[goal] = 1; how[goal] = 'goal';
-    statementClosure(goal, 40).forEach(function (y) { shown[y] = 1; how[y] = 's'; });
-    prereqs(goal, 'p').forEach(function (y) { if (isCore(y) && !shown[y]) { shown[y] = 1; how[y] = 'p'; } });
+    // 証明のルート：主証明と、各「別証明」（ビルドが別証明ごとに使う結果を altDeps に記録する）。2026-10-22 ユーザー指示：
+    // 強い定理を使う証明やほかの証明法もあるので、Pro では理解済みの項目から見て未習得の前提が最も少ないルートを自動で選ぶ
+    var ALT = (S.index.altDeps || {})[goal] || [];
+    var routes = [{ name: '主証明', deps: prereqs(goal, 'p').filter(isCore) }].concat(ALT.map(function (a) {
+      return { name: a.t, deps: a.d.filter(function (x) { return isCore(x) && x !== goal; }) };
+    }));
+    function unmetOf(r) { var u = understood(); return r.deps.filter(function (x) { return !u[x]; }).length; }
+    var route = 0, autoRoute = false;
+    if (routes.length > 1 && isPro()) {
+      routes.forEach(function (r, i) { if (unmetOf(r) < unmetOf(routes[route])) route = i; });
+      autoRoute = true;
+    }
+    function depsOf(x) { return x === goal ? prereqs(goal, 's').concat(routes[route].deps) : prereqs(x); }
+    function reset() {
+      shown = {}; how = {};
+      shown[goal] = 1; how[goal] = 'goal';
+      statementClosure(goal, 40).forEach(function (y) { shown[y] = 1; how[y] = 's'; });
+      routes[route].deps.forEach(function (y) { if (!shown[y]) { shown[y] = 1; how[y] = 'p'; } });
+    }
+    reset();
     var m = openModal('学習ルート：' + refText(goal), '<div class="mn-rm-body"></div>', { wide: true });
     var body = m.querySelector('.mn-rm-body'), ro = null;
-    function hidden(x) { return prereqs(x).filter(function (y) { return isCore(y) && !shown[y]; }); }
+    function hidden(x) { return depsOf(x).filter(function (y) { return isCore(y) && !shown[y]; }); }
     function render() {
       var ids = Object.keys(shown), u = understood(), pro = isPro();
-      var g = layers(ids, function (x) { return prereqs(x); });
+      var g = layers(ids, depsOf);
       var done = ids.filter(function (x) { return u[x]; }).length, pct = Math.round(100 * done / ids.length);
       var reg = getJSON('sm_goals', []).indexOf(goal) >= 0;
       var full = ids.length >= CAP || !ids.some(function (x) { return hidden(x).length; });
@@ -924,6 +941,10 @@
           '<button type="button" class="mn-btn mn-btn-quiet" data-goal>' + (reg ? '★ マイ・ロードマップに登録済み' : '☆ この目標をマイ・ロードマップに登録') + '</button>'
           : '<span class="mn-rm-pct mn-muted">🔒 達成率・未習得の強調・目標の登録は Pro プランの機能です。</span><button type="button" class="mn-textbtn" data-see-pro>Pro について</button>') +
         '</div>' +
+        (routes.length > 1 ? '<div class="mn-rm-routes"><span class="mn-rm-routes-k">証明のルート</span>' + routes.map(function (r, i) {
+          return '<button type="button" class="mn-textbtn' + (i === route ? ' is-on' : '') + '" data-route="' + i + '">' + S.renderer.renderInline(r.name) +
+            (pro ? '<span class="mn-rm-route-n">（未習得 ' + unmetOf(r) + '）</span>' : '') + '</button>';
+        }).join('') + (autoRoute ? '<span class="mn-muted mn-rm-route-note">未習得の前提が最も少ないルートを選びました</span>' : '') + '</div>' : '') +
         '<div class="mn-rm-legend"><span class="mn-rm-lg is-s">主張を読むのに必要（自動でさかのぼる）</span><span class="mn-rm-lg is-p">証明で使う（＋で 1 段ずつ広げる）</span>' +
         (full ? '' : '<button type="button" class="mn-textbtn" data-expand-all>すべてさかのぼる（詳細）</button>') + '</div>' +
         '<p class="mn-muted mn-rm-note">これはこのサイトが選んだ証明に沿った前提で、理解の道筋はほかにもありえます。主張を読むのに要るものだけを最後までたどり、証明で使うものは必要な分だけ広げてください。' +
@@ -950,6 +971,7 @@
         if (i >= 0) gs.splice(i, 1); else gs.push(goal);
         setJSON('sm_goals', gs); render(); return;
       }
+      if ((b = ev.target.closest('[data-route]'))) { route = +b.getAttribute('data-route'); autoRoute = false; reset(); render(); return; }
       if ((b = ev.target.closest('[data-expand]'))) { add(b.getAttribute('data-expand')); render(); return; }
       if (ev.target.closest('[data-expand-all]')) {
         for (var guard = 0; guard < 30; guard++) {

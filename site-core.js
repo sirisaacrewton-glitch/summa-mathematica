@@ -273,7 +273,8 @@
             node.num = secnum ? secnum + '.' + counter : String(counter);
             lastNumbered = node;
           } else if (def.attached) {
-            node.of = lastNumbered || parentEnv;
+            // {of="ラベル"} で、どの主張の証明かを明示できる（直前に補題などを挟んだ別証明のため。2026-10-22）
+            node.of = (node.attrs && node.attrs.of && byLabel[node.attrs.of]) || lastNumbered || parentEnv;
           }
           if (node.label) {
             byLabel[node.label] = node;
@@ -656,9 +657,11 @@
     TERM_XF_DENY = R.xfDeny || {};
     TERM_NO_AUTO = R.noAuto || {};
   }
-  function noAuto(term, f) {
+  // 値の各項目は分野番号（"13"）か、フォルダの一部（"/" を含む。"03B-general-logic/03-modal-logic" など。ページのフォルダに含まれれば当たり）
+  function noAuto(term, dir) {
     var d = TERM_NO_AUTO[term]; if (!d) return false;
-    var hit = (' ' + d.replace(/^!/, '') + ' ').indexOf(' ' + f + ' ') >= 0;
+    var f = String(dir || '').split('/')[0].split('-')[0];
+    var hit = d.replace(/^!/, '').split(/\s+/).some(function (x) { return x && (x.indexOf('/') >= 0 ? String(dir || '').indexOf(x) >= 0 : x === f); });
     return d.charAt(0) === '!' ? !hit : hit;
   }
   function isBase(dir) { return TERM_BASE.some(function (b) { return String(dir || '').indexOf(b) === 0; }); }
@@ -682,7 +685,7 @@
     function pick(term, pageIdx, depSet) {
       var cands = termDefs[term]; if (!cands) return null;
       var short = term.length <= 2, P = pages[pageIdx];
-      if (P && noAuto(term, field(P.dir).split('-')[0])) return null;
+      if (P && noAuto(term, P.dir)) return null;
       var info = candidates(term, pageIdx);
       if (P) {
         var tiers = [

@@ -181,6 +181,7 @@ function dedupeIndex(arr) {
 
 /* ---------------- 2. 解析と番号付け ---------------- */
 var labels = {};      // label -> {p, t, n, ti, e, tex}
+var altDeps = {};     // 主張のラベル -> [{t: 別証明の題, d: [その中で使う結果のラベル]}]（2026-10-22）
 var entries = [];     // 検索エントリ
 function addEntry(e) { entries.push(e); return entries.length - 1; }
 
@@ -330,7 +331,7 @@ function typeName(t) {
 }
 
 pages.forEach(function (pg) {
-  var currentFrom = null, currentRole = '';
+  var currentFrom = null, currentRole = '', currentAlt = null;
   var renderer = Core.createRenderer({
     marked: marked, katex: katex, macros: CONFIG.KATEX_MACROS, envs: CONFIG.ENVIRONMENTS,
     resolveRef: function (label, r) {
@@ -348,6 +349,7 @@ pages.forEach(function (pg) {
         var hit = list.filter(function (b) { return b.sig === sig; })[0];
         // \see{L}：表示は \ref と同じだが、論理の依存ではない案内（「〜は後で扱う」「詳細は〜」）。役割 x として記録し、前提・ロードマップ・順序の点検に数えない
         var role = r && r.cmd === 'see' ? 'x' : currentRole;
+        if (currentAlt && !(r && r.cmd === 'see') && currentAlt.d.indexOf(label) < 0) currentAlt.d.push(label);
         if (!hit) list.push({ sig: sig, v: [pg.idx, from ? (from.label || '') : '', from ? from.type : '', from ? (from.num || '') : '', role] });
         else if (ROLE_RANK[role] > ROLE_RANK[hit.v[4]]) hit.v[4] = role;   // 主張と証明の両方にあれば主張を優先
       }
@@ -386,9 +388,13 @@ pages.forEach(function (pg) {
       if (role === 'm') r = 'm';   // 付属ブロックの中はずっと付属
       // 題名が「別証明」で始まる証明（2026-10-22 ユーザー指示）：役割 a。主証明の前提には数えず、別のルートとして記録する
       if (node.type === 'proof' && /^別証明/.test(node.title || '')) r = 'a';
+      // 別証明ごとに、その中で使う結果を記録する（学習ルートで証明のルートを選べるように）
+      var prevAlt = currentAlt;
+      if (r === 'a' && from && from.label) { currentAlt = { t: node.title, d: [] }; (altDeps[from.label] = altDeps[from.label] || []).push(currentAlt); }
       currentFrom = from; currentRole = r;
       if (node.title) renderer.renderInline(node.title);
       walk(node.children, from, r, node);
+      currentAlt = prevAlt;
     });
   })(pg.parsed.children, null, '', null);
 });
@@ -893,6 +899,7 @@ if (!CHECK_ONLY) {
     backrefs: backOut,
     terms: termDefs,
     termRules: TERM_RULES_BROWSER,
+    altDeps: altDeps,
     tdeps: tdeps,
     entries: []   // 検索用の本文は search-index.js に分けた（必要になったときに読み込む）
   };
