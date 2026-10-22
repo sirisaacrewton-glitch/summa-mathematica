@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>代数体と整数環 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/01-algebraic-number-theory/01-number-fields/01-rings-of-integers.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 代数体と整数環 {#nt:page-rings-of-integers keywords="number field, algebraic integer, ring of integers O_K, integral basis, discriminant of a basis, discriminant of a number field, index formula, Eisenstein polynomial and index, ring of integers of quadratic fields, ring of integers of Q(zeta_p), discriminant of cyclotomic field, Q(cube root of 2), monogenic"}
+
+**代数体** $K$（$\mathbb{Q}$ の有限次拡大）の中で $\mathbb{Z}$ 上整な元全体 $\mathcal{O}_{K}$ を**整数環**という。$\mathcal{O}_{K}$ は階数 $[K:\mathbb{Q}]$ の自由 $\mathbb{Z}$ 加群で（環論の結果）、その基底（**整数環の基底**、整基底）から定まる**判別式** $d_{K}$ は $K$ の最も基本的な不変量である。この頁では、判別式と「指数」の関係を使って整数環を決める方法を示し、2 次体・$p$ 次円分体・$\mathbb{Q}(\sqrt[3]{2})$ の整数環と判別式を計算する。
+
+> 用語は雪江『整数論 1』（代数的整数の章）の用語に合わせた。証明は資料の文章によらず、標準的な議論で書いた。
+
+## 記法と定義の確認 {#nt:sec-ri-notation}
+
+::: notation
+- 整拡大・整閉包・正規環は \ref{ring:integral-closure}、一意分解環は正規（したがって $\mathbb{Z}$ は正規）は \ref{ring:ufd-normal}。
+- トレースとノルム（掛け算写像のトレースと行列式）、共役による表示、トレース形式の非退化性は \ref{ring:trace-norm}, \ref{ring:trace-conjugates}。整な元のトレース・ノルム・最小多項式は $A$ に入る（$A$ 正規）は \ref{ring:integral-trace-norm}。整閉包の有限性（PID 上なら自由）は \ref{ring:integral-closure-finite}。
+- 多項式の判別式 $D(f)=\prod_{i<j}(\alpha_{j}-\alpha_{i})^{2}=(-1)^{n(n-1)/2}\prod_{i}f'(\alpha_{i})$ は \ref{fld:discriminant}, \ref{fld:discriminant-properties}。円分多項式の既約性は \ref{fld:cyclotomic-irreducible}。アイゼンシュタインの判定法は \tref{ring:eisenstein}。
+- PID 上の自由加群の部分加群とスミス標準形は \ref{mod:pid-submodule-free}, \ref{mod:smith-normal-form}。
+- 線形代数：行列式の乗法性 $\det(PQ)=\det P\det Q$ と転置不変性（\ref{lin:det-multiplicative}）、ヴァンデルモンドの行列式 $\det(x_{i}^{j-1})=\prod_{i<j}(x_{j}-x_{i})$（\ref{lin:vandermonde}）。線形代数の系列で扱う予定。
+- 代数体 $K$ は標数 $0$ なので $K/\mathbb{Q}$ は分離的で、$\mathbb{C}$ への埋め込みはちょうど $n=[K:\mathbb{Q}]$ 個ある（$\sigma_{1},\dots,\sigma_{n}$）。
+- **選択公理**：使わない（有限次拡大の埋め込みと有限生成加群だけを扱う）。
+:::
+
+## 整数環 {#nt:sec-ri-integers}
+
+::: definition 代数体と整数環 {#nt:number-field keywords="number field, algebraic integer, ring of integers" index="代数体|だいすうたい, 代数的整数|だいすうてきせいすう, 整数環|せいすうかん"}
+$\mathbb{Q}$ の有限次拡大体 $K$ を**代数体**、$n=[K:\mathbb{Q}]$ をその次数という。$\mathbb{C}$（あるいは $\mathbb{Q}$ の代数閉包）の元で $\mathbb{Z}$ 上整なもの（整数係数のモニック多項式の根）を**代数的整数**といい、$K$ に含まれる代数的整数全体を $\mathcal{O}_{K}$ と書いて $K$ の**整数環**という。
+:::
+
+::: proposition 整数環の基本性質 {#nt:integers-basic keywords="O_K is a ring, O_K cap Q = Z, every element of K is an algebraic integer divided by a rational integer, minimal polynomial of an algebraic integer has integer coefficients, trace and norm are integers" index="整数環の基本性質|せいすうかんのきほんせいしつ" refname="整数環の基本性質" refscope="field"}
+1. $\mathcal{O}_{K}$ は $K$ の部分環で、$\mathcal{O}_{K}\cap\mathbb{Q}=\mathbb{Z}$。
+2. 任意の $\alpha\in K$ について、$0$ でない $d\in\mathbb{Z}$ で $d\alpha\in\mathcal{O}_{K}$ となるものがある。とくに $\operatorname{Frac}\mathcal{O}_{K}=K$。
+3. $\alpha\in\mathcal{O}_{K}$ の $\mathbb{Q}$ 上の最小多項式は $\mathbb{Z}[x]$ に属し、$\operatorname{Tr}_{K/\mathbb{Q}}(\alpha),N_{K/\mathbb{Q}}(\alpha)\in\mathbb{Z}$。
+4. $\alpha\in\mathcal{O}_{K}$ が単元 $\iff N_{K/\mathbb{Q}}(\alpha)=\pm1$。
+:::
+
+::: proof
+**Step 1（1）.** $\mathcal{O}_{K}$ は $\mathbb{Z}$ の $K$ における整閉包なので部分環（\ref{ring:integral-closure}）。$\mathbb{Z}$ は正規（\ref{ring:ufd-normal}）なので $\mathcal{O}_{K}\cap\mathbb{Q}=\mathbb{Z}$。
+
+**Step 2（2）.** $\alpha$ は $\mathbb{Q}$ 上代数的なので $a_{m}\alpha^{m}+\dots+a_{0}=0$（$a_{i}\in\mathbb{Z}$, $a_{m}\neq0$）。$a_{m}^{m-1}$ を掛けると $(a_{m}\alpha)^{m}+a_{m-1}(a_{m}\alpha)^{m-1}+\dots+a_{m}^{m-1}a_{0}=0$ はモニックなので $d=a_{m}$ でよい。
+
+**Step 3（3）.** \ref{ring:integral-trace-norm}（$A=\mathbb{Z}$）。
+
+**Step 4（4）.** ⇒：$\alpha\beta=1$（$\beta\in\mathcal{O}_{K}$）なら $N(\alpha)N(\beta)=1$ で、どちらも整数なので $\pm1$。⇐：最小多項式を $x^{r}+c_{r-1}x^{r-1}+\dots+c_{0}$（$c_{i}\in\mathbb{Z}$）とすると、$N(\alpha)=\pm c_{0}^{s}$（\ref{ring:trace-conjugates.1}）なので $c_{0}=\pm1$。$\alpha(\alpha^{r-1}+\dots+c_{1})=-c_{0}$ から $\alpha^{-1}=-c_{0}^{-1}(\alpha^{r-1}+\dots+c_{1})\in\mathcal{O}_{K}$。
+:::
+
+## 判別式 {#nt:sec-ri-discriminant}
+
+::: definition 基底の判別式 {#nt:discriminant-basis keywords="discriminant of n elements: det(Tr(a_i a_j)) = det(sigma_i(a_j))^2" index="判別式（基底）|はんべつしききてい"}
+$\alpha_{1},\dots,\alpha_{n}\in K$ について $d(\alpha_{1},\dots,\alpha_{n})\defeq\det\bigl(\operatorname{Tr}_{K/\mathbb{Q}}(\alpha_{i}\alpha_{j})\bigr)_{i,j}$ とする。
+:::
+
+::: proposition 判別式の性質 {#nt:discriminant-basis-properties keywords="d = det(sigma_i(alpha_j))^2; change of basis multiplies by det(P)^2; nonzero for a basis; power basis discriminant equals polynomial discriminant" index="判別式の性質（基底）|はんべつしきのせいしつきてい"}
+1. $d(\alpha_{1},\dots,\alpha_{n})=\det\bigl(\sigma_{i}(\alpha_{j})\bigr)^{2}$。
+2. $\beta_{i}=\sum_{j}p_{ij}\alpha_{j}$（$P=(p_{ij})\in M_{n}(\mathbb{Q})$）なら $d(\beta)=\det(P)^{2}d(\alpha)$。
+3. $\alpha_{1},\dots,\alpha_{n}$ が $K$ の $\mathbb{Q}$ 上の基底なら $d(\alpha)\neq0$。
+4. $K=\mathbb{Q}(\theta)$、$f$ を $\theta$ の最小多項式とすると $d(1,\theta,\dots,\theta^{n-1})=D(f)=(-1)^{n(n-1)/2}N_{K/\mathbb{Q}}(f'(\theta))$。
+:::
+
+::: proof
+**Step 1（1）.** $M\defeq(\sigma_{i}(\alpha_{j}))_{i,j}$ とすると、$({}^{t}MM)_{jl}=\sum_{i}\sigma_{i}(\alpha_{j})\sigma_{i}(\alpha_{l})=\sum_{i}\sigma_{i}(\alpha_{j}\alpha_{l})=\operatorname{Tr}(\alpha_{j}\alpha_{l})$（\ref{ring:trace-conjugates.2}）。行列式の乗法性と転置不変性から $d=\det({}^{t}MM)=\det(M)^{2}$。
+
+**Step 2（2）.** $(\operatorname{Tr}(\beta_{i}\beta_{l}))=P\,(\operatorname{Tr}(\alpha_{j}\alpha_{m}))\,{}^{t}P$（トレースの $\mathbb{Q}$ 線形性）なので、行列式の乗法性から。
+
+**Step 3（3）.** トレース形式は非退化（\ref{ring:trace-conjugates.3}）。$d(\alpha)=0$ なら行列 $(\operatorname{Tr}(\alpha_{i}\alpha_{j}))$ の核に $0$ でない $(c_{j})$ があり、$\gamma\defeq\sum c_{j}\alpha_{j}\neq0$ について $\operatorname{Tr}(\alpha_{i}\gamma)=0$（すべての $i$）、したがって $\operatorname{Tr}(K\gamma)=0$。$\gamma^{-1}$ をとれば $\operatorname{Tr}(1)=n=0$ となり矛盾。
+
+**Step 4（4）.** 1 で $\alpha_{j}=\theta^{j-1}$ とすると、$\det(\sigma_{i}(\theta)^{j-1})$ はヴァンデルモンドの行列式で $\prod_{i<j}(\sigma_{j}\theta-\sigma_{i}\theta)$。$\sigma_{i}\theta$ は $f$ の根全体なので、その 2 乗は $D(f)$。後半は \ref{fld:discriminant-properties.4} と、$\prod_{i}f'(\sigma_{i}\theta)=\prod_{i}\sigma_{i}(f'(\theta))=N(f'(\theta))$（\ref{ring:trace-conjugates.2} のノルム版：$N$ は埋め込みの像の積。\ref{fld:norm-trace-embeddings}）。
+:::
+
+::: theorem 整数環の基底と判別式 {#nt:integral-basis keywords="O_K is free of rank n; integral basis; discriminant d_K is a nonzero integer independent of the basis; index formula d(alpha) = [O_K : M]^2 d_K" index="整数環の基底|せいすうかんのきてい, 整基底|せいきてい, 代数体の判別式|だいすうたいのはんべつしき, 指数（整数環）|しすうせいすうかん" refname="整数環の基底と判別式" refscope="field"}
+1. $\mathcal{O}_{K}$ は階数 $n$ の自由 $\mathbb{Z}$ 加群。その基底を**整数環の基底**（**整基底**）という。
+2. 整数環の基底 $\omega_{1},\dots,\omega_{n}$ について $d_{K}\defeq d(\omega_{1},\dots,\omega_{n})$ は基底の取り方によらない $0$ でない整数で、$K$ の**判別式**という。
+3. $\alpha_{1},\dots,\alpha_{n}\in\mathcal{O}_{K}$ が $\mathbb{Q}$ 上一次独立なら、$M\defeq\sum\mathbb{Z}\alpha_{i}$ は $\mathcal{O}_{K}$ の有限指数の部分群で
+$$
+d(\alpha_{1},\dots,\alpha_{n})=[\mathcal{O}_{K}:M]^{2}\,d_{K}.
+$$
+:::
+
+::: proof
+**Step 1（1）.** \ref{ring:integral-closure-finite.3}（$A=\mathbb{Z}$ は PID、$K/\mathbb{Q}$ は分離的）。
+
+**Step 2（2）.** 二つの基底は $\mathrm{GL}_{n}(\mathbb{Z})$ の行列 $P$ で移り合い、$P$ と $P^{-1}$ の行列式はともに整数で積が $1$ なので $\det P=\pm1$。\ref{nt:discriminant-basis-properties.2} から $d$ は等しい。$\operatorname{Tr}(\omega_{i}\omega_{j})\in\mathbb{Z}$（\ref{nt:integers-basic.3}）なので整数、3 から $0$ でない。
+
+**Step 3（3：指数は行列式）.** $\alpha_{i}=\sum_{j}p_{ij}\omega_{j}$（$p_{ij}\in\mathbb{Z}$）と書く。$\det P\neq0$（$\alpha_{i}$ は一次独立）。スミス標準形（\ref{mod:smith-normal-form}）から $P=UEV$（$U,V\in\mathrm{GL}_{n}(\mathbb{Z})$、$E=\operatorname{diag}(e_{1},\dots,e_{n})$）と書け、$\mathcal{O}_{K}$ の基底 $\omega'=V\omega$ と $M$ の基底 $\alpha'=U^{-1}\alpha$ について $\alpha'_{i}=e_{i}\omega'_{i}$。よって $\mathcal{O}_{K}/M\cong\bigoplus\mathbb{Z}/e_{i}$ で $[\mathcal{O}_{K}:M]=\prod|e_{i}|=|\det P|$（$\det U,\det V=\pm1$）。
+
+**Step 4（3：結論）.** \ref{nt:discriminant-basis-properties.2} から $d(\alpha)=\det(P)^{2}d(\omega)=[\mathcal{O}_{K}:M]^{2}d_{K}$。
+:::
+
+::: corollary 判別式による整数環の判定 {#nt:squarefree-criterion keywords="if the discriminant of a basis of algebraic integers is squarefree it is an integral basis" index="判別式による判定|はんべつしきによるはんてい"}
+$\alpha_{1},\dots,\alpha_{n}\in\mathcal{O}_{K}$ が $\mathbb{Q}$ 上一次独立で、$d(\alpha_{1},\dots,\alpha_{n})$ が平方因子をもたない（$\pm1$ 倍の素数の積）なら、$\alpha_{1},\dots,\alpha_{n}$ は整数環の基底。より一般に、$p^{2}\nmid d(\alpha)$ なら $p\nmid[\mathcal{O}_{K}:M]$。
+:::
+
+::: proof
+\ref{nt:integral-basis.3} から $[\mathcal{O}_{K}:M]^{2}$ は $d(\alpha)$ を割り切る。
+:::
+
+::: lemma アイゼンシュタイン多項式と指数 {#nt:eisenstein-index keywords="if theta is a root of an Eisenstein polynomial at p, then p does not divide the index [O_K : Z[theta]]" index="アイゼンシュタイン多項式と指数|あいぜんしゅたいんたこうしきとしすう"}
+$\theta\in\mathcal{O}_{K}$ の最小多項式 $f=x^{n}+c_{n-1}x^{n-1}+\dots+c_{0}$ が素数 $p$ についてアイゼンシュタイン（$p\mid c_{i}$, $p^{2}\nmid c_{0}$）で、$K=\mathbb{Q}(\theta)$ なら、$p\nmid[\mathcal{O}_{K}:\mathbb{Z}[\theta]]$。
+:::
+
+::: proof
+**Step 1（背理法の設定）.** $p$ が指数を割り切るとすると、$\mathcal{O}_{K}/\mathbb{Z}[\theta]$ は位数 $p$ の元をもつ（コーシーの定理 \tref{grp:cauchy}）ので、$\xi\in\mathcal{O}_{K}\setminus\mathbb{Z}[\theta]$ で $p\xi\in\mathbb{Z}[\theta]$ となるものがある。$\xi=(a_{0}+a_{1}\theta+\dots+a_{n-1}\theta^{n-1})/p$（$a_{i}\in\mathbb{Z}$、すべては $p$ で割り切れない）と書き、$p\nmid a_{j}$ となる最小の $j$ をとる。$\eta\defeq(a_{j}\theta^{j}+\dots+a_{n-1}\theta^{n-1})/p=\xi-\sum_{i<j}(a_{i}/p)\theta^{i}\in\mathcal{O}_{K}$（$a_{i}/p\in\mathbb{Z}$）。
+
+**Step 2（$\theta^{m}/p$ の整性）.** $\theta^{n}=-(c_{n-1}\theta^{n-1}+\dots+c_{0})$ で $p\mid c_{i}$ なので $\theta^{n}/p\in\mathbb{Z}[\theta]$、したがって $m\ge n$ で $\theta^{m}/p=\theta^{m-n}\cdot\theta^{n}/p\in\mathcal{O}_{K}$。
+
+**Step 3（$a_{j}\theta^{n-1}/p$ は整）.** $\eta\theta^{n-1-j}=a_{j}\theta^{n-1}/p+\sum_{i>j}a_{i}\theta^{i+n-1-j}/p$ で、和の各項は Step 2 から $\mathcal{O}_{K}$ の元。よって $a_{j}\theta^{n-1}/p\in\mathcal{O}_{K}$。
+
+**Step 4（ノルムで矛盾）.** $N(\theta)=(-1)^{n}c_{0}$（\ref{ring:trace-conjugates.1}、$s=1$）なので
+$$
+N\Bigl(\frac{a_{j}\theta^{n-1}}{p}\Bigr)=\frac{a_{j}^{n}N(\theta)^{n-1}}{p^{n}}=\pm\frac{a_{j}^{n}c_{0}^{n-1}}{p^{n}}.
+$$
+$p\nmid a_{j}$、$c_{0}$ はちょうど 1 回 $p$ で割り切れるので、分子の $p$ の指数は $n-1$ で、この数は整数でない。\ref{nt:integers-basic.3} に反する。
+:::
+
+## 例 {#nt:sec-ri-examples}
+
+::: theorem 2 次体の整数環 {#nt:quadratic-integers keywords="ring of integers of Q(sqrt d): Z[sqrt d] if d = 2,3 mod 4, Z[(1+sqrt d)/2] if d = 1 mod 4; discriminant 4d or d" index="2 次体の整数環|にじたいのせいすうかん"}
+$d\neq0,1$ を平方因子をもたない整数、$K=\mathbb{Q}(\sqrt{d})$ とする。
+1. $d\equiv2,3\pmod4$ なら $\mathcal{O}_{K}=\mathbb{Z}[\sqrt{d}]$、$d_{K}=4d$。
+2. $d\equiv1\pmod4$ なら $\mathcal{O}_{K}=\mathbb{Z}[\tfrac{1+\sqrt{d}}{2}]$、$d_{K}=d$。
+:::
+
+::: proof
+**Step 1（整性の条件）.** $\alpha=a+b\sqrt{d}$（$a,b\in\mathbb{Q}$）について、$b\neq0$ なら最小多項式は $x^{2}-2ax+(a^{2}-db^{2})$。\ref{nt:integers-basic.3} とその逆（モニックな整数係数）から、$\alpha\in\mathcal{O}_{K}\iff2a\in\mathbb{Z}$ かつ $a^{2}-db^{2}\in\mathbb{Z}$（$b=0$ なら $a\in\mathbb{Z}$ で同じ条件に含まれる）。
+
+**Step 2（分母は 2 まで）.** $2a=u\in\mathbb{Z}$ とすると $4(a^{2}-db^{2})=u^{2}-d(2b)^{2}\in4\mathbb{Z}$ なので $d(2b)^{2}\in\mathbb{Z}$。$d$ は平方因子をもたないので $2b=v\in\mathbb{Z}$（$2b=r/s$ を既約分数として $dr^{2}/s^{2}\in\mathbb{Z}$ なら $s^{2}\mid d$、$s=1$）。条件は $u^{2}\equiv dv^{2}\pmod4$。
+
+**Step 3（場合分け）.** 平方は $\bmod4$ で $0$ か $1$。$d\equiv2,3$ なら、$u^{2}\equiv dv^{2}$ は $u,v$ がともに偶数のときに限る（$v$ 奇数なら $dv^{2}\equiv2,3$ は平方でない；$v$ 偶数なら $u$ 偶数）ので $a,b\in\mathbb{Z}$。$d\equiv1$ なら条件は $u\equiv v\pmod2$ で、$\alpha=\tfrac{u-v}{2}+v\cdot\tfrac{1+\sqrt{d}}{2}$ と書けるので $\mathcal{O}_{K}=\mathbb{Z}+\mathbb{Z}\tfrac{1+\sqrt{d}}{2}$。
+
+**Step 4（判別式）.** 1 では $d(1,\sqrt{d})=\det\begin{pmatrix}2&0\\0&2d\end{pmatrix}=4d$。2 では $\omega=\tfrac{1+\sqrt{d}}{2}$ について $\operatorname{Tr}\omega=1$, $\operatorname{Tr}\omega^{2}=\operatorname{Tr}\tfrac{1+d+2\sqrt{d}}{4}=\tfrac{1+d}{2}$ なので $d(1,\omega)=2\cdot\tfrac{1+d}{2}-1=d$。
+:::
+
+::: theorem $p$ 次円分体の整数環 {#nt:cyclotomic-integers keywords="ring of integers of Q(zeta_p) is Z[zeta_p]; discriminant (-1)^{(p-1)/2} p^{p-2}; N(1 - zeta) = p" index="円分体の整数環|えんぶんたいのせいすうかん"}
+$p$ を奇素数、$\zeta$ を 1 の原始 $p$ 乗根、$K=\mathbb{Q}(\zeta)$（$[K:\mathbb{Q}]=p-1$）とする。
+1. $N_{K/\mathbb{Q}}(1-\zeta)=p$。
+2. $d(1,\zeta,\dots,\zeta^{p-2})=(-1)^{(p-1)/2}p^{p-2}$。
+3. $\mathcal{O}_{K}=\mathbb{Z}[\zeta]$、したがって $d_{K}=(-1)^{(p-1)/2}p^{p-2}$。
+:::
+
+::: proof
+**Step 1（1）.** $\Phi_{p}(x)=x^{p-1}+\dots+1=\prod_{i=1}^{p-1}(x-\zeta^{i})$ は既約（\ref{fld:cyclotomic-irreducible}）で $\zeta$ の最小多項式。埋め込みは $\zeta\mapsto\zeta^{i}$ なので $N(1-\zeta)=\prod_{i}(1-\zeta^{i})=\Phi_{p}(1)=p$。
+
+**Step 2（2）.** $(x-1)\Phi_{p}(x)=x^{p}-1$ を微分して $x=\zeta$ を代入すると $(\zeta-1)\Phi_{p}'(\zeta)=p\zeta^{p-1}$。$N(\zeta)=\prod\zeta^{i}=\zeta^{p(p-1)/2}=1$、$N(\zeta-1)=(-1)^{p-1}N(1-\zeta)=p$、$N(p)=p^{p-1}$ なので $N(\Phi_{p}'(\zeta))=p^{p-1}/p=p^{p-2}$。\ref{nt:discriminant-basis-properties.4} から $d=(-1)^{(p-1)(p-2)/2}p^{p-2}$ で、$p-2$ は奇数なので $(p-1)(p-2)/2\equiv(p-1)/2\pmod2$。
+
+**Step 3（3：指数は $p$ の冪）.** $M\defeq\mathbb{Z}[\zeta]$ について、\ref{nt:integral-basis.3} から $[\mathcal{O}_{K}:M]^{2}$ は $p^{p-2}$ を割り切るので、指数は $p$ の冪。
+
+**Step 4（3：アイゼンシュタイン）.** $\theta\defeq\zeta-1$ の最小多項式は $\Phi_{p}(x+1)=((x+1)^{p}-1)/x=\sum_{k=1}^{p}\binom{p}{k}x^{k-1}$ で、$0<k<p$ のとき $p\mid\binom{p}{k}$、定数項は $\binom{p}{1}=p$（$p^{2}\nmid p$）、最高次の係数は 1 なので、$p$ についてアイゼンシュタイン。$\mathbb{Z}[\theta]=\mathbb{Z}[\zeta]$ なので、\ref{nt:eisenstein-index} から $p\nmid[\mathcal{O}_{K}:M]$。Step 3 と合わせて指数は 1。
+:::
+
+::: example $\mathbb{Q}(\sqrt[3]{2})$ {#nt:cube-root-two}
+$K=\mathbb{Q}(\theta)$, $\theta=\sqrt[3]{2}$ とすると $\mathcal{O}_{K}=\mathbb{Z}[\theta]$、$d_{K}=-108$。実際、$f=x^{3}-2$ について $D(f)=-27\cdot4=-108=-2^{2}3^{3}$（$x^{3}+ax+b$ の判別式 $-4a^{3}-27b^{2}$）。\ref{nt:integral-basis.3} から指数の 2 乗は $108$ を割り切るので、指数は $1,2,3,6$ のどれか。$f$ は $2$ についてアイゼンシュタインなので $2\nmid$ 指数。$\theta+1$ の最小多項式 $(x-1)^{3}-2=x^{3}-3x^{2}+3x-3$ は $3$ についてアイゼンシュタインで、$\mathbb{Z}[\theta+1]=\mathbb{Z}[\theta]$ なので $3\nmid$ 指数（\ref{nt:eisenstein-index}）。よって指数は 1。
+:::
+
+::: remark 単項生成でない整数環
+すべての整数環が $\mathbb{Z}[\theta]$ の形（**単項生成**）とは限らない。デデキントは $x^{3}-x^{2}-2x-8$ の根が生成する 3 次体の整数環が、どの $\theta$ についても $\mathbb{Z}[\theta]$ にならないことを示したことが知られている（素数 $2$ が 3 つの異なる素イデアルに分解し、$\mathbb{F}_{2}$ 上に 3 個の異なる 1 次式がないため。素イデアルの分解は \tref{nt:page-prime-decomposition} で扱う）。一般の円分体 $\mathbb{Q}(\zeta_{n})$ でも $\mathcal{O}=\mathbb{Z}[\zeta_{n}]$ であることが知られている（本サイト未収録。素数冪の場合は上と同様の議論、一般には判別式が互いに素な体の合成の議論による）。
+:::
+
+::: hypcheck
+- **標数 $0$（分離性）**：トレース形式の非退化性（\ref{nt:discriminant-basis-properties.3}）と埋め込みが $n$ 個あること（1・4）に使う。整閉包の有限性（\ref{ring:integral-closure-finite}）もこれによる。
+- **$\mathbb{Z}$ が PID**：$\mathcal{O}_{K}$ が**自由**であることと、スミス標準形で指数を行列式として計算すること（\ref{nt:integral-basis} の Step 3）に使う。デデキント環 $A$ 上の相対拡大では整閉包は一般に自由でなく、判別式はイデアルとして定義される。
+- **平方因子をもたないこと**：\ref{nt:quadratic-integers} の Step 2 で $2b\in\mathbb{Z}$ を導くのに使う。
+- **$p^{2}\nmid c_{0}$**：\ref{nt:eisenstein-index} の Step 4 でちょうど $n-1$ 回割り切れることに使う。
+- **選択公理**：使わない。
+:::
+
+::: supplement
+**前提を弱めると.** \ref{nt:integral-basis.1}・\ref[2]{nt:integral-basis.2} は、PID $A$ とその商体の有限次分離拡大について同じ証明で成り立つ（判別式は $A^{\times2}$ 倍を除いて定まる）。\ref{nt:eisenstein-index} は、任意のデデキント環上で「$\mathfrak{p}$ についてアイゼンシュタイン」な多項式について、局所化した形で成り立つ。
+
+**似た定理.** \ref{nt:integral-basis.3} は、格子の部分格子の指数が基底変換の行列式の絶対値であることの特別な場合で、ミンコフスキーの幾何学（\ref{nt:page-class-group}）では $\sqrt{|d_{K}|}$ が $\mathcal{O}_{K}$ の格子の体積（の $2^{r_{2}}$ 倍）として現れる。
+
+**計算の観点.** 整数環の計算は「判別式の平方因子の素数 $p$ ごとに、$p$ で割った元が整かどうかを調べる」という手順になる（\ref{nt:squarefree-criterion}、ザッセンハウスのラウンド 2 アルゴリズムなど）。判別式の素因数分解が計算の律速段階であることが一般に知られている。
+:::
+
+## 高い視点 {#nt:sec-ri-viewpoint}
+
+::: remark 整数環は「算術的な曲線」
+$\operatorname{Spec}\mathcal{O}_{K}$ は 1 次元のスキームで、$\operatorname{Spec}\mathbb{Z}$ 上の有限な被覆（\ref{ag:fibers-gaussian} の $\mathbb{Z}[i]$ のように、各素数でのファイバーが有限個の点）である。整数環を決めることは、方程式 $f(\theta)=0$ が定める（特異点をもちうる）曲線 $\operatorname{Spec}\mathbb{Z}[\theta]$ を**正規化**することにあたり、指数 $[\mathcal{O}_{K}:\mathbb{Z}[\theta]]$ を割る素数は特異点のある場所である（代数曲線の正規化 \ref{ag:curve-normalization} の算術版）。判別式は「被覆が分岐する場所」を測る量で、これは次の頁以降で素イデアルの分岐として現れる。比喩で言えば、$\mathbb{Z}[\theta]$ は与えられた方程式で作った粗い模型で、$\mathcal{O}_{K}$ はその継ぎ目（特異点）をならした完成品であり、判別式は完成品を作るときに直す必要がありうる場所の目録である。
+:::
+
+## 問題 {#nt:sec-ri-problems}
+
+::: problem {#nt:prob-ri-gaussian}
+$\mathbb{Z}[i]$ と $\mathbb{Z}[\tfrac{1+\sqrt{-3}}{2}]$ がそれぞれ $\mathbb{Q}(i)$, $\mathbb{Q}(\sqrt{-3})$ の整数環であることと、判別式がそれぞれ $-4$, $-3$ であることを確かめよ。また、$\mathbb{Z}[\sqrt{-3}]$ の指数を求めよ。
+:::
+
+::: solution
+$-1\equiv3$, $-3\equiv1\pmod4$ なので \ref{nt:quadratic-integers} から整数環と判別式 $4\cdot(-1)=-4$, $-3$ を得る。$\mathbb{Z}[\sqrt{-3}]$ の基底 $1,\sqrt{-3}$ は $1,\omega$（$\omega=\tfrac{1+\sqrt{-3}}{2}$）で $\sqrt{-3}=2\omega-1$ と書けるので、基底変換の行列は $\begin{pmatrix}1&0\\-1&2\end{pmatrix}$、行列式 $2$、指数 $2$（\ref{nt:integral-basis} の Step 3）。実際 $d(1,\sqrt{-3})=4\cdot(-3)=-12=2^{2}\cdot(-3)$。
+:::
+
+::: problem {#nt:prob-ri-units-norm}
+$\alpha=1+\sqrt{2}\in\mathbb{Z}[\sqrt{2}]$ が単元であること、$\alpha$ の冪がすべて異なることを示せ。
+:::
+
+::: solution
+$N(\alpha)=(1+\sqrt{2})(1-\sqrt{2})=-1$ なので \ref{nt:integers-basic.4} から単元。$\alpha>1$（実数として）なので $\alpha^{m}$ は狭義単調増加で、すべて異なる。（単元群の構造は \ref{nt:page-units} で扱う。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

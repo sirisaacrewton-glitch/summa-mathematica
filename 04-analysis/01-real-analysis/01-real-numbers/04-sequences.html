@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数列の極限 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/01-real-numbers/04-sequences.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 数列の極限 {#calc:page-sequences keywords="limit of a sequence, limit laws, squeeze theorem, divergence to infinity, extended real line, limit superior, limit inferior, subsequential limits, n-th root, Bernoulli inequality, standard limits, Napier's constant e, Stolz-Cesaro theorem, Cesaro mean"}
+
+実数の連続性（\ref{calc:page-continuity-axioms}）を道具にして、実数列の極限を調べる。極限と四則演算の両立、無限大への発散、収束しない列の振る舞いを測る**上極限**と**下極限**、よく使う極限（$n$ 乗根、指数的減衰、階乗）、そして **ネイピア数** $e$ の定義を扱う。最後に、数列の比の極限を差分の比から求める**シュトルツ–チェザロの定理**を示す。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 3 章（3.1〜3.20, 3.30〜3.32）、杉浦光夫『解析入門 I』第 I 章 §2〜§3 の内容に相当する標準的な事項。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-sq-notation}
+
+::: notation
+- $\mathbb{R}$ は完備順序体（\ref{calc:complete-ordered-field}, \ref{calc:complete-ordered-field-unique}）。アルキメデス的で（\ref{calc:reals-basic}）、(M)・(B-W)・(C) などが成り立つ（\ref{calc:continuity-axioms-equivalent}）。
+- 収束・コーシー列・部分列と、その基本性質（極限の一意性、極限は弱い不等号を保つ、収束列は有界、単調部分列の存在）は \ref{calc:ordered-field-sequences}。中間値の定理 \ref{calc:reals-basic}。上限と下限 \ref{calc:supremum}, \ref{calc:sup-characterization}。
+- **拡大実数** $\overline{\mathbb{R}}\defeq\mathbb{R}\cup\{-\infty,+\infty\}$ に、すべての $x\in\mathbb{R}$ で $-\infty<x<+\infty$ となる全順序を入れる。$\overline{\mathbb{R}}$ の空でない部分集合は上限・下限をもつ（上に有界でなければ $\sup=+\infty$）。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 極限と演算 {#calc:sec-sq-laws}
+
+::: proposition 極限の演算 {#calc:limit-laws keywords="limits of sums, products, quotients and absolute values; squeeze theorem" index="極限の演算|きょくげんのえんざん, はさみうちの原理|はさみうちのげんり"}
+$a_{n}\to a$, $b_{n}\to b$ とする。
+1. $a_{n}+b_{n}\to a+b$、$ca_{n}\to ca$、$a_{n}b_{n}\to ab$、$|a_{n}|\to|a|$。
+2. $b\neq0$ なら、ある $N$ 以降 $b_{n}\neq0$ で、$\frac{a_{n}}{b_{n}}\to\frac ab$。
+3. **（はさみうち）** $a_{n}\le c_{n}\le b_{n}$（すべての $n$）で $a=b$ なら $c_{n}\to a$。
+:::
+
+::: proof
+**1.** 和は \ref{calc:ordered-field-sequences.4}。$|ca_{n}-ca|=|c||a_{n}-a|$。積：収束列は有界なので $|b_{n}|\le M$ として
+$$
+|a_{n}b_{n}-ab|\le|a_{n}-a||b_{n}|+|a||b_{n}-b|\le M|a_{n}-a|+|a||b_{n}-b|.
+$$
+$||a_{n}|-|a||\le|a_{n}-a|$。
+
+**2.** $\varepsilon=\frac{|b|}{2}$ の $N$ 以降 $|b_{n}|>\frac{|b|}{2}>0$。そこで
+$$
+\Bigl|\frac{1}{b_{n}}-\frac1b\Bigr|=\frac{|b-b_{n}|}{|b_{n}||b|}\le\frac{2}{|b|^{2}}|b_{n}-b|
+$$
+から $\frac1{b_{n}}\to\frac1b$ で、1 の積と合わせる。
+
+**3.** $\varepsilon>0$ について、十分大きい $n$ で $a-\varepsilon<a_{n}\le c_{n}\le b_{n}<a+\varepsilon$。
+:::
+
+::: definition 無限大への発散 {#calc:divergence-infinity keywords="a sequence diverges to +infinity if it eventually exceeds every real number" index="無限大への発散|むげんだいへのはっさん"}
+数列 $(a_{n})$ が**正の無限大に発散する**（$a_{n}\to+\infty$）とは、任意の $M\in\mathbb{R}$ に $N$ があって $n\ge N\Rightarrow a_{n}>M$ となることをいう。$a_{n}\to-\infty$ も同様。
+:::
+
+::: proposition 単調列の極限 {#calc:monotone-limit keywords="a monotone increasing sequence converges to its supremum if bounded and diverges to +infinity otherwise; 1/a_n -> 0 if a_n -> infinity" index="単調列の極限|たんちょうれつのきょくげん"}
+1. 単調増加列 $(a_{n})$ は、上に有界なら $\sup_{n}a_{n}$ に収束し、上に有界でなければ $+\infty$ に発散する。
+2. $a_{n}\to+\infty$ なら、ある $N$ 以降 $a_{n}>0$ で $\frac{1}{a_{n}}\to0$。
+:::
+
+::: proof
+1：有界な場合は \ref{calc:continuity-axioms-equivalent} の Step 3。有界でなければ、$M$ について $a_{N}>M$ となる $N$ があり、$n\ge N$ で $a_{n}\ge a_{N}>M$。2：$M=\frac1\varepsilon$ について $a_{n}>\frac1\varepsilon$ なら $0<\frac1{a_{n}}<\varepsilon$。
+:::
+
+## 上極限と下極限 {#calc:sec-sq-limsup}
+
+::: definition 上極限・下極限 {#calc:limsup keywords="limit superior limsup a_n = inf_n sup_{k>=n} a_k and limit inferior in the extended reals" index="上極限|じょうきょくげん, 下極限|かきょくげん"}
+実数列 $(a_{n})$ について、$\overline{\mathbb{R}}$ の中で
+$$
+\limsup_{n\to\infty}a_{n}\defeq\inf_{n}\sup_{k\ge n}a_{k},\qquad\liminf_{n\to\infty}a_{n}\defeq\sup_{n}\inf_{k\ge n}a_{k}
+$$
+と定め、**上極限**・**下極限**という。$s_{n}\defeq\sup_{k\ge n}a_{k}$ は $n$ について単調減少なので、$\limsup a_{n}=\lim s_{n}$（$\overline{\mathbb{R}}$ での極限）である。
+:::
+
+::: theorem 上極限の性質 {#calc:limsup-properties keywords="properties of limsup and liminf: epsilon characterization, largest subsequential limit, convergence iff limsup = liminf, subadditivity" index="上極限の性質|じょうきょくげんのせいしつ, 集積値|しゅうせきち"}
+実数列 $(a_{n})$, $(b_{n})$ について次が成り立つ。
+1. $\liminf a_{n}\le\limsup a_{n}$、$\limsup(-a_{n})=-\liminf a_{n}$。
+2. $L\in\mathbb{R}$ について、$L=\limsup a_{n}$ $\iff$ 任意の $\varepsilon>0$ について (i) ある $N$ 以降 $a_{n}<L+\varepsilon$、(ii) $a_{n}>L-\varepsilon$ となる $n$ が無限個ある。
+3. $\limsup a_{n}$ は、部分列の極限（$\overline{\mathbb{R}}$ の値も許す。**集積値**という）のうち最大のもの、$\liminf a_{n}$ は最小のもの。
+4. $(a_{n})$ が $a\in\mathbb{R}$ に収束する $\iff$ $\liminf a_{n}=\limsup a_{n}=a$。
+5. 右辺が $\infty-\infty$ の形でなければ、$\limsup(a_{n}+b_{n})\le\limsup a_{n}+\limsup b_{n}$。
+:::
+
+::: proof
+**Step 1（1）.** $\inf_{k\ge n}a_{k}\le a_{n}\le\sup_{k\ge n}a_{k}$。$m\le n$ なら $\inf_{k\ge m}a_{k}\le\inf_{k\ge n}a_{k}\le\sup_{k\ge n}a_{k}\le\sup_{k\ge m}a_{k}$ でもあるので、任意の $m,n$ について $\inf_{k\ge m}a_{k}\le\sup_{k\ge\max(m,n)}a_{k}\le\sup_{k\ge n}a_{k}$。$m$ について上限、$n$ について下限をとる。後半は $\sup(-A)=-\inf A$（\ref{calc:sup-characterization.2}）を各段に使う。
+
+**Step 2（2 の ⇒）.** $L=\inf_{n}s_{n}$ なので、$\varepsilon>0$ について $s_{N}<L+\varepsilon$ となる $N$ があり、$n\ge N$ で $a_{n}\le s_{N}<L+\varepsilon$。また各 $n$ で $s_{n}\ge L>L-\varepsilon$ なので、$a_{k}>L-\varepsilon$ となる $k\ge n$ がある。$n$ は任意なのでそのような $k$ は無限個。
+
+**Step 3（2 の ⇐）.** (i) から $N$ 以降 $s_{n}\le L+\varepsilon$、(ii) から各 $n$ で $s_{n}>L-\varepsilon$。よって $L-\varepsilon\le\inf s_{n}\le L+\varepsilon$。$\varepsilon$ は任意なので $\inf s_{n}=L$。
+
+**Step 4（3）.** 部分列 $a_{n_{j}}\to c\in\overline{\mathbb{R}}$ について、$a_{n_{j}}\le s_{n_{j}}$ と $s_{n}\to\limsup a_{n}$ から $c\le\limsup a_{n}$（$\overline{\mathbb{R}}$ でも極限は弱い不等号を保つ）。$L\defeq\limsup a_{n}$ に収束する部分列を作る。$L\in\mathbb{R}$ なら、2 の (ii) を $\varepsilon=\frac1j$ に使い、$n_{j}$ を「$n_{j}>n_{j-1}$ かつ $n_{j}$ が (i) の $N(\frac1j)$ 以上で $a_{n_{j}}>L-\frac1j$ となる最小の添字」と定めると、$|a_{n_{j}}-L|<\frac1j$。$L=+\infty$ なら $(a_{n})$ は上に有界でないので、$a_{n_{j}}>j$ となる $n_{j}>n_{j-1}$ を最小にとる。$L=-\infty$ なら $s_{n}\to-\infty$ で $a_{n}\le s_{n}$ から $a_{n}\to-\infty$。$\liminf$ は 1 の後半から。
+
+**Step 5（4）.** (⇒) 部分列もすべて $a$ に収束するので 3 から。(⇐) $\inf_{k\ge n}a_{k}\le a_{n}\le s_{n}$ で、両端が $a$ に収束するのではさみうち。
+
+**Step 6（5）.** $\sup_{k\ge n}(a_{k}+b_{k})\le\sup_{k\ge n}a_{k}+\sup_{k\ge n}b_{k}$ で、$n\to\infty$ とする（単調な列の極限の和）。
+
+::: hypcheck
+- **選択公理**：Step 4 で部分列の添字を「最小の」ものとして決め、使わなかった。
+- 5 の不等号は等号にならないことがある：$a_{n}=(-1)^{n}$, $b_{n}=-a_{n}$ では左辺 $0$、右辺 $2$。
+:::
+:::
+
+## よく使う極限 {#calc:sec-sq-standard}
+
+::: lemma ベルヌーイの不等式と $n$ 乗根 {#calc:nth-root keywords="Bernoulli inequality (1+h)^n >= 1+nh; existence and uniqueness of positive n-th roots in R" index="ベルヌーイの不等式|べるぬーいのふとうしき, 累乗根|るいじょうこん"}
+1. $h\ge-1$, $n\in\mathbb{N}$ なら $(1+h)^{n}\ge1+nh$。$h\ge0$, $n\ge2$ なら $(1+h)^{n}\ge\binom n2h^{2}$。
+2. $a\ge0$, $n\ge1$ について、$b^{n}=a$ となる $b\ge0$ がただ一つある（$b=a^{1/n}=\sqrt[n]{a}$ と書く）。$0\le a<a'$ なら $a^{1/n}<a'^{1/n}$。
+:::
+
+::: proof
+1：$n$ についての帰納法：$(1+h)^{n+1}\ge(1+nh)(1+h)=1+(n+1)h+nh^{2}\ge1+(n+1)h$（$1+h\ge0$ を使った）。後半は二項展開の $h^{2}$ の項だけを残す（他の項は $0$ 以上）。2：$f(y)=y^{n}$ は $[0,a+1]$ で連続（$|y^{n}-z^{n}|=|y-z|\,\bigl|\sum_{i}y^{i}z^{n-1-i}\bigr|\le n(a+1)^{n-1}|y-z|$）で、$f(0)=0\le a<a+1\le f(a+1)$ なので、中間値の定理（\ref{calc:reals-basic}）から $b$ がある。$0\le y<z$ なら $y^{n}<z^{n}$ なので一意で、単調性も同じ不等式から。
+:::
+
+::: proposition よく使う極限 {#calc:standard-limits keywords="1/n^k -> 0, a^{1/n} -> 1, n^{1/n} -> 1, x^n -> 0 for |x|<1, n^k x^n -> 0, x^n / n! -> 0" index="よく使う極限|よくつかうきょくげん"}
+1. $k\ge1$ なら $\frac{1}{n^{k}}\to0$。
+2. $a>0$ なら $a^{1/n}\to1$。
+3. $n^{1/n}\to1$。
+4. $|x|<1$ なら $x^{n}\to0$。より強く、$k\in\mathbb{N}$ について $n^{k}x^{n}\to0$。
+5. 任意の $x\in\mathbb{R}$ で $\frac{x^{n}}{n!}\to0$。
+:::
+
+::: proof
+**1.** $0<\frac{1}{n^{k}}\le\frac1n\to0$（アルキメデスの原理）。
+
+**2.** $a>1$ なら $h_{n}\defeq a^{1/n}-1>0$ で、ベルヌーイの不等式から $a=(1+h_{n})^{n}\ge1+nh_{n}$、$0<h_{n}\le\frac{a-1}{n}$。$a<1$ なら $\frac1a$ に使い、$a=1$ は明らか。
+
+**3.** $h_{n}\defeq n^{1/n}-1\ge0$。$n\ge2$ で $n=(1+h_{n})^{n}\ge\binom n2h_{n}^{2}$ から $0\le h_{n}\le\sqrt{\frac{2}{n-1}}\to0$（$\sqrt{\ }$ は単調で、$\frac{2}{n-1}<\varepsilon^{2}$ なら $\sqrt{\frac{2}{n-1}}<\varepsilon$）。
+
+**4.** $x\neq0$ とし、$\frac{1}{|x|}=1+h$（$h>0$）とおく。$n>2k$ なら二項展開の $h^{k+1}$ の項から
+$$
+(1+h)^{n}\ge\binom{n}{k+1}h^{k+1}>\frac{(n/2)^{k+1}}{(k+1)!}h^{k+1}
+$$
+（$n-k>\frac n2$ を使った）。よって $|n^{k}x^{n}|=\frac{n^{k}}{(1+h)^{n}}<\frac{2^{k+1}(k+1)!}{h^{k+1}}\cdot\frac1n\to0$。
+
+**5.** $m>2|x|$ をとると、$n>m$ で $\frac{|x|^{n}}{n!}=\frac{|x|^{m}}{m!}\prod_{j=m+1}^{n}\frac{|x|}{j}\le\frac{|x|^{m}}{m!}\bigl(\frac12\bigr)^{n-m}\to0$（4）。
+:::
+
+## ネイピア数 {#calc:sec-sq-e}
+
+::: theorem ネイピア数 {#calc:napier-e keywords="(1+1/n)^n is increasing and converges to the same limit e as the partial sums of 1/k!; 2 < e < 3" index="ネイピア数|ねいぴあすう, e|いー"}
+$e_{n}\defeq\bigl(1+\frac1n\bigr)^{n}$、$s_{n}\defeq\sum_{k=0}^{n}\frac{1}{k!}$ とおく。
+1. $(e_{n})$ と $(s_{n})$ は単調増加で、$e_{n}\le s_{n}<3$。
+2. 両者は同じ極限に収束する。その値を $e$ と書き、**ネイピア数**という。$2<e\le3$。
+:::
+
+::: proof
+**Step 1（二項展開）.** 
+$$
+e_{n}=\sum_{k=0}^{n}\binom nk\frac{1}{n^{k}}=\sum_{k=0}^{n}\frac{1}{k!}\prod_{j=0}^{k-1}\Bigl(1-\frac jn\Bigr).
+$$
+積の各因子は $1$ 以下なので $e_{n}\le s_{n}$。$n$ を $n+1$ に変えると、各 $k\le n$ の積の各因子 $1-\frac jn$ は $1-\frac{j}{n+1}$ に増え、さらに $k=n+1$ の正の項が加わるので $e_{n}<e_{n+1}$。$s_{n}$ が増加なのは明らか。
+
+**Step 2（上界）.** $k\ge1$ で $k!\ge2^{k-1}$ なので $s_{n}\le1+\sum_{k=1}^{n}2^{1-k}=1+2(1-2^{-n})<3$。
+
+**Step 3（極限の一致）.** 1・2 と (M) から $e_{n}\to e'$, $s_{n}\to e$。$e_{n}\le s_{n}$ から $e'\le e$。$m$ を固定し $n\ge m$ とすると、Step 1 の和を $k\le m$ に限って $e_{n}\ge\sum_{k=0}^{m}\frac1{k!}\prod_{j<k}(1-\frac jn)$。$n\to\infty$ とすると、右辺は有限個の項の和で各項は $\frac1{k!}$ に収束する（\ref{calc:limit-laws}）ので、$e'\ge s_{m}$。$m\to\infty$ で $e'\ge e$。$e_{1}=2<e_{2}$ から $2<e$、$s_{n}<3$ から $e\le3$。
+:::
+
+::: intuition
+$\bigl(1+\frac1n\bigr)^{n}$ は「年利 100% を $n$ 回に分けて複利で付けたときの 1 年後の元利合計」で、分割を細かくするほど増えるが、どこまでも増えるわけではない。その上限が $e$ である。同じ数が階乗の逆数の和でも表されることは、後に指数関数 $e^{x}=\sum\frac{x^{k}}{k!}$（\ref[指数関数と対数関数]{calc:page-exp-log}）として一般化される。
+:::
+
+## シュトルツ–チェザロの定理 {#calc:sec-sq-stolz}
+
+::: theorem シュトルツ–チェザロの定理 {#calc:stolz-cesaro keywords="Stolz-Cesaro theorem: if b_n increases strictly to infinity and the ratio of differences converges, then a_n/b_n converges to the same limit; Cesaro means" index="シュトルツ–チェザロの定理|しゅとるつちぇざろのていり, チェザロ平均|ちぇざろへいきん" refname="シュトルツ–チェザロの定理"}
+$(b_{n})$ が狭義単調増加で $b_{n}\to+\infty$、$\dfrac{a_{n+1}-a_{n}}{b_{n+1}-b_{n}}\to L\in\mathbb{R}$ なら、$\dfrac{a_{n}}{b_{n}}\to L$。とくに $a_{n}\to L$ なら $\dfrac{a_{1}+\cdots+a_{n}}{n}\to L$（**チェザロ平均**）。
+:::
+
+::: proof
+**Step 1.** $\varepsilon>0$ について、$n\ge N$ で $\bigl|\frac{a_{n+1}-a_{n}}{b_{n+1}-b_{n}}-L\bigr|<\frac{\varepsilon}{2}$ となる $N$ をとる（$b_{N}>0$ となるように大きくとる）。$b_{n+1}-b_{n}>0$ を掛けて、$n\ge N$ で $(L-\frac\varepsilon2)(b_{n+1}-b_{n})<a_{n+1}-a_{n}<(L+\frac\varepsilon2)(b_{n+1}-b_{n})$。$n=N,\dots,m-1$ について足すと
+$$
+\Bigl(L-\frac\varepsilon2\Bigr)(b_{m}-b_{N})<a_{m}-a_{N}<\Bigl(L+\frac\varepsilon2\Bigr)(b_{m}-b_{N}).
+$$
+
+**Step 2.** $b_{m}>0$ で割ると
+$$
+\Bigl|\frac{a_{m}}{b_{m}}-L\Bigr|<\frac\varepsilon2\Bigl(1-\frac{b_{N}}{b_{m}}\Bigr)+\frac{|a_{N}-Lb_{N}|}{b_{m}}\le\frac\varepsilon2+\frac{|a_{N}-Lb_{N}|}{b_{m}}.
+$$
+$b_{m}\to+\infty$ なので、十分大きい $m$ で右辺の第 2 項は $\frac{\varepsilon}{2}$ 未満。
+
+**Step 3（チェザロ平均）.** $A_{n}\defeq a_{1}+\cdots+a_{n}$, $B_{n}\defeq n$ とすると $\frac{A_{n+1}-A_{n}}{B_{n+1}-B_{n}}=a_{n+1}\to L$。
+
+::: hypcheck
+- **$b_{n}\to+\infty$**：Step 2 で第 2 項を消すのに使った。外すと偽：$b_{n}=1-\frac1n$, $a_{n}=b_{n}$ に $1$ を加えたもの $a_{n}=2-\frac1n$ では差の比は $1$ だが $\frac{a_{n}}{b_{n}}\to2$。
+- 逆は成り立たない：$a_{n}=(-1)^{n}$ のチェザロ平均は $0$ に収束するが $a_{n}$ は収束しない。
+:::
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- 上極限・下極限は、$\overline{\mathbb{R}}$ の順序完備性（すべての部分集合が上限・下限をもつ）を使った定義で、任意の完備束の列に一般化される。集合列の上極限・下極限 $\bigcap_{n}\bigcup_{k\ge n}A_{k}$ などは、測度論・確率論（ボレル–カンテリの補題）で使う。
+- シュトルツ–チェザロの定理は、離散版のロピタルの定理である（\ref[微分と平均値の定理]{calc:page-derivatives} で扱う）。$L=\pm\infty$ でも同じ証明で成り立つ。
+
+**前提を変えると.** 有理数体 $\mathbb{Q}$ の中では、$e_{n}=(1+\frac1n)^{n}$ は単調増加で有界な有理数列だが、極限 $e$ は無理数（\ref[指数関数と対数関数]{calc:page-exp-log} で示す）なので $\mathbb{Q}$ の中では収束しない。単調収束 (M) は実数の連続性そのものである。
+
+**高い視点.** 上極限は「列の未来全体の上限」を時間とともに追いかけた値で、位相的には列の集積点の集合（閉集合）の最大元である。比喩で言えば、上極限は「どれほど待っても、ときどきは届く最高の高さ」で、列が収束するとは、その高さと「どれほど待っても、ときどきは落ちる最低の深さ」（下極限）が一致することである。
+:::
+
+## 問題 {#calc:sec-sq-problems}
+
+::: problem {#calc:prob-sq-limsup-example}
+$a_{n}=(-1)^{n}\bigl(1+\frac1n\bigr)$ の上極限・下極限と、集積値の全体を求めよ。
+:::
+
+::: solution
+偶数番目の部分列は $1+\frac1{2m}\to1$、奇数番目は $-(1+\frac{1}{2m+1})\to-1$。どの部分列も、偶数番目か奇数番目の項を無限個含むので、収束するなら極限は $1$ か $-1$。よって集積値は $\{-1,1\}$ で、\ref{calc:limsup-properties.3} から $\limsup a_{n}=1$, $\liminf a_{n}=-1$。
+:::
+
+::: problem {#calc:prob-sq-sqrt-recursion}
+$a_{1}\defeq\sqrt2$, $a_{n+1}\defeq\sqrt{2+a_{n}}$ で定まる列は収束し、極限は $2$ であることを示せ。
+:::
+
+::: solution
+帰納法で $0<a_{n}<2$（$a_{n}<2$ なら $a_{n+1}<\sqrt4=2$）。$a_{n+1}^{2}-a_{n}^{2}=2+a_{n}-a_{n}^{2}=(2-a_{n})(1+a_{n})>0$ なので $a_{n+1}>a_{n}$（$\sqrt{\ }$ の単調性、\ref{calc:nth-root}）。(M) から $a_{n}\to a$、$0<a\le2$。$a_{n+1}^{2}=2+a_{n}$ で極限をとると $a^{2}=2+a$（\ref{calc:limit-laws}）、$a>0$ から $a=2$。
+:::
+
+::: problem {#calc:prob-sq-e-upper}
+$f_{n}\defeq\bigl(1+\frac1n\bigr)^{n+1}$ は単調減少で $e$ に収束することを示し、$e_{n}<e<f_{n}$ を導け。
+:::
+
+::: solution
+$\frac{f_{n-1}}{f_{n}}=\frac{(1+\frac1{n-1})^{n}}{(1+\frac1n)^{n+1}}=\frac{n}{n+1}\Bigl(\frac{n^{2}}{n^{2}-1}\Bigr)^{n}=\frac{n}{n+1}\Bigl(1+\frac{1}{n^{2}-1}\Bigr)^{n}$ で、ベルヌーイの不等式から $\ge\frac{n}{n+1}\bigl(1+\frac{n}{n^{2}-1}\bigr)>\frac{n}{n+1}\bigl(1+\frac1n\bigr)=1$。よって $f_{n}$ は減少。$f_{n}=e_{n}(1+\frac1n)\to e\cdot1$。増加列 $e_{n}$ と減少列 $f_{n}$ が同じ極限をもつので $e_{n}<e<f_{n}$（狭義なのは単調性が狭義だから）。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-sq-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

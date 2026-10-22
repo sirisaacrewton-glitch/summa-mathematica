@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CW 複体と胞体ホモロジー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/02-algebraic-topology/02-homology/06-cellular.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# CW 複体と胞体ホモロジー {#at:page-cellular-homology keywords="CW complex, cell, skeleton, attaching map, characteristic map, weak topology, finite-dimensional CW complex, homology of skeleta, cellular chain complex, cellular homology equals singular homology, cellular boundary formula, Euler characteristic of a CW complex, homology of surfaces, real projective space, complex projective space"}
+
+空間を「胞体」（開円板と同相な部分）の貼り合わせとして組み立てたものが **CW 複体**である。単体複体よりはるかに少ない部品で済み（$S^{n}$ は 0 胞体 1 個と $n$ 胞体 1 個）、ほとんどの重要な空間がこの形をもつ。CW 複体の特異ホモロジーは、各次元の胞体を基底とする小さな鎖複体（**胞体鎖複体**）のホモロジーとして計算でき、境界作用素は貼り付け写像の写像度で与えられる。このページでは胞体ホモロジーと特異ホモロジーの一致を示し、閉曲面と射影空間のホモロジーを計算する。
+
+> 資料：Massey『Singular Homology Theory』第 IV 章（CW 複体と胞体鎖複体）、Fulton『Algebraic Topology』などの標準的な内容。胞体境界公式の証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#at:sec-cw-notation}
+
+::: notation
+- 胞体の貼り付け $X\cup_{\varphi}D^{n}$ とその近傍は \ref{at:wedge-attaching}, \ref{at:attaching-neighborhoods}（商空間 \ref{top:quotient-topology}、商写像の普遍性 \ref{top:quotient-universal}、商空間上のホモトピー \ref{top:homotopy-on-quotient}）。
+- 特異ホモロジーの長完全列 \ref{at:pair-long-exact}、良い対と商空間 \ref{at:good-pair}、球面と円板 \ref{at:sphere-homology}、写像度 \ref{at:degree}、円周の写像度と回転数 \ref{at:circle-h1-generator}、射影空間の貼り付け写像の写像度（\ref{at:two-hemispheres} の後の例）。
+- $u_{m}$ を $H_{m}(D^{m},\partial D^{m})\cong\mathbb{Z}$ の生成元として 1 つ固定し、$s_{m-1}\defeq\partial u_{m}\in\tilde H_{m-1}(S^{m-1})$（生成元）とする。
+- 局所化（$\otimes\mathbb{Q}$）の完全性 \ref{ring:localization-exact}。
+- **選択公理**：使わない。
+:::
+
+## CW 複体 {#at:sec-cw-complexes}
+
+::: definition CW 複体 {#at:cw-complex keywords="CW complex built inductively by attaching cells, n-skeleton X^n, characteristic map, attaching map, open cell, weak topology, finite and finite-dimensional CW complexes, subcomplex" index="CW 複体|しーだぶりゅーふくたい, 胞体|ほうたい, 骨格|こっかく, 特性写像|とくせいしゃぞう, 胞体複体|ほうたいふくたい"}
+空間の列 $X^{0}\subset X^{1}\subset\cdots$ を次のように作る。
+1. $X^{0}$ は離散空間（その点を **0 胞体**という）。
+2. $X^{n}$ は、$n$ 次元円板の族 $D^{n}_{\alpha}$（$\alpha\in\Lambda_{n}$）と連続写像 $\varphi_{\alpha}\colon\partial D^{n}_{\alpha}\to X^{n-1}$（**貼り付け写像**）について、$X^{n-1}\sqcup\bigsqcup_{\alpha}D^{n}_{\alpha}$ で $x\in\partial D^{n}_{\alpha}$ と $\varphi_{\alpha}(x)$ を同一視した商空間。
+$X\defeq\bigcup_{n}X^{n}$ に、「$A\subset X$ が開 $\iff$ すべての $n$ で $A\cap X^{n}$ が $X^{n}$ で開」という位相（**弱位相**）を入れたものを **CW 複体**、$X^{n}$ を $n$ **骨格**という。合成 $\Phi_{\alpha}\colon D^{n}_{\alpha}\to X^{n-1}\sqcup\bigsqcup D^{n}_{\beta}\to X^{n}\subset X$ を**特性写像**、$e_{\alpha}\defeq\Phi_{\alpha}(\mathring D^{n}_{\alpha})$ を $n$ **胞体**（開胞体）という。胞体が有限個なら**有限** CW 複体、ある $N$ で $X=X^{N}$ なら**有限次元**という。
+:::
+
+::: example
+1. $S^{n}$（$n\ge1$）：0 胞体 1 個と、定値写像 $\partial D^{n}\to X^{0}$ で貼った $n$ 胞体 1 個。$D^{n}/\partial D^{n}\cong S^{n}$（\ref{at:two-hemispheres} の $\pi$）。
+2. グラフは 1 次元の CW 複体。ブーケ $\bigvee S^{1}$ と、2 胞体を貼った空間（\ref{at:presentation-complex}、閉曲面 $M_{g}$, $N_{h}$）は 2 次元の CW 複体。
+3. 有限 Δ 複体の幾何学的実現（\ref{at:delta-complex}）は、各 $n$ 単体を $n$ 胞体とする有限 CW 複体（特性写像は $\Delta^{n}\to|X|$、$\Delta^{n}\cong D^{n}$）。
+:::
+
+::: lemma 骨格の対 {#at:skeleton-pairs keywords="(X^n, X^{n-1 refname="CW 複体の骨格の対" refscope="field"}) is a good pair; X^n/X^{n-1} is a wedge of n-spheres; H_k(X^n, X^{n-1}) is free on the n-cells for k = n and zero otherwise" index="骨格の対|こっかくのつい"}
+1. $X^{n-1}$ は $X^{n}$ の閉集合で、$X^{n}$ から各 $n$ 胞体の中心 $\Phi_{\alpha}(0)$ を除いた開集合の変位レトラクト。とくに $(X^{n},X^{n-1})$ は良い対。
+2. 特性写像は同相 $\bigsqcup_{\alpha}D^{n}_{\alpha}/\bigsqcup_{\alpha}\partial D^{n}_{\alpha}\cong X^{n}/X^{n-1}$ を誘導する。
+3. $H_{k}(X^{n},X^{n-1})$ は $k\ne n$ で $0$、$k=n$ で $e_{\alpha}\defeq\Phi_{\alpha*}(u_{n})$（$\alpha\in\Lambda_{n}$）を基底とする自由アーベル群。
+:::
+
+::: proof
+**Step 1（1）.** \ref{at:attaching-neighborhoods} の証明は、胞体が何個あっても同じに進む：商写像 $q\colon X^{n-1}\sqcup\bigsqcup D^{n}_{\alpha}\to X^{n}$ について、$X^{n-1}\sqcup\bigsqcup\partial D^{n}_{\alpha}$ の飽和化 $X^{n-1}\sqcup\bigsqcup\partial D^{n}_{\alpha}$ は閉なので $X^{n-1}=q(\cdots)$ は閉、$W\defeq X^{n-1}\sqcup\bigsqcup(D^{n}_{\alpha}\setminus\{0\})$ は飽和した開集合で、各円板の上の放射状の変形 $((1-t)r+t)z$ は $q\restriction W$ を通って $X^{n}\setminus\{\text{中心}\}$ の変位ホモトピーに降りる（\ref{top:homotopy-on-quotient}）。
+
+**Step 2（2）.** $X^{n}/X^{n-1}$ と $\bigsqcup D_{\alpha}/\bigsqcup\partial D_{\alpha}$ は、どちらも $X^{n-1}\sqcup\bigsqcup D_{\alpha}$ を「$X^{n-1}\sqcup\bigsqcup\partial D_{\alpha}$ を 1 点に潰す」同値関係で割った商空間（商写像の合成は商写像）なので、恒等写像で同相。
+
+**Step 3（3）.** 1・2 と \ref{at:good-pair} から $H_{k}(X^{n},X^{n-1})\cong\tilde H_{k}(X^{n}/X^{n-1})\cong\tilde H_{k}(\bigsqcup D_{\alpha}/\bigsqcup\partial D_{\alpha})\cong H_{k}(\bigsqcup D_{\alpha},\bigsqcup\partial D_{\alpha})$（$(\bigsqcup D_{\alpha},\bigsqcup\partial D_{\alpha})$ も良い対）。非交和の相対鎖複体は直和なので、右辺は $\bigoplus_{\alpha}H_{k}(D^{n}_{\alpha},\partial D^{n}_{\alpha})$ で、\ref{at:sphere-homology} から結論。同型を合成すると $\alpha$ 成分の生成元は $\Phi_{\alpha*}u_{n}$ に対応する。
+:::
+
+::: proposition 骨格のホモロジー {#at:skeleton-homology keywords="H_k(X^n) = 0 for k > n; H_k(X^n) -> H_k(X^{n+1}) is an isomorphism for k < n and surjective for k = n; H_k(X^n) -> H_k(X) is an isomorphism for k < n" index="骨格のホモロジー|こっかくのほもろじー"}
+1. $k>n$ なら $H_{k}(X^{n})=0$。
+2. 包含の誘導写像 $H_{k}(X^{n})\to H_{k}(X^{n+1})$ は $k<n$ で同型、$k=n$ で全射。
+3. $X$ が有限次元なら $H_{k}(X^{n})\to H_{k}(X)$ は $k<n$ で同型。
+:::
+
+::: proof
+対 $(X^{m},X^{m-1})$ の長完全列 $H_{k+1}(X^{m},X^{m-1})\to H_{k}(X^{m-1})\to H_{k}(X^{m})\to H_{k}(X^{m},X^{m-1})$ と \ref{at:skeleton-pairs.3} を使う。1：$m$ についての帰納法。$H_{k}(X^{0})=0$（$k\ge1$：離散空間は 1 点の非交和、\ref{at:singular-h0-point}）。$k>m$ なら $H_{k}(X^{m-1})=0$（帰納法の仮定）と $H_{k}(X^{m},X^{m-1})=0$（$k\ne m$）から、完全性で $H_{k}(X^{m})=0$。2：$m=n+1$ で、$k<n$ なら両端 $0$、$k=n$ なら右端 $H_{n}(X^{n+1},X^{n})=0$。3：$X=X^{N}$ として 2 を $n,n+1,\dots,N-1$ で繰り返す。
+:::
+
+::: remark
+無限次元の CW 複体でも 3 は成り立つ。証明には、特異鎖の台（コンパクト集合）が有限次元の骨格に入ること（CW 複体のコンパクト部分集合は有限個の胞体としか交わらないこと）を使う。この位相的な補題は次ページ \ref{at:page-cw-topology} で証明し、無限次元の場合の 3 と下の主定理をそこで導く（\ref{at:cellular-singular-general}）。このページでは有限次元の場合を証明する。
+:::
+
+## 胞体ホモロジー {#at:sec-cw-cellular}
+
+::: definition 胞体鎖複体 {#at:cellular-chain-complex keywords="cellular chain complex C_n^CW = H_n(X^n, X^{n-1}), d_n = j_{n-1} o boundary" index="胞体鎖複体|ほうたいさふくたい, 胞体ホモロジー|ほうたいほもろじー"}
+$C^{\mathrm{CW}}_{n}(X)\defeq H_{n}(X^{n},X^{n-1})$（$n$ 胞体を基底とする自由アーベル群）とし、$d_{n}\defeq j_{n-1}\circ\partial_{n}$ とおく。ここで $\partial_{n}\colon H_{n}(X^{n},X^{n-1})\to H_{n-1}(X^{n-1})$ は対の連結射、$j_{n-1}\colon H_{n-1}(X^{n-1})\to H_{n-1}(X^{n-1},X^{n-2})$ は自然な写像。$d_{n}d_{n+1}=j_{n-1}(\partial_{n}j_{n})\partial_{n+1}=0$（$\partial_{n}j_{n}$ は対 $(X^{n},X^{n-1})$ の長完全列の隣り合う 2 つの写像の合成）。そのホモロジー $H^{\mathrm{CW}}_{n}(X)$ を**胞体ホモロジー**という。
+:::
+
+::: theorem 胞体ホモロジーと特異ホモロジー {#at:cellular-singular keywords="cellular homology is isomorphic to singular homology for CW complexes" index="胞体ホモロジーと特異ホモロジーの一致|ほうたいほもろじーととくいほもろじーのいっち"}
+有限次元 CW 複体 $X$ について $H^{\mathrm{CW}}_{n}(X)\cong H_{n}(X)$。
+:::
+
+::: proof
+**Step 1（$j_{n}$ は単射）.** 長完全列 $H_{n}(X^{n-1})\to H_{n}(X^{n})\xrightarrow{j_{n}}H_{n}(X^{n},X^{n-1})$ で、左端は \ref{at:skeleton-homology.1} で $0$。
+
+**Step 2（$\ker d_{n}$）.** $j_{n-1}$ も単射なので $\ker d_{n}=\ker\partial_{n}=\operatorname{im}j_{n}$（長完全列の完全性）。Step 1 から $j_{n}\colon H_{n}(X^{n})\cong\ker d_{n}$。
+
+**Step 3（$\operatorname{im}d_{n+1}$）.** $j_{n}$ は $\operatorname{im}\partial_{n+1}\subset H_{n}(X^{n})$ を $\operatorname{im}(j_{n}\partial_{n+1})=\operatorname{im}d_{n+1}$ に同型に写す。
+
+**Step 4.** 対 $(X^{n+1},X^{n})$ の長完全列 $H_{n+1}(X^{n+1},X^{n})\xrightarrow{\partial_{n+1}}H_{n}(X^{n})\to H_{n}(X^{n+1})\to H_{n}(X^{n+1},X^{n})=0$ から $H_{n}(X^{n+1})\cong H_{n}(X^{n})/\operatorname{im}\partial_{n+1}$。Step 2・3 から右辺は $\ker d_{n}/\operatorname{im}d_{n+1}=H^{\mathrm{CW}}_{n}(X)$。\ref{at:skeleton-homology.3} で $H_{n}(X^{n+1})\cong H_{n}(X)$。
+
+::: hypcheck
+- 有限次元は Step 4 の最後だけに使った（上の注意。一般の場合は \ref{at:cellular-singular-general}）。
+- \ref{at:skeleton-pairs.3}（相対ホモロジーが 1 つの次数に集中）が証明の全体を支えている。
+:::
+:::
+
+::: corollary CW 複体のホモロジーの性質 {#at:cw-homology-consequences keywords="H_k(X) = 0 above the dimension; H_n(X) is a quotient of a free group on n-cells; Euler characteristic of a finite CW complex" index="CW 複体のオイラー標数|しーだぶりゅーふくたいのおいらーひょうすう"}
+有限次元 CW 複体 $X$ について、
+1. $k>\dim X$ なら $H_{k}(X)=0$。$H_{n}(X)$ は $n$ 胞体の個数以下の個数の元で生成される。
+2. $X$ が有限なら $H_{n}(X)$ は有限生成で、ベッチ数 $b_{n}\defeq\dim_{\mathbb{Q}}H_{n}(X)\otimes\mathbb{Q}$ について $\chi(X)\defeq\sum(-1)^{n}c_{n}=\sum(-1)^{n}b_{n}$（$c_{n}$ は $n$ 胞体の個数）。とくに $\chi$ は胞体分割によらない。
+:::
+
+::: proof
+1：$H_{n}\cong\ker d_{n}/\operatorname{im}d_{n+1}$ は $C^{\mathrm{CW}}_{n}$ の部分群の商（PID 上の有限生成自由加群の部分加群は自由で階数は以下、\ref{mod:pid-submodule-free}）。2：$\mathbb{Q}$ との局所化は完全（\ref{ring:localization-exact}）なので $H_{n}(C^{\mathrm{CW}})\otimes\mathbb{Q}\cong H_{n}(C^{\mathrm{CW}}\otimes\mathbb{Q})$（$\otimes\mathbb{Q}$ は核と像を保つ）。あとは \ref{at:euler-poincare} の証明と同じ次元の計算。
+:::
+
+::: theorem 胞体境界公式 {#at:cellular-boundary-formula keywords="cellular boundary formula d(e_alpha) = sum over beta of deg(phi_{alpha beta refname="胞体境界公式"}) e_beta, degree of attaching map composed with collapse" index="胞体境界公式|ほうたいきょうかいこうしき"}
+$n\ge2$ の $n$ 胞体 $e_{\alpha}$ と $(n-1)$ 胞体 $e_{\beta}$ について、$q_{\beta}\colon X^{n-1}\to X^{n-1}/(X^{n-1}\setminus e_{\beta})$ を潰す写像とし、同相 $\bar\Phi_{\beta}\colon D^{n-1}/\partial D^{n-1}\cong X^{n-1}/(X^{n-1}\setminus e_{\beta})$（$\Phi_{\beta}$ の誘導）で右辺を球面と見る。$q_{\beta}\circ\varphi_{\alpha}\colon S^{n-1}\to X^{n-1}/(X^{n-1}\setminus e_{\beta})$ の写像度 $d_{\alpha\beta}$ を、$(q_{\beta}\varphi_{\alpha})_{*}s_{n-1}=d_{\alpha\beta}\,\bar\Phi_{\beta*}u_{n-1}$ で定める（$H_{n-1}(D^{n-1},\partial D^{n-1})\cong\tilde H_{n-1}(D^{n-1}/\partial D^{n-1})$ と同一視）。このとき
+$$
+d_{n}(e_{\alpha})=\sum_{\beta}d_{\alpha\beta}\,e_{\beta}
+$$
+（有限和：$\varphi_{\alpha}$ の像はコンパクトで有限個の胞体としか交わらない。有限 CW 複体では明らか）。$n=1$ では $d_{1}(e_{\alpha})=[\varphi_{\alpha}(1)]-[\varphi_{\alpha}(-1)]$（符号は $u_{1}$ の選び方による）。
+:::
+
+::: proof
+**Step 1（$\partial e_{\alpha}$）.** 特性写像は対の写像 $\Phi_{\alpha}\colon(D^{n},\partial D^{n})\to(X^{n},X^{n-1})$ で、$\Phi_{\alpha}\restriction\partial D^{n}=\varphi_{\alpha}$。連結射の自然性から $\partial_{n}e_{\alpha}=\partial_{n}\Phi_{\alpha*}u_{n}=\varphi_{\alpha*}\partial u_{n}=\varphi_{\alpha*}s_{n-1}\in H_{n-1}(X^{n-1})$。
+
+**Step 2（$\beta$ 成分の取り出し）.** $X^{n-1}\setminus e_{\beta}$ は $X^{n-2}$ と他の $(n-1)$ 胞体の閉包の和で、商写像による逆像が閉なので閉、$X^{n-2}$ を含む。対の写像の合成
+$$
+\Pi_{\beta}\colon(X^{n-1},X^{n-2})\to(X^{n-1},X^{n-1}\setminus e_{\beta})\to\bigl(X^{n-1}/(X^{n-1}\setminus e_{\beta}),\ast\bigr)
+$$
+の誘導写像 $\Pi_{\beta*}\colon C^{\mathrm{CW}}_{n-1}\to H_{n-1}(X^{n-1}/(X^{n-1}\setminus e_{\beta}),\ast)\cong\mathbb{Z}$ は $e_{\gamma}$ を、$\gamma\ne\beta$ なら $0$ に（$\Pi_{\beta}\circ\Phi_{\gamma}$ は定値写像なので $H_{n-1}(\ast,\ast)=0$ を経由する）、$\gamma=\beta$ なら $\bar\Phi_{\beta*}u_{n-1}$（生成元）に送る。よって $\Pi_{\beta*}$ は $\beta$ 座標を取り出す写像。
+
+**Step 3.** $\Pi_{\beta*}\circ j_{n-1}$ は $q_{\beta*}\colon H_{n-1}(X^{n-1})\to H_{n-1}(X^{n-1}/(X^{n-1}\setminus e_{\beta}),\ast)$ に等しい（対の写像の合成 $(X^{n-1},\varnothing)\to(X^{n-1},X^{n-2})\to\cdots$ が $q_{\beta}$）。よって $d_{n}e_{\alpha}$ の $\beta$ 座標は $q_{\beta*}\varphi_{\alpha*}s_{n-1}=d_{\alpha\beta}\bar\Phi_{\beta*}u_{n-1}$ の係数 $d_{\alpha\beta}$。
+
+**Step 4（同相 $\bar\Phi_{\beta}$）.** $\Phi_{\beta}$ は $\partial D^{n-1}$ を $X^{n-1}\setminus e_{\beta}$ に写すので連続写像 $\bar\Phi_{\beta}$ を誘導し、全単射。逆写像は、$X^{n-2}\sqcup\bigsqcup_{\gamma}D_{\gamma}$ から $D^{n-1}/\partial D^{n-1}$ への写像（$D_{\beta}$ では商写像、他はすべて基点）が商写像を通して誘導するもので連続（\ref{top:quotient-universal}）。
+
+**Step 5（$n=1$）.** $u_{1}$ を $\partial u_{1}=[1]-[-1]$ となるように選べば、Step 1 から $\partial_{1}e_{\alpha}=[\varphi_{\alpha}(1)]-[\varphi_{\alpha}(-1)]$ で、$j_{0}$ は $H_{0}(X^{0})=C^{\mathrm{CW}}_{0}$ の恒等写像。
+:::
+
+## 計算例 {#at:sec-cw-examples}
+
+::: example 球面とトーラス
+1. $S^{n}$（$n\ge2$）：胞体は次元 $0$ と $n$ だけなので $d=0$ で、$H_{0}=H_{n}=\mathbb{Z}$、他は $0$。\ref{at:sphere-homology} と一致。
+2. $S^{1}$：$d_{1}e=[x_{0}]-[x_{0}]=0$。
+:::
+
+::: proposition 閉曲面のホモロジー {#at:surface-homology keywords="homology of orientable surfaces M_g: Z, Z^{2g}, Z; non-orientable N_h: Z, Z^{h-1} + Z/2, 0" index="閉曲面のホモロジー|へいきょくめんのほもろじー"}
+\ref{at:presentation-complex} の後の例の閉曲面について
+$$
+H_{*}(M_{g})=(\mathbb{Z},\ \mathbb{Z}^{2g},\ \mathbb{Z}),\qquad H_{*}(N_{h})=(\mathbb{Z},\ \mathbb{Z}^{h-1}\oplus\mathbb{Z}/2\mathbb{Z},\ 0).
+$$
+:::
+
+::: proof
+**Step 1（1 胞体の係数）.** 1 骨格はブーケ $\bigvee S^{1}_{i}$ で、$X^{1}\setminus e_{i}$ は他の円周の和、$q_{i}$ は他の円周を潰す写像 $\bigvee S^{1}\to S^{1}_{i}$。2 胞体の貼り付け写像 $\varphi$ は語 $w$ を読む閉道で、$q_{i}\circ\varphi$ は、$w$ の各文字 $a_{i}^{\pm1}$ を $\omega_{\pm1}$、他の文字を定値道に置き換えた閉道の積。回転数は積について加法的（\ref{at:fundamental-group-circle}）なので、その回転数は $w$ の中の $a_{i}$ の指数和 $\epsilon_{i}(w)$。\ref{at:circle-h1-generator} から、胞体境界公式の係数は $d_{i}=\pm\epsilon_{i}(w)$ で、符号は $u_{1}$, $s_{1}$ と $\bar\Phi_{i}$ による向きの同一視だけで決まり $i$ ごとに一定（$w$ によらない）。以下の結論はこの符号によらない。
+
+**Step 2.** $M_{g}$：$w=\prod[a_{i},b_{i}]$ の指数和はすべて $0$ なので $d_{2}=0$。$d_{1}=0$（1 胞体の両端は同じ 0 胞体）。よって $H_{2}=\mathbb{Z}$, $H_{1}=\mathbb{Z}^{2g}$, $H_{0}=\mathbb{Z}$。$N_{h}$：$w=a_{1}^{2}\cdots a_{h}^{2}$ で $d_{2}(e)=2(a_{1}+\cdots+a_{h})$ は単射なので $H_{2}=0$、$H_{1}=\mathbb{Z}^{h}/\langle2(a_{1}+\cdots+a_{h})\rangle\cong\mathbb{Z}^{h-1}\oplus\mathbb{Z}/2$（\ref{at:surfaces-distinguished} の Step 3 と同じ基底変換）。
+:::
+
+::: proposition 射影空間のホモロジー {#at:projective-space-homology keywords="homology of RP^n: Z in degree 0, Z/2 in odd degrees below n, Z in degree n if n is odd; homology of CP^n: Z in even degrees up to 2n" index="射影空間のホモロジー|しゃえいくうかんのほもろじー"}
+1. $\mathbb{R}P^{n}$ は各次元 $0\le k\le n$ に 1 個ずつ胞体をもつ CW 複体で、$d_{k}=\pm(1+(-1)^{k})$。したがって
+$$
+H_{k}(\mathbb{R}P^{n})\cong\begin{cases}\mathbb{Z}&(k=0,\ \text{または }k=n\text{ が奇数})\\\mathbb{Z}/2\mathbb{Z}&(k\text{ が奇数で }0<k<n)\\0&(\text{それ以外})\end{cases}
+$$
+2. $\mathbb{C}P^{n}$ は次元 $0,2,\dots,2n$ に 1 個ずつ胞体をもつ CW 複体で、$H_{2k}(\mathbb{C}P^{n})\cong\mathbb{Z}$（$0\le k\le n$）、他は $0$。
+:::
+
+::: proof
+**Step 1（$\mathbb{R}P^{k}$ の胞体構造）.** $\mathbb{R}P^{k-1}\subset\mathbb{R}P^{k}$ を $x_{k+1}=0$ の点の像とする。$\Phi\colon D^{k}\to\mathbb{R}P^{k}$, $y\mapsto[p_{+}(y)]$（上半球を経由）と包含 $\mathbb{R}P^{k-1}\to\mathbb{R}P^{k}$ は、$\partial D^{k}$ の上で $q\colon S^{k-1}\to\mathbb{R}P^{k-1}$ と両立するので、連続写像 $\mathbb{R}P^{k-1}\cup_{q}D^{k}\to\mathbb{R}P^{k}$ を誘導する。これは全単射（$x_{k+1}\ne0$ の類は $x_{k+1}>0$ の代表をただ 1 つもつ）で、定義域はコンパクト（$\mathbb{R}P^{k-1}\sqcup D^{k}$ の像）、値域はハウスドルフ（$S^{k}$ の異なる 2 つの類 $\{\pm x\}$, $\{\pm y\}$ は、4 点の距離の最小値の半分を半径とする球の和で分離できる）なので同相（\ref{top:compact-to-hausdorff}）。帰納法で $\mathbb{R}P^{n}$ は各次元に 1 個ずつ胞体をもち、$k$ 胞体の貼り付け写像は $q\colon S^{k-1}\to\mathbb{R}P^{k-1}$。
+
+**Step 2（境界）.** $k\ge2$ で $d_{k}(e_{k})=d_{k,k-1}e_{k-1}$。$q_{k-1}\circ q$ は \ref{at:two-hemispheres} の後の例の $f$ で、$|d_{k,k-1}|=1+(-1)^{k}$。$k=1$：$\mathbb{R}P^{1}$ の 1 胞体の両端は同じ 0 胞体なので $d_{1}=0=1+(-1)^{1}$。
+
+**Step 3（ホモロジー）.** 鎖複体は $\mathbb{Z}\xleftarrow{0}\mathbb{Z}\xleftarrow{\pm2}\mathbb{Z}\xleftarrow{0}\mathbb{Z}\xleftarrow{\pm2}\cdots$（$d_{k}$ は $k$ 偶数で $\pm2$、奇数で $0$）。$0<k<n$ では、$k$ 奇数なら $\ker d_{k}=\mathbb{Z}$, $\operatorname{im}d_{k+1}=2\mathbb{Z}$ で $\mathbb{Z}/2$、$k$ 偶数なら $\ker d_{k}=0$。$k=n$ では $\operatorname{im}d_{n+1}=0$ で、$n$ 奇数なら $\mathbb{Z}$、偶数なら $0$。
+
+**Step 4（$\mathbb{C}P^{n}$）.** $\mathbb{C}P^{n}\defeq S^{2n+1}/S^{1}$（$S^{2n+1}\subset\mathbb{C}^{n+1}$、$z\sim\lambda z$, $|\lambda|=1$）。$D^{2k}\to\mathbb{C}P^{k}$, $y\mapsto[y,\sqrt{1-|y|^{2}}]$（$y\in\mathbb{C}^{k}\cong\mathbb{R}^{2k}$）は Step 1 と同様に、$\mathbb{C}P^{k-1}\cup_{q}D^{2k}\cong\mathbb{C}P^{k}$（$q\colon S^{2k-1}\to\mathbb{C}P^{k-1}$ は商写像）を与える（最後の座標が $0$ でない類は、最後の座標を正の実数にする代表をただ 1 つもつ）。胞体は偶数次元だけなので $d=0$ で、$C^{\mathrm{CW}}$ がそのままホモロジー。
+
+::: hypcheck
+- $\mathbb{R}P^{n}$ の計算で写像度の符号は不要（Step 3 は $\pm2$ のどちらでも同じ）。
+- 値域のハウスドルフ性は Step 1 の同相に使った。$\mathbb{C}P^{n}$ のハウスドルフ性は、$S^{1}$ 軌道（コンパクト）の間の距離が正であることから同様に分かる。
+:::
+:::
+
+::: supplement
+**一般化と注意.** レンズ空間 $L(p;q_{1},\dots,q_{n})=S^{2n-1}/(\mathbb{Z}/p)$ も各次元に 1 個ずつの胞体をもち、$H_{k}=\mathbb{Z}/p$（$k$ 奇数、$0<k<2n-1$）であることが知られている（本サイト未収録）。$L(p;q)$ たちはホモロジー（や基本群）が同じでもホモトピー同値でない例を含む。CW 複体の重要な性質として、任意の連続写像は胞体写像（$X^{n}$ を $Y^{n}$ に写す写像）とホモトープであること（**胞体近似定理**、\tref{at:cellular-approximation}）と、CW 複体の間の弱ホモトピー同値はホモトピー同値であること（ホワイトヘッドの定理、\tref{at:whitehead-theorem}）がある。
+
+**高い視点.** 胞体鎖複体は、骨格によるフィルトレーション $X^{0}\subset X^{1}\subset\cdots$ のスペクトル系列（本サイト未収録）の $E^{1}$ 項で、$E^{1}_{p,q}=H_{p+q}(X^{p},X^{p-1})$ が $q=0$ に集中するために $E^{2}$ で退化する、という見方ができる（知られている）。比喩で言えば、特異鎖は「空間を無数の小石で埋めた帳簿」、胞体鎖は「部屋ごとに 1 行の帳簿」で、骨格の対の相対ホモロジーが 1 次数に集中することが、詳細な帳簿を部屋ごとの帳簿に要約してよい理由である。
+:::
+
+::: supplement 計算の観点
+有限 CW 複体のホモロジーは、胞体境界の整数行列のスミス標準形で求まる（\ref{at:page-simplicial-homology} の計算の観点と同じ）。ただし係数 $d_{\alpha\beta}$ は貼り付け写像の写像度で、写像が具体的に（たとえば単体的に）与えられていないと計算できない。Δ 複体や単体複体では係数は $\pm1$ と $0$ に限られ、組合せ的に読み取れる。
+:::
+
+## 問題 {#at:sec-cw-problems}
+
+::: problem {#at:prob-cw-klein}
+クラインの壺（$N_{2}$）のホモロジーを胞体鎖複体で求め、\ref{at:prob-klein-bottle} の結果と比べよ。
+:::
+
+::: solution
+\ref{at:surface-homology} で $h=2$：$H_{1}=\mathbb{Z}\oplus\mathbb{Z}/2$, $H_{2}=0$。Δ 複体での計算と一致する（両者が一致することの一般論は \ref[単体的ホモロジーと特異ホモロジーの一致]{at:page-simplicial-singular}）。
+:::
+
+::: problem {#at:prob-euler-surfaces}
+$\chi(M_{g})=2-2g$, $\chi(N_{h})=2-h$ を胞体の数とベッチ数の両方から確かめよ。
+:::
+
+::: solution
+胞体：$M_{g}$ は $1-2g+1$、$N_{h}$ は $1-h+1$。ベッチ数：$M_{g}$ は $1-2g+1$、$N_{h}$ は $1-(h-1)+0$。
+:::
+
+::: problem {#at:prob-rp-even-odd}
+$\mathbb{R}P^{2}$ と $S^{2}$、$\mathbb{R}P^{3}$ と $S^{3}$ は、それぞれホモトピー同値でないことを示せ。
+:::
+
+::: solution
+$H_{1}(\mathbb{R}P^{2})\cong H_{1}(\mathbb{R}P^{3})\cong\mathbb{Z}/2$ だが $H_{1}(S^{2})=H_{1}(S^{3})=0$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

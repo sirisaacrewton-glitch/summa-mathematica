@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>解析接続とモノドロミー定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/02-complex-analysis/03-global/05-analytic-continuation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 解析接続とモノドロミー定理 {#cx:page-analytic-continuation keywords="function element, germ of a holomorphic function, direct analytic continuation, analytic continuation along a path, uniqueness of continuation, stability under small perturbations of the path, monodromy theorem, global branches on simply connected domains, continuation of log and square root around a circle, natural boundary, lacunary series, sheaf of germs, etale space, Riemann surface of an analytic function"}
+
+正則関数は一致の定理によって「硬い」ので、小さな円板の上の関数を、隣り合う円板へ次々と延ばしていくと、延長の仕方は道ごとに一つに決まる（**解析接続**）。ただし、違う道を通ると違う関数になって戻ってくることがある：$\operatorname{Log}$ を原点のまわりに一周させると $2\pi i$ だけずれ、$\sqrt z$ は符号が変わる。このページでは、道に沿った解析接続を定式化し、その一意性と、道を少し動かしても結果が変わらないことを示す。その帰結が**モノドロミー定理**で、端点を止めてホモトープな道に沿った接続は同じ結果を与える。とくに単連結な領域では、すべての道に沿って接続できる関数の芽は、領域全体の正則関数を定める。最後に、どの方向にも接続できない例（自然境界）を挙げ、層とエタール空間・被覆空間の言葉との関係を述べる。
+
+## 記法と定義の確認 {#cx:sec-ac-notation}
+
+::: notation
+- 一致の定理 \tref{cx:identity-theorem}、正則関数は解析的 \tref{cx:holomorphic-analytic}、対数の主値 \ref{cx:principal-log}, \ref{cx:log-holomorphic}、正則な対数 \ref{cx:holomorphic-log}。
+- 道とホモトピー \ref{at:path}, \ref{at:homotopy}、道の積の基本性質 \tref{at:path-groupoid}、単連結（\ref{at:fundamental-group} の 3）、ルベーグ数の補題 \tref{top:lebesgue-number}、一様連続性（コンパクト距離空間上の連続写像）、コンパクト集合と閉集合の距離 \ref{top:compact-closed-distance}。
+- 二つの開円板の共通部分は凸で、空でなければ連結である。
+- 以下、道は連続写像 $\gamma\colon[0,1]\to\C$（区分的 $C^{1}$ でなくてよい）。
+- **公理系**：$\ZF$ で行い、選択公理は使わない（有限個の選択だけを使う）。
+:::
+
+## 関数の芽と解析接続 {#cx:sec-ac-definitions}
+
+::: definition 関数要素と芽 {#cx:germ keywords="function element (f, D): an open disk with a holomorphic function; germ of a holomorphic function at a point; direct analytic continuation" index="関数要素|かんすうようそ, 芽（正則関数）|めせいそくかんすう, 直接接続|ちょくせつせつぞく"}
+1. 開円板 $D$ と $f\in\mathcal{O}(D)$ の組 $(f,D)$ を**関数要素**という。
+2. 点 $a$ について、$a$ を含む開集合上の正則関数 $(f,U)$ と $(g,V)$ は、$a$ のある近傍で $f=g$ のとき同値であるという。同値類を $f$ の $a$ における**芽**といい $[f]_{a}$ と書く。
+3. 関数要素 $(f,D)$ と $(g,E)$ が $D\cap E\neq\varnothing$ かつ $D\cap E$ 上で $f=g$ のとき、互いに**直接接続**であるという。
+:::
+
+::: lemma 芽の一致の広がり {#cx:germ-agreement keywords="if two function elements have the same germ at one point of the intersection of their disks, they agree on the whole intersection" index=""}
+関数要素 $(f,D)$, $(g,E)$ と $b\in D\cap E$ について $[f]_{b}=[g]_{b}$ なら、$D\cap E$ 全体で $f=g$。
+:::
+
+::: proof
+$D\cap E$ は空でない凸集合なので連結な開集合（領域）。$f-g$ は $D\cap E$ で正則で、$b$ のある近傍で $0$ なので、一致の定理から $D\cap E$ で $0$。
+:::
+
+::: definition 道に沿った解析接続 {#cx:continuation-along-path keywords="analytic continuation along a path: a family of function elements (f_t, D_t) with gamma(t) in D_t and locally consistent germs" index="道に沿った解析接続|みちにそったかいせきせつぞく, 解析接続|かいせきせつぞく"}
+道 $\gamma$ に沿った**解析接続**とは、関数要素の族 $(f_{t},D_{t})_{t\in[0,1]}$ で、$\gamma(t)\in D_{t}$ であり、各 $t$ について $\delta>0$ があって、$|s-t|<\delta$ なら $\gamma(s)\in D_{t}$ かつ $[f_{s}]_{\gamma(s)}=[f_{t}]_{\gamma(s)}$ となるものをいう。$[f_{0}]_{\gamma(0)}$ を**始めの芽**、$[f_{1}]_{\gamma(1)}$ を**終わりの芽**という。開集合 $U$ について、すべての $D_{t}\subset U$ のとき $U$ の中の解析接続という。
+:::
+
+::: intuition
+道に沿って小さな円板を並べ、隣り合う円板の上では関数が一致するようにつないでいく、というのが定義の意味である。円板の大きさは道の場所ごとに違ってよい。
+:::
+
+::: theorem 解析接続の一意性 {#cx:continuation-uniqueness keywords="two analytic continuations along the same path with the same initial germ have the same germ at every point, in particular the same terminal germ" index="解析接続の一意性|かいせきせつぞくのいちいせい"}
+$(f_{t},D_{t})$ と $(g_{t},E_{t})$ がともに道 $\gamma$ に沿った解析接続で、$[f_{0}]_{\gamma(0)}=[g_{0}]_{\gamma(0)}$ なら、すべての $t$ で $[f_{t}]_{\gamma(t)}=[g_{t}]_{\gamma(t)}$。とくに終わりの芽は一致する。
+:::
+
+::: proof
+**Step 1.** $T\defeq\{t\in[0,1]\mid[f_{t}]_{\gamma(t)}=[g_{t}]_{\gamma(t)}\}$ とおく。$0\in T$。$t\in[0,1]$ について、$\delta>0$ を両方の族について定義の条件が成り立つようにとる（二つの $\delta$ の小さい方）。
+
+**Step 2（$T$ は開）.** $t\in T$ なら、\ref{cx:germ-agreement} から $D_{t}\cap E_{t}$ で $f_{t}=g_{t}$。$|s-t|<\delta$ なら $\gamma(s)\in D_{t}\cap E_{t}$ で、$[f_{s}]_{\gamma(s)}=[f_{t}]_{\gamma(s)}=[g_{t}]_{\gamma(s)}=[g_{s}]_{\gamma(s)}$、すなわち $s\in T$。
+
+**Step 3（$T$ は閉）.** $t$ が $T$ の閉包の点なら、$|s-t|<\delta$ となる $s\in T$ がある。$\gamma(s)\in D_{t}\cap E_{t}$ で $[f_{t}]_{\gamma(s)}=[f_{s}]_{\gamma(s)}=[g_{s}]_{\gamma(s)}=[g_{t}]_{\gamma(s)}$。\ref{cx:germ-agreement} から $D_{t}\cap E_{t}$ で $f_{t}=g_{t}$、とくに $\gamma(t)$ の近くで一致し $t\in T$。
+
+**Step 4.** $[0,1]$ は連結なので $T=[0,1]$。
+:::
+
+::: example
+**対数の接続.** $\gamma(t)=e^{2\pi it}$ と、$D_{t}\defeq D(\gamma(t),1)$、$L_{t}(z)\defeq\operatorname{Log}(ze^{-2\pi it})+2\pi it$ をとる（$z\in D_{t}$ なら $ze^{-2\pi it}\in D(1,1)\subset\C^{-}$ なので定義される）。$e^{L_{t}(z)}=z$ なので $L_{s}-L_{t}$ は $D_{s}\cap D_{t}$ 上で $2\pi i\mathbb{Z}$ に値をとる連続関数で、連結性から定数。$|s-t|<\frac12$ なら $z=\gamma(s)$ で $L_{s}(\gamma(s))=2\pi is$, $L_{t}(\gamma(s))=\operatorname{Log}(e^{2\pi i(s-t)})+2\pi it=2\pi is$ なので定数は $0$。よって $(L_{t},D_{t})$ は $\gamma$ に沿った解析接続で、始めの芽は $[\operatorname{Log}]_{1}$、終わりの芽は $[\operatorname{Log}+2\pi i]_{1}$。原点を一周すると対数は $2\pi i$ だけずれる。同様に $\sqrt z\defeq e^{\frac12\operatorname{Log}z}$ の芽は一周で $-\sqrt z$ になる。
+:::
+
+## モノドロミー定理 {#cx:sec-ac-monodromy}
+
+::: lemma 道の摂動に対する安定性 {#cx:continuation-stability keywords="if an analytic continuation exists along gamma, then for paths sigma uniformly close to gamma with the same endpoints, any continuation along sigma with the same initial germ has the same terminal germ" index=""}
+$(f_{t},D_{t})$ を道 $\gamma$ に沿った解析接続とする。$\varepsilon>0$ があって、$\sigma(0)=\gamma(0)$, $\sigma(1)=\gamma(1)$, $\sup_{t}|\sigma(t)-\gamma(t)|<\varepsilon$ を満たす任意の道 $\sigma$ について、次が成り立つ。
+1. $\sigma$ に沿って、始めの芽が $[f_{0}]_{\gamma(0)}$ の解析接続が存在し、
+2. そのような解析接続の終わりの芽はどれも $[f_{1}]_{\gamma(1)}$ に等しい。
+
+さらに、$\gamma$ の解析接続が開集合 $U$ の中にあれば、1 の解析接続も $U$ の中にとれる。
+:::
+
+::: proof
+**Step 1（区間の分割）.** 各 $\tau$ について定義の $\delta_{\tau}$ をとると、開区間 $(\tau-\delta_{\tau},\tau+\delta_{\tau})$ は $[0,1]$ を覆う。\ref{top:lebesgue-number}から $\lambda>0$ があって、長さ $\lambda$ 未満の区間はどれかの $(\tau-\delta_{\tau},\tau+\delta_{\tau})$ に含まれる。分割 $0=t_{0}<\cdots<t_{n}=1$ を幅が $\lambda$ 未満にとり、各 $j$ について $[t_{j-1},t_{j}]\subset(\tau_{j}-\delta_{\tau_{j}},\tau_{j}+\delta_{\tau_{j}})$ となる $\tau_{j}$ を一つずつとる（有限個の選択）。$B_{j}\defeq D_{\tau_{j}}$, $F_{j}\defeq f_{\tau_{j}}$ とおくと、$\gamma([t_{j-1},t_{j}])\subset B_{j}$ で、$s\in[t_{j-1},t_{j}]$ について $[F_{j}]_{\gamma(s)}=[f_{s}]_{\gamma(s)}$。
+
+**Step 2（$\varepsilon$）.** コンパクト集合 $\gamma([t_{j-1},t_{j}])$ は開円板 $B_{j}$ に含まれるので、$\C\setminus B_{j}$ との距離 $\varepsilon_{j}>0$ がある（\ref{top:compact-closed-distance}）。$\varepsilon\defeq\min_{j}\varepsilon_{j}$。すると $\sup|\sigma-\gamma|<\varepsilon$ なら $\sigma([t_{j-1},t_{j}])\subset B_{j}$。
+
+**Step 3（隣どうしの一致）.** $\gamma(t_{j})\in B_{j}\cap B_{j+1}$ で、$[F_{j}]_{\gamma(t_{j})}=[f_{t_{j}}]_{\gamma(t_{j})}=[F_{j+1}]_{\gamma(t_{j})}$。\ref{cx:germ-agreement} から $B_{j}\cap B_{j+1}$ 上で $F_{j}=F_{j+1}$。
+
+**Step 4（$\sigma$ に沿った接続）.** $t\in[t_{j-1},t_{j})$ について $(g_{t},E_{t})\defeq(F_{j},B_{j})$、$t=1$ では $(F_{n},B_{n})$ とする。これは $\sigma$ に沿った解析接続である：区間の内部では関数要素が一定で $\sigma(s)\in B_{j}$、分点 $t_{j}$ では $\sigma(t_{j})\in B_{j}\cap B_{j+1}$ で Step 3 から $F_{j}$ と $F_{j+1}$ の芽が一致し、$\sigma$ の連続性から $t_{j}$ の近くの $s$ で $\sigma(s)\in B_{j}\cap B_{j+1}$。始めの芽は $[F_{1}]_{\gamma(0)}=[f_{0}]_{\gamma(0)}$、終わりの芽は $[F_{n}]_{\gamma(1)}=[f_{1}]_{\gamma(1)}$。$B_{j}=D_{\tau_{j}}$ なので、$D_{t}\subset U$ ならこの接続も $U$ の中にある。
+
+**Step 5（2）.** \ref{cx:continuation-uniqueness} から、$\sigma$ に沿った同じ始めの芽の解析接続は、Step 4 のものと同じ終わりの芽をもつ。
+:::
+
+::: theorem モノドロミー定理 {#cx:monodromy keywords="monodromy theorem: if a germ can be continued along every path of a homotopy with fixed endpoints, then the continuations along the two end paths give the same terminal germ" index="モノドロミー定理|ものどろみーていり" refname="モノドロミー定理"}
+$U$ を開集合、$H\colon[0,1]\times[0,1]\to U$ を道 $\gamma_{0}$ から $\gamma_{1}$ への端点を止めたホモトピー（$\gamma_{s}\defeq H(\cdot,s)$、$\gamma_{s}(0)=a$, $\gamma_{s}(1)=b$）とする。$a$ における芽 $\varphi$ が、すべての $s$ について $\gamma_{s}$ に沿って $U$ の中で解析接続できるなら、$\gamma_{0}$ に沿った接続の終わりの芽と $\gamma_{1}$ に沿った接続の終わりの芽は等しい。
+:::
+
+::: proof
+**Step 1.** 各 $s$ について、$\gamma_{s}$ に沿った解析接続の終わりの芽 $\Phi(s)$ は、接続の選び方によらず一つに決まる（\ref{cx:continuation-uniqueness}）。
+
+**Step 2（局所定数）.** $s_{0}$ を固定し、$\gamma_{s_{0}}$ に沿った接続について \ref{cx:continuation-stability} の $\varepsilon$ をとる。$H$ はコンパクト集合上の連続写像なので一様連続で、$\eta>0$ があって $|s-s_{0}|<\eta$ なら $\sup_{t}|\gamma_{s}(t)-\gamma_{s_{0}}(t)|<\varepsilon$。そのような $s$ では、$\gamma_{s}$ は端点が同じなので、\ref{cx:continuation-stability.2} から $\Phi(s)=\Phi(s_{0})$。
+
+**Step 3.** $\Phi$ は $[0,1]$ 上で局所定数なので、連結性から定数で、$\Phi(0)=\Phi(1)$。
+
+::: hypcheck
+- **前提「すべての $\gamma_{s}$ に沿って接続できる」**：Step 1・2 で $\Phi(s)$ が定義されるために使った。これを外すと成り立たない：$U=\C$, $\varphi=[\operatorname{Log}]_{1}$ で、$1$ を基点とする単位円周の道 $\gamma_{0}$ と定値道 $\gamma_{1}$ は $\C$ の中で（原点を通る道を経由して）ホモトープだが、終わりの芽は $\operatorname{Log}+2\pi i$ と $\operatorname{Log}$ で異なる。原点を通る道に沿っては接続できないからである。
+- 道は連続であればよく、区分的 $C^{1}$ である必要はない（解析接続は積分を使わずに定義した）。
+:::
+:::
+
+::: corollary 単連結領域上の大域的な分枝 {#cx:global-branch keywords="on a simply connected domain, a germ that can be continued along every path in the domain extends to a holomorphic function on the whole domain" index="大域的な分枝|たいいきてきなぶんし"}
+$U$ を単連結な領域、$a\in U$、$\varphi$ を $a$ における芽とし、$a$ から始まる $U$ 内の任意の道に沿って $\varphi$ が $U$ の中で解析接続できるとする。このとき $U$ で正則な $F$ で $[F]_{a}=\varphi$ となるものがただ一つある。
+:::
+
+::: proof
+**Step 1（定義）.** $z\in U$ について、$a$ から $z$ への $U$ 内の道 $\gamma$（$U$ は弧状連結）に沿った接続の終わりの芽を $\psi_{\gamma}$ とし、$F(z)\defeq\psi_{\gamma}$ の $z$ での値とおく。
+
+**Step 2（道によらない）.** $a$ から $z$ への二つの道 $\gamma,\gamma'$ について、$\gamma\cdot\bar\gamma'$ は閉道で、$U$ が単連結なので定値道とホモトープ。\ref{at:path-groupoid} から $\gamma\simeq\gamma'$（端点を止めて）。モノドロミー定理（すべての道に沿って接続できるという仮定から、ホモトピーの途中の道に沿っても接続できる）から $\psi_{\gamma}=\psi_{\gamma'}$。
+
+**Step 3（正則性）.** $z\in U$ と、$\gamma$ に沿った接続の最後の関数要素 $(g,D)$ をとる。$w\in D\cap D(z,r)$（$D(z,r)\subset U$）について、$\gamma$ に線分 $[z,w]$ をつないだ道に沿っては、元の接続のあとに $(g,D)$ をそのまま続ければ解析接続になる（線分は $D$ の中）ので、終わりの芽は $[g]_{w}$、$F(w)=g(w)$。よって $F$ は $z$ の近くで $g$ と一致し正則。$[F]_{a}=\varphi$ は定値道について。一意性は一致の定理。
+:::
+
+::: example
+単連結な領域 $U$ で零点をもたない正則関数 $f$ について、$\frac{f'}{f}$ の原始関数を使わずに、対数の芽を道に沿って接続することでも正則な対数が得られる（\ref{cx:holomorphic-log} の別証明）。
+:::
+
+## 自然境界 {#cx:sec-ac-natural-boundary}
+
+::: proposition 自然境界の例 {#cx:natural-boundary keywords="the lacunary series sum z^{2^n} cannot be continued analytically across any point of the unit circle" index="自然境界|しぜんきょうかい"}
+$f(z)\defeq\sum_{n\ge0}z^{2^{n}}$（$|z|<1$）について、単位円周上のどの点 $\zeta$ についても、$\zeta$ を中心とする開円板 $D(\zeta,\rho)$ と $g\in\mathcal{O}(D(\zeta,\rho))$ で、$D(\zeta,\rho)\cap\mathbb{D}$ 上 $g=f$ となるものは存在しない。
+:::
+
+::: proof
+**Step 1（特別な点での発散）.** $\omega\defeq e^{2\pi ik/2^{m}}$（$k,m$ は整数）とすると、$n\ge m$ で $\omega^{2^{n}}=1$ なので、$0<r<1$ について
+$$
+f(r\omega)=\sum_{n<m}(r\omega)^{2^{n}}+\sum_{n\ge m}r^{2^{n}}.
+$$
+第 1 項は有界で、第 2 項は $r\to1-$ で $+\infty$ に発散する（任意の $N$ について、$r$ が $1$ に近ければ最初の $N$ 項がそれぞれ $\frac12$ を超える）。
+
+**Step 2.** そのような $\omega$ は単位円周上で稠密なので、$D(\zeta,\rho)$ の中にある。$g$ が存在すれば、$g$ は $\omega$ で連続なので $\omega$ の近くで有界で、$r\omega\in D(\zeta,\rho)\cap\mathbb{D}$（$r$ が $1$ に近いとき）では $f(r\omega)=g(r\omega)$ が有界となり、Step 1 に反する。
+:::
+
+::: supplement
+**層と被覆空間の言葉で.** 正則関数の芽の全体は、$\C$ 上の正則関数の層のエタール空間 $\mathcal{E}$（\ref{cat:etale-space}）をなす。道に沿った解析接続は、道を $\mathcal{E}$ に持ち上げることにほかならず、\ref{cx:continuation-uniqueness} は持ち上げの一意性、モノドロミー定理はホモトピー持ち上げの性質にあたる（被覆空間の理論 \tref{at:page-covering-spaces} と同じ形）。芽 $\varphi$ から接続できる芽の全体（$\mathcal{E}$ の連結成分）は、$\varphi$ の定める解析関数の**リーマン面**で、$\operatorname{Log}$ のリーマン面は $\C\setminus\{0\}$ の普遍被覆、$\sqrt z$ のリーマン面は 2 重被覆である。
+
+**類似の定理.** 自然境界はアダマールの間隙定理（係数が $0$ でない冪の間隔が一定の比以上で広がる冪級数は、収束円を自然境界にもつ）の特別な場合である（未収録）。
+:::
+
+## 問題 {#cx:sec-ac-problems}
+
+::: problem {#cx:prob-ac-sqrt-two-points}
+$f(z)=\sqrt{z(z-1)}$ の $z=2$ での芽（正の平方根をとる分枝）を、(a) $0$ と $1$ の両方を囲む大きな円周、(b) $1$ だけを囲む小さな円周に沿って一周させると、それぞれどうなるか。
+:::
+
+::: solution
+$\sqrt{z(z-1)}=e^{\frac12(L_{1}+L_{2})}$（$L_{1},L_{2}$ は $z$ と $z-1$ の対数の接続）と書ける。$z$ が $0$ のまわりを一周すると $L_{1}$ が $2\pi i$、$1$ のまわりを一周すると $L_{2}$ が $2\pi i$ 増える。(a) 両方増えるので指数は $2\pi i$ 増え、$e^{\pi i}\cdot e^{\pi i}=1$：元に戻る。(b) $L_{2}$ だけ増えて $e^{\pi i}=-1$：符号が変わる。
+:::
+
+::: problem {#cx:prob-ac-log-annulus}
+$U=\C\setminus\{0\}$ で、$\operatorname{Log}$ の $1$ での芽は、$U$ の中のすべての道に沿って解析接続できるが、$U$ 全体の正則関数には延びないことを確かめ、\ref{cx:global-branch} の仮定のどれが崩れているか答えよ。
+:::
+
+::: solution
+$U$ の任意の点の近傍の円板は $0$ を含まない（小さくとれば）ので、その上で対数の分枝があり、道に沿って並べると接続できる（\ref{cx:continuation-stability} の構成のように、局所的な分枝を順につなぐ）。しかし単位円周を一周すると $2\pi i$ ずれるので、大域的な関数にはならない（\ref{cx:no-continuous-sqrt} からも $U$ 上の連続な対数はない）。崩れている仮定は「$U$ は単連結」である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{cx:sec-ac-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

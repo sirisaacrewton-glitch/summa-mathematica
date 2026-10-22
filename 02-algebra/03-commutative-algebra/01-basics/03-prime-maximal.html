@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>素イデアルと極大イデアル | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/03-commutative-algebra/01-basics/03-prime-maximal.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 素イデアルと極大イデアル {#ring:page-prime-maximal keywords="prime ideal, maximal ideal, existence of maximal ideals, Krull's theorem, local ring, nilradical, radical of an ideal, Jacobson radical, prime avoidance, multiplicative set"}
+
+整数の素数 $p$ は「$p\mid ab$ なら $p\mid a$ または $p\mid b$」という性質で特徴付けられる。これをイデアルに移したものが**素イデアル**であり、剰余環が整域になるイデアルとして現れる（\ref{ring:prime-maximal-quotient}）。剰余環が体になるイデアルは**極大イデアル**である。このページでは二つの定義と基本性質を述べたあと、ツォルンの補題による極大イデアルの存在（\ref{ring:maximal-ideal-existence}）を示し、局所環（\ref{ring:local-ring}）、冪零根基が素イデアルの共通部分であること（\ref{ring:nilradical}）、イデアルの根基、ジャコブソン根基（\ref{ring:jacobson-radical}）を調べる。素イデアルの回避（\ref{ring:prime-avoidance}）も、後の次元論で使うのでここで証明しておく。
+
+> 雪江明彦『代数学 2』第 1 章 §1.7 の流れを参考にした。冪零根基・根基・ジャコブソン根基・素イデアルの回避・局所環の判定は、本の範囲を超えて Atiyah–Macdonald 第 1 章で標準的に扱われる内容を補った。
+
+## 記法と定義の確認 {#ring:sec-pm-notation}
+
+::: notation
+- 環は可換とする（\ref{ring:convention}）。イデアル・生成されたイデアル・イデアルの演算は \ref{ring:ideal}, \ref{ring:generated-ideal}, \ref{ring:ideal-operations}、剰余環・対応定理は \ref{ring:quotient-ring}, \ref{ring:correspondence}、整域・体・冪零元は \ref{ring:domain-field-def}。
+- 素イデアルは $\mathfrak{p},\mathfrak{q}$、極大イデアルは $\mathfrak{m}$ と、ドイツ文字で書く習慣に従う。
+- **選択公理**：極大イデアルの存在（\ref{ring:maximal-ideal-existence}）とそれに依存する主張では、\ref{set:zorn}を使う。使う箇所は各証明の hypcheck に明記する。それ以外は $\ZF$ で成り立つ。
+:::
+
+## 素イデアルと極大イデアル {#ring:sec-pm-definitions}
+
+::: definition 素イデアル・極大イデアル {#ring:prime-maximal-def keywords="prime ideal, maximal ideal" index="素イデアル|そいである, 極大イデアル|きょくだいいである"}
+$A$ を可換環とする。
+1. イデアル $\mathfrak{p}$ が $\mathfrak{p}\neq A$ をみたし、$ab\in\mathfrak{p}$ なら $a\in\mathfrak{p}$ または $b\in\mathfrak{p}$ であるとき、$\mathfrak{p}$ を**素イデアル**という。
+2. イデアル $\mathfrak{m}$ が $\mathfrak{m}\neq A$ をみたし、$\mathfrak{m}\subset I\subset A$ となるイデアル $I$ が $\mathfrak{m}$ と $A$ のほかにないとき、$\mathfrak{m}$ を**極大イデアル**という。すなわち $\mathfrak{m}$ は、真のイデアル全体の中で包含について極大な元である。
+:::
+
+::: intuition
+素イデアルの条件は「$\mathfrak{p}$ の外の元どうしの積は $\mathfrak{p}$ の外にある」と言い換えられる。$A\setminus\mathfrak{p}$ が掛け算で閉じていることである。極大イデアルは「これ以上大きくすると全体になってしまう」イデアルで、幾何的には一点に対応する（\ref{ring:prime-maximal-examples} の $C(X)$ の例）。
+:::
+
+::: proposition 剰余環による特徴付け {#ring:prime-maximal-quotient keywords="A/p is a domain iff p is prime, A/m is a field iff m is maximal, maximal ideals are prime" index="素イデアルと整域|そいであるとせいいき, 極大イデアルと体|きょくだいいであるとたい"}
+$A$ を可換環、$I$ をイデアルとする。
+1. $I$ が素イデアル $\iff$ $A/I$ は整域。
+2. $I$ が極大イデアル $\iff$ $A/I$ は体。
+3. 極大イデアルは素イデアルである。
+4. $A$ が整域 $\iff$ $0$ は素イデアル。$A$ が体 $\iff$ $0$ は極大イデアル。
+:::
+
+::: proof
+**Step 1（1）.** $I\neq A\iff A/I$ は零環でない $\iff 1+I\neq 0+I$（\ref{ring:quotient-ring.4}）。また $A/I$ で $(a+I)(b+I)=0$ は $ab\in I$、$a+I=0$ は $a\in I$ と同値なので、「$ab\in I\Rightarrow a\in I$ または $b\in I$」は「$A/I$ に $0$ でない零因子がない」と同値。合わせて 1 を得る。
+
+**Step 2（2）.** 対応定理（\tref{ring:correspondence}）から、$I$ を含む $A$ のイデアルと $A/I$ のイデアルは包含を保って一対一に対応し、$I\leftrightarrow 0$, $A\leftrightarrow A/I$。よって「$I\neq A$ で、$I$ を含むイデアルが $I$ と $A$ だけ」は「$A/I$ のイデアルがちょうど二つ（$0$ と $A/I$）」と同値で、\ref{ring:field-ideals.1} からこれは $A/I$ が体であることと同値。
+
+**Step 3（3）.** 2 と 1 と、体は整域であること（\ref{ring:domain-field.2}）から。
+
+**Step 4（4）.** $A/0\cong A$（準同型定理 \tref{ring:first-isomorphism} を恒等写像に使う）なので、1・2 の $I=0$ の場合。
+
+::: hypcheck
+- 3 の逆は偽：$\Z$ の $0$ は素イデアル（$\Z$ は整域）だが、$0\subsetneq 2\Z\subsetneq\Z$ なので極大でない。
+:::
+:::
+
+::: example 素イデアルと極大イデアルの例 {#ring:prime-maximal-examples}
+1. **$\Z$.** イデアルは $n\Z$（$n\ge 0$。\ref{ring:ideals-of-z}）で、$\Z/n\Z$ が整域 $\iff$ $n=0$ または $n$ が素数（\ref{ring:z-mod-n-ring.3}、$n=0$ は $\Z$ 自身）。よって素イデアルは $0$ と $p\Z$（$p$ 素数）、極大イデアルは $p\Z$ である（$\Z/p\Z$ は体、$\Z$ は体でない）。
+2. **$C(X)$.** 点 $x_{0}\in X$ について $\mathfrak{m}_{x_{0}}=\{f : f(x_{0})=0\}$ は、$C(X)/\mathfrak{m}_{x_{0}}\cong\R$（\ref{ring:first-isomorphism-examples.1}）が体なので極大イデアルである。$X$ がコンパクトなら極大イデアルはこの形のものに限る（問題 \ref{ring:prob-compact-maximal} で証明する）。
+3. **$\Z[i]$.** $\Z[i]/(2-i)\cong\Z/5\Z$（\ref{ring:first-isomorphism-examples.2}）、$\Z[i]/(3)$ は 9 元の体（\ref{ring:prob-gaussian-mod-3}）なので、$(2-i)$ と $(3)$ は極大イデアル。一方 $(2)$ は素イデアルでない：$(1+i)^{2}=2i\in(2)$ だが $1+i\notin(2)$（$2(x+yi)$ の実部・虚部は偶数）。
+4. **直積.** $A\times B$ の素イデアルは $\mathfrak{p}\times B$（$\mathfrak{p}$ は $A$ の素イデアル）と $A\times\mathfrak{q}$（$\mathfrak{q}$ は $B$ の素イデアル）の形のものですべてである（問題 \ref{ring:prob-primes-of-product}）。
+:::
+
+::: proposition 準同型と素イデアル {#ring:prime-preimage keywords="preimage of a prime ideal is prime, primes of a quotient ring" index="素イデアルの逆像|そいであるのぎゃくぞう"}
+1. 環準同型 $f:A\to B$ と $B$ の素イデアル $\mathfrak{q}$ について、$f^{-1}(\mathfrak{q})$ は $A$ の素イデアルである。
+2. イデアル $I$ について、対応定理の全単射 $J\mapsto J/I$ は、$I$ を含む素イデアル（極大イデアル）と $A/I$ の素イデアル（極大イデアル）を対応させる。
+:::
+
+::: proof
+**Step 1（1）.** $f^{-1}(\mathfrak{q})$ はイデアル（\ref{ring:ideal-image-preimage.1}）。$f(1)=1\notin\mathfrak{q}$ なので $1\notin f^{-1}(\mathfrak{q})$、すなわち真のイデアル。$ab\in f^{-1}(\mathfrak{q})$ なら $f(a)f(b)=f(ab)\in\mathfrak{q}$ なので $f(a)\in\mathfrak{q}$ または $f(b)\in\mathfrak{q}$。
+
+**Step 2（2）.** $I\subset J$ について、第三同型定理（\ref{ring:correspondence.3}）から $(A/I)/(J/I)\cong A/J$。\ref{ring:prime-maximal-quotient.1}・\ref[2]{ring:prime-maximal-quotient.2} から、$J$ が素（極大）$\iff$ $A/J$ が整域（体）$\iff$ $(A/I)/(J/I)$ が整域（体）$\iff$ $J/I$ が素（極大）。
+
+::: hypcheck
+- **1 で極大イデアルを考えると偽**：包含写像 $\Z\to\Q$ で、$\Q$ の極大イデアル $0$ の逆像は $0$ で、$\Z$ の極大イデアルでない。極大イデアルの逆像が極大になるのは、例えば $f$ が全射のとき（2 の状況）。
+- **前提 $f(1)=1$**：Step 1 で逆像が真のイデアルであることに使った。
+:::
+:::
+
+::: proposition 素イデアルと積・共通部分 {#ring:prime-contains-product keywords="prime containing a product of ideals contains a factor" index="素イデアルと積|そいであるとせき"}
+素イデアル $\mathfrak{p}$ とイデアル $I_{1},\dots,I_{n}$ について、$\mathfrak{p}\supset I_{1}\cdots I_{n}$ または $\mathfrak{p}\supset I_{1}\cap\dots\cap I_{n}$ なら、ある $k$ で $\mathfrak{p}\supset I_{k}$。特に $\mathfrak{p}=I_{1}\cap\dots\cap I_{n}$ なら、ある $k$ で $\mathfrak{p}=I_{k}$。
+:::
+
+::: proof
+**Step 1.** $I_{1}\cdots I_{n}\subset I_{1}\cap\dots\cap I_{n}$（\ref{ring:ideal-operations.1}）なので、$\mathfrak{p}\supset I_{1}\cdots I_{n}$ の場合を示せばよい。どの $k$ でも $I_{k}\not\subset\mathfrak{p}$ と仮定し、$a_{k}\in I_{k}\setminus\mathfrak{p}$ をとる（有限個の選択なので選択公理は要らない）。$a_{1}\cdots a_{n}\in I_{1}\cdots I_{n}\subset\mathfrak{p}$ だが、素イデアルの定義を $n$ についての帰納法で使うと、$a_{1}\cdots a_{n}\in\mathfrak{p}$ ならある $a_{k}\in\mathfrak{p}$ となり矛盾。
+
+**Step 2.** $\mathfrak{p}=\bigcap I_{k}$ なら Step 1 から $\mathfrak{p}\supset I_{k}$ となる $k$ があり、$I_{k}\supset\bigcap I_{j}=\mathfrak{p}$ と合わせて $\mathfrak{p}=I_{k}$。
+
+::: hypcheck
+- **前提「有限個」**：Step 1 で有限個の積を作るのに使った。無限個の共通部分では偽：$\Z$ で $\bigcap_{p}p\Z=0$ は素イデアルだが、どの $p\Z$ にも等しくない。
+:::
+:::
+
+::: theorem 素イデアルの回避 {#ring:prime-avoidance keywords="prime avoidance lemma" index="素イデアルの回避|そいであるのかいひ"}
+イデアル $I$ と素イデアル $\mathfrak{p}_{1},\dots,\mathfrak{p}_{n}$（$n\ge 1$）について、$I\subset\mathfrak{p}_{1}\cup\dots\cup\mathfrak{p}_{n}$ なら、ある $k$ で $I\subset\mathfrak{p}_{k}$。
+:::
+
+::: intuition
+イデアルは「有限個の素イデアルの和集合に入るなら、どれか一つにまるごと入る」。対偶の形「$I$ がどの $\mathfrak{p}_{k}$ にも含まれなければ、どの $\mathfrak{p}_{k}$ にも属さない $I$ の元がある」で、正則列やパラメーター系を作るときに使う（\ref{ring:page-dimension-theory}）。
+:::
+
+::: proof
+$n$ についての帰納法で示す。$n=1$ は自明。$n\ge 2$ とし、$n-1$ 個の場合は成り立つとする。結論が偽、すなわちどの $k$ でも $I\not\subset\mathfrak{p}_{k}$ と仮定する。
+
+**Step 1（元の選び方）.** 各 $k$ について、帰納法の仮定（$\mathfrak{p}_{j}$, $j\neq k$ の $n-1$ 個に適用）から $I\not\subset\bigcup_{j\neq k}\mathfrak{p}_{j}$。そこで $x_{k}\in I\setminus\bigcup_{j\neq k}\mathfrak{p}_{j}$ をとる。$x_{k}\in I\subset\bigcup_{j}\mathfrak{p}_{j}$ なので、$x_{k}\in\mathfrak{p}_{k}$ である。
+
+**Step 2（反例の構成）.** $y\defeq x_{n}+x_{1}x_{2}\cdots x_{n-1}\in I$ とおく。
+- $y\notin\mathfrak{p}_{n}$：$x_{1},\dots,x_{n-1}\notin\mathfrak{p}_{n}$ で $\mathfrak{p}_{n}$ は素イデアルなので $x_{1}\cdots x_{n-1}\notin\mathfrak{p}_{n}$。一方 $x_{n}\in\mathfrak{p}_{n}$。もし $y\in\mathfrak{p}_{n}$ なら $x_{1}\cdots x_{n-1}=y-x_{n}\in\mathfrak{p}_{n}$ となり矛盾。
+- $k<n$ について $y\notin\mathfrak{p}_{k}$：$x_{k}\in\mathfrak{p}_{k}$ なので $x_{1}\cdots x_{n-1}\in\mathfrak{p}_{k}$。一方 $x_{n}\notin\mathfrak{p}_{k}$。もし $y\in\mathfrak{p}_{k}$ なら $x_{n}=y-x_{1}\cdots x_{n-1}\in\mathfrak{p}_{k}$ となり矛盾。
+
+よって $y\in I$ はどの $\mathfrak{p}_{k}$ にも属さず、$I\subset\bigcup\mathfrak{p}_{k}$ に反する。
+
+::: hypcheck
+- **前提「素イデアル」**：Step 2 の最初の項目で $\mathfrak{p}_{n}$ が素であることだけを使った（$n=2$ では $x_{1}\notin\mathfrak{p}_{2}$ が直接わかるので、素であることは要らない）。$\mathfrak{p}_{1},\dots,\mathfrak{p}_{n}$ のうち二つまでは素でなくてよい：素でないものを $\mathfrak{p}_{1},\mathfrak{p}_{2}$ に置くと、帰納法の各段で Step 2 の最初の項目に使うのは最後の $\mathfrak{p}_{n}$ の素性だけで、$n\ge 3$ なら $\mathfrak{p}_{n}$ は素、$n=2$ なら上の注意のとおり素性は要らない（帰納法の仮定を適用する $n-1$ 個の組も、素でないものは二つ以下）。
+- **前提「有限個」**：Step 1 の帰納法に使った。無限個では偽：体 $k$ 上の 2 変数多項式環 $k[x,y]$ で、イデアル $(x,y)$ の $0$ でない元は単元でないので、ある既約多項式 $f$ で割り切れ、$(f)$ は素イデアルである（$k[x,y]$ が UFD であることによる。\ref{ring:polynomial-ufd}）。よって $(x,y)$ は無限個の素イデアル $(f)$ の和集合に含まれるが、$x$ と $y$ の両方で割り切れる既約多項式はないので、どの $(f)$ にも含まれない。
+:::
+:::
+
+## 極大イデアルの存在 {#ring:sec-pm-existence}
+
+::: lemma イデアルの鎖の和集合 {#ring:chain-union-ideal keywords="union of a chain of ideals" index="イデアルの鎖|いであるのくさり"}
+可換環 $A$ の部分集合 $S$ と、イデアルの空でない族 $\mathcal{C}$ で包含について全順序なもの（鎖）を考える。$\mathcal{C}$ の各イデアルが $S$ と交わらなければ、$\bigcup\mathcal{C}$ は $S$ と交わらないイデアルである。
+:::
+
+::: proof
+$\bigcup\mathcal{C}$ がイデアルであることは問題 \ref{ring:prob-chain-of-ideals} の解答の Step 1 と同じ：$\mathcal{C}\neq\emptyset$ から $0\in\bigcup\mathcal{C}$、$a\in I$, $b\in I'$（$I,I'\in\mathcal{C}$）なら、全順序なので大きい方 $I''$ に $a,b$ がともに属し、$a+b\in I''$。$ra\in I$ も明らか。$S$ の元が $\bigcup\mathcal{C}$ に属するなら、ある $I\in\mathcal{C}$ に属することになり、仮定に反する。
+:::
+
+::: theorem 極大イデアルの存在（クルル） {#ring:maximal-ideal-existence keywords="existence of maximal ideals, Krull's theorem" index="極大イデアルの存在|きょくだいいであるのそんざい, クルルの定理|くるるのていり"}
+（AC）可換環 $A$ の真のイデアル $I$ は、ある極大イデアルに含まれる。特に、零環でない可換環は極大イデアルをもつ。
+:::
+
+::: proof
+**Step 1（半順序集合）.** $I$ を含む真のイデアル全体を $\Sigma$ とし、真の包含 $\subsetneq$ で半順序集合とみる。$I\in\Sigma$ なので $\Sigma\neq\emptyset$。
+
+**Step 2（鎖の上界）.** $\mathcal{C}\subset\Sigma$ を鎖とする。$\mathcal{C}=\emptyset$ なら $I$ が上界。$\mathcal{C}\neq\emptyset$ なら、\ref{ring:chain-union-ideal} を $S=\{1\}$ に使うと（真のイデアルは $1$ を含まない。\ref{ring:ideal-basic.3}）、$\bigcup\mathcal{C}$ は $1$ を含まないイデアル、すなわち真のイデアルで、$I$ を含む。よって $\bigcup\mathcal{C}\in\Sigma$ は $\mathcal{C}$ の上界。
+
+**Step 3（ツォルンの補題）.** \tref{set:zorn}から $\Sigma$ は極大元 $\mathfrak{m}$ をもつ。$\mathfrak{m}$ は真のイデアルで、$\mathfrak{m}\subsetneq J\subsetneq A$ となるイデアル $J$ があれば $J\in\Sigma$ で $\mathfrak{m}$ の極大性に反するので、$\mathfrak{m}$ は極大イデアルで $I\subset\mathfrak{m}$。
+
+**Step 4（特に）.** 零環でなければ $0$ は真のイデアルなので、Step 1〜3 を $I=0$ に適用する。
+
+::: hypcheck
+- **選択公理**：Step 3 のツォルンの補題で使った。逆に、「零環でない可換環はすべて極大イデアルをもつ」から $\ZF$ 上で選択公理が導けること（ホッジス 1979）が知られている（\ref{set:zorn} のページの同値物の一覧）。
+- **単位元の役割**：Step 2 で「真のイデアル $\iff$ $1$ を含まない」を使った。単位元をもたない環では、鎖の和集合が全体になりうるので議論が通らず、実際に極大イデアルをもたない例がある：加法群 $\Q$ に零乗法 $ab\defeq 0$ を入れた環では、イデアルは加法部分群と同じで、$\Q$ の真の部分群 $H$ には $H\subsetneq H'\subsetneq\Q$ となる部分群 $H'$ が常にあるので、極大イデアルがない（$\Q$ が可除群であることによる）。
+- **ネーター環**（\ref{ring:page-noetherian-artinian}）では、イデアルの昇鎖が止まることから、ツォルンの補題なしで（従属選択公理だけで）極大イデアルの存在が言える。
+:::
+:::
+
+::: corollary 非単元は極大イデアルに含まれる {#ring:nonunit-in-maximal keywords="every non-unit lies in a maximal ideal" index="非単元|ひたんげん"}
+（AC）可換環 $A$ の元 $a$ について、$a$ が単元でないことと、$a$ がある極大イデアルに属することは同値である。したがって $A^{\times}=A\setminus\bigcup_{\mathfrak{m}}\mathfrak{m}$（$\mathfrak{m}$ は極大イデアル全体を動く）。
+:::
+
+::: proof
+$a$ が単元でなければ $(a)=aA$ は $1$ を含まない（$1=ab$ なら単元）ので真のイデアルで、\ref{ring:maximal-ideal-existence} からある極大イデアルに含まれる。逆に $a\in\mathfrak{m}$ なら、$a$ が単元だと $\mathfrak{m}=A$ となる（\ref{ring:ideal-basic.3}）ので単元でない。
+:::
+
+## 局所環 {#ring:sec-pm-local}
+
+::: definition 局所環 {#ring:local-ring keywords="local ring, residue field" index="局所環|きょくしょかん, 剰余体|じょうよたい"}
+極大イデアルをちょうど一つもつ可換環を**局所環**という。その極大イデアルを $\mathfrak{m}$ とするとき $(A,\mathfrak{m})$ と書き、体 $A/\mathfrak{m}$ を**剰余体**という。
+:::
+
+::: proposition 局所環の判定 {#ring:local-ring-criterion keywords="local ring iff non-units form an ideal" index="局所環の判定|きょくしょかんのはんてい"}
+可換環 $A$ について、
+1. $A\setminus A^{\times}$ がイデアルなら、$A$ はそれを唯一の極大イデアルとする局所環である。
+2. （AC）逆に、$A$ が局所環なら $A\setminus A^{\times}$ はその極大イデアルに等しい。
+3. 極大イデアル $\mathfrak{m}$ で、$1+\mathfrak{m}\defeq\{1+x : x\in\mathfrak{m}\}$ のすべての元が単元であるものがあれば、$A$ は局所環で $\mathfrak{m}=A\setminus A^{\times}$（選択公理は使わない）。
+:::
+
+::: proof
+**Step 1（1）.** $\mathfrak{m}\defeq A\setminus A^{\times}$ がイデアルとする。$1\notin\mathfrak{m}$ なので真のイデアル。任意の真のイデアル $J$ は単元を含まない（\ref{ring:ideal-basic.3}）ので $J\subset\mathfrak{m}$。よって $\mathfrak{m}$ は極大で、ほかの極大イデアル $\mathfrak{m}'$ は $\mathfrak{m}'\subset\mathfrak{m}$ と極大性から $\mathfrak{m}'=\mathfrak{m}$。
+
+**Step 2（2）.** $(A,\mathfrak{m})$ を局所環とする。\ref{ring:nonunit-in-maximal} から、非単元はある極大イデアル、すなわち $\mathfrak{m}$ に属し、$\mathfrak{m}$ の元は非単元である。
+
+**Step 3（3）.** $x\notin\mathfrak{m}$ とする。$\mathfrak{m}\subsetneq\mathfrak{m}+(x)$ で $\mathfrak{m}$ は極大なので $\mathfrak{m}+(x)=A$、よって $1=y+xz$（$y\in\mathfrak{m}$, $z\in A$）。$xz=1-y=1+(-y)\in 1+\mathfrak{m}$ は単元なので、$x\cdot z(xz)^{-1}=1$ で $x$ は単元。したがって $A\setminus A^{\times}\subset\mathfrak{m}$。逆に $\mathfrak{m}$ の元は非単元なので $\mathfrak{m}=A\setminus A^{\times}$ で、1 から局所環。
+
+::: hypcheck
+- **選択公理（2）**：Step 2 で \ref{ring:nonunit-in-maximal} を使った。1 と 3 は選択公理を使わない。
+:::
+:::
+
+::: example 局所環の例 {#ring:local-ring-examples}
+1. 体は局所環（極大イデアルは $0$）。
+2. 素数 $p$ について $\Z_{(p)}\defeq\{a/b\in\Q : a,b\in\Z,\ p\nmid b\}$ は $\Q$ の部分環である（$1=1/1$、$\frac{a}{b}\pm\frac{c}{d}=\frac{ad\pm bc}{bd}$、$\frac{a}{b}\cdot\frac{c}{d}=\frac{ac}{bd}$ で、$p\nmid b,d$ なら $p\nmid bd$）。$a/b$（既約分数で $p\nmid b$）が単元 $\iff$ $b/a\in\Z_{(p)}$ $\iff$ $p\nmid a$。非単元全体は $p\Z_{(p)}=\{pa/b : p\nmid b\}$ でイデアルなので、1 から $\Z_{(p)}$ は局所環で、剰余体は $\Z_{(p)}/p\Z_{(p)}\cong\mathbb{F}_{p}$ である。実際、$\Z\to\Z_{(p)}/p\Z_{(p)}$ は全射（$p\nmid b$ なら $bc\equiv 1\pmod p$ となる $c$ があり、$\frac{a}{b}-ac=\frac{a(1-bc)}{b}\in p\Z_{(p)}$）で、核は $p\Z_{(p)}\cap\Z=p\Z$（$pa/b\in\Z$, $p\nmid b$ なら $b\mid a$ なので $p$ の倍数）なので、準同型定理から。これは局所化 $S^{-1}\Z$（\ref{ring:localization}）の最初の例である。
+3. 素数冪 $p^{e}$（$e\ge 1$）について $\Z/p^{e}\Z$ は局所環で、極大イデアルは $p\Z/p^{e}\Z$：単元は $p\nmid a$ なる $a$ の類（\ref{ring:z-mod-n-ring.2}）なので、非単元全体は $p$ の倍数の類でイデアル。
+4. $\Z$ は局所環でない（$2\Z\neq 3\Z$ はともに極大）。
+:::
+
+## 冪零根基と根基 {#ring:sec-pm-nilradical}
+
+::: definition 積閉集合・被約環 {#ring:multiplicative-set keywords="multiplicative set, multiplicatively closed subset, reduced ring" index="積閉集合|せきへいしゅうごう, 乗法的集合|じょうほうてきしゅうごう, 被約環|ひやくかん"}
+1. 可換環 $A$ の部分集合 $S$ が $1\in S$ をみたし、$s,t\in S$ なら $st\in S$ であるとき、$S$ を**積閉集合**（**乗法的集合**）という。例：素イデアル $\mathfrak{p}$ について $A\setminus\mathfrak{p}$、元 $f$ について $\{f^{n} : n\in\N\}$、整域の $A\setminus\{0\}$。
+2. $0$ 以外に冪零元をもたない可換環を**被約環**という。整域は被約である（\ref{ring:nilpotent-unit.1}）。
+:::
+
+::: lemma 積閉集合と交わらない極大なイデアル {#ring:maximal-disjoint-prime keywords="ideal maximal with respect to being disjoint from a multiplicative set is prime" index="積閉集合と素イデアル|せきへいしゅうごうとそいである"}
+$S$ を可換環 $A$ の積閉集合、$I$ を $S$ と交わらないイデアルとする。
+1. $S$ と交わらないイデアルの中で（包含について）極大なイデアル $\mathfrak{p}$ は、素イデアルである。
+2. （AC）$I$ を含み $S$ と交わらないイデアルの中で極大なものが存在する。したがって、$I$ を含み $S$ と交わらない素イデアルが存在する。
+:::
+
+::: proof
+**Step 1（1：真のイデアル）.** $1\in S$ で $\mathfrak{p}\cap S=\emptyset$ なので $1\notin\mathfrak{p}$。
+
+**Step 2（1：素であること）.** $a,b\notin\mathfrak{p}$ とする。$\mathfrak{p}\subsetneq\mathfrak{p}+(a)$ なので、極大性から $\mathfrak{p}+(a)$ は $S$ と交わる：$s=x+ra\in S$（$x\in\mathfrak{p}$, $r\in A$）。同様に $t=y+r'b\in S$（$y\in\mathfrak{p}$）。積をとると
+$$
+st=xy+xr'b+ray+rr'ab=\bigl(xy+xr'b+ray\bigr)+rr'ab,
+$$
+括弧の中は $\mathfrak{p}$ に属する。$st\in S$ で $S\cap\mathfrak{p}=\emptyset$ なので $st\notin\mathfrak{p}$、よって $rr'ab\notin\mathfrak{p}$、したがって $ab\notin\mathfrak{p}$。
+
+**Step 3（2）.** $I$ を含み $S$ と交わらないイデアル全体 $\Sigma$ は $I$ を含むので空でない。$\Sigma$ の空でない鎖の和集合は、\ref{ring:chain-union-ideal} から $S$ と交わらないイデアルで $I$ を含むので、$\Sigma$ に属する上界。\ref{set:zorn}から $\Sigma$ は極大元をもち、それは $S$ と交わらないイデアル全体の中でも極大（$S$ と交わらないイデアル $J\supset\mathfrak{p}$ は $I$ を含むので $\Sigma$ に属する）。1 から素イデアル。
+
+::: hypcheck
+- **選択公理**：Step 3 のツォルンの補題で使った。1 は使わない。
+- **前提「積閉」**：Step 2 で $st\in S$ に、Step 1 で $1\in S$ に使った。$S=\{1\}$ とすると 2 は \ref{ring:maximal-ideal-existence}（極大イデアルは素）を含む。
+:::
+:::
+
+::: theorem 冪零根基 {#ring:nilradical keywords="nilradical, nilradical is the intersection of all prime ideals" index="冪零根基|べきれいこんき, 冪零元根基|べきれいげんこんき"}
+（AC）可換環 $A$ の冪零元全体 $\mathrm{nil}(A)$ は、$A$ のすべての素イデアルの共通部分に等しい。$\mathrm{nil}(A)$ を $A$ の**冪零根基**（冪零元根基）という。$\mathrm{nil}(A)$ はイデアルで、$A/\mathrm{nil}(A)$ は被約環である。
+:::
+
+::: proof
+**Step 1（$\subset$）.** $f^{n}=0$ とし、$\mathfrak{p}$ を素イデアルとする。$f^{n}=0\in\mathfrak{p}$ から、素イデアルの定義を $n$ について帰納的に使って $f\in\mathfrak{p}$。
+
+**Step 2（$\supset$）.** $f$ が冪零でないとする。$S=\{f^{n} : n\in\N\}$ は積閉集合で $0\notin S$、すなわち $S$ はイデアル $0$ と交わらない。\ref{ring:maximal-disjoint-prime.2} から、$S$ と交わらない素イデアル $\mathfrak{p}$ がある。$f\in S$ なので $f\notin\mathfrak{p}$。よって $f$ はすべての素イデアルの共通部分に属さない。
+
+**Step 3（イデアル・被約）.** 素イデアルの共通部分としてイデアル（\ref{ring:generated-ideal.1}。$A$ が零環のときは素イデアルがなく、空の共通部分を $A$ と読む。このとき $\mathrm{nil}(A)=A$ で主張は成り立つ）。$(f+\mathrm{nil}(A))^{n}=0$ なら $f^{n}\in\mathrm{nil}(A)$ で $f^{nm}=(f^{n})^{m}=0$ となる $m$ があるので $f\in\mathrm{nil}(A)$。よって $A/\mathrm{nil}(A)$ の冪零元は $0$ だけ。
+
+::: hypcheck
+- **選択公理**：Step 2 で \ref{ring:maximal-disjoint-prime.2} を通して使った。$\mathrm{nil}(A)$ がイデアルであることだけなら、選択公理なしで直接示せる（\ref{ring:prob-nilpotent-ideal}）。
+:::
+:::
+
+::: definition イデアルの根基 {#ring:radical-ideal keywords="radical of an ideal, radical ideal" index="根基|こんき, 根基イデアル|こんきいである"}
+可換環 $A$ のイデアル $I$ について、$\sqrt{I}\defeq\{a\in A : \text{ある }n\ge 1\text{ で }a^{n}\in I\}$ を $I$ の**根基**という。$\sqrt{I}=I$ となるイデアルを**根基イデアル**という。$\sqrt{0}=\mathrm{nil}(A)$ である。
+:::
+
+::: proposition 根基の性質 {#ring:radical-properties keywords="radical is the intersection of primes containing I, properties of radicals" index="根基の性質|こんきのせいしつ"}
+$A$ を可換環、$I,J$ をイデアル、$\pi:A\to A/I$ を自然な射影とする。
+1. $\sqrt{I}=\pi^{-1}(\mathrm{nil}(A/I))$。特に $\sqrt{I}$ は $I$ を含むイデアル。
+2. （AC）$\sqrt{I}$ は $I$ を含む素イデアル全体の共通部分である。
+3. $\sqrt{\sqrt{I}}=\sqrt{I}$、$\sqrt{IJ}=\sqrt{I\cap J}=\sqrt{I}\cap\sqrt{J}$、$\sqrt{I}=A\iff I=A$、$\sqrt{I+J}=\sqrt{\sqrt{I}+\sqrt{J}}$。
+4. 素イデアルは根基イデアルである。
+:::
+
+::: proof
+**Step 1（1）.** $a^{n}\in I\iff(a+I)^{n}=0$ in $A/I$ なので、$a\in\sqrt{I}\iff\pi(a)$ が冪零。$\mathrm{nil}(A/I)$ はイデアル（\ref{ring:prob-nilpotent-ideal}）なので、その逆像はイデアル（\ref{ring:ideal-image-preimage.1}）で $\Ker\pi=I$ を含む。
+
+**Step 2（2）.** \ref{ring:nilradical} を $A/I$ に使うと、$\mathrm{nil}(A/I)$ は $A/I$ の素イデアルの共通部分。\ref{ring:prime-preimage.2} から、$A/I$ の素イデアルは $I$ を含む $A$ の素イデアル $\mathfrak{p}$ の像 $\mathfrak{p}/I$ で、$\pi^{-1}(\mathfrak{p}/I)=\mathfrak{p}$。逆像は共通部分と可換なので、1 から $\sqrt{I}=\bigcap_{\mathfrak{p}\supset I}\mathfrak{p}$。
+
+**Step 3（3）.** $\sqrt{\sqrt{I}}\supset\sqrt{I}$ は $I\subset\sqrt{I}$ から。$a^{n}\in\sqrt{I}$ なら $(a^{n})^{m}\in I$ となる $m$ があるので $a\in\sqrt{I}$。次に $IJ\subset I\cap J\subset I,J$ から $\sqrt{IJ}\subset\sqrt{I\cap J}\subset\sqrt{I}\cap\sqrt{J}$。$a\in\sqrt{I}\cap\sqrt{J}$ なら $a^{m}\in I$, $a^{n}\in J$ で $a^{m+n}=a^{m}a^{n}\in IJ$ なので $a\in\sqrt{IJ}$。$\sqrt{I}=A$ なら $1^{n}=1\in I$ で $I=A$、逆は明らか。最後に、$I+J\subset\sqrt{I}+\sqrt{J}$ から $\sqrt{I+J}\subset\sqrt{\sqrt{I}+\sqrt{J}}$。逆に $\sqrt{I}+\sqrt{J}\subset\sqrt{I+J}$（$a^{m}\in I$, $b^{n}\in J$ なら二項定理 \tref{ring:binomial} で $(a+b)^{m+n-1}$ の各項は $I$ か $J$ に属する）の両辺の根基をとって、前半から $\sqrt{\sqrt{I}+\sqrt{J}}\subset\sqrt{\sqrt{I+J}}=\sqrt{I+J}$。
+
+**Step 4（4）.** $a^{n}\in\mathfrak{p}$ なら帰納的に $a\in\mathfrak{p}$。
+
+::: hypcheck
+- **選択公理**：2 だけで使った（\ref{ring:nilradical} を通して）。1・3・4 は使わない。
+:::
+:::
+
+::: example
+$\Z$ で $n=p_{1}^{e_{1}}\cdots p_{r}^{e_{r}}$（$e_{k}\ge 1$, 相異なる素数）なら $\sqrt{n\Z}=p_{1}\cdots p_{r}\Z$。実際、$a^{m}\in n\Z$ なら各 $p_{k}\mid a^{m}$ で、ユークリッドの補題から $p_{k}\mid a$、異なる素数なので $p_{1}\cdots p_{r}\mid a$。逆に $a=p_{1}\cdots p_{r}b$ なら $m=\max e_{k}$ として $n\mid a^{m}$。特に $\mathrm{nil}(\Z/n\Z)=p_{1}\cdots p_{r}\Z/n\Z$ で、$\Z/n\Z$ が被約 $\iff$ $n$ は平方因子をもたない。
+:::
+
+## ジャコブソン根基 {#ring:sec-pm-jacobson}
+
+::: theorem ジャコブソン根基 {#ring:jacobson-radical keywords="Jacobson radical, characterization of Jacobson radical" index="ジャコブソン根基|じゃこぶそんこんき"}
+可換環 $A$ のすべての極大イデアルの共通部分を $\mathrm{rad}(A)$ と書き、**ジャコブソン根基**という。
+1. （AC）$x\in\mathrm{rad}(A)$ であることと、すべての $y\in A$ について $1-xy$ が単元であることは同値である。
+2. （AC）$\mathrm{nil}(A)\subset\mathrm{rad}(A)$。
+3. $(A,\mathfrak{m})$ が局所環なら $\mathrm{rad}(A)=\mathfrak{m}$。
+:::
+
+::: proof
+**Step 1（1、⇒）.** $x\in\mathrm{rad}(A)$ で、ある $y$ について $1-xy$ が単元でないとする。\ref{ring:nonunit-in-maximal} から $1-xy\in\mathfrak{m}$ となる極大イデアル $\mathfrak{m}$ がある。$x\in\mathfrak{m}$ なので $xy\in\mathfrak{m}$、よって $1=(1-xy)+xy\in\mathfrak{m}$ となり矛盾。
+
+**Step 2（1、⇐）.** $x\notin\mathfrak{m}$ となる極大イデアル $\mathfrak{m}$ があるとする。$\mathfrak{m}+(x)=A$ なので $1=u+xy$（$u\in\mathfrak{m}$）と書け、$1-xy=u\in\mathfrak{m}$ は単元でない。対偶から ⇐ を得る。
+
+**Step 3（2）.** 極大イデアルは素イデアルなので、\ref{ring:nilradical} から $\mathrm{nil}(A)=\bigcap_{\mathfrak{p}}\mathfrak{p}\subset\bigcap_{\mathfrak{m}}\mathfrak{m}$。
+
+**Step 4（3）.** 極大イデアルが $\mathfrak{m}$ だけなので共通部分は $\mathfrak{m}$。
+
+::: hypcheck
+- **選択公理**：Step 1 で \ref{ring:nonunit-in-maximal} を、Step 3 で \ref{ring:nilradical} を使った。2 は選択公理なしでも直接示せる：冪零な $x$ と任意の $y$ について $xy$ は冪零なので $1-xy$ は単元（\ref{ring:nilpotent-unit.2}）、したがって 1 の ⇐（選択公理を使わない Step 2 の対偶）から $x\in\mathrm{rad}(A)$。
+- **2 の包含は真になりうる**：$\Z_{(p)}$ は整域なので $\mathrm{nil}=0$ だが、局所環なので $\mathrm{rad}=p\Z_{(p)}\neq 0$（\ref{ring:local-ring-examples.2}）。
+:::
+:::
+
+::: supplement
+**素スペクトル.** 可換環 $A$ の素イデアル全体を $\Spec A$ と書く。\ref{ring:prime-preimage.1} から、環準同型 $f:A\to B$ は写像 $\Spec B\to\Spec A$, $\mathfrak{q}\mapsto f^{-1}(\mathfrak{q})$ を誘導し、$\Spec$ は環の圏から集合の圏への反変関手になる。極大イデアルについては同じことが成り立たない（\ref{ring:prime-preimage} の hypcheck）ことが、素イデアルを基本の「点」として採用する理由の一つである。$\Spec A$ にはザリスキ位相が入り（\ref{ag:zariski-topology}）、冪零根基は「$\Spec A$ のすべての点で値が $0$ になる関数」と解釈できる（\ref{ring:nilradical}）。根基 $\sqrt{I}$ は「$I$ の零点集合だけで決まる部分」であり、ヒルベルトの零点定理（\tref{ring:nullstellensatz}）はこの直感を体上の多項式環で正確にしたものである。
+
+**選択公理なしでは.** 「零環でない可換環はすべて素イデアルをもつ」は選択公理より真に弱い（ブール素イデアル定理と同値）ことが知られている。極大イデアルと素イデアルとで、存在のために必要な選択公理の強さが違う。
+:::
+
+## 問題 {#ring:sec-pm-problems}
+
+::: problem {#ring:prob-finite-prime-maximal}
+有限な可換環の素イデアルは極大イデアルであることを示せ。
+:::
+
+::: solution
+$\mathfrak{p}$ が素なら $A/\mathfrak{p}$ は有限な整域（\ref{ring:prime-maximal-quotient.1}）で、\ref{ring:domain-field.3} から体。\ref{ring:prime-maximal-quotient.2} から $\mathfrak{p}$ は極大。（より一般に、すべての元 $x$ について $x^{n}=x$ となる $n\ge 2$ がある環でも同じことが言える：$A/\mathfrak{p}$ で $x(x^{n-1}-1)=0$。）
+:::
+
+::: problem {#ring:prob-primes-of-product}
+可換環 $A,B$ について、$A\times B$ の素イデアルは $\mathfrak{p}\times B$（$\mathfrak{p}\in\Spec A$）と $A\times\mathfrak{q}$（$\mathfrak{q}\in\Spec B$）の形のものですべてであることを示せ。
+:::
+
+::: solution
+**Step 1（これらは素）.** 射影 $p_{1}:A\times B\to A$ は準同型で、$p_{1}^{-1}(\mathfrak{p})=\mathfrak{p}\times B$ は素（\ref{ring:prime-preimage.1}）。$A\times\mathfrak{q}$ も同様。
+
+**Step 2（他にない）.** $P$ を素イデアルとする。$(1,0)(0,1)=(0,0)\in P$ なので $(1,0)\in P$ または $(0,1)\in P$。$(0,1)\in P$ の場合：$(0,b)=(0,1)(0,b)\in P$ なので $0\times B\subset P$。$\mathfrak{p}\defeq\{a : (a,0)\in P\}$ とおくと $P=\mathfrak{p}\times B$（$(a,b)=(a,0)+(0,b)$）で、$\mathfrak{p}=p_{1}(P)$ は $A$ のイデアル、$P\neq A\times B$ から $\mathfrak{p}\neq A$、$ab\in\mathfrak{p}$ なら $(a,1)(b,1)=(ab,1)\in P$ なので $a\in\mathfrak{p}$ または $b\in\mathfrak{p}$。$(1,0)\in P$ の場合も対称。
+:::
+
+::: problem {#ring:prob-boolean-primes}
+ブール環（\ref{ring:prob-boolean-ring}）の素イデアルはすべて極大イデアルで、剰余体は $\mathbb{F}_{2}$ であることを示せ。
+:::
+
+::: solution
+$\mathfrak{p}$ を素イデアルとすると $D\defeq A/\mathfrak{p}$ は整域で、すべての元が $x^{2}=x$、すなわち $x(x-1)=0$ をみたすので $x=0$ または $x=1$。よって $D=\{0,1\}$ は $\mathbb{F}_{2}$ に同型な体で、$\mathfrak{p}$ は極大。
+:::
+
+::: problem {#ring:prob-compact-maximal}
+$X$ をコンパクト・ハウスドルフ空間とする。$C(X)$ の極大イデアルはすべて $\mathfrak{m}_{x_{0}}$（$x_{0}\in X$）の形であることを示せ。
+:::
+
+::: solution
+**Step 1.** $\mathfrak{m}$ を極大イデアルとし、どの $x\in X$ についても $\mathfrak{m}\not\subset\mathfrak{m}_{x}$ と仮定する。各 $x$ について $f_{x}\in\mathfrak{m}$ で $f_{x}(x)\neq 0$ のものがあり、連続性から $x$ の開近傍 $U_{x}$ 上で $f_{x}\neq 0$。
+
+**Step 2.** コンパクト性から $X=U_{x_{1}}\cup\dots\cup U_{x_{n}}$。$g\defeq f_{x_{1}}^{2}+\dots+f_{x_{n}}^{2}\in\mathfrak{m}$ は $X$ の各点で正なので、$1/g\in C(X)$ で $g$ は単元。これは $\mathfrak{m}\neq C(X)$ に反する。
+
+**Step 3.** よって $\mathfrak{m}\subset\mathfrak{m}_{x_{0}}$ となる $x_{0}$ があり、$\mathfrak{m}$ の極大性と $\mathfrak{m}_{x_{0}}\neq C(X)$ から $\mathfrak{m}=\mathfrak{m}_{x_{0}}$。
+
+（ハウスドルフ性は使っていない。ハウスドルフ性は、異なる点 $x_{0}\neq x_{1}$ の $\mathfrak{m}_{x_{0}}\neq\mathfrak{m}_{x_{1}}$ を示すのに使う：ウリゾーンの補題から $f(x_{0})=0$, $f(x_{1})=1$ となる連続関数がある。コンパクト性を外すと偽：$C(\R)$ で、台が有界な連続関数全体を含む極大イデアル（\ref{ring:maximal-ideal-existence}）はどの $\mathfrak{m}_{x}$ とも異なる。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

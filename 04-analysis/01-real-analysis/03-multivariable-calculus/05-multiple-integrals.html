@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>重積分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/03-multivariable-calculus/05-multiple-integrals.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 重積分 {#calc:page-multiple-integrals keywords="Riemann integral over a box in R^n, Darboux sums, partitions of boxes, mesh criterion, measure zero in R^n, Lebesgue criterion for Riemann integrability in several variables, Jordan measurable sets, sets with volume, Jordan content, integral over a Jordan measurable set"}
+
+1 変数の\ref{calc:page-riemann-integral}は、区間を小区間に分けて上下から長方形の面積で挟む方法だった。$\mathbb{R}^{n}$ では区間の代わりに**直方体**を小直方体に分けて同じことを行う。このページでは、直方体上の積分を定義し、積分可能性の判定法（分割を細かくすればよいこと、**ルベーグの判定法**）を示したうえで、積分できる領域として**ジョルダン可測集合**（体積確定集合）を導入する。積分の順序交換（フビニの定理）は次ページ（\ref[フビニの定理]{calc:page-fubini}）で扱う。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 10 章、杉浦光夫『解析入門 I』第 IV 章と同じ標準的な内容。証明は自分で書き下ろした（ルベーグの判定法は、1 変数の場合 \tref{calc:lebesgue-criterion} と同じく選択公理を使わない形にした）。
+
+## 記法と定義の確認 {#calc:sec-mi-notation}
+
+::: notation
+- 1 変数のダルブー和と積分 \ref{calc:darboux-sums}, \ref{calc:riemann-integrable}, \ref{calc:riemann-criterion}, \ref{calc:lebesgue-criterion}。
+- ハイネ–ボレル \ref{top:heine-borel}、ルベーグ数の補題 \tref{top:lebesgue-number}、ハイネ–カントール \tref{top:heine-cantor}。
+- **直方体**：$R=\prod_{i=1}^{n}[a_{i},b_{i}]$（$a_{i}\le b_{i}$）を閉直方体、$\prod(a_{i},b_{i})$ を開直方体といい、どちらも**体積** $v(R)\defeq\prod_{i}(b_{i}-a_{i})$ をもつ。$\operatorname{int}R$ は内部。
+- 関数は実数値で有界とする（$|f|\le B$）。
+- **体系**：$\mathsf{ZF}$。選択公理を使わない（「測度 $0$ の集合の可算和」は一般論としては使わない）。
+:::
+
+## 直方体上の積分 {#calc:sec-mi-box}
+
+::: definition 分割とダルブー和 {#calc:box-partition keywords="partition of a box as product of partitions of the sides, subboxes, mesh, upper and lower Darboux sums in several variables" index="直方体の分割|ちょくほうたいのぶんかつ, 小直方体|しょうちょくほうたい"}
+閉直方体 $R=\prod[a_{i},b_{i}]$ の**分割** $P=(P_{1},\dots,P_{n})$ とは、各辺の分割 $P_{i}\colon a_{i}=t_{i,0}<t_{i,1}<\cdots<t_{i,k_{i}}=b_{i}$ の組をいう。各辺の小区間を 1 つずつ選んだ積 $Q=\prod_{i}[t_{i,j_{i}-1},t_{i,j_{i}}]$ を $P$ の**小直方体**といい、その全体も $P$ と書く。$|P|\defeq\max_{i,j}(t_{i,j}-t_{i,j-1})$（**網目**）。各 $P_{i}$ が $P'_{i}$ に含まれるとき $P'$ は $P$ の**細分**という。有界な $f\colon R\to\mathbb{R}$ について $M_{Q}\defeq\sup_{Q}f$, $m_{Q}\defeq\inf_{Q}f$ とし、
+$$
+U(f,P)\defeq\sum_{Q\in P}M_{Q}v(Q),\qquad L(f,P)\defeq\sum_{Q\in P}m_{Q}v(Q).
+$$
+:::
+
+::: lemma 体積の加法性 {#calc:box-volume-additivity keywords="volumes of the subboxes of a partition add up; boxes with disjoint interiors inside a box have total volume at most its volume; a box covered by finitely many boxes has volume at most their sum" index="体積の加法性|たいせきのかほうせい"}
+1. $R$ の分割 $P$ について $\sum_{Q\in P}v(Q)=v(R)$。
+2. 閉直方体 $Q_{1},\dots,Q_{r}\subset R$ の内部が互いに交わらないなら $\sum_{j}v(Q_{j})\le v(R)$。
+3. 閉直方体 $R$ が有限個の直方体 $J_{1},\dots,J_{r}$（開でも閉でもよい）の和に含まれるなら $v(R)\le\sum_{j}v(J_{j})$。
+:::
+
+::: proof
+**Step 1（1）.** 分配法則から $\sum_{Q}v(Q)=\prod_{i}\sum_{j}(t_{i,j}-t_{i,j-1})=\prod_{i}(b_{i}-a_{i})$。
+
+**Step 2（格子）.** 2・3 では、$R$ の各辺の分割を、$R$ と $Q_{j}$（あるいは $J_{j}$）の辺の端点のうち $[a_{i},b_{i}]$ に入るものすべてで作り、その分割 $P$ の小直方体を**格子の胞**と呼ぶ。各 $Q_{j}$（の $R$ との共通部分）は胞の和で、1 から $v(Q_{j}\cap R)$ はそこに含まれる胞の体積の和（$Q_{j}\cap R$ の辺の分割を考える）。
+
+**Step 3（2）.** 胞 $C$ が 2 つの $Q_{j}$, $Q_{l}$ に含まれ $v(C)>0$ なら $\operatorname{int}C\subset\operatorname{int}Q_{j}\cap\operatorname{int}Q_{l}$ で矛盾。よって体積正の胞は高々 1 つの $Q_{j}$ に含まれ、$\sum_{j}v(Q_{j})\le\sum_{C}v(C)=v(R)$。
+
+**Step 4（3）.** 体積正の胞 $C$ について、$\operatorname{int}C$ の 1 点はある $J_{j}$ に属する。胞の辺は $J_{j}$ の辺の端点をまたがないので、$\operatorname{int}C$ が $J_{j}$ と交わるなら $C\subset\overline{J_{j}}$。各胞をそのような $j$ の 1 つに割り当てる（最小の $j$）と、2 から $\sum_{C\subset\overline{J_{j}}}v(C)\le v(J_{j})$。よって $v(R)=\sum_{C}v(C)\le\sum_{j}v(J_{j})$。
+:::
+
+::: lemma 細分とダルブー和（多変数） {#calc:box-refinement keywords="refinement increases lower sums and decreases upper sums; L(f,P) <= U(f,Q) for all partitions" index="細分とダルブー和（多変数）|さいぶんとだるぶーわたへんすう"}
+$P'$ が $P$ の細分なら $L(f,P)\le L(f,P')\le U(f,P')\le U(f,P)$。任意の 2 つの分割 $P,P''$ について $L(f,P)\le U(f,P'')$。
+:::
+
+::: proof
+$P$ の各小直方体 $Q$ に含まれる $P'$ の小直方体は、$Q$ の分割（各辺で $P'_{i}$ の点を使う）をなすので、\ref{calc:box-volume-additivity.1} から $v(Q)=\sum_{Q'\subset Q}v(Q')$。$m_{Q}\le m_{Q'}$ なので $m_{Q}v(Q)\le\sum_{Q'\subset Q}m_{Q'}v(Q')$。足して $L(f,P)\le L(f,P')$。上和も同様。後半は、各辺の分点の和集合で作った共通の細分 $P'$ について $L(f,P)\le L(f,P')\le U(f,P')\le U(f,P'')$。
+:::
+
+::: definition 直方体上のリーマン積分 {#calc:box-integral keywords="Riemann integrable on a box: sup of lower sums equals inf of upper sums; multiple integral" index="重積分|じゅうせきぶん, リーマン積分（多変数）|りーまんせきぶんたへんすう"}
+$\underline{\int_{R}}f\defeq\sup_{P}L(f,P)$, $\overline{\int_{R}}f\defeq\inf_{P}U(f,P)$（\ref{calc:box-refinement} から $\underline{\int}\le\overline{\int}$）が等しいとき、$f$ は $R$ 上で**リーマン積分可能**といい、その値を $\int_{R}f=\int_{R}f(x)\,dx$ と書く（**重積分**）。
+:::
+
+::: theorem 積分可能性の判定（多変数） {#calc:box-riemann-criterion keywords="f integrable iff for every eps a partition with U - L < eps; iff U - L -> 0 as the mesh tends to 0; Riemann sums" index="積分可能性の判定（多変数）|せきぶんかのうせいのはんていたへんすう"}
+有界な $f\colon R\to\mathbb{R}$ について次は同値。
+1. $f$ は積分可能。
+2. 任意の $\varepsilon>0$ に、$U(f,P)-L(f,P)<\varepsilon$ となる分割 $P$ がある。
+3. 任意の $\varepsilon>0$ に $\delta>0$ があって、$|P|<\delta$ なら $U(f,P)-L(f,P)<\varepsilon$。
+
+このとき、$|P|\to0$ で $L(f,P)$ と $U(f,P)$ はともに $\int_{R}f$ に収束する。
+:::
+
+::: proof
+**Step 1（1 ⇔ 2）.** 2 なら $0\le\overline{\int}f-\underline{\int}f\le U(f,P)-L(f,P)<\varepsilon$。1 なら、$L(f,P_{1})>\int f-\frac\varepsilon2$, $U(f,P_{2})<\int f+\frac\varepsilon2$ となる $P_{1},P_{2}$ の共通の細分 $P$ で、\ref{calc:box-refinement} から $U(f,P)-L(f,P)<\varepsilon$。
+
+**Step 2（2 ⇒ 3）.** $U(f,P_{0})-L(f,P_{0})<\frac\varepsilon2$ となる $P_{0}$ をとる。$P_{0}$ の分点のうち辺の内部にあるものの総数を $K$、$c\defeq\max_{i}\prod_{l\neq i}(b_{l}-a_{l})$ とする。網目 $<\delta$ の $P$ の小直方体 $Q$ を、$P_{0}$ のある小直方体に含まれる「良いもの」とそうでない「悪いもの」に分ける。悪い $Q=\prod[c_{i},d_{i}]$ では、ある $i$ で $P_{0,i}$ の分点 $t$ が $(c_{i},d_{i})$ に入る（どの $i$ でも入らなければ、各 $[c_{i},d_{i}]$ は $P_{0,i}$ の 1 つの小区間に含まれ、$Q$ は良い）。分点 $t$（第 $i$ 座標）をまたぐ $Q$ は直方体 $\{x\in R:|x_{i}-t|\le\delta\}$ に含まれ内部が交わらないので、体積の和は $2\delta c$ 以下（\ref{calc:box-volume-additivity.2}）。よって悪い $Q$ の体積の和は $2K\delta c$ 以下。良い $Q\subset Q_{0}$ では $M_{Q}-m_{Q}\le M_{Q_{0}}-m_{Q_{0}}$ で、$Q_{0}$ に含まれる良い $Q$ の体積の和は $v(Q_{0})$ 以下（同じく 2）。したがって
+$$
+U(f,P)-L(f,P)\le\sum_{Q_{0}\in P_{0}}(M_{Q_{0}}-m_{Q_{0}})v(Q_{0})+2B\cdot2K\delta c<\frac\varepsilon2+4BKc\,\delta,
+$$
+$\delta\defeq\varepsilon/(8BKc+1)$ とすれば $<\varepsilon$。3 ⇒ 2 は明らか。
+
+**Step 3（収束）.** $L(f,P)\le\int f\le U(f,P)$ と 3 から。
+
+::: hypcheck
+- **有界性**：ダルブー和の定義と Step 2 の $B$ に使った。
+- 選択公理は使わない（$\delta$ は具体的な式で与えた）。
+:::
+:::
+
+::: proposition 積分の基本性質（多変数） {#calc:box-integral-properties keywords="linearity, monotonicity, |int f| <= int |f|, continuous functions are integrable, integral of a constant" index="重積分の基本性質|じゅうせきぶんのきほんせいしつ"}
+$f,g$ を $R$ 上で積分可能とする。
+1. $\lambda f+\mu g$ は積分可能で $\int(\lambda f+\mu g)=\lambda\int f+\mu\int g$。$f\le g$ なら $\int f\le\int g$。
+2. $|f|$ は積分可能で $|\int f|\le\int|f|\le Bv(R)$。
+3. 連続関数は積分可能。定数 $c$ の積分は $cv(R)$。
+:::
+
+::: proof
+**Step 1（1）.** $\sup_{Q}(f+g)\le M_{Q}(f)+M_{Q}(g)$ などから $L(f,P)+L(g,P)\le L(f+g,P)\le U(f+g,P)\le U(f,P)+U(g,P)$。網目 $\to0$（\ref{calc:box-riemann-criterion.3}）で両端は $\int f+\int g$ に収束。$\lambda\ge0$ では $L(\lambda f,P)=\lambda L(f,P)$、$\lambda<0$ では上下が入れ替わる。単調性は $L(f,P)\le L(g,P)$ から。
+
+**Step 2（2）.** $\sup_{Q}|f|-\inf_{Q}|f|\le M_{Q}-m_{Q}$（$||f(s)|-|f(t)||\le|f(s)-f(t)|$）から $|f|$ も判定法の 2 を満たす。$-|f|\le f\le|f|$ と 1。
+
+**Step 3（3）.** $R$ はコンパクト（\ref{top:heine-borel}）なので $f$ は一様連続（\ref{top:heine-cantor}）。$\varepsilon>0$ に $\delta$ を、$|s-t|<\delta$ なら $|f(s)-f(t)|<\varepsilon/(v(R)+1)$ ととる。$\sqrt{n}|P|<\delta$ なら各小直方体の直径は $\delta$ 未満で、$U-L\le\frac{\varepsilon}{v(R)+1}v(R)<\varepsilon$。定数は $L=U=cv(R)$。
+:::
+
+## 測度 0 とルベーグの判定法 {#calc:sec-mi-lebesgue}
+
+::: definition 測度 0（多変数） {#calc:measure-zero-rn keywords="a subset of R^n has measure zero if it is covered by countably many boxes of arbitrarily small total volume; content zero" index="測度 0（多変数）|そくどぜろたへんすう, 零集合（多変数）|れいしゅうごうたへんすう"}
+$E\subset\mathbb{R}^{n}$ が**測度 $0$** であるとは、任意の $\varepsilon>0$ に、開直方体の列 $(J_{k})_{k\ge1}$ で $E\subset\bigcup_{k}J_{k}$, $\sum_{k}v(J_{k})<\varepsilon$ となるものがあることをいう。
+:::
+
+::: lemma 測度 0 の集合の性質 {#calc:measure-zero-rn-properties keywords="closed boxes may be used; subsets and finite unions of null sets are null; compact null sets are covered by finitely many boxes; boxes of positive volume are not null; graphs of continuous functions on boxes are null" index="測度 0 の集合の性質|そくどぜろのしゅうごうのせいしつ" refname="ℝⁿ の測度 0 の集合の性質" refscope="field"}
+1. 定義で開直方体の代わりに閉直方体を使っても同じ。
+2. 測度 $0$ の集合の部分集合、および有限個の測度 $0$ の集合の和集合は測度 $0$。
+3. 体積が正の閉直方体は測度 $0$ でない。
+4. 閉直方体 $A\subset\mathbb{R}^{n}$ 上の連続関数 $\varphi$ のグラフ $\{(x,\varphi(x)):x\in A\}\subset\mathbb{R}^{n+1}$ は測度 $0$。閉直方体の境界、および座標超平面 $\{x_{i}=c\}$ と有界集合の共通部分は測度 $0$。
+:::
+
+::: proof
+**Step 1（1）.** 開直方体の閉包は同じ体積の閉直方体。逆に閉直方体 $C_{k}$ の列で $\sum v(C_{k})<\frac\varepsilon2$ なら、$C_{k}$ の各辺を両側に $\eta$ だけ延ばした開直方体の体積は $\eta\to0$ で $v(C_{k})$ に収束するので、$v<v(C_{k})+\varepsilon2^{-k-1}$ となる $\eta=1/N$ のうち最小の $N$ を使えば（選択は不要）、和は $<\varepsilon$。
+
+**Step 2（2）.** 部分集合は明らか。$E_{1},\dots,E_{r}$ の被覆（それぞれ和 $<\varepsilon/r$）を 1 列に並べる（有限個の存在命題の具体化なので選択公理は要らない）。
+
+**Step 3（3）.** 体積 $v(R)>0$ の閉直方体 $R$ が、和 $<v(R)$ の開直方体の列で覆えたとする。$R$ はコンパクトなので有限個で覆え、\ref{calc:box-volume-additivity.3} から $v(R)\le\sum v(J_{j})<v(R)$。矛盾。
+
+**Step 4（4）.** $\varepsilon>0$ とする。$\varphi$ は一様連続なので、$A$ の分割 $P$ を十分細かくとって、各小直方体 $Q$ で $\sup_{Q}\varphi-\inf_{Q}\varphi<\varepsilon/(v(A)+1)$ とできる（$n=0$ や $v(A)=0$ の場合も同じ式）。グラフは閉直方体 $Q\times[\inf_{Q}\varphi,\sup_{Q}\varphi]$ たちの和に含まれ、体積の和は $\sum_{Q}v(Q)\frac{\varepsilon}{v(A)+1}<\varepsilon$。1 から測度 $0$。超平面との共通部分は、それを含む閉直方体 $\prod_{l\neq i}[\alpha_{l},\beta_{l}]\times\{c\}$（定数関数のグラフの座標を並べ替えたもの）に含まれるので測度 $0$。閉直方体の境界は $2n$ 個の面の和で 2 から測度 $0$。
+:::
+
+::: definition 振動 {#calc:oscillation-rn keywords="oscillation of a bounded function at a point of a box" index="振動（多変数）|しんどうたへんすう"}
+$f\colon R\to\mathbb{R}$ と $x\in R$ について $\omega_{f}(x)\defeq\lim_{\delta\to0+}\sup\{|f(s)-f(t)|:s,t\in R,\ |s-x|,|t-x|<\delta\}$（単調減少な関数の極限）。$f$ が $x$ で連続 $\iff$ $\omega_{f}(x)=0$。
+:::
+
+::: theorem ルベーグの判定法（多変数） {#calc:lebesgue-criterion-rn keywords="a bounded function on a box is Riemann integrable iff its set of discontinuities has measure zero, proved without choice" index="ルベーグの判定法（多変数）|るべーぐのはんていほうたへんすう" refname="ルベーグの判定法（多変数）"}
+有界な $f\colon R\to\mathbb{R}$ が積分可能 $\iff$ $f$ の不連続点の集合 $D$ が測度 $0$。
+:::
+
+::: proof
+$D_{k}\defeq\{x\in R:\omega_{f}(x)\ge\frac1k\}$ とおくと $D=\bigcup_{k\ge1}D_{k}$。$D_{k}$ は閉（$\omega_{f}(x)<\frac1k$ なら、ある $\delta$ で $x$ の $\delta$ 近傍での振れ幅が $\frac1k$ 未満で、その近傍の各点 $y$ について $\omega_{f}(y)<\frac1k$）なので、コンパクト。
+
+**Step 1（⇒）.** $\varepsilon>0$ とする。$P_{N}$ を各辺の $N$ 等分による分割とする。\ref{calc:box-riemann-criterion.3} から $U(f,P_{N})-L(f,P_{N})\to0$。各 $k$ について、$U(f,P_{N})-L(f,P_{N})<\frac{\varepsilon}{2k}2^{-k}$ となる最小の $N=N(k)$ をとる。$D_{k}$ の点で、$P_{N}$ のある小直方体の内部にあるものについて、その小直方体 $Q$ では $M_{Q}-m_{Q}\ge\frac1k$ なので、そのような $Q$ の体積の和は $k\sum(M_{Q}-m_{Q})v(Q)<\frac\varepsilon2 2^{-k}$。残りの $D_{k}$ の点は、$P_{N}$ の分点を通る座標超平面（有限個）の上にあり、その個数を $K$、$c\defeq\max_{i}\prod_{l\neq i}(b_{l}-a_{l})$ とすると、超平面 $\{x_{i}=t\}$ と $R$ の共通部分は閉直方体 $\{x\in R:|x_{i}-t|\le\eta\}$（体積 $2\eta c$ 以下）に含まれる。$\eta\defeq\varepsilon2^{-k}/(4Kc+1)$ とすれば、これら $K$ 個の閉直方体の体積の和は $<\frac\varepsilon2 2^{-k}$。こうして各 $k$ について $D_{k}$ を体積の和 $<\varepsilon2^{-k}$ の有限個の閉直方体で覆う族が $k$ から一意に決まり、全部を並べると $D$ は和 $<\varepsilon$ の閉直方体の列で覆える。\ref{calc:measure-zero-rn-properties.1} で開直方体に直す。
+
+**Step 2（⇐）.** $\varepsilon>0$ とし、$k$ を $\frac{v(R)}{k}<\frac\varepsilon2$ ととる。$D_{k}\subset D$ は和 $<\eta$ の開直方体の列で覆え、$D_{k}$ はコンパクトなので有限個 $J_{1},\dots,J_{r}$ で覆える（$\eta$ はあとで決める）。$\mathcal{B}$ を、$f$ の $O\cap R$ での振れ幅 $\sup|f(s)-f(t)|$ が $\frac1k$ 未満となる開球 $O$ の全体とする。$R\setminus\bigcup J_{j}$ の点 $x$ では $\omega_{f}(x)<\frac1k$ なので $x$ はある $O\in\mathcal{B}$ に属し、$\{J_{j}\}\cup\mathcal{B}$ はコンパクト距離空間 $R$ の開被覆（$R$ との共通部分をとる）。そのルベーグ数 $\lambda$（\tref{top:lebesgue-number}）について、小直方体の直径が $\lambda$ 未満の分割 $P$ をとる。各小直方体は、ある $J_{j}$ に含まれるか、ある $O\in\mathcal{B}$ に含まれる（$M_{Q}-m_{Q}\le\frac1k$）。前者の体積の和は、$J_{j}$ ごとに \ref{calc:box-volume-additivity.2} で $v(J_{j})$ 以下なので $<\eta$。よって
+$$
+U(f,P)-L(f,P)<2B\eta+\frac1k v(R)<2B\eta+\frac\varepsilon2,
+$$
+$\eta\defeq\frac{\varepsilon}{4B+1}$ とすれば $<\varepsilon$。
+
+::: hypcheck
+- **選択公理を使わない工夫**：Step 1 で、各 $D_{k}$ の被覆を「条件を満たす最小の $N$ の等分割」から具体的に作った（1 変数の \ref{calc:lebesgue-criterion} と同じ）。Step 2 は 1 つの被覆の存在と、有限部分被覆・ルベーグ数（\tref{top:lebesgue-number} は選択公理を使わない）だけ。
+- **有界性**：$B$ による評価に使った。
+:::
+:::
+
+::: corollary 積分可能な関数の演算 {#calc:integrable-operations-rn keywords="products, maxima, compositions with continuous functions of integrable functions are integrable; changing values on a null set" index="積分可能な関数の演算|せきぶんかのうなかんすうのえんざん"}
+$f,g$ が $R$ 上で積分可能なら、$fg$、$\max(f,g)$、および連続関数 $\Phi\colon\mathbb{R}^{2}\to\mathbb{R}$ との合成 $\Phi(f,g)$ は積分可能。
+:::
+
+::: proof
+$\Phi(f,g)$ の不連続点は $f$ または $g$ の不連続点（連続関数の合成）なので、測度 $0$ の 2 つの集合の和に含まれ、測度 $0$（\ref{calc:measure-zero-rn-properties.2}）。$\Phi(f,g)$ は有界（$\Phi$ はコンパクト集合 $[-B,B]^{2}$ 上で有界）なので、ルベーグの判定法から積分可能。積と最大は $\Phi(u,v)=uv$, $\max(u,v)$。
+:::
+
+## ジョルダン可測集合 {#calc:sec-mi-jordan}
+
+::: lemma 外への零延長 {#calc:integral-zero-extension keywords="if f vanishes outside a box R0 contained in R, then f is integrable on R iff on R0, with the same integral" index="零延長と積分|れいえんちょうとせきぶん"}
+閉直方体 $R_{0}\subset R$ とし、$f\colon R\to\mathbb{R}$ は有界で $R\setminus R_{0}$ の上で $0$ とする。$f$ が $R$ 上で積分可能 $\iff$ $f\restriction R_{0}$ が $R_{0}$ 上で積分可能で、このとき $\int_{R}f=\int_{R_{0}}f$。
+:::
+
+::: proof
+**Step 1（可能性）.** $R\setminus R_{0}$ の内部（$R$ での相対的な内部）の点で $f$ は連続（近傍で $0$）。よって $R$ 上の $f$ の不連続点の集合と $R_{0}$ 上の $f\restriction R_{0}$ の不連続点の集合は、$R_{0}$ の境界（測度 $0$、\ref{calc:measure-zero-rn-properties.4}）を除いて一致する。ルベーグの判定法と \ref{calc:measure-zero-rn-properties.2} から同値。
+
+**Step 2（値）.** $R$ の分割 $P$ で、各辺の分点に $R_{0}$ の辺の端点を含むものを考える。$P$ の小直方体のうち $R_{0}$ に含まれるものは $R_{0}$ の分割 $P_{0}$ をなす。それ以外の小直方体 $Q$ は $\operatorname{int}Q\cap R_{0}=\varnothing$ で、$f\neq0$ となりうるのは $Q\cap R_{0}$（$R_{0}$ の境界の上）だけ。そのような $Q$ のうち $R_{0}$ と交わるものは、$R_{0}$ のある面 $\{x_{i}=c\}$ と交わり、辺の長さは $|P|$ 以下なので、直方体 $\{x\in R:|x_{i}-c|\le|P|\}$ に含まれる。これらは内部が交わらないので、\ref{calc:box-volume-additivity.2} から、体積の和は $2n\cdot2|P|\max_{i}\prod_{l\neq i}(b_{l}-a_{l})$ 以下で、$|P|\to0$ で $0$ に近づく。よって $|L(f,P)-L(f,P_{0})|$ と $|U(f,P)-U(f,P_{0})|$ は $2B\times$（その体積の和）以下で、$|P|\to0$ として（\ref{calc:box-riemann-criterion.3}）$\int_{R}f=\int_{R_{0}}f$。
+:::
+
+::: definition ジョルダン可測集合と体積 {#calc:jordan-measurable keywords="Jordan measurable set (set with volume): bounded set whose characteristic function is Riemann integrable; volume v(E); integral over E" index="ジョルダン可測|じょるだんかそく, 体積確定集合|たいせきかくていしゅうごう, 面積確定|めんせきかくてい, ジョルダン測度|じょるだんそくど"}
+有界な $E\subset\mathbb{R}^{n}$ と、$E$ を含む閉直方体 $R$ について、特性関数 $\chi_{E}$ が $R$ 上で積分可能なとき、$E$ は**ジョルダン可測**（**体積確定**）であるといい、$v(E)\defeq\int_{R}\chi_{E}$ を $E$ の**体積**（**ジョルダン測度**）という。$E$ 上の有界な関数 $f$ について、$f$ を $E$ の外で $0$ と延長した $\tilde f$ が $R$ 上で積分可能なとき、$f$ は $E$ 上で積分可能といい、$\int_{E}f\defeq\int_{R}\tilde f$ とする。これらは $R$ の取り方によらない（\ref{calc:integral-zero-extension} を、$R$ と $R'$ をともに含む直方体に使う）。
+:::
+
+::: theorem ジョルダン可測性の判定 {#calc:jordan-measurable-criterion keywords="a bounded set is Jordan measurable iff its boundary has measure zero; continuous functions on compact Jordan measurable sets are integrable" index="ジョルダン可測性の判定|じょるだんかそくせいのはんてい"}
+1. 有界な $E$ がジョルダン可測 $\iff$ 境界 $\partial E$ が測度 $0$。
+2. ジョルダン可測集合の有限個の和・共通部分・差はジョルダン可測。
+3. $E$ がジョルダン可測で、$f$ が $E$ 上で有界で、$E$ の測度 $0$ の部分集合を除いて連続なら、$f$ は $E$ 上で積分可能。とくにコンパクトなジョルダン可測集合上の連続関数は積分可能。
+:::
+
+::: proof
+**Step 1（1）.** $E\subset\operatorname{int}R$ となる $R$ をとる。$\chi_{E}$ は $\operatorname{int}E$ と $R\setminus\overline{E}$ の点で連続（近傍で定数）、$\partial E$ の点で不連続（どの近傍も $E$ と補集合の両方と交わる）。よって不連続点の集合は $\partial E$ で、ルベーグの判定法から主張。
+
+**Step 2（2）.** $\partial(E\cup F)$, $\partial(E\cap F)$, $\partial(E\setminus F)$ はどれも $\partial E\cup\partial F$ に含まれる（たとえば $x\notin\partial E\cup\partial F$ なら、$x$ のある近傍で $\chi_{E}$, $\chi_{F}$ がともに定数なので、$\chi_{E\cup F}$ なども定数）。1 と \ref{calc:measure-zero-rn-properties.2}。
+
+**Step 3（3）.** $\tilde f$ の $R$ 上の不連続点は、$f$ の不連続点（測度 $0$）か $\partial E$ の点（測度 $0$）なので、ルベーグの判定法から積分可能。
+:::
+
+::: example
+1. 閉直方体はジョルダン可測で、体積は $v(R)$ と一致する（境界は測度 $0$。$\chi_{R}$ を大きい直方体上で積分すると \ref{calc:integral-zero-extension} から $\int_{R}1=v(R)$）。
+2. 閉球 $\bar B(0,1)\subset\mathbb{R}^{n}$ はジョルダン可測：境界の球面は、$[-1,1]^{n-1}$ 上の連続関数 $\pm\sqrt{\max(0,1-|x'|^{2})}$ のグラフの和に含まれ、測度 $0$（\ref{calc:measure-zero-rn-properties.4}）。体積は \ref[変数変換公式]{calc:page-change-of-variables} で計算する。
+3. **ジョルダン可測でない集合**：$E=\mathbb{Q}^{2}\cap[0,1]^{2}$ は $\partial E=[0,1]^{2}$ で、これは測度 $0$ でない（\ref{calc:measure-zero-rn-properties.3}）。$E$ は可算集合なので測度 $0$ だが、ジョルダン可測でない（「測度 $0$」と「体積 $0$ のジョルダン可測集合」は違う）。
+:::
+
+::: proposition 積分の領域に関する加法性 {#calc:jordan-additivity keywords="int over E cup F = int over E + int over F when E cap F has measure zero; null Jordan sets have zero integral" index="積分の加法性（領域）|せきぶんのかほうせいりょういき"}
+$E,F$ をジョルダン可測、$f$ を $E\cup F$ 上で積分可能とする。
+1. $Z$ が測度 $0$ のジョルダン可測集合なら、$Z$ 上の有界関数の積分は $0$。
+2. $E\cap F$ が測度 $0$ なら $\int_{E\cup F}f=\int_{E}f+\int_{F}f$。
+:::
+
+::: proof
+**Step 1（1）.** $g$ を $Z$ の外で $0$ の有界な積分可能関数とする。体積正の小直方体 $Q$ は測度 $0$ でない（\ref{calc:measure-zero-rn-properties.3}）ので $Z$ に含まれず、$g=0$ となる点を含む。よって $m_{Q}\le0\le M_{Q}$。体積 $0$ の小直方体は和に寄与しない。$L(g,P)\le0\le U(g,P)$ なので $\int g=0$。
+
+**Step 2（2）.** $\tilde f\chi_{E\cup F}=\tilde f\chi_{E}+\tilde f\chi_{F}-\tilde f\chi_{E\cap F}$ で、各項は \ref{calc:integrable-operations-rn} から積分可能。最後の項の積分は 1 から $0$。
+:::
+
+::: supplement
+**一般化.** ジョルダン可測集合の体積は有限加法的だが、可算加法的ではない（例 3 の $E$ は 1 点集合の可算和で、各 1 点の体積は $0$ だが $E$ は体積をもたない）。可算加法性をもつ測度への拡張がルベーグ測度で、リーマン積分可能な関数はルベーグ積分可能で値が一致する（\ref[測度論]{meas:lebesgue-measure} で扱う予定）。
+
+**前提を変えると.** 積分領域を有界でない集合や、非有界な関数に広げるには極限が要る（\ref[広義重積分とパラメータを含む積分]{calc:page-parameter-integrals}）。
+
+**高い視点.** ジョルダン可測性の判定（境界が測度 $0$）は、「体積を内側からと外側から近似したとき、その差が境界の部分にしか生じない」ことを言っている。内側からの近似（$E$ に含まれる小直方体の和）と外側からの近似（$E$ と交わる小直方体の和）の差は、境界と交わる小直方体の体積で、それが分割を細かくすると $0$ になることが体積確定の意味である。比喩で言えば、方眼紙で図形の面積を測るとき、内側の升目と外にはみ出す升目の差が「輪郭線」の分だけで、輪郭線が太さをもたない（測度 $0$）なら、方眼を細かくすれば測定は一つの値に収束する。
+:::
+
+## 問題 {#calc:sec-mi-problems}
+
+::: problem {#calc:prob-mi-product-function}
+$f$ を $[a,b]$ 上で、$g$ を $[c,d]$ 上で積分可能とする。$h(x,y)\defeq f(x)g(y)$ は $[a,b]\times[c,d]$ 上で積分可能で $\int h=\int f\int g$ であることを、ダルブー和で示せ（フビニの定理を使わずに）。
+:::
+
+::: solution
+分割 $P=(P_{1},P_{2})$ と小長方形 $I\times J$ について、$f,g\ge0$ なら $M_{I\times J}(h)=M_{I}(f)M_{J}(g)$, $m_{I\times J}(h)=m_{I}(f)m_{J}(g)$ なので $U(h,P)=U(f,P_{1})U(g,P_{2})$, $L(h,P)=L(f,P_{1})L(g,P_{2})$。網目 $\to0$ で両者は $\int f\int g$ に収束するので（1 変数の \ref{calc:riemann-criterion.3}）、$h$ は積分可能で値は $\int f\int g$。一般の場合は、定数 $C$ を足して $f+C\ge0$, $g+C\ge0$ とし、線形性で展開する（$(f+C)(g+C)=fg+Cf+Cg+C^{2}$ の各項に $fg$ 以外は上の結果が使える）。
+:::
+
+::: problem {#calc:prob-mi-cantor-like}
+$E\subset[0,1]$ が 1 変数の意味で測度 $0$ の閉集合なら、$E\times[0,1]\subset\mathbb{R}^{2}$ はジョルダン可測で面積 $0$ であることを示せ。
+:::
+
+::: solution
+$E$ はコンパクトなので、和 $<\varepsilon$ の有限個の開区間で覆える。それらと $[0,1]$ の積で $E\times[0,1]$ は和 $<\varepsilon$ の有限個の開長方形で覆え、測度 $0$。閉集合なので境界は自分自身に含まれ、測度 $0$。よってジョルダン可測で、\ref{calc:jordan-additivity.1} から面積 $0$。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-mi-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

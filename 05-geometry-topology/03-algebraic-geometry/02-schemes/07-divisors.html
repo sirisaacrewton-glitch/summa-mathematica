@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>因子と直線束 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/03-algebraic-geometry/02-schemes/07-divisors.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 因子と直線束 {#ag:page-divisors keywords="prime divisor, Weil divisor, valuation along a prime divisor, principal divisor, divisor class group Cl, Cl(Spec A) = 0 iff A is a UFD, Dedekind domain ideal class group, excision sequence, Cl(P^n) = Z, quadric cone Cl = Z/2, Cartier divisor, locally principal, Weil vs Cartier, locally factorial, invertible sheaf L(D), Picard group, Pic(P^n) = Z O(1), Nagata criterion as excision, Auslander-Buchsbaum"}
+
+正規なネーター整スキーム $X$ の余次元 1 の既約閉集合（**素因子**）の自由アーベル群を**ヴェイユ因子**の群とし、有理関数 $f$ の零と極を数えた $\operatorname{div}(f)$ で割った群を**因子類群** $\operatorname{Cl}X$ とする。$\operatorname{Spec}A$ では $\operatorname{Cl}=0\iff A$ が一意分解環、デデキント環では $\operatorname{Cl}$ はイデアル類群そのもので、代数幾何と整数論が同じ群を見ている。$\operatorname{Cl}(\mathbb{P}^{n})\cong\mathbb{Z}$ と、2 次錐の $\operatorname{Cl}\cong\mathbb{Z}/2$ を計算する。後半では局所的に一つの関数で定義される**カルティエ因子**と**可逆層**の対応を示し、局所環が一意分解環なら両者が一致することを示す。
+
+
+## 記法と定義の確認 {#ag:sec-dv-notation}
+
+::: notation
+- この頁を通して、$X$ は**ネーターで整かつ正規**（すべての局所環 $\mathcal{O}_{X,x}$ が整閉整域）なスキームとする。関数体 $K=K(X)=\mathcal{O}_{X,\eta}$ と生成点 $\eta$ は \ref{ag:reduced-integral.4}、既約閉集合の生成点は \ref{ag:scheme-generic-points}。
+- 離散付値環とその特徴付け（1 次元ネーター正規局所整域は DVR）は \ref{ring:dvr}, \ref{ring:dvr-characterization}。ネーター正規整域は高さ 1 の局所化の共通部分（クルル）は \ref{ring:normal-intersection-dvr}。一意分解環の高さ 1 の素イデアルによる特徴付けは \ref{ring:ufd-height-one}、一意分解環は正規は \ref{ring:ufd-normal}。デデキント環・分数イデアル・素イデアル分解・イデアル類群は \ref{ring:dedekind}, \ref{ring:fractional-ideal}, \ref{ring:dedekind-factorization}, \ref{ring:class-group}。
+- 既約成分への分解（ネーター空間）は \ref{ag:irreducible-decomposition}。$\operatorname{Proj}$ と $\mathcal{O}(1)$ は \ref{ag:proj-projective-space}, \ref{ag:twisting-sheaf}。可逆層は \ref{ag:twisting-sheaf.3}。
+- 局所化の素イデアルの対応は \ref{ring:localization-primes}：$x\in X$ について、$x$ を含む既約閉集合 $Y$（$x\in Y$、すなわち $\eta_{Y}$ が $x$ の一般化）は $\mathcal{O}_{X,x}$ の素イデアルと一対一（アフィン近傍 $\operatorname{Spec}A\ni x$ で $\mathfrak{p}_{x}$ に含まれる素イデアル）。
+- **選択公理**：\ref{ring:normal-intersection-dvr}, \ref{ring:dvr-characterization}, \ref{ring:ufd-height-one} と、スペクトルの基本性質を通して使う。
+:::
+
+## ヴェイユ因子と因子類群 {#ag:sec-dv-weil}
+
+::: definition 素因子とヴェイユ因子 {#ag:weil-divisor keywords="prime divisor: irreducible closed subset whose generic point has one-dimensional local ring; Weil divisor; effective; valuation v_Y" index="素因子|そいんし, ヴェイユ因子|ゔぇいゆいんし, 有効因子|ゆうこういんし"}
+1. 既約閉集合 $Y\subset X$ で、生成点 $\eta_{Y}$ の局所環 $\mathcal{O}_{X,\eta_{Y}}$ が 1 \term[次元]{ring:krull-dimension}のものを**素因子**という。$\mathcal{O}_{X,\eta_{Y}}$ は 1 次元のネーター正規局所整域なので離散付値環（\ref{ring:dvr-characterization}）で、その商体は $K$。対応する正規化された付値を $v_{Y}:K^{\times}\to\mathbb{Z}$ とする。
+2. 素因子の生成する自由アーベル群 $\operatorname{Div}X$ の元 $D=\sum n_{Y}Y$（有限和）を**ヴェイユ因子**という。すべての $n_{Y}\ge0$ のとき**有効**といい $D\ge0$ と書く。
+:::
+
+::: lemma 零と極は有限個 {#ag:divisor-finite keywords="a rational function has nonzero valuation along only finitely many prime divisors" index="主因子の有限性|しゅいんしのゆうげんせい"}
+$f\in K^{\times}$ について、$v_{Y}(f)\neq0$ となる素因子 $Y$ は有限個。
+:::
+
+::: proof
+**Step 1（$f$ が単元である開集合）.** 空でないアフィン開集合 $\operatorname{Spec}A$ をとると $K=\operatorname{Frac}A$（\ref{ag:reduced-integral.4}）なので $f=a/b$（$a,b\in A\setminus0$）。$U\defeq D(ab)$ とすると $f,f^{-1}\in A_{ab}=\mathcal{O}(U)$。$U$ と交わる素因子 $Y$ では $\eta_{Y}\in U$（\ref{ag:scheme-generic-points} の Step 2 の議論）なので $f,f^{-1}\in\mathcal{O}_{X,\eta_{Y}}$、$v_{Y}(f)=0$。
+
+**Step 2（$U$ と交わらない素因子）.** $Z\defeq X\setminus U$ は真の閉集合で、ネーター空間なので有限個の既約成分 $Z_{1},\dots,Z_{r}$ をもつ（\ref{ag:irreducible-decomposition}）。素因子 $Y\subset Z$ はある $Z_{j}$ に含まれる。$Y\subsetneq Z_{j}$ とすると、$\eta_{Y}$ のアフィン近傍 $V=\operatorname{Spec}B$ で、$Y\cap V\subsetneq Z_{j}\cap V\subsetneq V$ は（閉包をとると元の $Y,Z_{j},X$ に戻るので真の包含のまま）素イデアルの鎖 $\mathfrak{p}_{Y}\supsetneq\mathfrak{p}_{Z_{j}}\supsetneq0$ に対応し、$\dim\mathcal{O}_{X,\eta_{Y}}=\dim B_{\mathfrak{p}_{Y}}\ge2$ となって矛盾。よって $Y$ は $Z_{1},\dots,Z_{r}$ のどれかに等しく、有限個。
+:::
+
+::: definition 主因子と因子類群 {#ag:divisor-class-group keywords="principal divisor div(f), linear equivalence, divisor class group Cl X" index="主因子|しゅいんし, 因子類群|いんしるいぐん, 線形同値|せんけいどうち"}
+$f\in K^{\times}$ について $\operatorname{div}(f)\defeq\sum_{Y}v_{Y}(f)Y$（\ref{ag:divisor-finite} から有限和）を**主因子**という。$\operatorname{div}(fg)=\operatorname{div}f+\operatorname{div}g$ なので $\operatorname{div}:K^{\times}\to\operatorname{Div}X$ は準同型で、その像による剰余群 $\operatorname{Cl}X\defeq\operatorname{Div}X/\operatorname{div}(K^{\times})$ を**因子類群**という。$D-D'$ が主因子のとき $D\sim D'$（**線形同値**）と書く。
+:::
+
+::: theorem 因子類群と一意分解性 {#ag:cl-ufd keywords="for a Noetherian normal domain A, Cl(Spec A) = 0 iff A is a UFD" index="因子類群と一意分解環|いんしるいぐんといちいぶんかいかん"}
+（AC）$A$ をネーター正規整域、$X=\operatorname{Spec}A$ とする。
+1. 素因子は高さ 1 の素イデアル $\mathfrak{p}$ と一対一に対応し（$Y=V(\mathfrak{p})$）、$v_{Y}$ は DVR $A_{\mathfrak{p}}$ の付値。$f\in K^{\times}$ について、$\operatorname{div}(f)\ge0\iff f\in A$。
+2. $\operatorname{Cl}X=0\iff A$ は一意分解環。
+:::
+
+::: proof
+**Step 1（1）.** 素イデアル $\mathfrak{p}$ の生成点の局所環は $A_{\mathfrak{p}}$ で、$\dim A_{\mathfrak{p}}=\operatorname{ht}\mathfrak{p}$。$\operatorname{div}(f)\ge0$ はすべての高さ 1 の $\mathfrak{p}$ で $f\in A_{\mathfrak{p}}$ ということで、\ref{ring:normal-intersection-dvr} から $f\in A$（$A$ が体なら素因子はなく、$K=A$ で自明）。
+
+**Step 2（2：⇐）.** 高さ 1 の素イデアル $\mathfrak{p}$ は単項 $(\pi)$（\ref{ring:ufd-height-one}）。$\mathfrak{p}A_{\mathfrak{p}}=\pi A_{\mathfrak{p}}$ なので $v_{\mathfrak{p}}(\pi)=1$。他の高さ 1 の $\mathfrak{q}$ では、$\pi\in\mathfrak{q}$ なら $0\subsetneq(\pi)\subset\mathfrak{q}$ と高さ 1 から $\mathfrak{q}=(\pi)=\mathfrak{p}$ なので、$\pi\notin\mathfrak{q}$ で $v_{\mathfrak{q}}(\pi)=0$。よって $\operatorname{div}(\pi)=V(\mathfrak{p})$ で、素因子はすべて主因子、$\operatorname{Cl}X=0$。
+
+**Step 3（2：⇒）.** 高さ 1 の $\mathfrak{p}$ について $V(\mathfrak{p})=\operatorname{div}(f)$ となる $f\in K^{\times}$ がある。1 から $f\in A$、$v_{\mathfrak{p}}(f)=1>0$ なので $f\in\mathfrak{p}A_{\mathfrak{p}}\cap A=\mathfrak{p}$。$g\in\mathfrak{p}\setminus0$ について $\operatorname{div}(g)\ge V(\mathfrak{p})=\operatorname{div}(f)$（$v_{\mathfrak{p}}(g)\ge1$、他は $\ge0$）なので $\operatorname{div}(g/f)\ge0$、1 から $g/f\in A$、$g\in fA$。よって $\mathfrak{p}=(f)$。\ref{ring:ufd-height-one} から $A$ は一意分解環。
+:::
+
+::: corollary デデキント環の因子類群 {#ag:cl-dedekind keywords="for a Dedekind domain A, Cl(Spec A) is the ideal class group of A" index="デデキント環の因子類群|でできんとかんのいんしるいぐん"}
+（AC）デデキント環 $A$ について、$\sum n_{\mathfrak{p}}V(\mathfrak{p})\mapsto\prod\mathfrak{p}^{n_{\mathfrak{p}}}$ は同型 $\operatorname{Div}(\operatorname{Spec}A)\cong\mathcal{I}(A)$（$0$ でない分数イデアルの群）を与え、$\operatorname{div}(f)$ を単項分数イデアル $fA$ に写す。したがって $\operatorname{Cl}(\operatorname{Spec}A)\cong\operatorname{Cl}(A)$（イデアル類群）。
+:::
+
+::: proof
+デデキント環の $0$ でない素イデアルは高さ 1 で（1 \term[次元]{ring:krull-dimension}）、分数イデアルは素イデアルの冪の積に一意に分解する（\ref{ring:dedekind-factorization}）ので、写像は同型。$fA$ の分解での $\mathfrak{p}$ の指数は、$A_{\mathfrak{p}}$ に局所化すると $fA_{\mathfrak{p}}=(\mathfrak{p}A_{\mathfrak{p}})^{v_{\mathfrak{p}}(f)}$ なので $v_{\mathfrak{p}}(f)$。よって主因子は単項分数イデアルに写る。
+:::
+
+::: proposition 除去完全列 {#ag:cl-excision keywords="excision: for Z closed and U = X - Z, Cl X -> Cl U is surjective; if Z is a prime divisor, Z -> Cl X -> Cl U -> 0 is exact; if Z has codimension at least two Cl X = Cl U" index="除去完全列|じょきょかんぜんれつ"}
+$Z\subsetneq X$ を閉集合、$U\defeq X\setminus Z$ とする。
+1. $\sum n_{Y}Y\mapsto\sum n_{Y}(Y\cap U)$（$Y\subset Z$ の項は捨てる）は全射 $\operatorname{Cl}X\to\operatorname{Cl}U$ を定める。
+2. $Z$ が素因子なら $\mathbb{Z}\to\operatorname{Cl}X\to\operatorname{Cl}U\to0$（$1\mapsto[Z]$）は完全。$Z$ が素因子を含まなければ $\operatorname{Cl}X\cong\operatorname{Cl}U$。
+:::
+
+::: proof
+**Step 1（素因子の対応）.** $U$ の素因子 $Y'$ と、$U$ と交わる $X$ の素因子 $Y$ は、$Y\mapsto Y\cap U$, $Y'\mapsto\overline{Y'}$ で一対一に対応し、生成点と局所環は同じ。$K(U)=K(X)$ で、$\operatorname{div}_{U}(f)$ は $\operatorname{div}_{X}(f)$ の制限。よって写像は $\operatorname{Div}$ の全射で、主因子を主因子に写す。
+
+**Step 2（核）.** $D|_{U}=\operatorname{div}_{U}(f)$ なら、$D-\operatorname{div}_{X}(f)$ の成分はすべて $Z$ に含まれる。$Z$ が素因子なら $Z$ に含まれる素因子は $Z$ だけ（\ref{ag:divisor-finite} の Step 2 と同じ議論）なので $D-\operatorname{div}(f)=nZ$。$Z$ が素因子を含まなければ $D=\operatorname{div}(f)$。
+:::
+
+::: remark ナガタの判定法は除去完全列
+\tref{ring:nagata-criterion}（ネーター整域 $A$ と素元 $x$ について、$A_{x}$ が一意分解環なら $A$ も）は、正規な場合には除去完全列の言い換えである：$Z=V(x)$ は素因子で $[Z]=[\operatorname{div}x]=0$、$U=D(x)=\operatorname{Spec}A_{x}$ なので、\ref{ag:cl-excision} から $\operatorname{Cl}(\operatorname{Spec}A)\cong\operatorname{Cl}(\operatorname{Spec}A_{x})=0$、\ref{ag:cl-ufd} から $A$ は一意分解環。（ナガタの判定法自体は正規性を仮定せずに成り立つ。）
+:::
+
+::: example 射影空間の因子類群 {#ag:cl-projective-space keywords="Cl(P^n_k) = Z generated by a hyperplane; V_+(g) is linearly equivalent to deg g times H" index="射影空間の因子類群|しゃえいくうかんのいんしるいぐん"}
+$k$ を体、$X=\mathbb{P}^{n}_{k}$（$n\ge1$）、$H\defeq V_{+}(x_{0})$ とする。
+1. $H$ は素因子で、$\operatorname{Cl}X\cong\mathbb{Z}$（$[H]$ が生成元）。
+2. $g$ が $d$ 次の既約斉次多項式（$g\neq cx_{0}$）なら $V_{+}(g)\sim dH$。
+:::
+
+::: proof
+**Step 1（$H$ は素因子）.** $D_{+}(x_{1})\cong\operatorname{Spec}k[y_{0},y_{2},\dots,y_{n}]$（$y_{j}=x_{j}/x_{1}$）の中で $H\cap D_{+}(x_{1})=V(y_{0})$ で、$y_{0}$ は多項式環の素元なので $(y_{0})$ は $0$ でない素イデアル、単項イデアル定理（\tref{ring:principal-ideal-theorem}）から高さ 1。よって $H$ の生成点の局所環 $k[y]_{(y_{0})}$ は 1 \term[次元]{ring:krull-dimension}。$H$ は $\mathbb{P}^{n-1}$ と同相で既約。
+
+**Step 2（生成）.** $X\setminus H=D_{+}(x_{0})\cong\mathbb{A}^{n}_{k}$ で、$k[y_{1},\dots,y_{n}]$ は一意分解環（\ref{ring:polynomial-ufd}）なので $\operatorname{Cl}(\mathbb{A}^{n})=0$（\ref{ag:cl-ufd}）。\ref{ag:cl-excision} から $[H]$ は $\operatorname{Cl}X$ を生成する。
+
+**Step 3（無限位数）.** $mH=\operatorname{div}(f)$ とすると、$\operatorname{div}(f)|_{\mathbb{A}^{n}}=0$ なので \ref{ag:cl-ufd.1} から $f,f^{-1}\in k[y_{1},\dots,y_{n}]$、$f\in k^{\times}$。よって $\operatorname{div}(f)=0$、$m=0$。
+
+**Step 4（2）.** $\varphi\defeq g/x_{0}^{d}\in K^{\times}$。$D_{+}(x_{0})$ では $\varphi$ は $g$ の非斉次化 $g(1,y_{1},\dots,y_{n})$ で、既約：$x_{0}\nmid g$ なので $g$ は $g(1,y)$ の斉次化に等しく（$x_{0}$ の冪の因子が出ない）、$g(1,y)$ は定数でなく（定数なら $g=cx_{0}^{d}$ で、既約性から $g=cx_{0}$）、$g(1,y)=pq$ と分解すれば $g$ も斉次化の積に分解する。よって素元で、$\operatorname{div}(\varphi)|_{D_{+}(x_{0})}=V_{+}(g)\cap D_{+}(x_{0})$（Step 2 の \ref{ag:cl-ufd} の証明と同じ）。$H$ 上では、$D_{+}(x_{1})$ で $\varphi=(g/x_{1}^{d})\cdot(x_{1}/x_{0})^{d}=g(y_{0},1,y_{2},\dots)\cdot y_{0}^{-d}$ で、$y_{0}\mid g(y_{0},1,\dots)$ なら（$x_{1}$ について斉次化して）$x_{0}\mid g$ となるので $y_{0}\nmid g(y_{0},1,\dots)$、$v_{H}(\varphi)=-d$。$D_{+}(x_{0})$ の外の素因子は $H$ だけである。よって $\operatorname{div}(\varphi)=V_{+}(g)-dH$。
+:::
+
+::: example 2 次錐 {#ag:cl-quadric-cone keywords="Cl of the quadric cone xy = z^2 is Z/2, generated by a ruling; the ruling is not principal; k[x,y,z]/(xy-z^2) = k[s^2,st,t^2] is normal" index="2 次錐の因子類群|にじすいのいんしるいぐん"}
+$k$ を代数的閉体、$A\defeq k[x,y,z]/(xy-z^{2})$、$X=\operatorname{Spec}A$、$Y\defeq V(y,z)$（錐の母線）とすると、$\operatorname{Cl}X\cong\mathbb{Z}/2$ で $[Y]$ が生成元。
+:::
+
+::: proof
+**Step 1（$A$ は正規整域）.** $\sigma:A\to k[s,t]$, $x\mapsto s^{2}$, $y\mapsto t^{2}$, $z\mapsto st$ を考える。$A$ は $x^{i}y^{j}z^{\varepsilon}$（$\varepsilon\in\{0,1\}$）で張られ（$z^{2}=xy$ で簡約）、その像 $s^{2i+\varepsilon}t^{2j+\varepsilon}$ は互いに異なる単項式なので、$\sigma$ は単射。像 $B$ は偶数次の単項式全体で張られる（$a+b$ が偶数で $a\ge b$ なら $s^{a}t^{b}=(s^{2})^{(a-b)/2}(st)^{b}$）。$\alpha\in\operatorname{Frac}B$ が $B$ 上整なら、$k[s,t]$ は正規（\ref{ring:ufd-normal}）なので $\alpha\in k[s,t]$。$\alpha g=f$（$f,g\in B$, $g\neq0$）で $\alpha$ を偶数次と奇数次の部分に分けると、奇数次の部分と $g$ の積は奇数次の項しかもたず $f$ と比べて $0$、整域なので奇数次の部分は $0$、$\alpha\in B$。
+
+**Step 2（$Y$ は素因子で $2Y=\operatorname{div}(y)$）.** $A/(y,z)\cong k[x]$ は整域なので $\mathfrak{p}\defeq(y,z)$ は素。$\dim A=2$（$B$ は $k[s^{2},t^{2}]$ 上整：$(st)^{2}=s^{2}t^{2}$。整拡大は\term[次元]{ring:krull-dimension}を保つ：\ref{ring:integral-dimension}）、$\dim A/\mathfrak{p}=1$ で、$\operatorname{ht}\mathfrak{p}\ge2$ なら $\dim A\ge3$ となるので $\operatorname{ht}\mathfrak{p}=1$。$A_{\mathfrak{p}}$ では $x\notin\mathfrak{p}$ は単元で $y=z^{2}x^{-1}$ なので $\mathfrak{p}A_{\mathfrak{p}}=(z)$、$v_{Y}(z)=1$, $v_{Y}(y)=2$。$y\in\mathfrak{q}$（高さ 1）なら $z^{2}=xy\in\mathfrak{q}$ から $z\in\mathfrak{q}$、$\mathfrak{q}\supset\mathfrak{p}$ で $\mathfrak{q}=\mathfrak{p}$。よって $\operatorname{div}(y)=2Y$。
+
+**Step 3（$\operatorname{Cl}$ は $[Y]$ で生成）.** $X\setminus Y\supset D(y)$ で、実は $X\setminus Y=D(y)$（$y\notin\mathfrak{q}\iff\mathfrak{q}\not\supset\mathfrak{p}$：$\mathfrak{q}\supset(y)\Rightarrow\mathfrak{q}\ni z$）。$A_{y}=k[x,y,z,y^{-1}]/(xy-z^{2})\cong k[y,y^{-1},z]$（$x=z^{2}/y$）は $k[y,z]$ の局所化で、高さ 1 の素イデアルは $k[y,z]$ の $y$ を含まない高さ 1 の素イデアル（単項）から来るので単項、\ref{ring:ufd-height-one} から一意分解環。\ref{ag:cl-ufd}, \ref{ag:cl-excision} から $\operatorname{Cl}X$ は $[Y]$ で生成され、Step 2 から $2[Y]=0$。
+
+**Step 4（$Y$ は主因子でない）.** $Y=\operatorname{div}(f)$ とすると、\ref{ag:cl-ufd} の Step 3 と同じ議論で $\mathfrak{p}=fA$。頂点 $\mathfrak{m}\defeq(x,y,z)$ で $\mathfrak{m}/\mathfrak{m}^{2}$ は $x,y,z$ を基底とする 3 \term[次元]{lin:dimension}の空間（$xy-z^{2}\in(x,y,z)^{2}$）で、$(\mathfrak{p}+\mathfrak{m}^{2})/\mathfrak{m}^{2}$ は $y,z$ の像を含むので 2 次元。しかし $\mathfrak{p}=fA$ なら、この空間は $f$ の像で張られ 1 次元以下。矛盾。よって $\operatorname{Cl}X\cong\mathbb{Z}/2$。
+:::
+
+## カルティエ因子と可逆層 {#ag:sec-dv-cartier}
+
+::: lemma 整スキームの切断 {#ag:integral-sections keywords="for an integral scheme O(U) is the intersection of the local rings O_x for x in U inside the function field; the constant sheaf K" index="整スキームの切断|せいすきーむのせつだん"}
+整スキーム $X$ と空でない開集合 $U$ について、$\mathcal{O}(U)\to K$ は単射で、$K$ の中で $\mathcal{O}(U)=\bigcap_{x\in U}\mathcal{O}_{X,x}$。また $U\mapsto K$（$U\neq\emptyset$）, $\emptyset\mapsto0$ は層（**関数体の定数層** $\mathcal{K}$）。
+:::
+
+::: proof
+単射：アフィン開集合 $V=\operatorname{Spec}A\subset U$ では $A\to\operatorname{Frac}A=K$ は単射で、$s|_{V}=0$ がすべての $V$ で成り立てば $s=0$。等式：$\subset$ は明らか。$s\in K$ がすべての $\mathcal{O}_{X,x}$ に入れば、各 $x$ の近傍 $W_{x}$ と $s_{x}\in\mathcal{O}(W_{x})$ で $K$ での像が $s$ のものがあり、重なりでは $K$ での像が同じなので（単射性から）一致し、貼り合わさる。層であること：既約空間の空でない開集合は交わるので、重なりの整合性は自動的で、貼り合わせは一意。
+:::
+
+::: definition カルティエ因子 {#ag:cartier-divisor keywords="Cartier divisor: compatible local equations {(U_i, f_i)} with f_i/f_j units; principal Cartier divisors; CaCl" index="カルティエ因子|かるてぃえいんし"}
+$X$ を整スキームとする。**カルティエ因子**とは、開被覆 $\{U_{i}\}$ と $f_{i}\in K^{\times}$ の族で、$f_{i}/f_{j}\in\mathcal{O}(U_{i}\cap U_{j})^{\times}$ をみたすもの（**局所方程式**）の同値類である。二つの族は、合併がまた条件をみたすとき同値とする。積 $\{(U_{i}\cap V_{j},f_{i}g_{j})\}$ で群 $\operatorname{Cart}X$ になり、$\{(X,f)\}$ の形を**主カルティエ因子**、剰余群を $\operatorname{CaCl}X$ とする。（層の言葉では $\operatorname{Cart}X=\Gamma(X,\mathcal{K}^{\times}/\mathcal{O}^{\times})$。）
+:::
+
+::: theorem カルティエ因子とヴェイユ因子 {#ag:cartier-weil keywords="Cartier divisors to Weil divisors is injective on normal schemes and bijective on locally factorial schemes; Cl = CaCl" index="カルティエ因子とヴェイユ因子|かるてぃえいんしとゔぇいゆいんし, 局所分解的|きょくしょぶんかいてき"}
+（AC）$X$ をネーター正規整スキームとする。
+1. $\{(U_{i},f_{i})\}\mapsto\sum_{Y}v_{Y}(f_{i(Y)})Y$（$i(Y)$ は $U_{i}\cap Y\neq\emptyset$ となる $i$）は単射準同型 $\operatorname{Cart}X\to\operatorname{Div}X$ で、主因子を主因子に写す。
+2. すべての局所環 $\mathcal{O}_{X,x}$ が一意分解環（**局所分解的**）なら全単射で、$\operatorname{CaCl}X\cong\operatorname{Cl}X$。
+:::
+
+::: proof
+**Step 1（well-defined）.** $Y$ が $U_{i}$, $U_{j}$ と交わるなら $\eta_{Y}\in U_{i}\cap U_{j}$ で、$f_{i}/f_{j}$ は $\mathcal{O}_{X,\eta_{Y}}$ の単元なので $v_{Y}(f_{i})=v_{Y}(f_{j})$。和が有限であることは、各 $U_{i}$ で \ref{ag:divisor-finite} を使い、$X$ は準コンパクトなので有限個の $U_{i}$ で足りることから。同値な族、積、主因子との両立は定義から。
+
+**Step 2（単射）.** 像が $0$ とすると、$U_{i}$ と交わるすべての $Y$ で $v_{Y}(f_{i})=0$。$x\in U_{i}$ について、$\mathcal{O}_{X,x}$ の高さ 1 の素イデアルは $x$ を含む素因子と一対一（記法の確認）で、$\mathcal{O}_{X,x}$ はネーター正規整域なので \ref{ring:normal-intersection-dvr} から $f_{i},f_{i}^{-1}\in\mathcal{O}_{X,x}$。\ref{ag:integral-sections} から $f_{i}\in\mathcal{O}(U_{i})^{\times}$、すなわち族は $\{(X,1)\}$ と同値。
+
+**Step 3（全射）.** $D\in\operatorname{Div}X$ と $x\in X$ をとる。$x$ を含む $D$ の成分 $Y$ は $\mathcal{O}_{X,x}$ の高さ 1 の素イデアル $\mathfrak{p}_{Y}$ に対応し、一意分解環なので $\mathfrak{p}_{Y}=(g_{Y})$（\ref{ring:ufd-height-one}）。$f_{x}\defeq\prod g_{Y}^{n_{Y}}$ とすると、$\mathcal{O}_{X,x}$ の中で（\ref{ag:cl-ufd} の Step 2 と同様に）$D-\operatorname{div}(f_{x})$ は $x$ を含む成分をもたない。$D-\operatorname{div}(f_{x})$ の成分のうち $x$ を含まないもの（有限個の閉集合）を除いた近傍 $U_{x}$ では $D|_{U_{x}}=\operatorname{div}(f_{x})|_{U_{x}}$。$\{(U_{x},f_{x})\}$ は、$U_{x}\cap U_{x'}$ 上 $\operatorname{div}(f_{x}/f_{x'})=0$ なので Step 2 の議論から $f_{x}/f_{x'}$ は単元で、カルティエ因子をなし、像は $D$。
+:::
+
+::: definition 因子の可逆層とピカール群 {#ag:picard-group keywords="invertible sheaf L(D) attached to a Cartier divisor as a subsheaf of K; Picard group Pic X" index="ピカール群|ぴかーるぐん"}
+整スキーム $X$ のカルティエ因子 $D=\{(U_{i},f_{i})\}$ について、$\mathcal{K}$ の部分 $\mathcal{O}_{X}$ 加群 $\mathcal{L}(D)$ を、$\mathcal{L}(D)|_{U_{i}}\defeq f_{i}^{-1}\mathcal{O}_{U_{i}}$ で定める（$U_{i}\cap U_{j}$ 上 $f_{i}^{-1}\mathcal{O}=f_{j}^{-1}\mathcal{O}$ なので well-defined）。$\mathcal{L}(D)$ は可逆層で、$\mathcal{L}(D)\cdot\mathcal{L}(D')=\mathcal{L}(D+D')$（$\mathcal{K}$ の中の積）。可逆層の同型類の集合を $\operatorname{Pic}X$ とする。
+:::
+
+::: theorem カルティエ因子類群とピカール群 {#ag:cacl-pic keywords="D -> L(D) induces a bijection CaCl X -> Pic X for integral X; every invertible sheaf is a subsheaf of K" index="カルティエ因子類群とピカール群|かるてぃえいんしるいぐんとぴかーるぐん"}
+整スキーム $X$ について、$D\mapsto\mathcal{L}(D)$ は全単射 $\operatorname{CaCl}X\to\operatorname{Pic}X$ を誘導する。すなわち
+1. $\mathcal{L}(D)\cong\mathcal{L}(D')\iff D-D'$ が主カルティエ因子。
+2. 任意の可逆層は、ある $\mathcal{L}(D)$ と同型。
+:::
+
+::: proof
+**Step 1（同型は掛け算）.** $\theta:\mathcal{L}(D)\to\mathcal{L}(D')$ を $\mathcal{O}$ 加群の同型とする。$D,D'$ の局所方程式の共通細分 $W$ 上では、$\mathcal{L}(D)|_{W}=f^{-1}\mathcal{O}$, $\mathcal{L}(D')|_{W}=f'^{-1}\mathcal{O}$ で、$\theta(f^{-1})=cf'^{-1}$（$c\in\mathcal{O}(W)$）なので、$\theta$ は $W$ 上 $h_{W}\defeq cf/f'\in K$ による掛け算。重なりでは同じ写像なので、$0$ でない元に施して比べると $h_{W}$ は一致する。よって $\theta$ は一つの $h\in K^{\times}$（逆写像も掛け算なので $h\neq0$）による掛け算。
+
+**Step 2（1）.** $h\mathcal{L}(D)=\mathcal{L}(D')$ は、局所的に $hf_{i}^{-1}\mathcal{O}=f_{i}'^{-1}\mathcal{O}$、すなわち $f_{i}'h/f_{i}\in\mathcal{O}^{\times}$ ということで、$D'=D-\{(X,h)\}$（加法的に書いて）と同値。
+
+**Step 3（2）.** 可逆層 $\mathcal{L}$ と、$\mathcal{L}|_{U_{i}}\cong\mathcal{O}_{U_{i}}$ となる被覆をとる（$U_{i}\neq\emptyset$）。生成点での茎 $\mathcal{L}_{\eta}$ は 1 \term[次元]{lin:dimension}の $K$ ベクトル空間で、自然な写像 $\mathcal{L}(V)\to\mathcal{L}_{\eta}$ は $U_{i}$ の開集合 $V\neq\emptyset$ 上で $\mathcal{O}(V)\to K$ と同じなので単射（\ref{ag:integral-sections}）。$\mathcal{L}_{\eta}\cong K$ を一つ固定すると、$\mathcal{L}$ は $\mathcal{K}$ の部分層と同型になり、$U_{i}$ 上では生成元の像 $g_{i}\in K^{\times}$ により $g_{i}\mathcal{O}_{U_{i}}$。$g_{i}/g_{j}$ は $U_{i}\cap U_{j}$ で単元なので、$D\defeq\{(U_{i},g_{i}^{-1})\}$ はカルティエ因子で、$\mathcal{L}\cong\mathcal{L}(D)$。
+:::
+
+::: remark 群の構造
+$\operatorname{Pic}X$ には可逆層のテンソル積 $\mathcal{L}\otimes\mathcal{L}'$ で群の構造が入り（単位元 $\mathcal{O}_{X}$、逆元 $\mathcal{H}om(\mathcal{L},\mathcal{O}_{X})$）、$\mathcal{L}(D)\otimes\mathcal{L}(D')\cong\mathcal{L}(D+D')$ なので \ref{ag:cacl-pic} は群の同型になることが知られている（層のテンソル積は本サイトでは定義していないので未収録。上の定義では $\mathcal{K}$ の中の積で群の構造を移した）。また $\operatorname{Pic}X\cong H^{1}(X,\mathcal{O}_{X}^{\times})$（チェックコホモロジー）であることも知られている。
+:::
+
+::: example 射影空間のピカール群 {#ag:pic-projective-space}
+$\mathbb{P}^{n}_{k}$ は局所環が正則局所環（多項式環の局所化）で、正則局所環は一意分解環（\ref{ring:regular-ufd}）なので局所分解的。\ref{ag:cartier-weil}, \ref{ag:cacl-pic}, \ref{ag:cl-projective-space} から $\operatorname{Pic}\mathbb{P}^{n}_{k}\cong\mathbb{Z}$。超平面 $H=V_{+}(x_{0})$ の局所方程式は $D_{+}(x_{i})$ 上 $x_{0}/x_{i}$ で、$\mathcal{L}(H)|_{D_{+}(x_{i})}=(x_{i}/x_{0})\mathcal{O}$。$\mathcal{O}(1)|_{D_{+}(x_{i})}=x_{i}\mathcal{O}$（\ref{ag:twisting-sheaf-properties.1}）を $1/x_{0}$ 倍すると一致するので $\mathcal{L}(H)\cong\mathcal{O}(1)$：$\operatorname{Pic}\mathbb{P}^{n}_{k}$ は $\mathcal{O}(1)$ で生成される。
+:::
+
+::: remark ヴェイユ、カルティエ、アウスランダー＝ブクスバウム、グロタンディーク
+1. 因子を「余次元 1 の部分多様体の形式和」とする見方はヴェイユの基礎論に、「局所方程式の族」とする見方はカルティエによる。両者は特異点で異なる：\ref{ag:cl-quadric-cone} の母線 $Y$ は頂点の近くで一つの方程式で定義できない（Step 4 の議論）のでカルティエ因子でないが、$2Y=\operatorname{div}(y)$ はカルティエ因子。
+2. **非特異なら一致する**ことは、正則局所環が一意分解環であるという可換環論の深い定理（\ref{ring:regular-ufd}、アウスランダー＝ブクスバウム 1959 年。証明はホモロジー代数による）に帰着する。
+3. グロタンディークは、$\operatorname{Pic}$ を関手 $T\mapsto\operatorname{Pic}(X\times T)/\operatorname{Pic}(T)$ として捉え、それを表現するスキーム（**ピカールスキーム**）の存在を FGA（1960 年代初め）で論じたことが知られている（本サイト未収録）。曲線の場合、その連結成分がヤコビ多様体である。
+:::
+
+::: hypcheck
+- **正規性**：\ref{ag:cl-ufd.1}（$\operatorname{div}f\ge0\Rightarrow f\in A$）と \ref{ag:cartier-weil} の Step 2 で \ref{ring:normal-intersection-dvr} を使うのに本質的。正規でない $A=k[t^{2},t^{3}]$ では、$\operatorname{div}$ を定義する前提（素因子の局所環が DVR）自体が崩れる（原点の局所環は DVR でない）。この頁の素因子の定義は「素因子の局所環が DVR」（余次元 1 で正則）しか使わないので、主因子と $\operatorname{Cl}$ の定義はその仮定だけで成り立つ。
+- **ネーター性**：\ref{ag:divisor-finite} の Step 2（既約成分が有限個）と、DVR であること（\ref{ring:dvr-characterization}）に使う。
+- **一意分解性**：\ref{ag:cartier-weil.2} の Step 3 で、各点の近くで因子を一つの関数で書くのに使う。\ref{ag:cl-quadric-cone} はこれが外せない例。
+- **分離性**：ハーツホーンの教科書は因子の節で分離性も仮定するが、この頁の証明では使わない。
+- **選択公理**：\ref{ring:normal-intersection-dvr}, \ref{ring:dvr-characterization}, \ref{ring:ufd-height-one} を通して使う。
+:::
+
+::: supplement
+**前提を弱めると.** 正規でない整スキームでも、カルティエ因子と $\operatorname{Pic}$ は定義でき、\ref{ag:cacl-pic} は整なら（ネーター性も正規性もなしに）成り立つ（証明で使っていない）。ヴェイユ因子の側は「余次元 1 での正則性」があれば定義できる。
+
+**似た定理.** \ref{ag:cl-excision} で $Z$ の余次元が 2 以上なら $\operatorname{Cl}$ は変わらない：$\operatorname{Cl}(\mathbb{A}^{2}\setminus\{0\})=0$。複素多様体では $\operatorname{Pic}$ は指数完全列 $0\to\mathbb{Z}\to\mathcal{O}\to\mathcal{O}^{\times}\to0$ を通して $H^{2}(X,\mathbb{Z})$ と結びつく（第一チャーン類）ことが知られている。
+
+**計算の観点.** デデキント環 $\mathcal{O}_{K}$（代数体の整数環）の類群は、ミンコフスキーの評価から有限個のイデアルを調べれば計算でき（代数的整数論で扱う予定）、\ref{ag:cl-dedekind} によりそれは $\operatorname{Spec}\mathcal{O}_{K}$ の因子類群そのものである。
+:::
+
+## 高い視点 {#ag:sec-dv-viewpoint}
+
+::: remark 余次元 1 の「穴」を測る群
+$\operatorname{Cl}X$ は「余次元 1 の部分を、一つの関数の零点として切り出せるか」という障害を測る群である。一意分解環は「すべての余次元 1 の素イデアルが単項」な環で、$\operatorname{Cl}$ はそこからのずれ（\ref{ag:cl-ufd}）。整数論のイデアル類群（クンマーが理想数を導入した動機）と、代数幾何の因子類群は、\ref{ag:cl-dedekind} で同じものになる。圏論的には、$\operatorname{Pic}$ は可逆層のなすモノイダル圏（テンソル積）の可逆対象の同型類の群で、層係数のコホモロジー $H^{1}(X,\mathcal{O}^{\times})$ で計算される「捻れ」の分類である。比喩で言えば、因子は地図上の等高線（零と極）の配置で、主因子は一つの関数の等高線として実現できる配置、$\operatorname{Cl}$ は実現できない配置の種類である。
+:::
+
+## 問題 {#ag:sec-dv-problems}
+
+::: problem {#ag:prob-dv-complement-hypersurface}
+$k$ を体、$g$ を $d$ 次の既約斉次多項式とし、$U\defeq\mathbb{P}^{n}_{k}\setminus V_{+}(g)$ とする。$\operatorname{Cl}U\cong\mathbb{Z}/d$ を示せ（$g\neq cx_{0}$ としてよい；$g=cx_{0}$ なら $d=1$ で $U=\mathbb{A}^{n}$）。
+:::
+
+::: solution
+$Z=V_{+}(g)$ は素因子（$D_{+}(x_{i})$ の中で既約多項式の零点で、\ref{ag:cl-projective-space} の Step 1 と同様）。\ref{ag:cl-excision} から $\mathbb{Z}\to\operatorname{Cl}\mathbb{P}^{n}\to\operatorname{Cl}U\to0$（$1\mapsto[Z]$）は完全で、\ref{ag:cl-projective-space} から $\operatorname{Cl}\mathbb{P}^{n}=\mathbb{Z}[H]$、$[Z]=d[H]$。よって $\operatorname{Cl}U\cong\mathbb{Z}/d$。
+:::
+
+::: problem {#ag:prob-dv-cone-not-cartier}
+\ref{ag:cl-quadric-cone} の母線 $Y$ はカルティエ因子にならない（どの局所方程式の族の像にもならない）ことを示せ。
+:::
+
+::: solution
+$Y$ が $\{(U_{i},f_{i})\}$ の像なら、頂点 $\mathfrak{m}$ を含む $U_{i}$ 上で $Y\cap U_{i}=\operatorname{div}(f_{i})|_{U_{i}}$。局所環 $A_{\mathfrak{m}}$（正規、\ref{ring:normal-intersection-dvr} が使える）で \ref{ag:cl-ufd} の Step 3 の議論を行うと、$\mathfrak{p}A_{\mathfrak{m}}=f_{i}A_{\mathfrak{m}}$ となり、$\mathfrak{m}A_{\mathfrak{m}}/\mathfrak{m}^{2}A_{\mathfrak{m}}\cong\mathfrak{m}/\mathfrak{m}^{2}$ の中で $\mathfrak{p}$ の像が 1 次元以下になる。しかし $y,z$ の像は 1 次独立（\ref{ag:cl-quadric-cone} の Step 4）。矛盾。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

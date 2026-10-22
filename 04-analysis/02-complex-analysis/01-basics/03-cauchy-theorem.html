@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>コーシーの積分定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/02-complex-analysis/01-basics/03-cauchy-theorem.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# コーシーの積分定理 {#cx:page-cauchy-theorem keywords="Cauchy's integral theorem, Goursat's theorem, Cauchy-Goursat theorem, integral over the boundary of a triangle, exceptional point, star-shaped domain, convex domain, primitive of a holomorphic function on a disk, Gaussian integral and its Fourier transform, Fresnel integrals, contour shifting"}
+
+正則関数を閉曲線に沿って積分すると $0$ になる、というのが**コーシーの積分定理**である。ただし \ref{cx:one-over-z-no-primitive} が示すように、領域に穴があると成り立たない。このページでは、まず三角形の周に沿った積分が $0$ になること（**グルサの定理**）を、導関数の連続性を仮定せずに示す。証明は、三角形を 4 つに分ける操作を繰り返して一点に追い込み、その点での複素微分可能性（一次近似）だけを使う。次に、星形の領域（ある一点からすべての点が見通せる領域）では正則関数が原始関数をもち、どの閉曲線に沿った積分も $0$ になることを示す。後のコーシーの積分公式のために、一点だけで正則性が分からない（連続であることだけ分かる）場合にも同じ結論が成り立つ形で述べる。最後に、積分路を平行移動したり回転したりすることで、ガウス積分のフーリエ変換とフレネル積分を計算する。
+
+## 記法と定義の確認 {#cx:sec-ct-notation}
+
+::: notation
+- 正則関数 \ref{cx:holomorphic}、複素線積分とその基本性質 \ref{cx:contour-integral}, \ref{cx:contour-integral-basic}、長さによる評価 \tref{cx:ml-inequality}、原始関数 \ref{cx:primitive}、線積分の基本定理 \tref{cx:fundamental-theorem-contour}、$\frac{1}{z}$ は $\C\setminus\{0\}$ で原始関数をもたない \ref{cx:one-over-z-no-primitive}。
+- 線分 $[z,w]$ はその曲線 $t\mapsto z+t(w-z)$（$t\in[0,1]$）も表す。その長さは $|w-z|$。$[w,z]$ は $[z,w]$ の逆向き。
+- $\C$ の部分集合 $E$ の**直径** $\operatorname{diam}E\defeq\sup\{|z-w|\mid z,w\in E\}$。
+- $\C$ の完備性（\ref{calc:page-trig} の記法）。凸関数 \ref{calc:convex}, \ref{calc:convex-properties}。ガウス積分 $\int_{-\infty}^{\infty}e^{-x^{2}}dx=\sqrt\pi$ \ref{calc:gaussian-integral}、広義積分 \ref{calc:improper-integral}。
+- **公理系**：$\ZF$ で行い、選択公理は使わない（三角形の分割で「どれか一つを選ぶ」箇所は、決まった順番で最初のものをとる）。
+:::
+
+## 三角形に対するコーシーの定理 {#cx:sec-ct-goursat}
+
+::: definition 三角形とその周 {#cx:triangle keywords="closed triangle as the convex hull of three points; positively oriented boundary curve" index="三角形の周|さんかくけいのしゅう"}
+$a,b,c\in\C$ について、**三角形** $\Delta=\Delta(a,b,c)\defeq\{sa+tb+uc\mid s,t,u\ge0,\ s+t+u=1\}$（閉集合）と、その**周** $\partial\Delta\defeq[a,b]+[b,c]+[c,a]$（3 本の線分をつないだ閉曲線）を考える。$a,b,c$ が一直線上にあるときも三角形と呼ぶ（退化した三角形）。
+:::
+
+::: lemma 三角形の基本性質 {#cx:triangle-basic keywords="the diameter of a triangle is its longest side; midpoint subdivision into four triangles with half the size; cancellation of interior edges" index=""}
+$\Delta=\Delta(a,b,c)$ とし、$p\defeq L(\partial\Delta)$（周の長さ）、$d\defeq\operatorname{diam}\Delta$ とする。
+1. $d=\max\{|a-b|,|b-c|,|c-a|\}\le p$。
+2. 辺の中点 $a'\defeq\frac{b+c}{2}$, $b'\defeq\frac{c+a}{2}$, $c'\defeq\frac{a+b}{2}$ をとり、
+$$
+\Delta^{1}\defeq\Delta(a,c',b'),\ \Delta^{2}\defeq\Delta(c',b,a'),\ \Delta^{3}\defeq\Delta(b',a',c),\ \Delta^{4}\defeq\Delta(a',b',c')
+$$
+とおく。各 $\Delta^{j}\subset\Delta$ で、周の長さは $\frac p2$、直径は $\frac d2$。また、$\Delta$ 上で連続な任意の関数 $f$ について
+$$
+\int_{\partial\Delta}f\,dz=\sum_{j=1}^{4}\int_{\partial\Delta^{j}}f\,dz.
+$$
+3. $\Delta$ が凸集合 $K$ に含まれる 3 点を頂点とするなら $\Delta\subset K$。
+:::
+
+::: proof
+**Step 1（1）.** $z\in\Delta$, $w\in\C$ について $|z-w|\le\max\{|a-w|,|b-w|,|c-w|\}$：$z=sa+tb+uc$ なら三角不等式から $|z-w|=|s(a-w)+t(b-w)+u(c-w)|\le s|a-w|+t|b-w|+u|c-w|$ で、右辺は最大値以下。これを $w\in\Delta$ についても使うと、$|z-w|$ は頂点どうしの距離の最大値以下。逆の不等式は頂点が $\Delta$ に入ることから。最大の辺の長さは 3 辺の和 $p$ 以下。
+
+**Step 2（2 の包含と大きさ）.** $\Delta^{j}$ の頂点は $\Delta$ の点（中点は $\Delta$ の点の凸結合）なので、3 から $\Delta^{j}\subset\Delta$（$\Delta$ は凸）。各 $\Delta^{j}$ の辺は $\Delta$ の辺のちょうど半分の長さ（たとえば $|c'-b'|=\frac{|b-c|}{2}$、$|a-c'|=\frac{|a-b|}{2}$）なので、周と直径（1 による）は半分。
+
+**Step 3（2 の積分の等式）.** 4 つの周を合わせると、内側の辺 $[c',b']$ と $[b',c']$、$[a',c']$ と $[c',a']$、$[b',a']$ と $[a',b']$ がそれぞれ逆向きに 1 回ずつ現れ、\ref{cx:contour-integral-basic.3} から打ち消し合う。残るのは $[a,c'],[c',b],[b,a'],[a',c],[c,b'],[b',a]$ で、$[a,c']$ と $[c',b]$ をつないだものは $[a,b]$ をパラメータ取り替えしたもの（\ref{cx:contour-integral-basic.2}・\ref[4]{cx:contour-integral-basic.4}）なので、合計は $\int_{\partial\Delta}f\,dz$。
+
+**Step 4（3）.** 凸集合は凸結合で閉じている（2 点の場合から帰納的に：$sa+tb+uc=sa+(1-s)\bigl(\frac{t}{1-s}b+\frac{u}{1-s}c\bigr)$、$s<1$）。
+:::
+
+::: theorem グルサの定理 {#cx:goursat keywords="Goursat's theorem: if f is holomorphic on an open set containing a closed triangle, then the integral over its boundary vanishes; no continuity of f' assumed" index="グルサの定理|ぐるさのていり, コーシー–グルサの定理|こーしーぐるさのていり" refname="グルサの定理"}
+$U\subset\C$ を開集合、$f$ を $U$ で正則、$\Delta\subset U$ を三角形とする。このとき
+$$
+\int_{\partial\Delta}f(z)\,dz=0.
+$$
+:::
+
+::: intuition
+$f$ が一次関数 $\alpha+\beta z$ なら原始関数があるので積分は $0$。一般の $f$ も、各点の近くでは一次関数でよく近似できる（複素微分可能性）。三角形を 4 等分していくと、積分の大きさは各段で高々 4 倍にしか減らないのに、誤差の項は「辺の長さ × 直径 × 近似の誤差」で $4$ 倍以上の速さで小さくなる。その競争で誤差が勝つ。
+:::
+
+::: proof
+**Step 1（設定）.** $I\defeq\bigl|\int_{\partial\Delta}f\,dz\bigr|$、$p\defeq L(\partial\Delta)$、$d\defeq\operatorname{diam}\Delta$ とおく。
+
+**Step 2（三角形の縮小列）.** $\Delta_{0}\defeq\Delta$ とし、$\Delta_{n}$ が決まったら、\ref{cx:triangle-basic.2} の 4 つの三角形のうち、$\bigl|\int_{\partial\Delta_{n}^{j}}f\,dz\bigr|$ が最大となるもの（最大のものが複数あれば番号 $j$ の最小のもの）を $\Delta_{n+1}$ とする。\ref{cx:triangle-basic.2} の等式と三角不等式から
+$$
+\Bigl|\int_{\partial\Delta_{n}}f\,dz\Bigr|\le4\Bigl|\int_{\partial\Delta_{n+1}}f\,dz\Bigr|,
+$$
+よって帰納的に $I\le4^{n}\bigl|\int_{\partial\Delta_{n}}f\,dz\bigr|$。また $\Delta_{n+1}\subset\Delta_{n}$、$L(\partial\Delta_{n})=2^{-n}p$、$\operatorname{diam}\Delta_{n}=2^{-n}d$。
+
+**Step 3（一点への収束）.** $\Delta_{n}$ の重心 $g_{n}$（3 頂点の平均）をとる。$m\ge n$ なら $g_{m}\in\Delta_{m}\subset\Delta_{n}$ なので $|g_{m}-g_{n}|\le2^{-n}d$。$(g_{n})$ はコーシー列で、$\C$ の完備性から極限 $z_{0}$ をもつ。$\Delta_{n}$ は閉集合で $g_{m}\in\Delta_{n}$（$m\ge n$）なので $z_{0}\in\Delta_{n}$（すべての $n$）。とくに $z_{0}\in\Delta\subset U$。
+
+**Step 4（一次近似）.** $f$ は $z_{0}$ で複素微分可能なので、$\varepsilon(z)\defeq\frac{f(z)-f(z_{0})}{z-z_{0}}-f'(z_{0})$（$z\neq z_{0}$）、$\varepsilon(z_{0})\defeq0$ とおくと、$\varepsilon$ は $z_{0}$ で連続で
+$$
+f(z)=f(z_{0})+f'(z_{0})(z-z_{0})+\varepsilon(z)(z-z_{0})\qquad(z\in U).
+$$
+一次関数 $f(z_{0})+f'(z_{0})(z-z_{0})$ は原始関数 $f(z_{0})z+\frac12f'(z_{0})(z-z_{0})^{2}$ をもつので、閉曲線 $\partial\Delta_{n}$ に沿った積分は $0$（\ref{cx:fundamental-theorem-contour}）。よって
+$$
+\int_{\partial\Delta_{n}}f\,dz=\int_{\partial\Delta_{n}}\varepsilon(z)(z-z_{0})\,dz.
+$$
+
+**Step 5（評価）.** $\eta>0$ をとる。$\varepsilon$ の $z_{0}$ での連続性から $\delta>0$ があって $|z-z_{0}|<\delta$ なら $|\varepsilon(z)|<\eta$。$2^{-n}d<\delta$ となる $n$ では、$z\in\Delta_{n}$ なら $|z-z_{0}|\le\operatorname{diam}\Delta_{n}=2^{-n}d<\delta$（$z_{0}\in\Delta_{n}$）なので、\ref{cx:ml-inequality} から
+$$
+\Bigl|\int_{\partial\Delta_{n}}f\,dz\Bigr|\le\eta\cdot2^{-n}d\cdot2^{-n}p=\frac{\eta dp}{4^{n}}.
+$$
+Step 2 と合わせて $I\le\eta dp$。$\eta>0$ は任意なので $I=0$。
+
+::: hypcheck
+- **前提「$f$ は $U$ で正則」**：Step 4 で、Step 3 で得た一点 $z_{0}$ における複素微分可能性だけを使った。$z_{0}$ はあらかじめ分からないので、$\Delta$ のすべての点での複素微分可能性が必要になる（ただし一点だけ連続性で代えられる：\ref{cx:goursat-exceptional}）。導関数 $f'$ の連続性は使っていない。
+- **前提「$\Delta\subset U$」**：Step 3 の $z_{0}\in U$ に使った。三角形の内部の一点で正則でないと成り立たない：$\frac1z$ と原点を内部に含む三角形では、積分は $0$ にならない（値は $2\pi i$ であることが \ref{cx:page-winding-number} で分かる）。
+- **選択公理**：Step 2 で $\Delta_{n+1}$ を番号の最小のものと決めたので、選択は使っていない。Step 3 でも点列は重心として具体的に決めた。
+:::
+:::
+
+::: supplement
+**歴史.** コーシー自身の証明はグリーンの定理を経由し、$f'$ の連続性を仮定していた（\ref{cx:contour-integral-real} とグリーンの定理を使えば、$f'$ が連続なときは積分がコーシー–リーマンの方程式から直ちに $0$ になる）。この仮定を取り除いたのがグルサである。後で、正則関数の導関数は自動的に連続（さらに正則）であることが分かるので、結果としてグルサの定理は「正則関数の定義に $f'$ の連続性を入れなくてよい」ことを保証する役割を果たす。
+
+**類似の定理.** 逆に、連続関数の三角形の周に沿った積分がすべて $0$ なら、その関数は正則である（モレラの定理、\ref{cx:page-cauchy-formula}）。
+:::
+
+::: theorem 例外点を許したグルサの定理 {#cx:goursat-exceptional keywords="Goursat's theorem remains true if f is only continuous at one point of U and holomorphic elsewhere" index="" refname="例外点を許したグルサの定理"}
+$U\subset\C$ を開集合、$q\in U$、$f$ を $U$ で連続かつ $U\setminus\{q\}$ で正則、$\Delta\subset U$ を三角形とする。このとき $\int_{\partial\Delta}f\,dz=0$。
+:::
+
+::: proof
+**Step 1（退化した三角形）.** $a,b,c$ が一直線上にあるとき、3 点のどれかが他の 2 点を結ぶ線分上にある。たとえば $b\in[a,c]$ なら $[a,b]+[b,c]$ は $[a,c]$ のパラメータ取り替えで、$[c,a]$ はその逆向きなので、\ref{cx:contour-integral-basic} から積分は $0$。他の場合も同じ。以下、退化していないとする。
+
+**Step 2（$q\notin\Delta$）.** $U\setminus\{q\}$ は開集合で $\Delta$ を含むので、\ref{cx:goursat} から $0$。
+
+**Step 3（$q$ が頂点、たとえば $q=a$）.** $0<s<1$ について $b_{s}\defeq a+s(b-a)$、$c_{s}\defeq a+s(c-a)$ とおく。三角形 $\Delta(a,b_{s},c_{s})$, $\Delta(b_{s},b,c)$, $\Delta(b_{s},c,c_{s})$ の周の積分の和は、内側の辺 $[b_{s},c_{s}]$, $[b_{s},c]$ がそれぞれ逆向きに 1 回ずつ現れて打ち消し合い、残りの辺をつなぐと $\partial\Delta$ のパラメータ取り替えになるので、$\int_{\partial\Delta}f\,dz$ に等しい（\ref{cx:contour-integral-basic}）。後の 2 つの三角形は $a$ を含まない（$\Delta$ が退化していないので、$a$ は $b_{s},b,c$ の凸結合でも $b_{s},c,c_{s}$ の凸結合でもない：$a$ をそう書くと、$b-a$ と $c-a$ が実数上一次従属になる）。よって Step 2 からその積分は $0$ で、
+$$
+\Bigl|\int_{\partial\Delta}f\,dz\Bigr|=\Bigl|\int_{\partial\Delta(a,b_{s},c_{s})}f\,dz\Bigr|\le\max_{\Delta}|f|\cdot s\,L(\partial\Delta)
+$$
+（$\partial\Delta(a,b_{s},c_{s})$ の長さは $sL(\partial\Delta)$、$|f|$ は連続でコンパクト集合 $\Delta$ 上最大値をもつ）。$s\to0$ として $0$。
+
+**Step 4（$q$ が頂点以外の $\Delta$ の点）.** $\Delta(a,b,q)$, $\Delta(b,c,q)$, $\Delta(c,a,q)$ の周の積分の和は、$[b,q]$ と $[q,b]$ などが打ち消し合って $\int_{\partial\Delta}f\,dz$ に等しい。各三角形は $\Delta$ に含まれ（\ref{cx:triangle-basic.3}）、$q$ を頂点とするので、Step 1・3 から積分は $0$。
+
+::: hypcheck
+- **前提「$f$ は $q$ で連続」**：Step 3 で $f$ が $\Delta$ 上有界であることに使った。外せない：$f(z)=\frac1z$（$q=0$）は $0$ で連続に延びず、原点を含む三角形では積分が $0$ にならない。
+- 例外点は有限個でも同じ議論で扱える（三角形を分けて、各三角形が高々 1 つの例外点を頂点にもつようにする）。
+:::
+:::
+
+## 星形領域に対するコーシーの定理 {#cx:sec-ct-star}
+
+::: definition 星形領域 {#cx:star-shaped keywords="open set star-shaped with respect to a point: every segment from the center to a point of the set lies in the set; convex sets, disks, slit plane" index="星形領域|ほしがたりょういき, 星形|ほしがた"}
+開集合 $D\subset\C$ と $z_{0}\in D$ について、すべての $z\in D$ で線分 $[z_{0},z]\subset D$ となるとき、$D$ は $z_{0}$ に関して**星形**であるという。星形の開集合は弧状連結なので領域である。凸な開集合（円板・長方形の内部・半平面）はその任意の点に関して星形である。
+:::
+
+::: example
+1. $\C^{-}=\C\setminus(-\infty,0]$ は $1$ に関して星形である（$z\in\C^{-}$ と $1$ を結ぶ線分が負の実軸と交わると、その交点 $w=(1-t)+tz\le0$ について虚部 $t\operatorname{Im}z=0$ から $\operatorname{Im}z=0$（$t>0$）、すると $z$ は正の実数で $w>0$ となり矛盾）。凸ではない。
+2. $\C\setminus\{0\}$ はどの点に関しても星形でない（$z_{0}\neq0$ に関しては、$-z_{0}$ と結ぶ線分が $0$ を通る）。
+:::
+
+::: theorem 星形領域に対するコーシーの定理 {#cx:cauchy-star keywords="Cauchy's theorem for star-shaped domains: a function continuous on D and holomorphic except at one point has a primitive, and its integral over every closed curve in D vanishes" index="コーシーの積分定理|こーしーのせきぶんていり, コーシーの定理（星形領域）|こーしーのていりほしがたりょういき" refname="星形領域に対するコーシーの定理"}
+$D$ を $z_{0}$ に関して星形の領域、$q\in D$、$f$ を $D$ で連続かつ $D\setminus\{q\}$ で正則とする。このとき
+$$
+F(z)\defeq\int_{[z_{0},z]}f(\zeta)\,d\zeta\qquad(z\in D)
+$$
+は $f$ の $D$ における原始関数である。したがって、$D$ 内の任意の閉曲線 $\gamma$ について
+$$
+\int_{\gamma}f(z)\,dz=0.
+$$
+（例外点 $q$ がなくても、すなわち $f$ が $D$ で正則でも、もちろん成り立つ。）
+:::
+
+::: proof
+**Step 1（三角形が $D$ に入る）.** $z\in D$ と、$D(z,r)\subset D$ となる $r>0$ をとり、$w\in D(z,r)$ とする。三角形 $\Delta(z_{0},z,w)\subset D$ を示す。その点は $\zeta=sz_{0}+tz+uw$（$s,t,u\ge0$, $s+t+u=1$）と書ける。$s=1$ なら $\zeta=z_{0}\in D$。$s<1$ なら $\xi\defeq\frac{tz+uw}{t+u}\in[z,w]\subset D(z,r)\subset D$（円板は凸）で、$\zeta=sz_{0}+(1-s)\xi\in[z_{0},\xi]\subset D$（星形）。
+
+**Step 2（差の公式）.** Step 1 と \ref{cx:goursat-exceptional} から $\int_{\partial\Delta(z_{0},z,w)}f\,d\zeta=0$、すなわち
+$$
+\int_{[z_{0},z]}f+\int_{[z,w]}f+\int_{[w,z_{0}]}f=0,\qquad F(w)-F(z)=\int_{[z,w]}f(\zeta)\,d\zeta
+$$
+（$\int_{[w,z_{0}]}=-\int_{[z_{0},w]}=-F(w)$、\ref{cx:contour-integral-basic.3}）。
+
+**Step 3（微分）.** $w\neq z$ について $\int_{[z,w]}d\zeta=w-z$（原始関数 $\zeta$）なので
+$$
+\frac{F(w)-F(z)}{w-z}-f(z)=\frac{1}{w-z}\int_{[z,w]}\bigl(f(\zeta)-f(z)\bigr)d\zeta,
+$$
+\ref{cx:ml-inequality} から右辺の絶対値は $\max_{\zeta\in[z,w]}|f(\zeta)-f(z)|$ 以下で、$f$ の連続性から $w\to z$ で $0$ に収束する。よって $F'(z)=f(z)$。
+
+**Step 4.** \ref{cx:fundamental-theorem-contour} から閉曲線に沿った積分は $0$。
+
+::: hypcheck
+- **前提「星形」**：Step 1 で三角形が $D$ に入ることに使った。外せない：$\C\setminus\{0\}$ 上の $\frac1z$ は原始関数をもたない（\ref{cx:one-over-z-no-primitive}）。
+- **前提「$f$ は $q$ で連続」**：\ref{cx:goursat-exceptional} と Step 3 の連続性に使った。
+- 証明は、すべての三角形について積分が $0$ であることと $f$ の連続性しか使っていない。したがって「星形領域上の連続関数で、領域内の三角形の周の積分がすべて $0$ なら原始関数をもつ」も同時に示されている。
+:::
+:::
+
+::: corollary 円板上の原始関数 {#cx:disk-primitive keywords="a holomorphic function on a disk has a primitive; locally every holomorphic function has a primitive" index=""}
+円板 $D(a,r)$（$r=+\infty$ も許す）で正則な関数は、そこで原始関数をもつ。とくに、正則関数は各点の近傍で原始関数をもつ。
+:::
+
+::: proof
+円板は凸なので中心に関して星形で、\ref{cx:cauchy-star} を使う。
+:::
+
+::: supplement
+**局所と大域.** \ref{cx:disk-primitive} により、正則関数はどこでも「局所的には」原始関数をもつ。$\frac1z$ のように大域的にもたない場合があるのは、局所的な原始関数をつなぎ合わせるときに、領域を一周すると値がずれるからである（$\operatorname{Log}$ の値が $2\pi i$ ずれる）。この「局所的には存在するが大域的には存在しない」という現象は、層のコホモロジー（\ref{cat:page-abelian-sheaves}）や基本群で測られる。一般の領域でのコーシーの定理は \ref{cx:page-winding-number} で扱う。
+:::
+
+## 応用：積分路の移動による定積分の計算 {#cx:sec-ct-applications}
+
+::: proposition ガウス積分のフーリエ変換 {#cx:gaussian-fourier keywords="int e^{-x^2} e^{-itx} dx = sqrt(pi) e^{-t^2/4}; shifting the contour by a rectangle" index="ガウス積分のフーリエ変換|がうすせきぶんのふーりえへんかん"}
+すべての実数 $t$ について
+$$
+\int_{-\infty}^{\infty}e^{-x^{2}}e^{-itx}\,dx=\sqrt\pi\,e^{-t^{2}/4},\qquad\int_{-\infty}^{\infty}e^{-x^{2}}\cos tx\,dx=\sqrt\pi\,e^{-t^{2}/4}.
+$$
+:::
+
+::: proof
+**Step 1（平方完成）.** $b\defeq t/2$ とおくと $-x^{2}-itx=-(x+ib)^{2}-b^{2}$。$|e^{-x^{2}}e^{-itx}|=e^{-x^{2}}$ なので広義積分は絶対収束し、
+$$
+\int_{-R}^{R}e^{-x^{2}-itx}\,dx=e^{-b^{2}}\int_{-R}^{R}e^{-(x+ib)^{2}}\,dx.
+$$
+
+**Step 2（長方形）.** $f(z)\defeq e^{-z^{2}}$ は整関数（\ref{cx:exp} と連鎖律）。$b>0$ とし（$b<0$ も同様、$b=0$ は \ref{calc:gaussian-integral}）、長方形の周 $\gamma_{R}\defeq[-R,R]+[R,R+ib]+[R+ib,-R+ib]+[-R+ib,-R]$ をとる。長方形は凸なので \ref{cx:cauchy-star} から $\int_{\gamma_{R}}f\,dz=0$。上の辺は $z=x+ib$、$x$ が $R$ から $-R$ なので
+$$
+\int_{-R}^{R}e^{-x^{2}}dx-\int_{-R}^{R}e^{-(x+ib)^{2}}dx+\int_{[R,R+ib]}f\,dz+\int_{[-R+ib,-R]}f\,dz=0.
+$$
+
+**Step 3（縦の辺）.** $z=\pm R+is$（$0\le s\le b$）で $|e^{-z^{2}}|=e^{-\operatorname{Re}(z^{2})}=e^{-(R^{2}-s^{2})}\le e^{-R^{2}+b^{2}}$。長さは $b$ なので、\ref{cx:ml-inequality} から縦の辺の積分は絶対値 $be^{b^{2}-R^{2}}$ 以下で、$R\to\infty$ で $0$。
+
+**Step 4.** $R\to\infty$ として $\int_{-\infty}^{\infty}e^{-(x+ib)^{2}}dx=\int_{-\infty}^{\infty}e^{-x^{2}}dx=\sqrt\pi$。Step 1 から第 1 式。実部をとると第 2 式（虚部 $-\int e^{-x^{2}}\sin tx\,dx$ は奇関数の積分で $0$）。
+:::
+
+::: intuition
+実軸上の積分を、虚軸方向に $b$ だけ平行移動した直線上の積分に取り替えている。整関数なら積分路を動かしても値は変わらず、無限遠で両端が消えるので、移動の前後の積分が等しくなる。
+:::
+
+::: proposition フレネル積分 {#cx:fresnel keywords="Fresnel integrals int_0^infty cos x^2 dx = int_0^infty sin x^2 dx = sqrt(2 pi)/4; sector contour" index="フレネル積分|ふれねるせきぶん"}
+広義積分 $\int_{0}^{\infty}\cos x^{2}\,dx$, $\int_{0}^{\infty}\sin x^{2}\,dx$ は収束し、
+$$
+\int_{0}^{\infty}\cos x^{2}\,dx=\int_{0}^{\infty}\sin x^{2}\,dx=\frac{\sqrt{2\pi}}{4}.
+$$
+:::
+
+::: proof
+**Step 1（扇形）.** $f(z)\defeq e^{-z^{2}}$、$R>0$ とし、扇形 $\{re^{i\theta}\mid0\le r\le R,\ 0\le\theta\le\frac\pi4\}$ の周 $[0,R]+\alpha_{R}+[Re^{i\pi/4},0]$（$\alpha_{R}(\theta)\defeq Re^{i\theta}$, $\theta\in[0,\frac\pi4]$）をとる。$f$ は整関数なので、凸な領域 $\C$ で \ref{cx:cauchy-star} を使うと、この閉曲線に沿った積分は $0$。
+
+**Step 2（斜めの辺）.** $z=re^{i\pi/4}$ で $z^{2}=ir^{2}$、$dz=e^{i\pi/4}dr$ なので $\int_{[Re^{i\pi/4},0]}f\,dz=-e^{i\pi/4}\int_{0}^{R}e^{-ir^{2}}dr$。
+
+**Step 3（円弧の評価）.** $|e^{-z^{2}}|=e^{-R^{2}\cos2\theta}$。$\varphi(\theta)\defeq-\cos2\theta$ は $\varphi''=4\cos2\theta\ge0$ なので $[0,\frac\pi4]$ で凸（\ref{calc:convex-properties.3}）。凸性の定義（\ref{calc:convex}）を $x=0$, $y=\frac\pi4$, $\theta=t\frac\pi4$ に使うと $-\cos2\theta\le-(1-t)$、すなわち $\cos2\theta\ge1-\frac{4\theta}{\pi}$。よって
+$$
+\Bigl|\int_{\alpha_{R}}f\,dz\Bigr|\le\int_{0}^{\pi/4}e^{-R^{2}(1-4\theta/\pi)}R\,d\theta=Re^{-R^{2}}\cdot\frac{\pi}{4R^{2}}\bigl(e^{R^{2}}-1\bigr)\le\frac{\pi}{4R}.
+$$
+
+**Step 4（極限）.** Step 1–3 から
+$$
+\int_{0}^{R}e^{-ir^{2}}dr=e^{-i\pi/4}\Bigl(\int_{0}^{R}e^{-x^{2}}dx+\int_{\alpha_{R}}f\,dz\Bigr).
+$$
+$R\to\infty$ で右辺は $e^{-i\pi/4}\frac{\sqrt\pi}{2}=\frac{\sqrt\pi}{2}\cdot\frac{1-i}{\sqrt2}$ に収束する（\ref{calc:gaussian-integral} と偶関数性、Step 3）。よって左辺の実部 $\int_{0}^{R}\cos r^{2}dr$ と虚部 $-\int_{0}^{R}\sin r^{2}dr$ はそれぞれ収束し、極限は $\frac{\sqrt\pi}{2\sqrt2}=\frac{\sqrt{2\pi}}{4}$。
+
+::: hypcheck
+- 広義積分の収束は、この等式から同時に得られた（$\int_{0}^{\infty}|\cos x^{2}|dx$ は発散するので、絶対収束ではない）。
+- Step 3 の評価で、$\cos2\theta$ が $\frac\pi4$ の近くで小さくなることを、一次関数の下からの評価で補った。$\theta$ の範囲を $\frac\pi2$ まで広げると $\cos2\theta<0$ となる部分が出て評価が壊れる。
+:::
+:::
+
+## 問題 {#cx:sec-ct-problems}
+
+::: problem {#cx:prob-ct-off-center-circle}
+$\oint_{|z-2|=1}\dfrac{dz}{z}$ と $\oint_{|z-2|=1}\dfrac{e^{z}}{z^{2}+1}\,dz$ を求めよ。
+:::
+
+::: solution
+どちらの被積分関数も円板 $D(2,\frac32)$ で正則（$0$, $\pm i$ はこの円板の外：$|0-2|=2$, $|\pm i-2|=\sqrt5$）。円周 $|z-2|=1$ はこの円板に入るので、\ref{cx:cauchy-star} から両方とも $0$。
+:::
+
+::: problem {#cx:prob-ct-log-primitive}
+$\C^{-}$ は $1$ に関して星形である。$F(z)\defeq\int_{[1,z]}\frac{d\zeta}{\zeta}$ とおくと、$F=\operatorname{Log}$ であることを示せ。
+:::
+
+::: solution
+\ref{cx:cauchy-star} から $F$ は $\C^{-}$ で $\frac1z$ の原始関数。$\operatorname{Log}$ も原始関数（\ref{cx:log-holomorphic}）なので、$\C^{-}$ は領域であることから差は定数（\ref{cx:primitive-existence} の一意性）。$z=1$ で $F(1)=0=\operatorname{Log}1$ なので $F=\operatorname{Log}$。
+:::
+
+::: problem {#cx:prob-ct-gaussian-cos}
+\ref{cx:gaussian-fourier} から $\displaystyle\int_{0}^{\infty}e^{-ax^{2}}\cos bx\,dx=\frac12\sqrt{\frac{\pi}{a}}\,e^{-b^{2}/(4a)}$（$a>0$, $b\in\R$）を導け。
+:::
+
+::: solution
+$x=y/\sqrt a$ と置換すると $\int_{-\infty}^{\infty}e^{-ax^{2}}\cos bx\,dx=\frac{1}{\sqrt a}\int_{-\infty}^{\infty}e^{-y^{2}}\cos\frac{b}{\sqrt a}y\,dy=\frac{\sqrt\pi}{\sqrt a}e^{-b^{2}/(4a)}$。被積分関数は偶関数なので $0$ から $\infty$ まではその半分。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{cx:sec-ct-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

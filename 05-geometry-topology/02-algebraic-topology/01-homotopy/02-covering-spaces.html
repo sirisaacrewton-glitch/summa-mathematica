@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>被覆空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/02-algebraic-topology/01-homotopy/02-covering-spaces.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 被覆空間 {#at:page-covering-spaces keywords="covering map, covering space, evenly covered neighborhood, sheet, unique lifting, path lifting, homotopy lifting, monodromy action on the fiber, p_* is injective, number of sheets equals index, lifting criterion, deck transformation, regular (normal, Galois) covering, Aut(p) = N(H)/H, semilocally simply connected, universal covering, classification of coverings, real projective space, Hawaiian earring"}
+
+\tref{at:fundamental-group-circle} では、らせん $p\colon\mathbb{R}\to S^{1}$ への持ち上げで円周の基本群を計算した。このページでは $p$ の性質のうち本質的なもの（各点の近くで「何枚かの同相なコピー」が積み重なっていること）を抜き出して**被覆**を定義し、道とホモトピーの持ち上げ、基本群のファイバーへの作用、持ち上げの基準、被覆変換群、そして**被覆の分類**（基本群の部分群との対応）を示す。これは体のガロア理論と同じ形の対応で、基本群が「空間のガロア群」であることを示している。
+
+> 資料：被覆空間の理論は標準的な内容で、Massey『Algebraic Topology: An Introduction』第 V 章などにある。証明は自分で書き下ろした。訳語は小松・中岡・菅原『位相幾何学 I』（被覆・標準近傍・被覆変換群・普遍被覆・正則被覆・弱局所単連結）。
+
+## 記法と定義の確認 {#at:sec-cov-notation}
+
+::: notation
+- 道・道の積・道のホモトピー・基本群・基点の取り替え・誘導準同型は \ref{at:path}, \ref{at:path-groupoid}, \ref{at:fundamental-group}, \ref{at:change-of-basepoint}, \ref{at:induced-homomorphism}。単連結は \ref{at:change-of-basepoint.3}。
+- 局所弧状連結は \ref{top:locally-path-connected}（各点の任意の近傍の中に、その点を含む弧状連結な開集合がある）。連結で局所弧状連結なら弧状連結（\ref{top:path-components-open}）。ルベーグ数 \tref{top:lebesgue-number}、貼り合わせ補題 \tref{top:pasting-lemma}、連結性の言い換え \ref{top:connected-equivalents}。
+- 群の右作用・軌道・安定化群は \ref{grp:orbit-stabilizer-def}, \ref{grp:orbit-stabilizer}、正規化群 $N(H)$ は \ref{grp:normalizer-centralizer}。
+- 道 $\gamma$ と点 $e$ について、$e$ を始点とする $\gamma$ の持ち上げ（\ref{at:path-lifting}）を $\tilde\gamma_{e}$ と書く。
+- **選択公理**：使わない（以下の「選ぶ」はすべて有限回か、具体的に定まる）。
+:::
+
+## 被覆 {#at:sec-cov-definition}
+
+::: definition 被覆 {#at:covering keywords="covering map, covering space, evenly covered (admissible) neighborhood, sheet, fiber, number of sheets" index="被覆|ひふく, 被覆空間|ひふくくうかん, 被覆写像|ひふくしゃぞう, 標準近傍|ひょうじゅんきんぼう, 葉（被覆）|ようひふく, 被覆度|ひふくど"}
+連続な全射 $p\colon E\to B$ が**被覆**（被覆写像）であるとは、各点 $b\in B$ に開近傍 $U$ があって、$p^{-1}(U)$ が互いに素な開集合 $V_{\lambda}$（$\lambda\in\Lambda$）の和で、各 $p\restriction V_{\lambda}\colon V_{\lambda}\to U$ が同相写像となることをいう。このような $U$ を**標準近傍**（均等に被覆される近傍）、$V_{\lambda}$ を $U$ の上の**葉**という。$E$ を**被覆空間**、$B$ を**底空間**、$p^{-1}(b)$ を $b$ の上の**ファイバー**という。
+:::
+
+::: intuition
+標準近傍の上では $p^{-1}(U)\cong U\times\Lambda$（$\Lambda$ は離散）で、被覆は局所的には「$U$ のコピーを何枚か重ねたもの」である。大域的にはコピーが互いにつながり合い、そのつながり方が基本群で記述される。
+:::
+
+::: example
+1. **らせん** $p\colon\mathbb{R}\to S^{1}$, $p(s)=e^{2\pi is}$ は被覆。$z_{0}=p(a)\in S^{1}$ について $U\defeq S^{1}\setminus\{-z_{0}\}$ とすると、$p^{-1}(U)=\bigsqcup_{n\in\mathbb{Z}}(a+n-\frac12,a+n+\frac12)$ で、各区間上の $p$ の逆写像は $w\mapsto a+n+\theta(z_{0},w)$（\ref{at:angle-difference}）。実際 $p(a+n+\theta(z_{0},w))=z_{0}\cdot w/z_{0}=w$ で、逆に $s$ が区間にあれば $s-a-n\in(-\frac12,\frac12)$ と $\theta(z_{0},p(s))$ はともに $p(\cdot)=p(s)/z_{0}$ を満たす $(-\frac12,\frac12)$ の元で、差は $(-1,1)$ の整数なので一致する。
+2. **$n$ 乗写像** $q_{n}\colon S^{1}\to S^{1}$, $q_{n}(z)=z^{n}$（$n\ge1$）は被覆。$w_{0}\in S^{1}$ と $z_{1}^{n}=w_{0}$ となる $z_{1}$ をとり、$U\defeq S^{1}\setminus\{-w_{0}\}$ とすると、$q_{n}^{-1}(U)$ は $n$ 個の開弧 $V_{k}\defeq\{z_{1}\zeta^{k}p(u):|u|<\frac{1}{2n}\}$（$\zeta=e^{2\pi i/n}$, $k=0,\dots,n-1$）の互いに素な和で、$V_{k}$ 上の逆写像は $w\mapsto z_{1}\zeta^{k}p(\theta(w_{0},w)/n)$。
+3. **実射影空間** $\mathbb{R}P^{n}\defeq S^{n}/(x\sim-x)$（商位相）と商写像 $\pi\colon S^{n}\to\mathbb{R}P^{n}$ は被覆。$U_{i}\defeq\pi(\{x_{i}\ne0\})$ とおくと、$\pi^{-1}(U_{i})=\{x_{i}>0\}\sqcup\{x_{i}<0\}$。$S^{n}$ の開集合 $W$ について $\pi^{-1}(\pi(W))=W\cup(-W)$ は開なので $\pi$ は開写像で、$\{x_{i}>0\}$ の上で単射。よって $\pi\restriction\{x_{i}>0\}$ は $U_{i}$ への同相写像（連続な開単射）。$\pm$ を入れ替えても同じ。$U_{i}$（$i=1,\dots,n+1$）は $\mathbb{R}P^{n}$ を覆う。
+4. 被覆 $p\colon E\to B$, $p'\colon E'\to B'$ の積 $p\times p'$ は被覆（標準近傍の積が標準近傍）。とくに $\mathbb{R}^{n}\to(S^{1})^{n}$ は被覆。
+5. **被覆でない例**：$p\restriction(0,\frac32)\colon(0,\frac32)\to S^{1}$ は連続な全射で各点で局所同相だが被覆でない。$1\in S^{1}$ の任意の開近傍 $U$ について、$U$ の上の葉はどれも $U$ 全体に写るので $1$ の逆像を含むが、$(0,\frac32)$ の中の $1$ の逆像は $s=1$ だけなので、葉は 1 枚しかなく $p^{-1}(U)\cap(0,\frac32)$ 全体と一致しなければならない。ところが十分小さい $s>0$ について $s$ と $1+s$ はともに $p^{-1}(U)$ に入り $p(s)=p(1+s)$ なので、$p$ はそこで単射でない。
+:::
+
+## 持ち上げ {#at:sec-cov-lifting}
+
+::: lemma 持ち上げの一意性 {#at:unique-lifting keywords="two lifts of the same map from a connected space that agree at one point coincide" index="持ち上げの一意性|もちあげのいちいせい"}
+$p\colon E\to B$ を被覆、$Y$ を連結空間、$f\colon Y\to B$ を連続写像とし、$\tilde f_{1},\tilde f_{2}\colon Y\to E$ を $p\circ\tilde f_{i}=f$ となる連続写像（$f$ の**持ち上げ**）とする。ある 1 点で $\tilde f_{1}=\tilde f_{2}$ なら、$\tilde f_{1}=\tilde f_{2}$。
+:::
+
+::: proof
+**Step 1.** $A\defeq\{y:\tilde f_{1}(y)=\tilde f_{2}(y)\}$ とおく。$y\in Y$ をとり、$f(y)$ の標準近傍 $U$ と、$\tilde f_{1}(y)$, $\tilde f_{2}(y)$ を含む葉 $V_{1},V_{2}$ をとる。$W\defeq\tilde f_{1}^{-1}(V_{1})\cap\tilde f_{2}^{-1}(V_{2})$ は $y$ の開近傍。
+
+**Step 2.** $V_{1}=V_{2}=V$ なら、$W$ の上で $\tilde f_{i}=(p\restriction V)^{-1}\circ f$（$\tilde f_{i}(W)\subset V$ で $p\circ\tilde f_{i}=f$、$p\restriction V$ は単射）なので $W\subset A$。$V_{1}\ne V_{2}$ なら $V_{1}\cap V_{2}=\varnothing$ なので $W\subset Y\setminus A$。
+
+**Step 3.** よって $A$ と $Y\setminus A$ はともに開。$Y$ は連結で $A\ne\varnothing$ なので $A=Y$（\ref{top:connected-equivalents}）。
+
+::: hypcheck
+- **$Y$ の連結性**：Step 3 で使った。外すと偽（$Y=\{0,1\}$ 離散で、各点を別々の葉に送る）。
+- $E$, $B$ のハウスドルフ性は使わない（葉が互いに素であることだけを使う）。
+:::
+:::
+
+::: lemma 道とホモトピーの持ち上げ {#at:path-lifting keywords="path lifting and homotopy lifting property of covering maps for I and I x I" index="道の持ち上げ|みちのもちあげ, ホモトピーの持ち上げ|ほもとぴーのもちあげ"}
+$p\colon E\to B$ を被覆とする。
+1. 道 $\gamma\colon I\to B$ と $e\in p^{-1}(\gamma(0))$ について、$e$ を始点とする持ち上げ $\tilde\gamma_{e}$ がただ一つある。
+2. 連続写像 $F\colon I\times I\to B$ と $e\in p^{-1}(F(0,0))$ について、$\tilde F(0,0)=e$ となる持ち上げ $\tilde F$ がただ一つある。
+3. $\gamma\simeq\delta$（道のホモトピー）なら $\tilde\gamma_{e}(1)=\tilde\delta_{e}(1)$ で、$\tilde\gamma_{e}\simeq\tilde\delta_{e}$。
+:::
+
+::: proof
+一意性は \ref{at:unique-lifting}（$I$, $I\times I$ は連結）。存在は 2 を示す（1 は 1 行だけの場合で同じ議論）。
+
+**Step 1（格子）.** 標準近傍の逆像 $\{F^{-1}(U)\}$ はコンパクト距離空間 $I\times I$ の開被覆なので、ルベーグ数 $\delta$ がある（\ref{top:lebesgue-number}）。$\sqrt{2}/N<\delta$ とし、$R_{ij}\defeq[\frac{i-1}{N},\frac{i}{N}]\times[\frac{j-1}{N},\frac{j}{N}]$ とすると、各 $R_{ij}$（直径 $\sqrt{2}/N$）はある標準近傍の逆像に含まれる。各 $R_{ij}$ について $F(R_{ij})\subset U_{ij}$ となる標準近傍 $U_{ij}$ を 1 つ固定する（有限個の選択なので選択公理は要らない）。
+
+**Step 2（順に持ち上げる）.** 正方形を $j$ の小さい順、同じ $j$ では $i$ の小さい順に並べ、その順に $\tilde F$ を $R_{ij}$ の上で定める。$R_{11}$ では、$e$ を含む $U_{11}$ の上の葉 $V$ をとり $\tilde F\defeq(p\restriction V)^{-1}\circ F$。$R_{ij}$ の番になったとき、それまでの正方形の和集合と $R_{ij}$ の共通部分 $C$ は、$R_{ij}$ の下辺（$j>1$ のとき）と左辺（$i>1$ のとき）の和である（前の行の正方形は下辺でしか、同じ行の左隣は左辺でしか $R_{ij}$ と交わらない）。$C$ は左下の角 $c=(\frac{i-1}{N},\frac{j-1}{N})$ を含む連結集合（1 辺または角を共有する 2 辺）。$p(\tilde F(c))=F(c)\in U_{ij}$ なので、$\tilde F(c)$ を含む $U_{ij}$ の上の葉 $V$ があり、$R_{ij}$ の上で $G\defeq(p\restriction V)^{-1}\circ F$ とおく。
+
+**Step 3（つながり）.** $G$ と既に定めた $\tilde F$ はともに $F\restriction C$ の持ち上げで、$c$ で一致し $C$ は連結なので、\ref{at:unique-lifting} から $C$ の上で一致する。よって $\tilde F$ を $R_{ij}$ に $G$ で延ばせる。最後に有限個の閉集合 $R_{ij}$ の上の連続写像として、貼り合わせ補題で $\tilde F$ は連続。
+
+**Step 4（3 の証明）.** $H$ を $\gamma$ から $\delta$ への道のホモトピーとし、2 で $\tilde H(0,0)=e$ の持ち上げをとる。$t\mapsto\tilde H(0,t)$ と $t\mapsto\tilde H(1,t)$ は定値道の持ち上げで、定値道も持ち上げなので一意性から定値。$s\mapsto\tilde H(s,0)$ は始点 $e$ の $\gamma$ の持ち上げなので $\tilde\gamma_{e}$、$s\mapsto\tilde H(s,1)$ は始点 $\tilde H(0,1)=e$ の $\delta$ の持ち上げなので $\tilde\delta_{e}$。よって $\tilde\gamma_{e}(1)=\tilde H(1,0)=\tilde H(1,1)=\tilde\delta_{e}(1)$ で、$\tilde H$ は道のホモトピー。
+
+::: hypcheck
+- 標準近傍の存在（被覆の定義）を Step 1・2 に使った。各点で局所同相なだけでは偽（例 5 の $(0,\frac32)\to S^{1}$ では、$\omega_{1}$ の始点 $1$ の持ち上げは $\mathbb{R}$ の中では $s\mapsto1+s$ しかなく、$s=\frac12$ で $(0,\frac32)$ の外に出るので、$(0,\frac32)$ の中には持ち上げがない）。
+- Step 3 で連結な $C$ の上の一意性を使うために、正方形を並べる順序が要る（任意の順では $C$ が連結でなくなる）。
+:::
+:::
+
+::: theorem 基本群のファイバーへの作用 {#at:monodromy-action keywords="monodromy (right) action of pi_1(B,b_0) on the fiber, p_* injective, stabilizer equals p_* pi_1(E,e_0), number of sheets equals index" index="モノドロミー作用|ものどろみーさよう, ファイバーへの作用|ふぁいばーへのさよう"}
+$p\colon E\to B$ を被覆、$b_{0}\in B$、$F\defeq p^{-1}(b_{0})$ とする。
+1. $e\cdot[\gamma]\defeq\tilde\gamma_{e}(1)$ は $\pi_{1}(B,b_{0})$ の $F$ への右作用を定める。
+2. $e_{0}\in F$ について $p_{*}\colon\pi_{1}(E,e_{0})\to\pi_{1}(B,b_{0})$ は単射で、その像 $H\defeq p_{*}\pi_{1}(E,e_{0})$ は $e_{0}$ の安定化群。すなわち $[\gamma]\in H$ と「$\tilde\gamma_{e_{0}}$ が閉道」は同値。
+3. $E$ が弧状連結なら作用は推移的で、$Hg\mapsto e_{0}\cdot g$ は右剰余類の集合 $H\backslash\pi_{1}(B,b_{0})$ から $F$ への全単射。とくに葉の数（被覆度）$|F|$ は指数 $[\pi_{1}(B,b_{0}):H]$ に等しい。
+4. $e_{1}=e_{0}\cdot g$ なら $p_{*}\pi_{1}(E,e_{1})=g^{-1}Hg$。
+:::
+
+::: proof
+**Step 1（作用）.** \ref{at:path-lifting.3} から $e\cdot[\gamma]$ は代表によらず、$p(\tilde\gamma_{e}(1))=\gamma(1)=b_{0}$ なので $F$ に入る。$\tilde\gamma_{e}\cdot\tilde\delta_{e\cdot[\gamma]}$ は $\gamma\cdot\delta$ の始点 $e$ の持ち上げ（\ref{at:path-groupoid.6}）なので $e\cdot([\gamma][\delta])=(e\cdot[\gamma])\cdot[\delta]$。定値道の持ち上げは定値なので $e\cdot1=e$。
+
+**Step 2（単射性）.** $\ell$ を $e_{0}$ を基点とする $E$ の閉道で $p\circ\ell\simeq c_{b_{0}}$ とする。$\ell$ は $p\circ\ell$ の始点 $e_{0}$ の持ち上げ、$c_{e_{0}}$ は $c_{b_{0}}$ の持ち上げなので、\ref{at:path-lifting.3} から $\ell\simeq c_{e_{0}}$。
+
+**Step 3（安定化群）.** $[\gamma]=p_{*}[\ell]$ なら $\gamma\simeq p\circ\ell$ で、$\ell$ が $p\circ\ell$ の持ち上げなので $e_{0}\cdot[\gamma]=\ell(1)=e_{0}$。逆に $e_{0}\cdot[\gamma]=e_{0}$ なら $\tilde\gamma_{e_{0}}$ は $E$ の閉道で $[\gamma]=p_{*}[\tilde\gamma_{e_{0}}]$。
+
+**Step 4（推移性）.** $e\in F$ について $E$ の道 $\eta$ を $e_{0}$ から $e$ へとると、$p\circ\eta$ は $b_{0}$ を基点とする閉道で、その始点 $e_{0}$ の持ち上げは $\eta$。よって $e=e_{0}\cdot[p\circ\eta]$。軌道と安定化群の関係（\ref{grp:orbit-stabilizer} の右作用版：$e_{0}\cdot g=e_{0}\cdot g'\iff gg'^{-1}\in H\iff Hg=Hg'$）から 3 の全単射が得られる。
+
+**Step 5（4 の証明）.** $\gamma$ を $g$ の代表、$\tilde\gamma\defeq\tilde\gamma_{e_{0}}$（$e_{0}$ から $e_{1}$ への道）とする。$\beta_{\tilde\gamma}\colon\pi_{1}(E,e_{1})\to\pi_{1}(E,e_{0})$ は同型（\ref{at:change-of-basepoint}）で、$p_{*}\beta_{\tilde\gamma}[\ell]=g\,p_{*}[\ell]\,g^{-1}$。よって $gp_{*}\pi_{1}(E,e_{1})g^{-1}=H$。
+
+::: hypcheck
+- 3 で $E$ の弧状連結性を使った。外すと作用は推移的でなく、$|F|$ は弧状連結成分ごとの指数の和になる。
+- 2 は $E$ の連結性を要しない。
+:::
+:::
+
+::: corollary 実射影空間の基本群 {#at:fundamental-group-rpn keywords="pi_1(RP^n) = Z/2 for n >= 2, RP^1 is a circle" index="実射影空間の基本群|じつしゃえいくうかんのきほんぐん"}
+$n\ge2$ なら $\pi_{1}(\mathbb{R}P^{n})\cong\mathbb{Z}/2\mathbb{Z}$。
+:::
+
+::: proof
+$\pi\colon S^{n}\to\mathbb{R}P^{n}$ は被覆（例 3）で、$S^{n}$ は単連結（\ref{at:sphere-simply-connected}）。\ref{at:monodromy-action.3} で $H=1$ なので $|\pi_{1}(\mathbb{R}P^{n})|=|\pi^{-1}(\pi(x_{0}))|=|\{x_{0},-x_{0}\}|=2$。位数 2 の群は $\mathbb{Z}/2\mathbb{Z}$。
+:::
+
+::: theorem 持ち上げの基準 {#at:lifting-criterion keywords="lifting criterion: a map from a path-connected, locally path-connected space lifts iff f_* pi_1(Y) is contained in p_* pi_1(E)" index="持ち上げの基準|もちあげのきじゅん"}
+$p\colon(E,e_{0})\to(B,b_{0})$ を被覆、$Y$ を弧状連結かつ局所弧状連結な空間、$f\colon(Y,y_{0})\to(B,b_{0})$ を連続写像とする。$\tilde f(y_{0})=e_{0}$ となる持ち上げ $\tilde f$ が存在するための必要十分条件は
+$$
+f_{*}\pi_{1}(Y,y_{0})\subset p_{*}\pi_{1}(E,e_{0}).
+$$
+このとき持ち上げは一意。
+:::
+
+::: proof
+**Step 1（必要性・一意性）.** $f=p\circ\tilde f$ なら $f_{*}=p_{*}\circ\tilde f_{*}$。一意性は \ref{at:unique-lifting}。
+
+**Step 2（定義）.** $y\in Y$ について $y_{0}$ から $y$ への道 $\alpha$ をとり、$\tilde f(y)\defeq\widetilde{(f\circ\alpha)}_{e_{0}}(1)$ とおく。
+
+**Step 3（$\alpha$ によらない）.** 別の道 $\alpha'$ をとる。$\ell\defeq\alpha\cdot\bar\alpha'$ は $y_{0}$ を基点とする閉道で、仮定から $[f\circ\ell]\in H\defeq p_{*}\pi_{1}(E,e_{0})$。\ref{at:monodromy-action.2} から $f\circ\ell=(f\circ\alpha)\cdot\overline{(f\circ\alpha')}$ の始点 $e_{0}$ の持ち上げは閉道。この持ち上げは $\widetilde{(f\circ\alpha)}_{e_{0}}$（終点 $e_{1}$）の後に $\overline{f\circ\alpha'}$ の始点 $e_{1}$ の持ち上げ $\lambda$ をつないだもので、$\lambda$ の終点は $e_{0}$。$\bar\lambda$ は始点 $e_{0}$ の $f\circ\alpha'$ の持ち上げなので、一意性から $\widetilde{(f\circ\alpha')}_{e_{0}}(1)=\bar\lambda(1)=e_{1}$。
+
+**Step 4（連続性）.** $y\in Y$ と $f(y)$ の標準近傍 $U$、$\tilde f(y)$ を含む葉 $V$ をとる。局所弧状連結性から、$y\in W\subset f^{-1}(U)$ となる弧状連結な開集合 $W$ がある。$y'\in W$ について $W$ の中の道 $\beta$ を $y$ から $y'$ へとると、$\alpha\cdot\beta$ は $y_{0}$ から $y'$ への道で、$f\circ(\alpha\cdot\beta)$ の始点 $e_{0}$ の持ち上げは $\widetilde{(f\circ\alpha)}_{e_{0}}$ の後に $(p\restriction V)^{-1}\circ f\circ\beta$（$f\circ\beta$ は $U$ の中にあり、これは始点 $\tilde f(y)$ の持ち上げ）をつないだもの。よって $\tilde f(y')=(p\restriction V)^{-1}(f(y'))$ が $W$ の上で成り立ち、$\tilde f$ は $W$ で連続。$p\circ\tilde f=f$ は定義から。
+
+::: hypcheck
+- **弧状連結**：Step 2（道 $\alpha$ の存在）に使った。
+- **局所弧状連結**：Step 4 だけで使った。外すと偽になる例が知られている：ワルシャワの円 $W$（\ref[ホモロジー理論が一致しない空間]{at:page-homology-counterexamples} で扱う）は弧状連結で $\pi_{1}(W)=1$ だが、振動する部分を 1 点に潰して得られる写像 $W\to S^{1}$ は $\mathbb{R}$ に持ち上がらない。
+- $E$ の弧状連結性は要らない。
+:::
+:::
+
+::: corollary 被覆の同型 {#at:covering-isomorphism keywords="two path-connected coverings of a locally path-connected space are isomorphic over B iff their subgroups are conjugate" index="被覆の同型|ひふくのどうけい"}
+$B$ を局所弧状連結、$p\colon(E,e_{0})\to(B,b_{0})$, $p'\colon(E',e'_{0})\to(B,b_{0})$ を弧状連結な被覆空間をもつ被覆とする。
+1. $p'\circ\varphi=p$, $\varphi(e_{0})=e'_{0}$ となる同相写像 $\varphi$（基点付きの同型）が存在することと、$p_{*}\pi_{1}(E,e_{0})=p'_{*}\pi_{1}(E',e'_{0})$ は同値。
+2. 基点を忘れると、$p'\circ\varphi=p$ となる同相写像が存在することと、2 つの部分群が $\pi_{1}(B,b_{0})$ で共役であることは同値。
+:::
+
+::: proof
+**Step 1（$E$ も局所弧状連結）.** $e\in E$ の近傍 $N$ をとる。$p(e)$ の標準近傍 $U$ と $e$ を含む葉 $V$ について、$p(N\cap V)$ は $U$ の開集合で $p(e)$ を含むので、その中に $p(e)$ を含む弧状連結な開集合 $W$ がある。$(p\restriction V)^{-1}(W)\subset N$ は $e$ を含む弧状連結な開集合。
+
+**Step 2（1 の十分性）.** Step 1 から \ref{at:lifting-criterion} を $f=p$ と被覆 $p'$ に使えて、$\varphi\colon E\to E'$ で $p'\varphi=p$, $\varphi(e_{0})=e'_{0}$ となるものがある。同様に $\psi\colon E'\to E$。$\psi\varphi$ は $p$ の $p$ に関する持ち上げで $e_{0}$ を固定するので、$1_{E}$ と一致（\ref{at:unique-lifting}）。同様に $\varphi\psi=1_{E'}$。必要性は $p_{*}=p'_{*}\varphi_{*}$ と $\varphi_{*}$ の同型性から。
+
+**Step 3（2）.** 基点を $e_{0}$ からファイバー上の別の点に替えると、\ref{at:monodromy-action.3}・\ref[4]{at:monodromy-action.4} から部分群は共役に替わり、すべての共役がこうして現れる。よって 1 から 2。
+:::
+
+## 被覆変換群 {#at:sec-cov-deck}
+
+::: definition 被覆変換・正則被覆 {#at:deck-transformation keywords="deck transformation (covering transformation), group Aut(p), regular (normal, Galois) covering" index="被覆変換|ひふくへんかん, 被覆変換群|ひふくへんかんぐん, 正則被覆|せいそくひふく, 正規被覆|せいきひふく, ガロア被覆|がろあひふく"}
+被覆 $p\colon E\to B$ について、$p\circ\varphi=p$ となる同相写像 $\varphi\colon E\to E$ を**被覆変換**といい、その全体を $\operatorname{Aut}(p)$（**被覆変換群**）と書く。$E$ が弧状連結で $H=p_{*}\pi_{1}(E,e_{0})$ が $\pi_{1}(B,b_{0})$ の正規部分群のとき、$p$ を**正則被覆**（正規被覆、ガロア被覆）という（\ref{at:monodromy-action.4} から $e_{0}$ の選び方によらない）。
+:::
+
+::: theorem 被覆変換群と基本群 {#at:deck-group keywords="Aut(p) is isomorphic to N(H)/H; for a regular covering Aut(p) = pi_1(B)/H acts simply transitively on fibers; universal covering has Aut = pi_1(B)" index="被覆変換群と基本群|ひふくへんかんぐんときほんぐん"}
+$B$ を局所弧状連結、$p\colon(E,e_{0})\to(B,b_{0})$ を弧状連結な $E$ の被覆、$H=p_{*}\pi_{1}(E,e_{0})$ とする。
+1. 被覆変換は、恒等写像でなければ不動点をもたず、$\varphi(e\cdot g)=\varphi(e)\cdot g$（$e\in F$, $g\in\pi_{1}(B,b_{0})$）を満たす。
+2. $g\in N(H)$ に $\varphi_{g}(e_{0})=e_{0}\cdot g$ となる被覆変換 $\varphi_{g}$ を対応させると、群の同型 $N(H)/H\cong\operatorname{Aut}(p)$ が得られる。
+3. とくに $p$ が正則被覆なら $\operatorname{Aut}(p)\cong\pi_{1}(B,b_{0})/H$ で、$\operatorname{Aut}(p)$ は各ファイバーに単純推移的に作用する。$E$ が単連結なら $\operatorname{Aut}(p)\cong\pi_{1}(B,b_{0})$。
+:::
+
+::: proof
+**Step 1（1）.** $\varphi(e)=e$ なら $\varphi$ と $1_{E}$ は $p$ の持ち上げで $e$ で一致するので等しい（\ref{at:unique-lifting}）。$\varphi\circ\tilde\gamma_{e}$ は始点 $\varphi(e)$ の $\gamma$ の持ち上げ（$p\varphi=p$）なので、$\varphi(e\cdot[\gamma])=\varphi(\tilde\gamma_{e}(1))=\varphi(e)\cdot[\gamma]$。
+
+**Step 2（$\varphi_{g}$ の存在）.** $e_{1}\defeq e_{0}\cdot g$ とする。\ref{at:covering-isomorphism.1} を $(E,e_{0})$ と $(E,e_{1})$ に使うと、$\varphi(e_{0})=e_{1}$ となる被覆変換が存在することと $H=p_{*}\pi_{1}(E,e_{1})=g^{-1}Hg$（\ref{at:monodromy-action.4}）、すなわち $g\in N(H)$ は同値。一意性は Step 1。
+
+**Step 3（準同型）.** Step 1 から $\varphi_{g}\varphi_{g'}(e_{0})=\varphi_{g}(e_{0}\cdot g')=\varphi_{g}(e_{0})\cdot g'=e_{0}\cdot gg'$ なので、一意性から $\varphi_{g}\varphi_{g'}=\varphi_{gg'}$。
+
+**Step 4（全射・核）.** $\varphi\in\operatorname{Aut}(p)$ について、作用の推移性（\ref{at:monodromy-action.3}）から $\varphi(e_{0})=e_{0}\cdot g$ となる $g$ があり、Step 2 から $g\in N(H)$、$\varphi=\varphi_{g}$。$\varphi_{g}=1\iff e_{0}\cdot g=e_{0}\iff g\in H$（\ref{at:monodromy-action.2}）。準同型定理で 2 を得る。
+
+**Step 5（3）.** 正規なら $N(H)=\pi_{1}(B,b_{0})$。$e_{0}$ を任意のファイバーの任意の点に替えても同じ議論ができ、$\varphi\mapsto\varphi(e_{0})$ は $\operatorname{Aut}(p)\to F$ の全単射（Step 4 と \ref{at:monodromy-action.3}）。単連結なら $H=1$。
+
+::: hypcheck
+- **局所弧状連結**：Step 2 で \ref{at:covering-isomorphism}（持ち上げの基準）を使うために要る。
+- **$E$ の弧状連結性**：Step 4 の推移性に使った。
+- 正則でない例：$S^{1}\vee S^{1}$ の基本群は 2 元 $a,b$ 上の自由群（\ref[ファン・カンペンの定理]{at:page-van-kampen}）で、$a\mapsto(1\,2)$, $b\mapsto(1\,3)$ で定まる $\{1,2,3\}$ への推移的作用の安定化群 $H$ は指数 3、$N(H)/H$ は $\{1,2,3\}$ の $\mathfrak{S}_{3}$ 集合としての自己同型群で自明。対応する 3 葉の被覆の被覆変換群は自明である。
+:::
+:::
+
+::: example
+1. らせん $\mathbb{R}\to S^{1}$：$\operatorname{Aut}(p)=\{s\mapsto s+n\}\cong\mathbb{Z}\cong\pi_{1}(S^{1})$。
+2. $q_{n}\colon S^{1}\to S^{1}$：$\operatorname{Aut}(q_{n})$ は $\zeta=e^{2\pi i/n}$ 倍の回転が生成する位数 $n$ の巡回群で、$(q_{n})_{*}\pi_{1}(S^{1})=n\mathbb{Z}$（$\deg(q_{n}\circ\omega_{1})=\deg\omega_{n}=n$）。$\mathbb{Z}/n\mathbb{Z}\cong\operatorname{Aut}(q_{n})$。
+3. $S^{n}\to\mathbb{R}P^{n}$（$n\ge2$）：$\operatorname{Aut}=\{\pm1\}\cong\mathbb{Z}/2\mathbb{Z}$。
+:::
+
+## 普遍被覆と分類定理 {#at:sec-cov-classification}
+
+::: definition 弱局所単連結・普遍被覆 {#at:semilocally-simply-connected keywords="semilocally simply connected space, universal covering" index="弱局所単連結|じゃくきょくしょたんれんけつ, 半局所単連結|はんきょくしょたんれんけつ, 普遍被覆|ふへんひふく"}
+$B$ が**弱局所単連結**（半局所単連結）であるとは、各点 $b$ に近傍 $N$ があって、包含写像の誘導準同型 $\pi_{1}(N,b)\to\pi_{1}(B,b)$ が自明になることをいう。$E$ が単連結な被覆 $p\colon E\to B$ を**普遍被覆**という。
+:::
+
+::: proposition 普遍被覆の必要条件 {#at:universal-necessary keywords="a space with a simply connected covering is semilocally simply connected; the Hawaiian earring has no universal covering" index="普遍被覆の必要条件|ふへんひふくのひつようじょうけん, ハワイの耳飾り|はわいのみみかざり"}
+普遍被覆をもつ空間は弱局所単連結である。とくにハワイの耳飾り $\mathbb{H}\defeq\bigcup_{n\ge1}C_{n}$（$C_{n}$ は中心 $(1/n,0)$、半径 $1/n$ の円周）は普遍被覆をもたない。
+:::
+
+::: proof
+**Step 1.** $p\colon E\to B$ を普遍被覆、$U$ を $b$ の標準近傍、$V$ を葉とする。$U$ の中の閉道 $\ell$（基点 $b$）について $(p\restriction V)^{-1}\circ\ell$ は $E$ の閉道で、$E$ は単連結なので定値道とホモトープ。$p$ で押し出すと $\ell$ は $B$ の中で定値道とホモトープ。
+
+**Step 2（耳飾り）.** $0$ の任意の近傍は、十分大きい $n$ について $C_{n}$ を含む。$r_{n}\colon\mathbb{H}\to C_{n}$ を $C_{n}$ の上で恒等、他の $C_{m}$ を $0$ に送る写像とすると、$r_{n}$ は連続（各 $C_{m}$ への制限は連続で、$C_{m}$ は閉集合。$0$ での連続性は、$0$ の $\varepsilon$ 近傍の点が $r_{n}$ で $0$ か $C_{n}$ 上の $0$ に近い点に写ることから）。よって $C_{n}$ は $\mathbb{H}$ のレトラクトで、$\pi_{1}(C_{n},0)\cong\mathbb{Z}$ は $\pi_{1}(\mathbb{H},0)$ に単射で入る（\ref{at:retract-injective}）。$C_{n}$ を一周する閉道は $0$ のどの近傍に入っていても $\mathbb{H}$ で自明でないので、$\mathbb{H}$ は弱局所単連結でない。
+
+::: hypcheck
+- Step 2 の $r_{n}$ の連続性：無限個の閉集合 $C_{m}$ での貼り合わせなので貼り合わせ補題は直接使えない。$0$ 以外の点は、ある $C_{m}$ の中に収まる開近傍をもつ（他の円は $0$ にしか集積しない）のでそこで連続で、$0$ では $|x|<\varepsilon$ なら $r_{n}(x)$ は $0$ か $x$ 自身なので連続。
+:::
+:::
+
+::: theorem 被覆の分類定理 {#at:classification-coverings keywords="classification of coverings: for B path-connected, locally path-connected and semilocally simply connected, based path-connected coverings correspond to subgroups of pi_1(B,b_0), unbased ones to conjugacy classes; existence of the universal covering" index="被覆の分類定理|ひふくのぶんるいていり, 普遍被覆の存在|ふへんひふくのそんざい" refname="被覆の分類定理"}
+$B$ を弧状連結・局所弧状連結・弱局所単連結とし、$b_{0}\in B$ とする。$\pi_{1}(B,b_{0})$ の任意の部分群 $H$ について、弧状連結な被覆 $p\colon(E_{H},e_{0})\to(B,b_{0})$ で $p_{*}\pi_{1}(E_{H},e_{0})=H$ となるものが存在する。したがって \ref{at:covering-isomorphism} と合わせて、
+$$
+\{\text{弧状連結な基点付き被覆}\}/\cong\ \longleftrightarrow\ \{\pi_{1}(B,b_{0})\text{ の部分群}\}
+$$
+は全単射で、基点を忘れると部分群の共役類と対応する。$H=1$ に対応するのが普遍被覆で、普遍被覆はすべての弧状連結な被覆を被覆する。
+:::
+
+::: proof
+**Step 1（良い開集合の族）.** $\mathcal{U}$ を、弧状連結な開集合 $U$ で $\pi_{1}(U,u)\to\pi_{1}(B,u)$ が自明（$u\in U$。$U$ が弧状連結なので $u$ によらない：基点の取り替えは $U$ の中の道で行え、包含写像と両立する）なもの全体とする。$\mathcal{U}$ は $B$ の開基：開集合 $O\ni b$ について、弱局所単連結性の近傍 $N$ と局所弧状連結性から $b\in U\subset O\cap N$ となる弧状連結な開集合 $U$ があり、$\pi_{1}(U,b)\to\pi_{1}(B,b)$ は $\pi_{1}(N,b)$ を経由するので自明。$U\in\mathcal{U}$ に含まれる弧状連結な開集合も $\mathcal{U}$ に入る。
+
+**Step 2（集合 $E_{H}$）.** $b_{0}$ を始点とする道全体の上で、$\gamma\sim\gamma'$ を「$\gamma(1)=\gamma'(1)$ かつ $[\gamma\cdot\bar\gamma']\in H$」で定める。これは同値関係（反射律は $[\gamma\bar\gamma]=1$、対称律は $[\gamma'\bar\gamma]=[\gamma\bar\gamma']^{-1}$、推移律は $[\gamma\bar\gamma'']=[\gamma\bar\gamma'][\gamma'\bar\gamma'']$）で、$\gamma\simeq\gamma'$（道のホモトピー）なら $\gamma\sim\gamma'$。類を $\langle\gamma\rangle$、類全体を $E_{H}$、$p\langle\gamma\rangle\defeq\gamma(1)$ とする。$B$ は弧状連結なので $p$ は全射。$\gamma\sim\gamma'$ で $\eta$ が $\gamma(1)$ から始まる道なら $\gamma\eta\sim\gamma'\eta$（$[\gamma\eta\bar\eta\bar\gamma']=[\gamma\bar\gamma']$）。
+
+**Step 3（位相）.** $U\in\mathcal{U}$ と $\gamma(1)\in U$ について $U_{\langle\gamma\rangle}\defeq\{\langle\gamma\cdot\eta\rangle:\eta\text{ は }U\text{ の中の、}\gamma(1)\text{ から始まる道}\}$ とおく（Step 2 から代表によらない）。
+- (a) $\langle\gamma'\rangle\in U_{\langle\gamma\rangle}$ なら $U_{\langle\gamma'\rangle}=U_{\langle\gamma\rangle}$：$\gamma'\sim\gamma\eta$ とすると、$\gamma'\mu\sim\gamma\eta\mu$ で $\eta\mu$ は $U$ の道なので $\subset$。逆に $\gamma\mu\sim\gamma\eta\bar\eta\mu\sim\gamma'\bar\eta\mu$ なので $\supset$。
+- (b) $\langle\gamma''\rangle\in U_{\langle\gamma\rangle}\cap V_{\langle\gamma'\rangle}$ なら、$\gamma''(1)\in W\subset U\cap V$ となる $W\in\mathcal{U}$ をとると (a) から $W_{\langle\gamma''\rangle}\subset U_{\langle\gamma''\rangle}\cap V_{\langle\gamma''\rangle}=U_{\langle\gamma\rangle}\cap V_{\langle\gamma'\rangle}$。
+よって $\{U_{\langle\gamma\rangle}\}$ は $E_{H}$ のある位相の開基。
+
+**Step 4（$p\restriction U_{\langle\gamma\rangle}$ は $U$ への同相）.** 全射：$U$ は弧状連結。単射：$\langle\gamma\eta\rangle$, $\langle\gamma\eta'\rangle$ で $\eta(1)=\eta'(1)$ なら、$\eta\bar\eta'$ は $U$ の閉道なので $B$ で自明で、$[\gamma\eta\bar\eta'\bar\gamma]=1\in H$。開写像：$U_{\langle\gamma\rangle}$ に含まれる開基の元は (a) から $V_{\langle\gamma'\rangle}$（$V\subset U$）の形で、像は $V$。連続：開集合 $O\subset B$ について、$p\langle\gamma\rangle\in O$ なら $\gamma(1)\in W\subset O$ となる $W\in\mathcal{U}$ について $W_{\langle\gamma\rangle}\subset p^{-1}(O)$ なので $p^{-1}(O)$ は開。
+
+**Step 5（被覆であること）.** $U\in\mathcal{U}$ について $p^{-1}(U)=\bigcup\{U_{\langle\gamma\rangle}:\gamma(1)\in U\}$ で、(a) から異なる $U_{\langle\gamma\rangle}$ は互いに素。Step 4 と合わせて $U$ は標準近傍。
+
+**Step 6（弧状連結性と基点の持ち上げ）.** $e_{0}\defeq\langle c_{b_{0}}\rangle$。道 $\gamma$ と $t\in I$ について $\gamma_{t}(s)\defeq\gamma(ts)$ とし、$\hat\gamma(t)\defeq\langle\gamma_{t}\rangle$ とおく。$\hat\gamma$ は連続：$t_{0}\in I$ と $\gamma(t_{0})\in U\in\mathcal{U}$ について、$t_{0}$ の近傍 $J$ で $\gamma(J)\subset U$ となるものをとる。$J$ は区間とする。$t\in J$ について、$\gamma_{t}$ と $\gamma_{t_{0}}\cdot\eta_{t}$（$\eta_{t}(s)\defeq\gamma(t_{0}+s(t-t_{0}))$ は $U$ の中の道）はどちらも $\gamma\circ\varphi$（$\varphi\colon I\to I$ 連続、$\varphi(0)=0$, $\varphi(1)=t$）の形で、二つの $\varphi$ の直線ホモトピー $(1-u)\varphi_{1}+u\varphi_{2}$ を $\gamma$ で写せば道のホモトピーになる。よって $\hat\gamma(t)\in U_{\langle\gamma_{t_{0}}\rangle}$ で $\hat\gamma(t)=(p\restriction U_{\langle\gamma_{t_{0}}\rangle})^{-1}(\gamma(t))$ となり、$J$ の上で連続。$\hat\gamma$ は $e_{0}$ から $\langle\gamma\rangle$ への道なので $E_{H}$ は弧状連結で、$\hat\gamma$ は $\gamma$ の始点 $e_{0}$ の持ち上げ。
+
+**Step 7（$p_{*}\pi_{1}=H$）.** \ref{at:monodromy-action.2} から、$b_{0}$ を基点とする閉道 $\gamma$ について $[\gamma]\in p_{*}\pi_{1}(E_{H},e_{0})\iff\hat\gamma(1)=e_{0}\iff\gamma\sim c_{b_{0}}\iff[\gamma]\in H$。
+
+**Step 8（残り）.** 全単射性は \ref{at:covering-isomorphism}（$B$ は局所弧状連結）と Step 7。$H=1$ では $E_{1}$ は単連結（$p_{*}$ は単射）。任意の弧状連結な被覆 $p'\colon(E',e'_{0})\to(B,b_{0})$ について、持ち上げの基準（$E_{1}$ は Step 1 の議論で局所弧状連結、$p_{*}\pi_{1}(E_{1})=1$）から $q\colon E_{1}\to E'$ で $p'q=p$ となるものがあり、$q$ が被覆であることも示せる（問題 \ref{at:prob-intermediate-covering}）。
+
+::: hypcheck
+- **弱局所単連結**：Step 1 で $\mathcal{U}$ が開基であることに使い、Step 4 の単射性で本質的に使った。必要条件でもある（\ref{at:universal-necessary}）。
+- **局所弧状連結**：Step 1（$\mathcal{U}$ の元を小さくとる）と Step 8（持ち上げの基準）。
+- **弧状連結**：Step 2（$p$ の全射性）。
+- 選択公理は使わない（$E_{H}$ は道の空間の商として明示的に定義した）。
+:::
+:::
+
+::: supplement
+**一般化と高い視点.** $B$ が分類定理の仮定を満たすとき、被覆 $p\colon E\to B$ にファイバー $p^{-1}(b_{0})$（右 $\pi_{1}(B,b_{0})$ 集合、\ref{at:monodromy-action}）を対応させる関手は、$B$ 上の被覆の圏と右 $\pi_{1}(B,b_{0})$ 集合の圏の圏同値を与えることが知られている（本サイト未収録。弧状連結な被覆が推移的な集合、つまり $H\backslash\pi_{1}$ に対応し、被覆変換群は $\operatorname{Aut}_{\pi_{1}}(H\backslash\pi_{1})\cong N(H)/H$）。これは体のガロア理論で、分離的な有限次代数がガロア群の有限連続作用集合と対応すること（\ref{fld:page-grothendieck-galois}）とまったく同じ形をしており、
+
+| 体論 | 被覆空間 |
+|---|---|
+| 分離閉包 $k^{\mathrm{sep}}$ | 普遍被覆 $\tilde B$ |
+| 絶対ガロア群 $\operatorname{Gal}(k^{\mathrm{sep}}/k)$ | 基本群 $\pi_{1}(B,b_{0})=\operatorname{Aut}(\tilde B/B)$ |
+| 中間体 $K$ | 中間被覆 $\tilde B\to E\to B$ |
+| ガロア拡大 | 正則被覆 |
+| $\operatorname{Aut}(K/k)\cong N(H)/H$ | $\operatorname{Aut}(p)\cong N(H)/H$ |
+
+（ガロアの基本定理 \tref{fld:fundamental-theorem} では、大きい部分群に小さい中間体が対応する。被覆でも大きい $H$ に小さい被覆度が対応する）。グロタンディークはこの二つを、スキームのエタール基本群として統一した（知られている）。
+
+比喩で言えば、普遍被覆は「すべての巻きつきをほどいた、底空間の完全な展開図」で、基本群はその展開図を自分自身に重ね直す仕方（被覆変換）の群である。中間の被覆は、展開図を部分群 $H$ の分だけ巻き戻して貼り合わせたものにあたる。
+:::
+
+::: supplement 計算の観点
+有限 CW 複体（\ref[CW 複体と胞体ホモロジー]{at:page-cellular-homology}）の基本群は有限表示群で、指数 $n$ の部分群（の共役類）は $n$ 葉の連結な被覆と対応するので、$\{1,\dots,n\}$ への推移的な作用（生成元に置換を割り当て、関係式を満たすもの）を全部数え上げれば、$n$ 葉の被覆はすべて有限時間で列挙できる。一方、群の語の問題が一般には決定不能なので、「与えられた閉道が自明か」は有限表示群の言葉では一般に決定できない（\ref{grp:page-presentations} の系列。ノヴィコフ–ブーンの定理として知られている。本サイト未収録）。
+:::
+
+## 問題 {#at:sec-cov-problems}
+
+::: problem {#at:prob-intermediate-covering}
+$p\colon E\to B$, $p'\colon E'\to B$ を局所弧状連結な $B$ の被覆で $E,E'$ は弧状連結とし、$q\colon E\to E'$ を $p'\circ q=p$ となる連続写像とする。$q$ は被覆であることを示せ。
+:::
+
+::: solution
+**全射**：$e'\in E'$ について、$E'$ の道 $\eta$ を $q(e_{0})$ から $e'$ へとり、$p'\circ\eta$ の始点 $e_{0}$ の $p$ に関する持ち上げ $\tilde\eta$ を考える。$q\circ\tilde\eta$ は $p'\circ\eta$ の始点 $q(e_{0})$ の $p'$ に関する持ち上げなので $\eta$ と一致し、$q(\tilde\eta(1))=e'$。**標準近傍**：$e'\in E'$ について、$b=p'(e')$ の弧状連結な開近傍 $U$ を $p$ と $p'$ の両方に対して標準近傍となるようにとる（両方の標準近傍の共通部分の中に、局所弧状連結性でとる。標準近傍の開部分集合は標準近傍）。$e'$ を含む $p'$ の葉 $V'$ をとる。$p^{-1}(U)$ の各葉 $V$ は弧状連結（$U$ と同相）なので $q(V)$ は $p'^{-1}(U)$ の弧状連結部分集合で、ある 1 枚の葉に含まれる。$q(V)\subset V'$ となる葉 $V$ について、$q\restriction V=(p'\restriction V')^{-1}\circ(p\restriction V)$ は同相写像 $V\to V'$。よって $q^{-1}(V')$ はそのような $V$ の互いに素な和で、$V'$ は $q$ の標準近傍。
+:::
+
+::: problem {#at:prob-rp2-maps-circle}
+$n\ge2$ のとき、連続写像 $f\colon\mathbb{R}P^{n}\to S^{1}$ はすべて定値写像とホモトープであることを示せ。
+:::
+
+::: solution
+$\mathbb{R}P^{n}$ は弧状連結（$S^{n}$ の連続像）かつ局所弧状連結（$S^{n}$ と局所同相）。$f_{*}\colon\mathbb{Z}/2\mathbb{Z}\to\mathbb{Z}$（\ref{at:fundamental-group-rpn}, \ref{at:fundamental-group-circle}）は、$\mathbb{Z}$ に位数 2 の元がないので自明。持ち上げの基準（\ref{at:lifting-criterion}）から $\tilde f\colon\mathbb{R}P^{n}\to\mathbb{R}$ で $p\circ\tilde f=f$ となるものがある。$H(x,t)\defeq p((1-t)\tilde f(x))$ は $f$ から定値写像 $1$ へのホモトピー。
+:::
+
+::: problem {#at:prob-coverings-circle}
+$S^{1}$ の弧状連結な被覆は、同型を除いて $\mathbb{R}\to S^{1}$ と $q_{n}\colon S^{1}\to S^{1}$（$n\ge1$）だけであることを示せ。
+:::
+
+::: solution
+$S^{1}$ は弧状連結・局所弧状連結・弱局所単連結（各点の近傍として開弧がとれ、開弧は可縮）なので分類定理が使える。$\pi_{1}(S^{1})\cong\mathbb{Z}$ は可換なので共役類は部分群そのもので、部分群は $0$ と $n\mathbb{Z}$（$n\ge1$）。$0$ に対応するのは普遍被覆 $\mathbb{R}$、$n\mathbb{Z}$ に対応するのは $q_{n}$（例：$(q_{n})_{*}\pi_{1}=n\mathbb{Z}$）。
+:::
+
+::: problem {#at:prob-simply-connected-covering-trivial}
+$B$ が単連結かつ局所弧状連結なら、弧状連結な $E$ をもつ被覆 $p\colon E\to B$ は同相写像であることを示せ。
+:::
+
+::: solution
+\ref{at:monodromy-action.3} から $|p^{-1}(b_{0})|=[\pi_{1}(B,b_{0}):H]=1$。よって $p$ は全単射で、局所同相なので開写像。連続な開全単射は同相写像。（局所弧状連結は不要で、この解答では使っていない。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

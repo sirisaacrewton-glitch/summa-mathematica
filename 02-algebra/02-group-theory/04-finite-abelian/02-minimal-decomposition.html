@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>最短の巡回分解と生成元の個数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/02-group-theory/04-finite-abelian/02-minimal-decomposition.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 最短の巡回分解と生成元の個数 {#grp:page-minimal-cyclic-decomposition keywords="minimal number of generators, shortest decomposition into cyclic groups, p-rank, invariant factors are the shortest decomposition, element of maximal order generates a direct summand, Z/m + Z/n = Z/gcd + Z/lcm, subgroups need no more generators"}
+
+有限アーベル群を巡回群の直和に分ける方法は一通りではない。例えば $\Z/2\oplus\Z/3\cong\Z/6$ のように、位数が\term[互いに素]{grp:gcd}な因子はまとめても分けてもよい。それでは、**できるだけ少ない個数**の巡回群に分けると何個になるか。本ページでは、その最小個数が群を生成するのに必要な元の最小個数 $d(A)$ と一致し、さらに単因子の個数 $s$ とも、各素数 $p$ についての $\abs{A/pA}$ の指数の最大値とも一致することを示す（\ref{grp:shortest-cyclic-decomposition}）。最短の分解は単因子による表示で実現され、最長の分解は初等因子による表示で実現され、その間の個数はすべて実現される。最短の分解は、位数最大の元を一つずつ切り出す「貪欲な」手順でも得られる（\ref{grp:max-order-summand}）。応用として、有限アーベル群の部分群は元の群より多くの生成元を必要としないこと（\ref{grp:subgroup-min-generators}）を示す。これは非可換群では成り立たない。
+
+
+## 記法と定義の確認 {#grp:sec-md-notation}
+
+::: notation
+- 可換群は加法的に書き、$\Z/n$ で $\Z/n\Z$ を表す。直和・内部直和、$nA$, $A[n]$ の記法は前ページ（\ref{grp:sec-fa-notation}）に従う。
+- 準素分解 $A=\bigoplus_{p}A_{p}$ は \ref{grp:primary-decomposition}、アーベル $p$ 群で位数最大の元が直和因子を生成することは \ref{grp:max-order-complement}、構造定理（初等因子）と単因子による表示は \ref{grp:finite-abelian-structure}, \ref{grp:invariant-factors}。
+- 中国剰余定理 $\Z/ab\cong\Z/a\oplus\Z/b$（$\gcd(a,b)=1$）は \ref{grp:chinese-remainder-group}、直和の元の位数が成分の位数の最小公倍数であることは \ref{grp:direct-product-basic.3}、冪の位数は \ref{grp:order-of-power}、巡回群の部分群は \ref{grp:subgroups-cyclic}。
+- 部分集合 $S$ で生成された部分群 $\ang{S}$ は \ref{grp:generated-subgroup}。可換群では $\ang{x_{1},\dots,x_{g}}=\{c_{1}x_{1}+\cdots+c_{g}x_{g} : c_{i}\in\Z\}$。
+- 「$A\cong\Z/n_{1}\oplus\cdots\oplus\Z/n_{t}$（各 $n_{i}>1$）」を $A$ の $t$ 項の**巡回分解**という。$A=\{0\}$ は $0$ 項の巡回分解をもつとする。
+- $\ZFC$ の中で議論し、選択公理は使わない。
+:::
+
+## 生成元の最小個数 {#grp:sec-md-generators}
+
+::: definition 生成元の最小個数 {#grp:min-generators keywords="minimal number of generators, d(G), rank of a finitely generated group" index="生成元の最小個数|せいせいげんのさいしょうこすう"}
+群 $G$ が有限個の元で生成されるとき、$G$ を生成する部分集合の元の個数の最小値を $d(G)$ と書き、$G$ の**生成元の最小個数**という。$d(\{e\})=0$ とする。
+:::
+
+::: example
+1. $n>1$ なら $d(\Z/n)=1$、$d(\Z)=1$。$d(G)\le 1\iff G$ は巡回群。
+2. $d(\Z/2\oplus\Z/2)=2$：位数 $4$ の群で、元の位数はすべて $2$ 以下なので一つの元では生成されない。
+3. 「生成元の最小個数」は「それ以上減らせない生成系の大きさ」とは違う。$\Z/6$ は $\{2,3\}$ で生成され（$3-2=1$）、$2$ だけでも $3$ だけでも生成されない（それぞれ位数 $3$, $2$ の部分群を生成する）。つまり $\{2,3\}$ はどの元を除いても生成しない生成系だが、$d(\Z/6)=1$ である（\ref{grp:prob-irredundant-generators}）。
+:::
+
+::: proposition 剰余群と直積 {#grp:min-generators-basic keywords="d(G/N) <= d(G), d(G x H) <= d(G) + d(H)" index="生成元の最小個数の性質|せいせいげんのさいしょうこすうのせいしつ"}
+有限個の元で生成される群 $G,H$ と正規部分群 $N\trianglelefteq G$ について、
+1. $d(G/N)\le d(G)$。
+2. $d(G\times H)\le d(G)+d(H)$。
+:::
+
+::: proof
+**1.** $G=\ang{x_{1},\dots,x_{g}}$（$g=d(G)$）とする。標準射影 $\pi:G\to G/N$ は全射準同型なので、$G/N=\pi(G)=\ang{\pi(x_{1}),\dots,\pi(x_{g})}$（準同型の像は生成元の像で生成される：$\pi$ は $x_{i}$ の冪の積を $\pi(x_{i})$ の冪の積に写す。\ref{grp:generated-subgroup-words}）。
+
+**2.** $G=\ang{x_{1},\dots,x_{g}}$, $H=\ang{y_{1},\dots,y_{h}}$ なら、$(x_{i},e)$, $(e,y_{j})$ の $g+h$ 個が $G\times H$ を生成する：$(x,y)=(x,e)(e,y)$ で、$(x,e)$ は $(x_{i},e)$ の冪の積、$(e,y)$ は $(e,y_{j})$ の冪の積に書ける。
+:::
+
+一般の群では、部分群の生成元の最小個数は元の群より大きくなりうる（\ref{grp:subgroup-min-generators} の hypcheck）。有限アーベル群ではそうならないことを、$p$ ランクを使って示す。
+
+## p ランク {#grp:sec-md-p-rank}
+
+::: lemma 巡回分解と p ランク {#grp:p-rank-count keywords="p-rank of a finite abelian group, |A/pA| = |A[p]| = p^r" index="p ランク|ぴーらんく"}
+有限アーベル群 $A$ が $A\cong\Z/n_{1}\oplus\cdots\oplus\Z/n_{t}$ と巡回分解されるとき、各素数 $p$ について
+$$
+\abs{A/pA}=\abs{A[p]}=p^{r_{p}},\qquad r_{p}\defeq\#\{i : p\mid n_{i}\}.
+$$
+特に $r_{p}$ は巡回分解の取り方によらず $A$ だけで決まる。これを $A$ の **$p$ ランク**といい $r_{p}(A)$ と書く。
+:::
+
+::: proof
+**Step 1（一つの巡回群）.** $C=\Z/n$ とする。
+- $p\mid n$ のとき：$pC=\ang{p}$ の位数は $n/\gcd(n,p)=n/p$（\ref{grp:order-of-power}）なので $\abs{C/pC}=p$。$C[p]$ は位数が $p$ を割り切る元全体で、$C$ の位数 $p$ のただ一つの部分群 $\ang{n/p}$ と $0$ を合わせたもの、すなわち $\ang{n/p}$（\ref{grp:subgroups-cyclic.2}：位数 $1$ または $p$ の元 $x$ は $\ang{x}$ が位数 $1$ か $p$ の部分群で、位数 $p$ の部分群は一つ）。よって $\abs{C[p]}=p$。
+- $p\nmid n$ のとき：$\gcd(n,p)=1$ なので $\ord(p)=n$、$pC=C$、$\abs{C/pC}=1$。$x\in C[p]$ なら $\ord(x)$ は $p$ と $n$ の両方を割り切る（\ref{grp:order-divides}、ラグランジュ）ので $1$、$C[p]=\{0\}$。
+
+いずれの場合も $\abs{C/pC}=\abs{C[p]}=p^{[p\mid n]}$（$p\mid n$ なら指数 $1$、そうでなければ $0$）。
+
+**Step 2（直和）.** $A$ を同型で $\bigoplus_{i}C_{i}$（$C_{i}=\Z/n_{i}$）に置き換えてよい（同型 $\varphi$ は $\varphi(pA)=pA'$, $\varphi(A[p])=A'[p]$ をみたすので、両辺の大きさは同型で変わらない）。成分ごとの計算で $p\bigl(\bigoplus C_{i}\bigr)=\bigoplus pC_{i}$、$\bigl(\bigoplus C_{i}\bigr)[p]=\bigoplus C_{i}[p]$。よって
+$$
+\abs{A/pA}=\frac{\prod_{i}\abs{C_{i}}}{\prod_{i}\abs{pC_{i}}}=\prod_{i}\abs{C_{i}/pC_{i}}=p^{r_{p}},
+$$
+$\abs{A[p]}=\prod_{i}\abs{C_{i}[p]}=p^{r_{p}}$。
+
+**Step 3（不変性）.** $\abs{A/pA}$ は $A$ だけで決まるので、$r_{p}$ も巡回分解によらない。
+:::
+
+::: lemma p ランクは生成元の個数以下 {#grp:p-rank-le-generators keywords="p-rank is at most the number of generators" index="p ランクと生成元|ぴーらんくとせいせいげん"}
+有限アーベル群 $A$ が $g$ 個の元で生成されるなら、すべての素数 $p$ について $r_{p}(A)\le g$。
+:::
+
+::: proof
+$A=\ang{x_{1},\dots,x_{g}}$ とし、$\bar x\defeq x+pA\in A/pA$ と書く。$A/pA$ の任意の元は $c_{1}\bar x_{1}+\cdots+c_{g}\bar x_{g}$（$c_{i}\in\Z$）と書け、$p\bar x_{i}=\overline{px_{i}}=\bar 0$ なので、$c_{i}$ を $p$ で割った余りに取り替えても同じ元を表す。よって $A/pA$ の元は $(c_{1},\dots,c_{g})\in\{0,1,\dots,p-1\}^{g}$ で尽くされ、$p^{r_{p}(A)}=\abs{A/pA}\le p^{g}$（\ref{grp:p-rank-count}）。
+:::
+
+::: remark
+$A/pA$ は体 $\F_{p}$ 上のベクトル空間で、$r_{p}(A)$ はその次元である。上の証明は「$g$ 個の元で張られる空間の次元は $g$ 以下」を数え上げで示したものにあたる。ここでは線形代数を使わずに済ませた。
+:::
+
+## 最短の巡回分解 {#grp:sec-md-shortest}
+
+::: theorem 最短の巡回分解 {#grp:shortest-cyclic-decomposition keywords="minimal number of cyclic direct summands equals number of invariant factors equals d(A) equals max p-rank; maximal number equals number of elementary divisors" index="最短の巡回分解|さいたんのじゅんかいぶんかい, 巡回分解|じゅんかいぶんかい"}
+$A\neq\{0\}$ を有限アーベル群とし、単因子を $d_{1}\mid d_{2}\mid\cdots\mid d_{s}$（\ref{grp:invariant-factors}）、初等因子の個数を $r$ とする。
+1. $d(A)=s=\max_{p}r_{p}(A)$。
+2. $A$ の $t$ 項の巡回分解があれば $s\le t\le r$。$t=s$ は単因子による表示で、$t=r$ は初等因子による表示で実現される。$t=r$ となるのは、すべての $n_{i}$ が素数冪のときに限る。
+3. $s\le t\le r$ をみたすすべての $t$ について、$t$ 項の巡回分解がある。
+:::
+
+::: intuition
+素数 $p$ ごとに、$A$ は「$p$ の方向に $r_{p}(A)$ 本の軸」をもつ。一つの巡回群 $\Z/n$ は、$n$ を割り切る素数それぞれについて 1 本ずつしか軸を受け持てないので、巡回群の個数は、軸がいちばん多い素数の本数 $\max_{p}r_{p}$ より少なくはできない。逆に、異なる素数の軸は中国剰余定理で一つの巡回群にまとめられるので、その本数まで減らせる。
+:::
+
+::: proof
+**Step 1（$r_{p}$ と単因子）.** $A\cong\bigoplus_{i=1}^{s}\Z/d_{i}$ に \ref{grp:p-rank-count} を使うと $r_{p}(A)=\#\{i : p\mid d_{i}\}$。$d_{1}\mid d_{i}$ なので、$p\mid d_{1}$ なら $p$ はすべての $d_{i}$ を割り切り $r_{p}(A)=s$。どの $p$ でも $r_{p}(A)\le s$。$d_{1}>1$ なので $d_{1}$ の素因数 $p$ がある。よって $\max_{p}r_{p}(A)=s$。
+
+**Step 2（$d(A)=s$）.** $A\cong\bigoplus_{i=1}^{s}\Z/d_{i}$ の各成分の $1$ に対応する $s$ 個の元が $A$ を生成するので $d(A)\le s$。逆に $A$ が $g$ 個の元で生成されれば、\ref{grp:p-rank-le-generators} より $s=\max_{p}r_{p}(A)\le g$。よって $d(A)=s$。
+
+**Step 3（下限 $t\ge s$）.** $t$ 項の巡回分解 $A\cong\bigoplus_{i=1}^{t}\Z/n_{i}$ があれば、各成分の $1$ に対応する $t$ 個の元が $A$ を生成するので $t\ge d(A)=s$。
+
+**Step 4（上限 $t\le r$）.** 同じ巡回分解に \ref{grp:p-rank-count} を使うと $r_{p}(A)=\#\{i : p\mid n_{i}\}$。各 $n_{i}>1$ は少なくとも一つの素因数をもつので、$i$ ごとに素因数の個数 $\omega(n_{i})\ge 1$ を数えて
+$$
+t\le\sum_{i=1}^{t}\omega(n_{i})=\sum_{p}\#\{i : p\mid n_{i}\}=\sum_{p}r_{p}(A).
+$$
+初等因子による表示 $A\cong\bigoplus_{j}\Z/p_{j}^{e_{j}}$ にも \ref{grp:p-rank-count} を使うと、$r_{p}(A)$ は $p_{j}=p$ である初等因子の個数なので、$\sum_{p}r_{p}(A)=r$。等号 $t=r$ は、すべての $i$ で $\omega(n_{i})=1$、すなわちすべての $n_{i}$ が素数冪のときに限る。
+
+**Step 5（中間の個数）.** \ref{grp:invariant-factors} の証明の Step 1 のとおり、初等因子を素数ごとに大きい順に $e_{p,1}\ge e_{p,2}\ge\cdots$ と並べると、$d_{s+1-i}=\prod_{p}p^{e_{p,i}}$ である。$i$ 番目の「行」に現れる素数（$e_{p,i}\ge 1$ のもの）の個数を $k_{i}$ とすると、$\sum_{i=1}^{s}k_{i}=r$。初等因子による表示（$r$ 項）から始めて、同じ行の因子を一つずつ併合する：まだ併合していない行の因子 $\Z/a$ と $\Z/p^{e}$（$a$ はその行の別の素数の冪の積で $p\nmid a$）を、\ref{grp:chinese-remainder-group}で $\Z/ap^{e}$ に置き換える。一回の併合で項の数はちょうど $1$ 減り、すべての行を併合し終えると単因子による表示（$s$ 項）になる。併合の回数は $\sum_{i}(k_{i}-1)=r-s$ で、途中で $r,r-1,\dots,s$ のすべての項数を通る。
+:::
+
+::: hypcheck
+- **有限**：\ref{grp:p-rank-count} の数え上げ（$\abs{A/pA}$ の計算）と、単因子による表示の存在に使った。有限生成アーベル群 $\Z^{k}\oplus T$ でも、$A/pA$ を使って同じ議論ができ、$d(\Z^{k}\oplus T)=k+d(T)$ となる（$T$ の単因子を $d_{1}\mid\cdots\mid d_{s}$ とすると $r_{p}=k+\#\{i: p\mid d_{i}\}$）。なお $\Z$ はそれ以上直和に分解できない（$0$ でない二つの部分群 $a\Z$, $b\Z$ は $0$ でない元 $ab$ を共有する）。
+- **可換**：巡回分解（直和）という形と、$pA$ が部分群であることに使った。非可換群では \ref{grp:subgroup-min-generators} の hypcheck の例のように $d$ の振る舞いが変わる。
+:::
+
+::: example
+1. $A=\Z/4\oplus\Z/6\oplus\Z/10$。初等因子は $4,2,3,2,5$（$r=5$）、$r_{2}=3$, $r_{3}=r_{5}=1$ なので $d(A)=s=3$。行ごとに並べると $2$ の指数は $(2,1,1)$、$3$ は $(1)$、$5$ は $(1)$ なので、単因子は $d_{3}=4\cdot 3\cdot 5=60$, $d_{2}=2$, $d_{1}=2$：
+$$
+A\cong\Z/2\oplus\Z/2\oplus\Z/60.
+$$
+途中の $4$ 項の分解として $\Z/2\oplus\Z/2\oplus\Z/12\oplus\Z/5$ などがある。
+2. 最短の分解は、単因子の条件 $d_{1}\mid d_{2}\mid\cdots$ を課さなければ一通りではない。$A=\Z/2\oplus\Z/4\oplus\Z/3\oplus\Z/9$（$s=2$）は
+$$
+A\cong\Z/6\oplus\Z/36\cong\Z/18\oplus\Z/12
+$$
+と二通りに $2$ 項で書ける（$2$ と $9$、$4$ と $3$ を併合するか、$2$ と $3$、$4$ と $9$ を併合するか）。整除の条件をみたすのは前者だけである。
+3. $A=(\Z/2)^{3}$ は $r=s=3$：初等因子も単因子も $(2,2,2)$ で、巡回分解の項数は $3$ しかない。逆に $A=\Z/30$ は $s=1$, $r=3$ で、$\Z/30$, $\Z/2\oplus\Z/15$, $\Z/2\oplus\Z/3\oplus\Z/5$ などがある。
+:::
+
+::: corollary 二つの巡回群の直和 {#grp:gcd-lcm-decomposition keywords="Z/m + Z/n is isomorphic to Z/gcd(m,n) + Z/lcm(m,n)" index="最大公約数と最小公倍数による分解|さいだいこうやくすうとさいしょうこうばいすうによるぶんかい"}
+正の整数 $m,n$ について
+$$
+\Z/m\oplus\Z/n\cong\Z/\gcd(m,n)\oplus\Z/\lcm(m,n).
+$$
+特に $\Z/m\oplus\Z/n$ が巡回群であるのは $\gcd(m,n)=1$ のときに限る。
+:::
+
+::: proof
+**Step 1（初等因子の比較）.** 素数 $p$ について $\alpha\defeq v_{p}(m)$, $\beta\defeq v_{p}(n)$（$p$ の指数）とする。中国剰余定理を繰り返し使うと $\Z/m\cong\bigoplus_{p}\Z/p^{v_{p}(m)}$ なので、左辺の $p$ の初等因子は $p^{\alpha}$, $p^{\beta}$（指数 $0$ のものは除く）。$v_{p}(\gcd(m,n))=\min(\alpha,\beta)$, $v_{p}(\lcm(m,n))=\max(\alpha,\beta)$ なので、右辺の $p$ の初等因子は $p^{\min(\alpha,\beta)}$, $p^{\max(\alpha,\beta)}$ で、指数の組 $\{\alpha,\beta\}$ と $\{\min,\max\}$ は一致する。\ref{grp:finite-abelian-structure} より両辺は同型。
+
+**Step 2（巡回となる条件）.** $\gcd(m,n)=1$ なら右辺は $\Z/1\oplus\Z/mn\cong\Z/mn$。$\gcd(m,n)>1$ ならその素因数 $p$ について $r_{p}=2$ なので、\ref{grp:shortest-cyclic-decomposition} より $d=2$ で、巡回群ではない。
+:::
+
+::: hypcheck
+- $v_{p}(\gcd)=\min$, $v_{p}(\lcm)=\max$ は素因数分解の一意性による。$\lcm$ は \ref{grp:direct-product-basic.3} で $a\Z\cap b\Z=\lcm(a,b)\Z$ として定義したもので、これは $\max$ の指数をもつ数と一致する（$l\Z=m\Z\cap n\Z\iff l$ は $m,n$ の公倍数の中で最小の正の数）。
+- $\gcd(m,n)=1$ の場合は中国剰余定理そのもの（\tref{grp:chinese-remainder-group}）で、本系はその一般化である。
+:::
+
+## 位数最大の元を切り出す {#grp:sec-md-greedy}
+
+::: theorem 位数最大の元は直和因子を生成する {#grp:max-order-summand keywords="in a finite abelian group a cyclic subgroup generated by an element of maximal order is a direct summand, exponent" index="位数最大の元|いすうさいだいのげん"}
+有限アーベル群 $A$ の元 $a$ の位数が $A$ の元の位数の最大値なら、
+1. $A$ のすべての元の位数は $\ord(a)$ を割り切る。
+2. $A=\ang{a}\oplus H$ となる部分群 $H$ がある。
+:::
+
+::: proof
+**Step 1（準素成分）.** 準素分解 $A=\bigoplus_{p}A_{p}$（\ref{grp:primary-decomposition}）で $a=\sum_{p}a_{p}$（$a_{p}\in A_{p}$）と書く。各 $p$ について、$A_{p}$ の元の位数の最大値を $p^{f_{p}}$ とし、それを実現する $b_{p}\in A_{p}$ をとる。$\ord(a_{p})$ たちは\term[互いに素]{grp:gcd}なので、直和の元の位数は成分の位数の最小公倍数（\ref{grp:direct-product-basic.3}）で、
+$$
+\ord(a)=\prod_{p}\ord(a_{p})\le\prod_{p}p^{f_{p}}=\ord\Bigl(\sum_{p}b_{p}\Bigr).
+$$
+$\ord(a)$ は最大なので等号が成り立ち、各 $p$ で $\ord(a_{p})\le p^{f_{p}}$ だから、すべての $p$ で $\ord(a_{p})=p^{f_{p}}$。
+
+**Step 2（1）.** $x=\sum_{p}x_{p}\in A$ について $\ord(x_{p})$ は $p$ の冪で $p^{f_{p}}$ 以下なので $p^{f_{p}}$ を割り切る。よって $\ord(x)=\prod_{p}\ord(x_{p})$ は $\prod_{p}p^{f_{p}}=\ord(a)$ を割り切る。
+
+**Step 3（各成分で切り出す）.** $a_{p}$ は $A_{p}$ で位数最大なので、\ref{grp:max-order-complement} より $A_{p}=\ang{a_{p}}\oplus H_{p}$ となる $H_{p}$ がある。$H\defeq\sum_{p}H_{p}$ とおく。
+
+**Step 4（$\ang{a}=\bigoplus_{p}\ang{a_{p}}$）.** $na=\sum_{p}na_{p}$ なので $\ang{a}\subseteq\bigoplus_{p}\ang{a_{p}}$。右辺の位数は $\prod_{p}\ord(a_{p})=\ord(a)=\abs{\ang{a}}$ なので等しい。
+
+**Step 5（直和）.** Step 3, 4 から $\ang{a}+H\supseteq\ang{a_{p}}+H_{p}=A_{p}$（すべての $p$）なので $\ang{a}+H=A$。また
+$$
+\abs{\ang{a}}\cdot\abs{H}=\prod_{p}\ord(a_{p})\cdot\prod_{p}\abs{H_{p}}=\prod_{p}\abs{A_{p}}=\abs{A}
+$$
+（$H=\bigoplus_{p}H_{p}$ は準素分解の部分なので $\abs{H}=\prod\abs{H_{p}}$）。可換群の部分群の和の位数の公式 $\abs{\ang{a}+H}=\abs{\ang{a}}\abs{H}/\abs{\ang{a}\cap H}$（\ref{grp:product-formula}）から $\ang{a}\cap H=\{0\}$。よって $A=\ang{a}\oplus H$。
+:::
+
+::: hypcheck
+- **位数が最大**：Step 1 で各成分の位数が最大であることを導くのに使った。外すと偽：$A=\Z/4$, $a=2$（\ref{grp:max-order-complement} の hypcheck と同じ例）。
+- **有限**：準素分解と位数の最大値の存在に使った。$\Q$ や $\Z[1/p]/\Z$ のように位数の最大値がない群もある（後者は有限位数の元だけからなる）。
+- 1 は「すべての元 $x$ で $nx=0$ となる最小の $n\ge 1$（英語で exponent）が元の位数の最大値に等しい」ことを意味し、可換性が要る：$S_{3}$ の元の位数は $1,2,3$ で最大値は $3$ だが、すべての元 $x$ で $x^{n}=e$ となる最小の $n$ は $6$。
+:::
+
+::: corollary 貪欲な手順による最短の分解 {#grp:greedy-decomposition keywords="greedy algorithm for invariant factor decomposition" index="貪欲な分解|どんよくなぶんかい"}
+有限アーベル群 $A$ で、位数最大の元 $a_{1}$ をとって $A=\ang{a_{1}}\oplus H_{1}$ と分け、$H_{1}$ で位数最大の元 $a_{2}$ をとって $H_{1}=\ang{a_{2}}\oplus H_{2}$ と分け、… と $H_{k}=\{0\}$ になるまで続けると、
+$$
+A=\ang{a_{1}}\oplus\ang{a_{2}}\oplus\cdots\oplus\ang{a_{k}},\qquad\ord(a_{k})\mid\cdots\mid\ord(a_{2})\mid\ord(a_{1})
+$$
+となり、これは単因子による表示（$k=s=d(A)$）である。
+:::
+
+::: proof
+**Step 1（停止と分解）.** 各段階で $\abs{H_{j}}=\abs{H_{j-1}}/\ord(a_{j})<\abs{H_{j-1}}$（$a_{j}\neq 0$）なので有限回で止まり、内部直和が得られる。
+
+**Step 2（整除）.** $a_{j+1}\in H_{j}\subseteq H_{j-1}$ で、$a_{j}$ は $H_{j-1}$ で位数最大なので、\ref{grp:max-order-summand.1} を $H_{j-1}$ に使って $\ord(a_{j+1})\mid\ord(a_{j})$（$H_{0}\defeq A$）。
+
+**Step 3（単因子）.** $\ord(a_{j})>1$ と整除の条件から、$(\ord(a_{k}),\dots,\ord(a_{1}))$ は単因子の条件をみたす列で、\ref{grp:invariant-factors} の一意性からそれが単因子である。項数は $s$ で、\ref{grp:shortest-cyclic-decomposition} より $s=d(A)$。
+:::
+
+## 部分群の生成元の個数 {#grp:sec-md-subgroups}
+
+::: theorem 部分群は元の群より多くの生成元を要しない {#grp:subgroup-min-generators keywords="subgroups of a finite abelian group need no more generators, d(B) <= d(A)" index="部分群の生成元の個数|ぶぶんぐんのせいせいげんのこすう"}
+有限アーベル群 $A$ の部分群 $B$ について $d(B)\le d(A)$ かつ $d(A/B)\le d(A)$。
+:::
+
+::: proof
+**Step 1（$p$ ランクの比較）.** $B[p]=B\cap A[p]\subseteq A[p]$ なので、\ref{grp:p-rank-count} より $p^{r_{p}(B)}=\abs{B[p]}\le\abs{A[p]}=p^{r_{p}(A)}$、すなわち $r_{p}(B)\le r_{p}(A)$。
+
+**Step 2（$d(B)$）.** $B=\{0\}$ なら $d(B)=0$。そうでなければ \ref{grp:shortest-cyclic-decomposition.1} を $B$ と $A$ に使って
+$$
+d(B)=\max_{p}r_{p}(B)\le\max_{p}r_{p}(A)=d(A).
+$$
+
+**Step 3（$d(A/B)$）.** \ref{grp:min-generators-basic.1}。
+:::
+
+::: hypcheck
+- **可換**：Step 1 の $A[p]$ が部分群であること（$x,y\in A[p]\Rightarrow p(x-y)=0$ には可換性が要る）と、$d=\max_{p}r_{p}$ に使った。非可換では偽：$S_{n}$ は $(1\ 2)$ と $(1\ 2\ \cdots\ n)$ で生成される（\ref{grp:sn-generators}）ので $d(S_{n})\le 2$ だが、\term[互いに素]{grp:cycle}な互換 $(1\ 2),(3\ 4),\dots$ が生成する部分群は $(\Z/2)^{m}$（$m=\lfloor n/2\rfloor$）と同型で、$d=m$（\ref{grp:shortest-cyclic-decomposition}）。$n\ge 6$ で $m\ge 3>2$。
+- **有限**：有限生成アーベル群でも $d(B)\le d(A)$ は成り立つ（$\Z^{k}\oplus T$ の部分群は $\Z^{k'}\oplus T'$（$k'\le k$）の形をとることを、\ref{mod:pid-structure} から示せる）。非可換な無限群では大きく崩れ、階数 $2$ の自由群の交換子部分群は、可算無限個の元で自由に生成される自由群である（標準的な事実で、証明は本サイトの範囲外。\ref{grp:nielsen-schreier} を参照）。
+:::
+
+::: example
+$A=\Z/4\oplus\Z/2$（$d(A)=2$）の部分群は、$\Z/4$, $\Z/2\oplus\Z/2$, $\Z/2$ と $\{0\}$, $A$ の型をもち、どれも $2$ 個以下の元で生成される。部分群の個数は、\ref{grp:subgroups-zm-zn} の公式で数えると $8$ である。
+:::
+
+::: supplement
+**巡回性の判定.** \ref{grp:shortest-cyclic-decomposition} から、有限アーベル群 $A$ が巡回群であることと、すべての素数 $p$ で $\abs{A[p]}\le p$（方程式 $px=0$ の解が $p$ 個以下）であることは同値である。これを使うと、体の乗法群の有限部分群が巡回群であること（\ref{fld:finite-multiplicative-cyclic}）がすぐに従う：多項式 $x^{p}-1$ の根は $p$ 個以下だからである（\ref{grp:prob-cyclic-criterion}）。
+
+**有限生成アーベル群・加群への一般化.** 単項イデアル整域 $R$ 上の有限生成加群 $M\cong R^{k}\oplus\bigoplus_{i=1}^{s}R/(d_{i})$（\ref{mod:pid-structure}）でも、同じ議論で、生成元の最小個数は $k+s$ に等しく、極大イデアル $\mathfrak{m}$ ごとの $\dim_{R/\mathfrak{m}}M/\mathfrak{m}M$ の最大値で与えられることが示せる。局所環上の有限生成加群では、生成元の最小個数が $\dim M/\mathfrak{m}M$ に一致することが中山の補題から従う（\tref{ring:nakayama}）。
+
+**高い視点.** $r_{p}(A)=\dim_{\F_{p}}(A\otimes\F_{p})$ で、$A\mapsto A\otimes\F_{p}$ は $\mathbf{Ab}$ から $\F_{p}$ 上のベクトル空間の圏への関手である。$d(A)$ を知るには、すべての「点」$p$ でのファイバーの次元を見て、その最大値をとればよい。これは可換環上の有限生成加群について、各素イデアルでのファイバーの次元を見る見方の、$\Z$ の場合にあたる。
+:::
+
+## 問題 {#grp:sec-md-problems}
+
+::: problem {#grp:prob-md-compute}
+$A=(\Z/2)^{3}\oplus\Z/3\oplus\Z/9$ の単因子、$d(A)$、巡回分解の項数のとりうる値を求めよ。
+:::
+
+::: solution
+初等因子は $2,2,2,3,9$（$r=5$）。$2$ の指数は $(1,1,1)$、$3$ の指数は大きい順に $(2,1)$。行ごとに掛けると $d_{3}=2\cdot 9=18$, $d_{2}=2\cdot 3=6$, $d_{1}=2$ で、$A\cong\Z/2\oplus\Z/6\oplus\Z/18$。$d(A)=s=3$（$=r_{2}$）。項数は $3,4,5$ のいずれもとりうる（\ref{grp:shortest-cyclic-decomposition.3}）。
+:::
+
+::: problem {#grp:prob-irredundant-generators}
+$n=p_{1}p_{2}\cdots p_{k}$（$p_{i}$ は相異なる素数）とする。$x_{i}\defeq n/p_{i}$（$i=1,\dots,k$）は $\Z/n$ を生成するが、どの $x_{j}$ を除いても生成しないことを示せ。（$d(\Z/n)=1$ なので、「減らせない生成系」の大きさは $d$ より大きくなりうる。）
+:::
+
+::: solution
+**生成する.** $\gcd(x_{1},\dots,x_{k})=1$（素数 $p_{j}$ は $x_{j}$ を割り切らない）なので、ベズーの等式（\ref{grp:bezout-euclid} を繰り返し使う）から $\sum c_{i}x_{i}=1$ となる整数 $c_{i}$ があり、$1$ が生成される。
+
+**除けない.** $x_{j}$ を除くと、残りの $x_{i}$（$i\neq j$）はすべて $p_{j}$ の倍数なので、それらの生成する部分群は $\ang{p_{j}}$（位数 $n/p_{j}<n$）に含まれる。
+:::
+
+::: problem {#grp:prob-cyclic-criterion}
+有限アーベル群 $A$ が巡回群であることと、すべての素数 $p$ で $\abs{A[p]}\le p$ であることが同値であることを示せ。これを使って、体 $K$ の乗法群 $K^{\times}$ の有限部分群が巡回群であることを示せ。
+:::
+
+::: solution
+**同値.** \ref{grp:p-rank-count} より $\abs{A[p]}=p^{r_{p}(A)}$ なので、条件は「すべての $p$ で $r_{p}(A)\le 1$」と同じ。\ref{grp:shortest-cyclic-decomposition.1} より、これは $d(A)\le 1$、すなわち $A$ が巡回群であることと同値（$A=\{0\}$ も巡回群）。
+
+**体の乗法群.** $A\le K^{\times}$ を有限部分群とする（乗法的に書く）。$A[p]=\{x\in A : x^{p}=1\}$ の元は多項式 $X^{p}-1\in K[X]$ の根で、体上の $0$ でない $p$ 次多項式の根は $p$ 個以下なので $\abs{A[p]}\le p$。前半より $A$ は巡回群。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

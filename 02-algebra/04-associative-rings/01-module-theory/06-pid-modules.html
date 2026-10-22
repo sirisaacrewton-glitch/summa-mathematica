@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PID 上の有限生成加群 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/04-associative-rings/01-module-theory/06-pid-modules.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# PID 上の有限生成加群 {#mod:page-pid-modules keywords="finitely generated modules over a PID, structure theorem, Smith normal form, invariant factors, elementary divisors, finitely generated abelian groups, Jordan normal form, torsion-free module"}
+
+単項イデアル整域（PID）$A$ 上の有限生成加群は、$A^{r}\oplus A/(d_{1})\oplus\dots\oplus A/(d_{t})$（$d_{1}\mid d_{2}\mid\dots\mid d_{t}$）という形に分解され、$r$ と $d_{i}$（同伴を除く）は加群だけで決まる（\ref{mod:pid-structure}, \ref{mod:pid-structure-unique}）。これが **PID 上の有限生成加群の構造定理**で、$A=\Z$ とすれば有限生成アーベル群の分類（\ref{mod:fg-abelian}）、$A=K[x]$ とすれば行列のジョルダン標準形（\ref{mod:jordan-normal-form}）が得られる。証明の鍵は、PID 上の行列を可逆な行列で左右から掛けて対角化する**スミス標準形**（\ref{mod:smith-normal-form}）である。\ref{grp:finite-abelian-structure}は群論だけで証明したが、このページの結果はそれを含み、群論のページで予告した有限生成の場合を回収する。
+
+> 雪江明彦『代数学 2』第 2 章 §2.12 の流れを参考にした。スミス標準形は、ユークリッド環でない PID でも通るよう、基本変形の代わりにベズーの等式から作る $2\times 2$ の可逆行列を使う形で書いた。
+
+## 記法と定義の確認 {#mod:sec-pm-notation}
+
+::: notation
+- このページでは $A$ を**単項イデアル整域**（\ref{ring:pid}）とする。PID は一意分解環で（\ref{ring:pid-ufd}）、最大公約元とベズーの等式がある（\ref{ring:pid-basic.1}）。
+- 加群・自由加群・階数の一意性・巡回加群・ねじれ部分加群は \ref{mod:module}, \ref{mod:free-module}, \ref{mod:rank-invariance}, \ref{mod:cyclic-module}, \ref{mod:prob-torsion-submodule}。ねじれ元全体を $T(M)$ と書き、$T(M)=0$ のとき $M$ は**ねじれがない**、$T(M)=M$ のとき**ねじれ加群**という。
+- $0$ でない $a\in A$ について、既約元分解に現れる既約元の個数（重複を込めて）を $\ell(a)$ と書く（単元なら $0$）。$\ell(ab)=\ell(a)+\ell(b)$ で、$a\mid b$, $b\nmid a$ なら $\ell(a)<\ell(b)$（\ref{ring:ufd-gcd.1} と一意性から）。
+- $A$ 係数の $m\times n$ 行列全体を $M_{m,n}(A)$、可逆な $n$ 次正方行列全体を $GL_{n}(A)$ と書く。$P\in M_{n}(A)$ が可逆 $\iff\det P\in A^{\times}$（余因子行列による。可換環上の行列式の性質は線形代数と同じ）。
+- **選択公理**：既約元分解の存在（\ref{ring:pid-ufd}）を通して従属選択公理を使う。それ以外は使わない。
+:::
+
+## 自由加群の部分加群 {#mod:sec-pm-submodules}
+
+::: theorem 自由加群の部分加群 {#mod:pid-submodule-free keywords="submodules of free modules over a PID are free" index="自由加群の部分加群|じゆうかぐんのぶぶんかぐん"}
+$A$ を PID とする。$A^{n}$ の部分加群は自由で、その階数は $n$ 以下である。
+:::
+
+::: proof
+$n$ の帰納法。$n=0$ は自明。$n\ge 1$ とし、$K\subset A^{n}$ を部分加群とする。
+
+**Step 1（最後の座標への射影）.** $\pi:A^{n}\to A$ を第 $n$ 成分への射影とする。$\pi(K)$ は $A$ のイデアルなので $\pi(K)=(c)$ と書ける。$K'\defeq K\cap\Ker\pi=K\cap(A^{n-1}\oplus 0)$ は $A^{n-1}$ の部分加群とみなせ、帰納法の仮定から自由で階数 $\le n-1$。
+
+**Step 2（$c=0$ の場合）.** $K=K'$ で、主張が成り立つ。
+
+**Step 3（$c\neq 0$ の場合）.** $\pi(k_{0})=c$ となる $k_{0}\in K$ をとる。$k\in K$ について $\pi(k)=ac$ と書くと $k-ak_{0}\in K'$ なので、$K=K'+Ak_{0}$。$K'\cap Ak_{0}=0$（$\pi(ak_{0})=ac=0$ なら $a=0$。整域）なので $K=K'\oplus Ak_{0}$ で、$Ak_{0}\cong A$（$a\mapsto ak_{0}$ は $\pi$ と合成して $a\mapsto ac$ が単射なので単射）。$K'$ の基底に $k_{0}$ を加えれば $K$ の基底で、階数 $\le n$。
+
+::: hypcheck
+- **前提「PID」**：Step 1 で $\pi(K)$ が単項であること、Step 3 で $a\mapsto ac$ が単射であること（整域）に使った。PID でないと偽：$\Z[x]$ のイデアル $(2,x)\subset\Z[x]$ は自由でない（\ref{mod:free-module} の後の例 4）。
+- **有限階数**：帰納法に使った。無限階数の自由加群の部分加群も自由だが、証明には整列定理（選択公理）による超限帰納法を使う。
+:::
+:::
+
+::: corollary 有限生成加群の部分加群 {#mod:pid-noetherian-modules keywords="submodules of finitely generated modules over a PID are finitely generated" index="有限生成加群の部分加群|ゆうげんせいせいかぐんのぶぶんかぐん"}
+PID 上の有限生成加群の部分加群は有限生成である。
+:::
+
+::: proof
+$M$ が $n$ 個の元で生成されるなら全射 $f:A^{n}\to M$ がある（\ref{mod:free-module-universal.3}）。部分加群 $N\subset M$ について $f^{-1}(N)\subset A^{n}$ は自由で階数 $\le n$（\ref{mod:pid-submodule-free}）なので、高々 $n$ 個の元で生成され、その像が $N$ を生成する。
+:::
+
+## スミス標準形 {#mod:sec-pm-smith}
+
+::: theorem スミス標準形 {#mod:smith-normal-form keywords="Smith normal form, diagonalization of matrices over a PID, invariant factors of a matrix" index="スミス標準形|すみすひょうじゅんけい, 単因子|たんいんし"}
+$A$ を PID、$X\in M_{m,n}(A)$ とする。$P\in GL_{m}(A)$, $Q\in GL_{n}(A)$ で
+$$
+PXQ=\begin{pmatrix}D&0\\0&0\end{pmatrix},\quad D=\operatorname{diag}(d_{1},\dots,d_{s}),
+$$
+$d_{i}\neq 0$, $d_{1}\mid d_{2}\mid\dots\mid d_{s}$ となるものがある。
+:::
+
+::: intuition
+左から可逆行列を掛けるのは行の取り替え（関係式の取り替え）、右から掛けるのは列の取り替え（基底の取り替え）にあたる。ユークリッド環なら「行の定数倍を他の行に足す」などの基本変形だけで対角化できるが、一般の PID では割り算ができないので、ベズーの等式 $d=ax+by$ を使って $(a,b)$ を $(d,0)$ に移す $2\times 2$ の可逆行列を使う。
+:::
+
+::: proof
+$X=0$ なら $s=0$ で終わり。$X\neq 0$ とし、$\ell$ を記法の欄の関数とする。
+
+**Step 1（ベズー変換）.** $a,b\in A$ が $0$ でないとき、$d=\gcd(a,b)=ax+by$ と書き（\ref{ring:pid-basic.1}）、$a=da'$, $b=db'$ とおくと $a'x+b'y=1$。行列
+$$
+B\defeq\begin{pmatrix}x&-b'\\y&a'\end{pmatrix},\qquad\det B=xa'+yb'=1
+$$
+は可逆で、$(a\ \ b)B=(ax+by\ \ -ab'+ba')=(d\ \ 0)$。この $B$ を第 $1$ 列と第 $j$ 列に作用させる（他の列は動かさない）$n$ 次正方行列も可逆である。行についても転置して同様。
+
+**Step 2（第 1 行・第 1 列の掃き出し）.** 行と列の入れ替え（置換行列は可逆）で、$0$ でない成分のうち $\ell$ が最小のものを $(1,1)$ 成分に移す。第 1 行のある $x_{1j}$ を $x_{11}$ が割り切らなければ、Step 1 の列変換で $(1,1)$ 成分を $\gcd(x_{11},x_{1j})$ に置き換えると、$\ell$ は真に減る（$\gcd\mid x_{11}$ で、$x_{11}\nmid\gcd$。そうでないと $x_{11}\mid x_{1j}$）。第 1 列についても行変換で同様。$\ell(x_{11})$ は非負整数なので、これは有限回で止まり、$x_{11}$ が第 1 行と第 1 列のすべての成分を割り切る状態になる。そこで、第 1 列の $x_{11}$ 倍を引く列変換と第 1 行の倍数を引く行変換（どちらも可逆）で、第 1 行と第 1 列の $(1,1)$ 以外の成分を $0$ にする。
+
+**Step 3（割り切りの条件）.** この状態で、残りの $(m-1)\times(n-1)$ 部分のある成分 $x_{ij}$ を $x_{11}$ が割り切らないなら、第 $i$ 行を第 1 行に足すと第 1 行に $x_{ij}$ が現れ、Step 2 に戻って $\ell(x_{11})$ が真に減る。これも有限回で止まり、$x_{11}$ が残りのすべての成分を割り切る状態で、行列は $\operatorname{diag}(x_{11})\oplus X'$ の形になる。
+
+**Step 4（帰納法）.** $X'$ に同じ操作を（$m,n$ についての帰納法で）施すと、$X'$ の行列は $\operatorname{diag}(d_{2},\dots,d_{s})\oplus 0$ に変形され、$x_{11}$ は $X'$ のすべての成分を割り切っていたので、可逆な変形の後の成分もすべて割り切る（成分は元の成分の $A$ 係数一次結合）。特に $d_{1}\defeq x_{11}\mid d_{2}$。各操作は可逆行列を左右から掛けることなので、積をとって $P,Q$ を得る。
+
+::: hypcheck
+- **前提「PID」**：Step 1 でベズーの等式を、Step 2・3 で $\ell$（UFD であること）を使った。$\Z[x]$ では偽：$1\times 2$ 行列 $(2\ \ x)$ は対角化できない（できたとすると $(2,x)$ が単項イデアル $(d_{1})$ になる。\ref{ring:ufd-not-pid}）。
+- **ユークリッド環なら**：Step 1 を「割り算の余りで置き換える」基本変形に替えられ、$\delta$ が減ることで停止する。$\Z$ や $K[x]$ での実際の計算はこちらが便利。
+:::
+:::
+
+::: example
+$\Z^{2}$ の部分加群 $K$ を $(2,4)$ と $(6,8)$ で生成されるものとし、これを行とする行列 $X=\begin{pmatrix}2&4\\6&8\end{pmatrix}$ を考える。第 2 行から第 1 行の 3 倍を引くと $\begin{pmatrix}2&4\\0&-4\end{pmatrix}$、第 2 列から第 1 列の 2 倍を引くと $\begin{pmatrix}2&0\\0&-4\end{pmatrix}$、第 2 行を $-1$ 倍して $\operatorname{diag}(2,4)$。したがって $\Z^{2}/K\cong\Z/2\Z\oplus\Z/4\Z$（下の \ref{mod:pid-structure} の証明のとおり）。
+:::
+
+## スミス標準形の計算可能性（発展） {#mod:sec-pm-computability}
+
+スミス標準形の証明は、そのまま行列を変形する手順になっている。この節では、その手順がどの程度「計算できる」か（原始再帰的か、一般の計算可能関数か）を、証明の概略だけで述べる。原始再帰関数は \ref{comp:primitive-recursive}、for プログラムとの一致は \ref{comp:pr-equals-for} を参照。
+
+::: definition 環の表示 {#mod:ring-presentation keywords="computable ring, presentation of a ring by natural numbers, primitive recursive ring" index="計算可能な環|けいさんかのうなかん, 環の表示|かんのひょうじ"}
+環 $A$ の**表示**とは、自然数の部分集合 $C$（元の**コード**の集合）から $A$ への全射 $c\mapsto[c]$ のことをいう。$C$ が決定可能で、$+,-,\times$ に対応する $C$ 上の関数と、関係「$[c]=[c']$」が計算可能なとき**計算可能な表示**、これらがすべて原始再帰的なとき**原始再帰的な表示**という。行列はコードの組として扱う。
+:::
+
+::: remark 計算の難しさは表示で決まる
+「スミス標準形が原始再帰的に計算できるか」は、環 $A$ だけでは決まらず、表示と、どの演算（特に割り算）が原始再帰的かで決まる。下の例 \ref{mod:smith-not-pr-example} はユークリッド環（体）でさえ、割り算が原始再帰的でない表示では原始再帰的に計算できないことを示す。したがって境目は「ユークリッド環か PID か」ではなく、「割り算（またはベズーの係数）が原始再帰的な上限つきで求まるか」である。
+:::
+
+::: proposition ユークリッド環での計算 {#mod:smith-pr-euclidean keywords="Smith normal form over a Euclidean domain is primitive recursive" index="スミス標準形の原始再帰性|すみすひょうじゅんけいのげんしさいきせい"}
+ユークリッド環 $A$ の原始再帰的な表示で、余りつきの割り算 $(a,b)\mapsto(q,r)$（$a=qb+r$、$r=0$ または $\delta(r)<\delta(b)$）とユークリッド関数 $\delta$ も原始再帰的とする。このとき $X\mapsto(P,D,Q)$（$PXQ=D$ はスミス標準形）を計算する原始再帰関数がある。
+:::
+
+::: proof
+（概略）\ref{mod:smith-normal-form} の hypcheck の「ユークリッド環なら」の版を使う：$0$ でない成分のうち $\delta$ が最小のものを $(1,1)$ に移し、第 1 行・第 1 列の各成分をそれで割った余りに置き換える。余りが $0$ でない成分があれば、それを新しい $(1,1)$ 成分にして繰り返す。第 1 行・第 1 列が片付いた後、残りの成分 $x_{ij}$ を $x_{11}$ が割り切らなければ、第 $i$ 行を第 1 行に足して同じことを繰り返す。
+- やり直しのたびに $\delta(x_{11})$ は真に減るので、一つの段階でのやり直しの回数は、その段階に入るときの $\delta(x_{11})$ 以下。これは段階に入る前に原始再帰的に計算できる。
+- 一回のやり直しは、行列の大きさで決まる回数（$m+n$ 回程度）の割り算と、決まった回数（$mn$ 回程度）の割り切りの判定（余りが $0$ か）からなる。
+- 段階の数は $\min(m,n)$ 以下。
+
+ループの回数がすべて「ループに入る前に原始再帰的に計算できる値」で抑えられるので、手順全体は for プログラムで書け（打ち切りは条件分岐で行う）、\ref{comp:pr-equals-for} から原始再帰的である。$P,Q$ は行った基本変形の積として同時に計算できる。
+:::
+
+::: remark 具体的な環での計算量
+- $\Z$（$\delta=\lvert\cdot\rvert$）や $\mathbb{F}_{p}[x]$, $\Q[x]$（$\delta=\deg$）の通常の表示は上の仮定をみたす。
+- 上の素朴な手順では途中の成分の桁数が指数的に増えることがあるが、それでも原始再帰的である。$\Z$ 上では、成分の大きさを抑える工夫をしたスミス標準形の多項式時間アルゴリズムが知られている（カナンとバッケム、1979 年。本サイト未収録）。多項式時間の意味は \ref{comp:class-p}。
+- $\Z$ でのユークリッドの互除法自体は、割り算の回数が小さい方の数の桁数の定数倍以下（ラメの定理）で、多項式時間である（未収録）。
+:::
+
+::: proposition 計算可能な PID での計算 {#mod:smith-computable-pid keywords="Smith normal form over a computable PID is computable by unbounded search" index="計算可能な PID|けいさんかのうなぴーあいでぃー"}
+PID $A$ の計算可能な表示があれば、$X\mapsto(P,D,Q)$ を計算するアルゴリズムがある（一般の計算可能関数。原始再帰的とは限らない）。
+:::
+
+::: proof
+（概略）$X$ を入力とし、コードの組 $(P,P',Q,Q',D,c_{1},\dots,c_{s-1})$ をすべて順に調べ、
+$$
+PP'=E,\quad QQ'=E,\quad PXQ=D,\quad D\text{ は対角で }d_{i+1}=d_{i}c_{i}
+$$
+が成り立つ最初のものを出力する。各条件の確認は環の演算と等号の判定だけで済むので計算可能。\ref{mod:smith-normal-form} から条件をみたす組は存在するので、この探索は必ず止まる。ただし止まるまでの回数に原始再帰的な上限があるとは限らない（無制限の探索、すなわち while ループや $\mu$ 作用素を使う）。
+:::
+
+::: example 原始再帰的に計算できない表示 {#mod:smith-not-pr-example keywords="a primitive recursive presentation of Q in which division is not primitive recursive" index="原始再帰的でない割り算|げんしさいきてきでないわりざん"}
+（このサイトでの構成。文献で確かめた例ではない。）$s(p)$ を、アッカーマン関数の対角 $A(p,p)$（\ref{comp:ackermann}）を計算するプログラム（\ref{comp:ackermann-computable}）が止まるまでのステップ数とする。言語 L の基本命令は変数の値の最大値を 1 ステップに高々 $1$ しか増やさないので $s(p)\ge A(p,p)-p$ で、$s$ はどの原始再帰関数よりも最終的に大きい（\ref{comp:ackermann-not-pr.1} を $g(n)+n$ に使い、$A$ の単調性 \ref{comp:ackermann-growth} と合わせる）。「$m$ ステップ以内に止まる」かどうかは、$m$ ステップだけ模倣すればわかるので原始再帰的に決定できる。
+
+$\Q$ の元 $a/b$ を、コード $(a,b,m)$（$a\in\Z$, $b\ge1$）で表す。ただし、$b$ を割り切るすべての素数 $p$ について「$s(p)\le m$」（プログラムが $m$ ステップ以内に止まる）が成り立つものだけを正しいコードとする。
+- 正しいコードかどうかは、$b$ を素因数分解し、各 $p$ についてプログラムを $m$ ステップだけ動かせばわかるので原始再帰的に決定できる。
+- 和・積は $(a,b,m)(a',b',m')=(aa',bb',\max(m,m'))$ などで原始再帰的。等号 $ab'=a'b$ も原始再帰的。各素数 $p$ で $s(p)$ は有限なので、すべての有理数にコードがある。
+
+この表示で $1/p$ を表すコード $(a,b,m)$ は $p\mid b$ をみたすので $m\ge s(p)$。したがって逆元 $p\mapsto1/p$ は原始再帰的でない（原始再帰関数の値のコードは入力の原始再帰関数で抑えられるが、$s(p)$ はそうでない）。体 $\Q$ はユークリッド環だが、この表示では余りつきの割り算が原始再帰的でなく、$1\times1$ 行列 $(p)$ を対角成分 $1$ に正規化したスミス標準形 $P(p)Q=(1)$ の変換行列も原始再帰的に求められない（$PQ=1/p$ なので $P,Q$ の一方の分母が $p$ で割り切れる）。一方、単元倍の正規化を要求しなければ、$(p)$ 自身がスミス標準形であり、体上では分数を使わない掃き出し（行に $0$ でない元を掛けて引く）で対角化できるので、原始再帰的に計算できる。
+:::
+
+::: remark PID でユークリッド環でない場合
+ユークリッド環でない PID（\ref{ring:pid-not-euclidean-fact} の $\Z[(1+\sqrt{-19})/2]$ など）で、自然な表示のもとでスミス標準形が原始再帰的に計算できない例を、本サイトは確かな文献で確認できていない。整数論で現れる PID では、イデアルの生成元を求める問題（単項イデアル問題）が計算量の上で難しくなりうることは知られているが（未収録）、それは原始再帰的かどうかよりずっと細かい（多項式時間かどうかの）問題である。
+:::
+
+## 構造定理 {#mod:sec-pm-structure}
+
+::: theorem 構造定理（存在） {#mod:pid-structure keywords="structure theorem for finitely generated modules over a PID, invariant factor decomposition, elementary divisor decomposition" index="構造定理|こうぞうていり, 単因子分解|たんいんしぶんかい, 初等因子|しょとういんし"}
+$A$ を PID、$M$ を有限生成 $A$ 加群とする。
+1. （単因子形）$0$ でも単元でもない $d_{1}\mid d_{2}\mid\dots\mid d_{t}$ と $r\ge 0$ があって
+$$
+M\cong A^{r}\oplus A/(d_{1})\oplus\dots\oplus A/(d_{t}).
+$$
+2. （素因子形）既約元 $p_{1},\dots,p_{k}$（重複を許す）と $e_{i}\ge 1$ があって
+$$
+M\cong A^{r}\oplus A/(p_{1}^{e_{1}})\oplus\dots\oplus A/(p_{k}^{e_{k}}).
+$$
+:::
+
+::: proof
+**Step 1（関係行列）.** 全射 $f:A^{n}\to M$ をとる。$K=\Ker f$ は $A^{n}$ の部分加群なので自由で、基底 $k_{1},\dots,k_{m}$（$m\le n$）をもつ（\ref{mod:pid-submodule-free}）。$k_{i}$ を標準基底で表した成分を第 $i$ 行とする行列 $X\in M_{m,n}(A)$ をとる。
+
+**Step 2（基底の取り替え）.** スミス標準形（\ref{mod:smith-normal-form}）で $PXQ=\operatorname{diag}(d_{1},\dots,d_{s})\oplus 0$ とする。$Q^{-1}$ の行を $e'_{1},\dots,e'_{n}$ とすると、これは $A^{n}$ の基底で（$Q^{-1}$ は可逆）、$PX$ の第 $i$ 行 $=\sum_{j}(PXQ)_{ij}e'_{j}$ なので、$K$ の生成系 $PX$ の行（$P$ は可逆なので $K$ の基底）は $d_{1}e'_{1},\dots,d_{s}e'_{s}$（と $0$）である。よって
+$$
+M\cong A^{n}/K=\bigoplus_{i=1}^{n}Ae'_{i}\Big/\bigoplus_{i=1}^{s}Ad_{i}e'_{i}\cong\bigoplus_{i=1}^{s}A/(d_{i})\oplus A^{n-s}.
+$$
+（最後の同型は、直和の成分ごとの準同型 $Ae'_{i}\to A/(d_{i})$ の直和が全射で、核がちょうど $\bigoplus Ad_{i}e'_{i}$ であることから。）
+
+**Step 3（単元の除去）.** $d_{i}$ が単元なら $A/(d_{i})=0$ なので省く。残った $d_{i}$ について 1 を得る（割り切りの関係は保たれる）。
+
+**Step 4（2）.** $d=u\prod_{j}q_{j}^{f_{j}}$（$q_{j}$ は互いに同伴でない既約元）と分解すると、$(q_{j}^{f_{j}})$ はどの二つも互いに素（$\gcd=1$ なのでベズーの等式から和が $A$）。\ref{ring:chinese-remainder}から $A/(d)\cong\bigoplus_{j}A/(q_{j}^{f_{j}})$（環として、したがって加群として）。これを各 $d_{i}$ に使う。
+:::
+
+::: theorem 構造定理（一意性） {#mod:pid-structure-unique keywords="uniqueness of invariant factors and elementary divisors, rank of a finitely generated module" index="構造定理の一意性|こうぞうていりのいちいせい"}
+\ref{mod:pid-structure.1} で、$r$ と、$d_{1},\dots,d_{t}$（同伴を除く）は $M$ だけで決まる。2 で、$r$ と、既約元の冪 $p_{i}^{e_{i}}$ の組（同伴と順序を除く）も $M$ だけで決まる。$r$ を $M$ の**階数**、$d_{i}$ を**単因子**、$p_{i}^{e_{i}}$ を**初等因子**という。
+:::
+
+::: proof
+**Step 1（ねじれ部分と階数）.** $N\defeq A/(d_{1})\oplus\dots\oplus A/(d_{t})$ について $T(A^{r}\oplus N)=N$（$A^{r}$ はねじれがなく、$N$ は $d_{t}$ で消える）。よって $T(M)\cong N$, $M/T(M)\cong A^{r}$ で、階数の一意性（\ref{mod:rank-invariance}）から $r$ は $M$ で決まる。以下 $T(M)$ だけを見る。
+
+**Step 2（素因子形の重複度）.** 既約元 $p$ と $k\ge 1$ について、$V_{p,k}\defeq p^{k-1}T/p^{k}T$ は $A/(p)$（体。\ref{ring:pid-basic.2}）上のベクトル空間である。直和成分ごとに計算すると：
+- $q$ が $p$ と同伴でない既約元なら、$p$ は $A/(q^{e})$ で単元（$\gcd(p,q^{e})=1$）なので $p^{j}(A/(q^{e}))=A/(q^{e})$ で、寄与は $0$。
+- $A/(p^{e})$ では $p^{j}(A/(p^{e}))=(p^{j})/(p^{e})$（$j\le e$）、$=0$（$j\ge e$）。$k\le e$ なら $(p^{k-1})/(p^{k})\cong A/(p)$（$a\mapsto p^{k-1}a$ が全射 $A\to(p^{k-1})/(p^{k})$ で核は $(p)$）、$k>e$ なら $0$。
+
+よって $\dim_{A/(p)}V_{p,k}$ は「$p$ と同伴な初等因子 $p^{e}$ で $e\ge k$ のものの個数」に等しい。左辺は $T(M)$ だけで決まるので、各 $p$ と $e$ について $p^{e}$ の個数が決まる。
+
+**Step 3（単因子）.** 単因子 $d_{1}\mid\dots\mid d_{t}$ から初等因子は $d_{i}$ の素因子冪の全体として得られ、逆に初等因子から、各 $p$ の指数を大きい順に $d_{t},d_{t-1},\dots$ に割り振ることで単因子が復元される（$d_{1}\mid\dots\mid d_{t}$ の条件から割り振り方は一通り）。Step 2 から単因子も $M$ で決まる。
+
+::: hypcheck
+- **ベクトル空間の次元の一意性**：Step 2 で使った（\ref{mod:vector-space-dimension}。有限次元なので選択公理は要らない）。
+:::
+:::
+
+::: corollary ねじれのない有限生成加群 {#mod:pid-torsion-free-free keywords="finitely generated torsion-free modules over a PID are free" index="ねじれのない加群|ねじれのないかぐん"}
+PID 上の有限生成でねじれのない加群は自由である。$M$ が有限生成なら $M\cong A^{r}\oplus T(M)$ で、$T(M)$ は有限生成なねじれ加群。
+:::
+
+::: proof
+構造定理（\ref{mod:pid-structure.1}）で $N=T(M)$（一意性の証明の Step 1）なので、ねじれがなければ $N=0$。後半も同じ。
+
+::: hypcheck
+- **有限生成**：構造定理の前提。外すと偽：$\Q$ はねじれのない $\Z$ 加群だが自由でない（\ref{mod:free-module} の後の例 3）。
+:::
+:::
+
+::: corollary 有限生成アーベル群の基本定理 {#mod:fg-abelian keywords="fundamental theorem of finitely generated abelian groups" index="有限生成アーベル群の基本定理|ゆうげんせいせいあーべるぐんのきほんていり" refname="有限生成アーベル群の基本定理"}
+有限生成アーベル群 $G$ は、ただ一組の $r\ge 0$ と $d_{1}\mid d_{2}\mid\dots\mid d_{t}$（$d_{i}\ge 2$）によって
+$$
+G\cong\Z^{r}\oplus\Z/d_{1}\Z\oplus\dots\oplus\Z/d_{t}\Z
+$$
+と書ける。$G$ が有限であることと $r=0$ は同値で、そのとき \ref{grp:invariant-factors} の単因子と一致する。
+:::
+
+::: proof
+$\Z$ は PID（\ref{ring:euclidean-examples}）で、$\Z$ の単元は $\pm1$、正の生成元を選べば同伴を除く曖昧さがなくなる。構造定理（\ref{mod:pid-structure}, \ref{mod:pid-structure-unique}）を適用する。有限 $\iff$ $\Z^{r}$ の部分がない。群論での単因子（\ref{grp:invariant-factors}）も同じ条件 $d_{1}\mid\dots\mid d_{t}$ で特徴付けられ、一意性から一致する。
+:::
+
+## ジョルダン標準形 {#mod:sec-pm-jordan}
+
+::: corollary ジョルダン標準形 {#mod:jordan-normal-form keywords="Jordan normal form, Jordan canonical form, rational canonical form" index="ジョルダン標準形|じょるだんひょうじゅんけい, 有理標準形|ゆうりひょうじゅんけい"}
+$K$ を代数閉体、$V$ を有限次元 $K$ ベクトル空間、$T:V\to V$ を線形写像とする。$V$ の基底をうまくとると、$T$ の表現行列はジョルダン細胞
+$$
+J_{e}(\lambda)\defeq\begin{pmatrix}\lambda&1&&\\&\lambda&\ddots&\\&&\ddots&1\\&&&\lambda\end{pmatrix}\quad(e\times e)
+$$
+の直和になり、細胞の組 $\{(\lambda,e)\}$ は順序を除いて $T$ で決まる。
+:::
+
+::: proof
+**Step 1（$K[x]$ 加群）.** $V$ を $f\cdot v=f(T)v$ で $K[x]$ 加群とみる（\ref{mod:module-examples.6}）。$V$ は $K$ 上有限生成なので $K[x]$ 上も有限生成で、$\dim V<\infty$ から $1,T,T^{2},\dots$ は一次従属なので、$0$ でない多項式で $V$ が消える：ねじれ加群。$K[x]$ は PID（\ref{ring:euclidean-examples}）。
+
+**Step 2（素因子形）.** 代数閉体上の既約多項式は一次式 $x-\lambda$ なので、構造定理の 2 から $V\cong\bigoplus_{i}K[x]/((x-\lambda_{i})^{e_{i}})$（$r=0$）。
+
+**Step 3（一つの成分の基底）.** $W=K[x]/((x-\lambda)^{e})$ で $v_{j}\defeq(x-\lambda)^{e-j}$ の類（$j=1,\dots,e$）は $K$ 上の基底である（$1,(x-\lambda),\dots,(x-\lambda)^{e-1}$ の類が基底：$(x-\lambda)^{e}$ で割った余りは次数 $<e$）。$x$ の作用は $xv_{j}=\lambda v_{j}+(x-\lambda)v_{j}=\lambda v_{j}+v_{j-1}$（$v_{0}\defeq 0$）なので、表現行列は $J_{e}(\lambda)$。
+
+**Step 4（一意性）.** 二つの基底に関する表示は $K[x]$ 加群の同型を与え（\ref{mod:prob-k-x-modules}）、初等因子 $(x-\lambda)^{e}$ の一意性（\ref{mod:pid-structure-unique}）から細胞の組が決まる。
+
+::: hypcheck
+- **前提「代数閉体」**：Step 2 で既約多項式が一次式であることに使った。一般の体では、単因子形から**有理標準形**（各 $K[x]/(d_{i})$ に同伴行列を対応させる）が得られる。
+:::
+:::
+
+::: supplement
+**高い視点.** 構造定理は「有限生成 $A$ 加群の同型類」が「$r$ と単因子の列」という組合せ的なデータで完全に分類されることを述べている。$A=\Z$ では有限生成アーベル群の分類、$A=K[x]$ では行列の相似類の分類（\ref{mod:prob-k-x-modules}）になり、同じ定理が二つの古典的な分類問題を同時に解く。証明の要点は、自由加群の部分加群が自由であること（\ref{mod:pid-submodule-free}。PID の大域次元が $1$ 以下であること、\ref{ha:pd-z} の一般化）と、行列の対角化である。デデキント整域上では有限生成ねじれなし加群は射影的（自由とは限らない）で、イデアル類群が障害になる（\ref{ring:page-dedekind}）。
+:::
+
+## 問題 {#mod:sec-pm-problems}
+
+::: problem {#mod:prob-abelian-group-classification}
+$\Z^{3}$ の部分群 $K$ が $(1,2,3)$, $(2,4,6)$, $(3,6,12)$ で生成されるとき、$\Z^{3}/K$ を構造定理の形に書け。
+:::
+
+::: solution
+行列 $\begin{pmatrix}1&2&3\\2&4&6\\3&6&12\end{pmatrix}$ を変形する。第 2 行 $-2\times$ 第 1 行、第 3 行 $-3\times$ 第 1 行で $\begin{pmatrix}1&2&3\\0&0&0\\0&0&3\end{pmatrix}$。第 2 列 $-2\times$ 第 1 列、第 3 列 $-3\times$ 第 1 列で $\begin{pmatrix}1&0&0\\0&0&0\\0&0&3\end{pmatrix}$。第 2 行と第 3 行、第 2 列と第 3 列を入れ替えて $\operatorname{diag}(1,3)\oplus 0$。よって $\Z^{3}/K\cong\Z/1\Z\oplus\Z/3\Z\oplus\Z\cong\Z\oplus\Z/3\Z$。
+:::
+
+::: problem {#mod:prob-subgroup-z2-index}
+$\Z^{2}$ の部分群 $K$ で $\Z^{2}/K$ が有限なものについて、$\abs{\Z^{2}/K}=\abs{\det X}$（$X$ は $K$ の基底を行とする $2\times 2$ 行列）を示せ。
+:::
+
+::: solution
+$\Z^{2}/K$ が有限なので構造定理で $r=0$、すなわち $K$ の階数は $2$ で $X$ は $2\times 2$。$PXQ=\operatorname{diag}(d_{1},d_{2})$ で $P,Q\in GL_{2}(\Z)$ なので $\det P,\det Q=\pm1$ で、$\abs{\det X}=\abs{d_{1}d_{2}}$。一方 $\Z^{2}/K\cong\Z/d_{1}\oplus\Z/d_{2}$（\ref{mod:pid-structure} の証明の Step 2）の位数は $\abs{d_{1}d_{2}}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

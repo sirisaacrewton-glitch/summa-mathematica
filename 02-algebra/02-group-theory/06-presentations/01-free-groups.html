@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自由群 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/02-group-theory/06-presentations/01-free-groups.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 自由群 {#grp:page-free-groups keywords="free group, reduced word, universal property of free groups, van der Waerden's trick, rank of a free group, every group is a quotient of a free group"}
+
+集合 $X$ の元を「何の関係もなく」掛け合わせてできる群が、$X$ 上の**自由群** $F(X)$ である（\ref{grp:free-group}）。その元は、$X$ の元とその形式的な逆元を並べ、隣り合う $x\,x^{-1}$ を消しきった語（**簡約語**）で表される。このページでは、簡約語の集合を自分自身に作用させる方法で $F(X)$ が群になることを証明し（結合法則の確認を避けられる）、**普遍性**——$X$ から群 $H$ への任意の写像が $F(X)\to H$ の準同型にただ一通りに延びること——を示す（\ref{grp:free-group-universal}）。系として、任意の群は自由群の剰余群になり（\ref{grp:quotient-of-free}）、有限集合上の自由群の生成元の個数（階数）は群で決まる（\ref{grp:free-rank}）。
+
+> 簡約語の集合への作用で自由群を構成する方法は、ファン・デル・ヴェルデンの方法として知られている。雪江明彦『代数学 1 群論入門』第 4 章 §4.6 は語の同値類として自由群を定義している。
+
+## 記法と定義の確認 {#grp:sec-fg-notation}
+
+::: notation
+- 群・生成された部分群・語は \ref{grp:group}, \ref{grp:generated-subgroup}, \ref{grp:generated-subgroup-words}。対称群 $\Sym(R)$ は \ref{grp:symmetric-group}。準同型・同型・生成元で決まること・第一同型定理は \ref{grp:homomorphism}, \ref{grp:homomorphism-basic}, \ref{grp:first-isomorphism}。可換化は \ref{grp:commutator-subgroup}, \ref{grp:abelianization-universal}。
+- 集合 $X$ に対し、$X$ と交わらない集合 $X^{-1}=\{x^{-1} : x\in X\}$（形式的な記号。$x\mapsto x^{-1}$ は全単射）を用意し、$X^{\pm}\defeq X\cup X^{-1}$ の元を**文字**という。文字 $\ell$ について、$\ell=x$ なら $\ell^{-1}\defeq x^{-1}$、$\ell=x^{-1}$ なら $\ell^{-1}\defeq x$ とおく（$(\ell^{-1})^{-1}=\ell$）。
+- 文字の有限列 $w=\ell_{1}\ell_{2}\cdots\ell_{n}$（$n\ge 0$）を**語**、$n$ をその**長さ**という。長さ $0$ の語を $\varepsilon$ と書く。語の連結を $uv$ と書く。
+- $\ZFC$ の中で議論する。選択公理は使わない。
+:::
+
+## 簡約語と自由群 {#grp:sec-fg-construction}
+
+::: definition 簡約語 {#grp:reduced-word keywords="reduced word, freely reduced" index="簡約語|かんやくご"}
+語 $\ell_{1}\cdots\ell_{n}$ が、どの $i$ についても $\ell_{i+1}\neq\ell_{i}^{-1}$ をみたすとき**簡約語**という。簡約語全体の集合を $R(X)$ と書く。語から隣り合う $\ell\,\ell^{-1}$ を一つ取り除く操作を**簡約**という。
+:::
+
+::: lemma 文字の作用 {#grp:letter-action keywords="van der Waerden's trick" index="ファン・デル・ヴェルデンの方法|ふぁんでるう゛ぇるでんのほうほう"}
+文字 $\ell$ に対し、$\sigma_{\ell}:R(X)\to R(X)$ を
+$$
+\sigma_{\ell}(w)\defeq\begin{cases}w' & (w=\ell^{-1}w'\text{ のとき}),\\ \ell w & (\text{それ以外}),\end{cases}
+$$
+で定める（$w$ が $\ell^{-1}$ で始まればそれを消し、そうでなければ先頭に $\ell$ を付ける）。$\sigma_{\ell}$ は $R(X)$ の置換で、$\sigma_{\ell^{-1}}=\sigma_{\ell}^{-1}$。
+:::
+
+::: proof
+**Step 1（値は簡約語）.** $w=\ell^{-1}w'$ なら $w'$ は簡約語の末尾部分なので簡約語。そうでないとき、$w$ は $\ell^{-1}$ で始まらないので、$\ell w$ の先頭の二文字は $\ell\,m$（$m\neq\ell^{-1}$）または $w=\varepsilon$ で、$\ell w$ は簡約語。
+
+**Step 2（$\sigma_{\ell^{-1}}\sigma_{\ell}=\id$）.** $w$ が $\ell^{-1}$ で始まる場合：$w=\ell^{-1}w'$ で $\sigma_{\ell}(w)=w'$。$w$ は簡約なので $w'$ は $(\ell^{-1})^{-1}=\ell$ で始まらない。よって $\sigma_{\ell^{-1}}(w')=\ell^{-1}w'=w$。始まらない場合：$\sigma_{\ell}(w)=\ell w$ は $\ell=(\ell^{-1})^{-1}$ で始まるので $\sigma_{\ell^{-1}}(\ell w)=w$。
+
+**Step 3.** Step 2 を $\ell^{-1}$ に使うと $\sigma_{\ell}\sigma_{\ell^{-1}}=\id$。よって $\sigma_{\ell}$ は全単射で、逆写像は $\sigma_{\ell^{-1}}$。
+:::
+
+::: theorem 自由群の構成 {#grp:free-group keywords="free group on a set, construction by reduced words" index="自由群|じゆうぐん"}
+$G\defeq\ang{\{\sigma_{x} : x\in X\}}\le\Sym(R(X))$ とし、$\varepsilon:G\to R(X)$ を $\varepsilon(g)\defeq g(\varepsilon)$（空語 $\varepsilon$ の行き先）とする。
+1. $\varepsilon$ は全単射で、簡約語 $u=\ell_{1}\cdots\ell_{n}$ に対応する元は $\sigma_{u}\defeq\sigma_{\ell_{1}}\circ\cdots\circ\sigma_{\ell_{n}}$。
+2. $R(X)$ に $u\ast v\defeq\varepsilon(\sigma_{u}\sigma_{v})=\sigma_{u}(v)$ で演算を入れると、$\varepsilon$ は群の同型になり、$R(X)$ は群になる。
+
+この群を $X$ 上の**自由群**といい $F(X)$ と書く。単位元は $\varepsilon$、$u=\ell_{1}\cdots\ell_{n}$ の逆元は $\ell_{n}^{-1}\cdots\ell_{1}^{-1}$。$x\in X$ を長さ $1$ の語 $x$ と同一視する。
+:::
+
+::: proof
+**Step 1（$\sigma_{u}(\varepsilon)=u$）.** 簡約語 $u=\ell_{1}\cdots\ell_{n}$ について、$\sigma_{\ell_{k}}\circ\cdots\circ\sigma_{\ell_{n}}(\varepsilon)=\ell_{k}\cdots\ell_{n}$ を $k=n,n-1,\dots,1$ の順に示す。$k=n$：$\sigma_{\ell_{n}}(\varepsilon)=\ell_{n}$。$k+1$ で成り立てば、$\ell_{k+1}\cdots\ell_{n}$ は $\ell_{k}^{-1}$ で始まらない（$u$ が簡約なので $\ell_{k+1}\neq\ell_{k}^{-1}$）ので、$\sigma_{\ell_{k}}$ は先頭に $\ell_{k}$ を付け、$\ell_{k}\cdots\ell_{n}$。
+
+**Step 2（$G$ の元は $\sigma_{u}$ の形）.** $\sigma_{x^{-1}}=\sigma_{x}^{-1}$（\ref{grp:letter-action}）なので、$G$ の元は文字の作用の有限個の合成 $\sigma_{w}\defeq\sigma_{m_{1}}\circ\cdots\circ\sigma_{m_{k}}$（$w=m_{1}\cdots m_{k}$ は語）として書ける（\ref{grp:generated-subgroup-words}）。$w$ が簡約語でなければ、隣り合う $m_{i}m_{i+1}=\ell\,\ell^{-1}$ を消しても $\sigma_{\ell}\sigma_{\ell^{-1}}=\id$ なので $\sigma_{w}$ は変わらない。簡約するたびに長さが $2$ 減るので、有限回で簡約語 $u$ に達し、$\sigma_{w}=\sigma_{u}$。
+
+**Step 3（1）.** 全射：簡約語 $u$ について $\sigma_{u}\in G$ で $\varepsilon(\sigma_{u})=u$（Step 1）。単射：$g\in G$ は Step 2 より $g=\sigma_{u}$（$u$ 簡約）と書け、$\varepsilon(g)=u$ なので $g=\sigma_{\varepsilon(g)}$。$\varepsilon(g)=\varepsilon(g')$ なら $g=g'$。
+
+**Step 4（2）.** $\varepsilon$ が全単射なので、$G$ の演算を $\varepsilon$ で $R(X)$ に移した $u\ast v\defeq\varepsilon(\varepsilon^{-1}(u)\varepsilon^{-1}(v))=\varepsilon(\sigma_{u}\sigma_{v})=\sigma_{u}(\sigma_{v}(\varepsilon))=\sigma_{u}(v)$ で $R(X)$ は群になり、$\varepsilon$ は同型（群の公理と準同型性は $G$ から移る）。単位元は $\varepsilon(\id)=\varepsilon$。$u=\ell_{1}\cdots\ell_{n}$ の逆元は $\varepsilon(\sigma_{u}^{-1})=\varepsilon(\sigma_{\ell_{n}^{-1}}\circ\cdots\circ\sigma_{\ell_{1}^{-1}})$ で、語 $\ell_{n}^{-1}\cdots\ell_{1}^{-1}$ は簡約（$\ell_{i}^{-1}$ の次が $\ell_{i-1}^{-1}$ で、$\ell_{i-1}^{-1}=(\ell_{i}^{-1})^{-1}=\ell_{i}$ は $u$ の簡約性に反する）なので、Step 1 よりそれ自身。
+
+::: hypcheck
+- 結合法則は $\Sym(R(X))$ の結合法則（写像の合成）から来ている。語の操作で直接結合法則を示すと、簡約の結果が簡約の順序によらないこと（の場合分け）が必要になる。それを避けるのがこの方法の要点である。
+- 選択公理は使っていない（$X^{-1}$ は例えば $X\times\{1\}$ として作れ、$X$ は $X\times\{0\}$ と同一視すればよい）。
+:::
+:::
+
+::: lemma 積は連結の簡約 {#grp:product-is-reduction}
+$u,v\in F(X)$ について、$u\ast v$ は連結 $uv$ から簡約を何回か行って得られる簡約語である。
+:::
+
+::: proof
+$u=\ell_{1}\cdots\ell_{n}$ とすると $u\ast v=\sigma_{\ell_{1}}(\cdots\sigma_{\ell_{n}}(v)\cdots)$。各 $\sigma_{\ell}$ は「先頭に $\ell$ を付ける」か「$\ell$ を付けてから先頭の $\ell\,\ell^{-1}$ を消す」かのどちらかなので、$\ell_{n},\ell_{n-1},\dots$ の順に $v$ の前に付けていき、そのつど必要なら簡約したものになる。全体として $uv$ に簡約を繰り返したもの。
+:::
+
+## 普遍性 {#grp:sec-fg-universal}
+
+::: theorem 自由群の普遍性 {#grp:free-group-universal keywords="universal property of free groups, free functor left adjoint to forgetful functor" index="自由群の普遍性|じゆうぐんのふへんせい"}
+群 $H$ と写像 $f:X\to H$ に対し、$\bar f(x)=f(x)$（$x\in X$）となる準同型 $\bar f:F(X)\to H$ がただ一つある。
+:::
+
+::: proof
+**Step 1（定義）.** 文字に $f(x^{-1})\defeq f(x)^{-1}$ と延ばし、語 $w=m_{1}\cdots m_{k}$ に $\hat f(w)\defeq f(m_{1})\cdots f(m_{k})$（$\hat f(\varepsilon)=e$）とおく。$\bar f\defeq\hat f|_{R(X)}$。
+
+**Step 2（簡約で不変）.** $w=w_{1}\ell\,\ell^{-1}w_{2}$ なら $\hat f(w)=\hat f(w_{1})f(\ell)f(\ell)^{-1}\hat f(w_{2})=\hat f(w_{1}w_{2})$（$f(\ell^{-1})=f(\ell)^{-1}$ は文字が $x$ でも $x^{-1}$ でも成り立つ）。
+
+**Step 3（準同型）.** \ref{grp:product-is-reduction} より $u\ast v$ は $uv$ の簡約の繰り返しなので、Step 2 から $\bar f(u\ast v)=\hat f(uv)=\hat f(u)\hat f(v)=\bar f(u)\bar f(v)$。
+
+**Step 4（一意性）.** $F(X)$ は $X$ で生成される（簡約語 $\ell_{1}\cdots\ell_{n}$ は文字 $\ell_{i}$（$x$ か $x$ の逆元）の積：\ref{grp:product-is-reduction} より $\ell_{1}\ast(\ell_{2}\ast\cdots)$ は簡約が起きないのでそのまま連結）。\ref{grp:homomorphism-basic.6} より、$X$ 上で一致する準同型は等しい。
+:::
+
+::: intuition
+自由群は「$X$ の元の間に、群の公理から従うもの以外の関係が何もない群」である。だから $X$ の行き先を勝手に決めても、それと矛盾する関係がなく、準同型が必ず作れる。
+:::
+
+::: corollary 任意の群は自由群の剰余群 {#grp:quotient-of-free keywords="every group is a quotient of a free group" index="自由群の剰余群|じゆうぐんのじょうよぐん"}
+群 $H$ が部分集合 $S$ で生成されるなら、$f:S\to H$ を包含として $\bar f:F(S)\to H$ は全射で、$H\cong F(S)/\Ker\bar f$。特に（$S=H$ として）任意の群は自由群の剰余群と同型である。
+:::
+
+::: proof
+$\im\bar f$ は $S$ を含む部分群なので $\ang{S}=H$ を含み、全射。第一同型定理（\tref{grp:first-isomorphism}）。
+:::
+
+::: theorem 階数の一意性 {#grp:free-rank keywords="rank of a free group is well defined, F(X) ≅ F(Y) iff |X| = |Y|" index="自由群の階数|じゆうぐんのかいすう"}
+$X,Y$ を有限集合とする。$F(X)\cong F(Y)\iff\abs{X}=\abs{Y}$。この数を自由群の**階数**という。
+:::
+
+::: proof
+**Step 1（$\Leftarrow$）.** 全単射 $\beta:X\to Y$ があれば、普遍性で $X\to Y\subseteq F(Y)$ と $Y\to X\subseteq F(X)$ を延ばした準同型は、合成が生成元の上で恒等写像なので互いに逆（\ref{grp:homomorphism-basic.6}）。
+
+**Step 2（$\Rightarrow$）.** 準同型 $F(X)\to\Z/2\Z$ は、普遍性より写像 $X\to\Z/2\Z$ と一対一に対応するので、ちょうど $2^{\abs{X}}$ 個。同型な群からの準同型の個数は等しいので、$2^{\abs{X}}=2^{\abs{Y}}$、$\abs{X}=\abs{Y}$。
+:::
+
+::: example
+1. $F(\emptyset)=\{\varepsilon\}$（自明な群）。
+2. $F(\{x\})$ の簡約語は $x^{n}$（$x\cdots x$, $n>0$）、$\varepsilon$、$x^{-1}\cdots x^{-1}$ で、$F(\{x\})\cong\Z$（下の問題）。
+3. $\abs{X}\ge 2$ なら $F(X)$ は非可換：$x\neq y$ について $xy$ と $yx$ は異なる簡約語。
+:::
+
+::: fact ニールセン–シュライアーの定理 {#grp:nielsen-schreier keywords="Nielsen-Schreier theorem, subgroups of free groups are free" index="ニールセン–シュライアーの定理|にーるせんしゅらいあーのていり"}
+自由群の部分群は自由群である。さらに、階数 $n$ の自由群の指数 $k$ の部分群は階数 $1+k(n-1)$ の自由群である（シュライアーの公式）。証明は本サイトの範囲外である（被覆空間を使う証明がよく知られている。出典：Lyndon–Schupp『Combinatorial Group Theory』）。
+:::
+
+::: supplement
+**高い視点.** 普遍性は、自由群を作る関手 $F:\Set\to\Grp$ が、群をその台集合に送る忘却関手 $U:\Grp\to\Set$ の左随伴であること、すなわち $\Hom_{\Grp}(F(X),H)\cong\Hom_{\Set}(X,U(H))$ を意味する（\ref{cat:page-adjunctions}）。階数 $2$ 以上の自由群は、階数がいくらでも大きい自由群を部分群として含む（ニールセン–シュライアーの公式から）。
+
+**位相幾何との関係.** 円周を $n$ 個一点でつないだ空間（花束）の基本群は階数 $n$ の自由群である。
+:::
+
+## 問題 {#grp:sec-fg-problems}
+
+::: problem {#grp:prob-free-rank-one}
+$F(\{x\})\cong\Z$ を示せ。
+:::
+
+::: solution
+普遍性で $x\mapsto 1$ から準同型 $\varphi:F(\{x\})\to\Z$ を作ると、$x^{n}\mapsto n$、$x^{-1}\cdots x^{-1}$（$n$ 個）$\mapsto -n$。簡約語は $\varepsilon$, $x^{n}$, $(x^{-1})^{n}$（$n\ge 1$）のどれか（$x$ と $x^{-1}$ が隣り合えないので）なので、$\varphi$ は全単射で同型。
+:::
+
+::: problem {#grp:prob-free-abelianization}
+有限集合 $X$ について、$F(X)/[F(X),F(X)]\cong\Z^{X}$（$X$ から $\Z$ への写像全体の加法群、すなわち $\Z^{\abs{X}}$）を示し、これを使って階数の一意性の別証明を与えよ。
+:::
+
+::: solution
+$e_{x}\in\Z^{X}$ を $x$ で $1$、他で $0$ の元とする。普遍性で $x\mapsto e_{x}$ から $\varphi:F(X)\to\Z^{X}$ を作り、可換化の普遍性（\ref{grp:abelianization-universal}）で $\bar\varphi:F(X)^{\mathrm{ab}}\to\Z^{X}$ を得る。逆に $\psi(a)\defeq\sum_{x}a(x)\,\bar x$（$\bar x$ は $x$ の可換化での像、加法的記法）は $\Z^{X}\to F(X)^{\mathrm{ab}}$ の準同型で、$\bar\varphi\psi(e_{x})=e_{x}$、$\psi\bar\varphi(\bar x)=\bar x$。生成元の上で恒等写像なので互いに逆（\ref{grp:homomorphism-basic.6}）。別証明：$F(X)\cong F(Y)$ なら可換化も同型で $\Z^{\abs{X}}\cong\Z^{\abs{Y}}$、$2$ で割ると $(\Z/2\Z)^{\abs{X}}\cong(\Z/2\Z)^{\abs{Y}}$ で位数を比べて $\abs{X}=\abs{Y}$。
+:::
+
+::: problem {#grp:prob-free-torsion-free}
+自由群の単位元以外の元の位数は無限大であることを示せ。
+:::
+
+::: solution
+**Step 1（巡回簡約）.** 簡約語 $w\neq\varepsilon$ について、先頭と末尾の文字が互いに逆である限り両端を取り除くと、$w=u\,c\,u^{-1}$（連結として。$u^{-1}$ は $u$ の逆元の語）で、$c\neq\varepsilon$ は簡約語、かつ $c$ の先頭と末尾は互いに逆でない（**巡回簡約**）と書ける（$c=\varepsilon$ となるのは $w=uu^{-1}$ が簡約語であることに反する）。
+
+**Step 2.** $w^{\ast n}=u\ast c^{\ast n}\ast u^{-1}$ で、$c$ の末尾と先頭が逆でないので $c^{\ast n}$ は連結 $c\,c\cdots c$（簡約が起きない）、長さ $n\abs{c}$。$u$ と $c^{n}$、$c^{n}$ と $u^{-1}$ の間でも簡約は起きない（$w=ucu^{-1}$ が簡約語であることから、$u$ の末尾と $c$ の先頭、$c$ の末尾と $u^{-1}$ の先頭は互いに逆でない）ので、$w^{\ast n}$ は長さ $2\abs{u}+n\abs{c}>0$ の簡約語で、$\varepsilon$ でない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

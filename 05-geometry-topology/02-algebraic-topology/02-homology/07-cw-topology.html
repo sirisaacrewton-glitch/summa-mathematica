@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CW 複体の位相 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/02-algebraic-topology/02-homology/07-cw-topology.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# CW 複体の位相 {#at:page-cw-topology keywords="topology of CW complexes, closed sets and characteristic maps, subcomplex, CW pair, partition of unity on a CW complex, CW complexes are Hausdorff normal and paracompact, compact subsets meet finitely many cells, finite subcomplex, local contractibility, homotopy extension property for CW pairs, cellular homology of infinite-dimensional CW complexes"}
+
+\ref{at:page-cellular-homology} で定義した CW 複体は、商空間を作る操作を繰り返し、最後に弱位相で全体をまとめた空間である。この作り方は抽象的なので、ハウスドルフ性のような基本的な性質も自明ではない。このページでは、CW 複体の位相についての基本的な事実を証明する。扱うのは、閉集合の判定、部分複体、1 の分割とその帰結（ハウスドルフ・正規・パラコンパクト）、コンパクト集合が有限個の胞体としか交わらないこと、局所可縮性、CW 対のホモトピー拡張性質と、CW 対が良い対であることである。応用として、無限次元の CW 複体でも胞体ホモロジーと特異ホモロジーが一致することを示す。
+
+> 資料：標準的な内容（Hatcher『Algebraic Topology』の付録などで扱われる事実）。1 の分割の構成と局所可縮な近傍の作り方は、骨格についての帰納法として自分で書き下ろした。
+
+## 記法と定義の確認 {#at:sec-cwt-notation}
+
+::: notation
+- CW 複体 \ref{at:cw-complex}：$X^{0}\subset X^{1}\subset\cdots$、$n$ 胞体 $e_{\alpha}$、特性写像 $\Phi_{\alpha}\colon D_{\alpha}\to X$（$D_{\alpha}=D^{n}$）、貼り付け写像 $\varphi_{\alpha}=\Phi_{\alpha}\restriction\partial D_{\alpha}$。0 胞体では $D^{0}$ は 1 点、$\partial D^{0}=\varnothing$ で、$\Phi_{\alpha}$ はその点の包含。$q_{n}\colon X^{n-1}\sqcup\bigsqcup_{\alpha}D_{\alpha}\to X^{n}$（$\alpha$ は $n$ 胞体）を骨格を作る商写像とする。骨格の対 \ref{at:skeleton-pairs}。
+- 商位相と商写像の普遍性 \ref{top:quotient-topology}, \ref{top:quotient-universal}、商写像と局所コンパクト・ハウスドルフ空間の積（ホワイトヘッドの定理 \tref{top:whitehead-product}）、商空間の上のホモトピー \ref{top:homotopy-on-quotient}、貼り合わせ補題 \tref{top:pasting-lemma}、チューブ補題 \tref{top:tube-lemma}, \ref{top:tube-lemma-compact-subset}、ハウスドルフ空間のコンパクト集合は閉 \tref{top:compact-hausdorff-closed}、局所有限 \ref{top:locally-finite}、パラコンパクト \ref{top:paracompact}。
+- **極座標**：$D^{n}\setminus\{0\}$ の点を $z=r\theta$（$0<r\le1$, $\theta\in\partial D^{n}$）と書く。$(r,\theta)\mapsto r\theta$ は $(0,1]\times\partial D^{n}\to D^{n}\setminus\{0\}$ の同相（逆写像は $z\mapsto(|z|,z/|z|)$）。$n=1$ では $\partial D^{1}=\{\pm1\}$。
+- 関数 $\phi\colon X\to[0,1]$ について $P(\phi)\defeq\{x\mid\phi(x)>0\}$ とし、その閉包を $\phi$ の**台** $\operatorname{supp}\phi$ という。
+- **選択公理**：コンパクト集合についての定理（各胞体から点を選ぶ）と、1 の分割の構成（各胞体での被覆の要素と有限部分被覆の選択）で使う。局所可縮性とホモトピー拡張性質では使わない。
+:::
+
+## 閉集合と部分複体 {#at:sec-cwt-closed}
+
+::: lemma 閉集合の判定 {#at:cw-closed-criterion keywords="X^{n-1 refname="CW 複体の閉集合の判定" refscope="field"} -> X^n is a closed embedding; a subset of a CW complex is closed iff its preimage under every characteristic map is closed; open cells are homeomorphic to open disks" index="CW 複体の閉集合|しーだぶりゅーふくたいのへいしゅうごう"}
+$X$ を CW 複体とする。
+1. 包含 $X^{n-1}\to X^{n}$ は閉埋め込みである。$X^{n}$ は $X$ の閉集合で、$X$ からの相対位相は $X^{n}$ 自身の位相に一致する。
+2. $F\subset X$ が閉 $\iff$ すべての胞体 $\alpha$ について $\Phi_{\alpha}^{-1}(F)$ が $D_{\alpha}$ の閉集合。言い換えると、すべての特性写像を並べた $Q\colon\bigsqcup_{\alpha}D_{\alpha}\to X$ は商写像である。
+3. $n$ 胞体 $e_{\alpha}$ について $\Phi_{\alpha}\restriction\mathring D_{\alpha}\colon\mathring D_{\alpha}\to e_{\alpha}$ は同相で、$e_{\alpha}$ は $X^{n}$ の開集合。$X$ は開胞体の非交和である。
+:::
+
+::: proof
+**Step 1（1 の前半）.** $C\subset X^{n-1}$ が閉なら、$q_{n}^{-1}(q_{n}(C))=C\sqcup\bigsqcup_{\alpha}\varphi_{\alpha}^{-1}(C)$ は閉なので、商位相の定義から $q_{n}(C)$ は $X^{n}$ の閉集合。$q_{n}$ の $X^{n-1}$ への制限は単射で連続（$X^{n-1}$ の 2 点が同一視されることはない）で、閉集合を閉集合に写すので、閉埋め込みである。
+
+**Step 2（1 の後半）.** $F$ を $X^{n}$ の閉集合とする。$m\le n$ なら、Step 1 を繰り返すと $X^{m}$ は $X^{n}$ の閉部分空間なので $F\cap X^{m}$ は $X^{m}$ で閉。$m>n$ なら同様に $X^{n}$ は $X^{m}$ の閉部分空間なので $F\cap X^{m}=F$ は $X^{m}$ で閉。弱位相の定義から $F$ は $X$ で閉。逆に $F\subset X^{n}$ が $X$ で閉なら、弱位相の定義から $F=F\cap X^{n}$ は $X^{n}$ で閉。よって $X$ からの相対位相は $X^{n}$ の位相に一致し、$F=X^{n}$ とすれば $X^{n}$ は $X$ で閉。
+
+**Step 3（2）.** (⇒) は $\Phi_{\alpha}$ の連続性。(⇐) $F\cap X^{n}$ が $X^{n}$ で閉であることを $n$ の帰納法で示す。$X^{0}$ は離散なので $n=0$ は成り立つ。$n\ge1$ では
+$$
+q_{n}^{-1}(F\cap X^{n})=(F\cap X^{n-1})\sqcup\bigsqcup_{\alpha:\,n\text{ 胞体}}\Phi_{\alpha}^{-1}(F)
+$$
+（$D_{\alpha}$ の上で $q_{n}$ は $\Phi_{\alpha}$）で、右辺は帰納法の仮定と仮定から閉。商位相の定義から $F\cap X^{n}$ は $X^{n}$ で閉。弱位相の定義から $F$ は閉。最後の言い換えは、$Q^{-1}(F)=\bigsqcup_{\alpha}\Phi_{\alpha}^{-1}(F)$ による。
+
+**Step 4（3）.** $\mathring D_{\alpha}$ の点は $q_{n}$ で他の点と同一視されないので、$\Phi_{\alpha}\restriction\mathring D_{\alpha}$ は単射。$V\subset\mathring D_{\alpha}$ が開なら $q_{n}^{-1}(\Phi_{\alpha}(V))=V$ は開なので、$\Phi_{\alpha}(V)$ は $X^{n}$ で開。よって $\Phi_{\alpha}\restriction\mathring D_{\alpha}$ は開写像で、$e_{\alpha}$ の上への同相。$V=\mathring D_{\alpha}$ とすれば $e_{\alpha}$ は $X^{n}$ で開。$X^{n}\setminus X^{n-1}$ は $q_{n}$ による $\bigsqcup\mathring D_{\alpha}$ の像なので $n$ 次元の開胞体の非交和で、$X=\bigcup_{n}X^{n}$ は開胞体の非交和。
+:::
+
+::: lemma 胞体と高々 1 点で交わる集合 {#at:cw-discrete-subsets keywords="a subset meeting each open cell in at most one point is closed and discrete; points of a CW complex are closed" index="CW 複体の離散部分集合|しーだぶりゅーふくたいのりさんぶぶんしゅうごう"}
+$S\subset X$ が各開胞体と高々 1 点でしか交わらないなら、$S$ のすべての部分集合は $X$ の閉集合である。とくに $S$ は離散な閉部分空間で、$X$ の各点は閉集合である（$X$ は T1 空間）。
+:::
+
+::: proof
+$T\subset S$ とし、$T\cap X^{n}$ が $X^{n}$ で閉であることを $n$ の帰納法で示す。$n=0$ では $X^{0}$ は離散。$n\ge1$ では、$n$ 胞体 $\alpha$ について
+$$
+q_{n}^{-1}(T\cap X^{n})\cap D_{\alpha}=\varphi_{\alpha}^{-1}(T\cap X^{n-1})\cup\Phi_{\alpha}^{-1}(T\cap e_{\alpha})
+$$
+で、前者は帰納法の仮定と $\varphi_{\alpha}$ の連続性から $\partial D_{\alpha}$ の閉集合（したがって $D_{\alpha}$ の閉集合）、後者は高々 1 点（\ref{at:cw-closed-criterion.3} により $\Phi_{\alpha}$ は $\mathring D_{\alpha}$ の上で単射）。$X^{n-1}$ の上の部分 $T\cap X^{n-1}$ も閉なので、商位相の定義から $T\cap X^{n}$ は $X^{n}$ で閉。弱位相の定義から $T$ は閉。$S$ のすべての部分集合が閉なので、$S$ の相対位相は離散。$S=\{x\}$ とすれば各点は閉。
+:::
+
+::: lemma 直積と開集合の上の連続性 {#at:cw-coherent-product keywords="a map out of X x I or N x I (N open in X) is continuous iff its composites with the characteristic maps are continuous" index="CW 複体と区間の積|しーだぶりゅーふくたいとくかんのせき" refname="CW 複体の直積と開集合の上の連続性" refscope="field"}
+$X$ を CW 複体、$K$ を局所コンパクト・ハウスドルフ空間（$I=[0,1]$, $[0,\infty)$, $I\times I$, $[0,\infty)\times I$ など）とする。
+1. 写像 $F\colon X\times K\to Y$ が連続 $\iff$ すべての胞体 $\alpha$ で $F\circ(\Phi_{\alpha}\times1_{K})\colon D_{\alpha}\times K\to Y$ が連続。同じことだが、$F\subset X\times K$ が閉 $\iff$ すべての $\alpha$ で $(\Phi_{\alpha}\times1_{K})^{-1}(F)$ が閉。
+2. $N\subset X$ が開なら、写像 $F\colon N\times K\to Y$ が連続 $\iff$ すべての $\alpha$ で $F\circ(\Phi_{\alpha}\times1_{K})\colon\Phi_{\alpha}^{-1}(N)\times K\to Y$ が連続。
+:::
+
+::: proof
+1：$Q$ は商写像（\ref{at:cw-closed-criterion.2}）で、$K$ は局所コンパクト・ハウスドルフなので $Q\times1_{K}$ は商写像（\ref{top:whitehead-product}）。商写像の普遍性から従う（閉集合の言い換えは、$Y$ を 2 点 $\{0,1\}$（$\{1\}$ だけが開でない位相）として特性関数に適用したもの、あるいは商位相の定義そのもの）。2：$Q^{-1}(N)=\bigsqcup_{\alpha}\Phi_{\alpha}^{-1}(N)$ は開で飽和している。制限 $Q'\colon Q^{-1}(N)\to N$ は商写像である：$U\subset N$ で $Q^{-1}(U)$ が $Q^{-1}(N)$ の開集合なら、$Q^{-1}(N)$ が開なので $Q^{-1}(U)$ は開、よって $U$ は $X$ で開、とくに $N$ で開。あとは 1 と同じく $Q'\times1_{K}$ に \ref{top:whitehead-product} を使う。
+:::
+
+::: definition 部分複体 {#at:subcomplex keywords="subcomplex: a closed subset that is a union of open cells; CW pair" index="部分複体|ぶぶんふくたい, CW 対|しーだぶりゅーつい"}
+CW 複体 $X$ の閉集合 $A$ で、開胞体の和集合であるものを**部分複体**といい、$(X,A)$ を **CW 対**という。
+:::
+
+::: proposition 部分複体の性質 {#at:subcomplex-properties keywords="a union of cells is closed iff it contains the images of the characteristic maps of its cells; a subcomplex is a CW complex with the subspace topology; unions and intersections of subcomplexes" index="部分複体の性質|ぶぶんふくたいのせいしつ"}
+1. 開胞体の和集合 $A$ が閉 $\iff$ $A$ に含まれる各胞体 $e_{\alpha}$ について $\Phi_{\alpha}(D_{\alpha})\subset A$。
+2. 部分複体 $A$ は、$A^{n}\defeq A\cap X^{n}$ と、$A$ に含まれる胞体（同じ特性写像）によって CW 複体になり、その位相は $X$ からの相対位相に一致する。
+3. 部分複体の任意個の和集合と共通部分は部分複体である。とくに $X^{n}$ と $X^{n}\cup A$ は部分複体。
+:::
+
+::: proof
+**Step 1（1 の ⇒）.** $D_{\alpha}=\overline{\mathring D_{\alpha}}$ と連続性から $\Phi_{\alpha}(D_{\alpha})\subset\overline{\Phi_{\alpha}(\mathring D_{\alpha})}=\overline{e_{\alpha}}$。$A$ は閉で $e_{\alpha}$ を含むので $\overline{e_{\alpha}}\subset A$。
+
+**Step 2（1 の ⇐）.** $A\cap X^{n}$ が $X^{n}$ で閉であることを $n$ の帰納法で示す。$n=0$ は離散。$n\ge1$ で、$n$ 胞体 $\beta$ について：$e_{\beta}\subset A$ なら仮定から $q_{n}^{-1}(A\cap X^{n})\cap D_{\beta}=D_{\beta}$。$e_{\beta}\not\subset A$ なら、開胞体は互いに交わらず $A$ は開胞体の和なので $e_{\beta}\cap A=\varnothing$ で、$q_{n}^{-1}(A\cap X^{n})\cap D_{\beta}=\varphi_{\beta}^{-1}(A\cap X^{n-1})$ は帰納法の仮定から閉。$X^{n-1}$ の上の部分も閉なので、$A\cap X^{n}$ は $X^{n}$ で閉。弱位相の定義から $A$ は閉。
+
+**Step 3（2）.** $A^{n}$ が $A^{n-1}$ に $A$ の $n$ 胞体を貼った商空間（の位相をもつ）ことを示す。$q_{A}\colon A^{n-1}\sqcup\bigsqcup_{e_{\beta}\subset A}D_{\beta}\to A^{n}$ を $q_{n}$ の制限とすると、Step 1 から値は $A^{n}$ に入り、連続な全射。$F\subset A^{n}$ で $q_{A}^{-1}(F)$ が閉とする。$q_{n}^{-1}(F)$ を調べると、$X^{n-1}$ の上では $F\cap A^{n-1}$（$A^{n-1}$ で閉で、$A^{n-1}$ は帰納法により $X^{n-1}$ の閉部分空間なので $X^{n-1}$ で閉）、$e_{\beta}\subset A$ の $D_{\beta}$ の上では仮定から閉、$e_{\beta}\not\subset A$ の $D_{\beta}$ の上では $\varphi_{\beta}^{-1}(F\cap A^{n-1})$ で閉。よって $F$ は $X^{n}$ で閉。したがって $A^{n}$ の相対位相は $q_{A}$ による商位相に一致する。$A^{0}$ は離散。$F\subset A$ がすべての $n$ で $F\cap A^{n}$ を $A^{n}$ で閉とすると、$A^{n}$ は $X^{n}$ で閉なので $F\cap X^{n}=F\cap A^{n}$ は $X^{n}$ で閉、よって $F$ は $X$ で閉。逆も明らかなので、$A$ の相対位相は弱位相に一致する。
+
+**Step 4（3）.** 開胞体は互いに交わらないので、開胞体の和集合の和集合・共通部分は再び開胞体の和集合である。1 の条件は、和集合では「$e_{\alpha}$ を含む $A_{i}$ について $\Phi_{\alpha}(D_{\alpha})\subset A_{i}$」、共通部分では「すべての $A_{i}$ で $\Phi_{\alpha}(D_{\alpha})\subset A_{i}$」から保たれる。$X^{n}$ は閉（\ref{at:cw-closed-criterion.1}）な開胞体の和集合。
+:::
+
+## CW 構造の判定と積・商 {#at:sec-cwt-recognition}
+
+商空間や積空間が CW 複体であることを確かめるための判定法を用意する。CW 複体の定義（\ref{at:cw-complex}）は骨格を順に作る形をしているが、実際には次の 3 条件を確かめればよい。
+
+::: lemma CW 構造の判定 {#at:cw-recognition keywords="recognition of CW structures: a space with characteristic maps whose open cells partition it, with boundaries in lower skeleta and coherent topology, is a CW complex" index="CW 構造の判定|しーだぶりゅーこうぞうのはんてい"}
+空間 $Y$ と、連続写像の族 $\Psi_{\gamma}\colon D^{n_{\gamma}}\to Y$（$\gamma\in\Gamma$）が次を満たすとする。$\varepsilon_{\gamma}\defeq\Psi_{\gamma}(\mathring D^{n_{\gamma}})$、$Y^{n}\defeq\bigcup_{n_{\gamma}\le n}\varepsilon_{\gamma}$ とおく（$\mathring D^{0}=D^{0}$）。
+1. $\Psi_{\gamma}$ は $\mathring D^{n_{\gamma}}$ の上で単射で、$\varepsilon_{\gamma}$ たちは $Y$ を非交和に分割する。また $\Psi_{\gamma}(\partial D^{n_{\gamma}})\subset Y^{n_{\gamma}-1}$。
+2. $F\subset Y$ が閉 $\iff$ すべての $\gamma$ で $\Psi_{\gamma}^{-1}(F)$ が閉。
+3. 各 $n$ と $G\subset Y^{n}$ について、$n_{\gamma}\le n$ のすべての $\gamma$ で $\Psi_{\gamma}^{-1}(G)$ が閉なら、$G$ は $Y$ の閉集合。
+
+このとき $Y$ は、$Y^{n}$ を $n$ 骨格、$\Psi_{\gamma}$ を特性写像とする CW 複体である。
+:::
+
+::: proof
+**Step 1（骨格の位相）.** $G\subset Y^{n}$ について、「$G$ が $Y^{n}$ で閉 $\iff$ $n_{\gamma}\le n$ のすべての $\gamma$ で $\Psi_{\gamma}^{-1}(G)$ が閉」を示す。$n_{\gamma}\le n$ なら 1 から $\Psi_{\gamma}(D^{n_{\gamma}})\subset Y^{n}$（内部は $\varepsilon_{\gamma}\subset Y^{n}$、境界は帰納的に $Y^{n_{\gamma}-1}\subset Y^{n}$）なので $\Psi_{\gamma}$ は $Y^{n}$ への連続写像とみなせ、(⇒) が従う。(⇐) は 3 から $G$ が $Y$ で閉、とくに $Y^{n}$ で閉。$G=Y^{n}$ とすれば $Y^{n}$ は $Y$ の閉集合。
+
+**Step 2（$Y^{0}$ は離散）.** $G\subset Y^{0}$ について、$n_{\gamma}=0$ なら $\Psi_{\gamma}^{-1}(G)$ は 1 点 $D^{0}$ か空集合で閉。Step 1 から $G$ は閉。
+
+**Step 3（胞体の貼り付け）.** $n\ge1$ とし、$q\colon Y^{n-1}\sqcup\bigsqcup_{n_{\gamma}=n}D^{n}_{\gamma}\to Y^{n}$ を包含と $\Psi_{\gamma}$ で定める。1 から $q$ は連続な全射で、同一視されるのはちょうど $x\in\partial D^{n}_{\gamma}$ と $\Psi_{\gamma}(x)\in Y^{n-1}$（$\mathring D^{n}_{\gamma}$ の点は他と同一視されない）。$q^{-1}(G)$ が閉となる $G\subset Y^{n}$ をとると、$G\cap Y^{n-1}$ は $Y^{n-1}$ で閉なので Step 1 から $n_{\gamma}\le n-1$ の $\Psi_{\gamma}^{-1}(G)=\Psi_{\gamma}^{-1}(G\cap Y^{n-1})$ は閉、$n_{\gamma}=n$ の $\Psi_{\gamma}^{-1}(G)$ は仮定から閉。Step 1 から $G$ は $Y^{n}$ で閉。よって $Y^{n}$ は $q$ の商位相をもち、$Y^{n-1}$ に $n$ 胞体を貼り付け写像 $\Psi_{\gamma}\restriction\partial D^{n}$ で貼ったものである。
+
+**Step 4（弱位相）.** $F\subset Y$ がすべての $n$ で $F\cap Y^{n}$ を $Y^{n}$ で閉とすると、$\Psi_{\gamma}^{-1}(F)=\Psi_{\gamma}^{-1}(F\cap Y^{n_{\gamma}})$ は閉で、2 から $F$ は閉。逆は $Y^{n}$ の連続な包含から。よって $Y$ は $Y^{n}$ たちの弱位相をもち、CW 複体である。
+
+::: hypcheck
+- 3 は省けない：2 だけでは、骨格 $Y^{n}$ の位相が「$Y^{n}$ の胞体だけで決まる」ことが保証されない。積と商（\ref{at:cw-product-interval}, \ref{at:cw-pair-good}）では、すでに CW 複体であることが分かっている空間 $X$ の骨格に帰着して 3 を確かめる。
+:::
+:::
+
+::: proposition CW 複体と区間の積 {#at:cw-product-interval keywords="the product of a CW complex with I or [0, infinity) is a CW complex with cells e x {j} and e x (j, j+1)" index="CW 複体と区間の積（CW 構造）|しーだぶりゅーふくたいとくかんのせきしーだぶりゅーこうぞう"}
+$X$ を CW 複体、$J$ を $I=[0,1]$ または $[0,\infty)$ とし、$J$ に整数点を 0 胞体、$(j,j+1)$ を 1 胞体とする CW 構造を入れる。$X\times J$（積位相）は、胞体 $e_{\alpha}\times\{j\}$（次元 $\dim e_{\alpha}$）と $e_{\alpha}\times(j,j+1)$（次元 $\dim e_{\alpha}+1$）をもつ CW 複体で、特性写像は
+$$
+\Phi_{\alpha}\times c_{j}\colon D^{k}\to X\times J,\qquad (\Phi_{\alpha}\times\lambda_{j})\circ\kappa_{k}\colon D^{k+1}\to X\times J
+$$
+である（$k=\dim e_{\alpha}$、$c_{j}$ は値 $j$ の定値写像、$\lambda_{j}\colon[-1,1]\to[j,j+1]$ はアフィンな同相、$\kappa_{k}\colon D^{k+1}\to D^{k}\times[-1,1]$ は境界を境界に写す同相）。$(X\times J)^{n}=X^{n}\times(J\cap\mathbb{Z})\cup X^{n-1}\times J$。$A$ が部分複体なら $A\times J$ と $X\times\{j\}$ は部分複体。
+:::
+
+::: proof
+**Step 1（$\kappa_{k}$）.** \ref{at:cube-disk.1} の同相 $\varphi_{m}\colon[-1,1]^{m}\to D^{m}$ は $|\varphi_{m}(x)|=|x|_{\infty}$ を満たすので、立方体の境界を球面に写す。$\kappa_{k}\defeq(\varphi_{k}\times1)\circ\varphi_{k+1}^{-1}$ とおくと、$D^{k+1}\cong[-1,1]^{k+1}=[-1,1]^{k}\times[-1,1]\cong D^{k}\times[-1,1]$ で、境界 $\partial D^{k+1}$ は $\partial[-1,1]^{k+1}$ を経て $\partial D^{k}\times[-1,1]\cup D^{k}\times\{\pm1\}$ に写る。
+
+**Step 2（判定法の 1）.** $X$ は開胞体の非交和（\ref{at:cw-closed-criterion.3}）、$J$ は整数点と開区間の非交和なので、$X\times J$ は $e_{\alpha}\times\{j\}$, $e_{\alpha}\times(j,j+1)$ の非交和。特性写像は内部の上で単射。$e_{\alpha}\times(j,j+1)$ の特性写像の境界の像は $\Phi_{\alpha}(\partial D^{k})\times[j,j+1]\cup\Phi_{\alpha}(D^{k})\times\{j,j+1\}\subset X^{k-1}\times J\cup X^{k}\times(J\cap\mathbb{Z})$ で、これは次元 $k$ 以下の胞体の和。$e_{\alpha}\times\{j\}$ についても同様。
+
+**Step 3（判定法の 2）.** \ref{at:cw-coherent-product.1}（$K=J$）から、$F\subset X\times J$ が閉 $\iff$ すべての $\alpha$ で $(\Phi_{\alpha}\times1_{J})^{-1}(F)$ が $D_{\alpha}\times J$ で閉。$D_{\alpha}\times J$ の各点 $(z,t)$ は近傍 $D_{\alpha}\times((t-\frac12,t+\frac12)\cap J)$ をもち、これは閉集合 $D_{\alpha}\times[j,j+1]$ の高々 2 つにしか交わらないので、$(\Phi_{\alpha}\times1_{J})^{-1}(F)$ が閉 $\iff$ 各 $j$ で $(\Phi_{\alpha}\times1_{J})^{-1}(F)\cap D_{\alpha}\times[j,j+1]$ が閉。後者は胞体 $e_{\alpha}\times(j,j+1)$ の特性写像による $F$ の逆像を同相 $(1\times\lambda_{j})\circ\kappa_{k}$ で移したもの。$J=I$ や $j=0$ の端の胞体も同じ（$e_{\alpha}\times\{j\}$ の特性写像による逆像は、その $D_{\alpha}\times\{j\}$ への制限）。
+
+**Step 4（判定法の 3）.** $G\subset(X\times J)^{n}$ で、次元 $n$ 以下の胞体の特性写像による逆像がすべて閉とする。$G_{\alpha,j}\defeq(\Phi_{\alpha}\times1_{J})^{-1}(G)\cap D_{\alpha}\times[j,j+1]$ が閉であることを $m=\dim e_{\alpha}$ の帰納法で示せば、Step 3 から $G$ は閉。$m\le n-1$：胞体 $e_{\alpha}\times(j,j+1)$ の次元は $m+1\le n$ なので仮定。$m\ge n$：$G\subset(X\times J)^{n}$ は次元 $m+1>n$ の胞体 $e_{\alpha}\times(j,j+1)$ と交わらないので
+$$
+G_{\alpha,j}=\bigl((\Phi_{\alpha}\times1_{J})^{-1}(G)\cap D_{\alpha}\times\{j,j+1\}\bigr)\cup\bigl((\varphi_{\alpha}\times1_{J})^{-1}(G)\cap\partial D_{\alpha}\times[j,j+1]\bigr).
+$$
+第 1 項は、$m=n$ なら胞体 $e_{\alpha}\times\{j\}$, $e_{\alpha}\times\{j+1\}$ の逆像なので仮定から閉、$m>n$ なら $\Phi_{\alpha}(\partial D_{\alpha})$ の上の点だけで第 2 項に含まれる。第 2 項：帰納法の仮定から、CW 複体 $X^{m-1}$ のすべての胞体 $\delta$ で $(\Phi_{\delta}\times1_{J})^{-1}(G)$ は閉なので、\ref{at:cw-coherent-product.1} を $X^{m-1}$ に使って $G\cap(X^{m-1}\times J)$ は $X^{m-1}\times J$ で閉。$\varphi_{\alpha}\times1_{J}\colon\partial D_{\alpha}\times J\to X^{m-1}\times J$ は連続なので第 2 項は閉。
+
+**Step 5.** \ref{at:cw-recognition} から $X\times J$ は CW 複体。骨格の式は Step 2 から。$A\times J$ と $X\times\{j\}$ は閉な開胞体の和なので部分複体（\ref{at:subcomplex}）。
+
+::: hypcheck
+- **$J$ の局所コンパクト性**：Step 3 で $Q\times1_{J}$ が商写像であることに使った。一般の CW 複体 $X,Y$ の積 $X\times Y$（積位相）は CW 複体にならないことがあることが知られている（本サイト未収録）。
+- 選択公理は使わない。
+:::
+:::
+
+## 1 の分割とハウスドルフ性 {#at:sec-cwt-partition}
+
+::: theorem CW 複体の 1 の分割 {#at:cw-partition-of-unity keywords="every open cover of a CW complex admits a locally finite partition of unity subordinate to it" index="CW 複体の 1 の分割|しーだぶりゅーふくたいのいちのぶんかつ"}
+CW 複体 $X$ の開被覆 $\{U_{s}\}_{s\in S}$ に対し、連続関数 $\phi_{s}\colon X\to[0,1]$（$s\in S$）で次を満たすものがある。
+1. $\operatorname{supp}\phi_{s}\subset U_{s}$。
+2. 各点 $y\in X$ は開近傍 $V$ で、$V\cap P(\phi_{s})\neq\varnothing$ となる $s$ が有限個しかないものをもつ。
+3. $\sum_{s}\phi_{s}=1$（2 により各点で有限和）。
+:::
+
+::: intuition
+骨格ごとに関数を延ばしていく。新しい胞体の上では、境界に近い「襟」の部分では境界での値を半径方向にそのまま延ばし、内部は円板の上の有限個の山形の関数で埋めて、最後に和で割って正規化する。襟の上で関数が半径方向に一定なので、低い骨格での「近くでは有限個の関数しか効かない」性質と台の条件が、襟を継ぎ足した近傍を通して高い骨格へそのまま伝わる。
+:::
+
+::: proof
+$X^{n}$ 上の関数族 $(\phi^{n}_{s})_{s}$ と $y\in X^{n}$ について、$X^{n}$ の開集合 $V\ni y$ が **$y$ に良い**とは、$V\cap P(\phi^{n}_{s})\neq\varnothing$ となる $s$ が有限個で、かつ $y\notin U_{s}$ となるすべての $s$ で $V\cap P(\phi^{n}_{s})=\varnothing$ となることとする。$n$ についての帰納法で、連続関数 $\phi^{n}_{s}\colon X^{n}\to[0,1]$ で次を満たすものを作る。
+- (i) $\phi^{n}_{s}\restriction X^{n-1}=\phi^{n-1}_{s}$。
+- (ii) $\sum_{s}\phi^{n}_{s}=1$（各点で有限和）。
+- (iii) $X^{n}$ の各点 $y$ は、$y$ に良い開近傍をもつ。
+- (iv) 各 $n$ 胞体 $\alpha$ に $\varepsilon_{\alpha}\in(0,\tfrac12]$ があって、$1-\varepsilon_{\alpha}\le r\le1$ ならすべての $s$ で $\phi^{n}_{s}(\Phi_{\alpha}(r\theta))=\phi^{n-1}_{s}(\varphi_{\alpha}(\theta))$。
+
+(iii) から $X^{n}$ での閉包について $\overline{P(\phi^{n}_{s})}\subset U_{s}$ が従う（$y\notin U_{s}$ なら、$y$ に良い近傍は $P(\phi^{n}_{s})$ と交わらない）。
+
+**Step 1（$n=0$）.** 各 0 胞体 $v$ に $v\in U_{s(v)}$ となる $s(v)$ を選び、$\phi^{0}_{s}(v)\defeq1$（$s=s(v)$）、$0$（それ以外）とする。$X^{0}$ は離散なので連続で、$\{v\}$ は $v$ に良い開近傍（交わる $P(\phi^{0}_{s})$ は $s=s(v)$ だけで、$v\notin U_{s}$ なら $s\neq s(v)$）。
+
+**Step 2（$n$ 胞体の上の関数）.** $n\ge1$ とし、$n$ 胞体 $\alpha$ を固定して $D=D_{\alpha}$, $\Phi=\Phi_{\alpha}$, $\varphi=\varphi_{\alpha}$, $\psi_{s}\defeq\phi^{n-1}_{s}\circ\varphi\colon\partial D\to[0,1]$ とおく。
+- (a) $\psi_{s}\not\equiv0$ となる $s$ は有限個：$\varphi(\partial D)$ はコンパクトなので、その点の良い開近傍（帰納法の仮定 (iii)）の有限個で覆え、各近傍は有限個の $P(\phi^{n-1}_{s})$ としか交わらない。それらを $s_{1},\dots,s_{k}$（相異なる）とすると、$\partial D$ の上で $\sum_{i}\psi_{s_{i}}=1$。
+- (b) $K_{i}\defeq\overline{P(\psi_{s_{i}})}$（$\partial D$ での閉包）は、連続性から $\varphi^{-1}(\overline{P(\phi^{n-1}_{s_{i}})})$ に含まれ、したがって $\varphi^{-1}(U_{s_{i}})$ に含まれる。$O_{i}\defeq\Phi^{-1}(U_{s_{i}})$ は $D$ の開集合で、$\partial D$ の上では $\Phi=\varphi$ なので $K_{i}\subset O_{i}$。$K_{i}$ はコンパクトなので、極座標で $O_{i}$ を $(0,1]\times\partial D$ の開集合とみてコンパクト部分集合のチューブ補題（\ref{top:tube-lemma-compact-subset}、$\{1\}\times K_{i}$ に適用）を使うと、$\varepsilon_{i}\in(0,\frac12]$ で $\{r\theta\mid\theta\in K_{i},\ 1-\varepsilon_{i}\le r\le1\}\subset O_{i}$ となるものがある。$\varepsilon\defeq\min_{i}\varepsilon_{i}$。
+- (c) $\lambda\colon[0,1]\to[0,1]$ を、$r\le1-\varepsilon$ で $0$、$[1-\varepsilon,1-\frac{\varepsilon}{2}]$ で $0$ から $1$ へ 1 次関数、$r\ge1-\frac{\varepsilon}{2}$ で $1$ とし、$a_{i}(r\theta)\defeq\lambda(r)\psi_{s_{i}}(\theta)$、$a_{i}(0)\defeq0$ とする（$0$ の近くで $\lambda=0$ なので連続）。$P(a_{i})\subset\{r\theta\mid\theta\in P(\psi_{s_{i}}),\ r>1-\varepsilon\}$ なので $\overline{P(a_{i})}\subset\{r\theta\mid\theta\in K_{i},\ r\ge1-\varepsilon\}\subset O_{i}$。
+- (d) $B\defeq\{|z|\le1-\frac{\varepsilon}{2}\}$ はコンパクト。各 $z\in B$ に、$\Phi(z)\in U_{t(z)}$ となる $t(z)\in S$ と、閉球 $\bar B(z,\rho(z))$ が $\Phi^{-1}(U_{t(z)})$ に含まれる $\rho(z)\in(0,\frac{\varepsilon}{4}]$ を選ぶ。有限個の開球 $B(z_{j},\rho_{j})$（$j=1,\dots,l$, $t_{j}\defeq t(z_{j})$）で $B$ を覆い、$b_{j}(w)\defeq\max\bigl(0,1-|w-z_{j}|/\rho_{j}\bigr)$ とする。$P(b_{j})=B(z_{j},\rho_{j})$、$\overline{P(b_{j})}\subset\Phi^{-1}(U_{t_{j}})\cap\{|w|\le1-\frac{\varepsilon}{4}\}$ で、$B$ の上で $\sum_{j}b_{j}>0$。
+- (e) $g_{s}\defeq\sum_{i:s_{i}=s}a_{i}+\sum_{j:t_{j}=s}b_{j}$（有限個の $s$ を除いて $0$）、$G\defeq\sum_{s}g_{s}$ とする。$|z|\ge1-\frac{\varepsilon}{2}$ では $\sum_{i}a_{i}=\sum_{i}\psi_{s_{i}}(\theta)=1$、$B$ の上では $\sum_{j}b_{j}>0$ なので、$D$ 全体で $G>0$。$\chi^{\alpha}_{s}\defeq g_{s}/G$ とおくと $\sum_{s}\chi^{\alpha}_{s}=1$ で、$\overline{P(\chi^{\alpha}_{s})}$ は (c)・(d) の有限個の閉包の和に含まれるので $\Phi^{-1}(U_{s})$ に含まれる。$\varepsilon_{\alpha}\defeq\frac{\varepsilon}{4}$ とすると、$|z|\ge1-\varepsilon_{\alpha}$ では $b_{j}=0$, $\lambda=1$ なので $g_{s}(r\theta)=\psi_{s}(\theta)$, $G=1$、よって $\chi^{\alpha}_{s}(r\theta)=\psi_{s}(\theta)$。
+
+**Step 3（$\phi^{n}_{s}$ の定義）.** $X^{n-1}$ の上では $\phi^{n-1}_{s}$、$e_{\alpha}$ の上では $\chi^{\alpha}_{s}\circ(\Phi_{\alpha}\restriction\mathring D_{\alpha})^{-1}$ と定める。$X^{n-1}\sqcup\bigsqcup D_{\alpha}$ の上の関数 $(\phi^{n-1}_{s},(\chi^{\alpha}_{s})_{\alpha})$ は連続で、$\partial D_{\alpha}$ の上で $\chi^{\alpha}_{s}=\psi_{s}=\phi^{n-1}_{s}\circ\varphi_{\alpha}$ なので $q_{n}$ のファイバーの上で一定。商写像の普遍性から $\phi^{n}_{s}$ は連続。(i)・(ii)・(iv) は Step 2 (e) から成り立つ。
+
+**Step 4（襟を継ぎ足した近傍）.** $m\le n$, $y\in X^{m}$ とし、$V^{m}$ を $X^{m}$ で $y$ に良い開近傍とする。$m<k\le n$ について帰納的に
+$$
+V^{k}\defeq V^{k-1}\cup\bigcup_{\beta:\,k\text{ 胞体}}\Phi_{\beta}(C_{\beta}),\qquad C_{\beta}\defeq\{r\theta\mid\theta\in\varphi_{\beta}^{-1}(V^{k-1}),\ 1-\varepsilon_{\beta}<r\le1\}
+$$
+とおく。$C_{\beta}$ は極座標で開集合の積なので $D_{\beta}$ の開集合で、$q_{k}^{-1}(V^{k})$ は $X^{k-1}$ の上で $V^{k-1}$、$D_{\beta}$ の上で $C_{\beta}$（$r=1$ の点 $\theta$ は $\varphi_{\beta}(\theta)\in V^{k-1}$ のとき、そのときに限り含まれる）なので、$V^{k}$ は $X^{k}$ の開集合で $V^{k}\cap X^{k-1}=V^{k-1}$。さらに $V^{k}$ は $y$ に良い：(iv) から $1-\varepsilon_{\beta}<r<1$ で $\phi^{k}_{s}(\Phi_{\beta}(r\theta))=\phi^{k-1}_{s}(\varphi_{\beta}(\theta))$ で、$\varphi_{\beta}(\theta)\in V^{k-1}$。よって $V^{k}\cap P(\phi^{k}_{s})\neq\varnothing$ なら $V^{k-1}\cap P(\phi^{k-1}_{s})\neq\varnothing$ で、良い近傍の 2 条件は $V^{k-1}$ から $V^{k}$ に受け継がれる。
+
+**Step 5（(iii) の確認）.** $y\in X^{n-1}$ なら、帰納法の仮定の良い近傍 $V^{n-1}$ に Step 4（$m=n-1$, $k=n$）を使う。$y\in e_{\alpha}$（$n$ 胞体）なら $y=\Phi_{\alpha}(z)$, $|z|<1$。$\chi^{\alpha}_{s}\not\equiv0$ となる $s$ は有限個で、そのうち $y\notin U_{s}$ となるものについては $z\notin\overline{P(\chi^{\alpha}_{s})}$（Step 2 (e) の閉包の包含）。これら有限個の閉集合を避ける開球 $W\ni z$ を $\mathring D_{\alpha}$ の中にとると、$\Phi_{\alpha}(W)$ は $X^{n}$ の開集合（\ref{at:cw-closed-criterion.3}）で、$y$ に良い。
+
+**Step 6（$X$ への移行）.** $\phi_{s}\defeq\bigcup_{n}\phi^{n}_{s}$ は (i) により定義され、$\phi_{s}\circ\Phi_{\alpha}=\phi^{n}_{s}\circ\Phi_{\alpha}$ は連続なので、\ref{at:cw-closed-criterion.2} から連続。(ii) から $\sum_{s}\phi_{s}=1$。$y\in X^{m}$ に、$X^{m}$ で良い近傍 $V^{m}$ をとり、Step 4 ですべての $k>m$ について $V^{k}$ を作り、$V\defeq\bigcup_{k\ge m}V^{k}$ とする。$k\ge m$ では $V\cap X^{k}=V^{k}$、$k<m$ では $V\cap X^{k}=V^{m}\cap X^{k}$ で、いずれも $X^{k}$ の開集合なので $V$ は $X$ の開集合。$V\cap P(\phi_{s})\neq\varnothing$ ならある $k$ で $V^{k}\cap P(\phi^{k}_{s})\neq\varnothing$、Step 4 を繰り返して $V^{m}\cap P(\phi^{m}_{s})\neq\varnothing$。よって 2 が成り立ち、$y\notin U_{s}$ なら $V$ は $P(\phi_{s})$ と交わらないので $y\notin\operatorname{supp}\phi_{s}$、すなわち 1 が成り立つ。
+
+::: hypcheck
+- **選択公理**：Step 1 の $s(v)$、Step 2 (d) の $t(z)$ と有限部分被覆を、無限個の胞体について同時に選ぶのに使った。
+- **(iv) の襟**：Step 4 で、低い骨格での局所有限性と台の条件を高い骨格へ伝えるのに使った。各段で台の条件だけを保っても、$\bigcup_{n}P(\phi^{n}_{s})$ の閉包は各段の閉包の和より大きくなりうるので、襟の条件は本質的である。
+- **円板のコンパクト性**：Step 2 (a)・(b)・(d) の有限性に使った（各胞体が有限次元の円板であることが効いている）。
+:::
+:::
+
+::: corollary CW 複体はパラコンパクト {#at:cw-paracompact keywords="CW complexes are Hausdorff, normal and paracompact" index="CW 複体のパラコンパクト性|しーだぶりゅーふくたいのぱらこんぱくとせい, CW 複体のハウスドルフ性|しーだぶりゅーふくたいのはうすどるふせい"}
+CW 複体はハウスドルフ・正規・パラコンパクトである。
+:::
+
+::: proof
+**Step 1（ハウスドルフ）.** $x\neq y$ とする。点は閉（\ref{at:cw-discrete-subsets}）なので $\{X\setminus\{x\},X\setminus\{y\}\}$ は開被覆。\ref{at:cw-partition-of-unity} の $\phi_{1},\phi_{2}$（$\operatorname{supp}\phi_{1}\subset X\setminus\{x\}$, $\operatorname{supp}\phi_{2}\subset X\setminus\{y\}$）について $\phi_{1}(x)=0$ なので $\phi_{2}(x)=1$、$\phi_{2}(y)=0$。$\{\phi_{2}>\frac12\}$ と $\{\phi_{2}<\frac12\}$ が $x,y$ を分ける交わらない開集合。
+
+**Step 2（正規）.** 交わらない閉集合 $A,B$ について、開被覆 $\{X\setminus A,X\setminus B\}$ の 1 の分割 $\phi_{1},\phi_{2}$ をとると、$A$ の上で $\phi_{1}=0$ なので $\phi_{2}=1$、$B$ の上で $\phi_{2}=0$。Step 1 と同じ開集合で分けられる。
+
+**Step 3（パラコンパクト）.** 開被覆 $\{U_{s}\}$ の 1 の分割について、$\{P(\phi_{s})\}_{s}$ は開集合の族で、$P(\phi_{s})\subset U_{s}$、和は $X$（$\sum\phi_{s}=1$）、\ref{at:cw-partition-of-unity.2} から局所有限。Step 1 と合わせて \ref{top:paracompact} の定義を満たす。
+:::
+
+## コンパクト集合 {#at:sec-cwt-compact}
+
+::: theorem コンパクト集合は有限個の胞体と交わる {#at:cw-compact-finite keywords="a compact subset of a CW complex meets only finitely many open cells" index="CW 複体のコンパクト集合|しーだぶりゅーふくたいのこんぱくとしゅうごう"}
+CW 複体 $X$ のコンパクト集合 $C$ は、有限個の開胞体としか交わらない。
+:::
+
+::: proof
+$C$ と交わる各開胞体 $e_{\alpha}$ から点 $x_{\alpha}\in C\cap e_{\alpha}$ を選び、$S\defeq\{x_{\alpha}\}$ とする。$S$ は各開胞体と高々 1 点で交わるので、\ref{at:cw-discrete-subsets} から $X$ の離散な閉部分空間。$S\subset C$ なので $S$ は $C$ の閉集合で、コンパクト。離散なコンパクト空間は（1 点集合たちの開被覆が有限部分被覆をもつので）有限。よって $C$ と交わる胞体は有限個。
+
+::: hypcheck
+- **選択公理**：各胞体から点 $x_{\alpha}$ を選ぶのに使った。
+- **コンパクト性**：最後の「離散でコンパクトなら有限」で使った。
+:::
+:::
+
+::: corollary 有限部分複体 {#at:cw-finite-subcomplex keywords="closure of a cell is the image of its characteristic map; each cell and each compact set lies in a finite subcomplex, hence in a finite skeleton; a CW complex is compact iff finite" index="有限部分複体|ゆうげんぶぶんふくたい"}
+1. $\overline{e_{\alpha}}=\Phi_{\alpha}(D_{\alpha})$。
+2. 各胞体は有限部分複体（有限個の胞体からなる部分複体）に含まれる。したがって $X$ のコンパクト集合は有限部分複体に含まれ、とくにある $X^{N}$ に含まれる。
+3. $X$ がコンパクト $\iff$ $X$ は有限 CW 複体。
+:::
+
+::: proof
+1：$\Phi_{\alpha}(D_{\alpha})$ はコンパクトで、$X$ はハウスドルフ（\ref{at:cw-paracompact}）なので閉（\ref{top:compact-hausdorff-closed}）。$e_{\alpha}$ を含むので $\overline{e_{\alpha}}\subset\Phi_{\alpha}(D_{\alpha})$。逆の包含は \ref{at:subcomplex-properties} の Step 1 と同じく連続性から。
+
+2：胞体の次元についての帰納法。0 胞体 $v$ は $\{v\}$ 自身が部分複体。$n$ 胞体 $e_{\alpha}$ について、$\varphi_{\alpha}(\partial D_{\alpha})$ はコンパクトで $X^{n-1}$ に含まれるので、\ref{at:cw-compact-finite} から有限個の胞体 $e_{1},\dots,e_{r}$（次元は $n-1$ 以下）としか交わらず、それらの和に含まれる。帰納法の仮定で $e_{i}$ を含む有限部分複体 $A_{i}$ をとり、$A\defeq A_{1}\cup\cdots\cup A_{r}\cup e_{\alpha}$ とする。$A$ は有限個の開胞体の和で、$A_{i}$ の胞体については $A_{i}$ が部分複体であることから、$e_{\alpha}$ については $\Phi_{\alpha}(D_{\alpha})=e_{\alpha}\cup\varphi_{\alpha}(\partial D_{\alpha})\subset e_{\alpha}\cup e_{1}\cup\cdots\cup e_{r}\subset A$ から、\ref{at:subcomplex-properties.1} の条件を満たす。よって $A$ は有限部分複体。コンパクト集合は有限個の胞体としか交わらないので、それらを含む有限部分複体の和（\ref{at:subcomplex-properties.3}）に含まれる。有限部分複体の胞体の次元の最大値を $N$ とすれば、それは $X^{N}$ に含まれる。
+
+3：(⇒) 2 から $X$ 自身が有限個の胞体の和。(⇐) $X=\bigcup_{\alpha}\Phi_{\alpha}(D_{\alpha})$ はコンパクト集合の有限個の和。
+:::
+
+## 局所可縮性 {#at:sec-cwt-local}
+
+::: theorem CW 複体は局所可縮 {#at:cw-locally-contractible keywords="CW complexes are locally contractible: every neighborhood of a point contains an open neighborhood that contracts to the point" index="CW 複体の局所可縮性|しーだぶりゅーふくたいのきょくしょかしゅくせい, 局所可縮|きょくしょかしゅく"}
+CW 複体 $X$ の点 $y$ と、$y$ の開近傍 $U$ について、$y$ の開近傍 $N\subset U$ と、連続写像 $F\colon N\times I\to N$ で $F_{0}=1_{N}$、$F_{1}$ は値 $y$ の定値写像、すべての $t$ で $F_{t}(y)=y$ となるものがある。とくに $X$ は局所可縮である。
+:::
+
+::: intuition
+$y$ を含む胞体の中に小さな球をとり、それより高い次元の胞体には、球（とそれまでに作った部分）に接する部分に、境界から内側へ伸びる薄い「襟」を継ぎ足していく。襟は半径方向に外側へ押し出すことで、1 段低い部分へ変形レトラクトできる。この押し出しを高い次元から順に、時間を $\frac14$, $\frac18$, … と細かく刻んで行えば、全体を $y$ まで縮められる。
+:::
+
+::: proof
+**Step 1（出発点）.** $y\in e_{\alpha}$（$m$ 胞体）、$z\defeq(\Phi_{\alpha}\restriction\mathring D_{\alpha})^{-1}(y)$ とする。$\Phi_{\alpha}^{-1}(U)$ は $z$ を含む開集合なので、$\delta>0$ を $B(z,\delta)\subset\mathring D_{\alpha}\cap\Phi_{\alpha}^{-1}(U)$ となるようにとる（たとえば、そのような $\delta$ の上限の半分と 1 の小さい方）。$N^{m}\defeq\Phi_{\alpha}(B(z,\delta))$ は $X^{m}$ の開集合（\ref{at:cw-closed-criterion.3}）で $U$ に含まれ、$X^{m-1}$ と交わらない。$H^{m}(\Phi_{\alpha}(w),t)\defeq\Phi_{\alpha}((1-t)w+tz)$ は、$\Phi_{\alpha}\restriction\mathring D_{\alpha}$ が同相で球が凸なので、$N^{m}$ の $y$ への縮約で $y$ を固定する。
+
+**Step 2（襟の継ぎ足し）.** $k>m$ とし、$X^{k-1}$ の開集合 $N^{k-1}\subset U$ が作られているとする。$k$ 胞体 $\beta$ について、$A_{\beta}\defeq\varphi_{\beta}^{-1}(N^{k-1})$（$\partial D_{\beta}$ の開集合）、$O_{\beta}\defeq\Phi_{\beta}^{-1}(U)$（$D_{\beta}$ の開集合）とし、
+$$
+W_{\beta}\defeq\{r\theta\mid\theta\in A_{\beta},\ \tfrac12<r\le1,\ \forall s\in[r,1]\ (s\theta\in O_{\beta})\}
+$$
+とおく。$N^{k}\defeq N^{k-1}\cup\bigcup_{\beta}\Phi_{\beta}(W_{\beta})$。
+- (a) $W_{\beta}$ は $D_{\beta}$ の開集合：$r_{0}\theta_{0}\in W_{\beta}$ とし、極座標で $O'\defeq\{(\theta,s)\mid s\theta\in O_{\beta}\}$ を $\partial D_{\beta}\times(0,1]$ の開集合とみる。$O_{\beta}$ は開で $r_{0}\theta_{0}\in O_{\beta}$ なので、$\eta>0$ を $\{\theta_{0}\}\times[r_{0}-\eta,1]\subset O'$ かつ $r_{0}-\eta>0$ となるようにとれる。チューブ補題（\tref{top:tube-lemma}、コンパクトな因子 $[r_{0}-\eta,1]$）から、$\theta_{0}$ の開近傍 $A'\subset A_{\beta}$ で $A'\times[r_{0}-\eta,1]\subset O'$ となるものがある。すると $\{r\theta\mid\theta\in A',\ \max(\frac12,r_{0}-\eta)<r\le1\}$ は $r_{0}\theta_{0}$ の開近傍で $W_{\beta}$ に含まれる。
+- (b) $W_{\beta}\subset O_{\beta}$ なので $N^{k}\subset U$。$\Phi_{\beta}(W_{\beta}\cap\mathring D_{\beta})\subset e_{\beta}$ なので $N^{k}\cap X^{k-1}=N^{k-1}$。
+- (c) $q_{k}^{-1}(N^{k})$ は $X^{k-1}$ の上で $N^{k-1}$、$D_{\beta}$ の上で $W_{\beta}$（$r=1$ の点 $\theta$ は、$\theta\in A_{\beta}$ のとき $\Phi_{\beta}(\theta)\in N^{k-1}\subset U$ なので条件を満たす）。よって $N^{k}$ は $X^{k}$ の開集合。
+- (d) $H^{k}\colon N^{k}\times I\to N^{k}$ を、$N^{k-1}$ の上では $H^{k}(x,t)=x$、$r\theta\in W_{\beta}$ について $H^{k}(\Phi_{\beta}(r\theta),t)\defeq\Phi_{\beta}\bigl(((1-t)r+t)\theta\bigr)$ と定める。$r=1$ では両者は一致し、$r'\defeq(1-t)r+t\in[r,1]$ なので $r'\theta\in W_{\beta}$（$[r',1]\subset[r,1]$）。$X^{k}$ を CW 複体とみて \ref{at:cw-coherent-product.2} を開集合 $N^{k}$ に使うと、次元 $k-1$ 以下の胞体の上では恒等的、$k$ 胞体の上では上の式で連続なので、$H^{k}$ は連続。$H^{k}_{0}=1$、$H^{k}_{t}$ は $N^{k-1}$ の上で恒等、$r_{k}\defeq H^{k}_{1}$ は $N^{k}$ を $N^{k-1}$ に写す。
+
+**Step 3（全体の縮約）.** $N\defeq\bigcup_{k\ge m}N^{k}$ とする。$k\ge m$ では $N\cap X^{k}=N^{k}$、$k<m$ では $N\cap X^{k}=\varnothing$ なので $N$ は $X$ の開集合で、$y\in N\subset U$。時間の区間を $J_{k}\defeq[2^{-(k-m)-1},2^{-(k-m)}]$（$k>m$）、$J_{m}\defeq[\frac12,1]$ とし、$x\in N^{n}$（$n\ge m$）について
+$$
+F(x,t)\defeq\begin{cases}x&(t\le2^{-(n-m)-1})\\ H^{k}\bigl(r_{k+1}\cdots r_{n}(x),\ 2^{k-m+1}t-1\bigr)&(t\in J_{k},\ m<k\le n)\\ H^{m}\bigl(r_{m+1}\cdots r_{n}(x),\ 2t-1\bigr)&(t\in J_{m})\end{cases}
+$$
+とする（$n=m$ では第 2 の場合はない）。区間の端点では、$H^{k}(\cdot,0)$ は恒等で $H^{k+1}(\cdot,1)=r_{k+1}$ なので値が一致する。$x\in N^{n-1}$ なら $r_{n}(x)=x$、$H^{n}(x,t)=x$ なので、$x$ を $N^{n}$ の点と見ても $N^{n-1}$ の点と見ても同じ値になり、$F$ は well-defined。連続性：\ref{at:cw-coherent-product.2} により、各胞体 $\gamma$ で $F\circ(\Phi_{\gamma}\times1)$ を調べればよい。$\gamma$ が $n$ 次元なら $\Phi_{\gamma}$ は $\Phi_{\gamma}^{-1}(N)$ を $N\cap X^{n}=N^{n}$ に写し、有限個の閉区間それぞれの上で連続写像の合成なので、貼り合わせ補題から連続。$F_{0}=1_{N}$、$F_{1}$ は値 $y$ の定値写像（$H^{m}_{1}$ が定値）、$y\in N^{m}$ の上では $r_{k}$ は恒等で $H^{m}(y,t)=\Phi_{\alpha}(z)=y$。
+
+::: hypcheck
+- **選択公理**：使わない（$\delta$ と $W_{\beta}$ は一意に定まるようにとれる）。
+- **弱位相**：Step 3 の連続性を胞体ごとに確かめるのに使った（\ref{at:cw-coherent-product}）。無限個の段を時間 $2^{-k}$ ずつに詰め込めるのは、各胞体の上では有限個の段しか効かないからである。
+:::
+:::
+
+## ホモトピー拡張性質 {#at:sec-cwt-hep}
+
+::: theorem CW 対のホモトピー拡張性質 {#at:cw-hep keywords="homotopy extension property of CW pairs; X x 0 cup A x I is a retract of X x I" index="ホモトピー拡張性質（CW 対）|ほもとぴーかくちょうせいしつしーだぶりゅーつい"}
+$(X,A)$ を CW 対、$Y$ を空間、$f\colon X\to Y$ と $h\colon A\times I\to Y$ を連続写像で $h(a,0)=f(a)$ とする。連続写像 $H\colon X\times I\to Y$ で $H(x,0)=f(x)$、$H\restriction A\times I=h$ となるものがある。とくに $X\times\{0\}\cup A\times I$ は $X\times I$ のレトラクトである。
+:::
+
+::: proof
+**Step 1（円板の場合）.** $n\ge1$ について $\rho\colon D^{n}\times I\to D^{n}\times\{0\}\cup\partial D^{n}\times I$ を、点 $(0,2)$ からの放射状の射影
+$$
+\rho(z,t)\defeq\begin{cases}\Bigl(\dfrac{2z}{2-t},\ 0\Bigr)&(2|z|\le2-t)\\[2mm] \Bigl(\dfrac{z}{|z|},\ 2-\dfrac{2-t}{|z|}\Bigr)&(2|z|\ge2-t)\end{cases}
+$$
+で定める。境目 $2|z|=2-t$ では両方とも $(z/|z|,0)$、第 2 の場合は $|z|\ge\frac12$ なので連続（貼り合わせ補題）。第 2 の場合の第 2 成分は、$|z|\le1$ から $2-\frac{2-t}{|z|}\le t$、場合の条件から $\ge0$ なので値は $D^{n}\times\{0\}\cup\partial D^{n}\times I$ に入る。$t=0$ では $\rho(z,0)=(z,0)$、$|z|=1$ では $\rho(z,t)=(z,t)$ なので $\rho$ はレトラクション。$n=0$ では $\rho(\ast,t)\defeq(\ast,0)$。
+
+**Step 2（骨格の帰納法）.** $X_{n}\defeq X^{n}\cup A$（部分複体、\ref{at:subcomplex-properties.3}）、$X_{-1}\defeq A$ とし、連続写像 $H_{n}\colon X_{n}\times I\to Y$ で $H_{n}(x,0)=f(x)$、$H_{n}\restriction X_{n-1}\times I=H_{n-1}$ となるものを作る（$H_{-1}\defeq h$）。$A$ に含まれない $n$ 胞体 $\beta$ について、$K_{\beta}\colon D_{\beta}\times\{0\}\cup\partial D_{\beta}\times I\to Y$ を $K_{\beta}(z,0)\defeq f(\Phi_{\beta}(z))$、$K_{\beta}(\theta,t)\defeq H_{n-1}(\varphi_{\beta}(\theta),t)$ とする（$(\theta,0)$ で一致し、閉集合 2 つの上で連続なので連続）。$H_{n}(\Phi_{\beta}(z),t)\defeq K_{\beta}(\rho(z,t))$ とすると、$\partial D_{\beta}$ の上では $H_{n-1}$ と一致し、$X_{n}\times I$ の各点は $X_{n-1}\times I$ か、ただ 1 つの $(e_{\beta}\setminus A)\times I$ にあるので well-defined。連続性は、CW 複体 $X_{n}$ に \ref{at:cw-coherent-product.1} を使う：$X_{n-1}$ の胞体の上では $H_{n-1}$、新しい $n$ 胞体の上では $K_{\beta}\circ\rho$ で連続。
+
+**Step 3.** $H\restriction X_{n}\times I\defeq H_{n}$ で $H$ を定める。各胞体は有限次元なのである $X_{n}$ に含まれ、\ref{at:cw-coherent-product.1} から $H$ は連続。$Y=X\times\{0\}\cup A\times I$、$f,h$ を包含とすれば $H$ はレトラクション。
+
+::: hypcheck
+- **選択公理**：使わない。
+- **$A$ が部分複体であること**：Step 2 で $X_{n}$ が CW 複体になることと、$A$ の外の胞体の境界が $X_{n-1}$ に入ることに使った。
+:::
+:::
+
+::: proposition CW 対は良い対 {#at:cw-pair-good keywords="a subcomplex has an open neighborhood that strongly deformation retracts onto it; CW pairs are good pairs; the quotient of a finite CW complex by a subcomplex is a finite CW complex" index="CW 対は良い対|しーだぶりゅーついはよいつい, 商 CW 複体|しょうしーだぶりゅーふくたい"}
+$(X,A)$ を CW 対とする。
+1. $A$ を含む開集合 $N$ と、連続写像 $F\colon N\times I\to N$ で $F_{0}=1_{N}$、$F_{1}(N)\subset A$、すべての $t$ で $F_{t}\restriction A=1_{A}$ となるものがある。とくに $(X,A)$ は良い対（\ref{at:good-pair}）。
+2. $A\neq\varnothing$ なら、商空間 $X/A$ は、$X\setminus A$ の胞体の像（特性写像は $p\circ\Phi_{\beta}$、$p\colon X\to X/A$ は商写像）と、0 胞体 $A/A$ を胞体とする CW 複体で、その $n$ 骨格は $p(X^{n}\cup A)$ である。$X$ が有限なら $X/A$ は有限 CW 複体。
+:::
+
+::: proof
+**Step 1（近傍の構成）.** $A^{n}\defeq A\cap X^{n}$、$N^{0}\defeq A^{0}$ とし、$n\ge1$ について、$A$ に含まれない $n$ 胞体 $\beta$ に $W_{\beta}\defeq\{r\theta\mid\theta\in\varphi_{\beta}^{-1}(N^{n-1}),\ \frac12<r\le1\}$ とおいて
+$$
+N^{n}\defeq N^{n-1}\cup A^{n}\cup\bigcup_{\beta}\Phi_{\beta}(W_{\beta})
+$$
+とする。$q_{n}^{-1}(N^{n})$ は、$X^{n-1}$ の上で $N^{n-1}$（$A^{n-1}\subset N^{n-1}$ は帰納的に成り立つ）、$A$ の $n$ 胞体の $D$ の上で全体、$A$ に含まれない $n$ 胞体の $D_{\beta}$ の上で $W_{\beta}$（極座標で開集合の積）なので、$N^{n}$ は $X^{n}$ の開集合で $N^{n}\cap X^{n-1}=N^{n-1}$。$N\defeq\bigcup_{n}N^{n}$ は $N\cap X^{n}=N^{n}$ を満たすので $X$ の開集合で、$A$ を含む。
+
+**Step 2（各段の押し出し）.** $Z_{n}\defeq N^{n}\cup A$ とし、$K^{n}\colon Z_{n}\times I\to Z_{n}$ を、$N^{n-1}\cup A$ の上では恒等、$r\theta\in W_{\beta}$ では $K^{n}(\Phi_{\beta}(r\theta),t)\defeq\Phi_{\beta}(((1-t)r+t)\theta)$ と定める（$r=1$ では恒等と一致）。$Z_{n}$ は閉集合 $N^{n}=Z_{n}\cap X^{n}$ と $A$ の和で、共通部分 $A^{n}$ の上ではどちらの定義も恒等。$N^{n}\times I$ の上の連続性は、CW 複体 $X^{n}$ の開集合 $N^{n}$ に \ref{at:cw-coherent-product.2} を使って胞体ごとに確かめられ、$A\times I$ の上では恒等なので、貼り合わせ補題から $K^{n}$ は連続。$K^{n}_{1}$ は $Z_{n}$ を $Z_{n-1}$ に写し、$K^{n}_{t}$ は $A$ の上で恒等。
+
+**Step 3（1）.** \ref{at:cw-locally-contractible} の Step 3 と同じく、$x\in N^{n}$ について、$t\le2^{-n-1}$ では $F(x,t)\defeq x$、$t\in[2^{-k-1},2^{-k}]$（$1\le k\le n$）では $F(x,t)\defeq K^{k}\bigl(K^{k+1}_{1}\cdots K^{n}_{1}(x),\ 2^{k+1}t-1\bigr)$、$t\ge\frac12$ では $F(x,t)\defeq K^{1}_{1}\cdots K^{n}_{1}(x)$ とおく。値は $Z_{k}\subset N$ に入り、$F_{1}(x)\in Z_{0}=A$。$x\in N^{n-1}$ なら $K^{n}$ は $x$ を動かさないので well-defined で、$A$ の点はどの段でも動かない。$n$ 胞体の上では有限個の段しか効かないので、\ref{at:cw-coherent-product.2} から $F$ は連続。$N$ は $A$ に変位レトラクトする $A$ の開近傍なので、$(X,A)$ は良い対。
+
+**Step 4（2）.** \ref{at:cw-recognition.3} 条件を、$Y\defeq X/A$、$\Psi_{\beta}\defeq p\circ\Phi_{\beta}$（$e_{\beta}\not\subset A$）と、1 点 $D^{0}$ を $\ast=p(A)$ に写す $\Psi_{\ast}$ について確かめる。$X_{n}\defeq X^{n}\cup A$ とおくと $Y^{n}=p(X_{n})$。
+- 判定法の 1：$p$ は $X\setminus A$ の上で単射で、$X\setminus A$ は $A$ に含まれない開胞体の非交和なので、$\{\ast\}$ と $p(e_{\beta})$ たちは $Y$ を分割する。$\Phi_{\beta}(\partial D_{\beta})\subset X^{n-1}$ なので $\Psi_{\beta}(\partial D_{\beta})\subset p(X_{n-1})$。
+- 判定法の 2：$F\subset Y$ が閉 $\iff$ $p^{-1}(F)$ が閉 $\iff$ $X$ のすべての胞体 $\alpha$ で $\Phi_{\alpha}^{-1}(p^{-1}(F))$ が閉（\ref{at:cw-closed-criterion.2}）。$e_{\alpha}\subset A$ なら $\Phi_{\alpha}(D_{\alpha})\subset A$（\ref{at:subcomplex-properties.1}）なので、この逆像は $D_{\alpha}$ か空集合で閉。よって条件は $\Psi_{\beta}^{-1}(F)$（と $\Psi_{\ast}^{-1}(F)$）だけで決まる。
+- 判定法の 3：$G\subset Y^{n}$ で、次元 $n$ 以下の $\Psi$ による逆像が閉とする。$X$ の胞体 $\gamma$ について $\Phi_{\gamma}^{-1}(p^{-1}(G))$ が閉であることを $m=\dim e_{\gamma}$ の帰納法で示す。$e_{\gamma}\subset A$ なら上と同じ。$e_{\gamma}\not\subset A$, $m\le n$ なら仮定。$e_{\gamma}\not\subset A$, $m>n$ なら、$e_{\gamma}$ は $X_{n}$ と交わらないので $\Phi_{\gamma}^{-1}(p^{-1}(G))=\varphi_{\gamma}^{-1}(p^{-1}(G)\cap X^{m-1})$ で、帰納法の仮定と \ref{at:cw-closed-criterion.2}（CW 複体 $X^{m-1}$ に適用）から $p^{-1}(G)\cap X^{m-1}$ は $X^{m-1}$ で閉、よって逆像は閉。\ref{at:cw-closed-criterion.2} から $p^{-1}(G)$ は閉で、$G$ は閉。
+
+\ref{at:cw-recognition} から $Y$ は CW 複体。胞体の個数は $X\setminus A$ の胞体の個数に 1 を足したものなので、$X$ が有限なら $Y$ も有限。
+:::
+
+## 無限次元の CW 複体の胞体ホモロジー {#at:sec-cwt-infinite}
+
+::: theorem 一般の CW 複体の胞体ホモロジー {#at:cellular-singular-general keywords="for any CW complex, H_k(X^n) -> H_k(X) is an isomorphism for k < n and cellular homology equals singular homology" index="無限次元 CW 複体の胞体ホモロジー|むげんじげんしーだぶりゅーふくたいのほうたいほもろじー"}
+$X$ を任意の CW 複体とする。
+1. $k<n$ なら包含の誘導写像 $H_{k}(X^{n})\to H_{k}(X)$ は同型。
+2. $H^{\mathrm{CW}}_{n}(X)\cong H_{n}(X)$。
+:::
+
+::: proof
+**Step 1（1 の全射）.** 特異サイクル $z\in S_{k}(X)$ の台（現れる有限個の特異単体の像の和）はコンパクトなので、\ref{at:cw-finite-subcomplex.2} からある $X^{N}$（$N\ge n$ にとる）に含まれ、$z$ は $X^{N}$ のサイクル。$X^{N}$ は有限次元の CW 複体なので、\ref{at:skeleton-homology.3} から $H_{k}(X^{n})\to H_{k}(X^{N})$ は同型。よって $[z]$ は $H_{k}(X^{n})$ の元の像。
+
+**Step 2（1 の単射）.** $X^{n}$ のサイクル $z$ が $X$ で $z=\partial c$ なら、$c$ の台もある $X^{M}$（$M\ge n$）に含まれ、$H_{k}(X^{M})$ で $[z]=0$。$H_{k}(X^{n})\to H_{k}(X^{M})$ は同型なので、$H_{k}(X^{n})$ で $[z]=0$。
+
+**Step 3（2）.** \ref{at:cellular-singular} の証明の Step 1〜4 は、最後の $H_{n}(X^{n+1})\cong H_{n}(X)$ を除いて有限次元性を使わない。その部分を 1 で置き換える。
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- CW 複体は、各胞体の閉包を\term[部分空間]{top:subspace}として位相が決まる（\ref{at:cw-closed-criterion.2}）。この性質と \ref{at:cw-finite-subcomplex.1}・\ref[2]{at:cw-finite-subcomplex.2} は、CW 複体の名前の由来でもある（C は closure-finite：各胞体の閉包は有限個の胞体としか交わらない、W は weak topology）。
+- CW 複体が距離化可能であるための必要十分条件は局所有限（各点の近傍が有限個の胞体としか交わらない）であることが知られている（本サイト未収録）。とくに可算個の円周のウェッジ（CW 位相）は距離化可能でない。
+- 局所可縮でパラコンパクト・ハウスドルフという性質は、層コホモロジー・チェックコホモロジーと特異コホモロジーの比較（\ref{at:cw-local-properties}）で使う。
+
+**前提を変えると.** 弱位相を外して、同じ集合に別の位相（たとえば $\mathbb{R}^{2}$ に埋め込んだ位相）を入れると、上の結論は崩れうる。可算個の円周を 1 点で貼った集合に、$\mathbb{R}^{2}$ の半径 $\frac1n$ の円の和としての位相を入れたものはハワイの耳飾り（\ref{at:page-homology-counterexamples}）で、コンパクトなのに無限個の胞体と交わる。
+
+**高い視点.** CW 複体の位相は「円板たちの非交和からの商位相」、すなわち位相空間の圏での余極限の位相である。このページの証明はすべて「性質を胞体ごとに確かめ、骨格についての帰納法で全体に広げる」形をしており、余極限の普遍性（写像の連続性が胞体ごとに判定できること、\ref{at:cw-coherent-product}）がそれを支えている。比喩で言えば、CW 複体は「規格化された部品を順に溶接した構造物」で、各部品が健全で溶接部（襟）を丁寧に作れば、全体の健全性（ハウスドルフ性・局所可縮性）は部品ごとの検査から保証される。
+:::
+
+## 問題 {#at:sec-cwt-problems}
+
+::: problem {#at:prob-cw-infinite-wedge}
+可算個の円周のウェッジ $\bigvee_{n\ge1}S^{1}$（0 胞体 1 個と 1 胞体可算個の CW 複体）はコンパクトでないこと、したがってハワイの耳飾り（$\mathbb{R}^{2}$ の円 $\{|x-(\frac1n,0)|=\frac1n\}$ たちの和）と同相でないことを示せ。
+:::
+
+::: solution
+CW 複体として胞体は無限個なので、\ref{at:cw-finite-subcomplex.3} からコンパクトでない。ハワイの耳飾りは $\mathbb{R}^{2}$ の有界閉集合（各円は閉で、和の閉包に新しく加わる点は原点だけで、原点は既に含まれる）なのでコンパクト。同相写像はコンパクト性を保つので、両者は同相でない。
+:::
+
+::: problem {#at:prob-cell-closure-not-subcomplex}
+胞体の閉包が部分複体にならない CW 複体の例を挙げよ。
+:::
+
+::: solution
+$X^{1}$ を、0 胞体 $a,b$ と、$a$ と $b$ を結ぶ 1 胞体 $e_{1},e_{2}$ からなる円周とする。$\partial D^{2}$ を、$a$ から $e_{1}$ の中点 $m$ まで行って $a$ に戻る道に写す連続写像（$\partial D^{2}\cong[0,1]/\{0,1\}$ で、$[0,\frac12]$ で $a\to m$、$[\frac12,1]$ でその逆）を $\varphi$ として 2 胞体を貼る。\ref{at:cw-finite-subcomplex.1} から $\overline{e^{2}}=e^{2}\cup\varphi(\partial D^{2})$ で、$\varphi(\partial D^{2})$ は $e_{1}$ の半分（$a$ から $m$ までの弧）なので、$\overline{e^{2}}$ は $e_{1}$ と交わるが $e_{1}$ を含まない。よって開胞体の和集合でなく、部分複体でない。
+:::
+
+::: problem {#at:prob-contractible-subcomplex-quotient}
+CW 対 $(X,A)$ で $A$ が可縮なら、商写像 $q\colon X\to X/A$ はホモトピー同値であることを示せ。
+:::
+
+::: solution
+$A$ の縮約 $h\colon A\times I\to A$（$h_{0}=1_{A}$、$h_{1}$ は定値）をとる。\ref{at:cw-hep} で、$f=1_{X}$ と $h$（$X$ への値として）から $H\colon X\times I\to X$ で $H_{0}=1_{X}$、$H\restriction A\times I=h$ となるものを得る。$H_{t}(A)\subset A$ なので、$q\circ H$ は各時刻で $A$ を 1 点に写し、\ref{top:homotopy-on-quotient} から $\bar H\colon(X/A)\times I\to X/A$、$\bar H_{t}\circ q=q\circ H_{t}$ が定まる。$H_{1}$ は $A$ を 1 点に写すので、商写像の普遍性から $g\colon X/A\to X$ で $g\circ q=H_{1}$ となるものがある。$g\circ q=H_{1}\simeq H_{0}=1_{X}$。また $q\circ g\circ q=q\circ H_{1}=\bar H_{1}\circ q$ で、$q$ は全射なので $q\circ g=\bar H_{1}\simeq\bar H_{0}=1_{X/A}$。よって $g$ は $q$ のホモトピー逆写像。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>変数変換公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/03-multivariable-calculus/07-change-of-variables.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 変数変換公式 {#calc:page-change-of-variables keywords="change of variables formula for multiple integrals, Jacobian determinant, volume of linear images, outer Jordan content, Lipschitz images of null sets, proof without partitions of unity by small cubes, polar coordinates, spherical coordinates, Gaussian integral, volume of the n-ball"}
+
+1 変数の置換積分 $\int_{\varphi(a)}^{\varphi(b)}f=\int_{a}^{b}f(\varphi(t))\varphi'(t)\,dt$ の多変数版が**変数変換公式**
+$$
+\int_{\Phi(E)}f=\int_{E}(f\circ\Phi)\,|\det D\Phi|
+$$
+である。$|\det D\Phi|$ は「$\Phi$ が各点の近くで体積を何倍にするか」を表す。このページでは、まず線形写像が体積を $|\det|$ 倍することを示し、次に $C^{1}$ 級の写像は小さい立方体を「ほぼ線形な像」に写すことから、上からの不等式を示し、逆写像に同じ不等式を使って等式を得る。この証明は 1 の分割を使わず、使う位相の道具はコンパクト性と一様連続性だけである。応用として、極座標・球座標、ガウス積分、$n$ 次元球の体積を求める。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 10 章（1 の分割を使う証明）、杉浦光夫『解析入門 I』第 IV 章を参照したうえで、小さい立方体の像の評価による証明を自分で組み立てた。
+
+## 記法と定義の確認 {#calc:sec-cv-notation}
+
+::: notation
+- 重積分・ジョルダン可測集合 \ref{calc:box-integral}, \ref{calc:box-riemann-criterion}, \ref{calc:jordan-measurable}, \ref{calc:jordan-measurable-criterion}, \ref{calc:jordan-additivity}、測度 $0$ \ref{calc:measure-zero-rn-properties}、フビニの定理 \tref{calc:fubini}, \ref{calc:normal-domain-integral}。
+- 逆関数定理と開写像性 \tref{calc:inverse-function-theorem}, \ref{calc:open-mapping-c1}、1 変数の平均値の定理 \tref{calc:mean-value-theorem}、作用素ノルムと逆行列の連続性 \ref{calc:invertible-open}。
+- 基本行列 \ref{lin:elementary-operations}、可逆行列は基本行列の積 \ref{lin:inverse-elimination}、行列式の乗法性 \ref{lin:det-multiplicative}。
+- **立方体**：$|x|_{\infty}=\max_{i}|x_{i}|$ とし、中心 $c$、半径 $r$ の閉立方体を $C(c,r)\defeq\{x:|x-c|_{\infty}\le r\}$ と書く（体積 $(2r)^{n}$）。
+- **外容量**：有界な $S\subset\mathbb{R}^{n}$ について $\bar v(S)\defeq\overline{\int_{R}}\chi_{S}$（$R\supset S$ は閉直方体。上積分）。$\bar v$ は単調、有限劣加法的（$\chi_{S\cup S'}\le\chi_{S}+\chi_{S'}$ と上積分の劣加法性）、ジョルダン可測集合では体積に一致し、閉直方体 $Q$ について $\bar v(Q)=v(Q)$。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## 線形写像と体積 {#calc:sec-cv-linear}
+
+::: lemma $C^{1}$ 写像による像の外容量 {#calc:c1-image-content keywords="a C^1 map on a neighborhood of a compact set K multiplies outer content by at most L^n; images of null sets are null" index="C1 写像の像の体積評価|しーわんしゃぞうのぞうのたいせきひょうか"}
+$U\subset\mathbb{R}^{n}$ を開集合、$\Phi\colon U\to\mathbb{R}^{n}$ を $C^{1}$ 級、$K\subset U$ をコンパクトとする。定数 $L$ があって、
+1. $K$ と交わる半径 $r\le r_{0}$ の閉立方体 $C$ について、$\Phi(C)\subset C(\Phi(c),Lr)$（$c$ は $C$ の中心）。
+2. $K$ に含まれる任意のジョルダン可測集合 $A$ について $\bar v(\Phi(A))\le L^{n}v(A)$。とくに、$A$ が測度 $0$ のコンパクト集合なら $\Phi(A)$ は測度 $0$。
+:::
+
+::: proof
+**Step 1（定数）.** $K$ の各点から $\mathbb{R}^{n}\setminus U$ までの距離は正の最小値をとるので（\ref{calc:sec-hd-taylor} の注意と同じ）、$\rho>0$ を $K_{\rho}\defeq\{x:\operatorname{dist}_{\infty}(x,K)\le\rho\}\subset U$ となるようにとれる（$K_{\rho}$ はコンパクト）。$L\defeq\max_{z\in K_{\rho}}\max_{i}\sum_{j}|\partial_{j}\Phi_{i}(z)|$（連続関数の最大値）、$r_{0}\defeq\rho/2$。
+
+**Step 2（1）.** $C$ が $K$ と交わり $r\le r_{0}$ なら $C\subset K_{\rho}$（$C$ の点と $K$ の点の $|\cdot|_{\infty}$ 距離は $2r\le\rho$ 以下）。$x\in C$ について、線分 $[c,x]\subset C$ 上で $g(t)\defeq\Phi_{i}(c+t(x-c))$ に 1 変数の平均値の定理を使うと、$\tau\in(0,1)$ で
+$$
+|\Phi_{i}(x)-\Phi_{i}(c)|=|g'(\tau)|=\Bigl|\sum_{j}\partial_{j}\Phi_{i}(c+\tau(x-c))(x_{j}-c_{j})\Bigr|\le L|x-c|_{\infty}\le Lr.
+$$
+
+**Step 3（2）.** $\varepsilon>0$ とする。$A$ を含む大きな立方体を、半径 $r\le r_{0}$ の立方体（辺 $2r$）の格子に分割すると、$A$ と交わる格子の立方体の体積の和は上和 $U(\chi_{A},P)$ で、網目 $\to0$ で $v(A)$ に収束する（\ref{calc:box-riemann-criterion}）ので、$<v(A)+\varepsilon$ となる $r$ をとる。$\Phi(A)$ はそれらの立方体の像の和に含まれ、1 から各像は体積 $L^{n}(2r)^{n}$ の立方体に含まれる。$\bar v$ の単調性と劣加法性から $\bar v(\Phi(A))\le L^{n}(v(A)+\varepsilon)$。測度 $0$ のコンパクト集合 $A$ は、有限個の開直方体で覆えるのでジョルダン可測で体積 $0$（境界は $A$ に含まれ測度 $0$）、よって $\bar v(\Phi(A))=0$ で、$\Phi(A)$ は体積の和がいくらでも小さい有限個の閉立方体で覆え、測度 $0$。
+:::
+
+::: theorem 線形写像は体積を $|\det|$ 倍する {#calc:linear-volume keywords="for a linear map T and a Jordan measurable set E, T(E) is Jordan measurable and v(T(E)) = |det T| v(E)" index="線形写像と体積|せんけいしゃぞうとたいせき, 平行体の体積|へいこうたいのたいせき"}
+$T\in M_{n}(\mathbb{R})$、$E$ をジョルダン可測集合とすると、$T(E)$ はジョルダン可測で $v(T(E))=|\det T|v(E)$。
+:::
+
+::: proof
+**Step 1（$T$ が特異な場合）.** $\det T=0$ なら $T(E)$ は次元 $<n$ の\term[部分空間]{lin:vector-space} $W$ の有界集合。$W$ の基底を延長した基底で $W$ を座標超平面に写す可逆な線形写像 $S$ をとると、$S(T(E))$ は座標超平面と有界集合の共通部分で測度 $0$（\ref{calc:measure-zero-rn-properties.4}）。その閉包はコンパクトで測度 $0$ なので、\ref{calc:c1-image-content.2}（$\Phi=S^{-1}$）から $T(E)$ の閉包も測度 $0$。よって $T(E)$ は境界が測度 $0$ でジョルダン可測、体積 $0$（\ref{calc:jordan-additivity.1}）。
+
+**Step 2（可逆な場合の可測性）.** $T$ は同相写像なので $\partial T(E)=T(\partial E)$。$\partial E$ はコンパクト（有界閉）で測度 $0$ なので、\ref{calc:c1-image-content.2} から $T(\partial E)$ は測度 $0$。よって $T(E)$ はジョルダン可測。また $T,S$ が主張を満たせば $TS$ も満たす（\ref{lin:det-multiplicative}）。可逆行列は基本行列の積（\ref{lin:inverse-elimination}）なので、基本行列で示せばよい。
+
+**Step 3（入れ替えと定数倍）.** 座標の入れ替え $P$、および 1 つの座標の $\lambda$ 倍（$\lambda\neq0$）$D$ は、閉直方体を閉直方体に写し、体積をそれぞれ $1=|\det P|$ 倍、$|\lambda|=|\det D|$ 倍する。$E$ を含む閉直方体 $R$ の分割は $T(R)$ の分割に 1 対 1 に対応し、$\chi_{T(E)}$ のダルブー和は $\chi_{E}$ のダルブー和の $|\det T|$ 倍。よって $v(T(E))=|\det T|v(E)$。
+
+**Step 4（せん断）.** $T(x)=x+cx_{2}e_{1}$（第 1 座標に第 2 座標の $c$ 倍を加える）とする。$x=(x_{1},x')$ と書き、フビニの定理（\tref{calc:fubini}、$x_{1}$ を内側、$x'$ を外側。変数の並べ替えは Step 3）を使う。$x'$ を固定したときの切り口は $T(E)_{x'}=E_{x'}+cx_{2}$（平行移動）で、1 変数の下積分 $\underline{\int}\chi_{E_{x'}+t}=\underline{\int}\chi_{E_{x'}}$（分割も平行移動すればダルブー和は同じ）。よって
+$$
+v(T(E))=\int\underline{\int}\chi_{T(E)_{x'}}\,dx_{1}\,dx'=\int\underline{\int}\chi_{E_{x'}}\,dx_{1}\,dx'=v(E)=|\det T|v(E).
+$$
+他の 2 座標の組のせん断は、入れ替えと合成して得られる。
+:::
+
+::: corollary 平行体の体積 {#calc:parallelepiped-volume keywords="the parallelepiped spanned by the columns of T has volume |det T|" index="平行体|へいこうたい"}
+$t_{1},\dots,t_{n}\in\mathbb{R}^{n}$ の張る平行体 $\{\sum c_{j}t_{j}:0\le c_{j}\le1\}$ はジョルダン可測で、体積は $|\det(t_{1},\dots,t_{n})|$。
+:::
+
+::: proof
+単位立方体 $[0,1]^{n}$ の、列が $t_{j}$ の行列 $T$ による像なので、\ref{calc:linear-volume}。
+:::
+
+## 変数変換公式 {#calc:sec-cv-formula}
+
+::: lemma 小さい立方体の像の体積 {#calc:small-cube-image keywords="for a C^1 diffeomorphism and small cubes C with center c, the outer content of Phi(C) is at most |det D Phi(c)| (1+eta)^n v(C)" index="小さい立方体の像の体積|ちいさいりっぽうたいのぞうのたいせき"}
+$U$ を開集合、$\Phi\colon U\to\mathbb{R}^{n}$ を $C^{1}$ 級ですべての点で $\det D\Phi\neq0$、$K\subset U$ をコンパクトとする。任意の $\eta>0$ に $r_{1}>0$ があって、$K$ と交わる半径 $r\le r_{1}$ の閉立方体 $C$（中心 $c$）について
+$$
+\bar v(\Phi(C))\le|\det D\Phi(c)|(1+\eta)^{n}v(C).
+$$
+:::
+
+::: proof
+**Step 1（定数）.** \ref{calc:c1-image-content} の $\rho$, $K_{\rho}$ をとる。行列の $\ell^{\infty}$ 作用素ノルム $\|A\|_{\infty}\defeq\max_{i}\sum_{j}|a_{ij}|$（$|Ax|_{\infty}\le\|A\|_{\infty}|x|_{\infty}$）を使う。$z\mapsto D\Phi(z)^{-1}$ は $K_{\rho}$ 上で連続（\ref{calc:invertible-open.3}）なので $M\defeq\max_{K_{\rho}}\|D\Phi^{-1}\|_{\infty}$ は有限。$D\Phi$ は $K_{\rho}$ 上で一様連続（\ref{top:heine-cantor}）なので、$r_{1}\le\rho/2$ を、$|z-w|_{\infty}\le2r_{1}$ ($z,w\in K_{\rho}$) なら $\|D\Phi(z)-D\Phi(w)\|_{\infty}\le\eta/M$ となるようにとる。
+
+**Step 2（線形化）.** $C$ は $K_{\rho}$ に含まれる（\ref{calc:c1-image-content} の Step 2）。$T\defeq D\Phi(c)$、$\psi\defeq T^{-1}\circ\Phi$ とおくと $D\psi(z)-I=T^{-1}(D\Phi(z)-D\Phi(c))$ で、$z\in C$ なら $\|D\psi(z)-I\|_{\infty}\le M\cdot\eta/M=\eta$。$\psi(x)-x$ の各成分に \ref{calc:c1-image-content} の Step 2 と同じ平均値の定理の評価を使うと、$x\in C$ について
+$$
+|(\psi(x)-x)-(\psi(c)-c)|_{\infty}\le\eta|x-c|_{\infty},
+$$
+したがって $|\psi(x)-\psi(c)|_{\infty}\le(1+\eta)r$。すなわち $\psi(C)\subset C(\psi(c),(1+\eta)r)\eqqcolon C'$。
+
+**Step 3.** $\Phi(C)=T(\psi(C))\subset T(C')$ で、\ref{calc:linear-volume} から $\bar v(\Phi(C))\le v(T(C'))=|\det T|(1+\eta)^{n}v(C)$。
+:::
+
+::: theorem 変数変換公式 {#calc:change-of-variables keywords="change of variables: for a C^1 injective map with nonvanishing Jacobian on an open set containing a compact Jordan measurable E, int over Phi(E) of f = int over E of (f o Phi)|det D Phi|" index="変数変換公式|へんすうへんかんこうしき, ヤコビアン|やこびあん" refname="変数変換公式"}
+$U\subset\mathbb{R}^{n}$ を開集合、$\Phi\colon U\to\mathbb{R}^{n}$ を $C^{1}$ 級の単射で、すべての点で $\det D\Phi\neq0$ とする。$E\subset U$ をコンパクトなジョルダン可測集合とすると、$\Phi(E)$ はコンパクトなジョルダン可測集合で、$\Phi(E)$ 上の連続関数 $f$ について
+$$
+\int_{\Phi(E)}f=\int_{E}(f\circ\Phi)\,|\det D\Phi|.
+\label{calc:eq-change-of-variables}
+$$
+:::
+
+::: intuition
+$E$ を小さい立方体 $C$ に分けると、$\Phi(C)$ は「$D\Phi(c)$ による立方体の像」すなわち平行体にほぼ等しく、その体積はほぼ $|\det D\Phi(c)|v(C)$。$\Phi(E)$ 上の積分を $\Phi(C)$ ごとに足すと、右辺のリーマン和になる。証明では「ほぼ」の部分を、Step 2 の上からの不等式だけで処理し、下からの不等式は逆写像 $\Phi^{-1}$ に同じ議論を使って得る。
+:::
+
+::: proof
+**Step 1（像の性質）.** $\Phi(E)$ はコンパクト。逆関数定理と開写像性（\ref{calc:open-mapping-c1}）から $\Phi(U)$ は開、$\Phi(\operatorname{int}E)$ は開で $\Phi(E)$ に含まれるので $\operatorname{int}\Phi(E)$ に含まれる。$\Phi(E)$ は閉なので $\partial\Phi(E)\subset\Phi(E)\setminus\Phi(\operatorname{int}E)=\Phi(\partial E)$（単射性）。$\partial E$ は測度 $0$ のコンパクト集合なので、\ref{calc:c1-image-content.2} から $\Phi(\partial E)$ は測度 $0$、$\Phi(E)$ はジョルダン可測。また逆写像 $\Phi^{-1}\colon\Phi(U)\to U$ は、逆関数定理の局所的な逆写像と一致するので $C^{1}$ 級で、$D\Phi^{-1}(y)=D\Phi(\Phi^{-1}(y))^{-1}$。
+
+**Step 2（$f\ge0$ のときの上からの不等式）.** $g\defeq(f\circ\Phi)|\det D\Phi|$（$E$ 上で連続、$\ge0$）とし、$\tilde g$ を $E$ の外で $0$ と延長する。$\eta>0$ について \ref{calc:small-cube-image}（$K=E$）の $r_{1}$ をとり、$E$ を含む立方体を半径 $r\le r_{1}$ の格子の立方体に分ける。$E$ と交わる格子の立方体を $C_{1},\dots,C_{N}$（中心 $c_{k}$）とすると $\Phi(E)\subset\bigcup_{k}\Phi(C_{k}\cap E)$ で、$f\ge0$ なので
+$$
+\chi_{\Phi(E)}f\le\sum_{k}\Bigl(\sup_{C_{k}\cap E}f\circ\Phi\Bigr)\chi_{\Phi(C_{k})}.
+$$
+上積分の単調性・劣加法性と \ref{calc:small-cube-image} から
+$$
+\int_{\Phi(E)}f\le\sum_{k}\Bigl(\sup_{C_{k}\cap E}f\circ\Phi\Bigr)|\det D\Phi(c_{k})|(1+\eta)^{n}v(C_{k}).
+$$
+$|\det D\Phi|$ は $K_{\rho}$ 上で一様連続なので、$|\det D\Phi(c_{k})|\le|\det D\Phi(x)|+\omega(r)$（$x\in C_{k}$、$\omega(r)\to0$）。よって右辺は $(1+\eta)^{n}\bigl(U(\tilde g,P_{r})+\|f\|_{\infty}\omega(r)\sum_{k}v(C_{k})\bigr)$ 以下（$P_{r}$ はこの格子の分割で、$C_{k}$ では $M_{C_{k}}(\tilde g)=\sup_{C_{k}\cap E}g$、それ以外の立方体では $0$）。$r\to0$ で $U(\tilde g,P_{r})\to\int_{E}g$（$\tilde g$ は積分可能、\ref{calc:jordan-measurable-criterion.3}）、$\sum v(C_{k})$ は有界。$\eta$ は任意なので
+$$
+\int_{\Phi(E)}f\le\int_{E}(f\circ\Phi)|\det D\Phi|.
+$$
+
+**Step 3（逆向きの不等式）.** Step 2 を $\Phi^{-1}$（Step 1 から仮定を満たす）、コンパクトなジョルダン可測集合 $\Phi(E)$、連続関数 $g\ge0$（$E=\Phi^{-1}(\Phi(E))$ 上）に使うと
+$$
+\begin{aligned}
+\int_{E}g&\le\int_{\Phi(E)}(g\circ\Phi^{-1})|\det D\Phi^{-1}|\\
+&=\int_{\Phi(E)}f\cdot|\det D\Phi(\Phi^{-1}(y))|\,|\det D\Phi^{-1}(y)|\,dy=\int_{\Phi(E)}f,
+\end{aligned}
+$$
+最後は $D\Phi(\Phi^{-1}(y))D\Phi^{-1}(y)=I$ と行列式の乗法性から。Step 2 と合わせて $f\ge0$ で等式。
+
+**Step 4（一般の $f$）.** $c\defeq\|f\|_{\infty}$ とすると $f+c\ge0$ と定数 $c\ge0$ について等式が成り立つので、差をとって（積分の線形性）$f$ でも成り立つ。
+
+::: hypcheck
+- **単射性**：Step 1 の $\partial\Phi(E)\subset\Phi(\partial E)$ と、Step 3 の逆写像に使った。外すと偽：$\Phi(x)=x^{2}$ を $E=[-1,1]$ で考えると $\int_{\Phi(E)}1=1$ だが $\int_{E}|2x|\,dx=2$（$E$ の像を 2 回数えている）。
+- **$\det D\Phi\neq0$**：\ref{calc:small-cube-image} の定数 $M$ と、逆写像が $C^{1}$ 級であることに使った。境界の上でだけ $0$ になる場合（極座標の原点）は次の系で扱う。
+- **$C^{1}$ 級**：一様連続性（立方体の像がほぼ平行体になること）に使った。
+- **1 の分割は使わない**：位相の道具は $K_{\rho}$ のコンパクト性、一様連続性、ハイネ–ボレルだけ。
+:::
+:::
+
+::: corollary 境界での退化を許す変数変換 {#calc:change-of-variables-boundary keywords="change of variables when Phi is injective with nonzero Jacobian only on the interior of E; polar coordinates" index="変数変換公式（境界での退化）|へんすうへんかんこうしききょうかいでのたいか"}
+$U$ を開集合、$\Phi\colon U\to\mathbb{R}^{n}$ を $C^{1}$ 級、$E\subset U$ をコンパクトなジョルダン可測集合とし、$\Phi$ は $\operatorname{int}E$ の上で単射かつ $\det D\Phi\neq0$ とする（境界の上では何も仮定しない）。このとき $\Phi(E)$ はジョルダン可測で、$\Phi(E)$ 上の連続関数 $f$ について \eqref{calc:eq-change-of-variables} が成り立つ。
+:::
+
+::: proof
+**Step 1（可測性）.** $\Phi(\operatorname{int}E)$ は開（$\operatorname{int}E$ 上で \ref{calc:open-mapping-c1}）なので、$\partial\Phi(E)\subset\Phi(E)\setminus\Phi(\operatorname{int}E)\subset\Phi(\partial E)$ で、これは測度 $0$（\ref{calc:c1-image-content.2}）。
+
+**Step 2（内側からの近似）.** $E$ を含む立方体の、辺 $2^{-k}$ の格子の立方体のうち $\operatorname{int}E$ に含まれるものの和を $E_{k}$ とする。$E_{k}$ はコンパクトなジョルダン可測集合で $E_{k}\subset\operatorname{int}E$。$v(E_{k})$ は $\chi_{\operatorname{int}E}$ の下和なので、$\operatorname{int}E$ がジョルダン可測で $v(\operatorname{int}E)=v(E)$（差は測度 $0$ の $\partial E$ の一部）であることから $v(E_{k})\to v(E)$。$F_{k}\defeq\overline{E\setminus E_{k}}$ はジョルダン可測で $v(F_{k})=v(E)-v(E_{k})\to0$。
+
+**Step 3（極限）.** \ref{calc:change-of-variables} を開集合 $\operatorname{int}E$ と $E_{k}$ に使うと $\int_{\Phi(E_{k})}f=\int_{E_{k}}(f\circ\Phi)|\det D\Phi|$。右辺と $\int_{E}$ の差は $\|f\|_{\infty}\max_{E}|\det D\Phi|\,v(F_{k})\to0$。左辺と $\int_{\Phi(E)}f$ の差は $\|f\|_{\infty}\bar v(\Phi(E)\setminus\Phi(E_{k}))\le\|f\|_{\infty}\bar v(\Phi(F_{k}))\le\|f\|_{\infty}L^{n}v(F_{k})\to0$（\ref{calc:c1-image-content.2}、$K=E$）。
+:::
+
+## 極座標と応用 {#calc:sec-cv-polar}
+
+::: example 極座標
+$\Phi(r,\theta)\defeq(r\cos\theta,r\sin\theta)$ は $\det D\Phi=r$ で、$E=[0,R]\times[0,2\pi]$ の内部 $(0,R)\times(0,2\pi)$ の上で単射かつ $\det D\Phi\neq0$。$\Phi(E)$ は閉円板 $\bar B(0,R)$。\ref{calc:change-of-variables-boundary} から、円板上の連続関数 $f$ について
+$$
+\int_{\bar B(0,R)}f=\int_{0}^{R}\int_{0}^{2\pi}f(r\cos\theta,r\sin\theta)\,r\,d\theta\,dr
+$$
+（右辺はフビニの定理）。$f=1$ なら面積 $\pi R^{2}$。
+:::
+
+::: example 球座標
+$\Phi(r,\phi,\theta)\defeq(r\sin\phi\cos\theta,r\sin\phi\sin\theta,r\cos\phi)$ は、行列式を第 3 行で展開して $\det D\Phi=r^{2}\sin\phi$。$E=[0,R]\times[0,\pi]\times[0,2\pi]$ の内部で単射かつ $\det\neq0$ なので、$\bar B(0,R)\subset\mathbb{R}^{3}$ 上で
+$$
+\int_{\bar B(0,R)}f=\int_{0}^{R}\int_{0}^{\pi}\int_{0}^{2\pi}f(\Phi(r,\phi,\theta))\,r^{2}\sin\phi\,d\theta\,d\phi\,dr.
+$$
+$f=1$ なら体積 $\frac43\pi R^{3}$。
+:::
+
+::: theorem ガウス積分 {#calc:gaussian-integral keywords="Gaussian integral int e^{-x^2} dx = sqrt(pi) via polar coordinates" index="ガウス積分|がうすせきぶん"}
+$\displaystyle\int_{-\infty}^{\infty}e^{-x^{2}}\,dx=\sqrt{\pi}$（広義積分、\ref{calc:improper-integral}）。
+:::
+
+::: proof
+**Step 1（円板上の積分）.** 極座標で $\int_{\bar B(0,R)}e^{-|x|^{2}}=\int_{0}^{R}2\pi re^{-r^{2}}dr=\pi(1-e^{-R^{2}})$。
+
+**Step 2（正方形との比較）.** $e^{-|x|^{2}}>0$ と $\bar B(0,R)\subset[-R,R]^{2}\subset\bar B(0,\sqrt2R)$ から（積分の単調性と領域の加法性）
+$$
+\pi(1-e^{-R^{2}})\le\int_{[-R,R]^{2}}e^{-|x|^{2}}\le\pi(1-e^{-2R^{2}}).
+$$
+中央はフビニの定理（\ref{calc:fubini-continuous}）と $e^{-x^{2}-y^{2}}=e^{-x^{2}}e^{-y^{2}}$ から $I(R)^{2}$、$I(R)\defeq\int_{-R}^{R}e^{-x^{2}}dx$。
+
+**Step 3.** $R\to\infty$ で両端は $\pi$ に収束するので $I(R)^{2}\to\pi$、$I(R)>0$ から $I(R)\to\sqrt\pi$。$I(R)$ は $R$ について増加なので、広義積分は $\sqrt\pi$（$e^{-x^{2}}$ は偶関数で、$\int_{0}^{\infty}$ の収束は $I(R)$ の有界単調性から）。
+:::
+
+::: theorem $n$ 次元球の体積 {#calc:ball-volume keywords="volume of the unit n-ball V_n = pi^{n/2}/Gamma(n/2 + 1), by slicing and the Beta function" index="球の体積|きゅうのたいせき, n 次元球|えぬじげんきゅう"}
+$\mathbb{R}^{n}$ の単位閉球 $\bar B^{n}$ の体積 $V_{n}$ は
+$$
+V_{n}=\frac{\pi^{n/2}}{\Gamma(\frac n2+1)}.
+$$
+とくに $V_{1}=2$, $V_{2}=\pi$, $V_{3}=\frac43\pi$, $V_{4}=\frac{\pi^{2}}{2}$。
+:::
+
+::: proof
+**Step 1（拡大）.** 半径 $\rho$ の閉球は $\bar B^{n}$ の $\rho$ 倍で、\ref{calc:linear-volume} から体積は $\rho^{n}V_{n}$（$\bar B^{n}$ のジョルダン可測性は \ref{calc:jordan-measurable-criterion} の後の例）。
+
+**Step 2（切り口）.** $x=(x',t)\in\mathbb{R}^{n-1}\times\mathbb{R}$ と書くと、$t\in[-1,1]$ での切り口は半径 $\sqrt{1-t^{2}}$ の $(n-1)$ 次元閉球で、ジョルダン可測で体積 $(1-t^{2})^{(n-1)/2}V_{n-1}$。フビニの定理（$t$ を外側。切り口がジョルダン可測なので下積分は体積）から
+$$
+V_{n}=V_{n-1}\int_{-1}^{1}(1-t^{2})^{\frac{n-1}{2}}dt=V_{n-1}\int_{0}^{1}s^{-\frac12}(1-s)^{\frac{n-1}{2}}ds=V_{n-1}B\Bigl(\frac12,\frac{n+1}{2}\Bigr)
+$$
+（偶関数なので $2\int_{0}^{1}$、$t=\sqrt s$ と置換。$s=0$ では広義積分）。
+
+**Step 3（帰納法）.** ベータ関数とガンマ関数の関係（\ref{calc:beta-function}）と $\Gamma(\frac12)=\sqrt\pi$ から $B(\frac12,\frac{n+1}{2})=\frac{\sqrt\pi\,\Gamma(\frac{n+1}{2})}{\Gamma(\frac n2+1)}$。$V_{1}=2=\frac{\pi^{1/2}}{\Gamma(3/2)}$（$\Gamma(\frac32)=\frac12\sqrt\pi$）から帰納的に
+$$
+V_{n}=\frac{\pi^{(n-1)/2}}{\Gamma(\frac{n+1}{2})}\cdot\frac{\sqrt\pi\,\Gamma(\frac{n+1}{2})}{\Gamma(\frac n2+1)}=\frac{\pi^{n/2}}{\Gamma(\frac n2+1)}.
+$$
+:::
+
+::: supplement
+**一般化.** 変数変換公式は、$E$ をジョルダン可測でない開集合に広げても、広義積分として（あるいはルベーグ積分で）成り立つ。$\Phi$ が単射でない場合は、$\int_{E}(f\circ\Phi)|\det D\Phi|=\int f(y)\,\#\Phi^{-1}(y)\,dy$（**面積公式**、逆像の点の個数で重みを付ける）が成り立つことが知られている（本サイト未収録）。多様体論では、変数変換公式が「微分形式の積分が座標によらない」ことの根拠になる（\ref[ℝⁿ 上の微分形式と鎖の上のストークスの定理]{calc:page-differential-forms}）。
+
+**前提を変えると.** $|\det D\Phi|$ の絶対値は、積分が「向きを考えない体積」を測っていることによる。1 変数の置換積分では $\varphi'$ に絶対値が付かないが、それは $\int_{a}^{b}=-\int_{b}^{a}$ という向き付きの積分を使っているからで、向き付き積分の多変数版が微分形式の積分である。
+
+**高い視点.** 行列式は「線形写像が体積を何倍にするか」という幾何的な量で（\ref{calc:linear-volume}）、変数変換公式はその局所版である：非線形写像は、各点の近くで線形写像 $D\Phi(x)$ にほぼ等しく、体積を $|\det D\Phi(x)|$ 倍する。比喩で言えば、ゴム膜に描いた方眼を引き伸ばすと、各升目はほぼ平行四辺形に変わり、その面積の倍率がヤコビアンである。全体の面積（積分）は、升目ごとの倍率の和として求まる。
+:::
+
+## 問題 {#calc:sec-cv-problems}
+
+::: problem {#calc:prob-cv-ellipse}
+楕円体 $\{x:\sum_{i}x_{i}^{2}/a_{i}^{2}\le1\}$（$a_{i}>0$）の体積が $a_{1}\cdots a_{n}V_{n}$ であることを示せ。
+:::
+
+::: solution
+線形写像 $T=\operatorname{diag}(a_{1},\dots,a_{n})$ による単位球の像なので、\ref{calc:linear-volume} から $|\det T|V_{n}=a_{1}\cdots a_{n}V_{n}$。
+:::
+
+::: problem {#calc:prob-cv-annulus}
+$\int_{1\le|x|\le2}\frac{dx}{|x|^{2}}$（$x\in\mathbb{R}^{2}$）を求めよ。
+:::
+
+::: solution
+極座標（$E=[1,2]\times[0,2\pi]$、内部で単射かつ $\det=r\neq0$）で $\int_{1}^{2}\int_{0}^{2\pi}\frac{1}{r^{2}}r\,d\theta\,dr=2\pi\log2$。
+:::
+
+::: problem {#calc:prob-cv-dirichlet-simplex}
+$\Delta_{n}\defeq\{x\in\mathbb{R}^{n}:x_{i}\ge0,\ \sum x_{i}\le1\}$ の体積が $\frac{1}{n!}$ であることを、$x_{n}$ を外側にしたフビニの定理と拡大で帰納的に示せ。
+:::
+
+::: solution
+$x_{n}=t\in[0,1]$ での切り口は $(1-t)\Delta_{n-1}$ で体積 $(1-t)^{n-1}v(\Delta_{n-1})$。$v(\Delta_{n})=v(\Delta_{n-1})\int_{0}^{1}(1-t)^{n-1}dt=\frac{v(\Delta_{n-1})}{n}$、$v(\Delta_{1})=1$。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-cv-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

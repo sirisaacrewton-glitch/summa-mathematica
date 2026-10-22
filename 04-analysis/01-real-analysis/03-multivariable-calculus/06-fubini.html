@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>フビニの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/03-multivariable-calculus/06-fubini.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# フビニの定理 {#calc:page-fubini keywords="Fubini's theorem for Riemann integrals, iterated integrals, lower and upper integrals, order of integration, normal domains (vertical slices), area and volume between graphs, counterexamples to Fubini"}
+
+重積分を実際に計算するには、1 変数の積分を繰り返す（**累次積分**）のがふつうである。このページの主結果**フビニの定理**は、直方体 $A\times B$ 上で積分可能な関数の重積分が、まず $y$ で、次に $x$ で積分した値に等しいことを主張する。リーマン積分の枠組みでは、各 $x$ で $y\mapsto f(x,y)$ が積分可能とは限らないので、主張は下積分・上積分を使って述べる。応用として、2 つのグラフにはさまれた**縦線集合**の上の積分を 1 変数の積分に帰着させる。積分の順序を入れ替えてはいけない例も挙げる。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 10 章、杉浦光夫『解析入門 I』第 IV 章と同じ標準的な内容。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-fu-notation}
+
+::: notation
+- 直方体上の積分・ダルブー和・判定法 \ref{calc:box-partition}, \ref{calc:box-integral}, \ref{calc:box-riemann-criterion}、基本性質 \ref{calc:box-integral-properties}、測度 $0$ \ref{calc:measure-zero-rn}, \ref{calc:measure-zero-rn-properties}、ルベーグの判定法 \tref{calc:lebesgue-criterion-rn}、ジョルダン可測集合 \ref{calc:jordan-measurable}, \ref{calc:jordan-measurable-criterion}。
+- 1 変数の積分の性質 \ref{calc:integral-properties}、微分積分学の基本定理 \tref{calc:fundamental-theorem}、置換積分 \ref{calc:substitution-parts}。
+- $A\subset\mathbb{R}^{n}$, $B\subset\mathbb{R}^{m}$ を閉直方体、$A\times B\subset\mathbb{R}^{n+m}$ の点を $(x,y)$ と書く。有界な関数 $g$ の下積分・上積分を $\underline{\int}g$, $\overline{\int}g$ と書く（\ref{calc:box-integral}）。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## フビニの定理 {#calc:sec-fu-fubini}
+
+::: theorem フビニの定理 {#calc:fubini keywords="Fubini's theorem for Riemann integrable functions on a product of boxes, stated with lower and upper integrals of the sections" index="フビニの定理|ふびにのていり, 累次積分|るいじせきぶん, 逐次積分|ちくじせきぶん" refname="フビニの定理"}
+$f\colon A\times B\to\mathbb{R}$ を積分可能とし、$x\in A$ について
+$$
+\underline{\varphi}(x)\defeq\underline{\int_{B}}f(x,y)\,dy,\qquad\overline{\varphi}(x)\defeq\overline{\int_{B}}f(x,y)\,dy
+$$
+とおく。$\underline{\varphi}$, $\overline{\varphi}$ は $A$ 上で積分可能で
+$$
+\int_{A\times B}f=\int_{A}\underline{\varphi}=\int_{A}\overline{\varphi}.
+$$
+とくに、各 $x$ で $y\mapsto f(x,y)$ が積分可能なら $\int_{A\times B}f=\int_{A}\bigl(\int_{B}f(x,y)\,dy\bigr)dx$。$x$ と $y$ の役割を入れ替えても同じ。
+:::
+
+::: intuition
+重積分のダルブー和を「$A$ 側の小直方体 $S$ ごと」に並べ直すと、$S$ の上での $y$ 方向のダルブー和を $S$ について足したものになる。$y$ 方向のダルブー和は $y$ についての下積分・上積分で挟めるので、重積分のダルブー和は累次積分のダルブー和で挟まれる。重積分のダルブー和の上下が近づくなら、挟まれた累次積分も同じ値になる。
+:::
+
+::: proof
+**Step 1（分割）.** $A\times B$ の分割は、$A$ の分割 $P_{A}$ と $B$ の分割 $P_{B}$ の組 $P=(P_{A},P_{B})$ で、小直方体は $S\times T$（$S\in P_{A}$, $T\in P_{B}$）、$v(S\times T)=v(S)v(T)$。
+
+**Step 2（下からの評価）.** $S\in P_{A}$ と $x\in S$ を固定する。各 $T$ で $m_{S\times T}(f)\le\inf_{y\in T}f(x,y)$ なので
+$$
+\sum_{T}m_{S\times T}(f)v(T)\le L\bigl(f(x,\cdot),P_{B}\bigr)\le\underline{\varphi}(x).
+$$
+左辺は $x\in S$ によらないので、$x$ について下限をとって $\sum_{T}m_{S\times T}(f)v(T)\le m_{S}(\underline{\varphi})$。$v(S)$ を掛けて $S$ について足すと $L(f,P)\le L(\underline{\varphi},P_{A})$。
+
+**Step 3（上からの評価）.** 同様に $U(\overline{\varphi},P_{A})\le U(f,P)$。また $\underline{\varphi}\le\overline{\varphi}$（\ref{calc:box-refinement}）。$|f|\le C$ なら $|\underline{\varphi}|,|\overline{\varphi}|\le Cv(B)$ で有界なので、ダルブー和が定義できる。以上から
+$$
+L(f,P)\le L(\underline{\varphi},P_{A})\le U(\underline{\varphi},P_{A})\le U(\overline{\varphi},P_{A})\le U(f,P),
+$$
+$$
+L(f,P)\le L(\underline{\varphi},P_{A})\le L(\overline{\varphi},P_{A})\le U(\overline{\varphi},P_{A})\le U(f,P).
+$$
+
+**Step 4（結論）.** $\varepsilon>0$ について $U(f,P)-L(f,P)<\varepsilon$ となる $P$ をとる（\ref{calc:box-riemann-criterion}）。上の 2 つの不等式の列から $U(\underline{\varphi},P_{A})-L(\underline{\varphi},P_{A})<\varepsilon$, $U(\overline{\varphi},P_{A})-L(\overline{\varphi},P_{A})<\varepsilon$ なので、$\underline{\varphi}$, $\overline{\varphi}$ は積分可能。さらに $\int_{A}\underline{\varphi}$ と $\int f$ はともに区間 $[L(f,P),U(f,P)]$ に入るので差は $\varepsilon$ 未満。$\varepsilon$ は任意なので等しい。$\overline{\varphi}$ も同様。各 $x$ で積分可能なら $\underline{\varphi}=\overline{\varphi}=\int_{B}f(x,y)\,dy$。
+
+::: hypcheck
+- **$f$ が $A\times B$ 上で積分可能**：Step 4 で $U(f,P)-L(f,P)$ を小さくするのに使った。外すと偽：下の \ref{calc:fubini-counterexamples.1} では累次積分が両方存在して等しいが、$f$ は積分可能でない。
+- 下積分・上積分の形は省けない：\ref{calc:fubini-counterexamples.2} では、$f$ は積分可能だが、ある $x$ で $f(x,\cdot)$ が積分可能でない。
+- 選択公理は使わない。
+:::
+:::
+
+::: corollary 連続関数の累次積分 {#calc:fubini-continuous keywords="for continuous f on a box, the integral equals the iterated integral in any order" index="累次積分（連続関数）|るいじせきぶんれんぞくかんすう"}
+$f$ が $R=\prod_{i=1}^{n}[a_{i},b_{i}]$ 上で連続なら、
+$$
+\int_{R}f=\int_{a_{1}}^{b_{1}}\Bigl(\cdots\Bigl(\int_{a_{n}}^{b_{n}}f(x_{1},\dots,x_{n})\,dx_{n}\Bigr)\cdots\Bigr)dx_{1}
+$$
+で、右辺の積分の順序は任意に入れ替えてよい。
+:::
+
+::: proof
+$n$ についての帰納法。$R=A\times[a_{n},b_{n}]$ とすると、$f$ は積分可能（\ref{calc:box-integral-properties.3}）、各 $x\in A$ で $f(x,\cdot)$ は連続なので積分可能。フビニの定理から $\int_{R}f=\int_{A}g$, $g(x)\defeq\int_{a_{n}}^{b_{n}}f(x,t)\,dt$。$g$ は連続：$f$ は一様連続なので、$|x-x'|<\delta$ なら $|f(x,t)-f(x',t)|<\varepsilon$ で、$|g(x)-g(x')|\le\varepsilon(b_{n}-a_{n})$。帰納法の仮定を $g$ に使う。順序の入れ替えは、変数の並べ替えが直方体上の積分を変えない（分割とダルブー和が並べ替えで対応する）ことによる。
+:::
+
+::: counterexample フビニの定理の前提が外れる例 {#calc:fubini-counterexamples keywords="iterated integrals equal but f not integrable (dense set meeting lines finitely); f integrable but a section not integrable; unbounded f with different iterated integrals" index="フビニの定理の反例|ふびにのていりのはんれい"}
+1. $S\defeq\{(i/2^{k},j/2^{k}):k\ge1,\ 0<i,j<2^{k},\ i,j\text{ は奇数}\}\subset[0,1]^{2}$、$f\defeq\chi_{S}$ とする。2 つの累次積分は存在してともに $0$ だが、$f$ は $[0,1]^{2}$ 上で積分可能でない。
+2. $f(x,y)\defeq1$（$x=\frac12$ かつ $y\in\mathbb{Q}$）、それ以外で $0$、とする。$f$ は $[0,1]^{2}$ 上で積分可能で積分は $0$ だが、$y\mapsto f(\frac12,y)$ は積分可能でない。
+3. $f(x,y)\defeq\dfrac{x^{2}-y^{2}}{(x^{2}+y^{2})^{2}}$（$(x,y)\in(0,1]^{2}$）は有界でなく、
+$$
+\int_{0}^{1}\Bigl(\int_{0}^{1}f\,dy\Bigr)dx=\frac\pi4,\qquad\int_{0}^{1}\Bigl(\int_{0}^{1}f\,dx\Bigr)dy=-\frac\pi4.
+$$
+:::
+
+::: proof
+**Step 1（1 の累次積分）.** $x=i/2^{k}$（$i$ 奇数、既約）と書ける $x$ について、$(x,y)\in S$ となる $y$ は分母が同じ $2^{k}$ のもの $j/2^{k}$ だけ（$S$ の点の 2 つの座標は同じ $k$ で既約表示される）で、有限個。それ以外の $x$ では $(x,y)\notin S$。よってどの $x$ でも $f(x,\cdot)$ は有限個の点を除いて $0$ で、積分は $0$（\ref{calc:jordan-additivity.1}、1 変数版）。累次積分は $0$。$x,y$ の役割は対称。
+
+**Step 2（1 の非可積分性）.** $S$ は $[0,1]^{2}$ で稠密（任意の開正方形は、十分大きい $k$ で奇数の分子 $i,j$ をもつ点を含む）で、補集合も稠密（$S$ は可算集合、正方形は非可算）。よって $\chi_{S}$ は $[0,1]^{2}$ のすべての点で不連続で、$[0,1]^{2}$ は測度 $0$ でない（\ref{calc:measure-zero-rn-properties.3}）ので、ルベーグの判定法から積分可能でない。
+
+**Step 3（2）.** $f$ の不連続点は線分 $\{\frac12\}\times[0,1]$ の上にあり、これは測度 $0$（\ref{calc:measure-zero-rn-properties.4}）なので $f$ は積分可能。$f\ge0$ で、体積正の小長方形はどれも $f=0$ の点を含むので下和は $0$、積分は $0$。$f(\frac12,\cdot)$ は 1 変数のディリクレ関数で積分可能でない。フビニの定理では $\underline{\varphi}(\frac12)=0$, $\overline{\varphi}(\frac12)=1$ で、1 点での値の違いは $\int_{A}$ に影響しない。
+
+**Step 4（3）.** $x\in(0,1]$ を固定すると、$\frac{\partial}{\partial y}\frac{y}{x^{2}+y^{2}}=\frac{(x^{2}+y^{2})-2y^{2}}{(x^{2}+y^{2})^{2}}=f(x,y)$ で、$y\mapsto f(x,y)$ は $[0,1]$ 上で連続なので、微分積分学の基本定理から $\int_{0}^{1}f(x,y)\,dy=\frac{1}{1+x^{2}}$。これは $[0,1]$ 上で連続に延び、$\int_{0}^{1}\frac{dx}{1+x^{2}}=\arctan1=\frac\pi4$。$f(y,x)=-f(x,y)$ なので、逆の順序では $-\frac\pi4$。$f$ は原点の近くで有界でない（$f(x,0)=1/x^{2}$）ので、リーマン積分の枠組み（フビニの定理）の外にある。
+:::
+
+## 縦線集合上の積分 {#calc:sec-fu-normal-domain}
+
+::: theorem 縦線集合上の積分 {#calc:normal-domain-integral keywords="region between graphs of continuous functions over a box is Jordan measurable; integral over it as an iterated integral; volume as integral of the difference" index="縦線集合|じゅうせんしゅうごう, 縦線領域|じゅうせんりょういき"}
+$A\subset\mathbb{R}^{n}$ を閉直方体、$\varphi_{1}\le\varphi_{2}$ を $A$ 上の連続関数とし、
+$$
+E\defeq\{(x,y)\in A\times\mathbb{R}:\varphi_{1}(x)\le y\le\varphi_{2}(x)\}
+$$
+（**縦線集合**）とおく。$E$ はコンパクトなジョルダン可測集合で、$E$ 上の連続関数 $f$ について
+$$
+\int_{E}f=\int_{A}\Bigl(\int_{\varphi_{1}(x)}^{\varphi_{2}(x)}f(x,y)\,dy\Bigr)dx.
+$$
+とくに $v(E)=\int_{A}(\varphi_{2}-\varphi_{1})$。
+:::
+
+::: proof
+**Step 1（コンパクト性）.** $\varphi_{i}$ は $A$ 上で有界なので、$c\le\varphi_{1}$, $\varphi_{2}\le d$ となる $c,d$ があり、$E\subset A\times[c,d]$ で有界。$E$ は連続関数 $(x,y)\mapsto y-\varphi_{1}(x)$, $\varphi_{2}(x)-y$ についての閉条件と閉集合 $A\times\mathbb{R}$ の共通部分なので閉。ハイネ–ボレルからコンパクト。
+
+**Step 2（境界）.** $E$ は閉なので $\partial E\subset E$。$(x,y)\in E$ で $x\in\operatorname{int}A$, $\varphi_{1}(x)<y<\varphi_{2}(x)$ なら、連続性から $(x,y)$ のある近傍で同じ不等式が成り立つので内点。よって $\partial E$ は 2 つのグラフと $\partial A\times[c,d]$ の和に含まれ、どれも測度 $0$（\ref{calc:measure-zero-rn-properties.4}。$\partial A\times[c,d]$ は、1 辺の長さが $0$ の閉直方体の有限個の和）。\ref{calc:jordan-measurable-criterion.1} からジョルダン可測。
+
+**Step 3（累次積分）.** $\tilde f$ を $f$ の $A\times[c,d]$ への零延長とすると、\ref{calc:jordan-measurable-criterion.3} から積分可能。各 $x\in A$ で $y\mapsto\tilde f(x,y)$ は、$[\varphi_{1}(x),\varphi_{2}(x)]$ の上で $f(x,y)$（連続）、その外で $0$ なので、不連続点は高々 2 個で積分可能、積分は $\int_{\varphi_{1}(x)}^{\varphi_{2}(x)}f(x,y)\,dy$（1 変数の区間の加法性）。フビニの定理（各 $x$ で積分可能な場合）から主張。$f=1$ として体積の式。
+:::
+
+::: example
+1. **円板の面積**：$A=[-1,1]$, $\varphi_{2}=\sqrt{1-x^{2}}=-\varphi_{1}$ で $v(E)=\int_{-1}^{1}2\sqrt{1-x^{2}}\,dx$。$x=\sin t$（$t\in[-\frac\pi2,\frac\pi2]$）と置換すると $\int_{-\pi/2}^{\pi/2}2\cos^{2}t\,dt=\pi$。
+2. **積分の順序の交換**：$\int_{0}^{1}\bigl(\int_{x}^{1}e^{y^{2}}dy\bigr)dx$ は内側の原始関数が初等関数で書けないが、領域 $\{0\le x\le y\le1\}$ を $y$ を外側にして縦線集合とみると（$A=[0,1]\ni y$, $0\le x\le y$）、
+$$
+\int_{0}^{1}\Bigl(\int_{0}^{y}e^{y^{2}}dx\Bigr)dy=\int_{0}^{1}ye^{y^{2}}dy=\frac{e-1}{2}.
+$$
+2 つの累次積分がともに三角形上の重積分に等しいことは、\ref{calc:normal-domain-integral} を $x$ 方向と $y$ 方向の両方の縦線集合として使うことによる。
+:::
+
+::: supplement
+**一般化.** ルベーグ積分では、$f$ が $A\times B$ 上で可積分（または非負可測）なら、ほとんどすべての $x$ で $f(x,\cdot)$ が可積分で同じ等式が成り立つ（フビニ–トネリの定理）ことが知られている（\ref[測度論]{meas:lebesgue-measure} で扱う予定）。\ref{calc:fubini-counterexamples.2} の「1 点での不具合」は、ルベーグ積分では「測度 $0$ の集合での不具合」として自然に吸収される。
+
+**前提を変えると.** 積分可能性を外すと、累次積分が等しくても重積分は存在しないことがあり（反例 1）、有界性を外すと、累次積分が順序によって異なることがある（反例 3）。
+
+**高い視点.** フビニの定理は、積分が「直積の上では各成分の積分の合成」になることを言っている。体積の言葉では、立体を薄い板に切って、板の面積を積分すれば体積になる（カヴァリエリの原理）。比喩で言えば、重積分は「升目に分けて数える」、累次積分は「まず各列を数え、次に列の合計を足す」数え方で、全体がきちんと数えられる（積分可能）なら、数え方の順序によらない。反例 1 は「各列は数えられるが、全体は数えられない」状況、反例 3 は「数える量が無限に大きく、足し方の順序で結果が変わる」状況（条件収束する級数の並べ替えと同じ現象）である。
+:::
+
+## 問題 {#calc:sec-fu-problems}
+
+::: problem {#calc:prob-fu-tetrahedron}
+$T\defeq\{(x,y,z):x,y,z\ge0,\ x+y+z\le1\}$ の体積が $\frac16$ であることを、縦線集合を 2 回使って示せ。
+:::
+
+::: solution
+$T=\{(x,y,z):(x,y)\in D,\ 0\le z\le1-x-y\}$、$D=\{0\le x\le1,\ 0\le y\le1-x\}$。$D$ は $[0,1]$ 上の縦線集合で、$T$ は $D$ 上のグラフにはさまれた集合（$D$ は直方体でないので、$\varphi_{1}=0$, $\varphi_{2}=\max(0,1-x-y)$ を $[0,1]^{2}$ 上の連続関数として使う。こうしてできる縦線集合は $T$ に平面 $z=0$ 上の集合を付け加えたもので、付け加えた部分は測度 $0$ なので体積は変わらない、\ref{calc:jordan-additivity}）。$v(T)=\int_{[0,1]^{2}}\max(0,1-x-y)=\int_{0}^{1}\int_{0}^{1-x}(1-x-y)\,dy\,dx=\int_{0}^{1}\frac{(1-x)^{2}}{2}dx=\frac16$。
+:::
+
+::: problem {#calc:prob-fu-continuity-of-parameter}
+$f$ が $[a,b]\times[c,d]$ 上で連続なら $F(x)\defeq\int_{c}^{d}f(x,y)\,dy$ は連続で、$\int_{a}^{b}F=\int_{c}^{d}\bigl(\int_{a}^{b}f(x,y)\,dx\bigr)dy$ であることを示せ。
+:::
+
+::: solution
+連続性は \ref{calc:fubini-continuous} の証明の $g$ と同じ（一様連続性）。等式は、フビニの定理を 2 通りの順序で使い、どちらも $\int_{[a,b]\times[c,d]}f$ に等しいことから。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-fu-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

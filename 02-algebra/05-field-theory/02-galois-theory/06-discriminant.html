@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>判別式と小さい次数のガロア群 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/05-field-theory/02-galois-theory/06-discriminant.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 判別式と小さい次数のガロア群 {#fld:page-discriminant keywords="symmetric polynomials, fundamental theorem of symmetric polynomials, general polynomial, discriminant, Galois group in A_n iff discriminant is a square, cubic, Cardano formula, quartic, resolvent cubic, transitive subgroups of S_4"}
+
+多項式 $f$ の根の対称式は係数の多項式で書ける（**対称式の基本定理**）。これを使うと、係数を不定元とした「一般の $n$ 次多項式」のガロア群が $S_{n}$ であることがわかる。根の差積の 2 乗である**判別式**は係数の多項式で、ガロア群が交代群 $A_{n}$ に含まれるかどうかを判定する。これらの道具で、3 次・4 次の多項式のガロア群を、判別式と**分解 3 次式**から決定する。3 次方程式の解の公式（カルダノ）も、ガロア理論の視点から導く。
+
+> 雪江『代数学 2』§4.2–4.5 の内容を参考にし、証明は独自に組み立てた。例のガロア群と判別式は計算機（sympy）でも確かめた。
+
+## 記法と定義の確認 {#fld:sec-ds-notation}
+
+::: notation
+- $A$ は可換環、$A[x_{1},\dots,x_{n}]$ は多変数多項式環（\ref{ring:multivariate-polynomial}）。$S_{n}$ は変数の置換で作用する。
+- $K$ は体、$f\in K[x]$ はモニックで次数 $n$、分解体 $L$ の中の根を $\alpha_{1},\dots,\alpha_{n}$ とする。$f$ が分離的なら $G=\operatorname{Gal}(L/K)$ は根の置換により $S_{n}$ の部分群とみなせる（\ref{fld:galois-equivalent}）。
+- 置換の符号（$\sgn$ の定義は差積の比）と交代群は \ref{grp:sign}, \ref{grp:sign-homomorphism}, \ref{grp:alternating-group}、アルティンの定理は \tref{fld:artin-theorem}、延長の個数は \ref{fld:extension-count}。
+- **選択公理**：使わない（分解体の中で計算する）。
+:::
+
+## 対称式 {#fld:sec-ds-symmetric}
+
+::: definition 基本対称式 {#fld:elementary-symmetric keywords="elementary symmetric polynomials, symmetric polynomial" index="基本対称式|きほんたいしょうしき, 対称式|たいしょうしき"}
+$S_{n}$ のすべての置換で不変な多項式を**対称式**という。$e_{k}\defeq\sum_{i_{1}<\dots<i_{k}}x_{i_{1}}\cdots x_{i_{k}}$（$1\le k\le n$）を**基本対称式**という。$\prod_{i=1}^{n}(T-x_{i})=T^{n}-e_{1}T^{n-1}+e_{2}T^{n-2}-\dots+(-1)^{n}e_{n}$。
+:::
+
+::: theorem 対称式の基本定理 {#fld:symmetric-fundamental keywords="fundamental theorem of symmetric polynomials: symmetric polynomials are polynomials in elementary symmetric ones, uniquely" index="対称式の基本定理|たいしょうしきのきほんていり" refname="対称式の基本定理"}
+可換環 $A$ 上で、対称式 $g\in A[x_{1},\dots,x_{n}]$ は $g=h(e_{1},\dots,e_{n})$ となる $h\in A[y_{1},\dots,y_{n}]$ でただ一通りに書ける。
+:::
+
+::: proof
+**Step 1（辞書式順序）.** 単項式 $x^{a}=x_{1}^{a_{1}}\cdots x_{n}^{a_{n}}$ を指数の辞書式順序で比べる。$g\neq0$ の最大の単項式を**先頭項** $c\,x^{\lambda}$ と書く。積の先頭項は先頭項の積（$A$ に零因子があっても、$e_{k}$ の先頭項の係数は $1$ なので以下では問題ない）。
+
+**Step 2（先頭項の形）.** $g$ が対称なら $\lambda_{1}\ge\lambda_{2}\ge\dots\ge\lambda_{n}$：$\lambda_{i}<\lambda_{i+1}$ なら、$x_{i}$ と $x_{i+1}$ を入れ替えた単項式も同じ係数で $g$ に現れ、それは $x^{\lambda}$ より辞書式で大きい。
+
+**Step 3（存在）.** $e_{k}$ の先頭項は $x_{1}\cdots x_{k}$ なので、$e_{1}^{\lambda_{1}-\lambda_{2}}e_{2}^{\lambda_{2}-\lambda_{3}}\cdots e_{n}^{\lambda_{n}}$ の先頭項は $x^{\lambda}$（係数 $1$）。$g'\defeq g-c\,e_{1}^{\lambda_{1}-\lambda_{2}}\cdots e_{n}^{\lambda_{n}}$ は対称で、先頭項は $x^{\lambda}$ より小さい（または $g'=0$）。$g$ を斉次成分に分けておけば（各成分も対称）、同じ次数の単項式は有限個なので、この操作は有限回で $0$ に達する。
+
+**Step 4（一意性）.** $h\neq0$ で $h(e_{1},\dots,e_{n})=0$ と仮定する。$h$ の単項式 $y^{b}$ に対し $e^{b}\defeq e_{1}^{b_{1}}\cdots e_{n}^{b_{n}}$ の先頭項は $x_{1}^{b_{1}+\dots+b_{n}}x_{2}^{b_{2}+\dots+b_{n}}\cdots x_{n}^{b_{n}}$（係数 $1$）で、相異なる $b$ からは相異なる先頭項が出る（指数の差分から $b$ が復元できる）。その中で最大のものは打ち消されないので $h(e)\neq0$、矛盾。
+:::
+
+::: theorem 一般の多項式のガロア群 {#fld:general-polynomial keywords="the general polynomial of degree n has Galois group S_n; K(x_1..x_n)^{S_n} = K(e_1..e_n)" index="一般の多項式|いっぱんのたこうしき"}
+体 $K$ と不定元 $x_{1},\dots,x_{n}$ について、$E\defeq K(e_{1},\dots,e_{n})\subset F\defeq K(x_{1},\dots,x_{n})$ とする。
+1. $F/E$ はガロア拡大で $\operatorname{Gal}(F/E)=S_{n}$、$F^{S_{n}}=E$。
+2. $e_{1},\dots,e_{n}$ は $K$ 上代数的に独立で、$E$ は $n$ 変数の有理関数体。したがって「係数が不定元 $s_{1},\dots,s_{n}$ の $n$ 次多項式」$T^{n}-s_{1}T^{n-1}+\dots+(-1)^{n}s_{n}$ の $K(s_{1},\dots,s_{n})$ 上のガロア群は $S_{n}$。
+:::
+
+::: proof
+**Step 1（1）.** $S_{n}$ は変数の置換で $F$ の自己同型として作用し（\ref{ring:polynomial-universal} と商体の普遍性）、$E$ を固定する。\ref{fld:artin-theorem}から $F/F^{S_{n}}$ はガロアで $\operatorname{Gal}=S_{n}$、$[F:F^{S_{n}}]=n!$。一方 $F$ は $E$ 上 $\prod(T-x_{i})\in E[T]$ の分解体なので $[F:E]\le n!$（\ref{fld:extension-count}、帰納的に）。$E\subset F^{S_{n}}$ と次数を比べて $F^{S_{n}}=E$。
+
+**Step 2（2）.** \ref{fld:symmetric-fundamental} の一意性から、$K[y_{1},\dots,y_{n}]\to K[e_{1},\dots,e_{n}]$, $y_{k}\mapsto e_{k}$ は同型で、商体も同型。$s_{k}\mapsto e_{k}$ で同一視すると、一般の多項式は $\prod(T-x_{i})$ になり、その分解体は $F$。
+:::
+
+## 判別式 {#fld:sec-ds-discriminant}
+
+::: definition 判別式 {#fld:discriminant keywords="discriminant of a polynomial, difference product" index="判別式|はんべつしき, 差積（根）|させきね"}
+$f=\prod_{i}(x-\alpha_{i})$ について $\Delta\defeq\prod_{i<j}(\alpha_{j}-\alpha_{i})$、$D(f)\defeq\Delta^{2}$ を $f$ の**判別式**という。
+:::
+
+::: proposition 判別式の性質 {#fld:discriminant-properties keywords="discriminant lies in K, is a polynomial in the coefficients, vanishes iff repeated roots, D = (-1)^{n(n-1)/2} prod f'(alpha_i), sigma(Delta) = sgn(sigma) Delta" index="判別式の性質|はんべつしきのせいしつ"}
+1. $D(f)$ は $f$ の係数の $\Z$ 係数の多項式で、特に $D(f)\in K$。
+2. $D(f)\neq0\iff f$ は分離的（重根をもたない）。
+3. $f$ が分離的なら、$\sigma\in G$ について $\sigma(\Delta)=\sgn(\sigma)\Delta$。
+4. $D(f)=(-1)^{n(n-1)/2}\prod_{i=1}^{n}f'(\alpha_{i})$。
+:::
+
+::: proof
+**Step 1（1）.** 不定元 $x_{i}$ について $\prod_{i<j}(x_{j}-x_{i})^{2}$ は対称式（置換で各因子は $\pm$ 付きで並べ替わり、2 乗で符号が消える）なので、\ref{fld:symmetric-fundamental} から $e_{k}$ の $\Z$ 係数多項式 $d(e_{1},\dots,e_{n})$。$x_{i}\mapsto\alpha_{i}$ を代入すると $e_{k}$ は $f$ の係数（の符号付き）になる。
+
+**Step 2（2）.** $\Delta=0\iff$ ある $\alpha_{i}=\alpha_{j}$（$i<j$）。
+
+**Step 3（3）.** $\sigma$ は根を $\alpha_{i}\mapsto\alpha_{\sigma(i)}$ と並べ替える。因子 $\alpha_{\sigma(j)}-\alpha_{\sigma(i)}$（$i<j$）は、$\sigma(i)<\sigma(j)$ なら $\Delta$ の因子そのもの、逆なら因子の $-1$ 倍で、各因子はちょうど一回ずつ現れる。符号の個数は $\sgn$ の定義（\ref{grp:sign}）の分子 $\sigma(j)-\sigma(i)$ の負の個数と同じなので、$\sigma(\Delta)=\sgn(\sigma)\Delta$（\ref{grp:sign-value}）。
+
+**Step 4（4）.** $f'(\alpha_{i})=\prod_{j\neq i}(\alpha_{i}-\alpha_{j})$（積の微分）。$i$ について積をとると、各組 $\{i,j\}$ について $(\alpha_{i}-\alpha_{j})(\alpha_{j}-\alpha_{i})=-(\alpha_{j}-\alpha_{i})^{2}$ が一回ずつ現れ、組は $n(n-1)/2$ 個。
+:::
+
+::: theorem 判別式と交代群 {#fld:discriminant-alternating keywords="the Galois group is contained in A_n iff the discriminant is a square in K" index="判別式と交代群|はんべつしきとこうたいぐん"}
+$\operatorname{char}K\neq2$、$f$ を分離的とする。$G\subset A_{n}\iff D(f)$ は $K$ の元の 2 乗。より正確に、$G\cap A_{n}$ の固定体は $K(\Delta)=K(\sqrt{D(f)})$。
+:::
+
+::: proof
+\ref{fld:discriminant-properties.3} から、$\sigma\in G$ が $\Delta$ を固定する $\iff\sgn(\sigma)=1$（$\Delta\neq0$ で、$\operatorname{char}K\neq2$ なので $\Delta\neq-\Delta$）。よって $K(\Delta)$ に対応する部分群は $G\cap A_{n}$（\ref{fld:fundamental-theorem}）。$G\subset A_{n}\iff\Delta\in K\iff D=\Delta^{2}$ は $K$ の 2 乗（$D$ の $\overline{K}$ での平方根は $\pm\Delta$ だけ）。
+:::
+
+::: example 判別式の公式
+1. $D(x^{2}+bx+c)=b^{2}-4c$。
+2. $D(x^{3}+px+q)=-4p^{3}-27q^{2}$。
+3. $D(x^{4}+px^{2}+qx+r)=16p^{4}r-4p^{3}q^{2}-128p^{2}r^{2}+144pq^{2}r-27q^{4}+256r^{3}$。
+
+2 の計算：$f'(\alpha)=3\alpha^{2}+p$ で、$\alpha^{3}=-p\alpha-q$ から $\alpha f'(\alpha)=-2p\alpha-3q$。$\prod_{i}\alpha_{i}=-q$ と、$\prod_{i}(-2p\alpha_{i}-3q)=(-2p)^{3}\prod_{i}(\alpha_{i}+\tfrac{3q}{2p})=8p^{3}f(-\tfrac{3q}{2p})=-27q^{3}-4p^{3}q$（$p\neq0$ のとき）から $\prod f'(\alpha_{i})=4p^{3}+27q^{2}$、4 から $D=-(4p^{3}+27q^{2})$。$p,q$ を不定元とした恒等式として示せば（$p\neq0$ の場合に帰着）一般に成り立つ。3 は同様の計算による（計算機で確かめた）。
+:::
+
+## 3 次方程式 {#fld:sec-ds-cubic}
+
+::: lemma 既約性と推移性 {#fld:irreducible-transitive keywords="a separable polynomial is irreducible iff its Galois group acts transitively on the roots" index="推移的（ガロア群）|すいいてきがろあぐん"}
+分離的な $f\in K[x]$ が既約 $\iff G$ は根の集合に推移的に作用する。
+:::
+
+::: proof
+$\Rightarrow$：根 $\alpha,\beta$ について $K(\alpha)\to K(\beta)$, $\alpha\mapsto\beta$ は $K$ 同型で（\ref{fld:extension-simple}）、分解体 $L$ の自己同型に延長できる（\ref{fld:splitting-field-uniqueness}）。$\Leftarrow$：$f=gh$（$g$ はモニック既約、$\deg g<n$）なら、$G$ の元は $g$ の根を $g$ の根に移す（$g$ の係数は $K$ の元）ので、$g$ の根から $h$ だけの根へは移らない。
+:::
+
+::: theorem 3 次多項式のガロア群 {#fld:cubic-galois keywords="Galois group of an irreducible separable cubic is A_3 or S_3 according to the discriminant" index="3 次多項式のガロア群|さんじたこうしきのがろあぐん"}
+$\operatorname{char}K\neq2$、$f$ を分離的な既約 3 次式とする。$G=A_{3}$（位数 3）$\iff D(f)$ は $K$ の 2 乗。そうでなければ $G=S_{3}$。
+:::
+
+::: proof
+$G\subset S_{3}$ は推移的なので（\ref{fld:irreducible-transitive}）位数が 3 の倍数で、$A_{3}$ か $S_{3}$。\ref{fld:discriminant-alternating} から。
+:::
+
+::: example
+1. $x^{3}-2$：$D=-108$ は $\Q$ の平方でないので $G=S_{3}$（\ref{fld:page-fundamental-theorem} の例と一致）。
+2. $x^{3}-3x+1$：$\pm1$ は根でないので既約（有理根は $\pm1$ だけ）。$D=-4(-27)-27=81=9^{2}$ なので $G=A_{3}$、分解体は 3 次の巡回拡大（実は $\Q(\zeta_{9}+\zeta_{9}^{-1})$）。
+:::
+
+::: theorem カルダノの公式 {#fld:cardano keywords="Cardano's formula for the depressed cubic" index="カルダノの公式|かるだののこうしき" refname="カルダノの公式"}
+$\operatorname{char}K\neq2,3$、$f=x^{3}+px+q$ とし、$\omega$ を 1 の原始 3 乗根とする。$\overline{K}$ の元 $u$ を
+$$
+u^{3}=-\frac{q}{2}+\sqrt{\frac{q^{2}}{4}+\frac{p^{3}}{27}}
+$$
+（平方根はどちらか一つ）をみたすようにとり、$u\neq0$ なら $v\defeq-p/(3u)$ とおく。このとき $f$ の根は $u+v$, $\omega u+\omega^{2}v$, $\omega^{2}u+\omega v$ である。
+:::
+
+::: proof
+**Step 1（$u^{3},v^{3}$）.** $z^{2}+qz-p^{3}/27$ の根は $-q/2\pm\sqrt{q^{2}/4+p^{3}/27}$ で、$u^{3}$ はその一つ。根の積は $-p^{3}/27$ なので、もう一つの根は $-p^{3}/(27u^{3})=v^{3}$。よって $u^{3}+v^{3}=-q$, $uv=-p/3$。
+
+**Step 2（根であること）.** $(u+v)^{3}=u^{3}+v^{3}+3uv(u+v)=-q-p(u+v)$ なので $u+v$ は根。$\omega u$, $\omega^{2}v$ も $(\omega u)(\omega^{2}v)=uv$, $(\omega u)^{3}+(\omega^{2}v)^{3}=u^{3}+v^{3}$ をみたすので同じ計算で根。$\omega^{2}u+\omega v$ も同様。
+
+**Step 3（3 個が重複度込みで根のすべて）.** $r_{1}=u+v$, $r_{2}=\omega u+\omega^{2}v$, $r_{3}=\omega^{2}u+\omega v$ の基本対称式を、$1+\omega+\omega^{2}=0$ を使って計算する。$r_{1}+r_{2}+r_{3}=0$。$r_{1}r_{2}+r_{1}r_{3}=(u+v)\bigl((\omega+\omega^{2})u+(\omega+\omega^{2})v\bigr)=-(u+v)^{2}$、$r_{2}r_{3}=u^{2}+(\omega+\omega^{2})uv+v^{2}=u^{2}-uv+v^{2}$ なので、$r_{1}r_{2}+r_{1}r_{3}+r_{2}r_{3}=-3uv=p$。$r_{1}r_{2}r_{3}=u^{3}+v^{3}=-q$（$(u+v)(u+\omega v)(u+\omega^{2}v)=u^{3}+v^{3}$ に $u,v$ の役割を合わせたもの）。よって $(x-r_{1})(x-r_{2})(x-r_{3})=x^{3}+px+q=f$。$u=0$ の場合は $u^{3}=0$ から $p^{3}=0$, $p=0$ で、根は $-q$ の三つの 3 乗根。
+:::
+
+::: remark ガロア理論との対応
+$K\subset K(\sqrt{D})\subset K(\sqrt{D},\omega)\subset K(\sqrt{D},\omega,u)$ が冪根の塔で、$q^{2}/4+p^{3}/27=-D/108$ なので最初の平方根は判別式の平方根である。これは $S_{3}\trianglerighteq A_{3}\trianglerighteq\{1\}$ という可解群の正規列（\ref{fld:galois-solvability} の Step 5）の具体化である。
+:::
+
+## 4 次方程式 {#fld:sec-ds-quartic}
+
+::: definition 分解 3 次式 {#fld:resolvent-cubic keywords="resolvent cubic of a quartic" index="分解 3 次式|ぶんかいさんじしき, 3 次分解式|さんじぶんかいしき"}
+4 次式 $f$ の根 $\alpha_{1},\dots,\alpha_{4}$ について $\theta_{1}=\alpha_{1}\alpha_{2}+\alpha_{3}\alpha_{4}$, $\theta_{2}=\alpha_{1}\alpha_{3}+\alpha_{2}\alpha_{4}$, $\theta_{3}=\alpha_{1}\alpha_{4}+\alpha_{2}\alpha_{3}$ とおき、$g(y)\defeq\prod_{k}(y-\theta_{k})$ を**分解 3 次式**という。$f=x^{4}+px^{2}+qx+r$ なら
+$$
+g(y)=y^{3}-py^{2}-4ry+(4pr-q^{2})
+$$
+（係数は根の対称式で、対称式の基本定理から計算できる。計算機でも確かめた）。
+:::
+
+::: proposition 分解 3 次式の性質 {#fld:resolvent-properties keywords="discriminant of the resolvent cubic equals that of the quartic; the resolvent splitting field is the fixed field of G cap V_4" index="分解 3 次式の性質|ぶんかいさんじしきのせいしつ"}
+$f$ を分離的な 4 次式とし、$V_{4}=\{1,(1\,2)(3\,4),(1\,3)(2\,4),(1\,4)(2\,3)\}$ とする。
+1. $D(g)=D(f)$。特に $g$ も分離的。
+2. $K(\theta_{1},\theta_{2},\theta_{3})$ は $G\cap V_{4}$ の固定体で、$\operatorname{Gal}(K(\theta_{1},\theta_{2},\theta_{3})/K)\cong G/(G\cap V_{4})$。
+:::
+
+::: proof
+**Step 1（1）.** 直接の展開で
+$$
+\begin{aligned}
+\theta_{1}-\theta_{2}&=(\alpha_{1}-\alpha_{4})(\alpha_{2}-\alpha_{3}),\qquad\theta_{1}-\theta_{3}=(\alpha_{1}-\alpha_{3})(\alpha_{2}-\alpha_{4}),\\
+\theta_{2}-\theta_{3}&=(\alpha_{1}-\alpha_{2})(\alpha_{3}-\alpha_{4})
+\end{aligned}
+$$
+（例えば $\theta_{1}-\theta_{2}=\alpha_{1}(\alpha_{2}-\alpha_{3})-\alpha_{4}(\alpha_{2}-\alpha_{3})$）。三つの積は $\pm\prod_{i<j}(\alpha_{j}-\alpha_{i})$ なので、2 乗して $D(g)=D(f)$。
+
+**Step 2（2）.** $S_{4}$ は $\{\theta_{1},\theta_{2},\theta_{3}\}$ を（$\{1,2,3,4\}$ の三通りの「2 組への分け方」の置換として）並べ替え、準同型 $S_{4}\to S_{3}$ の核は $V_{4}$（分け方をすべて保つのは $V_{4}$ の元だけ）。$\sigma\in G$ が $\theta_{1},\theta_{2},\theta_{3}$ をすべて固定する $\iff\sigma\in V_{4}$（1 から $\theta_{k}$ は相異なる）。基本定理から主張を得る。
+:::
+
+::: theorem 4 次多項式のガロア群 {#fld:quartic-galois keywords="Galois group of an irreducible quartic from the resolvent cubic and the discriminant: S_4, A_4, D_4, C_4, V_4" index="4 次多項式のガロア群|よじたこうしきのがろあぐん"}
+$\operatorname{char}K\neq2$、$f$ を分離的な既約 4 次式、$m\defeq[K(\theta_{1},\theta_{2},\theta_{3}):K]$ とする。
+1. $g$ が $K$ 上既約で $D(f)$ が平方でない $\Rightarrow G=S_{4}$。
+2. $g$ が既約で $D(f)$ が平方 $\Rightarrow G=A_{4}$。
+3. $g$ が $K$ 上一次式の積（$m=1$）$\Rightarrow G=V_{4}$。
+4. $g$ が $K$ に根をちょうど一つもつ（$m=2$）とき、$f$ が $K(\sqrt{D(f)})$ 上既約 $\Rightarrow G\cong D_{4}$（位数 8）、可約 $\Rightarrow G\cong C_{4}$。
+:::
+
+::: proof
+**Step 1（$S_{4}$ の推移的な部分群）.** $G$ は推移的なので（\ref{fld:irreducible-transitive}）$4\mid\lvert G\rvert$（軌道と安定化群）。位数 24 は $S_{4}$。位数 12 の部分群は指数 2 で正規なので、すべての元の 2 乗を含み、3 巡回置換 $c=(c^{2})^{2}$ をすべて含むので $A_{4}$（\ref{grp:an-generated-3cycles}）。位数 8 はシロー 2 部分群で、$V_{4}$ と互換一つで生成される二面体群 $D_{4}$（三つあり共役）。位数 4 の推移的な部分群は、4 巡回置換で生成される巡回群 $C_{4}$ か、すべての元の位数が 2 以下の群で、後者が互換 $(a\,b)$ を含むと、それと可換な位数 2 の元は $(c\,d)$, $(a\,b)(c\,d)$ だけで軌道 $\{a,b\}$ ができてしまうので、互換を含まず $V_{4}$。
+
+**Step 2（$m$ と $D$ による判別）.** \ref{fld:resolvent-properties.2} から $m=\lvert G/(G\cap V_{4})\rvert$。各群について $(G\cap V_{4},\ m,\ G\subset A_{4}?)$ は、$S_{4}$：$(V_{4},6,\text{否})$、$A_{4}$：$(V_{4},3,\text{是})$、$D_{4}$：$(V_{4},2,\text{否})$、$C_{4}$：$(\{1,(1\,3)(2\,4)\},2,\text{否})$（$C_{4}=\langle(1\,2\,3\,4)\rangle$）、$V_{4}$：$(V_{4},1,\text{是})$。$g$ が既約 $\iff m\in\{3,6\}$（$m$ は $g$ の分解体の次数で、既約なら 3 の倍数、そうでなければ根を $K$ にもち $m\le2$）。$D$ が平方 $\iff G\subset A_{4}$（\ref{fld:discriminant-alternating}）。これで 1〜3 を得る。
+
+**Step 3（4：$D_{4}$ と $C_{4}$）.** $m=2$ なら $G$ は $D_{4}$ か $C_{4}$。$K(\sqrt{D})$ は $G\cap A_{4}$ の固定体（\ref{fld:discriminant-alternating}）で、$D_{4}\cap A_{4}=V_{4}$ は推移的、$C_{4}\cap A_{4}=\{1,(1\,3)(2\,4)\}$ は推移的でない。\ref{fld:irreducible-transitive} から、$f$ が $K(\sqrt{D})$ 上既約 $\iff G=D_{4}$。
+:::
+
+::: example 4 次式のガロア群
+（ガロア群は計算機でも確かめた。）
+1. $x^{4}-x-1$：$g=y^{3}+4y-1$ は有理根 $\pm1$ をもたず既約、$D=-283$ は平方でない。$G=S_{4}$。
+2. $x^{4}+8x+12$：$g=y^{3}-48y-64$ は既約（有理根の候補 $\pm1,\pm2,\dots,\pm64$ を調べる）、$D=2^{12}3^{4}=576^{2}$。$G=A_{4}$。
+3. $x^{4}+1=\Phi_{8}$：$g=y(y-2)(y+2)$ で $G=V_{4}$（$(\Z/8\Z)^{\times}\cong C_{2}\times C_{2}$ と一致）。
+4. $x^{4}-2$：$g=y(y^{2}+8)$ で $m=2$。分解体 $\Q(\sqrt[4]{2},i)$ は次数 8（$\Q(\sqrt[4]{2})\subset\mathbb{R}$ は次数 4 で $i$ を含まない）なので $G=D_{4}$。
+5. $\Phi_{5}=x^{4}+x^{3}+x^{2}+x+1$：$G=(\Z/5\Z)^{\times}\cong C_{4}$（\ref{fld:cyclotomic-galois}）。
+:::
+
+::: supplement
+**フェラーリの解法.** 4 次方程式は、分解 3 次式の根 $\theta$ を一つ求め（カルダノ）、それを使って 2 次式の積に分解することで解ける。これは $S_{4}\trianglerighteq A_{4}\trianglerighteq V_{4}\trianglerighteq\{1\}$ の正規列と対応する。
+
+**計算の観点.** 有理数係数の多項式のガロア群は、分解式（分解 3 次式の一般化）を因数分解することで決められる（スタウドゥハーの方法など）。次数が小さければ、このページの方法がそのままアルゴリズムになる。
+
+**高い視点.** 対称式の基本定理は、$S_{n}$ の不変式環 $A[x_{1},\dots,x_{n}]^{S_{n}}$ が多項式環であることを述べている。有限群の不変式環が多項式環になるのは、標数 $0$ では鏡映群のときであることが知られている（シュヴァレー＝シェパード＝トッド。本サイト未収録）。
+:::
+
+## 問題 {#fld:sec-ds-problems}
+
+::: problem {#fld:prob-ds-power-sums}
+$n=3$ で、冪和 $p_{2}=x_{1}^{2}+x_{2}^{2}+x_{3}^{2}$ と $p_{3}=x_{1}^{3}+x_{2}^{3}+x_{3}^{3}$ を基本対称式で表せ。
+:::
+
+::: solution
+$e_{1}^{2}=p_{2}+2e_{2}$ から $p_{2}=e_{1}^{2}-2e_{2}$。各 $x_{i}$ は $x^{3}-e_{1}x^{2}+e_{2}x-e_{3}=0$ をみたすので、足し合わせて $p_{3}=e_{1}p_{2}-e_{2}p_{1}+3e_{3}=e_{1}^{3}-3e_{1}e_{2}+3e_{3}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

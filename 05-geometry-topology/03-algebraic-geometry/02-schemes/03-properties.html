@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>スキームの性質とファイバー積 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/03-algebraic-geometry/02-schemes/03-properties.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# スキームの性質とファイバー積 {#ag:page-scheme-properties keywords="affine-local properties, affine communication lemma, reduced scheme, integral scheme, generic point, function field, locally noetherian scheme, noetherian scheme, morphism locally of finite type, finite type, quasi-compact morphism, open immersion, closed immersion, closed subscheme, gluing morphisms, fiber product of schemes, tensor product, fibers of a morphism, base change"}
+
+スキームの性質（被約・整・ネーター）と射の性質（有限型）を定義し、それらが「アフィン開集合ごとに確かめればよい」性質であることを示す。後半では、スキームの圏に**ファイバー積**が存在すること、アフィンの場合はテンソル積 $\operatorname{Spec}(A\otimes_{R}B)$ であることを示し、射のファイバー（「方程式を素数 $p$ で還元したもの」など）を定義する。グロタンディークが「ネーター」を対象ではなく「射の有限性」で扱った理由——ファイバー積でネーター性が失われること、永田の例——にも触れる。
+
+
+## 記法と定義の確認 {#ag:sec-pf-notation}
+
+::: notation
+- 局所環付き空間・スキーム・開部分スキーム・貼り合わせは \ref{ag:locally-ringed-space}, \ref{ag:scheme}, \ref{ag:gluing-schemes}。アフィンスキームへの射は \tref{ag:morphisms-to-affine}（$\operatorname{Hom}(T,\operatorname{Spec}A)\cong\operatorname{Hom}(A,\Gamma(T,\mathcal{O}_{T}))$。この全単射は $T$ について自然：$T'\to T\to\operatorname{Spec}A$ には $A\to\Gamma(T)\to\Gamma(T')$ が対応する。構成から明らか）。
+- 単元の開集合 $X_{s}$ は \ref{ag:invertible-locus}。アフィンスキーム $\operatorname{Spec}A$ と $s\in A$ では $X_{s}=D(s)$（茎 $A_{\mathfrak{p}}$ で $s/1$ が単元 $\iff s\notin\mathfrak{p}$）。
+- スペクトルの位相・関手性・構造層は \ref{ag:spec-topology}, \ref{ag:spec-functor}, \ref{ag:structure-sheaf-properties}。とくに $\operatorname{Spec}A=\bigcup_{i}D(f_{i})\iff(f_{i})_{i}=A$（\ref{ag:spec-topology.4} で $f=1$）。
+- 既約な空間（空でない開集合は既約で稠密）は \ref{ag:irreducible-space}、ネーター空間は \ref{ag:noetherian-space}。
+- 代数のテンソル積とその余積としての普遍性は \ref{mod:tensor-algebras}、冪零根基は \ref{ring:nilradical}、局所化の普遍性・イデアル・素イデアルは \ref{ring:localization-universal}, \ref{ring:localization-ideals}, \ref{ring:localization-primes}、局所化と冪零根基は \ref{ring:localization-commutes}、ヒルベルトの基底定理は \tref{ring:hilbert-basis}。
+- 位相空間が**準コンパクト**とは、任意の開被覆が有限部分被覆をもつこと（ハウスドルフ性は課さない）。
+- **選択公理**：\ref{ag:spec-topology}・\ref{ag:structure-sheaf-properties}・\ref{ring:nilradical} を通して使う。
+:::
+
+## アフィン局所的な性質 {#ag:sec-pf-local}
+
+::: lemma 両方で主開集合になる近傍 {#ag:simultaneous-principal keywords="if Spec A and Spec B are affine opens of a scheme and x is in both, there is an open neighbourhood of x principal in both" index="両方で主開集合になる近傍|りょうほうでしゅかいしゅうごうになるきんぼう"}
+スキーム $X$ のアフィン開集合 $U=\operatorname{Spec}A$, $V=\operatorname{Spec}B$ と $x\in U\cap V$ について、$f\in A$, $g\in B$ で $x\in D_{A}(f)=D_{B}(g)$（$X$ の部分集合として）となるものがある。このとき環として $A_{f}\cong\mathcal{O}_{X}(D_{A}(f))=\mathcal{O}_{X}(D_{B}(g))\cong B_{g}$。
+:::
+
+::: proof
+**Step 1（$U$ の主開集合）.** $U\cap V$ は $x$ を含む $U$ の開集合で、$D_{A}(\cdot)$ は開基（\ref{ag:spec-topology.2}）なので、$x\in D_{A}(f')\subset U\cap V$ となる $f'\in A$ がある。
+
+**Step 2（$V$ の主開集合）.** $D_{A}(f')$ は $x$ を含む $V$ の開集合なので、同様に $x\in D_{B}(g)\subset D_{A}(f')$ となる $g\in B$ がある。
+
+**Step 3（$D_{B}(g)$ を $A$ の言葉で書く）.** $g$ を $D_{A}(f')$ に制限した切断を $g'\in\mathcal{O}_{X}(D_{A}(f'))\cong A_{f'}$（\ref{ag:structure-sheaf-properties.3}）とし、$g'=a/f'^{n}$（$a\in A$）と書く。点 $z\in D_{A}(f')$ について、「茎 $\mathcal{O}_{X,z}$ で $g$ の芽が単元」という条件は、$V$ の中で見ると $z\in D_{B}(g)$、$D_{A}(f')\cong\operatorname{Spec}A_{f'}$ の中で見ると $z\in D(g')$ と同値（記法の確認の $X_{s}=D(s)$。芽は $X$ の茎で考えるので、どちらのアフィン開集合で見ても同じ条件）。$D_{B}(g)\subset D_{A}(f')$ なので
+$$
+D_{B}(g)=D_{\operatorname{Spec}A_{f'}}(a/f'^{n})=\{\mathfrak{p}\in D_{A}(f') : a\notin\mathfrak{p}\}=D_{A}(af').
+$$
+（$f'$ は $A_{f'}$ の単元なので $a/f'^{n}\notin\mathfrak{p}A_{f'}\iff a\notin\mathfrak{p}$。）$f\defeq af'$ とおけばよい。環の同型は \ref{ag:structure-sheaf-properties.3} を $U$ と $V$ でそれぞれ使う。
+:::
+
+::: proposition アフィン局所性の判定 {#ag:affine-communication keywords="affine communication lemma: a property of rings stable under localization and local for coverings by principal opens holds for all affine opens once it holds for a cover" index="アフィン局所性|あふぃんきょくしょせい"}
+環の性質 $P$（同型で保たれる）が次をみたすとする。
+
+(i) $A$ が $P$ をみたせば、任意の $f\in A$ について $A_{f}$ も $P$ をみたす。
+
+(ii) $f_{1},\dots,f_{n}\in A$ が単位イデアルを生成し、各 $A_{f_{i}}$ が $P$ をみたせば、$A$ も $P$ をみたす。
+
+スキーム $X$ が $P$ をみたす環のスペクトルからなるアフィン開被覆をもてば、$X$ の**任意の**アフィン開集合 $\operatorname{Spec}B$ について $B$ は $P$ をみたす。
+:::
+
+::: proof
+**Step 1（局所的に $P$）.** 被覆を $\{\operatorname{Spec}A_{i}\}$ とする。$x\in\operatorname{Spec}B$ について $x\in\operatorname{Spec}A_{i}$ となる $i$ をとり、\ref{ag:simultaneous-principal} で $x\in D_{B}(g)=D_{A_{i}}(f)$ をとる。$B_{g}\cong(A_{i})_{f}$ で、(i) から $(A_{i})_{f}$ は $P$ をみたすので、$B_{g}$ も $P$ をみたす（同型で保たれる）。
+
+**Step 2（有限個の被覆）.** こうして $\operatorname{Spec}B=\bigcup_{x}D_{B}(g_{x})$ を得る。$\operatorname{Spec}B$ は準コンパクト（\ref{ag:spec-topology.4}）なので有限個 $D_{B}(g_{1}),\dots,D_{B}(g_{n})$ で覆え、記法の確認から $(g_{1},\dots,g_{n})=B$。(ii) から $B$ は $P$ をみたす。
+:::
+
+## 被約・整・ネーター {#ag:sec-pf-reduced}
+
+::: definition スキームの性質 {#ag:scheme-properties-def keywords="reduced scheme, integral scheme, locally noetherian scheme, noetherian scheme, quasi-compact scheme" index="被約スキーム|ひやくすきーむ, 整スキーム|せいすきーむ, ネータースキーム|ねーたーすきーむ, 局所ネータースキーム|きょくしょねーたーすきーむ"}
+スキーム $X$ について：
+1. **被約**：任意の開集合 $U$ について $\mathcal{O}_{X}(U)$ が被約（$0$ でない冪零元をもたない）。
+2. **整**：$X\neq\emptyset$ で、任意の空でない開集合 $U$ について $\mathcal{O}_{X}(U)$ が整域。
+3. **局所ネーター**：ネーター環 $A_{i}$ のスペクトルからなるアフィン開被覆 $\{\operatorname{Spec}A_{i}\}$ をもつ。**ネーター**：局所ネーターかつ準コンパクト。
+:::
+
+::: proposition 被約性と整性 {#ag:reduced-integral keywords="reduced iff all stalks reduced; Spec A reduced iff A reduced; integral iff reduced and irreducible; affine opens of an integral scheme are domains; generic point; function field" index="被約性と整性|ひやくせいとせいせい, 関数体（整スキーム）|かんすうたいせいすきーむ"}
+1. $X$ が被約 $\iff$ すべての茎 $\mathcal{O}_{X,x}$ が被約。
+2. （AC）$\operatorname{Spec}A$ が被約 $\iff$ $A$ が被約。したがって $X$ が被約 $\iff$ あるアフィン開被覆の環がすべて被約 $\iff$ すべてのアフィン開集合の環が被約。
+3. （AC）$X$ が整 $\iff$ $X$ が被約かつ既約。
+4. （AC）$X$ が整なら、$X$ はただ一つの生成点 $\eta$ をもち（\ref{ag:scheme-generic-points}）、空でないアフィン開集合 $\operatorname{Spec}A$ について $A$ は整域、$\eta$ は $(0)\in\operatorname{Spec}A$ に対応し、$\mathcal{O}_{X,\eta}\cong\operatorname{Frac}A$。この体を $X$ の**関数体** $K(X)$ という。
+:::
+
+::: proof
+**Step 1（1：⇒）.** 芽 $s_{x}$ が $s_{x}^{n}=0$ をみたすとする。$s$ を代表する切断を近傍 $W$ 上でとり、$W$ を縮めて $s^{n}|_{W}=0$ としてよい（芽が $0$ ということの定義）。$\mathcal{O}_{X}(W)$ は被約なので $s|_{W}=0$、よって $s_{x}=0$。
+
+**Step 2（1：⇐）.** $s\in\mathcal{O}_{X}(U)$, $s^{n}=0$ とすると、各 $x\in U$ で $s_{x}^{n}=0$ なので $s_{x}=0$。すべての芽が $0$ の切断は $0$（層の条件：局所的に $0$ なら $0$）。
+
+**Step 3（2）.** ⇒：$A\cong\mathcal{O}(\operatorname{Spec}A)$（\ref{ag:structure-sheaf-properties.3}）。⇐：茎 $A_{\mathfrak{p}}$ について $\mathrm{nil}(A_{\mathfrak{p}})=(\mathrm{nil}A)_{\mathfrak{p}}=0$（\ref{ring:localization-commutes.3}）なので、1 から被約。後半：被約性は 1 から茎だけで決まり、茎は開部分スキームに制限しても変わらないので、アフィン開被覆の各 $\operatorname{Spec}A_{i}$ が被約なら $X$ も被約、逆に $X$ が被約なら任意のアフィン開集合の環 $\mathcal{O}_{X}(\operatorname{Spec}B)\cong B$ は被約。
+
+**Step 4（3：⇒）.** 整域は被約なので被約。既約でないとすると、$X=Z_{1}\cup Z_{2}$（$Z_{i}$ は真の閉集合）と書け、$U_{i}\defeq X\setminus Z_{i}$ は空でない開集合で $U_{1}\cap U_{2}=X\setminus(Z_{1}\cup Z_{2})=\emptyset$。層の条件から $\mathcal{O}_{X}(U_{1}\cup U_{2})\cong\mathcal{O}_{X}(U_{1})\times\mathcal{O}_{X}(U_{2})$。空でない開集合 $U$ では $\mathcal{O}_{X}(U)\neq0$（茎は局所環で $1\neq0$）なので、$(1,0)(0,1)=0$ は零因子：整域でない。$U_{1}\cup U_{2}$ は空でないので矛盾。
+
+**Step 5（3：⇐、零因子の分離）.** $U\neq\emptyset$ を開集合、$f,g\in\mathcal{O}_{X}(U)$ で $fg=0$ とする。$Z(f)\defeq\{x\in U : f_{x}\in\mathfrak{m}_{x}\}$ は $U\setminus U_{f}$ なので閉（\ref{ag:invertible-locus}）。各 $x$ で $f_{x}g_{x}=0\in\mathfrak{m}_{x}$ で $\mathfrak{m}_{x}$ は素イデアルなので、$U=Z(f)\cup Z(g)$。$U$ は既約空間 $X$ の空でない開集合なので既約（\ref{ag:irreducible-space}）、よって $U=Z(f)$ または $U=Z(g)$。$U=Z(f)$ としてよい。
+
+**Step 6（3：⇐、$f=0$）.** $U$ に含まれるアフィン開集合 $V=\operatorname{Spec}A$ をとり、$a\defeq f|_{V}\in A$ とする。各 $\mathfrak{p}\in V$ で $a/1\in\mathfrak{p}A_{\mathfrak{p}}$、すなわち $a\in\mathfrak{p}$。よって $a$ はすべての素イデアルに含まれ、（AC）\ref{ring:nilradical} から冪零、$A$ は被約（2）なので $a=0$。$U$ はこのような $V$ で覆えるので、層の条件から $f=0$。よって $\mathcal{O}_{X}(U)$ は整域（$U\neq\emptyset$ なので $1\neq0$）。
+
+**Step 7（4）.** $U=\operatorname{Spec}A\neq\emptyset$ について $A\cong\mathcal{O}_{X}(U)$ は整域。$X$ は既約なので生成点 $\eta$ がただ一つあり（\ref{ag:scheme-generic-points}）、空でない開集合 $U$ は $\eta$ を含む（含まなければ $\eta\in X\setminus U$（閉）から $X=\overline{\{\eta\}}\subset X\setminus U$）。$U$ の中で $\eta$ は $U$ の生成点（$\overline{\{\eta\}}\cap U=U$）で、$\operatorname{Spec}A$ の生成点は $\mathrm{nil}(A)=(0)$ に対応する（\ref{ag:spec-topology.3}）。茎は $A_{(0)}=\operatorname{Frac}A$。
+:::
+
+::: proposition 既約閉集合の生成点 {#ag:scheme-generic-points keywords="every irreducible closed subset of a scheme has a unique generic point; schemes are sober" index="生成点（スキーム）|せいせいてんすきーむ"}
+（AC）スキーム $X$ の既約な閉集合 $Z$ は、ちょうど一つの点 $\eta$ で $Z=\overline{\{\eta\}}$ となるもの（**生成点**）をもつ。
+:::
+
+::: proof
+**Step 1（存在）.** $Z$ と交わるアフィン開集合 $U=\operatorname{Spec}A$ をとる。$Z\cap U$ は既約空間 $Z$ の空でない開集合なので既約で $Z$ の中で稠密（\ref{ag:irreducible-space}）。$Z\cap U$ は $U$ の既約閉集合なので、\ref{ag:spec-topology.3} から $Z\cap U=\overline{\{\eta\}}\cap U$ となる $\eta\in Z\cap U$ がある。$X$ での閉包 $\overline{\{\eta\}}$ は $Z$ に含まれ（$Z$ は閉）、$Z\cap U$ を含むので、その閉包 $Z$ を含む。よって $Z=\overline{\{\eta\}}$。
+
+**Step 2（一意性）.** $\eta,\eta'$ がともに $Z$ の生成点なら、Step 1 の $U$ はどちらも含む：$\eta\notin U$ なら $\eta\in Z\setminus U$（閉）から $Z=\overline{\{\eta\}}\subset Z\setminus U$ となり、$Z\cap U\neq\emptyset$ に反する。$U$ の中で $\overline{\{\eta\}}\cap U=Z\cap U=\overline{\{\eta'\}}\cap U$ で、$\operatorname{Spec}A$ では既約閉集合と生成点は一対一（\ref{ag:spec-topology.3}）なので $\eta=\eta'$。
+:::
+
+::: proposition 局所ネーター性 {#ag:locally-noetherian keywords="locally noetherian iff every affine open is the spectrum of a noetherian ring; Spec A noetherian iff A noetherian; underlying space of a noetherian scheme is noetherian" index="局所ネーター性|きょくしょねーたーせい"}
+1. $X$ が局所ネーター $\iff$ $X$ の任意のアフィン開集合 $\operatorname{Spec}B$ について $B$ がネーター環。
+2. $\operatorname{Spec}A$ がネータースキーム $\iff$ $A$ がネーター環。
+3. （AC）ネータースキームの台の空間はネーター空間。
+:::
+
+::: proof
+**Step 1（(i) の確認）.** $A$ をネーター環、$j:A\to A_{f}$ とする。$A_{f}$ のイデアルの昇鎖 $J_{1}\subset J_{2}\subset\cdots$ について、$j^{-1}(J_{n})$ は $A$ のイデアルの昇鎖なので、ある $N$ 以降一定。$J_{n}=S^{-1}j^{-1}(J_{n})$（\ref{ring:localization-ideals.2}）なので $J_{n}$ も $N$ 以降一定。
+
+**Step 2（(ii) の確認）.** $(f_{1},\dots,f_{n})=A$ で各 $A_{f_{i}}$ がネーター環とする。$A$ のイデアル $I$ について
+$$
+I=\bigcap_{i=1}^{n}j_{i}^{-1}(IA_{f_{i}})\qquad(j_{i}:A\to A_{f_{i}})
+$$
+を示す。$\subset$ は明らか。$a$ が右辺にあるとすると、$a/1\in IA_{f_{i}}$ なので $a/1=b_{i}/f_{i}^{m}$（$b_{i}\in I$、\ref{ring:localization-ideals.1}）、局所化での等式の定義から $f_{i}^{l}(f_{i}^{m}a-b_{i})=0$、よって $f_{i}^{N}a\in I$（$N$ は $i$ によらず大きくとる）。$f_{1}^{N},\dots,f_{n}^{N}$ も単位イデアルを生成する（$D(f_{i}^{N})=D(f_{i})$ と記法の確認）ので $\sum c_{i}f_{i}^{N}=1$、$a=\sum c_{i}f_{i}^{N}a\in I$。さて $A$ のイデアルの昇鎖 $I_{1}\subset I_{2}\subset\cdots$ について、各 $i$ で $I_{k}A_{f_{i}}$ は $k$ が大きいと一定（$A_{f_{i}}$ はネーター）、$i$ は有限個なので共通の $K$ 以降すべて一定で、上の等式から $I_{k}$ も $K$ 以降一定。
+
+**Step 3（1・2）.** 1 の ⇒ は Step 1・2 と \ref{ag:affine-communication}、⇐ はアフィン開被覆をとればよい。2 の ⇒ は 1、⇐ は定義（$\operatorname{Spec}A$ は準コンパクト）。
+
+**Step 4（3）.** ネーター環 $A$ について、$\operatorname{Spec}A$ の閉集合の降鎖 $V(I_{1})\supset V(I_{2})\supset\cdots$ は、（AC）\ref{ag:spec-topology.2} から根基の昇鎖 $\sqrt{I_{1}}\subset\sqrt{I_{2}}\subset\cdots$ に対応し、一定になる。$X=U_{1}\cup\dots\cup U_{n}$（$U_{i}$ はネーター環のスペクトル）とし、$X$ の閉集合の降鎖 $Z_{1}\supset Z_{2}\supset\cdots$ をとると、各 $Z_{k}\cap U_{i}$ は $k$ が大きいと一定、$Z_{k}=\bigcup_{i}(Z_{k}\cap U_{i})$ なので $Z_{k}$ も一定。
+:::
+
+::: counterexample 台がネーター空間でもネータースキームとは限らない {#ag:noetherian-space-not-scheme}
+体 $k$ 上 $A\defeq k[x_{1},x_{2},\dots]/\mathfrak{m}^{2}$（$\mathfrak{m}=(x_{1},x_{2},\dots)$）とする。
+1. $\operatorname{Spec}A$ は 1 点：素イデアルは冪零元 $x_{i}$（$x_{i}^{2}=0$）をすべて含むので $\mathfrak{m}A$ を含み、$A/\mathfrak{m}A\cong k$ なので $\mathfrak{m}A$ は極大。よって台はネーター空間。
+2. $A$ はネーター環でない：$k$ 上のベクトル空間として $A=k\cdot1\oplus\bigoplus_{i}k\,x_{i}$ で、$Ax_{i}=kx_{i}$（$x_{j}x_{i}=0$）なので $(x_{1},\dots,x_{n})=\bigoplus_{i\le n}kx_{i}$ は $x_{n+1}$ を含まない。真の昇鎖 $(x_{1})\subsetneq(x_{1},x_{2})\subsetneq\cdots$ がある。
+
+台の位相は根基イデアルしか見ないので、ネーター性（すべてのイデアルの昇鎖条件）は環の層が担う。
+:::
+
+## 有限型の射 {#ag:sec-pf-finite-type}
+
+::: definition 有限型の射 {#ag:finite-type keywords="morphism locally of finite type, quasi-compact morphism, morphism of finite type; scheme of finite type over a field" index="有限型の射|ゆうげんがたのしゃ, 局所有限型|きょくしょゆうげんがた, 準コンパクトな射|じゅんこんぱくとなしゃ"}
+スキームの射 $f:X\to Y$ について：
+1. **局所有限型**：$Y$ のアフィン開被覆 $\{\operatorname{Spec}B_{i}\}$ と、各 $f^{-1}(\operatorname{Spec}B_{i})$ のアフィン開被覆 $\{\operatorname{Spec}A_{ij}\}_{j}$ で、$A_{ij}$ が（$f^{\#}$ による）有限生成 $B_{i}$ 代数となるものがある。
+2. **準コンパクト**：$Y$ の任意のアフィン開集合 $V$ について $f^{-1}(V)$ が準コンパクト。
+3. **有限型**：局所有限型かつ準コンパクト。$X\to\operatorname{Spec}k$ が有限型のとき、$X$ を**体 $k$ 上有限型のスキーム**という。
+:::
+
+::: proposition 有限生成性の局所性 {#ag:finite-type-local keywords="finite generation is local on the source and target; locally of finite type can be checked on any affine opens; quasi-compactness on a cover; composition" index="有限型の局所性|ゆうげんがたのきょくしょせい"}
+1. 環準同型 $\varphi:B\to A$ について：
+   (a) $A$ が有限生成 $B$ 代数なら、$h\in A$ について $A_{h}$ も有限生成 $B$ 代数。
+   (b) $h_{1},\dots,h_{n}\in A$ が単位イデアルを生成し、各 $A_{h_{i}}$ が有限生成 $B$ 代数なら、$A$ も有限生成 $B$ 代数。
+   (c) $g\in B$ で $\varphi(g)$ が単元のとき、$A$ が有限生成 $B_{g}$ 代数 $\iff$ 有限生成 $B$ 代数。
+2. $f:X\to Y$ が局所有限型 $\iff$ $Y$ の任意のアフィン開集合 $V=\operatorname{Spec}B$ と、$f^{-1}(V)$ に含まれる任意のアフィン開集合 $U=\operatorname{Spec}A$ について、$A$ が有限生成 $B$ 代数。
+3. $Y$ のあるアフィン開被覆 $\{V_{i}\}$ について各 $f^{-1}(V_{i})$ が準コンパクトなら、$f$ は準コンパクト。
+4. 局所有限型（有限型）の射の合成は局所有限型（有限型）。
+:::
+
+::: proof
+**Step 1（1(a)）.** $A$ の生成元 $a_{1},\dots,a_{m}$ に $1/h$ を加えると $A_{h}$ を生成する（$a/h^{k}=a\cdot(1/h)^{k}$）。
+
+**Step 2（1(b)）.** $\sum c_{i}h_{i}=1$ とし、$A_{h_{i}}$ の $B$ 代数としての生成元を $a_{ik}/h_{i}^{e}$（$e$ は共通にとる）と書く。$A'\subset A$ を、$h_{i}$, $c_{i}$, $a_{ik}$ で生成される $B$ 部分代数とする。任意の $a\in A$ は $A_{h_{i}}$ で生成元の多項式として $a/1=p_{i}/h_{i}^{r}$（$p_{i}\in A'$）と書けるので、$h_{i}^{l}(h_{i}^{r}a-p_{i})=0$、すなわち $h_{i}^{N}a\in A'$（$N$ は共通にとる）。一方 $1=(\sum c_{i}h_{i})^{n(N-1)+1}$ を展開すると、各単項式はある $h_{i}^{N}$ を因子にもつ（指数の和が $n(N-1)+1$ なので、どれかの指数は $N$ 以上）ので、$1=\sum d_{i}h_{i}^{N}$（$d_{i}\in A'$）。よって $a=\sum d_{i}(h_{i}^{N}a)\in A'$、$A=A'$ は有限生成。
+
+**Step 3（1(c)）.** ⇒：$B_{g}$ は $B$ 上 $1/g$ で生成され、$1/g$ の $A$ での像は $\varphi(g)^{-1}$ なので、$A$ の $B_{g}$ 上の生成元に $\varphi(g)^{-1}$ を加えれば $B$ 上の生成元。⇐：$B$ 上の生成元はそのまま $B_{g}$ 上の生成元。
+
+**Step 4（2：⇐）.** $Y$ のアフィン開被覆と、各逆像のアフィン開被覆をとればよい。
+
+**Step 5（2：⇒、点の近傍）.** 定義の被覆を $\operatorname{Spec}B_{i}$, $\operatorname{Spec}A_{ij}$ とし、$V=\operatorname{Spec}B$, $U=\operatorname{Spec}A\subset f^{-1}(V)$ をとる。$x\in U$, $y\defeq f(x)$ について、$y\in\operatorname{Spec}B_{i}$ となる $i$ をとり、\ref{ag:simultaneous-principal} で $y\in W\defeq D_{B}(g)=D_{B_{i}}(g')$（$B_{g}\cong(B_{i})_{g'}$）とする。$x\in\operatorname{Spec}A_{ij}$ となる $j$ をとり、$x\in D_{A_{ij}}(h_{0})\subset U\cap f^{-1}(W)$ となる $h_{0}$ をとる（開基）。$U'\defeq D_{A_{ij}}(h_{0})\cong\operatorname{Spec}(A_{ij})_{h_{0}}$ と $U$ に \ref{ag:simultaneous-principal} を使い、$x\in W'\defeq D_{A}(h)=D_{U'}(h'')$ をとる。
+
+**Step 6（2：⇒、$\mathcal{O}(W')$ は有限生成 $B$ 代数）.** $\mathcal{O}_{X}(W')\cong((A_{ij})_{h_{0}})_{h''}$ は 1(a) を 2 回使って有限生成 $B_{i}$ 代数。$f(W')\subset W=\operatorname{Spec}(B_{i})_{g'}$ なので、\ref{ag:morphisms-to-affine} から $B_{i}\to\mathcal{O}_{X}(W')$ は $(B_{i})_{g'}\cong B_{g}$ を経由し（$g'$ は単元に写る）、よって $\mathcal{O}_{X}(W')$ は有限生成 $B_{g}$ 代数、1(c) から有限生成 $B$ 代数。ここで $B$ 代数の構造は、どの経路でも $f^{\#}$ と制限の合成なので一致する。$\mathcal{O}_{X}(W')\cong A_{h}$。
+
+**Step 7（2：⇒、まとめ）.** $U$ は準コンパクトなので有限個の $D_{A}(h_{1}),\dots,D_{A}(h_{n})$ で覆え、$(h_{1},\dots,h_{n})=A$。各 $A_{h_{k}}$ は有限生成 $B$ 代数なので、1(b) から $A$ も。
+
+**Step 8（3）.** $V=\operatorname{Spec}B$ をアフィン開集合とする。各 $y\in V$ について $y\in V_{i}$ をとり、\ref{ag:simultaneous-principal} で $y\in D_{B}(g)=D_{V_{i}}(g')$ とする。$f^{-1}(V_{i})$ は有限個のアフィン開集合 $\operatorname{Spec}A_{k}$ で覆え、$g'$ の $\operatorname{Spec}A_{k}$ への引き戻しを $\tilde{g}_{k}\in A_{k}$ とすると $f^{-1}(D_{V_{i}}(g'))\cap\operatorname{Spec}A_{k}=D_{A_{k}}(\tilde{g}_{k})$ はアフィンで準コンパクト。よって $f^{-1}(D_{B}(g))$ は準コンパクト。$V$ は有限個の $D_{B}(g)$ で覆えるので、$f^{-1}(V)$ も準コンパクト。
+
+**Step 9（4）.** $f:X\to Y$, $g:Y\to Z$ とし、$W=\operatorname{Spec}C\subset Z$, $U=\operatorname{Spec}A\subset(gf)^{-1}(W)$ をとる。$g^{-1}(W)$ をアフィン開集合 $V_{k}=\operatorname{Spec}B_{k}$ で覆い、$U\cap f^{-1}(V_{k})$ を $A$ の主開集合 $D_{A}(h)$ で覆う。2 から $A_{h}$ は有限生成 $B_{k}$ 代数、$B_{k}$ は有限生成 $C$ 代数なので、$A_{h}$ は有限生成 $C$ 代数（生成元を合わせる）。有限個の $h$ で $U$ を覆い（準コンパクト）、1(b) から $A$ は有限生成 $C$ 代数。準コンパクト性：$g^{-1}(W)$ は有限個の $V_{k}$ で覆え、各 $f^{-1}(V_{k})$ は準コンパクト。
+:::
+
+::: proposition ネーターな底の上の有限型 {#ag:finite-type-noetherian keywords="a scheme locally of finite type over a locally noetherian scheme is locally noetherian" index="有限型とネーター性|ゆうげんがたとねーたーせい"}
+$Y$ が局所ネーターで $f:X\to Y$ が局所有限型なら、$X$ は局所ネーター。$Y$ がネーターで $f$ が有限型なら、$X$ はネーター。とくに体や $\mathbb{Z}$ 上有限型のスキームはネーター。
+:::
+
+::: proof
+$Y$ のアフィン開集合 $\operatorname{Spec}B$（$B$ はネーター、\ref{ag:locally-noetherian.1}）と $f^{-1}(\operatorname{Spec}B)$ のアフィン開集合 $\operatorname{Spec}A$ について、$A$ は有限生成 $B$ 代数（\ref{ag:finite-type-local.2}）なので $A\cong B[x_{1},\dots,x_{n}]/I$。$B[x_{1},\dots,x_{n}]$ はネーター（\ref{ring:hilbert-basis}）、剰余環のイデアルは $I$ を含むイデアルと包含を保って対応するのでネーター。こうした $\operatorname{Spec}A$ が $X$ を覆う。後半：$Y$ を有限個のアフィン開集合で覆うと、その逆像はそれぞれ準コンパクトなので、$X$ も準コンパクト。
+:::
+
+## 開部分スキームと閉部分スキーム {#ag:sec-pf-subschemes}
+
+::: definition 開埋め込みと閉埋め込み {#ag:immersions keywords="open immersion, closed immersion, closed subscheme, reduced induced structure" index="開埋め込み|かいうめこみ, 閉埋め込み|へいうめこみ, 閉部分スキーム|へいぶぶんすきーむ"}
+スキームの射 $f:X\to Y$ について：
+1. **開埋め込み**：$f$ が $X$ から開部分スキーム $(V,\mathcal{O}_{Y}|_{V})$ への同型を誘導する。
+2. **閉埋め込み**：$f$ が $X$ から閉集合 $f(X)$ への同相で、$f^{\#}:\mathcal{O}_{Y}\to f_{*}\mathcal{O}_{X}$ が層の射として全射（すべての茎で全射）。閉埋め込みの同型類を $Y$ の**閉部分スキーム**という。
+:::
+
+::: proposition アフィンスキームの閉部分スキーム {#ag:closed-immersion-affine keywords="Spec A/I -> Spec A is a closed immersion; reduced subscheme Spec A/rad(I); Spec A_red" index="閉埋め込み（アフィン）|へいうめこみあふぃん"}
+1. 環 $A$ のイデアル $I$ について、$\pi:A\to A/I$ に対応する射 $i:\operatorname{Spec}A/I\to\operatorname{Spec}A$ は閉埋め込みで、像は $V(I)$。
+2. （AC）$V(I)=V(\sqrt{I})$ で、$\operatorname{Spec}A/\sqrt{I}$ は被約。とくに $\operatorname{Spec}A_{\mathrm{red}}\to\operatorname{Spec}A$（$A_{\mathrm{red}}=A/\mathrm{nil}A$）は同相な閉埋め込みだが、$A$ が被約でなければ同型でない。
+:::
+
+::: proof
+**Step 1（位相）.** \ref{ag:spec-functor} から $i$ は $\operatorname{Spec}A/I$ から閉集合 $V(I)$ への同相。
+
+**Step 2（茎の全射性）.** $i$ は閉集合への同相なので、$i(x)$ の近傍 $W$ について $i^{-1}(W)$ は $x$ の近傍の共終な系をなし、$(i_{*}\mathcal{O})_{i(x)}=\mathcal{O}_{\operatorname{Spec}A/I,x}$。$\mathfrak{p}\in V(I)$ では茎の準同型は $A_{\mathfrak{p}}\to(A/I)_{\mathfrak{p}}$, $a/s\mapsto\bar{a}/\bar{s}$ で全射。$\mathfrak{p}\notin V(I)$ では、$\mathfrak{p}$ の近傍 $D(g)$ で $V(I)$ と交わらないものがあり、$(i_{*}\mathcal{O})(D(g))=\mathcal{O}(\emptyset)=0$ なので茎は $0$、全射。
+
+**Step 3（2）.** $V(I)=V(\sqrt{I})$ は \ref{ag:spec-topology.2}。$A/\sqrt{I}$ は被約（$\bar{a}^{n}=0\Rightarrow a^{n}\in\sqrt{I}\Rightarrow a\in\sqrt{I}$）。$\operatorname{Spec}A_{\mathrm{red}}\to\operatorname{Spec}A$ が同型なら大域切断 $A\to A_{\mathrm{red}}$ が同型（\ref{ag:morphisms-to-affine}）となり、$\mathrm{nil}A=0$。
+:::
+
+::: remark 閉部分スキームの全体
+アフィンスキーム $\operatorname{Spec}A$ の閉部分スキームはすべて $\operatorname{Spec}A/I$ の形で、$I\mapsto\operatorname{Spec}A/I$ はイデアルと閉部分スキームの一対一対応を与える。この逆向き（任意の閉埋め込みの核がイデアル $I$ から来ること）には準連接層の理論が必要で、\ref{ag:closed-subschemes-affine} で示す。一般のスキーム $X$ の閉集合 $Z$ にも、被約な閉部分スキームの構造（**被約誘導構造**）がただ一つ入ることが知られている（本サイト未収録。アフィンの場合は上の 2 の $\operatorname{Spec}A/\sqrt{I}$）。古典的な多様体は「被約」な閉部分スキームだけを見ていたが、スキームでは $\operatorname{Spec}k[x]/(x^{2})$ のような被約でない閉部分スキーム（「2 重の点」）も区別される。
+:::
+
+## ファイバー積 {#ag:sec-pf-fiber-product}
+
+::: lemma 射の貼り合わせ {#ag:morphisms-glue keywords="morphisms of locally ringed spaces glue; Hom(-, Y) is a sheaf on X; morphisms into an open subscheme" index="射の貼り合わせ|しゃのはりあわせ"}
+1. 局所環付き空間 $X=\bigcup_{i}U_{i}$（開被覆）と、射 $f_{i}:U_{i}\to Y$ で $U_{i}\cap U_{j}$ 上 $f_{i}=f_{j}$ となるものについて、$f|_{U_{i}}=f_{i}$ となる射 $f:X\to Y$ がただ一つある。
+2. 射 $f:T\to Y$ の像が開集合 $V\subset Y$ に含まれれば、$f$ は開部分スキーム $V$ を一意に経由する。とくに開埋め込みはモノ射。
+:::
+
+::: proof
+**Step 1（1：空間）.** 連続写像 $f$ は $f_{i}$ を貼り合わせて一意に定まる。
+
+**Step 2（1：層の射）.** 開集合 $W\subset Y$ と $s\in\mathcal{O}_{Y}(W)$ について、$f_{i}^{\#}(s)\in\mathcal{O}_{X}(f_{i}^{-1}W)=\mathcal{O}_{X}(f^{-1}W\cap U_{i})$ は $U_{i}\cap U_{j}$ 上で一致するので、層の条件から $f^{\#}(s)\in\mathcal{O}_{X}(f^{-1}W)$ に一意に貼り合わさる。制限との両立も層の条件の一意性から。茎の準同型は $f_{i}^{\#}$ のものなので局所的。一意性は層の分離性から。
+
+**Step 3（2）.** $f^{\#}:\mathcal{O}_{Y}\to f_{*}\mathcal{O}_{T}$ を $V$ の開集合に制限すれば $\mathcal{O}_{Y}|_{V}\to f_{*}\mathcal{O}_{T}$ が得られ、これは $V$ への射である。$V$ を経由する仕方は、$V$ の開集合上の値で決まるので一意。
+:::
+
+::: theorem ファイバー積の存在 {#ag:fiber-product keywords="fiber products exist in the category of schemes; Spec A x_{Spec R} Spec B = Spec(A tensor_R B)" index="ファイバー積（スキーム）|ふぁいばーせきすきーむ"}
+（AC）スキームの射 $f:X\to S$, $g:Y\to S$ について、スキームの圏でのファイバー積（引き戻し）$X\times_{S}Y$ が存在する。$X=\operatorname{Spec}A$, $Y=\operatorname{Spec}B$, $S=\operatorname{Spec}R$ なら
+$$
+\operatorname{Spec}A\times_{\operatorname{Spec}R}\operatorname{Spec}B\cong\operatorname{Spec}(A\otimes_{R}B).
+$$
+:::
+
+::: proof
+**Step 1（アフィンの場合）.** スキーム $T$ について、\ref{ag:morphisms-to-affine} と \ref{mod:tensor-algebras.2} から、$T$ について自然な全単射
+$$
+\begin{aligned}
+\operatorname{Hom}(T,\operatorname{Spec}(A\otimes_{R}B))&\cong\operatorname{Hom}_{\mathbf{Ring}}(A\otimes_{R}B,\Gamma(T))\\
+&\cong\{(\alpha,\beta) : \alpha|_{R}=\beta|_{R}\}\\
+&\cong\operatorname{Hom}(T,X)\times_{\operatorname{Hom}(T,S)}\operatorname{Hom}(T,Y).
+\end{aligned}
+$$
+二つ目：$\alpha:A\to\Gamma(T)$, $\beta:B\to\Gamma(T)$ が $R$ 上で一致すれば、$\Gamma(T)$ はその共通の写像で $R$ 代数になり、$\alpha,\beta$ は $R$ 代数の準同型なので、余積の普遍性から $h$ がただ一つ定まる（逆は $h\circ i_{A}$, $h\circ i_{B}$）。三つ目は \ref{ag:morphisms-to-affine} を $X,Y,S$ に使い、$R\to A\to\Gamma(T)$ が $T\to X\to S$ に対応すること（自然性）から。$T=\operatorname{Spec}(A\otimes_{R}B)$ で恒等射に対応する二つの射が射影で、これがファイバー積の普遍性である。
+
+**Step 2（開集合への制限）.** $P=X\times_{S}Y$（射影 $p,q$）が存在し、$U\subset X$ が開なら、開部分スキーム $p^{-1}(U)$ は $U\times_{S}Y$ である：$a:T\to U$, $b:T\to Y$ が $S$ 上で両立すれば、$T\to P$ が一意に定まり、$p$ との合成の像が $U$ に入るので、\ref{ag:morphisms-glue.2} から $p^{-1}(U)$ を一意に経由する。
+
+**Step 3（$X$ の側での貼り合わせ）.** $X=\bigcup X_{i}$（開被覆）で、各 $P_{i}\defeq X_{i}\times_{S}Y$（射影 $p_{i},q_{i}$）が存在するとする。$P_{ij}\defeq p_{i}^{-1}(X_{i}\cap X_{j})\subset P_{i}$ は Step 2 から $(X_{i}\cap X_{j})\times_{S}Y$ で、$P_{ji}\subset P_{j}$ も同じファイバー積なので、射影と両立する同型 $\varphi_{ij}:P_{ij}\to P_{ji}$ がただ一つある（普遍性による一意性）。$\varphi_{ij}(P_{ij}\cap P_{ik})=P_{ji}\cap P_{jk}$（どちらも $X_{i}\cap X_{j}\cap X_{k}$ の逆像で、$\varphi_{ij}$ は $X$ への射影と両立）で、$P_{ij}\cap P_{ik}$ 上の $\varphi_{ik}$ と $\varphi_{jk}\circ\varphi_{ij}$ はどちらも $(X_{i}\cap X_{j}\cap X_{k})\times_{S}Y$ の射影と両立する同型なので一致する（コサイクル条件）。\ref{ag:gluing-schemes} で貼り合わせてスキーム $P$ を得る。$p_{i}$, $q_{i}$ は $\varphi_{ij}$ と両立するので、\ref{ag:morphisms-glue.1} から $p:P\to X$, $q:P\to Y$ に貼り合わさる。
+
+**Step 4（Step 3 の $P$ の普遍性）.** $a:T\to X$, $b:T\to Y$ が $S$ 上で両立するとし、$T_{i}\defeq a^{-1}(X_{i})$ とする。$P_{i}$ の普遍性から $c_{i}:T_{i}\to P_{i}\subset P$ が一意に定まる。$T_{i}\cap T_{j}$ 上では $c_{i}$, $c_{j}$ はどちらも $(X_{i}\cap X_{j})\times_{S}Y\cong P_{ij}\cong P_{ji}$ への、射影と両立する射なので一致する。\ref{ag:morphisms-glue.1} で $c:T\to P$ に貼り合わさる。一意性：$pc'=a$ となる $c'$ は $T_{i}$ を $p^{-1}(X_{i})=P_{i}$ に写すので、$P_{i}$ の普遍性から $c'|_{T_{i}}=c_{i}$。
+
+**Step 5（一般の場合）.** (a) $S,Y$ がアフィンなら、$X$ をアフィン開集合で覆い、Step 1・3。(b) $S$ がアフィンなら、ファイバー積は $X$ と $Y$ について対称なので、(a) を使って $Y$ の側で Step 3 を行う。(c) 一般の場合：$S=\bigcup S_{i}$（アフィン）、$X_{i}\defeq f^{-1}(S_{i})$, $Y_{i}\defeq g^{-1}(S_{i})$ とする。$X_{i}\times_{S_{i}}Y_{i}$ は (b) で存在し、これは $X_{i}\times_{S}Y$ でもある：$a:T\to X_{i}$, $b:T\to Y$ が $S$ 上で両立すれば、$g\circ b=f\circ a$ の像は $S_{i}$ に入るので $b$ の像は $Y_{i}$ に入り、\ref{ag:morphisms-glue.2} から $b$ は $Y_{i}$ を、$f\circ a$ は $S_{i}$ を一意に経由する。よって Step 3 で $X=\bigcup X_{i}$ について貼り合わせればよい。
+:::
+
+::: example ファイバー積の例 {#ag:fiber-product-examples}
+1. **アフィン空間**：$\mathbb{A}^{n}_{R}\defeq\operatorname{Spec}R[x_{1},\dots,x_{n}]$ について $\mathbb{A}^{n}_{R}\times_{R}\mathbb{A}^{m}_{R}\cong\mathbb{A}^{n+m}_{R}$（$R[x]\otimes_{R}R[y]\cong R[x,y]$）。
+2. **台の集合はファイバー積でない**：$\operatorname{Spec}\mathbb{C}\times_{\operatorname{Spec}\mathbb{R}}\operatorname{Spec}\mathbb{C}=\operatorname{Spec}(\mathbb{C}\otimes_{\mathbb{R}}\mathbb{C})$ で、$\mathbb{C}\otimes_{\mathbb{R}}\mathbb{C}\cong\mathbb{C}[t]/(t^{2}+1)\cong\mathbb{C}[t]/(t-i)\times\mathbb{C}[t]/(t+i)\cong\mathbb{C}\times\mathbb{C}$（\ref{mod:tensor-quotient} と中国剰余定理 \tref{ring:chinese-remainder}）。1 点と 1 点のファイバー積が 2 点になる。また $\mathbb{A}^{1}_{k}\times_{k}\mathbb{A}^{1}_{k}=\mathbb{A}^{2}_{k}$ には、曲線 $V(f)$ の生成点のように、二つの射影でどちらも生成点に写る点が無数にある。
+3. **係数拡大**：$R\to R'$ について $X_{R'}\defeq X\times_{\operatorname{Spec}R}\operatorname{Spec}R'$。$X=\operatorname{Spec}R[x]/(f)$ なら $X_{R'}=\operatorname{Spec}R'[x]/(f)$（\ref{mod:tensor-quotient}）：同じ方程式を $R'$ で考える。
+:::
+
+::: definition 射のファイバー {#ag:scheme-fiber keywords="residue field morphism Spec k(y) -> Y, fiber X_y = X x_Y Spec k(y), generic fiber, special fiber" index="ファイバー（射）|ふぁいばーしゃ, 生成ファイバー|せいせいふぁいばー"}
+点 $y\in Y$ について、アフィン近傍 $\operatorname{Spec}B\ni y$ と $B\to B_{\mathfrak{p}}\to\kappa(y)$ から射 $\operatorname{Spec}\kappa(y)\to Y$ が定まる（\ref{ag:simultaneous-principal} で二つのアフィン近傍を比べると、どちらも茎 $\mathcal{O}_{Y,y}\to\kappa(y)$ を経由するので、近傍によらない）。射 $f:X\to Y$ の $y$ での**ファイバー**を $X_{y}\defeq X\times_{Y}\operatorname{Spec}\kappa(y)$ とする。$Y$ が整なら、生成点でのファイバーを**生成ファイバー**という。
+:::
+
+::: proposition アフィンの場合のファイバー {#ag:affine-fiber keywords="A tensor_B k(p) = S^{-1}(A/pA); Spec of the fiber ring is homeomorphic to the set-theoretic fiber" index="ファイバーの位相|ふぁいばーのいそう"}
+環準同型 $\varphi:B\to A$、$\mathfrak{p}\in\operatorname{Spec}B$, $S\defeq\varphi(B\setminus\mathfrak{p})$ について
+1. $A\otimes_{B}\kappa(\mathfrak{p})\cong S^{-1}(A/\mathfrak{p}A)$。
+2. $\operatorname{Spec}(A\otimes_{B}\kappa(\mathfrak{p}))\to\operatorname{Spec}A$ は、ファイバー $\{\mathfrak{q} : \varphi^{-1}(\mathfrak{q})=\mathfrak{p}\}$（\term[部分空間]{top:subspace}）の上への同相。
+:::
+
+::: proof
+**Step 1（1）.** 可換環 $D$ への準同型を比べる。$S^{-1}(A/\mathfrak{p}A)\to D$ は、剰余環と局所化の普遍性（\ref{ring:factor-through-quotient}, \ref{ring:localization-universal}）から、$\alpha:A\to D$ で $\alpha(\varphi(\mathfrak{p}))=0$ かつ $\alpha(\varphi(B\setminus\mathfrak{p}))$ が単元となるものと一対一。一方 $A\otimes_{B}\kappa(\mathfrak{p})\to D$ は、余積の普遍性（\ref{mod:tensor-algebras}）から、$\alpha:A\to D$ と $\beta:\kappa(\mathfrak{p})=B_{\mathfrak{p}}/\mathfrak{p}B_{\mathfrak{p}}\to D$ で $B$ 上一致するものの組と一対一で、$\beta$ は $\alpha\circ\varphi$ から一意に決まり、それが存在する条件は $\alpha\circ\varphi$ が $\mathfrak{p}$ を消し $B\setminus\mathfrak{p}$ を単元に写すこと（同じ二つの普遍性）。両者は同じ関手を表現するので同型（米田）。
+
+**Step 2（2）.** \ref{ag:spec-functor} と \ref{ring:localization-primes} から、$\operatorname{Spec}S^{-1}(A/\mathfrak{p}A)$ は「$\mathfrak{p}A$ を含み $S$ と交わらない素イデアル $\mathfrak{q}$」の集合と同相に対応する（剰余と局所化の同相を合成）。$\mathfrak{q}\supset\mathfrak{p}A\iff\varphi^{-1}(\mathfrak{q})\supset\mathfrak{p}$、$\mathfrak{q}\cap S=\emptyset\iff\varphi^{-1}(\mathfrak{q})\subset\mathfrak{p}$ なので、条件は $\varphi^{-1}(\mathfrak{q})=\mathfrak{p}$。
+:::
+
+::: example $\operatorname{Spec}\mathbb{Z}[i]\to\operatorname{Spec}\mathbb{Z}$ のファイバー {#ag:fibers-gaussian}
+$A=\mathbb{Z}[i]\cong\mathbb{Z}[x]/(x^{2}+1)$ とする。素数 $p$ でのファイバーは $\operatorname{Spec}\mathbb{F}_{p}[x]/(x^{2}+1)$（\ref{ag:affine-fiber.1} で $S$ の元はすでに単元）。
+1. $p=2$：$x^{2}+1=(x+1)^{2}$ なので 1 点で、環 $\mathbb{F}_{2}[x]/((x+1)^{2})$ は被約でない（**分岐**）。
+2. $p\equiv1\pmod 4$：$\mathbb{F}_{p}^{\times}$ は位数 $p-1$ の巡回群（\ref{fld:finite-multiplicative-cyclic}）で $4\mid p-1$ なので位数 4 の元 $c$ がある。$c^{2}$ は位数 2 で、体の中で $t^{2}=1$ の根は $\pm1$ だけなので $c^{2}=-1$。$p$ は奇数なので $c\neq-c$ で、$x^{2}+1=(x-c)(x+c)$ と中国剰余定理から 2 点（**分解**）。
+3. $p\equiv3\pmod 4$：位数 4 の元がない（$4\nmid p-1$、ラグランジュ）ので $x^{2}+1$ は根をもたず、2 次なので既約、1 点で剰余体は $\mathbb{F}_{p^{2}}$（**惰性**）。
+4. 生成ファイバー：$\mathbb{Q}[x]/(x^{2}+1)=\mathbb{Q}(i)$、1 点。
+
+数論の「素数の分解」は、この射のファイバーの形として幾何的に読める（代数的整数論で詳しく扱う）。
+:::
+
+::: proposition 底変換で保たれる性質と保たれない性質 {#ag:base-change-properties keywords="locally of finite type and finite type are stable under base change; reduced, integral, irreducible, noetherian are not" index="底変換|そこへんかん"}
+1. 局所有限型・有限型は**底変換で保たれる**：$f:X\to S$ がそうなら、任意の $S'\to S$ について $f':X\times_{S}S'\to S'$ もそう。
+2. 被約・整・既約・ネーターは、スキームの性質としては底変換（ファイバー積）で保たれない。
+:::
+
+::: proof
+**Step 1（1：アフィンの場合）.** $A$ が $R$ 上 $a_{1},\dots,a_{m}$ で生成されれば、$A\otimes_{R}R'$ は $R'$ 上 $a_{k}\otimes1$ で生成される（純テンソル $a\otimes r'=(a\otimes1)(1\otimes r')$ で、$a$ は $a_{k}$ の多項式）。
+
+**Step 2（1：一般の場合）.** $S$ のアフィン開被覆 $S_{i}=\operatorname{Spec}R_{i}$ と、$f^{-1}(S_{i})$ のアフィン開被覆 $\operatorname{Spec}A_{ij}$（$A_{ij}$ は有限生成 $R_{i}$ 代数）をとり、$S'$ を、各々がある $S_{i}$ の逆像に含まれるアフィン開集合 $S'_{k}=\operatorname{Spec}R'_{k}$ で覆う。\ref{ag:fiber-product} の証明の Step 2・3・5 から、$X\times_{S}S'$ の $S'_{k}$ 上の部分は $f^{-1}(S_{i})\times_{S_{i}}S'_{k}$ で、これは $\operatorname{Spec}(A_{ij}\otimes_{R_{i}}R'_{k})$ で覆われる。Step 1 から局所有限型。$f^{-1}(S_{i})$ が有限個の $\operatorname{Spec}A_{ij}$ で覆えるなら、$S'_{k}$ 上の部分も有限個で覆えるので、\ref{ag:finite-type-local.3} から準コンパクト。
+
+**Step 3（2：反例）.** 被約：\ref{ring:tensor-not-reduced} の $L\otimes_{k}L$（$\operatorname{Spec}L$ は被約、$\operatorname{Spec}L\times_{k}\operatorname{Spec}L$ は被約でない）。整・既約：\ref{ag:fiber-product-examples.2} の $\operatorname{Spec}(\mathbb{C}\times\mathbb{C})$ は 2 点の離散空間で既約でない。ネーター：\ref{ring:tensor-not-noetherian} の $L=k(t_{1},t_{2},\dots)$ について、$\operatorname{Spec}L$ と $\operatorname{Spec}k$ はネーターだが $\operatorname{Spec}(L\otimes_{k}L)$ はネーターでない（\ref{ag:locally-noetherian.2}）。
+:::
+
+::: remark グロタンディークの設計：性質を射に載せる理由と永田の例
+1. **なぜ一般のスキームを許すか**：上の 2 のとおり、ネーター性はファイバー積で失われる。ファイバー積・ファイバー・係数拡大を自由に使うために、EGA はまず**一般の**スキームの圏で理論を作り、有限性の仮定を対象ではなく**射**（有限型、のちに有限表示）に載せた。有限表示の射については、ネーターでないスキームの議論をネーターな場合に帰着する「極限の議論」（EGA IV 第 8 節）が整備されていることが知られている（本サイト未収録）。
+2. **閉じた世界**：\ref{ag:finite-type-noetherian} と上の 1 から、「局所ネーターな $S$ 上の局所有限型スキーム」の族は、$S$ 上局所有限型な $S'$ への底変換で閉じている（$X\times_{S}S'$ は $S'$ 上局所有限型、$S'$ は局所ネーターなので局所ネーター）。これが代数幾何の多くの定理の標準的な仮定になった。
+3. **幾何的な性質**：被約・整は底変換で失われるので、EGA は「任意の体の拡大 $k'/k$ で $X_{k'}$ が被約」という**幾何的に被約**などの性質を別に定義した。完全体上では被約と幾何的に被約が一致することが知られている（本サイト未収録。体の側では \ref{fld:perfect-separably-generated} が関係する）。
+4. **永田の例とその回避**：ネーター性だけでは、\term[次元]{ring:krull-dimension}が無限大のネーター環（\ref{ring:nagata-infinite-dimension}）、正規化が有限でない整域（\ref{ring:nagata-examples}）、鎖状でない環（\ref{ag:page-dimension} の注意）が現れる。グロタンディークは、こうした病理を排除する条件として**優秀環**（普遍鎖状・G 環・J-2）を EGA IV（第 7.8 節）で導入し、体・$\mathbb{Z}$・完備ネーター局所環が優秀で、優秀環上有限型の代数がまた優秀であることを示したことが知られている（本サイト未収録）。とくに体や $\mathbb{Z}$ 上有限型のスキームでは、永田の病理はすべて起こらない。「ネーター」と「有限型」は条件の一部にすぎず、底を優秀にとることで残りが保証される、という二段構えである。
+:::
+
+::: hypcheck
+- **選択公理**：\ref{ag:spec-topology}（生成点、根基と $V$ の対応、準コンパクト性）、\ref{ag:structure-sheaf-properties}、\ref{ring:nilradical} を通して使う。\ref{ag:fiber-product} はアフィンの場合に \ref{ag:morphisms-to-affine} を通して AC に依存する。
+- **準コンパクト性**：\ref{ag:affine-communication} の Step 2 と \ref{ag:finite-type-local} の Step 7・8 で、有限個の主開集合に減らすのに本質的。(ii)・1(b) は有限個の $f_{i}$ についてしか言えない（無限個だと共通の $N$ がとれない）。
+- **局所性（茎の準同型が局所的）**：\ref{ag:simultaneous-principal} の Step 3 で、芽が単元かどうかがどのアフィン開集合で見ても同じ、という形で使う。\ref{ag:morphisms-glue} では局所性は $f_{i}$ から受け継ぐだけ。
+- **既約性**：\ref{ag:reduced-integral} の Step 5 で、$U=Z(f)\cup Z(g)$ から一方を選ぶのに使う。被約性は Step 6 で冪零元を $0$ にするのに使う。どちらも外せない（$k[x,y]/(xy)$ は被約で既約でない、$k[x]/(x^{2})$ は既約で被約でない）。
+- **ネーター性**：\ref{ag:finite-type-noetherian} で底がネーターであることを使い、\ref{ring:hilbert-basis} に帰着する。
+:::
+
+::: supplement
+**前提を変えると.** \ref{ag:affine-communication.i}・\ref[(ii)]{ag:affine-communication.ii} をみたす性質には、被約・ネーター・正規（整閉整域の局所化）などがあり、どれも「あるアフィン開被覆で確かめればよい」。局所環付き空間の圏でもファイバー積が存在し、スキームのファイバー積と一致することが知られている（本サイト未収録）。
+
+**似た定理.** 位相空間の圏のファイバー積は集合のファイバー積に部分位相を入れたものだが、スキームではそうならない（\ref{ag:fiber-product-examples.2}）。点の集合ではなく「点の関手」で見るとファイバー積は素朴なもの（次の節）になる。
+
+**計算の観点.** アフィンの場合 $A=R[x]/I$, $B=R[y]/J$ なら $A\otimes_{R}B\cong R[x,y]/(I+J)$（\ref{mod:tensor-quotient} を 2 回）で、ファイバー積は「二つの方程式系を並べたもの」。ファイバーは方程式の係数を $\kappa(\mathfrak{p})$ に還元して得られ、グレブナー基底などで具体的に計算できる。
+:::
+
+## 高い視点 {#ag:sec-pf-viewpoint}
+
+::: remark 表現可能な関手の引き戻し
+点の関手 $h_{X}=\operatorname{Hom}(-,X)$ で見ると、ファイバー積の普遍性は $h_{X\times_{S}Y}=h_{X}\times_{h_{S}}h_{Y}$（集合のファイバー積を各点でとったもの）そのものである。関手の側では引き戻しはいつでも存在し、\ref{ag:fiber-product} の内容は「スキームで表現可能な関手は引き戻しで閉じる」ことにある。証明の構造——アフィンでは環のテンソル積（余積）、一般には開被覆で貼り合わせ——は、スキームが「アフィン（環の反対）をザリスキ位相で貼り合わせた層」であることの直接の反映である。比喩で言えば、$T$ に値をとる $X\times_{S}Y$ の点とは「$X$ の点と $Y$ の点で、$S$ に落とすと同じになる組」で、二つの方程式系を「共通の係数の上で」連立したものである。台の集合がこの素朴な描像からずれるのは、点が「体に値をとる点」の同値類にすぎず、二つの体の合成のしかたが一通りでない（$\mathbb{C}\otimes_{\mathbb{R}}\mathbb{C}$）からである。
+:::
+
+## 問題 {#ag:sec-pf-problems}
+
+::: problem {#ag:prob-pf-parabola-fibers}
+$k$ を標数が $2$ でない代数閉体とし、$f:X=\operatorname{Spec}k[x,y]/(y^{2}-x)\to\operatorname{Spec}k[x]$ を $k[x]\to k[x,y]/(y^{2}-x)$ に対応する射とする。閉点 $x=a$ でのファイバーと生成ファイバーを求めよ。
+:::
+
+::: solution
+\ref{ag:affine-fiber} から、$x=a$ でのファイバーは $\operatorname{Spec}k[y]/(y^{2}-a)$。$a\neq0$ なら $a=b^{2}$（代数閉）、$b\neq-b$（標数 $\neq2$）で $y^{2}-a=(y-b)(y+b)$、中国剰余定理から $k\times k$：被約な 2 点。$a=0$ なら $k[y]/(y^{2})$：1 点で被約でない。生成ファイバーは $k(x)[y]/(y^{2}-x)$ で、$y^{2}-x$ は $k(x)$ で根をもたない（$x$ は $k(x)$ で平方でない：$x=(p/q)^{2}$ なら $xq^{2}=p^{2}$ の $x$ についての次数の偶奇が合わない）ので既約、体 $k(\sqrt{x})$ の 1 点。
+:::
+
+::: problem {#ag:prob-pf-two-lines}
+$X=\operatorname{Spec}k[x,y]/(xy)$（$k$ は体）は被約だが整でないことを、\ref{ag:reduced-integral} を使って示せ。
+:::
+
+::: solution
+$A=k[x,y]/(xy)$ は被約：$k[x,y]$ の元を $c+xp(x)+yq(y)+xy\,r$ と書くと、$A$ の元は $c+xp(x)+yq(y)$ と一意に表せる。その $n$ 乗は $c^{n}+x(\cdots)+y(\cdots)$ で、$0$ なら $c=0$、すると $x$ の部分 $(xp(x))^{n}$ と $y$ の部分 $(yq(y))^{n}$ がともに $0$ で、$k[x]$, $k[y]$ は整域なので $p=q=0$。よって \ref{ag:reduced-integral.2} から $X$ は被約。$xy=0$ で $x,y\neq0$ なので $A$ は整域でなく、4 から $X$ は整でない（3 から既約でもない：$X=V(x)\cup V(y)$）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

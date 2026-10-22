@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>行列式の定義 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/01-linear-algebra/02-determinants/01-definitions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 行列式の定義 {#lin:page-determinant-definitions keywords="determinant, Leibniz formula, alternating multilinear forms, Weierstrass characterization of the determinant, uniqueness of normalized alternating multilinear forms, alternating n-forms on a free module of rank n, basis-free determinant of an endomorphism, multiplicativity of the determinant, cofactor expansion as recursive definition, determinant by Gaussian elimination, product of pivots, triangular matrices, permutation matrices, multiplicative characterization of det, Sarrus rule, equivalent definitions"}
+
+行列式には多くの同値な定義がある。この頁では可換環 $A$ 上の正方行列について、(D1) ライプニッツの展開式、(D2) 列について多重線形・交代的で $\det I=1$ となるただ一つの関数（ワイエルシュトラスの特徴付け）、(D3) 階数 $n$ の自由加群上の交代 $n$ 形式への作用（基底によらない定義）、(D4) 第 1 列についての余因子展開による帰納的定義、の同値性を示す。(D3) から乗法性 $\det(AB)=\det A\det B$ が直ちに従う。体上では (D5) 掃き出し法のピボットの積、(D6) 乗法的で基本行列に対する値が決まった関数、とも一致する。固有値・外積代数・体積・ノルムによる定義は後の頁で扱う（最後の注意に一覧）。
+
+> 体の証明がそのまま通るので、最初から可換環上で書く。
+
+## 記法と定義の確認 {#lin:sec-df-notation}
+
+::: notation
+- $A$ は可換環（$1\neq0$ を仮定しなくても以下は成り立つ）。$M_{n}(A)$ の行列 $X=(x_{ij})$ の第 $j$ 列を $x_{j}\in A^{n}$ と書き、$X=(x_{1},\dots,x_{n})$。$e_{1},\dots,e_{n}$ は $A^{n}$ の標準基底。
+- 対称群 $S_{n}$ と符号 $\operatorname{sgn}$（準同型、互換は $-1$、互換 $m$ 個の積の符号は $(-1)^{m}$）は \ref{grp:sign}, \ref{grp:sign-homomorphism}, \ref{grp:sign-computation}。$S_{n}$ は互換で生成される。
+- 自由加群・標準基底・自由加群の普遍性は \ref{mod:free-module}, \ref{mod:free-module-universal}。階数の一意性は \ref{mod:rank-invariance}。
+- 体上の掃き出し法・基本行列・LU 分解は \ref{lin:elementary-operations}, \ref{lin:inverse-elimination}, \ref{lin:lu-decomposition}。
+- **選択公理**：使わない。
+:::
+
+## 交代多重線形形式 {#lin:sec-df-alternating}
+
+::: definition 多重線形・交代的 {#lin:alternating-form keywords="multilinear map, alternating: vanishes when two arguments are equal, skew-symmetric" index="多重線形|たじゅうせんけい, 交代的|こうたいてき, 交代形式|こうたいけいしき"}
+$A$ 加群 $M$, $N$ について、写像 $D:M^{n}\to N$ が**多重線形**とは各変数について $A$ 線形であること。さらに、ある $p\neq q$ で $v_{p}=v_{q}$ なら $D(v_{1},\dots,v_{n})=0$ となるとき**交代的**という。$N=A$ のとき**交代 $n$ 形式**といい、その全体を $\operatorname{Alt}^{n}(M)$（$A$ 加群）とする。
+:::
+
+::: lemma 交代性の帰結 {#lin:alternating-consequences keywords="alternating implies skew-symmetric; D(v_sigma(1), ..., v_sigma(n)) = sgn(sigma) D(v); vanishing on adjacent equal arguments suffices" index="交代性と符号|こうたいせいとふごう"}
+$D:M^{n}\to N$ を多重線形とする。
+1. $D$ が交代的なら、二つの変数を入れ替えると符号が変わり、$\sigma\in S_{n}$ について $D(v_{\sigma(1)},\dots,v_{\sigma(n)})=\operatorname{sgn}(\sigma)D(v_{1},\dots,v_{n})$。$v_{1},\dots,v_{n}$ が一次従属（ある $v_{p}$ が他の一次結合）なら $D(v)=0$。
+2. **隣り合う**二つの変数が等しいとき $0$ になれば、$D$ は交代的。
+:::
+
+::: proof
+**Step 1（隣接・一般の入れ替え）.** 第 $p$, $q$ 変数以外を固定した $E(u,w)\defeq D(\dots,u,\dots,w,\dots)$ について、$E(u,u)=0$ がすべての $u$ で成り立てば $0=E(u+w,u+w)=E(u,w)+E(w,u)$。よって入れ替えで符号が変わる。
+
+**Step 2（1：置換）.** $\sigma$ を互換の積 $\tau_{1}\cdots\tau_{m}$ に書き、一つずつ入れ替えると Step 1 から $(-1)^{m}=\operatorname{sgn}\sigma$ 倍（\ref{grp:sign-computation.3}）。一次従属なら、$v_{p}=\sum_{q\neq p}c_{q}v_{q}$ を代入して多重線形性で展開すると、各項は等しい変数を二つもつので $0$。
+
+**Step 3（2）.** 隣り合う変数が等しいと $0$ なら、Step 1 から隣接互換で符号が変わる。$v_{p}=v_{q}$（$p<q$）なら、第 $q$ 変数を隣接互換 $q-p-1$ 回で第 $p+1$ の位置に移すと $\pm D(\dots,v_{p},v_{p},\dots)=0$。
+:::
+
+## ライプニッツの式と特徴付け {#lin:sec-df-leibniz}
+
+::: definition 行列式（ライプニッツの式） {#lin:leibniz-formula keywords="Leibniz formula det X = sum over permutations of sgn(sigma) prod x_{sigma(j) j}" index="行列式|ぎょうれつしき, ライプニッツの式|らいぷにっつのしき"}
+$X\in M_{n}(A)$ の**行列式**を
+$$
+\det X\defeq\sum_{\sigma\in S_{n}}\operatorname{sgn}(\sigma)\prod_{j=1}^{n}x_{\sigma(j)\,j}
+$$
+とする（**(D1)**）。$n=0$ では $\det=1$（空の積）。
+:::
+
+::: theorem 行列式の特徴付け（ワイエルシュトラス） {#lin:det-characterization keywords="det is the unique map M_n(A) -> A which is multilinear and alternating in the columns with det I = 1; every alternating multilinear D satisfies D(X) = det(X) D(I)" index="行列式の特徴付け|ぎょうれつしきのとくちょうづけ"}
+1. $\det$ は列について多重線形かつ交代的で、$\det I=1$。
+2. 列について多重線形かつ交代的な $D:M_{n}(A)\to N$（$N$ は $A$ 加群）は $D(X)=\det(X)\,D(I)$ をみたす。
+3. したがって、列について多重線形・交代的で $D(I)=1$ となる $D:M_{n}(A)\to A$ は $\det$ だけである（**(D2)**）。
+4. $\det{}^{t}X=\det X$。とくに、行について多重線形・交代的としても同じ特徴付けが成り立つ。
+:::
+
+::: proof
+**Step 1（1：多重線形）.** 各項 $\prod_{j}x_{\sigma(j)j}$ は第 $j$ 列からちょうど一つの成分をとるので、各列について線形。$\det I$ では $\sigma=1$ 以外の項は $\delta$ の積が $0$。
+
+**Step 2（1：交代的）.** 第 $p$, $q$ 列が等しいとし、$\tau=(p\ q)$ とする。$\sigma\mapsto\sigma\tau$ は $S_{n}$ の不動点のない対合（$\sigma\tau\neq\sigma$）で、$S_{n}$ を対 $\{\sigma,\sigma\tau\}$ に分ける。$\prod_{j}x_{\sigma\tau(j)j}=\prod_{j}x_{\sigma(j)\tau(j)}$（第 $p$, $q$ 列が等しいので $x_{\sigma(q)p}=x_{\sigma(q)q}$ など）$=\prod_{j}x_{\sigma(j)j}$ で、符号は $\operatorname{sgn}(\sigma\tau)=-\operatorname{sgn}\sigma$。よって各対の和は $0$（$2$ で割ることは使わない）。
+
+**Step 3（2）.** $x_{j}=\sum_{i}x_{ij}e_{i}$ を代入して多重線形性で展開すると
+$$
+D(X)=\sum_{\phi:\{1..n\}\to\{1..n\}}\Bigl(\prod_{j}x_{\phi(j)j}\Bigr)D(e_{\phi(1)},\dots,e_{\phi(n)}).
+$$
+$\phi$ が単射でなければ等しい列があるので $0$。$\phi=\sigma\in S_{n}$ なら \ref{lin:alternating-consequences.1} から $D(e_{\sigma(1)},\dots,e_{\sigma(n)})=\operatorname{sgn}(\sigma)D(I)$。よって $D(X)=\det(X)D(I)$。
+
+**Step 4（3）.** 1 と 2 から。
+
+**Step 5（4）.** $\sigma\mapsto\sigma^{-1}$ は $S_{n}$ の全単射で $\operatorname{sgn}\sigma^{-1}=\operatorname{sgn}\sigma$、$\prod_{j}x_{\sigma(j)j}=\prod_{i}x_{i\,\sigma^{-1}(i)}$（$i=\sigma(j)$ と置き換え）。よって $\det X=\sum_{\pi}\operatorname{sgn}(\pi)\prod_{i}x_{i\pi(i)}=\det{}^{t}X$。
+:::
+
+## 基底によらない定義と乗法性 {#lin:sec-df-endomorphism}
+
+::: theorem 交代形式の加群と自己準同型の行列式 {#lin:det-endomorphism keywords="Alt^n(M) is free of rank one for M free of rank n; f^* acts on it by multiplication by det f; basis-free determinant of an endomorphism; equals det of any matrix of f" index="自己準同型の行列式|じこじゅんどうけいのぎょうれつしき"}
+$M$ を階数 $n$ の自由 $A$ 加群とする。
+1. 基底 $(b_{1},\dots,b_{n})$ について、$\omega_{b}(v_{1},\dots,v_{n})\defeq\det([v_{1}]_{b},\dots,[v_{n}]_{b})$（座標を列に並べた行列）は $\operatorname{Alt}^{n}(M)$ の基底で、$\operatorname{Alt}^{n}(M)\cong A$。
+2. $f\in\operatorname{End}_{A}(M)$ について $f^{*}\omega\defeq\omega(f-,\dots,f-)$ は $\operatorname{Alt}^{n}(M)$ の自己準同型で、ただ一つの $c_{f}\in A$ により $f^{*}\omega=c_{f}\omega$（すべての $\omega$）。$\det f\defeq c_{f}$ とおく（**(D3)**）。
+3. 任意の基底 $b$ について $\det f=\det[f]_{b}$。とくに $\det(P^{-1}XP)=\det X$（$P$ 可逆）。
+:::
+
+::: proof
+**Step 1（1）.** 座標写像 $M\cong A^{n}$ で \ref{lin:det-characterization} を写すと、$\omega\in\operatorname{Alt}^{n}(M)$ は $\omega=\omega(b_{1},\dots,b_{n})\,\omega_{b}$ をみたす（2 で $N=A$）。$\omega_{b}(b_{1},\dots,b_{n})=\det I=1$ なので、$a\omega_{b}=0\Rightarrow a=0$。よって $\omega_{b}$ は基底。
+
+**Step 2（2）.** $f^{*}\omega$ が交代 $n$ 形式であることは定義から。$\operatorname{Alt}^{n}(M)=A\omega_{b}$ なので $f^{*}\omega_{b}=c\,\omega_{b}$、$f^{*}$ は $A$ 線形なので $f^{*}(a\omega_{b})=c\,a\omega_{b}$。$c$ は $\omega_{b}$ が基底なので一意で、別の基底 $\omega'=u\omega_{b}$（$u$ は単元）でも同じ $c$。
+
+**Step 3（3）.** $c_{f}=(f^{*}\omega_{b})(b_{1},\dots,b_{n})=\det([f(b_{1})]_{b},\dots,[f(b_{n})]_{b})=\det[f]_{b}$（表現行列の第 $j$ 列が $[f(b_{j})]_{b}$）。$c_{f}$ は基底によらないので、$[f]_{b'}=P^{-1}[f]_{b}P$（\ref{lin:change-of-basis}、可換環上でも同じ証明）の行列式は等しい。
+:::
+
+::: corollary 行列式の乗法性 {#lin:det-multiplicative keywords="det(XY) = det X det Y; det of an invertible matrix is a unit; det is a group homomorphism GL_n(A) -> A^x" index="行列式の乗法性|ぎょうれつしきのじょうほうせい"}
+$X,Y\in M_{n}(A)$ について $\det(XY)=\det X\det Y$。$X$ が可逆なら $\det X\in A^{\times}$、$\det X^{-1}=(\det X)^{-1}$ で、$\det:\mathrm{GL}_{n}(A)\to A^{\times}$ は群準同型。
+:::
+
+::: proof
+$(fg)^{*}\omega=\omega(fg-,\dots)=g^{*}(f^{*}\omega)=\det f\det g\,\omega$。\ref{lin:det-endomorphism.3} で $M=A^{n}$, 標準基底をとる。後半は $XX^{-1}=I$ に適用。（逆に $\det X$ が単元なら $X$ は可逆であることは、余因子行列で示す：\see{lin:page-determinant-properties}。）
+:::
+
+## 余因子展開による帰納的定義 {#lin:sec-df-recursive}
+
+::: theorem 余因子展開による定義 {#lin:det-recursive keywords="recursive definition by expansion along the first column; agrees with the Leibniz formula" index="余因子展開による定義|よいんしてんかいによるていぎ"}
+$\delta_{1}(x)\defeq x$、$n\ge2$ で $\delta_{n}(X)\defeq\sum_{i=1}^{n}(-1)^{i+1}x_{i1}\delta_{n-1}(X_{i1})$（$X_{i1}$ は第 $i$ 行と第 1 列を除いた $(n-1)$ 次の行列）と帰納的に定める（**(D4)**）。このとき $\delta_{n}=\det$。
+:::
+
+::: proof
+**Step 1（方針）.** \ref{lin:det-characterization.3} から、$\delta_{n}$ が列について多重線形・交代的で $\delta_{n}(I)=1$ を示せばよい。$n$ についての帰納法で、$\delta_{n-1}=\det$ は列について多重線形・交代的とする。
+
+**Step 2（多重線形と正規化）.** 第 1 列については各項が $x_{i1}$ について線形。第 $j\ge2$ 列については、$X_{i1}$ の一つの列が $x_{j}$ から第 $i$ 成分を除いたもので、$\delta_{n-1}$ の線形性から。$\delta_{n}(I)=1\cdot\delta_{n-1}(I_{n-1})=1$（$i\ge2$ の項は $x_{i1}=0$）。
+
+**Step 3（隣接する列が等しい：$q\ge2$）.** \ref{lin:alternating-consequences.2} から、第 $q$, $q+1$ 列が等しいとき $0$ を示せばよい。$q\ge2$ なら各 $X_{i1}$ は隣接する二つの等しい列をもつので $\delta_{n-1}(X_{i1})=0$。
+
+**Step 4（第 1・2 列が等しい）.** $x_{i1}=x_{i2}\eqqcolon c_{i}$ とする。$\delta_{n-1}(X_{i1})$ を第 1 列（$X$ の第 2 列から第 $i$ 成分を除いたもの）で展開すると、行 $l\neq i$ について $(-1)^{l'+1}c_{l}\det X_{\{i,l\},\{1,2\}}$（$l'=l$ $(l<i)$, $l-1$ $(l>i)$、$X_{\{i,l\},\{1,2\}}$ は行 $i,l$ と列 $1,2$ を除いたもの）。よって $\delta_{n}(X)=\sum_{i\neq l}\varepsilon(i,l)c_{i}c_{l}\det X_{\{i,l\},\{1,2\}}$, $\varepsilon(i,l)=(-1)^{i+1}(-1)^{l'+1}$。$i<l$ について $\varepsilon(i,l)=(-1)^{i+l+1}$、$\varepsilon(l,i)=(-1)^{l+1}(-1)^{i+1}=(-1)^{i+l}$（このとき $i<l$ なので $i'=i$）で、二つの項は打ち消し合う。よって $\delta_{n}(X)=0$。
+:::
+
+## 体上での計算と特徴付け {#lin:sec-df-field}
+
+::: proposition 三角行列・置換行列・基本行列 {#lin:det-special-matrices keywords="det of a triangular matrix is the product of diagonal entries; det of a permutation matrix is the sign; det of elementary matrices" index="三角行列の行列式|さんかくぎょうれつのぎょうれつしき"}
+1. 上（下）三角行列の行列式は対角成分の積。
+2. 置換 $\sigma$ の置換行列 $P_{\sigma}$（$P_{\sigma}e_{j}=e_{\sigma(j)}$）について $\det P_{\sigma}=\operatorname{sgn}\sigma$。
+3. 基本行列について $\det P_{ij}=-1$, $\det D_{i}(c)=c$, $\det T_{ij}(c)=1$。
+:::
+
+::: proof
+**Step 1（1）.** 上三角 $X$（$i>j$ で $x_{ij}=0$）のライプニッツの式で、$\sigma\neq1$ ならある $j$ で $\sigma(j)>j$（すべての $j$ で $\sigma(j)\le j$ なら、$j=1,2,\dots$ と順に $\sigma(j)=j$）なので $x_{\sigma(j)j}=0$。残るのは $\sigma=1$ の項。下三角は転置（\ref{lin:det-characterization.4}）。
+
+**Step 2（2）.** $\det P_{\sigma}=\det(e_{\sigma(1)},\dots,e_{\sigma(n)})=\operatorname{sgn}\sigma\det I$（\ref{lin:alternating-consequences.1}）。
+
+**Step 3（3）.** $P_{ij}$ は互換の置換行列、$D_{i}(c)$, $T_{ij}(c)$ は三角行列。
+:::
+
+::: theorem 掃き出し法による行列式 {#lin:det-elimination keywords="over a field, det A = sgn(P)^{-1} prod of diagonal entries of U for PA = LU; det A is nonzero iff A is invertible" index="ピボットの積|ぴぼっとのせき"}
+体 $k$ 上で $PA=LU$（\ref{lin:lu-decomposition}）なら $\det A=\det(P)^{-1}\prod_{i}u_{ii}=\pm\prod_{i}u_{ii}$（**(D5)**：符号は行の入れ替えの回数の偶奇）。とくに $\det A\neq0\iff A$ は可逆。
+:::
+
+::: proof
+乗法性と \ref{lin:det-special-matrices} から $\det P\det A=\det L\det U=\prod u_{ii}$、$\det P=\pm1$。$A$ が可逆 $\iff U$ が可逆 $\iff$ すべての $u_{ii}\neq0$（三角行列が可逆 $\iff$ 対角成分がすべて $0$ でない：\ref{lin:inverse-elimination} の階数による判定）。
+:::
+
+::: theorem 乗法的な関数による特徴付け {#lin:det-multiplicative-characterization keywords="a multiplicative map f: M_n(k) -> k with f(D_1(c)) = c and f(T_ij(c)) = 1 equals det" index="行列式の乗法的特徴付け|ぎょうれつしきのじょうほうてきとくちょうづけ"}
+体 $k$ 上で、$f:M_{n}(k)\to k$ が $f(XY)=f(X)f(Y)$、$f(D_{1}(c))=c$（$c\in k$）、$f(T_{ij}(c))=1$ をみたせば $f=\det$（**(D6)**）。
+:::
+
+::: proof
+**Step 1（入れ替えと $D_{i}$）.** $i\neq1$ について $P_{1i}=T_{1i}(1)T_{i1}(-1)T_{1i}(1)D_{1}(-1)$（第 $1,i$ 行・列の $2\times2$ の部分で $\begin{pmatrix}1&1\\0&1\end{pmatrix}\begin{pmatrix}1&0\\-1&1\end{pmatrix}\begin{pmatrix}1&1\\0&1\end{pmatrix}=\begin{pmatrix}0&1\\-1&0\end{pmatrix}$ で、右から $\operatorname{diag}(-1,1)$ を掛けると $\begin{pmatrix}0&1\\1&0\end{pmatrix}$）。よって $f(P_{1i})=f(D_{1}(-1))=-1$。$D_{i}(c)=P_{1i}D_{1}(c)P_{1i}$ から $f(D_{i}(c))=c$、$P_{ij}=P_{1i}P_{1j}P_{1i}$ から $f(P_{ij})=-1$。よって $f$ と $\det$ は基本行列で一致する（\ref{lin:det-special-matrices.3}）。
+
+**Step 2（可逆行列）.** 可逆行列は基本行列の積（\ref{lin:inverse-elimination}）なので、乗法性から $f=\det$。
+
+**Step 3（可逆でない行列）.** $X$ の簡約階段形 $R=EX$（$E$ は基本行列の積）は最後の行が $0$ なので $R=D_{n}(0)R$、$f(R)=f(D_{n}(0))f(R)=0$。よって $f(X)=f(E)^{-1}f(R)=0=\det X$（$f(E)=\det E\neq0$）。
+:::
+
+::: remark 行列式の同値な定義の一覧
+この頁の (D1)〜(D6) のほかに、次も行列式の同値な定義（あるいは特徴付け）である。
+1. **(D7) 固有値の積・特性多項式**：$\det X=(-1)^{n}\chi_{X}(0)$、代数的閉体上では重複度込みの固有値の積（\ref{lin:page-eigenvalues}）。
+2. **(D8) 外積代数の最高次**：$\Lambda^{n}f:\Lambda^{n}M\to\Lambda^{n}M$ は $\det f$ 倍（\ref{lin:page-exterior}）。(D3) はその双対である。
+3. **(D9) 体積の拡大率**：$X\in M_{n}(\mathbb{R})$ について、ルベーグ測度で $\operatorname{vol}(X(S))=|\det X|\operatorname{vol}(S)$、符号は向き（\ref[多重線形代数の応用]{lin:page-multilinear-applications}）。
+4. **(D10) ノルム**：体の拡大 $L/K$ の元の掛け算写像の行列式がノルム $N_{L/K}$（\ref{ring:trace-norm}）。
+5. **(D11) 指数とトレース**：$X\in M_{n}(\mathbb{C})$ について $\det e^{X}=e^{\operatorname{tr}X}$、標数 $0$ ではニュートンの恒等式により $\det X$ は $\operatorname{tr}(X^{k})$（$k\le n$）の多項式（\ref{lin:page-matrix-functions}）。
+6. **組合せ論的な表示**：リンドストローム–ゲッセル–ヴィエノーの補題（非交差な経路の数え上げ）やグラスマン変数のベレジン積分としての表示が知られている（本サイト未収録）。
+:::
+
+::: hypcheck
+- **可換性**：ライプニッツの式の積の順序と、\ref{lin:det-endomorphism} の Step 2（スカラー $c$ が $\omega$ と可換）で使う。非可換環では行列式は一般に定義されない（ディユドネ行列式などの代替がある）。
+- **交代的の定義**：「等しい二変数で $0$」を採用した。「入れ替えで符号が変わる」だけでは、$2=0$ の環で同値にならない（$\mathbb{F}_{2}$ 上の $D(u,w)=u_{1}w_{1}$ は対称だが交代的でない）。\ref{lin:det-characterization} の Step 2 は $2$ で割らない。
+- **自由であること**：\ref{lin:det-endomorphism} で $\operatorname{Alt}^{n}(M)$ が階数 1 の自由加群であることに使う。有限生成射影加群では、局所的に自由なので同じ定義が局所的に通る。
+- **体であること**：(D5)・(D6) で掃き出し法と基本行列による生成を使う。
+- **選択公理**：使わない。
+:::
+
+::: supplement
+**前提を弱めると.** (D2) の議論は、$D$ の値が任意の $A$ 加群 $N$ でよいこと（2）を含み、これが「$\operatorname{Alt}^{n}(A^{n})$ は階数 1 の自由加群」という普遍性の形である。(D6) で $T_{ij}(c)$ の条件は、$|k|\ge3$ なら乗法性から自動的に従う（$T_{ij}((a-1)b)$ は $D_{i}(a)$ と $T_{ij}(b)$ の交換子で、$f$ の値は可換な $k$ に入るので $1$）。
+
+**似た定理.** パーマネント $\operatorname{per}X=\sum_{\sigma}\prod_{j}x_{\sigma(j)j}$ は符号を除いた同じ式だが、乗法的でなく、計算が \#P 困難であることが知られている（ヴァリアント）。行列式が効率よく計算できるのは、交代性と乗法性のおかげである。
+
+**計算の観点.** (D1) は $n!$ 項、(D4) も素朴には $n!$ 回の掛け算を要するが、(D5) の掃き出し法なら $O(n^{3})$。割り算のない環でも、ベルコヴィッツのアルゴリズムなどで $O(n^{4})$ 程度の環演算で計算できることが知られている。
+:::
+
+## 高い視点 {#lin:sec-df-viewpoint}
+
+::: remark 行列式は最高次の外冪
+(D2)・(D3) は、行列式が「$n$ 次元の空間の、向き付きの体積の単位」をどれだけ拡大するかという数であることを言う。交代 $n$ 形式の空間は 1 次元（階数 1）なので、自己準同型はそこにスカラー倍として作用するしかなく、そのスカラーが $\det$ である。関手的には $\det:\operatorname{End}(M)\to A$ は $\Lambda^{n}$ という関手が誘導する写像で、乗法性は関手性 $\Lambda^{n}(fg)=\Lambda^{n}f\circ\Lambda^{n}g$ そのものである。$\mathrm{GL}_{n}\to\mathbb{G}_{m}$ としては、$\det$ は $\mathrm{GL}_{n}$ の可換化（$\mathrm{GL}_{2}(\mathbb{F}_{2})$ を除いて $\mathrm{GL}_{n}(k)/[\mathrm{GL}_{n},\mathrm{GL}_{n}]\cong k^{\times}$ であることが知られている）を与える。比喩で言えば、行列はたくさんの情報をもつ変換だが、行列式は「体積を何倍にし、向きを保つか」だけを記録する一つの数で、その記録は合成と両立する。
+:::
+
+## 問題 {#lin:sec-df-problems}
+
+::: problem {#lin:prob-df-three}
+$n=3$ のライプニッツの式を書き下し（サラスの規則）、$\det\begin{pmatrix}1&2&0\\3&1&1\\0&2&1\end{pmatrix}$ を (D1) と (D5) の両方で計算せよ。
+:::
+
+::: solution
+$\det X=x_{11}x_{22}x_{33}+x_{21}x_{32}x_{13}+x_{31}x_{12}x_{23}-x_{31}x_{22}x_{13}-x_{11}x_{32}x_{23}-x_{21}x_{12}x_{33}$（偶置換 $1,(123),(132)$ と奇置換 $(13),(23),(12)$）。値は $1+0+0-0-2-6=-7$。掃き出し：第 2 行から第 1 行の 3 倍を引くと $(0,-5,1)$、第 3 行に第 2 行の $2/5$ 倍を足すと $(0,0,7/5)$。入れ替えなしで $\det=1\cdot(-5)\cdot\tfrac75=-7$。
+:::
+
+::: problem {#lin:prob-df-skew-odd}
+$2$ が単元である可換環 $A$ 上で、奇数次の交代行列（${}^{t}X=-X$）の行列式は $0$ であることを示せ。$A=\mathbb{F}_{2}$ ではどうか。
+:::
+
+::: solution
+$\det X=\det{}^{t}X=\det(-X)=(-1)^{n}\det X=-\det X$（多重線形性で各列から $-1$）なので $2\det X=0$、$2$ が単元なら $\det X=0$。$\mathbb{F}_{2}$ では ${}^{t}X=-X={}X$ は対称行列のことで、$I_{3}$ は「交代行列」の条件をみたすが $\det=1$。対角成分も $0$ という条件（交代形式の行列）を課すと、奇数次で行列式 $0$ が任意の可換環で成り立つことが知られている（パフィアンの理論）。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{lin:sec-df-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

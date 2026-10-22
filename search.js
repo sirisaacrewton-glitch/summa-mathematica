@@ -989,7 +989,7 @@
     if (!labs.length) return '';
     var items = labs.map(function (l) {
       var L = IDX.labels[l], pg = IDX.pages[L.p] || {};
-      var field = (pg.crumbs || []).filter(function (c) { return !c.t; }).map(function (c) { return c.title; })[0] || '';
+      var field = (pg.crumbs || []).filter(function (c) { return !c.t; }).map(function (c) { return c.title; })[1] || '';   // [0] は大分野、[1] が分野（2026-10-22 のディレクトリ再編から）
       return '<li><a class="mn-xref" href="' + root() + pg.path + '#' + Core.escapeHtml(l) + '" data-label="' + Core.escapeHtml(l) + '">' +
         Core.escapeHtml((L.ti || term)) + '</a> <span class="mn-meaning-where">' + Core.escapeHtml(field + (field ? ' › ' : '') + (pg.subj || '') + ' §' + pg.sec) + '</span></li>';
     }).join('');

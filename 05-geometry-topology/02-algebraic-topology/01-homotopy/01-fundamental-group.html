@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>基本群 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/02-algebraic-topology/01-homotopy/01-fundamental-group.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 基本群 {#at:page-fundamental-group keywords="homotopy, homotopy rel A, homotopy equivalence, contractible space, retract, deformation retract, path, loop, path homotopy, product of paths, fundamental group, change of base point, induced homomorphism, simply connected, fundamental group of the circle, degree of a loop, winding number, lifting lemma, Brouwer fixed point theorem in dimension 2, fundamental theorem of algebra, spheres are simply connected, R^2 is not homeomorphic to R^n"}
+
+代数的位相幾何の出発点として、空間の「穴」を群で捉える**基本群** $\pi_{1}(X,x_{0})$ を定義する。基点 $x_{0}$ から出て $x_{0}$ に戻る道（閉道）を、端点を止めた連続変形で同一視したものが元で、積は道をつなぐことで与えられる。基本群は連続写像について関手的で、ホモトピーで変わらない。主定理は**円周の基本群が $\mathbb{Z}$** であること（\tref{at:fundamental-group-circle}）で、閉道が原点の周りを何回まわるか（写像度）がそれを与える。応用として 2 次元のブラウワーの不動点定理、代数学の基本定理、$n\ge2$ での $S^{n}$ の単連結性と $\mathbb{R}^{2}\not\cong\mathbb{R}^{n}$（$n\ne2$）を示す。
+
+> 資料：基本群の定義と円周の計算は標準的な内容で、Massey『Algebraic Topology: An Introduction』第 II・V 章、Fulton『Algebraic Topology』第 3 章などにある。持ち上げの補題は、偏角の差を有限個足し合わせる形で自分で書き下ろした。訳語は小松・中岡・菅原『位相幾何学 I』に合わせた（道・閉道・ホモトープ・可縮・変位レトラクト）。
+
+## 記法と定義の確認 {#at:sec-fg-notation}
+
+::: notation
+- 位相空間・連続写像・同相写像は \ref{top:homeomorphism}、直積位相は \ref{top:product-topology}、商位相は \ref{top:quotient-topology}。貼り合わせ補題 \tref{top:pasting-lemma}（有限個の閉集合で覆われていれば、各制限が連続なら全体も連続）を何度も使う。
+- 連結性：\ref{top:connected-equivalents}（連結空間から $\{0,1\}$（より一般に離散空間）への連続写像は定値）、弧状連結 \ref{top:path-connected} とその連結性 \ref{top:path-connected-connected}。コンパクト距離空間のルベーグ数 \tref{top:lebesgue-number} と一様連続性 \ref{top:heine-cantor}。
+- $I\defeq[0,1]$。$\partial I\defeq\{0,1\}$。$\mathbb{R}^{n}$ には通常の内積 $\langle\cdot,\cdot\rangle$ とノルム $|\cdot|$ を入れる。$D^{n}\defeq\{x\in\mathbb{R}^{n}:|x|\le1\}$、$S^{n-1}\defeq\{x\in\mathbb{R}^{n}:|x|=1\}$。$\mathbb{R}^{2}=\mathbb{C}$ と同一視し、$S^{1}=\{z\in\mathbb{C}:|z|=1\}$。
+- 解析学から次の事実を使う：$p(s)\defeq e^{2\pi is}$ は連続な全射 $\mathbb{R}\to S^{1}$ で、$p(a)=p(b)\iff a-b\in\mathbb{Z}$、$p(a+b)=p(a)p(b)$（\ref{calc:circle-parametrization}）。$\arctan\colon\mathbb{R}\to(-\pi/2,\pi/2)$ は $\tan$ の逆関数で連続（\ref{calc:arctan}）。
+- **選択公理**：使わない。ルベーグ数の補題とハイネ–カントールの定理も選択公理なしで成り立つ（各ページの注意）。
+:::
+
+## ホモトピー {#at:sec-fg-homotopy}
+
+::: definition ホモトピー {#at:homotopy keywords="homotopy, homotopic maps, homotopy relative to a subspace, rel A" index="ホモトピー|ほもとぴー, ホモトープ|ほもとーぷ, 相対ホモトピー|そうたいほもとぴー"}
+$X,Y$ を位相空間、$f,g\colon X\to Y$ を連続写像とする。連続写像 $H\colon X\times I\to Y$ で $H(x,0)=f(x)$, $H(x,1)=g(x)$（$x\in X$）となるものを $f$ から $g$ への**ホモトピー**といい、存在するとき $f$ と $g$ は**ホモトープ**であるといって $f\simeq g$ と書く。$A\subset X$ について、さらにすべての $a\in A$, $t\in I$ で $H(a,t)=f(a)$ となるとき、$H$ を **$A$ を止めたホモトピー**（rel $A$）といい、$f\simeq g\ (\mathrm{rel}\ A)$ と書く（このとき $f\restriction A=g\restriction A$）。$H_{t}\defeq H(-,t)$ と書く。
+:::
+
+::: intuition
+$H_{t}$ は時刻 $t$ での写像で、$f=H_{0}$ を連続に動かして $g=H_{1}$ にする。rel $A$ は「$A$ の上では動かさない」という制約。
+:::
+
+::: lemma ホモトピーは同値関係 {#at:homotopy-equivalence-relation keywords="homotopy rel A is an equivalence relation compatible with composition" index="ホモトピーの同値関係|ほもとぴーのどうちかんけい"}
+$A\subset X$ を固定する。
+1. $\simeq\ (\mathrm{rel}\ A)$ は $X$ から $Y$ への連続写像の全体上の同値関係である。
+2. $f\simeq f'\colon X\to Y\ (\mathrm{rel}\ A)$ かつ $g\simeq g'\colon Y\to Z$ なら $g\circ f\simeq g'\circ f'$。$g\simeq g'\ (\mathrm{rel}\ B)$ で $f(A)\subset B$ なら、$g\circ f\simeq g'\circ f'\ (\mathrm{rel}\ A)$。
+:::
+
+::: proof
+**Step 1（反射律・対称律）.** $H(x,t)\defeq f(x)$ は $f$ から $f$ への rel $A$ のホモトピー（射影 $X\times I\to X$ と $f$ の合成なので連続）。$H$ が $f$ から $g$ への rel $A$ のホモトピーなら、$\bar H(x,t)\defeq H(x,1-t)$ は $g$ から $f$ への rel $A$ のホモトピー（$(x,t)\mapsto(x,1-t)$ は連続）。
+
+**Step 2（推移律）.** $H$ を $f$ から $g$ へ、$K$ を $g$ から $h$ への rel $A$ のホモトピーとし、
+$$
+L(x,t)\defeq\begin{cases}H(x,2t) & (t\le\tfrac12)\\ K(x,2t-1) & (t\ge\tfrac12)\end{cases}
+$$
+とおく。$X\times[0,\frac12]$ と $X\times[\frac12,1]$ は $X\times I$ の閉集合で、共通部分 $t=\frac12$ では $H(x,1)=g(x)=K(x,0)$ と一致するので、\ref{top:pasting-lemma.2}で $L$ は連続。$L(a,t)$ は $H(a,2t)=f(a)$ か $K(a,2t-1)=g(a)=f(a)$ なので rel $A$。
+
+**Step 3（合成）.** $H$ を $f$ から $f'$ への rel $A$、$K$ を $g$ から $g'$ へのホモトピーとする。$M(x,t)\defeq K(H(x,t),t)$ は連続写像 $(x,t)\mapsto(H(x,t),t)\in Y\times I$ と $K$ の合成なので連続で、$M_{0}=g\circ f$, $M_{1}=g'\circ f'$。$K$ が rel $B$ で $f(A)\subset B$ なら、$a\in A$ で $H(a,t)=f(a)\in B$ なので $M(a,t)=K(f(a),t)=g(f(a))$。
+
+::: hypcheck
+- 貼り合わせ補題は「有限個の閉集合」の形で Step 2 に使った。
+- Step 3 の後半で、$f(A)\subset B$ がないと $M(a,t)=K(f(a),t)$ が動きうる。
+:::
+:::
+
+::: definition ホモトピー同値・可縮・レトラクト {#at:homotopy-equivalent keywords="homotopy equivalence, homotopy inverse, homotopy type, contractible space, retract, retraction, deformation retract, strong deformation retract" index="ホモトピー同値|ほもとぴーどうち, 可縮|かしゅく, レトラクト|れとらくと, レトラクション|れとらくしょん, 変位レトラクト|へんいれとらくと, 変形レトラクト|へんけいれとらくと, 引き込み（位相）|ひきこみいそう"}
+1. 連続写像 $f\colon X\to Y$ は、連続写像 $g\colon Y\to X$ で $g\circ f\simeq1_{X}$, $f\circ g\simeq1_{Y}$ となるものがあるとき**ホモトピー同値**（写像）といい、$g$ をそのホモトピー逆写像という。このとき $X$ と $Y$ は**ホモトピー同値**（同じホモトピー型をもつ）という。
+2. $X$ が 1 点空間とホモトピー同値なとき、$X$ は**可縮**であるという。これは、$1_{X}$ がある定値写像とホモトープであることと同値（1 点空間を $\{\ast\}$ とし、$f\colon X\to\{\ast\}$, $g(\ast)=x_{0}$ とすれば $f\circ g=1$ で、条件は $g\circ f=$「$x_{0}$ への定値写像」$\simeq1_{X}$ だけになる）。
+3. $A\subset X$ と包含写像 $i\colon A\to X$ について、$r\circ i=1_{A}$ となる連続写像 $r\colon X\to A$ を**レトラクション**、存在するとき $A$ を $X$ の**レトラクト**という。さらに $i\circ r\simeq1_{X}\ (\mathrm{rel}\ A)$ となる $r$ があるとき、$A$ を $X$ の**変位レトラクト**という（別訳：変形レトラクト。rel $A$ を課さないものを弱い意味の変位レトラクトと呼ぶ流儀もある）。変位レトラクトの包含写像はホモトピー同値（$r$ がホモトピー逆写像）。
+:::
+
+::: example
+1. **凸集合は可縮.** $C\subset\mathbb{R}^{n}$ が凸で $c\in C$ なら、$H(x,t)\defeq(1-t)x+tc$ は $C\times I\to C$ の連続写像（凸性で値は $C$ に入る）で、$1_{C}$ から $c$ への定値写像へのホモトピー。$\{c\}$ は $C$ の変位レトラクトでもある（$H(c,t)=c$）。$\mathbb{R}^{n}$, $D^{n}$, $I$, $I\times I$ は可縮。
+2. **$S^{n-1}$ は $\mathbb{R}^{n}\setminus\{0\}$ の変位レトラクト.** $r(x)\defeq x/|x|$ と $H(x,t)\defeq(1-t)x+tx/|x|=\bigl((1-t)+t/|x|\bigr)x$ を考える。係数 $(1-t)+t/|x|$ は正なので $H(x,t)\ne0$。$H_{0}=1$, $H_{1}=i\circ r$、$|x|=1$ なら $H(x,t)=x$。よって $\mathbb{R}^{n}\setminus\{0\}$ と $S^{n-1}$ はホモトピー同値。
+3. $S^{1}$ が可縮でないこと、$S^{1}$ が $D^{2}$ のレトラクトでないことは、基本群を使って後で示す（\ref{at:no-retraction-disk}）。
+:::
+
+## 道と基本群 {#at:sec-fg-group}
+
+::: definition 道・閉道・道のホモトピー {#at:path keywords="path, initial point, terminal point, loop, constant path, inverse path, product (concatenation) of paths, path homotopy, homotopy rel endpoints" index="道|みち, 始点|してん, 終点|しゅうてん, 閉道|へいどう, ループ（位相）|るーぷいそう, 定値道|ていちどう, 逆の道|ぎゃくのみち, 道の積|みちのせき, 道のホモトピー|みちのほもとぴー"}
+1. 連続写像 $\gamma\colon I\to X$ を $X$ の**道**、$\gamma(0)$ をその**始点**、$\gamma(1)$ を**終点**という。$\gamma(0)=\gamma(1)=x_{0}$ のとき $x_{0}$ を基点とする**閉道**（ループ）という。$c_{x}(s)\defeq x$ を**定値道**という。
+2. **逆の道** $\bar\gamma(s)\defeq\gamma(1-s)$。$\alpha(1)=\beta(0)$ のとき、**道の積**（つないだ道）を
+$$
+(\alpha\cdot\beta)(s)\defeq\begin{cases}\alpha(2s) & (0\le s\le\tfrac12)\\ \beta(2s-1) & (\tfrac12\le s\le1)\end{cases}
+$$
+とする（$s=\frac12$ で両式は $\alpha(1)=\beta(0)$ で一致し、貼り合わせ補題で連続）。
+3. 始点と終点が同じ道 $\alpha,\beta$ が $\alpha\simeq\beta\ (\mathrm{rel}\ \partial I)$ のとき、**道としてホモトープ**といい $\alpha\simeq\beta$ と略す。その同値類（\ref{at:homotopy-equivalence-relation}）を $[\alpha]$ と書く。
+:::
+
+::: intuition
+道としてのホモトピーでは、端点を釘で留めたまま道を変形する。閉道のホモトピー類は「基点に糸を結んで空間に張った輪を、基点を外さずに動かしたもの」である。
+:::
+
+::: lemma 道の積の基本性質 {#at:path-groupoid keywords="reparametrization lemma, product of path classes is well defined, associative, unital, with inverses: the fundamental groupoid" index="道の積の基本性質|みちのせきのきほんせいしつ, 径数の付け替え|けいすうのつけかえ" refname="道の積の基本性質" refscope="field"}
+$X$ の道について次が成り立つ。
+1. **（径数の付け替え）** $\varphi\colon I\to I$ が連続で $\varphi(0)=0$, $\varphi(1)=1$ なら $\gamma\circ\varphi\simeq\gamma$。
+2. **（積はホモトピー類で定まる）** $\alpha\simeq\alpha'$, $\beta\simeq\beta'$, $\alpha(1)=\beta(0)$ なら $\alpha\cdot\beta\simeq\alpha'\cdot\beta'$。
+3. **（結合律）** $\alpha(1)=\beta(0)$, $\beta(1)=\gamma(0)$ なら $(\alpha\cdot\beta)\cdot\gamma\simeq\alpha\cdot(\beta\cdot\gamma)$。
+4. **（単位元）** $\gamma$ が $x$ から $y$ への道なら $c_{x}\cdot\gamma\simeq\gamma\simeq\gamma\cdot c_{y}$。
+5. **（逆元）** $\gamma\cdot\bar\gamma\simeq c_{x}$, $\bar\gamma\cdot\gamma\simeq c_{y}$。
+6. **（写像との両立）** 連続写像 $f\colon X\to Y$ について $f\circ(\alpha\cdot\beta)=(f\circ\alpha)\cdot(f\circ\beta)$, $f\circ\bar\gamma=\overline{f\circ\gamma}$ で、$\alpha\simeq\alpha'$ なら $f\circ\alpha\simeq f\circ\alpha'$。
+:::
+
+::: proof
+**Step 1（径数の付け替え）.** $H(s,t)\defeq\gamma\bigl((1-t)\varphi(s)+ts\bigr)$ とおく。$(1-t)\varphi(s)+ts$ は $I$ の 2 点の凸結合なので $I$ に入り、$H$ は連続。$H_{0}=\gamma\circ\varphi$, $H_{1}=\gamma$。$s=0$ では $(1-t)\cdot0+0=0$、$s=1$ では $(1-t)+t=1$ なので $H(0,t)=\gamma(0)$, $H(1,t)=\gamma(1)$。よって rel $\partial I$。
+
+**Step 2（積の well-definedness）.** $F$ を $\alpha$ から $\alpha'$、$G$ を $\beta$ から $\beta'$ への道のホモトピーとし、$K(s,t)\defeq F(2s,t)$（$s\le\frac12$）, $G(2s-1,t)$（$s\ge\frac12$）とおく。$s=\frac12$ で $F(1,t)=\alpha(1)=\beta(0)=G(0,t)$ と一致するので、貼り合わせ補題で $K$ は連続。$K_{0}=\alpha\cdot\beta$, $K_{1}=\alpha'\cdot\beta'$, $K(0,t)=F(0,t)=\alpha(0)$, $K(1,t)=G(1,t)=\beta(1)$。
+
+**Step 3（結合律）.** 定義を展開すると
+$$
+\bigl((\alpha\cdot\beta)\cdot\gamma\bigr)(s)=\begin{cases}\alpha(4s) & (0\le s\le\tfrac14)\\ \beta(4s-1) & (\tfrac14\le s\le\tfrac12)\\ \gamma(2s-1) & (\tfrac12\le s\le1)\end{cases}
+$$
+$$
+\bigl(\alpha\cdot(\beta\cdot\gamma)\bigr)(u)=\begin{cases}\alpha(2u) & (0\le u\le\tfrac12)\\ \beta(4u-2) & (\tfrac12\le u\le\tfrac34)\\ \gamma(4u-3) & (\tfrac34\le u\le1)\end{cases}
+$$
+$\varphi(s)\defeq2s$（$s\le\frac14$）, $s+\frac14$（$\frac14\le s\le\frac12$）, $\frac{s+1}{2}$（$s\ge\frac12$）とおく。$s=\frac14$ で $\frac12=\frac12$、$s=\frac12$ で $\frac34=\frac34$ と一致するので連続で、$\varphi(0)=0$, $\varphi(1)=1$。各区間で $\varphi$ は $[0,\frac14]\to[0,\frac12]$, $[\frac14,\frac12]\to[\frac12,\frac34]$, $[\frac12,1]\to[\frac34,1]$ の全単射で、$2\varphi(s)=4s$、$4\varphi(s)-2=4s-1$、$4\varphi(s)-3=2s-1$ となる。よって $(\alpha\cdot\beta)\cdot\gamma=(\alpha\cdot(\beta\cdot\gamma))\circ\varphi$ で、Step 1 から主張が従う。
+
+**Step 4（単位元）.** $\varphi(s)\defeq0$（$s\le\frac12$）, $2s-1$（$s\ge\frac12$）とすると $c_{x}\cdot\gamma=\gamma\circ\varphi$（$s\le\frac12$ では両辺 $x=\gamma(0)$）。$\psi(s)\defeq2s$（$s\le\frac12$）, $1$（$s\ge\frac12$）とすると $\gamma\cdot c_{y}=\gamma\circ\psi$。Step 1 で結論。
+
+**Step 5（逆元）.** $H(s,t)\defeq\gamma\bigl(2s(1-t)\bigr)$（$s\le\frac12$）, $\gamma\bigl((2-2s)(1-t)\bigr)$（$s\ge\frac12$）とおく。$s=\frac12$ で両式は $\gamma(1-t)$ で一致し、$H$ は連続。$H_{0}(s)$ は $s\le\frac12$ で $\gamma(2s)$、$s\ge\frac12$ で $\gamma(2-2s)=\bar\gamma(2s-1)$ なので $H_{0}=\gamma\cdot\bar\gamma$。$H_{1}=c_{\gamma(0)}=c_{x}$。$H(0,t)=\gamma(0)=x$, $H(1,t)=\gamma(0)=x$ なので rel $\partial I$。$\bar\gamma\cdot\gamma\simeq c_{y}$ は $\gamma$ を $\bar\gamma$ に替えれば得られる（$\bar{\bar\gamma}=\gamma$、$\bar\gamma(0)=y$）。
+
+**Step 6（写像との両立）.** 等式は定義から各点で成り立つ。$H$ が $\alpha$ から $\alpha'$ への道のホモトピーなら $f\circ H$ は $f\circ\alpha$ から $f\circ\alpha'$ への道のホモトピー。
+
+::: hypcheck
+- 貼り合わせ補題（閉集合 2 枚）を積の連続性と Step 2・5 に使った。
+- Step 1 では $I$ の凸性（2 点の凸結合が $I$ に入る）を使った。$\varphi$ が端点を保つことは rel $\partial I$ のために要る（$\varphi(1)=0$ なら $\gamma\circ\varphi$ の終点が変わる）。$\varphi$ の単調性や全射性は要らない。
+:::
+:::
+
+::: theorem 基本群 {#at:fundamental-group keywords="fundamental group pi_1(X,x_0), group of homotopy classes of loops, Poincare group" index="基本群|きほんぐん, ポアンカレ群|ぽあんかれぐん"}
+$x_{0}\in X$ を基点とする閉道のホモトピー類全体 $\pi_{1}(X,x_{0})$ は、$[\alpha][\beta]\defeq[\alpha\cdot\beta]$ で群になる。単位元は $[c_{x_{0}}]$、$[\alpha]^{-1}=[\bar\alpha]$。これを $X$ の $x_{0}$ における**基本群**という。
+:::
+
+::: proof
+閉道どうしの積と逆の道はまた $x_{0}$ を基点とする閉道。積が類の代表によらないことは \ref{at:path-groupoid.2}、結合律・単位元・逆元は同じ補題の 3・4・5 から従う。
+
+::: hypcheck
+- 連続性・貼り合わせ以外の前提はない。$X$ が弧状連結である必要はない（$\pi_{1}(X,x_{0})$ は $x_{0}$ を含む弧状連結成分だけで決まる：閉道とホモトピーの像は $I$, $I\times I$ の連続像なので弧状連結で、その成分に入る）。
+:::
+:::
+
+::: example
+1. $C\subset\mathbb{R}^{n}$ が凸なら $\pi_{1}(C,x_{0})=1$：$x_{0}$ を基点とする閉道 $\gamma$ に $H(s,t)\defeq(1-t)\gamma(s)+tx_{0}$ を考えると、凸性で $C$ に値をとり、$H(0,t)=H(1,t)=x_{0}$ なので $\gamma\simeq c_{x_{0}}$。
+2. 基本群が非可換になる例（8 の字形 $S^{1}\vee S^{1}$ の基本群は 2 元生成の自由群）は、ファン・カンペンの定理で計算する（\ref[ファン・カンペンの定理]{at:page-van-kampen}）。
+:::
+
+::: proposition 基点の取り替え {#at:change-of-basepoint keywords="change of base point isomorphism beta_h along a path h, depends on h up to inner automorphism; simply connected space" index="基点の取り替え|きてんのとりかえ, 単連結|たんれんけつ"}
+$h$ を $x_{0}$ から $x_{1}$ への道とし、$\beta_{h}\colon\pi_{1}(X,x_{1})\to\pi_{1}(X,x_{0})$, $\beta_{h}[\alpha]\defeq[h\cdot\alpha\cdot\bar h]$ とする（3 つの積の括弧は結合律によりどちらでもよい）。
+1. $\beta_{h}$ は群の同型で、逆写像は $\beta_{\bar h}$。
+2. $h\simeq h'$ なら $\beta_{h}=\beta_{h'}$。$h'$ も $x_{0}$ から $x_{1}$ への道なら $\beta_{h'}=\iota_{g}\circ\beta_{h}$（$g\defeq[h'\cdot\bar h]\in\pi_{1}(X,x_{0})$、$\iota_{g}(u)=gug^{-1}$）。
+3. したがって $X$ が弧状連結なら、$\pi_{1}(X,x_{0})$ の同型類は $x_{0}$ によらない。弧状連結で $\pi_{1}(X,x_{0})=1$ のとき、$X$ は**単連結**であるという。
+:::
+
+::: proof
+**Step 1（well-defined）.** \ref{at:path-groupoid.2} から $[h\cdot\alpha\cdot\bar h]$ は $[\alpha]$ だけで決まる。$h\cdot\alpha\cdot\bar h$ は $x_{0}$ から $x_{0}$ への閉道。
+
+**Step 2（準同型）.** \ref{at:path-groupoid.3}〜\ref[5]{at:path-groupoid.5} を使って、類の等式として
+$$
+\beta_{h}[\alpha]\,\beta_{h}[\beta]=[h\alpha\bar h\,h\beta\bar h]=[h\alpha\,c_{x_{1}}\,\beta\bar h]=[h\alpha\beta\bar h]=\beta_{h}([\alpha][\beta])
+$$
+（積の記号 $\cdot$ を省略した）。
+
+**Step 3（逆写像）.** $\beta_{\bar h}\beta_{h}[\alpha]=[\bar h h\alpha\bar h h]=[c_{x_{1}}\alpha c_{x_{1}}]=[\alpha]$、同様に $\beta_{h}\beta_{\bar h}=1$。よって同型。
+
+**Step 4（道の取り替え）.** $h\simeq h'$ なら $\bar h\simeq\bar h'$（ホモトピーを $s\mapsto1-s$ で裏返す）なので Step 1 と同じ理由で $\beta_{h}=\beta_{h'}$。一般には $[h'\alpha\bar h']=[h'\bar h\,h\alpha\bar h\,h\bar h']=g\,\beta_{h}[\alpha]\,g^{-1}$（$[h\bar h']=[h'\bar h]^{-1}$ は逆元の公式から）。
+
+**Step 5.** 弧状連結なら任意の 2 点を結ぶ道 $h$ があり、Step 3 から同型。
+
+::: hypcheck
+- 3 で弧状連結性を使った。外すと、異なる弧状連結成分の基本群は無関係（例：$X=\{0\}\sqcup S^{1}$ では $\pi_{1}(X,0)=1$、$\pi_{1}(X,1)\cong\mathbb{Z}$（\ref{at:fundamental-group-circle}））。
+- 同型 $\beta_{h}$ は $h$ に依存し、2 から $\pi_{1}$ が可換群のときに限り $h$ によらない（問題 \ref{at:prob-basepoint-abelian}）。
+:::
+:::
+
+::: proposition 誘導準同型 {#at:induced-homomorphism keywords="induced homomorphism f_*, functoriality of pi_1, (g f)_* = g_* f_*" index="誘導準同型|ゆうどうじゅんどうけい, 基本群の関手性|きほんぐんのかんしゅせい"}
+連続写像 $f\colon X\to Y$ と $y_{0}=f(x_{0})$ について、$f_{*}[\gamma]\defeq[f\circ\gamma]$ は準同型 $f_{*}\colon\pi_{1}(X,x_{0})\to\pi_{1}(Y,y_{0})$ を定める。$(g\circ f)_{*}=g_{*}\circ f_{*}$, $(1_{X})_{*}=1$。とくに同相写像は基本群の同型を誘導する。
+:::
+
+::: proof
+\ref{at:path-groupoid.6} から $f_{*}$ は well-defined で $f_{*}([\alpha][\beta])=[(f\circ\alpha)\cdot(f\circ\beta)]=f_{*}[\alpha]f_{*}[\beta]$。$(g\circ f)\circ\gamma=g\circ(f\circ\gamma)$ と $1_{X}\circ\gamma=\gamma$ から関手性。同相写像 $f$ と逆写像 $f^{-1}$ について $f_{*}(f^{-1})_{*}=1$, $(f^{-1})_{*}f_{*}=1$。
+:::
+
+::: theorem 基本群のホモトピー不変性 {#at:pi1-homotopy-invariance keywords="homotopic maps induce conjugate homomorphisms f_* = beta_h g_*; homotopy equivalences induce isomorphisms on pi_1; contractible spaces are simply connected" index="基本群のホモトピー不変性|きほんぐんのほもとぴーふへんせい"}
+$H\colon X\times I\to Y$ を $f$ から $g$ へのホモトピーとし、$h(t)\defeq H(x_{0},t)$（$f(x_{0})$ から $g(x_{0})$ への道）とする。このとき
+$$
+f_{*}=\beta_{h}\circ g_{*}\colon\pi_{1}(X,x_{0})\to\pi_{1}(Y,f(x_{0})).
+$$
+とくに、$H$ が $x_{0}$ を止める（rel $\{x_{0}\}$）なら $f_{*}=g_{*}$。ホモトピー同値写像 $f$ は同型 $f_{*}\colon\pi_{1}(X,x_{0})\to\pi_{1}(Y,f(x_{0}))$ を誘導し、可縮な空間は単連結である。
+:::
+
+::: lemma 正方形の補題 {#at:square-lemma keywords="for G: I x I -> Y the two boundary paths from (0,0) to (1,1) are path homotopic" index="正方形の補題|せいほうけいのほだい"}
+連続写像 $G\colon I\times I\to Y$ について $a(s)\defeq G(s,0)$, $b(t)\defeq G(1,t)$, $c(s)\defeq G(s,1)$, $d(t)\defeq G(0,t)$ とおくと、$a\cdot b\simeq d\cdot c$（どちらも $G(0,0)$ から $G(1,1)$ への道）。
+:::
+
+::: proof
+$I\times I$ の道 $\sigma\defeq\sigma_{1}\cdot\sigma_{2}$（$\sigma_{1}(s)=(s,0)$, $\sigma_{2}(t)=(1,t)$）と $\tau\defeq\tau_{1}\cdot\tau_{2}$（$\tau_{1}(t)=(0,t)$, $\tau_{2}(s)=(s,1)$）はどちらも $(0,0)$ から $(1,1)$ への道。$K(u,t)\defeq(1-t)\sigma(u)+t\tau(u)$ は凸集合 $I\times I$ に値をとる連続写像で、$K(0,t)=(0,0)$, $K(1,t)=(1,1)$ なので $\sigma\simeq\tau$。\ref{at:path-groupoid.6} から $G\circ\sigma\simeq G\circ\tau$ で、$G\circ\sigma=a\cdot b$, $G\circ\tau=d\cdot c$。
+:::
+
+::: restate {ref="at:pi1-homotopy-invariance"}
+:::
+
+::: proof
+**Step 1（主張の式）.** $x_{0}$ を基点とする閉道 $\gamma$ をとり、$G(s,t)\defeq H(\gamma(s),t)$ とおく（連続写像 $\gamma\times1_{I}$ と $H$ の合成なので連続）。\ref{at:square-lemma} の記号で $a=f\circ\gamma$, $b(t)=H(\gamma(1),t)=h(t)$, $c=g\circ\gamma$, $d(t)=H(\gamma(0),t)=h(t)$。よって $(f\circ\gamma)\cdot h\simeq h\cdot(g\circ\gamma)$。右から $\bar h$ を掛けて \ref{at:path-groupoid.3}〜\ref[5]{at:path-groupoid.5} を使うと $f\circ\gamma\simeq h\cdot(g\circ\gamma)\cdot\bar h$、すなわち $f_{*}[\gamma]=\beta_{h}(g_{*}[\gamma])$。
+
+**Step 2（rel $\{x_{0}\}$ の場合）.** $h$ は定値道で、$\beta_{c}$ は恒等写像（\ref{at:path-groupoid.4}）。
+
+**Step 3（ホモトピー同値）.** $g$ を $f$ のホモトピー逆写像とする。$g\circ f\simeq1_{X}$ に Step 1 を使うと（$g\circ f$ を $f$、$1_{X}$ を $g$ の役にする）、$gf(x_{0})$ から $x_{0}$ への道 $h_{1}$ について
+$$
+g_{*}\circ f_{*}=(g\circ f)_{*}=\beta_{h_{1}}\colon\pi_{1}(X,x_{0})\to\pi_{1}(X,gf(x_{0}))
+$$
+で、右辺は同型（\ref{at:change-of-basepoint}）。よって $f_{*}$ は単射で、$g_{*}\colon\pi_{1}(Y,f(x_{0}))\to\pi_{1}(X,gf(x_{0}))$ は全射。同様に $f\circ g\simeq1_{Y}$ を基点 $f(x_{0})$ で使うと、$fgf(x_{0})$ から $f(x_{0})$ への道 $h_{2}$ について
+$$
+f'_{*}\circ g_{*}=\beta_{h_{2}}\colon\pi_{1}(Y,f(x_{0}))\to\pi_{1}(Y,fgf(x_{0}))
+$$
+（$f'_{*}$ は基点 $gf(x_{0})$ での $f$ の誘導準同型）が同型なので、$g_{*}$（基点 $f(x_{0})$）は単射。よって $g_{*}$ は全単射で、$f_{*}=g_{*}^{-1}\circ\beta_{h_{1}}$ は同型。
+
+**Step 4（可縮）.** 1 点空間の基本群は自明なので、Step 3 から可縮な空間の基本群は自明。可縮な空間は弧状連結：$1_{X}\simeq c$（$x_{1}$ への定値写像）のホモトピー $H$ について、$t\mapsto H(x,t)$ は $x$ から $x_{1}$ への道。
+
+::: hypcheck
+- Step 3 で基点が $x_{0}\mapsto gf(x_{0})$ とずれるため、同型 $\beta_{h}$ を挟む必要がある。基点を保つホモトピーだけを考える流儀（基点付き空間の圏）なら Step 2 だけで済む。
+- 同値性の両側（$gf\simeq1$ と $fg\simeq1$）を使った。片側だけでは、$f_{*}$ は単射（$gf\simeq1$ のとき）または全射（$fg\simeq1$ のとき）しか言えない。
+:::
+:::
+
+::: corollary レトラクトと基本群 {#at:retract-injective keywords="a retract induces an injection on pi_1; a deformation retract induces an isomorphism" index="レトラクトと基本群|れとらくととききほんぐん"}
+$A$ が $X$ のレトラクトで $a_{0}\in A$ なら、包含写像の誘導準同型 $i_{*}\colon\pi_{1}(A,a_{0})\to\pi_{1}(X,a_{0})$ は単射で、$r_{*}$ は全射。$A$ が変位レトラクトなら $i_{*}$ は同型。とくに $\pi_{1}(\mathbb{R}^{n}\setminus\{0\},x_{0})\cong\pi_{1}(S^{n-1},x_{0})$（$|x_{0}|=1$）。
+:::
+
+::: proof
+$r\circ i=1_{A}$ から $r_{*}\circ i_{*}=1$。変位レトラクトでは $i$ がホモトピー同値なので \ref{at:pi1-homotopy-invariance}。最後は例（$S^{n-1}$ は変位レトラクト）から。
+:::
+
+## 円周の基本群 {#at:sec-fg-circle}
+
+円周の基本群を、$p(s)=e^{2\pi is}$ による「らせん」$\mathbb{R}\to S^{1}$ への持ち上げで計算する。持ち上げの存在は、近い 2 点の偏角の差を連続に選べることから構成的に示す。
+
+::: lemma 近い 2 点の偏角の差 {#at:angle-difference keywords="continuous choice of the angle difference theta(z,w) in (-1/2,1/2) for non-antipodal points of the circle" index="偏角の差|へんかくのさ"}
+$\Delta\defeq\{(z,w)\in S^{1}\times S^{1}: w\ne-z\}$ とする。連続関数 $\theta\colon\Delta\to(-\tfrac12,\tfrac12)$ で、すべての $(z,w)\in\Delta$ について $p(\theta(z,w))=w/z$ となり、$\theta(z,z)=0$ となるものがある。
+:::
+
+::: proof
+**Step 1（偏角の主値）.** $\Omega\defeq\mathbb{C}\setminus(-\infty,0]$ 上で
+$$
+\operatorname{Arg}(u)\defeq2\arctan\frac{\operatorname{Im}u}{\operatorname{Re}u+|u|}
+$$
+とおく。$u\in\Omega$ なら $\operatorname{Re}u+|u|>0$（$\operatorname{Re}u+|u|=0$ は $u$ が非正の実数であることと同値）なので、分母は $0$ にならず $\operatorname{Arg}$ は $\Omega$ 上連続で、値は $(-\pi,\pi)$ に入る。
+
+**Step 2（$e^{i\operatorname{Arg}u}=u/|u|$）.** $u\in\Omega$ を $u=|u|e^{i\phi}$, $\phi\in(-\pi,\pi)$ と書く（極形式。$u$ は負の実数でないので $\phi\ne\pi$）。$\frac{\sin\phi}{\cos\phi+1}=\frac{2\sin(\phi/2)\cos(\phi/2)}{2\cos^{2}(\phi/2)}=\tan\frac{\phi}{2}$ で、$\frac{\phi}{2}\in(-\frac{\pi}{2},\frac{\pi}{2})$ なので $\arctan\tan\frac{\phi}{2}=\frac{\phi}{2}$。よって $\operatorname{Arg}u=\phi$ で $e^{i\operatorname{Arg}u}=u/|u|$。
+
+**Step 3.** $(z,w)\in\Delta$ なら $w\bar z=w/z\in S^{1}$ で、$w/z\ne-1$ なので $w/z\in\Omega$。$\theta(z,w)\defeq\operatorname{Arg}(w\bar z)/2\pi$ は連続で、Step 2 から $p(\theta(z,w))=e^{i\operatorname{Arg}(w\bar z)}=w/z$。$\theta(z,z)=\operatorname{Arg}(1)/2\pi=0$。
+:::
+
+::: lemma 持ち上げの補題 {#at:lifting-lemma keywords="lifting lemma for the exponential map R -> S^1: maps from compact star-shaped sets lift uniquely; path lifting and homotopy lifting" index="持ち上げの補題|もちあげのほだい, リフト|りふと, 持ち上げ|もちあげ" refname="持ち上げの補題"}
+$Y\subset\mathbb{R}^{m}$ をコンパクトで、点 $y_{0}\in Y$ について星形（$y\in Y$, $\lambda\in I$ なら $y_{0}+\lambda(y-y_{0})\in Y$）とする。連続写像 $F\colon Y\to S^{1}$ と $p(\tilde s_{0})=F(y_{0})$ となる $\tilde s_{0}\in\mathbb{R}$ について、連続写像 $\tilde F\colon Y\to\mathbb{R}$ で $p\circ\tilde F=F$, $\tilde F(y_{0})=\tilde s_{0}$ となるもの（$F$ の**持ち上げ**）がただ一つある。とくに $Y=I$（$y_{0}=0$：**道の持ち上げ**）と $Y=I\times I$（$y_{0}=(0,0)$：**ホモトピーの持ち上げ**）に使える。
+:::
+
+::: proof
+**Step 1（一意性）.** $\tilde F_{1},\tilde F_{2}$ をともに条件を満たすものとする。各 $y$ で $p(\tilde F_{1}(y))=p(\tilde F_{2}(y))$ なので $\tilde F_{1}(y)-\tilde F_{2}(y)\in\mathbb{Z}$。$Y$ は星形なので弧状連結（$y$ と $y_{0}$ を線分で結べる）、よって連結（\ref{top:path-connected-connected}）。連続写像 $\tilde F_{1}-\tilde F_{2}\colon Y\to\mathbb{Z}$ は定値（\ref{top:connected-equivalents}：$\mathbb{Z}$ の各点は開かつ閉なので、値の集合の 1 点の逆像は $Y$ の開かつ閉集合）で、$y_{0}$ で $0$。よって $\tilde F_{1}=\tilde F_{2}$。
+
+**Step 2（細かさの選択）.** $Y$ はコンパクト距離空間なので $F$ は一様連続（\ref{top:heine-cantor}）。$\delta>0$ を $|y-y'|<\delta\Rightarrow|F(y)-F(y')|<2$ となるようにとる。$S^{1}$ の 2 点 $z,w$ で $|z-w|<2$ なら $w\ne-z$（$|z-(-z)|=2$）。$Y$ は有界なので、$|y-y_{0}|<N\delta$（$y\in Y$）となる自然数 $N\ge1$ をとる。
+
+**Step 3（構成）.** $y\in Y$ と $k=0,\dots,N$ について $y_{k}\defeq y_{0}+\frac{k}{N}(y-y_{0})\in Y$（星形性）。$|y_{k}-y_{k-1}|=\frac{1}{N}|y-y_{0}|<\delta$ なので $(F(y_{k-1}),F(y_{k}))\in\Delta$。\ref{at:angle-difference} の $\theta$ で
+$$
+\tilde F(y)\defeq\tilde s_{0}+\sum_{k=1}^{N}\theta\bigl(F(y_{k-1}),F(y_{k})\bigr)
+$$
+とおく。各項は $y$ の連続関数（$y\mapsto y_{k}$ は連続）の合成なので $\tilde F$ は連続。
+
+**Step 4（持ち上げであること）.** $p$ は和を積に移すので
+$$
+p(\tilde F(y))=p(\tilde s_{0})\prod_{k=1}^{N}\frac{F(y_{k})}{F(y_{k-1})}=F(y_{0})\cdot\frac{F(y_{N})}{F(y_{0})}=F(y)
+$$
+（積は打ち消し合う。$y_{N}=y$）。$y=y_{0}$ なら $y_{k}=y_{0}$ で各項 $\theta(F(y_{0}),F(y_{0}))=0$ なので $\tilde F(y_{0})=\tilde s_{0}$。
+
+::: hypcheck
+- **コンパクト性**：Step 2 で一様連続性（有限個の $N$ で足りること）と有界性に使った。星形でもコンパクトでない $Y$（例 $\mathbb{R}^{m}$）でも結論は成り立つ（有界閉な星形部分集合 $\{|y-y_{0}|\le R\}\cap Y$ ごとに作り、一意性で貼り合わせる）が、この補題では要らない。
+- **星形性**：Step 1（連結性）と Step 3（分点 $y_{k}$ が $Y$ に入ること）に使った。本質的な前提で、$Y=S^{1}$, $F=1_{S^{1}}$ は持ち上げをもたない（もつと $\pi_{1}(S^{1})$ が自明になる。\ref{at:fundamental-group-circle} の証明の Step 4 と同じ議論）。
+- 選択公理は使わない（$\theta$ は明示的な式で、$N$ は自然数の最小元としてとれる）。
+:::
+:::
+
+::: definition 閉道の写像度 {#at:degree-loop keywords="degree of a loop in S^1, winding number, deg gamma = tilde gamma(1) - tilde gamma(0)" index="写像度（閉道）|しゃぞうどへいどう, 回転数|かいてんすう"}
+$S^{1}$ の閉道 $\gamma$ と、その持ち上げ $\tilde\gamma\colon I\to\mathbb{R}$（\ref{at:lifting-lemma}）について、$\deg\gamma\defeq\tilde\gamma(1)-\tilde\gamma(0)$ を $\gamma$ の**写像度**（回転数）という。$p(\tilde\gamma(1))=\gamma(1)=\gamma(0)=p(\tilde\gamma(0))$ なので $\deg\gamma\in\mathbb{Z}$。持ち上げの始点を $\tilde s_{0}+n$（$n\in\mathbb{Z}$）に替えると、$\tilde\gamma+n$ も持ち上げなので一意性から持ち上げは $\tilde\gamma+n$ になり、$\deg\gamma$ は始点の選び方によらない。
+:::
+
+::: example
+$\omega_{n}(s)\defeq e^{2\pi ins}=p(ns)$（$n\in\mathbb{Z}$）は $1$ を基点とする閉道で、$\tilde\omega_{n}(s)=ns$ が持ち上げなので $\deg\omega_{n}=n$。$\omega_{n}$ は円周を $n$ 回（$n<0$ なら逆向きに $|n|$ 回）まわる。
+:::
+
+::: theorem 円周の基本群 {#at:fundamental-group-circle keywords="pi_1(S^1) is isomorphic to Z via the degree; generated by the standard loop" index="円周の基本群|えんしゅうのきほんぐん" refname="円周の基本群" refscope="field"}
+写像度は群の同型
+$$
+\deg\colon\pi_{1}(S^{1},1)\xrightarrow{\ \cong\ }\mathbb{Z},\qquad[\gamma]\mapsto\deg\gamma
+$$
+を与え、$[\omega_{1}]$ が生成元である。とくに $S^{1}$ は可縮でなく、$\pi_{1}(\mathbb{R}^{2}\setminus\{0\})\cong\mathbb{Z}$。
+:::
+
+::: intuition
+$S^{1}$ の閉道を $\mathbb{R}$ のらせんに持ち上げると、終点は始点から整数だけずれる。このずれ（何周したか）は端点を止めた変形では連続にしか動けないが整数なので変わらず、逆にずれが同じ閉道どうしは $\mathbb{R}$ の中で（$\mathbb{R}$ は可縮なので）変形できる。
+:::
+
+::: proof
+**Step 1（well-defined）.** $\gamma\simeq\delta$ とし、$H\colon I\times I\to S^{1}$ を道のホモトピー（$H(s,0)=\gamma(s)$, $H(s,1)=\delta(s)$, $H(0,t)=H(1,t)=1$）とする。\ref{at:lifting-lemma} を $Y=I\times I$, $y_{0}=(0,0)$ に使い、$\tilde H(0,0)=0$ となる持ち上げ $\tilde H$ をとる。$t\mapsto\tilde H(0,t)$ と $t\mapsto\tilde H(1,t)$ は $p$ で $1$ に移るので $\mathbb{Z}$ に値をとる連続写像で、$I$ は連結なので定値。$\tilde H(0,t)=0$、$\tilde H(1,t)=m$（定数）とする。$s\mapsto\tilde H(s,0)$ は $\gamma$ の持ち上げで始点 $0$ なので $\deg\gamma=\tilde H(1,0)-0=m$。$s\mapsto\tilde H(s,1)$ は $\delta$ の持ち上げで始点 $\tilde H(0,1)=0$ なので $\deg\delta=m$。よって $\deg\gamma=\deg\delta$。
+
+**Step 2（準同型）.** $\gamma,\delta$ の始点 $0$ の持ち上げを $\tilde\gamma,\tilde\delta$ とし、$m\defeq\deg\gamma=\tilde\gamma(1)$ とする。$\tilde\delta+m$ は始点 $m$ の道で $p\circ(\tilde\delta+m)=\delta$（$p(a+m)=p(a)$）。よって $\tilde\gamma\cdot(\tilde\delta+m)$ は定義され（$\tilde\gamma(1)=m$）、$p\circ(\tilde\gamma\cdot(\tilde\delta+m))=\gamma\cdot\delta$（\ref{at:path-groupoid.6}）。これは $\gamma\cdot\delta$ の始点 $0$ の持ち上げで、終点は $\tilde\delta(1)+m$。よって $\deg(\gamma\cdot\delta)=\deg\delta+\deg\gamma$。
+
+**Step 3（全射）.** 例から $\deg\omega_{n}=n$。
+
+**Step 4（単射）.** $\deg\gamma=0$ とすると、始点 $0$ の持ち上げ $\tilde\gamma$ は $\tilde\gamma(1)=0$ を満たす $\mathbb{R}$ の閉道。$G(s,t)\defeq(1-t)\tilde\gamma(s)$ は $\tilde\gamma$ から $c_{0}$ への道のホモトピー（$G(0,t)=G(1,t)=0$）で、$p\circ G$ は $\gamma$ から $c_{1}$ への道のホモトピー。よって $[\gamma]=1$。
+
+**Step 5（残りの主張）.** $\pi_{1}(S^{1},1)\cong\mathbb{Z}\ne1$ なので、\ref{at:pi1-homotopy-invariance} から $S^{1}$ は可縮でない。$\mathbb{R}^{2}\setminus\{0\}$ については \ref{at:retract-injective}。
+
+::: hypcheck
+- 持ち上げの補題は Step 1 で $Y=I\times I$ に、Step 2・4 で $Y=I$ に使った。一意性は Step 1（$\tilde H(s,0)$ が「その」持ち上げであること）と写像度の well-definedness に使った。
+- Step 1 で道のホモトピーが端点を止めることを使った。端点を動かすホモトピーでは、閉道の写像度は保存されるが（ホモトピーの各時刻が閉道なら同じ議論）、基点を動かすと $\pi_{1}(S^{1},1)$ の元として比べられない。
+- Step 4 では $\mathbb{R}$ の凸性（可縮性）を使った。
+:::
+:::
+
+::: supplement
+**一般化.** $p\colon\mathbb{R}\to S^{1}$ は**被覆写像**で、$\mathbb{R}$ は単連結なので $S^{1}$ の**普遍被覆**である。持ち上げの補題と写像度の議論は一般の被覆空間に拡張され、被覆変換群（ここでは整数の平行移動 $\mathbb{Z}$）が基本群と一致する（\ref[被覆空間]{at:page-covering-spaces}）。$n$ 次元トーラス $(S^{1})^{n}$ の基本群は $\mathbb{Z}^{n}$（問題 \ref{at:prob-product}）。
+
+**類似の定理.** 円周の閉道 $\gamma$ が滑らかなら、$\deg\gamma=\frac{1}{2\pi i}\oint_{\gamma}\frac{dz}{z}$（回転数の積分表示）。複素解析の偏角の原理はこの形で写像度を使う。
+
+**高い視点.** $\pi_{1}(S^{1})\cong\mathbb{Z}$ は「$S^{1}$ はアイレンベルグ–マクレーン空間 $K(\mathbb{Z},1)$ である」ことの 1 次元部分である（高次のホモトピー群も消える。\ref[高次ホモトピー群]{at:page-homotopy-groups}）。写像度は層の言葉でも読める：$S^{1}$ 上の連続関数の層の完全列 $0\to\underline{\mathbb{Z}}\to\mathcal{C}(-,\mathbb{R})\xrightarrow{p}\mathcal{C}(-,S^{1})\to1$ の連結準同型 $\Gamma(S^{1},\mathcal{C}(-,S^{1}))\to H^{1}(S^{1};\mathbb{Z})\cong\mathbb{Z}$ が写像度を与え、「局所的には対数（偏角）がとれるが大域的にはとれない」ことの障害が $H^{1}$ に現れる（知られている。層コホモロジーと特異コホモロジーの比較は \ref{cat:page-singular-comparison} と、この系列のチェックコホモロジーとの比較のページで扱う）。ホモトピー型理論では円周を高次帰納型として定義し（\ref{logic:circle-hit}）、らせん $\mathbb{R}\to S^{1}$ に当たる型族を使う同じ形の議論（符号化–復号化）で $\Omega S^{1}\simeq\mathbb{Z}$ を示すことが知られている（本サイト未収録）。
+:::
+
+::: supplement 計算の観点
+$S^{1}$ の閉道 $\gamma$ について、$|s-s'|<\delta\Rightarrow|\gamma(s)-\gamma(s')|<2$ となる $\delta$ と $N>1/\delta$ が分かっていれば、$\deg\gamma=\sum_{k=1}^{N}\theta\bigl(\gamma(\tfrac{k-1}{N}),\gamma(\tfrac{k}{N})\bigr)$（\ref{at:lifting-lemma} の証明）なので、写像度は $\gamma$ の $N+1$ 個の値から有限回の演算で求まる（値が厳密に分かる場合。数値計算では $\theta$ の誤差が $\frac12$ 未満なら和を丸めて正しい整数が得られる）。一方、連続性の度合い（$\delta$）の情報なしに有限個の標本だけから写像度を決めることはできない（標本点の間で何周でもできる）。
+:::
+
+## 応用 {#at:sec-fg-applications}
+
+::: corollary 円板は円周にレトラクトしない {#at:no-retraction-disk keywords="no retraction from D^2 onto S^1" index="レトラクションの非存在|れとらくしょんのひそんざい"}
+$S^{1}$ は $D^{2}$ のレトラクトでない。
+:::
+
+::: proof
+レトラクション $r\colon D^{2}\to S^{1}$ があるとすると、\ref{at:retract-injective} から $i_{*}\colon\pi_{1}(S^{1},1)\to\pi_{1}(D^{2},1)$ は単射。左辺は $\mathbb{Z}$（\ref{at:fundamental-group-circle}）、右辺は $D^{2}$ が凸なので自明。矛盾。
+:::
+
+::: theorem ブラウワーの不動点定理（2 次元） {#at:brouwer-2 keywords="Brouwer fixed point theorem for the closed disk D^2" index="ブラウワーの不動点定理|ぶらうわーのふどうてんていり" refname="ブラウワーの不動点定理（2 次元）"}
+連続写像 $f\colon D^{2}\to D^{2}$ は不動点をもつ。
+:::
+
+::: proof
+**Step 1（背理法の設定）.** すべての $x$ で $f(x)\ne x$ とし、$u(x)\defeq x-f(x)\ne0$ とおく。$f(x)$ から $x$ へ向かう半直線 $x+\lambda u(x)$（$\lambda\ge0$）が $S^{1}$ と交わる点を $r(x)$ とする。
+
+**Step 2（$\lambda$ の式）.** $|x+\lambda u|^{2}=1$ は $\lambda$ の 2 次方程式 $|u|^{2}\lambda^{2}+2\langle x,u\rangle\lambda+(|x|^{2}-1)=0$。$|x|\le1$ なので判別式 $\langle x,u\rangle^{2}+|u|^{2}(1-|x|^{2})\ge0$ で、
+$$
+\lambda(x)\defeq\frac{-\langle x,u\rangle+\sqrt{\langle x,u\rangle^{2}+|u|^{2}(1-|x|^{2})}}{|u|^{2}}
+$$
+は根で、$\sqrt{\cdots}\ge|\langle x,u\rangle|$ から $\lambda(x)\ge0$。$u=u(x)$ は $x$ の連続関数で $|u|^{2}>0$ なので $\lambda$ は連続、$r(x)\defeq x+\lambda(x)u(x)$ は連続写像 $D^{2}\to S^{1}$。
+
+**Step 3（$S^{1}$ の上で恒等）.** $|x|=1$ なら $\langle x,u\rangle=1-\langle x,f(x)\rangle\ge1-|x||f(x)|\ge0$（コーシー–シュワルツと $|f(x)|\le1$）。よって $\lambda(x)=(-\langle x,u\rangle+|\langle x,u\rangle|)/|u|^{2}=0$ で $r(x)=x$。
+
+**Step 4.** $r$ は $D^{2}\to S^{1}$ のレトラクションで、\ref{at:no-retraction-disk} に反する。
+
+::: hypcheck
+- **連続性**：Step 2 の $r$ の連続性に使った。不連続なら反例がある（$x\ne0$ で $f(x)=-x$、$f(0)=\frac12e_{1}$ とすると、$-x=x$ となるのは $x=0$ だけで、$f(0)\ne0$）。
+- **定義域と値域が $D^{2}$**：Step 2 の判別式（$|x|\le1$）と Step 3（$|f(x)|\le1$）に使った。$D^{2}$ と同相な空間（閉三角形など）でも成り立つ（同相で移す）。開円板では偽：$x\mapsto\frac{x+e_{1}}{2}$ は開円板 $\{|x|<1\}$ を自分自身に移す（$\frac{|x+e_{1}|}{2}\le\frac{|x|+1}{2}<1$）が、不動点は $x=e_{1}$ だけで開円板に入らない。円周 $S^{1}$ でも偽（回転）。
+- 選択公理は使わない。
+:::
+:::
+
+::: supplement
+**一般化.** 任意の $n$ で $D^{n}$ の連続な自己写像は不動点をもつ（\ref[ブラウワーの不動点定理]{at:brouwer-fixed-point}。$n\ge3$ では基本群では足りず、ホモロジーを使う：$S^{n-1}$ は単連結なので）。コンパクト凸集合に一般化され、無限次元ではシャウダーの不動点定理になる（知られている。本サイト未収録）。
+:::
+
+::: theorem 代数学の基本定理 {#at:fundamental-theorem-algebra keywords="every nonconstant complex polynomial has a root, proof via degree of loops" index="代数学の基本定理|だいすうがくのきほんていり" refname="代数学の基本定理"}
+次数 $n\ge1$ の複素係数多項式は $\mathbb{C}$ に根をもつ。
+:::
+
+::: proof
+**Step 1（設定）.** 最高次係数で割って $P(z)=z^{n}+a_{n-1}z^{n-1}+\dots+a_{0}$ としてよい。$P$ が根をもたないと仮定する。$q(z)\defeq P(z)/|P(z)|\in S^{1}$ は $\mathbb{C}$ 上の連続写像。
+
+**Step 2（半径 $0$ から $R$ への変形）.** $R>0$ を固定し、$F(s,t)\defeq q(tRe^{2\pi is})/q(tR)$ とおく。$F$ は $I\times I\to S^{1}$ の連続写像で、$F(0,t)=F(1,t)=1$。$F(-,0)$ は定値道 $c_{1}$、$F(-,1)=:f_{R}$ は $1$ を基点とする閉道。よって $f_{R}\simeq c_{1}$ で $\deg f_{R}=0$（\ref{at:fundamental-group-circle}）。
+
+**Step 3（大きな円の上では $z^{n}$ が支配する）.** $R>\max\{1,\sum_{k<n}|a_{k}|\}$ とし、$P_{t}(z)\defeq z^{n}+t(a_{n-1}z^{n-1}+\dots+a_{0})$（$t\in I$）とおく。$|z|=R$ なら、$R\ge1$ より $R^{k}\le R^{n-1}$（$k\le n-1$）なので
+$$
+\Bigl|t\sum_{k<n}a_{k}z^{k}\Bigr|\le\sum_{k<n}|a_{k}|R^{k}\le\Bigl(\sum_{k<n}|a_{k}|\Bigr)R^{n-1}<R^{n}=|z^{n}|
+$$
+で、$P_{t}(z)\ne0$。
+
+**Step 4.** $G(s,t)\defeq\dfrac{P_{t}(Re^{2\pi is})/|P_{t}(Re^{2\pi is})|}{P_{t}(R)/|P_{t}(R)|}$ は Step 3 から $I\times I\to S^{1}$ の連続写像で、$G(0,t)=G(1,t)=1$。$G(-,1)=f_{R}$、$G(-,0)(s)=\frac{R^{n}e^{2\pi ins}/R^{n}}{R^{n}/R^{n}}=\omega_{n}(s)$。よって $\deg f_{R}=\deg\omega_{n}=n\ge1$ で、Step 2 に反する。
+
+::: hypcheck
+- **$n\ge1$**：Step 4 の矛盾 $0=n$ に使った。$n=0$（0 でない定数）は根をもたない。
+- **係数体が $\mathbb{C}$**：$P$ を $\mathbb{C}\to\mathbb{C}$ の連続写像と見ることだけを使った。実係数でも結論（複素根の存在）は同じだが、実根は存在しないことがある（$z^{2}+1$）。
+- Step 3 の $R\ge1$ は $R^{k}\le R^{n-1}$ に使った。
+- 体論での証明（\ref{fld:fundamental-theorem-algebra}：ガロア理論とシローの定理に、実数の中間値の定理と $\mathbb{C}$ の平方根の存在を合わせる）と比べると、この証明は代数をほとんど使わず、位相（多項式の連続性と $\pi_{1}(S^{1})\cong\mathbb{Z}$）だけを使う。
+:::
+:::
+
+::: proposition 二つの単連結開集合の和 {#at:union-simply-connected keywords="union of two simply connected open sets with path-connected nonempty intersection is simply connected" index="単連結な開集合の和|たんれんけつなかいしゅうごうのわ"}
+$X=U\cup V$ で、$U,V$ は単連結な開集合、$U\cap V$ は空でない弧状連結集合とする。このとき $X$ は単連結。
+:::
+
+::: lemma 道の分割 {#at:path-subdivision keywords="a path is homotopic to the product of its pieces on a subdivision" index="道の分割|みちのぶんかつ"}
+$\gamma$ を道、$0=s_{0}<s_{1}<\dots<s_{M}=1$ とし、$\gamma_{k}(u)\defeq\gamma\bigl(s_{k-1}+u(s_{k}-s_{k-1})\bigr)$ とする。このとき $\gamma\simeq(\cdots(\gamma_{1}\cdot\gamma_{2})\cdots)\cdot\gamma_{M}$。
+:::
+
+::: proof
+$M$ についての帰納法。$M=1$ なら $\gamma_{1}=\gamma$。$M\ge2$ とし、$s\defeq s_{M-1}$、$\gamma'(u)\defeq\gamma(su)$, $\gamma''(u)\defeq\gamma(s+u(1-s))$ とおく。$\varphi(u)\defeq2us$（$u\le\frac12$）, $s+(2u-1)(1-s)$（$u\ge\frac12$）は連続で（$u=\frac12$ で $s$）、$\varphi(0)=0$, $\varphi(1)=1$、$\gamma\circ\varphi=\gamma'\cdot\gamma''$ なので \ref{at:path-groupoid.1} から $\gamma\simeq\gamma'\cdot\gamma''$。$\gamma''=\gamma_{M}$ で、$\gamma'$ を分点 $s_{k}/s$（$k\le M-1$）で分割した各片は $\gamma_{1},\dots,\gamma_{M-1}$ と一致する（$\gamma'(s_{k-1}/s+u(s_{k}-s_{k-1})/s)=\gamma_{k}(u)$）。帰納法の仮定と \ref{at:path-groupoid.2} で結論。
+:::
+
+::: restate {ref="at:union-simply-connected"}
+:::
+
+::: proof
+**Step 1（弧状連結）.** $x_{0}\in U\cap V$ をとる。$U,V$ の点は $x_{0}$ と $U$ または $V$ の中の道で結べる。
+
+**Step 2（分割）.** $x_{0}$ を基点とする閉道 $\gamma$ をとる。$\{\gamma^{-1}(U),\gamma^{-1}(V)\}$ はコンパクト距離空間 $I$ の開被覆なので、ルベーグ数 $\delta$（\tref{top:lebesgue-number}）がある。$1/N<\delta$ とし、$[\frac{k-1}{N},\frac{k}{N}]$ ごとに $\gamma$ の像を含む $L_{k}\in\{U,V\}$ を選ぶ（$U$ に入れば $U$、そうでなければ $V$ と決めておけば選択は要らない）。$L_{k}=L_{k+1}$ となる分点 $\frac{k}{N}$ を取り除き、残った分点を $0=s_{0}<\dots<s_{M}=1$、各片 $[s_{k-1},s_{k}]$ を含む集合を $L_{k}$ とする。すると $1\le k\le M-1$ で $L_{k}\ne L_{k+1}$ なので $\gamma(s_{k})\in L_{k}\cap L_{k+1}=U\cap V$。$\gamma(s_{0})=\gamma(s_{M})=x_{0}\in U\cap V$ でもある。
+
+**Step 3（基点に戻す）.** 各 $k=0,\dots,M$ について $U\cap V$ の中の $x_{0}$ から $\gamma(s_{k})$ への道 $g_{k}$ をとる（$U\cap V$ は弧状連結。$g_{0}=g_{M}=c_{x_{0}}$ とする）。\ref{at:path-subdivision} と \ref{at:path-groupoid} から
+$$
+[\gamma]=[\gamma_{1}][\gamma_{2}]\cdots[\gamma_{M}]=\prod_{k=1}^{M}[g_{k-1}\cdot\gamma_{k}\cdot\bar g_{k}]
+$$
+（$\bar g_{k}\cdot g_{k}\simeq c$ を間に挟んだ。各因子は $x_{0}$ を基点とする閉道の類）。
+
+**Step 4.** $g_{k-1}\cdot\gamma_{k}\cdot\bar g_{k}$ は $L_{k}$ の中の閉道で、$L_{k}$ は単連結なので $L_{k}$ の中で定値道とホモトープ。包含写像 $L_{k}\to X$ で押し出すと $X$ の中でもホモトープ。よって $[\gamma]=1$。
+
+::: hypcheck
+- **$U,V$ が開**：Step 2 で $\gamma^{-1}(U),\gamma^{-1}(V)$ が $I$ の開被覆になることに使った。閉集合の場合は、$U,V,U\cap V$ がそれぞれある開近傍の変位レトラクトであるといった条件を足せば、開近傍に置き換えて同じ結論が得られる。
+- **$U\cap V$ が弧状連結**：Step 3 の $g_{k}$ に使った。外すと偽：$S^{1}=U\cup V$（$U=S^{1}\setminus\{1\}$, $V=S^{1}\setminus\{-1\}$ はともに開弧で可縮）で $U\cap V$ は 2 つの開弧。
+- **$U\cap V\ne\varnothing$**：基点 $x_{0}$ と Step 1 に使った。
+- 選択公理は使わない（各 $g_{k}$ は有限個の選択）。
+:::
+:::
+
+::: supplement
+**一般化.** $U,V$ の基本群が自明でないときは、$\pi_{1}(X)$ は $\pi_{1}(U)$ と $\pi_{1}(V)$ の $\pi_{1}(U\cap V)$ 上の融合積になる（\ref[ファン・カンペンの定理]{at:page-van-kampen}）。この命題はその特別な場合で、証明の Step 2・3（ルベーグ数による分割と、基点への引き戻し）はファン・カンペンの定理の「生成」の部分と同じである。
+:::
+
+::: corollary 球面の単連結性 {#at:sphere-simply-connected keywords="S^n is simply connected for n >= 2; stereographic projection" index="球面の単連結性|きゅうめんのたんれんけつせい, 立体射影|りったいしゃえい"}
+$n\ge2$ なら $S^{n}$ は単連結。
+:::
+
+::: proof
+**Step 1（立体射影）.** $N\defeq e_{n+1}$, $S\defeq-e_{n+1}$ とし、$\sigma\colon S^{n}\setminus\{N\}\to\mathbb{R}^{n}$, $\sigma(x)\defeq\frac{(x_{1},\dots,x_{n})}{1-x_{n+1}}$, $\tau\colon\mathbb{R}^{n}\to S^{n}\setminus\{N\}$, $\tau(y)\defeq\frac{(2y,\,|y|^{2}-1)}{|y|^{2}+1}$ とおく。$|2y|^{2}+(|y|^{2}-1)^{2}=(|y|^{2}+1)^{2}$ なので $\tau(y)\in S^{n}$、第 $n+1$ 座標は $1$ 未満。$\sigma(\tau(y))=\frac{2y}{|y|^{2}+1}\cdot\frac{|y|^{2}+1}{2}=y$。$x\in S^{n}\setminus\{N\}$ で $y=\sigma(x)$ とすると $|y|^{2}=\frac{1-x_{n+1}^{2}}{(1-x_{n+1})^{2}}=\frac{1+x_{n+1}}{1-x_{n+1}}$ で、$|y|^{2}+1=\frac{2}{1-x_{n+1}}$, $|y|^{2}-1=\frac{2x_{n+1}}{1-x_{n+1}}$ なので $\tau(y)=x$。両者は分母が $0$ にならない有理式なので連続で、$\sigma$ は同相写像。$x\mapsto(x_{1},\dots,x_{n},-x_{n+1})$ と合成して $S^{n}\setminus\{S\}\cong\mathbb{R}^{n}$。
+
+**Step 2（共通部分）.** $\sigma$ は $S^{n}\setminus\{N,S\}$ を $\mathbb{R}^{n}\setminus\{\sigma(S)\}=\mathbb{R}^{n}\setminus\{0\}$ に同相に移す。$n\ge2$ なら $\mathbb{R}^{n}\setminus\{0\}$ は弧状連結：$a,b\ne0$ について、$a$ の張る直線上にない $c$ をとる（$n\ge2$）。$a$ と $c$ は一次独立なので線分 $(1-t)a+tc$ は $0$ を通らない。$b$ と $c$ についても、$b$ が $a$ の直線上にあれば $b,c$ は一次独立で同じ。$b$ が直線上になければ $a$ と $b$ が一次独立なので線分 $ab$ を使う。
+
+**Step 3.** $U\defeq S^{n}\setminus\{N\}$, $V\defeq S^{n}\setminus\{S\}$ は開集合で、$\mathbb{R}^{n}$（凸、したがって単連結）と同相。$U\cap V$ は Step 2 から空でなく弧状連結。\ref{at:union-simply-connected} から $S^{n}$ は単連結。
+
+::: hypcheck
+- **$n\ge2$**：Step 2 だけで使った。$n=1$ では $U\cap V\cong\mathbb{R}\setminus\{0\}$ が弧状連結でなく、実際 $\pi_{1}(S^{1})\cong\mathbb{Z}$。
+:::
+:::
+
+::: corollary 平面は他の次元のユークリッド空間と同相でない {#at:plane-not-homeomorphic keywords="R^2 is not homeomorphic to R^n for n != 2" index="ユークリッド空間の次元の位相不変性（2 次元）|ゆーくりっどくうかんのじげんのいそうふへんせい"}
+$n\ne2$ なら $\mathbb{R}^{2}$ と $\mathbb{R}^{n}$ は同相でない。
+:::
+
+::: proof
+同相写像 $h\colon\mathbb{R}^{2}\to\mathbb{R}^{n}$ があるとすると、$h$ は $\mathbb{R}^{2}\setminus\{0\}$ を $\mathbb{R}^{n}\setminus\{h(0)\}$ に同相に移し、平行移動で後者は $\mathbb{R}^{n}\setminus\{0\}$ と同相。
+- $n=0$：$\mathbb{R}^{0}$ は 1 点で、全単射がない。
+- $n=1$：$\mathbb{R}\setminus\{0\}$ は連結でない（\ref{top:connected-intervals}）が、$\mathbb{R}^{2}\setminus\{0\}$ は弧状連結（\ref{at:sphere-simply-connected} の Step 2）なので連結。
+- $n\ge3$：$\pi_{1}(\mathbb{R}^{n}\setminus\{0\})\cong\pi_{1}(S^{n-1})=1$（\ref{at:retract-injective}, \ref{at:sphere-simply-connected}。$n-1\ge2$）だが、$\pi_{1}(\mathbb{R}^{2}\setminus\{0\})\cong\mathbb{Z}$（\ref{at:fundamental-group-circle}）。同相写像は基本群の同型を誘導する（\ref{at:induced-homomorphism}）ので矛盾。
+:::
+
+::: supplement
+**一般化.** $m\ne n$ なら $\mathbb{R}^{m}$ と $\mathbb{R}^{n}$ は同相でない（次元の位相不変性）。$m,n\ge3$ では基本群で区別できず、ホモロジー（$\mathbb{R}^{n}\setminus\{0\}\simeq S^{n-1}$ のホモロジー）か領域不変性を使う（\ref[切除とマイヤー–ヴィートリス]{at:page-excision}）。
+:::
+
+## 高い視点 {#at:sec-fg-viewpoint}
+
+::: supplement 基本亜群と関手
+\ref{at:path-groupoid} は、$X$ の点を対象、道のホモトピー類を射とする圏 $\Pi_{1}(X)$ が**亜群**（すべての射が可逆な圏）であることを言っている。これを $X$ の**基本亜群**といい、基本群はその対象 $x_{0}$ の自己射の群 $\Pi_{1}(X)(x_{0},x_{0})$ である。基点の取り替え $\beta_{h}$ は「亜群の中で射 $h$ による共役」にすぎず、弧状連結な $X$ では $\Pi_{1}(X)$ は連結な亜群で、1 つの対象の自己射群 $\pi_{1}(X,x_{0})$ を 1 対象の圏と見たものと圏同値になる（同値は道 $h$ の選び方に依存する。これが $\beta_{h}$ の非標準性の正体）。
+
+連続写像は関手 $\Pi_{1}(f)\colon\Pi_{1}(X)\to\Pi_{1}(Y)$ を誘導し、ホモトピー $H$ は $\Pi_{1}(f)$ から $\Pi_{1}(g)$ への自然同値（成分は $h_{x}(t)=H(x,t)$ の類）を誘導する：\ref{at:square-lemma} はちょうどその自然性の四角形である。こうして \ref{at:pi1-homotopy-invariance} は「$\Pi_{1}$ は位相空間のホモトピー圏から亜群の圏（の自然同値で割った圏）への関手」という一文に集約される。
+
+比喩で言えば、基本群は「空間の中の輪ゴムの、ほどけない巻きつき方」の記録で、$\pi_{1}(S^{1})\cong\mathbb{Z}$ は「円柱に巻きついた輪ゴムは巻き数だけで分類される」こと、$\pi_{1}(S^{2})=1$ は「球面に掛けた輪ゴムは必ず滑り落ちる」ことである。
+
+同じ基本群は、ループ空間の弧状連結成分の集合 $\pi_{0}(\Omega X)$ として小区間オペラッドの作用からも得られる（\ref{cat:fundamental-group-loops}。$\Omega X$ の点が閉道、$\Omega X$ の道が閉道のホモトピーに対応するので、同じ集合と同じ積である）。この見方では、結合律が「ホモトピーを除いて」しか成り立たないこと（\ref{at:path-groupoid.3}）は、$\Omega X$ が $A_{\infty}$ 空間であることの影である。
+:::
+
+## 問題 {#at:sec-fg-problems}
+
+::: problem {#at:prob-product}
+$\pi_{1}(X\times Y,(x_{0},y_{0}))\cong\pi_{1}(X,x_{0})\times\pi_{1}(Y,y_{0})$ を示せ。とくにトーラス $S^{1}\times S^{1}$ の基本群は $\mathbb{Z}^{2}$ で、トーラスは $S^{2}$ と同相でない。
+:::
+
+::: solution
+射影 $p_{X},p_{Y}$ の誘導準同型を並べた $\Phi\defeq(p_{X*},p_{Y*})$ が同型であることを示す。**全射**：$X$ の閉道 $\alpha$ と $Y$ の閉道 $\beta$ に対し $\gamma(s)\defeq(\alpha(s),\beta(s))$ は直積位相の普遍性で連続な閉道で、$\Phi[\gamma]=([\alpha],[\beta])$。**単射**：$\Phi[\gamma]=1$ なら $p_{X}\circ\gamma\simeq c$ のホモトピー $F$ と $p_{Y}\circ\gamma\simeq c$ のホモトピー $G$ があり、$(F,G)$ は $\gamma$ から定値道への道のホモトピー。準同型性は \ref{at:induced-homomorphism}。トーラスについては \ref{at:fundamental-group-circle} から $\mathbb{Z}^{2}$、$S^{2}$ は \ref{at:sphere-simply-connected} から自明で、同相写像は同型を誘導する。
+:::
+
+::: problem {#at:prob-basepoint-abelian}
+$X$ を弧状連結とする。$\pi_{1}(X,x_{0})$ が可換群であることと、任意の $x_{0},x_{1}$ と $x_{0}$ から $x_{1}$ への任意の道 $h,h'$ について $\beta_{h}=\beta_{h'}$ となることは同値であることを示せ。
+:::
+
+::: solution
+\ref{at:change-of-basepoint.2} から $\beta_{h'}=\iota_{g}\circ\beta_{h}$（$g=[h'\bar h]$）。可換なら $\iota_{g}=1$。逆に $\beta_{h}=\beta_{h'}$ が常に成り立つなら、$x_{1}=x_{0}$, $h=c_{x_{0}}$, $h'$ を任意の閉道 $\ell$ とすると $\beta_{h}=1$, $\beta_{h'}=\iota_{[\ell]}$ なので、すべての $[\ell]$ について $\iota_{[\ell]}=1$、すなわち $\pi_{1}(X,x_{0})$ は可換（他の基点についても同型なので可換）。
+:::
+
+::: problem {#at:prob-nullhomotopic-extends}
+連続写像 $f\colon S^{1}\to S^{1}$ について、$f$ が定値写像とホモトープであることと、$f$ が連続写像 $D^{2}\to S^{1}$ に拡張できることは同値であることを示せ。
+:::
+
+::: solution
+拡張 $F$ があれば $H(z,t)\defeq F((1-t)z)$ は $f$ から定値写像 $F(0)$ へのホモトピー。逆に $H\colon S^{1}\times I\to S^{1}$ を $f$ から定値写像 $c$ へのホモトピーとする。$q\colon S^{1}\times I\to D^{2}$, $q(z,t)\defeq(1-t)z$ は連続な全射で、コンパクト空間からハウスドルフ空間への写像なので閉写像（\ref{top:compact-to-hausdorff}）、したがって商写像（\ref{top:quotient-map-criteria}）。$q(z,t)=q(z',t')$ となるのは $(z,t)=(z',t')$ か $t=t'=1$ のときで、後者では $H(z,1)=c=H(z',1)$。よって $H$ は $q$ を通って連続写像 $F\colon D^{2}\to S^{1}$ を誘導し（\ref{top:quotient-universal}）、$F(z)=F(q(z,0))=H(z,0)=f(z)$。
+:::
+
+::: problem {#at:prob-degree-z-n}
+$S^{1}$ の閉道 $\gamma,\delta$（基点 $1$）について、各点の積 $(\gamma\delta)(s)\defeq\gamma(s)\delta(s)$ も閉道で、$\deg(\gamma\delta)=\deg\gamma+\deg\delta$ を示せ。これから $\gamma\cdot\delta\simeq\gamma\delta$ を導け。
+:::
+
+::: solution
+始点 $0$ の持ち上げ $\tilde\gamma,\tilde\delta$ について $\tilde\gamma+\tilde\delta$ は連続で $p(\tilde\gamma+\tilde\delta)=\gamma\delta$、始点 $0$ なので $\deg(\gamma\delta)=\tilde\gamma(1)+\tilde\delta(1)$。\ref{at:fundamental-group-circle} の証明の Step 2 から $\deg(\gamma\cdot\delta)$ も同じ値で、$\deg$ は単射なので $[\gamma\cdot\delta]=[\gamma\delta]$。（これは $S^{1}$ が位相群であることから基本群が可換になる議論 \ref{cat:topological-group-pi1-abelian} の、$S^{1}$ での具体形である。）
+:::
+
+::: problem {#at:prob-antipodal-free}
+連続写像 $f\colon D^{2}\to\mathbb{R}^{2}$ が、すべての $x\in S^{1}$ で $f(x)\ne -\lambda x$（$\lambda>0$）を満たす、すなわち境界上で $f(x)$ が $x$ と真逆の向きを向かないとする。$f$ は $D^{2}$ に零点をもつことを示せ。
+:::
+
+::: solution
+零点がないとし、$g(x)\defeq f(x)/|f(x)|\colon D^{2}\to S^{1}$ とおく。$H(x,t)\defeq\frac{(1-t)x+tg(x)}{|(1-t)x+tg(x)|}$（$x\in S^{1}$）を考える。分母が $0$ なら $(1-t)x=-tg(x)$ で、$t\in(0,1)$ のとき $g(x)=-\frac{1-t}{t}x$ となり仮定に反し（$f(x)$ は $g(x)$ の正の倍数）、$t=0,1$ では $|x|=|g(x)|=1$ なので $0$ でない。よって $H$ は $1_{S^{1}}$ から $g\restriction S^{1}$ へのホモトピー。$g\restriction S^{1}$ は $D^{2}$ に拡張されるので定値写像とホモトープ（問題 \ref{at:prob-nullhomotopic-extends}）。よって $1_{S^{1}}$ も定値写像とホモトープで、\ref{at:pi1-homotopy-invariance} から $1=(1_{S^{1}})_{*}$ は $\beta_{h}\circ(\text{定値})_{*}$ という自明な準同型と同型の合成になり、$\pi_{1}(S^{1},1)\cong\mathbb{Z}$ に反する。（ブラウワーの不動点定理は、$f(x)\defeq x-F(x)$（$F\colon D^{2}\to D^{2}$）に適用した特別な場合になる：$x\in S^{1}$ で $x-F(x)=-\lambda x$（$\lambda>0$）なら $F(x)=(1+\lambda)x$ は $D^{2}$ に入らない。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>豊穣圏 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/06-category-theory/08-enriched-rigid/01-enriched.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 豊穣圏 {#cat:page-enriched keywords="enriched category, V-category, V-functor, V-natural transformation, underlying category, change of base along a lax monoidal functor, opposite and tensor product of V-categories, preadditive categories, 2-categories, topologically enriched categories"}
+
+**豊穣圏**は、hom 集合を対称モノイダル閉圏 $\mathbf{V}$ の対象に取り替えた圏である（定義は \ref{cat:closed-category.2}）。$\mathbf{V}=\mathbf{Set}$ ならふつうの圏、$\mathbf{V}=\mathbf{Ab}$ なら前加法圏、$\mathbf{V}=\mathbf{Cat}$ なら 2 圏、$\mathbf{V}=[0,\infty]$ なら距離空間（\ref{cat:page-lawvere-metric}）、$\mathbf{V}$ がコンパクト生成空間の圏なら「射の空間」に位相が入った圏になる。本ページでは豊穣関手・豊穣自然変換を定義し、豊穣圏から「台の圏」を取り出す操作と、モノイダル関手に沿って基礎の圏を取り替える操作を示す。
+
+> 豊穣圏論の標準的な文献は G. M. Kelly, *Basic Concepts of Enriched Category Theory* (1982)。
+
+## 記法と定義の確認 {#cat:sec-enr-notation}
+
+::: notation
+- $(\mathbf{V},\otimes,I,\alpha,\lambda,\varrho,\gamma)$ は対称モノイダル圏（\ref{cat:monoidal-category}, \ref{cat:symmetric-monoidal}）。既存のページの $\square$, $e$ をここでは $\otimes$, $I$ と書く。コヒーレンス定理（\tref{cat:coherence}, \ref{cat:symmetric-coherence-general}）により、構造射 $\alpha,\lambda,\varrho$ は省略して書くことがある（省略した等式はコヒーレンスで保証される）。
+- 閉構造・内部 hom $[b,c]$・評価射・転置・自己豊穣化は \ref{cat:closed-category}, \ref{cat:internal-hom-basic}, \ref{cat:self-enrichment}。モノイダル関手（緩い・強・厳密）は \ref{cat:monoidal-functor}。
+- 豊穣圏の定義は \ref{cat:closed-category.2}：$\mathbf{V}$ 圏 $\mathbf{A}$ は、対象の集合 $\operatorname{Ob}\mathbf{A}$、hom 対象 $\mathbf{A}(a,b)\in\mathbf{V}$、合成 $M:\mathbf{A}(b,c)\otimes\mathbf{A}(a,b)\to\mathbf{A}(a,c)$、単位 $j_{a}:I\to\mathbf{A}(a,a)$ からなり、結合律 $M(M\otimes1)=M(1\otimes M)\alpha$ と単位律 $M(j\otimes1)=\lambda$, $M(1\otimes j)=\varrho$ をみたす。
+- **選択公理**：使わない。
+:::
+
+## 豊穣関手と豊穣自然変換 {#cat:sec-enr-functors}
+
+::: definition 豊穣関手と豊穣自然変換 {#cat:enriched-functor keywords="V-functor, V-natural transformation, 2-category V-Cat" index="豊穣関手|ほうじょうかんしゅ, 豊穣自然変換|ほうじょうしぜんへんかん"}
+$\mathbf{V}$ 圏 $\mathbf{A},\mathbf{B}$ について：
+1. **$\mathbf{V}$ 関手** $F:\mathbf{A}\to\mathbf{B}$ は、写像 $F:\operatorname{Ob}\mathbf{A}\to\operatorname{Ob}\mathbf{B}$ と $\mathbf{V}$ の射 $F_{a,b}:\mathbf{A}(a,b)\to\mathbf{B}(Fa,Fb)$ の族で、$F_{a,c}\circ M=M\circ(F_{b,c}\otimes F_{a,b})$ と $F_{a,a}\circ j_{a}=j_{Fa}$ をみたすもの。
+2. $\mathbf{V}$ 関手 $F,G:\mathbf{A}\to\mathbf{B}$ の間の **$\mathbf{V}$ 自然変換** $\theta:F\Rightarrow G$ は、$\mathbf{V}$ の射 $\theta_{a}:I\to\mathbf{B}(Fa,Ga)$ の族で、次の二つの射 $\mathbf{A}(a,b)\to\mathbf{B}(Fa,Gb)$ が等しいもの：
+$$
+\begin{aligned}
+&M\circ(\theta_{b}\otimes F_{a,b})\circ\lambda^{-1},\\
+&M\circ(G_{a,b}\otimes\theta_{a})\circ\varrho^{-1}.
+\end{aligned}
+$$
+:::
+
+::: proposition 豊穣圏の 2 圏 {#cat:enriched-2-category keywords="V-categories, V-functors and V-natural transformations form a 2-category" index="豊穣圏の 2 圏|ほうじょうけんのにけん"}
+$\mathbf{V}$ 関手は合成 $(GF)_{a,b}\defeq G_{Fa,Fb}\circ F_{a,b}$ と恒等関手をもち、$\mathbf{V}$ 圏と $\mathbf{V}$ 関手は（局所的に小さい $\mathbf{V}$ の小さい $\mathbf{V}$ 圏について）圏 $\mathbf{V}\text{-}\mathbf{Cat}$ をなす。$\mathbf{V}$ 自然変換は $(\phi\theta)_{a}\defeq M\circ(\phi_{a}\otimes\theta_{a})\circ\lambda^{-1}$（$I\cong I\otimes I$）で縦に合成でき、$\mathbf{V}\text{-}\mathbf{Cat}$ は 2 圏になる。
+:::
+
+::: proof
+**Step 1（関手の合成）.** $(GF)_{a,c}M=G_{Fa,Fc}F_{a,c}M=G_{Fa,Fc}M(F_{b,c}\otimes F_{a,b})=M(G\otimes G)(F\otimes F)$ で、単位も同様。結合律と恒等は成分ごとの合成から。
+
+**Step 2（自然変換の縦の合成）.** $\phi\theta$ の自然性：二つの射 $\mathbf{A}(a,b)\to\mathbf{B}(Fa,Hb)$ を、$M$ の結合律で並べ替えると、$\theta$ の自然性と $\phi$ の自然性を一回ずつ使って一致する（コヒーレンスにより $I$ の挿入・削除は無視できる）。結合律と単位 $j_{Fa}$ は $\mathbf{B}$ の結合律・単位律から。横の合成と交換律も同様の計算で、詳細は通常の圏の場合（\ref{cat:horizontal-composition}）を、元の代わりに $I$ からの射で書き直したものになる。
+:::
+
+## 台の圏 {#cat:sec-enr-underlying}
+
+::: proposition 台の圏 {#cat:underlying-category keywords="underlying ordinary category of a V-category: hom-sets V(I, A(a,b))" index="台の圏|だいのけん"}
+$\mathbf{V}$ 圏 $\mathbf{A}$ について、対象は $\mathbf{A}$ と同じで、射の集合を $\mathbf{A}_{0}(a,b)\defeq\mathbf{V}(I,\mathbf{A}(a,b))$、合成を $g\circ f\defeq M\circ(g\otimes f)\circ\lambda_{I}^{-1}$、恒等射を $j_{a}$ とすると、ふつうの圏 $\mathbf{A}_{0}$（**台の圏**）が得られる。$\mathbf{V}$ 関手は関手 $F_{0}$ を、$\mathbf{V}$ 自然変換は自然変換を誘導し、2 関手 $(-)_{0}:\mathbf{V}\text{-}\mathbf{Cat}\to\mathbf{Cat}$ を得る。$\mathbf{V}$ の自己豊穣化（\ref{cat:self-enrichment}）の台の圏は $\mathbf{V}$ 自身。
+:::
+
+::: proof
+**Step 1（結合律）.** $h\circ(g\circ f)=M(h\otimes M(g\otimes f))\lambda^{-1}\lambda^{-1}$ と $(h\circ g)\circ f$ は、$\mathbf{A}$ の結合律 $M(1\otimes M)=M(M\otimes1)\alpha^{-1}$ と、$I\otimes(I\otimes I)\cong(I\otimes I)\otimes I$ がコヒーレンスで一致することから等しい。
+
+**Step 2（単位律）.** $j_{b}\circ f=M(j_{b}\otimes f)\lambda^{-1}=M(j_{b}\otimes1)(1\otimes f)\lambda^{-1}=\lambda(1\otimes f)\lambda^{-1}=f$（$\lambda$ の自然性）。右も同様（$\lambda_{I}=\varrho_{I}$。\ref{cat:monoidal-derived-triangles}）。
+
+**Step 3（関手と自然変換）.** $F_{0}(f)\defeq F_{a,b}\circ f$ は、$F$ の公理から合成と恒等を保つ。$\mathbf{V}$ 自然変換 $\theta$ の成分 $\theta_{a}\in\mathbf{B}_{0}(Fa,Ga)$ について、自然性の等式を $f:I\to\mathbf{A}(a,b)$ と合成すると $\theta_{b}\circ F_{0}f=G_{0}f\circ\theta_{a}$。
+
+**Step 4（自己豊穣化）.** \ref{cat:self-enrichment} の $\mathbf{V}(I,[a,b])\cong\mathbf{V}(a,b)$ が合成と両立すること（内部合成の定義を転置で追う）。
+:::
+
+## 例 {#cat:sec-enr-examples}
+
+::: example 豊穣圏の例 {#cat:enriched-examples}
+1. $\mathbf{V}=(\mathbf{Set},\times,1)$：$\mathbf{V}$ 圏は局所的に小さい圏、$\mathbf{V}$ 関手は関手、$\mathbf{V}$ 自然変換は自然変換。$\mathbf{A}_{0}=\mathbf{A}$。
+2. $\mathbf{V}=(\mathbf{Ab},\otimes_{\mathbb{Z}},\mathbb{Z})$：$\mathbf{V}$ 圏は前加法圏（\ref{ha:preadditive}。合成 $\mathbf{A}(b,c)\otimes\mathbf{A}(a,b)\to\mathbf{A}(a,c)$ は双線形写像と同じ）、$\mathbf{V}$ 関手は加法関手。対象が一つの $\mathbf{Ab}$ 圏は環。
+3. $\mathbf{V}=(\{0\le1\},\wedge,1)$（2 元の束、$0\to1$）：$\mathbf{V}$ 圏は前順序集合（$a\le b\iff\mathbf{A}(a,b)=1$）、$\mathbf{V}$ 関手は単調写像。$\mathbf{V}=([0,\infty],\ge,+,0)$ ではローヴェアの距離空間（\ref{cat:lawvere-metric-is-enriched}）。
+4. $\mathbf{V}=(\mathbf{Cat},\times,\mathbf{1})$：$\mathbf{V}$ 圏は（厳密な）2 圏（\ref{cat:page-2-categories}）。hom 圏の対象が 1 射、射が 2 射。
+5. $\mathbf{V}=(\mathbf{CGHaus},\times,\ast)$（コンパクト生成ハウスドルフ空間、デカルト閉。\ref{cat:cghaus-ccc}）：$\mathbf{V}$ 圏は「射の空間」に位相が入り合成が連続な圏。$\mathbf{V}$ 自身（写像空間 $[X,Y]$）が典型。台の圏の射 $\ast\to[X,Y]$ は連続写像。
+6. 次数付き加群：可換環 $k$ 上の $\mathbb{Z}$ 次数付き加群の圏（テンソル積に符号 $(-1)^{pq}$ の対称性）上の豊穣圏は**次数付き圏**、鎖複体の圏上の豊穣圏は **dg 圏**。
+:::
+
+## 基礎の変換 {#cat:sec-enr-change-of-base}
+
+::: proposition 基礎の変換 {#cat:change-of-base keywords="change of base along a lax monoidal functor N: V -> W gives N_*: V-Cat -> W-Cat" index="基礎の変換|きそのへんかん"}
+緩いモノイダル関手 $(N,N_{2},N_{0}):\mathbf{V}\to\mathbf{W}$（\ref{cat:monoidal-functor}）と $\mathbf{V}$ 圏 $\mathbf{A}$ について、$N_{*}\mathbf{A}$ を、同じ対象、hom 対象 $N\mathbf{A}(a,b)$、合成 $N(M)\circ N_{2}$、単位 $N(j_{a})\circ N_{0}$ で定めると $\mathbf{W}$ 圏で、$N_{*}$ は関手 $\mathbf{V}\text{-}\mathbf{Cat}\to\mathbf{W}\text{-}\mathbf{Cat}$ を定める。$N=\mathbf{V}(I,-):\mathbf{V}\to\mathbf{Set}$ は緩いモノイダル関手で、$N_{*}\mathbf{A}=\mathbf{A}_{0}$。
+:::
+
+::: proof
+**Step 1（結合律）.** $N(M)N_{2}(N(M)N_{2}\otimes1)=N(M)N(M\otimes1)N_{2}(N_{2}\otimes1)$（$N_{2}$ の自然性）$=N(M(M\otimes1))N_{2}(N_{2}\otimes1)$。$\mathbf{A}$ の結合律と $N_{2}$ の結合の公理（\ref{cat:monoidal-functor} の第一式）で $N(M(1\otimes M))N_{2}(1\otimes N_{2})\alpha'$ に等しい。
+
+**Step 2（単位律）.** $N(M)N_{2}(N(j)N_{0}\otimes1)=N(M)N(j\otimes1)N_{2}(N_{0}\otimes1)=N(\lambda)N_{2}(N_{0}\otimes1)=\lambda'$（第三式）。右も同様。
+
+**Step 3（関手）.** $\mathbf{V}$ 関手 $F$ には $N(F_{a,b})$ を対応させる（$N_{2}$ の自然性で公理が移る）。
+
+**Step 4（台の圏）.** $\mathbf{V}(I,-)$ の $N_{2}:\mathbf{V}(I,x)\times\mathbf{V}(I,y)\to\mathbf{V}(I,x\otimes y)$ を $(f,g)\mapsto(f\otimes g)\lambda_{I}^{-1}$、$N_{0}:1\to\mathbf{V}(I,I)$ を $1_{I}$ とすると、モノイダル関手の公理はコヒーレンスから従う。$N_{*}\mathbf{A}$ の合成は \ref{cat:underlying-category} の合成そのもの。
+:::
+
+::: example 基礎の変換の例
+1. **自由アーベル群** $\mathbb{Z}[-]:\mathbf{Set}\to\mathbf{Ab}$ は強モノイダル（$\mathbb{Z}[X\times Y]\cong\mathbb{Z}[X]\otimes\mathbb{Z}[Y]$）で、圏 $\mathbf{C}$ から**自由な前加法圏** $\mathbb{Z}\mathbf{C}$（射の形式的な整数係数の和）を作る。対象が一つ（モノイド $G$）なら群環・モノイド環 $\mathbb{Z}[G]$。
+2. **忘却** $\mathbf{Ab}\to\mathbf{Set}$ は緩いモノイダル（$A\times B\to A\otimes B$, $(a,b)\mapsto a\otimes b$）で、前加法圏の台の圏を与える。
+3. **連結成分** $\pi_{0}:\mathbf{CGHaus}\to\mathbf{Set}$ は積を保つ（$X\times Y$ の弧状連結成分は成分の積：道は成分ごとの道）ので、弧状連結成分 $\pi_{0}$ を使えば、位相的に豊穣された圏から「ホモトピー類」の圏が作れる。$\mathbf{V}$ 自身に施すと、射は写像空間の弧状連結成分、すなわち連続写像のホモトピー類（写像空間の道はホモトピー。$[0,1]$ が局所コンパクトなので \ref{cat:compact-open} の指数法則が使える）で、**ホモトピー圏**になる。
+:::
+
+::: proposition 反対圏とテンソル積 {#cat:enriched-opposite-tensor keywords="opposite V-category and tensor product of V-categories use the symmetry" index="豊穣圏のテンソル積|ほうじょうけんのてんそるせき"}
+1. $\mathbf{A}^{\mathrm{op}}(a,b)\defeq\mathbf{A}(b,a)$、合成 $M\circ\gamma$ で $\mathbf{V}$ 圏 $\mathbf{A}^{\mathrm{op}}$ が定まる。
+2. $(\mathbf{A}\otimes\mathbf{B})((a,b),(a',b'))\defeq\mathbf{A}(a,a')\otimes\mathbf{B}(b,b')$、合成を中央の交換（$\gamma$ を使う並べ替え）のあと $M\otimes M$ で定めると $\mathbf{V}$ 圏。
+:::
+
+::: proof
+**Step 1（1）.** 結合律は $\mathbf{A}$ の結合律と、$\gamma$ と $\alpha$ の六角形の公理（対称モノイダル圏のコヒーレンス、\ref{cat:symmetric-coherence-general}）から。単位律は $\gamma\circ(j\otimes1)=(1\otimes j)\circ\gamma$（自然性）と $\lambda\gamma=\varrho$ から。
+
+**Step 2（2）.** 中央の交換 $(x\otimes y)\otimes(x'\otimes y')\to(x\otimes x')\otimes(y\otimes y')$ は構造射の合成で、コヒーレンス定理により並べ替えの置換だけで決まる。結合律は二通りの並べ替えが同じ置換を与えることと $M$ の結合律から。
+:::
+
+::: hypcheck
+- **選択公理**：使わない。
+- **対称性** $\gamma$：反対圏とテンソル積（\ref{cat:enriched-opposite-tensor}）で使った。豊穣圏・豊穣関手・台の圏・基礎の変換は、対称でないモノイダル圏 $\mathbf{V}$ でも定義でき、証明もそのまま通る（$\mathbf{V}$ 自然変換も同様）。
+- **閉構造**：本ページでは自己豊穣化（例 5 と \ref{cat:underlying-category} の最後）にだけ使った。関手 $\mathbf{V}$ 圏 $[\mathbf{A},\mathbf{B}]$ を作るには、さらに $\mathbf{V}$ の完備性が要る（\ref{cat:page-day-convolution}）。
+:::
+
+::: supplement
+**豊穣でないと見えない構造.** 前加法圏 $\mathbf{A}$ について、対象 $a$ の自己準同型「環」$\mathbf{A}(a,a)$ や、加法関手の圏は、$\mathbf{Ab}$ への豊穣を使ってはじめて意味をもつ。同様に、2 圏の擬関手（\ref{cat:page-bicategories}）や、位相的な圏のホモトピー論（単体的豊穣圏によるホモトピー論のモデル）は、豊穣の強弱を変えた理論である。
+:::
+
+## 高い視点 {#cat:sec-enr-viewpoint}
+
+::: remark 「射の集合」から「射の対象」へ
+ふつうの圏論は、すべての数学的対象の間の「射の集まり」が集合であるという $\mathbf{Set}$ を基礎とした理論である。豊穣圏論は、その基礎を取り替え、射の集まり自身に構造（加法・位相・距離・次数）を持たせる。比喩で言えば、ふつうの圏が「道があるかないか、どの道か」を記録する地図なら、豊穣圏は道ごとに「長さ」「通行料」「道の空間」を書き込んだ地図である。基礎の変換 $N_{*}$ は、地図の注記を別の言語に翻訳する操作で、台の圏 $(-)_{0}$ は注記を消して道だけを残す翻訳にあたる。
+:::
+
+## 問題 {#cat:sec-enr-problems}
+
+::: problem {#cat:prob-en-one-object-ab}
+対象が一つの $\mathbf{Ab}$ 圏が（単位元をもつ）環と同じものであること、その間の $\mathbf{Ab}$ 関手が環準同型と同じものであることを示し、二つの環準同型 $f,g:R\to S$ の間の $\mathbf{Ab}$ 自然変換を記述せよ。
+:::
+
+::: solution
+対象 $\ast$ について $R\defeq\mathbf{A}(\ast,\ast)$ はアーベル群で、合成 $R\otimes R\to R$ は双線形写像（積）、単位 $j:\mathbb{Z}\to R$ は元 $1\defeq j(1)$。結合律・単位律は積の結合律と $1$ の単位性。$\mathbf{Ab}$ 関手は加法的で積と $1$ を保つ写像、すなわち環準同型。$\mathbf{Ab}$ 自然変換 $\theta:f\Rightarrow g$ は $\theta_{\ast}:\mathbb{Z}\to S$、すなわち元 $s\defeq\theta_{\ast}(1)\in S$ で、自然性の等式は（$\lambda^{-1}$ で $r\mapsto1\otimes r$ として）$s\,f(r)=g(r)\,s$（すべての $r\in R$）。たとえば $f=g$ なら、$s$ は $f(R)$ の中心化環の元。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

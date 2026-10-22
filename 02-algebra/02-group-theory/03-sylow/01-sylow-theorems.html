@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>シローの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/02-group-theory/03-sylow/01-sylow-theorems.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# シローの定理 {#grp:page-sylow keywords="Sylow theorems, Sylow p-subgroup, existence of Sylow subgroups, conjugacy of Sylow subgroups, number of Sylow subgroups, Frattini argument"}
+
+有限群 $G$ の位数を $\abs{G}=p^{a}m$（$p$ は素数、$p\nmid m$）と書く。ラグランジュの定理の逆は一般には成り立たない（\ref{grp:a4-no-order-6}）が、$p$ の最大冪 $p^{a}$ については、位数 $p^{a}$ の部分群（**シロー $p$ 部分群**）が必ず存在する。さらに、シロー $p$ 部分群はすべて互いに共役で、その個数 $n_{p}$ は $n_{p}\equiv 1\pmod p$ かつ $n_{p}\mid m$ をみたす。これらをまとめて**シローの定理**（\tref{grp:sylow-existence}, \ref{grp:sylow-conjugacy}, \ref{grp:sylow-count}）という。個数の条件は、有限群が正規部分群をもつことを示す強力な道具になる（\ref{grp:sylow-normal-iff-unique}）。
+
+> シローの定理の主張は雪江明彦『代数学 1 群論入門』第 4 章 §4.5 に従った。雪江は存在を部分集合への作用で示しているが、ここでは類等式とコーシーの定理を使う帰納法で示し、共役と個数の条件は $p$ 群の固定点の合同式（\ref{grp:fixed-point-congruence}）から導いた。
+
+## 記法と定義の確認 {#grp:sec-sl-notation}
+
+::: notation
+- 作用・軌道・安定化群・軌道と安定化群の関係は \ref{grp:group-action}, \ref{grp:orbit-stabilizer-def}, \ref{grp:orbit-stabilizer}。正規化群 $N_{G}(H)$ と、$H$ に共役な部分群の個数が $(G:N_{G}(H))$ であることは \ref{grp:normalizer-centralizer}, \ref{grp:normalizer-stabilizer}。
+- $p$ 群・固定点の合同式・類等式・コーシーの定理は \ref{grp:p-group}, \ref{grp:fixed-point-congruence}, \ref{grp:class-equation}, \ref{grp:cauchy}。
+- 剰余類・指数・ラグランジュの定理・指数の積公式は \ref{grp:coset}, \ref{grp:index}, \tref{grp:lagrange}, \ref{grp:index-tower}。正規部分群・剰余群・対応定理は \ref{grp:normal-subgroup}, \ref{grp:quotient-group}, \tref{grp:correspondence}、$HN$ と第二同型定理は \ref{grp:product-with-normal}, \ref{grp:second-isomorphism}。
+- 以下 $p$ は素数、$G$ は有限群で $\abs{G}=p^{a}m$（$a\ge 0$, $p\nmid m$）。$p$ の冪を位数にもつ部分群を **$p$ 部分群**という。
+- $\ZFC$ の中で議論し、選択公理は使わない。
+:::
+
+## 存在 {#grp:sec-sl-existence}
+
+::: definition シロー p 部分群 {#grp:sylow-subgroup keywords="Sylow p-subgroup, Syl_p(G), n_p" index="シロー p 部分群|しろーぴーぶぶんぐん"}
+位数がちょうど $p^{a}$ の $G$ の部分群を **シロー $p$ 部分群**という。その全体を $\mathrm{Syl}_{p}(G)$、個数を $n_{p}\defeq\abs{\mathrm{Syl}_{p}(G)}$ と書く。
+:::
+
+::: theorem シローの定理（存在） {#grp:sylow-existence keywords="first Sylow theorem, existence of Sylow subgroups" index="シローの定理|しろーのていり, シローの第一定理|しろーのだいいちていり" refname="シローの定理（存在）"}
+有限群 $G$ にはシロー $p$ 部分群が存在する。
+:::
+
+::: intuition
+中心に位数 $p$ の元 $z$ があれば、$G/\ang{z}$ のシロー部分群を引き戻せばよい。中心に $p$ で割り切れる部分がないときは、類等式から、指数が $p$ で割り切れない真部分群（ある元の中心化群）が見つかるので、そちらで探せばよい。
+:::
+
+::: proof
+$\abs{G}$ についての帰納法で示す。$\abs{G}=1$ または $a=0$ なら $\{e\}$ がシロー $p$ 部分群。$a\ge 1$ とし、$\abs{G}$ より小さい位数の群についてはシロー $p$ 部分群が存在すると仮定する。
+
+**Case 1（指数が $p$ で割り切れない真部分群がある）.** $K\lneq G$ で $p\nmid(G:K)$ とする。$\abs{G}=(G:K)\abs{K}$ なので $\abs{K}=p^{a}m'$（$m'=m/(G:K)$、$p\nmid m'$）。$\abs{K}<\abs{G}$ なので帰納法の仮定から $K$ は位数 $p^{a}$ の部分群 $P$ をもち、$P$ は $G$ のシロー $p$ 部分群。
+
+**Case 2（すべての真部分群の指数が $p$ で割り切れる）.** 類等式（\ref{grp:class-equation}）
+$$
+\abs{G}=\abs{Z(G)}+\sum_{i}(G:Z_{G}(x_{i}))
+$$
+で、各 $(G:Z_{G}(x_{i}))>1$ なので $Z_{G}(x_{i})$ は真部分群で、仮定よりその指数は $p$ で割り切れる。左辺も $p$ で割り切れる（$a\ge 1$）ので、$p\mid\abs{Z(G)}$。\ref{grp:cauchy}を可換群 $Z(G)$ に使い、位数 $p$ の $z\in Z(G)$ をとる。$N\defeq\ang{z}$ は中心に含まれるので正規。$\abs{G/N}=p^{a-1}m<\abs{G}$ なので、帰納法の仮定から $G/N$ は位数 $p^{a-1}$ の部分群 $\bar P$ をもつ。\ref{grp:correspondence}より $\bar P=P/N$（$N\subseteq P\le G$）となる $P$ があり、$\abs{P}=\abs{N}\abs{P/N}=p\cdot p^{a-1}=p^{a}$。
+
+**場合の網羅.** 真部分群のうち指数が $p$ で割り切れないものがあるかないかで、Case 1 か Case 2 のどちらかになる。
+
+::: hypcheck
+- **$p$ が素数**：Case 2 のコーシーの定理と、Case 1 で $p\nmid(G:K)$ から $\abs{K}$ に $p^{a}$ がそのまま残ること（$p^{a}\mid(G:K)\abs{K}$ で $\gcd(p^{a},(G:K))=1$ なのでユークリッドの補題 \ref{grp:bezout-euclid} から $p^{a}\mid\abs{K}$）に使った。素数冪でない約数については、その位数の部分群の存在は保証されない：$A_{4}$（位数 $12$）に位数 $6$ の部分群はない（\ref{grp:a4-no-order-6}）。
+- **公理**：帰納法は自然数についての帰納法で、選択公理は使わない。
+:::
+:::
+
+## 共役と包含 {#grp:sec-sl-conjugacy}
+
+::: theorem シローの定理（共役と包含） {#grp:sylow-conjugacy keywords="second Sylow theorem, Sylow subgroups are conjugate, every p-subgroup is contained in a Sylow subgroup" index="シローの第二定理|しろーのだいにていり" refname="シローの定理（共役と包含）"}
+$P$ を $G$ のシロー $p$ 部分群とする。
+1. $G$ の任意の $p$ 部分群 $Q$ について、$Q\subseteq gPg^{-1}$ となる $g\in G$ がある。特に、任意の $p$ 部分群はあるシロー $p$ 部分群に含まれる。
+2. $G$ のシロー $p$ 部分群はすべて互いに共役である。
+:::
+
+::: proof
+**Step 1（$Q$ を $G/P$ に作用させる）.** $Q$ は $G/P$ に左からの積 $q\cdot gP\defeq qgP$ で作用する（\ref{grp:action-examples.4} を $Q$ に制限）。$\abs{G/P}=(G:P)=m$ で $p\nmid m$。$Q$ は $p$ 群なので、\ref{grp:fixed-point-congruence} より固定点の個数は $m\not\equiv 0\pmod p$、特に固定点 $gP$ がある。
+
+**Step 2（固定点の意味）.** $gP$ が固定点 $\iff$ すべての $q\in Q$ で $qgP=gP\iff g^{-1}qg\in P\iff q\in gPg^{-1}$（\ref{grp:coset-partition.2}）。よって $Q\subseteq gPg^{-1}$。$gPg^{-1}$ は位数 $p^{a}$ の部分群なのでシロー $p$ 部分群。
+
+**Step 3（2）.** $Q$ がシロー $p$ 部分群なら、1 より $Q\subseteq gPg^{-1}$ で、位数がともに $p^{a}$ なので $Q=gPg^{-1}$。
+:::
+
+## 個数 {#grp:sec-sl-count}
+
+::: theorem シローの定理（個数） {#grp:sylow-count keywords="third Sylow theorem, n_p ≡ 1 mod p, n_p divides m, n_p = (G : N_G(P))" index="シローの第三定理|しろーのだいさんていり" refname="シローの定理（個数）"}
+$P\in\mathrm{Syl}_{p}(G)$ とする。
+1. $n_{p}=(G:N_{G}(P))$。特に $n_{p}$ は $m$ を割り切る。
+2. $n_{p}\equiv 1\pmod p$。
+:::
+
+::: proof
+**Step 1（1）.** \ref{grp:sylow-conjugacy.2} より、$\mathrm{Syl}_{p}(G)$ は共役による作用での $P$ の軌道に等しい。\ref{grp:normalizer-stabilizer.3} より $n_{p}=(G:N_{G}(P))$。$P\subseteq N_{G}(P)$ なので指数の積公式から $m=(G:P)=(G:N_{G}(P))(N_{G}(P):P)$、よって $n_{p}\mid m$。
+
+**Step 2（$P$ を $\mathrm{Syl}_{p}(G)$ に作用させる）.** $P$ は $\mathrm{Syl}_{p}(G)$ に共役で作用する。\ref{grp:fixed-point-congruence} より $n_{p}\equiv(\text{固定点の個数})\pmod p$。
+
+**Step 3（固定点は $P$ だけ）.** $P$ は固定点（$xPx^{-1}=P$, $x\in P$）。$Q\in\mathrm{Syl}_{p}(G)$ が固定点とすると、$P\subseteq N_{G}(Q)$。$Q\trianglelefteq N_{G}(Q)$（\ref{grp:normalizer-stabilizer.1}）なので、$PQ$ は $N_{G}(Q)$ の部分群（\ref{grp:product-with-normal}）で、$\abs{PQ}=\abs{P}\abs{Q}/\abs{P\cap Q}$（\ref{grp:product-formula}）は $p$ の冪。$PQ$ は $p$ 部分群で $Q\subseteq PQ$、$\abs{Q}=p^{a}$ が $p$ 部分群の位数の最大値（ラグランジュの定理）なので $PQ=Q$、よって $P\subseteq Q$、位数が等しいので $P=Q$。
+
+**Step 4.** 固定点は $P$ の一つだけなので、Step 2 より $n_{p}\equiv 1\pmod p$。
+
+::: hypcheck
+- Step 3 では、$P$ と $Q$ が $N_{G}(Q)$ の中で共役であることを使う別証明もある（$N_{G}(Q)$ のシロー $p$ 部分群は $Q$ だけ、なぜなら $Q$ は $N_{G}(Q)$ で正規）。ここでは積 $PQ$ の位数で直接示した。
+- **$p\nmid m$**：1 の $n_{p}\mid m$ を、$P$ がシロー部分群（$m=(G:P)$）であることから得た。
+:::
+:::
+
+::: corollary シロー部分群が正規であるための条件 {#grp:sylow-normal-iff-unique keywords="a Sylow subgroup is normal iff it is unique, n_p = 1" index="シロー部分群の正規性|しろーぶぶんぐんのせいきせい"}
+$P\in\mathrm{Syl}_{p}(G)$ について、$P\trianglelefteq G\iff n_{p}=1$。このとき $P$ は $G$ の位数 $p^{a}$ の部分群のただ一つで、$G$ のすべての $p$ 部分群を含む。
+:::
+
+::: proof
+$n_{p}=(G:N_{G}(P))=1\iff N_{G}(P)=G\iff P\trianglelefteq G$（\ref{grp:normalizer-stabilizer.1}）。$n_{p}=1$ なら、\ref{grp:sylow-conjugacy.1} より任意の $p$ 部分群は $P$ の共役、すなわち $P$ に含まれる。
+:::
+
+::: example
+1. $S_{3}$（$6=2\cdot 3$）：$n_{3}\equiv 1\pmod 3$, $n_{3}\mid 2$ より $n_{3}=1$（$A_{3}$）。$n_{2}\in\{1,3\}$ で、実際 $\{e,(1\ 2)\}$, $\{e,(1\ 3)\}$, $\{e,(2\ 3)\}$ の $3$ 個。
+2. $S_{4}$（$24=2^{3}\cdot 3$）：$n_{3}\in\{1,4\}$ で、3 巡回置換 $8$ 個が位数 $3$ の部分群を $2$ 個ずつ生成するので $n_{3}=4$。$n_{2}\in\{1,3\}$：位数 $8$ の部分群は、正方形の頂点に $1,2,3,4$ をどう並べるかで決まる二面体群 $D_{4}$ の写しで、$3$ 個。
+3. $A_{5}$（$60=2^{2}\cdot 3\cdot 5$）：5 巡回置換 $24$ 個（\ref{grp:alternating-basic} の後の例）は位数 $5$ の部分群を $4$ 個ずつ生成するので $n_{5}=6$（$\equiv 1\pmod 5$, $6\mid 12$）。3 巡回置換 $20$ 個から $n_{3}=10$。$A_{5}$ は単純（\ref{grp:an-simple}）なので $n_{p}=1$ となる $p$ はない。
+:::
+
+::: proposition フラッティーニの論法 {#grp:frattini keywords="Frattini argument, G = N P when P is Sylow in a normal subgroup N" index="フラッティーニの論法|ふらってぃーにのろんぽう"}
+$N\trianglelefteq G$, $P\in\mathrm{Syl}_{p}(N)$ なら $G=N\cdot N_{G}(P)$。
+:::
+
+::: proof
+$g\in G$ について、$N$ が正規なので $gPg^{-1}\subseteq gNg^{-1}=N$ で、$gPg^{-1}$ は $N$ のシロー $p$ 部分群。\tref{grp:sylow-conjugacy.2} を $N$ に使うと、$gPg^{-1}=nPn^{-1}$ となる $n\in N$ がある。すると $(n^{-1}g)P(n^{-1}g)^{-1}=P$ なので $n^{-1}g\in N_{G}(P)$、$g=n\cdot n^{-1}g\in N\cdot N_{G}(P)$。
+:::
+
+::: supplement
+**歴史と名前.** 存在・共役・個数の三つを、それぞれシローの第一・第二・第三定理と呼ぶことが多い。
+
+**別証明.** 存在には、$p^{a}$ 元の部分集合全体への左からの積の作用を使う証明（二項係数 $\binom{p^{a}m}{p^{a}}$ が $p$ で割り切れないことを使う。雪江はこの方法）もよく知られている。
+
+**応用.** 個数の条件 $n_{p}\equiv 1\pmod p$, $n_{p}\mid m$ から $n_{p}=1$ が強制されれば、シロー部分群は正規になり、群は単純でない。位数 $pq$ の群や位数 $60$ 未満の群への応用は次のページで扱う（\ref{grp:page-sylow-applications}）。
+:::
+
+## 問題 {#grp:sec-sl-problems}
+
+::: problem {#grp:prob-order-15-cyclic}
+位数 $15$ の群は巡回群であることを示せ。
+:::
+
+::: solution
+$n_{3}\equiv 1\pmod 3$, $n_{3}\mid 5$ より $n_{3}=1$。$n_{5}\equiv 1\pmod 5$, $n_{5}\mid 3$ より $n_{5}=1$。よってシロー $3$ 部分群 $H$（位数 $3$）とシロー $5$ 部分群 $K$（位数 $5$）はともに正規（\ref{grp:sylow-normal-iff-unique}）。$H\cap K=\{e\}$（\ref{grp:coprime-orders-trivial-intersection}）、$\abs{HK}=15$ なので $HK=G$。内部直積（\ref{grp:internal-direct-product}）より $G\cong\Z/3\Z\times\Z/5\Z\cong\Z/15\Z$（\ref{grp:chinese-remainder-group}）。
+:::
+
+::: problem {#grp:prob-sylow-normalizer-self}
+$P\in\mathrm{Syl}_{p}(G)$ について $N_{G}(N_{G}(P))=N_{G}(P)$ を示せ。
+:::
+
+::: solution
+$M\defeq N_{G}(P)$ とする。$M\subseteq N_{G}(M)$ は明らか。$g\in N_{G}(M)$ とすると $gPg^{-1}\subseteq gMg^{-1}=M$ で、$gPg^{-1}$ は $M$ のシロー $p$ 部分群。$P\trianglelefteq M$ なので、$M$ のシロー $p$ 部分群は $P$ だけ（\ref{grp:sylow-normal-iff-unique} を $M$ に使う）。よって $gPg^{-1}=P$、$g\in M$。
+:::
+
+::: problem {#grp:prob-sylow-of-quotient}
+$N\trianglelefteq G$, $P\in\mathrm{Syl}_{p}(G)$ なら、$PN/N$ は $G/N$ のシロー $p$ 部分群で、$P\cap N$ は $N$ のシロー $p$ 部分群であることを示せ。
+:::
+
+::: solution
+\ref{grp:second-isomorphism}より $PN/N\cong P/(P\cap N)$ は $p$ 群。指数は $(G/N:PN/N)=(G:PN)$（\ref{grp:correspondence.4}）で、$(G:P)=(G:PN)(PN:P)$ は $p$ で割り切れないので $(G:PN)$ も割り切れない。$p$ 部分群で指数が $p$ と\term[互いに素]{grp:gcd}なものはシロー部分群なので、$PN/N\in\mathrm{Syl}_{p}(G/N)$。同様に $(N:P\cap N)=\abs{N}/\abs{P\cap N}=\abs{PN}/\abs{P}=(PN:P)$（\ref{grp:product-formula}）は $p$ と互いに素で、$P\cap N$ は $p$ 群なので $N$ のシロー $p$ 部分群。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

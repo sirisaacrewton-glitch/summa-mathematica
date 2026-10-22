@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>パラメータ曲面と面積分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/04-vector-analysis/02-surface-integrals.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# パラメータ曲面と面積分 {#vec:page-surface-integrals keywords="parametrized surfaces, k-dimensional area of parametrized patches, Gram determinant, Cauchy-Binet, area element as root sum of squares of projected areas, cross product, surface area of the sphere and torus, graphs, surface integral of a function, flux integral, flux as integral of a 2-form, orientation"}
+
+曲線の長さ（\ref{vec:c1-curve-length}）の 2 次元以上の類似として、パラメータで表された曲面の**面積**を定義する。曲線の長さが $\int|\gamma'|$ だったのに対し、$k$ 次元のパラメータ曲面 $\varphi$ の面積は $\int\sqrt{\det({}^{t}D\varphi\,D\varphi)}$（**グラム行列式**の平方根）で、これはコーシー–ビネの公式から「各座標 $k$ 平面への射影の面積の 2 乗和の平方根」に等しい（前ページまでの $dx_{I}$ を使って書ける）。$\mathbb{R}^{3}$ の曲面では、これは外積 $|\varphi_{u}\times\varphi_{v}|$ である。面積がパラメータの取り方によらないことを変数変換公式から示し、関数の**面積分**、ベクトル場の**流束**を定義して、流束が 2 形式の積分と一致することを示す。
+
+> 資料：杉浦光夫『解析入門 II』（曲面積と面積分）、Spivak『Calculus on Manifolds』第 5 章と同じ標準的な内容。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#vec:sec-si-notation}
+
+::: notation
+- 重積分・ジョルダン可測集合・変数変換公式 \ref{calc:box-integral}, \ref{calc:jordan-measurable}, \tref{calc:change-of-variables}, \ref{calc:change-of-variables-boundary}、フビニの定理 \ref{calc:fubini-continuous}。
+- 小行列式による $dx_{I}$ と引き戻し \ref{calc:dx-minor}, \ref{calc:pullback-properties}、鎖の上の積分 \ref{calc:chain-integral}。曲線の長さ \ref{vec:c1-curve-length}。
+- コーシー–ビネの公式 \tref{lin:cauchy-binet}、行列式の乗法性 \ref{lin:det-multiplicative}。
+- $\mathbb{R}^{3}$ の外積 $a\times b\defeq(a_{2}b_{3}-a_{3}b_{2},\,a_{3}b_{1}-a_{1}b_{3},\,a_{1}b_{2}-a_{2}b_{1})$。$\langle a\times b,c\rangle=\det(a,b,c)$（第 3 列での余因子展開）、$a\times b$ は $a,b$ に直交。
+- **パラメータ曲面**：$D\subset\mathbb{R}^{k}$ をコンパクトなジョルダン可測集合とし、$D$ の近傍で定義された $C^{1}$ 級写像 $\varphi\colon D\to\mathbb{R}^{n}$ を **$k$ 次元のパラメータ曲面**という。$\varphi_{u_{j}}\defeq\partial_{j}\varphi$。$D\varphi(u)$ の階数が $\operatorname{int}D$ の各点で $k$ のとき**正則**という。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## 面積要素 {#vec:sec-si-area}
+
+::: lemma グラム行列式とコーシー–ビネ {#vec:gram-cauchy-binet keywords="det(A^T A) = sum over k-subsets I of det(A_I)^2; for k = 2, n = 3 this is |a x b|^2 (Lagrange identity)" index="グラム行列式|ぐらむぎょうれつしき, ラグランジュの恒等式|らぐらんじゅのこうとうしき"}
+$n\times k$ 行列 $A$（列 $a_{1},\dots,a_{k}$）について
+$$
+\det({}^{t}AA)=\sum_{I\in\mathcal{I}_{k}}\bigl(dx_{I}(a_{1},\dots,a_{k})\bigr)^{2}\ge0.
+$$
+とくに $n=3$, $k=2$ では $\det({}^{t}AA)=|a_{1}\times a_{2}|^{2}$。$k=n$ では $\det({}^{t}AA)=(\det A)^{2}$、$k=1$ では $|a_{1}|^{2}$。
+:::
+
+::: proof
+コーシー–ビネの公式（\tref{lin:cauchy-binet}、$X={}^{t}A$, $Y=A$）から $\det({}^{t}AA)=\sum_{I}\det({}^{t}A)_{[k],I}\det A_{I,[k]}=\sum_{I}(\det A_{I,[k]})^{2}$（転置で行列式は不変）。$\det A_{I,[k]}$ は $A$ の行 $I$ の小行列式、すなわち $dx_{I}(a_{1},\dots,a_{k})$（\ref{calc:dx-minor}）。$n=3$, $k=2$ では 3 つの小行列式 $dx_{(2,3)},dx_{(1,3)},dx_{(1,2)}$ は外積の成分（第 2 成分は符号違い）で、2 乗和は $|a_{1}\times a_{2}|^{2}$。
+:::
+
+::: intuition
+$\sqrt{\det({}^{t}AA)}$ は、$a_{1},\dots,a_{k}$ の張る $k$ 次元平行体の $k$ 次元体積である。補題はそれを「座標 $k$ 平面 $\{x_{I}\}$ への射影の（符号付き）体積 $dx_{I}(a)$ の 2 乗和の平方根」と表す：$k=1$ なら三平方の定理、$k=2$, $n=3$ なら「平行四辺形の面積の 2 乗は、3 つの座標平面への射影の面積の 2 乗の和」（ド・グアの定理の一般化）。$k=n$ では \ref{calc:linear-volume} の $|\det A|$ と一致する。
+:::
+
+::: definition $k$ 次元面積 {#vec:k-area keywords="k-dimensional area of a parametrized surface: int_D sqrt(det(D phi^T D phi)); surface area; area element" index="曲面積|きょくめんせき, 面積要素|めんせきようそ, k 次元面積|けーじげんめんせき"}
+$k$ 次元のパラメータ曲面 $\varphi\colon D\to\mathbb{R}^{n}$ について、$g_{\varphi}(u)\defeq\det\bigl({}^{t}D\varphi(u)\,D\varphi(u)\bigr)$ とおき、
+$$
+A(\varphi)\defeq\int_{D}\sqrt{g_{\varphi}(u)}\,du
+$$
+を $\varphi$ の **$k$ 次元面積**という（$\sqrt{g_{\varphi}}$ は連続で、\ref{calc:jordan-measurable-criterion.3} から積分可能）。$k=1$ では曲線の長さ（\ref{vec:c1-curve-length}）に、$k=n$ では $\int_{D}|\det D\varphi|$ に一致する。$n=3$, $k=2$ では $A(\varphi)=\int_{D}|\varphi_{u}\times\varphi_{v}|\,du\,dv$。
+:::
+
+::: theorem 面積はパラメータによらない {#vec:area-reparametrization keywords="k-dimensional area is invariant under C^1 reparametrizations with nonvanishing Jacobian" index="曲面積のパラメータ不変性|きょくめんせきのぱらめーたふへんせい"}
+$D,D'\subset\mathbb{R}^{k}$ をコンパクトなジョルダン可測集合、$h$ を $D'$ の近傍で定義された $C^{1}$ 級写像で $h(D')=D$、$\operatorname{int}D'$ の上で単射かつ $\det Dh\neq0$ とする。$\varphi\colon D\to\mathbb{R}^{n}$ について $A(\varphi\circ h)=A(\varphi)$。
+:::
+
+::: proof
+連鎖律から $D(\varphi\circ h)(s)=D\varphi(h(s))Dh(s)$ で、行列式の乗法性から
+$$
+g_{\varphi\circ h}(s)=\det\bigl({}^{t}Dh\,{}^{t}D\varphi\,D\varphi\,Dh\bigr)=(\det Dh(s))^{2}g_{\varphi}(h(s)).
+$$
+よって $\sqrt{g_{\varphi\circ h}}=(\sqrt{g_{\varphi}}\circ h)|\det Dh|$ で、変数変換公式（\ref{calc:change-of-variables-boundary}、$f=\sqrt{g_{\varphi}}$ は $D$ 上で連続）から $\int_{D'}\sqrt{g_{\varphi\circ h}}=\int_{D}\sqrt{g_{\varphi}}$。
+:::
+
+::: example
+1. **球面**：$\varphi(\theta,\phi)=R(\sin\theta\cos\phi,\sin\theta\sin\phi,\cos\theta)$、$D=[0,\pi]\times[0,2\pi]$。$\varphi_{\theta}\times\varphi_{\phi}=R^{2}\sin\theta\,(\sin\theta\cos\phi,\sin\theta\sin\phi,\cos\theta)$（外向き法線方向）で $|\varphi_{\theta}\times\varphi_{\phi}|=R^{2}\sin\theta$。面積 $\int_{0}^{2\pi}\int_{0}^{\pi}R^{2}\sin\theta\,d\theta\,d\phi=4\pi R^{2}$。
+2. **グラフ**：$g\colon D\to\mathbb{R}$（$D\subset\mathbb{R}^{2}$）の $C^{1}$ 級関数のグラフ $\varphi(x,y)=(x,y,g(x,y))$ は $\varphi_{x}\times\varphi_{y}=(-g_{x},-g_{y},1)$ で、面積 $\int_{D}\sqrt{1+|\nabla g|^{2}}$。
+3. **トーラス**：$\varphi(\theta,\phi)=((R+r\cos\theta)\cos\phi,(R+r\cos\theta)\sin\phi,r\sin\theta)$（$0<r<R$）は $|\varphi_{\theta}\times\varphi_{\phi}|=r(R+r\cos\theta)$ で、面積 $\int_{0}^{2\pi}\int_{0}^{2\pi}r(R+r\cos\theta)\,d\theta\,d\phi=4\pi^{2}Rr$。
+:::
+
+## 面積分と流束 {#vec:sec-si-flux}
+
+::: definition 面積分と流束 {#vec:surface-integral keywords="surface integral of a function int_S f dA = int_D f(phi) |phi_u x phi_v|; flux of a vector field through an oriented parametrized surface int_D <F(phi), phi_u x phi_v>" index="面積分|めんせきぶん, 流束|りゅうそく, フラックス|ふらっくす, 単位法線|たんいほうせん"}
+$\varphi\colon D\to\mathbb{R}^{3}$ を 2 次元のパラメータ曲面とする。
+1. $\varphi(D)$ 上の連続関数 $f$ の**面積分**：$\int_{\varphi}f\,dA\defeq\int_{D}f(\varphi(u,v))\,|\varphi_{u}\times\varphi_{v}|\,du\,dv$。
+2. $\varphi(D)$ の近傍で連続なベクトル場 $F$ の**流束**：$\int_{\varphi}F\cdot n\,dA\defeq\int_{D}\bigl\langle F(\varphi(u,v)),\varphi_{u}\times\varphi_{v}\bigr\rangle\,du\,dv$。正則な点では $n\defeq\frac{\varphi_{u}\times\varphi_{v}}{|\varphi_{u}\times\varphi_{v}|}$（**単位法線**）について、被積分関数は $\langle F,n\rangle|\varphi_{u}\times\varphi_{v}|$ で、記号の意味はこれによる。
+:::
+
+::: proposition 面積分・流束とパラメータの取り替え {#vec:flux-reparametrization keywords="surface integrals of functions are invariant; fluxes are invariant under orientation preserving and change sign under orientation reversing reparametrizations" index="流束の向き|りゅうそくのむき"}
+\ref{vec:area-reparametrization} の $h$ について、$\int_{\varphi\circ h}f\,dA=\int_{\varphi}f\,dA$。流束は、$\operatorname{int}D'$ で $\det Dh>0$ なら不変、$<0$ なら $-1$ 倍。
+:::
+
+::: proof
+$(\varphi\circ h)_{s}\times(\varphi\circ h)_{t}=\det Dh\cdot(\varphi_{u}\times\varphi_{v})\circ h$：外積は双線形で交代的なので、$(\varphi\circ h)_{s}=\varphi_{u}h_{1,s}+\varphi_{v}h_{2,s}$ などを代入すると $(h_{1,s}h_{2,t}-h_{1,t}h_{2,s})\varphi_{u}\times\varphi_{v}$。あとは \ref{vec:area-reparametrization} と同じく変数変換公式。流束では $\det Dh$ に絶対値が付かないので、$\det Dh$ の符号（$\operatorname{int}D'$ が連結でなくても、仮定から一定）が残る。
+:::
+
+::: theorem 流束は 2 形式の積分 {#vec:flux-two-form keywords="flux of F equals the integral of the 2-form F_1 dy^dz + F_2 dz^dx + F_3 dx^dy; pullback by phi gives <F(phi), phi_u x phi_v> du^dv" index="流束と 2 形式|りゅうそくとにけいしき"}
+ベクトル場 $F=(F_{1},F_{2},F_{3})$ に 2 形式
+$$
+\omega^{2}_{F}\defeq F_{1}\,dy\wedge dz+F_{2}\,dz\wedge dx+F_{3}\,dx\wedge dy
+$$
+を対応させる。2 次元のパラメータ曲面 $\varphi$ について
+$$
+\varphi^{*}\omega^{2}_{F}=\bigl\langle F\circ\varphi,\varphi_{u}\times\varphi_{v}\bigr\rangle\,du\wedge dv.
+$$
+とくに $D=I^{2}$ で $\varphi$ が $C^{2}$ 級（特異 2 立方体）なら、$\int_{\varphi}F\cdot n\,dA=\int_{\varphi}\omega^{2}_{F}$（\ref{calc:chain-integral}）。
+:::
+
+::: proof
+引き戻しの各点の式（\ref{calc:pullback-properties.1}）から、$(\varphi^{*}dy\wedge dz)(e_{1},e_{2})=dx_{(2,3)}(\varphi_{u},\varphi_{v})=\varphi_{2,u}\varphi_{3,v}-\varphi_{2,v}\varphi_{3,u}=(\varphi_{u}\times\varphi_{v})_{1}$。同様に $dz\wedge dx=dx_{(3,1)}$ は $(\varphi_{u}\times\varphi_{v})_{2}$、$dx\wedge dy$ は第 3 成分を与える。\ref{calc:dx-properties.4} から $\varphi^{*}\omega^{2}_{F}$ は $du\wedge dv$ の $\sum_{i}F_{i}(\varphi)(\varphi_{u}\times\varphi_{v})_{i}$ 倍。積分の定義（\ref{calc:chain-integral}）と比べる。
+:::
+
+::: remark
+同様に、線積分は 1 形式 $\omega^{1}_{F}\defeq F_{1}dx+F_{2}dy+F_{3}dz$ の積分で（\tref{vec:sec-cl-line-integral} の注意）、体積分 $\int f\,dV$ は 3 形式 $f\,dx\wedge dy\wedge dz$ の積分である（\ref{calc:pullback-properties.5} と変数変換公式。向きを保つパラメータで）。こうして $\mathbb{R}^{3}$ のベクトル解析の積分は、すべて微分形式の積分の言葉に翻訳される。次ページで、この翻訳のもとで勾配・回転・発散が外微分になることを示す。
+:::
+
+::: example
+$F(x)=x$（位置ベクトル）の、球面（例 1 のパラメータ、外向き）を通る流束：$\langle\varphi,\varphi_{\theta}\times\varphi_{\phi}\rangle=R\cdot R^{2}\sin\theta$ なので、流束 $=\int_{0}^{2\pi}\int_{0}^{\pi}R^{3}\sin\theta\,d\theta\,d\phi=4\pi R^{3}$。これは球の体積 $\frac43\pi R^{3}$ の 3 倍で、$\operatorname{div}x=3$ とガウスの定理（\ref[グリーン・ガウス・ストークスの定理]{vec:page-integral-theorems}）と整合する。
+:::
+
+::: supplement
+**前提を変えると.** 曲線の長さは内接折れ線の長さの上限として定義できたが、曲面の面積を内接多面体の面積の上限として定義することはできない：円柱に内接する多面体で、面積がいくらでも大きくなるものがある（シュヴァルツの提灯。知られている）。面積を微分（グラム行列式）で定義するのはこのためである。
+
+**一般化.** $k$ 次元面積は、$\mathbb{R}^{n}$ の $k$ 次元部分多様体の体積要素（リーマン計量の体積形式）の、パラメータ表示での表現である。多様体論では、向き付けられた $k$ 次元多様体の体積形式として座標によらずに定義する。
+
+**高い視点.** 面積要素 $\sqrt{\det({}^{t}D\varphi\,D\varphi)}$ は、接ベクトルの内積（第一基本形式 ${}^{t}D\varphi\,D\varphi$）から決まる量で、曲面の「内在的な」大きさを測る。流束は向き（法線の選び方）に依存する量で、2 形式の積分にあたる。比喩で言えば、面積は「布の大きさ」、流束は「布を通り抜ける風の量」で、前者は布を裏返しても変わらないが、後者は裏返すと符号が変わる。
+:::
+
+## 問題 {#vec:sec-si-problems}
+
+::: problem {#vec:prob-si-cone}
+円錐面 $\varphi(r,\theta)=(r\cos\theta,r\sin\theta,r)$（$0\le r\le1$, $0\le\theta\le2\pi$）の面積を求めよ。
+:::
+
+::: solution
+$\varphi_{r}=(\cos\theta,\sin\theta,1)$, $\varphi_{\theta}=(-r\sin\theta,r\cos\theta,0)$、$\varphi_{r}\times\varphi_{\theta}=(-r\cos\theta,-r\sin\theta,r)$ で長さ $\sqrt2r$。面積 $\int_{0}^{2\pi}\int_{0}^{1}\sqrt2r\,dr\,d\theta=\sqrt2\pi$。
+:::
+
+::: problem {#vec:prob-si-archimedes}
+単位球面の $a\le z\le b$（$-1\le a<b\le1$）の部分の面積が $2\pi(b-a)$ であること（アルキメデス）を示せ。
+:::
+
+::: solution
+例 1 の $\theta$ について $\cos\theta\in[a,b]$、すなわち $\theta\in[\arccos b,\arccos a]$ の部分で、面積は $2\pi\int_{\arccos b}^{\arccos a}\sin\theta\,d\theta=2\pi(b-a)$。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{vec:sec-si-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -4,7 +4,7 @@
  * access: 'free' は無料お試し（各分野の最初の 1 つ）、'pro' は Pro プランで全体が開く。 */
 window.SM_LEARN_MANIFEST = {
   // 可換環論の保存表：○× ゲーム
-  '13-commutative-algebra/13F-arithmetic-rings/01-integral-domains/08-preservation-table.html': {
+  '02-algebra/03-commutative-algebra/04-integral-domains/08-preservation-table.html': {
     interactive: [
       { id: 'qz-ring-preservation', type: 'quiz', target: 'ring:preservation-table', access: 'free', label: '○× ゲーム：環の性質は保たれる？',
         summary: '保存表から 10 問', yes: 'いつも保たれる', no: '保たれない例がある',
@@ -12,7 +12,7 @@ window.SM_LEARN_MANIFEST = {
     ]
   },
   // 群論の保存表と、極限の交換の一覧：○× ゲーム
-  '20-group-theory/20D-abstract-finite-groups/01-sylow/06-preservation-table.html': {
+  '02-algebra/02-group-theory/03-sylow/06-preservation-table.html': {
     interactive: [
       { id: 'qz-group-preservation', type: 'quiz', target: 'grp:operations-table', access: 'free', label: '○× ゲーム：群の性質は保たれる？',
         summary: '2 つの表から 10 問', yes: 'いつも成り立つ', no: '成り立たない例がある',
@@ -22,7 +22,7 @@ window.SM_LEARN_MANIFEST = {
         ] }
     ]
   },
-  '26-real-functions/26B-functions-of-several-variables/01-multivariable-calculus/10-limit-interchange.html': {
+  '04-analysis/01-real-analysis/03-multivariable-calculus/10-limit-interchange.html': {
     interactive: [
       { id: 'qz-limit-interchange', type: 'quiz', target: 'calc:interchange-table', access: 'free', label: '○× ゲーム：その交換は正しい？',
         summary: '交換定理と反例から 10 問', yes: '正しい', no: '反例がある',
@@ -54,7 +54,7 @@ window.SM_LEARN_MANIFEST = {
     ]
   },
   // 一般位相の一覧表：○× ゲーム（問題は表から作る）
-  '54-general-topology/54D-general-properties/02-property-tables/01-preservation.html': {
+  '05-geometry-topology/01-general-topology/04-properties/19-preservation.html': {
     interactive: [
       { id: 'qz-preservation', type: 'quiz', target: 'top:preservation-table-maps', access: 'free', label: '○× ゲーム：その性質は保たれる？',
         summary: '2 つの表から 10 問', yes: 'いつも保たれる', no: '保たれない例がある',
@@ -64,7 +64,7 @@ window.SM_LEARN_MANIFEST = {
         ] }
     ]
   },
-  '54-general-topology/54D-general-properties/02-property-tables/02-operations-commute.html': {
+  '05-geometry-topology/01-general-topology/04-properties/20-operations-commute.html': {
     interactive: [
       { id: 'qz-commute', type: 'quiz', target: 'top:commute-table-constructions', access: 'free', label: '○× ゲーム：入れ替えてよい？',
         summary: '2 つの表から 10 問', yes: 'いつも成り立つ', no: '成り立たない例がある',
@@ -74,7 +74,7 @@ window.SM_LEARN_MANIFEST = {
         ] }
     ]
   },
-  '54-general-topology/54D-general-properties/02-property-tables/03-implication-map.html': {
+  '05-geometry-topology/01-general-topology/04-properties/21-implication-map.html': {
     interactive: [
       { id: 'qz-implication', type: 'quiz', target: 'top:non-implication-table', access: 'free', label: '○× ゲーム：その含意は正しい？',
         summary: '含意とその逆から 10 問', yes: '正しい', no: '反例がある',
@@ -109,7 +109,7 @@ window.SM_LEARN_MANIFEST = {
         ] }
     ]
   },
-  '54-general-topology/54D-general-properties/01-separation-compactness/02-compactness.html': {
+  '05-geometry-topology/01-general-topology/04-properties/02-compactness.html': {
     intuition: {
       question: 'なぜこの概念が必要か？',
       text: '有限集合の上の関数は必ず最大値をとり、有限個の条件は同時に満たせる。**コンパクト性**は、無限集合にもこの「有限のように振る舞う」性質を持たせるための条件である。\n\n' +

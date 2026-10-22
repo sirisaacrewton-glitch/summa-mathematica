@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多項式環と冪級数環 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/03-commutative-algebra/01-basics/04-polynomial-rings.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 多項式環と冪級数環 {#ring:page-polynomial-rings keywords="polynomial ring, formal power series ring, algebra over a ring, universal property of polynomial ring, evaluation, degree, division algorithm, factor theorem, formal derivative, multiple root"}
+
+**多項式環** $A[x]$ と**形式的冪級数環** $A[[x]]$ は、可換環論で最も基本的な環の作り方である。このページでは、係数の列として両者を厳密に構成し（\ref{ring:power-series-ring}）、多項式環の普遍性（\ref{ring:polynomial-universal}）、次数と整域性（\ref{ring:polynomial-domain}）、モニックな多項式による割り算（\ref{ring:polynomial-division}）と因数定理、根の個数の上界を示す。冪級数環では単元の判定（\ref{ring:power-series-units}）と局所性を調べる。準備として、環 $A$ 上の**代数**の言葉を導入する（\ref{ring:algebra}）。
+
+> 雪江明彦『代数学 2』第 1 章 §1.2–1.3 の流れを参考にした。本が「証明は略」とした多項式環の乗法の結合法則や、普遍性の証明を補った。冪級数環の局所性と形式的微分による重根の判定は、本のこの箇所にない内容を加えた。
+
+## 記法と定義の確認 {#ring:sec-pr-notation}
+
+::: notation
+- 環は可換とする（\ref{ring:convention}）。環・準同型・部分環・単元・整域・冪零元・局所環は \ref{ring:page-rings-ideals}, \ref{ring:page-prime-maximal} のもの。
+- $\N=\{0,1,2,\dots\}$。有限和 $\sum_{i+j=n}$ は、$i,j\in\N$ で $i+j=n$ となる $n+1$ 個の組についての和を表す。同様に $\sum_{i+j+k=n}$ も有限和である。
+- 環 $A$ の元 $a$ と整数 $m$ の積 $m\cdot a$ は \ref{ring:ring-basic.5} の意味。
+- 選択公理は使わない。
+:::
+
+## 環上の代数 {#ring:sec-pr-algebras}
+
+::: definition 環上の代数 {#ring:algebra keywords="algebra over a ring, A-algebra, structure homomorphism, algebra homomorphism" index="代数|だいすう, 多元環|たげんかん, 構造射|こうぞうしゃ, 代数の準同型|だいすうのじゅんどうけい"}
+$A$ を可換環とする。可換環 $B$ と環準同型 $\iota_{B}:A\to B$ の組を **$A$ 上の代数**（**$A$ 代数**）といい、$\iota_{B}$ を**構造射**という。$a\in A$, $b\in B$ について $ab\defeq\iota_{B}(a)b$ と書く。$A$ 代数 $B,C$ の間の環準同型 $f:B\to C$ が $f\circ\iota_{B}=\iota_{C}$ をみたすとき、$f$ を **$A$ 代数の準同型**（**$A$ 準同型**）という。
+:::
+
+::: example
+1. 任意の環 $B$ は、ただ一つの準同型 $\Z\to B$（\ref{ring:z-initial}）によって、ただ一通りに $\Z$ 代数である。環準同型はすべて $\Z$ 代数の準同型である。
+2. $B$ が $A$ を部分環として含めば、包含写像によって $B$ は $A$ 代数である（例：$\C$ は $\R$ 代数）。
+3. イデアル $I$ について、剰余環 $A/I$ は自然な射影によって $A$ 代数である。
+:::
+
+## 形式的冪級数環と多項式環の構成 {#ring:sec-pr-construction}
+
+::: theorem 形式的冪級数環と多項式環 {#ring:power-series-ring keywords="formal power series ring, polynomial ring, construction, Cauchy product" index="形式的冪級数環|けいしきてきべききゅうすうかん, 冪級数環|べききゅうすうかん, 多項式環|たこうしきかん, 多項式|たこうしき, 係数|けいすう"}
+$A$ を可換環とし、$A^{\N}$ を写像 $f:\N\to A$（列 $(f_{0},f_{1},f_{2},\dots)$）全体とする。
+1. $A^{\N}$ は、和と積
+$$
+(f+g)_{n}\defeq f_{n}+g_{n},\qquad (fg)_{n}\defeq\sum_{i+j=n}f_{i}g_{j}
+$$
+で可換環になる。単位元は $(1,0,0,\dots)$。この環を $A$ 上の（一変数の）**形式的冪級数環**といい、$A[[x]]$ と書く。
+2. 有限個の $n$ を除いて $f_{n}=0$ となる列全体 $A[x]$ は $A[[x]]$ の部分環である。これを $A$ 上の**多項式環**、その元を**多項式**という。
+3. $\iota(a)\defeq(a,0,0,\dots)$ は単射な環準同型 $A\to A[x]$ で、これにより $A[x]$, $A[[x]]$ は $A$ 代数になる。$a$ と $\iota(a)$ を同一視する。
+4. $x\defeq(0,1,0,0,\dots)$ とおくと、$x^{k}$ は $k$ 番目だけが $1$ の列である。したがって、$f\in A[x]$ は、$f_{n}=0$（$n>d$）となる $d$ について $f=\sum_{k=0}^{d}f_{k}x^{k}$ とただ一通りに書ける。$f_{k}$ を $f$ の**係数**という。
+:::
+
+::: intuition
+多項式を「文字 $x$ の式」ではなく「係数の列」として定義するのは、$x$ が何であるかを問わずに済ませるためである。積の定義は、$\bigl(\sum f_{i}x^{i}\bigr)\bigl(\sum g_{j}x^{j}\bigr)$ を展開して $x^{n}$ の係数を集めたものにほかならない。冪級数は無限に続く列も許したもので、各係数は有限和で決まるので収束を気にする必要がない（「形式的」の意味）。
+:::
+
+::: proof
+**Step 1（加法群）.** 和は成分ごとなので、$(A^{\N},+)$ は可換群 $A$ の直積として可換群である。零元は $(0,0,\dots)$。
+
+**Step 2（積の可換性・分配法則）.** $(fg)_{n}=\sum_{i+j=n}f_{i}g_{j}=\sum_{j+i=n}g_{j}f_{i}=(gf)_{n}$（$A$ の可換性）。$(f(g+h))_{n}=\sum_{i+j=n}f_{i}(g_{j}+h_{j})=(fg)_{n}+(fh)_{n}$（\ref{ring:ring-basic.4}）。
+
+**Step 3（結合法則）.** 一般の分配法則（\ref{ring:ring-basic.4}）と有限和の並べ替えから
+$$
+((fg)h)_{n}=\sum_{m+k=n}\Bigl(\sum_{i+j=m}f_{i}g_{j}\Bigr)h_{k}=\sum_{i+j+k=n}f_{i}g_{j}h_{k}.
+$$
+（中辺の二重和の項 $f_{i}g_{j}h_{k}$ は、$i+j+k=n$ をみたす組 $(i,j,k)$ とちょうど一回ずつ対応する。）同様に $(f(gh))_{n}=\sum_{i+m=n}f_{i}\sum_{j+k=m}g_{j}h_{k}=\sum_{i+j+k=n}f_{i}g_{j}h_{k}$。よって $(fg)h=f(gh)$。
+
+**Step 4（単位元）.** $e=(1,0,0,\dots)$ について $(ef)_{n}=\sum_{i+j=n}e_{i}f_{j}=e_{0}f_{n}=f_{n}$。以上で 1 が示された。
+
+**Step 5（2）.** $f_{n}=0$（$n>d$）, $g_{n}=0$（$n>e$）なら、$n>d+e$ のとき $i+j=n$ の各組で $i>d$ または $j>e$ なので $(fg)_{n}=0$。和・差も有限個を除いて $0$。$e\in A[x]$。よって部分環（\ref{ring:subring-basic.1}）。
+
+**Step 6（3）.** 和は明らか。$(\iota(a)\iota(b))_{n}=\sum_{i+j=n}\iota(a)_{i}\iota(b)_{j}$ は $n=0$ で $ab$、$n\ge 1$ では $i,j$ の一方が正なので $0$。$\iota(1)=e$。単射は $\iota(a)_{0}=a$ から。
+
+**Step 7（4）.** $x^{k}$ が $k$ 番目だけ $1$ の列であることを $k$ の帰納法で示す。$k=0$ は $e$。$x^{k+1}=x^{k}x$ の $n$ 成分は $\sum_{i+j=n}(x^{k})_{i}x_{j}$ で、$i=k$, $j=1$ のときだけ $1\cdot 1$、他は $0$ なので、$n=k+1$ で $1$、それ以外で $0$。すると $\iota(a)x^{k}$ は $k$ 番目だけ $a$ の列で（Step 6 と同様の計算）、$\sum_{k\le d}f_{k}x^{k}$ は列 $f$ そのもの。一意性は、列の成分が係数として読み取れることから。
+
+::: hypcheck
+- **前提「$A$ は可換」**：Step 2 の可換性に使った。非可換環 $A$ でも同じ定義で（非可換な）環 $A[x]$, $A[[x]]$ ができ、$x$ は $A$ の元と可換になる。
+- 積の定義の和が有限和であることが本質で、そのため冪級数環でも位相や収束は要らない。
+:::
+:::
+
+::: definition 次数・最高次係数・モニック {#ring:degree keywords="degree of a polynomial, leading coefficient, monic polynomial, constant term, order of a power series" index="次数|じすう, 最高次係数|さいこうじけいすう, モニック|もにっく, 定数項|ていすうこう, 位数|いすう"}
+$f\in A[x]$ が $f\neq 0$ のとき、$f_{d}\neq 0$ となる最大の $d$ を $f$ の**次数**といい $\deg f$ と書く。$f_{\deg f}$ を**最高次係数**、$f_{0}$ を**定数項**という。最高次係数が $1$ の多項式を**モニック**という。$\deg 0\defeq-\infty$ とする（$-\infty<n$, $-\infty+n=-\infty$ と約束する）。冪級数 $f\neq 0$ について $f_{d}\neq 0$ となる最小の $d$ を $f$ の**位数**といい $\operatorname{ord}f$ と書く。
+:::
+
+::: proposition 次数と整域性 {#ring:polynomial-domain keywords="degree of product, polynomial ring over a domain is a domain, units of polynomial ring over a domain" index="次数の性質|じすうのせいしつ"}
+$A$ を可換環、$f,g\in A[x]$ とする。
+1. $\deg(f+g)\le\max(\deg f,\deg g)$、$\deg(fg)\le\deg f+\deg g$。
+2. $f,g\neq 0$ で最高次係数の積が $0$ でなければ（例えば一方の最高次係数が単元なら）$\deg(fg)=\deg f+\deg g$。
+3. $A$ が整域なら、$A[x]$ と $A[[x]]$ は整域で、$A[x]^{\times}=A^{\times}$。
+:::
+
+::: proof
+**Step 1（1）.** 和は成分ごと。積は \ref{ring:power-series-ring} の Step 5 の計算。
+
+**Step 2（2）.** $d=\deg f$, $e=\deg g$ とすると、$(fg)_{d+e}=\sum_{i+j=d+e}f_{i}g_{j}=f_{d}g_{e}$（$i<d$ なら $j>e$ で $g_{j}=0$、$i>d$ なら $f_{i}=0$）。これが $0$ でないので、1 と合わせて $\deg(fg)=d+e$。一方の最高次係数 $u$ が単元なら、$uc=0\Rightarrow c=u^{-1}uc=0$ なので積は $0$ でない。
+
+**Step 3（3）.** 整域では $f_{d}g_{e}\neq 0$ なので、2 から $fg\neq 0$。$A[x]$ は $1\neq 0$（$\iota$ が単射）なので整域。冪級数では位数で同じ議論をする：$d=\operatorname{ord}f$, $e=\operatorname{ord}g$ とすると $(fg)_{d+e}=f_{d}g_{e}\neq 0$。単元：$fg=1$ なら $\deg f+\deg g=0$ なので $\deg f=0$、すなわち $f\in A$ で、$f_{0}g_{0}=1$ から $f\in A^{\times}$。逆は明らか。
+
+::: hypcheck
+- **前提「整域」（3）**：Step 3 で $f_{d}g_{e}\neq 0$ に使った。外すと偽：$A=\Z/4\Z$ で $(1+2x)^{2}=1+4x+4x^{2}=1$ なので $1+2x$ は次数 $1$ の単元で、$(2x)(2x)=0$ なので $A[x]$ は整域でない。一般の可換環での $A[x]^{\times}$ の決定は問題 \ref{ring:prob-polynomial-units}。
+:::
+:::
+
+## 多項式環の普遍性 {#ring:sec-pr-universal}
+
+::: theorem 多項式環の普遍性 {#ring:polynomial-universal keywords="universal property of polynomial ring, evaluation homomorphism, substitution" index="多項式環の普遍性|たこうしきかんのふへんせい, 代入|だいにゅう, 評価写像|ひょうかしゃぞう"}
+$A,B$ を可換環、$\varphi:A\to B$ を環準同型、$b\in B$ とする。$\Phi|_{A}=\varphi$ かつ $\Phi(x)=b$ をみたす環準同型 $\Phi:A[x]\to B$ がただ一つあり、
+$$
+\Phi\Bigl(\sum_{k}a_{k}x^{k}\Bigr)=\sum_{k}\varphi(a_{k})b^{k}
+$$
+で与えられる。$A\subset B$ で $\varphi$ が包含写像のとき、$\Phi(f)$ を $f(b)$ と書き、$f$ に $b$ を**代入**した値という。
+:::
+
+::: proof
+**Step 1（一意性）.** $\Phi$ が条件をみたせば、準同型なので $\Phi(\sum a_{k}x^{k})=\sum\Phi(a_{k})\Phi(x)^{k}=\sum\varphi(a_{k})b^{k}$。
+
+**Step 2（存在：加法と単位元）.** 上の式で $\Phi$ を定める（\ref{ring:power-series-ring.4} から係数は一意なので矛盾なく定まる）。和を保つことと $\Phi(1)=\varphi(1)=1$、$\Phi(a)=\varphi(a)$、$\Phi(x)=b$ は定義から。
+
+**Step 3（存在：積）.** $f=\sum a_{i}x^{i}$, $g=\sum c_{j}x^{j}$ について
+$$
+\begin{aligned}
+\Phi(fg)&=\sum_{n}\varphi\Bigl(\sum_{i+j=n}a_{i}c_{j}\Bigr)b^{n}=\sum_{n}\sum_{i+j=n}\varphi(a_{i})\varphi(c_{j})b^{i}b^{j}\\
+&=\Bigl(\sum_{i}\varphi(a_{i})b^{i}\Bigr)\Bigl(\sum_{j}\varphi(c_{j})b^{j}\Bigr)=\Phi(f)\Phi(g).
+\end{aligned}
+$$
+2 番目の等号で $\varphi$ が準同型であることと $b^{n}=b^{i}b^{j}$ を、3 番目で一般の分配法則と $B$ の可換性（$\varphi(c_{j})$ と $b^{i}$ の入れ替え）を使った。
+
+::: hypcheck
+- **前提「$B$ は可換」**：Step 3 で $\varphi(c_{j})b^{i}=b^{i}\varphi(c_{j})$ に使った。非可換な $B$ では、$b$ が $\varphi(A)$ の元と可換なら同じ結論が成り立つ。そうでないと偽：$A=\C$、$B=\mathbb{H}$（四元数体。\ref{ring:domain-field} の後の補足で触れた斜体で、$\C$ を含む）、$b=j$ とする。$A[x]$ では $ix=xi$ だが、上の式で定めた $\Phi$ について $\Phi(ix)=ij=k$ に対し $\Phi(x)\Phi(i)=ji=-k$ なので、$\Phi$ は積を保たない。
+:::
+:::
+
+::: definition 多変数の多項式環・生成された部分代数 {#ring:multivariate-polynomial keywords="polynomial ring in several variables, monomial, subalgebra generated by elements, finitely generated algebra" index="多変数多項式環|たへんすうたこうしきかん, 単項式|たんこうしき, 生成された部分代数|せいせいされたぶぶんだいすう, 有限生成代数|ゆうげんせいせいだいすう"}
+1. $n\ge 1$ について、$A[x_{1},\dots,x_{n}]\defeq A[x_{1},\dots,x_{n-1}][x_{n}]$ と帰納的に定める（$n=1$ は $A[x_{1}]$）。各元は、多重指数 $\alpha=(\alpha_{1},\dots,\alpha_{n})\in\N^{n}$ についての有限和 $\sum_{\alpha}a_{\alpha}x^{\alpha}$（$x^{\alpha}\defeq x_{1}^{\alpha_{1}}\cdots x_{n}^{\alpha_{n}}$, $a_{\alpha}\in A$）とただ一通りに書ける（$n$ の帰納法と \ref{ring:power-series-ring.4}）。$x^{\alpha}$ を**単項式**という。
+2. $A$ 代数 $B$ と $b_{1},\dots,b_{n}\in B$ について、$A$ の像と $b_{1},\dots,b_{n}$ を含む最小の部分環を $A[b_{1},\dots,b_{n}]$ と書き、$b_{1},\dots,b_{n}$ で**生成された部分代数**という。$B=A[b_{1},\dots,b_{n}]$ となる有限個の元があるとき、$B$ を**有限生成 $A$ 代数**（**有限型**の $A$ 代数）という。
+:::
+
+::: proposition 多変数の普遍性 {#ring:multivariate-universal keywords="universal property of polynomial ring in several variables, finitely generated algebra is a quotient of polynomial ring" index="多変数多項式環の普遍性|たへんすうたこうしきかんのふへんせい"}
+1. 環準同型 $\varphi:A\to B$（$B$ は可換）と $b_{1},\dots,b_{n}\in B$ について、$\Phi|_{A}=\varphi$, $\Phi(x_{k})=b_{k}$ をみたす環準同型 $\Phi:A[x_{1},\dots,x_{n}]\to B$ がただ一つある。
+2. $A$ 代数 $B$ と $b_{1},\dots,b_{n}$ について、1 で $\varphi=\iota_{B}$ とした $\Phi$ の像は $A[b_{1},\dots,b_{n}]$ である。したがって、有限生成 $A$ 代数は、ある多項式環 $A[x_{1},\dots,x_{n}]$ の剰余環に $A$ 代数として同型である。
+3. $A$ が整域なら $A[x_{1},\dots,x_{n}]$ は整域である。
+:::
+
+::: proof
+**Step 1（1）.** $n$ の帰納法。$n=1$ は \ref{ring:polynomial-universal}。$n-1$ で成り立てば、$A[x_{1},\dots,x_{n-1}]\to B$ を $\varphi$ と $b_{1},\dots,b_{n-1}$ から作り、\ref{ring:polynomial-universal} をその準同型と $b_{n}$ に使う。一意性も同様に帰納的に従う（$A$ と $x_{1},\dots,x_{n}$ の値で決まる）。
+
+**Step 2（2）.** $\im\Phi$ は部分環（\ref{ring:homomorphism-basic.3}）で、$\iota_{B}(A)$ と $b_{k}$ を含む。それらを含む部分環は $\sum\iota_{B}(a_{\alpha})b^{\alpha}$ をすべて含むので $\im\Phi$ を含む。よって $\im\Phi=A[b_{1},\dots,b_{n}]$。$B=A[b_{1},\dots,b_{n}]$ なら $\Phi$ は全射で、\ref{ring:first-isomorphism}から $B\cong A[x_{1},\dots,x_{n}]/\Ker\Phi$。この同型は $A$ 代数の準同型である（$\Phi\circ\iota=\iota_{B}$）。
+
+**Step 3（3）.** $n$ の帰納法と \ref{ring:polynomial-domain.3}。
+:::
+
+::: supplement
+**変数の順序.** 帰納的な定義では $x_{1},\dots,x_{n}$ の順序が入っているが、普遍性から、どの順序で作っても互いに（変数を対応させる）同型になる：二つの構成の間に、普遍性で互いに逆の準同型が作れるからである。
+
+**高い視点.** \ref{ring:polynomial-universal} は、$A[x]$ が「$A$ 代数と元の組 $(B,b)$」の圏での始対象であることを述べている。言い換えれば、忘却関手 $U:(A\text{ 代数})\to\mathbf{Set}$ の左随伴が $S\mapsto A[x_{s} : s\in S]$（変数の集合 $S$ 上の多項式環）であり、多項式環は**自由な可換 $A$ 代数**である（随伴は \ref{cat:adjunction}）。群の自由群（\ref{grp:free-group}）と同じ位置にある構成である。
+:::
+
+## 割り算と根 {#ring:sec-pr-division}
+
+::: theorem モニックな多項式による割り算 {#ring:polynomial-division keywords="division algorithm for polynomials, division by monic polynomial, quotient and remainder" index="多項式の割り算|たこうしきのわりざん, 除法|じょほう, 商|しょう, 余り|あまり"}
+$A$ を可換環、$g\in A[x]$ を最高次係数が単元である多項式（例えばモニック）とする。任意の $f\in A[x]$ について、
+$$
+f=qg+r,\qquad\deg r<\deg g
+$$
+をみたす $q,r\in A[x]$ がただ一組ある。
+:::
+
+::: proof
+**Step 1（存在）.** $\deg f$ についての帰納法。$\deg f<\deg g$（$f=0$ を含む）なら $q=0$, $r=f$。$d\defeq\deg f\ge e\defeq\deg g$ とし、次数が $d$ より小さい多項式では成り立つとする。$a$ を $f$ の最高次係数、$u$ を $g$ の最高次係数とし、
+$$
+f_{1}\defeq f-au^{-1}x^{d-e}g
+$$
+とおく。$au^{-1}x^{d-e}g$ の次数は $d$ で最高次係数は $au^{-1}u=a$（\ref{ring:polynomial-domain.2}）なので、$f_{1}$ の $x^{d}$ の係数は $0$ で $\deg f_{1}<d$。帰納法の仮定から $f_{1}=q_{1}g+r$（$\deg r<e$）と書け、$f=(q_{1}+au^{-1}x^{d-e})g+r$。
+
+**Step 2（一意性）.** $qg+r=q'g+r'$（$\deg r,\deg r'<e$）とすると $(q-q')g=r'-r$。$q\neq q'$ なら、$g$ の最高次係数が単元なので \ref{ring:polynomial-domain.2} から $\deg((q-q')g)=\deg(q-q')+e\ge e$。一方 $\deg(r'-r)<e$ なので矛盾。よって $q=q'$, $r=r'$。
+
+::: hypcheck
+- **前提「$g$ の最高次係数が単元」**：Step 1 で $u^{-1}$ に、Step 2 で次数の加法性に使った。外すと存在が偽：$\Z[x]$ で $f=x$, $g=2x$ とすると、$x=q\cdot 2x+r$, $\deg r<1$ なら $r\in\Z$ で、$x$ の係数を比べて $1=2q_{0}$ となり不可能。$A$ が体なら $0$ でない $g$ はすべてこの条件をみたす。
+:::
+:::
+
+::: corollary 因数定理と根の個数 {#ring:factor-theorem keywords="factor theorem, remainder theorem, number of roots of a polynomial over a domain" index="因数定理|いんすうていり, 剰余の定理|じょうよのていり, 根|こん, 根の個数|こんのこすう"}
+$A$ を可換環、$f\in A[x]$, $a\in A$ とする。
+1. （剰余の定理）$f=q\cdot(x-a)+f(a)$ となる $q\in A[x]$ がある。
+2. （因数定理）$f(a)=0\iff(x-a)\mid f$（すなわち $f\in(x-a)$）。
+3. $A$ が整域で $f\neq 0$ なら、$f(a)=0$ となる $a\in A$（$f$ の**根**）は高々 $\deg f$ 個である。
+:::
+
+::: proof
+**Step 1（1）.** モニックな $x-a$ で割ると $f=q(x-a)+r$, $\deg r<1$ なので $r\in A$。$a$ を代入すると（代入は準同型。\ref{ring:polynomial-universal}）$f(a)=q(a)\cdot 0+r=r$。
+
+**Step 2（2）.** 1 から明らか（$\Leftarrow$ は代入すれば $0$）。
+
+**Step 3（3）.** $\deg f=n$ の帰納法。$n=0$ なら $f$ は $0$ でない定数で根がない。$n\ge 1$ で根 $a$ があれば、2 から $f=(x-a)q$ で、\ref{ring:polynomial-domain.2} から $\deg q=n-1$、$q\neq 0$。別の根 $b\neq a$ について $0=f(b)=(b-a)q(b)$ で、整域なので $q(b)=0$。よって $f$ の根は $a$ と $q$ の根に含まれ、帰納法の仮定から高々 $1+(n-1)=n$ 個。
+
+::: hypcheck
+- **前提「整域」（3）**：Step 3 で $(b-a)q(b)=0\Rightarrow q(b)=0$ に使った。外すと偽：$\Z/8\Z$ で $x^{2}-1$ は $1,3,5,7$ の 4 個の根をもつ（$3^{2}=9$, $5^{2}=25$, $7^{2}=49$ はすべて $\equiv 1\pmod 8$）。
+- **前提「可換」**：非可換な可除環では偽：四元数体 $\mathbb{H}$ で $x^{2}+1$ は $\pm i,\pm j,\pm k$ をはじめ無限個の根をもつ。
+:::
+:::
+
+::: corollary 多項式環の基本的な剰余環 {#ring:polynomial-quotients keywords="A[x]/(x-a) ≅ A, Z[x]/(x^2+1) ≅ Z[i], R[x]/(x^2+1) ≅ C" index="多項式環の剰余環|たこうしきかんのじょうよかん"}
+1. $a\in A$ について、代入 $f\mapsto f(a)$ は全射 $A[x]\to A$ で、その核は $(x-a)$。したがって $A[x]/(x-a)\cong A$。
+2. $\Z[x]/(x^{2}+1)\cong\Z[i]$、$\R[x]/(x^{2}+1)\cong\C$。
+:::
+
+::: proof
+**Step 1（1）.** 代入は準同型（\ref{ring:polynomial-universal}）で、全射は定数多項式から。核が $(x-a)$ であることは因数定理（\ref{ring:factor-theorem.2}）。\ref{ring:first-isomorphism}から主張を得る。
+
+**Step 2（2）.** 代入 $\Phi:\Z[x]\to\Z[i]$, $f\mapsto f(i)$ は、$\Phi(c+dx)=c+di$ なので全射。$x^{2}+1\in\Ker\Phi$。$f\in\Ker\Phi$ なら、モニックな $x^{2}+1$ による割り算（\ref{ring:polynomial-division}）で $f=q\cdot(x^{2}+1)+c+dx$（$c,d\in\Z$）と書け、$0=f(i)=c+di$ から $c=d=0$（$1,i$ は $\R$ 上一次独立）。よって $\Ker\Phi=(x^{2}+1)$。$\R$ の場合も同じ。
+
+:::
+
+::: definition 形式的微分 {#ring:formal-derivative keywords="formal derivative of a polynomial, Leibniz rule" index="形式的微分|けいしきてきびぶん, 導関数|どうかんすう"}
+$f=\sum_{k}a_{k}x^{k}\in A[x]$ について $f'\defeq\sum_{k\ge 1}(k\cdot a_{k})x^{k-1}$ を $f$ の**形式的微分**という。定義から $(f+g)'=f'+g'$、$(af)'=af'$（$a\in A$）。
+:::
+
+::: proposition ライプニッツ則と重根 {#ring:multiple-root keywords="Leibniz rule for formal derivative, multiple root criterion" index="ライプニッツ則|らいぷにっつそく, 重根|じゅうこん"}
+$A$ を可換環、$f,g\in A[x]$, $a\in A$ とする。
+1. $(fg)'=f'g+fg'$。
+2. $(x-a)^{2}\mid f\iff f(a)=0$ かつ $f'(a)=0$。
+:::
+
+::: proof
+**Step 1（1）.** 両辺は $f$ と $g$ のそれぞれについて加法的（分配法則と微分の加法性）で、$A$ の元倍とも可換なので、単項式 $f=x^{i}$, $g=x^{j}$ の場合に示せばよい。左辺は $(x^{i+j})'=(i+j)\cdot x^{i+j-1}$、右辺は $(i\cdot x^{i-1})x^{j}+x^{i}(j\cdot x^{j-1})=(i+j)\cdot x^{i+j-1}$（$i=0$ や $j=0$ の項は $0$ と読む）。
+
+**Step 2（2）.** $(\Rightarrow)$ $f=(x-a)^{2}h$ なら $f(a)=0$、1 から $f'=2(x-a)h+(x-a)^{2}h'$ なので $f'(a)=0$。$(\Leftarrow)$ $f(a)=0$ から $f=(x-a)g$（\ref{ring:factor-theorem.2}）。1 から $f'=g+(x-a)g'$ なので $0=f'(a)=g(a)$、再び因数定理から $(x-a)\mid g$、よって $(x-a)^{2}\mid f$。
+:::
+
+::: example
+標数 $p$ の可換環上では $(x^{p})'=p\cdot x^{p-1}=0$ なので、形式的微分が $0$ になる定数でない多項式がある。$\mathbb{F}_{p}(t)$（有理関数体）上の $x^{p}-t$ は、この現象から生じる非分離多項式の典型例で、体論で扱う（\ref{fld:separable-polynomial}）。
+:::
+
+## 形式的冪級数環 {#ring:sec-pr-power-series}
+
+::: proposition 冪級数の単元と局所性 {#ring:power-series-units keywords="units of formal power series ring, power series ring over a local ring is local, K[[x]] is local" index="冪級数の単元|べききゅうすうのたんげん"}
+$A$ を可換環とする。
+1. $f=\sum a_{n}x^{n}\in A[[x]]$ が単元であることと、定数項 $a_{0}$ が $A$ の単元であることは同値である。
+2. $(A,\mathfrak{m})$ が局所環なら、$A[[x]]$ は局所環で、極大イデアルは $\{f : f_{0}\in\mathfrak{m}\}=\mathfrak{m}+(x)$。特に体 $K$ について、$K[[x]]$ は極大イデアル $(x)$ をもつ局所環である。
+:::
+
+::: proof
+**Step 1（1、⇒）.** $fg=1$ なら定数項を比べて $a_{0}g_{0}=1$。
+
+**Step 2（1、⇐）.** $a_{0}\in A^{\times}$ とし、$b_{0}\defeq a_{0}^{-1}$、$n\ge 1$ について
+$$
+b_{n}\defeq-a_{0}^{-1}\sum_{k=1}^{n}a_{k}b_{n-k}
+$$
+と $n$ についての再帰で定め、$g=\sum b_{n}x^{n}$ とおく。$(fg)_{0}=a_{0}b_{0}=1$、$n\ge 1$ では $(fg)_{n}=a_{0}b_{n}+\sum_{k=1}^{n}a_{k}b_{n-k}=0$ なので $fg=1$。
+
+**Step 3（2）.** 定数項をとる写像 $\varepsilon:A[[x]]\to A$, $f\mapsto f_{0}$ は環準同型（積の $0$ 成分は $f_{0}g_{0}$）。1 から $A[[x]]$ の非単元全体は $\varepsilon^{-1}(A\setminus A^{\times})$ で、$(A,\mathfrak{m})$ が局所環なら $A\setminus A^{\times}=\mathfrak{m}$（\ref{ring:local-ring-criterion.2}）なので、これは $\varepsilon^{-1}(\mathfrak{m})$、すなわちイデアル（\ref{ring:ideal-image-preimage.1}）。\ref{ring:local-ring-criterion.1} から $A[[x]]$ は局所環で、極大イデアルは $\varepsilon^{-1}(\mathfrak{m})$。$f=f_{0}+x\sum_{n\ge 1}f_{n}x^{n-1}$ と書けるので $\varepsilon^{-1}(\mathfrak{m})=\mathfrak{m}+(x)$（ここで $\mathfrak{m}$ は定数の冪級数とみなし、$\mathfrak{m}+(x)$ は $\mathfrak{m}A[[x]]+(x)$ の意味）。
+
+::: hypcheck
+- **選択公理**：Step 3 で \ref{ring:local-ring-criterion.2} を使ったところで使う。体 $K$ の場合は $K\setminus K^{\times}=\{0\}$ が直接わかるので使わない。
+- 多項式環では 1 の類似は偽：$1+x\in\Z[x]$ は単元でない（\ref{ring:polynomial-domain.3}）が、$\Z[[x]]$ では単元で、逆元は $\sum(-1)^{n}x^{n}$。
+:::
+:::
+
+::: supplement
+**多項式環と冪級数環の比較.** $K$ を体とすると、$K[x]$ は極大イデアルを無限個もつ（例えば $x-a$, $a\in K$。$K$ が有限でも、既約多項式は無限個ある）のに対し、$K[[x]]$ は局所環である。幾何的には、$K[x]$ が直線全体の関数、$K[[x]]$ が原点の「無限小近傍」の関数にあたる。$K[[x]]$ は離散付値環の典型例であり（\ref{ring:dvr}）、多変数の $K[[x_{1},\dots,x_{n}]]$ は完備な正則局所環の基本例になる（\ref{ring:page-completion}）。
+
+**保存の性質.** 「$A$ がネーター環なら $A[x]$, $A[[x]]$ もネーター環」（ヒルベルトの基底定理 \tref{ring:hilbert-basis} とその冪級数版）、「$A$ が UFD なら $A[x]$ も UFD」（\ref{ring:polynomial-ufd}）など、多項式環・冪級数環への性質の遺伝は \ref{ring:page-preservation-table} にまとめる。
+:::
+
+## 問題 {#ring:sec-pr-problems}
+
+::: problem {#ring:prob-polynomial-units}
+可換環 $A$ について、$f=\sum_{k=0}^{d}a_{k}x^{k}\in A[x]$ が単元であることと、$a_{0}$ が単元で $a_{1},\dots,a_{d}$ が冪零元であることは同値であることを示せ。
+:::
+
+::: solution
+**Step 1（⇐）.** $a_{1},\dots,a_{d}$ が冪零なら $a_{k}x^{k}$ も冪零で、冪零元の和 $h=\sum_{k\ge 1}a_{k}x^{k}$ は冪零（\ref{ring:nilpotent-unit.3}）。$f=a_{0}+h$ は単元と冪零元の和なので単元（\ref{ring:nilpotent-unit.2}）。
+
+**Step 2（⇒）.** $fg=1$, $g=\sum_{j=0}^{e}b_{j}x^{j}$ とする。定数項から $a_{0}b_{0}=1$。$r\ge 0$ について $a_{d}^{r+1}b_{e-r}=0$ を $r$ の帰納法で示す。$fg$ の $x^{d+e-r}$ の係数は（$r\le e$ かつ $d+e-r\ge 1$ のとき）$0$ で、
+$$
+a_{d}b_{e-r}+a_{d-1}b_{e-r+1}+\dots+a_{d-r}b_{e}=0
+$$
+（$a_{k}=0$ for $k<0$）。両辺に $a_{d}^{r}$ を掛けると、帰納法の仮定 $a_{d}^{s+1}b_{e-s}=0$（$s<r$）から左辺の 2 項目以降が消え、$a_{d}^{r+1}b_{e-r}=0$。$r=e$ とすると $a_{d}^{e+1}b_{0}=0$ で、$b_{0}$ は単元なので $a_{d}^{e+1}=0$。（$d=0$ なら示すことはない。$d+e-r\ge 1$ は $d\ge 1$ から成り立つ。）
+
+**Step 3.** $a_{d}$ が冪零なので $a_{d}x^{d}$ は冪零で、$f-a_{d}x^{d}$ は単元と冪零元の和として単元（\ref{ring:nilpotent-unit.2}、$f$ は単元）。次数が下がったので、$d$ についての帰納法により $a_{1},\dots,a_{d-1}$ も冪零。
+:::
+
+::: problem {#ring:prob-polynomial-nilpotent}
+可換環 $A$ について、$f\in A[x]$ が冪零であることと、$f$ のすべての係数が冪零であることは同値であることを示せ。
+:::
+
+::: solution
+**⇐** は冪零元の和が冪零であること（\ref{ring:nilpotent-unit.3}）から。**⇒**：$f$ が冪零なら $1+xf$ は単元（\ref{ring:nilpotent-unit.2}）。$1+xf$ の定数項は $1$、$x^{k+1}$ の係数は $f$ の $x^{k}$ の係数なので、問題 \ref{ring:prob-polynomial-units} から $f$ の係数はすべて冪零。
+:::
+
+::: problem {#ring:prob-roots-z-mod-n}
+$p$ を奇素数とする。$\Z/p\Z$ 上の多項式 $x^{2}-1$ の根は $\pm1$ の 2 個だけであることを示せ。一方、$\Z/15\Z$ 上では 4 個の根をもつことを確かめよ。
+:::
+
+::: solution
+$\Z/p\Z$ は体（\ref{ring:z-mod-n-ring.3}）なので整域で、$x^{2}-1=(x-1)(x+1)$ の根は $1$ と $-1$。$p$ は奇数なので $1\neq-1$ で、\ref{ring:factor-theorem.3} から根は高々 2 個、ちょうど 2 個。$\Z/15\Z$ では、中国剰余定理（\ref{ring:crt-integers}）から $\Z/15\Z\cong\Z/3\Z\times\Z/5\Z$ で、各成分で $\pm1$ の 2 通りなので 4 個：$1,4,11,14$（$4^{2}=16\equiv 1$, $11^{2}=121\equiv 1$, $14^{2}=196\equiv 1$）。
+:::
+
+::: problem {#ring:prob-power-series-z}
+$\Z[[x]]$ で $1-x-x^{2}$ の逆元の係数は、フィボナッチ数 $F_{0}=1$, $F_{1}=1$, $F_{n}=F_{n-1}+F_{n-2}$ であることを示せ。
+:::
+
+::: solution
+定数項 $1$ は単元なので逆元 $g=\sum b_{n}x^{n}$ がある（\ref{ring:power-series-units.1}）。$(1-x-x^{2})g=1$ の係数を比べると $b_{0}=1$、$b_{1}-b_{0}=0$、$n\ge 2$ で $b_{n}-b_{n-1}-b_{n-2}=0$。これはフィボナッチ数の漸化式と初期値そのもの。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

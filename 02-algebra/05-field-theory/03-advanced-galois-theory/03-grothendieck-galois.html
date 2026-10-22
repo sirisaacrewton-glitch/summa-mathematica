@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>グロタンディークのガロア理論 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/05-field-theory/03-advanced-galois-theory/03-grothendieck-galois.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# グロタンディークのガロア理論 {#fld:page-grothendieck-galois keywords="Grothendieck's Galois theory, anti-equivalence between etale algebras split by L and finite G-sets, Hom_K(A, L), G-equivariant maps, fiber functor"}
+
+ガロアの基本定理は「中間体 ↔ 部分群」という順序集合の対応だった（\ref{fld:page-galois-connection}）。グロタンディークは、これを**圏の反変同値**に格上げした：有限次ガロア拡大 $L/K$（ガロア群 $G$）について、「$L$ で分解するエタール代数」の圏と「有限 $G$ 集合」の圏は反変同値である。中間体は推移的な $G$ 集合 $G/H$ に、体の直積は $G$ 集合の非交和に、テンソル積は直積に対応する。基本定理は、この同値を「$L$ の部分体」に制限したものとして再び得られる。この形は、位相空間の被覆空間と基本群の作用の対応と同じ形をしており、代数幾何のエタール基本群への出発点になる。
+
+> 資料：Szamuely, *Galois Groups and Fundamental Groups* 第 1 章の構成に従ったが、本文は資料によらず書いた。
+
+## 記法と定義の確認 {#fld:sec-gg-notation}
+
+::: notation
+- $L/K$ は有限次ガロア拡大、$G=\operatorname{Gal}(L/K)$。エタール代数とその特徴付けは \ref{fld:etale-algebra}, \ref{fld:etale-equivalent}。
+- **有限 $G$ 集合**は $G$ が左から作用する有限集合（\ref{grp:group-action}）、その射は $G$ の作用と可換な写像（$G$ 写像）。その圏を $G\text{-}\mathbf{FinSet}$ と書く。
+- 圏・関手・圏同値（本質的全射で充満忠実、あるいは自然同型で互いに逆）は \ref{cat:equivalence-of-categories}, \ref{cat:equivalence-characterization}。
+- 基本定理と分解体の一意性（同型の延長）は \ref{fld:fundamental-theorem}, \ref{fld:splitting-field-uniqueness}。
+- **選択公理**：使わない（$L$ の中で議論する）。
+:::
+
+## 二つの関手 {#fld:sec-gg-functors}
+
+::: definition $L$ で分解するエタール代数 {#fld:split-etale keywords="etale algebra split by L" index="分解するエタール代数|ぶんかいするえたーるだいすう"}
+有限次元 $K$ 代数 $A$ について $\lvert\Hom_{K}(A,L)\rvert=\dim_{K}A$ となるとき、$A$ は **$L$ で分解する**という。このとき $A$ はエタールで（\ref{fld:etale-equivalent.4} と不等式から、$L\subset\bar K$ への埋め込みの個数が最大）、直積成分の体はすべて $L$ に埋め込める。逆に、成分の体がすべて $L$ に埋め込める分離的な体の直積は $L$ で分解する（\ref{fld:etale-equivalent} の Step 4 の数え上げを $L$ で行う。$L/K$ は正規なので、成分の体 $M$ の埋め込み $M\to\bar K$ の像はすべて $L$ に入る）。その圏（射は $K$ 代数の準同型）を $\mathbf{Et}_{L/K}$ と書く。
+:::
+
+::: definition 二つの関手 {#fld:fiber-functor keywords="F(A) = Hom_K(A, L) with G-action; Map_G(X, L)" index="ファイバー関手|ふぁいばーかんしゅ"}
+1. $A\in\mathbf{Et}_{L/K}$ に $F(A)\defeq\Hom_{K}(A,L)$ を、$\sigma\cdot\varphi\defeq\sigma\circ\varphi$（$\sigma\in G$）による $G$ 集合として対応させる。$K$ 代数の準同型 $u:A\to B$ に $F(u)\defeq-\circ u:F(B)\to F(A)$ を対応させる（反変関手）。
+2. 有限 $G$ 集合 $X$ に、$G$ 写像 $f:X\to L$（$f(\sigma x)=\sigma(f(x))$）全体 $\Phi(X)\defeq\operatorname{Map}_{G}(X,L)$ を、値ごとの和と積による $K$ 代数として対応させる（$K$ の元は定数関数で、$\sigma$ で固定されるので $G$ 写像）。$G$ 写像 $t:X\to Y$ に $\Phi(t)\defeq-\circ t:\Phi(Y)\to\Phi(X)$ を対応させる。
+:::
+
+::: lemma 体と推移的な $G$ 集合 {#fld:field-transitive-gset keywords="Hom_K(M, L) is a transitive G-set isomorphic to G/Gal(L/M); Map_G(G/H, L) = L^H" index="推移的な G 集合|すいいてきなじーしゅうごう"}
+1. 中間体 $K\subset M\subset L$ について、$F(M)=\Hom_{K}(M,L)$ は推移的な $G$ 集合で、包含 $\iota$ の安定化群は $H=\operatorname{Gal}(L/M)$。したがって $F(M)\cong G/H$。
+2. 部分群 $H\subset G$ について、$f\mapsto f(H)$ は $K$ 代数の同型 $\Phi(G/H)\cong L^{H}$。
+:::
+
+::: proof
+**Step 1（1：推移性）.** $\varphi,\psi\in F(M)$ について、$\psi\circ\varphi^{-1}:\varphi(M)\to\psi(M)$ は $K$ 同型で、$L$ は $K$ 上のある多項式の分解体（\ref{fld:galois-equivalent}）なので、$L$ の自己同型 $\sigma$ に延長できる（\ref{fld:splitting-field-uniqueness}）。$\psi=\sigma\circ\varphi$。安定化群は $\sigma\circ\iota=\iota$、すなわち $M$ を固定する $\sigma$ 全体。軌道と安定化群の関係（\ref{grp:orbit-stabilizer}）から $F(M)\cong G/H$（$\sigma H\mapsto\sigma\circ\iota$）。
+
+**Step 2（2）.** $f\in\Phi(G/H)$ について $y\defeq f(H)$ は、$h\in H$ で $hy=f(hH)=f(H)=y$ をみたすので $y\in L^{H}$。逆に $y\in L^{H}$ なら $f(\sigma H)\defeq\sigma(y)$ は well-defined（$\sigma h(y)=\sigma(y)$）な $G$ 写像。値ごとの演算なので $K$ 代数の同型。
+:::
+
+## 反変同値 {#fld:sec-gg-equivalence}
+
+::: theorem グロタンディークのガロア理論（有限版） {#fld:grothendieck-galois keywords="the functor A -> Hom_K(A, L) is an anti-equivalence between etale K-algebras split by L and finite G-sets" index="グロタンディークのガロア理論|ぐろたんでぃーくのがろありろん"}
+$F:\mathbf{Et}_{L/K}^{\mathrm{op}}\to G\text{-}\mathbf{FinSet}$ と $\Phi:G\text{-}\mathbf{FinSet}^{\mathrm{op}}\to\mathbf{Et}_{L/K}$ は互いに逆の圏同値である：自然同型
+$$
+\eta_{A}:A\to\Phi(F(A)),\ a\mapsto(\varphi\mapsto\varphi(a)),\qquad\varepsilon_{X}:X\to F(\Phi(X)),\ x\mapsto(f\mapsto f(x))
+$$
+がある。この対応で、体 ↔ 推移的な $G$ 集合、直積 $A\times B$ ↔ 非交和 $F(A)\sqcup F(B)$、テンソル積 $A\otimes_{K}B$ ↔ 直積 $F(A)\times F(B)$、$L$ ↔ $G$（左からの積）、$K$ ↔ 1 点集合、が対応する。
+:::
+
+::: proof
+**Step 1（well-defined と自然性）.** $\eta_{A}(a)$ は $G$ 写像（$(\sigma\varphi)(a)=\sigma(\varphi(a))$）で、$\eta_{A}$ は $K$ 代数の準同型。$\Phi(X)$ が $\mathbf{Et}_{L/K}$ に入ることは Step 3 で示す。$\varepsilon_{X}(x)$ は $K$ 代数の準同型（値ごとの演算）、$\varepsilon_{X}$ は $G$ 写像（$f(\sigma x)=\sigma f(x)$）。どちらも定義から自然（$u:A\to B$ や $t:X\to Y$ との可換性は、元を代入する順序を入れ替えるだけ）。
+
+**Step 2（直積と非交和への帰着）.** $F(A\times B)=F(A)\sqcup F(B)$（体への準同型は一方の成分を経由する：\ref{fld:etale-equivalent} の Step 4）、$\Phi(X\sqcup Y)=\Phi(X)\times\Phi(Y)$（定義から）で、$\eta,\varepsilon$ はこれらと両立する。$A\in\mathbf{Et}_{L/K}$ は $L$ に埋め込める体の直積、有限 $G$ 集合は軌道（推移的な $G$ 集合）の非交和なので、$A$ が体、$X$ が推移的な場合に示せばよい。
+
+**Step 3（推移的な $X$）.** $X\cong G/H$ としてよい。\ref{fld:field-transitive-gset.2} から $\Phi(G/H)\cong L^{H}\eqdef M$（中間体、したがって $L$ で分解するエタール代数）。$\varepsilon_{G/H}:G/H\to F(M)=\Hom_{K}(M,L)$ は $\sigma H\mapsto(f\mapsto f(\sigma H)=\sigma(f(H)))$、すなわち $\sigma H\mapsto\sigma|_{M}$ で、\ref{fld:field-transitive-gset.1} の同型（基本定理から $\operatorname{Gal}(L/L^{H})=H$）。
+
+**Step 4（体 $A$）.** $A$ を $L$ に埋め込める体とし、埋め込みの一つで $A\cong M\subset L$ としてよい。$F(M)\cong G/H$（$H=\operatorname{Gal}(L/M)$）で、$\Phi(F(M))\cong\Phi(G/H)\cong L^{H}=M$（基本定理）。$\eta_{M}$ はこの同型を通すと $a\mapsto a$。
+
+**Step 5（対応の一覧）.** 体 ↔ 推移的：Step 3・4。直積 ↔ 非交和：Step 2。$L$：$F(L)=\Hom_{K}(L,L)=G$（左からの合成）。$K$：$F(K)$ は 1 点。テンソル積：$\Hom_{K}(A\otimes_{K}B,L)\cong\Hom_{K}(A,L)\times\Hom_{K}(B,L)$（テンソル積は可換 $K$ 代数の余積。\ref{mod:tensor-algebras}）で、$G$ の作用は成分ごと。
+:::
+
+::: corollary 基本定理の再現 {#fld:fundamental-from-grothendieck keywords="the fundamental theorem of Galois theory recovered from the anti-equivalence" index="基本定理の再現|きほんていりのさいげん"}
+中間体 $M$ に推移的な $G$ 集合 $F(M)$ と基点（包含）を、部分群 $H$ に $(G/H,H)$ を対応させると、中間体全体と、基点付き推移的 $G$ 集合の同型類全体（したがって部分群全体）の間の、包含を逆にする全単射が得られる。
+:::
+
+::: proof
+$M\subset M'$ は単射準同型 $M\to M'$ で、$F$ で全射 $G$ 写像 $F(M')\to F(M)$（基点を保つ）に移る。$G/H'\to G/H$ の基点を保つ $G$ 写像があることは $H'\subset H$ と同値。定理の反変同値と \ref{fld:field-transitive-gset} から、基本定理（\tref{fld:fundamental-theorem}）の対応 $M\mapsto\operatorname{Gal}(L/M)$ に一致する。
+:::
+
+::: example
+$K=\Q$, $L=\Q(\sqrt{2},\sqrt{3})$, $G=\{1,a,b,ab\}\cong(\Z/2)^{2}$（$a$ は $\sqrt2$ の符号を、$b$ は $\sqrt3$ の符号を変える）。$L$ で分解するエタール代数 $A=\Q(\sqrt2)\times\Q\times\Q$ には、$G$ 集合 $G/\langle b\rangle\sqcup\mathrm{pt}\sqcup\mathrm{pt}$（2 点と 1 点と 1 点）が対応する。$\Q(\sqrt2)\otimes\Q(\sqrt3)\cong\Q(\sqrt2,\sqrt3)$ には $G/\langle b\rangle\times G/\langle a\rangle\cong G$ が、$\Q(\sqrt2)\otimes\Q(\sqrt2)\cong\Q(\sqrt2)^{2}$ には $G/\langle b\rangle\times G/\langle b\rangle\cong G/\langle b\rangle\sqcup G/\langle b\rangle$ が対応し、\ref{fld:galois-tensor} の分解と一致する。
+:::
+
+::: supplement
+**被覆空間との類似.** 弧状連結で局所的に良い空間 $X$ の被覆空間の圏は、基本群 $\pi_{1}(X,x)$ が作用する集合の圏と同値で、対応は「基点の上のファイバー」をとる関手で与えられる。\ref{fld:fiber-functor} の $F(A)=\Hom_{K}(A,L)$ は、$\Spec A\to\Spec K$ の「幾何学的な点の上のファイバー」にあたる（それで**ファイバー関手**と呼ぶ）。体の拡大は「点の被覆」で、ガロア群は「点の基本群」である。
+
+**無限版.** $L$ を分離閉包 $K^{\mathrm{sep}}$ にとると、$K$ 上のすべてのエタール代数の圏が、絶対ガロア群 $\operatorname{Gal}(K^{\mathrm{sep}}/K)$（射有限群。\ref{fld:page-infinite-galois}）が連続に作用する有限集合の圏と反変同値になることが知られている（本サイト未収録）。
+
+**高い視点.** 体の側の「直積・テンソル積」と集合の側の「非交和・直積」が入れ替わるのは、反変同値が余極限を極限に移すことの表れである（可換 $K$ 代数の圏では、直積は積、テンソル積は余積）。グロタンディークは、この同値を公理化した「ガロア圏」を使って、スキームのエタール基本群を定義した。
+:::
+
+## 問題 {#fld:sec-gg-problems}
+
+::: problem {#fld:prob-gg-cubic}
+$K=\Q$, $L$ を $x^{3}-2$ の分解体（$G\cong S_{3}$）とする。$\Q(\sqrt[3]{2})$ と $\Q(\omega)$（$\omega$ は 1 の原始 3 乗根）に対応する $G$ 集合を求め、$\Q(\sqrt[3]{2})\otimes_{\Q}\Q(\sqrt[3]{2})$ の分解（\ref{fld:galois-tensor} の後の例 2）を $G$ 集合の側で確かめよ。
+:::
+
+::: solution
+$\Q(\sqrt[3]{2})$ の安定化群は位数 2 の部分群 $H$（$\sqrt[3]{2}$ を固定する互換）で、$G$ 集合は $G/H$（3 点：$\sqrt[3]{2}$ の三つの共役の位置）。$\Q(\omega)=L^{A_{3}}$ は $G/A_{3}$（2 点）。$G/H\times G/H$（9 点）は対角（3 点、$G/H$ と同型）と残り 6 点（$G$ は 3 点の順序付きの相異なる組に推移的に作用するので $G$ と同型、自由な軌道）に分かれる。よって $\Q(\sqrt[3]{2})\otimes\Q(\sqrt[3]{2})\cong\Q(\sqrt[3]{2})\times L$。\ref{fld:galois-tensor} の後の例 2 では $\Q(\sqrt[3]{2})$ を $L$ と書いたので、そこでの $L(\omega\sqrt[3]{2})$ はここでの分解体 $L$ で、結果は一致する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

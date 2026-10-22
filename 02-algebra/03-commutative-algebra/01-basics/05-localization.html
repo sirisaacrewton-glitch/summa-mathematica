@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>局所化と商体 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/03-commutative-algebra/01-basics/05-localization.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 局所化と商体 {#ring:page-localization keywords="localization, ring of fractions, field of fractions, quotient field, localization at a prime ideal, universal property of localization, extension and contraction of ideals, rational function field"}
+
+整数から有理数を作るときは、分母を許して $a/s$ という分数を考える。同じことを一般の可換環で、分母に許す元の集合 $S$ を指定して行うのが**局所化** $S^{-1}A$ である（\ref{ring:localization}）。$S$ の元を単元にする最も普遍的な方法として特徴付けられ（\ref{ring:localization-universal}）、整域の $0$ 以外の元をすべて分母に許したものが**商体**である（\ref{ring:fraction-field}）。素イデアル $\mathfrak{p}$ の外を分母に許した $A_{\mathfrak{p}}$ は局所環になり（\ref{ring:localization-at-prime}）、「点 $\mathfrak{p}$ の近くだけを見る」操作として可換環論のいたるところで使われる。このページでは局所化の構成と普遍性、イデアル・素イデアルの対応（\ref{ring:localization-primes}）、剰余環との交換を示す。加群の局所化と局所的性質は \ref{ring:page-local-properties} で扱う。
+
+> 雪江明彦『代数学 2』第 1 章 §1.8 の流れを参考にした。零因子を含む $S$ を許す一般の構成（同値関係に $u\in S$ が要ること）、素イデアルの対応、剰余環との交換の証明を補った。
+
+## 記法と定義の確認 {#ring:sec-lo-notation}
+
+::: notation
+- 環は可換とする（\ref{ring:convention}）。積閉集合（\ref{ring:multiplicative-set}）、素イデアル（\ref{ring:prime-maximal-def}）、局所環とその判定（\ref{ring:local-ring}, \ref{ring:local-ring-criterion}）、剰余環と準同型定理（\ref{ring:quotient-ring}, \ref{ring:first-isomorphism}）を使う。
+- 積閉集合 $S$ は $1\in S$ で積について閉じた部分集合。$0\in S$ は許す（そのとき局所化は零環になる）。
+- 選択公理は使わない。
+:::
+
+## 局所化の構成 {#ring:sec-lo-construction}
+
+::: theorem 局所化 {#ring:localization keywords="localization, ring of fractions, S^{-1}A, canonical homomorphism" index="局所化|きょくしょか, 分数環|ぶんすうかん, 商環|しょうかん"}
+$A$ を可換環、$S$ を積閉集合とする。
+1. $A\times S$ 上の関係「$(a,s)\sim(b,t)\iff$ ある $u\in S$ で $u(at-bs)=0$」は同値関係である。$(a,s)$ の同値類を $a/s$ または $\frac{a}{s}$ と書き、同値類全体を $S^{-1}A$ と書く。
+2. $S^{-1}A$ 上の演算
+$$
+\frac{a}{s}+\frac{b}{t}\defeq\frac{at+bs}{st},\qquad\frac{a}{s}\cdot\frac{b}{t}\defeq\frac{ab}{st}
+$$
+は代表元の取り方によらず矛盾なく定まり、$S^{-1}A$ は零元 $0/1$、単位元 $1/1$ の可換環になる。これを $A$ の $S$ による**局所化**（**分数環**）という。
+3. $j(a)\defeq a/1$ で定まる $j:A\to S^{-1}A$ は環準同型で、$s\in S$ について $j(s)$ は単元（逆元 $1/s$）。$\Ker j=\{a\in A : \text{ある }u\in S\text{ で }ua=0\}$。
+4. $S^{-1}A$ が零環であることと $0\in S$ は同値である。
+:::
+
+::: intuition
+整数では $a/s=b/t\iff at=bs$ だが、一般の環では $S$ が零因子を含むと $at-bs$ が $0$ でなくても「$u$ を掛けると $0$」になりうる。$u$ は分母に許した（したがって単元になる）元なので、$u(at-bs)=0$ なら局所化の中では $at-bs=0$ とみなすしかない。同値関係に $u$ を入れないと、推移律が成り立たなくなる（下の hypcheck）。
+:::
+
+::: proof
+**Step 1（1：同値関係）.** 反射律：$1(as-as)=0$。対称律：$u(at-bs)=0$ なら $u(bs-at)=0$。推移律：$u(at-bs)=0$, $v(br-ct)=0$（$u,v\in S$）とする。$w\defeq uvt\in S$ について
+$$
+\begin{aligned}
+w(ar-cs)&=uvt\,ar-uvt\,cs=vr\cdot u(at)-us\cdot v(ct)\\
+&=vr\cdot u(bs)-us\cdot v(br)=0.
+\end{aligned}
+$$
+（3 番目の等号で $u\,at=u\,bs$ と $v\,ct=v\,br$ を使った。）
+
+**Step 2（2：矛盾なく定まる）.** $(a,s)\sim(a',s')$（$u(as'-a's)=0$）とする。和について
+$$
+(at+bs)s't-(a't+bs')st=t^{2}(as'-a's)
+$$
+なので $u$ を掛けると $0$、すなわち $(at+bs,st)\sim(a't+bs',s't)$。積について $ab\,s't-a'b\,st=bt(as'-a's)$ なので同様。第 2 引数を取り替える場合も対称に示せるので、二つを続けて使えば両方の代表元を同時に取り替えてよい。
+
+**Step 3（2：環の公理）.** まず $u\in S$ について $\frac{a}{s}=\frac{ua}{us}$（$1\cdot(a\cdot us-ua\cdot s)=0$）なので、有限個の分数は共通の分母 $s$ で書ける。共通の分母では
+$$
+\frac{a}{s}+\frac{b}{s}=\frac{as+bs}{s^{2}}=\frac{a+b}{s}
+$$
+であり、和の結合法則・可換性、$0/1$ が零元であること、$-a/s$ が逆元であることは $A$ の加法の性質に帰着する。積の結合法則・可換性・$1/1$ が単位元であることは $A$ の積の性質から直ちにわかる。分配法則は
+$$
+\frac{a}{s}\Bigl(\frac{b}{t}+\frac{c}{t}\Bigr)=\frac{a(b+c)}{st}=\frac{ab}{st}+\frac{ac}{st}
+$$
+（最後は共通の分母 $st$ での和）で、$A$ の分配法則に帰着する。
+
+**Step 4（3）.** $j(a+b)=\frac{a+b}{1}=\frac{a}{1}+\frac{b}{1}$, $j(ab)=\frac{ab}{1}$, $j(1)=\frac{1}{1}$。$\frac{s}{1}\cdot\frac{1}{s}=\frac{s}{s}=\frac{1}{1}$（$1\cdot(s\cdot 1-1\cdot s)=0$）。$j(a)=0\iff(a,1)\sim(0,1)\iff$ ある $u\in S$ で $ua=0$。
+
+**Step 5（4）.** $S^{-1}A$ が零環 $\iff\frac{1}{1}=\frac{0}{1}\iff$ ある $u\in S$ で $u\cdot 1=0$、すなわち $0\in S$。
+
+::: hypcheck
+- **同値関係の $u$**：Step 1 の推移律で $w=uvt$ を作るのに使った。「$at=bs$」だけで関係を定義すると、$S$ が零因子を含むとき推移律が偽になる：$A=\Z/6\Z$, $S=\{1,2,4\}$ で、$(3,1)$ と $(0,2)$ は $3\cdot 2-0\cdot 1=0$、$(0,2)$ と $(0,1)$ は $0\cdot 1-0\cdot 2=0$ で関係するが、$(3,1)$ と $(0,1)$ は $3\cdot 1-0\cdot 1=3\neq 0$ で関係しない。
+- **前提「積閉」**：Step 1 で $w\in S$、Step 2・3 で分母 $st\in S$ に使った。
+:::
+:::
+
+::: theorem 局所化の普遍性 {#ring:localization-universal keywords="universal property of localization" index="局所化の普遍性|きょくしょかのふへんせい"}
+$A$ を可換環、$S$ を積閉集合、$f:A\to B$ を可換環への準同型で、すべての $s\in S$ について $f(s)\in B^{\times}$ をみたすものとする。$g\circ j=f$ となる環準同型 $g:S^{-1}A\to B$ がただ一つあり、$g(a/s)=f(a)f(s)^{-1}$ で与えられる。
+:::
+
+::: proof
+**Step 1（一意性）.** $g\circ j=f$ なら $g(a/s)\,f(s)=g(a/s)\,g(s/1)=g(a/1)=f(a)$。$f(s)$ は単元なので $g(a/s)=f(a)f(s)^{-1}$。
+
+**Step 2（矛盾なく定まる）.** $u(at-bs)=0$ なら $f(u)(f(a)f(t)-f(b)f(s))=0$ で、$f(u)$ は単元なので $f(a)f(t)=f(b)f(s)$、両辺に $f(s)^{-1}f(t)^{-1}$ を掛けて $f(a)f(s)^{-1}=f(b)f(t)^{-1}$。
+
+**Step 3（準同型）.** 和：$g(\frac{at+bs}{st})=(f(a)f(t)+f(b)f(s))f(s)^{-1}f(t)^{-1}=f(a)f(s)^{-1}+f(b)f(t)^{-1}$。積と単位元も同様。$g\circ j=f$ は $g(a/1)=f(a)$ から。
+
+::: hypcheck
+- **前提「$f(S)\subset B^{\times}$」**：Step 1・2 で $f(s)^{-1}$, $f(u)$ の可逆性に使った。外すと $g$ は存在しない（$g(s/1)$ は単元 $s/1$ の像なので単元でなければならない）。
+:::
+:::
+
+::: example 局所化の例 {#ring:localization-examples}
+1. **元による局所化.** $f\in A$ について $S=\{f^{n} : n\in\N\}$ による局所化を $A_{f}$ または $A[1/f]$ と書く。例えば $\Z[1/2]=\{a/2^{n}\}\subset\Q$。$f$ が冪零なら $0\in S$ なので $A_{f}=0$。
+2. **素イデアルでの局所化.** 素イデアル $\mathfrak{p}$ について $S=A\setminus\mathfrak{p}$（\ref{ring:multiplicative-set} の例）による局所化を $A_{\mathfrak{p}}$ と書く。$\Z_{(p)}$（\ref{ring:local-ring-examples.2}）は $\Z$ の素イデアル $p\Z$ での局所化である（次の \ref{ring:fraction-field.3} で $\Q$ の中に実現される）。
+3. **冪等元による局所化.** $e$ が冪等元なら $A_{e}\cong eA$（\ref{ring:idempotent-decomposition}）。実際、$A\to eA$, $a\mapsto ea$ は準同型で $e\mapsto e$（$eA$ の単位元）なので普遍性から $g:A_{e}\to eA$ ができ、逆写像は $ea\mapsto ea/1$。$a/e^{n}=ea/1$（$e\cdot(a\cdot 1-ea\cdot e^{n})=ea-ea=0$）に注意すると互いに逆であることが確かめられる。例えば $(\Z/6\Z)_{3}\cong 3\Z/6\Z\cong\Z/2\Z$。
+:::
+
+## 商体 {#ring:sec-lo-fraction-field}
+
+::: theorem 商体 {#ring:fraction-field keywords="field of fractions, quotient field, universal property of fraction field, smallest subfield containing a subring" index="商体|しょうたい, 分数体|ぶんすうたい"}
+$A$ を整域、$S=A\setminus\{0\}$ とする。
+1. $S$ は積閉集合で、$\Frac A\defeq S^{-1}A$ は体であり、$j:A\to\Frac A$ は単射である。$\Frac A$ を $A$ の**商体**という。$a/s=b/t\iff at=bs$。
+2. 体 $K$ への単射な準同型 $f:A\to K$ は、$g\circ j=f$ をみたす準同型 $g:\Frac A\to K$ にただ一通りに拡張され、$g$ は単射である。
+3. 体 $K$ の部分環 $A$ について、$A$ を含む $K$ の最小の部分体は $\{as^{-1} : a,s\in A,\ s\neq 0\}$ で、これは 2 の $g$（$f$ は包含）の像として $\Frac A$ に同型である。したがって、$A$ を部分環として含む二つの体 $K,K'$ の中の「$A$ で生成された部分体」は、$A$ の元を動かさない同型で移り合う。
+:::
+
+::: proof
+**Step 1（1）.** 整域なので $s,t\neq 0\Rightarrow st\neq 0$、$1\neq 0$ から $1\in S$。$0\notin S$ なので $\Frac A$ は零環でない（\ref{ring:localization.4}）。同値関係の $u(at-bs)=0$（$u\neq 0$）は整域では $at=bs$ と同値。$a/s\neq 0$ なら $a\neq 0$（$a/s=0/1\iff a=0$）なので $s/a\in\Frac A$ が逆元。よって体。$j(a)=0\iff a=0$ なので単射。
+
+**Step 2（2）.** $f$ が単射なので $s\neq 0\Rightarrow f(s)\neq 0$、すなわち $f(s)\in K^{\times}$。普遍性（\ref{ring:localization-universal}）から $g$ がただ一つある。$g$ は体からの準同型で $K$ は零環でないので単射（\ref{ring:field-ideals.2}）。
+
+**Step 3（3）.** $g(\Frac A)=\{f(a)f(s)^{-1}\}=\{as^{-1}\}$ は単射 $g$ による体の像なので部分体で、$A$ を含む。$A$ を含む部分体は $as^{-1}$ をすべて含むので、これが最小。$g$ は $\Frac A$ からこの部分体への同型。$K'$ についても同様の同型 $g'$ があり、$g'\circ g^{-1}$ は $A$ の元を動かさない同型である。
+
+::: hypcheck
+- **前提「整域」**：Step 1 で $S$ が積閉で $0\notin S$ であることに使った。整域でなければ $A\setminus\{0\}$ は積閉でない。零因子でない元全体 $S_{0}$ は常に積閉集合で、$S_{0}^{-1}A$ を**全商環**というが、体とは限らない。
+- **前提「$f$ は単射」（2）**：Step 2 で $f(s)\neq 0$ に使った。外すと拡張できない：$\Z\to\mathbb{F}_{p}$ は $\Q$ に拡張できない（$p$ が $0$ に送られるので $1/p$ の行き先がない）。
+:::
+:::
+
+::: example
+1. $\Frac\Z=\Q$（2 の構成そのもの）。$\Frac\Z[i]=\Q(i)\defeq\{x+yi : x,y\in\Q\}$：3 から、$\C$ の中で $\Z[i]$ を含む最小の部分体で、$\frac{a+bi}{c+di}=\frac{(a+bi)(c-di)}{c^{2}+d^{2}}$ からこの形になる。
+2. 体 $K$ 上の多項式環 $K[x]$ は整域（\ref{ring:polynomial-domain.3}）で、その商体 $K(x)\defeq\Frac K[x]$ を**有理関数体**という。$x$ は $K(x)$ で $K$ 上超越的な元である。多変数の $K(x_{1},\dots,x_{n})$ も同様。
+:::
+
+## 素イデアルでの局所化と素イデアルの対応 {#ring:sec-lo-primes}
+
+::: definition イデアルの拡大と縮約 {#ring:extension-contraction keywords="extension of ideals, contraction of ideals" index="イデアルの拡大|いであるのかくだい, イデアルの縮約|いであるのしゅくやく"}
+環準同型 $f:A\to B$ について、$A$ のイデアル $I$ の像で生成された $B$ のイデアル $f(I)B$ を $I$ の**拡大**、$B$ のイデアル $J$ の逆像 $f^{-1}(J)$ を $J$ の**縮約**という。局所化 $j:A\to S^{-1}A$ では、$I$ の拡大を $S^{-1}I$ と書く。
+:::
+
+::: proposition 局所化のイデアル {#ring:localization-ideals keywords="ideals of a localization are extended, S^{-1}I" index="局所化のイデアル|きょくしょかのいである"}
+$A$ を可換環、$S$ を積閉集合、$j:A\to S^{-1}A$ とする。
+1. イデアル $I$ について $S^{-1}I=\{a/s : a\in I,\ s\in S\}$。$S^{-1}I=S^{-1}A\iff I\cap S\neq\emptyset$。
+2. $S^{-1}A$ のイデアル $J$ について $J=S^{-1}(j^{-1}(J))$。したがって $S^{-1}A$ のイデアルはすべて $A$ のイデアルの拡大で、$J\mapsto j^{-1}(J)$ は単射である。
+:::
+
+::: proof
+**Step 1（1）.** $T\defeq\{a/s : a\in I, s\in S\}$ は $j(I)$ を含み、$\frac{a}{s}+\frac{b}{t}=\frac{at+bs}{st}$（$at+bs\in I$）、$\frac{c}{u}\cdot\frac{a}{s}=\frac{ca}{us}$（$ca\in I$）からイデアル。$j(I)$ を含むイデアルは $\frac{a}{s}=\frac{1}{s}\cdot\frac{a}{1}$ を含むので $T$ は最小、すなわち $T=S^{-1}I$。後半：$s\in I\cap S$ なら $1=\frac{s}{s}\in S^{-1}I$。逆に $\frac{1}{1}=\frac{a}{s}$（$a\in I$）なら $u(s-a)=0$ となる $u\in S$ があり、$us=ua\in I\cap S$。
+
+**Step 2（2）.** $S^{-1}(j^{-1}(J))\subset J$：$a\in j^{-1}(J)$ なら $\frac{a}{s}=\frac{1}{s}\cdot\frac{a}{1}\in J$。逆に $\frac{a}{s}\in J$ なら $\frac{a}{1}=\frac{s}{1}\cdot\frac{a}{s}\in J$ なので $a\in j^{-1}(J)$、よって $\frac{a}{s}\in S^{-1}(j^{-1}(J))$。単射性は、$j^{-1}(J)$ から $J$ が復元できることから。
+:::
+
+::: theorem 局所化の素イデアル {#ring:localization-primes keywords="prime ideals of a localization correspond to primes disjoint from S" index="局所化の素イデアル|きょくしょかのそいである"}
+$A$ を可換環、$S$ を積閉集合とする。$\mathfrak{p}\mapsto S^{-1}\mathfrak{p}$ と $\mathfrak{q}\mapsto j^{-1}(\mathfrak{q})$ は、「$S$ と交わらない $A$ の素イデアル全体」と「$S^{-1}A$ の素イデアル全体」の間の、包含を保つ互いに逆な全単射である。
+:::
+
+::: proof
+**Step 1（縮約は $S$ と交わらない素イデアル）.** $\mathfrak{q}$ を $S^{-1}A$ の素イデアルとすると、$j^{-1}(\mathfrak{q})$ は素イデアル（\ref{ring:prime-preimage.1}）。$s\in j^{-1}(\mathfrak{q})\cap S$ なら単元 $s/1$ が $\mathfrak{q}$ に属し $\mathfrak{q}=S^{-1}A$ となって矛盾。
+
+**Step 2（拡大は素イデアル）.** $\mathfrak{p}$ を $S$ と交わらない素イデアルとする。1 から $S^{-1}\mathfrak{p}\neq S^{-1}A$（$\mathfrak{p}\cap S=\emptyset$）。$\frac{a}{s}\cdot\frac{b}{t}\in S^{-1}\mathfrak{p}$ とすると $\frac{ab}{st}=\frac{c}{u}$（$c\in\mathfrak{p}$, $u\in S$）で、ある $v\in S$ について $v(abu-cst)=0$。よって $vu\cdot ab=v\,st\,c\in\mathfrak{p}$。$vu\in S$ は $\mathfrak{p}$ に属さないので、$\mathfrak{p}$ が素であることから $ab\in\mathfrak{p}$、さらに $a\in\mathfrak{p}$ または $b\in\mathfrak{p}$、すなわち $\frac{a}{s}\in S^{-1}\mathfrak{p}$ または $\frac{b}{t}\in S^{-1}\mathfrak{p}$。
+
+**Step 3（$j^{-1}(S^{-1}\mathfrak{p})=\mathfrak{p}$）.** $\supset$ は明らか。$\frac{a}{1}=\frac{c}{u}$（$c\in\mathfrak{p}$）なら $v(au-c)=0$ となる $v\in S$ があり、$vu\cdot a=vc\in\mathfrak{p}$、$vu\notin\mathfrak{p}$ なので $a\in\mathfrak{p}$。
+
+**Step 4（互いに逆）.** Step 3 と、\ref{ring:localization-ideals.2}（$\mathfrak{q}=S^{-1}(j^{-1}(\mathfrak{q}))$）から。包含を保つのは定義から明らか。
+
+::: hypcheck
+- **素イデアルに限ること**：Step 3 で $\mathfrak{p}$ が素であることを使った。一般のイデアル $I$ では $j^{-1}(S^{-1}I)=\{a : \text{ある }u\in S\text{ で }ua\in I\}$ で、$I$ より大きくなりうる：$\Z$ で $S=\{1,2,4,\dots\}$, $I=6\Z$ なら $j^{-1}(S^{-1}I)=3\Z$。
+:::
+:::
+
+::: theorem 素イデアルでの局所化は局所環 {#ring:localization-at-prime keywords="localization at a prime ideal is a local ring, A_p, residue field of A_p" index="素イデアルでの局所化|そいであるでのきょくしょか"}
+$A$ を可換環、$\mathfrak{p}$ を素イデアルとする。
+1. $A_{\mathfrak{p}}$ は局所環で、その極大イデアルは $\mathfrak{p}A_{\mathfrak{p}}\defeq S^{-1}\mathfrak{p}=\{a/s : a\in\mathfrak{p},\ s\notin\mathfrak{p}\}$ である。
+2. $A_{\mathfrak{p}}$ の素イデアルは、$\mathfrak{p}$ に含まれる $A$ の素イデアル $\mathfrak{q}$ の拡大 $\mathfrak{q}A_{\mathfrak{p}}$ ですべてであり、包含を保って一対一に対応する。
+:::
+
+::: proof
+**Step 1（1）.** $a/s\in A_{\mathfrak{p}}$（$s\notin\mathfrak{p}$）について、$a\notin\mathfrak{p}$ なら $s/a\in A_{\mathfrak{p}}$ が逆元。$a\in\mathfrak{p}$ で $\frac{a}{s}\cdot\frac{b}{t}=\frac{1}{1}$ なら $v(ab-st)=0$（$v\notin\mathfrak{p}$）で、$vst=vab\in\mathfrak{p}$ だが $v,s,t\notin\mathfrak{p}$ なので素イデアルであることに反する。よって非単元全体は $\mathfrak{p}A_{\mathfrak{p}}$ で、これはイデアル（\ref{ring:localization-ideals.1}）。\ref{ring:local-ring-criterion.1} から局所環。
+
+**Step 2（2）.** \ref{ring:localization-primes} で $S=A\setminus\mathfrak{p}$ とすると、「$S$ と交わらない」は「$\mathfrak{p}$ に含まれる」と同じ。
+
+::: hypcheck
+- 選択公理は使わない（\ref{ring:local-ring-criterion.1} は選択公理なしで成り立つ）。
+:::
+:::
+
+::: proposition 局所化と剰余環の交換 {#ring:localization-quotient keywords="localization commutes with quotients, residue field of A_p is Frac(A/p)" index="局所化と剰余環|きょくしょかとじょうよかん"}
+$A$ を可換環、$S$ を積閉集合、$I$ をイデアル、$\bar S$ を $S$ の $A/I$ での像とする。
+1. $S^{-1}A/S^{-1}I\cong\bar S^{-1}(A/I)$（$\frac{a}{s}+S^{-1}I\mapsto\frac{\bar a}{\bar s}$）。
+2. 素イデアル $\mathfrak{p}$ について、$A_{\mathfrak{p}}$ の剰余体 $A_{\mathfrak{p}}/\mathfrak{p}A_{\mathfrak{p}}$ は $\Frac(A/\mathfrak{p})$ に同型である。
+:::
+
+::: proof
+**Step 1（写像 $\alpha$）.** 合成 $A\to A/I\to\bar S^{-1}(A/I)$ は $S$ の元を単元に移すので、普遍性（\ref{ring:localization-universal}）から $\alpha:S^{-1}A\to\bar S^{-1}(A/I)$, $\frac{a}{s}\mapsto\frac{\bar a}{\bar s}$ ができる。$a\in I$ なら $\alpha(\frac{a}{s})=0$ なので $S^{-1}I\subset\Ker\alpha$ で、剰余環の普遍性（\ref{ring:factor-through-quotient}）から $\bar\alpha:S^{-1}A/S^{-1}I\to\bar S^{-1}(A/I)$ を得る。
+
+**Step 2（写像 $\beta$）.** 合成 $A\to S^{-1}A\to S^{-1}A/S^{-1}I$ は $I$ を $0$ に送るので $A/I\to S^{-1}A/S^{-1}I$ を誘導し、これは $\bar S$ の元 $\bar s$ を単元 $\frac{s}{1}+S^{-1}I$ に送る。普遍性から $\beta:\bar S^{-1}(A/I)\to S^{-1}A/S^{-1}I$, $\frac{\bar a}{\bar s}\mapsto\frac{a}{s}+S^{-1}I$ ができる。
+
+**Step 3（互いに逆）.** 定義の式から $\beta\circ\bar\alpha$ と $\bar\alpha\circ\beta$ は代表元 $\frac{a}{s}$ の形の元を動かさず、すべての元はこの形なので恒等写像。
+
+**Step 4（2）.** $S=A\setminus\mathfrak{p}$, $I=\mathfrak{p}$ とすると、$\bar S=(A\setminus\mathfrak{p})/\mathfrak{p}$ は整域 $A/\mathfrak{p}$ の $0$ でない元全体なので、1 から $A_{\mathfrak{p}}/\mathfrak{p}A_{\mathfrak{p}}\cong\bar S^{-1}(A/\mathfrak{p})=\Frac(A/\mathfrak{p})$。
+:::
+
+::: example
+$\Z_{(p)}/p\Z_{(p)}\cong\Frac(\Z/p\Z)=\mathbb{F}_{p}$（$\mathbb{F}_{p}$ は体なので自分自身が商体）。これは \ref{ring:local-ring-examples.2} で直接計算した結果と一致する。素イデアル $0\subset\Z$ では $\Z_{(0)}=\Q$ で、剰余体は $\Q$。
+:::
+
+::: supplement
+**高い視点.** 局所化の普遍性は、$S^{-1}A$ が「$S$ の元を単元にする」という条件を課した $A$ 代数の中の始対象であることを言っている。圏論的には、$j:A\to S^{-1}A$ は環の圏の**エピ射**である（$g\circ j=g'\circ j$ なら $g=g'$。普遍性の一意性の部分）が、一般に全射ではない：$\Z\to\Q$ は全射でないエピ射の典型例である。
+
+**幾何的な意味.** $\Spec A_{\mathfrak{p}}$ は、\ref{ring:localization-at-prime.2} により $\mathfrak{p}$ に含まれる素イデアル（$\mathfrak{p}$ を「通る」部分多様体）だけからなり、点 $\mathfrak{p}$ の「十分小さな近傍」を見ていることにあたる。$A_{f}$ は $f$ が消えない開集合 $D(f)$ 上の関数環である（\ref{ag:zariski-topology}）。剰余体 $\kappa(\mathfrak{p})=\Frac(A/\mathfrak{p})$ は「点 $\mathfrak{p}$ での関数の値が住む体」である。
+:::
+
+## 問題 {#ring:sec-lo-problems}
+
+::: problem {#ring:prob-localization-nilradical}
+可換環 $A$ と積閉集合 $S$ について、$S^{-1}(\mathrm{nil}(A))=\mathrm{nil}(S^{-1}A)$ を示せ。特に、被約環の局所化は被約である。
+:::
+
+::: solution
+**$\subset$**：$a^{n}=0$ なら $(a/s)^{n}=0$。**$\supset$**：$(a/s)^{n}=0$ なら $a^{n}/s^{n}=0/1$ で、ある $u\in S$ について $ua^{n}=0$。すると $(ua)^{n}=u^{n-1}\cdot ua^{n}=0$ なので $ua$ は冪零で、$\frac{a}{s}=\frac{ua}{us}\in S^{-1}(\mathrm{nil}(A))$。
+:::
+
+::: problem {#ring:prob-localization-domain}
+$A$ を整域、$S$ を $0$ を含まない積閉集合とする。$S^{-1}A$ は $\Frac A$ の部分環 $\{a/s : a\in A, s\in S\}$ に同型であることを示せ。（したがって整域の局所化は整域で、$A\subset S^{-1}A\subset\Frac A$ とみなせる。）
+:::
+
+::: solution
+$S\subset A\setminus\{0\}$ なので、$j:A\to\Frac A$ は $S$ を単元に移し、普遍性から $g:S^{-1}A\to\Frac A$, $\frac{a}{s}\mapsto\frac{a}{s}$ ができる。$g(\frac{a}{s})=0$ なら $a=0$ なので単射（\ref{ring:homomorphism-basic.5}）。像は記述のとおりの部分環。
+:::
+
+::: problem {#ring:prob-z-localizations}
+$\Z$ の局所化 $S^{-1}\Z$（$0\notin S$）は、ある素数の集合 $P$ によって $\Z[P^{-1}]\defeq\{a/b\in\Q : b\text{ の素因数はすべて }P\text{ に属する}\}$ と表せることを示せ。
+:::
+
+::: solution
+$P$ を、$S$ のある元を割り切る素数全体とする。問題 \ref{ring:prob-localization-domain} から $S^{-1}\Z=\{a/s : s\in S\}\subset\Q$。$s\in S$ の素因数は $P$ に属するので $S^{-1}\Z\subset\Z[P^{-1}]$。逆に $p\in P$ なら $p\mid s$ となる $s\in S$ があり、$\frac{1}{p}=\frac{s/p}{s}\in S^{-1}\Z$。素因数が $P$ に属する $b$ は $p\in P$ の積なので $\frac{1}{b}\in S^{-1}\Z$、よって $\frac{a}{b}\in S^{-1}\Z$。（符号 $-1\in S$ でも結果は同じ。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

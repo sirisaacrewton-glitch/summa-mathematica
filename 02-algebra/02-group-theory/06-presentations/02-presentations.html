@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>群の表示 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/02-group-theory/06-presentations/02-presentations.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 群の表示 {#grp:page-presentations keywords="group presentation, generators and relations, von Dyck's theorem, presentation of dihedral groups, presentation of quaternion group, groups of order 8, word problem"}
+
+群を「生成元」と、それらが満たすべき「関係式」で指定する方法を**群の表示**という。形式的には、自由群 $F(X)$（\ref{grp:free-group}）を、関係式の集合 $R$ の正規閉包で割った剰余群 $\ang{X\mid R}$ として定義する（\ref{grp:presentation}）。**フォン・ディックの定理**（\tref{grp:von-dyck}）は、生成元の行き先が関係式を満たしさえすれば準同型が作れることを保証する。これを使うと、ある群がある表示をもつことを「表示から作った群の位数の上からの評価」と「実際の群への全射」の二つに分けて示せる。このページでは $\Z/n\Z$, $\Z^{2}$, 二面体群 $D_{n}$, 四元数群 $Q_{8}$ の表示を求め（\ref{grp:dihedral-presentation}, \ref{grp:quaternion-presentation}）、応用として位数 $8$ の群をすべて分類する（\ref{grp:groups-of-order-8}）。
+
+> 表示の定義は雪江明彦『代数学 1 群論入門』第 4 章 §4.6 と同じである。
+
+## 記法と定義の確認 {#grp:sec-pr2-notation}
+
+::: notation
+- 自由群 $F(X)$ とその普遍性、簡約語は \ref{grp:free-group}, \ref{grp:free-group-universal}, \ref{grp:reduced-word}。$F(X)$ の元を $X$ の元とその逆元の積として書く。
+- 正規部分群・正規閉包・剰余群・自然な射影は \ref{grp:normal-subgroup}, \ref{grp:normal-closure}, \ref{grp:quotient-group}。準同型・生成元で決まること・分解定理・第一同型定理は \ref{grp:homomorphism}, \ref{grp:homomorphism-basic}, \ref{grp:factor-through-quotient}, \ref{grp:first-isomorphism}。
+- 二面体群 $D_{n}$ と $r^{n}=s^{2}=e$, $srs=r^{-1}$、$\abs{D_{n}}=2n$ は \ref{grp:dihedral-group}, \ref{grp:dihedral-order}。四元数群 $Q_{8}$ は \ref{grp:quaternion-group}。位数 $p^{2}$ の群と有限アーベル群の構造は \ref{grp:order-p-squared}, \ref{grp:finite-abelian-structure}。
+- $\ZFC$ の中で議論し、選択公理は使わない。
+:::
+
+## 表示 {#grp:sec-pr2-presentation}
+
+::: definition 群の表示 {#grp:presentation keywords="presentation, generators and relations, relators, finitely presented group" index="群の表示|ぐんのひょうじ, 生成元と関係式|せいせいげんとかんけいしき, 関係子|かんけいし"}
+集合 $X$ と $R\subseteq F(X)$ について、$R$ の $F(X)$ における正規閉包を $\overline{R}$ とし、
+$$
+\ang{X\mid R}\defeq F(X)/\overline{R}
+$$
+とおく。$X$ の元を**生成元**、$R$ の元を**関係子**という。群 $G$ が $\ang{X\mid R}$ と同型のとき、$\ang{X\mid R}$ を $G$ の**表示**という。関係子 $w$ の代わりに**関係式** $w=e$ や、$u=v$（関係子 $uv^{-1}$ の意味）と書くこともある。$X$ と $R$ が有限のとき有限表示という。
+:::
+
+::: intuition
+$\ang{X\mid R}$ は「$X$ で生成され、$R$ の元が単位元になり、それ以外の関係はできるだけない」群である。$R$ の元を単位元にするだけでなく、正規閉包で割るのは、剰余群を作るのに正規部分群が要り、$R$ の元が単位元になればその共役や積も単位元になるからである。
+:::
+
+::: theorem フォン・ディックの定理 {#grp:von-dyck keywords="von Dyck's theorem, universal property of a presentation" index="フォン・ディックの定理|ふぉんでぃっくのていり" refname="フォン・ディックの定理"}
+群 $H$ と写像 $f:X\to H$ について、普遍性で得られる準同型 $\bar f:F(X)\to H$（\ref{grp:free-group-universal}）が $R$ の元をすべて $e$ に送るなら、$x\overline{R}\mapsto f(x)$ となる準同型 $\ang{X\mid R}\to H$ がただ一つある。$f(X)$ が $H$ を生成するなら、これは全射である。
+:::
+
+::: proof
+**Step 1.** $R\subseteq\Ker\bar f$ で、$\Ker\bar f$ は正規部分群（\ref{grp:homomorphism-basic.2}）なので、正規閉包の最小性（\ref{grp:normal-closure}）から $\overline{R}\subseteq\Ker\bar f$。
+
+**Step 2.** \ref{grp:factor-through-quotient} より、$\bar f=\varphi\circ\pi$ となる準同型 $\varphi:\ang{X\mid R}\to H$ がただ一つあり、$\varphi(x\overline{R})=\bar f(x)=f(x)$。$\ang{X\mid R}$ は $\{x\overline{R} : x\in X\}$ で生成されるので、この条件だけで $\varphi$ は決まる（\ref{grp:homomorphism-basic.6}）。
+
+**Step 3.** $\im\varphi=\im\bar f$ は $f(X)$ を含む部分群なので、$f(X)$ が $H$ を生成すれば全射。
+:::
+
+::: lemma 表示を確かめる方法 {#grp:presentation-recipe keywords="how to verify a presentation, order bound plus surjection"}
+有限群 $G$ が $f(X)$ で生成され、$R$ の元が $G$ で $e$ になるとする。$\abs{\ang{X\mid R}}\le\abs{G}$ が示せれば、$G\cong\ang{X\mid R}$（同型は $x\overline{R}\mapsto f(x)$）。
+:::
+
+::: proof
+\ref{grp:von-dyck} より全射 $\varphi:\ang{X\mid R}\to G$ がある。$\abs{G}\le\abs{\ang{X\mid R}}\le\abs{G}$ なので両者は有限で位数が等しく、全射は全単射。
+:::
+
+::: example
+1. $\ang{x\mid x^{n}}\cong\Z/n\Z$（$n\ge 1$）：$F(\{x\})\cong\Z$（\ref{grp:prob-free-rank-one}）で $x^{n}\mapsto n$、正規閉包は $n\Z$。
+2. $\ang{x,y\mid xyx^{-1}y^{-1}}\cong\Z^{2}$：関係子の正規閉包は $[F,F]$ を含み（$F/\overline{R}$ では生成元が可換なので群全体が可換、\ref{grp:commutator-properties.2}）、$[F,F]$ に含まれる（$xyx^{-1}y^{-1}$ は交換子）。よって $\ang{x,y\mid xyx^{-1}y^{-1}}=F/[F,F]\cong\Z^{2}$（\ref{grp:prob-free-abelianization}）。
+3. $\ang{X\mid\emptyset}=F(X)$。
+:::
+
+## 二面体群と四元数群の表示 {#grp:sec-pr2-examples}
+
+::: theorem 二面体群の表示 {#grp:dihedral-presentation keywords="presentation of the dihedral group, <r, s | r^n, s^2, srsr>" index="二面体群の表示|にめんたいぐんのひょうじ"}
+$n\ge 3$ について
+$$
+D_{n}\cong\ang{r,s\mid r^{n},\ s^{2},\ srsr}.
+$$
+:::
+
+::: proof
+$P\defeq\ang{r,s\mid r^{n},s^{2},srsr}$ とし、$P$ での $r,s$ の像も $r,s$ と書く。
+
+**Step 1（関係式は $D_{n}$ で成り立つ）.** $D_{n}$ で $r^{n}=s^{2}=e$、$srs=r^{-1}$ から $srsr=e$（\ref{grp:dihedral-order}）。$D_{n}=\ang{r,s}$。
+
+**Step 2（$P$ の元は $r^{k}s^{\epsilon}$）.** $P$ では $s^{-1}=s$、$r^{-1}=r^{n-1}$、$sr=r^{-1}s^{-1}=r^{-1}s$（$srsr=e$ から）。よって $sr^{k}=r^{-k}s$（$k\ge 0$ の帰納法）。$P$ の元は $r^{\pm 1},s^{\pm 1}$ の積で、$r^{-1}=r^{n-1}$, $s^{-1}=s$ から $r,s$ の積。積の中の $s$ を右へ移す（$sr^{k}=r^{-k}s$）と $r^{k}s^{m}$ の形になり、$s^{2}=e$、$r^{n}=e$ から $r^{k}s^{\epsilon}$（$0\le k<n$, $\epsilon\in\{0,1\}$）の形。よって $\abs{P}\le 2n$。
+
+**Step 3.** $\abs{D_{n}}=2n$ なので \ref{grp:presentation-recipe} より $D_{n}\cong P$。
+:::
+
+::: theorem 四元数群の表示 {#grp:quaternion-presentation keywords="presentation of the quaternion group Q8" index="四元数群の表示|しげんすうぐんのひょうじ"}
+$$
+Q_{8}\cong\ang{a,b\mid a^{4},\ a^{2}b^{-2},\ bab^{-1}a}.
+$$
+すなわち関係式 $a^{4}=e$, $a^{2}=b^{2}$, $bab^{-1}=a^{-1}$ による表示である。
+:::
+
+::: proof
+$P\defeq\ang{a,b\mid a^{4},a^{2}b^{-2},bab^{-1}a}$ とする。
+
+**Step 1（関係式は $Q_{8}$ で成り立つ）.** $a\mapsto\mathbf{i}$, $b\mapsto\mathbf{j}$ とすると、$\mathbf{i}^{4}=(-1)^{2}=1$、$\mathbf{i}^{2}=-1=\mathbf{j}^{2}$、$\mathbf{j}\mathbf{i}\mathbf{j}^{-1}=\mathbf{j}\mathbf{i}(-\mathbf{j})=-\mathbf{j}\mathbf{i}\mathbf{j}=\mathbf{k}\mathbf{j}=-\mathbf{i}=\mathbf{i}^{-1}$（\ref{grp:quaternion-group} の関係式。$\mathbf{j}^{-1}=-\mathbf{j}$, $\mathbf{j}\mathbf{i}=-\mathbf{k}$, $\mathbf{k}\mathbf{j}=-\mathbf{i}$）。$\mathbf{i}\mathbf{j}=\mathbf{k}$ なので $Q_{8}=\ang{\mathbf{i},\mathbf{j}}$。
+
+**Step 2（$P$ の元は $a^{k}b^{\epsilon}$）.** $P$ で $ba=a^{-1}b$（$bab^{-1}=a^{-1}$ から）、よって $ba^{k}=a^{-k}b$。$b^{2}=a^{2}$ なので $b^{4}=a^{4}=e$、$b^{-1}=b^{3}=a^{2}b$、$a^{-1}=a^{3}$。$P$ の元は $a,b$ の積で、$b$ を右へ集めると $a^{k}b^{m}$、$b^{2}=a^{2}$ で $m\in\{0,1\}$ にでき、$a^{4}=e$ で $0\le k<4$。よって $\abs{P}\le 8$。
+
+**Step 3.** $\abs{Q_{8}}=8$ なので \ref{grp:presentation-recipe} より同型。
+:::
+
+## 位数 8 の群 {#grp:sec-pr2-order-8}
+
+::: theorem 位数 8 の群の分類 {#grp:groups-of-order-8 keywords="classification of groups of order 8" index="位数 8 の群|いすうはちのぐん"}
+位数 $8$ の群は、互いに同型でない次の $5$ 個のどれかと同型である：
+$$
+\Z/8\Z,\quad\Z/4\Z\times\Z/2\Z,\quad(\Z/2\Z)^{3},\quad D_{4},\quad Q_{8}.
+$$
+:::
+
+::: proof
+**Step 1（可換な場合）.** \ref{grp:finite-abelian-structure} より初等因子 $(8)$, $(4,2)$, $(2,2,2)$ の $3$ 個。
+
+**Step 2（非可換なら位数 $4$ の元がある）.** $\abs{G}=8$ で非可換とする。位数 $8$ の元があれば巡回群で可換なので、ない。すべての元が $x^{2}=e$ なら可換（\ref{grp:prob-exponent-two-abelian}）なので、位数 $4$ の元 $a$ がある。$N\defeq\ang{a}$ は指数 $2$ で正規。
+
+**Step 3（$b$ の選び方と関係式）.** $b\notin N$ をとる。$G=N\cup bN$ なので $G=\ang{a,b}$。$bab^{-1}\in N$ の位数は $4$ なので $bab^{-1}\in\{a,a^{3}\}$。$bab^{-1}=a$ なら $a,b$ は可換で $G$ は可換になるので、$bab^{-1}=a^{-1}$。$G/N$ は位数 $2$ なので $b^{2}\in N$。$b^{2}$ は $b$ と可換なので $b^{2}=b(b^{2})b^{-1}$ で、$b^{2}=a^{j}$ なら $a^{j}=ba^{j}b^{-1}=a^{-j}$、$a^{2j}=e$、$j\in\{0,2\}$。すなわち $b^{2}=e$ か $b^{2}=a^{2}$。
+
+**Step 4（$D_{4}$ か $Q_{8}$）.** $b^{2}=e$ なら $a,b$ は $D_{4}$ の表示 $\ang{r,s\mid r^{4},s^{2},srsr}$ の関係式（$sr s=r^{-1}$）をみたし、$G=\ang{a,b}$。\ref{grp:von-dyck} より $D_{4}\cong\ang{r,s\mid\cdots}\to G$ は全射（\ref{grp:dihedral-presentation}）で、位数が等しいので同型。$b^{2}=a^{2}$ なら同様に $Q_{8}$ の表示の関係式をみたし、$G\cong Q_{8}$（\ref{grp:quaternion-presentation}）。
+
+**Step 5（互いに同型でない）.** 可換な三つは初等因子が異なるので同型でない（\ref{grp:finite-abelian-structure}）。$D_{4}$, $Q_{8}$ は非可換。$D_{4}$ の位数 $2$ の元は $r^{2},s,rs,r^{2}s,r^{3}s$ の $5$ 個、$Q_{8}$ では $-1$ の $1$ 個なので、$D_{4}\not\cong Q_{8}$（同型は元の位数を保つ）。
+:::
+
+::: supplement
+**語の問題.** 有限表示 $\ang{X\mid R}$ が与えられたとき、二つの語が同じ元を表すかを判定する問題（**語の問題**）は、一般にはアルゴリズムで解けない（ノビコフとブーンによる）ことが知られている。自由群（$R=\emptyset$）では簡約語に直せば判定できる。
+
+**ティーツェ変換.** 同じ群の二つの有限表示は、生成元・関係子の追加と削除の有限回の操作（ティーツェ変換）で互いに移り合うことが知られている。
+
+**位相幾何との関係.** ファン・カンペンの定理により、多くの空間の基本群は生成元と関係式で計算される。例えば種数 $g$ の向き付け可能な閉曲面の基本群は $\ang{a_{1},b_{1},\dots,a_{g},b_{g}\mid[a_{1},b_{1}]\cdots[a_{g},b_{g}]}$ である。
+:::
+
+## 問題 {#grp:sec-pr2-problems}
+
+::: problem {#grp:prob-presentation-s3}
+$S_{3}\cong\ang{x,y\mid x^{2},\ y^{2},\ (xy)^{3}}$ を示せ。
+:::
+
+::: solution
+$x\mapsto(1\ 2)$, $y\mapsto(2\ 3)$ とすると $(1\ 2)(2\ 3)=(1\ 2\ 3)$ の位数は $3$ なので関係式をみたし、$(1\ 2),(2\ 3)$ は $S_{3}$ を生成する（\ref{grp:sn-generators.2}）。$P\defeq\ang{x,y\mid\cdots}$ で $r\defeq xy$, $s\defeq x$ とおくと $r^{3}=e$, $s^{2}=e$, $srs=x\,xy\,x=yx=(xy)^{-1}=r^{-1}$（$x^{-1}=x$, $y^{-1}=y$）。$y=x\cdot xy=sr$ なので $P=\ang{r,s}$ で、\ref{grp:dihedral-presentation} の Step 2 と同じ議論で $\abs{P}\le 6$。\ref{grp:presentation-recipe} より $S_{3}\cong P$。
+:::
+
+::: problem {#grp:prob-presentation-trivial}
+$\ang{a,b\mid a^{2}b^{-3},\ a^{3}b^{-4}}$ は自明な群であることを示せ。
+:::
+
+::: solution
+関係式は $a^{2}=b^{3}$, $a^{3}=b^{4}$。$a^{3}=a\cdot a^{2}=ab^{3}$ と $a^{3}=b^{4}=b\cdot b^{3}$ から $ab^{3}=bb^{3}$、右から $b^{-3}$ を掛けて $a=b$。すると $a^{2}=a^{3}$ から $a=e$、$b=e$。よって生成元がすべて単位元で、群は自明。
+:::
+
+::: problem {#grp:prob-presentation-infinite}
+$\ang{x,y\mid x^{2},\ y^{2}}$ は無限群であることを示せ（無限二面体群）。
+:::
+
+::: solution
+$\Z$ の置換 $\alpha(n)\defeq -n$, $\beta(n)\defeq 1-n$ は $\alpha^{2}=\beta^{2}=\id$ をみたすので、\ref{grp:von-dyck} より $x\mapsto\alpha$, $y\mapsto\beta$ の準同型がある。$\beta\alpha(n)=1+n$ なので $(\beta\alpha)^{k}(0)=k$、像は無限群 $\ang{\beta\alpha}$ を含む。準同型の像が無限なので、もとの群も無限。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

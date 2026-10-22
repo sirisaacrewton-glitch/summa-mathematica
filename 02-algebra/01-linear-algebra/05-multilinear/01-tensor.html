@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テンソル積とテンソル代数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/01-linear-algebra/05-multilinear/01-tensor.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# テンソル積とテンソル代数 {#lin:page-tensor keywords="tensor product of several modules, universal property for multilinear maps, basis of a tensor product of free modules, dimension is multiplicative, M^* tensor N and Hom(M,N), finite rank maps, rank one maps are pure tensors, dual of a tensor product, tensor product of linear maps, Kronecker product, trace and determinant of f tensor g, tensor algebra T(M), universal property of the tensor algebra, tensors of type (p,q), contravariant and covariant, transformation law, contraction, trace as contraction, complexification"}
+
+可換環 $A$ 上の加群のテンソル積（加群論で定義済み）を、線形代数の言葉で整理する。多重線形写像の普遍性、自由加群のテンソル積の基底、$M^{*}\otimes N\cong\operatorname{Hom}(M,N)$（有限生成自由なとき）、線形写像のテンソル積（クロネッカー積）のトレースと行列式を示す。続いて**テンソル代数** $T(M)=\bigoplus_{k}M^{\otimes k}$ の普遍性（線形写像は代数の準同型に一意に延びる）を示し、ベクトル空間上の $(p,q)$ 型テンソル、成分の変換法則、縮約、トレースが縮約であることを述べる。
+
+> テンソル積の構成と基本的な同型は加群論（\ref{ha:tensor-product}, \ref{mod:tensor-isomorphisms}）を参照し、ここでは最初から可換環上で述べる。
+
+## 記法と定義の確認 {#lin:sec-te-notation}
+
+::: notation
+- テンソル積 $M\otimes_{A}N$ の定義と普遍性（双線形写像 $M\times N\to P$ と線形写像 $M\otimes N\to P$ の対応）、$A$ 加群の構造、可換性・結合性・直和との分配・自由加群の基底は \ref{ha:tensor-product}, \ref{ha:tensor-universal}, \ref{mod:tensor-module-structure}, \ref{mod:tensor-isomorphisms}。多重線形写像は \ref{mod:bilinear}。係数拡大は \ref{mod:extension-of-scalars}。
+- $M^{*}\defeq\operatorname{Hom}_{A}(M,A)$。有限生成自由加群の双対基底、トレース・行列式は \ref{lin:dual-space}, \ref{lin:eigen-def}, \ref{lin:det-endomorphism}（可換環上でも同じ）。
+- $A$ は可換環、$\otimes=\otimes_{A}$。
+- **選択公理**：使わない（無限個の基底を扱う場合も、基底が与えられていれば不要）。
+:::
+
+## 多重線形写像の普遍性 {#lin:sec-te-universal}
+
+::: proposition 多重線形写像の普遍性 {#lin:multilinear-universal keywords="M_1 tensor ... tensor M_k represents multilinear maps; Hom(M_1 tensor ... tensor M_k, P) = Mult(M_1,...,M_k; P)" index="多重線形写像の普遍性|たじゅうせんけいしゃぞうのふへんせい"}
+$M_{1}\otimes\dots\otimes M_{k}$（結合性 \ref{mod:tensor-isomorphisms.2} で括弧を省く）について、$(m_{1},\dots,m_{k})\mapsto m_{1}\otimes\dots\otimes m_{k}$ は多重線形で、任意の多重線形写像 $\beta:M_{1}\times\dots\times M_{k}\to P$ に対し $\bar{\beta}(m_{1}\otimes\dots\otimes m_{k})=\beta(m_{1},\dots,m_{k})$ となる線形写像 $\bar{\beta}$ がただ一つある。
+:::
+
+::: proof
+$k$ についての帰納法（$k=1$ は自明、$k=2$ は \ref{ha:tensor-universal} と \ref{mod:tensor-module-structure}）。$M_{1}\otimes\dots\otimes M_{k}=(M_{1}\otimes\dots\otimes M_{k-1})\otimes M_{k}$ とする。$m_{k}$ を固定すると $\beta(-,\dots,-,m_{k})$ は $k-1$ 重線形なので、帰納法の仮定から線形写像 $\gamma_{m_{k}}:M_{1}\otimes\dots\otimes M_{k-1}\to P$ ができ、$m_{k}\mapsto\gamma_{m_{k}}$ は線形（一意性から）。よって $(t,m_{k})\mapsto\gamma_{m_{k}}(t)$ は双線形で、$k=2$ の場合から $\bar{\beta}$ ができる。一意性は純テンソル $m_{1}\otimes\dots\otimes m_{k}$ が生成することから。
+:::
+
+## 自由加群のテンソル積と Hom {#lin:sec-te-free}
+
+::: theorem テンソル積と Hom {#lin:tensor-hom keywords="for M finitely generated free, M^* tensor N is isomorphic to Hom(M,N) via phi tensor n -> (m -> phi(m) n); rank one maps correspond to pure tensors; (M tensor N)^* = M^* tensor N^*; for vector spaces the image is the finite rank maps" index="テンソル積と Hom|てんそるせきとほむ, 純テンソル|じゅんてんそる"}
+1. $\Theta:M^{*}\otimes N\to\operatorname{Hom}(M,N)$, $\varphi\otimes n\mapsto(m\mapsto\varphi(m)n)$ は線形で、$M$ が有限生成自由なら同型。
+2. $M$, $N$ が有限生成自由なら $(M\otimes N)^{*}\cong M^{*}\otimes N^{*}$（$\varphi\otimes\psi\mapsto(m\otimes n\mapsto\varphi(m)\psi(n))$）。
+3. $A=k$ が体で $V$, $W$ が任意のベクトル空間なら、$\Theta$ は単射で、像は有限階数の線形写像全体。$0$ でない純テンソル $\varphi\otimes w$ は階数 1 の写像に対応し、一般のテンソルの「純テンソルの和として書くときの最小の項数」は対応する写像の階数に等しい。
+:::
+
+::: proof
+**Step 1（1）.** $(\varphi,n)\mapsto(m\mapsto\varphi(m)n)$ は双線形なので $\Theta$ がある。$M$ の基底 $b_{1},\dots,b_{p}$ と双対基底 $b_{i}^{*}$ について、$M^{*}\otimes N=\bigoplus_{i}b_{i}^{*}\otimes N$（\ref{mod:tensor-isomorphisms.4}・\ref[3]{mod:tensor-isomorphisms.3}、$M^{*}\cong A^{p}$）。逆写像 $f\mapsto\sum_{i}b_{i}^{*}\otimes f(b_{i})$ を考えると、$\Theta(\sum b_{i}^{*}\otimes f(b_{i}))(b_{j})=f(b_{j})$ なので $\Theta\circ(\text{逆})=1$、また $\varphi\otimes n=\sum_{i}\varphi(b_{i})b_{i}^{*}\otimes n$ から逆 $\circ\Theta=1$。
+
+**Step 2（2）.** 1 と同様に基底 $b_{i}\otimes c_{j}$ の双対基底が $b_{i}^{*}\otimes c_{j}^{*}$ の像であることを確かめればよい：$(b_{i}^{*}\otimes c_{j}^{*})(b_{k}\otimes c_{l})=\delta_{ik}\delta_{jl}$。
+
+**Step 3（3）.** $t=\sum_{s=1}^{r}\varphi_{s}\otimes w_{s}$ を項数最小に書くと、$w_{s}$ は一次独立（従属なら一つを他で書いて項数を減らせる）、同様に $\varphi_{s}$ も一次独立。$\Theta(t)(v)=\sum\varphi_{s}(v)w_{s}$ の像は $\langle w_{1},\dots,w_{r}\rangle$ に含まれ、$\varphi_{s}$ が一次独立なので $(\varphi_{s}(v))_{s}$ は $k^{r}$ 全体を動き（$V\to k^{r}$, $v\mapsto(\varphi_{s}(v))$ の転置が単射：\ref{lin:dual-properties}）、像はちょうど $\langle w_{s}\rangle$、階数 $r$。とくに $t\neq0$ なら $\Theta(t)\neq0$ で単射。有限階数の $f$ は、像の基底 $w_{1},\dots,w_{r}$ と $f(v)=\sum\varphi_{s}(v)w_{s}$ で定まる $\varphi_{s}$ について $f=\Theta(\sum\varphi_{s}\otimes w_{s})$。
+:::
+
+::: theorem 線形写像のテンソル積 {#lin:tensor-of-maps keywords="f tensor g, Kronecker product of matrices, (f tensor g)(f' tensor g') = ff' tensor gg', tr(f tensor g) = tr f tr g, det(f tensor g) = det(f)^q det(g)^p, eigenvalues of Kronecker products" index="クロネッカー積|くろねっかーせき, 線形写像のテンソル積|せんけいしゃぞうのてんそるせき"}
+$f:M\to M'$, $g:N\to N'$ について $f\otimes g:m\otimes n\mapsto f(m)\otimes g(n)$ は well-defined で、$(f\otimes g)(f'\otimes g')=ff'\otimes gg'$。$M$, $N$ が階数 $p$, $q$ の自由加群（基底 $b_{i}$, $c_{j}$）、$f,g$ が自己準同型（行列 $X$, $Y$）なら：
+1. 基底 $b_{i}\otimes c_{j}$（辞書式順序）に関する $f\otimes g$ の行列は**クロネッカー積** $X\otimes Y\defeq(x_{ij}Y)_{i,j}$（$pq\times pq$ のブロック行列）。
+2. $\operatorname{tr}(f\otimes g)=\operatorname{tr}f\operatorname{tr}g$。
+3. $\det(f\otimes g)=(\det f)^{q}(\det g)^{p}$。
+4. 体上で $\chi_{f}$, $\chi_{g}$ が分解するとき、$f\otimes g$ の固有値は（重複度込みで）$\lambda_{i}\mu_{j}$。
+:::
+
+::: proof
+**Step 1（well-defined と合成）.** $(m,n)\mapsto f(m)\otimes g(n)$ は双線形。合成は純テンソル上で確かめる。
+
+**Step 2（1・2）.** $(f\otimes g)(b_{k}\otimes c_{l})=\sum_{i,j}x_{ik}y_{jl}\,b_{i}\otimes c_{j}$ なので行列成分は $x_{ik}y_{jl}$、ブロックで見て $x_{ik}Y$。トレースは $\sum_{i,j}x_{ii}y_{jj}$。
+
+**Step 3（3）.** $f\otimes g=(f\otimes1_{N})(1_{M}\otimes g)$。$1_{M}\otimes g$ の行列は $I_{p}\otimes Y=\operatorname{diag}(Y,\dots,Y)$（$p$ 個）で行列式 $(\det Y)^{p}$。$f\otimes1_{N}$ は、基底の順序を $c_{j}\otimes b_{i}$ 型に並べ替える（同じ置換で行と列を並べ替えるので行列式は変わらない）と $\operatorname{diag}(X,\dots,X)$（$q$ 個）で行列式 $(\det X)^{q}$。乗法性から。
+
+**Step 4（4）.** 三角化（\ref{lin:triangularization}）で $X$, $Y$ を上三角としてよく、$X\otimes Y$ は辞書式順序で上三角、対角成分は $x_{ii}y_{jj}$。
+:::
+
+## テンソル代数 {#lin:sec-te-algebra}
+
+::: theorem テンソル代数の普遍性 {#lin:tensor-algebra keywords="tensor algebra T(M) = direct sum of M^{tensor k}; graded associative algebra by concatenation; every linear map M -> B into an associative A-algebra extends uniquely to an algebra homomorphism T(M) -> B; T(A^n) is the free noncommutative polynomial ring" index="テンソル代数|てんそるだいすう"}
+$T(M)\defeq\bigoplus_{k\ge0}M^{\otimes k}$（$M^{\otimes0}=A$）に、$(m_{1}\otimes\dots\otimes m_{k})\cdot(m'_{1}\otimes\dots\otimes m'_{l})\defeq m_{1}\otimes\dots\otimes m_{k}\otimes m'_{1}\otimes\dots\otimes m'_{l}$ で積を入れると、次数付きの結合的 $A$ 代数になり（**テンソル代数**）、$\iota:M=M^{\otimes1}\hookrightarrow T(M)$ について次の普遍性をもつ：結合的 $A$ 代数（非可換でよい）$B$ と $A$ 線形写像 $\varphi:M\to B$ について、$\Phi\circ\iota=\varphi$ となる $A$ 代数の準同型 $\Phi:T(M)\to B$ がただ一つある。$M=A^{n}$ なら $T(M)$ は $n$ 変数の非可換多項式環 $A\langle x_{1},\dots,x_{n}\rangle$ と同型。
+:::
+
+::: proof
+**Step 1（積）.** 結合性の同型 $M^{\otimes k}\otimes M^{\otimes l}\cong M^{\otimes(k+l)}$（\ref{mod:tensor-isomorphisms.2}）が双線形な積 $M^{\otimes k}\times M^{\otimes l}\to M^{\otimes(k+l)}$ を与え、直和に延ばす。結合性は純テンソル上で明らか、単位元は $1\in A=M^{\otimes0}$。
+
+**Step 2（存在）.** 各 $k$ で $(m_{1},\dots,m_{k})\mapsto\varphi(m_{1})\cdots\varphi(m_{k})$ は多重線形（$B$ は $A$ 代数で積は双線形）なので、\ref{lin:multilinear-universal} から $\Phi_{k}:M^{\otimes k}\to B$ がある（$\Phi_{0}(a)=a\cdot1$）。$\Phi\defeq\bigoplus\Phi_{k}$ は純テンソルの積を保つので代数の準同型。
+
+**Step 3（一意性）.** $T(M)$ は代数として $\iota(M)$ で生成される（$m_{1}\otimes\dots\otimes m_{k}=\iota(m_{1})\cdots\iota(m_{k})$）ので、準同型は $\iota(M)$ 上の値で決まる。
+
+**Step 4（自由代数）.** $A^{\otimes k}$ の基底は $e_{i_{1}}\otimes\dots\otimes e_{i_{k}}$（\ref{mod:tensor-isomorphisms.5}）で、これを語 $x_{i_{1}}\cdots x_{i_{k}}$ に対応させると積は語の連結になる。
+:::
+
+## ベクトル空間上のテンソル {#lin:sec-te-type}
+
+::: definition (p,q) 型テンソル {#lin:tensor-type keywords="tensors of type (p,q) on V: V^{tensor p} tensor V*^{tensor q}; components; transformation law under change of basis; contravariant and covariant indices" index="テンソル（(p,q) 型）|てんそるぴーきゅーがた, 反変|はんぺん, 共変|きょうへん"}
+有限次元のベクトル空間 $V$（基底 $e_{i}$, 双対基底 $e^{i}\defeq e_{i}^{*}$）について、$T^{p}_{q}(V)\defeq V^{\otimes p}\otimes(V^{*})^{\otimes q}$ の元を **$(p,q)$ 型テンソル**（$p$ 階反変・$q$ 階共変）という。$t=\sum t^{i_{1}\cdots i_{p}}{}_{j_{1}\cdots j_{q}}\,e_{i_{1}}\otimes\dots\otimes e_{i_{p}}\otimes e^{j_{1}}\otimes\dots\otimes e^{j_{q}}$ の係数を**成分**という。$V$ のベクトルは $(1,0)$ 型、線形形式は $(0,1)$ 型、自己準同型は $(1,1)$ 型（\ref{lin:tensor-hom}：$V^{*}\otimes V\cong V\otimes V^{*}\cong\operatorname{End}V$）、双線形形式は $(0,2)$ 型（$(V\otimes V)^{*}\cong V^{*}\otimes V^{*}$）。
+:::
+
+::: proposition 成分の変換法則と縮約 {#lin:transformation-law keywords="under a change of basis e'_j = sum P_{ij} e_i, contravariant components transform by P^{-1} and covariant ones by P; contraction V^* tensor V -> k; trace is the contraction of the (1,1) tensor of an endomorphism" index="変換法則|へんかんほうそく, 縮約|しゅくやく"}
+1. 基底変換 $e'_{j}=\sum_{i}P_{ij}e_{i}$ のもとで、双対基底は $e'^{j}=\sum_{i}(P^{-1})_{ji}e^{i}$ と変わり、ベクトルの成分は $v'^{j}=\sum_{i}(P^{-1})_{ji}v^{i}$、線形形式の成分は $\varphi'_{j}=\sum_{i}P_{ij}\varphi_{i}$。一般の $(p,q)$ 型テンソルの成分は、上付きの添字ごとに $P^{-1}$、下付きの添字ごとに $P$ で変わる。
+2. **縮約** $c:V^{*}\otimes V\to k$, $\varphi\otimes v\mapsto\varphi(v)$ について、自己準同型 $f$ に対応するテンソル $t_{f}\in V^{*}\otimes V$ の縮約は $\operatorname{tr}f$。より一般に、$T^{p}_{q}$ から一つの上付きと一つの下付きの添字を縮約した $T^{p-1}_{q-1}$ への写像は基底によらない。
+:::
+
+::: proof
+**Step 1（1）.** $e'^{j}(e'_{l})=\delta_{jl}$ を満たすことを確かめる：$\sum_{i}(P^{-1})_{ji}e^{i}(\sum_{m}P_{ml}e_{m})=(P^{-1}P)_{jl}$。$v=\sum v^{i}e_{i}=\sum v'^{j}e'_{j}$ から $v^{i}=\sum_{j}P_{ij}v'^{j}$、すなわち $v'=P^{-1}v$。$\varphi_{j}'=\varphi(e'_{j})=\sum_{i}P_{ij}\varphi(e_{i})$。テンソル積の各因子に施す。
+
+**Step 2（2）.** $c$ は双線形写像 $(\varphi,v)\mapsto\varphi(v)$ から来るので基底によらない。$f=\Theta(\sum_{i}e^{i}\otimes f(e_{i}))$（\ref{lin:tensor-hom} の Step 1）なので $c(t_{f})=\sum_{i}e^{i}(f(e_{i}))=\sum_{i}[f]_{ii}=\operatorname{tr}f$。一般の縮約も、該当する二つの因子に $c$ を施し他を恒等写像とする線形写像で、基底によらない。
+:::
+
+::: hypcheck
+- **有限生成自由**：\ref{lin:tensor-hom.1}・\ref[2]{lin:tensor-hom.2} で双対基底を使う。無限次元のベクトル空間では $V^{*}\otimes W\to\operatorname{Hom}(V,W)$ は同型でなく（像は有限階数の写像）、$(V\otimes W)^{*}$ は $V^{*}\otimes W^{*}$ より真に大きい。自由でない加群では、$\mathbb{Z}$ 上 $(\mathbb{Z}/2)^{*}=0$ なのに $\operatorname{Hom}(\mathbb{Z}/2,\mathbb{Z}/2)\neq0$。
+- **可換性**：$A$ が可換なので $M\otimes_{A}N$ が $A$ 加群になり、行列式・トレースが使える。
+- **体であること**：\ref{lin:tensor-hom.3}（純テンソルの最小項数と階数）と \ref{lin:tensor-of-maps.4} で使う。
+- **選択公理**：使わない。
+:::
+
+::: supplement
+**前提を弱めると.** \ref{lin:tensor-hom.1} は、$M$ が有限生成射影加群なら成り立ち、逆にこの写像が同型になる（すべての $N$ で）ことは $M$ が有限生成射影であることと同値であることが知られている（\ref{cat:page-symmetric-monoidal-closed} の文脈：有限生成射影加群はモノイダル圏の双対可能な対象）。
+
+**似た定理.** 3 次以上のテンソル（$V_{1}\otimes V_{2}\otimes V_{3}$ の元）の「純テンソルの和としての最小項数」（**テンソル階数**）は行列の階数のような良い性質をもたず、計算が NP 困難であることが知られている（ホースタッド）。行列の積の計算量（ストラッセンのアルゴリズム）は、行列の積を表す 3 次のテンソルの階数の問題である。
+
+**計算の観点.** クロネッカー積は $X\otimes Y$ の線形方程式 $(X\otimes Y)\operatorname{vec}(Z)=\operatorname{vec}(YZ{}^{t}X)$（行列の列を縦に並べる $\operatorname{vec}$）を通して、行列方程式（シルヴェスター方程式 $XZ+ZY=C$ など）を大きな線形方程式に直すのに使われる。
+:::
+
+## 高い視点 {#lin:sec-te-viewpoint}
+
+::: remark テンソル積は「双線形の線形化」
+テンソル積は、双線形写像という非線形な対象を線形写像に変える普遍的な構成で、圏論的には加群の圏を**対称モノイダル閉圏**（$\operatorname{Hom}$ が右随伴）にする（\ref{ha:tensor-hom-adjunction}）。有限次元ベクトル空間の圏では各対象が双対 $V^{*}$ をもち、$V^{*}\otimes V\to k$（縮約）と $k\to V\otimes V^{*}$（恒等写像）が双対性を与えるので、トレースは「恒等写像を作って縮約する」という圏論的なトレースとして基底なしに定義される（\ref{cat:page-symmetric-monoidal-closed}）。テンソル代数は「$M$ 上の自由な結合代数」で、忘却関手（代数 → 加群）の左随伴である。比喩で言えば、テンソル積は二つの空間の「すべての組み合わせを、線形性のルールだけで整理した空間」で、行列の世界の積（クロネッカー積）と、行列を分解した世界（階数 1 の和）をつなぐ。
+:::
+
+## 問題 {#lin:sec-te-problems}
+
+::: problem {#lin:prob-te-pure}
+$k^{2}\otimes k^{2}$ の元 $t=e_{1}\otimes e_{1}+e_{2}\otimes e_{2}$ は純テンソル $v\otimes w$ でないことを示せ。
+:::
+
+::: solution
+$k^{2}\otimes k^{2}\cong M_{2}(k)$（$e_{i}\otimes e_{j}\mapsto E_{ij}$、\ref{lin:tensor-hom.3} と同じ同型）で、純テンソル $v\otimes w$ は行列 $v\,{}^{t}w$（階数 $\le1$）に対応する。$t$ は $I_{2}$（階数 2）に対応するので純テンソルでない。
+:::
+
+::: problem {#lin:prob-te-kronecker-det}
+$X\in M_{2}(A)$, $Y\in M_{3}(A)$ について $\det(X\otimes Y)$ と $\operatorname{tr}(X\otimes Y)$ を $\det X,\det Y,\operatorname{tr}X,\operatorname{tr}Y$ で表せ。
+:::
+
+::: solution
+\ref{lin:tensor-of-maps} で $p=2$, $q=3$：$\det(X\otimes Y)=(\det X)^{3}(\det Y)^{2}$、$\operatorname{tr}(X\otimes Y)=\operatorname{tr}X\operatorname{tr}Y$。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{lin:sec-te-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

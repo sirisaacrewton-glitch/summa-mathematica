@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>行列の関数と計算 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/01-linear-algebra/03-eigen/03-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 行列の関数と計算 {#lin:page-matrix-functions keywords="polynomial functional calculus, f(X) depends only on f modulo the minimal polynomial, Lagrange-Sylvester interpolation, spectral projections, functions of Jordan blocks, operator norm, matrix exponential, exp(X+Y) = exp X exp Y for commuting X Y, det exp X = exp tr X, Newton identities, coefficients of the characteristic polynomial from traces of powers, Jacobi's formula for the derivative of the determinant, Gershgorin circle theorem, power method"}
+
+行列の多項式 $f(X)$ は $f$ を最小多項式で割った余りだけで決まり、固有値での値（と微分係数）から補間で求まる。これを使って、べき級数で定まる関数（とくに**行列の指数関数** $e^{X}$）を扱い、$e^{X+Y}=e^{X}e^{Y}$（$XY=YX$）と $\det e^{X}=e^{\operatorname{tr}X}$ を示す。固有多項式の係数はトレースの冪から**ニュートンの恒等式**で決まり、行列式の微分は**ヤコビの公式**で与えられる。数値計算の側からは、固有値の位置を評価する**ゲルシュゴリンの定理**と、最大固有値を求める**冪乗法**の収束を示す。
+
+> 解析的な部分（級数の収束）は、$\mathbb{R}$ の完備性と絶対収束級数の基本性質を使う。
+
+## 記法と定義の確認 {#lin:sec-mf-notation}
+
+::: notation
+- 固有多項式・最小多項式・ケーリー–ハミルトン・核の分解・対角化・三角化は \ref{lin:char-poly}, \ref{lin:minimal-polynomial}, \ref{lin:cayley-hamilton}, \ref{lin:kernel-decomposition}, \ref{lin:diagonalizable}, \ref{lin:triangularization}。一般固有空間・ジョルダン標準形・ジョルダン–シュバレー分解は \ref{lin:generalized-eigenspaces}, \ref{lin:jordan-normal-form}, \ref{lin:jordan-chevalley}。余因子展開と余因子行列は \ref{lin:cofactor-expansion}, \ref{lin:adjugate}。中国剰余定理は \tref{ring:chinese-remainder}。
+- 解析：$\mathbb{C}$ の完備性、絶対収束する級数は収束し並べ替えてよく、絶対収束する二つの級数のコーシー積は積に収束すること（\ref{calc:cauchy-product}。実数の級数として示したが、絶対値の三角不等式と完備性だけを使うので、複素数の級数でも同じ証明が通る）。
+- $X\in M_{n}(\mathbb{C})$ の**作用素ノルム**を $\|X\|\defeq\max_{i}\sum_{j}|x_{ij}|$（最大行和）とする。$\|X+Y\|\le\|X\|+\|Y\|$, $\|XY\|\le\|X\|\|Y\|$, $|x_{ij}|\le\|X\|$（$\|Xv\|_{\infty}\le\|X\|\|v\|_{\infty}$ による）。
+- **選択公理**：使わない。
+:::
+
+## 多項式による関数 {#lin:sec-mf-polynomial}
+
+::: theorem 多項式の値と補間 {#lin:polynomial-calculus keywords="f(X) = g(X) iff mu_X divides f - g; Lagrange-Sylvester interpolation; spectral projections P_i are polynomials in X; f(X) = sum f(lambda_i) P_i for diagonalizable X; f(J_e(lambda)) = sum f^{(j)}(lambda)/j! N^j" index="スペクトル射影|すぺくとるしゃえい, ラグランジュ–シルヴェスター補間|らぐらんじゅしるゔぇすたーほかん"}
+体 $k$ 上の $X\in M_{n}(k)$ について：
+1. $f,g\in k[t]$ について $f(X)=g(X)\iff\mu_{X}\mid f-g$。
+2. $\chi_{X}=\prod(t-\lambda_{i})^{m_{i}}$ と分解するとき、一般固有空間 $\tilde{V}_{i}$ への射影 $P_{i}$（分解 $k^{n}=\bigoplus\tilde{V}_{i}$ に沿った射影）は $X$ の多項式で、$\sum P_{i}=I$, $P_{i}P_{j}=\delta_{ij}P_{i}$。
+3. $X$ が対角化可能なら $f(X)=\sum_{i}f(\lambda_{i})P_{i}$。
+4. $f(J_{e}(\lambda))=\sum_{j=0}^{e-1}\frac{f^{(j)}(\lambda)}{j!}N^{j}$（$N=J_{e}(0)$、$f^{(j)}/j!$ は形式的なテイラー係数で、標数によらず $f(\lambda+s)=\sum_{j}\frac{f^{(j)}(\lambda)}{j!}s^{j}$ の係数として定める）。
+:::
+
+::: proof
+**Step 1（1）.** $f(X)-g(X)=(f-g)(X)$ で、$\mu_{X}$ は $\{h : h(X)=0\}$ の生成元。
+
+**Step 2（2）.** 中国剰余定理で $p_{i}\in k[t]$ を $p_{i}\equiv\delta_{ij}\pmod{(t-\lambda_{j})^{m_{j}}}$ ととる。$p_{i}(X)$ は $\tilde{V}_{j}$ 上で $\delta_{ij}$ 倍（$(t-\lambda_{j})^{m_{j}}$ は $\tilde{V}_{j}$ で $0$）なので $P_{i}=p_{i}(X)$。関係式は射影の定義から。
+
+**Step 3（3）.** 対角化可能なら $\tilde{V}_{i}=V_{\lambda_{i}}$ で、$f(X)$ は $V_{\lambda_{i}}$ 上で $f(\lambda_{i})$ 倍。
+
+**Step 4（4）.** $J_{e}(\lambda)=\lambda I+N$ で $\lambda I$ と $N$ は可換、$N^{e}=0$。$f(\lambda+s)=\sum_{j}c_{j}s^{j}$（$c_{j}$ はテイラー係数）に $s=N$ を代入する（$k[s]\to M_{n}(k)$, $s\mapsto N$ は環準同型で、$\lambda+s\mapsto J_{e}(\lambda)$）。
+:::
+
+## 行列の指数関数 {#lin:sec-mf-exponential}
+
+::: theorem 行列の指数関数 {#lin:matrix-exponential keywords="exp X = sum X^m/m! converges absolutely; exp(P^{-1}XP) = P^{-1} exp(X) P; exp(X+Y) = exp X exp Y if XY = YX; exp X is invertible; det exp X = exp tr X; derivative of exp(tX)" index="行列の指数関数|ぎょうれつのしすうかんすう"}
+$X,Y\in M_{n}(\mathbb{C})$ について
+1. $e^{X}\defeq\sum_{m\ge0}X^{m}/m!$ は成分ごとに絶対収束し、$\|e^{X}\|\le e^{\|X\|}$。
+2. $e^{P^{-1}XP}=P^{-1}e^{X}P$、$X$ が三角行列（対角成分 $\lambda_{i}$）なら $e^{X}$ も三角行列で対角成分は $e^{\lambda_{i}}$。
+3. $XY=YX$ なら $e^{X+Y}=e^{X}e^{Y}$。とくに $e^{X}$ は可逆で $(e^{X})^{-1}=e^{-X}$。
+4. $\det e^{X}=e^{\operatorname{tr}X}$。
+5. $\frac{d}{ds}e^{sX}=Xe^{sX}$（成分ごとの微分）。
+:::
+
+::: proof
+**Step 1（1）.** $|(X^{m})_{ij}|\le\|X^{m}\|\le\|X\|^{m}$ で、$\sum\|X\|^{m}/m!=e^{\|X\|}$ が収束するので、各成分の級数は絶対収束（比較判定）。部分和の作用素ノルムも $e^{\|X\|}$ 以下。
+
+**Step 2（2）.** 部分和について $(P^{-1}XP)^{m}=P^{-1}X^{m}P$ で、行列の積は成分の一次式なので極限と交換する。三角行列の冪は三角行列で対角成分は $\lambda_{i}^{m}$。
+
+**Step 3（3）.** $XY=YX$ なら $(X+Y)^{m}/m!=\sum_{a+b=m}\frac{X^{a}}{a!}\frac{Y^{b}}{b!}$（二項定理）。右辺は二つの絶対収束級数 $\sum X^{a}/a!$, $\sum Y^{b}/b!$ のコーシー積の第 $m$ 項で、絶対収束級数のコーシー積は積に収束するので（成分ごとに：$(X^{a}Y^{b})_{ij}=\sum_{l}(X^{a})_{il}(Y^{b})_{lj}$ の有限和で、各 $l$ について絶対収束級数の積）、$e^{X+Y}=e^{X}e^{Y}$。$Y=-X$ で $e^{X}e^{-X}=e^{0}=I$。
+
+**Step 4（4）.** \ref{lin:triangularization}（$\mathbb{C}$ は代数的閉体：代数学の基本定理 \tref{fld:fundamental-theorem-algebra}）で $X=PTP^{-1}$（$T$ は上三角）。2 から $\det e^{X}=\det e^{T}=\prod e^{\lambda_{i}}=e^{\sum\lambda_{i}}=e^{\operatorname{tr}X}$。
+
+**Step 5（5）.** 成分ごとの冪級数 $\sum_{m}s^{m}(X^{m})_{ij}/m!$ は収束半径が無限大なので項別微分でき、$\sum_{m\ge1}s^{m-1}X^{m}/(m-1)!=Xe^{sX}$（冪級数の項別微分は 1 変数の解析で扱う）。
+:::
+
+::: example 指数関数の計算
+1. $X=\begin{pmatrix}0&-\theta\\\theta&0\end{pmatrix}$ なら $X^{2}=-\theta^{2}I$ で、偶数次と奇数次に分けて $e^{X}=\cos\theta\,I+\tfrac{\sin\theta}{\theta}X=\begin{pmatrix}\cos\theta&-\sin\theta\\\sin\theta&\cos\theta\end{pmatrix}$（回転）。
+2. $J_{e}(\lambda)$ について、\ref{lin:polynomial-calculus.4} と同じ計算（$e^{\lambda I+N}=e^{\lambda}e^{N}$、$e^{N}=\sum_{j<e}N^{j}/j!$）で $e^{J_{e}(\lambda)}=e^{\lambda}\sum_{j<e}N^{j}/j!$。
+3. 線形常微分方程式 $x'(s)=Xx(s)$, $x(0)=x_{0}$ の解は $x(s)=e^{sX}x_{0}$（5 から解であること。一意性は常微分方程式の系列で扱う予定）。
+:::
+
+## 固有多項式の係数とトレース {#lin:sec-mf-newton}
+
+::: theorem ニュートンの恒等式 {#lin:newton-identities keywords="Newton identities k e_k = sum_{i=1}^{k} (-1)^{i-1} e_{k-i} p_i with p_i = tr X^i; in characteristic zero chi_X is determined by tr X, ..., tr X^n; X nilpotent iff tr X^i = 0 for all i" index="ニュートンの恒等式|にゅーとんのこうとうしき"}
+可換環 $A$ 上の $X\in M_{n}(A)$ について、$e_{k}=e_{k}(X)$（\ref{lin:char-poly.1}、$e_{0}=1$）、$p_{i}\defeq\operatorname{tr}(X^{i})$ とすると、$1\le k\le n$ について
+$$
+ke_{k}=\sum_{i=1}^{k}(-1)^{i-1}e_{k-i}p_{i}.
+$$
+とくに $A$ が標数 $0$ の体なら、$\chi_{X}$ は $\operatorname{tr}X,\dots,\operatorname{tr}X^{n}$ で決まり、$X$ が冪零 $\iff$ すべての $i\le n$ で $\operatorname{tr}X^{i}=0$。
+:::
+
+::: proof
+**Step 1（帰着）.** 両辺は $X$ の成分の整数係数の多項式なので、一般の行列の技法（\ref{lin:sylvester-identity} の補足）で $F=\mathbb{Q}(x_{ij})$ 上の $\chi_{X}$ の分解体 $\bar{F}$（\ref{fld:splitting-field-existence}、選択公理は不要）上で示せばよい。$\bar{F}$ 上で \ref{lin:triangularization} から $X\sim T$（上三角、対角成分 $\lambda_{1},\dots,\lambda_{n}$）。$e_{k}$ と $p_{i}$ は相似不変で、$e_{k}$ は $\lambda$ の $k$ 次基本対称式（$\chi=\prod(t-\lambda_{i})$ の係数）、$p_{i}=\sum_{l}\lambda_{l}^{i}$（$T^{i}$ の対角成分は $\lambda_{l}^{i}$）。
+
+**Step 2（対称式の恒等式）.** $E(u)\defeq\prod_{l}(1-\lambda_{l}u)=\sum_{k}(-1)^{k}e_{k}u^{k}$ の対数微分 $-uE'(u)/E(u)=\sum_{l}\lambda_{l}u/(1-\lambda_{l}u)=\sum_{i\ge1}p_{i}u^{i}$（形式的冪級数として）。よって $-uE'(u)=E(u)\sum_{i\ge1}p_{i}u^{i}$。$u^{k}$ の係数を比べると $-(-1)^{k}ke_{k}=\sum_{i=1}^{k}(-1)^{k-i}e_{k-i}p_{i}$、両辺に $(-1)^{k+1}$ を掛けて結論。
+
+**Step 3（標数 0）.** $k$ が可逆なので、恒等式から $e_{k}$ が $p_{1},\dots,p_{k}$ で帰納的に決まる。冪零 $\iff\chi_{X}=t^{n}$（\ref{lin:nilpotent-trace}）$\iff$ すべての $e_{k}=0$（$k\ge1$）$\iff$ すべての $p_{i}=0$（$i\le n$）。
+:::
+
+::: theorem ヤコビの公式 {#lin:jacobi-formula keywords="Jacobi's formula: derivative of det X(s) equals tr(adj X(s) X'(s)); d det at I is the trace" index="ヤコビの公式|やこびのこうしき" refname="ヤコビの公式"}
+可換環 $A$ 上の多項式行列 $X(s)\in M_{n}(A[s])$ について、形式的な微分で
+$$
+\frac{d}{ds}\det X(s)=\operatorname{tr}\bigl(\operatorname{adj}X(s)\,X'(s)\bigr).
+$$
+とくに $\det(I+sY)=1+s\operatorname{tr}Y+O(s^{2})$。
+:::
+
+::: proof
+ライプニッツの式で各項は $n$ 個の成分の積で、積の微分法則から $\frac{d}{ds}\det X=\sum_{j}\det X^{[j]}$（$X^{[j]}$ は第 $j$ 列を微分したもの）。第 $j$ 列で余因子展開すると $\det X^{[j]}=\sum_{i}x_{ij}'\Delta_{ij}$。よって和は $\sum_{i,j}\Delta_{ij}x'_{ij}=\sum_{j}(\operatorname{adj}(X)X')_{jj}$（$(\operatorname{adj}X)_{ji}=\Delta_{ij}$）。後半は $X=I+sY$, $s=0$ で $\operatorname{adj}I=I$。
+:::
+
+## 固有値の数値計算の観点 {#lin:sec-mf-numerical}
+
+::: theorem ゲルシュゴリンの円板定理 {#lin:gershgorin keywords="every eigenvalue of X lies in the union of the discs |z - x_ii| <= sum_{j != i refname="ゲルシュゴリンの円板定理"} |x_ij|" index="ゲルシュゴリンの定理|げるしゅごりんのていり"}
+$X\in M_{n}(\mathbb{C})$ の固有値 $\lambda$ について、ある $i$ で $|\lambda-x_{ii}|\le\sum_{j\neq i}|x_{ij}|$。
+:::
+
+::: proof
+固有ベクトル $v$ の成分で $|v_{i}|$ が最大の $i$ をとる（$v_{i}\neq0$）。$(Xv)_{i}=\lambda v_{i}$ から $(\lambda-x_{ii})v_{i}=\sum_{j\neq i}x_{ij}v_{j}$、絶対値をとって $|\lambda-x_{ii}||v_{i}|\le\sum_{j\neq i}|x_{ij}||v_{i}|$。（\ref{nt:diagonally-dominant} は $\lambda=0$ の場合にあたる：狭義対角優位なら $0$ はどの円板にも入らない。）
+:::
+
+::: theorem 冪乗法 {#lin:power-method keywords="power method: if X is diagonalizable with a strictly dominant eigenvalue, X^m v / |X^m v| converges to an eigenvector direction for generic v, with rate |lambda_2/lambda_1|^m" index="冪乗法|べきじょうほう"}
+$X\in M_{n}(\mathbb{C})$ が対角化可能で、固有値が $|\lambda_{1}|>|\lambda_{2}|\ge\dots\ge|\lambda_{n}|$ をみたすとする。$v\in\mathbb{C}^{n}$ の $\lambda_{1}$ 成分（固有ベクトルの基底での係数）$c_{1}$ が $0$ でなければ、
+$$
+\lambda_{1}^{-m}X^{m}v=c_{1}u_{1}+O\bigl(|\lambda_{2}/\lambda_{1}|^{m}\bigr)\qquad(m\to\infty)
+$$
+（$u_{1}$ は $\lambda_{1}$ の固有ベクトル）で、とくに $X^{m}v$ の方向は $u_{1}$ の方向に収束する。
+:::
+
+::: proof
+固有ベクトルの基底 $u_{1},\dots,u_{n}$ で $v=\sum c_{l}u_{l}$ と書くと $\lambda_{1}^{-m}X^{m}v=c_{1}u_{1}+\sum_{l\ge2}c_{l}(\lambda_{l}/\lambda_{1})^{m}u_{l}$ で、$|\lambda_{l}/\lambda_{1}|\le|\lambda_{2}/\lambda_{1}|<1$。
+:::
+
+::: remark 実用的な固有値計算
+実際の数値計算では、行列をヘッセンベルグ形（三重対角）に直交変換で変形したのち、シフト付きの **QR 法**（$X_{k}=Q_{k}R_{k}$, $X_{k+1}=R_{k}Q_{k}$ を繰り返す）でシューア形（上三角）に収束させるのが標準的で、$O(n^{3})$ の手間で全固有値が得られることが知られている（本サイト未収録）。QR 法は冪乗法を部分空間全体に同時に施すものと解釈できる。
+:::
+
+::: hypcheck
+- **可換性**：\ref{lin:matrix-exponential.3} で $XY=YX$ が本質的。$X=\begin{pmatrix}0&1\\0&0\end{pmatrix}$, $Y=\begin{pmatrix}0&0\\1&0\end{pmatrix}$ では $e^{X+Y}\neq e^{X}e^{Y}$（左辺は対称行列 $\begin{pmatrix}\cosh1&\sinh1\\\sinh1&\cosh1\end{pmatrix}$、右辺は $\begin{pmatrix}2&1\\1&1\end{pmatrix}$）。
+- **標数 0**：ニュートンの恒等式から $e_{k}$ を求めるのに $k$ で割る。標数 $p$ では $\operatorname{tr}X^{i}=0$（すべての $i$）でも冪零とは限らない（$\mathbb{F}_{2}$ 上の $I_{2}$：$\operatorname{tr}I^{i}=2=0$）。
+- **完備性**：指数関数の収束に $\mathbb{C}$ の完備性を使う。
+- **支配的な固有値**：冪乗法で $|\lambda_{1}|>|\lambda_{2}|$ と $c_{1}\neq0$ が必要（$c_{1}=0$ となる $v$ は測度 0 の部分空間だが、丸め誤差で実際にはふつう回復する）。
+- **選択公理**：使わない。
+:::
+
+::: supplement
+**前提を弱めると.** 指数関数は任意の完備なノルム付き代数（バナッハ環）で同じく定義でき、可換な元について $e^{x+y}=e^{x}e^{y}$ が成り立つ。非可換な場合はベイカー–キャンベル–ハウスドルフの公式が $e^{X}e^{Y}=e^{Z}$ の $Z$ を交換子で表すことが知られている。$\det e^{X}=e^{\operatorname{tr}X}$ は、$\det$ がリー群 $\mathrm{GL}_{n}$ から $\mathbb{C}^{\times}$ への準同型で、その微分がトレース（ヤコビの公式）であることの帰結とも読める。
+
+**似た定理.** ゲルシュゴリンの定理は列についても成り立ち（転置）、各連結成分に含まれる固有値の個数は円板の個数に等しいことも知られている（連続性による議論）。
+
+**計算の観点.** 行列関数 $f(X)$ の計算は、対角化可能なら $Pf(D)P^{-1}$、一般にはシューア分解とパルレットの漸化式、指数関数ではスケーリングと二乗（$e^{X}=(e^{X/2^{s}})^{2^{s}}$）とパデ近似が標準的とされる。
+:::
+
+## 高い視点 {#lin:sec-mf-viewpoint}
+
+::: remark 関数計算と指数写像
+$f\mapsto f(X)$ は環準同型 $k[t]/(\mu_{X})\to M_{n}(k)$ で、$k[t]/(\mu_{X})$ は中国剰余定理で各固有値での「$(t-\lambda)^{e}$ を法とした局所的なテイラー展開」の積に分かれる。これが補間（\ref{lin:polynomial-calculus}）の正体で、正則関数でも同じ式で $f(X)$ が定義できる（正則関数計算、関数解析で一般化される）。$X\mapsto e^{X}$ はリー環 $M_{n}(\mathbb{C})$ からリー群 $\mathrm{GL}_{n}(\mathbb{C})$ への**指数写像**で、$\det e^{X}=e^{\operatorname{tr}X}$ は指数写像と群準同型 $\det$、リー環準同型 $\operatorname{tr}$ が可換図式をなすことを言う。比喩で言えば、行列の関数は「固有値ごとに関数を当てはめる」操作で、重なった固有値（ジョルダン細胞）では値だけでなく傾き（微分係数）まで当てはめる必要がある。
+:::
+
+## 問題 {#lin:sec-mf-problems}
+
+::: problem {#lin:prob-mf-nilpotent-exp}
+$N=J_{3}(0)$ について $e^{sN}$ を求め、$\det e^{sN}=1$ を確かめよ。
+:::
+
+::: solution
+$N^{3}=0$ なので $e^{sN}=I+sN+\tfrac{s^{2}}{2}N^{2}=\begin{pmatrix}1&s&s^{2}/2\\0&1&s\\0&0&1\end{pmatrix}$。上三角で対角成分が $1$ なので $\det=1=e^{\operatorname{tr}(sN)}=e^{0}$。
+:::
+
+::: problem {#lin:prob-mf-newton-two}
+$n=2$ のニュートンの恒等式を書き下し、$\det X=\tfrac12((\operatorname{tr}X)^{2}-\operatorname{tr}X^{2})$ を確かめよ（$2$ が可逆なとき）。
+:::
+
+::: solution
+$k=1$：$e_{1}=p_{1}$。$k=2$：$2e_{2}=e_{1}p_{1}-e_{0}p_{2}=p_{1}^{2}-p_{2}$。$e_{2}=\det X$ なので $\det X=\tfrac12((\operatorname{tr}X)^{2}-\operatorname{tr}X^{2})$。直接：$X=\begin{pmatrix}a&b\\c&d\end{pmatrix}$ で $(a+d)^{2}-(a^{2}+2bc+d^{2})=2(ad-bc)$。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{lin:sec-mf-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>関数の表示 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/02-complex-analysis/03-global/01-representations.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 関数の表示 {#cx:page-representations keywords="infinite products, convergence of infinite products of holomorphic functions, logarithmic derivative of a product, Mittag-Leffler theorem, prescribed principal parts, Weierstrass elementary factors, Weierstrass factorization theorem, meromorphic functions are quotients of entire functions, partial fraction expansion of pi cot pi z, product formula for sin pi z, Wallis product, complex Gamma function, meromorphic continuation, residues of Gamma, reflection formula, 1/Gamma is entire"}
+
+多項式は根で決まり、有理関数は極とその主要部で決まる（\ref{cx:meromorphic-sphere-rational}）。整関数や有理型関数でも、零点や極を指定した関数を作れるか。このページでは、指定した点に指定した主要部をもつ有理型関数が存在すること（**ミッタク–レフラーの定理**）と、指定した点を零点にもつ整関数が存在し、どの整関数も零点の積と零点のない因子に分解できること（**ワイエルシュトラスの因数分解定理**）を示す。応用として、$\pi\cot\pi z$ の部分分数展開と $\sin\pi z$ の無限積表示 $\sin\pi z=\pi z\prod_{n\ge1}\bigl(1-\frac{z^{2}}{n^{2}}\bigr)$ を導き、ガンマ関数を複素平面全体の有理型関数に延ばして相補公式 $\Gamma(z)\Gamma(1-z)=\frac{\pi}{\sin\pi z}$ を示す。
+
+## 記法と定義の確認 {#cx:sec-rp-notation}
+
+::: notation
+- 正則関数・有理型関数・主要部 \ref{cx:holomorphic}, \ref{cx:meromorphic}, \ref{cx:isolated-singularity}、ワイエルシュトラスの収束定理 \tref{cx:weierstrass-convergence}、一致の定理 \tref{cx:identity-theorem}、零点の\term[位数]{cx:zero-order} \ref{cx:zero-order}、正則な対数 \ref{cx:holomorphic-log}（$\C$ は凸なので単連結）、リウヴィルの定理 \tref{cx:liouville}。
+- 留数による級数の和 \ref{cx:residue-series} とその証明、余接の評価 \ref{cx:cot-bound}、留数の計算 \ref{cx:residue-computation}、冪を含む積分 \ref{cx:power-integral}。
+- 冪級数 \ref{cx:power-series-holomorphic}、対数の主値 \ref{cx:principal-log} と $\operatorname{Log}(1+w)$ の級数 \ref{cx:log-holomorphic}、指数関数 \ref{cx:exp}。
+- 実のガンマ関数とベータ関数 \ref{calc:gamma}, \ref{calc:gamma-basic}, \ref{calc:beta-function}、ウォリスの積 \ref{calc:wallis}、積分記号下の微分 \ref{calc:differentiation-under-integral}、置換積分 \ref{calc:substitution-parts}、広義積分 \ref{calc:improper-integral}。
+- $t>0$ と $z\in\C$ について $t^{z}\defeq e^{z\log t}$。$|t^{z}|=t^{\operatorname{Re}z}$。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 無限積 {#cx:sec-rp-products}
+
+::: lemma 有限積の評価 {#cx:product-estimate keywords="|prod (1+a_k) - 1| <= prod (1+|a_k|) - 1 <= e^{sum |a_k|} - 1" index=""}
+複素数 $a_{1},\dots,a_{n}$ について
+$$
+\Bigl|\prod_{k=1}^{n}(1+a_{k})-1\Bigr|\le\prod_{k=1}^{n}(1+|a_{k}|)-1\le e^{\sum_{k}|a_{k}|}-1.
+$$
+:::
+
+::: proof
+$\prod(1+a_{k})-1$ を展開すると、$a_{k}$ の異なる添字の積 $a_{k_{1}}\cdots a_{k_{j}}$（$j\ge1$）の和で、三角不等式から絶対値は同じ展開の $|a_{k}|$ 版、すなわち $\prod(1+|a_{k}|)-1$ 以下。$1+x\le e^{x}$（$x\ge0$）から 2 番目。
+:::
+
+::: theorem 正則関数の無限積 {#cx:infinite-product keywords="if sum |a_n(z)| converges uniformly on compact sets then prod (1 + a_n(z)) converges locally uniformly to a holomorphic function whose zeros are exactly those of the factors with multiplicity; logarithmic derivative of the product" index="無限積|むげんせき"}
+$U$ を開集合、$a_{n}$ を $U$ で正則な関数とし、$\sum_{n}|a_{n}(z)|$ が $U$ 上で広義一様収束するとする。
+1. $P_{N}(z)\defeq\prod_{n=1}^{N}(1+a_{n}(z))$ は $U$ 上で広義一様に正則関数 $P$ に収束する。
+2. $z\in U$ について $P(z)=0$ $\iff$ ある $n$ で $1+a_{n}(z)=0$。さらに $z$ での $P$ の零点の\term[位数]{cx:zero-order}は、各因子 $1+a_{n}$ の $z$ での零点の位数の和（有限和）に等しい。
+3. $P$ が $U$ の各連結成分で恒等的に $0$ でないなら、$P$ の零点でない点で $\displaystyle\frac{P'}{P}=\sum_{n}\frac{a_{n}'}{1+a_{n}}$（広義一様収束）。
+:::
+
+::: proof
+**Step 1（収束）.** コンパクト集合 $K\subset U$ で $S\defeq\sup_{K}\sum_{n}|a_{n}|<\infty$。\ref{cx:product-estimate} から $|P_{N}|\le e^{S}$。$\varepsilon>0$ について、一様収束から $N_{0}$ があって $\sup_{K}\sum_{n>N_{0}}|a_{n}|<\varepsilon$。$M>N\ge N_{0}$ なら
+$$
+|P_{M}-P_{N}|=|P_{N}|\Bigl|\prod_{n=N+1}^{M}(1+a_{n})-1\Bigr|\le e^{S}(e^{\varepsilon}-1)
+$$
+（\ref{cx:product-estimate}）。よって $(P_{N})$ は $K$ 上一様コーシーで、一様収束する。極限 $P$ はワイエルシュトラスの収束定理から正則。
+
+**Step 2（零点）.** $z_{0}\in U$ と、その近傍の閉円板 $K\subset U$ をとる。$N_{0}$ を $s\defeq\sup_{K}\sum_{n>N_{0}}|a_{n}|<\log2$ となるようにとる。$Q_{M}\defeq\prod_{n=N_{0}+1}^{M}(1+a_{n})$ は $K$ 上一様に $Q$ に収束し（Step 1 と同じ）、\ref{cx:product-estimate} から $|Q_{M}-1|\le e^{s}-1<1$、極限でも $|Q-1|\le e^{s}-1<1$、とくに $Q\neq0$。$P=P_{N_{0}}Q$ なので、$K$ の内部で $P$ の零点とその\term[位数]{cx:zero-order}は有限積 $P_{N_{0}}$ のものと一致する。
+
+**Step 3（対数微分）.** $P$ が $0$ でない点の近くで、$P_{N}\to P$ と $P_{N}'\to P'$（ワイエルシュトラスの収束定理）が広義一様、$P$ は $0$ でないので $\frac{P_{N}'}{P_{N}}\to\frac{P'}{P}$ も広義一様（$P_{N}$ は一様に $P$ に近く、$|P|$ は正の下限をもつ）。$\frac{P_{N}'}{P_{N}}=\sum_{n\le N}\frac{a_{n}'}{1+a_{n}}$（積の微分）。
+
+::: hypcheck
+- **広義一様収束の仮定**：Step 1 の一様コーシー性と、Step 2 の「残りの積が $0$ にならない」に使った。$\sum|a_{n}|$ が収束しないと、積は $0$ に収束したり発散したりする（$\prod_{n\ge1}(1-\frac{1}{n+1})=\lim\frac{1}{N+1}=0$ で、どの因子も $0$ でないのに極限は $0$）。
+:::
+:::
+
+## ミッタク–レフラーの定理 {#cx:sec-rp-mittag-leffler}
+
+::: theorem ミッタク–レフラーの定理 {#cx:mittag-leffler keywords="Mittag-Leffler theorem: given distinct points a_n with |a_n| -> infinity and principal parts, there is a meromorphic function on C with exactly those poles and principal parts" index="ミッタク–レフラーの定理|みったくれふらーのていり" refname="ミッタク–レフラーの定理"}
+相異なる複素数の列 $(a_{n})_{n\ge1}$ で $|a_{n}|\to\infty$ となるものと、定数項のない多項式 $Q_{n}$ が与えられたとする。$\C$ 上の有理型関数 $f$ で、極がちょうど $\{a_{n}\}$ で、$a_{n}$ での主要部が $Q_{n}\bigl(\frac{1}{z-a_{n}}\bigr)$ であるものが存在する。
+:::
+
+::: proof
+**Step 1（補正多項式）.** $h_{n}(z)\defeq Q_{n}\bigl(\frac{1}{z-a_{n}}\bigr)$ とおく。$a_{n}=0$ なら補正 $q_{n}\defeq0$。$a_{n}\neq0$ なら、$h_{n}$ は $D(0,|a_{n}|)$ で正則なので、そのテイラー級数は $\overline{D}(0,\frac{|a_{n}|}{2})$ で一様収束する（\ref{cx:holomorphic-analytic}）。テイラー多項式 $q_{n}$ を（次数の最小のものとして）$\sup_{|z|\le|a_{n}|/2}|h_{n}-q_{n}|<2^{-n}$ ととる。
+
+**Step 2（収束）.** $f\defeq\sum_{n}(h_{n}-q_{n})$ とおく。$R>0$ を固定すると、$|a_{n}|\to\infty$ なので $|a_{n}|>2R$ となる $n$ は有限個を除いたすべてで、それらの $n$ について $|z|\le R$ では $|h_{n}-q_{n}|<2^{-n}$。よって有限個の項を除いた和は $\overline{D}(0,R)$ で一様収束し、正則（ワイエルシュトラスの収束定理）。
+
+**Step 3（主要部）.** 除いた有限個の項は有理関数で、$D(0,R)$ の中の極 $a_{n}$ でちょうど主要部 $h_{n}$ をもつ（$q_{n}$ は多項式）。$R$ は任意なので $f$ は主張の有理型関数。
+:::
+
+::: example
+$\frac{\pi^{2}}{\sin^{2}\pi z}$ と $\sum_{n\in\mathbb{Z}}\frac{1}{(z-n)^{2}}$ は同じ極と主要部（$n$ で $\frac{1}{(z-n)^{2}}$）をもつ。右辺は補正なしで広義一様収束する。差は整関数で、周期 $1$ をもち、帯 $0\le\operatorname{Re}z\le1$ で $|\operatorname{Im}z|\to\infty$ のとき両方とも $0$ に近づくので有界、リウヴィルの定理から定数 $0$。よって $\frac{\pi^{2}}{\sin^{2}\pi z}=\sum_{n\in\mathbb{Z}}\frac{1}{(z-n)^{2}}$。
+:::
+
+## ワイエルシュトラスの因数分解定理 {#cx:sec-rp-weierstrass}
+
+::: definition ワイエルシュトラスの基本因子 {#cx:elementary-factor keywords="Weierstrass elementary factors E_0(z) = 1 - z, E_p(z) = (1 - z) exp(z + z^2/2 + ... + z^p/p)" index="基本因子|きほんいんし"}
+$E_{0}(z)\defeq1-z$、$p\ge1$ について $E_{p}(z)\defeq(1-z)\exp\bigl(z+\frac{z^{2}}{2}+\cdots+\frac{z^{p}}{p}\bigr)$ を**基本因子**という。$E_{p}$ は整関数で、零点は $1$（\term[位数]{cx:zero-order} 1）だけ。
+:::
+
+::: lemma 基本因子の評価 {#cx:elementary-factor-bound keywords="|1 - E_p(z)| <= |z|^{p+1} for |z| <= 1" index=""}
+$|z|\le1$ なら $|1-E_{p}(z)|\le|z|^{p+1}$。
+:::
+
+::: proof
+**Step 1.** $p\ge1$ で $E_{p}'(z)=-\exp\bigl(\sum_{k\le p}\frac{z^{k}}{k}\bigr)+(1-z)\bigl(\sum_{k\le p}z^{k-1}\bigr)\exp(\cdots)=-z^{p}\exp\bigl(\sum_{k\le p}\frac{z^{k}}{k}\bigr)$（$(1-z)(1+z+\cdots+z^{p-1})=1-z^{p}$）。指数関数の冪級数の係数は非負なので、$-E_{p}'$ は非負の係数の冪級数で、最低次は $z^{p}$。
+
+**Step 2.** $1-E_{p}(z)=\int_{[0,z]}(-E_{p}')$ は非負の係数 $b_{k}$ の冪級数 $\sum_{k\ge p+1}b_{k}z^{k}$ で、$z=1$ を入れると $\sum b_{k}=1-E_{p}(1)=1$。よって $|z|\le1$ で $|1-E_{p}(z)|\le\sum b_{k}|z|^{k}\le|z|^{p+1}\sum b_{k}=|z|^{p+1}$。$p=0$ は明らか。
+:::
+
+::: theorem ワイエルシュトラスの因数分解定理 {#cx:weierstrass-factorization keywords="Weierstrass factorization: an entire function with given zeros exists; every entire function is z^m e^{g(z) refname="ワイエルシュトラスの因数分解定理"} prod E_n(z/a_n)" index="ワイエルシュトラスの因数分解定理|わいえるしゅとらすのいんすうぶんかいていり"}
+1. $(a_{n})_{n\ge1}$ を $0$ でない複素数の列（重複を許す）で $|a_{n}|\to\infty$ とし、$m\ge0$ とする。$P(z)\defeq z^{m}\prod_{n\ge1}E_{n-1}\bigl(\frac{z}{a_{n}}\bigr)$ は広義一様収束する整関数で、その零点はちょうど $0$（\term[位数]{cx:zero-order} $m$）と $a_{n}$（重複の回数を位数として）である。
+2. 恒等的に $0$ でない整関数 $f$ の $0$ での零点の位数を $m$、$0$ 以外の零点を重複度込みで並べた列を $(a_{n})$ とすると、整関数 $g$ があって $f(z)=e^{g(z)}z^{m}\prod_{n}E_{n-1}\bigl(\frac{z}{a_{n}}\bigr)$。
+:::
+
+::: proof
+**Step 1（1）.** $R>0$ を固定すると、有限個を除いた $n$ で $|a_{n}|\ge2R$、そのとき $|z|\le R$ で $\bigl|\frac{z}{a_{n}}\bigr|\le\frac12$ なので、\ref{cx:elementary-factor-bound} から $\bigl|1-E_{n-1}\bigl(\frac{z}{a_{n}}\bigr)\bigr|\le2^{-n}$。\ref{cx:infinite-product}（$a_{n}(z)\defeq E_{n-1}(z/a_{n})-1$）から、積は $\overline{D}(0,R)$ で一様収束し、零点は因子の零点と一致する。
+
+**Step 2（2）.** $f$ の零点は孤立していて有限個ずつしか $\overline{D}(0,R)$ に入らないので、重複度込みで $|a_{n}|$ の小さい順に並べられ、$|a_{n}|\to\infty$（零点が無限個の場合。有限個なら有限積でよい）。1 の $P$ と $f$ は同じ零点を同じ\term[位数]{cx:zero-order}でもつので、$\frac fP$ は除去可能特異点を除いて整関数で零点をもたない。$\C$ は単連結なので正則な対数 $g$ がある（\ref{cx:holomorphic-log}）。
+:::
+
+::: corollary 有理型関数は整関数の商 {#cx:meromorphic-quotient keywords="every meromorphic function on C is the quotient of two entire functions" index=""}
+$\C$ 上の有理型関数は、二つの整関数の商として書ける。
+:::
+
+::: proof
+極 $b_{n}$（\term[位数]{cx:zero-order}込み）を零点にもつ整関数 $h$ を 1 で作ると、$fh$ は極が消えて（除去可能）整関数 $g$ になり、$f=\frac gh$。
+:::
+
+## $\sin$ の無限積表示 {#cx:sec-rp-sine}
+
+::: theorem 余接の部分分数展開 {#cx:cot-partial-fractions keywords="pi cot pi z = 1/z + sum_{n >= 1} 2z/(z^2 - n^2)" index="余接の部分分数展開|よせつのぶぶんぶんすうてんかい"}
+$z\notin\mathbb{Z}$ について
+$$
+\pi\cot\pi z=\frac1z+\sum_{n\ge1}\frac{2z}{z^{2}-n^{2}},
+$$
+右辺は $\C\setminus\mathbb{Z}$ で広義一様に絶対収束する。
+:::
+
+::: proof
+**Step 1（収束）.** $|z|\le R$ かつ $n\ge2R$ なら $|z^{2}-n^{2}|\ge n^{2}-R^{2}\ge\frac34n^{2}$ なので $\bigl|\frac{2z}{z^{2}-n^{2}}\bigr|\le\frac{8R}{3n^{2}}$。M 判定法。
+
+**Step 2（留数）.** $w\notin\mathbb{Z}$ を固定し、$g(z)\defeq\frac{\pi\cot\pi z}{z(z-w)}$ に \ref{cx:residue-series} の証明（正方形 $Q_{N}$ での留数定理と \ref{cx:cot-bound}）を使う。$|z(z-w)|\ge\frac12|z|^{2}$（$|z|$ 大）なので積分は $0$ に収束し、留数の総和は $0$：
+- $n\neq0$ の整数：$\frac{1}{n(n-w)}$。
+- $w$：$\frac{\pi\cot\pi w}{w}$。
+- $0$：$\pi\cot\pi z=\frac1z-\frac{\pi^{2}z}{3}+\cdots$ と $\frac{1}{z-w}=-\frac1w(1+\frac zw+\cdots)$ から、$\frac{\pi\cot\pi z}{z(z-w)}$ の $z^{-1}$ の係数は $-\frac{1}{w^{2}}$。
+
+よって $\pi\cot\pi w=\frac1w-w\sum_{n\neq0}\frac{1}{n(n-w)}$。$n$ と $-n$ の項をまとめると $\frac{1}{n(n-w)}+\frac{1}{n(n+w)}=\frac{2}{n^{2}-w^{2}}$ で、主張を得る（和を $n$ と $-n$ で組にしてよいのは、Step 2 の極限が正方形 $Q_{N}$ ごとの対称な部分和の極限だから）。
+:::
+
+::: theorem $\sin$ の無限積表示 {#cx:sine-product keywords="sin pi z = pi z prod (1 - z^2/n^2); Wallis product as a special case" index="正弦の無限積表示|せいげんのむげんせきひょうじ, オイラーの積公式（正弦）|おいらーのせきこうしきせいげん"}
+すべての $z\in\C$ について
+$$
+\sin\pi z=\pi z\prod_{n\ge1}\Bigl(1-\frac{z^{2}}{n^{2}}\Bigr).
+$$
+:::
+
+::: proof
+**Step 1.** $\sum\bigl|\frac{z^{2}}{n^{2}}\bigr|$ は広義一様収束するので、\ref{cx:infinite-product} から右辺 $P(z)$ は整関数で、零点は $\mathbb{Z}$（すべて\term[位数]{cx:zero-order} 1）。$\sin\pi z$ と同じ零点である。
+
+**Step 2（対数微分）.** $\C\setminus\mathbb{Z}$ で、\ref{cx:infinite-product.3} から $\frac{P'}{P}=\frac1z+\sum_{n\ge1}\frac{-2z/n^{2}}{1-z^{2}/n^{2}}=\frac1z+\sum\frac{2z}{z^{2}-n^{2}}=\pi\cot\pi z=\frac{(\sin\pi z)'}{\sin\pi z}$（\ref{cx:cot-partial-fractions}）。
+
+**Step 3.** $q\defeq\frac{\sin\pi z}{P}$ は除去可能特異点を除いて整関数で零点がなく、$\C\setminus\mathbb{Z}$ で $\frac{q'}{q}=\frac{(\sin\pi z)'}{\sin\pi z}-\frac{P'}{P}=0$。$\C\setminus\mathbb{Z}$ は連結なので $q$ は定数で、$z\to0$ のとき $\frac{\sin\pi z}{\pi z}\to1$, $\frac{P(z)}{\pi z}\to1$ から $q=1$。
+:::
+
+::: corollary ウォリスの積 {#cx:wallis-from-sine keywords="Wallis product from the sine product at z = 1/2" index=""}
+$\frac\pi2=\prod_{n\ge1}\frac{(2n)^{2}}{(2n-1)(2n+1)}$。
+:::
+
+::: proof
+$z=\frac12$ で $1=\frac\pi2\prod\bigl(1-\frac{1}{4n^{2}}\bigr)=\frac\pi2\prod\frac{(2n-1)(2n+1)}{(2n)^{2}}$。（実解析による証明は \ref{calc:wallis}。）
+:::
+
+::: supplement
+**ゼータ関数の値.** \ref{cx:sine-product} を $z$ の冪級数として比べると、$\sin\pi z=\pi z-\frac{\pi^{3}z^{3}}{6}+\cdots$ と $\pi z\bigl(1-z^{2}\sum\frac{1}{n^{2}}+\cdots\bigr)$ の $z^{3}$ の係数から $\sum\frac{1}{n^{2}}=\frac{\pi^{2}}{6}$（オイラーの最初の議論はこの形だったとされる）。
+:::
+
+## 複素ガンマ関数 {#cx:sec-rp-gamma}
+
+::: theorem ガンマ関数の有理型延長 {#cx:gamma-meromorphic keywords="Gamma(z) = int_0^infty t^{z-1} e^{-t} dt is holomorphic for Re z > 0, satisfies Gamma(z+1) = z Gamma(z), extends to a meromorphic function on C with simple poles at 0, -1, -2, ... and residue (-1)^n/n!" index="ガンマ関数（複素）|がんまかんすうふくそ"}
+1. $\operatorname{Re}z>0$ で $\Gamma(z)\defeq\int_{0}^{\infty}t^{z-1}e^{-t}dt$ は絶対収束し、正則で、$\Gamma(z+1)=z\Gamma(z)$ を満たす。
+2. $\Gamma$ は $\C$ 上の有理型関数に一意に延び、極は $0,-1,-2,\dots$ ですべて 1 位、$\operatorname{Res}(\Gamma,-n)=\frac{(-1)^{n}}{n!}$。延長も $\Gamma(z+1)=z\Gamma(z)$ を満たす。
+:::
+
+::: proof
+**Step 1（正則性）.** $|t^{z-1}e^{-t}|=t^{\operatorname{Re}z-1}e^{-t}$ なので、$\operatorname{Re}z\ge\sigma>0$ では実のガンマ関数の積分（\ref{calc:gamma-basic.1}）で上から抑えられ、絶対収束する。$\Gamma_{N}(z)\defeq\int_{1/N}^{N}t^{z-1}e^{-t}dt$ は整関数である：被積分関数 $t^{z-1}e^{-t}$ の実部・虚部は $(x,y,t)$ について連続な偏導関数をもち、各 $t$ でコーシー–リーマンの方程式を満たす。積分記号下の微分（\ref{calc:differentiation-under-integral}）から $\Gamma_{N}$ の実部・虚部も連続な偏導関数をもち、同じ方程式を満たすので、\ref{cx:cr-consequences.1} から正則。$\sigma\le\operatorname{Re}z\le S$ では $|\Gamma(z)-\Gamma_{N}(z)|\le\int_{0}^{1/N}t^{\sigma-1}dt+\int_{N}^{\infty}t^{S-1}e^{-t}dt\to0$ が一様なので、ワイエルシュトラスの収束定理から $\Gamma$ は $\operatorname{Re}z>0$ で正則。
+
+**Step 2（関数等式）.** 実数 $x>0$ では $\Gamma(x+1)=x\Gamma(x)$（\ref{calc:gamma-basic}）。両辺は $\operatorname{Re}z>0$ で正則なので、一致の定理から $\operatorname{Re}z>0$ で成り立つ。
+
+**Step 3（延長）.** $n\ge0$ について、$\operatorname{Re}z>-n-1$, $z\notin\{0,-1,\dots,-n\}$ で
+$$
+\Gamma_{(n)}(z)\defeq\frac{\Gamma(z+n+1)}{z(z+1)\cdots(z+n)}
+$$
+は有理型で、$\operatorname{Re}z>0$ では関数等式を $n+1$ 回使って $\Gamma(z)$ と一致する。$\Gamma_{(n)}$ と $\Gamma_{(n')}$ は共通の定義域で一致する（一致の定理）ので、これらをつないで $\C$ 上の有理型関数を得る。一意性は一致の定理から。
+
+**Step 4（極と留数）.** $z=-n$ の近くでは $\Gamma_{(n)}$ の分母の因子 $z+n$ だけが $0$ になり、分子は $\Gamma(1)=1$ なので 1 位の極で、留数は $\frac{1}{(-n)(-n+1)\cdots(-1)}=\frac{(-1)^{n}}{n!}$。
+:::
+
+::: theorem 相補公式 {#cx:gamma-reflection keywords="Euler's reflection formula Gamma(z) Gamma(1-z) = pi / sin(pi z); 1/Gamma is entire with zeros at 0, -1, -2, ...; Gamma never vanishes" index="相補公式|そうほこうしき, オイラーの反転公式|おいらーのはんてんこうしき" refname="相補公式"}
+1. $z\notin\mathbb{Z}$ について $\Gamma(z)\Gamma(1-z)=\dfrac{\pi}{\sin\pi z}$。
+2. $\Gamma$ は零点をもたず、$\frac{1}{\Gamma}$ は整関数で、零点はちょうど $0,-1,-2,\dots$（\term[位数]{cx:zero-order} 1）。
+:::
+
+::: proof
+**Step 1（実数での等式）.** $0<x<1$ とする。ベータ関数の公式（\ref{calc:beta-function}）から $\Gamma(x)\Gamma(1-x)=B(x,1-x)=\int_{0}^{1}t^{x-1}(1-t)^{-x}dt$。$t=\frac{s}{1+s}$ と置換する（$[\varepsilon,1-\varepsilon]$ で置換積分し、$\varepsilon\to0$）と $dt=\frac{ds}{(1+s)^{2}}$、$t^{x-1}(1-t)^{-x}=s^{x-1}(1+s)^{1-x}(1+s)^{x}$ なので、積分は $\int_{0}^{\infty}\frac{s^{x-1}}{1+s}ds=\frac{\pi}{\sin\pi x}$（\ref{cx:power-integral}）。
+
+**Step 2（一致の定理）.** 両辺は $\C\setminus\mathbb{Z}$（連結）で有理型、とくに正則で、$(0,1)$ 上で一致するので全体で一致する。
+
+**Step 3（2）.** $\Gamma(z_{0})=0$ となる $z_{0}\notin\mathbb{Z}$ があれば 1 の左辺が $0$ になって矛盾。正の整数では $\Gamma(n)=(n-1)!\neq0$。よって $\frac1\Gamma$ は $\C\setminus\{0,-1,\dots\}$ で正則で、各 $-n$ では $\Gamma$ が 1 位の極なので $\frac1\Gamma$ は\term[位数]{cx:zero-order} 1 の零点をもつ正則関数に延びる（\ref{cx:pole-characterization}）。
+:::
+
+::: example
+1 で $z=\frac12$ とすると $\Gamma(\frac12)^{2}=\pi$、$\Gamma(\frac12)>0$ から $\Gamma(\frac12)=\sqrt\pi$（\ref{calc:beta-function} と一致）。また $|\Gamma(\frac12+iy)|^{2}=\Gamma(\frac12+iy)\Gamma(\frac12-iy)=\frac{\pi}{\cosh\pi y}$（$\overline{\Gamma(z)}=\Gamma(\bar z)$ を使う：実軸上で実数値なので一致の定理から）。
+:::
+
+::: fact ワイエルシュトラスの積表示 {#cx:gamma-weierstrass-product}
+$\dfrac{1}{\Gamma(z)}=ze^{\gamma z}\prod_{n\ge1}\Bigl(1+\dfrac zn\Bigr)e^{-z/n}$（$\gamma$ はオイラー定数）が成り立つ。\ref{cx:weierstrass-factorization} の形で、指数因子 $e^{g}$ の $g$ が一次式 $\gamma z$ になる、という主張である（本サイト未収録。標準的な複素解析の教科書、たとえばアールフォース『Complex Analysis』にある）。
+:::
+
+## 問題 {#cx:sec-rp-problems}
+
+::: problem {#cx:prob-rp-cos-product}
+$\cos\pi z=\prod_{n\ge1}\Bigl(1-\dfrac{4z^{2}}{(2n-1)^{2}}\Bigr)$ を示せ。
+:::
+
+::: solution
+$\sin2\pi z=2\sin\pi z\cos\pi z$ と \ref{cx:sine-product} から $\cos\pi z=\frac{\sin2\pi z}{2\sin\pi z}=\frac{2\pi z\prod(1-\frac{4z^{2}}{n^{2}})}{2\pi z\prod(1-\frac{z^{2}}{n^{2}})}$。分子の偶数 $n=2k$ の因子 $1-\frac{z^{2}}{k^{2}}$ が分母と打ち消し合い（絶対収束する積なので因子の並べ替えと分割ができる）、奇数 $n$ の因子が残る（$z\notin\frac12+\mathbb{Z}$ で示し、両辺は整関数なので一致の定理で全体）。
+:::
+
+::: problem {#cx:prob-rp-sum-cot}
+\ref{cx:cot-partial-fractions} から $\sum_{n\ge1}\frac{1}{n^{2}+1}=\frac{\pi\coth\pi-1}{2}$ を導け。
+:::
+
+::: solution
+$z=i$ とすると $\pi\cot\pi i=\frac1i+\sum\frac{2i}{-1-n^{2}}$。$\cot(iy)=-i\coth y$ なので左辺 $=-i\pi\coth\pi$。$-i$ で割って $\pi\coth\pi=1+2\sum\frac{1}{n^{2}+1}$。数値は約 $1.0767$。
+:::
+
+::: problem {#cx:prob-rp-gamma-residue}
+$\Gamma$ の $z=-2$ での留数と、$\frac{1}{\Gamma}$ の $z=-2$ での微分係数を求めよ。
+:::
+
+::: solution
+$\operatorname{Res}(\Gamma,-2)=\frac{(-1)^{2}}{2!}=\frac12$。$\Gamma(z)=\frac{1/2}{z+2}+(\text{正則})$ なので $\frac{1}{\Gamma(z)}=2(z+2)+O((z+2)^{2})$、微分係数は $2$。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{cx:sec-rp-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

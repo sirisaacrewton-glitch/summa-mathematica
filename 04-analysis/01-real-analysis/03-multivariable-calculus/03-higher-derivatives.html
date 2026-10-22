@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>高階微分とテイラーの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/03-multivariable-calculus/03-higher-derivatives.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 高階微分とテイラーの定理 {#calc:page-higher-derivatives keywords="higher partial derivatives, C^k maps, symmetry of second derivatives, Schwarz theorem, Clairaut, counterexample xy(x^2-y^2)/(x^2+y^2), multi-index notation, Taylor's theorem in several variables, Lagrange and Peano remainders, Hessian matrix, second derivative test, saddle point"}
+
+偏導関数をさらに偏微分すると高階の偏導関数が得られる。このページの最初の主題は、**偏微分の順序を交換してよいか**という問題である（**シュワルツの定理**：2 階の偏導関数が連続なら交換できるが、連続性がないと交換できない例がある）。順序が交換できると、高階の偏導関数は多重指数で整理でき、1 変数のテイラーの定理を直線に沿って使うことで**多変数のテイラーの定理**が得られる。応用として、**ヘッセ行列**による極値の判定を示す。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 9 章、杉浦光夫『解析入門 I』第 II 章 §6 と同じ標準的な内容。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-hd-notation}
+
+::: notation
+- 全微分・偏微分・連鎖律・勾配は \ref{calc:total-derivative}, \ref{calc:total-derivative-basic}, \ref{calc:multivariable-chain-rule}, \ref{calc:gradient}。偏導関数が連続なら微分可能 \ref{calc:continuous-partials-differentiable}、$C^{1}$ 級 \ref{calc:c1-map}。
+- 1 変数のテイラーの定理 \tref{calc:taylor-lagrange}, \ref{calc:taylor-peano}、平均値の定理 \tref{calc:mean-value-theorem}。
+- 対称行列の正定値性とシルヴェスターの判定法 \tref{lin:sylvester-criterion}。コンパクト集合上の最大値・最小値 \tref{top:extreme-value}、ハイネ–ボレル \ref{top:heine-borel}。
+- $U\subset\mathbb{R}^{n}$ は開集合、$f\colon U\to\mathbb{R}$（ベクトル値の場合は成分ごとに考える）。
+- **順序の約束**：$\partial_{j}\partial_{i}f\defeq\partial_{j}(\partial_{i}f)$（先に $x_{i}$ で、次に $x_{j}$ で偏微分）。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## 高階偏導関数と順序交換 {#calc:sec-hd-schwarz}
+
+::: definition $C^{k}$ 級 {#calc:ck-map keywords="C^k: all partial derivatives of order <= k exist and are continuous; C^infinity" index="Ck 級|しーけーきゅう, C 無限大級|しーむげんだいきゅう, 高階偏導関数|こうかいへんどうかんすう"}
+$k\ge1$ について、$f$ のすべての $k$ 階以下の偏導関数 $\partial_{i_{k}}\cdots\partial_{i_{1}}f$ が $U$ 上で存在して連続なとき、$f$ は **$C^{k}$ 級**であるという。$C^{0}$ 級は連続、すべての $k$ で $C^{k}$ 級なら **$C^{\infty}$ 級**という。ベクトル値の写像は成分がすべて $C^{k}$ 級のとき $C^{k}$ 級という。
+:::
+
+::: theorem シュワルツの定理 {#calc:schwarz-theorem keywords="Schwarz (Clairaut) theorem: if d_1 f, d_2 f, d_2 d_1 f exist near a and d_2 d_1 f is continuous at a, then d_1 d_2 f(a) exists and equals d_2 d_1 f(a)" index="シュワルツの定理|しゅわるつのていり, 偏微分の順序交換|へんびぶんのじゅんじょこうかん, クレローの定理|くれろーのていり" refname="シュワルツの定理"}
+$n=2$、$a=(a_{1},a_{2})\in U$ とする。$a$ のある近傍で $\partial_{1}f$, $\partial_{2}f$, $\partial_{2}\partial_{1}f$ が存在し、$\partial_{2}\partial_{1}f$ が $a$ で連続なら、$\partial_{1}\partial_{2}f(a)$ が存在して
+$$
+\partial_{1}\partial_{2}f(a)=\partial_{2}\partial_{1}f(a).
+$$
+とくに $f$ が $C^{2}$ 級なら、$U$ 上で $\partial_{1}\partial_{2}f=\partial_{2}\partial_{1}f$。$n$ 変数でも、他の変数を固定して同じことが言える。
+:::
+
+::: intuition
+2 階の差分 $\Delta(h,k)\defeq f(a_{1}+h,a_{2}+k)-f(a_{1}+h,a_{2})-f(a_{1},a_{2}+k)+f(a_{1},a_{2})$ は、長方形の 4 頂点での値の交代和で、$h$ と $k$ について対称な形をしている。$\Delta/(hk)$ を「先に $h\to0$」とすれば $\partial_{2}\partial_{1}f$ の、「先に $k\to0$」とすれば $\partial_{1}\partial_{2}f$ の近似になる。問題は 2 つの極限の順序を交換できるかで、$\partial_{2}\partial_{1}f$ の連続性がそれを保証する。
+:::
+
+::: proof
+**Step 1（差分の表示）.** $\delta>0$ を、正方形 $Q\defeq\{|x_{1}-a_{1}|<\delta,|x_{2}-a_{2}|<\delta\}\subset U$ の上で仮定の偏導関数が存在するようにとる。$0<|h|,|k|<\delta$ とし、上の $\Delta(h,k)$ を考える。$u(s)\defeq f(s,a_{2}+k)-f(s,a_{2})$ は $a_{1}$ と $a_{1}+h$ の間で微分可能（$\partial_{1}f$ の存在）で、$\Delta=u(a_{1}+h)-u(a_{1})$。平均値の定理から、$a_{1}$ と $a_{1}+h$ の間の $s$ で
+$$
+\Delta=h\,u'(s)=h\bigl(\partial_{1}f(s,a_{2}+k)-\partial_{1}f(s,a_{2})\bigr).
+$$
+$t\mapsto\partial_{1}f(s,t)$ は $\partial_{2}\partial_{1}f$ の存在から微分可能なので、もう一度平均値の定理を使って、$a_{2}$ と $a_{2}+k$ の間の $t$ で
+$$
+\Delta(h,k)=hk\,\partial_{2}\partial_{1}f(s,t).
+$$
+
+**Step 2（連続性で評価）.** $A\defeq\partial_{2}\partial_{1}f(a)$ とし、$\varepsilon>0$ をとる。$a$ での連続性から $\delta'\le\delta$ を、$|x_{1}-a_{1}|,|x_{2}-a_{2}|<\delta'$ なら $|\partial_{2}\partial_{1}f(x)-A|<\varepsilon$ となるようにとる。$0<|h|,|k|<\delta'$ なら $(s,t)$ もその範囲にあるので
+$$
+\Bigl|\frac{\Delta(h,k)}{hk}-A\Bigr|<\varepsilon.
+\label{calc:eq-schwarz-estimate}
+$$
+
+**Step 3（$k\to0$）.** $h$ を固定して $k\to0$ とすると、$\partial_{2}f$ の存在から
+$$
+\begin{aligned}
+\frac{\Delta(h,k)}{hk}&=\frac1h\Bigl(\frac{f(a_{1}+h,a_{2}+k)-f(a_{1}+h,a_{2})}{k}-\frac{f(a_{1},a_{2}+k)-f(a)}{k}\Bigr)\\
+&\to\frac{\partial_{2}f(a_{1}+h,a_{2})-\partial_{2}f(a)}{h}.
+\end{aligned}
+$$
+\eqref{calc:eq-schwarz-estimate} の極限をとって、$0<|h|<\delta'$ なら $\bigl|\frac{\partial_{2}f(a_{1}+h,a_{2})-\partial_{2}f(a)}{h}-A\bigr|\le\varepsilon$。$\varepsilon$ は任意なので、左辺の差分商は $h\to0$ で $A$ に収束する。これは $\partial_{1}\partial_{2}f(a)=A$ ということ。
+
+::: hypcheck
+- **$\partial_{2}\partial_{1}f$ の $a$ での連続性**：Step 2 で、中間点 $(s,t)$ での値を $a$ での値で置き換えるのに使った。外すと偽（次の反例）。
+- **$\partial_{2}f$ の存在**：Step 3 で $k\to0$ の極限をとるのに使った。
+- 結論の $\partial_{1}\partial_{2}f(a)$ の存在は仮定していない（定理が保証する）。
+:::
+:::
+
+::: counterexample 偏微分の順序が交換できない例 {#calc:schwarz-counterexample keywords="f = xy(x^2-y^2)/(x^2+y^2) has d_1 d_2 f(0) = 1 and d_2 d_1 f(0) = -1" index="偏微分の順序が交換できない例|へんびぶんのじゅんじょがこうかんできないれい"}
+$f(x,y)\defeq\dfrac{xy(x^{2}-y^{2})}{x^{2}+y^{2}}$（$(x,y)\neq0$）、$f(0,0)\defeq0$ は $\mathbb{R}^{2}$ 上で $C^{1}$ 級で、すべての点で 2 階の偏導関数が存在するが、
+$$
+\partial_{1}\partial_{2}f(0,0)=1,\qquad\partial_{2}\partial_{1}f(0,0)=-1.
+$$
+:::
+
+::: proof
+**Step 1（座標軸の上の 1 階偏導関数）.** $y\neq0$ について、$f(0,y)=0$ なので
+$$
+\partial_{1}f(0,y)=\lim_{x\to0}\frac{f(x,y)}{x}=\lim_{x\to0}\frac{y(x^{2}-y^{2})}{x^{2}+y^{2}}=-y,
+$$
+$y=0$ でも $f(x,0)=0$ から $\partial_{1}f(0,0)=0=-0$。同様に $\partial_{2}f(x,0)=\lim_{y\to0}f(x,y)/y=x$。
+
+**Step 2（2 階）.** $\partial_{2}\partial_{1}f(0,0)=\frac{d}{dy}(-y)\big|_{y=0}=-1$、$\partial_{1}\partial_{2}f(0,0)=\frac{d}{dx}(x)\big|_{x=0}=1$。
+
+**Step 3（$C^{1}$ 級であること）.** 原点の外では有理関数なので $C^{\infty}$ 級。原点の外で直接計算すると
+$$
+\partial_{1}f=\frac{y(x^{4}+4x^{2}y^{2}-y^{4})}{(x^{2}+y^{2})^{2}}
+$$
+で、$|x^{4}+4x^{2}y^{2}-y^{4}|\le3(x^{2}+y^{2})^{2}$ から $|\partial_{1}f|\le3|y|\to0$。$\partial_{1}f(0,0)=0$ なので原点でも連続。$\partial_{2}f$ も同様（$f(y,x)=-f(x,y)$ による）。2 階の偏導関数は、原点の外では有理関数、原点では Step 2。
+
+::: hypcheck
+- $\partial_{2}\partial_{1}f$ は原点で連続でない（連続ならシュワルツの定理から両者は一致するはず）。実際、原点の外で $\partial_{2}\partial_{1}f(x,0)=1$, $\partial_{2}\partial_{1}f(0,y)=-1$ となることが計算で確かめられる。
+:::
+:::
+
+::: corollary 高階偏導関数の対称性 {#calc:ck-symmetric keywords="for a C^k function, partial derivatives of order <= k do not depend on the order of differentiation" index="高階偏導関数の対称性|こうかいへんどうかんすうのたいしょうせい"}
+$f$ が $C^{k}$ 級なら、$j\le k$ と添字の列 $(i_{1},\dots,i_{j})$ およびその任意の並べ替え $(i_{\pi(1)},\dots,i_{\pi(j)})$ について $\partial_{i_{j}}\cdots\partial_{i_{1}}f=\partial_{i_{\pi(j)}}\cdots\partial_{i_{\pi(1)}}f$。
+:::
+
+::: proof
+任意の置換は隣接互換の積なので、隣り合う 2 つを入れ替えても変わらないことを示せばよい。$\partial_{i_{j}}\cdots\partial_{i_{l+2}}\partial_{i_{l+1}}\partial_{i_{l}}\cdots\partial_{i_{1}}f$ で $\partial_{i_{l+1}}$ と $\partial_{i_{l}}$ を入れ替える。$g\defeq\partial_{i_{l-1}}\cdots\partial_{i_{1}}f$ は $C^{k-l+1}$ 級で $k-l+1\ge2$（$l+1\le j\le k$）なので、シュワルツの定理（$x_{i_{l}},x_{i_{l+1}}$ 以外を固定、$i_{l}=i_{l+1}$ なら自明）から $\partial_{i_{l+1}}\partial_{i_{l}}g=\partial_{i_{l}}\partial_{i_{l+1}}g$。外側の偏微分は同じ関数に施すので結果も等しい。
+:::
+
+## 多変数のテイラーの定理 {#calc:sec-hd-taylor}
+
+::: notation
+**多重指数**：$\alpha=(\alpha_{1},\dots,\alpha_{n})\in\mathbb{Z}_{\ge0}^{n}$ について $|\alpha|\defeq\sum\alpha_{i}$, $\alpha!\defeq\prod\alpha_{i}!$, $h^{\alpha}\defeq\prod h_{i}^{\alpha_{i}}$, $\partial^{\alpha}f\defeq\partial_{1}^{\alpha_{1}}\cdots\partial_{n}^{\alpha_{n}}f$（$C^{|\alpha|}$ 級なら \ref{calc:ck-symmetric} により順序によらない）。$|h^{\alpha}|\le|h|^{|\alpha|}$（各 $|h_{i}|\le|h|$）。
+:::
+
+::: lemma 直線に沿った高階微分 {#calc:derivative-along-line keywords="phi(t) = f(a + t h) has phi^{(j)}(t) = sum over |alpha| = j of j!/alpha! d^alpha f(a + t h) h^alpha" index="直線に沿った高階微分|ちょくせんにそったこうかいびぶん"}
+$f$ が $C^{k}$ 級、線分 $\{a+th:t\in J\}$（$J$ は開区間）が $U$ に含まれるとし、$\varphi(t)\defeq f(a+th)$ とおく。$j\le k$ について $\varphi$ は $j$ 回微分可能で
+$$
+\varphi^{(j)}(t)=\sum_{i_{1},\dots,i_{j}=1}^{n}\partial_{i_{j}}\cdots\partial_{i_{1}}f(a+th)\,h_{i_{1}}\cdots h_{i_{j}}=\sum_{|\alpha|=j}\frac{j!}{\alpha!}\partial^{\alpha}f(a+th)\,h^{\alpha}.
+$$
+:::
+
+::: proof
+**Step 1（第 1 の等式）.** $j$ についての帰納法。$j=0$ は定義。$j-1$ で成り立つとすると、右辺の各項 $\partial_{i_{j-1}}\cdots\partial_{i_{1}}f(a+th)$ は $C^{1}$ 級の関数 $g$ と $t\mapsto a+th$ の合成なので、連鎖律（\ref{calc:multivariable-chain-rule}）から微分可能で $\frac{d}{dt}g(a+th)=\sum_{i_{j}}\partial_{i_{j}}g(a+th)h_{i_{j}}$。足し合わせて $j$ の式。
+
+**Step 2（数え上げ）.** \ref{calc:ck-symmetric} から、項 $\partial_{i_{j}}\cdots\partial_{i_{1}}f\,h_{i_{1}}\cdots h_{i_{j}}$ は、各 $l$ が列 $(i_{1},\dots,i_{j})$ に現れる回数 $\alpha_{l}$ だけで決まり、$\partial^{\alpha}f\,h^{\alpha}$ に等しい。回数が $\alpha$ である長さ $j$ の列の個数は、$j$ 個の位置に $1$ を $\alpha_{1}$ 個、…、$n$ を $\alpha_{n}$ 個置く方法の数 $\frac{j!}{\alpha!}$（多項係数）。
+:::
+
+::: theorem 多変数のテイラーの定理 {#calc:multivariable-taylor keywords="Taylor's theorem in several variables with Lagrange remainder on a segment and Peano remainder o(|h|^k)" index="多変数のテイラーの定理|たへんすうのているあーのていり" refname="多変数のテイラーの定理"}
+1. （ラグランジュの剰余項）$f$ が $C^{k+1}$ 級で、線分 $[a,a+h]$ が $U$ に含まれるなら、ある $\theta\in(0,1)$ で
+$$
+f(a+h)=\sum_{|\alpha|\le k}\frac{\partial^{\alpha}f(a)}{\alpha!}h^{\alpha}+\sum_{|\alpha|=k+1}\frac{\partial^{\alpha}f(a+\theta h)}{\alpha!}h^{\alpha}.
+$$
+2. （ペアノの剰余項）$f$ が $C^{k}$ 級なら、$h\to0$ で
+$$
+f(a+h)=\sum_{|\alpha|\le k}\frac{\partial^{\alpha}f(a)}{\alpha!}h^{\alpha}+o(|h|^{k}).
+$$
+:::
+
+::: proof
+**Step 1（1）.** $h=0$ なら明らか。$U$ は開で $[a,a+h]$ はコンパクトなので、$[0,1]$ を含む開区間 $J$ で $a+th\in U$（$t\in J$）となる（定理の後の注意）。\ref{calc:derivative-along-line} から $\varphi$ は $J$ 上 $k+1$ 回微分可能で、$\varphi^{(k)}$ は連続。1 変数のテイラーの定理（\tref{calc:taylor-lagrange}、$x=1$, $a=0$）から、$\theta\in(0,1)$ で
+$$
+\varphi(1)=\sum_{j=0}^{k}\frac{\varphi^{(j)}(0)}{j!}+\frac{\varphi^{(k+1)}(\theta)}{(k+1)!}.
+$$
+\ref{calc:derivative-along-line} の式を代入すると $\frac{\varphi^{(j)}(0)}{j!}=\sum_{|\alpha|=j}\frac{\partial^{\alpha}f(a)}{\alpha!}h^{\alpha}$ などで、主張の式。
+
+**Step 2（2）.** $k\ge1$ とし、$r>0$ を $B(a,r)\subset U$ となるようにとる。$|h|<r$ なら $[a,a+h]\subset B(a,r)$（球は凸）。$f$ は $C^{k}$ 級なので、1 を $k-1$ で使うと、$\theta=\theta(h)\in(0,1)$ で
+$$
+f(a+h)-\sum_{|\alpha|\le k}\frac{\partial^{\alpha}f(a)}{\alpha!}h^{\alpha}=\sum_{|\alpha|=k}\frac{\partial^{\alpha}f(a+\theta h)-\partial^{\alpha}f(a)}{\alpha!}h^{\alpha}.
+$$
+右辺の絶対値は $\sum_{|\alpha|=k}\bigl|\partial^{\alpha}f(a+\theta h)-\partial^{\alpha}f(a)\bigr||h|^{k}$ 以下で、$\partial^{\alpha}f$ の $a$ での連続性と $|\theta h|\le|h|$ から、$|h|^{k}$ で割ると $h\to0$ で $0$ に近づく（有限個の $\alpha$ について $\varepsilon$–$\delta$ の最小をとる）。$k=0$ は連続性そのもの。
+
+::: hypcheck
+- **$C^{k+1}$ 級**（1）：Step 1 で \ref{calc:derivative-along-line}（偏微分の順序交換を含む）と、1 変数のテイラーの定理の仮定（$\varphi^{(k)}$ の連続性）に使った。
+- **線分が $U$ に含まれる**：$\varphi$ の定義に使った。
+- 2 では $C^{k}$ 級で十分（$C^{k+1}$ は要らない）。$a$ で $k$ 回全微分可能というより弱い仮定でも成り立つことが知られているが、ここでは扱わない。
+:::
+:::
+
+::: remark
+Step 1 の開区間 $J$ の存在：$K\defeq[a,a+h]$ はコンパクトで $\mathbb{R}^{n}\setminus U$ は閉なので、$K$ の各点から $\mathbb{R}^{n}\setminus U$ までの距離（連続関数）は $K$ 上で正の最小値 $\rho$ をとる（$U=\mathbb{R}^{n}$ なら何でもよい）。$|t|<\rho/|h|$ または $|t-1|<\rho/|h|$ なら $a+th$ は $K$ から距離 $\rho$ 未満なので $U$ に入る。
+:::
+
+## ヘッセ行列と極値 {#calc:sec-hd-extrema}
+
+::: definition ヘッセ行列 {#calc:hessian keywords="Hessian matrix H f(a) = (d_i d_j f(a)), symmetric for C^2; second order Taylor expansion" index="ヘッセ行列|へっせぎょうれつ, 極値（多変数）|きょくちたへんすう, 臨界点|りんかいてん, 鞍点|あんてん"}
+$f$ が $C^{2}$ 級のとき、$Hf(a)\defeq\bigl(\partial_{i}\partial_{j}f(a)\bigr)_{i,j}$ を $f$ の $a$ での**ヘッセ行列**という（\ref{calc:ck-symmetric} から対称行列）。$\nabla f(a)=0$ となる点を $f$ の**臨界点**という。$f$ が $a$ で**極小**（**極大**）であるとは、$a$ のある近傍で $f(x)\ge f(a)$（$\le$）となることをいい、$x\neq a$ で不等号が狭義なら**狭義の**極小（極大）という。
+:::
+
+::: remark
+テイラーの定理（\tref{calc:multivariable-taylor.2}、$k=2$）を書き直すと
+$$
+f(a+h)=f(a)+\langle\nabla f(a),h\rangle+\tfrac12\,{}^{t}h\,Hf(a)\,h+o(|h|^{2}).
+$$
+実際、$|\alpha|=2$ の項は $\alpha=2e_{i}$ で $\frac12\partial_{i}^{2}f\,h_{i}^{2}$、$\alpha=e_{i}+e_{j}$（$i<j$）で $\partial_{i}\partial_{j}f\,h_{i}h_{j}$ で、その和は $\frac12\sum_{i,j}\partial_{i}\partial_{j}f\,h_{i}h_{j}$。
+:::
+
+::: theorem 極値の判定 {#calc:second-derivative-test keywords="necessary conditions grad f = 0 and Hessian positive semidefinite at a local minimum; positive definite Hessian at a critical point gives a strict local minimum; indefinite Hessian gives a saddle" index="極値の判定（多変数）|きょくちのはんていたへんすう, 2 階の判定法|にかいのはんていほう"}
+$f$ を $U$ 上の $C^{2}$ 級関数、$a\in U$ とする。
+1. （必要条件）$f$ が $a$ で極小なら $\nabla f(a)=0$ で、$Hf(a)$ は半正定値（${}^{t}hHh\ge0$）。
+2. $\nabla f(a)=0$ で $Hf(a)$ が正定値なら、$f$ は $a$ で狭義の極小。負定値なら狭義の極大。
+3. $\nabla f(a)=0$ で $Hf(a)$ が不定値（${}^{t}vHv>0>{}^{t}wHw$ となる $v,w$ がある）なら、$f$ は $a$ で極値をとらない（**鞍点**）。
+:::
+
+::: proof
+$H\defeq Hf(a)$, $q(h)\defeq{}^{t}hHh$ とおく。テイラーの式から $R(h)\defeq f(a+h)-f(a)-\langle\nabla f(a),h\rangle-\frac12q(h)$ は $R(h)/|h|^{2}\to0$。
+
+**Step 1（1 の 1 階）.** 各 $v$ について $t\mapsto f(a+tv)$ は $t=0$ で極小なので、1 変数のフェルマーの定理（\ref{calc:mean-value-theorem.1}）と連鎖律から $\langle\nabla f(a),v\rangle=0$。$v=\nabla f(a)$ として $\nabla f(a)=0$。
+
+**Step 2（1 の 2 階）.** $v\neq0$、$t\to0$ で $0\le\frac{f(a+tv)-f(a)}{t^{2}}=\frac12q(v)+\frac{R(tv)}{t^{2}}$、右辺の第 2 項は $\frac{R(tv)}{|tv|^{2}}|v|^{2}\to0$ なので $q(v)\ge0$。
+
+**Step 3（2）.** 単位球面 $S$ はコンパクト（\ref{top:heine-borel}）で $q$ は連続なので、$q$ は $S$ 上で最小値 $\lambda=q(v_{0})$ をとり、正定値性から $\lambda>0$。$q(h)=|h|^{2}q(h/|h|)\ge\lambda|h|^{2}$。$|R(h)|\le\frac{\lambda}{4}|h|^{2}$ となる $\delta>0$ を（$0<|h|<\delta$ で）とると、$f(a+h)-f(a)\ge\frac{\lambda}{2}|h|^{2}-\frac{\lambda}{4}|h|^{2}>0$。負定値なら $-f$ に適用。
+
+**Step 4（3）.** $\frac{f(a+tv)-f(a)}{t^{2}}\to\frac12q(v)>0$、$\frac{f(a+tw)-f(a)}{t^{2}}\to\frac12q(w)<0$ なので、いくらでも $a$ に近い点で $f>f(a)$ と $f<f(a)$ の両方が起こる。
+
+::: hypcheck
+- **$C^{2}$ 級**：テイラーの式（ペアノの剰余項）とヘッセ行列の対称性に使った。
+- **半定値の場合は判定できない**：$f=x^{2}+y^{4}$ と $g=x^{2}-y^{4}$ は原点で同じヘッセ行列 $\operatorname{diag}(2,0)$ をもつが、$f$ は極小、$g$ は極値でない（$g(0,y)<0<g(x,0)$）。
+- 2 の結論の極小は狭義：逆に、狭義の極小でもヘッセ行列が正定値とは限らない（$x^{4}+y^{4}$）。
+:::
+:::
+
+::: example
+1. $f(x,y)=x^{3}-3x+y^{2}$：$\nabla f=(3x^{2}-3,2y)$ の零点は $(\pm1,0)$。$Hf=\operatorname{diag}(6x,2)$。$(1,0)$ では正定値で狭義の極小、$(-1,0)$ では $\operatorname{diag}(-6,2)$ で不定値なので鞍点。
+2. **2 変数の判定**：$H=\begin{pmatrix}p&r\\r&s\end{pmatrix}$ について、\ref{lin:sylvester-criterion}から、$p>0$ かつ $ps-r^{2}>0$ なら正定値。$ps-r^{2}<0$ なら不定値（$\det H<0$ なので固有値は異符号）。
+:::
+
+::: supplement
+**一般化.** 2 階の偏導関数は、点 $a$ ごとに対称双線形形式 $(h,k)\mapsto{}^{t}hHf(a)k$ を定める。これは「微分 $Df\colon U\to M_{1,n}(\mathbb{R})$ をもう一度微分したもの」$D^{2}f(a)$ で、シュワルツの定理は $D^{2}f(a)$ が**対称**であることを言っている。一般に $k$ 階微分 $D^{k}f(a)$ は対称 $k$ 重線形形式で、テイラーの定理の $|\alpha|=j$ の項は $\frac{1}{j!}D^{j}f(a)(h,\dots,h)$ と書ける。
+
+**前提を変えると.** 臨界点でヘッセ行列が正則（非退化）なら、$f$ は適当な $C^{\infty}$ 座標変換で 2 次形式 $-y_{1}^{2}-\cdots-y_{p}^{2}+y_{p+1}^{2}+\cdots+y_{n}^{2}$ に一致する（モースの補題、$f$ が $C^{\infty}$ 級のとき）ことが知られている（本サイト未収録）。
+
+**高い視点.** 極値の判定は、「臨界点の近くでは関数は 2 次形式で近似され、2 次形式の形は符号（シルヴェスターの慣性法則 \ref{lin:sylvester-inertia}）で分類される」という原理に基づく。1 次の近似（勾配）が消える点では、2 次の近似が主役になり、その形が正定値なら「お椀」、不定値なら「鞍（馬の鞍）」である。比喩で言えば、山の頂上や谷底では地面は平ら（勾配 $0$）で、そこで地形を見分けるには曲がり方（ヘッセ行列）を見る必要があり、曲がり方が平らな方向が残る（半定値）と、さらに高次の情報（$y^{4}$ の符号）を見るまで判定できない。
+:::
+
+## 問題 {#calc:sec-hd-problems}
+
+::: problem {#calc:prob-hd-laplacian-radial}
+$f(x)=g(|x|)$（$g$ は $(0,\infty)$ 上の $C^{2}$ 級関数、$x\in\mathbb{R}^{n}\setminus\{0\}$）について、$\Delta f\defeq\sum_{i}\partial_{i}^{2}f=g''(r)+\frac{n-1}{r}g'(r)$（$r=|x|$）を示せ。
+:::
+
+::: solution
+$\partial_{i}|x|=x_{i}/r$（\ref{calc:prob-di-norm-not-differentiable}）なので $\partial_{i}f=g'(r)x_{i}/r$。さらに $\partial_{i}(x_{i}/r)=\frac1r-\frac{x_{i}^{2}}{r^{3}}$ から $\partial_{i}^{2}f=g''(r)\frac{x_{i}^{2}}{r^{2}}+g'(r)\bigl(\frac1r-\frac{x_{i}^{2}}{r^{3}}\bigr)$。$i$ について足すと $\sum x_{i}^{2}=r^{2}$ から主張の式。
+:::
+
+::: problem {#calc:prob-hd-taylor-exp}
+$f(x,y)=e^{x}\cos y$ の原点での 2 次までのテイラー多項式を求めよ。
+:::
+
+::: solution
+$\partial^{\alpha}f(0)$：$f=1$, $\partial_{x}f=1$, $\partial_{y}f=0$, $\partial_{x}^{2}f=1$, $\partial_{x}\partial_{y}f=0$, $\partial_{y}^{2}f=-1$。よって $1+x+\frac12(x^{2}-y^{2})$。
+:::
+
+::: problem {#calc:prob-hd-only-critical-point}
+$\mathbb{R}^{2}$ 上の $C^{2}$ 級関数で、臨界点がただ 1 つでそこで狭義の極小をとるが、最小値をとらないものがあることを、$f(x,y)=x^{2}+y^{2}(1-x)^{3}$ で確かめよ（1 変数ではこのようなことは起こらない）。
+:::
+
+::: solution
+$\nabla f=(2x-3y^{2}(1-x)^{2},\,2y(1-x)^{3})$。第 2 成分が $0$ なら $y=0$ または $x=1$。$y=0$ なら第 1 成分から $x=0$。$x=1$ なら第 1 成分は $2\neq0$。よって臨界点は原点だけで、$Hf(0)=\operatorname{diag}(2,2)$ は正定値なので狭義の極小。しかし $f(4,1)=16-27=-11<0=f(0)$ なので、原点は最小点でない（さらに $f(x,1)\to-\infty$, $x\to\infty$）。1 変数では、ただ 1 つの臨界点での極小は、平均値の定理（導関数の符号）から最小になる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-hd-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

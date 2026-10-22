@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>特異コホモロジー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/02-algebraic-topology/03-cohomology/01-singular-cohomology.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 特異コホモロジー {#at:page-singular-cohomology keywords="singular cochains, coboundary, singular cohomology, Kronecker pairing, universal coefficient theorem for cohomology, Ext, cohomology axioms, homology isomorphisms of free complexes induce cohomology isomorphisms, homotopy invariance and small cochains for sheaf comparison, cohomology of spheres and projective spaces, transfer, odd maps have odd degree, Borsuk-Ulam theorem"}
+
+特異鎖複体に $\mathrm{Hom}(-,G)$ を施すと**特異コホモロジー**が得られる。ホモロジーの情報を双対にしただけに見えるが、(1) 層の理論やド・ラーム理論など「関数」から作られる理論と直接比べられ、(2) 次ページで扱うカップ積により環の構造をもつ、という利点がある。このページでは定義と**普遍係数定理**、公理の成立を示し、層の理論のページ（\ref{cat:page-singular-comparison}）で引用した二つの事実 (H)・(S) を証明する。応用として、$\mathbb{Z}/2$ 係数の「転送」の完全列から、奇写像の写像度が奇数であることと**ボルスク–ウラムの定理**を導く。
+
+> 資料：標準的な内容（Massey『Singular Homology Theory』のコホモロジーの章、Fulton『Algebraic Topology』など）。ボルスク–ウラムの転送による証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#at:sec-sc-notation}
+
+::: notation
+- 特異鎖複体・相対鎖複体・長完全列・ホモトピー不変性（プリズム作用素 $P$）・小さい単体の定理・切除は \ref{at:singular-homology}, \ref{at:relative-homology}, \ref{at:pair-long-exact}, \ref{at:singular-homotopy-invariance}, \ref{at:small-simplices}, \ref{at:excision}。
+- 普遍係数定理（ホモロジー）\ref{at:algebraic-uct}, \ref{at:uct-homology}、射影空間と円板の対の写像度 \ref{at:projective-space-homology}, \ref{at:degree}。被覆と持ち上げの基準 \ref{at:covering}, \ref{at:lifting-criterion}。
+- Ext は第 1 変数の射影分解で定義する（\ref{ha:ext}, \ref{ha:ext-basic}, \ref{ha:ext-z}）。五項補題 \tref{ha:five-lemma}。
+- 余鎖複体は次数が上がる複体 $C^{n}\xrightarrow{\delta}C^{n+1}$ で、そのコホモロジーを $H^{n}$ と書く（\ref{ha:chain-complex} の番号を逆にしたもの）。
+- **選択公理**：普遍係数定理の分裂（自由加群の部分加群が自由であること）で使う。それ以外は使わない。
+:::
+
+## 定義と普遍係数定理 {#at:sec-sc-definition}
+
+::: definition 特異コホモロジー {#at:singular-cohomology keywords="singular cochains S^n(X,A;G) = Hom(S_n(X,A), G), coboundary delta phi = phi o boundary, singular cohomology H^n(X,A;G), induced map f^*, Kronecker pairing" index="特異コホモロジー|とくいこほもろじー, コチェイン|こちぇいん, 余境界作用素|よきょうかいさようそ, クロネッカー積|くろねっかーせき"}
+空間対 $(X,A)$ とアーベル群 $G$ について、$S^{n}(X,A;G)\defeq\mathrm{Hom}(S_{n}(X,A),G)$（$A$ の単体の上で $0$ となる $X$ の $n$ **コチェイン**）、$\delta\varphi\defeq\varphi\circ\partial$ とする。$\delta\delta=0$ で、そのコホモロジー $H^{n}(X,A;G)$ を**特異コホモロジー**という（$G=\mathbb{Z}$ のとき $H^{n}(X,A)$）。対の写像 $f$ は $f^{\#}\varphi\defeq\varphi\circ f_{\#}$ により $f^{*}\colon H^{n}(Y,B;G)\to H^{n}(X,A;G)$ を誘導する（反変関手）。**クロネッカー積** $\langle[\varphi],[c]\rangle\defeq\varphi(c)\in G$ は $H^{n}(X,A;G)\times H_{n}(X,A)\to G$ を well-defined に定める（$\varphi(\partial b)=(\delta\varphi)(b)=0$, $(\delta\psi)(c)=\psi(\partial c)=0$）。
+:::
+
+::: lemma 自由鎖複体の普遍係数定理（コホモロジー） {#at:algebraic-uct-cohomology keywords="for a free chain complex C there is a natural split short exact sequence 0 -> Ext(H_{n-1}(C), G) -> H^n(Hom(C,G)) -> Hom(H_n(C), G) -> 0" index="普遍係数定理（コホモロジー）|ふへんけいすうていりこほもろじー"}
+$C$ を自由アーベル群の鎖複体、$G$ をアーベル群とする。自然な短完全列
+$$
+0\to\mathrm{Ext}^{1}_{\mathbb{Z}}(H_{n-1}(C),G)\to H^{n}(\mathrm{Hom}(C,G))\xrightarrow{h}\mathrm{Hom}(H_{n}(C),G)\to0
+$$
+があり（$h[\varphi]([z])=\varphi(z)$）、分裂する（分裂は自然ではない）。
+:::
+
+::: proof
+**Step 1.** \ref{at:algebraic-uct} の Step 1 と同じく、$0\to Z_{n}\to C_{n}\xrightarrow{\partial}B_{n-1}\to0$ は分裂する（$B_{n-1}$ は自由）ので、$\mathrm{Hom}(-,G)$ を施した $0\to\mathrm{Hom}(B_{n-1},G)\to\mathrm{Hom}(C_{n},G)\to\mathrm{Hom}(Z_{n},G)\to0$ も完全。微分 $0$ の複体 $Z$, $B[-1]$ について余鎖複体の短完全列になる。
+
+**Step 2（長完全列）.** 両端の余鎖複体は微分 $0$ なので、長完全列は
+$$
+\mathrm{Hom}(Z_{n-1},G)\xrightarrow{\delta'}\mathrm{Hom}(B_{n-1},G)\to H^{n}(\mathrm{Hom}(C,G))\to\mathrm{Hom}(Z_{n},G)\xrightarrow{\delta'}\mathrm{Hom}(B_{n},G)
+$$
+で、連結射 $\delta'$ は包含 $i_{n}\colon B_{n}\to Z_{n}$ による制限 $i_{n}^{*}$（$\psi\in\mathrm{Hom}(Z_{n},G)$ を $C_{n}$ に延ばして $\delta$ をとり、$C_{n+1}$ で評価すると $\psi(\partial c)$ で、これは $B_{n}$ 上の $\psi$ を $\partial$ で引き戻したもの）。
+
+**Step 3.** $0\to B_{n}\xrightarrow{i_{n}}Z_{n}\to H_{n}(C)\to0$ は自由分解なので、$\ker(i_{n}^{*})=\mathrm{Hom}(H_{n}(C),G)$（$\mathrm{Hom}$ の左完全性）、$\operatorname{coker}(i_{n-1}^{*})=\mathrm{Ext}^{1}(H_{n-1}(C),G)$（Ext の定義 \ref{ha:ext}）。Step 2 の列から主張の短完全列。右の写像は $[\varphi]\mapsto\varphi\restriction Z_{n}$ で、$B_{n}$ 上で $0$ なので $H_{n}(C)$ 上の準同型。
+
+**Step 4（分裂）.** 射影 $r\colon C_{n}\to Z_{n}$（Step 1 の分裂）をとる。$\psi\in\mathrm{Hom}(H_{n}(C),G)$ について $\varphi\defeq\psi\circ\pi\circ r$（$\pi\colon Z_{n}\to H_{n}$）は $\delta\varphi=\varphi\circ\partial=\psi\pi r\partial=\psi\pi\partial=0$（$\partial C_{n+1}=B_{n}\subset Z_{n}$ で $r$ は恒等、$\pi$ で $0$）なのでコサイクル。$\psi\mapsto[\varphi]$ は $h$ の右逆。
+:::
+
+::: theorem 普遍係数定理（コホモロジー） {#at:uct-cohomology keywords="universal coefficient theorem: 0 -> Ext(H_{n-1 refname="普遍係数定理（コホモロジー）"}(X,A), G) -> H^n(X,A;G) -> Hom(H_n(X,A), G) -> 0; for field coefficients H^n is the dual of H_n" index="普遍係数定理（コホモロジー）|ふへんけいすうていりこほもろじー"}
+空間対 $(X,A)$ について自然な分裂短完全列
+$$
+0\to\mathrm{Ext}^{1}_{\mathbb{Z}}(H_{n-1}(X,A),G)\to H^{n}(X,A;G)\to\mathrm{Hom}(H_{n}(X,A),G)\to0
+$$
+がある。とくに体 $k$ について $H^{n}(X;k)\cong\mathrm{Hom}_{k}(H_{n}(X;k),k)$。
+:::
+
+::: proof
+$S(X,A)$ は自由なので \ref{at:algebraic-uct-cohomology}。体の場合は、$S(X;k)=S(X)\otimes k$ を $k$ 上の自由な鎖複体と見て同じ議論を $k$ 上で行う（$k$ 上では Ext が消える）。
+:::
+
+::: corollary ホモロジー同型はコホモロジー同型 {#at:homology-iso-cohomology-iso keywords="a chain map between free chain complexes that induces an isomorphism on homology induces an isomorphism on cohomology with any coefficients" index="ホモロジー同型とコホモロジー同型|ほもろじーどうけいとこほもろじーどうけい"}
+自由アーベル群の鎖複体の間の鎖写像 $f\colon C\to D$ がホモロジーの同型を誘導するなら、任意の $G$ について $f^{*}\colon H^{n}(\mathrm{Hom}(D,G))\to H^{n}(\mathrm{Hom}(C,G))$ は同型。
+:::
+
+::: proof
+\ref{at:algebraic-uct-cohomology} の短完全列は自然なので、$f$ は $C$ と $D$ の列の間の可換図式を与える。両端の $\mathrm{Ext}(H_{n-1}(f),G)$ と $\mathrm{Hom}(H_{n}(f),G)$ は同型なので、五項補題（両端に $0$ を補う）で中央も同型。
+:::
+
+::: theorem コホモロジーの公理 {#at:cohomology-axioms keywords="singular cohomology satisfies the Eilenberg-Steenrod axioms for cohomology: exactness, homotopy, excision, additivity (product), dimension" index="コホモロジーの公理|こほもろじーのこうり" refname="コホモロジーの公理"}
+$H^{*}(-;G)$ は次を満たす。
+1. **（完全性）** 自然な長完全列 $\cdots\to H^{n}(X,A;G)\to H^{n}(X;G)\to H^{n}(A;G)\xrightarrow{\delta}H^{n+1}(X,A;G)\to\cdots$。
+2. **（ホモトピー）** 対としてホモトープな写像は同じ $f^{*}$ を誘導する。
+3. **（切除）** $\overline{Z}\subset\operatorname{int}A$ なら $H^{n}(X,A;G)\to H^{n}(X\setminus Z,A\setminus Z;G)$ は同型。
+4. **（加法性）** $H^{n}(\bigsqcup X_{\lambda};G)\cong\prod_{\lambda}H^{n}(X_{\lambda};G)$。
+5. **（次元）** $H^{n}(\ast;G)=G$（$n=0$）、$0$（$n\ne0$）。
+:::
+
+::: proof
+1：$0\to S(A)\to S(X)\to S(X,A)\to0$ は各次数で分裂するので $\mathrm{Hom}(-,G)$ で短完全。2：プリズム作用素の双対 $P^{*}\varphi\defeq\varphi\circ P$ について $\delta P^{*}+P^{*}\delta=g^{\#}-f^{\#}$。3：ホモロジーの切除の同型は、自由な鎖複体 $S(X\setminus Z,A\setminus Z)\to S(X,A)$ のホモロジー同型なので、\ref{at:homology-iso-cohomology-iso}。4：$S(\bigsqcup X_{\lambda})=\bigoplus S(X_{\lambda})$ で、$\mathrm{Hom}(\bigoplus,G)=\prod\mathrm{Hom}$。5：1 点の余鎖複体 $G\xrightarrow{0}G\xrightarrow{1}G\xrightarrow{0}\cdots$。
+:::
+
+## 層の理論のための二つの事実 {#at:sec-sc-sheaf-facts}
+
+::: corollary 可縮な空間と小さいコチェイン {#at:cohomology-sheaf-facts keywords="(H) contractible spaces have the cohomology of a point; (S) restriction to V-small cochains induces an isomorphism on cohomology" index="小さいコチェイン|ちいさいこちぇいん"}
+1. **(H)** $U$ が可縮なら $H^{0}(U;G)\cong G$（定数のコチェインの類）、$q\ge1$ で $H^{q}(U;G)=0$。
+2. **(S)** $\mathcal{V}$ を、内部が $U$ を覆う部分集合族とし、$S^{\bullet}_{\mathcal{V}}(U;G)\defeq\mathrm{Hom}(S^{\mathcal{V}}(U),G)$（$\mathcal{V}$ 小な単体の上の値だけを見たコチェイン）とする。制限 $S^{\bullet}(U;G)\to S^{\bullet}_{\mathcal{V}}(U;G)$ はコホモロジーの同型を誘導する。
+:::
+
+::: proof
+1：$U\to\ast$ はホモトピー同値なので、公理 2 と 5 から。$H^{0}$ の生成は、$H^{0}(U;G)=\ker(\delta\colon S^{0}\to S^{1})$ が「各道の両端で同じ値をとる関数」、すなわち弧状連結な $U$ 上の定数関数であることから。2：包含 $S^{\mathcal{V}}(U)\to S(U)$ は自由な鎖複体の間のホモロジー同型（\ref{at:small-simplices}）なので、\ref{at:homology-iso-cohomology-iso}。
+:::
+
+::: remark
+これで \ref{cat:page-singular-comparison} の (H)・(S) は本サイト内で証明された。層コホモロジーと特異コホモロジーの比較（\ref{cat:sheaf-singular-comparison}）は、パラコンパクトで局所可縮な空間（とくに CW 複体や位相多様体）で無条件に成り立つ。
+:::
+
+## 計算例 {#at:sec-sc-examples}
+
+::: example
+1. **球面**：$H^{k}(S^{n};G)\cong G$（$k=0,n$, $n\ge1$）、他は $0$（ホモロジーが自由なので Ext が消え、$\mathrm{Hom}(\mathbb{Z},G)=G$）。
+2. **実射影空間**（$\mathbb{Z}$ 係数）：\ref{at:projective-space-homology} と $\mathrm{Hom}(\mathbb{Z}/2,\mathbb{Z})=0$, $\mathrm{Ext}^{1}(\mathbb{Z}/2,\mathbb{Z})\cong\mathbb{Z}/2$（\ref{ha:ext-z}）から
+$$
+H^{k}(\mathbb{R}P^{n};\mathbb{Z})\cong\begin{cases}\mathbb{Z}&(k=0,\ \text{または }k=n\text{ が奇数})\\\mathbb{Z}/2&(k\text{ が偶数で }0<k\le n)\\0&(\text{それ以外})\end{cases}
+$$
+ねじれがホモロジーより 1 次上にずれる。
+3. **$\mathbb{Z}/2$ 係数**：$H^{k}(\mathbb{R}P^{n};\mathbb{Z}/2)\cong\mathbb{Z}/2$（$0\le k\le n$）。
+4. **胞体コホモロジー**：有限 CW 複体では $H^{n}(X;G)\cong H^{n}(\mathrm{Hom}(C^{\mathrm{CW}}(X),G))$。\ref{at:cellular-singular} の証明をコホモロジーの長完全列で繰り返すか、胞体鎖複体と特異鎖複体を結ぶ自由鎖複体のジグザグ（$H_{n}(X^{n},X^{n-1})$ を経由する）に \ref{at:homology-iso-cohomology-iso} を使う。
+:::
+
+## 転送とボルスク–ウラムの定理 {#at:sec-sc-borsuk-ulam}
+
+::: lemma 二重被覆の転送完全列 {#at:transfer-sequence keywords="for the double cover S^n -> RP^n there is a short exact sequence of Z/2-chain complexes 0 -> C(RP^n) -> C(S^n) -> C(RP^n) -> 0 given by transfer and projection" index="転送|てんそう, 転送完全列|てんそうかんぜんれつ"}
+$\pi\colon S^{n}\to\mathbb{R}P^{n}$ を二重被覆、$S(-;\mathbb{Z}/2)\defeq S(-)\otimes\mathbb{Z}/2$ とする。$\mathbb{R}P^{n}$ の特異単体 $\sigma$ の二つの持ち上げ $\tilde\sigma_{1},\tilde\sigma_{2}=a\circ\tilde\sigma_{1}$（$a$ は対蹠写像）について $\tau(\sigma)\defeq\tilde\sigma_{1}+\tilde\sigma_{2}$ とおくと、
+$$
+0\to S(\mathbb{R}P^{n};\mathbb{Z}/2)\xrightarrow{\tau}S(S^{n};\mathbb{Z}/2)\xrightarrow{\pi_{\#}}S(\mathbb{R}P^{n};\mathbb{Z}/2)\to0
+$$
+は鎖複体の短完全列。
+:::
+
+::: proof
+**Step 1（持ち上げ）.** $\Delta^{k}$ は単連結（凸）で局所弧状連結なので、持ち上げの基準（\ref{at:lifting-criterion}）から $\sigma$ は持ち上がり、持ち上げは始点の選び方の 2 通り（\ref{at:unique-lifting}）で、$a\circ\tilde\sigma_{1}$ も持ち上げで $\tilde\sigma_{1}$ と異なる（$a$ は不動点をもたない）ので $\tilde\sigma_{2}=a\tilde\sigma_{1}$。
+
+**Step 2（鎖写像）.** $\tilde\sigma_{i}\circ\delta^{j}$ は $\sigma\circ\delta^{j}$ の二つの持ち上げなので $\tau\partial=\partial\tau$。$\pi_{\#}$ は鎖写像。
+
+**Step 3（完全性）.** $\tau$ は単射（異なる $\sigma$ の持ち上げは異なる）。$\pi_{\#}$ は全射（持ち上げの存在）。$\pi_{\#}\tau(\sigma)=2\sigma=0$。$S^{n}$ の単体は対 $\{\tilde\sigma,a\tilde\sigma\}$ に分かれ、$\pi_{\#}$ は各対の 2 元を同じ $\sigma$ に送る。$\mathbb{Z}/2$ 係数の鎖 $c$ が $\pi_{\#}c=0$ なら、各対の係数の和が $0$、すなわち各対の 2 元の係数が等しく、$c$ は $\tau$ の像。
+:::
+
+::: theorem 奇写像の写像度 {#at:odd-map-degree keywords="an odd map f: S^n -> S^n (f(-x) = -f(x)) has odd degree" index="奇写像の写像度|きしゃぞうのしゃぞうど, 奇写像|きしゃぞう"}
+$n\ge1$ で、$f\colon S^{n}\to S^{n}$ が $f(-x)=-f(x)$ を満たす（**奇写像**）なら、$\deg f$ は奇数。
+:::
+
+::: proof
+**Step 1（誘導写像）.** $f$ は $\pi$ のファイバーをファイバーに写すので、商写像の普遍性から $\bar f\colon\mathbb{R}P^{n}\to\mathbb{R}P^{n}$, $\bar f\pi=\pi f$ が定まる。$f\circ\tilde\sigma_{1}$, $f\circ a\tilde\sigma_{1}=a f\tilde\sigma_{1}$ は $\bar f\sigma$ の二つの持ち上げなので、$f_{\#}\tau=\tau\bar f_{\#}$。よって $f$, $\bar f$ は転送完全列の間の写像を与え、その長完全列（$\mathbb{Z}/2$ 係数のホモロジー）の間の可換図式を与える。
+
+**Step 2（長完全列の形）.** $H_{k}(\mathbb{R}P^{n};\mathbb{Z}/2)\cong\mathbb{Z}/2$（$0\le k\le n$、\ref{at:uct-homology} の後の例）、$H_{k}(S^{n};\mathbb{Z}/2)$ は $k=0,n$ で $\mathbb{Z}/2$、他は $0$。次数 $0$ では $\tau_{*}[x]=[\tilde x_{1}]+[\tilde x_{2}]=0$（2 点は同じ類で、$\mathbb{Z}/2$ で 2 倍は $0$）。よって長完全列
+$$
+\cdots\to H_{k}(\mathbb{R}P^{n})\xrightarrow{\tau_{*}}H_{k}(S^{n})\xrightarrow{\pi_{*}}H_{k}(\mathbb{R}P^{n})\xrightarrow{\partial}H_{k-1}(\mathbb{R}P^{n})\xrightarrow{\tau_{*}}H_{k-1}(S^{n})\to\cdots
+$$
+（係数 $\mathbb{Z}/2$）で、$1\le k\le n$ の $\partial\colon H_{k}(\mathbb{R}P^{n})\to H_{k-1}(\mathbb{R}P^{n})$ は全射（$k-1\ge1$ なら $H_{k-1}(S^{n})=0$、$k=1$ なら次数 $0$ の $\tau_{*}=0$）で、両辺 $\mathbb{Z}/2$ なので同型。とくに $k=n$ で $\partial$ が単射なので $\pi_{*}\colon H_{n}(S^{n})\to H_{n}(\mathbb{R}P^{n})$ は $0$、よって $\tau_{*}\colon H_{n}(\mathbb{R}P^{n})\to H_{n}(S^{n})$ は全射で（両辺 $\mathbb{Z}/2$）同型。
+
+**Step 3（帰納法）.** $\bar f_{*}$ は $H_{0}(\mathbb{R}P^{n};\mathbb{Z}/2)$ で同型（弧状連結）。$\partial\bar f_{*}=\bar f_{*}\partial$ と Step 2 の $\partial$ の同型から、$k=0,1,\dots,n$ について順に $\bar f_{*}$ は $H_{k}(\mathbb{R}P^{n};\mathbb{Z}/2)$ の同型。$f_{*}\tau_{*}=\tau_{*}\bar f_{*}$ と $\tau_{*}$ の同型（次数 $n$）から、$f_{*}$ は $H_{n}(S^{n};\mathbb{Z}/2)$ の同型。
+
+**Step 4.** 普遍係数定理の自然性から $H_{n}(S^{n};\mathbb{Z}/2)\cong H_{n}(S^{n})\otimes\mathbb{Z}/2$ で、$f_{*}$ は $\deg f$ 倍の $\otimes\mathbb{Z}/2$。これが同型なので $\deg f$ は奇数。
+
+::: hypcheck
+- **奇写像**：Step 1 で $\bar f$ の存在と $f_{\#}\tau=\tau\bar f_{\#}$ に使った。外すと偽（定値写像は写像度 $0$）。
+- **係数 $\mathbb{Z}/2$**：Step 3 で $\tau_{*}$ が次数 $0$ で $0$ になることなどに本質的に使った。
+:::
+:::
+
+::: theorem ボルスク–ウラムの定理 {#at:borsuk-ulam keywords="Borsuk-Ulam theorem: every continuous map S^n -> R^n identifies some pair of antipodal points; no odd map S^n -> S^{n-1 refname="ボルスク–ウラムの定理"}" index="ボルスク–ウラムの定理|ぼるすくうらむのていり"}
+$n\ge1$ と連続写像 $g\colon S^{n}\to\mathbb{R}^{n}$ について、$g(x)=g(-x)$ となる $x$ がある。同値な形：奇写像 $S^{n}\to S^{n-1}$ は存在しない。
+:::
+
+::: proof
+**Step 1（同値性）.** $g(x)\ne g(-x)$ がすべての $x$ で成り立てば、$h(x)\defeq\frac{g(x)-g(-x)}{|g(x)-g(-x)|}$ は奇写像 $S^{n}\to S^{n-1}$。逆に奇写像 $h$ があれば、$g=h$（$\mathbb{R}^{n}$ への写像と見る）は $g(x)=-g(-x)\ne g(-x)$（$|g|=1$）。
+
+**Step 2.** 奇写像 $h\colon S^{n}\to S^{n-1}$ があるとし、$k\defeq h\restriction S^{n-1}$（赤道、$S^{n-1}$ と同一視）とする。$k$ は奇写像 $S^{n-1}\to S^{n-1}$ なので、$n-1\ge1$ なら \ref{at:odd-map-degree} から $\deg k$ は奇数。一方 $k$ は上半球 $D_{+}\cong D^{n}$ 上の $h$ に延びるので、定値写像とホモトープ（$D^{n}$ の可縮性：$H(x,t)\defeq h(p_{+}((1-t)x))$）で、写像度 $0$。矛盾。$n=1$：奇写像 $S^{1}\to S^{0}$ は連続写像から 2 点集合への写像で、$S^{1}$ は連結なので定値だが、奇写像は $x$ と $-x$ で異なる値をとる。矛盾。
+:::
+
+::: supplement
+**応用と一般化.** $n=2$ では「地球上のある対蹠点の組で、気温と気圧がともに等しい」。ボルスク–ウラムから、$\mathbb{R}^{n}$ の $n$ 個の有界可測集合は 1 枚の超平面で同時に二等分できること（ハムサンドイッチの定理）や、$S^{n}$ を $n+1$ 個の閉集合で覆うとある集合は対蹠点の組を含むこと（リュステルニク–シュニレルマン）が従うことが知られている（本サイト未収録）。
+**高い視点.** 転送 $\tau$ は、有限被覆 $E\to B$ について鎖のレベルで「各単体をそのすべての持ち上げの和に送る」写像で、一般に $\pi_{*}\tau_{*}$ は被覆度倍になる。$\mathbb{Z}/2$ 係数の完全列はスミス理論（$\mathbb{Z}/p$ の作用の不動点集合の研究）の原型である（知られている）。比喩で言えば、奇写像は「表と裏の対応を崩さない」写像で、その情報が $\mathbb{R}P^{n}$ の上に降りたときに、各次数の $\mathbb{Z}/2$ を順に受け渡していく（Step 3）ことが、球面の上での写像度の偶奇を決めている。
+:::
+
+## 問題 {#at:sec-sc-problems}
+
+::: problem {#at:prob-h1-hom}
+弧状連結な $X$ について $H^{1}(X;G)\cong\mathrm{Hom}(H_{1}(X),G)$ を示せ。
+:::
+
+::: solution
+普遍係数定理で $\mathrm{Ext}^{1}(H_{0}(X),G)=\mathrm{Ext}^{1}(\mathbb{Z},G)=0$（$\mathbb{Z}$ は射影的、\ref{ha:ext-basic.3}）。
+:::
+
+::: problem {#at:prob-cohomology-torsion-shift}
+有限 CW 複体 $X$ で $H_{n}(X)\cong\mathbb{Z}^{b_{n}}\oplus T_{n}$（$T_{n}$ は有限）なら、$H^{n}(X)\cong\mathbb{Z}^{b_{n}}\oplus T_{n-1}$ であることを示せ。
+:::
+
+::: solution
+$\mathrm{Hom}(\mathbb{Z}^{b}\oplus T,\mathbb{Z})=\mathbb{Z}^{b}$（有限群から $\mathbb{Z}$ への準同型は $0$）、$\mathrm{Ext}^{1}(\mathbb{Z}^{b}\oplus T,\mathbb{Z})\cong\mathrm{Ext}^{1}(T,\mathbb{Z})\cong T$（有限アーベル群は巡回群の直和で、$\mathrm{Ext}^{1}(\mathbb{Z}/m,\mathbb{Z})\cong\mathbb{Z}/m$、\ref{ha:ext-z}）。普遍係数定理の分裂から。
+:::
+
+::: problem {#at:prob-borsuk-ulam-retraction}
+\ref{at:borsuk-ulam} から、$S^{n}$ は $\mathbb{R}^{n}$ のどの部分集合とも同相でないこと（とくに \ref{at:prob-sphere-no-embedding} の別証明）を導け。
+:::
+
+::: solution
+連続単射 $g\colon S^{n}\to\mathbb{R}^{n}$ があれば、ボルスク–ウラムから $g(x)=g(-x)$ となる $x$ があり、$x\ne-x$ なので単射性に反する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

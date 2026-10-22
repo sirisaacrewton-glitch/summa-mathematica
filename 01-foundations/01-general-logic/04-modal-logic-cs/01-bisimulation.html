@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>双模倣と有限モデル性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/01-general-logic/04-modal-logic-cs/01-bisimulation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 双模倣と有限モデル性 {#logic:page-bisimulation keywords="bisimulation, bounded morphism, p-morphism, Hennessy-Milner theorem, n-bisimulation, unravelling, tree model property, filtration, finite model property, complexity of modal satisfiability, K is in PSPACE, S5 is NP-complete"}
+
+計算機科学では、クリプキモデルは「状態」と「遷移」からなる**遷移系**として現れ、様相論理式は遷移系の振る舞いを述べる言葉になる。そこで最初に問題になるのは「二つの遷移系が同じ振る舞いをするのはどんなときか」である。その答えが**双模倣**で、双模倣な点は様相論理式でまったく区別できない（\ref{logic:bisimulation-invariance}）。逆に、各点の後続が有限個なら、様相論理式で区別できない点は双模倣である（**ヘネシー–ミルナーの定理**、\tref{logic:hennessy-milner}）。このページでは双模倣を道具に、モデルを**木に展開**する方法と、モデルを有限に**フィルトレーション**で縮める方法を整え、\tref{logic:page-modal-completeness} で示した七つの体系の健全性・完全性・決定可能性を、計算量まで含めて見直す。$\mathsf{S5}$ の充足可能性は NP 完全（\tref{logic:s5-np-complete}）、$\mathsf{K}$ の充足可能性は PSPACE に属する（\tref{logic:k-pspace}）。
+
+> 参考：『コンピュータサイエンスにおける様相論理』（ユーザー指定の参考書。本文のテキストは未入手のため、構成は標準的な内容によった）。双模倣・フィルトレーションの扱いは Blackburn–de Rijke–Venema『Modal Logic』第 2 章の流れに近い。
+
+## 記法と定義の確認 {#logic:sec-bis-notation}
+
+::: notation
+- 様相論理式は命題変数（可算無限集合 $\mathrm{PV}$ の元）と $\bot$ から $\to$ と $\Box$ で作る（\ref{logic:modal-formula}）。$\neg A\defeq A\to\bot$、$\top\defeq\neg\bot$、$\wedge$, $\vee$, $\Diamond A\defeq\neg\Box\neg A$ は略記。$\mathrm{Sub}(A)$ は $A$ の部分論理式全体（\ref{logic:modal-substitution}）で、部分論理式をとる操作で閉じた有限集合である。$d(A)$ は様相次数（\ref{logic:modal-degree}）。
+- クリプキモデル $\mathcal{M}=(W,R,V)$（$V\subset W\times\mathrm{PV}$）、真理 $\mathcal{M},w\models A$、妥当性、生成部分モデル（\ref{logic:generated-submodel}）は \ref{logic:page-kripke-semantics} のとおり。略記の真理（$w\models\Diamond A\iff wRx$ かつ $x\models A$ となる $x$ がある、など）は \ref{logic:kripke-abbreviations}。
+- 七つの体系 $\mathsf{K},\mathsf{T},\mathsf{B},\mathsf{K4},\mathsf{S4},\mathsf{S5},\mathsf{GL}$ と、それぞれに**適切なフレーム**、健全性（\ref{logic:kripke-soundness}）・完全性・有限フレームについての完全性と決定可能性（\ref{logic:modal-fmp-decidability}）は \ref{logic:page-modal-completeness} のとおり。
+- 体系 $L$ について、様相論理式 $A$ が **$L$-充足可能**とは、$L$ に適切なフレームの上のあるモデルのある世界で $A$ が真であることをいう。健全性と完全性から、$A$ が $L$-充足可能 $\iff L\nvdash\neg A$ である。
+- 計算量の言葉（クラス P・NP・PSPACE、多項式時間還元、NP 完全、SAT の NP 完全性）は \ref{comp:class-p}, \ref{comp:class-np}, \ref{comp:class-pspace}, \ref{comp:poly-reduction}, \ref{comp:np-complete}, \ref{comp:cook-levin} のとおり。様相論理式の**長さ** $\lvert A\rvert$ は記号の個数とする。$\lvert\mathrm{Sub}(A)\rvert\le\lvert A\rvert$ である。
+- **公理系**：$\ZF$ で行う。選択公理は使わない（選ぶ対象はいつも有限個か、明示的に定まる）。
+:::
+
+## 双模倣 {#logic:sec-bis-bisimulation}
+
+::: definition 双模倣 {#logic:bisimulation keywords="bisimulation, bisimilar, zigzag relation, atomic harmony, forth condition, back condition" index="双模倣|そうもほう, 双模倣的|そうもほうてき, 行きの条件|いきのじょうけん, 戻りの条件|もどりのじょうけん"}
+$\mathcal{M}=(W,R,V)$, $\mathcal{M}'=(W',R',V')$ をクリプキモデルとする。関係 $Z\subset W\times W'$ が**双模倣**であるとは、$wZw'$ となるすべての組について次が成り立つことをいう。
+1. （命題変数）すべての $p\in\mathrm{PV}$ で $(w,p)\in V\iff(w',p)\in V'$。
+2. （**行きの条件**）$wRv$ ならば、$w'R'v'$ かつ $vZv'$ となる $v'$ がある。
+3. （**戻りの条件**）$w'R'v'$ ならば、$wRv$ かつ $vZv'$ となる $v$ がある。
+
+$wZw'$ となる双模倣 $Z$ があるとき、$(\mathcal{M},w)$ と $(\mathcal{M}',w')$ は**双模倣的**であるといい、$\mathcal{M},w\mathrel{\underline{\leftrightarrow}}\mathcal{M}',w'$ と書く。記号 $\mathrel{\underline{\leftrightarrow}}$ は下線までを含めて一つの記号である（Blackburn–de Rijke–Venema『Modal Logic』の記法。$\sim$ や $\simeq$ と書く本もある）。
+:::
+
+::: intuition
+世界を「状態」、$R$ を「1 ステップの遷移」、命題変数を「その状態で観測できる性質」と読むと、双模倣は「一方の系の動きを、もう一方の系がいつでも真似し続けられる」という対応である。行きの条件は $\mathcal{M}$ の動きを $\mathcal{M}'$ が真似ること、戻りの条件はその逆を表す。外から観測できるのが「今の性質」と「次にどこへ行けるか」だけなら、双模倣な二つの系は区別できない。木の形も、世界の個数も、同じである必要はない。
+:::
+
+::: example
+1. $\mathcal{M}$ を一点 $\{0\}$ に反射的な関係 $\{(0,0)\}$ を入れたもの、$\mathcal{M}'$ を $\mathbb{N}$ に後者関係 $\{(n,n+1)\}$ を入れたものとし、どちらもすべての命題変数を偽とする。$Z\defeq\{0\}\times\mathbb{N}$ は双模倣である：命題変数の条件は自明、$0R0$ に対して $nR'(n+1)$ で $0Z(n+1)$、$nR'(n+1)$ に対して $0R0$ で $0Z(n+1)$。ループは無限に続く鎖と見分けがつかない。
+2. $\mathcal{M}_{w}$ を $w$ から生成された部分モデル（\ref{logic:generated-submodel}）とすると、包含 $\{(x,x):x\in X\}$ は $\mathcal{M}_{w}$ と $\mathcal{M}$ の間の双模倣である（$X$ の点の後続は $X$ に入るので、行きと戻りの条件がそのまま成り立つ）。
+3. 一点 $w$ だけで関係が空なモデルと、一点 $w'$ に一本の矢 $w'\to v'$ があるモデルでは、$\{(w,w')\}$ は行きの条件を（空虚に）満たすが戻りの条件を満たさない。実際 $w\models\Box\bot$、$w'\not\models\Box\bot$ なので、両者は双模倣的でない（次の定理）。
+:::
+
+::: definition 有界射 {#logic:bounded-morphism keywords="bounded morphism, p-morphism, zigzag morphism, bounded morphic image" index="有界射|ゆうかいしゃ, p 射|ぴーしゃ"}
+モデルの間の写像 $f\colon W\to W'$ が**有界射**であるとは、次を満たすことをいう。
+1. すべての $w\in W$, $p\in\mathrm{PV}$ で $(w,p)\in V\iff(f(w),p)\in V'$。
+2. $wRv$ ならば $f(w)R'f(v)$。
+3. $f(w)R'v'$ ならば、$wRv$ かつ $f(v)=v'$ となる $v$ がある。
+
+フレームの間の写像で 2 と 3 を満たすものも有界射という。全射な有界射 $f$ があるとき、行き先を $f$ の**有界射像**という。
+:::
+
+::: intuition
+有界射は「関数として書ける双模倣」で、条件 2・3 はちょうど行きと戻りの条件である（グラフ $\{(w,f(w))\}$ が双模倣になる）。有界射の像は、元のモデルの状態を「振る舞いが同じものどうしで」まとめたものと思える。
+:::
+
+::: theorem 双模倣不変性 {#logic:bisimulation-invariance keywords="modal formulas are invariant under bisimulation" index="双模倣不変性|そうもほうふへんせい" refname="様相論理式の双模倣不変性"}
+$Z$ がモデル $\mathcal{M}$, $\mathcal{M}'$ の間の双模倣で $wZw'$ ならば、すべての様相論理式 $A$ について
+$$
+\mathcal{M},w\models A\iff\mathcal{M}',w'\models A.
+$$
+とくに有界射 $f$ について、$\mathcal{M},w\models A\iff\mathcal{M}',f(w)\models A$。
+:::
+
+::: proof
+$A$ の構成についての帰納法で、「$wZw'$ となる**すべての**組 $(w,w')$ について同値が成り立つ」ことを示す（帰納法の仮定をすべての組に対して使う）。
+
+**Step 1.** 【主張：$A$ が命題変数・$\bot$ のとき、および $A=B\to C$ で $B$, $C$ について同値が成り立つとき、$w\models A\iff w'\models A$】 $A=p$ なら双模倣の条件 1 そのものである。$A=\bot$ なら両辺とも偽である。$A=B\to C$ なら、帰納法の仮定から $w\models B\iff w'\models B$、$w\models C\iff w'\models C$ で、真理の定義（「$B$ が偽または $C$ が真」）は両辺で同じ条件になる。
+
+**Step 2.** 【主張：$B$ について（すべての組で）同値が成り立てば、$\Box B$ でも成り立つ】 ⇐：$w'\models\Box B$ とし、$wRv$ をとる。行きの条件から $w'R'v'$ かつ $vZv'$ となる $v'$ がある。$w'\models\Box B$ より $v'\models B$、帰納法の仮定（組 $(v,v')$ に対して）から $v\models B$。$v$ は任意なので $w\models\Box B$。⇒：$w\models\Box B$ とし、$w'R'v'$ をとる。戻りの条件から $wRv$ かつ $vZv'$ となる $v$ がある。$v\models B$ なので、帰納法の仮定から $v'\models B$。よって $w'\models\Box B$。
+
+**Step 3.** 【主張：有界射のグラフは双模倣である】 有界射 $f$ のグラフ $Z_{f}\defeq\{(w,f(w)):w\in W\}$ は双模倣である：条件 1 は有界射の条件 1、行きの条件は $wRv\Rightarrow f(w)R'f(v)$ と $vZ_{f}f(v)$、戻りの条件は有界射の条件 3 による。
+
+::: hypcheck
+- **行きの条件**：Step 2 の ⇐ にだけ使った。**戻りの条件**：Step 2 の ⇒ にだけ使った。片方だけでは足りない：上の例 3 は行きの条件だけを満たし、$\Box\bot$ が区別する。
+- **命題変数の条件**：Step 1 で使った。$A$ に現れる命題変数についてだけ一致していれば、その $A$ については同じ証明が通る。
+- 帰納法の仮定を $(v,v')$ という**別の組**に使うので、「固定した一組についての帰納法」では証明にならない。主張をすべての組について同時に述べてから帰納法を回すのが要点である。
+:::
+:::
+
+::: corollary 有界射像とフレームの妥当性 {#logic:bounded-morphic-image-validity keywords="validity is preserved under surjective bounded morphisms" index="有界射像|ゆうかいしゃぞう"}
+フレームの間の全射な有界射 $f\colon\mathcal{F}=(W,R)\to\mathcal{G}=(W',R')$ があるとき、$\mathcal{F}\models A$ ならば $\mathcal{G}\models A$。
+:::
+
+::: proof
+$\mathcal{G}$ の上のモデル $\mathcal{N}=(W',R',V')$ と $w'\in W'$ をとる。$\mathcal{F}$ の上の付値を $V\defeq\{(w,p):(f(w),p)\in V'\}$ と定めると、$f$ はモデル $(W,R,V)$ から $\mathcal{N}$ への有界射になる（条件 1 は $V$ の定義、2・3 はフレームの有界射の条件）。$f$ は全射なので $f(w)=w'$ となる $w$ がある。$\mathcal{F}\models A$ より $(W,R,V),w\models A$、\ref{logic:bisimulation-invariance} から $\mathcal{N},w'\models A$。$\mathcal{N}$ と $w'$ は任意なので $\mathcal{G}\models A$。
+
+::: hypcheck
+- **全射**：$\mathcal{G}$ の各点に $f$ の値として到達するのに使った。全射でなければ、像の外の点で $A$ が偽になりうる（$\mathcal{F}$ を反射的な一点、$\mathcal{G}$ をそれに関係のない点を一つ加えたもの、$A=\Box p\to p$ とすると、加えた点が反射的でなければ偽）。
+:::
+:::
+
+::: proposition 非反射性は様相論理式で定義できない {#logic:irreflexivity-undefinable keywords="irreflexivity is not modally definable" index="非反射性の定義不可能性|ひはんしゃせいのていぎふかのうせい"}
+どんな様相論理式 $A$ についても、「すべてのフレーム $\mathcal{F}=(W,R)$ について、$\mathcal{F}\models A\iff R$ は非反射的」は成り立たない。
+:::
+
+::: proof
+**Step 1.** $\mathcal{F}\defeq(\mathbb{N},<)$、$\mathcal{G}\defeq(\{0\},\{(0,0)\})$ とし、$f\colon\mathbb{N}\to\{0\}$ を定数写像とする。$m<n$ なら $f(m)=0R'0=f(n)$（行き）。$f(m)R'0$ のとき $v\defeq m+1$ をとれば $m<v$ かつ $f(v)=0$（戻り）。$f$ は全射な有界射である。
+
+**Step 2.** そのような $A$ があったとする。$<$ は非反射的なので $\mathcal{F}\models A$。\ref{logic:bounded-morphic-image-validity} から $\mathcal{G}\models A$。仮定から $\mathcal{G}$ の関係は非反射的になるが、$0R'0$ なので矛盾する。
+
+::: hypcheck
+- Step 1 の戻りの条件には「$\mathcal{F}$ のどの点にも後続がある」ことを使った（$<$ が上に有界でないこと）。有限の非反射的なフレームからは反射的な一点へ全射な有界射は作れない（後続のない点で戻りの条件が破れる）。
+:::
+:::
+
+::: supplement
+**関連する結果.** 反射性・推移性・対称性などは様相論理式で定義できた（\ref{logic:frame-correspondence}）が、非反射性はできない。フレームの一階の性質が様相論理式で定義できるための必要十分条件として、生成部分フレーム・有界射像・非交和で閉じ、超フィルター拡大を反映することを述べる**ゴールドブラット–トマソンの定理**が知られている（Blackburn–de Rijke–Venema『Modal Logic』第 3 章。本サイト未収録）。また、一つの自由変数をもつ一階の論理式が様相論理式の標準翻訳と同値であることと、双模倣で不変であることは同値である（**ファン・ベンセムの特徴付け定理**、同書第 2 章。本サイト未収録）。様相論理は「双模倣で不変な一階の性質」をちょうど表す言葉である。
+
+**高い視点.** クリプキモデルは集合 $W$ と写像 $W\to\mathcal{P}(W)\times\mathcal{P}(\mathrm{PV})$（$w\mapsto(\text{後続の集合},\text{真な命題変数の集合})$）の組、すなわち冪集合関手を使った**余代数**とみなせる。この見方では、有界射はちょうど余代数の準同型（写像と構造が可換になるもの）であり、双模倣は二つの余代数の間の「スパン」として統一的に定義できる。遷移系・オートマトン・ストリームなどの振る舞いの同値を同じ形で扱う枠組み（余代数の理論）の出発点である。
+:::
+
+## 有限の近似とヘネシー–ミルナーの定理 {#logic:sec-bis-hennessy-milner}
+
+::: definition n-双模倣 {#logic:n-bisimulation keywords="n-bisimilarity, finite approximations of bisimilarity" index="n-双模倣|えぬそうもほう"}
+モデル $\mathcal{M}$, $\mathcal{M}'$ の点 $w$, $w'$ について、関係 $w\mathrel{\underline{\leftrightarrow}}_{n}w'$（$n\in\mathbb{N}$）を $n$ についての帰納法で定める。
+- $w\mathrel{\underline{\leftrightarrow}}_{0}w'$ $\iff$ すべての $p\in\mathrm{PV}$ で $(w,p)\in V\iff(w',p)\in V'$。
+- $w\mathrel{\underline{\leftrightarrow}}_{n+1}w'$ $\iff$ $w\mathrel{\underline{\leftrightarrow}}_{0}w'$ で、かつ（行き）$wRv$ ならば $w'R'v'$ かつ $v\mathrel{\underline{\leftrightarrow}}_{n}v'$ となる $v'$ があり、（戻り）$w'R'v'$ ならば $wRv$ かつ $v\mathrel{\underline{\leftrightarrow}}_{n}v'$ となる $v$ がある。
+
+二つ以上のモデルにまたがっても同じ定義を使う。
+:::
+
+::: lemma n-双模倣の性質 {#logic:n-bisimulation-basic keywords="n-bisimilar points agree on formulas of modal degree at most n; bisimilar implies n-bisimilar; transitivity"}
+1. $\mathcal{M},w\mathrel{\underline{\leftrightarrow}}\mathcal{M}',w'$ ならば、すべての $n$ で $w\mathrel{\underline{\leftrightarrow}}_{n}w'$。
+2. $x\mathrel{\underline{\leftrightarrow}}_{n}y$ かつ $y\mathrel{\underline{\leftrightarrow}}_{n}z$ ならば $x\mathrel{\underline{\leftrightarrow}}_{n}z$（三つのモデルにまたがってよい）。
+3. $w\mathrel{\underline{\leftrightarrow}}_{n}w'$ ならば、$d(A)\le n$ となるすべての $A$ について $\mathcal{M},w\models A\iff\mathcal{M}',w'\models A$。
+:::
+
+::: proof
+**1.** $Z$ を $wZw'$ となる双模倣とし、「$vZv'$ ならば $v\mathrel{\underline{\leftrightarrow}}_{n}v'$」を $n$ についての帰納法で示す。$n=0$ は命題変数の条件。$n+1$ では、$vRu$ に対し行きの条件で $v'R'u'$, $uZu'$ となる $u'$ をとれば、帰納法の仮定から $u\mathrel{\underline{\leftrightarrow}}_{n}u'$。戻りも同様。
+
+**2.** $n$ についての帰納法。$n=0$ は「同値」の推移性。$n+1$ の行き：$xRx_{1}$ に対し、$x\mathrel{\underline{\leftrightarrow}}_{n+1}y$ から $yRy_{1}$, $x_{1}\mathrel{\underline{\leftrightarrow}}_{n}y_{1}$ となる $y_{1}$、さらに $y\mathrel{\underline{\leftrightarrow}}_{n+1}z$ から $zRz_{1}$, $y_{1}\mathrel{\underline{\leftrightarrow}}_{n}z_{1}$ となる $z_{1}$ があり、帰納法の仮定で $x_{1}\mathrel{\underline{\leftrightarrow}}_{n}z_{1}$。戻りは逆向きに同じことをする。
+
+**3.** $A$ の構成についての帰納法で、「すべての $n$ と、$w\mathrel{\underline{\leftrightarrow}}_{n}w'$ となるすべての組と、$d(A)\le n$」について示す。命題変数は $\mathrel{\underline{\leftrightarrow}}_{n}$ の定義に含まれる $\mathrel{\underline{\leftrightarrow}}_{0}$ から（$n\ge1$ でも定義の最初の条件に含めてある）。$\bot$ は自明。$B\to C$ は $d(B),d(C)\le d(B\to C)\le n$ なので帰納法の仮定。$\Box B$ では $d(B)=d(\Box B)-1\le n-1$、とくに $n\ge1$ で、$w\mathrel{\underline{\leftrightarrow}}_{n}w'$ の行き・戻りの条件は $\mathrel{\underline{\leftrightarrow}}_{n-1}$ な後続を与えるので、\ref{logic:bisimulation-invariance} の Step 3・4 と同じ議論が帰納法の仮定（$n-1$ と $B$ について）で通る。
+:::
+
+::: definition 像有限 {#logic:image-finite keywords="image-finite model" index="像有限|ぞうゆうげん"}
+モデル $(W,R,V)$ が**像有限**であるとは、各 $w\in W$ について $\{v:wRv\}$ が有限集合であることをいう。
+:::
+
+::: theorem ヘネシー–ミルナーの定理 {#logic:hennessy-milner keywords="Hennessy-Milner theorem: on image-finite models, modal equivalence coincides with bisimilarity" index="ヘネシー–ミルナーの定理|へねしーみるなーのていり" refname="ヘネシー–ミルナーの定理"}
+$\mathcal{M}=(W,R,V)$, $\mathcal{M}'=(W',R',V')$ を像有限なモデルとする。$w\in W$, $w'\in W'$ がすべての様相論理式について同じ真偽をとるならば、$\mathcal{M},w\mathrel{\underline{\leftrightarrow}}\mathcal{M}',w'$。
+:::
+
+::: intuition
+双模倣は「同じ振る舞い」の定義、様相論理式で区別できないことは「観測で区別できない」ことの定義である。双模倣不変性は「同じ振る舞いなら観測で区別できない」を言い、この定理はその逆を、各状態から行ける先が有限個という条件の下で保証する。区別できない二つの状態があれば、相手の動きを「区別できない状態どうし」で真似し続けられる。真似できない動きが一つでもあれば、それを捕える論理式を有限個の連言で組み立てられる、というのが証明の要点で、「有限個」の所に像有限性が効く。
+:::
+
+::: proof
+$Z\defeq\{(v,v')\in W\times W':v$ と $v'$ はすべての様相論理式について同じ真偽をとる$\}$ とおく。仮定から $wZw'$ なので、$Z$ が双模倣であることを示せばよい。命題変数の条件は、命題変数自身が様相論理式なので成り立つ。
+
+**Step 1.** 【主張：$Z$ は行きの条件を満たす】 $vZv'$, $vRu$ とし、$v'R'u'$ かつ $uZu'$ となる $u'$ がないと仮定して矛盾を導く。$v'$ の後続の全体 $\{u'_{1},\dots,u'_{k}\}$ は像有限性から有限である。
+- $k=0$ のとき：$v\models\Diamond\top$（後続 $u$ がある）だが $v'\not\models\Diamond\top$。$vZv'$ に反する。
+- $k\ge1$ のとき：各 $i$ で $u\not Z u'_{i}$ なので、真偽の異なる論理式 $C$ がある。$u\models C$ ならそれを、$u\not\models C$ なら $\neg C$ をとって $C_{i}$ とおくと、$u\models C_{i}$ かつ $u'_{i}\not\models C_{i}$。$D\defeq C_{1}\wedge\cdots\wedge C_{k}$ とおくと $u\models D$ なので $v\models\Diamond D$。一方、$v'$ の後続 $u'_{i}$ はどれも $C_{i}$ を満たさないので $D$ を満たさず、$v'\not\models\Diamond D$。$vZv'$ に反する。
+
+**Step 2.** 【主張：$Z$ は戻りの条件を満たす】 $\mathcal{M}$ と $\mathcal{M}'$ の役割を入れ替えて Step 1 と同じ議論をする（今度は $\mathcal{M}$ の像有限性を使う）。
+
+::: hypcheck
+- **$\mathcal{M}'$ の像有限性**：Step 1 で、後続 $u'_{i}$ を区別する論理式を**有限個**の連言 $D$ にまとめるのに使った。**$\mathcal{M}$ の像有限性**：Step 2 で同じ役割。どちらかを外すと偽：\ref{logic:hm-counterexample}。
+- 論理式を一つずつ「選ぶ」所は有限回なので選択公理は要らない（さらに、論理式全体は可算集合なので番号の最小のものを選べば選択なしに定まる）。
+- 像有限でなくても、論理式の**無限**の連言を許す言語（無限論理）では同じ議論が通り、任意のモデルで「無限論理で区別できない ⇔ 双模倣」となることが知られている（本サイト未収録）。
+:::
+:::
+
+::: counterexample 像有限でないと成り立たない {#logic:hm-counterexample keywords="modally equivalent but not bisimilar points in non-image-finite models" index="ヘネシー–ミルナーの定理の反例|へねしーみるなーのていりのはんれい"}
+すべての命題変数を偽とするモデル $\mathcal{M}$ を次のように作る：根 $r$ と、各 $n\ge1$ について長さ $n$ の鎖 $a^{n}_{1},\dots,a^{n}_{n}$ をとり、$rRa^{n}_{1}$, $a^{n}_{j}Ra^{n}_{j+1}$（$j<n$）とする（$a^{n}_{n}$ には後続がない）。$\mathcal{M}'$ は $\mathcal{M}$ に無限の鎖 $b_{1},b_{2},\dots$ を加え、$rR'b_{1}$, $b_{i}R'b_{i+1}$ としたものとする（$\mathcal{M}$ の点の間の関係はそのまま）。このとき $(\mathcal{M},r)$ と $(\mathcal{M}',r)$ はすべての様相論理式について同じ真偽をとるが、双模倣的でない。
+:::
+
+::: proof
+**Step 1.** 【主張：$(\mathcal{M},r)$ と $(\mathcal{M}',r)$ は双模倣的でない】 双模倣 $Z$ で $rZr$ となるものがあったとする。$rR'b_{1}$ に戻りの条件を使うと、$rRv$ かつ $vZb_{1}$ となる $v$ があり、$v=a^{n}_{1}$（ある $n$）である。$j=1,\dots,n$ について $a^{n}_{j}Zb_{j}$ を帰納法で示す：$j<n$ なら $b_{j}R'b_{j+1}$ に戻りの条件を使うと $a^{n}_{j}$ の後続で $b_{j+1}$ と $Z$ の関係にあるものがあり、後続は $a^{n}_{j+1}$ だけなので $a^{n}_{j+1}Zb_{j+1}$。$j=n$ で $b_{n}R'b_{n+1}$ に戻りの条件を使うと $a^{n}_{n}$ に後続が必要だが、ないので矛盾する。
+
+**Step 2（鎖の上の点）.** $\mathcal{M}'$ の中で $C_{d}\defeq\{b_{i}:i\ge1\}\cup\{a^{n}_{j}:n-j\ge d\}$ とおく（$a^{n}_{j}$ から先に残る矢の本数が $d$ 以上の点）。【主張：$x,y\in C_{d}$ ならば $\mathcal{M}',x\mathrel{\underline{\leftrightarrow}}_{d}\mathcal{M}',y$】 $d$ についての帰納法で示す。$d=0$ は命題変数がすべて偽なので成り立つ。$x\in C_{d+1}$ なら $x$ の後続はちょうど一つで、それは $C_{d}$ に属する（$b_{i}$ の後続 $b_{i+1}$、$n-j\ge d+1\ge1$ なら $a^{n}_{j}$ の後続 $a^{n}_{j+1}$ で $n-(j+1)\ge d$）。よって $x,y\in C_{d+1}$ の行き・戻りの条件は、それぞれの唯一の後続どうしに帰納法の仮定を使えば満たされる。
+
+**Step 3（根どうし）.** $\mathcal{M}$ の $r$ 以外の点 $x$ では、$\mathcal{M}$ での後続と $\mathcal{M}'$ での後続は同じである。$r$ はどの点の後続でもないので、$\{(x,x):x\neq r\}$ は $\mathcal{M}$ と $\mathcal{M}'$ の間の双模倣であり、\ref{logic:n-bisimulation-basic.1} から $\mathcal{M},x\mathrel{\underline{\leftrightarrow}}_{d}\mathcal{M}',x$（すべての $x\neq r$ と $d$）。【主張：すべての $d$ で $\mathcal{M},r\mathrel{\underline{\leftrightarrow}}_{d+1}\mathcal{M}',r$】 命題変数は一致する。行き：$rRa^{n}_{1}$ には $\mathcal{M}'$ の同じ後続 $a^{n}_{1}$ を対応させればよい（上の $x\neq r$ の場合）。戻り：$\mathcal{M}'$ の後続 $a^{n}_{1}$ には同じ点を対応させる。後続 $b_{1}$ には $\mathcal{M}$ の後続 $a^{d+1}_{1}$ を対応させる：上から $\mathcal{M},a^{d+1}_{1}\mathrel{\underline{\leftrightarrow}}_{d}\mathcal{M}',a^{d+1}_{1}$、Step 2 から（$(d+1)-1=d$ なので $a^{d+1}_{1}\in C_{d}$）$\mathcal{M}',a^{d+1}_{1}\mathrel{\underline{\leftrightarrow}}_{d}\mathcal{M}',b_{1}$、\ref{logic:n-bisimulation-basic.2} で $\mathcal{M},a^{d+1}_{1}\mathrel{\underline{\leftrightarrow}}_{d}\mathcal{M}',b_{1}$。
+
+したがって任意の様相論理式 $A$ について、$d\defeq d(A)$ とおくと Step 3 と \ref{logic:n-bisimulation-basic.3} から $\mathcal{M},r\models A\iff\mathcal{M}',r\models A$。一方 Step 1 から双模倣的でなく、$\mathcal{M}'$ の $r$ には無限個の後続があるので像有限でない。
+:::
+
+## 木への展開 {#logic:sec-bis-unravelling}
+
+::: definition 木への展開 {#logic:unravelling keywords="unravelling, tree unravelling of a pointed model" index="木への展開|きへのてんかい, 展開（クリプキモデル）|てんかいくりぷきもでる"}
+モデル $\mathcal{M}=(W,R,V)$ と $w\in W$ について、$w=v_{0}Rv_{1}R\cdots Rv_{n}$（$n\ge0$）となる有限列 $(v_{0},\dots,v_{n})$ 全体を $W^{\to}$ とし、$s=(v_{0},\dots,v_{n})$ の最後の項を $\mathrm{last}(s)\defeq v_{n}$ と書く。$sR^{\to}t$ を「$t$ は $s$ の後ろに一項を足したもの」、$V^{\to}\defeq\{(s,p):(\mathrm{last}(s),p)\in V\}$ と定め、$\mathcal{M}^{\to}_{w}\defeq(W^{\to},R^{\to},V^{\to})$ を $\mathcal{M}$ の $w$ からの**木への展開**（単に展開ともいう）という。根 $(w)$ から各点へは $R^{\to}$ の道がちょうど一本あり、$\mathcal{M}^{\to}_{w}$ は根つきの木である。
+:::
+
+::: proposition 展開は双模倣的 {#logic:unravelling-bisimilar keywords="last is a bounded morphism from the unravelling"}
+$\mathrm{last}\colon W^{\to}\to W$ は $\mathcal{M}^{\to}_{w}$ から $\mathcal{M}$ への有界射である。したがって、すべての $s\in W^{\to}$ と様相論理式 $A$ で $\mathcal{M}^{\to}_{w},s\models A\iff\mathcal{M},\mathrm{last}(s)\models A$。とくに $\mathcal{M}^{\to}_{w},(w)\models A\iff\mathcal{M},w\models A$。
+:::
+
+::: proof
+有界射の条件 1 は $V^{\to}$ の定義。条件 2：$sR^{\to}t$ なら $t=(s,v)$ の形で、列の定義から $\mathrm{last}(s)Rv=\mathrm{last}(t)$。条件 3：$\mathrm{last}(s)Rv$ なら $t\defeq(s,v)\in W^{\to}$ で、$sR^{\to}t$ かつ $\mathrm{last}(t)=v$。あとは \ref{logic:bisimulation-invariance}。
+:::
+
+::: theorem 有限木モデル性 {#logic:finite-tree-model keywords="finite tree model property of K: every satisfiable formula is satisfied at the root of a finite tree of depth at most its modal degree" index="有限木モデル性|ゆうげんきもでるせい"}
+$\mathcal{M},w\models A$ ならば、深さが $d(A)$ 以下で、各点の子の個数が $\mathrm{Sub}(A)$ の中の $\Box$ で始まる論理式の個数以下であるような有限の木 $\mathcal{T}$（根 $\rho$）の上のモデルがあって、$\mathcal{T},\rho\models A$ となる。
+:::
+
+::: proof
+$m\defeq d(A)$、$\mathrm{Sub}(A)$ の中の $\Box$ で始まる論理式を $\Box B_{1},\dots,\Box B_{k}$ とする。
+
+**Step 1（木の構成）.** 【主張：各節点に $\mathcal{M}$ の世界をラベルとして付けた、深さ $m$ 以下・各節点の子が $k$ 個以下の有限の木 $\mathcal{T}$ を作れる】 $\mathcal{M}$ の世界を「ラベル」にもつ節点からなる木を、深さについて帰納的に作る。根 $\rho$ のラベルは $w$、深さは $0$。深さ $\ell<m$ でラベル $u$ の節点 $x$ について、各 $i\le k$ で $d(\Box B_{i})\le m-\ell$ かつ $\mathcal{M},u\not\models\Box B_{i}$ ならば、$uRu'$ かつ $\mathcal{M},u'\not\models B_{i}$ となる $u'$ を一つ選び、ラベル $u'$・深さ $\ell+1$ の子を $x$ に付ける。深さ $m$ の節点には子を付けない。選ぶ回数は有限回（各節点で高々 $k$ 回、節点は高々 $1+k+\cdots+k^{m}$ 個）なので選択公理は要らない。木の関係は「親から子へ」、付値は「ラベルで真な命題変数」とする。
+
+**Step 2（真理の一致）.** 【主張：深さ $\ell$・ラベル $u$ の節点 $x$ と、$d(B)\le m-\ell$ となる $B\in\mathrm{Sub}(A)$ について $\mathcal{T},x\models B\iff\mathcal{M},u\models B$】 $B$ についての帰納法で示す。命題変数・$\bot$・$\to$ は付値の定義と帰納法の仮定（部分論理式の様相次数は小さいかそれ以下）。$B=\Box B_{i}$ のとき $\ell<m$ であり、子のラベル $u'$ はすべて $uRu'$ を満たし、子の深さ $\ell+1$ について $d(B_{i})\le m-(\ell+1)$ なので帰納法の仮定が使える。
+- $\mathcal{M},u\models\Box B_{i}$ なら、各子のラベル $u'$ で $\mathcal{M},u'\models B_{i}$、帰納法の仮定から各子で $B_{i}$ が真、よって $\mathcal{T},x\models\Box B_{i}$。
+- $\mathcal{M},u\not\models\Box B_{i}$ なら、Step 1 でラベル $u'$ の子を付けた（$d(\Box B_{i})\le m-\ell$ なので条件を満たす）。$\mathcal{M},u'\not\models B_{i}$ と帰納法の仮定から、その子で $B_{i}$ が偽、よって $\mathcal{T},x\not\models\Box B_{i}$。
+
+最後に、根 $\rho$ のラベルは $w$ で $d(A)=m$ なので、Step 2 で $\ell=0$, $B=A$ とすれば $\mathcal{T},\rho\models A$。深さが $m$ 以下なのは、Step 1 で深さ $m$ の節点に子を付けないから。各節点の子が $k$ 個以下なのは、子を $i\le k$ ごとに高々一つしか付けないから。
+
+::: hypcheck
+- **様相次数の制限 $d(B)\le m-\ell$**：Step 2 で、深さ $m$ の節点（子がない）では $\Box$ で始まる論理式を評価しなくてよいことを保証するのに使った。深さを打ち切らないと木は無限になりうる。
+- この定理は**フレームの条件を何も保たない**（反射的なモデルから作っても木は反射的でない）。したがって $\mathsf{K}$ にしか使えない。$\mathsf{T}$ や $\mathsf{S4}$ には、木の各点に反射や推移を足す修正が要る。
+:::
+:::
+
+::: corollary K は有限の木について完全 {#logic:k-finite-tree-completeness keywords="K is complete with respect to finite intransitive trees"}
+$\mathsf{K}\vdash A$ であることと、$A$ が深さ $d(A)$ 以下のすべての有限の木（フレーム）で妥当であることは同値である。
+:::
+
+::: proof
+⇒ は健全性定理（\ref{logic:kripke-soundness}）。⇐：$\mathsf{K}\nvdash A$ なら、$\mathsf{K}$ の完全性（\ref{logic:completeness-k-t}）から $\neg A$ はあるモデルのある世界で真。$d(\neg A)=d(A)$ なので、\ref{logic:finite-tree-model} から深さ $d(A)$ 以下の有限の木の根で $\neg A$ が真になり、その木で $A$ は妥当でない。
+:::
+
+## フィルトレーション {#logic:sec-bis-filtration}
+
+::: definition フィルトレーション {#logic:filtration keywords="filtration of a Kripke model through a subformula-closed set; smallest, largest and transitive filtrations" index="フィルトレーション（様相論理）|ふぃるとれーしょんようそうろんり, 最小フィルトレーション|さいしょうふぃるとれーしょん, 最大フィルトレーション|さいだいふぃるとれーしょん"}
+$\Sigma$ を部分論理式をとる操作で閉じた有限集合、$\mathcal{M}=(W,R,V)$ をモデルとする。$w\equiv_{\Sigma}v$ を「すべての $B\in\Sigma$ で $\mathcal{M},w\models B\iff\mathcal{M},v\models B$」と定め、同値類を $[w]$、商集合を $W^{f}$ と書く。モデル $\mathcal{M}^{f}=(W^{f},R^{f},V^{f})$ が $\mathcal{M}$ の **$\Sigma$ によるフィルトレーション**であるとは、次を満たすことをいう。
+1. $p\in\Sigma$ について $([w],p)\in V^{f}\iff(w,p)\in V$（$p\notin\Sigma$ は偽とする）。
+2. $wRv$ ならば $[w]R^{f}[v]$。
+3. $[w]R^{f}[v]$ ならば、すべての $\Box B\in\Sigma$ について、$\mathcal{M},w\models\Box B$ なら $\mathcal{M},v\models B$。
+:::
+
+::: intuition
+フィルトレーションは「$\Sigma$ の論理式で区別できない世界を一つにまとめる」操作である。まとめた後の関係は、元の矢を潰さず（条件 2）、しかも $\Box$ の約束を破る余計な矢を作らない（条件 3）ように選ぶ。$\Sigma$ が有限なので、まとめた後の世界は高々 $2^{\lvert\Sigma\rvert}$ 個になる。双模倣が「振る舞いを完全に保って」まとめるのに対し、フィルトレーションは「$\Sigma$ の範囲の観測だけを保って」まとめる。
+:::
+
+::: lemma フィルトレーションの補題 {#logic:filtration-lemma keywords="filtration lemma: filtrations preserve truth of formulas in Sigma" index="フィルトレーションの補題|ふぃるとれーしょんのほだい"}
+$\mathcal{M}^{f}$ が $\mathcal{M}$ の $\Sigma$ によるフィルトレーションならば、
+1. 条件 1・3 は代表元の選び方によらない。
+2. すべての $B\in\Sigma$ と $w\in W$ で $\mathcal{M},w\models B\iff\mathcal{M}^{f},[w]\models B$。
+3. $\lvert W^{f}\rvert\le2^{\lvert\Sigma\rvert}$。
+:::
+
+::: proof
+**1.** $w\equiv_{\Sigma}w'$, $v\equiv_{\Sigma}v'$ とする。$p\in\Sigma$ なら $w\models p\iff w'\models p$。$\Box B\in\Sigma$ なら $B\in\Sigma$（部分論理式で閉じている）なので、$w\models\Box B\iff w'\models\Box B$ かつ $v\models B\iff v'\models B$。
+
+**2.** $B$ についての帰納法（部分論理式も $\Sigma$ に属する）。命題変数は条件 1、$\bot$ は両辺とも偽、$\to$ は帰納法の仮定と真理の定義（$B\to C$ が真 $\iff$ $B$ が偽または $C$ が真）。$B=\Box C$ のとき：
+- $\mathcal{M}^{f},[w]\models\Box C$ とし、$wRv$ をとる。条件 2 から $[w]R^{f}[v]$、よって $\mathcal{M}^{f},[v]\models C$、帰納法の仮定から $\mathcal{M},v\models C$。したがって $\mathcal{M},w\models\Box C$。
+- $\mathcal{M},w\models\Box C$ とし、$[w]R^{f}u$ をとる。$u=[v]$ と書くと条件 3 から $\mathcal{M},v\models C$、帰納法の仮定から $\mathcal{M}^{f},[v]\models C$。したがって $\mathcal{M}^{f},[w]\models\Box C$。
+
+**3.** $[w]\mapsto\{B\in\Sigma:\mathcal{M},w\models B\}$ は $\equiv_{\Sigma}$ の定義から単射である。
+
+::: hypcheck
+- **$\Sigma$ が部分論理式で閉じていること**：1 と 2 の帰納法（$\Box C\in\Sigma\Rightarrow C\in\Sigma$）に使った。
+- **条件 2**：2 の $\Box$ の ⇒ に、**条件 3**：⇐ に使った。$\Sigma$ の外の論理式の真理は保たれない。
+:::
+:::
+
+::: proposition 三つのフィルトレーション {#logic:filtration-relations keywords="smallest filtration, largest filtration, Lemmon filtration for transitive models"}
+$W^{f}$ 上の関係を次のように定める。
+- **最小**：$[w]R^{s}[v]\iff w\equiv_{\Sigma}w'$, $v\equiv_{\Sigma}v'$, $w'Rv'$ となる $w',v'$ がある。
+- **最大**：$[w]R^{l}[v]\iff$ すべての $\Box B\in\Sigma$ で、$w\models\Box B$ なら $v\models B$。
+- **推移的**：$[w]R^{t}[v]\iff$ すべての $\Box B\in\Sigma$ で、$w\models\Box B$ なら $v\models\Box B$ かつ $v\models B$。
+
+このとき
+1. $R^{s}$ と $R^{l}$ を使ったもの（付値は条件 1 で定める）はフィルトレーションである。条件 2・3 を満たす関係 $R^{f}$ は $R^{s}\subset R^{f}\subset R^{l}$ を満たす。
+2. $R$ が推移的なら $R^{t}$ を使ったものはフィルトレーションで、$R^{t}$ は推移的である。
+3. $R$ が同値関係なら、$[w]R^{e}[v]\iff$「すべての $\Box B\in\Sigma$ で $w\models\Box B\iff v\models\Box B$」で定めた $R^{e}$ を使ったものはフィルトレーションで、$R^{e}$ は同値関係である。
+:::
+
+::: proof
+\ref{logic:filtration-lemma.1} と同じく、どの定義も代表元の選び方によらない。
+
+**Step 1.** 【主張：$R^{s}$ と $R^{l}$ は条件 2・3 を満たし、条件 2・3 を満たす $R^{f}$ は $R^{s}\subset R^{f}\subset R^{l}$ を満たす】 $R^{s}$ の条件 2：$wRv$ なら $w'=w$, $v'=v$ ととれる。$R^{s}$ の条件 3：$[w]R^{s}[v]$ を $w'Rv'$ で実現し、$w\models\Box B$（$\Box B\in\Sigma$）とすると、$w'\models\Box B$、$v'\models B$、$v\models B$（$B\in\Sigma$）。$R^{l}$ の条件 3 は定義そのもの、条件 2 は $wRv$ かつ $w\models\Box B$ なら $v\models B$ による。はさみうち：条件 2 を満たす $R^{f}$ は、$w'Rv'$ から $[w']R^{f}[v']$ なので $R^{s}\subset R^{f}$。条件 3 は $R^{f}\subset R^{l}$ と同じことである。
+
+**Step 2.** $R$ を推移的とする。【主張：$R^{t}$ は条件 2・3 を満たし、推移的である】 条件 2：$wRv$ かつ $w\models\Box B$ とすると $v\models B$。さらに $vRu$ なら推移性から $wRu$ で $u\models B$、よって $v\models\Box B$。条件 3 は定義から（後半の「$v\models B$」）。推移性：$[w]R^{t}[v]R^{t}[u]$ かつ $w\models\Box B$ なら $v\models\Box B$、よって $u\models\Box B$ かつ $u\models B$。
+
+**Step 3.** $R$ を同値関係とする。【主張：$R^{e}$ は同値関係で、条件 2・3 を満たす】 $R^{e}$ は「$\Sigma$ の各 $\Box B$ について $w\models\Box B\iff v\models\Box B$」で定まるので、$\iff$ の反射性・対称性・推移性から同値関係である（代表元の取り方にもよらない：$w\equiv_{\Sigma}w'$ なら $\Sigma$ の論理式の真偽が同じ）。条件 2：$wRv$ なら、$R$ の同値類が等しいので $w$ と $v$ の後続の集合は同じで、$w\models\Box B\iff v\models\Box B$。条件 3：$[w]R^{e}[v]$ かつ $w\models\Box B$ なら $v\models\Box B$、$R$ の反射性で $vRv$ なので $v\models B$。
+:::
+
+::: theorem フィルトレーションによる有限モデル性 {#logic:fmp-filtration keywords="finite model property of K, T, B, K4, S4, S5 via filtration" index="有限モデル性（フィルトレーション）|ゆうげんもでるせいふぃるとれーしょん"}
+$L$ を $\mathsf{K},\mathsf{T},\mathsf{B},\mathsf{K4},\mathsf{S4},\mathsf{S5}$ のどれかとする。$A$ が $L$-充足可能ならば、$A$ は世界の数が $2^{\lvert\mathrm{Sub}(A)\rvert}$ 以下の $L$ に適切なフレームの上のモデルで充足される。
+:::
+
+::: proof
+$L$ に適切なフレームの上のモデル $\mathcal{M}$ と世界 $w$ で $A$ が真とし、$\Sigma\defeq\mathrm{Sub}(A)$ とする。\ref{logic:filtration-lemma} から、どのフィルトレーションでも $\mathcal{M}^{f},[w]\models A$ で、世界は $2^{\lvert\Sigma\rvert}$ 個以下である。あとは $L$ ごとに、適切なフレームになる $R^{f}$ を選べばよい。
+- $\mathsf{K}$：$R^{s}$（条件なし）。
+- $\mathsf{T}$：$R^{s}$。$R$ が反射的なら、条件 2（$wRw\Rightarrow[w]R^{f}[w]$）からどのフィルトレーションも反射的。
+- $\mathsf{B}$：$R^{s}$。反射性は上と同じ。$R$ が対称なら $R^{s}$ も対称（$w'Rv'$ なら $v'Rw'$）。
+- $\mathsf{K4}$：$R^{t}$（\ref{logic:filtration-relations.2}）。
+- $\mathsf{S4}$：$R^{t}$。推移的で、条件 2 から反射的。
+- $\mathsf{S5}$：$R^{e}$（\ref{logic:filtration-relations.3}）。同値関係（反射的かつユークリッド的）である。
+
+::: hypcheck
+- **各体系での関係の選び方**：$\mathsf{K4}$ で $R^{s}$ を使うと推移性が壊れうる（$[w]R^{s}[v]$ と $[v]R^{s}[u]$ を実現する矢が、$[v]$ の別の代表元を通る場合）。$\mathsf{B}$ で $R^{t}$ を使うと対称性が壊れうる。体系ごとに、保ちたい性質に合わせて選ぶ必要がある。
+- $\mathsf{GL}$ はこの形では扱えない：フィルトレーションは逆整礎性（有限なら非反射性）を保つとは限らない。$\mathsf{GL}$ の有限モデル性は \ref{logic:completeness-gl} で、極大無矛盾集合を使って直接示した。
+:::
+:::
+
+::: remark
+有限モデル性そのものは \ref{logic:modal-fmp-decidability} ですでに示したが、そこでは公理系から作った有限のカノニカルモデルを使った。フィルトレーションは公理系に触れず、**任意の**モデルを意味を保ったまま有限に縮める。この方法は、公理系の完全性がまだ分からない論理（このあと扱う PDL など）の有限モデル性を示すのにそのまま使える。
+:::
+
+## 決定可能性と計算量 {#logic:sec-bis-complexity}
+
+::: lemma S5 の小さいモデル {#logic:s5-small-model keywords="S5 small model property: a satisfiable formula has a model with at most |A| worlds and the universal relation"}
+$A$ が $\mathsf{S5}$-充足可能ならば、世界の数が $1+k$ 以下（$k$ は $\mathrm{Sub}(A)$ の中の $\Box$ で始まる論理式の個数）で、関係が全体関係 $W\times W$ であるモデルで充足される。
+:::
+
+::: proof
+**Step 1（小さいモデルの構成）.** 同値関係のモデル $\mathcal{M}$ と世界 $w$ で $A$ が真とし、$w$ の同値類を $X$ とする。【主張：$\lvert Y\rvert\le1+k$ の $Y\subset X$ で、$\mathcal{M}_{w}$ で偽な各 $\Box B_{i}$ について $B_{i}$ が偽な点を含むものがとれる（$\mathcal{M}_{w}$ は $w$ から生成された部分モデル）】 $w$ から $R$ をたどって行ける世界は $w$ の同値類 $X$ の元であり、$R$ を $X$ に制限すると $X\times X$ になるので、$\mathcal{M}_{w}$ は全体関係のモデルで、\ref{logic:generated-submodel} から $\mathcal{M}_{w},w\models A$。全体関係のモデルでは $\Box B$ の真偽は世界によらない（どの世界の後続も全体）。$\mathrm{Sub}(A)$ の中の $\Box B_{1},\dots,\Box B_{k}$ のうち $\mathcal{M}_{w}$ で偽なもの $\Box B_{i}$ ごとに、$B_{i}$ が偽な世界 $x_{i}\in X$ を一つ選ぶ（有限回の選択）。$Y\defeq\{w\}\cup\{x_{i}\}$、$\mathcal{N}\defeq(Y,Y\times Y,V\cap(Y\times\mathrm{PV}))$ とおく。
+
+**Step 2（真理の一致）.** 【主張：$B\in\mathrm{Sub}(A)$ と $y\in Y$ について $\mathcal{N},y\models B\iff\mathcal{M}_{w},y\models B$】 $B$ についての帰納法で示す。命題変数は $\mathcal{N}$ の付値が $V$ の $Y$ への制限なので一致し、$\bot$ は両辺とも偽、$\to$ は帰納法の仮定と真理の定義による。$B=\Box C$ が $\mathcal{M}_{w}$ で真なら、$X$ のすべての点で $C$ が真、とくに $Y$ の点で真、帰納法の仮定から $\mathcal{N}$ でも $Y$ のすべての点で真なので $\mathcal{N},y\models\Box C$。偽なら $C$ が偽な証人 $x_{i}\in Y$ があり、帰納法の仮定から $\mathcal{N},x_{i}\not\models C$、よって $\mathcal{N},y\not\models\Box C$。$y=w$, $B=A$ として結論を得る。
+:::
+
+::: theorem S5 の充足可能性は NP 完全 {#logic:s5-np-complete keywords="S5-satisfiability is NP-complete; S5-provability is coNP-complete" index="S5 の計算量|えすふぁいぶのけいさんりょう" refname="S5 の充足可能性は NP 完全"}
+$\mathsf{S5}$-充足可能な様相論理式の全体は NP 完全である。したがって $\{A:\mathsf{S5}\vdash A\}$ は coNP 完全である。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathsf{S5}$-充足可能性は NP に属する】 入力 $A$ に対し、検証機は証拠として、世界の数 $n\le1+\lvert A\rvert$ と、各世界で $A$ に現れる命題変数の真偽表（$n\cdot\lvert A\rvert$ ビット以下）を受け取る。全体関係のモデルで $\mathrm{Sub}(A)$ の各論理式の真偽を、短い論理式から順に各世界で計算する（$\Box C$ は「すべての世界で $C$」）。計算は $\lvert\mathrm{Sub}(A)\rvert\cdot n$ 個の値を、各々 $O(n)$ 回の参照で埋めるので多項式時間である。$A$ が $\mathsf{S5}$-充足可能なら \ref{logic:s5-small-model} から受理する証拠があり、逆に受理されれば全体関係（同値関係）のモデルで $A$ が真なので $\mathsf{S5}$-充足可能である。よって \ref{comp:class-np} の意味で NP に属する。
+
+**Step 2.** 【主張：$\mathsf{S5}$-充足可能性は NP 困難である】 $\Box$ を含まない論理式（命題論理式）$\varphi$ について、$\varphi$ が命題論理の意味で充足可能 $\iff$ $\varphi$ が $\mathsf{S5}$-充足可能。⇒：充足する割り当てを一点の反射的なモデルの付値にすればよい。⇐：$\Box$ を含まないので、真になる世界での命題変数の真偽が充足する割り当てになる。$\varphi\mapsto\varphi$（論理結合子の略記の展開を含めても多項式時間）は SAT からの多項式時間還元であり、SAT は NP 完全（\ref{comp:cook-levin}）なので、\ref{comp:poly-reduction-basic} から NP 困難。
+
+最後に、$\mathsf{S5}\vdash A\iff\neg A$ が $\mathsf{S5}$-充足可能でない（健全性と完全性 \ref{logic:completeness-s5}）。$A\mapsto\neg A$ は多項式時間なので、証明可能な論理式全体は「充足可能でない」問題と多項式時間で互いに還元され、coNP 完全である。
+
+::: hypcheck
+- **小さいモデル（\ref{logic:s5-small-model}）**：Step 1 で証拠の長さを多項式に抑えるのに使った。これがなければ、NP に属するかどうかは分からない。
+- **$\mathsf{S5}$ のフレームが同値関係であること**：\ref{logic:s5-small-model} の Step 1 で全体関係のモデルに帰着するのに使った。$\mathsf{K}$ では同じ議論は通らない（$\Box$ の真偽が世界ごとに違う）。
+:::
+:::
+
+::: theorem K の充足可能性の再帰的な特徴付け {#logic:k-satisfiability-recursion keywords="recursive characterization of K-satisfiability by Hintikka-style sets"}
+$A$ を固定し、$\mathrm{Sub}_{m}\defeq\{B\in\mathrm{Sub}(A):d(B)\le m\}$ とおく。$X\subset\mathrm{Sub}_{m}$ が**命題的に整合**であるとは、$\bot\notin X$ で、$(B\to C)\in\mathrm{Sub}_{m}$ について「$(B\to C)\in X\iff B\notin X$ または $C\in X$」が成り立つことをいう。$T,F\subset\mathrm{Sub}_{m}$ について、$\mathrm{Sat}(T,F,m)$ を「あるモデルのある世界で、$T$ の論理式がすべて真、$F$ の論理式がすべて偽」と定めると、次は同値である。
+1. $\mathrm{Sat}(T,F,m)$。
+2. 命題的に整合な $X\subset\mathrm{Sub}_{m}$ で、$T\subset X$、$F\cap X=\varnothing$、かつ各 $\Box C\in\mathrm{Sub}_{m}\setminus X$ について $\mathrm{Sat}(\{D:\Box D\in X\},\{C\},m-1)$ となるものがある。
+
+（$m=0$ なら $\mathrm{Sub}_{0}$ に $\Box$ で始まる論理式はなく、2 の最後の条件は空虚である。$\Box D\in\mathrm{Sub}_{m}$ なら $D\in\mathrm{Sub}_{m-1}$ であることに注意。）
+:::
+
+::: proof
+**Step 1（1 ⇒ 2）.** 世界 $w$ で条件が満たされるとし、$X\defeq\{B\in\mathrm{Sub}_{m}:w\models B\}$ とおく。【主張：この $X$ が 2 の条件を満たす】命題的整合性は真理の定義、$T\subset X$, $F\cap X=\varnothing$ は仮定から。$\Box C\in\mathrm{Sub}_{m}\setminus X$ なら $w\not\models\Box C$ なので、$wRv$ かつ $v\not\models C$ となる $v$ があり、$\Box D\in X$ なら $v\models D$。よって $v$ が $\mathrm{Sat}(\{D:\Box D\in X\},\{C\},m-1)$ の証人になる。
+
+**Step 2（2 ⇒ 1）.** $X$ と、各 $\Box C\in\mathrm{Sub}_{m}\setminus X$ についての証人（モデル $\mathcal{M}_{C}$ と世界 $v_{C}$）をとる。$\mathcal{M}_{C}$ たちの世界の集合を互いに交わらないように取り替えて（例えば $C$ と組にして）合併し、新しい世界 $r$ を加えて、$r$ から各 $v_{C}$ への矢を足し、$r$ での付値を「$p\in X$ のとき真」とする。これを $\mathcal{N}$ とする。【主張：$B\in\mathrm{Sub}_{m}$ について $\mathcal{N},r\models B\iff B\in X$（とくに $r$ で $T$ は真、$F$ は偽）】 各 $v_{C}$ から生成される部分モデルは $\mathcal{M}_{C}$ の中にあり（$r$ へ戻る矢はない）、\ref{logic:generated-submodel} から $v_{C}$ での真偽は $\mathcal{M}_{C}$ と $\mathcal{N}$ で同じである。$B\in\mathrm{Sub}_{m}$ について $\mathcal{N},r\models B\iff B\in X$ を $B$ についての帰納法で示す。命題変数は付値の定義、$\bot$ と $\to$ は命題的整合性。$\Box B'\in X$ なら、$r$ の後続 $v_{C}$ はすべて $B'$ を満たす（証人の条件）ので $r\models\Box B'$。$\Box C\in\mathrm{Sub}_{m}\setminus X$ なら、後続 $v_{C}$ で $C$ が偽なので $r\not\models\Box C$。よって $r$ で $T$ は真、$F$ は偽。
+
+::: hypcheck
+- **様相次数の管理**：再帰の深さを $m$ で抑えるために、$\Box C\in\mathrm{Sub}_{m}$ の中身を $\mathrm{Sub}_{m-1}$ で扱った。
+- Step 2 の新しい世界 $r$ は**どの体系のフレーム条件も保たない**（$r$ は反射的でない、推移性も壊れる）。この特徴付けは $\mathsf{K}$ 専用である。
+:::
+:::
+
+::: theorem K の充足可能性は PSPACE に属する {#logic:k-pspace keywords="K-satisfiability is in PSPACE; Ladner's theorem: K is PSPACE-complete" index="K の計算量|けーのけいさんりょう" refname="K の充足可能性は PSPACE に属する"}
+$\mathsf{K}$-充足可能な様相論理式の全体は PSPACE に属する。したがって $\{A:\mathsf{K}\vdash A\}$ も PSPACE に属する（決定可能である）。
+:::
+
+::: proof
+**Step 1（アルゴリズム）.** 【主張：$\mathsf{K}$-充足可能性を正しく判定する再帰手続きがある】 \ref{logic:k-satisfiability-recursion} の 2 をそのまま再帰手続き $\mathrm{SAT}(T,F,m)$ にする：$\mathrm{Sub}_{m}$ の部分集合 $X$ を辞書式順にすべて試し、各 $X$ について命題的整合性と $T\subset X$, $F\cap X=\varnothing$ を確かめ、$\Box C\in\mathrm{Sub}_{m}\setminus X$ を一つずつ取り出して $\mathrm{SAT}(\{D:\Box D\in X\},\{C\},m-1)$ を呼ぶ。すべてが真になる $X$ があれば真を返す。$A$ が $\mathsf{K}$-充足可能 $\iff\mathrm{SAT}(\{A\},\varnothing,d(A))$ が真（$\mathsf{K}$ に適切なフレームはすべてのフレームなので、$\mathsf{K}$-充足可能は「あるモデルで充足される」と同じ）。正しさは \ref{logic:k-satisfiability-recursion} と $m$ についての帰納法による。
+
+**Step 2.** $n\defeq\lvert A\rvert$ とする。【主張：その手続きは $O(n^{2})$ の領域で動く】$\mathrm{Sub}(A)$ の元に番号を付けると、$T,F,X$ はそれぞれ $n$ ビットの列で、$m$ と「いま試している $\Box C$ の番号」は $O(\log n)$ ビットで表せる。再帰の各段で保持するのはこれらだけで $O(n)$ ビット、再帰の深さは $d(A)+1\le n+1$。したがって全体の領域は $O(n^{2})$ で、多項式領域の決定性の手続きになる。（時間は指数的でよい。）よって PSPACE に属する（\ref{comp:class-pspace}）。
+
+最後に、$\mathsf{K}\vdash A\iff\neg A$ が $\mathsf{K}$-充足可能でない（健全性と \ref{logic:completeness-k-t}）。PSPACE は補集合で閉じている（決定性の手続きの答えを反転すればよい）ので、$\{A:\mathsf{K}\vdash A\}$ も PSPACE に属する。
+
+::: hypcheck
+- **再帰の深さの評価**：Step 2 の領域の評価は、\ref{logic:k-satisfiability-recursion} で $m$ が一つずつ減ることに依存する。深さを抑えずに展開した木（\ref{logic:unravelling}）をそのまま調べると、木の大きさが指数的なので多項式領域にならない。
+- 各段で「すべての $X$ を順に試す」ので、答えを推測する（非決定性）必要はない。
+:::
+:::
+
+::: fact 様相論理の計算量（ラドナーの定理） {#logic:modal-complexity-fact keywords="Ladner 1977: satisfiability for K, T, S4 is PSPACE-complete; S5 is NP-complete" index="ラドナーの定理（様相論理）|らどなーのていりようそうろんり"}
+$\mathsf{K}$, $\mathsf{T}$, $\mathsf{S4}$ の充足可能性問題（したがって証明可能性問題）は PSPACE 完全である（R. E. Ladner, The computational complexity of provability in systems of modal propositional logic, SIAM Journal on Computing, 1977）。上界は $\mathsf{K}$ について \ref{logic:k-pspace} で示した。PSPACE 困難性の証明（真偽の量化つきブール式 \ref{comp:tqbf-complete} からの還元）は本サイト未収録。
+:::
+
+## 各体系のまとめ {#logic:sec-bis-summary}
+
+::: table 様相論理の体系の健全性・完全性・決定可能性 {#logic:modal-systems-summary keywords="soundness, completeness, finite model property, decidability and complexity of K, T, B, K4, S4, S5, GL"}
+| 体系 | 適切なフレーム | 健全性 | 完全性 | 有限モデル性・決定可能性 | 計算量（充足可能性） |
+|---|---|---|---|---|---|
+| $\mathsf{K}$ | すべて | \ref{logic:kripke-soundness} | \ref{logic:completeness-k-t} | :yes: \ref{logic:modal-fmp-decidability}, \ref{logic:fmp-filtration}, \ref{logic:k-finite-tree-completeness} | PSPACE 完全（上界 \ref{logic:k-pspace}、下界 \ref{logic:modal-complexity-fact}） |
+| $\mathsf{T}$ | 反射的 | 同上 | \ref{logic:completeness-k-t} | :yes: 同上 | PSPACE 完全（\ref{logic:modal-complexity-fact}） |
+| $\mathsf{B}$ | 反射的・対称的 | 同上 | \ref{logic:completeness-b} | :yes: 同上 | （本サイト未収録） |
+| $\mathsf{K4}$ | 推移的 | 同上 | \ref{logic:completeness-k4-s4} | :yes: 同上 | （本サイト未収録） |
+| $\mathsf{S4}$ | 反射的・推移的 | 同上 | \ref{logic:completeness-k4-s4} | :yes: 同上 | PSPACE 完全（\ref{logic:modal-complexity-fact}） |
+| $\mathsf{S5}$ | 同値関係 | 同上 | \ref{logic:completeness-s5} | :yes: 同上 | NP 完全（\ref{logic:s5-np-complete}） |
+| $\mathsf{GL}$ | 推移的・逆整礎 | 同上 | \ref{logic:completeness-gl} | :yes: \ref{logic:modal-fmp-decidability}（フィルトレーションは使えない） | （本サイト未収録） |
+:::
+
+::: remark
+「健全性」は定理が適切なフレームで妥当であること、「完全性」はその逆、「有限モデル性」は有限の適切なフレームだけで完全性が成り立つことである。有限モデル性と、公理系が有限（定理の全体が帰納的可算）であることを合わせると決定可能になる、というのが \ref{logic:modal-fmp-decidability} の議論の形であり、ここではさらに、判定にどれだけの資源が要るかまで評価した。表の「本サイト未収録」は、計算量が知られていないという意味ではない。
+:::
+
+## 問題 {#logic:sec-bis-problems}
+
+::: problem {#logic:prob-bis-two-successors}
+1. フレームの性質「どの世界にも後続がちょうど一つある」は、様相論理式 $\Diamond\top\wedge(\Diamond p\to\Box p)$ で定義できることを示せ。
+2. 一方、「非対称（$wRv$ ならば $vRw$ でない）」はどんな様相論理式でも定義できないことを示せ。
+:::
+
+::: solution
+**1.** $\mathcal{F}\models\Diamond\top\iff$ どの世界にも後続がある：$\top$ はどの世界でも真なので、$w\models\Diamond\top\iff$ $wRv$ となる $v$ がある（付値によらない）。$\mathcal{F}\models\Diamond p\to\Box p\iff$ どの世界も後続が高々一つ、を示す。⇐：$w\models\Diamond p$ なら $p$ が真な後続があり、後続はそれだけなので $w\models\Box p$。⇒：$w$ に相異なる後続 $x,y$ があれば、$p$ を $x$ だけで真にする付値で $w\models\Diamond p$、$w\not\models\Box p$（$y$ で偽）。連言をとれば「ちょうど一つ」になる（どちらの式も代入例をすべての付値で考えればよいので、連言の妥当性は各々の妥当性と同じ）。
+
+**2.** \ref{logic:irreflexivity-undefinable} と同じ有界射を使う。$(\mathbb{N},<)$ は非対称で、定数写像は反射的な一点 $(\{0\},\{(0,0)\})$ への全射な有界射である（Step 1 の確認がそのまま使える）。非対称性を定義する $A$ があれば $(\mathbb{N},<)\models A$、\ref{logic:bounded-morphic-image-validity} から一点のフレームでも $A$ が妥当になるが、$0R0$ なので一点のフレームは非対称でない。矛盾。
+:::
+
+::: problem {#logic:prob-bis-filtration-size}
+$A\defeq\Box(p\to\Diamond p)$ とする。$\mathrm{Sub}(A)$ を書き出し、最小フィルトレーションの世界の数の上界を求めよ。
+:::
+
+::: solution
+$\Diamond p=\neg\Box\neg p=(\Box(p\to\bot))\to\bot$ なので、$\mathrm{Sub}(A)=\{p,\ \bot,\ p\to\bot,\ \Box(p\to\bot),\ \Diamond p,\ p\to\Diamond p,\ A\}$ の 7 個である。$\bot$ はどの世界でも偽なので、同値類は残りの 6 個の論理式の真偽で決まり、しかも $p\to\bot$ は $p$ で、$\Diamond p$ は $\Box(p\to\bot)$ で、$p\to\Diamond p$ は $p$ と $\Diamond p$ で決まる。独立に動けるのは $p$, $\Box(p\to\bot)$, $A$ の 3 個なので、世界の数は $2^{3}=8$ 以下である（\ref{logic:filtration-lemma.3} の一般の上界 $2^{7}$ よりずっと小さい）。
+:::
+
+::: problem {#logic:prob-bis-hm-finite}
+ヘネシー–ミルナーの定理（\tref{logic:hennessy-milner}）を使って、有限モデル $\mathcal{M}$ の二点 $w,v$ が同じ様相論理式を満たすかどうかを判定するアルゴリズムを与えよ。
+:::
+
+::: solution
+有限モデルは像有限なので、「同じ論理式を満たす $\iff$ 双模倣的」。最大の双模倣は次の反復で求まる：$Z_{0}\defeq\{(x,y):x,y$ はすべての命題変数で一致$\}$（付値 $V$ は有限集合として与えられているとし、$x$ と $y$ で真になる命題変数の集合が等しいかを比べる）、$Z_{i+1}\defeq\{(x,y)\in Z_{i}:$ 行きと戻りの条件を $Z_{i}$ について満たす$\}$。$Z_{i}$ は減少列で $W\times W$ は有限なので、ある $i$ で $Z_{i+1}=Z_{i}$ となり、その $Z_{i}$ は双模倣で、しかも $x\mathrel{\underline{\leftrightarrow}}_{i}y\iff(x,y)\in Z_{i}$ がすべての $i$ で成り立つ（帰納法）ので、最大の双模倣である。$(w,v)\in Z_{i}$ かどうかを答えればよい。反復は高々 $\lvert W\rvert^{2}$ 回で、各回は多項式時間なので、全体も多項式時間である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>微分と平均値の定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/02-calculus/02-derivatives.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 微分と平均値の定理 {#calc:page-derivatives keywords="derivative, differentiable implies continuous, sum product quotient rules, chain rule, derivative of the inverse function, Fermat's theorem on local extrema, Rolle's theorem, mean value theorem, Cauchy mean value theorem, monotonicity from the sign of the derivative, L'Hopital's rule, Darboux's theorem, convex function, slopes of chords, one-sided derivatives, Jensen's inequality"}
+
+関数の各点での「瞬間の変化率」を微分係数として定義し、その計算規則（和・積・商・合成・逆関数）を示す。中心となるのは**平均値の定理**で、区間全体での変化を、ある 1 点での微分係数で表す。これから、導関数の符号と単調性の関係、極限の計算法（**ロピタルの定理**）、導関数が中間値の性質をもつこと（**ダルブーの定理**）が従う。最後に、**凸関数**を傾きの単調性で特徴づける。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 5 章、杉浦光夫『解析入門 I』第 II 章 §1〜§2 の内容に相当する標準的な事項。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-de-notation}
+
+::: notation
+- 関数の極限と連続性、区間の上の連続関数の基本定理（中間値・最大値）、逆関数の連続性は \tref{calc:page-continuity}（\ref{calc:function-limit}, \ref{calc:continuous-operations}, \ref{calc:interval-theorems}, \ref{calc:continuous-inverse}）。
+- 区間 $I$ の**内部**を $I^{\circ}$ と書く。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 微分 {#calc:sec-de-derivative}
+
+::: definition 微分係数と導関数 {#calc:derivative keywords="derivative f'(a) as the limit of difference quotients; differentiable function; derivative function; one-sided derivatives; higher derivatives; C^n" index="微分係数|びぶんけいすう, 導関数|どうかんすう, 微分可能|びぶんかのう, 片側微分係数|かたがわびぶんけいすう"}
+区間 $I$ 上の $f$ と $a\in I$ について、極限
+$$
+f'(a)\defeq\lim_{x\to a}\frac{f(x)-f(a)}{x-a}
+$$
+が（実数として）存在するとき、$f$ は $a$ で**微分可能**といい、$f'(a)$ を**微分係数**という。$x>a$（$x<a$）に限った極限を右（左）微分係数 $f'_{+}(a)$（$f'_{-}(a)$）という。$I$ の各点で微分可能なとき、$a\mapsto f'(a)$ を**導関数**という。$f^{(n)}$ を $n$ 階導関数とし、$f^{(n)}$ が存在して連続なとき $f$ は $C^{n}$ 級という。
+:::
+
+::: proposition 微分の基本規則 {#calc:derivative-rules keywords="differentiable implies continuous; linear approximation; derivatives of sums, products, quotients; derivative of x^n" index="微分の基本規則|びぶんのきほんきそく"}
+$f,g$ が $a$ で微分可能とする。
+1. $f$ は $a$ で連続。より詳しく、$a$ で連続な $\varphi$ で $f(x)-f(a)=\varphi(x)(x-a)$, $\varphi(a)=f'(a)$ となるものがある。
+2. $(f+g)'(a)=f'(a)+g'(a)$、$(fg)'(a)=f'(a)g(a)+f(a)g'(a)$、$g(a)\neq0$ なら $\bigl(\frac fg\bigr)'(a)=\frac{f'(a)g(a)-f(a)g'(a)}{g(a)^{2}}$。
+3. $n\in\mathbb{Z}$ について $(x^{n})'=nx^{n-1}$（$n<0$ では $x\neq0$）。
+:::
+
+::: proof
+**1.** $\varphi(x)\defeq\frac{f(x)-f(a)}{x-a}$（$x\neq a$）、$\varphi(a)\defeq f'(a)$ は定義から $a$ で連続。$f(x)=f(a)+\varphi(x)(x-a)\to f(a)$。
+
+**2.** 和は極限の和。積：$\frac{f(x)g(x)-f(a)g(a)}{x-a}=\frac{f(x)-f(a)}{x-a}g(x)+f(a)\frac{g(x)-g(a)}{x-a}$ で、$g(x)\to g(a)$（1）。商：$g(x)\neq0$ となる $a$ の近くで $\frac{1/g(x)-1/g(a)}{x-a}=-\frac{1}{g(x)g(a)}\cdot\frac{g(x)-g(a)}{x-a}\to-\frac{g'(a)}{g(a)^{2}}$ と積の規則。
+
+**3.** $n\ge0$ は $n$ についての帰納法（積の規則）、$n<0$ は商の規則。
+:::
+
+::: theorem 合成関数と逆関数の微分 {#calc:chain-rule keywords="chain rule (g o f)'(a) = g'(f(a)) f'(a); derivative of the inverse function 1/f'(f^{-1}(b))" index="合成関数の微分|ごうせいかんすうのびぶん, 連鎖律|れんさりつ, 逆関数の微分|ぎゃくかんすうのびぶん"}
+1. **（連鎖律）** $f$ が $a$ で、$g$ が $f(a)$ で微分可能なら、$g\circ f$ は $a$ で微分可能で $(g\circ f)'(a)=g'(f(a))f'(a)$。
+2. **（逆関数）** $f$ が区間 $I$ で連続かつ狭義単調で、$a\in I$ で微分可能かつ $f'(a)\neq0$ なら、$f^{-1}$ は $b\defeq f(a)$ で微分可能で $(f^{-1})'(b)=\frac{1}{f'(a)}$。
+:::
+
+::: proof
+**1.** \ref{calc:derivative-rules.1} を $g$ に使い、$g(y)-g(b)=\psi(y)(y-b)$（$b=f(a)$、$\psi$ は $b$ で連続、$\psi(b)=g'(b)$）。$y=f(x)$ を代入して $x-a$（$\neq0$）で割ると
+$$
+\frac{g(f(x))-g(f(a))}{x-a}=\psi(f(x))\cdot\frac{f(x)-f(a)}{x-a}.
+$$
+$f$ は $a$ で連続なので $\psi\circ f$ も $a$ で連続（\ref{calc:continuous-operations}）で、右辺は $g'(f(a))f'(a)$ に収束する。
+
+**2.** $f^{-1}$ は連続（\ref{calc:continuous-inverse}）。$y\to b$, $y\neq b$ なら $x\defeq f^{-1}(y)\to a$, $x\neq a$（単射）で、$\frac{f^{-1}(y)-f^{-1}(b)}{y-b}=\Bigl(\frac{f(x)-f(a)}{x-a}\Bigr)^{-1}\to\frac{1}{f'(a)}$。
+
+::: hypcheck
+- 1 で、差商 $\frac{g(f(x))-g(f(a))}{f(x)-f(a)}$ に直接分けると、$f(x)=f(a)$ となる $x$（$a$ のいくらでも近くにありうる）で割り算ができない。$\psi$ を使ってこれを避けた。
+- 2 の $f'(a)\neq0$：外すと偽（$f(x)=x^{3}$ の逆関数 $\sqrt[3]{y}$ は $0$ で微分可能でない）。
+:::
+:::
+
+## 平均値の定理 {#calc:sec-de-mvt}
+
+::: theorem 平均値の定理 {#calc:mean-value-theorem keywords="Fermat: derivative vanishes at an interior local extremum; Rolle's theorem; Lagrange mean value theorem; Cauchy mean value theorem" index="平均値の定理|へいきんちのていり, ロルの定理|ろるのていり, フェルマーの定理（極値）|ふぇるまーのていりきょくち, コーシーの平均値の定理|こーしーのへいきんちのていり" refname="平均値の定理"}
+1. **（フェルマー）** $f$ が $c\in I^{\circ}$ で極大または極小をとり、$c$ で微分可能なら $f'(c)=0$。
+2. **（ロル）** $f$ が $[a,b]$ で連続、$(a,b)$ で微分可能、$f(a)=f(b)$ なら、$f'(\xi)=0$ となる $\xi\in(a,b)$ がある。
+3. **（平均値の定理）** $f$ が $[a,b]$ で連続、$(a,b)$ で微分可能なら、$f(b)-f(a)=f'(\xi)(b-a)$ となる $\xi\in(a,b)$ がある。
+4. **（コーシーの平均値の定理）** $f,g$ が $[a,b]$ で連続、$(a,b)$ で微分可能なら、$\bigl(f(b)-f(a)\bigr)g'(\xi)=\bigl(g(b)-g(a)\bigr)f'(\xi)$ となる $\xi\in(a,b)$ がある。
+:::
+
+::: proof
+**1.** 極大とすると、$c$ の近くで $x>c$ なら $\frac{f(x)-f(c)}{x-c}\le0$、$x<c$ なら $\ge0$。極限は弱い不等号を保つので $f'(c)\le0$ かつ $f'(c)\ge0$。
+
+**2.** 最大値の定理（\ref{calc:interval-theorems.2}）から $f$ は $[a,b]$ で最大値と最小値をとる。両方が端点でとられるなら $f$ は定数で、任意の $\xi$ でよい。そうでなければ内部の点 $\xi$ で極値をとり、1 から $f'(\xi)=0$。
+
+**3.** $g(x)\defeq f(x)-\frac{f(b)-f(a)}{b-a}(x-a)$ に 2 を使う。
+
+**4.** $h(x)\defeq\bigl(f(b)-f(a)\bigr)g(x)-\bigl(g(b)-g(a)\bigr)f(x)$ は $h(a)=f(b)g(a)-g(b)f(a)=h(b)$ を満たすので、2 を使う。
+:::
+
+::: corollary 導関数の符号と単調性 {#calc:mvt-consequences keywords="f' = 0 implies constant; f' >= 0 implies increasing; f' > 0 implies strictly increasing; bounded derivative implies Lipschitz" index="導関数と単調性|どうかんすうとたんちょうせい"}
+$f$ が区間 $I$ で連続、$I^{\circ}$ で微分可能とする。
+1. $I^{\circ}$ で $f'=0$ なら $f$ は定数。
+2. $I^{\circ}$ で $f'\ge0$（$>0$）なら $f$ は単調増加（狭義単調増加）。
+3. $I^{\circ}$ で $|f'|\le M$ なら $|f(x)-f(y)|\le M|x-y|$。
+:::
+
+::: proof
+$x<y$ について、平均値の定理から $f(y)-f(x)=f'(\xi)(y-x)$（$\xi\in(x,y)\subset I^{\circ}$）。
+:::
+
+::: theorem ロピタルの定理 {#calc:lhopital keywords="L'Hopital's rule for 0/0 and infinity/infinity forms, one-sided limits and limits at infinity" index="ロピタルの定理|ろぴたるのていり" refname="ロピタルの定理"}
+$f,g$ が $(a,b)$ で微分可能で $g'(x)\neq0$、$\frac{f'(x)}{g'(x)}\to L\in\overline{\mathbb{R}}$（$x\to a+$）とする。(i) $f(x)\to0$, $g(x)\to0$ か、(ii) $g(x)\to\pm\infty$（$x\to a+$）なら、$\frac{f(x)}{g(x)}\to L$（$x\to a+$）。$a=-\infty$ や $x\to b-$ でも同様。
+:::
+
+::: proof
+**Step 1（上からの評価）.** $L<+\infty$ とし、$L<r<q$ をとる。$a<x<c$ で $\frac{f'}{g'}<r$ となる $c$ がある。$a<x<y<c$ について $g(x)\neq g(y)$（等しければロルの定理で間に $g'=0$ の点がある）。コーシーの平均値の定理から
+$$
+\frac{f(x)-f(y)}{g(x)-g(y)}=\frac{f'(\xi)}{g'(\xi)}<r\qquad(x<\xi<y).
+$$
+
+**Step 2（(i) の場合）.** $x\to a+$ とすると $\frac{f(y)}{g(y)}\le r<q$（$a<y<c$）。
+
+**Step 3（(ii) の場合）.** $y$ を固定し、$x$ を $a$ に近づけて $g(x)>g(y)$ かつ $g(x)>0$ とすると（$g\to+\infty$ の場合。$-\infty$ も同様）、Step 1 の式に $\frac{g(x)-g(y)}{g(x)}>0$ を掛けて
+$$
+\frac{f(x)}{g(x)}<r-r\frac{g(y)}{g(x)}+\frac{f(y)}{g(x)}.
+$$
+$x\to a+$ で右辺 $\to r$ なので、$a$ に十分近い $x$ で $\frac{f(x)}{g(x)}<q$。
+
+**Step 4.** $q>L$ は任意なので $\limsup\frac fg\le L$。$L>-\infty$ なら下からも同様にして $\liminf\frac fg\ge L$。
+:::
+
+::: theorem ダルブーの定理 {#calc:darboux keywords="Darboux's theorem: derivatives have the intermediate value property" index="ダルブーの定理|だるぶーのていり" refname="ダルブーの定理"}
+$f$ が $[a,b]$ で微分可能（端点では片側）で、$f'(a)<c<f'(b)$ なら、$f'(\xi)=c$ となる $\xi\in(a,b)$ がある。とくに導関数は跳躍不連続をもたない。
+:::
+
+::: proof
+$g(x)\defeq f(x)-cx$ は $[a,b]$ で連続（\ref{calc:derivative-rules.1}）で、最小値をとる。$g'(a)=f'(a)-c<0$ なので、$a$ の少し右で $g<g(a)$ となり、最小値は $a$ でとられない。同様に $g'(b)>0$ から $b$ でもとられない。内部の最小点 $\xi$ でフェルマーの定理から $g'(\xi)=0$。後半：$f'$ が $c$ で $f'(c-)\neq f'(c+)$ となる跳躍をもつと、その間の値を $c$ の近くでとらないことになり矛盾。
+:::
+
+## 凸関数 {#calc:sec-de-convex}
+
+::: definition 凸関数 {#calc:convex keywords="convex function on an interval: f((1-t)x+ty) <= (1-t)f(x)+tf(y)" index="凸関数|とつかんすう"}
+区間 $I$ 上の $f$ が**凸**であるとは、$x,y\in I$, $0\le t\le1$ について
+$$
+f((1-t)x+ty)\le(1-t)f(x)+tf(y)
+$$
+が成り立つことをいう。$-f$ が凸なとき $f$ は**凹**という。
+:::
+
+::: theorem 凸関数の性質 {#calc:convex-properties keywords="chord slopes are increasing; one-sided derivatives exist on the interior; convex functions are continuous on open intervals; differentiable f is convex iff f' is increasing; f'' >= 0 iff convex; supporting lines; Jensen's inequality" index="凸関数の性質|とつかんすうのせいしつ, イェンセンの不等式|いぇんせんのふとうしき"}
+$f$ を区間 $I$ 上の関数とする。
+1. $f$ が凸 $\iff$ $x<y<z$（$I$ の点）について
+$$
+\frac{f(y)-f(x)}{y-x}\le\frac{f(z)-f(x)}{z-x}\le\frac{f(z)-f(y)}{z-y}.
+$$
+2. $f$ が凸なら、$I^{\circ}$ の各点で片側微分係数 $f'_{-}\le f'_{+}$ が存在し、$f$ は $I^{\circ}$ で連続。
+3. $f$ が $I$ で微分可能なら、$f$ が凸 $\iff$ $f'$ が単調増加 $\iff$ すべての $x,a$ で $f(x)\ge f(a)+f'(a)(x-a)$。$f$ が 2 回微分可能なら、凸 $\iff$ $f''\ge0$。
+4. **（イェンセンの不等式）** $f$ が凸、$x_{1},\dots,x_{n}\in I$, $t_{i}\ge0$, $\sum t_{i}=1$ なら $f\bigl(\sum t_{i}x_{i}\bigr)\le\sum t_{i}f(x_{i})$。
+:::
+
+::: proof
+**Step 1（1）.** $y=(1-t)x+tz$, $t=\frac{y-x}{z-x}$ とおくと、凸性の不等式 $f(y)\le(1-t)f(x)+tf(z)$ は、$f(y)-f(x)\le t(f(z)-f(x))$ とも $f(z)-f(y)\ge(1-t)(f(z)-f(x))$ とも書け、$y-x=t(z-x)$, $z-y=(1-t)(z-x)$ で割るとそれぞれ左と右の不等式になる。逆も同じ変形を逆にたどる。
+
+**Step 2（2）.** $a\in I^{\circ}$ で、$s(x)\defeq\frac{f(x)-f(a)}{x-a}$ は 1 から $x$ について単調増加（$x<a$ と $x>a$ の両方で、$x<a<y$ なら $s(x)\le s(y)$）。よって $f'_{-}(a)=\sup_{x<a}s(x)\le\inf_{y>a}s(y)=f'_{+}(a)$ がともに有限で存在する（\ref{calc:monotone-function-limits} と同じ議論）。片側微分係数が存在すれば片側で連続なので、$a$ で連続。
+
+**Step 3（3）.** 凸なら、$x<y$ と $x<u<v<y$ について 1 から $s$ の単調性で $f'(x)\le\frac{f(y)-f(x)}{y-x}\le f'(y)$。逆に $f'$ が増加なら、$x<y<z$ に平均値の定理を $[x,y]$, $[y,z]$ で使うと $\frac{f(y)-f(x)}{y-x}=f'(\xi)\le f'(\eta)=\frac{f(z)-f(y)}{z-y}$ で、これから 1 の不等式が出る（中央の傾きは両端の傾きの重み付き平均）。接線の不等式：$x>a$ なら平均値の定理と $f'$ の増加から $\frac{f(x)-f(a)}{x-a}=f'(\xi)\ge f'(a)$、$x<a$ も同様。逆に接線の不等式から、$z=(1-t)x+ty$ での接線に $x,y$ を代入して重み付きで足すと凸性。$f''\ge0\iff f'$ 増加は \ref{calc:mvt-consequences}（⇐ は $f'$ の差商が $0$ 以上）。
+
+**Step 4（4）.** $n$ についての帰納法。$t_{n}<1$ なら $\sum t_{i}x_{i}=(1-t_{n})y+t_{n}x_{n}$, $y\defeq\sum_{i<n}\frac{t_{i}}{1-t_{n}}x_{i}\in I$ と書き、凸性と帰納法の仮定を使う。
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- 導関数は連続とは限らない（$x^{2}\sin\frac1x$ 型の例、\ref[三角関数と円周率]{calc:page-trig} の後で扱える）が、ダルブーの定理により中間値の性質はもつ。
+- 平均値の定理は値が $\mathbb{R}$ のときに限る：$\mathbb{C}$ 値や $\mathbb{R}^{2}$ 値の関数では等式の形では成り立たず、不等式 $|f(b)-f(a)|\le\sup|f'|\,(b-a)$ だけが残る（多変数の微分で扱う）。
+- 凸関数は、$I^{\circ}$ の可算個の点を除いて微分可能である（$f'_{-}$ は単調増加で、その不連続点は可算、\ref{calc:monotone-function-limits}）。
+
+**前提を変えると.** フェルマーの定理は内部の点に限る：$f(x)=x$ は $[0,1]$ の端点 $1$ で最大値をとるが $f'(1)=1$。ロルの定理では端点での連続性が要る：$f(x)=x$（$0\le x<1$）、$f(1)=0$ は $(0,1)$ で $f'=1$。
+
+**高い視点.** 微分は「関数を各点で一次関数（線形写像）で近似する」操作で、連鎖律は「近似の合成は合成の近似」という関手性である（\ref{calc:derivative-rules.1} の $\varphi$ がその近似の誤差を測る）。平均値の定理は、この局所的な情報を区間の連結性とコンパクト性（最大値の定理）を通して大域的な情報に変える。比喩で言えば、平均値の定理は「平均時速 60 km で走った車は、どこかで速度計がちょうど 60 km を指した瞬間がある」ことの保証である。
+:::
+
+## 問題 {#calc:sec-de-problems}
+
+::: problem {#calc:prob-de-lhopital-binomial}
+$n\ge2$ について $\lim_{x\to0}\frac{(1+x)^{n}-1-nx}{x^{2}}=\binom n2$ をロピタルの定理で求めよ。
+:::
+
+::: solution
+分子と分母はともに $x\to0$ で $0$。導関数の比は $\frac{n(1+x)^{n-1}-n}{2x}$ で、これも $0/0$。もう一度ロピタルの定理を使うと $\frac{n(n-1)(1+x)^{n-2}}{2}\to\frac{n(n-1)}{2}$。ロピタルの定理（2 回目から 1 回目へ）により、元の極限も $\binom n2$。$x\neq0$ の近くで $g'(x)=2x\neq0$, $g''=2\neq0$ なので仮定は満たされる。
+:::
+
+::: problem {#calc:prob-de-bernoulli-general}
+$x>0$ と整数 $n\ge1$ について $x^{n}-1\ge n(x-1)$ を、凸性を使って示せ。等号はいつ成り立つか。
+:::
+
+::: solution
+$f(x)=x^{n}$ は $(0,\infty)$ で $f''(x)=n(n-1)x^{n-2}\ge0$ なので凸（\ref{calc:convex-properties.3}）。$a=1$ での接線の不等式 $f(x)\ge f(1)+f'(1)(x-1)=1+n(x-1)$。$n\ge2$ なら $f''>0$ で $f'$ は狭義増加なので、Step 3 の議論から $x\neq1$ で狭義の不等号、等号は $x=1$ のときだけ。$n=1$ では常に等号。
+:::
+
+::: problem {#calc:prob-de-darboux-sign}
+符号関数 $\operatorname{sgn}x$（$x>0$ で $1$、$x<0$ で $-1$、$0$ で $0$）は、どんな区間 $(-1,1)$ 上の微分可能な関数の導関数にもならないことを示せ。
+:::
+
+::: solution
+$F'=\operatorname{sgn}$ とすると、$F'(-\frac12)=-1<\frac12<1=F'(\frac12)$ なので、ダルブーの定理から $F'(\xi)=\frac12$ となる $\xi$ があるはずだが、$\operatorname{sgn}$ は $\frac12$ をとらない。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-de-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

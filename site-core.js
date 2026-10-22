@@ -647,7 +647,13 @@
   var ITEM_HEAD = /^\s*(?:<strong>)?\s*[(（](\d+|[a-z]|[ivx]+)[)）]/;
   // 用語リンクの規則（結ばない語・基礎の系列・他分野へ結ばない組・自動では結ばない語など）は tools/terms.json で一元管理する。
   // ビルドはそれを読み、ブラウザは site-index.js の termRules を受け取って setTermRules で設定する（2026-10-22 ユーザー指示）。
-  var TERM_STOP = {}, TERM_PREFIX = '', TERM_BASE = [], TERM_BASE_SHORT = {}, TERM_XF_DENY = {}, TERM_NO_AUTO = {};
+  var TERM_STOP = {}, TERM_PREFIX = '', TERM_BASE = [], TERM_BASE_SHORT = {}, TERM_XF_DENY = {}, TERM_NO_AUTO = {}, FIELD_MAP = {}, SERIES_PRE = {};
+  // 分野の番号（"03" など）。フォルダのパスの、field をもつ最も近い祖先の値（_meta.json の field。2026-10-22 のディレクトリ再編から）
+  function fieldCode(dir) {
+    dir = String(dir || ''); var best = '', code = '';
+    for (var d in FIELD_MAP) if (dir.indexOf(d) === 0 && d.length > best.length) { best = d; code = FIELD_MAP[d]; }
+    return code || dir.split('/')[0].split('-')[0];
+  }
   function setTermRules(R) {
     R = R || {};
     TERM_STOP = {}; (R.stop || []).forEach(function (w) { TERM_STOP[w] = 1; });
@@ -656,11 +662,13 @@
     TERM_BASE_SHORT = {}; (R.baseShort || []).forEach(function (w) { TERM_BASE_SHORT[w] = 1; });
     TERM_XF_DENY = R.xfDeny || {};
     TERM_NO_AUTO = R.noAuto || {};
+    FIELD_MAP = R.fieldMap || {};
+    SERIES_PRE = R.seriesPre || {};
   }
   // 値の各項目は分野番号（"13"）か、フォルダの一部（"/" を含む。"03B-general-logic/03-modal-logic" など。ページのフォルダに含まれれば当たり）
   function noAuto(term, dir) {
     var d = TERM_NO_AUTO[term]; if (!d) return false;
-    var f = String(dir || '').split('/')[0].split('-')[0];
+    var f = fieldCode(dir);
     var hit = d.replace(/^!/, '').split(/\s+/).some(function (x) { return x && (x.indexOf('/') >= 0 ? String(dir || '').indexOf(x) >= 0 : x === f); });
     return d.charAt(0) === '!' ? !hit : hit;
   }
@@ -671,10 +679,10 @@
       .sort(function (a, b) { return b.length - a.length; });
     var re = keys.length ? new RegExp(keys.map(function (k) { return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }).join('|'), 'g') : null;
     function second(dir) { return String(dir || '').split('/').slice(0, 2).join('/'); }
-    function field(dir) { return String(dir || '').split('/')[0]; }
+    function field(dir) { return fieldCode(dir); }
     function denied(l, term, P, Q) {
       var d = TERM_XF_DENY[l + '#' + term], f = field(P.dir);
-      return !!d && f !== field(Q.dir) && (d === '*' || (' ' + d + ' ').indexOf(' ' + f.split('-')[0] + ' ') >= 0);
+      return !!d && f !== field(Q.dir) && (d === '*' || (' ' + d + ' ').indexOf(' ' + f + ' ') >= 0);
     }
     // 候補（拒否されたものを除く）。プレビューで「ほかの分野の定義」として並べるのにも使う
     function candidates(term, pageIdx) {
@@ -693,6 +701,8 @@
           function (x) { return x.p < pageIdx && pages[x.p].dir === P.dir; },
           function (x) { return x.p < pageIdx && second(pages[x.p].dir) === second(P.dir); },
           function (x) { return x.p < pageIdx && field(pages[x.p].dir) === field(P.dir); },
+          // 同じ分野（第 2 階層）で、このページの系列が前提にしている系列（_meta.json の prereq）の定義は、後ろにあっても結ぶ（2026-10-22）
+          function (x) { return second(pages[x.p].dir) === second(P.dir) && (SERIES_PRE[P.dir] || []).indexOf(pages[x.p].dir) >= 0; },
           function (x) { return !short && !!(depSet && depSet[x.p]); }
         ];
         for (var i = 0; i < tiers.length; i++) {

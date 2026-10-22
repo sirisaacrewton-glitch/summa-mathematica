@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分岐時相論理 CTL | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/01-general-logic/04-modal-logic-cs/06-ctl.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 分岐時相論理 CTL {#logic:page-ctl keywords="computation tree logic, CTL, branching time, EX, AX, EU, AU, EF, AF, EG, AG, completeness, finite model property, decidability, fragments, CTL*, expressiveness, LTL vs CTL"}
+
+LTL（\ref{logic:page-ltl}）は一本の実行列について語った。非決定的なシステムでは、一つの状態から多くの実行が分岐する。**分岐時相論理**（CTL、Clarke–Emerson 1981）では、時相演算子の前に必ず経路の量化子をつけ、「ある実行で次に $A$」$\mathbf{EX}A$、「どの実行でも $B$ になるまで $A$」$\mathbf{A}(A\,\mathbf{U}\,B)$ のように書く。このページでは CTL の意味論と公理系を与え、**健全性**と**完全性**を示す。完全性の証明では、論理式の閉包の極大な集合を状態の「型」とし、「いつか」の約束を一つずつ果たす有限の木（**断片**）を作って有限のグラフにつなぐ。得られるモデルは有限なので、**有限モデル性**と**決定可能性**が従う。最後に LTL との表現力の比較と、両者を含む CTL* を述べる。
+
+> 参考：『コンピュータサイエンスにおける様相論理』（ユーザー指定の参考書。本文のテキストは未入手のため、構成は標準的な内容によった）。CTL の公理系の完全性と有限モデル性は Emerson–Halpern, *Decision procedures and expressiveness in the temporal logic of branching time*, J. Comput. System Sci. 30 (1985) による。ここでは $\mathbf{EU}$, $\mathbf{AU}$ を最小不動点として扱う帰納規則の形の公理系を採り、断片の構成は同論文の考え方に沿って組み立て直した。
+
+## 記法と定義の確認 {#logic:sec-ctl-notation}
+
+::: notation
+- 恒真式、極大な集合 $W$ と $\widehat{w}$, $\widehat{Y}$、その性質（\ref{logic:pdl-atom-properties}）は \ref{logic:page-pdl-completeness} のとおり。そこでの証明は「定理から恒真式で導けるものは定理」しか使わないので、下の公理系でもそのまま成り立つ。
+- 有限の木：根から各頂点への道がただ一つの有限グラフ。子をもたない頂点を**葉**という。
+- **公理系**：$\ZF$ に**従属選択公理**（DC：空でない集合 $S$ 上の関係 $R$ で、どの $s$ にも $sRt$ となる $t$ があるなら、$s_{0}Rs_{1}Rs_{2}R\cdots$ となる無限列がある）を加えて行う。DC は、無限の経路を一歩ずつ選んで作るところ（\ref{logic:ctl-valid.4}）でだけ使う。有限のモデルの中では、状態に順序をつけて選べばよいので DC は要らない。
+:::
+
+## 構文と意味論 {#logic:sec-ctl-syntax}
+
+::: definition CTL の論理式 {#logic:ctl-syntax keywords="CTL syntax: AX, E(A U B), A(A U B) and abbreviations" index="分岐時相論理|ぶんきじそうろんり, CTL|しーてぃーえる"}
+CTL の**論理式**を次の規則で帰納的に定める。命題変数と $\bot$ は論理式。$A,B$ が論理式なら $A\to B$、$\mathbf{AX}A$、$\mathbf{E}(A\,\mathbf{U}\,B)$、$\mathbf{A}(A\,\mathbf{U}\,B)$ は論理式。$\neg,\wedge,\vee,\top,\leftrightarrow$ は通常の略記とし、
+$$
+\mathbf{EX}A\defeq\neg\mathbf{AX}\neg A,\quad\mathbf{EF}A\defeq\mathbf{E}(\top\,\mathbf{U}\,A),\quad\mathbf{AF}A\defeq\mathbf{A}(\top\,\mathbf{U}\,A),\quad\mathbf{AG}A\defeq\neg\mathbf{EF}\neg A,\quad\mathbf{EG}A\defeq\neg\mathbf{AF}\neg A
+$$
+とおく。$\mathbf{E}(A\,\mathbf{U}\,B)$ と $\mathbf{A}(A\,\mathbf{U}\,B)$ を**約束の論理式**という。
+:::
+
+::: definition CTL のモデルと真理 {#logic:ctl-semantics keywords="Kripke structure with total transition relation, paths, CTL semantics" index="CTL のモデル|しーてぃーえるのもでる, 経路（CTL）|けいろしーてぃーえる"}
+**CTL のモデル** $\mathcal{M}=(S,R,V)$ は、空でない集合 $S$、どの $s$ にも $sRt$ となる $t$ がある関係 $R\subset S\times S$（**全域的**）、\term[付値]{logic:kripke-model} $V\subset S\times\mathrm{PV}$ からなる。$sRs'$ となる $s'$ を $s$ の**後続**、$\pi(i)R\pi(i+1)$（すべての $i$）を満たす $\pi\colon\mathbb{N}\to S$ を**経路**、$\pi(0)=s$ のとき「$s$ からの経路」という。真理 $\mathcal{M},s\models A$ を再帰で定める：命題変数・$\bot$・$\to$ は通常どおり、
+- $s\models\mathbf{AX}A\iff s$ のすべての後続 $s'$ で $s'\models A$、
+- $s\models\mathbf{E}(A\,\mathbf{U}\,B)\iff s=s_{0}Rs_{1}R\cdots Rs_{k}$（$k\ge0$）で、$s_{k}\models B$ かつ $i<k$ で $s_{i}\models A$ となる有限の列がある、
+- $s\models\mathbf{A}(A\,\mathbf{U}\,B)\iff s$ からのすべての経路 $\pi$ に、$\pi(k)\models B$ かつ $i<k$ で $\pi(i)\models A$ となる $k\ge0$ がある。
+
+すべてのモデルのすべての状態で真なら**妥当**、あるモデルのある状態で真なら**充足可能**という。
+:::
+
+::: remark
+$R$ が全域的なので、有限の列はいつでも経路に延ばせる（DC を使う）。したがって $\mathbf{E}(A\,\mathbf{U}\,B)$ は「ある経路で $A\,\mathbf{U}\,B$」と同じで、LTL の $\mathbf{U}$（\ref{logic:ltl-semantics}）の前に経路の量化子 $\mathbf{E}$（ある）・$\mathbf{A}$（すべて）をつけたものである。$s\models\mathbf{EX}A\iff$ ある後続で $A$、$s\models\mathbf{EF}A\iff$ $s$ から有限回の遷移で $A$ が真な状態に着ける、$s\models\mathbf{AG}A\iff$ $s$ から着けるすべての状態で $A$。
+:::
+
+::: example 典型的な性質 {#logic:ctl-examples keywords="typical CTL properties: invariance, reset, inevitability, deadlock freedom"}
+1. $\mathbf{AG}\neg(c_{1}\wedge c_{2})$：二つのプロセスが同時に危険領域にいることはない（相互排除）。
+2. $\mathbf{AG}\,\mathbf{EF}\,r$：どこからでも初期状態 $r$ に戻る実行がある（リセット可能性）。LTL では書けない（\ref{logic:ctl-not-ltl}）。
+3. $\mathbf{AG}(t\to\mathbf{AF}c)$：試行 $t$ の後は、どの実行でも必ず危険領域 $c$ に入る。
+:::
+
+::: proposition CTL の基本的な妥当式 {#logic:ctl-valid keywords="valid CTL principles: K for AX, seriality, unfolding of EU and AU, least fixed point rules" index="CTL の妥当式|しーてぃーえるのだとうしき"}
+1. $\mathbf{AX}(A\to B)\to(\mathbf{AX}A\to\mathbf{AX}B)$ と $\neg\mathbf{AX}\bot$ は妥当。$A$ が妥当なら $\mathbf{AX}A$ も妥当。
+2. $\mathbf{E}(A\,\mathbf{U}\,B)\leftrightarrow B\vee(A\wedge\mathbf{EX}\,\mathbf{E}(A\,\mathbf{U}\,B))$ と $\mathbf{A}(A\,\mathbf{U}\,B)\leftrightarrow B\vee(A\wedge\mathbf{AX}\,\mathbf{A}(A\,\mathbf{U}\,B))$ は妥当。
+3. $B\vee(A\wedge\mathbf{EX}C)\to C$ が妥当ならば、$\mathbf{E}(A\,\mathbf{U}\,B)\to C$ も妥当。
+4. $B\vee(A\wedge\mathbf{AX}C)\to C$ が妥当ならば、$\mathbf{A}(A\,\mathbf{U}\,B)\to C$ も妥当。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathbf{AX}$ は K を満たし、$\neg\mathbf{AX}\bot$ は妥当】 前半は様相論理の K の公理（\ref{logic:kripke-k-sound}）と同じ。$\neg\mathbf{AX}\bot$ は $R$ が全域的なことによる。必然化も同じ。
+
+**Step 2.** 【主張：$\mathbf{EU}$・$\mathbf{AU}$ の一歩分の展開は妥当】 $\mathbf{E}$ は \ref{logic:ltl-valid.3} と同じく、列の最初の一歩で場合を分ける。$\mathbf{A}$：⇒ $s\models\mathbf{A}(A\,\mathbf{U}\,B)$ で $s\not\models B$ とする。$s$ から延ばせる経路で $k\ge1$ なので $s\models A$。後続 $s'$ からの経路 $\pi'$ の前に $s$ をつけた経路は条件を満たす $k\ge1$ をもち、$\pi'$ では $k-1$ が条件を満たすので $s'\models\mathbf{A}(A\,\mathbf{U}\,B)$。⇐ $B$ なら $k=0$。$A$ が真ですべての後続で $\mathbf{A}(A\,\mathbf{U}\,B)$ なら、$s$ からの経路 $\pi$ について $\pi(1)$ からの経路で得られる $k$ に $1$ を足せばよい。
+
+**Step 3.** 【主張：$\mathbf{E}$ の帰納規則は妥当性を保つ】 \ref{logic:ltl-valid.4} と同じく、$\mathbf{E}$ の定義の有限列を後ろからたどる：$s_{k}\models C$、$s_{i+1}\models C$ かつ $s_{i}\models A$ なら $s_{i}\models A\wedge\mathbf{EX}C$ で $s_{i}\models C$。
+
+**Step 4.** 【主張：$\mathbf{A}$ の帰納規則は妥当性を保つ】 $s\models\mathbf{A}(A\,\mathbf{U}\,B)$ かつ $s\not\models C$ とする。仮定の対偶から、$t\models\mathbf{A}(A\,\mathbf{U}\,B)$ かつ $t\not\models C$ なら、$t\not\models B$、2 で $t\models A$ かつすべての後続で $\mathbf{A}(A\,\mathbf{U}\,B)$、さらに $t\not\models\mathbf{AX}C$ なので $C$ が偽な後続がある。よって「$\mathbf{A}(A\,\mathbf{U}\,B)$ が真で $C$ が偽」な状態の集合で、どの元にも同じ集合の後続がある。DC でその中の経路 $s=\pi(0)R\pi(1)R\cdots$ をとると、どの $\pi(k)$ でも $B$ は偽で、$s\models\mathbf{A}(A\,\mathbf{U}\,B)$ に反する。
+:::
+
+::: remark
+2 と 3・4 は、$\mathbf{E}(A\,\mathbf{U}\,B)$ と $\mathbf{A}(A\,\mathbf{U}\,B)$ がそれぞれ $Y\leftrightarrow B\vee(A\wedge\mathbf{EX}Y)$、$Y\leftrightarrow B\vee(A\wedge\mathbf{AX}Y)$ の最小の解であることを言う（LTL の \ref{logic:ltl-valid} と同じ形）。
+:::
+
+## 公理系と健全性 {#logic:sec-ctl-axioms}
+
+::: definition CTL の公理系 {#logic:ctl-axioms keywords="axiom system for CTL: K and D for AX, unfolding axioms, least fixed point rules for EU and AU" index="CTL の公理系|しーてぃーえるのこうりけい"}
+CTL の恒真式（$\mathbf{AX}A$ と約束の論理式を命題変数のように扱ったときの恒真式）と、次の論理式を**公理**とする。
+1. $\mathbf{AX}(A\to B)\to(\mathbf{AX}A\to\mathbf{AX}B)$。
+2. $\neg\mathbf{AX}\bot$。
+3. $\mathbf{E}(A\,\mathbf{U}\,B)\leftrightarrow B\vee(A\wedge\mathbf{EX}\,\mathbf{E}(A\,\mathbf{U}\,B))$。
+4. $\mathbf{A}(A\,\mathbf{U}\,B)\leftrightarrow B\vee(A\wedge\mathbf{AX}\,\mathbf{A}(A\,\mathbf{U}\,B))$。
+
+推論規則は、モーダスポネンス、$\mathbf{AX}$ の必然化（$A$ から $\mathbf{AX}A$）、および次の二つの**帰納規則**とする。
+- $B\vee(A\wedge\mathbf{EX}C)\to C$ から $\mathbf{E}(A\,\mathbf{U}\,B)\to C$。
+- $B\vee(A\wedge\mathbf{AX}C)\to C$ から $\mathbf{A}(A\,\mathbf{U}\,B)\to C$。
+
+定理・$\vdash$・無矛盾は \ref{logic:pdl-axioms} と同じく定める。
+:::
+
+::: theorem CTL の健全性 {#logic:ctl-soundness keywords="soundness of the CTL axiom system" index="健全性（CTL）|けんぜんせいしーてぃーえる" refname="CTL の健全性"}
+$\vdash A$ ならば $A$ は妥当である。
+:::
+
+::: proof
+恒真式は \ref{logic:pdl-soundness} の Step 1 と同じ。公理と推論規則は \ref{logic:ctl-valid} の 1〜4 による。導出の長さについての帰納法。
+:::
+
+::: lemma 導出の基本性質（CTL） {#logic:ctl-normality keywords="derived rules for AX and EX in CTL"}
+1. \ref{logic:pdl-normality} の 1〜4 が、$[\alpha]$ を $\mathbf{AX}$、$\langle\alpha\rangle$ を $\mathbf{EX}$ として成り立つ。
+2. $\vdash\mathbf{AX}A\wedge\mathbf{AX}B\to\mathbf{AX}(A\wedge B)$。
+3. $\vdash\mathbf{AX}A\wedge\mathbf{EX}B\to\mathbf{EX}(A\wedge B)$。
+:::
+
+::: proof
+1：\ref{logic:pdl-normality} の証明は、公理 K・必然化・恒真式しか使わない。2：恒真式 $A\to(B\to A\wedge B)$ に必然化と公理 1 を 2 回。3：恒真式 $A\to(\neg(A\wedge B)\to\neg B)$ から同様に $\vdash\mathbf{AX}A\to(\mathbf{AX}\neg(A\wedge B)\to\mathbf{AX}\neg B)$、対偶をとると $\mathbf{AX}A\wedge\neg\mathbf{AX}\neg B\to\neg\mathbf{AX}\neg(A\wedge B)$。
+:::
+
+## 極大な集合と後続 {#logic:sec-ctl-atoms}
+
+以下、論理式 $A$ を固定する。
+
+::: definition 閉包 {#logic:ctl-closure keywords="closure CL(A) for CTL" index="閉包（CTL）|へいほうしーてぃーえる"}
+$\mathrm{CL}(A)$ を、$A$ を含み、部分論理式で閉じ、$\mathbf{E}(C\,\mathbf{U}\,D)\in\mathrm{CL}(A)$ なら $\mathbf{AX}\neg\mathbf{E}(C\,\mathbf{U}\,D)\in\mathrm{CL}(A)$、$\mathbf{A}(C\,\mathbf{U}\,D)\in\mathrm{CL}(A)$ なら $\mathbf{AX}\,\mathbf{A}(C\,\mathbf{U}\,D)\in\mathrm{CL}(A)$ となる最小の集合とする。$\Sigma\defeq\mathrm{CL}(A)$、$\Phi\defeq\Sigma\cup\{\neg B:B\in\Sigma\}$ とし、$W$ を $\Phi$ の極大な集合の全体とする。
+:::
+
+::: remark
+$\mathrm{CL}(A)$ は、$A$ の部分論理式に、約束の論理式ごとに $\neg\mathbf{E}(C\,\mathbf{U}\,D)$ と $\mathbf{AX}\neg\mathbf{E}(C\,\mathbf{U}\,D)$、または $\mathbf{AX}\,\mathbf{A}(C\,\mathbf{U}\,D)$ を加えたもので（加えたものの部分論理式はすでにある）、有限である。これらは公理 3・4 の右辺を極大な集合の中で読むために要る（$\mathbf{EX}\,\mathbf{E}(C\,\mathbf{U}\,D)=\neg\mathbf{AX}\neg\mathbf{E}(C\,\mathbf{U}\,D)$）。
+:::
+
+::: definition 後続 {#logic:ctl-successor-def keywords="successor relation between maximal sets for CTL"}
+$w,v\in W$ について、$\widehat{w}\wedge\mathbf{EX}\widehat{v}$ が無矛盾なとき $w\to v$ と書き、$\mathrm{succ}(w)\defeq\{v:w\to v\}$ とする。$\mathbf{AX}F\in\Sigma$ かつ $\neg\mathbf{AX}F\in w$ のとき、$\neg F$ を $w$ の**要求**という。
+:::
+
+::: lemma 後続の性質（CTL） {#logic:ctl-successor keywords="properties of successors: AX-formulas, requirements are met, w implies AX of the disjunction of its successors"}
+$w,v\in W$ とする。
+1. $w\to v$ かつ $\mathbf{AX}F\in w$（$\mathbf{AX}F\in\Sigma$）ならば $F\in v$。
+2. $w$ の各要求 $\neg F$ について、$\neg F\in v$ となる $v\in\mathrm{succ}(w)$ がある。
+3. $\vdash\widehat{w}\to\mathbf{AX}\widehat{\mathrm{succ}(w)}$。とくに $\mathrm{succ}(w)\ne\varnothing$。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathbf{AX}F\in w$ なら後続は $F$ を含む】 $F\notin v$ なら $\neg F\in v$ で $\vdash\widehat{v}\to\neg F$。\ref{logic:ctl-normality.3} で $\vdash\mathbf{AX}F\wedge\mathbf{EX}\widehat{v}\to\mathbf{EX}(F\wedge\neg F)$、\ref{logic:ctl-normality.1}（\ref{logic:pdl-normality.3}）で右辺は矛盾。よって $\widehat{w}\wedge\mathbf{EX}\widehat{v}$ が矛盾し、$w\to v$ に反する。
+
+**Step 2.** 【主張：要求にはそれを満たす後続がある】 \ref{logic:pdl-atom-properties.5} で $\vdash\neg F\leftrightarrow\bigvee\{\widehat{v}:\neg F\in v\}$（$F\in\Sigma$ で、$F\notin v\iff\neg F\in v$）。$\neg\mathbf{AX}F\in w$ と \ref{logic:pdl-normality.3} で $\vdash\widehat{w}\to\mathbf{EX}\neg F$、\ref{logic:pdl-normality.4} で $\vdash\widehat{w}\to\bigvee\{\mathbf{EX}\widehat{v}:\neg F\in v\}$。どの項も $\widehat{w}$ と矛盾するなら $\vdash\neg\widehat{w}$ となるので、$\widehat{w}\wedge\mathbf{EX}\widehat{v}$ が無矛盾な $v\ni\neg F$ がある。
+
+**Step 3.** 【主張：$\vdash\widehat{w}\to\mathbf{AX}\widehat{\mathrm{succ}(w)}$ で、後続は必ずある】 $\vdash\widehat{W}$（\ref{logic:pdl-atom-properties.4}）に必然化で $\vdash\mathbf{AX}\widehat{W}$。$v\notin\mathrm{succ}(w)$ なら $\vdash\widehat{w}\to\neg\mathbf{EX}\widehat{v}$ で、$\neg\mathbf{EX}\widehat{v}=\neg\neg\mathbf{AX}\neg\widehat{v}$ なので $\vdash\widehat{w}\to\mathbf{AX}\neg\widehat{v}$。\ref{logic:ctl-normality.2} でまとめて $\vdash\widehat{w}\to\mathbf{AX}(\widehat{W}\wedge\bigwedge_{v\notin\mathrm{succ}(w)}\neg\widehat{v})$、中身は恒真式で $\widehat{\mathrm{succ}(w)}$ を導くので \ref{logic:pdl-normality.2}。$\mathrm{succ}(w)=\varnothing$ なら $\vdash\widehat{w}\to\mathbf{AX}\bot$ と公理 2 で $\vdash\neg\widehat{w}$ となり矛盾。
+:::
+
+## 約束の補題 {#logic:sec-ctl-eventualities}
+
+::: definition 約束を果たせる集合 {#logic:ctl-fulfil-sets keywords="least sets G_E and G_A of maximal sets from which an E-until or A-until can be fulfilled; ranks"}
+$C,D\in\Sigma$ とする。$W$ の部分集合の増加列を次で定める。
+- $G^{\mathbf{E}}_{0}=G^{\mathbf{A}}_{0}\defeq\{v\in W:D\in v\}$。
+- $G^{\mathbf{E}}_{k+1}\defeq G^{\mathbf{E}}_{k}\cup\{v:C\in v,\ \mathrm{succ}(v)\cap G^{\mathbf{E}}_{k}\ne\varnothing\}$。
+- $G^{\mathbf{A}}_{k+1}\defeq G^{\mathbf{A}}_{k}\cup\{v:C\in v,\ \mathrm{succ}(v)\cap G^{\mathbf{A}}_{k}\ne\varnothing$、かつ $v$ の各要求 $\neg F$ について $\neg F\in u$ となる $u\in\mathrm{succ}(v)\cap G^{\mathbf{A}}_{k}$ がある$\}$。
+
+$W$ は有限なので、ある $K$ で $G^{\mathbf{E}}_{K}=G^{\mathbf{E}}_{K+1}$, $G^{\mathbf{A}}_{K}=G^{\mathbf{A}}_{K+1}$ となる。そのときの集合を $G^{\mathbf{E}}$, $G^{\mathbf{A}}$ とし、$v\in G^{\mathbf{A}}$ について $v\in G^{\mathbf{A}}_{k}$ となる最小の $k$ を $v$ の**ランク**という。
+:::
+
+::: lemma 約束の補題（CTL） {#logic:ctl-fulfil keywords="fulfilment lemma for CTL: E(C U D) in w implies w in G_E; A(C U D) in w implies w in G_A" index="約束の補題（CTL）|やくそくのほだいしーてぃーえる" refname="約束の補題（CTL）"}
+1. $\mathbf{E}(C\,\mathbf{U}\,D)\in w$ ならば $w\in G^{\mathbf{E}}$。
+2. $\mathbf{A}(C\,\mathbf{U}\,D)\in w$ ならば $w\in G^{\mathbf{A}}$。
+:::
+
+::: proof
+$G\subset W$ について、$w\notin G$ なら $\vdash\widehat{w}\to\neg\widehat{G}$（\ref{logic:pdl-atom-properties.4}）なので、$\vdash\mathbf{E}(C\,\mathbf{U}\,D)\to\widehat{G^{\mathbf{E}}}$ と $\vdash\mathbf{A}(C\,\mathbf{U}\,D)\to\widehat{G^{\mathbf{A}}}$ を示せばよい。それぞれ帰納規則で、前提
+$$
+\vdash D\vee(C\wedge\mathbf{EX}\widehat{G^{\mathbf{E}}})\to\widehat{G^{\mathbf{E}}},\qquad\vdash D\vee(C\wedge\mathbf{AX}\widehat{G^{\mathbf{A}}})\to\widehat{G^{\mathbf{A}}}
+$$
+を示せば従う。$\vdash\widehat{W}$ から、各 $v\notin G$ について $\vdash\widehat{v}\to\neg D$ と $\vdash\widehat{v}\wedge C\wedge(\cdots)\to\bot$ を示せば十分である（$v\in G$ なら $\vdash\widehat{v}\to\widehat{G}$）。$v\notin G$ なら $v\notin G_{0}$ なので $\neg D\in v$。$C\notin v$ なら $\vdash\widehat{v}\to\neg C$。以下 $C\in v$ とする。
+
+**Step 1（$\mathbf{E}$）.** 【主張：$v\notin G^{\mathbf{E}}$、$C\in v$ なら $\vdash\neg(\widehat{v}\wedge\mathbf{EX}\widehat{G^{\mathbf{E}}})$】 $G^{\mathbf{E}}$ が安定していることから $\mathrm{succ}(v)\cap G^{\mathbf{E}}=\varnothing$。\ref{logic:ctl-successor.3} と \ref{logic:pdl-normality.2} で $\vdash\widehat{v}\to\mathbf{AX}\neg\widehat{G^{\mathbf{E}}}$、これは $\neg\mathbf{EX}\widehat{G^{\mathbf{E}}}$ と同値（\ref{logic:pdl-normality.3}）。
+
+**Step 2（$\mathbf{A}$）.** 【主張：$v\notin G^{\mathbf{A}}$、$C\in v$ なら $\vdash\neg(\widehat{v}\wedge\mathbf{AX}\widehat{G^{\mathbf{A}}})$】 $G^{\mathbf{A}}$ が安定していることから、(a) $\mathrm{succ}(v)\cap G^{\mathbf{A}}=\varnothing$ か、(b) ある要求 $\neg F$ について $\neg F\in u$ となる $u\in\mathrm{succ}(v)\cap G^{\mathbf{A}}$ がない。(a) なら Step 1 と同様に $\vdash\widehat{v}\to\mathbf{AX}\neg\widehat{G^{\mathbf{A}}}$、\ref{logic:ctl-normality.2} で $\mathbf{AX}\widehat{G^{\mathbf{A}}}$ と合わせると $\mathbf{AX}\bot$ が導け、公理 2 で矛盾。(b) なら $\neg\mathbf{AX}F\in v$ から $\vdash\widehat{v}\to\mathbf{EX}\neg F$、\ref{logic:ctl-normality.3} で $\widehat{v}\wedge\mathbf{AX}\widehat{G^{\mathbf{A}}}\to\mathbf{EX}(\neg F\wedge\widehat{G^{\mathbf{A}}})$。\ref{logic:pdl-atom-properties.4}・\ref{logic:pdl-atom-properties.5} で $\vdash\neg F\wedge\widehat{G^{\mathbf{A}}}\leftrightarrow\bigvee\{\widehat{u}:u\in G^{\mathbf{A}},\ \neg F\in u\}$、\ref{logic:pdl-normality.4} で $\mathbf{EX}$ を配る。(b) からこの $u$ はどれも $\mathrm{succ}(v)$ に属さず $\vdash\neg(\widehat{v}\wedge\mathbf{EX}\widehat{u})$ なので、全体が矛盾する。
+
+::: hypcheck
+- **$G^{\mathbf{A}}$ の定義に要求の条件を入れた理由**：「すべての後続が $G^{\mathbf{A}}$ に入る」で定義すると Step 2 が通らない。$\widehat{v}\wedge\mathbf{EX}\widehat{u}$ が無矛盾であっても $\vdash\widehat{v}\to\mathbf{EX}\widehat{u}$ とは限らない（極大な集合は後続を一つに決めない）ので、「後続の一つが $G^{\mathbf{A}}$ の外にある」ことから $\widehat{v}\wedge\mathbf{AX}\widehat{G^{\mathbf{A}}}$ の矛盾は出てこない。要求ごとに「$G^{\mathbf{A}}$ の中で応えられる後続」を求める形にすると、矛盾は $\mathbf{AX}$ と $\mathbf{EX}$ の組み合わせ（\ref{logic:ctl-normality.3}）から出る。
+- 帰納規則を使ったのはこの補題だけである。
+:::
+:::
+
+## 断片と有限モデル {#logic:sec-ctl-fragments}
+
+::: definition 断片 {#logic:ctl-fragment keywords="fragment: finite tree of maximal sets meeting requirements at every inner node" index="断片（CTL）|だんぺんしーてぃーえる"}
+頂点に極大な集合のラベル $\lambda(x)\in W$ がついた有限の木 $\tau$ が次を満たすとき、$\lambda(\text{根})$ からの**断片**という。
+- 根は葉でない。
+- 葉でない頂点 $x$ の子 $y$ はすべて $\lambda(y)\in\mathrm{succ}(\lambda(x))$ を満たし、$\lambda(x)$ の各要求 $\neg F$ について $\neg F\in\lambda(y)$ となる子 $y$ がある。
+:::
+
+::: lemma 断片の存在 {#logic:ctl-fragment-exists keywords="for each maximal set and each eventuality there is a fragment fulfilling it"}
+$w\in W$ とする。
+1. $w$ からの断片がある。
+2. $\mathbf{E}(C\,\mathbf{U}\,D)\in w$ ならば、$w$ からの断片で、根からの道 $x_{0},\dots,x_{n}$ で $D\in\lambda(x_{n})$ かつ $i<n$ で $C\in\lambda(x_{i})$ となるものを含むものがある。
+3. $\mathbf{A}(C\,\mathbf{U}\,D)\in w$ ならば、$w$ からの断片で、根から葉への**どの**道 $x_{0},\dots,x_{m}$ にも、$D\in\lambda(x_{n})$ かつ $i<n$ で $C\in\lambda(x_{i})$ となる $n\le m$ があるものがある。
+:::
+
+::: proof
+$W$ に順序を一つ固定し、以下「ある $u$ をとる」はその順序で最初のものをとることとする（選択公理は要らない）。
+
+**Step 1.** 【主張：要求に一歩で応える断片 $B(w)$ がある】 根 $w$ に、各要求 $\neg F$ について \ref{logic:ctl-successor.2} の $u\ni\neg F$ を、さらに \ref{logic:ctl-successor.3} の後続を一つ、子（葉）としてつける。これを $B(w)$ と書く。
+
+**Step 2.** 【主張：$\mathbf{E}$ の約束を一本の道で果たす断片がある】 \ref{logic:ctl-fulfil.1} で $w\in G^{\mathbf{E}}_{k}$。$k$ についての帰納法で、$v\in G^{\mathbf{E}}_{k}$ なら $v=v_{0}\to v_{1}\to\cdots\to v_{n}$、$D\in v_{n}$、$i<n$ で $C\in v_{i}$ となる列がある（$v\in G_{0}$ なら $n=0$、そうでなければ $C\in v$ で $G^{\mathbf{E}}_{k-1}$ に入る後続がある）。この列の各 $v_{i}$（$i<n$）に、$v_{i+1}$ と $B(v_{i})$ の子をつけ、$v_{n}$ には $B(v_{n})$ の子をつける。
+
+**Step 3.** 【主張：$\mathbf{A}$ の約束をすべての分岐で果たす断片がある】 \ref{logic:ctl-fulfil.2} で $w\in G^{\mathbf{A}}$。ランク $k$ についての帰納法で、$v\in G^{\mathbf{A}}$ からの断片で 3 の性質をもつもの $\tau_{v}$ を作る。$k=0$ なら $D\in v$ なので $B(v)$（$n=0$）。$k\ge1$ なら $C\in v$、$D\notin v$ で、定義から各要求 $\neg F$ について $\neg F\in u_{F}$ となる $u_{F}\in\mathrm{succ}(v)\cap G^{\mathbf{A}}_{k-1}$ と、$u\in\mathrm{succ}(v)\cap G^{\mathbf{A}}_{k-1}$ がある。根 $v$ の子をこれらとし、各子の下に、ランクが $k-1$ 以下なので帰納法の仮定の断片をつなぐ。根から葉への道は根（$C$ を含む）から子の断片の道に入り、そこで性質 3 の $n$ が見つかる。
+:::
+
+::: definition 断片をつないだモデル {#logic:ctl-fragment-model keywords="finite model obtained by linking fragments in round-robin over the eventualities"}
+$\Sigma$ の約束の論理式を $\varepsilon_{1},\dots,\varepsilon_{r}$ と並べる（$r=0$ なら $r\defeq1$ とし $\varepsilon_{1}$ は「なし」とする）。各 $w\in W$ と $l\le r$ について、$\varepsilon_{l}\in w$ なら \ref{logic:ctl-fragment-exists} の 2 または 3 の断片を、そうでなければ 1 の断片を一つとり $\tau_{w,l}$ とする。モデル $\mathcal{M}^{f}=(S,R,V)$ を次で定める。
+- $S$：組 $(w,l,x)$ 全体。$x$ は $\tau_{w,l}$ の葉でない頂点。
+- $(w,l,x)R(w,l,y)$：$y$ が $x$ の子で葉でないとき。$(w,l,x)R(u,l',\text{根})$：$x$ のある子 $y$ が葉で $\lambda(y)=u$、$l'\equiv l+1\pmod r$（$1\le l'\le r$）のとき。
+- $((w,l,x),p)\in V\iff p\in\lambda(x)$。状態 $s=(w,l,x)$ のラベルを $\lambda(s)\defeq\lambda(x)$ とする。
+:::
+
+::: lemma 断片をつないだモデルの性質 {#logic:ctl-fragment-model-props keywords="properties M1-M4 of the fragment model"}
+$\mathcal{M}^{f}$ は有限の CTL のモデルで、次を満たす。
+1. $sRt$ ならば $\lambda(t)\in\mathrm{succ}(\lambda(s))$。
+2. $\lambda(s)$ の各要求 $\neg F$ について、$sRt$ かつ $\neg F\in\lambda(t)$ となる $t$ がある。
+3. $\mathbf{E}(C\,\mathbf{U}\,D)\in\lambda(s)$ ならば、$s=s_{0}Rs_{1}R\cdots Rs_{n}$ で $D\in\lambda(s_{n})$、$i<n$ で $C\in\lambda(s_{i})$ となる列がある。
+4. $\mathbf{A}(C\,\mathbf{U}\,D)\in\lambda(s)$ ならば、$s$ からのどの経路 $\pi$ にも、$D\in\lambda(\pi(n))$、$i<n$ で $C\in\lambda(\pi(i))$ となる $n$ がある。
+:::
+
+::: proof
+**Step 1.** 【主張：有限・全域的、1・2】 $W$ と各断片が有限なので $S$ は有限。葉でない頂点には子があるので $R$ は全域的。$s\,R\,t$ の $t$ のラベルは対応する子のラベル（葉の場合は同じラベルの根）なので、1・2 は断片の定義から。
+
+**Step 2.** 【主張：どの経路も、断片の根を番号 $1,\dots,r$ の順に無限回通る】 断片の中では $R$ は木を下に進むだけで、木は有限なので、有限回で葉に当たる子へ進み、番号が $1$ 増えた断片の根に移る。
+
+**Step 3.** 【主張：$\mathbf{E}$ の約束はある道で果たされる】 $\varepsilon_{j}=\mathbf{E}(C\,\mathbf{U}\,D)$ とする。$D\notin\lambda(t)$ かつ $\mathbf{E}(C\,\mathbf{U}\,D)\in\lambda(t)$ なら、公理 3 と \ref{logic:pdl-atom-properties.2} で $C\in\lambda(t)$ かつ $\neg\mathbf{AX}\neg\mathbf{E}(C\,\mathbf{U}\,D)\in\lambda(t)$。要求 $\neg\neg\mathbf{E}(C\,\mathbf{U}\,D)$ に応える後続（2）は $\mathbf{E}(C\,\mathbf{U}\,D)$ を含む。この後続をたどると、$D$ に着くか、Step 2 から番号 $j$ の断片の根 $(u,j,\text{根})$ に着き、$\mathbf{E}(C\,\mathbf{U}\,D)\in u$ なので $\tau_{u,j}$ の中に 3 の道がある（道の最後が葉なら、同じラベルの根に移る）。途中の状態は $C$ を含む。
+
+**Step 4.** 【主張：$\mathbf{A}$ の約束はどの経路でも果たされる】 $\varepsilon_{j}=\mathbf{A}(C\,\mathbf{U}\,D)$、$\pi$ を $s$ からの経路とし、条件を満たす $n$ がないとする。$D\notin\lambda(t)$ かつ $\mathbf{A}(C\,\mathbf{U}\,D)\in\lambda(t)$ なら、公理 4 で $C\in\lambda(t)$ かつ $\mathbf{AX}\,\mathbf{A}(C\,\mathbf{U}\,D)\in\lambda(t)$、1 と \ref{logic:ctl-successor.1} で次の状態も $\mathbf{A}(C\,\mathbf{U}\,D)$ を含む。よって $\pi$ のすべての状態が $\mathbf{A}(C\,\mathbf{U}\,D)$ と $C$ を含み $D$ を含まない。Step 2 で $\pi$ は番号 $j$ の断片の根を通り、そこから木を葉まで下る。$\tau_{u,j}$ の根から葉への道には $D$ を含む頂点があり（葉の場合は次の根のラベル）、矛盾。
+:::
+
+## 完全性と有限モデル性 {#logic:sec-ctl-completeness}
+
+::: lemma 真理補題（CTL） {#logic:ctl-truth-lemma keywords="truth lemma for the fragment model" refname="真理補題（CTL）"}
+すべての $F\in\Sigma$ と $s\in S$ について、$F\in\lambda(s)\iff\mathcal{M}^{f},s\models F$。
+:::
+
+::: proof
+$F$ の構成についての帰納法。命題変数は $V$ の定義、$\bot$ と $\to$ は \ref{logic:pdl-atom-properties} の 1・2。
+
+**Step 1（$\mathbf{AX}F$）.** 【主張：$\mathbf{AX}F\in\lambda(s)\iff$ すべての後続で $F$】 ⇒ は \ref{logic:ctl-fragment-model-props.1} と \ref{logic:ctl-successor.1}、帰納法の仮定。⇐ $\mathbf{AX}F\notin\lambda(s)$ なら $\neg F$ は要求で、\ref{logic:ctl-fragment-model-props.2} の後続 $t$ で $F\notin\lambda(t)$、帰納法の仮定で $t\not\models F$。
+
+**Step 2（$\mathbf{E}(C\,\mathbf{U}\,D)$）.** 【主張：両方向が成り立つ】 ⇒ は \ref{logic:ctl-fragment-model-props.3} と帰納法の仮定。⇐ 意味論の列 $s_{0}R\cdots Rs_{k}$ について、帰納法の仮定で $D\in\lambda(s_{k})$、$C\in\lambda(s_{i})$。公理 3 で $\mathbf{E}(C\,\mathbf{U}\,D)\in\lambda(s_{k})$。$\mathbf{E}(C\,\mathbf{U}\,D)\in\lambda(s_{i+1})$ なら、\ref{logic:ctl-fragment-model-props.1} と \ref{logic:ctl-successor.1} の対偶で $\mathbf{AX}\neg\mathbf{E}(C\,\mathbf{U}\,D)\notin\lambda(s_{i})$、よって $\mathbf{EX}\,\mathbf{E}(C\,\mathbf{U}\,D)\in\lambda(s_{i})$、公理 3 で $\mathbf{E}(C\,\mathbf{U}\,D)\in\lambda(s_{i})$。$i=k-1,\dots,0$ と下る。
+
+**Step 3（$\mathbf{A}(C\,\mathbf{U}\,D)$）.** 【主張：両方向が成り立つ】 ⇒ は \ref{logic:ctl-fragment-model-props.4} と帰納法の仮定。⇐ $\neg\mathbf{A}(C\,\mathbf{U}\,D)\in\lambda(s)$ とする。$\neg\mathbf{A}(C\,\mathbf{U}\,D)\in\lambda(t)$ なら、公理 4 で $D\notin\lambda(t)$ で、$C\notin\lambda(t)$ か $\neg\mathbf{AX}\,\mathbf{A}(C\,\mathbf{U}\,D)\in\lambda(t)$。後者なら要求 $\neg\mathbf{A}(C\,\mathbf{U}\,D)$ に応える後続（\ref{logic:ctl-fragment-model-props.2}。$S$ の順序で最初のもの）に進む。$C\notin\lambda(t)$ となったらそこから任意に（$S$ の順序で）延ばす。得られた経路 $\pi$ では、$C\notin\lambda(t)$ となる状態の手前まで（あるいはずっと）$D$ を含む状態がなく、その状態も $C,D$ を含まないので、帰納法の仮定から $\pi$ は $\mathbf{A}(C\,\mathbf{U}\,D)$ の条件を満たさない。よって $s\not\models\mathbf{A}(C\,\mathbf{U}\,D)$。
+:::
+
+::: theorem CTL の完全性と有限モデル性 {#logic:ctl-completeness keywords="completeness of CTL and the finite model property" index="完全性（CTL）|かんぜんせいしーてぃーえる, 有限モデル性（CTL）|ゆうげんもでるせいしーてぃーえる" refname="CTL の完全性定理"}
+CTL の論理式 $A$ について、$\vdash A\iff A$ は妥当。さらに $\nvdash A$ ならば、$A$ はある有限のモデルのある状態で偽になる。とくに、充足可能な論理式は有限のモデルで充足される。
+:::
+
+::: proof
+⇒ は \ref{logic:ctl-soundness}。$\nvdash A$ なら $\{\neg A\}$ は無矛盾で、$\neg A\in w$ となる $w\in W$ がある（\ref{logic:pdl-atom-properties.3}）。状態 $(w,1,\text{根})\in S$ で、$A\in\Sigma$, $A\notin w$ と \ref{logic:ctl-truth-lemma} から $A$ は偽。$\mathcal{M}^{f}$ は有限（\ref{logic:ctl-fragment-model-props}）。最後の主張：$B$ が充足可能なら、健全性から $\nvdash\neg B$ で、$\neg B$ が偽すなわち $B$ が真な状態をもつ有限のモデルがある。
+:::
+
+## 決定可能性 {#logic:sec-ctl-decidability}
+
+::: lemma 有限のモデルでの真理は計算できる {#logic:ctl-finite-evaluation keywords="truth of CTL formulas in a finite model is computable"}
+有限の CTL のモデル $\mathcal{M}$（状態 $N$ 個）と論理式 $F$ について、各状態で $F$ が真かどうかは計算できる。
+:::
+
+::: proof
+部分論理式ごとに、真な状態の集合を小さい順に計算する。$\mathbf{AX}$ は後続を調べる。
+
+**Step 1.** 【主張：$\mathbf{E}(C\,\mathbf{U}\,D)$ は長さ $N$ 以下の列だけ調べればよい】 定義の列 $s_{0},\dots,s_{k}$ で $s_{i}=s_{j}$（$i<j$）なら、間を取り除いても条件を満たす。くり返しのない列は長さ $N$ 以下。
+
+**Step 2.** 【主張：$\mathbf{A}(C\,\mathbf{U}\,D)$ が偽 $\iff$ 次のどちらかがある】 (a) くり返しのない列 $s=s_{0}R\cdots Rs_{k}$ で、すべての $s_{i}$ で $D$ が偽、$i<k$ で $C$ が真、$s_{k}$ で $C$ が偽。(b) 列 $s=s_{0}R\cdots Rs_{k}$（$k\le N$）で $s_{k}=s_{j}$（$j<k$）となり、すべての $s_{i}$ で $C$ が真で $D$ が偽。⇐：(a) は $R$ が全域的なので（状態の順序で最初の後続を選んで）経路に延ばせ、(b) は $s_{j},\dots,s_{k}$ をくり返して経路にでき、どちらも条件を満たす $n$ がない。⇒：条件を満たさない経路 $\pi$ をとる。$D$ が真な位置があればその最小のものを $m$ とすると、条件が $m$ で満たされないので $m$ より前に $C$ が偽な位置があり、その最初の位置までの列が (a) になる（$D$ はそこまで偽。くり返しは取り除く）。$D$ がずっと偽のとき、$C$ が偽な位置があれば同様に (a)。$C$ がずっと真なら、$\pi(0),\dots,\pi(N)$ の中に同じ状態が二度現れ、最初のくり返しまでで (b)。
+
+どちらも有限個の列を調べれば決まる。
+:::
+
+::: corollary CTL は決定可能 {#logic:ctl-decidable keywords="validity of CTL is decidable" index="決定可能性（CTL）|けっていかのうせいしーてぃーえる"}
+CTL の論理式が妥当かどうか（したがって定理かどうか）は決定可能である。
+:::
+
+::: proof
+定理の全体は、導出を順に列挙することで帰納的に枚挙できる。妥当でない論理式の全体も帰納的に枚挙できる：\ref{logic:ctl-completeness} から、$A$ が妥当でない $\iff$ $\neg A$ がある有限のモデルで充足される、で、有限のモデル（$A$ に現れる命題変数だけの\term[付値]{logic:kripke-model}）を順に列挙して \ref{logic:ctl-finite-evaluation} で検査すればよい。$\vdash A\iff A$ は妥当（\ref{logic:ctl-completeness}）なので、二つの枚挙を交互に進めればどちらかに必ず $A$ が現れ、止まる。
+:::
+
+::: remark
+この手続きは止まることしか保証しない。断片の大きさを評価すれば、状態の数を $A$ から計算できる値で抑えられるが、ここでは求めていない。CTL の充足可能性は **EXPTIME 完全**であることが知られている（EXPTIME に属することは Emerson–Halpern 1985 の、極大な集合を条件を満たさないものから取り除く方法による。EXPTIME 困難であることは PDL の場合（Fischer–Ladner 1979）と同様の符号化による）。このサイトではこれらを証明していない。
+:::
+
+## LTL との比較と CTL* {#logic:sec-ctl-expressiveness}
+
+LTL の論理式 $\varphi$ は、CTL のモデルの状態 $s$ で「$s$ からのすべての経路 $\pi$ について、$\sigma_{\pi}(i)\defeq\{p:(\pi(i),p)\in V\}$ とおくと $\sigma_{\pi},0\models\varphi$」と読む。これを $\mathcal{M},s\models\mathbf{A}\varphi$ と書く。CTL の論理式 $F$ と LTL の論理式 $\varphi$ が**同値**とは、すべてのモデルのすべての状態で $s\models F\iff s\models\mathbf{A}\varphi$ となることとする。
+
+::: proposition EF p は LTL で書けない {#logic:ctl-not-ltl keywords="EF p is not expressible in LTL: LTL properties are closed under removing paths" index="CTL と LTL の表現力|しーてぃーえるとえるてぃーえるのひょうげんりょく"}
+CTL の論理式 $\mathbf{EF}p$ と同値な LTL の論理式はない。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathcal{M}_{1},s_{1}$ と $\mathcal{M}_{2},s_{2}$ について、$s_{2}$ からの経路の命題変数の列 $\sigma_{\pi}$ が、すべて $s_{1}$ からのある経路の列として現れるなら、$s_{1}\models\mathbf{A}\varphi\Rightarrow s_{2}\models\mathbf{A}\varphi$】 $\mathbf{A}\varphi$ の定義は列についての「すべて」なので、列の集合が小さいほど成り立ちやすい。
+
+**Step 2.** 【主張：反例】 $\mathcal{M}_{1}$：状態 $a,b$、$R=\{(a,a),(a,b),(b,b)\}$、$p$ は $b$ でだけ真。$\mathcal{M}_{2}$：状態 $a$ だけ、$R=\{(a,a)\}$、$p$ は偽。$\mathcal{M}_{2}$ の $a$ からの経路の列はすべて空集合の列で、これは $\mathcal{M}_{1}$ で $a$ にとどまる経路の列でもある。$\mathcal{M}_{1},a\models\mathbf{EF}p$、$\mathcal{M}_{2},a\not\models\mathbf{EF}p$。$\mathbf{EF}p$ が $\mathbf{A}\varphi$ と同値なら、Step 1 で $\mathcal{M}_{2},a\models\mathbf{A}\varphi$、すなわち $\mathcal{M}_{2},a\models\mathbf{EF}p$ となり矛盾。
+:::
+
+::: remark
+1. 同じ議論（経路の列の集合の包含）で、\ref{logic:ctl-examples} の $\mathbf{AG}\,\mathbf{EF}\,r$ も LTL で書けない（\ref{logic:prob-ctl-agef}）。
+2. 逆に、LTL の $\mathbf{F}\mathbf{G}p$（すなわち $\mathbf{A}\mathbf{F}\mathbf{G}p$）と同値な CTL の論理式はないことが知られている（Emerson–Halpern, *"Sometimes" and "not never" revisited*, J. ACM 33 (1986)。Lamport 1980 にも同種の議論がある）。$\mathbf{AF}\,\mathbf{AG}\,p$ は $\mathbf{A}\mathbf{F}\mathbf{G}p$ より真に強い。このサイトではこの証明はしていない。
+3. したがって LTL と CTL の表現力は互いに比較できない。
+:::
+
+::: definition CTL* {#logic:ctl-star keywords="CTL*: state formulas and path formulas" index="CTL*|しーてぃーえるすたー"}
+**状態論理式**と**経路論理式**を同時に帰納的に定める：命題変数・$\bot$ は状態論理式、状態論理式の $\to$ は状態論理式、経路論理式 $\varphi$ について $\mathbf{E}\varphi$ は状態論理式。状態論理式は経路論理式、経路論理式の $\to$、$\mathbf{X}\varphi$、$\varphi\,\mathbf{U}\,\psi$ は経路論理式。状態論理式は状態で、経路論理式は経路 $\pi$ と位置 $i$ で解釈する：$\pi,i\models F\iff\pi(i)\models F$（$F$ が状態論理式）、$\mathbf{X}$, $\mathbf{U}$ は LTL と同じ、$s\models\mathbf{E}\varphi\iff s$ からのある経路 $\pi$ で $\pi,0\models\varphi$。$\mathbf{A}\varphi\defeq\neg\mathbf{E}\neg\varphi$。この論理を **CTL\*** という。
+:::
+
+::: remark
+CTL の各演算子は CTL* の論理式（$\mathbf{AX}A=\mathbf{A}\mathbf{X}A$、$\mathbf{E}(A\,\mathbf{U}\,B)$ など）で、LTL の $\varphi$ は $\mathbf{A}\varphi$ として CTL* に入る。CTL* は CTL と LTL の両方を含むので、\ref{logic:ctl-not-ltl} から LTL より真に強く、上の 2 の事実を認めれば CTL よりも真に強い。CTL* の充足可能性は 2EXPTIME 完全であることが知られている（2EXPTIME 困難は Vardi–Stockmeyer 1985、2EXPTIME に属することは Emerson–Jutla 1988）。このサイトでは証明していない。
+:::
+
+::: intuition
+**断片は「約束を一つ果たすための局所的な計画」である。** 極大な集合は状態の「型」で、後続の関係 $w\to v$ は「$w$ の次に $v$ が来ても矛盾しない」ことしか言わない。$\mathbf{E}$ の約束は一本の道で果たせるので、型のグラフの中で道を探せば足りる（LTL と同じ）。$\mathbf{A}$ の約束は**すべての**分岐で果たす必要があるので、「どの分岐を選んでもランクが下がる」ように子を選んだ有限の木（断片）が要る。いくつもの約束を同時に果たすのは難しいが、約束は果たされるまで持ち越されるので、一つずつ順番に（番号の巡回で）果たせばよい。
+
+**高い視点：交代のない不動点。** $\mathbf{E}(A\,\mathbf{U}\,B)$ と $\mathbf{A}(A\,\mathbf{U}\,B)$ は最小不動点、$\mathbf{EG}$ と $\mathbf{AG}$ は最大不動点で、CTL はこれらを入れ子にできるが、一つの不動点の中で最小と最大を絡め合わせる（交代させる）ことはできない。LTL の $\mathbf{F}\mathbf{G}p$ を分岐の世界で書くには「最大不動点を含む最小不動点」を経路ごとに解く必要があり、それが CTL で書けない理由の直観である（推測を含む説明で、上の remark の事実の証明ではない）。最小・最大の不動点を自由に交代させられる論理が様相 μ 計算である。
+:::
+
+## 問題 {#logic:sec-ctl-problems}
+
+::: problem {#logic:prob-ctl-ag-unfold}
+$\vdash\mathbf{AG}A\leftrightarrow A\wedge\mathbf{AX}\,\mathbf{AG}A$ と、$\vdash C\to A\wedge\mathbf{AX}C$ ならば $\vdash C\to\mathbf{AG}A$ であることを示せ。
+:::
+
+::: solution
+$\mathbf{AG}A=\neg\mathbf{E}(\top\,\mathbf{U}\,\neg A)$。公理 3 で $\mathbf{E}(\top\,\mathbf{U}\,\neg A)\leftrightarrow\neg A\vee\mathbf{EX}\,\mathbf{E}(\top\,\mathbf{U}\,\neg A)$、否定をとり $\neg\mathbf{EX}\neg\mathbf{AG}A$ を（\ref{logic:pdl-normality.3} と同じく）$\mathbf{AX}\,\mathbf{AG}A$ に直す（$\mathbf{EX}\,\mathbf{E}(\cdots)=\neg\mathbf{AX}\neg\mathbf{E}(\cdots)$、$\neg\mathbf{E}(\cdots)=\mathbf{AG}A$）。後半：$\mathbf{E}$ の帰納規則を論理式 $\neg C$ に使う。前提 $\neg A\vee(\top\wedge\mathbf{EX}\neg C)\to\neg C$ は、$\mathbf{EX}\neg C=\neg\mathbf{AX}\neg\neg C$ と $\mathbf{AX}\neg\neg C\leftrightarrow\mathbf{AX}C$ から、仮定 $C\to A\wedge\mathbf{AX}C$ の対偶と恒真式で同値。よって $\vdash\mathbf{E}(\top\,\mathbf{U}\,\neg A)\to\neg C$、対偶で $\vdash C\to\mathbf{AG}A$。
+:::
+
+::: problem {#logic:prob-ctl-agef}
+$\mathbf{AG}\,\mathbf{EF}\,r$ と同値な LTL の論理式はないことを示せ。
+:::
+
+::: solution
+$\mathcal{M}_{3}$：状態 $a,b$、$R=\{(a,a),(a,b),(b,a),(b,b)\}$、$r$ は $a$ でだけ真。どこからでも $a$ に戻れるので $\mathcal{M}_{3},a\models\mathbf{AG}\,\mathbf{EF}\,r$。$\mathcal{M}_{1}$：同じ状態と命題変数の真偽で $R=\{(a,a),(a,b),(b,b)\}$。$b$ から $a$ へ戻れないので $\mathcal{M}_{1},a\not\models\mathbf{AG}\,\mathbf{EF}\,r$。$\mathcal{M}_{1}$ の $a$ からの経路（ずっと $a$、または $a$ にしばらくとどまってから $b$ に移り以後 $b$）は、そのまま $\mathcal{M}_{3}$ の $a$ からの経路でもあり、命題変数の列も同じ。$\mathbf{AG}\,\mathbf{EF}\,r$ が $\mathbf{A}\varphi$ と同値なら、$\mathcal{M}_{3},a\models\mathbf{A}\varphi$ で、\ref{logic:ctl-not-ltl} の Step 1 から $\mathcal{M}_{1},a\models\mathbf{A}\varphi$、すなわち $\mathcal{M}_{1},a\models\mathbf{AG}\,\mathbf{EF}\,r$ となり矛盾する。
+:::
+
+::: problem {#logic:prob-ctl-ag-ef-ltl}
+LTL の $\mathbf{G}\,p$ について、$\mathbf{A}\mathbf{G}p$ と CTL の $\mathbf{AG}\,p$ が同値であることを示せ。また $\mathbf{A}\mathbf{F}\mathbf{G}p$ と $\mathbf{AF}\,\mathbf{AG}\,p$ が同値でない例を挙げよ。
+:::
+
+::: solution
+前半：$s\models\mathbf{AG}p\iff s$ から着けるすべての状態で $p$。$s$ から着ける状態はある経路の上にあり（全域性で延ばす）、経路の上の状態は $s$ から着けるので、「すべての経路のすべての位置で $p$」と同じ。後半：状態 $0,1,2$、$R=\{(0,0),(0,1),(1,2),(2,2)\}$、$p$ は $0,2$ で真、$1$ で偽。$0$ からの経路は、ずっと $0$ にとどまるか、いつか $1$ を経て $2$ にとどまる。どちらも最後は $p$ がずっと真なので $0\models\mathbf{A}\mathbf{F}\mathbf{G}p$。一方 $\mathbf{AG}p$ は $0$ では偽（$1$ に着ける）、$1$ でも偽、$2$ でだけ真。ずっと $0$ にとどまる経路は $\mathbf{AG}p$ が真な状態を通らないので $0\not\models\mathbf{AF}\,\mathbf{AG}\,p$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

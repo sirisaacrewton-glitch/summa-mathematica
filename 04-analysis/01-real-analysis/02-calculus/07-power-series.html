@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>冪級数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/02-calculus/07-power-series.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 冪級数 {#calc:page-power-series keywords="power series, radius of convergence, Cauchy-Hadamard formula, uniform convergence on smaller intervals, termwise differentiation and integration, Taylor coefficients, Abel's theorem on boundary behavior, product of power series, real analytic function, re-expansion of a power series, identity theorem"}
+
+**冪級数** $\sum c_{n}(x-a)^{n}$ は、多項式を無限次に延ばしたもので、収束する範囲（**収束半径**）の内部では、項ごとに微分・積分してよい滑らかな関数を定める。このページでは、収束半径のコーシー–アダマールの公式、項別微分、収束域の端での振る舞い（**アーベルの定理**）、冪級数の積を示し、冪級数で局所的に表される関数（**実解析関数**）について、別の点のまわりでの展開と**一致の定理**を述べる。指数関数・三角関数は次の系列で冪級数として定義する。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 8 章（8.1〜8.5）、杉浦光夫『解析入門 I』第 V 章の冪級数の節の内容に相当する標準的な事項。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-ps-notation}
+
+::: notation
+- 上極限 \ref{calc:limsup}、よく使う極限（$n^{1/n}\to1$）\ref{calc:standard-limits}、根判定法 \ref{calc:root-ratio-tests}、アーベルの総和公式 \tref{calc:summation-by-parts}、コーシー積 \ref{calc:cauchy-product}、二重級数 \ref{calc:double-series}。
+- 一様収束と項別微分・積分 \ref{calc:uniform-limit-theorems}, \ref{calc:uniform-derivative}。
+- $\frac{1}{0}\defeq+\infty$, $\frac{1}{+\infty}\defeq0$ と約束する。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 収束半径 {#calc:sec-ps-radius}
+
+::: definition 冪級数と収束半径 {#calc:power-series keywords="power series centered at a; radius of convergence R = 1/limsup |c_n|^{1/n}" index="冪級数|べききゅうすう, 収束半径|しゅうそくはんけい"}
+実数列 $(c_{n})_{n\ge0}$ と $a\in\mathbb{R}$ について $\sum_{n\ge0}c_{n}(x-a)^{n}$ を $a$ を中心とする**冪級数**といい、$R\defeq\dfrac{1}{\limsup_{n}|c_{n}|^{1/n}}\in[0,+\infty]$ をその**収束半径**という。
+:::
+
+::: theorem コーシー–アダマールの定理 {#calc:cauchy-hadamard keywords="a power series converges absolutely for |x-a| < R, diverges for |x-a| > R, and converges uniformly on |x-a| <= r for every r < R" index="コーシー–アダマールの定理|こーしーあだまーるのていり" refname="コーシー–アダマールの定理"}
+冪級数 $\sum c_{n}(x-a)^{n}$ の収束半径を $R$ とする。
+1. $|x-a|<R$ なら絶対収束、$|x-a|>R$ なら発散する。
+2. $0<r<R$ なら、$|x-a|\le r$ の上で一様収束する。
+:::
+
+::: proof
+**1.** $\limsup|c_{n}(x-a)^{n}|^{1/n}=\frac{|x-a|}{R}$（$|x-a|$ は定数なので上極限から出せる）。根判定法（\ref{calc:root-ratio-tests.1}）。
+
+**2.** $\limsup|c_{n}r^{n}|^{1/n}=\frac rR<1$ なので $\sum|c_{n}|r^{n}$ は収束し、$|c_{n}(x-a)^{n}|\le|c_{n}|r^{n}$ から M 判定法（\ref{calc:uniform-limit-theorems.3}）。
+:::
+
+::: example
+1. $\sum x^{n}$ は $R=1$ で、$|x|<1$ で $\frac{1}{1-x}$。$x=\pm1$ で発散。
+2. $\sum\frac{x^{n}}{n}$ は $R=1$（$n^{1/n}\to1$）で、$x=-1$ で収束（交代級数）、$x=1$ で発散。端点での振る舞いは級数ごとに異なる。
+3. $\sum(-1)^{n}x^{2n}$ は $R=1$ で、$|x|<1$ で $\frac{1}{1+x^{2}}$。関数 $\frac{1}{1+x^{2}}$ は $\mathbb{R}$ 全体で滑らかだが、$0$ を中心とする冪級数は $|x|<1$ でしか表さない（複素数 $\pm i$ で分母が $0$ になるため。\ref{cx:page-power-series} で扱う予定）。
+:::
+
+## 項別微分と積分 {#calc:sec-ps-differentiation}
+
+::: theorem 冪級数の項別微分 {#calc:power-series-differentiation keywords="a power series defines a C^infinity function on its interval of convergence; derived and integrated series have the same radius; c_k = f^{(k)}(a)/k!" index="冪級数の項別微分|べききゅうすうのこうべつびぶん"}
+冪級数 $f(x)\defeq\sum c_{n}(x-a)^{n}$ の収束半径 $R>0$ とし、$I\defeq(a-R,a+R)$ とする。
+1. 項別に微分した級数 $\sum nc_{n}(x-a)^{n-1}$ と項別に積分した級数 $\sum\frac{c_{n}}{n+1}(x-a)^{n+1}$ の収束半径も $R$。
+2. $f$ は $I$ で微分可能で、$f'(x)=\sum_{n\ge1}nc_{n}(x-a)^{n-1}$。$\int_{a}^{x}f=\sum\frac{c_{n}}{n+1}(x-a)^{n+1}$。
+3. $f$ は $I$ で $C^{\infty}$ 級で、$c_{k}=\frac{f^{(k)}(a)}{k!}$。とくに、収束半径が正の二つの冪級数が $a$ の近くで等しい関数を表せば、係数は一致する。
+:::
+
+::: proof
+**1.** $(n|c_{n}|)^{1/n}=n^{1/n}|c_{n}|^{1/n}$ で $n^{1/n}\to1$ なので、上極限は変わらない（$\limsup(\alpha_{n}\beta_{n})=\lim\alpha_{n}\cdot\limsup\beta_{n}$、$\alpha_{n}\to1$）。$\sum nc_{n}x^{n-1}$ と $\sum nc_{n}x^{n}$ は同じ収束半径。積分の方も同様（$(n+1)^{-1/n}\to1$）。
+
+**2.** $x\in I$ について $|x-a|<r<R$ となる $r$ をとる。部分和は多項式で、その導関数の列は $[a-r,a+r]$ で一様収束する（1 とコーシー–アダマール）。$x=a$ で部分和は収束するので、項別微分の定理（\ref{calc:uniform-derivative}）から結論。積分は一様収束と積分の交換（\ref{calc:uniform-limit-theorems.4}）。
+
+**3.** 2 を繰り返すと $f^{(k)}(x)=\sum_{n\ge k}\frac{n!}{(n-k)!}c_{n}(x-a)^{n-k}$ で、$x=a$ を代入する。
+:::
+
+::: theorem アーベルの定理 {#calc:abel-theorem keywords="Abel's theorem: if sum c_n converges then sum c_n x^n -> sum c_n as x -> 1-; the convergence is uniform on [0,1]" index="アーベルの定理（冪級数）|あーべるのていりべききゅうすう" refname="アーベルの定理"}
+$\sum c_{n}$ が収束するなら、$\sum c_{n}x^{n}$ は $[0,1]$ で一様収束する。とくに $\lim_{x\to1-}\sum c_{n}x^{n}=\sum c_{n}$。
+:::
+
+::: proof
+$\varepsilon>0$ について、$N\le m\le n$ なら $\bigl|\sum_{k=m}^{n}c_{k}\bigr|<\varepsilon$ となる $N$ をとる（コーシーの判定法）。$m\ge N$ を固定し、$A_{j}\defeq\sum_{k=m}^{j}c_{k}$（$A_{m-1}=0$）として、\ref{calc:summation-by-parts}を $a_{k}=c_{k}$, $b_{k}=x^{k}$ に使うと、$0\le x\le1$ で $x^{k}$ は $k$ について減少なので
+$$
+\Bigl|\sum_{k=m}^{n}c_{k}x^{k}\Bigr|=\Bigl|A_{n}x^{n}+\sum_{k=m}^{n-1}A_{k}(x^{k}-x^{k+1})\Bigr|\le\varepsilon x^{n}+\varepsilon\sum_{k=m}^{n-1}(x^{k}-x^{k+1})=\varepsilon x^{m}\le\varepsilon.
+$$
+一様コーシーの判定法から一様収束し、極限は連続（各 $x^{n}$ は連続）なので $x=1$ での値に $x\to1-$ で近づく。
+:::
+
+::: proposition 冪級数の積 {#calc:power-series-product keywords="the product of two power series is the power series with Cauchy product coefficients, with radius at least the minimum" index="冪級数の積|べききゅうすうのせき"}
+$f(x)=\sum a_{n}x^{n}$, $g(x)=\sum b_{n}x^{n}$ の収束半径を $R_{f}$, $R_{g}$ とする。$|x|<\min(R_{f},R_{g})$ なら $f(x)g(x)=\sum_{n}\bigl(\sum_{k\le n}a_{k}b_{n-k}\bigr)x^{n}$ で、右辺の収束半径は $\min(R_{f},R_{g})$ 以上。
+:::
+
+::: proof
+$|x|<\min(R_{f},R_{g})$ で両方の級数が絶対収束するので、コーシー積（\ref{calc:cauchy-product.1}・\ref[2]{calc:cauchy-product.2}）から、積は $\sum c_{n}$（$c_{n}=\sum_{k}a_{k}x^{k}b_{n-k}x^{n-k}$）に絶対収束する。右辺の級数がこれらの $x$ で収束するので、収束半径は $|x|$ 以上（\ref{calc:cauchy-hadamard.1} の対偶）。
+:::
+
+## 実解析関数 {#calc:sec-ps-analytic}
+
+::: definition 実解析関数 {#calc:real-analytic keywords="real analytic function: locally the sum of a convergent power series" index="実解析関数|じつかいせきかんすう, 解析関数（実）|かいせきかんすうじつ"}
+開区間 $I$ 上の関数 $f$ が**実解析的**であるとは、各 $b\in I$ に $\rho>0$ と冪級数があって、$|x-b|<\rho$ で $f(x)=\sum d_{n}(x-b)^{n}$ となることをいう。
+:::
+
+::: theorem 冪級数は実解析的 {#calc:power-series-analytic keywords="a power series is real analytic on its interval of convergence: it can be re-expanded around any interior point b with radius at least R - |b - a|" index="冪級数の展開し直し|べききゅうすうのてんかいしなおし"}
+冪級数 $f(x)=\sum c_{n}(x-a)^{n}$ の収束半径を $R>0$ とし、$|b-a|<R$ とする。$|x-b|<R-|b-a|$ なら
+$$
+f(x)=\sum_{k\ge0}\frac{f^{(k)}(b)}{k!}(x-b)^{k}.
+$$
+とくに $f$ は $(a-R,a+R)$ で実解析的。
+:::
+
+::: proof
+**Step 1（二重級数）.** $x-a=(x-b)+(b-a)$ を二項展開して
+$$
+c_{n}(x-a)^{n}=\sum_{k=0}^{n}c_{n}\binom nk(b-a)^{n-k}(x-b)^{k}.
+$$
+$|x-b|+|b-a|<R$ なので、絶対値の二重和 $\sum_{n}\sum_{k}|c_{n}|\binom nk|b-a|^{n-k}|x-b|^{k}=\sum_{n}|c_{n}|(|x-b|+|b-a|)^{n}$ は収束する（\ref{calc:cauchy-hadamard.1}）。
+
+**Step 2（和の交換）.** 二重級数の定理（\ref{calc:double-series}）で和の順序を入れ替えると、$f(x)=\sum_{k}\Bigl(\sum_{n\ge k}c_{n}\binom nk(b-a)^{n-k}\Bigr)(x-b)^{k}$。この係数は \ref{calc:power-series-differentiation.3} の証明の式から $\frac{f^{(k)}(b)}{k!}$。
+:::
+
+::: theorem 一致の定理 {#calc:identity-theorem keywords="identity theorem: zeros of a nonzero real analytic function on an interval do not accumulate in the interval; two analytic functions agreeing near a point agree on the whole interval" index="一致の定理|いっちのていり" refname="一致の定理（冪級数）"}
+$f$ を開区間 $I$ 上の実解析関数とする。
+1. $f$ の零点の集合が $I$ に集積点をもつなら、$f\equiv0$。
+2. とくに、$I$ 上の二つの実解析関数が、$I$ のある点の近くで一致すれば、$I$ 全体で一致する。
+:::
+
+::: proof
+**Step 1（集積点では係数がすべて 0）.** $b\in I$ が零点の集積点とし、$b$ のまわりで $f(x)=\sum d_{n}(x-b)^{n}$ とする。$d_{n}$ がすべて $0$ でないなら、最初の $0$ でない係数を $d_{m}$ とすると $f(x)=(x-b)^{m}g(x)$, $g(x)=\sum_{n\ge m}d_{n}(x-b)^{n-m}$ で、$g$ は連続（冪級数）で $g(b)=d_{m}\neq0$。よって $b$ の近くで $x\neq b$ なら $f(x)\neq0$ となり、$b$ が零点の集積点であることに反する。$f$ は連続なので $f(b)=0$ でもある。
+
+**Step 2（開かつ閉）.** $A\defeq\{b\in I\mid b$ のまわりの展開の係数がすべて $0\}$ とする。$A$ は開集合（$b\in A$ なら $b$ の近傍で $f=0$ で、その近傍の点のまわりの係数も $0$）。$A$ は $I$ で閉（$b_{j}\in A$, $b_{j}\to b\in I$ なら $b$ は零点の集積点（$b_{j}\neq b$ のとき）か、$b$ のある近傍で $f=0$ で、Step 1 から $b\in A$）。1 の仮定と Step 1 から $A\neq\varnothing$。$I$ は連結なので $A=I$。2 は差に 1 を使う。
+:::
+
+::: supplement
+**一般化と関連する事実.**
+- 冪級数の理論は複素数の係数・変数でもそのまま成り立ち、収束域は円板になる。複素数の世界では、微分可能な関数は自動的に解析的になる（\ref{cx:page-power-series} で扱う予定）。実数の世界では、$C^{\infty}$ 級でも解析的でない関数がある（\ref[指数関数と対数関数]{calc:page-exp-log}）。
+- アーベルの定理の逆（$\lim_{x\to1-}\sum c_{n}x^{n}$ が存在すれば $\sum c_{n}$ が収束する）は一般には偽（$c_{n}=(-1)^{n}$ では左辺 $\frac12$）で、$c_{n}=o(\frac1n)$ などの条件を付けると成り立つ（**タウバー型定理**、知られている）。
+- 実解析関数の和・積・合成・（$0$ にならない関数の）逆数は実解析的である（知られている。合成は二重級数の議論で示せる）。
+
+**前提を変えると.** 一致の定理で区間 $I$ の連結性を外すと偽（$I=(0,1)\cup(2,3)$ で、片方で $0$、もう片方で $1$ の関数は解析的）。
+
+**高い視点.** 冪級数は「無限次の多項式」で、その係数は 1 点での全階数の微分係数（テイラー係数）で決まる。一致の定理は、解析関数が「1 点の近くでの情報だけで全体が決まる」硬い対象であることを言っており、これは $C^{\infty}$ 級関数の柔らかさ（局所的に自由に変形できる）と対照的である。比喩で言えば、解析関数は「1 本の骨の化石から全身が復元できる」生き物で、$C^{\infty}$ 級関数は「骨の形が似ていても体つきはいくらでも違いうる」生き物である。
+:::
+
+## 問題 {#calc:sec-ps-problems}
+
+::: problem {#calc:prob-ps-radius}
+次の冪級数の収束半径を求めよ：
+- (1) $\sum n^{3}x^{n}$
+- (2) $\sum\frac{x^{n}}{n!}$
+- (3) $\sum n!\,x^{n}$
+- (4) $\sum2^{n}x^{n^{2}}$
+:::
+
+::: solution
+(1) $(n^{3})^{1/n}=(n^{1/n})^{3}\to1$ で $R=1$。(2) $(n!)^{1/n}\to\infty$（$n!\ge(\frac n2)^{n/2}$ から $(n!)^{1/n}\ge\sqrt{n/2}$）なので $R=\infty$。(3) 同じ理由で $R=0$。(4) 係数は $n=m^{2}$ で $2^{m}$、それ以外で $0$。$|c_{m^{2}}|^{1/m^{2}}=2^{1/m}\to1$ なので上極限は $1$、$R=1$。
+:::
+
+::: problem {#calc:prob-ps-abel-converse}
+$\sum_{n\ge0}(-1)^{n}x^{n}=\frac{1}{1+x}$（$|x|<1$）で $x\to1-$ とすると $\frac12$ に収束するが、$\sum(-1)^{n}$ は収束しないことを確かめ、アーベルの定理の逆が成り立たないことを説明せよ。
+:::
+
+::: solution
+$\frac{1}{1+x}\to\frac12$。$\sum(-1)^{n}$ の部分和は $1,0,1,0,\dots$ で収束しない。アーベルの定理は「級数が収束すれば境界での極限と一致する」ことで、境界での極限が存在しても級数の収束は従わない。
+:::
+
+::: problem {#calc:prob-ps-derivative-geometric}
+$|x|<1$ で $\sum_{n\ge1}nx^{n}=\frac{x}{(1-x)^{2}}$ を、幾何級数の項別微分から導け。
+:::
+
+::: solution
+$\frac{1}{1-x}=\sum_{n\ge0}x^{n}$（$|x|<1$）を項別に微分すると（\ref{calc:power-series-differentiation.2}）$\frac{1}{(1-x)^{2}}=\sum_{n\ge1}nx^{n-1}$。$x$ を掛ける。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-ps-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

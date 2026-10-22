@@ -116,7 +116,7 @@
       type: G.t, num: G.n, title: G.t === 'page' ? pg.title : G.ti, refname: G.rn || '', typeName: typeName(G.t),
       href: same ? '#' + label : ROOT + pg.path + (G.t === 'page' ? '' : '#' + label),
       prefix: (!PG || pg.dir !== PG.dir) ? pg.subj + ' ' : '', external: !same,
-      secName: pg.subj + ' §' + pg.sec, refscope: G.rs || '', otherField: !PG || pg.dir.split('/')[0] !== PG.dir.split('/')[0]
+      secName: pg.subj + ' §' + pg.sec, refscope: G.rs || '', otherField: !PG || pg.dir.split('/').slice(0, 2).join('/') !== PG.dir.split('/').slice(0, 2).join('/')
     };
   }
   var renderer = Core.createRenderer({
@@ -257,7 +257,7 @@
             '<a class="mn-tree-link" href="' + ROOT + it.href + '">' + esc(it.title) + '</a></summary>' +
             '<div class="mn-tree-children">' + kids + '</div></details>';
         });
-        if (inner) out += '<div class="mn-tree-group">' + esc(g.title) + '</div>' + inner;
+        if (inner) out += '<div class="mn-tree-group">' + (g.href ? '<a href="' + ROOT + g.href + '">' + esc(g.title) + '</a>' : esc(g.title)) + '</div>' + inner;
       });
       el.innerHTML = out;
     } else el.innerHTML = node(T, 0);

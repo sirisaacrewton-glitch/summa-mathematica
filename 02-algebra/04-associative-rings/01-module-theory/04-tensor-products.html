@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テンソル積の計算 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/04-associative-rings/01-module-theory/04-tensor-products.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# テンソル積の計算 {#mod:page-tensor-products keywords="tensor product over a commutative ring, bilinear map, associativity and commutativity of tensor product, extension of scalars, tensor product of algebras, M/IM, base change"}
+
+二つの加群の**テンソル積** $M\otimes_{R}N$ は、「双線形な写像を線形写像に直す」ための加群である。定義・普遍性・右完全性・$\Hom$ との随伴は、ホモロジー代数の系列の \ref{ha:page-tensor-tor} で一般の環について示した。このページでは可換環 $A$ 上に話を限り、テンソル積が $A$ 加群になること（\ref{mod:tensor-module-structure}）、交換・結合・直和との分配（\ref{mod:tensor-isomorphisms}）、$A/I\otimes M\cong M/IM$（\ref{mod:tensor-quotient}）、スカラーの拡大（\ref{mod:extension-of-scalars}）、代数のテンソル積が可換代数の余積であること（\ref{mod:tensor-algebras}）を示し、具体的な計算例を集める。
+
+> 雪江明彦『代数学 2』第 2 章 §2.10 と Atiyah–Macdonald 第 2 章の流れを参考にした。証明は普遍性からの議論で書き直した。
+
+## 記法と定義の確認 {#mod:sec-tp-notation}
+
+::: notation
+- このページでは $A$ を**可換環**とし、加群は $A$ 加群（\ref{mod:module}）とする。$A$ 代数・多項式環の普遍性は \ref{ring:algebra}, \ref{ring:polynomial-universal}, \ref{ring:multivariate-universal}。
+- テンソル積 $M\otimes_{A}N$ の構成（$M\times N$ 上の自由可換群を、双加法性と $(ma,n)-(m,an)$ で割ったもの）、$A$ 平衡写像についての普遍性、関手性、$M\otimes_{A}A\cong M$ は \ref{ha:tensor-product}, \ref{ha:tensor-universal}。右完全性は \ref{ha:tensor-right-exact}、直和との交換は \ref{ha:projective-flat.1}。$A$ が可換なので、$A$ 加群 $M$ は $ma\defeq am$ によって右加群ともみなす。
+- $m\otimes n$ の形の元を**純テンソル**という。$M\otimes_{A}N$ の元は純テンソルの有限和であり、一般に純テンソルとは限らない。
+- 選択公理は使わない。
+:::
+
+## 双線形写像とテンソル積 {#mod:sec-tp-bilinear}
+
+::: definition 双線形写像 {#mod:bilinear keywords="A-bilinear map" index="双線形写像|そうせんけいしゃぞう, 多重線形写像|たじゅうせんけいしゃぞう"}
+$A$ 加群 $M,N,P$ について、写像 $\beta:M\times N\to P$ が各変数について $A$ 線形であるとき、**$A$ 双線形**という。同様に $M_{1}\times\dots\times M_{k}\to P$ で各変数について線形な写像を **$A$ 多重線形**という。
+:::
+
+::: proposition テンソル積の $A$ 加群構造と普遍性 {#mod:tensor-module-structure keywords="tensor product over a commutative ring is a module, universal property for bilinear maps" index="テンソル積の普遍性|てんそるせきのふへんせい"}
+$M,N$ を $A$ 加群とする。
+1. $a(m\otimes n)\defeq(am)\otimes n$ によって $M\otimes_{A}N$ は $A$ 加群になり、$(am)\otimes n=m\otimes(an)=a(m\otimes n)$。
+2. $\otimes:M\times N\to M\otimes_{A}N$ は $A$ 双線形で、任意の $A$ 双線形写像 $\beta:M\times N\to P$ に対し、$\bar\beta(m\otimes n)=\beta(m,n)$ をみたす $A$ 線形写像 $\bar\beta:M\otimes_{A}N\to P$ がただ一つある。
+3. $A$ 線形写像 $f:M\to M'$, $g:N\to N'$ について、$(f\otimes g)(m\otimes n)\defeq f(m)\otimes g(n)$ で $A$ 線形写像 $f\otimes g:M\otimes_{A}N\to M'\otimes_{A}N'$ が定まり、$(f'\otimes g')\circ(f\otimes g)=(f'f)\otimes(g'g)$。
+:::
+
+::: proof
+**Step 1（1）.** $a\in A$ について $(m,n)\mapsto(am)\otimes n$ は $A$ 平衡（各変数で加法的で、$(a(mb))\otimes n=(amb)\otimes n=(am)\otimes(bn)$。可換性で $amb=(am)b$）なので、\ref{ha:tensor-universal.1} から加法的な写像 $\mu_{a}:M\otimes_{A}N\to M\otimes_{A}N$ で $\mu_{a}(m\otimes n)=(am)\otimes n$ となるものがただ一つある。$\mu_{a+b}=\mu_{a}+\mu_{b}$, $\mu_{ab}=\mu_{a}\mu_{b}$, $\mu_{1}=\id$ は純テンソル上で一致し、純テンソルは $M\otimes_{A}N$ を加法群として生成するので成り立つ。よって $A$ 加群（\ref{mod:module-as-homomorphism}）。$(am)\otimes n=(ma)\otimes n=m\otimes(an)$ はテンソル積の関係式 $(ma,n)\sim(m,an)$ から。
+
+**Step 2（2）.** $\beta$ が $A$ 双線形なら、$\beta(ma,n)=\beta(am,n)=a\beta(m,n)=\beta(m,an)$ なので $A$ 平衡で、\ref{ha:tensor-universal.1} から加法的な $\bar\beta$ がただ一つある。$\bar\beta(a(m\otimes n))=\beta(am,n)=a\beta(m,n)=a\bar\beta(m\otimes n)$ で、純テンソルは生成系なので $\bar\beta$ は $A$ 線形。$\otimes$ 自身が双線形であることは 1 とテンソル積の関係式から。
+
+**Step 3（3）.** $(m,n)\mapsto f(m)\otimes g(n)$ は双線形なので 2 から $f\otimes g$ が定まる。合成の式は純テンソル上で一致することから。
+
+::: hypcheck
+- **前提「$A$ は可換」**：Step 1 で $(a(mb))=(am)b$ に使った。非可換環 $R$ では $M\otimes_{R}N$ は一般に可換群にすぎず、$M$ が $(S,R)$ 両側加群のときに左 $S$ 加群になる。
+:::
+:::
+
+::: theorem テンソル積の基本的な同型 {#mod:tensor-isomorphisms keywords="commutativity, associativity, distributivity over direct sums, tensor of free modules" index="テンソル積の基本性質|てんそるせきのきほんせいしつ"}
+$A$ 加群 $M,N,P$ と族 $(N_{i})_{i\in I}$ について、次の $A$ 加群の同型があり、いずれも加群について自然である。
+1. $M\otimes_{A}N\cong N\otimes_{A}M$（$m\otimes n\mapsto n\otimes m$）。
+2. $(M\otimes_{A}N)\otimes_{A}P\cong M\otimes_{A}(N\otimes_{A}P)$（$(m\otimes n)\otimes p\mapsto m\otimes(n\otimes p)$）。
+3. $A\otimes_{A}M\cong M$（$a\otimes m\mapsto am$）。
+4. $M\otimes_{A}\bigl(\bigoplus_{i}N_{i}\bigr)\cong\bigoplus_{i}(M\otimes_{A}N_{i})$。
+5. $A^{m}\otimes_{A}A^{n}\cong A^{mn}$。より一般に、$M,N$ が基底 $(x_{i})_{i\in I}$, $(y_{j})_{j\in J}$ をもつ自由加群なら、$(x_{i}\otimes y_{j})_{(i,j)\in I\times J}$ は $M\otimes_{A}N$ の基底である。
+:::
+
+::: proof
+**Step 1（1）.** $(m,n)\mapsto n\otimes m$ は双線形なので $M\otimes N\to N\otimes M$ ができ、逆向きも同様。合成は純テンソル上で恒等写像なので恒等写像。
+
+**Step 2（2：三重線形の普遍性）.** $(M\otimes N)\otimes P$ が三重線形写像について普遍的、すなわち任意の三重線形 $t:M\times N\times P\to Q$ に対し $\bar t((m\otimes n)\otimes p)=t(m,n,p)$ となる線形写像がただ一つあることを示す。$p\in P$ を固定すると $(m,n)\mapsto t(m,n,p)$ は双線形で、$t_{p}:M\otimes N\to Q$ を得る。$t_{p+p'}=t_{p}+t_{p'}$, $t_{ap}=at_{p}$ は純テンソル上で確かめられるので、$(u,p)\mapsto t_{p}(u)$ は $(M\otimes N)\times P$ 上の双線形写像で、\ref{mod:tensor-module-structure.2} から $\bar t$ を得る。一意性は $(m\otimes n)\otimes p$ が生成系であることから。
+
+**Step 3（2：同型）.** 同様に $M\otimes(N\otimes P)$ も三重線形写像について普遍的。三重線形写像 $(m,n,p)\mapsto m\otimes(n\otimes p)$ と $(m,n,p)\mapsto(m\otimes n)\otimes p$ からそれぞれ線形写像が作られ、合成は生成系の上で恒等写像なので、互いに逆な同型。
+
+**Step 4（3・4）.** \ref{ha:tensor-universal.3} と \ref{ha:projective-flat.1}（と 1 の交換）。どちらも $A$ 線形であることは純テンソル上で確かめられる。
+
+**Step 5（5）.** $M\cong A^{(I)}=\bigoplus_{i}A$, $N\cong A^{(J)}$ とし、4（両変数に使う）と 3 から
+$$
+A^{(I)}\otimes_{A}A^{(J)}\cong\bigoplus_{i,j}A\otimes_{A}A\cong A^{(I\times J)}.
+$$
+この同型で $x_{i}\otimes y_{j}$ は $(i,j)$ 成分の $1\otimes 1\mapsto 1$ に対応するので、標準基底に移る。
+:::
+
+::: example 計算例 {#mod:tensor-examples}
+1. $\Z/m\Z\otimes_{\Z}\Z/n\Z\cong\Z/\gcd(m,n)\Z$（問題 \ref{ha:prob-tt-zm-zn}。下の \ref{mod:tensor-quotient} からも出る）。特に $\Z/2\Z\otimes\Z/3\Z=0$。
+2. $\Q\otimes_{\Z}T=0$（$T$ はねじれ群：すべての元が有限位数）。実際 $t\in T$ が $nt=0$ なら $q\otimes t=\frac{q}{n}n\otimes t=\frac{q}{n}\otimes nt=0$。
+3. $\Q\otimes_{\Z}\Q\cong\Q$（$a\otimes b\mapsto ab$）。逆写像は $q\mapsto q\otimes 1$。$\frac{a}{b}\otimes\frac{c}{d}=\frac{a}{bd}\cdot d\otimes\frac{c}{d}=\frac{a}{bd}\otimes c=\frac{ac}{bd}\otimes 1$ からすべての元が $q\otimes 1$ の形になり、互いに逆であることがわかる。
+4. 純テンソルでない元：$K$ を体とし $V=K^{2}$ の基底を $e_{1},e_{2}$ とすると、$e_{1}\otimes e_{1}+e_{2}\otimes e_{2}\in V\otimes_{K}V\cong K^{4}$ は純テンソルでない。純テンソル $(ae_{1}+be_{2})\otimes(ce_{1}+de_{2})$ の座標 $(ac,ad,bc,bd)$ は「$2\times 2$ 行列とみて階数 $1$ 以下」をみたすが、$(1,0,0,1)$ は階数 $2$ だからである。
+:::
+
+## 剰余とスカラーの拡大 {#mod:sec-tp-base-change}
+
+::: proposition 剰余加群とのテンソル積 {#mod:tensor-quotient keywords="A/I tensor M = M/IM, A/I tensor A/J = A/(I+J)" index="剰余とテンソル積|じょうよとてんそるせき"}
+$A$ のイデアル $I,J$ と $A$ 加群 $M$ について、$IM\defeq\{\sum a_{k}m_{k} : a_{k}\in I\}$ とおくと、
+$$
+A/I\otimes_{A}M\cong M/IM\quad(\bar a\otimes m\mapsto am+IM).
+$$
+特に $A/I\otimes_{A}A/J\cong A/(I+J)$。
+:::
+
+::: proof
+**Step 1.** 短完全列 $0\to I\to A\to A/I\to 0$ に右完全性（\ref{ha:tensor-right-exact}。$\otimes_{A}M$ を右から施す形は交換 \ref{mod:tensor-isomorphisms.1} で移せる）を使うと、
+$$
+I\otimes_{A}M\to A\otimes_{A}M\to A/I\otimes_{A}M\to 0
+$$
+は完全。
+
+**Step 2.** $A\otimes_{A}M\cong M$（$a\otimes m\mapsto am$）のもとで、最初の写像の像は $\{\sum a_{k}m_{k} : a_{k}\in I\}=IM$。よって $A/I\otimes_{A}M\cong M/IM$。
+
+**Step 3.** $M=A/J$ なら $I(A/J)=(I+J)/J$ で、第三同型定理（\ref{ring:correspondence.3}）から $(A/J)/((I+J)/J)\cong A/(I+J)$。
+:::
+
+::: theorem スカラーの拡大 {#mod:extension-of-scalars keywords="extension of scalars, base change, B tensor_A M, adjunction with restriction of scalars" index="スカラーの拡大|すからーのかくだい, 基底変換|きていへんかん, 係数拡大|けいすうかくだい"}
+$\varphi:A\to B$ を可換環の準同型（$B$ を $A$ 代数とみる）、$M$ を $A$ 加群とする。
+1. $M_{B}\defeq B\otimes_{A}M$ は $b'(b\otimes m)\defeq b'b\otimes m$ で $B$ 加群になる。$A$ 線形写像 $\iota:M\to M_{B}$, $m\mapsto 1\otimes m$ がある。
+2. 任意の $B$ 加群 $N$（スカラーの制限で $A$ 加群ともみる）と $A$ 線形写像 $f:M\to N$ に対し、$g\circ\iota=f$ となる $B$ 線形写像 $g:M_{B}\to N$ がただ一つある。すなわち
+$$
+\Hom_{B}(B\otimes_{A}M,N)\cong\Hom_{A}(M,N).
+$$
+3. $B\otimes_{A}A^{n}\cong B^{n}$、$B\otimes_{A}(A/I)\cong B/IB$（$IB$ は $\varphi(I)$ で生成される $B$ のイデアル）。
+:::
+
+::: proof
+**Step 1（1）.** $b'\in B$ について、$(b,m)\mapsto b'b\otimes m$ は $A$ 双線形なので、$B\otimes_{A}M$ の自己準同型 $\mu_{b'}$ を定め、\ref{mod:tensor-module-structure} の Step 1 と同様に $B$ 加群の構造を得る。$\iota$ は $(1\otimes am)=\varphi(a)\otimes m=a(1\otimes m)$ から $A$ 線形。
+
+**Step 2（2）.** $g$ があれば $g(b\otimes m)=bg(1\otimes m)=bf(m)$ なので一意。逆に $(b,m)\mapsto bf(m)$ は $A$ 双線形（$f(am)=af(m)=\varphi(a)f(m)$）なので、$A$ 線形な $g$ ができ、$g(b'(b\otimes m))=b'bf(m)=b'g(b\otimes m)$ から $B$ 線形。
+
+**Step 3（3）.** \ref{mod:tensor-isomorphisms.4}・\ref[3]{mod:tensor-isomorphisms.3} から $B\otimes_{A}A^{n}\cong(B\otimes_{A}A)^{n}\cong B^{n}$。$B\otimes_{A}A/I\cong B/IB$ は \ref{mod:tensor-quotient} を $A$ 加群 $B$ に使い（交換して）、$IB$ が $I$ による $B$ の部分加群 $\{\sum a_{k}b_{k}\}$ と一致することから。
+:::
+
+::: example
+1. 実ベクトル空間 $V$ の**複素化** $V_{\C}\defeq\C\otimes_{\R}V$ は、$\dim_{\C}V_{\C}=\dim_{\R}V$ の複素ベクトル空間である（3 から $\C\otimes_{\R}\R^{n}\cong\C^{n}$）。
+2. 可換群 $M$ と素数 $p$ について、$\mathbb{F}_{p}\otimes_{\Z}M\cong M/pM$ は $\mathbb{F}_{p}$ 上のベクトル空間で、$M=\Z^{n}$ なら $\mathbb{F}_{p}^{n}$。自由加群の階数の一意性（\ref{mod:rank-invariance}）の証明は、このスカラーの拡大で体に落とす議論だった。
+:::
+
+## 代数のテンソル積 {#mod:sec-tp-algebras}
+
+::: theorem 代数のテンソル積 {#mod:tensor-algebras keywords="tensor product of algebras, coproduct of commutative algebras" index="代数のテンソル積|だいすうのてんそるせき"}
+$B,C$ を可換 $A$ 代数とする。
+1. $B\otimes_{A}C$ には $(b\otimes c)(b'\otimes c')\defeq bb'\otimes cc'$ を純テンソル上でみたす積がただ一つあり、可換 $A$ 代数になる（単位元 $1\otimes 1$）。$i_{B}(b)\defeq b\otimes 1$, $i_{C}(c)\defeq 1\otimes c$ は $A$ 代数の準同型である。
+2. （余積の普遍性）可換 $A$ 代数 $D$ と $A$ 代数の準同型 $f:B\to D$, $g:C\to D$ に対し、$h\circ i_{B}=f$, $h\circ i_{C}=g$ となる $A$ 代数の準同型 $h:B\otimes_{A}C\to D$ がただ一つあり、$h(b\otimes c)=f(b)g(c)$。
+:::
+
+::: proof
+**Step 1（積の定義）.** $(b',c')$ を固定すると、$(b,c)\mapsto bb'\otimes cc'$ は双線形なので、$r_{b',c'}:B\otimes C\to B\otimes C$ が定まる。$(b',c')\mapsto r_{b',c'}$ は $\End_{A}(B\otimes C)$ への双線形写像なので、線形写像 $B\otimes C\to\End_{A}(B\otimes C)$, $v\mapsto r_{v}$ を得る。積を $uv\defeq r_{v}(u)$ と定めると双線形で、純テンソル上で所定の式をみたす。
+
+**Step 2（環の公理）.** 結合法則・可換性・分配法則・$1\otimes 1$ が単位元であることは、両辺がそれぞれの変数について加法的なので、純テンソル上で確かめれば足り、そこでは $B,C$ の対応する法則に帰着する。構造射は $a\mapsto a\otimes 1=1\otimes a$。$i_{B}$, $i_{C}$ が準同型であることは定義から。
+
+**Step 3（2）.** $h$ があれば $h(b\otimes c)=h(i_{B}(b)i_{C}(c))=f(b)g(c)$ で一意。逆に $(b,c)\mapsto f(b)g(c)$ は $A$ 双線形なので線形写像 $h$ ができ、積を保つことは純テンソル上で $f(bb')g(cc')=f(b)g(c)f(b')g(c')$（$D$ の可換性）から。
+
+::: hypcheck
+- **前提「$D$ は可換」**：Step 3 で積の並べ替えに使った。非可換な $D$ では、$f(B)$ と $g(C)$ の元が互いに可換なら同じ結論が成り立つ。
+:::
+:::
+
+::: example 代数のテンソル積の計算 {#mod:tensor-algebra-examples}
+1. $A[x]\otimes_{A}A[y]\cong A[x,y]$。余積の普遍性と多項式環の普遍性（\ref{ring:multivariate-universal}）から、どちらも「$A$ 代数 $D$ と二つの元の組」に対して普遍的だからである。同様に $B\otimes_{A}A[x]\cong B[x]$。
+2. $f\in A[x]$ について $B\otimes_{A}A[x]/(f)\cong B[x]/(f)$（\ref{mod:extension-of-scalars.3} を $A[x]$ 上で使う、あるいは普遍性から）。
+3. $\C\otimes_{\R}\C\cong\C\times\C$。実際 $\C\cong\R[x]/(x^{2}+1)$（\ref{ring:polynomial-quotients}）なので、2 から $\C\otimes_{\R}\C\cong\C[x]/(x^{2}+1)=\C[x]/((x-i)(x+i))$ で、$(x-i)+(x+i)\ni 2i$ は単元なので二つのイデアルは互いに素、\ref{ring:chinese-remainder}から $\cong\C[x]/(x-i)\times\C[x]/(x+i)\cong\C\times\C$。体どうしのテンソル積は体とは限らず、整域ですらない。
+4. $\Q\otimes_{\Z}\mathbb{F}_{p}=0$（\ref{mod:tensor-examples.2}）。零環も可換 $A$ 代数の余積として現れうる。
+:::
+
+::: supplement
+**高い視点.** \ref{mod:tensor-module-structure.2} は、$A$ 加群の圏 $A\text{-}\mathbf{Mod}$ が $\otimes_{A}$ と単位対象 $A$ で**対称モノイダル圏**（\ref{cat:page-monoidal}）になることの出発点で、\ref{mod:tensor-isomorphisms.1}〜\ref[3]{mod:tensor-isomorphisms.3} がその構造同型である。$\Hom_{A}(M\otimes N,P)\cong\Hom_{A}(M,\Hom_{A}(N,P))$（\ref{ha:tensor-hom-adjunction} の可換環版）により閉圏にもなる。\ref{mod:extension-of-scalars.2} は、スカラーの拡大 $B\otimes_{A}-$ がスカラーの制限の左随伴であることを言っている（\ref{cat:adjunction}）。可換環の圏で $B\otimes_{A}C$ が余積（押し出し）であることは、幾何的には「アフィンスキームのファイバー積 $\Spec B\times_{\Spec A}\Spec C$」に対応する（\ref{mod:tensor-algebras}）。
+
+**圏論の言葉で.** 可換環上の加群の圏は、テンソル積と $\Hom$ により対称モノイダル閉圏になる（\tref{cat:page-symmetric-monoidal-closed}）。
+:::
+
+## 問題 {#mod:sec-tp-problems}
+
+::: problem {#mod:prob-tensor-localization-preview}
+$A$ を整域、$K=\Frac A$ とする。$A$ 加群 $M$ について、$m\in M$ がねじれ元（$am=0$ となる $a\neq 0$ がある）なら $K\otimes_{A}M$ で $1\otimes m=0$ となることを示せ。
+:::
+
+::: solution
+$am=0$, $a\neq 0$ とすると、$K$ で $a$ は単元なので $1\otimes m=\frac{1}{a}a\otimes m=\frac{1}{a}\otimes am=0$。（逆も成り立ち、$\Ker(M\to K\otimes_{A}M)$ はちょうどねじれ部分になる。これは $K\otimes_{A}M\cong S^{-1}M$（$S=A\setminus\{0\}$）から従い、\ref{ring:page-local-properties} で示す。）
+:::
+
+::: problem {#mod:prob-tensor-vector-spaces}
+体 $K$ 上の有限次元ベクトル空間 $V,W$ について $\dim_{K}(V\otimes_{K}W)=\dim V\cdot\dim W$、また $\Hom_{K}(V,K)\otimes_{K}W\cong\Hom_{K}(V,W)$（$\xi\otimes w\mapsto(v\mapsto\xi(v)w)$）を示せ。
+:::
+
+::: solution
+**Step 1.** 基底をとって $V\cong K^{m}$, $W\cong K^{n}$ とすれば、\ref{mod:tensor-isomorphisms.5} から $V\otimes W\cong K^{mn}$。
+
+**Step 2.** 写像 $\Phi(\xi\otimes w)(v)\defeq\xi(v)w$ は双線形な $(\xi,w)\mapsto(v\mapsto\xi(v)w)$ から定まる線形写像。$V$ の基底 $(e_{i})$ と双対基底 $(e^{i})$（$e^{i}(e_{j})=\delta_{ij}$）、$W$ の基底 $(f_{k})$ をとると、$\Phi(e^{i}\otimes f_{k})$ は $e_{i}\mapsto f_{k}$、他の $e_{j}\mapsto 0$ の線形写像で、これらは $\Hom(V,W)$ の基底（行列単位）。$e^{i}\otimes f_{k}$ は Step 1 から左辺の基底なので、$\Phi$ は基底を基底に移す同型。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

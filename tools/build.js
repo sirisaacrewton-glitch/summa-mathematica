@@ -42,7 +42,9 @@ function walkDir(absDir, relDir, depth) {
     en: meta.en || '', description: meta.description || '', intro: meta.intro || '',
     msc: meta.msc || '', id: meta.id || '', prereq: meta.prereq || [], groups: meta.groups || null, also: meta.also || [], alsoKids: [], alsoIn: [], children: [],
     // transparent：表示上この階層を飛ばし、子を親の直下に並べる（住所は MSC のまま）。order：兄弟フォルダの表示順（小さいほど先。省略は名前順の後）
-    transparent: !!meta.transparent, order: typeof meta.order === 'number' ? meta.order : null
+    transparent: !!meta.transparent, order: typeof meta.order === 'number' ? meta.order : null,
+    // field：分野（第 2 階層）の分類番号（MSC の 2 桁。"03" など）。用語リンクの規則（tools/terms.json の @03 など）で使う
+    field: meta.field || ''
   };
   var entries = fs.readdirSync(absDir, { withFileTypes: true })
     .filter(function (e) { return e.name.charAt(0) !== '.' && e.name.charAt(0) !== '_'; })
@@ -90,7 +92,7 @@ var tree = walkDir(ROOT, '', 0);
   var hasLeaf = node.children.some(function (c) { return c.kind === 'page'; });
   // ページのない（空の）子フォルダは数えない（メニュー・検索の分野選択でも出さないため）
   var full = subs.filter(function (c) { return countPages(c) > 0; });
-  if (!isRoot && full.length === 1 && !hasLeaf) full[0].solo = true;
+  // 2026-10-22：ディレクトリの構成をそのまま表示に使うことにしたので、子が一つでも飛ばさない（ユーザー指示）
   // _meta.json の "transparent": true のフォルダも同じ仕組みで飛ばす（子が複数あっても、子をすべて親の直下に並べる）
   full.forEach(function (c) { if (c.transparent) c.solo = true; });
   subs.forEach(function (c) { markSolo(c, false); });
@@ -104,6 +106,18 @@ var tree = walkDir(ROOT, '', 0);
     else pages[c.idx].crumbs = crumbs;
   });
 })(tree, []);
+
+// 分野の番号：フォルダのパス → field（祖先のうち最も近い field をもつフォルダの値）
+var FIELD_MAP = {};
+(function fm(node, cur) {
+  if (node.field) { cur = node.field; FIELD_MAP[node.path] = cur; }
+  node.children.forEach(function (c) { if (c.kind === 'dir') fm(c, cur); });
+})(tree, '');
+function fieldOfPath(p) {
+  var best = '', code = '';
+  Object.keys(FIELD_MAP).forEach(function (d) { if (p.indexOf(d) === 0 && d.length > best.length) { best = d; code = FIELD_MAP[d]; } });
+  return code || p.split('/')[0].split('-')[0];
+}
 
 // フォルダの id（_meta.json の "id"）→ ノード。前提知識（"prereq"）の参照先に使う
 var dirById = {};
@@ -307,7 +321,14 @@ entries.forEach(function (e) {
 var pageInfo = pages.map(function (pg) { return { path: pg.path, dir: pg.dirPath }; });
 // 用語リンクの規則は tools/terms.json で一元管理する（ブラウザには site-index.js の termRules として渡す）
 var TERM_RULES = readJSON(path.join(ROOT, 'tools', 'terms.json')) || {};
-var TERM_RULES_BROWSER = { stop: TERM_RULES.stop || [], prefix: TERM_RULES.prefix || '', base: TERM_RULES.base || [], baseShort: TERM_RULES.baseShort || [], xfDeny: TERM_RULES.xfDeny || {}, noAuto: TERM_RULES.noAuto || {} };
+// 系列の前提（_meta.json の prereq）：系列のパス → 前提の系列のパス。用語リンクで、前提の系列の定義は後ろにあっても結ぶ（2026-10-22）
+var SERIES_PRE = {};
+Object.keys(dirById).forEach(function (id) {
+  var d = dirById[id]; if (!d.prereq || !d.prereq.length) return;
+  var ps = d.prereq.map(function (q) { return dirById[q.dir] ? dirById[q.dir].path : null; }).filter(Boolean);
+  if (ps.length) SERIES_PRE[d.path] = ps;
+});
+var TERM_RULES_BROWSER = { stop: TERM_RULES.stop || [], prefix: TERM_RULES.prefix || '', base: TERM_RULES.base || [], baseShort: TERM_RULES.baseShort || [], xfDeny: TERM_RULES.xfDeny || {}, noAuto: TERM_RULES.noAuto || {}, fieldMap: FIELD_MAP, seriesPre: SERIES_PRE };
 Core.setTermRules(TERM_RULES_BROWSER);
 var termLinker = Core.createTermLinker(termDefs, labels, pageInfo);
 var tdeps = {};   // 主張（番号付き環境）のラベル -> その主張に現れる用語の定義のラベル（学習ルートの「主張の前提」に加える）
@@ -441,7 +462,7 @@ pages.forEach(function (pg) {
   Object.keys(termDefs).forEach(function (t) {
     if (Core.termNoAuto()[t]) return;
     var fields = {};
-    termDefs[t].forEach(function (l) { var L = labels[l]; if (!L) return; var f = pages[L.p].path.split('/')[0].split('-')[0]; (fields[f] = fields[f] || []).push(l); });
+    termDefs[t].forEach(function (l) { var L = labels[l]; if (!L) return; var f = fieldOfPath(pages[L.p].path); (fields[f] = fields[f] || []).push(l); });
     var keys = Object.keys(fields), report = [];
     keys.forEach(function (f) { if (fields[f].length > 1 && !reviewed[t + '@' + f]) report.push(t + '@' + f + '（' + fields[f].join(', ') + '）'); });
     if (keys.length > 1 && !reviewed[t + '@*']) report.push(t + '@*（' + keys.join(', ') + ' の分野に定義）');
@@ -536,7 +557,14 @@ Object.keys(backrefs).forEach(function (k) {
 // { "title": "圏論", "codes": ["18A", "18B"] }（例：18 を圏論とホモロジー代数に分けて見せる）。
 // どこにも入らないフォルダは「その他」に出る。
 var NAV_GROUPS = (function () {
-  if (!tree.groups) return null;
+  // 2026-10-22：第 1 階層のフォルダ（大分野）をそのまま大分野の見出しにし、その子（分野）を項目にする（ディレクトリ＝表示）
+  if (!tree.groups) {
+    return tree.children.filter(function (c) { return c.kind === 'dir'; }).map(function (d) {
+      return { title: d.title, en: d.en || '', href: d.path + 'index.html', items: d.children.filter(function (c) { return c.kind === 'dir'; }).map(function (e) {
+        return { title: e.title, en: e.en || '', d: e.description || '', paths: [e.path], href: e.path + 'index.html', n: countPages(e) };
+      }) };
+    });
+  }
   var isDir = function (c) { return c.kind === 'dir'; };
   var code = function (d) { return d.name.split('-')[0]; };
   var l1 = tree.children.filter(isDir), byCode = {}, l2ByCode = {};
@@ -929,8 +957,7 @@ if (!CHECK_ONLY) {
   var head = [];
   entries.forEach(function (e, i) {
     var segs = pages[e.p] ? pages[e.p].path.split('/') : ['x'];
-    var key = segs[0].split('-')[0];
-    if (key === '03' && segs[1]) key = segs[1].split('-')[0];   // 数理論理は大きいので第 2 階層で分ける
+    var key = segs[0].split('-')[0] + (segs[1] ? '-' + segs[1].split('-')[0] : '');   // 分野（第 2 階層）ごとに分ける
     var h = {};   // 空の値は省く（ブラウザ側で既定値に戻す）
     Object.keys(e).forEach(function (k) {
       var v = e[k];

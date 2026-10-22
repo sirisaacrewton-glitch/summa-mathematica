@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>広義重積分とパラメータを含む積分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/01-real-analysis/03-multivariable-calculus/08-parameter-integrals.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 広義重積分とパラメータを含む積分 {#calc:page-parameter-integrals keywords="integrals depending on a parameter, continuity and differentiation under the integral sign, Leibniz rule with variable limits, improper multiple integrals, exhaustion by compact Jordan measurable sets, absolutely convergent improper integrals, dominated convergence for parameter integrals, Gaussian integral over the plane"}
+
+積分 $F(x)=\int f(x,y)\,dy$ が $x$ について連続か、微分可能か、そして $F'(x)=\int\partial_{x}f(x,y)\,dy$（**積分記号下の微分**）が成り立つか。このページでは、積分範囲が有界な場合にこれを示したあと、有界でない領域や有界でない関数への積分（**広義重積分**）を、コンパクトなジョルダン可測集合による近似として定義する。広義積分では、被積分関数が非負か絶対可積分なら近似の取り方によらないことを示し、変数変換公式をこの場合に広げる。最後に、パラメータを含む広義積分について、可積分な関数による上からの評価（**優関数**）のもとで、連続性と積分記号下の微分を示す。
+
+> 資料：Rudin『Principles of Mathematical Analysis』第 9・10 章、杉浦光夫『解析入門 I』第 IV 章・『解析入門 II』（広義積分）と同じ標準的な内容。証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#calc:sec-pi-notation}
+
+::: notation
+- 重積分とジョルダン可測集合 \ref{calc:box-integral}, \ref{calc:jordan-measurable}, \ref{calc:jordan-measurable-criterion}, \ref{calc:jordan-additivity}、フビニの定理 \tref{calc:fubini}, \ref{calc:fubini-continuous}、変数変換公式 \tref{calc:change-of-variables}, \ref{calc:change-of-variables-boundary}。
+- 1 変数の広義積分とその判定 \ref{calc:improper-integral}, \ref{calc:improper-tests}、微分積分学の基本定理 \tref{calc:fundamental-theorem}、平均値の定理 \tref{calc:mean-value-theorem}、連鎖律 \ref{calc:multivariable-chain-rule}。
+- ハイネ–カントール \tref{top:heine-cantor}。$|x|_{\infty}=\max|x_{i}|$、$\operatorname{dist}_{\infty}(x,S)=\inf_{s\in S}|x-s|_{\infty}$。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## パラメータを含む積分 {#calc:sec-pi-parameter}
+
+::: theorem 積分記号下の微分 {#calc:differentiation-under-integral keywords="if f and its partial derivative in x are continuous on U x B with B compact Jordan measurable, then F(x) = int_B f(x,y) dy is C^1 with dF/dx_i = int_B d_i f(x,y) dy" index="積分記号下の微分|せきぶんきごうかのびぶん, パラメータを含む積分|ぱらめーたをふくむせきぶん"}
+$U\subset\mathbb{R}^{n}$ を開集合、$B\subset\mathbb{R}^{m}$ をコンパクトなジョルダン可測集合、$f\colon U\times B\to\mathbb{R}$ を連続とし、$F(x)\defeq\int_{B}f(x,y)\,dy$ とおく。
+1. $F$ は $U$ 上で連続。
+2. さらに偏導関数 $\partial_{x_{i}}f$ が $U\times B$ 上で存在して連続なら、$F$ は $x_{i}$ で偏微分可能で
+$$
+\partial_{i}F(x)=\int_{B}\partial_{x_{i}}f(x,y)\,dy.
+$$
+すべての $i$ でそうなら $F$ は $C^{1}$ 級。
+:::
+
+::: proof
+**Step 1（1）.** $x_{0}\in U$ と $r>0$ を $\bar B(x_{0},r)\subset U$ となるようにとる。$\bar B(x_{0},r)\times B$ はコンパクトなので $f$ はその上で一様連続（\ref{top:heine-cantor}）。$\varepsilon>0$ について $\delta\le r$ を、$|x-x_{0}|<\delta$ なら（すべての $y\in B$ で）$|f(x,y)-f(x_{0},y)|<\varepsilon$ となるようにとると、$|F(x)-F(x_{0})|\le\varepsilon v(B)$。
+
+**Step 2（2）.** $x_{0}$, $r$ を同じにとり、$0<|t|<r$ について、1 変数の平均値の定理から $f(x_{0}+te_{i},y)-f(x_{0},y)=t\,\partial_{x_{i}}f(x_{0}+\theta te_{i},y)$（$\theta=\theta(t,y)\in(0,1)$）。$\partial_{x_{i}}f$ は $\bar B(x_{0},r)\times B$ 上で一様連続なので、$\varepsilon>0$ に $\delta$ があり、$|t|<\delta$ ならすべての $y$ で $|\partial_{x_{i}}f(x_{0}+\theta te_{i},y)-\partial_{x_{i}}f(x_{0},y)|<\varepsilon$。よって
+$$
+\Bigl|\frac{F(x_{0}+te_{i})-F(x_{0})}{t}-\int_{B}\partial_{x_{i}}f(x_{0},y)\,dy\Bigr|\le\varepsilon v(B).
+$$
+右辺の積分は 1 から $x_{0}$ について連続なので、すべての偏導関数が連続なら $F$ は $C^{1}$ 級（\ref{calc:c1-map}）。
+
+::: hypcheck
+- **$B$ のコンパクト性**：一様連続性に使った。$B$ が有界でない場合は、次節の優関数の条件が要る。
+- **$\partial_{x_{i}}f$ の連続性**：Step 2 で、中間点での値を $x_{0}$ での値に置き換えるのに使った。
+- 被積分関数が $(x,y)$ の連続関数なので、積分 $\int_{B}f(x,y)\,dy$ は各 $x$ で存在する（\ref{calc:jordan-measurable-criterion.3}）。
+:::
+:::
+
+::: corollary 積分範囲が動く場合 {#calc:leibniz-rule keywords="Leibniz rule: d/dx int_{a(x)}^{b(x)} f(x,y) dy = f(x,b(x)) b'(x) - f(x,a(x)) a'(x) + int d_x f dy" index="ライプニッツの積分法則|らいぷにっつのせきぶんほうそく"}
+$f$, $\partial_{x}f$ が $(\alpha,\beta)\times[c,d]$ 上で連続、$a,b\colon(\alpha,\beta)\to[c,d]$ が微分可能なら、$\Phi(x)\defeq\int_{a(x)}^{b(x)}f(x,y)\,dy$ は微分可能で
+$$
+\Phi'(x)=f(x,b(x))b'(x)-f(x,a(x))a'(x)+\int_{a(x)}^{b(x)}\partial_{x}f(x,y)\,dy.
+$$
+:::
+
+::: proof
+$G(x,u,v)\defeq\int_{u}^{v}f(x,y)\,dy$ は、微分積分学の基本定理から $\partial_{v}G=f(x,v)$, $\partial_{u}G=-f(x,u)$、\ref{calc:differentiation-under-integral.2}（$[u,v]$ を固定）から $\partial_{x}G=\int_{u}^{v}\partial_{x}f$ で、3 つとも $(x,u,v)$ の連続関数（$\partial_{x}G$ の連続性は、$|\int_{u}^{v}-\int_{u'}^{v'}|\le\max|\partial_{x}f|(|u-u'|+|v-v'|)$ と \ref{calc:differentiation-under-integral.1}）。よって $G$ は $C^{1}$ 級（\ref{calc:continuous-partials-differentiable}）で、$\Phi(x)=G(x,a(x),b(x))$ に連鎖律を使う。
+:::
+
+## 広義重積分 {#calc:sec-pi-improper}
+
+::: definition 広義重積分 {#calc:improper-multiple-integral keywords="improper multiple integral of a nonnegative or absolutely integrable function over an open set, defined via compact Jordan measurable subsets" index="広義重積分|こうぎじゅうせきぶん, 絶対可積分|ぜったいかせきぶん"}
+$\Omega\subset\mathbb{R}^{n}$ を開集合とし、$f\colon\Omega\to\mathbb{R}$ が $\Omega$ に含まれる任意のコンパクトなジョルダン可測集合 $K$ の上で積分可能とする（**局所可積分**）。
+1. $f\ge0$ のとき、$\int_{\Omega}f\defeq\sup\{\int_{K}f:K\subset\Omega\text{ はコンパクトでジョルダン可測}\}\in[0,\infty]$ とし、有限なら**広義積分は収束する**という。
+2. $\int_{\Omega}|f|<\infty$ のとき $f$ は**絶対可積分**であるといい、$f^{\pm}\defeq\max(\pm f,0)$ について $\int_{\Omega}f\defeq\int_{\Omega}f^{+}-\int_{\Omega}f^{-}$ とする（$0\le f^{\pm}\le|f|$ なので両方とも有限）。
+:::
+
+::: lemma 近似列 {#calc:exhaustion keywords="every open set has an increasing exhaustion by compact Jordan measurable sets K_j with K_j in int K_{j+1}; every compact subset lies in some K_j; integrals along any exhaustion converge to the improper integral" index="近似列|きんじれつ, 増加近似列|ぞうかきんじれつ"}
+$\Omega\subset\mathbb{R}^{n}$ を開集合とする。
+1. コンパクトなジョルダン可測集合の列 $K_{1}\subset K_{2}\subset\cdots$ で、$K_{j}\subset\operatorname{int}K_{j+1}$, $\bigcup_{j}K_{j}=\Omega$ を満たすもの（**近似列**）が存在する。
+2. 1 の性質をもつ任意の列について、$\Omega$ に含まれる任意のコンパクト集合はある $K_{j}$ に含まれる。
+3. 局所可積分な $f\ge0$ と任意の近似列について $\int_{K_{j}}f\to\int_{\Omega}f$（$+\infty$ も許す）。$f$ が絶対可積分なら、任意の近似列で $\int_{K_{j}}f\to\int_{\Omega}f$。
+:::
+
+::: proof
+**Step 1（1）.** $K_{j}$ を、格子 $2^{-j}\mathbb{Z}^{n}$ の辺 $2^{-j}$ の閉立方体 $C$ のうち、$C\subset[-j,j]^{n}$ かつ $\operatorname{dist}_{\infty}(C,\mathbb{R}^{n}\setminus\Omega)\ge2^{1-j}$ を満たすものの和とする（$\Omega=\mathbb{R}^{n}$ なら距離の条件は不要）。有限個の立方体の和なのでコンパクトでジョルダン可測。$x\in K_{j}$ なら、格子 $2^{-j-1}\mathbb{Z}^{n}$ の立方体で $x$ から $|\cdot|_{\infty}$ 距離 $2^{-j-1}$ 以内の点を含むものは、$x$ から距離 $2^{-j}$ 以内にあるので、$[-(j+1),j+1]^{n}$ に含まれ、$\mathbb{R}^{n}\setminus\Omega$ からの距離は $2^{1-j}-2^{-j}=2^{1-(j+1)}$ 以上。よってそれらは $K_{j+1}$ に含まれ、その和は $x$ の近傍を含むので $x\in\operatorname{int}K_{j+1}$。$x\in\Omega$ なら $d\defeq\operatorname{dist}_{\infty}(x,\mathbb{R}^{n}\setminus\Omega)>0$（$\Omega$ は開）で、$2^{-j}+2^{1-j}\le d$ かつ $|x|_{\infty}\le j-1$ となる $j$ では $x$ を含む格子の立方体が条件を満たすので $x\in K_{j}$。
+
+**Step 2（2）.** コンパクト集合 $K\subset\Omega$ は開集合の増大列 $\operatorname{int}K_{j+1}$ で覆われるので有限個で覆え、最大の番号の $K_{j+1}$ に含まれる。
+
+**Step 3（3）.** $\int_{K_{j}}f$ は増加で、すべて $\int_{\Omega}f$ 以下。任意のコンパクトなジョルダン可測集合 $K\subset\Omega$ は 2 からある $K_{j}$ に含まれ、$\int_{K}f\le\int_{K_{j}}f$（$f\ge0$）。よって極限は上限 $\int_{\Omega}f$。絶対可積分なら $f^{\pm}$ に適用して差をとる。
+:::
+
+::: example
+1. **平面のガウス積分**：$\int_{\mathbb{R}^{2}}e^{-|x|^{2}}=\pi$。近似列として閉円板 $\bar B(0,j)$ をとれる（コンパクトでジョルダン可測、$\bar B(0,j)\subset B(0,j+1)$）ので、極座標（\ref{calc:gaussian-integral} の Step 1）から $\pi(1-e^{-j^{2}})\to\pi$。
+2. **べき関数**：$\int_{|x|>1}|x|^{-p}\,dx$（$\mathbb{R}^{n}$、$\Omega=\{|x|>1\}$）は $p>n$ のとき、そのときに限り収束する。殻 $S_{k}\defeq\{2^{k}\le|x|\le2^{k+1}\}$ の体積は $(2^{n}-1)2^{nk}V_{n}$（\ref{calc:ball-volume} と拡大）で、その上で $2^{-p(k+1)}\le|x|^{-p}\le2^{-pk}$。$\int_{1+1/j\le|x|\le2^{j}}$ を殻の和で上下から評価すると、$\sum_{k}2^{(n-p)k}$ と同じ収束・発散をする。
+3. **原点の特異性**：$\int_{0<|x|<1}|x|^{-p}\,dx$ は $p<n$ のとき、そのときに限り収束する（同様に殻 $2^{-k-1}\le|x|\le2^{-k}$ で評価）。
+:::
+
+::: counterexample 絶対可積分でないと近似列によって値が変わる例 {#calc:improper-exhaustion-dependence keywords="for a non absolutely integrable function the limit along exhaustions depends on the exhaustion" index="広義重積分の近似列依存性|こうぎじゅうせきぶんのきんじれついぞんせい"}
+$\Omega=(0,1)^{2}$ 上の $f(x,y)=\dfrac{x^{2}-y^{2}}{(x^{2}+y^{2})^{2}}$ は局所可積分だが絶対可積分でなく、近似列 $K_{j}=[\frac1j,1-\frac1j]^{2}$ では $\int_{K_{j}}f=0$ だが、近似列 $K'_{j}=[\frac2j,1-\frac1j]\times[\frac1j,1-\frac1j]$ では $\int_{K'_{j}}f$ は $0$ でない極限をもつ。
+:::
+
+::: proof
+**Step 1（正方形）.** $f(y,x)=-f(x,y)$ で $K_{j}$ は対称なので、$x\leftrightarrow y$ の入れ替え（\ref{calc:linear-volume}、行列式 $-1$）で $\int_{K_{j}}f=-\int_{K_{j}}f$、すなわち $0$。
+
+**Step 2（長方形）.** $K_{j}\setminus K'_{j}=[\frac1j,\frac2j)\times[\frac1j,1-\frac1j]$ なので $\int_{K'_{j}}f=-\int_{\frac1j}^{\frac2j}\int_{1/j}^{1-1/j}f\,dy\,dx$。内側は $\bigl[\frac{y}{x^{2}+y^{2}}\bigr]_{y=1/j}^{1-1/j}$（\ref{calc:fubini-counterexamples.3} の計算）。$x=s/j$ と置くと、$\frac{1/j}{x^{2}+1/j^{2}}=\frac{j}{s^{2}+1}$ で、外側の積分は
+$$
+\int_{1/j}^{2/j}\frac{1/j}{x^{2}+1/j^{2}}dx=\int_{1}^{2}\frac{ds}{s^{2}+1}=\arctan2-\frac\pi4,
+$$
+もう一方の項 $\int_{1/j}^{2/j}\frac{1-1/j}{x^{2}+(1-1/j)^{2}}dx\to0$。よって $\int_{K'_{j}}f\to\arctan2-\frac\pi4\neq0$。
+
+**Step 3（絶対可積分でない）.** 3 の結論（任意の近似列で同じ極限）に反するので、$f$ は絶対可積分でない。
+:::
+
+::: theorem 広義積分の変数変換 {#calc:improper-change-of-variables keywords="change of variables for improper integrals of nonnegative or absolutely integrable continuous functions under a C^1 diffeomorphism of open sets" index="広義積分の変数変換|こうぎせきぶんのへんすうへんかん"}
+$\Omega\subset\mathbb{R}^{n}$ を開集合、$\Phi\colon\Omega\to\mathbb{R}^{n}$ を $C^{1}$ 級の単射で $\det D\Phi\neq0$ とし、$f$ を $\Phi(\Omega)$ 上の連続関数とする。$f\ge0$ なら（$+\infty$ を許して）
+$$
+\int_{\Phi(\Omega)}f=\int_{\Omega}(f\circ\Phi)|\det D\Phi|.
+$$
+とくに、一方が絶対可積分なら他方もそうで、等式が成り立つ。
+:::
+
+::: proof
+$\Phi(\Omega)$ は開（\ref{calc:open-mapping-c1}）で、$\Phi\colon\Omega\to\Phi(\Omega)$ は同相写像（逆は $C^{1}$ 級）。$\Omega$ の近似列 $K_{j}$ について、$\Phi(K_{j})$ はコンパクトなジョルダン可測集合（\ref{calc:change-of-variables} の Step 1）で、$\Phi(K_{j})\subset\Phi(\operatorname{int}K_{j+1})=\operatorname{int}\Phi(K_{j+1})$（同相写像は内部を内部に写す）、$\bigcup\Phi(K_{j})=\Phi(\Omega)$。よって $\Phi(K_{j})$ は $\Phi(\Omega)$ の近似列。\ref{calc:change-of-variables} から $\int_{\Phi(K_{j})}f=\int_{K_{j}}(f\circ\Phi)|\det D\Phi|$ で、\ref{calc:exhaustion.3} から両辺の極限をとる。絶対可積分の場合は $|f|$ と $f^{\pm}$ に適用する。
+:::
+
+## 広義積分と極限・微分の交換 {#calc:sec-pi-dominated}
+
+::: theorem 優関数による交換 {#calc:dominated-parameter-integral keywords="if |f(x,y)| <= g(y) with g improperly integrable, the parameter integral is continuous; if also |d_x f| <= h(y), it can be differentiated under the integral sign; Fubini for such integrals" index="優関数|ゆうかんすう, 一様収束する広義積分|いちようしゅうそくするこうぎせきぶん"}
+$U\subset\mathbb{R}^{n}$ を開集合、$f\colon U\times[c,\infty)\to\mathbb{R}$ を連続とし、$[c,\infty)$ 上の連続関数 $g\ge0$ で $\int_{c}^{\infty}g<\infty$、$|f(x,y)|\le g(y)$（すべての $x,y$）となるものがあるとする。$F(x)\defeq\int_{c}^{\infty}f(x,y)\,dy$（絶対収束、\ref{calc:improper-tests.2}）とおく。
+1. $F$ は連続。
+2. さらに $\partial_{x_{i}}f$ が連続で $|\partial_{x_{i}}f(x,y)|\le h(y)$（$\int_{c}^{\infty}h<\infty$）なら、$\partial_{i}F(x)=\int_{c}^{\infty}\partial_{x_{i}}f(x,y)\,dy$。
+3. $n=1$, $[a,b]\subset U$ なら $\int_{a}^{b}F(x)\,dx=\int_{c}^{\infty}\bigl(\int_{a}^{b}f(x,y)\,dx\bigr)dy$。
+:::
+
+::: proof
+**Step 1（裾の一様評価）.** $\varepsilon>0$ について、$\int_{d}^{\infty}g<\varepsilon$ となる $d>c$ をとる（$\int_{c}^{\infty}g$ の収束）。$F_{d}(x)\defeq\int_{c}^{d}f(x,y)\,dy$ とおくと、すべての $x$ で $|F(x)-F_{d}(x)|\le\int_{d}^{\infty}g<\varepsilon$。
+
+**Step 2（1）.** $F_{d}$ は \ref{calc:differentiation-under-integral.1} から連続。$x_{0}$ で、$|x-x_{0}|<\delta$ なら $|F_{d}(x)-F_{d}(x_{0})|<\varepsilon$ となる $\delta$ をとると $|F(x)-F(x_{0})|<3\varepsilon$。
+
+**Step 3（2）.** $G(x)\defeq\int_{c}^{\infty}\partial_{x_{i}}f(x,y)\,dy$ は 1（$h$ を優関数として）から連続。$|t|$ が小さいとき、$[c,d]$ の上では \ref{calc:differentiation-under-integral} の Step 2、裾では平均値の定理から $\bigl|\frac{f(x+te_{i},y)-f(x,y)}{t}\bigr|\le h(y)$ なので
+$$
+\Bigl|\frac{F(x+te_{i})-F(x)}{t}-G(x)\Bigr|\le\Bigl|\frac{F_{d}(x+te_{i})-F_{d}(x)}{t}-\int_{c}^{d}\partial_{x_{i}}f\,dy\Bigr|+2\int_{d}^{\infty}h,
+$$
+第 1 項は $t\to0$ で $0$（\ref{calc:differentiation-under-integral.2}）、第 2 項は $d$ を大きくとれば小さい（$h$ についての Step 1）。
+
+**Step 4（3）.** $[a,b]\times[c,d]$ 上ではフビニの定理（\ref{calc:fubini-continuous}）から $\int_{a}^{b}F_{d}=\int_{c}^{d}\int_{a}^{b}f\,dx\,dy$。$d\to\infty$ で、左辺は Step 1 から $\int_{a}^{b}F$ との差が $(b-a)\varepsilon$ 以下、右辺は $|\int_{a}^{b}f\,dx|\le(b-a)g(y)$ なので広義積分として収束する（\ref{calc:improper-tests.2}）。
+
+::: hypcheck
+- **優関数 $g$**：Step 1 で、裾が $x$ によらず一様に小さいことに使った。外すと偽：$f(x,y)=|x|e^{-|x|y}$（$U=\mathbb{R}$, $y\ge0$）は連続で $F(x)=1$（$x\neq0$）、$F(0)=0$ で、$F$ は $0$ で連続でない（$x$ が小さいと質量が遠くへ逃げる）。
+- **$U$ が開**：偏微分に使った。
+:::
+:::
+
+::: example
+$F(x)\defeq\int_{0}^{\infty}e^{-y^{2}}\cos(xy)\,dy$ とおくと $F(x)=\frac{\sqrt\pi}{2}e^{-x^{2}/4}$。実際、$|e^{-y^{2}}\cos(xy)|\le e^{-y^{2}}$、$|\partial_{x}(\cdots)|=|ye^{-y^{2}}\sin(xy)|\le ye^{-y^{2}}$ はともに可積分なので、2 から $F'(x)=-\int_{0}^{\infty}ye^{-y^{2}}\sin(xy)\,dy$。部分積分（$ye^{-y^{2}}=-\frac12(e^{-y^{2}})'$、境界項は $0$）で $F'(x)=-\frac x2F(x)$。よって $(F(x)e^{x^{2}/4})'=0$ で、$F(0)=\frac{\sqrt\pi}{2}$（\ref{calc:gaussian-integral}）。
+:::
+
+::: supplement
+**一般化.** 優関数による交換は、ルベーグ積分の**優収束定理**の特別な場合で、ルベーグ積分では $f$ の連続性を可測性に、近似列を任意の極限に弱められる（\ref[測度論]{meas:lebesgue-measure} で扱う予定）。多変数の広義積分では、条件収束する積分は近似列の取り方に依存するので（\ref{calc:improper-exhaustion-dependence}）、絶対可積分性を基本にするのが自然で、これはルベーグ積分の「可積分 $=$ 絶対可積分」と整合する。
+
+**高い視点.** 広義積分の定義は「コンパクトなジョルダン可測集合の上の積分の、包含関係についての極限（上限）」で、これは有向集合に沿った極限（ネットの極限）である。非負関数や絶対可積分関数では、この極限が近似列の取り方によらないことが、可算列で計算してよい根拠になる。比喩で言えば、無限に広い土地の面積を、だんだん広げていく囲い（近似列）で測るとき、土地に「負の面積」がなければ（非負）囲いの広げ方によらず同じ値に近づくが、正と負が打ち消し合う土地（条件収束）では、どちらの方向から先に広げるかで結果が変わる。
+:::
+
+## 問題 {#calc:sec-pi-problems}
+
+::: problem {#calc:prob-pi-moments}
+$t>0$ について $\int_{0}^{\infty}y^{k}e^{-ty}\,dy=\frac{k!}{t^{k+1}}$ を、$\int_{0}^{\infty}e^{-ty}dy=\frac1t$ を $t$ で $k$ 回微分して示せ（優関数を明示せよ）。
+:::
+
+::: solution
+$t\ge t_{0}>0$ の範囲で $|\partial_{t}^{j}e^{-ty}|=y^{j}e^{-ty}\le y^{j}e^{-t_{0}y}$ は $[0,\infty)$ で可積分（$y^{j}e^{-t_{0}y/2}$ は有界なので $y^{j}e^{-t_{0}y}\le Ce^{-t_{0}y/2}$）。\ref{calc:dominated-parameter-integral.2} を $U=(t_{0},\infty)$ で $k$ 回使い、$\frac{d^{k}}{dt^{k}}\frac1t=\frac{(-1)^{k}k!}{t^{k+1}}$ と比べる。
+:::
+
+::: problem {#calc:prob-pi-beta-via-gamma}
+$\Gamma(a)\Gamma(b)=\int_{(0,\infty)^{2}}x^{a-1}y^{b-1}e^{-x-y}\,dx\,dy$ に $x=uv$, $y=u(1-v)$（$u>0$, $0<v<1$）を代入して、$B(a,b)=\frac{\Gamma(a)\Gamma(b)}{\Gamma(a+b)}$ を導け。
+:::
+
+::: solution
+$\Phi(u,v)=(uv,u(1-v))$ は $(0,\infty)\times(0,1)$ から $(0,\infty)^{2}$ への $C^{1}$ 級の全単射で、$\det D\Phi=\det\begin{pmatrix}v&u\\1-v&-u\end{pmatrix}=-u$。被積分関数は非負で連続なので、\ref{calc:improper-change-of-variables} から
+$$
+\Gamma(a)\Gamma(b)=\int_{0}^{\infty}\int_{0}^{1}u^{a+b-1}v^{a-1}(1-v)^{b-1}e^{-u}\,dv\,du=\Gamma(a+b)B(a,b)
+$$
+（左辺の重積分が $\Gamma(a)\Gamma(b)$ に等しいこと、右辺が累次積分に等しいことは、近似列として直方体をとり、フビニの定理を使って極限をとる）。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{calc:sec-pi-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

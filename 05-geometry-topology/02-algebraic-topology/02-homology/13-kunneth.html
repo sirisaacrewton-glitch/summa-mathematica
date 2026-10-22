@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>キュネットの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/02-algebraic-topology/02-homology/13-kunneth.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# キュネットの定理 {#at:page-kunneth keywords="tensor product of chain complexes, acyclic models theorem, free functor with models, Eilenberg-Zilber theorem, S(X x Y) chain homotopy equivalent to S(X) (x) S(Y), algebraic Kunneth theorem, cross product, Kunneth formula for singular homology, homology of products of spheres, torus T^n, field coefficients, Euler characteristic of products"}
+
+積空間 $X\times Y$ のホモロジーは、$X$ と $Y$ のホモロジーのテンソル積（と Tor の補正項）で決まる。これが**キュネットの定理**である。証明は二段に分かれる：位相的な部分は特異鎖複体の同値 $S(X\times Y)\simeq S(X)\otimes S(Y)$（**アイレンバーグ–ジルバーの定理**）で、これを**非輪状モデルの方法**で示す。代数的な部分は自由鎖複体のテンソル積のホモロジーの計算（**代数的キュネット定理**）で、普遍係数定理（\ref{at:algebraic-uct}）と同じ議論である。非輪状モデルの議論ではモデルの上で「境界の原像」を選ぶ必要があるが、モデルが凸集合なので錐を使って原像を明示的に与えることができ、アイレンバーグ–ジルバーの定理は選択公理なしで成り立つ。
+
+> 資料：標準的な内容（Massey『Singular Homology Theory』の積の章、Fulton『Algebraic Topology』など）。非輪状モデルの定理の証明は自分で書き下ろした。
+
+## 記法と定義の確認 {#at:sec-ku-notation}
+
+::: notation
+- 特異鎖複体と添加写像 \ref{at:singular-homology}、ホモトピー不変性 \tref{at:singular-homotopy-invariance}。普遍係数定理の代数的な形 \ref{at:algebraic-uct}。
+- テンソル積の右完全性 \ref{ha:tensor-right-exact}、Tor \ref{ha:tor}, \ref{ha:tor-basic}（$\mathrm{Tor}^{R}_{1}(M,N)$ は第 2 変数 $N$ の射影分解を $M\otimes_{R}-$ で写したもののホモロジー）。鎖ホモトピー \ref{ha:chain-homotopy}, \ref{ha:homotopy-invariance}、長完全列とその自然性 \ref{ha:long-exact-sequence}。
+- **添加鎖複体**：次数 $\ge-1$ の鎖複体で $F_{-1}=\mathbb{Z}$, $\partial_{0}=\varepsilon$ としたもの。添加鎖写像は次数 $-1$ で恒等。添加鎖複体 $F$ の**縮約**とは、$s_{n}\colon F_{n}\to F_{n+1}$（$n\ge-1$）で、すべての $n\ge-1$ で $\partial s+s\partial=1$ を満たすものをいう（$n=-1$ では $\partial_{0}s_{-1}=1$）。縮約があれば $F$ は完全（\ref{ha:homotopy-invariance}）。
+- 添加鎖複体 $F$ について、次数 $\ge0$ の部分（$\partial_{0}$ を $0$ に取り替えたもの）を $F^{+}$ と書く。$S(X)^{+}=S(X)$ は通常の特異鎖複体。
+- **選択公理**：非輪状モデルの定理は、モデルの上で境界の原像を選ぶので一般には選択公理（実際には従属選択）を使うが、モデルの上の縮約が与えられていれば選択を使わない。アイレンバーグ–ジルバーの定理では、凸集合の錐によって縮約を明示的に与えるので、**選択公理を使わない**。代数的キュネット定理では、自由加群の部分加群が自由であること（無限生成のときに選択公理を使う、\ref{at:algebraic-uct} と同じ）を使う。
+:::
+
+## 鎖複体のテンソル積 {#at:sec-ku-tensor}
+
+::: definition 鎖複体のテンソル積 {#at:tensor-chain-complexes keywords="tensor product of chain complexes with Koszul sign rule" index="鎖複体のテンソル積|さふくたいのてんそるせき"}
+$R$ を可換環、$C,D$ を $R$ 加群の鎖複体（次数 $\ge0$）とする。$(C\otimes D)_{n}\defeq\bigoplus_{p+q=n}C_{p}\otimes_{R}D_{q}$、$\partial(a\otimes b)\defeq\partial a\otimes b+(-1)^{p}a\otimes\partial b$（$a\in C_{p}$）とする。
+$$
+\partial\partial(a\otimes b)=\partial\partial a\otimes b+(-1)^{p-1}\partial a\otimes\partial b+(-1)^{p}\partial a\otimes\partial b+a\otimes\partial\partial b=0.
+$$
+添加鎖複体 $C,D$ については、$C^{+}\otimes D^{+}$ に次数 $-1$ の $\mathbb{Z}$ と $\varepsilon(a\otimes b)\defeq\varepsilon(a)\varepsilon(b)$（$a,b$ が次数 $0$ のとき。それ以外は $0$）を付けた添加鎖複体を $C\otimes D$ と書く（$\varepsilon\partial=0$ は、次数 $1$ の元 $a\otimes b$ で $\varepsilon\partial a=0$, $\varepsilon\partial b=0$ から）。
+:::
+
+::: lemma テンソル積の縮約 {#at:tensor-contraction keywords="if augmented chain complexes C, D have contractions s, s', then s (x) 1 + eta epsilon (x) s' with s_{-1}(1) = eta (x) eta' is a contraction of the augmented tensor product" index="テンソル積の縮約|てんそるせきのしゅくやく"}
+添加鎖複体 $C,D$（$\mathbb{Z}$ 上）に縮約 $s,s'$ があるとする。$\eta\defeq s_{-1}(1)\in C_{0}$, $\eta'\defeq s'_{-1}(1)\in D_{0}$ とし、$C\otimes D$ の上の $\sigma$ を
+$$
+\sigma_{-1}(1)\defeq\eta\otimes\eta',\qquad \sigma(a\otimes b)\defeq s(a)\otimes b+\varepsilon(a)\,\eta\otimes s'(b)
+$$
+（$a\in C_{p}$, $b\in D_{q}$, $p,q\ge0$。$\varepsilon(a)$ は $p=0$ のときの添加写像の値で、$p>0$ では $0$ とおく）で定めると、$\sigma$ は $C\otimes D$ の縮約である。
+:::
+
+::: proof
+**Step 1（$C^{+}$ の上のホモトピー）.** $C^{+}$ の微分を $\partial^{+}$（次数 $0$ で $0$）、$\phi\defeq\eta\varepsilon\colon C^{+}\to C^{+}$（次数 $0$ で $a\mapsto\varepsilon(a)\eta$、それ以外で $0$）とする。縮約の式を次数 $0$ で書くと $\partial s(a)+s_{-1}\varepsilon(a)=a$、すなわち $\partial^{+}s(a)=a-\phi(a)$。次数 $p\ge1$ では $\partial s+s\partial^{+}=1$ で $\phi=0$。よって $C^{+}$ の上で $\partial^{+}s+s\partial^{+}=1-\phi$。$\phi$ は鎖写像（$\phi\partial^{+}$ は次数 $1$ で $\varepsilon\partial=0$、$\partial^{+}\phi=0$）。$D$ についても同様に $\partial^{+}s'+s'\partial^{+}=1-\phi'$。
+
+**Step 2（$C^{+}\otimes D^{+}$ の上の計算）.** $a\in C_{p}$, $b\in D_{q}$ とし、$H(a\otimes b)\defeq s(a)\otimes b+\phi(a)\otimes s'(b)$ とおく（$\sigma$ の次数 $\ge0$ の部分）。第 1 項について
+$$
+\begin{aligned}
+&\partial(sa\otimes b)+(s\otimes1)\bigl(\partial^{+}a\otimes b+(-1)^{p}a\otimes\partial^{+}b\bigr)\\
+&=\partial^{+}sa\otimes b+(-1)^{p+1}sa\otimes\partial^{+}b+s\partial^{+}a\otimes b+(-1)^{p}sa\otimes\partial^{+}b=(a-\phi a)\otimes b.
+\end{aligned}
+$$
+第 2 項（$p=0$ のときだけ $0$ でない）について、$\phi a$ は次数 $0$ なので $\partial(\phi a\otimes s'b)=\phi a\otimes\partial^{+}s'b$。また $\phi(\partial^{+}a)=0$（$p=0$ なら $\partial^{+}a=0$、$p=1$ なら $\varepsilon\partial a=0$）なので、$\partial(a\otimes b)$ の第 2 項への寄与は $\phi a\otimes s'\partial^{+}b$ だけ。和は $\phi a\otimes(\partial^{+}s'+s'\partial^{+})b=\phi a\otimes(b-\phi'b)$。両者を足して
+$$
+\partial H+H\partial=1-\phi\otimes\phi'\quad(C^{+}\otimes D^{+}\text{ の上}).
+$$
+
+**Step 3（添加）.** 次数 $n\ge1$ では添加は関係しないので Step 2 が $\partial\sigma+\sigma\partial=1$。次数 $0$ では、添加鎖複体の微分 $\partial_{0}=\varepsilon\otimes\varepsilon$ を使って $\partial\sigma_{0}+\sigma_{-1}\partial_{0}=(1-\phi\otimes\phi')+\eta\otimes\eta'\cdot\varepsilon(a)\varepsilon(b)=1$（$C^{+}\otimes D^{+}$ の次数 $0$ の微分は $0$ なので Step 2 の左辺は $\partial H$ だけ）。次数 $-1$ では $\partial_{0}\sigma_{-1}(1)=\varepsilon(\eta)\varepsilon(\eta')=1$（$\varepsilon(\eta)=\partial s_{-1}(1)=1$）。
+:::
+
+::: lemma 凸集合の錐による縮約 {#at:convex-cone-contraction keywords="cone construction on singular chains of a convex set gives an explicit contraction of the augmented singular chain complex" index="凸集合の錐|とつしゅうごうのすい"}
+$Y\subset\mathbb{R}^{N}$ を凸集合、$b\in Y$ とする。特異単体 $\sigma\colon\Delta^{n}\to Y$ について $b\sigma\colon\Delta^{n+1}\to Y$ を
+$$
+(b\sigma)(t_{0},\dots,t_{n+1})\defeq\begin{cases}t_{0}b+(1-t_{0})\,\sigma\Bigl(\dfrac{t_{1}}{1-t_{0}},\dots,\dfrac{t_{n+1}}{1-t_{0}}\Bigr)&(t_{0}<1)\\ b&(t_{0}=1)\end{cases}
+$$
+で定め、$s(\sigma)\defeq b\sigma$、$s_{-1}(1)\defeq b$（点 $b$ の特異 0 単体）とおくと、$s$ は添加鎖複体 $S(Y)$ の縮約である。
+:::
+
+::: proof
+**Step 1（連続性）.** $t_{0}<1$ では連続な写像の合成で、値は凸性から $Y$ に入る。$t_{0}\to1$ のとき、$\sigma(\Delta^{n})$ はコンパクトなので $R\defeq\max|\sigma-b|<\infty$ で、$|(b\sigma)(t)-b|=(1-t_{0})|\sigma(\cdots)-b|\le(1-t_{0})R\to0$。
+
+**Step 2（面）.** $\delta^{0}$ の面（$t_{0}=0$）では $(b\sigma)\circ\delta^{0}=\sigma$。$1\le i\le n+1$ では、$(b\sigma)\circ\delta^{i}$ は $t_{i}=0$ を代入したもので、$(t_{1},\dots,t_{n+1})/(1-t_{0})$ の $i$ 番目が $0$ になるので $(b\sigma)\circ\delta^{i}=b(\sigma\circ\delta^{i-1})$（$n\ge1$）。$n=0$, $i=1$ では $(b\sigma)\circ\delta^{1}$ は $t_{1}=0$, $t_{0}=1$ の点、すなわち $b$。
+
+**Step 3（縮約の式）.** $n\ge1$：
+$$
+\partial(b\sigma)=\sigma+\sum_{i=1}^{n+1}(-1)^{i}b(\sigma\circ\delta^{i-1})=\sigma-b\,\partial\sigma.
+$$
+$n=0$：$\partial(b\sigma)=\sigma-b$ で、$s_{-1}\varepsilon(\sigma)=b$ なので $\partial s\sigma+s\partial\sigma=\sigma$。$n=-1$：$\varepsilon(s_{-1}1)=\varepsilon(b)=1$。線形に延ばす。
+:::
+
+## 非輪状モデル {#at:sec-ku-acyclic-models}
+
+::: definition 自由関手と非輪状性 {#at:free-on-models keywords="functor to augmented chain complexes free on models, acyclic on models" index="モデル上自由|もでるじょうじゆう, モデル上非輪状|もでるじょうひりんじょう, 非輪状モデル|ひりんじょうもでる"}
+圏 $\mathcal{C}$ から添加鎖複体の圏への関手 $F$ について、
+1. $F$ が**モデル上自由**であるとは、各 $n\ge0$ に対象の集合 $\mathcal{M}_{n}$ と元 $m_{M}\in F_{n}(M)$（$M\in\mathcal{M}_{n}$）があって、任意の対象 $X$ について $\{F_{n}(f)(m_{M}):M\in\mathcal{M}_{n},\ f\in\mathcal{C}(M,X)\}$ が $F_{n}(X)$ の基底（異なる $(M,f)$ は異なる基底元）となることをいう。
+2. 関手 $G$ が**モデル $\mathcal{M}=\bigcup_{n}\mathcal{M}_{n}$ の上で非輪状**であるとは、すべての $M\in\mathcal{M}$ で添加鎖複体 $G(M)$ が完全（$\tilde H_{*}(G(M))=0$）であることをいう。各 $M$ に $G(M)$ の縮約 $s_{M}$ が指定されているとき、**モデルの上で縮約付き**という。
+:::
+
+::: theorem 非輪状モデルの定理 {#at:acyclic-models keywords="acyclic models theorem: natural augmented chain maps from a free functor to a functor acyclic on the models exist and are unique up to natural chain homotopy" index="非輪状モデルの定理|ひりんじょうもでるのていり" refname="非輪状モデルの定理"}
+$F$ がモデル $\mathcal{M}$ 上自由で、$G$ が $\mathcal{M}$ の上で非輪状なら、
+1. 自然な添加鎖写像 $\tau\colon F\to G$ が存在し、
+2. 任意の 2 つの自然な添加鎖写像 $\tau,\tau'\colon F\to G$ は自然な鎖ホモトピーで結ばれる（$\partial D+D\partial=\tau-\tau'$、$D_{-1}=0$）。
+
+$G$ がモデルの上で縮約付きなら、1 の $\tau$ と 2 の $D$ は選択を使わずに構成できる。
+:::
+
+::: proof
+**Step 0（原像の取り方）.** 各 $M\in\mathcal{M}$ と、$G(M)$ の境界 $c$ について、$\partial g=c$ となる $g$ を 1 つ指定する規則 $c\mapsto\lambda_{M}(c)$ を固定する（一般には選択公理で。縮約付きなら $\lambda_{M}(c)\defeq s_{M}(c)$ とすれば、$c$ がサイクルなら $\partial s_{M}c=c-s_{M}\partial c=c$）。$G(M)$ は完全なので、サイクルはすべて境界である。
+
+**Step 1（存在）.** $\tau_{-1}\defeq1$ とし、$n\ge0$ で $\tau_{k}$（$k<n$）が自然で $\partial\tau_{k}=\tau_{k-1}\partial$ を満たすとする。$M\in\mathcal{M}_{n}$ について $c\defeq\tau_{n-1}(\partial m_{M})\in G_{n-1}(M)$ は $\partial c=\tau_{n-2}\partial\partial m_{M}=0$ を満たすサイクル（$n=0$ では $c=\varepsilon(m_{M})\in\mathbb{Z}=G_{-1}$ で、次数 $-1$ の元はすべてサイクル）。$g_{M}\defeq\lambda_{M}(c)$ とおき、基底元について $\tau_{n}(F_{n}(f)m_{M})\defeq G_{n}(f)g_{M}$ と定め、線形に延ばす（基底の表示は一意なので well-defined）。
+
+**Step 2（自然性と鎖写像）.** $h\colon X\to X'$ について
+$$
+\tau_{n}F_{n}(h)(F_{n}(f)m_{M})=\tau_{n}(F_{n}(hf)m_{M})=G_{n}(hf)g_{M}=G_{n}(h)\tau_{n}(F_{n}(f)m_{M}).
+$$
+また、$\tau_{n-1}$ の自然性と $F(f)$ が鎖写像であることから
+$$
+\begin{aligned}
+\partial\tau_{n}(F_{n}(f)m_{M})&=G_{n-1}(f)\partial g_{M}=G_{n-1}(f)\tau_{n-1}(\partial m_{M})\\
+&=\tau_{n-1}(F_{n-1}(f)\partial m_{M})=\tau_{n-1}\partial(F_{n}(f)m_{M}).
+\end{aligned}
+$$
+
+**Step 3（一意性）.** $D_{k}$（$k<n$）が自然で $\partial D_{k}+D_{k-1}\partial=\tau_{k}-\tau'_{k}$ を満たすとする（$D_{-1}=0$。次数 $-1$ では $\tau=\tau'=1$）。$M\in\mathcal{M}_{n}$ について $c\defeq\tau_{n}m_{M}-\tau'_{n}m_{M}-D_{n-1}\partial m_{M}$ とおくと
+$$
+\partial c=(\tau_{n-1}-\tau'_{n-1})\partial m_{M}-\partial D_{n-1}\partial m_{M}=D_{n-2}\partial\partial m_{M}=0
+$$
+（$n=0$ では $\partial c=\varepsilon\tau_{0}m-\varepsilon\tau'_{0}m=\varepsilon m-\varepsilon m=0$）。$d_{M}\defeq\lambda_{M}(c)$ とし、$D_{n}(F_{n}(f)m_{M})\defeq G_{n+1}(f)d_{M}$ と定める。Step 2 と同じ計算で $D_{n}$ は自然。基底元 $x=F_{n}(f)m_{M}$ で、$D_{n-1}$ の自然性から
+$$
+\partial D_{n}x+D_{n-1}\partial x=G_{n}(f)c+G_{n}(f)D_{n-1}\partial m_{M}=G_{n}(f)(\tau_{n}-\tau'_{n})m_{M}=(\tau_{n}-\tau'_{n})x.
+$$
+
+::: hypcheck
+- **$F$ の自由性**：Step 1・3 で、モデルの上で値を決めれば自然に延びること（基底の一意性）に使った。
+- **$G$ の非輪状性**：Step 0 で、サイクルが境界であることに使った。モデルの上でだけ必要で、一般の $X$ では $G(X)$ は非輪状でなくてよい。
+- **選択**：Step 0 の $\lambda_{M}$ だけ。縮約付きなら不要。
+:::
+:::
+
+## アイレンバーグ–ジルバーの定理 {#at:sec-ku-ez}
+
+::: theorem アイレンバーグ–ジルバーの定理 {#at:eilenberg-zilber keywords="Eilenberg-Zilber theorem: natural chain homotopy equivalence S(X x Y) ~ S(X) (x) S(Y)" index="アイレンバーグ–ジルバーの定理|あいれんばーぐじるばーのていり" refname="アイレンバーグ–ジルバーの定理"}
+空間 $X,Y$ について自然な鎖写像 $\theta\colon S(X\times Y)\to S(X)\otimes S(Y)$, $\psi\colon S(X)\otimes S(Y)\to S(X\times Y)$ があり、$\psi\theta\simeq1$, $\theta\psi\simeq1$（自然な鎖ホモトピー）。次数 $0$ では $\theta(x,y)=x\otimes y$, $\psi(x\otimes y)=(x,y)$。構成に選択公理を使わない。
+:::
+
+::: proof
+**Step 1（関手とモデル）.** $\mathcal{C}=\mathbf{Top}\times\mathbf{Top}$ とし、$F(X,Y)\defeq S(X\times Y)$, $G(X,Y)\defeq S(X)\otimes S(Y)$（ともに添加付き）とする。
+- $F$ はモデル $\mathcal{M}^{F}_{n}=\{(\Delta^{n},\Delta^{n})\}$、元 $m=(\iota_{n},\iota_{n})$（対角写像 $\Delta^{n}\to\Delta^{n}\times\Delta^{n}$）の上で自由：特異単体 $\sigma=(\sigma_{1},\sigma_{2})\colon\Delta^{n}\to X\times Y$ は $F(\sigma_{1},\sigma_{2})(m)=(\sigma_{1}\times\sigma_{2})\circ m$ とただ一通りに書ける（$\sigma_{1},\sigma_{2}$ は $\sigma$ の成分として決まる）。
+- $G$ はモデル $\mathcal{M}^{G}_{n}=\{(\Delta^{p},\Delta^{q}):p+q=n\}$、元 $\iota_{p}\otimes\iota_{q}$ の上で自由：$G_{n}(X,Y)$ は $\sigma\otimes\tau$（$\sigma\in\operatorname{Sing}_{p}(X)$, $\tau\in\operatorname{Sing}_{q}(Y)$）を基底とする自由アーベル群（自由加群のテンソル積の基底）で、$\sigma\otimes\tau=G(\sigma,\tau)(\iota_{p}\otimes\iota_{q})$ とただ一通りに書ける。
+
+**Step 2（モデルの上の縮約）.** $\Delta^{p}\times\Delta^{q}\subset\mathbb{R}^{p+1}\times\mathbb{R}^{q+1}$ は凸なので、\ref{at:convex-cone-contraction}（$b$ として重心の対をとる）で $F(\Delta^{p},\Delta^{q})$ に縮約が与えられる。$S(\Delta^{p})$, $S(\Delta^{q})$ にも同じ補題で縮約が与えられ、\ref{at:tensor-contraction} で $G(\Delta^{p},\Delta^{q})$ に縮約が与えられる。よって $F$, $G$ はどちらも $\mathcal{M}^{F}\cup\mathcal{M}^{G}$ の上で縮約付き（とくに非輪状）。
+
+**Step 3（同値）.** \ref{at:acyclic-models.1}（$F$ は $\mathcal{M}^{F}$ 上自由、$G$ は $\mathcal{M}^{F}$ の上で縮約付き）で自然な添加鎖写像 $\theta\colon F\to G$ を、同様に $\psi\colon G\to F$ を作る。$\psi\theta$ と $1_{F}$ はともに $F\to F$ の自然な添加鎖写像で、$F$ は $\mathcal{M}^{F}$ の上で縮約付きなので、2 から自然な鎖ホモトピー $D$ で結ばれる。同様に $\theta\psi\simeq1_{G}$。添加を外すと：次数 $n\ge1$ の関係式はそのまま、次数 $0$ の関係式 $\partial D_{0}+D_{-1}\varepsilon=\psi\theta-1$ は $D_{-1}=0$ から $\partial D_{0}=\psi\theta-1$ となり、これは $F^{+}$ の上の鎖ホモトピーの次数 $0$ の式。よって $S(X\times Y)\simeq S(X)\otimes S(Y)$（通常の鎖複体として）。
+
+**Step 4（次数 $0$）.** モデル $(\Delta^{0},\Delta^{0})$ の上で、$G_{0}(\Delta^{0},\Delta^{0})=\mathbb{Z}(e_{0}\otimes e_{0})$ で、添加鎖写像は $\varepsilon\theta_{0}(m)=\varepsilon(m)=1$ を満たすので $\theta_{0}(m)=e_{0}\otimes e_{0}$。自然性から $\theta_{0}(x,y)=x\otimes y$。$\psi_{0}$ も同様。
+
+::: hypcheck
+- **モデルが凸集合（の積）であること**：Step 2 で、縮約を錐で明示的に与えるのに使った。これにより選択公理を使わない。
+- 一般の空間 $X,Y$ には何の仮定も要らない：非輪状性はモデルの上でだけ使う。
+:::
+:::
+
+## キュネットの定理 {#at:sec-ku-kunneth}
+
+::: lemma テンソル積のホモロジー（代数的キュネット） {#at:algebraic-kunneth keywords="algebraic Kunneth theorem over a PID: for a complex C of free modules, 0 -> sum H_p(C) (x) H_q(D) -> H_n(C (x) D) -> sum Tor(H_q(D), H_{p}(C)) -> 0, natural, split (non-naturally) if D is free" index="代数的キュネット定理|だいすうてききゅねっとていり"}
+$R$ を PID、$C$ を自由 $R$ 加群の鎖複体、$D$ を $R$ 加群の鎖複体とする（次数 $\ge0$）。自然な短完全列
+$$
+0\to\bigoplus_{p+q=n}H_{p}(C)\otimes_{R}H_{q}(D)\xrightarrow{\mu}H_{n}(C\otimes_{R}D)\to\bigoplus_{p+q=n-1}\mathrm{Tor}^{R}_{1}(H_{q}(D),H_{p}(C))\to0
+$$
+がある（$\mu([z]\otimes[w])=[z\otimes w]$）。$D$ も自由なら分裂する（分裂は自然ではない）。
+:::
+
+::: proof
+以下 $\otimes=\otimes_{R}$。
+
+**Step 1（短完全列）.** $Z_{p}\defeq\ker\partial_{p}$, $B_{p}\defeq\operatorname{im}\partial_{p+1}\subset Z_{p}$。$B_{p-1}$ は自由加群 $C_{p-1}$ の部分加群なので自由（PID、\ref{at:algebraic-uct} の Step 1 と同じ）で、$0\to Z_{p}\to C_{p}\xrightarrow{\partial}B_{p-1}\to0$ は分裂する。微分 $0$ の鎖複体 $Z$ と $\bar B$（$\bar B_{p}\defeq B_{p-1}$）を考えると、包含 $Z\to C$ と $\partial\colon C\to\bar B$ は鎖写像（$\partial\partial=0$）で、$0\to Z\to C\to\bar B\to0$ は各次数で分裂する短完全列。
+
+**Step 2（$\otimes D$）.** 各次数で分裂しているので、$0\to Z\otimes D\to C\otimes D\to\bar B\otimes D\to0$ も各次数で（分裂）完全。写像は鎖写像：$c\otimes d\mapsto\partial c\otimes d$ について、$\partial(c\otimes d)=\partial c\otimes d+(-1)^{p}c\otimes\partial d\mapsto(-1)^{p}\partial c\otimes\partial d$ で、$\bar B\otimes D$ の微分で $\partial c\otimes d$（$\partial c\in\bar B_{p}$）を写したものも $(-1)^{p}\partial c\otimes\partial d$。
+
+**Step 3（両端のホモロジー）.** $Z\otimes D=\bigoplus_{p}Z_{p}\otimes D$（$Z_{p}$ は次数 $p$ に置く）で、微分は $\pm1\otimes\partial$。$Z_{p}$ は自由なので $Z_{p}\otimes-$ は完全関手（自由加群とのテンソル積は直和のコピー）で、ホモロジーと可換。符号は核と像を変えない。よって $z\otimes[w]\mapsto[z\otimes w]$ は同型 $\bigoplus_{p+q=n}Z_{p}\otimes H_{q}(D)\cong H_{n}(Z\otimes D)$。同様に $H_{n}(\bar B\otimes D)\cong\bigoplus_{p+q=n}B_{p-1}\otimes H_{q}(D)$。
+
+**Step 4（連結射）.** 長完全列（\ref{ha:long-exact-sequence}）の連結射 $\delta\colon H_{n}(\bar B\otimes D)\to H_{n-1}(Z\otimes D)$ を生成元 $b\otimes[w]$（$b\in B_{p-1}$, $w\in D_{q}$ はサイクル）で計算する。$b=\partial c$（$c\in C_{p}$）とすると、$c\otimes w$ は $b\otimes w$ の持ち上げで、$\partial(c\otimes w)=b\otimes w+(-1)^{p}c\otimes\partial w=b\otimes w\in Z_{p-1}\otimes D_{q}$。よって $\delta(b\otimes[w])=i(b)\otimes[w]$（$i\colon B_{p-1}\to Z_{p-1}$ は包含）。$\delta$ と $i\otimes1$ はともに加法的で生成元で一致するので、$\delta=\bigoplus(i_{p-1}\otimes1_{H_{q}(D)})$。
+
+**Step 5（短完全列）.** 長完全列 $H_{n+1}(\bar B\otimes D)\xrightarrow{\delta}H_{n}(Z\otimes D)\to H_{n}(C\otimes D)\to H_{n}(\bar B\otimes D)\xrightarrow{\delta}H_{n-1}(Z\otimes D)$ から
+$$
+0\to\operatorname{coker}\delta_{n+1}\to H_{n}(C\otimes D)\to\ker\delta_{n}\to0.
+$$
+$\operatorname{coker}\delta_{n+1}=\bigoplus_{p+q=n}\operatorname{coker}(i_{p}\otimes1\colon B_{p}\otimes H_{q}(D)\to Z_{p}\otimes H_{q}(D))$。$0\to B_{p}\to Z_{p}\to H_{p}(C)\to0$ に右完全性（\ref{ha:tensor-right-exact}、$M\otimes N\cong N\otimes M$ で左右を入れ替える）を使うと、これは $H_{p}(C)\otimes H_{q}(D)$ で、写像は $[z]\otimes[w]\mapsto[z\otimes w]$。$\ker\delta_{n}=\bigoplus_{p+q=n-1}\ker(i_{p}\otimes1)$。$0\to B_{p}\to Z_{p}$ は $H_{p}(C)$ の自由（とくに射影）分解なので、Tor の定義（\ref{ha:tor}）から $\ker(H_{q}(D)\otimes B_{p}\to H_{q}(D)\otimes Z_{p})=\mathrm{Tor}^{R}_{1}(H_{q}(D),H_{p}(C))$。
+
+**Step 6（自然性）.** 鎖写像 $f\colon C\to C'$（$C'$ も自由）と $g\colon D\to D'$ は、$Z\to Z'$, $\bar B\to\bar B'$ を誘導し、Step 1・2 の短完全列どうしの写像を与える。長完全列の自然性（\ref{ha:long-exact-sequence}）と、分解 $B_{p}\to Z_{p}$ から $B'_{p}\to Z'_{p}$ への写像が $H_{p}(f)$ の持ち上げであること（Tor の自然性は分解の比較による）から、短完全列は自然。
+
+**Step 7（分裂）.** $D$ も自由とする。Step 1 の分裂から射影 $r_{C}\colon C_{p}\to Z_{p}$（$Z_{p}$ の上で恒等）、同様に $r_{D}\colon D_{q}\to Z_{q}(D)$ をとり、$\pi_{C}\colon Z_{p}\to H_{p}(C)$ などを商写像として $\Pi\defeq(\pi_{C}r_{C})\otimes(\pi_{D}r_{D})\colon C\otimes D\to\bigoplus H_{p}(C)\otimes H_{q}(D)$ とおく。境界 $\partial a\otimes b\pm a\otimes\partial b$ について、$\partial a\in B\subset Z$ なので $\pi_{C}r_{C}\partial a=\pi_{C}\partial a=0$、同様に第 2 項も $0$。よって $\Pi$ はサイクルの上で境界を $0$ に送り、$H_{n}(C\otimes D)\to\bigoplus H_{p}(C)\otimes H_{q}(D)$ を誘導する。$\Pi\mu([z]\otimes[w])=\Pi(z\otimes w)=[z]\otimes[w]$ なので $\Pi$ は $\mu$ の左逆で、列は分裂する。$r_{C}$ の選び方に依存するので、この分裂は自然ではない。
+
+::: hypcheck
+- **$C$ が自由**：Step 1 で $0\to Z\to C\to\bar B\to0$ が各次数で分裂すること（$\otimes D$ で完全性が保たれる）と、Step 3 の $Z_{p}\otimes-$ の完全性、Step 5 の自由分解に使った。$C$, $D$ の**どちらも**自由でないと偽：$C=D=\mathbb{Z}/2$（次数 $0$ だけの複体）では $C\otimes D$ は次数 $0$ だけなので $H_{1}(C\otimes D)=0$ だが、右辺の Tor の項は $\mathrm{Tor}^{\mathbb{Z}}_{1}(\mathbb{Z}/2,\mathbb{Z}/2)\cong\mathbb{Z}/2\neq0$（\ref{ha:tor-z}）。$C$, $D$ の役割は対称なので、どちらか一方が自由なら成り立つ。
+- **$R$ が PID**：$B_{p-1}$ が自由であること（Step 1）と、$H_{p}(C)$ の長さ 1 の自由分解（Step 5）に使った。一般の環では、Tor$_{\ge2}$ の項が現れるスペクトル系列になることが知られている（本サイト未収録）。
+- **$D$ の自由性**：分裂（Step 7）にだけ使った。
+- **選択公理**：Step 1 で、無限生成の自由加群の部分加群が自由であることに使う。
+:::
+:::
+
+::: theorem キュネットの定理 {#at:kunneth keywords="Kunneth theorem for singular homology of products; cross product; field coefficients" index="キュネットの定理|きゅねっとのていり, クロス積|くろすせき" refname="キュネットの定理"}
+空間 $X,Y$ について、自然な短完全列
+$$
+0\to\bigoplus_{p+q=n}H_{p}(X)\otimes H_{q}(Y)\xrightarrow{\times}H_{n}(X\times Y)\to\bigoplus_{p+q=n-1}\mathrm{Tor}^{\mathbb{Z}}_{1}(H_{q}(Y),H_{p}(X))\to0
+$$
+があり、分裂する（分裂は自然ではない）。左の写像 $\times$（**クロス積**）は $[a]\times[b]\defeq[\psi(a\otimes b)]$。体 $k$ 係数では $H_{n}(X\times Y;k)\cong\bigoplus_{p+q=n}H_{p}(X;k)\otimes_{k}H_{q}(Y;k)$（自然）。
+:::
+
+::: proof
+**Step 1（整係数）.** \ref{at:eilenberg-zilber} の $\psi$ は鎖ホモトピー同値なので、ホモロジーの同型 $\psi_{*}\colon H_{n}(S(X)\otimes S(Y))\cong H_{n}(X\times Y)$ を誘導し（\ref{ha:homotopy-invariance}）、$X,Y$ について自然。$S(X)$, $S(Y)$ は自由アーベル群の鎖複体なので、\ref{at:algebraic-kunneth}（$R=\mathbb{Z}$）の短完全列を $\psi_{*}$ で移す。左の写像は $\psi_{*}\mu([a]\otimes[b])=[\psi(a\otimes b)]$。
+
+**Step 2（体係数）.** $S(X;k)\defeq S(X)\otimes_{\mathbb{Z}}k$ とおく。加法的関手 $-\otimes_{\mathbb{Z}}k$ は鎖ホモトピー同値を保つので $S(X\times Y)\otimes k\simeq(S(X)\otimes S(Y))\otimes k$。さらに自然な同型 $(A\otimes_{\mathbb{Z}}B)\otimes_{\mathbb{Z}}k\cong(A\otimes_{\mathbb{Z}}k)\otimes_{k}(B\otimes_{\mathbb{Z}}k)$（$a\otimes b\otimes\lambda\mapsto(a\otimes\lambda)\otimes(b\otimes1)$。微分と可換）で、右辺は $S(X;k)\otimes_{k}S(Y;k)$。\ref{at:algebraic-kunneth} を $R=k$（体は PID）に使うと、$H_{p}(X;k)$ は $k$ 上のベクトル空間、すなわち自由（射影的）加群なので $\mathrm{Tor}^{k}_{1}(H_{q}(Y;k),H_{p}(X;k))=0$（\ref{ha:tor-basic.2}）。よって $\mu$ が同型。
+
+::: hypcheck
+- **アイレンバーグ–ジルバー**：Step 1 で積空間の鎖複体をテンソル積に取り替えるのに使った。$X,Y$ に仮定は要らない。
+- **選択公理**：アイレンバーグ–ジルバーでは使わないが、代数的キュネット定理（部分加群の自由性、ベクトル空間の基底）で使う。$X,Y$ が有限 CW 複体なら、胞体鎖複体（有限生成）を使って選択なしで同じ結論が得られる（\ref{mod:pid-submodule-free} は有限階数の場合）。
+:::
+:::
+
+::: example
+1. **球面の積**：$m,n\ge1$ で $H_{*}(S^{m}\times S^{n})$ は次数 $0,m,n,m+n$ に $\mathbb{Z}$（$m=n$ なら次数 $n$ は $\mathbb{Z}^{2}$）。
+2. **トーラス** $T^{n}=(S^{1})^{n}$：帰納法で $H_{k}(T^{n})\cong\mathbb{Z}^{\binom{n}{k}}$（Tor は消える）。
+3. **Tor が現れる例**：$H_{3}(\mathbb{R}P^{2}\times\mathbb{R}P^{2})\supset\mathrm{Tor}_{1}(H_{1},H_{1})=\mathrm{Tor}_{1}(\mathbb{Z}/2,\mathbb{Z}/2)\cong\mathbb{Z}/2$（\ref{ha:tor-z}）で、テンソル積の項は $H_{p}\otimes H_{q}$（$p+q=3$）で $H_{2}(\mathbb{R}P^{2})=0$ なので $0$。よって $H_{3}(\mathbb{R}P^{2}\times\mathbb{R}P^{2})\cong\mathbb{Z}/2$。
+4. **オイラー標数**：有限 CW 複体について $\chi(X\times Y)=\chi(X)\chi(Y)$（$\mathbb{Q}$ 係数のキュネットから、ベッチ数の母関数 $P_{X}(t)=\sum b_{n}t^{n}$ について $P_{X\times Y}=P_{X}P_{Y}$、$t=-1$ を代入）。
+:::
+
+::: supplement
+**一般化.** 非輪状モデルの定理は、特異ホモロジーのホモトピー不変性（モデル $\Delta^{n}$ と $\Delta^{n}\times I$）や、カップ積の結合性・可換性の証明（\ref[特異コホモロジーとカップ積]{at:page-singular-cohomology}）にも使える汎用の道具である。明示的な鎖写像としては、$\theta$ にアレクサンダー–ホイットニー写像 $\sigma\mapsto\sum_{p+q=n}\sigma\restriction[e_{0},\dots,e_{p}]\otimes\sigma\restriction[e_{p},\dots,e_{n}]$（成分ごとに射影したもの）、$\psi$ にシャッフル写像（$\Delta^{p}\times\Delta^{q}$ の標準的な三角形分割による）をとれることが知られている（プリズム作用素 \ref{at:singular-homotopy-invariance} は $q=1$ のシャッフル写像にあたる）。
+
+**高い視点.** アイレンバーグ–ジルバーの定理は、特異鎖関手 $S\colon\mathbf{Top}\to\mathrm{Ch}$ が「ホモトピーを除いて」モノイダル関手（積をテンソル積に移す）であることを言っている。これを精密化すると $S(X)$ は $E_{\infty}$ 余代数の構造をもち、コホモロジー側でのカップ積の可換性（次数付き可換）と、それが鎖レベルでは「ホモトピーを除いてしか可換でない」こと（スティーンロッド平方の源）が説明される（\ref{cat:page-little-disks} の $E_{n}$ オペラッドの話と同じ現象）。比喩で言えば、非輪状モデルの定理は「設計図を標準部品（モデル）の上でだけ決めれば、あとは自然性が自動的に全部の空間に配ってくれる」という原理で、モデルが可縮（非輪状）であることが、その設計図の選び方の自由度がホモトピーで吸収できることを保証している。
+:::
+
+## 問題 {#at:sec-ku-problems}
+
+::: problem {#at:prob-torus-betti}
+$T^{n}$ のベッチ数の母関数が $(1+t)^{n}$ であることを示せ。
+:::
+
+::: solution
+$P_{S^{1}}(t)=1+t$ と \ref{at:kunneth} の例 4 の乗法性から。
+:::
+
+::: problem {#at:prob-product-not-sphere}
+$S^{2}\times S^{2}$ と $S^{4}\vee S^{2}\vee S^{2}$ は同じホモロジー群をもつことを示せ（両者がホモトピー同値でないことはカップ積で示す：\ref[特異コホモロジーとカップ積]{at:page-singular-cohomology}）。
+:::
+
+::: solution
+$S^{2}\times S^{2}$：次数 $0,2,2,4$ に $\mathbb{Z}$ で $H_{2}=\mathbb{Z}^{2}$, $H_{4}=\mathbb{Z}$。ウェッジ：被約ホモロジーは各球面の和（\ref{at:prob-wedge-spheres} の議論を繰り返す）で、$H_{2}=\mathbb{Z}^{2}$, $H_{4}=\mathbb{Z}$。
+:::
+
+::: problem {#at:prob-kunneth-z2}
+$H_{*}(\mathbb{R}P^{2}\times\mathbb{R}P^{2};\mathbb{Z}/2)$ を求めよ。
+:::
+
+::: solution
+体係数のキュネットで、$H_{*}(\mathbb{R}P^{2};\mathbb{Z}/2)$ は次数 $0,1,2$ に $\mathbb{Z}/2$（\ref{at:uct-homology} の後の例）なので、積の次数 $n$ の次元は $(1+t+t^{2})^{2}=1+2t+3t^{2}+2t^{3}+t^{4}$ の係数。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

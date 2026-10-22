@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>準同型定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/02-group-theory/01-groups/05-homomorphism-theorems.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 準同型定理 {#grp:page-homomorphism-theorems keywords="group homomorphism, isomorphism, kernel, image, first isomorphism theorem, second isomorphism theorem, third isomorphism theorem, correspondence theorem, automorphism, inner automorphism, classification of cyclic groups"}
+
+群の演算を保つ写像を**準同型**という（\ref{grp:homomorphism}）。準同型 $\varphi:G\to H$ の核 $\Ker\varphi$ は正規部分群で、**準同型定理**（第一同型定理、\tref{grp:first-isomorphism}）は「像 $\varphi(G)$ は剰余群 $G/\Ker\varphi$ と同型である」と主張する。その土台は、準同型が剰余群を経由するための条件を与える分解定理（\ref{grp:factor-through-quotient}）である。このページでは準同型の基本性質を整えたあと、これらの定理と、剰余群の部分群の\ref{grp:correspondence}、第二・第三同型定理（\tref{grp:second-isomorphism}, \ref{grp:third-isomorphism}）を証明する。応用として、巡回群が $\Z$ か $\Z/d\Z$ に同型であること（\ref{grp:cyclic-classification}）、内部自己同型群が $G/Z(G)$ と同型であること（\ref{grp:inner-automorphisms}）、可換化の普遍性（\ref{grp:abelianization-universal}）を示す。
+
+> 雪江明彦『代数学 1 群論入門』第 2 章 §2.5, §2.10 を参考にした。雪江は第一同型定理を先に示し、分解定理（雪江の「準同型の分解」）を第三同型定理から導いているが、ここでは分解定理を先に直接証明し、第一〜第三同型定理をその系として得た。
+
+## 記法と定義の確認 {#grp:sec-ht-notation}
+
+::: notation
+- 群・部分群・生成された部分群とその元の形は \ref{grp:group}, \ref{grp:subgroup}, \ref{grp:generated-subgroup}, \ref{grp:generated-subgroup-words}、巡回群は \ref{grp:cyclic-group}, \ref{grp:cyclic-subgroup-powers}、元の位数は \ref{grp:element-order}, \ref{grp:order-divides}, \ref{grp:order-cyclic-subgroup}、$\Z$ の部分群は \ref{grp:subgroups-of-z}。
+- 剰余類・指数・ラグランジュの定理は \ref{grp:coset}, \ref{grp:coset-partition}, \ref{grp:index}, \tref{grp:lagrange}。正規部分群・剰余群・自然な射影 $\pi:G\to G/N$ は \ref{grp:normal-subgroup}, \ref{grp:normal-equivalent}, \ref{grp:quotient-group}、$\Z/n\Z$ を剰余群とみることは \ref{grp:z-mod-nz-quotient}。$HN$ は \ref{grp:product-with-normal}、中心 $Z(G)$ と交換子部分群 $[G,G]$ は \ref{grp:center}, \ref{grp:commutator-subgroup}, \ref{grp:commutator-properties}。
+- 写像 $f:X\to Y$ と $A\subseteq X$, $B\subseteq Y$ について、$f(A)\defeq\{f(a) : a\in A\}$（**像**）、$f^{-1}(B)\defeq\{x\in X : f(x)\in B\}$（**逆像**）。合成は $(g\circ f)(x)=g(f(x))$。
+- $\ZFC$ の中で議論し、選択公理は使わない。
+:::
+
+## 準同型と同型 {#grp:sec-ht-homomorphisms}
+
+::: definition 準同型・同型・核・像 {#grp:homomorphism keywords="group homomorphism, isomorphism, isomorphic groups, kernel, image, endomorphism, automorphism" index="準同型|じゅんどうけい, 同型|どうけい, 核|かく, 像|ぞう, 自己同型|じこどうけい"}
+$G,H$ を群とする。
+1. 写像 $\varphi:G\to H$ がすべての $x,y\in G$ について $\varphi(xy)=\varphi(x)\varphi(y)$ をみたすとき、$\varphi$ を**準同型**という。
+2. 全単射な準同型を**同型**という。$G$ から $H$ への同型があるとき $G$ と $H$ は**同型**であるといい、$G\cong H$ と書く。$G$ から $G$ への同型を $G$ の**自己同型**といい、その全体を $\Aut(G)$ と書く。
+3. 準同型 $\varphi$ について、$\Ker\varphi\defeq\{x\in G : \varphi(x)=e_{H}\}$ を**核**、$\im\varphi\defeq\varphi(G)$ を**像**という。
+:::
+
+::: intuition
+準同型は「掛け算の表を写す」写像である。同型な群は、元の名前を付け替えただけで演算の表がまったく同じ群なので、群として区別しない。核は「単位元に潰れる元」全体で、準同型がどれだけ情報を失うかを測る。
+:::
+
+::: proposition 準同型の基本性質 {#grp:homomorphism-basic keywords="homomorphism preserves identity and inverses, kernel is normal, image is a subgroup, injective iff trivial kernel" index="準同型の基本性質|じゅんどうけいのきほんせいしつ" refname="群準同型の基本性質" refscope="field"}
+$\varphi:G\to H$ を準同型とする。
+1. $\varphi(e_{G})=e_{H}$、$\varphi(x^{-1})=\varphi(x)^{-1}$、$\varphi(x^{n})=\varphi(x)^{n}$（$n\in\Z$）。
+2. $\Ker\varphi\trianglelefteq G$、$\im\varphi\le H$。より一般に、$K\le G$ なら $\varphi(K)\le H$、$L\le H$ なら $\varphi^{-1}(L)\le G$ で、$L\trianglelefteq H$ なら $\varphi^{-1}(L)\trianglelefteq G$。
+3. $\varphi$ が単射 $\iff\Ker\varphi=\{e_{G}\}$。より詳しく、$\varphi(x)=\varphi(y)\iff x^{-1}y\in\Ker\varphi$。
+4. 準同型の合成は準同型、同型の合成は同型で、同型の逆写像は同型である。
+5. $\varphi$ が単射なら、$x\in G$ の位数と $\varphi(x)$ の位数は等しい。
+6. $G=\ang{S}$ で、二つの準同型 $\varphi,\psi:G\to H$ が $S$ 上で一致すれば $\varphi=\psi$。
+:::
+
+::: proof
+**Step 1（1）.** $\varphi(e)=\varphi(ee)=\varphi(e)\varphi(e)$ の両辺に左から $\varphi(e)^{-1}$ を掛けて $e_{H}=\varphi(e)$。$\varphi(x)\varphi(x^{-1})=\varphi(xx^{-1})=\varphi(e)=e_{H}$ なので、逆元の一意性（\ref{grp:group-basic}）から $\varphi(x^{-1})=\varphi(x)^{-1}$。$n\ge 0$ について $\varphi(x^{n})=\varphi(x)^{n}$ は $n$ についての帰納法（$\varphi(x^{n+1})=\varphi(x^{n})\varphi(x)$）、$n<0$ は $x^{n}=(x^{-1})^{-n}$ と前半による。
+
+**Step 2（2：像と逆像）.** $K\le G$ とする。$e_{H}=\varphi(e)\in\varphi(K)$、$\varphi(a)\varphi(b)^{-1}=\varphi(ab^{-1})\in\varphi(K)$（$a,b\in K$）。\ref{grp:subgroup-criterion} より $\varphi(K)\le H$。$L\le H$ とする。$\varphi(e)=e_{H}\in L$ なので $e\in\varphi^{-1}(L)$、$x,y\in\varphi^{-1}(L)$ なら $\varphi(xy^{-1})=\varphi(x)\varphi(y)^{-1}\in L$。よって $\varphi^{-1}(L)\le G$。$L\trianglelefteq H$ なら、$x\in\varphi^{-1}(L)$, $g\in G$ について $\varphi(gxg^{-1})=\varphi(g)\varphi(x)\varphi(g)^{-1}\in L$。$\im\varphi=\varphi(G)$、$\Ker\varphi=\varphi^{-1}(\{e_{H}\})$ で $\{e_{H}\}\trianglelefteq H$ なので、前半から主張が従う。
+
+**Step 3（3）.** $\varphi(x)=\varphi(y)\iff\varphi(x)^{-1}\varphi(y)=e_{H}\iff\varphi(x^{-1}y)=e_{H}\iff x^{-1}y\in\Ker\varphi$。$\Ker\varphi=\{e\}$ なら、$\varphi(x)=\varphi(y)$ から $x^{-1}y=e$、$x=y$。逆に単射なら、$\varphi(x)=e_{H}=\varphi(e)$ から $x=e$。
+
+**Step 4（4）.** $\psi\circ\varphi(xy)=\psi(\varphi(x)\varphi(y))=\psi\varphi(x)\,\psi\varphi(y)$。全単射の合成は全単射。同型 $\varphi$ の逆写像 $\varphi^{-1}$ について、$u,v\in H$ とし $x=\varphi^{-1}(u)$, $y=\varphi^{-1}(v)$ とおくと $\varphi(xy)=uv$ なので $\varphi^{-1}(uv)=xy=\varphi^{-1}(u)\varphi^{-1}(v)$。
+
+**Step 5（5）.** 1 より $x^{n}=e\Rightarrow\varphi(x)^{n}=e_{H}$。逆に $\varphi(x)^{n}=e_{H}$ なら $\varphi(x^{n})=e_{H}=\varphi(e)$ で、単射性から $x^{n}=e$。よって $\{n : x^{n}=e\}=\{n : \varphi(x)^{n}=e_{H}\}$ で、位数（この集合の正の最小元、または $\infty$）は等しい。
+
+**Step 6（6）.** $G$ の元は $x_{1}^{\varepsilon_{1}}\cdots x_{k}^{\varepsilon_{k}}$（$x_{i}\in S$, $\varepsilon_{i}=\pm 1$）と書け（\ref{grp:generated-subgroup-words}）、1 から $\varphi$ の値は $\varphi(x_{1})^{\varepsilon_{1}}\cdots\varphi(x_{k})^{\varepsilon_{k}}$。$\psi$ も同じ式なので一致する。
+:::
+
+::: example
+1. **指数関数**：$\R$（加法）から正の実数全体 $\R_{>0}$（乗法）への $\exp$ は $\exp(x+y)=\exp x\exp y$ をみたす全単射なので同型で、$(\R,+)\cong(\R_{>0},\cdot)$。
+2. **行列式**：$\det:\GL_{n}(\R)\to\R^{\times}$（$\R^{\times}=\R\setminus\{0\}$ は乗法で群）は $\det(AB)=\det A\det B$ をみたす準同型で、$\Ker\det=\SL_{n}(\R)$。対角行列 $\mathrm{diag}(a,1,\dots,1)$ の行列式は $a$ なので全射。
+3. **冪**：群 $G$ の元 $x$ について $\varphi_{x}(n)\defeq x^{n}$ は $\Z$ から $G$ への準同型（指数法則 \ref{grp:power-laws}）で、$\im\varphi_{x}=\ang{x}$。$\Ker\varphi_{x}=\{n : x^{n}=e\}$ は、$\ord(x)=d<\infty$ なら $d\Z$、$\ord(x)=\infty$ なら $\{0\}$（\ref{grp:order-divides}）。
+4. **自然な射影**：$N\trianglelefteq G$ のとき $\pi:G\to G/N$ は全射準同型で $\Ker\pi=N$（\ref{grp:quotient-group.3}）。したがって、**正規部分群とは準同型の核になりうる部分群のことである**（核は正規、正規部分群は $\pi$ の核）。
+5. **包含**：$K\le G$ なら包含写像 $K\to G$ は単射準同型。
+:::
+
+::: proposition 内部自己同型 {#grp:inner-automorphisms keywords="inner automorphism, conjugation map, Inn(G) ≅ G/Z(G), automorphism group" index="内部自己同型|ないぶじこどうけい, 自己同型群|じこどうけいぐん"}
+$G$ を群とする。
+1. $\Aut(G)$ は写像の合成を演算として群である（$\Sym(G)$ の部分群）。
+2. $g\in G$ について $c_{g}(x)\defeq gxg^{-1}$ は $G$ の自己同型で、$c:G\to\Aut(G)$, $g\mapsto c_{g}$ は準同型、$\Ker c=Z(G)$。$c_{g}$ の形の自己同型を**内部自己同型**といい、その全体 $\mathrm{Inn}(G)\defeq\im c$ は $\Aut(G)$ の正規部分群である。
+:::
+
+::: proof
+**Step 1（1）.** \ref{grp:homomorphism-basic.4} より、$\Aut(G)$ は恒等写像を含み、合成と逆写像で閉じた $\Sym(G)$（\ref{grp:symmetric-group}）の部分集合なので部分群。
+
+**Step 2（$c_{g}$ は自己同型）.** $c_{g}(xy)=gxyg^{-1}=(gxg^{-1})(gyg^{-1})=c_{g}(x)c_{g}(y)$。$c_{g^{-1}}(c_{g}(x))=g^{-1}gxg^{-1}g=x$、同様に $c_{g}\circ c_{g^{-1}}=\id$ なので全単射。
+
+**Step 3（$c$ は準同型、核は中心）.** $c_{gh}(x)=ghx(gh)^{-1}=g(hxh^{-1})g^{-1}=c_{g}(c_{h}(x))$ なので $c_{gh}=c_{g}\circ c_{h}$。$c_{g}=\id\iff$ すべての $x$ で $gxg^{-1}=x\iff gx=xg\iff g\in Z(G)$。
+
+**Step 4（正規性）.** $\alpha\in\Aut(G)$ について $(\alpha\circ c_{g}\circ\alpha^{-1})(x)=\alpha\bigl(g\alpha^{-1}(x)g^{-1}\bigr)=\alpha(g)\,x\,\alpha(g)^{-1}=c_{\alpha(g)}(x)$。よって $\alpha\,\mathrm{Inn}(G)\,\alpha^{-1}\subseteq\mathrm{Inn}(G)$。
+:::
+
+## 分解定理と第一同型定理 {#grp:sec-ht-first}
+
+::: theorem 準同型の分解 {#grp:factor-through-quotient keywords="universal property of the quotient group, factorization through the quotient, induced homomorphism" index="準同型の分解|じゅんどうけいのぶんかい, 剰余群の普遍性|じょうよぐんのふへんせい"}
+$\varphi:G\to H$ を準同型、$N\trianglelefteq G$、$\pi:G\to G/N$ を自然な射影とする。次は同値である。
+1. $N\subseteq\Ker\varphi$。
+2. $\varphi=\bar\varphi\circ\pi$ となる準同型 $\bar\varphi:G/N\to H$ が存在する。
+
+このとき $\bar\varphi$ はただ一つで $\bar\varphi(gN)=\varphi(g)$ で与えられ、$\im\bar\varphi=\im\varphi$、$\Ker\bar\varphi=\pi(\Ker\varphi)=\{gN : g\in\Ker\varphi\}$。
+:::
+
+::: intuition
+$G/N$ は「$N$ の元を単位元とみなした」群なので、$N$ を単位元に送る準同型だけが $G/N$ を通って定義できる。2 は図式
+$$
+\begin{CD}G @>{\varphi}>> H\\ @V{\pi}VV @|\\ G/N @>{\bar\varphi}>> H\end{CD}
+$$
+が可換であることを言っている。
+:::
+
+::: proof
+**Step 1（2⇒1）.** $n\in N$ なら $\pi(n)=N$ は $G/N$ の単位元なので、$\varphi(n)=\bar\varphi(\pi(n))=e_{H}$（\ref{grp:homomorphism-basic.1}）。
+
+**Step 2（1⇒2：矛盾なく定まる）.** $\bar\varphi(gN)\defeq\varphi(g)$ とおく。$gN=g'N$ なら $g^{-1}g'\in N\subseteq\Ker\varphi$（\ref{grp:coset-partition.2}）なので、\ref{grp:homomorphism-basic.3} から $\varphi(g)=\varphi(g')$。よって $\bar\varphi$ は代表元によらない。
+
+**Step 3（1⇒2：準同型で $\varphi=\bar\varphi\circ\pi$）.** $\bar\varphi((gN)(hN))=\bar\varphi(ghN)=\varphi(gh)=\varphi(g)\varphi(h)=\bar\varphi(gN)\bar\varphi(hN)$。$\bar\varphi(\pi(g))=\bar\varphi(gN)=\varphi(g)$。
+
+**Step 4（一意性）.** $\psi\circ\pi=\varphi$ なら $\psi(gN)=\psi(\pi(g))=\varphi(g)=\bar\varphi(gN)$。$G/N$ の元はすべて $gN$ の形なので $\psi=\bar\varphi$。
+
+**Step 5（像と核）.** $\im\bar\varphi=\{\varphi(g) : g\in G\}=\im\varphi$。$\bar\varphi(gN)=e_{H}\iff\varphi(g)=e_{H}\iff g\in\Ker\varphi$ なので、$\Ker\bar\varphi=\{gN : g\in\Ker\varphi\}$。
+
+::: hypcheck
+- **$N\subseteq\Ker\varphi$**：Step 2 の矛盾なく定まることだけに使った。外すと 2 は成り立たない（Step 1）。
+- **$N$ が正規**：$G/N$ が群であること（\ref{grp:quotient-group}）に使った。
+- $\varphi$ の全射性・単射性は使っていない。
+:::
+:::
+
+::: theorem 準同型定理（第一同型定理） {#grp:first-isomorphism keywords="first isomorphism theorem, fundamental homomorphism theorem, G/Ker ≅ Im" index="準同型定理|じゅんどうけいていり, 第一同型定理|だいいちどうけいていり" refname="群の準同型定理"}
+$\varphi:G\to H$ が準同型なら、$gN\mapsto\varphi(g)$（$N=\Ker\varphi$）は矛盾なく定まる同型
+$$
+G/\Ker\varphi\ \cong\ \im\varphi
+$$
+である。特に $\varphi$ が全射なら $G/\Ker\varphi\cong H$、$G$ が有限なら $\abs{G}=\abs{\Ker\varphi}\cdot\abs{\im\varphi}$。
+:::
+
+::: proof
+**Step 1.** $N\defeq\Ker\varphi$ は正規部分群（\ref{grp:homomorphism-basic.2}）で、$N\subseteq\Ker\varphi$ なので \ref{grp:factor-through-quotient} から準同型 $\bar\varphi:G/N\to H$, $\bar\varphi(gN)=\varphi(g)$ が得られる。
+
+**Step 2（単射）.** \ref{grp:factor-through-quotient} より $\Ker\bar\varphi=\{gN : g\in N\}=\{N\}$ は $G/N$ の単位元だけなので、\ref{grp:homomorphism-basic.3} より $\bar\varphi$ は単射。
+
+**Step 3（同型）.** $\im\bar\varphi=\im\varphi$ なので、値域を $\im\varphi$ に制限した $\bar\varphi:G/N\to\im\varphi$ は全単射な準同型、すなわち同型。
+
+**Step 4（位数）.** $G$ が有限なら \ref{grp:lagrange} より $\abs{G/N}=\abs{G}/\abs{N}$ で、これが $\abs{\im\varphi}$ に等しい。
+:::
+
+::: example
+1. $\det:\GL_{n}(\R)\to\R^{\times}$ は全射で核は $\SL_{n}(\R)$ なので、$\GL_{n}(\R)/\SL_{n}(\R)\cong\R^{\times}$。
+2. \ref{grp:inner-automorphisms} の $c:G\to\Aut(G)$ から、$G/Z(G)\cong\mathrm{Inn}(G)$。例えば $Z(D_{3})=\{e\}$（\ref{grp:center} の例）なので $\mathrm{Inn}(D_{3})\cong D_{3}$。
+3. $\exp:\R\to\R_{>0}$ のように核が自明なら、$G\cong\im\varphi$ そのもの。
+:::
+
+::: theorem 巡回群の分類 {#grp:cyclic-classification keywords="every cyclic group is isomorphic to Z or Z/nZ, classification of cyclic groups" index="巡回群の分類|じゅんかいぐんのぶんるい"}
+巡回群 $G=\ang{a}$ は、$\ord(a)=\infty$ なら $\Z$ と、$\ord(a)=d<\infty$ なら $\Z/d\Z$ と同型である。特に、位数の等しい巡回群は互いに同型である。
+:::
+
+::: proof
+**Step 1.** $\varphi(n)\defeq a^{n}$ は $\Z$ から $G$ への準同型で、$\im\varphi=\ang{a}=G$（\ref{grp:cyclic-subgroup-powers}）なので全射（上の例 3）。
+
+**Step 2.** $\Ker\varphi$ は $\ord(a)=\infty$ なら $\{0\}$、$\ord(a)=d$ なら $d\Z$（\ref{grp:order-divides}）。\ref{grp:first-isomorphism} より $G\cong\Z/\Ker\varphi$、すなわち $G\cong\Z/\{0\}\cong\Z$ または $G\cong\Z/d\Z$（$\Z/\{0\}\to\Z$, $n+\{0\}\mapsto n$ は明らかに同型）。
+
+**Step 3.** 位数 $d<\infty$ の巡回群はどちらも $\Z/d\Z$ に同型なので、\ref{grp:homomorphism-basic.4} より互いに同型。無限巡回群どうしも同様。
+:::
+
+::: supplement
+**素数位数の群.** \ref{grp:lagrange-corollaries} と合わせると、素数 $p$ について位数 $p$ の群はすべて $\Z/p\Z$ と同型である。群の分類は、位数ごとに「同型を除いて何個あるか」を問う問題で、位数 $p$ の答えは「一つ」である。
+
+**高い視点.** $\Z$ は一つの元で**自由に**生成された群で、「任意の群 $G$ と元 $a\in G$ に対し、$1\mapsto a$ となる準同型 $\Z\to G$ がただ一つある」（\ref{grp:homomorphism-basic.6} と例 3）。巡回群の分類は、この準同型に第一同型定理を当てはめたものである。$\Z$ の代わりに多くの元で自由に生成された群（自由群）を使うと、任意の群が自由群の剰余群として表せる（\tref{grp:page-free-groups}）。
+:::
+
+## 対応定理と第二・第三同型定理 {#grp:sec-ht-correspondence}
+
+::: theorem 対応定理 {#grp:correspondence keywords="correspondence theorem, lattice isomorphism theorem, fourth isomorphism theorem, subgroups of a quotient group" index="対応定理|たいおうていり, 剰余群の部分群|じょうよぐんのぶぶんぐん" refname="対応定理"}
+$N\trianglelefteq G$、$\pi:G\to G/N$ を自然な射影とする。$N$ を含む $G$ の部分群全体を $\mathcal{S}_{N}(G)$、$G/N$ の部分群全体を $\mathcal{S}(G/N)$ とする。
+1. $K\mapsto\pi(K)=K/N$ と $\bar K\mapsto\pi^{-1}(\bar K)$ は、$\mathcal{S}_{N}(G)$ と $\mathcal{S}(G/N)$ の間の互いに逆な全単射である。
+2. この対応は包含関係を保つ：$K\subseteq K'\iff K/N\subseteq K'/N$。
+3. $K\trianglelefteq G\iff K/N\trianglelefteq G/N$。
+4. $(G:K)=(G/N:K/N)$。
+:::
+
+::: proof
+**Step 1（写像の行き先）.** $K\in\mathcal{S}_{N}(G)$ なら $\pi(K)\le G/N$（\ref{grp:homomorphism-basic.2}）。$N\trianglelefteq K$（$G$ で正規なので $K$ の元による共役でも閉じる）なので $K/N$ は群で、その元 $kN$ は $\pi(k)$ に等しいから、$\pi(K)=K/N$ と書いてよい。$\bar K\le G/N$ なら $\pi^{-1}(\bar K)\le G$（同 2）で、$n\in N$ なら $\pi(n)=N\in\bar K$ なので $N\subseteq\pi^{-1}(\bar K)$。
+
+**Step 2（$\pi(\pi^{-1}(\bar K))=\bar K$）.** $\subseteq$ は逆像の定義から。$\pi$ は全射なので、$u\in\bar K$ に $\pi(g)=u$ となる $g$ があり、$g\in\pi^{-1}(\bar K)$、$u=\pi(g)$。
+
+**Step 3（$\pi^{-1}(\pi(K))=K$）.** $\supseteq$ は明らか。$g\in\pi^{-1}(\pi(K))$ なら $\pi(g)=\pi(k)$（$k\in K$）で、\ref{grp:homomorphism-basic.3} より $k^{-1}g\in\Ker\pi=N\subseteq K$、よって $g=k(k^{-1}g)\in K$。ここで $N\subseteq K$ を使った。Step 2, 3 で 1 が示された。
+
+**Step 4（2）.** $K\subseteq K'$ なら $\pi(K)\subseteq\pi(K')$。逆に $\pi(K)\subseteq\pi(K')$ なら、Step 3 より $K=\pi^{-1}(\pi(K))\subseteq\pi^{-1}(\pi(K'))=K'$。
+
+**Step 5（3）.** $K\trianglelefteq G$ なら、$\pi(g)\pi(k)\pi(g)^{-1}=\pi(gkg^{-1})\in\pi(K)$ で、$G/N$ の元はすべて $\pi(g)$ の形なので $K/N\trianglelefteq G/N$。逆に $K/N\trianglelefteq G/N$ なら $K=\pi^{-1}(K/N)$ は正規部分群の逆像なので正規（\ref{grp:homomorphism-basic.2}）。
+
+**Step 6（4）.** $\bar K\defeq\pi(K)$ とおき、$gK\mapsto\pi(g)\bar K$ を考える。$g,g'\in G$ について
+$$
+gK=g'K\iff g^{-1}g'\in K\iff\pi(g^{-1}g')\in\bar K\iff\pi(g)\bar K=\pi(g')\bar K.
+$$
+（一つめと三つめは \ref{grp:coset-partition.2}、二つめの $\Leftarrow$ は Step 3 の $\pi^{-1}(\bar K)=K$。）右向きから矛盾なく定まり、左向きから単射。$\pi$ の全射性から全射。よって $G/K$ と $(G/N)/\bar K$ の左剰余類の集合は一対一に対応し、指数は等しい。
+
+::: hypcheck
+- **$N\subseteq K$**：Step 3 の $\pi^{-1}(\pi(K))=K$ に本質的に使った。外すと $\pi^{-1}(\pi(K))=KN\supsetneq K$ となりうる：$G=\Z$, $N=2\Z$, $K=4\Z$ なら $\pi(K)=\{0+2\Z\}$ で、その逆像は $2\Z\neq 4\Z$。
+- 4 で $G$ の有限性は使っていない。
+:::
+:::
+
+::: example
+$n\ge 1$ について、$\Z/n\Z$ の部分群は $n\Z\subseteq d\Z$、すなわち $d\mid n$（$d>0$）となる $d\Z/n\Z$ と一対一に対応する（\ref{grp:subgroups-of-z} と対応定理）。これは \ref{grp:subgroups-cyclic.2} の別証明になっている：$d\Z/n\Z$ の位数は $(\Z:n\Z)/(\Z:d\Z)=n/d$（\ref{grp:index-tower} と 4）。
+:::
+
+::: theorem 第二同型定理 {#grp:second-isomorphism keywords="second isomorphism theorem, diamond isomorphism theorem, HN/N ≅ H/(H ∩ N)" index="第二同型定理|だいにどうけいていり" refname="群の第二同型定理"}
+$H\le G$, $N\trianglelefteq G$ なら、$H\cap N\trianglelefteq H$ であり、$h(H\cap N)\mapsto hN$ は矛盾なく定まる同型
+$$
+H/(H\cap N)\ \cong\ HN/N
+$$
+である。
+:::
+
+::: proof
+**Step 1.** $HN\le G$ で $N\trianglelefteq HN$（\ref{grp:product-with-normal}）なので、剰余群 $HN/N$ がある。$\psi(h)\defeq hN$（$h\in H$）は、自然な射影 $HN\to HN/N$ を $H$ に制限したものなので準同型。
+
+**Step 2（全射）.** $HN/N$ の元は $hnN$（$h\in H$, $n\in N$）の形で、$hnN=hN$（$h^{-1}(hn)=n\in N$）なので $\psi(h)$ に等しい。
+
+**Step 3（核）.** $\psi(h)=N\iff h\in N$ なので $\Ker\psi=H\cap N$。\ref{grp:first-isomorphism} より $H/(H\cap N)\cong HN/N$ で、同型は $h(H\cap N)\mapsto\psi(h)=hN$。$H\cap N$ が $H$ で正規なことも核であることから従う。
+
+::: hypcheck
+- **$N$ が正規**：Step 1 で $HN$ が部分群になり $N$ がその正規部分群になることに使った。
+- 有限群なら位数を比べて $\abs{HN}=\abs{H}\abs{N}/\abs{H\cap N}$ が出る。これは \ref{grp:product-formula}（正規性を仮定しない）の特別な場合である。
+:::
+:::
+
+::: theorem 第三同型定理 {#grp:third-isomorphism keywords="third isomorphism theorem, (G/N)/(K/N) ≅ G/K" index="第三同型定理|だいさんどうけいていり" refname="群の第三同型定理"}
+$N\subseteq K$ がともに $G$ の正規部分群なら、$K/N\trianglelefteq G/N$ であり、$(gN)(K/N)\mapsto gK$ は矛盾なく定まる同型
+$$
+(G/N)\big/(K/N)\ \cong\ G/K
+$$
+である。
+:::
+
+::: proof
+**Step 1.** 自然な射影 $\pi_{K}:G\to G/K$ について $N\subseteq K=\Ker\pi_{K}$ なので、\ref{grp:factor-through-quotient} より準同型 $f:G/N\to G/K$, $f(gN)=gK$ がある。$\pi_{K}$ が全射なので $f$ も全射（$\im f=\im\pi_{K}$）。
+
+**Step 2.** $\Ker f=\{gN : g\in\Ker\pi_{K}\}=\{gN : g\in K\}=K/N$（\ref{grp:factor-through-quotient}）。よって $K/N\trianglelefteq G/N$ で、\ref{grp:first-isomorphism} より $(G/N)/(K/N)\cong G/K$。
+:::
+
+::: proposition 可換化の普遍性 {#grp:abelianization-universal keywords="universal property of abelianization, homomorphisms to abelian groups factor through G/[G,G]" index="可換化の普遍性|かかんかのふへんせい"}
+$G$ を群、$\pi:G\to G/[G,G]$ を自然な射影とする。可換群 $A$ への任意の準同型 $\varphi:G\to A$ に対し、$\varphi=\bar\varphi\circ\pi$ となる準同型 $\bar\varphi:G/[G,G]\to A$ がただ一つある。
+:::
+
+::: proof
+$A$ は可換なので $\varphi([x,y])=\varphi(x)\varphi(y)\varphi(x)^{-1}\varphi(y)^{-1}=e_{A}$。よって交換子はすべて $\Ker\varphi$ に属し、$\Ker\varphi$ は部分群なので $[G,G]\subseteq\Ker\varphi$。$[G,G]\trianglelefteq G$（\ref{grp:commutator-properties}）なので、\ref{grp:factor-through-quotient} より $\bar\varphi$ がただ一つある。
+:::
+
+::: supplement
+**圏論の言葉で.** \ref{grp:factor-through-quotient} は、剰余群 $G/N$ が「$N$ を潰す準同型」の中で普遍的なもの（余等化子の一種）であることを言っている。可換化の普遍性は、可換化 $G\mapsto G/[G,G]$ が、可換群の圏 $\Ab$ から群の圏 $\Grp$ への包含関手の左随伴であることを意味する（\ref{cat:page-adjunctions}）。
+
+**同型定理の名前.** 第一〜第三の番号の付け方は本によって異なることがある。対応定理を「第四同型定理」と呼ぶ本もある。
+:::
+
+## 問題 {#grp:sec-ht-problems}
+
+::: problem {#grp:prob-aut-cyclic}
+$C=\ang{a}$ を位数 $n$ の巡回群とする。$\Aut(C)\cong(\Z/n\Z)^{\times}$（\ref{grp:units-mod-n}）を示せ。
+:::
+
+::: solution
+**Step 1（自己同型は $a\mapsto a^{k}$ で決まる）.** $k\in\Z$ について $\varphi_{k}(a^{m})\defeq a^{km}$ は矛盾なく定まる：$a^{m}=a^{m'}$ なら $n\mid m-m'$（\ref{grp:order-divides}）で $n\mid km-km'$、$a^{km}=a^{km'}$。指数法則から準同型。自己同型 $\alpha$ について $\alpha(a)\in C$ なので $\alpha(a)=a^{k}$ と書け、\ref{grp:homomorphism-basic.6} より $\alpha=\varphi_{k}$。また $\varphi_{k}$ は $r_{n}(k)$ だけで決まる。
+
+**Step 2（自己同型になる条件）.** $\varphi_{k}$ の像は $\ang{a^{k}}$ で、その位数は $n/\gcd(n,k)$（\ref{grp:order-of-power}, \ref{grp:order-cyclic-subgroup}）。$\varphi_{k}$ が全射 $\iff\gcd(n,k)=1$。$C$ は有限なので全射と全単射は同値。
+
+**Step 3（同型）.** $\Phi(k)\defeq\varphi_{k}$（$k\in(\Z/n\Z)^{\times}$）は Step 1, 2 より全射。$\varphi_{k}=\varphi_{l}$ なら $a^{k}=a^{l}$、$n\mid k-l$ で、$0\le k,l<n$ から $k=l$：単射。$\varphi_{k}\circ\varphi_{l}(a)=a^{kl}=a^{r_{n}(kl)}$ なので $\varphi_{k}\circ\varphi_{l}=\varphi_{k\odot l}$：準同型。
+:::
+
+::: problem {#grp:prob-q8-mod-center}
+$Q_{8}/Z(Q_{8})$ がクラインの四元群 $V$（\ref{grp:page-groups-subgroups} の例）と同型であることを示せ。
+:::
+
+::: solution
+$Z\defeq Z(Q_{8})=\{\pm 1\}$（\ref{grp:center} の例）。$\abs{Q_{8}/Z}=8/2=4$ で、元は $Z$, $\mathbf{i}Z$, $\mathbf{j}Z$, $\mathbf{k}Z$（$-\mathbf{i}\in\mathbf{i}Z$ など）。$\mathbf{i}^{2}=-1\in Z$ などから、どの元も 2 乗すると単位元。$(\mathbf{i}Z)(\mathbf{j}Z)=\mathbf{k}Z$, $(\mathbf{j}Z)(\mathbf{k}Z)=\mathbf{i}Z$, $(\mathbf{k}Z)(\mathbf{i}Z)=\mathbf{j}Z$ で、逆順の積も $-\mathbf{k}\in\mathbf{k}Z$ などから同じ。$V$ の $a,b,c$（$a^{2}=b^{2}=c^{2}=e$, $ab=ba=c$, $bc=cb=a$, $ca=ac=b$）と比べると、$Z\mapsto e$, $\mathbf{i}Z\mapsto a$, $\mathbf{j}Z\mapsto b$, $\mathbf{k}Z\mapsto c$ は積の表を保つ全単射、すなわち同型。
+:::
+
+::: problem {#grp:prob-hom-cyclic-count}
+$m,n\ge 1$ とする。$\Z/m\Z$ から $\Z/n\Z$ への準同型の個数は $\gcd(m,n)$ であることを示せ。
+:::
+
+::: solution
+**Step 1（準同型は 1 の行き先で決まる）.** $\Z/m\Z=\ang{1}$ なので、準同型 $\varphi$ は $x\defeq\varphi(1)$ で決まる（\ref{grp:homomorphism-basic.6}）。$\varphi(1)^{m}=\varphi(m\cdot 1)=\varphi(0)$ は単位元なので、加法的に書いて $mx=0$、すなわち $\ord(x)\mid m$。逆に $mx=0$ をみたす $x\in\Z/n\Z$ に対し、\ref{grp:factor-through-quotient} を $\Z\to\Z/n\Z$, $k\mapsto kx$（核は $\ord(x)\Z\supseteq m\Z$）に使うと、$1\mapsto x$ となる準同型 $\Z/m\Z\to\Z/n\Z$ がある。よって個数は $X\defeq\{x\in\Z/n\Z : mx=0\}$ の元の個数。
+
+**Step 2（$X$ を数える）.** $g\defeq\gcd(m,n)$ とおく。$x\in X$ なら $\ord(x)$ は $m$ と（\ref{grp:lagrange-corollaries} より）$n$ を割り切るので $g$ を割り切り（\ref{grp:bezout-euclid.2}）、$gx=0$。逆に $gx=0$ なら $g\mid m$ から $mx=0$。よって $X=\{x : gx=0\}$。\ref{grp:subgroups-cyclic.2} より位数 $g$ の部分群 $C_{g}$ がただ一つあり、その元は $gx=0$ をみたす（ラグランジュの定理の系）。逆に $gx=0$ なら $\ang{x}$ の位数 $d$ は $g$ を割り切り、$\ang{x}$ は位数 $d$ のただ一つの部分群 $\ang{(n/d)\cdot 1}$ で、$(n/g)\mid(n/d)$ なのでこれは $C_{g}=\ang{(n/g)\cdot 1}$ に含まれる。よって $X=C_{g}$、$\abs{X}=g$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

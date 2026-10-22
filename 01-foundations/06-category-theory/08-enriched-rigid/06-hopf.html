@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ホップ代数と表現圏 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/06-category-theory/08-enriched-rigid/06-hopf.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ホップ代数と表現圏 {#cat:page-hopf keywords="coalgebra, bialgebra, Hopf algebra, antipode, Sweedler notation, convolution, monoidal structures on module categories correspond to bialgebras, antipode gives duals, quasitriangular Hopf algebra, R-matrix, braiding from R-matrix, group algebra, function algebra, graded vector spaces"}
+
+群 $G$ の表現どうしのテンソル積が再び表現になるのは、群環 $k[G]$ に「余積」$g\mapsto g\otimes g$ があるからである。一般に、代数 $H$ の加群の圏に、台のベクトル空間のテンソル積を使ったモノイダル構造を入れることと、$H$ に**双代数**の構造（余積と余単位）を入れることは同じである。さらに、**対合射**（アンチポード）があるとき（**ホップ代数**）有限次元加群の圏は剛性になり、**$R$ 行列**があるとき（**準三角ホップ代数**）組紐モノイダル圏になる。
+
+
+## 記法と定義の確認 {#cat:sec-hpf-notation}
+
+::: notation
+- $k$ は体、$\otimes=\otimes_{k}$。$k$ ベクトル空間の圏は対称モノイダル圏（入れ替え $\tau(v\otimes w)=w\otimes v$）。モノイダル圏・モノイダル関手・組紐モノイダル圏・右双対は \ref{cat:monoidal-category}, \ref{cat:monoidal-functor}, \ref{cat:braided-monoidal}, \ref{cat:right-left-dual}。
+- 群の表現のテンソル積・双対表現は \ref{rep:constructions}。
+- **スウィードラーの記法**：$\Delta(h)=\sum h_{(1)}\otimes h_{(2)}$ と書き、$(\Delta\otimes1)\Delta(h)=\sum h_{(1)}\otimes h_{(2)}\otimes h_{(3)}$ などとする（和の添字は省略した記号で、具体的な分解を選ぶわけではない）。
+- **選択公理**：使わない（有限次元の空間の基底は有限個の元を選ぶだけ）。
+:::
+
+## 双代数とホップ代数 {#cat:sec-hpf-definitions}
+
+::: definition 双代数とホップ代数 {#cat:hopf-algebra keywords="coalgebra, bialgebra, Hopf algebra, antipode" index="余代数|よだいすう, 双代数|そうだいすう, ホップ代数|ほっぷだいすう, 対合射（ホップ代数）|たいごうしゃほっぷだいすう, アンチポード|あんちぽーど"}
+1. **余代数**とは、ベクトル空間 $C$ と線形写像 $\Delta:C\to C\otimes C$（余積）、$\varepsilon:C\to k$（余単位）で、$(\Delta\otimes1)\Delta=(1\otimes\Delta)\Delta$、$(\varepsilon\otimes1)\Delta=1=(1\otimes\varepsilon)\Delta$ をみたすもの（$k$ ベクトル空間の圏の反対圏でのモノイド）。
+2. **双代数**とは、代数 $(H,m,u)$ で余代数でもあり、$\Delta$ と $\varepsilon$ が代数の準同型であるもの。
+3. **ホップ代数**とは、双代数 $H$ と線形写像 $S:H\to H$（**対合射**）で
+$$
+\sum S(h_{(1)})h_{(2)}=\varepsilon(h)1=\sum h_{(1)}S(h_{(2)})
+$$
+をみたすもの。
+:::
+
+::: example ホップ代数の例 {#cat:hopf-examples}
+1. **群環** $k[G]$：$\Delta(g)=g\otimes g$, $\varepsilon(g)=1$, $S(g)=g^{-1}$（$g\in G$ について定め線形に延長）。$\sum S(g_{(1)})g_{(2)}=g^{-1}g=1=\varepsilon(g)1$。
+2. **関数環** $k^{G}$（$G$ は有限群）：$\delta_{g}$（$g$ で $1$、他で $0$ の関数）を基底として、積は点ごと、$\Delta(\delta_{g})=\sum_{ab=g}\delta_{a}\otimes\delta_{b}$, $\varepsilon(\delta_{g})=[g=1]$, $S(\delta_{g})=\delta_{g^{-1}}$。$k[G]$ の双対ホップ代数。
+3. **包絡環** $U(\mathfrak{g})$（リー代数 $\mathfrak{g}$）：$x\in\mathfrak{g}$ について $\Delta(x)=x\otimes1+1\otimes x$, $\varepsilon(x)=0$, $S(x)=-x$（これらが代数準同型（$S$ は反準同型）として延びることは包絡環の普遍性による。本サイト未収録）。
+:::
+
+::: lemma 対合射は反準同型 {#cat:antipode-anti-homomorphism keywords="the antipode is an algebra anti-homomorphism: S(xy) = S(y)S(x), S(1) = 1, epsilon S = epsilon" index="対合射の反準同型性|たいごうしゃのはんじゅんどうけいせい"}
+ホップ代数で $S(xy)=S(y)S(x)$, $S(1)=1$。
+:::
+
+::: proof
+**Step 1（畳み込み）.** 余代数 $C$ と代数 $A$ について、線形写像 $f,g:C\to A$ の**畳み込み** $(f*g)(c)\defeq\sum f(c_{(1)})g(c_{(2)})$ は、余代数の公理と代数の公理から結合的で、単位は $u\varepsilon$。$C=H\otimes H$（余積 $\Delta(x\otimes y)=\sum(x_{(1)}\otimes y_{(1)})\otimes(x_{(2)}\otimes y_{(2)})$、余単位 $\varepsilon\otimes\varepsilon$）, $A=H$ とする。
+
+**Step 2.** $m(x\otimes y)\defeq xy$, $N(x\otimes y)\defeq S(xy)$, $P(x\otimes y)\defeq S(y)S(x)$ とおく。$\Delta$ は代数準同型なので $\Delta(xy)=\sum x_{(1)}y_{(1)}\otimes x_{(2)}y_{(2)}$ で
+$$
+(m*N)(x\otimes y)=\sum x_{(1)}y_{(1)}S(x_{(2)}y_{(2)})=\sum(xy)_{(1)}S((xy)_{(2)})=\varepsilon(xy)=\varepsilon(x)\varepsilon(y).
+$$
+また
+$$
+(P*m)(x\otimes y)=\sum S(y_{(1)})S(x_{(1)})x_{(2)}y_{(2)}=\sum S(y_{(1)})\varepsilon(x)y_{(2)}=\varepsilon(x)\varepsilon(y).
+$$
+
+**Step 3.** よって $m*N=u(\varepsilon\otimes\varepsilon)=P*m$ で、結合律から $P=P*(m*N)=(P*m)*N=N$。$S(1)=1$ は、$\Delta(1)=1\otimes1$ から $S(1)\cdot1=\varepsilon(1)1=1$。
+:::
+
+## 加群の圏のモノイダル構造 {#cat:sec-hpf-monoidal}
+
+::: theorem 双代数と加群圏のモノイダル構造 {#cat:bialgebra-monoidal keywords="bialgebra structures on H correspond to monoidal structures on H-Mod lifting the tensor product of vector spaces" index="双代数と加群の圏|そうだいすうとかぐんのけん"}
+代数 $H$ について、次は一対一に対応する。
+1. $H$ の双代数の構造（$\Delta,\varepsilon$）。
+2. 左 $H$ 加群の圏 $H\text{-}\mathbf{Mod}$ のモノイダル構造で、忘却関手 $H\text{-}\mathbf{Mod}\to k\text{-}\mathbf{Vect}$ が厳密モノイダル（台のベクトル空間のテンソル積・単位 $k$・結合子・単位子がそのまま）になるもの。
+
+対応は $h\cdot(m\otimes n)\defeq\Delta(h)(m\otimes n)=\sum h_{(1)}m\otimes h_{(2)}n$、$h\cdot\lambda\defeq\varepsilon(h)\lambda$（$\lambda\in k$）。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2）.** $\Delta$ が代数準同型なので $M\otimes N$ は $H\otimes H$ 加群を $\Delta$ で引き戻した $H$ 加群、$\varepsilon$ が代数準同型なので $k$ は $H$ 加群。$H$ 線形写像のテンソル積は $H$ 線形。結合子 $(L\otimes M)\otimes N\cong L\otimes(M\otimes N)$ が $H$ 線形なのは余結合律 $(\Delta\otimes1)\Delta=(1\otimes\Delta)\Delta$、単位子 $k\otimes M\cong M$ が $H$ 線形なのは $(\varepsilon\otimes1)\Delta=1$ から。五角形・三角形はベクトル空間で成り立つ。
+
+**Step 2（2 ⇒ 1：余積の構成）.** モノイダル構造が与えられたとし、$\Delta(h)\defeq h\cdot(1\otimes1)\in H\otimes H$（$H$ を左正則加群とみた $H\otimes H$ の元への作用）、$\varepsilon(h)\defeq h\cdot1\in k$（単位対象 $k$ への作用）とおく。$m\in M$ について $r_{m}:H\to M$, $x\mapsto xm$ は $H$ 線形なので、テンソル積の関手性から $r_{m}\otimes r_{n}$ は $H$ 線形で、
+$$
+h\cdot(m\otimes n)=h\cdot(r_{m}\otimes r_{n})(1\otimes1)=(r_{m}\otimes r_{n})(\Delta(h))=\Delta(h)(m\otimes n).
+$$
+よって作用は $\Delta$ で決まり、同様に $k$ への作用は $\varepsilon$ で決まる。
+
+**Step 3（2 ⇒ 1：公理）.** $M\otimes N$ が $H$ 加群であること（$(hh')\cdot x=h\cdot(h'\cdot x)$）を $M=N=H$, $x=1\otimes1$ に使うと $\Delta(hh')=\Delta(h)\Delta(h')$。$\Delta(1)=1\otimes1$ も同様。結合子が $H$ 線形であることを $H\otimes H\otimes H$ の $1\otimes1\otimes1$ に使うと余結合律、単位子が $H$ 線形であることを $k\otimes H$ の $1\otimes1$ に使うと余単位律。$\varepsilon$ が代数準同型なのは $k$ が $H$ 加群だから。
+
+**Step 4（対応が互いに逆）.** Step 2 の構成を 1 ⇒ 2 で得たモノイダル構造に施すと、$h\cdot(1\otimes1)=\Delta(h)(1\otimes1)=\Delta(h)$ で元の $\Delta$ に戻る。逆に Step 2 の等式から、モノイダル構造は構成した $\Delta$ で定まるものと一致する。
+:::
+
+::: theorem 対合射と双対 {#cat:antipode-duals keywords="for a Hopf algebra, the dual space of a finite dimensional module is a module and gives a right dual; the category of finite dimensional modules is rigid" index="ホップ代数と剛性|ほっぷだいすうとごうせい"}
+ホップ代数 $H$ と有限次元 $H$ 加群 $M$ について、$M^{*}=\operatorname{Hom}_{k}(M,k)$ に $(h\cdot\xi)(m)\defeq\xi(S(h)m)$ で作用を入れると $H$ 加群で、$\mathrm{ev}(\xi\otimes m)\defeq\xi(m)$ と $\mathrm{coev}(1)\defeq\sum_{i}e_{i}\otimes e^{i}$（基底と双対基底）は $H$ 線形。したがって $M^{*}$ は $M$ の右双対で、有限次元 $H$ 加群の圏は右双対をもつ。$S$ が全単射なら $(h\cdot\xi)(m)\defeq\xi(S^{-1}(h)m)$ で左双対も得られ、剛性になる。
+:::
+
+::: proof
+**Step 1（加群）.** \ref{cat:antipode-anti-homomorphism} から $((hh')\cdot\xi)(m)=\xi(S(h')S(h)m)=(h'\cdot\xi)(S(h)m)=(h\cdot(h'\cdot\xi))(m)$、$1\cdot\xi=\xi$。
+
+**Step 2（$\mathrm{ev}$ は $H$ 線形）.** $\mathrm{ev}(h\cdot(\xi\otimes m))=\sum(h_{(1)}\cdot\xi)(h_{(2)}m)=\sum\xi(S(h_{(1)})h_{(2)}m)=\varepsilon(h)\xi(m)=h\cdot\mathrm{ev}(\xi\otimes m)$（第 1 の対合射の公理）。
+
+**Step 3（$\mathrm{coev}$ は $H$ 線形）.** $M\otimes M^{*}\cong\operatorname{End}_{k}(M)$（$m\otimes\xi\mapsto(x\mapsto\xi(x)m)$）で、$\mathrm{coev}(1)$ は恒等写像に対応する。$h\cdot\mathrm{coev}(1)=\sum_{i}h_{(1)}e_{i}\otimes h_{(2)}\cdot e^{i}$ は、$x\mapsto\sum_{i}(h_{(2)}\cdot e^{i})(x)\,h_{(1)}e_{i}=\sum_{i}e^{i}(S(h_{(2)})x)\,h_{(1)}e_{i}=\sum h_{(1)}S(h_{(2)})x=\varepsilon(h)x$ に対応する（第 2 の公理）。よって $h\cdot\mathrm{coev}(1)=\varepsilon(h)\mathrm{coev}(1)$。
+
+**Step 4.** ジグザグ等式はベクトル空間で成り立つ（\ref{cat:rigid-examples.1}）。左双対も同様の計算で、$S^{-1}$ が反準同型であることと $\sum S^{-1}(h_{(2)})h_{(1)}=\varepsilon(h)$（$S$ を施すと第 1 の公理）を使う。
+:::
+
+::: example
+群環 $k[G]$ では、テンソル積・双対の作用は $g(v\otimes w)=gv\otimes gw$, $(g\xi)(v)=\xi(g^{-1}v)$ で、群の表現の構成（\ref{rep:constructions}）と一致する。関数環 $k^{G}$ の加群は $G$ 次数付きベクトル空間 $V=\bigoplus_{g}V_{g}$（$V_{g}=\delta_{g}V$）で、テンソル積は $(V\otimes W)_{g}=\bigoplus_{ab=g}V_{a}\otimes W_{b}$（\ref{cat:day-examples.1} と同じ形の畳み込み）、双対は $(V^{*})_{g}=(V_{g^{-1}})^{*}$。
+:::
+
+## 準三角ホップ代数と組紐 {#cat:sec-hpf-quasitriangular}
+
+::: definition 準三角ホップ代数 {#cat:quasitriangular keywords="quasitriangular Hopf algebra, universal R-matrix" index="準三角ホップ代数|じゅんさんかくほっぷだいすう, R 行列|あーるぎょうれつ"}
+双代数 $H$ と可逆元 $R=\sum_{i}s_{i}\otimes t_{i}\in H\otimes H$ で
+$$
+\Delta^{\mathrm{op}}(h)=R\,\Delta(h)\,R^{-1},\qquad(\Delta\otimes1)(R)=R_{13}R_{23},\qquad(1\otimes\Delta)(R)=R_{13}R_{12}
+$$
+をみたすものを**準三角**といい、$R$ を**普遍 $R$ 行列**という（$\Delta^{\mathrm{op}}=\tau\Delta$、$R_{12}=\sum s_{i}\otimes t_{i}\otimes1$, $R_{13}=\sum s_{i}\otimes1\otimes t_{i}$, $R_{23}=\sum1\otimes s_{i}\otimes t_{i}$）。
+:::
+
+::: theorem $R$ 行列と組紐 {#cat:r-matrix-braiding keywords="an R-matrix gives a braiding c(m tensor n) = tau(R(m tensor n)) on H-Mod" index="R 行列による組紐|あーるぎょうれつによるくみひも"}
+準三角双代数 $(H,R)$ について、$c_{M,N}(m\otimes n)\defeq\tau(R(m\otimes n))=\sum t_{i}n\otimes s_{i}m$ は $H\text{-}\mathbf{Mod}$ の組紐で、$H\text{-}\mathbf{Mod}$ は組紐モノイダル圏になる。$R$ は $R_{12}R_{13}R_{23}=R_{23}R_{13}R_{12}$（量子ヤン–バクスター方程式）をみたす。
+:::
+
+::: proof
+**Step 1（$H$ 線形性）.** $c(h\cdot(m\otimes n))=\tau(R\Delta(h)(m\otimes n))=\tau(\Delta^{\mathrm{op}}(h)R(m\otimes n))=\Delta(h)\tau(R(m\otimes n))=h\cdot c(m\otimes n)$（$\tau\Delta^{\mathrm{op}}(h)=\Delta(h)\tau$）。$R$ が可逆なので $c$ は同型で、$M,N$ について自然（$R$ の作用は $H$ 線形写像と可換）。
+
+**Step 2（六角形）.** $c_{L\otimes M,N}=(c_{L,N}\otimes1_{M})(1_{L}\otimes c_{M,N})$ は、両辺を $l\otimes m\otimes n$ で評価すると、左辺は $\tau_{(12),3}((\Delta\otimes1)(R)(l\otimes m\otimes n))$、右辺は $R_{13}R_{23}$ を作用させてから同じ置換を施したもの（成分を追う計算）で、$(\Delta\otimes1)(R)=R_{13}R_{23}$ から一致する。もう一方の六角形は $(1\otimes\Delta)(R)=R_{13}R_{12}$ から。
+
+**Step 3（ヤン–バクスター）.** 組紐はヤン–バクスター方程式（\ref{cat:yang-baxter}）をみたす。$M=N=L=H$ として $1\otimes1\otimes1$ で評価し、置換を外すと $R_{12}R_{13}R_{23}=R_{23}R_{13}R_{12}$。
+:::
+
+::: example
+1. 可換かつ余可換な $H$（たとえば可換群の群環）で $R=1\otimes1$ なら、組紐は通常の入れ替え $\tau$（対称）。
+2. 有限巡回群 $\mathbb{Z}/n$ の関数環 $k^{\mathbb{Z}/n}$ と、$1$ の原始 $n$ 乗根 $\zeta\in k$ について $R=\sum_{a,b}\zeta^{ab}\delta_{a}\otimes\delta_{b}$ は準三角構造で、対応する組紐は $\mathbb{Z}/n$ 次数付きベクトル空間の $c(v\otimes w)=\zeta^{|v||w|}w\otimes v$（双指標による組紐。\ref{cat:page-braids}）。$R^{-1}=\sum\zeta^{-ab}\delta_{a}\otimes\delta_{b}$ で、公理は $\zeta^{(a+a')b}=\zeta^{ab}\zeta^{a'b}$ から確かめられる。$n\ge3$ なら $c_{W,V}c_{V,W}\neq1$ となりうるので対称でない。
+3. **ドリンフェルトの量子化**：$U_{q}(\mathfrak{sl}_{2})$（$U(\mathfrak{sl}_{2})$ の変形）は（形式的な完備化の上で）準三角で、その 2 次元表現の組紐はカウフマンの交差（\ref{cat:kauffman-crossing}）と対応することが知られている（本サイト未収録）。有限群 $G$ の**ドリンフェルトの二重** $D(G)=k^{G}\rtimes k[G]$ も準三角で、その表現圏は $G$ 上の $G$ 同変ベクトル束の圏と同値（本サイト未収録）。
+:::
+
+::: hypcheck
+- **選択公理**：使わない。
+- **有限次元性**：\ref{cat:antipode-duals} の $\mathrm{coev}$ の構成（$M\otimes M^{*}\cong\operatorname{End}_{k}(M)$）に使った。無限次元の加群は双対をもたない。
+- **対合射の両側の公理**：$\mathrm{ev}$ の $H$ 線形性に第 1 式、$\mathrm{coev}$ に第 2 式を使った。反準同型性（\ref{cat:antipode-anti-homomorphism}）は $M^{*}$ が加群になるために使った。
+- **忘却関手が厳密モノイダル**という条件は \ref{cat:bialgebra-monoidal} の対応に本質的。忘却関手が強モノイダル（構造射が同型だが恒等とは限らない）な場合は**準ホップ代数**（$\Delta$ の余結合律が内部の元 $\Phi$ で補正される）に対応することが知られている（本サイト未収録）。
+:::
+
+::: supplement
+**逆向きの対応.** 有限次元加群の圏が剛性で、忘却関手が双対を保つ（台の空間の双対が双対になる）なら、$H$ は対合射をもつことが知られている（本サイト未収録）。これを推し進めたのが\ref{cat:page-tannaka}で、圏とファイバー関手から $H$ そのものを復元する。
+
+**計算の観点.** 有限群 $G$ の $k[G]$ では、$M\otimes N$ の作用は $(\dim M)(\dim N)$ 次の行列のクロネッカー積で計算でき、$R$ 行列の作用も同じ大きさの行列の積である。
+:::
+
+## 高い視点 {#cat:sec-hpf-viewpoint}
+
+::: remark 「掛け算」を圏の構造に持ち上げる
+代数 $H$ の構造（積・単位）は加群の圏そのものを決め、余代数の構造（余積・余単位）は加群の圏の**テンソル積**を決め、対合射は**双対**を、$R$ 行列は**組紐**を決める。ホップ代数は「モノイダル圏を内側から作る代数」であり、圏の側の性質（剛性・組紐・対称）が代数の側の性質（対合射・準三角・余可換）にそのまま翻訳される。比喩で言えば、ホップ代数は「対称性の集まり」で、群が「対称性が合成できる」ことを表すのに対し、余積は「二つの物の組に対称性が作用する方法」を表す。
+:::
+
+## 問題 {#cat:sec-hpf-problems}
+
+::: problem {#cat:prob-hpf-primitive}
+双代数 $H$ の元 $x$ で $\Delta(x)=x\otimes1+1\otimes x$ をみたすものを**原始元**という。原始元全体は交換子 $[x,y]=xy-yx$ で閉じる（リー代数をなす）ことを示し、ホップ代数では $S(x)=-x$, $\varepsilon(x)=0$ であることを示せ。
+:::
+
+::: solution
+$\Delta$ は代数準同型なので
+$$
+\Delta(xy)=(x\otimes1+1\otimes x)(y\otimes1+1\otimes y)=xy\otimes1+x\otimes y+y\otimes x+1\otimes xy,
+$$
+同様に $\Delta(yx)=yx\otimes1+y\otimes x+x\otimes y+1\otimes yx$。差をとると $\Delta([x,y])=[x,y]\otimes1+1\otimes[x,y]$。余単位律 $(\varepsilon\otimes1)\Delta(x)=x$ から $\varepsilon(x)1+x=x$、すなわち $\varepsilon(x)=0$。対合射の公理 $\sum S(x_{(1)})x_{(2)}=\varepsilon(x)1$ から $S(x)\cdot1+S(1)x=0$、$S(1)=1$（\ref{cat:antipode-anti-homomorphism}）なので $S(x)=-x$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

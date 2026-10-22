@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>内積空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/01-linear-algebra/04-forms/02-inner-product.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 内積空間 {#lin:page-inner-product keywords="inner product, Hermitian form, Cauchy-Schwarz inequality, triangle inequality, Gram-Schmidt orthonormalization, QR decomposition, orthogonal projection and best approximation, adjoint, unitary and orthogonal matrices, Schur decomposition, normal operators, spectral theorem for normal and self-adjoint operators, real symmetric matrices, positive semidefinite operators, square root, polar decomposition, singular value decomposition, Hadamard inequality, Rayleigh quotient, Courant-Fischer min-max theorem"}
+
+$\mathbb{R}$ または $\mathbb{C}$ 上の有限次元内積空間について、グラム–シュミットの直交化（QR 分解）と直交射影による最良近似を示し、随伴作用素を定義する。中心は**スペクトル定理**：複素内積空間の正規作用素はユニタリに対角化でき、実対称行列は直交行列で対角化できる。その系として、正値作用素の平方根、極分解、**特異値分解**、アダマールの不等式、固有値のミニマックス原理（クーラン–フィッシャー）を導く。
+
+
+## 記法と定義の確認 {#lin:sec-ip-notation}
+
+::: notation
+- $\mathbb{K}$ は $\mathbb{R}$ または $\mathbb{C}$、$\bar{c}$ は複素共役（$\mathbb{R}$ では恒等）。$X^{*}\defeq{}^{t}\bar{X}$。
+- 双線形形式・直交補空間・シルヴェスターの判定法は \ref{lin:bilinear-form}, \ref{lin:orthogonal-complement}, \tref{lin:sylvester-criterion}。固有値・三角化・対角化・同時対角化・最小多項式は \ref{lin:char-poly}, \ref{lin:triangularization}, \ref{lin:diagonalizable}, \ref{lin:simultaneous-diagonalization}, \ref{lin:minimal-polynomial}。代数学の基本定理（$\mathbb{C}$ は代数的閉体）は \tref{fld:fundamental-theorem-algebra}。
+- **選択公理**：使わない。
+:::
+
+## 内積と直交化 {#lin:sec-ip-inner}
+
+::: definition 内積 {#lin:inner-product keywords="inner product: sesquilinear (linear in the second variable), Hermitian symmetric, positive definite; norm; orthonormal" index="内積|ないせき, エルミート形式|えるみーとけいしき, 正規直交基底|せいきちょっこうきてい, ノルム|のるむ"}
+$\mathbb{K}$ 上のベクトル空間 $V$ の**内積**とは、$\langle\ ,\ \rangle:V\times V\to\mathbb{K}$ で、第 2 変数について線形、$\langle w,v\rangle=\overline{\langle v,w\rangle}$（したがって第 1 変数について共役線形）、$v\neq0$ なら $\langle v,v\rangle>0$ となるもの。$\|v\|\defeq\sqrt{\langle v,v\rangle}$。$\langle e_{i},e_{j}\rangle=\delta_{ij}$ をみたす族を**正規直交系**という。標準内積は $\langle x,y\rangle={}^{t}\bar{x}y=x^{*}y$。
+:::
+
+::: theorem コーシー–シュワルツの不等式 {#lin:cauchy-schwarz keywords="|<v,w>| <= |v| |w| with equality iff linearly dependent; triangle inequality; Pythagoras" index="コーシー–シュワルツの不等式|こーしーしゅわるつのふとうしき, 三角不等式|さんかくふとうしき" refname="コーシー–シュワルツの不等式"}
+$|\langle v,w\rangle|\le\|v\|\|w\|$ で、等号 $\iff v,w$ は一次従属。したがって $\|v+w\|\le\|v\|+\|w\|$。$\langle v,w\rangle=0$ なら $\|v+w\|^{2}=\|v\|^{2}+\|w\|^{2}$（ピタゴラス）。
+:::
+
+::: proof
+$v=0$ なら自明。$v\neq0$ として $c\defeq\langle v,w\rangle/\|v\|^{2}$, $u\defeq w-cv$ とおくと $\langle v,u\rangle=0$ で、ピタゴラス（展開すれば交差項が $0$）から $\|w\|^{2}=|c|^{2}\|v\|^{2}+\|u\|^{2}\ge|\langle v,w\rangle|^{2}/\|v\|^{2}$。等号 $\iff u=0\iff w=cv$。三角不等式は $\|v+w\|^{2}=\|v\|^{2}+2\operatorname{Re}\langle v,w\rangle+\|w\|^{2}\le(\|v\|+\|w\|)^{2}$。
+:::
+
+::: theorem グラム–シュミットの直交化と QR 分解 {#lin:gram-schmidt keywords="Gram-Schmidt: from a basis obtain an orthonormal basis with the same flags; every invertible matrix is QR with Q unitary and R upper triangular with positive diagonal, uniquely" index="グラム–シュミットの直交化|ぐらむしゅみっとのちょっこうか, QR 分解|きゅーあーるぶんかい, ユニタリ行列|ゆにたりぎょうれつ, 直交行列|ちょっこうぎょうれつ"}
+1. 一次独立な $v_{1},\dots,v_{m}$ から、正規直交系 $e_{1},\dots,e_{m}$ で、各 $j$ で $\langle e_{1},\dots,e_{j}\rangle=\langle v_{1},\dots,v_{j}\rangle$ かつ $\langle e_{j},v_{j}\rangle>0$ となるものがただ一つ作れる。とくに有限次元内積空間は正規直交基底をもつ。
+2. 可逆な $X\in M_{n}(\mathbb{K})$ は、$Q^{*}Q=I$（**ユニタリ**、$\mathbb{R}$ では**直交**）と、対角成分が正の上三角行列 $R$ により $X=QR$ と一意に書ける。
+:::
+
+::: proof
+**Step 1（1：構成）.** $u_{j}\defeq v_{j}-\sum_{i<j}\langle e_{i},v_{j}\rangle e_{i}$, $e_{j}\defeq u_{j}/\|u_{j}\|$。$u_{j}\neq0$（$v_{j}\notin\langle v_{1},\dots,v_{j-1}\rangle=\langle e_{1},\dots,e_{j-1}\rangle$）で、$i<j$ について $\langle e_{i},u_{j}\rangle=\langle e_{i},v_{j}\rangle-\langle e_{i},v_{j}\rangle=0$。$\langle e_{j},v_{j}\rangle=\langle e_{j},u_{j}\rangle=\|u_{j}\|>0$。
+
+**Step 2（1：一意性）.** $e_{j}$ は $\langle v_{1},\dots,v_{j}\rangle$ の中で $\langle v_{1},\dots,v_{j-1}\rangle$ に直交する 1 次元の部分空間の単位ベクトルで（\ref{lin:orthogonal-complement.1}、内積は非退化）、$\langle e_{j},v_{j}\rangle>0$ が符号（位相）を決める。
+
+**Step 3（2）.** $X$ の列に 1 を適用し、$Q$ を $e_{j}$ を並べた行列、$R_{ij}\defeq\langle e_{i},x_{j}\rangle$ とする。$x_{j}=\sum_{i\le j}R_{ij}e_{i}$ なので $X=QR$。一意性は 1 の一意性（$X=QR$ なら $Q$ の列はグラム–シュミットの条件をみたす）。
+:::
+
+::: theorem 直交射影と最良近似 {#lin:orthogonal-projection keywords="orthogonal projection onto a subspace, V = W direct sum W^perp, best approximation property, least squares and normal equations" index="直交射影|ちょっこうしゃえい, 最小二乗法|さいしょうにじょうほう"}
+部分空間 $W$ と正規直交基底 $e_{1},\dots,e_{m}$ について、$P_{W}v\defeq\sum\langle e_{i},v\rangle e_{i}$ は $V=W\oplus W^{\perp}$ に沿った射影で、$\|v-P_{W}v\|<\|v-w\|$（$w\in W$, $w\neq P_{W}v$）。$W=\operatorname{Col}(X)$ なら $P_{W}v=Xc$ の $c$ は**正規方程式** $X^{*}Xc=X^{*}v$ の解。
+:::
+
+::: proof
+$v-P_{W}v\perp e_{i}$ なので $V=W\oplus W^{\perp}$（$W\cap W^{\perp}=0$ は正定値性）。$w\in W$ について $v-w=(v-P_{W}v)+(P_{W}v-w)$ はピタゴラスの形で $\|v-w\|^{2}=\|v-P_{W}v\|^{2}+\|P_{W}v-w\|^{2}$。正規方程式は $v-Xc\perp\operatorname{Col}(X)$、すなわち $X^{*}(v-Xc)=0$。
+:::
+
+## 随伴とスペクトル定理 {#lin:sec-ip-spectral}
+
+::: definition 随伴作用素 {#lin:adjoint keywords="adjoint f^*, <f v, w> = <v, f^* w>; matrix of adjoint in orthonormal basis is conjugate transpose; self-adjoint (Hermitian, symmetric), unitary, normal" index="随伴作用素|ずいはんさようそ, 自己随伴|じこずいはん, エルミート行列|えるみーとぎょうれつ, 正規作用素|せいきさようそ"}
+有限次元内積空間の自己準同型 $f$ について、$\langle fv,w\rangle=\langle v,f^{*}w\rangle$ となる $f^{*}$ がただ一つあり（**随伴**）、正規直交基底での行列は $[f]^{*}$。$f^{*}=f$ を**自己随伴**（行列は**エルミート**、実なら**対称**）、$f^{*}f=1$ を**ユニタリ**、$f^{*}f=ff^{*}$ を**正規**という。
+:::
+
+::: proof
+正規直交基底 $e_{i}$ について $f^{*}w\defeq\sum_{i}\langle fe_{i},w\rangle e_{i}$ とすると $\langle e_{i},f^{*}w\rangle=\langle fe_{i},w\rangle$ で、両辺は $v$ について共役線形なので一般の $v$ で成り立つ。一意性は内積の非退化性。行列：$[f^{*}]_{ij}=\langle e_{i},f^{*}e_{j}\rangle=\langle fe_{i},e_{j}\rangle=\overline{[f]_{ji}}$。
+:::
+
+::: theorem シューア分解 {#lin:schur-decomposition keywords="every complex square matrix is unitarily similar to an upper triangular matrix; real matrices with real eigenvalues are orthogonally triangularizable" index="シューア分解|しゅーあぶんかい"}
+$X\in M_{n}(\mathbb{C})$ について、ユニタリ $U$ と上三角 $T$ で $X=UTU^{*}$ となるものがある。$\mathbb{R}$ 上でも $\chi_{X}$ が実数の一次式に分解すれば $U$ を直交行列にとれる。
+:::
+
+::: proof
+$\chi_{X}$ は分解する（代数学の基本定理）ので \ref{lin:triangularization} で三角化の基底 $v_{1},\dots,v_{n}$（$Xv_{j}\in\langle v_{1},\dots,v_{j}\rangle$）がとれる。グラム–シュミットで $\langle e_{1},\dots,e_{j}\rangle=\langle v_{1},\dots,v_{j}\rangle$ とすれば、$Xe_{j}\in\langle e_{1},\dots,e_{j}\rangle$ のまま正規直交基底になる。
+:::
+
+::: theorem スペクトル定理 {#lin:spectral-theorem keywords="complex normal matrices are unitarily diagonalizable and conversely; Hermitian matrices have real eigenvalues; real symmetric matrices are orthogonally diagonalizable; eigenspaces of a normal operator are orthogonal" index="スペクトル定理|すぺくとるていり" refname="スペクトル定理"}
+1. $X\in M_{n}(\mathbb{C})$ がユニタリに対角化できる（$X=UDU^{*}$, $D$ 対角）$\iff X$ が正規。
+2. エルミート行列の固有値は実数、ユニタリ行列の固有値は絶対値 1。
+3. 実対称行列は直交行列で対角化できる：$X=QD{}^{t}Q$（$Q$ 直交、$D$ 実対角）。
+4. 正規作用素の異なる固有値の固有空間は直交する。
+:::
+
+::: proof
+**Step 1（1：⇐ に必要な補題）.** 上三角行列 $T$ が正規なら対角：$(T^{*}T)_{11}=|t_{11}|^{2}$, $(TT^{*})_{11}=\sum_{j}|t_{1j}|^{2}$ を比べて $t_{1j}=0$（$j>1$）、以下第 2 行、… と帰納的に。
+
+**Step 2（1）.** ⇒：$X^{*}X=UD^{*}DU^{*}=UDD^{*}U^{*}=XX^{*}$。⇐：シューア分解 $X=UTU^{*}$ で $T=U^{*}XU$ も正規なので、Step 1 から対角。
+
+**Step 3（2）.** エルミートなら $Xv=\lambda v$ について $\lambda\|v\|^{2}=\langle v,Xv\rangle=\langle Xv,v\rangle=\bar{\lambda}\|v\|^{2}$。ユニタリなら $\|v\|=\|Xv\|=|\lambda|\|v\|$。
+
+**Step 4（3）.** 実対称行列は複素エルミートなので、固有値は実数で $\chi_{X}$ は実数の一次式に分解する。シューア分解の実版（\ref{lin:schur-decomposition}）で $X=QT{}^{t}Q$, $T={}^{t}QXQ$ は対称な上三角、すなわち対角。
+
+**Step 5（4）.** 正規な $f$ について $\|f^{*}v\|=\|fv\|$（$\langle fv,fv\rangle=\langle v,f^{*}fv\rangle=\langle v,ff^{*}v\rangle$）。$f-\lambda$ も正規なので $fv=\lambda v\Rightarrow f^{*}v=\bar{\lambda}v$。$fv=\lambda v$, $fw=\mu w$, $\lambda\neq\mu$ なら $\mu\langle v,w\rangle=\langle v,fw\rangle=\langle f^{*}v,w\rangle=\lambda\langle v,w\rangle$（$\langle\bar\lambda v,w\rangle=\lambda\langle v,w\rangle$）なので $\langle v,w\rangle=0$。
+:::
+
+## 正値作用素と特異値分解 {#lin:sec-ip-svd}
+
+::: theorem 正値作用素・極分解・特異値分解 {#lin:svd keywords="positive semidefinite iff Hermitian with nonnegative eigenvalues; unique positive square root; polar decomposition X = U P; singular value decomposition X = U Sigma V^*; singular values are square roots of eigenvalues of X^* X; rank equals number of nonzero singular values" index="正値作用素|せいちさようそ, 平方根（行列）|へいほうこんぎょうれつ, 極分解|きょくぶんかい, 特異値分解|とくいちぶんかい, 特異値|とくいち"}
+1. エルミートな $P$ について、$\langle v,Pv\rangle\ge0$（すべての $v$、**半正値**）$\iff$ 固有値がすべて $\ge0$。半正値な $P$ には、半正値な平方根 $\sqrt{P}$（$\sqrt{P}^{2}=P$）がただ一つある。
+2. $X\in M_{n}(\mathbb{C})$ は $X=UP$（$U$ ユニタリ、$P=\sqrt{X^{*}X}$ 半正値）と書ける（**極分解**）。$X$ が可逆なら一意。
+3. $X\in M_{m\times n}(\mathbb{C})$ はユニタリ $U\in\mathrm{U}(m)$, $V\in\mathrm{U}(n)$ と、対角に $\sigma_{1}\ge\dots\ge\sigma_{r}>0$（残りは $0$）をもつ $m\times n$ 行列 $\Sigma$ により $X=U\Sigma V^{*}$ と書ける（**特異値分解**）。$\sigma_{i}^{2}$ は $X^{*}X$ の $0$ でない固有値で、$r=\operatorname{rank}X$。実行列なら $U,V$ を直交行列にとれる。
+:::
+
+::: proof
+**Step 1（1）.** スペクトル定理で $P=UDU^{*}$ と書くと $\langle v,Pv\rangle=\sum d_{i}|(U^{*}v)_{i}|^{2}$ なので、半正値 $\iff$ すべての $d_{i}\ge0$。$\sqrt{P}\defeq U\sqrt{D}U^{*}$ は半正値で平方が $P$。一意性：半正値な $S$ で $S^{2}=P$ なら、$S$ の固有値 $s$ の固有空間は $P$ の固有値 $s^{2}$ の固有空間に含まれ、$s\ge0$ なので $s=\sqrt{s^{2}}$ は $P$ の固有値で決まり、$S$ は $P$ の各固有空間上で $\sqrt{\cdot}$ 倍。
+
+**Step 2（3）.** $X^{*}X$ は半正値（$\langle v,X^{*}Xv\rangle=\|Xv\|^{2}$）で、正規直交固有ベクトル $v_{1},\dots,v_{n}$、固有値 $\sigma_{1}^{2}\ge\dots\ge\sigma_{r}^{2}>0=\dots$ をとる。$\ker X=\ker X^{*}X$（$\|Xv\|^{2}=\langle v,X^{*}Xv\rangle$）なので $r=n-\dim\ker X=\operatorname{rank}X$。$u_{i}\defeq Xv_{i}/\sigma_{i}$（$i\le r$）は正規直交（$\langle Xv_{i},Xv_{j}\rangle=\langle v_{i},X^{*}Xv_{j}\rangle=\sigma_{j}^{2}\delta_{ij}$）で、$\mathbb{C}^{m}$ の正規直交基底に延長する（グラム–シュミット）。$Xv_{i}=\sigma_{i}u_{i}$（$i\le r$）, $Xv_{i}=0$（$i>r$）から $XV=U\Sigma$。
+
+**Step 3（2）.** $m=n$ の 3 で $X=U\Sigma V^{*}=(UV^{*})(V\Sigma V^{*})$、$V\Sigma V^{*}$ は半正値で $(V\Sigma V^{*})^{2}=V\Sigma^{2}V^{*}=X^{*}X$ なので 1 の一意性から $\sqrt{X^{*}X}$。可逆なら $P$ も可逆で $U=XP^{-1}$ が決まる。
+:::
+
+::: corollary アダマールの不等式とミニマックス原理 {#lin:hadamard-minmax keywords="Hadamard inequality |det X| <= product of column norms; Rayleigh quotient; Courant-Fischer: k-th eigenvalue of a Hermitian matrix is max over k-dimensional subspaces of the min of the Rayleigh quotient" index="アダマールの不等式|あだまーるのふとうしき, クーラン–フィッシャーの定理|くーらんふぃっしゃーのていり, レイリー商|れいりーしょう"}
+1. $X\in M_{n}(\mathbb{C})$ の列 $x_{j}$ について $|\det X|\le\prod_{j}\|x_{j}\|$。
+2. エルミートな $H$ の固有値を $\lambda_{1}\ge\dots\ge\lambda_{n}$ とすると
+$$
+\lambda_{k}=\max_{\dim W=k}\ \min_{0\neq v\in W}\frac{\langle v,Hv\rangle}{\langle v,v\rangle}.
+$$
+:::
+
+::: proof
+**Step 1（1）.** $X$ が可逆でなければ自明。可逆なら $X=QR$ で $|\det X|=|\det R|=\prod r_{jj}$（$|\det Q|=1$：$\det Q^{*}\det Q=1$, $\det Q^{*}=\overline{\det Q}$）、$r_{jj}=\langle e_{j},x_{j}\rangle\le\|x_{j}\|$（コーシー–シュワルツ）。
+
+**Step 2（2：$\ge$）.** 正規直交固有ベクトル $v_{i}$ について $W_{0}=\langle v_{1},\dots,v_{k}\rangle$ では $\langle v,Hv\rangle=\sum_{i\le k}\lambda_{i}|c_{i}|^{2}\ge\lambda_{k}\|v\|^{2}$。
+
+**Step 3（2：$\le$）.** $\dim W=k$ なら $W\cap\langle v_{k},\dots,v_{n}\rangle\neq0$（次元の和 $k+(n-k+1)>n$、\ref{lin:dimension-properties.3}）で、その元 $v$ について $\langle v,Hv\rangle=\sum_{i\ge k}\lambda_{i}|c_{i}|^{2}\le\lambda_{k}\|v\|^{2}$。
+:::
+
+::: hypcheck
+- **正定値性**：コーシー–シュワルツ・グラム–シュミット・直交射影で、$u\neq0\Rightarrow\|u\|>0$ と $W\cap W^{\perp}=0$ に使う。不定値な形式（ミンコフスキー計量）では直交補空間が補空間にならない（光的ベクトル $v$ は $v\perp v$）。
+- **代数的閉体 $\mathbb{C}$**：シューア分解とスペクトル定理で固有値の存在に使う。実の正規行列（回転行列）は実数の範囲では対角化できない。実対称行列については、エルミートの固有値が実数であること（2）が代わりになる。
+- **正規性**：スペクトル定理の 1 で本質的。$\begin{pmatrix}1&1\\0&1\end{pmatrix}$ は正規でなく、ユニタリには（どんな相似でも）対角化できない。
+- **有限次元**：随伴の存在と、シューア分解の帰納法に使う。無限次元（ヒルベルト空間）では、コンパクト自己随伴作用素のスペクトル定理など関数解析の議論が要る。
+- **選択公理**：使わない。
+:::
+
+::: supplement
+**前提を弱めると.** スペクトル定理は、可換な正規行列の族が同時にユニタリ対角化できる形に強められる（\ref{lin:simultaneous-diagonalization} の内積版）。無限次元では、有界な正規作用素について射影値測度によるスペクトル分解が成り立つことが知られている（関数解析）。
+
+**似た定理.** 特異値は $\|X\|_{\mathrm{op}}=\sigma_{1}$（作用素ノルム）や、エッカート–ヤングの定理（階数 $k$ 以下の行列による最良近似は特異値分解を $k$ 項で打ち切ったもの）を与えることが知られている。ワイルの不等式・インターレース定理はミニマックス原理から従う。
+
+**計算の観点.** グラム–シュミットは数値的には直交性が崩れやすく、ハウスホルダー変換やギブンス回転による QR 分解が使われる。特異値分解は数値線形代数で最も安定な階数・最小二乗の道具で、ゴルブ–カハンのアルゴリズムで計算される。
+:::
+
+## 高い視点 {#lin:sec-ip-viewpoint}
+
+::: remark 正規作用素は「対角」の不変な書き方
+内積は $V\cong\bar{V}^{*}$ という同一視（$v\mapsto\langle v,-\rangle$）を与え、随伴はこの同一視のもとでの転置である。スペクトル定理は「正規作用素の可換な $*$ 部分環 $\mathbb{C}[X,X^{*}]$ は、固有空間への直交射影で張られる $\mathbb{C}^{r}$ と同型」すなわち有限集合（スペクトル）上の関数環であることを言い、ゲルファント–ナイマルクの定理（可換 C* 環はコンパクト空間上の連続関数環）の有限次元版である。特異値分解は、両側のユニタリ群 $\mathrm{U}(m)\times\mathrm{U}(n)$ による $M_{m\times n}$ の軌道が特異値の列で分類されることを言う。比喩で言えば、正規作用素は直交する方向ごとに独立に伸び縮みする（回転を含む）変換で、一般の変換は特異値分解によって「回転・軸方向の伸縮・回転」の三段階に分けられる。
+:::
+
+## 問題 {#lin:sec-ip-problems}
+
+::: problem {#lin:prob-ip-gram-schmidt}
+$\mathbb{R}^{3}$ の $v_{1}={}^{t}(1,1,0)$, $v_{2}={}^{t}(1,0,1)$ をグラム–シュミットで直交化し、$v_{3}={}^{t}(0,0,1)$ の $\langle v_{1},v_{2}\rangle$ への直交射影を求めよ。
+:::
+
+::: solution
+$e_{1}=\tfrac{1}{\sqrt2}{}^{t}(1,1,0)$。$u_{2}=v_{2}-\langle e_{1},v_{2}\rangle e_{1}={}^{t}(1,0,1)-\tfrac12{}^{t}(1,1,0)={}^{t}(\tfrac12,-\tfrac12,1)$, $e_{2}=u_{2}/\sqrt{3/2}$。射影は $\langle e_{1},v_{3}\rangle e_{1}+\langle e_{2},v_{3}\rangle e_{2}=0+\tfrac{1}{3/2}u_{2}=\tfrac23{}^{t}(\tfrac12,-\tfrac12,1)={}^{t}(\tfrac13,-\tfrac13,\tfrac23)$。
+:::
+
+::: problem {#lin:prob-ip-singular-values}
+$X=\begin{pmatrix}1&1\\0&1\end{pmatrix}$ の特異値を求め、$X$ が正規でないことを確かめよ。
+:::
+
+::: solution
+$X^{*}X=\begin{pmatrix}1&1\\1&2\end{pmatrix}$ で固有値は $t^{2}-3t+1=0$ の根 $\tfrac{3\pm\sqrt5}{2}$、特異値は $\sigma_{1,2}=\sqrt{(3\pm\sqrt5)/2}=\tfrac{\sqrt5\pm1}{2}$（$(\tfrac{\sqrt5\pm1}{2})^{2}=\tfrac{6\pm2\sqrt5}{4}$）。$XX^{*}=\begin{pmatrix}2&1\\1&1\end{pmatrix}\neq X^{*}X$ なので正規でない。固有値はともに $1$ だが特異値は $1$ でない：正規でない行列では固有値の絶対値と特異値は一致しない。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{lin:sec-ip-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

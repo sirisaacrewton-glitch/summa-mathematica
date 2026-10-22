@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>楕円関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/02-complex-analysis/03-global/06-elliptic-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 楕円関数 {#cx:page-elliptic-functions keywords="lattice, fundamental parallelogram, elliptic function, doubly periodic meromorphic function, Liouville's theorems for elliptic functions, sum of residues, order of an elliptic function, Abel's relation sum of zeros minus poles, Eisenstein series, Weierstrass p-function, Laurent expansion of p, differential equation (p')^2 = 4p^3 - g2 p - g3, half periods, e1 e2 e3, discriminant, even elliptic functions are rational in p, field of elliptic functions C(p, p'), elliptic curve, complex torus"}
+
+$e^{z}$ は周期 $2\pi i$ をもつ一重周期の関数である。では、実数上一次独立な二つの周期をもつ（**二重周期**の）関数はあるか。正則なものは定数しかない（リウヴィルの定理）が、極を許せば豊富に存在する。それが**楕円関数**で、楕円の弧長の積分の逆関数として歴史的に現れた。このページでは、楕円関数の基本的な性質（リウヴィルの定理群：周期平行四辺形の中の留数の和は $0$、零点と極の個数は等しい、など）を示し、**ワイエルシュトラスの $\wp$ 関数**を構成して、微分方程式 $(\wp')^{2}=4\wp^{3}-g_{2}\wp-g_{3}$ を導く。偶な楕円関数は $\wp$ の有理関数で、楕円関数全体は $\wp$ と $\wp'$ で生成される体になる。
+
+## 記法と定義の確認 {#cx:sec-el-notation}
+
+::: notation
+- 有理型関数と極・留数 \ref{cx:meromorphic}, \ref{cx:residue}, \ref{cx:residue-computation}、留数定理 \tref{cx:residue-theorem}、偏角の原理 \tref{cx:argument-principle}、リウヴィルの定理 \tref{cx:liouville}、ワイエルシュトラスの収束定理 \tref{cx:weierstrass-convergence}、零点の\term[位数]{cx:zero-order} \ref{cx:zero-order}、極の特徴づけ \ref{cx:pole-characterization}、二重級数 \ref{calc:double-series}。
+- **格子**：$\omega_{1},\omega_{2}\in\C$ が $\R$ 上一次独立（$\frac{\omega_{2}}{\omega_{1}}\notin\R$）のとき $\Lambda\defeq\mathbb{Z}\omega_{1}+\mathbb{Z}\omega_{2}$。$\Lambda^{*}\defeq\Lambda\setminus\{0\}$。$\sum_{\omega}'$ は $\omega\in\Lambda^{*}$ についての和。
+- **周期平行四辺形**：$a\in\C$ について $P_{a}\defeq\{a+s\omega_{1}+t\omega_{2}\mid0\le s,t<1\}$。$\C$ の各点は $\Lambda$ を法としてちょうど一つの $P_{a}$ の点と合同。周はその閉包の境界を $a\to a+\omega_{1}\to a+\omega_{1}+\omega_{2}\to a+\omega_{2}\to a$ とたどる閉曲線 $\partial P_{a}$（正の向き、内部の点の回転数は $1$）。
+- **公理系**：$\ZF$ で行い、選択公理は使わない。
+:::
+
+## 楕円関数の基本性質 {#cx:sec-el-basic}
+
+::: definition 楕円関数 {#cx:elliptic-function keywords="elliptic function: meromorphic on C with f(z + omega) = f(z) for all omega in the lattice; order of an elliptic function" index="楕円関数|だえんかんすう, 二重周期関数|にじゅうしゅうきかんすう, 楕円関数の位数|だえんかんすうのいすう"}
+$\C$ 上の有理型関数 $f$ で、すべての $\omega\in\Lambda$ について $f(z+\omega)=f(z)$ となるものを、$\Lambda$ に関する**楕円関数**という（$\omega_{1},\omega_{2}$ で周期的であれば十分）。周期平行四辺形の中の極の個数（\term[位数]{cx:isolated-singularity}込み）を $f$ の**位数**という（$P_{a}$ の選び方によらない）。
+:::
+
+::: theorem リウヴィルの定理（楕円関数） {#cx:elliptic-liouville keywords="Liouville's theorems for elliptic functions: holomorphic elliptic functions are constant; the sum of residues in a period parallelogram is zero; number of zeros equals number of poles; sum of zeros minus sum of poles lies in the lattice; nonconstant elliptic functions have order at least 2" index="リウヴィルの定理（楕円関数）|りうゔぃるのていりだえんかんすう" refname="リウヴィルの定理（楕円関数）"}
+$f$ を楕円関数とし、$a$ を $\partial P_{a}$ 上に $f$ の零点も極もないようにとる（このような $a$ は存在する：零点と極は離散集合で、$\partial P_{a}$ をずらせば避けられる）。
+1. $f$ が極をもたなければ定数である。
+2. $P_{a}$ の中の極での留数の和は $0$。
+3. $f$ が定数でなければ、任意の $c\in\C$ について、$P_{a}$ の中の $f-c$ の零点の個数（重複度込み）は $f$ の\term[位数]{cx:elliptic-function}に等しい（$\partial P_{a}$ 上に $f=c$ の点がないように $a$ をとる）。
+4. $P_{a}$ の中の零点を $a_{1},\dots,a_{n}$、極を $b_{1},\dots,b_{n}$（重複度込み）とすると $\sum a_{j}-\sum b_{j}\in\Lambda$。
+5. 定数でない楕円関数の位数は $2$ 以上である。
+:::
+
+::: proof
+**Step 1（1）.** $f$ は $\overline{P_{0}}$（コンパクト）で連続なので有界、周期性から $\C$ 全体で有界。リウヴィルの定理から定数。
+
+**Step 2（周の積分が消える）.** 周期的な $g$（$\partial P_{a}$ 上で連続）について $\oint_{\partial P_{a}}g\,dz=0$：向かい合う辺 $[a,a+\omega_{1}]$ と $[a+\omega_{1}+\omega_{2},a+\omega_{2}]$ は、$\omega_{2}$ の平行移動で互いに移り、向きが逆なので、$g$ の周期性から積分が打ち消し合う。もう一組の辺も同様。
+
+**Step 3（2・3）.** 留数定理と Step 2（$g=f$）から 2。$g=\frac{f'}{f-c}$ も楕円関数（$f'$ も周期的）なので、偏角の原理と Step 2 から、$P_{a}$ の中の $f-c$ の零点の個数と極の個数は等しく、極の個数は $f$ のものと同じ。
+
+**Step 4（4）.** $\frac{1}{2\pi i}\oint_{\partial P_{a}}z\frac{f'(z)}{f(z)}dz=\sum a_{j}-\sum b_{j}$（一般化した偏角の原理、$g(z)=z$）。左辺を辺ごとに計算する。$[a,a+\omega_{1}]$ と $[a+\omega_{1}+\omega_{2},a+\omega_{2}]$ の組では、後者を $z=w+\omega_{2}$（$w$ は $a+\omega_{1}$ から $a$ へ）と書き直すと
+$$
+\int_{[a,a+\omega_{1}]}z\frac{f'}{f}dz-\int_{[a,a+\omega_{1}]}(z+\omega_{2})\frac{f'}{f}dz=-\omega_{2}\int_{[a,a+\omega_{1}]}\frac{f'}{f}dz.
+$$
+$\int_{[a,a+\omega_{1}]}\frac{f'}{f}dz$ は、閉曲線 $f\circ[a,a+\omega_{1}]$（$f(a)=f(a+\omega_{1})$）の $0$ のまわりの回転数の $2\pi i$ 倍（\ref{cx:argument-principle} の Step 2）なので $2\pi i\,k$（$k\in\mathbb{Z}$）。もう一組も同様で、合計は $\frac{1}{2\pi i}(-\omega_{2}\cdot2\pi ik+\omega_{1}\cdot2\pi il)\in\Lambda$。
+
+**Step 5（5）.** \term[位数]{cx:elliptic-function} 1 なら、ただ一つの極は 1 位で、その留数は $0$ でない。2 に反する。
+
+::: hypcheck
+- **$\partial P_{a}$ 上に零点・極がない**：線積分が定義されるために使った。
+- Step 2 の打ち消し合いは周期性だけを使い、正則性は使っていない。
+:::
+:::
+
+## ワイエルシュトラスの $\wp$ 関数 {#cx:sec-el-wp}
+
+::: lemma 格子上の級数の収束 {#cx:lattice-series keywords="sum over nonzero lattice points of |omega|^{-s} converges iff s > 2" index="アイゼンシュタイン級数|あいぜんしゅたいんきゅうすう"}
+$\sum_{\omega}'|\omega|^{-s}$ は $s>2$ で収束する。とくに $k\ge3$ について $G_{k}\defeq\sum_{\omega}'\omega^{-k}$（**アイゼンシュタイン級数**）は絶対収束し、$k$ が奇数なら $G_{k}=0$。
+:::
+
+::: proof
+**Step 1（下からの評価）.** $\phi(s,t)\defeq|s\omega_{1}+t\omega_{2}|$ はコンパクト集合 $\{\max(|s|,|t|)=1\}$ 上で連続で正（一次独立性）なので、最小値 $c>0$ をもつ。同次性から $|m\omega_{1}+n\omega_{2}|\ge c\max(|m|,|n|)$。
+
+**Step 2（数え上げ）.** $\max(|m|,|n|)=k\ge1$ となる整数の組はちょうど $8k$ 個。よって $\sum_{\omega}'|\omega|^{-s}\le\sum_{k\ge1}8k(ck)^{-s}=8c^{-s}\sum_{k}k^{1-s}<\infty$（$s-1>1$）。
+
+**Step 3.** $k$ が奇数なら $\omega\mapsto-\omega$ で $\omega^{-k}$ と $(-\omega)^{-k}$ が打ち消し合う（絶対収束なので並べ替えてよい）。
+:::
+
+::: definition ワイエルシュトラスの $\wp$ 関数 {#cx:weierstrass-p keywords="Weierstrass p-function p(z) = 1/z^2 + sum' (1/(z-omega)^2 - 1/omega^2)" index="ワイエルシュトラスの p 関数|わいえるしゅとらすのぺーかんすう, ペー関数|ぺーかんすう"}
+$$
+\wp(z)\defeq\frac{1}{z^{2}}+\sum_{\omega}{}'\Bigl(\frac{1}{(z-\omega)^{2}}-\frac{1}{\omega^{2}}\Bigr).
+$$
+:::
+
+::: theorem $\wp$ の基本性質 {#cx:wp-properties keywords="p is an even elliptic function of order 2 with a double pole at each lattice point; p' is an odd elliptic function of order 3; Laurent expansion p(z) = 1/z^2 + sum (2n+1) G_{2n+2} z^{2n}" index=""}
+1. 級数は $\C\setminus\Lambda$ で広義一様に絶対収束し、$\wp$ は $\C$ 上の有理型関数で、極は $\Lambda$ の各点の 2 位の極（主要部 $\frac{1}{(z-\omega)^{2}}$、留数 $0$）である。
+2. $\wp$ は偶関数、$\wp'(z)=-2\sum_{\omega\in\Lambda}\frac{1}{(z-\omega)^{3}}$ は奇関数。
+3. $\wp$ と $\wp'$ は楕円関数で、\term[位数]{cx:elliptic-function}はそれぞれ $2$ と $3$。
+4. $0<|z|<\min_{\omega\in\Lambda^{*}}|\omega|$ で $\displaystyle\wp(z)=\frac{1}{z^{2}}+\sum_{n\ge1}(2n+1)G_{2n+2}z^{2n}=\frac{1}{z^{2}}+3G_{4}z^{2}+5G_{6}z^{4}+\cdots$。
+:::
+
+::: proof
+**Step 1（収束）.** $|z|\le R$, $|\omega|\ge2R$ なら $|z-\omega|\ge\frac{|\omega|}{2}$ で
+$$
+\Bigl|\frac{1}{(z-\omega)^{2}}-\frac{1}{\omega^{2}}\Bigr|=\frac{|z||2\omega-z|}{|\omega|^{2}|z-\omega|^{2}}\le\frac{R\cdot\frac52|\omega|}{|\omega|^{2}\frac{|\omega|^{2}}{4}}=\frac{10R}{|\omega|^{3}}.
+$$
+\ref{cx:lattice-series}（$s=3$）と M 判定法から、有限個の $\omega$ を除いた和は $\overline{D}(0,R)$ で一様絶対収束し正則。除いた有限個の項と $\frac{1}{z^{2}}$ が $\Lambda\cap\overline{D}(0,R)$ に 2 位の極を与える。ワイエルシュトラスの収束定理から 1。
+
+**Step 2（2）.** $\Lambda=-\Lambda$ なので、$\omega$ を $-\omega$ で置き換えると $\wp(-z)=\wp(z)$。項別微分（ワイエルシュトラスの収束定理）で $\wp'$ の式、これは $z\mapsto-z$, $\omega\mapsto-\omega$ で符号が変わる。
+
+**Step 3（3）.** $\wp'$ の式は $\omega\mapsto\omega+\omega_{j}$ の並べ替え（絶対収束）で不変なので $\wp'$ は周期的。よって $\wp(z+\omega_{j})-\wp(z)$ は導関数が $0$ で定数 $c_{j}$（$\C\setminus\Lambda$ は連結）。$z=-\frac{\omega_{j}}{2}$（$\Lambda$ に入らない）を代入すると $c_{j}=\wp(\frac{\omega_{j}}{2})-\wp(-\frac{\omega_{j}}{2})=0$（偶関数）。\term[位数]{cx:elliptic-function}：$P_{a}$ に $\Lambda$ の点がちょうど一つ入るようにとれば、極はその 1 点だけで、$\wp$ は 2 位、$\wp'$ は 3 位。
+
+**Step 4（4）.** $|z|<|\omega|$ で $\frac{1}{(z-\omega)^{2}}-\frac{1}{\omega^{2}}=\sum_{n\ge1}\frac{(n+1)z^{n}}{\omega^{n+2}}$（$\frac{1}{(1-u)^{2}}=\sum(n+1)u^{n}$ を $u=\frac z\omega$ で）。$|z|<r<\min|\omega|$ では $\sum_{\omega}'\sum_{n}\frac{(n+1)|z|^{n}}{|\omega|^{n+2}}<\infty$（$\frac{1}{(1-|z|/|\omega|)^{2}}-1\le C\frac{|z|}{|\omega|}$ と \ref{cx:lattice-series}）なので、二重級数の順序を交換して $\sum_{n\ge1}(n+1)G_{n+2}z^{n}$。奇数の $n+2$ では $G_{n+2}=0$。
+:::
+
+::: theorem $\wp$ の微分方程式 {#cx:wp-differential-equation keywords="(p')^2 = 4 p^3 - g2 p - g3 with g2 = 60 G4, g3 = 140 G6; p'' = 6 p^2 - g2/2" index="ワイエルシュトラスの微分方程式|わいえるしゅとらすのびぶんほうていしき"}
+$g_{2}\defeq60G_{4}$, $g_{3}\defeq140G_{6}$ とおくと
+$$
+\wp'(z)^{2}=4\wp(z)^{3}-g_{2}\wp(z)-g_{3}.
+$$
+:::
+
+::: proof
+**Step 1（ローラン展開の比較）.** \ref{cx:wp-properties.4} から、$0$ の近くで
+$$
+\begin{aligned}
+\wp'(z)&=-\frac{2}{z^{3}}+6G_{4}z+20G_{6}z^{3}+O(z^{5}),\\
+\wp'(z)^{2}&=\frac{4}{z^{6}}-\frac{24G_{4}}{z^{2}}-80G_{6}+O(z^{2}),\\
+\wp(z)^{3}&=\frac{1}{z^{6}}+\frac{9G_{4}}{z^{2}}+15G_{6}+O(z^{2}).
+\end{aligned}
+$$
+よって $h\defeq\wp'^{2}-4\wp^{3}+60G_{4}\wp+140G_{6}$ は $0$ の近くで $\bigl(-24-36+60\bigr)\frac{G_{4}}{z^{2}}+(-80-60+140)G_{6}+O(z^{2})=O(z^{2})$。
+
+**Step 2.** $h$ は楕円関数で、極の候補は $\Lambda$ の点だけだが、Step 1 と周期性から $\Lambda$ の各点で除去可能で値 $0$。\ref{cx:elliptic-liouville.1} から $h$ は定数で、$h=h(0)=0$。（ローラン展開の係数は計算機でも確かめた。）
+:::
+
+::: corollary 半周期と判別式 {#cx:half-periods keywords="the zeros of p' are the half periods omega1/2, omega2/2, (omega1+omega2)/2; e1, e2, e3 distinct; 4p^3 - g2 p - g3 = 4(p-e1)(p-e2)(p-e3); discriminant g2^3 - 27 g3^2 != 0" index="半周期|はんしゅうき, 判別式（楕円関数）|はんべつしきだえんかんすう"}
+$\eta_{1}\defeq\frac{\omega_{1}}{2}$, $\eta_{2}\defeq\frac{\omega_{2}}{2}$, $\eta_{3}\defeq\frac{\omega_{1}+\omega_{2}}{2}$、$e_{j}\defeq\wp(\eta_{j})$ とする。
+1. $\wp'$ の零点は $\eta_{1},\eta_{2},\eta_{3}$（を $\Lambda$ で平行移動した点）で、すべて 1 位。
+2. $e_{1},e_{2},e_{3}$ は相異なり、$4x^{3}-g_{2}x-g_{3}=4(x-e_{1})(x-e_{2})(x-e_{3})$。とくに判別式 $g_{2}^{3}-27g_{3}^{2}\neq0$。
+:::
+
+::: proof
+**Step 1（1）.** $2\eta_{j}\in\Lambda$ なので $-\eta_{j}=\eta_{j}-2\eta_{j}\equiv\eta_{j}\pmod\Lambda$。$\wp'$ は周期的で奇関数なので $\wp'(\eta_{j})=\wp'(-\eta_{j})=-\wp'(\eta_{j})$、よって $\wp'(\eta_{j})=0$。$\wp'$ の\term[位数]{cx:elliptic-function}は 3 なので周期平行四辺形の中の零点は重複度込みで 3 個（\ref{cx:elliptic-liouville.3}）、$\eta_{1},\eta_{2},\eta_{3}$ は $\Lambda$ を法として相異なるので、それぞれ 1 位で、ほかに零点はない。
+
+**Step 2（2）.** $\wp-e_{j}$ は $\eta_{j}$ で零点をもち、$\wp'(\eta_{j})=0$ なので\term[位数]{cx:zero-order} 2 以上。$\wp$ の位数は 2 なので、$\wp-e_{j}$ の零点は周期平行四辺形の中で $\eta_{j}$ の 2 位の零点だけ。よって $l\neq j$ なら $\wp(\eta_{l})\neq e_{j}$、すなわち $e_{j}$ は相異なる。微分方程式から $\wp'(\eta_{j})^{2}=0=4e_{j}^{3}-g_{2}e_{j}-g_{3}$ なので、3 次式 $4x^{3}-g_{2}x-g_{3}$ の 3 つの相異なる根は $e_{1},e_{2},e_{3}$。根が相異なることと判別式 $16(g_{2}^{3}-27g_{3}^{2})\neq0$（3 次式 $4x^{3}-g_{2}x-g_{3}$ の判別式）は同値。
+:::
+
+## 楕円関数の体 {#cx:sec-el-field}
+
+::: theorem 偶な楕円関数は $\wp$ の有理関数 {#cx:even-elliptic-rational keywords="every even elliptic function is a rational function of p; every elliptic function is R1(p) + p' R2(p); the field of elliptic functions is C(p, p')" index="楕円関数体|だえんかんすうたい"}
+1. 偶な楕円関数 $f$ は、ある有理関数 $R$ について $f=R(\wp)$ と書ける。
+2. 任意の楕円関数 $f$ は、有理関数 $R_{1},R_{2}$ について $f=R_{1}(\wp)+\wp'R_{2}(\wp)$ と書ける。したがって $\Lambda$ に関する楕円関数の全体は体 $\C(\wp,\wp')$ で、これは $\C(\wp)$ の 2 次拡大である（$\wp'^{2}\in\C(\wp)$）。
+:::
+
+::: proof
+**Step 1（偶関数の零点と極の対称性）.** $f$ を定数でない偶な楕円関数とする。$f(z)=f(-z)$ なので、$u$ が $f$ の零点（または極）なら $-u$ も同じ\term[位数]{cx:zero-order}の零点（極）。$u\equiv-u\pmod\Lambda$、すなわち $u$ が $\Lambda$ の点か半周期のとき、$f(u+v)=f(-u-v)=f(u-v)$ から $v\mapsto f(u+v)$ は偶関数で、$u$ での零点・極の\term[位数]{cx:isolated-singularity}は偶数。
+
+**Step 2（因子の構成）.** 周期平行四辺形の中の、$\Lambda$ に属さない零点・極を、$u$ と $-u$ を組にして並べる（半周期の位数 $2m$ の零点は $m$ 組と数える）。各組の代表 $u$ について、$\wp-\wp(u)$ は $u$ と $-u$ に 1 位の零点（$u$ が半周期なら $u$ に 2 位の零点、\ref{cx:half-periods}）をもち、零点はそれだけ（位数 2）。零点の組の代表を $u_{1},\dots,u_{p}$、極の組の代表を $v_{1},\dots,v_{q}$ として
+$$
+g\defeq\frac{\prod_{i}(\wp-\wp(u_{i}))}{\prod_{j}(\wp-\wp(v_{j}))}
+$$
+とおくと、$g$ は $\Lambda$ の外で $f$ と同じ零点と極を同じ位数でもつ。
+
+**Step 3.** $\frac fg$ は楕円関数で、$\Lambda$ の外に零点も極もない。周期平行四辺形の中で零点の個数と極の個数は等しく（\ref{cx:elliptic-liouville.3}）、それらは $\Lambda$ の 1 点にしかないので、そこでの位数は $0$。よって $\frac fg$ は極をもたず定数（同 1）。$f=c\,g$ は $\wp$ の有理関数。
+
+**Step 4（2）.** $f$ を任意の楕円関数とすると、$f_{+}(z)\defeq\frac{f(z)+f(-z)}{2}$ と $f_{-}(z)\defeq\frac{f(z)-f(-z)}{2\wp'(z)}$ は偶な楕円関数（$\wp'$ は奇関数）。1 から $f_{\pm}$ は $\wp$ の有理関数で、$f=f_{+}+\wp'f_{-}$。
+:::
+
+::: supplement
+**楕円曲線との関係.** \ref{cx:wp-differential-equation} から、$z\mapsto(\wp(z),\wp'(z))$ は $(\C/\Lambda)\setminus\{0\}$ を 3 次曲線 $E\colon y^{2}=4x^{3}-g_{2}x-g_{3}$ の上に写す。$\wp$ は各値を $\pm z$ の 2 点でとり、$\wp'$ の符号がその 2 点を区別するので、この写像は全単射で、$0$ を射影平面の無限遠点に送れば、複素トーラス $\C/\Lambda$ と楕円曲線 $E$（の射影閉包）が対応する。楕円曲線の上の加法（コード・タンジェント法）は、$\C/\Lambda$ の加法そのものである。この対応は代数幾何（\ref{ag:page-riemann-roch} の種数 1 の曲線）と数論への入り口になる。
+
+**歴史.** 楕円関数は、楕円の弧長を表す積分 $\int\frac{dx}{\sqrt{(1-x^{2})(1-k^{2}x^{2})}}$ の逆関数として、アーベルとヤコビによって 1820 年代に導入された。$\wp$ 関数による現在の扱いはワイエルシュトラスによる。
+:::
+
+## 問題 {#cx:sec-el-problems}
+
+::: problem {#cx:prob-el-second-derivative}
+$\wp''=6\wp^{2}-\frac{g_{2}}{2}$ を示せ。
+:::
+
+::: solution
+$\wp'^{2}=4\wp^{3}-g_{2}\wp-g_{3}$ を微分すると $2\wp'\wp''=(12\wp^{2}-g_{2})\wp'$。$\wp'\not\equiv0$ なので、零点の集合（離散）の外で $\wp'$ で割って、一致の定理から全体で成り立つ。（ローラン展開 $\wp''=\frac{6}{z^{4}}+6G_{4}+\cdots$, $6\wp^{2}=\frac{6}{z^{4}}+36G_{4}+\cdots$ から定数 $-30G_{4}=-\frac{g_{2}}{2}$ と合う。）
+:::
+
+::: problem {#cx:prob-el-order-one}
+\term[位数]{cx:elliptic-function} 1 の楕円関数が存在しないことを、周期平行四辺形の周に沿った積分を直接計算して示せ。
+:::
+
+::: solution
+\term[位数]{cx:elliptic-function} 1 なら、周期平行四辺形 $P_{a}$（周上に極がないようにとる）の中に 1 位の極 $b$ がただ一つあり、その留数 $c$ は $0$ でない（1 位の極の主要部は $\frac{c}{z-b}$, $c\neq0$）。留数定理から $\oint_{\partial P_{a}}f\,dz=2\pi ic\neq0$。一方、向かい合う辺は平行移動で移り合い向きが逆なので、周期性から積分が打ち消し合って $0$。矛盾。
+:::
+
+::: problem {#cx:prob-el-zeros-of-p}
+$\wp$ は周期平行四辺形の中にちょうど 2 個（重複度込み）の零点をもち、それらは $z_{0}$ と $-z_{0}$ の形であることを示せ。
+:::
+
+::: solution
+$\wp$ の\term[位数]{cx:elliptic-function}は 2 なので、零点は重複度込みで 2 個（\ref{cx:elliptic-liouville.3}、$c=0$）。偶関数なので $z_{0}$ が零点なら $-z_{0}$ も零点。$z_{0}\not\equiv-z_{0}$ なら 2 つの相異なる 1 位の零点、$z_{0}$ が半周期なら 2 位の零点（\ref{cx:half-periods} の証明と同じ）。また \ref{cx:elliptic-liouville.4} と整合する：零点の和 $z_{0}+(-z_{0})=0$、極の和 $0+0$（$\Lambda$ の点の 2 位の極）で、差は $0\in\Lambda$。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{cx:sec-el-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
