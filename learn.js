@@ -1445,33 +1445,81 @@
   /* =====================================================================
    * 証明の段階表示（Pro）
    * ===================================================================== */
+  /* 証明を「Step 1」「Step 2」… の段落で区切り、1 ステップだけを表示して前へ・次へで進む（2026-10-22 ユーザー指示：
+   * 下に増えていくのではなく、本当に 1 ステップずつ）。Step 1 より前の段落（方針など）はいつも表示する。
+   * 最後のステップには、その後ろの段落と前提の確認（hypcheck）も含める。全体表示といつでも行き来できる。
+   * 操作：ボタン、←／→ キー（最後に操作した証明）、スマホは本文を左右にスワイプ。 */
+  var activeStepper = null;
   function decorateProofs() {
     S.article.querySelectorAll('.mn-prose details.mn-env[data-env="proof"]').forEach(function (d) {
       var body = d.querySelector(':scope > .mn-env-body'); if (!body) return;
       var steps = [].filter.call(body.children, function (c) { return c.tagName === 'P' && /^Step\s*\d/.test((c.querySelector('strong') || {}).textContent || ''); });
       if (steps.length < 3 || body.querySelector('.mn-stepper')) return;
-      var bar = el('<div class="mn-stepper mn-learn-x"><button type="button" class="mn-textbtn" data-stepper>' + (isPro() ? '▶ 1 ステップずつ読む' : '🔒 1 ステップずつ読む（Pro）') + '</button></div>');
+      var bar = el('<div class="mn-stepper mn-learn-x" role="group" aria-label="証明の段階表示"></div>');
       body.insertBefore(bar, body.firstChild);
-      bar.addEventListener('click', function (ev) {
-        if (!ev.target.closest('[data-stepper]')) return;
-        if (!isPro()) { proModal('証明を 1 ステップずつ表示する読み方は Pro プランの機能です。'); return; }
-        var all = [].slice.call(body.children).filter(function (c) { return c !== bar; });
-        var idx = all.indexOf(steps[0]), shown = 1;
-        function apply() {
-          var cut = shown < steps.length ? all.indexOf(steps[shown]) : all.length;
-          all.forEach(function (c, i) { c.classList.toggle('mn-step-hidden', i >= cut && i > idx - 1 && i >= all.indexOf(steps[0])); });
-          bar.innerHTML = shown < steps.length
-            ? '<button type="button" class="mn-btn" data-next>次のステップ（' + (shown + 1) + ' / ' + steps.length + '）</button> <button type="button" class="mn-textbtn" data-all>すべて表示</button>'
-            : '<span class="mn-muted">全 ' + steps.length + ' ステップを表示しました。</span>';
+      var all = [].slice.call(body.children).filter(function (c) { return c !== bar; });
+      var first = all.indexOf(steps[0]);
+      // ブロックごとに、どのステップに属するか（-1 は Step 1 より前）
+      var seg = all.map(function (c, i) {
+        if (i < first) return -1;
+        var k = 0; while (k + 1 < steps.length && all.indexOf(steps[k + 1]) <= i) k++;
+        return k;
+      });
+      var on = false, cur = 0;
+      function render() {
+        if (!on) {
+          all.forEach(function (c) { c.classList.remove('mn-step-hidden'); });
+          bar.classList.remove('is-on');
+          bar.innerHTML = isPro()
+            ? '<button type="button" class="mn-textbtn" data-start>▶ 1 ステップずつ読む（全 ' + steps.length + ' ステップ）</button>'
+            : '<button type="button" class="mn-textbtn" data-start>🔒 1 ステップずつ読む（Pro）</button>';
+          return;
         }
-        apply();
-        bar.onclick = function (e2) {
-          if (e2.target.closest('[data-next]')) { shown++; apply(); }
-          else if (e2.target.closest('[data-all]')) { shown = steps.length; apply(); }
-        };
-      }, { once: true });
+        all.forEach(function (c, i) { c.classList.toggle('mn-step-hidden', seg[i] >= 0 && seg[i] !== cur); });
+        bar.classList.add('is-on');
+        var dots = steps.map(function (_, k) { return '<button type="button" class="mn-step-dot' + (k === cur ? ' is-cur' : '') + '" data-go="' + k + '" aria-label="Step ' + (k + 1) + ' へ"></button>'; }).join('');
+        bar.innerHTML =
+          '<button type="button" class="mn-btn mn-step-prev" data-prev' + (cur === 0 ? ' disabled' : '') + ' aria-label="前のステップ">◀ 前へ</button>' +
+          '<span class="mn-step-pos">ステップ ' + (cur + 1) + ' / ' + steps.length + '</span>' +
+          '<button type="button" class="mn-btn mn-step-next" data-next' + (cur === steps.length - 1 ? ' disabled' : '') + ' aria-label="次のステップ">次へ ▶</button>' +
+          '<span class="mn-step-dots">' + dots + '</span>' +
+          '<button type="button" class="mn-textbtn" data-all>全体表示</button>';
+        var c = steps[cur];
+        if (c && c.animate && !REDUCED_L) all.forEach(function (x, i) { if (seg[i] === cur) x.animate([{ opacity: 0, transform: 'translateY(4px)' }, { opacity: 1, transform: 'none' }], { duration: 180, easing: 'ease-out' }); });
+        var r = bar.getBoundingClientRect();
+        if (r.top < 0 || r.top > window.innerHeight - 60) bar.scrollIntoView({ block: 'nearest', behavior: REDUCED_L ? 'auto' : 'smooth' });
+      }
+      function go(k) { cur = Math.max(0, Math.min(steps.length - 1, k)); activeStepper = api; render(); }
+      var api = { prev: function () { if (on) go(cur - 1); }, next: function () { if (on) go(cur + 1); }, el: d };
+      bar.addEventListener('click', function (ev) {
+        var t = ev.target.closest('button'); if (!t) return;
+        if (t.hasAttribute('data-start')) {
+          if (!isPro()) { proModal('証明を 1 ステップずつ表示する読み方は Pro プランの機能です。'); return; }
+          on = true; go(0); return;
+        }
+        if (t.hasAttribute('data-prev')) go(cur - 1);
+        else if (t.hasAttribute('data-next')) go(cur + 1);
+        else if (t.hasAttribute('data-go')) go(+t.getAttribute('data-go'));
+        else if (t.hasAttribute('data-all')) { on = false; activeStepper = null; render(); }
+      });
+      // スマホ：本文を左右にスワイプして前へ・次へ（縦のスクロールは邪魔しない）
+      var sx = null, sy = 0;
+      body.addEventListener('touchstart', function (ev) { if (!on) return; sx = ev.touches[0].clientX; sy = ev.touches[0].clientY; }, { passive: true });
+      body.addEventListener('touchend', function (ev) {
+        if (!on || sx === null) return;
+        var t = ev.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy; sx = null;
+        if (Math.abs(dx) > 60 && Math.abs(dx) > 2 * Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+      });
+      render();
     });
   }
+  var REDUCED_L = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.addEventListener('keydown', function (ev) {
+    if (!activeStepper || typing(ev.target) || ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if (!activeStepper.el.open) return;
+    if (ev.key === 'ArrowRight') { ev.preventDefault(); activeStepper.next(); }
+    else if (ev.key === 'ArrowLeft') { ev.preventDefault(); activeStepper.prev(); }
+  });
 
   /* =====================================================================
    * 開発用の Free / Pro 切替（テーマ切替の隣）
