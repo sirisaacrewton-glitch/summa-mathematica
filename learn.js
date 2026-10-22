@@ -1538,13 +1538,15 @@
       }
       var past = el('<div class="mn-step-past mn-learn-x" hidden></div>'), quiz = el('<div class="mn-step-quiz mn-learn-x" hidden></div>');
       var stepHyp = el('<div class="mn-step-hyp mn-learn-x" hidden></div>');
+      // 主張（【主張：…】）のないステップ：全文を見せたうえで、その下で記録だけ付けられるようにする
+      var recRow = el('<div class="mn-step-rec mn-learn-x" hidden></div>');
       function pastItem(k) { return '<span class="mn-step-label">' + labels[k] + '</span>' + (claims[k] ? ' <span class="mn-step-claim">' + claims[k].innerHTML + '</span>' : ''); }
       function lastBlock(k) { var lb = null; all.forEach(function (c, i) { if (seg[i] === k) lb = c; }); return lb; }
       function render() {
         if (!on) {
           all.forEach(function (c) { c.classList.remove('mn-step-hidden'); });
           if (hyp) hyp.classList.remove('mn-step-hidden');
-          past.hidden = quiz.hidden = stepHyp.hidden = true;
+          past.hidden = quiz.hidden = stepHyp.hidden = recRow.hidden = true;
           bar.classList.remove('is-on');
           bar.innerHTML = '<button type="button" class="mn-textbtn mn-step-start" data-start>' + (isPro() ? '1 ステップずつ読む' : '🔒 1 ステップずつ読む（Pro）') + '</button>';
           return;
@@ -1560,12 +1562,20 @@
             '<button type="button" class="mn-textbtn" data-reveal="unsure">わからなかった・理由を見る</button>';
           body.insertBefore(quiz, steps[cur]); quiz.hidden = false;
         } else quiz.hidden = true;
+        if (!claims[cur]) {
+          var r2 = rec(cur);
+          recRow.innerHTML = '<span class="mn-step-quiz-hint">このステップ：</span>' +
+            '<button type="button" class="mn-textbtn' + (r2 && r2.s === 'self' ? ' is-on' : '') + '" data-rec="self">確かめた</button> ' +
+            '<button type="button" class="mn-textbtn' + (r2 && r2.s === 'unsure' ? ' is-on' : '') + '" data-rec="unsure">わからなかった</button>';
+          var lb0 = lastBlock(cur); body.insertBefore(recRow, lb0 ? lb0.nextSibling : null); recRow.hidden = false;
+        } else recRow.hidden = true;
         // このステップで使った前提（理由を見た後に）
         var hs = hideCur ? [] : hypFor(cur);
         if (hs.length) {
           stepHyp.innerHTML = '<div class="mn-step-hyp-k">このステップで使った前提</div><ul>' + hs.map(function (li) { return '<li>' + li.innerHTML + '</li>'; }).join('') + '</ul>';
           var lb = lastBlock(cur); body.insertBefore(stepHyp, lb ? lb.nextSibling : null); stepHyp.hidden = false;
         } else stepHyp.hidden = true;
+        if (!recRow.hidden && !stepHyp.hidden) body.insertBefore(recRow, stepHyp.nextSibling);   // 記録の行は前提の下
         // 前提の使用箇所の全体：最後のステップの理由まで見たとき、またはバーから開いたとき
         var atEnd = cur === steps.length - 1 && !hideCur;
         if (hyp) hyp.classList.toggle('mn-step-hidden', !(atEnd || showHyp));
@@ -1618,6 +1628,11 @@
         else if (t.hasAttribute('data-hide')) { revealed[cur] = false; render(); }
         else if (t.hasAttribute('data-hyp')) { showHyp = !showHyp; render(); }
         else if (t.hasAttribute('data-all')) { on = false; activeStepper = null; render(); }
+      });
+      recRow.addEventListener('click', function (ev) {
+        var b = ev.target.closest('[data-rec]'); if (!b) return;
+        var st = b.getAttribute('data-rec'), r3 = rec(cur);
+        StepLog.set(key, cur, heads0[cur], r3 && r3.s === st ? null : st); activeStepper = api; render();
       });
       quiz.addEventListener('click', function (ev) {
         var b = ev.target.closest('[data-reveal]'); if (!b) return;
