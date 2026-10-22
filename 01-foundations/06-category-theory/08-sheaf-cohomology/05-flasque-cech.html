@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>脆弱層とチェックコホモロジー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/06-category-theory/08-sheaf-cohomology/05-flasque-cech.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 脆弱層とチェックコホモロジー {#cat:page-flasque-cech keywords="flasque sheaf, flabby, flasque sheaves are acyclic, injective sheaves are flasque, Godement resolution, acyclic resolutions compute cohomology, Cech complex, Cech cohomology of a cover, sheafified Cech resolution, Leray's theorem"}
+
+層コホモロジーは入射分解で定義した（\ref{cat:sheaf-cohomology}）が、入射層は具体的に扱いにくい。制限写像がすべて全射な**脆弱層**はコホモロジーが消え（Γ 非輪状）、どの層も標準的な脆弱分解（**ゴドマン分解**）をもつので、コホモロジーは脆弱分解で計算できる。さらに、開被覆の交わりの上の切断で作る**チェック複体**を導入し、交わりがすべて非輪状な被覆ではチェックコホモロジーが層コホモロジーと一致すること（**ルレイの定理**）を示す。
+
+
+## 記法と定義の確認 {#cat:sec-flc-notation}
+
+::: notation
+- $X$ は位相空間、$\mathbf{Ab}(X)$ はアーベル群の層の圏。核・余核・完全性は茎で判定できる（\ref{cat:sheaf-kernel-cokernel}, \ref{cat:ab-sheaves-abelian}）。エピ射は局所的に持ち上がる：$\psi:F\to F''$ がエピで $s''\in F''(U)$, $x\in U$ なら、$x$ の近傍 $W$ と $t\in F(W)$ で $\psi(t)=s''|_{W}$ となるものがある（茎の全射性から）。
+- 大域切断 $\Gamma$ の左完全性、層コホモロジー $H^{q}(X,-)=R^{q}\Gamma$、長完全列、入射層の非輪状性は \ref{cat:global-sections-left-exact}, \ref{cat:sheaf-cohomology}, \ref{cat:sheaf-cohomology-basic}。開集合 $U$ について $H^{q}(U,F)\defeq H^{q}(U,F|_{U})$。
+- 摩天楼層・順像・0 拡張は \ref{cat:presheaf-examples}, \ref{cat:direct-image}, \ref{cat:extension-by-zero}, \ref{cat:extension-by-zero-properties}。定数層 $\underline{\mathbb{Z}}$（\ref{cat:presheaf-examples.4}）。
+- **選択公理**：脆弱層の基本補題（\ref{cat:flasque-surjective}）でツォルンの補題を、層コホモロジーの定義（入射分解）で選択公理を使う。ゴドマン分解とチェック複体は選択なしに定まる。
+:::
+
+## 脆弱層 {#cat:sec-flc-flasque}
+
+::: definition 脆弱層 {#cat:flasque keywords="flasque (flabby) sheaf: restriction maps are surjective" index="脆弱層|ぜいじゃくそう"}
+層 $F$ が**脆弱**であるとは、すべての開集合 $U$ について制限 $F(X)\to F(U)$ が全射であることをいう。このとき開集合 $U\subset V$ について $F(V)\to F(U)$ も全射（$F(X)\to F(U)$ が $F(V)$ を経由する）。
+:::
+
+::: example 脆弱層の例 {#cat:flasque-examples}
+1. 摩天楼層 $x_{*}A$：$F(U)$ は $A$ か $0$ で、制限は恒等か $0$。
+2. 脆弱層の積 $\prod_{\lambda}F_{\lambda}$（切断ごとの積）は脆弱。脆弱層の順像 $f_{*}F$ は脆弱（$F(X)\to F(f^{-1}V)$ が全射）。脆弱層の開集合への制限は脆弱。
+3. **不連続な切断の層**：層 $F$ について $\mathcal{G}^{0}(F)\defeq\prod_{x\in X}(x_{*}F_{x})$、すなわち $\mathcal{G}^{0}(F)(U)=\prod_{x\in U}F_{x}$（芽の任意の族）は脆弱（制限は射影）。$F\to\mathcal{G}^{0}(F)$, $s\mapsto(s_{x})_{x}$ は単射（\ref{cat:germs-determine-sections}）。
+4. 定数層 $\underline{\mathbb{Z}}$ は $X=\mathbb{R}$ で脆弱でない：$U=(-2,-1)\cup(1,2)$ 上の切断（$-1$ と $1$）は、連結な $\mathbb{R}$ 上の局所定数関数（定数）の制限でない。
+:::
+
+::: lemma 脆弱層の基本補題 {#cat:flasque-surjective keywords="if F' is flasque in 0 -> F' -> F -> F'' -> 0 then F(U) -> F''(U) is surjective; quotients of flasque by flasque are flasque" index="脆弱層の基本補題|ぜいじゃくそうのきほんほだい"}
+$0\to F'\to F\xrightarrow{\psi}F''\to0$ を $\mathbf{Ab}(X)$ の短完全列とする。
+1. $F'$ が脆弱なら、すべての開集合 $U$ で $\psi_{U}:F(U)\to F''(U)$ は全射。
+2. $F'$, $F$ が脆弱なら $F''$ も脆弱。
+:::
+
+::: proof
+**Step 1（1：ツォルンの補題）.** $s''\in F''(U)$ をとる。組 $(V,t)$（$V\subset U$ は開、$t\in F(V)$, $\psi(t)=s''|_{V}$）の集合に、$(V,t)\le(V',t')\iff V\subset V'$ かつ $t'|_{V}=t$ で順序を入れる。$(\emptyset,0)$ があるので空でなく、鎖 $(V_{\lambda},t_{\lambda})$ について $t_{\lambda}$ は両立するので $\bigcup V_{\lambda}$ 上に貼り合わさり（$F$ は層）、$\psi$ との両立は $F''$ の分離性から。ツォルンの補題により極大元 $(V,t)$ がある。
+
+**Step 2（1：極大元は $U$ 全体）.** $V\neq U$ と仮定し、$x\in U\setminus V$ をとる。エピ射の局所的な持ち上げから、$x$ の近傍 $W\subset U$ と $t'\in F(W)$ で $\psi(t')=s''|_{W}$。$V\cap W$ 上 $\psi(t-t')=0$ なので $t-t'$ は $F'(V\cap W)$ の元。$F'$ は脆弱なので $r\in F'(W)$ で $r|_{V\cap W}=(t-t')|_{V\cap W}$ となるものがある。$t'+r$ と $t$ は $V\cap W$ で一致するので $V\cup W$ 上に貼り合わさり、$\psi(t'+r)=s''|_{W}$。これは極大性に反する。
+
+**Step 3（2）.** $U$ について、可換図式
+$$
+\begin{array}{ccc}
+F(X) & \to & F''(X)\\
+\downarrow & & \downarrow\\
+F(U) & \to & F''(U)
+\end{array}
+$$
+で、左の縦は $F$ の脆弱性から全射、下の横は 1 から全射。よって $F(X)\to F''(U)$ は全射で、右の縦も全射。
+:::
+
+::: theorem 脆弱層は非輪状 {#cat:flasque-acyclic keywords="injective sheaves are flasque; flasque sheaves have vanishing higher cohomology" index="脆弱層の非輪状性|ぜいじゃくそうのひりんじょうせい"}
+1. 入射層は脆弱。
+2. 脆弱層 $F$ について、$q\ge1$ で $H^{q}(X,F)=0$。
+:::
+
+::: proof
+**Step 1（1）.** $I$ を入射層、$j:U\to X$ を開集合の包含とする。$\underline{\mathbb{Z}}_{U}$ を $U$ 上の定数層とすると、$j_{!}\underline{\mathbb{Z}}_{U}\to\underline{\mathbb{Z}}_{X}$（$j_{!}\dashv j^{-1}$ で $\underline{\mathbb{Z}}_{U}=\underline{\mathbb{Z}}_{X}|_{U}$ に対応する射）は茎で $U$ 上 $\mathbb{Z}\to\mathbb{Z}$（恒等）、$U$ の外で $0\to\mathbb{Z}$ なので単射（\ref{cat:extension-by-zero-properties.1}）。層 $G$ について $\operatorname{Hom}(\underline{\mathbb{Z}},G)\cong G(X)$（射は大域切断 $\varphi(1)$ で決まり、逆に $s\in G(X)$ から局所定数関数 $n$ に $n\cdot s$ を局所的に対応させる）で、同様に $\operatorname{Hom}(j_{!}\underline{\mathbb{Z}}_{U},I)\cong\operatorname{Hom}(\underline{\mathbb{Z}}_{U},I|_{U})\cong I(U)$。入射性から $\operatorname{Hom}(\underline{\mathbb{Z}}_{X},I)\to\operatorname{Hom}(j_{!}\underline{\mathbb{Z}}_{U},I)$ は全射で、これは制限 $I(X)\to I(U)$ と一致する。
+
+**Step 2（2：$q=1$）.** 脆弱層 $F$ を入射層 $I$ に埋め込み、$0\to F\to I\to Q\to0$ とする（$Q$ は余核）。$I$ は脆弱（1）なので $Q$ も脆弱（\ref{cat:flasque-surjective.2}）。長完全列 $I(X)\to Q(X)\to H^{1}(X,F)\to H^{1}(X,I)=0$ と \ref{cat:flasque-surjective.1} から $H^{1}(X,F)=0$。
+
+**Step 3（2：$q\ge2$）.** 同じ列から $H^{q}(X,Q)\cong H^{q+1}(X,F)$（$q\ge1$。両側の $H^{q}(X,I)$, $H^{q+1}(X,I)$ が $0$）。$Q$ も脆弱なので、$q$ についての帰納法で $H^{q}(X,F)=0$（すべての脆弱層について同時に）。
+:::
+
+::: theorem 非輪状分解による計算 {#cat:acyclic-resolution keywords="cohomology can be computed by any Gamma-acyclic resolution, e.g. a flasque resolution; Godement resolution" index="非輪状分解|ひりんじょうぶんかい, ゴドマン分解|ごどまんぶんかい"}
+1. $0\to F\to L^{0}\to L^{1}\to\cdots$ が完全で、各 $L^{p}$ が $\Gamma$ 非輪状（$q\ge1$ で $H^{q}(X,L^{p})=0$）なら、$H^{q}(X,F)\cong H^{q}(\Gamma(X,L^{\bullet}))$。
+2. （ゴドマン分解）$\mathcal{G}^{0}\defeq\mathcal{G}^{0}(F)$, $Z^{1}\defeq\operatorname{coker}(F\to\mathcal{G}^{0})$, $\mathcal{G}^{1}\defeq\mathcal{G}^{0}(Z^{1})$, … と続けた $0\to F\to\mathcal{G}^{0}\to\mathcal{G}^{1}\to\cdots$ は脆弱分解で、$F$ について関手的。したがって $H^{q}(X,F)\cong H^{q}(\Gamma(X,\mathcal{G}^{\bullet}(F)))$。
+:::
+
+::: proof
+**Step 1（1：短完全列に分ける）.** $Z^{p}\defeq\ker(L^{p}\to L^{p+1})$ とすると、完全性から $Z^{0}=F$ で、$0\to Z^{p}\to L^{p}\to Z^{p+1}\to0$ は短完全列（\ref{cat:ab-sheaves-abelian.4}）。長完全列から、$q\ge1$ で $H^{q}(X,Z^{p+1})\cong H^{q+1}(X,Z^{p})$、また
+$$
+H^{1}(X,Z^{p})\cong\operatorname{coker}\bigl(L^{p}(X)\to Z^{p+1}(X)\bigr).
+$$
+
+**Step 2（1：まとめる）.** $\Gamma$ は左完全なので $Z^{p+1}(X)=\ker(L^{p+1}(X)\to L^{p+2}(X))$。よって右辺は $H^{p+1}(\Gamma L^{\bullet})$ で、$H^{1}(X,Z^{p})\cong H^{p+1}(\Gamma L^{\bullet})$。$q\ge1$ について Step 1 をくり返すと $H^{q}(X,F)=H^{q}(X,Z^{0})\cong H^{q-1}(X,Z^{1})\cong\cdots\cong H^{1}(X,Z^{q-1})\cong H^{q}(\Gamma L^{\bullet})$。$q=0$ は左完全性から。
+
+**Step 3（2）.** 各 $\mathcal{G}^{p}$ は脆弱（\ref{cat:flasque-examples.3}）で、$Z^{p}\to\mathcal{G}^{0}(Z^{p})$ は単射なので、構成から完全。$\mathcal{G}^{0}$ と余核は関手的。脆弱層は非輪状（\ref{cat:flasque-acyclic}）なので 1 が使える。
+:::
+
+## チェックコホモロジー {#cat:sec-flc-cech}
+
+::: definition チェック複体 {#cat:cech-complex keywords="Cech complex of an open cover, Cech cohomology of a cover" index="チェック複体|ちぇっくふくたい, チェックコホモロジー|ちぇっくこほもろじー"}
+開被覆 $\mathcal{U}=\{U_{i}\}_{i\in I}$ と添字の列 $\sigma=(i_{0},\dots,i_{p})$ について $U_{\sigma}\defeq U_{i_{0}}\cap\cdots\cap U_{i_{p}}$ とおく。前層 $F$ について
+$$
+C^{p}(\mathcal{U},F)\defeq\prod_{(i_{0},\dots,i_{p})\in I^{p+1}}F(U_{i_{0}\cdots i_{p}}),
+$$
+$$
+(dc)_{i_{0}\cdots i_{p+1}}\defeq\sum_{k=0}^{p+1}(-1)^{k}c_{i_{0}\cdots\widehat{i_{k}}\cdots i_{p+1}}\big|_{U_{i_{0}\cdots i_{p+1}}}
+$$
+とする（$\widehat{i_{k}}$ は除くことを表す）。$dd=0$（各項が 2 通りに異なる符号で現れる）なので複体で、そのコホモロジーを**チェックコホモロジー** $\check{H}^{p}(\mathcal{U},F)$ という。
+:::
+
+::: proposition チェック複体の基本性質 {#cat:cech-basic keywords="Cech H^0 is global sections; the sheafified Cech complex is a resolution; Cech cohomology of a flasque sheaf vanishes" index="チェック分解|ちぇっくぶんかい"}
+$F$ を層とする。
+1. $\check{H}^{0}(\mathcal{U},F)=F(X)$。
+2. $\mathcal{C}^{p}(\mathcal{U},F)(V)\defeq\prod_{\sigma}F(V\cap U_{\sigma})$ は層で、$0\to F\to\mathcal{C}^{0}(\mathcal{U},F)\to\mathcal{C}^{1}(\mathcal{U},F)\to\cdots$ は完全（**チェック分解**）。$\Gamma(X,\mathcal{C}^{\bullet})=C^{\bullet}(\mathcal{U},F)$。
+3. $F$ が脆弱なら各 $\mathcal{C}^{p}(\mathcal{U},F)$ は脆弱で、$p\ge1$ で $\check{H}^{p}(\mathcal{U},F)=0$。
+:::
+
+::: proof
+**Step 1（1）.** $c\in C^{0}$ が $dc=0$ とは $c_{j}|_{U_{ij}}-c_{i}|_{U_{ij}}=0$、すなわち両立する族。層の条件から $F(X)$ と一対一。
+
+**Step 2（2：層）.** $\mathcal{C}^{p}=\prod_{\sigma}(j_{\sigma})_{*}(F|_{U_{\sigma}})$（$j_{\sigma}:U_{\sigma}\to X$）で、順像と積は層を保つ（\ref{cat:direct-image-basic}）。
+
+**Step 3（2：完全性）.** 茎で調べる（\ref{cat:ab-sheaves-abelian.4}）。$x\in X$ をとり $x\in U_{j}$ となる $j$ を一つ固定する（存在するものを一つ固定して議論するだけで、選択関数は作らない）。$V\subset U_{j}$ となる開集合 $V$ について、$V$ 上の切断の複体（$F(V)\to\mathcal{C}^{0}(V)\to\cdots$、$F(V)$ を $(-1)$ 次とみる）に
+$$
+(hc)_{i_{0}\cdots i_{p-1}}\defeq c_{j\,i_{0}\cdots i_{p-1}}\qquad(V\cap U_{j\,i_{0}\cdots i_{p-1}}=V\cap U_{i_{0}\cdots i_{p-1}})
+$$
+を考えると、計算により $dh+hd=1$（$p=0$ では $h(c)\defeq c_{j}\in F(V)$ で、$-1$ 次の項を含めて）。よって $V$ 上の複体は完全。茎の元は $x$ のある近傍 $V\subset U_{j}$ 上の切断で表されるので、茎の複体も完全（コサイクル $c_{x}$ を $V$ 上のコサイクルで表し、$c=d(hc)$）。
+
+**Step 4（3）.** $F|_{U_{\sigma}}$ は脆弱、順像と積は脆弱性を保つ（\ref{cat:flasque-examples.2}）。2 は脆弱分解なので、\ref{cat:acyclic-resolution.1} と \ref{cat:flasque-acyclic} から $\check{H}^{p}(\mathcal{U},F)=H^{p}(\Gamma\mathcal{C}^{\bullet})\cong H^{p}(X,F)=0$（$p\ge1$）。
+:::
+
+::: theorem ルレイの定理 {#cat:leray-theorem keywords="Leray's theorem: if F is acyclic on all finite intersections of a cover, Cech cohomology of the cover equals sheaf cohomology" index="ルレイの定理|るれいのていり" refname="ルレイの定理"}
+開被覆 $\mathcal{U}$ と層 $F$ について、すべての $\sigma$ と $q\ge1$ で $H^{q}(U_{\sigma},F)=0$ なら、すべての $p$ で $\check{H}^{p}(\mathcal{U},F)\cong H^{p}(X,F)$。
+:::
+
+::: proof
+**Step 1（脆弱層への埋め込み）.** $0\to F\to\mathcal{G}\to Q\to0$（$\mathcal{G}=\mathcal{G}^{0}(F)$ は脆弱）をとる。各 $U_{\sigma}$ に制限しても短完全列で（完全性は茎で判定）、$\mathcal{G}|_{U_{\sigma}}$ は脆弱なので非輪状。$U_{\sigma}$ での長完全列と $H^{1}(U_{\sigma},F)=0$ から $0\to F(U_{\sigma})\to\mathcal{G}(U_{\sigma})\to Q(U_{\sigma})\to0$ は完全、また $H^{q}(U_{\sigma},Q)\cong H^{q+1}(U_{\sigma},F)=0$（$q\ge1$）。よって $Q$ も仮定をみたす。
+
+**Step 2（チェック複体の短完全列）.** Step 1 から、成分ごとに $0\to C^{\bullet}(\mathcal{U},F)\to C^{\bullet}(\mathcal{U},\mathcal{G})\to C^{\bullet}(\mathcal{U},Q)\to0$ は複体の短完全列で、長完全列（\ref{ha:long-exact-sequence}）を得る。\ref{cat:cech-basic.3} から $p\ge1$ で $\check{H}^{p}(\mathcal{U},\mathcal{G})=0$、1 から $\check{H}^{0}=\Gamma$。
+
+**Step 3（比較）.** 二つの長完全列から
+$$
+\check{H}^{1}(\mathcal{U},F)\cong\operatorname{coker}(\mathcal{G}(X)\to Q(X))\cong H^{1}(X,F),
+$$
+$p\ge1$ で $\check{H}^{p+1}(\mathcal{U},F)\cong\check{H}^{p}(\mathcal{U},Q)$ と $H^{p+1}(X,F)\cong H^{p}(X,Q)$（どちらも中央の項が消える）。$Q$ も仮定をみたすので、$p$ についての帰納法（すべての層について同時に）で $\check{H}^{p}(\mathcal{U},F)\cong H^{p}(X,F)$。$p=0$ は \ref{cat:cech-basic.1}。
+:::
+
+::: lemma 二つの開集合の被覆 {#cat:cech-two-cover keywords="Cech H^1 of a cover by two open sets" index="二つの開集合の被覆|ふたつのかいしゅうごうのひふく"}
+開被覆が二つの開集合 $\mathcal{U}=\{U_{0},U_{1}\}$ のとき、層 $F$ について
+$$
+\check{H}^{1}(\mathcal{U},F)\cong F(U_{0}\cap U_{1})/\bigl(F(U_{0})|_{U_{01}}+F(U_{1})|_{U_{01}}\bigr).
+$$
+:::
+
+::: proof
+$C^{1}$ の成分は $(00),(01),(10),(11)$。コサイクル条件 $(dc)_{ijk}=c_{jk}-c_{ik}+c_{ij}=0$ から、$(i,j,k)=(0,0,0)$ で $c_{00}=0$、同様に $c_{11}=0$、$(0,1,0)$ で $c_{10}+c_{01}-c_{00}=0$ すなわち $c_{10}=-c_{01}$。他の $(i,j,k)$ の条件はこれらから従う（たとえば $(0,1,1)$：$c_{11}-c_{01}+c_{01}=0$）。よってコサイクルは $c_{01}\in F(U_{01})$ で決まる。コバウンダリは $(db)_{01}=b_{1}|-b_{0}|$, $(db)_{00}=(db)_{11}=0$ なので、$c_{01}$ の像の全体は $F(U_{0})|+F(U_{1})|$。
+:::
+
+::: example 円周のチェックコホモロジー
+$X=S^{1}$ を二つの開弧 $U_{0},U_{1}$ で、交わりが二つの交わらない開弧 $A\sqcup B$ となるように覆い、$F=\underline{\mathbb{Z}}$ とする。連結な開集合上の切断は $\mathbb{Z}$ なので $F(U_{01})=\mathbb{Z}^{2}$ で、$F(U_{i})=\mathbb{Z}$ の像はどちらも対角 $\{(n,n)\}$。\ref{cat:cech-two-cover} から $\check{H}^{1}(\mathcal{U},\underline{\mathbb{Z}})\cong\mathbb{Z}^{2}/\mathbb{Z}(1,1)\cong\mathbb{Z}$。開弧（および二つの開弧の非交和）の上で $\underline{\mathbb{Z}}$ が非輪状であること（\ref{cat:page-singular-comparison} の比較定理と特異コホモロジーのホモトピー不変性から従う）を認めれば、ルレイの定理から $H^{1}(S^{1},\underline{\mathbb{Z}})\cong\mathbb{Z}$。
+:::
+
+::: hypcheck
+- **選択公理**：\ref{cat:flasque-surjective.1} でツォルンの補題を使う。\ref{cat:flasque-acyclic.1} では入射層の定義を使うだけ、2 では入射層への埋め込み（\ref{cat:ab-sheaves-enough-injectives}、選択公理を使う）を使う。ゴドマン分解とチェック複体は選択なしに定まる。チェック分解の完全性（\ref{cat:cech-basic} の Step 3）では、点 $x$ ごとに $x\in U_{j}$ となる $j$ を一つ固定するが、これは各茎の完全性を示すための議論で、族として選ぶ必要はない。
+- ルレイの定理の仮定「すべての有限個の交わりで非輪状」は Step 1 で、$F(U_{\sigma})\to\mathcal{G}(U_{\sigma})\to Q(U_{\sigma})$ の全射性（$H^{1}=0$）と $Q$ への仮定の継承（高次の消滅）に使った。
+- 添字の列はすべての $(i_{0},\dots,i_{p})$ をとった（交代チェック複体ではない）。交代複体でも同じコホモロジーになることが知られている（本サイト未収録）。
+:::
+
+::: supplement
+**被覆の細分と $\check{H}(X,F)$（未収録）.** 被覆の細分について $\check{H}^{p}(\mathcal{U},F)$ の余極限をとったものを $\check{H}^{p}(X,F)$ と書く。つねに $\check{H}^{1}(X,F)\cong H^{1}(X,F)$ で、$X$ がパラコンパクト・ハウスドルフならすべての $p$ で $\check{H}^{p}(X,F)\cong H^{p}(X,F)$ であることが知られている（本サイト未収録）。
+
+**計算の観点.** 有限な開被覆と、各交わりで値が有限生成アーベル群の層について、チェック複体は有限生成自由加群（の積）の複体で、コホモロジーは整数行列のスミス標準形（\ref{mod:smith-pr-euclidean}）で計算できる（原始再帰的）。ルレイの定理は「良い被覆」さえ見つければ層コホモロジーが有限の線形代数に帰着することを述べている。
+:::
+
+## 高い視点 {#cat:sec-flc-viewpoint}
+
+::: remark 被覆の神経と単体的な見方
+チェック複体は、被覆の**神経**（添字の組 $(i_{0},\dots,i_{p})$ で $U_{\sigma}\neq\emptyset$ のものを $p$ 単体とする単体的集合）の上で、係数を場所ごとに変えたコチェイン複体である。単体的集合（\ref{cat:page-simplicial}）の言葉では、$p\mapsto\prod F(U_{\sigma})$ は余単体的アーベル群で、チェック複体はその交代和の複体にあたる。比喩で言えば、層コホモロジーは「空間全体を見る理想の測量」、チェックコホモロジーは「有限個の地図の重なりだけを見る実地測量」で、ルレイの定理は「各地図とその重なりが歪みのない（非輪状な）地図なら、実地測量で理想の値が得られる」ことを保証する。
+:::
+
+## 問題 {#cat:sec-flc-problems}
+
+::: problem {#cat:prob-fc-sierpinski}
+シェルピンスキー空間 $X=\{a,b\}$（開集合は $\emptyset,\{a\},X$）上のアーベル群の層 $F$ は、準同型 $\rho:F(X)\to F(\{a\})$ と同じものであることを示し、$F$ が脆弱 $\iff\rho$ が全射を確かめよ。さらに、脆弱でない層も含めて、すべての層 $F$ と $q\ge1$ で $H^{q}(X,F)=0$ となることを示せ。
+:::
+
+::: solution
+$X$ の開被覆は $X$ 自身を含むか（このとき層の条件は自明）、空集合の被覆（$\emptyset$ 上：$F(\emptyset)=0$）だけで、$\{a\}$ の開被覆も同様。よって層の条件は $F(\emptyset)=0$ だけで、層は $\rho$ と同じもの。脆弱性の定義から、$F$ が脆弱 $\iff\rho$ が全射（$F(X)\to F(\emptyset)=0$ はつねに全射）。たとえば $\rho:0\to\mathbb{Z}$（0 拡張 $j_{!}\underline{\mathbb{Z}}$、$j:\{a\}\to X$）は脆弱でない。
+
+$b$ を含む開集合は $X$ だけなので $F_{b}=F(X)$、すなわち $\Gamma(X,-)$ は茎 $F\mapsto F_{b}$ と同じ関手で、完全（\ref{cat:ab-sheaves-abelian.4}）。入射分解 $0\to F\to I^{\bullet}$ に完全関手 $\Gamma$ を施すと完全列なので、$q\ge1$ で $H^{q}(X,F)=0$。脆弱でない層も非輪状になりうる例である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

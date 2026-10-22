@@ -96,3 +96,59 @@
 * 統合：基本群と被覆空間＋高次ホモトピー群 → ホモトピー論（id `at-homotopy`。旧 id `at-fundamental-group`・`at-higher-homotopy` を置き換え）。分離公理・コンパクト性・連結性＋性質の保存と含意の一覧 → 基本性質（id `top-properties`、§19〜21 が旧一覧）。
 * 一様空間・距離空間は一般位相の直下の系列。圏論は 9 系列を平らに（基礎論の下）。ホモロジー代数は代数の下。
 * 分野の `_meta.json` の `field` が用語リンクの分野番号（旧フォルダ名の先頭 2 桁と同じ値）。
+
+
+## 圏論の系列の組み直し（2026-10-22 ユーザー承認）
+
+本質的な関連（ページ間の参照）に基づく再編。ラベルは変わらない（層の定義 `cat:sheaf-space` だけは、層のトポスのページから層のコホモロジー §1 に移した）。フォルダはすべて `01-foundations/06-category-theory/` の下。
+
+| 旧ページ | 新ページ |
+|---|---|
+| `02-structured-categories/01-cartesian-closed` | `02-monoidal-categories/04-cartesian-closed` |
+| `02-structured-categories/02-monoidal` | `02-monoidal-categories/01-monoidal` |
+| `02-structured-categories/03-monoids-actions` | `02-monoidal-categories/02-monoids-actions` |
+| `02-structured-categories/04-simplicial` | `02-monoidal-categories/03-simplicial` |
+| `02-structured-categories/05-closed-categories` | `02-monoidal-categories/05-closed-categories` |
+| `02-structured-categories/06-monoidal-functors` | `02-monoidal-categories/06-monoidal-functors` |
+| `02-structured-categories/07-symmetric-coherence` | `02-monoidal-categories/07-symmetric-coherence` |
+| `02-structured-categories/08-braids` | `02-monoidal-categories/08-braids` |
+| `02-structured-categories/09-loops-suspensions` | `07-operads/01-loops-suspensions` |
+| `02-structured-categories/10-doctrinal-adjunction` | `02-monoidal-categories/09-doctrinal-adjunction` |
+| `02-structured-categories/11-lawvere-metric` | `02-monoidal-categories/10-lawvere-metric` |
+| `02-structured-categories/12-symmetric-monoidal-closed` | `02-monoidal-categories/11-symmetric-monoidal-closed` |
+| `04-kan-extensions/06-nerve-realization` | `05-higher-categories/02-nerve-realization` |
+| `05-higher-structures/01-internal-categories` | `05-higher-categories/01-internal-categories` |
+| `05-higher-structures/02-2-categories` | `05-higher-categories/03-2-categories` |
+| `05-higher-structures/03-bicategories` | `05-higher-categories/04-bicategories` |
+| `05-higher-structures/04-crossed-modules` | `05-higher-categories/05-crossed-modules` |
+| `05-higher-structures/05-segal-condition` | `05-higher-categories/06-segal-condition` |
+| `08-enriched-rigid/01-enriched` | `06-enriched-rigid/01-enriched` |
+| `08-enriched-rigid/02-day-convolution` | `06-enriched-rigid/02-day-convolution` |
+| `08-enriched-rigid/03-string-diagrams` | `06-enriched-rigid/03-string-diagrams` |
+| `08-enriched-rigid/04-rigid-pivotal` | `06-enriched-rigid/04-rigid-pivotal` |
+| `08-enriched-rigid/05-ribbon-tangles` | `06-enriched-rigid/05-ribbon-tangles` |
+| `08-enriched-rigid/06-hopf` | `06-enriched-rigid/06-hopf` |
+| `08-enriched-rigid/07-tannaka` | `06-enriched-rigid/07-tannaka` |
+| `09-operads/01-operads` | `07-operads/02-operads` |
+| `09-operads/02-little-intervals` | `07-operads/03-little-intervals` |
+| `09-operads/03-little-disks` | `07-operads/04-little-disks` |
+| `09-operads/04-eckmann-hilton` | `07-operads/05-eckmann-hilton` |
+| `09-operads/05-e2-braided` | `07-operads/06-e2-braided` |
+| `09-operads/06-infinite-loop` | `07-operads/07-infinite-loop` |
+| `07-sheaves/01-presheaves-sheaves` | `08-sheaf-cohomology/01-presheaves-sheaves` |
+| `07-sheaves/02-sheafification` | `08-sheaf-cohomology/02-sheafification` |
+| `07-sheaves/03-direct-inverse-image` | `08-sheaf-cohomology/03-direct-inverse-image` |
+| `07-sheaves/04-abelian-sheaves` | `08-sheaf-cohomology/04-abelian-sheaves` |
+| `07-sheaves/10-flasque-cech` | `08-sheaf-cohomology/05-flasque-cech` |
+| `07-sheaves/11-singular-comparison` | `08-sheaf-cohomology/06-singular-comparison` |
+| `07-sheaves/05-sites` | `09-topos-theory/05-sites` |
+| `07-sheaves/06-site-sheafification` | `09-topos-theory/06-site-sheafification` |
+| `07-sheaves/07-giraud-axioms` | `09-topos-theory/07-giraud-axioms` |
+| `07-sheaves/08-giraud-theorem` | `09-topos-theory/08-giraud-theorem` |
+| `07-sheaves/09-etale-site` | `09-topos-theory/09-etale-site` |
+| `06-topos-theory/01-presheaf-topos` | `09-topos-theory/01-presheaf-topos` |
+| `06-topos-theory/02-sheaf-topos` | `09-topos-theory/02-sheaf-topos` |
+| `06-topos-theory/03-topos-basics` | `09-topos-theory/03-topos-basics` |
+| `06-topos-theory/04-presheaf-heyting` | `09-topos-theory/04-presheaf-heyting` |
+
+系列の id：cat-structured → cat-monoidal、cat-monoidal-advanced → cat-enriched（ほかは同じ。cat-sheaves は層のコホモロジー、cat-topos はトポスとサイト）。

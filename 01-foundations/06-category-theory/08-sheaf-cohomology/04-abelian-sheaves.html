@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>アーベル群の層 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/06-category-theory/08-sheaf-cohomology/04-abelian-sheaves.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# アーベル群の層 {#cat:page-abelian-sheaves keywords="sheaves of abelian groups, abelian category of sheaves, kernel sheaf, cokernel sheaf needs sheafification, exactness on stalks, global sections left exact, enough injectives in Ab(X), Godement resolution, sheaf cohomology as right derived functors of global sections"}
+
+アーベル群の層の圏 $\mathbf{Ab}(X)$ はアーベル圏になる。核は切断ごとの核でよいが、余核は切断ごとの余核の**層化**が要る。その結果、完全性は茎で判定でき、大域切断をとる関手 $\Gamma(X,-)$ は左完全だが右完全でない（局所的に全射でも大域的に全射とは限らない。\ref{cat:page-presheaves-sheaves} の 2 乗写像の例）。$\mathbf{Ab}(X)$ は十分な入射対象をもつので、$\Gamma(X,-)$ の右導来関手として**層コホモロジー** $H^{q}(X,-)$ が定義され、右完全性の欠如を長完全列で測る。
+
+
+## 記法と定義の確認 {#cat:sec-as-notation}
+
+::: notation
+- アーベル群の前層・層（\ref{cat:page-presheaves-sheaves} の記法）とその射（各 $F(U)$ で準同型な自然変換）の圏を $\mathbf{PAb}(X)$, $\mathbf{Ab}(X)$ と書く。アーベル群の前層の層化がアーベル群の層で、普遍性が準同型のまま成り立つことは \ref{cat:abelian-sheafification}。茎とその判定は \ref{cat:stalk}, \ref{cat:germs-determine-sections}, \ref{cat:stalkwise-criteria}（茎で全単射な層の射は集合の層として同型で、逆写像は自動的に準同型）。
+- 前加法圏・加法圏・アーベル圏・完全列・左完全関手は \ref{ha:preadditive}, \ref{ha:additive-category}, \ref{ha:abelian-category}, \ref{ha:exact-sequence}, \ref{ha:left-exact-criterion}。モノかつエピな射は同型（\ref{ha:mono-epi-iso}）。
+- 入射的アーベル群（＝可除群）と埋め込みは \ref{ha:injective-divisible}, \ref{ha:embed-divisible}。左導来関手とその長完全列は \ref{ha:left-derived-functor}, \ref{ha:derived-long-exact}。
+- 摩天楼層 $x_{*}A$（\ref{cat:presheaf-examples.5}、\ref{cat:direct-image-examples.2}）。
+- **選択公理**：入射対象の構成（可除群の入射性、各点での延長の選択）と、導来関手の定義（入射分解の選択）で使う。どこで使うかは各証明と最後の hypcheck に書く。
+:::
+
+## 核・余核と茎 {#cat:sec-as-kernel-cokernel}
+
+::: proposition 核と余核 {#cat:sheaf-kernel-cokernel keywords="kernel of a morphism of sheaves is the sectionwise kernel; cokernel is the sheafification of the sectionwise cokernel; stalks of kernel and cokernel" index="核（層の射）|かくそうのしゃ, 余核（層の射）|よかくそうのしゃ"}
+$\varphi:F\to G$ を $\mathbf{Ab}(X)$ の射とする。
+1. $\mathbf{Ab}(X)$ は加法圏：$\operatorname{Hom}(F,G)$ は切断ごとの和でアーベル群、零対象は $0$（すべての $U$ で $0$）、双積は $(F\oplus G)(U)=F(U)\oplus G(U)$。
+2. $K(U)\defeq\ker\varphi_{U}$ は層で、$\varphi$ の核。$K_{x}=\ker\varphi_{x}$。
+3. 前層 $C^{\mathrm{p}}(U)\defeq G(U)/\varphi_{U}(F(U))$ の層化 $C\defeq(C^{\mathrm{p}})^{+}$ が $\varphi$ の余核。$C_{x}=G_{x}/\varphi_{x}(F_{x})$。
+:::
+
+::: proof
+**Step 1（1）.** 射の和 $(\varphi+\psi)_{U}=\varphi_{U}+\psi_{U}$ は自然変換で、合成は双線形。$0$ と $F(U)\oplus G(U)$ は層（層の条件は成分ごと）で、双積の等式 $p_{1}i_{1}=1$ などは切断ごとに成り立つ（\ref{ha:biproduct}）。
+
+**Step 2（2：層）.** $U=\bigcup U_{i}$ と両立する $s_{i}\in K(U_{i})$ について、$F$ で貼り合わせた $s\in F(U)$ は $\varphi(s)|_{U_{i}}=\varphi(s_{i})=0$ をみたし、$G$ の分離性から $\varphi(s)=0$、すなわち $s\in K(U)$。一意性は $F$ から。$K\to F$ は $\varphi$ との合成が $0$ で、$\varphi\circ\psi=0$ となる $\psi:H\to F$ は切断ごとに $K$ に入るので、$K$ を一意に経由する。
+
+**Step 3（2：茎）.** $K_{x}\to F_{x}$ は単射（$s\in K(U)$ の芽が $F_{x}$ で $0$ なら、ある近傍で $s|_{W}=0$）で、像は $\ker\varphi_{x}$ に入る。逆に $\varphi_{x}(s_{x})=0$ なら $x\in W$ で $\varphi(s)|_{W}=0$、すなわち $s|_{W}\in K(W)$。
+
+**Step 4（3：余核）.** $\mathbf{Ab}(X)$ の対象 $H$ について、層の射 $C\to H$ は前層の射 $C^{\mathrm{p}}\to H$ と一対一（\ref{cat:abelian-sheafification}）、それは $\psi\circ\varphi=0$ となる $\psi:G\to H$ と一対一（切断ごとの準同型定理）。よって $G\to C^{\mathrm{p}}\to C$ が余核。
+
+**Step 5（3：茎）.** 層化は茎を保つので $C_{x}=C^{\mathrm{p}}_{x}$。写像 $G_{x}\to C^{\mathrm{p}}_{x}$ は全射。$t\in G(U)$ の像の芽が $0$ なら、ある $W\ni x$ で $t|_{W}\in\varphi(F(W))$、すなわち $t_{x}\in\varphi_{x}(F_{x})$。逆に $t_{x}=\varphi(s)_{x}$ なら、ある $W$ で $t|_{W}=\varphi(s|_{W})$ で、像の芽は $0$。よって核は $\varphi_{x}(F_{x})$。
+:::
+
+::: theorem 層の圏はアーベル圏 {#cat:ab-sheaves-abelian keywords="Ab(X) is an abelian category; monomorphisms and epimorphisms are detected on stalks; exactness is checked on stalks" index="アーベル群の層の圏|あーべるぐんのそうのけん, 完全性の茎による判定|かんぜんせいのくきによるはんてい"}
+1. $\varphi$ がモノ射 $\iff$ すべての $U$ で $\varphi_{U}$ が単射 $\iff$ すべての $x$ で $\varphi_{x}$ が単射。
+2. $\varphi$ がエピ射 $\iff$ すべての $x$ で $\varphi_{x}$ が全射。
+3. $\mathbf{Ab}(X)$ はアーベル圏。
+4. $F\xrightarrow{\varphi}G\xrightarrow{\psi}H$ が $G$ で完全 $\iff$ すべての $x$ で $F_{x}\to G_{x}\to H_{x}$ が完全。
+:::
+
+::: proof
+**Step 1（1）.** 前加法圏では、$\varphi$ がモノ $\iff\ker\varphi=0$（$\varphi k=0=\varphi 0$ から $k=0$。逆に $\varphi\alpha=\varphi\beta$ なら $\varphi(\alpha-\beta)=0$ で、$\alpha-\beta$ は核を経由して $0$）。\ref{cat:sheaf-kernel-cokernel.2} から、$\ker\varphi=0\iff$ すべての $\ker\varphi_{U}=0$。茎については、茎が $\ker\varphi_{x}$ の層 $K$ が $0$ であることと、すべての茎が $0$ であることは同値（\ref{cat:germs-determine-sections}：切断は芽で決まる）。
+
+**Step 2（2）.** 同様に、$\varphi$ がエピ $\iff\operatorname{coker}\varphi=0\iff$ すべての茎 $C_{x}=G_{x}/\varphi_{x}(F_{x})$ が $0$（\ref{cat:sheaf-kernel-cokernel.3}）。
+
+**Step 3（3：モノは核）.** モノ射 $\varphi:F\to G$ と余核 $q:G\to C$ について、$q\varphi=0$ から $\varphi$ は $\ker q\to G$ を経由し、$\theta:F\to\ker q$ を得る。茎で見ると、$\varphi_{x}$ は単射（1）で、$(\ker q)_{x}=\ker(G_{x}\to G_{x}/\varphi_{x}(F_{x}))=\varphi_{x}(F_{x})$（\ref{cat:sheaf-kernel-cokernel.2}・\ref[3]{cat:sheaf-kernel-cokernel.3}）。よって $\theta_{x}$ は全単射、$\theta$ は同型（\ref{cat:stalkwise-criteria.2}）。
+
+**Step 4（3：エピは余核）.** エピ射 $\varphi$ と核 $k:K\to F$ について、$\varphi k=0$ から $\varphi$ は $\operatorname{coker}k$ を経由し、$\theta:\operatorname{coker}k\to G$ を得る。茎で見ると $F_{x}/\ker\varphi_{x}\to G_{x}$ で、$\varphi_{x}$ は全射（2）なので全単射。よって $\theta$ は同型。1 と合わせて、アーベル圏の公理（\ref{ha:abelian-category}）がすべてみたされる。
+
+**Step 5（4）.** $\varphi$ の像 $\operatorname{im}\varphi=\ker(\operatorname{coker}\varphi)$ は $G$ の部分層で、Step 3 と同じ計算から茎は $\varphi_{x}(F_{x})$。$\ker\psi$ の茎は $\ker\psi_{x}$。$G$ の二つの部分層 $A,B$ について、すべての $x$ で $A_{x}=B_{x}$（$G_{x}$ の中で）なら $A=B$：$s\in A(U)$ なら各点で $s_{x}\in B_{x}$ なので、$U$ の開被覆 $W_{i}$ と $t_{i}\in B(W_{i})$ で $s|_{W_{i}}=t_{i}$ となるものがあり（芽が等しいので近傍を小さくする）、$B$ で貼り合わせたものは $G$ の分離性から $s$ に等しい。よって $s\in B(U)$。逆も同様。完全性は $\operatorname{im}\varphi=\ker\psi$（部分対象として）なので、茎の等式と同値。
+:::
+
+::: example 局所的に全射、大域的に全射でない {#cat:global-sections-not-right-exact}
+$X=\mathbb{C}^{\times}$ 上で、$\mathbb{C}^{\times}$ に値をとる連続関数のアーベル群の層（積を群演算とする）を $\mathcal{C}^{\times}$ とし、2 乗写像 $\varphi(f)=f^{2}$ を考える。核は局所定数な $\{\pm1\}$ 値関数の層 $\underline{\mathbb{Z}/2}$ で、
+$$
+0\to\underline{\mathbb{Z}/2}\to\mathcal{C}^{\times}\xrightarrow{\varphi}\mathcal{C}^{\times}\to0
+$$
+は茎の上で完全（全射性は \ref{cat:page-presheaves-sheaves} の例）、したがって $\mathbf{Ab}(X)$ の短完全列（\ref{cat:ab-sheaves-abelian.4}）。しかし大域切断の $\varphi_{X}$ は全射でない（同じ例で $z\mapsto z$ が 2 乗でない）。
+:::
+
+::: proposition 大域切断は左完全 {#cat:global-sections-left-exact keywords="the global sections functor Gamma(X,-) is left exact but not exact" index="大域切断関手|たいいきせつだんかんしゅ"}
+$\Gamma(X,-):\mathbf{Ab}(X)\to\mathbf{Ab}$, $F\mapsto F(X)$ は左完全で、一般に右完全でない。より一般に、各開集合 $U$ について $F\mapsto F(U)$ は左完全。
+:::
+
+::: proof
+**Step 1.** 加法的なのは射の和が切断ごとだから。\ref{ha:left-exact-criterion.2} により、核を保つことを示せばよい。\ref{cat:sheaf-kernel-cokernel.2} から $(\ker\varphi)(U)=\ker\varphi_{U}$ で、これは $\Gamma(U,-)$ が核を保つことそのもの。
+
+**Step 2.** 右完全でないことは \ref{cat:global-sections-not-right-exact}。
+:::
+
+## 十分な入射対象 {#cat:sec-as-injectives}
+
+::: lemma 摩天楼層への射 {#cat:skyscraper-hom keywords="Hom(F, x_* A) = Hom(F_x, A)" index="摩天楼層への射|まてんろうそうへのしゃ"}
+$x\in X$ とアーベル群 $A$ について、自然な同型 $\operatorname{Hom}_{\mathbf{Ab}(X)}(F,x_{*}A)\cong\operatorname{Hom}_{\mathbf{Ab}}(F_{x},A)$ がある。
+:::
+
+::: proof
+$x_{*}A$ は $x\in U$ で $A$、そうでなければ $0$（アーベル群版）で、制限は $A$ の恒等写像か $0$。射 $\alpha:F\to x_{*}A$ は、$x\in U$ となる $U$ ごとの準同型 $\alpha_{U}:F(U)\to A$ で $\alpha_{V}(s|_{V})=\alpha_{U}(s)$（$x\in V\subset U$）をみたすもの（$x\notin U$ では $0$ で、両立は自動的）。これは余極限 $F_{x}=\operatorname*{colim}_{x\in U}F(U)$ からの準同型と一対一（\ref{cat:filtered-colimit-set}、和は茎の和）。
+:::
+
+::: theorem 十分な入射対象 {#cat:ab-sheaves-enough-injectives keywords="Ab(X) has enough injectives: embed into a product of skyscraper sheaves of injective groups (Godement)" index="十分な入射対象（層）|じゅうぶんなにゅうしゃたいしょうそう, ゴドマン分解|ごどまんぶんかい"}
+$\mathbf{Ab}(X)$ は十分な入射対象をもつ。具体的には、各 $x$ で $F_{x}$ を可除群 $I_{x}$ に埋め込み、$I\defeq\prod_{x\in X}x_{*}I_{x}$（$I(U)=\prod_{x\in U}I_{x}$）とおくと、$I$ は入射的で、$F\to I$, $s\mapsto(\iota_{x}(s_{x}))_{x\in U}$ は単射。
+:::
+
+::: proof
+**Step 1（埋め込みの選択）.** 各 $F_{x}$ について、\ref{ha:embed-divisible} の構成は $F_{x}$ から具体的に可除群 $I_{x}$ と単射 $\iota_{x}:F_{x}\to I_{x}$ を作るので、選択は要らない。
+
+**Step 2（$I$ は層）.** 各 $x_{*}I_{x}$ は層で、層の積（切断ごとの積）は層（貼り合わせは成分ごと）。$I(U)=\prod_{x\in U}I_{x}$。
+
+**Step 3（$I$ は入射的）.** 積の普遍性と \ref{cat:skyscraper-hom} から $\operatorname{Hom}(F,I)\cong\prod_{x}\operatorname{Hom}(F_{x},I_{x})$。モノ射 $\mu:F'\to F$ について、$\mu_{x}$ は単射（\ref{cat:ab-sheaves-abelian.1}）。$\alpha\in\operatorname{Hom}(F',I)$、すなわち $(\alpha_{x}:F'_{x}\to I_{x})_{x}$ が与えられたとき、$I_{x}$ は入射的（\ref{ha:injective-divisible.1}。ここでベールの判定法を通じて選択公理を使う）なので $\beta_{x}\circ\mu_{x}=\alpha_{x}$ となる $\beta_{x}$ がある。すべての $x$ について同時に $\beta_{x}$ を選ぶ（ここでも選択公理）と、$\beta=(\beta_{x})$ が $\beta\circ\mu=\alpha$ をみたす（\ref{cat:skyscraper-hom} の同型は自然なので、合成と両立する）。
+
+**Step 4（$F\to I$ は単射）.** 対応する族は $(\iota_{x})_{x}$ で、写像は $s\mapsto(\iota_{x}(s_{x}))_{x\in U}$。これが $0$ なら各 $\iota_{x}$ が単射なのですべての芽 $s_{x}$ が $0$ で、$s=0$（\ref{cat:germs-determine-sections}）。
+:::
+
+## 層コホモロジー {#cat:sec-as-cohomology}
+
+::: definition 層コホモロジー {#cat:sheaf-cohomology keywords="sheaf cohomology H^q(X,F) as right derived functors of global sections via injective resolutions" index="層コホモロジー|そうこほもろじー"}
+$\mathbf{Ab}(X)$ の各対象 $F$ に入射分解 $0\to F\to I^{0}\to I^{1}\to\cdots$ を一つずつ選ぶ（\ref{cat:ab-sheaves-enough-injectives} を繰り返す。各段の余核を埋め込む）。
+$$
+H^{q}(X,F)\defeq H^{q}\bigl(\Gamma(X,I^{0})\to\Gamma(X,I^{1})\to\cdots\bigr)
+$$
+を $F$ の $q$ 次の**層コホモロジー**という。これは $\Gamma(X,-)$ の $q$ 次の右導来関手 $R^{q}\Gamma(X,-)$ である。反対圏 $\mathbf{Ab}(X)^{\mathrm{op}}$ は（アーベル圏の公理が双対について対称なので）アーベル圏で、入射分解はそこでの射影分解、左完全関手 $\Gamma$ は右完全関手 $\Gamma^{\mathrm{op}}:\mathbf{Ab}(X)^{\mathrm{op}}\to\mathbf{Ab}^{\mathrm{op}}$ になるので、$R^{q}\Gamma\defeq(L_{q}\Gamma^{\mathrm{op}})^{\mathrm{op}}$ と定める（\ref{ha:left-derived-functor}）。
+:::
+
+::: theorem 層コホモロジーの基本性質 {#cat:sheaf-cohomology-basic keywords="H^0 = global sections; long exact sequence of sheaf cohomology; injective sheaves are acyclic" index="層コホモロジーの長完全列|そうこほもろじーのちょうかんぜんれつ"}
+1. $H^{0}(X,F)\cong\Gamma(X,F)$（自然同型）。
+2. $\mathbf{Ab}(X)$ の短完全列 $0\to F'\to F\to F''\to0$ に対し、長完全列
+$$
+\begin{aligned}
+0&\to\Gamma(X,F')\to\Gamma(X,F)\to\Gamma(X,F'')\\
+&\to H^{1}(X,F')\to H^{1}(X,F)\to H^{1}(X,F'')\to H^{2}(X,F')\to\cdots
+\end{aligned}
+$$
+がある。
+3. $I$ が入射的なら、$q\ge1$ で $H^{q}(X,I)=0$。
+4. $X$ が 1 点なら、$q\ge1$ で $H^{q}(X,F)=0$。
+:::
+
+::: proof
+**Step 1（1・2）.** 定義の双対化により、\ref{ha:l0-right-exact}（$\Gamma^{\mathrm{op}}$ は右完全なので $L_{0}\Gamma^{\mathrm{op}}\cong\Gamma^{\mathrm{op}}$）と \ref{ha:derived-long-exact} を $\mathbf{Ab}(X)^{\mathrm{op}}$ で使い、$\mathbf{Ab}$ に戻す（矢印の向きと添字の上下が入れ替わる）。$H^{0}=\Gamma$ と \ref{cat:global-sections-left-exact} から長完全列の最初の部分が得られる。
+
+**Step 2（3）.** $0\to I\to I\to0\to\cdots$ が入射分解なので（導来関手は分解の選び方によらない。\ref{ha:derived-well-defined} の双対）、$q\ge1$ で $0$。
+
+**Step 3（4）.** 1 点空間上では $\Gamma$ は $\mathbf{Ab}(\{*\})\to\mathbf{Ab}$ の圏同値（$F(\emptyset)=0$ で、$F$ は $F(\{*\})$ だけで決まる）で完全。入射分解に $\Gamma$ を施した複体は $0\to\Gamma F\to\Gamma I^{0}\to\cdots$ が完全なので、$q\ge1$ のコホモロジーは $0$。
+:::
+
+::: example 1 次のコホモロジーが消えない例 {#cat:sheaf-cohomology-example}
+\ref{cat:global-sections-not-right-exact} の短完全列に長完全列を適用すると、
+$$
+\Gamma(X,\mathcal{C}^{\times})\xrightarrow{f\mapsto f^{2}}\Gamma(X,\mathcal{C}^{\times})\to H^{1}(X,\underline{\mathbb{Z}/2})
+$$
+が完全で、左の写像は全射でない（$z$ が像に入らない）ので、$H^{1}(\mathbb{C}^{\times},\underline{\mathbb{Z}/2})\neq0$。$z$ の像は「$\sqrt{z}$ の二つの枝が一周で入れ替わる」ことを記録する類である。$H^{1}(\mathbb{C}^{\times},\underline{\mathbb{Z}/2})\cong\mathbb{Z}/2$ であることは、特異コホモロジーとの比較定理（\ref{cat:sheaf-singular-comparison}）と $H^{1}_{\mathrm{sing}}(\mathbb{C}^{\times};\mathbb{Z}/2)\cong\mathbb{Z}/2$（本サイト未収録）から従う。チェックコホモロジーで直接計算することもできる（\ref{cat:cech-two-cover}, \ref{cat:leray-theorem}）。
+:::
+
+::: hypcheck
+- **選択公理**：\ref{cat:ab-sheaves-enough-injectives} の Step 3 で 2 回使う（可除群の入射性はベールの判定法の ⇐ でツォルンの補題を使う。\ref{ha:baer-criterion}。さらに各点 $x$ での延長 $\beta_{x}$ を同時に選ぶ）。層コホモロジーの定義では各対象の入射分解を選ぶ（\ref{ha:left-derived-functor} と同じく、宇宙の上の選択）。核・余核・アーベル圏であること・完全性の茎による判定（\ref{cat:sheaf-kernel-cokernel}, \ref{cat:ab-sheaves-abelian}）、大域切断の左完全性には使わない。
+- 層化の普遍性が準同型で成り立つこと（\ref{cat:abelian-sheafification}）は余核の構成（\ref{cat:sheaf-kernel-cokernel} の Step 4）で、層化が茎を保つことは Step 5 で使った。$G$ が層であること（分離性）は核が層であること（Step 2）と部分層の比較（\ref{cat:ab-sheaves-abelian} の Step 5）で使った。
+- $X$ の位相についての仮定はない。どの位相空間でも成り立つ。
+:::
+
+::: supplement
+**前提を変えると.** 環 $\mathcal{O}$ の層の上の加群の層 $\mathbf{Mod}(\mathcal{O})$ も同じ議論でアーベル圏になり、十分な入射対象をもつ（$I_{x}$ を $\mathcal{O}_{x}$ 加群の入射加群にとる。\ref{ha:enough-injectives}）。そこで計算したコホモロジーは $\mathbf{Ab}(X)$ で計算したものと一致することが知られている（入射的 $\mathcal{O}$ 加群は脆弱層で、脆弱層は $\Gamma$ 非輪状。本サイト未収録）。
+
+**計算の手段.** 実際の計算では、入射分解の代わりに $\Gamma$ 非輪状な層による分解（**脆弱層**・**軟層**・**細層**）を使い（\ref{cat:acyclic-resolution}, \ref{cat:soft-surjective}）、また開被覆についての**チェックコホモロジー**と比較する（\ref{cat:leray-theorem}）。開集合がすべてパラコンパクトで局所可縮な空間では $H^{q}(X,\underline{\mathbb{Z}})$ は特異コホモロジーと一致する（\ref{cat:sheaf-singular-comparison}）。$n$ 次元の多様体では $q>n$ で消えること（グロタンディークの消滅定理の位相版）は知られている（本サイト未収録）。
+
+**ホモロジー代数の道案内との関係.** 一般のアーベル圏の右導来関手は \tref{ha:page-derived-functors} の双対で、加群の圏の入射対象は \ref{ha:page-injective-modules}。$\mathbf{Ab}(X)$ は一般に十分な射影対象をもたない（$X$ が 1 点でない典型的な空間で。本サイト未収録）ので、層では入射分解だけが使える。
+:::
+
+## 高い視点 {#cat:sec-as-viewpoint}
+
+::: remark 層化はアーベル圏を「局所化」する
+$\mathbf{PAb}(X)$ は切断ごとに核と余核を計算するアーベル圏で、$\mathbf{Ab}(X)$ はその充満部分圏だが、包含関手は余核を保たない。層化 $(-)^{+}$ は包含の左随伴で、しかも有限の極限を保つ（\ref{cat:page-sheafification} の補足）。このような「完全な左随伴をもつ充満部分圏」はアーベル圏の**局所化**（セール部分圏による商。ここでは茎がすべて $0$ の前層たちで割る）の典型で、$\mathbf{Ab}(X)$ の余核は「前層で計算し、茎で見えない部分を捨てる」ことで得られる（ここまでは上の定理の言い換え。セール部分圏による商としての一般論は本サイト未収録）。比喩で言えば、前層は「各開集合で別々に書かれた帳簿」、層化は「どの点の近くで見ても同じなら同じとみなす監査」で、余核の帳簿は監査を通してはじめて意味をもつ。層コホモロジーは、局所的には帳尻が合うのに大域的には合わない度合いを測る。
+:::
+
+## 問題 {#cat:sec-as-problems}
+
+::: problem {#cat:prob-as-presheaf-cokernel}
+$X=S^{1}$ とする。\ref{cat:global-sections-not-right-exact} と同じ 2 乗写像 $\varphi:\mathcal{C}^{\times}\to\mathcal{C}^{\times}$（$S^{1}$ 上の $\mathbb{C}^{\times}$ 値連続関数の層）について、前層の余核 $C^{\mathrm{p}}(U)=\mathcal{C}^{\times}(U)/\varphi(\mathcal{C}^{\times}(U))$ が層でないことを示せ。
+:::
+
+::: solution
+包含 $\iota:S^{1}\to\mathbb{C}^{\times}$ は $\mathcal{C}^{\times}(S^{1})$ の元で、2 乗ではない（連続な $g$ で $g^{2}=\iota$ とすると、$\mathbb{C}^{\times}$ 上の例と同じ議論（\ref{cat:page-presheaves-sheaves}）で矛盾）。よって $C^{\mathrm{p}}(S^{1})$ で $[\iota]\neq0$。一方、$S^{1}$ を二つの開弧 $U_{1},U_{2}$（どちらも全体ではない）で覆うと、各 $U_{i}$ 上には $\iota$ の連続な平方根がある（$U_{i}$ 上で偏角の連続な枝がとれる）ので $[\iota]|_{U_{i}}=0$。$0$ でない切断が被覆の上で $0$ になるので、$C^{\mathrm{p}}$ は分離的でなく、層でない。層化された余核では $[\iota]$ は $0$（茎がすべて $0$。\ref{cat:sheaf-kernel-cokernel.3}）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=f862ab2e"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
