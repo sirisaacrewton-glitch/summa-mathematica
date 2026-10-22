@@ -24,7 +24,7 @@ var CHECK_ONLY = args.indexOf('--check') >= 0;
 var QUIET = args.indexOf('--quiet') >= 0;
 var ONLY = (function () { var i = args.indexOf('--only'); return i >= 0 ? args[i + 1] : null; })();
 
-var SKIP_DIRS = { vendor: 1, tools: 1, node_modules: 1, assets: 1, learn: 1, api: 1 };
+var SKIP_DIRS = { vendor: 1, tools: 1, node_modules: 1, assets: 1, learn: 1, api: 1, pv: 1, 'search-body': 1 };
 var SOURCE_RE = /<script type="text\/markdown" id="source">([\s\S]*?)<\/script>/;
 
 function readJSON(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return null; } }
@@ -304,6 +304,10 @@ entries.forEach(function (e) {
   });
 });
 var pageInfo = pages.map(function (pg) { return { path: pg.path, dir: pg.dirPath }; });
+// 用語リンクの規則は tools/terms.json で一元管理する（ブラウザには site-index.js の termRules として渡す）
+var TERM_RULES = readJSON(path.join(ROOT, 'tools', 'terms.json')) || {};
+var TERM_RULES_BROWSER = { stop: TERM_RULES.stop || [], prefix: TERM_RULES.prefix || '', base: TERM_RULES.base || [], baseShort: TERM_RULES.baseShort || [], xfDeny: TERM_RULES.xfDeny || {}, noAuto: TERM_RULES.noAuto || {} };
+Core.setTermRules(TERM_RULES_BROWSER);
 var termLinker = Core.createTermLinker(termDefs, labels, pageInfo);
 var tdeps = {};   // 主張（番号付き環境）のラベル -> その主張に現れる用語の定義のラベル（学習ルートの「主張の前提」に加える）
 var stmtTexts = [];   // 主張の本文（参照の検査のあとで用語を探す。ページどうしの前提が要るため）
@@ -390,7 +394,7 @@ pages.forEach(function (pg) {
 });
 
 // 文脈で意味が変わるかもしれない用語の検出（2026-10-22 ユーザー指示）：同じ語の定義が同じ分野に複数ある、または複数の分野にある語で、
-// まだ確認していないもの（tools/term-review.json の reviewed にも site-core.js の TERM_NO_AUTO にもないもの）を報告する。
+// まだ確認していないもの（tools/terms.json の reviewed にも noAuto にもないもの）を報告する。
 // 確認したら、同じページ・同じ系列の定義が選ばれれば正しい語は reviewed に足し、同じページの中でも意味が変わる語は TERM_NO_AUTO に足して
 // 原稿で出現ごとに \term[語]{ラベル} を付ける。
 // 参照リンクの表示名を、同じ文の中で本文にも書いていないかの検査（2026-10-22 ユーザー指示：「ヘネシー–ミルナーの定理（ヘネシー–ミルナーの定理）」のように
@@ -427,16 +431,16 @@ pages.forEach(function (pg) {
 })();
 
 (function checkAmbiguousTerms() {
-  var reviewed = {}; try { (JSON.parse(fs.readFileSync(path.join(ROOT, 'tools', 'term-review.json'), 'utf8')).reviewed || []).forEach(function (k) { reviewed[k] = 1; }); } catch (e) {}
+  var reviewed = {}; (TERM_RULES.reviewed || []).forEach(function (k) { reviewed[k] = 1; });
   Object.keys(termDefs).forEach(function (t) {
-    if (Core.TERM_NO_AUTO[t]) return;
+    if (Core.termNoAuto()[t]) return;
     var fields = {};
     termDefs[t].forEach(function (l) { var L = labels[l]; if (!L) return; var f = pages[L.p].path.split('/')[0].split('-')[0]; (fields[f] = fields[f] || []).push(l); });
     var keys = Object.keys(fields), report = [];
     keys.forEach(function (f) { if (fields[f].length > 1 && !reviewed[t + '@' + f]) report.push(t + '@' + f + '（' + fields[f].join(', ') + '）'); });
     if (keys.length > 1 && !reviewed[t + '@*']) report.push(t + '@*（' + keys.join(', ') + ' の分野に定義）');
     if (process.env.TERM_REVIEW_DUMP) report.forEach(function (r) { (global.__rev = global.__rev || []).push(r.split('（')[0]); });
-    report.forEach(function (r) { warn('tools/term-review.json', '文脈で意味が変わるかもしれない用語：' + r + '。確認して reviewed か TERM_NO_AUTO に足す'); });
+    report.forEach(function (r) { warn('tools/terms.json', '文脈で意味が変わるかもしれない用語：' + r + '。確認して reviewed か noAuto に足す'); });
   });
   if (process.env.TERM_REVIEW_DUMP) fs.writeFileSync(process.env.TERM_REVIEW_DUMP, JSON.stringify(global.__rev || []));
 })();
@@ -888,6 +892,7 @@ if (!CHECK_ONLY) {
     planned: Object.keys(planned).reduce(function (o, k) { o[k] = { ti: planned[k].ti }; return o; }, {}),
     backrefs: backOut,
     terms: termDefs,
+    termRules: TERM_RULES_BROWSER,
     tdeps: tdeps,
     entries: []   // 検索用の本文は search-index.js に分けた（必要になったときに読み込む）
   };
@@ -907,10 +912,42 @@ if (!CHECK_ONLY) {
       '/* 自動生成ファイル（tools/build.js）。編集しないでください。 */\n' +
       '(window.SM_PV = window.SM_PV || {})[' + pg.idx + '] = ' + JSON.stringify(pvByPage[pg.idx] || {}) + ';\n');
   });
-  // 検索用の本文（大きいので、検索を開いたときやページの表示後に遅れて読み込む）
+  // 検索用の索引（2026-10-22 ユーザー指示：重くならないように分ける）。
+  //   search-index.js：本文（x）以外。題・索引語・読み・キーワードで、これだけで検索の結果を出せる。各項目の b は本文のファイルの鍵。
+  //   search-body/<分野番号>.js：その分野の項目の本文 { 項目番号: 本文 }。検索を開いたあと並行して読み込み、届いた分から本文の一致を加える。
+  if (!fs.existsSync(path.join(ROOT, 'search-body'))) fs.mkdirSync(path.join(ROOT, 'search-body'));
+  var bodies = {};
+  // 題のない項目（証明・解答・前提の使用箇所・直感・地の文）は本文がないと検索に当たらないので、項目ごと本文側に置く
+  var BODY_ONLY = { proof: 1, hypcheck: 1, solution: 1, intuition: 1, text: 1 };
+  var head = [];
+  entries.forEach(function (e, i) {
+    var segs = pages[e.p] ? pages[e.p].path.split('/') : ['x'];
+    var key = segs[0].split('-')[0];
+    if (key === '03' && segs[1]) key = segs[1].split('-')[0];   // 数理論理は大きいので第 2 階層で分ける
+    var h = {};   // 空の値は省く（ブラウザ側で既定値に戻す）
+    Object.keys(e).forEach(function (k) {
+      var v = e[k];
+      if (k === 'x' || v === '' || v == null || (Array.isArray(v) && !v.length)) return;
+      if (k === 'a' && v === e.l) return;
+      h[k] = v;
+    });
+    h.i = i; h.b = key;
+    var B = bodies[key] = bodies[key] || { x: {}, e: [] };
+    if (BODY_ONLY[e.t]) { if (e.x) h.x = e.x; B.e.push(h); }
+    else { head.push(h); if (e.x) B.x[i] = e.x; }
+  });
+  var bodyKeys = Object.keys(bodies).sort();
+  fs.readdirSync(path.join(ROOT, 'search-body')).forEach(function (f) { if (/\.js$/.test(f) && bodyKeys.indexOf(f.replace(/\.js$/, '')) < 0) fs.unlinkSync(path.join(ROOT, 'search-body', f)); });
+  bodyKeys.forEach(function (k) {
+    write(path.join(ROOT, 'search-body', k + '.js'),
+      '/* 自動生成ファイル（tools/build.js）。編集しないでください。 */\n' +
+      '(window.SM_SB = window.SM_SB || {})[' + JSON.stringify(k) + '] = ' + JSON.stringify(bodies[k]) + ';\n');
+  });
   write(path.join(ROOT, 'search-index.js'),
     '/* 自動生成ファイル（tools/build.js）。編集しないでください。 */\n' +
-    '(window.MATH_INDEX = window.MATH_INDEX || {}).entries = ' + JSON.stringify(entries) + ';\n');
+    '(window.MATH_INDEX = window.MATH_INDEX || {}).entryHeads = ' + JSON.stringify(head) + ';\n' +
+    'window.MATH_INDEX.entryCount = ' + entries.length + ';\n' +
+    'window.MATH_INDEX.bodyKeys = ' + JSON.stringify(bodyKeys) + ';\n');
 }
 
 /* ---------------- 5. 報告 ---------------- */

@@ -644,47 +644,18 @@
   // 項目参照 \ref{ラベル.キー}（キーは番号・英小文字 1 字・ローマ数字）と、HTML の段落・項目の頭の「(キー)」
   var ITEM_REF = /^(.+)\.(\d+|[a-z]|[ivx]+)$/;
   var ITEM_HEAD = /^\s*(?:<strong>)?\s*[(（](\d+|[a-z]|[ivx]+)[)）]/;
-  var TERM_STOP = {};
-  ('定理 公理 仮定 変数 言語 構造 解釈 同値 高さ 領域 否定 略記 項数 証拠 解消 矛盾 様相 定義 記号 演算 関係 写像 関数 集合 性質 条件 命題 補題 ' +
-   '自然 標準 自明 有限 無限 完全 分離 導出 妥当 充足 モデル 極大 極小 部分 全体 成分 次数 長さ 大きさ 個数 作用 生成 拡大 分解 表現 同型 順序 ' +
-   '証明 推論 計算 定数 関数記号 述語 理論 体系 対象 射 構成 拡張 制限 埋め込み 同一視 対応 等しい 一致 存在 一意 因子 分割 小さい 大きい 境界 閉じている 閉じた 規則 ' +
-   // 日常語として地の文に頻出し、リンクにすると邪魔な語（2026-10-22 ユーザー指摘）
-   'すべての 満たす 存在する 交わる 交わらない 内容 符号 記述 適用 表示 内部 外部 強い 弱い 粗い 名前 計算する 定義する 最小 最小の 最大 最大の ' +
-   'ちょうど一つ 一対一 等式 単位 近似 独立 状態 覆う 張る 勝つ 死ぬ 移動 並び 適切 有効 深さ 判断 形成 候補 翻訳 実現 文脈 サイト 包含 世界 真理 ' +
-   '実数 素数 剰余 後者 前者 指数 中心 代数 置換 向き 双対 図式 一様 単純 特性 年齢 宇宙 燃料 命令 走行 受理 拒否 停止 収穫 整除 正しい 導ける ただ一通りに パラメータ 代数的 持ち上げ').split(' ').forEach(function (w) { TERM_STOP[w] = 1; });
-  var TERM_PREFIX = '冪非半準反余双逆単不無超亜擬';
-  // 基礎の系列：ここで定義された語（単射・部分集合・選択公理・コンパクト・関手など）は、どの分野のページからでも結ぶ。
-  // 2 文字の語は語の一部に当たりやすいので、TERM_BASE_SHORT にあるものだけ。候補が複数あれば分類番号の近い分野を選ぶ。
-  var TERM_BASE = ['03-mathematical-logic/03E-set-theory/01-basics/', '54-general-topology/54A-generalities/',
-    '54-general-topology/54D-general-properties/01-separation-compactness/', '26-real-functions/26A-functions-of-one-variable/',
-    '15-linear-algebra/15A-basic-linear-algebra/', '26-real-functions/26B-functions-of-several-variables/01-multivariable-calculus/',
-    '55-algebraic-topology/55P-homotopy-theory/01-fundamental-group/', '18-category-theory/18G-homological-algebra/01-abelian-categories/', '20-group-theory/20K-abelian-groups/', '20-group-theory/20A-foundations/01-groups/',
-    '13-commutative-algebra/13A-general-commutative-ring-theory/01-basics/', '16-associative-rings/16D-modules/01-module-theory/',
-    '18-category-theory/18A-general-theory/01-basics/', '12-field-theory/12F-field-extensions/01-extensions/'];
-  var TERM_BASE_SHORT = {};
-  '単射 全射 関手 基底 次元 加群 連続 直積 直和 逆像 閉包 近傍 有界 上限 下限 上界 下界 可算 同相 距離 位数 整域 標数'.split(' ').forEach(function (w) { TERM_BASE_SHORT[w] = 1; });
-  // 他の分野の定義へ結ぶと意味が違うもの（2026-10-22 に分野をまたぐ用語リンク 628 組を確認して決めた）。
-  // 「ラベル#語」→ 結ばない分野（ディレクトリの第 1 階層の番号。'*' はその定義の分野以外すべて）。同じ分野の中では常に結ぶ。
-  var TERM_XF_DENY = {
-    'cat:graph#グラフ': '*', 'cat:subobject#共通部分': '*', 'cat:category#定義域': '*', 'cat:preserve-limits#連続': '*',
-    'calc:function-limit#連続': '*', 'calc:function-limit#連続関数': '13 14 18 30 54 55', 'set:transitive-set#推移的': '*',
-    'set:rank#ランク': '*', 'at:covering#ファイバー': '03 11 12 13 14 16 18 20 54', 'lin:inner-product#ノルム': '11 12 13 18 20',
-    'lin:eigen-def#トレース': '03 11 12', 'grp:gcd#互いに素': '18 54 55', 'ring:ideal-sum-product#互いに素': '03',
-    'ha:homology#サイクル': '12 16 20 26', 'mod:ring-presentation#コード': '*', 'calc:pullback#引き戻し': '*',
-    'cat:monoid-object#準同型': '*', 'set:finitary-closure#閉包': '*', 'set:cofinal-map#非有界': '*', 'set:order-isomorphism#自己同型': '*',
-    'set:order-isomorphism#同型写像': '*', 'ring:degree#位数': '*', 'grp:abelian-group#位数': '26 30', 'calc:differential-form#k 形式': '*',
-    'calc:differential-form#微分形式': '11 12 13 14 18', 'ag:algebraic-set#イデアル': '*', 'cat:etale-topology-ring#エタール': '*',
-    'lin:adjoint#エルミート': '03 11', 'calc:trig-functions#オイラーの公式': '*', 'set:class#クラス': '12 13 26 54',
-    'ag:scheme-properties-def#ネーター': '*', 'set:boolean-algebra#交わり': '*', 'ring:gcd-content#原始的': '*',
-    'grp:free-abelian#基底': '*', 'calc:cauchy-construction#完備化': '11 12 14 16 18', 'ring:formal-derivative#導関数': '*',
-    'ring:local-property-def#局所的': '*', 'calc:general-power#指数法則': '*', 'ring:normal-domain#正規化': '15',
-    'set:free-bound-variable#自由変数': '15', 'top:adjunction-space#貼り合わせ': '18', 'fld:separable-polynomial#分離的': '55',
-    'cat:reflective-subcategory#反射的': '03 54', 'cat:category#結合律': '03 20', 'ag:weil-divisor#素因子': '*',
-    'ag:divisor-class-group#主因子': '*', 'grp:direct-product#直積': '26 54 55', 'mod:direct-sum#直積': '26 54 55', 'grp:element-order#位数': '26 30'
-  };
-  // 自動では結ばない語と分野：同じ分野の中で意味が文脈によって変わる語。原稿で出現ごとに \term[語]{ラベル} で指定する。
-  // 値は分野番号の並び。'!' で始まるときは「その分野以外すべて」（2026-10-22 ユーザー指示：次元・部分空間はその都度確認）
-  var TERM_NO_AUTO = { '次元': '13 14', '部分空間': '!15 54', '互いに素': '20', '位数': '30' };
+  // 用語リンクの規則（結ばない語・基礎の系列・他分野へ結ばない組・自動では結ばない語など）は tools/terms.json で一元管理する。
+  // ビルドはそれを読み、ブラウザは site-index.js の termRules を受け取って setTermRules で設定する（2026-10-22 ユーザー指示）。
+  var TERM_STOP = {}, TERM_PREFIX = '', TERM_BASE = [], TERM_BASE_SHORT = {}, TERM_XF_DENY = {}, TERM_NO_AUTO = {};
+  function setTermRules(R) {
+    R = R || {};
+    TERM_STOP = {}; (R.stop || []).forEach(function (w) { TERM_STOP[w] = 1; });
+    TERM_PREFIX = R.prefix || '';
+    TERM_BASE = R.base || [];
+    TERM_BASE_SHORT = {}; (R.baseShort || []).forEach(function (w) { TERM_BASE_SHORT[w] = 1; });
+    TERM_XF_DENY = R.xfDeny || {};
+    TERM_NO_AUTO = R.noAuto || {};
+  }
   function noAuto(term, f) {
     var d = TERM_NO_AUTO[term]; if (!d) return false;
     var hit = (' ' + d.replace(/^!/, '') + ' ').indexOf(' ' + f + ' ') >= 0;
@@ -792,7 +763,7 @@
     parseBlocks: parseBlocks, extractMath: extractMath, numberTree: numberTree,
     createRenderer: createRenderer, splitForSearch: splitForSearch,
     normalizeText: normalizeText, normalizeTex: normalizeTex, stripMarkdown: stripMarkdown,
-    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS, createTermLinker: createTermLinker, ITEM_REF: ITEM_REF, TERM_NO_AUTO: TERM_NO_AUTO,
+    escapeHtml: escapeHtml, REF_CMDS: REF_CMDS, createTermLinker: createTermLinker, setTermRules: setTermRules, termNoAuto: function () { return TERM_NO_AUTO; }, ITEM_REF: ITEM_REF,
     MATH_OPEN: MATH_OPEN, MATH_CLOSE: MATH_CLOSE
   };
 });

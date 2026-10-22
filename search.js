@@ -42,6 +42,7 @@
     READINGS = [];
     var seen = {};
     IDX.entries.forEach(function (e) {
+      if (!e) return;
       (e.ix || []).forEach(function (x) {
         if (!x.reading || seen[x.term]) return;
         seen[x.term] = 1;
@@ -52,38 +53,47 @@
   }
   function isKanaOnly(w) { return /^[\u3041-\u309f\u30fcー]+$/.test(w); }
 
+  // 項目一つ分の検索用の正規化（本文が後から届いた項目は、届いたときにこれで作り直す）
+  var whereOf = {};   // 所在の文字列はページごとに同じなので、ページごとに 1 回だけ正規化する
+  function pageWhere(p, pg) {
+    if (!(p in whereOf)) {
+      var crumbs = (pg.crumbs || []).map(function (c) { return c.title; }).join(' ');
+      whereOf[p] = Core.normalizeText(crumbs + ' ' + (pg.subj || '') + ' ' + (pg.path || '') + ' ' + (pg.title || ''));
+    }
+    return whereOf[p];
+  }
+  function prepRow(e, i) {
+    var pg = IDX.pages[e.p] || {};
+    var sb = Core.splitForSearch(e.x || '');
+    var st = Core.splitForSearch(e.ti || '');
+    var ni = (e.ix || []).map(function (x) { return fold(x.term + (x.reading ? ' ' + x.reading : '')); });
+    return {
+      i: i, e: e, pg: pg,
+      rawT: st.text + ' ' + (e.k || ''), rawB: sb.text,
+      rawI: (e.ix || []).map(function (x) { return x.term + (x.reading ? ' ' + x.reading : ''); }),
+      nt: fold(st.text + ' ' + (e.k || '')),
+      ntt: fold(st.text).trim().replace(/[（(][^）)]*[）)]$/, '').trim(),   // 題だけ（末尾の括弧書きを除く）。完全一致の判定用
+      ni: ni, nis: splitIx(ni),
+      nl: (e.l || '').toLowerCase(),
+      nb: fold(sb.text),
+      ntm: st.maths.map(norm).join('\u0001'),
+      nm: sb.maths.map(norm).join('\u0001'),
+      where: pageWhere(e.p, pg),
+      pt: fold(pg.title || ''), rawP: pg.title || ''
+    };
+  }
+  var prepPos = {};
+  function updatePrepared(i) {
+    if (!prepared || !IDX.entries[i]) return;
+    var row = prepRow(IDX.entries[i], i);
+    if (i in prepPos) prepared[prepPos[i]] = row; else { prepPos[i] = prepared.length; prepared.push(row); }
+  }
   // 検索用に正規化した索引（索引の読み込み時に 1 回だけ作り、以後の検索では使い回す）
   function prepare() {
     if (prepared) return prepared;
     var t0 = window.performance ? performance.now() : 0;
-    var whereOf = {};   // 所在の文字列はページごとに同じなので、ページごとに 1 回だけ正規化する
-    function pageWhere(p, pg) {
-      if (!(p in whereOf)) {
-        var crumbs = (pg.crumbs || []).map(function (c) { return c.title; }).join(' ');
-        whereOf[p] = Core.normalizeText(crumbs + ' ' + (pg.subj || '') + ' ' + (pg.path || '') + ' ' + (pg.title || ''));
-      }
-      return whereOf[p];
-    }
-    prepared = IDX.entries.map(function (e, i) {
-      var pg = IDX.pages[e.p] || {};
-      var sb = Core.splitForSearch(e.x || '');
-      var st = Core.splitForSearch(e.ti || '');
-      var ni = (e.ix || []).map(function (x) { return fold(x.term + (x.reading ? ' ' + x.reading : '')); });
-      return {
-        i: i, e: e, pg: pg,
-        rawT: st.text + ' ' + (e.k || ''), rawB: sb.text,
-        rawI: (e.ix || []).map(function (x) { return x.term + (x.reading ? ' ' + x.reading : ''); }),
-        nt: fold(st.text + ' ' + (e.k || '')),
-        ntt: fold(st.text).trim().replace(/[（(][^）)]*[）)]$/, '').trim(),   // 題だけ（末尾の括弧書きを除く）。完全一致の判定用
-        ni: ni, nis: splitIx(ni),
-        nl: (e.l || '').toLowerCase(),
-        nb: fold(sb.text),
-        ntm: st.maths.map(norm).join('\u0001'),
-        nm: sb.maths.map(norm).join('\u0001'),
-        where: pageWhere(e.p, pg),
-        pt: fold(pg.title || ''), rawP: pg.title || ''
-      };
-    });
+    prepared = []; prepPos = {};
+    IDX.entries.forEach(function (e, i) { if (!e) return; prepPos[i] = prepared.length; prepared.push(prepRow(e, i)); });
     // 式ラベルもエントリとして追加
     Object.keys(IDX.labels).forEach(function (l) {
       var L = IDX.labels[l];
@@ -443,27 +453,56 @@
   function root() { return document.body.getAttribute('data-root') || ''; }
 
   /* ---------- 検索用の本文（search-index.js）の遅延読み込み ---------- */
-  // site-index.js には本文を入れず、検索を開いたとき（参照のプレビューで本文が要るときも）に初めて読み込む。
-  // 読み込んだら、検索用の正規化（prepare）をその場で 1 回だけ行う。
-  var entriesState = (IDX.entries && IDX.entries.length) ? 2 : 0, entriesWaiters = [];
+  // site-index.js には本文を入れず、検索を開いたとき（参照のプレビューで本文が要るときも）に初めて読み込む（2026-10-22 ユーザー指示で二段に分けた）。
+  //   search-index.js：本文以外（題・索引語・読み・キーワード）。これが届いたら検索できる（headReady）。
+  //   search-body/<鍵>.js：分野ごとの本文と、題のない項目（証明・解答など）。並行して読み込み、届いた分から索引に加える。
+  //   MathEntries.load(cb) は従来どおり、本文がすべて届いてから cb を呼ぶ（参照のプレビュー・付箋用）。
+  var headState = (IDX.entries && IDX.entries.length) ? 2 : 0, entriesState = headState, headWaiters = [], entriesWaiters = [], bodyKeys = [], bodyDone = 0, bodyListener = null;
+  function fillEntry(h) {
+    var e = {}; Object.keys(h).forEach(function (k) { e[k] = h[k]; });
+    e.n = e.n || ''; e.l = e.l || ''; e.ti = e.ti || ''; e.k = e.k || ''; e.of = e.of || null; e.h = e.h || '';
+    e.a = e.a || e.l; e.ix = e.ix || []; e.x = e.x || '';
+    return e;
+  }
+  function addScript(src, onload, onerror) {
+    var sc = document.createElement('script'); sc.src = src; sc.onload = onload; sc.onerror = onerror; document.head.appendChild(sc);
+  }
+  function loadHead(cb) {
+    if (headState === 2) { if (cb) cb(); return; }
+    if (cb) headWaiters.push(cb);
+    if (headState === 1) return;
+    headState = 1;
+    var v = IDX.built ? '?v=' + encodeURIComponent(IDX.built) : '';   // 索引を作り直したら URL が変わる（古いキャッシュを使わない）
+    addScript(root() + 'search-index.js' + v, function () {
+      var M = window.MATH_INDEX || {};
+      IDX.entries = new Array(M.entryCount || 0);
+      (M.entryHeads || []).forEach(function (h) { IDX.entries[h.i] = fillEntry(h); });
+      bodyKeys = M.bodyKeys || [];
+      headState = 2; prepared = null; READINGS = null;
+      headWaiters.splice(0).forEach(function (f) { try { f(); } catch (e) {} });
+      if (!bodyKeys.length) { entriesState = 2; entriesWaiters.splice(0).forEach(function (f) { try { f(); } catch (e) {} }); return; }
+      bodyKeys.forEach(function (k) {
+        addScript(root() + 'search-body/' + k + '.js' + v, function () {
+          var B = (window.SM_SB || {})[k] || { x: {}, e: [] };
+          Object.keys(B.x || {}).forEach(function (i) { if (IDX.entries[i]) { IDX.entries[i].x = B.x[i]; updatePrepared(+i); } });
+          (B.e || []).forEach(function (h) { IDX.entries[h.i] = fillEntry(h); updatePrepared(h.i); });
+          bodyDone++;
+          if (bodyDone === bodyKeys.length) {
+            entriesState = 2;
+            entriesWaiters.splice(0).forEach(function (f) { try { f(); } catch (e) {} });
+          }
+          if (bodyListener) bodyListener(bodyDone, bodyKeys.length);
+        }, function () { bodyDone++; if (bodyListener) bodyListener(bodyDone, bodyKeys.length); });
+      });
+    }, function () { headState = 0; });
+  }
   function loadEntries(cb) {
     if (entriesState === 2) { if (cb) cb(); return; }
     if (cb) entriesWaiters.push(cb);
-    if (entriesState === 1) return;
-    entriesState = 1;
-    var sc = document.createElement('script');
-    sc.src = root() + 'search-index.js' + (IDX.built ? '?v=' + encodeURIComponent(IDX.built) : '');   // 索引を作り直したら URL が変わる（古いキャッシュを使わない）
-    sc.onload = function () {
-      var M = window.MATH_INDEX || {};
-      IDX.entries = M.entries || [];
-      entriesState = 2; prepared = null; READINGS = null;
-      try { prepare(); } catch (e) {}
-      entriesWaiters.splice(0).forEach(function (f) { try { f(); } catch (e) {} });
-    };
-    sc.onerror = function () { entriesState = 0; };
-    document.head.appendChild(sc);
+    loadHead();
   }
   function entriesReady() { return entriesState === 2; }
+  function headReady() { return headState === 2; }
   window.MathEntries = { load: loadEntries, ready: entriesReady };
   // 索引の読み込み中は、結果の形をした灰色の枠に光の波を流して待たせる（スケルトン表示）
   var LOADING_HTML = '<div class="mn-skel-list" role="status" aria-live="polite"><span class="mn-sr-only">検索用の索引を読み込んでいます…</span>' +
@@ -934,11 +973,34 @@
     var rest = box._out.results.length - box._shown;
     return rest > 0 ? '<button type="button" class="mn-search-more mn-search-showmore">さらに表示（残り ' + rest + ' 件）</button>' : '';
   }
+  // 検索語が用語（定義された語）とちょうど一致するとき、その語のすべての意味（全分野の定義）を結果の先頭に並べる（2026-10-22 ユーザー指示：
+  // 同じ語の別の意味まで網羅する）。用語と定義の対応は site-index.js の terms（原稿の定義から自動で集めたもの）を使うので、本文の索引を待たずに出せる。
+  function meaningsHtml(pq) {
+    var words = (pq.terms || []).filter(function (t) { return t.kind === 'text' && t.txt; });
+    if (words.length !== 1 || !IDX.terms) return '';
+    var w = words[0], cands = [w.s || w.txt].concat(w.alts || []), term = null;
+    for (var i = 0; i < cands.length && !term; i++) if (IDX.terms[cands[i]]) term = cands[i];
+    if (!term) {
+      var f = fold(w.txt);
+      Object.keys(IDX.terms).some(function (k) { if (fold(k) === f) { term = k; return true; } return false; });
+    }
+    if (!term) return '';
+    var labs = IDX.terms[term].filter(function (l) { return IDX.labels[l]; });
+    if (!labs.length) return '';
+    var items = labs.map(function (l) {
+      var L = IDX.labels[l], pg = IDX.pages[L.p] || {};
+      var field = (pg.crumbs || []).filter(function (c) { return !c.t; }).map(function (c) { return c.title; })[0] || '';
+      return '<li><a class="mn-xref" href="' + root() + pg.path + '#' + Core.escapeHtml(l) + '" data-label="' + Core.escapeHtml(l) + '">' +
+        Core.escapeHtml((L.ti || term)) + '</a> <span class="mn-meaning-where">' + Core.escapeHtml(field + (field ? ' › ' : '') + (pg.subj || '') + ' §' + pg.sec) + '</span></li>';
+    }).join('');
+    return '<div class="mn-meanings"><div class="mn-meanings-k">「' + Core.escapeHtml(term) + '」の定義' + (labs.length > 1 ? '（' + labs.length + ' 通りの意味）' : '') + '</div><ul>' + items + '</ul></div>';
+  }
   function showResults(box, out) {
     box._out = out;
-    if (!out.results.length) { box._shown = 0; box.innerHTML = '<div class="mn-search-empty">該当する項目が見つかりませんでした。語を減らすか、条件を外してみてください。</div>'; return; }
+    var mean = meaningsHtml(out.pq || {});
+    if (!out.results.length) { box._shown = 0; box.innerHTML = mean + '<div class="mn-search-empty">該当する項目が見つかりませんでした。語を減らすか、条件を外してみてください。</div>'; return; }
     box._shown = Math.min(PAGE_SIZE, out.results.length);
-    box.innerHTML = '<div class="mn-search-count">' + out.total + ' 件' + (out.fuzzy ? '（完全に一致するものがないため、近い候補を表示）' : '') + '</div>' +
+    box.innerHTML = mean + '<div class="mn-search-count">' + out.total + ' 件' + (out.fuzzy ? '（完全に一致するものがないため、近い候補を表示）' : '') + '</div>' +
       out.results.slice(0, box._shown).map(function (it) { return renderResult(it, out.pq, root(), false); }).join('') +
       moreButtonHtml(box);
   }
@@ -1000,14 +1062,22 @@
     pageQ = f.q;
     bindMore(res);
     f.write(fromParams(new URLSearchParams(location.search)));
-    loadEntries();   // 検索ページを開いたら索引を読み込んでおく
+    loadHead();   // 検索ページを開いたら索引を読み込んでおく
     function run() {
       var v = f.read();
-      if (!f.isEmpty(v) && !entriesReady()) { res.innerHTML = LOADING_HTML; loadEntries(run); return; }
+      if (!f.isEmpty(v) && !headReady()) { res.innerHTML = LOADING_HTML; loadHead(run); return; }
       if (f.isEmpty(v)) res.innerHTML = EMPTY_HELP;
       else {
         var t0 = window.performance ? performance.now() : 0;
         var out = search(v, { limit: 1e9 }); lastPQ = out.pq; showResults(res, out);
+        // 本文がまだ届いていなければ、題・索引語での結果を先に出し、本文が届いたら出し直す
+        if (!entriesReady()) {
+          res.insertAdjacentHTML('afterbegin', '<p class="mn-muted mn-body-loading" role="status">本文を読み込んでいます（' + bodyDone + ' / ' + bodyKeys.length + '）。題・索引語の一致を先に表示しています。</p>');
+          bodyListener = function (d, n) {
+            var note = res.querySelector('.mn-body-loading'); if (note) note.textContent = '本文を読み込んでいます（' + d + ' / ' + n + '）。題・索引語の一致を先に表示しています。';
+            if (d === n) { bodyListener = null; run(); }
+          };
+        }
         if (window.performance && window.console) console.debug('[search] 検索と描画 ' + Math.round(performance.now() - t0) + ' ms（' + out.total + ' 件）');
       }
       if (typeof psel !== 'undefined') { psel = 0; pmark(); }

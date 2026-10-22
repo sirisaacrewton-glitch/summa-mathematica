@@ -44,6 +44,7 @@
    * 数式・既存のリンク・見出し・環境の題・その語を定義している環境の中は対象外。 */
   function linkTerms(article) {
     if (!IDX.terms || KIND !== 'page' || !window.MathCore || !MathCore.createTermLinker) return;
+    if (MathCore.setTermRules) MathCore.setTermRules(IDX.termRules);
     var linker = MathCore.createTermLinker(IDX.terms, IDX.labels, IDX.pages);
     if (!linker.size) return;
     var deps = linker.pageDeps(IDX.backrefs, pageIdx, 2).set;
@@ -592,7 +593,7 @@
         var want0 = label;
         loadPv(G.p, function () { if (popFor && popLabel === want0) { if (popStack.length) setPopContent(want0, popItems); else showPop(popFor); } });
       }
-      else if (G.e != null && !(IDX.entries && IDX.entries.length) && window.MathEntries) {
+      else if (G.e != null && window.MathEntries && !window.MathEntries.ready()) {
         // 本文の索引がまだ読み込まれていない：読み込み後に表示し直す
         bodyHtml = '<div class="mn-pv-loading" role="status"><span class="mn-sr-only">読み込み中…</span><div class="mn-skel-line"></div><div class="mn-skel-line"></div><div class="mn-skel-line" style="width:64%"></div></div>';
         var want = label;
@@ -602,7 +603,7 @@
       else if (isNamed) {
         for (var i = 0; i < IDX.entries.length; i++) {
           var e = IDX.entries[i];
-          if (e.p === G.p && (G.t === 'page' ? e.t === 'page' : e.l === label)) { bodyHtml = renderer.renderMarkdown((e.x || '').slice(0, 900)); break; }
+          if (e && e.p === G.p && (G.t === 'page' ? e.t === 'page' : e.l === label)) { bodyHtml = renderer.renderMarkdown((e.x || '').slice(0, 900)); break; }
         }
       }
       head = head.replace('<!--where-->', '<div class="mn-pv-where">' + esc(pg.subj) + ' §' + pg.sec + ' ' + esc(pg.title) + '</div>');
