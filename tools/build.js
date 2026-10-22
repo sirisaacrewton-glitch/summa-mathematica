@@ -245,6 +245,7 @@ pages.forEach(function (pg) {
       return;
     }
     var rec = { p: pg.idx, t: L.type, n: L.num || '', ti: L.title || '' };
+    if (L.refname) rec.rn = L.refname;
     if (L.node && L.node._entry != null) rec.e = L.node._entry;
     if (L.type === 'equation') rec.tex = L.tex;
     if (L.type === 'page') rec.ti = pg.title;
@@ -343,7 +344,7 @@ pages.forEach(function (pg) {
         if (!hit) list.push({ sig: sig, v: [pg.idx, from ? (from.label || '') : '', from ? from.type : '', from ? (from.num || '') : '', currentRole] });
         else if (ROLE_RANK[currentRole] > ROLE_RANK[hit.v[4]]) hit.v[4] = currentRole;   // 主張と証明の両方にあれば主張を優先
       }
-      return { type: L.t, num: L.n, title: L.ti, typeName: typeName(L.t), href: '#', prefix: '' };
+      return { type: L.t, num: L.n, title: L.ti, refname: L.rn || '', typeName: typeName(L.t), href: '#', prefix: '' };
     },
     onItemRef: function (label, n) { itemRefs.push({ label: label, n: n, path: pg.path }); },
     onMathError: function (err, m) {

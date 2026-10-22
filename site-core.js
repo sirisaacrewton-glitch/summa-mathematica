@@ -15,7 +15,7 @@
   var REF_OPEN = '', REF_CLOSE = '';
   var DISPLAY_ENVS = ['equation', 'equation*', 'align', 'align*', 'gather', 'gather*',
     'multline', 'multline*', 'eqnarray', 'eqnarray*', 'alignat', 'alignat*', 'CD'];
-  var REF_CMDS = ['ref', 'eqref', 'nameref', 'numref', 'fullref'];
+  var REF_CMDS = ['ref', 'eqref', 'nameref', 'numref', 'fullref', 'tref'];
 
   function escapeHtml(s) {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -193,7 +193,7 @@
           index.push({ term: parts[0].trim(), reading: (parts[1] || '').trim() });
           i += im[0].length; continue;
         }
-        var rm = /^\\(ref|eqref|nameref|numref|fullref)(?:\[([^\]]*)\])?\{([^{}]+)\}/.exec(s.slice(i, i + 300));
+        var rm = /^\\(ref|eqref|nameref|numref|fullref|tref)(?:\[([^\]]*)\])?\{([^{}]+)\}/.exec(s.slice(i, i + 300));
         if (rm) {
           refs.push({ cmd: rm[1], label: rm[3].trim(), text: rm[2] != null ? rm[2].trim() : null });
           out += REF_OPEN + (refs.length - 1) + REF_CLOSE;
@@ -278,7 +278,7 @@
           if (node.label) {
             byLabel[node.label] = node;
             labels.push({ label: node.label, type: node.type, num: node.num || '', title: node.title,
-              keywords: node.keywords, node: node });
+              keywords: node.keywords, refname: (node.attrs && node.attrs.refname) || '', node: node });
           }
           var nextParent = (def.num && !inAttached) ? node : (def.attached ? (node.of || parentEnv) : parentEnv);
           walk(node.children, nextParent, inAttached || !!def.attached);
@@ -459,6 +459,8 @@
       else if (r.cmd === 'nameref') text = info.title || (tname + ' ' + info.num);
       else if (r.cmd === 'fullref') text = (info.prefix || '') + tname + ' ' + info.num + (info.title ? '（' + info.title + '）' : '');
       else if (r.text) text = r.text;
+      // 有名な定理・頻出の補題は番号でなく名前で表示する（属性 refname）。\tref は名前を持つ項目でも「種類 番号」で表示する（直前に名前を書いたとき用）
+      else if (info.refname && r.cmd !== 'tref') text = info.refname;
       else if (!info.num && info.type !== 'equation' && info.type !== 'section' && info.type !== 'page') text = info.title || tname;
       else {
         if (info.type === 'equation') text = '(' + info.num + ')';
@@ -467,7 +469,8 @@
       }
       var href = info.href;
       if (item) {
-        if (!r.text) text += r.cmd === 'eqref' ? '' : ' の ' + (/^\d+$/.test(item) ? item : '(' + item + ')');
+        var key = /^\d+$/.test(item) ? item : '(' + item + ')';
+        if (!r.text && r.cmd !== 'eqref') text += (info.refname && r.cmd === 'ref' ? ' ' : ' の ') + key;
         var hash = '#' + r.label;
         if (href.slice(-hash.length) === hash) href = href + '.' + item;
       }

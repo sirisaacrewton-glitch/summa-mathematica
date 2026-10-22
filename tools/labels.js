@@ -47,7 +47,7 @@ function patterns(L) {
   return [
     new RegExp('(\\{[^}\\n]*#)' + e + end, 'g'),                                   // {#L ...}
     new RegExp('(\\\\label\\{)' + e + '(?=\\})', 'g'),                               // \label{L}
-    new RegExp('(\\\\(?:ref|eqref|nameref|fullref|numref)(?:\\[[^\\]\\n]*\\])?\\{)' + e + '(?=(?:\\.(?:\\d+|[a-z]|[ivx]+))?\\})', 'g'),   // 項目参照 L.N も含む
+    new RegExp('(\\\\(?:ref|eqref|nameref|fullref|numref|tref)(?:\\[[^\\]\\n]*\\])?\\{)' + e + '(?=(?:\\.(?:\\d+|[a-z]|[ivx]+))?\\})', 'g'),   // 項目参照 L.N も含む
     new RegExp('(ref=")' + e + '(?=")', 'g')                                        // restate
   ];
 }
