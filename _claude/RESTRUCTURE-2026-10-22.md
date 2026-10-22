@@ -152,3 +152,19 @@
 | `06-topos-theory/04-presheaf-heyting` | `09-topos-theory/04-presheaf-heyting` |
 
 系列の id：cat-structured → cat-monoidal、cat-monoidal-advanced → cat-enriched（ほかは同じ。cat-sheaves は層のコホモロジー、cat-topos はトポスとサイト）。
+
+
+## 一般位相の調整（2026-10-22 ユーザー指示）
+
+フォルダはすべて `05-geometry-topology/01-general-topology/` の下。
+
+| 旧 | 新 |
+|---|---|
+| `01-topological-spaces/03-bases-countability` | `01-topological-spaces/03-bases-neighborhoods`（近傍系の公理 top:neighborhood-axioms を §1 から移動） |
+| `04-properties/09-stone-duality` | `05-advanced-properties/01-stone-duality` |
+| `04-properties/10-local-connectedness` | `04-properties/09-local-connectedness` |
+| `04-properties/11-cantor-set` … `21-implication-map` | `05-advanced-properties/02-cantor-set` … `12-implication-map`（順序はそのまま） |
+| `05-metric-spaces` | `06-metric-spaces` |
+| `06-uniform-spaces` | `07-uniform-spaces` |
+| `07-counterexamples` | `08-counterexamples` |
+| `08-topological-groups` | `09-topological-groups` |
