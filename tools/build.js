@@ -65,6 +65,8 @@ function walkDir(absDir, relDir, depth) {
       sec++;
       var pg = { path: rel, abs: abs, dirNode: node, sec: sec, src: unescapeSource(m[1]) };
       pg.idx = pages.length; pages.push(pg);
+      // keywords の中の { … } に属性が紛れ込んだ見出し（refname が効かない。2026-10-23 に 31 か所あった）
+      (pg.src.match(/^:::.*keywords="[^"]*\{[^"}]* (?:refname|refscope|name|index)="[^\n]*$/mg) || []).forEach(function (l) { warn(rel, '見出しの keywords の中に属性が紛れ込んでいます（keywords の { } を閉じ、属性を外に出す）：' + l.slice(0, 80)); });
       node.children.push({ kind: 'page', idx: pg.idx });
     }
   });
