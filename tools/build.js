@@ -1005,18 +1005,28 @@ if (!CHECK_ONLY) {
 // 直感（intuition）のない主張の数（2026-10-23 ユーザー指示：主張の内容を日本語で検索できるよう、定義・定理などにはやさしい日本語の直感を付ける。
 // INTUITION_REPORT=1 で系列ごとの一覧）
 (function intuitionReport() {
-  var NEED = { definition: 1, theorem: 1, proposition: 1, lemma: 1, corollary: 1 }, total = 0, missing = 0, bySeries = {};
+  // 対象：定義と主要な定理（theorem、または refname をもつもの）。主要な定理の証明（Step が 3 つ以上）に【主張】があるかも数える
+  var total = 0, missing = 0, ptotal = 0, pmissing = 0, bySeries = {};
+  function major(e) { return e.t === 'theorem' || (NAMED_TYPES[e.t] && labels[e.l] && labels[e.l].rn); }
   entries.forEach(function (e, i) {
-    if (!NEED[e.t]) return;
+    if (e.t !== 'definition' && !major(e)) return;
+    var dp = pages[e.p].dirPath, rec = bySeries[dp] || (bySeries[dp] = { i: 0, c: 0 });
     total++;
     var nx = entries[i + 1];
-    if (nx && nx.t === 'intuition' && nx.of) return;
-    missing++;
-    var dp = pages[e.p].dirPath; bySeries[dp] = (bySeries[dp] || 0) + 1;
+    if (!(nx && nx.t === 'intuition' && nx.of)) { missing++; rec.i++; }
+    if (e.t === 'definition') return;
+    for (var k = i + 1; k < Math.min(entries.length, i + 6); k++) {
+      var p = entries[k];
+      if (p.t !== 'proof' || !p.of || p.of.l !== e.l) continue;
+      if (((p.x || '').match(/\*\*Step \d/g) || []).length < 3) break;
+      ptotal++;
+      if ((p.x || '').indexOf('【主張：') < 0) { pmissing++; rec.c++; }
+      break;
+    }
   });
   if (QUIET) return;
-  console.log('\n[直感（intuition）のない定義・定理など ' + missing + ' / ' + total + ' 件 — INTUITION_REPORT=1 で系列ごとの件数]');
-  if (process.env.INTUITION_REPORT) Object.keys(bySeries).sort().forEach(function (k) { console.log('  ' + k + '  ' + bySeries[k]); });
+  console.log('\n[直感のない定義・主要な定理 ' + missing + ' / ' + total + ' 件、【主張】のない主要な定理の証明（Step 3 つ以上） ' + pmissing + ' / ' + ptotal + ' 件 — INTUITION_REPORT=1 で系列ごと]');
+  if (process.env.INTUITION_REPORT) Object.keys(bySeries).sort().forEach(function (k) { var r = bySeries[k]; if (r.i || r.c) console.log('  ' + k + '  直感 ' + r.i + '・主張 ' + r.c); });
 })();
 var plannedKeys = Object.keys(planned);
 if (plannedKeys.length && !QUIET) {
