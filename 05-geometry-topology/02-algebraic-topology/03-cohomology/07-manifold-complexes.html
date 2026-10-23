@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多様体になる複体 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=f98d0af1">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/02-algebraic-topology/03-cohomology/07-manifold-complexes.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 多様体になる複体 {#at:page-manifold-complexes keywords="when is a simplicial complex or CW complex a manifold, local homology, link of a simplex, homology manifold, invariance of boundary, triangulated manifolds, vertex links, pure complexes, non-manifold complexes"}
+
+単体複体や CW 複体は、多様体を組み立てる部品としてよく使われる。しかし、単体を貼り合わせた空間がいつも多様体になるわけではない。三枚の三角形を一本の辺で貼り合わせた「三ページの本」は、辺の上の点で、どれだけ拡大しても平面と同じ形にならない。このページでは、複体が多様体になるための条件を調べる。
+
+道具は**局所ホモロジー** $H_{*}(X,X\setminus\{x\})$ である。これは点 $x$ のまわりの形だけで決まる位相的不変量で、$n$ 次元多様体では $\mathbb{R}^{n}$ と同じ値をとる（\ref{at:local-homology-ball}）。主定理（\ref{at:link-local-homology}）は、単体複体の点の局所ホモロジーを、その点を含む単体の**まつわり複体**（その単体を「外から取り囲む」部分複体）のホモロジーで表す。これから、多様体の三角形分割がもつべき組合せ的な条件（純粋性、$(n-1)$ 単体はちょうど二つの $n$ 単体の面であること、まつわり複体はホモロジー球面であること）が出る（\ref{at:manifold-link-conditions}）。逆に、頂点のまつわり複体が球面なら多様体である（\ref{at:vertex-link-sphere-manifold}）。2 次元と 3 次元では、この二つの条件がまつわり複体の言葉で一致する（\ref{at:surface-complex-criterion}, \ref{at:three-manifold-complex}）。4 次元以上で何が起こるか（ホモロジー多様体だが多様体でない例、二重懸垂定理）と、三角形分割できない多様体の存在は、範囲外の事実として述べる。
+
+> 資料：標準的な内容（Rourke–Sanderson『Introduction to Piecewise-Linear Topology』のまつわり複体の扱い、小松・中岡・菅原『位相幾何学 I』のホモロジー多様体の節で扱われている内容）。証明は本サイトの既存の結果から書き下ろした。
+
+## 記法と定義の確認 {#at:sec-mc-notation}
+
+::: notation
+- 単体複体は $\mathbb{R}^{N}$ の中の有限単体複体で、$|K|$ はその多面体（\ref{at:simplicial-complex}）。単体を頂点の集合と同一視し、$\tau\subseteq\sigma$ で「$\tau$ は $\sigma$ の面」を表す。空でない頂点の集合が $K$ の単体であるとき「$K$ の単体を張る」という。
+- $y\in|K|$ の**重心座標**を $t_{v}(y)$（$v$ は $K$ の頂点）と書く（\ref{at:open-star}）。$t_{v}$ は連続で、$\operatorname{st}v=\{t_{v}>0\}$ は開集合（\ref{at:open-star-properties.1}）。$\operatorname{supp}y\defeq\{v:t_{v}(y)>0\}$ は $y$ を含む最小の単体（**台単体**）で、$y\in|\tau|$ と $\operatorname{supp}y\subseteq\tau$ は同値である。$\operatorname{supp}y=\sigma$ となる点の全体を $\sigma$ の**開単体**という。一つの単体 $|\eta|$ の中では、点と重心座標の組は一対一に対応し、$\mathbb{R}^{N}$ でのアフィン結合は重心座標のアフィン結合に対応する。
+- 局所ホモロジー：$H_{k}(X|A)\defeq H_{k}(X,X\setminus A)$, $H_{k}(X|x)\defeq H_{k}(X|\{x\})$（\ref{at:page-orientation} と同じ記法。係数は $\mathbb{Z}$）。
+- 被約ホモロジー：単体的な被約ホモロジー $\tilde H_{j}$ は添加写像を次数 $-1$ に入れた鎖複体のホモロジー（\ref{at:simplicial-chains}）で、単体複体では有向単体の鎖複体（\ref{at:oriented-chains}）で計算する。空の複体では次数 $-1$ の $\mathbb{Z}$ だけが残り、$\tilde H_{-1}(\varnothing)=\mathbb{Z}$、それ以外は $0$。特異ホモロジーでも空集合について同じ約束をする。単体複体に頂点の順序を入れると Δ 複体になり（\ref{at:oriented-ordered-iso}）、単体的ホモロジーと特異ホモロジーは添加写像と両立する同型で一致する（\ref{at:simplicial-singular-iso}）ので、$\tilde H_{j}(L)\cong\tilde H_{j}(|L|)$（$L=\varnothing$ も含む）。$p$ 点からなる離散空間では $\tilde H_{0}\cong\mathbb{Z}^{p-1}$（$p\ge1$）。
+- 位相多様体は \ref{at:topological-manifold}（ハウスドルフで、各点が $\mathbb{R}^{n}$ と同相な開近傍をもつ）。局所ホモロジーの値 \ref{at:local-homology-ball.1} と、$\mathbb{R}^{n}$ の開集合の局所ホモロジー \ref{at:invariance-of-dimension} を使う。
+- CW 複体は \ref{at:cw-complex}。開胞体は開円板と同相（\ref{at:cw-closed-criterion.3}）、コンパクト集合は有限個の胞体としか交わらない（\ref{at:cw-compact-finite}）。
+:::
+
+## 局所ホモロジーと境界 {#at:sec-mc-local}
+
+::: lemma 局所ホモロジーは近傍で決まる {#at:local-homology-open-nbhd keywords="local homology can be computed in any open neighbourhood; homeomorphisms preserve local homology" index="局所ホモロジーの局所性|きょくしょほもろじーのきょくしょせい"}
+空間 $X$ の 1 点集合はすべて閉集合であるとする。$U\subseteq X$ が開集合で $x\in U$ なら、包含が同型 $H_{k}(U|x)\cong H_{k}(X|x)$（すべての $k$）を誘導する。とくに、点 $x\in X$ と $y\in Y$ がそれぞれ開近傍 $U$, $V$ をもち、$x$ を $y$ に写す同相 $U\cong V$ があれば、$H_{k}(X|x)\cong H_{k}(Y|y)$。
+:::
+
+::: proof
+$Z\defeq X\setminus U$ とおく。$Z$ は閉集合で、$x\notin Z$ なので $Z\subseteq X\setminus\{x\}$。$\{x\}$ は閉なので $X\setminus\{x\}$ は開で、$\overline{Z}=Z\subseteq\operatorname{int}(X\setminus\{x\})$。\ref{at:excision} から、$(X\setminus Z,(X\setminus\{x\})\setminus Z)=(U,U\setminus\{x\})\to(X,X\setminus\{x\})$ はホモロジーの同型を誘導する。後半は、$H_{k}(X|x)\cong H_{k}(U|x)\cong H_{k}(V|y)\cong H_{k}(Y|y)$（中央は同相が誘導する対の同相 $(U,U\setminus\{x\})\cong(V,V\setminus\{y\})$ による）。
+
+::: hypcheck
+- **1 点集合が閉**：$X\setminus\{x\}$ が開であることに使った。ハウスドルフ空間（多様体・単体複体の多面体・CW 複体）ではつねに成り立つ。
+:::
+:::
+
+::: definition 境界付き多様体 {#at:manifold-with-boundary keywords="topological manifold with boundary, closed half-space H^n, boundary points, interior points" index="境界付き多様体|きょうかいつきたようたい, 境界をもつ多様体|きょうかいをもつたようたい, 半空間|はんくうかん, 境界点（多様体）|きょうかいてんたようたい, 内点（多様体）|ないてんたようたい"}
+$n\ge1$ とし、$\mathbb{H}^{n}\defeq\{x\in\mathbb{R}^{n}:x_{n}\ge0\}$ を**閉半空間**、$\partial\mathbb{H}^{n}\defeq\{x_{n}=0\}$ とする。ハウスドルフ空間 $M$ の各点 $p$ が、$\mathbb{H}^{n}$ の開集合と同相な開近傍 $W$（同相を $\varphi\colon W\to\varphi(W)$ とする）をもつとき、$M$ を **$n$ 次元境界付き多様体**という。$\varphi(p)\in\partial\mathbb{H}^{n}$ となる $(W,\varphi)$ があるとき $p$ を（多様体の）境界点、$\varphi(p)\notin\partial\mathbb{H}^{n}$ となる $(W,\varphi)$ があるとき（多様体の）内点という。
+:::
+
+::: proposition 境界の不変性 {#at:boundary-invariance keywords="invariance of boundary: local homology at boundary points of a manifold with boundary vanishes, at interior points it is Z in degree n" index="境界の不変性|きょうかいのふへんせい"}
+$M$ を $n$ 次元境界付き多様体とする。
+1. $p$ が内点なら $H_{k}(M|p)\cong\mathbb{Z}$（$k=n$）、$0$（$k\ne n$）。
+2. $p$ が境界点なら、すべての $k$ で $H_{k}(M|p)=0$。
+3. したがって、どの点も内点と境界点のどちらか一方だけである。境界点の全体を $\partial M$ と書く。
+:::
+
+::: proof
+**Step 1（チャートへの帰着）.** 【主張：$p$ の近傍 $(W,\varphi)$ について $H_{k}(M|p)\cong H_{k}(\mathbb{H}^{n}|\varphi(p))$】 \ref{at:local-homology-open-nbhd} を $M$ の開集合 $W$ と、$\mathbb{H}^{n}$ の開集合 $\varphi(W)$ に使う（$M$, $\mathbb{H}^{n}$ はハウスドルフ）。
+
+**Step 2（内点）.** 【主張：$q\in\mathbb{H}^{n}$, $q_{n}>0$ なら $H_{k}(\mathbb{H}^{n}|q)\cong\mathbb{Z}$（$k=n$）、$0$（それ以外）】 開球 $B\defeq\{z:|z-q|<q_{n}\}$ は $\mathbb{H}^{n}$ に含まれ（$z_{n}>q_{n}-q_{n}=0$）、$\mathbb{H}^{n}$ の開集合で、$\mathbb{R}^{n}$ の開集合でもある。\ref{at:local-homology-open-nbhd} から $H_{k}(\mathbb{H}^{n}|q)\cong H_{k}(B|q)$ で、これは \ref{at:invariance-of-dimension} から主張の値。
+
+**Step 3（境界点）.** 【主張：$q\in\partial\mathbb{H}^{n}$ なら $H_{k}(\mathbb{H}^{n}|q)=0$】 $e_{n}=(0,\dots,0,1)$ とし、$c\defeq q+e_{n}$ とおく。$y\in\mathbb{H}^{n}\setminus\{q\}$ と $s\in[0,1]$ について $p_{s}\defeq(1-s)c+sy$ の第 $n$ 座標は $(1-s)+sy_{n}\ge0$ なので $p_{s}\in\mathbb{H}^{n}$。$p_{s}=q$ なら第 $n$ 座標から $(1-s)+sy_{n}=0$、すなわち $s=1$ かつ $y_{n}=0$ で、$p_{1}=y\ne q$ に反する。よって $\mathbb{H}^{n}\setminus\{q\}$ は $c$ に関して星形で可縮（$c$ への直線ホモトピー）。$\mathbb{H}^{n}$ も可縮。被約ホモロジーの対の長完全列（\ref{at:pair-long-exact}。$\mathbb{H}^{n}\setminus\{q\}\neq\varnothing$）で、両端の被約ホモロジーが $0$ なので $H_{k}(\mathbb{H}^{n},\mathbb{H}^{n}\setminus\{q\})=0$。
+
+**Step 4（結論）.** Step 1〜3 から 1, 2。3：$n\ge1$ で $\mathbb{Z}\neq0$ なので、同じ点が 1 と 2 の両方を満たすことはない。
+
+::: hypcheck
+- **$n\ge1$**：$\mathbb{H}^{0}$ は定義しない（$n=0$ では境界は空）。3 で次数 $n$ の群が $\mathbb{Z}\ne0$ であることを使った。
+- **ハウスドルフ性**：Step 1 で \ref{at:local-homology-open-nbhd} の仮定（1 点集合が閉）に使った。
+:::
+:::
+
+::: definition ホモロジー多様体 {#at:homology-manifold keywords="homology n-manifold: local homology of R^n at every point" index="ホモロジー多様体|ほもろじーたようたい"}
+空間 $X$ のすべての点 $x$ で $H_{k}(X|x)\cong\mathbb{Z}$（$k=n$）、$0$（$k\ne n$）となるとき、$X$ を **$n$ 次元ホモロジー多様体**という。
+:::
+
+::: remark
+$n$ 次元多様体は $n$ 次元ホモロジー多様体である（\ref{at:local-homology-ball.1}）。逆は成り立たない（\ref{at:homology-manifold-not-manifold}）。文献によっては、局所コンパクト性や有限次元性などを定義に加える。このページでは局所ホモロジーの条件だけを使う。
+:::
+
+## まつわり複体と局所ホモロジー {#at:sec-mc-links}
+
+::: definition 星状体・まつわり複体・結 {#at:star-link keywords="closed star, link of a simplex, join of a face with a subcomplex of the link" index="まつわり複体|まつわりふくたい, リンク（単体複体）|りんくたんたいふくたい, 星状体|せいじょうたい, 閉星状体|へいせいじょうたい, 結（単体複体）|けつたんたいふくたい, ジョイン|じょいん"}
+単体複体 $K$ の単体 $\sigma$ について、
+1. $\sigma$ を含む単体の面の全体 $\overline{\operatorname{St}}\,\sigma$ を $\sigma$ の**星状体**という。
+2. $\sigma$ と交わらない単体 $\rho$ で、$\sigma\cup\rho$ が $K$ の単体であるものの全体 $\operatorname{Lk}\sigma$ を $\sigma$ の**まつわり複体**（リンク）という。
+3. 部分集合 $L\subseteq\operatorname{Lk}\sigma$ で面について閉じたもの（$\operatorname{Lk}\sigma$ の部分複体）について、$\tau\subseteq\sigma$, $\rho\in L\cup\{\varnothing\}$, $\tau\cup\rho\ne\varnothing$ となる $\tau\cup\rho$ の全体を $\overline{\sigma}*L$ と書き、そのうち $\tau\ne\sigma$ のものの全体を $\partial\sigma*L$ と書く（**結**）。
+:::
+
+::: remark
+どれも $K$ の部分複体である：$\rho\in\operatorname{Lk}\sigma$ なら $\sigma\cup\rho\in K$ なので、その面 $\tau\cup\rho'$（$\tau\subseteq\sigma$, $\rho'\subseteq\rho$）も $K$ の単体で、$\rho'\in\operatorname{Lk}\sigma$。星状体は結で $\overline{\operatorname{St}}\,\sigma=\overline{\sigma}*\operatorname{Lk}\sigma$ と書ける：$\sigma\subseteq\eta\in K$ なら $\eta=\sigma\cup(\eta\setminus\sigma)$ で $\eta\setminus\sigma\in\operatorname{Lk}\sigma\cup\{\varnothing\}$、その面は $\tau\cup\rho'$ の形である。$\sigma=\{v\}$ が頂点なら $\partial\sigma*L=L$ で、$\overline{\sigma}*L$ は $v$ を頂点とする錐（\ref{at:cone-complex}）。
+:::
+
+::: example
+1. 三角形 $\{a,b,c\}$ の境界（3 本の辺）では、$\operatorname{Lk}a=\{\{b\},\{c\}\}$（2 点）。
+2. 四面体の境界 $\partial\Delta^{3}$ では、頂点のまつわり複体は向かいの三角形の境界（3 頂点と 3 辺の円周）、辺 $\{a,b\}$ のまつわり複体は残りの 2 頂点。
+3. 三枚の三角形 $\{a,b,c_{i}\}$（$i=1,2,3$）を辺 $\{a,b\}$ で貼った複体（「三ページの本」）では $\operatorname{Lk}\{a,b\}=\{\{c_{1}\},\{c_{2}\},\{c_{3}\}\}$（3 点）。
+:::
+
+::: lemma 結のホモロジー {#at:join-link-homology keywords="reduced homology of the join of the boundary of a d-simplex with a subcomplex of its link is shifted by d" index="結のホモロジー|けつのほもろじー"}
+単体 $\sigma$ の次元を $d\ge0$ とし、$L$ を $\operatorname{Lk}\sigma$ の部分複体（空でもよい）とする。すべての $j$ について
+$$
+\tilde H_{j}(\partial\sigma*L)\cong\tilde H_{j-d}(L).
+$$
+:::
+
+::: proof
+$d$ についての帰納法。$d=0$ なら $\partial\sigma*L=L$ なので成り立つ。$d\ge1$ とし、$\sigma$ の頂点 $v$ を一つ選び、$\sigma'\defeq\sigma\setminus\{v\}$（$(d-1)$ 単体）とおく。$L\subseteq\operatorname{Lk}\sigma\subseteq\operatorname{Lk}\sigma'$（$\rho\cup\sigma\in K$ なら $\rho\cup\sigma'\in K$、$v\in\rho$ はない）なので $\partial\sigma'*L$ も定まる。
+
+**Step 1（分解）.** 【主張：$A\defeq\overline{\sigma'}*L$ と $B\defeq\{\tau\cup\rho,\ \{v\}\cup\tau\cup\rho:\tau\subsetneq\sigma',\ \rho\in L\cup\{\varnothing\}\}\setminus\{\varnothing\}$ は部分複体で、$A\cup B=\partial\sigma*L$, $A\cap B=\partial\sigma'*L$】 $\partial\sigma*L$ の単体 $\tau\cup\rho$（$\tau\subsetneq\sigma$）は、$v\notin\tau$ なら $\tau\subseteq\sigma'$ で $A$ に、$v\in\tau$ なら $\tau=\{v\}\cup\tau''$ で $\tau''\subsetneq\sigma'$（$\tau\neq\sigma$ だから）なので $B$ に属する。逆に $A$, $B$ の単体は $\sigma$ と等しくない $\sigma$ の面と $L$ の単体の和なので $\partial\sigma*L$ に属する。$A\cap B$：$A$ の単体は $v$ を含まないので、$B$ の単体のうち $v$ を含まない $\tau''\cup\rho$（$\tau''\subsetneq\sigma'$）だけが共通で、それがちょうど $\partial\sigma'*L$。面について閉じていることは定義から分かる。
+
+**Step 2（錐）.** 【主張：$\tilde H_{*}(A)=\tilde H_{*}(B)=0$】 $\sigma'$ の頂点 $u$（$d-1\ge0$ なので存在）について、$A$ の単体 $\tau\cup\rho$ に $u$ を加えた $(\tau\cup\{u\})\cup\rho$ も $A$ の単体なので、$A$ は $u$ を頂点とする錐（\ref{at:cone-complex}）。同様に $B$ の単体に $v$ を加えたものも $B$ の単体なので、$B$ は $v$ を頂点とする錐。錐は非輪状（\ref{at:cone-acyclic}）。
+
+**Step 3（マイヤー–ヴィートリス）.** 【主張：$\tilde H_{j}(\partial\sigma*L)\cong\tilde H_{j-1}(\partial\sigma'*L)$】 有向単体の鎖は、各単体に向きを一つ選べばその単体の上の自由アーベル群なので、被約鎖複体の列
+$$
+0\to\tilde C(A\cap B)\xrightarrow{c\mapsto(c,c)}\tilde C(A)\oplus\tilde C(B)\xrightarrow{(a,b)\mapsto a-b}\tilde C(A\cup B)\to0
+$$
+は各次数で完全（次数 $\ge0$ では「$A\cup B$ の単体は $A$ か $B$ の単体、両方に属するのは $A\cap B$ の単体」から、次数 $-1$ では $\mathbb{Z}\to\mathbb{Z}^{2}\to\mathbb{Z}$, $n\mapsto(n,n)$, $(a,b)\mapsto a-b$）。鎖写像であることは包含と添加写像の両立から。長完全列（\ref{ha:long-exact-sequence}）と Step 2 から、連結射が同型 $\tilde H_{j}(A\cup B)\cong\tilde H_{j-1}(A\cap B)$ を与える。
+
+**Step 4（帰納法）.** Step 1, 3 と帰納法の仮定（$\dim\sigma'=d-1$）から $\tilde H_{j}(\partial\sigma*L)\cong\tilde H_{j-1}(\partial\sigma'*L)\cong\tilde H_{(j-1)-(d-1)}(L)=\tilde H_{j-d}(L)$。
+
+::: hypcheck
+- **$L$ が空でもよいこと**：Step 3 で $A\cap B$ が空になりうる（$d=1$, $L=\varnothing$）。次数 $-1$ まで含めた被約鎖複体を使ったので、そのままで正しい（例：$\partial\Delta^{1}$ は 2 点で $\tilde H_{0}=\mathbb{Z}=\tilde H_{-1}(\varnothing)$）。
+- **$d\ge1$**：Step 2 で $\sigma'$ が空でない（$A$ が錐になる）ことに使った。
+:::
+:::
+
+::: theorem 局所ホモロジーとまつわり複体 {#at:link-local-homology keywords="local homology of a polyhedron at a point in the open simplex sigma equals the reduced homology of the link of sigma shifted by dim sigma + 1" index="局所ホモロジーとまつわり複体|きょくしょほもろじーとまつわりふくたい" refname="局所ホモロジーとまつわり複体"}
+有限単体複体 $K$ の $d$ 単体 $\sigma$ の開単体の点 $x$（$\operatorname{supp}x=\sigma$）について、すべての $k$ で
+$$
+H_{k}(|K|\,|\,x)\cong\tilde H_{k-d-1}(|\operatorname{Lk}\sigma|).
+$$
+:::
+
+::: intuition
+点 $x$ のまわりを小さな球面で囲むと、その球面は「$\sigma$ の向きに $d$ 回懸垂したまつわり複体」に見える。局所ホモロジーはその球面の被約ホモロジーを一つずらしたものなので、全体で $d+1$ ずれる。$x$ が頂点（$d=0$）なら、まつわり複体そのものが $x$ を囲む「小さな球面」である。
+:::
+
+::: example
+1. $K=\partial\Delta^{3}$（2 次元球面）の頂点 $x$：$\operatorname{Lk}x$ は円周なので $H_{k}(|K|\,|\,x)\cong\tilde H_{k-1}(S^{1})$ で、$k=2$ だけ $\mathbb{Z}$。2 次元多様体と同じ値である。
+2. 三ページの本の辺 $\{a,b\}$ の開単体の点 $x$（$d=1$）：$\operatorname{Lk}$ は 3 点なので $H_{2}(|K|\,|\,x)\cong\tilde H_{0}(3\text{ 点})\cong\mathbb{Z}^{2}$。2 次元多様体なら $\mathbb{Z}$ のはずなので、三ページの本は多様体でない。
+:::
+
+::: proof
+$L\defeq\operatorname{Lk}\sigma$, $S\defeq|\overline{\operatorname{St}}\,\sigma|$ とおく。
+
+**Step 1（星状体への帰着）.** 【主張：$H_{k}(|K|\,|\,x)\cong H_{k}(S|x)$】 $U\defeq\bigcap_{v\in\sigma}\operatorname{st}v=\{y:\sigma\subseteq\operatorname{supp}y\}$ は開集合の有限個の共通部分なので $|K|$ の開集合で、$x\in U$。$y\in U$ なら $\operatorname{supp}y\supseteq\sigma$ は $\sigma$ を含む単体なので $y\in S$、すなわち $U\subseteq S$ で、$U$ は $S$ の開集合でもある。$|K|$ と $S$ はハウスドルフなので、\ref{at:local-homology-open-nbhd} から $H_{k}(|K|\,|\,x)\cong H_{k}(U|x)\cong H_{k}(S|x)$。
+
+**Step 2（星状体は可縮）.** 【主張：$S\setminus\{x\}\neq\varnothing$ なら $H_{k}(S|x)\cong\tilde H_{k-1}(S\setminus\{x\})$】 $y\in S$ は、$\sigma$ を含むある単体 $\eta$ について $y\in|\eta|$ を満たす（$y$ はある $\tau\cup\rho$ の上にあり、それは $\eta\defeq\sigma\cup\rho$ の面）。$x\in|\sigma|\subseteq|\eta|$ で $|\eta|$ は凸なので、線分 $[x,y]\subseteq|\eta|\subseteq S$。よって $(y,s)\mapsto(1-s)y+sx$ は $S$ から $\{x\}$ への縮約で、$S$ は可縮、$\tilde H_{*}(S)=0$。被約ホモロジーの対の長完全列（\ref{at:pair-long-exact}）の連結射が同型になる。
+
+**Step 3（動径方向のレトラクション）.** 【主張：$|\partial\sigma*L|$ は $S\setminus\{x\}$ の変形レトラクトである】 $y\in S\setminus\{x\}$ について
+$$
+m(y)\defeq\max_{v\in\sigma}\frac{t_{v}(x)-t_{v}(y)}{t_{v}(x)},\qquad r(y)\defeq x+\frac{1}{m(y)}(y-x)
+$$
+とおく（$v\in\sigma$ では $t_{v}(x)>0$）。$y\in|\eta|$, $\eta\supseteq\sigma$ とする。
+- $m(y)>0$：すべての $v\in\sigma$ で $t_{v}(y)\ge t_{v}(x)$ なら、$\sum_{v\in\sigma}t_{v}(x)=1$ と $\sum_{v}t_{v}(y)=1$ から $t_{v}(y)=t_{v}(x)$（$v\in\sigma$）かつ $\sigma$ の外の座標は $0$ で $y=x$。よってある $v\in\sigma$ で $t_{v}(y)<t_{v}(x)$。また $t_{v}(y)\ge0$ から $m(y)\le1$。
+- $z_{s}\defeq x+s(y-x)$（$1\le s\le1/m(y)$）は $|\eta|\setminus\{x\}$ の点：$|\eta|$ の重心座標で、$u\notin\sigma$ の座標は $s\,t_{u}(y)\ge0$、$u\in\sigma$ の座標は $t_{u}(x)\bigl(1-s\frac{t_{u}(x)-t_{u}(y)}{t_{u}(x)}\bigr)\ge t_{u}(x)(1-s\,m(y))\ge0$、和は $1$。$s>0$ と $y\neq x$ から $z_{s}\neq x$。
+- $r(y)=z_{1/m(y)}$ では、最大値を与える $u\in\sigma$ の座標が $0$ なので $\operatorname{supp}r(y)\subseteq(\sigma\setminus\{u\})\cup(\eta\setminus\sigma)$ で、$r(y)\in|\partial\sigma*L|$。
+- $y\in|\partial\sigma*L|$ なら、ある $u\in\sigma$ で $t_{u}(y)=0$ なので $m(y)=1$, $r(y)=y$。また $|\partial\sigma*L|$ の点の台単体は $\sigma$ を含まないので $x\notin|\partial\sigma*L|$。
+$t_{v}$ が連続なので $m$ は $S\setminus\{x\}$ 上の正の連続関数で、$r$ は連続。$H(y,s)\defeq(1-s)y+s\,r(y)=z_{(1-s)+s/m(y)}$ は $S\setminus\{x\}$ の中のホモトピーで、$H_{0}=\mathrm{id}$, $H_{1}=r$、$|\partial\sigma*L|$ の上では動かない。
+
+**Step 4（結論）.** 【主張：$H_{k}(|K|\,|\,x)\cong\tilde H_{k-d-1}(|L|)$】 $S\setminus\{x\}=\varnothing$ となるのは、$\sigma=\{x\}$ が他のどの単体の面でもない（$d=0$, $L=\varnothing$）ときだけで、このとき $H_{k}(\{x\}|x)=H_{k}(\{x\})$ は $k=0$ で $\mathbb{Z}$、それ以外で $0$ となり、$\tilde H_{k-1}(\varnothing)$ と一致する。そうでなければ、Step 1〜3、ホモトピー不変性（\ref{at:singular-homotopy-invariance}）、単体的ホモロジーとの一致、\ref{at:join-link-homology} から
+$$
+\begin{aligned}
+H_{k}(|K|\,|\,x)&\cong\tilde H_{k-1}(S\setminus\{x\})\cong\tilde H_{k-1}(|\partial\sigma*L|)\\
+&\cong\tilde H_{k-1}(\partial\sigma*L)\cong\tilde H_{k-1-d}(L)\cong\tilde H_{k-d-1}(|L|).
+\end{aligned}
+$$
+
+::: hypcheck
+- **$K$ は有限**：単体的ホモロジーと特異ホモロジーの一致（\ref{at:simplicial-singular-iso}）が有限 Δ 複体についての定理なので使った。局所有限な複体でも、Step 1 で星状体（有限部分複体）に帰着できるので同じ結論になる。
+- **$x$ が $\sigma$ の開単体にあること**：Step 1 で $x\in U$（$\operatorname{supp}x\supseteq\sigma$）に、Step 3 で $t_{v}(x)>0$（$v\in\sigma$）と $x\notin|\partial\sigma*L|$（$\operatorname{supp}x\subseteq\sigma$）に使った。
+- **ハウスドルフ性**：Step 1 で \ref{at:local-homology-open-nbhd} に使った（$\mathbb{R}^{N}$ の部分空間なので成り立つ）。
+:::
+:::
+
+::: supplement
+**高い視点.** 局所ホモロジー $x\mapsto H_{k}(X|x)$ は、$U\mapsto H_{k}(X,X\setminus U)$ の層化の茎と見ることができ、ホモロジー多様体の定義は「この層が局所的に $\mathbb{R}^{n}$ のものと同じ」という条件である。定理は、この茎を組合せ的なデータ（まつわり複体）だけで計算する公式である。比喩で言えば、点 $x$ に立って周りを見回したときの景色が $\operatorname{Lk}\sigma$ で、多様体であるとは、どこに立っても景色が球面に見えることである。
+:::
+
+::: corollary 三角形分割された多様体の組合せ的条件 {#at:manifold-link-conditions keywords="if |K| is a homology n-manifold then links of d-simplices are homology (n-d-1)-spheres, K is pure n-dimensional, every (n-1)-simplex is a face of exactly two n-simplices" index="三角形分割の組合せ的条件|さんかくけいぶんかつのくみあわせてきじょうけん, 純粋な複体|じゅんすいなふくたい"}
+有限単体複体 $K$ について $|K|$ が $n$ 次元ホモロジー多様体（とくに $n$ 次元多様体）なら、次が成り立つ。
+1. $K$ のすべての $d$ 単体 $\sigma$ について、$\tilde H_{j}(|\operatorname{Lk}\sigma|)\cong\mathbb{Z}$（$j=n-d-1$）、$0$（それ以外）。
+2. $K$ の単体の次元は $n$ 以下で、すべての単体はある $n$ 単体の面である（$K$ は **$n$ 次元で純粋**）。
+3. すべての $(n-1)$ 単体は、ちょうど二つの $n$ 単体の面である。
+4. $n\ge2$ なら、すべての頂点のまつわり複体は空でなく連結である。
+:::
+
+::: proof
+**1.** \ref{at:link-local-homology} とホモロジー多様体の定義から、$\tilde H_{k-d-1}(|\operatorname{Lk}\sigma|)$ は $k=n$ で $\mathbb{Z}$、それ以外で $0$。$j=k-d-1$ と置き直せばよい。
+
+**2.** 包含について極大な単体 $\sigma$（$d$ 次元）では $\operatorname{Lk}\sigma=\varnothing$ なので $\tilde H_{-1}=\mathbb{Z}$ で、1 から $n-d-1=-1$、すなわち $d=n$。どの単体も極大な単体の面なので（$K$ は有限）、2 が成り立つ。
+
+**3.** $(n-1)$ 単体 $\tau$ について、$\operatorname{Lk}\tau$ の単体 $\rho$ は $\tau\cup\rho$ の次元が $n$ 以下（2）なので頂点で、$\operatorname{Lk}\tau$ は $p$ 点の離散集合（$p$ は $\tau$ を面にもつ $n$ 単体の個数）。1 から $\tilde H_{0}\cong\mathbb{Z}$, $\tilde H_{-1}=0$。$p=0$ なら $\tilde H_{-1}=\mathbb{Z}$ なので $p\ge1$ で $\mathbb{Z}^{p-1}\cong\mathbb{Z}$、よって $p=2$。
+
+**4.** 頂点 $v$（$d=0$）について 1 から $\tilde H_{n-1}(|\operatorname{Lk}v|)\cong\mathbb{Z}$ で $n-1\ge1$ なので $\operatorname{Lk}v\neq\varnothing$（空なら次数 $-1$ 以外は $0$）、$\tilde H_{0}=0$ なので連結（\ref{at:h0-components}）。
+:::
+
+::: example 多様体でない複体 {#at:non-manifold-complex-examples}
+次の複体の多面体は多様体でない。\ref{at:manifold-link-conditions} のどれかに反する。
+1. **8 の字**（二つの三角形の境界を 1 頂点で貼ったもの）：貼った頂点のまつわり複体は 4 点で $\tilde H_{0}\cong\mathbb{Z}^{3}$。1 次元多様体なら $\mathbb{Z}$。
+2. **三ページの本**：共通の辺は三つの三角形の面（3 に反する）。
+3. **蝶ネクタイ**（二つの三角形を 1 頂点 $v$ だけで貼ったもの）：$\operatorname{Lk}v$ は交わらない 2 本の辺で、$\tilde H_{0}\cong\mathbb{Z}$, $\tilde H_{1}=0$。2 次元多様体なら $\tilde H_{1}\cong\mathbb{Z}$, $\tilde H_{0}=0$（4 に反する）。
+4. **三角形と線分**（三角形の頂点に辺を 1 本付けたもの）：純粋でない（2 に反する）。
+5. **トーラスの錐**：トーラスを三角形分割した複体 $T$ の上の錐 $v*T$ の頂点 $v$ では $\operatorname{Lk}v=T$ で $\tilde H_{1}\cong\mathbb{Z}^{2}\ne0$。3 次元ホモロジー多様体でない。
+:::
+
+## まつわり複体が球面なら多様体 {#at:sec-mc-sufficient}
+
+::: theorem 頂点のまつわり複体が球面なら多様体 {#at:vertex-link-sphere-manifold keywords="if every vertex link of a finite simplicial complex is homeomorphic to S^{n-1} then the polyhedron is a closed n-manifold; open stars are open n-balls" index="まつわり複体と多様体|まつわりふくたいとたようたい"}
+$n\ge1$ とし、有限単体複体 $K$ のすべての頂点 $v$ で $|\operatorname{Lk}v|$ が $S^{n-1}$ と同相なら、$|K|$ は（コンパクトな）$n$ 次元多様体で、各開星状体 $\operatorname{st}v$ は $\mathbb{R}^{n}$ と同相である。
+:::
+
+::: proof
+頂点 $v$ を固定し、$L\defeq\operatorname{Lk}v$ とする。
+
+**Step 1（星状体は錐）.** 【主張：$c\colon|L|\times[0,1]\to|\overline{\operatorname{St}}\,v|$, $c(y,t)\defeq(1-t)y+tv$ は、錐 $C|L|\defeq|L|\times[0,1]/(|L|\times\{1\})$ からの同相を誘導する】 $y\in|\rho|$（$\rho\in L$）なら $\rho\cup\{v\}\in K$ で、線分 $[y,v]\subseteq|\rho\cup\{v\}|$ なので $c$ は定まり、連続。全射：星状体の点 $p\neq v$ は、ある $\rho\in L\cup\{\varnothing\}$ について $|\rho\cup\{v\}|$ に属する。$t\defeq t_{v}(p)<1$ とし、$y\defeq(p-tv)/(1-t)$ とおくと、$y$ の重心座標は $\rho$ の頂点の上の $t_{u}(p)/(1-t)$（和は $1$）なので $y\in|\rho|$、$c(y,t)=p$（$\rho=\varnothing$ は $p=v$ の場合だけ）。単射性：$c(y,t)$ の $v$ 座標は $t$（$y$ の $v$ 座標は $0$、$|\rho\cup\{v\}|$ の中で重心座標はアフィン）なので、$c(y,t)=c(y',t')$, $t,t'<1$ なら $t=t'$, $y=y'$。$t=1$ の点はすべて $v$ に写る。よって $c$ は $C|L|$ からの連続全単射を誘導し、$C|L|$ はコンパクト（コンパクト空間の商）、$|\overline{\operatorname{St}}\,v|$ はハウスドルフなので同相。
+
+**Step 2（開星状体は開球）.** 【主張：$\operatorname{st}v\cong\mathbb{R}^{n}$】 Step 1 の同相で $\operatorname{st}v=\{t_{v}>0\}$ は $\{t>0\}$、すなわち錐から底 $|L|\times\{0\}$ を除いた部分に対応する（$\operatorname{st}v$ の点の台単体は $v$ を含むので $\operatorname{st}v\subseteq|\overline{\operatorname{St}}\,v|$）。同相 $h\colon|L|\to S^{n-1}$ は錐の同相 $C|L|\cong CS^{n-1}$（底を底に写す）を誘導する。$CS^{n-1}\to D^{n}$, $(u,t)\mapsto(1-t)u$ はコンパクトからハウスドルフへの連続全単射なので同相で、底を $S^{n-1}=\partial D^{n}$ に写す。よって $\operatorname{st}v\cong D^{n}\setminus S^{n-1}$（開球）$\cong\mathbb{R}^{n}$。
+
+**Step 3（結論）.** 【主張：$|K|$ は $n$ 次元多様体】 各点 $y$ はある頂点 $v$ で $t_{v}(y)>0$ なので、開星状体は $|K|$ を覆い（\ref{at:open-star-properties.1}）、それぞれ $\mathbb{R}^{n}$ と同相な開集合。$|K|\subseteq\mathbb{R}^{N}$ はハウスドルフでコンパクト。
+
+::: hypcheck
+- **まつわり複体が $S^{n-1}$ と同相**：Step 2 で開星状体が開球になることにだけ使った。頂点だけで足り、高次元の単体のまつわり複体には条件を課さない。
+- **$K$ は有限**：コンパクト性にだけ使った。局所有限な複体でも、各点の近傍が開球であることは同じ証明で示せる。
+- **$n\ge1$**：$S^{n-1}$ が空でないことに使った（$n=0$ では $\operatorname{Lk}v=\varnothing$ で、$|K|$ は有限集合、すなわち 0 次元多様体）。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 頂点のまつわり複体が $S^{n-1}$ または $D^{n-1}$ と同相なら、$|K|$ は $n$ 次元境界付き多様体になる（錐 $CD^{n-1}$ から底を除いたものが半空間の開集合と同相であることを使う。Rourke–Sanderson を参照。ここでは証明しない）。
+
+**弱められる前提.** 必要条件 \ref{at:manifold-link-conditions} はまつわり複体の**ホモロジー**しか見ないが、十分条件はまつわり複体が球面と**同相**であることを要求する。この差が本質的であることは \ref{at:homology-manifold-not-manifold} で見る。
+:::
+
+## 2 次元と 3 次元 {#at:sec-mc-low}
+
+::: lemma 次数 2 の連結グラフは円周 {#at:degree-two-graph-cycle keywords="a finite connected graph in which every vertex has degree two is a cycle, and its polyhedron is a circle" index="次数 2 のグラフ|じすうにのぐらふ"}
+次元 1 以下の有限単体複体 $G$ が空でなく、連結で、すべての頂点がちょうど 2 本の辺の面なら、頂点を $w_{1},\dots,w_{m}$（$m\ge3$）と並べて辺がちょうど $\{w_{i},w_{i+1}\}$（$1\le i<m$）と $\{w_{m},w_{1}\}$ になるようにでき、$|G|$ は $S^{1}$ と同相である。
+:::
+
+::: proof
+**Step 1（閉路を見つける）.** 【主張：相異なる頂点 $w_{1},\dots,w_{m}$（$m\ge3$）で、$\{w_{i},w_{i+1}\}$ と $\{w_{m},w_{1}\}$ が辺になるものがある】 頂点 $w_{1}$ から、直前に使った辺と異なる辺を選んで進み、$w_{1},w_{2},\dots$ を作る（各頂点の辺は 2 本なので、入ってきた辺と違う辺がちょうど一つある）。有限なので、ある $w_{m+1}$ が初めて既出の頂点 $w_{j}$ に一致する。$j\ge2$ なら $w_{j}$ は三つの異なる辺 $\{w_{j-1},w_{j}\}$, $\{w_{j},w_{j+1}\}$, $\{w_{m},w_{j}\}$ の面になる（$w_{m}$ は $w_{j-1},w_{j+1}$ と異なる：$w_{m}=w_{j+1}$ なら $m=j+1$ で、$w_{m+1}=w_{j}$ への辺は直前の辺と同じになり選び方に反する）ので矛盾。よって $j=1$。$m\ge3$ は、単体複体の辺が相異なる 2 頂点からなり、$m=2$ なら同じ辺を往復することになるから。
+
+**Step 2（閉路で全体）.** 【主張：$G$ の頂点と辺は Step 1 のものだけ】 $w_{i}$ はすでに 2 本の辺 $\{w_{i-1},w_{i}\}$, $\{w_{i},w_{i+1}\}$（添字は $m$ を法として）の面なので、他の辺の面ではない。閉路の頂点と閉路の外の頂点を結ぶ辺はないので、連結性（\ref{at:h0-components}）から外の頂点はない。辺はすべて頂点の辺なので閉路のものだけ。
+
+**Step 3（円周との同相）.** $w_{i}\mapsto e^{2\pi\sqrt{-1}\,i/m}$ を各辺の上でアフィンに延ばすと、$|G|$ から正 $m$ 角形の周への連続全単射（コンパクトからハウスドルフへなので同相）で、周は $z\mapsto z/|z|$ で $S^{1}$ と同相。
+:::
+
+::: theorem 曲面になる単体複体 {#at:surface-complex-criterion keywords="a finite simplicial complex is a closed surface iff every vertex link is a cycle (polygon); a 1-dimensional complex is a 1-manifold iff every vertex is in exactly two edges" index="曲面になる単体複体|きょくめんになるたんたいふくたい"}
+有限単体複体 $K$ について、
+1. $|K|$ が 1 次元多様体 $\iff$ すべての頂点のまつわり複体がちょうど 2 点。
+2. $|K|$ が 2 次元多様体 $\iff$ すべての頂点のまつわり複体が円周（\ref{at:degree-two-graph-cycle} の閉路）。
+:::
+
+::: proof
+**Step 1（1 の ⇒）.** 【主張：$|K|$ が 1 次元多様体なら頂点のまつわり複体は 2 点】 \ref{at:manifold-link-conditions.1}（$n=1$, $d=0$）から $\tilde H_{0}(|\operatorname{Lk}v|)\cong\mathbb{Z}$ で他は $0$。\ref{at:manifold-link-conditions.2} から $K$ は 1 次元なので $\operatorname{Lk}v$ は点の集まりで、$\tilde H_{-1}=0$ から空でなく、$\tilde H_{0}\cong\mathbb{Z}$ から 2 点。
+
+**Step 2（2 の ⇒）.** 【主張：$|K|$ が 2 次元多様体なら、$G\defeq\operatorname{Lk}v$ は \ref{at:degree-two-graph-cycle} の仮定を満たす】 \ref{at:manifold-link-conditions.2} から $K$ は 2 次元なので $G$ の次元は 1 以下。\ref{at:manifold-link-conditions.4} から $G$ は空でなく連結。$G$ の頂点 $w$ について、$w$ を面にもつ $G$ の辺 $\{w,u\}$ は、$\{v,w,u\}\in K$、すなわち辺 $\{v,w\}$ を面にもつ三角形と一対一に対応し、\ref{at:manifold-link-conditions.3} からちょうど 2 個。
+
+**Step 3（⇐）.** 【主張：まつわり複体が 2 点・円周なら多様体】 2 点は $S^{0}$、円周は $S^{1}$ と同相（\ref{at:degree-two-graph-cycle}）なので、\ref{at:vertex-link-sphere-manifold} から。
+:::
+
+::: fact 閉曲面の分類 {#at:closed-surface-classification-fact keywords="classification of closed surfaces: sphere, connected sums of tori, connected sums of projective planes; a closed connected surface with H_1 = 0 is the sphere" index="閉曲面の分類|へいきょくめんのぶんるい"}
+三角形分割されたコンパクトで連結な 2 次元多様体は、球面 $S^{2}$、$g$ 個のトーラスの連結和（$g\ge1$）、$k$ 個の射影平面の連結和（$k\ge1$）のどれか一つと同相で、1 次ホモロジーはそれぞれ $0$, $\mathbb{Z}^{2g}$, $\mathbb{Z}^{k-1}\oplus\mathbb{Z}/2$ である。とくに、$H_{1}=0$ なら $S^{2}$ と同相（分類は Massey『Algebraic Topology: An Introduction』。1 次ホモロジーは基本群のアーベル化として計算できる）。
+:::
+
+::: theorem 3 次元多様体になる単体複体 {#at:three-manifold-complex keywords="a finite simplicial complex is a 3-manifold iff every vertex link is homeomorphic to S^2" index="3 次元多様体になる単体複体|さんじげんたようたいになるたんたいふくたい"}
+有限単体複体 $K$ について、$|K|$ が 3 次元多様体 $\iff$ すべての頂点のまつわり複体の多面体が $S^{2}$ と同相。
+:::
+
+::: proof
+「⇐」は \ref{at:vertex-link-sphere-manifold}。「⇒」を示す。頂点 $v$ を固定し、$G\defeq\operatorname{Lk}v$ とする。
+
+**Step 1（まつわり複体の中のまつわり複体）.** 【主張：$G$ の頂点 $w$ について $\operatorname{Lk}_{G}w=\operatorname{Lk}_{K}\{v,w\}$】 $\rho\in\operatorname{Lk}_{G}w$ $\iff$ $w\notin\rho$, $\rho\cup\{w\}\in G$ $\iff$ $v,w\notin\rho$, $\rho\cup\{v,w\}\in K$ $\iff$ $\rho\in\operatorname{Lk}_{K}\{v,w\}$。
+
+**Step 2（$G$ は閉曲面）.** 【主張：$|G|$ はコンパクトな 2 次元多様体】 $G$ の頂点 $w$ について $H\defeq\operatorname{Lk}_{K}\{v,w\}$ を考える。\ref{at:manifold-link-conditions.1}（$n=3$, $d=1$）から $\tilde H_{j}(|H|)$ は $j=1$ で $\mathbb{Z}$、それ以外で $0$ なので、$H$ は空でなく連結。\ref{at:manifold-link-conditions.2} から $H$ の次元は 1 以下。$H$ の頂点 $u$ について $\{v,w,u\}$ は $K$ の三角形で、$u$ を面にもつ $H$ の辺 $\{u,u'\}$ は、$\{v,w,u,u'\}\in K$、すなわち三角形 $\{v,w,u\}$ を面にもつ四面体と一対一に対応する。\ref{at:manifold-link-conditions.3}（$n=3$）からそれはちょうど 2 個なので、$H$ の各頂点はちょうど 2 本の辺の面である。\ref{at:degree-two-graph-cycle} から $H$ は円周。Step 1 から $G$ の頂点のまつわり複体はすべて円周で、\ref{at:surface-complex-criterion.2} から $|G|$ は 2 次元多様体（有限なのでコンパクト）。
+
+**Step 3（ホモロジー球面である曲面）.** 【主張：$|G|\cong S^{2}$】 \ref{at:manifold-link-conditions.1}（$d=0$）から $\tilde H_{j}(|G|)$ は $j=2$ で $\mathbb{Z}$、それ以外で $0$。よって $|G|$ は連結で $H_{1}(|G|)=0$。閉曲面の分類（\ref{at:closed-surface-classification-fact}）から $S^{2}$ と同相。
+
+::: hypcheck
+- **閉曲面の分類**：Step 3 でだけ使った（証明していない事実）。Step 2 までで「頂点のまつわり複体は、ホモロジーが $S^{2}$ と同じ閉曲面」までは証明できている。
+:::
+:::
+
+::: supplement
+**4 次元以上.** 同じ議論で、$n$ 次元多様体の三角形分割の頂点のまつわり複体は「$(n-1)$ 次元のホモロジー球面で、その頂点のまつわり複体は $(n-2)$ 次元のホモロジー球面で…」という条件を満たすことが分かる。しかし $n\ge4$ では、$(n-1)$ 次元のホモロジー球面で球面でないもの（ポアンカレのホモロジー球面など）があるので、まつわり複体が球面とは限らず、話は複雑になる（\ref{at:homology-manifold-not-manifold}）。
+:::
+
+## CW 複体の場合 {#at:sec-mc-cw}
+
+::: proposition 多様体である CW 複体の次元 {#at:cw-manifold-dimension keywords="a CW complex which is an n-manifold has no cells of dimension greater than n and is the union of the closures of its n-cells" index="多様体である CW 複体|たようたいであるしーだぶりゅーふくたい"}
+CW 複体 $X$ が $n$ 次元多様体なら、
+1. $X$ に $n$ より大きい次元の胞体はない。
+2. $X$ の各点は、ある $n$ 胞体の閉包 $\Phi_{\alpha}(D^{n}_{\alpha})$ に属する。とくに $X\neq\varnothing$ なら $X$ の次元はちょうど $n$。
+:::
+
+::: proof
+**Step 1（最大次元の胞体は開集合を与える）.** 【主張：開集合 $V$ と交わる胞体が有限個で、そのうち次元が最大のもの $e'$（次元 $k'$）について、$V\cap e'$ は $X$ の開集合】 $V$ と交わる $e'$ 以外の胞体 $c$（次元 $\le k'$）について、$\Phi_{c}(D_{c})\subseteq c\cup X^{\dim c-1}$ は $e'$ と交わらない（$c\neq e'$ で、$X^{\dim c-1}$ の胞体の次元は $k'$ より小さい）。また $\Phi_{c}(D_{c})$ はハウスドルフ空間 $X$ のコンパクト集合なので閉。$V$ の点はどれかの胞体に属するので
+$$
+V\cap e'=V\setminus\bigcup_{c\ne e',\ c\cap V\ne\varnothing}\Phi_{c}(D_{c})
+$$
+で、右辺は開集合から有限個の閉集合を除いたもので開。
+
+**Step 2（次元の比較）.** 【主張：Step 1 の状況で $V\cap e'\neq\varnothing$ なら $k'=n$】 $y\in V\cap e'$ と座標近傍 $W\ni y$, $W\cong\mathbb{R}^{n}$ をとる。$O\defeq W\cap V\cap e'$ は $X$ の空でない開集合で、$W$ を通して $\mathbb{R}^{n}$ の開集合と同相、$e'\cong\mathring D^{k'}$（\ref{at:cw-closed-criterion.3}）を通して $\mathbb{R}^{k'}$ の開集合と同相（$O$ は $e'$ の開集合）。次元の不変性（\ref{at:invariance-of-dimension}）から $k'=n$。
+
+**Step 3（1）.** 【主張：$k$ 胞体 $e$ があれば $k\le n$】 $x\in e$ をとり、座標近傍の中の閉球 $N$（コンパクトな近傍）とその内部 $V\ni x$ をとる。$N$ と交わる胞体は有限個（\ref{at:cw-compact-finite}）なので $V$ と交わる胞体も有限個で、$e$ はその一つ。最大次元のもの $e'$ は $k'\ge k$ で、Step 1, 2 から $k'=n$。
+
+**Step 4（2）.** 【主張：各点 $x$ はある $n$ 胞体の閉包に属する】 Step 3 の $V$ と交わる $n$ 胞体を $e_{1},\dots,e_{r}$ とする。$x$ がどの $\Phi_{e_{i}}(D)$ にも属さないなら、$V'\defeq V\setminus\bigcup_{i}\Phi_{e_{i}}(D)$ は $x$ の開近傍で、$n$ 胞体と交わらず、$V'$ と交わる胞体は有限個で次元は $n$ 未満（1 より）。これは Step 1, 2（$V'$ に対して、$x$ の属する胞体があるので最大次元の胞体は $V'$ と交わる）に反する。
+
+::: hypcheck
+- **多様体であること**：ハウスドルフ性は Step 1 で $\Phi_{c}(D_{c})$ が閉であることに、局所コンパクト性（座標近傍の閉球）は Step 3 で有限性に、局所ユークリッド性は Step 2 に使った。
+:::
+:::
+
+::: remark
+単体複体と違い、一般の CW 複体には「まつわり複体」が定まらない。**正則** CW 複体（特性写像がすべて埋め込みであるもの）は、胞体の面の関係のなす半順序集合の順序複体で三角形分割できることが知られており（Lundell–Weingram『The Topology of CW Complexes』）、その三角形分割に \ref{at:link-local-homology} 以下を使える。正則でない CW 複体は、局所ホモロジーを直接調べるか、細分して正則にしてから調べる。たとえば、1 個の 0 胞体・1 個の 1 胞体 $a$・1 個の 2 胞体を語 $aaa^{-1}$ で貼った**ダンス帽子**は可縮だが、1 胞体の上の点のまわりは三ページの本と同じ形になり、多様体でない。
+:::
+
+## 範囲外の事実 {#at:sec-mc-facts}
+
+::: fact ホモロジー多様体だが多様体でない例 {#at:homology-manifold-not-manifold keywords="suspension of the Poincare homology sphere is a homology 4-manifold but not a manifold; Cannon-Edwards double suspension theorem" index="二重懸垂定理|にじゅうけんすいていり, ポアンカレのホモロジー球面|ぽあんかれのほもろじーきゅうめん"}
+1. **ポアンカレのホモロジー球面** $P$ は、$S^{3}$ と同じホモロジーをもつが基本群が位数 120 の群である 3 次元閉多様体である。三角形分割できる。
+2. $P$ の（非被約）懸垂 $\Sigma P$ は、\ref{at:link-local-homology} で計算すると 4 次元ホモロジー多様体である（懸垂の頂点を含む単体のまつわり複体は $P$ または $P$ の単体のまつわり複体（\ref{at:three-manifold-complex} から球面）、それ以外の単体のまつわり複体は球面の懸垂で、どれもホモロジー球面）。しかし懸垂の頂点は $\mathbb{R}^{4}$ と同相な近傍をもたず、$\Sigma P$ は多様体でない（頂点を除いた近傍の基本群を調べて示される。$\pi_{1}(P)\neq1$ が効く）。
+3. **二重懸垂定理**（キャノン、エドワーズ）：$\Sigma^{2}P=\Sigma\Sigma P$ は $S^{5}$ と同相である。$\Sigma^{2}P$ を、2 回の懸垂の頂点 4 個（円周をなす）と $P$ の三角形分割の結として三角形分割すると、二つの懸垂の頂点を結ぶ辺のまつわり複体は $P$ で、球面でない。したがって、5 次元以上では「まつわり複体が球面」は多様体であるための必要条件ではない。
+:::
+
+::: fact 多様体の三角形分割と CW 構造 {#at:manifold-triangulation-facts keywords="smooth manifolds are triangulable; surfaces (Rado) and 3-manifolds (Moise) are triangulable; E8 manifold and Manolescu's non-triangulable manifolds; compact smooth manifolds admit CW structures; manifolds have the homotopy type of CW complexes" index="三角形分割可能性|さんかくけいぶんかつかのうせい"}
+1. 滑らかな多様体は三角形分割できる（ケアンズ、ホワイトヘッド）。
+2. 2 次元の位相多様体は三角形分割できる（ラドーの定理。本サイトでは多様体の系列で証明する予定）。3 次元の位相多様体も三角形分割できる（モイーズ）。
+3. 三角形分割できない位相多様体がある：4 次元ではフリードマンの $E_{8}$ 多様体（カッソン不変量による）、5 次元以上の各次元ではマノレスクが存在を示した。
+4. コンパクトな滑らかな多様体は有限 CW 複体の構造をもつ（モース理論。Milnor『Morse Theory』）。第二可算な位相多様体は CW 複体とホモトピー同値である（ミルナー）。コンパクトな位相多様体が CW 構造をもつ（CW 複体と同相である）かどうかについては、どの次元で何が示されているかをここでは確認できていない。
+:::
+
+## 問題 {#at:sec-mc-problems}
+
+::: problem {#at:prob-tetrahedron-surface}
+四面体の境界 $\partial\Delta^{3}$ のすべての頂点のまつわり複体を求め、\ref{at:surface-complex-criterion} を使って $|\partial\Delta^{3}|$ が 2 次元多様体であることを確かめよ。
+:::
+
+::: solution
+頂点 $a$ のまつわり複体は、$a$ を含まない単体 $\rho$ で $\rho\cup\{a\}$ が $\partial\Delta^{3}$ の単体（四面体全体以外の面）であるもの：残り 3 頂点 $b,c,d$ と辺 $\{b,c\},\{c,d\},\{b,d\}$（三角形 $\{b,c,d\}$ は $\{a,b,c,d\}$ が単体でないので入らない）。これは 3 頂点の閉路で、各頂点の次数は 2。対称性から他の頂点も同じなので、\ref{at:surface-complex-criterion.2} から 2 次元多様体。
+:::
+
+::: problem {#at:prob-surface-edge-count}
+有限単体複体 $K$ の多面体が 2 次元多様体のとき、三角形の個数 $f_{2}$ と辺の個数 $f_{1}$ について $3f_{2}=2f_{1}$ を示せ。さらにオイラー標数（\ref{at:euler-poincare}）が $\chi=f_{0}-f_{2}/2$ となることを示せ。
+:::
+
+::: solution
+組 $(e,T)$（$e$ は辺、$T$ は $e$ を面にもつ三角形）を数える。三角形ごとに辺は 3 本なので $3f_{2}$ 個。\ref{at:manifold-link-conditions.3} から各辺はちょうど 2 個の三角形の面なので $2f_{1}$ 個。よって $3f_{2}=2f_{1}$。$\chi=f_{0}-f_{1}+f_{2}=f_{0}-\tfrac{3}{2}f_{2}+f_{2}=f_{0}-f_{2}/2$。
+:::
+
+::: problem {#at:prob-bowtie-local-homology}
+二つの三角形 $\{v,a,b\}$, $\{v,c,d\}$ を頂点 $v$ だけで貼った複体（蝶ネクタイ）について、$H_{k}(|K|\,|\,v)$ をすべての $k$ について求めよ。
+:::
+
+::: solution
+$\operatorname{Lk}v$ は辺 $\{a,b\}$ と辺 $\{c,d\}$（とその頂点）で、多面体は交わらない 2 本の線分。$\tilde H_{0}\cong\mathbb{Z}$, 他は $0$。\ref{at:link-local-homology}（$d=0$）から $H_{1}(|K|\,|\,v)\cong\mathbb{Z}$、他の $k$ では $0$。2 次元多様体なら $H_{2}\cong\mathbb{Z}$, $H_{1}=0$ なので、多様体でない。
+:::
+
+::: problem {#at:prob-cone-circle-boundary}
+4 頂点の閉路 $C$ の上の錐 $v*C$（正方形を 4 枚の三角形に分けた複体）について、頂点 $v$ と $C$ の頂点での局所ホモロジーを求め、\ref{at:boundary-invariance} と比べて $|v*C|$ の内点と境界点を判定せよ。
+:::
+
+::: solution
+$\operatorname{Lk}v=C$（円周）なので $H_{k}(|v*C|\,|\,v)\cong\tilde H_{k-1}(S^{1})$ は $k=2$ で $\mathbb{Z}$、他で $0$（内点と同じ）。$C$ の頂点 $w$ のまつわり複体は、$w$ の両隣の頂点 $w_{\pm}$ と $v$、辺 $\{v,w_{+}\}$, $\{v,w_{-}\}$ からなる線分で可縮なので、$\tilde H_{*}=0$ で $H_{*}(|v*C|\,|\,w)=0$（境界点と同じ）。実際 $|v*C|$ は円板（\ref{at:vertex-link-sphere-manifold} の証明 Step 1, 2 と同様に錐 $CS^{1}\cong D^{2}$）で、$|C|$ が境界である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=081a7d61"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

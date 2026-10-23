@@ -564,6 +564,7 @@
 | Cech cohomology / good cover / nerve / double complex / total complex / Alexander-Spanier cohomology | チェックコホモロジー / 良い被覆 / 脈体 / 二重複体 / 全複体 / アレクサンダー–スパニエのコホモロジー | 神経（脈体の別訳） | 標準的（脈体は小松の用語を未確認、仮）。at:page-cech-comparison |
 | Warsaw circle / quasi-circle / Hawaiian earring / exponential sheaf sequence / continuity (of Cech cohomology) | ワルシャワの円 / 擬円周 / ハワイの耳飾り / 指数層の完全列 / 連続性 | | 標準的（仮）。at:page-homology-counterexamples |
 | topological manifold / closed manifold / orientation / orientable / orientation double cover / fundamental class | 位相多様体 / 閉多様体 / 向き / 向き付け可能 / 向きの二重被覆 / 基本類 | 向き付けられる | 標準的。at:page-orientation |
+| link (of a simplex) / closed star / join / homology manifold / manifold with boundary / closed half-space / pure complex | まつわり複体 / 星状体 / 結 / ホモロジー多様体 / 境界付き多様体 / 閉半空間 / 純粋な複体 | リンク、閉星状体、ジョイン、境界をもつ多様体 | 小松・中岡・菅原（まつわり複体・結・星状体・ホモロジー多様体 45）。境界付き多様体は既存ページに合わせた。純粋は仮。at:page-manifold-complexes |
 | cap product / compactly supported cohomology / Poincare duality / intersection form / signature / Lefschetz duality | キャップ積 / コンパクト台コホモロジー / ポアンカレ双対性 / 交叉形式 / 符号数 / ルフシェッツ双対性 | | 標準的。at:page-poincare-duality |
 | homotopy group / relative homotopy group / compression criterion / cellular approximation | ホモトピー群 / 相対ホモトピー群 / 圧縮の基準 / 胞体近似定理 | | 標準的（圧縮の基準は仮）。at:page-homotopy-groups |
 | Serre fibration / homotopy lifting property / fiber bundle / local trivialization / Hopf map (Hopf fibration) | セールファイブレーション / ホモトピー持ち上げ性質 / ファイバー束 / 局所自明化 / ホップ写像（ホップ・ファイブレーション） | ファイバー空間（小松） | 小松・中岡・菅原は「ファイバー空間」。at:page-fibrations |
