@@ -200,6 +200,20 @@ var labels = {};      // label -> {p, t, n, ti, e, tex}
 var altDeps = {};     // 主張のラベル -> [{t: 別証明の題, d: [その中で使う結果のラベル]}]（2026-10-22）
 var entries = [];     // 検索エントリ
 function addEntry(e) { entries.push(e); return entries.length - 1; }
+// 定理などの名前が標準的な名前（人名の定理・「〜の定理／補題／公式／不等式／原理」・有名な定理の refname）か、サイト独自の説明的な名前か（2026-10-23 ユーザー指示）。
+// 検索では、標準的な名前だけを「語を含む定理名」の段に出し、サイト独自の名前は主張の一部として扱う。環境の属性 name="std" / name="own" で個別に指定できる
+var NAMED_TYPES = { theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, counterexample: 1 };
+var STD_NAME_SUFFIX = /(定理|補題|公式|不等式|原理|恒等式|判定法|議論|予想|公理|パラドックス|論法|の構成|双対性|双対)(（[^）]*）)?$/;
+// 「モナドの」「ホモロジーの」のような専門用語のカタカナと人名は見分けられないので、人名は末尾の括弧書き（「…（マイケル）」）だけで見る。人名の定理はたいてい「〜の定理／補題」の形で上の規則に当たる
+var STD_NAME_PERSON = /（[ァ-ヶー]{2,}[^）]*）$/;
+function isStdName(node) {
+  var a = node.attrs || {}, t = String(node.title || '').trim();
+  if (a.name === 'std') return true;
+  if (a.name === 'own') return false;
+  if (!t) return false;
+  if (a.refname && a.refscope !== 'field') return true;
+  return STD_NAME_SUFFIX.test(t) || STD_NAME_PERSON.test(t);
+}
 
 pages.forEach(function (pg) {
   var parsed = Core.parseBlocks(pg.src);
@@ -249,7 +263,7 @@ pages.forEach(function (pg) {
       var of = node.of ? { n: node.of.num || '', t: node.of.type, ti: node.of.title || '', l: node.of.label || '' } : null;
       node._entry = addEntry({ p: pg.idx, t: node.type, n: node.num || '', l: node.label || '',
         ti: node.title || '', k: node.keywords || '', x: node.raw || '', of: of, h: heading,
-        a: node.label || ('env-' + envOrd), ix: envIndex(node) });
+        a: node.label || ('env-' + envOrd), ix: envIndex(node), sn: NAMED_TYPES[node.type] && isStdName(node) ? 1 : undefined });
       walk(node.children, depth + 1);
     });
   })(parsed.children, 0);
@@ -988,6 +1002,22 @@ if (!CHECK_ONLY) {
 }
 
 /* ---------------- 5. 報告 ---------------- */
+// 直感（intuition）のない主張の数（2026-10-23 ユーザー指示：主張の内容を日本語で検索できるよう、定義・定理などにはやさしい日本語の直感を付ける。
+// INTUITION_REPORT=1 で系列ごとの一覧）
+(function intuitionReport() {
+  var NEED = { definition: 1, theorem: 1, proposition: 1, lemma: 1, corollary: 1 }, total = 0, missing = 0, bySeries = {};
+  entries.forEach(function (e, i) {
+    if (!NEED[e.t]) return;
+    total++;
+    var nx = entries[i + 1];
+    if (nx && nx.t === 'intuition' && nx.of) return;
+    missing++;
+    var dp = pages[e.p].dirPath; bySeries[dp] = (bySeries[dp] || 0) + 1;
+  });
+  if (QUIET) return;
+  console.log('\n[直感（intuition）のない定義・定理など ' + missing + ' / ' + total + ' 件 — INTUITION_REPORT=1 で系列ごとの件数]');
+  if (process.env.INTUITION_REPORT) Object.keys(bySeries).sort().forEach(function (k) { console.log('  ' + k + '  ' + bySeries[k]); });
+})();
 var plannedKeys = Object.keys(planned);
 if (plannedKeys.length && !QUIET) {
   console.log('\n[未執筆（予定）のラベル ' + plannedKeys.length + ' 件 — 記事が書かれると自動でリンクになります]');

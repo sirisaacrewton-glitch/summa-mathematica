@@ -445,7 +445,8 @@
       if (anyMode && dt.length && wordCands.some(function (c) { return c.some(function (w) { return dt.some(function (d) { return d === w || (loose(w) && loose(d) === loose(w)); }); }); })) { x.tier = 6; x.ex = 1; return; }
       if (anyMode && dt.length && dt.some(function (d) { return hasAny([d]); })) { x.tier = 6; x.cl = closeness(dt.filter(function (d) { return hasAny([d]); })); return; }
       if (DEF_TYPES[t]) { x.tier = 3; return; }   // その語を定義していない定義は「語を使う定義」
-      if (NAMED[t] && hasAll([r.ntt || ''])) {
+      // 標準的な名前（ビルドが sn を付けたもの）だけを定理名の段に。サイト独自の説明的な名前は主張の一部として扱う（下の段 2）
+      if (NAMED[t] && r.e.sn && hasAll([r.ntt || ''])) {
         x.tier = 5; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
       }
       if (t === 'dir' || t === 'page' || (t === 'section' && !genericSec[r.ntt])) {
@@ -460,6 +461,8 @@
         x.tier = 1; return;
       }
       // 2 語を含む主張：定理などの主張文や、証明のステップの【主張：…】に語が出てくるもの
+      // 直感（intuition）の説明文も主張の内容として一致させる（定理などの直感は段 2、定義の直感は段 3）
+      if (t === 'intuition' && r.e.of && hasAll([r.nb || ''])) { x.tier = NAMED[r.e.of.t] ? 2 : DEF_TYPES[r.e.of.t] ? 3 : 1; return; }
       if (NAMED[t] && hasAll([r.nb || '', r.ntt || ''])) { x.tier = 2; return; }
       if (t === 'proof' && hasAll(stepClaims(r))) { x.tier = 2; return; }
       x.tier = 1;
