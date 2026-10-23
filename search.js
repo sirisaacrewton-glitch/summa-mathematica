@@ -1021,12 +1021,12 @@
         '語の定義は、定義のカードに定義する語として登録された語（太字の語・索引語）で判定します。登録されていない語の定義は「語を使う定義」に入っていることがあります。</p>' +
       '</details>' +
       '<div class="mn-order-wrap">' +
-        '<button type="button" class="mn-order-open" aria-haspopup="dialog" aria-expanded="false">並び順</button>' +
+        '<button type="button" class="mn-order-open" aria-haspopup="dialog" aria-expanded="false"><svg class="mn-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h11M4 12h7M4 17h4M17 9l3-3 3 3M20 6v12"/></svg><span>並び順</span></button>' +
         '<div class="mn-order-pop" role="dialog" aria-label="検索結果の並び順" hidden>' +
-          '<div class="mn-order-title">検索結果の段の順番</div>' +
-          '<p class="mn-order-note">↑↓ で入れ替えると、すぐ結果に反映され、このブラウザに記憶されます。</p>' +
+          '<div class="mn-order-head"><span class="mn-order-title">結果の並び順</span><button type="button" class="mn-order-x" aria-label="閉じる"><svg class="mn-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>' +
+          '<p class="mn-order-note">検索結果の段をこの順に表示します。入れ替えるとすぐ反映され、このブラウザに記憶されます。</p>' +
           '<ol class="mn-order-list"></ol>' +
-          '<div class="mn-order-foot"><button type="button" class="mn-order-reset">初期の順に戻す</button><button type="button" class="mn-order-close">閉じる</button></div>' +
+          '<div class="mn-order-foot"><button type="button" class="mn-order-reset"><svg class="mn-ico" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg><span>初期の順に戻す</span></button><button type="button" class="mn-order-close">完了</button></div>' +
         '</div>' +
       '</div>' +
       '</div>' +
@@ -1050,20 +1050,40 @@
     }
     locs.forEach(function (b) { b.addEventListener('click', function () { setLoc(b.getAttribute('data-loc')); }); });
     var olist = form.querySelector('.mn-order-list'), orderListeners = [];
+    var ORDER_DESC = { 6: '定義語として登録された語の定義', 5: '標準的な名前の定理・補題など', 4: '分類・記事・節の名前', 3: '本文でその語を使う定義', 2: '定理の主張・直感・証明のステップ', 1: '証明・例・補足など' };
+    var CHEV = function (d) { return '<svg class="mn-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="' + (d < 0 ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6') + '"/></svg>'; };
     function drawOrder() {
       var o = groupOrder();
       olist.innerHTML = o.map(function (t, i) {
-        return '<li data-tier="' + t + '"><span class="mn-order-name">' + ORDER_NAMES[t] + '</span>' +
-          '<button type="button" class="mn-order-btn" data-dir="-1" aria-label="上へ"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
-          '<button type="button" class="mn-order-btn" data-dir="1" aria-label="下へ"' + (i === o.length - 1 ? ' disabled' : '') + '>↓</button></li>';
+        return '<li data-tier="' + t + '"><span class="mn-order-num">' + (i + 1) + '</span>' +
+          '<span class="mn-order-name">' + ORDER_NAMES[t] + '<small>' + ORDER_DESC[t] + '</small></span>' +
+          '<span class="mn-order-ctrl">' +
+          '<button type="button" class="mn-order-btn" data-dir="-1" aria-label="「' + ORDER_NAMES[t] + '」を上へ"' + (i === 0 ? ' disabled' : '') + '>' + CHEV(-1) + '</button>' +
+          '<button type="button" class="mn-order-btn" data-dir="1" aria-label="「' + ORDER_NAMES[t] + '」を下へ"' + (i === o.length - 1 ? ' disabled' : '') + '>' + CHEV(1) + '</button></span></li>';
       }).join('');
     }
-    function saveOrder(o) { store(ORDER_KEY, JSON.stringify(o)); drawOrder(); orderListeners.forEach(function (f) { f(); }); }
+    // 入れ替えたとき、行が新しい位置へすっと動くようにする（FLIP。動きを減らす設定では動かさない）
+    function saveOrder(o, focus) {
+      var before = {};
+      [].forEach.call(olist.children, function (li) { before[li.getAttribute('data-tier')] = li.getBoundingClientRect().top; });
+      store(ORDER_KEY, JSON.stringify(o)); drawOrder();
+      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+      [].forEach.call(olist.children, function (li) {
+        var t = li.getAttribute('data-tier'), dy = (before[t] || 0) - li.getBoundingClientRect().top;
+        if (!reduce && dy && li.animate) li.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.22,.61,.36,1)' });
+        if (focus && +t === focus.t) {
+          li.classList.add('is-moved'); setTimeout(function () { li.classList.remove('is-moved'); }, 700);
+          var b = li.querySelector('.mn-order-btn[data-dir="' + focus.d + '"]');
+          (b && !b.disabled ? b : li.querySelector('.mn-order-btn:not(:disabled)')).focus();
+        }
+      });
+      orderListeners.forEach(function (f) { f(); });
+    }
     olist.addEventListener('click', function (ev) {
       var b = ev.target.closest && ev.target.closest('.mn-order-btn'); if (!b) return;
       var t = +b.closest('li').getAttribute('data-tier'), o = groupOrder(), i = o.indexOf(t), j = i + (+b.getAttribute('data-dir'));
       if (j < 0 || j >= o.length) return;
-      o[i] = o[j]; o[j] = t; saveOrder(o);
+      o[i] = o[j]; o[j] = t; saveOrder(o, { t: t, d: b.getAttribute('data-dir') });
     });
     form.querySelector('.mn-order-reset').addEventListener('click', function () { saveOrder([6, 5, 4, 3, 2, 1]); });
     // 並び順は小窓（ポップオーバー）で指定する（2026-10-23 ユーザー指示：条件の欄を開いても位置が動かないように）
@@ -1071,6 +1091,7 @@
     function setPop(open) { opop.hidden = !open; obtn.setAttribute('aria-expanded', open); obtn.classList.toggle('is-on', open); }
     obtn.addEventListener('click', function (ev) { ev.stopPropagation(); setPop(opop.hidden); });
     form.querySelector('.mn-order-close').addEventListener('click', function () { setPop(false); obtn.focus(); });
+    form.querySelector('.mn-order-x').addEventListener('click', function () { setPop(false); obtn.focus(); });
     var owrap = form.querySelector('.mn-order-wrap');
     // 小窓の中の ↑↓ は押すと描き直されて文書から外れるので、closest ではなく押した時点の経路で外側かどうかを判定する
     document.addEventListener('click', function (ev) { if (!opop.hidden && (ev.composedPath ? ev.composedPath() : []).indexOf(owrap) < 0) setPop(false); });
