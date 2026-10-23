@@ -52,6 +52,32 @@
     });
     return READINGS;
   }
+  // 定義語の索引（site-index.js の terms：語 → その語を定義するラベル）を、ラベル → 定義している語（正規化済み）に引き直す
+  var DEFINED = null;
+  var DEF_TYPES = { definition: 1, construction: 1, axiom: 1 };
+  function definedTerms(label) {
+    if (!label) return [];
+    if (!DEFINED) {
+      DEFINED = {};
+      var T = IDX.terms || {};
+      Object.keys(T).forEach(function (term) {
+        var ft = fold(term);
+        (T[term] || []).forEach(function (l) { (DEFINED[l] = DEFINED[l] || []).push(ft); });
+      });
+      // 定義語の索引は用語リンク用に 1 文字の語（群・環・体）を除いているので、同じ元（定義の環境の索引語）から補う
+      (IDX.entries || []).forEach(function (e) {
+        if (!e || !e.l || !DEF_TYPES[e.t]) return;
+        (e.ix || []).forEach(function (x) {
+          var t = String(x.term || '').normalize('NFKC').trim();
+          if (!t || /[$\\{}^_]/.test(t)) return;
+          var L = DEFINED[e.l] || (DEFINED[e.l] = []);
+          // 「多様体（位相）」のような区別の括弧書きを除いた形でも引く
+          [t, t.replace(/\s*[（(][^（）()]*[）)]\s*$/, '')].forEach(function (u) { var fu = fold(u); if (fu && L.indexOf(fu) < 0) L.push(fu); });
+        });
+      });
+    }
+    return DEFINED[label] || [];
+  }
   function isKanaOnly(w) { return /^[\u3041-\u309f\u30fcー]+$/.test(w); }
 
   // 項目一つ分の検索用の正規化（本文が後から届いた項目は、届いたときにこれで作り直す）
@@ -333,42 +359,46 @@
       return 0;
     }
     // 並べ方（2026-10-23 ユーザー指示）：
-    //   4 完全一致の定義など（題か索引語が検索語そのもの）
-    //   3 分類（大分野・分野・系列）とページで、名前（分類は英語名・別名も）が検索語を含むもの。名前が完全に一致するものが先
-    //   2 題か索引語が検索語を含む項目（部分一致の定義など）
-    //   1 それ以外（本文だけに出てくるもの）
+    //   5 その語をぴったり定義している箇所（定義語の索引 IDX.terms で、検索語そのものを定義しているラベル）
+    //   4 定理・命題・補題・系などで、名前（題）が検索語を含むもの（名前が完全に一致・短いものが先）
+    //   3 分類（大分野・分野・系列）とページで、名前（分類は英語名・別名も）が検索語を含むもの
+    //   2 検索語を含む語を定義している箇所（定義語の索引で部分一致）
+    //   1 それ以外（本文などだけに出てくるもの）
+    // 定義の題は定義する語そのものでないことが多いので、定義の判定には題ではなく定義語の索引を使う。
     var wordCands = words.map(function (t) { return [t.txt].concat((t.alts || []).map(function (a) { return fold(a); })); });
     function hasAll(strs) {
       return wordCands.length > 0 && wordCands.every(function (c) { return c.some(function (w) { return strs.some(function (x) { return x.indexOf(w) >= 0; }); }); });
     }
-    var EXACT_TOP = { definition: 1, theorem: 1, proposition: 1, lemma: 1, corollary: 1, axiom: 1, construction: 1, fact: 1, counterexample: 1 };
-    function tierOf(r, ex) {
-      if (fuzzy || !wordCands.length) return 0;
-      var t = r.e.t;
-      if (t === 'dir') return hasAll(r.nal) ? 3 : 1;
-      if (t === 'page') return hasAll([r.pt || '']) ? 3 : 1;
-      if ((ex === 2 && EXACT_TOP[t]) || (ex && t === 'definition')) return 4;
-      return hasAll([r.ntt || ''].concat((r.nis || []).map(function (x) { return x[0]; }))) ? 2 : 1;
-    }
-    function nameExact(r) {
-      if (r.e.t !== 'dir' && r.e.t !== 'page') return 0;
-      var names = r.nal || [(r.pt || '').trim()], cand = [whole].concat(wholeAlts);
-      return cand.some(function (w) { return names.indexOf(w) >= 0; }) ? 1 : 0;
+    var exactCands = [whole].concat(wholeAlts);
+    var NAMED = { theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, axiom: 1, counterexample: 1, construction: 1 };
+    function closeness(names) {
+      var nm = names.filter(function (n) { return hasAll([n]); });
+      if (!nm.length || !whole) return 0;
+      return Math.round(100 * whole.length / Math.min.apply(null, nm.map(function (n) { return n.length; })));
     }
     res.forEach(function (x) {
-      x.here = !!CUR_PAGE && x.r.pg.path === CUR_PAGE;
-      x.ex = fuzzy ? 0 : exactness(x.r);
-      x.tier = tierOf(x.r, x.ex); x.nx = nameExact(x.r);
-      // 分類・ページで、名前そのもの（別名・英語名でなく）が検索語を含むもの
-      x.th = x.tier === 3 ? (hasAll([x.r.e.t === 'dir' ? x.r.ntt : (x.r.pt || '')]) ? 1 : 0) : 0;
-      // 名前の長さが検索語に近いもの（「群」なら「群論」が「群と部分群」より先）
-      if (x.tier === 3) {
-        var nm = (x.r.e.t === 'dir' ? (x.th ? [x.r.ntt] : x.r.nal) : [x.r.pt || '']).filter(function (n) { return n.indexOf(whole) >= 0; });
-        var len = nm.length ? Math.min.apply(null, nm.map(function (n) { return n.length; })) : 0;
-        x.cl = len ? Math.round(100 * whole.length / len) : 0;
-      } else x.cl = 0;
+      var r = x.r, t = r.e.t, dt = definedTerms(r.e.l);
+      x.here = !!CUR_PAGE && r.pg.path === CUR_PAGE;
+      x.ex = 0; x.th = 0; x.cl = 0;
+      if (fuzzy || !wordCands.length) { x.tier = 0; return; }
+      if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0; })) { x.tier = 5; return; }
+      if (NAMED[t] && hasAll([r.ntt || ''])) {
+        x.tier = 4; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
+      }
+      if (t === 'dir' || t === 'page') {
+        var names = t === 'dir' ? r.nal : [r.pt || ''];
+        if (hasAll(names)) {
+          x.tier = 3; x.ex = exactCands.some(function (w) { return names.indexOf(w) >= 0; }) ? 1 : 0;
+          x.th = hasAll([names[0]]) ? 1 : 0;   // 名前そのもの（別名・英語名でなく）が含む
+          x.cl = closeness(x.th ? [names[0]] : names);
+          return;
+        }
+        x.tier = 1; return;
+      }
+      if (dt.length && hasAll(dt)) { x.tier = 2; x.cl = closeness(dt); return; }
+      x.tier = 1;
     });
-    res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.nx - a.nx) || (b.th - a.th) || (b.cl - a.cl) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
+    res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.th - a.th) || (b.cl - a.cl) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
     return { results: res.slice(0, opts.limit || 60), total: res.length, pq: pq, fuzzy: fuzzy };
   }
 
@@ -540,7 +570,7 @@
       IDX.entries = new Array(M.entryCount || 0);
       (M.entryHeads || []).forEach(function (h) { IDX.entries[h.i] = fillEntry(h); });
       bodyKeys = M.bodyKeys || [];
-      headState = 2; prepared = null; READINGS = null;
+      headState = 2; prepared = null; READINGS = null; DEFINED = null;
       headWaiters.splice(0).forEach(function (f) { try { f(); } catch (e) {} });
       if (!bodyKeys.length) { entriesState = 2; entriesWaiters.splice(0).forEach(function (f) { try { f(); } catch (e) {} }); return; }
       bodyKeys.forEach(function (k) {
