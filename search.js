@@ -566,7 +566,7 @@
   var TYPE_CHIPS = [
     ['definition', '定義'], ['theorem,proposition,lemma,corollary', '定理・命題・補題・系'],
     ['proof', '証明'], ['example', '例'], ['supplement,remark,intuition', '補足・注意'], ['counterexample', '反例'], ['problem', '問題'],
-    ['equation', '式'], ['page', 'ページ'], ['series', '系列'], ['field', '分野'], ['bigfield', '大分野']
+    ['equation', '式'], ['page', 'ページ'], ['bigfield,field,series', '分類（大分野・分野・系列）']
   ];
   var DIR_TYPES = ['bigfield', 'field', 'series'];   // 分類の行の種類（深さ 0・1・2）
   function rowType(r) { return r.e.t === 'dir' ? (DIR_TYPES[r.e.depth] || 'series') : r.e.t; }
@@ -970,11 +970,15 @@
           TYPE_CHIPS.map(function (t) { return '<button type="button" class="mn-chip" data-type="' + t[0] + '" aria-pressed="false">' + t[1] + '</button>'; }).join('') +
         '</fieldset>' +
       '</details>' +
-      '<details class="mn-sform-order"><summary>並び順</summary>' +
-        '<p class="mn-order-note">検索結果の段の順番です。↑↓ で入れ替えると、このブラウザに記憶されます。</p>' +
-        '<ol class="mn-order-list"></ol>' +
-        '<button type="button" class="mn-order-reset">初期の順に戻す</button>' +
-      '</details>' +
+      '<div class="mn-order-wrap">' +
+        '<button type="button" class="mn-order-open" aria-haspopup="dialog" aria-expanded="false">並び順</button>' +
+        '<div class="mn-order-pop" role="dialog" aria-label="検索結果の並び順" hidden>' +
+          '<div class="mn-order-title">検索結果の段の順番</div>' +
+          '<p class="mn-order-note">↑↓ で入れ替えると、すぐ結果に反映され、このブラウザに記憶されます。</p>' +
+          '<ol class="mn-order-list"></ol>' +
+          '<div class="mn-order-foot"><button type="button" class="mn-order-reset">初期の順に戻す</button><button type="button" class="mn-order-close">閉じる</button></div>' +
+        '</div>' +
+      '</div>' +
       '</div>' +
     '</form>';
   }
@@ -1012,6 +1016,15 @@
       o[i] = o[j]; o[j] = t; saveOrder(o);
     });
     form.querySelector('.mn-order-reset').addEventListener('click', function () { saveOrder([5, 4, 3, 2, 1]); });
+    // 並び順は小窓（ポップオーバー）で指定する（2026-10-23 ユーザー指示：条件の欄を開いても位置が動かないように）
+    var obtn = form.querySelector('.mn-order-open'), opop = form.querySelector('.mn-order-pop');
+    function setPop(open) { opop.hidden = !open; obtn.setAttribute('aria-expanded', open); obtn.classList.toggle('is-on', open); }
+    obtn.addEventListener('click', function (ev) { ev.stopPropagation(); setPop(opop.hidden); });
+    form.querySelector('.mn-order-close').addEventListener('click', function () { setPop(false); obtn.focus(); });
+    var owrap = form.querySelector('.mn-order-wrap');
+    // 小窓の中の ↑↓ は押すと描き直されて文書から外れるので、closest ではなく押した時点の経路で外側かどうかを判定する
+    document.addEventListener('click', function (ev) { if (!opop.hidden && (ev.composedPath ? ev.composedPath() : []).indexOf(owrap) < 0) setPop(false); });
+    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !opop.hidden) { setPop(false); obtn.focus(); } });
     drawOrder();
     function setMode(m) {
       mode = m === 'any' ? 'any' : 'all';
@@ -1090,7 +1103,7 @@
     '<p><b>キーワード</b>に定理名や用語を入れると、定義・定理・本文と<a href="' + (document.body.getAttribute('data-root') || '') + 'glossary.html">用語索引</a>から探します。英語名（例：Tychonoff）でも見つかります。' +
     'スペースで区切って複数の語を入れられます（「すべての語を含む」か「いずれかの語を含む」を選べます）。</p>' +
     '<p><b>数式を含む</b>には LaTeX で数式を書きます（例：<code>\\pi_1(S^1)</code>）。空白や括弧の付け方、<code>\\le</code> と <code>\\leq</code> などの違いは気にしなくて大丈夫です。</p>' +
-    '<p><b>種類</b>のボタンで「定理・命題・補題・系だけ」「定義だけ」「系列・分野だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、本文だけの一致に絞れます。</p>' +
+    '<p><b>種類</b>のボタンで「定理・命題・補題・系だけ」「定義だけ」「分類（大分野・分野・系列）だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、本文だけの一致に絞れます。</p>' +
     '<p>結果は「ぴったりの定義」「名前を含む定理など」「分類・ページ」「語を含む定義」「本文など」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
     '<p>日本語は<b>ふりがな</b>でも探せます（例：「べきしゅうごう」で「冪集合」）。いま開いているページの結果は一番上に出ます。</p>' +
     '<p>条件を入力・選択してから <kbd>Enter</kbd> か「検索」ボタンを押すと検索します（漢字変換の確定の <kbd>Enter</kbd> では検索しません）。</p>' +

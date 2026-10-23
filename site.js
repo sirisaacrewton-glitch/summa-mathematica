@@ -806,7 +806,7 @@
    * <details> は標準では一瞬で開閉するので、高さを補間して滑らかにする（開くとき・閉じるとき両方）。
    * 動きを減らす設定（prefers-reduced-motion）では何もしない。 */
   var REDUCED = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var FOLD_SEL = 'details.mn-fold, details.mn-tree-dir, .mn-toc-inline details, .mn-backrefs details, details.mn-sform-more, details.mn-sform-order';
+  var FOLD_SEL = 'details.mn-fold, details.mn-tree-dir, .mn-toc-inline details, .mn-backrefs details, details.mn-sform-more';
   function closedHeight(d) {
     var cs = getComputedStyle(d), sum = d.querySelector(':scope > summary');
     return sum.offsetHeight + ['paddingTop', 'paddingBottom', 'borderTopWidth', 'borderBottomWidth']
