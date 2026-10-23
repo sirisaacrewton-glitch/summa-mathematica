@@ -44,7 +44,9 @@ function walkDir(absDir, relDir, depth) {
     // transparent：表示上この階層を飛ばし、子を親の直下に並べる（住所は MSC のまま）。order：兄弟フォルダの表示順（小さいほど先。省略は名前順の後）
     transparent: !!meta.transparent, order: typeof meta.order === 'number' ? meta.order : null,
     // field：分野（第 2 階層）の分類番号（MSC の 2 桁。"03" など）。用語リンクの規則（tools/terms.json の @03 など）で使う
-    field: meta.field || ''
+    field: meta.field || '',
+    // aliases：検索で分類名として引く別名（例：代数的位相幾何学 → 代数トポロジー）。2026-10-23 ユーザー指示
+    aliases: meta.aliases || []
   };
   var entries = fs.readdirSync(absDir, { withFileTypes: true })
     .filter(function (e) { return e.name.charAt(0) !== '.' && e.name.charAt(0) !== '_'; })
@@ -782,6 +784,7 @@ function jsTree(node, isAlso) {
   if (!isAlso) node.alsoKids.forEach(function (a) { var t = jsTree(a, true); t.x = 1; c.push(t); });
   return {
     k: 'd', path: node.path, title: node.title, abbr: node.abbr, en: node.en, d: node.description,
+    al: node.aliases && node.aliases.length ? node.aliases : undefined,
     s: node.solo ? 1 : undefined, c: c,
     // 系列の id と前提知識（_meta.json の prereq の dir）。ページのロードマップで、ほかの系列を系列単位でたどるのに使う
     id: node.id || undefined, pre: node.prereq && node.prereq.length ? node.prereq.map(function (q) { return q.dir; }) : undefined

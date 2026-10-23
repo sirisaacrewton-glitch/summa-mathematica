@@ -12,13 +12,14 @@
   var prepared = null;
 
   var TYPE_WEIGHT = {
-    page: 1.6, definition: 1.45, theorem: 1.45, proposition: 1.3, lemma: 1.2, corollary: 1.2,
+    dir: 1.6, page: 1.6, definition: 1.45, theorem: 1.45, proposition: 1.3, lemma: 1.2, corollary: 1.2,
     axiom: 1.4, fact: 1.1, construction: 1.1, example: 1.0, counterexample: 1.05, remark: 0.9,
     table: 1.1, section: 1.0, text: 0.75, proof: 0.6, hypcheck: 0.65, supplement: 0.8, intuition: 0.85, solution: 0.6, problem: 0.9,
     notation: 1.0, exercise: 0.8, summary: 0.8, equation: 1.0
   };
 
   function typeName(t) {
+    if (t === 'dir') return '分類';
     if (t === 'page') return 'ページ';
     if (t === 'text') return '本文';
     if (t === 'section') return '節';
@@ -106,6 +107,24 @@
         pt: fold(pg.title || '')
       });
     });
+    // 分類（大分野・分野・系列のフォルダ）もエントリとして追加する（2026-10-23 ユーザー指示：分類名で引いてその概要ページへ飛べるように）。
+    // 題は名前、英語名と別名（_meta.json の aliases）は索引語の扱い、本文は説明文、所在は祖先の名前。
+    (function walk(n, anc) {
+      (n.c || []).forEach(function (c) {
+        if (c.k !== 'd' || c.x) return;
+        var names = [c.en || ''].concat(c.al || []).filter(Boolean);
+        var pg = { path: c.path + 'index.html', title: c.title, subj: anc.join(' › '), crumbs: anc.map(function (t) { return { title: t }; }), sec: '' };
+        var nal = [fold(c.title)].concat(names.map(function (x) { return fold(x); }));
+        prepared.push({
+          i: -2, e: { p: -1, t: 'dir', n: '', l: '', ti: c.title, en: c.en || '', k: names.join(' '), x: c.d || '', a: '', ix: [], depth: anc.length }, pg: pg,
+          nt: fold(c.title + ' ' + names.join(' ')), ntt: fold(c.title).trim(), nal: nal,
+          ni: nal.slice(1), nis: splitIx(nal.slice(1)), rawT: c.title + ' ' + names.join(' '), rawB: c.d || '', rawI: names, rawP: c.title,
+          nl: '', nb: fold(c.d || ''), ntm: '', nm: '',
+          where: Core.normalizeText(anc.join(' ') + ' ' + c.path + ' ' + c.title), pt: fold(c.title)
+        });
+        walk(c, anc.concat([c.title]));
+      });
+    })(IDX.tree || { c: [] }, []);
     if (window.performance && window.console) console.debug('[search] 索引の準備 ' + Math.round(performance.now() - t0) + ' ms（' + prepared.length + ' 項目）');
     return prepared;
   }
@@ -126,11 +145,13 @@
   // ひらがな（またはカタカナ）だけの語は、読みが一致する索引語でも探す（例：べきしゅうごう → 冪集合）
   function addAlts(t) {
     if (t.kind !== 'text' || !t.txt || !isKanaOnly(t.txt)) return;
-    var alts = [];
+    var alts = [], exact = [];
     readings().forEach(function (R) {
       if (R.r === t.txt || (t.txt.length >= 3 && R.r.indexOf(t.txt) === 0)) alts.push(R.term);
+      if (R.r === t.txt) exact.push(R.term);   // 読みが検索語そのものの用語（完全一致の判定に使う。前方一致の別表記は使わない）
     });
     if (alts.length) t.alts = alts;
+    if (exact.length) t.exactAlts = exact;
   }
   function parseQuery(q) {
     var out = { terms: [], neg: [], types: null, where: [], label: null, raw: q };
@@ -298,19 +319,56 @@
     // 検索語にぴったり一致する項目（題か索引語が検索語そのもの）を一番上に、次に現在のページの結果（2026-10-22 ユーザー指示）
     var words = pq.terms.filter(function (t) { return t.kind === 'text' && t.txt; });
     var whole = words.map(function (t) { return t.txt; }).join('');
-    var wholeAlts = words.length === 1 ? (words[0].alts || []).map(function (a) { return fold(a); }) : [];
+    var wholeAlts = words.length === 1 ? (words[0].exactAlts || []).map(function (a) { return fold(a); }) : [];
     function exactness(r) {
       if (!whole) return 0;
       var cand = [whole].concat(wholeAlts);
       for (var i = 0; i < cand.length; i++) {
         var w = cand[i];
         if (r.ntt === w) return 2;
-        for (var k = 0; k < (r.nis || []).length; k++) if (r.nis[k][0] === w || r.ni[k] === w) return 2;
+      }
+      for (var i2 = 0; i2 < cand.length; i2++) {
+        for (var k = 0; k < (r.nis || []).length; k++) if (r.nis[k][0] === cand[i2] || r.ni[k] === cand[i2]) return 1;   // 索引語だけが一致
       }
       return 0;
     }
-    res.forEach(function (x) { x.here = !!CUR_PAGE && x.r.pg.path === CUR_PAGE; x.ex = fuzzy ? 0 : exactness(x.r); });
-    res.sort(function (a, b) { return (b.ex - a.ex) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
+    // 並べ方（2026-10-23 ユーザー指示）：
+    //   4 完全一致の定義など（題か索引語が検索語そのもの）
+    //   3 分類（大分野・分野・系列）とページで、名前（分類は英語名・別名も）が検索語を含むもの。名前が完全に一致するものが先
+    //   2 題か索引語が検索語を含む項目（部分一致の定義など）
+    //   1 それ以外（本文だけに出てくるもの）
+    var wordCands = words.map(function (t) { return [t.txt].concat((t.alts || []).map(function (a) { return fold(a); })); });
+    function hasAll(strs) {
+      return wordCands.length > 0 && wordCands.every(function (c) { return c.some(function (w) { return strs.some(function (x) { return x.indexOf(w) >= 0; }); }); });
+    }
+    var EXACT_TOP = { definition: 1, theorem: 1, proposition: 1, lemma: 1, corollary: 1, axiom: 1, construction: 1, fact: 1, counterexample: 1 };
+    function tierOf(r, ex) {
+      if (fuzzy || !wordCands.length) return 0;
+      var t = r.e.t;
+      if (t === 'dir') return hasAll(r.nal) ? 3 : 1;
+      if (t === 'page') return hasAll([r.pt || '']) ? 3 : 1;
+      if ((ex === 2 && EXACT_TOP[t]) || (ex && t === 'definition')) return 4;
+      return hasAll([r.ntt || ''].concat((r.nis || []).map(function (x) { return x[0]; }))) ? 2 : 1;
+    }
+    function nameExact(r) {
+      if (r.e.t !== 'dir' && r.e.t !== 'page') return 0;
+      var names = r.nal || [(r.pt || '').trim()], cand = [whole].concat(wholeAlts);
+      return cand.some(function (w) { return names.indexOf(w) >= 0; }) ? 1 : 0;
+    }
+    res.forEach(function (x) {
+      x.here = !!CUR_PAGE && x.r.pg.path === CUR_PAGE;
+      x.ex = fuzzy ? 0 : exactness(x.r);
+      x.tier = tierOf(x.r, x.ex); x.nx = nameExact(x.r);
+      // 分類・ページで、名前そのもの（別名・英語名でなく）が検索語を含むもの
+      x.th = x.tier === 3 ? (hasAll([x.r.e.t === 'dir' ? x.r.ntt : (x.r.pt || '')]) ? 1 : 0) : 0;
+      // 名前の長さが検索語に近いもの（「群」なら「群論」が「群と部分群」より先）
+      if (x.tier === 3) {
+        var nm = (x.r.e.t === 'dir' ? (x.th ? [x.r.ntt] : x.r.nal) : [x.r.pt || '']).filter(function (n) { return n.indexOf(whole) >= 0; });
+        var len = nm.length ? Math.min.apply(null, nm.map(function (n) { return n.length; })) : 0;
+        x.cl = len ? Math.round(100 * whole.length / len) : 0;
+      } else x.cl = 0;
+    });
+    res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.nx - a.nx) || (b.th - a.th) || (b.cl - a.cl) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
     return { results: res.slice(0, opts.limit || 60), total: res.length, pq: pq, fuzzy: fuzzy };
   }
 
@@ -431,11 +489,15 @@
     var r = item.r, e = r.e, pg = r.pg;
     var badge = typeName(e.t) + (e.n ? ' ' + e.n : '');
     var title;
-    if (e.t === 'page') title = '§' + pg.sec + ' ' + renderInlineTitle(pg.title, pq);
+    if (e.t === 'dir') {
+      badge = ['大分野', '分野', '系列'][e.depth] || '分類';
+      title = renderInlineTitle(e.ti, pq) + (e.en ? ' <span class="mn-result-en">' + highlight(e.en, pq) + '</span>' : '');
+    }
+    else if (e.t === 'page') title = '§' + pg.sec + ' ' + renderInlineTitle(pg.title, pq);
     else if ((C.ENVIRONMENTS[e.t] || {}).attached && !e.ti) {
       title = e.of ? typeName(e.of.t) + ' ' + e.of.n + (e.of.ti ? '（' + renderInlineTitle(e.of.ti, pq) + '）' : '') + ' の' + typeName(e.t) : typeName(e.t);
     } else title = e.ti ? renderInlineTitle(e.ti, pq) : (e.h ? renderInlineTitle(e.h, pq) : '');
-    var crumb = Core.escapeHtml(pg.subj || '') + ' › §' + pg.sec + ' ' + renderInlineTitle(pg.title || '', { terms: [] });
+    var crumb = e.t === 'dir' ? Core.escapeHtml(pg.subj || 'トップ') : Core.escapeHtml(pg.subj || '') + ' › §' + pg.sec + ' ' + renderInlineTitle(pg.title || '', { terms: [] });
     return '<a class="mn-result' + (active ? ' is-active' : '') + '" href="' + Core.escapeHtml(resultHref(r, root)) + '">' +
       '<div class="mn-result-top"><span class="mn-badge" data-type="' + e.t + '">' + Core.escapeHtml(badge) + '</span>' +
       '<span class="mn-result-title"' + (e.l && e.t !== 'page' && e.t !== 'section' && IDX.labels[e.l] ? ' data-pv-label="' + Core.escapeHtml(e.l) + '"' : '') + '>' + title + '</span>' + (item.here ? '<span class="mn-here">このページ</span>' : '') +
