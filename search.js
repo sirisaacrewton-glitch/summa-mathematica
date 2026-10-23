@@ -78,6 +78,7 @@
     }
     return DEFINED[label] || [];
   }
+  function loose(x) { return String(x || '').replace(/的/g, ''); }
   function isKanaOnly(w) { return /^[\u3041-\u309f\u30fcー]+$/.test(w); }
 
   // 項目一つ分の検索用の正規化（本文が後から届いた項目は、届いたときにこれで作り直す）
@@ -259,6 +260,14 @@
     if (cb) s += 1.5 + Math.log(1 + cb);
     if (F.pt.indexOf(w) >= 0) s += 1.2;
     if (/^[a-z]{2,}$/.test(w) && (r.nm.indexOf('\\' + w) >= 0 || r.ntm.indexOf(w) >= 0)) s += 1.5;
+    // 「的」の有無を区別しない一致（「代数位相幾何」で「代数的位相幾何学」を引く。2026-10-23 ユーザー指示）。題・索引語・ページ名だけで見る
+    if (!s && !cs) {
+      var wl = loose(w);
+      if (wl) {
+        if (r.lz === undefined) r.lz = loose(r.nt + '\u0001' + (r.ni || []).join('\u0001') + '\u0001' + (r.pt || ''));
+        if (r.lz.indexOf(wl) >= 0) s += 8;
+      }
+    }
     return s;
   }
 
@@ -367,28 +376,28 @@
     // 定義の題は定義する語そのものでないことが多いので、定義の判定には題ではなく定義語の索引を使う。
     var wordCands = words.map(function (t) { return [t.txt].concat((t.alts || []).map(function (a) { return fold(a); })); });
     function hasAll(strs) {
-      return wordCands.length > 0 && wordCands.every(function (c) { return c.some(function (w) { return strs.some(function (x) { return x.indexOf(w) >= 0; }); }); });
+      return wordCands.length > 0 && wordCands.every(function (c) { return c.some(function (w) { var wl = loose(w); return strs.some(function (x) { return x.indexOf(w) >= 0 || (wl && loose(x).indexOf(wl) >= 0); }); }); });
     }
     var exactCands = [whole].concat(wholeAlts);
     var NAMED = { theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, axiom: 1, counterexample: 1, construction: 1 };
     function closeness(names) {
       var nm = names.filter(function (n) { return hasAll([n]); });
       if (!nm.length || !whole) return 0;
-      return Math.round(100 * whole.length / Math.min.apply(null, nm.map(function (n) { return n.length; })));
+      return Math.round(100 * loose(whole).length / Math.min.apply(null, nm.map(function (n) { return loose(n).length || 1; })));
     }
     res.forEach(function (x) {
       var r = x.r, t = r.e.t, dt = definedTerms(r.e.l);
       x.here = !!CUR_PAGE && r.pg.path === CUR_PAGE;
       x.ex = 0; x.th = 0; x.cl = 0;
       if (fuzzy || !wordCands.length) { x.tier = 0; return; }
-      if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0; })) { x.tier = 5; return; }
+      if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0 || dt.some(function (d) { return loose(d) === loose(w) && loose(w); }); })) { x.tier = 5; return; }
       if (NAMED[t] && hasAll([r.ntt || ''])) {
         x.tier = 4; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
       }
       if (t === 'dir' || t === 'page') {
         var names = t === 'dir' ? r.nal : [r.pt || ''];
         if (hasAll(names)) {
-          x.tier = 3; x.ex = exactCands.some(function (w) { return names.indexOf(w) >= 0; }) ? 1 : 0;
+          x.tier = 3; x.ex = exactCands.some(function (w) { return names.some(function (n) { return n === w || (loose(w) && loose(n) === loose(w)); }); }) ? 1 : 0;
           x.th = hasAll([names[0]]) ? 1 : 0;   // 名前そのもの（別名・英語名でなく）が含む
           x.cl = closeness(x.th ? [names[0]] : names);
           return;
@@ -1087,8 +1096,45 @@
     }).join('');
     return '<div class="mn-meanings"><div class="mn-meanings-k">「' + Core.escapeHtml(term) + '」の定義' + (labs.length > 1 ? '（' + labs.length + ' 通りの意味）' : '') + '</div><ul>' + items + '</ul></div>';
   }
+  // 段ごとにまとめて表示する（2026-10-23 ユーザー指示：部分一致の定義などが、前の段の多い結果に埋もれないように）。
+  // 各段は最初の数件だけを出し、「この段をさらに表示」で足す。あいまい検索のときは段に分けない。
+  var GROUPS = [
+    { t: 5, h: function (q) { return '「' + q + '」の定義'; }, n: 30 },
+    { t: 4, h: function (q) { return '名前に「' + q + '」を含む定理・命題・補題など'; }, n: 6 },
+    { t: 3, h: function (q) { return '名前に「' + q + '」を含む分類・ページ'; }, n: 6 },
+    { t: 2, h: function (q) { return '「' + q + '」を含む語の定義'; }, n: 8 },
+    { t: 1, h: function () { return '本文などでの一致'; }, n: 10 }
+  ];
+  var GROUP_STEP = 20;
+  function groupMoreHtml(box, t) {
+    var g = box._groups[t], rest = g.items.length - g.shown;
+    return rest > 0 ? '<button type="button" class="mn-search-more mn-search-groupmore" data-tier="' + t + '">この段をさらに表示（残り ' + rest + ' 件）</button>' : '';
+  }
+  function showGrouped(box, out) {
+    var q = (out.pq.terms || []).filter(function (t) { return t.kind === 'text'; }).map(function (t) { return t.s; }).join(' ');
+    box._groups = {};
+    var html = '<div class="mn-search-count">' + out.total + ' 件</div>';
+    GROUPS.forEach(function (G) {
+      var items = out.results.filter(function (x) { return x.tier === G.t; });
+      if (!items.length) return;
+      var g = box._groups[G.t] = { items: items, shown: Math.min(G.n, items.length) };
+      html += '<section class="mn-result-group" data-tier="' + G.t + '"><div class="mn-result-group-h">' + Core.escapeHtml(G.h(q)) + '<span class="mn-result-group-n">' + items.length + ' 件</span></div>' +
+        items.slice(0, g.shown).map(function (it) { return renderResult(it, out.pq, root(), false); }).join('') + groupMoreHtml(box, G.t) + '</section>';
+    });
+    box.innerHTML = html;
+  }
+  function showGroupMore(box, btn) {
+    var t = +btn.getAttribute('data-tier'), g = box._groups && box._groups[t];
+    if (!g) return;
+    var from = g.shown, to = Math.min(from + GROUP_STEP, g.items.length);
+    g.shown = to;
+    btn.insertAdjacentHTML('beforebegin', g.items.slice(from, to).map(function (it) { return renderResult(it, box._out.pq, root(), false); }).join(''));
+    var next = groupMoreHtml(box, t);
+    if (next) btn.outerHTML = next; else btn.remove();
+  }
   function showResults(box, out) {
     box._out = out;
+    if (out.results.length && !out.fuzzy && out.results.some(function (x) { return x.tier > 0; })) { box._shown = 0; showGrouped(box, out); return; }
     var mean = meaningsHtml(out.pq || {});
     if (!out.results.length) { box._shown = 0; box.innerHTML = mean + '<div class="mn-search-empty">該当する項目が見つかりませんでした。語を減らすか、条件を外してみてください。</div>'; return; }
     box._shown = Math.min(PAGE_SIZE, out.results.length);
@@ -1108,6 +1154,8 @@
   function bindMore(box) {
     box.addEventListener('click', function (ev) {
       if (ev.target.closest && ev.target.closest('.mn-search-showmore')) { ev.preventDefault(); showMore(box); }
+      var gb = ev.target.closest && ev.target.closest('.mn-search-groupmore');
+      if (gb) { ev.preventDefault(); showGroupMore(box, gb); }
     });
   }
   /* ---------- 検索の入口 ----------
