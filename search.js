@@ -1024,7 +1024,7 @@
         '<button type="button" class="mn-order-open" aria-haspopup="dialog" aria-expanded="false"><svg class="mn-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h11M4 12h7M4 17h4M17 9l3-3 3 3M20 6v12"/></svg><span>並び順</span></button>' +
         '<div class="mn-order-pop" role="dialog" aria-label="検索結果の並び順" hidden>' +
           '<div class="mn-order-head"><span class="mn-order-title">結果の並び順</span><button type="button" class="mn-order-x" aria-label="閉じる"><svg class="mn-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>' +
-          '<p class="mn-order-note">検索結果の段をこの順に表示します。入れ替えるとすぐ反映され、このブラウザに記憶されます。</p>' +
+          '<p class="mn-order-note">検索結果の段をこの順に表示します。行を長押しして上下に動かすと入れ替わり、すぐ反映されて、このブラウザに記憶されます。</p>' +
           '<ol class="mn-order-list"></ol>' +
           '<div class="mn-order-foot"><button type="button" class="mn-order-reset"><svg class="mn-ico" viewBox="0 0 24 24" width="13" height="13" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.5-5.8M4 4v5h5"/></svg><span>初期の順に戻す</span></button><button type="button" class="mn-order-close">完了</button></div>' +
         '</div>' +
@@ -1051,39 +1051,90 @@
     locs.forEach(function (b) { b.addEventListener('click', function () { setLoc(b.getAttribute('data-loc')); }); });
     var olist = form.querySelector('.mn-order-list'), orderListeners = [];
     var ORDER_DESC = { 6: '定義語として登録された語の定義', 5: '標準的な名前の定理・補題など', 4: '分類・記事・節の名前', 3: '本文でその語を使う定義', 2: '定理の主張・直感・証明のステップ', 1: '証明・例・補足など' };
-    var CHEV = function (d) { return '<svg class="mn-ico" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="' + (d < 0 ? 'M6 15l6-6 6 6' : 'M6 9l6 6 6-6') + '"/></svg>'; };
+    var GRIP = '<svg class="mn-ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>';
     function drawOrder() {
       var o = groupOrder();
       olist.innerHTML = o.map(function (t, i) {
-        return '<li data-tier="' + t + '"><span class="mn-order-num">' + (i + 1) + '</span>' +
+        return '<li data-tier="' + t + '" tabindex="0" aria-label="' + (i + 1) + ' 番目：' + ORDER_NAMES[t] + '（長押しして上下に動かす。キーボードでは Alt+↑↓）">' +
+          '<span class="mn-order-num">' + (i + 1) + '</span>' +
           '<span class="mn-order-name">' + ORDER_NAMES[t] + '<small>' + ORDER_DESC[t] + '</small></span>' +
-          '<span class="mn-order-ctrl">' +
-          '<button type="button" class="mn-order-btn" data-dir="-1" aria-label="「' + ORDER_NAMES[t] + '」を上へ"' + (i === 0 ? ' disabled' : '') + '>' + CHEV(-1) + '</button>' +
-          '<button type="button" class="mn-order-btn" data-dir="1" aria-label="「' + ORDER_NAMES[t] + '」を下へ"' + (i === o.length - 1 ? ' disabled' : '') + '>' + CHEV(1) + '</button></span></li>';
+          '<span class="mn-order-grip">' + GRIP + '</span></li>';
       }).join('');
     }
-    // 入れ替えたとき、行が新しい位置へすっと動くようにする（FLIP。動きを減らす設定では動かさない）
-    function saveOrder(o, focus) {
-      var before = {};
-      [].forEach.call(olist.children, function (li) { before[li.getAttribute('data-tier')] = li.getBoundingClientRect().top; });
-      store(ORDER_KEY, JSON.stringify(o)); drawOrder();
-      var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var REDUCE = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // 行の位置を覚えておき、並びが変わったあとに元の位置から滑らせる（FLIP）
+    function rects() { var r = {}; [].forEach.call(olist.children, function (li) { r[li.getAttribute('data-tier')] = li.getBoundingClientRect().top; }); return r; }
+    function slideFrom(before, skip) {
+      if (REDUCE) return;
       [].forEach.call(olist.children, function (li) {
-        var t = li.getAttribute('data-tier'), dy = (before[t] || 0) - li.getBoundingClientRect().top;
-        if (!reduce && dy && li.animate) li.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }], { duration: 260, easing: 'cubic-bezier(.22,.61,.36,1)' });
-        if (focus && +t === focus.t) {
-          li.classList.add('is-moved'); setTimeout(function () { li.classList.remove('is-moved'); }, 700);
-          var b = li.querySelector('.mn-order-btn[data-dir="' + focus.d + '"]');
-          (b && !b.disabled ? b : li.querySelector('.mn-order-btn:not(:disabled)')).focus();
-        }
+        if (li === skip) return;
+        var dy = (before[li.getAttribute('data-tier')] || 0) - li.getBoundingClientRect().top;
+        if (dy && li.animate) li.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }], { duration: 200, easing: 'cubic-bezier(.22,.61,.36,1)' });
       });
+    }
+    function saveOrder(o, focusTier) {
+      var before = rects();
+      store(ORDER_KEY, JSON.stringify(o)); drawOrder(); slideFrom(before);
+      if (focusTier) {
+        var li = olist.querySelector('li[data-tier="' + focusTier + '"]');
+        if (li) { li.classList.add('is-moved'); setTimeout(function () { li.classList.remove('is-moved'); }, 700); li.focus(); }
+      }
       orderListeners.forEach(function (f) { f(); });
     }
-    olist.addEventListener('click', function (ev) {
-      var b = ev.target.closest && ev.target.closest('.mn-order-btn'); if (!b) return;
-      var t = +b.closest('li').getAttribute('data-tier'), o = groupOrder(), i = o.indexOf(t), j = i + (+b.getAttribute('data-dir'));
+    function domOrder() { return [].map.call(olist.children, function (li) { return +li.getAttribute('data-tier'); }); }
+    // 長押しで持ち上げて上下に動かす（2026-10-23 ユーザー指示）。マウスは少し動かしても持ち上がる。タッチは長押し（約 0.3 秒）で持ち上がる
+    var drag = null;
+    olist.addEventListener('pointerdown', function (ev) {
+      var li = ev.target.closest && ev.target.closest('li'); if (!li || ev.button > 0) return;
+      var touch = ev.pointerType !== 'mouse';
+      drag = { li: li, id: ev.pointerId, y0: ev.clientY, lifted: false, touch: touch, timer: null };
+      drag.timer = setTimeout(function () { if (drag && drag.li === li) lift(ev.clientY); }, touch ? 300 : 180);
+      try { li.setPointerCapture(ev.pointerId); } catch (e) {}
+    });
+    function lift(y) {
+      drag.lifted = true; drag.yStart = y; drag.base = drag.li.getBoundingClientRect().top;
+      drag.li.classList.add('is-dragging'); olist.classList.add('is-sorting');
+      if (navigator.vibrate) try { navigator.vibrate(10); } catch (e) {}
+    }
+    olist.addEventListener('pointermove', function (ev) {
+      if (!drag || ev.pointerId !== drag.id) return;
+      if (!drag.lifted) {
+        if (Math.abs(ev.clientY - drag.y0) > 6) { if (drag.touch) { clearTimeout(drag.timer); drag = null; return; } clearTimeout(drag.timer); lift(drag.y0); }
+        else return;
+      }
+      ev.preventDefault();
+      var li = drag.li, y = ev.clientY;
+      // 指の位置が隣の行の中央を越えたら入れ替える
+      var prev = li.previousElementSibling, next = li.nextElementSibling, before;
+      if (prev && y < prev.getBoundingClientRect().top + prev.offsetHeight / 2) { before = rects(); olist.insertBefore(li, prev); slideFrom(before, li); }
+      else if (next && y > next.getBoundingClientRect().top + next.offsetHeight / 2) { before = rects(); olist.insertBefore(next, li); slideFrom(before, li); }
+      [].forEach.call(olist.children, function (x, k) { x.querySelector('.mn-order-num').textContent = k + 1; });
+      var natural = li.getBoundingClientRect().top - (parseFloat(li.dataset.dy) || 0);
+      var dy = (drag.base + (y - drag.yStart)) - natural;
+      li.dataset.dy = dy; li.style.transform = 'translateY(' + dy + 'px) scale(1.02)';
+    });
+    function endDrag(ev) {
+      if (!drag || (ev && ev.pointerId !== drag.id)) return;
+      clearTimeout(drag.timer);
+      var d = drag; drag = null;
+      if (!d.lifted) return;
+      var li = d.li, dy = parseFloat(li.dataset.dy) || 0;
+      li.style.transform = ''; delete li.dataset.dy;
+      li.classList.remove('is-dragging'); olist.classList.remove('is-sorting');
+      if (!REDUCE && dy && li.animate) li.animate([{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }], { duration: 160, easing: 'ease-out' });
+      var o = domOrder();
+      setTimeout(function () { saveOrder(o, o.join() === groupOrder().join() ? 0 : +li.getAttribute('data-tier')); }, REDUCE ? 0 : 170);
+    }
+    olist.addEventListener('pointerup', endDrag);
+    olist.addEventListener('pointercancel', endDrag);
+    olist.addEventListener('contextmenu', function (ev) { if (drag) ev.preventDefault(); });   // 長押しでメニューが出ないように
+    // キーボード：行にフォーカスして Alt+↑↓ で動かす
+    olist.addEventListener('keydown', function (ev) {
+      var li = ev.target.closest && ev.target.closest('li'); if (!li || !ev.altKey || (ev.key !== 'ArrowUp' && ev.key !== 'ArrowDown')) return;
+      ev.preventDefault();
+      var t = +li.getAttribute('data-tier'), o = groupOrder(), i = o.indexOf(t), j = i + (ev.key === 'ArrowUp' ? -1 : 1);
       if (j < 0 || j >= o.length) return;
-      o[i] = o[j]; o[j] = t; saveOrder(o, { t: t, d: b.getAttribute('data-dir') });
+      o[i] = o[j]; o[j] = t; saveOrder(o, t);
     });
     form.querySelector('.mn-order-reset').addEventListener('click', function () { saveOrder([6, 5, 4, 3, 2, 1]); });
     // 並び順は小窓（ポップオーバー）で指定する（2026-10-23 ユーザー指示：条件の欄を開いても位置が動かないように）
@@ -1093,7 +1144,7 @@
     form.querySelector('.mn-order-close').addEventListener('click', function () { setPop(false); obtn.focus(); });
     form.querySelector('.mn-order-x').addEventListener('click', function () { setPop(false); obtn.focus(); });
     var owrap = form.querySelector('.mn-order-wrap');
-    // 小窓の中の ↑↓ は押すと描き直されて文書から外れるので、closest ではなく押した時点の経路で外側かどうかを判定する
+    // 小窓の中の行は動かすと描き直されて文書から外れるので、closest ではなく押した時点の経路で外側かどうかを判定する
     document.addEventListener('click', function (ev) { if (!opop.hidden && (ev.composedPath ? ev.composedPath() : []).indexOf(owrap) < 0) setPop(false); });
     document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !opop.hidden) { setPop(false); obtn.focus(); } });
     drawOrder();
