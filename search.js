@@ -1252,7 +1252,7 @@
     var html = '<div class="mn-search-count">' + out.total + ' 件</div>';
     // 語の定義が 1 件もなく、語を使う定義があるときは、定義が「語を使う定義」に入っている可能性を小さく知らせる
     if (q && !out.results.some(function (x) { return x.tier === 6; }) && out.results.some(function (x) { return x.tier === 3; }))
-      html += '<p class="mn-search-note">「' + Core.escapeHtml(q) + '」を定義する語として登録された定義は見つかりませんでした。定義のカードに定義する語として登録されていない場合は、「語を使う定義」の段に入っていることがあります。</p>';
+      html += '<div class="mn-search-notice" role="note"><b>「' + Core.escapeHtml(q) + '」は定義語として登録されていません。</b>定義のカードに定義する語として登録されていない場合は、「語を使う定義」の段に入っていることがあります。</div>';
     groupsInOrder().forEach(function (G) {
       var items = out.results.filter(function (x) { return x.tier === G.t; });
       if (!items.length) return;
