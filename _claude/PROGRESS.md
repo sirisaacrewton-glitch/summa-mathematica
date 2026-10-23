@@ -638,6 +638,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | TP-02 | 54H/01/02-group-uniformities | 左一様構造・完全正則性・一様連続な準同型・バーコフ–角谷の定理 | — | 完了 |
 
 ## 完了ログ（新しいものを上に。1 行ずつ）
+- 2026-10-23 直感と【主張】の書き足し：ベクトル解析（vec-analysis）の定義・主要な定理 15 件に直感、保存場の特徴づけの証明に【主張】。曲線論の残り 2 件。build.js の INTUITION_REPORT=<フォルダの先頭> で対象の項目（ラベル）も出るようにした。次の書き足し候補：一変数の微積分・多変数解析（微分幾何の前提）。
 - 2026-10-23 DC-01 曲線とフレネの公式（05-geometry-topology/04-differential-geometry/01-curves/01-curves-frenet, surf:page-curves-frenet）。新系列 surf-curves（曲線論）を作り §8.2 の 6 か所を確認。正則曲線とパラメータ変換、弧長パラメータ、フレネ曲線・標準フレネ標構（余因子で e_n を滑らかに作る）、フレネ標構をもたない C^∞ 正則曲線（(t, f(t), f(-t))）、フレネ–セレの公式と κ_1..κ_{n-2}>0、曲率の不変性、線形常微分方程式の解の存在と一意性（ピカールの逐次近似。区間全体）、曲線論の基本定理（surf:fundamental-theorem-curves。存在は E E^t ≡ I を一意性で示す）、平面曲線（符号付き曲率、接線角、直線と円）、空間曲線（ベクトル積、曲率・捩率の公式、常らせん、捩率 0 と平面、局所標準形、接触平面・法平面・展直平面）、問題 6 題。
 - 2026-10-23 AT-16 多様体になる複体（02-homology/14-manifold-complexes（2026-10-23 にコホモロジー §7 から移動。位相多様体の定義 at:topological-manifold も向きのページからここへ移した）, at:page-manifold-complexes：at:link-local-homology, at:manifold-link-conditions, at:vertex-link-sphere-manifold, at:surface-complex-criterion, at:three-manifold-complex, at:cw-manifold-dimension, at:boundary-invariance）。
 - 2026-10-22 一般位相の調整：位相空間 §3「開基と近傍系」（基本近傍系の公理を追加）、基本性質を I・II に分割（距離空間 06・一様空間 07・反例 08・位相群 09 に繰り下げ）。CW 複体が多様体になる条件のページ AT-16 を計画に追加。

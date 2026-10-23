@@ -1010,23 +1010,25 @@ if (!CHECK_ONLY) {
   function major(e) { return e.t === 'theorem' || (NAMED_TYPES[e.t] && labels[e.l] && labels[e.l].rn); }
   entries.forEach(function (e, i) {
     if (e.t !== 'definition' && !major(e)) return;
-    var dp = pages[e.p].dirPath, rec = bySeries[dp] || (bySeries[dp] = { i: 0, c: 0 });
+    var dp = pages[e.p].dirPath, rec = bySeries[dp] || (bySeries[dp] = { i: 0, c: 0, li: [] });
     total++;
     var nx = entries[i + 1];
-    if (!(nx && nx.t === 'intuition' && nx.of)) { missing++; rec.i++; }
+    if (!(nx && nx.t === 'intuition' && nx.of)) { missing++; rec.i++; rec.li.push('直感 ' + e.l); }
     if (e.t === 'definition') return;
     for (var k = i + 1; k < Math.min(entries.length, i + 6); k++) {
       var p = entries[k];
       if (p.t !== 'proof' || !p.of || p.of.l !== e.l) continue;
       if (((p.x || '').match(/\*\*Step \d/g) || []).length < 3) break;
       ptotal++;
-      if ((p.x || '').indexOf('【主張：') < 0) { pmissing++; rec.c++; }
+      if ((p.x || '').indexOf('【主張：') < 0) { pmissing++; rec.c++; rec.li.push('主張 ' + e.l); }
       break;
     }
   });
   if (QUIET) return;
-  console.log('\n[直感のない定義・主要な定理 ' + missing + ' / ' + total + ' 件、【主張】のない主要な定理の証明（Step 3 つ以上） ' + pmissing + ' / ' + ptotal + ' 件 — INTUITION_REPORT=1 で系列ごと]');
-  if (process.env.INTUITION_REPORT) Object.keys(bySeries).sort().forEach(function (k) { var r = bySeries[k]; if (r.i || r.c) console.log('  ' + k + '  直感 ' + r.i + '・主張 ' + r.c); });
+  console.log('\n[直感のない定義・主要な定理 ' + missing + ' / ' + total + ' 件、【主張】のない主要な定理の証明（Step 3 つ以上） ' + pmissing + ' / ' + ptotal + ' 件 — INTUITION_REPORT=1 で系列ごと、=<フォルダ> で項目も]');
+  // INTUITION_REPORT=<フォルダの先頭部分> なら、その系列の対象の項目（ラベル）も出す
+  var IR = process.env.INTUITION_REPORT;
+  if (IR) Object.keys(bySeries).sort().forEach(function (k) { var r = bySeries[k]; if (!(r.i || r.c)) return; console.log('  ' + k + '  直感 ' + r.i + '・主張 ' + r.c); if (IR !== '1' && k.indexOf(IR) === 0) r.li.forEach(function (x) { console.log('      ' + x); }); });
 })();
 var plannedKeys = Object.keys(planned);
 if (plannedKeys.length && !QUIET) {
