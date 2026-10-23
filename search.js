@@ -271,8 +271,22 @@
     return s;
   }
 
+  // 一致する場所（2026-10-23 ユーザー指示）：'title' は題・名前・索引語・キーワードで、'body' は本文で、すべての語が一致するもの
+  function locOk(r, pq) {
+    var words = pq.terms.filter(function (t) { return t.kind === 'text' && t.txt; });
+    if (!words.length) return true;
+    return words.every(function (t) {
+      var cands = [t.txt].concat((t.alts || []).map(function (a) { return fold(a); }));
+      return cands.some(function (w) {
+        var wl = loose(w);
+        if (pq.loc === 'body') return r.nb.indexOf(w) >= 0;
+        var names = [r.nt, r.pt || ''].concat(r.ni || [], r.nal || []);
+        return names.some(function (x) { return x && (x.indexOf(w) >= 0 || (wl && loose(x).indexOf(wl) >= 0)); });
+      });
+    });
+  }
   function filterOk(r, pq) {
-    if (pq.types && pq.types.indexOf(r.e.t) < 0) return false;
+    if (pq.types && pq.types.indexOf(rowType(r)) < 0) return false;
     for (var i = 0; i < pq.where.length; i++) if (r.where.indexOf(pq.where[i]) < 0) return false;
     if (pq.dirs && pq.dirs.length && !pq.dirs.some(function (d) { return (r.pg.path || '').indexOf(d) === 0; })) return false;
     if (pq.label && r.nl.indexOf(pq.label) !== 0) return false;
@@ -310,6 +324,7 @@
     if (query.types && query.types.length) pq.types = (pq.types || []).concat(query.types);
     if (query.dirs && query.dirs.length) pq.dirs = expandDirs(query.dirs);
     if (query.mode === 'any') pq.mode = 'any';
+    if (query.loc === 'title' || query.loc === 'body') pq.loc = query.loc;
     if (query.cs) {
       pq.cs = true;
       pq.terms.concat(pq.neg).forEach(function (t) { t.cs = true; });
@@ -327,6 +342,7 @@
     var anyMode = pq.mode === 'any';
     rows.forEach(function (r) {
       if (!filterOk(r, pq)) return;
+      if (pq.loc && !locOk(r, pq)) return;
       var total = 0, hits = 0;
       for (var i = 0; i < pq.terms.length; i++) {
         var s = scoreTerm(r, pq.terms[i]);
@@ -546,11 +562,14 @@
   }
 
   /* ---------- 検索フォーム（モーダルと検索ページで共通） ---------- */
+  // 種類の絞り込み（2026-10-23 ユーザー指示：定理・命題・補題・系はまとめる。分類（大分野・分野・系列）も選べる）。値はカンマ区切りで複数の種類を表す
   var TYPE_CHIPS = [
-    ['definition', '定義'], ['theorem', '定理'], ['proposition', '命題'], ['lemma', '補題'], ['corollary', '系'],
-    ['proof', '証明'], ['example', '例'], ['supplement', '補足・注意'], ['counterexample', '反例'], ['problem', '問題'],
-    ['equation', '式'], ['page', 'ページ']
+    ['definition', '定義'], ['theorem,proposition,lemma,corollary', '定理・命題・補題・系'],
+    ['proof', '証明'], ['example', '例'], ['supplement,remark,intuition', '補足・注意'], ['counterexample', '反例'], ['problem', '問題'],
+    ['equation', '式'], ['page', 'ページ'], ['series', '系列'], ['field', '分野'], ['bigfield', '大分野']
   ];
+  var DIR_TYPES = ['bigfield', 'field', 'series'];   // 分類の行の種類（深さ 0・1・2）
+  function rowType(r) { return r.e.t === 'dir' ? (DIR_TYPES[r.e.depth] || 'series') : r.e.t; }
   function root() { return document.body.getAttribute('data-root') || ''; }
 
   /* ---------- 検索用の本文（search-index.js）の遅延読み込み ---------- */
@@ -928,6 +947,7 @@
         '<button type="button" class="mn-sform-go" title="検索する（Enter）">検索</button>' +
       '</div>' +
       '<div class="mn-sform-hint"><kbd>Enter</kbd> か「検索」で検索。↑↓ で結果を選び <kbd>Shift</kbd>+<kbd>Enter</kbd> でその項目を開く</div>' +
+      '<div class="mn-sform-opts">' +
       '<details class="mn-sform-more" data-kind="' + id + '"' + (moreOpen(id) ? ' open' : '') + '>' +
         '<summary>条件を指定</summary>' +
         '<div class="mn-sform-grid">' +
@@ -937,6 +957,10 @@
           '<div class="mn-field"><span class="mn-field-label">複数の語を入れたとき</span><div class="mn-seg" role="radiogroup">' +
             '<button type="button" class="mn-seg-btn is-on" data-mode="all" role="radio" aria-checked="true">すべて含む</button>' +
             '<button type="button" class="mn-seg-btn" data-mode="any" role="radio" aria-checked="false">いずれかを含む</button></div></div>' +
+          '<div class="mn-field"><span class="mn-field-label">一致する場所</span><div class="mn-seg mn-seg-loc" role="radiogroup">' +
+            '<button type="button" class="mn-seg-btn is-on" data-loc="" role="radio" aria-checked="true">すべて</button>' +
+            '<button type="button" class="mn-seg-btn" data-loc="title" role="radio" aria-checked="false">題・名前</button>' +
+            '<button type="button" class="mn-seg-btn" data-loc="body" role="radio" aria-checked="false">本文</button></div></div>' +
           '<div class="mn-checks"><label class="mn-check"><input type="checkbox" name="exact"> 語句を完全一致で探す</label>' +
           '<label class="mn-check"><input type="checkbox" name="cs"> 英字の大文字・小文字を区別する</label></div>' +
         '</div>' +
@@ -946,6 +970,12 @@
           TYPE_CHIPS.map(function (t) { return '<button type="button" class="mn-chip" data-type="' + t[0] + '" aria-pressed="false">' + t[1] + '</button>'; }).join('') +
         '</fieldset>' +
       '</details>' +
+      '<details class="mn-sform-order"><summary>並び順</summary>' +
+        '<p class="mn-order-note">検索結果の段の順番です。↑↓ で入れ替えると、このブラウザに記憶されます。</p>' +
+        '<ol class="mn-order-list"></ol>' +
+        '<button type="button" class="mn-order-reset">初期の順に戻す</button>' +
+      '</details>' +
+      '</div>' +
     '</form>';
   }
 
@@ -958,7 +988,31 @@
       more = form.querySelector('.mn-sform-more');
     var chips = [].slice.call(form.querySelectorAll('.mn-chip'));
     var dir = createDirPicker(form.querySelector('.mn-dirpick'), function () {});
-    var segs = [].slice.call(form.querySelectorAll('.mn-seg-btn')), mode = 'all';
+    var segs = [].slice.call(form.querySelectorAll('.mn-seg-btn[data-mode]')), mode = 'all';
+    var locs = [].slice.call(form.querySelectorAll('.mn-seg-btn[data-loc]')), loc = '';
+    function setLoc(m) {
+      loc = m === 'title' || m === 'body' ? m : '';
+      locs.forEach(function (b) { var on = b.getAttribute('data-loc') === loc; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on); });
+    }
+    locs.forEach(function (b) { b.addEventListener('click', function () { setLoc(b.getAttribute('data-loc')); }); });
+    var olist = form.querySelector('.mn-order-list'), orderListeners = [];
+    function drawOrder() {
+      var o = groupOrder();
+      olist.innerHTML = o.map(function (t, i) {
+        return '<li data-tier="' + t + '"><span class="mn-order-name">' + ORDER_NAMES[t] + '</span>' +
+          '<button type="button" class="mn-order-btn" data-dir="-1" aria-label="上へ"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+          '<button type="button" class="mn-order-btn" data-dir="1" aria-label="下へ"' + (i === o.length - 1 ? ' disabled' : '') + '>↓</button></li>';
+      }).join('');
+    }
+    function saveOrder(o) { store(ORDER_KEY, JSON.stringify(o)); drawOrder(); orderListeners.forEach(function (f) { f(); }); }
+    olist.addEventListener('click', function (ev) {
+      var b = ev.target.closest && ev.target.closest('.mn-order-btn'); if (!b) return;
+      var t = +b.closest('li').getAttribute('data-tier'), o = groupOrder(), i = o.indexOf(t), j = i + (+b.getAttribute('data-dir'));
+      if (j < 0 || j >= o.length) return;
+      o[i] = o[j]; o[j] = t; saveOrder(o);
+    });
+    form.querySelector('.mn-order-reset').addEventListener('click', function () { saveOrder([5, 4, 3, 2, 1]); });
+    drawOrder();
     function setMode(m) {
       mode = m === 'any' ? 'any' : 'all';
       segs.forEach(function (b) { var on = b.getAttribute('data-mode') === mode; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on); });
@@ -995,8 +1049,9 @@
         return {
           q: q.value, tex: tex.value, exclude: ex.value, exact: exact.checked, cs: csBox.checked, mode: mode,
           dirs: dir.get() ? [dir.get()] : [],
-          types: chips.filter(function (x) { return x.getAttribute('data-type') && x.classList.contains('is-on'); })
-            .map(function (x) { return x.getAttribute('data-type'); })
+          types: [].concat.apply([], chips.filter(function (x) { return x.getAttribute('data-type') && x.classList.contains('is-on'); })
+            .map(function (x) { return x.getAttribute('data-type').split(','); })),
+          loc: loc
         };
       },
       write: function (v) {
@@ -1004,9 +1059,11 @@
         dir.set((v.dirs && v.dirs[0]) || '');
         setMode(v.mode);
         var ts = v.types || [];
-        chips.forEach(function (x) { var t = x.getAttribute('data-type'); x.classList.toggle('is-on', t ? ts.indexOf(t) >= 0 : !ts.length); });
+        chips.forEach(function (x) { var t = x.getAttribute('data-type'); x.classList.toggle('is-on', t ? t.split(',').every(function (u) { return ts.indexOf(u) >= 0; }) : !ts.length); });
+        setLoc(v.loc);
         preview(); syncClear();
       },
+      onOrder: function (f) { orderListeners.push(f); },
       isEmpty: function (v) { return !(v.q.trim() || v.tex.trim() || v.types.length || v.dirs.length); }
     };
   }
@@ -1021,18 +1078,20 @@
     if (v.dirs.length) p.set('in', v.dirs[0]);
     if (v.mode === 'any') p.set('mode', 'any');
     if (v.cs) p.set('cs', '1');
+    if (v.loc) p.set('loc', v.loc);
     return p.toString();
   }
   function fromParams(sp) {
     return { q: sp.get('q') || '', tex: sp.get('tex') || '', exclude: sp.get('ex') || '', exact: sp.get('exact') === '1',
-      types: (sp.get('type') || '').split(',').filter(Boolean), dirs: sp.get('in') ? [sp.get('in')] : [], mode: sp.get('mode') || 'all', cs: sp.get('cs') === '1' };
+      types: (sp.get('type') || '').split(',').filter(Boolean), dirs: sp.get('in') ? [sp.get('in')] : [], mode: sp.get('mode') || 'all', cs: sp.get('cs') === '1', loc: sp.get('loc') || '' };
   }
 
   var EMPTY_HELP = '<div class="mn-search-help">' +
     '<p><b>キーワード</b>に定理名や用語を入れると、定義・定理・本文と<a href="' + (document.body.getAttribute('data-root') || '') + 'glossary.html">用語索引</a>から探します。英語名（例：Tychonoff）でも見つかります。' +
     'スペースで区切って複数の語を入れられます（「すべての語を含む」か「いずれかの語を含む」を選べます）。</p>' +
     '<p><b>数式を含む</b>には LaTeX で数式を書きます（例：<code>\\pi_1(S^1)</code>）。空白や括弧の付け方、<code>\\le</code> と <code>\\leq</code> などの違いは気にしなくて大丈夫です。</p>' +
-    '<p><b>種類</b>のボタンで「定理だけ」「定義だけ」のように絞り込めます（複数選択可）。</p>' +
+    '<p><b>種類</b>のボタンで「定理・命題・補題・系だけ」「定義だけ」「系列・分野だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、本文だけの一致に絞れます。</p>' +
+    '<p>結果は「ぴったりの定義」「名前を含む定理など」「分類・ページ」「語を含む定義」「本文など」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
     '<p>日本語は<b>ふりがな</b>でも探せます（例：「べきしゅうごう」で「冪集合」）。いま開いているページの結果は一番上に出ます。</p>' +
     '<p>条件を入力・選択してから <kbd>Enter</kbd> か「検索」ボタンを押すと検索します（漢字変換の確定の <kbd>Enter</kbd> では検索しません）。</p>' +
     '<p class="mn-search-kbd"><kbd>/</kbd> でどこからでも検索、<kbd>↑</kbd><kbd>↓</kbd> で選んで <kbd>Shift</kbd>+<kbd>Enter</kbd> で開きます。</p></div>';
@@ -1106,6 +1165,19 @@
     { t: 1, h: function () { return '本文などでの一致'; }, n: 10 }
   ];
   var GROUP_STEP = 20;
+  // 段の並び順（2026-10-23 ユーザー指示：どの段を先に出すか選べるようにし、ブラウザに記憶する）
+  var ORDER_KEY = 'mn-search-order', ORDER_NAMES = { 5: 'ぴったりの定義', 4: '名前を含む定理・補題など', 3: '名前を含む分類・ページ', 2: '語を含む定義', 1: '本文など' };
+  function groupOrder() {
+    var o = null;
+    try { o = JSON.parse(store(ORDER_KEY) || 'null'); } catch (e) {}
+    var def = [5, 4, 3, 2, 1];
+    if (!Array.isArray(o) || o.length !== def.length || def.some(function (t) { return o.indexOf(t) < 0; })) return def;
+    return o;
+  }
+  function groupsInOrder() {
+    var byT = {}; GROUPS.forEach(function (G) { byT[G.t] = G; });
+    return groupOrder().map(function (t) { return byT[t]; });
+  }
   function groupMoreHtml(box, t) {
     var g = box._groups[t], rest = g.items.length - g.shown;
     return rest > 0 ? '<button type="button" class="mn-search-more mn-search-groupmore" data-tier="' + t + '">この段をさらに表示（残り ' + rest + ' 件）</button>' : '';
@@ -1114,7 +1186,7 @@
     var q = (out.pq.terms || []).filter(function (t) { return t.kind === 'text'; }).map(function (t) { return t.s; }).join(' ');
     box._groups = {};
     var html = '<div class="mn-search-count">' + out.total + ' 件</div>';
-    GROUPS.forEach(function (G) {
+    groupsInOrder().forEach(function (G) {
       var items = out.results.filter(function (x) { return x.tier === G.t; });
       if (!items.length) return;
       var g = box._groups[G.t] = { items: items, shown: Math.min(G.n, items.length) };
@@ -1201,6 +1273,7 @@
     }
     pageQ = f.q;
     bindMore(res);
+    f.onOrder(function () { if (res._out) showResults(res, res._out); });
     f.write(fromParams(new URLSearchParams(location.search)));
     loadHead();   // 検索ページを開いたら索引を読み込んでおく
     function run() {
