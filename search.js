@@ -341,11 +341,11 @@
       pq.neg.push({ kind: /[\\^_{}]/.test(w) ? 'tex' : 'text', s: w, txt: fold(w), txtC: fold(w, true), tex: norm(w) });
     });
     if (query.types && query.types.length) {
-      var ts = query.types.slice(), sel = { def: ts.indexOf('termdef') >= 0, use: ts.indexOf('termuse') >= 0 };
-      ts = ts.filter(function (t) { return t !== 'termdef' && t !== 'termuse'; });
-      // 「語の定義」「語を使う定義」はどちらも定義の環境（定義・構成・公理）を対象にし、段を決めたあとで振り分ける
-      if (sel.def || sel.use) { ts = ts.concat(['definition', 'construction', 'axiom']); pq.defSel = sel; }
-      pq.types = (pq.types || []).concat(ts);
+      // 種類のチップは 6 つの段（GROUP_CODES）。それ以外（URL の type=theorem など、古い書き方）は環境の種類として絞る
+      var gs = [], ts = [];
+      query.types.forEach(function (t) { if (GROUP_CODES[t]) gs.push(GROUP_CODES[t]); else ts.push(t); });
+      if (gs.length) pq.groups = gs;
+      if (ts.length) pq.types = (pq.types || []).concat(ts);
     }
     if (query.dirs && query.dirs.length) pq.dirs = expandDirs(query.dirs);
     if (query.mode === 'any') pq.mode = 'any';
@@ -408,13 +408,13 @@
       }
       return 0;
     }
-    // 並べ方（2026-10-23 ユーザー指示）：
-    //   5 その語をぴったり定義している箇所（定義語の索引 IDX.terms で、検索語そのものを定義しているラベル）
-    //   4 定理・命題・補題・系などで、名前（題）が検索語を含むもの（名前が完全に一致・短いものが先）
-    //   3 分類（大分野・分野・系列）とページで、名前（分類は英語名・別名も）が検索語を含むもの
-    //   2 検索語を含む語を定義している箇所（定義語の索引で部分一致）
-    //   1 それ以外（本文などだけに出てくるもの）
-    // 定義の題は定義する語そのものでないことが多いので、定義の判定には題ではなく定義語の索引を使う。
+    // 6 つの段（2026-10-23 ユーザー指示：種類・並び順・段を「語がどう現れるか」の一つの軸にそろえた）
+    //   6 語の定義（その語、またはその語を含む語を定義している箇所。定義語の索引で判定。完全一致が先）
+    //   5 語を含む定理名（定理・命題・補題・系・事実・反例の名前）
+    //   4 語を含む分類・節（大分野・分野・系列・記事・節の名前。定型の節は除く）
+    //   3 語を使う定義（定義・構成・公理で、その語を定義していないもの）
+    //   2 語を含む主張（定理などの主張文、証明のステップの【主張：…】）
+    //   1 本文（証明・例・補足・問題など、それ以外）
     var wordCands = words.map(function (t) { return [t.txt].concat((t.alts || []).map(function (a) { return fold(a); })); });
     function hasAll(strs) {
       return wordCands.length > 0 && wordCands.every(function (c) { return c.some(function (w) { var wl = loose(w); return strs.some(function (x) { return x.indexOf(w) >= 0 || (wl && loose(x).indexOf(wl) >= 0); }); }); });
@@ -423,7 +423,7 @@
       return wordCands.some(function (c) { return c.some(function (w) { var wl = loose(w); return strs.some(function (x) { return x.indexOf(w) >= 0 || (wl && loose(x).indexOf(wl) >= 0); }); }); });
     }
     var exactCands = [whole].concat(wholeAlts);
-    var NAMED = { theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, axiom: 1, counterexample: 1, construction: 1 };
+    var NAMED = { theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, counterexample: 1 };
     // 定型の節（「記法と定義の確認」「問題」など、多くのページにある同じ名前の節）は見出しとして数えない
     var genericSec = genericSections(rows);
     function closeness(names) {
@@ -438,36 +438,38 @@
       x.st = STMT[t] ? 1 : 0;   // 主張（定義・定理など）での一致。本文などの段で、証明・補足だけの一致より先に出す
       if (fuzzy || !wordCands.length) { x.tier = 0; return; }
       // 5 語の定義：その語（完全一致）か、その語を含む語（部分一致）を定義している箇所。完全一致が先。その語を使うだけの定義はここに入らない
-      if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0 || dt.some(function (d) { return loose(d) === loose(w) && loose(w); }); })) { x.tier = 5; x.ex = 1; return; }
+      if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0 || dt.some(function (d) { return loose(d) === loose(w) && loose(w); }); })) { x.tier = 6; x.ex = 1; return; }
       // 部分一致は、一つの定義語の中にすべての語がそろっているときだけ（語が別々の定義語に散っているものは数えない。語の順番は問わない）
-      if (dt.length && dt.some(function (d) { return hasAll([d]); })) { x.tier = 5; x.cl = closeness(dt.filter(function (d) { return hasAll([d]); })); return; }
+      if (dt.length && dt.some(function (d) { return hasAll([d]); })) { x.tier = 6; x.cl = closeness(dt.filter(function (d) { return hasAll([d]); })); return; }
       // 「いずれかを含む」では語ごとに定義を引く（「群 環」なら群の定義と環の定義）
-      if (anyMode && dt.length && wordCands.some(function (c) { return c.some(function (w) { return dt.some(function (d) { return d === w || (loose(w) && loose(d) === loose(w)); }); }); })) { x.tier = 5; x.ex = 1; return; }
-      if (anyMode && dt.length && dt.some(function (d) { return hasAny([d]); })) { x.tier = 5; x.cl = closeness(dt.filter(function (d) { return hasAny([d]); })); return; }
+      if (anyMode && dt.length && wordCands.some(function (c) { return c.some(function (w) { return dt.some(function (d) { return d === w || (loose(w) && loose(d) === loose(w)); }); }); })) { x.tier = 6; x.ex = 1; return; }
+      if (anyMode && dt.length && dt.some(function (d) { return hasAny([d]); })) { x.tier = 6; x.cl = closeness(dt.filter(function (d) { return hasAny([d]); })); return; }
+      if (DEF_TYPES[t]) { x.tier = 3; return; }   // その語を定義していない定義は「語を使う定義」
       if (NAMED[t] && hasAll([r.ntt || ''])) {
-        x.tier = 4; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
+        x.tier = 5; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
       }
       if (t === 'dir' || t === 'page' || (t === 'section' && !genericSec[r.ntt])) {
         var names = t === 'dir' ? r.nal : t === 'page' ? [r.pt || ''] : [r.ntt || ''];
         x.gr = t === 'dir' ? (r.e.depth || 0) : t === 'page' ? 3 : 4;   // 粗い順（大分野・分野・系列 → 記事 → 節）
         if (hasAll(names)) {
-          x.tier = 3; x.ex = exactCands.some(function (w) { return names.some(function (n) { return n === w || (loose(w) && loose(n) === loose(w)); }); }) ? 1 : 0;
+          x.tier = 4; x.ex = exactCands.some(function (w) { return names.some(function (n) { return n === w || (loose(w) && loose(n) === loose(w)); }); }) ? 1 : 0;
           x.th = hasAll([names[0]]) ? 1 : 0;   // 名前そのもの（別名・英語名でなく）が含む
           x.cl = closeness(x.th ? [names[0]] : names);
           return;
         }
         x.tier = 1; return;
       }
-      // 2 語を含む主張：定義・定理などの本文（主張）や、証明のステップの【主張：…】に語が出てくるもの
-      if (STMT[t] && hasAll([r.nb || '', r.ntt || ''])) { x.tier = 2; return; }
+      // 2 語を含む主張：定理などの主張文や、証明のステップの【主張：…】に語が出てくるもの
+      if (NAMED[t] && hasAll([r.nb || '', r.ntt || ''])) { x.tier = 2; return; }
       if (t === 'proof' && hasAll(stepClaims(r))) { x.tier = 2; return; }
       x.tier = 1;
     });
-    if (pq.defSel && !(pq.defSel.def && pq.defSel.use) && wordCands.length && !fuzzy) {
-      // 語の定義だけ／語を使う定義だけ（定義の環境で、語の定義の段（5）に入ったかどうか）。他の種類の行はそのまま
+    // 種類（6 つの段）で絞る。検索語がないときは環境の種類から段を決める
+    if (pq.groups && pq.groups.length) {
       res = res.filter(function (x) {
-        if (!DEF_TYPES[x.r.e.t]) return true;
-        return x.tier === 5 ? pq.defSel.def : pq.defSel.use;
+        var g = x.tier;
+        if (!g) { var t = x.r.e.t; g = DEF_TYPES[t] ? 3 : NAMED[t] ? 2 : (t === 'dir' || t === 'page' || t === 'section') ? 4 : 1; if (DEF_TYPES[t] && pq.groups.indexOf(6) >= 0) return true; }
+        return pq.groups.indexOf(g) >= 0;
       });
     }
     res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.th - a.th) || (b.cl - a.cl) || (a.gr - b.gr) || (b.st - a.st) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
@@ -612,11 +614,9 @@
   // 種類の絞り込み（2026-10-23 ユーザー指示：定理・命題・補題・系はまとめる。分類（大分野・分野・系列）も選べる）。値はカンマ区切りで複数の種類を表す
   // 並びは結果の段に合わせる（2026-10-23 ユーザー指示）。定義は「語の定義」（検索語を定義しているもの）と「語を使う定義」（検索語を使うだけのもの）に分ける
   var TYPE_CHIPS = [
-    ['termdef', '語の定義'], ['termuse', '語を使う定義'], ['theorem,proposition,lemma,corollary', '定理・命題・補題・系'],
-    ['bigfield,field,series,page,section', '見出し（分類・記事・節）'],
-    ['proof', '証明'], ['example', '例'], ['supplement,remark,intuition', '補足・注意'], ['counterexample', '反例'], ['problem', '問題'],
-    ['equation', '式']
+    ['def', '語の定義'], ['thm', '語を含む定理名'], ['head', '語を含む分類・節'], ['use', '語を使う定義'], ['stmt', '語を含む主張'], ['body', '本文']
   ];
+  var GROUP_CODES = { def: 6, thm: 5, head: 4, use: 3, stmt: 2, body: 1, termdef: 6, termuse: 3 };   // termdef・termuse は前の書き方
   var DIR_TYPES = ['bigfield', 'field', 'series'];   // 分類の行の種類（深さ 0・1・2）
   function rowType(r) { return r.e.t === 'dir' ? (DIR_TYPES[r.e.depth] || 'series') : r.e.t; }
   function root() { return document.body.getAttribute('data-root') || ''; }
@@ -1006,11 +1006,6 @@
           '<div class="mn-field"><span class="mn-field-label">複数の語を入れたとき</span><div class="mn-seg" role="radiogroup">' +
             '<button type="button" class="mn-seg-btn is-on" data-mode="all" role="radio" aria-checked="true">すべて含む</button>' +
             '<button type="button" class="mn-seg-btn" data-mode="any" role="radio" aria-checked="false">いずれかを含む</button></div></div>' +
-          '<div class="mn-field"><span class="mn-field-label">一致する場所</span><div class="mn-seg mn-seg-loc" role="radiogroup">' +
-            '<button type="button" class="mn-seg-btn is-on" data-loc="" role="radio" aria-checked="true">すべて</button>' +
-            '<button type="button" class="mn-seg-btn" data-loc="title" role="radio" aria-checked="false">題・名前</button>' +
-            '<button type="button" class="mn-seg-btn" data-loc="stmt" role="radio" aria-checked="false">主張</button>' +
-            '<button type="button" class="mn-seg-btn" data-loc="body" role="radio" aria-checked="false">本文</button></div></div>' +
           '<div class="mn-checks"><label class="mn-check"><input type="checkbox" name="exact"> 語句を完全一致で探す</label>' +
           '<label class="mn-check"><input type="checkbox" name="cs"> 英字の大文字・小文字を区別する</label></div>' +
         '</div>' +
@@ -1065,7 +1060,7 @@
       if (j < 0 || j >= o.length) return;
       o[i] = o[j]; o[j] = t; saveOrder(o);
     });
-    form.querySelector('.mn-order-reset').addEventListener('click', function () { saveOrder([5, 4, 3, 2, 1]); });
+    form.querySelector('.mn-order-reset').addEventListener('click', function () { saveOrder([6, 5, 4, 3, 2, 1]); });
     // 並び順は小窓（ポップオーバー）で指定する（2026-10-23 ユーザー指示：条件の欄を開いても位置が動かないように）
     var obtn = form.querySelector('.mn-order-open'), opop = form.querySelector('.mn-order-pop');
     function setPop(open) { opop.hidden = !open; obtn.setAttribute('aria-expanded', open); obtn.classList.toggle('is-on', open); }
@@ -1146,15 +1141,15 @@
   }
   function fromParams(sp) {
     return { q: sp.get('q') || '', tex: sp.get('tex') || '', exclude: sp.get('ex') || '', exact: sp.get('exact') === '1',
-      types: (sp.get('type') || '').split(',').filter(Boolean), dirs: sp.get('in') ? [sp.get('in')] : [], mode: sp.get('mode') || 'all', cs: sp.get('cs') === '1', loc: sp.get('loc') || '' };
+      types: (sp.get('type') || '').split(',').filter(Boolean).map(function (t) { return t === 'termdef' ? 'def' : t === 'termuse' ? 'use' : t; }), dirs: sp.get('in') ? [sp.get('in')] : [], mode: sp.get('mode') || 'all', cs: sp.get('cs') === '1', loc: sp.get('loc') || '' };
   }
 
   var EMPTY_HELP = '<div class="mn-search-help">' +
     '<p><b>キーワード</b>に定理名や用語を入れると、定義・定理・本文と<a href="' + (document.body.getAttribute('data-root') || '') + 'glossary.html">用語索引</a>から探します。英語名（例：Tychonoff）でも見つかります。' +
     'スペースで区切って複数の語を入れられます（「すべての語を含む」か「いずれかの語を含む」を選べます）。</p>' +
     '<p><b>数式を含む</b>には LaTeX で数式を書きます（例：<code>\\pi_1(S^1)</code>）。空白や括弧の付け方、<code>\\le</code> と <code>\\leq</code> などの違いは気にしなくて大丈夫です。</p>' +
-    '<p><b>種類</b>のボタンで「語の定義だけ」（検索語を定義しているもの）「語を使う定義だけ」「定理・命題・補題・系だけ」「見出し（分類・記事・節）だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、定義・定理の主張だけ、本文だけの一致に絞れます。</p>' +
-    '<p>結果は「語の定義」「語を含む定理名・補題名など」「語を含む見出し」「語を含む主張」「それ以外」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
+    '<p>結果は「語の定義」「語を含む定理名」「語を含む分類・節」「語を使う定義」「語を含む主張」「本文」の 6 つの段に分かれます。<b>種類</b>のボタンで段を選んで絞り込めます（複数選択可）。</p>' +
+    '<p><b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
     '<p>日本語は<b>ふりがな</b>でも探せます（例：「べきしゅうごう」で「冪集合」）。いま開いているページの結果は一番上に出ます。</p>' +
     '<p>条件を入力・選択してから <kbd>Enter</kbd> か「検索」ボタンを押すと検索します（漢字変換の確定の <kbd>Enter</kbd> では検索しません）。</p>' +
     '<p class="mn-search-kbd"><kbd>/</kbd> でどこからでも検索、<kbd>↑</kbd><kbd>↓</kbd> で選んで <kbd>Shift</kbd>+<kbd>Enter</kbd> で開きます。</p></div>';
@@ -1221,19 +1216,20 @@
   // 段ごとにまとめて表示する（2026-10-23 ユーザー指示：部分一致の定義などが、前の段の多い結果に埋もれないように）。
   // 各段は最初の数件だけを出し、「この段をさらに表示」で足す。あいまい検索のときは段に分けない。
   var GROUPS = [
-    { t: 5, h: function (q) { return '「' + q + '」の定義（完全一致 → 部分一致）'; }, n: 5 },
-    { t: 4, h: function (q) { return '「' + q + '」を含む定理名・補題名など'; }, n: 5 },
-    { t: 3, h: function (q) { return '「' + q + '」を含む見出し（分類・記事・節）'; }, n: 5 },
-    { t: 2, h: function (q) { return '「' + q + '」を含む主張（定義・定理の本文、証明のステップ）'; }, n: 5 },
-    { t: 1, h: function () { return 'それ以外での一致'; }, n: 5 }
+    { t: 6, h: function (q) { return '「' + q + '」の定義（完全一致 → 部分一致）'; }, n: 5 },
+    { t: 5, h: function (q) { return '「' + q + '」を含む定理名'; }, n: 5 },
+    { t: 4, h: function (q) { return '「' + q + '」を含む分類・節（分類・記事・節の名前）'; }, n: 5 },
+    { t: 3, h: function (q) { return '「' + q + '」を使う定義'; }, n: 5 },
+    { t: 2, h: function (q) { return '「' + q + '」を含む主張（定理の主張・証明のステップ）'; }, n: 5 },
+    { t: 1, h: function () { return '本文での一致'; }, n: 5 }
   ];
   var GROUP_STEP = 20;
   // 段の並び順（2026-10-23 ユーザー指示：どの段を先に出すか選べるようにし、ブラウザに記憶する）
-  var ORDER_KEY = 'mn-search-order', ORDER_NAMES = { 5: '語の定義', 4: '語を含む定理名・補題名など', 3: '語を含む見出し（分類・記事・節）', 2: '語を含む主張', 1: 'それ以外' };
+  var ORDER_KEY = 'mn-search-order', ORDER_NAMES = { 6: '語の定義', 5: '語を含む定理名', 4: '語を含む分類・節', 3: '語を使う定義', 2: '語を含む主張', 1: '本文' };
   function groupOrder() {
     var o = null;
     try { o = JSON.parse(store(ORDER_KEY) || 'null'); } catch (e) {}
-    var def = [5, 4, 3, 2, 1];
+    var def = [6, 5, 4, 3, 2, 1];
     if (!Array.isArray(o) || o.length !== def.length || def.some(function (t) { return o.indexOf(t) < 0; })) return def;
     return o;
   }
