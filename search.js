@@ -280,10 +280,21 @@
       return cands.some(function (w) {
         var wl = loose(w);
         if (pq.loc === 'body') return r.nb.indexOf(w) >= 0;
+        if (pq.loc === 'stmt') return !!STMT[r.e.t] && (r.nb.indexOf(w) >= 0 || (r.nt || '').indexOf(w) >= 0 || (wl && loose(r.nb + r.nt).indexOf(wl) >= 0));
         var names = [r.nt, r.pt || ''].concat(r.ni || [], r.nal || []);
         return names.some(function (x) { return x && (x.indexOf(w) >= 0 || (wl && loose(x).indexOf(wl) >= 0)); });
       });
     });
+  }
+  var STMT = { definition: 1, theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, axiom: 1, counterexample: 1, construction: 1 };
+  var genericCache = null, genericN = -1;
+  function genericSections(rows) {
+    if (genericCache && genericN === rows.length) return genericCache;
+    var cnt = {};
+    rows.forEach(function (r) { if (r.e.t === 'section' && r.ntt) cnt[r.ntt] = (cnt[r.ntt] || 0) + 1; });
+    genericCache = {}; genericN = rows.length;
+    Object.keys(cnt).forEach(function (k) { if (cnt[k] >= 5) genericCache[k] = 1; });
+    return genericCache;
   }
   function filterOk(r, pq) {
     if (pq.types && pq.types.indexOf(rowType(r)) < 0) return false;
@@ -324,7 +335,7 @@
     if (query.types && query.types.length) pq.types = (pq.types || []).concat(query.types);
     if (query.dirs && query.dirs.length) pq.dirs = expandDirs(query.dirs);
     if (query.mode === 'any') pq.mode = 'any';
-    if (query.loc === 'title' || query.loc === 'body') pq.loc = query.loc;
+    if (query.loc === 'title' || query.loc === 'body' || query.loc === 'stmt') pq.loc = query.loc;
     if (query.cs) {
       pq.cs = true;
       pq.terms.concat(pq.neg).forEach(function (t) { t.cs = true; });
@@ -396,6 +407,8 @@
     }
     var exactCands = [whole].concat(wholeAlts);
     var NAMED = { theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, axiom: 1, counterexample: 1, construction: 1 };
+    // 定型の節（「記法と定義の確認」「問題」など、多くのページにある同じ名前の節）は見出しとして数えない
+    var genericSec = genericSections(rows);
     function closeness(names) {
       var nm = names.filter(function (n) { return hasAll([n]); });
       if (!nm.length || !whole) return 0;
@@ -404,14 +417,16 @@
     res.forEach(function (x) {
       var r = x.r, t = r.e.t, dt = definedTerms(r.e.l);
       x.here = !!CUR_PAGE && r.pg.path === CUR_PAGE;
-      x.ex = 0; x.th = 0; x.cl = 0;
+      x.ex = 0; x.th = 0; x.cl = 0; x.gr = 0;
+      x.st = STMT[t] ? 1 : 0;   // 主張（定義・定理など）での一致。本文などの段で、証明・補足だけの一致より先に出す
       if (fuzzy || !wordCands.length) { x.tier = 0; return; }
       if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0 || dt.some(function (d) { return loose(d) === loose(w) && loose(w); }); })) { x.tier = 5; return; }
       if (NAMED[t] && hasAll([r.ntt || ''])) {
         x.tier = 4; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
       }
-      if (t === 'dir' || t === 'page') {
-        var names = t === 'dir' ? r.nal : [r.pt || ''];
+      if (t === 'dir' || t === 'page' || (t === 'section' && !genericSec[r.ntt])) {
+        var names = t === 'dir' ? r.nal : t === 'page' ? [r.pt || ''] : [r.ntt || ''];
+        x.gr = t === 'dir' ? (r.e.depth || 0) : t === 'page' ? 3 : 4;   // 粗い順（大分野・分野・系列 → 記事 → 節）
         if (hasAll(names)) {
           x.tier = 3; x.ex = exactCands.some(function (w) { return names.some(function (n) { return n === w || (loose(w) && loose(n) === loose(w)); }); }) ? 1 : 0;
           x.th = hasAll([names[0]]) ? 1 : 0;   // 名前そのもの（別名・英語名でなく）が含む
@@ -423,7 +438,7 @@
       if (dt.length && hasAll(dt)) { x.tier = 2; x.cl = closeness(dt); return; }
       x.tier = 1;
     });
-    res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.th - a.th) || (b.cl - a.cl) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
+    res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.th - a.th) || (b.cl - a.cl) || (a.gr - b.gr) || (b.st - a.st) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
     return { results: res.slice(0, opts.limit || 60), total: res.length, pq: pq, fuzzy: fuzzy };
   }
 
@@ -566,7 +581,7 @@
   var TYPE_CHIPS = [
     ['definition', '定義'], ['theorem,proposition,lemma,corollary', '定理・命題・補題・系'],
     ['proof', '証明'], ['example', '例'], ['supplement,remark,intuition', '補足・注意'], ['counterexample', '反例'], ['problem', '問題'],
-    ['equation', '式'], ['page', 'ページ'], ['bigfield,field,series', '分類（大分野・分野・系列）']
+    ['equation', '式'], ['bigfield,field,series,page,section', '見出し（分類・記事・節）']
   ];
   var DIR_TYPES = ['bigfield', 'field', 'series'];   // 分類の行の種類（深さ 0・1・2）
   function rowType(r) { return r.e.t === 'dir' ? (DIR_TYPES[r.e.depth] || 'series') : r.e.t; }
@@ -960,6 +975,7 @@
           '<div class="mn-field"><span class="mn-field-label">一致する場所</span><div class="mn-seg mn-seg-loc" role="radiogroup">' +
             '<button type="button" class="mn-seg-btn is-on" data-loc="" role="radio" aria-checked="true">すべて</button>' +
             '<button type="button" class="mn-seg-btn" data-loc="title" role="radio" aria-checked="false">題・名前</button>' +
+            '<button type="button" class="mn-seg-btn" data-loc="stmt" role="radio" aria-checked="false">主張</button>' +
             '<button type="button" class="mn-seg-btn" data-loc="body" role="radio" aria-checked="false">本文</button></div></div>' +
           '<div class="mn-checks"><label class="mn-check"><input type="checkbox" name="exact"> 語句を完全一致で探す</label>' +
           '<label class="mn-check"><input type="checkbox" name="cs"> 英字の大文字・小文字を区別する</label></div>' +
@@ -995,7 +1011,7 @@
     var segs = [].slice.call(form.querySelectorAll('.mn-seg-btn[data-mode]')), mode = 'all';
     var locs = [].slice.call(form.querySelectorAll('.mn-seg-btn[data-loc]')), loc = '';
     function setLoc(m) {
-      loc = m === 'title' || m === 'body' ? m : '';
+      loc = m === 'title' || m === 'body' || m === 'stmt' ? m : '';
       locs.forEach(function (b) { var on = b.getAttribute('data-loc') === loc; b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on); });
     }
     locs.forEach(function (b) { b.addEventListener('click', function () { setLoc(b.getAttribute('data-loc')); }); });
@@ -1103,8 +1119,8 @@
     '<p><b>キーワード</b>に定理名や用語を入れると、定義・定理・本文と<a href="' + (document.body.getAttribute('data-root') || '') + 'glossary.html">用語索引</a>から探します。英語名（例：Tychonoff）でも見つかります。' +
     'スペースで区切って複数の語を入れられます（「すべての語を含む」か「いずれかの語を含む」を選べます）。</p>' +
     '<p><b>数式を含む</b>には LaTeX で数式を書きます（例：<code>\\pi_1(S^1)</code>）。空白や括弧の付け方、<code>\\le</code> と <code>\\leq</code> などの違いは気にしなくて大丈夫です。</p>' +
-    '<p><b>種類</b>のボタンで「定理・命題・補題・系だけ」「定義だけ」「分類（大分野・分野・系列）だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、本文だけの一致に絞れます。</p>' +
-    '<p>結果は「ぴったりの定義」「名前を含む定理など」「分類・ページ」「語を含む定義」「本文など」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
+    '<p><b>種類</b>のボタンで「定理・命題・補題・系だけ」「定義だけ」「見出し（分類・記事・節）だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、定義・定理の主張だけ、本文だけの一致に絞れます。</p>' +
+    '<p>結果は「ぴったりの定義」「名前を含む定理など」「見出し」「語を含む定義」「本文など」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
     '<p>日本語は<b>ふりがな</b>でも探せます（例：「べきしゅうごう」で「冪集合」）。いま開いているページの結果は一番上に出ます。</p>' +
     '<p>条件を入力・選択してから <kbd>Enter</kbd> か「検索」ボタンを押すと検索します（漢字変換の確定の <kbd>Enter</kbd> では検索しません）。</p>' +
     '<p class="mn-search-kbd"><kbd>/</kbd> でどこからでも検索、<kbd>↑</kbd><kbd>↓</kbd> で選んで <kbd>Shift</kbd>+<kbd>Enter</kbd> で開きます。</p></div>';
@@ -1171,15 +1187,15 @@
   // 段ごとにまとめて表示する（2026-10-23 ユーザー指示：部分一致の定義などが、前の段の多い結果に埋もれないように）。
   // 各段は最初の数件だけを出し、「この段をさらに表示」で足す。あいまい検索のときは段に分けない。
   var GROUPS = [
-    { t: 5, h: function (q) { return '「' + q + '」の定義'; }, n: 30 },
-    { t: 4, h: function (q) { return '名前に「' + q + '」を含む定理・命題・補題など'; }, n: 6 },
-    { t: 3, h: function (q) { return '名前に「' + q + '」を含む分類・ページ'; }, n: 6 },
-    { t: 2, h: function (q) { return '「' + q + '」を含む語の定義'; }, n: 8 },
-    { t: 1, h: function () { return '本文などでの一致'; }, n: 10 }
+    { t: 5, h: function (q) { return '「' + q + '」の定義'; }, n: 5 },
+    { t: 4, h: function (q) { return '名前に「' + q + '」を含む定理・命題・補題など'; }, n: 5 },
+    { t: 3, h: function (q) { return '名前に「' + q + '」を含む見出し（分類・記事・節）'; }, n: 5 },
+    { t: 2, h: function (q) { return '「' + q + '」を含む語の定義'; }, n: 5 },
+    { t: 1, h: function () { return '本文などでの一致（主張での一致が先）'; }, n: 5 }
   ];
   var GROUP_STEP = 20;
   // 段の並び順（2026-10-23 ユーザー指示：どの段を先に出すか選べるようにし、ブラウザに記憶する）
-  var ORDER_KEY = 'mn-search-order', ORDER_NAMES = { 5: 'ぴったりの定義', 4: '名前を含む定理・補題など', 3: '名前を含む分類・ページ', 2: '語を含む定義', 1: '本文など' };
+  var ORDER_KEY = 'mn-search-order', ORDER_NAMES = { 5: 'ぴったりの定義', 4: '名前を含む定理・補題など', 3: '名前を含む見出し', 2: '語を含む定義', 1: '本文など' };
   function groupOrder() {
     var o = null;
     try { o = JSON.parse(store(ORDER_KEY) || 'null'); } catch (e) {}
