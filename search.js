@@ -1014,6 +1014,8 @@
           '<button type="button" class="mn-chip is-on" data-type="">すべて</button>' +
           TYPE_CHIPS.map(function (t) { return '<button type="button" class="mn-chip" data-type="' + t[0] + '" aria-pressed="false">' + t[1] + '</button>'; }).join('') +
         '</fieldset>' +
+        '<p class="mn-chips-note">この語を使う結果を探したいときは、「語を使う定義」と「語を含む主張」を一緒に選ぶと便利です。' +
+        '語の定義は、定義のカードに定義する語として登録された語（太字の語・索引語）で判定します。登録されていない語の定義は「語を使う定義」に入っていることがあります。</p>' +
       '</details>' +
       '<div class="mn-order-wrap">' +
         '<button type="button" class="mn-order-open" aria-haspopup="dialog" aria-expanded="false">並び順</button>' +
@@ -1245,6 +1247,9 @@
     var q = (out.pq.terms || []).filter(function (t) { return t.kind === 'text'; }).map(function (t) { return t.s; }).join(' ');
     box._groups = {};
     var html = '<div class="mn-search-count">' + out.total + ' 件</div>';
+    // 語の定義が 1 件もなく、語を使う定義があるときは、定義が「語を使う定義」に入っている可能性を小さく知らせる
+    if (q && !out.results.some(function (x) { return x.tier === 6; }) && out.results.some(function (x) { return x.tier === 3; }))
+      html += '<p class="mn-search-note">「' + Core.escapeHtml(q) + '」を定義する語として登録された定義は見つかりませんでした。定義のカードに定義する語として登録されていない場合は、「語を使う定義」の段に入っていることがあります。</p>';
     groupsInOrder().forEach(function (G) {
       var items = out.results.filter(function (x) { return x.tier === G.t; });
       if (!items.length) return;
