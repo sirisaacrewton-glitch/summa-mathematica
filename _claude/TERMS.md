@@ -589,3 +589,5 @@
 | Cauchy–Riemann equations / conformal / Wirtinger derivative | コーシー–リーマンの方程式 / 等角 / ヴィルティンガー微分 | コーシー・リーマンの方程式（杉浦） | 人名の区切りはサイトの「–」に統一。cx:page-power-series |
 | principal value / principal argument / branch of the logarithm | 主値 / 偏角の主値 / 対数の分枝 | | 杉浦 主値 11・偏角 29。「分枝」は用例が少ない（杉浦 I に 1）。cx:page-power-series |
 | meromorphic / pole / essential singularity / removable singularity / residue / winding number / Laurent expansion | 有理型 / 極 / 真性特異点 / 除去可能な特異点 / 留数 / 回転数 / ローラン展開 | | 杉浦 II（有理型 36、真性特異点 24、除去可能 21、回転数 32、ローラン 22）。CX-05 以降で使う |
+| regular curve / reparametrization / arc length parametrization / Frenet frame / distinguished Frenet frame / Frenet–Serret formulas | 正則曲線 / パラメータ変換（パラメータの取り替え） / 弧長パラメータ / フレネ標構 / 標準フレネ標構 / フレネ–セレの公式 | 径数変換、フレネ・セレの公式、フレネの公式 | 標準的。「標準フレネ標構」（distinguished）と「フレネ曲線」（c',…,c^{(n-1)} が一次独立）は本サイトでの呼び名。surf:page-curves-frenet |
+| curvature / torsion / unit tangent / principal normal / binormal / osculating plane / normal plane / rectifying plane / circular helix / signed curvature | 曲率 / 捩率 / 単位接ベクトル / 主法線ベクトル / 従法線ベクトル / 接触平面 / 法平面 / 展直平面 / 常らせん / 符号付き曲率 | 捩れ率、つるまき線 | 捩率は nomizu で用例 46。surf:page-curves-frenet |
