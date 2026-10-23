@@ -419,6 +419,9 @@
     function hasAll(strs) {
       return wordCands.length > 0 && wordCands.every(function (c) { return c.some(function (w) { var wl = loose(w); return strs.some(function (x) { return x.indexOf(w) >= 0 || (wl && loose(x).indexOf(wl) >= 0); }); }); });
     }
+    function hasAny(strs) {
+      return wordCands.some(function (c) { return c.some(function (w) { var wl = loose(w); return strs.some(function (x) { return x.indexOf(w) >= 0 || (wl && loose(x).indexOf(wl) >= 0); }); }); });
+    }
     var exactCands = [whole].concat(wholeAlts);
     var NAMED = { theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, axiom: 1, counterexample: 1, construction: 1 };
     // 定型の節（「記法と定義の確認」「問題」など、多くのページにある同じ名前の節）は見出しとして数えない
@@ -436,7 +439,11 @@
       if (fuzzy || !wordCands.length) { x.tier = 0; return; }
       // 5 語の定義：その語（完全一致）か、その語を含む語（部分一致）を定義している箇所。完全一致が先。その語を使うだけの定義はここに入らない
       if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0 || dt.some(function (d) { return loose(d) === loose(w) && loose(w); }); })) { x.tier = 5; x.ex = 1; return; }
-      if (dt.length && hasAll(dt)) { x.tier = 5; x.cl = closeness(dt); return; }
+      // 部分一致は、一つの定義語の中にすべての語がそろっているときだけ（語が別々の定義語に散っているものは数えない。語の順番は問わない）
+      if (dt.length && dt.some(function (d) { return hasAll([d]); })) { x.tier = 5; x.cl = closeness(dt.filter(function (d) { return hasAll([d]); })); return; }
+      // 「いずれかを含む」では語ごとに定義を引く（「群 環」なら群の定義と環の定義）
+      if (anyMode && dt.length && wordCands.some(function (c) { return c.some(function (w) { return dt.some(function (d) { return d === w || (loose(w) && loose(d) === loose(w)); }); }); })) { x.tier = 5; x.ex = 1; return; }
+      if (anyMode && dt.length && dt.some(function (d) { return hasAny([d]); })) { x.tier = 5; x.cl = closeness(dt.filter(function (d) { return hasAny([d]); })); return; }
       if (NAMED[t] && hasAll([r.ntt || ''])) {
         x.tier = 4; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
       }
