@@ -60,9 +60,11 @@
     if (!DEFINED) {
       DEFINED = {};
       var T = IDX.terms || {};
+      // 区別の括弧書き（「既約（位相空間）」の「（位相空間）」）は語の一部ではないので除く。除かないと「位相空間」で既約の定義が部分一致してしまう
+      function base(t) { return String(t).normalize('NFKC').trim().replace(/\s*[（(][^（）()]*[）)]\s*$/, ''); }
       Object.keys(T).forEach(function (term) {
-        var ft = fold(term);
-        (T[term] || []).forEach(function (l) { (DEFINED[l] = DEFINED[l] || []).push(ft); });
+        var ft = fold(base(term));
+        (T[term] || []).forEach(function (l) { var L = DEFINED[l] || (DEFINED[l] = []); if (ft && L.indexOf(ft) < 0) L.push(ft); });
       });
       // 定義語の索引は用語リンク用に 1 文字の語（群・環・体）を除いているので、同じ元（定義の環境の索引語）から補う
       (IDX.entries || []).forEach(function (e) {
@@ -70,9 +72,8 @@
         (e.ix || []).forEach(function (x) {
           var t = String(x.term || '').normalize('NFKC').trim();
           if (!t || /[$\\{}^_]/.test(t)) return;
-          var L = DEFINED[e.l] || (DEFINED[e.l] = []);
-          // 「多様体（位相）」のような区別の括弧書きを除いた形でも引く
-          [t, t.replace(/\s*[（(][^（）()]*[）)]\s*$/, '')].forEach(function (u) { var fu = fold(u); if (fu && L.indexOf(fu) < 0) L.push(fu); });
+          var L = DEFINED[e.l] || (DEFINED[e.l] = []), fu = fold(base(t));
+          if (fu && L.indexOf(fu) < 0) L.push(fu);
         });
       });
     }
@@ -287,6 +288,13 @@
     });
   }
   var STMT = { definition: 1, theorem: 1, proposition: 1, lemma: 1, corollary: 1, fact: 1, axiom: 1, counterexample: 1, construction: 1 };
+  // 証明のステップの主張（【主張：…】）を取り出す（正規化して行に覚えておく）
+  function stepClaims(r) {
+    if (r._claims) return r._claims;
+    var out = [], re = /【主張：([\s\S]*?)】/g, m, x = r.e.x || '';
+    while ((m = re.exec(x))) out.push(fold(Core.stripMarkdown(m[1])));
+    return (r._claims = out);
+  }
   var genericCache = null, genericN = -1;
   function genericSections(rows) {
     if (genericCache && genericN === rows.length) return genericCache;
@@ -420,7 +428,9 @@
       x.ex = 0; x.th = 0; x.cl = 0; x.gr = 0;
       x.st = STMT[t] ? 1 : 0;   // 主張（定義・定理など）での一致。本文などの段で、証明・補足だけの一致より先に出す
       if (fuzzy || !wordCands.length) { x.tier = 0; return; }
-      if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0 || dt.some(function (d) { return loose(d) === loose(w) && loose(w); }); })) { x.tier = 5; return; }
+      // 5 語の定義：その語（完全一致）か、その語を含む語（部分一致）を定義している箇所。完全一致が先。その語を使うだけの定義はここに入らない
+      if (dt.length && exactCands.some(function (w) { return dt.indexOf(w) >= 0 || dt.some(function (d) { return loose(d) === loose(w) && loose(w); }); })) { x.tier = 5; x.ex = 1; return; }
+      if (dt.length && hasAll(dt)) { x.tier = 5; x.cl = closeness(dt); return; }
       if (NAMED[t] && hasAll([r.ntt || ''])) {
         x.tier = 4; x.ex = exactCands.indexOf(r.ntt) >= 0 ? 1 : 0; x.cl = closeness([r.ntt]); return;
       }
@@ -435,7 +445,9 @@
         }
         x.tier = 1; return;
       }
-      if (dt.length && hasAll(dt)) { x.tier = 2; x.cl = closeness(dt); return; }
+      // 2 語を含む主張：定義・定理などの本文（主張）や、証明のステップの【主張：…】に語が出てくるもの
+      if (STMT[t] && hasAll([r.nb || '', r.ntt || ''])) { x.tier = 2; return; }
+      if (t === 'proof' && hasAll(stepClaims(r))) { x.tier = 2; return; }
       x.tier = 1;
     });
     res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.th - a.th) || (b.cl - a.cl) || (a.gr - b.gr) || (b.st - a.st) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
@@ -1120,7 +1132,7 @@
     'スペースで区切って複数の語を入れられます（「すべての語を含む」か「いずれかの語を含む」を選べます）。</p>' +
     '<p><b>数式を含む</b>には LaTeX で数式を書きます（例：<code>\\pi_1(S^1)</code>）。空白や括弧の付け方、<code>\\le</code> と <code>\\leq</code> などの違いは気にしなくて大丈夫です。</p>' +
     '<p><b>種類</b>のボタンで「定理・命題・補題・系だけ」「定義だけ」「見出し（分類・記事・節）だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、定義・定理の主張だけ、本文だけの一致に絞れます。</p>' +
-    '<p>結果は「ぴったりの定義」「名前を含む定理など」「見出し」「語を含む定義」「本文など」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
+    '<p>結果は「語の定義」「名前を含む定理など」「見出し」「語を含む主張」「それ以外」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
     '<p>日本語は<b>ふりがな</b>でも探せます（例：「べきしゅうごう」で「冪集合」）。いま開いているページの結果は一番上に出ます。</p>' +
     '<p>条件を入力・選択してから <kbd>Enter</kbd> か「検索」ボタンを押すと検索します（漢字変換の確定の <kbd>Enter</kbd> では検索しません）。</p>' +
     '<p class="mn-search-kbd"><kbd>/</kbd> でどこからでも検索、<kbd>↑</kbd><kbd>↓</kbd> で選んで <kbd>Shift</kbd>+<kbd>Enter</kbd> で開きます。</p></div>';
@@ -1187,15 +1199,15 @@
   // 段ごとにまとめて表示する（2026-10-23 ユーザー指示：部分一致の定義などが、前の段の多い結果に埋もれないように）。
   // 各段は最初の数件だけを出し、「この段をさらに表示」で足す。あいまい検索のときは段に分けない。
   var GROUPS = [
-    { t: 5, h: function (q) { return '「' + q + '」の定義'; }, n: 5 },
+    { t: 5, h: function (q) { return '「' + q + '」の定義（完全一致 → 部分一致）'; }, n: 5 },
     { t: 4, h: function (q) { return '名前に「' + q + '」を含む定理・命題・補題など'; }, n: 5 },
     { t: 3, h: function (q) { return '名前に「' + q + '」を含む見出し（分類・記事・節）'; }, n: 5 },
-    { t: 2, h: function (q) { return '「' + q + '」を含む語の定義'; }, n: 5 },
-    { t: 1, h: function () { return '本文などでの一致（主張での一致が先）'; }, n: 5 }
+    { t: 2, h: function (q) { return '「' + q + '」を含む主張（定義・定理の本文、証明のステップ）'; }, n: 5 },
+    { t: 1, h: function () { return 'それ以外での一致'; }, n: 5 }
   ];
   var GROUP_STEP = 20;
   // 段の並び順（2026-10-23 ユーザー指示：どの段を先に出すか選べるようにし、ブラウザに記憶する）
-  var ORDER_KEY = 'mn-search-order', ORDER_NAMES = { 5: 'ぴったりの定義', 4: '名前を含む定理・補題など', 3: '名前を含む見出し', 2: '語を含む定義', 1: '本文など' };
+  var ORDER_KEY = 'mn-search-order', ORDER_NAMES = { 5: '語の定義', 4: '名前を含む定理・補題など', 3: '名前を含む見出し', 2: '語を含む主張', 1: 'それ以外' };
   function groupOrder() {
     var o = null;
     try { o = JSON.parse(store(ORDER_KEY) || 'null'); } catch (e) {}
