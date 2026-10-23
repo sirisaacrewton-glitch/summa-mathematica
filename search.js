@@ -340,7 +340,13 @@
     (query.exclude || '').split(/[\s　]+/).filter(Boolean).forEach(function (w) {
       pq.neg.push({ kind: /[\\^_{}]/.test(w) ? 'tex' : 'text', s: w, txt: fold(w), txtC: fold(w, true), tex: norm(w) });
     });
-    if (query.types && query.types.length) pq.types = (pq.types || []).concat(query.types);
+    if (query.types && query.types.length) {
+      var ts = query.types.slice(), sel = { def: ts.indexOf('termdef') >= 0, use: ts.indexOf('termuse') >= 0 };
+      ts = ts.filter(function (t) { return t !== 'termdef' && t !== 'termuse'; });
+      // 「語の定義」「語を使う定義」はどちらも定義の環境（定義・構成・公理）を対象にし、段を決めたあとで振り分ける
+      if (sel.def || sel.use) { ts = ts.concat(['definition', 'construction', 'axiom']); pq.defSel = sel; }
+      pq.types = (pq.types || []).concat(ts);
+    }
     if (query.dirs && query.dirs.length) pq.dirs = expandDirs(query.dirs);
     if (query.mode === 'any') pq.mode = 'any';
     if (query.loc === 'title' || query.loc === 'body' || query.loc === 'stmt') pq.loc = query.loc;
@@ -450,6 +456,13 @@
       if (t === 'proof' && hasAll(stepClaims(r))) { x.tier = 2; return; }
       x.tier = 1;
     });
+    if (pq.defSel && !(pq.defSel.def && pq.defSel.use) && wordCands.length && !fuzzy) {
+      // 語の定義だけ／語を使う定義だけ（定義の環境で、語の定義の段（5）に入ったかどうか）。他の種類の行はそのまま
+      res = res.filter(function (x) {
+        if (!DEF_TYPES[x.r.e.t]) return true;
+        return x.tier === 5 ? pq.defSel.def : pq.defSel.use;
+      });
+    }
     res.sort(function (a, b) { return (b.tier - a.tier) || (b.ex - a.ex) || (b.th - a.th) || (b.cl - a.cl) || (a.gr - b.gr) || (b.st - a.st) || (b.here - a.here) || (b.s - a.s) || (a.r.e.p - b.r.e.p); });
     return { results: res.slice(0, opts.limit || 60), total: res.length, pq: pq, fuzzy: fuzzy };
   }
@@ -590,10 +603,12 @@
 
   /* ---------- 検索フォーム（モーダルと検索ページで共通） ---------- */
   // 種類の絞り込み（2026-10-23 ユーザー指示：定理・命題・補題・系はまとめる。分類（大分野・分野・系列）も選べる）。値はカンマ区切りで複数の種類を表す
+  // 並びは結果の段に合わせる（2026-10-23 ユーザー指示）。定義は「語の定義」（検索語を定義しているもの）と「語を使う定義」（検索語を使うだけのもの）に分ける
   var TYPE_CHIPS = [
-    ['definition', '定義'], ['theorem,proposition,lemma,corollary', '定理・命題・補題・系'],
+    ['termdef', '語の定義'], ['termuse', '語を使う定義'], ['theorem,proposition,lemma,corollary', '定理・命題・補題・系'],
+    ['bigfield,field,series,page,section', '見出し（分類・記事・節）'],
     ['proof', '証明'], ['example', '例'], ['supplement,remark,intuition', '補足・注意'], ['counterexample', '反例'], ['problem', '問題'],
-    ['equation', '式'], ['bigfield,field,series,page,section', '見出し（分類・記事・節）']
+    ['equation', '式']
   ];
   var DIR_TYPES = ['bigfield', 'field', 'series'];   // 分類の行の種類（深さ 0・1・2）
   function rowType(r) { return r.e.t === 'dir' ? (DIR_TYPES[r.e.depth] || 'series') : r.e.t; }
@@ -1131,7 +1146,7 @@
     '<p><b>キーワード</b>に定理名や用語を入れると、定義・定理・本文と<a href="' + (document.body.getAttribute('data-root') || '') + 'glossary.html">用語索引</a>から探します。英語名（例：Tychonoff）でも見つかります。' +
     'スペースで区切って複数の語を入れられます（「すべての語を含む」か「いずれかの語を含む」を選べます）。</p>' +
     '<p><b>数式を含む</b>には LaTeX で数式を書きます（例：<code>\\pi_1(S^1)</code>）。空白や括弧の付け方、<code>\\le</code> と <code>\\leq</code> などの違いは気にしなくて大丈夫です。</p>' +
-    '<p><b>種類</b>のボタンで「定理・命題・補題・系だけ」「定義だけ」「見出し（分類・記事・節）だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、定義・定理の主張だけ、本文だけの一致に絞れます。</p>' +
+    '<p><b>種類</b>のボタンで「語の定義だけ」（検索語を定義しているもの）「語を使う定義だけ」「定理・命題・補題・系だけ」「見出し（分類・記事・節）だけ」のように絞り込めます（複数選択可）。<b>一致する場所</b>で題・名前だけ、定義・定理の主張だけ、本文だけの一致に絞れます。</p>' +
     '<p>結果は「語の定義」「名前を含む定理など」「見出し」「語を含む主張」「それ以外」の段に分かれます。<b>並び順</b>で段の順番を入れ替えられ、このブラウザに記憶されます。</p>' +
     '<p>日本語は<b>ふりがな</b>でも探せます（例：「べきしゅうごう」で「冪集合」）。いま開いているページの結果は一番上に出ます。</p>' +
     '<p>条件を入力・選択してから <kbd>Enter</kbd> か「検索」ボタンを押すと検索します（漢字変換の確定の <kbd>Enter</kbd> では検索しません）。</p>' +
