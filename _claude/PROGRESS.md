@@ -218,7 +218,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | ID | フォルダ / ファイル（案） | 題（案） | 主な内容 | 状態 |
 |---|---|---|---|---|
 | DC-01 | 05-geometry-topology/04-differential-geometry/01-curves/01-curves-frenet | 曲線とフレネの公式 | 正則曲線、弧長、曲率・捩率、フレネ＝セレの公式、曲線論の基本定理（合同を除く一意性と存在） | 完了（2026-10-23。系列 id surf-curves、題「曲線論」） |
-| DC-02 | （01-curves）/02-plane-curves-global | 平面曲線の大域理論 | 回転数、ホップの回転定理、凸曲線の特徴づけ | 未着手 |
+| DC-02 | （01-curves）/02-plane-curves-global | 平面曲線の大域理論 | 回転数、ホップの回転定理、凸曲線の特徴づけ | 完了（2026-10-23。四頂点定理（凸の場合）も収録） |
 | DC-03 | （01-curves）/03-four-vertex-fenchel | 四頂点定理とフェンチェルの定理 | 四頂点定理、全曲率とフェンチェルの定理（ファリ＝ミルナーは fact） | 未着手 |
 | DS-01 | 05-geometry-topology/04-differential-geometry/02-surfaces/01-regular-surfaces | 正則曲面と第一基本形式 | ℝ³ の正則曲面、局所座標、接平面、第一基本形式、面積 | 未着手 |
 | DS-02 | （02-surfaces）/02-second-fundamental-form | ガウス写像と曲率 | 第二基本形式、形作用素、主曲率・ガウス曲率・平均曲率、例 | 未着手 |
@@ -638,6 +638,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | TP-02 | 54H/01/02-group-uniformities | 左一様構造・完全正則性・一様連続な準同型・バーコフ–角谷の定理 | — | 完了 |
 
 ## 完了ログ（新しいものを上に。1 行ずつ）
+- 2026-10-23 DC-02 平面曲線の大域理論（01-curves/02-plane-curves-global, surf:page-plane-curves-global）。向きのついた角 ∠(v,u)=2arctan(det/(1+内積))、凸コンパクト集合上の角度の持ち上げ、閉曲線・単純閉曲線、回転数（=全曲率/2π、整数、合同・取り替え・逆向きでの変化）、8 の字は 0、ホップの回転定理（surf:umlaufsatz。最下点で正規化し三角形上の弦の向きを持ち上げる）、凸曲線の特徴づけ（凸 ⇒ 曲率の符号一定は単純性なしに連結性で示した。⇐ は回転定理を使う）、リマソン（κ>0 だが凸でも単純でもない、回転数 2、頂点 2）、四頂点定理（凸な単純閉曲線。高さ関数の単峰性で弦の両側を示した）、問題 4 題。terms.json：「頂点」は分野 53 で自動リンクしない。
 - 2026-10-23 直感と【主張】の書き足し：ベクトル解析（vec-analysis）の定義・主要な定理 15 件に直感、保存場の特徴づけの証明に【主張】。曲線論の残り 2 件。build.js の INTUITION_REPORT=<フォルダの先頭> で対象の項目（ラベル）も出るようにした。次の書き足し候補：一変数の微積分・多変数解析（微分幾何の前提）。
 - 2026-10-23 DC-01 曲線とフレネの公式（05-geometry-topology/04-differential-geometry/01-curves/01-curves-frenet, surf:page-curves-frenet）。新系列 surf-curves（曲線論）を作り §8.2 の 6 か所を確認。正則曲線とパラメータ変換、弧長パラメータ、フレネ曲線・標準フレネ標構（余因子で e_n を滑らかに作る）、フレネ標構をもたない C^∞ 正則曲線（(t, f(t), f(-t))）、フレネ–セレの公式と κ_1..κ_{n-2}>0、曲率の不変性、線形常微分方程式の解の存在と一意性（ピカールの逐次近似。区間全体）、曲線論の基本定理（surf:fundamental-theorem-curves。存在は E E^t ≡ I を一意性で示す）、平面曲線（符号付き曲率、接線角、直線と円）、空間曲線（ベクトル積、曲率・捩率の公式、常らせん、捩率 0 と平面、局所標準形、接触平面・法平面・展直平面）、問題 6 題。
 - 2026-10-23 AT-16 多様体になる複体（02-homology/14-manifold-complexes（2026-10-23 にコホモロジー §7 から移動。位相多様体の定義 at:topological-manifold も向きのページからここへ移した）, at:page-manifold-complexes：at:link-local-homology, at:manifold-link-conditions, at:vertex-link-sphere-manifold, at:surface-complex-criterion, at:three-manifold-complex, at:cw-manifold-dimension, at:boundary-invariance）。

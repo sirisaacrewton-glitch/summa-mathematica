@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平面曲線の大域理論 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-differential-geometry/01-curves/02-plane-curves-global.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 平面曲線の大域理論 {#surf:page-plane-curves-global keywords="closed curve, simple closed curve, lifting of angle functions, rotation number, rotation index, Umlaufsatz, Hopf's theorem on turning tangents, total curvature, convex curve, characterization of convex curves, vertex, four vertex theorem, limacon"}
+
+前のページ（\ref{surf:page-curves-frenet}）では、曲線の各点の近くでの形を曲率で調べた。このページでは平面の**閉曲線**全体を見る。接ベクトルの向きを連続な角度として追いかけ、一周の間に何回転するかを**回転数**として定める。回転数は曲率の積分 $\frac{1}{2\pi}\int\kappa\,ds$ に等しく、主定理の**ホップの回転定理**は、自分自身と交わらない閉曲線の回転数は $\pm1$ であることを主張する。応用として、**凸な閉曲線**が曲率の符号で特徴づけられることと、凸な閉曲線には曲率の極値点（**頂点**）が少なくとも四つあること（**四頂点定理**）を証明する。
+
+> 資料：Klingenberg『A Course in Differential Geometry』第 2 章と同じ標準的な内容。角度の持ち上げは逆正接による角度の式で書き直し、ホップの回転定理は最下点で正規化する形で書いた。凸曲線の特徴づけの「凸 ⇒ 曲率の符号が一定」の部分と、四頂点定理の幾何的な部分（弦の両側に曲線が分かれること）は、資料の図に頼る議論の代わりに、連結性と、高さ関数が一周の間に一度だけ増えて一度だけ減ることを使って書き下ろした。
+
+## 記法と定義の確認 {#surf:sec-pg-notation}
+
+::: notation
+- 正則曲線・パラメータ変換 \ref{surf:regular-curve}、符号付き曲率と標準フレネ標構 $e_{1}=c'/|c'|$, $e_{2}=Je_{1}$（$J(x,y)=(-y,x)$）\ref{surf:signed-curvature}、その公式 \ref{surf:plane-curvature-formula}、接線角 \ref{surf:tangent-angle}、曲率の不変性 \ref{surf:curvature-invariance}。$v=|c'|$ と書くと $c'=ve_{1}$, $c''=v'e_{1}+v^{2}\kappa e_{2}$（$e_{1}'=v\kappa e_{2}$ から）。
+- $\mathbf{u}(\alpha)\defeq(\cos\alpha,\sin\alpha)$ と書く。三角関数の基本性質と加法定理 \ref{calc:trig-properties}、周期 $2\pi$ \ref{calc:circle-parametrization}、逆正接 \ref{calc:arctan}。$\mathbb{R}^{2}$ を $\mathbb{C}$ とみると $\mathbf{u}(\alpha)=e^{i\alpha}$ なので、極形式（\ref{calc:polar-form}）から、**単位ベクトルはすべて $\mathbf{u}(\alpha)$ と書け、$\alpha$ は $2\pi$ の整数倍を除いて一意**（$\mathbf{u}(\alpha)=\mathbf{u}(\beta)\iff\alpha-\beta\in2\pi\mathbb{Z}$）。$S^{1}\defeq\{x\in\mathbb{R}^{2}\mid|x|=1\}$。
+- $\sin$ は $(0,\pi)$ で正、$(\pi,2\pi)$ で負である（$\sin$ は $[0,\frac\pi2]$ で $0$ から $1$ へ増加し（\ref{calc:pi-definition}）、加法定理から $\sin(\pi-x)=\sin x$, $\sin(x+\pi)=-\sin x$）。したがって $\sin\alpha\ge0\iff\alpha\in\bigcup_{k\in\mathbb{Z}}[2k\pi,(2k+1)\pi]$。
+- 中間値の定理・最大値の定理 \ref{calc:interval-theorems}、\ref{calc:mean-value-theorem}（フェルマーの定理を含む）、テイラーの定理 \ref{calc:taylor-peano}、部分積分 \ref{calc:substitution-parts}、ハイネ–ボレル \ref{top:heine-borel}、ハイネ–カントール \ref{top:heine-cantor}。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## 角度の持ち上げ {#surf:sec-pg-lifting}
+
+単位ベクトルに値をとる連続写像 $e$ を $e=\mathbf{u}\circ\theta$ と書き、角度 $\theta$ を連続に選ぶことを、$e$ の**持ち上げ**という。滑らかな曲線の接ベクトルについては \ref{surf:tangent-angle} で微分方程式から作ったが、ホップの回転定理では、平面の三角形の上で定義された連続写像の持ち上げが必要になる。
+
+::: lemma 二つの単位ベクトルのなす角 {#surf:oriented-angle keywords="oriented angle between unit vectors v and u with u != -v: 2 arctan(det(v,u)/(1+<v,u>)) in (-pi, pi); continuity" index="向きのついた角|むきのついたかく, なす角|なすかく"}
+$v,u\in S^{1}$ で $u\neq-v$ のとき
+$$
+\angle(v,u)\defeq2\arctan\frac{\det(v,u)}{1+\langle v,u\rangle}\in(-\pi,\pi)
+$$
+とおく。
+1. $\angle$ は $\{(v,u)\in S^{1}\times S^{1}\mid u\neq-v\}$ の上で連続で、$\angle(u,u)=0$。
+2. $v=\mathbf{u}(\beta)$ なら $u=\mathbf{u}(\beta+\angle(v,u))$。
+3. $v=\mathbf{u}(\beta)$, $u=\mathbf{u}(\beta+\gamma)$, $|\gamma|<\pi$ なら $\angle(v,u)=\gamma$。
+:::
+
+::: proof
+**1.** $u\neq-v$ なら $\langle v,u\rangle>-1$（コーシー–シュワルツの等号条件 \ref{lin:cauchy-schwarz}）で分母は正、各成分の連続関数の合成なので連続。$\det(u,u)=0$ から $\angle(u,u)=0$。
+
+**3.** $\det(v,u)=\cos\beta\sin(\beta+\gamma)-\sin\beta\cos(\beta+\gamma)=\sin\gamma$、$\langle v,u\rangle=\cos\gamma$（加法定理）。倍角の式 $\sin\gamma=2\sin\frac\gamma2\cos\frac\gamma2$, $1+\cos\gamma=2\cos^{2}\frac\gamma2$ から $\frac{\sin\gamma}{1+\cos\gamma}=\tan\frac\gamma2$。$\frac\gamma2\in(-\frac\pi2,\frac\pi2)$ なので $\arctan\tan\frac\gamma2=\frac\gamma2$（\ref{calc:arctan.1}）、よって $\angle(v,u)=\gamma$。
+
+**2.** $u=\mathbf{u}(\alpha)$ と書き、$2\pi$ の整数倍をずらして $\gamma\defeq\alpha-\beta\in(-\pi,\pi]$ とする。$\gamma=\pi$ なら $u=\mathbf{u}(\beta+\pi)=-v$ となり仮定に反するので $|\gamma|<\pi$。3 から $\angle(v,u)=\gamma$。
+:::
+
+::: lemma 凸集合上の持ち上げ {#surf:angle-lifting keywords="a continuous map from a compact convex set K in R^m to the circle has a continuous lift theta with e = (cos theta, sin theta), unique up to 2 pi k" index="持ち上げ（角度）|もちあげ, 角度関数|かくどかんすう"}
+$K\subset\mathbb{R}^{m}$ を空でないコンパクトな凸集合、$e\colon K\to S^{1}$ を連続、$x_{0}\in K$、$e(x_{0})=\mathbf{u}(\theta_{0})$ とする。
+1. 連続な $\theta\colon K\to\mathbb{R}$ で $e=\mathbf{u}\circ\theta$、$\theta(x_{0})=\theta_{0}$ となるものがただ一つある。
+2. $e=\mathbf{u}\circ\theta_{1}=\mathbf{u}\circ\theta_{2}$ となる連続な $\theta_{1},\theta_{2}$ について、$\theta_{1}-\theta_{2}$ は $2\pi$ の整数倍の定数である。
+3. とくに $K=[a,b]$ なら、$\theta(b)-\theta(a)$ は持ち上げ $\theta$ の選び方によらない。
+:::
+
+::: proof
+**Step 1（2）.** 【主張：二つの持ち上げの差は $2\pi\mathbb{Z}$ の値の定数】$d\defeq\theta_{1}-\theta_{2}$ は連続で、各点で $\mathbf{u}(\theta_{1})=\mathbf{u}(\theta_{2})$ から $d\in2\pi\mathbb{Z}$。$x\in K$ について $s\mapsto d(x_{0}+s(x-x_{0}))$（$0\le s\le1$。凸なので線分は $K$ に入る）は連続で整数の $2\pi$ 倍の値しかとらないので、中間値の定理から定数で、$d(x)=d(x_{0})$。
+
+**Step 2（$\delta$ の選択）.** 【主張：$\delta>0$ で、$x,y\in K$, $|x-y|<\delta$ なら $e(y)\neq-e(x)$ となるものがある】$K$ はコンパクトなので $e$ は一様連続で（\ref{top:heine-cantor}）、$|x-y|<\delta$ なら $|e(x)-e(y)|<2$ となる $\delta$ がある。$|e(x)-(-e(x))|=2$ なので $e(y)\neq-e(x)$。
+
+**Step 3（線分上の持ち上げ）.** 【主張：各 $x\in K$ について、$f_{x}(s)\defeq e(x_{0}+s(x-x_{0}))$ の連続な持ち上げ $\lambda_{x}\colon[0,1]\to\mathbb{R}$ で $\lambda_{x}(0)=\theta_{0}$ となるものがただ一つある】$N|x-x_{0}|<\delta$ となる自然数 $N\ge1$ をとり、$s_{k}\defeq k/N$ とする。$[s_{k-1},s_{k}]$ 上で $\lambda_{x}(s)\defeq\lambda_{x}(s_{k-1})+\angle(f_{x}(s_{k-1}),f_{x}(s))$ と順に定める（$|s-s_{k-1}|\,|x-x_{0}|<\delta$ なので Step 2 から $\angle$ は定義され、\ref{surf:oriented-angle.1} から連続）。\ref{surf:oriented-angle.2} と帰納法から $f_{x}=\mathbf{u}\circ\lambda_{x}$。一意性は Step 1（$K=[0,1]$）。$\theta(x)\defeq\lambda_{x}(1)$ と定めると $e(x)=\mathbf{u}(\theta(x))$、$\theta(x_{0})=\theta_{0}$。
+
+**Step 4（連続性）.** 【主張：$|y-x|<\delta$ なら $\theta(y)-\theta(x)=\angle(e(x),e(y))$。したがって $\theta$ は連続】$0\le s\le1$ で $|(x_{0}+s(y-x_{0}))-(x_{0}+s(x-x_{0}))|=s|y-x|<\delta$ なので、$\varphi(s)\defeq\lambda_{y}(s)-\lambda_{x}(s)-\angle(f_{x}(s),f_{y}(s))$ は連続。\ref{surf:oriented-angle.2} から $\lambda_{x}(s)+\angle(f_{x}(s),f_{y}(s))$ も $f_{y}(s)$ の角度なので、$\varphi(s)\in2\pi\mathbb{Z}$。$\varphi(0)=-\angle(e(x_{0}),e(x_{0}))=0$ なので中間値の定理から $\varphi\equiv0$、$s=1$ として主張の式。$y\to x$ のとき $e(y)\to e(x)$ で、$\angle$ の連続性と $\angle(e(x),e(x))=0$ から $\theta(y)\to\theta(x)$。
+
+**Step 5（3）.** 2 から、二つの持ち上げの差は定数なので、$\theta(b)-\theta(a)$ は同じ。
+
+::: hypcheck
+- **前提「コンパクト」**：Step 2 の一様連続性に使った。本質的ではない：開集合のような凸集合でも、$x$ の近くの $y$ と $x_{0}$ を結ぶ線分の和は $x_{0}$ と $x$ のまわりの小さな閉球の凸包に含まれ、これはコンパクトなので、そこで $\delta$ を選べば同じ議論が通る。
+- **前提「凸」**：Step 1・3 で線分 $x_{0}x$ が $K$ に入ることに使った。星形（ある $x_{0}$ からの線分がすべて入る）であれば足りる（Klingenberg はこの形で述べている）。穴のあいた集合では偽：$K=\{x\in\mathbb{R}^{2}\mid1\le|x|\le2\}$ 上の $e(x)=x/|x|$ は持ち上げをもたない（もてば、$t\mapsto\theta(\frac32\mathbf{u}(t))$ と $t\mapsto t$ はどちらも $[0,2\pi]$ 上の $\mathbf{u}(t)$ の持ち上げなので、2 から差は定数で、$\theta(\frac32\mathbf{u}(2\pi))-\theta(\frac32\mathbf{u}(0))=2\pi$。一方 $\mathbf{u}(2\pi)=\mathbf{u}(0)$ なので左辺は $0$ で、矛盾）。
+:::
+:::
+
+## 回転数 {#surf:sec-pg-rotation}
+
+::: definition 閉曲線 {#surf:closed-curve keywords="closed curve as a periodic regular smooth curve c: R -> R^2 with period L; simple closed curve" index="閉曲線|へいきょくせん, 単純閉曲線|たんじゅんへいきょくせん, 周期|しゅうき"}
+$L>0$ とする。$C^{\infty}$ 級の正則曲線 $c\colon\mathbb{R}\to\mathbb{R}^{2}$ で、すべての $t$ で $c(t+L)=c(t)$ となるものを、周期 $L$ の（正則な）**閉曲線**という。さらに $c$ の $[0,L)$ への制限が単射であるとき、**単純閉曲線**という。
+:::
+
+::: intuition
+閉曲線とは、一周すると出発点に同じ向き・同じ速さで戻ってきて、それを繰り返す曲線である。単純閉曲線とは、一周の間に自分自身と交わらない閉曲線である。
+:::
+
+::: definition 回転数 {#surf:rotation-number keywords="rotation number (rotation index) of a closed regular plane curve: (theta(L) - theta(0))/2 pi for a continuous angle function of the unit tangent; equals (1/2 pi) int kappa |c'| dt" index="回転数（接線の）|かいてんすう, 回転指数|かいてんしすう, 全曲率|ぜんきょくりつ"}
+周期 $L$ の閉曲線 $c$ について、単位接ベクトル $e_{1}=c'/|c'|$ の $[0,L]$ 上の連続な持ち上げ $\theta$（$e_{1}=\mathbf{u}\circ\theta$）をとり、
+$$
+n_{c}\defeq\frac{\theta(L)-\theta(0)}{2\pi}
+$$
+を $c$ の**回転数**という。
+:::
+
+::: intuition
+回転数とは、曲線を一周する間に、進む向き（接ベクトル）が反時計回りに何回転するかを数えたものである。時計回りの回転は負に数える。
+:::
+
+::: proposition 回転数の基本性質 {#surf:rotation-number-properties keywords="the rotation number is a well-defined integer, equals the total curvature divided by 2 pi, and is invariant under orientation preserving reparametrizations and rigid motions; it changes sign under reversal and reflections" index="回転数の性質|かいてんすうのせいしつ"}
+$c$ を周期 $L$ の閉曲線とする。
+1. $n_{c}$ は持ち上げの選び方によらない整数で、$\displaystyle n_{c}=\frac{1}{2\pi}\int_{0}^{L}\kappa(t)|c'(t)|\,dt$。
+2. $\mathbb{R}$ 上の連続な持ち上げ $\theta$ について、すべての $t$ で $\theta(t+L)-\theta(t)=2\pi n_{c}$。
+3. $B(x)=Rx+b$ を合同変換とすると $n_{B\circ c}=(\det R)\,n_{c}$。
+4. $\varphi\colon\mathbb{R}\to\mathbb{R}$ が $C^{\infty}$ 級で $\varphi'>0$、$\varphi(s+L')=\varphi(s)+L$ なら、$c\circ\varphi$ は周期 $L'$ の閉曲線で $n_{c\circ\varphi}=n_{c}$。
+5. $\tilde c(t)\defeq c(-t)$（逆向き）は周期 $L$ の閉曲線で $n_{\tilde c}=-n_{c}$。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$n_{c}$ は整数で、積分の式が成り立つ】持ち上げの差 $\theta(L)-\theta(0)$ は選び方によらない（\ref{surf:angle-lifting.3}）。$\theta(t)\defeq\theta_{0}+\int_{0}^{t}\kappa|c'|$ は持ち上げなので（\ref{surf:tangent-angle}）、積分の式を得る。$c'$ は周期 $L$ をもつので $e_{1}(L)=e_{1}(0)$、すなわち $\mathbf{u}(\theta(L))=\mathbf{u}(\theta(0))$ で、$\theta(L)-\theta(0)\in2\pi\mathbb{Z}$。
+
+**Step 2（2）.** 【主張：$\theta(t+L)-\theta(t)$ は $t$ によらず $2\pi n_{c}$】$t\mapsto\theta(t+L)$ も $e_{1}$ の持ち上げ（$e_{1}$ は周期 $L$）なので、$\theta(t+L)-\theta(t)$ は $2\pi\mathbb{Z}$ に値をとる連続関数で、中間値の定理から定数。$t=0$ での値は $2\pi n_{c}$。
+
+**Step 3（3〜5）.** 【主張：合同変換では $\det R$ 倍、向きを保つ取り替えでは不変、逆向きでは $-1$ 倍】3：$B\circ c$ の符号付き曲率は $(\det R)\kappa$（\ref{surf:curvature-invariance.2}。$n=2$ では最後の曲率が $\kappa$）、速さは $|c'|$ のままなので、1 の積分の式から。4：$c\circ\varphi$ が閉曲線なのは $c(\varphi(s+L'))=c(\varphi(s)+L)=c(\varphi(s))$ から。曲率は $\kappa\circ\varphi$、速さは $\varphi'|c'|\circ\varphi$（\ref{surf:curvature-invariance.1}）なので、置換積分で $\int_{0}^{L'}\kappa(\varphi)|c'(\varphi)|\varphi'\,ds=\int_{\varphi(0)}^{\varphi(0)+L}\kappa|c'|$、これは 2 から $\theta(\varphi(0)+L)-\theta(\varphi(0))=2\pi n_{c}$。5：$\tilde c'(t)=-c'(-t)$, $\tilde c''(t)=c''(-t)$ なので \ref{surf:plane-curvature-formula.2} から $\tilde\kappa(t)=-\kappa(-t)$、$|\tilde c'(t)|=|c'(-t)|$。$\int_{0}^{L}\tilde\kappa|\tilde c'|=-\int_{-L}^{0}\kappa|c'|=-2\pi n_{c}$（最後は 2）。
+
+::: hypcheck
+- **前提「正則」**：$e_{1}=c'/|c'|$ の定義に使った。
+- **前提「$C^{\infty}$ 級」**：積分の式には $c$ が $C^{2}$ 級あれば足りる。回転数そのもの（持ち上げの差）は $c$ が $C^{1}$ 級なら定義できる。
+:::
+:::
+
+::: example
+1. 単位円を $m$ 回まわる $c(t)=\mathbf{u}(t)$（周期 $L=2\pi m$、$m\ge1$）：$\kappa=1$, $|c'|=1$ なので $n_{c}=m$。逆向きにまわれば $-m$。
+2. **8 の字** $c(t)=(\sin t,\sin t\cos t)$（周期 $2\pi$）：$c'(t)=(\cos t,\cos2t)$ で、$\cos t=0$ のとき $\cos2t=-1$ なので正則。$c(t+\pi)=(-\sin t,\sin t\cos t)$ は $c(t)$ を $y$ 軸で折り返したものなので、$e_{1}(t+\pi)$ は $e_{1}(t)$ の折り返し $(x,y)\mapsto(-x,y)$ で、角度 $\alpha$ を $\pi-\alpha$ に写す。持ち上げ $\theta$ について $\theta(t+\pi)+\theta(t)-\pi$ は $2\pi\mathbb{Z}$ に値をとる連続関数なので定数 $2\pi k$。$t=0$ と $t=\pi$ での式を引くと $\theta(2\pi)-\theta(0)=0$、よって $n_{c}=0$。
+:::
+
+## ホップの回転定理 {#surf:sec-pg-umlaufsatz}
+
+::: theorem ホップの回転定理 {#surf:umlaufsatz keywords="Umlaufsatz, Hopf's theorem on turning tangents: the rotation number of a simple closed regular plane curve is +1 or -1; theorem of turning tangents" index="ホップの回転定理|ほっぷのかいてんていり, 回転定理|かいてんていり, 接線回転定理|せっせんかいてんていり" refname="ホップの回転定理"}
+平面の単純閉曲線 $c$ の回転数は $n_{c}=\pm1$ である。
+:::
+
+::: intuition
+自分自身と交わらない閉じた道を一周すると、進む向きはちょうど一回転する（反時計回りなら $+1$、時計回りなら $-1$）。何回も余分に回ったり、回り切らずに戻ったりはできない。
+:::
+
+::: proof
+周期を $L$ とし、$c=(x,y)$ と成分で書く。
+
+**Step 1（正規化）.** 【主張：$c(0)=0$、すべての $t$ で $y(t)\ge0$、$e_{1}(0)=(1,0)$ としてよい】$y$ は $[0,L]$ 上で最小値をとるので（最大値の定理）、周期性から $\mathbb{R}$ 上の最小点 $t_{*}$ がある。$c(t+t_{*})-c(t_{*})$ に取り替えても、単純閉曲線であることと回転数は変わらない（\ref{surf:rotation-number-properties.4}、$\varphi(t)=t+t_{*}$。平行移動は $\det R=1$）。すると $c(0)=0$, $y\ge0$。$y$ は $0$ で最小なので $y'(0)=0$（\ref{calc:mean-value-theorem.1}）、正則性から $x'(0)\neq0$。$x'(0)<0$ なら折り返し $(x,y)\mapsto(-x,y)$ を施す。これは $y\ge0$ と $c(0)=0$ を保ち、回転数の符号を変える（\ref{surf:rotation-number-properties.3}）。よって $e_{1}(0)=(1,0)$ の場合に $n_{c}=1$ を示せばよい。
+
+**Step 2（弦の向きの写像）.** 【主張：三角形 $T\defeq\{(t_{1},t_{2})\mid0\le t_{1}\le t_{2}\le L\}$ の上の次の写像 $e\colon T\to S^{1}$ は連続である】
+$$
+e(t_{1},t_{2})\defeq\begin{cases}e_{1}(t) & (t_{1}=t_{2}=t),\\ -e_{1}(0) & ((t_{1},t_{2})=(0,L)),\\ \dfrac{c(t_{2})-c(t_{1})}{|c(t_{2})-c(t_{1})|} & (\text{それ以外}).\end{cases}
+$$
+「それ以外」では $t_{1}<t_{2}$ で、$t_{2}<L$ なら単純性から、$t_{2}=L$ なら $0<t_{1}<L$ と $c(L)=c(0)$ と単純性から $c(t_{1})\neq c(t_{2})$。この範囲では連続な関数の商で連続。対角線の点 $(t,t)$ では、$t_{1}<t_{2}$ について
+$$
+\frac{c(t_{2})-c(t_{1})}{t_{2}-t_{1}}-c'(t)=\frac{1}{t_{2}-t_{1}}\int_{t_{1}}^{t_{2}}(c'(u)-c'(t))\,du
+$$
+の長さは $\max_{u\in[t_{1},t_{2}]}|c'(u)-c'(t)|$ 以下（\ref{vec:vector-integral-inequality}）で、$(t_{1},t_{2})\to(t,t)$ のとき $0$ に近づく。$c'(t)\neq0$ なので、正規化した $e(t_{1},t_{2})$ は $e_{1}(t)$ に近づく（$t_{1}=t_{2}$ の点では定義から $e_{1}(t_{1})\to e_{1}(t)$）。点 $(0,L)$ では、$t_{1}\ge0$, $t_{2}\le L$ について周期性から $c(t_{2})-c(t_{1})=-(c(t_{1})-c(t_{2}-L))$ で、$t_{2}-L\le0\le t_{1}$, $t_{1}-(t_{2}-L)>0$ だから、同じ評価を $0$ の近くの 2 点 $t_{2}-L<t_{1}$ に使うと $e(t_{1},t_{2})\to-e_{1}(0)$。
+
+**Step 3（対角線）.** 【主張：$e$ の持ち上げ $\theta\colon T\to\mathbb{R}$ で $\theta(0,0)=0$ となるものがあり、$\theta(L,L)-\theta(0,0)=2\pi n_{c}$】$T$ はコンパクト（有界閉、\ref{top:heine-borel}）で凸なので、\ref{surf:angle-lifting.1} から $\theta$ がある（$e(0,0)=e_{1}(0)=\mathbf{u}(0)$）。$t\mapsto\theta(t,t)$ は $e_{1}$ の $[0,L]$ 上の連続な持ち上げなので、回転数の定義から主張が従う。
+
+**Step 4（左の辺）.** 【主張：$\theta(0,L)=\pi$】$0<s<L$ では $e(0,s)=c(s)/|c(s)|$ の第 2 成分は $y(s)/|c(s)|\ge0$、$e(0,0)=(1,0)$、$e(0,L)=(-1,0)$。よって $[0,L]$ 上で $\sin\theta(0,s)\ge0$ で、$\theta(0,s)\in\bigcup_{k}[2k\pi,(2k+1)\pi]$。$s\mapsto\theta(0,s)$ の像は区間で（中間値の定理）、$0$ を含み、互いに離れた閉区間の和に含まれるので $[0,\pi]$ に含まれる。$\mathbf{u}(\theta(0,L))=(-1,0)$ から $\theta(0,L)\in\pi+2\pi\mathbb{Z}$、よって $\theta(0,L)=\pi$。
+
+**Step 5（上の辺）.** 【主張：$\theta(L,L)=2\pi$。したがって $n_{c}=1$】$0<s<L$ では $e(s,L)=(c(L)-c(s))/|c(L)-c(s)|=-c(s)/|c(s)|$ の第 2 成分は $\le0$、$e(L,L)=e_{1}(L)=e_{1}(0)=(1,0)$。$\sin\theta(s,L)\le0$ から $\theta(s,L)\in\bigcup_{k}[(2k-1)\pi,2k\pi]$ で、$s\mapsto\theta(s,L)$ の像は $\theta(0,L)=\pi$ を含む区間なので $[\pi,2\pi]$ に含まれる。$\mathbf{u}(\theta(L,L))=(1,0)$ から $\theta(L,L)=2\pi$。Step 3 から $2\pi n_{c}=2\pi$。
+
+::: hypcheck
+- **前提「単純」**：Step 2 で、対角線と $(0,L)$ 以外で $c(t_{1})\neq c(t_{2})$（$e$ が定義できること）に使った。外すと偽：円を 2 回まわる曲線は $n=2$、8 の字は $n=0$。
+- **前提「正則」**：$e_{1}$ の定義と、Step 2 の対角線での連続性（$c'(t)\neq0$）、Step 1 の $x'(0)\neq0$ に使った。
+- **前提「閉曲線（周期的）」**：Step 2 の点 $(0,L)$ での連続性に、$c'(L)=c'(0)$ まで含めて使った。$c(L)=c(0)$ だけで接ベクトルが合わない区分的に滑らかな曲線では、角の外角を足す必要がある（補足）。
+- **$C^{\infty}$ 級**：$C^{1}$ 級で足りる（Step 2 は $c'$ の連続性だけを使う）。
+:::
+:::
+
+::: corollary 単純閉曲線の全曲率 {#surf:total-curvature-simple keywords="for a simple closed regular plane curve parametrized by arc length, the integral of the signed curvature over one period is 2 pi or -2 pi" index="全曲率（単純閉曲線）|ぜんきょくりつ"}
+平面の単純閉曲線 $c$（周期 $L$）について $\displaystyle\int_{0}^{L}\kappa(t)|c'(t)|\,dt=\pm2\pi$。弧長で径数づけられていれば $\int_{0}^{L}\kappa\,ds=\pm2\pi$。
+:::
+
+::: proof
+\ref{surf:rotation-number-properties.1} と \ref{surf:umlaufsatz}。
+:::
+
+::: supplement
+**一般化.** 区分的に滑らかな単純閉曲線では、角での外角 $\alpha_{j}\in(-\pi,\pi)$ を加えて $\sum_{j}\int\kappa\,ds+\sum_{j}\alpha_{j}=\pm2\pi$ が成り立つ（Hopf の 1935 年の論文。Klingenberg 第 2 章に証明がある）。凸多角形では $\kappa=0$ なので外角の和が $2\pi$ になる。これは曲面のガウス＝ボネの定理（\ref[ガウス＝ボネの定理（局所版）]{surf:page-gauss-bonnet-local}）の平面の場合である。
+
+**類似の定理.** 正則な閉曲線の回転数は、閉曲線を正則なまま連続に変形しても変わらず（回転数は曲率の積分で、変形に対して連続な整数値）、逆に回転数の等しい二つの正則閉曲線は正則なまま変形し合える（ホイットニー–グラウスタインの定理として知られる。本サイトでは扱わない）。
+
+**高い視点.** 回転数は、単位接ベクトルの写像 $e_{1}\colon\mathbb{R}/L\mathbb{Z}\to S^{1}$ の写像度にほかならない（\see{at:sec-deg-circle}）。ホップの証明は、三角形 $T$ を使って、接ベクトルの写像（対角線）を、弦の向きの写像（二辺）に連続に変形している。単純閉曲線では弦の向きの写像が具体的に計算でき、それが半回転ずつ二度で合計一回転する、というのが証明の核心である。
+:::
+
+## 凸曲線 {#surf:sec-pg-convex}
+
+::: definition 凸曲線 {#surf:convex-curve keywords="a closed regular plane curve is convex if it lies on one side of each of its tangent lines" index="凸曲線|とつきょくせん, 凸閉曲線|とつへいきょくせん"}
+平面の閉曲線 $c$ が**凸**であるとは、各 $t_{0}$ について、$h_{t_{0}}(t)\defeq\langle c(t)-c(t_{0}),e_{2}(t_{0})\rangle$ が「すべての $t$ で $\ge0$」か「すべての $t$ で $\le0$」のどちらかをみたすことをいう。すなわち、曲線は各点での接線の片側にある。
+:::
+
+::: intuition
+凸な閉曲線とは、どの点で接線を引いても、曲線全体がその接線の片側に収まる閉曲線のことである。
+:::
+
+::: lemma 閉曲線は直線に含まれない {#surf:closed-curve-not-in-line keywords="a closed regular curve is not contained in a straight line" index="閉曲線と直線|へいきょくせんとちょくせん"}
+平面の閉曲線の像は、一本の直線に含まれない。
+:::
+
+::: proof
+直線 $\{q+\lambda w\}$（$|w|=1$）に含まれれば $f(t)\defeq\langle c(t)-q,w\rangle$ について $c=q+fw$ で、$c'=f'w\neq0$ から $f'\neq0$。一方 $f$ は周期的で、$[0,L]$ 上の最大点はすべての $t$ での最大点なので $f'=0$ となる点がある（\ref{calc:mean-value-theorem.1}）。矛盾。
+:::
+
+::: theorem 凸曲線の特徴づけ {#surf:convex-characterization keywords="a simple closed regular plane curve is convex iff its signed curvature does not change sign; convex closed curves have curvature of constant sign even without simplicity" index="凸曲線の特徴づけ|とつきょくせんのとくちょうづけ"}
+$c$ を平面の閉曲線とする。
+1. $c$ が凸なら、すべての $t$ で $\kappa(t)\ge0$ であるか、すべての $t$ で $\kappa(t)\le0$ である。
+2. $c$ が単純閉曲線で、$\kappa\ge0$（または $\kappa\le0$）が常に成り立てば、$c$ は凸である。
+:::
+
+::: intuition
+凸な閉曲線は、いつも同じ側に曲がる（曲率の符号が変わらない）。逆に、自分と交わらない閉曲線がいつも同じ側に曲がっていれば、凸である。
+:::
+
+::: proof
+**Step 1（接線からの高さ）.** 【主張：$\kappa(t_{0})>0$ なら $t_{0}$ の近くの $t\neq t_{0}$ で $h_{t_{0}}(t)>0$、$\kappa(t_{0})<0$ なら $<0$】$h\defeq h_{t_{0}}$ は $C^{\infty}$ 級で、$h(t_{0})=0$、$h'(t_{0})=\langle c'(t_{0}),e_{2}(t_{0})\rangle=0$、$h''(t_{0})=\langle c''(t_{0}),e_{2}(t_{0})\rangle=v(t_{0})^{2}\kappa(t_{0})$（記法の $c''$ の式）。テイラーの定理（\ref{calc:taylor-peano.1}、$n=2$）から $h(t)=\frac12v(t_{0})^{2}\kappa(t_{0})(t-t_{0})^{2}+o((t-t_{0})^{2})$。
+
+**Step 2（1）.** 【主張：$c$ が凸なら、すべての $t_{0}$ で $h_{t_{0}}\ge0$ であるか、すべての $t_{0}$ で $h_{t_{0}}\le0$ である】$S_{\pm}\defeq\{t_{0}\in\mathbb{R}\mid\text{すべての }t\text{ で }\pm h_{t_{0}}(t)\ge0\}$ とおく。$h_{t_{0}}(t)$ は $t_{0}$ について連続なので、$S_{\pm}$ は閉集合の共通部分として閉集合で、凸性から $S_{+}\cup S_{-}=\mathbb{R}$。$t_{0}\in S_{+}\cap S_{-}$ なら $h_{t_{0}}\equiv0$ で、$c$ は $c(t_{0})$ での接線に含まれ、\ref{surf:closed-curve-not-in-line} に反する。よって $S_{+}\cap S_{-}=\emptyset$。$\sigma\defeq1$（$S_{+}$ 上）、$-1$（$S_{-}$ 上）は、各点の近くでもう一方の閉集合と交わらないので連続で、中間値の定理から定数。
+
+**Step 3（1 の結論）.** 【主張：すべての $t_{0}$ で $h_{t_{0}}\ge0$ なら $\kappa\ge0$】$\kappa(t_{0})<0$ なら Step 1 から $t_{0}$ の近くで $h_{t_{0}}<0$ となり矛盾。$\le0$ の場合も同様に $\kappa\le0$。
+
+**Step 4（2：準備）.** 【主張：$\kappa\ge0$ の単純閉曲線が凸でないとすると、$e_{1}(s_{1})=e_{1}(s_{2})$, $s_{1}<s_{2}<s_{1}+L$ で、$h\defeq h_{t_{0}}$ の値 $h(s_{1})\neq h(s_{2})$ となるものがある】凸でないので、ある $t_{0}$ で $h$ は正の値と負の値をとる。$h$ は周期的なので最大点 $t_{+}$ と最小点 $t_{-}$ があり、$h(t_{-})<0=h(t_{0})<h(t_{+})$。最大点・最小点では $h'=\langle c',e_{2}(t_{0})\rangle=0$ なので、$e_{1}(t_{\pm})$ は $e_{2}(t_{0})$ に直交する単位ベクトル、すなわち $\pm e_{1}(t_{0})$。三つの単位ベクトル $e_{1}(t_{0}),e_{1}(t_{+}),e_{1}(t_{-})$ は二つの値しかとらないので、二つが等しい。その二つのパラメータを $L$ の整数倍ずらして $s_{1}<s_{2}<s_{1}+L$ とする。$h$ の三つの値は相異なるので $h(s_{1})\neq h(s_{2})$。
+
+**Step 5（2：矛盾）.** 【主張：Step 4 の状況は起こらない】$\theta$ を $e_{1}$ の $\mathbb{R}$ 上の持ち上げ（\ref{surf:tangent-angle}）とすると $\theta'=\kappa|c'|\ge0$ で、$\theta$ は単調非減少。$\theta(s_{2})-\theta(s_{1})=2\pi k$, $\theta(s_{1}+L)-\theta(s_{2})=2\pi k'$（$k,k'\in\mathbb{Z}$, $k,k'\ge0$）で、\ref{surf:rotation-number-properties.2} とホップの回転定理から $k+k'=n_{c}=\pm1$。よって $k$ か $k'$ の一方は $0$ で、$[s_{1},s_{2}]$ か $[s_{2},s_{1}+L]$ の上で $\theta$ は定数、すなわち $e_{1}$ は定数 $e_{1}(s_{1})=\pm e_{1}(t_{0})$。その区間で $c'$ は $e_{2}(t_{0})$ に直交するので $h'=0$ で、$h$ は両端で等しい。$h(s_{1}+L)=h(s_{1})$ なので、どちらの場合も $h(s_{1})=h(s_{2})$ となり、Step 4 に反する。$\kappa\le0$ の場合は逆向きの曲線 $c(-t)$（曲率 $-\kappa(-t)\ge0$、単純で、接線の片側にあるかどうかは変わらない）に帰着する。
+
+::: hypcheck
+- **前提「単純」**：2 の Step 5 でホップの回転定理に使った。1 には使わない。外すと 2 は偽（\ref{surf:limacon}）。
+- **前提「閉曲線」**：1 では Step 2 で \ref{surf:closed-curve-not-in-line} に、2 では Step 4 の最大点・最小点の存在と Step 5 に使った。閉じていない曲線（たとえば $\kappa>0$ の渦巻き）は凸の定義の外である。
+- **$\kappa\ge0$ と $\kappa>0$**：2 は $\kappa\ge0$（直線部分を許す）で成り立つ。たとえば角を丸めた正方形（陸上競技のトラックの形）は直線部分をもつ凸曲線である。
+:::
+:::
+
+::: counterexample 単純でない閉曲線 {#surf:limacon keywords="limacon with inner loop r = 1 + 2 cos t has positive curvature but is not convex; rotation number 2" index="リマソン|りまそん, パスカルの蝸牛形|ぱすかるのかぎゅうけい"}
+極方程式 $r(t)=1+2\cos t$ の曲線 $c(t)\defeq r(t)\mathbf{u}(t)$（**リマソン**、周期 $2\pi$）は、正則で $\kappa>0$ だが凸でなく、単純でもない。
+:::
+
+::: proof
+$u\defeq\mathbf{u}(t)$ とすると $u'=Ju$, $(Ju)'=-u$ なので、$c'=r'u+rJu$, $c''=(r''-r)u+2r'Ju$。$\det(au+bJu,pu+qJu)=aq-bp$（$\det(u,Ju)=1$）から
+$$
+\det(c',c'')=2r'^{2}-r(r''-r)=r^{2}+2r'^{2}-rr'',\qquad|c'|^{2}=r^{2}+r'^{2}.
+$$
+$r=1+2\cos t$, $r'=-2\sin t$, $r''=-2\cos t$ を代入すると $|c'|^{2}=5+4\cos t\ge1$（正則）、$\det(c',c'')=9+6\cos t\ge3$ なので $\kappa>0$（\ref{surf:plane-curvature-formula.2}）。$t=\pi$ では $c(\pi)=(1,0)$, $c'(\pi)=(0,1)$ で、接線は $x=1$。$c(0)=(3,0)$ は $x>1$、$c(\pi/2)=(0,1)$ は $x<1$ の側にあるので凸でない。$t=\frac{2\pi}3,\frac{4\pi}3$ で $r=0$、$c=0$ なので単純でない。
+:::
+
+## 四頂点定理 {#surf:sec-pg-four-vertex}
+
+::: definition 頂点 {#surf:vertex keywords="vertex of a plane curve: a critical point of the signed curvature, kappa'(t) = 0" index="頂点（曲線の）|ちょうてん"}
+平面の正則曲線 $c$ について、$\kappa'(t)=0$ となる $t$ を $c$ の**頂点**という。周期 $L$ の閉曲線では、頂点は $[0,L)$ の中で数える。
+:::
+
+::: intuition
+頂点とは、曲がり方の強さ（曲率）が増えも減りもしない点で、曲率が一番強いところや一番弱いところがその例である。
+:::
+
+::: theorem 四頂点定理 {#surf:four-vertex keywords="four vertex theorem: a simple closed convex regular plane curve has at least four vertices" index="四頂点定理|よんちょうてんていり" refname="四頂点定理"}
+平面の凸な単純閉曲線は、少なくとも 4 つの頂点をもつ。
+:::
+
+::: intuition
+卵形の閉曲線では、曲がり方の強さは一周の間に少なくとも二度強くなって二度弱くなる。一度強くなって一度弱くなるだけ（頂点が二つだけ）ということはありえない。
+:::
+
+::: proof
+周期を $L$ とする。
+
+**Step 1（帰着）.** 【主張：$c$ は弧長で径数づけられ、$\kappa\ge0$、$n_{c}=1$、$\kappa$ は定数でなく、$\kappa'$ の零点は $[0,L)$ に有限個（3 個以下）と仮定して矛盾を導けばよい】\ref{surf:arc-length-reparametrization} の $s$ は $s(t+L)=s(t)+\ell$（$\ell$ は一周の長さ）をみたすので、$c\circ s^{-1}$ は周期 $\ell$ の閉曲線で、曲率は $\kappa\circ s^{-1}$（\ref{surf:curvature-invariance.1}）、頂点は $s$ で一対一に対応する。凸性は接線と曲線の像だけで決まるので保たれる。\ref{surf:convex-characterization.1} から $\kappa\ge0$ または $\kappa\le0$ で、後者なら逆向きの曲線に替える。$n_{c}=\frac1{2\pi}\int\kappa\ge0$ とホップの回転定理から $n_{c}=1$。$\kappa$ が定数なら $\kappa'\equiv0$ で頂点は無限個。$\kappa'$ の零点が無限個なら主張は成り立つ。
+
+**Step 2（曲率の増減）.** 【主張：パラメータをずらして $\kappa$ の最小点を $0$、最大点を $t_{0}\in(0,L)$ とすると、$[0,t_{0}]$ で $\kappa'\ge0$、$[t_{0},L]$ で $\kappa'\le0$】最小点と最大点は $\kappa'$ の零点で、$\kappa$ は定数でないので相異なる。零点は 3 個以下なので、$0,t_{0}$ のほかの零点は高々 1 個。それが $(0,t_{0})$ にあるとすると、$(t_{0},L)$ には零点がなく $\kappa'$ の符号は一定で、$\kappa(t_{0})>\kappa(L)=\kappa(0)$ から $\kappa'<0$。$(0,t_{0})$ を零点 $z$ で分けた二つの区間でも符号は一定で、$(0,z)$ で $\kappa'<0$ なら $\kappa(z)<\kappa(0)$（最小値に反する）、$(z,t_{0})$ で $\kappa'<0$ なら $\kappa(z)>\kappa(t_{0})$（最大値に反する）。$(t_{0},L)$ にある場合も同様。
+
+**Step 3（積分の恒等式）.** 【主張：任意の $\nu\in\mathbb{R}^{2}$, $b\in\mathbb{R}$ について $\int_{0}^{L}\kappa'(t)\bigl(\langle c(t),\nu\rangle-b\bigr)\,dt=0$】部分積分（\ref{calc:substitution-parts}）と周期性から $\int_{0}^{L}\kappa'\langle c,\nu\rangle=-\int_{0}^{L}\kappa\langle e_{1},\nu\rangle$。弧長パラメータでは $e_{2}'=-\kappa e_{1}$ なので、これは $\langle e_{2}(L)-e_{2}(0),\nu\rangle=0$。$\int_{0}^{L}\kappa'=\kappa(L)-\kappa(0)=0$。
+
+**Step 4（高さ関数は一度増えて一度減る）.** 【主張：単位ベクトル $\nu$ について $g(t)\defeq\langle c(t),\nu\rangle$ とすると、$p<q<p+L$ で、$g$ は $[p,q]$ で単調非減少、$[q,p+L]$ で単調非増加となるものがある。$g$ の最大値は $g(q)$、最小値は $g(p)$】$\nu=\mathbf{u}(\beta)$、$\theta$ を $e_{1}$ の持ち上げとすると $g'=\langle\mathbf{u}(\theta),\mathbf{u}(\beta)\rangle=\cos(\theta-\beta)$。$\theta$ は単調非減少（$\theta'=\kappa\ge0$）で $\theta(t+L)=\theta(t)+2\pi$（\ref{surf:rotation-number-properties.2}、$n_{c}=1$）。$\theta(\mathbb{R})=\mathbb{R}$ なので、$\theta(p)=\beta-\frac\pi2$ となる最小の $p$ と、$\theta(q)=\beta+\frac\pi2$ となる最大の $q$ がある（逆像は閉集合で、$\theta$ の単調性と $\theta(t\pm L)=\theta(t)\pm2\pi$ から有界）。$[p,q]$ では $\theta-\beta\in[-\frac\pi2,\frac\pi2]$ で $g'\ge0$、$[q,p+L]$ では $\theta-\beta\in[\frac\pi2,\frac{3\pi}2]$ で $g'\le0$。$q<p+L$ は $\theta(p+L)=\beta+\frac{3\pi}2>\theta(q)$ から。$g(p+L)=g(p)$ なので最大値・最小値の主張が従う。
+
+**Step 5（弦の両側）.** 【主張：$c(0)$ と $c(t_{0})$ を通る直線の単位法線 $\nu$ と $b\defeq\langle c(0),\nu\rangle$ について、$g\defeq\langle c,\nu\rangle$ は $[0,t_{0}]$ で $\ge b$、$[t_{0},L]$ で $\le b$ であるか、またはその逆で、さらに $g>b$ となる開区間と $g<b$ となる開区間がある】$c(0)\neq c(t_{0})$（単純性）なので $\nu$ は定まり、$g(0)=g(t_{0})=b$。まず、$g\equiv b$ となる区間の上では $\langle c',\nu\rangle=0$ から $e_{1}$ は定数で $\kappa=\langle e_{1}',e_{2}\rangle=0$ であることに注意する。(a) $b$ が $g$ の最大値の場合：Step 4 から $\{t\in[p,p+L]\mid g(t)=b\}$ は $q$ を含む一つの閉区間で、$0$ と $t_{0}$ の（$L$ の整数倍ずらした）代表を含むので、それらの間で $g\equiv b$、とくに最大点 $t_{0}$ で $\kappa=0$ となり、$\kappa\ge0$ から $\kappa\equiv0$、$n_{c}=0$ で矛盾。最小値の場合は $\nu$ を $-\nu$ に替えて同じ。(b) したがって $g(p)<b<g(q)$。Step 4 の単調性から、$J_{1}\defeq\{t\in[p,q]\mid g=b\}$ と $J_{2}\defeq\{t\in[q,p+L]\mid g=b\}$ は閉区間で、$[p,p+L]$ の中で $p<J_{1}<q<J_{2}<p+L$ の順に並び、$J_{1}$ と $J_{2}$ の間の開区間 $A$（$q$ を含む）で $g>b$、残りの部分 $B$（$p$ と $p+L$ を含む）で $g<b$。$0$ と $t_{0}$ の代表は $J_{1}\cup J_{2}$ にあり、同じ $J_{i}$ にあれば (a) と同じく $\kappa(t_{0})=0$ で矛盾。よって一方が $J_{1}$、他方が $J_{2}$ にあり、$0$ から $t_{0}$ へ進む弧は $A$ か $B$ の一方を通り、$t_{0}$ から $L$ へ進む弧は他方を通る。
+
+**Step 6（矛盾）.** 【主張：$\kappa'(g-b)$ は恒等的に $0$ になり、$\kappa'$ の零点が無限個になる】Step 2 と Step 5 から、$\kappa'(g-b)$ は $[0,L]$ 全体で $\ge0$、または全体で $\le0$。Step 3 からその積分は $0$ なので、連続性から $\kappa'(g-b)\equiv0$。$g\neq b$ の開区間 $A$ の上で $\kappa'=0$ となり、$\kappa'$ の零点は無限個。Step 1 の仮定に反する。
+
+::: hypcheck
+- **前提「凸」**：Step 1 で $\kappa\ge0$ を得るのに使い、それは Step 4 の $\theta$ の単調性（高さ関数が一度だけ増えて一度だけ減ること）に効いている。
+- **前提「単純」**：Step 1 の $n_{c}=1$（ホップの回転定理）と、Step 5 の $c(0)\neq c(t_{0})$ に使った。
+- **前提「閉曲線」**：Step 3 の部分積分で境界項が消えることに使った。
+- **凸性は本質的でない**：単純閉曲線であれば凸でなくても四頂点定理は成り立つ（Klingenberg 第 2 章の注。証明はより難しい）。単純でない閉曲線では偽になりうる：リマソン（\ref{surf:limacon}）では $\kappa=(9+6\cos t)/(5+4\cos t)^{3/2}$ で、これが極値をとるのは $\sin t=0$ のときだけなので、頂点は 2 つ。
+:::
+:::
+
+::: example
+楕円 $c(t)=(a\cos t,b\sin t)$（$a>b>0$）の曲率は $\kappa=ab(a^{2}\sin^{2}t+b^{2}\cos^{2}t)^{-3/2}$（\ref{surf:prob-cf-ellipse}）で、$\kappa'=-\frac32ab(a^{2}-b^{2})\cdot2\sin t\cos t\,(a^{2}\sin^{2}t+b^{2}\cos^{2}t)^{-5/2}$。頂点は $\sin t\cos t=0$、すなわち $t=0,\frac\pi2,\pi,\frac{3\pi}2$ の 4 つ（長軸と短軸の端）で、四頂点定理の 4 は改善できない。
+:::
+
+## 問題 {#surf:sec-pg-problems}
+
+::: problem {#surf:prob-pg-ellipse-rotation}
+★ 基本：楕円 $c(t)=(a\cos t,b\sin t)$（$a,b>0$, 周期 $2\pi$）の回転数が $1$ であることを、ホップの回転定理を使って示せ。
+:::
+
+::: solution
+$\mathbf{u}(t)$ の角度の一意性から $t\mapsto(\cos t,\sin t)$ は $[0,2\pi)$ で単射なので、$c$ も単射で、単純閉曲線。ホップの回転定理から $n_{c}=\pm1$。曲率は $ab(\cdots)^{-3/2}>0$ なので $n_{c}=\frac{1}{2\pi}\int\kappa|c'|>0$、よって $n_{c}=1$。
+:::
+
+::: problem {#surf:prob-pg-multiple}
+★ 基本：周期 $L$ の閉曲線 $c$ を、周期 $mL$（$m\ge1$）の閉曲線とみたときの回転数は $mn_{c}$ であることを示せ。また、回転数が $0$ の閉曲線では、$\kappa$ は $0$ になる点をもつことを示せ。
+:::
+
+::: solution
+$\frac{1}{2\pi}\int_{0}^{mL}\kappa|c'|=\sum_{j=0}^{m-1}\frac1{2\pi}\int_{jL}^{(j+1)L}\kappa|c'|=mn_{c}$（被積分関数は周期 $L$）。後半：$\int_{0}^{L}\kappa|c'|=0$ で $|c'|>0$ なので、$\kappa$ が常に正または常に負ということはなく、中間値の定理から $\kappa=0$ となる点がある。
+:::
+
+::: problem {#surf:prob-pg-strictly-convex}
+★★ 標準：$\kappa>0$ の単純閉曲線（周期 $L$）では、単位接ベクトル $t\mapsto e_{1}(t)$ は $[0,L)$ から $S^{1}$ への全単射であることを示せ。とくに、各単位ベクトル $w$ について、$e_{2}(t)=w$ となる点がちょうど一つある。
+:::
+
+::: solution
+持ち上げ $\theta$ は $\theta'=\kappa|c'|>0$ で狭義増加、ホップの回転定理と $\kappa>0$ から $\theta(L)=\theta(0)+2\pi$。$\theta$ は $[0,L)$ から $[\theta(0),\theta(0)+2\pi)$ への全単射（中間値の定理と狭義単調性）で、$\mathbf{u}$ はこの区間で単射かつ全射（角度は $2\pi$ の整数倍を除いて一意で、長さ $2\pi$ の半開区間にちょうど一つの代表がある）。$e_{2}=Je_{1}$ で $J$ は全単射。
+:::
+
+::: problem {#surf:prob-pg-limacon-rotation}
+★★★ 発展：リマソン（\ref{surf:limacon}）の回転数が $2$ であることを示せ。積分 $\int_{0}^{2\pi}\frac{dt}{5+4\cos t}=\frac{2\pi}{3}$ は使ってよい（置換 $t=2\arctan u$、または留数定理で計算できる）。
+:::
+
+::: solution
+\ref{surf:limacon} の計算から $\kappa|c'|=\det(c',c'')/|c'|^{2}=\frac{9+6\cos t}{5+4\cos t}=\frac32+\frac{3/2}{5+4\cos t}$。積分すると $3\pi+\frac32\cdot\frac{2\pi}3=4\pi$ で、$n_{c}=2$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=0da81835"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=0b0e07b5"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
