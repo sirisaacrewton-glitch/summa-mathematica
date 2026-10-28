@@ -238,7 +238,7 @@ def statement_text(lab, limit=700):
     return t[:limit] + (" …" if len(t) > limit else "")
 
 
-def label_table(src, rel=None):
+def label_table(src, rel=None, brief=False):
     """The cited results with their statements (and the text of each cited item), for the referee."""
     global _LABELS
     if _LABELS is None:
@@ -269,7 +269,7 @@ def label_table(src, rel=None):
         if rel and L.get("page") == rel and not items[base]:
             continue  # on this page: the referee sees it in the source
         kind = ("%s %s" % (L.get("type", ""), L.get("num", ""))).strip()
-        st = statement_text(base) if L.get("type") not in ("page", "section") else ""
+        st = statement_text(base) if L.get("type") not in ("page", "section") and not brief else ""
         out.append("- `%s` — %s「%s」(%s)%s" % (base, kind, L.get("title", ""), L.get("page", ""), (": " + st) if st else ""))
         for k in items[base]:
             out.append("  - cited item `%s.%s`: %s" % (base, k, item_text(base, k) or "(see the statement)"))
@@ -538,6 +538,18 @@ def verify(rel, args, meta, do_assist=False):
     if args.dry_run:
         print("  would verify %s (%d chars, %d open, %d closed) -> %s" % (rel, len(src), len(open_issues), len(closed), tracker_path(rel)))
         return False
+    if args.style == "minimal":
+        q = ATOMIC_Q + "\n\n<context>\nCited results (title; quoted text of each cited item):\n" + label_table(src, rel, brief=True) + \
+            "\n</context>\n\n<passage>\n" + src + "\n</passage>"
+        a = deepseek_api.chat(None, q, model=args.model,
+                              **({"max_tokens": 16000, "timeout": 1500} if deepseek_api.is_reasoner(args.model) else {}))
+        cands = []
+        for blk in re.findall(r"<error>([\s\S]*?)</error>", a or ""):
+            quote, why, fix = (_xml("quote", blk) or [""])[0], (_xml("why", blk) or [""])[0], (_xml("fix", blk) or [""])[0]
+            cands.append({"category": "Error", "title": why[:80], "location": "", "quote": quote, "problem": why,
+                          "proposed_fix": fix, "second_opinion": {"verdict": "valid", "reason": "(no second opinion in this style)"}})
+        print("  %s: %d candidates" % (rel, len(cands)))
+        return finish(rel, args, meta, issues, tp, {"existing": [], "new_issues": [], "summary": ""}, cands, cands)
     if args.style == "atomic":
         cands = atomic_candidates(rel, src, args)
         for n in cands:
@@ -629,8 +641,8 @@ def main():
     ap.add_argument("--rev", help="read the pages at this git revision instead of the working tree")
     ap.add_argument("--out-dir", help="benchmark mode: write raw JSON results here and do not touch trackers")
     ap.add_argument("--no-confirm", action="store_true", help="skip the second-opinion stage")
-    ap.add_argument("--style", choices=["page", "atomic"], default=os.environ.get("VERIFY_STYLE") or "page",
-                    help="page: one referee call per page; atomic: one short question per unit of the page")
+    ap.add_argument("--style", choices=["page", "atomic", "minimal"], default=os.environ.get("VERIFY_STYLE") or "page",
+                    help="page: referee prompt + second opinion; atomic: one short question per unit; minimal: one short question per page")
     ap.add_argument("--unit-workers", type=int, default=4, help="parallel calls per page in the atomic style")
     ap.add_argument("--assist", action="store_true",
                     help="also write verifications/<path>_assist.md (step claims, alternative proofs/definitions)")

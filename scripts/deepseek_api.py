@@ -5,11 +5,13 @@ The API key is read from the environment variable DEEPSEEK_API_KEY and is
 never printed or written anywhere.
 """
 
+import atexit
 import http.client
 import json
 import os
 import re
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -28,6 +30,17 @@ STRICT_LATEX_RULES = """Strict LaTeX Rules (Must Follow):
 
 
 _SEEN_MODELS = set()
+USAGE = {"calls": 0, "prompt_tokens": 0, "cache_hit_tokens": 0, "completion_tokens": 0, "reasoning_tokens": 0}
+_USAGE_LOCK = threading.Lock()
+
+
+def _report_usage():
+    if USAGE["calls"]:
+        print("DeepSeek usage: %(calls)d calls, %(prompt_tokens)d prompt tokens (%(cache_hit_tokens)d cache hits), "
+              "%(completion_tokens)d completion tokens (%(reasoning_tokens)d reasoning)" % USAGE, file=sys.stderr)
+
+
+atexit.register(_report_usage)
 
 
 def is_reasoner(model):
@@ -79,6 +92,13 @@ def chat(system, user, *, model=DEFAULT_MODEL, temperature=0.0, max_tokens=8192,
             if served and served not in _SEEN_MODELS:
                 _SEEN_MODELS.add(served)
                 print("DeepSeek served model: %s" % served, file=sys.stderr)
+            u = payload.get("usage") or {}
+            with _USAGE_LOCK:
+                USAGE["calls"] += 1
+                USAGE["prompt_tokens"] += u.get("prompt_tokens", 0)
+                USAGE["cache_hit_tokens"] += u.get("prompt_cache_hit_tokens", 0)
+                USAGE["completion_tokens"] += u.get("completion_tokens", 0)
+                USAGE["reasoning_tokens"] += (u.get("completion_tokens_details") or {}).get("reasoning_tokens", 0)
             choice = payload["choices"][0]
             text = choice["message"].get("content") or ""
             if choice.get("finish_reason") == "length":

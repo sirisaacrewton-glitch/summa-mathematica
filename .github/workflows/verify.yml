@@ -8,15 +8,10 @@ name: verify
 #   mode "all"  : full audit of every page, split over 8 parallel jobs
 #   mode "bench": run the verifier on scripts/bench/benchmark.json (pages at a fixed old revision with known
 #                 true and false findings) and push the raw results to verifications/bench/ for scoring
+# 2026-10-28: automatic runs on push are switched off to save DeepSeek tokens (user request) until the
+# verification method is chosen by the benchmark. Re-enable by restoring the push trigger:
+#   push: {branches: [main], paths: ['0[1-5]-*/**/*.html', 'src/**/*.md', 'src/**/*.tex', 'verifications/**_tracker.md', '0[1-5]-*/**/_meta.json']}
 on:
-  push:
-    branches: [main]
-    paths:
-      - '0[1-5]-*/**/*.html'
-      - 'src/**/*.md'
-      - 'src/**/*.tex'
-      - 'verifications/**_tracker.md'
-      - '0[1-5]-*/**/_meta.json'
   workflow_dispatch:
     inputs:
       mode:
@@ -36,12 +31,12 @@ on:
       style:
         description: 'page = one referee call per page; atomic = one short question per unit of the page'
         type: choice
-        options: [page, atomic]
+        options: [page, atomic, minimal]
         default: page
       assist:
         description: 'Also write *_assist.md (step claims, alternative proofs/definitions)'
         type: boolean
-        default: true
+        default: false
       skip_verified:
         description: 'mode all: skip pages that already have a tracker (resume an interrupted audit)'
         type: boolean
@@ -149,7 +144,8 @@ jobs:
           VERIFY_STYLE: ${{ inputs.style }}
         run: |
           REV=$(python -c "import json;print(json.load(open('scripts/bench/benchmark.json'))['rev'])")
-          FILES=$(python -c "import json;print(' '.join(p['page'] for p in json.load(open('scripts/bench/benchmark.json'))['pages']))")
+          FILES="${{ inputs.files }}"
+          [ -z "$FILES" ] && FILES=$(python -c "import json;print(' '.join(p['page'] for p in json.load(open('scripts/bench/benchmark.json'))['pages']))")
           python scripts/verify.py --files $FILES --rev $REV --workers 5 --max-files 100 \
             --out-dir "verifications/bench/${DEEPSEEK_MODEL}-${VERIFY_STYLE}-run${{ github.run_number }}"
 
