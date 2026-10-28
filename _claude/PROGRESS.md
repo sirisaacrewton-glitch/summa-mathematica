@@ -225,7 +225,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | TM-02〜08 | （01-topological-manifolds）/02〜08 | シェーンフリース〜閉曲面の分類 | 旧 MF-05〜11 を移動 | 完了（2026-10-29 移動） |
 | TM-09 | （01-topological-manifolds）/09-triangulation-smoothing | 三角形分割の事実 | 旧 MF-12。埋め込みは TM-01 へ、可微分構造の事実は SM-08 へ分ける | 要分割 |
 | TM-E | （01-topological-manifolds）/10-exercises | 演習 | | 未着手 |
-| SM-01 | 04-manifolds/02-smooth-manifolds/01-smooth-manifolds | 可微分多様体と接空間 | C^r 級多様体の定義に一般化、C^r 構造の中の C^∞ 構造（ホイットニー、fact）、導分の接空間は C^∞ のみ | 要改訂 |
+| SM-01 | 04-manifolds/02-smooth-manifolds/01-smooth-manifolds | 可微分多様体と接空間 | C^r 級多様体の定義に一般化、C^r だが C^{r+1} でないアトラスの例（mfd:cr-not-cr1）、C^r 構造の中の C^∞ 構造（ホイットニー、fact）、導分の接空間は C^∞ のみ（注意） | 完了（2026-10-29） |
 | SM-02〜04 | （02-smooth-manifolds）/02〜04 | 1 の分割・部分多様体、微分形式、積分とストークス | 旧 MF-02〜04 | 完了 |
 | SM-05 | （02-smooth-manifolds）/05-vector-fields | ベクトル場とリー微分 | 積分曲線・流れ、リー括弧、内部積、リー微分、カルタンの公式 | 未着手 |
 | SM-06 | （02-smooth-manifolds）/06-sard | サードの定理 | 測度 0、サードの定理（C^∞ で証明）、滑らかさの条件と反例（注意） | 未着手 |
