@@ -33,6 +33,11 @@ on:
         type: choice
         options: [deepseek-chat, deepseek-reasoner]
         default: deepseek-chat
+      style:
+        description: 'page = one referee call per page; atomic = one short question per unit of the page'
+        type: choice
+        options: [page, atomic]
+        default: page
       assist:
         description: 'Also write *_assist.md (step claims, alternative proofs/definitions)'
         type: boolean
@@ -66,6 +71,7 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_MODEL: ${{ inputs.model || 'deepseek-chat' }}
+          VERIFY_STYLE: ${{ inputs.style || 'page' }}
           FILES: ${{ inputs.files }}
           ASSIST: ${{ github.event_name == 'push' || inputs.assist }}
         run: |
@@ -81,6 +87,7 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_MODEL: ${{ inputs.model || 'deepseek-chat' }}
+          VERIFY_STYLE: ${{ inputs.style || 'page' }}
         run: python scripts/roadmap.py --git-range "${{ github.event.before }}..${{ github.sha }}"
 
       - name: Push trackers to verifications/
@@ -109,6 +116,7 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_MODEL: ${{ inputs.model || 'deepseek-chat' }}
+          VERIFY_STYLE: ${{ inputs.style || 'page' }}
           ASSIST: ${{ inputs.assist }}
           SKIP: ${{ inputs.skip_verified }}
         run: |
@@ -138,11 +146,12 @@ jobs:
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           DEEPSEEK_MODEL: ${{ inputs.model }}
+          VERIFY_STYLE: ${{ inputs.style }}
         run: |
           REV=$(python -c "import json;print(json.load(open('scripts/bench/benchmark.json'))['rev'])")
           FILES=$(python -c "import json;print(' '.join(p['page'] for p in json.load(open('scripts/bench/benchmark.json'))['pages']))")
           python scripts/verify.py --files $FILES --rev $REV --workers 5 --max-files 100 \
-            --out-dir "verifications/bench/${DEEPSEEK_MODEL}-run${{ github.run_number }}"
+            --out-dir "verifications/bench/${DEEPSEEK_MODEL}-${VERIFY_STYLE}-run${{ github.run_number }}"
 
       - name: Push results to verifications/bench/
         if: always()

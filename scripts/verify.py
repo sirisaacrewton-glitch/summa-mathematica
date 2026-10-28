@@ -375,6 +375,98 @@ def next_id(issues):
     return "ISSUE-%04d" % (n + 1)
 
 
+# ---------------------------------------------------------------- atomic style
+# One short question per unit of the page (a statement with its proof, a remark, a fact, ...), with only the
+# notation and the statements the unit cites. Minimal instruction, XML output, no system prompt.
+
+ATOMIC_Q = """Find the mathematical errors in the passage below (from a Japanese mathematics textbook).
+An error is a false statement, an inference that does not follow, or a citation that does not give what is used. Ignore style, wording and terseness.
+For each error output <error><quote>the exact sentence, in Japanese</quote><why>why it is wrong, in English</why><fix>the correction, in English</fix></error>. If there is no error, output <none/>.
+
+""" + deepseek_api.STRICT_LATEX_RULES
+
+ATOMIC_CONFIRM = """Is the claimed error below a real mathematical error in the passage? Wording and terseness are not errors.
+Output <verdict>valid</verdict> or <verdict>invalid</verdict>, then <reason>one to three sentences in English</reason>.
+
+""" + deepseek_api.STRICT_LATEX_RULES
+
+UNIT_RE = re.compile(r"(?m)^::: (\w+)")
+
+
+def split_units(src, limit=7000):
+    """Top-level blocks: a statement together with the proof/hypcheck that follow it; other environments alone;
+    prose between environments goes with the next block. Long blocks are kept whole."""
+    lines = src.split("\n")
+    blocks, cur, depth, kind = [], [], 0, None
+    for ln in lines:
+        m = re.match(r"^::: (\w+)", ln)
+        if m and depth == 0:
+            k = m.group(1)
+            attach = k in ("proof", "hypcheck") and kind in ("theorem", "lemma", "proposition", "corollary", "construction")
+            if cur and not attach and any(l.startswith(":::") for l in cur):
+                blocks.append("\n".join(cur))
+                cur = []
+            if not attach:
+                kind = k
+        if re.match(r"^::: \w", ln):
+            depth += 1
+        elif re.match(r"^:::\s*$", ln):
+            depth = max(0, depth - 1)
+        cur.append(ln)
+    if cur:
+        blocks.append("\n".join(cur))
+    units = []
+    for b in blocks:
+        k = UNIT_RE.search(b)
+        if not k or k.group(1) in ("notation", "table") and len(b) < 200:
+            continue
+        units.append(b[:limit * 2])
+    return units
+
+
+def _xml(tag, text):
+    return [re.sub(r"\s+", " ", m).strip() for m in re.findall(r"<%s>([\s\S]*?)</%s>" % (tag, tag), text or "")]
+
+
+def atomic_candidates(rel, src, args):
+    notation = "\n".join(m.group(0) for m in re.finditer(r"(?ms)^::: notation\n.*?^:::\s*$", src))[:4000]
+    units = split_units(src)
+    out = []
+
+    def ask(u):
+        ctx = label_table(u, None)
+        q = ATOMIC_Q + "\n\n<context>\n" + notation + "\n\nCited statements:\n" + ctx + "\n</context>\n\n<passage>\n" + u + "\n</passage>"
+        try:
+            return u, deepseek_api.chat(None, q, model=args.model,
+                                        **({"max_tokens": 32000, "timeout": 1200} if deepseek_api.is_reasoner(args.model) else {}))
+        except deepseek_api.DeepSeekError as e:
+            print("  unit failed: %s" % e)
+            return u, ""
+
+    with ThreadPoolExecutor(max_workers=max(1, args.unit_workers)) as ex:
+        answers = list(ex.map(ask, units))
+    for u, a in answers:
+        for blk in re.findall(r"<error>([\s\S]*?)</error>", a or ""):
+            quote, why, fix = (_xml("quote", blk) or [""])[0], (_xml("why", blk) or [""])[0], (_xml("fix", blk) or [""])[0]
+            m = re.search(r"\{#([^ }]+)", u)
+            out.append({"category": "Error", "title": why[:80], "location": m.group(1) if m else "(prose)",
+                        "quote": quote, "problem": why, "proposed_fix": fix, "_unit": u})
+    print("  %s: %d units, %d candidates" % (rel, len(units), len(out)))
+    return out
+
+
+def atomic_confirm(issue, args):
+    q = ATOMIC_CONFIRM + "\n\n<passage>\n" + issue["_unit"] + "\n</passage>\n\n<context>\nCited statements:\n" + \
+        label_table(issue["_unit"], None) + "\n</context>\n\n<claimed_error>\n" + issue["quote"] + "\n" + issue["problem"] + "\n</claimed_error>"
+    try:
+        a = deepseek_api.chat(None, q, model=args.model,
+                              **({"max_tokens": 32000, "timeout": 1200} if deepseek_api.is_reasoner(args.model) else {}))
+    except deepseek_api.DeepSeekError as e:
+        return {"verdict": "unsure", "reason": "second opinion failed: %s" % e}
+    v = ((_xml("verdict", a) or ["unsure"])[0]).lower()
+    return {"verdict": v if v in ("valid", "invalid") else "unsure", "reason": (_xml("reason", a) or [""])[0]}
+
+
 def read_source(rel, rev=None):
     if rev:
         return source_at(rev, rel)
@@ -436,6 +528,14 @@ def verify(rel, args, meta, do_assist=False):
     if args.dry_run:
         print("  would verify %s (%d chars, %d open, %d closed) -> %s" % (rel, len(src), len(open_issues), len(closed), tracker_path(rel)))
         return False
+    if args.style == "atomic":
+        cands = atomic_candidates(rel, src, args)
+        for n in cands:
+            n["second_opinion"] = {"verdict": "valid", "reason": "(not checked)"} if args.no_confirm else atomic_confirm(n, args)
+            n.pop("_unit", None)
+        kept = [n for n in cands if n["second_opinion"]["verdict"] == "valid"]
+        res = {"existing": [], "new_issues": [], "summary": ""}
+        return finish(rel, args, meta, issues, tp, res, cands, kept)
     try:
         if args.mock_response:
             res = deepseek_api.parse_json(open(args.mock_response, encoding="utf-8").read())
@@ -456,7 +556,11 @@ def verify(rel, args, meta, do_assist=False):
             else confirm(rel, src, table, {k: n.get(k) for k in ("category", "location", "quote", "problem", "proposed_fix")}, args)
         candidates.append(n)
     kept = [n for n in candidates if n["second_opinion"]["verdict"] == "valid"]
+    return finish(rel, args, meta, issues, tp, res, candidates, kept)
 
+
+def finish(rel, args, meta, issues, tp, res, candidates, kept):
+    bench = bool(args.out_dir)
     if bench:
         os.makedirs(args.out_dir, exist_ok=True)
         out = os.path.join(args.out_dir, rel.replace("/", "__").replace(".html", ".json"))
@@ -515,6 +619,9 @@ def main():
     ap.add_argument("--rev", help="read the pages at this git revision instead of the working tree")
     ap.add_argument("--out-dir", help="benchmark mode: write raw JSON results here and do not touch trackers")
     ap.add_argument("--no-confirm", action="store_true", help="skip the second-opinion stage")
+    ap.add_argument("--style", choices=["page", "atomic"], default=os.environ.get("VERIFY_STYLE") or "page",
+                    help="page: one referee call per page; atomic: one short question per unit of the page")
+    ap.add_argument("--unit-workers", type=int, default=4, help="parallel calls per page in the atomic style")
     ap.add_argument("--assist", action="store_true",
                     help="also write verifications/<path>_assist.md (step claims, alternative proofs/definitions)")
     ap.add_argument("--mock-assist", help="read the assist JSON answer from this file (testing)")

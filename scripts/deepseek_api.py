@@ -49,10 +49,7 @@ def chat(system, user, *, model=DEFAULT_MODEL, temperature=0.0, max_tokens=8192,
     """Send one chat completion request and return the assistant text."""
     body = {
         "model": model,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user},
-        ],
+        "messages": ([{"role": "system", "content": system}] if system else []) + [{"role": "user", "content": user}],
         "max_tokens": max_tokens,
         "stream": False,
     }
