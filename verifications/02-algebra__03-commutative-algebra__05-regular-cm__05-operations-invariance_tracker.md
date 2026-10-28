@@ -4,12 +4,12 @@
 <!-- Managed by scripts/verify.py (GitHub Actions). To dispute an [Open] issue, add a line starting with
      **Opus Rebuttal:** at the end of that issue and push; the next run judges it. Do not edit other lines. -->
 
-- Last verified: 2026-10-28 (commit 048145a, deepseek-chat)
+- Last verified: 2026-10-28 (commit 68bdb31, deepseek-chat)
 - Open: 6 / Resolved: 0 / Ignored: 2
 
 ## Summary of the last run
 
-The page is largely sound: the polynomial, completion, quotient and faithfully-flat descent arguments are correct, and the previously reported ISSUE-0004 and ISSUE-0008 are validly rebutted. The remaining genuine problems are in the side remarks: the A[[t]] statement (ISSUE-0001) is imprecise about direction and hypotheses, the Nagata attribution (ISSUE-0002) conflates reduced and normal counterexamples, the '上昇' bullet (ISSUE-0003) is ambiguous, and most seriously the claim that normality lifts from A/xA to A (ISSUE-0005) is false. ISSUE-0006 and ISSUE-0007 are now essentially addressed by the added finite-generation parentheticals.
+The page's main theorems (polynomial invariance, completion invariance, quotient by a regular element, faithfully flat descent) are essentially correct, and the previously reported issues about the A[[t]] remark, Nagata's example, the '上昇' bullet, and the Nakayama finite-generation omissions remain as before (mostly minor/ambiguity). The one serious mathematical error still present is the remark '正規性の持ち上げ', which asserts a false lifting statement for normality; it should be corrected or removed. The two Nakayama steps are routine given Noetherian hypotheses and could be left, but the normality remark is a genuine false claim.
 
 ## Issues
 
@@ -20,6 +20,7 @@ The page is largely sound: the polynomial, completion, quotient and faithfully-f
 - **Proposed fix:** Replace with: "For a Noetherian local ring $A$, $A[[t]]$ is regular (resp. Cohen-Macaulay, Gorenstein) if and only if $A$ is; in particular these properties are preserved by $A\mapsto A[[t]]$. When $A$ is complete, $A[[t]]$ is the $(\mathfrak{m},t)$-adic completion of $A[t]_{(\mathfrak{m},t)}$, so the 'if' direction follows from \ref{ring:polynomial-invariance} and \ref{ring:completion-invariance}; the general case is not covered here."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The remark still says regular/CM/Gorenstein are 'preserved' for A[[t]] without stating the equivalence or the Noetherian hypothesis clearly; the direction and the completeness caveat remain imprecise.
+  2026-10-28 (68bdb31): Open — The remark still says only that regular/CM/Gorenstein are 'preserved' for A[[t]] with A a Noetherian local ring, without stating the equivalence or the completeness caveat; the ambiguity noted remains, though the parenthetical does restrict the completion argument to complete A.
 
 ### ISSUE-0002 [Open] 完備化で正規性が失われる例の帰属
 - **Category:** Supplement/remark error
@@ -28,6 +29,7 @@ The page is largely sound: the polynomial, completion, quotient and faithfully-f
 - **Proposed fix:** Replace with: "It is known that the completion of a reduced (resp. normal) Noetherian local ring need not be reduced (resp. normal); Nagata constructed examples of this phenomenon (not covered here). For excellent rings, reducedness and normality are preserved by completion (not covered here)."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The remark still attributes both loss of reducedness and loss of normality to 'Nagata's example' in one sentence, which conflates distinct constructions.
+  2026-10-28 (68bdb31): Open — The remark still attributes both failure of reducedness and failure of normality of completions to 'Nagata's example' in one sentence; the conflation noted remains.
 
 ### ISSUE-0003 [Open] 上昇が成り立たない例の記述
 - **Category:** Supplement/remark error
@@ -36,6 +38,7 @@ The page is largely sound: the polynomial, completion, quotient and faithfully-f
 - **Proposed fix:** Replace with: "Preservation in the upward direction fails in general: $k\to k[t]/(t^{2})$ is free (hence faithfully flat), but the reduced (indeed regular) ring $k$ maps to a non-reduced ring. Thus reducedness (and regularity) is not preserved upward under faithfully flat extensions."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The bullet still says '上昇は成り立たない' with the k→k[t]/(t^2) example, which is a failure of reducedness ascending, not clearly identified; the wording remains ambiguous about which property fails to ascend.
+  2026-10-28 (68bdb31): Open — The bullet still reads '上昇は成り立たない：k→k[t]/(t²) は自由（忠実平坦）だが、正則な k から被約でない環になる', which does not specify which property fails to ascend; the ambiguity remains.
 
 ### ISSUE-0004 [Ignored: Valid Rebuttal] 完備化の例：$\hat A$ が零因子をもつことの結論
 - **Category:** Unsupported fact
@@ -53,6 +56,7 @@ The page is largely sound: the polynomial, completion, quotient and faithfully-f
 - **Proposed fix:** Delete this remark, or replace with the correct statement: "If $A$ is a Noetherian local ring and $x\in\mathfrak{m}$ is a non-zero-divisor such that $A/xA$ is reduced, then $A$ is reduced (Proposition \ref{ring:regular-element-quotient}(4)). Normality does not lift in general: for example $A=k[[x^{2},x^{3}]]$ is a non-normal domain with $x$ a non-zero-divisor and $A/(x)\cong k$ normal."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The remark still claims 'if A-bar is normal then A is normal', which is false (e.g. A=k[[x^2,x^3]], x a non-zero-divisor, A/(x)≅k normal but A not normal).
+  2026-10-28 (68bdb31): Open — The remark '正規性の持ち上げ' still asserts that A is normal whenever A/xA is normal (x a non-zero-divisor), which is false; e.g. A=k[[x²,x³]], x a non-zero-divisor, A/xA≅k normal but A not normal. No rebuttal attached.
 
 ### ISSUE-0006 [Open] Step 4 の中山の補題の適用条件
 - **Category:** Logical gap
@@ -61,6 +65,7 @@ The page is largely sound: the polynomial, completion, quotient and faithfully-f
 - **Proposed fix:** Add: "Since $A$ is Noetherian, $\mathfrak{p}$ is a finitely generated $A$-module, so Nakayama's lemma applies to $\mathfrak{p}=\mathfrak{m}\mathfrak{p}$ and gives $\mathfrak{p}=0$."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — Step 4 still invokes Nakayama on p without explicitly noting p is finitely generated; the parenthetical '(A is Noetherian)' is present in the current text, so this is essentially addressed—but the chain p=xp⊂mp to p=mp is still terse. Marking Open as the finite-generation remark is now present; see note.
+  2026-10-28 (68bdb31): Open — Step 4 still invokes Nakayama on p without noting p is finitely generated; this is a routine omission (A Noetherian), so it is minor, but the text is unchanged.
 
 ### ISSUE-0007 [Open] Step 5 の中山の補題の適用
 - **Category:** Logical gap
@@ -69,6 +74,7 @@ The page is largely sound: the polynomial, completion, quotient and faithfully-f
 - **Proposed fix:** Add: "Since $A$ is Noetherian, the nilradical $N$ is a finitely generated ideal, and $N=xN\subset\mathfrak{m}N$ together with $\mathfrak{m}N\subset N$ gives $N=\mathfrak{m}N$; Nakayama's lemma then yields $N=0$."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — Step 5 still applies Nakayama to N=nil(A) with the finite-generation remark now present ('N は有限生成（A はネーター）'); largely addressed but the N=xN⊂mN to N=mN step remains implicit.
+  2026-10-28 (68bdb31): Open — Step 5 still invokes Nakayama on N=nil(A) without noting finite generation; again routine since A is Noetherian, text unchanged.
 
 ### ISSUE-0008 [Ignored: Valid Rebuttal] Step 7 の $t\notin P^{2}B_{P}$ の議論
 - **Category:** Logical gap
