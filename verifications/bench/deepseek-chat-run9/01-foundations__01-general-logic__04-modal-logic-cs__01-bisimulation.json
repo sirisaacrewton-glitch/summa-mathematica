@@ -1,0 +1,34 @@
+{
+ "page": "01-foundations/01-general-logic/04-modal-logic-cs/01-bisimulation.html",
+ "rev": "8ccef3d",
+ "model": "deepseek-chat",
+ "candidates": [
+  {
+   "category": "Error",
+   "title": "Filtration lemma proof of item 1 mislabels which condition is representative-independent",
+   "location": "logic:filtration-lemma / proof Step 1",
+   "quote": "**1.** $w\\equiv_{\\Sigma}w'$, $v\\equiv_{\\Sigma}v'$ とする。$p\\in\\Sigma$ なら $w\\models p\\iff w'\\models p$。$\\Box B\\in\\Sigma$ なら $B\\in\\Sigma$（部分論理式で閉じている）なので、$w\\models\\Box B\\iff w'\\models\\Box B$ かつ $v\\models B\\iff v'\\models B$。",
+   "problem": "The lemma item 1 claims that conditions 1 and 3 are independent of the choice of representatives. The proof given only verifies that the *hypotheses* $w\\models\\Box B$ and $v\\models B$ in condition 3 are preserved under $\\equiv_{\\Sigma}$; it never checks that the *conclusion* $[w]R^{f}[v]$ is well-defined, i.e. that if $[w]R^{f}[v]$ holds and $w\\equiv_{\\Sigma}w'$, $v\\equiv_{\\Sigma}v'$, then $[w']R^{f}[v']$ holds. For a general filtration relation $R^{f}$ satisfying only conditions 2 and 3 this is not automatic from the displayed computation; the argument as written establishes only that the truth values of the formulas appearing in condition 3 do not change, not that the relation itself is representative-independent. (For the specific relations $R^{s},R^{l},R^{t},R^{e}$ this is checked separately in logic:filtration-relations, but the lemma is stated for an arbitrary filtration.)",
+   "defense": "Condition 3 is a statement about truth values of $\\Box B$ at $w$ and $B$ at $v$; since $\\equiv_{\\Sigma}$ preserves these truth values for $B\\in\\Sigma$, the truth value of the condition-3 assertion is the same for $(w,v)$ and $(w',v')$. If one reads 'condition 3 does not depend on representatives' as 'the truth value of the condition-3 formula is representative-independent', the proof is complete. Condition 1 is likewise immediate from $\\equiv_{\\Sigma}$.",
+   "proposed_fix": "Add: 'Moreover, the assertion of condition 3 is a Boolean combination of statements $\\mathcal{M},w\\models\\Box B$ and $\\mathcal{M},v\\models B$ with $B\\in\\Sigma$, whose truth values are unchanged when $w,v$ are replaced by $\\equiv_{\\Sigma}$-equivalent points; hence whether $[w]R^{f}[v]$ holds is independent of the chosen representatives.'",
+   "second_opinion": {
+    "verdict": "invalid",
+    "reason": "The reported issue misreads the lemma. Item 1 says only that conditions 1 and 3 are independent of the choice of representatives, and the proof checks exactly that: condition 1's truth value (p in V) and condition 3's truth value (the implication from M,w ⊨ □B to M,v ⊨ B) are unchanged when w,v are replaced by ≡_Σ-equivalent points. Condition 3 is a statement about truth of formulas, not a definition of R^f, so there is no separate well-definedness obligation for R^f beyond this. The proposed fix would add a claim about R^f being representative-independent, which is not what item 1 asserts and is not needed for the lemma's use in item 2."
+   }
+  },
+  {
+   "category": "Gap",
+   "title": "Step 2 of finite tree model property: child labels chosen only when $d(\\Box B_{i})\\le m-\\ell$ but the induction needs all children to satisfy $uRu'$",
+   "location": "logic:finite-tree-model / Step 1 and Step 2",
+   "quote": "深さ $\\ell<m$ でラベル $u$ の節点 $x$ について、各 $i\\le k$ で $d(\\Box B_{i})\\le m-\\ell$ かつ $\\mathcal{M},u\\not\\models\\Box B_{i}$ ならば、$uRu'$ かつ $\\mathcal{M},u'\\not\\models B_{i}$ となる $u'$ を一つ選び、ラベル $u'$・深さ $\\ell+1$ の子を $x$ に付ける。",
+   "problem": "In Step 2 the case $\\mathcal{M},u\\not\\models\\Box B_{i}$ is handled by saying 'Step 1 でラベル $u'$ の子を付けた（$d(\\Box B_{i})\\le m-\\ell$ なので条件を満たす）'. But Step 1 attaches a child for $\\Box B_{i}$ only when *both* $d(\\Box B_{i})\\le m-\\ell$ and $\\mathcal{M},u\\not\\models\\Box B_{i}$ hold. The proof must argue that whenever $\\Box B_{i}\\in\\mathrm{Sub}(A)$ with $d(\\Box B_{i})\\le m-\\ell$ and $\\mathcal{M},u\\not\\models\\Box B_{i}$, the child was indeed attached; this is true but the text's parenthetical only cites the degree bound, not the falsity hypothesis, so the inference as written is incomplete. More seriously, the '⇒' direction of the $\\Box$ case requires that *every* child label $u'$ satisfies $\\mathcal{M},u'\\models B_{i}$ when $\\mathcal{M},u\\models\\Box B_{i}$; this is fine since children are always actual successors, but the text should note that children are attached only as actual $R$-successors (which it does).",
+   "defense": "The falsity hypothesis $\\mathcal{M},u\\not\\models\\Box B_{i}$ is exactly the hypothesis of the case being treated in Step 2, and the degree bound is the other hypothesis of Step 1's attachment rule; combining them, the child was attached. This is a routine one-line check.",
+   "proposed_fix": "In Step 2 replace the parenthetical by: '（$d(\\Box B_{i})\\le m-\\ell$ と $\\mathcal{M},u\\not\\models\\Box B_{i}$ の両方が成り立つので Step 1 の規則で子を付けた）'.",
+   "second_opinion": {
+    "verdict": "invalid",
+    "reason": "The reported gap is not real. In Step 2 the case $\\mathcal{M},u\\not\\models\\Box B_{i}$ is being considered under the standing hypothesis $d(B)\\le m-\\ell$ with $B=\\Box B_{i}$, so $d(\\Box B_{i})\\le m-\\ell$ holds; combined with the falsity hypothesis this is exactly the antecedent of Step 1's attachment rule, so the child was indeed attached. The parenthetical '（$d(\\Box B_{i})\\le m-\\ell$ なので条件を満たす）' is a terse reminder of the degree bound, and the falsity hypothesis is the very case being handled, so the inference is complete as written. The second concern (that children are actual $R$-successors) is explicitly stated in the text ('子のラベル $u'$ はすべて $uRu'$ を満たし'), so no error remains."
+   }
+  }
+ ],
+ "summary": "The page is a careful and largely correct treatment of bisimulation, Hennessy–Milner, unravelling, filtration and complexity of modal logic. The main results (bisimulation invariance, Hennessy–Milner with its counterexample, finite tree model property, filtration lemma and the three filtrations, S5 NP-completeness, K in PSPACE, the summary table) are stated and proved correctly, and the cited results are used consistently. The only issues found are minor: the proof of representative-independence in the filtration lemma verifies the hypotheses rather than the relation itself, and one parenthetical in the finite tree model proof omits one of the two hypotheses needed to invoke the attachment rule. Neither affects the truth of any stated theorem."
+}
