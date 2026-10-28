@@ -11,6 +11,7 @@ on:
       - 'src/**/*.md'
       - 'src/**/*.tex'
       - 'verifications/**_tracker.md'
+      - '0[1-5]-*/**/_meta.json'
   workflow_dispatch:
     inputs:
       files:
@@ -47,6 +48,12 @@ jobs:
           else
             python scripts/verify.py --assist --git-range "${{ github.event.before }}..${{ github.sha }}"
           fi
+
+      - name: Roadmap suggestions for fields whose _meta.json changed
+        if: github.event_name == 'push'
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: python scripts/roadmap.py --git-range "${{ github.event.before }}..${{ github.sha }}"
 
       - name: Push trackers to verifications/
         if: always()

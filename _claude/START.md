@@ -454,4 +454,7 @@
    * 手で特定のページだけ調べるとき：Actions の「verify」→ Run workflow に、ページのパスを空白区切りで入れる。ローカルなら `python3 scripts/verify.py --assist --files <ページ>`（`--dry-run`、`--mock-response`/`--mock-assist` で API なしに試せる）。
    * **bot が main に commit するので、push の前に必ず `git pull --rebase origin main` をする。**
    * 記事を書く・直すトークの最初に、そのページの `verifications/` の `[Open]` と `_assist.md` を確かめ、反映したら PROGRESS に書く。
+4. **ロードマップの洗練**（`scripts/roadmap.py`）：分野（例 `05-geometry-topology/04-differential-geometry`）ごとに、系列の説明・`prereq`・ページの順・各ページの主な定義と定理、宣言されていない系列への引用（`DEP_REPORT`）、PROGRESS の割り当て表（未着手の行を含む）を DeepSeek に渡し、`verifications/roadmap/<分野>_roadmap.md`（英語、毎回作り直す）に、順序・前提の過不足・欠けている標準的な話題（優先度つき）・分割や統合・予定のページの範囲・学習ルートの案を書かせる。
+   * `_meta.json` が変わった push では、その分野について自動で動く（最大 3 分野）。手では `python3 scripts/roadmap.py <分野>`、サイト全体の分野間の欠けと順序は `python3 scripts/roadmap.py all`。
+   * **ロードマップ（系列の構成・順序・割り当て表）の変更はユーザーの承認が要る。** Claude は提案を確かめ、採るべきものを日本語でまとめてユーザーに提案する（勝手に構成を変えない）。新しい分野の割り当て表を作るときにも使う。
 * DeepSeek に渡す全プロンプトには、ユーザー指定の「Strict LaTeX Rules」（`scripts/deepseek_api.py` の `STRICT_LATEX_RULES`）を必ず含める。
