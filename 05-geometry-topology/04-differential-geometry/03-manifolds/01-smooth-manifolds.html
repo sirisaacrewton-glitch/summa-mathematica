@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>可微分多様体と接空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-differential-geometry/03-manifolds/01-smooth-manifolds.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 可微分多様体と接空間 {#mfd:page-smooth-manifolds keywords="smooth manifold, differentiable manifold, chart, coordinate system, atlas, smooth structure, maximal atlas, smooth map, diffeomorphism, germ, derivation, tangent vector, tangent space, coordinate vectors, differential, pushforward, cotangent space, velocity of a curve, stereographic projection"}
+
+曲面論（\ref{surf:page-regular-surfaces}）では、曲面を $\mathbb{R}^{3}$ の中の図形として扱い、接平面も $\mathbb{R}^{3}$ の部分空間として定義した。このページでは、外側の空間を使わずに「各点のまわりが $\mathbb{R}^{d}$ の開集合と滑らかに同一視できる空間」を定義する。これが**可微分多様体**である。外側の空間がないので、接ベクトルを矢印として描くことはできない。代わりに「関数を方向微分する操作」として接ベクトルを定義し（**導分**）、接空間が座標の数と同じ次元のベクトル空間になることを示す。最後に、滑らかな写像の**微分**を定義し、多変数の微分積分の連鎖律がそのまま多様体に移ることを確かめる。
+
+## 記法と定義の確認 {#mfd:sec-sm-notation}
+
+::: notation
+- 位相の言葉：ハウスドルフ空間（\ref{top:hausdorff}）、第二可算（\ref{top:second-countable.2}）、連結（\ref{top:connected}）、同相写像（\ref{top:homeomorphism}）。
+- $\mathbb{R}^{d}$ の開集合 $U$ 上の写像 $f\colon U\to\mathbb{R}^{c}$ が $C^{\infty}$ 級であること（\ref{calc:ck-map}）、全微分 $Df(a)$ と連鎖律（\ref{calc:multivariable-chain-rule}）、$C^{\infty}$ 級写像の合成が $C^{\infty}$ 級であること（\ref{calc:ck-composition.1}）。$\partial_{i}$ は $i$ 番目の座標についての偏微分。
+- $r_{i}\colon\mathbb{R}^{d}\to\mathbb{R}$ は $i$ 番目の座標を取り出す関数 $r_{i}(a_{1},\dots,a_{d})=a_{i}$。
+- **滑らか**は $C^{\infty}$ 級の意味で使う。このページの多様体はすべて $C^{\infty}$ 級である。
+- 線形代数：双対空間 $V^{*}$ と双対基底（\ref{lin:dual-space}）。
+- 本ページは Warner『Foundations of Differentiable Manifolds and Lie Groups』第 1 章の前半を参考にした。接ベクトルを関数の芽の上の導分として定義する流儀は同書に従い、基底の存在の証明は、芽の剰余環 $\mathfrak{m}/\mathfrak{m}^{2}$ を経由せずに直接示す形にした。
+:::
+
+## 座標近傍と可微分構造 {#mfd:sec-sm-charts}
+
+::: definition 座標近傍 {#mfd:chart keywords="locally Euclidean space, chart, coordinate system, coordinate map, coordinate functions" index="座標近傍|ざひょうきんぼう, 局所座標系|きょくしょざひょうけい, チャート|ちゃーと, 座標関数|ざひょうかんすう, 局所ユークリッド空間|きょくしょゆーくりっどくうかん"}
+$M$ を位相空間、$d\ge0$ を整数とする。
+1. $M$ の開集合 $U$ と、$U$ から $\mathbb{R}^{d}$ のある開集合 $\varphi(U)$ への同相写像 $\varphi$ の組 $(U,\varphi)$ を、$M$ の（$d$ 次元の）**座標近傍**という。$x_{i}\defeq r_{i}\circ\varphi\colon U\to\mathbb{R}$ を**座標関数**といい、$(U,\varphi)$ を $(U;x_{1},\dots,x_{d})$ とも書く。$m\in U$ で $\varphi(m)=0$ のとき、$m$ を**中心とする**座標近傍という。
+2. $M$ の各点が $d$ 次元の座標近傍に含まれるとき、$M$ を **$d$ 次元の局所ユークリッド空間**という。
+:::
+
+::: intuition
+座標近傍とは、空間の一部分に、平らな空間の座標を目盛りとして貼り付けたものである。局所ユークリッド空間とは、どの点のまわりにもそのような目盛りが貼れる空間である。
+:::
+
+::: definition 両立する座標近傍とアトラス {#mfd:atlas keywords="smoothly compatible charts, transition map, smooth atlas" index="座標変換|ざひょうへんかん, 両立（座標近傍）|りょうりつざひょうきんぼう, アトラス|あとらす, 座標近傍系|ざひょうきんぼうけい"}
+$M$ の二つの $d$ 次元の座標近傍 $(U,\varphi)$, $(V,\psi)$ を考える。$\varphi(U\cap V)$ と $\psi(U\cap V)$ は $\mathbb{R}^{d}$ の開集合で（$U\cap V$ は $U$ でも $V$ でも開で、$\varphi,\psi$ は開集合の間の同相写像だから）、その間の同相写像
+$$
+\psi\circ\varphi^{-1}\colon\varphi(U\cap V)\to\psi(U\cap V)
+$$
+を**座標変換**という。$\psi\circ\varphi^{-1}$ とその逆写像 $\varphi\circ\psi^{-1}$ がともに $C^{\infty}$ 級であるとき（$U\cap V=\varnothing$ のときも含めて）、$(U,\varphi)$ と $(V,\psi)$ は**両立する**という。$d$ 次元の座標近傍の族 $\mathcal{A}=\{(U_{\alpha},\varphi_{\alpha})\}_{\alpha}$ で、$\bigcup_{\alpha}U_{\alpha}=M$ かつ、どの二つも両立するものを（$C^{\infty}$ 級の）**アトラス**（**座標近傍系**）という。
+:::
+
+::: intuition
+二つの目盛りが重なる所では、一方の目盛りの読みからもう一方の読みへの換算が滑らかな関数で与えられる。そういう目盛りで全体を覆ったものがアトラスである。
+:::
+
+::: definition 可微分構造と可微分多様体 {#mfd:smooth-manifold keywords="smooth structure, maximal atlas, smooth manifold, differentiable manifold of class C infinity, dimension" index="可微分構造|かびぶんこうぞう, 極大アトラス|きょくだいあとらす, 可微分多様体|かびぶんたようたい, 滑らかな多様体|なめらかなたようたい, C 無限大級多様体|しーむげんだいきゅうたようたい"}
+1. 位相空間 $M$ のアトラス $\mathcal{F}$ で、「$\mathcal{F}$ のすべての座標近傍と両立する $d$ 次元の座標近傍は $\mathcal{F}$ に属する」（極大性）を満たすものを、$M$ の **可微分構造**（**極大アトラス**）という。
+2. **$d$ 次元の可微分多様体**（**滑らかな多様体**）とは、ハウスドルフかつ第二可算な $d$ 次元の局所ユークリッド空間 $M$ と、その可微分構造 $\mathcal{F}$ の組 $(M,\mathcal{F})$ のことである。以下、単に $M$ と書き、「$M$ の座標近傍」と言えば $\mathcal{F}$ に属する座標近傍を指す。$M^{d}$ と書いて次元を示すこともある。
+:::
+
+::: intuition
+可微分多様体とは、どこでも滑らかに換算できる目盛りが貼れる空間で、使ってよい目盛りを「換算できるものは全部」と決めておいたものである。ハウスドルフ性と第二可算性は、点が分離でき、空間が大きすぎないことを保証する。
+:::
+
+::: example
+1. ハウスドルフ性を外した例：$\mathbb{R}\times\{0,1\}$ で $(t,0)\sim(t,1)$（$t\neq0$）と同一視した商空間（原点が二つある直線）は、二つの座標近傍（それぞれの原点を含む直線）で覆われて座標変換は恒等写像だが、二つの原点を開集合で分離できない。
+2. 第二可算性を外した例：$\mathbb{R}$ を離散位相の集合 $\mathbb{R}$ 個だけ並べた $\mathbb{R}\times\mathbb{R}_{\text{離散}}$ は、ハウスドルフな $1$ 次元の局所ユークリッド空間だが、非可算個の互いに交わらない空でない開集合 $\mathbb{R}\times\{s\}$ をもつので第二可算でない（開基 $\mathcal{B}$ があれば、各 $s$ について開集合 $\mathbb{R}\times\{s\}$ は $\mathcal{B}$ の元の和なので、空でない $B_{s}\in\mathcal{B}$ で $B_{s}\subset\mathbb{R}\times\{s\}$ となるものがある。$s\neq s'$ なら $B_{s}\neq B_{s'}$ なので、$\mathcal{B}$ は非可算）。
+:::
+
+位相空間と次元を固定するので、可微分構造は「どの座標近傍を使ってよいか」を決めるデータである。実際には極大アトラスを書き下すことはなく、小さなアトラスを一つ与えれば十分であることを次に示す。
+
+::: proposition アトラスは極大アトラスに一意に延びる {#mfd:maximal-atlas keywords="every smooth atlas is contained in a unique maximal atlas; restriction and affine change of charts" index="極大アトラスの存在と一意性|きょくだいあとらすのそんざいといちいせい"}
+$\mathcal{A}$ を位相空間 $M$ の $d$ 次元のアトラスとする。
+1. $\mathcal{A}$ を含む可微分構造がただ一つ存在する。それは $\bar{\mathcal{A}}\defeq\{(U,\varphi):(U,\varphi)$ は $\mathcal{A}$ のすべての座標近傍と両立する $d$ 次元の座標近傍$\}$ である。
+2. $(U,\varphi)$ が可微分構造 $\mathcal{F}$ に属し、$U'\subset U$ が開集合なら、$(U',\varphi\restriction U')$ も $\mathcal{F}$ に属する。
+3. $(U,\varphi)$ が $\mathcal{F}$ に属し、$T\colon\mathbb{R}^{d}\to\mathbb{R}^{d}$ が $T(y)=Ay+b$（$A$ は可逆行列）の形なら、$(U,T\circ\varphi)$ も $\mathcal{F}$ に属する。とくに、各点 $m$ について、$m$ を中心とし、像が開球 $B(0,\varepsilon)$ である座標近傍がある。
+:::
+
+::: proof
+**Step 1（滑らかさは局所的）.** 【主張：$\mathbb{R}^{d}$ の開集合 $W$ 上の写像 $h$ が、$W$ の各点の開近傍の上で $C^{\infty}$ 級なら、$h$ は $W$ 上で $C^{\infty}$ 級である】偏導関数の存在と連続性は各点の近傍だけで決まるから（\ref{calc:ck-map}）。
+
+**Step 2（$\bar{\mathcal{A}}$ の二元は両立する）.** 【主張：$(U,\varphi),(V,\psi)\in\bar{\mathcal{A}}$ なら $\psi\circ\varphi^{-1}$ は $\varphi(U\cap V)$ 上 $C^{\infty}$ 級】$y\in\varphi(U\cap V)$ とし、$m\defeq\varphi^{-1}(y)$ を含む $(W,\chi)\in\mathcal{A}$ をとる（$\mathcal{A}$ は $M$ を覆う）。開集合 $O\defeq\varphi(U\cap V\cap W)$ は $y$ を含み、$O$ の上で
+$$
+\psi\circ\varphi^{-1}=(\psi\circ\chi^{-1})\circ(\chi\circ\varphi^{-1}).
+$$
+右辺の二つは、$(U,\varphi)$ と $(V,\psi)$ が $\mathcal{A}$ の元 $(W,\chi)$ と両立することから $C^{\infty}$ 級で、その合成も $C^{\infty}$ 級（\ref{calc:ck-composition.1}）。Step 1 から $\psi\circ\varphi^{-1}$ は $C^{\infty}$ 級。役割を入れ替えれば $\varphi\circ\psi^{-1}$ も $C^{\infty}$ 級。
+
+**Step 3（$\bar{\mathcal{A}}$ は可微分構造）.** 【主張：$\bar{\mathcal{A}}$ は $\mathcal{A}$ を含むアトラスで、極大性を満たす】$\mathcal{A}$ の元はどうしが両立するので $\mathcal{A}\subset\bar{\mathcal{A}}$、とくに $\bar{\mathcal{A}}$ は $M$ を覆い、Step 2 からアトラスである。$\bar{\mathcal{A}}$ のすべての元と両立する座標近傍は、とくに $\mathcal{A}$ のすべての元と両立するので、定義から $\bar{\mathcal{A}}$ に属する。
+
+**Step 4（一意性）.** 【主張：$\mathcal{A}$ を含む可微分構造 $\mathcal{D}$ は $\bar{\mathcal{A}}$ に等しい】$\mathcal{D}$ の元は $\mathcal{D}\supset\mathcal{A}$ の元と両立するので $\mathcal{D}\subset\bar{\mathcal{A}}$。逆に $c\in\bar{\mathcal{A}}$ をとると、Step 2 から $c$ は $\bar{\mathcal{A}}\supset\mathcal{D}$ のすべての元と両立し、$\mathcal{D}$ の極大性から $c\in\mathcal{D}$。よって 1 が成り立つ。
+
+**2 と 3.** $(U',\varphi\restriction U')$ と $(V,\psi)\in\mathcal{F}$ の座標変換は、$(U,\varphi)$ と $(V,\psi)$ の座標変換の開集合への制限なので $C^{\infty}$ 級。$(U,T\circ\varphi)$ との座標変換は $T\circ(\varphi\circ\psi^{-1})$ と $(\psi\circ\varphi^{-1})\circ T^{-1}$ で、$T,T^{-1}$ は $C^{\infty}$ 級なので $C^{\infty}$ 級。いずれも $\mathcal{F}$ の極大性から $\mathcal{F}$ に属する。最後の主張は、$m$ を含む座標近傍 $(U,\varphi)$ に $T(y)=y-\varphi(m)$ を合成し、$B(0,\varepsilon)\subset T\varphi(U)$ となる $\varepsilon>0$ をとって $U'\defeq(T\circ\varphi)^{-1}(B(0,\varepsilon))$ に制限すればよい。
+
+::: hypcheck
+- **アトラスのどの二つも両立すること**：Step 2 で、$\varphi$ と $\psi$ の座標変換を $\mathcal{A}$ の元 $\chi$ 経由で分解するのに使った。$\mathcal{A}$ の中に両立しない二つがあると、それらを両方含む可微分構造はない。
+- **$\mathcal{A}$ が $M$ を覆うこと**：Step 2 で $m$ を含む $\chi$ をとるのに使った。
+- **ハウスドルフ性・第二可算性**：使っていない（この命題は位相空間について成り立つ）。
+:::
+:::
+
+::: proposition 次元は座標近傍によらない {#mfd:dimension-invariance keywords="smooth invariance of dimension: if smoothly compatible charts into R^d and R^e overlap then d = e" index="次元の不変性（可微分）|じげんのふへんせいかびぶん"}
+$\mathbb{R}^{d}$ の空でない開集合 $O$ から $\mathbb{R}^{e}$ の開集合 $O'$ への全単射 $\tau$ で、$\tau$ と $\tau^{-1}$ がともに $C^{\infty}$ 級（$C^{1}$ 級で十分）なものがあれば $d=e$ である。したがって、空でない位相空間に、$d$ 次元の座標近傍と $e$ 次元の座標近傍で、共通の点をもち座標変換がともに滑らかなものがあれば $d=e$ である。
+:::
+
+::: proof
+$a\in O$ をとる。$\tau^{-1}\circ\tau=\mathrm{id}_{O}$, $\tau\circ\tau^{-1}=\mathrm{id}_{O'}$ に連鎖律（\ref{calc:multivariable-chain-rule.2}）を使うと、線形写像 $P\defeq D\tau(a)\colon\mathbb{R}^{d}\to\mathbb{R}^{e}$ と $Q\defeq D\tau^{-1}(\tau(a))\colon\mathbb{R}^{e}\to\mathbb{R}^{d}$ について $QP=I_{d}$, $PQ=I_{e}$。よって $P$ は線形同型で、$d=e$。後半は、共通点の近くの座標変換に前半を使えばよい。
+:::
+
+::: supplement
+**位相的な場合.** 座標変換が同相写像であるだけでも次元は一致する（**領域の不変性**による）が、その証明にはホモロジーなどの道具が要る（\see{at:manifold-local-homology}：$n$ 次元の位相多様体の局所ホモロジーは次数 $n$ でだけ $0$ でない）。滑らかな場合は上のように線形代数だけで済む。
+:::
+
+::: proposition 可微分多様体の基本的な例 {#mfd:manifold-examples keywords="Euclidean space, finite dimensional vector space, open submanifold, sphere via stereographic projection, product manifold, general linear group" index="可微分多様体の例|かびぶんたようたいのれい, 立体射影|りったいしゃえい, 開部分多様体|かいぶぶんたようたい, 積多様体|せきたようたい"}
+1. $\mathbb{R}^{d}$ は、恒等写像だけからなるアトラス $\{(\mathbb{R}^{d},\mathrm{id})\}$ が定める可微分構造（**標準的な可微分構造**）で $d$ 次元の可微分多様体になる。
+2. $d$ 次元の実ベクトル空間 $V$ は、基底 $(e_{1},\dots,e_{d})$ による座標 $\sum a_{i}e_{i}\mapsto(a_{1},\dots,a_{d})$ だけからなるアトラスで可微分多様体になり、可微分構造は基底の選び方によらない。
+3. 可微分多様体 $M$ の開集合 $W$ は、$\{(U\cap W,\varphi\restriction U\cap W):(U,\varphi)\in\mathcal{F}\}$ を可微分構造として可微分多様体になる（**開部分多様体**）。とくに $GL_{n}(\mathbb{R})=\{A\in M_{n}(\mathbb{R}):\det A\neq0\}$ は $\mathbb{R}^{n^{2}}$ の開部分多様体である。
+4. 球面 $S^{d}\defeq\{x\in\mathbb{R}^{d+1}:|x|=1\}$ は、北極 $N=(0,\dots,0,1)$ と南極 $S=-N$ からの**立体射影**
+$$
+p_{N}(x)\defeq\frac{(x_{1},\dots,x_{d})}{1-x_{d+1}},\qquad p_{S}(x)\defeq\frac{(x_{1},\dots,x_{d})}{1+x_{d+1}}
+$$
+（定義域はそれぞれ $S^{d}\setminus\{N\}$, $S^{d}\setminus\{S\}$）からなるアトラスで $d$ 次元の可微分多様体になる。
+5. $d_{1}$ 次元の $M_{1}$ と $d_{2}$ 次元の $M_{2}$ の直積空間 $M_{1}\times M_{2}$ は、$\{(U\times V,\varphi\times\psi)\}$（$(U,\varphi)$, $(V,\psi)$ はそれぞれ $M_{1}$, $M_{2}$ の座標近傍）をアトラスとして $d_{1}+d_{2}$ 次元の可微分多様体になる（**積多様体**）。
+:::
+
+::: proof
+各項で、ハウスドルフ性・第二可算性と、アトラスであること（座標変換が滑らか）を確かめれば、\ref{mfd:maximal-atlas.1} から可微分構造が定まる。$\mathbb{R}^{k}$ はハウスドルフで、有理数を中心・有理数を半径とする開球の全体が可算な開基になるので第二可算である。
+
+**Step 1（部分空間と直積）.** 【主張：ハウスドルフかつ第二可算な空間の部分空間と、二つの直積は、ハウスドルフかつ第二可算】ハウスドルフ性は \ref{top:hausdorff-properties.1}。$\mathcal{B}$ が $X$ の可算な開基なら $\{B\cap A:B\in\mathcal{B}\}$ は部分空間 $A$ の可算な開基（部分空間の開集合は $X$ の開集合と $A$ の共通部分で、それは $\mathcal{B}$ の元と $A$ の共通部分の和）。$\mathcal{B}_{1},\mathcal{B}_{2}$ が可算な開基なら $\{B_{1}\times B_{2}\}$ は直積位相の可算な開基（\ref{top:product-topology}）。
+
+**1〜3.** 1 は座標近傍が一つなので両立は自明（座標変換は恒等写像）。2：二つの基底による座標の座標変換は可逆行列による線形写像 $a\mapsto Pa$ で、逆も線形なので $C^{\infty}$ 級。よって二つのアトラスの合併もアトラスで、\ref{mfd:maximal-atlas.1} の一意性から同じ可微分構造を定める。位相は基底によらず $\mathbb{R}^{d}$ と同相（線形同型は同相）なので、ハウスドルフかつ第二可算。3：$W$ は Step 1 からハウスドルフかつ第二可算、座標変換は $M$ の座標変換の制限。$\det$ は成分の多項式なので連続で、$GL_{n}(\mathbb{R})=\det^{-1}(\mathbb{R}\setminus\{0\})$ は開集合。
+
+**Step 2（立体射影は同相写像）.** 【主張：$p_{N}\colon S^{d}\setminus\{N\}\to\mathbb{R}^{d}$ は全単射で、逆写像は $p_{N}^{-1}(u)=\bigl(2u,\ |u|^{2}-1\bigr)/(|u|^{2}+1)$】右辺を $q(u)$ とおく。$|q(u)|^{2}=(4|u|^{2}+(|u|^{2}-1)^{2})/(|u|^{2}+1)^{2}=1$ で、最後の座標は $(|u|^{2}-1)/(|u|^{2}+1)<1$ なので $q(u)\in S^{d}\setminus\{N\}$。$1-q_{d+1}(u)=2/(|u|^{2}+1)$ だから $p_{N}(q(u))=u$。逆に $x\in S^{d}\setminus\{N\}$、$u\defeq p_{N}(x)$ とすると、$|u|^{2}=(1-x_{d+1}^{2})/(1-x_{d+1})^{2}=(1+x_{d+1})/(1-x_{d+1})$ なので $|u|^{2}+1=2/(1-x_{d+1})$、$|u|^{2}-1=2x_{d+1}/(1-x_{d+1})$ となり、$q(u)=x$。$p_{N}$ と $q$ はともに連続（分母が $0$ にならない有理式）。$p_{S}$ も $x_{d+1}$ の符号を変えて同様。
+
+**Step 3（立体射影は両立する）.** 【主張：$p_{S}\circ p_{N}^{-1}(u)=u/|u|^{2}$（$u\neq0$）】$S^{d}\setminus\{N,S\}$ の $p_{N}$ による像は $\mathbb{R}^{d}\setminus\{0\}$（$p_{N}(S)=0$）。$x=q(u)$ について $1+x_{d+1}=2|u|^{2}/(|u|^{2}+1)$ なので $p_{S}(x)=\dfrac{2u}{|u|^{2}+1}\cdot\dfrac{|u|^{2}+1}{2|u|^{2}}=\dfrac{u}{|u|^{2}}$。これは $\mathbb{R}^{d}\setminus\{0\}$ 上 $C^{\infty}$ 級で、自分自身が逆写像（$|u/|u|^{2}|=1/|u|$）なので逆も $C^{\infty}$ 級。$S^{d}$ は $\mathbb{R}^{d+1}$ の部分空間として Step 1 からハウスドルフかつ第二可算。
+
+**5.** Step 1 からハウスドルフかつ第二可算。$\varphi\times\psi$ は $U\times V$ から開集合 $\varphi(U)\times\psi(V)\subset\mathbb{R}^{d_{1}+d_{2}}$ への同相写像で、二つの積座標近傍の座標変換は $(\varphi'\circ\varphi^{-1})\times(\psi'\circ\psi^{-1})$ である。各成分は一方の変数だけの $C^{\infty}$ 級関数なので $C^{\infty}$ 級。
+:::
+
+## 滑らかな写像 {#mfd:sec-sm-maps}
+
+::: definition 滑らかな関数と滑らかな写像 {#mfd:smooth-map keywords="smooth function on an open subset of a manifold, smooth map between manifolds, C^infinity(M,N)" index="滑らかな関数（多様体上）|なめらかなかんすうたようたいじょう, 滑らかな写像|なめらかなしゃぞう, Cinf(M)|しーむげんだいえむ"}
+$M$, $N$ をそれぞれ $d$ 次元、$c$ 次元の可微分多様体とする。
+1. $M$ の開集合 $W$ 上の関数 $f\colon W\to\mathbb{R}$ が**滑らか**であるとは、$M$ のすべての座標近傍 $(U,\varphi)$ について、$f\circ\varphi^{-1}$ が $\varphi(U\cap W)$ 上 $C^{\infty}$ 級であることをいう。その全体を $C^{\infty}(W)$ と書く。
+2. 連続写像 $F\colon M\to N$ が**滑らか**であるとは、$M$ のすべての座標近傍 $(U,\varphi)$ と $N$ のすべての座標近傍 $(V,\psi)$ について、
+$$
+\psi\circ F\circ\varphi^{-1}\colon\varphi(U\cap F^{-1}(V))\to\mathbb{R}^{c}
+$$
+が $C^{\infty}$ 級であることをいう（$F$ が連続なので定義域は開集合）。この写像を $F$ の**局所表示**という。
+:::
+
+::: intuition
+滑らかな写像とは、目盛りを通して読めば普通の多変数の滑らかな写像になっている写像である。
+:::
+
+::: proposition 滑らかさの判定 {#mfd:smooth-map-criteria keywords="smoothness can be checked in one chart around each point; pullback of smooth functions; compositions; coordinate functions are smooth" index="滑らかさの判定（多様体）|なめらかさのはんていたようたい"}
+$M,N,P$ を可微分多様体とする。
+1. $f\colon W\to\mathbb{R}$ が滑らかであることは、$W$ の各点 $m$ について、$m$ を含むある座標近傍 $(U,\varphi)$ があって $f\circ\varphi^{-1}$ が $\varphi(m)$ のある近傍で $C^{\infty}$ 級であることと同値。
+2. 座標近傍 $(U;x_{1},\dots,x_{d})$ の座標関数 $x_{i}$ は $C^{\infty}(U)$ に属し、$\varphi\colon U\to\varphi(U)$ は（開部分多様体の間の）滑らかな写像である。
+3. 連続写像 $F\colon M\to N$ について、次は同値：(a) $F$ は滑らか。(b) $N$ の任意の開集合 $W$ と $g\in C^{\infty}(W)$ について $g\circ F\in C^{\infty}(F^{-1}(W))$。
+4. 滑らかな写像 $F\colon M\to N$, $G\colon N\to P$ の合成 $G\circ F$ は滑らかである。
+:::
+
+::: proof
+**1.** 「⇒」は定義から。「⇐」：任意の座標近傍 $(V,\psi)$ と $y\in\psi(V\cap W)$ をとり、$m\defeq\psi^{-1}(y)$ について仮定の $(U,\varphi)$ をとる。$y$ の近くで $f\circ\psi^{-1}=(f\circ\varphi^{-1})\circ(\varphi\circ\psi^{-1})$ で、右辺は $C^{\infty}$ 級の合成（\ref{calc:ck-composition.1}）。滑らかさは局所的（\ref{mfd:maximal-atlas} の証明の Step 1）なので $f\circ\psi^{-1}$ は $C^{\infty}$ 級。
+
+**2.** 任意の座標近傍 $(V,\psi)$ について $x_{i}\circ\psi^{-1}=r_{i}\circ(\varphi\circ\psi^{-1})$ は $C^{\infty}$ 級。$\varphi(U)$ には恒等写像を座標近傍にとれるので、局所表示 $\mathrm{id}\circ\varphi\circ\psi^{-1}$ が $C^{\infty}$ 級であることから $\varphi$ は滑らか（任意の座標近傍との局所表示はさらに $C^{\infty}$ 級の座標変換を合成したもの）。
+
+**3.** (a)⇒(b)：$(U,\varphi)$ を $M$ の座標近傍とし、$y\in\varphi(U\cap F^{-1}(W))$、$n\defeq F(\varphi^{-1}(y))$ を含む $N$ の座標近傍 $(V,\psi)$ をとる。$y$ の近く（$\varphi(U\cap F^{-1}(V\cap W))$ の上）で $g\circ F\circ\varphi^{-1}=(g\circ\psi^{-1})\circ(\psi\circ F\circ\varphi^{-1})$ は $C^{\infty}$ 級の合成。(b)⇒(a)：$N$ の座標近傍 $(V;y_{1},\dots,y_{c})$ について、2 から $y_{i}\in C^{\infty}(V)$ なので、(b) より $y_{i}\circ F\in C^{\infty}(F^{-1}(V))$。$\psi\circ F\circ\varphi^{-1}$ の第 $i$ 成分は $(y_{i}\circ F)\circ\varphi^{-1}$ なので $C^{\infty}$ 級。
+
+**4.** 3(b) を使う：$g\in C^{\infty}(W)$ について $g\circ G\in C^{\infty}(G^{-1}(W))$、さらに $(g\circ G)\circ F\in C^{\infty}(F^{-1}(G^{-1}(W)))$。合成は連続なので、3 から $G\circ F$ は滑らか。
+:::
+
+::: definition 微分同相写像 {#mfd:diffeomorphism keywords="diffeomorphism between smooth manifolds; diffeomorphic manifolds" index="微分同相写像（多様体）|びぶんどうそうしゃぞうたようたい, 微分同相|びぶんどうそう"}
+可微分多様体の間の全単射 $F\colon M\to N$ で、$F$ と $F^{-1}$ がともに滑らかなものを**微分同相写像**という。微分同相写像があるとき $M$ と $N$ は**微分同相**であるという。
+:::
+
+::: intuition
+微分同相写像とは、滑らかで逆も滑らかな一対一の対応で、可微分多様体として「同じもの」とみなす基準である。
+:::
+
+::: example
+1. 座標近傍 $\varphi\colon U\to\varphi(U)$ は、開部分多様体 $U$ と $\mathbb{R}^{d}$ の開部分多様体 $\varphi(U)$ の間の微分同相写像である（\ref{mfd:smooth-map-criteria.2} と、$\varphi^{-1}$ の局所表示 $\varphi\circ\varphi^{-1}=\mathrm{id}$）。
+2. 同相でも微分同相でない例：$F\colon\mathbb{R}\to\mathbb{R}$, $F(t)=t^{3}$ は滑らかな同相写像だが、$F^{-1}(s)=s^{1/3}$ は $0$ で微分可能でないので微分同相写像でない。
+:::
+
+## 接ベクトルと接空間 {#mfd:sec-sm-tangent}
+
+$\mathbb{R}^{d}$ の点 $p$ におけるベクトル $v=(v_{1},\dots,v_{d})$ は、関数 $f$ に方向微分 $\sum_{i}v_{i}\,\partial_{i}f(p)$ を対応させる。この対応は線形で、積については $v(fg)=f(p)v(g)+g(p)v(f)$ を満たす。多様体では矢印が描けないので、逆にこの二つの性質をもつ操作を接ベクトルと定義する。微分は点の近くの値だけで決まるので、関数そのものではなく「点の近くでの様子」を扱う。
+
+::: definition 関数の芽 {#mfd:germ keywords="germ of a smooth function at a point, algebra of germs" index="芽（関数の）|めかんすうの, 関数の芽|かんすうのめ"}
+$m\in M$ とする。$m$ を含む開集合 $U$ と $f\in C^{\infty}(U)$ の組 $(f,U)$ の全体に、「$m$ を含むある開集合 $W\subset U\cap U'$ の上で $f=f'$」で $(f,U)\sim(f',U')$ と定めた同値関係を入れる。同値類を $m$ における $f$ の**芽**といい、$[f]_{m}$ または単に $f$ と書く。芽の全体を $C^{\infty}_{m}$ と書く。
+:::
+
+::: intuition
+芽とは、点のごく近くでの関数の様子だけを覚えておき、遠くでの値は忘れたものである。
+:::
+
+$\sim$ が同値関係であること（推移律は、二つの開集合の共通部分をとる）と、和・実数倍・積を共通の定義域の上で定めると $C^{\infty}_{m}$ が $\mathbb{R}$ 上の可換な多元環になること、値 $f(m)$ が代表元によらずに定まることは、定義からすぐ確かめられる（積が滑らかなことは \ref{mfd:smooth-map-criteria.1} と、$\mathbb{R}^{d}$ 上の $C^{\infty}$ 級関数の積が $C^{\infty}$ 級であることから）。
+
+::: definition 導分・接ベクトル・接空間 {#mfd:tangent-space keywords="tangent vector as a derivation of the algebra of germs, tangent space T_m M" index="導分|どうぶん, 接ベクトル（多様体）|せつべくとるたようたい, 接空間|せつくうかん"}
+$m\in M$ とする。線形写像 $v\colon C^{\infty}_{m}\to\mathbb{R}$ で、ライプニッツ則
+$$
+v(fg)=f(m)\,v(g)+g(m)\,v(f)\qquad(f,g\in C^{\infty}_{m})
+$$
+を満たすものを、$m$ における**導分**、または $M$ の $m$ における**接ベクトル**という。その全体を $T_{m}M$ と書き、$(v+w)(f)\defeq v(f)+w(f)$、$(\lambda v)(f)\defeq\lambda v(f)$ で実ベクトル空間とみたものを $m$ における**接空間**という。$m$ の近くで定義された滑らかな関数 $f$ について、$v(f)\defeq v([f]_{m})$ と書く。
+:::
+
+::: intuition
+接ベクトルとは、点の近くの関数を「ある方向に微分する」操作のことで、和の微分は微分の和、積の微分は積の微分法則に従う、という二つの性質だけで特徴づけたものである。接空間はそういう操作全体のなすベクトル空間である。
+:::
+
+$v+w$ と $\lambda v$ が再びライプニッツ則を満たすことは、両辺がそれぞれの和・実数倍であることから従う。
+
+::: lemma 定数の微分は 0 {#mfd:derivation-constant keywords="a derivation kills constants" index="導分は定数を 0 に送る|どうぶんはていすうをぜろにおくる"}
+$v\in T_{m}M$ と定数関数（の芽）$c$ について $v(c)=0$。
+:::
+
+::: proof
+ライプニッツ則で $f=g=1$ とすると $v(1)=1\cdot v(1)+1\cdot v(1)=2v(1)$ なので $v(1)=0$。線形性から $v(c)=c\,v(1)=0$。
+:::
+
+::: lemma アダマールの補題 {#mfd:hadamard-lemma keywords="Hadamard's lemma: g(x) = g(p) + sum (x_i - p_i) g_i(x) with smooth g_i and g_i(p) = d_i g(p) on a ball" index="アダマールの補題|あだまーるのほだい"}
+$B\subset\mathbb{R}^{d}$ を点 $p$ を中心とする開球、$g\in C^{\infty}(B)$ とする。$C^{\infty}$ 級関数 $g_{1},\dots,g_{d}\colon B\to\mathbb{R}$ で、
+$$
+g(x)=g(p)+\sum_{i=1}^{d}(x_{i}-p_{i})\,g_{i}(x)\quad(x\in B),\qquad g_{i}(p)=\partial_{i}g(p)
+$$
+を満たすものがある。
+:::
+
+::: intuition
+滑らかな関数は、点 $p$ のまわりで「定数＋座標の差の一次結合」の形に書け、その係数も滑らかな関数にとれ、$p$ での係数は偏微分係数になる。
+:::
+
+::: proof
+**Step 1（線分上の微分）.** 【主張：$g(x)-g(p)=\sum_{i}(x_{i}-p_{i})\int_{0}^{1}\partial_{i}g(p+t(x-p))\,dt$】球は凸なので、$x\in B$ について線分 $\{p+t(x-p):0\le t\le1\}$ は $B$ に含まれる。$h(t)\defeq g(p+t(x-p))$ は連鎖律（\ref{calc:multivariable-chain-rule.2}）から $C^{1}$ 級で $h'(t)=\sum_{i}(x_{i}-p_{i})\,\partial_{i}g(p+t(x-p))$。\ref{calc:fundamental-theorem.2} から $g(x)-g(p)=h(1)-h(0)=\int_{0}^{1}h'(t)\,dt$。
+
+**Step 2（係数の滑らかさ）.** 【主張：$g_{i}(x)\defeq\int_{0}^{1}\partial_{i}g(p+t(x-p))\,dt$ は $B$ 上 $C^{\infty}$ 級で、多重指数 $\alpha$ について $\partial^{\alpha}g_{i}(x)=\int_{0}^{1}t^{|\alpha|}(\partial^{\alpha}\partial_{i}g)(p+t(x-p))\,dt$】$\Phi_{\alpha}(x,t)\defeq t^{|\alpha|}(\partial^{\alpha}\partial_{i}g)(p+t(x-p))$ は $B\times[0,1]$ 上連続で、$x_{j}$ についての偏導関数は連鎖律から $\Phi_{\alpha+e_{j}}$ に等しく、これも連続。$[0,1]$ はコンパクトでジョルダン可測なので、\ref{calc:differentiation-under-integral} を使うと、$\int_{0}^{1}\Phi_{\alpha}(x,t)\,dt$ は $x_{j}$ で偏微分可能で偏導関数は $\int_{0}^{1}\Phi_{\alpha+e_{j}}(x,t)\,dt$、これは \ref{calc:differentiation-under-integral.1} から連続。$|\alpha|$ に関する帰納法で、すべての階数の偏導関数が存在して連続である。
+
+最後に $g_{i}(p)=\int_{0}^{1}\partial_{i}g(p)\,dt=\partial_{i}g(p)$。
+
+::: hypcheck
+- **$B$ が球（凸）であること**：Step 1 で線分が $B$ に入るのに使った。$p$ に関して星形の開集合でも同じ証明が通る。一般の開集合では、$p$ の近くの球に制限して使う（接空間の議論では芽しか見ないのでそれで足りる）。
+- **$g$ が $C^{\infty}$ 級であること**：Step 2 で、すべての階数の $\partial^{\alpha}\partial_{i}g$ が連続であることに使った。$g$ が $C^{k}$ 級なら $g_{i}$ は $C^{k-1}$ 級しか保証されない。
+:::
+:::
+
+::: definition 座標ベクトル {#mfd:coordinate-vectors keywords="coordinate vector fields d/dx_i at a point; partial derivatives in a chart" index="座標ベクトル|ざひょうべくとる, 偏微分（座標近傍での）|へんびぶんざひょうきんぼうでの"}
+$(U,\varphi)=(U;x_{1},\dots,x_{d})$ を座標近傍、$m\in U$ とする。$m$ の近くで滑らかな $f$ に対して
+$$
+\left.\frac{\partial}{\partial x_{i}}\right|_{m}(f)\defeq\partial_{i}(f\circ\varphi^{-1})(\varphi(m))
+$$
+と定める。$\partial f/\partial x_{i}(m)$ とも書く。これは芽だけで決まり、偏微分の積の法則からライプニッツ則を満たすので $T_{m}M$ の元である。これらを $m$ における**座標ベクトル**という。
+:::
+
+::: intuition
+座標ベクトルとは、目盛りの $i$ 番目の座標だけを動かす方向に関数を微分する操作である。
+:::
+
+::: theorem 接空間の基底 {#mfd:tangent-basis keywords="the coordinate vectors form a basis of T_m M; dim T_m M = dim M; v = sum v(x_i) d/dx_i" index="接空間の次元|せつくうかんのじげん, 接空間の基底|せつくうかんのきてい" refname="接空間の基底"}
+$(U;x_{1},\dots,x_{d})$ を $m$ を含む座標近傍とする。
+1. 座標ベクトル $\left.\partial/\partial x_{1}\right|_{m},\dots,\left.\partial/\partial x_{d}\right|_{m}$ は $T_{m}M$ の基底である。とくに $\dim T_{m}M=d=\dim M$。
+2. 任意の $v\in T_{m}M$ について
+$$
+v=\sum_{i=1}^{d}v(x_{i})\left.\frac{\partial}{\partial x_{i}}\right|_{m}.
+$$
+:::
+
+::: intuition
+多様体の各点の接空間は、多様体の次元と同じ次元のベクトル空間で、どの接ベクトルも座標方向の微分の一次結合として書ける。係数は、その接ベクトルで各座標関数を微分した値である。
+:::
+
+::: proof
+$a\defeq\varphi(m)$ とおく。
+
+**Step 1（一次独立）.** 【主張：$\left.\partial/\partial x_{i}\right|_{m}(x_{j})=\delta_{ij}$。とくに座標ベクトルは一次独立】$x_{j}\circ\varphi^{-1}=r_{j}$ なので $\partial_{i}r_{j}(a)=\delta_{ij}$。$\sum_{i}c_{i}\left.\partial/\partial x_{i}\right|_{m}=0$ なら、両辺を $x_{j}$ に施して $c_{j}=0$。
+
+**Step 2（芽の展開）.** 【主張：$m$ の近くで滑らかな $f$ について、$m$ のある開近傍 $U'$ と $h_{i}\in C^{\infty}(U')$ があって、$U'$ 上 $f=f(m)+\sum_{i}(x_{i}-x_{i}(m))\,h_{i}$、かつ $h_{i}(m)=\left.\partial/\partial x_{i}\right|_{m}(f)$】$f$ の定義域を $W$ とし、$B(a,\varepsilon)\subset\varphi(U\cap W)$ となる $\varepsilon>0$ をとる。$g\defeq f\circ\varphi^{-1}$ は $B(a,\varepsilon)$ 上 $C^{\infty}$ 級なので、アダマールの補題（\ref{mfd:hadamard-lemma}）から $g=g(a)+\sum_{i}(r_{i}-a_{i})g_{i}$。$U'\defeq\varphi^{-1}(B(a,\varepsilon))$ の上で $\varphi$ を合成すると、$r_{i}\circ\varphi=x_{i}$, $a_{i}=x_{i}(m)$, $g(a)=f(m)$ から主張の式を得る。$h_{i}\defeq g_{i}\circ\varphi$ は $h_{i}\circ\varphi^{-1}=g_{i}$ が $C^{\infty}$ 級なので滑らか（\ref{mfd:smooth-map-criteria.1}）で、$h_{i}(m)=g_{i}(a)=\partial_{i}g(a)=\left.\partial/\partial x_{i}\right|_{m}(f)$。
+
+**Step 3（全域性）.** 【主張：$v(f)=\sum_{i}v(x_{i})\left.\partial/\partial x_{i}\right|_{m}(f)$】$v$ は芽にしか依存しないので、Step 2 の式に $v$ を施してよい。線形性と \ref{mfd:derivation-constant}（$v(f(m))=0$, $v(x_{i}(m))=0$）、ライプニッツ則から
+$$
+v(f)=\sum_{i}\Bigl((x_{i}(m)-x_{i}(m))\,v(h_{i})+h_{i}(m)\,v(x_{i})\Bigr).
+$$
+第一項は $0$ なので $v(f)=\sum_{i}h_{i}(m)v(x_{i})$ となり、Step 2 の $h_{i}(m)$ の値を代入すればよい。
+
+Step 3 は 2 そのもので、座標ベクトルが $T_{m}M$ を張ることを示す。Step 1 と合わせて 1 が成り立つ。
+
+::: hypcheck
+- **$C^{\infty}$ 級であること**：Step 2 でアダマールの補題を使い、係数 $h_{i}$ が再び滑らか（したがって芽として $v$ を施せる）であることに使った。$C^{k}$ 級（$k<\infty$）の多様体で同じように導分を定義すると、この議論は通らない。実際、$m$ で $0$ になる $C^{k}$ 級の芽のイデアル $\mathfrak{m}$ について $\mathfrak{m}/\mathfrak{m}^{2}$ は無限次元になることが知られており（Warner §1.21 が文献を挙げている）、下の補足の同型 $T_{m}M\cong(\mathfrak{m}/\mathfrak{m}^{2})^{*}$ は $C^{k}$ 級でも同じ議論で成り立つので、導分の空間も無限次元になる。
+- **ハウスドルフ性・第二可算性**：使っていない。この定理は点の近くだけの議論である。
+- **ライプニッツ則**：Step 3 で、$(x_{i}-x_{i}(m))h_{i}$ を微分したときに $v(h_{i})$ の項が $x_{i}(m)-x_{i}(m)=0$ 倍で消えることに使った。線形性だけでは $v$ は芽の空間（無限次元）上の任意の線形形式になりうる。
+:::
+:::
+
+::: corollary 座標の取り替え {#mfd:change-of-coordinates keywords="transformation rule of coordinate vectors under change of chart; Jacobian matrix" index="座標ベクトルの変換則|ざひょうべくとるのへんかんそく"}
+$(U;x_{1},\dots,x_{d})$, $(V;y_{1},\dots,y_{d})$ を $m$ を含む座標近傍とすると
+$$
+\left.\frac{\partial}{\partial x_{j}}\right|_{m}=\sum_{i=1}^{d}\frac{\partial y_{i}}{\partial x_{j}}(m)\left.\frac{\partial}{\partial y_{i}}\right|_{m}.
+$$
+係数 $\frac{\partial y_{i}}{\partial x_{j}}(m)=\partial_{j}(r_{i}\circ\psi\circ\varphi^{-1})(\varphi(m))$ は、座標変換 $\psi\circ\varphi^{-1}$ のヤコビ行列の成分である。
+:::
+
+::: proof
+\ref{mfd:tangent-basis.2} を $v=\left.\partial/\partial x_{j}\right|_{m}$ と座標近傍 $(V,\psi)$ に使うと、係数は $v(y_{i})=\partial_{j}(y_{i}\circ\varphi^{-1})(\varphi(m))$ で、$y_{i}\circ\varphi^{-1}=r_{i}\circ\psi\circ\varphi^{-1}$。
+:::
+
+::: example
+$\mathbb{R}^{d}$（標準的な可微分構造）で恒等写像を座標近傍にとると、座標ベクトル $\left.\partial/\partial r_{i}\right|_{p}$ は通常の偏微分 $f\mapsto\partial_{i}f(p)$ である。\ref{mfd:tangent-basis} から、写像 $T_{p}\mathbb{R}^{d}\to\mathbb{R}^{d}$, $v\mapsto(v(r_{1}),\dots,v(r_{d}))$ は線形同型で、逆写像はベクトル $u$ に方向微分 $f\mapsto\sum_{i}u_{i}\,\partial_{i}f(p)=Df(p)u$ を対応させる。以下、この同型で $T_{p}\mathbb{R}^{d}=\mathbb{R}^{d}$ と同一視する。
+:::
+
+## 写像の微分 {#mfd:sec-sm-differential}
+
+::: definition 写像の微分 {#mfd:differential keywords="differential (pushforward, tangent map) dF_m: T_m M -> T_{F(m)} N, dF_m(v)(g) = v(g o F)" index="写像の微分|しゃぞうのびぶん, 微分（多様体の間の写像）|びぶんたようたいのあいだのしゃぞう"}
+滑らかな写像 $F\colon M\to N$ と $m\in M$ について、$v\in T_{m}M$ と $F(m)$ の近くで滑らかな $g$ に対して
+$$
+dF_{m}(v)(g)\defeq v(g\circ F)
+$$
+と定める。これは $T_{F(m)}N$ の元で、$v\mapsto dF_{m}(v)$ は線形写像 $dF_{m}\colon T_{m}M\to T_{F(m)}N$ である。$dF_{m}$ を $F$ の $m$ における**写像の微分**という（単に微分ともいい、$F_{*}$ とも書く）。
+:::
+
+::: intuition
+写像の微分とは、出発点での「微分する方向」を、写像で行き先へ運ぶ操作である。行き先の関数を微分するには、写像で引き戻してから元の方向に微分すればよい。
+:::
+
+$dF_{m}(v)$ が well-defined な導分であることを確かめておく。$g$ が $F(m)$ を含む開集合 $W$ 上で滑らかなら、$g\circ F$ は開集合 $F^{-1}(W)\ni m$ 上で滑らか（\ref{mfd:smooth-map-criteria.3}）。$g=g'$ が $F(m)$ のある開近傍 $W'$ 上で成り立てば、$g\circ F=g'\circ F$ が $F^{-1}(W')$ 上で成り立つので、$dF_{m}(v)(g)$ は $g$ の芽だけで決まる。$(gh)\circ F=(g\circ F)(h\circ F)$ と $(g\circ F)(m)=g(F(m))$ からライプニッツ則が従い、線形性は明らか。
+
+::: proposition 写像の微分の性質 {#mfd:differential-properties keywords="chain rule for differentials, identity, diffeomorphisms induce isomorphisms, Jacobian matrix in coordinates, compatibility with the derivative in Euclidean space" index="連鎖律（多様体）|れんさりつたようたい, 写像の微分の性質|しゃぞうのびぶんのせいしつ, ヤコビ行列（多様体）|やこびぎょうれつたようたい"}
+$F\colon M\to N$, $G\colon N\to P$ を滑らかな写像、$m\in M$ とする。
+1. （連鎖律）$d(G\circ F)_{m}=dG_{F(m)}\circ dF_{m}$。また $d(\mathrm{id}_{M})_{m}=\mathrm{id}_{T_{m}M}$。
+2. $F$ が微分同相写像なら $dF_{m}$ は線形同型で、$(dF_{m})^{-1}=d(F^{-1})_{F(m)}$。とくに、空でない可微分多様体が微分同相なら次元が等しい。
+3. （局所表示）$(U;x_{1},\dots,x_{d})$ を $m$ を含む座標近傍、$(V;y_{1},\dots,y_{c})$ を $F(m)$ を含む座標近傍とすると
+$$
+dF_{m}\Bigl(\left.\frac{\partial}{\partial x_{j}}\right|_{m}\Bigr)=\sum_{i=1}^{c}\frac{\partial(y_{i}\circ F)}{\partial x_{j}}(m)\left.\frac{\partial}{\partial y_{i}}\right|_{F(m)}.
+$$
+すなわち、座標ベクトルの基底に関する $dF_{m}$ の表現行列は、局所表示 $\psi\circ F\circ\varphi^{-1}$ の $\varphi(m)$ におけるヤコビ行列である。
+4. $M,N$ が $\mathbb{R}^{d},\mathbb{R}^{c}$ の開部分多様体なら、$T_{p}\mathbb{R}^{d}=\mathbb{R}^{d}$ の同一視のもとで $dF_{p}=DF(p)$。
+:::
+
+::: proof
+**1.** $v\in T_{m}M$ と $P$ の関数 $g$ について、$d(G\circ F)_{m}(v)(g)=v(g\circ G\circ F)=dF_{m}(v)(g\circ G)=dG_{F(m)}(dF_{m}(v))(g)$。恒等写像については $v(g\circ\mathrm{id})=v(g)$。
+
+**2.** 1 を $F^{-1}\circ F=\mathrm{id}_{M}$, $F\circ F^{-1}=\mathrm{id}_{N}$ に使うと、$d(F^{-1})_{F(m)}$ が $dF_{m}$ の両側の逆写像になる。次元については、空でない $M$ の点 $m$ で $\dim M=\dim T_{m}M=\dim T_{F(m)}N=\dim N$（\ref{mfd:tangent-basis.1}）。
+
+**3.** $w\defeq dF_{m}(\left.\partial/\partial x_{j}\right|_{m})$ に \ref{mfd:tangent-basis.2} を使うと $w=\sum_{i}w(y_{i})\left.\partial/\partial y_{i}\right|_{F(m)}$ で、$w(y_{i})=\left.\partial/\partial x_{j}\right|_{m}(y_{i}\circ F)$。これは定義から $\partial_{j}(y_{i}\circ F\circ\varphi^{-1})(\varphi(m))=\partial_{j}(r_{i}\circ\psi\circ F\circ\varphi^{-1})(\varphi(m))$ で、局所表示のヤコビ行列の $(i,j)$ 成分である。
+
+**4.** 恒等写像を座標近傍にとって 3 を使うと、$dF_{p}$ の表現行列は $F$ のヤコビ行列、すなわち $DF(p)$ の表現行列である（\ref{calc:multivariable-chain-rule}）。
+:::
+
+::: definition 余接空間と関数の微分 {#mfd:cotangent-space keywords="cotangent space T_m^* M, differential df_m of a function, dual basis dx_i" index="余接空間|よせっくうかん, 関数の微分（多様体）|かんすうのびぶんたようたい"}
+$T_{m}M$ の双対空間 $T_{m}^{*}M\defeq(T_{m}M)^{*}$ を $m$ における**余接空間**という。$m$ の近くで滑らかな関数 $f$ について、$df_{m}\in T_{m}^{*}M$ を $df_{m}(v)\defeq v(f)$ で定め、$f$ の $m$ における**微分**という。
+:::
+
+::: intuition
+関数の微分とは、各方向に対して、その方向に関数を微分した値を返す一次式である。
+:::
+
+::: proposition 座標による関数の微分の表示 {#mfd:df-in-coordinates keywords="dx_i form the dual basis of the coordinate vectors; df = sum (df/dx_i) dx_i" index="関数の微分の座標表示|かんすうのびぶんのざひょうひょうじ"}
+$(U;x_{1},\dots,x_{d})$ を $m$ を含む座標近傍とする。$(dx_{1})_{m},\dots,(dx_{d})_{m}$ は座標ベクトルの双対基底で、$m$ の近くで滑らかな $f$ について
+$$
+df_{m}=\sum_{i=1}^{d}\frac{\partial f}{\partial x_{i}}(m)\,(dx_{i})_{m}.
+$$
+:::
+
+::: proof
+$(dx_{i})_{m}(\left.\partial/\partial x_{j}\right|_{m})=\left.\partial/\partial x_{j}\right|_{m}(x_{i})=\delta_{ij}$（\ref{mfd:tangent-basis} の証明の Step 1）なので双対基底である。両辺を $\left.\partial/\partial x_{j}\right|_{m}$ に施すと、左辺は $\partial f/\partial x_{j}(m)$、右辺は $\sum_{i}\frac{\partial f}{\partial x_{i}}(m)\delta_{ij}=\frac{\partial f}{\partial x_{j}}(m)$。基底の上で一致する線形形式は等しい。
+:::
+
+::: definition 曲線の速度ベクトル {#mfd:velocity keywords="smooth curve in a manifold, velocity vector sigma'(t) = d sigma (d/dt)" index="滑らかな曲線（多様体）|なめらかなきょくせんたようたい, 速度ベクトル（多様体）|そくどべくとるたようたい"}
+開区間 $I\subset\mathbb{R}$ から $M$ への滑らかな写像 $\sigma$ を $M$ の**滑らかな曲線**という。$t\in I$ について、$\sigma'(t)\defeq d\sigma_{t}\bigl(\left.d/dr\right|_{t}\bigr)\in T_{\sigma(t)}M$ を $\sigma$ の $t$ における**速度ベクトル**という（$r$ は $\mathbb{R}$ の恒等写像を座標近傍とした座標関数で、$\left.d/dr\right|_{t}$ はその座標ベクトル）。定義から $\sigma'(t)(f)=(f\circ\sigma)'(t)$ である。
+:::
+
+::: intuition
+曲線の速度ベクトルとは、関数を曲線に沿って眺めたときの変化の速さを測る操作である。
+:::
+
+::: proposition 接ベクトルは曲線の速度ベクトル {#mfd:tangent-vector-curve keywords="every tangent vector is the velocity of a smooth curve; velocity in coordinates" index="接ベクトルと曲線|せつべくとるときょくせん"}
+1. 座標近傍 $(U;x_{1},\dots,x_{d})$ の中を動く曲線 $\sigma$ について $\sigma'(t)=\sum_{i}(x_{i}\circ\sigma)'(t)\left.\partial/\partial x_{i}\right|_{\sigma(t)}$。
+2. 任意の $v\in T_{m}M$ に対して、$\sigma(0)=m$, $\sigma'(0)=v$ となる滑らかな曲線 $\sigma\colon(-\delta,\delta)\to M$ がある。
+:::
+
+::: proof
+**1.** \ref{mfd:tangent-basis.2} から、係数は $\sigma'(t)(x_{i})=(x_{i}\circ\sigma)'(t)$。
+
+**2.** \ref{mfd:maximal-atlas.3} から、$m$ を中心とし像が $B(0,\varepsilon)$ の座標近傍 $(U,\varphi)$ をとる。$v=\sum_{i}a_{i}\left.\partial/\partial x_{i}\right|_{m}$ と書き（\ref{mfd:tangent-basis}）、$\delta>0$ を $\delta|a|<\varepsilon$ となるようにとって $\sigma(t)\defeq\varphi^{-1}(ta)$ とする（$a=0$ なら $\delta$ は任意で、$\sigma$ は定数）。$\sigma$ は滑らかな写像 $t\mapsto ta$ と $\varphi^{-1}$ の合成なので滑らか（\ref{mfd:smooth-map-criteria.4}）で、$x_{i}\circ\sigma(t)=ta_{i}$。1 から $\sigma'(0)=\sum_{i}a_{i}\left.\partial/\partial x_{i}\right|_{m}=v$。
+:::
+
+::: theorem 微分が 0 の写像は定数 {#mfd:zero-differential-constant keywords="if M is connected and dF_m = 0 for all m then F is constant" index="微分が 0 の写像は定数（多様体）|びぶんがぜろのしゃぞうはていすうたようたい"}
+$M$ を連結な可微分多様体、$F\colon M\to N$ を滑らかな写像とし、すべての $m\in M$ で $dF_{m}=0$ とする。このとき $F$ は定数写像である。
+:::
+
+::: intuition
+つながった多様体の上で、どの方向に動いても値が変化しない写像は、全体で一定である。
+:::
+
+::: proof
+$M=\varnothing$ なら主張は自明なので、$m_{0}\in M$ をとり $n\defeq F(m_{0})$、$A\defeq F^{-1}(n)$ とおく。
+
+**Step 1（$A$ は閉）.** 【主張：$A$ は $M$ の空でない閉集合】$m_{0}\in A$。$N$ はハウスドルフなので一点 $\{n\}$ は閉集合（$n$ と異なる各点は $n$ を含まない開近傍をもつ）で、$F$ は連続なので $A$ は閉。
+
+**Step 2（$A$ は開）.** 【主張：$m\in A$ なら、$m$ のある開近傍が $A$ に含まれる】$n$ を含む座標近傍 $(V,\psi)$ と、\ref{mfd:maximal-atlas.2}・\ref{mfd:maximal-atlas.3} により $m$ を含む座標近傍 $(U,\varphi)$ で $U\subset F^{-1}(V)$ かつ $\varphi(U)$ が開球であるものをとる。局所表示 $H\defeq\psi\circ F\circ\varphi^{-1}\colon\varphi(U)\to\mathbb{R}^{c}$ のヤコビ行列は、\ref{mfd:differential-properties.3} から $dF$ の表現行列なので、$\varphi(U)$ のすべての点で $DH=0$。開球は凸なので連結で、\ref{calc:zero-derivative-constant} から $H$ は定数 $\psi(F(m))=\psi(n)$。$\psi$ は単射なので $F(U)=\{n\}$、すなわち $U\subset A$。
+
+**Step 3.** $A$ は空でなく開かつ閉なので、$M$ の連結性（\ref{top:connected}）から $A=M$。
+
+::: hypcheck
+- **$M$ が連結**：Step 3 で使った。外すと偽：二点からなる $0$ 次元多様体 $\{a,b\}$ から $\mathbb{R}$ への $F(a)=0$, $F(b)=1$（$0$ 次元なので $dF=0$）。
+- **$N$ がハウスドルフ**：Step 1 で一点が閉集合であることに使った（一点が閉であれば十分）。
+- **すべての点で $dF_{m}=0$**：Step 2 で使った。一点だけでは足りない（$t\mapsto t^{3}$ は $0$ で微分が $0$ だが定数でない）。
+- **第二可算性**：使っていない。
+:::
+:::
+
+::: supplement
+**芽の剰余環による見方.** $\mathfrak{m}_{m}\subset C^{\infty}_{m}$ を $m$ で $0$ になる芽のイデアルとすると、$T_{m}M$ は $(\mathfrak{m}_{m}/\mathfrak{m}_{m}^{2})^{*}$ と自然に同型である（導分は $\mathfrak{m}_{m}^{2}$ の元を $0$ に送るので $\mathfrak{m}_{m}/\mathfrak{m}_{m}^{2}$ 上の線形形式を与え、逆に線形形式 $\ell$ から $f\mapsto\ell(f-f(m)\bmod\mathfrak{m}_{m}^{2})$ で導分が作れる）。$C^{\infty}_{m}$ は $\mathfrak{m}_{m}$ をただ一つの極大イデアルとする局所環で、この見方は代数幾何のザリスキ接空間 $(\mathfrak{m}/\mathfrak{m}^{2})^{*}$ と同じ形をしている（\see{ring:page-regular-local-rings}）。Warner は $\mathfrak{m}_{m}/\mathfrak{m}_{m}^{2}$ の次元を数えることで \ref{mfd:tangent-basis} を示している。
+
+**他の定義との比較.** 接ベクトルは、(a) 曲線の同値類（$f\circ\sigma$ の微分係数がすべての $f$ で一致する曲線を同一視）、(b) 座標近傍ごとの数の組で座標の取り替えの規則 \ref{mfd:change-of-coordinates} に従って変わるもの、としても定義できる。\ref{mfd:tangent-vector-curve} と \ref{mfd:change-of-coordinates} は、$C^{\infty}$ 級の多様体ではこれらがすべて同じベクトル空間を与えることを示している。
+
+**高い視点.** 点付きの可微分多様体 $(M,m)$ に $T_{m}M$、滑らかな写像に $dF_{m}$ を対応させる操作は、連鎖律 \ref{mfd:differential-properties.1} によって関手になる。微分同相写像が同型に移ることは、この関手性の帰結である。曲面論（\ref{surf:page-regular-surfaces}）の接平面は $\mathbb{R}^{3}$ の中のベクトルで定義したが、正則曲面を $\mathbb{R}^{3}$ の部分多様体（次のページ）とみると、包含写像の微分（\ref{mfd:differential-properties.4} の同一視）によって、ここでの接空間は接平面に同型に移る。
+:::
+
+## 問題 {#mfd:sec-sm-problems}
+
+::: problem {#mfd:prob-sm-cube-chart}
+$\mathbb{R}$ の座標近傍 $(\mathbb{R},\varphi)$, $\varphi(t)=t$ と $(\mathbb{R},\psi)$, $\psi(t)=t^{3}$ を考える。(1) この二つは両立しないことを示せ。(2) $\{(\mathbb{R},\psi)\}$ が定める可微分構造をもつ $\mathbb{R}$ を $\mathbb{R}'$ とする。$\mathbb{R}'$ と標準的な $\mathbb{R}$ は微分同相であることを示せ。
+:::
+
+::: solution
+(1) 座標変換 $\varphi\circ\psi^{-1}(s)=s^{1/3}$ は $s=0$ で微分可能でない。(2) $F\colon\mathbb{R}'\to\mathbb{R}$, $F(t)=t^{3}$ とする。局所表示は $\mathrm{id}\circ F\circ\psi^{-1}(s)=(s^{1/3})^{3}=s$ で $C^{\infty}$ 級、$F^{-1}(u)=u^{1/3}$ の局所表示は $\psi\circ F^{-1}(u)=u$ で $C^{\infty}$ 級（\ref{mfd:smooth-map-criteria.1}：一つの座標近傍で確かめれば十分）。よって $F$ は微分同相写像。同じ位相空間の上の異なる可微分構造が、微分同相な多様体を与えうる。
+:::
+
+::: problem {#mfd:prob-sm-product-tangent}
+$M,N$ を可微分多様体、$\pi_{1}\colon M\times N\to M$, $\pi_{2}\colon M\times N\to N$ を射影とする。$(d(\pi_{1})_{(m,n)},d(\pi_{2})_{(m,n)})\colon T_{(m,n)}(M\times N)\to T_{m}M\oplus T_{n}N$ は線形同型であることを示せ。
+:::
+
+::: solution
+$m$, $n$ を含む座標近傍 $(U;x_{1},\dots,x_{d})$, $(V;y_{1},\dots,y_{c})$ をとり、積座標近傍の座標関数を $\bar{x}_{i}=x_{i}\circ\pi_{1}$, $\bar{y}_{k}=y_{k}\circ\pi_{2}$ とする。射影の局所表示は座標の一部を取り出す線形写像なので滑らか。\ref{mfd:differential-properties.3} から、$d\pi_{1}(\partial/\partial\bar{x}_{j})=\sum_{i}\frac{\partial(x_{i}\circ\pi_{1})}{\partial\bar{x}_{j}}\partial/\partial x_{i}=\partial/\partial x_{j}$、$d\pi_{1}(\partial/\partial\bar{y}_{k})=0$、同様に $d\pi_{2}(\partial/\partial\bar{x}_{j})=0$, $d\pi_{2}(\partial/\partial\bar{y}_{k})=\partial/\partial y_{k}$。よってこの写像は基底を基底に移し（\ref{mfd:tangent-basis.1}）、線形同型である。
+:::
+
+::: problem {#mfd:prob-sm-critical-point}
+空でないコンパクトな可微分多様体 $M$ 上の滑らかな関数 $f$ には、$df_{m}=0$ となる点 $m$ があることを示せ。
+:::
+
+::: solution
+連続関数 $f$ はコンパクト空間上で最大値をとるので、最大値をとる点 $m$ をとる。$v\in T_{m}M$ について、\ref{mfd:tangent-vector-curve.2} から $\sigma(0)=m$, $\sigma'(0)=v$ の曲線 $\sigma$ をとると、$f\circ\sigma$ は $t=0$ で最大値をとる微分可能な $1$ 変数関数なので $(f\circ\sigma)'(0)=0$。よって $df_{m}(v)=v(f)=\sigma'(0)(f)=(f\circ\sigma)'(0)=0$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
