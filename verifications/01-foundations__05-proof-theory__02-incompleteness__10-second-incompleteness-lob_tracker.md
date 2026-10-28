@@ -19,6 +19,7 @@ The page is largely correct: the formalized first incompleteness lemma, the seco
 - **Detail:** The proof of part 2 cites \ref{pt:godel-first.2}, but the label table only lists pt:godel-first.1 (theorem 8.5, Gödel's first incompleteness theorem). There is no pt:godel-first.2 entry, so the citation target is not established. Moreover, part 2 requires the ω-consistency form of the first incompleteness theorem (that PA does not prove ¬G under ω-consistency), which is a distinct statement from the plain consistency form in pt:godel-first.1.
 - **Proposed fix:** Cite the correct label for the ω-consistency half of Gödel's first incompleteness theorem (the statement that if PA is ω-consistent then PA \nvdash \neg G), or add that statement explicitly: "By the ω-consistency part of Gödel's first incompleteness theorem, PA is ω-consistent implies PA \nvdash \neg G."
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). pt:godel-first.2 is: if PA is ω-consistent then $\PA\nvdash\neg G$ — exactly the ω-consistency half.
 
 ### ISSUE-0002 [Open] Rosser's predicate claimed not to satisfy D1–D3
 - **Category:** Supplement/remark error

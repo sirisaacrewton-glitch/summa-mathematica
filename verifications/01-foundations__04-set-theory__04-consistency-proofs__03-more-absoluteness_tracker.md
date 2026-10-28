@@ -33,6 +33,7 @@ The page is largely correct: the main theorems (WF model of ZF, absoluteness of 
 - **Detail:** The text asserts that the converse $\mathrm{AC}^{\mathbf{WF}}\to\mathrm{AC}$ is not provable, i.e. it is consistent with $\ZF^{-}$ that every well-founded set is well-orderable but some non-well-founded set is not. This is stated as a fact attributed to Kunen's Chapter IV exercises but not proved. The claim is plausible but stated without proof and without precise hypotheses; as an unsupported assertion it should be flagged or softened.
 - **Proposed fix:** Either supply a reference/proof sketch, or soften to: 'The converse $\mathrm{AC}^{\mathbf{WF}}\to\mathrm{AC}$ is not expected to hold in general; in $\ZF^{-}$ it is consistent that all well-founded sets are well-orderable while some non-well-founded set is not (cf. Kunen, Chapter IV exercises; not proved here).'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The sentence only says the converse is not provable and points to Kunen's exercises; it does not claim a proof. This is a correctly labelled pointer, not an unsupported assertion.
 
 ### ISSUE-0004 [Open] Power set non-absoluteness for infinite x
 - **Category:** Supplement/remark error

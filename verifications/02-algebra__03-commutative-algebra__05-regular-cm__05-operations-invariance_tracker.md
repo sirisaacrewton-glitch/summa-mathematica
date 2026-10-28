@@ -40,6 +40,7 @@ The page is largely correct and well-organized. The main genuine problems are in
 - **Detail:** 「$y-xs\in g\hat R$ なら…矛盾。同様に $y+xs\notin g\hat R$。よって $\hat A$ は零因子をもつ」とあるが、$\hat A=\hat R/g\hat R$ で $y-xs$ と $y+xs$ の像が零因子であることを示すには、両方の像が非零で、かつ積が $g\hat R$ に入ることを言う必要がある。積 $(y-xs)(y+xs)=y^{2}-x^{2}s^{2}=y^{2}-x^{2}(1+x)=g$ が $g\hat R$ に入ることは明らかだが、$y-xs$ の像が非零（$y-xs\notin g\hat R$）は示されている。しかし $y+xs$ の像が非零であることも必要で、「同様に」で済ませている。これは概ね正しいが、$y+xs$ が $g\hat R$ に属さないことの議論が省略されている。
 - **Proposed fix:** Add: "Similarly, if $y+xs\in g\hat R=(y-xs)(y+xs)\hat R$, then since $k[[x,y]]$ is a domain we may cancel $y+xs$ to get $1\in(y-xs)\hat R$, which is impossible since $y-xs$ lies in the maximal ideal. Hence the images of $y-xs$ and $y+xs$ in $\hat A$ are both nonzero and their product is zero, so $\hat A$ has zero divisors."
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The argument for $y+xs$ is literally the same as the one written out for $y-xs$ (swap the two factors); '同様に' is appropriate.
 
 ### ISSUE-0005 [Open] 正規性の持ち上げの記述
 - **Category:** Supplement/remark error
@@ -68,3 +69,4 @@ The page is largely correct and well-organized. The main genuine problems are in
 - **Detail:** Step 7 で「$t\in P^{2}B_{P}$ なら $R_{(t)}$ で $t=t^{2}g/u$（$u\notin(t)$）、整域なので $u=tg\in(t)$ となり矛盾」とあるが、$B_{P}\to R_{(t)}$ における $P$ の像が $(t)$ であること、および $t\in P^{2}B_{P}$ から $R_{(t)}$ で $t\in(t)^{2}R_{(t)}$ が従うことの説明が不足している。また $u\notin(t)$ と $u=tg$ から $u\in(t)$ を導く部分は、$t\in(t)$ から明らかだが、$g$ の所在（$R_{(t)}$ の元）が不明瞭。
 - **Proposed fix:** Add: "The image of $P$ under $B_{P}\to R_{(t)}$ is $(t)R_{(t)}$, so $t\in P^{2}B_{P}$ implies $t\in(t)^{2}R_{(t)}$, i.e. $t=t^{2}g/u$ with $g\in R_{(t)}$ and $u\notin(t)$. Since $R_{(t)}$ is a domain, this gives $u=tg\in(t)$, contradicting $u\notin(t)$."
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** $B_{P}\to R_{(t)}$ is the localization map and sends $P$ to $(t)$ by Step 6; the remaining manipulation is in the domain $R_{(t)}$ as written.

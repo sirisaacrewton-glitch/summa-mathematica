@@ -19,6 +19,7 @@
 - **Detail:** Step 3 cites \ref{ring:ass-localization} for the claim that if \mathfrak{p}A_{\mathfrak{p}}\in\operatorname{Ass}_{A_{\mathfrak{p}}}(A_{\mathfrak{p}}/aA_{\mathfrak{p}}) then \mathfrak{p}\in\operatorname{Ass}(A/aA). The label table lists only ring:ass-localization.2 (proposition 4.6, 局所化と台), which is about supports/localization, not this contraction statement. The bare label ring:ass-localization is not in the table, so the citation target is unverified/likely wrong.
 - **Proposed fix:** Cite the correct result (the standard fact that Ass contracts: \mathfrak{p}\in\operatorname{Ass}(A/aA) iff \mathfrak{p}A_{\mathfrak{p}}\in\operatorname{Ass}(A_{\mathfrak{p}}/aA_{\mathfrak{p}})), e.g. replace with the appropriate label from the primary-decomposition page (such as ring:ass-localization.2 if it indeed states this, otherwise the correct proposition on Ass and localization).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** ring:ass-localization (the whole proposition) includes the correspondence $\mathfrak{p}\in\mathrm{Ass}(M)\iff\mathfrak{p}A_{\mathfrak{p}}\in\mathrm{Ass}(M_{\mathfrak{p}})$ used here.
 
 ### ISSUE-0002 [Open] Geometric characterization of CM via multiplicity equality
 - **Category:** Supplement/remark error

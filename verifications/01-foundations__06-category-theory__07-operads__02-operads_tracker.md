@@ -19,6 +19,7 @@ The page is largely correct: the definitions, the End_X operad proposition, the 
 - **Detail:** Step 1 cites \ref[2]{cat:symmetric-operad.2}, but the label table only contains cat:symmetric-operad.1 (definition 2.2, 対称オペラッド). There is no item 2 of that definition listed; the equivariance axioms (1 and 2) are items within the single definition cat:symmetric-operad.1, not separate labels. The citation target does not exist as given.
 - **Proposed fix:** Replace \ref[2]{cat:symmetric-operad.2} with a reference to the second equivariance axiom of \ref{cat:symmetric-operad.1} (e.g. \ref{cat:symmetric-operad.1}・その公理 2), since both equivariance axioms are items of definition cat:symmetric-operad.1.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). cat:symmetric-operad.2 is the second equivariance axiom $\gamma(c;d_{1}\tau_{1},\dots)=\gamma(c;d_{1},\dots)(\tau_{1}\oplus\cdots\oplus\tau_{k})$.
 
 ### ISSUE-0002 [Open] Ass generating function and EGF composition claim
 - **Category:** Supplement/remark error

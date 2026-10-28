@@ -33,3 +33,4 @@ The page is largely correct. The main genuine problem is the final sentence of t
 - **Detail:** The hypcheck cites 'Kunen Chapter VI exercises 19, 20' as dealing with the point that Lemma 1.3 (set:definable-subset-formula) does not immediately give item 3. This specific exercise attribution is a factual claim about Kunen's text that is easy to get wrong and is not verifiable from the page; if the numbers are wrong this is a misattribution. Since the mathematical content (that the schema does not give uniformity) is correct, only the attribution is at risk.
 - **Proposed fix:** Either verify the exact exercise numbers or soften to 'Kunen 第 VI 章の演習（有限部分集合の扱い）がこの点を扱っている'.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Checked in Kunen (1980), Ch. VI exercises: (19) asks to define Df*, En* satisfying V 1.3/1.5/1.7 for which 1.3(c) (finite subsets are definable) is not provable, and (20) asks what is wrong with a 'proof' of 1.3(c). The attribution is correct.

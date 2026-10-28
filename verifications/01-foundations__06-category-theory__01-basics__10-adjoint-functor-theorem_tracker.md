@@ -26,6 +26,7 @@
 - **Detail:** The hypcheck says '体では成り立たず、実際、自由な体は存在しない（\ref{cat:universal-arrow} の例 4 と同じ理由で、標数が定まらない）'. The forgetful functor Field→Set does have a left adjoint in the sense that free fields (free field on a set, as a field with a map from the set) do exist; what fails is that there is no left adjoint to the forgetful functor to Set in the strict sense because there is no initial field (fields of different characteristics), i.e. the category of fields has no initial object. Saying '自由な体は存在しない' is at best ambiguous and the reason given (標数が定まらない) actually shows only that Field has no initial object / the forgetful functor has no left adjoint, not that free fields fail to exist.
 - **Proposed fix:** Replace with: '体の圏では、忘却関手 Field→Set は左随伴をもたない。実際、体の圏は始対象をもたない（標数 0 の体と標数 p の体の間に射がない）ので、空集合上の自由対象が存在しない。'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** '自由な体は存在しない' means precisely that the forgetful functor Field→Set has no left adjoint (no free field on a set), with the given reason (no initial field: characteristics cannot be determined). The proposed wording says the same thing.
 
 ### ISSUE-0003 [Open] Counterexample 2 attribution to Gelfand–Hales and Solovay is vague and the statement about 'forgetful functor from complete Boolean algebras' needs care
 - **Category:** Supplement/remark error

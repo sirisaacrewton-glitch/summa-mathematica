@@ -30,7 +30,7 @@ The main definitions, theorems and proofs (GNI ∈ IP, IP ⊆ PSPACE, TQBF ∈ I
 ### ISSUE-0003 [Open] グラフ非同型の証明系がゼロ知識の典型例であるという記述
 - **Category:** Supplement/remark error
 - **Location:** supplement「似た定理」
-- **Detail:** 本ページの GNI の証明系（ef{comp:gni-in-ip}）は検証者が挑戦を出す型だが、これはゼロ知識証明ではない。ゼロ知識性（検証者が「同型でない」以外何も学ばない）を示すにはシミュレータの構成が必要で、本ページの手続きはそのままでは zero-knowledge とは言えない。GNI のゼロ知識証明は別途構成される（Goldreich–Micali–Wigderson など）。「典型例でもある」は誇張。
+- **Detail:** 本ページの GNI の証明系（
 - **Proposed fix:** 「グラフ非同型にはゼロ知識証明も知られており（Goldreich–Micali–Wigderson）、検証者が挑戦を出す型の代表例である。ただし本ページの手続き自体がゼロ知識であることを示すには別の議論（シミュレータ）が必要である」。
 - **Reported:** 2026-10-28 (8ccef3d)
 
@@ -47,3 +47,4 @@ The main definitions, theorems and proofs (GNI ∈ IP, IP ⊆ PSPACE, TQBF ∈ I
 - **Detail:** 「プラットの証明書。多項式時間で検査できることが知られている」という記述は、素数性の証明書（Pratt certificate）の検査が多項式時間でできるという主張だが、Pratt certificate の検査は一般には多項式時間とは限らない（原始根の存在確認や因数分解を含むため）。素数性が P に属すること（AKS）や、素数性が IP に属すること（Goldwasser–Kilian, Adleman–Huang）は別の結果である。解答の枠組みで素数 q を検証者に検査させるには、これらの結果を正しく引用すべき。
 - **Proposed fix:** 「素数性は IP に属する（Goldwasser–Kilian, Adleman–Huang）ので、証明者が q とその素数性の対話証明を送り、検証者が検査すればよい」に修正する。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Pratt certificates are verifiable in polynomial time: that is Pratt's 1975 theorem showing PRIMES $\in$ NP (the certificate includes the factorization of $p-1$, recursively certified, of total size $O(\log^{2}p)$). The claim is correct.

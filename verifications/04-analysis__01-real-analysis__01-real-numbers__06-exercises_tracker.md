@@ -26,6 +26,7 @@ The page is a set of exercises with solutions; most solutions are correct. The m
 - **Detail:** The estimate q_{n+1}-√2 = (q_n-√2)^2/(2q_n) ≤ (q_n-√2)^2/(2√2) requires q_n ≥ √2, which is asserted from AM-GM. AM-GM gives q_{n+1} ≥ √2 for n≥1, and q_1=3/2>√2, so q_n≥√2 holds for all n; this is fine. However the displayed inequality is stated as if immediate without noting q_n≥√2 is needed, and more importantly the claim 'error decreases quadratically' alone does not prove convergence to √2 without an induction that the error is bounded by a geometric contraction. The step is essentially correct but the justification that q_n≥√2 for all n (including the base case) should be explicit; as written the bound (q_n-√2)^2/(2√2) is only a contraction once q_n-√2<2√2, which needs verification.
 - **Proposed fix:** Add: By induction q_n≥√2 for all n (base q_1=3/2>√2; AM-GM gives q_{n+1}≥√2). Since q_1-√2<1<2√2, the recursion e_{n+1}≤e_n^2/(2√2) with e_1<1 yields e_n→0, so q_n→√2; being convergent it is Cauchy.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The solution states $q_{n}\ge\sqrt2$ from AM-GM for all $n\ge1$ (and $q_{1}=3/2$); the error recursion with $e_{1}<1$ then gives convergence. Correct as written.
 
 ### ISSUE-0003 [Open] Claim about two decimal expansions needs the 'all 9s / all 0s' tail precisely
 - **Category:** Supplement/remark error

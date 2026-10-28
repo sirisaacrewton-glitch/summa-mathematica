@@ -26,3 +26,4 @@
 - **Detail:** The fact states that if one of N or G/N is solvable then all complements are conjugate, and that the general case of the conjugacy claim uses the Feit–Thompson theorem. This is essentially correct (the solvable-case conjugacy is Schur–Zassenhaus; the general case requires Feit–Thompson for the odd-order case), but the phrasing 'N または G/N の一方が可解なら' combined with '共役の主張の一般の場合はファイト–トンプソンの定理を使う' is slightly imprecise: the standard statement is that conjugacy holds when N or G/N is solvable, and the remaining case (both non-solvable) is reduced to Feit–Thompson. This is acceptable as a stated fact, but the attribution should be precise.
 - **Proposed fix:** State: 'さらに $N$ または $G/N$ の一方が可解なら補群はすべて互いに共役である。可解でない場合の共役性はファイト–トンプソンの定理（奇数位数の群は可解）に帰着される。'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The fact as written ('N または G/N の一方が可解なら補群は共役。一般の場合はファイト–トンプソン') is the standard statement.

@@ -19,6 +19,7 @@ The main theorems (norm equivalence, operator norm, Neumann series, open inverti
 - **Detail:** The supplement cites `\ref{calc:componentwise.3}` for the continuity of det. The label table lists only `calc:componentwise.1` (proposition 1.6, item 1 = coordinatewise convergence). Item 3 of that proposition (sums/products/quotients of continuous functions) is not a separately registered label, so the link target does not exist / does not say what is used.
 - **Proposed fix:** Replace `\ref{calc:componentwise.3}` with `\ref{calc:componentwise}` (proposition 1.6, item 3), or state explicitly: "det is a polynomial in the entries, hence continuous by \ref{calc:componentwise} (3)."
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). calc:componentwise.3 is: sums, products and quotients of continuous functions are continuous; polynomials are continuous.
 
 ### ISSUE-0002 [Open] Claim that all linear maps between finite-dimensional spaces are continuous is imprecise
 - **Category:** Supplement/remark error

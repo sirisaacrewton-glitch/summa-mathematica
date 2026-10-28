@@ -26,6 +26,7 @@ The page is largely correct: the definitions, the Rasiowa–Sikorski argument fo
 - **Detail:** The fact states: '$\kappa>\aleph_{1}$ が正則基数で $2^{<\kappa}=\kappa$ を満たすならば...'. The actual Solovay–Tennenbaum theorem requires $\kappa^{<\kappa}=\kappa$ (not $2^{<\kappa}=\kappa$), and $\kappa$ need not be regular—the iteration works for any $\kappa$ with $\kappa^{<\kappa}=\kappa$ and $\mathrm{cf}(\kappa)>\omega$. Writing $2^{<\kappa}=\kappa$ is a different (stronger in some cases, weaker in others) condition and is not the standard hypothesis. Also the requirement $\kappa>\aleph_{1}$ should be $\kappa\ge\aleph_{1}$ or $\kappa>\aleph_{0}$ with $\kappa^{<\kappa}=\kappa$.
 - **Proposed fix:** State: '$\kappa$ が $\kappa^{<\kappa}=\kappa$ を満たす基数ならば、c.c.c. をもつ半順序による強制拡大で $\mathrm{MA}+2^{\aleph_{0}}=\kappa$ を成り立たせることができる（Solovay–Tennenbaum 1971）。特に $\kappa=\aleph_{2}$ や、$\kappa$ が正則で $2^{<\kappa}=\kappa$ を満たすならばこれが適用できる。'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Kunen's statement (Thm VIII.6.3, also Solovay–Tennenbaum) is exactly: $\kappa>\aleph_{1}$ regular with $2^{<\kappa}=\kappa$. For regular $\kappa$, $2^{<\kappa}=\kappa$ is equivalent to $\kappa^{<\kappa}=\kappa$, so there is no discrepancy; regularity is needed since $2^{\aleph_{0}}$ has uncountable cofinality and MA implies $2^{\aleph_{0}}$ regular.
 
 ### ISSUE-0003 [Open] PFA attribution and claim about proper forcing
 - **Category:** Supplement/remark error

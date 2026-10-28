@@ -191,6 +191,29 @@ def source_at(rev, rel):
 
 
 _LABELS = None
+_ITEM_CACHE = {}
+
+
+def item_text(lab, key):
+    """Text of item `key` (1, 2, ..., a, i, ...) of the environment `lab`, read from its page source."""
+    L = _LABELS.get(lab) or {}
+    page = L.get("page")
+    if not page:
+        return ""
+    if page not in _ITEM_CACHE:
+        try:
+            _ITEM_CACHE[page] = extract_source(page, open(os.path.join(ROOT, page), encoding="utf-8").read()) or ""
+        except OSError:
+            _ITEM_CACHE[page] = ""
+    src = _ITEM_CACHE[page]
+    m = re.search(r"\{#" + re.escape(lab) + r"[ }]", src)
+    if not m:
+        return ""
+    end = src.find("\n:::", m.end())
+    body = src[src.find("\n", m.end()) + 1:end if end > 0 else None]
+    pat = (r"(?m)^" + re.escape(key) + r"\. (.*)") if key.isdigit() else (r"(?m)^\s*(?:- )?(?:\*\*)?[(（]" + re.escape(key) + r"[)）](.*)")
+    im = re.search(pat, body)
+    return re.sub(r"\s+", " ", im.group(1)).strip()[:220] if im else ""
 
 
 def label_table(src):
@@ -206,16 +229,21 @@ def label_table(src):
         return "(labels.json not available)"
     rows, seen = [], set()
     for lab in REF_RE.findall(src):
-        base = lab.split(".")[0] if lab.split(".")[0] in labels else lab
-        if base in seen:
+        if lab in seen:
             continue
-        seen.add(base)
+        seen.add(lab)
+        base, _, key = lab.rpartition(".") if "." in lab and lab.rpartition(".")[0] in labels else (lab, "", "")
         L = labels.get(base)
         if L:
-            rows.append("| %s | %s %s | %s | %s |" % (lab, L.get("type", ""), L.get("num", ""), L.get("title", ""), L.get("page", "")))
+            txt = item_text(base, key) if key else ""
+            rows.append("| %s | %s %s | %s | %s | %s |" % (lab, L.get("type", ""), L.get("num", ""), L.get("title", ""), L.get("page", ""),
+                                                        txt.replace("|", "\\|") or ("item %s" % key if key else "")))
         else:
-            rows.append("| %s | (undefined or planned) | | |" % lab)
-    return "| label | kind | title | page |\n|---|---|---|---|\n" + "\n".join(rows) if rows else "(no citations)"
+            rows.append("| %s | (undefined or planned) | | | |" % lab)
+    head = ("Every label below exists (the site build checks labels and items). `L.N` / `L.i` is item N / (i) of L; "
+            "the last column quotes that item so you can check that it says what the text uses it for.\n"
+            "| label | kind | title | page | cited item |\n|---|---|---|---|---|\n")
+    return head + "\n".join(rows) if rows else "(no citations)"
 
 
 def targets_from_range(rng):

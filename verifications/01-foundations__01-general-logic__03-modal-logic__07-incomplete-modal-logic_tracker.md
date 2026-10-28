@@ -19,6 +19,7 @@ The page is largely correct: the Berk theorem proof, the Cresswell model lemmas,
 - **Detail:** Step 1 and Step 3 cite \ref{logic:normality.5}, but the label table only lists logic:normality.3 (theorem 1.13, 正規性). The target logic:normality.5 is not among the cited labels, so the citation cannot be verified against the table and may point to a nonexistent or wrong item. The intended content (distribution of \Box over conjunctions / necessitation inside \Box) is presumably part of the normality theorem, but the specific item is unverified.
 - **Proposed fix:** Replace \ref{logic:normality.5} with the correct label from the normality page (e.g. \ref{logic:normality.3} if the needed distributivity/necessitation facts are items of theorem 1.13), or add the missing label to the citation table so the reference resolves.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). logic:normality.5 is: if $\vdash\varphi_{1}\wedge\cdots\wedge\varphi_{n}\to\psi$ then $\vdash\Box\varphi_{1}\wedge\cdots\wedge\Box\varphi_{n}\to\Box\psi$.
 
 ### ISSUE-0002 [Open] Citation of normality.1 in the solution of prob-incomp-hk4
 - **Category:** Improper link
@@ -26,6 +27,7 @@ The page is largely correct: the Berk theorem proof, the Cresswell model lemmas,
 - **Detail:** The solution cites \ref{logic:normality.1}, which is not in the label table (only logic:normality.3 is listed). The step uses it to derive \Box C \to \Box(\Box p \leftrightarrow \Box\Box p) from (i), i.e. a monotonicity/necessitation-inside-\Box principle; the target is unverified.
 - **Proposed fix:** Cite the correct label for the normality/monotonicity fact used (e.g. \ref{logic:normality.3} if it contains the rule A\to B \vdash \Box A\to\Box B), or add the referenced label to the table.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). logic:normality.1 is: if $\vdash\varphi\to\psi$ then $\vdash\Box\varphi\to\Box\psi$.
 
 ### ISSUE-0003 [Open] Citation of frame-correspondence.2 not in the label table
 - **Category:** Improper link
@@ -33,6 +35,7 @@ The page is largely correct: the Berk theorem proof, the Cresswell model lemmas,
 - **Detail:** Both the Magari theorem proof and the canonical-model problem solution cite \ref{logic:frame-correspondence.2}, but the label table lists only logic:frame-correspondence.5 (theorem 3.11, フレームの対応). The item .2 is not verifiable; the text uses it for 'transitivity validates 4' and for the model-level direction, which may or may not be what item 2 states.
 - **Proposed fix:** Replace \ref{logic:frame-correspondence.2} with the correct label (e.g. \ref{logic:frame-correspondence.5} if that theorem covers the 4/transitivity correspondence), or add the label to the citation table.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). logic:frame-correspondence.2 is: $\mathcal{F}\models\Box p\to\Box\Box p\iff R$ is transitive.
 
 ### ISSUE-0004 [Open] Claim that H is 'simplest' in number of propositional variables is imprecise
 - **Category:** Supplement/remark error

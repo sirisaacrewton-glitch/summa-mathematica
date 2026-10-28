@@ -47,6 +47,7 @@
 - **Detail:** 「(κ≥ω_1)^M なら、Fn(κ,2) と Fn(ω,2) は V では同型だが M では同型でなく」は偽。Fn(κ,2) と Fn(ω,2) は濃度が異なる（κ>ω なら |Fn(κ,2)|>|Fn(ω,2)|）ので V でも同型でない。同型なのは Fn(κ,2) と Fn(κ×ω,2) のような場合。
 - **Proposed fix:** Remove the claim that Fn(κ,2) and Fn(ω,2) are isomorphic in V; instead say they are not isomorphic (different cardinality) and give different extensions when κ≥ω_1 in M.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Here $M$ is a countable transitive model, so in $V$ the ordinal $\kappa\in M$ is countable; then $\mathrm{Fn}(\kappa,2)$ and $\mathrm{Fn}(\omega,2)$ are isomorphic in $V$ via a bijection $\kappa\to\omega$ (both are the countable posets of finite partial functions). In $M$ they have different cardinalities. The text is correct.
 
 ### ISSUE-0006 [Open] Fn(ω,2), Fn(ω,3), Fn(ω,ω) が同型でないという主張
 - **Category:** Supplement/remark error

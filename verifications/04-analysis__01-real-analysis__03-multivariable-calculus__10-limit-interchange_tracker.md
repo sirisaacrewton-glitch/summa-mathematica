@@ -26,6 +26,7 @@ The page is largely correct, but the treatment of the example f_{n} = (1/n)χ_{[
 - **Detail:** The table lists f_{n} = (1/n)χ_{[0,n]} as a counterexample where f_{n}→0 uniformly on [0,∞) but ∫ f_{n} = 1 ↛ 0. However this example actually satisfies the hypotheses of Proposition 10.4 (calc:li-improper-dominated): f_{n}→0 uniformly on each [c,R], and g(x) = sup_{n} f_{n}(x) = 1/⌈x⌉ is continuous (away from integers, and bounded) and integrable on [0,∞). So the proposition would predict ∫ f_{n} → 0, which is false. Either the proposition's statement is too weak/wrong, or this is not a valid counterexample to it. As stated, the table entry is inconsistent with the cited proposition.
 - **Proposed fix:** Use a genuine counterexample, e.g. f_{n}(x) = (1/n)χ_{[0,n^{2}]} (integral = n → ∞) or f_{n}(x) = χ_{[n,n+1]}(x) (integral = 1, pointwise → 0, no integrable dominating function since sup_{n} f_{n} = 1 on [1,∞)). Replace the row's counterexample accordingly and note that the failure is the absence of an integrable dominating function.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** $\sup_{n}\frac1n\chi_{[0,n]}(x)=1/\lceil x\rceil$, which is NOT integrable on $[0,\infty)$ (harmonic series). So there is no integrable dominating function and the example is a valid counterexample.
 
 ### ISSUE-0003 [Open] Intuition paragraph mischaracterizes 1/n χ_{[0,n]} as escaping to infinity without dominating function
 - **Category:** Supplement/remark error

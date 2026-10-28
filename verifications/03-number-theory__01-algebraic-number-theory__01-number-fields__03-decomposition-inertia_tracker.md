@@ -19,6 +19,7 @@ The main theorems and proofs are essentially correct. The genuine problems are: 
 - **Detail:** Step 3 cites \ref{nt:integers-basic.1}, but the label table only contains nt:integers-basic.3 (proposition 1.2, 整数環の基本性質). The label nt:integers-basic.1 is not in the table, so the citation is broken/mechanically wrong. The intended fact (coefficients of h lie in Z) is indeed covered by nt:integers-basic.3.
 - **Proposed fix:** Replace \ref{nt:integers-basic.1} with \ref{nt:integers-basic.3}.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). nt:integers-basic.1 is: $\mathcal{O}_{K}$ is a subring and $\mathcal{O}_{K}\cap\mathbb{Q}=\mathbb{Z}$ — exactly what is used.
 
 ### ISSUE-0002 [Open] Inertia field / decomposition field description is imprecise
 - **Category:** Supplement/remark error

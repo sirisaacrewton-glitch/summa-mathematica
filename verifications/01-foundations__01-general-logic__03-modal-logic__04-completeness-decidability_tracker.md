@@ -19,6 +19,7 @@ The page is largely correct: the finite canonical model constructions for K, T, 
 - **Detail:** The relation is defined as wRx iff (i) for all □B∈w, B,□B∈x, and (ii) there exists □E∈Sub(D) with □E∈x and □E∉w. In the 後半 the text takes x⊇X and asserts the second condition is satisfied by E:=B because □B∈x and □B∉w. But □B∈x is only guaranteed if □B∈Sub(D); the hypothesis is □B∉w, which presupposes □B∈Sub(D) (as stated at the start of the section), so this is fine only if one notes it. More importantly, the first condition requires that for every □C∈w we have C∈x AND □C∈x; X contains C and □C for each □C∈w, so this holds. However the text never checks that □B∈Sub(D) so that '□B∈x' follows from X⊆x; this is implicit but should be stated. Minor but a genuine gap in the verification of condition (ii).
 - **Proposed fix:** Since □B∉w and w⊆Φ, we have □B∈Sub(D), so □B∈X⊆x; together with □B∉w this gives the second condition with E:=B. Also, for each □C∈w, both C and □C belong to X⊆x, giving the first condition.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The section convention stated just before these theorems says that $\Box B$ always denotes an element of $\mathrm{Sub}(D)$ ('$\Box B\in w$ と書けば $\Box B\in\mathrm{Sub}(D)$ も意味する'), so $\Box B\in X\subseteq x$ is covered.
 
 ### ISSUE-0002 [Open] Claim that GL's canonical model is not conversely well-founded is imprecise
 - **Category:** Supplement/remark error

@@ -19,6 +19,7 @@ The page is largely correct: the expressiveness proof (Steps 1–3 of logic:n-ex
 - **Detail:** Step 2 cites \ref{comp:sigma1-recognizable.2}, but the label table only lists comp:sigma1-recognizable.1 (theorem 2.7, Kleene normal form / Σ₁ and recognizability). There is no item 2 of that result in the table, so the citation target does not exist / does not say what is used. The claim needed is "if K and its complement are both Σ₁ (r.e.), then K is decidable", which is the standard Post/Δ₁ argument, not a consequence of the Kleene normal form theorem as listed.
 - **Proposed fix:** Replace the citation with a correct one, e.g. cite the result establishing that a set that is both r.e. and co-r.e. is decidable (Post's theorem / closure of Δ₁ under complement), or add the one-line argument: if K is enumerated by a computable procedure and its complement too, run both enumerations in parallel until one of them lists the given e; this decides K.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cited item exists and says exactly what is used (the earlier label table listed only one item per result; this was a bug in the verifier, now fixed: the table quotes every cited item). comp:sigma1-recognizable.2 is: a relation is $\Delta_{1}$ iff it is decidable.
 
 ### ISSUE-0002 [Open] Remark 1: Th(N) not r.e. attributed to 'same argument as Step 2'
 - **Category:** Supplement/remark error
