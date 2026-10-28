@@ -1,0 +1,66 @@
+name: verify
+
+# Runs only when deployed content is pushed to main:
+#   site pages (NN-*/**/*.html), src/**/*.md|tex, or a tracker edited to add an Opus Rebuttal.
+# scripts/verify.py skips pages whose Markdown source did not change (build-only rewrites).
+on:
+  push:
+    branches: [main]
+    paths:
+      - '0[1-5]-*/**/*.html'
+      - 'src/**/*.md'
+      - 'src/**/*.tex'
+      - 'verifications/**_tracker.md'
+  workflow_dispatch:
+    inputs:
+      files:
+        description: 'Space-separated repository-relative files to verify'
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: verify-main
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Verify changed pages with DeepSeek
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          FILES: ${{ github.event.inputs.files }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python scripts/verify.py --assist --files $FILES
+          else
+            python scripts/verify.py --assist --git-range "${{ github.event.before }}..${{ github.sha }}"
+          fi
+
+      - name: Push trackers to verifications/
+        if: always()
+        run: |
+          git config user.name "verify-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add verifications
+          if git diff --cached --quiet; then
+            echo "no tracker changes"
+            exit 0
+          fi
+          git commit -m "chore: update verification trackers [skip ci]"
+          for i in 1 2 3 4; do
+            git pull --rebase origin main && git push origin HEAD:main && exit 0
+            sleep $((2 ** i))
+          done
+          exit 1

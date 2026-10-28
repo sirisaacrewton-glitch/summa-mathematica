@@ -428,3 +428,30 @@
 - 生成物（index.html, labels.json, site-index.js, search-index.js など）も commit する（Pages はビルドしないため）。
 - **style.css や *.js を直したら、必ず `node tools/build.js` をしてから commit する**。各ページの `<link>`・`<script>` の URL に中身のハッシュ（`?v=…`）が付くので、ビルドしないと古いハッシュのままになり、閲覧者のブラウザに古いファイルが残る（2026-10-10 に影の変更が反映されないように見えた原因）。
 - 初回 push の経緯：Cowork ではコンピュータ側で git が使えず（接続フォルダでは削除が禁止）、クラウド側にもリポジトリを接続できなかったため、bundle を作ってユーザーの Mac から push した。
+
+## 12. OCR・DeepSeek パイプライン（2026-10-28 ユーザー指示）
+
+3 つの部品からなる。**DeepSeek は英語で出力し、Claude がそれを読んで検討し、採用するものだけを日本語で記事に反映する**（DeepSeek の出力をそのまま記事に貼らない。誤りもあるので、数学的に正しいか Claude が必ず確かめる）。
+
+1. **OCR**（`scripts/colab/colab_ocr_pipeline.ipynb`。ユーザーが Google Colab で実行）
+   * Google Drive の PDF フォルダ（リンクはユーザーが持っている。このリポジトリには書かない）から PDF を読み、`marker-pdf` で Markdown にする。API は呼ばない。
+   * 出力は**非公開**リポジトリ `math_books` の `raw_ocr/` に、コミットメッセージ `chore: add raw OCR markdown` で自動 push される。
+   * Colab の「シークレット」に `GITHUB_TOKEN`（fine-grained、`math_books` の Contents: Read and write だけ）と `DRIVE_FOLDER_ID`（PDF フォルダの URL の `/folders/` の後ろ）を登録しておく。フォルダの ID はノートブックに書かない（公開のため）。
+   * `SOURCE_MODE = "mount"` では、共有フォルダを「マイドライブにショートカットを追加」しておく必要がある。`"gdown"` ならリンク共有だけでよい。
+2. **構造化・要約**（`scripts/structure_ocr.py`）：**ユーザーが「このファイルを要約して」と頼んだときだけ**実行する（費用がかかる）。
+   ```
+   DEEPSEEK_API_KEY=... python3 scripts/structure_ocr.py ../math_books/raw_ocr/X.md ../math_books/drafts/X.md [--start-line A --end-line B]
+   ```
+   * 出力（英語 Markdown。証明を Step に分け、各 Step の Short Claim、必要な定義・前提知識、本の飛ばしている所）は `math_books/drafts/` に置く。**公開リポジトリには書かない**（スクリプトも拒否する）。
+   * まず `--dry-run` で分割数を確かめ、長い本は節ごとに行範囲を指定する。
+3. **検証とアシスト**（`.github/workflows/verify.yml` + `scripts/verify.py`）：main に記事（`0[1-5]-*/**/*.html`、`src/**`）が push されると GitHub Actions が動く。
+   * リポジトリの Secrets（Settings → Secrets and variables → Actions）に `DEEPSEEK_API_KEY` が必要。ないときは何もせず成功で終わる。
+   * Markdown 原稿（`<script id="source">`）が変わったページだけを、1 回の push で最大 15 ページ（`--max-files`）調べる。ビルドだけの変更は対象外。
+   * **`verifications/<パス>_tracker.md`**（状態を持つ。英語）：論理の飛躍・仮定の不足・強すぎる定理（循環を含む）・不適切なリンク・**補足／注意の誤り**・**根拠のない事実**を `[Open]` で記録し、各項目に `Proposed fix`（改善案）を付ける。補足・注意・intuition・`::: fact`・証明なしで述べた文は誤りが集中するので、DeepSeek に重点的に調べさせている。
+     * 直すと次回 `[Resolved]` になる。
+     * 誤検出なら、その ISSUE の末尾に `**Opus Rebuttal:** 理由（英語）` を書いて push する。DeepSeek が理由を認めれば `[Ignored: Valid Rebuttal]` になる。ほかの行は書き換えない。
+   * **`verifications/<パス>_assist.md`**（毎回作り直す。英語）：【主張：…】のない Step への短い主張の案、別証明の案、別定義の案、その他の改善点。Claude が読んで、正しく有益なものを日本語で記事に入れる（別証明は `::: proof 別証明` など、別定義は `::: supplement` か `::: remark` で同値性の証明つき）。
+   * 手で特定のページだけ調べるとき：Actions の「verify」→ Run workflow に、ページのパスを空白区切りで入れる。ローカルなら `python3 scripts/verify.py --assist --files <ページ>`（`--dry-run`、`--mock-response`/`--mock-assist` で API なしに試せる）。
+   * **bot が main に commit するので、push の前に必ず `git pull --rebase origin main` をする。**
+   * 記事を書く・直すトークの最初に、そのページの `verifications/` の `[Open]` と `_assist.md` を確かめ、反映したら PROGRESS に書く。
+* DeepSeek に渡す全プロンプトには、ユーザー指定の「Strict LaTeX Rules」（`scripts/deepseek_api.py` の `STRICT_LATEX_RULES`）を必ず含める。

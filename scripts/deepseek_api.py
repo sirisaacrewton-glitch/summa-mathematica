@@ -1,0 +1,81 @@
+"""Shared DeepSeek API client for structure_ocr.py and verify.py.
+
+Standard library only (no pip install needed locally or on GitHub Actions).
+The API key is read from the environment variable DEEPSEEK_API_KEY and is
+never printed or written anywhere.
+"""
+
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+API_BASE = os.environ.get("DEEPSEEK_API_BASE", "https://api.deepseek.com")
+DEFAULT_MODEL = "deepseek-chat"
+
+# Mandatory for every DeepSeek system prompt in this project (user rule, 2026-10-28).
+STRICT_LATEX_RULES = """Strict LaTeX Rules (Must Follow):
+- ALL subscripts must be wrapped in curly braces, even single characters (e.g., use `a_{n}`, `P_{0}`, NOT `a_n`).
+- Underscores `_` must ONLY be used with curly braces to avoid Markdown rendering conflicts.
+- Always use `\\Vec` instead of `\\vect`.
+- Complex formulas or those with multiple relational operators must be formatted as independent display math `$$ ... $$` on new lines, never inline.
+- Simplify complex LaTeX commands to standard ones (e.g., use `\\subset` instead of `\\subsetneq`).
+- Do NOT insert unnecessary spaces or line breaks before/after formulas."""
+
+
+class DeepSeekError(RuntimeError):
+    pass
+
+
+def api_key():
+    key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+    if not key:
+        raise DeepSeekError("DEEPSEEK_API_KEY is not set")
+    return key
+
+
+def chat(system, user, *, model=DEFAULT_MODEL, temperature=0.0, max_tokens=8192,
+         json_mode=False, retries=4, timeout=600):
+    """Send one chat completion request and return the assistant text."""
+    body = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": user},
+        ],
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+        "stream": False,
+    }
+    if json_mode:
+        body["response_format"] = {"type": "json_object"}
+    data = json.dumps(body).encode("utf-8")
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + api_key(),
+    }
+    delay = 2.0
+    last = None
+    for attempt in range(retries + 1):
+        req = urllib.request.Request(API_BASE.rstrip("/") + "/chat/completions",
+                                     data=data, headers=headers, method="POST")
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                payload = json.loads(resp.read().decode("utf-8"))
+            choice = payload["choices"][0]
+            text = choice["message"].get("content") or ""
+            if choice.get("finish_reason") == "length":
+                print("warning: DeepSeek output was truncated (max_tokens)", file=sys.stderr)
+            return text
+        except urllib.error.HTTPError as e:
+            last = "HTTP %d: %s" % (e.code, e.read().decode("utf-8", "replace")[:300])
+            if e.code not in (429, 500, 502, 503, 504):
+                break
+        except (urllib.error.URLError, TimeoutError, KeyError, ValueError) as e:
+            last = repr(e)
+        if attempt < retries:
+            time.sleep(delay)
+            delay *= 2
+    raise DeepSeekError("DeepSeek request failed: %s" % last)
