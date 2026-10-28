@@ -3,6 +3,9 @@ name: verify
 # Runs only when deployed content is pushed to main:
 #   site pages (NN-*/**/*.html), src/**/*.md|tex, or a tracker edited to add an Opus Rebuttal.
 # scripts/verify.py skips pages whose Markdown source did not change (build-only rewrites).
+# Manual run (Actions -> verify -> Run workflow):
+#   mode "files": the space-separated files given in "files"
+#   mode "all"  : full audit of every page, split over 8 parallel jobs
 on:
   push:
     branches: [main]
@@ -14,21 +17,35 @@ on:
       - '0[1-5]-*/**/_meta.json'
   workflow_dispatch:
     inputs:
+      mode:
+        description: 'files = the files below; all = full audit of every page'
+        type: choice
+        options: [files, all]
+        default: files
       files:
-        description: 'Space-separated repository-relative files to verify'
-        required: true
+        description: 'Space-separated repository-relative files to verify (mode files)'
+        required: false
+        default: ''
+      assist:
+        description: 'Also write *_assist.md (step claims, alternative proofs/definitions)'
+        type: boolean
+        default: true
+      skip_verified:
+        description: 'mode all: skip pages that already have a tracker (resume an interrupted audit)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
 
-concurrency:
-  group: verify-main
-  cancel-in-progress: false
-
 jobs:
   verify:
+    if: github.event_name == 'push' || inputs.mode == 'files'
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    concurrency:
+      group: verify-main
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
@@ -41,12 +58,14 @@ jobs:
       - name: Verify changed pages with DeepSeek
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          FILES: ${{ github.event.inputs.files }}
+          FILES: ${{ inputs.files }}
+          ASSIST: ${{ github.event_name == 'push' || inputs.assist }}
         run: |
+          A=""; [ "$ASSIST" = "true" ] && A="--assist"
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            python scripts/verify.py --assist --files $FILES
+            python scripts/verify.py $A --files $FILES
           else
-            python scripts/verify.py --assist --git-range "${{ github.event.before }}..${{ github.sha }}"
+            python scripts/verify.py $A --git-range "${{ github.event.before }}..${{ github.sha }}"
           fi
 
       - name: Roadmap suggestions for fields whose _meta.json changed
@@ -58,16 +77,36 @@ jobs:
       - name: Push trackers to verifications/
         if: always()
         run: |
-          git config user.name "verify-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add verifications
-          if git diff --cached --quiet; then
-            echo "no tracker changes"
-            exit 0
-          fi
-          git commit -m "chore: update verification trackers [skip ci]"
-          for i in 1 2 3 4; do
-            git pull --rebase origin main && git push origin HEAD:main && exit 0
-            sleep $((2 ** i))
-          done
-          exit 1
+          bash scripts/push_verifications.sh "chore: update verification trackers [skip ci]"
+
+  audit:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'all'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6, 7, 8]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Full audit, shard ${{ matrix.shard }}/8
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          ASSIST: ${{ inputs.assist }}
+          SKIP: ${{ inputs.skip_verified }}
+        run: |
+          A=""; [ "$ASSIST" = "true" ] && A="--assist"
+          S=""; [ "$SKIP" = "true" ] && S="--skip-verified"
+          python scripts/verify.py --all $A $S --shard ${{ matrix.shard }}/8 --workers 4 --max-files 10000
+
+      - name: Push trackers to verifications/
+        if: always()
+        run: |
+          bash scripts/push_verifications.sh "chore: full verification audit, shard ${{ matrix.shard }}/8 [skip ci]"

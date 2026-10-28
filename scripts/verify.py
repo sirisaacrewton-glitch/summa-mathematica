@@ -29,6 +29,8 @@ import os
 import re
 import subprocess
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import deepseek_api  # noqa: E402
@@ -185,11 +187,19 @@ def source_at(rev, rel):
     return extract_source(rel, r.stdout) if r.returncode == 0 else None
 
 
+_LABELS = None
+
+
 def label_table(src):
-    try:
-        with open(os.path.join(ROOT, "labels.json"), encoding="utf-8") as f:
-            labels = json.load(f).get("labels", {})
-    except (OSError, ValueError):
+    global _LABELS
+    if _LABELS is None:
+        try:
+            with open(os.path.join(ROOT, "labels.json"), encoding="utf-8") as f:
+                _LABELS = json.load(f).get("labels", {})
+        except (OSError, ValueError):
+            _LABELS = {}
+    labels = _LABELS
+    if not labels:
         return "(labels.json not available)"
     rows, seen = [], set()
     for lab in REF_RE.findall(src):
@@ -382,8 +392,12 @@ def main():
     g = ap.add_mutually_exclusive_group(required=True)
     g.add_argument("--git-range", help="BEFORE..AFTER commit range (push event)")
     g.add_argument("--files", nargs="+", help="explicit target files (repository-relative)")
+    g.add_argument("--all", action="store_true", help="every page and src file (full audit; use with --shard)")
     ap.add_argument("--max-files", type=int, default=15, help="cap per run to bound API cost (default 15)")
     ap.add_argument("--model", default=deepseek_api.DEFAULT_MODEL)
+    ap.add_argument("--shard", default="1/1", help="K/N: take every N-th target starting at K (parallel jobs)")
+    ap.add_argument("--workers", type=int, default=1, help="parallel API requests in this process")
+    ap.add_argument("--skip-verified", action="store_true", help="skip targets that already have a tracker (resume)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--mock-response", help="read the DeepSeek JSON answer from this file (testing)")
     ap.add_argument("--assist", action="store_true",
@@ -393,8 +407,16 @@ def main():
 
     if args.git_range:
         targets = targets_from_range(args.git_range)
+    elif args.all:
+        files = git("ls-files").stdout.split()
+        targets = [(f, "full audit") for f in sorted(files) if PAGE_RE.match(f) or SRC_RE.match(f)]
     else:
         targets = [(f, "requested") for f in args.files]
+    k, _, n = args.shard.partition("/")
+    k, n = int(k), int(n or 1)
+    targets = targets[k - 1::n]
+    if args.skip_verified:
+        targets = [t for t in targets if not os.path.exists(os.path.join(ROOT, tracker_path(t[0])))]
     if not targets:
         print("verify: nothing to check")
         return
@@ -407,16 +429,24 @@ def main():
         return
     sha = os.environ.get("GITHUB_SHA") or git("rev-parse", "HEAD").stdout.strip()
     meta = {"date": datetime.date.today().isoformat(), "commit": sha[:7], "model": args.model}
-    failures = 0
-    for rel, why in targets:
-        print("verify %s (%s)" % (rel, why))
+    failures = []
+    lock = threading.Lock()
+
+    def one(t):
+        rel, why = t
+        print("verify %s (%s)" % (rel, why), flush=True)
         try:
             # a tracker-only change (new rebuttal) does not need new suggestions
             verify(rel, args, meta, args.assist and why != "tracker changed")
         except (deepseek_api.DeepSeekError, OSError) as e:
-            failures += 1
-            print("  error: %s" % e)
+            with lock:
+                failures.append(rel)
+            print("  error %s: %s" % (rel, e), flush=True)
+
+    with ThreadPoolExecutor(max_workers=max(1, args.workers)) as ex:
+        list(ex.map(one, targets))
     if failures:
+        print("verify: %d failure(s): %s" % (len(failures), " ".join(failures)))
         sys.exit(1)
 
 
