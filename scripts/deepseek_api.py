@@ -38,6 +38,10 @@ class DeepSeekError(RuntimeError):
     pass
 
 
+class DeepSeekFatal(DeepSeekError):
+    """Errors that no retry can fix (no balance, bad key): the whole run must stop instead of reporting 'no issues'."""
+
+
 def api_key():
     key = os.environ.get("DEEPSEEK_API_KEY", "").strip()
     if not key:
@@ -82,6 +86,8 @@ def chat(system, user, *, model=DEFAULT_MODEL, temperature=0.0, max_tokens=8192,
             return text
         except urllib.error.HTTPError as e:
             last = "HTTP %d: %s" % (e.code, e.read().decode("utf-8", "replace")[:300])
+            if e.code in (401, 402, 403):
+                raise DeepSeekFatal("DeepSeek request failed: %s" % last)
             if e.code not in (429, 500, 502, 503, 504):
                 break
         except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError, KeyError, ValueError) as e:

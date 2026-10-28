@@ -431,7 +431,7 @@ def _xml(tag, text):
 def atomic_candidates(rel, src, args):
     notation = "\n".join(m.group(0) for m in re.finditer(r"(?ms)^::: notation\n.*?^:::\s*$", src))[:4000]
     units = split_units(src)
-    out = []
+    out, failed = [], []
 
     def ask(u):
         ctx = label_table(u, None)
@@ -439,8 +439,11 @@ def atomic_candidates(rel, src, args):
         try:
             return u, deepseek_api.chat(None, q, model=args.model,
                                         **({"max_tokens": 32000, "timeout": 1200} if deepseek_api.is_reasoner(args.model) else {}))
+        except deepseek_api.DeepSeekFatal:
+            raise
         except deepseek_api.DeepSeekError as e:
             print("  unit failed: %s" % e)
+            failed.append(u)
             return u, ""
 
     with ThreadPoolExecutor(max_workers=max(1, args.unit_workers)) as ex:
@@ -452,6 +455,9 @@ def atomic_candidates(rel, src, args):
             out.append({"category": "Error", "title": why[:80], "location": m.group(1) if m else "(prose)",
                         "quote": quote, "problem": why, "proposed_fix": fix, "_unit": u})
     print("  %s: %d units, %d candidates" % (rel, len(units), len(out)))
+    if failed:
+        # a page with unanswered units must not be recorded as "no issues"
+        raise deepseek_api.DeepSeekError("%d of %d units of %s got no answer" % (len(failed), len(units), rel))
     return out
 
 
@@ -461,6 +467,8 @@ def atomic_confirm(issue, args):
     try:
         a = deepseek_api.chat(None, q, model=args.model,
                               **({"max_tokens": 32000, "timeout": 1200} if deepseek_api.is_reasoner(args.model) else {}))
+    except deepseek_api.DeepSeekFatal:
+        raise
     except deepseek_api.DeepSeekError as e:
         return {"verdict": "unsure", "reason": "second opinion failed: %s" % e}
     v = ((_xml("verdict", a) or ["unsure"])[0]).lower()
@@ -489,6 +497,8 @@ def confirm(rel, src, table, issue, args):
                       "## Page source", "----- SOURCE START -----", src, "----- SOURCE END -----"])
     try:
         r = ask_json(CONFIRM_PROMPT, user, args, "Answer again with the JSON object only.")
+    except deepseek_api.DeepSeekFatal:
+        raise
     except (ValueError, deepseek_api.DeepSeekError) as e:
         return {"verdict": "unsure", "reason": "second opinion failed: %s" % e}
     v = str(r.get("verdict", "unsure")).lower()
@@ -651,15 +661,21 @@ def main():
         return
     sha = os.environ.get("GITHUB_SHA") or git("rev-parse", "HEAD").stdout.strip()
     meta = {"date": datetime.date.today().isoformat(), "commit": sha[:7], "model": args.model}
-    failures = []
+    failures, fatal = [], []
     lock = threading.Lock()
 
     def one(t):
         rel, why = t
+        if fatal:
+            return
         print("verify %s (%s)" % (rel, why), flush=True)
         try:
             # a tracker-only change (new rebuttal) does not need new suggestions
             verify(rel, args, meta, args.assist and why != "tracker changed")
+        except deepseek_api.DeepSeekFatal as e:
+            with lock:
+                fatal.append(str(e))
+            print("  FATAL %s: %s" % (rel, e), flush=True)
         except (deepseek_api.DeepSeekError, OSError) as e:
             with lock:
                 failures.append(rel)
@@ -667,6 +683,9 @@ def main():
 
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as ex:
         list(ex.map(one, targets))
+    if fatal:
+        print("verify: stopped: %s" % fatal[0])
+        sys.exit(2)
     if failures:
         print("verify: %d failure(s): %s" % (len(failures), " ".join(failures)))
         sys.exit(1)
