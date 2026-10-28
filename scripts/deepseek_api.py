@@ -5,6 +5,7 @@ The API key is read from the environment variable DEEPSEEK_API_KEY and is
 never printed or written anywhere.
 """
 
+import http.client
 import json
 import os
 import re
@@ -83,7 +84,7 @@ def chat(system, user, *, model=DEFAULT_MODEL, temperature=0.0, max_tokens=8192,
             last = "HTTP %d: %s" % (e.code, e.read().decode("utf-8", "replace")[:300])
             if e.code not in (429, 500, 502, 503, 504):
                 break
-        except (urllib.error.URLError, TimeoutError, KeyError, ValueError) as e:
+        except (urllib.error.URLError, http.client.HTTPException, OSError, TimeoutError, KeyError, ValueError) as e:
             last = repr(e)
         if attempt < retries:
             time.sleep(delay)
