@@ -437,7 +437,7 @@
    * Google Drive の PDF フォルダ（リンクはユーザーが持っている。このリポジトリには書かない）から PDF を読み、`marker-pdf` で Markdown にする。API は呼ばない。
    * 出力は**非公開**リポジトリ `math_books` の `raw_ocr/` に、コミットメッセージ `chore: add raw OCR markdown` で自動 push される。
    * Colab の「シークレット」に `GITHUB_TOKEN`（fine-grained、`math_books` の Contents: Read and write だけ）と `DRIVE_FOLDER_ID`（PDF フォルダの URL の `/folders/` の後ろ）を登録しておく。フォルダの ID はノートブックに書かない（公開のため）。
-   * `SOURCE_MODE = "mount"` では、共有フォルダを「マイドライブにショートカットを追加」しておく必要がある。`"gdown"` ならリンク共有だけでよい。
+   * PDF の取り込みは既定で `SOURCE_MODE = "api"`（Colab のサインインで Drive API からフォルダ ID で直接ダウンロード。マウント不要）。`"mount"` は「credential propagation was unsuccessful」で失敗しやすい（2026-10-28 に実際に失敗）ので、失敗すると自動で api に切り替わる。
 2. **構造化・要約**（`scripts/structure_ocr.py`）：**ユーザーが「このファイルを要約して」と頼んだときだけ**実行する（費用がかかる）。
    ```
    DEEPSEEK_API_KEY=... python3 scripts/structure_ocr.py ../math_books/raw_ocr/X.md ../math_books/drafts/X.md [--start-line A --end-line B]
