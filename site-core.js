@@ -682,7 +682,13 @@
     function field(dir) { return fieldCode(dir); }
     function denied(l, term, P, Q) {
       var d = TERM_XF_DENY[l + '#' + term], f = field(P.dir);
-      return !!d && f !== field(Q.dir) && (d === '*' || (' ' + d + ' ').indexOf(' ' + f + ' ') >= 0);
+      if (!d) return false;
+      // フォルダの範囲で指定したとき（"/" を含む項目。'!' で始まればその範囲以外）は、同じ分野の中でも拒否する（2026-10-28）
+      if (d.indexOf('/') >= 0) {
+        var hit = d.replace(/^!/, '').split(/\s+/).some(function (x) { return x && String(P.dir || '').indexOf(x) >= 0; });
+        return d.charAt(0) === '!' ? !hit : hit;
+      }
+      return f !== field(Q.dir) && (d === '*' || (' ' + d + ' ').indexOf(' ' + f + ' ') >= 0);
     }
     // 候補（拒否されたものを除く）。プレビューで「ほかの分野の定義」として並べるのにも使う
     function candidates(term, pageIdx) {

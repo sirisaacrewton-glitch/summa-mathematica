@@ -451,7 +451,7 @@
   /* ---------- 参照プレビュー ----------
    * 他ページの項目の本文は search-index.js（大きい）から作るので、一度描画した本文を Map と sessionStorage に
    * 保存し、同じセッションの 2 回目以降は「読み込み中」を出さずに表示する（キーは索引の更新時刻ごと）。 */
-  var pop, popTimer, hideTimer, popFor = null, popLabel = null, popItems = null, popStack = [];
+  var pop, popTimer, hideTimer, popFor = null, popLabel = null, popItems = null, popStack = [], popAlts = null, popStickUntil = 0;
   var PV_KEY = 'sm_pv_cache', PV_MAX = 300, pvMem = new Map();
   (function loadPvCache() {
     try {
@@ -656,6 +656,9 @@
     var alt = typeof a !== 'string' && a.getAttribute('data-alt');
     if (html && alt) html += altHtml(alt.split(' '));
     if (!html) return;
+    // 同じ語の定義の候補（最初の定義＋ほかの定義）。切り替えた先でも残りの候補を並べて、行き来できるようにする（2026-10-28）
+    if (typeof a !== 'string') popAlts = alt ? [label].concat(alt.split(' ')) : null;
+    pop.style.minHeight = '';
     if (typeof a !== 'string') popFor = a;
     if (!keepStack) popStack = [];
     popLabel = label; popItems = it;
@@ -687,7 +690,7 @@
   var POP_EASE = 'cubic-bezier(.22,.61,.36,1)';
   function popAnim(frames, dur) { if (REDUCED || !pop.animate) return null; return pop.animate(frames, { duration: dur, easing: POP_EASE }); }
   function hidePop() {
-    popFor = null; popLabel = null; popStack = [];
+    popFor = null; popLabel = null; popStack = []; popAlts = null; popStickUntil = 0;
     if (pop.hasAttribute('hidden') || pop._out) return;
     var sheet = pop.classList.contains('is-sheet');
     var cur = getComputedStyle(pop).transform;   // スワイプで途中まで下げた位置から続ける
@@ -747,6 +750,11 @@
     if (!html) return false;
     var forward = popStack.length > 0 && popStack[popStack.length - 1].label !== label;
     popLabel = label; popItems = it || null;
+    if (popAlts && popAlts.indexOf(label) >= 0) html += altHtml(popAlts.filter(function (x) { return x !== label; }));
+    // 中身を入れ替えたときにカードが縮むと、カーソルがカードの外に出てホバーが切れて閉じてしまうので、
+    // PC では入れ替え前の高さを下限として保ち、少しのあいだはカードから外れても閉じない（2026-10-28 ユーザー指摘）
+    if (!pop.classList.contains('is-sheet')) pop.style.minHeight = Math.max(pop.offsetHeight, parseFloat(pop.style.minHeight) || 0) + 'px';
+    popStickUntil = Date.now() + 1500;
     pop.innerHTML = (popStack.length ? '<button type="button" class="mn-pv-back" title="前のプレビューに戻る">← 戻る</button>' : '') + html;
     pop.querySelectorAll('[id]').forEach(function (x) { x.removeAttribute('id'); });
     pop.scrollTop = 0;
@@ -775,7 +783,10 @@
     });
     document.addEventListener('mouseout', function (ev) {
       if (touch || !ev.target.closest) return;
-      if (ev.target.closest(PV_SEL) || ev.target.closest('.mn-popover')) { clearTimeout(popTimer); hideTimer = setTimeout(hidePop, 260); }
+      if (ev.target.closest(PV_SEL) || ev.target.closest('.mn-popover')) {
+        clearTimeout(popTimer); clearTimeout(hideTimer);
+        hideTimer = setTimeout(hidePop, Math.max(260, popStickUntil - Date.now()));
+      }
     });
     // タッチ端末：1 回目のタップでプレビュー、「開く」で移動
     document.addEventListener('click', function (ev) {
