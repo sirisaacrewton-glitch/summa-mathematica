@@ -669,7 +669,7 @@ window.SM_LEARN_GUIDES = {
 
 **わかるようになること.** 定理の前提が本当に必要かを確かめる反例を自分で使えるようになる。平面の絵に頼った直感が外れる場面を知っておくことは、一般位相の議論を正しく進めるための大事な訓練である。
 ` },
-  '05-geometry-topology/01-general-topology/09-topological-groups/index.html': { kind: 'series', text: String.raw`
+  '05-geometry-topology/06-lie-groups/01-topological-groups/index.html': { kind: 'series', text: String.raw`
 **目標：バーコフ–角谷の距離化定理.** ハウスドルフな位相群が距離化できるのは、単位元が可算な基本近傍系をもつときに限る。しかも左移動で不変な距離が取れる。位相と群の構造が両立すると、一般の位相空間よりずっと強い結論が出ることの代表例である。
 
 **わかるようになること.** 位相群は単位元の近傍だけで位相が決まり、自然な一様構造をもつので、ハウスドルフなら自動的に完全正則になる。リー群・ $p$ 進数の群・関数空間の群などを扱う基礎である。
