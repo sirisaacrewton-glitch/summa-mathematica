@@ -24,7 +24,7 @@ var CHECK_ONLY = args.indexOf('--check') >= 0;
 var QUIET = args.indexOf('--quiet') >= 0;
 var ONLY = (function () { var i = args.indexOf('--only'); return i >= 0 ? args[i + 1] : null; })();
 
-var SKIP_DIRS = { vendor: 1, tools: 1, node_modules: 1, assets: 1, learn: 1, api: 1, pv: 1, 'search-body': 1 };
+var SKIP_DIRS = { vendor: 1, tools: 1, node_modules: 1, assets: 1, learn: 1, api: 1, pv: 1, 'search-body': 1, scripts: 1, verifications: 1 };   // scripts・verifications は DeepSeek の検証パイプライン（サイトの一部ではない）
 var SOURCE_RE = /<script type="text\/markdown" id="source">([\s\S]*?)<\/script>/;
 
 function readJSON(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch (e) { return null; } }
