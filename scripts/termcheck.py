@@ -17,6 +17,8 @@ import json
 import os
 import re
 import sys
+import threading
+from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import deepseek_api  # noqa: E402
@@ -56,6 +58,7 @@ def main():
     ap.add_argument("--limit", type=int, default=100, help="max (series, term, label) groups to check")
     ap.add_argument("--model", default=os.environ.get("DEEPSEEK_MODEL") or "deepseek-chat")
     ap.add_argument("--out", default="verifications/termlinks/report.md")
+    ap.add_argument("--workers", type=int, default=8, help="parallel questions")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args()
 
@@ -80,28 +83,46 @@ def main():
     if not os.environ.get("DEEPSEEK_API_KEY"):
         sys.exit("DEEPSEEK_API_KEY is not set")
 
-    problems, ok_default = [], 0
-    for k in order:
+    problems, ok_default, done, stopped = [], [0], [0], []
+    lock = threading.Lock()
+
+    def check(k):
+        if stopped:
+            return
         u = groups[k]["unit"]
         chain = []
         fit = None
-        for lab in [u["label"]] + u["others"]:
-            ok, why = ask(u["term"], u["context"], lab, args.model)
-            chain.append((lab, ok, why))
-            if ok:
-                fit = lab
-                break
-        if fit == u["label"]:
-            ok_default += 1
-            continue
-        problems.append({"series": k[0], "term": u["term"], "default": u["label"], "fit": fit,
-                         "pages": groups[k]["pages"], "context": u["context"], "chain": chain})
+        try:
+            for lab in [u["label"]] + u["others"]:
+                ok, why = ask(u["term"], u["context"], lab, args.model)
+                chain.append((lab, ok, why))
+                if ok:
+                    fit = lab
+                    break
+        except deepseek_api.DeepSeekFatal as e:   # e.g. the balance ran out: keep what we have
+            stopped.append(str(e))
+            return
+        except deepseek_api.DeepSeekError as e:
+            print("  skipped %s 「%s」: %s" % (k[0], u["term"], e), file=sys.stderr)
+            return
+        with lock:
+            done[0] += 1
+            if fit == u["label"]:
+                ok_default[0] += 1
+                return
+            problems.append({"series": k[0], "term": u["term"], "default": u["label"], "fit": fit,
+                             "pages": groups[k]["pages"], "context": u["context"], "chain": chain})
         print("  NG %s 「%s」 %s -> %s" % (k[0], u["term"], u["label"], fit or "(none)"), file=sys.stderr)
+
+    with ThreadPoolExecutor(max_workers=args.workers) as ex:
+        list(ex.map(check, order))
+    problems.sort(key=lambda p: (p["series"], p["term"]))
 
     os.makedirs(os.path.dirname(os.path.join(ROOT, args.out)), exist_ok=True)
     lines = ["# Term-link check", "",
-             "- Date: %s, model %s; groups checked: %d; default fits: %d; problems: %d" % (
-                 datetime.date.today().isoformat(), args.model, len(order), ok_default, len(problems)),
+             "- Date: %s, model %s; groups checked: %d of %d; default fits: %d; problems: %d%s" % (
+                 datetime.date.today().isoformat(), args.model, done[0], len(order), ok_default[0], len(problems),
+                 ("; STOPPED: " + stopped[0]) if stopped else ""),
              "- Usage: %(calls)d calls, %(prompt_tokens)d prompt tokens (%(cache_hit_tokens)d cache hits), "
              "%(completion_tokens)d completion tokens" % deepseek_api.USAGE, "",
              "Each entry: the term, the series, the definition the linker chose (NG), and the first candidate that fits "

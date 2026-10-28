@@ -435,6 +435,10 @@
 
 ## 12. OCR・DeepSeek パイプライン（2026-10-28 ユーザー指示）
 
+> **2026-10-28 改定（ユーザー判断）**：ベンチマーク（`scripts/bench/`）の結果、記事の数学的な検証は DeepSeek より Claude が行う方が正確で速いので、**記事の検証・アシスト・ロードマップは DeepSeek に任せない**。DeepSeek に任せるのは **用語リンクの検証**（`scripts/termcheck.py`、Actions の mode `terms`）だけ。過去の記事の数学的な見直しは、Claude が記事を見直すときに自分で行う（`verifications/` の既存の指摘は参考にとどめる）。push のたびの自動検証は止めてある。以下の 3 の記述は経緯として残す。
+>
+> **用語リンクの検証**：自動で結ばれた語ごとに、使われている文と既定の定義カードの全文を送って OK/NG を問い、NG のときだけ次の候補を送る（最初の OK で止める）。結果は `verifications/termlinks/`。NG は本物の誤リンクのことが多いが、「代わりに合う候補」の判定は甘いので、Claude が確かめてから `\term[語]{ラベル}` か `tools/terms.json` の規則で直す。
+
 3 つの部品からなる。**DeepSeek は英語で出力し、Claude がそれを読んで検討し、採用するものだけを日本語で記事に反映する**（DeepSeek の出力をそのまま記事に貼らない。誤りもあるので、数学的に正しいか Claude が必ず確かめる）。
 
 1. **OCR**（`scripts/colab/colab_ocr_pipeline.ipynb`。ユーザーが Google Colab で実行）
