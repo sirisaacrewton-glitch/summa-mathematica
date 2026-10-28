@@ -444,6 +444,7 @@
 1. **OCR**（`scripts/colab/colab_ocr_pipeline.ipynb`。ユーザーが Google Colab で実行）
    * Google Drive の PDF フォルダ（リンクはユーザーが持っている。このリポジトリには書かない）から PDF を読み、`marker-pdf` で Markdown にする。API は呼ばない。
    * 出力は**非公開**リポジトリ `math_books` の `raw_ocr/` に、コミットメッセージ `chore: add raw OCR markdown` で自動 push される。
+   * （2026-10-28 改定。300 冊規模でメモリ不足で落ちたため）Drive は一覧だけ取り、PDF は一冊ずつダウンロードして処理後に消す。OCR は一冊ごと（さらに `CHUNK_PAGES` ページごと）に別プロセスで実行し、メモリを毎回解放する。進捗は `math_books/raw_ocr/_manifest.json`（本ごとに status: pending / running / done / failed、attempts、pages、chars、error）に記録し、一冊ごとに本文と一緒に push する。処理を始める前に試行回数を push するので、ランタイムを落とす本は `MAX_ATTEMPTS` 回で failed になり飛ばされる。**中断したら「ランタイム → すべてのセルを実行」で続きから再開する**。failed の本をやり直すには `RETRY_FAILED = True`。
    * Colab の「シークレット」に `GITHUB_TOKEN`（fine-grained、`math_books` の Contents: Read and write だけ）と `DRIVE_FOLDER_ID`（PDF フォルダの URL の `/folders/` の後ろ）を登録しておく。フォルダの ID はノートブックに書かない（公開のため）。
    * PDF の取り込みは既定で `SOURCE_MODE = "api"`（Colab のサインインで Drive API からフォルダ ID で直接ダウンロード。マウント不要）。`"mount"` は「credential propagation was unsuccessful」で失敗しやすい（2026-10-28 に実際に失敗）ので、失敗すると自動で api に切り替わる。
 2. **構造化・要約**（`scripts/structure_ocr.py`）：**ユーザーが「このファイルを要約して」と頼んだときだけ**実行する（費用がかかる）。
