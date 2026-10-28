@@ -46,6 +46,8 @@ CATEGORIES = ["Logical gap", "Missing hypothesis", "Overpowered theorem", "Impro
               "Supplement/remark error", "Unsupported fact"]
 STATUSES = ["Open", "Resolved", "Ignored: Valid Rebuttal"]
 REBUTTAL = "**Opus Rebuttal:**"
+# entries that are not problems (the model sometimes lists sentences it checked and found correct)
+NOT_A_PROBLEM = re.compile(r"\b(no (change|issue|problem|correction|fix)s?\b|not an? (issue|problem|error)|none needed|is correct\.?\s*$|this is correct|acceptable as (is|written)|keep as is)", re.I)
 
 SYSTEM_PROMPT = """You are a strict but fair referee for Summa Mathematica, a Japanese-language mathematics textbook website.
 You check ONE page for logical correctness. The page source is a custom Markdown dialect:
@@ -65,7 +67,8 @@ Report ONLY genuine problems of these six kinds:
 
 PRIORITY: errors are known to concentrate in supplements, remarks and stated-only facts (kinds 5 and 6), because they are not protected by a proof. Check EVERY such sentence individually: verify the exact hypotheses, quantifiers, dimensions and edge cases, and that each counterexample really is one. Spend more effort there than on the proofs.
 For every issue give a concrete "proposed_fix": the corrected statement or the missing argument, written so that it can be inserted directly (in English).
-Do not report style, wording, typography, translation choices, or missing intuition. Do not report something that the text justifies by a citation unless the citation is wrong. Prefer no report over a speculative one. Locate each issue by the environment label or title and the Step number.
+Do not report style, wording, typography, translation choices, or missing intuition.
+ONLY PROBLEMS: never output an entry for something you checked and found correct, acceptable, informal or merely terse. If your proposed fix would be "no change needed", do not output the entry at all. A page with no genuine problem must get "new_issues": []. Report at most 12 new issues per page, the most serious first, and give each a "confidence" of "high" or "medium" (omit anything you are less sure of). Do not report something that the text justifies by a citation unless the citation is wrong. Prefer no report over a speculative one. Locate each issue by the environment label or title and the Step number.
 
 You also re-evaluate previously reported OPEN issues:
 - "Resolved" if the current text fixes the problem (or the problem no longer exists).
@@ -75,7 +78,7 @@ Never re-report an issue that is listed as closed (Resolved or Ignored) unless t
 
 Answer with a single JSON object (json), no prose outside it:
 {"existing": [{"id": "ISSUE-0001", "status": "Open" | "Resolved" | "Ignored: Valid Rebuttal", "note": "one or two sentences"}],
- "new_issues": [{"category": "Logical gap" | "Missing hypothesis" | "Overpowered theorem" | "Improper link" | "Supplement/remark error" | "Unsupported fact", "title": "short title", "location": "label / Step", "detail": "explanation", "proposed_fix": "corrected text or missing argument"}],
+ "new_issues": [{"category": "Logical gap" | "Missing hypothesis" | "Overpowered theorem" | "Improper link" | "Supplement/remark error" | "Unsupported fact", "title": "short title", "location": "label / Step", "detail": "explanation", "proposed_fix": "corrected text or missing argument", "confidence": "high" | "medium"}],
  "summary": "one paragraph overall assessment"}
 All text fields must be written in English Markdown.
 
@@ -353,8 +356,17 @@ def verify(rel, args, meta, do_assist=False):
     try:
         res = json.loads(raw)
     except ValueError:
-        print("  %s: DeepSeek returned invalid JSON; tracker left unchanged" % rel)
-        return False
+        if args.mock_response:
+            print("  %s: invalid JSON; tracker left unchanged" % rel)
+            return False
+        # usually a truncated answer: ask again for a shorter one
+        raw = deepseek_api.chat(SYSTEM_PROMPT, user + "\n\nYour previous answer was not valid JSON (probably too long). "
+                                "Answer again with at most 6 new issues and short fields.", model=args.model, json_mode=True)
+        try:
+            res = json.loads(raw)
+        except ValueError:
+            print("  %s: DeepSeek returned invalid JSON twice; tracker left unchanged" % rel)
+            return False
 
     stamp = "%s (%s)" % (meta["date"], meta["commit"])
     by_id = {i["id"]: i for i in issues}
@@ -372,7 +384,16 @@ def verify(rel, args, meta, do_assist=False):
             hist = it["fields"].get("History", "")
             it["fields"]["History"] = (hist + "\n" if hist else "") + "%s: %s%s" % (stamp, st, (" — " + note) if note else "")
         it["status"] = st
+    kept = []
     for n in res.get("new_issues", []) or []:
+        fix, det = (n.get("proposed_fix") or "").strip(), (n.get("detail") or "").strip()
+        if not fix or NOT_A_PROBLEM.search(fix) or NOT_A_PROBLEM.search(det[-80:]):
+            continue
+        if str(n.get("confidence", "high")).lower() not in ("high", "medium"):
+            continue
+        kept.append(n)
+    res["new_issues"] = kept
+    for n in kept:
         cat = n.get("category") if n.get("category") in CATEGORIES else "Logical gap"
         it = {"id": next_id(issues), "status": "Open", "title": (n.get("title") or "issue").strip().replace("\n", " "),
               "fields": {"Category": cat, "Location": (n.get("location") or "").strip(),
