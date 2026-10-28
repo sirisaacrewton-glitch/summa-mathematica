@@ -6,6 +6,7 @@ name: verify
 # Manual run (Actions -> verify -> Run workflow):
 #   mode "files": the space-separated files given in "files"
 #   mode "all"  : full audit of every page, split over 8 parallel jobs
+#   mode "terms": check the automatic term links (scripts/termcheck.py); "files" = folders to check, "limit" = max groups
 #   mode "bench": run the verifier on scripts/bench/benchmark.json (pages at a fixed old revision with known
 #                 true and false findings) and push the raw results to verifications/bench/ for scoring
 # 2026-10-28: automatic runs on push are switched off to save DeepSeek tokens (user request) until the
@@ -17,7 +18,7 @@ on:
       mode:
         description: 'files = the files below; all = full audit of every page'
         type: choice
-        options: [files, all, bench]
+        options: [files, all, bench, terms]
         default: files
       files:
         description: 'Space-separated repository-relative files to verify (mode files)'
@@ -37,6 +38,14 @@ on:
         description: 'Also write *_assist.md (step claims, alternative proofs/definitions)'
         type: boolean
         default: false
+      limit:
+        description: 'mode terms: max (series, term, definition) groups to check'
+        required: false
+        default: '100'
+      ambiguous_only:
+        description: 'mode terms: only terms with more than one candidate definition'
+        type: boolean
+        default: true
       skip_verified:
         description: 'mode all: skip pages that already have a tracker (resume an interrupted audit)'
         type: boolean
@@ -153,3 +162,33 @@ jobs:
         if: always()
         run: |
           bash scripts/push_verifications.sh "chore: verifier benchmark (${{ inputs.model }}) [skip ci]"
+
+  terms:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'terms'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Check the automatic term links
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ inputs.model }}
+          DIRS: ${{ inputs.files }}
+          LIMIT: ${{ inputs.limit }}
+          AMB: ${{ inputs.ambiguous_only }}
+        run: |
+          node tools/term-links.js > /tmp/units.json
+          A=""; [ "$AMB" = "true" ] && A="--ambiguous"
+          D=""; [ -n "$DIRS" ] && D="--dirs $DIRS"
+          python scripts/termcheck.py /tmp/units.json $A $D --limit "$LIMIT" \
+            --out "verifications/termlinks/run${{ github.run_number }}.md"
+
+      - name: Push the report
+        if: always()
+        run: |
+          bash scripts/push_verifications.sh "chore: term-link check [skip ci]"
