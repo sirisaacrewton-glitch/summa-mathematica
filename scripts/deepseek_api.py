@@ -25,6 +25,9 @@ STRICT_LATEX_RULES = """Strict LaTeX Rules (Must Follow):
 - Do NOT insert unnecessary spaces or line breaks before/after formulas."""
 
 
+_SEEN_MODELS = set()
+
+
 class DeepSeekError(RuntimeError):
     pass
 
@@ -64,6 +67,10 @@ def chat(system, user, *, model=DEFAULT_MODEL, temperature=0.0, max_tokens=8192,
         try:
             with urllib.request.urlopen(req, timeout=timeout) as resp:
                 payload = json.loads(resp.read().decode("utf-8"))
+            served = payload.get("model")
+            if served and served not in _SEEN_MODELS:
+                _SEEN_MODELS.add(served)
+                print("DeepSeek served model: %s" % served, file=sys.stderr)
             choice = payload["choices"][0]
             text = choice["message"].get("content") or ""
             if choice.get("finish_reason") == "length":
