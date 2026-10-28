@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ラドーの三角形分割定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-manifolds/01-topological-manifolds/06-rado.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ラドーの三角形分割定理 {#mfd:page-rado keywords="Rado's theorem: every compact topological surface admits a triangulation; finite graphs in surfaces, curves meeting a graph in finitely many points, cell decompositions, from cells to a simplicial complex"}
+
+このページでは、コンパクトな 2 次元位相多様体（**位相曲面**）がつねに三角形分割をもつこと（**ラドーの三角形分割定理**）を証明する。方針は次のとおり。
+
+1. 曲面を有限個の座標円板で覆う。
+2. 各座標円板を少し大きいジョルダン曲線で囲む。それまでの曲線と有限個の点でしか交わらないように曲線を選ぶ（前のページの、有限平面グラフの馴らしと煉瓦積みの多角形を使う）。
+3. 曲線の和は曲面の中の有限グラフになり、その面はどれか一つの座標円板の中に入る。座標の中で面を凸多角形に切り分ける。
+4. すべての面が閉円板になる有限グラフ（胞体分割）から、単体複体を組み立てる。
+
+## 記法と定義の確認 {#mfd:sec-rd-notation}
+
+::: notation
+- 位相多様体は \ref{at:topological-manifold}：ハウスドルフ空間で、各点が $\mathbb{R}^{2}$ と同相な開近傍（座標近傍）をもつものを **2 次元位相多様体**（**位相曲面**）という。
+- 単体複体・多面体 $|K|$・三角形分割は \ref{at:simplicial-complex}。空間 $X$ の三角形分割とは、有限単体複体 $K$ と同相写像 $|K|\to X$ の組である。
+- 有限グラフ・面・閉路・折れ線グラフは \ref{mfd:plane-graph}。ハウスドルフ空間の中の有限グラフも同じ言葉で扱う。
+- $\mathbb{D}$ は開単位円板、$\overline{\mathbb{D}}$ は閉単位円板、$S^{1}=\partial\mathbb{D}$。$B(0,r)$ は $\mathbb{R}^{2}$ の開円板。
+- 手元の資料にこの部分を扱う本がないため、証明はすべてここで書き下ろした。座標円板を囲む曲線を有限個の点で交わるように選ぶ方針は標準的なものだが、細部はこのサイトの道具に合わせて組み立てた。
+:::
+
+## 曲面の中の有限グラフ {#mfd:sec-rd-graphs}
+
+::: lemma 弧は内点をもたない {#mfd:arc-no-interior keywords="a finite union of arcs in a surface has empty interior" index="弧の和の内部|このわのないぶ"}
+$S$ を位相曲面、$A_{1},\dots,A_{m}$ を $S$ の弧とする。$A_{1}\cup\cdots\cup A_{m}$ は $S$ の空でない開集合を含まない。
+:::
+
+::: proof
+**Step 1（1 本の弧）.** 【主張：弧 $A$ は空でない開集合を含まない】含むとすると、座標近傍との共通部分をとって、$A$ は開円板と同相な部分集合 $W$ を含む。$A$ を $[0,1]$ と同一視すると、$W$ は連結なので区間で、1 点ではないので内部の点 $t$ をもつ。$W\setminus\{t\}$ は連結でない（区間から内部の点を除いた）が、開円板から 1 点を除いた集合は連結なので矛盾。
+
+**Step 2（有限個の和）.** 【主張：内点をもたない閉集合二つの和も内点をもたない】$W\subset A\cup A'$ を空でない開集合とする。$W\setminus A$ は開集合で、空なら $W\subset A$ となり Step 1 に反するので空でなく、$A'$ に含まれて矛盾。帰納法で $m$ 個の場合も従う。
+:::
+
+::: lemma 座標近傍の中のグラフ {#mfd:local-finiteness keywords="inside a chart, the part of a finite graph in a closed disk coincides with a finite plane graph" index="座標近傍の中のグラフ|ざひょうきんぼうのなかのぐらふ"}
+$S$ を位相曲面、$G=(V,E)$ を $S$ の有限グラフ、$U\subset S$ を開集合、$h\colon U\to\mathbb{R}^{2}$ を同相写像、$R>0$ とする。有限平面グラフ $Y$ で
+$$
+|Y|\cap\overline{B}(0,R)=h(|G|\cap U)\cap\overline{B}(0,R)
+$$
+となるものがある。
+:::
+
+::: proof
+$K_{R}\defeq h^{-1}(\overline{B}(0,R))$ は $U$ のコンパクト部分集合。
+
+**Step 1（各辺の有限個の部分弧）.** 【主張：各辺 $\varepsilon$ について、互いに交わらない有限個の閉区間 $[s_{I},t_{I}]\subset[0,1]$ で、$\varepsilon([s_{I},t_{I}])\subset U$ かつ $\varepsilon^{-1}(K_{R})\subset\bigcup_{I}[s_{I},t_{I}]$ となるものがある（$\varepsilon$ を $[0,1]$ でパラメータ表示する）】$P\defeq\varepsilon^{-1}(U)$ は $[0,1]$ の開集合で、その連結成分は $[0,1]$ の中で開いた区間。$Q\defeq\varepsilon^{-1}(K_{R})$ はコンパクトで $P$ に含まれ、$P$ の連結成分は $Q$ の互いに交わらない開被覆なので、$Q$ と交わる成分は有限個。そのような成分 $I$ について $Q\cap I$ は $Q$ の閉集合（ほかの成分との共通部分を除いたもの）でコンパクト、その最小値と最大値を $s_{I}\le t_{I}$ とすると $[s_{I},t_{I}]\subset I$。
+
+**Step 2（グラフ）.** 【主張：$Y$ が作れる】$Y$ の辺を、$s_{I}<t_{I}$ となる $I$ についての $h(\varepsilon([s_{I},t_{I}]))$ とし、頂点を、これらの端点と、$s_{I}=t_{I}$ となる点 $h(\varepsilon(s_{I}))$ と、$K_{R}$ に含まれる $G$ の孤立した頂点の像とする。辺の内部は $\varepsilon$ の内部の点からなり、ほかの部分弧の点とも、ほかの辺の点とも一致しない（$G$ の相異なる辺は共通の端点でだけ交わり、それは $\varepsilon(0)$ か $\varepsilon(1)$）。共通の端点 $\varepsilon(0)$ が部分弧に含まれれば $s_{I}=0$ でその部分弧の端点になる。よって $Y$ は有限平面グラフ。$|Y|\subset h(|G|\cap U)$ で、$h(|G|\cap K_{R})$ の点は Step 1 から $|Y|$ に入るので、主張の等式が成り立つ。
+:::
+
+::: lemma 有限個の点で交わる曲線 {#mfd:good-curve keywords="in a chart one can surround the unit disk by a Jordan curve in the annulus 1 < |z| < 2 meeting a given finite graph in finitely many points" index="グラフと有限個の点で交わる曲線|ぐらふとゆうげんこのてんでまじわるきょくせん"}
+$S$ を位相曲面、$G$ を $S$ の有限グラフ、$h\colon U\to\mathbb{R}^{2}$ を開集合 $U\subset S$ からの同相写像とする。ジョルダン曲線 $C\subset S$ で、$h(C)\subset\{1<|z|<2\}$、$\overline{B}(0,1)\subset\operatorname{int}h(C)$ であり、$C\cap|G|$ が有限集合となるものがある。
+:::
+
+::: proof
+\ref{mfd:local-finiteness}（$R=2$）の $Y$ と、\ref{mfd:tame-graph} の同相写像 $\psi$ をとる。$\psi(Y)$ の辺は有限個の線分 $s_{1},\dots,s_{N}$ の和。\ref{mfd:brick-polygon} を $K\defeq\psi(\overline{B}(0,1))$（コンパクトで連結）、$O\defeq\psi(B(0,2))$ と $s_{l}$ に使い、多角形 $Z$ をとる。$C\defeq h^{-1}(\psi^{-1}(Z))$ とする。$\psi^{-1}(Z)\subset B(0,2)\setminus\overline{B}(0,1)$。$\psi^{-1}$ は平面の同相写像なので、$\mathbb{R}^{2}\setminus Z$ の連結成分を $\mathbb{R}^{2}\setminus\psi^{-1}(Z)$ の連結成分に移し、閉包がコンパクトな成分 $\operatorname{int}Z$ を閉包がコンパクトな成分 $\operatorname{int}\psi^{-1}(Z)$ に移す。よって$\overline{B}(0,1)\subset\operatorname{int}\psi^{-1}(Z)$。$\psi^{-1}(Z)\subset\overline{B}(0,2)$ なので、$h(C\cap|G|)=\psi^{-1}(Z)\cap h(|G|\cap U)=\psi^{-1}(Z)\cap|Y|=\psi^{-1}(Z\cap\psi(|Y|))$ で、$Z\cap s_{l}$ は有限なのでこれは有限集合。
+:::
+
+::: lemma 曲線を加える {#mfd:add-curve keywords="adding a Jordan curve meeting a finite graph in finitely many points gives a finite graph" index="グラフに曲線を加える|ぐらふにきょくせんをくわえる"}
+$G=(V,E)$ をハウスドルフ空間 $X$ の有限グラフ、$C\subset X$ をジョルダン曲線で $C\cap|G|$ が有限のものとする。有限グラフ $G'$ で、$|G'|=|G|\cup C$、$V$ は $G'$ の頂点、$G$ の各辺と $C$ はそれぞれ $G'$ の辺の和、となるものがある。
+:::
+
+::: proof
+$V'\defeq V\cup(C\cap|G|)\cup P$ とする。ここで $P\subset C$ は、$V'\cap C$ が 2 点以上になるように加える高々 2 点。$G$ の各辺を、その内部にある $V'$ の点（有限個）で区切った部分弧と、$C$ を $V'\cap C$ の点で区切った弧を $G'$ の辺とする。$C$ から作った辺の内部は $|G|$ と交わらない（$C\cap|G|\subset V'$）。$G$ の辺から作った辺どうしは、同じ辺から作ったものは隣り合う区切りの点で、異なる辺から作ったものは $G$ の頂点でだけ交わる。$C$ から作った辺と $G$ の辺から作った辺の共通点は $V'$ の点で、それは両方の辺の端点になっている。よって $G'$ は有限グラフ。
+:::
+
+## 胞体分割から三角形分割へ {#mfd:sec-rd-cells}
+
+::: definition 胞体分割 {#mfd:cell-decomposition keywords="cell decomposition of a compact surface by a finite graph: every face is an open disk whose closure is a closed disk bounded by a cycle" index="胞体分割（曲面）|ほうたいぶんかつきょくめん"}
+$S$ をコンパクトな位相曲面とする。$S$ の有限グラフ $G$ が**胞体分割**であるとは、$S\setminus|G|$ の連結成分（$G$ の**面**）が有限個で、各面 $O$ について、同相写像 $\varphi_{O}\colon\overline{\mathbb{D}}\to\overline{O}$ で $\varphi_{O}(\mathbb{D})=O$、$\varphi_{O}(S^{1})\subset|G|$ となるものがあることをいう。
+:::
+
+::: proposition 胞体分割からの三角形分割 {#mfd:cell-to-triangulation keywords="a compact surface with a cell decomposition admits a triangulation: barycentric-type subdivision with a vertex for each vertex, edge and face" index="胞体分割からの三角形分割|ほうたいぶんかつからのさんかくけいぶんかつ"}
+コンパクトな位相曲面 $S$ が胞体分割 $G=(V,E)$ をもてば、$S$ は三角形分割をもつ。
+:::
+
+::: intuition
+曲面がいくつかの「ゆがんだ多角形」に切り分けられていれば、各多角形の中心から頂点と辺の中点へ線を引いて、三角形に分けられる。辺の上の点の対応を、両側の多角形で共通に決めておくのが要点である。
+:::
+
+::: proof
+**Step 1（面の境界）.** 【主張：各面 $O$ について、$J_{O}\defeq\varphi_{O}(S^{1})=\overline{O}\setminus O$ は $G$ の閉路で、頂点 $v_{1},\dots,v_{k}$（$k\ge2$）と、$v_{j}$, $v_{j+1}$ を結ぶ辺 $\varepsilon_{j}$（$v_{k+1}=v_{1}$）が巡回的に並ぶ】$\varphi_{O}$ は全単射なので $\overline{O}\setminus O=\varphi_{O}(S^{1})$。これは $|G|$ に含まれるジョルダン曲線なので、\ref{mfd:cycle-edges} から従う。
+
+**Step 2（面の閉包の和）.** 【主張：$S=\bigcup_{O}\overline{O}$ で、各辺はある $J_{O}$ に含まれる】$|G|$ は有限個の弧と点の和なので、\ref{mfd:arc-no-interior} から空でない開集合を含まない（点も、座標近傍の中で考えれば内点をもたない）。よって $S\setminus|G|=\bigcup_{O}O$ は $S$ で稠密で、有限個の閉集合 $\overline{O}$ の和は $S$。辺 $\varepsilon$ の内部の点 $x$ はある $\overline{O}$ に入り、$O$ には入らないので $J_{O}$ に入る。Step 1 から $x$ はある $\varepsilon_{j}$ の内部にあり、相異なる辺の内部は交わらないので $\varepsilon=\varepsilon_{j}\subset J_{O}$。
+
+**Step 3（単体複体）.** 頂点の集合 $W\defeq V\sqcup\{m_{\varepsilon}:\varepsilon\in E\}\sqcup\{c_{O}:O\text{ は面}\}$ をとり、$\mathbb{R}^{W}$ の標準基底を $e_{w}$ とする。各面 $O$、$J_{O}$ に含まれる各辺 $\varepsilon$、$\varepsilon$ の各端点 $v$ について 2 単体 $\sigma(O,v,\varepsilon)\defeq[e_{c_{O}},e_{v},e_{m_{\varepsilon}}]$ をとり、これらとそのすべての面の集合を $K$ とする。標準基底の部分集合が張る単体どうしの共通部分は、共通の基底ベクトルが張る単体なので、$K$ は単体複体（\ref{at:simplicial-complex}）。
+
+**Step 4（各面の模型）.** 【主張：各面 $O$ に、正 $2k$ 角形 $P_{O}$ から $\overline{O}$ への同相写像 $\Phi_{O}$ で、境界での値が辺ごとに固定したパラメータで決まるものがある】各辺 $\varepsilon$ に同相写像 $\theta_{\varepsilon}\colon[0,1]\to\varepsilon$ を一つ固定し、端点 $v$ について $\theta^{v}_{\varepsilon}(t)\defeq\theta_{\varepsilon}(t)$（$\theta_{\varepsilon}(0)=v$ のとき）、$\theta_{\varepsilon}(1-t)$（そうでないとき）とおく。$\varepsilon$ の両端 $v,v'$ について $\theta^{v}_{\varepsilon}(t)=\theta^{v'}_{\varepsilon}(1-t)$。$P_{O}$ を中心 $0$ の正 $2k$ 角形とし、頂点を反時計回りに $a_{1},b_{1},a_{2},b_{2},\dots,a_{k},b_{k}$ と名づける（$a_{j}\leftrightarrow v_{j}$, $b_{j}\leftrightarrow m_{\varepsilon_{j}}$, $a_{k+1}\defeq a_{1}$）。$\beta_{O}\colon\partial P_{O}\to J_{O}$ を
+$$
+\beta_{O}(a_{j}+s(b_{j}-a_{j}))\defeq\theta^{v_{j}}_{\varepsilon_{j}}(s/2),\qquad\beta_{O}(b_{j}+s(a_{j+1}-b_{j}))\defeq\theta^{v_{j}}_{\varepsilon_{j}}((1+s)/2)
+$$
+（$0\le s\le1$）と定めると、角で値が一致し（$a_{j+1}$ ではどちらの式も $v_{j+1}$）、全単射なので同相写像（\ref{top:pasting-lemma}, \ref{top:compact-to-hausdorff}）。$\varphi_{O}^{-1}\circ\beta_{O}\colon\partial P_{O}\to S^{1}$ は \ref{mfd:convex-body.3} から同相写像 $P_{O}\to\overline{\mathbb{D}}$ に延び、それと $\varphi_{O}$ の合成を $\Phi_{O}$ とする。
+
+**Step 5（写像の定義）.** 【主張：連続写像 $T\colon|K|\to S$ が定まる】$\sigma(O,v_{j},\varepsilon_{j})$ を、$e_{c_{O}}\mapsto0$, $e_{v_{j}}\mapsto a_{j}$, $e_{m_{\varepsilon_{j}}}\mapsto b_{j}$ となるアフィン写像で三角形 $[0,a_{j},b_{j}]$ に移してから $\Phi_{O}$ で移す。$\sigma(O,v_{j+1},\varepsilon_{j})$ は同様に $[0,a_{j+1},b_{j}]$ を経由する。二つの 2 単体の共通部分は共通の頂点が張る面で、そこでの値が一致することを確かめる。同じ面 $O$ の 2 単体どうしでは、共通の辺は $[e_{c_{O}},e_{v_{j}}]$ か $[e_{c_{O}},e_{m_{\varepsilon_{j}}}]$ で、どちらの 2 単体でも同じ線分 $[0,a_{j}]$ か $[0,b_{j}]$ を経由する。異なる面 $O,O'$ の 2 単体の共通の辺は $[e_{v},e_{m_{\varepsilon}}]$ の形で、点 $(1-s)e_{v}+se_{m_{\varepsilon}}$ はどちらの面でも $\theta^{v}_{\varepsilon}(s/2)$ に移る（$\beta$ の定義と $\theta^{v_{j}}_{\varepsilon}(1-s/2)=\theta^{v_{j+1}}_{\varepsilon}(s/2)$ による）。頂点 $e_{v}$ はつねに $v$ に移る。よって $T$ は矛盾なく定まり、有限個の閉集合（2 単体）の上で連続なので連続（\ref{top:pasting-lemma}）。
+
+**Step 6（全単射）.** 【主張：$T$ は同相写像】全射：$P_{O}$ は三角形 $[0,a_{j},b_{j}]$, $[0,b_{j},a_{j+1}]$ の和（\ref{mfd:convex-body.1}：$P_{O}$ の点は中心から境界の点への線分の上にある）なので $T(|K|)\supset\Phi_{O}(P_{O})=\overline{O}$ で、Step 2 から全射。単射：面 $O$ の $2k$ 個の 2 単体の和 $\mathrm{St}_{O}$ は、中心 $e_{c_{O}}$ のまわりに辺を共有して巡回的に並び（$v_{j}$, $m_{\varepsilon_{j}}$ は相異なる）、$P_{O}$ の扇形の分割と同じ貼り合わせなので、アフィン写像を合わせた $\mathrm{St}_{O}\to P_{O}$ は全単射で、$T\restriction\mathrm{St}_{O}$ は単射。$T(x)=T(y)$, $x\in\mathrm{St}_{O}$, $y\in\mathrm{St}_{O'}$, $O\neq O'$ とすると、$\overline{O}\cap\overline{O'}=J_{O}\cap J_{O'}$（面は $|G|$ とも互いにも交わらない）なので、$x,y$ は $\Phi_{O}^{-1}(J_{O})=\partial P_{O}$ に対応する辺 $[e_{v},e_{m_{\varepsilon}}]$ の上にある。$T(x)$ が辺 $\varepsilon$ の内部の点なら、$T(y)$ を含む辺も $\varepsilon$ で、$x,y$ はともに $[e_{v},e_{m_{\varepsilon}}]\cup[e_{m_{\varepsilon}},e_{v'}]$（$v,v'$ は $\varepsilon$ の端点）の上にあり、そこで $T$ は $\theta_{\varepsilon}$ を通して単射。$T(x)$ が頂点 $v$ なら $x=y=e_{v}$。よって $T$ は単射で、コンパクト空間 $|K|$ からハウスドルフ空間 $S$ への連続な全単射なので同相写像（\ref{top:compact-to-hausdorff}）。
+
+::: hypcheck
+- **各面の閉包が閉円板で、境界が閉路**：Step 4 で模型の多角形からの同相写像を作るのに使った。境界が閉路でない（たとえば辺が境界に二度現れる）と、多角形の辺と曲面の辺の対応が作れない。
+- **$S$ が曲面**：Step 2 で $|G|$ が内点をもたないこと（各点がどれかの面の閉包に入ること）に使った。
+:::
+:::
+
+## ラドーの三角形分割定理 {#mfd:sec-rd-theorem}
+
+::: theorem ラドーの三角形分割定理 {#mfd:rado-triangulation keywords="Rado's theorem: every compact topological surface (2-manifold) admits a triangulation by a finite simplicial complex" index="ラドーの三角形分割定理|らどーのさんかくけいぶんかつていり, ラドーの定理|らどーのていり, 曲面の三角形分割|きょくめんのさんかくけいぶんかつ" refname="ラドーの三角形分割定理"}
+コンパクトな位相曲面 $S$ は三角形分割をもつ：有限単体複体 $K$ と同相写像 $|K|\to S$ がある。
+:::
+
+::: intuition
+どんな閉じた曲面も、有限個の三角形を辺と頂点でぴったり貼り合わせて作れる。曲面を小さな円板で覆い、円板の縁の曲線どうしが有限回しか交わらないように選び直すと、曲面は有限個の「ゆがんだ多角形」に切り分けられ、それを三角形に分ければよい。
+:::
+
+::: proof
+$S=\varnothing$ なら $K=\varnothing$。以下 $S\neq\varnothing$ とする。
+
+**Step 1（座標円板）.** 【主張：開集合 $U_{1},\dots,U_{n}$ と同相写像 $h_{i}\colon U_{i}\to\mathbb{R}^{2}$ で、$S=\bigcup_{i}h_{i}^{-1}(B(0,1))$ となるものがある】各点 $x$ は $\mathbb{R}^{2}$ と同相な開近傍 $U_{x}$ をもち（\ref{at:topological-manifold}）、同相写像に平行移動を合成して $h_{x}(x)=0$ とできる。開集合 $h_{x}^{-1}(B(0,1))$ は $S$ を覆い、$S$ はコンパクトなので有限個で覆える。
+
+**Step 2（曲線の列）.** 【主張：ジョルダン曲線 $C_{1},\dots,C_{n}$ と有限グラフ $G_{1},\dots,G_{n}$ で、$h_{i}(C_{i})\subset\{1<|z|<2\}$、$\overline{B}(0,1)\subset\operatorname{int}h_{i}(C_{i})$、$|G_{i}|=C_{1}\cup\cdots\cup C_{i}$、各 $C_{l}$（$l\le i$）は $G_{i}$ の辺の和、となるものがある】$G_{0}$ を空のグラフとし、$i=1,\dots,n$ について順に、\ref{mfd:good-curve} を $G_{i-1}$ と $h_{i}$ に使って $C_{i}$ をとり、\ref{mfd:add-curve} で $G_{i}$ を作る。\ref{mfd:add-curve} では古い辺は新しい辺の和になるので、$C_{l}$ は辺の和のままである。$G\defeq G_{n}$ とする。
+
+**Step 3（各曲線の内側）.** $\Delta_{i}^{\circ}\defeq h_{i}^{-1}(\operatorname{int}h_{i}(C_{i}))$, $\Delta_{i}\defeq h_{i}^{-1}(h_{i}(C_{i})\cup\operatorname{int}h_{i}(C_{i}))$ とおく。$\Delta_{i}^{\circ}$ は $S$ の開集合、$\Delta_{i}$ はコンパクトなので $S$ の閉集合で、$S\setminus C_{i}=\Delta_{i}^{\circ}\sqcup(S\setminus\Delta_{i})$ は二つの開集合への分割。Step 1・2 から $h_{i}^{-1}(B(0,1))\subset\Delta_{i}^{\circ}$ なので、$S=\bigcup_{i}\Delta_{i}^{\circ}$。
+
+**Step 4（面の位置）.** 【主張：$G$ の各面 $F$ はある $\Delta_{i}^{\circ}$ に含まれる】$x\in F$ を $x\in\Delta_{i}^{\circ}$ となるようにとる。$F$ は連結で $C_{i}\subset|G|$ と交わらないので、Step 3 の分割から $F\subset\Delta_{i}^{\circ}$。
+
+**Step 5（面の中の平面グラフ）.** 【主張：$F\subset\Delta_{i}^{\circ}$ のとき、$\Delta_{i}$ に含まれる $G$ の辺と頂点の $h_{i}$ による像は有限平面グラフ $\Gamma_{i}$ をなし、$|\Gamma_{i}|=h_{i}(|G|\cap\Delta_{i})$、$h_{i}(F)$ は $\Gamma_{i}$ の有界な面】$G$ の辺 $\varepsilon$ は、$C_{i}$ に含まれるか、内部が $C_{i}$ と交わらない（$C_{i}$ は辺の和で、相異なる辺の内部は交わらない）。後者なら内部は連結なので $\Delta_{i}^{\circ}$ か $S\setminus\Delta_{i}$ に含まれる。よって $|G|\cap\Delta_{i}$ は $\Delta_{i}$ に含まれる辺と頂点の和で、その像は有限平面グラフ。$h_{i}(F)$ は連結で $|\Gamma_{i}|$ と交わらないので $\Gamma_{i}$ のある面 $W$ に含まれる。$W$ は $h_{i}(C_{i})\subset|\Gamma_{i}|$ と交わらず $\operatorname{int}h_{i}(C_{i})$ と交わるので、$W\subset\operatorname{int}h_{i}(C_{i})$（有界）。$h_{i}^{-1}(W)$ は連結で $|G|$ と交わらず $F$ を含むので、$F$ の極大性から $h_{i}^{-1}(W)=F$。
+
+**Step 6（面の凸分割）.** 【主張：$G$ の面は有限個で、各面 $F$ に有限個の弧を加えて、$F$ を凸多角形の内部の像に分けられる】まず、$\Gamma_{i}$ に孤立頂点はない：\ref{mfd:add-curve} は曲線か既存の辺の上にしか頂点を作らず、空のグラフから始めたので、$G$ の各頂点はある辺の上にある。$\Delta_{i}^{\circ}$ の頂点を端点にもつ辺は、内部が $\Delta_{i}^{\circ}$ と交わり、内部は連結で $C_{i}$ と交わらないので $\Delta_{i}$ に含まれる。$C_{i}$ の上の頂点は $C_{i}$ の辺の端点。$F$ と $i$ を Step 5 のようにとり、\ref{mfd:tame-graph} で $\Gamma_{i}$ を折れ線グラフに移す同相写像 $\psi$ をとる。孤立頂点のない折れ線グラフの面はどれも、\ref{mfd:convex-subdivision} の証明の胞（辺の線分を含む直線の補集合の連結成分。グラフはこれらの直線の和に含まれる）を少なくとも一つ含み、異なる面は異なる胞を含むので、面は有限個。よって $G$ の面も有限個（各面はある $\Gamma_{i}$ の面の像）。$\psi h_{i}(F)$ に \ref{mfd:convex-subdivision} を使って $\Gamma^{+}_{F}$ を作り、$\theta_{F}\defeq h_{i}^{-1}\circ\psi^{-1}\colon\mathbb{R}^{2}\to U_{i}$ とおく。$N_{F}\defeq\theta_{F}(|\Gamma^{+}_{F}|\setminus|\psi(\Gamma_{i})|)\subset F$。
+
+**Step 7（胞体分割）.** 【主張：$|G|\cup\bigcup_{F}N_{F}$ は $S$ の胞体分割 $G^{*}$ の $|G^{*}|$】$G^{*}$ の頂点を、$G$ の頂点と、各 $F$ について $\Gamma^{+}_{F}$ の頂点の $\theta_{F}$ による像とし、辺を、$\Gamma^{+}_{F}$ の辺で $|\psi(\Gamma_{i})|$ に含まれないものの像と、$G$ の辺をその上にある新しい頂点（有限個）で区切った部分弧とする。新しい辺の内部は $F$ に入り、異なる面の新しい辺は $|G|$ の上の共通の端点でだけ交わり、$G$ の辺とは頂点でだけ交わるので、$G^{*}$ は有限グラフ。$S\setminus|G^{*}|=\bigsqcup_{F}(F\setminus N_{F})$ で、$F\setminus N_{F}=\theta_{F}(\psi h_{i}(F)\setminus|\Gamma^{+}_{F}|)$ の連結成分は、\ref{mfd:convex-subdivision} から凸多角形 $\partial\overline{C}\subset|\Gamma^{+}_{F}|$ の内部 $C$ の像 $O=\theta_{F}(C)$。$\overline{C}$ は凸体なので、\ref{mfd:convex-body.3} の同相写像 $\overline{\mathbb{D}}\to\overline{C}$（$S^{1}$ を $\partial\overline{C}$ に移す）と $\theta_{F}$ の合成を $\varphi_{O}$ とすると、$\varphi_{O}(\overline{\mathbb{D}})=\theta_{F}(\overline{C})$ はコンパクトで $O$ を含み $O$ の閉包に含まれるので $\overline{O}$ に等しく、$\varphi_{O}(\mathbb{D})=O$、$\varphi_{O}(S^{1})=\theta_{F}(\partial\overline{C})\subset\theta_{F}(|\Gamma^{+}_{F}|)\subset|G^{*}|$。
+
+**Step 8（結論）.** \ref{mfd:cell-to-triangulation} から $S$ は三角形分割をもつ。
+
+::: hypcheck
+- **コンパクト性**：Step 1 で座標円板を有限個にすることに使った。曲線とグラフが有限個で済むことは、すべてこれによる。
+- **2 次元であること**：\ref{mfd:good-curve} の中で、平面グラフの馴らし（シェーンフリースの定理による）と煉瓦積みの多角形を使った。3 次元でも三角形分割の存在は成り立つが（モイーズ）、証明ははるかに難しい（\ref{at:manifold-triangulation-facts}）。
+- **ハウスドルフ性**：コンパクト集合 $\Delta_{i}$ が閉集合であること（Step 3）と、\ref{mfd:cell-to-triangulation} の最後の同相の判定に使った。
+:::
+:::
+
+::: supplement
+**高い視点：組合せ的な骨格.** 三角形分割は、連続的な対象である曲面を、有限個の頂点と「どの頂点の組が単体を張るか」という組合せ的なデータに置き換えるものである。比喩で言えば、曲面という布に、ほつれない縫い目の網をかけることにあたる。網がかかれば、ホモロジー（単体ホモロジー）やオイラー標数が有限の計算で求まり、その値が網のかけ方によらないこと（\ref{at:simplicial-topological-invariance}）と合わせて、曲面の不変量になる。曲面の分類定理（球面・トーラスの連結和・射影平面の連結和）も、三角形分割の存在を出発点とする。
+
+**前提を変えると.**
+- コンパクトでない曲面についても、第二可算であれば三角形分割（無限単体複体による）が存在することが知られている（ラドー、1925 年）。
+- 3 次元の位相多様体も三角形分割できる（モイーズ）。4 次元以上では、三角形分割できない位相多様体がある（\ref{at:manifold-triangulation-facts}）。
+
+**似た定理.** 滑らかな曲面については、各三角形が座標近傍の中の滑らかな三角形になる三角形分割がある（\see{surf:triangulation-facts}）。これは位相的な場合の証明をなぞりつつ、各段階を滑らかに取れることを確かめれば得られるが、本サイトでは証明していない。
+:::
+
+## 問題 {#mfd:sec-rd-problems}
+
+::: problem {#mfd:prob-rd-two-triangles}
+$K$ を有限単体複体で $|K|$ がコンパクトな位相曲面と同相なものとする。$K$ のすべての単体は 2 単体の面であり、各 1 単体はちょうど二つの 2 単体の面であることを示せ。
+:::
+
+::: solution
+位相曲面の各点の局所ホモロジーは $\mathbb{R}^{2}$ のものと同じ（\ref{at:manifold-local-homology}）なので、$|K|$ はホモロジー 2 多様体（\ref{at:homology-manifold}）。\ref{at:manifold-link-conditions} から、$K$ は純 2 次元（すべての単体が 2 単体の面）で、各 1 単体はちょうど二つの 2 単体の面である。
+:::
+
+::: problem {#mfd:prob-rd-count}
+\ref{mfd:cell-to-triangulation} の証明で作った単体複体 $K$ の 2 単体の数は、胞体分割 $G$ の辺の数 $E$ の 4 倍であることを示せ。
+:::
+
+::: solution
+2 単体 $\sigma(O,v,\varepsilon)$ の数は $\sum_{O}2k_{O}$（$k_{O}$ は $J_{O}$ の辺の数）。1 単体 $[e_{v},e_{m_{\varepsilon}}]$ を面にもつ 2 単体は、$J_{O}\supset\varepsilon$ となる面 $O$ ごとに一つずつで、前の問題からちょうど二つなので、各辺はちょうど二つの面の境界に含まれる。よって $\sum_{O}k_{O}=2E$ で、2 単体の数は $4E$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

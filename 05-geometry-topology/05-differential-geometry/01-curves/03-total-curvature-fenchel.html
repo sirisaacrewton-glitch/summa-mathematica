@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全曲率とフェンチェルの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/05-differential-geometry/01-curves/03-total-curvature-fenchel.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 全曲率とフェンチェルの定理 {#surf:page-total-curvature-fenchel keywords="total curvature of closed curves, tangent indicatrix, spherical distance, Horn's lemma on curves not contained in an open hemisphere, Fenchel's theorem, equality case for plane curves, Fary-Milnor theorem, knots, four vertex theorem for simple closed curves"}
+
+閉曲線の曲率を一周にわたって積分したものを**全曲率**という。平面の単純閉曲線では、\ref{surf:umlaufsatz}から符号付き曲率の積分は $\pm2\pi$ なので、曲率の絶対値の積分は $2\pi$ 以上である。**フェンチェルの定理**はこれを空間の閉曲線に広げ、どんな閉曲線も全曲率は $2\pi$ 以上であることを主張する。証明の鍵は、単位接ベクトルを単位球面の上の曲線（**接線標形**）とみると、その長さが全曲率に等しく、しかもそれが球面のどの開いた半球にも収まらないことである。球面上の、開いた半球に収まらない閉曲線の長さは $2\pi$ 以上である（ホーンの補題）。平面曲線については、等号が成り立つのが凸曲線であることも示す。
+
+> 資料：Klingenberg『A Course in Differential Geometry』第 2 章 2.4（演習 2.4.9, 2.4.10：フェンチェルの定理とその証明の筋道）。ホーンの補題（Klingenberg が R. A. Horn の論文として引用）の証明と、球面上の距離の下界の証明は、自分で書き下ろした。空間曲線の等号成立条件とファーリ–ミルナーの定理は事実として述べる。
+
+## 記法と定義の確認 {#surf:sec-tc-notation}
+
+::: notation
+- 曲線の長さ \ref{vec:curve-length}、$C^{1}$ 級曲線の長さ $\int|\gamma'|$ \ref{vec:c1-curve-length}、長さの加法性 \ref{vec:length-basic.2}。
+- 平面の閉曲線・回転数・符号付き曲率 \ref{surf:closed-curve}・\ref{surf:rotation-number}・\ref{surf:signed-curvature}、回転数の性質 \ref{surf:rotation-number-properties}、ホップの回転定理 \tref{surf:umlaufsatz}、凸曲線 \ref{surf:convex-curve}・\ref{surf:convex-characterization}。
+- $S^{n-1}\defeq\{x\in\mathbb{R}^{n}\mid|x|=1\}$。$\arccos\colon[-1,1]\to[0,\pi]$ は $\cos\restriction[0,\pi]$（狭義減少な連続全単射）の逆関数で連続（\ref{calc:continuous-inverse}）、$(-1,1)$ の上で微分可能で $\arccos'(y)=-1/\sqrt{1-y^{2}}$（\ref{calc:chain-rule.2}。$(0,\pi)$ で $\cos'=-\sin<0$、$\sin=\sqrt{1-\cos^{2}}$）。
+- 中間値の定理 \ref{calc:interval-theorems}、コーシー–シュワルツの不等式 \tref{lin:cauchy-schwarz}。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## 全曲率と接線標形 {#surf:sec-tc-total-curvature}
+
+::: definition 全曲率 {#surf:total-curvature keywords="closed regular curve in R^n, curvature kappa = |e_1'|/|c'|, total curvature int kappa |c'| dt, tangent indicatrix" index="全曲率（閉曲線）|ぜんきょくりつ, 接線標形|せっせんひょうけい, 接線の標形|せっせんのひょうけい"}
+$C^{\infty}$ 級の正則曲線 $c\colon\mathbb{R}\to\mathbb{R}^{n}$ で $c(t+L)=c(t)$ となるものを周期 $L$ の閉曲線という（$n=2$ では \ref{surf:closed-curve} と同じ）。$e_{1}\defeq c'/|c'|$ について $\kappa\defeq|e_{1}'|/|c'|$ を $c$ の曲率、
+$$
+\kappa_{\mathrm{tot}}(c)\defeq\int_{0}^{L}\kappa(t)|c'(t)|\,dt=\int_{0}^{L}|e_{1}'(t)|\,dt
+$$
+を**全曲率**という。$e_{1}\colon[0,L]\to S^{n-1}$ を $c$ の**接線標形**という。
+:::
+
+::: intuition
+全曲率とは、閉じた曲線を一周する間に、進む向きがどれだけ大きく変わったかの合計である。接線標形は、進む向きを表す単位ベクトルの先端が単位球面の上に描く曲線で、その長さが全曲率に等しい。
+:::
+
+::: remark
+弧長パラメータでは $\kappa=|c''|$ で、フレネ曲線なら第 1 曲率（\ref{surf:frenet-curvature}）に、平面曲線なら符号付き曲率の絶対値 $|\kappa|$（\ref{surf:plane-curvature-formula.1}）に等しい。全曲率はパラメータの取り替えと合同変換で変わらない（定義と置換積分から直接確かめられる）。平面曲線では $2\pi|n_{c}|=\bigl|\int\kappa_{\pm}|c'|\bigr|\le\kappa_{\mathrm{tot}}(c)$（$\kappa_{\pm}$ は符号付き曲率、\ref{surf:rotation-number-properties.1}）。
+:::
+
+::: lemma 球面上の距離の下界 {#surf:sphere-distance-bound keywords="a C^1 curve on the unit sphere from x to y has length at least arccos <x,y>; antipodal points are at distance at least pi" index="球面上の距離|きゅうめんじょうのきょり"}
+$\gamma\colon[a,b]\to S^{n-1}$ が区分的に $C^{1}$ 級なら $L(\gamma)\ge\arccos\langle\gamma(a),\gamma(b)\rangle$。とくに $\gamma(b)=-\gamma(a)$ なら $L(\gamma)\ge\pi$。
+:::
+
+::: proof
+**Step 1（角の微分の評価）.** 【主張：$x\defeq\gamma(a)$, $h\defeq\langle\gamma,x\rangle$, $\varphi\defeq\arccos h$ とすると、$0<\varphi<\pi$ となる開集合の上で $\varphi$ は $C^{1}$ 級で $|\varphi'|\le|\gamma'|$】$|\gamma|^{2}=1$ を微分して $\langle\gamma',\gamma\rangle=0$ なので $h'=\langle\gamma',x\rangle=\langle\gamma',x-h\gamma\rangle$、$|x-h\gamma|^{2}=1-2h^{2}+h^{2}=1-h^{2}$。コーシー–シュワルツから $|h'|\le|\gamma'|\sqrt{1-h^{2}}$。$|h|<1$ の範囲で $\varphi'=-h'/\sqrt{1-h^{2}}$ は連続で、$|\varphi'|\le|\gamma'|$。
+
+**Step 2（端の処理）.** 【主張：$\varphi(b)\le L(\gamma)$】$\varphi$ は $[a,b]$ で連続で $\varphi(a)=0$。$t_{0}\defeq\sup\{t\in[a,b]\mid\varphi(t)=0\}$ とすると $\varphi(t_{0})=0$ で、$(t_{0},b]$ では $\varphi>0$。$\varphi(b)<\pi$ なら $t_{1}\defeq b$、そうでなければ $t_{1}\defeq\inf\{t\ge t_{0}\mid\varphi(t)=\pi\}$ とし、$(t_{0},t_{1})$ の上で $0<\varphi<\pi$。$t_{0}<s<t<t_{1}$ なら Step 1 と基本定理から $\varphi(t)-\varphi(s)\le\int_{s}^{t}|\gamma'|$（区分的に $C^{1}$ 級なら、$C^{1}$ 級の小区間ごとに示して足す。$\varphi$ は連続）。$s\to t_{0}$, $t\to t_{1}$ として $\varphi(t_{1})\le\int_{t_{0}}^{t_{1}}|\gamma'|\le L(\gamma)$（\ref{vec:c1-curve-length}）。$\varphi(b)\le\varphi(t_{1})$（$t_{1}=b$ か、$\varphi(t_{1})=\pi$）。
+
+**Step 3.** 【主張：結論】$\varphi(b)=\arccos\langle\gamma(b),x\rangle$。$\gamma(b)=-x$ なら $\arccos(-1)=\pi$。
+:::
+
+::: lemma ホーンの補題 {#surf:horn-lemma keywords="a closed C^1 curve on the unit sphere which is not contained in any open hemisphere has length at least 2 pi" index="ホーンの補題|ほーんのほだい, 開半球|かいはんきゅう"}
+$\gamma\colon[a,b]\to S^{n-1}$ を $C^{1}$ 級で $\gamma(a)=\gamma(b)$ とする。どの単位ベクトル $m$ についても $\gamma$ が開半球 $\{x\mid\langle x,m\rangle>0\}$ に含まれないなら、$L(\gamma)\ge2\pi$。
+:::
+
+::: intuition
+球面の上の閉じた曲線が、どの半球にも収まりきらないなら、その長さは大円一周（$2\pi$）以上である。
+:::
+
+::: proof
+**Step 1（二等分）.** 【主張：$\Lambda\defeq L(\gamma)<2\pi$ と仮定すると、$\gamma$ を長さ $\Lambda/2$ ずつの二つの弧に分ける点 $p=\gamma(a)$, $q=\gamma(t_{*})$ について $p\neq-q$】$t\mapsto\int_{a}^{t}|\gamma'|$ は連続で $0$ から $\Lambda$ まで動くので、中間値の定理から長さ $\Lambda/2$ になる $t_{*}$ がある。\ref{surf:sphere-distance-bound} から $\arccos\langle p,q\rangle\le\Lambda/2<\pi$ なので $\langle p,q\rangle>-1$、$p\neq-q$。
+
+**Step 2（中点と鏡映）.** 【主張：$m\defeq(p+q)/|p+q|$ と $\rho(x)\defeq2\langle x,m\rangle m-x$ について、$\rho$ は長さを保ち、$\rho(p)=q$、$\langle x,m\rangle=0$ なら $\rho(x)=-x$】$\rho$ は直交行列（$m$ を含む直線についての 180 度回転）で、$S^{n-1}$ を保ち、曲線の長さを保つ。$|p+q|^{2}=2+2\langle p,q\rangle$ と $\langle p,p+q\rangle=1+\langle p,q\rangle$ から $\langle p,m\rangle=|p+q|/2$、よって $2\langle p,m\rangle m=p+q$、$\rho(p)=q$。
+
+**Step 3（矛盾）.** 【主張：$\gamma$ は開半球 $\langle x,m\rangle>0$ に含まれる】含まれないとし、たとえば $[a,t_{*}]$ の弧に $\langle\gamma(t),m\rangle\le0$ となる点があるとする（他方の弧でも同じ）。$\langle p,m\rangle>0$ なので、中間値の定理から $\langle r,m\rangle=0$ となる $r=\gamma(t_{2})$（$a<t_{2}<t_{*}$）がある。弧 $\gamma\restriction[t_{2},t_{*}]$（$r$ から $q$ へ）のあとに、$\rho\circ\gamma\restriction[a,t_{2}]$（$\rho(p)=q$ から $\rho(r)=-r$ へ）をつなぐと、$r$ から $-r$ への区分的に $C^{1}$ 級の曲線で、長さは $\Lambda/2<\pi$。これは \ref{surf:sphere-distance-bound}（区分的に $C^{1}$ 級の曲線に使う）に反する。よって $\gamma$ は開半球に含まれ、仮定に反する。したがって $\Lambda\ge2\pi$。
+
+::: hypcheck
+- **前提「閉曲線」**：Step 1 で二つの弧が $p$ と $q$ を結ぶことに使った。
+- **前提「開半球に含まれない」**：Step 3 の結論と矛盾させるのに使った。閉半球には含まれてよい（赤道一周は長さ $2\pi$ で、等号）。
+- **区分的 $C^{1}$**：Step 3 でつないだ曲線は継ぎ目で角をもちうるので、\ref{surf:sphere-distance-bound} を区分的に $C^{1}$ 級の曲線について述べておいた。
+:::
+:::
+
+::: lemma 接線標形は半球に入らない {#surf:indicatrix-hemisphere keywords="the tangent indicatrix of a closed curve is not contained in any open hemisphere, since the integral of <c', v> over a period vanishes" index="接線標形と半球|せっせんひょうけいとはんきゅう"}
+閉曲線 $c$（周期 $L$）の接線標形 $e_{1}$ は、どの単位ベクトル $v$ についても開半球 $\{\langle x,v\rangle>0\}$ に含まれない。
+:::
+
+::: proof
+$\int_{0}^{L}\langle e_{1},v\rangle|c'|\,dt=\int_{0}^{L}\langle c',v\rangle dt=\langle c(L)-c(0),v\rangle=0$（基本定理）。$|c'|>0$ なので、$\langle e_{1},v\rangle>0$ が $[0,L]$ 全体で成り立つことはない（成り立てば積分は正）。
+:::
+
+## フェンチェルの定理 {#surf:sec-tc-fenchel}
+
+::: theorem フェンチェルの定理 {#surf:fenchel keywords="Fenchel's theorem: the total curvature of a closed curve in R^n is at least 2 pi" index="フェンチェルの定理|ふぇんちぇるのていり" refname="フェンチェルの定理"}
+$\mathbb{R}^{n}$ の閉曲線 $c$ の全曲率は $2\pi$ 以上である：$\kappa_{\mathrm{tot}}(c)\ge2\pi$。
+:::
+
+::: intuition
+空間の中のどんな閉じた曲線でも、一周する間に進む向きは合計で少なくとも一回転分（$2\pi$）は変わる。曲がり方を少なくして閉じることはできない。
+:::
+
+::: proof
+**Step 1.** 【主張：$\kappa_{\mathrm{tot}}(c)$ は接線標形の長さ】$e_{1}$ は $C^{\infty}$ 級で、長さは $\int_{0}^{L}|e_{1}'|$（\ref{vec:c1-curve-length}）。これは定義から全曲率。
+
+**Step 2.** 【主張：$\kappa_{\mathrm{tot}}(c)\ge2\pi$】$e_{1}$ は $S^{n-1}$ 上の閉曲線（$e_{1}(L)=e_{1}(0)$）で、どの開半球にも含まれない（\ref{surf:indicatrix-hemisphere}）。ホーンの補題（\ref{surf:horn-lemma}）から長さは $2\pi$ 以上。
+
+::: hypcheck
+- **前提「閉曲線」**：\ref{surf:indicatrix-hemisphere} で $c(L)=c(0)$ を使った。閉じていない曲線では全曲率はいくらでも小さくできる（ほとんど直線の弧）。
+- **滑らかさ**：$c$ が $C^{2}$ 級で正則なら同じ証明が通る。
+:::
+:::
+
+::: proposition 平面曲線の等号成立 {#surf:plane-fenchel-equality keywords="for a closed plane curve, total curvature equals 2 pi iff the signed curvature does not change sign and the rotation number is +-1, iff it is convex with rotation number +-1; for simple closed curves iff convex" index="フェンチェルの定理の等号|ふぇんちぇるのていりのとうごう"}
+平面の閉曲線 $c$ について、次は同値。
+1. $\kappa_{\mathrm{tot}}(c)=2\pi$。
+2. 符号付き曲率の符号が一定（$\ge0$ または $\le0$）で、$n_{c}=\pm1$。
+3. $c$ は凸で、$n_{c}=\pm1$。
+
+とくに単純閉曲線では、$\kappa_{\mathrm{tot}}(c)=2\pi$ と凸であることは同値。
+:::
+
+::: proof
+**Step 1（2 ⇒ 1）.** 【主張：符号が一定なら $\kappa_{\mathrm{tot}}=2\pi|n_{c}|$】符号付き曲率 $\kappa_{\pm}$ の符号が一定なら $\int|\kappa_{\pm}||c'|=|\int\kappa_{\pm}|c'||=2\pi|n_{c}|$（\ref{surf:rotation-number-properties.1}）。
+
+**Step 2（1 ⇒ 2：回転数）.** 【主張：$\kappa_{\mathrm{tot}}=2\pi$ なら $n_{c}\neq0$】$n_{c}=0$ と仮定する。接ベクトルの角 $\theta$（$e_{1}=\mathbf{u}(\theta)$, $\theta'=\kappa_{\pm}|c'|$, \ref{surf:tangent-angle}）は $[0,L]$ で最小値 $\theta_{-}$ と最大値 $\theta_{+}$ をとり、$\theta(L)=\theta(0)$ なので、最小点と最大点の間を往復する。全変動 $\int|\theta'|=\kappa_{\mathrm{tot}}=2\pi$ は $2(\theta_{+}-\theta_{-})$ 以上なので $\theta_{+}-\theta_{-}\le\pi$。$v\defeq\mathbf{u}(\frac{\theta_{+}+\theta_{-}}2)$ とすると $\langle e_{1},v\rangle=\cos(\theta-\frac{\theta_{+}+\theta_{-}}2)\ge0$。\ref{surf:indicatrix-hemisphere} の証明から $\int\langle e_{1},v\rangle|c'|=0$ なので、$\langle e_{1},v\rangle\equiv0$、すなわち $\theta-\frac{\theta_{+}+\theta_{-}}2\in\frac\pi2+\pi\mathbb{Z}$ が連続に成り立ち、$\theta$ は定数。$e_{1}$ が一定の閉曲線はない（$\int c'=0$ に反する）。
+
+**Step 3（1 ⇒ 2：符号）.** 【主張：$\kappa_{\mathrm{tot}}=2\pi$ なら $n_{c}=\pm1$ で符号は一定】$2\pi|n_{c}|\le\kappa_{\mathrm{tot}}=2\pi$ と Step 2 から $|n_{c}|=1$。すると $|\int\kappa_{\pm}|c'||=\int|\kappa_{\pm}||c'|$ なので、連続関数 $\kappa_{\pm}$ は符号を変えない（変えれば正の部分と負の部分が打ち消し合い、不等号が厳密になる）。
+
+**Step 4（2 ⇔ 3）.** 【主張：$n_{c}=\pm1$ のもとで、符号が一定であることと凸であることは同値】凸なら符号は一定（\ref{surf:convex-characterization.1}。単純性は使わない）。逆に、\ref{surf:convex-characterization.2} の証明で単純性を使ったのは $n_{c}=\pm1$ を得る（ホップの回転定理）ためだけなので、$n_{c}=\pm1$ と符号の一定性から凸が従う。単純閉曲線では $n_{c}=\pm1$（\ref{surf:umlaufsatz}）。
+
+::: hypcheck
+- **$n_{c}=\pm1$ の条件**：3 から外せない。円を 2 回まわる曲線は凸だが全曲率は $4\pi$。
+:::
+:::
+
+::: fact 空間曲線の等号成立とファーリ–ミルナーの定理 {#surf:fenchel-equality-fary-milnor keywords="equality in Fenchel's theorem holds exactly for plane convex curves; Fary-Milnor: a knotted closed curve in R^3 has total curvature greater than 4 pi" index="ファーリ–ミルナーの定理|ふぁーりみるなーのていり, 結び目|むすびめ"}
+1. $\mathbb{R}^{n}$ の閉曲線について $\kappa_{\mathrm{tot}}(c)=2\pi$ となるのは、$c$ が平面に含まれ、その平面で凸（で回転数 $\pm1$）のときに限る（フェンチェル、1929 年。Klingenberg 第 2 章 2.4.9）。
+2. **（ファーリ–ミルナーの定理）** $\mathbb{R}^{3}$ の単純閉曲線が結ばれている（$\mathbb{R}^{3}$ の同相写像で円に写せない）なら、全曲率は $4\pi$ 以上である（Klingenberg 第 2 章 2.4.9 で、Fáry と Milnor の論文として引用）。
+:::
+
+::: fact 単純閉曲線の四頂点定理 {#surf:four-vertex-simple keywords="four vertex theorem for simple closed plane curves without convexity; converse by Gluck" index="四頂点定理（一般の単純閉曲線）|よんちょうてんていり"}
+凸でない平面の単純閉曲線も、少なくとも 4 つの頂点をもつ（Klingenberg 第 2 章 2.3.4 の注。凸の場合は \ref{surf:four-vertex} で証明した）。逆に、正で連続な周期関数が定数であるか、二つの極大と二つの極小（極大値が極小値より大きい）をもてば、それを曲率にもつ単純閉曲線がある（グルック、Klingenberg 第 2 章 2.4.6）。
+:::
+
+::: supplement
+**平面曲線との関係.** 平面の単純閉曲線では、ホップの回転定理から $\kappa_{\mathrm{tot}}\ge\bigl|\int\kappa_{\pm}\bigr|=2\pi$ がすぐ従う。フェンチェルの定理は、回転数の定義されない空間曲線についても同じ下界が成り立つことを、接線標形と球面の幾何で示す。
+
+**高い視点.** 全曲率は接線標形（単位接ベクトルの写像 $S^{1}\to S^{n-1}$）の長さであり、フェンチェルの定理は「閉曲線の接線標形は大円一周より短くなれない」という球面の幾何の命題に帰着される。ミルナーの証明では、方向 $v$ ごとの高さ関数 $\langle c,v\rangle$ の極大点の個数の平均が全曲率に比例すること（積分幾何）を使い、結び目では極大点が少なくとも 2 つ必要なことから $4\pi$ を得る。
+:::
+
+## 問題 {#surf:sec-tc-problems}
+
+::: problem {#surf:prob-tc-ellipse}
+★ 基本：楕円 $c(t)=(a\cos t,b\sin t)$ の全曲率が $2\pi$ であることを、\ref{surf:plane-fenchel-equality} を使って示せ。
+:::
+
+::: solution
+符号付き曲率は $ab(a^{2}\sin^{2}t+b^{2}\cos^{2}t)^{-3/2}>0$（\ref{surf:prob-cf-ellipse}）で、回転数は $1$（\ref{surf:prob-pg-ellipse-rotation}）。2 が成り立つので全曲率は $2\pi$。
+:::
+
+::: problem {#surf:prob-tc-sphere-curve}
+★★ 標準：半径 $r$ の球面に含まれる長さ $\ell$ の閉曲線（弧長で径数づけ、$\kappa>0$）の全曲率は $\ell/r$ 以上であることを示せ（\ref{surf:prob-cf-sphere}）。大円以外の閉曲線では、全曲率と $2\pi$ のどちらが大きいとは限らないか。
+:::
+
+::: solution
+\ref{surf:prob-cf-sphere} から $\kappa\ge1/r$ なので $\int\kappa\,ds\ge\ell/r$。大円は $\ell=2\pi r$, $\kappa=1/r$ で全曲率 $2\pi$。小円（半径 $\rho<r$）は全曲率 $2\pi$ で $\ell/r=2\pi\rho/r<2\pi$。フェンチェルの定理から全曲率はいつも $2\pi$ 以上で、$\ell/r$ の下界は $\ell>2\pi r$ のときにだけフェンチェルより強い。
+:::
+
+::: problem {#surf:prob-tc-hemisphere-necessary}
+★★ 標準：ホーンの補題で「開半球に含まれない」という条件を外すと結論が偽になる例を挙げよ。また、閉半球に含まれ、開半球には含まれない、長さちょうど $2\pi$ の閉曲線の例を挙げよ。
+:::
+
+::: solution
+北緯 $\alpha$（$0<\alpha<\frac\pi2$）の緯線は北半球（開半球）に含まれ、長さ $2\pi\cos\alpha<2\pi$。赤道は閉じた北半球に含まれるが開いた半球（どの $m$ についても）には含まれず（$\langle x,m\rangle$ の赤道上の積分は $0$ なので常に正にはなれない）、長さは $2\pi$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

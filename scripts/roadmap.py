@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Roadmap refinement assist with DeepSeek (English output; Claude reflects it in Japanese).
 
-For one field folder (e.g. 05-geometry-topology/04-differential-geometry) DeepSeek receives
+For one field folder (e.g. 05-geometry-topology/05-differential-geometry) DeepSeek receives
   * every series in it (_meta.json: id, title, description, prereq with notes) and its pages in order,
     with the main definitions and theorems of each page (from labels.json),
   * the prerequisite series outside the field (title and description),
@@ -12,7 +12,7 @@ splits/merges, the planned pages and learning paths. Nothing is changed automati
 suggestions, checks them, and proposes the changes to the user (roadmap changes need the user's approval).
 
 Usage:
-  python3 scripts/roadmap.py 05-geometry-topology/04-differential-geometry
+  python3 scripts/roadmap.py 05-geometry-topology/05-differential-geometry
   python3 scripts/roadmap.py all                           # whole site: gaps and order between fields
   python3 scripts/roadmap.py --git-range BEFORE..AFTER     # fields whose _meta.json changed (workflow)
   add --dry-run to see the prompt size, --mock-response FILE to test without the API
@@ -261,7 +261,7 @@ def fields_from_range(rng):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     g = ap.add_mutually_exclusive_group(required=True)
-    g.add_argument("field", nargs="?", help="field folder, e.g. 05-geometry-topology/04-differential-geometry")
+    g.add_argument("field", nargs="?", help="field folder, e.g. 05-geometry-topology/05-differential-geometry")
     g.add_argument("--git-range", help="BEFORE..AFTER: fields whose _meta.json changed")
     ap.add_argument("--max-fields", type=int, default=3)
     ap.add_argument("--model", default=deepseek_api.DEFAULT_MODEL)

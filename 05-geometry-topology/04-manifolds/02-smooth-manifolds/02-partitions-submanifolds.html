@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 の分割と部分多様体 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-manifolds/02-smooth-manifolds/02-partitions-submanifolds.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 1 の分割と部分多様体 {#mfd:page-partitions-submanifolds keywords="bump function, partition of unity, smooth Urysohn lemma, extension of germs, immersion, submersion, embedding, inverse function theorem on manifolds, local normal forms, embedded submanifold, slice chart, regular value theorem, level set, sphere, orthogonal group, figure eight"}
+
+可微分多様体の上で大域的な対象（関数・計量・積分）を作るときは、座標近傍の上で作ったものを貼り合わせる。そのための道具が**滑らかな 1 の分割**で、ここでハウスドルフ性と第二可算性が初めて効いてくる。後半では、多変数の微分積分の逆関数定理と階数定理を多様体に移し、**はめ込み**・**沈め込み**の局所的な標準形を得る。その帰結として、**正則値定理**（滑らかな写像の正則値の逆像は部分多様体）を示す。球面や直交群が多様体であることも、これで一度に分かる。
+
+## 記法と定義の確認 {#mfd:sec-ps-notation}
+
+::: notation
+- 可微分多様体・座標近傍・滑らかな写像・接空間・写像の微分は \ref{mfd:page-smooth-manifolds} のとおり。$\dim M=d$ のとき $M^{d}$ とも書く。
+- 位相の言葉：局所有限な族と閉包（\ref{top:locally-finite-closure}）、コンパクト集合による近似列（\ref{top:compact-exhaustion}）、連続関数の 1 の分割（\ref{top:partition-of-unity}）。関数 $f$ の**台**は $\operatorname{supp}f\defeq\overline{\{x:f(x)\neq0\}}$。
+- 多変数の微分積分：\ref{calc:inverse-function-theorem}、\ref{calc:constant-rank-theorem}、$C^{\infty}$ 級の隆起関数（\ref{calc:non-analytic-smooth.2}）。
+- 公理：1 の分割の存在では、位相の側のコンパクト集合による近似列で従属選択公理（DC）を使う。
+- 本ページは Warner『Foundations of Differentiable Manifolds and Lie Groups』第 1 章 1.7〜1.11, 1.27〜1.40 を参考にした。はめ込み・沈め込みの標準形は、本サイトの多変数の階数定理から座標近傍を取り替えて導く形にした。
+:::
+
+## 滑らかな 1 の分割 {#mfd:sec-ps-partitions}
+
+::: lemma 隆起関数 {#mfd:bump-function keywords="smooth bump function on R^d equal to 1 on the closed unit ball and 0 outside the ball of radius 2" index="隆起関数|りゅうきかんすう, バンプ関数|ばんぷかんすう"}
+$C^{\infty}$ 級関数 $\beta\colon\mathbb{R}^{d}\to[0,1]$ で、$|x|\le1$ で $\beta(x)=1$、$|x|\ge2$ で $\beta(x)=0$ となるものがある。
+:::
+
+::: proof
+\ref{calc:non-analytic-smooth.2} の関数 $s$（$C^{\infty}$ 級で、$t\le0$ で $0$、$t\ge1$ で $1$、値は $[0,1]$）を使い、$\beta(x)\defeq s\bigl((4-|x|^{2})/3\bigr)$ とおく。$|x|^{2}$ は多項式なので $\beta$ は $C^{\infty}$ 級（\ref{calc:ck-composition.1}）。$|x|\le1$ なら $(4-|x|^{2})/3\ge1$ で $\beta(x)=1$、$|x|\ge2$ なら $(4-|x|^{2})/3\le0$ で $\beta(x)=0$。
+:::
+
+::: lemma 多様体の位相的性質 {#mfd:manifold-topology keywords="manifolds are locally compact, sigma-compact and admit compact exhaustions; regular charts" index="多様体の局所コンパクト性|たようたいのきょくしょこんぱくとせい"}
+$M$ を可微分多様体とする。
+1. 各点 $m$ と $m$ の開近傍 $O$ について、$m$ を中心とする座標近傍 $(V,\tau)$ で、$\tau(V)\supset\overline{B(0,3)}$、かつ $K\defeq\tau^{-1}(\overline{B(0,2)})$ がコンパクトで $V\subset O$ となるものがある。$K$ は $M$ の閉集合である。
+2. $M$ はσコンパクトで、コンパクト集合の列 $(K_{n})_{n\ge1}$ で $K_{n}\subset\operatorname{int}K_{n+1}$, $M=\bigcup_{n}K_{n}$ となるものがある（DC を使う）。
+:::
+
+::: proof
+**1.** \ref{mfd:maximal-atlas.2}・\ref{mfd:maximal-atlas.3} から、$m$ を中心とし、像が $B(0,\varepsilon)$ で、定義域が $O$ に含まれる座標近傍 $(V,\varphi)$ をとる。$\tau\defeq(4/\varepsilon)\varphi$ とすると（\ref{mfd:maximal-atlas.3}）$\tau(V)=B(0,4)\supset\overline{B(0,3)}$。$\tau^{-1}$ は連続で $\overline{B(0,2)}$ はコンパクトなので $K$ はコンパクト。$M$ はハウスドルフなので、コンパクト集合 $K$ は閉集合である。
+
+**2.** 【主張：可算個のコンパクト集合で $M$ が覆える】$\mathcal{B}$ を可算な開基とし、$\mathcal{B}'\defeq\{B\in\mathcal{B}:\overline{B}$ がコンパクト$\}$ とする。$x\in M$ について 1 の $K$ は $x$ の近傍で、$x\in B\subset\operatorname{int}K$ となる $B\in\mathcal{B}$ をとると、$\overline{B}$ はコンパクト集合 $K$ の閉部分集合なのでコンパクト。よって $M=\bigcup_{B\in\mathcal{B}'}\overline{B}$。$M$ は 1 から局所コンパクトなハウスドルフ空間なので、\ref{top:compact-exhaustion} から $(K_{n})$ がとれる。
+:::
+
+::: theorem 滑らかな 1 の分割の存在 {#mfd:smooth-partition-of-unity keywords="existence of smooth partitions of unity subordinate to any open cover of a manifold; countable with compact supports" index="滑らかな 1 の分割|なめらかないちのぶんかつ, 1 の分割（滑らかな）|いちのぶんかつなめらかな" refname="滑らかな 1 の分割の存在"}
+可微分多様体 $M$ の開被覆 $(U_{\alpha})_{\alpha\in A}$ について、次が成り立つ。
+1. 滑らかな関数の列 $(\varphi_{j}\colon M\to[0,1])_{j\ge1}$ で、各 $\operatorname{supp}\varphi_{j}$ はコンパクトでどれかの $U_{\alpha}$ に含まれ、台の族は局所有限、$\sum_{j}\varphi_{j}=1$ となるものがある。
+2. 同じ添字の滑らかな関数の族 $(\phi_{\alpha}\colon M\to[0,1])_{\alpha\in A}$ で、$\operatorname{supp}\phi_{\alpha}\subset U_{\alpha}$、台の族は局所有限、$\sum_{\alpha}\phi_{\alpha}=1$ となるものがある（**$(U_{\alpha})$ に従属する滑らかな 1 の分割**）。
+:::
+
+::: intuition
+多様体をどんな開集合で覆っても、各開集合の中だけで正の値をとる滑らかな関数たちで、足すとちょうど 1 になるものが作れる。これを重みとして使えば、開集合ごとに作ったものを全体に貼り合わせられる。
+:::
+
+::: proof
+\ref{mfd:manifold-topology.2} の $(K_{n})$ をとり、$K_{0}\defeq K_{-1}\defeq\varnothing$ とする。$\beta$ は \ref{mfd:bump-function} の関数。
+
+**Step 1（一つの点の隆起関数）.** 【主張：$n\ge1$ と $p\in K_{n}\setminus\operatorname{int}K_{n-1}$ について、滑らかな $\psi_{p}\colon M\to[0,1]$ と $p$ の開近傍 $W_{p}$ で、$W_{p}$ 上 $\psi_{p}=1$、$\operatorname{supp}\psi_{p}$ はコンパクトで、ある $U_{\alpha}$ と $\operatorname{int}K_{n+1}\setminus K_{n-2}$ の両方に含まれるものがある】$p\in U_{\alpha}$ となる $\alpha$ をとる。$O\defeq U_{\alpha}\cap(\operatorname{int}K_{n+1}\setminus K_{n-2})$ は $p$ を含む開集合（$p\in K_{n}\subset\operatorname{int}K_{n+1}$、$p\notin\operatorname{int}K_{n-1}\supset K_{n-2}$）。\ref{mfd:manifold-topology.1} の $(V,\tau)$ と $K=\tau^{-1}(\overline{B(0,2)})$ をとり、$\psi_{p}\defeq\beta\circ\tau$（$V$ 上）、$\psi_{p}\defeq0$（$M\setminus V$ 上）とする。$\psi_{p}$ は開集合 $V$ 上で滑らかで、開集合 $M\setminus K$ 上で $0$（$\beta$ は $|x|\ge2$ で $0$）、$V\cup(M\setminus K)=M$ なので滑らか。$\{\psi_{p}\neq0\}\subset K$ で $K$ は閉なので $\operatorname{supp}\psi_{p}\subset K\subset V\subset O$。$W_{p}\defeq\tau^{-1}(B(0,1))$ の上で $\psi_{p}=1$。
+
+**Step 2（有限個ずつ選ぶ）.** 【主張：滑らかな関数の列 $(\psi_{j})$ で、台の族は局所有限、各点で $\sum_{j}\psi_{j}>0$ となるものがある】各 $n\ge1$ について、コンパクト集合 $K_{n}\setminus\operatorname{int}K_{n-1}$ は開集合 $W_{p}$（$p\in K_{n}\setminus\operatorname{int}K_{n-1}$）で覆われるので、有限個の $p$ で覆われる。それらの $\psi_{p}$ を $n=1,2,\dots$ の順に並べて列 $(\psi_{j})$ とする。局所有限性：$x\in M$ は、ある $N$ で $x\in\operatorname{int}K_{N}$。第 $n$ 段の関数の台は $M\setminus K_{n-2}$ に含まれるので、$n\ge N+2$ なら $K_{N}\supset\operatorname{int}K_{N}$ と交わらない。よって開近傍 $\operatorname{int}K_{N}$ と交わる台は、第 $N+1$ 段までの有限個だけ。正値性：$x$ について $x\in K_{n}$ となる最小の $n$ をとると $x\notin K_{n-1}\supset\operatorname{int}K_{n-1}$ なので、$x$ はある $W_{p}$ に入り、$\psi_{p}(x)=1$。
+
+**Step 3（1 の分割 1）.** 【主張：$\psi\defeq\sum_{j}\psi_{j}$ は滑らかで正、$\varphi_{j}\defeq\psi_{j}/\psi$ が 1 を満たす】各点の開近傍 $\operatorname{int}K_{N}$ の上で $\psi$ は有限個の滑らかな関数の和なので滑らか。Step 2 から $\psi>0$ なので $\varphi_{j}$ は滑らかで値は $[0,1]$、$\operatorname{supp}\varphi_{j}=\operatorname{supp}\psi_{j}$ はコンパクトでどれかの $U_{\alpha}$ に含まれ、台の族は局所有限、$\sum_{j}\varphi_{j}=\psi/\psi=1$。
+
+**Step 4（添字をそろえる）.** 【主張：$\operatorname{supp}\varphi_{j}\subset U_{\alpha(j)}$ となる $\alpha(j)$ を一つずつ選び、$\phi_{\alpha}\defeq\sum_{j:\alpha(j)=\alpha}\varphi_{j}$ とおくと 2 を満たす】各点の近傍と交わる $\operatorname{supp}\varphi_{j}$ は有限個なので、$\phi_{\alpha}$ はその近傍で有限和となり滑らか、その近傍と交わる $\operatorname{supp}\phi_{\alpha}$ も有限個（交わるのは、その有限個の $j$ の $\alpha(j)$ だけ）。$\operatorname{supp}\phi_{\alpha}\subset\overline{\bigcup_{\alpha(j)=\alpha}\operatorname{supp}\varphi_{j}}=\bigcup_{\alpha(j)=\alpha}\operatorname{supp}\varphi_{j}\subset U_{\alpha}$（局所有限な族の閉包、\ref{top:locally-finite-closure}）。和は $\sum_{\alpha}\phi_{\alpha}=\sum_{j}\varphi_{j}=1$。
+
+::: hypcheck
+- **第二可算性**：\ref{mfd:manifold-topology.2} でσコンパクト性を導くのに使い、Step 2 で各段を有限個（全体で可算個）にまとめるのに使った。外すと一般には偽：任意の開被覆に従属する 1 の分割をもつハウスドルフ空間はパラコンパクトであり、第二可算でないハウスドルフな $1$ 次元多様体である「長い直線」はパラコンパクトでないことが知られている（範囲外）。
+- **ハウスドルフ性**：\ref{mfd:manifold-topology.1} で、コンパクト集合 $K$ が閉であることに使い、Step 1 で $\psi_{p}$ が $V$ の外で滑らかに $0$ へつながることに使った。原点が二つある直線（\ref{mfd:smooth-manifold} の例）では、一方の原点の近くで $1$、他方の原点の開近傍の外で $0$ の連続関数は作れない（二つの原点のどの近傍も交わるので、連続関数は二つの原点で同じ値をとる）。
+- **$C^{\infty}$ 級であること**：Step 1 で $\beta\circ\tau$ が滑らかなことに使った。位相多様体なら同じ構成で連続な 1 の分割が得られる（\see{top:partition-of-unity-existence}）。
+- **公理**：選択公理を使う（\ref{top:compact-exhaustion} で DC、Step 1 で各点 $p$ に $\alpha$ と座標近傍を選ぶ。Step 4 の $\alpha(j)$ の選択は可算回）。
+:::
+:::
+
+::: corollary 滑らかなウリゾーンの補題と大域化 {#mfd:smooth-urysohn keywords="smooth Urysohn lemma: smooth function equal to 1 on a closed set with support in an open neighborhood; every germ is the germ of a global smooth function" index="滑らかなウリゾーンの補題|なめらかなうりぞーんのほだい, 芽の大域化|めのたいいきか"}
+1. $A\subset G\subset M$ で $A$ が閉集合、$G$ が開集合なら、滑らかな $f\colon M\to[0,1]$ で、$A$ 上 $f=1$、$\operatorname{supp}f\subset G$ となるものがある。
+2. $m\in M$ と、$m$ の開近傍 $U$ 上の滑らかな関数 $g$ について、滑らかな $\tilde{g}\colon M\to\mathbb{R}$ で、$m$ のある開近傍の上で $\tilde{g}=g$ となるものがある。とくに $C^{\infty}_{m}$ のどの芽も $M$ 全体で定義された滑らかな関数の芽である。
+:::
+
+::: proof
+**1.** 開被覆 $\{G,M\setminus A\}$ に従属する滑らかな 1 の分割 $(\phi_{G},\phi_{M\setminus A})$ をとる（\ref{mfd:smooth-partition-of-unity.2}）。$f\defeq\phi_{G}$ とすると $\operatorname{supp}f\subset G$。$x\in A$ なら $x\notin\operatorname{supp}\phi_{M\setminus A}$（台は $M\setminus A$ に含まれる）なので $\phi_{M\setminus A}(x)=0$、よって $f(x)=1$。
+
+**2.** \ref{mfd:manifold-topology.1} で $O=U$ として $(V,\tau)$ と $K$ をとり、$W\defeq\tau^{-1}(B(0,1))$ とする。$\overline{W}\subset K\subset U$（$K$ は閉）なので、1 を $A=\overline{W}$, $G=U$ に使って $f$ をとる。$\tilde{g}\defeq fg$（$U$ 上）、$\tilde{g}\defeq0$（$M\setminus\operatorname{supp}f$ 上）は、二つの開集合の共通部分で一致し（そこでは $f=0$）、それぞれの上で滑らかなので、$M$ 上の滑らかな関数である。$W$ 上で $\tilde{g}=g$。
+:::
+
+## はめ込みと沈め込み {#mfd:sec-ps-immersions}
+
+::: definition はめ込み・沈め込み・埋め込み {#mfd:immersion keywords="immersion: injective differential; submersion: surjective differential; embedding: injective immersion that is a homeomorphism onto its image" index="はめ込み（多様体）|はめこみたようたい, 沈め込み（多様体）|しずめこみたようたい, 埋め込み（多様体）|うめこみたようたい, 局所微分同相|きょくしょびぶんどうそう"}
+$F\colon M\to N$ を滑らかな写像とする。
+1. すべての $m$ で $dF_{m}$ が単射のとき、$F$ を**はめ込み**という。
+2. すべての $m$ で $dF_{m}$ が全射のとき、$F$ を**沈め込み**という。
+3. 単射なはめ込みで、像 $F(M)$（$N$ の部分空間）への同相写像であるものを**埋め込み**という。
+4. 各点 $m$ に開近傍 $U$ があって、$F(U)$ が開集合で $F\restriction U\colon U\to F(U)$ が微分同相写像であるとき、$F$ を**局所微分同相写像**という。
+:::
+
+::: intuition
+はめ込みとは、どの方向にも潰さずに写す写像である。沈め込みとは、行き先のどの方向にも動けるように写す写像である。埋め込みとは、はめ込みのうち、像が元の形のまま（自分自身と交わったり近づいたりせずに）入っているものである。
+:::
+
+::: lemma 座標近傍と微分同相写像の合成 {#mfd:chart-diffeo-composition keywords="composing a chart with a diffeomorphism of open subsets of R^d gives a chart in the smooth structure" index="座標近傍の取り替え（微分同相）|ざひょうきんぼうのとりかえびぶんどうそう"}
+$(U,\varphi)$ を $M$ の座標近傍、$W\subset\mathbb{R}^{d}$ を開集合、$\beta\colon W\to\beta(W)$ を $\mathbb{R}^{d}$ の開集合の間の $C^{\infty}$ 微分同相写像（\ref{calc:diffeomorphism}）とする。$U'\defeq\varphi^{-1}(W)$ とおくと、$(U',\beta\circ\varphi)$ は $M$ の座標近傍である。
+:::
+
+::: proof
+$\beta\circ\varphi\restriction U'$ は $U'$ から開集合 $\beta(\varphi(U')) $ への同相写像。任意の座標近傍 $(V,\psi)$ との座標変換は $\beta\circ(\varphi\circ\psi^{-1})$ と $(\psi\circ\varphi^{-1})\circ\beta^{-1}$ で、$C^{\infty}$ 級の合成なので $C^{\infty}$ 級（\ref{calc:ck-composition.1}）。可微分構造の極大性から、$(U',\beta\circ\varphi)$ は可微分構造に属する。
+:::
+
+::: theorem 多様体の逆関数定理 {#mfd:inverse-function-theorem keywords="inverse function theorem on manifolds: if dF_m is an isomorphism then F is a diffeomorphism near m; local diffeomorphisms" index="逆関数定理（多様体）|ぎゃくかんすうていりたようたい" refname="多様体の逆関数定理"}
+$F\colon M\to N$ を滑らかな写像とし、$dF_{m}\colon T_{m}M\to T_{F(m)}N$ が線形同型であるとする。このとき $m$ の開近傍 $U$ で、$F(U)$ が開集合、$F\restriction U\colon U\to F(U)$ が微分同相写像となるものがある。とくに、すべての点で $dF_{m}$ が同型なら $F$ は局所微分同相写像である。
+:::
+
+::: intuition
+ある点で写像の微分が逆写像をもつなら、写像そのものもその点の近くで滑らかな逆写像をもつ。
+:::
+
+::: proof
+**Step 1（局所表示に移す）.** 【主張：$m$ を含む座標近傍 $(U_{0},\varphi)$ と $F(m)$ を含む座標近傍 $(V,\psi)$ で $F(U_{0})\subset V$ となるものをとると、$H\defeq\psi\circ F\circ\varphi^{-1}$ について $DH(\varphi(m))$ は可逆】$\dim M=\dim T_{m}M=\dim T_{F(m)}N=\dim N$（\ref{mfd:tangent-basis.1}）なので $H$ は $\mathbb{R}^{d}$ の開集合から $\mathbb{R}^{d}$ への $C^{\infty}$ 級写像で、$DH(\varphi(m))$ は座標ベクトルの基底に関する $dF_{m}$ の表現行列（\ref{mfd:differential-properties.3}）なので可逆。$F(U_{0})\subset V$ は、$U_{0}$ を $F^{-1}(V)$ との共通部分に縮めればよい（\ref{mfd:maximal-atlas.2}）。
+
+**Step 2.** 【主張：$m$ の開近傍 $U$ で、$F(U)$ が開、$F\restriction U$ が微分同相写像となるものがある】\ref{calc:inverse-function-theorem} から、$\varphi(m)$ を含む開集合 $O\subset\varphi(U_{0})$ と開集合 $O'$ があって $H\restriction O\colon O\to O'$ は $C^{\infty}$ 級の逆をもつ全単射。$U\defeq\varphi^{-1}(O)$ とおくと、$F\restriction U=\psi^{-1}\circ H\circ\varphi\restriction U$ なので、$F(U)=\psi^{-1}(O')$ は $N$ の開集合（$\psi^{-1}$ は開集合 $\psi(V)$ から $V$ への同相）で、$F\restriction U$ は全単射、逆写像 $\varphi^{-1}\circ(H\restriction O)^{-1}\circ\psi$ は滑らかな写像の合成なので滑らか（\ref{mfd:smooth-map-criteria.4}）。
+:::
+
+::: theorem はめ込みと沈め込みの標準形 {#mfd:normal-forms keywords="local normal forms: an immersion looks like x -> (x,0), a submersion looks like (x,y) -> x in suitable charts" index="はめ込みの標準形|はめこみのひょうじゅんけい, 沈め込みの標準形|しずめこみのひょうじゅんけい, 局所標準形|きょくしょひょうじゅんけい"}
+$F\colon M^{d}\to N^{c}$ を滑らかな写像、$m\in M$ とする。
+1. $dF_{m}$ が単射なら（$d\le c$）、$m$ を中心とする座標近傍 $(U,\varphi)$ と $F(m)$ を含む座標近傍 $(V,\psi)$ で、$F(U)\subset V$ かつ $U$ 上で
+$$
+\psi\circ F\circ\varphi^{-1}(x_{1},\dots,x_{d})=(x_{1},\dots,x_{d},0,\dots,0)
+$$
+となるものがある。
+2. $dF_{m}$ が全射なら（$d\ge c$）、$m$ を含む座標近傍 $(U,\varphi)$ と $F(m)$ を中心とする座標近傍 $(V,\psi)$ で、$F(U)\subset V$ かつ $U$ 上で
+$$
+\psi\circ F\circ\varphi^{-1}(x_{1},\dots,x_{d})=(x_{1},\dots,x_{c})
+$$
+となるものがある。とくに $F$ は $m$ のある開近傍の上で沈め込みである。
+:::
+
+::: intuition
+潰さない写像は、目盛りをうまく選べば「平らな空間を一回り大きな平らな空間に、余分な座標を 0 にして入れる」写像に見える。行き先のどの方向にも動ける写像は、目盛りをうまく選べば「余分な座標を忘れる」写像に見える。
+:::
+
+::: proof
+\ref{calc:constant-rank-theorem} を局所表示に使い、座標近傍を取り替える。$m$ を中心とする座標近傍 $(U_{0},\varphi_{0})$ と $F(m)$ を含む座標近傍 $(V_{0},\psi_{0})$ を $F(U_{0})\subset V_{0}$ となるようにとり（\ref{mfd:maximal-atlas}）、$H\defeq\psi_{0}\circ F\circ\varphi_{0}^{-1}$、$b\defeq\psi_{0}(F(m))$ とおく。$DH(0)$ は $dF_{m}$ の表現行列（\ref{mfd:differential-properties.3}）なので、1 の場合は単射、2 の場合は全射。
+
+**Step 1（はめ込み）.** 【主張：1 の座標近傍がとれる】\ref{calc:constant-rank-theorem} の最後の主張（$Df$ が単射なら $\alpha$ は平行移動にとれ、階数一定は自動）から、$0$ を含む開集合 $V'$ と、$b$ を含む開集合 $W$ 上の $C^{\infty}$ 微分同相写像 $\beta\colon W\to\beta(W)$ があって、$V'$ 上で $\beta\circ H(x)=(x,0)$（$\alpha(0)=0$ なので $\alpha$ は恒等写像）。$U\defeq\varphi_{0}^{-1}(V')\cap F^{-1}(\psi_{0}^{-1}(W))$、$\varphi\defeq\varphi_{0}\restriction U$、$V\defeq\psi_{0}^{-1}(W)$、$\psi\defeq\beta\circ\psi_{0}\restriction V$ とする。$(V,\psi)$ は \ref{mfd:chart-diffeo-composition} から座標近傍で、$U$ 上 $\psi\circ F\circ\varphi^{-1}=\beta\circ H=(x,0)$。
+
+**Step 2（沈め込み）.** 【主張：2 の座標近傍がとれる】\ref{calc:constant-rank-theorem} から（$Df$ が全射なら $\beta$ は平行移動にとれる）、$0$ を含む開集合 $V'$ と $C^{\infty}$ 微分同相写像 $\alpha\colon V'\to\alpha(V')$（$\alpha(0)=0$）があって、$V'$ 上で $H\circ\alpha(u)-b=(u_{1},\dots,u_{c})$。$\alpha(V')\subset\varphi_{0}(U_{0})$（$H$ の定義域）なので、$\varphi\defeq\alpha^{-1}\circ\varphi_{0}$ を $U\defeq\varphi_{0}^{-1}(\alpha(V'))$ 上で考えると、\ref{mfd:chart-diffeo-composition}（$\alpha^{-1}$ は $C^{\infty}$ 微分同相）から座標近傍。$\psi\defeq\psi_{0}-b$（\ref{mfd:maximal-atlas.3}）とすると、$\psi\circ F\circ\varphi^{-1}=H\circ\alpha-b$ は $(x_{1},\dots,x_{c})$。最後の主張：この局所表示の微分はどの点でも全射なので、$U$ の各点で $dF$ は全射（\ref{mfd:differential-properties.3}）。
+
+::: hypcheck
+- **$dF_{m}$ の単射性・全射性**：はじめの段落で $DH(0)$ の階数を決め、階数定理の「階数一定は $m$ での条件から自動的に従う」場合に当てはめるのに使った。階数が最大でない点では、近くで階数が変わりうるので標準形は一般に得られない（$x\mapsto x^{2}$ の $0$）。
+- **$C^{\infty}$ 級であること**：階数定理を $k=\infty$ で使い、取り替えた座標近傍が同じ可微分構造に属するのに使った。
+:::
+:::
+
+## 部分多様体と正則値定理 {#mfd:sec-ps-submanifolds}
+
+::: definition 部分多様体 {#mfd:submanifold keywords="embedded (regular) submanifold of dimension k, slice chart, codimension" index="部分多様体|ぶぶんたようたい, 埋め込まれた部分多様体|うめこまれたぶぶんたようたい, スライス座標近傍|すらいすざひょうきんぼう, 余次元|よじげん"}
+$M$ を $d$ 次元の可微分多様体、$0\le k\le d$ とする。部分集合 $S\subset M$ が **$k$ 次元の部分多様体**であるとは、$S$ の各点 $p$ について、$p$ を含む $M$ の座標近傍 $(U,\varphi)$ で
+$$
+\varphi(U\cap S)=\varphi(U)\cap(\mathbb{R}^{k}\times\{0\})
+$$
+となるもの（**スライス座標近傍**）があることをいう。$d-k$ を $S$ の**余次元**という。
+:::
+
+::: intuition
+部分多様体とは、各点のまわりで目盛りをうまく選ぶと、平らな空間の中の平らな切り口（いくつかの座標を 0 にした所）に見える部分集合である。
+:::
+
+::: proposition 部分多様体の可微分構造 {#mfd:submanifold-structure keywords="a submanifold with the subspace topology is a manifold whose inclusion is an embedding; tangent space as a subspace" index="部分多様体の可微分構造|ぶぶんたようたいのかびぶんこうぞう"}
+$S\subset M$ を $k$ 次元の部分多様体とし、$\pi\colon\mathbb{R}^{d}\to\mathbb{R}^{k}$ を最初の $k$ 個の座標への射影とする。
+1. 部分空間 $S$ は、スライス座標近傍 $(U,\varphi)$ から作った $(U\cap S,\ \pi\circ\varphi\restriction U\cap S)$ の全体をアトラスとして、$k$ 次元の可微分多様体になる。
+2. この構造で、包含写像 $\iota\colon S\to M$ は埋め込みである。$d\iota_{p}$ によって $T_{p}S$ を $T_{p}M$ の $k$ 次元部分空間とみなす。
+3. 滑らかな写像 $G\colon P\to M$ の像が $S$ に含まれるなら、$G\colon P\to S$ も滑らかである。
+:::
+
+::: proof
+**1.** $S$ は部分空間なので、\ref{mfd:manifold-examples} の証明の Step 1 からハウスドルフかつ第二可算。$\varphi_{S}\defeq\pi\circ\varphi\restriction U\cap S$ は、$U\cap S$（$S$ の開集合）から $\mathbb{R}^{k}$ の開集合 $\{y\in\mathbb{R}^{k}:(y,0)\in\varphi(U)\}$ への同相写像で、逆写像は $y\mapsto\varphi^{-1}(y,0)$。二つのスライス座標近傍 $(U,\varphi)$, $(U',\varphi')$ の座標変換は $\varphi'_{S}\circ\varphi_{S}^{-1}(y)=\pi\circ\varphi'\circ\varphi^{-1}(y,0)$ で、$C^{\infty}$ 級写像の合成なので $C^{\infty}$ 級。
+
+**2.** スライス座標近傍で $\iota$ の局所表示は $y\mapsto(y,0)$ で、\term[微分]{mfd:differential}は単射。$\iota$ は単射で、$S$ には部分空間の位相を入れているので、像への同相写像である。
+
+**3.** $G$ は $S$ への写像として連続（部分空間の位相）。スライス座標近傍で、$\varphi_{S}\circ G=\pi\circ(\varphi\circ G)$ は $C^{\infty}$ 級の合成。
+:::
+
+::: theorem 埋め込みの像は部分多様体 {#mfd:embedding-image-submanifold keywords="the image of an embedding is a submanifold and the embedding is a diffeomorphism onto it" index="埋め込みの像|うめこみのぞう"}
+$F\colon P^{k}\to M^{d}$ が埋め込みなら、$F(P)$ は $M$ の $k$ 次元の部分多様体で、$F\colon P\to F(P)$ は微分同相写像である。
+:::
+
+::: proof
+**Step 1（スライス）.** 【主張：$q\in P$ について、$F(q)$ のまわりのスライス座標近傍がある】\ref{mfd:normal-forms.1} から、$q$ を中心とする $(V,\phi)$ と、$F(q)$ を含む $(U_{0},\psi)$ で、$F(V)\subset U_{0}$、$V$ 上 $\psi\circ F\circ\phi^{-1}(x)=(x,0)$ となるものをとる。$F$ は像への同相写像なので、$F(V)$ は $F(P)$ の開集合で、$F(V)=F(P)\cap O$ となる $M$ の開集合 $O$ がある。
+$$
+U\defeq U_{0}\cap O\cap\psi^{-1}(\phi(V)\times\mathbb{R}^{d-k})
+$$
+とおく（開集合）。$F(P)\cap U\subset F(P)\cap O=F(V)$ なので $F(P)\cap U=F(V)\cap U$。$\psi(F(V))=\phi(V)\times\{0\}$ と $\psi$ の $U_{0}$ 上の単射性から
+$$
+\psi(U\cap F(P))=\psi(U)\cap(\phi(V)\times\{0\})=\psi(U)\cap(\mathbb{R}^{k}\times\{0\}).
+$$
+最後の等号は $\psi(U)\subset\phi(V)\times\mathbb{R}^{d-k}$ から。よって $(U,\psi\restriction U)$ はスライス座標近傍。
+
+**Step 2（微分同相）.** 【主張：$F\colon P\to F(P)$ は微分同相写像】\ref{mfd:submanifold-structure.3} から $F\colon P\to F(P)$ は滑らかな全単射。Step 1 の座標近傍での局所表示は $\pi\circ\psi\circ F\circ\phi^{-1}(x)=x$ なので、逆写像の局所表示も恒等写像で滑らか。
+
+::: hypcheck
+- **像への同相写像であること**：Step 1 で $F(V)=F(P)\cap O$ となる $O$ をとるのに使った。単射なはめ込みでも像への同相でなければ偽（\ref{mfd:figure-eight}）。
+- **単射性**：Step 2 で全単射であることに使った。
+:::
+:::
+
+::: counterexample 8 の字 {#mfd:figure-eight keywords="figure eight: an injective immersion that is not an embedding" index="8 の字曲線|はちのじきょくせん"}
+$F\colon(-\pi,\pi)\to\mathbb{R}^{2}$, $F(t)=(\sin2t,\sin t)$ は単射なはめ込みだが、埋め込みではない。像（8 の字）は部分多様体でない。
+:::
+
+::: proof
+**はめ込み.** $F'(t)=(2\cos2t,\cos t)$ で、$\cos t=0$ なら $\cos2t=2\cos^{2}t-1=-1$ なので $F'(t)\neq0$。
+
+**単射.** $F(t)=F(t')$ とする。$\sin t=\sin t'$ から、$(-\pi,\pi)$ の中で $t'=t$ か $t'=\pm\pi-t$。後者なら $\sin2t'=\sin(\pm2\pi-2t)=-\sin2t$ なので $\sin2t=0$、$t\in\{0,\pm\pi/2\}$。$t=\pm\pi/2$ なら $t'=\pm\pi/2=t$、$t=0$ なら $t'=\pm\pi\notin(-\pi,\pi)$。よって $t=t'$。
+
+**埋め込みでない.** $t_{n}\defeq\pi-1/n\to\pi$ について $F(t_{n})\to(0,0)=F(0)$ だが、$t_{n}\not\to0$。$F$ が像への同相写像なら $F^{-1}$ は連続で $t_{n}=F^{-1}(F(t_{n}))\to F^{-1}(F(0))=0$ となるはずなので矛盾。像 $S$ が部分多様体だとすると、$1$ 次元である（$S$ のうち原点以外の点の近くでは $F$ の像は $1$ 次元のスライスなので）。\ref{mfd:submanifold-structure.3} から $F\colon(-\pi,\pi)\to S$ は滑らかな全単射で、$d\iota\circ dF$ が単射なので $dF$ も単射、次元が等しいので同型。\ref{mfd:inverse-function-theorem} から $F$ は局所微分同相で、全単射なので $F^{-1}$ も滑らか、とくに連続になり、上の議論に反する。
+:::
+
+::: definition 正則値 {#mfd:regular-value keywords="regular value and critical point of a smooth map" index="正則値（多様体）|せいそくちたようたい, 臨界点|りんかいてん, 正則点|せいそくてん"}
+滑らかな写像 $F\colon M\to N$ について、$dF_{m}$ が全射でない点 $m$ を**臨界点**、そうでない点を**正則点**という。$q\in N$ が**正則値**であるとは、$F^{-1}(q)$ のすべての点が正則点であることをいう（$F^{-1}(q)=\varnothing$ でもよい）。
+:::
+
+::: intuition
+正則値とは、その値をとるどの点でも、写像が行き先のすべての方向に動けるような値である。
+:::
+
+::: theorem 正則値定理 {#mfd:regular-value-theorem keywords="regular value theorem (preimage theorem): the preimage of a regular value is a submanifold of codimension dim N with tangent space ker dF" index="正則値定理|せいそくちていり, 逆像定理|ぎゃくぞうていり, 等位集合|とういしゅうごう" refname="正則値定理"}
+$F\colon M^{d}\to N^{c}$ を滑らかな写像、$q\in N$ を正則値とし、$S\defeq F^{-1}(q)\neq\varnothing$ とする。このとき $S$ は $M$ の $(d-c)$ 次元の部分多様体で、各 $p\in S$ について
+$$
+T_{p}S=\ker dF_{p}\subset T_{p}M.
+$$
+:::
+
+::: intuition
+滑らかな写像で、ある値をとる点の集まりは、その値が正則値なら、もとの次元から行き先の次元を引いた次元の滑らかな図形になる。その図形の接空間は、写像の微分で 0 に移る方向全体である。
+:::
+
+::: proof
+**Step 1（スライス）.** 【主張：$p\in S$ のまわりにスライス座標近傍がある】\ref{mfd:normal-forms.2} から、$p$ を含む $(U,\varphi)$ と $q$ を中心とする $(V,\psi)$ で、$U$ 上 $\psi\circ F\circ\varphi^{-1}(x)=(x_{1},\dots,x_{c})$ となるものをとる。$\psi$ は単射で $\psi(q)=0$ なので、$u\in U$ について、$F(u)=q$ と「$\varphi(u)$ の最初の $c$ 個の座標がすべて $0$」は同値。座標の順番を入れ替える線形同型 $T(x_{1},\dots,x_{d})\defeq(x_{c+1},\dots,x_{d},x_{1},\dots,x_{c})$ を合成した $\varphi'\defeq T\circ\varphi$（\ref{mfd:maximal-atlas.3}）について、$\varphi'(U\cap S)=\varphi'(U)\cap(\mathbb{R}^{d-c}\times\{0\})$。
+
+**Step 2（接空間）.** 【主張：$T_{p}S=\ker dF_{p}$】$F\circ\iota$ は $S$ 上の定数写像なので、連鎖律（\ref{mfd:differential-properties.1}）から $dF_{p}\circ d\iota_{p}=d(F\circ\iota)_{p}=0$（定数写像 $c$ について $dc(v)(g)=v(g\circ c)=0$、\ref{mfd:derivation-constant}）。よって $T_{p}S=d\iota_{p}(T_{p}S)\subset\ker dF_{p}$。$dF_{p}$ は全射なので $\dim\ker dF_{p}=d-c=\dim T_{p}S$（\ref{mfd:tangent-basis.1}）で、等号が成り立つ。
+
+::: hypcheck
+- **$q$ が正則値**：Step 1 で標準形を使うのに、$S$ のすべての点で使った。外すと偽：$f(x,y)=x^{2}-y^{2}$ の $0$ は正則値でなく、$f^{-1}(0)$ は原点で交わる二直線で部分多様体でない（原点の近傍から原点を除くと 4 つの連結成分）。
+- **$S\neq\varnothing$**：次元の主張のためだけ。空集合は任意の次元の部分多様体とみなせる。
+- 正則値でなくても逆像が部分多様体になることはある：$f(x,y)=y^{2}$ の $0$ は正則値でないが、$f^{-1}(0)$ は $x$ 軸。
+:::
+:::
+
+::: example
+1. **球面.** $f\colon\mathbb{R}^{d+1}\to\mathbb{R}$, $f(x)=|x|^{2}$ について $df_{x}(v)=2\langle x,v\rangle$（\ref{mfd:differential-properties.4}）で、$x\neq0$ なら全射。よって $1$ は正則値で、$S^{d}=f^{-1}(1)$ は $d$ 次元の部分多様体、$T_{x}S^{d}=x^{\perp}$。この可微分構造は立体射影による構造（\ref{mfd:manifold-examples.4}）と一致する：立体射影の逆写像 $p_{N}^{-1}\colon\mathbb{R}^{d}\to\mathbb{R}^{d+1}$ は滑らかで像が $S^{d}$ に入るので、\ref{mfd:submanifold-structure.3} から部分多様体の構造に関して滑らか、逆に $p_{N}$ は $\mathbb{R}^{d+1}$ の開集合上の滑らかな写像の制限なので滑らか。
+2. **直交群.** $\mathrm{Sym}_{n}$ を $n$ 次実対称行列の空間（$n(n+1)/2$ 次元のベクトル空間）とし、$g\colon M_{n}(\mathbb{R})\to\mathrm{Sym}_{n}$, $g(A)\defeq{}^{t}AA$ とする。$dg_{A}(X)={}^{t}XA+{}^{t}AX$ で、$A\in O(n)=g^{-1}(I)$ と $S\in\mathrm{Sym}_{n}$ について $X\defeq AS/2$ とおくと ${}^{t}XA+{}^{t}AX=S/2+S/2=S$。よって $I$ は正則値で、$O(n)$ は $M_{n}(\mathbb{R})$ の $n^{2}-n(n+1)/2=n(n-1)/2$ 次元の部分多様体。$T_{I}O(n)=\{X:{}^{t}X+X=0\}$（交代行列全体）。
+3. **曲面論との関係.** $\mathbb{R}^{3}$ の正則曲面（\ref{surf:regular-surface}）の局所パラメータ表示は、\term[微分]{mfd:differential}が単射で像の開集合への同相写像なので埋め込みであり、\ref{mfd:embedding-image-submanifold} から正則曲面は $\mathbb{R}^{3}$ の $2$ 次元の部分多様体である。\ref{surf:regular-value-surface} は正則値定理の $\mathbb{R}^{3}\to\mathbb{R}$ の場合である。
+:::
+
+::: supplement
+**一般化.** はめ込みの標準形は、階数が一定の写像に一般化される（\ref{calc:constant-rank-theorem} を多様体に移せばよい）。その帰結として、階数一定の写像の逆像は部分多様体である。また、ほとんどすべての値は正則値である（**サードの定理**。臨界値の全体は測度 0）ことが知られている。サードの定理から、正則値定理は「ほとんどすべての等位集合は部分多様体」と言い換えられる。
+
+**埋め込みの存在.** 任意の $d$ 次元の可微分多様体は $\mathbb{R}^{2d}$ に埋め込める（**ホイットニーの埋め込み定理**）ことが知られている。コンパクトな場合に十分大きな $N$ への埋め込みを作るのは、1 の分割と座標近傍を並べる簡単な議論でできる（問題）。
+
+**高い視点.** 1 の分割は、「局所的に作れるものを大域的に貼り合わせられる」という性質で、層の言葉では滑らかな関数の層が**細層**であることにあたる。そのため滑らかな関数の層のコホモロジーは消え、ド・ラームの定理などの議論が可能になる（\see{cat:page-flasque-cech}）。複素多様体の正則関数ではこれが成り立たず（正則関数の 1 の分割はない：一致の定理）、そこから複素幾何の豊かさが生まれる。
+:::
+
+## 問題 {#mfd:sec-ps-problems}
+
+::: problem {#mfd:prob-ps-compact-embedding}
+コンパクトな可微分多様体 $M^{d}$ は、ある $\mathbb{R}^{N}$ に埋め込めることを示せ。（ヒント：有限個の座標近傍 $(V_{i},\tau_{i})$ と、$\overline{B(0,1)}$ 上で $1$ の隆起関数 $\rho_{i}=\beta\circ\tau_{i}$ をとり、$F=(\rho_{1}\tau_{1},\dots,\rho_{n}\tau_{n},\rho_{1},\dots,\rho_{n})$ を考える。）
+:::
+
+::: solution
+各点 $p$ について \ref{mfd:manifold-topology.1} の $(V_{p},\tau_{p})$ をとり、開集合 $\tau_{p}^{-1}(B(0,1))$ で $M$ を覆う。コンパクト性から有限個 $p_{1},\dots,p_{n}$ で覆えるので、$\tau_{i}\defeq\tau_{p_{i}}$, $\rho_{i}\defeq\beta\circ\tau_{i}$（$V_{p_{i}}$ の外では $0$。\ref{mfd:smooth-partition-of-unity} の Step 1 と同じく滑らか）とする。$\rho_{i}\tau_{i}$ も $V_{p_{i}}$ の外で $0$ として滑らか。$F\colon M\to\mathbb{R}^{n(d+1)}$ を上のように定める。
+
+単射：$F(x)=F(y)$ とし、$x\in\tau_{i}^{-1}(B(0,1))$ となる $i$ をとると $\rho_{i}(y)=\rho_{i}(x)=1$ なので $y\in V_{p_{i}}$（$\rho_{i}$ は $V_{p_{i}}$ の外で $0$）。$\tau_{i}(x)=\rho_{i}(x)\tau_{i}(x)=\rho_{i}(y)\tau_{i}(y)=\tau_{i}(y)$ で、$\tau_{i}$ は単射なので $x=y$。
+
+はめ込み：$x\in\tau_{i}^{-1}(B(0,1))$ の近くでは $\rho_{i}=1$ なので $F$ の成分に $\tau_{i}$ が現れ、$d(\tau_{i})_{x}$ は同型なので $dF_{x}$ は単射（$v\in\ker dF_{x}$ なら $d(\tau_{i})_{x}v=0$）。
+
+像への同相：$M$ はコンパクト、$\mathbb{R}^{N}$ はハウスドルフなので、連続な単射 $F$ は像への同相写像（コンパクト空間からハウスドルフ空間への連続な全単射は同相）。
+:::
+
+::: problem {#mfd:prob-ps-sl}
+$SL_{n}(\mathbb{R})\defeq\{A:\det A=1\}$ は $M_{n}(\mathbb{R})$ の $(n^{2}-1)$ 次元の部分多様体であることを示せ。
+:::
+
+::: solution
+$\det\colon M_{n}(\mathbb{R})\to\mathbb{R}$ は多項式なので滑らか。$A\in SL_{n}(\mathbb{R})$ で曲線 $t\mapsto(1+t)A$ を考えると $\det((1+t)A)=(1+t)^{n}$ なので、$d\det_{A}(A)=\frac{d}{dt}(1+t)^{n}\big|_{t=0}=n\neq0$。$1$ 次元の行き先への $0$ でない線形写像は全射なので、$1$ は正則値。\ref{mfd:regular-value-theorem} から $SL_{n}(\mathbb{R})$ は $n^{2}-1$ 次元の部分多様体。
+:::
+
+::: problem {#mfd:prob-ps-submersion-open}
+沈め込みは開写像である（開集合を開集合に写す）ことを示せ。
+:::
+
+::: solution
+$F\colon M\to N$ を沈め込み、$O\subset M$ を開集合、$m\in O$ とする。\ref{mfd:normal-forms.2} の座標近傍 $(U,\varphi)$, $(V,\psi)$ をとり、$U$ を $U\cap O$ に縮める（\ref{mfd:maximal-atlas.2}）。射影 $(x_{1},\dots,x_{d})\mapsto(x_{1},\dots,x_{c})$ は開写像なので、$\psi(F(U))=\pi(\varphi(U))$ は開集合で、$F(U)=\psi^{-1}(\pi(\varphi(U)))$ は $F(m)$ の開近傍で $F(O)$ に含まれる。よって $F(O)$ は開集合。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

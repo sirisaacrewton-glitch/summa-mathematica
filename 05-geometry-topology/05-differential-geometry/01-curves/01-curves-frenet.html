@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>曲線とフレネの公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/05-differential-geometry/01-curves/01-curves-frenet.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 曲線とフレネの公式 {#surf:page-curves-frenet keywords="regular curve, reparametrization, arc length parametrization, Frenet frame, distinguished Frenet frame, Frenet curve, Frenet-Serret formulas, curvature, torsion, higher curvatures, fundamental theorem of the local theory of curves, rigid motion, signed curvature of plane curves, space curves, helix, osculating plane, normal plane, rectifying plane"}
+
+微分幾何学の最初の対象として、$\mathbb{R}^{n}$ の中の曲線を扱う。曲線の各点に、曲線の微分 $c',c'',\dots$ から決まる正規直交基底（**フレネ標構**）を立てると、その動きは歪対称で三重対角な行列で表され（**フレネ–セレの公式**）、行列の成分として**曲率**が定まる。主定理は**曲線論の基本定理**で、弧長で径数づけた曲線は、曲率の組によって向きを保つ合同変換を除いて一意に決まり、しかも曲率の組は（正値条件の下で）自由に与えられる。存在の証明には線形常微分方程式の解の存在と一意性を使うので、その部分もこのページで証明する。最後に平面曲線（符号付き曲率）と空間曲線（曲率と捩率）を詳しく見る。
+
+> 資料：Klingenberg『A Course in Differential Geometry』第 1 章と同じ標準的な内容。線形常微分方程式の補題、フレネ標構が存在しない例の検証、基本定理の存在部分（解が直交行列のままであること、得られた曲線の標準フレネ標構が解そのものであること）など、本で省略された部分は補って書き下ろした。
+
+## 記法と定義の確認 {#surf:sec-cf-notation}
+
+::: notation
+- $\mathbb{R}^{n}$ の標準内積を $\langle x,y\rangle=\sum_{i}x_{i}y_{i}$、ノルムを $|x|=\langle x,x\rangle^{1/2}$ と書く（\ref{lin:inner-product}）。コーシー–シュワルツの不等式 \tref{lin:cauchy-schwarz}、グラム–シュミットの直交化 \ref{lin:gram-schmidt}。
+- 行列式は列について多重線形・交代的で、転置で変わらず（\ref{lin:det-characterization.1}・\ref[4]{lin:det-characterization.4}）、乗法的で（\ref{lin:det-multiplicative}）、三角行列なら対角成分の積（\ref{lin:det-special-matrices.1}）。ベクトル $v_{1},\dots,v_{n}\in\mathbb{R}^{n}$ を列に並べた行列の行列式を $\det(v_{1},\dots,v_{n})$ と書く。$\det(v_{1},\dots,v_{n})>0$ のとき基底 $(v_{i})$ は**正の向き**であるという。
+- **直交行列**：${}^{t}RR=I$ をみたす $R\in M_{n}(\mathbb{R})$。$\langle Rx,Ry\rangle=\langle x,y\rangle$ で、$\det R=\pm1$（$1=\det({}^{t}RR)=(\det R)^{2}$）。正規直交基底を列に並べた行列は直交行列である。
+- **合同変換**：$B(x)=Rx+b$（$R$ は直交行列、$b\in\mathbb{R}^{n}$）。$\det R=1$ のとき**向きを保つ**という。
+- 区間 $I\subset\mathbb{R}$ は 2 点以上を含むものとする。端点を含む場合、端点での微分は片側微分とする。$C^{k}$ 級・$C^{\infty}$ 級は通常の意味で、ベクトル値・行列値の関数では成分ごとに考える。ベクトル値・行列値の関数の積分も成分ごとに定める。行列のノルムは成分の 2 乗和の平方根 $\|X\|$（$\mathbb{R}^{m\times p}$ をユークリッド空間とみたノルム）とする。コーシー–シュワルツから $\|XY\|\le\|X\|\,\|Y\|$。
+- 1 変数の微積分：微分の基本規則 \ref{calc:derivative-rules}、連鎖律と逆関数の微分 \ref{calc:chain-rule}、\ref{calc:mean-value-theorem}、テイラーの定理 \ref{calc:taylor-peano}、微分積分学の基本定理 \tref{calc:fundamental-theorem}、中間値の定理と最大値の定理 \ref{calc:interval-theorems}、一様収束の基本定理 \ref{calc:uniform-limit-theorems}、ベクトル値積分の不等式 \ref{vec:vector-integral-inequality}。
+- 曲線の長さ \ref{vec:curve-length}、$C^{1}$ 級曲線の長さ \ref{vec:c1-curve-length}、弧長パラメータ \ref{vec:reparametrization-length}。
+- 平方根 $x\mapsto\sqrt{x}$ は $(0,\infty)$ で $C^{\infty}$ 級である（$x^{2}$ に \ref{calc:chain-rule.2} を使うと $(\sqrt{x})'=1/(2\sqrt{x})$ で、帰納的に何回でも微分できる）。したがって $v\neq0$ の範囲で $v\mapsto|v|$ は $C^{\infty}$ 級であり、$C^{k}$ 級のベクトル値関数 $u$ が零にならなければ $|u|$ と $u/|u|$ も $C^{k}$ 級である。
+- **体系**：$\mathsf{ZF}$。選択公理は使わない。
+:::
+
+## 正則曲線と弧長 {#surf:sec-cf-regular}
+
+::: definition 正則曲線とパラメータ変換 {#surf:regular-curve keywords="regular curve: C^k map c: I -> R^n with nonvanishing velocity; change of parameter; orientation preserving reparametrization" index="正則曲線|せいそくきょくせん, パラメータ変換|ぱらめーたへんかん, 径数変換|けいすうへんかん, 向きを保つパラメータ変換|むきをたもつぱらめーたへんかん"}
+$k\ge1$ とする。$C^{k}$ 級の写像 $c\colon I\to\mathbb{R}^{n}$ で、すべての $t\in I$ で $c'(t)\neq0$ となるものを $C^{k}$ 級の**正則曲線**という。$c'(t)$ を**速度ベクトル**、$|c'(t)|$ を**速さ**という。区間 $J$ から $I$ への $C^{k}$ 級の全単射 $\varphi$ で $\varphi'$ が零にならないものを**パラメータ変換**といい、$c\circ\varphi$ を $c$ の**パラメータの取り替え**という。$\varphi'>0$ なら向きを保つ、$\varphi'<0$ なら向きを逆にするという。
+:::
+
+::: intuition
+正則曲線とは、止まらずに動き続ける点の軌跡のことである。同じ道を速さや出発時刻を変えてたどり直すのがパラメータの取り替えで、曲線の「形」はパラメータの取り替えで変わらない性質として捉える。
+:::
+
+::: lemma パラメータ変換の逆写像 {#surf:reparametrization-inverse keywords="the inverse of a C^k change of parameter is C^k; reparametrizations of regular curves are regular" index="パラメータ変換の逆写像|ぱらめーたへんかんのぎゃくしゃぞう"}
+1. $\varphi\colon J\to I$ がパラメータ変換なら $\varphi'$ の符号は一定で、$\varphi^{-1}\colon I\to J$ もパラメータ変換である。
+2. $c$ が $C^{k}$ 級の正則曲線なら、$c\circ\varphi$ も $C^{k}$ 級の正則曲線である。
+:::
+
+::: proof
+**1.** $\varphi'$ は連続で零にならないので、中間値の定理（\ref{calc:interval-theorems.1}）から符号は一定であり、平均値の定理から $\varphi$ は狭義単調である。逆関数の微分（\ref{calc:chain-rule.2}）から $\varphi^{-1}$ は微分可能で $(\varphi^{-1})'=1/(\varphi'\circ\varphi^{-1})$。$\varphi^{-1}$ が $C^{j}$ 級（$0\le j<k$）なら、右辺は $C^{j}$ 級の関数 $\varphi'\circ\varphi^{-1}$（$\varphi'$ は $C^{k-1}$ 級）の逆数なので $C^{j}$ 級で、$\varphi^{-1}$ は $C^{j+1}$ 級。$j=0$ から始めて帰納的に $\varphi^{-1}$ は $C^{k}$ 級。
+
+**2.** 連鎖律から $(c\circ\varphi)'(s)=c'(\varphi(s))\varphi'(s)\neq0$。
+:::
+
+::: definition 弧長パラメータ {#surf:arc-length-parameter keywords="curve parametrized by arc length: |c'| = 1; unit speed curve" index="弧長パラメータ|こちょうぱらめーた, 弧長で径数づけられた曲線|こちょうでけいすうづけられたきょくせん, 単位速度|たんいそくど"}
+正則曲線 $c$ が $|c'(s)|=1$（すべての $s$）をみたすとき、$c$ は**弧長で径数づけられている**（弧長パラメータをもつ）という。
+:::
+
+::: intuition
+弧長パラメータとは、いつも同じ速さ 1 で道をたどることで、パラメータの値の差がそのまま道のりになる。
+:::
+
+::: proposition 弧長パラメータへの取り替え {#surf:arc-length-reparametrization keywords="every regular C^k curve has an orientation preserving reparametrization by arc length, unique up to translation of the parameter" index="弧長パラメータへの取り替え|こちょうぱらめーたへのとりかえ"}
+$c\colon I\to\mathbb{R}^{n}$ を $C^{k}$ 級の正則曲線、$t_{0}\in I$ とする。
+1. $s(t)\defeq\int_{t_{0}}^{t}|c'(u)|\,du$ は $I$ から区間 $J\defeq s(I)$ への向きを保つパラメータ変換で、$\tilde c\defeq c\circ s^{-1}$ は弧長で径数づけられている。$t_{0}\le t$ なら $s(t)$ は $c\restriction[t_{0},t]$ の長さである。
+2. 向きを保つパラメータ変換 $\varphi,\psi$ で $c\circ\varphi$, $c\circ\psi$ がともに弧長で径数づけられていれば、定数 $a$ があって $\psi^{-1}\circ\varphi(\sigma)=\sigma+a$。
+:::
+
+::: proof
+**1.** $|c'|$ は $C^{k-1}$ 級（記法の最後の項目。$k-1\ge0$）で正。\ref{calc:fundamental-theorem.1} から $s'=|c'|>0$ で、$s$ は $C^{k}$ 級。$s(I)$ は中間値の定理から区間である。\ref{surf:reparametrization-inverse.1} から $s^{-1}$ は $C^{k}$ 級で、連鎖律から $|\tilde c'(\sigma)|=|c'(s^{-1}(\sigma))|\cdot(s^{-1})'(\sigma)=|c'(s^{-1}(\sigma))|/s'(s^{-1}(\sigma))=1$。長さについては \ref{vec:c1-curve-length}。
+
+**2.** $\chi\defeq\psi^{-1}\circ\varphi$ は向きを保つパラメータ変換で、$c\circ\varphi=(c\circ\psi)\circ\chi$。両辺を微分して長さをとると $1=1\cdot\chi'$。よって $(\chi(\sigma)-\sigma)'=0$ で、平均値の定理から $\chi(\sigma)-\sigma$ は定数。
+:::
+
+::: remark
+曲線の性質のうち、パラメータの取り替えで変わらないものを調べたいので、以下では多くの場合に弧長パラメータを使う。ただし、具体的な曲線では弧長パラメータを初等関数で書けないことが多いので（たとえば楕円）、公式は一般のパラメータでも書いておく。
+:::
+
+## フレネ標構 {#surf:sec-cf-frame}
+
+::: definition フレネ曲線とフレネ標構 {#surf:frenet-frame keywords="Frenet frame along a curve: orthonormal frame e_1,...,e_n with c^{(k)} in span(e_1,...,e_k); Frenet curve: c',...,c^{(n-1)} linearly independent; distinguished Frenet frame" index="フレネ標構|ふれねひょうこう, フレネ曲線|ふれねきょくせん, 標準フレネ標構|ひょうじゅんふれねひょうこう, 動標構|どうひょうこう"}
+$n\ge2$、$c\colon I\to\mathbb{R}^{n}$ を $C^{\infty}$ 級の曲線とする。
+1. 連続写像 $e_{1},\dots,e_{n}\colon I\to\mathbb{R}^{n}$ の組で、各 $t$ で $(e_{1}(t),\dots,e_{n}(t))$ が正規直交基底であり、各 $k=1,\dots,n$ で $c^{(k)}(t)\in\langle e_{1}(t),\dots,e_{k}(t)\rangle$ となるものを、$c$ に沿った**フレネ標構**という（$\langle\cdots\rangle$ は張る部分空間）。
+2. すべての $t$ で $c'(t),\dots,c^{(n-1)}(t)$ が一次独立であるとき、$c$ を**フレネ曲線**とよぶ（本サイトでの呼び名）。$n=2$ では正則曲線と同じ、$n=3$ では $c'$ と $c''$ が一次独立ということである。
+3. フレネ曲線 $c$ について、各 $t$ で次の (i)(ii) をみたす $(e_{1}(t),\dots,e_{n}(t))$ を**標準フレネ標構**という。
+   - (i) $k=1,\dots,n-1$ で、$e_{1}(t),\dots,e_{k}(t)$ は $c'(t),\dots,c^{(k)}(t)$ にグラム–シュミットの直交化（\ref{lin:gram-schmidt.1}）を施したもの。すなわち $\langle e_{1},\dots,e_{k}\rangle=\langle c',\dots,c^{(k)}\rangle$ かつ $\langle e_{k},c^{(k)}\rangle>0$。
+   - (ii) $(e_{1}(t),\dots,e_{n}(t))$ は正の向きの正規直交基底。
+:::
+
+::: intuition
+フレネ標構は、曲線とともに動く座標軸である。第 1 軸は進む向き、第 2 軸は曲がる向き、第 3 軸はねじれる向き、というように、速度・加速度・加加速度…が順に新しい向きを加えていくのに合わせて軸を立てる。フレネ曲線とは、そのように軸を $n-1$ 本まで決められるほど、各点で十分に曲がっている曲線のことである。
+:::
+
+::: proposition 標準フレネ標構の存在と一意性 {#surf:distinguished-frame-exists keywords="a Frenet curve has a unique distinguished Frenet frame; it is C^infinity; c^{(k)} = sum_{l<=k} a_{kl} e_l with a_{kk} > 0" index="標準フレネ標構の存在|ひょうじゅんふれねひょうこうのそんざい"}
+$c\colon I\to\mathbb{R}^{n}$ をフレネ曲線とする。
+1. 標準フレネ標構 $(e_{1},\dots,e_{n})$ はただ一つ存在し、各 $e_{i}\colon I\to\mathbb{R}^{n}$ は $C^{\infty}$ 級である。とくにこれはフレネ標構である。
+2. $C^{\infty}$ 級の関数 $a_{kl}\colon I\to\mathbb{R}$（$1\le l\le k\le n-1$）で $a_{kk}>0$ かつ
+$$
+c^{(k)}=\sum_{l=1}^{k}a_{kl}\,e_{l}\quad(1\le k\le n-1)
+\label{surf:eq-triangular}
+$$
+となるものがある。$a_{11}=|c'|$ で、$a_{kl}=\langle c^{(k)},e_{l}\rangle$。
+3. 逆に $e_{k}$（$k\le n-1$）は $c',\dots,c^{(k)}$ の $C^{\infty}$ 級の関数を係数とする一次結合である。
+:::
+
+::: proof
+**Step 1（$e_{1},\dots,e_{n-1}$）.** 【主張：グラム–シュミットの式で作った $e_{1},\dots,e_{n-1}$ は $C^{\infty}$ 級で \ref[3(i)]{surf:frenet-frame.3} をみたし、\ref[3(i)]{surf:frenet-frame.3} をみたすものはこれに限る】$u_{k}\defeq c^{(k)}-\sum_{i<k}\langle e_{i},c^{(k)}\rangle e_{i}$, $e_{k}\defeq u_{k}/|u_{k}|$ と帰納的に定める（\ref{lin:gram-schmidt.1} の Step 1 と同じ式）。$c',\dots,c^{(k)}$ が一次独立なので $u_{k}\neq0$。$e_{1},\dots,e_{k-1}$ が $C^{\infty}$ 級なら $u_{k}$ は $C^{\infty}$ 級で、記法の最後の項目から $e_{k}$ も $C^{\infty}$ 級。\ref[3(i)]{surf:frenet-frame.3} をみたすことと一意性は \ref{lin:gram-schmidt.1} そのもの（各 $t$ ごとに適用する）。
+
+**Step 2（$e_{n}$ の構成）.** 【主張：$\det(e_{1},\dots,e_{n-1},x)=\langle w,x\rangle$（すべての $x$）となる $C^{\infty}$ 級の $w$ があり、$e_{n}\defeq w/|w|$ で \ref[3(ii)]{surf:frenet-frame.3} がみたされる】$x\mapsto\det(e_{1}(t),\dots,e_{n-1}(t),x)$ は線形なので（多重線形性）、第 $n$ 列での余因子 $w_{j}(t)$ を並べた $w(t)$ について $\det(e_{1},\dots,e_{n-1},x)=\sum_{j}w_{j}x_{j}$。$w_{j}$ は $e_{1},\dots,e_{n-1}$ の成分の多項式なので $C^{\infty}$ 級。$i\le n-1$ について $\langle w,e_{i}\rangle=\det(e_{1},\dots,e_{n-1},e_{i})=0$（同じ列が 2 つある）。$e_{1},\dots,e_{n-1}$ を正規直交基底 $(e_{1},\dots,e_{n-1},f)$ に延ばすと（\ref{lin:gram-schmidt.1}）、この基底を並べた行列は直交行列で $\langle w,f\rangle=\det(e_{1},\dots,e_{n-1},f)=\pm1\neq0$、よって $w\neq0$。$e_{n}\defeq w/|w|$ は $C^{\infty}$ 級の単位ベクトルで $e_{1},\dots,e_{n-1}$ と直交し、$\det(e_{1},\dots,e_{n-1},e_{n})=\langle w,w\rangle/|w|=|w|>0$。
+
+**Step 3（$e_{n}$ の一意性）.** $e_{1},\dots,e_{n-1}$ の直交補空間は 1 次元（\ref{lin:orthogonal-complement}）なので、そこに属する単位ベクトルは $\pm e_{n}$ の 2 つで、$\det(e_{1},\dots,e_{n-1},-e_{n})=-\det(e_{1},\dots,e_{n})<0$。よって \ref[3(ii)]{surf:frenet-frame.3} をみたすのは $e_{n}$ だけ。$c^{(n)}\in\mathbb{R}^{n}=\langle e_{1},\dots,e_{n}\rangle$ は自明なので、これはフレネ標構である。
+
+**Step 4（2 と 3）.** $a_{kl}\defeq\langle c^{(k)},e_{l}\rangle$ は $C^{\infty}$ 級で、$c^{(k)}\in\langle e_{1},\dots,e_{k}\rangle$ と正規直交性から \eqref{surf:eq-triangular} が成り立ち、$a_{kk}=\langle e_{k},c^{(k)}\rangle>0$。$k=1$ では $e_{1}=c'/|c'|$ なので $a_{11}=|c'|$。3 は Step 1 の式 $e_{k}=\bigl(c^{(k)}-\sum_{i<k}\langle e_{i},c^{(k)}\rangle e_{i}\bigr)/|u_{k}|$ から $k$ についての帰納法でわかる。
+
+::: hypcheck
+- **前提「$c'(t),\dots,c^{(n-1)}(t)$ が一次独立」**：Step 1 で $u_{k}\neq0$ に使った。外すと標準フレネ標構は定義できず、フレネ標構すら存在しないことがある（\ref{surf:no-frenet-frame}）。
+- **前提「$C^{\infty}$ 級」**：$e_{k}$ の滑らかさに使った。$c$ が $C^{n}$ 級でも $e_{1},\dots,e_{n}$ は $C^{1}$ 級になり、以下のフレネ–セレの公式には足りる（補足）。
+:::
+:::
+
+::: counterexample フレネ標構をもたない正則曲線 {#surf:no-frenet-frame keywords="a regular smooth space curve with no continuous Frenet frame: (t, f(t), f(-t)) with f(t) = exp(-1/t) for t > 0" index="フレネ標構をもたない曲線|ふれねひょうこうをもたないきょくせん"}
+$f(t)\defeq e^{-1/t}$（$t>0$）、$f(t)\defeq0$（$t\le0$）とし、$c(t)\defeq(t,f(t),f(-t))\in\mathbb{R}^{3}$（$t\in\mathbb{R}$）とする。$c$ は $C^{\infty}$ 級の正則曲線だが、$c$ に沿ったフレネ標構は（$0$ を含むどの開区間の上でも）存在しない。
+:::
+
+::: proof
+**Step 1.** 【主張：$c$ は $C^{\infty}$ 級の正則曲線で、$0<t<\frac12$ では $c'(t),c''(t)$ は $xy$ 平面の一次独立なベクトル、$-\frac12<t<0$ では $xz$ 平面の一次独立なベクトルである】$f$ は $C^{\infty}$ 級（\ref{calc:non-analytic-smooth.1}）なので $c$ も $C^{\infty}$ 級で、$c'(t)$ の第 1 成分は $1$ だから $c'\neq0$。$t>0$ では $c(t)=(t,f(t),0)$、$f'(t)=e^{-1/t}/t^{2}$、
+$$
+f''(t)=e^{-1/t}\Bigl(\frac{1}{t^{4}}-\frac{2}{t^{3}}\Bigr)=\frac{e^{-1/t}(1-2t)}{t^{4}}
+$$
+で、$0<t<\frac12$ なら $f''(t)>0$。$c'=(1,f',0)$ と $c''=(0,f'',0)$ は $xy$ 平面にあって一次独立。$t<0$ では $c(t)=(t,0,f(-t))$ で、同じ計算が $xz$ 平面で成り立つ。
+
+**Step 2.** 【主張：フレネ標構 $(e_{i})$ があれば、$t\to+0$ で $e_{2}(t)\to\pm(0,1,0)$、$t\to-0$ で $e_{2}(t)\to\pm(0,0,1)$ となるので、$e_{2}$ は $0$ で連続でない】$0<t<\frac12$ で $c',c''\in\langle e_{1},e_{2}\rangle$ は一次独立なので $\langle e_{1},e_{2}\rangle=\langle c',c''\rangle$ は $xy$ 平面であり、$e_{1}=\pm c'/|c'|$（$c'\in\langle e_{1}\rangle$）。$e_{2}$ は $xy$ 平面の中で $e_{1}$ に直交する単位ベクトルなので $e_{2}=\pm(-f',1,0)/\sqrt{1+f'^{2}}$。符号は連続性と中間値の定理から $(0,\frac12)$ 上で一定（$\langle e_{2},(0,1,0)\rangle$ は連続で零にならない）。$f'(t)\to0$（$t\to+0$）なので $e_{2}(t)\to\pm(0,1,0)$。$t<0$ でも同様に $e_{2}(t)\to\pm(0,0,1)$。$e_{2}$ が $0$ で連続なら $e_{2}(0)$ は両方に等しいことになり矛盾。
+
+::: hypcheck
+- この例は「$C^{\infty}$ 級の正則曲線」という前提だけではフレネ標構が存在しないことを示す。$t=0$ では $c''(0)=0$ で、$c$ はフレネ曲線でない。
+:::
+:::
+
+## フレネ–セレの公式 {#surf:sec-cf-frenet-equations}
+
+以下、$c\colon I\to\mathbb{R}^{n}$ はフレネ曲線、$(e_{1},\dots,e_{n})$ はその標準フレネ標構とし、
+$$
+\omega_{ij}(t)\defeq\langle e_{i}'(t),e_{j}(t)\rangle\qquad(1\le i,j\le n)
+$$
+とおく。$(e_{j})$ は正規直交基底なので $e_{i}'=\sum_{j}\omega_{ij}e_{j}$ である。
+
+::: lemma 接続行列は歪対称で三重対角 {#surf:connection-matrix keywords="omega_{ij} = <e_i', e_j> is skew symmetric and omega_{ij} = 0 for j > i+1" index="接続行列|せつぞくぎょうれつ"}
+1. $\omega_{ij}=-\omega_{ji}$。とくに $\omega_{ii}=0$。
+2. $|i-j|\ge2$ なら $\omega_{ij}=0$。
+:::
+
+::: proof
+**1.** $\langle e_{i},e_{j}\rangle=\delta_{ij}$（定数）を微分して $\langle e_{i}',e_{j}\rangle+\langle e_{i},e_{j}'\rangle=0$。
+
+**2.** 1 から $j\ge i+2$ の場合を示せば十分。このとき $i\le n-2$ なので、\ref{surf:distinguished-frame-exists.3} から $e_{i}=\sum_{l\le i}b_{il}c^{(l)}$（$b_{il}$ は $C^{\infty}$ 級）。微分すると $e_{i}'=\sum_{l\le i}(b_{il}'c^{(l)}+b_{il}c^{(l+1)})\in\langle c',\dots,c^{(i+1)}\rangle$。$i+1\le n-1$ なので標準フレネ標構の条件 \ref[(i)]{surf:frenet-frame.3} からこれは $\langle e_{1},\dots,e_{i+1}\rangle$ で、$e_{j}$（$j\ge i+2$）と直交する。
+:::
+
+::: definition 曲率 {#surf:frenet-curvature keywords="i-th curvature of a Frenet curve kappa_i = <e_i', e_{i+1}>/|c'|; curvature and torsion of space curves" index="曲率|きょくりつ, 第 i 曲率|だいあいきょくりつ, 高次の曲率|こうじのきょくりつ"}
+$i=1,\dots,n-1$ について
+$$
+\kappa_{i}(t)\defeq\frac{\omega_{i,i+1}(t)}{|c'(t)|}=\frac{\langle e_{i}'(t),e_{i+1}(t)\rangle}{|c'(t)|}
+$$
+をフレネ曲線 $c$ の**第 $i$ 曲率**という。$\kappa_{1}$ を単に**曲率**という。
+:::
+
+::: intuition
+曲率とは、曲線に沿って一定の速さで進んだとき、動く座標軸の第 $i$ 軸が第 $i+1$ 軸の方へ傾く速さのことである。速さ $|c'|$ で割ってあるので、道のり 1 あたりの傾き方になり、たどる速さによらない。
+:::
+
+::: theorem フレネ–セレの公式 {#surf:frenet-serret keywords="Frenet-Serret formulas: e_i' = |c'| (-kappa_{i-1} e_{i-1} + kappa_i e_{i+1}); kappa_1, ..., kappa_{n-2} > 0" index="フレネ–セレの公式|ふれねせれのこうしき, フレネの公式|ふれねのこうしき" refname="フレネ–セレの公式"}
+$v\defeq|c'|$、$\kappa_{0}\defeq\kappa_{n}\defeq0$、$e_{0}\defeq e_{n+1}\defeq0$ とおくと、$i=1,\dots,n$ について
+$$
+e_{i}'=v\bigl(-\kappa_{i-1}e_{i-1}+\kappa_{i}e_{i+1}\bigr).
+\label{surf:eq-frenet}
+$$
+さらに $\kappa_{1},\dots,\kappa_{n-2}>0$ であり、各 $\kappa_{i}$ は $C^{\infty}$ 級で、\eqref{surf:eq-triangular} の対角成分は
+$$
+a_{kk}=v^{k}\kappa_{1}\kappa_{2}\cdots\kappa_{k-1}\qquad(1\le k\le n-1).
+$$
+:::
+
+::: intuition
+動く座標軸の各軸は、すぐ隣の軸の方へだけ傾き、二つ以上離れた軸の方へは傾かない。そして最後の曲率を除いて、傾きは決まった向き（正の向き）になる。
+:::
+
+::: proof
+**Step 1.** 【主張：\eqref{surf:eq-frenet} が成り立つ】$e_{i}'=\sum_{j}\omega_{ij}e_{j}$ に \ref{surf:connection-matrix.2} を使うと $e_{i}'=\omega_{i,i-1}e_{i-1}+\omega_{i,i+1}e_{i+1}$（$\omega_{ii}=0$、範囲外の項は $0$）。\ref{surf:connection-matrix.1} から $\omega_{i,i-1}=-\omega_{i-1,i}=-v\kappa_{i-1}$、定義から $\omega_{i,i+1}=v\kappa_{i}$。
+
+**Step 2.** 【主張：$1\le k\le n-2$ について $a_{k+1,k+1}=a_{kk}\,v\kappa_{k}$】\eqref{surf:eq-triangular} を微分すると
+$$
+c^{(k+1)}=\sum_{l\le k}a_{kl}'e_{l}+\sum_{l\le k}a_{kl}e_{l}'.
+$$
+Step 1 から $e_{l}'\in\langle e_{l-1},e_{l+1}\rangle$ なので、右辺で $e_{k+1}$ の係数をもつのは $l=k$ の $a_{kk}e_{k}'$ だけで、その係数は $a_{kk}v\kappa_{k}$。$k+1\le n-1$ なので左辺の $e_{k+1}$ の係数は $a_{k+1,k+1}$（\ref{surf:distinguished-frame-exists.2}）。
+
+**Step 3.** 【主張：$\kappa_{1},\dots,\kappa_{n-2}>0$ で、$a_{kk}=v^{k}\kappa_{1}\cdots\kappa_{k-1}$】Step 2 から $v\kappa_{k}=a_{k+1,k+1}/a_{kk}$ で、右辺は正の数の商なので $\kappa_{k}>0$（$v>0$）。$a_{11}=v$ と Step 2 を繰り返して $a_{kk}$ の式を得る。$\kappa_{i}=\langle e_{i}',e_{i+1}\rangle/v$ は $C^{\infty}$ 級の関数の積と商なので $C^{\infty}$ 級。
+
+::: hypcheck
+- **前提「フレネ曲線」**：標準フレネ標構の存在（\ref{surf:distinguished-frame-exists}）と、Step 2 での $a_{k+1,k+1}>0$ に使った。
+- **$\kappa_{n-1}$ の符号**：Step 2 は $k+1\le n-1$ でしか使えないので、$\kappa_{n-1}$ の符号は決まらない。実際、空間曲線の捩率 $\kappa_{2}$ は正にも負にもなる（\ref{surf:helix}）。
+:::
+:::
+
+::: example
+行列で書くと、$e_{i}$ を第 $i$ 行とする行列 $E$ について $E'=vKE$、
+$$
+K=\begin{pmatrix}0&\kappa_{1}&&&\\-\kappa_{1}&0&\kappa_{2}&&\\&-\kappa_{2}&\ddots&\ddots&\\&&\ddots&0&\kappa_{n-1}\\&&&-\kappa_{n-1}&0\end{pmatrix}
+$$
+（空欄は $0$）。$K$ は歪対称（${}^{t}K=-K$）で三重対角である。
+:::
+
+::: proposition 曲率の不変性 {#surf:curvature-invariance keywords="curvatures are invariant under orientation preserving reparametrizations and under orientation preserving rigid motions; under reflections the last curvature changes sign" index="曲率の不変性|きょくりつのふへんせい"}
+$c\colon I\to\mathbb{R}^{n}$ をフレネ曲線、$(e_{i})$ を標準フレネ標構、$\kappa_{i}$ を曲率とする。
+1. $\varphi\colon J\to I$ を向きを保つ $C^{\infty}$ 級のパラメータ変換とすると、$\tilde c\defeq c\circ\varphi$ はフレネ曲線で、標準フレネ標構は $(e_{i}\circ\varphi)$、曲率は $\kappa_{i}\circ\varphi$。
+2. $B(x)=Rx+b$ を合同変換とすると、$B\circ c$ はフレネ曲線である。$\det R=1$ なら標準フレネ標構は $(Re_{i})$ で、曲率は $\kappa_{i}$ に等しい。$\det R=-1$ なら標準フレネ標構は $(Re_{1},\dots,Re_{n-1},-Re_{n})$ で、曲率は $\kappa_{1},\dots,\kappa_{n-2},-\kappa_{n-1}$。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\tilde c^{(k)}=(\varphi')^{k}\,c^{(k)}\circ\varphi+\sum_{l<k}g_{kl}\,c^{(l)}\circ\varphi$（$g_{kl}$ は $C^{\infty}$ 級の関数）】$k=1$ は連鎖律。$k$ で成り立てば、微分して $(c^{(l)}\circ\varphi)'=\varphi'\,c^{(l+1)}\circ\varphi$ を使うと、$c^{(k+1)}\circ\varphi$ の係数は $(\varphi')^{k}\varphi'$、残りは $c^{(l)}\circ\varphi$（$l\le k$）の一次結合。
+
+**Step 2（1）.** 【主張：$\tilde c$ はフレネ曲線で、標準フレネ標構は $(e_{i}\circ\varphi)$、曲率は $\kappa_{i}\circ\varphi$】Step 1 は係数が三角で対角成分 $(\varphi')^{k}\neq0$ なので、$k\le n-1$ について $\langle\tilde c',\dots,\tilde c^{(k)}\rangle=\langle c',\dots,c^{(k)}\rangle\circ\varphi$ で、一次独立性も保たれる。$\langle e_{k}\circ\varphi,\tilde c^{(k)}\rangle=(\varphi')^{k}\langle e_{k},c^{(k)}\rangle\circ\varphi>0$（$\varphi'>0$、$e_{k}\perp c^{(l)}$（$l<k$））。グラム–シュミットの一意性（\ref{lin:gram-schmidt.1}）から $\tilde e_{k}=e_{k}\circ\varphi$（$k\le n-1$）、\ref[3(ii)]{surf:frenet-frame.3} の一意性から $\tilde e_{n}=e_{n}\circ\varphi$。曲率は $\langle(e_{i}\circ\varphi)',e_{i+1}\circ\varphi\rangle=\varphi'\,\omega_{i,i+1}\circ\varphi$ と $|\tilde c'|=\varphi'\,|c'|\circ\varphi$ の商。
+
+**Step 3（2）.** 【主張：$\det R=1$ なら標準フレネ標構は $(Re_{i})$ で曲率は変わらない】$(B\circ c)^{(k)}=Rc^{(k)}$。$R$ は単射なので一次独立性は保たれる。$R$ は内積を保つので $(Re_{1},\dots,Re_{n})$ は正規直交で、$\langle Re_{1},\dots,Re_{k}\rangle=R\langle c',\dots,c^{(k)}\rangle$、$\langle Re_{k},Rc^{(k)}\rangle=\langle e_{k},c^{(k)}\rangle>0$。$\det(Re_{1},\dots,Re_{n})=\det R\cdot\det(e_{1},\dots,e_{n})$（\ref{lin:det-multiplicative}）$=1\cdot\det(e_{1},\dots,e_{n})>0$。一意性から標準フレネ標構は $(Re_{i})$。$\langle Re_{i}',Re_{i+1}\rangle=\langle e_{i}',e_{i+1}\rangle$、$|Rc'|=|c'|$ から曲率は等しい。
+
+**Step 4（2）.** 【主張：$\det R=-1$ なら標準フレネ標構は $(Re_{1},\dots,Re_{n-1},-Re_{n})$ で、$\kappa_{n-1}$ だけ符号が変わる】Step 3 の議論は $k\le n-1$ ではそのまま使え、$\det(Re_{1},\dots,Re_{n})=-\det(e_{1},\dots,e_{n})<0$ なので最後の向きを逆にする。曲率 $\kappa_{i}$（$i\le n-2$）は $Re_{i}$ と $Re_{i+1}$ から決まるので変わらず、$\langle Re_{n-1}',-Re_{n}\rangle=-\omega_{n-1,n}$ から $\kappa_{n-1}$ は $-1$ 倍。
+
+::: hypcheck
+- **前提「$\varphi'>0$」**：Step 2 の $(\varphi')^{k}>0$ に使った。$\varphi'<0$ では $k$ が奇数の $e_{k}$ の向きが逆になる（空間曲線では \ref{surf:prob-cf-reverse}）。
+:::
+:::
+
+## 線形常微分方程式 {#surf:sec-cf-ode}
+
+曲線論の基本定理の存在部分では、フレネ–セレの公式 $E'=KE$ を、$E$ を未知関数とする微分方程式として解く。必要なのは係数が連続な線形の方程式だけなので、ここで証明しておく。
+
+::: lemma 線形常微分方程式の解の存在と一意性 {#surf:linear-ode keywords="existence and uniqueness of global solutions of linear ODE X' = A(t) X with continuous coefficients on an interval, by Picard iteration; smoothness of solutions" index="線形常微分方程式|せんけいじょうびぶんほうていしき, ピカールの逐次近似|ぴかーるのちくじきんじ"}
+$I$ を区間、$A\colon I\to M_{m}(\mathbb{R})$ を連続、$t_{0}\in I$、$X_{0}\in\mathbb{R}^{m\times p}$ とする。
+1. $C^{1}$ 級の $X\colon I\to\mathbb{R}^{m\times p}$ で $X'(t)=A(t)X(t)$（$t\in I$）、$X(t_{0})=X_{0}$ となるものがただ一つ存在する。
+2. $A$ が $C^{k}$ 級なら $X$ は $C^{k+1}$ 級。とくに $A$ が $C^{\infty}$ 級なら $X$ も $C^{\infty}$ 級。
+:::
+
+::: proof
+**Step 1（積分方程式への言い換え）.** 【主張：連続な $X$ について、$X$ が 1 の解であることと $X(t)=X_{0}+\int_{t_{0}}^{t}A(u)X(u)\,du$（$t\in I$）は同値】解なら $X'=AX$ は連続で、\ref{calc:fundamental-theorem.2} を成分ごとに使う。逆に積分方程式をみたせば、被積分関数は連続なので \ref{calc:fundamental-theorem.1} から $X$ は $C^{1}$ 級で $X'=AX$、$X(t_{0})=X_{0}$。
+
+**Step 2（逐次近似の評価）.** 【主張：$t_{0}$ を含む有界閉区間 $J\subset I$ と $M\defeq\max_{J}\|A\|$ について、$X_{0}(t)\defeq X_{0}$、$X_{j+1}(t)\defeq X_{0}+\int_{t_{0}}^{t}AX_{j}$ とおくと、$t\in J$ で $\|X_{j+1}(t)-X_{j}(t)\|\le\|X_{0}\|\,M^{j+1}|t-t_{0}|^{j+1}/(j+1)!$】$\|A\|$ は連続なので最大値の定理（\ref{calc:interval-theorems.2}）から $M$ がある。$j=0$：$\|X_{1}(t)-X_{0}\|=\bigl\|\int_{t_{0}}^{t}AX_{0}\bigr\|\le\bigl|\int_{t_{0}}^{t}\|A\|\|X_{0}\|\bigr|\le M\|X_{0}\||t-t_{0}|$（\ref{vec:vector-integral-inequality} と $\|AX\|\le\|A\|\|X\|$）。$j$ で成り立てば
+$$
+\begin{aligned}
+\|X_{j+2}(t)-X_{j+1}(t)\|&\le\Bigl|\int_{t_{0}}^{t}M\,\|X_{j+1}(u)-X_{j}(u)\|\,du\Bigr|\\
+&\le\|X_{0}\|\frac{M^{j+2}}{(j+1)!}\Bigl|\int_{t_{0}}^{t}|u-t_{0}|^{j+1}du\Bigr|=\|X_{0}\|\frac{M^{j+2}|t-t_{0}|^{j+2}}{(j+2)!}.
+\end{aligned}
+$$
+
+**Step 3（$J$ 上の存在）.** 【主張：$X_{j}$ は $J$ 上で一様収束し、極限は $J$ 上で積分方程式をみたす】$J$ の長さを $\ell$ とすると $\|X_{j+1}-X_{j}\|\le\|X_{0}\|(M\ell)^{j+1}/(j+1)!$ で、右辺の和は収束する（$e^{M\ell}$ の級数）。M 判定法（\ref{calc:uniform-limit-theorems.3}、成分ごと）から $X_{j}=X_{0}+\sum_{i<j}(X_{i+1}-X_{i})$ は一様収束し、極限 $X$ は連続（\ref{calc:uniform-limit-theorems.2}）。$\|AX_{j}-AX\|\le M\|X_{j}-X\|$ なので $AX_{j}\to AX$ も一様収束で、\ref{calc:uniform-limit-theorems.4} から漸化式で $j\to\infty$ として積分方程式を得る。
+
+**Step 4（$J$ 上の一意性）.** 【主張：$J$ 上の二つの解は一致する】差 $D$ は $D(t)=\int_{t_{0}}^{t}AD$ をみたし、連続なので $\|D\|\le C$（$J$ 上）。Step 2 と同じ帰納法で $\|D(t)\|\le C\,M^{j}|t-t_{0}|^{j}/j!$（すべての $j$）、$j\to\infty$ で $D(t)=0$。
+
+**Step 5（$I$ 全体へ）.** 【主張：$I$ 全体の解がただ一つある】$t\in I$ について $J_{t}\defeq[\min(t,t_{0}),\max(t,t_{0})]$ とし、$J_{t}$ 上の解の $t$ での値を $X(t)$ とする（$t=t_{0}$ では $X_{0}$）。$J_{t}\subset J_{t'}$ なら $J_{t'}$ 上の解の $J_{t}$ への制限は $J_{t}$ 上の解なので、Step 4 から値は矛盾しない。$t$ の近くの点 $t'$ はすべて、$t_{0}$ と $t$ を含む一つの有界閉区間 $J\subset I$（$t$ が $I$ の端点でなければ $t$ の両側に少しはみ出すもの）に入るので、$X$ は $J$ 上の解と一致し、$t$ で微分可能で $X'(t)=A(t)X(t)$。一意性は各 $J_{t}$ 上で Step 4。
+
+**Step 6（2）.** 【主張：$A$ が $C^{k}$ 級なら $X$ は $C^{k+1}$ 級】$X$ が $C^{j}$ 級（$1\le j\le k$）なら $X'=AX$ は $C^{j}$ 級なので $X$ は $C^{j+1}$ 級。$j=1$ から帰納的に $C^{k+1}$ 級。
+
+::: hypcheck
+- **前提「$A$ は連続」**：Step 2 の $M$ の存在（最大値の定理）と Step 1 の基本定理に使った。区分的に連続でも積分方程式の意味の解は作れるが、$C^{1}$ 級とは限らない。
+- **前提「線形」**：Step 2 の評価が $J$ の長さによらず収束することに使った。非線形の方程式 $x'=x^{2}$ では解が有限時間で発散し、区間全体の解はないことがある（$x(t)=1/(1-t)$）。
+- **公理**：解は構成的に定まり、選択公理は使わない。
+:::
+:::
+
+## 曲線論の基本定理 {#surf:sec-cf-fundamental}
+
+::: theorem 曲線論の基本定理 {#surf:fundamental-theorem-curves keywords="fundamental theorem of the local theory of curves: given smooth kappa_1,...,kappa_{n-1} with kappa_1,...,kappa_{n-2} > 0 there is a unique arc length parametrized Frenet curve with these curvatures, initial point and initial frame; two such curves with the same curvatures differ by an orientation preserving rigid motion" index="曲線論の基本定理|きょくせんろんのきほんていり" refname="曲線論の基本定理"}
+$I$ を区間、$\kappa_{1},\dots,\kappa_{n-1}\colon I\to\mathbb{R}$ を $C^{\infty}$ 級の関数で $\kappa_{1},\dots,\kappa_{n-2}>0$ とする。
+1. **（存在）** $s_{0}\in I$、$p\in\mathbb{R}^{n}$、正の向きの正規直交基底 $(f_{1},\dots,f_{n})$ を与えると、弧長で径数づけられたフレネ曲線 $c\colon I\to\mathbb{R}^{n}$ で、$c(s_{0})=p$、標準フレネ標構が $s_{0}$ で $(f_{i})$ に等しく、第 $i$ 曲率が $\kappa_{i}$ であるものがただ一つ存在する。
+2. **（合同を除く一意性）** 弧長で径数づけられたフレネ曲線 $c,\tilde c\colon I\to\mathbb{R}^{n}$ の曲率がすべて等しければ、向きを保つ合同変換 $B$ で $\tilde c=B\circ c$ となるものがただ一つある。
+:::
+
+::: intuition
+曲線の形は曲率の組だけで決まり、曲率が同じ二つの曲線は、動かして重ねればぴったり一致する。しかも、最後以外が正であるような曲率の組なら、どんな関数でも、それを曲率にもつ曲線が実際に作れる。
+:::
+
+::: proof
+以下、弧長パラメータなので $v=|c'|=1$ で、$e_{1}=c'$（$a_{11}=1$）。$K(s)$ を例で書いた歪対称で三重対角な行列（$\kappa_{i}$ から作る）とし、$e_{i}$ を第 $i$ 行とする行列を $E$ と書く。\ref{surf:frenet-serret} は $E'=KE$ となる。
+
+**Step 1（2：$B$ の構成）.** 【主張：$s_{0}\in I$ を一つとり、直交行列 $R$ を $Re_{i}(s_{0})=\tilde e_{i}(s_{0})$（$i=1,\dots,n$）で、$b\defeq\tilde c(s_{0})-Rc(s_{0})$ と定めると、$\det R=1$】二つの正規直交基底を列に並べた直交行列を $F\defeq(e_{1}(s_{0}),\dots,e_{n}(s_{0}))$、$\tilde F$ とし、$R\defeq\tilde F\,{}^{t}F$ とおくと $RF=\tilde F$（${}^{t}FF=I$ から $F^{-1}={}^{t}F$）で、$R$ は直交行列の積なので直交行列。$\det R=\det\tilde F\det F>0$（両方とも正の向き）、$\det R=\pm1$ なので $\det R=1$。
+
+**Step 2（2：一致）.** 【主張：$B(x)\defeq Rx+b$ について $B\circ c=\tilde c$】\ref{surf:curvature-invariance.2} から $B\circ c$ の標準フレネ標構は $(Re_{i})$、曲率は $\kappa_{i}$ で、$B\circ c$ も弧長で径数づけられている。その行列は $E\,{}^{t}R$（行 $e_{i}$ を ${}^{t}(Re_{i})={}^{t}e_{i}\,{}^{t}R$ に置き換えたもの）で、$(E\,{}^{t}R)'=KE\,{}^{t}R$。$\tilde E$ も $\tilde E'=K\tilde E$ をみたし、$s_{0}$ で一致する。\ref{surf:linear-ode.1}（$m=p=n$）から $E\,{}^{t}R=\tilde E$。とくに $(B\circ c)'=Re_{1}=\tilde e_{1}=\tilde c'$ で、$s_{0}$ で値が等しいので、平均値の定理（成分ごと）から $B\circ c=\tilde c$。
+
+**Step 3（2：$B$ の一意性）.** 【主張：$B$ はただ一つ】$R'x+b'$ も条件をみたせば、\ref{surf:curvature-invariance.2} から $R'e_{i}(s_{0})=\tilde e_{i}(s_{0})=Re_{i}(s_{0})$ がすべての $i$ で成り立つので、基底上で一致して $R'=R$。$Rc(s_{0})+b'=\tilde c(s_{0})$ から $b'=b$。
+
+**Step 4（1：標構の構成）.** 【主張：$E'=KE$、$E(s_{0})=F_{0}$（$f_{i}$ を第 $i$ 行とする行列）の解 $E$ は $I$ 全体で $C^{\infty}$ 級で、各 $s$ で $E(s)$ は直交行列、$\det E(s)=1$】解の存在と $C^{\infty}$ 性は \ref{surf:linear-ode}。$P\defeq E\,{}^{t}E$ とおくと、${}^{t}K=-K$ から
+$$
+P'=KE\,{}^{t}E+E\,{}^{t}E\,{}^{t}K=KP-PK.
+$$
+$P\mapsto KP-PK$ は $M_{n}(\mathbb{R})=\mathbb{R}^{n^{2}}$ 上の線形写像で、その表現行列（$n^{2}$ 次）は $s$ の連続関数である。定数関数 $I$ もこの方程式をみたし（$KI-IK=0$）、$P(s_{0})=F_{0}\,{}^{t}F_{0}=I$。\ref{surf:linear-ode.1}（$m=n^{2}$, $p=1$）の一意性から $P\equiv I$。よって $E(s)$ は直交行列で $\det E(s)=\pm1$。$\det E$ は連続で $\det E(s_{0})=\det F_{0}=\det{}^{t}F_{0}>0$ なので、中間値の定理から常に $\det E=1$。
+
+**Step 5（1：曲線の構成と微分）.** 【主張：$e_{i}$ を $E$ の第 $i$ 行（の転置）、$c(s)\defeq p+\int_{s_{0}}^{s}e_{1}$ とすると、$k=1,\dots,n$ について $c^{(k)}=\sum_{l\le k}a_{kl}e_{l}$（$a_{kl}$ は $C^{\infty}$ 級）、$a_{kk}=\kappa_{1}\cdots\kappa_{k-1}$】基本定理から $c'=e_{1}$ で、$a_{11}=1$。$E'=KE$ は $e_{l}'=-\kappa_{l-1}e_{l-1}+\kappa_{l}e_{l+1}$（$\kappa_{0}=\kappa_{n}=0$）ということである。$k$ で成り立てば、微分して $c^{(k+1)}=\sum_{l\le k}(a_{kl}'e_{l}+a_{kl}e_{l}')$ で、$e_{k+1}$ の係数は $a_{kk}\kappa_{k}$、ほかは $\langle e_{1},\dots,e_{k}\rangle$ に入る。
+
+**Step 6（1：$(e_{i})$ が標準フレネ標構）.** 【主張：$c$ は弧長で径数づけられたフレネ曲線で、標準フレネ標構は $(e_{1},\dots,e_{n})$、第 $i$ 曲率は $\kappa_{i}$】$|c'|=|e_{1}|=1$。$k\le n-1$ では $a_{kk}=\kappa_{1}\cdots\kappa_{k-1}>0$（$\kappa_{1},\dots,\kappa_{n-2}>0$）なので、Step 5 の係数は対角成分が正の三角行列で、$c',\dots,c^{(n-1)}$ は一次独立、$\langle c',\dots,c^{(k)}\rangle=\langle e_{1},\dots,e_{k}\rangle$、$\langle e_{k},c^{(k)}\rangle=a_{kk}>0$。$(e_{i})$ は正規直交（Step 4）なので、グラム–シュミットの一意性から $e_{1},\dots,e_{n-1}$ は \ref[3(i)]{surf:frenet-frame.3} の基底。$\det(e_{1},\dots,e_{n})=\det{}^{t}E=\det E=1$ から \ref[3(ii)]{surf:frenet-frame.3} もみたす。曲率は $\langle e_{i}',e_{i+1}\rangle/|c'|=\kappa_{i}$。$c(s_{0})=p$、$e_{i}(s_{0})=f_{i}$ は作り方から。
+
+**Step 7（1：一意性）.** 【主張：条件をみたす曲線はただ一つ】二つあれば 2 から $\tilde c=B\circ c$。Step 1 の $R$ は $Rf_{i}=f_{i}$ をみたすので $R=I$、$b=\tilde c(s_{0})-c(s_{0})=p-p=0$。よって $\tilde c=c$。
+
+::: hypcheck
+- **前提「$\kappa_{1},\dots,\kappa_{n-2}>0$」**：Step 6 で $c',\dots,c^{(n-1)}$ の一次独立性に使った。フレネ曲線の曲率はこれをみたす（\ref{surf:frenet-serret}）ので、外せない。$\kappa_{1}\equiv0$ を許すと $c$ は直線で、$\kappa_{2}$ などは曲線から定まらない。
+- **前提「弧長で径数づけられている」**：Step 2 で $E'=KE$（速さの因子 $v$ がない）と $c'=e_{1}$ に使った。一般のパラメータでは、まず弧長パラメータに取り替える（\ref{surf:arc-length-reparametrization}・\ref{surf:curvature-invariance.1}）。
+- **前提「$(f_{i})$ は正の向き」**：Step 4 の $\det E=1$ と Step 6 の \ref[3(ii)]{surf:frenet-frame.3} に使った。負の向きの基底を与えると、標準フレネ標構にはならない（$\kappa_{n-1}$ の符号を変えて鏡映を合成すればよい）。
+- **前提「合同変換は向きを保つ」**：Step 1 の $\det R=1$。向きを逆にする合同変換は $\kappa_{n-1}$ の符号を変える（\ref{surf:curvature-invariance.2}）ので、曲率がすべて等しい曲線どうしの間には（$\kappa_{n-1}\equiv0$ でない限り）現れない。
+- **前提「$C^{\infty}$ 級」**：Step 4 で $E$ の滑らかさ（\ref{surf:linear-ode.2}）に使った。$\kappa_{i}$ が $C^{k}$ 級なら $E$ は $C^{k+1}$ 級、$c$ は $C^{k+2}$ 級になる。
+:::
+:::
+
+::: supplement
+**前提を弱めると.** 曲率を定めるだけなら $c$ は $C^{n}$ 級でよい。このとき $e_{k}$（$k\le n-1$）は $c',\dots,c^{(k)}$ から作るので $C^{n-k}$ 級、$e_{n}$ はその余因子から作るので $C^{1}$ 級になり、フレネ–セレの公式もそのまま成り立つ。ここでは扱いを簡単にするため $C^{\infty}$ 級に限った。
+
+**類似の定理.** 曲面に対しては、第一基本形式・第二基本形式がガウス方程式とコダッツィ＝マイナルディ方程式をみたせば曲面が合同を除いて一意に存在するという定理（ボネの定理。\see{surf:fundamental-theorem-surfaces}）がある。曲線の場合と違い、曲面では与えるデータが積分可能条件（偏微分の順序交換）をみたす必要がある。
+
+**高い視点.** 標準フレネ標構を並べた行列 $E(s)$ は、行列式 1 の直交行列全体 $\mathrm{SO}(n)$ の中の曲線であり、$E'E^{-1}=K$ は歪対称行列全体 $\mathfrak{so}(n)$ に値をとる。基本定理は「$\mathfrak{so}(n)$ に値をとる曲線 $K(s)$ を与えると、$E'=KE$ を解いて $\mathrm{SO}(n)$ の曲線が初期値を除いて一意に決まる」ことと、「曲線は $E$ の第 1 行を積分して決まる」ことの組み合わせである。初期値の取り替えが右からの直交行列の掛け算、すなわち合同変換に対応する。これはリー群の中の曲線を、そのリー環の中の曲線（対数微分）から復元する話の最も簡単な場合であり、カルタンの動標構法の出発点とされる。
+:::
+
+## 平面曲線 {#surf:sec-cf-plane}
+
+$n=2$ では、フレネ曲線とは正則曲線のことである。$J(x,y)\defeq(-y,x)$（$90^{\circ}$ の回転）とおくと、$\det(u,Ju)=u_{1}^{2}+u_{2}^{2}$ なので、標準フレネ標構は $e_{1}=c'/|c'|$, $e_{2}=Je_{1}$ である。
+
+::: definition 符号付き曲率 {#surf:signed-curvature keywords="signed curvature of a regular plane curve kappa = det(c', c'')/|c'|^3" index="符号付き曲率|ふごうつききょくりつ, 平面曲線の曲率|へいめんきょくせんのきょくりつ"}
+平面の正則曲線 $c$ の第 1 曲率 $\kappa\defeq\kappa_{1}=\langle e_{1}',Je_{1}\rangle/|c'|$ を**符号付き曲率**という。
+:::
+
+::: intuition
+符号付き曲率は、進行方向が左に曲がっていれば正、右に曲がっていれば負で、その曲がり方の強さを道のり 1 あたりの向きの変化で測ったものである。
+:::
+
+::: proposition 平面曲線の曲率の公式 {#surf:plane-curvature-formula keywords="kappa = det(c', c'')/|c'|^3 = (x' y'' - x'' y')/(x'^2 + y'^2)^{3/2}; Frenet equations e_1' = v kappa e_2, e_2' = - v kappa e_1" index="平面曲線の曲率の公式|へいめんきょくせんのきょくりつのこうしき"}
+$c=(x,y)$ を平面の $C^{\infty}$ 級の正則曲線、$v=|c'|$ とする。
+1. $e_{1}'=v\kappa\,e_{2}$、$e_{2}'=-v\kappa\,e_{1}$。
+2. $\displaystyle\kappa=\frac{\det(c',c'')}{|c'|^{3}}=\frac{x'y''-x''y'}{(x'^{2}+y'^{2})^{3/2}}$。
+:::
+
+::: proof
+**1.** \ref{surf:frenet-serret} の $n=2$ の場合。
+
+**2.** $e_{1}=c'/v$ を微分すると $e_{1}'=c''/v+(1/v)'c'$。$\langle c',Jc'\rangle=-c_{1}'c_{2}'+c_{2}'c_{1}'=0$ なので $\langle e_{1}',e_{2}\rangle=\langle c'',Jc'\rangle/v^{2}$。$\langle c'',Jc'\rangle=-c_{1}''c_{2}'+c_{2}''c_{1}'=\det(c',c'')$。$v$ で割って式を得る。
+:::
+
+::: example
+1. 半径 $r>0$ の円 $c(t)=m+r(\cos t,\sin t)$：$c'=r(-\sin t,\cos t)$, $c''=-r(\cos t,\sin t)$、$\det(c',c'')=r^{2}(\sin^{2}t+\cos^{2}t)=r^{2}$、$|c'|^{3}=r^{3}$ なので $\kappa=1/r$。逆回り $t\mapsto m+r(\cos t,-\sin t)$ では $\kappa=-1/r$。
+2. グラフ $c(t)=(t,f(t))$：$\kappa=f''/(1+f'^{2})^{3/2}$。$f''>0$（下に凸）なら左に曲がる。
+:::
+
+::: proposition 接線角 {#surf:tangent-angle keywords="for a regular plane curve there is a smooth angle function theta with e_1 = (cos theta, sin theta) and theta' = kappa |c'|" index="接線角|せっせんかく, 回転角|かいてんかく"}
+$c\colon I\to\mathbb{R}^{2}$ を $C^{\infty}$ 級の正則曲線、$t_{0}\in I$、$\theta_{0}\in\mathbb{R}$ を $e_{1}(t_{0})=(\cos\theta_{0},\sin\theta_{0})$ となる数とする。
+$$
+\theta(t)\defeq\theta_{0}+\int_{t_{0}}^{t}\kappa(u)|c'(u)|\,du
+$$
+とおくと、すべての $t\in I$ で $e_{1}(t)=(\cos\theta(t),\sin\theta(t))$。
+:::
+
+::: proof
+$u(t)\defeq(\cos\theta(t),\sin\theta(t))$ とおくと、$\theta'=\kappa|c'|$（基本定理）から $u'=\theta'(-\sin\theta,\cos\theta)=\kappa|c'|\,Ju$。一方 \ref{surf:plane-curvature-formula.1} から $e_{1}'=\kappa|c'|\,e_{2}=\kappa|c'|\,Je_{1}$。$u$ と $e_{1}$ はともに係数行列 $A(t)\defeq\kappa(t)|c'(t)|\,J$（連続）の線形方程式 $x'=Ax$ の解で、$t_{0}$ で一致するので、\ref{surf:linear-ode.1} から $u=e_{1}$。
+:::
+
+::: remark
+$\theta$ は「接ベクトルの角度」を連続に選んだもので、$\theta(t_{1})-\theta(t_{0})=\int_{t_{0}}^{t_{1}}\kappa|c'|$ は、その間に接ベクトルが何回転したかを表す。閉曲線についてのこの量（回転数）とホップの回転定理は次のページ \see{surf:page-plane-curves-global} で扱う。
+:::
+
+::: proposition 直線と円の特徴づけ {#surf:line-circle-characterization keywords="a plane curve has kappa = 0 iff it is part of a line; constant kappa = k != 0 iff part of a circle of radius 1/|k|" index="直線と円の特徴づけ|ちょくせんとえんのとくちょうづけ"}
+$c\colon I\to\mathbb{R}^{2}$ を $C^{\infty}$ 級の正則曲線とする。
+1. $\kappa\equiv0$ であることと、$c(I)$ が一本の直線に含まれることは同値。
+2. $\kappa$ が零でない定数であることと、$c(I)$ が一つの円に含まれることは同値で、そのとき円の半径は $1/|\kappa|$。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\kappa\equiv0$ なら $c(t)=c(t_{0})+\bigl(\int_{t_{0}}^{t}|c'|\bigr)e_{1}(t_{0})$】$e_{1}'=v\kappa e_{2}=0$ なので $e_{1}$ は定数（平均値の定理）。$c'=ve_{1}(t_{0})$ を積分する。逆に $c(I)$ が直線 $\{q+\lambda u\}$ に含まれれば、$\langle c-q,Ju\rangle=0$ を 2 回微分して $c',c''\perp Ju$、よって $c'$ と $c''$ は平行で $\det(c',c'')=0$。
+
+**Step 2（2：⇒）.** 【主張：$\kappa\equiv k$ なら $m(t)\defeq c(t)+k^{-1}e_{2}(t)$ は定数で、$|c(t)-m|=1/|k|$】$m'=ve_{1}+k^{-1}(-vke_{1})=0$（\ref{surf:plane-curvature-formula.1}）なので、平均値の定理から $m$ は定数。$|c-m|=|k^{-1}e_{2}|=1/|k|$。
+
+**Step 3（2：⇐）.** 【主張：$c(I)$ が中心 $m$、半径 $r$ の円に含まれれば $|\kappa|\equiv1/r$ で、$\kappa$ の符号は一定】$|c-m|^{2}=r^{2}$ を微分して $\langle c-m,c'\rangle=0$ なので、$c-m=\pm re_{2}$（$e_{2}$ と平行な長さ $r$ のベクトル）。符号は連続性と中間値の定理から一定。もう一度微分すると $ve_{1}=\pm r(-v\kappa e_{1})$ で、$1=\mp r\kappa$。よって $\kappa=\mp1/r$（定数）。
+
+::: hypcheck
+- **前提「正則」**：$e_{1},e_{2}$ と $\kappa$ の定義に使った。正則でない曲線（$c(t)=(t^{3},t^{2})$ のように $c'(0)=0$ の点をもつもの）では曲率が定義されない。
+- 2 の ⇐ では「円に含まれる」だけから、向きが途中で変わらないことも従う（Step 3 の符号の一定性）。これは正則性による。
+:::
+:::
+
+## 空間曲線 {#surf:sec-cf-space}
+
+$n=3$ では、フレネ曲線とは $c'$ と $c''$ がいつも一次独立な曲線である。
+
+::: definition ベクトル積 {#surf:cross-product keywords="cross product, vector product in R^3: <x times y, z> = det(x, y, z)" index="ベクトル積|べくとるせき, クロス積|くろすせき"}
+$x,y\in\mathbb{R}^{3}$ について、すべての $z$ で $\langle x\times y,z\rangle=\det(x,y,z)$ となるベクトル
+$$
+x\times y\defeq(x_{2}y_{3}-x_{3}y_{2},\;x_{3}y_{1}-x_{1}y_{3},\;x_{1}y_{2}-x_{2}y_{1})
+$$
+を $x$ と $y$ の**ベクトル積**という（第 3 列での余因子展開）。$x\times y$ は双線形・交代的で、$x$ にも $y$ にも直交する。
+:::
+
+::: intuition
+ベクトル積は、二つのベクトルの両方に垂直なベクトルで、長さは二つが張る平行四辺形の面積、向きは右手の親指の向きになる。
+:::
+
+::: definition 曲率と捩率 {#surf:curvature-torsion keywords="space curve: unit tangent T, principal normal N, binormal B = T x N, curvature kappa > 0, torsion tau" index="単位接ベクトル|たんいせつべくとる, 主法線ベクトル|しゅほうせんべくとる, 従法線ベクトル|じゅうほうせんべくとる, 捩率|れいりつ, 空間曲線の曲率|くうかんきょくせんのきょくりつ"}
+$\mathbb{R}^{3}$ のフレネ曲線 $c$ の標準フレネ標構を $T\defeq e_{1}$（**単位接ベクトル**）、$N\defeq e_{2}$（**主法線ベクトル**）、$\mathrm{B}\defeq e_{3}$（**従法線ベクトル**）と書き、$\kappa\defeq\kappa_{1}$ を曲率（\ref{surf:frenet-curvature}）、$\tau\defeq\kappa_{2}$ を**捩率**という。$v=|c'|$ とすると、フレネ–セレの公式は
+$$
+T'=v\kappa N,\qquad N'=v(-\kappa T+\tau\mathrm{B}),\qquad\mathrm{B}'=-v\tau N
+$$
+で、$\kappa>0$。$\mathrm{B}=T\times N$ である（\ref{surf:distinguished-frame-exists} の Step 2 の $w$ がちょうど $T\times N$ で、$|w|=1$）。
+:::
+
+::: intuition
+曲率は曲線がどれだけ強く曲がっているか、捩率は曲がっている平面そのものがどれだけねじれていくかを表す。平面の中に収まっている曲線は、ねじれがない。
+:::
+
+::: proposition 曲率と捩率の公式 {#surf:curvature-torsion-formulas keywords="kappa = |c' x c''|/|c'|^3, tau = det(c', c'', c''')/|c' x c''|^2; for arc length: kappa = |c''|, tau = det(c', c'', c''')/kappa^2" index="曲率と捩率の公式|きょくりつとれいりつのこうしき"}
+$\mathbb{R}^{3}$ のフレネ曲線 $c$ について
+$$
+\kappa=\frac{|c'\times c''|}{|c'|^{3}},\qquad\tau=\frac{\det(c',c'',c''')}{|c'\times c''|^{2}}.
+$$
+とくに弧長で径数づけられていれば $\kappa=|c''|$、$\tau=\det(c',c'',c''')/\kappa^{2}$。
+:::
+
+::: proof
+**Step 1.** 【主張：$c'=vT$、$c''=v'T+v^{2}\kappa N$、$c'''=(v''-v^{3}\kappa^{2})T+(3vv'\kappa+v^{2}\kappa')N+v^{3}\kappa\tau\mathrm{B}$】$c'=vT$（$a_{11}=v$）を微分し、フレネ–セレの公式 $T'=v\kappa N$, $N'=v(-\kappa T+\tau\mathrm{B})$ を代入する。
+
+**Step 2.** 【主張：$c'\times c''=v^{3}\kappa\mathrm{B}$、$\det(c',c'',c''')=v^{6}\kappa^{2}\tau$】ベクトル積の双線形性と $T\times T=0$、$T\times N=\mathrm{B}$ から $c'\times c''=v\cdot v^{2}\kappa\,T\times N$。行列式は Step 1 の係数を並べた上三角行列と $(T,N,\mathrm{B})$ の積で（\ref{lin:det-multiplicative}）、対角成分の積 $v\cdot v^{2}\kappa\cdot v^{3}\kappa\tau$ に $\det(T,N,\mathrm{B})=1$ を掛けたもの。
+
+**Step 3.** 【主張：公式が成り立つ】$|c'\times c''|=v^{3}\kappa$（$\kappa>0$）から $\kappa$ の式、$\tau=v^{6}\kappa^{2}\tau/(v^{3}\kappa)^{2}$ から $\tau$ の式。$v=1$ なら $v'=0$ で $c''=\kappa N$、$|c''|=\kappa$。
+
+::: hypcheck
+- **前提「フレネ曲線」**：$c'\times c''\neq0$（分母が正）は $c',c''$ の一次独立性と同値。
+:::
+:::
+
+::: example 常らせん {#surf:helix keywords="circular helix (a cos t, a sin t, b t) has constant curvature a/(a^2+b^2) and torsion b/(a^2+b^2)" index="常らせん|つねらせん, 螺旋|らせん, つるまき線|つるまきせん"}
+$a>0$, $b\in\mathbb{R}$ について $c(t)=(a\cos t,a\sin t,bt)$ とすると
+$$
+c'=(-a\sin t,a\cos t,b),\quad c''=(-a\cos t,-a\sin t,0),\quad c'''=(a\sin t,-a\cos t,0).
+$$
+$c'\times c''=(ab\sin t,-ab\cos t,a^{2})$、$|c'\times c''|=a\sqrt{a^{2}+b^{2}}$、$|c'|=\sqrt{a^{2}+b^{2}}$、$\det(c',c'',c''')=\langle c'\times c'',c'''\rangle=a^{2}b$ なので
+$$
+\kappa=\frac{a}{a^{2}+b^{2}},\qquad\tau=\frac{b}{a^{2}+b^{2}}.
+$$
+$b>0$ なら右ねじ（$\tau>0$）、$b<0$ なら左ねじ（$\tau<0$）、$b=0$ なら円で $\tau=0$。
+:::
+
+::: corollary 曲率と捩率が一定の曲線 {#surf:constant-curvature-torsion keywords="a space curve with constant curvature kappa > 0 and constant torsion tau is congruent to a circular helix" index="曲率と捩率が一定の曲線|きょくりつとれいりつがいっていのきょくせん"}
+弧長で径数づけられた $\mathbb{R}^{3}$ のフレネ曲線の曲率 $\kappa>0$ と捩率 $\tau$ が定数なら、$c$ は向きを保つ合同変換で、常らせん $(a\cos(s/\ell),a\sin(s/\ell),bs/\ell)$（$a\defeq\kappa/(\kappa^{2}+\tau^{2})$, $b\defeq\tau/(\kappa^{2}+\tau^{2})$, $\ell\defeq\sqrt{a^{2}+b^{2}}$）の一部に写る。
+:::
+
+::: proof
+例の常らせんは速さ $\ell$ なので、$t=s/\ell$ と取り替えると弧長で径数づけられ、曲率と捩率は $a/(a^{2}+b^{2})$, $b/(a^{2}+b^{2})$ のまま（\ref{surf:curvature-invariance.1}）。$a^{2}+b^{2}=1/(\kappa^{2}+\tau^{2})$ なので、これは $\kappa$, $\tau$ に等しい。\ref{surf:fundamental-theorem-curves.2} から結論が従う（定義域は平行移動 $s\mapsto s+\text{定数}$ で合わせる。常らせんは全区間 $\mathbb{R}$ で定義されているので、制限すればよい）。
+:::
+
+::: proposition 平面に含まれる空間曲線 {#surf:planar-iff-torsion-zero keywords="a Frenet curve in R^3 lies in a plane iff its torsion vanishes identically" index="平面曲線と捩率|へいめんきょくせんとれいりつ"}
+$\mathbb{R}^{3}$ のフレネ曲線 $c\colon I\to\mathbb{R}^{3}$ が一つの平面に含まれることと、$\tau\equiv0$ は同値。このとき $c(I)$ は $c(t_{0})$ を通り $\mathrm{B}(t_{0})$ に直交する平面に含まれる。
+:::
+
+::: proof
+**⇐.** $\mathrm{B}'=-v\tau N=0$ なので $\mathrm{B}$ は定数 $\mathrm{B}_{0}$。$\langle c,\mathrm{B}_{0}\rangle'=\langle vT,\mathrm{B}_{0}\rangle=0$ なので $\langle c(t)-c(t_{0}),\mathrm{B}_{0}\rangle=0$。
+
+**⇒.** 単位ベクトル $u$ と点 $q$ で $\langle c-q,u\rangle\equiv0$ とすると、3 回微分して $c',c'',c'''\perp u$。三つのベクトルが 2 次元の部分空間 $u^{\perp}$ に入るので一次従属で、$\det(c',c'',c''')=0$。\ref{surf:curvature-torsion-formulas} から $\tau=0$。
+:::
+
+::: proposition 局所標準形 {#surf:local-canonical-form keywords="local canonical form of a space curve: Taylor expansion of c(s) in the Frenet frame at s = 0 up to order 3" index="局所標準形|きょくしょひょうじゅんけい, ブーケの公式|ぶーけのこうしき"}
+$c$ を弧長で径数づけられた $\mathbb{R}^{3}$ のフレネ曲線、$0\in I$ とし、$T,N,\mathrm{B},\kappa,\tau,\kappa'$ を $s=0$ での値とする。$s\to0$ で
+$$
+\begin{aligned}
+c(s)-c(0)={}&\Bigl(s-\frac{\kappa^{2}}{6}s^{3}\Bigr)T+\Bigl(\frac{\kappa}{2}s^{2}+\frac{\kappa'}{6}s^{3}\Bigr)N\\
+&+\frac{\kappa\tau}{6}s^{3}\mathrm{B}+o(s^{3}).
+\end{aligned}
+$$
+:::
+
+::: proof
+\ref{surf:curvature-torsion-formulas} の Step 1 で $v=1$ とすると、$s=0$ で $c'=T$, $c''=\kappa N$, $c'''=-\kappa^{2}T+\kappa'N+\kappa\tau\mathrm{B}$。各成分にペアノの剰余項をもつテイラーの定理（\ref{calc:taylor-peano.1}、$n=3$）を使い、$c(s)-c(0)=sc'(0)+\frac{s^{2}}{2}c''(0)+\frac{s^{3}}{6}c'''(0)+o(s^{3})$ に代入する。
+:::
+
+::: definition 接触平面・法平面・展直平面 {#surf:osculating-plane keywords="osculating plane spanned by T and N; normal plane spanned by N and B; rectifying plane spanned by T and B" index="接触平面|せっしょくへいめん, 法平面|ほうへいめん, 展直平面|てんちょくへいめん"}
+フレネ曲線 $c$ の点 $c(s)$ を通り、$T(s),N(s)$ で張られる平面を**接触平面**、$N(s),\mathrm{B}(s)$ で張られる平面を**法平面**、$T(s),\mathrm{B}(s)$ で張られる平面を**展直平面**という。
+:::
+
+::: intuition
+接触平面は、その点の近くで曲線が最もよく収まる平面で、曲線が曲がっていく平面である。法平面は進む向きに垂直な平面、展直平面は曲がる向きに垂直な平面である。
+:::
+
+::: corollary 接触平面と展直平面からの距離 {#surf:osculating-distance keywords="the distance from c(s) to the osculating plane is |kappa tau| |s|^3/6 + o(s^3); to the rectifying plane kappa s^2/2 + o(s^2), and the curve lies on the side of N" index="接触平面からの距離|せっしょくへいめんからのきょり"}
+\ref{surf:local-canonical-form} の状況で、$s\to0$ のとき
+1. $c(s)$ と $s=0$ での接触平面の距離は $\frac{|\kappa\tau|}{6}|s|^{3}+o(s^{3})$。
+2. $c(s)$ と展直平面の距離は $\frac{\kappa}{2}s^{2}+o(s^{2})$ で、十分小さい $s\neq0$ では $c(s)$ は展直平面に対して $N$ の側にある。
+:::
+
+::: proof
+平面 $c(0)+\langle T,N\rangle$ との距離は $|\langle c(s)-c(0),\mathrm{B}\rangle|$ で、\ref{surf:local-canonical-form} から $\frac{\kappa\tau}{6}s^{3}+o(s^{3})$ の絶対値。展直平面とでは $\langle c(s)-c(0),N\rangle=\frac{\kappa}{2}s^{2}+O(s^{3})$ で、$\kappa>0$ なので $s\neq0$ が小さければ正。
+:::
+
+::: intuition
+曲線は、各点で接触平面に 2 次まで貼りついていて、そこから離れるのは 3 次の量（捩率に比例）である。また、曲線はいつも主法線の向きの側へ曲がる。
+:::
+
+## 問題 {#surf:sec-cf-problems}
+
+::: problem {#surf:prob-cf-ellipse}
+★ 基本：楕円 $c(t)=(a\cos t,b\sin t)$（$a,b>0$）の符号付き曲率を求めよ。$a>b$ のとき、曲率が最大・最小になる点はどこか。
+:::
+
+::: solution
+$c'=(-a\sin t,b\cos t)$, $c''=(-a\cos t,-b\sin t)$、$\det(c',c'')=ab\sin^{2}t+ab\cos^{2}t=ab$。\ref{surf:plane-curvature-formula.2} から
+$$
+\kappa(t)=\frac{ab}{(a^{2}\sin^{2}t+b^{2}\cos^{2}t)^{3/2}}.
+$$
+分母の中は $b^{2}+(a^{2}-b^{2})\sin^{2}t$ なので、$a>b$ なら $\sin t=0$（長軸の端 $(\pm a,0)$）で最小になり $\kappa=a/b^{2}$（最大）、$\cos t=0$（短軸の端）で $\kappa=b/a^{2}$（最小）。
+:::
+
+::: problem {#surf:prob-cf-reverse}
+★ 基本：$\mathbb{R}^{3}$ のフレネ曲線 $c\colon(-\alpha,\alpha)\to\mathbb{R}^{3}$ について、逆にたどった曲線 $\tilde c(s)\defeq c(-s)$ の標準フレネ標構・曲率・捩率を、$c$ のもので表せ。
+:::
+
+::: solution
+$\tilde c'(s)=-c'(-s)$, $\tilde c''(s)=c''(-s)$, $\tilde c'''(s)=-c'''(-s)$。\ref{surf:curvature-torsion-formulas} から $|\tilde c'\times\tilde c''|=|c'\times c''|$、$\det(\tilde c',\tilde c'',\tilde c''')=(-1)(1)(-1)\det(c',c'',c''')$ なので $\tilde\kappa(s)=\kappa(-s)$, $\tilde\tau(s)=\tau(-s)$。標構は $\tilde T=-T$（$\langle\tilde T,\tilde c'\rangle>0$）、$\tilde N$ は $\langle\tilde c',\tilde c''\rangle$ の中で $T$ に直交し $\langle\tilde N,c''\rangle>0$ なので $\tilde N=N$、$\det(-T,N,\tilde{\mathrm{B}})=1$ から $\tilde{\mathrm{B}}=-\mathrm{B}$（いずれも $-s$ で評価）。曲率と捩率は向きを逆にするパラメータの取り替えでも変わらない。
+:::
+
+::: problem {#surf:prob-cf-mirror}
+★ 基本：$R$ を $\det R=-1$ の直交行列とする。$\mathbb{R}^{3}$ のフレネ曲線 $c$ について、$Rc$ の曲率と捩率を、\ref{surf:curvature-torsion-formulas} を使って求めよ（\ref{surf:curvature-invariance.2} と比べよ）。
+:::
+
+::: solution
+弧長パラメータで考えてよい（\ref{surf:curvature-invariance.1}）。$(Rc)^{(k)}=Rc^{(k)}$ で $R$ は長さを保つので $|(Rc)''|=|c''|$、曲率は等しい。$\det(Rc',Rc'',Rc''')=\det R\cdot\det(c',c'',c''')=-\det(c',c'',c''')$ なので捩率は $-\tau$。鏡に映した右ねじのらせんは左ねじになる。
+:::
+
+::: problem {#surf:prob-cf-sphere}
+★★ 標準：弧長で径数づけられた $\mathbb{R}^{3}$ のフレネ曲線が半径 $r$ の球面に含まれるなら、$\kappa\ge1/r$ であることを示せ。
+:::
+
+::: solution
+球面の中心を $m$ とすると $|c-m|^{2}=r^{2}$。微分して $\langle c-m,T\rangle=0$、もう一度微分して $\langle T,T\rangle+\langle c-m,\kappa N\rangle=0$、すなわち $\kappa\langle c-m,N\rangle=-1$。コーシー–シュワルツから $1=\kappa|\langle c-m,N\rangle|\le\kappa|c-m|=\kappa r$。
+:::
+
+::: problem {#surf:prob-cf-hyperplane}
+★★ 標準：$\mathbb{R}^{n}$ のフレネ曲線 $c$ が一つの超平面（$n-1$ 次元のアフィン部分空間）に含まれることと、$\kappa_{n-1}\equiv0$ は同値であることを示せ（\ref{surf:planar-iff-torsion-zero} の一般化）。
+:::
+
+::: solution
+**⇐.** フレネ–セレの公式から $e_{n}'=-v\kappa_{n-1}e_{n-1}=0$ で $e_{n}$ は定数。$\langle c,e_{n}\rangle'=\langle ve_{1},e_{n}\rangle=0$ なので、$c$ は $c(t_{0})$ を通り $e_{n}$ に直交する超平面に含まれる。
+
+**⇒.** 単位ベクトル $u$ で $\langle c-q,u\rangle\equiv0$ とすると、すべての $k\ge1$ で $c^{(k)}\perp u$。$c',\dots,c^{(n-1)}$ は $u^{\perp}$（$n-1$ 次元）の中の $n-1$ 個の一次独立なベクトルなので $u^{\perp}$ を張り、$\langle e_{1},\dots,e_{n-1}\rangle=u^{\perp}$。よって $e_{n}=\pm u$ で、符号は連続性から一定、$e_{n}$ は定数。$0=e_{n}'=-v\kappa_{n-1}e_{n-1}$ から $\kappa_{n-1}=0$。
+:::
+
+::: problem {#surf:prob-cf-bounded-curvature}
+★★★ 発展：弧長で径数づけられた平面曲線 $c\colon[0,L]\to\mathbb{R}^{2}$ の符号付き曲率が $|\kappa|\le k$ をみたし、$kL\le\pi$ であるとする。$|c(L)-c(0)|\ge\frac{2}{k}\sin\frac{kL}{2}$ を示せ（等号は円弧）。
+:::
+
+::: solution
+$\theta$ を接線角（\ref{surf:tangent-angle}）とし、$\theta_{m}\defeq\theta(L/2)$ とおく。$|\theta(s)-\theta_{m}|=\bigl|\int_{L/2}^{s}\kappa\bigr|\le k|s-L/2|\le kL/2\le\pi/2$。$u\defeq(\cos\theta_{m},\sin\theta_{m})$ とすると $\langle c'(s),u\rangle=\cos(\theta(s)-\theta_{m})\ge\cos(k|s-L/2|)$（$\cos$ は $[0,\pi/2]$ で減少）。よって
+$$
+|c(L)-c(0)|\ge\langle c(L)-c(0),u\rangle\ge\int_{0}^{L}\cos\Bigl(k\Bigl|s-\frac L2\Bigr|\Bigr)ds=\frac{2}{k}\sin\frac{kL}{2}.
+$$
+半径 $1/k$ の円弧では $\kappa\equiv k$ で、各不等式が等号になる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
