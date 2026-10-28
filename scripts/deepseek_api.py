@@ -102,7 +102,9 @@ def chat(system, user, *, model=DEFAULT_MODEL, temperature=0.0, max_tokens=8192,
             choice = payload["choices"][0]
             text = choice["message"].get("content") or ""
             if choice.get("finish_reason") == "length":
-                print("warning: DeepSeek output was truncated (max_tokens)", file=sys.stderr)
+                # a cut-off answer must never be read as "no issues"
+                raise DeepSeekError("answer cut off at max_tokens=%d (reasoning used %s tokens)" % (
+                    max_tokens, (u.get("completion_tokens_details") or {}).get("reasoning_tokens", "?")))
             return text
         except urllib.error.HTTPError as e:
             last = "HTTP %d: %s" % (e.code, e.read().decode("utf-8", "replace")[:300])

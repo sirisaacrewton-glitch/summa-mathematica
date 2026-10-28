@@ -539,16 +539,26 @@ def verify(rel, args, meta, do_assist=False):
         print("  would verify %s (%d chars, %d open, %d closed) -> %s" % (rel, len(src), len(open_issues), len(closed), tracker_path(rel)))
         return False
     if args.style == "minimal":
-        q = ATOMIC_Q + "\n\n<context>\nCited results (title; quoted text of each cited item):\n" + label_table(src, rel, brief=True) + \
-            "\n</context>\n\n<passage>\n" + src + "\n</passage>"
-        a = deepseek_api.chat(None, q, model=args.model,
-                              **({"max_tokens": 16000, "timeout": 1500} if deepseek_api.is_reasoner(args.model) else {}))
+        # one short question per chunk of at most ~12000 characters (a whole page makes the reasoning run out of room)
+        chunks, cur = [], ""
+        for u in split_units(src):
+            if cur and len(cur) + len(u) > 12000:
+                chunks.append(cur)
+                cur = ""
+            cur += u + "\n\n"
+        if cur.strip():
+            chunks.append(cur)
         cands = []
-        for blk in re.findall(r"<error>([\s\S]*?)</error>", a or ""):
-            quote, why, fix = (_xml("quote", blk) or [""])[0], (_xml("why", blk) or [""])[0], (_xml("fix", blk) or [""])[0]
-            cands.append({"category": "Error", "title": why[:80], "location": "", "quote": quote, "problem": why,
-                          "proposed_fix": fix, "second_opinion": {"verdict": "valid", "reason": "(no second opinion in this style)"}})
-        print("  %s: %d candidates" % (rel, len(cands)))
+        for ch in chunks:
+            q = ATOMIC_Q + "\n\n<context>\nCited results (title; quoted text of each cited item):\n" + label_table(ch, None, brief=True) + \
+                "\n</context>\n\n<passage>\n" + ch + "\n</passage>"
+            a = deepseek_api.chat(None, q, model=args.model,
+                                  **({"max_tokens": 32000, "timeout": 1800} if deepseek_api.is_reasoner(args.model) else {}))
+            for blk in re.findall(r"<error>([\s\S]*?)</error>", a or ""):
+                quote, why, fix = (_xml("quote", blk) or [""])[0], (_xml("why", blk) or [""])[0], (_xml("fix", blk) or [""])[0]
+                cands.append({"category": "Error", "title": why[:80], "location": "", "quote": quote, "problem": why,
+                              "proposed_fix": fix, "second_opinion": {"verdict": "valid", "reason": "(no second opinion in this style)"}})
+        print("  %s: %d chunks, %d candidates" % (rel, len(chunks), len(cands)))
         return finish(rel, args, meta, issues, tp, {"existing": [], "new_issues": [], "summary": ""}, cands, cands)
     if args.style == "atomic":
         cands = atomic_candidates(rel, src, args)
