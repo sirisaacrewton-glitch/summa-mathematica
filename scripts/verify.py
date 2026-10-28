@@ -42,45 +42,58 @@ SRC_RE = re.compile(r"^src/.+\.(?:md|tex)$")
 TRACKER_RE = re.compile(r"^verifications/.+_tracker\.md$")
 SOURCE_RE = re.compile(r'<script type="text/markdown" id="source">([\s\S]*?)</script>')
 REF_RE = re.compile(r"\\(?:ref|tref|nameref|fullref|eqref|numref|see|term)(?:\[[^\]]*\])?\{([^}]+)\}")
-CATEGORIES = ["Logical gap", "Missing hypothesis", "Overpowered theorem", "Improper link",
+CATEGORIES = ["Error", "Gap", "Circularity",
+              # categories of the first prompt (kept so that old trackers still parse)
+              "Logical gap", "Missing hypothesis", "Overpowered theorem", "Improper link",
               "Supplement/remark error", "Unsupported fact"]
 STATUSES = ["Open", "Resolved", "Ignored: Valid Rebuttal"]
 REBUTTAL = "**Opus Rebuttal:**"
 # entries that are not problems (the model sometimes lists sentences it checked and found correct)
 NOT_A_PROBLEM = re.compile(r"\b(no (change|issue|problem|correction|fix)s?\b|not an? (issue|problem|error)|none needed|is correct\.?\s*$|this is correct|acceptable as (is|written)|keep as is)", re.I)
 
-SYSTEM_PROMPT = """You are a strict but fair referee for Summa Mathematica, a Japanese-language mathematics textbook website.
-You check ONE page for logical correctness. The page source is a custom Markdown dialect:
-- Environments are written as `::: theorem Title {#label ...}` ... `:::` (definition, theorem, lemma, proposition, corollary, fact, proof, hypcheck, intuition, example, supplement, remark, problem, solution).
-- `::: fact` states a known result WITHOUT proof on purpose; citing a fact is legitimate.
-- `\\ref{label}`, `\\tref{label}` etc. cite results from other pages; a table of the cited labels (kind, title, page) is given. `\\see{label}` is a non-logical pointer (guidance only) and must not be used as a logical dependency. A label with a suffix like `label.2` means item 2 of that result.
-- Proof steps look like `**Step N.** 【主張：claim】 reason`; 【主張：...】 is the short claim of the step.
-- `::: hypcheck` lists where each hypothesis is used.
+SYSTEM_PROMPT = """You are a careful referee for Summa Mathematica, a Japanese-language mathematics textbook website.
+You check ONE page. Assume the page is correct unless you can SHOW a specific error; a false alarm costs the authors as much as a missed error.
 
-Report ONLY genuine problems of these six kinds:
-1. "Logical gap": a step that does not follow from what precedes it and the cited results, or an essential case that is skipped.
-2. "Missing hypothesis": a cited theorem whose hypotheses are not verified, or a statement that is false without an unstated hypothesis.
-3. "Overpowered theorem": a proof that invokes a much stronger theorem than needed, or a theorem that depends on the result being proved (circularity).
-4. "Improper link": a citation whose target (according to the label table) does not say what the text uses it for, or a mechanically inserted link to the wrong definition or theorem.
-5. "Supplement/remark error": a false, overstated or imprecise claim inside `::: supplement`, `::: remark`, `::: intuition`, a hypcheck comment, or any side comment (e.g. "the hypothesis X cannot be dropped", "this generalizes to Y", "the converse fails", historical attributions, counterexamples).
-6. "Unsupported fact": a `::: fact` or a sentence stated without proof that is false, misattributed, missing hypotheses, or stated more strongly than the literature supports.
+Page format (custom Markdown):
+- Environments: `::: theorem Title {#label ...}` ... `:::` (definition, theorem, lemma, proposition, corollary, fact, proof, hypcheck, intuition, example, supplement, remark, problem, solution, notation, table).
+- `::: fact` states a known result without proof on purpose. `\\see{label}` is a non-logical pointer.
+- `\\ref{L}` cites a result; `\\ref{L.N}` cites item N of L (`L.i` cites item (i)); `\\ref[text]{L.N}` shows "text". The table "Cited results" quotes the statement of every cited result and the text of every cited item. Read it before claiming that a citation is wrong: every label in it exists (the site build checks this).
+- Proof steps: `**Step N.** 【主張：claim】 reason`.
+- Section-wide conventions are stated in `::: notation` and in sentences such as 「以下、…は常に…を表す」; apply them.
+- In tables headed 「含意 | 逆が成り立たない例」 each row is a TRUE implication followed by a space where its CONVERSE fails.
 
-PRIORITY: errors are known to concentrate in supplements, remarks and stated-only facts (kinds 5 and 6), because they are not protected by a proof. Check EVERY such sentence individually: verify the exact hypotheses, quantifiers, dimensions and edge cases, and that each counterexample really is one. Spend more effort there than on the proofs.
-For every issue give a concrete "proposed_fix": the corrected statement or the missing argument, written so that it can be inserted directly (in English).
-Do not report style, wording, typography, translation choices, or missing intuition.
-ONLY PROBLEMS: never output an entry for something you checked and found correct, acceptable, informal or merely terse. If your proposed fix would be "no change needed", do not output the entry at all. A page with no genuine problem must get "new_issues": []. Report at most 12 new issues per page, the most serious first, and give each a "confidence" of "high" or "medium" (omit anything you are less sure of). Do not report something that the text justifies by a citation unless the citation is wrong. Prefer no report over a speculative one. Locate each issue by the environment label or title and the Step number.
+What to report (only these):
+- "Error": a statement, step, example, counterexample or side remark that is mathematically false; or a citation whose quoted text does not give what is used.
+- "Gap": an inference that does not follow from what precedes it and the cited statements, where the missing argument is not a routine one-line check; or a hypothesis of a cited result that is not verified and can fail.
+- "Circularity": a proof that depends on the result being proved.
+Check stated-only claims (facts, remarks, supplements, hypchecks, examples, solutions) as carefully as proofs.
+
+Do NOT report: wording, style, terseness, routine verifications left implicit, missing references, attributions or dates you are not certain are wrong, things the page explicitly says it does not prove, and anything you would fix with "no change".
+
+For each candidate issue, before you output it:
+1. Quote the exact sentence (Japanese original, verbatim, at most 200 characters) in "quote".
+2. State the problem concretely in "problem": for a false claim, give a counterexample or the correct statement and why; for a gap, the exact implication that fails and why the cited statements do not give it.
+3. Write in "defense" the strongest argument that the text is right as written (page conventions, definitions, cited statements, standard facts). If the defense succeeds, DROP the issue.
+Output at most 8 issues, most serious first.
 
 You also re-evaluate previously reported OPEN issues:
-- "Resolved" if the current text fixes the problem (or the problem no longer exists).
-- "Ignored: Valid Rebuttal" ONLY if an Opus Rebuttal is attached AND its argument is mathematically correct. Read the rebuttal carefully; if it is wrong or incomplete, keep "Open" and explain why in the note.
-- otherwise "Open".
-Never re-report an issue that is listed as closed (Resolved or Ignored) unless the text has clearly re-introduced it.
+- "Resolved" if the current text fixes the problem or the problem does not exist.
+- "Ignored: Valid Rebuttal" ONLY if an Opus Rebuttal is attached AND its argument is mathematically correct; otherwise keep "Open" and say why in the note.
+Never re-report an issue that is listed as closed unless the text has clearly re-introduced it.
 
 Answer with a single JSON object (json), no prose outside it:
 {"existing": [{"id": "ISSUE-0001", "status": "Open" | "Resolved" | "Ignored: Valid Rebuttal", "note": "one or two sentences"}],
- "new_issues": [{"category": "Logical gap" | "Missing hypothesis" | "Overpowered theorem" | "Improper link" | "Supplement/remark error" | "Unsupported fact", "title": "short title", "location": "label / Step", "detail": "explanation", "proposed_fix": "corrected text or missing argument", "confidence": "high" | "medium"}],
+ "new_issues": [{"category": "Error" | "Gap" | "Circularity", "title": "short title", "location": "label / Step", "quote": "...", "problem": "...", "defense": "...", "proposed_fix": "corrected text or missing argument"}],
  "summary": "one paragraph overall assessment"}
-All text fields must be written in English Markdown.
+All text fields except "quote" must be written in English Markdown.
+
+""" + deepseek_api.STRICT_LATEX_RULES
+
+
+CONFIRM_PROMPT = """You are a second, independent referee for Summa Mathematica (a Japanese mathematics textbook site).
+Another referee reported a possible problem on the page below. Decide whether it is REAL.
+Work like this: re-read the quoted text in context, read the cited statements, and try hard to show that the text is correct as written (page conventions, definitions, the cited statements, standard mathematics). The report is "valid" only if you cannot defend the text and can state the error concretely (a counterexample, a false implication, or a citation whose quoted text does not give what is used). Wording, terseness and routine one-line checks are not errors: answer "invalid" for those.
+Answer with a single JSON object (json): {"verdict": "valid" | "invalid" | "unsure", "reason": "two to five sentences in English"}
 
 """ + deepseek_api.STRICT_LATEX_RULES
 
@@ -160,7 +173,7 @@ def render_tracker(rel, issues, meta, summary):
         out += ["(no issues)", ""]
     for it in issues:
         out.append("### %s [%s] %s" % (it["id"], it["status"], it["title"]))
-        for k in ["Category", "Location", "Detail", "Proposed fix", "Reported", "History"]:
+        for k in ["Category", "Location", "Quote", "Detail", "Proposed fix", "Second opinion", "Reported", "History"]:
             v = it["fields"].get(k)
             if v:
                 lines = v.split("\n")
@@ -194,8 +207,7 @@ _LABELS = None
 _ITEM_CACHE = {}
 
 
-def item_text(lab, key):
-    """Text of item `key` (1, 2, ..., a, i, ...) of the environment `lab`, read from its page source."""
+def _env_body(lab):
     L = _LABELS.get(lab) or {}
     page = L.get("page")
     if not page:
@@ -210,13 +222,24 @@ def item_text(lab, key):
     if not m:
         return ""
     end = src.find("\n:::", m.end())
-    body = src[src.find("\n", m.end()) + 1:end if end > 0 else None]
+    return src[src.find("\n", m.end()) + 1:end if end > 0 else None]
+
+
+def item_text(lab, key):
+    """Text of item `key` (1, 2, ..., a, i, ...) of the environment `lab`, read from its page source."""
+    body = _env_body(lab)
     pat = (r"(?m)^" + re.escape(key) + r"\. (.*)") if key.isdigit() else (r"(?m)^\s*(?:- )?(?:\*\*)?[(（]" + re.escape(key) + r"[)）](.*)")
     im = re.search(pat, body)
-    return re.sub(r"\s+", " ", im.group(1)).strip()[:220] if im else ""
+    return re.sub(r"\s+", " ", im.group(1)).strip()[:300] if im else ""
 
 
-def label_table(src):
+def statement_text(lab, limit=700):
+    t = re.sub(r"\s+", " ", _env_body(lab)).strip()
+    return t[:limit] + (" …" if len(t) > limit else "")
+
+
+def label_table(src, rel=None):
+    """The cited results with their statements (and the text of each cited item), for the referee."""
     global _LABELS
     if _LABELS is None:
         try:
@@ -227,23 +250,30 @@ def label_table(src):
     labels = _LABELS
     if not labels:
         return "(labels.json not available)"
-    rows, seen = [], set()
+    order, items = [], {}
     for lab in REF_RE.findall(src):
-        if lab in seen:
-            continue
-        seen.add(lab)
-        base, _, key = lab.rpartition(".") if "." in lab and lab.rpartition(".")[0] in labels else (lab, "", "")
+        base, key = lab, ""
+        if "." in lab and lab.rpartition(".")[0] in labels:
+            base, _, key = lab.rpartition(".")
+        if base not in items:
+            order.append(base)
+            items[base] = []
+        if key and key not in items[base]:
+            items[base].append(key)
+    out = []
+    for base in order:
         L = labels.get(base)
-        if L:
-            txt = item_text(base, key) if key else ""
-            rows.append("| %s | %s %s | %s | %s | %s |" % (lab, L.get("type", ""), L.get("num", ""), L.get("title", ""), L.get("page", ""),
-                                                        txt.replace("|", "\\|") or ("item %s" % key if key else "")))
-        else:
-            rows.append("| %s | (undefined or planned) | | | |" % lab)
-    head = ("Every label below exists (the site build checks labels and items). `L.N` / `L.i` is item N / (i) of L; "
-            "the last column quotes that item so you can check that it says what the text uses it for.\n"
-            "| label | kind | title | page | cited item |\n|---|---|---|---|---|\n")
-    return head + "\n".join(rows) if rows else "(no citations)"
+        if not L:
+            out.append("- `%s`: (planned, not yet written)" % base)
+            continue
+        if rel and L.get("page") == rel and not items[base]:
+            continue  # on this page: the referee sees it in the source
+        kind = ("%s %s" % (L.get("type", ""), L.get("num", ""))).strip()
+        st = statement_text(base) if L.get("type") not in ("page", "section") else ""
+        out.append("- `%s` — %s「%s」(%s)%s" % (base, kind, L.get("title", ""), L.get("page", ""), (": " + st) if st else ""))
+        for k in items[base]:
+            out.append("  - cited item `%s.%s`: %s" % (base, k, item_text(base, k) or "(see the statement)"))
+    return "\n".join(out) if out else "(no citations)"
 
 
 def targets_from_range(rng):
@@ -323,9 +353,10 @@ def assist(rel, src, args, meta):
     if args.mock_assist:
         raw = open(args.mock_assist, encoding="utf-8").read()
     else:
-        raw = deepseek_api.chat(ASSIST_PROMPT, user, model=args.model, json_mode=True, temperature=0.3)
+        raw = deepseek_api.chat(ASSIST_PROMPT, user, model=args.model, json_mode=True, temperature=0.3,
+                                **({"max_tokens": 32000, "timeout": 1200} if deepseek_api.is_reasoner(args.model) else {}))
     try:
-        res = json.loads(raw)
+        res = deepseek_api.parse_json(raw)
     except ValueError:
         print("  %s: assist returned invalid JSON; suggestions left unchanged" % rel)
         return
@@ -344,15 +375,42 @@ def next_id(issues):
     return "ISSUE-%04d" % (n + 1)
 
 
+def read_source(rel, rev=None):
+    if rev:
+        return source_at(rev, rel)
+    with open(os.path.join(ROOT, rel), encoding="utf-8") as f:
+        return extract_source(rel, f.read())
+
+
+def ask_json(system, user, args, retry_note):
+    """One JSON answer; on a broken answer (usually truncated) ask once more with retry_note appended."""
+    try:
+        return deepseek_api.chat_json(system, user, model=args.model)
+    except ValueError:
+        return deepseek_api.chat_json(system, user + "\n\n" + retry_note, model=args.model)
+
+
+def confirm(rel, src, table, issue, args):
+    """Second, independent judgement of one candidate issue: 'valid', 'invalid' or 'unsure'."""
+    user = "\n".join(["Page: %s" % rel, "", "## Reported problem", json.dumps(issue, ensure_ascii=False, indent=1), "",
+                      "## Cited results (statements quoted from their pages)", table, "",
+                      "## Page source", "----- SOURCE START -----", src, "----- SOURCE END -----"])
+    try:
+        r = ask_json(CONFIRM_PROMPT, user, args, "Answer again with the JSON object only.")
+    except (ValueError, deepseek_api.DeepSeekError) as e:
+        return {"verdict": "unsure", "reason": "second opinion failed: %s" % e}
+    v = str(r.get("verdict", "unsure")).lower()
+    return {"verdict": v if v in ("valid", "invalid", "unsure") else "unsure", "reason": (r.get("reason") or "").strip()}
+
+
 def verify(rel, args, meta, do_assist=False):
-    path = os.path.join(ROOT, rel)
-    with open(path, encoding="utf-8") as f:
-        src = extract_source(rel, f.read())
+    src = read_source(rel, args.rev)
     if not src:
         print("  skip %s: no source" % rel)
         return False
+    bench = bool(args.out_dir)
     tp = os.path.join(ROOT, tracker_path(rel))
-    issues = parse_tracker(open(tp, encoding="utf-8").read()) if os.path.exists(tp) else []
+    issues = parse_tracker(open(tp, encoding="utf-8").read()) if (os.path.exists(tp) and not bench) else []
     open_issues = [i for i in issues if i["status"] == "Open"]
     closed = [i for i in issues if i["status"] != "Open"]
 
@@ -363,38 +421,50 @@ def verify(rel, args, meta, do_assist=False):
             d["opus_rebuttal"] = i["rebuttal"][len(REBUTTAL):].strip() if i["rebuttal"] else ""
         return d
 
+    table = label_table(src, rel)
     user = "\n".join([
         "Page: %s" % rel, "",
-        "## Cited labels", label_table(src), "",
+        "## Cited results (statements quoted from their pages)", table, "",
         "## Previously reported OPEN issues (re-evaluate each)",
         json.dumps([brief(i, True) for i in open_issues], ensure_ascii=False, indent=1), "",
         "## Closed issues (do not re-report)",
         json.dumps([{"id": i["id"], "status": i["status"], "title": i["title"]} for i in closed], ensure_ascii=False, indent=1), "",
         "## Page source", "----- SOURCE START -----", src, "----- SOURCE END -----"])
 
-    if do_assist:
+    if do_assist and not bench:
         assist(rel, src, args, meta)
     if args.dry_run:
         print("  would verify %s (%d chars, %d open, %d closed) -> %s" % (rel, len(src), len(open_issues), len(closed), tracker_path(rel)))
         return False
-    if args.mock_response:
-        raw = open(args.mock_response, encoding="utf-8").read()
-    else:
-        raw = deepseek_api.chat(SYSTEM_PROMPT, user, model=args.model, json_mode=True)
     try:
-        res = json.loads(raw)
-    except ValueError:
         if args.mock_response:
-            print("  %s: invalid JSON; tracker left unchanged" % rel)
-            return False
-        # usually a truncated answer: ask again for a shorter one
-        raw = deepseek_api.chat(SYSTEM_PROMPT, user + "\n\nYour previous answer was not valid JSON (probably too long). "
-                                "Answer again with at most 6 new issues and short fields.", model=args.model, json_mode=True)
-        try:
-            res = json.loads(raw)
-        except ValueError:
-            print("  %s: DeepSeek returned invalid JSON twice; tracker left unchanged" % rel)
-            return False
+            res = deepseek_api.parse_json(open(args.mock_response, encoding="utf-8").read())
+        else:
+            res = ask_json(SYSTEM_PROMPT, user, args,
+                           "Your previous answer was not valid JSON (probably too long). Answer again with at most 5 new issues and short fields.")
+    except ValueError:
+        print("  %s: DeepSeek returned invalid JSON twice; tracker left unchanged" % rel)
+        return False
+
+    # second stage: every candidate is judged again independently; only "valid" ones are kept
+    candidates = []
+    for n in res.get("new_issues", []) or []:
+        fix = (n.get("proposed_fix") or "").strip()
+        if not fix or NOT_A_PROBLEM.search(fix):
+            continue
+        n["second_opinion"] = {"verdict": "valid", "reason": "(not checked)"} if (args.no_confirm or args.mock_response) \
+            else confirm(rel, src, table, {k: n.get(k) for k in ("category", "location", "quote", "problem", "proposed_fix")}, args)
+        candidates.append(n)
+    kept = [n for n in candidates if n["second_opinion"]["verdict"] == "valid"]
+
+    if bench:
+        os.makedirs(args.out_dir, exist_ok=True)
+        out = os.path.join(args.out_dir, rel.replace("/", "__").replace(".html", ".json"))
+        with open(out, "w", encoding="utf-8") as f:
+            json.dump({"page": rel, "rev": args.rev, "model": args.model, "candidates": candidates,
+                       "summary": res.get("summary", "")}, f, ensure_ascii=False, indent=1)
+        print("  %s: %d candidates, %d confirmed -> %s" % (rel, len(candidates), len(kept), out))
+        return True
 
     stamp = "%s (%s)" % (meta["date"], meta["commit"])
     by_id = {i["id"]: i for i in issues}
@@ -412,27 +482,20 @@ def verify(rel, args, meta, do_assist=False):
             hist = it["fields"].get("History", "")
             it["fields"]["History"] = (hist + "\n" if hist else "") + "%s: %s%s" % (stamp, st, (" — " + note) if note else "")
         it["status"] = st
-    kept = []
-    for n in res.get("new_issues", []) or []:
-        fix, det = (n.get("proposed_fix") or "").strip(), (n.get("detail") or "").strip()
-        if not fix or NOT_A_PROBLEM.search(fix) or NOT_A_PROBLEM.search(det[-80:]):
-            continue
-        if str(n.get("confidence", "high")).lower() not in ("high", "medium"):
-            continue
-        kept.append(n)
-    res["new_issues"] = kept
     for n in kept:
-        cat = n.get("category") if n.get("category") in CATEGORIES else "Logical gap"
+        cat = n.get("category") if n.get("category") in CATEGORIES else "Error"
         it = {"id": next_id(issues), "status": "Open", "title": (n.get("title") or "issue").strip().replace("\n", " "),
               "fields": {"Category": cat, "Location": (n.get("location") or "").strip(),
-                         "Detail": (n.get("detail") or "").strip(),
-                         "Proposed fix": (n.get("proposed_fix") or "").strip(), "Reported": stamp}, "rebuttal": ""}
+                         "Quote": (n.get("quote") or "").strip(),
+                         "Detail": (n.get("problem") or n.get("detail") or "").strip(),
+                         "Proposed fix": (n.get("proposed_fix") or "").strip(),
+                         "Second opinion": n["second_opinion"]["reason"], "Reported": stamp}, "rebuttal": ""}
         issues.append(it)
     os.makedirs(os.path.dirname(tp), exist_ok=True)
     with open(tp, "w", encoding="utf-8") as f:
         f.write(render_tracker(rel, issues, meta, res.get("summary") or ""))
-    print("  %s: %d open, %d new -> %s" % (rel, sum(1 for i in issues if i["status"] == "Open"),
-                                            len(res.get("new_issues", []) or []), tracker_path(rel)))
+    print("  %s: %d open, %d new (%d candidates) -> %s" % (rel, sum(1 for i in issues if i["status"] == "Open"),
+                                                         len(kept), len(candidates), tracker_path(rel)))
     return True
 
 
@@ -443,12 +506,15 @@ def main():
     g.add_argument("--files", nargs="+", help="explicit target files (repository-relative)")
     g.add_argument("--all", action="store_true", help="every page and src file (full audit; use with --shard)")
     ap.add_argument("--max-files", type=int, default=15, help="cap per run to bound API cost (default 15)")
-    ap.add_argument("--model", default=deepseek_api.DEFAULT_MODEL)
+    ap.add_argument("--model", default=os.environ.get("DEEPSEEK_MODEL") or deepseek_api.DEFAULT_MODEL)
     ap.add_argument("--shard", default="1/1", help="K/N: take every N-th target starting at K (parallel jobs)")
     ap.add_argument("--workers", type=int, default=1, help="parallel API requests in this process")
     ap.add_argument("--skip-verified", action="store_true", help="skip targets that already have a tracker (resume)")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--mock-response", help="read the DeepSeek JSON answer from this file (testing)")
+    ap.add_argument("--rev", help="read the pages at this git revision instead of the working tree")
+    ap.add_argument("--out-dir", help="benchmark mode: write raw JSON results here and do not touch trackers")
+    ap.add_argument("--no-confirm", action="store_true", help="skip the second-opinion stage")
     ap.add_argument("--assist", action="store_true",
                     help="also write verifications/<path>_assist.md (step claims, alternative proofs/definitions)")
     ap.add_argument("--mock-assist", help="read the assist JSON answer from this file (testing)")

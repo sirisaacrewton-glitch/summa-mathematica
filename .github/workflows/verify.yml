@@ -6,6 +6,8 @@ name: verify
 # Manual run (Actions -> verify -> Run workflow):
 #   mode "files": the space-separated files given in "files"
 #   mode "all"  : full audit of every page, split over 8 parallel jobs
+#   mode "bench": run the verifier on scripts/bench/benchmark.json (pages at a fixed old revision with known
+#                 true and false findings) and push the raw results to verifications/bench/ for scoring
 on:
   push:
     branches: [main]
@@ -20,12 +22,17 @@ on:
       mode:
         description: 'files = the files below; all = full audit of every page'
         type: choice
-        options: [files, all]
+        options: [files, all, bench]
         default: files
       files:
         description: 'Space-separated repository-relative files to verify (mode files)'
         required: false
         default: ''
+      model:
+        description: 'DeepSeek model (deepseek-reasoner thinks before answering: slower, usually more accurate)'
+        type: choice
+        options: [deepseek-chat, deepseek-reasoner]
+        default: deepseek-chat
       assist:
         description: 'Also write *_assist.md (step claims, alternative proofs/definitions)'
         type: boolean
@@ -58,6 +65,7 @@ jobs:
       - name: Verify changed pages with DeepSeek
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ inputs.model || 'deepseek-chat' }}
           FILES: ${{ inputs.files }}
           ASSIST: ${{ github.event_name == 'push' || inputs.assist }}
         run: |
@@ -72,6 +80,7 @@ jobs:
         if: github.event_name == 'push'
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ inputs.model || 'deepseek-chat' }}
         run: python scripts/roadmap.py --git-range "${{ github.event.before }}..${{ github.sha }}"
 
       - name: Push trackers to verifications/
@@ -99,6 +108,7 @@ jobs:
       - name: Full audit, shard ${{ matrix.shard }}/8
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ inputs.model || 'deepseek-chat' }}
           ASSIST: ${{ inputs.assist }}
           SKIP: ${{ inputs.skip_verified }}
         run: |
@@ -110,3 +120,31 @@ jobs:
         if: always()
         run: |
           bash scripts/push_verifications.sh "chore: full verification audit, shard ${{ matrix.shard }}/8 [skip ci]"
+
+  bench:
+    if: github.event_name == 'workflow_dispatch' && inputs.mode == 'bench'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Benchmark the verifier
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ inputs.model }}
+        run: |
+          REV=$(python -c "import json;print(json.load(open('scripts/bench/benchmark.json'))['rev'])")
+          FILES=$(python -c "import json;print(' '.join(p['page'] for p in json.load(open('scripts/bench/benchmark.json'))['pages']))")
+          python scripts/verify.py --files $FILES --rev $REV --workers 5 --max-files 100 \
+            --out-dir "verifications/bench/${DEEPSEEK_MODEL}-run${{ github.run_number }}"
+
+      - name: Push results to verifications/bench/
+        if: always()
+        run: |
+          bash scripts/push_verifications.sh "chore: verifier benchmark (${{ inputs.model }}) [skip ci]"
