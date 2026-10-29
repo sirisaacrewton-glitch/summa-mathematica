@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>解の延長と最大解 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/01-basics/03-maximal-solutions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 解の延長と最大解 {#ode:page-maximal-solutions keywords="locally Lipschitz implies Lipschitz on compact sets, uniform existence time on compact sets, maximal solution exists uniquely on an open interval, escape lemma: a maximal solution leaves every compact subset of D at the ends, blow-up alternative, global existence under linear growth, autonomous systems: solutions staying in a compact set exist for all time"}
+
+ピカール–リンデレーフの定理は短い時間の解しか与えない。解をどこまで延ばせるかを調べると、局所リプシッツの条件のもとで、各初期値に対して延長できない解（**最大解**）がただ一つあり、その定義域は開区間である（\ref{ode:maximal-solution}）。さらに、最大解は定義域の端で、$D$ のどんなコンパクト集合からも出ていく（**逃避補題**、\ref{ode:escape-lemma}）。つまり、解が途中で止まるのは「$D$ の境界に近づく」か「無限遠に飛んでいく」ときに限る。帰結として、右辺が $x$ について線形以下の増大度なら、解は時間の区間全体で存在する（\ref{ode:linear-growth-global}）。
+
+## 記法と定義の確認 {#ode:sec-ms-notation}
+
+::: notation
+- 解・積分方程式・リプシッツ条件・グロンウォールの不等式は \ref{ode:ode-solution}, \ref{ode:integral-equation}, \ref{ode:lipschitz-condition}, \ref{ode:gronwall}。\ref{ode:picard-lindelof}、一意性は \ref{ode:uniqueness}。
+- このページ以降、とくに断らない限り、$D\subset\mathbb{R}\times\mathbb{R}^{n}$ は開集合、$f\colon D\to\mathbb{R}^{n}$ は連続で $x$ について局所リプシッツとする。
+- 点と集合の距離 $\operatorname{dist}(p,A)\defeq\inf_{q\in A}|p-q|$（$\mathbb{R}\times\mathbb{R}^{n}=\mathbb{R}^{n+1}$ のユークリッド距離）。
+:::
+
+## コンパクト集合の上での一様な評価 {#ode:sec-ms-uniform}
+
+::: lemma コンパクト集合上のリプシッツ性 {#ode:lipschitz-on-compact keywords="a function locally Lipschitz in x is Lipschitz in x on every compact subset of D" index="コンパクト集合上のリプシッツ性|こんぱくとしゅうごうじょうのりぷしっつせい"}
+$K\subset D$ がコンパクトなら、$f$ は $K$ の上で $x$ についてリプシッツ連続である（$(t,x),(t,y)\in K$ なら $|f(t,x)-f(t,y)|\le L|x-y|$ となる $L$ がある）。
+:::
+
+::: proof
+そうでないとすると、各 $m\ge1$ に $(t_{m},x_{m}),(t_{m},y_{m})\in K$ で $|f(t_{m},x_{m})-f(t_{m},y_{m})|>m|x_{m}-y_{m}|$ となるものがある。$M\defeq\max_{K}|f|$ とすると左辺は $2M$ 以下なので $|x_{m}-y_{m}|<2M/m\to0$。$K$ はコンパクトなので、部分列をとって $(t_{m},x_{m})\to p\in K$ としてよく、このとき $(t_{m},y_{m})\to p$。$p$ の近傍 $U$ で $f$ が定数 $L_{p}$ で $x$ についてリプシッツ連続なものをとると、十分大きな $m$ で両方の点が $U$ に入り、$m|x_{m}-y_{m}|<|f(t_{m},x_{m})-f(t_{m},y_{m})|\le L_{p}|x_{m}-y_{m}|$。$x_{m}\neq y_{m}$（不等式が真なので）だから $m<L_{p}$ で、$m\to\infty$ に矛盾。
+:::
+
+::: lemma 一様な存在時間 {#ode:uniform-existence-time keywords="for a compact K in D there is h > 0 such that every initial value problem with initial point in K has a solution on [tau - h, tau + h]" index="一様な存在時間|いちようなそんざいじかん"}
+$K\subset D$ をコンパクトとする。$h>0$ があって、各 $(\tau,\eta)\in K$ について、初期値 $(\tau,\eta)$ の解が $[\tau-h,\tau+h]$ の上に存在する。
+:::
+
+::: proof
+**Step 1（余裕のあるコンパクト近傍）.** $D=\mathbb{R}^{n+1}$ なら $\rho\defeq1$、そうでなければ連続関数 $p\mapsto\operatorname{dist}(p,\mathbb{R}^{n+1}\setminus D)$ は $K$ 上で正（$D$ は開集合）なので最小値 $2\rho>0$ をとる。$K_{\rho}\defeq\{p:\operatorname{dist}(p,K)\le\rho\}$ は有界閉集合でコンパクトで、$D$ に含まれる。
+
+**Step 2（定数）.** $a=r\defeq\rho/2$ とすると、$(\tau,\eta)\in K$ について $C_{(\tau,\eta)}\defeq[\tau-a,\tau+a]\times\bar B(\eta,r)$ の点は $(\tau,\eta)$ から距離 $\sqrt{a^{2}+r^{2}}<\rho$ 以内なので $C_{(\tau,\eta)}\subset K_{\rho}$。\ref{ode:lipschitz-on-compact} から $f$ は $K_{\rho}$ の上で $x$ について（定数 $L$ で）リプシッツ連続、$M\defeq\max_{K_{\rho}}|f|$。$h\defeq\min(a,r/M)$（$M=0$ なら $a$）とすると、\ref{ode:picard-lindelof} を $C_{(\tau,\eta)}$ に使えて（$C_{(\tau,\eta)}$ 上の $|f|$ の最大値は $M$ 以下なので、そこでの $h$ は上の $h$ 以上）、解は $[\tau-h,\tau+h]$ 上に存在する。
+:::
+
+## 最大解 {#ode:sec-ms-maximal}
+
+::: definition 延長と最大解 {#ode:maximal-solution-def keywords="extension of a solution; maximal (non-extendable) solution" index="解の延長|かいのえんちょう, 最大解|さいだいかい, 延長不能な解|えんちょうふのうなかい"}
+区間 $J\subset J'$ の上の解 $x$, $x'$ について $x'\restriction J=x$ のとき、$x'$ を $x$ の**延長**という。自分自身以外に延長をもたない解を**最大解**（延長不能な解）という。
+:::
+
+::: theorem 最大解の存在と一意性 {#ode:maximal-solution keywords="for f locally Lipschitz in x, each initial value problem has a unique maximal solution, defined on an open interval (alpha, beta) containing t_0, and every solution of the problem is a restriction of it" index="最大解の存在と一意性|さいだいかいのそんざいといちいせい"}
+各 $(t_{0},\xi)\in D$ について、初期値 $(t_{0},\xi)$ の最大解 $x$ がただ一つあり、その定義域は $t_{0}$ を含む開区間 $(\alpha,\beta)$（$-\infty\le\alpha<t_{0}<\beta\le\infty$）である。初期値 $(t_{0},\xi)$ のどの解も $x$ の制限である。
+:::
+
+::: proof
+**Step 1（すべての解の和）.** 初期値 $(t_{0},\xi)$ の解の全体を $\mathcal{S}$ とし、$J_{\max}\defeq\bigcup_{y\in\mathcal{S}}\operatorname{dom}y$ とする。各定義域は $t_{0}$ を含む区間なので、$J_{\max}$ も区間。$\mathcal{S}$ は空でない（\ref{ode:local-existence-uniqueness}）。$t\in J_{\max}$ について、$t\in\operatorname{dom}y$ となる $y\in\mathcal{S}$ をとり $x(t)\defeq y(t)$ とおく。二つの解は定義域の共通部分で一致する（\ref{ode:uniqueness}）ので、$x$ は well-defined。$x$ は各 $\operatorname{dom}y$ の上で解 $y$ に一致し、各点 $t$ のまわりで（区間 $\operatorname{dom}y$ の中で）$C^{1}$ 級で方程式を満たすので、$J_{\max}$ 上の解である。作り方から、すべての解は $x$ の制限で、$x$ は最大解。最大解が二つあれば、一方は他方の制限で、最大性から一致する。
+
+**Step 2（定義域は開）.** $J_{\max}$ が右端 $\beta$ を含むとする。$(\beta,x(\beta))\in D$ なので、初期値 $(\beta,x(\beta))$ の解 $z$ が $[\beta,\beta+\delta]$ 上にある（\ref{ode:local-existence-uniqueness}）。$t\le\beta$ で $x$、$t\ge\beta$ で $z$ とつないだ $\tilde x$ は、積分方程式 $\tilde x(t)=\xi+\int_{t_{0}}^{t}f(s,\tilde x(s))ds$ を満たす（$t\ge\beta$ では $z(t)=x(\beta)+\int_{\beta}^{t}f(s,z)$ と $x(\beta)=\xi+\int_{t_{0}}^{\beta}f(s,x)$ を足す）ので、\ref{ode:integral-equation} から解で、$x$ の真の延長になり矛盾。左端も同様。$t_{0}$ は内部にある（局所解は $t_{0}$ の両側に延びる）。
+:::
+
+::: theorem 逃避補題 {#ode:escape-lemma keywords="escape lemma: a maximal solution on (alpha, beta) leaves every compact subset K of D as t -> beta and as t -> alpha: there is t_K < beta with (t, x(t)) not in K for t in (t_K, beta)" index="逃避補題|とうひほだい, 解の爆発（判定）|かいのばくはつはんてい"}
+$x$ を $(\alpha,\beta)$ 上の最大解とし、$K\subset D$ をコンパクトとする。$t_{K}<\beta$ があって、$t\in(t_{K},\beta)$ なら $(t,x(t))\notin K$。$\alpha$ の側も同様。
+:::
+
+::: intuition
+コンパクト集合の中では、どの点から出発しても一定の時間 $h$ は解が延びる（一様な存在時間）。もし解が、終わりの時刻 $\beta$ の直前にもう一度 $K$ に戻ってきたら、そこから $h$ だけ延ばせて $\beta$ を超えてしまう。だから最後には $K$ に戻ってこない。
+:::
+
+::: proof
+$\beta=\infty$ なら、$K$ の $t$ 座標は有界なので、$t_{K}\defeq\max\{t:(t,x)\in K\}$（$K\neq\varnothing$ のとき）でよい。$\beta<\infty$ とし、結論が成り立たないとすると、$t_{m}\to\beta$（$t_{m}<\beta$）で $(t_{m},x(t_{m}))\in K$ となる列がある。\ref{ode:uniform-existence-time} の $h$ をとり、$\beta-t_{m}<h$ となる $m$ を一つ固定する。初期値 $(t_{m},x(t_{m}))$ の解 $z$ が $[t_{m}-h,t_{m}+h]$ 上にある。$z$ と $x$ は $t_{m}$ で一致するので、共通の定義域 $[t_{m},\beta)$ の上で一致する（\ref{ode:uniqueness}）。$x$ と $z$ をつないだもの（$t<t_{m}$ で $x$、$t\ge t_{m}$ で $z$）は $(\alpha,t_{m}+h]$ 上の解で（\ref{ode:maximal-solution} の Step 2 と同じく積分方程式から）、$t_{m}+h>\beta$ なので $x$ の真の延長になり、最大性に矛盾。
+:::
+
+::: corollary 逃避補題の帰結 {#ode:escape-corollaries keywords="if D = I x R^n and beta < sup I then |x(t)| -> infinity as t -> beta; for autonomous systems on W, if beta < infinity then x(t) leaves every compact subset of W; a solution staying in a compact set is global" index="爆発の判定|ばくはつのはんてい"}
+$x$ を $(\alpha,\beta)$ 上の最大解とする。
+1. $D=I\times\mathbb{R}^{n}$（$I$ は開区間）で $\beta<\sup I$ なら、$t\to\beta$ で $|x(t)|\to\infty$。
+2. 自励系 $x'=F(x)$（$D=\mathbb{R}\times W$）で $\beta<\infty$ なら、$W$ の任意のコンパクト集合 $K$ について、$t$ が $\beta$ に十分近ければ $x(t)\notin K$。
+3. とくに自励系で、$[t_{0},\beta)$ の上で $x(t)$ が $W$ のあるコンパクト集合に留まるなら $\beta=\infty$。
+:::
+
+::: proof
+**1.** $R>0$ について、$K\defeq[t_{0},\beta]\times\bar B(0,R)$ はコンパクトで $D$ に含まれる（$\beta<\sup I$）。逃避補題から、$\beta$ に近い $t$ では $(t,x(t))\notin K$、$t\in[t_{0},\beta]$ なので $|x(t)|>R$。
+
+**2.** $K'\defeq[t_{0},\beta]\times K$ に逃避補題を使う。
+
+**3.** 2 の対偶。
+:::
+
+::: theorem 線形増大なら大域解 {#ode:linear-growth-global keywords="if D = I x R^n and |f(t,x)| <= a(t) + b(t)|x| with a, b continuous on I, every maximal solution is defined on all of I" index="大域解|たいいきかい, 線形増大条件|せんけいぞうだいじょうけん"}
+$D=I\times\mathbb{R}^{n}$（$I$ は開区間）で、$I$ 上の連続関数 $a,b\ge0$ があって $|f(t,x)|\le a(t)+b(t)|x|$ なら、すべての最大解の定義域は $I$ である。
+:::
+
+::: proof
+$\beta<\sup I$ とする。$t\in[t_{0},\beta)$ で、積分方程式から
+$$
+|x(t)|\le|\xi|+\int_{t_{0}}^{t}\bigl(a+b|x|\bigr)\le\Bigl(|\xi|+\int_{t_{0}}^{\beta}a\Bigr)+\int_{t_{0}}^{t}b(s)|x(s)|ds.
+$$
+（$a,b$ は $[t_{0},\beta]\subset I$ で連続なので積分は有限。）$[t_{0},t_{1}]$（$t_{1}<\beta$）にグロンウォールの不等式（定数の形）を使うと $|x(t)|\le\bigl(|\xi|+\int_{t_{0}}^{\beta}a\bigr)\exp\bigl(\int_{t_{0}}^{\beta}b\bigr)$ で、右辺は $t_{1}$ によらない。よって $x$ は $[t_{0},\beta)$ で有界で、\ref{ode:escape-corollaries.1} に反する。$\alpha$ の側も同様。
+:::
+
+::: supplement
+**高い視点：局所から大域へ、コンパクト性の役割.** 最大解の存在は「局所解の一意性」と「解の貼り合わせ」から従う。これは層の言葉で言えば、解の全体が局所的に決まる（層をなす）ことと、一意性によって貼り合わせが整合することの帰結である。逃避補題は、一様な存在時間（コンパクト集合の上での一様性）を使って、局所の情報を端点での振る舞いに変える。同じ型の議論は、多様体上のベクトル場の流れ（コンパクトな台をもつベクトル場は完備）、リーマン幾何のホップ–リノウの定理（距離空間としての完備性と測地線の延長）、リー群の左不変ベクトル場の完備性（群の一様性が一様な存在時間を与える、\ref{lie:invariant-field-complete}）に現れる。比喩で言えば、解が「止まる」のは、地図（$D$）の端に着くか、地図の外へ飛び出すときだけで、地図の中の囲まれた部屋（コンパクト集合）に居続ける限り、旅は終わらない。
+
+**補足.** 局所リプシッツの仮定がなく連続なだけでも、ペアノの定理とツォルンの補題から延長不能な解の存在が示せるが、一意性はなく、逃避補題に相当する主張も（適切に述べ直せば）成り立つことが知られている。
+:::
+
+## 問題 {#ode:sec-ms-problems}
+
+::: problem {#ode:prob-ms-blowup-power}
+$p>1$ について、$x'=x^{p}$, $x(0)=1$（$D=\mathbb{R}\times(0,\infty)$）の最大解を求め、右端 $\beta$ と $t\to\beta$ での振る舞いを確かめよ。
+:::
+
+::: solution
+変数分離（\ref{ode:basic-examples.4}）で $\int_{1}^{x}s^{-p}ds=t$、$\frac{1-x^{1-p}}{p-1}=t$、$x(t)=(1-(p-1)t)^{-1/(p-1)}$。$\beta=1/(p-1)$ で $x\to\infty$。左は $t\to-\infty$ で $x\to0$ だが $x>0$ のまま延びるので $\alpha=-\infty$。\ref{ode:escape-corollaries.2} と整合（$\beta<\infty$ で、$x(t)$ は $(0,\infty)$ のどのコンパクト集合からも出ていく）。
+:::
+
+::: problem {#ode:prob-ms-sin-global}
+$x'=\sin(tx)$（$n=1$）の最大解はすべて $\mathbb{R}$ 全体で定義されることを示せ。
+:::
+
+::: solution
+$|\sin(tx)|\le1$ なので、$a\equiv1$, $b\equiv0$ として \ref{ode:linear-growth-global} が使える。右辺は $C^{1}$ 級なので局所リプシッツ（\ref{ode:c1-locally-lipschitz}）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

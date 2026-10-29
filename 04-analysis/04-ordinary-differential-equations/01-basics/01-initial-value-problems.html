@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>初期値問題 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/01-basics/01-initial-value-problems.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 初期値問題 {#ode:page-initial-value-problems keywords="ordinary differential equation in normal form x' = f(t,x), solution, initial value problem, reduction of higher order equations to first order systems, autonomous equations, equivalent integral equation, examples: linear scalar equation, blow-up, non-uniqueness, separation of variables, Lipschitz condition, locally Lipschitz, C^1 implies locally Lipschitz, Gronwall inequality"}
+
+常微分方程式は、未知の曲線 $x(t)$ の速度 $x'(t)$ を、時刻 $t$ と現在の位置 $x(t)$ の関数として与える方程式 $x'=f(t,x)$ である。この系列では、初期値 $x(t_{0})=\xi$ を与えたときに解が存在するか（存在）、一つに決まるか（一意性）、どこまで延びるか（延長）、初期値を動かすと解がどう動くか（依存性）を順に調べ、最後に、自励系の解をまとめた**流れ**が滑らかであることを示す。この最後の結果は、多様体上のベクトル場の流れ（\ref{mfd:flow-theorem}）、リーマン幾何の指数写像、リー群の指数写像の土台である。
+
+このページでは、問題の定式化と、以後の議論で繰り返し使う二つの道具を準備する。一つは、微分方程式を同値な**積分方程式**に書き直すこと（\ref{ode:integral-equation}）。もう一つは、解の差を評価する**グロンウォールの不等式**（\ref{ode:gronwall}）である。また、解が有限時間で発散する例と、解が一つに決まらない例を見て、定理の仮定がどこで効くかを確かめる。
+
+## 記法と定義の確認 {#ode:sec-iv-notation}
+
+::: notation
+- $|\cdot|$ は $\mathbb{R}^{n}$ のユークリッドノルム、$\|A\|$ は行列の作用素ノルム（\ref{calc:operator-norm}, \ref{calc:operator-norm-properties}）。$\bar B(\xi,r)\defeq\{x:|x-\xi|\le r\}$。
+- **区間**は、1 点でない $\mathbb{R}$ の連結部分集合（開・閉・半開、有界・非有界を問わない）とする。区間の端点での微分は片側微分とする。
+- ベクトル値関数の積分は成分ごとの積分。\ref{calc:fundamental-theorem}は成分ごとに使える。不等式 $\bigl|\int_{a}^{b}g\bigr|\le\int_{a}^{b}|g|$（$a\le b$）は \ref{vec:vector-integral-inequality}。$t<t_{0}$ のときも $\int_{t_{0}}^{t}$ と書き、$\bigl|\int_{t_{0}}^{t}g\bigr|\le\bigl|\int_{t_{0}}^{t}|g|\bigr|$ と使う。
+- \ref{calc:mean-value-inequality}、$C^{k}$ 級写像の合成は \ref{calc:ck-composition}。
+- 以下、$D\subset\mathbb{R}\times\mathbb{R}^{n}$ は開集合、$f\colon D\to\mathbb{R}^{n}$ は連続とする。
+:::
+
+## 初期値問題 {#ode:sec-iv-definition}
+
+::: definition 常微分方程式と解 {#ode:ode-solution keywords="first order system x' = f(t,x) in normal form; solution on an interval J: C^1 map with graph in D; initial value problem x(t_0) = xi; autonomous equation x' = F(x)" index="常微分方程式|じょうびぶんほうていしき, 初期値問題|しょきちもんだい, 解（常微分方程式）|かいじょうびぶんほうていしき, 自励系|じれいけい, 正規形|せいきけい"}
+1. 方程式 $x'=f(t,x)$ の区間 $J$ 上の**解**とは、$C^{1}$ 級の写像 $x\colon J\to\mathbb{R}^{n}$ で、すべての $t\in J$ について $(t,x(t))\in D$ かつ $x'(t)=f(t,x(t))$ となるものをいう。
+2. $(t_{0},\xi)\in D$ について、$t_{0}\in J$ かつ $x(t_{0})=\xi$ となる解を求める問題を**初期値問題**といい、$(t_{0},\xi)$ を**初期値**という。
+3. $f$ が $t$ によらない、つまり開集合 $W\subset\mathbb{R}^{n}$ 上の連続写像 $F$ があって $D=\mathbb{R}\times W$, $f(t,x)=F(x)$ のとき、方程式 $x'=F(x)$ を**自励系**という。
+:::
+
+$x$ が解なら $x'(t)=f(t,x(t))$ は連続関数の合成で連続なので、「$C^{1}$ 級」は「微分可能」と同じ条件である。
+
+::: proposition 高階の方程式の 1 階化 {#ode:higher-order-reduction keywords="an m-th order equation y^(m) = g(t, y, y', ..., y^(m-1)) is equivalent to a first order system for x = (y, y', ..., y^(m-1))" index="高階の微分方程式|こうかいのびぶんほうていしき, 1 階化|いっかいか"}
+$E\subset\mathbb{R}\times(\mathbb{R}^{k})^{m}$ を開集合、$g\colon E\to\mathbb{R}^{k}$ を連続とする。$C^{m}$ 級の $y\colon J\to\mathbb{R}^{k}$ が $y^{(m)}=g(t,y,y',\dots,y^{(m-1)})$ を満たすことと、$x\defeq(y,y',\dots,y^{(m-1)})\colon J\to\mathbb{R}^{km}$ が 1 階の方程式
+$$
+x_{1}'=x_{2},\ \dots,\ x_{m-1}'=x_{m},\ x_{m}'=g(t,x_{1},\dots,x_{m})
+$$
+の解であることは同値である。逆に、この方程式の解 $x$ について、$y\defeq x_{1}$ は $C^{m}$ 級で元の方程式を満たし、$x=(y,\dots,y^{(m-1)})$。
+:::
+
+::: proof
+前半は定義をそのまま書き直したもの。後半：$x$ が解なら、$x_{1}'=x_{2}$, $x_{2}'=x_{3}$, … から帰納的に $x_{1}$ は $j$ 回微分可能で $x_{1}^{(j-1)}=x_{j}$（$j\le m$）。$x_{m}'=g(\dots)$ は連続なので $x_{1}$ は $C^{m}$ 級で、$y^{(m)}=x_{m}'=g(t,y,\dots,y^{(m-1)})$。
+:::
+
+以下、この 1 階化によって、1 階の連立方程式だけを扱う。
+
+::: lemma 積分方程式との同値 {#ode:integral-equation keywords="a continuous x with graph in D solves x' = f(t,x), x(t_0) = xi iff x(t) = xi + int_{t_0}^t f(s, x(s)) ds" index="積分方程式（常微分方程式）|せきぶんほうていしきじょうびぶんほうていしき"}
+$J$ を $t_{0}$ を含む区間、$x\colon J\to\mathbb{R}^{n}$ を連続で $(t,x(t))\in D$（$t\in J$）とする。次は同値である。
+1. $x$ は初期値 $(t_{0},\xi)$ の解である。
+2. すべての $t\in J$ について $x(t)=\xi+\int_{t_{0}}^{t}f(s,x(s))\,ds$。
+:::
+
+::: proof
+$s\mapsto f(s,x(s))$ は連続（連続写像の合成）。1 ⇒ 2：$x'$ は連続なので、基本定理（\ref{calc:fundamental-theorem.2}）を成分ごとに使うと $x(t)-x(t_{0})=\int_{t_{0}}^{t}x'=\int_{t_{0}}^{t}f(s,x(s))ds$。2 ⇒ 1：右辺は連続関数の不定積分なので、基本定理（\ref{calc:fundamental-theorem.1}）から微分可能で、導関数は $f(t,x(t))$。$t=t_{0}$ とおいて $x(t_{0})=\xi$。
+:::
+
+::: intuition
+微分方程式は「各瞬間の速度」を指定し、積分方程式は「それまでの速度の累積」で位置を指定する。積分方程式の形にすると、微分可能性を仮定せず連続関数の中で解を探せる。連続関数の空間は一様収束で完備なので、極限操作（逐次近似や部分列の極限）が扱いやすくなる。
+:::
+
+## 例 {#ode:sec-iv-examples}
+
+::: example 解の振る舞いの典型例 {#ode:basic-examples keywords="x' = a x has only the solutions c e^{at}; x' = x^2 blows up in finite time; x' = 2 sqrt|x| has infinitely many solutions with x(0) = 0; separation of variables" index="有限時間での爆発|ゆうげんじかんでのばくはつ, 解の非一意性|かいのひいちいせい, 変数分離形|へんすうぶんりけい"}
+1. $a\in\mathbb{R}$ について、$x'=ax$（$n=1$, $D=\mathbb{R}^{2}$）の区間 $J$ 上の解は $x(t)=ce^{at}$（$c$ は定数）に限る。
+2. $x'=x^{2}$, $x(0)=1$ の解は $x(t)=1/(1-t)$ で、$t<1$ の範囲にしか延びない。右辺 $x^{2}$ は滑らかで、方程式は $\mathbb{R}^{2}$ 全体で定義されているのに、解は有限時間で発散する（**爆発**）。
+3. $x'=2\sqrt{|x|}$, $x(0)=0$ は、$x\equiv0$ と、各 $c\ge0$ についての
+$$
+x_{c}(t)\defeq\begin{cases}0&(t\le c)\\(t-c)^{2}&(t>c)\end{cases}
+$$
+を解にもつ。初期値問題の解が一つに決まらない。
+4. （**変数分離形**）$g\colon I\to\mathbb{R}$, $h\colon K\to\mathbb{R}$ を開区間上の連続関数とし、$K$ 上で $h\neq0$ とする。$H(x)\defeq\int_{\xi}^{x}\frac{ds}{h(s)}$, $G(t)\defeq\int_{t_{0}}^{t}g$ とおくと、$x'=g(t)h(x)$, $x(t_{0})=\xi$（$t_{0}\in I$, $\xi\in K$）の $K$ に値をとる解は、$H(x(t))=G(t)$ を満たす関数とちょうど一致する。$H$ は狭義単調なので、解は $x(t)=H^{-1}(G(t))$（$G(t)\in H(K)$ となる $t$ の、$t_{0}$ を含む区間の上）。
+:::
+
+::: proof
+**1.** $ce^{at}$ が解であることは微分すれば分かる。逆に $x$ が解なら $(e^{-at}x)'=e^{-at}(x'-ax)=0$ なので、区間の上で $e^{-at}x$ は定数（平均値の定理）。
+
+**2.** $x(t)=1/(1-t)$ は $x'=1/(1-t)^{2}=x^{2}$, $x(0)=1$。$t\to1-0$ で $x\to+\infty$ なので、$t=1$ を含む区間の上の解には延ばせない（解は連続なので、$t=1$ の近くで有界でなければならない）。この初期値の解がほかにないことは、次のページの一意性の定理で示す（右辺は $C^{1}$ 級。\see{ode:uniqueness}）。
+
+**3.** $x_{c}$ は $C^{1}$ 級：$t>c$ で $x_{c}'=2(t-c)$、$t<c$ で $0$、$t=c$ では左右の微分係数がともに $0$（右側は $\lim_{h\to+0}h^{2}/h=0$）。$t>c$ で $2\sqrt{|x_{c}|}=2(t-c)=x_{c}'$、$t\le c$ で両辺 $0$。$c\ge0$ なので $x_{c}(0)=0$。
+
+**4.** $H$ は $K$ 上で $C^{1}$ 級で $H'=1/h$ は符号が一定（中間値の定理：$h$ は連続で $0$ にならない）なので、$H$ は狭義単調で、逆関数 $H^{-1}\colon H(K)\to K$ は $C^{1}$ 級（\ref{calc:inverse-function-theorem} の 1 変数の場合、あるいは逆関数の微分公式）。$K$ に値をとる $C^{1}$ 級の $x$ について、連鎖律から $\frac{d}{dt}H(x(t))=x'(t)/h(x(t))$ なので、$x'=g\,h(x)\iff\frac{d}{dt}(H(x(t))-G(t))=0$。$H(x(t_{0}))-G(t_{0})=0$ なので、これは区間の上で $H(x(t))=G(t)$ と同値。
+:::
+
+::: remark
+3 の非一意性は、右辺 $2\sqrt{|x|}$ が $x=0$ で連続だがリプシッツ連続でないことによる（次節）。2 の爆発は、右辺が $x$ について「線形より速く増える」ことによる（線形の増大度なら爆発しないことを後で示す。\see{ode:linear-growth-global}）。
+:::
+
+## リプシッツ条件 {#ode:sec-iv-lipschitz}
+
+::: definition リプシッツ条件 {#ode:lipschitz-condition keywords="f is Lipschitz in x on a set A with constant L; locally Lipschitz in x on D: each point has a neighbourhood on which f is Lipschitz in x" index="リプシッツ条件|りぷしっつじょうけん, 局所リプシッツ|きょくしょりぷしっつ"}
+1. 部分集合 $A\subset D$ の上で $f$ が **$x$ についてリプシッツ連続**（定数 $L$）であるとは、$(t,x),(t,y)\in A$ なら $|f(t,x)-f(t,y)|\le L|x-y|$ となることをいう。
+2. $D$ の各点が、その上で $f$ が $x$ についてリプシッツ連続になる近傍をもつとき、$f$ は **$x$ について局所リプシッツ**であるという。
+:::
+
+::: proposition 偏微分が連続なら局所リプシッツ {#ode:c1-locally-lipschitz keywords="if the partial derivative D_x f exists and is continuous on D, then f is locally Lipschitz in x; in particular C^1 maps are; Lipschitz on compact cylinders" index="局所リプシッツの十分条件|きょくしょりぷしっつのじゅうぶんじょうけん"}
+$D_{x}f$（$x$ についてのヤコビ行列）が $D$ 上で存在して連続なら、$f$ は $x$ について局所リプシッツである。より詳しく、$[t_{0}-a,t_{0}+a]\times\bar B(\xi,r)\subset D$ なら、$L\defeq\max\|D_{x}f\|$（この集合の上の最大値）を定数として、$f$ はこの集合の上で $x$ についてリプシッツ連続である。
+:::
+
+::: proof
+$C\defeq[t_{0}-a,t_{0}+a]\times\bar B(\xi,r)$ は有界閉集合なのでコンパクト（\ref{top:heine-borel}）で、$\|D_{x}f\|$ は連続（作用素ノルムは $M_{n}(\mathbb{R})$ のノルムで連続、\ref{calc:operator-norm-properties.3}）なので最大値 $L$ をとる（\ref{top:extreme-value}）。$t$ を固定すると、$x\mapsto f(t,x)$ は凸集合 $\bar B(\xi,r)$ の近傍で微分可能で、導関数のノルムは $L$ 以下なので、\ref{calc:mean-value-inequality}から $|f(t,x)-f(t,y)|\le L|x-y|$。$D$ は開集合なので、各点 $(t_{0},\xi)\in D$ に $C\subset D$ となる $a,r>0$ があり、$C$ の内部はその点の近傍。
+:::
+
+## グロンウォールの不等式 {#ode:sec-iv-gronwall}
+
+::: theorem グロンウォールの不等式 {#ode:gronwall keywords="Gronwall: if u(t) <= a(t) + int_{t_0}^t b u, then u(t) <= a(t) + int_{t_0}^t a(s) b(s) exp(int_s^t b) ds; with a constant, u(t) <= a exp(int b); backward version" index="グロンウォールの不等式|ぐろんうぉーるのふとうしき"}
+$t_{0}<t_{1}$ とし、$u,a,b\colon[t_{0},t_{1}]\to\mathbb{R}$ を連続、$b\ge0$ とする。すべての $t\in[t_{0},t_{1}]$ で
+$$
+u(t)\le a(t)+\int_{t_{0}}^{t}b(s)u(s)\,ds
+$$
+なら、すべての $t\in[t_{0},t_{1}]$ で
+$$
+u(t)\le a(t)+\int_{t_{0}}^{t}a(s)b(s)\exp\Bigl(\int_{s}^{t}b\Bigr)ds.
+$$
+とくに $a$ が定数 $C$ なら $u(t)\le C\exp\bigl(\int_{t_{0}}^{t}b\bigr)$。区間 $[t_{1},t_{0}]$（$t_{1}<t_{0}$）で $u(t)\le C+\int_{t}^{t_{0}}bu$ なら $u(t)\le C\exp\bigl(\int_{t}^{t_{0}}b\bigr)$。
+:::
+
+::: intuition
+$u$ が「自分自身の過去の積分」で上から抑えられているなら、$u$ は指数関数より速くは増えられない。等号の場合 $u'=bu$ の解が指数関数であることを、不等式に移したものである。
+:::
+
+::: proof
+**Step 1（積分の部分を微分する）.** $R(t)\defeq\int_{t_{0}}^{t}b(s)u(s)ds$, $B(t)\defeq\int_{t_{0}}^{t}b$ とおく。基本定理から $R'=bu$, $B'=b$。仮定 $u\le a+R$ と $b\ge0$ から $R'=bu\le ab+bR$。
+
+**Step 2（積分因子）.** $\frac{d}{dt}\bigl(e^{-B(t)}R(t)\bigr)=e^{-B}(R'-bR)\le a(t)b(t)e^{-B(t)}$。$t_{0}$ から $t$ まで積分すると（$R(t_{0})=0$、積分の単調性）
+$$
+e^{-B(t)}R(t)\le\int_{t_{0}}^{t}a(s)b(s)e^{-B(s)}ds,\qquad R(t)\le\int_{t_{0}}^{t}a(s)b(s)e^{B(t)-B(s)}ds.
+$$
+$B(t)-B(s)=\int_{s}^{t}b$ で、$u\le a+R$ から主張が従う。
+
+**Step 3（定数の場合）.** $a\equiv C$ なら $\int_{t_{0}}^{t}Cb(s)e^{B(t)-B(s)}ds=C\bigl[-e^{B(t)-B(s)}\bigr]_{s=t_{0}}^{s=t}=C(e^{B(t)}-1)$ なので $u\le Ce^{B(t)}$。
+
+**Step 4（逆向き）.** $\tilde u(\tau)\defeq u(t_{0}-\tau)$, $\tilde b(\tau)\defeq b(t_{0}-\tau)$（$\tau\in[0,t_{0}-t_{1}]$）とおくと、置換 $s=t_{0}-\sigma$ で $\int_{t}^{t_{0}}bu=\int_{0}^{t_{0}-t}\tilde b\tilde u$ なので、Step 3 を $\tilde u$ に使えばよい。
+
+::: hypcheck
+- **$b\ge0$**：Step 1 で $u\le a+R$ に $b$ を掛けて不等号を保つのに使った。$b$ が負になりうると結論は成り立たない。
+- **連続性**：基本定理で $R'=bu$ とするのに使った（積分可能なだけでも、ほとんど至るところの微分で同様の議論ができることが知られているが、ここでは扱わない）。
+:::
+:::
+
+::: corollary 解の差の評価と一意性の原型 {#ode:gronwall-difference keywords="if f is Lipschitz in x with constant L on a set containing the graphs of two solutions x, y on [t_0, t_1], then |x(t) - y(t)| <= |x(t_0) - y(t_0)| e^{L|t - t_0|}" index="解の差の評価|かいのさのひょうか"}
+$J$ を $t_{0}$ を含む有界閉区間、$x,y$ を $J$ 上の $x'=f(t,x)$ の解とし、両者のグラフを含む集合 $A\subset D$ の上で $f$ が $x$ について定数 $L$ でリプシッツ連続であるとする。このとき、$t\in J$ について
+$$
+|x(t)-y(t)|\le|x(t_{0})-y(t_{0})|\,e^{L|t-t_{0}|}.
+$$
+とくに $x(t_{0})=y(t_{0})$ なら $J$ 上で $x=y$。
+:::
+
+::: proof
+積分方程式（\ref{ode:integral-equation}）の差をとると、$t\ge t_{0}$ で
+$$
+|x(t)-y(t)|\le|x(t_{0})-y(t_{0})|+\int_{t_{0}}^{t}|f(s,x(s))-f(s,y(s))|ds\le|x(t_{0})-y(t_{0})|+\int_{t_{0}}^{t}L|x(s)-y(s)|ds.
+$$
+グロンウォールの不等式（$u=|x-y|$, $a=|x(t_{0})-y(t_{0})|$, $b=L$）から主張が従う。$t\le t_{0}$ では逆向きの形を使う。
+:::
+
+::: supplement
+**高い視点：微分方程式は「積分作用素の不動点」.** 積分方程式 $x=\xi+\int_{t_{0}}^{t}f(s,x)$ は、連続関数の空間の上の写像 $T(x)(t)\defeq\xi+\int_{t_{0}}^{t}f(s,x(s))ds$ の不動点を求める問題である。$f$ がリプシッツなら $T$ は（短い時間では）縮小写像になり、不動点はただ一つで、逐次近似 $T^{k}(x_{0})$ で求まる（次のページ）。グロンウォールの不等式は、$T$ の「縮小の度合い」を時間について積み上げた評価で、$T$ の $k$ 回の反復が $L^{k}|t-t_{0}|^{k}/k!$ 倍に縮むことの、閉じた形での表現である（$\sum L^{k}t^{k}/k!=e^{Lt}$）。比喩で言えば、リプシッツ定数 $L$ は「二つの解が離れていく速さの上限」で、グロンウォールは「その速さで離れても、最初の差の $e^{Lt}$ 倍を超えない」と言っている。
+
+**補足.** \ref{ode:basic-examples.3} のように右辺が連続なだけでも、解は存在する（ペアノの定理。\see{ode:peano}）。一意性は、リプシッツ条件より弱いオスグッドの条件 $|f(t,x)-f(t,y)|\le\omega(|x-y|)$, $\int_{0}\frac{dr}{\omega(r)}=\infty$ でも成り立つことが知られている。$\omega(r)=2\sqrt r$ では積分が有限で、3 の非一意性と整合する。
+:::
+
+## 問題 {#ode:sec-iv-problems}
+
+::: problem {#ode:prob-iv-second-order}
+$y''=-y$ を 1 階の連立方程式に書き直し、$y(0)=0$, $y'(0)=1$ の解 $y=\sin t$ に対応する解 $x(t)$ を書け。
+:::
+
+::: solution
+$x=(x_{1},x_{2})=(y,y')$ とすると $x_{1}'=x_{2}$, $x_{2}'=-x_{1}$（\ref{ode:higher-order-reduction}）。$x(t)=(\sin t,\cos t)$、初期値 $x(0)=(0,1)$。
+:::
+
+::: problem {#ode:prob-iv-logistic}
+$x'=x(1-x)$, $x(0)=\xi\in(0,1)$ の解を変数分離で求め、$\mathbb{R}$ 全体で定義され $t\to\infty$ で $1$ に収束することを示せ。
+:::
+
+::: solution
+$h(x)=x(1-x)$ は $(0,1)$ で正。$H(x)=\int_{\xi}^{x}\frac{ds}{s(1-s)}=\log\frac{x}{1-x}-\log\frac{\xi}{1-\xi}$、$G(t)=t$。$H(x)=t$ を解くと $x(t)=\frac{\xi e^{t}}{1-\xi+\xi e^{t}}$。分母は正なので $\mathbb{R}$ 全体で定義され、値は $(0,1)$ にあり（$H$ の値域は $\mathbb{R}$）、$t\to\infty$ で $1$ に収束する。\ref{ode:basic-examples.4} から、$(0,1)$ に値をとる解はこれだけ。
+:::
+
+::: problem {#ode:prob-iv-gronwall-sharp}
+グロンウォールの不等式で $a\equiv C$, $b\equiv L$ のとき、結論 $u\le Ce^{L(t-t_{0})}$ は等号が成り立ちうること（最良であること）を示せ。
+:::
+
+::: solution
+$u(t)\defeq Ce^{L(t-t_{0})}$ とすると $C+\int_{t_{0}}^{t}Lu=C+C(e^{L(t-t_{0})}-1)=u(t)$ で、仮定は等号で成り立ち、結論も等号。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

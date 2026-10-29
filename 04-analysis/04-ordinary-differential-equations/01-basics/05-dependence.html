@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>初期値とパラメータへの依存性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/01-basics/05-dependence.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 初期値とパラメータへの依存性 {#ode:page-dependence keywords="general solution phi(t, t_0, xi), its domain Omega is open, continuous dependence on initial conditions, Gronwall estimate, continuous dependence of linear equations on coefficients, differentiable dependence, variational equation Y' = D_x f(t, phi) Y, derivative with respect to the initial time, C^k and C^infinity dependence by induction on the augmented system, dependence on parameters"}
+
+最大解を初期値の関数として並べたもの $\phi(t,t_{0},\xi)$（**一般解**）を考える。このページの主結果は、右辺 $f$ が $C^{k}$ 級なら一般解も $C^{k}$ 級であること（\ref{ode:ck-dependence}）である。証明は三段階で進む。まず、一般解の定義域が開集合で、一般解が連続であることを、グロンウォールの不等式で示す（\ref{ode:continuous-dependence}）。次に、初期値で微分できること、そしてその微分が**変分方程式**という線形方程式の解であることを示す（\ref{ode:c1-dependence}）。最後に、元の方程式と変分方程式を並べた拡大系に、同じ結果を帰納的に適用して $C^{k}$ 級を得る。パラメータへの依存性は、パラメータを「時間で変化しない未知関数」とみなせば初期値への依存性に帰着する。
+
+## 記法と定義の確認 {#ode:sec-dp-notation}
+
+::: notation
+- 最大解・逃避補題・コンパクト集合上のリプシッツ性は \ref{ode:maximal-solution}, \ref{ode:escape-lemma}, \ref{ode:lipschitz-on-compact}。グロンウォールの不等式は \ref{ode:gronwall}。線形方程式は \ref{ode:linear-existence}, \ref{ode:fundamental-matrix}。
+- 偏導関数が連続なら $C^{1}$ 級であることは \ref{calc:continuous-partials-differentiable}, \ref{calc:c1-equivalent}、連鎖律は \ref{calc:multivariable-chain-rule}、\ref{calc:mean-value-inequality}、\ref{top:heine-cantor}。
+- $D\subset\mathbb{R}\times\mathbb{R}^{n}$ は開集合、$f\colon D\to\mathbb{R}^{n}$ は連続で $x$ について局所リプシッツ。$(t_{0},\xi)\in D$ の最大解の定義域を $(\alpha(t_{0},\xi),\beta(t_{0},\xi))$ とし、
+$$
+\Omega\defeq\{(t,t_{0},\xi):(t_{0},\xi)\in D,\ \alpha(t_{0},\xi)<t<\beta(t_{0},\xi)\}\subset\mathbb{R}\times\mathbb{R}\times\mathbb{R}^{n},
+$$
+$\phi(t,t_{0},\xi)$ を $(t_{0},\xi)$ の最大解の時刻 $t$ での値とする（**一般解**）。
+:::
+
+一意性から、$t_{1}$ が $(t_{0},\xi)$ の最大解の定義域にあれば、$(t_{1},\phi(t_{1},t_{0},\xi))$ の最大解は $(t_{0},\xi)$ の最大解と同じで、
+$$
+\phi(t,t_{1},\phi(t_{1},t_{0},\xi))=\phi(t,t_{0},\xi).
+$$
+
+## 連続依存性 {#ode:sec-dp-continuous}
+
+::: theorem 初期値への連続依存性 {#ode:continuous-dependence keywords="Omega is open and the general solution phi is continuous on Omega; quantitative estimate |phi(t,t_0,xi) - phi(t,t_0*,xi*)| <= (|xi - xi*| + M|t_0 - t_0*|) e^{L(d-c)} on compact subintervals" index="初期値への連続依存性|しょきちへのれんぞくいぞんせい, 一般解|いっぱんかい"}
+$\Omega$ は開集合で、$\phi\colon\Omega\to\mathbb{R}^{n}$ は連続である。より詳しく、$(t_{0}^{*},\xi^{*})\in D$ とその最大解 $x^{*}$、$t_{0}^{*}$ を含む有界閉区間 $[c,d]\subset(\alpha(t_{0}^{*},\xi^{*}),\beta(t_{0}^{*},\xi^{*}))$ について、定数 $\delta,L,M>0$ があって、$|t_{0}-t_{0}^{*}|<\delta$, $|\xi-\xi^{*}|<\delta$ なら $(t_{0},\xi)$ の最大解は $[c,d]$ 上で定義され、$t\in[c,d]$ で
+$$
+|\phi(t,t_{0},\xi)-x^{*}(t)|\le\bigl(|\xi-\xi^{*}|+M|t_{0}-t_{0}^{*}|\bigr)e^{L(d-c)}.
+$$
+:::
+
+::: intuition
+近い初期値から出た二つの解は、リプシッツ定数 $L$ の速さ以上には離れない（グロンウォール）。離れる量が小さいうちは、両方の解が同じコンパクト集合の中にあって、同じリプシッツ定数が使える。その「小さいうち」が区間 $[c,d]$ 全体で続くことを、連続性の議論で確かめる。
+:::
+
+::: proof
+**Step 1（定数）.** 最大解の定義域は開区間なので、必要なら $[c,d]$ を定義域の中で少し広げて、$t_{0}^{*}$ が $[c,d]$ の内部にあるとしてよい。$G\defeq\{(t,x^{*}(t)):t\in[c,d]\}$ はコンパクトで $D$ に含まれる。\ref{ode:uniform-existence-time} の Step 1 と同じく $\rho>0$ を、$K\defeq\{p:\operatorname{dist}(p,G)\le\rho\}\subset D$ となるようにとる（$K$ はコンパクト）。$L$ を $K$ 上の $x$ についてのリプシッツ定数（\ref{ode:lipschitz-on-compact}）、$M\defeq\max_{K}|f|$ とする。$\delta>0$ を、$\delta(1+M)e^{L(d-c)}<\rho$ かつ $[t_{0}^{*}-\delta,t_{0}^{*}+\delta]\subset[c,d]$ となるようにとる。
+
+**Step 2（出発点の差）.** $|t_{0}-t_{0}^{*}|<\delta$, $|\xi-\xi^{*}|<\delta$ とし、$y$ を $(t_{0},\xi)$ の最大解とする。$t_{0}\in[c,d]$ で、$|x^{*}(t_{0})-x^{*}(t_{0}^{*})|\le M|t_{0}-t_{0}^{*}|$（積分方程式と $|f|\le M$ on $G$）なので
+$$
+e_{0}\defeq|y(t_{0})-x^{*}(t_{0})|\le|\xi-\xi^{*}|+M|t_{0}-t_{0}^{*}|<\delta(1+M).
+$$
+
+**Step 3（右向きの継続）.** $S\defeq\{t\in[t_{0},d]:t<\beta(t_{0},\xi)\text{ かつ }[t_{0},t]\text{ 上で }|y-x^{*}|<\rho\}$ とする。$t_{0}\in S$（$e_{0}<\rho$）。【主張：$S$ の上で $|y(t)-x^{*}(t)|\le e_{0}e^{L(t-t_{0})}$】$s\in[t_{0},t]$ で $(s,y(s))$ は $(s,x^{*}(s))$ から距離 $\rho$ 未満なので $K$ に入る。積分方程式の差から $|y(t)-x^{*}(t)|\le e_{0}+\int_{t_{0}}^{t}L|y-x^{*}|$ で、グロンウォールの不等式から主張が従う。とくに $S$ の上で $|y-x^{*}|\le e_{0}e^{L(d-c)}<\rho$（$\delta$ の選び方）。
+
+【主張：$S=[t_{0},d]$】$\tau\defeq\sup S$ とする。$[t_{0},\tau)$ の上で $y$ のグラフはコンパクト集合 $K$ に入るので、逃避補題（\ref{ode:escape-lemma}）から $\tau<\beta(t_{0},\xi)$（$\tau=\beta$ なら $\beta$ の直前で $K$ から出ていくはず）。よって $y(\tau)$ が定義され、連続性から $|y(\tau)-x^{*}(\tau)|\le e_{0}e^{L(d-c)}<\rho$。$\tau<d$ なら、連続性から $\tau$ の少し右まで $|y-x^{*}|<\rho$ で、$\tau=\sup S$ に反する。よって $\tau=d\in S$。
+
+**Step 4（左向き）.** 同様に $[c,t_{0}]$ の上でも（逆向きのグロンウォール）。以上で $[c,d]$ 上の評価が示された。
+
+**Step 5（開集合と連続性）.** $(t_{1},t_{0}^{*},\xi^{*})\in\Omega$ をとり、$[c,d]$ を $t_{0}^{*}$ と $t_{1}$ を内部に含むようにとる（定義域は開区間なので可能）。Step 3・4 から、$(c,d)\times(t_{0}^{*}-\delta,t_{0}^{*}+\delta)\times B(\xi^{*},\delta)\subset\Omega$ で、$\Omega$ は開。この近傍の点 $(t,t_{0},\xi)$ について
+$$
+|\phi(t,t_{0},\xi)-\phi(t_{1},t_{0}^{*},\xi^{*})|\le|\phi(t,t_{0},\xi)-x^{*}(t)|+|x^{*}(t)-x^{*}(t_{1})|\le\bigl(|\xi-\xi^{*}|+M|t_{0}-t_{0}^{*}|\bigr)e^{L(d-c)}+M|t-t_{1}|
+$$
+で、右辺は $(t,t_{0},\xi)\to(t_{1},t_{0}^{*},\xi^{*})$ で $0$ に近づく。
+
+::: hypcheck
+- **局所リプシッツ**：Step 1 の $L$（コンパクト集合上のリプシッツ性）と、逃避補題（最大解の一意性）に使った。
+- **逃避補題**：Step 3 で、近くの解が $[c,d]$ の途中で終わらないことに使った。
+:::
+:::
+
+::: lemma 線形方程式の係数への連続依存性 {#ode:linear-parameter-continuity keywords="if A(t, lambda) is continuous on [c,d] x Lambda, the transition matrices Phi_lambda(t, s) of X' = A(t, lambda) X are continuous in (t, s, lambda)" index="線形方程式の係数への依存性|せんけいほうていしきのけいすうへのいぞんせい"}
+$\Lambda$ を距離空間、$A\colon[c,d]\times\Lambda\to M_{n}(\mathbb{R})$ を連続とし、$\Phi_{\lambda}(t,s)$ を $X'=A(t,\lambda)X$ の推移行列とする。$(t,s,\lambda)\mapsto\Phi_{\lambda}(t,s)$ は $[c,d]^{2}\times\Lambda$ 上で連続である。
+:::
+
+::: proof
+$\lambda_{0}\in\Lambda$ を固定する。$\lambda_{0}$ のコンパクトな近傍は一般にないので、点列で考える：$\lambda_{m}\to\lambda_{0}$ とする。$K\defeq\{\lambda_{m}\}\cup\{\lambda_{0}\}$ はコンパクトなので、$N\defeq\max_{[c,d]\times K}\|A\|$ がある。$\|\Phi_{\lambda}(t,s)\|\le e^{N|t-s|}$（$\Phi_{\lambda}(t,s)=I+\int_{s}^{t}A\Phi_{\lambda}$ とグロンウォール）。$s$ を固定して $\Delta_{m}(t)\defeq\Phi_{\lambda_{m}}(t,s)-\Phi_{\lambda_{0}}(t,s)$ とおくと
+$$
+\Delta_{m}(t)=\int_{s}^{t}A(u,\lambda_{m})\Delta_{m}(u)du+\int_{s}^{t}\bigl(A(u,\lambda_{m})-A(u,\lambda_{0})\bigr)\Phi_{\lambda_{0}}(u,s)du.
+$$
+$\varepsilon_{m}\defeq\max_{u\in[c,d]}\|A(u,\lambda_{m})-A(u,\lambda_{0})\|\to0$（$A$ はコンパクト集合 $[c,d]\times K$ 上で一様連続）。グロンウォールから $\|\Delta_{m}(t)\|\le(d-c)\varepsilon_{m}e^{N(d-c)}e^{N(d-c)}$ で、$s$, $t$ について一様に $0$ に収束する。よって $\Phi_{\lambda_{m}}(t,s)\to\Phi_{\lambda_{0}}(t,s)$ は $(t,s)$ について一様。$\Phi_{\lambda_{0}}(t,s)=\Phi_{\lambda_{0}}(t,c)\Phi_{\lambda_{0}}(s,c)^{-1}$ は $(t,s)$ について連続なので、一様収束と合わせて $(t_{m},s_{m},\lambda_{m})\to(t,s,\lambda_{0})$ で $\Phi_{\lambda_{m}}(t_{m},s_{m})\to\Phi_{\lambda_{0}}(t,s)$。距離空間では点列連続性が連続性なので、主張が従う。
+:::
+
+## 微分可能な依存性と変分方程式 {#ode:sec-dp-differentiable}
+
+::: theorem 初期値への C¹ 依存性 {#ode:c1-dependence keywords="if D_x f is continuous on D, phi is C^1 on Omega; d phi / d xi = Y solves the variational equation Y' = D_x f(t, phi) Y, Y(t_0) = I; d phi / d t_0 = - Y(t) f(t_0, xi); d phi / d t = f(t, phi)" index="変分方程式|へんぶんほうていしき, 初期値への微分可能な依存性|しょきちへのびぶんかのうないぞんせい"}
+$D_{x}f$ が $D$ 上で存在して連続であるとする。このとき $\phi$ は $\Omega$ 上で $C^{1}$ 級で、$(t,t_{0},\xi)\in\Omega$ について
+$$
+\frac{\partial\phi}{\partial t}=f(t,\phi),\qquad\frac{\partial\phi}{\partial\xi}(t,t_{0},\xi)=Y(t),\qquad\frac{\partial\phi}{\partial t_{0}}(t,t_{0},\xi)=-Y(t)f(t_{0},\xi).
+$$
+ここで $Y$ は**変分方程式** $Y'=D_{x}f\bigl(t,\phi(t,t_{0},\xi)\bigr)\,Y$, $Y(t_{0})=I$ の解（$n\times n$ 行列値）である。
+:::
+
+::: intuition
+初期値を $h$ だけずらすと、解は $Y(t)h$ だけずれる（1 次の近似で）。そのずれ $v(t)$ は、元の方程式を解のまわりで線形化した方程式 $v'=D_{x}f(t,x(t))v$ に従う。これが変分方程式で、初期値の微小な摂動が時間とともにどう運ばれるかを表す。
+:::
+
+::: proof
+**Step 1（設定）.** $(t_{0},\xi)\in D$ を固定し、$x\defeq\phi(\cdot,t_{0},\xi)$, $A(t)\defeq D_{x}f(t,x(t))$ とする。$A$ は最大解の定義域で連続なので、$Y$ は定義域全体で存在する（\ref{ode:linear-existence}）。$t_{0}$ を内部に含む有界閉区間 $[c,d]$ を定義域の中にとり、\ref{ode:continuous-dependence} の $\delta,L,K$ を（$t_{0}^{*}=t_{0}$, $\xi^{*}=\xi$ として）とる。
+
+**Step 2（$\xi$ についての微分）.** $|h|<\delta$ について $x_{h}\defeq\phi(\cdot,t_{0},\xi+h)$ は $[c,d]$ 上で定義され、$|x_{h}(t)-x(t)|\le C|h|$（$C\defeq e^{L(d-c)}$）。$r_{h}(t)\defeq x_{h}(t)-x(t)-Y(t)h$ とおくと、積分方程式から
+$$
+r_{h}(t)=\int_{t_{0}}^{t}\Bigl(f(s,x_{h})-f(s,x)-A(s)\bigl(x_{h}-x\bigr)\Bigr)ds+\int_{t_{0}}^{t}A(s)r_{h}(s)ds.
+$$
+（$x_{h}-x=h+\int(f(s,x_{h})-f(s,x))$, $Yh=h+\int AYh$ の差。）【主張：第 1 項の被積分関数は $\omega(C|h|)\,C|h|$ 以下】ここで $\omega(\eta)\defeq\sup\{\|D_{x}f(s,y)-D_{x}f(s,x(s))\|:s\in[c,d],\ |y-x(s)|\le\eta\}$。$s$ を固定して $y\mapsto f(s,y)-A(s)y$ に、線分 $[x(s),x_{h}(s)]$（$\bar B(x(s),C|h|)$ の中にあり、$C|h|<\rho$ なら $K$ に入る）の上で平均値の不等式を使えば、導関数 $D_{x}f(s,y)-A(s)$ のノルムは $\omega(C|h|)$ 以下で、主張が従う。$D_{x}f$ はコンパクト集合 $K$ の上で一様連続（\ref{top:heine-cantor}）なので $\omega(\eta)\to0$（$\eta\to0$）。$N\defeq\max_{[c,d]}\|A\|$ とすると、グロンウォールの不等式から
+$$
+\max_{t\in[c,d]}|r_{h}(t)|\le(d-c)\,\omega(C|h|)\,C|h|\,e^{N(d-c)}=o(|h|).
+$$
+よって $\xi\mapsto\phi(t,t_{0},\xi)$ は $\xi$ で微分可能で、微分は $Y(t)$。
+
+**Step 3（$t_{0}$ についての微分）.** $|s|$ が小さいとき、$\eta_{s}\defeq\phi(t_{0},t_{0}+s,\xi)$（時刻 $t_{0}+s$ に $\xi$ を通る解の、時刻 $t_{0}$ での値）とおくと、記法の後の式から $\phi(t,t_{0}+s,\xi)=\phi(t,t_{0},\eta_{s})$。積分方程式から
+$$
+\frac{\eta_{s}-\xi}{s}=-\frac1s\int_{t_{0}}^{t_{0}+s}f\bigl(u,\phi(u,t_{0}+s,\xi)\bigr)du\to-f(t_{0},\xi)\qquad(s\to0)
+$$
+（被積分関数は $\phi$ の連続性（\ref{ode:continuous-dependence}）から、$(u,s)\to(t_{0},0)$ で $f(t_{0},\xi)$ に収束）。Step 2 から $\phi(t,t_{0},\cdot)$ は $\xi$ で微分可能なので、連鎖律の 1 変数版（$\eta_{s}$ は $s=0$ で微分可能）から $\frac{d}{ds}\phi(t,t_{0},\eta_{s})\big|_{s=0}=Y(t)\cdot(-f(t_{0},\xi))$。
+
+**Step 4（偏導関数の連続性）.** $\partial\phi/\partial t=f(t,\phi)$ は連続。$\partial\phi/\partial\xi(t,t_{0},\xi)=\Phi_{(t_{0},\xi)}(t,t_{0})$ で、$\Phi_{(t_{0},\xi)}$ は係数 $A_{(t_{0},\xi)}(t)\defeq D_{x}f(t,\phi(t,t_{0},\xi))$ の推移行列。点 $(t_{1},t_{0}^{*},\xi^{*})\in\Omega$ の近傍では、\ref{ode:continuous-dependence} の $[c,d]$ と $\delta$ について、$A_{(t_{0},\xi)}(t)$ は $(t,(t_{0},\xi))\in[c,d]\times\Lambda$（$\Lambda\defeq$ 半径 $\delta$ の近傍）で連続なので、\ref{ode:linear-parameter-continuity} から $(t,t_{0},\xi)\mapsto\Phi_{(t_{0},\xi)}(t,t_{0})$ は連続。$\partial\phi/\partial t_{0}=-\Phi_{(t_{0},\xi)}(t,t_{0})f(t_{0},\xi)$ も連続。偏導関数がすべて存在して連続なので、$\phi$ は $C^{1}$ 級（\ref{calc:continuous-partials-differentiable}）。
+
+::: hypcheck
+- **$D_{x}f$ の連続性**：Step 2 の $\omega(\eta)\to0$（一様連続性）と、Step 4 の係数の連続性に使った。$f$ がリプシッツなだけでは、一般解は初期値について微分可能とは限らない。
+- **$t$ についての微分可能性に $f$ の $t$ についての微分は要らない**：$\partial\phi/\partial t=f(t,\phi)$ は方程式そのもの。
+:::
+:::
+
+::: theorem 初期値への Cᵏ 依存性 {#ode:ck-dependence keywords="if f is C^k on D (1 <= k <= infinity), the general solution phi is C^k on Omega; proof by induction applying the C^1 result to the augmented system (x, Y)' = (f(t,x), D_x f(t,x) Y)" index="初期値への滑らかな依存性|しょきちへのなめらかないぞんせい"}
+$1\le k\le\infty$ とし、$f$ が $D$ 上で $C^{k}$ 級なら、$\phi$ は $\Omega$ 上で $C^{k}$ 級である。
+:::
+
+::: proof
+有限の $k$ について、「$D$ 上で $C^{k}$ 級のすべての $f$（任意の次元 $n$）について、一般解は $C^{k}$ 級」を $k$ についての帰納法で示す。$k=\infty$ はすべての $k$ について成り立つことから。
+
+**$k=1$.** \ref{ode:c1-dependence}（$C^{1}$ 級の $f$ は連続で $D_{x}f$ も連続、とくに局所リプシッツ \ref{ode:c1-locally-lipschitz}）。
+
+**$k-1\Rightarrow k$（$k\ge2$）.** $f$ を $C^{k}$ 級とする。$D\times M_{n}(\mathbb{R})$（$\mathbb{R}\times\mathbb{R}^{n+n^{2}}$ の開集合）上の**拡大系**
+$$
+x'=f(t,x),\qquad Y'=D_{x}f(t,x)\,Y
+$$
+を考えると、右辺 $F(t,x,Y)\defeq(f(t,x),D_{x}f(t,x)Y)$ は $C^{k-1}$ 級（$k-1\ge1$）。【主張：拡大系の初期値 $(t_{0},(\xi,Y_{0}))$ の最大解は $(\phi(t,t_{0},\xi),\,\Phi_{(t_{0},\xi)}(t,t_{0})Y_{0})$ で、定義域は $(\alpha(t_{0},\xi),\beta(t_{0},\xi))$】右の組は（$Y$ の部分は線形方程式で、$x$ の定義域全体で解をもつ）この区間上の拡大系の解。拡大系の解の $x$ 成分は元の方程式の解なので、この区間より長くは延びない（延びれば $x$ 成分が最大解の延長になる）。一意性から最大解。
+
+よって拡大系の一般解 $\psi$ は $\psi(t,t_{0},(\xi,Y_{0}))=(\phi(t,t_{0},\xi),\Phi_{(t_{0},\xi)}(t,t_{0})Y_{0})$ で、その定義域 $\tilde\Omega$ は $\Omega\times M_{n}(\mathbb{R})$ と同一視できる。帰納法の仮定から $\psi$ は $C^{k-1}$ 級。したがって
+- $\phi(t,t_{0},\xi)$（$\psi$ の第 1 成分で $Y_{0}=0$ としたもの）は $C^{k-1}$ 級、
+- $\partial\phi/\partial\xi=\Phi_{(t_{0},\xi)}(t,t_{0})$（$\psi$ の第 2 成分で $Y_{0}=I$）は $C^{k-1}$ 級、
+- $\partial\phi/\partial t_{0}=-\Phi_{(t_{0},\xi)}(t,t_{0})f(t_{0},\xi)$ と $\partial\phi/\partial t=f(t,\phi)$ は $C^{k-1}$ 級の関数の積・合成で $C^{k-1}$ 級（\ref{calc:ck-composition}）。
+
+1 階の偏導関数がすべて $C^{k-1}$ 級なので、$\phi$ は $C^{k}$ 級。
+:::
+
+::: corollary パラメータへの依存性 {#ode:parameter-dependence keywords="for x' = f(t, x, lambda) with f C^k in (t, x, lambda), the solution phi(t, t_0, xi, lambda) is C^k in all variables; reduction by adding lambda' = 0" index="パラメータへの依存性|ぱらめーたへのいぞんせい"}
+$\Lambda\subset\mathbb{R}^{p}$ を開集合、$f\colon D\times\Lambda\to\mathbb{R}^{n}$ を $C^{k}$ 級（$1\le k\le\infty$）とする。$x'=f(t,x,\lambda)$, $x(t_{0})=\xi$ の最大解の時刻 $t$ での値 $\phi(t,t_{0},\xi,\lambda)$ は、その定義域（開集合）の上で $C^{k}$ 級である。
+:::
+
+::: proof
+$(x,\lambda)$ についての方程式 $x'=f(t,x,\lambda)$, $\lambda'=0$（右辺は $C^{k}$ 級）の初期値 $(t_{0},(\xi,\lambda))$ の最大解は $(\phi(t,t_{0},\xi,\lambda),\lambda)$（$\lambda$ 成分は定数）。\ref{ode:continuous-dependence}・\ref{ode:ck-dependence} から、定義域は開で、$C^{k}$ 級。
+:::
+
+::: supplement
+**高い視点：線形化と接写像.** 変分方程式は、解の写像 $\xi\mapsto\phi(t,t_{0},\xi)$ の微分（接写像）を計算する方程式である。多様体の言葉では、流れ $\phi_{t}$ の微分 $d\phi_{t}$ が、接束の上の「線形化された流れ」を与え、それが変分方程式の解である（\ref{ode:page-flows} 以降）。リーマン幾何のヤコビ場（測地線の族の変分）は、測地流の変分方程式の解にほかならない。拡大系による帰納法は、「$\phi$ の微分が、もう一つの微分方程式の解として $\phi$ と同じ滑らかさで得られる」ことを繰り返す構造で、比喩で言えば、解の「微分を運ぶ方程式」がまた同じ種類の方程式なので、何回でも同じ議論で微分できる。
+
+**補足.** $f$ が実解析的なら、一般解も実解析的であることが知られている（コーシーの優級数の方法）。逆に、$f$ が $C^{k}$ 級で $C^{k+1}$ 級でなければ、一般解は一般に $C^{k+1}$ 級にならない（$t$ 方向にはもう 1 階滑らかになる：$\partial\phi/\partial t=f(t,\phi)$）。
+:::
+
+## 問題 {#ode:sec-dp-problems}
+
+::: problem {#ode:prob-dp-linear-exp}
+$x'=ax$（$a$ は定数、$n=1$）の一般解 $\phi(t,t_{0},\xi)=\xi e^{a(t-t_{0})}$ について、\ref{ode:c1-dependence} の三つの式を直接確かめよ。
+:::
+
+::: solution
+$\partial\phi/\partial t=a\phi=f(\phi)$。変分方程式は $Y'=aY$, $Y(t_{0})=1$ で $Y=e^{a(t-t_{0})}=\partial\phi/\partial\xi$。$\partial\phi/\partial t_{0}=-a\xi e^{a(t-t_{0})}=-Y(t)f(\xi)$。
+:::
+
+::: problem {#ode:prob-dp-parameter-derivative}
+$x'=\lambda x^{2}$, $x(0)=1$ について、$\lambda$ による微分 $z(t)\defeq\partial\phi/\partial\lambda(t,0,1,\lambda)$ が満たす線形方程式を導き、$\lambda=0$ で $z(t)=t$ となることを確かめよ。
+:::
+
+::: solution
+拡大系の変分方程式（あるいは方程式を $\lambda$ で微分する：\ref{ode:parameter-dependence} から $\phi$ は $C^{\infty}$ 級で、偏微分の順序を交換できる）から $z'=2\lambda xz+x^{2}$, $z(0)=0$。$\lambda=0$ では $x\equiv1$ なので $z'=1$、$z=t$。実際、$\phi(t,0,1,\lambda)=1/(1-\lambda t)$ を $\lambda$ で微分して $\lambda=0$ とおくと $t$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

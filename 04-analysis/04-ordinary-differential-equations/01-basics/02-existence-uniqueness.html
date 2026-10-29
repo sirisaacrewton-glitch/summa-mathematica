@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>解の存在と一意性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/01-basics/02-existence-uniqueness.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 解の存在と一意性 {#ode:page-existence-uniqueness keywords="Picard-Lindelof theorem via the contraction mapping principle with a weighted sup norm, existence interval h = min(a, r/M), uniqueness of solutions under a local Lipschitz condition, Picard iteration, Peano existence theorem via Euler polygons and the Arzela-Ascoli theorem, non-uniqueness without Lipschitz"}
+
+初期値問題 $x'=f(t,x)$, $x(t_{0})=\xi$ について、右辺が $x$ について局所リプシッツなら、短い時間の間に解がただ一つ存在する（**ピカール–リンデレーフの定理**）。証明は、積分方程式を連続関数の空間の上の縮小写像の不動点として解くものである。存在区間の長さは、右辺の大きさ $M$ と、右辺が定義されている範囲の大きさ $a,r$ だけで決まり、リプシッツ定数 $L$ によらないように、重み付きの一様ノルムを使う。一意性は、局所的なグロンウォールの評価を連結性でつなげて、解が定義されている区間全体で示す（\ref{ode:uniqueness}）。右辺が連続なだけでも解は存在するが（**ペアノの定理**、\ref{ode:peano}）、一意性は失われうる。
+
+## 記法と定義の確認 {#ode:sec-eu-notation}
+
+::: notation
+- 初期値問題・解・積分方程式・リプシッツ条件・グロンウォールの不等式は \ref{ode:ode-solution}, \ref{ode:integral-equation}, \ref{ode:lipschitz-condition}, \ref{ode:gronwall}, \ref{ode:gronwall-difference}。
+- 縮小写像の原理 \ref{top:banach-fixed-point}、有界写像の空間の完備性は \ref{top:bounded-functions-complete}、一様収束と積分の交換は \ref{calc:uniform-limit-theorems}、アスコリ–アルツェラの定理は \ref{top:ascoli-classical}、コンパクト距離空間上の連続写像の一様連続性（ハイネ–カントール）は \ref{top:heine-cantor}。
+- 以下 $D\subset\mathbb{R}\times\mathbb{R}^{n}$ は開集合、$f\colon D\to\mathbb{R}^{n}$ は連続、$(t_{0},\xi)\in D$。$a,r>0$ を $C\defeq[t_{0}-a,t_{0}+a]\times\bar B(\xi,r)\subset D$ となるようにとり、$M\defeq\max_{C}|f|$（$C$ はコンパクトで $|f|$ は連続）、$h\defeq\min(a,r/M)$（$M=0$ なら $h\defeq a$）、$I_{h}\defeq[t_{0}-h,t_{0}+h]$ とする。
+:::
+
+## ピカール–リンデレーフの定理 {#ode:sec-eu-picard}
+
+::: theorem ピカール–リンデレーフの定理 {#ode:picard-lindelof keywords="if f is continuous and Lipschitz in x with constant L on C = [t_0 - a, t_0 + a] x B(xi, r), the initial value problem has exactly one solution on I_h, h = min(a, r/M), with values in B(xi, r); it is the uniform limit of the Picard iterates" index="ピカール–リンデレーフの定理（一般）|ぴかーるりんでれーふのていりいっぱん, 逐次近似法|ちくじきんじほう, ピカールの逐次近似（一般）|ぴかーるのちくじきんじいっぱん" refname="ピカール–リンデレーフの定理"}
+記法の状況で、さらに $f$ が $C$ の上で $x$ について定数 $L$ でリプシッツ連続であるとする。このとき、$I_{h}$ 上の初期値 $(t_{0},\xi)$ の解 $x$ で、値が $\bar B(\xi,r)$ に入るものがただ一つある。さらに、$x_{0}(t)\defeq\xi$、$x_{k+1}(t)\defeq\xi+\int_{t_{0}}^{t}f(s,x_{k}(s))ds$（**逐次近似**）は $I_{h}$ 上で $x$ に一様収束する。
+:::
+
+::: intuition
+積分方程式の右辺 $T(x)=\xi+\int f(s,x)$ は、「仮の解」を一回分だけ改良する操作である。リプシッツ条件があると、二つの仮の解の差は改良のたびに縮む。縮み方は時間がたつほど弱くなる（積分区間が長くなる）ので、遠い時刻の差を軽く見る重み $e^{-2L|t-t_{0}|}$ で測ると、区間全体で一様に半分以下に縮む。
+:::
+
+::: proof
+**Step 1（関数空間）.** $X\defeq\{x\colon I_{h}\to\mathbb{R}^{n}\text{ 連続}:|x(t)-\xi|\le r\ (t\in I_{h})\}$ に
+$$
+d(x,y)\defeq\sup_{t\in I_{h}}e^{-2L|t-t_{0}|}|x(t)-y(t)|
+$$
+を入れる。$e^{-2Lh}\rho\le d\le\rho$（$\rho$ は一様距離）なので、$d$ は距離で、$d$ についてのコーシー列と収束は $\rho$ についてのものと同じ。$(C(I_{h},\mathbb{R}^{n}),\rho)$ は完備（\ref{top:bounded-functions-complete.2}、コンパクト区間上の連続写像は有界）で、$X$ はその閉集合（各点での条件 $|x(t)-\xi|\le r$ は一様収束で保たれる）なので、$(X,d)$ は空でない（定数 $\xi$ を含む）完備距離空間。
+
+**Step 2（$T$ は $X$ を $X$ に写す）.** $x\in X$ なら $(s,x(s))\in C$ なので、$Tx(t)\defeq\xi+\int_{t_{0}}^{t}f(s,x(s))ds$ が定義され、連続（不定積分）。$|Tx(t)-\xi|\le\bigl|\int_{t_{0}}^{t}|f(s,x(s))|ds\bigr|\le M|t-t_{0}|\le Mh\le r$（$h\le r/M$ を使った）。
+
+**Step 3（縮小）.** 【主張：$d(Tx,Ty)\le\frac12d(x,y)$】$L=0$ なら $Tx=Ty$ で明らか。$L>0$ とする。$t\ge t_{0}$ で（$t\le t_{0}$ も同様）
+$$
+|Tx(t)-Ty(t)|\le\int_{t_{0}}^{t}L|x(s)-y(s)|ds\le Ld(x,y)\int_{t_{0}}^{t}e^{2L(s-t_{0})}ds\le Ld(x,y)\frac{e^{2L(t-t_{0})}}{2L}.
+$$
+両辺に $e^{-2L(t-t_{0})}$ を掛けて上限をとればよい。
+
+**Step 4（存在と逐次近似）.** \ref{top:banach-fixed-point}から $T$ はただ一つの不動点 $x\in X$ をもち、$x_{k}=T^{k}(x_{0})$ は $d$ について、したがって一様に $x$ に収束する。積分方程式との同値（\ref{ode:integral-equation}）から $x$ は解。
+
+**Step 5（一意性）.** 値が $\bar B(\xi,r)$ に入る $I_{h}$ 上の解は、積分方程式を満たすので $T$ の不動点で、不動点は一つ。
+
+::: hypcheck
+- **$h\le r/M$**：Step 2 で $T$ が $X$ を保つこと（解が $C$ から出ないこと）に使った。
+- **$h\le a$**：$(s,x(s))\in C$ となるために使った。
+- **リプシッツ条件**：Step 3 の縮小に使った。$h$ は $L$ によらない（重み付きの距離の効果）。
+:::
+:::
+
+::: theorem 解の一意性 {#ode:uniqueness keywords="if f is locally Lipschitz in x, two solutions on an interval J which agree at one point agree on all of J" index="解の一意性|かいのいちいせい"}
+$f$ が $x$ について局所リプシッツであるとする。区間 $J$ 上の二つの解 $x,y$ が、ある $t_{1}\in J$ で $x(t_{1})=y(t_{1})$ なら、$J$ 全体で $x=y$。
+:::
+
+::: proof
+$S\defeq\{t\in J:x(t)=y(t)\}$ とする。$S\ni t_{1}$ は空でなく、$x-y$ の連続性から $J$ の閉集合。【主張：$S$ は $J$ の開集合】$t_{*}\in S$, $p\defeq(t_{*},x(t_{*}))$ とし、$p$ の近傍 $C_{*}\defeq[t_{*}-a_{*},t_{*}+a_{*}]\times\bar B(x(t_{*}),r_{*})\subset D$ で $f$ が $x$ について（定数 $L_{*}$ で）リプシッツ連続なものをとる（局所リプシッツの定義の近傍に含まれるように小さくとる）。$x,y$ は連続で $x(t_{*})=y(t_{*})$ なので、$t_{*}$ を含む $J$ の有界閉区間 $J_{*}$（$J$ における $t_{*}$ の近傍）で、両方のグラフが $C_{*}$ に入るものがある。\ref{ode:gronwall-difference} を $J_{*}$ に使うと $J_{*}$ 上で $x=y$。よって $S$ は $J$ の中で開。$J$ は連結なので $S=J$。
+:::
+
+::: corollary 局所リプシッツの場合の局所存在と一意性 {#ode:local-existence-uniqueness keywords="for f locally Lipschitz in x (e.g. C^1), every initial value problem has a solution on some interval around t_0, and any two solutions agree on the intersection of their domains" index="局所存在と一意性|きょくしょそんざいといちいせい"}
+$f$ が $x$ について局所リプシッツ（たとえば $D_{x}f$ が連続、\ref{ode:c1-locally-lipschitz}）なら、各初期値 $(t_{0},\xi)\in D$ について、$t_{0}$ を内部に含む区間の上の解があり、初期値が同じ二つの解は、定義域の共通部分の上で一致する。
+:::
+
+::: proof
+存在：局所リプシッツの定義から、$(t_{0},\xi)$ の近傍で $f$ が $x$ についてリプシッツ連続なので、その中に記法の $C$ をとって \ref{ode:picard-lindelof} を使う。一致：定義域の共通部分は $t_{0}$ を含む区間（区間の共通部分）で、\ref{ode:uniqueness} をそこで使う。
+:::
+
+曲面論の \ref{surf:picard-lindelof} は、この系の自励系の場合である（そこでは逐次近似の評価を直接示した）。
+
+## ペアノの存在定理 {#ode:sec-eu-peano}
+
+::: theorem ペアノの存在定理 {#ode:peano keywords="Peano: if f is continuous, the initial value problem has a solution on I_h = [t_0 - h, t_0 + h], h = min(a, r/M); proof by Euler polygons and Arzela-Ascoli" index="ペアノの存在定理|ぺあののそんざいていり, オイラーの折れ線|おいらーのおれせん"}
+記法の状況（$f$ は連続なだけ）で、$I_{h}$ 上の初期値 $(t_{0},\xi)$ の解で、値が $\bar B(\xi,r)$ に入るものが少なくとも一つある。
+:::
+
+::: intuition
+各時刻で速度ベクトルの方向に少しだけ直進することを繰り返すと、折れ線（オイラー法の近似解）ができる。刻みを細かくした折れ線の列は、速さが $M$ 以下なので一様に「同じ程度にしか曲がらない」（同等連続）。アスコリの定理から一様収束する部分列があり、その極限が解になる。一意性がないので、列全体は収束しないかもしれない。
+:::
+
+::: proof
+$[t_{0},t_{0}+h]$ の上で解を作る（$[t_{0}-h,t_{0}]$ も同様で、二つを $t_{0}$ でつなぐ。つないだものも積分方程式を満たすので解）。$M=0$ なら $f(t,\xi)=0$ で定数 $\xi$ が解なので、$M>0$ とする。
+
+**Step 1（オイラーの折れ線）.** $k\ge1$ について $t_{j}\defeq t_{0}+jh/k$（$0\le j\le k$）とし、$x_{k}(t_{0})\defeq\xi$、$t\in[t_{j},t_{j+1}]$ で
+$$
+x_{k}(t)\defeq x_{k}(t_{j})+(t-t_{j})\,f(t_{j},x_{k}(t_{j}))
+$$
+と帰納的に定める。【主張：$|x_{k}(t)-x_{k}(s)|\le M|t-s|$、とくに $|x_{k}(t)-\xi|\le M(t-t_{0})\le r$】$j$ についての帰納法：$[t_{0},t_{j}]$ で主張が成り立てば $x_{k}(t_{j})\in\bar B(\xi,r)$ で、$(t_{j},x_{k}(t_{j}))\in C$ なので $|f(t_{j},x_{k}(t_{j}))|\le M$。よって $[t_{j},t_{j+1}]$ の上で $x_{k}$ は傾きのノルムが $M$ 以下の線分で、$[t_{0},t_{j+1}]$ 全体で $M$ リプシッツ（区分的に線形な連続関数で、各区間の傾きが $M$ 以下）。
+
+**Step 2（部分列の一様収束）.** $\{x_{k}\}$ は Step 1 から同等連続（$M$ リプシッツ）で、値は $\bar B(\xi,r)$ に入るので各点で有界。アスコリ–アルツェラの定理（\ref{top:ascoli-classical}）から、$C([t_{0},t_{0}+h],\mathbb{R}^{n})$ の中で相対コンパクトで、距離空間の相対コンパクト集合の列は収束する部分列をもつので、一様収束する部分列 $x_{k_{m}}\to x$ がある。$x$ は連続で $\bar B(\xi,r)$ に値をとる。
+
+**Step 3（極限は解）.** $\tau_{k}(s)\defeq t_{j}$（$s\in[t_{j},t_{j+1})$）とおくと、$x_{k}$ は区分的に線形なので
+$$
+x_{k}(t)=\xi+\int_{t_{0}}^{t}f\bigl(\tau_{k}(s),x_{k}(\tau_{k}(s))\bigr)ds
+$$
+（被積分関数は各小区間で定数で、積分は線分の増分の和）。$f$ はコンパクト集合 $C$ の上で一様連続（\ref{top:heine-cantor}）。$|\tau_{k}(s)-s|\le h/k$, $|x_{k}(\tau_{k}(s))-x(s)|\le|x_{k}(\tau_{k}(s))-x_{k}(s)|+|x_{k}(s)-x(s)|\le Mh/k+\sup|x_{k}-x|$ なので、$k=k_{m}\to\infty$ で $f(\tau_{k}(s),x_{k}(\tau_{k}(s)))\to f(s,x(s))$ は $s$ について一様。被積分関数は区分的に連続で積分可能なので、\ref{calc:uniform-limit-theorems.4} から極限をとると $x(t)=\xi+\int_{t_{0}}^{t}f(s,x(s))ds$。\ref{ode:integral-equation} から $x$ は解。
+
+::: hypcheck
+- **$f$ の連続性**：Step 3 の一様連続性に使った。リプシッツ条件は使っていないので、一意性は保証されない（\ref{ode:basic-examples.3}）。
+- **アスコリの定理**：Step 2 で、極限を取るための部分列の存在に使った。部分列を取るのは、列全体が収束するとは限らないからである（一意性がない場合、異なる部分列が異なる解に収束しうる）。
+:::
+:::
+
+::: supplement
+**高い視点：不動点定理の二つの型.** ピカール–リンデレーフは**縮小写像の原理**（距離の不動点定理）で、存在・一意性・逐次近似による計算法を同時に与える。ペアノは**コンパクト性**による存在定理で、一意性も構成法も与えない。後者はシャウダーの不動点定理（バナッハ空間の凸コンパクト集合を自分自身に写す連続写像は不動点をもつ）の特別な場合とみることができ、\ref{at:brouwer-fixed-point}の無限次元版にあたる。比喩で言えば、ピカールは「目標に向かって確実に歩幅を縮めていく道案内」、ペアノは「どこかに必ず着地点があることだけを保証する、地図のない探検」である。
+
+**補足.** 局所リプシッツ条件は一意性のための十分条件で、必要条件ではない（オスグッドの条件、\ref{ode:gronwall} の後の補足）。逆に、連続な $f$ で、すべての初期値で一意性が崩れる例もあることが知られている（ルジェの例など）。
+:::
+
+## 問題 {#ode:sec-eu-problems}
+
+::: problem {#ode:prob-eu-picard-exp}
+$x'=x$, $x(0)=1$ の逐次近似 $x_{k}$ を計算し、$x_{k}(t)=\sum_{j=0}^{k}t^{j}/j!$ であることを示せ。
+:::
+
+::: solution
+$x_{0}=1$。$x_{k}=\sum_{j\le k}t^{j}/j!$ なら $x_{k+1}(t)=1+\int_{0}^{t}x_{k}=1+\sum_{j\le k}t^{j+1}/(j+1)!=\sum_{j\le k+1}t^{j}/j!$。極限は $e^{t}$ で、\ref{ode:picard-lindelof} の一様収束と整合する。
+:::
+
+::: problem {#ode:prob-eu-existence-interval}
+$x'=1+x^{2}$, $x(0)=0$ について、$a=\infty$ とみなせる（$D=\mathbb{R}^{2}$）とき、$C=[-a,a]\times[-r,r]$ から得られる存在区間の長さ $h=\min(a,r/(1+r^{2}))$ の最大値を求め、実際の解 $x=\tan t$ の存在区間 $(-\pi/2,\pi/2)$ と比べよ。
+:::
+
+::: solution
+$a$ は大きくとれるので $h=r/(1+r^{2})$ を $r>0$ について最大化する。微分すると $(1-r^{2})/(1+r^{2})^{2}$ で、$r=1$ で最大値 $1/2$。定理の保証する区間 $[-\frac12,\frac12]$ は、実際の存在区間 $(-\pi/2,\pi/2)$ より狭い。定理は「少なくともこれだけ」を保証するだけで、最大の存在区間は解の延長（\ref{ode:page-maximal-solutions}）で調べる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

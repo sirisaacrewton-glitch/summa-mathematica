@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>線形微分方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/01-basics/04-linear.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 線形微分方程式 {#ode:page-linear keywords="linear systems x' = A(t)x + b(t), global existence and uniqueness on any interval, solution space of the homogeneous equation has dimension n, fundamental matrix, transition matrix Phi(t,s), Liouville formula det Phi = det Phi(t_0) exp int tr A, variation of constants, constant coefficients and e^{tA}, Jordan form, higher order scalar linear equations, Wronskian and Abel formula, characteristic polynomial, t^k e^{lambda t}"}
+
+右辺が $x$ について線形な方程式 $x'=A(t)x+b(t)$ では、非線形の場合と違って解が爆発せず、係数が連続な区間全体で解がただ一つ存在する（\ref{ode:linear-existence}）。さらに、斉次方程式 $x'=A(t)x$ の解全体は $n$ 次元のベクトル空間で、その基底を並べた**基本行列**がすべての解を記述する。非斉次方程式は**定数変化法**で斉次方程式に帰着し（\ref{ode:variation-of-constants}）、係数が定数なら基本行列は行列の指数関数 $e^{tA}$ である。このページの結果は、次のページで、初期値についての微分（**変分方程式**）を扱うときに使う。
+
+## 記法と定義の確認 {#ode:sec-ln-notation}
+
+::: notation
+- 解・積分方程式・最大解・線形増大での大域存在は \ref{ode:ode-solution}, \ref{ode:integral-equation}, \ref{ode:maximal-solution}, \ref{ode:linear-growth-global}。一意性は \ref{ode:uniqueness}。
+- 行列の指数関数は \ref{lin:matrix-exponential}、ジョルダン標準形は \ref{lin:jordan-normal-form}、行列式の特徴づけ（列について多重線形・交代的で $\det I=1$ のものは $\det$ だけ）は \ref{lin:det-characterization}、余因子行列は \ref{lin:adjugate}。
+- 以下、$J$ は区間、$A\colon J\to M_{n}(\mathbb{R})$, $b\colon J\to\mathbb{R}^{n}$ は連続とする。行列値の関数の微分・積分は成分ごと。複素数値の関数 $u+iv$ の微分は $u'+iv'$。
+:::
+
+## 存在と解空間 {#ode:sec-ln-existence}
+
+::: theorem 線形方程式の大域的な存在と一意性 {#ode:linear-existence keywords="for continuous A, b on an interval J, x' = A(t)x + b(t), x(t_0) = xi has a unique solution on all of J; the same for matrix equations X' = A(t)X; C^k coefficients give C^{k+1} solutions" index="線形微分方程式|せんけいびぶんほうていしき, 線形方程式の大域解|せんけいほうていしきのたいいきかい"}
+$t_{0}\in J$, $\xi\in\mathbb{R}^{n}$ について、$x'=A(t)x+b(t)$, $x(t_{0})=\xi$ の解が $J$ 全体の上にただ一つある。$n\times p$ 行列値の方程式 $X'=A(t)X+B(t)$ についても同じ。$A,b$ が $C^{k}$ 級なら解は $C^{k+1}$ 級。
+:::
+
+::: proof
+**Step 1（開区間に広げる）.** $J$ が端点を含むときは、$A,b$ を端点の外へ定数で延ばして、開区間 $\tilde J\supset J$ 上の連続関数にする（$J$ の右端 $\beta\in J$ なら、$t>\beta$ で $A(t)\defeq A(\beta)$ など）。
+
+**Step 2（大域存在）.** $f(t,x)\defeq A(t)x+b(t)$ は $\tilde J\times\mathbb{R}^{n}$ 上で連続、$D_{x}f=A(t)$ は連続なので $x$ について局所リプシッツ（\ref{ode:c1-locally-lipschitz}）。$|f(t,x)|\le|b(t)|+\|A(t)\||x|$（\ref{calc:operator-norm-properties.2}）で、$\|A(t)\|$, $|b(t)|$ は連続なので、\ref{ode:linear-growth-global} から初期値 $(t_{0},\xi)$ の最大解は $\tilde J$ 全体で定義される。その $J$ への制限が求める解。
+
+**Step 3（一意性）.** $J$ 上の二つの解は、\ref{ode:uniqueness}（$J$ の上で考えてよい：その証明は区間 $J$ の連結性だけを使う）から一致する。行列値の方程式は列ごとに考えればよい。滑らかさ：$x'=Ax+b$ の右辺は、$x$ が $C^{j}$ 級なら $C^{\min(j,k)}$ 級なので、帰納的に $x$ は $C^{k+1}$ 級。
+:::
+
+::: theorem 斉次方程式の解空間 {#ode:solution-space keywords="the solutions of x' = A(t)x on J form an n-dimensional vector space; evaluation at any t_0 is an isomorphism; solutions are either identically zero or never zero" index="解空間（線形方程式）|かいくうかんせんけいほうていしき"}
+斉次方程式 $x'=A(t)x$ の $J$ 上の解の全体 $V$ は、関数の和とスカラー倍で $n$ 次元の実ベクトル空間で、各 $t_{0}\in J$ について評価写像 $V\to\mathbb{R}^{n}$, $x\mapsto x(t_{0})$ は線形同型である。とくに、解がある 1 点で $0$ なら恒等的に $0$。
+:::
+
+::: proof
+解の線形結合は解（微分の線形性と $A(t)$ の線形性）なので $V$ は部分空間。評価写像は線形で、\ref{ode:linear-existence} の存在から全射、一意性から単射（$x(t_{0})=0$ の解は $0$ だけ）。
+:::
+
+::: definition 基本行列と推移行列 {#ode:fundamental-matrix keywords="fundamental matrix: n x n matrix whose columns form a basis of solutions; Phi' = A Phi, Phi(t) invertible for all t; transition matrix Phi(t,s) = Phi(t) Phi(s)^{-1}, the unique solution with Phi(s,s) = I" index="基本行列|きほんぎょうれつ, 基本解系|きほんかいけい, 推移行列|すいいぎょうれつ, 解行列|かいぎょうれつ"}
+$x'=A(t)x$ の $n$ 個の解 $\varphi_{1},\dots,\varphi_{n}$ が $V$ の基底をなすとき、これを**基本解系**といい、それを列に並べた行列値関数 $\Phi=(\varphi_{1}\ \cdots\ \varphi_{n})$ を**基本行列**という。$\Phi'=A\Phi$ で、\ref{ode:solution-space} から各 $\Phi(t)$ は可逆である（$\Phi(t)c=0$ なら解 $\Phi c$ が $t$ で $0$ なので恒等的に $0$、基底なので $c=0$）。$\Phi(t,s)\defeq\Phi(t)\Phi(s)^{-1}$ を**推移行列**という。
+:::
+
+$\Phi(\cdot,s)$ は $X'=AX$, $X(s)=I$ のただ一つの解なので基本行列の選び方によらず、$\Phi(t,s)\Phi(s,r)=\Phi(t,r)$、初期値 $(t_{0},\xi)$ の解は $\Phi(t,t_{0})\xi$ である。
+
+::: theorem リウヴィルの公式 {#ode:liouville-formula keywords="Liouville (Abel-Jacobi) formula: det Phi(t) = det Phi(t_0) exp(int_{t_0}^t tr A); for a linear map A and the determinant, sum_j det(v_1, ..., A v_j, ..., v_n) = tr(A) det(v_1, ..., v_n)" index="リウヴィルの公式|りうゔぃるのこうしき, ロンスキアン（連立）|ろんすきあんれんりつ"}
+$\Phi$ を $X'=A(t)X$ の解（$n\times n$ 行列値）とすると
+$$
+\det\Phi(t)=\det\Phi(t_{0})\exp\Bigl(\int_{t_{0}}^{t}\operatorname{tr}A(s)\,ds\Bigr).
+$$
+:::
+
+::: proof
+**Step 1（トレースの補題）.** 【主張：$A\in M_{n}(\mathbb{R})$ と列ベクトル $v_{1},\dots,v_{n}$ について $\sum_{j}\det(v_{1},\dots,Av_{j},\dots,v_{n})=\operatorname{tr}(A)\det(v_{1},\dots,v_{n})$】左辺を $D(v_{1},\dots,v_{n})$ とおくと、各項は列について多重線形なので $D$ も多重線形。交代的：$v_{p}=v_{q}$（$p<q$）なら、$j\neq p,q$ の項は等しい列を二つ含むので $0$、$j=p$ と $j=q$ の項は列を入れ替えた関係にあって和が $0$（\ref{lin:alternating-consequences.1}）。よって \ref{lin:det-characterization} から $D=D(e_{1},\dots,e_{n})\det$ で、$D(e_{1},\dots,e_{n})=\sum_{j}\det(e_{1},\dots,Ae_{j},\dots,e_{n})=\sum_{j}A_{jj}$（第 $j$ 列だけ $Ae_{j}$ の行列の行列式は、その対角成分 $A_{jj}$）。
+
+**Step 2（微分）.** $\det\Phi$ は列 $\varphi_{j}$ の多重線形関数なので、積の微分と同様に $\frac{d}{dt}\det\Phi=\sum_{j}\det(\varphi_{1},\dots,\varphi_{j}',\dots,\varphi_{n})$（ライプニッツの展開式 $\det=\sum_{\sigma}\operatorname{sgn}\sigma\prod_{i}\Phi_{\sigma(i)i}$ の各項を積の微分で微分し、微分された列ごとにまとめる）。$\varphi_{j}'=A\varphi_{j}$ と Step 1 から $\frac{d}{dt}\det\Phi=\operatorname{tr}A(t)\det\Phi$。
+
+**Step 3.** スカラーの線形方程式 $u'=\operatorname{tr}A(t)\,u$ の解は $u(t)=u(t_{0})\exp\int_{t_{0}}^{t}\operatorname{tr}A$ だけ（$(u\,e^{-\int\operatorname{tr}A})'=0$）。
+:::
+
+::: intuition
+$\det\Phi$ は、基本解系が張る平行体の体積である。流れに沿って体積が変化する割合は、ベクトル場 $A(t)x$ の発散 $\operatorname{tr}A(t)$ に等しい。体積の微分方程式 $\frac{d}{dt}\mathrm{vol}=(\operatorname{div})\mathrm{vol}$ を積分したものがリウヴィルの公式で、ハミルトン力学のリウヴィルの定理（\ref{symp:hamiltonian-conservation.2}）の線形版である。
+:::
+
+## 非斉次方程式と定数係数 {#ode:sec-ln-inhomogeneous}
+
+::: theorem 定数変化法 {#ode:variation-of-constants keywords="variation of constants (Duhamel formula): the solution of x' = A x + b, x(t_0) = xi is x(t) = Phi(t,t_0) xi + int_{t_0}^t Phi(t,s) b(s) ds" index="定数変化法|ていすうへんかほう, デュアメルの公式|でゅあめるのこうしき"}
+$\Phi(t,s)$ を $x'=A(t)x$ の推移行列とする。$x'=A(t)x+b(t)$, $x(t_{0})=\xi$ の解は
+$$
+x(t)=\Phi(t,t_{0})\,\xi+\int_{t_{0}}^{t}\Phi(t,s)\,b(s)\,ds.
+$$
+:::
+
+::: proof
+基本行列 $\Phi$ を一つとると $\Phi(t,s)=\Phi(t)\Phi(s)^{-1}$ なので、右辺は $\Phi(t)c(t)$, $c(t)\defeq\Phi(t_{0})^{-1}\xi+\int_{t_{0}}^{t}\Phi(s)^{-1}b(s)ds$（$\Phi(s)^{-1}$ は連続、\ref{calc:ck-composition.2}）。積の微分と基本定理から $(\Phi c)'=A\Phi c+\Phi\Phi^{-1}b=A(\Phi c)+b$、$t=t_{0}$ で $\xi$。一意性（\ref{ode:linear-existence}）から、これが解。
+:::
+
+::: intuition
+斉次方程式の解 $\Phi(t)c$ の「定数」$c$ を時間とともに変化させて、非斉次項を吸収させる。各時刻 $s$ に加えられた外力 $b(s)\,ds$ が、その後の時間発展 $\Phi(t,s)$ で運ばれて時刻 $t$ に寄与し、それを足し合わせたものが積分である。
+:::
+
+::: theorem 定数係数の方程式 {#ode:constant-coefficients keywords="for constant A, the transition matrix is e^{(t-s)A}; x(t) = e^{(t-t_0)A} xi + int e^{(t-s)A} b(s) ds; for a Jordan block, e^{t(lambda I + N)} = e^{lambda t} sum t^k N^k / k!" index="定数係数線形方程式|ていすうけいすうせんけいほうていしき"}
+$A\in M_{n}(\mathbb{R})$ が定数なら、$x'=Ax$ の推移行列は $\Phi(t,s)=e^{(t-s)A}$ である。とくに $x'=Ax+b(t)$, $x(t_{0})=\xi$ の解は $x(t)=e^{(t-t_{0})A}\xi+\int_{t_{0}}^{t}e^{(t-s)A}b(s)ds$。$A=P(\lambda I+N)P^{-1}$（$N^{m}=0$、$\lambda\in\mathbb{C}$ でもよい）なら
+$$
+e^{tA}=P\,e^{\lambda t}\Bigl(\sum_{k=0}^{m-1}\frac{t^{k}}{k!}N^{k}\Bigr)P^{-1}.
+$$
+:::
+
+::: proof
+\ref{lin:matrix-exponential.5} から $\frac{d}{dt}e^{(t-s)A}=Ae^{(t-s)A}$、$t=s$ で $I$ なので、一意性から推移行列。後半は \ref{ode:variation-of-constants}。最後の式：$\lambda I$ と $N$ は可換なので $e^{t(\lambda I+N)}=e^{\lambda t}e^{tN}$（\ref{lin:matrix-exponential.3}）、$e^{tN}$ の級数は $N^{m}=0$ で有限和、$e^{PXP^{-1}}=Pe^{X}P^{-1}$（\ref{lin:matrix-exponential.2}）。
+:::
+
+ジョルダン標準形（\ref{lin:jordan-normal-form}、$\mathbb{C}$ の上で）を使えば、任意の $A$ について $e^{tA}$ の成分は $t^{k}e^{\lambda t}$（$\lambda$ は固有値、$k$ はジョルダン細胞の大きさ未満）の一次結合である。
+
+## 高階の線形方程式 {#ode:sec-ln-higher}
+
+::: proposition 高階の線形方程式とロンスキアン {#ode:higher-order-linear keywords="y^(n) + a_{n-1}(t) y^(n-1) + ... + a_0(t) y = g(t): unique global solutions, the homogeneous solutions form an n-dimensional space, Wronskian W(t) satisfies Abel's formula W(t) = W(t_0) exp(-int a_{n-1})" index="ロンスキアン|ろんすきあん, アーベルの公式（ロンスキアン）|あーべるのこうしきろんすきあん, 高階線形微分方程式|こうかいせんけいびぶんほうていしき"}
+$a_{0},\dots,a_{n-1},g$ を $J$ 上の連続関数とし、$y^{(n)}+a_{n-1}(t)y^{(n-1)}+\cdots+a_{0}(t)y=g(t)$ を考える。
+1. 各 $t_{0}\in J$ と $(\eta_{0},\dots,\eta_{n-1})$ について、$y^{(j)}(t_{0})=\eta_{j}$ となる $J$ 上の解がただ一つある。
+2. $g=0$ のとき解の全体は $n$ 次元。解 $y_{1},\dots,y_{n}$ の**ロンスキアン** $W\defeq\det\bigl(y_{j}^{(i-1)}\bigr)_{i,j}$ は $W(t)=W(t_{0})\exp\bigl(-\int_{t_{0}}^{t}a_{n-1}\bigr)$ を満たし、$y_{1},\dots,y_{n}$ が基底であることと、ある（したがってすべての）$t$ で $W(t)\neq0$ は同値。
+:::
+
+::: proof
+\ref{ode:higher-order-reduction} から、$x=(y,\dots,y^{(n-1)})$ についての線形方程式 $x'=C(t)x+(0,\dots,0,g)$ と同値。$C(t)$ は最後の行が $(-a_{0},\dots,-a_{n-1})$ で、その上は $(0\ I_{n-1})$ の形の行列（**同伴行列**）で、$\operatorname{tr}C=-a_{n-1}$。1 は \ref{ode:linear-existence}、2 は \ref{ode:solution-space} と、$W=\det\Phi$（$\Phi$ の第 $j$ 列は $y_{j}$ に対応する解 $x$）へのリウヴィルの公式。
+:::
+
+::: theorem 定数係数の高階方程式 {#ode:constant-coefficient-higher keywords="for constant coefficients with characteristic polynomial P(z) = prod (z - lambda_j)^{m_j}, the functions t^k e^{lambda_j t} (0 <= k < m_j) form a basis of complex solutions; real solutions from real and imaginary parts" index="特性多項式（微分方程式）|とくせいたこうしきびぶんほうていしき, 特性方程式|とくせいほうていしき"}
+$a_{0},\dots,a_{n-1}\in\mathbb{R}$ を定数とし、$P(z)\defeq z^{n}+a_{n-1}z^{n-1}+\cdots+a_{0}=\prod_{j=1}^{s}(z-\lambda_{j})^{m_{j}}$（$\lambda_{j}\in\mathbb{C}$ は相異なる）とする。$y^{(n)}+\cdots+a_{0}y=0$ の複素数値の解の全体は、$t^{k}e^{\lambda_{j}t}$（$1\le j\le s$, $0\le k<m_{j}$）を基底とする $n$ 次元の複素ベクトル空間である。実数値の解は、それらの実部・虚部の実一次結合である。
+:::
+
+::: proof
+微分作用素 $\partial\defeq d/dt$ を使うと方程式は $P(\partial)y=0$ と書け、$P(\partial)=\prod_{j}(\partial-\lambda_{j})^{m_{j}}$（定数係数の多項式の因数分解は、可換な作用素 $\partial-\lambda_{j}$ の積としてもそのまま成り立つ）。
+
+**Step 1（解であること）.** $(\partial-\lambda)(e^{\lambda t}u)=e^{\lambda t}u'$ なので $(\partial-\lambda)^{m}(e^{\lambda t}u)=e^{\lambda t}u^{(m)}$。$u=t^{k}$, $k<m_{j}$ なら $u^{(m_{j})}=0$ で、$(\partial-\lambda_{j})^{m_{j}}$ を最後に（可換性から順序を入れ替えて）施せば $P(\partial)(t^{k}e^{\lambda_{j}t})=0$。
+
+**Step 2（一次独立）.** 【主張：多項式 $p_{j}$ について $\sum_{j}p_{j}(t)e^{\lambda_{j}t}=0$（$t\in J$）なら、すべての $p_{j}=0$】$s$ についての帰納法。$s=1$ は $e^{\lambda_{1}t}\neq0$ から。$s\ge2$ とし、両辺に $e^{-\lambda_{s}t}$ を掛けて $(\deg p_{s}+1)$ 回微分すると、$p_{s}$ の項は消え、$j<s$ の項は $q_{j}(t)e^{(\lambda_{j}-\lambda_{s})t}$ の形になる。ここで $\frac{d}{dt}(p(t)e^{\mu t})=(p'+\mu p)e^{\mu t}$ で、$\mu\neq0$ なら $p\mapsto p'+\mu p$ は多項式の次数を保つ単射なので、$q_{j}\neq0\iff p_{j}\neq0$。帰納法の仮定から $q_{j}=0$、よって $p_{j}=0$（$j<s$）。最後に $p_{s}e^{\lambda_{s}t}=0$ から $p_{s}=0$。
+
+**Step 3（基底と次元）.** 複素数値の解の空間は、実部と虚部に分けて考えれば、\ref{ode:higher-order-linear.2} と同じ議論で $n$ 次元の複素ベクトル空間（評価写像 $y\mapsto(y(t_{0}),\dots,y^{(n-1)}(t_{0}))\in\mathbb{C}^{n}$ が同型）。Step 1・2 の $\sum m_{j}=n$ 個の解は一次独立なので基底。実係数なので、複素数値の解の実部・虚部も解で、実数値の解 $y$ は $y=\operatorname{Re}y$ と書けるから、基底の実部・虚部の一次結合。
+:::
+
+::: supplement
+**高い視点：線形方程式は「表現」、基本行列は「平行移動」.** 線形方程式 $x'=A(t)x$ は、自明束 $J\times\mathbb{R}^{n}$ の上の接続 $\nabla_{d/dt}=d/dt-A(t)$ の平行な切断の方程式とみることができる（\ref{riem:connection}）。推移行列 $\Phi(t,s)$ はその平行移動で、$\Phi(t,s)\Phi(s,r)=\Phi(t,r)$ は平行移動の合成則である。リーマン幾何の平行移動（\ref{riem:parallel-transport}）は、まさにこの線形方程式の大域的な存在に依存していた。定数係数の場合には、$t\mapsto e^{tA}$ は $\mathbb{R}$ から $\mathrm{GL}(n,\mathbb{R})$ への 1 パラメータ部分群で（\ref{lie:exp-gl}）、リー群の指数写像そのものである。比喩で言えば、線形方程式の解は「各瞬間の微小な変換 $I+A(t)dt$ を時間順に掛け合わせたもの」（時間順序積）で、$A$ が可換なら普通の指数関数になる。
+
+**補足.** リウヴィルの公式から、$\operatorname{tr}A\equiv0$ なら推移行列は $\mathrm{SL}(n)$ に値をとる。$A(t)$ が交代行列なら推移行列は直交行列で（\ref{ode:prob-ln-skew}）、これは計量接続の平行移動が等長であること（\ref{riem:metric-connection-properties.2}）の行列版である。
+:::
+
+## 問題 {#ode:sec-ln-problems}
+
+::: problem {#ode:prob-ln-skew}
+$A(t)$ がすべての $t$ で交代行列なら、推移行列 $\Phi(t,s)$ は直交行列であることを示せ。
+:::
+
+::: solution
+$X(t)\defeq\Phi(t,s)$ とすると $\frac{d}{dt}(X^{\mathsf{T}}X)=X^{\mathsf{T}}A^{\mathsf{T}}X+X^{\mathsf{T}}AX=X^{\mathsf{T}}(A^{\mathsf{T}}+A)X=0$。$t=s$ で $I$ なので、$X^{\mathsf{T}}X=I$。
+:::
+
+::: problem {#ode:prob-ln-oscillator}
+$y''+\omega^{2}y=\cos(\omega t)$（$\omega>0$、共鳴）の解で $y(0)=y'(0)=0$ となるものを、定数変化法で求めよ。
+:::
+
+::: solution
+1 階化すると $x'=Ax+b$, $A=\begin{pmatrix}0&1\\-\omega^{2}&0\end{pmatrix}$, $b=(0,\cos\omega t)$。$e^{tA}=\begin{pmatrix}\cos\omega t&\omega^{-1}\sin\omega t\\-\omega\sin\omega t&\cos\omega t\end{pmatrix}$（微分して $A$ を掛けたものに等しく、$t=0$ で $I$）。定数変化法から $y(t)=\int_{0}^{t}\omega^{-1}\sin(\omega(t-s))\cos(\omega s)ds$。積和の公式 $\sin(\omega(t-s))\cos(\omega s)=\frac12(\sin\omega t+\sin(\omega t-2\omega s))$ から、$y(t)=\frac{1}{2\omega}\bigl(t\sin\omega t+\bigl[\tfrac{\cos(\omega t-2\omega s)}{2\omega}\bigr]_{0}^{t}\bigr)=\frac{t\sin\omega t}{2\omega}$。振幅が $t$ に比例して増える（共鳴）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
