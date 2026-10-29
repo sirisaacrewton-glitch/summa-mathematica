@@ -223,15 +223,16 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 |---|---|---|---|---|
 | TM-01 | 04-manifolds/01-topological-manifolds/01-basics | 位相多様体の定義と基本性質 | 座標近傍・局所ユークリッド・位相多様体（SM-01 から移動）、条件を外した例、次元の一意性・局所コンパクト・局所弧状連結、連結なら第二可算⇔σコンパクト⇔パラコンパクト⇔距離化可能、コンパクト多様体の埋め込み（09 から移動） | 完了（2026-10-29。SM-01 は「位相多様体＋追加の構造」の形に直した） |
 | TM-02〜08 | （01-topological-manifolds）/02〜08 | シェーンフリース〜閉曲面の分類 | 旧 MF-05〜11 を移動 | 完了（2026-10-29 移動） |
-| TM-09 | （01-topological-manifolds）/09-triangulation-smoothing | 三角形分割の事実 | 旧 MF-12。埋め込みは TM-01 へ、可微分構造の事実は SM-08 へ分ける | 要分割 |
+| TM-09 | （01-topological-manifolds）/09-triangulation-smoothing | 高い次元の三角形分割 | 旧 MF-12。埋め込みは TM-01 へ、可微分構造の事実は SM-09 へ移した。三角形分割・ハウプトフェアムートゥングの事実と問題が残る | 完了（2026-10-29 分割） |
 | TM-E | （01-topological-manifolds）/10-exercises | 演習 | | 未着手 |
 | SM-01 | 04-manifolds/02-smooth-manifolds/01-smooth-manifolds | 可微分多様体と接空間 | C^r 級多様体の定義に一般化、C^r だが C^{r+1} でないアトラスの例（mfd:cr-not-cr1）、C^r 構造の中の C^∞ 構造（ホイットニー、fact）、導分の接空間は C^∞ のみ（注意） | 完了（2026-10-29） |
 | SM-02〜04 | （02-smooth-manifolds）/02〜04 | 1 の分割・部分多様体、微分形式、積分とストークス | 旧 MF-02〜04 | 完了 |
-| SM-05 | （02-smooth-manifolds）/05-vector-fields | ベクトル場とリー微分 | 積分曲線・流れ、リー括弧、内部積、リー微分、カルタンの公式 | 未着手 |
-| SM-06 | （02-smooth-manifolds）/06-sard | サードの定理 | 測度 0、サードの定理（C^∞ で証明）、滑らかさの条件と反例（注意） | 未着手 |
-| SM-07 | （02-smooth-manifolds）/07-whitney | ホイットニーの埋め込み定理 | コンパクトの場合 ℝ^{2n+1} への埋め込み・ℝ^{2n} へのはめ込み（証明）、強い形（2n）は fact | 未着手 |
-| SM-08 | （02-smooth-manifolds）/08-smooth-structures | 可微分構造の事実 | TOP・PL・DIFF、エキゾチック球面など（TM-09 から移す） | 未着手 |
-| SM-E | （02-smooth-manifolds）/09-exercises | 演習 | 旧 05-exercises | 移動のみ |
+| SM-05 | （02-smooth-manifolds）/05-tangent-bundle | 接束とベクトル場 | 座標近傍からの多様体の構成、ヤコビ行列による TM・T*M の構成、ベクトル場＝導分、リー括弧 | 完了（2026-10-29） |
+| SM-06 | （02-smooth-manifolds）/06-flows-lie-derivative | 流れとリー微分 | 積分曲線・流れ（初期値への滑らかな依存は事実として引用）、L_X Y=[X,Y]、内部積、カルタンの公式、dω(X,Y) | 完了（2026-10-29） |
+| SM-07 | （02-smooth-manifolds）/07-sard | サードの定理 | 測度 0、フビニの補題、サードの定理（C^∞ で証明、ミルナーの流れ）、モース–サードの滑らかさの条件 r≥max(1,m−n+1) とホイットニーの反例（注意） | 完了（2026-10-29） |
+| SM-08 | （02-smooth-manifolds）/08-whitney | ホイットニーの埋め込み定理 | コンパクトの場合 ℝ^{2n+1} への埋め込み・ℝ^{2n} へのはめ込み（M×M∖Δ と単位接束 SM による一般射影）、強い形（2n）は fact | 完了（2026-10-29） |
+| SM-09 | （02-smooth-manifolds）/09-smooth-structures | 可微分構造の存在と一意性 | 同相写像による引き戻し（証明）、ℝ 上の互いに異なるが微分同相な構造が非可算個（証明）、微分同相を除いた個数の定義、1 次元の分類（fact）、TOP・PL・DIFF、エキゾチック球面（TM-09 から移動） | 完了（2026-10-29） |
+| SM-E | （02-smooth-manifolds）/10-exercises | 演習 | 旧 05-exercises | 移動のみ |
 | FB | 04-manifolds/03-fiber-bundles | ファイバー束の一般論 | ファイバー束・主束・付随束・ベクトル束、接束＝フレーム束の付随束（SM-05 の伏線回収）、構造群の還元 | 未着手 |
 | DG-R | 05-differential-geometry/03-riemannian | リーマン幾何 | リーマン計量（構造群の O(n) への還元）、接続と共変微分、レビ–チビタ接続、曲率、測地線、ホッジの星作用素 | 未着手 |
 | DG-S | 05-differential-geometry/04-symplectic | シンプレクティック幾何 | シンプレクティック形式、ダルブーの定理、ハミルトン系、ケーラー形式への導入 | 未着手 |

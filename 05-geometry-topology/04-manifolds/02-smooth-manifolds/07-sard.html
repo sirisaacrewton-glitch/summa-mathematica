@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>サードの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-manifolds/02-smooth-manifolds/07-sard.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# サードの定理 {#mfd:page-sard keywords="measure zero sets in R^n and in manifolds, countable unions, C^1 images of null sets, Fubini lemma for null sets, Sard's theorem, critical values have measure zero, density of regular values, Morse-Sard smoothness condition, Whitney's counterexample"}
+
+滑らかな写像 $F\colon M\to N$ の臨界点（微分が全射でない点）はたくさんありうる（定値写像ではすべての点が臨界点）。しかし、臨界点の**像**（臨界値）は「ほとんどない」：臨界値の全体は測度 $0$ である（**サードの定理**）。とくに正則値は稠密にある。サードの定理は、次のページのホイットニーの埋め込み定理をはじめ、多様体論で「一般の位置」にあるものを選ぶときの基本的な道具である。
+
+## 記法と定義の確認 {#mfd:sec-sd-notation}
+
+::: notation
+- $\mathbb{R}^{n}$ の測度 $0$ の集合と、その基本的な性質（閉直方体で覆ってよい、有限和、正の体積の直方体は測度 $0$ でない）は \ref{calc:measure-zero-rn}, \ref{calc:measure-zero-rn-properties}。$v(J)$ は直方体 $J$ の体積。
+- \ref{calc:mean-value-inequality}、\ref{calc:multivariable-taylor}、\ref{calc:inverse-function-theorem}。
+- 臨界点・正則値は \ref{mfd:regular-value}。$\partial^{\alpha}$ は多重指数 $\alpha$ による偏微分。
+- 本ページの証明は、ミルナー『Topology from the Differentiable Viewpoint』の証明の流れ（次元についての帰納法、臨界点の集合を高階の導関数が消える点で分ける）を参考に、細部をここで書き下ろした。
+:::
+
+## 測度 0 の集合 {#mfd:sec-sd-null}
+
+::: lemma 測度 0 の集合の可算和と $C^{1}$ 級写像による像 {#mfd:null-sets-basic keywords="countable unions of null sets are null; a C^1 map between open subsets of R^n maps null sets to null sets" index="測度 0 の集合の可算和|そくどぜろのしゅうごうのかさんわ"}
+1. 測度 $0$ の集合 $E_{1},E_{2},\dots\subset\mathbb{R}^{n}$ の和 $\bigcup_{k}E_{k}$ は測度 $0$。
+2. $U\subset\mathbb{R}^{n}$ を開集合、$G\colon U\to\mathbb{R}^{n}$ を $C^{1}$ 級とする。$E\subset U$ が測度 $0$ なら $G(E)$ も測度 $0$。
+:::
+
+::: proof
+**1.** $\varepsilon>0$ について、$E_{k}$ を体積の和 $<\varepsilon/2^{k}$ の可算個の直方体で覆い、それらを全部合わせる。
+
+**2.** $U$ は、閉包が $U$ に含まれる可算個の閉立方体 $Q_{j}$ の和（有理数の頂点をもつもの）なので、1 から $E\cap Q_{j}$ ごとに示せばよい。$Q\defeq Q_{j}$ は凸でコンパクトなので $L\defeq\sup_{Q}\|DG\|<\infty$ で、\ref{calc:mean-value-inequality} から $x,y\in Q$ について $|G(x)-G(y)|\le L|x-y|$。$\varepsilon>0$ について $E\cap Q$ を体積の和 $<\varepsilon$ の可算個の立方体（直方体を細かい立方体に分けても体積の和は変わらない）$Q'_{k}$ で覆い、$Q$ との共通部分（直方体）をとる。辺の長さ $s$ の立方体 $Q'_{k}\cap Q$ の直径は $\sqrt{n}s$ なので、その像は辺の長さ $2L\sqrt{n}s$ の立方体に入り、体積は $(2L\sqrt{n})^{n}s^{n}$。和は $(2L\sqrt{n})^{n}\varepsilon$ 未満。（共通部分が立方体でないときは、さらに小さい立方体に分ける。）
+:::
+
+::: definition 多様体の中の測度 0 の集合 {#mfd:measure-zero-manifold keywords="a subset of a manifold has measure zero if its image in every chart has measure zero" index="測度 0（多様体）|そくどぜろたようたい"}
+$n$ 次元の可微分多様体 $N$ の部分集合 $E$ が**測度 $0$** であるとは、$N$ のすべての座標近傍 $(V,\psi)$ について $\psi(E\cap V)\subset\mathbb{R}^{n}$ が測度 $0$ であることをいう。\ref{mfd:null-sets-basic.2} から、$N$ を覆う座標近傍の族（可算個でよい）の各座標近傍で測度 $0$ なら、すべての座標近傍で測度 $0$（座標変換は $C^{\infty}$ 級）。測度 $0$ の集合は内点をもたない（\ref{calc:measure-zero-rn-properties.3}）。
+:::
+
+::: lemma 測度 0 についてのフビニの補題 {#mfd:fubini-null keywords="if a compact set in R x R^{n-1} meets every slice {t} x R^{n-1} in a null set then it is null; countable unions of compact sets" index="フビニの補題（測度 0）|ふびにのほだいそくどぜろ"}
+$A\subset\mathbb{R}\times\mathbb{R}^{n-1}$ がコンパクト集合の可算和で、各 $t$ について切り口 $A_{t}\defeq\{y:(t,y)\in A\}\subset\mathbb{R}^{n-1}$ が測度 $0$ なら、$A$ は測度 $0$。
+:::
+
+::: proof
+\ref{mfd:null-sets-basic.1} から、$A$ がコンパクトな場合に示せばよい。$A\subset[a,b]\times\mathbb{R}^{n-1}$ とし、$\varepsilon>0$ をとる。
+
+**Step 1（切り口ごとの被覆）.** 【主張：各 $t\in[a,b]$ に開区間 $I_{t}\ni t$ と、体積の和 $<\varepsilon$ の有限個の開直方体 $W^{t}_{1},\dots$ で、$A\cap(I_{t}\times\mathbb{R}^{n-1})\subset I_{t}\times\bigcup_{j}W^{t}_{j}$ となるものがある】$A_{t}$ はコンパクトで測度 $0$ なので、体積の和 $<\varepsilon$ の有限個の開直方体で覆える（\ref{calc:measure-zero-rn-properties}）。その和 $W$ は開集合。$\{(s,y)\in A:y\notin W\}$ はコンパクトで、第 1 成分の像は $t$ を含まないコンパクト集合なので、$t$ のある開区間 $I_{t}$ と交わらない。
+
+**Step 2（合わせる）.** 開区間 $I_{t}$（$t\in[a,b]$）はコンパクトな $[a,b]$ を覆うので、ルベーグ数 $\lambda>0$ がある（長さ $<\lambda$ の部分区間はどれかの $I_{t}$ に含まれる）。$[a,b]$ を長さ $<\lambda$ の閉区間 $L_{1},\dots,L_{p}$ に分け、$L_{i}\subset I_{t_{i}}$ をとる。閉直方体 $L_{i}\times\overline{W^{t_{i}}_{j}}$ たちは $A$ を覆い（$A$ の点の第 1 成分はある $L_{i}$ に入る）、体積の和は $\sum_{i}|L_{i}|\cdot\varepsilon=(b-a)\varepsilon$。$\varepsilon$ は任意なので、\ref{calc:measure-zero-rn-properties.1} から $A$ は測度 $0$。
+:::
+
+## サードの定理 {#mfd:sec-sd-theorem}
+
+::: theorem サードの定理 {#mfd:sard keywords="Sard's theorem: the set of critical values of a smooth map between manifolds has measure zero; regular values are dense" index="サードの定理|さーどのていり, 臨界値|りんかいち" refname="サードの定理"}
+$F\colon M^{m}\to N^{n}$ を可微分多様体の間の滑らかな写像、$C$ をその臨界点の集合とする。臨界値の集合 $F(C)$ は $N$ の測度 $0$ の集合である。とくに正則値の全体は $N$ で稠密である。
+:::
+
+::: intuition
+写像が「つぶれる」点（臨界点）はたくさんあってもよいが、つぶれた先の値はごく薄い集合にしかならない。たとえば平面から直線への射影 $(x,y)\mapsto x$ をゆがめた写像でも、ほとんどすべての値の逆像は、きれいな曲線（多様体）になっている。
+:::
+
+::: proof
+$M$, $N$ を可算個の座標近傍で覆い、\ref{mfd:null-sets-basic.1} と \ref{mfd:measure-zero-manifold} から、$U\subset\mathbb{R}^{m}$ が開集合で $F\colon U\to\mathbb{R}^{n}$ が $C^{\infty}$ 級の場合に示せばよい（臨界点の集合の、座標近傍の中の閉部分集合のコンパクト集合による可算和に分ける）。$n=0$ なら臨界点はないので $n\ge1$ とする。$m$ についての帰納法。$m=0$ なら $U$ は可算集合（点）で像は可算、測度 $0$。$m\ge1$ とし、$m-1$ 次元で（すべての $n$ について）成り立つとする。$C_{k}\defeq\{x\in U:\partial^{\alpha}F_{i}(x)=0\ (1\le|\alpha|\le k,\ \text{すべての}\ i)\}$ とおくと、$C\supset C_{1}\supset C_{2}\supset\cdots$ はどれも $U$ の閉集合（$n\ge1$ なら $C_{1}\subset C$）。
+
+**Step 1（$F(C\setminus C_{1})$ は測度 0）.** 【主張】$n=1$ なら $C=C_{1}$（臨界点とは $DF=0$ の点）なので $n\ge2$ としてよい。$x\in C\setminus C_{1}$ では、ある $\partial F_{i}/\partial x_{j}\neq0$。座標の番号を付け替えて $\partial F_{1}/\partial x_{1}(x)\neq0$ とする。$h(z)\defeq(F_{1}(z),z_{2},\dots,z_{m})$ は $Dh(x)$ が可逆なので、\ref{calc:inverse-function-theorem} から $x$ の開近傍 $V$ で微分同相写像。$g\defeq F\circ h^{-1}\colon h(V)\to\mathbb{R}^{n}$ は $g(t,y)=(t,g_{t}(y))$ の形で、ヤコビ行列は $\begin{pmatrix}1&0\\ \ast&Dg_{t}(y)\end{pmatrix}$ なので、$(t,y)$ が $g$ の臨界点であることと $y$ が $g_{t}$ の臨界点であることは同値。$g_{t}$ は $m-1$ 次元の開集合からの写像なので、帰納法の仮定から $g_{t}(\mathrm{crit}\,g_{t})$ は測度 $0$。$K$ を $h(V)$ の中のコンパクト集合とすると、$g(\mathrm{crit}\,g\cap K)$ はコンパクトで、その切り口 $\{t\}\times(\ldots)$ は $g_{t}(\mathrm{crit}\,g_{t})$ に含まれ測度 $0$。\ref{mfd:fubini-null} から測度 $0$。$h(V)$ はコンパクト集合の可算和で、$F(C\cap V)=g(\mathrm{crit}\,g)$ は測度 $0$。$C\setminus C_{1}$ は可算個のこのような $V$ で覆える（第二可算性）。
+
+**Step 2（$F(C_{k}\setminus C_{k+1})$ は測度 0、$k\ge1$）.** 【主張】$x\in C_{k}\setminus C_{k+1}$ では、ある $|\alpha|=k$ と $i,j$ で $w\defeq\partial^{\alpha}F_{i}$ について $\partial w/\partial x_{j}(x)\neq0$、番号を付け替えて $j=1$。$h(z)\defeq(w(z),z_{2},\dots,z_{m})$ は $x$ の開近傍 $V$ で微分同相写像で、$w$ は $C_{k}$ の上で $0$ なので $h(C_{k}\cap V)\subset\{0\}\times\mathbb{R}^{m-1}$。$g\defeq F\circ h^{-1}$ を $\{0\}\times\mathbb{R}^{m-1}$ の開集合に制限した $\bar g$（$m-1$ 次元の開集合からの写像）について、$h(C_{k}\cap V)$ の点では $g$ の 1 階導関数がすべて $0$（$k\ge1$）なので、それらは $\bar g$ の臨界点。帰納法の仮定から $\bar g(\mathrm{crit}\,\bar g)$ は測度 $0$ で、$F(C_{k}\cap V)$ はそれに含まれる。可算個の $V$ で覆う。
+
+**Step 3（$F(C_{k})$ は測度 0、$nk\ge m$）.** 【主張】$U$ の中の辺の長さ $\delta$ の閉立方体 $Q$ について示せば十分（可算個で覆える）。$Q$ は凸でコンパクトなので、\ref{calc:multivariable-taylor.1} を各成分に使うと、$k+1$ 階の偏導関数の上限から定まる定数 $c$ で、$x\in C_{k}\cap Q$, $x+h\in Q$ について $|F(x+h)-F(x)|\le c|h|^{k+1}$（$x$ で 1 階から $k$ 階までの偏導関数が $0$）。$Q$ を辺 $\delta/r$ の $r^{m}$ 個の小立方体に分け、$C_{k}$ と交わる小立方体 $Q'$ の点 $x$ をとると、$F(Q')$ は中心 $F(x)$、半径 $c(\sqrt{m}\delta/r)^{k+1}$ の球に入り、体積 $\le c'r^{-n(k+1)}$ の立方体で覆える（$c'$ は $r$ によらない）。体積の和は $r^{m}\cdot c'r^{-n(k+1)}=c'r^{m-n(k+1)}\to0$（$r\to\infty$、$n(k+1)>m$）。
+
+**Step 4（結論）.** $k\ge m/n$ をとると、$C=(C\setminus C_{1})\cup\bigcup_{j=1}^{k-1}(C_{j}\setminus C_{j+1})\cup C_{k}$ なので、Step 1〜3 と \ref{mfd:null-sets-basic.1} から $F(C)$ は測度 $0$。稠密性は、測度 $0$ の集合が内点をもたないことから。
+
+::: hypcheck
+- **滑らかさ**：Step 3 で $k$ を $m/n$ 以上にとり、$k+1$ 階の偏導関数を使った。$C^{\infty}$ 級なのでどの $k$ もとれる。$C^{r}$ 級なら、この証明は $r\ge k+1$、つまり $r\ge m/n+1$ 程度で回る。最良の条件は $r\ge\max(1,m-n+1)$ であることが知られている（下の補足）。
+- **第二可算性**：Step 1・2 で、$C\setminus C_{1}$ などを可算個の近傍で覆うのに使った。
+:::
+:::
+
+::: corollary サードの定理の帰結 {#mfd:sard-corollaries keywords="if dim M < dim N the image of a smooth map has measure zero; almost every fibre is a submanifold" index="サードの定理の系|さーどのていりのけい"}
+$F\colon M^{m}\to N^{n}$ を滑らかな写像とする。
+1. $m<n$ なら $F(M)$ は測度 $0$ で、とくに $F$ は全射でない。
+2. 測度 $0$ の集合を除くすべての $q\in N$ について、$F^{-1}(q)$ は空集合か $(m-n)$ 次元の部分多様体（\ref{mfd:regular-value-theorem}）。
+:::
+
+::: proof
+1：$m<n$ ならどの点でも $dF_{m}$ は全射でなく、$M$ 全体が臨界点。2：正則値については \ref{mfd:regular-value-theorem}。
+:::
+
+::: supplement
+**滑らかさの条件（モース–サードの定理）.** $C^{r}$ 級の写像 $F\colon\mathbb{R}^{m}\to\mathbb{R}^{n}$ の臨界値の集合が測度 $0$ になるのは、$r\ge\max(1,m-n+1)$ のときであることが知られている（モース、サード）。この条件は最良で、ホイットニー（1935 年）は、$C^{1}$ 級の関数 $f\colon\mathbb{R}^{2}\to\mathbb{R}$ で、臨界点だけからなる弧の上で定数でない（したがって臨界値が区間を含む）ものを構成した。$m-n+1=2$ なので、$C^{1}$ では足りない例になっている。この意味で、サードの定理は「$C^{\infty}$ でしか成り立たない」わけではないが、次元差に応じた滑らかさを要する。
+
+**高い視点：一般の位置.** サードの定理の典型的な使い方は、「パラメータを少し動かせば、悪い状況（臨界値に当たる、非横断的に交わる）を避けられる」というもので、悪いパラメータの集合が測度 $0$ であることをサードの定理で示す。比喩で言えば、ダーツを無作為に投げれば、細い線（臨界値の集合）に当たる確率は $0$ である。次のページの埋め込み定理は、射影の方向をこの意味で「一般に」選ぶことで示される。
+:::
+
+## 問題 {#mfd:sec-sd-problems}
+
+::: problem {#mfd:prob-sd-sphere-curve}
+滑らかな曲線 $\gamma\colon\mathbb{R}\to S^{2}$ は全射でないことを示せ。（空間を埋め尽くす曲線は連続だが滑らかではありえない。）
+:::
+
+::: solution
+$\dim\mathbb{R}=1<2=\dim S^{2}$ なので、\ref{mfd:sard-corollaries.1} から $\gamma(\mathbb{R})$ は測度 $0$ で、$S^{2}$（空でない開集合を含む）と一致しない。
+:::
+
+::: problem {#mfd:prob-sd-saddle}
+$f(x,y)=x^{2}-y^{2}$（$\mathbb{R}^{2}\to\mathbb{R}$）の臨界点と臨界値を求め、正則値 $c$ について $f^{-1}(c)$ が 1 次元の部分多様体であることを確かめよ。$f^{-1}(0)$ はどうか。
+:::
+
+::: solution
+$df=2x\,dx-2y\,dy$ が $0$ になるのは原点だけで、臨界値は $f(0,0)=0$ だけ（測度 $0$）。$c\neq0$ は正則値で、\ref{mfd:regular-value-theorem} から $f^{-1}(c)$（双曲線）は 1 次元の部分多様体。$f^{-1}(0)$ は 2 直線 $y=\pm x$ の和で、原点の近くで十字形になり部分多様体ではない（原点を除くと 4 つの連結成分に分かれるが、1 次元の多様体の点の小さな連結な近傍から 1 点を除くと成分は高々 2 個）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
