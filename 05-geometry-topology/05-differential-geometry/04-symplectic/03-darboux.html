@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ダルブーの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/05-differential-geometry/04-symplectic/03-darboux.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ダルブーの定理 {#symp:page-darboux keywords="time-dependent vector fields and their flows via the suspended vector field d/dt + X_t, derivative of phi_t^* omega_t, Moser's trick, Darboux theorem: local canonical coordinates for symplectic forms, no local invariants in symplectic geometry, Moser stability"}
+
+リーマン多様体には曲率という局所不変量があり、球面の小さな部分を平面に等長的に移すことはできなかった（\ref{surf:no-isometric-map-sphere}）。シンプレクティック多様体では状況がまったく違い、どの点のまわりにも $\omega=\sum dx_{i}\wedge dy_{i}$ となる座標がある（**ダルブーの定理**、\ref{symp:darboux}）。つまり、シンプレクティック幾何には局所不変量がなく、興味はすべて大域的な性質にある。このページでは、**モーザーの方法**による証明を与える。二つのシンプレクティック形式を線分 $\omega_{t}$ で結び、$\omega_{t}$ を一定に見せる座標の変形を、時間に依存するベクトル場の流れとして作る。そのため、まず時間に依存するベクトル場の流れを、$\mathbb{R}\times M$ 上の普通のベクトル場の流れとして扱う補題を示す（\ref{symp:moser-lemma}）。
+
+## 記法と定義の確認 {#symp:sec-db-notation}
+
+::: notation
+- シンプレクティック形式と標準形は \ref{symp:symplectic-manifold}, \ref{symp:symplectic-basis}。流れの基本定理・リー微分・カルタンの公式は \ref{mfd:flow-theorem}, \ref{mfd:lie-derivative}, \ref{mfd:cartan-formula}、流れによる引き戻しの微分は \ref{symp:flow-pullback-derivative}。ポアンカレの補題は \ref{mfd:poincare-lemma-manifold}。
+- $I\subset\mathbb{R}$ を開区間とする。**時間に依存するベクトル場**とは、滑らかな写像 $X\colon I\times M\to TM$ で $X(t,m)\in T_{m}M$ となるものをいい、$X_{t}\defeq X(t,\cdot)$ と書く。**滑らかな $k$ 形式の族** $(\omega_{t})_{t\in I}$ とは、座標近傍で $\omega_{t}=\sum_{I}a_{I}(t,x)dx_{I}$ と書いたとき係数 $a_{I}$ が $(t,x)$ について滑らかなものをいい、$\dot\omega_{t}\defeq\sum_{I}\partial_{t}a_{I}\,dx_{I}$ と書く（座標によらないことは、引き戻しの式が $t$ を含まないことから）。
+- $\iota_{t}\colon M\to I\times M$, $\iota_{t}(m)\defeq(t,m)$、$\mathrm{pr}\colon I\times M\to M$ を射影とする。
+:::
+
+## 時間に依存するベクトル場の流れ {#symp:sec-db-moser-lemma}
+
+::: lemma モーザーの補題 {#symp:moser-lemma keywords="for a time-dependent vector field X_t vanishing at p, there is a neighbourhood V of p and smooth phi_t: V -> M, t in [0,1], with phi_0 = id, d/dt phi_t = X_t o phi_t, phi_t diffeomorphisms onto open sets, and d/dt phi_t^* omega_t = phi_t^*(L_{X_t} omega_t + dot omega_t)" index="モーザーの補題|もーざーのほだい, 時間に依存するベクトル場|じかんにいぞんするべくとるば"}
+$I\supset[0,1]$ を開区間、$X_{t}$ を $M$ 上の時間に依存するベクトル場、$(\omega_{t})$ を滑らかな $k$ 形式の族とし、点 $p\in M$ ですべての $t\in I$ について $X_{t}(p)=0$ とする。このとき、$p$ の開近傍 $V$、開区間 $J$（$[0,1]\subset J\subset I$）と滑らかな写像 $\phi\colon J\times V\to M$, $(t,m)\mapsto\phi_{t}(m)$ で、次を満たすものがある。
+1. $\phi_{0}=\mathrm{id}_{V}$、$\frac{\partial}{\partial t}\phi_{t}(m)=X_{t}(\phi_{t}(m))$、$\phi_{t}(p)=p$。
+2. 各 $\phi_{t}$ は $V$ から $M$ の開集合への微分同相写像。
+3. $\displaystyle\frac{d}{dt}\bigl(\phi_{t}^{*}\omega_{t}\bigr)=\phi_{t}^{*}\bigl(\mathcal{L}_{X_{t}}\omega_{t}+\dot\omega_{t}\bigr)$（$V$ の各点で）。
+:::
+
+::: proof
+**Step 1（懸垂したベクトル場）.** $I\times M$ 上のベクトル場 $\tilde Y\defeq\partial_{t}+\tilde X$、$\tilde X_{(t,m)}\defeq(0,X_{t}(m))\in T_{t}I\oplus T_{m}M$ を考える（成分が滑らかなので滑らか）。$\tilde Y$ の積分曲線を $s\mapsto(\tau(s),c(s))$ と書くと、$\dot\tau=1$, $\dot c(s)=X_{\tau(s)}(c(s))$。$(0,m)$ を始点とするものは $\tau(s)=s$ で、$c$ は $\dot c(s)=X_{s}(c(s))$, $c(0)=m$ の解である。$m=p$ では $c\equiv p$ が解なので、$s\mapsto(s,p)$ が $s\in I$ 全体で定義された積分曲線。$\tilde Y$ の流れ $\Psi$ の定義域 $\mathcal{D}$ は開集合（\ref{mfd:flow-theorem.2}）で、コンパクト集合 $[0,1]\times\{(0,p)\}$ を含むので、開区間 $J\supset[0,1]$ と $p$ の開近傍 $V$ で $J\times(\{0\}\times V)\subset\mathcal{D}$ となるものがある（$[0,1]$ の各点の近傍を有限個とって共通部分をとる）。$\phi_{t}(m)\defeq\mathrm{pr}(\Psi_{t}(0,m))$ と定めると、上の計算から $\Psi_{t}(0,m)=(t,\phi_{t}(m))$、つまり
+$$
+\Psi_{t}\circ\iota_{0}=\iota_{t}\circ\phi_{t}\qquad(V\text{ の上}).
+$$
+$\phi$ は滑らかで、1 は積分曲線の式から（$\phi_{t}(p)=p$ は $c\equiv p$ から）。
+
+**Step 2（微分同相写像）.** $\Psi_{t}$ は開集合の間の微分同相写像（\ref{mfd:flow-theorem.3}）で、$\{0\}\times V$ を $\{t\}\times M$ に写すので、$m\in V$ での微分は $T_{(0,m)}(\{0\}\times M)$ を $T_{(t,\phi_{t}(m))}(\{t\}\times M)$ に単射に写し、次元が等しいので同型。よって $d(\phi_{t})_{m}$ は同型で、$\phi_{t}$ は局所微分同相写像（\ref{mfd:inverse-function-theorem}）。$\Psi_{t}$ が単射なので $\phi_{t}$ も単射で、開集合への微分同相写像。
+
+**Step 3（形式の延長）.** $I\times M$ 上の $k$ 形式 $\Omega$ を、$\Omega_{(t,m)}(v_{1},\dots,v_{k})\defeq(\omega_{t})_{m}(d\mathrm{pr}\,v_{1},\dots,d\mathrm{pr}\,v_{k})$ と定める。座標では $\Omega=\sum_{I}a_{I}(t,x)dx_{I}$ で滑らか、$\iota_{t}^{*}\Omega=\omega_{t}$、$i_{\partial_{t}}\Omega=0$。Step 1 の関係式から
+$$
+\phi_{t}^{*}\omega_{t}=\phi_{t}^{*}\iota_{t}^{*}\Omega=(\iota_{t}\circ\phi_{t})^{*}\Omega=(\Psi_{t}\circ\iota_{0})^{*}\Omega=\iota_{0}^{*}(\Psi_{t}^{*}\Omega).
+$$
+
+**Step 4（微分）.** \ref{symp:flow-pullback-derivative} を $I\times M$ 上の $\tilde Y$ に使うと $\frac{d}{dt}\Psi_{t}^{*}\Omega=\Psi_{t}^{*}\mathcal{L}_{\tilde Y}\Omega$（$(0,m)$ の各点で）。$\iota_{0}^{*}$ は各点で $t$ によらない線形写像なので微分と交換し、もう一度 Step 1 の関係式を使うと
+$$
+\frac{d}{dt}\phi_{t}^{*}\omega_{t}=\iota_{0}^{*}\Psi_{t}^{*}\mathcal{L}_{\tilde Y}\Omega=\phi_{t}^{*}\,\iota_{t}^{*}\bigl(\mathcal{L}_{\tilde Y}\Omega\bigr).
+$$
+
+**Step 5（$\iota_{t}^{*}\mathcal{L}_{\tilde Y}\Omega$ の計算）.** 【主張：$\iota_{t}^{*}\mathcal{L}_{\tilde Y}\Omega=\mathcal{L}_{X_{t}}\omega_{t}+\dot\omega_{t}$】カルタンの公式から $\mathcal{L}_{\tilde Y}\Omega=d(i_{\tilde Y}\Omega)+i_{\tilde Y}d\Omega$。
+
+(a) $i_{\tilde Y}\Omega=i_{\tilde X}\Omega$（$i_{\partial_{t}}\Omega=0$）で、$\tilde X$ は切り口 $\{t\}\times M$ に接するので $\iota_{t}^{*}(i_{\tilde X}\Omega)=i_{X_{t}}\omega_{t}$。$\iota_{t}^{*}$ は $d$ と可換なので $\iota_{t}^{*}d(i_{\tilde Y}\Omega)=d(i_{X_{t}}\omega_{t})$。
+
+(b) 座標で $d\Omega=\sum_{I}\partial_{t}a_{I}\,dt\wedge dx_{I}+\beta$、$\beta\defeq\sum_{I}d_{x}a_{I}\wedge dx_{I}$（$d_{x}$ は $x$ についての微分の部分）。$i_{\partial_{t}}(dt\wedge dx_{I})=dx_{I}$, $i_{\partial_{t}}\beta=0$ なので、$\iota_{t}^{*}i_{\partial_{t}}d\Omega=\dot\omega_{t}$。$i_{\tilde X}(dt\wedge dx_{I})=-dt\wedge i_{\tilde X}dx_{I}$（$dt(\tilde X)=0$）は $\iota_{t}^{*}dt=0$ から引き戻すと $0$。$\iota_{t}^{*}i_{\tilde X}\beta=i_{X_{t}}d\omega_{t}$（$\iota_{t}^{*}\beta=d\omega_{t}$ で、(a) と同じ理由）。よって $\iota_{t}^{*}i_{\tilde Y}d\Omega=\dot\omega_{t}+i_{X_{t}}d\omega_{t}$。
+
+(a)(b) を足し、$M$ 上のカルタンの公式 $\mathcal{L}_{X_{t}}\omega_{t}=di_{X_{t}}\omega_{t}+i_{X_{t}}d\omega_{t}$ を使えば主張が従い、Step 4 と合わせて 3 が示された。
+
+::: hypcheck
+- **$X_{t}(p)=0$**：Step 1 で、$p$ を始点とする解が $[0,1]$ 全体で存在することに使った。これがないと、流れが時刻 $1$ まで存在する保証がない（$M$ がコンパクトなら、この仮定なしに $V=M$ ととれる）。
+- 流れの定義域が開集合で流れが滑らかであること（\ref{mfd:flow-theorem.2}）は、常微分方程式の事実として引用している。
+:::
+:::
+
+## ダルブーの定理 {#symp:sec-db-darboux}
+
+::: theorem ダルブーの定理 {#symp:darboux keywords="Darboux theorem: around every point of a symplectic manifold there are coordinates x_1..x_n, y_1..y_n with omega = sum dx_i ^ dy_i; proof by Moser's trick" index="ダルブーの定理|だるぶーのていり, ダルブー座標|だるぶーざひょう, モーザーの方法|もーざーのほうほう"}
+$(M,\omega)$ を $2n$ 次元のシンプレクティック多様体、$p\in M$ とする。$p$ を含む座標近傍 $(U;x_{1},\dots,x_{n},y_{1},\dots,y_{n})$ で、$U$ の上で
+$$
+\omega=\sum_{i=1}^{n}dx_{i}\wedge dy_{i}
+$$
+となるもの（**ダルブー座標**）がある。
+:::
+
+::: intuition
+$p$ では、線形代数（\ref{symp:symplectic-basis}）で $\omega$ を標準形 $\omega_{0}$ にできる。近くの点では $\omega$ と $\omega_{0}$ は少しずれている。そのずれを、$\omega_{0}$ から $\omega$ への線分 $\omega_{t}$ に沿って少しずつ「流し去る」座標変換を作る。流す速度 $X_{t}$ は、$\omega_{t}$ が時間とともに変わる分 $\dot\omega_{t}=d\sigma$ を、$X_{t}$ による変形 $\mathcal{L}_{X_{t}}\omega_{t}=d(i_{X_{t}}\omega_{t})$ でちょうど打ち消すように選ぶ：$i_{X_{t}}\omega_{t}=-\sigma$。
+:::
+
+::: proof
+**Step 1（$p$ で標準形にする）.** $p$ を中心とし、像が開球 $B$ の座標近傍 $(U_{0},\psi)$ をとる。\ref{symp:symplectic-basis} から、$T_{p}M$ のシンプレクティック基底をとり、それを標準基底に写す線形変換を $\psi$ に合成すれば（像は開球の線形像で、星形の開集合）、$\omega_{1}\defeq(\psi^{-1})^{*}\omega$ は $\psi(U_{0})\subset\mathbb{R}^{2n}$ 上のシンプレクティック形式で $\omega_{1}(0)=\omega_{0}$（定数係数の標準形式）。以下、$W\defeq\psi(U_{0})$ の上で考える。
+
+**Step 2（差の原始形式）.** $\omega_{1}-\omega_{0}$ は $W$ 上の閉 2 形式で、$W$ は星形なので、\ref{mfd:poincare-lemma-manifold.1} から $W$ 上の 1 形式 $\sigma$ で $d\sigma=\omega_{1}-\omega_{0}$ となるものがある。$\sigma(0)=\sum c_{i}dz_{i}$（定数）を引いても $d$ は変わらないので、$\sigma(0)=0$ としてよい。
+
+**Step 3（線分の非退化性）.** $\omega_{t}\defeq\omega_{0}+t(\omega_{1}-\omega_{0})$ とする。$\omega_{t}$ の係数行列の行列式は $(t,z)$ について連続で、$z=0$ では $\omega_{t}(0)=\omega_{0}$ なのでどの $t$ でも $0$ でない。コンパクト集合 $[0,1]\times\{0\}$ は開集合 $\{(t,z):\det\neq0\}$ に含まれるので、開区間 $I\supset[0,1]$ と $0$ の開近傍 $W'\subset W$ があって、$t\in I$, $z\in W'$ で $\omega_{t}(z)$ は非退化。
+
+**Step 4（モーザーのベクトル場）.** $t\in I$ について $W'$ 上のベクトル場 $X_{t}$ を $i_{X_{t}}\omega_{t}=-\sigma$ で定める（各点で非退化なので一意。成分は $\omega_{t}$ の係数行列の逆行列と $\sigma$ の成分の積で、$(t,z)$ について滑らか）。$\sigma(0)=0$ なので $X_{t}(0)=0$。\ref{symp:moser-lemma} を $M=W'$, $p=0$ に適用して、$0$ の開近傍 $V$ と $\phi_{t}\colon V\to W'$（$t\in[0,1]$）を得る。$\dot\omega_{t}=\omega_{1}-\omega_{0}=d\sigma$, $d\omega_{t}=0$ なので、補題の 3 とカルタンの公式から
+$$
+\frac{d}{dt}\phi_{t}^{*}\omega_{t}=\phi_{t}^{*}\bigl(d(i_{X_{t}}\omega_{t})+i_{X_{t}}d\omega_{t}+\dot\omega_{t}\bigr)=\phi_{t}^{*}(-d\sigma+0+d\sigma)=0.
+$$
+よって $V$ の各点で $\phi_{1}^{*}\omega_{1}=\phi_{0}^{*}\omega_{0}=\omega_{0}$。
+
+**Step 5（座標）.** $\phi_{1}$ は $V$ から開集合 $\phi_{1}(V)\ni0$ への微分同相写像（補題の 2）で、$\phi_{1}(0)=0$。$U\defeq\psi^{-1}(\phi_{1}(V))$, $\chi\defeq\phi_{1}^{-1}\circ\psi\restriction U$ とすると、$(U,\chi)$ は $p$ を含む座標近傍で
+$$
+(\chi^{-1})^{*}\omega=(\psi^{-1}\circ\phi_{1})^{*}\omega=\phi_{1}^{*}(\psi^{-1})^{*}\omega=\phi_{1}^{*}\omega_{1}=\omega_{0}.
+$$
+$\chi$ の成分を $(x_{1},\dots,x_{n},y_{1},\dots,y_{n})$ と書けば、$U$ の上で $\omega=\sum dx_{i}\wedge dy_{i}$。
+
+::: hypcheck
+- **$d\omega=0$**：Step 2 で $\omega_{1}-\omega_{0}$ が閉形式であること（原始形式 $\sigma$ の存在）と、Step 4 の $d\omega_{t}=0$ に使った。閉でない非退化 2 形式（概シンプレクティック形式）には、一般にダルブー座標がない（$d\omega$ が座標によらない障害になる）。
+- **非退化性**：Step 3・4 で $X_{t}$ を定めるのに使った。
+:::
+:::
+
+::: corollary シンプレクティック幾何には局所不変量がない {#symp:no-local-invariants keywords="any two symplectic manifolds of the same dimension are locally symplectomorphic" index="局所不変量（シンプレクティック）|きょくしょふへんりょうしんぷれくてぃっく"}
+同じ次元の二つのシンプレクティック多様体 $(M,\omega)$, $(M',\omega')$ と点 $p\in M$, $p'\in M'$ について、$p$, $p'$ の開近傍の間のシンプレクティック同相写像で $p$ を $p'$ に写すものがある。
+:::
+
+::: proof
+両方の点のまわりにダルブー座標 $\chi$, $\chi'$ をとり（中心を $0$ に平行移動しても標準形は変わらない）、像の共通部分の $0$ を含む連結成分を $O$ として、$\chi'^{-1}\circ\chi$ を $\chi^{-1}(O)$ に制限する。$(\chi'^{-1}\circ\chi)^{*}\omega'=\chi^{*}(\chi'^{-1})^{*}\omega'=\chi^{*}\omega_{0}=\omega$。
+:::
+
+::: fact モーザーの安定性定理 {#symp:moser-stability keywords="Moser stability: on a compact manifold, a smooth family of cohomologous symplectic forms omega_t are related by an isotopy phi_t^* omega_t = omega_0" index="モーザーの安定性定理|もーざーのあんていせいていり"}
+$M$ をコンパクトな多様体、$(\omega_{t})_{t\in[0,1]}$ をシンプレクティック形式の滑らかな族で、コホモロジー類 $[\omega_{t}]\in H^{2}(M)$ が $t$ によらないものとする。このとき微分同相写像の族 $\phi_{t}$ で $\phi_{0}=\mathrm{id}$, $\phi_{t}^{*}\omega_{t}=\omega_{0}$ となるものがある。（証明は \ref{symp:darboux} と同じモーザーの方法で、$\dot\omega_{t}=d\sigma_{t}$ となる $\sigma_{t}$ を $t$ について滑らかに選ぶ部分にホッジ理論などを使う。マクダフ–サラモン『Introduction to Symplectic Topology』第 3 章。）
+:::
+
+::: supplement
+**高い視点：柔らかい局所、硬い大域.** リーマン計量の局所的な分類は曲率という無限個の不変量をもつが、シンプレクティック形式は局所的には一種類しかない（ダルブー）。これは、リーマン計量の構造群 $\mathrm{O}(n)$ の「無限小の対称性」が有限次元なのに対し、シンプレクティック同相写像の群は、任意の関数 $H$ から $X_{H}$ を作れるほど巨大（関数の数だけある）であることの反映である：モーザーの方法は、この巨大な群の中で $\omega$ のずれを打ち消す元を探している。一方、大域的には、グロモフの非圧縮性定理（半径 $r$ の球は、$r'<r$ の円柱 $B^{2}(r')\times\mathbb{R}^{2n-2}$ にシンプレクティックに埋め込めない）のように、体積保存だけからは出ない「硬い」現象があることが知られている。比喩で言えば、シンプレクティック形式は局所的には完全に一様な「面積の布」だが、大域的には布を折りたたむ自由に、体積だけでは測れない制約がかかっている。
+:::
+
+## 問題 {#symp:sec-db-problems}
+
+::: problem {#symp:prob-db-area-forms}
+平面の開集合上の面積形式 $\omega=f(x,y)\,dx\wedge dy$（$f>0$）について、ダルブー座標を具体的に作れ。（ヒント：$u\defeq\int_{0}^{x}f(s,y)\,ds$, $v\defeq y$。）
+:::
+
+::: solution
+原点を含む長方形 $(-a,a)\times(-b,b)$ の上で考える。$u=\int_{0}^{x}f(s,y)ds$, $v=y$ とすると $du=f\,dx+(\partial_{y}u)dy$, $dv=dy$ なので $du\wedge dv=f\,dx\wedge dy=\omega$。$\partial(u,v)/\partial(x,y)$ の行列式は $f>0$ で、$x\mapsto u$ は各 $y$ について狭義単調なので $(x,y)\mapsto(u,v)$ は単射。逆関数定理から開集合への微分同相写像で、$(u,v)$ はダルブー座標。
+:::
+
+::: problem {#symp:prob-db-volume-moser}
+コンパクトで連結な向きづけられた $n$ 次元多様体の上の二つの体積形式 $\mu_{0},\mu_{1}$ について、$\int\mu_{0}=\int\mu_{1}$ なら $\phi^{*}\mu_{1}=\mu_{0}$ となる微分同相写像 $\phi$ があることが知られている（モーザーの定理）。$\mu_{t}\defeq(1-t)\mu_{0}+t\mu_{1}$ が各 $t$ で体積形式であることを示し、$\mu_{1}-\mu_{0}=d\sigma$ となる $\sigma$ があると仮定して、\ref{symp:moser-lemma} の方法で証明の筋道を書け（$M$ はコンパクトなので、流れは $[0,1]$ 全体で $M$ 上に定義される）。
+:::
+
+::: solution
+$\mu_{0},\mu_{1}$ はどちらも正の向きの体積形式（\ref{mfd:orientable-equivalents}）なので、正の座標近傍で $\mu_{i}=h_{i}dx_{1}\wedge\cdots\wedge dx_{n}$, $h_{i}>0$ と書け、$\mu_{t}$ の係数 $(1-t)h_{0}+th_{1}>0$。$X_{t}$ を $i_{X_{t}}\mu_{t}=-\sigma$ で定める（$\mu_{t}$ は各点で $0$ でない $n$ 形式なので、$v\mapsto i_{v}\mu_{t}$ は $T_{m}M\to\Lambda^{n-1}T_{m}^{*}M$ の同型）。$M$ がコンパクトなので、時間に依存するベクトル場 $X_{t}$ の流れ $\phi_{t}$ は $[0,1]\times M$ 全体で定義されることが知られている（\ref{symp:moser-lemma} の Step 1 で $V=M$ ととれる。ここでは証明しない）。すると補題の 3 と同じ計算で $\frac{d}{dt}\phi_{t}^{*}\mu_{t}=\phi_{t}^{*}(d i_{X_{t}}\mu_{t}+\dot\mu_{t})=\phi_{t}^{*}(-d\sigma+d\sigma)=0$（$d\mu_{t}=0$）。よって $\phi_{1}^{*}\mu_{1}=\mu_{0}$。（$\sigma$ の存在は $H^{n}(M)\cong\mathbb{R}$ が積分で与えられることによるが、これはここでは示していない。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
