@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>閉部分群定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/06-lie-groups/02-lie-groups/03-closed-subgroups.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 閉部分群定理 {#lie:page-closed-subgroups keywords="product formula lim (exp(X/n) exp(Y/n))^n = exp(X+Y), Cartan's closed subgroup theorem, closed subgroups of Lie groups are embedded Lie subgroups, Lie algebra of a closed subgroup h = {X : exp(tX) in H}, closed subgroups of GL(n) are Lie groups, kernels of homomorphisms, continuous homomorphisms are smooth"}
+
+$\mathrm{O}(n)$ や $\mathrm{SL}(n)$ がリー群であることは、正則値定理で一つずつ示した（\ref{lie:classical-groups}）。**閉部分群定理**（カルタン）は、それらを一度に、しかも大きく一般化する：リー群の部分群が位相的に閉じてさえいれば、自動的に部分多様体（したがってリー群）で、そのリー環は $\{X:\exp(tX)\in H\ (t\in\mathbb{R})\}$ である（\ref{lie:closed-subgroup-theorem}）。証明の鍵は二つで、一つは積公式 $\lim(\exp\frac Xn\exp\frac Yn)^{n}=\exp(X+Y)$（\ref{lie:product-formula}）、もう一つは「$H$ の元は、$\mathfrak{h}$ に横断的な方向には単位元の近くに現れない」という補題である。
+
+## 記法と定義の確認 {#lie:sec-cs-notation}
+
+::: notation
+- 指数写像とその性質は \ref{lie:exponential-map}, \ref{lie:exponential-properties}、自然性は \ref{lie:exp-natural}。リー群の部分群かつ部分多様体はリー群で、その接空間はリー部分環（\ref{lie:homomorphism-differential.2}）。
+- 部分多様体とスライス座標近傍は \ref{mfd:submanifold}、逆関数定理は \ref{mfd:inverse-function-theorem}。
+- $\mathfrak{g}$ には内積を一つ固定し、ノルムを $|\cdot|$ と書く（有限次元なので、位相はどの内積でも同じ）。
+:::
+
+## 積公式 {#lie:sec-cs-product}
+
+::: lemma 積公式 {#lie:product-formula keywords="exp(sX) exp(sY) = exp(Z(s)) with Z smooth, Z(0) = 0, Z'(0) = X + Y; lim_{n -> infinity} (exp(X/n) exp(Y/n))^n = exp(X + Y)" index="積公式（リー群）|せきこうしきりーぐん, リー–トロッターの積公式|りーとろったーのせきこうしき"}
+$X,Y\in\mathfrak{g}$ について
+$$
+\lim_{n\to\infty}\Bigl(\exp\frac{X}{n}\exp\frac{Y}{n}\Bigr)^{n}=\exp(X+Y).
+$$
+:::
+
+::: proof
+**Step 1（対数）.** $\exp$ を $0$ の開近傍 $U$ から $e$ の開近傍 $V$ への微分同相写像に制限し（\ref{lie:exponential-properties.3}）、その逆を $\log\colon V\to U$ とする。$s\mapsto\exp(sX)\exp(sY)$ は連続で $s=0$ で $e$ なので、$|s|$ が小さければ $V$ に入り、$Z(s)\defeq\log(\exp(sX)\exp(sY))$ は $0$ の近くで滑らかで $Z(0)=0$。
+
+**Step 2（微分）.** 積 $\mu\colon G\times G\to G$ の $(e,e)$ での微分は $d\mu_{(e,e)}(u,v)=u+v$（$\mu(g,e)=g$, $\mu(e,h)=h$ を微分すると、$T_{e}G\oplus T_{e}G$ の各成分の上で恒等写像）。連鎖律と $d\exp_{0}=\mathrm{id}$（したがって $d\log_{e}=\mathrm{id}$）から
+$$
+Z'(0)=d\log_{e}\,d\mu_{(e,e)}\bigl(X,Y\bigr)=X+Y.
+$$
+
+**Step 3（極限）.** 微分係数の定義から $nZ(1/n)=\frac{Z(1/n)-Z(0)}{1/n}\to X+Y$。$\exp(Z(1/n))=\exp\frac{X}{n}\exp\frac{Y}{n}$ で、1 パラメータ部分群の性質から $\exp(Z)^{n}=\exp(nZ)$（\ref{lie:exponential-properties.1}）。よって $\bigl(\exp\frac Xn\exp\frac Yn\bigr)^{n}=\exp(nZ(1/n))\to\exp(X+Y)$（$\exp$ の連続性）。
+:::
+
+## 閉部分群定理 {#lie:sec-cs-theorem}
+
+::: lemma 横断方向の分離 {#lie:transversal-separation keywords="for a closed subgroup H and a complement m of h = {X : exp(tX) in H}, there is a neighbourhood W of 0 in m with exp(W) cap H = {e}" index="閉部分群の横断方向|へいぶぶんぐんのおうだんほうこう"}
+$H$ をリー群 $G$ の閉部分群とし、$\mathfrak{h}\defeq\{X\in\mathfrak{g}:\text{すべての }t\in\mathbb{R}\text{ で }\exp(tX)\in H\}$、$\mathfrak{m}$ を $\mathfrak{h}$ の直交補空間とする（$\mathfrak{h}$ が部分空間であることは次の定理の Step 1 で示す。ここでは $\mathfrak{m}\defeq\{Y:Y\perp\mathfrak{h}\}$ を部分空間として使う）。このとき $0$ の近傍 $W\subset\mathfrak{m}$ で $\exp(W)\cap H=\{e\}$ となるものがある。
+:::
+
+::: proof
+そのような $W$ がないとすると、$Y_{k}\in\mathfrak{m}\setminus\{0\}$, $Y_{k}\to0$, $\exp(Y_{k})\in H$ となる列がある。単位球面はコンパクトなので、部分列をとって $Y_{k}/|Y_{k}|\to Y$（$|Y|=1$, $Y\in\mathfrak{m}$、$\mathfrak{m}$ は閉集合）としてよい。【主張：$Y\in\mathfrak{h}$】$t\in\mathbb{R}$ を固定し、$n_{k}\defeq\lfloor t/|Y_{k}|\rfloor\in\mathbb{Z}$ とする。$|n_{k}|Y_{k}|-t|\le|Y_{k}|\to0$ なので
+$$
+n_{k}Y_{k}=n_{k}|Y_{k}|\cdot\frac{Y_{k}}{|Y_{k}|}\to tY.
+$$
+$\exp(n_{k}Y_{k})=\exp(Y_{k})^{n_{k}}\in H$（$H$ は部分群）で、$\exp$ の連続性と $H$ が閉であることから $\exp(tY)\in H$。$t$ は任意なので $Y\in\mathfrak{h}$。すると $Y\in\mathfrak{h}\cap\mathfrak{m}$ で、$Y\perp Y$ から $Y=0$、$|Y|=1$ に矛盾。
+:::
+
+::: theorem 閉部分群定理 {#lie:closed-subgroup-theorem keywords="Cartan: a closed subgroup H of a Lie group G is an embedded submanifold, hence a Lie group, with Lie algebra h = {X : exp(tX) in H for all t}" index="閉部分群定理|へいぶぶんぐんていり, カルタンの定理（閉部分群）|かるたんのていりへいぶぶんぐん"}
+$H$ をリー群 $G$ の閉部分群とする。
+1. $\mathfrak{h}\defeq\{X\in\mathfrak{g}:\text{すべての }t\text{ で }\exp(tX)\in H\}$ は $\mathfrak{g}$ の部分空間である。
+2. $H$ は $G$ の部分多様体で、したがって（部分多様体の構造で）リー群であり、$T_{e}H=\mathfrak{h}$。とくに $\mathfrak{h}$ はリー部分環である。
+:::
+
+::: proof
+**Step 1（部分空間）.** スカラー倍で閉じることは定義から（$\exp(t(cX))=\exp((tc)X)$）。和：$X,Y\in\mathfrak{h}$, $t\in\mathbb{R}$ について、積公式（\ref{lie:product-formula}）を $tX,tY$ に使うと、$\exp(t(X+Y))=\lim_{n}\bigl(\exp\frac{tX}{n}\exp\frac{tY}{n}\bigr)^{n}$ で、右辺の各項は $H$ の元。$H$ は閉なので極限も $H$ の元。
+
+**Step 2（局所座標）.** $\mathfrak{m}\defeq\mathfrak{h}^{\perp}$ として $\Phi\colon\mathfrak{m}\times\mathfrak{h}\to G$, $\Phi(Y,X)\defeq\exp(Y)\exp(X)$ とおく。\ref{lie:product-formula} の Step 2 と同じ計算で $d\Phi_{(0,0)}(Y,X)=Y+X$ で、$\mathfrak{g}=\mathfrak{m}\oplus\mathfrak{h}$ なのでこれは同型。逆関数定理から、$0$ の開近傍 $W_{\mathfrak{m}}\subset\mathfrak{m}$, $W_{\mathfrak{h}}\subset\mathfrak{h}$ で、$\Phi$ が $W_{\mathfrak{m}}\times W_{\mathfrak{h}}$ から $e$ の開近傍 $U$ への微分同相写像になるものがある。\ref{lie:transversal-separation} の $W$ について $W_{\mathfrak{m}}\subset W$ と縮めておく。
+
+**Step 3（$U\cap H$ の形）.** 【主張：$U\cap H=\Phi(\{0\}\times W_{\mathfrak{h}})$】$\supset$：$X\in\mathfrak{h}$ なら $\exp(X)\in H$。$\subset$：$g=\exp(Y)\exp(X)\in H$（$Y\in W_{\mathfrak{m}}$, $X\in W_{\mathfrak{h}}$）なら、$\exp(Y)=g\exp(X)^{-1}\in H$ で、$Y\in W$ なので \ref{lie:transversal-separation} から $\exp(Y)=e$、$\Phi$ の単射性から $Y=0$。
+
+**Step 4（スライス座標）.** $\mathfrak{h}$ と $\mathfrak{m}$ の基底をとって $\mathfrak{h}\times\mathfrak{m}\cong\mathbb{R}^{k}\times\mathbb{R}^{d-k}$ と同一視し、$\varphi\defeq\Phi^{-1}\colon U\to W_{\mathfrak{m}}\times W_{\mathfrak{h}}$ の成分を並べ替えて $(X,Y)$ の順にした座標近傍を考える。Step 3 から $\varphi(U\cap H)=\varphi(U)\cap(\mathbb{R}^{k}\times\{0\})$ で、これは $e$ でのスライス座標近傍。$h\in H$ では、$(hU,\varphi\circ L_{h^{-1}})$ が座標近傍で、$hU\cap H=h(U\cap H)$（$h\in H$ で $H$ は部分群）なので、スライス条件が同じく成り立つ。よって $H$ は $k$ 次元の部分多様体（\ref{mfd:submanifold}）。$H$ の部分空間位相はスライス座標近傍が定める位相で、部分群かつ部分多様体なのでリー群（\ref{lie:homomorphism-differential.2}）。$T_{e}H=d\Phi_{(0,0)}(\{0\}\times\mathfrak{h})=\mathfrak{h}$。
+
+::: hypcheck
+- **$H$ が閉**：Step 1（極限が $H$ に入る）と、\ref{lie:transversal-separation}（$\exp(tY)\in H$ の極限）に使った。閉でない部分群、たとえばトーラス $T^{2}$ の中の無理数の傾きの直線 $\{(e^{it},e^{i\alpha t})\}$（$\alpha\notin\mathbb{Q}$）は、稠密で部分多様体ではない（はめ込まれたリー部分群ではある）。
+:::
+:::
+
+::: corollary 閉部分群定理の帰結 {#lie:closed-subgroup-corollaries keywords="closed subgroups of GL(n) are Lie groups with Lie algebra {X : e^{tX} in H}; kernels of Lie group homomorphisms are closed normal Lie subgroups; stabilizers of smooth actions are closed Lie subgroups" index="閉部分群定理の系|へいぶぶんぐんていりのけい, 等方部分群（リー群）|とうほうぶぶんぐんりーぐん"}
+1. $\mathrm{GL}(n,\mathbb{R})$ の閉部分群 $H$ はリー群で、そのリー環は $\{X\in M_{n}(\mathbb{R}):\text{すべての }t\text{ で }e^{tX}\in H\}$。
+2. リー群の準同型 $\phi\colon G\to G'$ の核は閉な正規部分群で、リー群であり、そのリー環は $\ker\phi_{*}$。
+3. リー群 $G$ の多様体 $M$ への連続な作用について、点 $p$ の等方部分群 $G_{p}\defeq\{g:g\cdot p=p\}$ は閉部分群で、リー群である。
+:::
+
+::: proof
+**1.** 閉部分群定理と \ref{lie:exp-gl}。
+
+**2.** 核は連続写像による 1 点の逆像なので閉で、正規部分群。$X\in\mathfrak{g}$ について $\phi(\exp tX)=\exp(t\phi_{*}X)$（\ref{lie:exp-natural}）なので、「すべての $t$ で $\exp(tX)\in\ker\phi$」は「すべての $t$ で $\exp(t\phi_{*}X)=e$」と同値。$\phi_{*}X=0$ なら成り立つ。逆に成り立てば、$t\mapsto\exp(t\phi_{*}X)$ を $t=0$ で微分して $\phi_{*}X=0$。
+
+**3.** $G_{p}$ は連続写像 $g\mapsto g\cdot p$ による 1 点の逆像で閉、部分群であることは作用の公理から。
+:::
+
+::: example 直交群のリー環の再計算 {#lie:orthogonal-via-cartan keywords="o(n) = {X : X^T = -X} recomputed from e^{tX} in O(n) for all t" index="直交群のリー環|ちょっこうぐんのりーかん"}
+$\mathrm{O}(n)$ は $\mathrm{GL}(n,\mathbb{R})$ の閉部分群で、$X$ について「すべての $t$ で $e^{tX}\in\mathrm{O}(n)$」と $X^{\mathsf{T}}=-X$ は同値である。
+:::
+
+::: proof
+$X^{\mathsf{T}}=-X$ なら $(e^{tX})^{\mathsf{T}}=e^{tX^{\mathsf{T}}}=e^{-tX}=(e^{tX})^{-1}$（転置は級数の各項と可換）。逆に $(e^{tX})^{\mathsf{T}}e^{tX}=I$ がすべての $t$ で成り立てば、$t=0$ で微分して $X^{\mathsf{T}}+X=0$。これは \ref{lie:classical-lie-algebras.2} と一致する。
+:::
+
+::: fact 連続な準同型は滑らか {#lie:continuous-homomorphism-smooth keywords="every continuous homomorphism between Lie groups is smooth; a topological group has at most one Lie group structure" index="連続な準同型の滑らかさ|れんぞくなじゅんどうけいのなめらかさ"}
+リー群の間の連続な群準同型は滑らかである。とくに、位相群に（その位相と整合する）リー群の構造は高々一つしかない。（グラフ $\{(g,\phi(g))\}$ が $G\times G'$ の閉部分群であることに閉部分群定理を使う。ワーナー『Foundations of Differentiable Manifolds and Lie Groups』3.39。）
+:::
+
+::: supplement
+**高い視点：位相が滑らかさを決める.** 閉部分群定理と連続な準同型の滑らかさは、リー群では「位相的な情報が滑らかな構造を決めてしまう」ことを示している。これは、群の構造が一様性を強制するからである：ある一点のまわりの振る舞いが、左移動で至るところに運ばれる。さらに強く、ヒルベルトの第 5 問題の解決（グリーソン、モンゴメリー–ジッピン、1952 年）によれば、位相多様体である位相群はリー群の構造をもつことが知られている。比喩で言えば、群は「どこを切っても同じ断面の棒」で、断面（単位元の近く）の一点がきれいなら全体がきれいになる。\ref{lie:transversal-separation} はその断面の議論で、閉であることが「横方向の小さな元が溜まらない」ことを保証している。
+:::
+
+## 問題 {#lie:sec-cs-problems}
+
+::: problem {#lie:prob-cs-upper-triangular}
+対角成分が正の上三角行列の全体 $B\subset\mathrm{GL}(n,\mathbb{R})$ は閉部分群で、そのリー環は上三角行列の全体であることを示せ。
+:::
+
+::: solution
+$B=\{A:A_{ij}=0\ (i>j),\ A_{ii}>0\}$ は積と逆元で閉じる（上三角行列の積・逆は上三角で、対角成分は積・逆数）。閉であること：$B$ の点列の極限 $A\in\mathrm{GL}(n)$ は上三角で $A_{ii}\ge0$、可逆なので $\det A=\prod A_{ii}\neq0$、よって $A_{ii}>0$。リー環：$X$ が上三角なら $e^{tX}$ は上三角で対角成分 $e^{tX_{ii}}>0$（\ref{lin:matrix-exponential.2}）。逆に $e^{tX}\in B$ がすべての $t$ で成り立てば、$\frac{d}{dt}e^{tX}|_{0}=X$ は上三角行列の極限なので上三角。
+:::
+
+::: problem {#lie:prob-cs-irrational-line}
+$\alpha\notin\mathbb{Q}$ について、$T^{2}=\mathrm{U}(1)^{2}$ の部分群 $H\defeq\{(e^{it},e^{i\alpha t}):t\in\mathbb{R}\}$ は閉でないことを示せ（ヒント：$t=2\pi k$ を考えよ）。
+:::
+
+::: solution
+$t=2\pi k$（$k\in\mathbb{Z}$）で $(1,e^{2\pi i\alpha k})\in H$。$\alpha$ が無理数なので $\{\alpha k\bmod1\}$ は $[0,1)$ で稠密であることが知られており（クロネッカーの定理の 1 次元の場合：鳩の巣原理で、$|\alpha k-m|<\varepsilon$ となる $k\neq0$, $m$ があり、その倍数で $[0,1)$ を $\varepsilon$ 刻みで覆える）、$\{1\}\times\mathrm{U}(1)$ は $\overline{H}$ に含まれる。一方 $(1,-1)$ が $H$ に属すると、$e^{it}=1$ から $t=2\pi k$、$e^{2\pi i\alpha k}=-1$ から $2\alpha k\in2\mathbb{Z}+1$ で $\alpha\in\mathbb{Q}$ となり矛盾（$k=0$ は $1\neq-1$）。よって $H\neq\overline{H}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
