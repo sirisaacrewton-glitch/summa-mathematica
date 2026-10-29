@@ -267,7 +267,7 @@ Boolos の章末には演習がない。IN 系列は Boolos の方針（再帰�
 | OD-05 | （01-basics）/05-dependence | 初期値とパラメータへの依存性 | 連続依存性、一般解の定義域が開で連続、C^1 依存性と変分方程式、C^k・C^∞、パラメータ | 完了（2026-10-29） |
 | OD-06 | （01-basics）/06-flows | 自励系と流れ | 流れの定義域が開・流れが C^k・群の性質、時間依存の場合の懸垂、整流定理、第一積分 | 完了（2026-10-29） |
 | OD-E | （01-basics）/07-exercises | 演習 | 各ページ 3〜4 問（★〜★★★） | 完了（2026-10-29） |
-| SM-06' | 02-smooth-manifolds/06-flows-lie-derivative | 流れの基本定理の証明 | 項 2 の「事実」を OD-05・06 を使った証明に置き換え。surf:smooth-dependence も同様 | 未着手 |
+| SM-06' | 02-smooth-manifolds/06-flows-lie-derivative | 流れの基本定理の証明 | 項 2 の「事実」を OD-05・06 を使った証明に置き換え。surf:smooth-dependence も同様 | 完了（2026-10-29） |
 | GC | （riem か mfd） | 良い被覆の存在 | 測地的に凸な近傍（ホワイトヘッド）、良い被覆が共終 | 未着手 |
 | DR | 02-smooth-manifolds | ド・ラームの定理 | A：二重複体（主証明）、B：積分による同型（補足／別証明）、H^k(S^n) の計算 | 未着手 |
 
