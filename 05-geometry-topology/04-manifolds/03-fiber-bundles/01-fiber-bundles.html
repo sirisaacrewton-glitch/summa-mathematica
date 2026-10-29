@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ファイバー束と推移関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-manifolds/03-fiber-bundles/01-fiber-bundles.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ファイバー束と推移関数 {#mfd:page-fiber-bundles keywords="smooth fiber bundle, local trivialization, Lie group, matrix groups GL(n), O(n), SO(n), smooth effective action, structure group, G-atlas, transition functions, cocycle condition, construction of a bundle from a cocycle, isomorphism of G-bundles, cohomologous cocycles, Mobius band, tangent bundle as a GL(n)-bundle"}
+
+接束 $TM$（\ref{mfd:tangent-bundle}）は、座標近傍の上では直積 $U\times\mathbb{R}^{n}$ と同一視でき、二つの同一視はヤコビ行列で貼り合わさっていた。この「局所的には直積、貼り合わせは群の元」という構造を一般化したものが**ファイバー束**である。このページでは、ファイバー束と構造群を定義し、貼り合わせの関数（**推移関数**）が満たす**コサイクル条件**を導く。逆に、コサイクル条件を満たす関数の族から束が一つ作れること（\ref{mfd:bundle-from-cocycle}）、二つの束が同型であることがコサイクルの言葉で書けること（\ref{mfd:cocycle-isomorphism}）を示す。これで、束を「貼り合わせのデータ」と同一視できるようになり、次のページ以降の主束・付随束・フレーム束の議論の土台になる。
+
+## 記法と定義の確認 {#mfd:sec-fb-notation}
+
+::: notation
+- 可微分多様体は $C^{\infty}$ 級でハウスドルフかつ第二可算（\ref{mfd:smooth-manifold}）。滑らかな写像・微分同相写像は \ref{mfd:smooth-map}, \ref{mfd:diffeomorphism}、部分多様体は \ref{mfd:submanifold}, \ref{mfd:submanifold-structure}、さらに \ref{mfd:regular-value-theorem}、貼り合わせによる多様体の構成は \ref{mfd:manifold-from-charts}。
+- $M_{n}(\mathbb{R})$ は実 $n$ 次正方行列の全体で、成分によって $\mathbb{R}^{n^{2}}$ と同一視する。$\mathrm{Sym}_{n}$ は対称行列の全体（$\frac{n(n+1)}{2}$ 次元の部分空間）。$A^{\mathsf{T}}$ は転置。
+- 位相空間の範疇でのファイバー束（連続写像と同相写像による）は \ref{at:fiber-bundle}。この系列では、すべてを滑らかな範疇で考える。
+- 二つの写像の直積 $u\times v$ は $(a,b)\mapsto(u(a),v(b))$。$\mathrm{pr}_{1}$ は第 1 成分への射影。
+:::
+
+## リー群と滑らかな作用 {#mfd:sec-fb-groups}
+
+::: definition リー群と滑らかな作用 {#mfd:lie-group keywords="Lie group: a group with a smooth manifold structure such that multiplication and inversion are smooth; smooth left action; effective action" index="リー群|りーぐん, 滑らかな作用|なめらかなさよう, 効果的な作用|こうかてきなさよう, 忠実な作用（リー群）|ちゅうじつなさようりーぐん"}
+1. 群 $G$ が可微分多様体でもあり、積 $G\times G\to G$, $(g,h)\mapsto gh$ と逆元 $G\to G$, $g\mapsto g^{-1}$ がともに滑らかであるとき、$G$ を**リー群**という。単位元を $e$ と書く。
+2. リー群 $G$ の可微分多様体 $F$ への（左からの）**滑らかな作用**とは、滑らかな写像 $G\times F\to F$, $(g,f)\mapsto g\cdot f$ で、$e\cdot f=f$, $g\cdot(h\cdot f)=(gh)\cdot f$ を満たすものをいう。
+3. 作用が**効果的**（忠実）であるとは、すべての $f\in F$ について $g\cdot f=f$ となる $g$ は $e$ だけであることをいう。
+:::
+
+リー群の一般論（リー環・指数写像・閉部分群定理など）は、リー群の系列で扱う。この系列で使うのは、次の行列群だけである。
+
+::: proposition 行列群はリー群 {#mfd:matrix-lie-groups keywords="GL(n,R) is open in M_n(R); GL^+(n), O(n), SO(n) are Lie groups; O(n) is a compact submanifold of dimension n(n-1)/2 via the regular value theorem" index="一般線形群（リー群）|いっぱんせんけいぐんりーぐん, 直交群（リー群）|ちょっこうぐんりーぐん, 行列群|ぎょうれつぐん"}
+1. $\mathrm{GL}(n,\mathbb{R})\defeq\{A\in M_{n}(\mathbb{R}):\det A\neq0\}$ と $\mathrm{GL}^{+}(n,\mathbb{R})\defeq\{\det A>0\}$ は $M_{n}(\mathbb{R})$ の開集合で、開部分多様体としてリー群である。
+2. $G\subset\mathrm{GL}(n,\mathbb{R})$ が部分群かつ部分多様体なら、部分多様体の構造で $G$ はリー群である。
+3. $\mathrm{O}(n)\defeq\{A:A^{\mathsf{T}}A=I\}$ は $\mathrm{GL}(n,\mathbb{R})$ の $\frac{n(n-1)}{2}$ 次元のコンパクトな部分多様体で、2 からリー群。$\mathrm{SO}(n)\defeq\mathrm{O}(n)\cap\mathrm{GL}^{+}(n,\mathbb{R})$ は $\mathrm{O}(n)$ の開集合で、やはりリー群。
+4. $\mathrm{GL}(n,\mathbb{R})$ の $\mathbb{R}^{n}$ への作用 $(A,v)\mapsto Av$ は滑らかで効果的。$\mathrm{O}(1)=\{\pm1\}$ である。
+:::
+
+::: proof
+**1.** $\det$ は成分の多項式なので連続で、$\mathrm{GL}=\det^{-1}(\mathbb{R}\setminus\{0\})$, $\mathrm{GL}^{+}=\det^{-1}((0,\infty))$ は開集合。積の成分 $(AB)_{ij}=\sum_{k}A_{ik}B_{kj}$ は多項式なので積は $C^{\infty}$ 級。クラメルの公式 $A^{-1}=\frac{1}{\det A}\,\widetilde{A}$（$\widetilde{A}$ は余因子行列で、成分は $A$ の成分の多項式）から、逆元の成分は分母が $0$ にならない有理式で $C^{\infty}$ 級。$\mathrm{GL}^{+}$ は積と逆元で閉じている（$\det(AB)=\det A\det B$, $\det A^{-1}=(\det A)^{-1}$）ので部分群で、演算は $\mathrm{GL}$ の演算の制限として滑らか。
+
+**2.** 包含写像 $\iota\colon G\to\mathrm{GL}$ は滑らか（\ref{mfd:submanifold-structure.2}）なので、$G\times G\to\mathrm{GL}$, $(g,h)\mapsto\iota(g)\iota(h)$ は滑らかな写像の合成として滑らかで、値は $G$ に入る（部分群）。\ref{mfd:submanifold-structure.3} から $G\times G\to G$ として滑らか。逆元も同様。
+
+**3.** 【主張：$I$ は $\Phi\colon\mathrm{GL}\to\mathrm{Sym}_{n}$, $\Phi(A)=A^{\mathsf{T}}A$ の正則値】$\Phi$ の成分は多項式なので滑らかで、$A$ における微分は、$t\mapsto(A+tH)^{\mathsf{T}}(A+tH)$ の $t=0$ での微分係数から
+$$
+d\Phi_{A}(H)=A^{\mathsf{T}}H+H^{\mathsf{T}}A\qquad(H\in M_{n}(\mathbb{R})).
+$$
+$A\in\Phi^{-1}(I)=\mathrm{O}(n)$ と $S\in\mathrm{Sym}_{n}$ について $H\defeq\frac12AS$ とおくと、$A^{\mathsf{T}}A=I$, $S^{\mathsf{T}}=S$ から $d\Phi_{A}(H)=\frac12S+\frac12S^{\mathsf{T}}=S$。よって $d\Phi_{A}$ は全射。\ref{mfd:regular-value-theorem} から $\mathrm{O}(n)$ は $n^{2}-\frac{n(n+1)}{2}=\frac{n(n-1)}{2}$ 次元の部分多様体。$\mathrm{O}(n)$ は部分群（$(AB)^{\mathsf{T}}AB=B^{\mathsf{T}}B=I$, $A^{-1}=A^{\mathsf{T}}$ で $(A^{\mathsf{T}})^{\mathsf{T}}A^{\mathsf{T}}=AA^{\mathsf{T}}=I$）なので 2 からリー群。$\{A\in M_{n}(\mathbb{R}):A^{\mathsf{T}}A=I\}$ は連続写像 $M_{n}\to M_{n}$, $A\mapsto A^{\mathsf{T}}A$ による 1 点の逆像なので $M_{n}(\mathbb{R})$ の閉集合で、$A^{\mathsf{T}}A=I$ なら $(\det A)^{2}=1$ なので、この集合は $\mathrm{O}(n)$ に等しい。各列が単位ベクトルなので有界でもあり、よってコンパクト。$\mathrm{SO}(n)$ は $\mathrm{O}(n)$ の中で $\det>0$ という開条件で定まる部分群で、開部分多様体としてリー群（演算は $\mathrm{O}(n)$ の演算の制限）。
+
+**4.** 作用の成分 $(Av)_{i}=\sum_{j}A_{ij}v_{j}$ は多項式。すべての $v$ で $Av=v$ なら $A=I$（$v$ を標準基底にとる）。$n=1$ では $a^{2}=1\iff a=\pm1$。
+
+::: hypcheck
+- **正則値**：3 で $\Phi^{-1}(I)$ の各点で微分が全射であることを確かめた。$\Phi$ の値域を $M_{n}$ にすると全射にならない（像は対称行列）ので、値域を $\mathrm{Sym}_{n}$ にとることが本質的。
+:::
+:::
+
+## ファイバー束と構造群 {#mfd:sec-fb-bundles}
+
+::: definition ファイバー束 {#mfd:fiber-bundle keywords="smooth fiber bundle (E, M, pi, F); local trivialization; fibre E_m; trivial bundle; bundle map over M" index="ファイバー束|ふぁいばーそく, 局所自明化|きょくしょじめいか, 全空間|ぜんくうかん, 底空間|ていくうかん, ファイバー（束）|ふぁいばーそく, 自明束|じめいそく"}
+$E$, $M$, $F$ を可微分多様体、$\pi\colon E\to M$ を滑らかな写像とする。
+1. $M$ の開集合 $U$ と微分同相写像 $\Phi\colon\pi^{-1}(U)\to U\times F$ で $\mathrm{pr}_{1}\circ\Phi=\pi$ を満たすものを、$U$ の上の**局所自明化**という。
+2. $M$ の各点が、その上の局所自明化をもつ開近傍をもつとき、$(E,M,\pi,F)$ を $F$ を**ファイバー**とする**ファイバー束**という。$E$ を**全空間**、$M$ を**底空間**、$E_{m}\defeq\pi^{-1}(m)$ を $m$ 上のファイバーという。
+3. $M\times F$ と $\mathrm{pr}_{1}$ の組を**自明束**という。
+:::
+
+$\Phi$ を $E_{m}$ に制限すると、$E_{m}$ から $\{m\}\times F$ への全単射が得られる。とくに各ファイバーは $F$ と「同じ形」をしている。
+
+::: definition 構造群と推移関数 {#mfd:g-bundle keywords="G-atlas: local trivializations whose changes are given by smooth G-valued transition functions g_{alpha beta}; G-bundle with structure group G" index="構造群|こうぞうぐん, 推移関数|すいいかんすう, 変換関数（束）|へんかんかんすうそく, G 束|じーそく, G アトラス|じーあとらす"}
+$G$ をリー群、$G$ の $F$ への滑らかで効果的な作用を固定する。ファイバー束 $\pi\colon E\to M$ の局所自明化の族 $\{(U_{\alpha},\Phi_{\alpha})\}_{\alpha}$ で、$\bigcup_{\alpha}U_{\alpha}=M$ であり、各 $\alpha,\beta$ について滑らかな写像 $g_{\alpha\beta}\colon U_{\alpha}\cap U_{\beta}\to G$ があって
+$$
+\Phi_{\alpha}\circ\Phi_{\beta}^{-1}(m,f)=\bigl(m,\ g_{\alpha\beta}(m)\cdot f\bigr)\qquad(m\in U_{\alpha}\cap U_{\beta},\ f\in F)
+$$
+となるものを **$G$ アトラス**という。$g_{\alpha\beta}$ を**推移関数**という。$G$ アトラスを一つ固定したファイバー束を、**構造群** $G$ をもつファイバー束、または **$G$ 束**という。
+:::
+
+::: proposition コサイクル条件 {#mfd:cocycle-condition keywords="transition functions are uniquely determined by the trivializations and satisfy g_{alpha alpha} = e, g_{alpha beta} g_{beta gamma} = g_{alpha gamma}, g_{beta alpha} = g_{alpha beta}^{-1}" index="コサイクル条件|こさいくるじょうけん"}
+$G$ アトラスの推移関数は、局所自明化から一意に定まり、次を満たす：
+$$
+g_{\alpha\alpha}(m)=e,\qquad g_{\alpha\beta}(m)\,g_{\beta\gamma}(m)=g_{\alpha\gamma}(m)\quad(m\in U_{\alpha}\cap U_{\beta}\cap U_{\gamma}),\qquad g_{\beta\alpha}(m)=g_{\alpha\beta}(m)^{-1}.
+$$
+:::
+
+::: proof
+**一意性.** $g,g'\colon U_{\alpha}\cap U_{\beta}\to G$ がどちらも定義の式を満たせば、各 $m$ ですべての $f$ について $g(m)\cdot f=g'(m)\cdot f$、つまり $(g'(m)^{-1}g(m))\cdot f=f$。作用が効果的なので $g'(m)^{-1}g(m)=e$。
+
+**コサイクル条件.** $m\in U_{\alpha}\cap U_{\beta}\cap U_{\gamma}$ で、写像の合成 $\Phi_{\alpha}\circ\Phi_{\gamma}^{-1}=(\Phi_{\alpha}\circ\Phi_{\beta}^{-1})\circ(\Phi_{\beta}\circ\Phi_{\gamma}^{-1})$ を $(m,f)$ に適用すると
+$$
+g_{\alpha\gamma}(m)\cdot f=g_{\alpha\beta}(m)\cdot\bigl(g_{\beta\gamma}(m)\cdot f\bigr)=\bigl(g_{\alpha\beta}(m)g_{\beta\gamma}(m)\bigr)\cdot f
+$$
+（作用の公理を使った）。すべての $f$ で成り立つので、一意性と同じ議論（効果性）で $g_{\alpha\beta}g_{\beta\gamma}=g_{\alpha\gamma}$。$\Phi_{\alpha}\circ\Phi_{\alpha}^{-1}=\mathrm{id}$ から同様に $g_{\alpha\alpha}=e$。$\gamma=\alpha$ とおくと $g_{\alpha\beta}g_{\beta\alpha}=g_{\alpha\alpha}=e$。
+
+::: hypcheck
+- **効果的な作用**：一意性とコサイクル条件の両方で使った。効果的でないと、推移関数は作用の核の分だけ不定になり、コサイクル条件も核を法としてしか成り立たない。
+:::
+:::
+
+::: example 接束と余接束の構造群 {#mfd:tangent-bundle-gl keywords="TM and T*M are GL(n)-bundles: transition functions are Jacobian matrices and their inverse transposes; the chain rule is the cocycle condition" index="接束の推移関数|せっそくのすいいかんすう"}
+$M$ を $n$ 次元の可微分多様体、$\{(U_{\alpha},\varphi_{\alpha})\}$ をアトラス、$x^{\alpha}=(x^{\alpha}_{1},\dots,x^{\alpha}_{n})$ を座標関数とする。
+1. $\Phi_{\alpha}\colon\pi^{-1}(U_{\alpha})\to U_{\alpha}\times\mathbb{R}^{n}$, $(m,v)\mapsto(m,(v(x^{\alpha}_{i}))_{i})$ は $TM$ の局所自明化で、$\{(U_{\alpha},\Phi_{\alpha})\}$ は $\mathrm{GL}(n,\mathbb{R})$ アトラス（作用は \ref{mfd:matrix-lie-groups.4}）である。推移関数はヤコビ行列
+$$
+g_{\alpha\beta}(m)=\Bigl(\frac{\partial x^{\alpha}_{i}}{\partial x^{\beta}_{j}}(m)\Bigr)_{ij}=D(\varphi_{\alpha}\circ\varphi_{\beta}^{-1})(\varphi_{\beta}(m))
+$$
+で、コサイクル条件は連鎖律にほかならない。
+2. 余接束 $T^{*}M$ も同様に $\mathrm{GL}(n,\mathbb{R})$ 束で、推移関数は $(g_{\alpha\beta}(m)^{-1})^{\mathsf{T}}$ である。
+:::
+
+::: proof
+**1.** \ref{mfd:tangent-bundle-manifold.3} から $\Phi_{\alpha}$ は局所自明化（$\Phi_{\alpha}$ は自然な座標近傍 $\tilde\varphi_{\alpha}$ に $\varphi_{\alpha}^{-1}\times\mathrm{id}$ を合成したもの）。\ref{mfd:tangent-bundle-manifold.1} の座標変換の式で $\alpha$ と $\beta$ の役割を入れ替えると、$\tau\defeq\varphi_{\alpha}\circ\varphi_{\beta}^{-1}$ について $\tilde\varphi_{\alpha}\circ\tilde\varphi_{\beta}^{-1}(a,\xi)=(\tau(a),D\tau(a)\xi)$。よって
+$$
+\Phi_{\alpha}\circ\Phi_{\beta}^{-1}(m,\xi)=\bigl(m,\ D\tau(\varphi_{\beta}(m))\,\xi\bigr).
+$$
+$D\tau$ は可逆（逆は $D(\varphi_{\beta}\circ\varphi_{\alpha}^{-1})$）で、成分 $\partial x^{\alpha}_{i}/\partial x^{\beta}_{j}$ は $U_{\alpha}\cap U_{\beta}$ 上の滑らかな関数なので、$g_{\alpha\beta}$ は $\mathrm{GL}(n,\mathbb{R})$（の開部分多様体としての構造）への滑らかな写像。コサイクル条件 $g_{\alpha\beta}g_{\beta\gamma}=g_{\alpha\gamma}$ を成分で書くと $\sum_{k}\frac{\partial x^{\alpha}_{i}}{\partial x^{\beta}_{k}}\frac{\partial x^{\beta}_{k}}{\partial x^{\gamma}_{j}}=\frac{\partial x^{\alpha}_{i}}{\partial x^{\gamma}_{j}}$ で、連鎖律である。
+
+**2.** \ref{mfd:cotangent-bundle} の座標変換の式から、1 と同じ計算で推移関数は $(D\tau^{-1})^{\mathsf{T}}=(g_{\alpha\beta}^{-1})^{\mathsf{T}}$。$A\mapsto(A^{-1})^{\mathsf{T}}$ は滑らか（\ref{mfd:matrix-lie-groups.1}）。
+:::
+
+## コサイクルからの束の構成 {#mfd:sec-fb-construction}
+
+::: theorem コサイクルからの束の構成 {#mfd:bundle-from-cocycle keywords="given an open cover and smooth G-valued functions satisfying the cocycle condition, gluing U_alpha x F gives a G-bundle with these transition functions" index="コサイクルからの束の構成|こさいくるからのそくのこうせい, 貼り合わせ（束）|はりあわせそく"}
+$M$ を可微分多様体、$\{U_{\alpha}\}_{\alpha\in A}$ を $M$ の開被覆で $A$ は可算とし、$G$ をリー群、$G$ の可微分多様体 $F$ への滑らかで効果的な作用を固定する。滑らかな写像 $g_{\alpha\beta}\colon U_{\alpha}\cap U_{\beta}\to G$ が
+$$
+g_{\alpha\beta}(m)\,g_{\beta\gamma}(m)=g_{\alpha\gamma}(m)\qquad(m\in U_{\alpha}\cap U_{\beta}\cap U_{\gamma})
+$$
+を満たすとする（**コサイクル**）。$\tilde E\defeq\{(\alpha,m,f):\alpha\in A,\ m\in U_{\alpha},\ f\in F\}$ に
+$$
+(\alpha,m,f)\sim(\beta,m',f')\iff m=m'\text{ かつ }f=g_{\alpha\beta}(m)\cdot f'
+$$
+と定め、$E\defeq\tilde E/{\sim}$, $\pi([\alpha,m,f])\defeq m$, $\Phi_{\alpha}([\alpha,m,f])\defeq(m,f)$ とおく。このとき $E$ にはただ一つの可微分多様体の構造があって、$(E,M,\pi,F)$ は $\{(U_{\alpha},\Phi_{\alpha})\}$ を $G$ アトラスとし $g_{\alpha\beta}$ を推移関数とする $G$ 束になる。これを $E(g)$ と書く。
+:::
+
+::: intuition
+各 $U_{\alpha}$ の上に直積 $U_{\alpha}\times F$ を一枚ずつ用意し、重なりの上で「$\beta$ 側の $f'$ を $\alpha$ 側の $g_{\alpha\beta}(m)\cdot f'$ と同一視する」糊でつなぐ。コサイクル条件は、三枚が重なる場所で、糊を二回使っても一回使っても同じ点に貼られる、という整合性である。
+:::
+
+::: proof
+**Step 1（同値関係）.** 【主張：$g_{\alpha\alpha}=e$, $g_{\beta\alpha}=g_{\alpha\beta}^{-1}$】コサイクル条件で $\alpha=\beta=\gamma$ とすると $g_{\alpha\alpha}g_{\alpha\alpha}=g_{\alpha\alpha}$ で、$G$ の中で $g_{\alpha\alpha}^{-1}$ を掛けて $g_{\alpha\alpha}=e$。$\gamma=\alpha$ とすると $g_{\alpha\beta}g_{\beta\alpha}=e$。これから、$\sim$ は反射的（$f=e\cdot f$）、対称的（$f=g_{\alpha\beta}\cdot f'$ なら $f'=g_{\beta\alpha}\cdot f$）、推移的（$f=g_{\alpha\beta}\cdot f'$, $f'=g_{\beta\gamma}\cdot f''$ なら $f=(g_{\alpha\beta}g_{\beta\gamma})\cdot f''=g_{\alpha\gamma}\cdot f''$）である。
+
+**Step 2（$\Phi_{\alpha}$ は全単射）.** 【主張：$\Phi_{\alpha}\colon\pi^{-1}(U_{\alpha})\to U_{\alpha}\times F$ は well-defined な全単射で、$\Phi_{\alpha}\circ\Phi_{\beta}^{-1}(m,f)=(m,g_{\alpha\beta}(m)\cdot f)$】$\pi^{-1}(U_{\alpha})$ の元 $[\beta,m,f']$ は $[\alpha,m,g_{\alpha\beta}(m)\cdot f']$ に等しいので、添字 $\alpha$ の代表元をもつ。添字 $\alpha$ の代表元 $(\alpha,m,f)$, $(\alpha,m,f_{1})$ が同値なら $f=g_{\alpha\alpha}\cdot f_{1}=f_{1}$ なので、代表元は一意。よって $\Phi_{\alpha}$ は well-defined な全単射。$\Phi_{\beta}^{-1}(m,f)=[\beta,m,f]=[\alpha,m,g_{\alpha\beta}(m)\cdot f]$ から式が従う。
+
+**Step 3（座標近傍の族）.** $F$ は第二可算なので、可算な開基のうち、ある座標近傍の定義域に含まれる元の全体も開基で（座標近傍の定義域は開集合なので）、その各元に座標近傍の制限を一つずつ選ぶと、定義域が $F$ の開基をなす可算個の座標近傍 $\{(W_{k},\chi_{k})\}$ が得られる。同様に、各 $\alpha$ について、定義域が $U_{\alpha}$ の開基をなす可算個の座標近傍 $\{(V_{\alpha j},\psi_{\alpha j})\}_{j}$ をとる（$V_{\alpha j}\subset U_{\alpha}$）。$E$ の部分集合と単射
+$$
+\Omega_{\alpha jk}\defeq\Phi_{\alpha}^{-1}(V_{\alpha j}\times W_{k}),\qquad\theta_{\alpha jk}\defeq(\psi_{\alpha j}\times\chi_{k})\circ\Phi_{\alpha}\restriction\Omega_{\alpha jk}
+$$
+の可算族を考える（$A$ が可算であることをここで使う）。
+
+**Step 4（\ref{mfd:manifold-from-charts} の条件）.** (1) $\Omega_{\alpha jk}$ は $E$ を覆い、像 $\psi_{\alpha j}(V_{\alpha j})\times\chi_{k}(W_{k})$ は開集合。$\theta_{\alpha jk}(\Omega_{\alpha jk}\cap\Omega_{\beta lh})$ は、Step 2 から
+$$
+(\psi_{\alpha j}\times\chi_{k})\bigl(\{(m,f)\in(V_{\alpha j}\cap V_{\beta l})\times W_{k}:g_{\beta\alpha}(m)\cdot f\in W_{h}\}\bigr)
+$$
+で、括弧の中の集合は連続写像 $(m,f)\mapsto g_{\beta\alpha}(m)\cdot f$ による開集合 $W_{h}$ の逆像と開集合の共通部分なので開集合、その同相写像 $\psi_{\alpha j}\times\chi_{k}$ による像も開集合。(2) 座標変換は
+$$
+\theta_{\beta lh}\circ\theta_{\alpha jk}^{-1}(a,b)=\Bigl(\psi_{\beta l}\circ\psi_{\alpha j}^{-1}(a),\ \chi_{h}\bigl(g_{\beta\alpha}(\psi_{\alpha j}^{-1}(a))\cdot\chi_{k}^{-1}(b)\bigr)\Bigr)
+$$
+で、$M$ と $F$ の座標変換、$g_{\beta\alpha}$、作用がすべて滑らかなので $C^{\infty}$ 級。(3) 分離：$p\neq q$ とする。$\pi(p)\neq\pi(q)$ なら、$M$ のハウスドルフ性から交わらない開近傍 $O\ni\pi(p)$, $O'\ni\pi(q)$ があり、$V_{\alpha j}$ が開基なので $\pi(p)\in V_{\alpha j}\subset O$, $\pi(q)\in V_{\beta l}\subset O'$ ととれる。$p$, $q$ を含む $\Omega_{\alpha jk}$, $\Omega_{\beta lh}$ は $\pi$ の像が交わらないので交わらない。$\pi(p)=\pi(q)=m$ なら、$m\in V_{\alpha j}$ をとると $\Phi_{\alpha}(p)=(m,f)$, $\Phi_{\alpha}(q)=(m,f')$ で $f\neq f'$。$F$ のハウスドルフ性から交わらない $W_{k}\ni f$, $W_{h}\ni f'$ がとれ、$\Omega_{\alpha jk}\ni p$ と $\Omega_{\alpha jh}\ni q$ は交わらない。
+
+**Step 5（$G$ 束であること）.** \ref{mfd:manifold-from-charts} から、$E$ は $\{(\Omega_{\alpha jk},\theta_{\alpha jk})\}$ をアトラスとする可微分多様体になる（第二可算性とハウスドルフ性もこの補題に含まれる）。この座標近傍と $M$ の座標近傍 $\psi_{\alpha j}$ で見ると $\pi$ は $(a,b)\mapsto a$ で滑らか。$\Phi_{\alpha}$ は、$\theta_{\alpha jk}$ と $U_{\alpha}\times F$ の座標近傍 $\psi_{\alpha j}\times\chi_{k}$ で見ると恒等写像なので、各点の近くで微分同相写像、全単射なので微分同相写像。$\mathrm{pr}_{1}\circ\Phi_{\alpha}=\pi$ は定義から。Step 2 の式から $\{(U_{\alpha},\Phi_{\alpha})\}$ は推移関数 $g_{\alpha\beta}$ の $G$ アトラス。構造の一意性：各 $\Phi_{\alpha}$ が微分同相写像になる構造では $\theta_{\alpha jk}$ はすべて座標近傍なので、極大性（\ref{mfd:maximal-atlas.1}）から構造はこのアトラスが定めるものに一致する。
+
+::: hypcheck
+- **コサイクル条件**：Step 1 で $\sim$ が同値関係になることに使った。
+- **$A$ が可算**：Step 3 で座標近傍の族を可算にするために使った（\ref{mfd:manifold-from-charts} の仮定）。$M$ は第二可算なので、任意の開被覆は可算な部分被覆をもち、実際上の制限にはならない。
+- **作用が滑らか**：Step 4 の座標変換の滑らかさ。**効果的**であることは構成には使っておらず、「推移関数が $g_{\alpha\beta}$ に一意に定まる」ために使う（\ref{mfd:cocycle-condition}）。
+- **$M$, $F$ のハウスドルフ性**：Step 4 (3)。
+:::
+:::
+
+## 束の同型とコサイクル {#mfd:sec-fb-isomorphism}
+
+::: definition $G$ 束の同型 {#mfd:g-bundle-isomorphism keywords="isomorphism of G-bundles over M: a diffeomorphism over M which in local trivializations is given by smooth G-valued functions" index="G 束の同型|じーそくのどうけい, 束の同型|そくのどうけい"}
+$E$, $E'$ を、同じ開被覆 $\{U_{\alpha}\}$ の上の $G$ アトラス $\{\Phi_{\alpha}\}$, $\{\Phi'_{\alpha}\}$ をもつ $M$ 上の $G$ 束（ファイバーと作用は共通）とする。微分同相写像 $\Theta\colon E\to E'$ で $\pi'\circ\Theta=\pi$ を満たし、各 $\alpha$ について滑らかな $\lambda_{\alpha}\colon U_{\alpha}\to G$ があって
+$$
+\Phi'_{\alpha}\circ\Theta\circ\Phi_{\alpha}^{-1}(m,f)=\bigl(m,\ \lambda_{\alpha}(m)\cdot f\bigr)
+$$
+となるものを、**$G$ 束の同型**という。
+:::
+
+二つの $G$ アトラスの開被覆が違うときは、共通の細分 $\{U_{\alpha}\cap U'_{\beta}\}$ に局所自明化を制限すれば同じ被覆にできる（制限しても $G$ アトラスのまま）。
+
+::: proposition 同型とコホモロガスなコサイクル {#mfd:cocycle-isomorphism keywords="two G-bundles with cocycles g, g' on the same cover are isomorphic iff g'_{alpha beta} = lambda_alpha g_{alpha beta} lambda_beta^{-1}; every G-bundle is isomorphic to E(g) of its own cocycle" index="コホモロガス（コサイクル）|こほもろがすこさいくる"}
+記号は \ref{mfd:g-bundle-isomorphism} のとおりとし、$g$, $g'$ をそれぞれの推移関数とする。
+1. $E$ と $E'$ が $G$ 束として同型であるための必要十分条件は、滑らかな $\lambda_{\alpha}\colon U_{\alpha}\to G$ の族で
+$$
+g'_{\alpha\beta}(m)=\lambda_{\alpha}(m)\,g_{\alpha\beta}(m)\,\lambda_{\beta}(m)^{-1}\qquad(m\in U_{\alpha}\cap U_{\beta})
+$$
+となるものがあることである（このとき $g$ と $g'$ は**コホモロガス**であるという）。
+2. （添字集合が可算のとき）$G$ 束 $E$ は、その推移関数から作った $E(g)$（\ref{mfd:bundle-from-cocycle}）と $G$ 束として同型である。
+:::
+
+::: proof
+**1.「⇒」.** $\Theta$ を同型とする。$m\in U_{\alpha}\cap U_{\beta}$ で
+$$
+\Phi'_{\alpha}\circ\Phi'^{-1}_{\beta}=(\Phi'_{\alpha}\circ\Theta\circ\Phi_{\alpha}^{-1})\circ(\Phi_{\alpha}\circ\Phi_{\beta}^{-1})\circ(\Phi'_{\beta}\circ\Theta\circ\Phi_{\beta}^{-1})^{-1}
+$$
+を $(m,f)$ に適用すると、左辺は $g'_{\alpha\beta}(m)\cdot f$、右辺は $\lambda_{\alpha}(m)g_{\alpha\beta}(m)\lambda_{\beta}(m)^{-1}\cdot f$（最後の因子の逆は $(m,f)\mapsto(m,\lambda_{\beta}(m)^{-1}\cdot f)$）。作用が効果的なので（\ref{mfd:cocycle-condition} の一意性と同じ議論）等式が成り立つ。
+
+**1.「⇐」.** $\Theta$ を、$\pi^{-1}(U_{\alpha})$ の上で $\Theta_{\alpha}\defeq\Phi'^{-1}_{\alpha}\circ(\mathrm{id}\ltimes\lambda_{\alpha})\circ\Phi_{\alpha}$ と定める。ただし $(\mathrm{id}\ltimes\lambda_{\alpha})(m,f)\defeq(m,\lambda_{\alpha}(m)\cdot f)$ で、これは $U_{\alpha}\times F$ の微分同相写像（逆は $\lambda_{\alpha}^{-1}$ を使った同じ形の写像で、$m\mapsto\lambda_{\alpha}(m)^{-1}$ は滑らかな写像と逆元の合成なので滑らか）。【主張：$U_{\alpha}\cap U_{\beta}$ の上で $\Theta_{\alpha}=\Theta_{\beta}$】$e\in\pi^{-1}(U_{\alpha}\cap U_{\beta})$ について $\Phi_{\beta}(e)=(m,f)$ とすると $\Phi_{\alpha}(e)=(m,g_{\alpha\beta}(m)\cdot f)$ なので、$\Phi'_{\alpha}(\Theta_{\alpha}(e))=(m,\lambda_{\alpha}g_{\alpha\beta}\cdot f)=(m,g'_{\alpha\beta}\lambda_{\beta}\cdot f)$。一方 $\Phi'_{\alpha}(\Theta_{\beta}(e))=\Phi'_{\alpha}\circ\Phi'^{-1}_{\beta}(m,\lambda_{\beta}\cdot f)=(m,g'_{\alpha\beta}\lambda_{\beta}\cdot f)$。$\Phi'_{\alpha}$ は単射なので一致する。よって $\Theta$ は well-defined で、各 $\pi^{-1}(U_{\alpha})$ の上で微分同相写像の合成なので滑らか、$\lambda_{\alpha}^{-1}$ から同様に作った写像が逆写像になるので微分同相写像。$\pi'\circ\Theta=\pi$ と同型の式は作り方から。
+
+**2.** $\Theta\colon E(g)\to E$, $[\alpha,m,f]\mapsto\Phi_{\alpha}^{-1}(m,f)$ とする。well-defined：$(\beta,m,f')\sim(\alpha,m,f)$ なら $f=g_{\alpha\beta}(m)\cdot f'$ なので $\Phi_{\beta}^{-1}(m,f')=\Phi_{\alpha}^{-1}\circ(\Phi_{\alpha}\circ\Phi_{\beta}^{-1})(m,f')=\Phi_{\alpha}^{-1}(m,f)$。$E(g)$ の局所自明化 $\Phi^{g}_{\alpha}$ を使うと $\Phi_{\alpha}\circ\Theta\circ(\Phi^{g}_{\alpha})^{-1}=\mathrm{id}_{U_{\alpha}\times F}$ なので、$\lambda_{\alpha}=e$ の同型である（$\Theta$ は各 $\pi^{-1}(U_{\alpha})$ の上で微分同相写像の合成で、全単射）。
+
+::: hypcheck
+- **効果的な作用**：1「⇒」で、写像としての等式から群の元の等式を出すのに使った。
+- 1「⇐」では、$\lambda_{\alpha}$ の滑らかさと、リー群の逆元の滑らかさを、$\Theta$ とその逆の滑らかさに使った。
+:::
+:::
+
+::: example メビウスの帯 {#mfd:mobius-bundle keywords="Mobius band as an O(1)-bundle over the circle with fibre R, built from a locally constant cocycle with value -1 on one component of the overlap; it is not O(1)-isomorphic to the trivial bundle" index="メビウスの帯（束）|めびうすのおびそく"}
+$S^{1}\subset\mathbb{R}^{2}$ を $U_{+}\defeq S^{1}\setminus\{(0,-1)\}$, $U_{-}\defeq S^{1}\setminus\{(0,1)\}$ で覆う。$U_{+}\cap U_{-}$ は $x>0$ の部分 $C_{1}$ と $x<0$ の部分 $C_{2}$ の二つの連結成分からなる。$G=\mathrm{O}(1)=\{\pm1\}$（$0$ 次元のリー群）を $\mathbb{R}$ に掛け算で作用させ、
+$$
+g_{++}=g_{--}=1,\qquad g_{+-}=g_{-+}=\begin{cases}1&(C_{1}\text{ の上})\\-1&(C_{2}\text{ の上})\end{cases}
+$$
+とする。これはコサイクルで、\ref{mfd:bundle-from-cocycle} から $\mathrm{O}(1)$ 束 $E(g)$ が得られる（**メビウスの帯**）。$E(g)$ は、自明束 $S^{1}\times\mathbb{R}$ と $\mathrm{O}(1)$ 束として同型でない（\ref{mfd:cocycle-isomorphism} の意味）。
+:::
+
+::: proof
+**コサイクル.** 局所定数関数は滑らか。添字は二つなので、三つの添字の少なくとも二つが一致し、$g_{\alpha\alpha}=1$ と $g_{+-}g_{-+}=1$（値が $\pm1$ で一致するので積は $1$）からすべての場合が従う。
+
+**自明でないこと.** 同型であるとすると、\ref{mfd:cocycle-isomorphism} から、滑らかな $\lambda_{\pm}\colon U_{\pm}\to\{\pm1\}$ で $\lambda_{+}g_{+-}\lambda_{-}^{-1}=1$（自明束の推移関数）となるものがある。$U_{\pm}$ は円弧で連結なので、連続な $\lambda_{\pm}$ は定数。すると $g_{+-}=\lambda_{+}^{-1}\lambda_{-}$ は $U_{+}\cap U_{-}$ 上で定数になるが、$C_{1}$ と $C_{2}$ で値が違うので矛盾。
+:::
+
+::: supplement
+**高い視点：非可換コホモロジーと圏論的な貼り合わせ.** 開被覆 $\mathfrak{U}=\{U_{\alpha}\}$ の上のコサイクルの全体を、「コホモロガス」という同値関係で割った集合を $\check H^{1}(\mathfrak{U};G)$ と書き、被覆を細かくする極限をとったものを $\check H^{1}(M;G)$ と書く（$G$ に値をとる滑らかな関数の層の、チェック・コホモロジー）。\ref{mfd:bundle-from-cocycle} と \ref{mfd:cocycle-isomorphism} を合わせると、「$G$ 束の同型類」と「$\check H^{1}(M;G)$ の元」が一対一に対応する。$G$ が可換でなくても定義でき、群ではなく基点付き集合になる点が、通常の（可換群係数の）コホモロジーとの違いである。圏論的には、$G$ 束の圏は、各 $U_{\alpha}$ の上の自明束の圏を「降下データ」（推移関数とコサイクル条件）で貼り合わせて得られる：これは開集合ごとに定まる圏を貼り合わせる「スタック」の考え方の、最も簡単な例である。比喩で言えば、コサイクルは地図帳の各ページの間の「乗り換え案内」で、乗り換え案内が三ページの間で矛盾しなければ、ページを貼り合わせて一つの世界ができる。
+
+**補足.** 構造群 $G$ をもつファイバー束は、ファイバーの形 $F$ だけでなく、貼り合わせに使ってよい変換の範囲 $G$ を指定している。同じ $E$ でも $G$ を小さくとれるか（**構造群の還元**）は、束の幾何的な性質（向き・計量など）を表す。これは \ref{mfd:page-reduction} で扱う。
+:::
+
+## 問題 {#mfd:sec-fb-problems}
+
+::: problem {#mfd:prob-fb-circle-tangent}
+$S^{1}$ に立体射影の二つの座標近傍 $p_{N}$, $p_{S}$（\ref{mfd:manifold-examples}）を入れる。$TS^{1}$ の推移関数 $g_{NS}$ を求め、$g_{NS}$ と自明束の推移関数 $1$ がコホモロガスであること、つまり $TS^{1}$ が $\mathrm{GL}(1,\mathbb{R})$ 束として自明であることを示せ。
+:::
+
+::: solution
+$p_{N}\circ p_{S}^{-1}(u)=1/u$（\ref{mfd:manifold-examples} の Step 3 で $d=1$ とした式 $p_{S}\circ p_{N}^{-1}(u)=1/u$ の逆写像）なので、$g_{NS}(m)=\frac{d}{du}(1/u)\big|_{u=p_{S}(m)}=-1/p_{S}(m)^{2}$。$\lambda_{N}\colon U_{N}\to\mathrm{GL}(1)$, $\lambda_{S}\colon U_{S}\to\mathrm{GL}(1)$ で $\lambda_{N}g_{NS}\lambda_{S}^{-1}=1$ となるものを探す。$\lambda_{S}(m)\defeq-1/(1+p_{S}(m)^{2})$, $\lambda_{N}(m)\defeq1/(1+p_{N}(m)^{2})$ とおくと、$U_{N}\cap U_{S}$ で $p_{N}=1/p_{S}$ なので、$u\defeq p_{S}(m)$ として
+$$
+\lambda_{N}g_{NS}\lambda_{S}^{-1}=\frac{1}{1+u^{-2}}\cdot\Bigl(-\frac{1}{u^{2}}\Bigr)\cdot\bigl(-(1+u^{2})\bigr)=\frac{u^{2}}{u^{2}+1}\cdot\frac{1+u^{2}}{u^{2}}=1.
+$$
+$\lambda_{N}$, $\lambda_{S}$ は滑らかで値は $0$ でない。\ref{mfd:cocycle-isomorphism.1} から $TS^{1}$ は自明束と同型。
+:::
+
+::: problem {#mfd:prob-fb-cocycle-check}
+$G$ 束の推移関数について、$g_{\alpha\beta}g_{\beta\gamma}g_{\gamma\alpha}=e$ を $U_{\alpha}\cap U_{\beta}\cap U_{\gamma}$ 上で示せ。また、\ref{mfd:cocycle-isomorphism.1} の関係「コホモロガス」が同値関係であることを示せ。
+:::
+
+::: solution
+\ref{mfd:cocycle-condition} から $g_{\alpha\beta}g_{\beta\gamma}g_{\gamma\alpha}=g_{\alpha\gamma}g_{\gamma\alpha}=g_{\alpha\alpha}=e$。同値関係：反射律は $\lambda_{\alpha}=e$。$g'=\lambda g\lambda^{-1}$ なら $g=\lambda^{-1}g'\lambda$ なので、$\lambda_{\alpha}^{-1}$ を使えば対称律（$m\mapsto\lambda_{\alpha}(m)^{-1}$ は滑らか）。$g'=\lambda g\lambda^{-1}$, $g''=\mu g'\mu^{-1}$ なら $g''_{\alpha\beta}=(\mu_{\alpha}\lambda_{\alpha})g_{\alpha\beta}(\mu_{\beta}\lambda_{\beta})^{-1}$ で、積 $\mu_{\alpha}\lambda_{\alpha}$ はリー群の積の滑らかさから滑らか。よって推移律。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

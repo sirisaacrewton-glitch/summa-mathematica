@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>構造群の還元 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-manifolds/03-fiber-bundles/04-reduction.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 構造群の還元 {#mfd:page-reduction keywords="reduction of the structure group, H-valued cocycle cohomologous to the given one, orientability as reduction to GL^+(n), fibre metric on a vector bundle, existence of fibre metrics by partitions of unity, Gram-Schmidt and orthonormal frames, reduction to O(k), G-structures: Riemannian metric, almost complex and symplectic structures"}
+
+$G$ 束の推移関数を、適当に局所自明化を取り替えて、より小さい部分群 $H\subset G$ に値をとるようにできるとき、構造群が $H$ に**還元**できるという。還元できるかどうかは、束の上の幾何的な構造の有無と対応する。このページでは二つの基本的な例を証明する。一つは、多様体が向き付け可能であることと、接束の構造群が $\mathrm{GL}^{+}(n)$ に還元できることの同値性（\ref{mfd:reduction-orientation}）。もう一つは、ベクトル束の**ファイバー計量**（各ファイバーの内積の滑らかな族）と、構造群の $\mathrm{O}(k)$ への還元の対応、およびファイバー計量がいつも存在すること（\ref{mfd:reduction-orthogonal}）である。後者を接束に使うと、どの多様体にもリーマン計量があることになり、微分幾何の系列への入口になる。
+
+## 記法と定義の確認 {#mfd:sec-red-notation}
+
+::: notation
+- $G$ 束・推移関数・同型・コホモロガスは \ref{mfd:g-bundle}, \ref{mfd:g-bundle-isomorphism}, \ref{mfd:cocycle-isomorphism}。ベクトル束・局所フレームは \ref{mfd:vector-bundle}, \ref{mfd:local-frame}, \ref{mfd:local-frame-trivialization}。行列群は \ref{mfd:matrix-lie-groups}。
+- 向きと、その言い換え（ヤコビ行列式が正のアトラス）は \ref{mfd:orientation}, \ref{mfd:orientable-equivalents}。滑らかな 1 の分割は \ref{mfd:smooth-partition-of-unity}。
+- $H\subset G$ はリー群 $G$ の部分群で部分多様体であるもの（\ref{mfd:matrix-lie-groups.2} の状況。このページでは $\mathrm{GL}^{+}(k)$, $\mathrm{O}(k)\subset\mathrm{GL}(k)$ だけを使う）。$G$ に値をとる滑らかな写像で値が $H$ に入るものは、$H$ への写像としても滑らか（\ref{mfd:submanifold-structure.3}）。
+- 二つの $G$ アトラスの被覆が違うときは、共通の細分に制限して比べる（\ref{mfd:g-bundle-isomorphism} の後の注意）。
+:::
+
+## 還元の定義 {#mfd:sec-red-definition}
+
+::: definition 構造群の還元 {#mfd:structure-group-reduction keywords="a G-bundle reduces to a subgroup H if it is G-isomorphic to a G-bundle whose transition functions take values in H; equivalently its cocycle is cohomologous to an H-valued cocycle" index="構造群の還元|こうぞうぐんのかんげん, 還元（構造群）|かんげんこうぞうぐん, G 構造|じーこうぞう"}
+$E$ を $G$ 束とする。$E$ と $G$ 束として同型な $G$ 束 $E'$ で、推移関数がすべて $H$ に値をとるものがあるとき、$E$ の構造群は **$H$ に還元できる**という。\ref{mfd:cocycle-isomorphism} から、これは、$E$ の推移関数 $g$（適当な被覆の上の）が、$H$ に値をとるコサイクルとコホモロガスであること、つまり滑らかな $\lambda_{\alpha}\colon U_{\alpha}\to G$ で $\lambda_{\alpha}g_{\alpha\beta}\lambda_{\beta}^{-1}$ がすべて $H$ に値をとるものがあることと同値である。
+:::
+
+::: intuition
+推移関数は「隣の地図との乗り換え」である。乗り換えに使う変換を $G$ 全体から $H$ だけに制限できるなら、$H$ で保たれる量（向き・長さ・角度など）は、地図によらずに束全体で意味をもつ。逆に、そのような量が束全体で与えられていれば、それを保つ地図だけを使えばよい。
+:::
+
+接束 $TM$ を $\mathrm{GL}(n)$ 束とみるときは、$M$ のアトラスから \ref{mfd:tangent-bundle-gl.1} の $\mathrm{GL}(n)$ アトラスを作る。二つのアトラスから作った $\mathrm{GL}(n)$ アトラスは、恒等写像 $TM\to TM$ によって（共通の細分の上で、ヤコビ行列を $\lambda_{\alpha}$ として）$G$ 束として同型なので、還元できるかどうかはアトラスの選び方によらない。
+
+## 向きと GL⁺(n) {#mfd:sec-red-orientation}
+
+::: theorem 向き付け可能性と構造群の還元 {#mfd:reduction-orientation keywords="M is orientable iff the structure group of TM reduces from GL(n) to GL^+(n)" index="向きと構造群の還元|むきとこうぞうぐんのかんげん"}
+$n\ge1$ 次元の可微分多様体 $M$ について、$M$ が向き付け可能であることと、$TM$ の構造群が $\mathrm{GL}^{+}(n)$ に還元できることは同値である。
+:::
+
+::: proof
+**「⇒」.** \ref{mfd:orientable-equivalents} の 1 ⇒ 2 から、座標変換のヤコビ行列式がすべて正のアトラス $\{(U_{\alpha},\varphi_{\alpha})\}$ がある（可算個に減らしてよい）。これから作った $TM$ の $\mathrm{GL}(n)$ アトラスの推移関数はヤコビ行列 $J_{\alpha\beta}$（\ref{mfd:tangent-bundle-gl.1}）で、$\det J_{\alpha\beta}>0$ なので $\mathrm{GL}^{+}(n)$ に値をとる。上の注意から、これは $TM$ の還元である。
+
+**「⇐」.** 【主張：ヤコビ行列式の符号の分解】アトラス $\{(U_{\alpha},\varphi_{\alpha})\}$ と滑らかな $\lambda_{\alpha}\colon U_{\alpha}\to\mathrm{GL}(n)$ で、$h_{\alpha\beta}\defeq\lambda_{\alpha}J_{\alpha\beta}\lambda_{\beta}^{-1}$ がすべて $\mathrm{GL}^{+}(n)$ に値をとるものがあるとする。$\varepsilon_{\alpha}(m)\defeq\operatorname{sgn}\det\lambda_{\alpha}(m)\in\{\pm1\}$ とおくと、$\det h_{\alpha\beta}=\det\lambda_{\alpha}\det J_{\alpha\beta}(\det\lambda_{\beta})^{-1}>0$ から
+$$
+\operatorname{sgn}\det J_{\alpha\beta}(m)=\varepsilon_{\alpha}(m)\,\varepsilon_{\beta}(m)\qquad(m\in U_{\alpha}\cap U_{\beta}).
+$$
+
+【主張：符号をそろえたアトラス】$\det\lambda_{\alpha}$ は連続で $0$ にならないので、$U_{\alpha}^{\pm}\defeq\{m\in U_{\alpha}:\varepsilon_{\alpha}(m)=\pm1\}$ は開集合で $U_{\alpha}$ を覆う。$r(x_{1},x_{2},\dots,x_{n})\defeq(-x_{1},x_{2},\dots,x_{n})$ として、座標近傍
+$$
+(U_{\alpha}^{+},\ \varphi_{\alpha}\restriction U_{\alpha}^{+}),\qquad(U_{\alpha}^{-},\ r\circ\varphi_{\alpha}\restriction U_{\alpha}^{-})
+$$
+を考える（\ref{mfd:maximal-atlas} の 2・3 から可微分構造に属する）。これらは $M$ を覆う。$r^{+}\defeq\mathrm{id}$, $r^{-}\defeq r$, $R^{\pm}\defeq Dr^{\pm}=\mathrm{diag}(\pm1,1,\dots,1)$ と書くと、$(U_{\alpha}^{\varepsilon},r^{\varepsilon}\circ\varphi_{\alpha})$ と $(U_{\beta}^{\delta},r^{\delta}\circ\varphi_{\beta})$ の座標変換のヤコビ行列は、連鎖律から $R^{\varepsilon}J_{\alpha\beta}R^{\delta}$（$r^{\delta}$ は自分自身の逆）で、その行列式の符号は、$U_{\alpha}^{\varepsilon}\cap U_{\beta}^{\delta}$ の上で
+$$
+\varepsilon\cdot\operatorname{sgn}\det J_{\alpha\beta}\cdot\delta=\varepsilon\cdot\varepsilon\delta\cdot\delta=1
+$$
+（$\varepsilon_{\alpha}=\varepsilon$, $\varepsilon_{\beta}=\delta$ を使った）。よってヤコビ行列式がすべて正のアトラスが得られ、\ref{mfd:orientable-equivalents} の 2 ⇒ 1 から $M$ は向き付け可能。
+
+::: hypcheck
+- **$\lambda_{\alpha}$ の連続性**：$U_{\alpha}^{\pm}$ が開集合であることに使った。$U_{\alpha}$ が連結でないと $\varepsilon_{\alpha}$ は定数とは限らないので、$U_{\alpha}$ を符号で分けた。
+- **$n\ge1$**：$r$ を定義するのに使った（$n=0$ では向きの定義が別になる）。
+:::
+:::
+
+## ファイバー計量と O(k) {#mfd:sec-red-metric}
+
+::: definition ファイバー計量 {#mfd:fiber-metric keywords="fibre metric on a vector bundle: inner products on fibres whose Gram matrices in local frames are smooth; Riemannian metric as a fibre metric on TM" index="ファイバー計量|ふぁいばーけいりょう, 束計量|そくけいりょう, 正規直交フレーム|せいきちょっこうふれーむ"}
+$E$ を階数 $k$ のベクトル束とする。各ファイバー $E_{m}$ の内積 $\langle\ ,\ \rangle_{m}$ の族で、$U$ の上の任意の局所フレーム $(\sigma_{i})$ について、グラム行列の成分 $m\mapsto\langle\sigma_{i}(m),\sigma_{j}(m)\rangle_{m}$ が滑らかになるものを、$E$ の**ファイバー計量**という。各点で正規直交基底になる局所フレームを**正規直交フレーム**という。$TM$ のファイバー計量を $M$ の**リーマン計量**という（微分幾何の系列で扱う）。
+:::
+
+$M$ を覆う局所フレームの族の一つで成分が滑らかなら、他の局所フレーム $\sigma'_{j}=\sum_{i}C_{ij}\sigma_{i}$（$C$ は滑らかな行列値関数。\ref{mfd:local-frame-trivialization} の証明の $B$ と同じ理由）のグラム行列は $C^{\mathsf{T}}(\langle\sigma_{i},\sigma_{j}\rangle)C$ なので滑らかである。よって、条件は一つの被覆について確かめれば十分である。
+
+::: proposition ファイバー計量の存在 {#mfd:fiber-metric-existence keywords="every vector bundle admits a fibre metric, by gluing the standard inner products of local trivializations with a partition of unity" index="ファイバー計量の存在|ふぁいばーけいりょうのそんざい, リーマン計量の存在|りーまんけいりょうのそんざい"}
+どのベクトル束にもファイバー計量が存在する。とくに、どの可微分多様体にもリーマン計量が存在する。
+:::
+
+::: proof
+**Step 1（定義）.** ベクトル束の局所自明化 $\{(U_{\alpha},\Phi_{\alpha})\}$ で $M$ を覆い、$\{U_{\alpha}\}$ に従属する滑らかな 1 の分割 $\{\phi_{\alpha}\}$ をとる（\ref{mfd:smooth-partition-of-unity.2}）。$\phi_{m,\alpha}\defeq\mathrm{pr}_{2}\circ\Phi_{\alpha}\restriction E_{m}$ とし、$v,w\in E_{m}$ について
+$$
+\langle v,w\rangle_{m}\defeq\sum_{\alpha:\ m\in U_{\alpha}}\phi_{\alpha}(m)\,\bigl(\phi_{m,\alpha}(v)\cdot\phi_{m,\alpha}(w)\bigr)
+$$
+とおく（$\cdot$ は $\mathbb{R}^{k}$ の標準内積）。台の族は局所有限なので、各 $m$ で和は有限和。
+
+**Step 2（内積）.** 各項は $E_{m}$ 上の対称双線形形式で、和もそう。正定値性：$v\neq0$ なら、$\phi_{m,\alpha}$ は線形同型なので $\phi_{m,\alpha}(v)\cdot\phi_{m,\alpha}(v)>0$。係数 $\phi_{\alpha}(m)\ge0$ で、和が $1$ なので少なくとも一つは正。よって $\langle v,v\rangle_{m}>0$。
+
+**Step 3（滑らかさ）.** 局所フレーム $\sigma_{i}(m)\defeq\Phi_{\beta}^{-1}(m,e_{i})$（$U_{\beta}$ 上）で見る。$U_{\alpha}\cap U_{\beta}$ の上で $\phi_{m,\alpha}(\sigma_{i}(m))=g_{\alpha\beta}(m)e_{i}$ なので、$\alpha$ の項のグラム行列は $\phi_{\alpha}(m)\,g_{\alpha\beta}(m)^{\mathsf{T}}g_{\alpha\beta}(m)$。【主張：これは $U_{\beta}$ 全体の滑らかな関数に延びる】$U_{\beta}\setminus\operatorname{supp}\phi_{\alpha}$ の上では $0$ とおく。$\operatorname{supp}\phi_{\alpha}$ は $M$ の閉集合で $U_{\alpha}$ に含まれるので、$U_{\beta}$ は開集合 $U_{\alpha}\cap U_{\beta}$ と $U_{\beta}\setminus\operatorname{supp}\phi_{\alpha}$ で覆われ、両方の上の定義は重なりで一致（どちらも $0$）し、それぞれ滑らか。局所有限性から、各点の近傍で 0 でない項は有限個なので、和は滑らか。
+
+::: hypcheck
+- **1 の分割**：局所的な内積を貼り合わせるのに使った。正定値性は「凸結合」で保たれる性質なので、貼り合わせが可能である（符号が不定な二次形式や、シンプレクティック形式のような非退化性は凸結合で保たれず、同じ議論は使えない）。
+- **$M$ の第二可算性（パラコンパクト性）**：1 の分割の存在の中で使われている。
+:::
+:::
+
+::: theorem ファイバー計量と O(k) への還元 {#mfd:reduction-orthogonal keywords="a fibre metric gives orthonormal local frames by Gram-Schmidt, whose trivializations have O(k)-valued transition functions; conversely an O(k)-reduction gives a fibre metric; every vector bundle reduces to O(k)" index="直交群への還元|ちょっこうぐんへのかんげん"}
+$E$ を階数 $k$ のベクトル束とする。
+1. $E$ にファイバー計量があれば、各点のまわりに正規直交フレームがあり、正規直交フレームから作った局所自明化（\ref{mfd:local-frame-trivialization}）の推移関数は $\mathrm{O}(k)$ に値をとる。これは $E$ の構造群の $\mathrm{O}(k)$ への還元である。
+2. 逆に、推移関数が $\mathrm{O}(k)$ に値をとるベクトル束の局所自明化の族 $\{\Phi_{\alpha}\}$ があれば、$\langle v,w\rangle_{m}\defeq\phi_{m,\alpha}(v)\cdot\phi_{m,\alpha}(w)$（$m\in U_{\alpha}$）は $\alpha$ によらず、ファイバー計量を定める。
+3. したがって、どのベクトル束も構造群を $\mathrm{O}(k)$ に還元できる。
+:::
+
+::: proof
+**1.** 【主張：グラム–シュミットは滑らか】$m_{0}$ のまわりの局所フレーム $(\sigma_{1},\dots,\sigma_{k})$ をとる（\ref{mfd:local-frame-trivialization} の後半）。帰納的に
+$$
+\tilde\sigma_{j}\defeq\sigma_{j}-\sum_{i<j}\langle\sigma_{j},\epsilon_{i}\rangle\,\epsilon_{i},\qquad\epsilon_{j}\defeq\frac{\tilde\sigma_{j}}{\sqrt{\langle\tilde\sigma_{j},\tilde\sigma_{j}\rangle}}
+$$
+とおく。各 $m$ で $\mathrm{span}(\epsilon_{1},\dots,\epsilon_{j-1})=\mathrm{span}(\sigma_{1},\dots,\sigma_{j-1})$（帰納法）で、$\sigma_{j}$ はこれに属さないので $\tilde\sigma_{j}(m)\neq0$。内積の値はファイバー計量の定義と双線形性から滑らかな関数、$\sqrt{\ }$ は $(0,\infty)$ 上で滑らか、切断の滑らかな関数倍と和は滑らかなので、$\epsilon_{j}$ は滑らかな切断。各点で正規直交基底になる（線形代数のグラム–シュミットの直交化）。
+
+【主張：推移関数は直交行列】正規直交フレーム $(\epsilon^{\alpha}_{i})$, $(\epsilon^{\beta}_{i})$ から作った局所自明化 $\Phi_{\alpha}$, $\Phi_{\beta}$ について、$g_{\alpha\beta}(m)$ は、$\epsilon^{\beta}_{j}(m)=\sum_{i}g_{\alpha\beta}(m)_{ij}\epsilon^{\alpha}_{i}(m)$ で定まる基底の変換行列である（$\Phi_{\alpha}(\epsilon^{\beta}_{j})=(m,g_{\alpha\beta}e_{j})$）。正規直交性から $g_{\alpha\beta}(m)_{ij}=\langle\epsilon^{\beta}_{j},\epsilon^{\alpha}_{i}\rangle$ で、
+$$
+\bigl(g_{\alpha\beta}^{\mathsf{T}}g_{\alpha\beta}\bigr)_{jl}=\sum_{i}\langle\epsilon^{\beta}_{j},\epsilon^{\alpha}_{i}\rangle\langle\epsilon^{\beta}_{l},\epsilon^{\alpha}_{i}\rangle=\langle\epsilon^{\beta}_{j},\epsilon^{\beta}_{l}\rangle=\delta_{jl}
+$$
+（正規直交基底による展開）。よって $g_{\alpha\beta}(m)\in\mathrm{O}(k)$。
+
+【主張：還元である】元の局所自明化 $\Phi'_{\gamma}$ と新しい $\Phi_{\alpha}$ は、どちらもベクトル束の局所自明化なので、\ref{mfd:vector-bundle-gl.1} から $\Phi_{\alpha}\circ\Phi'^{-1}_{\gamma}(m,v)=(m,C(m)v)$ と滑らかな $C\colon U_{\alpha}\cap U'_{\gamma}\to\mathrm{GL}(k)$ で書ける。共通の細分の上で、恒等写像 $E\to E$ は $\lambda=C$ の $\mathrm{GL}(k)$ 束の同型なので、定義の還元になっている（可算個の正規直交フレームで $M$ を覆う）。
+
+**2.** $m\in U_{\alpha}\cap U_{\beta}$ なら $\phi_{m,\alpha}=g_{\alpha\beta}(m)\phi_{m,\beta}$ で、$g_{\alpha\beta}(m)$ は標準内積を保つので、二つの定義は一致する。内積であることは $\phi_{m,\alpha}$ が線形同型であることから。局所フレーム $\Phi_{\alpha}^{-1}(m,e_{i})$ のグラム行列は単位行列で滑らか。
+
+**3.** \ref{mfd:fiber-metric-existence} と 1。
+
+::: hypcheck
+- **ファイバー計量の滑らかさ**：グラム–シュミットの各段の係数が滑らかであることに使った。
+- **$\mathrm{O}(k)$ が $\mathrm{GL}(k)$ の部分多様体**：$\mathrm{O}(k)$ に値をとる推移関数が $\mathrm{O}(k)$ への滑らかな写像になることに使う（\ref{mfd:matrix-lie-groups.3}）。
+:::
+:::
+
+::: corollary 向きと計量 {#mfd:reduction-so keywords="an orientable manifold's tangent bundle reduces to SO(n); an oriented vector bundle with a fibre metric has SO(k)-valued transitions" index="特殊直交群への還元|とくしゅちょっこうぐんへのかんげん"}
+向き付け可能な $n$ 次元多様体 $M$（$n\ge1$）の接束は、構造群を $\mathrm{SO}(n)$ に還元できる。
+:::
+
+::: proof
+\ref{mfd:reduction-orientation} の「⇒」の証明のとおり、向き付けられた（ヤコビ行列式が正の）アトラスの座標ベクトル場は、各点で正の基底である。リーマン計量を一つ固定し（\ref{mfd:fiber-metric-existence}）、座標ベクトル場の局所フレームにグラム–シュミットを施すと、得られる正規直交フレームは元の基底と同じ向きをもつ（グラム–シュミットの変換行列は対角成分が正の上三角行列で、行列式が正）。二つの正の正規直交基底の間の変換行列は、$\mathrm{O}(n)$ の元で行列式が正（どちらの基底も、正の座標基底からの変換行列式が正）なので $\mathrm{SO}(n)$ に属する。あとは \ref{mfd:reduction-orthogonal.1} と同じ。
+:::
+
+::: supplement
+**$G$ 構造の一覧（多くは微分幾何の系列で扱う予定）.** $n$ 次元多様体の接束（またはフレーム束）の構造群の還元は、次のような幾何構造に対応する。
+
+| 部分群 $H\subset\mathrm{GL}(n)$ | 対応する構造 | いつも存在するか |
+|---|---|---|
+| $\mathrm{GL}^{+}(n)$ | 向き | いいえ（\ref{mfd:reduction-orientation}） |
+| $\mathrm{O}(n)$ | リーマン計量 | はい（\ref{mfd:reduction-orthogonal}） |
+| $\mathrm{SO}(n)$ | 向き＋リーマン計量 | 向き付け可能なとき（\ref{mfd:reduction-so}） |
+| $\mathrm{GL}(m,\mathbb{C})$（$n=2m$） | 概複素構造 | いいえ（例：$S^{4}$ にはないことが知られている） |
+| $\mathrm{Sp}(2m,\mathbb{R})$（$n=2m$） | 非退化 2 形式（概シンプレクティック構造） | いいえ |
+| $\mathrm{U}(m)$ | 概エルミート構造 | 概複素構造があれば（$\mathrm{U}(m)=\mathrm{O}(2m)\cap\mathrm{GL}(m,\mathbb{C})$） |
+
+$\mathrm{O}(n)$ への還元がいつも存在するのは、正定値性が凸結合で保たれるから（\ref{mfd:fiber-metric-existence} の hypcheck）で、位相的には $\mathrm{GL}(n)$ が $\mathrm{O}(n)$ に変形レトラクトする（極分解）ことの反映である。シンプレクティック形式（閉な非退化 2 形式）やケーラー構造は、還元に加えて「積分可能性」（$d\omega=0$ など）を要求する点で、単なる還元より強い。
+
+**高い視点（事実）.** 一般に、主 $G$ 束 $P$ の構造群の $H$ への還元は、付随束 $P\times_{G}(G/H)$ の大域切断と一対一に対応することが知られている（$G/H$ が多様体になることには、リー群の系列で扱う閉部分群定理を使う）。$\mathrm{GL}(n)/\mathrm{O}(n)$ は正定値対称行列の空間と同一視でき、可縮なので、切断はいつも存在する。これは、「計量の空間」が凸集合で、1 の分割で貼り合わせられることの言い換えである。比喩で言えば、還元は「乗り換え案内から余計な自由度を消す」ことで、消せるかどうかは、各点で消し方の候補の空間（$G/H$）がどれだけつながっているかで決まる。
+:::
+
+## 問題 {#mfd:sec-red-problems}
+
+::: problem {#mfd:prob-rd-mobius-orientation}
+メビウスの帯の $\mathrm{O}(1)$ 束（\ref{mfd:mobius-bundle}）を $\mathrm{GL}(1)$ 束とみたとき、構造群を $\mathrm{GL}^{+}(1)=(0,\infty)$ に還元できないことを示せ。
+:::
+
+::: solution
+還元できるとすると、滑らかな $\lambda_{\pm}\colon U_{\pm}\to\mathrm{GL}(1)=\mathbb{R}\setminus\{0\}$ で $\lambda_{+}g_{+-}\lambda_{-}^{-1}>0$ となるものがある。$U_{\pm}$ は連結で $\lambda_{\pm}$ は連続かつ $0$ にならないので、符号 $\varepsilon_{\pm}$ は定数。すると $\operatorname{sgn}g_{+-}=\varepsilon_{+}\varepsilon_{-}$ は $U_{+}\cap U_{-}$ 上で定数になるが、$g_{+-}$ は $C_{1}$ で $1$, $C_{2}$ で $-1$ なので矛盾。
+:::
+
+::: problem {#mfd:prob-rd-sphere-metric}
+$S^{n}\subset\mathbb{R}^{n+1}$ の接空間 $T_{p}S^{n}$ を $p^{\perp}\subset\mathbb{R}^{n+1}$ と同一視する（\ref{mfd:regular-value-theorem} で $F(x)=|x|^{2}$ とする）。$\mathbb{R}^{n+1}$ の標準内積を制限したものが $TS^{n}$ のファイバー計量であることを示せ。
+:::
+
+::: solution
+正則値定理から $T_{p}S^{n}=\ker dF_{p}=\{v:2p\cdot v=0\}=p^{\perp}$（$T_{p}\mathbb{R}^{n+1}=\mathbb{R}^{n+1}$ と同一視）。標準内積の制限は各ファイバーの内積。滑らかさ：$S^{n}$ の座標近傍 $(U;x)$ の座標ベクトル場 $\partial/\partial x_{i}$ は、包含写像 $\iota$ の微分で $\mathbb{R}^{n+1}$ のベクトル $D(\iota\circ\varphi^{-1})(\varphi(m))e_{i}$ に移り、これは $m$ の滑らかな関数。よってグラム行列 $\bigl(D(\iota\circ\varphi^{-1})^{\mathsf{T}}D(\iota\circ\varphi^{-1})\bigr)\circ\varphi$ は滑らか。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
