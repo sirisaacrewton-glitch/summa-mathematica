@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>滑らかな特異ホモロジー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/04-manifolds/04-de-rham/02-smooth-singular.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 滑らかな特異ホモロジー {#mfd:page-smooth-singular keywords="smooth singular simplices, smooth singular chain complex S^infinity(M), barycentric subdivision and prism operators preserve smoothness, small smooth chains, smoothly contractible open sets, smooth singular cohomology equals singular cohomology, smooth singular homology equals singular homology, mapping cone"}
+
+微分形式は滑らかな写像でしか引き戻せないので、形式を鎖の上で積分するには、特異単体 $\sigma\colon\Delta^{k}\to M$ が滑らかである必要がある。そこで、滑らかな特異単体だけで作った鎖複体 $S^{\infty}(M)$ を考える。このページでは、これが特異鎖複体 $S(M)$ と同じホモロジーとコホモロジーを与えることを示す。
+
+証明の方針は次の二点である。
+1. 重心細分の作用素とプリズム作用素は「線形な単体を合成する」形で定義されていたので、滑らかな単体を滑らかな単体の鎖に写す。したがって、小さい単体の定理（\ref{at:small-simplices}）とホモトピー不変性（\ref{at:singular-homotopy-invariance}）は、証明をそのまま滑らかな鎖に制限できる。
+2. 良い被覆（\ref{riem:good-cover-exists}）の二重複体を使うと、大域的な比較が「星形の開集合の上での比較」に帰着し、そこでは両方とも 1 点のコホモロジーになる。
+
+連続写像を滑らかな写像で近似する議論（ホイットニーの近似定理）は使わない。
+
+## 記法と定義の確認 {#mfd:sec-ssg-notation}
+
+::: notation
+- 特異鎖複体・面の写像 $\delta^{i}$・誘導鎖写像 $\sigma_{\#}$ は \ref{at:singular-homology}, \ref{at:sec-ex-notation}（$\sigma=\sigma_{\#}\iota_{k}$、$\iota_{k}=1_{\Delta^{k}}$）。線形鎖 $LC$、重心細分 $S$ と鎖ホモトピー $T$ は \ref{at:barycentric-subdivision}, \ref{at:subdivision-algebra}、その特異鎖への拡張と $D_{m}\defeq\sum_{i<m}TS^{i}$ は \ref{at:small-simplices} の証明の Step 1・2。プリズム作用素 $P$ は \ref{at:singular-homotopy-invariance}。
+- 特異コチェイン $S^{\bullet}(X;G)\defeq\mathrm{Hom}(S(X),G)$、余境界 $\delta\varphi\defeq\varphi\circ\partial$ は \ref{at:singular-cohomology}。$\mathcal{U}$ 小なコチェインと (S)・(H) は \ref{at:cohomology-sheaf-facts}、ホモロジー同型からコホモロジー同型を導くのは \ref{at:homology-iso-cohomology-iso}、普遍係数定理は \ref{at:algebraic-uct-cohomology}。
+- 一般化されたマイヤー–ヴィートリス（コチェイン）と二重複体の比較は \ref{at:generalized-mayer-vietoris}, \ref{at:double-complex-comparison}、良い被覆のチェックコホモロジーは \ref{at:cech-good-cover}。鎖複体の長完全列は \ref{ha:long-exact-sequence}（余鎖複体には添字の符号を変えて使う）。
+- 良い被覆の存在は \ref{riem:good-cover-exists}（空でない有限個の共通部分は $\mathbb{R}^{n}$ の星形の開集合と微分同相）。開部分多様体は \ref{mfd:manifold-examples}。
+- 標準単体 $\Delta^{k}$ を、アフィン同型 $(t_{0},\dots,t_{k})\mapsto(t_{1},\dots,t_{k})$ によって $\mathbb{R}^{k}$ の部分集合 $\{x:x_{i}\ge0,\ \sum x_{i}\le1\}$ とみる。単体の間のアフィン写像（面の写像 $\delta^{i}$ や線形鎖のアフィン単体）は、この同一視でもアフィン写像 $\mathbb{R}^{j}\to\mathbb{R}^{k}$ の制限である。
+- $\Delta^{k}\times I\subset\mathbb{R}^{k}\times\mathbb{R}$（$I=[0,1]$）。
+- **選択公理**：使うところで明記する。
+:::
+
+## 滑らかな特異鎖 {#mfd:sec-ssg-chains}
+
+::: definition 滑らかな特異単体 {#mfd:smooth-singular-simplex keywords="smooth singular k-simplex: a map Delta^k -> M that extends smoothly to an open neighbourhood of Delta^k in R^k; the smooth singular chain complex S^infinity(M); smooth cochains; U-small smooth chains" index="滑らかな特異単体|なめらかなとくいたんたい, 滑らかな特異鎖複体|なめらかなとくいさふくたい"}
+$M$ を可微分多様体とする。
+1. 写像 $\sigma\colon\Delta^{k}\to M$ が、$\mathbb{R}^{k}$ における $\Delta^{k}$ のある開近傍 $W$ の上の滑らかな写像 $\tilde\sigma\colon W\to M$ に延びるとき、**滑らかな特異 $k$ 単体**という。その全体が生成する $S_{k}(M)$ の部分群を $S^{\infty}_{k}(M)$ と書く。
+2. $G$ をアーベル群とし、$S^{k}_{\infty}(M;G)\defeq\mathrm{Hom}(S^{\infty}_{k}(M),G)$（滑らかな $k$ 単体の上の $G$ 値関数）、$\delta\varphi\defeq\varphi\circ\partial$ とおく。$r\colon S^{\bullet}(M;G)\to S^{\bullet}_{\infty}(M;G)$ を、滑らかな単体への制限とする。
+3. $M$ の部分集合族 $\mathcal{U}$ について、像がある $U\in\mathcal{U}$ に含まれる滑らかな特異単体を **$\mathcal{U}$ 小**といい、それらが生成する部分群を $S^{\infty,\mathcal{U}}_{k}(M)$、その双対を $S^{k}_{\infty,\mathcal{U}}(M;G)\defeq\mathrm{Hom}(S^{\infty,\mathcal{U}}_{k}(M),G)$ と書く。
+:::
+
+::: lemma 滑らかな単体の基本性質 {#mfd:smooth-simplex-basics keywords="composition of a smooth simplex with an affine map or a smooth map is smooth; S^infinity(M) is a subcomplex; smooth simplices of an open subset V are the smooth simplices of M with image in V; maps that are smooth near a compact convex set compose with affine simplices to smooth simplices; for a 0-dimensional manifold every singular simplex is smooth" index="滑らかな単体の基本性質|なめらかなたんたいのきほんせいしつ"}
+$M$, $N$ を可微分多様体とする。
+1. $K\subset\mathbb{R}^{a}$ を部分集合、$F\colon K\to M$ を、$K$ のある開近傍 $W'$ の上の滑らかな写像 $\tilde F\colon W'\to M$ の制限とする。アフィン写像 $\lambda\colon\mathbb{R}^{k}\to\mathbb{R}^{a}$ が $\lambda(\Delta^{k})\subset K$ を満たすなら、$F\circ\lambda\restriction\Delta^{k}$ は滑らかな特異単体である。
+2. 滑らかな特異単体 $\sigma$ の面 $\sigma\circ\delta^{i}$ は滑らかで、$S^{\infty}(M)$ は $S(M)$ の部分鎖複体。$S^{\infty,\mathcal{U}}(M)$ は $S^{\infty}(M)$ の部分鎖複体。
+3. 滑らかな写像 $f\colon M\to N$ と滑らかな特異単体 $\sigma$ について、$f\circ\sigma$ は滑らか。よって $f_{\#}$ は $S^{\infty}(M)\to S^{\infty}(N)$ を与え、制限 $r$ と可換：$r\circ f^{\#}=f^{\#}\circ r$。
+4. $V\subset M$ が開集合なら、開部分多様体 $V$ の滑らかな特異単体は、像が $V$ に含まれる $M$ の滑らかな特異単体と同じものである。
+5. $\dim M=0$ なら、$M$ のすべての特異単体は滑らかで、$S^{\infty}(M)=S(M)$。
+:::
+
+::: proof
+**1.** $W\defeq\lambda^{-1}(W')$ はアフィン写像（連続）による開集合の逆像なので $\mathbb{R}^{k}$ の開集合で、$\lambda(\Delta^{k})\subset K\subset W'$ から $\Delta^{k}\subset W$。$\tilde F\circ\lambda\restriction W$ は滑らかな写像の合成で滑らかで、$\Delta^{k}$ の上で $F\circ\lambda$ と一致する。
+
+**2.** $\delta^{i}\colon\Delta^{k-1}\to\Delta^{k}$ はアフィン写像 $\mathbb{R}^{k-1}\to\mathbb{R}^{k}$ の制限（記法）なので、1 を $K=\Delta^{k}$, $F=\sigma$ に使う。$\partial\sigma=\sum(-1)^{i}\sigma\circ\delta^{i}\in S^{\infty}_{k-1}(M)$。$\mathcal{U}$ 小な単体の面の像は元の像に含まれるので $\mathcal{U}$ 小。
+
+**3.** $\tilde\sigma\colon W\to M$ を延長とすると、$f\circ\tilde\sigma$ は $f\circ\sigma$ の滑らかな延長。$r(f^{\#}\varphi)$ と $f^{\#}(r\varphi)$ はどちらも、滑らかな $\sigma$ に $\varphi(f\circ\sigma)$ を対応させる。
+
+**4.** 包含 $V\to M$ は滑らかなので、$V$ の滑らかな単体は 3 から $M$ の滑らかな単体。逆に、$\sigma$ が $M$ の滑らかな単体で $\sigma(\Delta^{k})\subset V$ なら、延長 $\tilde\sigma\colon W\to M$ について $W\cap\tilde\sigma^{-1}(V)$ は $\Delta^{k}$ を含む開集合で、その上で $\tilde\sigma$ は $V$ への滑らかな写像（開部分多様体への写像の滑らかさは、$M$ の座標近傍で判定される）。
+
+**5.** $\Delta^{k}$ は連結で $M$ は離散なので、連続写像 $\sigma\colon\Delta^{k}\to M$ は定値。定値写像は $\mathbb{R}^{k}$ 全体の上の定値写像に延び、それは滑らか。
+:::
+
+::: lemma 細分作用素とプリズム作用素は滑らかさを保つ {#mfd:smooth-operators keywords="the barycentric subdivision operator S, the homotopy T and D_m map smooth chains to smooth chains; the prism operator of a smooth homotopy H: M x R -> N maps smooth chains to smooth chains" index="滑らかな鎖と細分作用素|なめらかなくさりとさいぶんさようそ"}
+1. \ref{at:small-simplices} の証明の作用素 $S$, $T$, $D_{m}$ は、$S^{\infty}(M)$ を $S^{\infty}(M)$ に、$S^{\infty,\mathcal{U}}(M)$ を $S^{\infty,\mathcal{U}}(M)$ に写す。
+2. $H\colon M\times\mathbb{R}\to N$ を滑らかな写像とし、$f\defeq H(\,\cdot\,,0)$, $g\defeq H(\,\cdot\,,1)$ とおく。$H\restriction M\times I$ から作ったプリズム作用素 $P$ は $S^{\infty}_{k}(M)$ を $S^{\infty}_{k+1}(N)$ に写し、$S^{\infty}(M)$ の上で
+$$
+\partial P+P\partial=g_{\#}-f_{\#}.
+$$
+:::
+
+::: proof
+**1.** 【主張：$\sigma$ が滑らかなら $S\sigma$, $T\sigma$ に現れる単体はすべて滑らか】定義から $S\sigma=\sigma_{\#}(S\iota_{k})$, $T\sigma=\sigma_{\#}(T\iota_{k})$ で、$S\iota_{k}\in LC_{k}(\Delta^{k})$, $T\iota_{k}\in LC_{k+1}(\Delta^{k})$ は $\Delta^{k}$ のアフィン単体 $\lambda$ の整数係数の和（\ref{at:barycentric-subdivision} の定義は錐作用素の繰り返しで、アフィン単体からアフィン単体しか作らない）。よって現れる単体は $\sigma\circ\lambda$ の形で、\ref{mfd:smooth-simplex-basics.1}（$K=\Delta^{k}$, $F=\sigma$）から滑らか。$\sigma\circ\lambda$ の像は $\sigma$ の像に含まれるので、$\mathcal{U}$ 小も保たれる。$D_{m}=\sum TS^{i}$ は $S$, $T$ の合成の和なので同様。
+
+**2.** 【主張：$P\sigma$ に現れる単体は滑らか】$\sigma$ を滑らかな $k$ 単体、$\tilde\sigma\colon W\to M$ を延長とする。$P\sigma$ に現れる単体は $F_{\sigma}\circ\lambda$ の形で、$F_{\sigma}=H\circ(\sigma\times1_{I})\colon\Delta^{k}\times I\to N$、$\lambda=[v_{0},\dots,v_{i},w_{i},\dots,w_{k}]$ は $\Delta^{k+1}$ から凸集合 $\Delta^{k}\times I$ へのアフィン単体である（\ref{at:singular-homotopy-invariance} の Step 1）。$F_{\sigma}$ は、$\Delta^{k}\times I$ の開近傍 $W\times\mathbb{R}$ の上の滑らかな写像 $H\circ(\tilde\sigma\times1_{\mathbb{R}})$ の制限なので、\ref{mfd:smooth-simplex-basics.1}（$K=\Delta^{k}\times I$）から $F_{\sigma}\circ\lambda$ は滑らか。
+
+等式は \ref{at:singular-homotopy-invariance} の Step 2〜5 の計算そのもので、その計算は単体の滑らかさによらない。$f$, $g$ は滑らかなので $f_{\#}$, $g_{\#}$ は $S^{\infty}$ を保つ（\ref{mfd:smooth-simplex-basics.3}）。
+:::
+
+## 滑らかな小さい単体と可縮な開集合 {#mfd:sec-ssg-local}
+
+::: theorem 滑らかな小さい単体の定理 {#mfd:smooth-small-simplices keywords="for a family U whose interiors cover M, the inclusion of U-small smooth chains into smooth chains induces isomorphisms on homology, and restriction of smooth cochains to U-small ones induces isomorphisms on cohomology with any coefficients" index="滑らかな小さい単体の定理|なめらかなちいさいたんたいのていり"}
+可微分多様体 $M$ の部分集合族 $\mathcal{U}$ で、内部 $\{\operatorname{int}U\}_{U\in\mathcal{U}}$ が $M$ を覆うものについて、
+1. 包含 $S^{\infty,\mathcal{U}}(M)\to S^{\infty}(M)$ はホモロジーの同型を誘導する。
+2. 任意のアーベル群 $G$ について、制限 $S^{\bullet}_{\infty}(M;G)\to S^{\bullet}_{\infty,\mathcal{U}}(M;G)$ はコホモロジーの同型を誘導する。
+:::
+
+::: proof
+**Step 1（1 の証明）.** \ref{at:small-simplices} の証明の Step 2〜5 を、$S(X)$ を $S^{\infty}(M)$ に、$S^{\mathcal{U}}(X)$ を $S^{\infty,\mathcal{U}}(M)$ に置き換えて繰り返す。そこで使ったのは次の三つだけである。
+- $\partial D_{m}+D_{m}\partial=1-S^{m}$ と、$S$ が鎖写像であること：$S^{\infty}(M)$ の上でも同じ式（$S^{\infty}(M)$ は部分鎖複体で、作用素は $S^{\infty}$ を保つ。\ref{mfd:smooth-operators.1}）。
+- $S$, $T$, $D_{m}$ が $\mathcal{U}$ 小な鎖を $\mathcal{U}$ 小な鎖に写すこと：\ref{mfd:smooth-operators.1}。
+- 各単体 $\sigma$ について、十分大きい $m$ で $S^{m}\sigma=\sigma_{\#}(S^{m}\iota_{k})$ が $\mathcal{U}$ 小になること（ルベーグ数と \ref{at:subdivision-diameter}）：これは $\sigma$ の連続性と内部が覆うことだけを使い、滑らかな $\sigma$ にもそのまま当てはまる。$S^{m}\sigma$ は滑らかな鎖なので、$S^{\infty,\mathcal{U}}(M)$ に入る。
+
+よって全射（サイクル $z\in S^{\infty}_{k}(M)$ について $z-S^{m}z=\partial D_{m}z$ で $D_{m}z\in S^{\infty}_{k+1}(M)$）と単射（$z=\partial c$, $c\in S^{\infty}_{k+1}(M)$ なら $z=\partial(D_{m}z+S^{m}c)$ で、括弧内は $S^{\infty,\mathcal{U}}$ に入る）が同じ式で示される。
+
+**Step 2（2 の証明）.** $S^{\infty}_{k}(M)$ は滑らかな単体を基底とする自由アーベル群で、$S^{\infty,\mathcal{U}}_{k}(M)$ は $\mathcal{U}$ 小な滑らかな単体を基底とする自由アーベル群。1 から包含は自由な鎖複体の間のホモロジー同型なので、\ref{at:homology-iso-cohomology-iso} から $\mathrm{Hom}(-,G)$ をとった制限はコホモロジーの同型。
+
+::: hypcheck
+- **内部が覆う**こと：Step 1 の三つ目（ルベーグ数）に使った。
+- $M$ が多様体であることは、単体が滑らかであることを定義するためにだけ使った。証明の中身は、$S^{\infty}$ が「アフィン単体との合成で閉じた部分鎖複体」であることしか使っていない（補足を参照）。
+- **選択公理**：使わない（$m$ は自然数の最小元としてとれる）。
+:::
+:::
+
+::: definition 滑らかに可縮 {#mfd:smoothly-contractible keywords="a manifold U is smoothly contractible if there are x_0 in U and a smooth map H: U x R -> U with H(x,0) = x_0 and H(x,1) = x; open sets diffeomorphic to star-shaped open subsets of R^n are smoothly contractible" index="滑らかに可縮|なめらかにかしゅく"}
+可微分多様体 $U$ が**滑らかに可縮**であるとは、点 $x_{0}\in U$ と滑らかな写像 $H\colon U\times\mathbb{R}\to U$ で、すべての $x\in U$ について $H(x,0)=x_{0}$, $H(x,1)=x$ となるものがあることをいう。$(x_{0},H)$ を**滑らかな可縮化**という。
+:::
+
+::: lemma 星形の開集合は滑らかに可縮 {#mfd:star-shaped-smoothly-contractible keywords="an open set diffeomorphic to a star-shaped open subset of R^n is smoothly contractible, via H(x,t) = psi^{-1}(p + beta(t)(psi(x) - p)) with beta(t) = (1 - cos pi t)/2" index="星形の開集合の滑らかな可縮化|ほしがたのかいしゅうごうのなめらかなかしゅくか"}
+$\psi\colon U\to V$ を、$\mathbb{R}^{n}$ の点 $p$ について星形の開集合 $V$ への微分同相写像とし、$\beta(t)\defeq\frac{1-\cos\pi t}{2}$ とおく。
+$$
+H(x,t)\defeq\psi^{-1}\bigl(p+\beta(t)(\psi(x)-p)\bigr)
+$$
+は $U\times\mathbb{R}$ から $U$ への滑らかな写像で、$(\psi^{-1}(p),H)$ は滑らかな可縮化である。
+:::
+
+::: proof
+$\beta$ は $\mathbb{R}$ 上で滑らかで、値は $[0,1]$、$\beta(0)=0$, $\beta(1)=1$。$V$ は $p$ について星形なので、$y\in V$ と $s\in[0,1]$ について $p+s(y-p)\in V$。よって $p+\beta(t)(\psi(x)-p)\in V$ で、$H$ は定義される。$(x,t)\mapsto p+\beta(t)(\psi(x)-p)$ は $U\times\mathbb{R}$ から $V$ への滑らかな写像（成分は $\beta$ と $\psi$ の成分の積と和）で、$\psi^{-1}$ は滑らかなので $H$ は滑らか。$H(x,0)=\psi^{-1}(p)$, $H(x,1)=\psi^{-1}(\psi(x))=x$。
+
+::: hypcheck
+- 線形の $t$ の代わりに $\beta(t)$ を使ったのは、$t\notin[0,1]$ でも $p+\beta(t)(\psi(x)-p)$ が $V$ に入るようにするため（$p+t(y-p)$ は $t>1$ で $V$ から出ることがある）。$H$ が $U\times\mathbb{R}$ 全体で滑らかであることは、\ref{mfd:smooth-operators.2} でプリズムの単体の滑らかさに使う。
+:::
+:::
+
+::: proposition 滑らかに可縮な多様体の滑らかなコホモロジー {#mfd:smooth-contractible-cohomology keywords="for a smoothly contractible manifold U, the augmented complex 0 -> G -> S^0_infinity(U;G) -> S^1_infinity(U;G) -> ... has an explicit contraction built from the prism operator and the point; hence H^0 = G (constants) and H^q = 0 for q >= 1" index="滑らかに可縮な多様体のコホモロジー|なめらかにかしゅくなたようたいのこほもろじー"}
+$U$ を滑らかに可縮な可微分多様体、$(x_{0},H)$ を滑らかな可縮化、$G$ をアーベル群とし、$\varepsilon\colon G\to S^{0}_{\infty}(U;G)$ を「値 $g$ の定数関数」とする。添加した余鎖複体
+$$
+0\to G\xrightarrow{\varepsilon}S^{0}_{\infty}(U;G)\xrightarrow{\delta}S^{1}_{\infty}(U;G)\xrightarrow{\delta}\cdots
+$$
+には、$(x_{0},H)$ から明示的に決まる縮約 $k$（$\delta k+k\delta=1$）がある。とくにこの列は完全で、$H^{0}(S^{\bullet}_{\infty}(U;G))$ は定数関数の全体 $\cong G$、$q\ge1$ で $H^{q}(S^{\bullet}_{\infty}(U;G))=0$。
+:::
+
+::: proof
+**Step 1（1 点）.** 1 点 $\ast$ の $k$ 単体は定値写像 $\kappa_{k}$ ただ一つで、どれも滑らか（\ref{mfd:smooth-simplex-basics.5}）。$\partial\kappa_{k}=\sum_{i=0}^{k}(-1)^{i}\kappa_{k-1}$ は $k$ が正の偶数なら $\kappa_{k-1}$、奇数なら $0$。よって $S^{k}(\ast;G)=G$（$\varphi\mapsto\varphi(\kappa_{k})$）で、$\delta\colon S^{k}\to S^{k+1}$ は $k$ が奇数なら恒等写像、偶数なら $0$。添加 $\varepsilon_{\ast}\colon G\to S^{0}(\ast;G)$ は恒等写像。$s\colon G\leftarrow S^{0}$ を恒等写像、$s\colon S^{k}\to S^{k-1}$（$k\ge1$）を $k$ が偶数なら恒等写像、奇数なら $0$ とおくと、各次数で $\delta s+s\delta=1$：
+- 次数 $-1$（$G$）：$s\varepsilon_{\ast}=1$。
+- 次数 $0$：$\varepsilon_{\ast}s+s\delta=1+0$（$\delta\colon S^{0}\to S^{1}$ は $0$）。
+- 次数 $k\ge1$：$k$ が奇数なら $\delta s+s\delta=0+1\cdot1$、偶数なら $1\cdot1+0$（$\delta\colon S^{k-1}\to S^{k}$ は $k-1$ が奇数のとき恒等写像）。
+
+**Step 2（プリズムの双対）.** $c\colon U\to\ast$ と $j\colon\ast\to U$（$\ast\mapsto x_{0}$）は滑らかで、$c\circ j=1_{\ast}$、$j\circ c=H(\,\cdot\,,0)$、$1_{U}=H(\,\cdot\,,1)$。\ref{mfd:smooth-operators.2} から、$S^{\infty}(U)$ の上で $\partial P+P\partial=1-j_{\#}c_{\#}$（次数 $0$ では $P\partial$ の項はない）。$P^{*}\varphi\defeq\varphi\circ P$ とおくと、$\varphi\in S^{q}_{\infty}(U;G)$ について
+$$
+(\delta P^{*}+P^{*}\delta)\varphi=\varphi\circ(\partial P+P\partial)=\varphi-c^{\#}j^{\#}\varphi\qquad(q\ge1),
+$$
+次数 $0$ では $P^{*}\delta\varphi=\varphi-c^{\#}j^{\#}\varphi$。ここで $j^{\#}\colon S^{\bullet}_{\infty}(U;G)\to S^{\bullet}(\ast;G)$, $c^{\#}\colon S^{\bullet}(\ast;G)\to S^{\bullet}_{\infty}(U;G)$ は余鎖写像で、添加と可換（$c^{\#}\varepsilon_{\ast}=\varepsilon$：定数関数の引き戻しは定数関数、$j^{\#}\varepsilon=\varepsilon_{\ast}$）。
+
+**Step 3（縮約）.** $k\colon G\leftarrow S^{0}_{\infty}(U;G)$ を $k\defeq sj^{\#}$（$\varphi\mapsto\varphi(x_{0})$）、$k\colon S^{q}_{\infty}\to S^{q-1}_{\infty}$（$q\ge1$）を $k\defeq P^{*}+c^{\#}sj^{\#}$ とおく。
+- 次数 $q\ge1$：$\delta k+k\delta=(\delta P^{*}+P^{*}\delta)+c^{\#}(\delta s+s\delta)j^{\#}=(1-c^{\#}j^{\#})+c^{\#}j^{\#}=1$（$c^{\#}$, $j^{\#}$ は $\delta$ と可換、Step 1）。
+- 次数 $0$：$\varepsilon k+k\delta=\varepsilon sj^{\#}+P^{*}\delta+c^{\#}s\delta j^{\#}=c^{\#}(\varepsilon_{\ast}s+s\delta)j^{\#}+P^{*}\delta=c^{\#}j^{\#}+(1-c^{\#}j^{\#})=1$。
+- 次数 $-1$：$k\varepsilon=sj^{\#}\varepsilon=s\varepsilon_{\ast}=1$。
+
+**Step 4（帰結）.** 縮約をもつ余鎖複体は完全（$\delta x=0$ なら $x=\delta(kx)$）。$H^{0}=\ker\delta=\operatorname{im}\varepsilon$ で、$\varepsilon$ は単射（$k\varepsilon=1$）。
+
+::: hypcheck
+- **滑らかな可縮化**：Step 2 で、プリズム作用素が滑らかな鎖を保つこと（\ref{mfd:smooth-operators.2}）に $H$ の $U\times\mathbb{R}$ 上の滑らかさを使った。連続な可縮化しかない場合は、プリズムの単体が滑らかとは限らず、この証明は通らない。
+- 縮約が $(x_{0},H)$ から明示的に決まることは、無限個の $U$ の直積をとるときに、各成分で原像を選ぶ必要をなくす（\ref{mfd:smooth-singular-iso} の Step 5）。
+:::
+:::
+
+## 特異コホモロジーとの一致 {#mfd:sec-ssg-comparison}
+
+::: theorem 滑らかな特異コホモロジーと特異コホモロジー {#mfd:smooth-singular-iso keywords="for every smooth manifold M and abelian group G, restriction S(M;G) -> S_infinity(M;G) induces isomorphisms on cohomology; proof by comparing the Cech-singular and Cech-smooth-singular double complexes of a good cover" index="滑らかな特異コホモロジー|なめらかなとくいこほもろじー"}
+可微分多様体 $M$ とアーベル群 $G$ について、制限 $r\colon S^{\bullet}(M;G)\to S^{\bullet}_{\infty}(M;G)$ はすべての次数でコホモロジーの同型
+$$
+r^{*}\colon H^{k}_{\mathrm{sing}}(M;G)\xrightarrow{\ \cong\ }H^{k}(S^{\bullet}_{\infty}(M;G))
+$$
+を誘導する。
+:::
+
+::: proof
+$\dim M=0$ なら \ref{mfd:smooth-simplex-basics.5} から $r$ は恒等写像。以下 $n\defeq\dim M\ge1$。
+
+**Step 1（良い被覆）.** \ref{riem:good-cover-exists} から、$M$ の開被覆 $\mathcal{U}=\{U_{i}\}_{i\in\mathbb{N}}$ で、空でない有限個の共通部分 $U_{\sigma}\defeq U_{i_{0}}\cap\cdots\cap U_{i_{p}}$（$\sigma=(i_{0},\dots,i_{p})$）がすべて $\mathbb{R}^{n}$ の星形の開集合と微分同相であるものをとる。$U_{\sigma}$ は可縮で、とくに連結。
+
+**Step 2（二つの二重複体）.**
+$$
+K^{p,q}\defeq\prod_{\sigma\in\mathbb{N}^{p+1}}S^{q}(U_{\sigma};G),\qquad L^{p,q}\defeq\prod_{\sigma\in\mathbb{N}^{p+1}}S^{q}_{\infty}(U_{\sigma};G)
+$$
+とおく（$U_{\sigma}=\varnothing$ の成分は $0$）。行の微分はチェックの微分 $d$（\ref{at:generalized-mayer-vietoris} の式。制限の符号付きの和）、列の微分は成分ごとの $\delta$。$K$ は \ref{at:cech-good-cover} の証明の二重複体である。$L$ も二重複体：開集合 $V'\subset V$ への制限は、\ref{mfd:smooth-simplex-basics.4} から「$V$ の滑らかな単体のうち像が $V'$ に入るものへの制限」で、$\delta$ と可換。成分ごとの $r$ は $d$（制限と可換）とも $\delta$ とも可換なので、二重複体の写像 $r\colon K\to L$ を与える。
+
+**Step 3（行の添加）.** $K$ の行を $R_{K}^{q}\defeq S^{q}_{\mathcal{U}}(M;G)$ で、$L$ の行を $R_{L}^{q}\defeq S^{q}_{\infty,\mathcal{U}}(M;G)$ で、どちらも各 $U_{i}$ への制限 $\eta$ で添加する。$K$ の行は \ref{at:generalized-mayer-vietoris} から完全。$L$ の行も、その証明を、$T$ を「$\mathcal{U}$ 小な滑らかな $q$ 単体の集合」に置き換えて繰り返せば完全：\ref{mfd:smooth-simplex-basics.4} から、$S^{q}_{\infty}(U_{\sigma};G)$ は「$T$ のうち像が $U_{\sigma}$ に含まれる単体」の上の関数全体、$S^{q}_{\infty,\mathcal{U}}(M;G)$ は $T$ の上の関数全体で、列は単体 $\tau\in T$ ごとの列の直積に分かれ、各成分は $j\defeq\min I_{\tau}$（$\mathbb{N}$ の最小元）を使った $h$ で縮約される。制限 $r_{\mathcal{U}}\colon R_{K}\to R_{L}$（$\mathcal{U}$ 小な単体の上の関数を、そのうち滑らかなものに制限）について $\eta\circ r_{\mathcal{U}}=r\circ\eta$。
+
+**Step 4（列の添加）.** $C^{p}\defeq\prod_{\sigma}\underline{G}(U_{\sigma})$（$U_{\sigma}\ne\varnothing$ なら $U_{\sigma}$ は連結なので $\underline{G}(U_{\sigma})=G$、空なら $0$）とし、$\iota_{K}\colon C^{p}\to K^{p,0}$, $\iota_{L}\colon C^{p}\to L^{p,0}$ を「成分ごとに定数関数」とする。定数関数の制限は定数関数なので $r\circ\iota_{K}=\iota_{L}$。
+
+**Step 5（列の完全性）.** 各 $\sigma$ で $U_{\sigma}\ne\varnothing$ なら、\ref{mfd:star-shaped-smoothly-contractible} から滑らかな可縮化 $(x_{\sigma},H_{\sigma})$ を一つずつ選ぶ（$\sigma$ は可算個なので可算選択公理）。\ref{mfd:smooth-contractible-cohomology} の縮約 $k_{\sigma}$ を成分ごとに並べた $\prod_{\sigma}k_{\sigma}$ は、$L$ の $p$ 列を $C^{p}$ で添加した列の縮約で、したがってこの列は完全。$K$ の列についても、$H_{\sigma}\restriction U_{\sigma}\times I$ は連続な可縮化なので、\ref{mfd:smooth-contractible-cohomology} の証明を（滑らかさを忘れて）$S(U_{\sigma})$ で繰り返すと縮約が得られ、完全（これは \ref{at:cech-good-cover} の Step 3 そのもの）。
+
+**Step 6（二重複体の比較）.** \ref{at:double-complex-comparison} を $K$ と $L$ に使うと、$\eta$ と $\iota$ が誘導する写像
+$$
+\eta_{K}^{*}\colon H(R_{K})\to H(\mathrm{Tot}K),\quad\iota_{K}^{*}\colon H(C)\to H(\mathrm{Tot}K),\quad\eta_{L}^{*},\ \iota_{L}^{*}\ (L\text{ も同様})
+$$
+はすべて同型。ここで $\eta$, $\iota$ は全複体への余鎖写像である（$D=d+(-1)^{p}\delta$ について、$D\eta(x)=d\eta(x)+\delta\eta(x)=\eta(\delta x)$（$d\eta=0$）、$D\iota(c)=\iota(dc)+(-1)^{p}\delta\iota(c)=\iota(dc)$（$\delta\iota=0$））。$r$ は $D$ と可換で、Step 3・4 から $\mathrm{Tot}(r)\circ\iota_{K}=\iota_{L}$, $\mathrm{Tot}(r)\circ\eta_{K}=\eta_{L}\circ r_{\mathcal{U}}$。前者から
+$$
+\mathrm{Tot}(r)^{*}=\iota_{L}^{*}\circ(\iota_{K}^{*})^{-1}
+$$
+は同型、後者から $r_{\mathcal{U}}^{*}=(\eta_{L}^{*})^{-1}\circ\mathrm{Tot}(r)^{*}\circ\eta_{K}^{*}$ も同型。
+
+**Step 7（小さいコチェインを外す）.** 次の図式は可換（どれも関数の制限）：
+$$
+\begin{array}{ccc}
+S^{\bullet}(M;G)&\xrightarrow{\ r\ }&S^{\bullet}_{\infty}(M;G)\\
+\downarrow&&\downarrow\\
+S^{\bullet}_{\mathcal{U}}(M;G)&\xrightarrow{\ r_{\mathcal{U}}\ }&S^{\bullet}_{\infty,\mathcal{U}}(M;G)
+\end{array}
+$$
+左の縦の写像は (S)（\ref{at:cohomology-sheaf-facts}）から、右の縦の写像は \ref{mfd:smooth-small-simplices} からコホモロジーの同型。下の写像は Step 6 から同型。よって $r^{*}$ も同型。
+
+::: hypcheck
+- **良い被覆**：Step 1 で存在を、Step 5 で各 $U_{\sigma}$ が星形の開集合と微分同相であること（滑らかな可縮化）を使った。可縮なだけでは、滑らかな鎖の側の列の完全性は示せない（\ref{mfd:smooth-contractible-cohomology} の前提）。
+- **開被覆**であることは、Step 7 の (S) と \ref{mfd:smooth-small-simplices}（内部が覆う）に使った。
+- **添字の整列順序**：Step 3 の $\min I_{\tau}$ に使った。\ref{riem:good-cover-exists} の被覆は $\mathbb{N}$ で添字づけられている（第二可算性による）。
+- **選択公理**：Step 5 で可算個の $(x_{\sigma},H_{\sigma})$ を選ぶのに可算選択公理を使う。
+- **係数** $G$ は任意のアーベル群でよい（ド・ラームの定理に使うのは $G=\mathbb{R}$）。
+:::
+:::
+
+::: corollary 滑らかな特異ホモロジーと特異ホモロジー {#mfd:smooth-singular-homology-iso keywords="the inclusion S^infinity(M) -> S(M) induces isomorphisms on integral homology; proof via the mapping cone and the universal coefficient theorem" index="滑らかな特異ホモロジー|なめらかなとくいほもろじー, 写像錐（鎖複体）|しゃぞうすいさふくたい"}
+可微分多様体 $M$ について、包含 $\iota\colon S^{\infty}(M)\to S(M)$ はすべての次数でホモロジーの同型 $H_{k}(S^{\infty}(M))\cong H_{k}(M;\mathbb{Z})$ を誘導する。
+:::
+
+::: proof
+**Step 1（写像錐）.** $C_{k}\defeq S^{\infty}_{k-1}(M)\oplus S_{k}(M)$, $\partial(a,b)\defeq(-\partial a,\ \iota a+\partial b)$ とおく。$\partial\partial(a,b)=(\partial\partial a,\ -\iota\partial a+\partial\iota a+\partial\partial b)=0$（$\iota$ は鎖写像）なので鎖複体で、$C_{k}$ は自由アーベル群の直和なので自由。$b\mapsto(0,b)$ と $(a,b)\mapsto a$ は、鎖複体の短完全列
+$$
+0\to S(M)\to C\to S^{\infty}(M)[-1]\to0
+$$
+を与える（$S^{\infty}(M)[-1]_{k}\defeq S^{\infty}_{k-1}(M)$、微分は $-\partial$。ホモロジーは $H_{k-1}(S^{\infty}(M))$）。各次数で分裂している。
+
+**Step 2（$\mathrm{Hom}(C,G)$ は非輪状）.** 各次数で分裂する短完全列に $\mathrm{Hom}(-,G)$ をとると、余鎖複体の短完全列
+$$
+0\to\mathrm{Hom}(S^{\infty}(M)[-1],G)\to\mathrm{Hom}(C,G)\to S^{\bullet}(M;G)\to0
+$$
+が得られ、長完全列（\ref{ha:long-exact-sequence}）
+$$
+\cdots\to H^{k-1}(S^{\bullet}_{\infty}(M;G))\to H^{k}(\mathrm{Hom}(C,G))\to H^{k}(M;G)\xrightarrow{\ \partial^{*}\ }H^{k}(S^{\bullet}_{\infty}(M;G))\to\cdots
+$$
+がある。【主張：連結射 $\partial^{*}$ は $r^{*}$】コサイクル $\varphi\in S^{k}(M;G)$ を $\hat\varphi(a,b)\defeq\varphi(b)$ に持ち上げると、$(\delta\hat\varphi)(a,b)=\hat\varphi(\partial(a,b))=\varphi(\iota a)+\varphi(\partial b)=\varphi(\iota a)$。これは $\mathrm{Hom}(S^{\infty}(M)[-1],G)$ の元 $a\mapsto\varphi(\iota a)$、すなわち $r\varphi$ の像で、連結射の定義（持ち上げて微分を施し、引き戻す）から $\partial^{*}[\varphi]=[r\varphi]$（ずらした複体の微分の符号は、コホモロジー群を変えない）。\ref{mfd:smooth-singular-iso} から $r^{*}$ はすべての次数で同型なので、長完全列の完全性から：$H^{k}(\mathrm{Hom}(C,G))\to H^{k}(M;G)$ の像は $\ker r^{*}=0$、$H^{k-1}(S_{\infty})\to H^{k}(\mathrm{Hom}(C,G))$ の核は $\operatorname{im}r^{*}$ ですべて。よって $H^{k}(\mathrm{Hom}(C,G))=0$（すべての $k$ と $G$）。
+
+**Step 3（$C$ は非輪状）.** $C$ は自由な鎖複体なので、普遍係数定理（\ref{at:algebraic-uct-cohomology}）の全射 $H^{k}(\mathrm{Hom}(C,G))\to\mathrm{Hom}(H_{k}(C),G)$ から、すべての $G$ で $\mathrm{Hom}(H_{k}(C),G)=0$。$G=H_{k}(C)$ ととると恒等写像が $0$ なので $H_{k}(C)=0$。
+
+**Step 4.** Step 1 の短完全列の長完全列 $\cdots\to H_{k}(C)\to H_{k-1}(S^{\infty}(M))\xrightarrow{\partial}H_{k-1}(M)\to H_{k-1}(C)\to\cdots$ で、連結射は $\iota_{*}$（サイクル $a$ を $(a,0)$ に持ち上げると $\partial(a,0)=(-\partial a,\iota a)=(0,\iota a)$）。$H(C)=0$ なので $\iota_{*}$ は同型。
+
+::: hypcheck
+- 自由性：Step 2 で $\mathrm{Hom}(-,G)$ が短完全列を保つこと（各次数の分裂）、Step 3 で普遍係数定理に使った。
+- Step 2 で、すべての係数 $G$ について \ref{mfd:smooth-singular-iso} を使った（$G=\mathbb{R}$ だけではホモロジーのねじれは検出できない）。
+:::
+:::
+
+::: supplement
+**別の証明と強い形.** 連続な特異単体を、面と両立するように滑らかな単体へホモトピーで動かす（ホイットニーの近似定理を単体の次元についての帰納法で使う）と、$\iota$ が鎖ホモトピー同値であること（ホモトピー逆 $s\colon S(M)\to S^{\infty}(M)$ で $s\circ\iota=1$ となるもの）が直接示される（Lee『Introduction to Smooth Manifolds』第 2 版 定理 18.7）。このページの証明は近似定理を使わない代わりに、良い被覆（リーマン計量の凸な球）を使った。一般に、有界下の自由な鎖複体の間のホモロジー同型は鎖ホモトピー同値であることが知られているので、この系からも鎖ホモトピー同値が従う（本サイトでは未証明）。
+
+**一般化.** 証明が使ったのは、(a) 部分鎖複体 $S^{\infty}$ が「アフィン単体との合成」と「滑らかな写像による像」で閉じていること、(b) 局所的に（星形の開集合の上で）両方の理論が 1 点のコホモロジーになること、の二つだけである。たとえば $C^{r}$ 級（$1\le r<\infty$）の単体で作った鎖複体も、同じ証明で特異コホモロジーを計算する（滑らかな可縮化 $H$ と $C^{r}$ 級の単体の合成は $C^{r}$ 級）。
+
+**高い視点：局所から大域へ.** 二つのコホモロジー理論の間の自然変換（ここでは制限 $r$）が同型であることを示すのに、(1) 両方が「小さい単体」で計算できる（マイヤー–ヴィートリス性）、(2) 被覆の元とその共通部分の上では同型、の二つを確かめて、良い被覆の二重複体で貼り合わせた。これは、層の言葉では「二つの分解が同じ層 $\underline{G}$ の非輪状分解である」ことの具体化で、\ref{mfd:de-rham-theorem} の証明と同じ構造をもつ。比喩で言えば、連続な単体と滑らかな単体は、同じ地形を測る「粗い網」と「細かい網」で、どちらも小さな区画ごとには同じ結果（平らな土地）を返し、区画の重なり方の記録（チェック複体）が共通なので、全体の測量結果も一致する。
+:::
+
+## 問題 {#mfd:sec-ssg-problems}
+
+::: problem {#mfd:prob-ss-naturality}
+滑らかな写像 $f\colon M\to N$ について、次の図式が可換であることを示し、\ref{mfd:smooth-singular-iso} の同型 $r^{*}$ が $f$ と両立する（自然である）ことを導け。
+$$
+\begin{array}{ccc}
+H^{k}_{\mathrm{sing}}(N;G)&\xrightarrow{\ r^{*}\ }&H^{k}(S^{\bullet}_{\infty}(N;G))\\
+\downarrow f^{*}&&\downarrow f^{*}\\
+H^{k}_{\mathrm{sing}}(M;G)&\xrightarrow{\ r^{*}\ }&H^{k}(S^{\bullet}_{\infty}(M;G))
+\end{array}
+$$
+:::
+
+::: solution
+\ref{mfd:smooth-simplex-basics.3} から $f_{\#}$ は滑らかな単体を滑らかな単体に写すので、$f^{\#}\colon S^{\bullet}_{\infty}(N;G)\to S^{\bullet}_{\infty}(M;G)$, $\varphi\mapsto\varphi\circ f_{\#}$ は余鎖写像で、余鎖のレベルで $r\circ f^{\#}=f^{\#}\circ r$（どちらも、$M$ の滑らかな単体 $\sigma$ に $\varphi(f\circ\sigma)$ を対応させる）。コホモロジーに移れば図式は可換。
+:::
+
+::: problem {#mfd:prob-ss-sqrt}
+$\mathbb{R}$ の特異 1 単体 $\sigma(s)\defeq\sqrt{s}$ と $\lambda(s)\defeq s$（$s\in[0,1]=\Delta^{1}$）を考える。
+1. $\sigma$ は滑らかな特異単体でないことを示せ。
+2. $G(s,t)\defeq(1-t)\sigma(s)+t\lambda(s)$ とし、$[0,1]^{2}$ の点 $v_{j}\defeq(j,0)$, $w_{j}\defeq(j,1)$ と、アフィン単体 $[p,q,u]$（頂点を順に $p,q,u$ に写すアフィン写像）を使って、$\tau_{1}\defeq G\circ[v_{0},w_{0},w_{1}]$, $\tau_{2}\defeq G\circ[v_{0},v_{1},w_{1}]$ とおく。$x\in\mathbb{R}$ での定値 2 単体を $\kappa_{x}$ とするとき、
+$$
+\partial(\tau_{1}-\tau_{2}+\kappa_{1}-\kappa_{0})=\lambda-\sigma
+$$
+を示せ。
+:::
+
+::: solution
+**1.** 滑らかな延長 $\tilde\sigma\colon W\to\mathbb{R}$（$W\supset[0,1]$ は開集合）があれば、$\tilde\sigma'(0)=\lim_{h\downarrow0}\frac{\tilde\sigma(h)-\tilde\sigma(0)}{h}=\lim_{h\downarrow0}\frac{\sqrt{h}}{h}=\lim_{h\downarrow0}h^{-1/2}=\infty$ となり、$\tilde\sigma$ が $0$ で微分可能であることに矛盾。
+
+**2.** 2 単体 $[a,b,c]$ の境界は $[b,c]-[a,c]+[a,b]$。$G\circ[w_{0},w_{1}](u)=G(u,1)=\lambda(u)$、$G\circ[v_{0},v_{1}](u)=G(u,0)=\sigma(u)$、$G\circ[v_{0},w_{0}](u)=G(0,u)=0$、$G\circ[v_{1},w_{1}](u)=G(1,u)=1$（$\sigma(0)=\lambda(0)=0$, $\sigma(1)=\lambda(1)=1$）。対角線 $d\defeq G\circ[v_{0},w_{1}]$ とおき、$x$ での定値 1 単体を $\kappa^{1}_{x}$ とすると
+$$
+\partial\tau_{1}=\lambda-d+\kappa^{1}_{0},\qquad\partial\tau_{2}=\kappa^{1}_{1}-d+\sigma.
+$$
+また $\partial\kappa_{x}=\kappa^{1}_{x}-\kappa^{1}_{x}+\kappa^{1}_{x}=\kappa^{1}_{x}$。よって
+$$
+\partial(\tau_{1}-\tau_{2}+\kappa_{1}-\kappa_{0})=(\lambda-d+\kappa^{1}_{0})-(\kappa^{1}_{1}-d+\sigma)+\kappa^{1}_{1}-\kappa^{1}_{0}=\lambda-\sigma.
+$$
+（$\tau_{2}$ は辺に $\sigma$ を含み、$\tau_{1}$ も $\sqrt{\ }$ を含む式で、どちらも滑らかでない。滑らかでない単体を使えば $\lambda-\sigma$ は境界になる、というのがこの計算で、\ref{mfd:smooth-singular-homology-iso} は、滑らかなサイクルが境界なら滑らかな鎖の境界にもなることを保証する。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
