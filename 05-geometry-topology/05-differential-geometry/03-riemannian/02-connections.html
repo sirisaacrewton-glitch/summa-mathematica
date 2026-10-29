@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>接続と共変微分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/05-differential-geometry/03-riemannian/02-connections.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 接続と共変微分 {#riem:page-connections keywords="connection on a vector bundle, affine connection, Koszul connection, locality, (nabla_X s)(m) depends only on X_m, connection 1-forms, Christoffel symbols, gauge transformation law, existence of connections, affine space of connections, covariant derivative along a curve, parallel transport, metric connection, skew-symmetric connection matrix"}
+
+ベクトル束の切断を「微分」するには、隣り合うファイバーのベクトルを比べる必要がある。しかしファイバーは別々のベクトル空間で、比べ方は自然には決まらない（局所自明化によって変わる）。**接続**は、この比べ方を一つ指定するものである。このページでは、接続を、ベクトル場の方向に切断を微分する操作 $\nabla_{X}s$ として公理的に定義し、それが局所的な操作であること、局所フレームでは**接続形式**（接束ならクリストッフェル記号）で表されること、フレームの取り替えでの変換則、存在を示す。さらに曲線に沿った共変微分と**平行移動**を定義し、ファイバー計量と両立する接続では平行移動が等長であることを示す。曲面論の共変微分と平行移動（\ref{surf:covariant-derivative}, \ref{surf:parallel-transport}）の一般化である。
+
+## 記法と定義の確認 {#riem:sec-cn-notation}
+
+::: notation
+- ベクトル束・切断・局所フレーム・ファイバー計量は \ref{mfd:vector-bundle}, \ref{mfd:local-frame}, \ref{mfd:local-frame-trivialization}, \ref{mfd:fiber-metric}。$\Gamma(E)$ は滑らかな切断の全体、$\mathfrak{X}(M)=\Gamma(TM)$ はベクトル場の全体（\ref{mfd:vector-field}）。
+- 隆起関数と 1 の分割は \ref{mfd:bump-function}, \ref{mfd:smooth-partition-of-unity}。$M$ の各点 $m$ と開近傍 $W$ について、$\beta\in C^{\infty}(M)$ で $\operatorname{supp}\beta\subset W$ かつ $m$ の近くで $\beta=1$ となるものがある（座標近傍の中で隆起関数を縮小して使う）。これを **$W$ の中の $m$ の隆起関数**と呼ぶ。$W$ の上の切断に隆起関数を掛けたものは、$W$ の外で $0$ とおいて $M$ 全体の切断とみなす。
+- 1 形式は \ref{mfd:differential-form}。行列値の 1 形式 $\omega=(\omega^{a}{}_{b})$ とベクトル場 $X$ について $\omega(X)=(\omega^{a}{}_{b}(X))$ は関数を成分とする行列。
+- 線形常微分方程式の解の存在と一意性は \ref{surf:linear-ode}。
+:::
+
+## 接続の定義と局所性 {#riem:sec-cn-definition}
+
+::: definition 接続 {#riem:connection keywords="connection (covariant derivative) on a vector bundle: C^infinity-linear in X, R-linear in s, Leibniz rule; affine connection on TM" index="接続（ベクトル束）|せつぞくべくとるそく, 共変微分（ベクトル束）|きょうへんびぶんべくとるそく, アフィン接続|あふぃんせつぞく, コシュール接続|こしゅーるせつぞく"}
+$\pi\colon E\to M$ をベクトル束とする。写像 $\nabla\colon\mathfrak{X}(M)\times\Gamma(E)\to\Gamma(E)$, $(X,s)\mapsto\nabla_{X}s$ が、$f,h\in C^{\infty}(M)$, $X,Y\in\mathfrak{X}(M)$, $s,s'\in\Gamma(E)$, $c\in\mathbb{R}$ について
+1. $\nabla_{fX+hY}s=f\nabla_{X}s+h\nabla_{Y}s$（$X$ について $C^{\infty}(M)$ 線形）
+2. $\nabla_{X}(s+cs')=\nabla_{X}s+c\nabla_{X}s'$（$s$ について $\mathbb{R}$ 線形）
+3. $\nabla_{X}(fs)=(Xf)\,s+f\,\nabla_{X}s$（ライプニッツ則）
+
+を満たすとき、$\nabla$ を $E$ の**接続**という。$\nabla_{X}s$ を $s$ の $X$ 方向の**共変微分**という。$TM$ の接続を $M$ の**アフィン接続**という。
+:::
+
+::: example 自明束の自明な接続 {#riem:trivial-connection keywords="the trivial connection d on M x R^k differentiates components; the flat connection on R^n" index="自明な接続|じめいなせつぞく"}
+自明束 $M\times\mathbb{R}^{k}$ の切断 $s=(s^{1},\dots,s^{k})$ について $\nabla_{X}s\defeq(Xs^{1},\dots,Xs^{k})$ は接続である（3 は積の微分）。$\mathbb{R}^{n}$ の接束を標準フレームで自明化して得られるアフィン接続を**標準的な平坦接続**という：$\nabla_{X}Y$ は $Y$ の成分を $X$ 方向に方向微分したもの。
+:::
+
+::: proposition 接続の局所性 {#riem:connection-local keywords="nabla_X s on an open set depends only on X and s there; (nabla_X s)(m) depends only on X_m; restriction of a connection to open subsets; covariant derivative nabla_v s for v in T_mM" index="接続の局所性|せつぞくのきょくしょせい"}
+$\nabla$ を $E$ の接続とする。
+1. $s$ が開集合 $W$ の上で $0$ なら、$\nabla_{X}s$ も $W$ の上で $0$ である。$X$ が $W$ の上で $0$ なら、$\nabla_{X}s$ も $W$ の上で $0$ である。
+2. $X_{m}=0$ なら $(\nabla_{X}s)(m)=0$。したがって $(\nabla_{X}s)(m)$ は $X_{m}$ と $m$ の近くの $s$ だけで決まり、$v\in T_{m}M$ について $\nabla_{v}s\defeq(\nabla_{X}s)(m)$（$X_{m}=v$）が定まる。
+3. 各開集合 $W$ に、$E\restriction W$ の接続 $\nabla^{W}$ で、$X\in\mathfrak{X}(M)$, $s\in\Gamma(E)$ について $\nabla^{W}_{X\restriction W}(s\restriction W)=(\nabla_{X}s)\restriction W$ となるものがただ一つある。
+:::
+
+::: proof
+**1.** $m\in W$ と、$W$ の中の $m$ の隆起関数 $\beta$ をとる。$W$ の上で $s=0$ なら $\beta s=0$（$W$ の外では $\beta=0$）なので、公理 2・3 から $0=\nabla_{X}(\beta s)=(X\beta)s+\beta\nabla_{X}s$（$\nabla_{X}0=0$ は $\mathbb{R}$ 線形性から）。$m$ で評価すると、$s(m)=0$, $\beta(m)=1$ から $(\nabla_{X}s)(m)=0$。$W$ の上で $X=0$ のときは $\beta X=0$ で、公理 1 から $0=\nabla_{\beta X}s=\beta\nabla_{X}s$、$m$ で評価して $(\nabla_{X}s)(m)=0$。
+
+**2.** $m$ を含む座標近傍 $(U;x)$ と、$U$ の中の $m$ の隆起関数 $\beta$ をとる。$U$ の上で $X=\sum_{i}X^{i}\partial_{i}$ とすると、$f_{i}\defeq\beta X^{i}$, $Y_{i}\defeq\beta\partial_{i}$ は $M$ 全体の関数・ベクトル場で、$\beta^{2}X=\sum_{i}f_{i}Y_{i}$（$U$ の外ではどちらも $0$）。公理 1 から $\nabla_{\beta^{2}X}s=\sum_{i}f_{i}\nabla_{Y_{i}}s$ で、$m$ では $f_{i}(m)=X^{i}(m)=0$ なので $(\nabla_{\beta^{2}X}s)(m)=0$。一方 $\nabla_{\beta^{2}X}s=\beta^{2}\nabla_{X}s$ で $\beta(m)=1$ なので、$(\nabla_{X}s)(m)=0$。二つのベクトル場 $X,X'$ が $X_{m}=X'_{m}$ なら $X-X'$ に適用すればよい。
+
+**3.** $X\in\mathfrak{X}(W)$, $s\in\Gamma(W,E)$, $m\in W$ について、$W$ の中の $m$ の隆起関数 $\beta$ をとり、$(\nabla^{W}_{X}s)(m)\defeq(\nabla_{\beta X}(\beta s))(m)$ とおく。別の $\beta'$ をとっても、$\beta X$ と $\beta'X$、$\beta s$ と $\beta's$ は $m$ の近くで一致するので、1 から値は同じ。$m$ の近くで同じ $\beta$ が使えるので $\nabla^{W}_{X}s$ は滑らかで、接続の公理は $\nabla$ の公理から従う。$X$, $s$ が $M$ 全体のものなら、$\beta X=X$, $\beta s=s$ が $m$ の近くで成り立つので、1 から $W$ の上で $\nabla^{W}_{X}s=\nabla_{X}s$。一意性は、同じ条件を満たす接続が、隆起関数で延ばした $\beta X,\beta s$ について 1 と同じ議論で値が決まることから。
+:::
+
+以下、$\nabla^{W}$ も $\nabla$ と書く。
+
+## 接続形式と変換則 {#riem:sec-cn-local}
+
+::: definition 接続形式とクリストッフェル記号 {#riem:connection-form keywords="connection 1-forms omega^a_b in a local frame: nabla e_b = sum_a omega^a_b e_a; Christoffel symbols of an affine connection nabla_{d_i} d_j = sum_k Gamma^k_ij d_k" index="接続形式|せつぞくけいしき, クリストッフェル記号（接続）|くりすとっふぇるきごうせつぞく"}
+$U$ の上の局所フレーム $e=(e_{1},\dots,e_{k})$ について、
+$$
+\nabla_{X}e_{b}=\sum_{a}\omega^{a}{}_{b}(X)\,e_{a}
+$$
+で定まる行列 $\omega=(\omega^{a}{}_{b})$ を、フレーム $e$ に関する**接続形式**という。アフィン接続と座標フレーム $(\partial_{i})$ については $\nabla_{\partial_{i}}\partial_{j}=\sum_{k}\Gamma^{k}_{ij}\partial_{k}$ と書き、$\Gamma^{k}_{ij}$ を**クリストッフェル記号**という（$\omega^{k}{}_{j}=\sum_{i}\Gamma^{k}_{ij}dx_{i}$）。
+:::
+
+::: proposition 接続形式の性質 {#riem:connection-form-properties keywords="omega^a_b are smooth 1-forms; nabla_X s = sum_a (X s^a + sum_b omega^a_b(X) s^b) e_a; under a change of frame e' = e A, omega' = A^{-1} omega A + A^{-1} dA" index="接続形式の変換則|せつぞくけいしきのへんかんそく, ゲージ変換|げーじへんかん"}
+1. 各 $\omega^{a}{}_{b}$ は $U$ 上の滑らかな 1 形式である。
+2. $s=\sum_{b}s^{b}e_{b}$ について $\nabla_{X}s=\sum_{a}\bigl(Xs^{a}+\sum_{b}\omega^{a}{}_{b}(X)s^{b}\bigr)e_{a}$。行列で書けば $\nabla s=e\,(ds+\omega s)$（$s$ は成分の列ベクトル）。
+3. 別の局所フレームを $e'=eA$（$e'_{b}=\sum_{a}A^{a}{}_{b}e_{a}$、$A\colon U\to\mathrm{GL}(k)$ は滑らか）とすると、$e'$ に関する接続形式は
+$$
+\omega'=A^{-1}\omega A+A^{-1}dA.
+$$
+:::
+
+::: proof
+**1.** $X\mapsto\omega^{a}{}_{b}(X)$ は、$\nabla_{X}e_{b}$ の $e_{a}$ 成分（成分を取り出す写像は線形で、\ref{mfd:local-frame-trivialization} から滑らかな関数を与える）なので、$X$ について $C^{\infty}(U)$ 線形。\ref{riem:connection-local.2} から、値 $\omega^{a}{}_{b}(X)(m)$ は $X_{m}$ だけで決まり、$T_{m}M$ 上の線形形式を与える。座標では $\omega^{a}{}_{b}=\sum_{i}\omega^{a}{}_{b}(\partial_{i})dx_{i}$ で、係数は滑らかなので滑らかな 1 形式。
+
+**2.** 2 と 3 の公理（ライプニッツ則）から $\nabla_{X}(\sum s^{b}e_{b})=\sum_{b}\bigl((Xs^{b})e_{b}+s^{b}\sum_{a}\omega^{a}{}_{b}(X)e_{a}\bigr)$。添字を整理すればよい。
+
+**3.** 2 を $e'_{b}=\sum_{a}A^{a}{}_{b}e_{a}$ に使うと、行列で $\nabla e'=e\,(dA+\omega A)=e'A^{-1}(dA+\omega A)$。$e'$ に関する接続形式の定義と比べて $\omega'=A^{-1}dA+A^{-1}\omega A$。
+:::
+
+::: intuition
+接続形式は「フレームそのものが、動くとどう回るか」を記録する。フレームを $A$ で取り替えると、新しいフレームは古いフレームの回り方 $\omega$（を $A$ で見直したもの）に加えて、取り替え $A$ 自体の変化 $A^{-1}dA$ の分だけ回る。この第 2 項のため、接続形式は（テンソルと違って）フレームの取り替えで単純な線形変換を受けない。
+:::
+
+::: proposition 接続の存在と接続の空間 {#riem:connection-existence keywords="every vector bundle admits a connection (partition of unity); the difference of two connections is C^infinity-bilinear (an End(E)-valued 1-form); convex combinations of connections are connections" index="接続の存在|せつぞくのそんざい, 接続の空間|せつぞくのくうかん"}
+1. ベクトル束 $E$ の接続 $\nabla^{1},\dots,\nabla^{r}$ と、和が $1$ の滑らかな関数 $\phi_{1},\dots,\phi_{r}$ について、$\sum_{j}\phi_{j}\nabla^{j}$ は接続である。局所有限な和でも同じ。
+2. どのベクトル束にも接続が存在する。
+3. 二つの接続の差 $A(X,s)\defeq\nabla_{X}s-\nabla'_{X}s$ は、$X$ についても $s$ についても $C^{\infty}(M)$ 線形である。逆に、接続 $\nabla$ と、両方の変数について $C^{\infty}(M)$ 線形な $A$ について、$\nabla+A$ は接続である。
+:::
+
+::: proof
+**1.** 公理 1・2 は各項で成り立つ。ライプニッツ則：$\sum_{j}\phi_{j}\bigl((Xf)s+f\nabla^{j}_{X}s\bigr)=(\sum_{j}\phi_{j})(Xf)s+f\sum_{j}\phi_{j}\nabla^{j}_{X}s$ で、$\sum\phi_{j}=1$ を使う。局所有限な和は各点の近くで有限和なので滑らか。
+
+**2.** ベクトル束の局所自明化の族 $\{(U_{\alpha},\Phi_{\alpha})\}$ で $M$ を覆い、$U_{\alpha}$ の上で \ref{riem:trivial-connection} の接続 $\nabla^{\alpha}$ をとる（局所フレーム $\Phi_{\alpha}^{-1}(m,e_{a})$ の成分を微分する）。従属する 1 の分割 $\{\phi_{\alpha}\}$ について $\nabla_{X}s\defeq\sum_{\alpha}\phi_{\alpha}\nabla^{\alpha}_{X}(s\restriction U_{\alpha})$ とおく。各項は $U_{\alpha}$ の外で $0$ とおいて $M$ 全体の切断になる（\ref{mfd:fiber-metric-existence} の Step 3 と同じ理由：$\operatorname{supp}\phi_{\alpha}$ は閉集合で $U_{\alpha}$ に含まれる）。1 と同じ計算で接続になる。
+
+**3.** $A(X,fs)=(Xf)s+f\nabla_{X}s-(Xf)s-f\nabla'_{X}s=fA(X,s)$。$X$ についての線形性は公理 1 から。逆は、$A$ がライプニッツ則の第 1 項を生まないことから、公理を直接確かめればよい。
+:::
+
+3 の $A$ は、\ref{riem:connection-local} と同じ議論で各点の値 $A(X_{m},s(m))$ だけで決まり、$\mathrm{Hom}(TM\otimes E,E)$ の切断（$\mathrm{End}(E)$ に値をとる 1 形式）とみなせる。つまり接続の全体は、$\mathrm{End}(E)$ 値 1 形式の空間を平行移動の群とするアフィン空間である。
+
+## 曲線に沿った共変微分と平行移動 {#riem:sec-cn-parallel}
+
+::: theorem 曲線に沿った共変微分 {#riem:covariant-along-curve keywords="covariant derivative D_t of sections of E along a curve gamma: unique R-linear operator with Leibniz rule and D_t(s o gamma) = nabla_{gamma'} s; formula in a local frame" index="曲線に沿った共変微分|きょくせんにそったきょうへんびぶん, 曲線に沿った切断|きょくせんにそったせつだん"}
+$\gamma\colon I\to M$ を開区間上の滑らかな曲線とし、$\gamma$ に沿った切断（滑らかな $V\colon I\to E$ で $\pi\circ V=\gamma$）の全体を $\Gamma_{\gamma}(E)$ とする。$E$ の接続 $\nabla$ について、写像 $D_{t}\colon\Gamma_{\gamma}(E)\to\Gamma_{\gamma}(E)$ で
+1. $\mathbb{R}$ 線形
+2. $D_{t}(fV)=f'V+fD_{t}V$（$f\in C^{\infty}(I)$）
+3. $s\in\Gamma(E)$ について $D_{t}(s\circ\gamma)(t)=\nabla_{\gamma'(t)}s$
+
+を満たすものがただ一つある。局所フレーム $e$ の上で $V(t)=\sum_{a}v^{a}(t)e_{a}(\gamma(t))$ と書くと
+$$
+D_{t}V=\sum_{a}\Bigl(\frac{dv^{a}}{dt}+\sum_{b}\omega^{a}{}_{b}(\gamma'(t))\,v^{b}\Bigr)e_{a}(\gamma(t)).
+$$
+:::
+
+::: proof
+**Step 1（局所性）.** 【主張：1・2 を満たす $D_{t}$ について、$V$ が開区間 $J\subset I$ の上で $0$ なら $D_{t}V$ も $J$ の上で $0$】$t_{0}\in J$ と、台が $J$ に含まれ $\phi(t_{0})=1$ の滑らかな $\phi$ をとると、$\phi V=0$ なので $0=D_{t}(\phi V)=\phi'V+\phi D_{t}V$、$t_{0}$ で評価して $D_{t}V(t_{0})=0$。
+
+**Step 2（一意性）.** $t_{0}\in I$ と、$\gamma(t_{0})$ を含む局所フレーム $e$ の定義域 $U$、$\gamma(J)\subset U$ となる開区間 $J\ni t_{0}$ をとる。$U$ の中の $\gamma(t_{0})$ の隆起関数 $\beta$ を、$\gamma(J')$ の上で $\beta=1$ となるようにとり（$J'\ni t_{0}$ を小さくとる）、$M$ 全体の切断 $\tilde e_{a}\defeq\beta e_{a}$ を考える。$J'$ の上で $V=\sum v^{a}(\tilde e_{a}\circ\gamma)$ で、Step 1 から、$J'$ の上の $D_{t}V$ は、$v^{a}$ を $I$ 全体の滑らかな関数に（台が $J$ の中に入るように切って）延ばしたものを使って計算してよい。2・3 から
+$$
+D_{t}V=\sum_{a}\bigl(v^{a\prime}\,\tilde e_{a}\circ\gamma+v^{a}\nabla_{\gamma'}\tilde e_{a}\bigr)=\sum_{a}\Bigl(v^{a\prime}+\sum_{b}\omega^{a}{}_{b}(\gamma')v^{b}\Bigr)e_{a}\circ\gamma\qquad(J'\text{ の上}).
+$$
+よって $D_{t}V$ は定理の式に決まる。
+
+**Step 3（存在）.** 各局所フレームの上で式によって $D_{t}V$ を定義する。【主張：フレームによらない】$e'=eA$ とし、$V$ の成分を $v=Av'$（列ベクトル、$A$ は $A(\gamma(t))$）とする。\ref{riem:connection-form-properties.3} から $\omega'(\gamma')=A^{-1}\omega(\gamma')A+A^{-1}\frac{d}{dt}(A\circ\gamma)$（$dA(\gamma'(t))=\frac{d}{dt}A(\gamma(t))$）なので
+$$
+e'\bigl(v'_{t}+\omega'(\gamma')v'\bigr)=e\bigl(Av'_{t}+(A\circ\gamma)_{t}v'+\omega(\gamma')Av'\bigr)=e\bigl(v_{t}+\omega(\gamma')v\bigr)
+$$
+（添字 $t$ は $t$ での微分、$v_{t}=(Av')_{t}=A_{t}v'+Av'_{t}$）。よって局所的な定義は貼り合わさり、$\Gamma_{\gamma}(E)$ の上の写像になる。1・2 は式から、3 は \ref{riem:connection-form-properties.2} と連鎖律 $\frac{d}{dt}(s^{a}\circ\gamma)=\gamma'(t)s^{a}$ から。
+:::
+
+::: theorem 平行移動 {#riem:parallel-transport keywords="parallel sections along a curve exist uniquely for given initial value; parallel transport P_gamma: E_{gamma(a)} -> E_{gamma(b)} is a linear isomorphism" index="平行移動（接続）|へいこういどうせつぞく, 平行な切断|へいこうなせつだん"}
+$\gamma\colon I\to M$ を開区間上の滑らかな曲線、$t_{0}\in I$、$v\in E_{\gamma(t_{0})}$ とする。$D_{t}V=0$（**平行**）で $V(t_{0})=v$ となる $V\in\Gamma_{\gamma}(E)$ が $I$ 全体の上でただ一つある。$t_{1}\in I$ について $P_{t_{0},t_{1}}\colon v\mapsto V(t_{1})$ は $E_{\gamma(t_{0})}$ から $E_{\gamma(t_{1})}$ への線形同型（**平行移動**）である。
+:::
+
+::: proof
+**Step 1（局所）.** $\gamma(J)$ が局所フレーム $e$ の定義域に入る開区間 $J$ の上では、平行であることは成分の線形常微分方程式 $v'=-\Omega(t)v$, $\Omega(t)\defeq\omega(\gamma'(t))$（係数は滑らか）と同値（\ref{riem:covariant-along-curve} の式）。\ref{surf:linear-ode} から、$J$ の任意の点での初期値に対して $J$ 全体の解がただ一つあり、滑らか。
+
+**Step 2（大域）.** $t\in I$, $t>t_{0}$ をとる（$t<t_{0}$ 側も同様）。$[t_{0},t]$ はコンパクトなので、局所フレームの定義域に入る有限個の開区間で覆え、Step 1 の解を隣り合う区間の重なりの点で初期値を受け渡してつなげると、重なりでは Step 1 の一意性から一致する。こうして、任意の $t\in I$（$t\ge t_{0}$）について解が延び、一意性も各区間の一意性から従う。
+
+**Step 3（線形同型）.** 解の一意性から、初期値の線形結合に対する解は解の線形結合（$D_{t}$ は $\mathbb{R}$ 線形）なので $P_{t_{0},t_{1}}$ は線形。$P_{t_{1},t_{0}}$ が逆写像（同じ平行な切断を逆にたどる）なので同型。
+:::
+
+::: definition 計量と両立する接続 {#riem:metric-connection keywords="connection compatible with a fibre metric: X<s, s'> = <nabla_X s, s'> + <s, nabla_X s'>" index="計量と両立する接続|けいりょうとりょうりつするせつぞく, 計量接続|けいりょうせつぞく"}
+ファイバー計量 $\langle\ ,\ \rangle$ をもつベクトル束 $E$ の接続 $\nabla$ が、すべての $X$, $s$, $s'$ について
+$$
+X\langle s,s'\rangle=\langle\nabla_{X}s,s'\rangle+\langle s,\nabla_{X}s'\rangle
+$$
+を満たすとき、計量と**両立する**（**計量接続**）という。
+:::
+
+::: proposition 計量接続の性質 {#riem:metric-connection-properties keywords="a connection is metric iff its connection matrix in orthonormal frames is skew-symmetric; parallel transport of a metric connection is an isometry; metric connections exist" index="計量接続の性質|けいりょうせつぞくのせいしつ"}
+$E$ をファイバー計量をもつベクトル束とする。
+1. 接続 $\nabla$ が計量と両立することと、各正規直交フレーム（\ref{mfd:reduction-orthogonal.1}）に関する接続形式が交代行列 $\omega^{a}{}_{b}=-\omega^{b}{}_{a}$ であることは同値である。
+2. 計量接続について、曲線に沿った切断 $V,W$ について $\frac{d}{dt}\langle V,W\rangle=\langle D_{t}V,W\rangle+\langle V,D_{t}W\rangle$。とくに平行移動は内積を保つ線形同型である。
+3. 計量接続は存在する。
+:::
+
+::: proof
+**1.** 正規直交フレーム $e$ で $s=\sum s^{a}e_{a}$, $s'=\sum s'^{a}e_{a}$ とすると $\langle s,s'\rangle=\sum_{a}s^{a}s'^{a}$。\ref{riem:connection-form-properties.2} から
+$$
+\langle\nabla_{X}s,s'\rangle+\langle s,\nabla_{X}s'\rangle-X\langle s,s'\rangle=\sum_{a,b}\bigl(\omega^{a}{}_{b}(X)+\omega^{b}{}_{a}(X)\bigr)s^{b}s'^{a}.
+$$
+これがすべての $s,s'$ で $0$ になることは、$\omega^{a}{}_{b}+\omega^{b}{}_{a}=0$ と同値（$s,s'$ をフレームの元にとる）。正規直交フレームは各点のまわりにあるので、局所的な条件で全体が決まる（\ref{riem:connection-local}）。
+
+**2.** 正規直交フレームの上で $V,W$ の成分を列ベクトル $v,w$、$\Omega\defeq\omega(\gamma')$ とすると、\ref{riem:covariant-along-curve} の式から
+$$
+\langle D_{t}V,W\rangle+\langle V,D_{t}W\rangle=(v'+\Omega v)^{\mathsf{T}}w+v^{\mathsf{T}}(w'+\Omega w)=\frac{d}{dt}(v^{\mathsf{T}}w)+v^{\mathsf{T}}(\Omega^{\mathsf{T}}+\Omega)w
+$$
+で、1 から $\Omega^{\mathsf{T}}=-\Omega$ なので最後の項は $0$、左辺は $\frac{d}{dt}\langle V,W\rangle$ に等しい。平行な $V,W$ について $\langle V,W\rangle$ は定数なので、平行移動は内積を保つ。
+
+**3.** \ref{riem:connection-existence.2} の証明で、局所自明化を正規直交フレームから作る（\ref{mfd:reduction-orthogonal.1}）。正規直交フレームの成分を微分する接続は、接続形式が $0$ なので 1 から計量接続。計量接続の凸結合（$\sum\phi_{\alpha}=1$）は、両立の式が線形なので計量接続。
+:::
+
+::: supplement
+**高い視点：主束の接続とゲージ理論.** 変換則 $\omega'=A^{-1}\omega A+A^{-1}dA$ は、ベクトル束のフレームの取り替え（構造群 $\mathrm{GL}(k)$ に値をとる関数 $A$ による「ゲージ変換」）での接続形式の変わり方である。フレーム束 $\mathrm{Fr}(E)$（\ref{mfd:frame-bundle}）の上では、局所フレーム $e$（局所切断）ごとに決まる $\omega$ を貼り合わせて、$\mathfrak{gl}(k)$ に値をとる 1 形式 $\tilde\omega$ が $\mathrm{Fr}(E)$ 全体の上に一つ定まり、$e^{*}\tilde\omega=\omega$ となることが知られている（**主束の接続形式**）。物理のゲージ理論では、構造群 $\mathrm{U}(1)$ や $\mathrm{SU}(n)$ の主束の接続がゲージ場（電磁ポテンシャルなど）にあたる。計量接続の接続形式が交代行列になること（\ref{riem:metric-connection-properties.1}）は、構造群が $\mathrm{O}(k)$ に還元されたとき、接続形式がそのリー環 $\mathfrak{o}(k)$（交代行列）に値をとることの表れである。比喩で言えば、接続は「隣のファイバーへの橋の架け方」で、平行移動はその橋を渡り続けることである。橋の架け方は自由に選べるが、計量と両立させると、橋を渡ってもものの長さが変わらない。
+:::
+
+## 問題 {#riem:sec-cn-problems}
+
+::: problem {#riem:prob-cn-christoffel-transform}
+アフィン接続のクリストッフェル記号は、座標変換 $x\mapsto y$ のもとで
+$$
+\Gamma'^{k}_{ij}=\sum_{p,q,r}\frac{\partial x_{p}}{\partial y_{i}}\frac{\partial x_{q}}{\partial y_{j}}\frac{\partial y_{k}}{\partial x_{r}}\Gamma^{r}_{pq}+\sum_{r}\frac{\partial^{2}x_{r}}{\partial y_{i}\partial y_{j}}\frac{\partial y_{k}}{\partial x_{r}}
+$$
+と変わることを示せ（$\Gamma'$ は $y$ 座標でのもの）。第 2 項のため、$\Gamma^{k}_{ij}$ はテンソルの成分ではない。
+:::
+
+::: solution
+$\partial/\partial y_{j}=\sum_{q}\frac{\partial x_{q}}{\partial y_{j}}\partial/\partial x_{q}$ を使うと、公理 1・3 から
+$$
+\nabla_{\partial/\partial y_{i}}\frac{\partial}{\partial y_{j}}=\sum_{p}\frac{\partial x_{p}}{\partial y_{i}}\nabla_{\partial_{x_{p}}}\Bigl(\sum_{q}\frac{\partial x_{q}}{\partial y_{j}}\partial_{x_{q}}\Bigr)=\sum_{q}\frac{\partial^{2}x_{q}}{\partial y_{i}\partial y_{j}}\partial_{x_{q}}+\sum_{p,q,r}\frac{\partial x_{p}}{\partial y_{i}}\frac{\partial x_{q}}{\partial y_{j}}\Gamma^{r}_{pq}\partial_{x_{r}}
+$$
+（第 1 項では $\sum_{p}\frac{\partial x_{p}}{\partial y_{i}}\partial_{x_{p}}\bigl(\frac{\partial x_{q}}{\partial y_{j}}\bigr)=\frac{\partial^{2}x_{q}}{\partial y_{i}\partial y_{j}}$ は連鎖律）。最後に $\partial_{x_{r}}=\sum_{k}\frac{\partial y_{k}}{\partial x_{r}}\partial/\partial y_{k}$ で書き直せば式が得られる。
+:::
+
+::: problem {#riem:prob-cn-difference-tensor}
+アフィン接続 $\nabla$, $\nabla'$ について、差 $A(X,Y)=\nabla_{X}Y-\nabla'_{X}Y$ の成分は $A^{k}_{ij}=\Gamma^{k}_{ij}-\Gamma'^{k}_{ij}$ で、これは座標変換でテンソルの成分として（第 2 項なしに）変わることを、前問から確かめよ。
+:::
+
+::: solution
+前問の式で、第 2 項は接続によらない（座標変換だけで決まる）ので、二つの接続の式の差をとると第 2 項は打ち消し合い、$A'^{k}_{ij}=\sum\frac{\partial x_{p}}{\partial y_{i}}\frac{\partial x_{q}}{\partial y_{j}}\frac{\partial y_{k}}{\partial x_{r}}A^{r}_{pq}$。これは \ref{riem:connection-existence.3} の $C^{\infty}$ 双線形性の座標での表れである。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
