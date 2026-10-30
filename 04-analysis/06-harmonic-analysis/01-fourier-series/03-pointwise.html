@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>各点収束 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/01-fourier-series/03-pointwise.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 各点収束 {#four:page-pointwise keywords="pointwise convergence of Fourier series, Dirichlet kernel, Riemann-Lebesgue lemma with half-integer frequencies, Dini's test, Riemann localization principle, Holder and Lipschitz functions (uniform convergence), jump discontinuities converge to the midpoint, Dirichlet-Jordan test for functions of bounded variation, sine integral, Gibbs phenomenon"}
+
+フーリエ級数の部分和 $S_{N}f$ は、連続関数に対してさえ各点で収束するとは限らない（\ref{fa:fourier-divergence}）。このページでは、点 $x$ の近くでの $f$ の振る舞いだけから $S_{N}f(x)$ の収束を保証する判定法を二つ示す。一つは「$x$ の近くで $f$ があまり激しく動かない」ことを積分で測る**ディニの判定法**で、そこから**局所化原理**（$S_{N}f(x)$ の収束は $x$ の近くの $f$ だけで決まる）と、ヘルダー連続関数の一様収束が従う。もう一つは**有界変動関数**についての**ディリクレ–ジョルダンの判定法**で、跳びのある点では左右の極限の平均に収束する。最後に、跳びの近くで部分和が約 $9\%$ はみ出す**ギブス現象**を計算する。
+
+## 記法と定義の確認 {#four:sec-pw-notation}
+
+::: notation
+- $\mathbb{T}$, $L^{1}(\mathbb{T})$, $\hat f(n)$, $S_{N}f$, $|y|_{\mathbb{T}}$ は \ref{four:page-coefficients-convolution} のとおり。$\mathbb{T}$ 上の積分は $[-\frac12,\frac12)$ の上でとる（\ref{four:circle-translation.1}）。
+- ディリクレ核 $D_{N}$ と $S_{N}f=D_{N}*f$、$D_{N}(y)=\frac{\sin((2N+1)\pi y)}{\sin(\pi y)}$（$y\notin\mathbb{Z}$）は \ref{four:kernel-formulas}。$D_{N}$ は偶関数で、$\int_{\mathbb{T}}D_{N}=1$。
+- $f$ の点 $x$ での右極限・左極限を $f(x+)\defeq\lim_{y\downarrow0}f(x+y)$, $f(x-)\defeq\lim_{y\downarrow0}f(x-y)$ と書く。
+- 有界変動関数とジョルダン分解（単調増加関数の差）は \ref{meas:bounded-variation}, \ref{meas:bv-jordan}。複素数値関数は実部と虚部がともに有界変動のとき有界変動という。
+- 不等式 $\sin(\pi t)\ge2t$（$0\le t\le\frac12$、$\sin$ の凹性）を何度も使う。
+- **選択公理**：使わない。
+:::
+
+## リーマン–ルベーグの補題の変形 {#four:sec-pw-rl}
+
+::: lemma 半整数振動数のリーマン–ルベーグ {#four:half-integer-rl keywords="for g in L^1([-1/2,1/2]), int g(y) sin((2N+1) pi y) dy -> 0; uniformly over a compact family of g in L^1" index="リーマン–ルベーグの補題（半整数振動数）|りーまんるべーぐのほだいはんせいすうしんどうすう"}
+1. $g\in L^{1}([-\frac12,\frac12])$ なら $\int_{-1/2}^{1/2}g(y)\sin((2N+1)\pi y)\,dy\to0$（$N\to\infty$）。
+2. $\mathcal{K}\subset L^{1}([-\frac12,\frac12])$ が全有界（任意の $\varepsilon>0$ について有限個の $L^{1}$ ノルムの $\varepsilon$ 球で覆える）なら、1 の収束は $g\in\mathcal{K}$ について一様。
+:::
+
+::: proof
+**1.** 加法定理から $\sin((2N+1)\pi y)=\sin(2\pi Ny)\cos(\pi y)+\cos(2\pi Ny)\sin(\pi y)$。$g_{1}(y)\defeq g(y)\cos(\pi y)$, $g_{2}(y)\defeq g(y)\sin(\pi y)$ を $[-\frac12,\frac12)$ 上の関数とみて周期 $1$ に延ばすと $L^{1}(\mathbb{T})$ の元で、$\sin(2\pi Ny)=\frac{1}{2i}(e_{N}-e_{-N})$, $\cos(2\pi Ny)=\frac12(e_{N}+e_{-N})$ から
+$$
+\int_{-1/2}^{1/2}g(y)\sin((2N+1)\pi y)\,dy=\frac{1}{2i}\bigl(\hat g_{1}(-N)-\hat g_{1}(N)\bigr)+\frac12\bigl(\hat g_{2}(-N)+\hat g_{2}(N)\bigr).
+$$
+\ref{four:riemann-lebesgue} から右辺は $0$ に収束する。
+
+**2.** $I_{N}(g)$ を 1 の積分とおくと $|I_{N}(g)-I_{N}(h)|\le\|g-h\|_{1}$。$\varepsilon>0$ について $\mathcal{K}$ を覆う有限個の球の中心 $h_{1},\dots,h_{m}$ をとり、1 から $N\ge N_{0}$ で $|I_{N}(h_{j})|<\varepsilon$（すべての $j$）となる $N_{0}$ をとる。$g\in\mathcal{K}$ なら $\|g-h_{j}\|_{1}<\varepsilon$ となる $j$ があり、$|I_{N}(g)|<2\varepsilon$。
+:::
+
+## ディニの判定法 {#four:sec-pw-dini}
+
+::: theorem ディニの判定法 {#four:dini-test keywords="Dini's test: if int_0^{1/2} |f(x+y)+f(x-y)-2c|/y dy < infinity then S_N f(x) -> c; in particular if f is differentiable or Holder continuous at x, S_N f(x) -> f(x)" index="ディニの判定法|でぃにのはんていほう"}
+$f\in L^{1}(\mathbb{T})$, $x\in\mathbb{R}$, $c\in\mathbb{C}$ とし、
+$$
+\int_{0}^{1/2}\frac{|f(x+y)+f(x-y)-2c|}{y}\,dy<\infty
+$$
+とする。このとき $S_{N}f(x)\to c$。
+:::
+
+::: proof
+**Step 1（対称化）.** $S_{N}f(x)=\int_{-1/2}^{1/2}f(x-y)D_{N}(y)\,dy$ で、$D_{N}$ は偶関数なので $y\mapsto-y$ と組にして、また $\int_{\mathbb{T}}D_{N}=1$ から $c=\int_{0}^{1/2}2c\,D_{N}(y)\,dy$ なので
+$$
+S_{N}f(x)-c=\int_{0}^{1/2}\bigl(f(x+y)+f(x-y)-2c\bigr)D_{N}(y)\,dy.
+$$
+
+**Step 2.** $\psi(y)\defeq f(x+y)+f(x-y)-2c$ とおき、$g(y)\defeq\frac{\psi(y)}{\sin(\pi y)}\mathbf{1}_{(0,1/2]}(y)$ とする。$\sin(\pi y)\ge2y$ から $|g(y)|\le\frac{|\psi(y)|}{2y}$ で、仮定から $g\in L^{1}$。Step 1 と $D_{N}$ の式から $S_{N}f(x)-c=\int_{-1/2}^{1/2}g(y)\sin((2N+1)\pi y)\,dy$ で、\ref{four:half-integer-rl.1} から $0$ に収束する。
+:::
+
+::: corollary ディニの判定法の帰結 {#four:dini-consequences keywords="Riemann localization principle; convergence at points of Holder continuity or differentiability; convergence to the midpoint (f(x+)+f(x-))/2 at jumps with one-sided Holder conditions" index="局所化原理|きょくしょかげんり"}
+$f\in L^{1}(\mathbb{T})$, $x\in\mathbb{R}$ とする。
+1. （局所化原理）$f,g\in L^{1}(\mathbb{T})$ が $x$ のある近傍で（a.e.）一致するなら、$S_{N}f(x)-S_{N}g(x)\to0$。とくに一方が収束すれば他方も同じ値に収束する。
+2. ある $C,\alpha>0$, $\delta>0$ について $|f(x\pm y)-f(x)|\le Cy^{\alpha}$（$0<y<\delta$）なら $S_{N}f(x)\to f(x)$。とくに $f$ が $x$ で微分可能なら $S_{N}f(x)\to f(x)$。
+3. $f(x\pm)$ が存在し、ある $C,\alpha,\delta>0$ について $|f(x\pm y)-f(x\pm)|\le Cy^{\alpha}$（$0<y<\delta$）なら $S_{N}f(x)\to\frac12(f(x+)+f(x-))$。とくに区分的に $C^{1}$ 級の関数（有限個の点を除いて $C^{1}$ で、その点で $f,f'$ が左右の極限をもつ）では、すべての点で $S_{N}f(x)\to\frac12(f(x+)+f(x-))$。
+:::
+
+::: proof
+**1.** $h\defeq f-g$ に $c=0$ で \ref{four:dini-test} を使う：$h$ は $|y|<\delta$ で（a.e.）$0$ なので、被積分関数は $[\delta,\frac12]$ に台をもち、そこで $\frac{1}{y}\le\frac1\delta$ だから積分は $\le\frac{2}{\delta}\|h\|_{1}<\infty$。
+
+**2.** $c=f(x)$ とすると、$0<y<\delta$ で $\frac{|f(x+y)+f(x-y)-2c|}{y}\le2Cy^{\alpha-1}$ で、$\alpha>0$ から $(0,\delta)$ 上可積分。$[\delta,\frac12]$ 上の積分は 1 と同じく有限。微分可能なら $\alpha=1$ で成り立つ（$\frac{f(x\pm y)-f(x)}{y}$ は $y\to0$ で有界）。
+
+**3.** $c=\frac12(f(x+)+f(x-))$ とすると $f(x+y)+f(x-y)-2c=(f(x+y)-f(x+))+(f(x-y)-f(x-))$ で、2 と同じ評価。区分的に $C^{1}$ なら、各点で片側の平均値の定理から $\alpha=1$ の条件が成り立つ。
+:::
+
+## ヘルダー連続関数の一様収束 {#four:sec-pw-uniform}
+
+::: theorem ヘルダー連続関数の一様収束 {#four:holder-uniform keywords="if f is Holder continuous of order alpha > 0 on the circle, S_N f -> f uniformly" index="ヘルダー連続関数のフーリエ級数|へるだーれんぞくかんすうのふーりえきゅうすう"}
+$f$ が周期 $1$ で、ある $C,\alpha>0$ についてすべての $x,y$ で $|f(x)-f(y)|\le C|x-y|^{\alpha}$ なら、$S_{N}f\to f$（一様収束）。
+:::
+
+::: proof
+**Step 1（分割）.** $\varepsilon>0$ とし、$\delta\in(0,\frac12)$ を $\int_{0}^{\delta}Cy^{\alpha-1}dy=\frac{C\delta^{\alpha}}{\alpha}<\varepsilon$ となるようにとる。\ref{four:dini-test} の証明の Step 1 から、$\psi_{x}(y)\defeq f(x+y)+f(x-y)-2f(x)$ について
+$$
+S_{N}f(x)-f(x)=\int_{0}^{\delta}\psi_{x}(y)D_{N}(y)\,dy+\int_{\delta}^{1/2}\psi_{x}(y)D_{N}(y)\,dy.
+$$
+
+**Step 2（近い部分）.** $|\psi_{x}(y)|\le2Cy^{\alpha}$ と $|D_{N}(y)|\le\frac{1}{\sin(\pi y)}\le\frac{1}{2y}$ から、第 1 項の絶対値は $\le\int_{0}^{\delta}Cy^{\alpha-1}dy<\varepsilon$（$x,N$ によらない）。
+
+**Step 3（遠い部分）.** $g_{x}(y)\defeq\frac{\psi_{x}(y)}{\sin(\pi y)}\mathbf{1}_{[\delta,1/2]}(y)$ とおくと、第 2 項は $\int g_{x}(y)\sin((2N+1)\pi y)\,dy$。$\frac{1}{\sin(\pi y)}\le\frac{1}{2\delta}$ と $|\psi_{x}(y)-\psi_{x'}(y)|\le4C|x-x'|^{\alpha}$ から $\|g_{x}-g_{x'}\|_{1}\le\frac{2C}{\delta}|x-x'|^{\alpha}$。$g_{x}$ は $x$ について周期 $1$ なので、$x\in[0,1]$ を有限個の点 $x_{1},\dots,x_{m}$ で十分細かく分ければ $\{g_{x}\}$ は有限個の $\varepsilon$ 球で覆え、全有界。\ref{four:half-integer-rl.2} から、第 2 項は $x$ について一様に $0$ に収束する。
+
+Step 2・3 から $\limsup_{N}\sup_{x}|S_{N}f(x)-f(x)|\le\varepsilon$ で、$\varepsilon$ は任意。
+:::
+
+## 有界変動関数 {#four:sec-pw-bv}
+
+::: lemma ディリクレ核の積分の有界性 {#four:dirichlet-integral-bound keywords="the integrals int_0^t D_N(y) dy are bounded uniformly in N and t in [0,1/2]; the sine integral int_0^T sin u/u du lies in [0, pi]" index="正弦積分|せいげんせきぶん"}
+1. $T\ge0$ について $0\le\int_{0}^{T}\frac{\sin u}{u}\,du\le\pi$。
+2. ある定数 $A$ があって、すべての $N\ge0$, $0\le t\le\frac12$ で $\bigl|\int_{0}^{t}D_{N}(y)\,dy\bigr|\le A$。
+:::
+
+::: proof
+**1.** $a_{k}\defeq\int_{k\pi}^{(k+1)\pi}\frac{|\sin u|}{u}\,du$ とおくと、$u\mapsto u+\pi$ の置き換えで $a_{k+1}=\int_{k\pi}^{(k+1)\pi}\frac{|\sin u|}{u+\pi}du<a_{k}$。$\sin u$ の符号は $[k\pi,(k+1)\pi]$ で $(-1)^{k}$ なので、$T\in[k\pi,(k+1)\pi]$ について $\int_{0}^{T}=a_{0}-a_{1}+\dots+(-1)^{k-1}a_{k-1}+(-1)^{k}\theta a_{k}$（ある $\theta\in[0,1]$）。交代和で絶対値が減少するので、この値は $0$ と $a_{0}$ の間にある。$a_{0}\le\int_{0}^{\pi}1\,du=\pi$（$\sin u\le u$）。
+
+**2.** $r(y)\defeq\frac{1}{\sin(\pi y)}-\frac{1}{\pi y}$（$0<y\le\frac12$）とおく。$\sin u\ge u-\frac{u^{3}}{6}$（$u\ge0$、テイラーの定理）と $\sin(\pi y)\ge2y$ から
+$$
+0\le r(y)=\frac{\pi y-\sin(\pi y)}{\pi y\sin(\pi y)}\le\frac{(\pi y)^{3}/6}{\pi y\cdot2y}=\frac{\pi^{2}y}{12}\le\frac{\pi^{2}}{24}.
+$$
+よって
+$$
+\int_{0}^{t}D_{N}(y)\,dy=\int_{0}^{t}\frac{\sin((2N+1)\pi y)}{\pi y}dy+\int_{0}^{t}r(y)\sin((2N+1)\pi y)\,dy=\frac1\pi\int_{0}^{(2N+1)\pi t}\frac{\sin u}{u}du+(\text{絶対値}\le\tfrac{\pi^{2}}{48})
+$$
+（第 1 項は $u=(2N+1)\pi y$ と置き換えた）。1 から $A\defeq1+\frac{\pi^{2}}{48}$ でよい。
+:::
+
+::: lemma 単調関数とディリクレ核 {#four:monotone-dirichlet keywords="if phi is increasing and nonnegative on (0,delta], |int_0^delta phi D_N| <= 2 A phi(delta)" index="単調関数とディリクレ核|たんちょうかんすうとでぃりくれかく"}
+$0<\delta\le\frac12$ とし、$\varphi\colon(0,\delta]\to[0,\infty)$ を単調増加とする。このとき、すべての $N$ で $\bigl|\int_{0}^{\delta}\varphi D_{N}\bigr|\le2A\varphi(\delta)$（$A$ は \ref{four:dirichlet-integral-bound.2} の定数）。
+:::
+
+::: proof
+**Step 1（階段関数）.** $0=t_{0}<t_{1}<\dots<t_{m}=\delta$ と $0\le a_{1}\le\dots\le a_{m}$ について $\varphi=\sum_{j}a_{j}\mathbf{1}_{(t_{j-1},t_{j}]}$ の場合を示す。$G(t)\defeq\int_{0}^{t}D_{N}$ とおくと、$G(t_{0})=0$ と和の付け替え（アーベルの総和法）から
+$$
+\int_{0}^{\delta}\varphi D_{N}=\sum_{j=1}^{m}a_{j}\bigl(G(t_{j})-G(t_{j-1})\bigr)=a_{m}G(t_{m})-\sum_{j=1}^{m-1}(a_{j+1}-a_{j})G(t_{j}).
+$$
+$|G|\le A$ と $a_{j+1}-a_{j}\ge0$ から、絶対値は $\le Aa_{m}+A(a_{m}-a_{1})\le2Aa_{m}$。
+
+**Step 2（一般の場合）.** $k\ge1$ について $\varphi_{k}\defeq\frac{1}{k}\lfloor k\varphi\rfloor$ とおく。$\varphi_{k}$ は単調増加で、$[0,\varphi(\delta)]$ の中の有限個の値しかとらず、各値をとる集合は（単調性から）区間なので、Step 1 の形の階段関数である（区間の端点の扱いは零集合の違いで積分に影響しない）。その最大値は $\le\varphi(\delta)$ なので $|\int\varphi_{k}D_{N}|\le2A\varphi(\delta)$。$0\le\varphi-\varphi_{k}\le\frac1k$ と $\int_{0}^{\delta}|D_{N}|<\infty$（$D_{N}$ は連続）から $\int\varphi_{k}D_{N}\to\int\varphi D_{N}$（$k\to\infty$）。
+:::
+
+::: theorem ディリクレ–ジョルダンの判定法 {#four:dirichlet-jordan keywords="Dirichlet-Jordan test: for f of bounded variation on [0,1] (periodic), S_N f(x) -> (f(x+)+f(x-))/2 for every x; at points of continuity S_N f(x) -> f(x)" index="ディリクレ–ジョルダンの判定法|でぃりくれじょるだんのはんていほう"}
+$f$ を周期 $1$ で $[0,1]$ 上有界変動な関数とする。このとき各点 $x$ で $f(x\pm)$ が存在し、$S_{N}f(x)\to\frac12(f(x+)+f(x-))$。とくに $f$ が連続な点では $S_{N}f(x)\to f(x)$。
+:::
+
+::: proof
+実部と虚部に分けて、$f$ は実数値としてよい。
+
+**Step 1（分解）.** \ref{meas:bv-jordan} を $[x-1,x+1]$ 上の $f$ に使うと（周期性から $[x-1,x+1]$ 上でも有界変動）、単調増加な $u,v$ で $f=u-v$ となるものがある。単調関数は片側極限をもつので $f(x\pm)$ が存在する。$y\in(0,\frac12]$ について
+$$
+\Phi(y)\defeq\bigl(u(x+y)-u(x+)\bigr)+\bigl(v(x-)-v(x-y)\bigr),\qquad\Psi(y)\defeq\bigl(v(x+y)-v(x+)\bigr)+\bigl(u(x-)-u(x-y)\bigr)
+$$
+とおくと、$\Phi,\Psi$ は $y$ について単調増加、$\ge0$ で、$\Phi(0+)=\Psi(0+)=0$、かつ
+$$
+\Phi(y)-\Psi(y)=f(x+y)+f(x-y)-f(x+)-f(x-).
+$$
+
+**Step 2.** $c\defeq\frac12(f(x+)+f(x-))$ とすると、\ref{four:dini-test} の証明の Step 1 から $S_{N}f(x)-c=\int_{0}^{1/2}(\Phi-\Psi)D_{N}$。$\Phi$ について $\int_{0}^{1/2}\Phi D_{N}\to0$ を示せば、$\Psi$ も同様で結論が出る。
+
+**Step 3.** $\varepsilon>0$ について $\Phi(\delta)<\varepsilon$ となる $\delta\in(0,\frac12)$ をとる。\ref{four:monotone-dirichlet} から $|\int_{0}^{\delta}\Phi D_{N}|\le2A\varepsilon$（$N$ によらない）。残りは $\int_{\delta}^{1/2}\Phi D_{N}=\int g(y)\sin((2N+1)\pi y)\,dy$, $g\defeq\frac{\Phi}{\sin(\pi y)}\mathbf{1}_{[\delta,1/2]}$ で、$\Phi$ は有界、$\frac{1}{\sin(\pi y)}\le\frac1{2\delta}$ なので $g\in L^{1}$、\ref{four:half-integer-rl.1} から $0$ に収束する。よって $\limsup|\int_{0}^{1/2}\Phi D_{N}|\le2A\varepsilon$。
+:::
+
+## ギブス現象 {#four:sec-pw-gibbs}
+
+::: example ギブス現象 {#four:gibbs keywords="Gibbs phenomenon for the sawtooth: S_N f(1/(2N)) -> (1/pi) int_0^pi sin u/u du ~ 0.5895 while f(0+) = 1/2; the overshoot is about 9% of the jump" index="ギブス現象|ぎぶすげんしょう"}
+$[0,1)$ 上で $f(x)\defeq\frac12-x$ とし周期 $1$ に延ばす。$f$ は $x=0$ で $f(0-)=-\frac12$ から $f(0+)=\frac12$ へ大きさ $1$ の跳びをもつ。\ref{four:prob-cc-sawtooth} から $\hat f(0)=0$、$n\ne0$ で $\hat f(n)=-\frac{i}{2\pi n}$ なので、$n$ と $-n$ を組にして
+$$
+S_{N}f(x)=\sum_{n=1}^{N}\frac{-i}{2\pi n}\bigl(e^{2\pi inx}-e^{-2\pi inx}\bigr)=\sum_{n=1}^{N}\frac{\sin(2\pi nx)}{\pi n}.
+$$
+$f$ は区分的に $C^{1}$ なので、\ref{four:dini-consequences.3} から各点で $S_{N}f(x)\to f(x)$（$x\notin\mathbb{Z}$）、$S_{N}f(0)=0=\frac12(f(0+)+f(0-))$。ところが $x_{N}\defeq\frac{1}{2N}$ では
+$$
+S_{N}f(x_{N})=\frac1\pi\sum_{n=1}^{N}\frac{1}{N}\cdot\frac{\sin(\pi n/N)}{n/N}\to\frac{1}{\pi}\int_{0}^{1}\frac{\sin(\pi t)}{t}dt=\frac1\pi\int_{0}^{\pi}\frac{\sin u}{u}du
+$$
+（$t\mapsto\frac{\sin(\pi t)}{t}$ は $[0,1]$ に連続に延びるので、リーマン和が積分に収束する）。この極限が $\frac12$ より大きいことは次のようにわかる。$\cos u\le1$ を $0$ から $u$ まで積分すると $\sin u\le u$、これを積分すると $\cos u\ge1-\frac{u^{2}}{2}$、と交互に積分を繰り返すと、$u\ge0$ で $\sin u\ge u-\frac{u^{3}}{3!}+\frac{u^{5}}{5!}-\frac{u^{7}}{7!}$ が得られる。$u$ で割って $[0,\pi]$ で積分すると
+$$
+\int_{0}^{\pi}\frac{\sin u}{u}du\ge\pi-\frac{\pi^{3}}{18}+\frac{\pi^{5}}{600}-\frac{\pi^{7}}{35280}>1.84>\frac{\pi}{2}.
+$$
+数値計算では右辺の極限は約 $0.5895$ で、$f(0+)=\frac12$ を跳びの大きさの約 $9\%$ だけ超える。$x_{N}\to0$ なので、部分和のグラフは跳びのすぐ右で常に約 $9\%$ はみ出し、そのはみ出しは $N$ を大きくしても小さくならない（はみ出す位置が跳びに近づくだけ）。各点収束はするが、跳びを含む区間で一様収束はしない。
+:::
+
+::: hypcheck
+- ディニの判定法で使ったのは、$\sin(\pi y)\ge2y$（$|D_{N}(y)|\le\frac{1}{2|y|}$）と \ref{four:half-integer-rl} だけである。$f\in L^{1}$ の仮定は、$x$ から離れた部分の可積分性に使った。
+- \ref{four:holder-uniform} では、$\alpha>0$ は近い部分の積分 $\int_{0}^{\delta}y^{\alpha-1}dy$ の収束に本質的。$\alpha=0$（単なる連続性）では偽（\ref{fa:fourier-divergence}）。遠い部分の一様性には \ref{four:half-integer-rl.2} の全有界性を使った。
+- ディリクレ–ジョルダンの判定法は、\ref{four:dini-test} の仮定（$\int\frac{|\psi|}{y}<\infty$）を満たさない関数にも使える。例えば $0$ の近くで $f(y)=\frac{1}{\log(1/|y|)}$ のような、単調だがどんなヘルダー条件も満たさない関数。逆にディニの判定法は有界変動でない関数にも使える。二つの判定法は互いに他を含まない。
+- ギブス現象の数値 $0.5895$ は数値計算の値で、証明の中では使っていない。はみ出しが正であること（極限 $>\frac12$）は、多項式による下からの評価で示した。
+:::
+
+::: supplement
+**弱めた仮定・関連する結果.**
+- ディリクレ–ジョルダンの判定法は、$f$ が連続な閉区間 $[a,b]$ の上で一様収束に強められる（同じ証明で $\delta$ を $x$ について一様にとる）。
+- ヘルダー条件をさらに弱めて、連続の度合い $\omega(\delta)\defeq\sup_{|x-y|\le\delta}|f(x)-f(y)|$ が $\omega(\delta)\log\frac1\delta\to0$ を満たせば一様収束する（ディニ–リプシッツの判定法）。これは標準的な事実として知られているが、このサイトではまだ証明していない。
+- $L^{2}$ 関数のフーリエ級数はほとんどすべての点で収束する（カールソンの定理）。\ref{four:page-fejer} の補足を参照。
+
+**高い視点：局所化と大域的な核.** 部分和 $S_{N}f(x)$ はすべての $y$ での $f(y)$ を使う大域的な量なのに、収束するかどうかは $x$ の近くだけで決まる（局所化原理）。これは、$x$ から離れたところでは $D_{N}$ が「滑らかな重み $\times$ 速く振動する正弦波」になっていて、リーマン–ルベーグの補題によって打ち消し合うからである。比喩で言えば、遠くの声はどれも高速に振動する雑音として互いに打ち消し合い、聞こえるのは近くの声だけになる。ただし近くの部分の $D_{N}$ は高さ $2N+1$ の山で、$\|D_{N}\|_{1}\to\infty$ であることがギブス現象や \ref{fa:fourier-divergence} の発散の原因になる。
+:::
+
+## 問題 {#four:sec-pw-problems}
+
+::: problem {#four:prob-pw-leibniz}
+$[-\frac12,\frac12)$ 上で $f(x)\defeq|x|$ とし周期 $1$ に延ばす。$\hat f(0)=\frac14$、$n\ne0$ で $\hat f(n)=\frac{(-1)^{n}-1}{2\pi^{2}n^{2}}$ を示し、$x=0$ での収束から $\sum_{k=0}^{\infty}\frac{1}{(2k+1)^{2}}=\frac{\pi^{2}}{8}$ を導け。
+:::
+
+::: solution
+$\hat f(0)=2\int_{0}^{1/2}x\,dx=\frac14$。$n\ne0$ なら、$f$ が偶関数なので $\hat f(n)=2\int_{0}^{1/2}x\cos(2\pi nx)dx$。部分積分で
+$$
+2\int_{0}^{1/2}x\cos(2\pi nx)dx=2\Bigl[\frac{x\sin(2\pi nx)}{2\pi n}\Bigr]_{0}^{1/2}-\frac{2}{2\pi n}\int_{0}^{1/2}\sin(2\pi nx)dx=0-\frac{1}{\pi n}\cdot\frac{1-\cos(\pi n)}{2\pi n}=\frac{(-1)^{n}-1}{2\pi^{2}n^{2}}.
+$$
+$f$ はリプシッツ連続なので、\ref{four:dini-consequences.2} から $S_{N}f(0)\to f(0)=0$。$n$ と $-n$ を組にすると
+$$
+0=\frac14+2\sum_{n\ge1}\frac{(-1)^{n}-1}{2\pi^{2}n^{2}}=\frac14-\frac{2}{\pi^{2}}\sum_{k\ge0}\frac{1}{(2k+1)^{2}}.
+$$
+:::
+
+::: problem {#four:prob-pw-localization}
+$f\in L^{1}(\mathbb{T})$ が開区間 $(a,b)$ の上で $C^{1}$ 級なら、$(a,b)$ の各点で $S_{N}f(x)\to f(x)$ を示せ。
+:::
+
+::: solution
+$x\in(a,b)$ で $f$ は微分可能なので、\ref{four:dini-consequences.2}（微分可能な点）から。条件は $x$ の近くだけで、$(a,b)$ の外の $f$ は $L^{1}$ であればよい（\ref{four:dini-consequences.1} の局所化原理の現れ）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
