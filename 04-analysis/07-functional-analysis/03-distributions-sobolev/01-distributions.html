@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テスト関数と超関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/03-distributions-sobolev/01-distributions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# テスト関数と超関数 {#fa:page-distributions keywords="test functions C_c^infinity(Omega), mollifiers, smoothing by convolution, local L^p convergence, smooth Urysohn lemma, smooth partitions of unity on compact sets, fundamental lemma of the calculus of variations (du Bois-Reymond), distributions D'(Omega) defined by seminorm estimates on compact sets, order, examples (locally integrable functions, Dirac delta, measures, principal value), derivatives and multiplication by smooth functions, convergence of distributions, support, distributions with zero derivative, relation to tempered distributions"}
+
+偏微分方程式の解は、しばしば微分可能でない（あるいは関数でさえない）。そうした「解」を扱うために、微分を部分積分によって定義し直すのが**超関数**（distribution）の考え方である：$\varphi$ を台がコンパクトな滑らかな関数（**テスト関数**）として、$\int f'\varphi=-\int f\varphi'$ を $f'$ の定義にする。フーリエ解析では $\mathbb{R}^{n}$ 全体の上の緩増加超関数（\ref{four:page-schwartz-distributions}）を扱ったが、偏微分方程式では開集合 $\Omega$ の上で局所的に議論したいので、テスト関数の空間を $C_{c}^{\infty}(\Omega)$ にとる。このページでは、まず**軟化子**（滑らかな総和核）との畳み込みで関数を滑らかに近似する方法を整え、そこから滑らかなウリゾーンの補題・1 の分割・変分法の基本補題を導く。そのうえで $\Omega$ 上の超関数を定義し、微分・掛け算・収束・台を扱う。
+
+## 記法と定義の確認 {#fa:sec-di-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$ は空でない開集合。関数 $f$ の**台** $\operatorname{supp}f$ は $\{f\ne0\}$ の閉包。$C_{c}^{\infty}(\Omega)$ は $\Omega$ の中にコンパクトな台をもつ $C^{\infty}$ 級関数（複素数値）の全体で、**テスト関数**という。$\mathcal{D}(\Omega)$ とも書く。
+- 多重指数の記法 $\partial^{\alpha}$, $|\alpha|$ は \ref{four:page-schwartz-distributions} のとおり。$K\subset\Omega$ がコンパクトで $N\ge0$ のとき $\|\varphi\|_{C^{N}}\defeq\max_{|\alpha|\le N}\sup_{x}|\partial^{\alpha}\varphi(x)|$。
+- $L_{\mathrm{loc}}^{p}(\Omega)$ は、各コンパクト集合 $K\subset\Omega$ の上で $p$ 乗可積分な可測関数（a.e. で等しいものを同一視）の全体。
+- $\Omega_{\varepsilon}\defeq\{x\in\Omega:\operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)>\varepsilon\}$（$\Omega=\mathbb{R}^{n}$ なら $\mathbb{R}^{n}$）。
+- 畳み込みと総和核 $K_{t}$ は \ref{four:convolution-rd}, \ref{four:approximate-identity-rd}、パラメータ積分の微分は \ref{meas:parameter-integrals}、緩増加超関数は \ref{four:tempered-distribution}。
+- **選択公理**：使わない。
+:::
+
+## 軟化子 {#fa:sec-di-mollifiers}
+
+::: definition 軟化子 {#fa:mollifier keywords="standard mollifier rho in C_c^infinity, rho >= 0, supported in the closed unit ball, integral 1; rho_eps(x) = eps^{-n} rho(x / eps); mollification f_eps = rho_eps * f" index="軟化子|なんかし, 軟化|なんか, 平滑化|へいかつか"}
+\ref{mfd:bump-function} の $\beta$ について $\rho(x)\defeq\beta(2x)/\int\beta(2y)\,dy$ とおく。$\rho\in C_{c}^{\infty}(\mathbb{R}^{n})$、$\rho\ge0$、$\operatorname{supp}\rho\subset\{|x|\le1\}$、$\int\rho=1$。$\varepsilon>0$ について $\rho_{\varepsilon}(x)\defeq\varepsilon^{-n}\rho(x/\varepsilon)$（台は $\{|x|\le\varepsilon\}$、積分は $1$）を**軟化子**といい、$f\in L_{\mathrm{loc}}^{1}(\Omega)$ について
+$$
+f_{\varepsilon}(x)\defeq(\rho_{\varepsilon}*f)(x)\defeq\int_{\Omega}\rho_{\varepsilon}(x-y)f(y)\,dy\qquad(x\in\Omega_{\varepsilon})
+$$
+を $f$ の**軟化**という。
+:::
+
+::: theorem 軟化による近似 {#fa:mollification keywords="mollification f_eps = rho_eps * f is C^infinity on Omega_eps with d^alpha f_eps = (d^alpha rho_eps) * f; f_eps -> f locally uniformly for continuous f and in L^p_loc for f in L^p_loc, p < infinity; if f has compact support in Omega, so has f_eps for small eps" index="軟化による近似|なんかによるきんじ"}
+$f\in L_{\mathrm{loc}}^{1}(\Omega)$ とする。
+1. $f_{\varepsilon}\in C^{\infty}(\Omega_{\varepsilon})$ で、$\partial^{\alpha}f_{\varepsilon}=(\partial^{\alpha}\rho_{\varepsilon})*f$。
+2. $f$ が連続なら、$\Omega$ の各コンパクト集合の上で $f_{\varepsilon}\to f$（一様収束、$\varepsilon\to0$）。
+3. $1\le p<\infty$, $f\in L_{\mathrm{loc}}^{p}(\Omega)$ なら、各コンパクト集合 $K\subset\Omega$ で $\|f_{\varepsilon}-f\|_{L^{p}(K)}\to0$。
+4. $\operatorname{supp}f$ が $\Omega$ のコンパクト集合で、$\varepsilon<\operatorname{dist}(\operatorname{supp}f,\mathbb{R}^{n}\setminus\Omega)$ なら、$f_{\varepsilon}\in C_{c}^{\infty}(\Omega)$ で $\operatorname{supp}f_{\varepsilon}\subset\{x:\operatorname{dist}(x,\operatorname{supp}f)\le\varepsilon\}$。
+:::
+
+::: proof
+**1.** $x_{0}\in\Omega_{\varepsilon}$ をとり、$\delta>0$ を $\overline{B(x_{0},2\delta)}\subset\Omega_{\varepsilon}$ となるようにとる。$x\in B(x_{0},\delta)$ なら $\rho_{\varepsilon}(x-y)\ne0$ となる $y$ はコンパクト集合 $L\defeq\{y:\operatorname{dist}(y,\overline{B(x_{0},\delta)})\le\varepsilon\}\subset\Omega$ に入る。$x$ の第 $j$ 座標について、$|\partial_{j}\rho_{\varepsilon}(x-y)f(y)|\le\sup|\partial_{j}\rho_{\varepsilon}|\cdot|f(y)|\mathbf{1}_{L}(y)$ は $x$ によらない可積分関数で抑えられるので、\ref{meas:parameter-integrals.2} から $\partial_{j}f_{\varepsilon}=(\partial_{j}\rho_{\varepsilon})*f$。$\partial_{j}\rho_{\varepsilon}$ も同じ性質（$C_{c}^{\infty}$、台は $\{|x|\le\varepsilon\}$）をもつので帰納法で 1。
+
+**2.** $K\subset\Omega$ をコンパクト、$\varepsilon_{0}>0$ を $K_{0}\defeq\{x:\operatorname{dist}(x,K)\le\varepsilon_{0}\}\subset\Omega$ となるようにとる（$K$ と $\mathbb{R}^{n}\setminus\Omega$ の距離は正）。$f$ は $K_{0}$ 上一様連続。$x\in K$, $\varepsilon<\varepsilon_{0}$ なら $\int\rho_{\varepsilon}=1$ から
+$$
+|f_{\varepsilon}(x)-f(x)|=\Bigl|\int\rho_{\varepsilon}(z)\bigl(f(x-z)-f(x)\bigr)\,dz\Bigr|\le\sup_{|z|\le\varepsilon,\,x\in K}|f(x-z)-f(x)|\to0.
+$$
+
+**3.** 2 の $K_{0}$ について $g\defeq f\mathbf{1}_{K_{0}}\in L^{p}(\mathbb{R}^{n})$。$x\in K$, $\varepsilon<\varepsilon_{0}$ なら $f_{\varepsilon}(x)=(\rho_{\varepsilon}*g)(x)$（積分に寄与する $y$ は $K_{0}$ に入る）。\ref{four:approximate-identity-rd.1} から $\|\rho_{\varepsilon}*g-g\|_{L^{p}(\mathbb{R}^{n})}\to0$ で、$K$ の上では $g=f$。
+
+**4.** $f_{\varepsilon}(x)\ne0$ なら、$|x-y|\le\varepsilon$ となる $y\in\operatorname{supp}f$ がある。
+:::
+
+::: corollary テスト関数の存在と稠密性 {#fa:test-function-density keywords="C_c^infinity(Omega) is dense in L^p(Omega) for 1 <= p < infinity; smooth Urysohn: for compact K in open U there is phi in C_c^infinity(U), 0 <= phi <= 1, phi = 1 near K; smooth partitions of unity subordinate to a finite open cover of a compact set" index="滑らかなウリゾーンの補題|なめらかなうりぞーんのほだい, 1 の分割（ユークリッド空間）|1のぶんかつゆーくりっどくうかん"}
+1. $1\le p<\infty$ について $C_{c}^{\infty}(\Omega)$ は $L^{p}(\Omega)$ で稠密。
+2. コンパクト $K\subset U$（$U\subset\mathbb{R}^{n}$ 開）について、$\varphi\in C_{c}^{\infty}(U)$ で $0\le\varphi\le1$、$K$ のある近傍で $\varphi=1$ となるものがある。
+3. コンパクト $K\subset U_{1}\cup\dots\cup U_{m}$（$U_{j}$ 開）について、$\varphi_{j}\in C_{c}^{\infty}(U_{j})$, $\varphi_{j}\ge0$ で、$K$ のある近傍で $\sum_{j}\varphi_{j}=1$ となるものがある。
+:::
+
+::: proof
+**1.** $f\in L^{p}(\Omega)$ と $\eta>0$ について、\ref{meas:cc-dense}（$f$ を $\Omega$ の外で $0$ とした $L^{p}(\mathbb{R}^{n})$ の元に使う）から $\|f-g\|_{p}<\eta$ となる $g\in C_{c}(\mathbb{R}^{n})$ をとる。$\Omega$ のコンパクト集合 $K_{j}\defeq\{x\in\Omega:|x|\le j,\operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)\ge\frac1j\}$ は $\Omega$ を覆う増大列なので、$\|g-g\mathbf{1}_{K_{j}}\|_{p}\to0$（優収束定理）。$g\mathbf{1}_{K_{j}}$ を軟化すると、4 から $C_{c}^{\infty}(\Omega)$ の元で（$\varepsilon<\frac1{2j}$）、3（$\mathbb{R}^{n}$ 全体で \ref{four:approximate-identity-rd.1}）から $L^{p}$ で $g\mathbf{1}_{K_{j}}$ に近づく。
+
+**2.** $\delta\defeq\frac13\operatorname{dist}(K,\mathbb{R}^{n}\setminus U)>0$（$U=\mathbb{R}^{n}$ なら $\delta=1$）、$K_{2\delta}\defeq\{x:\operatorname{dist}(x,K)\le2\delta\}$ とし、$\varphi\defeq\rho_{\delta}*\mathbf{1}_{K_{2\delta}}$。$0\le\varphi\le1$、台は $K_{3\delta}\subset U$（コンパクト）、$\operatorname{dist}(x,K)<\delta$ なら $B(x,\delta)\subset K_{2\delta}$ なので $\varphi(x)=\int\rho_{\delta}=1$。
+
+**3.** $d_{j}(x)\defeq\min\bigl(1,\operatorname{dist}(x,\mathbb{R}^{n}\setminus U_{j})\bigr)$（$U_{j}=\mathbb{R}^{n}$ なら $1$）は連続で、$g\defeq\max_{j}d_{j}$ は $K$ の上で正なので、最小値 $\delta_{0}>0$ をとる。$K_{j}\defeq\{x\in K:d_{j}(x)\ge\delta_{0}\}$ は $K$ の閉集合でコンパクト、$K_{j}\subset U_{j}$、$\bigcup_{j}K_{j}=K$（$x\in K$ で $d_{j}(x)=g(x)$ となる $j$ をとる）。2 から $\psi_{j}\in C_{c}^{\infty}(U_{j})$, $0\le\psi_{j}\le1$, $K_{j}$ の近傍で $\psi_{j}=1$ をとり、$\varphi_{1}\defeq\psi_{1}$, $\varphi_{j}\defeq\psi_{j}\prod_{l<j}(1-\psi_{l})$ とおく。帰納法で $1-\sum_{j\le m}\varphi_{j}=\prod_{j\le m}(1-\psi_{j})$ で、$K_{j}$ の近傍たちの和（$K$ の近傍）の各点ではある $\psi_{j}=1$ なので右辺は $0$。
+:::
+
+（2・3 の構成では、近似の幅や集合をすべて距離関数から具体的に決めたので、選択公理は使っていない。）
+
+::: lemma 変分法の基本補題 {#fa:fundamental-lemma keywords="fundamental lemma of the calculus of variations (du Bois-Reymond): if f in L^1_loc(Omega) and int f phi = 0 for all test functions phi then f = 0 a.e." index="変分法の基本補題|へんぶんほうのきほんほだい, デュ・ボア・レーモンの補題|でゅぼあれーもんのほだい"}
+$f\in L_{\mathrm{loc}}^{1}(\Omega)$ がすべての $\varphi\in C_{c}^{\infty}(\Omega)$ について $\int_{\Omega}f\varphi=0$ を満たすなら、$f=0$（a.e.）。
+:::
+
+::: proof
+$x\in\Omega_{\varepsilon}$ について $y\mapsto\rho_{\varepsilon}(x-y)$ は $C_{c}^{\infty}(\Omega)$ の元なので $f_{\varepsilon}(x)=0$。\ref{fa:mollification.3}（$p=1$）から、各コンパクト $K\subset\Omega$ で $\|f\|_{L^{1}(K)}=\lim\|f_{\varepsilon}-f\|_{L^{1}(K)}=0$。$\Omega$ はコンパクト集合の可算和なので $f=0$ a.e.。
+:::
+
+## 超関数 {#fa:sec-di-distributions}
+
+::: definition 超関数 {#fa:distribution keywords="distribution on Omega: linear T on C_c^infinity(Omega) such that for each compact K there are C and N with |T(phi)| <= C ||phi||_{C^N} whenever supp phi subset K; order; the space D'(Omega)" index="超関数（開集合上）|ちょうかんすうかいしゅうごうじょう, 超関数の階数|ちょうかんすうのかいすう"}
+線形写像 $T\colon C_{c}^{\infty}(\Omega)\to\mathbb{C}$ が、各コンパクト集合 $K\subset\Omega$ について、ある $C_{K}\ge0$, $N_{K}\ge0$ で
+$$
+|T(\varphi)|\le C_{K}\|\varphi\|_{C^{N_{K}}}\qquad(\varphi\in C_{c}^{\infty}(\Omega),\ \operatorname{supp}\varphi\subset K)
+$$
+を満たすとき、$\Omega$ 上の**超関数**といい、その全体を $\mathcal{D}'(\Omega)$ と書く。$N_{K}$ が $K$ によらずにとれるとき、その最小値を $T$ の**階数**という。$T(\varphi)$ を $\langle T,\varphi\rangle$ とも書く。
+:::
+
+::: example 超関数の例 {#fa:distribution-examples keywords="locally integrable functions as distributions of order 0; Dirac delta; derivatives of delta; locally finite Borel measures; principal value of 1/x is a distribution of order 1 on R; D'(R^n) contains S'(R^n) by restriction" index="主値|しゅち, 局所可積分関数|きょくしょかせきぶんかんすう"}
+1. $f\in L_{\mathrm{loc}}^{1}(\Omega)$ について $T_{f}(\varphi)\defeq\int f\varphi$ は階数 $0$ の超関数で、\ref{fa:fundamental-lemma} から $f\mapsto T_{f}$ は単射。以下 $T_{f}$ を $f$ と書く。
+2. $a\in\Omega$ と多重指数 $\beta$ について $\varphi\mapsto\partial^{\beta}\varphi(a)$ は階数 $|\beta|$ 以下の超関数。とくに $\delta_{a}$。
+3. $\Omega$ のボレル集合上の測度 $\mu$ で、各コンパクト集合で有限なものについて $\varphi\mapsto\int\varphi\,d\mu$ は階数 $0$ の超関数。
+4. $\Omega=\mathbb{R}$ で、$\operatorname{p.v.}\frac1x(\varphi)\defeq\lim_{\varepsilon\to0}\int_{|x|>\varepsilon}\frac{\varphi(x)}{x}dx$ は存在し、階数 $1$ 以下の超関数（**主値**）。
+:::
+
+::: proof
+**1–3.** $\operatorname{supp}\varphi\subset K$ なら $|\int f\varphi|\le\|f\|_{L^{1}(K)}\sup|\varphi|$、$|\partial^{\beta}\varphi(a)|\le\|\varphi\|_{C^{|\beta|}}$、$|\int\varphi\,d\mu|\le\mu(K)\sup|\varphi|$。
+
+**4.** $\operatorname{supp}\varphi\subset[-R,R]$ とする。$\frac1x$ は奇関数なので $\int_{\varepsilon<|x|<R}\frac{\varphi(0)}{x}dx=0$、よって
+$$
+\int_{|x|>\varepsilon}\frac{\varphi(x)}{x}dx=\int_{\varepsilon<|x|\le R}\frac{\varphi(x)-\varphi(0)}{x}dx.
+$$
+平均値の定理から $\bigl|\frac{\varphi(x)-\varphi(0)}{x}\bigr|\le\sup|\varphi'|$ なので、$\varepsilon\to0$ で（優収束定理）極限が存在し、$|\operatorname{p.v.}\frac1x(\varphi)|\le2R\|\varphi\|_{C^{1}}$。
+:::
+
+::: definition 超関数の演算と収束 {#fa:distribution-operations keywords="derivative of a distribution (d^alpha T)(phi) = (-1)^{|alpha|} T(d^alpha phi); multiplication by a smooth function (a T)(phi) = T(a phi); convergence in D': T_k(phi) -> T(phi) for every test function" index="超関数の微分（開集合上）|ちょうかんすうのびぶんかいしゅうごうじょう, 超関数の収束|ちょうかんすうのしゅうそく"}
+$T\in\mathcal{D}'(\Omega)$ について
+1. $(\partial^{\alpha}T)(\varphi)\defeq(-1)^{|\alpha|}T(\partial^{\alpha}\varphi)$、
+2. $a\in C^{\infty}(\Omega)$ について $(aT)(\varphi)\defeq T(a\varphi)$、
+3. $T_{k},T\in\mathcal{D}'(\Omega)$ について、すべての $\varphi$ で $T_{k}(\varphi)\to T(\varphi)$ のとき $T_{k}\to T$（$\mathcal{D}'$ で）という。
+:::
+
+::: proposition 演算の基本性質 {#fa:distribution-operations-properties keywords="d^alpha T and a T are distributions; for f in C^1(Omega) the distributional derivative equals the classical one; Leibniz rule d_j (a T) = (d_j a) T + a d_j T; derivatives are continuous for convergence in D'; rho_eps -> delta" index="超関数の微分と古典的な微分|ちょうかんすうのびぶんとこてんてきなびぶん"}
+1. $\partial^{\alpha}T$, $aT$ は超関数で、$\partial_{j}(aT)=(\partial_{j}a)T+a\,\partial_{j}T$。
+2. $f\in C^{1}(\Omega)$ なら、超関数として $\partial_{j}f$（$f$ の超関数微分）は古典的な偏導関数 $\partial_{j}f$ に等しい。
+3. $T_{k}\to T$ なら $\partial^{\alpha}T_{k}\to\partial^{\alpha}T$。
+4. $\Omega=\mathbb{R}^{n}$ で $\rho_{\varepsilon}\to\delta$（$\varepsilon\to0$）。
+:::
+
+::: proof
+**1.** $\operatorname{supp}\varphi\subset K$ なら $\operatorname{supp}\partial^{\alpha}\varphi,\operatorname{supp}(a\varphi)\subset K$ で、$\|\partial^{\alpha}\varphi\|_{C^{N}}\le\|\varphi\|_{C^{N+|\alpha|}}$、ライプニッツの公式から $\|a\varphi\|_{C^{N}}\le C_{a,K,N}\|\varphi\|_{C^{N}}$（$a$ の $K$ 上の $N$ 階までの導関数の上限から決まる定数）。ライプニッツ則：$(\partial_{j}(aT))(\varphi)=-T(a\partial_{j}\varphi)=-T(\partial_{j}(a\varphi))+T((\partial_{j}a)\varphi)=(a\partial_{j}T)(\varphi)+((\partial_{j}a)T)(\varphi)$。
+
+**2.** $\int\partial_{j}f\,\varphi=-\int f\,\partial_{j}\varphi$ を示せばよい。$f\varphi\in C_{c}^{1}(\mathbb{R}^{n})$（$\Omega$ の外で $0$ と延ばす）で $\partial_{j}(f\varphi)=\partial_{j}f\,\varphi+f\partial_{j}\varphi$。$x_{j}$ 以外の座標を固定すると、$x_{j}\mapsto(f\varphi)(x)$ は台がコンパクトな $C^{1}$ 関数なので、微積分の基本定理から $\int_{\mathbb{R}}\partial_{j}(f\varphi)\,dx_{j}=0$。フビニで残りの座標について積分すればよい。
+
+**3.** $(\partial^{\alpha}T_{k})(\varphi)=(-1)^{|\alpha|}T_{k}(\partial^{\alpha}\varphi)\to(-1)^{|\alpha|}T(\partial^{\alpha}\varphi)$。
+
+**4.** $\int\rho_{\varepsilon}(x)\varphi(x)\,dx=(\rho_{\varepsilon}*\check\varphi)(0)$（$\check\varphi(x)\defeq\varphi(-x)$）$\to\varphi(0)$（\ref{fa:mollification.2}）。
+:::
+
+## 台と微分が 0 の超関数 {#fa:sec-di-support}
+
+::: proposition 超関数の台 {#fa:distribution-support keywords="if a distribution vanishes on each open set of a family, it vanishes on their union; support of a distribution: complement of the largest open set where it vanishes; supp of a function versus supp of its distribution; supp delta = {0}" index="超関数の台|ちょうかんすうのだい"}
+$T\in\mathcal{D}'(\Omega)$ について、開集合 $U\subset\Omega$ の上で $T$ が**消える**とは、$\operatorname{supp}\varphi\subset U$ となるすべての $\varphi$ で $T(\varphi)=0$ となることをいう。
+1. $T$ が開集合の族 $\{U_{i}\}$ のそれぞれの上で消えるなら、$\bigcup U_{i}$ の上で消える。
+2. したがって $T$ が消える最大の開集合 $U_{T}$ があり、$\operatorname{supp}T\defeq\Omega\setminus U_{T}$ を $T$ の**台**という。$f$ が連続なら $\operatorname{supp}T_{f}=\operatorname{supp}f$（$\Omega$ の中で）。$\operatorname{supp}\delta_{a}=\{a\}$。
+:::
+
+::: proof
+**1.** $\operatorname{supp}\varphi\subset\bigcup U_{i}$ とする。$K\defeq\operatorname{supp}\varphi$ はコンパクトなので有限個 $U_{1},\dots,U_{m}$ で覆われる。\ref{fa:test-function-density.3} の $\psi_{j}\in C_{c}^{\infty}(U_{j})$（$K$ の近傍で $\sum\psi_{j}=1$）をとると $\varphi=\sum_{j}\psi_{j}\varphi$ で、$\operatorname{supp}(\psi_{j}\varphi)\subset U_{j}$ なので $T(\varphi)=\sum_{j}T(\psi_{j}\varphi)=0$。
+
+**2.** $U_{T}$ は $T$ が消える開集合すべての和。$f$ が連続のとき、$f$ が $U$ で $0$ なら $T_{f}$ は $U$ で消え、逆に $T_{f}$ が $U$ で消えれば \ref{fa:fundamental-lemma} から $U$ で $f=0$ a.e.、連続性から $f=0$。$\delta_{a}$ は $\Omega\setminus\{a\}$ で消え、$a$ の近傍で $\varphi(a)=1$ となる $\varphi$ がある（\ref{fa:test-function-density.2}）ので、$a$ を含む開集合では消えない。
+:::
+
+::: theorem 微分が 0 の超関数 {#fa:zero-derivative keywords="on an open interval, a distribution with T' = 0 is a constant function; a test function with integral 0 is the derivative of a test function" index="微分が 0 の超関数|びぶんが0のちょうかんすう"}
+$I\subset\mathbb{R}$ を開区間、$T\in\mathcal{D}'(I)$ で $T'=0$ なら、ある定数 $c$ で $T=c$（定数関数 $c$ の定める超関数）。
+:::
+
+::: proof
+**Step 1.** $\varphi\in C_{c}^{\infty}(I)$ で $\int\varphi=0$ なら、$\psi(x)\defeq\int_{-\infty}^{x}\varphi$（$I$ の外で $\varphi=0$ と延ばす）は $C^{\infty}$ で $\psi'=\varphi$、$\operatorname{supp}\varphi\subset[a,b]$ なら $x<a$ で $\psi=0$、$x>b$ で $\psi=\int\varphi=0$。よって $\psi\in C_{c}^{\infty}(I)$。
+
+**Step 2.** $\theta\in C_{c}^{\infty}(I)$ で $\int\theta=1$ となるものを固定し（$\rho_{\varepsilon}$ を平行移動）、$c\defeq T(\theta)$。任意の $\varphi$ について $\varphi-(\int\varphi)\theta$ は積分 $0$ なので Step 1 から $\psi'$ の形で、$T(\psi')=-T'(\psi)=0$。よって $T(\varphi)=(\int\varphi)T(\theta)=\int c\varphi$。
+:::
+
+::: proposition 緩増加超関数との関係 {#fa:tempered-restriction keywords="C_c^infinity(R^n) is dense in S(R^n) for the Schwartz seminorms; restriction S'(R^n) -> D'(R^n) is injective, so tempered distributions are distributions" index="緩増加超関数と超関数|かんぞうかちょうかんすうとちょうかんすう"}
+1. $\varphi\in\mathcal{S}(\mathbb{R}^{n})$ と \ref{mfd:bump-function} の $\beta$ について、$\varphi_{R}(x)\defeq\beta(x/R)\varphi(x)\in C_{c}^{\infty}$ は、$R\to\infty$ ですべての半ノルムについて $\varphi$ に近づく：$\|\varphi_{R}-\varphi\|_{(N)}\to0$。
+2. 緩増加超関数 $T\in\mathcal{S}'$ を $C_{c}^{\infty}(\mathbb{R}^{n})$ に制限したものは $\mathcal{D}'(\mathbb{R}^{n})$ の元で、制限は単射。
+:::
+
+::: proof
+**1.** ライプニッツの公式から $x^{\alpha}\partial^{\gamma}(\varphi_{R}-\varphi)=x^{\alpha}(\beta(x/R)-1)\partial^{\gamma}\varphi+\sum_{0<\gamma'\le\gamma}\binom{\gamma}{\gamma'}R^{-|\gamma'|}(\partial^{\gamma'}\beta)(x/R)\,x^{\alpha}\partial^{\gamma-\gamma'}\varphi$。第 1 項は $|x|\ge R$ でしか $0$ でなく、そこで $|x^{\alpha}\partial^{\gamma}\varphi(x)|\le\frac{1}{R}\sup_{y}|y|\,|y^{\alpha}\partial^{\gamma}\varphi(y)|$ で、右辺の上限は有限（$|y|\le\sum_{l}|y_{l}|$ と、$y_{l}y^{\alpha}\partial^{\gamma}\varphi$ が有界であることから）。残りの項は $R^{-1}\sup|\partial^{\gamma'}\beta|\cdot\sup|x^{\alpha}\partial^{\gamma-\gamma'}\varphi|$ で抑えられる。
+
+**2.** $\operatorname{supp}\varphi\subset K$ なら $\|\varphi\|_{(N)}\le C_{K,N}\|\varphi\|_{C^{N}}$（$K$ の上で $|x^{\alpha}|$ は有界）なので超関数。単射性：$T$ が $C_{c}^{\infty}$ の上で $0$ なら、1 と $|T(\varphi)-T(\varphi_{R})|\le C\|\varphi-\varphi_{R}\|_{(N)}\to0$ から $T(\varphi)=0$。
+:::
+
+::: hypcheck
+- 超関数の定義を「位相」ではなく「各コンパクト集合ごとの半ノルムの評価」で与えた。これは $C_{c}^{\infty}(\Omega)$ の帰納極限位相についての連続性と同値だが、ここでは位相を導入していない。評価の定数 $C_{K}$, $N_{K}$ が $K$ によってよいことが、$\mathcal{S}'$ との違い（無限遠での増大を許す）である。
+- 軟化による近似（\ref{fa:mollification.3}）で $p<\infty$ は本質的：$L^{\infty}$ の不連続な関数（例えば区間の指示関数）は、連続関数で一様には近似できない。
+- 微分が 0 の超関数（\ref{fa:zero-derivative}）で区間（連結性）は本質的：$I=(0,1)\cup(2,3)$ なら各成分ごとに異なる定数がとれる。
+- 主値（\ref{fa:distribution-examples.4}）は階数 $1$ が必要で、階数 $0$ ではない（$\frac1x$ は $0$ の近くで可積分でないので、$\sup|\varphi|$ だけでは抑えられない）。これは演習で確かめる。
+:::
+
+::: supplement
+**関連する結果.**
+- 台が一点 $\{a\}$ の超関数は $\sum_{|\alpha|\le N}c_{\alpha}\partial^{\alpha}\delta_{a}$ の形に限る。台がコンパクトな超関数は有限階数で、$C^{\infty}(\Omega)$ 全体に延びる（$\mathcal{E}'(\Omega)$）。
+- 局所的には、どの超関数も連続関数の有限階の導関数である（構造定理）。
+- 超関数どうしの積は一般には定義できない（$\delta\cdot\delta$ や $\frac1x\cdot\delta$ など）。シュワルツの不可能性定理は、結合的で微分のライプニッツ則を満たし、連続関数の積と一致する積は存在しないことを述べる。
+
+**高い視点：双対としての一般化された関数.** 超関数は、良すぎる関数の空間 $C_{c}^{\infty}(\Omega)$ の（連続な）双対であり、関数 $f$ は「$\varphi$ に対する応答 $\int f\varphi$」としてその中に埋め込まれる。微分は $C_{c}^{\infty}$ の上の作用素 $\partial$ の転置（$-1$ 倍）として定義されるので、どの超関数も何回でも微分でき、微分は収束と可換になる。線形代数の比喩では、関数を「ベクトル」、テスト関数を「座標を測る物差し」とみると、超関数は物差しの値の一貫した割り当てだけで定まる一般化されたベクトルで、成分（点ごとの値）をもたなくてもよい。軟化子はその逆向きで、一般化されたベクトルを本物の滑らかな関数に「ぼかして」戻す。
+:::
+
+## 問題 {#fa:sec-di-problems}
+
+::: problem {#fa:prob-di-abs}
+$\Omega=\mathbb{R}$ で、超関数の意味で $|x|'=\operatorname{sgn}x$、$|x|''=2\delta$ を示せ。
+:::
+
+::: solution
+$\varphi\in C_{c}^{\infty}(\mathbb{R})$ について、部分積分（端点の値は台がコンパクトなので $0$、$x=0$ での境界項は $|x|$ が $0$）から
+$$
+\langle|x|',\varphi\rangle=-\int|x|\varphi'=-\int_{0}^{\infty}x\varphi'\,dx+\int_{-\infty}^{0}x\varphi'\,dx=\int_{0}^{\infty}\varphi-\int_{-\infty}^{0}\varphi=\int\operatorname{sgn}(x)\varphi.
+$$
+さらに $\langle\operatorname{sgn}',\varphi\rangle=-\int_{0}^{\infty}\varphi'+\int_{-\infty}^{0}\varphi'=\varphi(0)+\varphi(0)$。
+:::
+
+::: problem {#fa:prob-di-log}
+$\Omega=\mathbb{R}$ で $\log|x|\in L_{\mathrm{loc}}^{1}$ であり、超関数の意味で $(\log|x|)'=\operatorname{p.v.}\frac1x$ を示せ。
+:::
+
+::: solution
+$\int_{0}^{1}|\log x|\,dx=1<\infty$ なので局所可積分。$\varphi\in C_{c}^{\infty}$ について、優収束定理から $-\int\log|x|\varphi'=\lim_{\varepsilon\to0}\bigl(-\int_{|x|>\varepsilon}\log|x|\varphi'\bigr)$。$|x|>\varepsilon$ の各半直線で部分積分すると
+$$
+-\int_{|x|>\varepsilon}\log|x|\varphi'(x)\,dx=\log\varepsilon\,\bigl(\varphi(\varepsilon)-\varphi(-\varepsilon)\bigr)+\int_{|x|>\varepsilon}\frac{\varphi(x)}{x}dx.
+$$
+$|\varphi(\varepsilon)-\varphi(-\varepsilon)|\le2\varepsilon\sup|\varphi'|$ で $\varepsilon\log\varepsilon\to0$ なので、第 1 項は $0$ に収束し、第 2 項は $\operatorname{p.v.}\frac1x(\varphi)$ に収束する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
