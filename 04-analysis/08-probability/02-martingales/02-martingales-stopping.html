@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マルチンゲールと停止時刻 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/02-martingales/02-martingales-stopping.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# マルチンゲールと停止時刻 {#prb:page-martingales-stopping keywords="filtration, adapted process, martingale, submartingale, supermartingale, examples (sums of independent centered variables, products, Doob martingale E[X | F_n]), convex functions of martingales, predictable processes and martingale transforms, stopping times, stopped processes, sigma-algebra F_tau, optional stopping theorem for bounded stopping times, Doob decomposition, Doob's maximal inequality, Doob's L^p inequality, gambler's ruin"}
+
+**マルチンゲール**は「公平な賭け」の数学的な表現である：これまでの情報の下での次の時刻の期待値が、現在の値に等しい確率過程。このページでは、情報の増え方（**フィルトレーション**）とマルチンゲールを定義し、賭け方をどう工夫しても（未来を見ない限り）公平な賭けは公平なままであること（**マルチンゲール変換**）、とくに有界な**停止時刻**でやめても期待値は変わらないこと（**任意抽出定理**）を示す。さらに、劣マルチンゲールをマルチンゲールと増加過程に分解する**ドゥーブ分解**と、過程の最大値を最終値で抑える**ドゥーブの不等式**を証明する。応用として、ギャンブラーの破産問題を解く。
+
+## 記法と定義の確認 {#prb:sec-ms-notation}
+
+::: notation
+- 条件付けの基本性質は \ref{prb:page-conditional-expectation}（とくに \ref{prb:conditional-properties}, \ref{prb:conditional-jensen}）。
+- 時刻は $n\in\mathbb{Z}_{\ge0}$。確率過程 $X=(X_{n})_{n\ge0}$ は実数値確率変数の列。$\Delta X_{n}\defeq X_{n}-X_{n-1}$（$n\ge1$）。$a\wedge b\defeq\min(a,b)$, $a\vee b\defeq\max(a,b)$, $x^{+}\defeq x\vee0$。
+- ヘルダーの不等式は \ref{meas:holder}、トネリの定理は \ref{meas:tonelli}、裾の公式は \ref{prb:tail-formula}。
+- **選択公理**：使わない。
+:::
+
+## マルチンゲール {#prb:sec-ms-martingales}
+
+::: definition マルチンゲール {#prb:martingale keywords="filtration F_0 subset F_1 subset ... subset F; adapted process; martingale E[X_{n+1} | F_n] = X_n; submartingale (>=); supermartingale (<=)" index="マルチンゲール|まるちんげーる, 劣マルチンゲール|れつまるちんげーる, 優マルチンゲール|ゆうまるちんげーる, フィルトレーション|ふぃるとれーしょん, 適合過程|てきごうかてい"}
+1. 部分 σ-加法族の増大列 $\mathcal{F}_{0}\subset\mathcal{F}_{1}\subset\cdots\subset\mathcal{F}$ を**フィルトレーション**という。過程 $X$ が**適合**しているとは、各 $X_{n}$ が $\mathcal{F}_{n}$ 可測なことをいう。
+2. 適合した可積分な過程 $X$ が、すべての $n$ で
+$$
+E[X_{n+1}\mid\mathcal{F}_{n}]=X_{n}\quad(\text{それぞれ}\ \ge X_{n},\ \le X_{n})
+$$
+を満たすとき、**マルチンゲール**（それぞれ**劣マルチンゲール**、**優マルチンゲール**）という。フィルトレーションを明示しないときは $\mathcal{F}_{n}\defeq\sigma(X_{0},\dots,X_{n})$。
+:::
+
+（塔の性質から、マルチンゲールなら $m\ge n$ で $E[X_{m}\mid\mathcal{F}_{n}]=X_{n}$、とくに $E[X_{m}]=E[X_{0}]$。劣マルチンゲールでは $E[X_{m}\mid\mathcal{F}_{n}]\ge X_{n}$ で、$E[X_{n}]$ は単調増加。）
+
+::: example マルチンゲールの例 {#prb:martingale-examples keywords="sums of independent mean-zero variables; S_n^2 - n sigma^2; products of independent mean-one variables; Doob martingale E[Z | F_n]; convex functions of martingales are submartingales; |X_n|, X_n^+ and X_n^2" index="ドゥーブのマルチンゲール|どぅーぶのまるちんげーる"}
+1. $\xi_{1},\xi_{2},\dots$ が独立で可積分、$E[\xi_{k}]=0$ なら $S_{n}\defeq\xi_{1}+\dots+\xi_{n}$（$S_{0}=0$）はマルチンゲール。さらに $E[\xi_{k}^{2}]=\sigma^{2}$ なら $S_{n}^{2}-n\sigma^{2}$ もマルチンゲール。
+2. $\xi_{k}\ge0$ が独立で $E[\xi_{k}]=1$ なら $M_{n}\defeq\xi_{1}\cdots\xi_{n}$（$M_{0}=1$）はマルチンゲール。
+3. $Z\in L^{1}$ とフィルトレーション $(\mathcal{F}_{n})$ について $X_{n}\defeq E[Z\mid\mathcal{F}_{n}]$ はマルチンゲール（**ドゥーブのマルチンゲール**）。
+4. $X$ がマルチンゲールで $\varphi$ が凸、$\varphi(X_{n})\in L^{1}$ なら $\varphi(X_{n})$ は劣マルチンゲール。$X$ が劣マルチンゲールで $\varphi$ が凸かつ単調増加なら同じ。とくに $|X_{n}|$, $X_{n}^{2}$（マルチンゲールのとき）、$X_{n}^{+}$（劣マルチンゲールのとき）は劣マルチンゲール。
+:::
+
+::: proof
+1・2 では $\mathcal{F}_{n}\defeq\sigma(\xi_{1},\dots,\xi_{n})$ とし、$\xi_{n+1}$ は $\mathcal{F}_{n}$ と独立（\ref{prb:pi-system-independence.2}）。
+
+**1.** $E[S_{n+1}\mid\mathcal{F}_{n}]=S_{n}+E[\xi_{n+1}\mid\mathcal{F}_{n}]=S_{n}+E[\xi_{n+1}]=S_{n}$（\ref{prb:conditional-properties} の 3・6）。$S_{n+1}^{2}=S_{n}^{2}+2S_{n}\xi_{n+1}+\xi_{n+1}^{2}$ で、$S_{n}\xi_{n+1}$ は可積分（独立な $L^{2}$ の積）、\ref{prb:conditional-properties.4} と 6 から $E[S_{n}\xi_{n+1}\mid\mathcal{F}_{n}]=S_{n}E[\xi_{n+1}]=0$、$E[\xi_{n+1}^{2}\mid\mathcal{F}_{n}]=\sigma^{2}$。よって $E[S_{n+1}^{2}-(n+1)\sigma^{2}\mid\mathcal{F}_{n}]=S_{n}^{2}-n\sigma^{2}$。
+
+**2.** $M_{n}$ は独立な可積分変数の積なので可積分（\ref{prb:independence-criteria.3} を繰り返す）。$E[M_{n}\xi_{n+1}\mid\mathcal{F}_{n}]=M_{n}E[\xi_{n+1}]=M_{n}$。
+
+**3.** 可積分性は \ref{prb:conditional-jensen.2}、マルチンゲール性は塔の性質（\ref{prb:conditional-properties.5}）。
+
+**4.** 条件付きイェンセンの不等式（\ref{prb:conditional-jensen.1}）から $E[\varphi(X_{n+1})\mid\mathcal{F}_{n}]\ge\varphi(E[X_{n+1}\mid\mathcal{F}_{n}])$。マルチンゲールなら右辺は $\varphi(X_{n})$。劣マルチンゲールなら $E[X_{n+1}\mid\mathcal{F}_{n}]\ge X_{n}$ と $\varphi$ の単調性から右辺 $\ge\varphi(X_{n})$。
+:::
+
+## マルチンゲール変換 {#prb:sec-ms-transform}
+
+::: theorem マルチンゲール変換 {#prb:martingale-transform keywords="for a predictable bounded process H and a martingale X, the transform (H.X)_n = sum_{k<=n} H_k (X_k - X_{k-1}) is a martingale; for H >= 0 and X a submartingale it is a submartingale; no betting system beats a fair game" index="マルチンゲール変換|まるちんげーるへんかん, 可予測過程|かよそくかてい"}
+過程 $H=(H_{n})_{n\ge1}$ が**可予測**であるとは、各 $H_{n}$ が $\mathcal{F}_{n-1}$ 可測なことをいう。$H$ が可予測で有界なとき、
+$$
+(H\cdot X)_{n}\defeq\sum_{k=1}^{n}H_{k}\,\Delta X_{k}\qquad((H\cdot X)_{0}\defeq0)
+$$
+とおく。$X$ がマルチンゲールなら $H\cdot X$ もマルチンゲール。$X$ が劣マルチンゲールで $H\ge0$ なら $H\cdot X$ も劣マルチンゲール。
+:::
+
+::: proof
+$(H\cdot X)_{n}$ は $\mathcal{F}_{n}$ 可測で、$|H|\le C$ から可積分。$H_{n+1}$ は $\mathcal{F}_{n}$ 可測なので、\ref{prb:conditional-properties.4} から
+$$
+E\bigl[(H\cdot X)_{n+1}-(H\cdot X)_{n}\bigm|\mathcal{F}_{n}\bigr]=H_{n+1}E[\Delta X_{n+1}\mid\mathcal{F}_{n}].
+$$
+マルチンゲールなら $E[\Delta X_{n+1}\mid\mathcal{F}_{n}]=0$、劣マルチンゲールなら $\ge0$ で $H_{n+1}\ge0$。
+:::
+
+## 停止時刻と任意抽出定理 {#prb:sec-ms-stopping}
+
+::: definition 停止時刻 {#prb:stopping-time keywords="stopping time tau with {tau <= n} in F_n; hitting times; sigma-algebra F_tau of events determined up to time tau; stopped process X^tau_n = X_{tau and n}" index="停止時刻|ていしじこく, 到達時刻|とうたつじこく, 停止過程|ていしかてい"}
+1. $\tau\colon\Omega\to\mathbb{Z}_{\ge0}\cup\{\infty\}$ が**停止時刻**であるとは、すべての $n$ で $\{\tau\le n\}\in\mathcal{F}_{n}$（同値に $\{\tau=n\}\in\mathcal{F}_{n}$）となることをいう。
+2. 停止時刻 $\tau$ について $\mathcal{F}_{\tau}\defeq\{A\in\mathcal{F}:\text{すべての }n\text{ で }A\cap\{\tau\le n\}\in\mathcal{F}_{n}\}$。
+3. 適合過程 $X$ と停止時刻 $\tau$ について、**停止過程**を $X_{n}^{\tau}\defeq X_{\tau\wedge n}$ と定める。
+:::
+
+（同値性：$\{\tau=n\}=\{\tau\le n\}\setminus\{\tau\le n-1\}$, $\{\tau\le n\}=\bigcup_{k\le n}\{\tau=k\}$。例：適合過程 $X$ とボレル集合 $B$ について、**到達時刻** $\tau_{B}\defeq\inf\{n:X_{n}\in B\}$（$\inf\emptyset=\infty$）は停止時刻：$\{\tau_{B}\le n\}=\bigcup_{k\le n}\{X_{k}\in B\}$。$\mathcal{F}_{\tau}$ が σ-加法族であることは、補集合について $A^{c}\cap\{\tau\le n\}=\{\tau\le n\}\setminus(A\cap\{\tau\le n\})$ から。）
+
+::: theorem 任意抽出定理 {#prb:optional-stopping keywords="optional stopping theorem: for a submartingale and bounded stopping times tau <= sigma, X_tau is F_tau-measurable and E[X_sigma | F_tau] >= X_tau; stopped (sub)martingales are (sub)martingales; E X_tau = E X_0 for martingales under boundedness of tau or of the stopped process" index="任意抽出定理|にんいちゅうしゅつていり, 任意停止定理|にんいていしていり"}
+$X$ を劣マルチンゲール（それぞれマルチンゲール）とする。
+1. 停止過程 $X^{\tau}$ も劣マルチンゲール（マルチンゲール）。
+2. $\tau\le\sigma\le N$（$N$ は定数）を停止時刻とすると、$X_{\tau}$ は $\mathcal{F}_{\tau}$ 可測かつ可積分で、$E[X_{\sigma}\mid\mathcal{F}_{\tau}]\ge X_{\tau}$（$=X_{\tau}$）。とくに $E[X_{0}]\le E[X_{\tau}]\le E[X_{N}]$（マルチンゲールなら $E[X_{\tau}]=E[X_{0}]$）。
+3. $X$ がマルチンゲールで、$\tau<\infty$（a.s.）、ある定数 $K$ ですべての $n$ について $|X_{\tau\wedge n}|\le K$ なら $E[X_{\tau}]=E[X_{0}]$。
+:::
+
+::: proof
+**1.** $H_{k}\defeq\mathbf{1}_{\{k\le\tau\}}=1-\mathbf{1}_{\{\tau\le k-1\}}$ は可予測で、$X_{\tau\wedge n}=X_{0}+(H\cdot X)_{n}$。\ref{prb:martingale-transform} から。
+
+**2.** **可測性と可積分性.** $|X_{\tau}|\le\sum_{k\le N}|X_{k}|$ で可積分。ボレル集合 $B$ について $\{X_{\tau}\in B\}\cap\{\tau\le n\}=\bigcup_{k\le n}\{X_{k}\in B\}\cap\{\tau=k\}\in\mathcal{F}_{n}$。
+
+**期待値の比較.** $H_{k}\defeq\mathbf{1}_{\{\tau<k\le\sigma\}}=\mathbf{1}_{\{\tau\le k-1\}}-\mathbf{1}_{\{\sigma\le k-1\}}$ は可予測で $\ge0$、$X_{\sigma}-X_{\tau}=(H\cdot X)_{N}$。\ref{prb:martingale-transform} から $E[X_{\sigma}-X_{\tau}]=E[(H\cdot X)_{N}]\ge E[(H\cdot X)_{0}]=0$。
+
+**条件付きの形.** $A\in\mathcal{F}_{\tau}$ とし、$\tau_{A}\defeq\tau\mathbf{1}_{A}+N\mathbf{1}_{A^{c}}$, $\sigma_{A}\defeq\sigma\mathbf{1}_{A}+N\mathbf{1}_{A^{c}}$ とおく。$n<N$ で $\{\tau_{A}\le n\}=A\cap\{\tau\le n\}\in\mathcal{F}_{n}$、$\{\sigma_{A}\le n\}=A\cap\{\sigma\le n\}$ で、$\{\sigma\le n\}\subset\{\tau\le n\}$ から $A\cap\{\sigma\le n\}=(A\cap\{\tau\le n\})\cap\{\sigma\le n\}\in\mathcal{F}_{n}$。よって $\tau_{A}\le\sigma_{A}\le N$ は停止時刻で、前段から $E[X_{\tau_{A}}]\le E[X_{\sigma_{A}}]$。$A^{c}$ の上では両方 $X_{N}$ なので、$E[X_{\tau};A]\le E[X_{\sigma};A]$。$X_{\tau}$ は $\mathcal{F}_{\tau}$ 可測なので、これは $E[E[X_{\sigma}\mid\mathcal{F}_{\tau}]-X_{\tau};A]\ge0$（すべての $A\in\mathcal{F}_{\tau}$）を意味し、$A\defeq\{E[X_{\sigma}\mid\mathcal{F}_{\tau}]<X_{\tau}\}$ ととれば（\ref{prb:conditional-properties.2} の証明と同じく）確率 $0$。$E[X_{0}]\le E[X_{\tau}]\le E[X_{N}]$ は $0\le\tau\le N$ に使う。
+
+**3.** 2 から $E[X_{\tau\wedge n}]=E[X_{0}]$。$\tau<\infty$ なので $X_{\tau\wedge n}\to X_{\tau}$（a.s.）で、$K$ で抑えられるので優収束定理から結論。
+:::
+
+## ドゥーブ分解と不等式 {#prb:sec-ms-doob}
+
+::: theorem ドゥーブ分解 {#prb:doob-decomposition keywords="Doob decomposition: an adapted integrable process X_n = X_0 + M_n + A_n with M a martingale and A predictable, uniquely; X is a submartingale iff A is increasing" index="ドゥーブ分解|どぅーぶぶんかい"}
+適合した可積分な過程 $X$ は、マルチンゲール $M$（$M_{0}=0$）と可予測な過程 $A$（$A_{0}=0$）で $X_{n}=X_{0}+M_{n}+A_{n}$ と一意に（a.s.）分解できる。$X$ が劣マルチンゲールであることと $A$ が単調増加であることは同値。
+:::
+
+::: proof
+**存在.** $A_{n}\defeq\sum_{k=1}^{n}E[\Delta X_{k}\mid\mathcal{F}_{k-1}]$, $M_{n}\defeq\sum_{k=1}^{n}\bigl(\Delta X_{k}-E[\Delta X_{k}\mid\mathcal{F}_{k-1}]\bigr)$ とおく。$A_{n}$ は $\mathcal{F}_{n-1}$ 可測、$E[\Delta M_{k}\mid\mathcal{F}_{k-1}]=0$ なので $M$ はマルチンゲール、和をとれば $X_{n}-X_{0}=M_{n}+A_{n}$。
+
+**一意性.** 二つの分解があれば、$D\defeq M-M'=A'-A$ は可予測なマルチンゲールで $D_{0}=0$。$D_{n}=E[D_{n}\mid\mathcal{F}_{n-1}]=D_{n-1}$ から $D\equiv0$。
+
+**劣マルチンゲール.** $\Delta A_{n}=E[\Delta X_{n}\mid\mathcal{F}_{n-1}]$ で、$\ge0$ であることが劣マルチンゲールの定義。
+:::
+
+::: theorem ドゥーブの不等式 {#prb:doob-inequalities keywords="Doob's maximal inequality lambda P(max_{k<=n} X_k >= lambda) <= E[X_n; max >= lambda] <= E X_n^+ for submartingales; Doob's L^p inequality ||max_{k<=n} |X_k| ||_p <= p/(p-1) ||X_n||_p for martingales and p > 1" index="ドゥーブの最大不等式|どぅーぶのさいだいふとうしき, ドゥーブの Lp 不等式|どぅーぶのえるぴーふとうしき"}
+$X$ を劣マルチンゲール、$X_{n}^{*}\defeq\max_{k\le n}X_{k}$ とする。
+1. $\lambda>0$ について $\lambda P(X_{n}^{*}\ge\lambda)\le E[X_{n};X_{n}^{*}\ge\lambda]\le E[X_{n}^{+}]$。
+2. $X\ge0$（あるいは $X$ がマルチンゲールで $|X|$ を考える）、$p>1$ なら $\bigl\|\max_{k\le n}|X_{k}|\bigr\|_{p}\le\frac{p}{p-1}\|X_{n}\|_{p}$。
+:::
+
+::: proof
+**1.** $\tau\defeq\inf\{k:X_{k}\ge\lambda\}\wedge n$ は停止時刻で $\tau\le n$。$A\defeq\{X_{n}^{*}\ge\lambda\}$ の上では $X_{\tau}\ge\lambda$、$A^{c}$ の上では $\tau=n$。\ref{prb:optional-stopping.2} から $E[X_{\tau}]\le E[X_{n}]$ なので
+$$
+\lambda P(A)+E[X_{n};A^{c}]\le E[X_{\tau};A]+E[X_{\tau};A^{c}]=E[X_{\tau}]\le E[X_{n}]=E[X_{n};A]+E[X_{n};A^{c}].
+$$
+両辺から $E[X_{n};A^{c}]$ を引けばよい。後半は $X_{n}\le X_{n}^{+}$。
+
+**2.** マルチンゲールなら $|X_{n}|$ は非負の劣マルチンゲール（\ref{prb:martingale-examples.4}）なので、$X\ge0$ の場合を示せばよい。$Y\defeq X_{n}^{*}$ とし、まず $\|X_{n}\|_{p}<\infty$ とする（そうでなければ自明）。$Y\le\sum_{k\le n}X_{k}$ なので $Y\in L^{p}$（各 $X_{k}\in L^{p}$：$X_{k}^{p}\le E[X_{n}\mid\mathcal{F}_{k}]^{p}\le E[X_{n}^{p}\mid\mathcal{F}_{k}]$）。\ref{prb:tail-formula.1}・1・トネリから
+$$
+E[Y^{p}]\le\int_{0}^{\infty}p\lambda^{p-1}P(Y\ge\lambda)\,d\lambda\le\int_{0}^{\infty}p\lambda^{p-2}E[X_{n};Y\ge\lambda]\,d\lambda=\frac{p}{p-1}E[X_{n}Y^{p-1}].
+$$
+（\ref{prb:tail-formula.1} は $P(Y>\lambda)$ で書かれているが、$P(Y>\lambda)\le P(Y\ge\lambda)$ なので不等式は成り立つ。）ヘルダーの不等式（指数 $p$, $\frac{p}{p-1}$）から $E[X_{n}Y^{p-1}]\le\|X_{n}\|_{p}\|Y\|_{p}^{p-1}$。$\|Y\|_{p}<\infty$ なので割って $\|Y\|_{p}\le\frac{p}{p-1}\|X_{n}\|_{p}$（$\|Y\|_{p}=0$ なら自明）。
+:::
+
+::: example ギャンブラーの破産 {#prb:gamblers-ruin keywords="gambler's ruin for the simple symmetric random walk: started at 0 and stopped on hitting -a or b, P(hit b first) = a/(a+b) and E tau = ab" index="ギャンブラーの破産|ぎゃんぶらーのはさん, 単純ランダムウォーク|たんじゅんらんだむうぉーく"}
+$\xi_{1},\xi_{2},\dots$ を i.i.d. で $P(\xi_{k}=\pm1)=\frac12$、$S_{n}\defeq\xi_{1}+\dots+\xi_{n}$（$S_{0}=0$、**単純ランダムウォーク**）とし、正の整数 $a,b$ について $\tau\defeq\inf\{n:S_{n}\in\{-a,b\}\}$ とする。このとき $\tau<\infty$（a.s.）、$E[\tau]<\infty$ で
+$$
+P(S_{\tau}=b)=\frac{a}{a+b},\qquad E[\tau]=ab.
+$$
+:::
+
+::: proof
+**Step 1（$\tau$ の裾）.** $L\defeq a+b$ とし、$B_{k}$ を「$\xi_{kL+1},\dots,\xi_{(k+1)L}$ がすべて $+1$ ではない」事象とする。$\tau>kL$ なら $S_{kL}>-a$ で、続く $L$ 回がすべて $+1$ なら $S$ は 1 ずつ増えて $L$ 回以内に $b$ に達する。よって $\{\tau>(k+1)L\}\subset\{\tau>kL\}\cap B_{k}$。$\{\tau>kL\}\in\sigma(\xi_{1},\dots,\xi_{kL})$ は $B_{k}$ と独立（\ref{prb:pi-system-independence.2}）なので $P(\tau>(k+1)L)\le P(\tau>kL)(1-2^{-L})$。帰納法で $P(\tau>kL)\le(1-2^{-L})^{k}$。\ref{prb:tail-formula.2} から $E[\tau]=\sum_{n\ge1}P(\tau\ge n)\le L\sum_{k\ge0}(1-2^{-L})^{k}<\infty$。
+
+**Step 2（到達確率）.** $|S_{\tau\wedge n}|\le\max(a,b)$ なので、\ref{prb:optional-stopping.3} から $E[S_{\tau}]=0$。$p\defeq P(S_{\tau}=b)$ とすると $pb-(1-p)a=0$。
+
+**Step 3（期待値）.** $S_{n}^{2}-n$ はマルチンゲール（\ref{prb:martingale-examples.1}）なので、\ref{prb:optional-stopping.2} から $E[S_{\tau\wedge n}^{2}]=E[\tau\wedge n]$。$n\to\infty$ で、左辺は有界収束定理から $E[S_{\tau}^{2}]=pb^{2}+(1-p)a^{2}=\frac{ab^{2}+ba^{2}}{a+b}=ab$、右辺は単調収束定理から $E[\tau]$。
+:::
+
+::: hypcheck
+- 任意抽出定理の 2 で停止時刻の有界性は本質的：単純ランダムウォークで $\tau\defeq\inf\{n:S_{n}=1\}$ とすると $\tau<\infty$（a.s.、マルコフ連鎖のページで示す予定の再帰性）だが $E[S_{\tau}]=1\ne0=E[S_{0}]$。3 では有界性の代わりに停止過程の有界性を仮定した。
+- マルチンゲール変換で $H$ の可予測性は本質的：$H_{k}\defeq\xi_{k}$（現在の結果を見て賭ける）なら $(H\cdot S)_{n}=n$ で、公平でなくなる。
+- ドゥーブの $L^{p}$ 不等式は $p=1$ では成り立たない：$E[\max_{k\le n}|X_{k}|]$ は $E[|X_{n}|]$ で抑えられない（$L\log L$ の補正が要る）。
+- ギャンブラーの破産の Step 1 で、独立性は「過去の事象 $\{\tau>kL\}$」と「次の $L$ 回の結果」の独立性（\ref{prb:pi-system-independence.2}）として使った。
+:::
+
+::: supplement
+**関連する結果.**
+- 任意抽出定理は、$X$ が一様可積分なマルチンゲールなら、任意の停止時刻（$\infty$ を許す、$X_{\infty}$ は次のページの極限）について成り立つ。また $E[\tau]<\infty$ で増分が有界（$|\Delta X_{n}|\le K$）なら $E[X_{\tau}]=E[X_{0}]$（ワルドの等式の一般化）。演習で扱う。
+- 連続時間のマルチンゲール（ブラウン運動など）にも同じ理論があり、確率積分 $\int H\,dX$ はマルチンゲール変換の連続版である。
+
+**高い視点：情報の流れと公平性.** フィルトレーションは「時間とともに増える情報」で、マルチンゲールは「現在の情報での最良の予測が現在の値である」過程、すなわち条件付き期待値の射影の系列 $E[\,\cdot\mid\mathcal{F}_{n}]$ と両立する過程である。ドゥーブのマルチンゲール $E[Z\mid\mathcal{F}_{n}]$ は、最終的な量 $Z$ についての予測が情報の増加とともに更新されていく様子そのものである。比喩で言えば、マルチンゲール変換の定理は「インサイダー情報（未来）を使わない限り、賭け金の調整や途中でやめる戦略でカジノの公平なゲームに勝つことはできない」という定理である。
+:::
+
+## 問題 {#prb:sec-ms-problems}
+
+::: problem {#prb:prob-ms-asymmetric-ruin}
+\ref{prb:gamblers-ruin} で $P(\xi_{k}=1)=p$, $P(\xi_{k}=-1)=q\defeq1-p$（$p\ne\frac12$）とする。$M_{n}\defeq(q/p)^{S_{n}}$ がマルチンゲールであることを示し、$P(S_{\tau}=b)=\frac{1-(q/p)^{-a}}{(q/p)^{b}-(q/p)^{-a}}$ を導け。
+:::
+
+::: solution
+$E[(q/p)^{\xi_{k}}]=p\cdot\frac qp+q\cdot\frac pq=1$ なので \ref{prb:martingale-examples.2} からマルチンゲール。$\tau<\infty$（a.s.）は \ref{prb:gamblers-ruin} の Step 1 と同じ（$2^{-L}$ を $\min(p,q)^{L}$ に替える）。$M_{\tau\wedge n}$ は $(q/p)^{-a}$ と $(q/p)^{b}$ の間にあって有界なので、\ref{prb:optional-stopping.3} から $E[M_{\tau}]=M_{0}=1$。$\pi\defeq P(S_{\tau}=b)$ とすると $\pi(q/p)^{b}+(1-\pi)(q/p)^{-a}=1$ で、$p\ne q$ から $(q/p)^{b}\ne(q/p)^{-a}$ なので解ける。
+:::
+
+::: problem {#prb:prob-ms-wald}
+$\xi_{1},\xi_{2},\dots$ を i.i.d. で可積分、$S_{n}$ をその部分和、$\tau$ を $(\sigma(\xi_{1},\dots,\xi_{n}))$ についての停止時刻で $E[\tau]<\infty$ とする。$E[S_{\tau}]=E[\tau]E[\xi_{1}]$（ワルドの等式）を示せ。
+:::
+
+::: solution
+$S_{\tau}=\sum_{k\ge1}\xi_{k}\mathbf{1}_{\{\tau\ge k\}}$。$\{\tau\ge k\}=\{\tau\le k-1\}^{c}\in\sigma(\xi_{1},\dots,\xi_{k-1})$ は $\xi_{k}$ と独立なので、$E[|\xi_{k}|\mathbf{1}_{\{\tau\ge k\}}]=E[|\xi_{1}|]P(\tau\ge k)$。トネリと \ref{prb:tail-formula.2} から $E\bigl[\sum_{k}|\xi_{k}|\mathbf{1}_{\{\tau\ge k\}}\bigr]=E[|\xi_{1}|]E[\tau]<\infty$。よってフビニ（和と期待値の交換）が使え、同じ計算で $E[S_{\tau}]=\sum_{k}E[\xi_{1}]P(\tau\ge k)=E[\xi_{1}]E[\tau]$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
