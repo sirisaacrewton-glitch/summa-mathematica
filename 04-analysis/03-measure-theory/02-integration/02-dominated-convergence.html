@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>可積分関数と優収束定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/02-integration/02-dominated-convergence.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 可積分関数と優収束定理 {#meas:page-dominated-convergence keywords="integrable functions, L^1, integral of real and complex valued functions, linearity, triangle inequality for integrals, dominated convergence theorem, continuity and differentiation of parameter integrals, Riemann integrable functions are Lebesgue integrable with the same integral, improper Riemann integrals, sin x / x is not Lebesgue integrable"}
+
+符号をもつ関数は、正の部分と負の部分に分けて積分する。両方の積分が有限な関数が**可積分**で、積分は線形になる。このページの中心は**優収束定理**：各点収束する列が一つの可積分関数で押さえられていれば、積分と極限が交換できる。これは単調収束定理と並ぶルベーグ積分の基本道具で、パラメータを含む積分の連続性・微分可能性（微分と積分の交換）をただちに与える。最後に、リーマン積分可能な関数はルベーグ可積分で値が一致すること、広義リーマン積分との関係を示す。
+
+## 記法と定義の確認 {#meas:sec-dc-notation}
+
+::: notation
+- 非負可測関数の積分・単調収束定理・加法性・マルコフの不等式・ファトゥの補題は \ref{meas:nonnegative-integral}, \ref{meas:monotone-convergence}, \ref{meas:termwise-integration}, \ref{meas:markov}, \ref{meas:fatou}。
+- $f^{+}\defeq\max(f,0)$, $f^{-}\defeq\max(-f,0)$、$f=f^{+}-f^{-}$, $|f|=f^{+}+f^{-}$（\ref{meas:measurable-operations}）。
+- 多変数のダルブー和・細分・積分可能性の判定・ジョルダン可測は \ref{calc:box-partition}, \ref{calc:box-refinement}, \ref{calc:box-riemann-criterion}, \ref{calc:jordan-measurable}。広義積分は \ref{calc:improper-integral}。\ref{calc:mean-value-theorem} も使う。ルベーグ測度の基本性質は \ref{meas:lebesgue-basic}。
+- **選択公理**：使わない。
+:::
+
+## 可積分関数 {#meas:sec-dc-integrable}
+
+::: definition 可積分関数 {#meas:integrable keywords="integrable function: measurable with int |f| < infinity; integral as int f^+ - int f^-; complex valued integrable functions; L^1 as a vector space" index="可積分|かせきぶん, ルベーグ可積分|るべーぐかせきぶん, L^1|えるわん"}
+可測関数 $f\colon X\to\mathbb{R}$ が $\int|f|\,d\mu<\infty$ を満たすとき**可積分**といい、
+$$
+\int f\,d\mu\defeq\int f^{+}\,d\mu-\int f^{-}\,d\mu\in\mathbb{R}
+$$
+と定める（$f^{\pm}\le|f|$ なので両項は有限）。可積分関数の全体を $\mathcal{L}^{1}(\mu)$ と書く。複素数値の可測関数 $f$（実部と虚部が可測）は $\int|f|<\infty$ のとき可積分といい、$\int f\defeq\int\operatorname{Re}f+i\int\operatorname{Im}f$ とする。
+:::
+
+::: proposition 積分の線形性と三角不等式 {#meas:integral-linearity keywords="L^1 is a vector space and the integral is a linear functional; monotonicity; |int f| <= int |f|; integrals of functions equal a.e. agree" index="積分の線形性|せきぶんのせんけいせい"}
+$f,g\in\mathcal{L}^{1}(\mu)$（実数値または複素数値）、$a,b$ をスカラーとする。
+1. $af+bg\in\mathcal{L}^{1}$ で $\int(af+bg)=a\int f+b\int g$。
+2. 実数値で $f\le g$ なら $\int f\le\int g$。
+3. $\bigl|\int f\bigr|\le\int|f|$。
+4. $f=g$（a.e.）なら $\int f=\int g$。
+:::
+
+::: proof
+**1（実数値）.** $|af+bg|\le|a||f|+|b||g|$ と \ref{meas:termwise-integration.1} から可積分。$h\defeq f+g$ について $h^{+}-h^{-}=f^{+}-f^{-}+g^{+}-g^{-}$ なので $h^{+}+f^{-}+g^{-}=h^{-}+f^{+}+g^{+}$。両辺は非負可測で、加法性から積分の等式を得て、すべて有限なので移項すれば $\int h=\int f+\int g$。$a\ge0$ なら $(af)^{\pm}=af^{\pm}$、$a<0$ なら $(af)^{\pm}=|a|f^{\mp}$ で、\ref{meas:nonnegative-integral-basic.3} から $\int af=a\int f$。複素数値は実部と虚部に分けて同じ（$i$ を掛けると実部と虚部が入れ替わることを確かめる）。
+
+**2.** $g-f\ge0$ で、1 から $\int g-\int f=\int(g-f)\ge0$。
+
+**3.** 実数値なら $-|f|\le f\le|f|$ と 2。複素数値なら $\int f=re^{i\theta}$（$r\ge0$）として $r=\int e^{-i\theta}f=\int\operatorname{Re}(e^{-i\theta}f)\le\int|f|$（左の等号で、$\int e^{-i\theta}f$ は実数 $r$ なので虚部の積分は $0$）。
+
+**4.** $f^{\pm}=g^{\pm}$（a.e.）と \ref{meas:markov.4}。
+:::
+
+## 優収束定理 {#meas:sec-dc-dominated}
+
+::: theorem 優収束定理 {#meas:dominated-convergence keywords="Lebesgue dominated convergence theorem: if f_n -> f a.e. and |f_n| <= g with g integrable then f is integrable, int |f_n - f| -> 0 and int f_n -> int f" index="優収束定理|ゆうしゅうそくていり, ルベーグの収束定理|るべーぐのしゅうそくていり"}
+可測関数 $f_{n},f$（実数値または複素数値）について、$f_{n}\to f$（a.e.）で、可積分な $g\ge0$ が存在してすべての $n$ で $|f_{n}|\le g$（a.e.）とする。このとき $f$ は可積分で
+$$
+\lim_{n\to\infty}\int|f_{n}-f|\,d\mu=0,\qquad\lim_{n\to\infty}\int f_{n}\,d\mu=\int f\,d\mu.
+$$
+:::
+
+::: proof
+**Step 1（例外集合を除く）.** 可算個の零集合の和 $N$ の外で $f_{n}\to f$ かつ $|f_{n}|\le g$（すべての $n$）とする。$f$, $f_{n}$ を $N$ の上で $0$ に置き換えても積分は変わらない（\ref{meas:integral-linearity.4}）ので、すべての点で成り立つとしてよい。
+
+**Step 2（$f$ は可積分）.** $|f|=\lim|f_{n}|\le g$ なので $\int|f|\le\int g<\infty$。
+
+**Step 3（ファトゥ）.** $h_{n}\defeq2g-|f_{n}-f|\ge0$（$|f_{n}-f|\le|f_{n}|+|f|\le2g$）は可測で、$h_{n}\to2g$。\ref{meas:fatou} から
+$$
+\int2g\le\liminf_{n}\int(2g-|f_{n}-f|)=\int2g-\limsup_{n}\int|f_{n}-f|.
+$$
+$\int2g<\infty$ なので $\limsup\int|f_{n}-f|\le0$。最後の主張は $\bigl|\int f_{n}-\int f\bigr|\le\int|f_{n}-f|$（\ref{meas:integral-linearity.3}）。
+
+::: hypcheck
+- **優関数の可積分性**：Step 3 で $\int2g$ を両辺から引くのに有限性を使った。外すと偽：$f_{n}\defeq n\mathbf{1}_{(0,1/n)}\to0$ は $|f_{n}|\le g\defeq\sup_{n}f_{n}$ で押さえられるが、$g\ge\frac{1}{2x}$ 程度で $(0,1)$ 上可積分でなく、$\int f_{n}=1\not\to0$。
+- **可測性**：$f$ の可測性は仮定した（完備な測度空間なら \ref{meas:ae-measurable.2} から自動）。
+- 有限測度空間で $|f_{n}|\le M$（定数）なら $g=M$ が可積分な優関数なので、**有界収束定理**が特別な場合として従う。
+:::
+:::
+
+::: corollary 級数の項別積分（可積分の場合） {#meas:series-dominated keywords="if sum int |f_k| < infinity then sum f_k converges a.e. absolutely, is integrable, and int sum f_k = sum int f_k" index="項別積分（可積分）|こうべつせきぶんかせきぶん"}
+可測関数 $f_{k}$ が $\sum_{k}\int|f_{k}|<\infty$ を満たせば、$\sum_{k}f_{k}(x)$ はほとんど至る所絶対収束し、その和は可積分で $\int\sum_{k}f_{k}=\sum_{k}\int f_{k}$。
+:::
+
+::: proof
+$G\defeq\sum_{k}|f_{k}|$ は \ref{meas:termwise-integration.2} から $\int G=\sum\int|f_{k}|<\infty$、\ref{meas:markov.3} から $G<\infty$（a.e.）で、そこで級数は絶対収束する。部分和は $|\sum_{k\le n}f_{k}|\le G$ で押さえられるので、\ref{meas:dominated-convergence} と線形性から。
+:::
+
+## パラメータを含む積分 {#meas:sec-dc-parameter}
+
+::: theorem パラメータ積分の連続性と微分 {#meas:parameter-integrals keywords="continuity and differentiability of F(t) = int f(x,t) dmu(x) under a dominating integrable function; differentiation under the integral sign" index="パラメータ積分（ルベーグ）|ぱらめーたせきぶんるべーぐ, 微分と積分の交換|びぶんとせきぶんのこうかん"}
+$T\subset\mathbb{R}$ を区間、$f\colon X\times T\to\mathbb{R}$ を、各 $t$ で $x\mapsto f(x,t)$ が可積分な関数とし、$F(t)\defeq\int f(x,t)\,d\mu(x)$ とおく。
+1. ほとんどすべての $x$ で $t\mapsto f(x,t)$ が $t_{0}$ で連続で、可積分な $g$ について $|f(x,t)|\le g(x)$（すべての $t$, a.e. $x$）なら、$F$ は $t_{0}$ で連続。
+2. ほとんどすべての $x$ で $t\mapsto f(x,t)$ が $T$ 上微分可能で、可積分な $g$ について $|\partial_{t}f(x,t)|\le g(x)$（すべての $t$, a.e. $x$）なら、$F$ は $T$ 上微分可能で $F'(t)=\int\partial_{t}f(x,t)\,d\mu(x)$。
+:::
+
+::: proof
+**1.** $t_{n}\to t_{0}$ を任意の列とすると、$f(\cdot,t_{n})\to f(\cdot,t_{0})$（a.e.）で $|f(\cdot,t_{n})|\le g$。\ref{meas:dominated-convergence} から $F(t_{n})\to F(t_{0})$。列による連続性の判定から $F$ は $t_{0}$ で連続。
+
+**2.** $t\in T$ と $t_{n}\to t$（$t_{n}\in T\setminus\{t\}$）について $q_{n}(x)\defeq\frac{f(x,t_{n})-f(x,t)}{t_{n}-t}$ は可積分で（可積分関数の差の定数倍）、ほとんどすべての $x$ で $\partial_{t}f(x,t)$ に収束する（したがって $\partial_{t}f(\cdot,t)$ は可測関数の極限として、ほとんど至る所等しい可測関数をもつ）。\ref{calc:mean-value-theorem} から、ほとんどすべての $x$ で $q_{n}(x)=\partial_{t}f(x,\xi)$（$\xi$ は $t$ と $t_{n}$ の間）なので $|q_{n}|\le g$。\ref{meas:dominated-convergence} から $\frac{F(t_{n})-F(t)}{t_{n}-t}=\int q_{n}\to\int\partial_{t}f(x,t)\,d\mu$。
+
+::: hypcheck
+- 2 で優関数を**導関数**に対して要求したのは、平均値の定理で差分商を押さえるため。$f$ 自身の優関数だけでは足りない。
+- 2 の $\partial_{t}f(\cdot,t)$ の可測性は、差分商の極限として得た（零集合の上の値は積分に影響しない）。
+:::
+:::
+
+## リーマン積分との関係 {#meas:sec-dc-riemann}
+
+::: theorem リーマン積分とルベーグ積分 {#meas:riemann-lebesgue keywords="a bounded Riemann integrable function on a closed box is Lebesgue integrable and the two integrals agree; proof by monotone limits of step functions from Darboux sums" index="リーマン積分とルベーグ積分|りーまんせきぶんとるべーぐせきぶん"}
+閉直方体 $R\subset\mathbb{R}^{n}$ 上の有界な $f$ がリーマン積分可能なら、$f$ は $R$ 上ルベーグ可測かつ可積分で、$\int_{R}f\,d\lambda$ はリーマン積分 $\int_{R}f$（\ref{calc:box-integral}）に等しい。
+:::
+
+::: proof
+**Step 1（ダルブー和を階段関数で表す）.** $R$ の分割 $P$ について、小直方体（閉）$Q$ の内部 $Q^{\circ}$ は互いに素で、$R\setminus\bigsqcup Q^{\circ}$ は小直方体の境界の和で $\lambda$ 零集合（各面は退化した直方体、\ref{meas:lebesgue-basic.3}）。
+$$
+\varphi_{P}\defeq\sum_{Q}\bigl(\inf_{Q}f\bigr)\mathbf{1}_{Q^{\circ}},\qquad\psi_{P}\defeq\sum_{Q}\bigl(\sup_{Q}f\bigr)\mathbf{1}_{Q^{\circ}}
+$$
+はボレル可測で、$R$ 上ほとんど至る所 $\varphi_{P}\le f\le\psi_{P}$、$\int_{R}\varphi_{P}\,d\lambda=L(f,P)$, $\int_{R}\psi_{P}\,d\lambda=U(f,P)$（$\lambda(Q^{\circ})=v(Q)$）。
+
+**Step 2（単調な列）.** \ref{calc:box-riemann-criterion} から分割 $P'_{k}$ で $U(f,P'_{k})-L(f,P'_{k})<\frac1k$ となるものがある。$P_{k}$ を $P'_{1},\dots,P'_{k}$ の共通の細分とすると、\ref{calc:box-refinement} から $U-L$ はさらに小さく、細分では各小直方体の $\inf$ は増え $\sup$ は減るので、ほとんど至る所 $\varphi_{P_{k}}$ は増加、$\psi_{P_{k}}$ は減少する（細分の小直方体の内部は、元の小直方体の内部に含まれるか、境界の零集合の中にある）。$\varphi\defeq\sup_{k}\varphi_{P_{k}}$, $\psi\defeq\inf_{k}\psi_{P_{k}}$ はボレル可測で、ほとんど至る所 $\varphi\le f\le\psi$。
+
+**Step 3（一致）.** $f$ は有界なので $|\varphi_{P_{k}}|,|\psi_{P_{k}}|\le\sup|f|$ で、$\lambda(R)<\infty$ なので定数が優関数になり、\ref{meas:dominated-convergence} から $\int\varphi=\lim L(f,P_{k})=\int_{R}f$、$\int\psi=\lim U(f,P_{k})=\int_{R}f$。よって $\int(\psi-\varphi)=0$、$\psi-\varphi\ge0$（a.e.）から $\psi=\varphi$（a.e.、\ref{meas:markov.2}）。したがって $f=\varphi$（a.e.）で、ルベーグ測度は完備なので $f$ はルベーグ可測（\ref{meas:ae-measurable.1}）、$\int_{R}f\,d\lambda=\int\varphi\,d\lambda=\int_{R}f$。
+
+::: hypcheck
+- **有界性**：Step 3 の優関数（定数）に使った。リーマン積分可能な関数はもともと有界である。
+- 逆は偽：$\mathbf{1}_{\mathbb{Q}\cap[0,1]}$ はルベーグ可積分（積分 $0$）だがリーマン積分可能でない。リーマン積分可能性は「ほとんど至る所連続」と同値（\ref{calc:lebesgue-criterion-rn}）で、「ほとんど至る所等しい関数がほとんど至る所連続」より強い。
+- $f$ がボレル可測とは限らない：$f$ を、カントール集合の部分集合でボレルでないものの特性関数にとると、不連続点はカントール集合に含まれ測度 $0$ なのでリーマン積分可能だが、ボレル可測でない。
+:::
+:::
+
+::: proposition 広義積分との関係 {#meas:improper-lebesgue keywords="for f >= 0 locally Riemann integrable on [a, infinity), the Lebesgue integral equals the improper Riemann integral; absolutely convergent improper integrals are Lebesgue integrals; sin x / x is improperly integrable but not Lebesgue integrable" index="広義積分とルベーグ積分|こうぎせきぶんとるべーぐせきぶん"}
+$f\colon[a,\infty)\to\mathbb{R}$ を、各 $[a,b]$ 上リーマン積分可能な関数とする。
+1. $f\ge0$ なら $\int_{[a,\infty)}f\,d\lambda=\lim_{b\to\infty}\int_{a}^{b}f\in[0,\infty]$。
+2. 広義積分 $\int_{a}^{\infty}|f|$ が収束すれば、$f$ はルベーグ可積分で $\int_{[a,\infty)}f\,d\lambda=\int_{a}^{\infty}f$。
+3. $\int_{1}^{\infty}\frac{\sin x}{x}\,dx$ は広義積分として収束するが、$\frac{\sin x}{x}$ は $[1,\infty)$ 上ルベーグ可積分でない。
+:::
+
+::: proof
+**1.** $f\mathbf{1}_{[a,b_{k}]}\uparrow f$（$b_{k}\uparrow\infty$）と \ref{meas:monotone-convergence}、\ref{meas:riemann-lebesgue}。
+
+**2.** 1 から $\int|f|\,d\lambda=\int_{a}^{\infty}|f|<\infty$。$|f\mathbf{1}_{[a,b_{k}]}|\le|f|$ なので \ref{meas:dominated-convergence} から $\int f\,d\lambda=\lim\int_{a}^{b_{k}}f$。
+
+**3.** 収束：部分積分で $\int_{1}^{b}\frac{\sin x}{x}dx=\cos1-\frac{\cos b}{b}-\int_{1}^{b}\frac{\cos x}{x^{2}}dx$ で、右辺は $b\to\infty$ で収束する（$|\cos x/x^{2}|\le x^{-2}$ の広義積分は収束、\ref{calc:improper-tests}）。非可積分：$k\ge1$ について $[k\pi,(k+1)\pi]$ 上で $\frac{|\sin x|}{x}\ge\frac{|\sin x|}{(k+1)\pi}$ で、$\int_{k\pi}^{(k+1)\pi}|\sin x|\,dx=2$ なので、1 から $\int_{[1,\infty)}\frac{|\sin x|}{x}d\lambda\ge\sum_{k\ge1}\frac{2}{(k+1)\pi}=\infty$。
+:::
+
+::: supplement
+**高い視点：積分は「極限で閉じた」線形汎関数.** リーマン積分は「区間で細かく切る」ので、関数の連続性（あるいはほとんど至る所の連続性）に強く依存し、各点収束の極限で閉じない。ルベーグ積分は「値で切る」ので、可測性さえあればよく、可測関数は極限で閉じている（\ref{meas:measurable-limits}）。優収束定理は、この閉じ方が積分の値とも両立することを、可積分な優関数という一つの条件で保証する。関数解析の言葉では、$\mathcal{L}^{1}$ をほとんど至る所等しい関数で割った空間 $L^{1}$ は完備なノルム空間（次の次のページ）で、リーマン積分可能な関数の空間はその中で稠密だが閉じていない。ルベーグ積分は、リーマン積分を「$L^{1}$ ノルムについて完備化」したものと見ることができる。比喩で言えば、リーマン積分は「目盛りの細かい定規で測れる形」しか測れないが、ルベーグ積分は「定規で測れる形の極限」まで測れる測量機で、優収束定理はその測量機が極限で狂わない保証書である。
+:::
+
+## 問題 {#meas:sec-dc-problems}
+
+::: problem {#meas:prob-dc-exponential-limit}
+$\lim_{n\to\infty}\int_{0}^{n}\bigl(1-\frac{x}{n}\bigr)^{n}dx=1$ を優収束定理で示せ。
+:::
+
+::: solution
+$f_{n}(x)\defeq(1-\frac xn)^{n}\mathbf{1}_{[0,n]}(x)$（$x\ge0$）とする。$0\le t<1$ で $\log(1-t)\le-t$ なので、$0\le x<n$ で $0\le f_{n}(x)=e^{n\log(1-x/n)}\le e^{-x}$（$x=n$ では $f_{n}=0$）。各 $x$ で $n\log(1-\frac xn)\to-x$ なので $f_{n}(x)\to e^{-x}$。$e^{-x}$ は $[0,\infty)$ 上ルベーグ可積分で積分は $\lim_{b}\int_{0}^{b}e^{-x}dx=1$（\ref{meas:improper-lebesgue.1}）。\ref{meas:dominated-convergence} から $\int f_{n}\,d\lambda\to1$、左辺はリーマン積分 $\int_{0}^{n}(1-\frac xn)^{n}dx$ に等しい（\ref{meas:riemann-lebesgue}）。
+:::
+
+::: problem {#meas:prob-dc-gamma-integers}
+$t>0$ について $\int_{0}^{\infty}e^{-tx}\,dx=\frac1t$ を、$t$ について $k$ 回微分して $\int_{0}^{\infty}x^{k}e^{-tx}\,dx=\frac{k!}{t^{k+1}}$ を示せ（各段の微分と積分の交換を正当化せよ）。
+:::
+
+::: solution
+$a>0$ を固定し $t\in T\defeq(a,\infty)$ とする。$f_{j}(x,t)\defeq(-x)^{j}e^{-tx}$ とおくと $\partial_{t}f_{j}=f_{j+1}$ で、$|f_{j+1}(x,t)|\le x^{j+1}e^{-ax}\eqdef g_{j}(x)$。$g_{j}$ は $[0,\infty)$ 上可積分（$x^{j+1}e^{-ax/2}$ は有界なので $g_{j}\le Ce^{-ax/2}$、\ref{meas:improper-lebesgue.1}）。\ref{meas:parameter-integrals.2} を $j=0,1,\dots,k-1$ について順に使うと、$F(t)\defeq\int_{0}^{\infty}e^{-tx}dx=\frac1t$ について $F^{(k)}(t)=\int_{0}^{\infty}(-x)^{k}e^{-tx}dx$。一方 $(\frac1t)^{(k)}=\frac{(-1)^{k}k!}{t^{k+1}}$。両辺を $(-1)^{k}$ で割る。$a>0$ は任意なので、すべての $t>0$ で成り立つ。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
