@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：条件付き期待値とマルチンゲール | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/02-martingales/05-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：条件付き期待値とマルチンゲール {#prb:page-exercises-martingales keywords="exercises, Conditional Expectation and Martingales"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは、条件付き期待値の具体的な計算（三角形上の一様分布・ポアソン分布の間引き・ラプラスの継起の法則）と条件付きの収束定理、任意抽出定理の応用（非対称なランダムウォークの破産までの時間・到達時刻の母関数）とアズマ–ヘフディングの不等式、収束定理の応用（2 進区間による密度の近似・ポリアの壺の極限分布・角谷の定理）、および、分枝過程の分散・ランダムな級数・投票問題である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#prb:sec-expr2-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。とくに、条件付き期待値は \ref{prb:conditional-expectation}、マルチンゲール・停止時刻は \ref{prb:martingale}, \ref{prb:stopping-time} のとおり。$E[X;A]\defeq E[X\mathbf{1}_{A}]$、$a\wedge b\defeq\min(a,b)$、$x^{+}\defeq\max(x,0)$、$x^{-}\defeq\max(-x,0)$。確率変数の間の等式・不等式は、とくに断らなければ a.s. の意味。
+- 分布 $B(n,p)$, $\mathrm{Po}(\lambda)$, $U(a,b)$, $\mathrm{Exp}(\lambda)$, $N(m,\sigma^{2})$ は \ref{prb:distribution-examples} のとおり。**単純ランダムウォーク** $S_{n}=\xi_{1}+\dots+\xi_{n}$（$\xi_{k}$ は i.i.d. で $P(\xi_{k}=\pm1)=\frac12$、$S_{0}=0$）は \ref{prb:gamblers-ruin} のとおりで、フィルトレーションは $\mathcal{F}_{n}\defeq\sigma(\xi_{1},\dots,\xi_{n})$ とする。
+- 必要な独立な確率変数の列は、\ref{prb:independent-sequence-existence.3} によって一つの確率空間の上に作れる。以下ではそれを断らずに使う。
+- **独立な積の期待値**：$Y_{1},\dots,Y_{n}$ が独立で可積分なら $E[Y_{1}\cdots Y_{n}]=E[Y_{1}]\cdots E[Y_{n}]$。\ref{prb:pi-system-independence.2} から $Y_{1}\cdots Y_{n-1}$ と $Y_{n}$ は独立なので、\ref{prb:independence-criteria.3} と $n$ についての帰納法から。
+- **ベータ積分**：整数 $j,k\ge0$ について
+$$
+\int_{0}^{1}\theta^{j}(1-\theta)^{k}\,d\theta=\frac{j!\,k!}{(j+k+1)!}.
+$$
+左辺を $I(j,k)$ とおくと、$I(j,0)=\frac{1}{j+1}$ で、$k\ge1$ なら部分積分から $I(j,k)=\frac{k}{j+1}I(j+1,k-1)$。$k$ についての帰納法で $I(j,k)=\frac{k}{j+1}\cdot\frac{(j+1)!\,(k-1)!}{(j+k+1)!}=\frac{j!\,k!}{(j+k+1)!}$。
+- $\cosh x\defeq\frac{e^{x}+e^{-x}}{2}=\sum_{k\ge0}\frac{x^{2k}}{(2k)!}$。$0\le s<1$ について $s^{\infty}\defeq0$。
+- 対数の不等式 $-\frac{y}{1-y}\le\log(1-y)\le-y$（$0\le y<1$）は \ref{prb:sec-expr1-notation} のとおり。
+- **選択公理**：使わない。
+:::
+
+## 条件付き期待値 {#prb:sec-ce-exercises}
+
+対応するページ：\ref{prb:page-conditional-expectation}
+
+::: problem ★ 基本：三角形上の一様分布とポアソン分布の間引き {#prb:ex-ce-1}
+1. $(X,Y)$ が三角形 $T\defeq\{(x,y):0\le y\le x\le1\}$ 上の一様分布（密度 $2\cdot\mathbf{1}_{T}$）に従うとき、$E[Y\mid X]=\frac{X}{2}$, $E[X\mid Y]=\frac{1+Y}{2}$ を示せ。
+2. $\lambda>0$, $0<p<1$, $q\defeq1-p$ とする。$N\sim\mathrm{Po}(\lambda)$ と、i.i.d. で $B(1,p)$ に従う $\eta_{1},\eta_{2},\dots$ について、$\sigma(N)$ と $\sigma(\eta_{1},\eta_{2},\dots)$ が独立とし、$M\defeq\sum_{i=1}^{N}\eta_{i}$（$N=0$ なら $M\defeq0$）とおく（$N$ 個の点のそれぞれを独立に確率 $p$ で残す「間引き」）。$E[M\mid N]=pN$ を示せ。
+3. 2 の $M$ と $K\defeq N-M$ は独立で、$M\sim\mathrm{Po}(\lambda p)$, $K\sim\mathrm{Po}(\lambda q)$ であることを示し、$E[N\mid M]=M+\lambda q$ を導け。
+:::
+
+::: solution
+**1.** $f\defeq2\cdot\mathbf{1}_{T}$ とする。$0\le X,Y\le1$ なので $X,Y$ は可積分。\ref{prb:conditional-examples.3} を使う（$X$ と $Y$ の役割を入れ替えた形も同じ証明で成り立つ）。
+
+**$E[Y\mid X]$.** $0<x\le1$ では
+$$
+f_{X}(x)\defeq\int f(x,y)\,dy=\int_{0}^{x}2\,dy=2x>0,\qquad\int yf(x,y)\,dy=\int_{0}^{x}2y\,dy=x^{2},
+$$
+よって $h(x)=\frac{x^{2}}{2x}=\frac x2$。$x\notin(0,1]$ では $f_{X}(x)=0$ で、$P(X\notin(0,1])=\int_{\mathbb{R}\setminus(0,1]}f_{X}(x)\,dx=0$。よって $E[Y\mid X]=h(X)=\frac X2$（a.s.）。
+
+**$E[X\mid Y]$.** $0\le y<1$ では
+$$
+f_{Y}(y)=\int_{y}^{1}2\,dx=2(1-y)>0,\qquad\int xf(x,y)\,dx=\int_{y}^{1}2x\,dx=1-y^{2},
+$$
+よって $h(y)=\frac{1-y^{2}}{2(1-y)}=\frac{1+y}{2}$。$P(Y\notin[0,1))=0$ も同様なので $E[X\mid Y]=\frac{1+Y}{2}$。
+
+**2.** $N$ は a.s. で非負整数値なので、零集合の上で値を $0$ に取り替えて、$N$ は非負整数値としてよい。このとき $\sigma(N)$ は可算分割 $\{N=n\}$（$n\ge0$）が生成する σ-加法族で、$P(N=n)=e^{-\lambda}\frac{\lambda^{n}}{n!}>0$。$T_{n}\defeq\sum_{i\le n}\eta_{i}$ とおくと $T_{n}$ は $\sigma(\eta_{1},\eta_{2},\dots)$ 可測で $E[T_{n}]=np$、$\{N=n\}$ の上で $M=T_{n}$。$0\le M\le N$ なので $M$ は可積分で、独立性（\ref{prb:independence-criteria.3}）から
+$$
+E[M;N=n]=E\bigl[T_{n}\mathbf{1}_{\{N=n\}}\bigr]=E[T_{n}]P(N=n)=npP(N=n).
+$$
+\ref{prb:conditional-examples.2} から $E[M\mid N]=\sum_{n\ge0}\frac{npP(N=n)}{P(N=n)}\mathbf{1}_{\{N=n\}}=pN$。
+
+**3.** **同時分布.** 長さ $n$ の 0-1 列で $1$ を $j$ 個含むものは $\binom nj$ 個あり、$\eta_{i}$ の独立性から各列の確率は $p^{j}q^{n-j}$ なので、$P(T_{n}=j)=\binom nj p^{j}q^{n-j}$。整数 $j,k\ge0$ について $\{M=j,K=k\}=\{N=j+k\}\cap\{T_{j+k}=j\}$ なので、独立性から
+$$
+P(M=j,K=k)=e^{-\lambda}\frac{\lambda^{j+k}}{(j+k)!}\binom{j+k}{j}p^{j}q^{k}=e^{-\lambda p}\frac{(\lambda p)^{j}}{j!}\cdot e^{-\lambda q}\frac{(\lambda q)^{k}}{k!}
+$$
+（$e^{-\lambda}=e^{-\lambda p}e^{-\lambda q}$, $\lambda^{j+k}=\lambda^{j}\lambda^{k}$）。
+
+**周辺分布と独立性.** $k$ について足すと、$\sum_{k\ge0}e^{-\lambda q}\frac{(\lambda q)^{k}}{k!}=1$ から $P(M=j)=e^{-\lambda p}\frac{(\lambda p)^{j}}{j!}$、すなわち $M\sim\mathrm{Po}(\lambda p)$。同様に $K\sim\mathrm{Po}(\lambda q)$。よって $P(M=j,K=k)=P(M=j)P(K=k)$ で、$B,C\subset\mathbb{Z}_{\ge0}$ について足せば $P(M\in B,K\in C)=P(M\in B)P(K\in C)$。$M,K$ は $\mathbb{Z}_{\ge0}$ に値をとるので、$\sigma(M)$, $\sigma(K)$ の元はこの形の事象で、$M$ と $K$ は独立。
+
+**$E[N\mid M]$.** $N=M+K$ で、\ref{prb:conditional-properties.1}・3・6 と \ref{prb:prob-rv-moments} から
+$$
+E[N\mid M]=E[M\mid M]+E[K\mid M]=M+E[K]=M+\lambda q.
+$$
+
+（1 で $E\bigl[E[Y\mid X]\bigr]=\frac{E[X]}{2}=\frac13=E[Y]$ となり、\ref{prb:conditional-properties.3} と整合する。2・3 の二つの条件付き期待値は向きによって形が違う：$N$ を知れば $M$ の平均は $pN$ だが、$M$ を知ったときの $N$ の平均は、残った $M$ 個に、$M$ と独立な「消えた点の数」の平均 $\lambda q$ を足したものである。ポアソン分布の間引きが独立な二つのポアソン分布に分かれることがその理由である。）
+:::
+
+::: problem ★★ 標準：条件付きの収束定理と L¹ での近さ {#prb:ex-ce-2}
+$\mathcal{G}\subset\mathcal{F}$ を部分 σ-加法族とする。
+1. （条件付きファトゥの補題）$X_{n}\ge0$ が可積分で、$\liminf_{n}X_{n}$ も可積分なら、$E[\liminf_{n}X_{n}\mid\mathcal{G}]\le\liminf_{n}E[X_{n}\mid\mathcal{G}]$ を示せ。
+2. （条件付き優収束定理）$X_{n}\to X$（a.s.）で、可積分な $Z$ についてすべての $n$ で $|X_{n}|\le Z$ なら、$E[X_{n}\mid\mathcal{G}]\to E[X\mid\mathcal{G}]$（a.s.）を示せ。
+3. $X\in L^{1}$ と、$\mathcal{G}$ 可測で可積分な任意の $W$ について $E\bigl[|X-E[X\mid\mathcal{G}]|\bigr]\le2E[|X-W|]$ を示せ。また、$\mathcal{G}=\{\emptyset,\Omega\}$, $X\sim B(1,p)$（$0<p<\frac12$）の場合を考えて、$E[X\mid\mathcal{G}]$ は $E[|X-W|]$ を最小にする $W$ とは限らないこと、および定数 $2$ はこれより小さくできないことを示せ。
+:::
+
+::: solution
+**1.** $Y_{n}\defeq\inf_{k\ge n}X_{k}$ とおくと、$Y_{n}$ は可測で $0\le Y_{n}\le X_{n}$（よって可積分）、$Y_{n}\uparrow X_{\ast}\defeq\liminf_{n}X_{n}\in L^{1}$。\ref{prb:conditional-properties.7} から $E[Y_{n}\mid\mathcal{G}]\uparrow E[X_{\ast}\mid\mathcal{G}]$。一方 $k\ge n$ なら $Y_{n}\le X_{k}$ なので、\ref{prb:conditional-properties.2} から $E[Y_{n}\mid\mathcal{G}]\le E[X_{k}\mid\mathcal{G}]$（a.s.）。これは可算個の $k$ についての主張なので、確率 $1$ の事象の上で同時に成り立ち、$E[Y_{n}\mid\mathcal{G}]\le\inf_{k\ge n}E[X_{k}\mid\mathcal{G}]$。$n\to\infty$ とすれば
+$$
+E[X_{\ast}\mid\mathcal{G}]=\lim_{n}E[Y_{n}\mid\mathcal{G}]\le\lim_{n}\inf_{k\ge n}E[X_{k}\mid\mathcal{G}]=\liminf_{n}E[X_{n}\mid\mathcal{G}].
+$$
+
+**2.** $|X|\le Z$（a.s.）なので $X$ は可積分。$W_{n}\defeq\sup_{k\ge n}|X_{k}-X|$ とおくと、$W_{n}$ は可測で $0\le W_{n}\le2Z$、$W_{n}$ は $n$ について減少し、$X_{n}\to X$ の成り立つ点では $W_{n}\to0$。\ref{prb:conditional-properties.1}・2 から
+$$
+\bigl|E[X_{n}\mid\mathcal{G}]-E[X\mid\mathcal{G}]\bigr|=\bigl|E[X_{n}-X\mid\mathcal{G}]\bigr|\le E\bigl[|X_{n}-X|\bigm|\mathcal{G}\bigr]\le E[W_{n}\mid\mathcal{G}].
+$$
+$V_{n}\defeq E[W_{n}\mid\mathcal{G}]$ は、単調性から a.s. で非負かつ $n$ について減少するので、極限 $V\ge0$ をもつ。すべての $n$ で、$V\le V_{n}$ と \ref{prb:conditional-properties.3} から $E[V]\le E[V_{n}]=E[W_{n}]$ で、\ref{meas:dominated-convergence}（優関数 $2Z$）から $E[W_{n}]\to0$。よって $E[V]=0$、$V=0$（a.s.）で、上の不等式の右辺は $0$ に収束する。
+
+**3.** **不等式.** $Y\defeq E[X\mid\mathcal{G}]$ とする。$W$ は $\mathcal{G}$ 可測なので $W=E[W\mid\mathcal{G}]$（\ref{prb:conditional-properties.3}）で、\ref{prb:conditional-properties.1}・2 から
+$$
+|Y-W|=\bigl|E[X-W\mid\mathcal{G}]\bigr|\le E\bigl[|X-W|\bigm|\mathcal{G}\bigr].
+$$
+$|X-Y|\le|X-W|+|W-Y|$ の期待値をとり、\ref{prb:conditional-properties.3} を使うと
+$$
+E[|X-Y|]\le E[|X-W|]+E\Bigl[E\bigl[|X-W|\bigm|\mathcal{G}\bigr]\Bigr]=2E[|X-W|].
+$$
+
+**例.** $\mathcal{G}=\{\emptyset,\Omega\}$ なら $E[X\mid\mathcal{G}]=E[X]=p$（\ref{prb:conditional-examples.1}）で、$\mathcal{G}$ 可測な $W$ は定数。$X\sim B(1,p)$ なら
+$$
+E[|X-p|]=p(1-p)+(1-p)p=2p(1-p),\qquad E[|X-0|]=p.
+$$
+$0<p<\frac12$ なら $2(1-p)>1$ なので $E[|X-0|]<E[|X-p|]$ で、$E[X\mid\mathcal{G}]$ は $L^{1}$ の距離を最小にしない（例えば $p=\frac14$ で $\frac14<\frac38$）。また $\frac{E[|X-p|]}{E[|X-0|]}=2(1-p)\to2$（$p\to0$）なので、$2$ より小さい定数 $c$ で $E[|X-Y|]\le cE[|X-W|]$ がつねに成り立つことはない。
+
+（1・2 は \ref{prb:page-conditional-expectation} の補足で述べた条件付きの収束定理である。3 から、$E[X\mid\mathcal{G}]$ は $L^{2}$ では $\mathcal{G}$ 可測な確率変数の中で最も近い（\ref{prb:conditional-expectation-existence.2}）が、$L^{1}$ ではそうとは限らず、ただ最良のものの $2$ 倍以内に収まる。$L^{1}$ の距離を最小にするのは条件付きの中央値で、例では $X$ の中央値 $0$ が最良である。）
+:::
+
+::: problem ★★★ 発展：ラプラスの継起の法則 {#prb:ex-ce-3}
+$\Theta,U_{1},U_{2},\dots$ を独立で、どれも $U(0,1)$ に従う確率変数とし、
+$$
+\xi_{k}\defeq\mathbf{1}_{\{U_{k}\le\Theta\}},\qquad S_{n}\defeq\xi_{1}+\dots+\xi_{n},\qquad\mathcal{F}_{n}\defeq\sigma(\xi_{1},\dots,\xi_{n})
+$$
+とおく（表の出る確率 $\Theta$ が未知で一様に分布するコインを投げる）。$e=(e_{1},\dots,e_{n})\in\{0,1\}^{n}$ について $A_{e}\defeq\{\xi_{1}=e_{1},\dots,\xi_{n}=e_{n}\}$, $s(e)\defeq e_{1}+\dots+e_{n}$ とする。
+1. 有界なボレル関数 $g\colon[0,1]\to[0,\infty)$ について $E[g(\Theta);A_{e}]=\int_{0}^{1}g(\theta)\theta^{s(e)}(1-\theta)^{n-s(e)}\,d\theta$ を示せ。これから、$S_{n}$ は $\{0,1,\dots,n\}$ 上の一様分布に従うことを導け。
+2. $E[\Theta\mid\mathcal{F}_{n}]=P(\xi_{n+1}=1\mid\mathcal{F}_{n})=\frac{S_{n}+1}{n+2}$ を示せ。
+3. $E\bigl[(\Theta-E[\Theta\mid\mathcal{F}_{n}])^{2}\bigr]=\frac{1}{6(n+2)}$ を示せ。
+:::
+
+::: solution
+**1.** **積分表示.** \ref{prb:independence-criteria.1} から $(\Theta,U_{1},\dots,U_{n})$ の分布は $[0,1]^{n+1}$ 上の $\lambda^{\otimes(n+1)}$。$\varphi_{1}(\theta,u)\defeq\mathbf{1}_{\{u\le\theta\}}$, $\varphi_{0}(\theta,u)\defeq\mathbf{1}_{\{u>\theta\}}$ とおくと $g(\Theta)\mathbf{1}_{A_{e}}=g(\Theta)\prod_{k\le n}\varphi_{e_{k}}(\Theta,U_{k})$ で、右辺は非負のボレル関数の合成。$\theta\in[0,1]$ について $\int_{0}^{1}\varphi_{1}(\theta,u)\,du=\theta$, $\int_{0}^{1}\varphi_{0}(\theta,u)\,du=1-\theta$ なので、\ref{prb:change-of-variables} と \ref{meas:tonelli}（$u_{1},\dots,u_{n}$ について先に積分する）から
+$$
+E[g(\Theta);A_{e}]=\int_{0}^{1}g(\theta)\prod_{k\le n}\Bigl(\int_{0}^{1}\varphi_{e_{k}}(\theta,u)\,du\Bigr)d\theta=\int_{0}^{1}g(\theta)\theta^{s(e)}(1-\theta)^{n-s(e)}\,d\theta.
+$$
+
+**$S_{n}$ の分布.** $g=1$ とし、記法の確認のベータ積分を使うと $P(A_{e})=\frac{s!\,(n-s)!}{(n+1)!}$（$s=s(e)$）。$\{S_{n}=s\}$ は $s(e)=s$ となる $\binom ns$ 個の $A_{e}$ の互いに素な和なので
+$$
+P(S_{n}=s)=\binom ns\frac{s!\,(n-s)!}{(n+1)!}=\frac{1}{n+1}\qquad(s=0,1,\dots,n).
+$$
+
+**2.** $\mathcal{F}_{n}$ は有限分割 $\{A_{e}\}_{e\in\{0,1\}^{n}}$ が生成する σ-加法族で、1 から $P(A_{e})>0$。1 を $g(\theta)=\theta$ に使うと、$s=s(e)$ について
+$$
+\frac{E[\Theta;A_{e}]}{P(A_{e})}=\frac{(s+1)!\,(n-s)!}{(n+2)!}\cdot\frac{(n+1)!}{s!\,(n-s)!}=\frac{s+1}{n+2}.
+$$
+\ref{prb:conditional-examples.2} から $E[\Theta\mid\mathcal{F}_{n}]=\sum_{e}\frac{s(e)+1}{n+2}\mathbf{1}_{A_{e}}=\frac{S_{n}+1}{n+2}$。また $A_{e}\cap\{\xi_{n+1}=1\}=A_{(e,1)}$ なので、1 を $n+1$ と $g=1$ に使うと $P(A_{e}\cap\{\xi_{n+1}=1\})=\int_{0}^{1}\theta^{s+1}(1-\theta)^{n-s}\,d\theta=E[\Theta;A_{e}]$。よって同じ計算で $P(\xi_{n+1}=1\mid\mathcal{F}_{n})=\frac{S_{n}+1}{n+2}$。
+
+**3.** $M\defeq E[\Theta\mid\mathcal{F}_{n}]$ とする。$0\le\Theta,M\le1$ で、\ref{prb:conditional-properties.4}・3 から $E[\Theta M]=E\bigl[E[\Theta M\mid\mathcal{F}_{n}]\bigr]=E[M\cdot M]$。よって
+$$
+E[(\Theta-M)^{2}]=E[\Theta^{2}]-2E[\Theta M]+E[M^{2}]=E[\Theta^{2}]-E[M^{2}].
+$$
+$E[\Theta^{2}]=\int_{0}^{1}\theta^{2}d\theta=\frac13$。1・2 から
+$$
+E[M^{2}]=\sum_{s=0}^{n}\frac{1}{n+1}\Bigl(\frac{s+1}{n+2}\Bigr)^{2}=\frac{1}{(n+1)(n+2)^{2}}\sum_{j=1}^{n+1}j^{2}=\frac{(n+1)(n+2)(2n+3)}{6(n+1)(n+2)^{2}}=\frac{2n+3}{6(n+2)}.
+$$
+よって $E[(\Theta-M)^{2}]=\frac{2n+4}{6(n+2)}-\frac{2n+3}{6(n+2)}=\frac{1}{6(n+2)}$。
+
+（$\frac{S_{n}+1}{n+2}$ はラプラスの**継起の法則**で、素朴な推定 $\frac{S_{n}}{n}$ と違い、$n$ 回すべて表でも $1$ にはならない。2 の二つの等式は「次に表の出る確率は、それまでの結果で見た $\Theta$ の平均である」ことを言う。3 から $E[\Theta\mid\mathcal{F}_{n}]\to\Theta$（$L^{2}$）で、観測が増えると未知の $\Theta$ が「学習」される。マルチンゲールの収束定理を使えば a.s. 収束もわかる。1 で $S_{n}$ が一様分布に従うことは、後で扱うポリアの壺と同じ現象である。）
+:::
+
+## マルチンゲールと停止時刻 {#prb:sec-ms-exercises}
+
+対応するページ：\ref{prb:page-martingales-stopping}
+
+::: problem ★ 基本：非対称なランダムウォークの破産までの時間 {#prb:ex-ms-1}
+$\xi_{1},\xi_{2},\dots$ を i.i.d. で $P(\xi_{k}=1)=p$, $P(\xi_{k}=-1)=q\defeq1-p$（$p\ne\frac12$）とし、$S_{n}\defeq\xi_{1}+\dots+\xi_{n}$（$S_{0}=0$）、$\mathcal{F}_{n}\defeq\sigma(\xi_{1},\dots,\xi_{n})$ とする。正の整数 $a,b$ について $\tau\defeq\inf\{n:S_{n}\in\{-a,b\}\}$ とし、$\pi\defeq P(S_{\tau}=b)$ を \ref{prb:prob-ms-asymmetric-ruin} で求めた値とする。
+1. $S_{n}-n(p-q)$ はマルチンゲールであることを示せ。
+2. $E[\tau]<\infty$ で、$E[\tau]=\frac{b\pi-a(1-\pi)}{p-q}$ であることを示せ。
+3. $p>q$ のとき、$\sigma_{b}\defeq\inf\{n:S_{n}=b\}$ は $E[\sigma_{b}]=\frac{b}{p-q}$ を満たすことを示せ。
+:::
+
+::: solution
+**1.** $E[\xi_{k}]=p-q$ なので、$\xi_{k}-(p-q)$ は独立で可積分、平均 $0$。\ref{prb:martingale-examples.1} から、その部分和 $S_{n}-n(p-q)$ はマルチンゲール。
+
+**2.** $\tau$ は到達時刻なので停止時刻で、$\tau\wedge n\le n$ は有界な停止時刻。\ref{prb:optional-stopping.2} を 1 のマルチンゲールに使うと
+$$
+E[S_{\tau\wedge n}]=(p-q)E[\tau\wedge n].
+$$
+時刻 $\tau$ より前は $-a<S_{k}<b$、時刻 $\tau$ では $S_{\tau}\in\{-a,b\}$ なので、$c\defeq\max(a,b)$ について $|S_{\tau\wedge n}|\le c$。よって $E[\tau\wedge n]\le\frac{c}{|p-q|}$ で、\ref{meas:monotone-convergence} から $E[\tau]=\lim_{n}E[\tau\wedge n]\le\frac{c}{|p-q|}<\infty$。とくに $\tau<\infty$（a.s.）なので $S_{\tau\wedge n}\to S_{\tau}$（a.s.）で、$|S_{\tau\wedge n}|\le c$ と \ref{meas:dominated-convergence} から $E[S_{\tau\wedge n}]\to E[S_{\tau}]=b\pi-a(1-\pi)$。両辺の極限から $(p-q)E[\tau]=b\pi-a(1-\pi)$。
+
+**3.** $\sigma_{b}$ は停止時刻で、時刻 $\sigma_{b}$ より前は $S_{k}<b$、時刻 $\sigma_{b}$ では $S_{\sigma_{b}}=b$ なので $S_{\sigma_{b}\wedge n}\le b$。2 と同じく
+$$
+(p-q)E[\sigma_{b}\wedge n]=E[S_{\sigma_{b}\wedge n}]\le b,
+$$
+\ref{meas:monotone-convergence} から $E[\sigma_{b}]\le\frac{b}{p-q}<\infty$。とくに $\sigma_{b}<\infty$（a.s.）で $S_{\sigma_{b}}=b$。$\xi_{k}$ は i.i.d. で可積分なので、\ref{prb:prob-ms-wald} から $b=E[S_{\sigma_{b}}]=E[\sigma_{b}]E[\xi_{1}]=(p-q)E[\sigma_{b}]$。
+
+（2 で $p\to\frac12$ とすると、右辺は \ref{prb:gamblers-ruin} の $ab$ に近づく。3 は「上向きの速さ $p-q$ で距離 $b$ を進むのにかかる平均時間は $\frac{b}{p-q}$」という直観どおりの式である。3 では $S_{\sigma_{b}\wedge n}$ は下に有界でないので、\ref{prb:optional-stopping.3} は使えず、先に $E[\sigma_{b}]<\infty$ を示してから \ref{prb:prob-ms-wald} を使った。）
+:::
+
+::: problem ★★ 標準：指数マルチンゲールと到達時刻の母関数 {#prb:ex-ms-2}
+1. $\xi_{1},\xi_{2},\dots$ を i.i.d. とし、実数 $\theta$ について $E[e^{\theta\xi_{1}}]<\infty$ とする。$\psi(\theta)\defeq\log E[e^{\theta\xi_{1}}]$, $S_{n}\defeq\xi_{1}+\dots+\xi_{n}$ とおくと、$M_{n}\defeq\exp\bigl(\theta S_{n}-n\psi(\theta)\bigr)$ は $\mathcal{F}_{n}\defeq\sigma(\xi_{1},\dots,\xi_{n})$ についてのマルチンゲールであることを示せ。
+2. $S_{n}$ を単純ランダムウォークとし、$\tau\defeq\inf\{n:S_{n}=1\}$ とする。$0<s<1$ について
+$$
+E[s^{\tau}]=\frac{1-\sqrt{1-s^{2}}}{s}
+$$
+を示し（$s^{\infty}=0$）、$P(\tau<\infty)=1$ を導け。
+3. 2 の $\tau$ について $E[\tau]=\infty$ を示せ。
+:::
+
+::: solution
+**1.** $\eta_{k}\defeq e^{\theta\xi_{k}-\psi(\theta)}$ は非負で、$E[\eta_{k}]=e^{-\psi(\theta)}E[e^{\theta\xi_{1}}]=1$。$M_{n}=\eta_{1}\cdots\eta_{n}$ は $\mathcal{F}_{n}$ 可測で、記法の確認の独立な積の期待値から $E[M_{n}]=1$（とくに可積分）。$\eta_{n+1}$ は $\mathcal{F}_{n}$ と独立（\ref{prb:pi-system-independence.2}）なので、\ref{prb:conditional-properties.4}・6 から
+$$
+E[M_{n+1}\mid\mathcal{F}_{n}]=M_{n}E[\eta_{n+1}\mid\mathcal{F}_{n}]=M_{n}E[\eta_{n+1}]=M_{n}.
+$$
+
+**2.** **マルチンゲール.** 単純ランダムウォークでは $E[e^{\theta\xi_{1}}]=\cosh\theta$。$\theta>0$ とし、$s\defeq\frac{1}{\cosh\theta}\in(0,1)$ とおくと、1 から $M_{n}=e^{\theta S_{n}}s^{n}$ はマルチンゲール。
+
+**停止.** $\tau$ は停止時刻。$S_{0}=0$ で $S$ は $1$ ずつ動くので、$1$ に達する前は $S_{k}\le0$。よって $S_{\tau\wedge n}\le1$ で $0\le M_{\tau\wedge n}\le e^{\theta}$。\ref{prb:optional-stopping.2}（停止時刻 $\tau\wedge n\le n$）から $E[M_{\tau\wedge n}]=E[M_{0}]=1$。$n\to\infty$ とすると、$\{\tau<\infty\}$ の上では $M_{\tau\wedge n}\to e^{\theta}s^{\tau}$、$\{\tau=\infty\}$ の上では $0\le M_{\tau\wedge n}=e^{\theta S_{n}}s^{n}\le s^{n}\to0$。\ref{meas:dominated-convergence}（優関数 $e^{\theta}$）から $e^{\theta}E[s^{\tau}]=1$、すなわち $E[s^{\tau}]=e^{-\theta}$。
+
+**$s$ で表す.** $\cosh$ は $[0,\infty)$ で連続かつ狭義単調増加で、$\cosh0=1$, $\cosh\theta\to\infty$ なので、任意の $s\in(0,1)$ に $\cosh\theta=\frac1s$ となる $\theta>0$ がただ一つある。$x\defeq e^{-\theta}\in(0,1)$ は $x+\frac1x=\frac2s$、すなわち $x^{2}-\frac2sx+1=0$ を満たす。この 2 次方程式の解は $\frac{1\pm\sqrt{1-s^{2}}}{s}$ で、積は $1$ なので、$(0,1)$ にあるのは小さい方である。よって $E[s^{\tau}]=e^{-\theta}=\frac{1-\sqrt{1-s^{2}}}{s}$。
+
+**$\tau<\infty$.** $s_{m}\uparrow1$ とすると、$s_{m}^{\tau}=s_{m}^{\tau}\mathbf{1}_{\{\tau<\infty\}}\uparrow\mathbf{1}_{\{\tau<\infty\}}$ なので、\ref{meas:monotone-convergence} から
+$$
+P(\tau<\infty)=\lim_{m}\frac{1-\sqrt{1-s_{m}^{2}}}{s_{m}}=1.
+$$
+
+**3.** 2 から $1\le\tau<\infty$（a.s.）。整数 $k\ge1$ について $\frac{1-s^{k}}{1-s}=\sum_{j<k}s^{j}$ は $s\uparrow1$ で単調に $k$ に増加するので、$s_{m}\uparrow1$ について \ref{meas:monotone-convergence} から $E[\tau]=\lim_{m}\frac{1-E[s_{m}^{\tau}]}{1-s_{m}}$。ここで
+$$
+\frac{1-E[s^{\tau}]}{1-s}=\frac{s-1+\sqrt{1-s^{2}}}{s(1-s)}=-\frac1s+\frac{\sqrt{1+s}}{s\sqrt{1-s}}\to\infty\qquad(s\uparrow1).
+$$
+よって $E[\tau]=\infty$。
+
+（$\frac{1-\sqrt{1-s^{2}}}{s}$ を $s$ の冪級数に展開すると、$P(\tau=2m-1)=\frac{C_{m-1}}{2^{2m-1}}$（$C_{m}\defeq\frac{1}{m+1}\binom{2m}{m}$ はカタラン数）、例えば $P(\tau=1)=\frac12$, $P(\tau=3)=\frac18$, $P(\tau=5)=\frac1{16}$ が読み取れる。2 の停止は、指数マルチンゲール $e^{\theta S_{n}}$ が $S$ の上側でだけ大きくなり、$\tau$ の前は $S\le0$ で抑えられることを使った。$\tau$ は有限だが平均は無限大で、\ref{prb:optional-stopping.2} の有界性の仮定が本質的であること（$E[S_{\tau}]=1\ne0$）の別の表れである。）
+:::
+
+::: problem ★★★ 発展：アズマ–ヘフディングの不等式 {#prb:ex-ms-3}
+1. $\mathcal{G}$ を部分 σ-加法族、$c>0$ とし、確率変数 $Y$ が $|Y|\le c$ と $E[Y\mid\mathcal{G}]=0$ を満たすとする。すべての実数 $\theta$ について
+$$
+E[e^{\theta Y}\mid\mathcal{G}]\le\cosh(\theta c)\le e^{\theta^{2}c^{2}/2}
+$$
+を示せ。
+2. $M$ をマルチンゲールで $M_{0}=0$、定数 $c_{k}>0$ についてすべての $k\ge1$ で $|M_{k}-M_{k-1}|\le c_{k}$ とし、$V_{n}\defeq\sum_{k\le n}c_{k}^{2}$ とおく。$\lambda>0$ について
+$$
+P\Bigl(\max_{k\le n}M_{k}\ge\lambda\Bigr)\le\exp\Bigl(-\frac{\lambda^{2}}{2V_{n}}\Bigr),\qquad P(|M_{n}|\ge\lambda)\le2\exp\Bigl(-\frac{\lambda^{2}}{2V_{n}}\Bigr)
+$$
+を示せ。
+3. 単純ランダムウォーク $S_{n}$ について、a.s. で十分大きなすべての $n$ で $|S_{n}|<2\sqrt{n\log n}$ となることを示せ。
+:::
+
+::: solution
+**1.** **凸性.** $y\mapsto e^{\theta y}$ は 2 階導関数 $\theta^{2}e^{\theta y}\ge0$ をもつので凸（\ref{calc:convex-properties.3}）。$|y|\le c$ なら
+$$
+y=\frac{c-y}{2c}\cdot(-c)+\frac{c+y}{2c}\cdot c,\qquad\frac{c-y}{2c},\frac{c+y}{2c}\ge0,\qquad\frac{c-y}{2c}+\frac{c+y}{2c}=1
+$$
+なので、凸性から
+$$
+e^{\theta y}\le\frac{c-y}{2c}e^{-\theta c}+\frac{c+y}{2c}e^{\theta c}.
+$$
+
+**条件付き期待値.** これを $y=Y$ に使い（$|Y|\le c$ は a.s.）、\ref{prb:conditional-properties.1}・2・3 と $E[Y\mid\mathcal{G}]=0$ を使うと、$e^{\theta Y}$ は有界なので
+$$
+E[e^{\theta Y}\mid\mathcal{G}]\le\frac{e^{-\theta c}+e^{\theta c}}{2}=\cosh(\theta c).
+$$
+
+**$\cosh$ の評価.** $(2k)!=\prod_{j=1}^{k}(2j)(2j-1)\ge\prod_{j=1}^{k}2j=2^{k}k!$ なので
+$$
+\cosh x=\sum_{k\ge0}\frac{x^{2k}}{(2k)!}\le\sum_{k\ge0}\frac{x^{2k}}{2^{k}k!}=\sum_{k\ge0}\frac{(x^{2}/2)^{k}}{k!}=e^{x^{2}/2}.
+$$
+
+**2.** **指数モーメント.** $\theta>0$ とする。$|M_{n}|\le\sum_{k\le n}c_{k}$ なので $e^{\theta M_{n}}$ は有界。$\Delta M_{n}\defeq M_{n}-M_{n-1}$ は $|\Delta M_{n}|\le c_{n}$, $E[\Delta M_{n}\mid\mathcal{F}_{n-1}]=0$ を満たすので、\ref{prb:conditional-properties.4} と 1 から
+$$
+E[e^{\theta M_{n}}\mid\mathcal{F}_{n-1}]=e^{\theta M_{n-1}}E[e^{\theta\Delta M_{n}}\mid\mathcal{F}_{n-1}]\le e^{\theta M_{n-1}}e^{\theta^{2}c_{n}^{2}/2}.
+$$
+期待値をとり（\ref{prb:conditional-properties.3}）、$n$ についての帰納法を使うと $E[e^{\theta M_{n}}]\le e^{\theta^{2}V_{n}/2}$（$M_{0}=0$）。
+
+**最大値.** $x\mapsto e^{\theta x}$ は凸なので、\ref{prb:martingale-examples.4} から $e^{\theta M_{k}}$ は劣マルチンゲール。$\{\max_{k\le n}M_{k}\ge\lambda\}=\{\max_{k\le n}e^{\theta M_{k}}\ge e^{\theta\lambda}\}$ なので、\ref{prb:doob-inequalities.1} から
+$$
+P\Bigl(\max_{k\le n}M_{k}\ge\lambda\Bigr)\le e^{-\theta\lambda}E[e^{\theta M_{n}}]\le\exp\Bigl(\frac{\theta^{2}V_{n}}{2}-\theta\lambda\Bigr).
+$$
+$\theta\defeq\frac{\lambda}{V_{n}}$ とおけば右辺は $\exp(-\frac{\lambda^{2}}{2V_{n}})$。
+
+**両側.** $-M$ も同じ仮定を満たすマルチンゲールなので、$P(M_{n}\ge\lambda)$ と $P(-M_{n}\ge\lambda)$ はどちらも $\exp(-\frac{\lambda^{2}}{2V_{n}})$ 以下で、和をとれば第 2 の不等式。
+
+**3.** $S_{n}$ は $c_{k}=1$, $V_{n}=n$ として 2 の仮定を満たす（\ref{prb:martingale-examples.1}）。$n\ge2$ について $\lambda_{n}\defeq2\sqrt{n\log n}$ とおくと
+$$
+P(|S_{n}|\ge\lambda_{n})\le2\exp\Bigl(-\frac{4n\log n}{2n}\Bigr)=\frac{2}{n^{2}}.
+$$
+$\sum_{n}\frac{2}{n^{2}}<\infty$ なので、\ref{prb:borel-cantelli.1} から a.s. で有限個の $n$ を除いて $|S_{n}|<\lambda_{n}$。
+
+（\ref{prb:basic-inequalities.2} からは $P(|S_{n}|\ge\lambda)\le\frac{n}{\lambda^{2}}$ しか出ないが、増分が有界なら裾は正規分布と同じく $e^{-\lambda^{2}/(2n)}$ の速さで減る。独立性は使わず、増分の有界性とマルチンゲール性だけを使ったので、独立でない和にも使える。3 の $2\sqrt{n\log n}$ は最良ではなく、正確な大きさは重複対数の法則 $\limsup\frac{S_{n}}{\sqrt{2n\log\log n}}=1$ が与える。）
+:::
+
+## マルチンゲール収束定理 {#prb:sec-ct-exercises}
+
+対応するページ：\ref{prb:page-convergence-theorems}
+
+::: problem ★ 基本：2 進区間による密度の近似 {#prb:ex-ct-1}
+確率空間を $([0,1),\mathcal{B},\lambda)$ とし、$n\ge0$, $0\le k<2^{n}$ について $I_{n,k}\defeq[k2^{-n},(k+1)2^{-n})$, $\mathcal{F}_{n}\defeq\sigma(I_{n,k}:0\le k<2^{n})$ とおく。$Q$ を $([0,1),\mathcal{B})$ 上の確率測度とし、
+$$
+X_{n}\defeq\sum_{k<2^{n}}\frac{Q(I_{n,k})}{\lambda(I_{n,k})}\mathbf{1}_{I_{n,k}}=\sum_{k<2^{n}}2^{n}Q(I_{n,k})\mathbf{1}_{I_{n,k}}
+$$
+とおく。
+1. $(\mathcal{F}_{n})$ はフィルトレーションで、$X_{n}$ は非負のマルチンゲールであり、a.s. で有限の極限に収束することを示せ。
+2. $Q$ が密度 $g$ をもつ（ボレル可測な $g\ge0$ で、すべての $B\in\mathcal{B}$ について $Q(B)=\int_{B}g\,d\lambda$）なら、$X_{n}=E[g\mid\mathcal{F}_{n}]$ で、$X_{n}\to g$（a.s. かつ $L^{1}$）であることを示せ。
+3. $g(u)=2u$ のとき $X_{n}$ を具体的に求め、すべての $u\in[0,1)$ で $|X_{n}(u)-g(u)|\le2^{-n}$ となることを確かめよ。
+:::
+
+::: solution
+**1.** **フィルトレーション.** $I_{n,k}=I_{n+1,2k}\cup I_{n+1,2k+1}$ なので $\mathcal{F}_{n}\subset\mathcal{F}_{n+1}$。$\{I_{n,k}\}_{k}$ は $[0,1)$ の有限分割なので、$\mathcal{F}_{n}$ の元はそのいくつかの和で、$X_{n}$ は $\mathcal{F}_{n}$ 可測、$0\le X_{n}\le2^{n}$。
+
+**マルチンゲール性.** $\lambda(I_{n+1,j})=2^{-n-1}$ なので
+$$
+E[X_{n+1};I_{n,k}]=2^{n+1}Q(I_{n+1,2k})2^{-n-1}+2^{n+1}Q(I_{n+1,2k+1})2^{-n-1}=Q(I_{n,k}).
+$$
+\ref{prb:conditional-examples.2} から $E[X_{n+1}\mid\mathcal{F}_{n}]=\sum_{k}\frac{Q(I_{n,k})}{2^{-n}}\mathbf{1}_{I_{n,k}}=X_{n}$。
+
+**収束.** $X_{n}\ge0$, $E[X_{n}]=\sum_{k}Q(I_{n,k})=1$ なので $L^{1}$ で有界で、\ref{prb:martingale-convergence} からある $X_{\infty}\in L^{1}$ に a.s. 収束する。
+
+**2.** **条件付き期待値.** $E[g]=Q([0,1))=1$ なので $g\in L^{1}$ で、$E[g;I_{n,k}]=Q(I_{n,k})$。\ref{prb:conditional-examples.2} から $E[g\mid\mathcal{F}_{n}]=\sum_{k}\frac{Q(I_{n,k})}{2^{-n}}\mathbf{1}_{I_{n,k}}=X_{n}$。
+
+**$\mathcal{F}_{\infty}=\mathcal{B}$.** $[0,1)$ の（相対位相での）開集合 $O$ と $u\in O$ について、$[u-\varepsilon,u+\varepsilon]\cap[0,1)\subset O$ となる $\varepsilon>0$ があり、$2^{-n}<\varepsilon$ なら $u$ を含む $I_{n,k}$ は $O$ に含まれる。よって $O$ は $O$ に含まれる 2 進区間 $I_{n,k}$（可算個）の和で、$O\in\mathcal{F}_{\infty}$。$[0,1)$ のボレル集合族は開集合が生成するので $\mathcal{B}\subset\mathcal{F}_{\infty}$、逆の包含は明らか。
+
+**収束.** \ref{prb:levy-upward.1} から $X_{n}=E[g\mid\mathcal{F}_{n}]\to E[g\mid\mathcal{F}_{\infty}]$（a.s. かつ $L^{1}$）。$g$ は $\mathcal{F}_{\infty}=\mathcal{B}$ 可測なので $E[g\mid\mathcal{F}_{\infty}]=g$（\ref{prb:conditional-properties.3}）。
+
+**3.** $Q(I_{n,k})=\int_{k2^{-n}}^{(k+1)2^{-n}}2u\,du=\bigl((k+1)^{2}-k^{2}\bigr)4^{-n}=(2k+1)4^{-n}$ なので、$I_{n,k}$ の上で
+$$
+X_{n}=(2k+1)2^{-n}=2\cdot\frac{k2^{-n}+(k+1)2^{-n}}{2},
+$$
+すなわち $X_{n}(u)$ は $u$ を含む区間 $I_{n,k}$ の中点での $g$ の値。$u\in I_{n,k}$ と中点の距離は $2^{-n-1}$ 以下なので、$|X_{n}(u)-2u|\le2\cdot2^{-n-1}=2^{-n}$。
+
+（$X_{n}(u)$ は「$u$ を含む長さ $2^{-n}$ の 2 進区間の $Q$-測度と $\lambda$-測度の比」で、2 は、測度の比の極限として密度が復元されるというルベーグの微分定理の 2 進区間版である。確率論の言葉では、$X_{n}$ は $\mathcal{F}_{n}$ の情報だけで見た $Q$ の $P$ に対する**尤度比**である。$Q$ が密度をもたないとき、例えば $Q=\delta_{0}$ なら $X_{n}=2^{n}\mathbf{1}_{[0,2^{-n})}$ は、\ref{prb:page-convergence-theorems} の注意で挙げた例で、$X_{n}\to0$（a.s.）だが $E[X_{n}]=1$ であり、極限は $Q$ を表さない。）
+:::
+
+::: problem ★★ 標準：ポリアの壺の極限分布 {#prb:ex-ct-2}
+$U_{1},U_{2},\dots$ を i.i.d. で $U(0,1)$ に従うとし、$r_{0}\defeq1$、$j\ge1$ について
+$$
+\varepsilon_{j}\defeq\mathbf{1}_{\{U_{j}\le R_{j-1}\}},\qquad r_{j}\defeq r_{j-1}+\varepsilon_{j},\qquad R_{j}\defeq\frac{r_{j}}{j+2}
+$$
+と定める（$R_{0}=\frac12$。$j$ 回目に赤が出ることが $\varepsilon_{j}=1$ で、ポリアの壺の $j$ 回後の赤玉の数が $r_{j}$、割合が $R_{j}$ である。次に赤が出る条件付き確率が $R_{j-1}$ であることは \ref{prb:prob-ct-polya} の設定と同じ）。\ref{prb:prob-ct-polya} から $R_{n}$ はある $R_{\infty}$ に a.s. 収束する。
+1. $e\in\{0,1\}^{n}$, $s\defeq e_{1}+\dots+e_{n}$ について $P(\varepsilon_{1}=e_{1},\dots,\varepsilon_{n}=e_{n})=\frac{s!\,(n-s)!}{(n+1)!}$ を示し、$r_{n}-1$ は $\{0,1,\dots,n\}$ 上の一様分布に従うことを導け。
+2. $R_{\infty}\sim U(0,1)$ を示せ。
+3. $(\varepsilon_{1},\dots,\varepsilon_{n})$ は \ref{prb:ex-ce-3} の $(\xi_{1},\dots,\xi_{n})$ と同分布で、$R_{n}$ は \ref{prb:ex-ce-3} の $E[\Theta\mid\mathcal{F}_{n}]$ と同分布であることを示せ。
+:::
+
+::: solution
+**1.** **列の確率.** $A_{e}\defeq\{\varepsilon_{1}=e_{1},\dots,\varepsilon_{n}=e_{n}\}$ とし、$n$ についての帰納法で示す。$n=0$ なら両辺 $1$。$n$ で成り立つとする。$A_{e}\in\sigma(U_{1},\dots,U_{n})$ で、$A_{e}$ の上では $r_{n}=1+s$、$R_{n}=\frac{1+s}{n+2}$ は定数。$U_{n+1}$ は $\sigma(U_{1},\dots,U_{n})$ と独立（\ref{prb:pi-system-independence.2}）なので
+$$
+P(A_{(e,1)})=P\Bigl(A_{e}\cap\Bigl\{U_{n+1}\le\frac{1+s}{n+2}\Bigr\}\Bigr)=\frac{s!\,(n-s)!}{(n+1)!}\cdot\frac{s+1}{n+2}=\frac{(s+1)!\,(n-s)!}{(n+2)!},
+$$
+$$
+P(A_{(e,0)})=\frac{s!\,(n-s)!}{(n+1)!}\cdot\frac{n+1-s}{n+2}=\frac{s!\,(n+1-s)!}{(n+2)!}.
+$$
+これは $n+1$ での主張である。
+
+**$r_{n}$ の分布.** $\{r_{n}=1+s\}$ は $e_{1}+\dots+e_{n}=s$ となる $\binom ns$ 個の $A_{e}$ の互いに素な和なので、$P(r_{n}=1+s)=\binom ns\frac{s!\,(n-s)!}{(n+1)!}=\frac{1}{n+1}$（$0\le s\le n$）。
+
+**2.** **$R_{n}$ の分布関数.** 1 から $R_{n}$ は $\frac{j}{n+2}$（$j=1,\dots,n+1$）を確率 $\frac{1}{n+1}$ ずつとる。$x\in[0,1]$ について、$j\le(n+2)x$ となる $j\in\{1,\dots,n+1\}$ の個数は $\min(n+1,\lfloor(n+2)x\rfloor)$ なので
+$$
+\min\Bigl(1,\frac{(n+2)x-1}{n+1}\Bigr)\le F_{R_{n}}(x)=\frac{\min(n+1,\lfloor(n+2)x\rfloor)}{n+1}\le\frac{(n+2)x}{n+1}.
+$$
+両端は $\min(1,x)=x$ に収束するので $F_{R_{n}}(x)\to x$。
+
+**極限.** $R_{n}\to R_{\infty}$（a.s.）なので、\ref{prb:convergence-relations.1} と \ref{prb:portmanteau.4} から $R_{n}\Rightarrow R_{\infty}$。$F\defeq F_{R_{\infty}}$ の連続点 $x\in(0,1)$ では $F(x)=\lim F_{R_{n}}(x)=x$。$F$ の不連続点は高々可算（\ref{prb:sec-cv-notation}）なので、$x\in[0,1)$ に対して連続点の列 $x_{m}\downarrow x$（$x_{m}\in(x,1)$）がとれ、右連続性から $F(x)=\lim F(x_{m})=x$。$0\le R_{\infty}\le1$ なので $x<0$ で $F(x)=0$、$x\ge1$ で $F(x)=1$。よって $F$ は $U(0,1)$ の分布関数と一致し、\ref{prb:distribution-function.2} から $R_{\infty}\sim U(0,1)$。
+
+**3.** \ref{prb:ex-ce-3.1}（$g=1$）と記法の確認のベータ積分から $P(\xi_{1}=e_{1},\dots,\xi_{n}=e_{n})=\frac{s!\,(n-s)!}{(n+1)!}$ で、1 の確率と一致する。$\{0,1\}^{n}$ は有限集合なので、$(\varepsilon_{1},\dots,\varepsilon_{n})$ と $(\xi_{1},\dots,\xi_{n})$ は同分布。$h(e)\defeq\frac{1+e_{1}+\dots+e_{n}}{n+2}$ とおくと、$R_{n}=h(\varepsilon_{1},\dots,\varepsilon_{n})$ で、\ref{prb:ex-ce-3.2} から $E[\Theta\mid\mathcal{F}_{n}]=h(\xi_{1},\dots,\xi_{n})$。同分布な確率変数の同じ関数なので同分布。
+
+（3 は、ポリアの壺から取り出す玉の色の列が「表の確率 $\Theta\sim U(0,1)$ がランダムなコイン」の列と区別できないことを言う（デ・フィネッティの定理の典型例）。壺の赤玉の割合 $R_{n}$ が、コインの列から見た $\Theta$ の条件付き期待値 $\frac{S_{n}+1}{n+2}$ にあたり、$R_{\infty}$ が $\Theta$ の役を演じる。2 の極限が一様分布になるのはそのためである。最初の赤玉・白玉の数を変えると、極限はベータ分布になる。）
+:::
+
+::: problem ★★★ 発展：角谷の定理 {#prb:ex-ct-3}
+$\xi_{1},\xi_{2},\dots$ を独立で、$\xi_{k}\ge0$, $E[\xi_{k}]=1$ とし、$M_{n}\defeq\xi_{1}\cdots\xi_{n}$（$M_{0}=1$）、$\mathcal{F}_{n}\defeq\sigma(\xi_{1},\dots,\xi_{n})$、$\rho_{k}\defeq E[\sqrt{\xi_{k}}]$ とおく。
+1. $0<\rho_{k}\le1$ を示せ。したがって $\rho\defeq\lim_{n}\prod_{k\le n}\rho_{k}\in[0,1]$ が存在する。また $M_{n}$ はある $M_{\infty}$ に a.s. 収束することを示せ。
+2. $\rho>0$ なら $\{M_{n}\}$ は一様可積分で、$M_{n}\to M_{\infty}$（$L^{1}$）、$E[M_{\infty}]=1$ であることを示せ。
+3. $\rho=0$ なら $M_{\infty}=0$（a.s.）で、$\{M_{n}\}$ は一様可積分でないことを示せ。とくに、$\xi_{k}$ が i.i.d. で $P(\xi_{1}=1)<1$ なら $M_{n}\to0$（a.s.）であることを示せ。
+4. $\varepsilon_{k}$ を i.i.d. で $P(\varepsilon_{k}=\pm1)=\frac12$、$a_{k}$ を $|a_{k}|\le1$ の実数とし、$\xi_{k}\defeq1+a_{k}\varepsilon_{k}$ とする。$\{M_{n}\}$ が一様可積分であることと $\sum_{k}a_{k}^{2}<\infty$ は同値であることを示せ。
+:::
+
+::: solution
+**1.** **$\rho_{k}$.** \ref{prb:basic-inequalities.4}（$p=\frac12$, $q=1$）から $\rho_{k}=E[\xi_{k}^{1/2}]\le E[\xi_{k}]^{1/2}=1$。$\rho_{k}=0$ なら $\sqrt{\xi_{k}}=0$（a.s.）で $E[\xi_{k}]=0$ となり矛盾するので $\rho_{k}>0$。$\prod_{k\le n}\rho_{k}$ は $n$ について減少し、$0$ 以上なので極限をもつ。
+
+**収束.** \ref{prb:martingale-examples.2} から $M_{n}$ は非負のマルチンゲールで、\ref{prb:martingale-convergence} から a.s. 収束する。
+
+**2.** **補助のマルチンゲール.** $N_{n}\defeq\prod_{k\le n}\frac{\sqrt{\xi_{k}}}{\rho_{k}}$ とおく。因子は独立で非負、平均 $1$ なので、\ref{prb:martingale-examples.2} から $N_{n}$ はマルチンゲール。記法の確認の独立な積の期待値から
+$$
+E[N_{n}^{2}]=\prod_{k\le n}\frac{E[\xi_{k}]}{\rho_{k}^{2}}=\frac{1}{\prod_{k\le n}\rho_{k}^{2}}\le\frac{1}{\rho^{2}}.
+$$
+
+**優関数.** \ref{prb:doob-inequalities.2}（$p=2$）から $E[\max_{k\le n}N_{k}^{2}]\le4E[N_{n}^{2}]\le\frac{4}{\rho^{2}}$ で、\ref{meas:monotone-convergence} から $N^{\ast}\defeq\sup_{n}N_{n}$ は $E[(N^{\ast})^{2}]\le\frac{4}{\rho^{2}}$ を満たす。$\prod_{k\le n}\rho_{k}^{2}\le1$ なので
+$$
+0\le M_{n}=N_{n}^{2}\prod_{k\le n}\rho_{k}^{2}\le(N^{\ast})^{2}\in L^{1}.
+$$
+
+**結論.** \ref{prb:ui-criteria.3} から $\{M_{n}\}$ は一様可積分で、\ref{prb:ui-martingale} から $M_{n}\to M_{\infty}$（$L^{1}$）。とくに $E[M_{\infty}]=\lim E[M_{n}]=1$。
+
+**3.** **極限は $0$.** 記法の確認の独立な積の期待値から $E[\sqrt{M_{n}}]=\prod_{k\le n}\rho_{k}\to\rho=0$。$\sqrt{M_{n}}\to\sqrt{M_{\infty}}$（a.s.）なので、\ref{meas:fatou} から
+$$
+E\bigl[\sqrt{M_{\infty}}\bigr]\le\liminf_{n}E\bigl[\sqrt{M_{n}}\bigr]=0,
+$$
+よって $M_{\infty}=0$（a.s.）。$\{M_{n}\}$ が一様可積分なら、\ref{prb:ui-martingale} から $E[M_{\infty}]=\lim E[M_{n}]=1$ となり矛盾する。
+
+**i.i.d. の場合.** $\rho_{k}=\rho_{1}$ で、$\rho_{1}=1$ とすると $E[(\sqrt{\xi_{1}}-1)^{2}]=E[\xi_{1}]-2\rho_{1}+1=0$ から $\xi_{1}=1$（a.s.）となり仮定に反する。よって $\rho_{1}<1$、$\rho=\lim\rho_{1}^{n}=0$（\ref{calc:standard-limits.4}）で、前段から $M_{n}\to0$（a.s.）。
+
+**4.** **$\rho_{k}$ の計算.** $\xi_{k}\ge0$, $E[\xi_{k}]=1$ で、$\rho_{k}=\frac{\sqrt{1+a_{k}}+\sqrt{1-a_{k}}}{2}$。$\rho_{k}^{2}=\frac{2+2\sqrt{1-a_{k}^{2}}}{4}$ なので
+$$
+y_{k}\defeq1-\rho_{k}^{2}=\frac{1-\sqrt{1-a_{k}^{2}}}{2}=\frac{a_{k}^{2}}{2\bigl(1+\sqrt{1-a_{k}^{2}}\bigr)}\in\Bigl[\frac{a_{k}^{2}}{4},\frac{a_{k}^{2}}{2}\Bigr]\subset\Bigl[0,\frac12\Bigr].
+$$
+
+**積と和.** 記法の確認の対数の不等式から、$0\le y\le\frac12$ なら $-2y\le-\frac{y}{1-y}\le\log(1-y)\le-y$。よって
+$$
+\exp\Bigl(-2\sum_{k\le n}y_{k}\Bigr)\le\prod_{k\le n}\rho_{k}^{2}=\exp\Bigl(\sum_{k\le n}\log(1-y_{k})\Bigr)\le\exp\Bigl(-\sum_{k\le n}y_{k}\Bigr).
+$$
+$n\to\infty$ とすると、$\sum y_{k}<\infty$ なら $\rho^{2}\ge e^{-2\sum y_{k}}>0$、$\sum y_{k}=\infty$ なら $\rho^{2}=0$。$y_{k}$ と $a_{k}^{2}$ は定数倍の範囲で比較できるので、$\rho>0\iff\sum a_{k}^{2}<\infty$。2・3 から結論を得る。
+
+（$\xi_{k}$ を、ある確率測度 $Q_{k}$ の $P_{k}$ に対する密度と見ると、$M_{n}$ は積測度 $Q_{1}\otimes\dots\otimes Q_{n}$ の $P_{1}\otimes\dots\otimes P_{n}$ に対する尤度比で、\ref{prb:ex-ct-1} と同じく情報 $\mathcal{F}_{n}$ の下での密度である。角谷の定理は、無限積測度 $\bigotimes Q_{k}$ と $\bigotimes P_{k}$ が、$\rho>0$ なら（一方が他方の密度をもつという意味で）同値、$\rho=0$ なら互いに特異であることを言う。$\rho_{k}$ は**ヘリンジャー積分**と呼ばれ、二つの分布の重なり具合を測る。i.i.d. の場合の 3 は、どんなにわずかでも違う二つの分布から独立な観測を無限に続ければ、尤度比が $0$ に向かい、どちらの分布かを確実に見分けられることを表す。）
+:::
+
+## マルチンゲールの応用 {#prb:sec-ma-exercises}
+
+対応するページ：\ref{prb:page-martingale-applications}
+
+::: problem ★ 基本：分枝過程の平均と分散 {#prb:ex-ma-1}
+$Z_{n}$ を、\ref{prb:galton-watson} で定めた第 $n$ 世代の個体数とし、$\mathcal{F}_{n}\defeq\sigma(\xi_{k,i}:k\le n,i\ge1)$ とする。子の数 $\xi$ について $E[\xi^{2}]<\infty$ とし、$\mu\defeq E[\xi]$, $\sigma^{2}\defeq\operatorname{Var}(\xi)$ とおく。
+1. $E[Z_{n+1}\mid\mathcal{F}_{n}]=\mu Z_{n}$, $E[Z_{n+1}^{2}\mid\mathcal{F}_{n}]=\sigma^{2}Z_{n}+\mu^{2}Z_{n}^{2}$ を示し（とくに $Z_{n}\in L^{2}$）、$E[Z_{n}]=\mu^{n}$ を導け。
+2. $n\ge1$ について、$\mu\ne1$ なら $\operatorname{Var}(Z_{n})=\sigma^{2}\mu^{n-1}\frac{\mu^{n}-1}{\mu-1}$、$\mu=1$ なら $\operatorname{Var}(Z_{n})=n\sigma^{2}$ であることを示せ（$0^{0}\defeq1$）。
+3. $\mu>1$ なら、$W_{n}\defeq\frac{Z_{n}}{\mu^{n}}$ はある $W$ に a.s. かつ $L^{2}$ で収束し、$E[W]=1$, $\operatorname{Var}(W)=\frac{\sigma^{2}}{\mu(\mu-1)}$、$P(W>0)\ge\frac{\mu(\mu-1)}{\mu(\mu-1)+\sigma^{2}}$ であることを示せ。
+:::
+
+::: solution
+**1.** $n$ についての帰納法で $Z_{n}\in L^{2}$ と二つの式を同時に示す。$Z_{0}=1\in L^{2}$。$Z_{n}\in L^{2}$ とする。$Z_{n}$ は $\mathcal{F}_{n}$ 可測で非負整数値、$(\xi_{n+1,i})_{i\ge1}$ は $\mathcal{F}_{n}$ と独立（\ref{prb:pi-system-independence.2}）。$T_{k}\defeq\sum_{i\le k}\xi_{n+1,i}$ とおくと、$\{Z_{n}=k\}$ の上で $Z_{n+1}=T_{k}$ で、\ref{prb:independence-criteria.3} から
+$$
+E[T_{k}]=k\mu,\qquad E[T_{k}^{2}]=\operatorname{Var}(T_{k})+E[T_{k}]^{2}=k\sigma^{2}+k^{2}\mu^{2}.
+$$
+$G\in\mathcal{F}_{n}$ とすると、$\mathbf{1}_{G\cap\{Z_{n}=k\}}$ は $T_{k}$ と独立なので
+$$
+E[Z_{n+1}^{2};G\cap\{Z_{n}=k\}]=(k\sigma^{2}+k^{2}\mu^{2})P(G\cap\{Z_{n}=k\})=E[\sigma^{2}Z_{n}+\mu^{2}Z_{n}^{2};G\cap\{Z_{n}=k\}].
+$$
+両辺は非負なので、$k\ge0$ について足して（\ref{meas:monotone-convergence}）$E[Z_{n+1}^{2};G]=E[\sigma^{2}Z_{n}+\mu^{2}Z_{n}^{2};G]$。$G=\Omega$ とすると右辺は有限なので $Z_{n+1}\in L^{2}$ で、右辺の $\sigma^{2}Z_{n}+\mu^{2}Z_{n}^{2}$ は $\mathcal{F}_{n}$ 可測で可積分なので、これは $E[Z_{n+1}^{2}\mid\mathcal{F}_{n}]$ の定義の条件である。$E[T_{k}]=k\mu$ を使えば同じ議論で $E[Z_{n+1}\mid\mathcal{F}_{n}]=\mu Z_{n}$。期待値をとり帰納法を使えば $E[Z_{n}]=\mu^{n}$。
+
+**2.** $v_{n}\defeq\operatorname{Var}(Z_{n})$ とする。1 の第 2 式の期待値から $E[Z_{n+1}^{2}]=\sigma^{2}\mu^{n}+\mu^{2}E[Z_{n}^{2}]$ で、$\mu^{2(n+1)}$ を引くと
+$$
+v_{n+1}=\sigma^{2}\mu^{n}+\mu^{2}v_{n},\qquad v_{0}=0.
+$$
+$\mu=1$ なら $v_{n+1}=v_{n}+\sigma^{2}$ から $v_{n}=n\sigma^{2}$。$\mu\ne1$ なら、$v_{1}=\sigma^{2}$ は主張の式と一致し、$n$ で成り立てば
+$$
+v_{n+1}=\mu^{2}\sigma^{2}\mu^{n-1}\frac{\mu^{n}-1}{\mu-1}+\sigma^{2}\mu^{n}=\sigma^{2}\mu^{n}\frac{\mu^{n+1}-\mu+\mu-1}{\mu-1}=\sigma^{2}\mu^{n}\frac{\mu^{n+1}-1}{\mu-1}.
+$$
+
+**3.** **$L^{2}$ 有界性.** \ref{prb:extinction-probability.4} から $W_{n}$ は非負のマルチンゲール。2 から
+$$
+E[W_{n}^{2}]=\frac{v_{n}+\mu^{2n}}{\mu^{2n}}=1+\frac{\sigma^{2}(1-\mu^{-n})}{\mu(\mu-1)}\le1+\frac{\sigma^{2}}{\mu(\mu-1)}.
+$$
+
+**収束と平均・分散.** \ref{prb:lp-martingale-convergence}（$p=2$）から $W_{n}\to W$（a.s. かつ $L^{2}$）で、$W\ge0$。$L^{2}$ 収束から、ミンコフスキーの不等式で $\|W_{n}\|_{2}\to\|W\|_{2}$、コーシー–シュワルツの不等式で $E[W_{n}]\to E[W]$。よって
+$$
+E[W]=1,\qquad E[W^{2}]=\lim_{n}E[W_{n}^{2}]=1+\frac{\sigma^{2}}{\mu(\mu-1)},\qquad\operatorname{Var}(W)=\frac{\sigma^{2}}{\mu(\mu-1)}.
+$$
+
+**$W>0$ の確率.** \ref{meas:holder}（指数 $2,2$）から $1=E[W\mathbf{1}_{\{W>0\}}]\le E[W^{2}]^{1/2}P(W>0)^{1/2}$、よって
+$$
+P(W>0)\ge\frac{1}{E[W^{2}]}=\frac{\mu(\mu-1)}{\mu(\mu-1)+\sigma^{2}}.
+$$
+
+（3 から、$\mu>1$ なら正の確率で $Z_{n}\approx W\mu^{n}$ と指数的に増える。$\{W>0\}$ の上では絶滅しないので、$1-q\ge P(W>0)>0$ で、\ref{prb:extinction-probability.3} の $\mu>1$ の場合を（$E[\xi^{2}]<\infty$ の下で）別の方法で示したことになる。例えば \ref{prb:prob-ma-geometric-offspring} で $r=\frac23$ なら $\mu=2$, $\sigma^{2}=6$ で、下からの評価は $\frac14$、実際の生存確率は $1-q=\frac12$ である。）
+:::
+
+::: problem ★★ 標準：ランダムな級数 {#prb:ex-ma-2}
+1. $X_{1},X_{2},\dots$ を i.i.d. で $\mathrm{Exp}(1)$ に従うとし、$c_{n}\ge0$ とする。$\sum_{n}c_{n}<\infty$ なら $\sum_{n}c_{n}X_{n}<\infty$（a.s.）、$\sum_{n}c_{n}=\infty$ なら $\sum_{n}c_{n}X_{n}=\infty$（a.s.）であることを示せ。
+2. $X_{1},X_{2},\dots$ を独立で $X_{n}\sim N(0,\sigma_{n}^{2})$（$\sigma_{n}>0$）とする。$\sum_{n}X_{n}$ が a.s. で収束することと $\sum_{n}\sigma_{n}^{2}<\infty$ は同値で、$\sum_{n}\sigma_{n}^{2}=\infty$ なら $\sum_{n}X_{n}$ は a.s. で収束しないことを示せ。
+:::
+
+::: solution
+**準備.** 独立な確率変数の級数が収束する事象の確率は $0$ か $1$（\ref{prb:tail-examples}）。よって 1・2 の後半（a.s. で収束しない）は、「a.s. で収束する」が成り立たないことを示せばよい。
+
+**1.** **$\sum c_{n}<\infty$ の場合.** 非負項の和なので \ref{meas:monotone-convergence} から $E[\sum_{n}c_{n}X_{n}]=\sum_{n}c_{n}E[X_{n}]=\sum_{n}c_{n}<\infty$。よって $\sum_{n}c_{n}X_{n}<\infty$（a.s.）。
+
+**$\sum c_{n}=\infty$ の場合.** $\sum_{n}c_{n}X_{n}$ が a.s. で収束したと仮定して矛盾を導く。\ref{prb:three-series} を独立な $c_{n}X_{n}$ と $A=1$ に使う。条件 1 から $\sum_{n}P(c_{n}X_{n}>1)<\infty$。$c_{n}>0$ なら $P(c_{n}X_{n}>1)=e^{-1/c_{n}}$ なので、$c_{n}\ge\delta>0$ となる $n$ が無限にあれば和は発散する。よって $c_{n}\to0$ で、ある $n_{0}$ から先 $c_{n}\le1$。$n\ge n_{0}$ では、$\{X_{n}\le1\}\subset\{X_{n}\le\frac{1}{c_{n}}\}$ と $X_{n}\ge0$ から
+$$
+E[c_{n}X_{n};c_{n}X_{n}\le1]\ge c_{n}E[X_{n};X_{n}\le1]=c_{n}\int_{0}^{1}xe^{-x}\,dx=c_{n}\Bigl(1-\frac2e\Bigr)
+$$
+（$c_{n}=0$ でも成り立つ）。$1-\frac2e>0$ で、条件 2 からこの左辺の和は収束するので $\sum_{n}c_{n}<\infty$ となり、矛盾。
+
+**2.** **$\sum\sigma_{n}^{2}<\infty$ の場合.** $T_{n}\defeq\sum_{k\le n}X_{k}$ は \ref{prb:martingale-examples.1} からマルチンゲールで、\ref{prb:independence-criteria.3} から $E[T_{n}^{2}]=\sum_{k\le n}\sigma_{k}^{2}\le\sum_{k}\sigma_{k}^{2}$。\ref{prb:lp-martingale-convergence}（$p=2$）から a.s. で収束する。
+
+**$\sum\sigma_{n}^{2}=\infty$ の場合.** $\sum X_{n}$ が a.s. で収束したと仮定し、\ref{prb:three-series} を $A=1$ で使う。$Z\sim N(0,1)$ とすると、\ref{meas:lebesgue-linear} による変数変換から $X_{n}$ は $\sigma_{n}Z$ と同分布。条件 1 から $P(|X_{n}|>1)=P(|Z|>\frac{1}{\sigma_{n}})\to0$ で、$\sigma_{n}\ge\delta>0$ となる $n$ が無限にあれば $P(|X_{n}|>1)\ge P(|Z|>\frac1\delta)>0$ が無限回起こるので、$\sigma_{n}\to0$。ある $n_{0}$ から先 $\sigma_{n}\le1$ とする。$Y_{n}\defeq X_{n}\mathbf{1}_{\{|X_{n}|\le1\}}$ は、$X_{n}$ と $-X_{n}$ が同分布なので $Y_{n}$ と $-Y_{n}$ も同分布で、$E[Y_{n}]=0$。$n\ge n_{0}$ では $\frac{1}{\sigma_{n}}\ge1$ なので
+$$
+\operatorname{Var}(Y_{n})=E[X_{n}^{2};|X_{n}|\le1]=\sigma_{n}^{2}E\Bigl[Z^{2};|Z|\le\frac{1}{\sigma_{n}}\Bigr]\ge\sigma_{n}^{2}E[Z^{2};|Z|\le1]=c\sigma_{n}^{2},
+$$
+ここで $c\defeq E[Z^{2};|Z|\le1]=\frac{1}{\sqrt{2\pi}}\int_{-1}^{1}z^{2}e^{-z^{2}/2}\,dz>0$。条件 3 から $\sum_{n}\operatorname{Var}(Y_{n})<\infty$ なので $\sum_{n}\sigma_{n}^{2}<\infty$ となり、矛盾。
+
+（1 では $c_{n}=\frac1n$ のとき、各項は $\frac{X_{n}}{n}\to0$（a.s.）だが級数は発散する。2 は、正規分布の和では「$\sum X_{n}$ が収束 $\iff$ 分散の和が有限」と、条件が 3 級数定理の条件 3 だけになることを言う。どちらも、3 級数定理の（⇒）の向きを、切り捨てた変数の平均や分散を元の分布のパラメータで下から抑えることで使った。）
+:::
+
+::: problem ★★★ 発展：投票問題 {#prb:ex-ma-3}
+整数 $a>b\ge0$ について $n\defeq a+b$ とし、$+1$ を $a$ 個、$-1$ を $b$ 個並べた列 $e=(e_{1},\dots,e_{n})$ の全体を $\Omega$、その上の一様分布を $P$ とする（候補者 A, B の得票 $a,b$ を無作為な順に開票する）。$\xi_{j}(e)\defeq e_{j}$, $S_{j}\defeq\xi_{1}+\dots+\xi_{j}$（$S_{0}=0$、$S_{j}$ は $j$ 票開票した時点での A のリード）とする。
+1. $1\le m\le n$ について $\mathcal{H}_{m}\defeq\sigma(\xi_{m+1},\dots,\xi_{n})$（$\mathcal{H}_{n}\defeq\{\emptyset,\Omega\}$）とおく。$j\le m$ なら $E[\xi_{j}\mid\mathcal{H}_{m}]=\frac{S_{m}}{m}$ を示し、$X_{k}\defeq\frac{S_{n-k}}{n-k}$（$0\le k\le n-1$）が $\mathcal{G}_{k}\defeq\mathcal{H}_{n-k}$ についてのマルチンゲールであることを導け。
+2. （投票定理）$P(S_{j}>0\ (1\le j\le n))=\frac{a-b}{a+b}$ を示せ。
+3. 単純ランダムウォーク $S_{n}$ について
+$$
+P(S_{1}>0,\dots,S_{n}>0)=\frac{E[S_{n}^{+}]}{n},\qquad P(S_{k}\ne0\ (1\le k\le n))=\frac{E[|S_{n}|]}{n}\le\frac{1}{\sqrt n}
+$$
+を示し、単純ランダムウォークは確率 $1$ で $0$ に戻ることを導け。
+:::
+
+::: solution
+**1.** **$S_{m}$ の可測性.** $S_{n}=a-b$ は定数なので $S_{m}=(a-b)-\sum_{i>m}\xi_{i}$ は $\mathcal{H}_{m}$ 可測。
+
+**交換可能性.** $j,j'\le m$ とし、$\pi\colon\Omega\to\Omega$ を第 $j$ 成分と第 $j'$ 成分の入れ替えとする。$\pi$ は $\Omega$ の全単射で、$\xi_{j}\circ\pi=\xi_{j'}$。$A\in\mathcal{H}_{m}$ は第 $m+1$ 成分以降だけで決まる集合（$A=\{e:(e_{m+1},\dots,e_{n})\in C\}$ の形）なので $\pi(A)=A$。$P$ は一様分布なので
+$$
+E[\xi_{j'};A]=\frac{1}{\#\Omega}\sum_{e\in A}e_{j'}=\frac{1}{\#\Omega}\sum_{e\in A}(\pi e)_{j}=\frac{1}{\#\Omega}\sum_{e'\in A}e'_{j}=E[\xi_{j};A]
+$$
+（$e'=\pi e$ と置き換えた）。
+
+**条件付き期待値.** $j'=1,\dots,m$ について足すと $mE[\xi_{j};A]=E[S_{m};A]$。$\frac{S_{m}}{m}$ は $\mathcal{H}_{m}$ 可測なので $E[\xi_{j}\mid\mathcal{H}_{m}]=\frac{S_{m}}{m}$。
+
+**マルチンゲール.** $\mathcal{H}_{m}\subset\mathcal{H}_{m-1}$ なので $\mathcal{G}_{k}$ は増大列で、$X_{k}$ は $\mathcal{G}_{k}$ 可測。$0\le k\le n-2$ について $m\defeq n-k\ge2$ とすると、前段を $j\le m-1$ について足して
+$$
+E[X_{k+1}\mid\mathcal{G}_{k}]=\frac{1}{m-1}E[S_{m-1}\mid\mathcal{H}_{m}]=\frac{1}{m-1}\cdot(m-1)\frac{S_{m}}{m}=X_{k}.
+$$
+（$k\ge n-1$ では $X_{k}\defeq X_{n-1}$, $\mathcal{G}_{k}\defeq\mathcal{G}_{n-1}$ とおけば、時刻 $\mathbb{Z}_{\ge0}$ のマルチンゲールになる。）
+
+**2.** **停止時刻.** $\tau\defeq\min\{k\le n-1:X_{k}=0\}$（そのような $k$ がなければ $\tau\defeq n-1$）とおくと、$k<n-1$ で $\{\tau\le k\}=\bigcup_{i\le k}\{X_{i}=0\}\in\mathcal{G}_{k}$、$k\ge n-1$ で $\{\tau\le k\}=\Omega$ なので、$\tau\le n-1$ は有界な停止時刻。\ref{prb:optional-stopping.2} から
+$$
+E[X_{\tau}]=E[X_{0}]=\frac{S_{n}}{n}=\frac{a-b}{a+b}.
+$$
+
+**$X_{\tau}$ の値.** $B\defeq\{S_{j}>0\ (1\le j\le n)\}$ とする。$B$ の上では $X_{k}>0$（$k\le n-1$）なので $\tau=n-1$ で、$X_{\tau}=S_{1}=1$（$S_{1}>0$ なので $\xi_{1}=1$）。$B^{c}$ の上では $S_{j}\le0$ となる $1\le j\le n$ があり、$S_{n}=a-b>0$ なので $j<n$。そのような $j$ の最大のものを $j_{0}$ とすると $S_{j_{0}+1}>0$ で、$S$ は $1$ ずつ動くので $S_{j_{0}}\ge S_{j_{0}+1}-1\ge0$、すなわち $S_{j_{0}}=0$。$k_{0}\defeq n-j_{0}\in[1,n-1]$ で $X_{k_{0}}=0$ なので、$\tau$ は $X_{k}=0$ となる最初の $k$ で $X_{\tau}=0$。よって $X_{\tau}=\mathbf{1}_{B}$ で、$P(B)=E[X_{\tau}]=\frac{a-b}{a+b}$。
+
+**3.** **正の側.** 整数 $c$ で $0<c\le n$, $c\equiv n\ (\mathrm{mod}\ 2)$ とし、$a\defeq\frac{n+c}{2}$, $b\defeq\frac{n-c}{2}$ とおく。$\xi_{1},\dots,\xi_{n}$ の独立性から $\{\pm1\}^{n}$ の各列は確率 $2^{-n}$ をもつので、$\{S_{n}=c\}$ の上の列（$+1$ が $a$ 個、$-1$ が $b$ 個）はどれも同じ確率をもつ。よって 2 から
+$$
+P(S_{1}>0,\dots,S_{n}>0,\ S_{n}=c)=\frac{c}{n}P(S_{n}=c).
+$$
+$S_{n}\le0$ の上では $S_{n}>0$ が成り立たないので、$c$ について足すと
+$$
+P(S_{1}>0,\dots,S_{n}>0)=\sum_{c>0}\frac cnP(S_{n}=c)=\frac{E[S_{n}^{+}]}{n}.
+$$
+
+**両側.** $-S$ も単純ランダムウォークなので $P(S_{1}<0,\dots,S_{n}<0)=\frac{E[S_{n}^{-}]}{n}$。$S$ は $1$ ずつ動くので、$S_{k}\ne0$（$1\le k\le n$）なら $S_{1},\dots,S_{n}$ はすべて同符号で、二つの事象は互いに素。足して
+$$
+P(S_{k}\ne0\ (1\le k\le n))=\frac{E[S_{n}^{+}+S_{n}^{-}]}{n}=\frac{E[|S_{n}|]}{n}\le\frac{E[S_{n}^{2}]^{1/2}}{n}=\frac{1}{\sqrt n}
+$$
+（\ref{prb:basic-inequalities.4} と $E[S_{n}^{2}]=n$）。
+
+**再帰.** $\{S_{k}\ne0\ (k\ge1)\}\subset\{S_{k}\ne0\ (1\le k\le n)\}$ なので、その確率は $\frac{1}{\sqrt n}$ 以下で、$n\to\infty$ として $0$。よって確率 $1$ で、ある $k\ge1$ で $S_{k}=0$。
+
+（2 はベルトランの**投票定理**で、鏡像の原理による組合せ論的な証明もよく知られている。ここでは、開票の順を逆にたどると平均リード $\frac{S_{m}}{m}$ がマルチンゲールになること（\ref{prb:slln-backward} の証明と同じく、時間を逆向きにした構造）を使った。3 の $E[|S_{n}|]$ は中心極限定理から $\sqrt{\frac{2n}{\pi}}$ 程度であることがわかり、$S$ が時刻 $n$ まで $0$ に戻らない確率は $\sqrt{\frac{2}{\pi n}}$ 程度で減る。再帰性は \ref{prb:random-walk-hitting.1} の別証明である。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
