@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：シンプレクティック幾何とケーラー幾何 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="05-geometry-topology/05-differential-geometry/04-symplectic/05-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：シンプレクティック幾何とケーラー幾何 {#symp:page-exercises-symplectic keywords="exercises, Symplectic and Kähler Geometry"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは具体的な計算（シンプレクティック行列・ハミルトン流・ポアソン括弧・ダルブー座標・ケーラー形式）と、いくつかのページの結果を組み合わせる問題である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#symp:sec-exsg-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。
+- $\mathbb{R}^{2n}$ の座標を $(x_{1},\dots,x_{n},y_{1},\dots,y_{n})$ とし、$\omega_{0}\defeq\sum_{i}dx_{i}\wedge dy_{i}$、その行列を $\Omega_{0}\defeq\begin{pmatrix}0&I\\-I&0\end{pmatrix}$（$\omega_{0}(u,v)=u^{\mathsf{T}}\Omega_{0}v$）、$J_{0}\defeq\begin{pmatrix}0&-I\\I&0\end{pmatrix}$ と書く。$\Omega_{0}^{2}=-I$, $\Omega_{0}^{\mathsf{T}}=-\Omega_{0}$, $\Omega_{0}J_{0}=I$ である。
+- ハミルトンベクトル場は $i_{X_{H}}\omega=dH$ で定め、$\omega=\sum dq_{i}\wedge dp_{i}$ の座標では $X_{H}=\sum_{i}(\partial_{p_{i}}H\,\partial_{q_{i}}-\partial_{q_{i}}H\,\partial_{p_{i}})$。ポアソン括弧は $\{F,G\}\defeq\omega(X_{F},X_{G})=\sum_{i}(\partial_{q_{i}}F\,\partial_{p_{i}}G-\partial_{p_{i}}F\,\partial_{q_{i}}G)$ で、$X_{H}$ の積分曲線に沿って $\frac{d}{dt}F=\{F,H\}$。
+- 両立する複素構造 $J$ に対し $g_{J}(u,v)\defeq\omega(u,Jv)$。エルミート計量 $g$ の基本 2 形式は $\omega(u,v)\defeq g(Ju,v)$。
+:::
+
+## シンプレクティック線形代数 {#symp:sec-sla-exercises}
+
+対応するページ：\ref{symp:page-linear-algebra}
+
+::: problem ★ 基本：ブロック行列のシンプレクティック性 {#symp:ex-sla-1}
+$P\in\mathrm{GL}(n,\mathbb{R})$、$S$ を $n\times n$ 実行列とする。
+1. $\begin{pmatrix}P&0\\0&Q\end{pmatrix}\in\mathrm{Sp}(2n,\mathbb{R})$ となる $Q$ は $Q=(P^{\mathsf{T}})^{-1}$ に限ることを示せ。
+2. $\begin{pmatrix}I&S\\0&I\end{pmatrix}\in\mathrm{Sp}(2n,\mathbb{R})$ であることと、$S$ が対称であることは同値であることを示せ。
+:::
+
+::: solution
+\ref{symp:symplectic-group} の条件 $A^{\mathsf{T}}\Omega_{0}A=\Omega_{0}$ をブロックごとに計算する。
+
+**1.** $A=\begin{pmatrix}P&0\\0&Q\end{pmatrix}$ とすると $\Omega_{0}A=\begin{pmatrix}0&Q\\-P&0\end{pmatrix}$ で、
+$$
+A^{\mathsf{T}}\Omega_{0}A=\begin{pmatrix}P^{\mathsf{T}}&0\\0&Q^{\mathsf{T}}\end{pmatrix}\begin{pmatrix}0&Q\\-P&0\end{pmatrix}=\begin{pmatrix}0&P^{\mathsf{T}}Q\\-Q^{\mathsf{T}}P&0\end{pmatrix}.
+$$
+これが $\Omega_{0}$ に等しいことは $P^{\mathsf{T}}Q=I$ かつ $Q^{\mathsf{T}}P=I$ と同値である。後者は前者の転置なので、条件は $P^{\mathsf{T}}Q=I$、すなわち $Q=(P^{\mathsf{T}})^{-1}$。このとき $A$ は可逆で、$A\in\mathrm{Sp}(2n,\mathbb{R})$。
+
+**2.** $A=\begin{pmatrix}I&S\\0&I\end{pmatrix}$ は可逆で、$\Omega_{0}A=\begin{pmatrix}0&I\\-I&-S\end{pmatrix}$ なので
+$$
+A^{\mathsf{T}}\Omega_{0}A=\begin{pmatrix}I&0\\S^{\mathsf{T}}&I\end{pmatrix}\begin{pmatrix}0&I\\-I&-S\end{pmatrix}=\begin{pmatrix}0&I\\-I&S^{\mathsf{T}}-S\end{pmatrix}.
+$$
+これが $\Omega_{0}$ に等しいことは $S^{\mathsf{T}}=S$ と同値である。どちらの場合も $\det A=1$ で、$\mathrm{Sp}(2n,\mathbb{R})$ の元の行列式が $1$ であることと整合する。
+:::
+
+::: problem ★ 基本：シンプレクティック基底を作る {#symp:ex-sla-2}
+$\mathbb{R}^{4}$ の座標を $z_{1},\dots,z_{4}$、標準基底を $b_{1},\dots,b_{4}$ とし、
+$$
+\omega\defeq dz_{1}\wedge dz_{3}+dz_{1}\wedge dz_{4}+dz_{2}\wedge dz_{4}
+$$
+とする。$\omega$ が非退化であることを $\omega\wedge\omega$ で確かめ、\ref{symp:symplectic-basis} の証明の手順に従ってシンプレクティック基底を作れ。さらに、$\omega=dX_{1}\wedge dY_{1}+dX_{2}\wedge dY_{2}$ となる線形座標 $X_{1},X_{2},Y_{1},Y_{2}$ を求めよ。
+:::
+
+::: solution
+**非退化性.** 2 形式どうしは可換で、$\alpha\wedge\alpha$ の形の項は共通の 1 形式を含むので $0$ である。よって
+$$
+\omega\wedge\omega=2\bigl(dz_{1}\wedge dz_{3}\wedge dz_{1}\wedge dz_{4}+dz_{1}\wedge dz_{3}\wedge dz_{2}\wedge dz_{4}+dz_{1}\wedge dz_{4}\wedge dz_{2}\wedge dz_{4}\bigr)=-2\,dz_{1}\wedge dz_{2}\wedge dz_{3}\wedge dz_{4}\neq0
+$$
+（第 1・3 項は $dz_{1}$ または $dz_{4}$ を二度含むので $0$）。\ref{symp:omega-power} から $\omega$ は非退化である。
+
+**値の表.** $v=\sum v_{i}b_{i}$, $w=\sum w_{i}b_{i}$ について
+$$
+\omega(v,w)=(v_{1}w_{3}-v_{3}w_{1})+(v_{1}w_{4}-v_{4}w_{1})+(v_{2}w_{4}-v_{4}w_{2}).
+$$
+
+**Step 1.** $e_{1}\defeq b_{1}$ とすると $\omega(b_{1},b_{3})=1$ なので $f_{1}\defeq b_{3}$ とおける。
+
+**Step 2.** 上の式から $\omega(v,b_{1})=-v_{3}-v_{4}$, $\omega(v,b_{3})=v_{1}$ なので、$W\defeq\mathrm{span}(e_{1},f_{1})$ について $W^{\omega}=\{v:v_{1}=0,\ v_{3}+v_{4}=0\}=\mathrm{span}(b_{2},\,b_{4}-b_{3})$。
+
+**Step 3.** $W^{\omega}$ の中で $\omega(b_{2},b_{4}-b_{3})=v_{2}w_{4}=1$（$v=b_{2}$, $w=b_{4}-b_{3}$ で、他の項は $v_{1}=v_{3}=v_{4}=0$, $w_{1}=w_{2}=0$ から $0$）なので、$e_{2}\defeq b_{2}$, $f_{2}\defeq b_{4}-b_{3}$ とする。
+
+確認すると、$\omega(e_{1},f_{1})=\omega(e_{2},f_{2})=1$、$\omega(e_{1},e_{2})=\omega(b_{1},b_{2})=0$、$\omega(e_{1},f_{2})=\omega(b_{1},b_{4})-\omega(b_{1},b_{3})=1-1=0$、$\omega(f_{1},e_{2})=\omega(b_{3},b_{2})=0$、$\omega(f_{1},f_{2})=\omega(b_{3},b_{4})-\omega(b_{3},b_{3})=0$ で、$e_{1},e_{2},f_{1},f_{2}$ はシンプレクティック基底である。
+
+**座標.** $v=X_{1}e_{1}+X_{2}e_{2}+Y_{1}f_{1}+Y_{2}f_{2}=X_{1}b_{1}+X_{2}b_{2}+(Y_{1}-Y_{2})b_{3}+Y_{2}b_{4}$ なので、双対基底は
+$$
+X_{1}=z_{1},\qquad X_{2}=z_{2},\qquad Y_{1}=z_{3}+z_{4},\qquad Y_{2}=z_{4}.
+$$
+実際 $dX_{1}\wedge dY_{1}+dX_{2}\wedge dY_{2}=dz_{1}\wedge(dz_{3}+dz_{4})+dz_{2}\wedge dz_{4}=\omega$。また $\omega^{2}/2!=dX_{1}\wedge dY_{1}\wedge dX_{2}\wedge dY_{2}=dz_{1}\wedge dz_{3}\wedge dz_{2}\wedge dz_{4}=-dz_{1}\wedge dz_{2}\wedge dz_{3}\wedge dz_{4}$ で、最初の計算と一致する。
+:::
+
+::: problem ★★ 標準：対角な内積から作る両立する複素構造 {#symp:ex-sla-3}
+$(\mathbb{R}^{2},\omega_{0})$（$\omega_{0}=dx\wedge dy$）と、$\lambda,\mu>0$ について内積 $g(u,v)\defeq u^{\mathsf{T}}Gv$, $G\defeq\mathrm{diag}(\lambda,\mu)$ をとる。\ref{symp:compatible-complex-structure} の構成 $J=AP^{-1/2}$ を実行し、$J$ と $g_{J}$ を求めよ。$J=J_{0}$ となるのはいつか、$g_{J}=g$ となるのはいつか。
+:::
+
+::: solution
+**$A$.** $\omega_{0}(u,v)=u^{\mathsf{T}}\Omega_{0}v$, $g(Au,v)=u^{\mathsf{T}}A^{\mathsf{T}}Gv$ なので、条件は $A^{\mathsf{T}}G=\Omega_{0}$、すなわち $A=(\Omega_{0}G^{-1})^{\mathsf{T}}=G^{-1}\Omega_{0}^{\mathsf{T}}=-G^{-1}\Omega_{0}$（$G$ は対称）。$-\Omega_{0}=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$ だから
+$$
+A=\begin{pmatrix}0&-1/\lambda\\1/\mu&0\end{pmatrix},\qquad A^{2}=-\frac{1}{\lambda\mu}I.
+$$
+
+**$P$ と $J$.** $P=-A^{2}=\frac{1}{\lambda\mu}I$ はスカラー行列なので、その正の平方根の逆は $P^{-1/2}=\sqrt{\lambda\mu}\,I$。よって
+$$
+J=AP^{-1/2}=\begin{pmatrix}0&-\sqrt{\mu/\lambda}\\\sqrt{\lambda/\mu}&0\end{pmatrix}.
+$$
+直接 $J^{2}=-I$ が確かめられる。
+
+**$g_{J}$.** $g_{J}(u,v)=\omega_{0}(u,Jv)=u^{\mathsf{T}}\Omega_{0}Jv$ で、
+$$
+\Omega_{0}J=\begin{pmatrix}0&1\\-1&0\end{pmatrix}\begin{pmatrix}0&-\sqrt{\mu/\lambda}\\\sqrt{\lambda/\mu}&0\end{pmatrix}=\begin{pmatrix}\sqrt{\lambda/\mu}&0\\0&\sqrt{\mu/\lambda}\end{pmatrix}=\frac{1}{\sqrt{\lambda\mu}}G.
+$$
+これは正定値対称で、$J$ が両立することの確認にもなっている（$\omega_{0}(Ju,Jv)=\omega_{0}(u,v)$ は $\det J=1$ と \ref{symp:prob-la-two-dim} から）。
+
+**比較.** $J=J_{0}=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$ となるのは $\sqrt{\mu/\lambda}=1$、すなわち $\lambda=\mu$ のとき。$g_{J}=g$ となるのは $\lambda\mu=1$ のときである。後者の場合 $g$ 自身が $g_{J}$ の形なので、構成が $J$ を変えずに返すという \ref{symp:compatible-complex-structure} の後の注意と整合する。一般には $g_{J}$ は $g$ の定数倍 $g/\sqrt{\lambda\mu}$ で、$J$ は $g$ の「形」（比 $\lambda/\mu$）だけで決まる。
+:::
+
+::: problem ★★★ 発展：平面の両立する複素構造の全体 {#symp:ex-sla-4}
+$(\mathbb{R}^{2},\omega_{0})$ と両立する複素構造 $J$ の全体は
+$$
+\Bigl\{J_{a,c}\defeq\begin{pmatrix}a&-(1+a^{2})/c\\c&-a\end{pmatrix}:a\in\mathbb{R},\ c>0\Bigr\}
+$$
+で、$(a,c)\mapsto J_{a,c}$ は上半平面 $\{(a,c):c>0\}$ からこの集合への全単射であることを示せ。\ref{symp:ex-sla-3} で得た $J$ はどの $(a,c)$ にあたるか。
+:::
+
+::: solution
+$J=\begin{pmatrix}a&b\\c&d\end{pmatrix}$ とする。$g_{J}$ の行列は
+$$
+\Omega_{0}J=\begin{pmatrix}0&1\\-1&0\end{pmatrix}\begin{pmatrix}a&b\\c&d\end{pmatrix}=\begin{pmatrix}c&d\\-a&-b\end{pmatrix}.
+$$
+
+**必要性.** $J$ が両立するとする。$g_{J}$ は対称（\ref{symp:compatible-triple} の後の注意）なので $d=-a$。このとき
+$$
+J^{2}=\begin{pmatrix}a^{2}+bc&ab+bd\\ca+dc&bc+d^{2}\end{pmatrix}=(a^{2}+bc)I
+$$
+で、$J^{2}=-I$ から $bc=-1-a^{2}$。正定値性から $g_{J}(b_{1},b_{1})=c>0$。よって $b=-(1+a^{2})/c$ で、$J=J_{a,c}$。
+
+**十分性.** $J=J_{a,c}$（$c>0$）とする。$d=-a$, $bc=-1-a^{2}$ なので上の式から $J^{2}=-I$。$\det J=-a^{2}-bc=1$ なので $J\in\mathrm{SL}(2,\mathbb{R})=\mathrm{Sp}(2,\mathbb{R})$（\ref{symp:prob-la-two-dim}）、すなわち $\omega_{0}(Ju,Jv)=\omega_{0}(u,v)$。$g_{J}$ の行列 $\begin{pmatrix}c&-a\\-a&(1+a^{2})/c\end{pmatrix}$ は対称で、$(1,1)$ 成分 $c>0$、行列式 $(1+a^{2})-a^{2}=1>0$ なので、2 次の対称行列の正定値性の判定（首座小行列式がすべて正）から正定値である。よって $J_{a,c}$ は両立する。
+
+**全単射.** $J_{a,c}$ の $(1,1)$ 成分と $(2,1)$ 成分から $(a,c)$ が読み取れるので単射で、必要性から全射。
+
+**\ref{symp:ex-sla-3} との対応.** そこで得た $J$ は $(1,1)$ 成分 $0$、$(2,1)$ 成分 $\sqrt{\lambda/\mu}$ なので $(a,c)=(0,\sqrt{\lambda/\mu})$。実際 $-(1+0)/c=-\sqrt{\mu/\lambda}$ で一致する。$J_{0}$ は $(a,c)=(0,1)$ である。対角な内積からは $a=0$ の半直線しか得られないが、非対角な内積を使えば上半平面のすべての点が現れる（\ref{symp:compatible-complex-structure} の後の注意から、$g=g_{J_{a,c}}$ を与えれば $J_{a,c}$ 自身が返る）。
+:::
+
+## シンプレクティック多様体とハミルトン力学 {#symp:sec-ssm-exercises}
+
+対応するページ：\ref{symp:page-symplectic-manifolds}
+
+::: problem ★ 基本：双曲型のハミルトン流 {#symp:ex-ssm-1}
+$(\mathbb{R}^{2},dq\wedge dp)$ で $H\defeq qp$ のハミルトンベクトル場と流れを求め、流れが面積と $H$ を保つことを直接確かめよ。また、$\{q,H\}$, $\{p,H\}$ を計算して、運動方程式と一致することを確かめよ。
+:::
+
+::: solution
+\ref{symp:hamiltonian-vector-field} の後の式から $X_{H}=\partial_{p}H\,\partial_{q}-\partial_{q}H\,\partial_{p}=q\,\partial_{q}-p\,\partial_{p}$。運動方程式は $\dot q=q$, $\dot p=-p$ で、解は $q(t)=e^{t}q_{0}$, $p(t)=e^{-t}p_{0}$。これはすべての $t\in\mathbb{R}$ で定義され、流れは $\phi_{t}(q,p)=(e^{t}q,e^{-t}p)$。
+
+**面積.** $\phi_{t}$ は線形写像 $\mathrm{diag}(e^{t},e^{-t})$ で、$\phi_{t}^{*}(dq\wedge dp)=d(e^{t}q)\wedge d(e^{-t}p)=dq\wedge dp$。これは \ref{symp:hamiltonian-conservation.2} と整合する。
+
+**エネルギー.** $H(\phi_{t}(q,p))=e^{t}q\cdot e^{-t}p=qp$ で一定（\ref{symp:hamiltonian-conservation.1}）。軌道は双曲線 $qp=\text{一定}$ の上を動き、$q$ 軸の方向に伸び $p$ 軸の方向に縮む。
+
+**ポアソン括弧.** \ref{symp:poisson-bracket} の座標表示から $\{q,H\}=\partial_{q}q\,\partial_{p}H-\partial_{p}q\,\partial_{q}H=q$, $\{p,H\}=\partial_{q}p\,\partial_{p}H-\partial_{p}p\,\partial_{q}H=-p$。$\frac{d}{dt}F=\{F,H\}$ に $F=q,p$ を入れると $\dot q=q$, $\dot p=-p$ で、運動方程式と一致する。
+:::
+
+::: problem ★★ 標準：角運動量のポアソン括弧 {#symp:ex-ssm-2}
+$(T^{*}\mathbb{R}^{3}=\mathbb{R}^{6},\sum_{i=1}^{3}dq_{i}\wedge dp_{i})$ で
+$$
+L_{1}\defeq q_{2}p_{3}-q_{3}p_{2},\qquad L_{2}\defeq q_{3}p_{1}-q_{1}p_{3},\qquad L_{3}\defeq q_{1}p_{2}-q_{2}p_{1}
+$$
+とする。
+1. $\{L_{1},L_{2}\}=L_{3}$, $\{L_{2},L_{3}\}=L_{1}$, $\{L_{3},L_{1}\}=L_{2}$ を示せ。
+2. $H\in C^{\infty}(\mathbb{R}^{6})$ について、$L_{1}$ と $L_{2}$ が $H$ の保存量なら、$L_{3}$ も保存量であることを示せ。
+3. $[X_{L_{1}},X_{L_{2}}]$ を $X_{L_{3}}$ で表せ。
+:::
+
+::: solution
+**1.** 偏微分は
+$$
+\partial_{q}L_{1}=(0,p_{3},-p_{2}),\quad\partial_{p}L_{1}=(0,-q_{3},q_{2}),\quad\partial_{q}L_{2}=(-p_{3},0,p_{1}),\quad\partial_{p}L_{2}=(q_{3},0,-q_{1})
+$$
+（成分は $i=1,2,3$ の順）。\ref{symp:poisson-bracket} の座標表示から
+$$
+\{L_{1},L_{2}\}=\sum_{i}\partial_{q_{i}}L_{1}\,\partial_{p_{i}}L_{2}-\sum_{i}\partial_{p_{i}}L_{1}\,\partial_{q_{i}}L_{2}=(-p_{2})(-q_{1})-q_{2}p_{1}=q_{1}p_{2}-q_{2}p_{1}=L_{3}.
+$$
+添字の巡回置換 $1\to2\to3\to1$ による変数の付け替え $(q_{1},q_{2},q_{3},p_{1},p_{2},p_{3})\mapsto(q_{2},q_{3},q_{1},p_{2},p_{3},p_{1})$ は、ポアソン括弧の座標表示（$i$ についての和）を変えず、$L_{1}\mapsto L_{2}$, $L_{2}\mapsto L_{3}$, $L_{3}\mapsto L_{1}$ と写す（たとえば $L_{1}=q_{2}p_{3}-q_{3}p_{2}\mapsto q_{3}p_{1}-q_{1}p_{3}=L_{2}$）。よって上の式から $\{L_{2},L_{3}\}=L_{1}$、もう一度使って $\{L_{3},L_{1}\}=L_{2}$。
+
+**2.** \ref{symp:poisson-lie-algebra} から、保存量であることは $H$ とのポアソン括弧が $0$ であることと同値なので、$\{L_{1},H\}=\{L_{2},H\}=0$ を仮定して $\{L_{3},H\}=0$ を示せばよい。ヤコビ恒等式（\ref{symp:poisson-lie-algebra.3}）を $L_{1},L_{2},H$ に使うと
+$$
+\{L_{1},\{L_{2},H\}\}+\{L_{2},\{H,L_{1}\}\}+\{H,\{L_{1},L_{2}\}\}=0.
+$$
+仮定と交代性から $\{L_{2},H\}=0$, $\{H,L_{1}\}=-\{L_{1},H\}=0$ で、$\{F,0\}=0$（双線形性）なので第 1・2 項は $0$。1 から第 3 項は $\{H,L_{3}\}$ なので $\{H,L_{3}\}=0$、交代性から $\{L_{3},H\}=0$。
+
+**3.** \ref{symp:poisson-lie-algebra.2} と 1 から $[X_{L_{1}},X_{L_{2}}]=-X_{\{L_{1},L_{2}\}}=-X_{L_{3}}$。
+:::
+
+::: problem ★★ 標準：閉 1 形式によるファイバーの平行移動 {#symp:ex-ssm-3}
+$M$ を可微分多様体、$\alpha$ を $M$ 上の 1 形式とし、$\tau_{\alpha}\colon T^{*}M\to T^{*}M$, $\tau_{\alpha}(m,\xi)\defeq(m,\xi+\alpha_{m})$ とする。$\lambda$, $\omega=-d\lambda$ を \ref{symp:cotangent-canonical} の同語反復形式と標準形式とする。
+1. $\tau_{\alpha}$ は微分同相写像で、$\tau_{\alpha}^{*}\lambda=\lambda+\pi^{*}\alpha$ であることを示せ。
+2. $\tau_{\alpha}$ がシンプレクティック同相写像であることと、$d\alpha=0$ は同値であることを示せ。
+:::
+
+::: solution
+**1.** 自然な座標 $(q,p)$ で $\alpha=\sum a_{i}(q)dq_{i}$ と書くと $\tau_{\alpha}(q,p)=(q,p+a(q))$ で、成分が滑らかなので $\tau_{\alpha}$ は滑らか。$\tau_{-\alpha}$ が逆写像なので微分同相写像である。$\pi\circ\tau_{\alpha}=\pi$ なので、$v\in T_{(m,\xi)}T^{*}M$ について $d\pi(d\tau_{\alpha}v)=d\pi(v)$ で、同語反復形式の定義（\ref{symp:cotangent-canonical.1}）から
+$$
+(\tau_{\alpha}^{*}\lambda)(v)=\lambda_{(m,\xi+\alpha_{m})}(d\tau_{\alpha}v)=(\xi+\alpha_{m})\bigl(d\pi(v)\bigr)=\lambda_{(m,\xi)}(v)+(\pi^{*}\alpha)(v).
+$$
+（座標では $\tau_{\alpha}^{*}\sum p_{i}dq_{i}=\sum(p_{i}+a_{i}(q))dq_{i}$ で、同じ式である。）
+
+**2.** 1 と、引き戻しが $d$ と可換であること（\ref{mfd:pullback-properties}）から
+$$
+\tau_{\alpha}^{*}\omega=-d(\tau_{\alpha}^{*}\lambda)=-d\lambda-d\pi^{*}\alpha=\omega-\pi^{*}d\alpha.
+$$
+よって $\tau_{\alpha}$ がシンプレクティック同相写像であることは $\pi^{*}d\alpha=0$ と同値。$d\alpha=0$ なら明らかに $\pi^{*}d\alpha=0$。逆に $\pi^{*}d\alpha=0$ なら、零切断 $s_{0}\colon M\to T^{*}M$ について $\pi\circ s_{0}=\mathrm{id}_{M}$ なので $d\alpha=s_{0}^{*}\pi^{*}d\alpha=0$。
+
+（たとえば $\alpha=df$ なら $\tau_{df}$ はシンプレクティック同相写像で、$\tau_{df}$ は零切断を $df$ のグラフに写す。これは \ref{symp:cotangent-canonical} の後の注意の、閉 1 形式のグラフがラグランジュ部分多様体であることとも整合する。）
+:::
+
+::: problem ★★★ 発展：線形ハミルトン系 {#symp:ex-ssm-4}
+$(\mathbb{R}^{2n},\omega_{0})$ で、$2n$ 次の実対称行列 $S$ について $H(z)\defeq\frac12z^{\mathsf{T}}Sz$（$z=(x,y)$）とし、$K\defeq\Omega_{0}S$ とおく。
+1. $X_{H}(z)=Kz$ であることを示し、$X_{H}$ の流れが $\phi_{t}(z)=e^{tK}z$（$t\in\mathbb{R}$）であることを示せ。
+2. $e^{tK}\in\mathrm{Sp}(2n,\mathbb{R})$ を行列の計算で直接示せ。
+3. $K$ の特性多項式 $\chi_{K}(\lambda)\defeq\det(\lambda I-K)$ は $\chi_{K}(-\lambda)=\chi_{K}(\lambda)$ を満たすことを示せ。とくに $\lambda$ が $K$ の固有値なら $-\lambda$ も固有値である。
+4. $n=1$, $H=\frac12(x^{2}-y^{2})$ のとき $e^{tK}$ を求めよ。
+:::
+
+::: solution
+**1.** $S$ は対称なので $H$ の勾配は $(\partial_{x}H,\partial_{y}H)=Sz$（$\partial_{z_{k}}\frac12\sum S_{ij}z_{i}z_{j}=\frac12\sum_{j}(S_{kj}+S_{jk})z_{j}=(Sz)_{k}$）。\ref{symp:hamiltonian-vector-field} の後の式（$q=x$, $p=y$）から、$X_{H}$ の成分は $(\partial_{y}H,-\partial_{x}H)$ で、これは $\Omega_{0}\begin{pmatrix}a\\b\end{pmatrix}=\begin{pmatrix}b\\-a\end{pmatrix}$ により $\Omega_{0}(Sz)=Kz$ に等しい。積分曲線は線形方程式 $\dot z=Kz$ の解で、\ref{lin:matrix-exponential.5} から $z(t)=e^{tK}z_{0}$ は解であり、\ref{ode:linear-existence} から解は $\mathbb{R}$ 全体でただ一つなので、流れは $\phi_{t}(z)=e^{tK}z$ である。
+
+**2.** $M(t)\defeq(e^{tK})^{\mathsf{T}}\Omega_{0}e^{tK}$ とおく。$\frac{d}{dt}e^{tK}=Ke^{tK}=e^{tK}K$（\ref{lin:matrix-exponential.5}、$e^{tK}$ は $K$ のべき級数なので $K$ と可換）で、転置して $\frac{d}{dt}(e^{tK})^{\mathsf{T}}=(e^{tK})^{\mathsf{T}}K^{\mathsf{T}}$。よって
+$$
+M'(t)=(e^{tK})^{\mathsf{T}}\bigl(K^{\mathsf{T}}\Omega_{0}+\Omega_{0}K\bigr)e^{tK}.
+$$
+$K^{\mathsf{T}}\Omega_{0}=S\Omega_{0}^{\mathsf{T}}\Omega_{0}=S\cdot(-\Omega_{0})\Omega_{0}=S$（$\Omega_{0}^{2}=-I$）、$\Omega_{0}K=\Omega_{0}^{2}S=-S$ なので括弧の中は $0$、$M'\equiv0$。$M(0)=\Omega_{0}$ なので $M(t)=\Omega_{0}$。$e^{tK}$ は可逆（\ref{lin:matrix-exponential.3}）なので $e^{tK}\in\mathrm{Sp}(2n,\mathbb{R})$。これは、線形写像 $A$ について $(A^{*}\omega_{0})(u,v)=u^{\mathsf{T}}A^{\mathsf{T}}\Omega_{0}Av$ であることを通して、\ref{symp:hamiltonian-conservation.2} の線形な場合の直接の確認になっている。
+
+**3.** $\Omega_{0}^{-1}=-\Omega_{0}$ なので
+$$
+\Omega_{0}K\Omega_{0}^{-1}=\Omega_{0}\Omega_{0}S(-\Omega_{0})=S\Omega_{0},\qquad -K^{\mathsf{T}}=-S\Omega_{0}^{\mathsf{T}}=S\Omega_{0}.
+$$
+よって $K$ は $-K^{\mathsf{T}}$ と相似で、特性多項式は相似で不変、転置で不変だから
+$$
+\chi_{K}(\lambda)=\det(\lambda I+K^{\mathsf{T}})=\det(\lambda I+K)=(-1)^{2n}\det(-\lambda I-K)=\chi_{K}(-\lambda).
+$$
+$\chi_{K}(\lambda)=0$ なら $\chi_{K}(-\lambda)=0$ なので、$-\lambda$ も固有値である。
+
+**4.** $S=\mathrm{diag}(1,-1)$, $K=\Omega_{0}S=\begin{pmatrix}0&1\\-1&0\end{pmatrix}\begin{pmatrix}1&0\\0&-1\end{pmatrix}=\begin{pmatrix}0&-1\\-1&0\end{pmatrix}$。$K^{2}=I$ なので、べき級数を偶数次と奇数次に分けて
+$$
+e^{tK}=\cosh t\,I+\sinh t\,K=\begin{pmatrix}\cosh t&-\sinh t\\-\sinh t&\cosh t\end{pmatrix}.
+$$
+$\det e^{tK}=\cosh^{2}t-\sinh^{2}t=1$ で 2 と整合し、固有値 $\pm1$ は 3 と整合する。運動方程式 $\dot x=\partial_{y}H=-y$, $\dot y=-\partial_{x}H=-x$ を $x(t)=x_{0}\cosh t-y_{0}\sinh t$, $y(t)=-x_{0}\sinh t+y_{0}\cosh t$ が満たすことも直接確かめられる。
+:::
+
+## ダルブーの定理 {#symp:sec-sdb-exercises}
+
+対応するページ：\ref{symp:page-darboux}
+
+::: problem ★ 基本：極座標から作るダルブー座標 {#symp:ex-sdb-1}
+$(\mathbb{R}^{2},\omega_{0}=dx\wedge dy)$ の開集合 $U\defeq\mathbb{R}^{2}\setminus\{(x,0):x\le0\}$ の上で、極座標 $x=r\cos\theta$, $y=r\sin\theta$（$r>0$, $-\pi<\theta<\pi$）を使い、$s\defeq r^{2}/2$ とおく。$(s,\theta)$ が $U$ のダルブー座標（$\omega_{0}=ds\wedge d\theta$）であることを示せ。さらに、滑らかな $h\colon(0,\infty)\to\mathbb{R}$ について $H\defeq h(s)$ のハミルトンベクトル場を $(s,\theta)$ で求め、$h(s)=s$ の場合を \ref{symp:prob-sm-harmonic-oscillator} と比べよ。
+:::
+
+::: solution
+**座標であること.** $(s,\theta)\mapsto(\sqrt{2s}\cos\theta,\sqrt{2s}\sin\theta)$ は $(0,\infty)\times(-\pi,\pi)$ から $U$ への滑らかな全単射で、その逆 $(x,y)\mapsto(s,\theta)$ も滑らか（$\theta$ は $U$ 上の偏角の連続な分枝で、極座標の標準的な性質による）。よって $(U;s,\theta)$ は座標近傍である。
+
+**形式.** $dx=\cos\theta\,dr-r\sin\theta\,d\theta$, $dy=\sin\theta\,dr+r\cos\theta\,d\theta$ から
+$$
+dx\wedge dy=r\cos^{2}\theta\,dr\wedge d\theta-r\sin^{2}\theta\,d\theta\wedge dr=r\,dr\wedge d\theta.
+$$
+$ds=r\,dr$ なので $\omega_{0}=ds\wedge d\theta$。つまり $(s,\theta)$ は（$s$ を $x_{1}$、$\theta$ を $y_{1}$ の役として）ダルブー座標である。
+
+**ハミルトンベクトル場.** $X_{H}$ は $i_{X_{H}}\omega_{0}=dH$ だけで決まるので、どのダルブー座標で計算してもよい。\ref{symp:hamiltonian-vector-field} の後の式を $(q,p)=(s,\theta)$ に使うと
+$$
+X_{H}=\partial_{\theta}H\,\partial_{s}-\partial_{s}H\,\partial_{\theta}=-h'(s)\,\partial_{\theta}.
+$$
+積分曲線は $s$ 一定、$\theta(t)=\theta_{0}-h'(s_{0})t$（$U$ にとどまる間）で、各円 $r=\text{一定}$ の上を角速度 $-h'(r^{2}/2)$ で回る。
+
+**比較.** $h(s)=s$ のとき $H=\frac12(x^{2}+y^{2})$ で $X_{H}=-\partial_{\theta}$。直交座標では $\partial_{\theta}=\frac{\partial x}{\partial\theta}\partial_{x}+\frac{\partial y}{\partial\theta}\partial_{y}=-y\,\partial_{x}+x\,\partial_{y}$ なので $X_{H}=y\,\partial_{x}-x\,\partial_{y}$。これは \ref{symp:prob-sm-harmonic-oscillator} の $X_{H}=p\,\partial_{q}-q\,\partial_{p}$（$q=x$, $p=y$）と一致し、流れが角 $-t$ の回転であることも一致する。$(s,\theta)$ は力学でいう作用・角変数にあたる。
+:::
+
+::: problem ★★ 標準：磁場項をもつ形式の大域的なダルブー座標 {#symp:ex-sdb-2}
+$\pi\colon\mathbb{R}^{2n}\to\mathbb{R}^{n}$, $(x,y)\mapsto x$ とし、$\beta$ を $\mathbb{R}^{n}$ 上の閉 2 形式とする。$\omega\defeq\omega_{0}+\pi^{*}\beta$ について、
+1. $\omega$ は $\mathbb{R}^{2n}$ のシンプレクティック形式で、$\mathbb{R}^{2n}$ 全体で $\omega=\sum_{i}dx_{i}\wedge dY_{i}$ となる座標 $(x,Y)$（$Y_{i}=y_{i}-a_{i}(x)$ の形）があることを示せ。
+2. $n=2$, $\beta=x_{1}\,dx_{1}\wedge dx_{2}$ のとき、そのような $Y$ を一つ具体的に求めよ。
+:::
+
+::: solution
+**1.** $\beta$ は $\mathbb{R}^{n}$（星形）の上の閉 2 形式なので、\ref{mfd:poincare-lemma-manifold.1}（$H^{2}(\mathbb{R}^{n})=0$）から $\beta=d\alpha$ となる 1 形式 $\alpha=\sum_{i}a_{i}(x)dx_{i}$ がある。$\pi^{*}\alpha=\sum_{i}a_{i}(x)dx_{i}$（$\mathbb{R}^{2n}$ 上で $a_{i}$ は $x$ だけの関数）で、
+$$
+\pi^{*}\beta=d\pi^{*}\alpha=\sum_{i}da_{i}\wedge dx_{i}=-\sum_{i}dx_{i}\wedge da_{i}.
+$$
+よって
+$$
+\omega=\sum_{i}dx_{i}\wedge dy_{i}-\sum_{i}dx_{i}\wedge da_{i}=\sum_{i}dx_{i}\wedge d(y_{i}-a_{i}(x)).
+$$
+$\Phi(x,y)\defeq(x,y-a(x))$ は $\mathbb{R}^{2n}$ の微分同相写像（逆は $(x,Y)\mapsto(x,Y+a(x))$）なので、$(x,Y)$, $Y_{i}\defeq y_{i}-a_{i}(x)$ は $\mathbb{R}^{2n}$ 全体の座標で、$\omega=\sum dx_{i}\wedge dY_{i}$。とくに $\omega=\Phi^{*}\omega_{0}$ は閉で各点で非退化、すなわちシンプレクティック形式である（$d\omega=d\omega_{0}+\pi^{*}d\beta=0$ からも閉形式であることがわかる）。
+
+**2.** $\alpha\defeq\frac12x_{1}^{2}\,dx_{2}$ とすると $d\alpha=x_{1}\,dx_{1}\wedge dx_{2}=\beta$（$\beta$ は 2 変数の 2 形式なので閉）。$a_{1}=0$, $a_{2}=\frac12x_{1}^{2}$ だから $Y_{1}=y_{1}$, $Y_{2}=y_{2}-\frac12x_{1}^{2}$。検算：
+$$
+dx_{1}\wedge dy_{1}+dx_{2}\wedge d\bigl(y_{2}-\tfrac12x_{1}^{2}\bigr)=dx_{1}\wedge dy_{1}+dx_{2}\wedge dy_{2}-x_{1}\,dx_{2}\wedge dx_{1}=\omega_{0}+x_{1}\,dx_{1}\wedge dx_{2}.
+$$
+（ダルブー座標は一意でない。たとえば $x_{1}\,dx_{1}\wedge dx_{2}=dx_{1}\wedge d(x_{1}x_{2})$ を使えば $Y_{1}=y_{1}+x_{1}x_{2}$, $Y_{2}=y_{2}$ も同じ性質をもつ。）
+
+\ref{symp:darboux} が保証するのは各点の近くのダルブー座標だけだが、この例では $\beta$ の原始形式が全体でとれるので、座標が $\mathbb{R}^{2n}$ 全体で得られた。
+:::
+
+::: problem ★★★ 発展：モーザーの方法を具体的に実行する {#symp:ex-sdb-3}
+$f\colon\mathbb{R}\to\mathbb{R}$ を滑らかな関数で、定数 $c>0$ について $f\ge c$ とする。$F(x)\defeq\int_{0}^{x}f(s)ds$ とおき、$\mathbb{R}^{2}$ 上で $\omega_{0}\defeq dx\wedge dy$, $\omega_{1}\defeq f(x)\,dx\wedge dy$, $\omega_{t}\defeq\omega_{0}+t(\omega_{1}-\omega_{0})$（$0\le t\le1$）、$\sigma\defeq(F(x)-x)\,dy$ とする。
+1. $d\sigma=\omega_{1}-\omega_{0}$ を示し、$i_{X_{t}}\omega_{t}=-\sigma$ で定まるベクトル場 $X_{t}$ を求めよ。
+2. $G_{t}(\xi)\defeq(1-t)\xi+tF(\xi)$ とし、$\xi_{t}\defeq G_{t}^{-1}$, $\phi_{t}(x,y)\defeq(\xi_{t}(x),y)$ とおく。$\phi_{t}$ が $\phi_{0}=\mathrm{id}$, $\partial_{t}\phi_{t}=X_{t}\circ\phi_{t}$ を満たす（$X_{t}$ の流れである）ことを示せ。
+3. すべての $t\in[0,1]$ で $\phi_{t}^{*}\omega_{t}=\omega_{0}$ を示し、$\omega_{1}$ のダルブー座標を求めよ。
+:::
+
+::: solution
+**1.** $d\sigma=d(F(x)-x)\wedge dy=(f(x)-1)\,dx\wedge dy=\omega_{1}-\omega_{0}$。$\omega_{t}=h_{t}(x)\,dx\wedge dy$, $h_{t}\defeq1-t+tf$ と書ける。$0\le t\le1$ で $h_{t}\ge(1-t)+tc\ge m\defeq\min(1,c)>0$ なので $\omega_{t}$ は各点で非退化。$X=a\,\partial_{x}+b\,\partial_{y}$ について $i_{X}(dx\wedge dy)=a\,dy-b\,dx$ なので、$i_{X_{t}}\omega_{t}=-\sigma$ は $h_{t}(a\,dy-b\,dx)=-(F(x)-x)\,dy$、すなわち $b=0$, $a=\frac{x-F(x)}{h_{t}(x)}$。よって
+$$
+X_{t}=\frac{x-F(x)}{h_{t}(x)}\,\partial_{x}.
+$$
+
+**2.** 【主張：$G_{t}$（$0\le t\le1$）は $\mathbb{R}$ の微分同相写像で、$(t,x)\mapsto\xi_{t}(x)$ は滑らか】$G_{t}'(\xi)=h_{t}(\xi)\ge m>0$ なので $G_{t}$ は狭義単調増加で、平均値の定理から $\xi>0$ で $G_{t}(\xi)\ge G_{t}(0)+m\xi=m\xi$、$\xi<0$ で $G_{t}(\xi)\le m\xi$ だから全射。よって全単射で、逆関数定理から $\xi_{t}=G_{t}^{-1}$ は滑らか。$(t,x)$ についての滑らかさは、$\Phi(t,\xi,x)\defeq G_{t}(\xi)-x$（$t\in\mathbb{R}$ で定義された滑らかな関数）に \ref{calc:implicit-function-theorem} を使う：$\partial_{\xi}\Phi=h_{t}(\xi)>0$ なので、$(t_{0},x_{0})$（$t_{0}\in[0,1]$）の近くで $\Phi=0$ の滑らかな解 $\tilde\xi(t,x)$ があり、$t\in[0,1]$ では解の一意性（狭義単調性）から $\tilde\xi(t,x)=\xi_{t}(x)$。
+
+$G_{0}=\mathrm{id}$ なので $\xi_{0}=\mathrm{id}$, $\phi_{0}=\mathrm{id}$。恒等式 $G_{t}(\xi_{t}(x))=x$ を $t$ で微分すると、$\partial_{t}G_{t}(\xi)=F(\xi)-\xi$ と $G_{t}'=h_{t}$ から
+$$
+F(\xi_{t})-\xi_{t}+h_{t}(\xi_{t})\,\partial_{t}\xi_{t}=0,\qquad\text{すなわち}\qquad\partial_{t}\xi_{t}(x)=\frac{\xi_{t}-F(\xi_{t})}{h_{t}(\xi_{t})}.
+$$
+右辺は 1 の $X_{t}$ の $\partial_{x}$ 成分を点 $\phi_{t}(x,y)=(\xi_{t}(x),y)$ で評価したもので、$y$ 成分は $\partial_{t}y=0=b$。よって $\partial_{t}\phi_{t}=X_{t}\circ\phi_{t}$。
+
+**3.** 恒等式 $G_{t}(\xi_{t}(x))=x$ を $x$ で微分すると $h_{t}(\xi_{t}(x))\,\partial_{x}\xi_{t}(x)=1$。よって
+$$
+\phi_{t}^{*}\omega_{t}=h_{t}(\xi_{t}(x))\,d(\xi_{t}(x))\wedge dy=h_{t}(\xi_{t}(x))\,\partial_{x}\xi_{t}(x)\,dx\wedge dy=dx\wedge dy=\omega_{0}.
+$$
+これは \ref{symp:darboux} の証明の Step 4 で、\ref{symp:moser-lemma.3} から $\frac{d}{dt}\phi_{t}^{*}\omega_{t}=0$ を導いた計算の、具体的な場合の確認である（ここでは流れが全体で定義されるので、局所化は要らない）。
+
+$t=1$ では $G_{1}=F$ なので $\phi_{1}(x,y)=(F^{-1}(x),y)$ で、$\phi_{1}^{*}\omega_{1}=\omega_{0}$。したがって $\phi_{1}^{-1}(x,y)=(F(x),y)$ の成分 $u\defeq F(x)$, $v\defeq y$ について $\omega_{1}=du\wedge dv$ で、$(u,v)$ は $\omega_{1}$ の $\mathbb{R}^{2}$ 全体のダルブー座標である（直接にも $du\wedge dv=f(x)\,dx\wedge dy$）。これは \ref{symp:prob-db-area-forms} のヒントの座標（$f$ が $x$ だけによる場合）と一致し、モーザーの方法がその座標を自動的に見つけていることがわかる。
+:::
+
+## 概複素構造とケーラー多様体 {#symp:sec-skh-exercises}
+
+対応するページ：\ref{symp:page-kahler}
+
+::: problem ★ 基本：ハミルトンベクトル場と勾配 {#symp:ex-skh-1}
+$(M,\omega)$ をシンプレクティック多様体、$J$ を $\omega$ と両立する概複素構造、$g\defeq g_{J}$ とし、$H\in C^{\infty}(M)$ の $g$ についての勾配 $\nabla H$（$g(\nabla H,v)=dH(v)$）を考える。$X_{H}=-J\nabla H$ を示せ。これを使って、$\mathbb{C}^{n}$ の標準のケーラー構造で $H=\frac12|z|^{2}$ のハミルトン流を求めよ。
+:::
+
+::: solution
+**一般の式.** $v\in T_{m}M$ について、$g_{J}$ の定義と両立性 $\omega(Ju,Jw)=\omega(u,w)$（\ref{symp:compatible-triple}）から
+$$
+dH(v)=g(\nabla H,v)=\omega(\nabla H,Jv)=\omega(J\nabla H,J^{2}v)=-\omega(J\nabla H,v)=\omega(-J\nabla H,v).
+$$
+よって $i_{-J\nabla H}\omega=dH$ で、$\omega$ の非退化性から $X_{H}$ は一意なので $X_{H}=-J\nabla H$。
+
+**$\mathbb{C}^{n}$ の場合.** \ref{symp:kahler-examples.1} から、標準計量 $g$ と $J_{0}$ の基本 2 形式は $\omega_{0}$ で、\ref{symp:kahler-symplectic} から $g=g_{J_{0}}$。$H=\frac12\sum_{j}(x_{j}^{2}+y_{j}^{2})$ の勾配は $\nabla H=\sum_{j}(x_{j}\partial_{x_{j}}+y_{j}\partial_{y_{j}})$、すなわち点 $z$ での位置ベクトル $z$ そのもので、$J_{0}$ は $i$ 倍なので $X_{H}(z)=-iz$。方程式 $\dot z=-iz$ の解は $z(t)=e^{-it}z_{0}$ で、流れは各複素座標を同時に角 $-t$ だけ回す。
+
+検算：$-J_{0}\nabla H=-\sum_{j}(x_{j}\partial_{y_{j}}-y_{j}\partial_{x_{j}})=\sum_{j}(y_{j}\partial_{x_{j}}-x_{j}\partial_{y_{j}})$ で、これは \ref{symp:hamiltonian-vector-field} の後の式（$q=x$, $p=y$）による $X_{H}=\sum(\partial_{y_{j}}H\,\partial_{x_{j}}-\partial_{x_{j}}H\,\partial_{y_{j}})$ と一致する。$n=1$ では \ref{symp:prob-sm-harmonic-oscillator} の回転と同じである。
+:::
+
+::: problem ★ 基本：平面上の共形計量のケーラー形式と面積 {#symp:ex-skh-2}
+$\mathbb{C}=\mathbb{R}^{2}$（$J=J_{0}$）の上の計量 $g\defeq\rho\,(dx^{2}+dy^{2})$, $\rho\defeq(1+x^{2}+y^{2})^{-2}$ がケーラー計量であることを示し、そのケーラー形式 $\omega$ と全面積 $\int_{\mathbb{R}^{2}}\omega$ を求めよ。
+:::
+
+::: solution
+**エルミート性.** $J_{0}$ は標準内積について直交変換（$90$ 度回転）なので、$g(J_{0}u,J_{0}v)=\rho\langle J_{0}u,J_{0}v\rangle=\rho\langle u,v\rangle=g(u,v)$。$\rho>0$ は滑らかなので $g$ はエルミート計量である。$\mathbb{C}$ は恒等写像を座標とする 1 次元の複素多様体で、その概複素構造は $J_{0}$（\ref{symp:complex-manifold-j}）。
+
+**ケーラー形式.** 基本 2 形式は $\omega(u,v)=g(J_{0}u,v)=\rho\langle J_{0}u,v\rangle=\rho\,\omega_{0}(u,v)$（\ref{symp:symplectic-vector-space} の $\omega_{0}(u,v)=\langle J_{0}u,v\rangle$）なので
+$$
+\omega=\frac{dx\wedge dy}{(1+x^{2}+y^{2})^{2}}.
+$$
+これは実 2 次元の上の 2 形式なので $d\omega$ は 3 形式で $0$ で、$g$ はケーラー計量である（\ref{symp:kahler-examples.2}）。
+
+**面積.** 標準の向きで、$\omega$ の積分は係数のルベーグ積分で、極座標で
+$$
+\int_{\mathbb{R}^{2}}\omega=\int_{0}^{2\pi}\int_{0}^{\infty}\frac{r}{(1+r^{2})^{2}}\,dr\,d\theta=2\pi\Bigl[-\frac{1}{2(1+r^{2})}\Bigr]_{0}^{\infty}=2\pi\cdot\frac12=\pi.
+$$
+全面積は有限で、これは $\mathbb{C}$ を $\mathbb{CP}^{1}$ のアフィン座標とみたとき、この計量が無限遠点まで滑らかに延びることの反映である（この計量は、定数倍を除いて \ref{symp:kahler-examples.4} のフビニ–スタディ計量のアフィン座標での表示であることが知られている）。
+:::
+
+::: problem ★★ 標準：シンプレクティック行列で動かした複素構造 {#symp:ex-skh-3}
+$A\in\mathrm{Sp}(2n,\mathbb{R})$ について $J_{A}\defeq AJ_{0}A^{-1}$ とする。
+1. $J_{A}$ は $\omega_{0}$ と両立する複素構造で、$g_{J_{A}}$ の行列は $(A^{-1})^{\mathsf{T}}A^{-1}$ であることを示せ。
+2. $J_{A}$ を $\mathbb{R}^{2n}$ 上の（定数係数の）概複素構造とみると可積分で、$(\mathbb{R}^{2n},J_{A},g_{J_{A}})$ はケーラー形式 $\omega_{0}$ のケーラー多様体であることを示せ。
+3. $n=1$, $A=\mathrm{diag}(\kappa,1/\kappa)$（$\kappa>0$）のとき $J_{A}$ を求め、\ref{symp:ex-sla-4} の $(a,c)$ を答えよ。
+:::
+
+::: solution
+**1.** $J_{A}^{2}=AJ_{0}^{2}A^{-1}=-I$。$J_{0}=-\Omega_{0}$, $J_{0}^{\mathsf{T}}=\Omega_{0}$ と $\Omega_{0}^{2}=-I$ から $J_{0}^{\mathsf{T}}\Omega_{0}J_{0}=\Omega_{0}\Omega_{0}(-\Omega_{0})=\Omega_{0}$。よって $J_{0}\in\mathrm{Sp}(2n,\mathbb{R})$。$\mathrm{Sp}(2n,\mathbb{R})$ は群なので $J_{A}=AJ_{0}A^{-1}\in\mathrm{Sp}(2n,\mathbb{R})$、すなわち $\omega_{0}(J_{A}u,J_{A}v)=\omega_{0}(u,v)$。次に、$A^{\mathsf{T}}\Omega_{0}A=\Omega_{0}$ から $\Omega_{0}A=(A^{\mathsf{T}})^{-1}\Omega_{0}$ で、$\Omega_{0}J_{0}=I$ を使うと
+$$
+g_{J_{A}}(u,v)=u^{\mathsf{T}}\Omega_{0}AJ_{0}A^{-1}v=u^{\mathsf{T}}(A^{-1})^{\mathsf{T}}\Omega_{0}J_{0}A^{-1}v=u^{\mathsf{T}}(A^{-1})^{\mathsf{T}}A^{-1}v=\langle A^{-1}u,A^{-1}v\rangle.
+$$
+これは $A^{-1}$ が可逆なので正定値対称で、$J_{A}$ は両立する。
+
+**2.** 線形同型 $\Phi\defeq A^{-1}\colon\mathbb{R}^{2n}\to\mathbb{R}^{2n}=\mathbb{C}^{n}$ を一つだけの座標近傍とするアトラスは（座標変換が恒等写像なので）正則アトラスで、$\mathbb{R}^{2n}$ に複素多様体の構造を与える。\ref{symp:complex-manifold-j} の概複素構造 $J$ は、座標 $w=\Phi(z)$ の座標ベクトルについて $J_{0}$ と同じ行列をもつ、すなわち $d\Phi\circ J=J_{0}\circ d\Phi$ を満たすので、$J=\Phi^{-1}J_{0}\Phi=AJ_{0}A^{-1}=J_{A}$。よって $J_{A}$ は可積分である。$\omega_{0}$ はシンプレクティック形式で $J_{A}$ はそれと両立するので、\ref{symp:kahler-symplectic.3} から $g_{J_{A}}$ はエルミート計量でその基本 2 形式は $\omega_{0}$、$d\omega_{0}=0$ なのでケーラー多様体である。
+
+**3.** $A^{-1}=\mathrm{diag}(1/\kappa,\kappa)$ で
+$$
+J_{A}=\begin{pmatrix}\kappa&0\\0&1/\kappa\end{pmatrix}\begin{pmatrix}0&-1\\1&0\end{pmatrix}\begin{pmatrix}1/\kappa&0\\0&\kappa\end{pmatrix}=\begin{pmatrix}0&-\kappa^{2}\\\kappa^{-2}&0\end{pmatrix}.
+$$
+\ref{symp:ex-sla-4} の形と比べると $a=0$, $c=\kappa^{-2}$（実際 $-(1+0)/c=-\kappa^{2}$）。$g_{J_{A}}$ の行列は $\mathrm{diag}(\kappa^{-2},\kappa^{2})$ で、1 と一致する。
+:::
+
+::: problem ★★★ 発展：共形計量がケーラーになる条件 {#symp:ex-skh-4}
+$U\subset\mathbb{C}^{n}$ を連結な開集合、$u\in C^{\infty}(U)$ とし、$U$ 上の計量 $g\defeq e^{2u}g_{0}$（$g_{0}$ は標準計量）を考える。$J=J_{0}$ について $g$ はエルミート計量であることを示し、
+1. $n=1$ なら $g$ はいつもケーラー計量であること、
+2. $n\ge2$ なら $g$ がケーラー計量であることと $u$ が定数であることは同値であること
+
+を示せ。
+:::
+
+::: solution
+**エルミート性と基本 2 形式.** $J_{0}$ は $g_{0}$ について直交変換なので $g(J_{0}u',J_{0}v')=e^{2u}g_{0}(J_{0}u',J_{0}v')=g(u',v')$ で、$g$ はエルミート計量（$U$ は恒等写像を座標とする複素多様体で、概複素構造は $J_{0}$：\ref{symp:complex-manifold-j}）。基本 2 形式は $\omega=g(J_{0}\cdot,\cdot)=e^{2u}g_{0}(J_{0}\cdot,\cdot)=e^{2u}\omega_{0}$（\ref{symp:kahler-examples.1}）。よって
+$$
+d\omega=d(e^{2u})\wedge\omega_{0}+e^{2u}d\omega_{0}=2e^{2u}\,du\wedge\omega_{0},
+$$
+$g$ がケーラー（\ref{symp:kahler-manifold}）であることは $du\wedge\omega_{0}=0$ と同値である（$2e^{2u}\neq0$）。
+
+**1.** $n=1$ なら $du\wedge\omega_{0}$ は 2 次元の上の 3 形式なので $0$。（\ref{symp:kahler-examples.2} の特別な場合。）
+
+**2.** 【主張：$n\ge2$ なら、1 形式 $\alpha$ について $\alpha\wedge\omega_{0}=0$ は $\alpha=0$ と同値】各点で $\alpha=\sum_{i}(a_{i}dx_{i}+b_{i}dy_{i})$ と書くと
+$$
+\alpha\wedge\omega_{0}=\sum_{i}\sum_{j\neq i}\bigl(a_{i}\,dx_{i}\wedge dx_{j}\wedge dy_{j}+b_{i}\,dy_{i}\wedge dx_{j}\wedge dy_{j}\bigr)
+$$
+（$j=i$ の項は同じ 1 形式を二度含むので $0$）。$i\neq j$ のとき 3 形式 $dx_{i}\wedge dx_{j}\wedge dy_{j}$, $dy_{i}\wedge dx_{j}\wedge dy_{j}$ は、現れる座標の集合 $\{x_{i},x_{j},y_{j}\}$, $\{y_{i},x_{j},y_{j}\}$ から $(i,j)$ と種類が読み取れるので、互いに異なる基底元（の符号違い）である。よって $\alpha\wedge\omega_{0}=0$ なら、$n\ge2$ により各 $i$ について $j\neq i$ がとれて、その係数 $a_{i}$, $b_{i}$ が $0$。したがって $\alpha=0$。逆は明らか。
+
+主張を $\alpha=du$ に使うと、$g$ がケーラーであることは $du=0$ と同値で、$U$ は連結なので、これは $u$ が定数であることと同値である（$du=0$ なら各偏微分が $0$ で、連結な開集合上で定数）。
+
+（$n=1$ と $n\ge2$ の違いは、$\alpha\mapsto\alpha\wedge\omega_{0}$ が $n\ge2$ で単射になることにある。たとえば $\mathbb{C}^{2}\setminus\{0\}$ 上の $|z|^{-2}g_{0}$ はエルミート計量だが、$u=-\log|z|$ は定数でないのでケーラーでない。これはホップ曲面（\ref{symp:kahler-examples.5}）の上の自然なエルミート計量の、普遍被覆への持ち上げである。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
