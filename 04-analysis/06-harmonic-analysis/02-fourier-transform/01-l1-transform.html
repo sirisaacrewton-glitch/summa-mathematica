@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>L¹ のフーリエ変換 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/02-fourier-transform/01-l1-transform.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# L¹ のフーリエ変換 {#four:page-l1-transform keywords="Fourier transform on R^d of integrable functions, hat f(xi) = int f(x) e^{-2 pi i x.xi} dx, continuity and boundedness, translation modulation dilation, Riemann-Lebesgue lemma C_0, convolution on R^d and Young's inequality, (f*g)^ = hat f hat g, multiplication formula int hat f g = int f hat g, differentiation and multiplication by x, Fourier transform of the Gaussian e^{-pi |x|^2}"}
+
+フーリエ級数は周期関数を $e^{2\pi inx}$（$n\in\mathbb{Z}$）の和に分解した。周期をもたない $\mathbb{R}^{d}$ 上の関数では、振動数 $\xi$ が連続的に動き、和は積分になる：$f(x)=\int\hat f(\xi)e^{2\pi ix\cdot\xi}d\xi$。このページでは、その係数にあたる**フーリエ変換** $\hat f(\xi)$ を可積分関数について定義し、円周の場合と同じく、有界連続性・**リーマン–ルベーグの補題**・**畳み込み**を積に移すことを示す。さらに $\mathbb{R}^{d}$ に特有の性質として、微分と「$x$ を掛けること」が入れ替わることを示し、ガウス関数 $e^{-\pi|x|^{2}}$ が自分自身に移ることを計算する。
+
+## 記法と定義の確認 {#four:sec-ft-notation}
+
+::: notation
+- $d\ge1$。$x\cdot\xi\defeq\sum_{j}x_{j}\xi_{j}$, $|x|\defeq\sqrt{x\cdot x}$。積分は $\mathbb{R}^{d}$ 上のルベーグ測度について。$L^{p}\defeq L^{p}(\mathbb{R}^{d})$（\ref{meas:lp-space}）。
+- $C_{0}(\mathbb{R}^{d})$ は、連続で $|\xi|\to\infty$ で $0$ に近づく関数全体で、ノルムは $\|\cdot\|_{\infty}\defeq\sup|\cdot|$。
+- 平行移動 $(\tau_{h}f)(x)\defeq f(x-h)$、変調 $(M_{\eta}f)(x)\defeq e^{2\pi ix\cdot\eta}f(x)$、拡大縮小 $(\delta_{a}f)(x)\defeq f(ax)$（$a>0$）。
+- 平行移動不変性と平行移動の連続性は \ref{meas:translation-continuity}、フビニ・トネリは \ref{meas:fubini-lebesgue}、優収束定理は \ref{meas:dominated-convergence}、ボレル版は \ref{meas:borel-version}、ヘルダーの不等式は \ref{meas:holder}、線形変換による積分の変換は \ref{meas:lebesgue-linear}。
+- **選択公理**：使わない。
+:::
+
+## 定義と基本性質 {#four:sec-ft-basic}
+
+::: definition フーリエ変換 {#four:fourier-transform keywords="Fourier transform hat f(xi) = int f(x) e^{-2 pi i x . xi} dx of f in L^1(R^d); also written F f" index="フーリエ変換|ふーりえへんかん"}
+$f\in L^{1}(\mathbb{R}^{d})$ について
+$$
+\hat f(\xi)\defeq\int_{\mathbb{R}^{d}}f(x)e^{-2\pi ix\cdot\xi}\,dx\qquad(\xi\in\mathbb{R}^{d})
+$$
+を $f$ の**フーリエ変換**といい、$\mathcal{F}f$ とも書く。
+:::
+
+::: proposition フーリエ変換の基本性質 {#four:transform-basic keywords="hat f is bounded and uniformly continuous with ||hat f||_infty <= ||f||_1; translation becomes modulation and vice versa; dilation; complex conjugation" index="フーリエ変換の性質|ふーりえへんかんのせいしつ"}
+$f\in L^{1}(\mathbb{R}^{d})$ とする。
+1. $\hat f$ は有界な一様連続関数で $\|\hat f\|_{\infty}\le\|f\|_{1}$。$f\mapsto\hat f$ は線形。
+2. $\widehat{\tau_{h}f}(\xi)=e^{-2\pi ih\cdot\xi}\hat f(\xi)$、$\widehat{M_{\eta}f}(\xi)=\hat f(\xi-\eta)$。
+3. $a>0$ なら $\widehat{\delta_{a}f}(\xi)=a^{-d}\hat f(\xi/a)$。
+4. $\widehat{\bar f}(\xi)=\overline{\hat f(-\xi)}$。
+:::
+
+::: proof
+**1.** $|f(x)e^{-2\pi ix\cdot\xi}|=|f(x)|$ から有界性。一様連続性：
+$$
+|\hat f(\xi+\eta)-\hat f(\xi)|\le\int|f(x)|\,\bigl|e^{-2\pi ix\cdot\eta}-1\bigr|\,dx.
+$$
+右辺は $\xi$ によらず、$\eta\to0$ で被積分関数は各点で $0$ に収束し $2|f|$ で抑えられるので、優収束定理（列 $\eta_{k}\to0$ に使う）から $0$ に収束する。
+
+**2.** $\int f(x-h)e^{-2\pi ix\cdot\xi}dx$ で $x\mapsto x+h$（平行移動不変性）とすれば $e^{-2\pi ih\cdot\xi}\hat f(\xi)$。変調は定義から直接。
+
+**3.** $x\mapsto x/a$ の置き換え：\ref{meas:lebesgue-linear} から $\int g(ax)\,dx=a^{-d}\int g(y)\,dy$ なので、$\int f(ax)e^{-2\pi ix\cdot\xi}dx=a^{-d}\int f(y)e^{-2\pi iy\cdot\xi/a}dy$。
+
+**4.** 定義の複素共役をとる。
+:::
+
+::: theorem リーマン–ルベーグの補題（実数直線） {#four:transform-riemann-lebesgue keywords="Riemann-Lebesgue lemma on R^d: hat f in C_0(R^d) for f in L^1" index="リーマン–ルベーグの補題（フーリエ変換）|りーまんるべーぐのほだいふーりえへんかん"}
+$f\in L^{1}(\mathbb{R}^{d})$ なら $\hat f\in C_{0}(\mathbb{R}^{d})$。
+:::
+
+::: proof
+$\xi\ne0$ とし $h\defeq\frac{\xi}{2|\xi|^{2}}$ とおくと $h\cdot\xi=\frac12$、$e^{-2\pi ih\cdot\xi}=-1$。$x\mapsto x+h$ と置き換えると（\ref{meas:translation-continuity.1}）
+$$
+\hat f(\xi)=\int f(x+h)e^{-2\pi i(x+h)\cdot\xi}dx=-\int f(x+h)e^{-2\pi ix\cdot\xi}dx.
+$$
+定義式と足して 2 で割ると $|\hat f(\xi)|\le\frac12\|f-f(\cdot+h)\|_{1}$。$|\xi|\to\infty$ で $|h|=\frac{1}{2|\xi|}\to0$ なので、\ref{meas:translation-continuity.2} から $0$ に収束する。連続性は \ref{four:transform-basic.1}。
+:::
+
+## 畳み込み {#four:sec-ft-convolution}
+
+::: theorem 実数空間上の畳み込み {#four:convolution-rd keywords="convolution on R^d: for f in L^p, g in L^1, f*g(x) = int f(x-y) g(y) dy is defined a.e., ||f*g||_p <= ||f||_p ||g||_1, commutative and associative on L^1, (f*g)^ = hat f hat g" index="畳み込み（実数空間）|たたみこみじっすうくうかん"}
+$1\le p\le\infty$, $f\in L^{p}(\mathbb{R}^{d})$, $g\in L^{1}(\mathbb{R}^{d})$ とする。
+1. ほとんどすべての $x$ で $(f*g)(x)\defeq\int f(x-y)g(y)\,dy$ は絶対収束し、$\|f*g\|_{p}\le\|f\|_{p}\|g\|_{1}$。
+2. $f,g\in L^{1}$ なら $f*g=g*f$ で、$\widehat{f*g}=\hat f\,\hat g$。
+3. $f\in L^{\infty}$ なら $f*g$ は一様連続。
+:::
+
+::: proof
+**Step 0（可測性）.** $f$ をボレル版（\ref{meas:borel-version}）に取り替えれば $(x,y)\mapsto f(x-y)g(y)$ は $\mathbb{R}^{2d}$ 上可測で、元の $f$ との違いは $\{(x,y):x-y\in N\}$（$N$ は零集合）の上だけであり、この集合はトネリから測度 $0$。
+
+**Step 1.** $p=1$：トネリと平行移動不変性から $\iint|f(x-y)||g(y)|\,dx\,dy=\|f\|_{1}\|g\|_{1}<\infty$ なので、a.e. の $x$ で絶対収束し $\|f*g\|_{1}\le\|f\|_{1}\|g\|_{1}$。$1<p<\infty$：$q$ を共役指数として $|g|=|g|^{1/p}|g|^{1/q}$ とヘルダーの不等式から
+$$
+\int|f(x-y)||g(y)|\,dy\le\Bigl(\int|f(x-y)|^{p}|g(y)|\,dy\Bigr)^{1/p}\|g\|_{1}^{1/q}.
+$$
+$p$ 乗して $x$ で積分し、トネリと平行移動不変性を使うと $\|f*g\|_{p}^{p}\le\|g\|_{1}^{p/q}\|f\|_{p}^{p}\|g\|_{1}$、すなわち $\|f*g\|_{p}\le\|f\|_{p}\|g\|_{1}$。$p=\infty$ は $|f(x-y)|\le\|f\|_{\infty}$（a.e. $y$）から。
+
+**Step 2.** 可換性は $y\mapsto x-y$ の置き換え（平行移動と $y\mapsto-y$ についてのルベーグ測度の不変性）。変換：Step 1 から $(x,y)\mapsto f(x-y)g(y)e^{-2\pi ix\cdot\xi}$ は可積分なので、フビニから
+$$
+\widehat{f*g}(\xi)=\int g(y)e^{-2\pi iy\cdot\xi}\Bigl(\int f(x-y)e^{-2\pi i(x-y)\cdot\xi}dx\Bigr)dy=\hat f(\xi)\hat g(\xi).
+$$
+
+**Step 3.** 可換性の置き換えと同じく $(f*g)(x)=\int f(y)g(x-y)\,dy$ なので、$|(f*g)(x+h)-(f*g)(x)|\le\|f\|_{\infty}\|g(\cdot+h)-g\|_{1}\to0$（\ref{meas:translation-continuity.2}）。右辺は $x$ によらない。
+:::
+
+::: proposition 掛け算公式 {#four:multiplication-formula keywords="multiplication formula int hat f g = int f hat g for f, g in L^1" index="掛け算公式（フーリエ変換）|かけざんこうしきふーりえへんかん"}
+$f,g\in L^{1}(\mathbb{R}^{d})$ なら $\int\hat f(\xi)g(\xi)\,d\xi=\int f(x)\hat g(x)\,dx$。
+:::
+
+::: proof
+$(x,\xi)\mapsto f(x)g(\xi)e^{-2\pi ix\cdot\xi}$ は $\mathbb{R}^{2d}$ 上可測で、絶対値の積分はトネリから $\|f\|_{1}\|g\|_{1}<\infty$。フビニで積分の順序を入れ替えれば両辺が等しい。
+:::
+
+## 微分と掛け算 {#four:sec-ft-differentiation}
+
+::: theorem 微分と掛け算の入れ替え {#four:differentiation-multiplication keywords="if x_j f in L^1 then hat f is differentiable in xi_j with derivative (-2 pi i x_j f)^; if f in C^1 with f and its partial derivatives integrable then (d_j f)^ = 2 pi i xi_j hat f" index="フーリエ変換と微分|ふーりえへんかんとびぶん"}
+$f\in L^{1}(\mathbb{R}^{d})$, $1\le j\le d$ とする。
+1. $x_{j}f\in L^{1}$ なら $\hat f$ は $\xi_{j}$ について偏微分可能で、$\partial_{\xi_{j}}\hat f=\widehat{(-2\pi ix_{j}f)}$（とくに連続）。
+2. $f$ が $C^{1}$ 級で $\partial_{j}f\in L^{1}$ なら $\widehat{\partial_{j}f}(\xi)=2\pi i\xi_{j}\hat f(\xi)$。
+:::
+
+::: proof
+**1.** $e_{j}$ を第 $j$ 単位ベクトル、$t\ne0$ とする。
+$$
+\frac{\hat f(\xi+te_{j})-\hat f(\xi)}{t}=\int f(x)e^{-2\pi ix\cdot\xi}\,\frac{e^{-2\pi itx_{j}}-1}{t}\,dx.
+$$
+$|e^{-is}-1|\le|s|$（$s\in\mathbb{R}$、$|e^{-is}-1|=|\int_{0}^{s}e^{-iu}du|$）から被積分関数の絶対値は $2\pi|x_{j}||f(x)|$ 以下で、$t\to0$ で各点で $f(x)e^{-2\pi ix\cdot\xi}(-2\pi ix_{j})$ に収束する。優収束定理（$t$ の列に使う）から結論。
+
+**2.** $j=1$ として、$x=(s,x')$（$s\in\mathbb{R}$, $x'\in\mathbb{R}^{d-1}$）と書く。
+
+**Step 1（端での値）.** トネリから、ほとんどすべての $x'$ について $s\mapsto f(s,x')$ と $s\mapsto\partial_{1}f(s,x')$ は $\mathbb{R}$ 上可積分。そのような $x'$ を固定する。微積分の基本定理から $f(s,x')=f(0,x')+\int_{0}^{s}\partial_{1}f(u,x')\,du$ で、右辺は $s\to\pm\infty$ で極限をもつ（$\partial_{1}f(\cdot,x')$ が可積分なので優収束定理）。$f(\cdot,x')$ は可積分なので、その極限は $0$ でなければならない（$0$ でない極限 $c$ をもつなら、十分大きな $|s|$ で $|f(s,x')|\ge|c|/2$ となり可積分でない）。
+
+**Step 2（部分積分）.** Step 1 の $x'$ について、$[-R,R]$ 上で部分積分すると
+$$
+\int_{-R}^{R}\partial_{1}f(s,x')e^{-2\pi is\xi_{1}}ds=\Bigl[f(s,x')e^{-2\pi is\xi_{1}}\Bigr]_{-R}^{R}+2\pi i\xi_{1}\int_{-R}^{R}f(s,x')e^{-2\pi is\xi_{1}}ds.
+$$
+$R\to\infty$ で境界項は Step 1 から $0$ に、積分は（可積分性と優収束定理から）$\mathbb{R}$ 上の積分に収束する。
+
+**Step 3.** Step 2 の等式に $e^{-2\pi ix'\cdot\xi'}$ を掛けて $x'$ で積分し、フビニを使えば $\widehat{\partial_{1}f}(\xi)=2\pi i\xi_{1}\hat f(\xi)$。
+:::
+
+::: corollary 滑らかさと減衰 {#four:smoothness-decay keywords="if f is C^k with all derivatives up to order k integrable then |xi|^k hat f(xi) -> 0; if |x|^k f is integrable then hat f is C^k" index="滑らかさと減衰|なめらかさとげんすい"}
+$f\in L^{1}(\mathbb{R}^{d})$, $k\ge1$ とする。
+1. $f$ が $C^{k}$ 級で、$k$ 階までのすべての偏導関数が可積分なら、$|\xi|^{k}|\hat f(\xi)|\to0$（$|\xi|\to\infty$）。
+2. $|x|^{k}f\in L^{1}$ なら $\hat f$ は $C^{k}$ 級。
+:::
+
+::: proof
+**1.** \ref{four:differentiation-multiplication.2} を繰り返し使うと、多重指数 $|\beta|=k$ について $\widehat{\partial^{\beta}f}(\xi)=(2\pi i)^{k}\xi^{\beta}\hat f(\xi)$。\ref{four:transform-riemann-lebesgue} から左辺 $\to0$。$|\xi|^{k}\le d^{k}\max_{j}|\xi_{j}|^{k}$ なので、$\beta=ke_{j}$ の $d$ 個の場合から結論が出る。
+
+**2.** $|\beta|\le k$ なら $|x^{\beta}f|\le(1+|x|)^{k}|f|\le2^{k}(|f|+|x|^{k}|f|)$ で可積分。\ref{four:differentiation-multiplication.1} を繰り返し使えば、$\partial^{\beta}\hat f=\widehat{(-2\pi ix)^{\beta}f}$ が存在し、\ref{four:transform-basic.1} から連続。
+:::
+
+## ガウス関数 {#four:sec-ft-gaussian}
+
+::: theorem ガウス関数のフーリエ変換 {#four:gaussian-transform keywords="the Gaussian e^{-pi |x|^2} is its own Fourier transform; (e^{-pi a |x|^2})^ = a^{-d/2} e^{-pi |xi|^2 / a}" index="ガウス関数のフーリエ変換|がうすかんすうのふーりえへんかん"}
+$G(x)\defeq e^{-\pi|x|^{2}}$ とすると $\hat G=G$。より一般に $a>0$ について
+$$
+\int_{\mathbb{R}^{d}}e^{-\pi a|x|^{2}}e^{-2\pi ix\cdot\xi}dx=a^{-d/2}e^{-\pi|\xi|^{2}/a}.
+$$
+:::
+
+::: proof
+**Step 1（$d=1$ の常微分方程式）.** $g(x)\defeq e^{-\pi x^{2}}$ とする。$x^{k}g$ は可積分で $g$ は $C^{1}$、$g'(x)=-2\pi xg(x)$ も可積分。\ref{four:differentiation-multiplication.1} と \ref{four:differentiation-multiplication.2} から
+$$
+\hat g'(\xi)=\widehat{(-2\pi ixg)}(\xi)=i\,\widehat{g'}(\xi)=i\cdot2\pi i\xi\,\hat g(\xi)=-2\pi\xi\hat g(\xi).
+$$
+よって $\frac{d}{d\xi}\bigl(e^{\pi\xi^{2}}\hat g(\xi)\bigr)=e^{\pi\xi^{2}}(2\pi\xi\hat g+\hat g')=0$ で、$\hat g(\xi)=\hat g(0)e^{-\pi\xi^{2}}$。
+
+**Step 2（$\hat g(0)=1$）.** $\hat g(0)=\int e^{-\pi x^{2}}dx$ で、$x=y/\sqrt\pi$ と置き換えると $\frac{1}{\sqrt\pi}\int e^{-y^{2}}dy=1$（\ref{calc:gaussian-integral}。広義積分とルベーグ積分は、非負関数なので単調収束定理から一致する）。
+
+**Step 3（$d$ 次元）.** $G(x)e^{-2\pi ix\cdot\xi}=\prod_{j}g(x_{j})e^{-2\pi ix_{j}\xi_{j}}$ で、フビニから $\hat G(\xi)=\prod_{j}\hat g(\xi_{j})=G(\xi)$。
+
+**Step 4（$a$）.** $e^{-\pi a|x|^{2}}=(\delta_{\sqrt a}G)(x)$ なので、\ref{four:transform-basic.3} から変換は $a^{-d/2}G(\xi/\sqrt a)$。
+:::
+
+::: example 典型的な変換 {#four:transform-examples keywords="Fourier transforms of the indicator of [-1/2,1/2] (sinc function) and of e^{-2 pi |x|} (Cauchy/Lorentz function)" index="sinc 関数|しんくかんすう"}
+$d=1$ とする。
+1. $f=\mathbf{1}_{[-1/2,1/2]}$ なら $\hat f(\xi)=\frac{\sin(\pi\xi)}{\pi\xi}$（$\xi\ne0$）、$\hat f(0)=1$。$\hat f$ は $C_{0}$ に入るが可積分でない。
+2. $f(x)=e^{-2\pi|x|}$ なら $\hat f(\xi)=\frac{1}{\pi(1+\xi^{2})}$。
+:::
+
+::: proof
+**1.** $\int_{-1/2}^{1/2}e^{-2\pi ix\xi}dx=\frac{e^{\pi i\xi}-e^{-\pi i\xi}}{2\pi i\xi}=\frac{\sin(\pi\xi)}{\pi\xi}$。非可積分性：$k\ge1$ について $\xi\in[k+\frac14,k+\frac34]$ で $|\sin(\pi\xi)|\ge\frac{1}{\sqrt2}$ なので $\int_{k}^{k+1}|\hat f|\ge\frac{1}{2\sqrt2\,\pi(k+1)}$ で、$\sum_{k}\frac{1}{k+1}=\infty$。
+
+**2.** $f$ は偶関数なので $\hat f(\xi)=2\int_{0}^{\infty}e^{-2\pi x}\cos(2\pi x\xi)\,dx=2\operatorname{Re}\int_{0}^{\infty}e^{-2\pi x(1-i\xi)}dx=2\operatorname{Re}\frac{1}{2\pi(1-i\xi)}=\frac{1}{\pi}\cdot\frac{1}{1+\xi^{2}}$。
+:::
+
+::: hypcheck
+- \ref{four:transform-riemann-lebesgue} では平行移動の連続性（\ref{meas:translation-continuity.2}）だけを使い、フーリエ変換の反転公式は使っていない。
+- \ref{four:differentiation-multiplication.2} で「$f$ が無限遠で $0$ に近づく」を仮定しなかったのは、可積分性から（ほとんどすべての直線上で）自動的に出るからである（Step 1）。$C^{1}$ を外して $f$ を絶対連続（直線ごと）にしても同じ証明が通る。
+- ガウス関数の計算は複素解析（周回積分）でもできるが、ここでは \ref{four:differentiation-multiplication} による常微分方程式の議論にした。用いたのは 1 変数の一意性（導関数が $0$ なら定数）だけである。
+- 例 1 から、$f\in L^{1}$ でも $\hat f\in L^{1}$ とは限らない。したがって反転公式 $f(x)=\int\hat f(\xi)e^{2\pi ix\cdot\xi}d\xi$ は、そのままでは意味をもたないことがある。これが次のページで総和法（ガウス核）を使う理由である。
+:::
+
+::: supplement
+**関連する結果.**
+- $\mathcal{F}\colon L^{1}\to C_{0}$ は単射（次のページの反転公式から）だが全射ではない。これはバナッハの開写像定理を使って示せる（全射なら逆写像が有界になるが、$\|\hat f\|_{\infty}$ と $\|f\|_{1}$ が比較できない例がある）。これは標準的な事実として知られているが、このサイトではまだ証明していない。
+- フーリエ級数のページとの対応：$\mathbb{T}$ の双対は $\mathbb{Z}$、$\mathbb{R}^{d}$ の双対は $\mathbb{R}^{d}$。$f\in L^{1}(\mathbb{R})$ の周期化 $\sum_{m}f(x+m)$ のフーリエ係数は $\hat f(n)$ になる（ポアソン和公式への入り口）。
+
+**高い視点：指標と群環.** $L^{1}(\mathbb{R}^{d})$ は畳み込みを積とする可換バナッハ環で、$f\mapsto\hat f(\xi)$ はその環から $\mathbb{C}$ への準同型（指標）である。指標 $e^{2\pi ix\cdot\xi}$ は群 $\mathbb{R}^{d}$ から単位円への連続準同型そのもので、フーリエ変換はすべての指標での値を一度に並べたもの（ゲルファント変換）にあたる。微分と掛け算の入れ替えは、平行移動 $\tau_{h}$ が指標の上で $e^{-2\pi ih\cdot\xi}$ 倍として対角化されることの微小版で、微分 $\partial_{j}=-\frac{d}{dh}\tau_{he_{j}}|_{h=0}$ は掛け算 $2\pi i\xi_{j}$ になる。比喩で言えば、フーリエ変換は「平行移動に関して最も単純な座標系」への座標変換で、そこでは微分方程式が掛け算の方程式に変わる。ガウス関数はこの座標変換で形を変えない、ちょうど「どちらの座標系から見ても同じに見える」特別な関数である。
+:::
+
+## 問題 {#four:sec-ft-problems}
+
+::: problem {#four:prob-ft-triangle}
+$\Lambda(x)\defeq\max(1-|x|,0)$（$d=1$）について、$\Lambda=\mathbf{1}_{[-1/2,1/2]}*\mathbf{1}_{[-1/2,1/2]}$ を確かめ、$\hat\Lambda(\xi)=\Bigl(\frac{\sin(\pi\xi)}{\pi\xi}\Bigr)^{2}$ を示せ。
+:::
+
+::: solution
+$\chi\defeq\mathbf{1}_{[-1/2,1/2]}$ とすると $(\chi*\chi)(x)=\int\chi(x-y)\chi(y)\,dy=\lambda\bigl([x-\frac12,x+\frac12]\cap[-\frac12,\frac12]\bigr)=\max(1-|x|,0)$（$|x|\le1$ なら共通部分は長さ $1-|x|$ の区間、そうでなければ空）。\ref{four:convolution-rd.2} と \ref{four:transform-examples.1} から $\hat\Lambda=\hat\chi^{2}$。
+:::
+
+::: problem {#four:prob-ft-no-unit}
+$L^{1}(\mathbb{R}^{d})$ の畳み込みには単位元がないこと、すなわち、すべての $f\in L^{1}$ について $f*u=f$ となる $u\in L^{1}$ は存在しないことを示せ。
+:::
+
+::: solution
+そのような $u$ があるとする。$f\defeq G$（ガウス関数）とすると \ref{four:convolution-rd.2} と \ref{four:gaussian-transform} から $G(\xi)\hat u(\xi)=G(\xi)$、$G>0$ なので $\hat u\equiv1$。これは \ref{four:transform-riemann-lebesgue}（$\hat u(\xi)\to0$）に反する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

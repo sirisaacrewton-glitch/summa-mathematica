@@ -354,7 +354,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | FS-02 | （01-fourier-series）/02-fejer | フェイェールの定理と L² 理論 | フェイェール核、チェザロ平均の収束、一意性定理、三角多項式の稠密性（ワイエルシュトラス）、三角関数系は L²(𝕋) の正規直交基底、パーセヴァル | 完了 |
 | FS-03 | （01-fourier-series）/03-pointwise | 各点収束 | ディリクレ核、局所化原理、ディニの判定法、リプシッツ関数の一様収束、有界変動関数（ディリクレ–ジョルダン）、ギブス現象 | 完了 |
 | FS-04 | （01-fourier-series）/04-applications | フーリエ級数の応用 | ζ(2) などの計算、ワイルの一様分布定理、円周上の熱方程式、等周不等式（フルヴィッツ） | 完了 |
-| FT-01 | 04-analysis/06-harmonic-analysis/02-fourier-transform/01-l1-transform | L¹ のフーリエ変換 | 定義と基本性質、リーマン–ルベーグ、畳み込み、微分と掛け算、ガウス関数の変換 | 未着手 |
+| FT-01 | 04-analysis/06-harmonic-analysis/02-fourier-transform/01-l1-transform | L¹ のフーリエ変換 | 定義と基本性質、リーマン–ルベーグ、畳み込み、微分と掛け算、ガウス関数の変換 | 完了 |
 | FT-02 | （02-fourier-transform）/02-inversion-plancherel | 反転公式とプランシュレルの定理 | ガウス核による反転公式、L¹∩L² 上の等長性、L² への延長（プランシュレル）、ユニタリ性 | 未着手 |
 | FT-03 | （02-fourier-transform）/03-schwartz-distributions | シュワルツ空間と緩増加超関数 | シュワルツ空間とフーリエ変換の同型、緩増加超関数、微分とフーリエ変換、デルタ関数 | 未着手 |
 | FT-04 | （02-fourier-transform）/04-poisson-uncertainty | ポアソン和公式と不確定性原理 | ポアソン和公式、テータ関数の変換公式、ハイゼンベルクの不等式 | 未着手 |
