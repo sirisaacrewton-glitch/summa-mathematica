@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>微分定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/02-integration/06-differentiation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 微分定理 {#meas:page-differentiation keywords="Vitali covering lemma, Hardy-Littlewood maximal function, weak type (1,1) maximal inequality, Lebesgue differentiation theorem, Lebesgue points, locally integrable functions, Lebesgue density theorem, derivative of the indefinite integral, differentiation of absolutely continuous measures"}
+
+微積分学の基本定理の前半は「連続関数 $f$ について $\frac{d}{dx}\int_{a}^{x}f=f(x)$」だった。ルベーグ積分では $f$ は可積分なだけでよく、ほとんどすべての点で同じことが成り立つ。その核心は**ルベーグの微分定理**：局所可積分な $f$ について、ほとんどすべての $x$ で、$x$ を中心とする小さな球の上の $f$ の平均が $f(x)$ に収束する。証明は、球の被覆から互いに素な球を選び出す**ヴィタリの被覆補題**と、平均の上限をとった**極大関数**の評価、そしてコンパクト台の連続関数による近似（\ref{meas:cc-dense}）の組合せである。
+
+## 記法と定義の確認 {#meas:sec-df-notation}
+
+::: notation
+- $B(x,r)\defeq\{y\in\mathbb{R}^{n}:|y-x|<r\}$（開球）、$cB(x,r)\defeq B(x,cr)$。$\lambda(B(x,r))=\omega_{n}r^{n}$（$\omega_{n}\defeq\lambda(B(0,1))$、\ref{meas:lebesgue-linear} を $T=r I$ と平行移動に使う）。
+- $f$ が**局所可積分**とは、可測で、すべての有界な可測集合 $E$ について $\int_{E}|f|<\infty$ であること。その全体を $L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ と書く。
+- ルベーグ測度の正則性、$C_{c}$ の稠密性、ラドン–ニコディムの定理は \ref{meas:lebesgue-regularity}, \ref{meas:cc-dense}, \ref{meas:radon-nikodym}。マルコフの不等式は \ref{meas:markov}。
+- **選択公理**：使わない（被覆の選び出しは有限個の球についての操作）。
+:::
+
+## ヴィタリの被覆補題と極大関数 {#meas:sec-df-maximal}
+
+::: lemma ヴィタリの被覆補題 {#meas:vitali-covering keywords="finite Vitali covering lemma: from finitely many balls one can select disjoint ones whose triples cover the union" index="ヴィタリの被覆補題|う゛ぃたりのひふくほだい"}
+$\mathbb{R}^{n}$ の有限個の開球 $B_{1},\dots,B_{m}$ から、互いに素な $B_{i_{1}},\dots,B_{i_{k}}$ を選んで、$\bigcup_{i}B_{i}\subset\bigcup_{j}3B_{i_{j}}$ とできる。
+:::
+
+::: proof
+球を半径の大きい順に並べ（同じ半径なら番号順）、先頭から順に調べて、それまでに選んだ球のどれとも交わらなければ選ぶ。選ばれた球は互いに素である。選ばれなかった球 $B$ は、調べた時点ですでに選ばれていた球 $B_{i_{j}}$ と交わり、$B_{i_{j}}$ は並びで $B$ より前にあるので半径は $B$ 以上である。$B=B(y,s)$, $B_{i_{j}}=B(z,t)$, $s\le t$, $w\in B\cap B_{i_{j}}$ とすると、$B$ の点 $u$ について $|u-z|\le|u-y|+|y-w|+|w-z|<s+s+t\le3t$ なので $B\subset3B_{i_{j}}$。
+:::
+
+::: definition ハーディ–リトルウッドの極大関数 {#meas:maximal-function keywords="Hardy-Littlewood maximal function Mf(x) = sup over r of the average of |f| over B(x,r); {Mf > t} is open" index="極大関数|きょくだいかんすう, ハーディ–リトルウッドの極大関数|はーでぃりとるうっどのきょくだいかんすう"}
+$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ について
+$$
+Mf(x)\defeq\sup_{r>0}\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}|f|\,d\lambda\in[0,\infty]
+$$
+とおく。$t\ge0$ について $\{Mf>t\}$ は開集合である（とくに $Mf$ はボレル可測）。
+:::
+
+::: proof
+$Mf(x)>t$ なら $r>0$ で $\int_{B(x,r)}|f|>t\omega_{n}r^{n}$ となるものがある。$\delta>0$ を $\int_{B(x,r)}|f|>t\omega_{n}(r+\delta)^{n}$ となるようにとる。$|x'-x|<\delta$ なら $B(x,r)\subset B(x',r+\delta)$ なので $\int_{B(x',r+\delta)}|f|>t\omega_{n}(r+\delta)^{n}$、$Mf(x')>t$。
+:::
+
+::: theorem 極大不等式 {#meas:maximal-inequality keywords="weak type (1,1) inequality lambda{Mf > t} <= 3^n ||f||_1 / t for f in L^1" index="極大不等式|きょくだいふとうしき, 弱 (1,1) 型評価|じゃくいちいちがたひょうか"}
+$f\in L^{1}(\mathbb{R}^{n})$, $t>0$ について $\lambda(\{Mf>t\})\le\frac{3^{n}}{t}\|f\|_{1}$。
+:::
+
+::: proof
+$K\subset\{Mf>t\}$ をコンパクトとする。$\int_{B(x,r)}|f|>t\lambda(B(x,r))$ を満たす球 $B(x,r)$（$x\in K$, $r>0$）の全体は $K$ の開被覆なので（$Mf(x)>t$ からそのような $r$ がある）、コンパクト性から有限個 $B_{1},\dots,B_{m}$ で覆える。\ref{meas:vitali-covering} から互いに素な $B_{i_{1}},\dots,B_{i_{k}}$ を選ぶと
+$$
+\lambda(K)\le\sum_{j}\lambda(3B_{i_{j}})=3^{n}\sum_{j}\lambda(B_{i_{j}})<\frac{3^{n}}{t}\sum_{j}\int_{B_{i_{j}}}|f|\le\frac{3^{n}}{t}\|f\|_{1}.
+$$
+$\{Mf>t\}$ は開集合で可測なので、内正則性（\ref{meas:lebesgue-regularity.2}）で $K$ について上限をとる。
+
+::: hypcheck
+- 「強い」評価 $\|Mf\|_{1}\le C\|f\|_{1}$ は成り立たない：$f=\mathbf{1}_{B(0,1)}$ なら $|x|\ge1$ で $Mf(x)\ge\frac{\lambda(B(0,1))}{\lambda(B(x,|x|+1))}=(|x|+1)^{-n}$ で、これは $\mathbb{R}^{n}$ 上可積分でない。
+:::
+:::
+
+## ルベーグの微分定理 {#meas:sec-df-lebesgue}
+
+::: theorem ルベーグの微分定理 {#meas:lebesgue-differentiation keywords="Lebesgue differentiation theorem: for locally integrable f, almost every point is a Lebesgue point: averages of |f - f(x)| over B(x,r) tend to 0; averages of f tend to f(x)" index="ルベーグの微分定理|るべーぐのびぶんていり, ルベーグ点|るべーぐてん"}
+$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ について、ほとんどすべての $x$ で
+$$
+\lim_{r\to0}\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}|f(y)-f(x)|\,dy=0.
+$$
+このような $x$ を $f$ の**ルベーグ点**という。とくに、ほとんどすべての $x$ で $\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}f\to f(x)$。
+:::
+
+::: proof
+**Step 1（局所化）.** $R\in\mathbb{N}$ について、$|x|<R$ かつ $r<1$ なら $B(x,r)\subset B(0,R+1)$ なので、$|x|<R$ での主張は $f$ を $f\mathbf{1}_{B(0,R+1)}\in L^{1}$ に替えても同じ。$R$ について可算和をとればよいので、$f\in L^{1}$ とする。
+
+**Step 2（振動）.** $A_{r}h(x)\defeq\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}|h(y)-h(x)|\,dy$、$\Omega h(x)\defeq\limsup_{r\to0}A_{r}h(x)$ とおく。$g\in C_{c}(\mathbb{R}^{n})$ なら、$g$ は $x$ で連続なので $\Omega g(x)=0$（$r$ が小さいと $B(x,r)$ 上で $|g(y)-g(x)|$ が小さい）。$h\defeq f-g$ について
+$$
+A_{r}f(x)\le A_{r}h(x)+A_{r}g(x)\le Mh(x)+|h(x)|+A_{r}g(x)
+$$
+（$|h(y)-h(x)|\le|h(y)|+|h(x)|$）なので $\Omega f(x)\le Mh(x)+|h(x)|$。
+
+**Step 3（例外集合は零集合）.** $t>0$ について $\{\Omega f>2t\}\subset\{Mh>t\}\cup\{|h|>t\}$ で、右辺は可測で、\ref{meas:maximal-inequality} と \ref{meas:markov.1} から測度は $\le\frac{3^{n}+1}{t}\|f-g\|_{1}$。\ref{meas:cc-dense} から $\|f-g\|_{1}$ はいくらでも小さくできるので、$\lambda^{*}(\{\Omega f>2t\})=0$。ルベーグ測度は完備なので可測な零集合で、$t=\frac1k$ の可算和をとって $\Omega f=0$（a.e.）。
+
+**Step 4（平均）.** $\bigl|\frac{1}{\lambda(B)}\int_{B}f-f(x)\bigr|\le A_{r}f(x)$。
+
+::: hypcheck
+- **局所可積分性**は Step 1 で $f\mathbf{1}_{B(0,R+1)}\in L^{1}$ に、Step 3 で極大不等式に使った。
+- **球**（あるいは「大きさが比較できる」集合）を使うことは本質的：$x$ を含むが細長い長方形の族では、平均が収束しない $L^{1}$ 関数があることが知られている（$n\ge2$）。
+- Step 3 で $\{\Omega f>2t\}$ の可測性を前もって示さず、外測度が $0$ であることから完備性で可測性を得た。
+:::
+:::
+
+::: corollary ルベーグの密度定理 {#meas:density-theorem keywords="Lebesgue density theorem: for measurable A, the density of A at x is 1 for almost every x in A and 0 for almost every x outside A" index="ルベーグの密度定理|るべーぐのみつどていり, 密度点|みつどてん"}
+$A\in\mathcal{L}_{n}$ について、ほとんどすべての $x\in A$ で $\frac{\lambda(A\cap B(x,r))}{\lambda(B(x,r))}\to1$、ほとんどすべての $x\notin A$ で $\to0$。
+:::
+
+::: proof
+$\mathbf{1}_{A}$ は局所可積分なので、\ref{meas:lebesgue-differentiation} の平均の収束を使う。平均は $\frac{\lambda(A\cap B(x,r))}{\lambda(B(x,r))}$、極限は $\mathbf{1}_{A}(x)$。
+:::
+
+::: corollary 積分関数の微分 {#meas:indefinite-integral-derivative keywords="if f is locally integrable on R then F(x) = int_a^x f is differentiable at every Lebesgue point of f with F'(x) = f(x); hence almost everywhere" index="積分関数の微分|せきぶんかんすうのびぶん"}
+$f\in L^{1}_{\mathrm{loc}}(\mathbb{R})$, $a\in\mathbb{R}$ について $F(x)\defeq\int_{[a,x]}f\,d\lambda$（$x<a$ では $-\int_{[x,a]}f$）とおくと、$f$ のルベーグ点 $x$ で $F$ は微分可能で $F'(x)=f(x)$。とくにほとんど至る所 $F'=f$。
+:::
+
+::: proof
+$h\ne0$ について $\frac{F(x+h)-F(x)}{h}-f(x)=\frac1h\int_{[x,x+h]}(f(y)-f(x))\,dy$（$h<0$ なら区間 $[x+h,x]$、向きの符号を込めて）。$[x,x+h]\subset B(x,2|h|)$ で $\lambda(B(x,2|h|))=4|h|$ なので、絶対値は $4A_{2|h|}f(x)\to0$。
+:::
+
+::: corollary 絶対連続な測度の微分 {#meas:measure-differentiation keywords="for a locally finite Borel measure nu absolutely continuous with respect to Lebesgue measure, nu(B(x,r))/lambda(B(x,r)) tends to dnu/dlambda(x) for almost every x" index="測度の微分|そくどのびぶん"}
+$\nu$ を $\mathcal{B}(\mathbb{R}^{n})$ 上の測度で、有界集合に有限値をとり $\nu\ll\lambda$ とする。ほとんどすべての $x$ で
+$$
+\frac{d\nu}{d\lambda}(x)=\lim_{r\to0}\frac{\nu(B(x,r))}{\lambda(B(x,r))}.
+$$
+:::
+
+::: proof
+$\nu$ は σ 有限（$\mathbb{R}^{n}=\bigcup B(0,R)$）なので \ref{meas:radon-nikodym} から $\nu=f\,d\lambda$、$\int_{B(0,R)}f=\nu(B(0,R))<\infty$ なので $f\in L^{1}_{\mathrm{loc}}$。$\nu(B(x,r))=\int_{B(x,r)}f$ で、\ref{meas:lebesgue-differentiation} の平均の収束。
+:::
+
+::: supplement
+**高い視点：平均をとって極限をとる.** ルベーグの微分定理は「平均作用素 $A_{r}f$（球の上の平均）が $r\to0$ で恒等作用素に近づく」ことの各点版で、その証明の型——**稠密な部分集合（連続関数）では明らか、一般には極大関数の弱型評価で例外集合を制御**——は、調和解析で各点収束を示す標準的な方法である（たとえばフーリエ級数のカールソンの定理も、本質的にはある極大作用素の評価に帰着される。知られている）。ヴィタリの被覆補題の「3 倍」は、球の大きさが比較できること（倍化性）だけを使っていて、倍化性をもつ測度の上の距離空間でも同じ議論が通る。比喩で言えば、ルベーグ点とは「虫眼鏡で拡大していくと、まわりの値がその点の値にそろって見える点」で、微分定理は、可積分な関数ならほとんどすべての点がそういう点であることを保証する。
+:::
+
+## 問題 {#meas:sec-df-problems}
+
+::: problem {#meas:prob-df-half-density}
+可測集合 $A\subset\mathbb{R}$ で、すべての有界区間 $I$ について $\lambda(A\cap I)=\frac12\lambda(I)$ となるものは存在しないことを示せ。
+:::
+
+::: solution
+そのような $A$ があれば、すべての $x$, $r$ で $\frac{\lambda(A\cap B(x,r))}{\lambda(B(x,r))}=\frac12$（$B(x,r)$ は区間）。\ref{meas:density-theorem} から、ほとんどすべての $x\in A$ でこれは $1$ に、ほとんどすべての $x\notin A$ で $0$ に収束するので、$A$ と $A^{c}$ はともに零集合となり、$\lambda(\mathbb{R})=0$ の矛盾。
+:::
+
+::: problem {#meas:prob-df-heaviside}
+$H\defeq\mathbf{1}_{[0,\infty)}$ について、$0$ は $H$ のルベーグ点でないことを示し、$F(x)\defeq\int_{[0,x]}H$（$x\ge0$）、$0$（$x<0$）が $0$ で微分可能でないことを確かめよ。
+:::
+
+::: solution
+$\frac{1}{2r}\int_{(-r,r)}|H(y)-H(0)|\,dy=\frac{1}{2r}\lambda((-r,0))=\frac12\not\to0$。$F(x)=\max(x,0)$ で、右微分係数 $1$、左微分係数 $0$ が異なるので $0$ で微分可能でない（\ref{meas:indefinite-integral-derivative} はルベーグ点でしか微分可能性を保証しない）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
