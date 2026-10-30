@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：確率過程 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/03-processes/04-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：確率過程 {#prb:page-exercises-processes keywords="exercises, Stochastic Processes"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは、具体的な連鎖の定常分布と周期（エーレンフェストの壺・グラフ上のランダムウォーク）、吸収確率と調和関数、過渡的な連鎖のグリーン関数、整合的でない族と無限個の確率測度の積、両側に延びた定常マルコフ連鎖と時間の逆転、ブラウン橋・時間反転・一般の分割に沿った 2 次変分・道の振動と零点である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#prb:sec-expr3-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。とくに、マルコフ連鎖と $P_{i}$, $E_{i}$, $p_{ij}^{(n)}$ は \ref{prb:markov-chain}、戻り時刻 $T_{i}$・既約は \ref{prb:recurrence}、定常分布・周期は \ref{prb:stationary-distribution}、訪問回数 $N_{j}\defeq\#\{n\ge0:X_{n}=j\}$ は \ref{prb:recurrence-criterion}、ブラウン運動は \ref{prb:brownian-motion} のとおり。
+- **到達時刻**：$H_{j}\defeq\inf\{n\ge0:X_{n}=j\}$（時刻 $0$ を含める。$X_{0}\ne j$ なら $H_{j}=T_{j}$）。$\{H_{j}\le n\}=\bigcup_{m\le n}\{X_{m}=j\}\in\mathcal{F}_{n}$ なので $H_{j}$ は停止時刻。
+- **柱事象の和.** $C\subset S^{\mathbb{Z}_{\ge0}}$ が、互いに素な可算個の「柱」$\{x:x_{0}=j_{0},\dots,x_{n}=j_{n}\}$ の和であるとき、事象 $\{(X_{n})_{n\ge0}\in C\}$ の確率は柱の確率 $\nu(j_{0})p_{j_{0}j_{1}}\cdots p_{j_{n-1}j_{n}}$ の和で、初期分布と遷移行列だけで決まる。$\{T_{j}<\infty\}$, $\{H_{j}<\infty\}$, $\{N_{j}\ge k\}$ などはこの形である（「初めて $j$ に着く時刻が $m$」「$k$ 回目の訪問の時刻が $m$」のように時刻 $m$ ごとに分ければ、有限個の座標で決まる事象の互いに素な可算和になる）。
+- **一歩目による分解.** 上の $C$ と $i\in S$ について
+$$
+P_{i}\bigl((X_{n+1})_{n\ge0}\in C\bigr)=\sum_{j}p_{ij}P_{j}\bigl((X_{n})_{n\ge0}\in C\bigr).
+$$
+$C$ が柱 $\{x_{0}=j_{0},\dots,x_{n}=j_{n}\}$ なら両辺とも $p_{ij_{0}}p_{j_{0}j_{1}}\cdots p_{j_{n-1}j_{n}}$（右辺は $j=j_{0}$ の項だけが残る）で、一般の $C$ は柱について足せばよい（右辺は非負項の和の順序交換）。
+- **選択公理**：使わない。
+:::
+
+## マルコフ連鎖 {#prb:sec-mc-exercises}
+
+対応するページ：\ref{prb:page-markov-chains}
+
+::: problem ★ 基本：エーレンフェストの壺 {#prb:ex-mc-1}
+$N\ge1$ とする。二つの壺に合わせて $N$ 個の玉があり、毎回 $N$ 個の玉から一つを等確率で選んで反対の壺に移す。壺 1 の玉の数を状態とする $S=\{0,1,\dots,N\}$ 上の連鎖
+$$
+p_{i,i-1}=\frac{i}{N}\ (1\le i\le N),\qquad p_{i,i+1}=\frac{N-i}{N}\ (0\le i\le N-1)
+$$
+（他の成分は $0$）を考える。
+1. $P$ は既約で、$\pi_{i}\defeq\binom{N}{i}2^{-N}$ がただ一つの定常分布であることを示せ。
+2. すべての状態の周期は $2$ で、$p_{00}^{(n)}$ は $n\to\infty$ で収束しないことを示せ。一方、$\tilde P\defeq\frac12(I+P)$（毎回確率 $\frac12$ で何もしない連鎖）では、すべての $i,j$ で $\tilde p_{ij}^{(n)}\to\pi_{j}$ であることを示せ。
+3. $E_{0}[T_{0}]=2^{N}$ を示せ。
+:::
+
+::: solution
+**1.** **既約性.** $i<N$ なら $p_{i,i+1}>0$、$i>0$ なら $p_{i,i-1}>0$ なので、$i<j$ について $p_{ij}^{(j-i)}\ge p_{i,i+1}\cdots p_{j-1,j}>0$、$p_{ji}^{(j-i)}\ge p_{j,j-1}\cdots p_{i+1,i}>0$。
+
+**定常性.** $k<0$ または $k>N$ で $\binom{N}{k}\defeq0$ と約束すると、$0\le j\le N$ について（端の $j=0,N$ でも同じ式で）
+$$
+\sum_{i}\pi_{i}p_{ij}=\pi_{j-1}\frac{N-j+1}{N}+\pi_{j+1}\frac{j+1}{N}.
+$$
+階乗で書けば $\binom{N}{j-1}(N-j+1)=\frac{N!}{(j-1)!(N-j)!}=N\binom{N-1}{j-1}$、$\binom{N}{j+1}(j+1)=\frac{N!}{j!(N-j-1)!}=N\binom{N-1}{j}$（約束の下で端でも成り立つ）なので、パスカルの三角形の関係から
+$$
+\sum_{i}\pi_{i}p_{ij}=2^{-N}\Bigl(\binom{N-1}{j-1}+\binom{N-1}{j}\Bigr)=2^{-N}\binom{N}{j}=\pi_{j}.
+$$
+二項定理から $\sum_{i}\pi_{i}=1$。既約な連鎖が定常分布をもつので、\ref{prb:stationary-existence.3} から定常分布はこれだけである。
+
+**2.** **周期.** 各ステップで状態はちょうど $1$ 変わるので、$X_{n}-X_{0}$ の偶奇は $n$ の偶奇に等しく、$n$ が奇数なら $p_{ii}^{(n)}=0$。一方 $i$ の隣の状態 $i'$（$i<N$ なら $i+1$、$i=N$ なら $N-1$）について $p_{ii}^{(2)}\ge p_{ii'}p_{i'i}>0$。よって $d(i)=\gcd\{n:p_{ii}^{(n)}>0\}=2$。
+
+**収束しないこと.** $p_{00}^{(n)}\to c$ と仮定すると、奇数の $n$ で $p_{00}^{(n)}=0$ なので $c=0$。$1\le i\le N$ について $p_{0i}^{(i)}>0$ で、$p_{0i}^{(i)}p_{i0}^{(n)}\le p_{00}^{(i+n)}$（行列の積の一つの項）なので
+$$
+p_{i0}^{(n)}\le\frac{p_{00}^{(i+n)}}{p_{0i}^{(i)}}\to0.
+$$
+定常性を $n$ 回使うと $\pi_{0}=\sum_{i=0}^{N}\pi_{i}p_{i0}^{(n)}$ で、右辺は有限和なので $0$ に収束する。これは $\pi_{0}=2^{-N}>0$ に反する。
+
+**怠惰な連鎖.** $\tilde P$ は確率行列で、$\tilde p_{ij}\ge\frac12p_{ij}$ から $\tilde p_{ij}^{(n)}\ge2^{-n}p_{ij}^{(n)}$ なので既約。$\tilde p_{ii}\ge\frac12>0$ から $d(i)=1$ で非周期的。$\pi\tilde P=\frac12(\pi+\pi P)=\pi$。\ref{prb:markov-convergence} から $\tilde p_{ij}^{(n)}\to\pi_{j}$。
+
+**3.** \ref{prb:stationary-existence.3} から $E_{0}[T_{0}]=\frac{1}{\pi_{0}}=2^{N}$。
+
+（エーレンフェストの壺は、気体の拡散の「不可逆性」と力学の再帰性の矛盾を説明するための模型である。$N=100$ なら、片方の壺が空の状態に戻るまでの平均は $2^{100}\approx1.27\times10^{30}$ 回で、事実上起こらない。一方、半々の状態 $50$ への平均の戻り時間は $\frac{2^{100}}{\binom{100}{50}}\approx12.6$ 回にすぎない。2 は、\ref{prb:markov-convergence} の非周期性の仮定が外せないことの具体例である。）
+:::
+
+::: problem ★★ 標準：詳細つり合いとグラフ上のランダムウォーク {#prb:ex-mc-2}
+1. 確率行列 $P$ と $S$ 上の確率分布 $\pi$ が**詳細つり合い**の式 $\pi_{i}p_{ij}=\pi_{j}p_{ji}$（すべての $i,j$）を満たせば、$\pi$ は定常分布であることを示せ。さらに、初期分布 $\pi$ の連鎖について、各 $n$ で $(X_{0},\dots,X_{n})$ と $(X_{n},\dots,X_{0})$ は同じ分布をもつ（**可逆性**）ことを示せ。
+2. $G=(V,E)$ を頂点が 2 個以上の有限・連結な単純グラフ（ループや多重辺はない）とし、$\deg v$ を頂点 $v$ の次数とする。$\{u,v\}\in E$ なら $p_{uv}\defeq\frac{1}{\deg u}$、それ以外は $p_{uv}\defeq0$ で定める $V$ 上の連鎖（**単純ランダムウォーク**）について、$\pi_{v}\defeq\frac{\deg v}{2|E|}$ がただ一つの定常分布で、$E_{v}[T_{v}]=\frac{2|E|}{\deg v}$ であることを示せ。
+3. 2 の連鎖について、$G$ が 2 部グラフ（$V=V_{0}\sqcup V_{1}$ で、すべての辺が $V_{0}$ の頂点と $V_{1}$ の頂点を結ぶ）ならすべての状態の周期は $2$ であることを示せ。また、$G$ が長さ $L$ が奇数の閉じた道（$v_{0},v_{1},\dots,v_{L}=v_{0}$ で $\{v_{l-1},v_{l}\}\in E$。頂点の重複は許す）をもてば、連鎖は非周期的で、すべての $u,v$ で $p_{uv}^{(n)}\to\pi_{v}$ であることを示せ。
+4. $8\times8$ のチェス盤の上をキングが無作為に動く（毎回、縦・横・斜めに隣接するマスのうち盤上にあるものから等確率で一つを選ぶ）。隅のマスから出発して初めて隅のそのマスに戻るまでの手数の期待値は $140$ であることを示せ。
+:::
+
+::: solution
+**1.** **定常性.** $\sum_{i}\pi_{i}p_{ij}=\sum_{i}\pi_{j}p_{ji}=\pi_{j}$。
+
+**可逆性.** $i_{0},\dots,i_{n}\in S$ について、詳細つり合いを $\pi_{i_{0}}p_{i_{0}i_{1}}=p_{i_{1}i_{0}}\pi_{i_{1}}$, $\pi_{i_{1}}p_{i_{1}i_{2}}=p_{i_{2}i_{1}}\pi_{i_{2}}$, … と左から順に使うと（$k$ についての帰納法）
+$$
+\pi_{i_{0}}p_{i_{0}i_{1}}\cdots p_{i_{n-1}i_{n}}=p_{i_{1}i_{0}}p_{i_{2}i_{1}}\cdots p_{i_{n}i_{n-1}}\pi_{i_{n}}=\pi_{i_{n}}p_{i_{n}i_{n-1}}\cdots p_{i_{1}i_{0}}.
+$$
+左辺は $P(X_{0}=i_{0},\dots,X_{n}=i_{n})$、右辺は $P(X_{0}=i_{n},\dots,X_{n}=i_{0})=P\bigl((X_{n},\dots,X_{0})=(i_{0},\dots,i_{n})\bigr)$。二つのベクトルはともに可算集合 $S^{n+1}$ に値をとるので、分布は 1 点の確率で決まり、一致する。
+
+**2.** 連結で頂点が 2 個以上なので $\deg u\ge1$ で、$\sum_{v}p_{uv}=\frac{\deg u}{\deg u}=1$。各辺はその両端で 1 回ずつ数えられるので $\sum_{v}\deg v=2|E|$、よって $\sum_{v}\pi_{v}=1$。$\{u,v\}\in E$ なら $\pi_{u}p_{uv}=\frac{1}{2|E|}=\pi_{v}p_{vu}$、そうでなければ両辺 $0$ なので、1 から $\pi$ は定常分布。連結性から $u$ と $v$ を結ぶ道 $u=w_{0},w_{1},\dots,w_{m}=v$ があり、$p_{uv}^{(m)}\ge\prod_{l}p_{w_{l-1}w_{l}}>0$ なので既約。\ref{prb:stationary-existence.3} から定常分布は一意で、$E_{v}[T_{v}]=\frac{1}{\pi_{v}}=\frac{2|E|}{\deg v}$。
+
+**3.** **2 部グラフ.** $X_{0}\in V_{a}$ なら、各ステップで $V_{0}$ と $V_{1}$ を行き来するので、$X_{n}\in V_{a'}$（$a'\equiv a+n\pmod 2$）。よって奇数の $n$ で $p_{vv}^{(n)}=0$。$v$ の隣接点 $u$ について $p_{vv}^{(2)}\ge p_{vu}p_{uv}>0$ なので $d(v)=2$。
+
+**奇数の閉じた道.** $w\defeq v_{0}$ とすると $p_{ww}^{(L)}\ge\prod_{l}p_{v_{l-1}v_{l}}>0$。任意の $v$ について、$v$ から $w$ への長さ $a$ の道をとると、逆にたどれば $w$ から $v$ への長さ $a$ の道なので、$p_{vv}^{(2a+L)}\ge p_{vw}^{(a)}p_{ww}^{(L)}p_{wv}^{(a)}>0$。また上と同じく $p_{vv}^{(2)}>0$。$d(v)$ は $2$ と奇数 $2a+L$ の公約数なので $d(v)=1$。2 から既約で定常分布 $\pi$ をもつので、\ref{prb:markov-convergence} から $p_{uv}^{(n)}\to\pi_{v}$。
+
+**4.** マスを頂点、キングの 1 手で移れる 2 マスを辺とするグラフは連結な単純グラフで、キングの動きはその上の単純ランダムウォークである。次数は、隅の 4 マスで $3$、隅以外の縁の $24$ マスで $5$、内側の $36$ マスで $8$ なので
+$$
+2|E|=\sum_{v}\deg v=4\cdot3+24\cdot5+36\cdot8=420.
+$$
+2 から、隅のマス $v$ について $E_{v}[T_{v}]=\frac{420}{3}=140$。
+
+（隣接する 3 マスは三角形をなすので、3 からキングの連鎖は非周期的で、十分大きな $n$ では $n$ 手目に隅のそのマスにいる確率はほぼ $\frac{3}{420}=\frac{1}{140}$ である。中央のマスへの平均の戻り時間は $\frac{420}{8}=52.5$ 手。連結なグラフについて、2 部グラフであることと奇数の閉じた道をもたないことは同値であることが知られており、3 は「単純ランダムウォークが非周期的 $\iff$ 2 部グラフでない」を意味する。1 の可逆性は、定常状態の映像を逆再生しても統計的に区別できないことを言う。）
+:::
+
+::: problem ★★ 標準：吸収確率と調和関数 {#prb:ex-mc-3}
+$N\ge2$, $S=\{0,1,\dots,N\}$ とし、$0<p_{i}<1$, $q_{i}\defeq1-p_{i}$（$1\le i\le N-1$）について
+$$
+p_{i,i+1}=p_{i},\quad p_{i,i-1}=q_{i}\quad(1\le i\le N-1),\qquad p_{00}=p_{NN}=1
+$$
+（他の成分は $0$）とする。$\tau\defeq\inf\{n\ge0:X_{n}\in\{0,N\}\}$, $h(i)\defeq P_{i}(\tau<\infty,\ X_{\tau}=N)$ とおく。
+1. すべての $i\in S$ で $P_{i}(\tau<\infty)=1$ を示せ。
+2. $h(0)=0$, $h(N)=1$ で、$1\le i\le N-1$ について $h(i)=p_{i}h(i+1)+q_{i}h(i-1)$ を示せ。
+3. $\rho_{0}\defeq1$, $\rho_{k}\defeq\prod_{j=1}^{k}\frac{q_{j}}{p_{j}}$（$1\le k\le N-1$）とおく。2 の条件を満たす関数 $g\colon S\to\mathbb{R}$ はただ一つで、
+$$
+h(i)=\frac{\sum_{k=0}^{i-1}\rho_{k}}{\sum_{k=0}^{N-1}\rho_{k}}\qquad(0\le i\le N)
+$$
+であることを示せ。とくに $p_{i}=p$（一定）で $r\defeq\frac{q}{p}\ne1$ なら $h(i)=\frac{1-r^{i}}{1-r^{N}}$、$p=\frac12$ なら $h(i)=\frac iN$。
+:::
+
+::: solution
+**1.** $i\in\{0,N\}$ なら $\tau=0$。$\delta\defeq\prod_{j=1}^{N-1}p_{j}>0$ とおき、$k\ge0$ について $P_{i}(\tau>(k+1)N)\le(1-\delta)P_{i}(\tau>kN)$ を示す。$\{\tau>kN\}=\{X_{0},\dots,X_{kN}\notin\{0,N\}\}\in\mathcal{F}_{kN}$ で、この事象の上で $X_{kN}\in\{1,\dots,N-1\}$。$1\le j\le N-1$ について、事象
+$$
+A_{j}\defeq\{\tau>kN,\ X_{kN}=j,\ X_{kN+1}=j+1,\ \dots,\ X_{kN+N-j}=N\}
+$$
+は $\{kN<\tau\le(k+1)N\}$ に含まれ、互いに素である。\ref{prb:strong-markov}（定数の停止時刻 $kN$ と $\{\tau>kN\}\in\mathcal{F}_{kN}$）から
+$$
+P_{i}(A_{j})=P_{i}(\tau>kN,\ X_{kN}=j)\,p_{j}p_{j+1}\cdots p_{N-1}\ge\delta P_{i}(\tau>kN,\ X_{kN}=j).
+$$
+$j$ について足すと $P_{i}(kN<\tau\le(k+1)N)\ge\delta P_{i}(\tau>kN)$、すなわち $P_{i}(\tau>(k+1)N)\le(1-\delta)P_{i}(\tau>kN)$。帰納法で $P_{i}(\tau>kN)\le(1-\delta)^{k}$ なので、$P_{i}(\tau=\infty)\le\lim_{k}(1-\delta)^{k}=0$。
+
+**2.** $h(0)=0$, $h(N)=1$ は $\tau=0$ から。$C$ を、ある $n\ge0$ で $x_{0},\dots,x_{n-1}\in\{1,\dots,N-1\}$, $x_{n}=N$ となる点列 $x$ の全体とすると、$\{\tau<\infty,X_{\tau}=N\}=\{(X_{n})_{n\ge0}\in C\}$ で、$C$ は（$n$ ごとに分けて）互いに素な柱の可算和。$x_{0}\in\{1,\dots,N-1\}$ なら、$x\in C$ と $(x_{n+1})_{n\ge0}\in C$ は同値である（$\{0,N\}$ に初めて入る時刻が $1$ ずれるだけ）。$1\le i\le N-1$ なら $P_{i}$ の下で $X_{0}=i$ なので、記法の確認の一歩目による分解から
+$$
+h(i)=P_{i}\bigl((X_{n+1})_{n\ge0}\in C\bigr)=\sum_{j}p_{ij}h(j)=p_{i}h(i+1)+q_{i}h(i-1).
+$$
+
+**3.** $g$ が 2 の条件を満たすとし、$\Delta_{k}\defeq g(k+1)-g(k)$（$0\le k\le N-1$）とおく。$p_{i}+q_{i}=1$ なので 2 の式は $p_{i}\Delta_{i}=q_{i}\Delta_{i-1}$、すなわち $\Delta_{i}=\frac{q_{i}}{p_{i}}\Delta_{i-1}$（$1\le i\le N-1$）と同値で、$\Delta_{k}=\rho_{k}\Delta_{0}$。
+$$
+1=g(N)-g(0)=\sum_{k=0}^{N-1}\Delta_{k}=\Delta_{0}\sum_{k=0}^{N-1}\rho_{k}
+$$
+から $\Delta_{0}=\bigl(\sum_{k<N}\rho_{k}\bigr)^{-1}$ で、$g(i)=g(0)+\sum_{k<i}\Delta_{k}$ は与えられた式に等しい。逆にこの式の $g$ は $g(0)=0$, $g(N)=1$, $\Delta_{i}=\frac{q_{i}}{p_{i}}\Delta_{i-1}$ を満たすので、2 の条件を満たす関数はちょうど一つ。2 から $h$ はその条件を満たすので、$h$ はこの式で与えられる。
+
+$p_{i}=p$ なら $\rho_{k}=r^{k}$ で、$r\ne1$ なら等比級数の和から $h(i)=\frac{(1-r^{i})/(1-r)}{(1-r^{N})/(1-r)}=\frac{1-r^{i}}{1-r^{N}}$。$p=\frac12$ なら $\rho_{k}=1$ で $h(i)=\frac iN$。
+
+（1 から $P_{i}(\tau<\infty,X_{\tau}=0)=1-h(i)$。2 は「$h$ は内部の点で $Ph=h$ を満たす（**調和関数**）」と読める。$p_{i}=\frac12$、$N=a+b$、出発点 $a$ とすれば \ref{prb:gamblers-ruin} の $\frac{a}{a+b}$ が、$p_{i}=p$ とすれば \ref{prb:prob-ms-asymmetric-ruin} の式（分子と分母に $r^{a}$ を掛けたもの）が、マルチンゲールを使わずに再現される。ここでは $p_{i}$ が状態ごとに違ってよい。）
+:::
+
+::: problem ★★★ 発展：偏りのあるランダムウォークとグリーン関数 {#prb:ex-mc-4}
+1. 一般の連鎖について、$G(i,j)\defeq\sum_{n\ge0}p_{ij}^{(n)}\in[0,\infty]$（**グリーン関数**）とおく。$G(i,j)=E_{i}[N_{j}]$ と $G(i,j)=P_{i}(H_{j}<\infty)\,G(j,j)$（$0\cdot\infty\defeq0$）を示せ。
+2. 以下、$\frac12<p<1$, $q\defeq1-p$, $r\defeq\frac qp\in(0,1)$ とし、$S=\mathbb{Z}$ 上の連鎖 $p_{i,i+1}=p$, $p_{i,i-1}=q$ を考える。$P_{1}(T_{0}<\infty)=r$ と $P_{-1}(T_{0}<\infty)=1$ を示し、$P_{0}(T_{0}<\infty)=2q$ を導け。とくに連鎖は過渡的で、$G(0,0)=\frac{1}{p-q}$。
+3. 2 の連鎖について
+$$
+G(0,j)=\frac{1}{p-q}\quad(j\ge0),\qquad G(0,j)=\frac{r^{|j|}}{p-q}\quad(j<0)
+$$
+を示し、$0$ から出発した連鎖が負の整数にいる時間の総和の期待値は $E_{0}\bigl[\#\{n\ge0:X_{n}<0\}\bigr]=\frac{q}{(p-q)^{2}}$ であることを示せ。
+:::
+
+::: solution
+**1.** **$G=E[N]$.** $N_{j}=\sum_{n\ge0}\mathbf{1}_{\{X_{n}=j\}}$ に \ref{meas:tonelli}（和と期待値の交換）と \ref{prb:markov-construction.2} を使えば $E_{i}[N_{j}]=\sum_{n}P_{i}(X_{n}=j)=G(i,j)$。
+
+**分解.** $k\ge1$ とする。時刻 $H_{j}$ より前に $j$ への訪問はないので、$\{N_{j}\ge k\}$ は「$H_{j}<\infty$ かつ、$(X_{H_{j}+n})_{n\ge0}$ が $j$ を $k$ 回以上訪れる」という事象である。後半を「$k$ 回目の訪問の時刻 $m$」で分けると、$\{N_{j}\ge k\}$ は、$m\ge0$ と、$j$ で始まり $j$ をちょうど $k$ 回含み $j$ で終わる語 $(j,j_{1},\dots,j_{m})\in S^{m+1}$ についての、互いに素な事象
+$$
+\{H_{j}<\infty,\ X_{H_{j}+1}=j_{1},\dots,X_{H_{j}+m}=j_{m}\}
+$$
+の和である。$\{H_{j}<\infty\}$ の上で $X_{H_{j}}=j$ なので、\ref{prb:strong-markov}（$T=H_{j}$, $A=\Omega$, $i=j$）からこの事象の確率は $P_{i}(H_{j}<\infty)\,p_{jj_{1}}\cdots p_{j_{m-1}j_{m}}=P_{i}(H_{j}<\infty)P_{j}(X_{1}=j_{1},\dots,X_{m}=j_{m})$。同じ語について足すと
+$$
+P_{i}(N_{j}\ge k)=P_{i}(H_{j}<\infty)\,P_{j}(N_{j}\ge k).
+$$
+$N_{j}=\sum_{k\ge1}\mathbf{1}_{\{N_{j}\ge k\}}$（$N_{j}=\infty$ でも成り立つ）に \ref{meas:tonelli} を使って $k$ について足せば $G(i,j)=P_{i}(H_{j}<\infty)G(j,j)$（$P_{i}(H_{j}<\infty)=0$ なら両辺 $0$）。
+
+**2.** **連鎖の実現.** \ref{prb:independent-sequence-existence.3} から i.i.d. の $\xi_{1},\xi_{2},\dots$ で $P(\xi_{k}=1)=p$, $P(\xi_{k}=-1)=q$ となるものをとり、$i\in\mathbb{Z}$ について $Y_{n}\defeq i+\xi_{1}+\dots+\xi_{n}$ とおく。独立性から柱の確率は $p,q$ の積で、$(Y_{n})$ は $i$ から出発するこの連鎖である。記法の確認から、柱の可算和で書ける事象の $P_{i}$ の下での確率は $(Y_{n})$ で計算してよい。\ref{prb:strong-law} から $\frac{Y_{n}}{n}\to E[\xi_{1}]=p-q>0$（a.s.）なので $Y_{n}\to\infty$。$Y$ は $1$ ずつ動くので、$Y_{0}=i<j$ なら $Y_{n}\ge j$ となる最初の $n$ で $Y_{n}=j$。よって
+$$
+P_{i}(H_{j}<\infty)=1\qquad(i<j).
+$$
+とくに $P_{-1}(T_{0}<\infty)=P_{-1}(H_{0}<\infty)=1$。
+
+**$P_{1}(T_{0}<\infty)=r$.** $M\ge2$ について $E_{M}\defeq\{H_{0}<H_{M}\}$ とおく（$P_{1}$ の下で $T_{0}=H_{0}$）。$E_{M}$ は、$n\ge1$ について柱 $\{X_{0}=1,X_{1},\dots,X_{n-1}\in\{1,\dots,M-1\},X_{n}=0\}$ の互いに素な和で、これらの柱の確率は、$\{1,\dots,M-1\}$ の中での推移だけを含むので、\ref{prb:ex-mc-3} の $\{0,\dots,M\}$ 上の連鎖（$p_{i}=p$）での同じ柱の確率と等しい。後者の和は、\ref{prb:ex-mc-3.1} と \ref{prb:ex-mc-3.3} から $1-h(1)=1-\frac{1-r}{1-r^{M}}=\frac{r-r^{M}}{1-r^{M}}$。よって
+$$
+P_{1}(E_{M})=\frac{r-r^{M}}{1-r^{M}}\to r\qquad(M\to\infty).
+$$
+$1$ から $M+1$ に行くには $M$ を通るので $H_{M}<H_{M+1}$ で、$E_{M}$ は $M$ について増加。また $H_{M}\ge M-1$ なので、$H_{0}<\infty$ なら $M>H_{0}+1$ で $E_{M}$ が起こる。よって $E_{M}\uparrow\{T_{0}<\infty\}$ で、測度の連続性から $P_{1}(T_{0}<\infty)=r$。
+
+**$P_{0}(T_{0}<\infty)$.** $\{T_{0}<\infty\}=\{(X_{n+1})_{n\ge0}\in C\}$（$C\defeq\{x:\text{ある }n\text{ で }x_{n}=0\}$）なので、一歩目による分解から
+$$
+P_{0}(T_{0}<\infty)=pP_{1}(H_{0}<\infty)+qP_{-1}(H_{0}<\infty)=pr+q=2q.
+$$
+$p>\frac12$ から $2q<1$ で、$0$ は過渡的。\ref{prb:recurrence-criterion.3} と 1 から $G(0,0)=E_{0}[N_{0}]=\frac{1}{1-2q}=\frac{1}{p-q}$。
+
+**3.** **平行移動.** $p_{i+m,j+m}=p_{ij}$ なので、柱の確率を比べると、柱の可算和 $C$ について $P_{i+m}\bigl((X_{n})\in C+m\bigr)=P_{i}\bigl((X_{n})\in C\bigr)$（$C+m\defeq\{(x_{n}+m)_{n}:x\in C\}$）。とくに $G(j,j)=G(0,0)=\frac{1}{p-q}$、$P_{-k}(H_{-k-1}<\infty)=P_{1}(H_{0}<\infty)=r$。
+
+**$j\ge0$.** 2 から $P_{0}(H_{j}<\infty)=1$（$j=0$ は自明）なので、1 から $G(0,j)=G(j,j)=\frac{1}{p-q}$。
+
+**$j<0$.** $P_{0}(H_{-k}<\infty)=r^{k}$（$k\ge1$）を帰納法で示す。$k=1$ は平行移動から $P_{0}(H_{-1}<\infty)=P_{1}(H_{0}<\infty)=r$。$0$ から $-(k+1)$ に行くには $-k$ を通るので、$\{H_{-k-1}<\infty\}$ は「$H_{-k}<\infty$ かつ、$(X_{H_{-k}+n})_{n\ge0}$ が $-(k+1)$ に着く」という事象で、1 の分解と同じく \ref{prb:strong-markov} を柱ごとに使って足すと
+$$
+P_{0}(H_{-k-1}<\infty)=P_{0}(H_{-k}<\infty)\,P_{-k}(H_{-k-1}<\infty)=r^{k}\cdot r.
+$$
+1 から $G(0,-k)=r^{k}G(-k,-k)=\frac{r^{k}}{p-q}$。
+
+**負の側にいる時間.** $\#\{n:X_{n}<0\}=\sum_{j<0}N_{j}$ なので、\ref{meas:tonelli} から
+$$
+E_{0}\bigl[\#\{n:X_{n}<0\}\bigr]=\sum_{k\ge1}\frac{r^{k}}{p-q}=\frac{r}{(1-r)(p-q)}=\frac{q}{(p-q)^{2}}
+$$
+（$\frac{r}{1-r}=\frac{q/p}{(p-q)/p}=\frac{q}{p-q}$）。
+
+（$G(0,0)=\sum_{n}\binom{2n}{n}(pq)^{n}$ で、2 の結果は $\sum_{n}\binom{2n}{n}x^{n}=(1-4x)^{-1/2}$ と $1-4pq=(p-q)^{2}$ からも読める。$p\downarrow\frac12$ で $G(0,0)\to\infty$ となるのは、対称な場合の再帰性（\ref{prb:polya-theorem} の $d=1$）と整合する。例えば $p=\frac34$ なら、$0$ への訪問は平均 $2$ 回、負の側にいる時間は平均 $1$ である。1 は「$j$ への訪問の期待値＝$j$ に着く確率 × $j$ から出発したときの訪問の期待値」という分解で、過渡的な連鎖の解析の基本である。）
+:::
+
+## コルモゴロフの拡張定理 {#prb:sec-ke-exercises}
+
+対応するページ：\ref{prb:page-kolmogorov-extension}
+
+::: problem ★ 基本：整合的でない族 {#prb:ex-ke-1}
+1. $T=\{1,2,\dots\}$ とし、空でない有限集合 $J\subset T$ について、$\mu_{J}$ を各座標が独立に $N(0,|J|)$ に従う $\mathbb{R}^{J}$ 上の分布とする。この族は整合的でなく、これらを有限次元分布にもつ確率過程は存在しないことを示せ。
+2. $T=\{1,2,3\}$ とし、$Z\sim N(0,1)$ について、$\nu_{12}$, $\nu_{23}$ を $(Z,Z)$ の分布、$\nu_{13}$ を $(Z,-Z)$ の分布とする（$\nu_{jl}$ は $\mathbb{R}^{\{j,l\}}$ 上の分布で、座標 $j$ が第 1 成分）。どの $\nu_{jl}$ も、二つの座標への像はともに $N(0,1)$ である。しかし、確率変数 $X_{1},X_{2},X_{3}$ で、$j<l$ について $(X_{j},X_{l})$ の分布が $\nu_{jl}$ となるものは存在しないことを示せ。
+3. 2 の $X_{1},X_{2},X_{3}$ が存在したとすると、$C\defeq(E[X_{j}X_{l}])_{j,l}$ は半正定値でなければならないことを示し、$C$ を計算して 2 の別証明を与えよ。
+:::
+
+::: solution
+**1.** $\mu_{\{1,2\}}$ の第 1 座標への像は、ボレル集合 $B$ について $\mu_{\{1,2\}}(B\times\mathbb{R})=N(0,2)(B)$ で、$N(0,2)$ である。これは $\mu_{\{1\}}=N(0,1)$ と異なる（分散が $2$ と $1$）。よって整合的でない。確率過程の有限次元分布は整合的（\ref{prb:finite-dimensional-distributions} の後の注意）なので、このような過程はない。
+
+**2.** **周辺.** $\nu_{12}$, $\nu_{23}$ の二つの座標への像はともに $Z$ の分布 $N(0,1)$。$\nu_{13}$ の第 2 座標への像は $-Z$ の分布で、\ref{prb:characteristic-basic.2}, \ref{prb:characteristic-basic.4} から特性関数は $e^{-t^{2}/2}$、\ref{prb:characteristic-uniqueness.2} から $N(0,1)$。
+
+**存在しないこと.** $X_{1},X_{2},X_{3}$ があったとする。$D_{\pm}\defeq\{(x,y):x=\pm y\}$ は閉集合なので
+$$
+P(X_{1}=X_{2})=\nu_{12}(D_{+})=P(Z=Z)=1,\quad P(X_{2}=X_{3})=1,\quad P(X_{1}=-X_{3})=\nu_{13}(D_{-})=P(Z=-(-Z))=1.
+$$
+三つの確率 $1$ の事象の共通部分の上で $X_{1}=X_{2}=X_{3}=-X_{1}$、すなわち $X_{1}=0$。よって $P(X_{1}=0)=1$ となるが、$X_{1}\sim N(0,1)$ は密度をもつので $P(X_{1}=0)=0$ で矛盾。
+
+**3.** **半正定値性.** $X_{j}\sim N(0,1)$ は $L^{2}$ の元なので、$a\in\mathbb{R}^{3}$ について
+$$
+\sum_{j,l}a_{j}a_{l}E[X_{j}X_{l}]=E\Bigl[\Bigl(\sum_{j}a_{j}X_{j}\Bigr)^{2}\Bigr]\ge0.
+$$
+
+**計算.** \ref{prb:change-of-variables} から $E[X_{j}X_{l}]$ は $(X_{j},X_{l})$ の分布で決まり、$E[X_{j}^{2}]=E[Z^{2}]=1$、$E[X_{1}X_{2}]=E[X_{2}X_{3}]=E[Z\cdot Z]=1$、$E[X_{1}X_{3}]=E[Z\cdot(-Z)]=-1$。よって
+$$
+C=\begin{pmatrix}1&1&-1\\1&1&1\\-1&1&1\end{pmatrix},\qquad a=(1,-1,1)\ \text{について}\ \sum_{j,l}a_{j}a_{l}C_{jl}=3+2\bigl(-1-1-1\bigr)=-3<0.
+$$
+これは半正定値性に反する。
+
+（1 は、各 $\mu_{J}$ はもっともらしくても、互いに矛盾すれば「影」を落とす実体がないことを示す。2 では 1 次元の周辺は整合的なのに、2 次元の周辺が 3 次元の分布にまとまらない。整合性は、すべての有限集合の組 $I\subset J$ について確かめる必要がある。3 は、共分散の半正定値性が、\ref{prb:gaussian-process} で使われた十分条件であるだけでなく、2 次のモーメントをもつどんな過程にも必要な条件であることを示している。$C$ の固有値は $-1,2,2$ である。）
+:::
+
+::: problem ★★ 標準：無限個の確率測度の積 {#prb:ex-ke-2}
+$T$ を空でない集合とし、各 $t\in T$ に $\mathbb{R}$ 上の確率測度 $\mu_{t}$ が与えられているとする。空でない有限集合 $J\subset T$ について、$\mu_{J}$ を $\mathbb{R}^{J}$ 上の確率測度で、ボレル集合 $B_{t}$ の直方体の上で $\mu_{J}\bigl(\prod_{t\in J}B_{t}\bigr)=\prod_{t\in J}\mu_{t}(B_{t})$ となるもの（\ref{meas:product-measure} を繰り返して得られる測度）とする。
+1. $\mu_{J}$ はこの条件で一意に定まり、族 $(\mu_{J})$ は整合的であることを示せ。これから、確率過程 $(X_{t})_{t\in T}$ で、$X_{t}$（$t\in T$）が独立で、各 $X_{t}$ の分布が $\mu_{t}$ となるものが存在することを導け。
+2. $T=\{1,2,\dots\}$, $\mu_{n}\defeq B(1,\frac12)$ とし、1 の $(X_{n})$ について、すべての $n$ で $X_{n}\in\{0,1\}$ となるところで $Y\defeq\sum_{n\ge1}X_{n}2^{-n}$、それ以外で $Y\defeq0$ とおく。$Y\sim U(0,1)$ を示せ。
+3. $T=[0,1]$, $\mu_{t}\defeq N(0,1)$ とする。どんな確率空間の上でも、1 の過程と同じ有限次元分布をもつ過程 $(Y_{t})_{t\in[0,1]}$ で、すべての道 $t\mapsto Y_{t}(\omega)$ が $t=0$ で連続なものは存在しないことを示せ。
+:::
+
+::: solution
+**1.** **一意性.** 直方体の全体は π 系で、$\mathbb{R}^{J}$ のボレル集合族を生成する（開集合は有理数の端点をもつ開直方体の可算和）。\ref{meas:measure-uniqueness} から、直方体の上の値で $\mu_{J}$ は決まる。とくに $\mu_{J}$ は $J$ の元の並べ方によらない。
+
+**整合性.** $\emptyset\ne I\subset J$ とし、$B_{t}$（$t\in I$）をボレル集合とする。$t\in I$ で $B'_{t}\defeq B_{t}$、$t\in J\setminus I$ で $B'_{t}\defeq\mathbb{R}$ とおくと $(\pi_{I}^{J})^{-1}\bigl(\prod_{t\in I}B_{t}\bigr)=\prod_{t\in J}B'_{t}$ なので
+$$
+\mu_{J}\circ(\pi_{I}^{J})^{-1}\Bigl(\prod_{t\in I}B_{t}\Bigr)=\prod_{t\in I}\mu_{t}(B_{t})\cdot\prod_{t\in J\setminus I}\mu_{t}(\mathbb{R})=\mu_{I}\Bigl(\prod_{t\in I}B_{t}\Bigr).
+$$
+一意性の議論から $\mu_{J}\circ(\pi_{I}^{J})^{-1}=\mu_{I}$。
+
+**過程の存在.** \ref{prb:kolmogorov-extension} から座標過程 $X_{t}\defeq\pi_{t}$ の有限次元分布は $(\mu_{J})$。$J=\{t\}$ として $X_{t}$ の分布は $\mu_{t}$。相異なる $t_{1},\dots,t_{k}$ について $(X_{t_{1}},\dots,X_{t_{k}})$ の分布は積測度 $\mu_{t_{1}}\otimes\cdots\otimes\mu_{t_{k}}$ なので、\ref{prb:independence-criteria.1}（(c) ⇒ (a)）から独立。独立性は有限個ずつの条件（\ref{prb:independence}）なので、族全体が独立。
+
+**2.** **比較する列.** $([0,1),\mathcal{B},\lambda)$ 上の 2 進展開の桁 $d_{n}$ は、\ref{prb:independent-sequence-existence.1} から独立で $B(1,\frac12)$ に従う。写像 $\Phi\colon\omega\mapsto(X_{n}(\omega))_{n}$ と $\Psi\colon u\mapsto(d_{n}(u))_{n}$ は、座標が可測なので $\mathcal{B}^{T}$ に関して可測で、その分布 $P\circ\Phi^{-1}$, $\lambda\circ\Psi^{-1}$ は、有限次元分布がともに $B(1,\frac12)$ の積（\ref{prb:independence-criteria.1}）なので、\ref{prb:kolmogorov-extension} の一意性から一致する。
+
+**$Y$ を座標で書く.** $D\defeq\bigcap_{n}\pi_{n}^{-1}(\{0,1\})\in\mathcal{B}^{T}$ とし、$g\colon\mathbb{R}^{T}\to\mathbb{R}$ を $x\in D$ で $g(x)\defeq\sum_{n}x_{n}2^{-n}$、それ以外で $g(x)\defeq0$ と定める。$g=\lim_{m}\mathbf{1}_{D}\sum_{n\le m}x_{n}2^{-n}$（各点）なので $g$ は $\mathcal{B}^{T}$ 可測で、$Y=g\circ\Phi$。一方 $u\in[0,1)$ では、\ref{prb:ex-rv-3.1} の $\lfloor2^{k}u\rfloor=\sum_{i\le k}d_{i}(u)2^{k-i}$ から
+$$
+0\le u-\sum_{i\le k}d_{i}(u)2^{-i}=2^{-k}\bigl(2^{k}u-\lfloor2^{k}u\rfloor\bigr)<2^{-k},
+$$
+よって $g(\Psi(u))=u$。
+
+**分布.** ボレル集合 $B$ について
+$$
+P(Y\in B)=P\bigl(\Phi\in g^{-1}(B)\bigr)=\lambda\bigl(\Psi\in g^{-1}(B)\bigr)=\lambda\bigl(\{u\in[0,1):u\in B\}\bigr)=\lambda(B\cap[0,1)).
+$$
+すなわち $Y\sim U(0,1)$。
+
+**3.** そのような $Y$ があったとする。$n\ge1$ について $(Y_{0},Y_{1/n})$ の分布は $N(0,1)\otimes N(0,1)$ なので、\ref{prb:independence-criteria.1} から $Y_{0}$ と $Y_{1/n}$ は独立で、\ref{prb:characteristic-basic.2}・3・4 から $Y_{1/n}-Y_{0}$ の特性関数は $e^{-u^{2}/2}e^{-u^{2}/2}=e^{-u^{2}}$。\ref{prb:characteristic-uniqueness.2} から $Y_{1/n}-Y_{0}\sim N(0,2)$ で、
+$$
+P(|Y_{1/n}-Y_{0}|>1)=P(|W|>1)\eqdef c\qquad(W\sim N(0,2))
+$$
+は $n$ によらない正の定数（$N(0,2)$ の密度は正）。一方、道が $t=0$ で連続なら、すべての $\omega$ で $Y_{1/n}-Y_{0}\to0$ なので、\ref{prb:convergence-relations.1} から $P(|Y_{1/n}-Y_{0}|>1)\to0$。これは $c>0$ に反する。
+
+（1 は、ページの補足で述べた「無限個の確率測度の積」の構成で、$T$ は非可算でもよい。2 は \ref{prb:independent-sequence-existence.1}（一様分布の 2 進展開の桁は独立）の逆向きで、拡張定理の一意性によって「桁の分布が同じなら数の分布も同じ」と議論した。3 の過程（各時刻で独立な標準正規、いわば「離散的な白色雑音」）は、拡張定理で存在するが、どの実現も連続な道をもてない。道の連続性は有限次元分布だけでは保証されず、共分散の連続性のような追加の情報が要る。）
+:::
+
+::: problem ★★★ 発展：両側に延びた定常マルコフ連鎖 {#prb:ex-ke-3}
+$S\subset\mathbb{Z}$ を空でない集合（可算集合は番号を付けてこの形にできる）とし、$P$ を $S$ 上の既約な確率行列で定常分布 $\pi$ をもつものとする。$\mathbb{Z}$ の空でない有限集合 $J=\{n_{1}<n_{2}<\dots<n_{k}\}$ について、$\mathbb{R}^{J}$ 上の測度 $\mu_{J}$ を、$S^{J}$ の各点 $(i_{1},\dots,i_{k})$ に質量
+$$
+w_{J}(i_{1},\dots,i_{k})\defeq\pi_{i_{1}}p_{i_{1}i_{2}}^{(n_{2}-n_{1})}p_{i_{2}i_{3}}^{(n_{3}-n_{2})}\cdots p_{i_{k-1}i_{k}}^{(n_{k}-n_{k-1})}
+$$
+を置いたもの（$\mu_{J}(B)\defeq\sum_{i\in S^{J}\cap B}w_{J}(i)$）とする。
+1. $\mu_{J}$ は確率測度で、族 $(\mu_{J})$ は整合的であることを示せ。
+2. 確率過程 $(X_{n})_{n\in\mathbb{Z}}$ で、各 $X_{n}$ は $S$ に値をとり、すべての $m\in\mathbb{Z}$ について $(X_{m+n})_{n\ge0}$ が初期分布 $\pi$、遷移行列 $P$ のマルコフ連鎖となるものが存在することを示せ。
+3. すべての $i$ で $\pi_{i}>0$ であることを示せ。また、$q_{ij}\defeq\frac{\pi_{j}p_{ji}}{\pi_{i}}$ とおくと $Q=(q_{ij})$ は確率行列で、2 の過程について $(X_{-n})_{n\ge0}$ は初期分布 $\pi$、遷移行列 $Q$ のマルコフ連鎖であることを示せ。さらに、$Q=P$ であることと $\pi$ が \ref{prb:ex-mc-2.1} の式 $\pi_{i}p_{ij}=\pi_{j}p_{ji}$ を満たすことは同値であることを示せ。
+:::
+
+::: solution
+以下、非負項の和の順序交換（\ref{meas:tonelli} の数え上げ測度の場合）を断らずに使う。とくに、$P^{n}$ は確率行列で（$\sum_{j}p_{ij}^{(n+1)}=\sum_{l}p_{il}^{(n)}\sum_{j}p_{lj}=1$ と帰納法）、$P^{a}P^{b}=P^{a+b}$、$\pi P^{n}=\pi$（$\pi P=\pi$ と帰納法）。
+
+**1.** **確率測度.** $\mu_{J}$ は非負の重みの点質量の可算和なので、$\mathbb{R}^{J}$ のボレル集合族上の測度で、可算集合 $S^{J}$ の上に集中している。$w_{J}$ を $i_{k}$ から順に足すと、$\sum_{i_{k}}p_{i_{k-1}i_{k}}^{(n_{k}-n_{k-1})}=1$ を繰り返して最後に $\sum_{i_{1}}\pi_{i_{1}}=1$ が残る。
+
+**整合性.** 制限写像の合成は制限写像なので、$I=J\setminus\{n_{l}\}$（$k\ge2$）の場合を示せばよい。$\mu_{J}\circ(\pi_{I}^{J})^{-1}$ と $\mu_{I}$ はともに可算集合 $S^{I}$ の上に集中しているので、各点 $i'\in S^{I}$ の質量を比べればよく、前者の質量は $i'$ に第 $l$ 成分 $i_{l}$ を挿入した点の $w_{J}$ の $i_{l}\in S$ についての和である。
+- $l=k$：$\sum_{i_{k}}p_{i_{k-1}i_{k}}^{(n_{k}-n_{k-1})}=1$ なので和は $w_{I}(i')$。
+- $l=1$：$\sum_{i_{1}}\pi_{i_{1}}p_{i_{1}i_{2}}^{(n_{2}-n_{1})}=(\pi P^{n_{2}-n_{1}})_{i_{2}}=\pi_{i_{2}}$ なので和は $w_{I}(i')$。
+- $1<l<k$：$a\defeq n_{l}-n_{l-1}$, $b\defeq n_{l+1}-n_{l}$ とすると $\sum_{i_{l}}p_{i_{l-1}i_{l}}^{(a)}p_{i_{l}i_{l+1}}^{(b)}=p_{i_{l-1}i_{l+1}}^{(a+b)}$ で、$a+b=n_{l+1}-n_{l-1}$ なので和は $w_{I}(i')$。
+
+**2.** \ref{prb:kolmogorov-extension} から、$(\mathbb{R}^{\mathbb{Z}},\mathcal{B}^{\mathbb{Z}})$ 上の確率測度で座標過程 $Z_{n}$ の有限次元分布が $(\mu_{J})$ となるものがある。$P(Z_{n}\in S)=\mu_{\{n\}}(S)=1$ なので、$\Omega'\defeq\bigcap_{n\in\mathbb{Z}}\{Z_{n}\in S\}$ は確率 $1$。$s_{0}\in S$ を一つ固定し、$\Omega'$ の上で $X_{n}\defeq Z_{n}$、それ以外で $X_{n}\defeq s_{0}$ とおくと、$X_{n}$ は $S$ に値をとり、有限次元分布は $(Z_{n})$ と同じ。$m\in\mathbb{Z}$, $n\ge0$, $J=\{m,m+1,\dots,m+n\}$ とすると
+$$
+P(X_{m}=i_{0},\dots,X_{m+n}=i_{n})=w_{J}(i_{0},\dots,i_{n})=\pi_{i_{0}}p_{i_{0}i_{1}}\cdots p_{i_{n-1}i_{n}}
+$$
+で、これは \ref{prb:markov-chain} の定義そのものである。
+
+**3.** **$\pi_{i}>0$.** \ref{prb:stationary-existence.3} から $\pi_{i}=\frac{1}{E_{i}[T_{i}]}$ で、$1\le E_{i}[T_{i}]<\infty$ なので $\pi_{i}>0$。
+
+**$Q$ は確率行列.** $q_{ij}\ge0$ で、$\sum_{j}q_{ij}=\frac{1}{\pi_{i}}\sum_{j}\pi_{j}p_{ji}=\frac{\pi_{i}}{\pi_{i}}=1$。
+
+**逆向きの連鎖.** 2 を $m=-n$ で使うと
+$$
+P(X_{0}=i_{0},X_{-1}=i_{1},\dots,X_{-n}=i_{n})=P(X_{-n}=i_{n},\dots,X_{0}=i_{0})=\pi_{i_{n}}p_{i_{n}i_{n-1}}\cdots p_{i_{1}i_{0}}.
+$$
+一方、積が隣り合う $\pi$ で打ち消し合うので
+$$
+\pi_{i_{0}}q_{i_{0}i_{1}}\cdots q_{i_{n-1}i_{n}}=\pi_{i_{0}}\prod_{l=1}^{n}\frac{\pi_{i_{l}}p_{i_{l}i_{l-1}}}{\pi_{i_{l-1}}}=\pi_{i_{n}}\prod_{l=1}^{n}p_{i_{l}i_{l-1}}.
+$$
+両者は等しく、$(X_{-n})_{n\ge0}$ は初期分布 $\pi$、遷移行列 $Q$ のマルコフ連鎖。
+
+**$Q=P$ の条件.** $\pi_{i}>0$ なので、$q_{ij}=p_{ij}$ は $\pi_{j}p_{ji}=\pi_{i}p_{ij}$ と同値。
+
+（2 の過程は、遠い過去から定常状態で動いている連鎖である。その時間を逆にたどると再びマルコフ連鎖になるが、遷移行列は一般に $Q\ne P$ で、例えば $S=\{0,1,2\}$, $p_{01}=p_{12}=p_{20}=1$ なら $\pi$ は一様で、$Q$ は逆回りの回転である。$Q=P$ となるのは詳細つり合いのときに限り、\ref{prb:ex-mc-2.1} の可逆性はこの特別な場合にあたる。\ref{prb:markov-construction.1} の構成では時刻 $0$ から先しか作れなかったが、拡張定理を使えば時刻を $\mathbb{Z}$ 全体に延ばせる。）
+:::
+
+## ブラウン運動 {#prb:sec-bm-exercises}
+
+対応するページ：\ref{prb:page-brownian-motion}
+
+::: problem ★ 基本：ブラウン橋 {#prb:ex-bm-1}
+$(B_{t})$ をブラウン運動とし、$t\in[0,1]$ について $\beta_{t}\defeq B_{t}-tB_{1}$ とおく（**ブラウン橋**）。
+1. $(\beta_{t})_{t\in[0,1]}$ は連続な道をもち $\beta_{0}=\beta_{1}=0$ で、平均 $0$、共分散 $E[\beta_{s}\beta_{t}]=\min(s,t)-st$ のガウス過程であることを示せ。
+2. σ-加法族 $\sigma(\beta_{t}:t\in[0,1])$ と $\sigma(B_{1})$ は独立であることを示せ。
+3. $t\in[0,1]$ について $E[B_{t}\mid\sigma(B_{1})]=tB_{1}$ と $E\bigl[(B_{t}-tB_{1})^{2}\bigr]=t(1-t)\le\frac14$ を示せ。
+:::
+
+::: solution
+**1.** 道の連続性は $B$ の連続性から、$\beta_{0}=B_{0}=0$, $\beta_{1}=B_{1}-B_{1}=0$。$t_{1},\dots,t_{k}\in[0,1]$ について、\ref{prb:brownian-gaussian} から $(B_{t_{1}},\dots,B_{t_{k}},B_{1})$ は平均 $0$ の正規分布に従い、$(\beta_{t_{1}},\dots,\beta_{t_{k}})$ はその線形変換なので、\ref{prb:multivariate-normal-properties.2} から平均 $0$ の正規分布に従う。\ref{prb:multivariate-normal-properties.3} の $E[B_{s}B_{t}]=\min(s,t)$ から
+$$
+E[\beta_{s}\beta_{t}]=\min(s,t)-t\min(s,1)-s\min(1,t)+st\min(1,1)=\min(s,t)-st.
+$$
+
+**2.** **有限個の時刻.** $t_{1},\dots,t_{k}\in[0,1]$ とし、$V\defeq(\beta_{t_{1}},\dots,\beta_{t_{k}})$, $W\defeq B_{1}$ とおく。1 と同じく $(V,W)$ は平均 $0$ の正規分布に従い、
+$$
+E[\beta_{t}B_{1}]=\min(t,1)-t\cdot1=0
+$$
+なので共分散行列は $\begin{pmatrix}C&0\\0&1\end{pmatrix}$（$C\defeq(\min(t_{j},t_{l})-t_{j}t_{l})_{j,l}$）。よって $(u,v)\in\mathbb{R}^{k}\times\mathbb{R}$ で
+$$
+E\bigl[e^{i(\langle u,V\rangle+vW)}\bigr]=e^{-\frac12\langle u,Cu\rangle}e^{-\frac12v^{2}}=\varphi_{V}(u)\varphi_{W}(v)
+$$
+（$v=0$, $u=0$ とおけば右辺の各因子はそれぞれ $V$, $W$ の特性関数）。右辺は、\ref{meas:fubini} から積測度 $P_{V}\otimes P_{W}$ の特性関数でもあるので、\ref{prb:multivariate-uniqueness.2} から $(V,W)$ の分布は $P_{V}\otimes P_{W}$。とくにボレル集合 $A\subset\mathbb{R}^{k}$, $A'\subset\mathbb{R}$ について $P(V\in A,W\in A')=P(V\in A)P(W\in A')$。
+
+**σ-加法族へ.** 事象 $\{(\beta_{t_{1}},\dots,\beta_{t_{k}})\in A\}$（$k$, $t_{j}$, $A$ は任意）の全体 $\mathcal{P}$ は π 系（二つの事象は、時刻を合併した同じ形の事象で書ける）で、$\sigma(\beta_{t}:t\in[0,1])$ を生成する。$\mathcal{P}$ と $\sigma(B_{1})=\{\{W\in A'\}\}$ は上の等式から独立なので、\ref{prb:pi-system-independence.1} から結論を得る。
+
+**3.** $B_{t}=\beta_{t}+tB_{1}$ で、2 から $\beta_{t}$ は $\sigma(B_{1})$ と独立なので、\ref{prb:conditional-properties.1}・3・6 から
+$$
+E[B_{t}\mid\sigma(B_{1})]=E[\beta_{t}]+tB_{1}=tB_{1}.
+$$
+1 から $E[\beta_{t}^{2}]=t-t^{2}=\frac14-\bigl(t-\frac12\bigr)^{2}\le\frac14$。
+
+（ブラウン橋は「$B_{1}=0$ という条件の下でのブラウン運動」と解釈される：2 から $B=\beta+tB_{1}$ は、$B_{1}$ と独立な「橋」と、終点を結ぶ直線とに分かれる。3 の $E[B_{t}\mid B_{1}]=tB_{1}$ は、終点を知ったときの途中の最良の予測が直線補間であることを言い、その誤差の分散は中点 $t=\frac12$ で最大になる。共分散 $\min(s,t)-st$ は 1 から半正定値で、\ref{prb:gaussian-process} の核の連続な道をもつ実現を具体的に与えている。）
+:::
+
+::: problem ★★ 標準：時間反転と大数の法則 {#prb:ex-bm-2}
+$(B_{t})$ をブラウン運動とする。
+1. $X_{0}\defeq0$, $X_{t}\defeq tB_{1/t}$（$t>0$）とおく。すべての $0\le t_{1}<\dots<t_{k}$ について $(X_{t_{1}},\dots,X_{t_{k}})\sim N\bigl(0,(\min(t_{j},t_{l}))_{j,l}\bigr)$ を示せ。
+2. $M\defeq\sup_{t\in[0,1]}|B_{t}|$ は確率変数で、$E[M^{2}]\le4$ を示せ。
+3. $\frac{B_{t}}{t}\to0$（$t\to\infty$、a.s.）を示せ。
+4. 確率 $1$ の事象 $\Omega_{1}$ があって、$\omega\in\Omega_{1}$ で $\tilde X_{t}\defeq X_{t}$、$\omega\notin\Omega_{1}$ で $\tilde X_{t}\defeq0$ とおくと、$(\tilde X_{t})_{t\ge0}$ はブラウン運動であることを示せ（**時間反転**）。
+:::
+
+::: solution
+**1.** $t_{j}>0$ となる $j$ について $s_{j}\defeq\frac{1}{t_{j}}$ とおく。\ref{prb:brownian-gaussian} から $(B_{s_{j}})_{j:t_{j}>0}$ は平均 $0$ の正規分布に従い、$(X_{t_{1}},\dots,X_{t_{k}})$ はその線形変換（$t_{j}>0$ の成分は $t_{j}$ 倍、$t_{1}=0$ の成分は $0$）なので、\ref{prb:multivariate-normal-properties.2} から平均 $0$ の正規分布に従う。共分散は、$t_{j},t_{l}>0$ なら
+$$
+E[X_{t_{j}}X_{t_{l}}]=t_{j}t_{l}\min\Bigl(\frac{1}{t_{j}},\frac{1}{t_{l}}\Bigr)=\frac{t_{j}t_{l}}{\max(t_{j},t_{l})}=\min(t_{j},t_{l}),
+$$
+どちらかが $0$ なら $0=\min(t_{j},t_{l})$。
+
+**2.** **可測性.** $M_{m}\defeq\max_{0\le k\le2^{m}}|B_{k2^{-m}}|$ とおく。格子は $m$ とともに細かくなるので $M_{m}$ は単調増加で $M_{m}\le M$。$t\in[0,1]$ について $k_{m}\defeq\lfloor2^{m}t\rfloor$ とすると $k_{m}2^{-m}\to t$ なので、道の連続性から $|B_{t}|=\lim_{m}|B_{k_{m}2^{-m}}|\le\lim_{m}M_{m}$。よって $M=\lim_{m}M_{m}$ で、$M$ は可測。
+
+**評価.** $m$ を固定し、$\xi_{k}\defeq B_{k2^{-m}}-B_{(k-1)2^{-m}}$（$k\ge1$）とおくと、定義の 2・3 から $\xi_{k}$ は独立で $N(0,2^{-m})$ に従う。\ref{prb:martingale-examples.1} から $Y_{k}\defeq B_{k2^{-m}}=\xi_{1}+\dots+\xi_{k}$ はマルチンゲールで、\ref{prb:doob-inequalities.2}（$p=2$）から
+$$
+E[M_{m}^{2}]=E\Bigl[\max_{k\le2^{m}}|Y_{k}|^{2}\Bigr]\le4E[Y_{2^{m}}^{2}]=4E[B_{1}^{2}]=4.
+$$
+$M_{m}^{2}\uparrow M^{2}$ なので、\ref{meas:monotone-convergence} から $E[M^{2}]\le4$。
+
+**3.** **整数時刻.** $\xi_{n}\defeq B_{n}-B_{n-1}$（$n\ge1$）は定義の 2・3 から i.i.d. で $N(0,1)$ に従うので、\ref{prb:strong-law} から $\frac{B_{n}}{n}=\frac{\xi_{1}+\dots+\xi_{n}}{n}\to0$（a.s.）。
+
+**間のゆらぎ.** $n\ge1$ について $M'_{n}\defeq\sup_{s\in[0,1]}|B_{n+s}-B_{n}|$ とおく。\ref{prb:brownian-invariance.2} から $(B_{n+s}-B_{n})_{s\ge0}$ はブラウン運動なので、2 をそれに使って $E[(M'_{n})^{2}]\le4$。$\varepsilon>0$ について、\ref{prb:basic-inequalities.1}（$\varphi(x)=x^{2}$）から
+$$
+P(M'_{n}>\varepsilon n)\le\frac{4}{\varepsilon^{2}n^{2}},
+$$
+和は有限なので、\ref{prb:borel-cantelli.1} から a.s. で有限個の $n$ を除いて $M'_{n}\le\varepsilon n$。
+
+**まとめ.** $\Omega_{1}$ を、$\frac{B_{n}}{n}\to0$ かつ、すべての $j\ge1$ について有限個の $n$ を除いて $M'_{n}\le\frac nj$ となる事象とすると、$P(\Omega_{1})=1$（可算個の確率 $1$ の事象の共通部分）。$\Omega_{1}$ の上で、$t\ge1$, $n\defeq\lfloor t\rfloor$ なら $|B_{t}|\le|B_{n}|+M'_{n}$ なので
+$$
+\frac{|B_{t}|}{t}\le\frac{|B_{n}|+M'_{n}}{n}\to0\qquad(t\to\infty).
+$$
+
+**4.** $\Omega_{1}$ を 3 の事象とする。$\omega\in\Omega_{1}$ なら、道 $t\mapsto X_{t}=tB_{1/t}$ は $(0,\infty)$ で連続で、$t\downarrow0$ のとき $s\defeq\frac1t\to\infty$ なので 3 から $X_{t}=\frac{B_{s}}{s}\to0=X_{0}$。$\omega\notin\Omega_{1}$ なら $\tilde X\equiv0$。よってすべての道は連続で $\tilde X_{0}=0$。各 $t$ で $\tilde X_{t}=X_{t}$（a.s.）なので、$\tilde X$ の有限次元分布は $X$ のものと同じで、1 から $N(0,(\min(t_{j},t_{l})))$。\ref{prb:brownian-gaussian} から $\tilde X$ はブラウン運動。
+
+（時間反転は、$t\to\infty$ での振る舞いと $t\to0$ での振る舞いを入れ替える。3 は「ブラウン運動の大数の法則」で、4 ではそれが反転した過程の時刻 $0$ での連続性になる。2 で使ったのは、連続な道の上限を可算個の時刻の最大値の極限として扱う、という連続時間の過程の標準的な技法である。2 の定数は粗いが、可積分性があれば十分である。）
+:::
+
+::: problem ★★ 標準：一般の分割に沿った 2 次変分と単調性 {#prb:ex-bm-3}
+$(B_{t})$ をブラウン運動、$t>0$ とする。$[0,t]$ の分割 $\Delta\colon0=s_{0}<s_{1}<\dots<s_{m}=t$ について、$|\Delta|\defeq\max_{k}(s_{k}-s_{k-1})$, $Q(\Delta)\defeq\sum_{k=1}^{m}(B_{s_{k}}-B_{s_{k-1}})^{2}$ とおく。
+1. $E\bigl[(Q(\Delta)-t)^{2}\bigr]=2\sum_{k=1}^{m}(s_{k}-s_{k-1})^{2}\le2t|\Delta|$ を示せ。とくに、分割の列 $\Delta_{n}$ が $|\Delta_{n}|\to0$ を満たせば $Q(\Delta_{n})\to t$（$L^{2}$ 収束、したがって確率収束）。
+2. 分割の列 $\Delta_{n}$ が $\sum_{n}|\Delta_{n}|<\infty$ を満たせば、$Q(\Delta_{n})\to t$（a.s.）であることを示せ。
+3. 確率 $1$ で、道 $s\mapsto B_{s}$ は長さが正のどんな区間の上でも単調でないことを示せ。
+:::
+
+::: solution
+**1.** $h_{k}\defeq s_{k}-s_{k-1}$, $D_{k}\defeq B_{s_{k}}-B_{s_{k-1}}$ とおくと、$D_{k}$ は独立で $N(0,h_{k})$ に従う。\ref{prb:quadratic-variation} の証明と同じく $E[D_{k}^{2}]=h_{k}$, $E[D_{k}^{4}]=3h_{k}^{2}$、よって $\operatorname{Var}(D_{k}^{2})=2h_{k}^{2}$。$D_{k}^{2}$ は独立（\ref{prb:independence-criteria.2}）で $L^{2}$ の元なので、\ref{prb:independence-criteria.3} から
+$$
+E[Q(\Delta)]=\sum_{k}h_{k}=t,\qquad E\bigl[(Q(\Delta)-t)^{2}\bigr]=\operatorname{Var}(Q(\Delta))=2\sum_{k}h_{k}^{2}\le2|\Delta|\sum_{k}h_{k}=2t|\Delta|.
+$$
+確率収束は \ref{prb:convergence-relations.2}。
+
+**2.** $\varepsilon>0$ について、\ref{prb:basic-inequalities.2} と 1 から $P(|Q(\Delta_{n})-t|\ge\varepsilon)\le\frac{2t|\Delta_{n}|}{\varepsilon^{2}}$ で、和は有限。\ref{prb:borel-cantelli.1} から a.s. で有限個の $n$ を除いて $|Q(\Delta_{n})-t|<\varepsilon$。$\varepsilon=\frac1j$（$j\ge1$）について共通部分をとればよい。
+
+**3.** **一つの区間.** 有理数 $0\le a<b$ について、$I_{a,b}$ を道が $[a,b]$ で単調増加（広義）である事象とする。道は連続なので、$I_{a,b}=\bigcap\{B_{r}\le B_{r'}\}$（$r<r'$ は $[a,b]$ の有理数）で、$I_{a,b}$ は事象である（実数 $x<y$ には $x,y$ に収束する有理数 $r_{n}<r'_{n}$ がとれ、不等式は極限で保たれる）。$n\ge1$ について $u_{k}\defeq a+\frac{k(b-a)}{n}$ とおくと
+$$
+I_{a,b}\subset\bigcap_{k=1}^{n}\{B_{u_{k}}-B_{u_{k-1}}\ge0\}.
+$$
+右辺の増分は独立で $N(0,\frac{b-a}{n})$ に従い、正規分布は原点について対称で原子をもたないので、各々の確率は $\frac12$。よって $P(I_{a,b})\le2^{-n}$ がすべての $n$ で成り立ち、$P(I_{a,b})=0$。$-B$ もブラウン運動（\ref{prb:brownian-invariance.1}）なので、単調減少の事象 $I'_{a,b}$ についても $P(I'_{a,b})=0$。
+
+**すべての区間.** 有理数の組 $(a,b)$ は可算なので、$\mathcal{N}\defeq\bigcup_{a<b}(I_{a,b}\cup I'_{a,b})$ は零集合。$\omega\notin\mathcal{N}$ とし、道が区間 $[c,d]$（$c<d$）で単調だとすると、有理数 $c<a<b<d$ をとれば $[a,b]$ でも単調で、$\omega\in I_{a,b}\cup I'_{a,b}$ となり矛盾。
+
+（1 は、\ref{prb:quadratic-variation.2} 進分割を一般の分割に広げたもので、$L^{2}$ 収束には分割が細かくなることだけが要る。概収束には 2 のような細かくなる速さの条件が使われ、2 進分割では $|\Delta_{n}|=t2^{-n}$ でこれを満たす。条件がないと概収束しない分割の列があることが知られている。3 は、単調な関数が有界変動であることと \ref{prb:quadratic-variation.2} からも従うが、ここでは増分の独立性と対称性から直接示した。）
+:::
+
+::: problem ★★★ 発展：道の振動と 0 の近くの零点 {#prb:ex-bm-4}
+$(B_{t})$ をブラウン運動とする。
+1. $\limsup_{n\to\infty}\frac{B_{n}}{\sqrt n}=+\infty$, $\liminf_{n\to\infty}\frac{B_{n}}{\sqrt n}=-\infty$（a.s.）を示せ。
+2. 確率 $1$ で、すべての $a\in\mathbb{R}$ について $\{t\ge0:B_{t}=a\}$ は上に有界でないことを示せ。
+3. 確率 $1$ で、すべての $\varepsilon>0$ について、$B_{t}>0$ となる $t\in(0,\varepsilon)$ と $B_{t}<0$ となる $t\in(0,\varepsilon)$ があり、とくに $B_{t}=0$ となる $t\in(0,\varepsilon)$ があることを示せ。
+:::
+
+::: solution
+**1.** **0-1 法則.** $\xi_{k}\defeq B_{k}-B_{k-1}$（$k\ge1$）は定義の 2・3 から i.i.d. で $N(0,1)$ に従う。$L\defeq\limsup_{n}\frac{B_{n}}{\sqrt n}\in[-\infty,\infty]$ とおく。$m\ge1$ を固定すると、$n>m$ で $\frac{B_{n}}{\sqrt n}=\frac{B_{m}}{\sqrt n}+\frac{\xi_{m+1}+\dots+\xi_{n}}{\sqrt n}$ で、各 $\omega$ で $\frac{B_{m}}{\sqrt n}\to0$ なので
+$$
+L=\limsup_{n}\frac{\xi_{m+1}+\dots+\xi_{n}}{\sqrt n}.
+$$
+右辺は $\bigvee_{k>m}\sigma(\xi_{k})$ 可測なので、$L$ は末尾 σ-加法族に関して可測で、\ref{prb:kolmogorov-zero-one.2} から a.s. で定数 $L_{0}\in[-\infty,\infty]$。
+
+**定数の値.** $K>0$ とし、$A_{n}\defeq\{B_{n}>K\sqrt n\}$ とおく。$B_{n}\sim N(0,n)$ なので、\ref{prb:characteristic-basic.2}, \ref{prb:characteristic-basic.4}, \ref{prb:characteristic-uniqueness.2} から $\frac{B_{n}}{\sqrt n}\sim N(0,1)$ で、$P(A_{n})=P(Z>K)\eqdef c_{K}>0$（$Z\sim N(0,1)$、密度は正）。測度の連続性から
+$$
+P\Bigl(\limsup_{n}A_{n}\Bigr)=\lim_{m}P\Bigl(\bigcup_{n\ge m}A_{n}\Bigr)\ge\limsup_{m}P(A_{m})=c_{K}>0.
+$$
+$\limsup_{n}A_{n}$ の上では無限に多くの $n$ で $\frac{B_{n}}{\sqrt n}>K$ なので $L\ge K$。よって $P(L\ge K)>0$ で、$L=L_{0}$（a.s.）から $L_{0}\ge K$。$K$ は任意なので $L_{0}=+\infty$。$-B$ もブラウン運動（\ref{prb:brownian-invariance.1}）なので、同じ議論から $\limsup_{n}\frac{-B_{n}}{\sqrt n}=+\infty$、すなわち $\liminf_{n}\frac{B_{n}}{\sqrt n}=-\infty$（a.s.）。
+
+**2.** 1 の確率 $1$ の事象 $\Omega_{2}$ の上で考える。$a\in\mathbb{R}$, $R>0$ とする。$\liminf_{n}\frac{B_{n}}{\sqrt n}=-\infty$ から、無限に多くの $n$ で $B_{n}<-\sqrt n\le-|a|-1<a$（$n\ge(|a|+1)^{2}$ のとき）となるので、$m>R$ で $B_{m}<a$ となるものがある。同様に $\limsup$ から $n>m$ で $B_{n}>a$ となるものがある。道は連続なので、\ref{top:intermediate-value} から $B_{t}=a$ となる $t\in(m,n)$ があり、$t>R$。$\Omega_{2}$ は $a$ によらないので、確率 $1$ ですべての $a$ について結論が成り立つ。
+
+**3.** \ref{prb:ex-bm-2.4} の $\Omega_{1}$ とブラウン運動 $\tilde X$ をとる。1 を $\tilde X$ に使うと、確率 $1$ の事象 $\Omega_{3}$ の上で $\limsup_{n}\frac{\tilde X_{n}}{\sqrt n}=+\infty$, $\liminf_{n}\frac{\tilde X_{n}}{\sqrt n}=-\infty$。$\omega\in\Omega_{1}\cap\Omega_{3}$ と $\varepsilon>0$ をとる。無限に多くの $n$ で $\tilde X_{n}>0$ なので、$n>\frac1\varepsilon$ で $\tilde X_{n}>0$ となるものがあり、$\Omega_{1}$ の上では $\tilde X_{n}=nB_{1/n}$ なので $B_{1/n}>0$、$\frac1n\in(0,\varepsilon)$。同様に $n'>\frac1\varepsilon$ で $B_{1/n'}<0$ となるものがある。\ref{top:intermediate-value} から、$\frac1n$ と $\frac{1}{n'}$ の間（$(0,\varepsilon)$ に含まれる）に $B_{t}=0$ となる $t$ がある。$P(\Omega_{1}\cap\Omega_{3})=1$。
+
+（1 は、ブラウン運動が $\sqrt n$ のどんな定数倍も無限回超えることを言い、補足の重複対数の法則（増加の正確な速さは $\sqrt{2n\log\log n}$）の粗い形である。2 は 1 次元のブラウン運動がすべての水準に何度でも戻る（再帰的である）ことで、\ref{prb:random-walk-hitting} の連続版にあたる。3 から、$0$ から出発したブラウン運動は出発直後から正負に無限回振動し、零点の集合は $0$ に集積する。とくに $\inf\{t>0:B_{t}>0\}=0$（a.s.）で、道は $0$ を端点とするどんな区間でも単調でない（\ref{prb:ex-bm-3.3} の特別な場合）。\ref{prb:ex-bm-2.4} によって、$t\to\infty$ での振動が $t\to0$ での振動に移されたのである。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
