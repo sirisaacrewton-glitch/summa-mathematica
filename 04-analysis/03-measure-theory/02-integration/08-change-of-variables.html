@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>変数変換公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/02-integration/08-change-of-variables.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 変数変換公式 {#meas:page-change-of-variables keywords="change of variables formula for Lebesgue integrals under C^1 diffeomorphisms, measure of the image of a cube, sup norm and operator norm, Jacobian determinant, images of null sets, polar coordinates, Gaussian integral in the plane"}
+
+線形写像 $T$ による像の測度は $|\det T|$ 倍になった（\ref{meas:lebesgue-linear}）。$C^{1}$ 級の微分同相写像 $\Phi$ は各点の近くで微分 $D\Phi(x)$ で近似できるので、像の測度は局所的に $|\det D\Phi(x)|$ 倍になり、積分すると
+$$
+\int_{\Phi(U)}f(y)\,dy=\int_{U}f(\Phi(x))\,|\det D\Phi(x)|\,dx
+$$
+が得られる。このページではこの**変数変換公式**を、非負可測関数と可積分関数について示す。証明の要は、小さな立方体の像の測度の評価（平均値の定理）と、測度の外正則性による一般の集合への拡張、そして $\Phi^{-1}$ についての同じ不等式との組合せである。リーマン積分版（\ref{calc:change-of-variables}）と違い、被積分関数の連続性や積分領域のジョルダン可測性は要らない。
+
+## 記法と定義の確認 {#meas:sec-cv-notation}
+
+::: notation
+- $C^{1}$ 級・微分同相写像・連鎖律は \ref{calc:c1-map}, \ref{calc:diffeomorphism}, \ref{calc:chain-rule}。$1$ 変数の \ref{calc:mean-value-theorem} も使う。
+- $\|x\|_{\infty}\defeq\max_{i}|x_{i}|$。$n\times n$ 行列 $A=(a_{ij})$ について $\|A\|\defeq\max_{i}\sum_{j}|a_{ij}|$。$\|Ax\|_{\infty}\le\|A\|\|x\|_{\infty}$、$\|AB\|\le\|A\|\|B\|$（$|\sum_{j}a_{ij}x_{j}|\le\sum_{j}|a_{ij}|\|x\|_{\infty}$ と、それを $B$ の各列に使う）。
+- **立方体**は $Q=\prod_{k}[c_{k}-s,c_{k}+s]$（中心 $c$、半辺 $s$）＝ $\{x:\|x-c\|_{\infty}\le s\}$。$\lambda(Q)=(2s)^{n}$。
+- $J_{\Phi}(x)\defeq|\det D\Phi(x)|$。
+- 線形写像と測度、平行移動不変性、正則性、単調収束定理は \ref{meas:lebesgue-linear}, \ref{meas:translation-invariant-unique}, \ref{meas:lebesgue-regularity}, \ref{meas:monotone-convergence}。
+- **選択公理**：使わない。
+:::
+
+## 立方体の像 {#meas:sec-cv-cubes}
+
+::: lemma 立方体の像の評価 {#meas:cube-image-estimate keywords="for a C^1 map Phi on a neighbourhood of a cube Q, Phi(Q) is contained in a cube of half side (sup ||DPhi||) s, so lambda(Phi(Q)) <= (sup ||DPhi||)^n lambda(Q)" index="立方体の像|りっぽうたいのぞう"}
+$\Phi$ を立方体 $Q$（中心 $c$、半辺 $s$）を含む開集合上の $C^{1}$ 写像とし、$K\defeq\sup_{x\in Q}\|D\Phi(x)\|$ とすると、$\Phi(Q)\subset\{y:\|y-\Phi(c)\|_{\infty}\le Ks\}$。とくに $\lambda(\Phi(Q))\le K^{n}\lambda(Q)$（$\Phi(Q)$ はコンパクトで可測）。
+:::
+
+::: proof
+$x\in Q$ と各成分 $i$ について、$g(t)\defeq\Phi_{i}(c+t(x-c))$ に $1$ 変数の \ref{calc:mean-value-theorem} を使うと（線分は凸集合 $Q$ に含まれる）、$\Phi_{i}(x)-\Phi_{i}(c)=\sum_{j}\partial_{j}\Phi_{i}(\xi)(x_{j}-c_{j})$（$\xi\in Q$ は $i$ ごとの線分上の点）。よって $|\Phi_{i}(x)-\Phi_{i}(c)|\le\sum_{j}|\partial_{j}\Phi_{i}(\xi)|\,s\le Ks$。像の立方体の測度は $(2Ks)^{n}=K^{n}\lambda(Q)$。
+:::
+
+::: proposition 立方体の像の測度 {#meas:cube-image-measure keywords="for a C^1 diffeomorphism Phi and a closed cube Q in its domain, lambda(Phi(Q)) <= int_Q |det DPhi|" index="立方体の像の測度|りっぽうたいのぞうのそくど"}
+$\Phi\colon U\to V$ を開集合の間の $C^{1}$ 微分同相写像、$Q\subset U$ を立方体とすると $\lambda(\Phi(Q))\le\int_{Q}J_{\Phi}\,d\lambda$。
+:::
+
+::: proof
+**Step 1（線形写像で正規化）.** $x_{0}\in Q$ と $T\defeq D\Phi(x_{0})^{-1}$ について、$T\circ\Phi$ に \ref{meas:cube-image-estimate} を使い、\ref{meas:lebesgue-linear} から
+$$
+\lambda(\Phi(Q))=|\det D\Phi(x_{0})|\,\lambda(T\Phi(Q))\le J_{\Phi}(x_{0})\Bigl(\sup_{x\in Q}\|D\Phi(x_{0})^{-1}D\Phi(x)\|\Bigr)^{n}\lambda(Q).
+$$
+
+**Step 2（一様連続性）.** $Q$ はコンパクトで、$x\mapsto D\Phi(x)$ と $x\mapsto D\Phi(x)^{-1}$（逆行列の成分は行列式で割った有理式で連続）、$J_{\Phi}$ は $Q$ 上一様連続。$\varepsilon>0$ について $\eta>0$ を、$\|x-x'\|_{\infty}\le\eta$ なら $\|D\Phi(x')^{-1}D\Phi(x)\|\le1+\varepsilon$ かつ $|J_{\Phi}(x)-J_{\Phi}(x')|\le\varepsilon$ となるようにとる（$\|D\Phi(x')^{-1}D\Phi(x)-I\|\le\|D\Phi(x')^{-1}\|\|D\Phi(x)-D\Phi(x')\|$ で、$\|D\Phi(x')^{-1}\|$ は $Q$ 上有界）。
+
+**Step 3（分割）.** $Q$ を、各辺を $N$ 等分して半辺 $s/N\le\eta$ の $N^{n}$ 個の小立方体 $Q_{j}$（中心 $x_{j}$）に分ける。小立方体どうしは境界でしか交わらず、境界は零集合なので $\lambda(Q)=\sum\lambda(Q_{j})$、$\int_{Q}J_{\Phi}=\sum\int_{Q_{j}}J_{\Phi}$。Step 1 を各 $Q_{j}$（$x_{0}=x_{j}$）に使い、Step 2 から
+$$
+\lambda(\Phi(Q))\le\sum_{j}\lambda(\Phi(Q_{j}))\le(1+\varepsilon)^{n}\sum_{j}J_{\Phi}(x_{j})\lambda(Q_{j})\le(1+\varepsilon)^{n}\sum_{j}\int_{Q_{j}}(J_{\Phi}+\varepsilon)=(1+\varepsilon)^{n}\Bigl(\int_{Q}J_{\Phi}+\varepsilon\lambda(Q)\Bigr).
+$$
+$\varepsilon\to0$。
+:::
+
+## 変数変換公式 {#meas:sec-cv-theorem}
+
+::: theorem 変数変換公式（ルベーグ積分） {#meas:change-of-variables keywords="change of variables: for a C^1 diffeomorphism Phi: U -> V and nonnegative measurable or integrable f on V, int_V f = int_U f o Phi |det DPhi|; lambda(Phi(E)) = int_E |det DPhi|; Phi maps null sets to null sets" index="変数変換公式（ルベーグ積分）|へんすうへんかんこうしきるべーぐせきぶん"}
+$\Phi\colon U\to V$ を $\mathbb{R}^{n}$ の開集合の間の $C^{1}$ 微分同相写像とする。
+1. $E\subset U$ がルベーグ可測なら $\Phi(E)$ もルベーグ可測で、$\lambda(\Phi(E))=\int_{E}J_{\Phi}\,d\lambda$。
+2. $V$ 上のルベーグ可測な $f\ge0$ について $\int_{V}f\,d\lambda=\int_{U}(f\circ\Phi)J_{\Phi}\,d\lambda$。
+3. $f\in\mathcal{L}^{1}(V)$ $\iff$ $(f\circ\Phi)J_{\Phi}\in\mathcal{L}^{1}(U)$ で、そのとき 2 の等式が成り立つ。
+:::
+
+::: proof
+**Step 1（開集合）.** $U$ に含まれる開集合 $W$ は、閉包が $W$ に含まれる半開の 2 進立方体 $\prod_{k}[m_{k}2^{-l},(m_{k}+1)2^{-l})$ の互いに素な可算和で書ける（各点を含む十分小さい 2 進立方体のうち極大なものを集める。2 進立方体は包含関係か交わらないかのどちらか）。各 $Q$ について $\Phi(Q)\subset\Phi(\overline{Q})$ と \ref{meas:cube-image-measure}（閉立方体と半開立方体の積分は同じ）から、$\lambda(\Phi(W))\le\sum\lambda(\Phi(Q))\le\sum\int_{Q}J_{\Phi}=\int_{W}J_{\Phi}$。
+
+**Step 2（ボレル集合、不等式）.** $\nu(E)\defeq\int_{E}J_{\Phi}\,d\lambda$ は $U$ のボレル集合上の測度（\ref{meas:density-measure}）。まず $E$ が、閉包がコンパクトで $U$ に含まれる開集合 $G$ に含まれるとし、$M\defeq\max_{\overline{G}}J_{\Phi}$ とする。$\varepsilon>0$ について開集合 $W$ で $E\subset W\subset G$, $\lambda(W\setminus E)<\varepsilon/(M+1)$ となるものをとる（\ref{meas:lebesgue-regularity.3}。得られた開集合と $G$ の共通部分をとる）。$\Phi$ は同相写像なので $\Phi(E)$ はボレル集合で、Step 1 から
+$$
+\lambda(\Phi(E))\le\lambda(\Phi(W))\le\nu(W)=\nu(E)+\nu(W\setminus E)\le\nu(E)+M\lambda(W\setminus E)<\nu(E)+\varepsilon.
+$$
+一般のボレル集合 $E\subset U$ には、$G_{m}\defeq\{x\in U:|x|<m,\ \operatorname{dist}(x,\mathbb{R}^{n}\setminus U)>\frac1m\}$（$U=\mathbb{R}^{n}$ なら距離の条件を外す）が上の条件を満たし $G_{m}\uparrow U$ なので、$E\cap G_{m}$ に使って下からの連続性で極限をとる。よって $\lambda(\Phi(E))\le\nu(E)$。
+
+**Step 3（非負ボレル関数、不等式）.** Step 2 は $f=\mathbf{1}_{\Phi(E)}$ について $\int_{V}f\le\int_{U}(f\circ\Phi)J_{\Phi}$ を意味する。非負の単関数は線形性、非負ボレル関数は単関数近似と \ref{meas:monotone-convergence}（$s_{n}\circ\Phi\uparrow f\circ\Phi$）で同じ不等式が成り立つ。
+
+**Step 4（逆向き）.** $\Phi^{-1}\colon V\to U$ に Step 3 を使い、関数 $g\defeq(f\circ\Phi)J_{\Phi}$ をとると
+$$
+\int_{U}(f\circ\Phi)J_{\Phi}\le\int_{V}(f\circ\Phi\circ\Phi^{-1})(J_{\Phi}\circ\Phi^{-1})J_{\Phi^{-1}}=\int_{V}f.
+$$
+最後は、連鎖律 $D\Phi(\Phi^{-1}(y))D\Phi^{-1}(y)=I$（\ref{calc:chain-rule}）と行列式の乗法性から $(J_{\Phi}\circ\Phi^{-1})J_{\Phi^{-1}}=1$。よって非負ボレル関数で 2 の等式、$f=\mathbf{1}_{\Phi(E)}$ で 1 の等式（ボレル集合）。
+
+**Step 5（ルベーグ可測へ）.** $Z\subset U$ がボレル零集合なら $\lambda(\Phi(Z))=\int_{Z}J_{\Phi}=0$。ルベーグ可測な $E=B\cup N$（$B$ ボレル、$N\subset Z$ ボレル零集合）について $\Phi(E)=\Phi(B)\cup\Phi(N)$、$\Phi(N)\subset\Phi(Z)$ は零集合なので $\Phi(E)$ はルベーグ可測で $\lambda(\Phi(E))=\lambda(\Phi(B))=\int_{B}J_{\Phi}=\int_{E}J_{\Phi}$。ルベーグ可測な $f\ge0$ は、\ref{meas:borel-version} のボレル版 $g$ とボレル零集合の外で一致し、$f\circ\Phi$ と $g\circ\Phi$ は $\Phi^{-1}$（零集合を零集合に写す）による零集合の外で一致するので、2 は $g$ の場合に帰着する。
+
+**Step 6（3）.** $|f|$ に 2 を使えば可積分性は同値で、$f^{\pm}$ に分けて引き算する（複素数値なら実部・虚部）。
+
+::: hypcheck
+- **$C^{1}$ 級**（微分の連続性）は \ref{meas:cube-image-measure} の Step 2 の一様連続性に使った。
+- **単射**（微分同相）は Step 1 で $\Phi(W)$ の測度を立方体ごとの和で上から押さえるのに、Step 4 で $\Phi^{-1}$ を使うのに使った。単射でない写像では、像は重なりの分だけ小さくなり、等式は「重複度つき」になる（面積公式。知られている）。
+- 微分が退化する点（$J_{\Phi}=0$）は $U$ に含めていない。零集合の上で退化してもよい場合は、その零集合を除いた開集合で使える（極座標の原点など）。
+:::
+:::
+
+::: example 極座標 {#meas:polar-coordinates keywords="polar coordinates in the plane: int_{R^2} f = int_0^infinity int_0^{2pi} f(r cos theta, r sin theta) r d theta dr for nonnegative measurable f" index="極座標（ルベーグ積分）|きょくざひょうるべーぐせきぶん"}
+$\mathbb{R}^{2}$ 上のルベーグ可測な $f\ge0$ について
+$$
+\int_{\mathbb{R}^{2}}f\,d\lambda_{2}=\int_{(0,\infty)\times(0,2\pi)}f(r\cos\theta,r\sin\theta)\,r\,d\lambda_{2}(r,\theta).
+$$
+:::
+
+::: proof
+$\Phi(r,\theta)\defeq(r\cos\theta,r\sin\theta)$ は $U\defeq(0,\infty)\times(0,2\pi)$ から $V\defeq\mathbb{R}^{2}\setminus\{(x,0):x\ge0\}$ への $C^{1}$ 微分同相写像（全単射で、逆写像は偏角の連続な選び方で $C^{1}$、\ref{calc:polar-form}）で、$\det D\Phi=\cos\theta\cdot r\cos\theta-(-r\sin\theta)\sin\theta=r$。除いた半直線は零集合（\ref{meas:lebesgue-linear} の Step 5 と同じく、超平面に含まれる）なので $\int_{\mathbb{R}^{2}}f=\int_{V}f$ で、\ref{meas:change-of-variables.2}。
+:::
+
+::: supplement
+**リーマン積分版との比較.** リーマン積分版（\ref{calc:change-of-variables}）では、積分領域のジョルダン可測性や被積分関数の連続性を仮定し、境界での退化を別に扱う必要があった（\ref{calc:change-of-variables-boundary}）。ルベーグ積分版では、非負可測関数について無条件で、零集合はすべて無視できる。
+
+**高い視点：押し出し測度.** 等式 1 は、測度 $J_{\Phi}\,d\lambda$ の $\Phi$ による押し出し $\Phi_{*}(J_{\Phi}\lambda)(B)\defeq(J_{\Phi}\lambda)(\Phi^{-1}(B))$ がルベーグ測度に等しい、と読める。言い換えると、$\Phi$ による押し出し $\Phi_{*}\lambda$ はルベーグ測度に関して絶対連続で、ラドン–ニコディム導関数は $\frac{d\Phi_{*}\lambda}{d\lambda}=J_{\Phi^{-1}}$ である。多様体の上では、$|\det D\Phi|$ は座標変換による体積要素の変換則で、向きを考えれば微分形式の引き戻しの公式 $\Phi^{*}(dy_{1}\wedge\cdots\wedge dy_{n})=\det D\Phi\,dx_{1}\wedge\cdots\wedge dx_{n}$ になる。比喩で言えば、$J_{\Phi}(x)$ は「$x$ の近くの小さな立方体が、写像でどれだけ膨らむか」の倍率で、変数変換公式は「膨らんだ先で測った量は、膨らむ前に倍率をかけて測った量に等しい」と言っている。
+:::
+
+## 問題 {#meas:sec-cv-problems}
+
+::: problem {#meas:prob-cv-gaussian-plane}
+極座標を使って $\int_{\mathbb{R}^{2}}e^{-(x^{2}+y^{2})}\,d\lambda_{2}=\pi$ を示し、\ref{meas:tonelli} と合わせて $\int_{\mathbb{R}}e^{-x^{2}}dx=\sqrt{\pi}$ を導け。
+:::
+
+::: solution
+\ref{meas:polar-coordinates} とトネリの定理から $\int_{\mathbb{R}^{2}}e^{-(x^{2}+y^{2})}=\int_{0}^{\infty}\Bigl(\int_{0}^{2\pi}d\theta\Bigr)e^{-r^{2}}r\,dr=2\pi\cdot\frac12=\pi$（$\int_{0}^{\infty}re^{-r^{2}}dr=[-\frac12e^{-r^{2}}]_{0}^{\infty}$ は広義積分、\ref{meas:improper-lebesgue.1}）。一方トネリの定理から左辺は $\bigl(\int_{\mathbb{R}}e^{-x^{2}}dx\bigr)^{2}$。正の平方根をとる。
+:::
+
+::: problem {#meas:prob-cv-ball-volume}
+$\mathbb{R}^{2}$ の単位円板の面積が $\pi$、$\mathbb{R}^{3}$ の単位球の体積が $\frac43\pi$ であることを、極座標とフビニの定理（カヴァリエリの原理）で示せ。
+:::
+
+::: solution
+**円板.** \ref{meas:polar-coordinates} を $f=\mathbf{1}_{\{x^{2}+y^{2}<1\}}$ に使うと $\int_{0}^{1}\int_{0}^{2\pi}r\,d\theta\,dr=\pi$。
+
+**球.** \ref{meas:lebesgue-product.2}（カヴァリエリ）から、$B\defeq\{|x|<1\}\subset\mathbb{R}^{3}$ について $\lambda_{3}(B)=\int_{-1}^{1}\lambda_{2}(B_{z})\,dz$、切り口 $B_{z}$ は半径 $\sqrt{1-z^{2}}$ の円板で、\ref{meas:lebesgue-linear}（$T=\sqrt{1-z^{2}}I$）から面積 $\pi(1-z^{2})$。$\int_{-1}^{1}\pi(1-z^{2})dz=\frac43\pi$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
