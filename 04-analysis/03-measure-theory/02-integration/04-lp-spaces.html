@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lᵖ 空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/02-integration/04-lp-spaces.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# Lᵖ 空間 {#meas:page-lp-spaces keywords="L^p spaces, essential supremum, L^infinity, Young's inequality, Hoelder's inequality, Minkowski's inequality, L^p is a normed space modulo a.e. equality, Riesz-Fischer theorem: completeness of L^p, a.e. convergent subsequence, density of simple functions, density of compactly supported continuous functions in L^p(R^n), continuity of translation in L^p, inclusions between L^p spaces on finite measure spaces and l^p spaces"}
+
+$p$ 乗が可積分な関数の全体 $L^{p}$ は、ほとんど至る所等しい関数を同一視すると**完備なノルム空間**（バナッハ空間）になる。このページでは、ノルムの三角不等式（**ミンコフスキーの不等式**）をその双対の形の**ヘルダーの不等式**から導き、完備性（**リース–フィッシャーの定理**）を、$L^{p}$ 収束する列からほとんど至る所収束する部分列を取り出すことで示す。さらに、$\mathbb{R}^{n}$ 上ではコンパクト台の連続関数が $L^{p}$（$p<\infty$）で稠密であること、その帰結として平行移動が $L^{p}$ ノルムについて連続であることを示す。
+
+## 記法と定義の確認 {#meas:sec-lp-notation}
+
+::: notation
+- $(X,\mathcal{M},\mu)$ を測度空間とする。可積分関数・積分の線形性・優収束定理・単調収束定理・マルコフの不等式は \ref{meas:integrable}, \ref{meas:integral-linearity}, \ref{meas:dominated-convergence}, \ref{meas:monotone-convergence}, \ref{meas:markov}。単関数近似は \ref{meas:simple-approximation}。ルベーグ測度の正則性と平行移動不変性は \ref{meas:lebesgue-regularity}, \ref{meas:translation-invariant-unique}。
+- 凸関数と 2 階微分による判定は \ref{calc:convex}, \ref{calc:convex-properties}。距離空間のコーシー列は \ref{top:cauchy-basic}、距離による連続関数の構成は \ref{top:urysohn-metric}。
+- $1<p<\infty$ について $q\defeq\frac{p}{p-1}$（$\frac1p+\frac1q=1$）を $p$ の**共役指数**という。$p=1$ には $q=\infty$、$p=\infty$ には $q=1$ を対応させる。
+- 関数は実数値または複素数値とする。
+- **選択公理**：使わない。
+:::
+
+## 定義とヘルダー・ミンコフスキー {#meas:sec-lp-inequalities}
+
+::: definition Lᵖ 空間 {#meas:lp-space keywords="L^p norm (int |f|^p)^{1/p}; essential supremum; L^infinity; L^p as equivalence classes modulo a.e. equality" index="Lp 空間|えるぴーくうかん, 本質的上限|ほんしつてきじょうげん, Lp ノルム|えるぴーのるむ"}
+1. $1\le p<\infty$ について、可測関数 $f$ の $\|f\|_{p}\defeq\bigl(\int|f|^{p}\,d\mu\bigr)^{1/p}\in[0,\infty]$ とおき、$\|f\|_{p}<\infty$ となる $f$ の全体を $\mathcal{L}^{p}(\mu)$ とする。
+2. $\|f\|_{\infty}\defeq\inf\{M\ge0:|f|\le M\text{（a.e.）}\}$（**本質的上限**、$\inf\varnothing=\infty$）とし、$\|f\|_{\infty}<\infty$ となる $f$ の全体を $\mathcal{L}^{\infty}(\mu)$ とする。
+3. $\mathcal{L}^{p}$ をほとんど至る所等しいという同値関係で割ったものを $L^{p}(\mu)$ と書く。$\|\cdot\|_{p}$ は代表元によらない（\ref{meas:markov.4}）。
+:::
+
+::: lemma 本質的上限の性質 {#meas:ess-sup keywords="|f| <= ||f||_infinity almost everywhere; ||f||_infinity = 0 iff f = 0 a.e." index="本質的上限の性質|ほんしつてきじょうげんのせいしつ"}
+$|f|\le\|f\|_{\infty}$（a.e.）。とくに $\|f\|_{\infty}=0\iff f=0$（a.e.）。
+:::
+
+::: proof
+$\|f\|_{\infty}=\infty$ なら自明。そうでなければ各 $k$ で $\{|f|>\|f\|_{\infty}+\frac1k\}$ は零集合で、その可算和 $\{|f|>\|f\|_{\infty}\}$ も零集合。
+:::
+
+::: lemma ヤングの不等式 {#meas:young-inequality keywords="Young's inequality ab <= a^p/p + b^q/q for a, b >= 0 and conjugate exponents, from convexity of exp" index="ヤングの不等式|やんぐのふとうしき"}
+$1<p<\infty$, $q$ を共役指数、$a,b\ge0$ とすると $ab\le\frac{a^{p}}{p}+\frac{b^{q}}{q}$。
+:::
+
+::: proof
+$a=0$ または $b=0$ なら自明。$a,b>0$ なら $s\defeq p\log a$, $t\defeq q\log b$ とおく。$\exp$ は $\exp''>0$ なので凸（\ref{calc:convex-properties.3}）で、$\frac1p+\frac1q=1$ から $\exp(\frac sp+\frac tq)\le\frac1pe^{s}+\frac1qe^{t}$。左辺は $ab$、右辺は $\frac{a^{p}}{p}+\frac{b^{q}}{q}$。
+:::
+
+::: theorem ヘルダーの不等式 {#meas:holder keywords="Hoelder's inequality ||fg||_1 <= ||f||_p ||g||_q for conjugate exponents 1 <= p <= infinity" index="ヘルダーの不等式|へるだーのふとうしき"}
+$1\le p\le\infty$, $q$ を共役指数とすると、可測関数 $f,g$ について $\|fg\|_{1}\le\|f\|_{p}\|g\|_{q}$（右辺は $[0,\infty]$ の積で $0\cdot\infty=0$）。
+:::
+
+::: proof
+**Step 1（$p=1$, $q=\infty$）.** \ref{meas:ess-sup} から $|fg|\le|f|\,\|g\|_{\infty}$（a.e.）で積分する（$p=\infty$ も対称）。
+
+**Step 2（$1<p<\infty$、退化した場合）.** $\|f\|_{p}=0$ なら $f=0$（a.e.、\ref{meas:markov.2}）で $fg=0$（a.e.）、両辺 $0$。$\|g\|_{q}=0$ も同様。そうでなく一方が $\infty$ なら右辺は $\infty$。
+
+**Step 3（正規化）.** $0<\|f\|_{p},\|g\|_{q}<\infty$ とし、$F\defeq|f|/\|f\|_{p}$, $G\defeq|g|/\|g\|_{q}$ とおくと $\int F^{p}=\int G^{q}=1$。\ref{meas:young-inequality} から $FG\le\frac{F^{p}}{p}+\frac{G^{q}}{q}$ で、積分して $\int FG\le\frac1p+\frac1q=1$、すなわち $\|fg\|_{1}\le\|f\|_{p}\|g\|_{q}$。
+:::
+
+::: theorem ミンコフスキーの不等式 {#meas:minkowski keywords="Minkowski's inequality ||f + g||_p <= ||f||_p + ||g||_p; L^p is a normed vector space" index="ミンコフスキーの不等式|みんこふすきーのふとうしき"}
+$1\le p\le\infty$ について $\|f+g\|_{p}\le\|f\|_{p}+\|g\|_{p}$。とくに $L^{p}(\mu)$ はノルム空間である。
+:::
+
+::: proof
+**Step 1（$p=1,\infty$）.** $|f+g|\le|f|+|g|$ を積分する（$p=\infty$ では \ref{meas:ess-sup} から a.e. に $|f+g|\le\|f\|_{\infty}+\|g\|_{\infty}$）。
+
+**Step 2（$1<p<\infty$、有限性）.** 右辺が $\infty$ なら自明なので $f,g\in\mathcal{L}^{p}$ とする。$|f+g|^{p}\le(2\max(|f|,|g|))^{p}\le2^{p}(|f|^{p}+|g|^{p})$ なので $f+g\in\mathcal{L}^{p}$。
+
+**Step 3（ヘルダーへの帰着）.** $(p-1)q=p$ なので $\||f+g|^{p-1}\|_{q}=\bigl(\int|f+g|^{p}\bigr)^{1/q}=\|f+g\|_{p}^{p-1}$。\ref{meas:holder} から
+$$
+\|f+g\|_{p}^{p}\le\int|f||f+g|^{p-1}+\int|g||f+g|^{p-1}\le(\|f\|_{p}+\|g\|_{p})\|f+g\|_{p}^{p-1}.
+$$
+$\|f+g\|_{p}=0$ なら自明、そうでなければ有限な $\|f+g\|_{p}^{p-1}$ で割る。
+
+**Step 4（ノルム空間）.** $\mathcal{L}^{p}$ は和（Step 2）とスカラー倍で閉じ、$\|cf\|_{p}=|c|\|f\|_{p}$、三角不等式が成り立つ。$\|f\|_{p}=0\iff f=0$（a.e.）なので（$p<\infty$ は \ref{meas:markov.2}、$p=\infty$ は \ref{meas:ess-sup}）、$L^{p}$ の上でノルム。
+:::
+
+## 完備性 {#meas:sec-lp-completeness}
+
+::: theorem リース–フィッシャーの定理 {#meas:riesz-fischer keywords="Riesz-Fischer: L^p is complete for 1 <= p <= infinity; every L^p convergent sequence has an a.e. convergent subsequence (p < infinity)" index="リース–フィッシャーの定理|りーすふぃっしゃーのていり, Lp の完備性|えるぴーのかんびせい"}
+$1\le p\le\infty$ について $L^{p}(\mu)$ は完備（バナッハ空間）である。さらに $p<\infty$ なら、$L^{p}$ で $f$ に収束する列は、ほとんど至る所 $f$ に収束する部分列をもつ。
+:::
+
+::: proof
+**Step 1（$p<\infty$、速い部分列）.** $(f_{n})$ をコーシー列とし、$n_{1}<n_{2}<\cdots$ を $\|f_{n_{k+1}}-f_{n_{k}}\|_{p}<2^{-k}$ となるようにとる（各 $k$ で条件を満たす最小の番号）。
+$$
+G_{N}\defeq|f_{n_{1}}|+\sum_{k<N}|f_{n_{k+1}}-f_{n_{k}}|,\qquad G\defeq\lim_{N}G_{N}
+$$
+とおくと、\ref{meas:minkowski} から $\|G_{N}\|_{p}\le\|f_{n_{1}}\|_{p}+1$、\ref{meas:monotone-convergence}（$G_{N}^{p}\uparrow G^{p}$）から $\|G\|_{p}\le\|f_{n_{1}}\|_{p}+1<\infty$。よって $G<\infty$（a.e.）。
+
+**Step 2（極限）.** $G(x)<\infty$ の点では、級数 $f_{n_{1}}(x)+\sum_{k}(f_{n_{k+1}}(x)-f_{n_{k}}(x))$ は絶対収束し、その部分和は $f_{n_{N}}(x)$ なので $f(x)\defeq\lim_{N}f_{n_{N}}(x)$ が存在する。それ以外の点では $f\defeq0$。$f$ は可測（\ref{meas:measurable-limits}）で、$|f_{n_{N}}|\le G$, $|f|\le G$（a.e.）なので $f\in\mathcal{L}^{p}$。
+
+**Step 3（$L^{p}$ 収束）.** $|f_{n_{N}}-f|^{p}\le(2G)^{p}$ は可積分で、a.e. に $0$ に収束するので、\ref{meas:dominated-convergence} から $\|f_{n_{N}}-f\|_{p}\to0$。コーシー列が収束する部分列をもつので、列全体が $f$ に収束する（\ref{top:cauchy-basic.3}）。
+
+**Step 4（部分列の主張）.** $f_{n}\to f$ in $L^{p}$ ならコーシー列で、Step 1〜3 の部分列 $f_{n_{k}}$ は a.e. にある $\tilde f$ に収束し、$L^{p}$ で $\tilde f$ に収束する。極限の一意性から $\tilde f=f$（a.e.）。
+
+**Step 5（$p=\infty$）.** $N\defeq\bigcup_{m,n}\{|f_{n}-f_{m}|>\|f_{n}-f_{m}\|_{\infty}\}$ は零集合（\ref{meas:ess-sup}）。$N$ の外で $(f_{n})$ は一様コーシー列なので一様収束し、極限 $f$（$N$ 上では $0$）は可測で有界、$\|f_{n}-f\|_{\infty}\le\sup_{N^{c}}|f_{n}-f|\to0$。
+
+::: hypcheck
+- $L^{p}$ 収束から**列全体**の a.e. 収束は出ない：$[0,1]$ 上で、長さ $2^{-k}$ の区間を左から右へ順に動かす特性関数の列（「タイプライター列」）は $L^{p}$ で $0$ に収束するが、どの点でも収束しない。
+- 選択公理は使っていない（部分列の番号は最小元として選んだ）。
+:::
+:::
+
+## 稠密性 {#meas:sec-lp-density}
+
+::: proposition 単関数の稠密性 {#meas:lp-simple-dense keywords="simple functions whose support has finite measure are dense in L^p for p < infinity" index="単関数の稠密性|たんかんすうのちゅうみつせい"}
+$1\le p<\infty$ とする。$\mu(\{s\neq0\})<\infty$ となる単関数 $s$ の全体は $L^{p}(\mu)$ で稠密。
+:::
+
+::: proof
+$f=f^{+}-f^{-}$（複素数値なら実部と虚部にも分ける）に分けて、$f\ge0$, $f\in\mathcal{L}^{p}$ としてよい。\ref{meas:simple-approximation} の単関数 $0\le s_{n}\uparrow f$ について、$s_{n}$ の正の値の最小値を $c>0$ とすると $\{s_{n}\ne0\}\subset\{f\ge c\}$ で、\ref{meas:markov.1} を $f^{p}$ に使って $\mu(\{f\ge c\})\le c^{-p}\|f\|_{p}^{p}<\infty$。$|f-s_{n}|^{p}\le f^{p}$（可積分）と $s_{n}\to f$ から、\ref{meas:dominated-convergence} で $\|f-s_{n}\|_{p}\to0$。
+:::
+
+::: theorem コンパクト台の連続関数の稠密性 {#meas:cc-dense keywords="continuous functions with compact support are dense in L^p(R^n, Lebesgue) for 1 <= p < infinity" index="コンパクト台の連続関数|こんぱくとだいのれんぞくかんすう, 稠密性（Lp）|ちゅうみつせいえるぴー"}
+$1\le p<\infty$ について、$\mathbb{R}^{n}$ 上のコンパクト台の連続関数の全体 $C_{c}(\mathbb{R}^{n})$ は $L^{p}(\lambda)$ で稠密。
+:::
+
+::: proof
+\ref{meas:lp-simple-dense} と三角不等式から、$\lambda(A)<\infty$ となる $A\in\mathcal{L}_{n}$ について $\mathbf{1}_{A}$ を近似すればよい。$\varepsilon>0$ について、正則性（\ref{meas:lebesgue-regularity}）からコンパクト集合 $K\subset A$ と開集合 $U\supset A$ で $\lambda(U\setminus K)<\varepsilon$ となるものをとる。$U$ を $U\cap\{x:|x|<r\}$（$K\subset\{|x|<r\}$）に替えて、$U$ は有界としてよい。$K\ne\varnothing$, $U^{c}\neq\varnothing$ のとき
+$$
+\varphi(x)\defeq\frac{\operatorname{dist}(x,U^{c})}{\operatorname{dist}(x,U^{c})+\operatorname{dist}(x,K)}
+$$
+は連続で（\ref{top:urysohn-metric}。分母は、$K$ と $U^{c}$ が交わらない閉集合なので $0$ にならない）、$0\le\varphi\le1$、$K$ 上で $1$、$U$ の外で $0$。台は $\overline{U}$（コンパクト）に含まれる。$|\varphi-\mathbf{1}_{A}|\le\mathbf{1}_{U\setminus K}$ なので $\|\varphi-\mathbf{1}_{A}\|_{p}^{p}\le\lambda(U\setminus K)<\varepsilon$。$K=\varnothing$ なら $\varphi=0$ で同じ評価。
+:::
+
+::: corollary 平行移動の連続性 {#meas:translation-continuity keywords="for f in L^p(R^n), 1 <= p < infinity, ||f(. + h) - f||_p -> 0 as h -> 0; integrals are translation invariant" index="平行移動の連続性|へいこういどうのれんぞくせい"}
+1. 非負可測または可積分な $f$ と $h\in\mathbb{R}^{n}$ について $\int f(x+h)\,dx=\int f(x)\,dx$。とくに $\|f(\cdot+h)\|_{p}=\|f\|_{p}$。
+2. $f\in L^{p}(\mathbb{R}^{n})$, $1\le p<\infty$ なら $\lim_{h\to0}\|f(\cdot+h)-f\|_{p}=0$。
+:::
+
+::: proof
+**1.** $f=\mathbf{1}_{A}$ なら $f(\cdot+h)=\mathbf{1}_{A-h}$ で \ref{meas:translation-invariant-unique.1}。単関数は線形性、非負可測関数は単関数近似と \ref{meas:monotone-convergence}、可積分関数は $f^{\pm}$ に分ける。
+
+**2.** $\varepsilon>0$ について \ref{meas:cc-dense} から $g\in C_{c}$ で $\|f-g\|_{p}<\varepsilon$ となるものをとる。$g$ の台を含む閉球 $B$ をとり、$|h|\le1$ なら $g(\cdot+h)-g$ の台は $B$ の $1$ 近傍 $B_{1}$（コンパクト）に含まれる。$g$ は一様連続なので $\sup_{x}|g(x+h)-g(x)|\to0$ で、$\|g(\cdot+h)-g\|_{p}\le\sup|g(\cdot+h)-g|\cdot\lambda(B_{1})^{1/p}\to0$。1 と三角不等式から
+$$
+\|f(\cdot+h)-f\|_{p}\le\|f(\cdot+h)-g(\cdot+h)\|_{p}+\|g(\cdot+h)-g\|_{p}+\|g-f\|_{p}<2\varepsilon+\|g(\cdot+h)-g\|_{p}.
+$$
+:::
+
+## 包含関係 {#meas:sec-lp-inclusions}
+
+::: proposition Lᵖ の包含関係 {#meas:lp-inclusions keywords="on a finite measure space L^q is contained in L^p for p < q with ||f||_p <= mu(X)^{1/p - 1/q} ||f||_q; for counting measure l^p is contained in l^q for p < q; no inclusion on R" index="Lp の包含関係|えるぴーのほうがんかんけい"}
+$1\le p<q\le\infty$ とする。
+1. $\mu(X)<\infty$ なら $\|f\|_{p}\le\mu(X)^{\frac1p-\frac1q}\|f\|_{q}$。とくに $L^{q}\subset L^{p}$。
+2. 数え上げ測度（$\ell^{p}$）では $\|a\|_{q}\le\|a\|_{p}$。とくに $\ell^{p}\subset\ell^{q}$。
+3. $\mathbb{R}$ 上のルベーグ測度では、$L^{p}$ と $L^{q}$ の間に包含関係はない。
+:::
+
+::: proof
+**1.** $q=\infty$ なら $|f|^{p}\le\|f\|_{\infty}^{p}$（a.e.）を積分。$q<\infty$ なら $r\defeq q/p>1$ とその共役指数 $r'$ について、\ref{meas:holder} を $|f|^{p}\cdot1$ に使い $\int|f|^{p}\le\||f|^{p}\|_{r}\|1\|_{r'}=\|f\|_{q}^{p}\mu(X)^{1-p/q}$。$1/p$ 乗する。
+
+**2.** $\|a\|_{p}<\infty$ とする。各 $n$ で $|a_{n}|\le\|a\|_{p}$。$q=\infty$ ならこれが結論。$q<\infty$ なら $|a_{n}|^{q}=|a_{n}|^{p}|a_{n}|^{q-p}\le|a_{n}|^{p}\|a\|_{p}^{q-p}$ を和にして $\|a\|_{q}^{q}\le\|a\|_{p}^{q}$。
+
+**3.** たとえば $p=1$, $q=2$ では、$x^{-1/2}\mathbf{1}_{(0,1)}\in L^{1}\setminus L^{2}$（$\int_{0}^{1}x^{-1/2}=2$, $\int_{0}^{1}x^{-1}=\infty$）、$x^{-1}\mathbf{1}_{(1,\infty)}\in L^{2}\setminus L^{1}$（\ref{meas:improper-lebesgue.1} で広義積分として計算）。一般の $p<q$ でも、$x^{-a}\mathbf{1}_{(0,1)}$ と $x^{-b}\mathbf{1}_{(1,\infty)}$ の指数を $1/q\le a<1/p$（$q=\infty$ では $0<a<1/p$）、$1/q<b\le1/p$ にとれば同様（$x^{-a}\mathbf{1}_{(0,1)}\in L^{r}\iff ar<1$、$x^{-b}\mathbf{1}_{(1,\infty)}\in L^{r}\iff br>1$）。
+:::
+
+::: supplement
+**高い視点：Lᵖ は双対で結ばれた一族.** ヘルダーの不等式は、$g\in L^{q}$ が $f\mapsto\int fg$ によって $L^{p}$ 上の有界線形汎関数を与えることを意味し、σ 有限なら $1\le p<\infty$ で $L^{p}$ の双対空間は $L^{q}$ に等しいことが知られている（ラドン–ニコディムの定理を使う。関数解析で扱う予定）。$p=2$ では $L^{2}$ は内積 $\langle f,g\rangle=\int f\bar g$ をもつヒルベルト空間で、自分自身と双対になる。完備性（リース–フィッシャー）は、リーマン積分可能な関数の空間が $L^{p}$ ノルムで完備でないことと対照的で、ルベーグ積分の最大の利点の一つである。比喩で言えば、$p$ は「大きな値をどれだけ重く見るか」のつまみで、$p\to\infty$ では最大値だけを見る $L^{\infty}$ に、$p=1$ では総量だけを見る $L^{1}$ になる。有限測度空間では大きな値を重く見るほど条件が厳しく（$L^{q}\subset L^{p}$）、数え上げ測度では小さな値が無数に並ぶことの方が問題になるので向きが逆になる。
+:::
+
+## 問題 {#meas:sec-lp-problems}
+
+::: problem {#meas:prob-lp-limit-infinity}
+$f\in L^{1}(\mu)\cap L^{\infty}(\mu)$ なら、すべての $1\le p<\infty$ で $f\in L^{p}$ で、$\lim_{p\to\infty}\|f\|_{p}=\|f\|_{\infty}$ であることを示せ。
+:::
+
+::: solution
+**上からの評価.** $|f|^{p}\le\|f\|_{\infty}^{p-1}|f|$（a.e.）を積分して $\|f\|_{p}\le\|f\|_{\infty}^{1-1/p}\|f\|_{1}^{1/p}$。$\|f\|_{1}>0$ なら右辺は $\|f\|_{\infty}$ に収束し（$\|f\|_{1}=0$ なら $f=0$ a.e. で両辺 $0$）、$\limsup\|f\|_{p}\le\|f\|_{\infty}$。
+
+**下からの評価.** $0<M<\|f\|_{\infty}$ について $A\defeq\{|f|>M\}$ は零集合でなく（$\|f\|_{\infty}$ の定義）、$\mu(A)\le\|f\|_{1}/M<\infty$（\ref{meas:markov.1}）。$\|f\|_{p}\ge M\mu(A)^{1/p}\to M$ なので $\liminf\|f\|_{p}\ge M$。$M\uparrow\|f\|_{\infty}$。
+:::
+
+::: problem {#meas:prob-lp-typewriter}
+$[0,1]$ 上で、$n=2^{k}+j$（$k\ge0$, $0\le j<2^{k}$）について $f_{n}\defeq\mathbf{1}_{[j2^{-k},(j+1)2^{-k}]}$ とおく。$\|f_{n}\|_{p}\to0$（$1\le p<\infty$）だが、どの $x\in[0,1]$ でも $f_{n}(x)$ は収束しないことを示し、$L^{p}$ で $0$ に収束する部分列でほとんど至る所収束するものを具体的に挙げよ。
+:::
+
+::: solution
+$\|f_{n}\|_{p}^{p}=2^{-k}\to0$（$n\to\infty$ で $k\to\infty$）。各 $x$ と各 $k$ について、$x\in[j2^{-k},(j+1)2^{-k}]$ となる $j$ があるので $f_{2^{k}+j}(x)=1$、また $x$ を含まない区間もある（$k\ge1$ で区間の長さは $\frac12$ 以下）ので $f_{n}(x)=0$ となる $n$ も無限にある。よって収束しない。部分列 $f_{2^{k}}=\mathbf{1}_{[0,2^{-k}]}$ は、$x>0$ で $k$ が大きければ $0$ なので、$x\ne0$ で（ほとんど至る所）$0$ に収束する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
