@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>強マルコフ性と反射原理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/03-processes/04-strong-markov.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 強マルコフ性と反射原理 {#prb:page-strong-markov-brownian keywords="stopping times for Brownian motion, sigma-algebra F_tau, dyadic approximation of stopping times, strong Markov property of Brownian motion, hitting times tau_a, reflection principle P(max_{s<=t} B_s >= a) = 2 P(B_t >= a), joint law of the maximum and B_t, the running maximum has the law of |B_t|, distribution and density of hitting times, tau_a finite a.s. with infinite mean"}
+
+ブラウン運動の単純マルコフ性（\ref{prb:brownian-invariance.2}）は、決まった時刻 $s$ から先の増分が、それまでの過去と独立なブラウン運動になることを述べる。このページでは、$s$ を**停止時刻** $\tau$——例えば「初めて高さ $a$ に達する時刻」——に置き換えても同じことが成り立つこと（**強マルコフ性**）を示す。方法は、$\tau$ を 2 進有理数の値をとる停止時刻で上から近似して単純マルコフ性に帰着させ、道の連続性で極限をとるというものである。応用として**反射原理**を証明する：高さ $a>0$ に時刻 $t$ までに達する確率は $2P(B_{t}\ge a)$ に等しい。到達したあとの道を $a$ で折り返しても再びブラウン運動になる、という対称性がその背後にある。
+
+## 記法と定義の確認 {#prb:sec-sm-notation}
+
+::: notation
+- $(B_{t})_{t\ge0}$ はブラウン運動（\ref{prb:brownian-motion}）、$\mathcal{F}_{t}\defeq\sigma(B_{r}:r\le t)$。
+- $[0,\infty]$ に値をとる $\tau$ が（$(\mathcal{F}_{t})$ についての）**停止時刻**であるとは、すべての $t\ge0$ で $\{\tau\le t\}\in\mathcal{F}_{t}$ となることをいう。$\mathcal{F}_{\tau}\defeq\{A\in\mathcal{F}:\text{すべての }t\text{ で }A\cap\{\tau\le t\}\in\mathcal{F}_{t}\}$（離散時間の \ref{prb:stopping-time} と同じ形）。
+- $M_{t}\defeq\max_{0\le s\le t}B_{s}$（道は連続なので最大値は存在する）。$a>0$ について $\tau_{a}\defeq\inf\{s\ge0:B_{s}=a\}$（$\inf\emptyset\defeq\infty$）。
+- 標準正規分布の分布関数を $\Phi$ とし、$\bar\Phi\defeq1-\Phi$。$P(B_{t}\ge a)=\bar\Phi(a/\sqrt t)$。
+- 測度が有界連続関数の積分で決まることは \ref{prb:multivariate-uniqueness.1}（有限測度でも同じ証明が通る）。
+- **選択公理**：使わない。
+:::
+
+## 停止時刻 {#prb:sec-sm-stopping}
+
+::: lemma ブラウン運動の停止時刻 {#prb:bm-stopping-times keywords="hitting times tau_a of levels are stopping times; {tau < t} is in F_t; the dyadic approximations tau_n = (floor(2^n tau) + 1)/2^n are stopping times decreasing to tau with F_tau subset F_{tau_n}" index="ブラウン運動の停止時刻|ぶらうんうんどうのていしじこく, 到達時刻（ブラウン運動）|とうたつじこくぶらうんうんどう"}
+1. $a>0$ について $\tau_{a}$ は停止時刻で、$\{\tau_{a}\le t\}=\{M_{t}\ge a\}$。
+2. 停止時刻 $\tau$ について $\{\tau<t\}\in\mathcal{F}_{t}$、$A\in\mathcal{F}_{\tau}$ なら $A\cap\{\tau<t\}\in\mathcal{F}_{t}$。$\tau$ は $\mathcal{F}_{\tau}$ 可測。
+3. $\tau_{n}\defeq2^{-n}(\lfloor2^{n}\tau\rfloor+1)$（$\tau=\infty$ なら $\infty$）は $2^{-n}\mathbb{Z}_{\ge1}\cup\{\infty\}$ に値をとる停止時刻で、$\tau<\tau_{n}\le\tau+2^{-n}$、$\tau_{n}\downarrow\tau$、$\mathcal{F}_{\tau}\subset\mathcal{F}_{\tau_{n}}$。
+:::
+
+::: proof
+**1.** 道は連続で $B_{0}=0<a$ なので、中間値の定理から $\tau_{a}\le t\iff M_{t}\ge a$（$\tau_{a}$ では $B_{\tau_{a}}=a$：下限に収束する列 $s_{k}\downarrow\tau_{a}$ で $B_{s_{k}}=a$、連続性）。$M_{t}=\sup\{B_{q}:q\in(\mathbb{Q}\cap[0,t])\cup\{t\}\}$（連続性）なので $M_{t}$ は $\mathcal{F}_{t}$ 可測。
+
+**2.** $\{\tau<t\}=\bigcup_{m}\{\tau\le t-\frac1m\}$ で、各項は $\mathcal{F}_{t-1/m}\subset\mathcal{F}_{t}$ に属する。$A$ との共通部分も同じ。$\{\tau\le s\}\cap\{\tau\le t\}=\{\tau\le s\wedge t\}\in\mathcal{F}_{t}$ なので $\{\tau\le s\}\in\mathcal{F}_{\tau}$。
+
+**3.** $k\ge1$ について $\{\tau_{n}=k2^{-n}\}=\{\tau<k2^{-n}\}\setminus\{\tau<(k-1)2^{-n}\}\in\mathcal{F}_{k2^{-n}}$（2）。よって $\{\tau_{n}\le t\}$ は $k2^{-n}\le t$ となる $k$ についての和で、$\mathcal{F}_{t}$ に属する。不等式は床関数の定義から。$A\in\mathcal{F}_{\tau}$ なら $A\cap\{\tau_{n}=k2^{-n}\}=(A\cap\{\tau<k2^{-n}\})\setminus(A\cap\{\tau<(k-1)2^{-n}\})\in\mathcal{F}_{k2^{-n}}$（2）で、和をとって $A\cap\{\tau_{n}\le t\}\in\mathcal{F}_{t}$。
+:::
+
+## 強マルコフ性 {#prb:sec-sm-strong-markov}
+
+::: theorem ブラウン運動の強マルコフ性 {#prb:bm-strong-markov keywords="strong Markov property of Brownian motion: for a stopping time tau with P(tau < infinity) > 0, conditionally on tau < infinity, W_u = B_{tau+u} - B_tau is a Brownian motion independent of F_tau" index="ブラウン運動の強マルコフ性|ぶらうんうんどうのきょうまるこふせい"}
+$\tau$ を停止時刻とし、$\{\tau<\infty\}$ の上で $W_{u}\defeq B_{\tau+u}-B_{\tau}$（$u\ge0$）とおく。このとき、すべての $A\in\mathcal{F}_{\tau}$、$0\le u_{1}<\dots<u_{k}$、$\mathbb{R}^{k}$ のボレル集合 $C$ について
+$$
+P\bigl(A\cap\{\tau<\infty\}\cap\{(W_{u_{1}},\dots,W_{u_{k}})\in C\}\bigr)=P\bigl(A\cap\{\tau<\infty\}\bigr)\,P\bigl((B_{u_{1}},\dots,B_{u_{k}})\in C\bigr).
+$$
+とくに $P(\tau<\infty)>0$ なら、$P(\,\cdot\mid\tau<\infty)$ の下で $W$ はブラウン運動で、$\mathcal{F}_{\tau}$ と独立。
+:::
+
+::: proof
+$G\defeq A\cap\{\tau<\infty\}$, $u\defeq(u_{1},\dots,u_{k})$ と書き、有界連続な $g\colon\mathbb{R}^{k}\to\mathbb{R}$ について
+$$
+E\bigl[g(W_{u})\mathbf{1}_{G}\bigr]=P(G)\,E\bigl[g(B_{u})\bigr]\tag{$*$}
+$$
+を示せば、両辺を $C\mapsto(\cdot)$ の有限測度とみて \ref{prb:multivariate-uniqueness.1} から結論が出る。
+
+**Step 1（2 進の停止時刻）.** \ref{prb:bm-stopping-times.3} の $\tau_{n}$ について $W^{(n)}_{u}\defeq B_{\tau_{n}+u}-B_{\tau_{n}}$ とおく。$\{\tau_{n}<\infty\}=\{\tau<\infty\}$ で、$G\in\mathcal{F}_{\tau}\subset\mathcal{F}_{\tau_{n}}$。$s_{k}\defeq k2^{-n}$ ごとに分けると、$G\cap\{\tau_{n}=s_{k}\}\in\mathcal{F}_{s_{k}}$ で、その上で $W^{(n)}_{u}=(B_{s_{k}+u_{j}}-B_{s_{k}})_{j}$。\ref{prb:brownian-invariance.2} から、この増分のベクトルは $\mathcal{F}_{s_{k}}$ と独立で $B_{u}$ と同分布なので
+$$
+E\bigl[g(W^{(n)}_{u})\mathbf{1}_{G\cap\{\tau_{n}=s_{k}\}}\bigr]=P(G\cap\{\tau_{n}=s_{k}\})E[g(B_{u})].
+$$
+$k$ について足せば（優収束定理で可算和と期待値を交換）、$(*)$ が $W^{(n)}$ について成り立つ。
+
+**Step 2（極限）.** $\{\tau<\infty\}$ の上で $\tau_{n}\downarrow\tau$ なので、道の連続性から $W^{(n)}_{u_{j}}\to W_{u_{j}}$（各 $\omega$）。$g$ は有界連続なので、優収束定理から Step 1 の左辺は $E[g(W_{u})\mathbf{1}_{G}]$ に収束し、$(*)$ が得られる。
+
+**後半.** $A=\Omega$ とすれば、$P(\cdot\mid\tau<\infty)$ の下で $W$ の有限次元分布はブラウン運動のもので、$W$ は連続な道をもち $W_{0}=0$。独立性は、$\mathcal{F}_{\tau}$ と $W$ の有限個の座標の事象についての積の式が $(*)$ そのもので、後者は $\sigma(W)$ を生成する π 系なので \ref{prb:pi-system-independence.1} から。
+:::
+
+::: lemma 停止時刻と後の道の結合分布 {#prb:bm-strong-markov-joint keywords="for measurable h on [0, infinity) x R, E[h(tau, W_{t - tau}); tau <= t] = int_{[0,t]} E[h(s, B_{t-s})] P(tau in ds), by the strong Markov property and Fubini" index="強マルコフ性と結合分布|きょうまるこふせいとけつごうぶんぷ"}
+$\tau$ を停止時刻、$t>0$、$h\colon[0,t]\times\mathbb{R}\to[0,\infty)$ をボレル可測とすると
+$$
+E\bigl[h(\tau,W_{t-\tau});\tau\le t\bigr]=\int_{[0,t]}E\bigl[h(s,B_{t-s})\bigr]\,P(\tau\in ds).
+$$
+:::
+
+::: proof
+**Step 1（$h$ が直積の指示関数）.** $h=\mathbf{1}_{I\times C}$（$I\subset[0,t]$ は区間、$C$ はボレル集合）のときを示す。$s\in[0,t]$ を固定すると $W_{t-s}$ は \ref{prb:bm-strong-markov} の形の量だが、$t-\tau$ は確率変数なので直接は使えない。そこで $\tau$ を離散化する：$m\ge1$ について $[0,t]$ を長さ $\frac tm$ の区間 $I_{l}$ に分け、$I_{l}$ の左端を $r_{l}$ とする。$\{\tau\in I\cap I_{l}\}\in\mathcal{F}_{\tau}$（\ref{prb:bm-stopping-times.2}）なので、\ref{prb:bm-strong-markov} から
+$$
+P\bigl(\tau\in I\cap I_{l},\ W_{t-r_{l}}\in C\bigr)=P(\tau\in I\cap I_{l})\,P(B_{t-r_{l}}\in C).
+$$
+$C$ を開集合として、$C$ の指示関数の代わりに有界連続関数 $g$ をとると同じ式が期待値の形で成り立ち、$l$ について足すと
+$$
+E\Bigl[\mathbf{1}_{I}(\tau)\sum_{l}\mathbf{1}_{I_{l}}(\tau)g(W_{t-r_{l}})\Bigr]=\int_{I}\sum_{l}\mathbf{1}_{I_{l}}(s)E[g(B_{t-r_{l}})]\,P(\tau\in ds).
+$$
+$m\to\infty$ で、$\tau\in I_{l}$ なら $r_{l}\to\tau$（幅 $\frac tm$）なので、道の連続性から左辺の中身は $\mathbf{1}_{I}(\tau)g(W_{t-\tau})$ に、右辺の中身は $E[g(B_{t-s})]$（$s\mapsto E[g(B_{t-s})]$ は優収束定理で連続）に収束する。優収束定理から $E[\mathbf{1}_{I}(\tau)g(W_{t-\tau});\tau\le t]=\int_{I}E[g(B_{t-s})]P(\tau\in ds)$。$g\uparrow\mathbf{1}_{C}$（$C$ 開集合）として単調収束定理を使い、π-λ 定理で $C$ をボレル集合に延ばす。
+
+**Step 2（一般の $h$）.** 両辺は $h$ について線形で単調収束と両立するので、$\{I\times C\}$（π 系）から π-λ 定理で $[0,t]\times\mathbb{R}$ のボレル集合の指示関数に、さらに単関数近似で非負可測関数に延びる。
+:::
+
+## 反射原理 {#prb:sec-sm-reflection}
+
+::: theorem 反射原理 {#prb:reflection-principle keywords="reflection principle for Brownian motion: for a > 0 and b <= a, P(M_t >= a, B_t <= b) = P(B_t >= 2a - b); P(M_t >= a) = 2 P(B_t >= a) = P(|B_t| >= a); M_t has the same law as |B_t|" index="反射原理|はんしゃげんり, ブラウン運動の最大値|ぶらうんうんどうのさいだいち"}
+$t>0$, $a>0$ とする。
+1. $b\le a$ について $P(M_{t}\ge a,B_{t}\le b)=P(B_{t}\ge2a-b)$。
+2. $P(M_{t}\ge a)=2P(B_{t}\ge a)=P(|B_{t}|\ge a)$。とくに $M_{t}$ は $|B_{t}|$ と同分布。
+:::
+
+::: proof
+**Step 1（到達後の分解）.** \ref{prb:bm-stopping-times.1} から $\{M_{t}\ge a\}=\{\tau_{a}\le t\}$。その上で $B_{\tau_{a}}=a$ なので、$W_{u}\defeq B_{\tau_{a}+u}-B_{\tau_{a}}$ について $B_{t}=a+W_{t-\tau_{a}}$。
+
+**Step 2（折り返し）.** \ref{prb:bm-strong-markov-joint} を $h(s,x)\defeq\mathbf{1}_{\{x\le b-a\}}$ と $h'(s,x)\defeq\mathbf{1}_{\{x\ge a-b\}}$ に使う。$B_{t-s}\sim N(0,t-s)$ は原点について対称（$s=t$ では $B_{0}=0$ で、$b\le a$ なので両方とも確率は $\mathbf{1}_{\{a=b\}}$ で等しい）なので、$E[h(s,B_{t-s})]=E[h'(s,B_{t-s})]$。よって
+$$
+P(M_{t}\ge a,B_{t}\le b)=P(\tau_{a}\le t,W_{t-\tau_{a}}\le b-a)=P(\tau_{a}\le t,W_{t-\tau_{a}}\ge a-b)=P(\tau_{a}\le t,B_{t}\ge2a-b).
+$$
+
+**Step 3.** $2a-b\ge a$ なので、$B_{t}\ge2a-b$ なら $M_{t}\ge B_{t}\ge a$、すなわち $\tau_{a}\le t$。よって最後の確率は $P(B_{t}\ge2a-b)$。これが 1。
+
+**Step 4（2）.** $P(M_{t}\ge a)=P(M_{t}\ge a,B_{t}\le a)+P(M_{t}\ge a,B_{t}>a)$。第 1 項は 1（$b=a$）から $P(B_{t}\ge a)$、第 2 項は $B_{t}>a\Rightarrow M_{t}\ge a$ から $P(B_{t}>a)=P(B_{t}\ge a)$（$P(B_{t}=a)=0$）。和は $2P(B_{t}\ge a)=P(|B_{t}|\ge a)$（対称性）。$a\le0$ では $P(M_{t}\ge a)=1=P(|B_{t}|\ge a)$（$M_{t}\ge B_{0}=0$）なので、分布関数が一致し同分布。
+:::
+
+::: corollary 到達時刻の分布 {#prb:hitting-time-law keywords="for a > 0, P(tau_a <= t) = 2 bar Phi(a / sqrt t); tau_a < infinity a.s.; density a/sqrt(2 pi t^3) exp(-a^2/(2t)); E tau_a = infinity; tau_a has the law of a^2 / Z^2" index="到達時刻の分布|とうたつじこくのぶんぷ, レヴィ分布|れう゛ぃぶんぷ"}
+$a>0$ とする。
+1. $P(\tau_{a}\le t)=2\bar\Phi(a/\sqrt t)$。とくに $\tau_{a}<\infty$（a.s.）で、$\limsup_{t\to\infty}B_{t}=\infty$, $\liminf_{t\to\infty}B_{t}=-\infty$（a.s.）。
+2. $\tau_{a}$ は密度 $\frac{a}{\sqrt{2\pi t^{3}}}e^{-a^{2}/(2t)}$（$t>0$）をもち、$E[\tau_{a}]=\infty$。$\tau_{a}$ は $\frac{a^{2}}{Z^{2}}$（$Z\sim N(0,1)$）と同分布。
+:::
+
+::: proof
+**1.** \ref{prb:reflection-principle.2} と \ref{prb:bm-stopping-times.1}。$t\to\infty$ で $2\bar\Phi(a/\sqrt t)\to2\bar\Phi(0)=1$。$a=1,2,\dots$ について共通部分をとれば $\sup_{t}B_{t}=\infty$。$-B$ もブラウン運動（\ref{prb:brownian-invariance.1}）なので $\inf_{t}B_{t}=-\infty$。「$\limsup$」にするには、$\sup_{t\ge s}(B_{t}-B_{s})=\infty$ を \ref{prb:brownian-invariance.2} の $W$ に使えばよい。
+
+**2.** $P(\frac{a^{2}}{Z^{2}}\le t)=P(|Z|\ge a/\sqrt t)=2\bar\Phi(a/\sqrt t)$ なので同分布。$F(t)\defeq2\bar\Phi(a/\sqrt t)$ を微分すると $F'(t)=2\cdot\frac{e^{-a^{2}/(2t)}}{\sqrt{2\pi}}\cdot\frac{a}{2}t^{-3/2}$。$t\to\infty$ で密度は $\sim\frac{a}{\sqrt{2\pi}}t^{-3/2}$ なので $\int^{\infty}t\cdot t^{-3/2}dt=\infty$、$E[\tau_{a}]=\infty$。
+:::
+
+::: hypcheck
+- 強マルコフ性の証明で道の連続性は 2 か所で本質的に使った：$\tau_{n}\downarrow\tau$ のとき $W^{(n)}\to W$（Step 2）と、到達時刻で $B_{\tau_{a}}=a$ となること。連続でない過程（ポアソン過程の変形など）では、単純マルコフ性があっても強マルコフ性が成り立たない例がある。
+- 停止時刻のフィルトレーションは $\mathcal{F}_{t}=\sigma(B_{r}:r\le t)$（右連続化していない）でよかった。\ref{prb:bm-stopping-times.2} で $\{\tau<t\}\in\mathcal{F}_{t}$ を、\ref{prb:bm-stopping-times.3} で 2 進近似が停止時刻であることを確かめたので、右連続性は要らない。
+- \ref{prb:bm-strong-markov-joint} が必要だったのは、$W_{t-\tau}$ の添字 $t-\tau$ が確率変数だからである。\ref{prb:bm-strong-markov} は固定された時刻 $u$ での $W_{u}$ についてだけ述べている。
+- 反射原理の 1 で $b\le a$ は本質的：$b>a$ なら $\{B_{t}\le b\}$ と $\{B_{t}\ge2a-b\}$ は対称な位置になく、Step 3 も成り立たない。
+- 1 次元の単純ランダムウォークの再帰性（\ref{prb:random-walk-hitting}）と同じく、ブラウン運動も各レベルに必ず到達するが、到達時刻の期待値は無限大である（2）。
+:::
+
+::: supplement
+**関連する結果.**
+- 反射されたブラウン運動 $\tilde B_{t}\defeq B_{t}$（$t\le\tau_{a}$）、$\tilde B_{t}\defeq2a-B_{t}$（$t>\tau_{a}$）は、再びブラウン運動である。反射原理はこの事実の言い換えである。
+- 逆正弦法則：$[0,1]$ でブラウン運動が最大値をとる時刻、最後に $0$ を通る時刻は、密度 $\frac{1}{\pi\sqrt{s(1-s)}}$ の逆正弦分布に従う。これも強マルコフ性と反射原理から導かれる。このサイトではまだ証明していない。
+- $(\tau_{a})_{a\ge0}$ は独立定常増分をもつ過程（$\frac12$ 安定な従属過程）で、$\tau_{a}\overset{d}{=}a^{2}\tau_{1}$ というスケール則はブラウン運動のスケール不変性（\ref{prb:brownian-invariance.1}）の反映である。
+
+**高い視点：対称性と停止.** 反射原理は、ブラウン運動の法則が「ある停止時刻から先の部分を折り返す」変換で不変であることを使っている。離散時間のランダムウォークでは同じ議論が組合せ論的な鏡像法（投票問題）になる。強マルコフ性は、ブラウン運動を、止まった時刻と場所をリセットしても同じ規則で動き続ける「記憶のない粒子」として扱えることを保証するもので、ここから調和関数とのつながり（ディリクレ問題の確率的な解 $u(x)=E_{x}[f(B_{\tau})]$）が生まれる。比喩で言えば、山登りをする酔歩者が初めて高さ $a$ の尾根に着いた瞬間から、その先の上りと下りは五分五分なので、「最終的に $a$ より下にいる道」と「$a$ より上にいる道」が一対一に対応する。
+:::
+
+## 問題 {#prb:sec-sm-problems}
+
+::: problem {#prb:prob-sm-max-density}
+$(M_{t},B_{t})$ の同時密度は $x\le m$, $m\ge0$ で $f(m,x)=\frac{2(2m-x)}{\sqrt{2\pi t^{3}}}\exp\bigl(-\frac{(2m-x)^{2}}{2t}\bigr)$ であることを、\ref{prb:reflection-principle.1} から導け。
+:::
+
+::: solution
+$m>0$, $x\le m$ について $P(M_{t}\ge m,B_{t}\le x)=\bar\Phi\bigl(\frac{2m-x}{\sqrt t}\bigr)$。$P(M_{t}\le m,B_{t}\le x)=P(B_{t}\le x)-\bar\Phi(\frac{2m-x}{\sqrt t})$（$P(M_{t}=m)=0$：\ref{prb:reflection-principle.2} から $M_{t}$ は連続な分布をもつ）。$m$ と $x$ で偏微分すると、$\frac{\partial^{2}}{\partial m\,\partial x}\Bigl(-\bar\Phi\bigl(\tfrac{2m-x}{\sqrt t}\bigr)\Bigr)$ で、$\psi(y)\defeq\frac{e^{-y^{2}/2}}{\sqrt{2\pi}}$ とすると $\frac{\partial}{\partial x}(-\bar\Phi(\frac{2m-x}{\sqrt t}))=-\frac{1}{\sqrt t}\psi(\frac{2m-x}{\sqrt t})$、さらに $m$ で微分して $-\frac{2}{t}\psi'(\frac{2m-x}{\sqrt t})=\frac{2(2m-x)}{t^{3/2}}\psi(\frac{2m-x}{\sqrt t})$。これが $f(m,x)$。
+:::
+
+::: problem {#prb:prob-sm-max-mean}
+$E[M_{t}]=\sqrt{\frac{2t}{\pi}}$ と $P(M_{t}>0)=1$（$t>0$）を示せ。さらに、ほとんど確実に、どんな $\varepsilon>0$ についても $B$ は $(0,\varepsilon)$ で正の値をとることを示せ。
+:::
+
+::: solution
+\ref{prb:reflection-principle.2} から $M_{t}\overset{d}{=}|B_{t}|$ なので $E[M_{t}]=E[|B_{t}|]=2\int_{0}^{\infty}x\frac{e^{-x^{2}/(2t)}}{\sqrt{2\pi t}}dx=\frac{2t}{\sqrt{2\pi t}}=\sqrt{\frac{2t}{\pi}}$。$P(M_{t}>0)=P(|B_{t}|>0)=1$。後半：$\varepsilon=\frac1k$（$k\ge1$）について $P(M_{1/k}>0)=1$ で、可算個の共通部分の上では、すべての $k$ で $(0,\frac1k]$ に $B_{s}>0$ となる $s$ がある（$B_{0}=0$ なので最大値が正なら $s>0$）。任意の $\varepsilon$ について $\frac1k<\varepsilon$ となる $k$ をとればよい。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
