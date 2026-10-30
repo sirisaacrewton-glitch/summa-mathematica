@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>スペクトル測度とスペクトル定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/04-spectral-theory/02-spectral-measures.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# スペクトル測度とスペクトル定理 {#fa:page-spectral-measures keywords="Riesz-Markov representation of positive linear functionals on C([a,b]) via Lebesgue-Stieltjes measures, spectral measures mu_{x,y} of a bounded self-adjoint operator, polarization, Borel functional calculus f(A) for bounded Borel functions, multiplicativity, projection-valued measure E(B) = 1_B(A), spectral theorem A = int t dE(t), cyclic vectors and unitary equivalence with multiplication operators on L^2(mu), direct sums for separable Hilbert spaces"}
+
+\ref{fa:page-functional-calculus} の関数計算では $f(A)$ を連続な $f$ にしか定義できなかった。ところが、スペクトル分解の「射影」——有限次元なら固有空間への射影 $P_{\lambda}=\mathbf{1}_{\{\lambda\}}(A)$——を作るには、指示関数のような不連続な関数を $A$ に代入したい。このページでは、$\langle f(A)x,x\rangle$ が $f$ について正値な線形汎関数であることから、それを測度 $\mu_{x}$ の積分 $\int f\,d\mu_{x}$ として表し（**スペクトル測度**）、この積分の式を使って有界なボレル関数 $f$ にまで関数計算を延ばす。とくに $E(B)\defeq\mathbf{1}_{B}(A)$ は射影で、$B$ について可算加法的な「射影値測度」をなし、$A=\int t\,dE(t)$ と書ける（**スペクトル定理**）。また、ヒルベルト空間が可分なら、$A$ は $L^{2}$ 空間たちの直和の上の「$t$ を掛ける作用素」とユニタリ同値であることも示す。測度による表現には、区間上の正値線形汎関数のリース–マルコフの表現定理を、ルベーグ–スティルチェス測度から直接証明して使う。
+
+## 記法と定義の確認 {#fa:sec-sm2-notation}
+
+::: notation
+- $A\in B(H)$ は自己共役、$K\defeq\sigma(A)\subset[a,b]$（$a<b$ を固定）。連続関数計算 $f\mapsto f(A)$ は \ref{fa:continuous-functional-calculus}。$f\in C([a,b])$ について $f(A)\defeq(f|_{K})(A)$ とする。
+- ルベーグ–スティルチェス測度は \ref{meas:lebesgue-stieltjes}、測度の一意性は \ref{meas:measure-uniqueness}、優収束定理は \ref{meas:dominated-convergence}。
+- $B_{b}([a,b])$ は $[a,b]$ 上の有界なボレル可測関数（複素数値）の全体、$\|f\|_{\sup}\defeq\sup|f|$。
+- **複素測度**：$[a,b]$ のボレル集合族上の有限な正の測度 $\nu_{1},\dots,\nu_{4}$ と定数 $c_{k}\in\mathbb{C}$ による $\nu=\sum c_{k}\nu_{k}$（集合関数として）。$\int f\,d\nu\defeq\sum c_{k}\int f\,d\nu_{k}$（$f$ 有界ボレル）。
+- 強収束：$T_{k}x\to Tx$（すべての $x$）。
+- **選択公理**：使わない（\ref{fa:separable-multiplication} では可分性から可算稠密列を固定して使う）。
+:::
+
+## 区間上のリース–マルコフの定理 {#fa:sec-sm2-riesz-markov}
+
+::: lemma 区間上のリース–マルコフの定理 {#fa:riesz-markov-interval keywords="every positive linear functional on C([a,b]) is integration against a unique finite Borel measure; proof by the Stieltjes function F(t) = lim Lambda(g_k^t) and Riemann-Stieltjes sums; complex measures are determined by integrals of continuous functions" index="リース–マルコフの表現定理（区間）|りーすまるこふのひょうげんていりくかん"}
+1. $\Lambda\colon C([a,b])\to\mathbb{C}$ が線形で正値（$f\ge0\Rightarrow\Lambda(f)\ge0$）なら、$[a,b]$ のボレル集合族上の有限測度 $\mu$ で、すべての $f\in C([a,b])$ について $\Lambda(f)=\int f\,d\mu$ となるものがただ一つある。$\mu([a,b])=\Lambda(1)$。
+2. 二つの複素測度 $\nu,\nu'$ がすべての $f\in C([a,b])$ で $\int f\,d\nu=\int f\,d\nu'$ を満たすなら、すべての $f\in B_{b}([a,b])$ で $\int f\,d\nu=\int f\,d\nu'$（すなわち $\nu=\nu'$）。
+:::
+
+::: proof
+**1.** **Step 1（スティルチェス関数）.** $t\in\mathbb{R}$, $k\ge1$ について $g_{k}^{t}(u)\defeq\min\bigl(1,\max(0,1-k(u-t))\bigr)$（$u\le t$ で $1$、$u\ge t+\frac1k$ で $0$、間は 1 次関数）とおく。$k$ について $g_{k}^{t}$ は減少するので、$F(t)\defeq\lim_{k}\Lambda(g_{k}^{t})$（$[a,b]$ に制限して $\Lambda$ を適用）は存在し、$t$ について単調増加。右連続：$|g_{k}^{s}-g_{k}^{t}|\le k|s-t|$ なので $F(s)\le\Lambda(g_{k}^{s})\le\Lambda(g_{k}^{t})+k|s-t|\Lambda(1)$、$s\downarrow t$ で $\limsup F(s)\le\Lambda(g_{k}^{t})$、$k\to\infty$ で $\le F(t)$。$t<a$ なら、$k>\frac{1}{a-t}$ で $g_{k}^{t}=0$ が $[a,b]$ 上で成り立つので $F(t)=0$。$t\ge b$ なら $F(t)=\Lambda(1)$。$\mu$ を $F$ のルベーグ–スティルチェス測度（\ref{meas:lebesgue-stieltjes}）の $[a,b]$ への制限とする（$F$ は $a$ の左で $0$ なので、$\mu$ は $[a,b]$ の外に質量をもたない）。
+
+**Step 2（積分の一致）.** $f\in C([a,b])$, $\delta>0$ とし、$\omega(\delta)\defeq\sup_{|u-v|\le\delta}|f(u)-f(v)|$。分割 $a=t_{0}<t_{1}<\dots<t_{N}=b$（幅 $\le\delta$）と $\frac1k<\min_{j}(t_{j}-t_{j-1})$ について
+$$
+\varphi_{k}\defeq f(t_{0})g_{k}^{t_{0}}+\sum_{j=1}^{N}f(t_{j})\bigl(g_{k}^{t_{j}}-g_{k}^{t_{j-1}}\bigr)
+$$
+とおく。$u\in[t_{j-1}+\frac1k,t_{j}]$ なら $g_{k}^{t_{i}}(u)$ は $i\ge j$ で $1$、$i\le j-1$ で $0$ なので $\varphi_{k}(u)=f(t_{j})$。$u\in(t_{j-1},t_{j-1}+\frac1k)$ なら $\varphi_{k}(u)$ は $f(t_{j-1})$ と $f(t_{j})$ の凸結合。$u=a$ では $f(t_{0})$。よって $\|\varphi_{k}-f\|_{\infty}\le2\omega(\delta)$ で、正値性から $|\Lambda(f)-\Lambda(\varphi_{k})|\le2\omega(\delta)\Lambda(1)$。一方 $k\to\infty$ で
+$$
+\Lambda(\varphi_{k})\to S\defeq f(t_{0})F(t_{0})+\sum_{j}f(t_{j})\bigl(F(t_{j})-F(t_{j-1})\bigr)=\int\Bigl(f(t_{0})\mathbf{1}_{\{a\}}+\sum_{j}f(t_{j})\mathbf{1}_{(t_{j-1},t_{j}]}\Bigr)d\mu,
+$$
+（$\mu(\{a\})=F(a)-F(a-)=F(a)$、$\mu((s,t])=F(t)-F(s)$）で、被積分関数と $f$ の差は $\le\omega(\delta)$ なので $|S-\int f\,d\mu|\le\omega(\delta)\mu([a,b])$。$\mu([a,b])=F(b)=\Lambda(1)$。合わせて $|\Lambda(f)-\int f\,d\mu|\le3\omega(\delta)\Lambda(1)\to0$。
+
+**Step 3（一意性）.** $\Lambda(f)=\int f\,d\mu'$ なら、優収束定理から $\mu'([a,t])=\lim\int g_{k}^{t}d\mu'=F(t)$。$\{[a,t]\}\cup\{\emptyset\}$ は π 系で $[a,b]$ のボレル集合族を生成するので、\ref{meas:measure-uniqueness} から $\mu'=\mu$。
+
+**2.** $\nu-\nu'$ を実部と虚部に分け、それぞれを正の測度の差 $\rho_{1}-\rho_{2}$ と書く。$\int f\,d\rho_{1}=\int f\,d\rho_{2}$（実数値の連続な $f$）なので、1 の一意性（$\Lambda(f)\defeq\int f\,d\rho_{1}$ を表す測度）から $\rho_{1}=\rho_{2}$。
+:::
+
+## スペクトル測度とボレル関数計算 {#fa:sec-sm2-borel}
+
+::: definition スペクトル測度 {#fa:spectral-measure keywords="spectral measures: mu_x is the finite Borel measure on [a,b] with <f(A)x,x> = int f d mu_x for continuous f; mu_{x,y} by polarization, <f(A)x,y> = int f d mu_{x,y}" index="スペクトル測度|すぺくとるそくど"}
+$x\in H$ について、$f\mapsto\langle f(A)x,x\rangle$ は $C([a,b])$ 上の正値線形汎関数（\ref{fa:continuous-functional-calculus.3}）なので、\ref{fa:riesz-markov-interval.1} から有限測度 $\mu_{x}$ で $\langle f(A)x,x\rangle=\int f\,d\mu_{x}$, $\mu_{x}([a,b])=\|x\|^{2}$ となるものがただ一つある。$x,y\in H$ について複素測度 $\mu_{x,y}\defeq\frac14\sum_{k=0}^{3}i^{k}\mu_{x+i^{k}y}$ とおくと、分極恒等式から $\langle f(A)x,y\rangle=\int f\,d\mu_{x,y}$（$f\in C([a,b])$）。$\mu_{x,y}$ を $A$ の**スペクトル測度**という。
+:::
+
+::: theorem ボレル関数計算 {#fa:borel-functional-calculus keywords="Borel functional calculus: for bounded Borel f there is a unique f(A) in B(H) with <f(A)x,y> = int f d mu_{x,y}; f -> f(A) is a *-homomorphism extending the continuous calculus, ||f(A)|| <= sup |f|, f(A) commutes with operators commuting with A, and bounded pointwise convergence f_k -> f gives strong convergence f_k(A) -> f(A)" index="ボレル関数計算|ぼれるかんすうけいさん"}
+$f\in B_{b}([a,b])$ について、$f(A)\in B(H)$ で
+$$
+\langle f(A)x,y\rangle=\int f\,d\mu_{x,y}\qquad(x,y\in H)
+$$
+となるものがただ一つある。さらに：
+1. $f$ が連続なら連続関数計算の $f(A)$ と一致する。$f\mapsto f(A)$ は線形で、$\|f(A)\|\le\|f\|_{\sup}$、$\bar f(A)=f(A)^{*}$。
+2. $(fg)(A)=f(A)g(A)$（$f,g\in B_{b}$）。
+3. $f_{k}\to f$ が各点収束で $\sup_{k}\|f_{k}\|_{\sup}<\infty$ なら、$f_{k}(A)\to f(A)$（強収束）。
+4. $S\in B(H)$ が $A$ と可換なら $f(A)$ とも可換。
+:::
+
+::: proof
+**Step 1（存在と有界性）.** $|\int f\,d\mu_{x}|\le\|f\|_{\sup}\|x\|^{2}$。$(x,y)\mapsto\int f\,d\mu_{x,y}$ は半双線形：連続な $g$ については $\langle g(A)x,y\rangle$ なので半双線形で、\ref{fa:riesz-markov-interval.2} から測度 $\mu_{x,y}$ 自体が $x$ について線形・$y$ について共役線形に依存する（例えば $\mu_{x+x',y}$ と $\mu_{x,y}+\mu_{x',y}$ は連続関数の積分が一致する）。有界性：$|\int f\,d\mu_{x,y}|\le\frac14\sum_{k}\|f\|_{\sup}\|x+i^{k}y\|^{2}\le2\|f\|_{\sup}$（$\|x\|=\|y\|=1$）。リースの表現定理（\ref{fa:riesz-representation}）から $f(A)$ が一意に存在し、$\|f(A)\|\le2\|f\|_{\sup}$。
+
+**Step 2（1）.** 連続な $f$ では定義の式が連続関数計算と一致。$\mu_{y,x}=\overline{\mu_{x,y}}$（連続関数の積分で比較、\ref{fa:riesz-markov-interval.2}）なので $\langle\bar f(A)x,y\rangle=\int\bar f\,d\mu_{x,y}=\overline{\int f\,d\mu_{y,x}}=\overline{\langle f(A)y,x\rangle}=\langle x,f(A)y\rangle$。ノルム $\le\|f\|_{\sup}$ は 2 の後で：$\|f(A)x\|^{2}=\langle\bar f(A)f(A)x,x\rangle=\langle|f|^{2}(A)x,x\rangle=\int|f|^{2}d\mu_{x}\le\|f\|_{\sup}^{2}\|x\|^{2}$。
+
+**Step 3（2）.** (a) $g$ 連続のとき、$d\mu_{g(A)x,y}=g\,d\mu_{x,y}$：連続な $f$ について $\int f\,d\mu_{g(A)x,y}=\langle f(A)g(A)x,y\rangle=\langle(fg)(A)x,y\rangle=\int fg\,d\mu_{x,y}$ で、\ref{fa:riesz-markov-interval.2}。(b) $f$ ボレル、$g$ 連続：$\langle f(A)g(A)x,y\rangle=\int f\,d\mu_{g(A)x,y}=\int fg\,d\mu_{x,y}=\langle(fg)(A)x,y\rangle$。(c) $f$, $g$ ともにボレル：(b) を $\bar f$ と連続な $h$ に使うと、$\langle h(A)x,\bar f(A)y\rangle=\langle f(A)h(A)x,y\rangle=\int fh\,d\mu_{x,y}$ で、左辺は $\int h\,d\mu_{x,\bar f(A)y}$。よって $d\mu_{x,\bar f(A)y}=f\,d\mu_{x,y}$（\ref{fa:riesz-markov-interval.2}）。これをボレルな $g$ に使うと $\langle f(A)g(A)x,y\rangle=\langle g(A)x,\bar f(A)y\rangle=\int g\,d\mu_{x,\bar f(A)y}=\int gf\,d\mu_{x,y}$。
+
+**Step 4（3）.** $\|(f_{k}(A)-f(A))x\|^{2}=\int|f_{k}-f|^{2}d\mu_{x}\to0$（2、優収束定理）。
+
+**Step 5（4）.** $S$ は連続な $g(A)$ と可換（\ref{fa:continuous-functional-calculus.4}）なので、$\int g\,d\mu_{Sx,y}=\langle g(A)Sx,y\rangle=\langle g(A)x,S^{*}y\rangle=\int g\,d\mu_{x,S^{*}y}$。\ref{fa:riesz-markov-interval.2} から $\mu_{Sx,y}=\mu_{x,S^{*}y}$ で、ボレルな $f$ についても $\langle f(A)Sx,y\rangle=\langle f(A)x,S^{*}y\rangle=\langle Sf(A)x,y\rangle$。
+:::
+
+::: theorem スペクトル定理（有界自己共役作用素） {#fa:spectral-theorem-bounded keywords="spectral theorem: E(B) = 1_B(A) is a projection-valued measure on the Borel sets of [a,b], supported on sigma(A), commuting with A, countably additive in the strong topology, and A = int t dE(t) in the sense <Ax,y> = int t d<E(t)x,y>" index="スペクトル定理（有界自己共役作用素）|すぺくとるていりゆうかいじこきょうやくさようそ, 射影値測度|しゃえいちそくど, スペクトル分解|すぺくとるぶんかい"}
+ボレル集合 $B\subset[a,b]$ について $E(B)\defeq\mathbf{1}_{B}(A)$ とおく。
+1. $E(B)$ は直交射影（$E(B)^{2}=E(B)=E(B)^{*}$）で、$E(\emptyset)=0$, $E([a,b])=I$, $E(B\cap C)=E(B)E(C)$, $E([a,b]\setminus\sigma(A))=0$。
+2. （可算加法性）互いに素な $B_{j}$ について $E(\bigcup_{j}B_{j})x=\sum_{j}E(B_{j})x$（すべての $x$）。
+3. $\langle E(B)x,y\rangle=\mu_{x,y}(B)$ で、$\langle Ax,y\rangle=\int t\,d\mu_{x,y}(t)$。すなわち $A=\int t\,dE(t)$。
+:::
+
+::: proof
+**1.** $\mathbf{1}_{B}^{2}=\mathbf{1}_{B}=\overline{\mathbf{1}_{B}}$ と \ref{fa:borel-functional-calculus} の 1・2。$\mathbf{1}_{[a,b]}=1$ の連続関数計算は $I$。$E([a,b]\setminus K)$：$\mu_{x}$ は $K$ の外に質量をもたない（$g_{k}(u)\defeq\min(1,k\operatorname{dist}(u,K))$ は連続で $K$ の上で $0$ なので $g_{k}(A)=0$、$\int g_{k}d\mu_{x}=0$。$g_{k}\uparrow\mathbf{1}_{[a,b]\setminus K}$ と単調収束定理）ので $\|E([a,b]\setminus K)x\|^{2}=\mu_{x}([a,b]\setminus K)=0$。
+
+**2.** $\mathbf{1}_{\bigcup_{j\le N}B_{j}}=\sum_{j\le N}\mathbf{1}_{B_{j}}\to\mathbf{1}_{\bigcup B_{j}}$（各点、有界）なので \ref{fa:borel-functional-calculus.3}。
+
+**3.** 定義と、$f(t)=t$（連続）の関数計算が $A$ であること。
+:::
+
+::: theorem 掛け算作用素表示 {#fa:separable-multiplication keywords="if x is a cyclic vector for A, H is unitarily equivalent to L^2(mu_x) with A corresponding to multiplication by t; for separable H, A is unitarily equivalent to multiplication by t on a countable orthogonal direct sum of L^2(mu_j)" index="掛け算作用素表示|かけざんさようそひょうじ, 巡回ベクトル|じゅんかいべくとる"}
+1. $x\in H$ が**巡回ベクトル**、すなわち $\{p(A)x:p\text{ は多項式}\}$ が $H$ で稠密なら、ユニタリ作用素 $U\colon L^{2}([a,b],\mu_{x})\to H$ で $U(g)=g(A)x$（$g$ 連続）、$U^{-1}AU$ が $t$ による掛け算となるものがある。
+2. $H$ が可分なら、$H$ は $A$ と可換な射影で互いに直交する閉部分空間 $H_{j}$（可算個）の直和に分かれ、各 $H_{j}$ の上で 1 が成り立つ。とくに $A$ は $\bigoplus_{j}L^{2}(\mu_{j})$ 上の $t$ の掛け算とユニタリ同値。
+:::
+
+::: proof
+**1.** 連続な $g$ について $\|g(A)x\|^{2}=\langle|g|^{2}(A)x,x\rangle=\int|g|^{2}d\mu_{x}$ なので、$g\mapsto g(A)x$ は $C([a,b])\subset L^{2}(\mu_{x})$ から $H$ への等長写像。$C([a,b])$ は $L^{2}(\mu_{x})$ で稠密である：その閉包 $\overline{C}$ は $g_{k}^{t}\to\mathbf{1}_{[a,t]}$（有界な各点収束、優収束定理）から $\mathbf{1}_{[a,t]}$ を含み、$\mathbf{1}_{B}\in\overline{C}$ となるボレル集合 $B$ の全体は λ 系なので、π-λ 定理からすべてのボレル集合 $B$ について $\mathbf{1}_{B}\in\overline{C}$、よって単関数を含み、\ref{meas:lp-simple-dense} から $\overline{C}=L^{2}(\mu_{x})$。したがって、$L^{2}(\mu_{x})$ 全体へ等長に延びる。像は多項式 $p(A)x$ を含むので稠密で、閉（等長写像の像は完備）なので全射。$U(tg)=(tg)(A)x=A\,g(A)x=AU(g)$（$g$ 連続）で、極限で $L^{2}$ 全体。
+
+**2.** 可算稠密列 $(z_{j})$ を固定する。$H_{1}\defeq\overline{\{p(A)z_{1}\}}$ とし、帰納的に $H_{j}$ までできたら、$z_{j+1}$ の $(H_{1}\oplus\dots\oplus H_{j})^{\perp}$ への射影 $w_{j+1}$ で $H_{j+1}\defeq\overline{\{p(A)w_{j+1}\}}$。$H_{j}$ は $A$ で不変（$Ap(A)w=(tp)(A)w$）で、$A$ が自己共役なので直交補空間も不変（\ref{fa:selfadjoint.2}）、よって $p(A)w_{j+1}\perp H_{i}$（$i\le j$）。$z_{j}\in H_{1}\oplus\dots\oplus H_{j}$ なので、直和は稠密で、閉包は $H$。各 $H_{j}$ では $w_{j}$ が巡回ベクトルなので 1 を使う。
+:::
+
+::: hypcheck
+- 区間上のリース–マルコフの定理（\ref{fa:riesz-markov-interval}）では、区間の上の関数 $g_{k}^{t}$ が具体的に作れること（順序構造）を使った。一般の局所コンパクト空間のリース–マルコフの定理はウリゾーンの補題と 1 の分割で示すが、ここでは $\sigma(A)\subset\mathbb{R}$ なので区間で足りる。
+- ボレル関数計算の Step 3 では、測度の一意性（\ref{fa:riesz-markov-interval.2}）を 3 回使って、連続関数で成り立つ等式をボレル関数に移した。単調族定理を使う方法もある。
+- 掛け算作用素表示の 2 で可分性は、巡回部分空間を可算個で尽くすために使った。非可分な $H$ でも、ツォルンの補題で極大な直交族をとれば同じ結論が得られる（選択公理を使う）。
+- 有界ボレル関数計算の連続性は「有界な各点収束 ⇒ 強収束」で、ノルム収束ではない：$\mathbf{1}_{(-\infty,t-1/k]}\to\mathbf{1}_{(-\infty,t)}$ でも $\|E(\cdot)\|$ の差は一般に $1$ のまま。
+:::
+
+::: supplement
+**関連する結果.**
+- **正規作用素のスペクトル定理**：正規作用素 $T$ にも $\sigma(T)\subset\mathbb{C}$ 上の射影値測度 $E$ があって $T=\int z\,dE(z)$。$T=A+iB$（$A,B$ は可換な自己共役作用素）と分け、$A$, $B$ の射影値測度の積をとるか、ゲルファント理論で $C(\sigma(T))$ から始める。このサイトではまだ証明していない。
+- 固有値と $E$ の関係：$\lambda$ が固有値 $\iff$ $E(\{\lambda\})\ne0$ で、$E(\{\lambda\})$ は固有空間への射影。$\mu_{x}$ をルベーグ分解すると、$H$ は点スペクトル・絶対連続スペクトル・特異連続スペクトルの部分に直交分解される（量子力学の束縛状態と散乱状態）。
+- 非有界な自己共役作用素へは、ケーリー変換（ユニタリ作用素）を通じて同じ定理が延びる（このシリーズの後半）。
+
+**高い視点：対角化としてのスペクトル定理.** 有限次元の対角化 $A=\sum_{\lambda}\lambda P_{\lambda}$ は、無限次元では和が積分 $\int t\,dE(t)$ に、固有ベクトルの基底が $L^{2}(\mu)$ の「座標」に置き換わる。掛け算作用素表示は「どんな自己共役作用素も、適当な測度空間の上で関数 $t$ を掛ける作用素にすぎない」という意味で、自己共役作用素の理論を測度論に還元する。比喩で言えば、スペクトル測度 $\mu_{x}$ はベクトル $x$ を $A$ の「周波数」ごとに分解したときのエネルギーの分布図で、ボレル関数計算はその分布図の上で周波数ごとに任意の重み $f$ をかけて元に戻すイコライザーである。
+:::
+
+## 問題 {#fa:sec-sm2-problems}
+
+::: problem {#fa:prob-sm2-finite}
+$H=\mathbb{C}^{n}$、$A$ をエルミート行列とし、固有値 $\lambda_{1},\dots,\lambda_{r}$（相異なる）と固有空間への直交射影 $P_{1},\dots,P_{r}$ をとる。$\mu_{x}=\sum_{i}\|P_{i}x\|^{2}\delta_{\lambda_{i}}$、$f(A)=\sum_{i}f(\lambda_{i})P_{i}$、$E(B)=\sum_{\lambda_{i}\in B}P_{i}$ を示せ。
+:::
+
+::: solution
+$A=\sum\lambda_{i}P_{i}$（\ref{lin:spectral-theorem.1}）、$P_{i}P_{j}=\delta_{ij}P_{i}$ から多項式 $p$ について $p(A)=\sum p(\lambda_{i})P_{i}$、極限で連続な $f$ についても成り立つ。$\langle f(A)x,x\rangle=\sum f(\lambda_{i})\|P_{i}x\|^{2}=\int f\,d\bigl(\sum\|P_{i}x\|^{2}\delta_{\lambda_{i}}\bigr)$ で、\ref{fa:riesz-markov-interval.1} の一意性から $\mu_{x}$ はこの測度。分極して $\mu_{x,y}=\sum\langle P_{i}x,y\rangle\delta_{\lambda_{i}}$、よってボレルな $f$ について $\langle f(A)x,y\rangle=\sum f(\lambda_{i})\langle P_{i}x,y\rangle$。$f=\mathbf{1}_{B}$ とすれば $E(B)$ の式。
+:::
+
+::: problem {#fa:prob-sm2-multiplication}
+$H=L^{2}([0,1])$、$(Ax)(t)=tx(t)$ とする。$\mu_{x}$ は密度 $|x(t)|^{2}$ をもつ測度で、$E(B)$ は $\mathbf{1}_{B}$ の掛け算であることを示せ。とくに $E(\{\lambda\})=0$（すべての $\lambda$）。
+:::
+
+::: solution
+\ref{fa:prob-fc-multiplication} から連続な $f$ について $f(A)$ は $f$ の掛け算なので、$\langle f(A)x,x\rangle=\int_{0}^{1}f(t)|x(t)|^{2}dt$。\ref{fa:riesz-markov-interval.1} の一意性から $\mu_{x}=|x|^{2}dt$。分極で $\mu_{x,y}=x\bar y\,dt$、よって $\langle\mathbf{1}_{B}(A)x,y\rangle=\int_{B}x\bar y\,dt$ で、$E(B)$ は $\mathbf{1}_{B}$ の掛け算。$\{\lambda\}$ はルベーグ測度 $0$ なので $E(\{\lambda\})=0$、すなわち $A$ は固有値をもたない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
