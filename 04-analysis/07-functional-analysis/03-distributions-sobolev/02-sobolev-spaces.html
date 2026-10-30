@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>弱微分とソボレフ空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/03-distributions-sobolev/02-sobolev-spaces.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 弱微分とソボレフ空間 {#fa:page-sobolev-spaces keywords="weak derivatives, uniqueness, Sobolev spaces W^{k,p}(Omega) and H^k(Omega), completeness, H^k is a Hilbert space, weak compactness, product rule with smooth functions, one-dimensional characterization by absolutely continuous representatives, local approximation by mollification, Meyers-Serrin theorem H = W, Fourier characterization of H^k(R^n), fractional Sobolev spaces H^s(R^n)"}
+
+偏微分方程式の弱解は、「弱い意味での導関数」が $L^{p}$ に入る関数として探すのが基本である。超関数の微分（\ref{fa:distribution-operations}）が局所可積分関数で表せるとき、それを**弱微分**という。$k$ 階までの弱微分がすべて $L^{p}$ に入る関数の空間が**ソボレフ空間** $W^{k,p}(\Omega)$ で、これはバナッハ空間（$p=2$ ならヒルベルト空間）になる。このページでは、ソボレフ空間の完備性、1 次元では「絶対連続で導関数が $L^{p}$」と同値であること、軟化による局所近似、そして $\Omega$ 全体で滑らかな関数が稠密であること（**マイヤーズ–セリンの定理**）を示す。最後に $\mathbb{R}^{n}$ 上では、$H^{k}=W^{k,2}$ がフーリエ変換の重み $(1+|\xi|^{2})^{k/2}$ で特徴づけられることを示し、非整数の $s$ への一般化 $H^{s}$ を定義する。
+
+## 記法と定義の確認 {#fa:sec-so-notation}
+
+::: notation
+- 開集合 $\Omega$、テスト関数、軟化子 $\rho_{\varepsilon}$、$\Omega_{\varepsilon}$、$L_{\mathrm{loc}}^{p}$、超関数の微分は \ref{fa:page-distributions} のとおり。
+- $1\le p\le\infty$。$\|\cdot\|_{p}$ は $L^{p}(\Omega)$ のノルム、$p'$ は共役指数。ヘルダーの不等式は \ref{meas:holder}、$L^{p}$ の完備性は \ref{meas:riesz-fischer}。
+- 多重指数の和 $\sum_{|\alpha|\le k}$ は $\alpha\in\mathbb{Z}_{\ge0}^{n}$, $|\alpha|\le k$ についての有限和。
+- フーリエ変換 $\mathcal{F}$（$L^{2}$ 上のユニタリ作用素）と緩増加超関数のフーリエ変換は \ref{four:plancherel}, \ref{four:distribution-fourier}。
+- **選択公理**：使わない。
+:::
+
+## 弱微分とソボレフ空間 {#fa:sec-so-definition}
+
+::: definition 弱微分とソボレフ空間 {#fa:sobolev-space keywords="weak derivative d^alpha u = v in L^1_loc: int u d^alpha phi = (-1)^{|alpha|} int v phi for all test functions; Sobolev space W^{k,p}(Omega) with norm (sum ||d^alpha u||_p^p)^{1/p}; H^k = W^{k,2} with inner product" index="弱微分|じゃくびぶん, ソボレフ空間|そぼれふくうかん, 弱導関数|じゃくどうかんすう"}
+1. $u,v\in L_{\mathrm{loc}}^{1}(\Omega)$ と多重指数 $\alpha$ について、すべての $\varphi\in C_{c}^{\infty}(\Omega)$ で
+$$
+\int_{\Omega}u\,\partial^{\alpha}\varphi=(-1)^{|\alpha|}\int_{\Omega}v\,\varphi
+$$
+が成り立つとき、$v$ を $u$ の**弱微分**といい $\partial^{\alpha}u\defeq v$ と書く。これは超関数の微分 $\partial^{\alpha}T_{u}$ が $T_{v}$ であることと同じで、\ref{fa:fundamental-lemma} から $v$ は（a.e. で）一意。
+2. $k\ge0$ について、$|\alpha|\le k$ のすべての弱微分 $\partial^{\alpha}u$ が存在して $L^{p}(\Omega)$ に入る $u\in L^{p}(\Omega)$ の全体を $W^{k,p}(\Omega)$ と書き、
+$$
+\|u\|_{W^{k,p}}\defeq\Bigl(\sum_{|\alpha|\le k}\|\partial^{\alpha}u\|_{p}^{p}\Bigr)^{1/p}\quad(p<\infty),\qquad\|u\|_{W^{k,\infty}}\defeq\max_{|\alpha|\le k}\|\partial^{\alpha}u\|_{\infty}
+$$
+とおく。$H^{k}(\Omega)\defeq W^{k,2}(\Omega)$ には内積 $\langle u,v\rangle_{H^{k}}\defeq\sum_{|\alpha|\le k}\langle\partial^{\alpha}u,\partial^{\alpha}v\rangle_{L^{2}}$ を入れる。
+:::
+
+::: theorem ソボレフ空間の完備性 {#fa:sobolev-complete keywords="W^{k,p}(Omega) is a Banach space; H^k(Omega) is a Hilbert space; bounded sequences in H^k have weakly convergent subsequences" index="ソボレフ空間の完備性|そぼれふくうかんのかんびせい"}
+1. $W^{k,p}(\Omega)$ はバナッハ空間である。
+2. $H^{k}(\Omega)$ はヒルベルト空間で、その有界列は弱収束する部分列をもつ。
+:::
+
+::: proof
+**1.** ノルムの公理は $L^{p}$ ノルムとミンコフスキーの不等式（有限個の $\ell^{p}$ ノルムとの合成）から。$(u_{m})$ をコーシー列とすると、各 $|\alpha|\le k$ について $(\partial^{\alpha}u_{m})$ は $L^{p}$ のコーシー列なので、\ref{meas:riesz-fischer} から $\partial^{\alpha}u_{m}\to u_{\alpha}$（$L^{p}$）。$u\defeq u_{0}$ とする。$\varphi\in C_{c}^{\infty}(\Omega)$ について、ヘルダーの不等式から $\int u_{m}\partial^{\alpha}\varphi\to\int u\,\partial^{\alpha}\varphi$, $\int\partial^{\alpha}u_{m}\varphi\to\int u_{\alpha}\varphi$（$\varphi,\partial^{\alpha}\varphi\in L^{p'}$）。$u_{m}$ について弱微分の定義の等式が成り立つので、極限でも成り立ち、$\partial^{\alpha}u=u_{\alpha}$。よって $u\in W^{k,p}$ で $\|u_{m}-u\|_{W^{k,p}}\to0$。
+
+**2.** 内積は $\|u\|_{H^{k}}^{2}=\langle u,u\rangle_{H^{k}}$ を満たし、1 から完備。後半は \ref{fa:hilbert-weak-compactness}。
+:::
+
+::: proposition 滑らかな関数との積 {#fa:sobolev-product-rule keywords="if u in W^{k,p}(Omega) and a in C^infinity with bounded derivatives, then a u in W^{k,p} and the Leibniz rule holds for weak derivatives; in particular cut-offs zeta u" index="弱微分のライプニッツ則|じゃくびぶんのらいぷにっつそく"}
+$u\in W^{k,p}(\Omega)$、$a\in C^{\infty}(\Omega)$ で $|\gamma|\le k$ のすべての $\partial^{\gamma}a$ が有界なら、$au\in W^{k,p}(\Omega)$ で $\partial^{\alpha}(au)=\sum_{\gamma\le\alpha}\binom{\alpha}{\gamma}\partial^{\gamma}a\,\partial^{\alpha-\gamma}u$。とくに $\zeta\in C_{c}^{\infty}(\Omega)$ について $\zeta u\in W^{k,p}(\Omega)$。
+:::
+
+::: proof
+$|\alpha|=1$、すなわち $\partial_{j}$ の場合を示せば、帰納法で一般の場合が出る。$\varphi\in C_{c}^{\infty}(\Omega)$ について $a\varphi\in C_{c}^{\infty}(\Omega)$ なので
+$$
+\int au\,\partial_{j}\varphi=\int u\bigl(\partial_{j}(a\varphi)-(\partial_{j}a)\varphi\bigr)=-\int\bigl(a\,\partial_{j}u+(\partial_{j}a)u\bigr)\varphi.
+$$
+右辺の括弧の中は $L^{p}$ に入る（$a$, $\partial_{j}a$ は有界）。
+:::
+
+::: theorem 1 次元のソボレフ空間 {#fa:sobolev-one-dimension keywords="on a bounded open interval I = (a,b), u in W^{1,p}(I) iff u has an absolutely continuous representative on [a,b] whose classical derivative (a.e.) is in L^p; then the weak and classical derivatives agree" index="1 次元のソボレフ空間|1じげんのそぼれふくうかん"}
+$I=(a,b)$ を有界な開区間、$1\le p\le\infty$ とする。$u\in L^{p}(I)$ について次は同値。
+1. $u\in W^{1,p}(I)$。
+2. $u$ は a.e. で $[a,b]$ 上の絶対連続関数 $\tilde u$ に等しく、$\tilde u'$（a.e. で存在）は $L^{p}(I)$ に入る。
+
+このとき弱微分は $\tilde u'$ に等しい。
+:::
+
+::: proof
+**補題（フビニによる部分積分）.** $g\in L^{1}(I)$, $w(x)\defeq\int_{a}^{x}g$ とすると、$\varphi\in C_{c}^{\infty}(I)$ について
+$$
+\int_{a}^{b}w\varphi'\,dx=\int_{a}^{b}\Bigl(\int_{a}^{x}g(t)\,dt\Bigr)\varphi'(x)\,dx=\int_{a}^{b}g(t)\Bigl(\int_{t}^{b}\varphi'(x)\,dx\Bigr)dt=-\int_{a}^{b}g\varphi
+$$
+（フビニ：$|g(t)\varphi'(x)|$ は $[a,b]^{2}$ 上可積分。$\varphi(b)=0$）。すなわち $w$ の弱微分は $g$。
+
+**2 ⇒ 1.** \ref{meas:ftc-lebesgue} から $\tilde u(x)=\tilde u(a)+\int_{a}^{x}\tilde u'$。定数の弱微分は $0$（$\int\varphi'=0$）なので、補題から $u$ の弱微分は $\tilde u'\in L^{p}$。
+
+**1 ⇒ 2.** $g\defeq\partial u\in L^{p}(I)\subset L^{1}(I)$（$I$ は有界なので \ref{meas:lp-inclusions.1}）、$w(x)\defeq\int_{a}^{x}g$ とする。補題から $u-w$ の弱微分は $0$、すなわち超関数として $(u-w)'=0$。\ref{fa:zero-derivative} から $u-w=c$（a.e.）。$\tilde u\defeq w+c$ は \ref{meas:ftc-lebesgue} から絶対連続で $\tilde u'=g$（a.e.）。
+:::
+
+## 近似 {#fa:sec-so-approximation}
+
+::: lemma 軟化と弱微分 {#fa:mollification-sobolev keywords="for u in W^{k,p}(Omega), d^alpha (rho_eps * u) = rho_eps * d^alpha u on Omega_eps; rho_eps * u -> u in W^{k,p}_loc; if u has compact support in Omega, rho_eps * u -> u in W^{k,p}(Omega)" index="軟化とソボレフ空間|なんかとそぼれふくうかん"}
+$u\in W^{k,p}(\Omega)$, $1\le p<\infty$ とする。
+1. $\Omega_{\varepsilon}$ の上で $\partial^{\alpha}(\rho_{\varepsilon}*u)=\rho_{\varepsilon}*\partial^{\alpha}u$（$|\alpha|\le k$）。
+2. 各コンパクト $K\subset\Omega$ について $\sum_{|\alpha|\le k}\|\partial^{\alpha}(\rho_{\varepsilon}*u)-\partial^{\alpha}u\|_{L^{p}(K)}\to0$。
+3. $\operatorname{supp}u$ が $\Omega$ のコンパクト集合なら、小さな $\varepsilon$ で $\rho_{\varepsilon}*u\in C_{c}^{\infty}(\Omega)$ で、$\|\rho_{\varepsilon}*u-u\|_{W^{k,p}(\Omega)}\to0$。
+:::
+
+::: proof
+**1.** $x\in\Omega_{\varepsilon}$ について $\varphi_{x}(y)\defeq\rho_{\varepsilon}(x-y)$ は $C_{c}^{\infty}(\Omega)$ の元で、$\partial_{y}^{\alpha}\varphi_{x}(y)=(-1)^{|\alpha|}(\partial^{\alpha}\rho_{\varepsilon})(x-y)$。\ref{fa:mollification.1} と弱微分の定義から
+$$
+\partial^{\alpha}(\rho_{\varepsilon}*u)(x)=\int(\partial^{\alpha}\rho_{\varepsilon})(x-y)u(y)\,dy=(-1)^{|\alpha|}\int u\,\partial^{\alpha}\varphi_{x}=\int\partial^{\alpha}u(y)\rho_{\varepsilon}(x-y)\,dy.
+$$
+
+**2.** 1 と \ref{fa:mollification.3} を各 $\partial^{\alpha}u\in L^{p}$ に使う。
+
+**3.** \ref{fa:mollification.4} から台の主張。$u$ と $\partial^{\alpha}u$ を $\Omega$ の外で $0$ と延ばしたものを $\bar u$, $\overline{\partial^{\alpha}u}$ とすると、小さな $\varepsilon$ では $\Omega$ 全体で $\partial^{\alpha}(\rho_{\varepsilon}*u)=\rho_{\varepsilon}*\overline{\partial^{\alpha}u}$（1 と台の議論）で、\ref{four:approximate-identity-rd.1} から $L^{p}(\mathbb{R}^{n})$ で $\overline{\partial^{\alpha}u}$ に収束する。
+:::
+
+::: theorem マイヤーズ–セリンの定理 {#fa:meyers-serrin keywords="Meyers-Serrin theorem: for 1 <= p < infinity, C^infinity(Omega) cap W^{k,p}(Omega) is dense in W^{k,p}(Omega) (H = W); proof by a locally finite smooth partition of unity and mollification" index="マイヤーズ–セリンの定理|まいやーずせりんのていり"}
+$1\le p<\infty$ なら、$C^{\infty}(\Omega)\cap W^{k,p}(\Omega)$ は $W^{k,p}(\Omega)$ で稠密である。
+:::
+
+::: proof
+**Step 1（局所有限な 1 の分割）.** $j\ge1$ について $\Omega_{(j)}\defeq\{x\in\Omega:|x|<j,\ \operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)>\frac1j\}$、$\Omega_{(0)}=\Omega_{(-1)}\defeq\emptyset$ とする。$K_{j}\defeq\overline{\Omega_{(j)}}\setminus\Omega_{(j-1)}$ はコンパクトで $K_{j}\subset V_{j}\defeq\Omega_{(j+1)}\setminus\overline{\Omega_{(j-2)}}$（開集合、$\overline{\Omega_{(j+1)}}\subset\Omega$）。\ref{fa:test-function-density.2} から $\psi_{j}\in C_{c}^{\infty}(V_{j})$, $0\le\psi_{j}\le1$, $K_{j}$ の近傍で $\psi_{j}=1$ をとる。各点は高々 4 個の $V_{j}$ にしか属さないので $\Psi\defeq\sum_{j}\psi_{j}$ は局所的に有限和で $C^{\infty}$、$\bigcup K_{j}=\Omega$ から $\Psi\ge1$。$\zeta_{j}\defeq\psi_{j}/\Psi\in C_{c}^{\infty}(V_{j})$, $\sum_{j}\zeta_{j}=1$。
+
+**Step 2.** $u\in W^{k,p}(\Omega)$, $\delta>0$ とする。\ref{fa:sobolev-product-rule} から $\zeta_{j}u\in W^{k,p}$ で台は $V_{j}$ の中のコンパクト集合。\ref{fa:mollification-sobolev.3} から $\varepsilon_{j}>0$ を、$w_{j}\defeq\rho_{\varepsilon_{j}}*(\zeta_{j}u)$ が $C_{c}^{\infty}(V_{j})$ に入り $\|w_{j}-\zeta_{j}u\|_{W^{k,p}}<\delta2^{-j}$ となるようにとる。
+
+**Step 3.** $v\defeq\sum_{j}w_{j}$ は局所的に有限和なので $C^{\infty}(\Omega)$。$u=\sum_{j}\zeta_{j}u$（各点で有限和）。$\sum_{j}(w_{j}-\zeta_{j}u)$ は $W^{k,p}$ で絶対収束し（\ref{fa:sobolev-complete.1}）、その極限は各点の和 $v-u$ と a.e. で一致する（$L^{p}$ 収束する部分和の部分列は a.e. 収束し、各点の和は局所的に有限）。よって $v\in W^{k,p}$ で $\|v-u\|_{W^{k,p}}\le\delta$。
+:::
+
+## ℝⁿ 上のソボレフ空間とフーリエ変換 {#fa:sec-so-fourier}
+
+::: theorem フーリエ変換による特徴づけ {#fa:sobolev-fourier keywords="for u in L^2(R^n): u in H^k(R^n) iff (1 + |xi|^2)^{k/2} F u in L^2; then F(d^alpha u) = (2 pi i xi)^alpha F u and ||u||_{H^k} is equivalent to ||(1+|xi|^2)^{k/2} F u||_2; Sobolev spaces H^s(R^n) for real s >= 0" index="ソボレフ空間のフーリエ変換による特徴づけ|そぼれふくうかんのふーりえへんかんによるとくちょうづけ, 分数階ソボレフ空間|ぶんすうかいそぼれふくうかん"}
+$u\in L^{2}(\mathbb{R}^{n})$ と $k\ge0$ について：
+1. $|\alpha|\le k$ の弱微分 $\partial^{\alpha}u\in L^{2}$ が存在することと、$(2\pi i\xi)^{\alpha}\mathcal{F}u\in L^{2}$ は同値で、そのとき $\mathcal{F}(\partial^{\alpha}u)=(2\pi i\xi)^{\alpha}\mathcal{F}u$。
+2. $u\in H^{k}(\mathbb{R}^{n})$ $\iff$ $(1+|\xi|^{2})^{k/2}\mathcal{F}u\in L^{2}$。さらに $k$, $n$ だけで決まる定数 $c,C>0$ で
+$$
+c\|u\|_{H^{k}}\le\|(1+|\xi|^{2})^{k/2}\mathcal{F}u\|_{2}\le C\|u\|_{H^{k}}.
+$$
+:::
+
+::: proof
+**1.** $u\in L^{2}\subset\mathcal{S}'$（\ref{four:tempered-examples.1}）。\ref{four:distribution-fourier} の 1・3 から、緩増加超関数として $\widehat{\partial^{\alpha}u}=(2\pi i\xi)^{\alpha}\mathcal{F}u$（右辺は多項式で増大する関数）。
+
+（⇒）$\partial^{\alpha}u\in L^{2}$ が弱微分なら、$\mathcal{D}'$ での微分と $\mathcal{S}'$ での微分は $C_{c}^{\infty}$ の上で一致し、\ref{fa:tempered-restriction.2} の単射性から $\mathcal{S}'$ でも $\partial^{\alpha}T_{u}=T_{\partial^{\alpha}u}$。その変換は $\mathcal{F}(\partial^{\alpha}u)\in L^{2}$（\ref{four:distribution-fourier.1}）で、\ref{four:distribution-injective} から関数として $(2\pi i\xi)^{\alpha}\mathcal{F}u=\mathcal{F}(\partial^{\alpha}u)\in L^{2}$。
+
+（⇐）$h\defeq(2\pi i\xi)^{\alpha}\mathcal{F}u\in L^{2}$ とし、$g\defeq\mathcal{F}^{-1}h\in L^{2}$。$\mathcal{S}'$ で $\widehat{T_{g}}=h=\widehat{\partial^{\alpha}T_{u}}$ なので（フーリエ変換の単射性、\ref{four:distribution-fourier.2}）$\partial^{\alpha}T_{u}=T_{g}$。$C_{c}^{\infty}$ に制限すれば $g$ は弱微分。
+
+**2.** 多項定理から、$k$ と $n$ だけで決まる正の定数 $c_{1},c_{2}$ で
+$$
+c_{1}(1+|\xi|^{2})^{k}\le\sum_{|\alpha|\le k}|(2\pi\xi)^{\alpha}|^{2}\le c_{2}(1+|\xi|^{2})^{k}
+$$
+（右：$|\xi^{\alpha}|^{2}\le|\xi|^{2|\alpha|}\le(1+|\xi|^{2})^{k}$。左：$(1+|\xi|^{2})^{k}=\sum_{j}\binom kj(\sum_{l}\xi_{l}^{2})^{j}$ は $|\xi^{\alpha}|^{2}$（$|\alpha|\le k$）の正係数の一次結合）。1 とプランシュレルの定理（\ref{four:plancherel.2}）から $\|u\|_{H^{k}}^{2}=\int\sum_{|\alpha|\le k}|(2\pi\xi)^{\alpha}|^{2}|\mathcal{F}u|^{2}d\xi$ で、結論が出る。
+:::
+
+::: definition 分数階のソボレフ空間 {#fa:fractional-sobolev keywords="H^s(R^n) = {u in L^2 : (1 + |xi|^2)^{s/2} F u in L^2} with norm ||(1+|xi|^2)^{s/2} F u||_2 for real s >= 0" index="Hs 空間|えいちえすくうかん"}
+実数 $s\ge0$ について $H^{s}(\mathbb{R}^{n})\defeq\{u\in L^{2}:(1+|\xi|^{2})^{s/2}\mathcal{F}u\in L^{2}\}$、ノルムを $\|u\|_{H^{s}}\defeq\|(1+|\xi|^{2})^{s/2}\mathcal{F}u\|_{2}$ と定める。$s=k$ が整数なら、\ref{fa:sobolev-fourier.2} から $H^{k}(\mathbb{R}^{n})$ と同じ空間で、ノルムは同値。$H^{s}$ は重み付き $L^{2}$ 空間 $L^{2}((1+|\xi|^{2})^{s}d\xi)$ とフーリエ変換で同型なので、ヒルベルト空間である。
+:::
+
+::: hypcheck
+- 完備性（\ref{fa:sobolev-complete}）で使ったのは、$L^{p}$ の完備性と、弱微分の定義の等式が $L^{p}$ 収束で保たれること（ヘルダーの不等式）だけである。
+- 1 次元の特徴づけ（\ref{fa:sobolev-one-dimension}）で区間の有界性は、$L^{p}\subset L^{1}$ のためだけに使った。非有界区間でも、局所的に同じ議論が通る（絶対連続性は各有界閉区間の上で）。
+- マイヤーズ–セリンの定理は $\Omega$ の境界の正則性を何も仮定しない。その代わり、近似関数は $\Omega$ の中で滑らかなだけで、境界まで（$\overline\Omega$ 上で）滑らかとは限らない。$\overline\Omega$ 上の滑らかな関数で近似するには、境界の正則性（次のページの延長）が要る。
+- $p=\infty$ ではマイヤーズ–セリンの定理は成り立たない：$W^{1,\infty}((-1,1))$ の $|x|$ は、$C^{1}$ 関数で $W^{1,\infty}$ ノルムについて近似できない（導関数 $\operatorname{sgn}$ が連続関数で一様近似できない）。
+:::
+
+::: supplement
+**関連する結果.**
+- $1<p<\infty$ なら $W^{k,p}(\Omega)$ は回帰的で（$L^{p}$ の有限積の閉部分空間と等長）、有界列は弱収束する部分列をもつ。$1\le p<\infty$ なら可分。
+- $W^{k,p}$ の関数を「微分可能な関数」の一般化とみるとき、どれだけ古典的な意味で滑らかかを測るのが埋め込み定理（このシリーズの後半）である。1 次元の \ref{fa:sobolev-one-dimension} はその最も簡単な場合で、$W^{1,p}(I)\subset C(\bar I)$。
+- 負の階数の $H^{-s}(\mathbb{R}^{n})$ は $(1+|\xi|^{2})^{-s/2}\hat u\in L^{2}$ となる緩増加超関数の空間で、$H^{s}$ の双対と同一視できる。
+
+**高い視点：滑らかさとフーリエ側の減衰.** $\mathbb{R}^{n}$ では、関数が $k$ 回弱微分可能であることは、フーリエ変換が $|\xi|^{-k}$ 程度より速く（2 乗平均の意味で）減衰することと同値である。微分という「局所的」な性質が、フーリエ側では「無限遠での減衰」という大域的な性質に翻訳される。比喩で言えば、$H^{s}$ のノルムは関数を周波数ごとに分解して、高い周波数ほど重く課税する税制で、$s$ はその累進の強さである。この見方では $s$ が整数である必要はなく、$H^{s}$ は「$s$ 回微分可能」の連続的な補間になる。
+:::
+
+## 問題 {#fa:sec-so-problems}
+
+::: problem {#fa:prob-so-heaviside}
+$\Omega=(-1,1)$ で $H\defeq\mathbf{1}_{(0,1)}$ は $L^{p}$ に入るが、どの $p$ についても $W^{1,p}(\Omega)$ に入らないことを示せ。
+:::
+
+::: solution
+弱微分 $g\in L_{\mathrm{loc}}^{1}$ があるとすると、超関数として $H'=g$。一方 $\langle H',\varphi\rangle=-\int_{0}^{1}\varphi'=\varphi(0)$ なので $H'=\delta$。$\delta=T_{g}$ なら、$(0,1)$ と $(-1,0)$ の上のテスト関数で $\int g\varphi=0$ なので \ref{fa:fundamental-lemma} から $g=0$ a.e.、すると $T_{g}=0\ne\delta$ で矛盾。（あるいは \ref{fa:sobolev-one-dimension} から、$W^{1,p}$ の元は連続な代表元をもつが、$H$ は $0$ で跳ぶ。）
+:::
+
+::: problem {#fa:prob-so-hs-continuous}
+$s>\frac n2$ なら $H^{s}(\mathbb{R}^{n})$ の元は有界連続な代表元をもち、$\sup|u|\le C\|u\|_{H^{s}}$ を示せ。
+:::
+
+::: solution
+コーシー–シュワルツの不等式から
+$$
+\int|\mathcal{F}u|\,d\xi\le\Bigl(\int(1+|\xi|^{2})^{-s}d\xi\Bigr)^{1/2}\|u\|_{H^{s}},
+$$
+右辺の積分は $2s>n$ なら有限：殻 $A_{k}\defeq\{2^{k}\le|\xi|<2^{k+1}\}$（$k\ge0$）の上で $(1+|\xi|^{2})^{-s}\le2^{-2sk}$、$\lambda(A_{k})=2^{kn}\lambda(A_{0})$（\ref{meas:lebesgue-linear}）なので、$|\xi|\ge1$ の部分は $\lambda(A_{0})\sum_{k}2^{k(n-2s)}<\infty$ で抑えられる。よって $\mathcal{F}u\in L^{1}\cap L^{2}$ で、$v(x)\defeq\int\mathcal{F}u(\xi)e^{2\pi ix\cdot\xi}d\xi$ は有界連続（\ref{four:transform-basic.1}）、$\sup|v|\le\|\mathcal{F}u\|_{1}$。$\mathcal{F}u\in L^{1}\cap L^{2}$ なので $\mathcal{F}^{-1}\mathcal{F}u$ は $L^{2}$ の元として $v$ に等しく（\ref{four:plancherel} の逆変換は $L^{1}\cap L^{2}$ の上で積分で与えられる）、$u=v$ a.e.。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
