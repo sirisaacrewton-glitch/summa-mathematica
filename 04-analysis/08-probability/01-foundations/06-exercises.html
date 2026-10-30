@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：確率論の基礎 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/01-foundations/06-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：確率論の基礎 {#prb:page-exercises-foundations keywords="exercises, Foundations of Probability"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは、具体的な分布の計算（幾何分布・カントール分布）、ボレル–カンテリの補題と 0-1 法則の応用（ランダムな冪級数・連の長さ）、大数の法則の応用（クーポン収集・記録の数）、法則収束の道具（スルツキーの定理・一様可積分性・デルタ法）と中心極限定理の応用、および、いくつかのページの結果を組み合わせる問題である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#prb:sec-expr1-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。とくに、確率空間・分布・分布関数・期待値は \ref{prb:probability-space}, \ref{prb:random-variable}, \ref{prb:distribution-function}, \ref{prb:expectation}、確率収束・概収束は \ref{prb:sec-ln-notation}、法則収束 $\Rightarrow$ は \ref{prb:convergence-in-distribution} のとおり。$S_{n}\defeq X_{1}+\dots+X_{n}$。
+- 幾何分布 $\mathrm{Ge}(p)$（$0<p\le1$）は \ref{prb:ex-rv-1} で定める。
+- 必要な独立な確率変数の列は、\ref{prb:independent-sequence-existence.3} によって一つの確率空間 $([0,1),\mathcal{B},\lambda)$ の上に作れる。以下ではそれを断らずに使う。
+- 対数と指数の不等式：$0\le y<1$ について
+$$
+-\frac{y}{1-y}\le\log(1-y)\le-y,\qquad\text{とくに}\qquad1-y\le e^{-y}.
+$$
+右は \ref{calc:log-properties.3} を $1-y$ に、左は同じ不等式を $\frac{1}{1-y}$ に使えばよい（$\log\frac{1}{1-y}\le\frac{1}{1-y}-1=\frac{y}{1-y}$）。
+- 調和数 $H_{n}\defeq\sum_{k=1}^{n}\frac1k$ は $\log(n+1)\le H_{n}\le1+\log n$ を満たす（$\frac1k\ge\int_{k}^{k+1}\frac{dt}{t}$ と、$k\ge2$ で $\frac1k\le\int_{k-1}^{k}\frac{dt}{t}$ を足す）。とくに $\frac{H_{n}}{\log n}\to1$。
+- **選択公理**：使わない。
+:::
+
+## 確率空間と確率変数 {#prb:sec-rv-exercises}
+
+対応するページ：\ref{prb:page-random-variables}
+
+::: problem ★ 基本：幾何分布と無記憶性 {#prb:ex-rv-1}
+$0<p\le1$, $q\defeq1-p$ とする。正の整数に値をとる確率変数 $T$ が $P(T=k)=q^{k-1}p$（$k\ge1$、$0^{0}\defeq1$）を満たすとき、$T$ は**幾何分布** $\mathrm{Ge}(p)$ に従うという（成功確率 $p$ の試行を繰り返して初めて成功するまでの回数）。
+1. $P(T>k)=q^{k}$（$k\ge0$ の整数）、$E[T]=\frac1p$、$\operatorname{Var}(T)=\frac{1-p}{p^{2}}$ を示せ。
+2. （無記憶性）すべての整数 $m,n\ge0$ で $P(T>m+n)=P(T>m)P(T>n)$ を示せ。すなわち $P(T>m)>0$ なら $\frac{P(T>m+n)}{P(T>m)}=P(T>n)$。
+3. 逆に、正の整数に値をとる確率変数 $T$ が 2 の等式をすべての整数 $m,n\ge0$ で満たせば、ある $0<p\le1$ について $T\sim\mathrm{Ge}(p)$ であることを示せ。
+:::
+
+::: solution
+**1.** $p>0$ なので等比級数から
+$$
+P(T>k)=\sum_{j>k}q^{j-1}p=\frac{q^{k}p}{1-q}=q^{k}.
+$$
+$T$ は非負整数値なので、\ref{prb:tail-formula.2} から $E[T]=\sum_{n\ge1}P(T\ge n)=\sum_{n\ge1}q^{n-1}=\frac1p$。2 次のモーメントは、\ref{prb:tail-formula.1} を指数 $2$ で使う。$t\in[n-1,n)$ で $P(T>t)=P(T\ge n)=q^{n-1}$、$\int_{n-1}^{n}2t\,dt=2n-1$ なので
+$$
+E[T^{2}]=\int_{0}^{\infty}2tP(T>t)\,dt=\sum_{n\ge1}(2n-1)q^{n-1}.
+$$
+ここで、非負項の和の順序交換から
+$$
+\sum_{n\ge1}nq^{n-1}=\sum_{n\ge1}\sum_{j=1}^{n}q^{n-1}=\sum_{j\ge1}\sum_{n\ge j}q^{n-1}=\sum_{j\ge1}\frac{q^{j-1}}{p}=\frac{1}{p^{2}}.
+$$
+よって $E[T^{2}]=\frac{2}{p^{2}}-\frac1p$ で、$\operatorname{Var}(T)=E[T^{2}]-E[T]^{2}=\frac{2}{p^{2}}-\frac1p-\frac{1}{p^{2}}=\frac{1-p}{p^{2}}$。
+
+**2.** 1 から $P(T>m+n)=q^{m+n}=q^{m}q^{n}=P(T>m)P(T>n)$。
+
+**3.** $q\defeq P(T>1)$ とおく。$P(T>0)=1$ で、$n$ についての帰納法から $P(T>n+1)=P(T>n)P(T>1)=q^{n+1}$、すなわちすべての $n\ge0$ で $P(T>n)=q^{n}$。$q=1$ とすると、すべての $n$ で $P(T>n)=1$ となるが、$T$ は実数値なので $\{T>n\}\downarrow\emptyset$ で、有限測度の連続性から $P(T>n)\to0$ となり矛盾。よって $q<1$ で、$p\defeq1-q\in(0,1]$ とおく。$T$ は整数値なので $\{T=k\}=\{T>k-1\}\setminus\{T>k\}$ で
+$$
+P(T=k)=q^{k-1}-q^{k}=q^{k-1}p\qquad(k\ge1).
+$$
+（連続な場合の類似は指数分布である：$P(X>s+t)=P(X>s)P(X>t)$ を満たす正の確率変数は指数分布に従う。$\mathrm{Ge}(p)$ は「離散時間の指数分布」である。）
+:::
+
+::: problem ★★ 標準：裾とモーメント {#prb:ex-rv-2}
+1. 実数値確率変数 $X$ について
+$$
+\sum_{n\ge1}P(|X|\ge n)\le E[|X|]\le1+\sum_{n\ge1}P(|X|\ge n)
+$$
+を示せ。とくに $E[|X|]<\infty\iff\sum_{n\ge1}P(|X|\ge n)<\infty$。
+2. $p>0$ で $E[|X|^{p}]<\infty$ なら、$t\to\infty$ で $t^{p}P(|X|>t)\to0$ を示せ。
+3. 2 の逆は成り立たないことを示せ。すなわち、$t<e$ で $G(t)\defeq0$、$t\ge e$ で $G(t)\defeq1-\frac{e}{t\log t}$ とおくと、$G$ は分布関数で、$G$ を分布関数にもつ確率変数 $Y$ は $tP(Y>t)\to0$ を満たすが $E[Y]=\infty$ であることを示せ。
+:::
+
+::: solution
+**1.** \ref{prb:tail-formula.1} から $E[|X|]=\int_{0}^{\infty}P(|X|>t)\,dt=\sum_{n\ge1}\int_{n-1}^{n}P(|X|>t)\,dt$。$t\in[n-1,n)$ では
+$$
+P(|X|\ge n)\le P(|X|>t)\le P(|X|\ge n-1)
+$$
+なので、$n\ge1$ について足して
+$$
+\sum_{n\ge1}P(|X|\ge n)\le E[|X|]\le\sum_{n\ge1}P(|X|\ge n-1)=1+\sum_{n\ge1}P(|X|\ge n).
+$$
+
+**2.** $|X|>t$ なら $t^{p}<|X|^{p}$ なので $t^{p}P(|X|>t)\le E\bigl[|X|^{p}\mathbf{1}_{\{|X|>t\}}\bigr]$。$t_{j}\to\infty$ を任意の列とすると、$|X|<\infty$ なので各点で $|X|^{p}\mathbf{1}_{\{|X|>t_{j}\}}\to0$ で、可積分な $|X|^{p}$ で抑えられる。\ref{meas:dominated-convergence} から右辺は $0$ に収束する。
+
+**3.** **分布関数であること.** $t\ge e$ で $(t\log t)'=\log t+1>0$ なので $t\log t$ は増加で $\infty$ に発散し、$G$ は $[e,\infty)$ で連続・単調増加、$G(t)\to1$（$t\to\infty$）。$G(e)=1-\frac{e}{e\cdot1}=0$ なので $G$ は $\mathbb{R}$ 全体で連続・単調増加で、$G=0$（$t<e$）。よって \ref{prb:distribution-function.1} の性質をもち、\ref{prb:distribution-function.3} からそれを分布関数にもつ $Y$ がある。
+
+**裾.** $t\ge e$ で $P(Y>t)=1-G(t)=\frac{e}{t\log t}$ なので $tP(Y>t)=\frac{e}{\log t}\to0$。
+
+**期待値.** $Y\ge e>0$（a.s.）で、$\frac{d}{dt}\log\log t=\frac{1}{t\log t}$（$t>1$）なので、$R>e$ について \ref{prb:tail-formula.1} から
+$$
+E[Y]\ge\int_{e}^{R}\frac{e}{t\log t}\,dt=e\bigl(\log\log R-\log\log e\bigr)=e\log\log R\to\infty\qquad(R\to\infty).
+$$
+よって $E[Y]=\infty$。
+
+（1 は、整数値でない確率変数の可積分性を、整数点での裾の和で判定する式で、事象の列 $\{|X_{n}|\ge n\}$ の確率の和と結びつくので、独立な列の議論でよく使う。3 の $Y$ は、裾が $\frac1t$ よりわずかに速く減るだけなので、$tP(Y>t)\to0$ でも積分 $\int_{0}^{\infty}P(Y>t)\,dt$ は発散する。）
+:::
+
+::: problem ★★★ 発展：カントール分布 {#prb:ex-rv-3}
+確率空間 $([0,1),\mathcal{B},\lambda)$ の上で、$u$ の 2 進展開の第 $k$ 桁 $d_{k}(u)\defeq\lfloor2^{k}u\rfloor-2\lfloor2^{k-1}u\rfloor\in\{0,1\}$ を使って
+$$
+X(u)\defeq\sum_{k\ge1}\frac{2d_{k}(u)}{3^{k}}
+$$
+とおく（2 進展開の桁 $1$ を 3 進展開の桁 $2$ に置き換えた数）。
+1. $\lfloor2^{k}u\rfloor=\sum_{i\le k}d_{i}(u)2^{k-i}$ を示し、$X$ は $[0,1)$ 上で狭義単調増加であることを示せ。これから、すべての $x$ で $P(X=x)=0$、すなわち $F_{X}$ は連続であることを導け。
+2. $C_{n}$ を、$e=(e_{1},\dots,e_{n})\in\{0,1\}^{n}$ についての $2^{n}$ 個の閉区間 $\bigl[a_{e},a_{e}+3^{-n}\bigr]$（$a_{e}\defeq\sum_{k\le n}2e_{k}3^{-k}$）の和とし、$C\defeq\bigcap_{n}C_{n}$ とする。$P(X\in C)=1$ かつ $\lambda(C)=0$ を示せ。これから、$X$ の分布は密度をもたないことを導け。
+3. $T(u)\defeq2u-d_{1}(u)$ とおく。$d_{k}(T(u))=d_{k+1}(u)$ と $X=\frac{2d_{1}+X\circ T}{3}$ を示し、これを使って $E[X]=\frac12$, $\operatorname{Var}(X)=\frac18$ を示せ。
+:::
+
+::: solution
+**1.** **桁の和.** $\lfloor2^{i}u\rfloor-2\lfloor2^{i-1}u\rfloor$ に $2^{k-i}$ を掛けて $i=1,\dots,k$ で足すと、隣り合う項が打ち消し合って
+$$
+\sum_{i\le k}d_{i}(u)2^{k-i}=\lfloor2^{k}u\rfloor-2^{k}\lfloor u\rfloor=\lfloor2^{k}u\rfloor\qquad(0\le u<1).
+$$
+また $d_{k}\in\{0,1\}$：$y\defeq2^{k-1}u$ について $\lfloor2y\rfloor-2\lfloor y\rfloor\in\{0,1\}$（$y$ の小数部分が $\frac12$ 未満か以上か）。$d_{k}$ はボレル可測で、$X$ はその級数の各点極限なので可測（\ref{meas:measurable-limits}）。
+
+**単調性.** $0\le u<v<1$ とする。$2^{n}(v-u)>1$ となる $n$ では $\lfloor2^{n}u\rfloor<\lfloor2^{n}v\rfloor$ なので、$\lfloor2^{k}u\rfloor\ne\lfloor2^{k}v\rfloor$ となる最小の $k$ がある。$\lfloor2^{k-1}u\rfloor=\lfloor2^{k-1}v\rfloor$ なので、上の式から $i<k$ で $d_{i}(u)=d_{i}(v)$ で、$\lfloor2^{k}u\rfloor<\lfloor2^{k}v\rfloor$ の差は第 $k$ 桁だけなので $d_{k}(u)=0$, $d_{k}(v)=1$。よって
+$$
+X(v)-X(u)=\frac{2}{3^{k}}+\sum_{j>k}\frac{2(d_{j}(v)-d_{j}(u))}{3^{j}}\ge\frac{2}{3^{k}}-\sum_{j>k}\frac{2}{3^{j}}=\frac{2}{3^{k}}-\frac{1}{3^{k}}>0.
+$$
+
+**原子がない.** $X$ は単射なので $\{X=x\}$ は高々 1 点で、$P(X=x)=0$。\ref{prb:distribution-function.1} から $F_{X}(x)-F_{X}(x-)=0$、すなわち $F_{X}$ は連続。
+
+**2.** **$X\in C$.** $u$ と $n$ を固定し、$e_{k}\defeq d_{k}(u)$（$k\le n$）とすると
+$$
+0\le X(u)-a_{e}=\sum_{k>n}\frac{2d_{k}(u)}{3^{k}}\le\sum_{k>n}\frac{2}{3^{k}}=3^{-n},
+$$
+すなわち $X(u)\in[a_{e},a_{e}+3^{-n}]\subset C_{n}$。$n$ は任意なので $X(u)\in C$ がすべての $u$ で成り立ち、$P(X\in C)=1$。
+
+**$\lambda(C)=0$.** $\lambda(C)\le\lambda(C_{n})\le2^{n}\cdot3^{-n}\to0$。（$C_{n}$, $C$ は \ref{meas:cantor-set} のものと同じである。）
+
+**密度がない.** ボレル可測な $f\ge0$ で $P(X\in B)=\int_{B}f\,d\lambda$（すべての $B$）となるものがあれば、$1=P(X\in C)=\int_{C}f\,d\lambda=0$（零集合上の積分）となり矛盾。
+
+**3.** **自己相似性.** $T(u)=2u-d_{1}(u)\in[0,1)$（$u<\frac12$ なら $d_{1}=0$、$u\ge\frac12$ なら $d_{1}=1$）。$2^{k}d_{1}(u)$ は整数なので
+$$
+\lfloor2^{k}T(u)\rfloor=\lfloor2^{k+1}u\rfloor-2^{k}d_{1}(u),
+$$
+これを $d_{k}$ の定義に代入すると $d_{k}(T(u))=\lfloor2^{k+1}u\rfloor-2^{k}d_{1}-2\bigl(\lfloor2^{k}u\rfloor-2^{k-1}d_{1}\bigr)=d_{k+1}(u)$。よって
+$$
+X(u)=\frac{2d_{1}(u)}{3}+\sum_{k\ge1}\frac{2d_{k+1}(u)}{3^{k+1}}=\frac{2d_{1}(u)}{3}+\frac13X(T(u)).
+$$
+
+**$T$ による積分.** $h$ を $[0,1)$ 上の有界ボレル関数とする。$\{d_{1}=1\}=[\frac12,1)$ の上で $T(u)=2u-1$、$\{d_{1}=0\}=[0,\frac12)$ の上で $T(u)=2u$ なので、\ref{meas:lebesgue-linear} から
+$$
+E[d_{1}\,h(T)]=\int_{1/2}^{1}h(2u-1)\,du=\frac12\int_{0}^{1}h,\qquad E[(1-d_{1})h(T)]=\int_{0}^{1/2}h(2u)\,du=\frac12\int_{0}^{1}h.
+$$
+とくに $E[h(T)]=E[h]$, $E[d_{1}h(T)]=\frac12E[h]$。
+
+**平均と分散.** $0\le X\le1$ なので $m\defeq E[X]$, $s\defeq E[X^{2}]$ は有限。$E[d_{1}]=\lambda([\frac12,1))=\frac12$ と、上の式を $h=X$ に使うと
+$$
+m=\frac{2E[d_{1}]+E[X\circ T]}{3}=\frac{1+m}{3},\qquad m=\frac12.
+$$
+$d_{1}^{2}=d_{1}$ と、上の式を $h=X$, $h=X^{2}$ に使うと
+$$
+s=\frac{E\bigl[(2d_{1}+X\circ T)^{2}\bigr]}{9}=\frac{4E[d_{1}]+4E[d_{1}\,X\circ T]+E[(X\circ T)^{2}]}{9}=\frac{2+2m+s}{9}=\frac{3+s}{9},
+$$
+よって $s=\frac38$、$\operatorname{Var}(X)=\frac38-\frac14=\frac18$。
+
+（$X$ の分布を**カントール分布**という。原子も密度ももたない「特異連続」な分布の典型で、1 の単調性から $F_{X}(X(v))=\lambda([0,v])=v$、すなわち $F_{X}\bigl(\sum_{k}2e_{k}3^{-k}\bigr)=\sum_{k}e_{k}2^{-k}$ となる。$F_{X}$ は \ref{meas:cantor-function} の $\Phi$ と一致することが確かめられるが、ここでは使わない。分散 $\frac18$ は、同じ $[0,1]$ 上の一様分布の分散 $\frac{1}{12}$ より大きい。質量が両端に寄っているからである。）
+:::
+
+## 独立性 {#prb:sec-in-exercises}
+
+対応するページ：\ref{prb:page-independence}
+
+::: problem ★ 基本：指数分布の最小値とポアソン分布の和 {#prb:ex-in-1}
+$\lambda,\mu,\alpha,\beta>0$ とする。
+1. $X\sim\mathrm{Exp}(\lambda)$, $Y\sim\mathrm{Exp}(\mu)$ が独立なら $\min(X,Y)\sim\mathrm{Exp}(\lambda+\mu)$ を示せ。
+2. 1 の $X,Y$ について $P(X<Y)=\frac{\lambda}{\lambda+\mu}$ を示せ。
+3. $X\sim\mathrm{Po}(\alpha)$, $Y\sim\mathrm{Po}(\beta)$ が独立なら $X+Y\sim\mathrm{Po}(\alpha+\beta)$ を示せ。
+:::
+
+::: solution
+**1.** $\mathrm{Exp}(\lambda)$ の分布関数は、密度を積分して $t\ge0$ で $1-e^{-\lambda t}$、$t<0$ で $0$。$t\ge0$ なら、$\{X>t\}\in\sigma(X)$, $\{Y>t\}\in\sigma(Y)$ の独立性から
+$$
+P(\min(X,Y)>t)=P(X>t,\,Y>t)=P(X>t)P(Y>t)=e^{-(\lambda+\mu)t},
+$$
+$t<0$ なら $P(\min(X,Y)>t)=1$（$X,Y\ge0$ a.s.）。よって $\min(X,Y)$ の分布関数は $\mathrm{Exp}(\lambda+\mu)$ の分布関数と一致し、\ref{prb:distribution-function.2} から同分布。
+
+**2.** \ref{prb:independence-criteria.1} から $(X,Y)$ の分布は $P_{X}\otimes P_{Y}$。\ref{prb:change-of-variables} と \ref{meas:tonelli} から
+$$
+P(X<Y)=\iint\mathbf{1}_{\{x<y\}}\,P_{Y}(dy)\,P_{X}(dx)=\int P(Y>x)\,P_{X}(dx)=\int_{0}^{\infty}e^{-\mu x}\lambda e^{-\lambda x}\,dx=\frac{\lambda}{\lambda+\mu}.
+$$
+（3 番目の等号は、$P_{X}$ が密度 $\lambda e^{-\lambda x}\mathbf{1}_{[0,\infty)}$ をもつことと、$x\ge0$ で $P(Y>x)=e^{-\mu x}$ から。）
+
+**3.** $X,Y$ は a.s. で非負整数値なので、$n\ge0$ について、$\{X+Y=n\}$ は零集合を除いて互いに素な事象 $\{X=k,\,Y=n-k\}$（$0\le k\le n$）の和。独立性から
+$$
+P(X+Y=n)=\sum_{k=0}^{n}e^{-\alpha}\frac{\alpha^{k}}{k!}e^{-\beta}\frac{\beta^{n-k}}{(n-k)!}=\frac{e^{-(\alpha+\beta)}}{n!}\sum_{k=0}^{n}\binom nk\alpha^{k}\beta^{n-k}=e^{-(\alpha+\beta)}\frac{(\alpha+\beta)^{n}}{n!}.
+$$
+これらの和は $1$ なので、$X+Y$ の分布は $\sum_{n}P(X+Y=n)\delta_{n}=\mathrm{Po}(\alpha+\beta)$（二つの測度はすべての 1 点集合で一致し、ともに $\mathbb{Z}_{\ge0}$ の上に集中している）。
+
+（1 は「競合する二つの指数時計のうち先に鳴る方の時刻」、2 は「どちらが先に鳴るか」の確率である。3 は、特性関数を使えば $\exp(\alpha(e^{it}-1))\exp(\beta(e^{it}-1))=\exp((\alpha+\beta)(e^{it}-1))$ とも読める。）
+:::
+
+::: problem ★★ 標準：ランダムな冪級数の収束半径 {#prb:ex-in-2}
+$\xi_{1},\xi_{2},\dots$ を i.i.d. の実数値確率変数で $P(\xi_{1}\ne0)>0$ とし、
+$$
+L\defeq\limsup_{n\to\infty}|\xi_{n}|^{1/n}\in[0,\infty],\qquad R\defeq\frac1L\in[0,\infty]
+$$
+とおく（$\frac10\defeq\infty$, $\frac1\infty\defeq0$。$R$ は冪級数 $\sum_{n}\xi_{n}z^{n}$ の収束半径である）。$\log^{+}x\defeq\max(\log x,0)$（$x>0$）、$\log^{+}0\defeq0$ とする。
+1. $R$ は a.s. で定数であることを、$\xi_{n}$ の分布を計算せずに示せ。
+2. $E[\log^{+}|\xi_{1}|]<\infty$ なら $R=1$（a.s.）を示せ。
+3. $E[\log^{+}|\xi_{1}|]=\infty$ なら $R=0$（a.s.）を示せ。
+:::
+
+::: solution
+**1.** $\mathcal{G}_{k}\defeq\sigma(\xi_{k})$ は独立。各 $m$ について $L=\limsup_{n\ge m}|\xi_{n}|^{1/n}$ で、$|\xi_{n}|^{1/n}$ は $\mathcal{G}_{n}$ 可測なので、$L$ は $\bigvee_{k\ge m}\mathcal{G}_{k}$ 可測（\ref{meas:measurable-limits}）。よって $L$ は末尾 σ-加法族に関して可測で、\ref{prb:kolmogorov-zero-one.2} から a.s. で定数。$R=\frac1L$ も同じ。
+
+**2.** **$L\ge1$.** $\{|\xi_{1}|\ge\frac1j\}\uparrow\{\xi_{1}\ne0\}$ なので、測度の連続性から、ある $\delta>0$ で $c\defeq P(|\xi_{1}|\ge\delta)>0$。事象 $A_{n}\defeq\{|\xi_{n}|\ge\delta\}$ は独立（$A_{n}\in\mathcal{G}_{n}$）で、同分布から $\sum_{n}P(A_{n})=\sum_{n}c=\infty$。\ref{prb:borel-cantelli.2} から a.s. で無限に多くの $n$ について $|\xi_{n}|^{1/n}\ge\delta^{1/n}$。\ref{calc:standard-limits.2} から $\delta^{1/n}\to1$ なので $L\ge1$。
+
+**$L\le1$.** $Y\defeq\log^{+}|\xi_{1}|$ とし、$\varepsilon>0$ とする。$\varepsilon n>0$ なので
+$$
+\{|\xi_{n}|^{1/n}>e^{\varepsilon}\}=\{\log|\xi_{n}|>\varepsilon n\}=\{\log^{+}|\xi_{n}|>\varepsilon n\},
+$$
+同分布から $P(|\xi_{n}|^{1/n}>e^{\varepsilon})=P(Y>\varepsilon n)\le P\bigl(\frac Y\varepsilon\ge n\bigr)$。\ref{prb:ex-rv-2.1} を $\frac{Y}{\varepsilon}$ に使うと
+$$
+\sum_{n\ge1}P\Bigl(\frac{Y}{\varepsilon}\ge n\Bigr)\le\frac{E[Y]}{\varepsilon}<\infty.
+$$
+\ref{prb:borel-cantelli.1} から、a.s. で有限個の $n$ を除いて $|\xi_{n}|^{1/n}\le e^{\varepsilon}$、よって $L\le e^{\varepsilon}$。$\varepsilon=\frac1j$（$j\ge1$）についての可算個の確率 $1$ の事象の共通部分の上で $L\le1$。合わせて $L=1$、$R=1$（a.s.）。
+
+**3.** $K>0$ とする。$E[\frac YK]=\infty$ なので、\ref{prb:ex-rv-2.1} から $\sum_{n\ge1}P(Y\ge Kn)=\sum_{n\ge1}P(\frac YK\ge n)=\infty$。事象 $\{\log^{+}|\xi_{n}|\ge Kn\}$ は独立で、確率は $P(Y\ge Kn)$ なので、\ref{prb:borel-cantelli.2} から a.s. で無限に多くの $n$ について $\log|\xi_{n}|\ge Kn$（$Kn>0$ なので $\log^{+}$ は $\log$ に等しい）、すなわち $|\xi_{n}|^{1/n}\ge e^{K}$。よって $L\ge e^{K}$。$K=1,2,\dots$ について共通部分をとれば $L=\infty$、$R=0$（a.s.）。
+
+（\ref{calc:log-properties.3} から $\log^{+}x\le x$ なので、$E[|\xi_{1}|]<\infty$ なら 2 が使え、収束半径はほとんど確実に $1$。一方、$P(|\xi_{1}|>t)=\frac{1}{\log t}$（$t\ge e$）のように裾が極端に重いと、級数は $z=0$ 以外のどこでも収束しない。収束半径が a.s. で定数であることは 1 の 0-1 法則から先にわかっていて、2・3 はその値を決めている。）
+:::
+
+::: problem ★★★ 発展：表の連の長さ {#prb:ex-in-3}
+$\xi_{1},\xi_{2},\dots$ を i.i.d. で $P(\xi_{n}=1)=P(\xi_{n}=0)=\frac12$（公平なコイン投げ）とし、$n$ 回目から始まる表（$1$）の連の長さを
+$$
+\ell_{n}\defeq\sup\{m\ge0:\xi_{n}=\xi_{n+1}=\dots=\xi_{n+m-1}=1\}\in\{0,1,2,\dots\}\cup\{\infty\}
+$$
+とする（$m=0$ の条件は空で、常に満たされる）。
+1. 長さ $m\ge1$ の任意の 0-1 列 $w=(w_{1},\dots,w_{m})$ について、a.s. で $w$ は列 $(\xi_{n})$ の中に（連続した $m$ 項として）無限回現れることを示せ。
+2. $\limsup_{n\to\infty}\frac{\ell_{n}}{\log_{2}n}=1$（a.s.）を示せ。
+:::
+
+::: solution
+**準備.** 互いに素な有限個の添字の組 $J_{1},\dots,J_{r}$ について、$\sigma(\xi_{i}:i\in J_{s})$（$s=1,\dots,r$）は独立（\ref{prb:pi-system-independence.2}）。また、相異なる添字 $i_{1},\dots,i_{m}$ と $e_{1},\dots,e_{m}\in\{0,1\}$ について、独立性から $P(\xi_{i_{1}}=e_{1},\dots,\xi_{i_{m}}=e_{m})=2^{-m}$。とくに $\{\ell_{n}\ge m\}=\{\xi_{n}=\dots=\xi_{n+m-1}=1\}$ は事象で、$P(\ell_{n}\ge m)=2^{-m}$。$\ell_{n}$ は整数（または $\infty$）値なので、実数 $x$ について $\{\ell_{n}\ge x\}=\{\ell_{n}\ge\lceil x\rceil\}$。
+
+**1.** $j\ge1$ について $B_{j}\defeq\{\xi_{(j-1)m+i}=w_{i}\ (i=1,\dots,m)\}$ とおく。$B_{j}$ は互いに素な添字の組 $\{(j-1)m+1,\dots,jm\}$ で決まるので独立で、$P(B_{j})=2^{-m}$。$\sum_{j}P(B_{j})=\infty$ なので \ref{prb:borel-cantelli.2} から a.s. で無限に多くの $B_{j}$ が起こる。
+
+**2.** **上からの評価.** $\varepsilon>0$ とし、$n\ge2$ について $m_{n}\defeq\lceil(1+\varepsilon)\log_{2}n\rceil$ とおくと
+$$
+P\bigl(\ell_{n}\ge(1+\varepsilon)\log_{2}n\bigr)=2^{-m_{n}}\le2^{-(1+\varepsilon)\log_{2}n}=n^{-1-\varepsilon}.
+$$
+和は有限なので、\ref{prb:borel-cantelli.1} から a.s. で有限個の $n$ を除いて $\ell_{n}<(1+\varepsilon)\log_{2}n$、よって $\limsup\frac{\ell_{n}}{\log_{2}n}\le1+\varepsilon$。
+
+**下からの評価.** $0<\varepsilon<1$ とする。$k\ge4$ について
+$$
+m_{k}\defeq\bigl\lceil(1-\varepsilon)(k+1)\bigr\rceil,\qquad N_{k}\defeq\Bigl\lfloor\frac{2^{k}}{m_{k}}\Bigr\rfloor,\qquad n_{k,j}\defeq2^{k}+jm_{k}\quad(0\le j<N_{k})
+$$
+とおく。$1\le m_{k}\le(1-\varepsilon)(k+1)+1\le k+2$ で、$k\ge4$ なら $\frac{2^{k}}{k+2}\ge2$ なので $N_{k}\ge1$。区間 $[n_{k,j},n_{k,j}+m_{k}-1]$（$0\le j<N_{k}$）は互いに素で、$2^{k}+N_{k}m_{k}-1\le2^{k+1}-1$ なので $[2^{k},2^{k+1})$ に含まれる。$E_{k,j}\defeq\{\ell_{n_{k,j}}\ge m_{k}\}$ はそれぞれこの区間の添字で決まるので独立で、確率は $2^{-m_{k}}$。$F_{k}\defeq\bigcap_{j<N_{k}}E_{k,j}^{c}$ とおくと、記法の確認の $1-y\le e^{-y}$ から
+$$
+P(F_{k})=(1-2^{-m_{k}})^{N_{k}}\le\exp\bigl(-N_{k}2^{-m_{k}}\bigr).
+$$
+$N_{k}\ge\frac{2^{k}}{m_{k}}-1\ge\frac{2^{k}}{k+2}-1\ge\frac{2^{k-1}}{k+2}$（$\frac{2^{k}}{k+2}\ge2$ を使った）と $2^{-m_{k}}\ge2^{-(1-\varepsilon)(k+1)-1}$ から
+$$
+N_{k}2^{-m_{k}}\ge\frac{2^{k-1-(1-\varepsilon)(k+1)-1}}{k+2}=\frac{2^{\varepsilon(k+1)-3}}{k+2}\eqdef c_{k}.
+$$
+$\log k\le k$（\ref{calc:log-properties.3}）と \ref{calc:standard-limits.4}（$x=2^{-\varepsilon}<1$）から $\frac{2\log k}{c_{k}}\le\frac{16k(k+2)}{2^{\varepsilon(k+1)}}\to0$ なので、十分大きな $k$ で $c_{k}\ge2\log k$、$P(F_{k})\le e^{-c_{k}}\le k^{-2}$。よって $\sum_{k}P(F_{k})<\infty$ で、\ref{prb:borel-cantelli.1} から a.s. である $k_{0}$ から先 $F_{k}$ は起こらない。すなわち $k\ge k_{0}$ ごとに、ある $n=n_{k,j}\in[2^{k},2^{k+1})$ で
+$$
+\ell_{n}\ge m_{k}\ge(1-\varepsilon)(k+1)>(1-\varepsilon)\log_{2}n.
+$$
+$k$ ごとに $n$ は異なる区間 $[2^{k},2^{k+1})$ にあるので、このような $n$ は無限にある。よって $\limsup\frac{\ell_{n}}{\log_{2}n}\ge1-\varepsilon$。
+
+$\varepsilon=\frac1j$（$j\ge2$）についての可算個の確率 $1$ の事象の共通部分をとれば結論を得る。（とくに $P(\ell_{n}=\infty)\le P(\ell_{n}\ge m)=2^{-m}$ から $\ell_{n}<\infty$ a.s. である。）
+
+（1 は、猿がタイプライターをでたらめに打ち続ければ、どんな文章もいつかは（何度でも）打たれるという「無限の猿の定理」である。2 は、$n$ 回投げたときの最長の表の連がおよそ $\log_{2}n$ であることを示す：長さ $m$ の連の確率 $2^{-m}$ が、試行の回数 $n$ の逆数と釣り合う長さである。下からの評価で、重なり合う連 $\ell_{n},\ell_{n+1},\dots$ は独立でないので、互いに素な区間の上の事象に取り替えて \ref{prb:borel-cantelli.1} だけで済ませた。）
+:::
+
+## 大数の法則 {#prb:sec-ln-exercises}
+
+対応するページ：\ref{prb:page-law-of-large-numbers}
+
+::: problem ★ 基本：バーンスタイン多項式とモンテカルロ法 {#prb:ex-ln-1}
+1. \ref{prb:bernstein-polynomials} の $B_{n}$ について、$f_{0}(x)=1$, $f_{1}(x)=x$, $f_{2}(x)=x^{2}$ とすると $B_{n}f_{0}=1$, $B_{n}f_{1}(x)=x$, $B_{n}f_{2}(x)=x^{2}+\frac{x(1-x)}{n}$ であることを示し、$\sup_{x\in[0,1]}|B_{n}f_{2}(x)-f_{2}(x)|=\frac{1}{4n}$ を導け。
+2. $U_{1},U_{2},\dots$ を i.i.d. で $U(0,1)$ に従うとし、$Z_{k}\defeq\mathbf{1}_{\{U_{2k-1}^{2}+U_{2k}^{2}\le1\}}$ とおく。$Z_{1},Z_{2},\dots$ は i.i.d. で $P(Z_{k}=1)=\frac\pi4$ であることを示し、$\frac4n\sum_{k\le n}Z_{k}\to\pi$（a.s.）を導け。さらに $n\ge4\cdot10^{6}$ なら $P\bigl(\bigl|\frac4n\sum_{k\le n}Z_{k}-\pi\bigr|\ge10^{-2}\bigr)\le10^{-2}$ を示せ。
+:::
+
+::: solution
+**1.** \ref{prb:bernstein-polynomials} の証明の Step 1 から $B_{n}f(x)=E[f(\frac{S_{n}}{n})]$ で、$S_{n}$ は独立な $B(1,x)$ の和。$E[S_{n}]=nx$、\ref{prb:independence-criteria.3} から $\operatorname{Var}(S_{n})=nx(1-x)$。よって $B_{n}f_{0}=1$, $B_{n}f_{1}(x)=E[\frac{S_{n}}{n}]=x$、
+$$
+B_{n}f_{2}(x)=E\Bigl[\Bigl(\frac{S_{n}}{n}\Bigr)^{2}\Bigr]=\operatorname{Var}\Bigl(\frac{S_{n}}{n}\Bigr)+x^{2}=x^{2}+\frac{x(1-x)}{n}.
+$$
+$x(1-x)$ は $[0,1]$ 上で $x=\frac12$ のとき最大値 $\frac14$ をとるので $\sup_{x}|B_{n}f_{2}-f_{2}|=\frac{1}{4n}$。
+
+**2.** **分布.** \ref{prb:independence-criteria.1} から $(U_{2k-1},U_{2k})$ の分布は $[0,1]^{2}$ 上の $\lambda\otimes\lambda$。$D\defeq\{(x,y)\in[0,1]^{2}:x^{2}+y^{2}\le1\}$ の $x$ での切り口は $[0,\sqrt{1-x^{2}}]$ なので、\ref{meas:tonelli} から
+$$
+P(Z_{k}=1)=(\lambda\otimes\lambda)(D)=\int_{0}^{1}\sqrt{1-x^{2}}\,dx=\Bigl[\frac{x\sqrt{1-x^{2}}+\arcsin x}{2}\Bigr]_{0}^{1}=\frac\pi4
+$$
+（$\frac{d}{dx}\frac{x\sqrt{1-x^{2}}+\arcsin x}{2}=\sqrt{1-x^{2}}$ を $(0,1)$ で確かめ、端点まで連続に延ばして \ref{calc:fundamental-theorem.2} を使う）。$Z_{k}$ は互いに素な組 $(U_{2k-1},U_{2k})$ の関数なので、\ref{prb:independence-criteria.2}（有限個ずつ）から独立で、上の計算から同分布。
+
+**強法則.** $E[Z_{1}]=\frac\pi4$ なので \ref{prb:strong-law} から $\frac1n\sum_{k\le n}Z_{k}\to\frac\pi4$（a.s.）、$4$ 倍して結論。
+
+**誤差の評価.** $\operatorname{Var}(Z_{1})=\frac\pi4(1-\frac\pi4)\le\frac14$ なので、\ref{prb:independence-criteria.3} から $\operatorname{Var}\bigl(\frac4n\sum_{k\le n}Z_{k}\bigr)=\frac{16}{n}\operatorname{Var}(Z_{1})\le\frac4n$。\ref{prb:basic-inequalities.2} から
+$$
+P\Bigl(\Bigl|\frac4n\sum_{k\le n}Z_{k}-\pi\Bigr|\ge10^{-2}\Bigr)\le\frac{4/n}{10^{-4}}=\frac{4\cdot10^{4}}{n}\le10^{-2}\qquad(n\ge4\cdot10^{6}).
+$$
+
+（1 は、$B_{n}f\to f$ の速さが一般には $\frac1n$ より良くならないことを示す。2 の評価は、誤差を $10$ 分の $1$ にするには点の数を $100$ 倍にしなければならないという、モンテカルロ法の誤差が $\frac{1}{\sqrt n}$ の程度であることの表れである。）
+:::
+
+::: problem ★★ 標準：クーポン収集問題 {#prb:ex-ln-2}
+$n\ge2$ とし、$C_{1},C_{2},\dots$ を i.i.d. で $\{1,\dots,n\}$ 上の一様分布に従う確率変数とする（$n$ 種類のおまけを 1 個ずつ無作為に集める）。$k=1,\dots,n$ について $\tau_{k}\defeq\min\{m:\#\{C_{1},\dots,C_{m}\}=k\}$（$k$ 種類目が初めてそろう時刻、そのような $m$ がなければ $\infty$）、$T_{n}\defeq\tau_{n}$ とおく。
+1. $P(T_{n}<\infty)=1$ で、$G_{k}\defeq\tau_{k}-\tau_{k-1}$（$k=2,\dots,n$）は独立、$G_{k}\sim\mathrm{Ge}\bigl(\frac{n-k+1}{n}\bigr)$ であることを示せ。
+2. $E[T_{n}]=nH_{n}$, $\operatorname{Var}(T_{n})\le2n^{2}$ を示せ。
+3. $\frac{T_{n}}{n\log n}\to1$（確率収束）、すなわち任意の $\varepsilon>0$ で $P\bigl(\bigl|\frac{T_{n}}{n\log n}-1\bigr|>\varepsilon\bigr)\to0$ を示せ。
+:::
+
+::: solution
+**1.** $p_{k}\defeq\frac{n-k+1}{n}\in(0,1)$（$k\ge2$）とおく。$\tau_{1}=1$ である。$j_{2},\dots,j_{n}\ge1$ を整数とし、$t_{1}\defeq1$, $t_{k}\defeq1+j_{2}+\dots+j_{k}$, $M\defeq t_{n}$ とおく。事象 $A\defeq\{G_{2}=j_{2},\dots,G_{n}=j_{n}\}=\{\tau_{k}=t_{k}\ (2\le k\le n)\}$ は、$(C_{1},\dots,C_{M})$ が次の条件を満たす語 $c\in\{1,\dots,n\}^{M}$ の集合 $W$ に入ることと同値である：各 $m\le M$ について、$c_{m}$ が $c_{1},\dots,c_{m-1}$ に現れない文字であることと $m\in\{t_{1},\dots,t_{n}\}$ が同値。
+
+$W$ の元を左から順に選んで数える。$m=t_{k}$ では、それまでに現れた文字は $k-1$ 種類で、新しい文字を選ぶので $n-k+1$ 通り。$t_{k-1}<m<t_{k}$ では、既に現れた $k-1$ 種類から選ぶので $k-1$ 通り。よって
+$$
+\#W=\prod_{k=1}^{n}(n-k+1)\cdot\prod_{k=2}^{n}(k-1)^{j_{k}-1}.
+$$
+独立性から各語の確率は $n^{-M}$ で、$M=1+\sum_{k\ge2}j_{k}$ なので
+$$
+P(A)=\frac{n}{n}\prod_{k=2}^{n}\Bigl(\frac{k-1}{n}\Bigr)^{j_{k}-1}\frac{n-k+1}{n}=\prod_{k=2}^{n}(1-p_{k})^{j_{k}-1}p_{k}.
+$$
+$(j_{2},\dots,j_{n})$ について足すと、$\sum_{j\ge1}(1-p_{k})^{j-1}p_{k}=1$ から和は $1$。異なる $(j_{k})$ の $A$ は互いに素で、その和は $\{T_{n}<\infty\}$ なので $P(T_{n}<\infty)=1$。（$\{T_{n}=\infty\}$ の上では $G_{k}\defeq1$ と定めておく。確率 $0$ なので以下に影響しない。）
+
+$B_{2},\dots,B_{n}\subset\mathbb{Z}_{\ge1}$ について、$(j_{k})\in\prod B_{k}$ で足すと
+$$
+P(G_{2}\in B_{2},\dots,G_{n}\in B_{n})=\prod_{k=2}^{n}\sum_{j\in B_{k}}(1-p_{k})^{j-1}p_{k}.
+$$
+一つの $k$ 以外で $B_{i}=\mathbb{Z}_{\ge1}$ とすれば $G_{k}\sim\mathrm{Ge}(p_{k})$ がわかり、上の式は $P(\bigcap_{k}\{G_{k}\in B_{k}\})=\prod_{k}P(G_{k}\in B_{k})$ となる。$G_{k}$ は a.s. で $\mathbb{Z}_{\ge1}$ に値をとるので、$\sigma(G_{k})$ の元は零集合を除いて $\{G_{k}\in B\}$（$B\subset\mathbb{Z}_{\ge1}$）の形で、$G_{2},\dots,G_{n}$ は独立。
+
+**2.** $T_{n}=1+\sum_{k=2}^{n}G_{k}$。\ref{prb:ex-rv-1.1} から $E[G_{k}]=\frac{1}{p_{k}}=\frac{n}{n-k+1}$ なので
+$$
+E[T_{n}]=1+\sum_{k=2}^{n}\frac{n}{n-k+1}=\sum_{k=1}^{n}\frac{n}{n-k+1}=n\sum_{i=1}^{n}\frac1i=nH_{n}.
+$$
+\ref{prb:independence-criteria.3} と \ref{prb:ex-rv-1.1} から
+$$
+\operatorname{Var}(T_{n})=\sum_{k=2}^{n}\frac{1-p_{k}}{p_{k}^{2}}\le\sum_{k=2}^{n}\frac{n^{2}}{(n-k+1)^{2}}=n^{2}\sum_{i=1}^{n-1}\frac{1}{i^{2}}\le2n^{2}
+$$
+（$\sum_{i\ge1}\frac{1}{i^{2}}\le1+\sum_{i\ge2}\bigl(\frac{1}{i-1}-\frac1i\bigr)=2$）。
+
+**3.** \ref{prb:basic-inequalities.2} と 2 から
+$$
+P\bigl(|T_{n}-nH_{n}|>\varepsilon n\log n\bigr)\le\frac{2n^{2}}{\varepsilon^{2}n^{2}(\log n)^{2}}=\frac{2}{\varepsilon^{2}(\log n)^{2}}\to0.
+$$
+一方、記法の確認から $\frac{H_{n}}{\log n}\to1$ なので、十分大きな $n$ で $\bigl|\frac{H_{n}}{\log n}-1\bigr|\le\frac\varepsilon2$。そのような $n$ では
+$$
+\Bigl|\frac{T_{n}}{n\log n}-1\Bigr|\le\frac{|T_{n}-nH_{n}|}{n\log n}+\Bigl|\frac{H_{n}}{\log n}-1\Bigr|
+$$
+から $P\bigl(\bigl|\frac{T_{n}}{n\log n}-1\bigr|>\varepsilon\bigr)\le P\bigl(|T_{n}-nH_{n}|>\frac\varepsilon2n\log n\bigr)\to0$。
+
+（$T_{n}$ は $n$ ごとに別の確率空間の上にあってよい：極限が定数なので、主張は各 $T_{n}$ の分布だけで決まる。$T_{n}=1+\sum_{k}G_{k}$ は、行ごとに分布の変わる独立な和（三角配列）で、\ref{prb:weak-law} と同じくチェビシェフの評価で平均のまわりに集中する。ただし平均 $nH_{n}$ が分散の平方根 $O(n)$ よりずっと速く増えることが要点である。$n=50$ 種類なら平均 $50H_{50}\approx225$ 個必要になる。）
+:::
+
+::: problem ★★★ 発展：記録の数 {#prb:ex-ln-3}
+$X_{1},X_{2},\dots$ を i.i.d. の実数値確率変数で、分布関数 $F$ が連続（すべての $x$ で $P(X_{1}=x)=0$）とする。$X_{k}$ が**記録**であるとは $X_{k}>\max_{j<k}X_{j}$ となることとし（$X_{1}$ は記録とする）、$A_{k}\defeq\{X_{k}\text{ が記録}\}$, $I_{k}\defeq\mathbf{1}_{A_{k}}$、$R_{n}\defeq\sum_{k\le n}I_{k}$（最初の $n$ 個の中の記録の数）とおく。
+1. $i\ne j$ なら $P(X_{i}=X_{j})=0$ を示せ。
+2. $I_{1},I_{2},\dots$ は独立で、$P(I_{k}=1)=\frac1k$ であることを示せ。
+3. $\frac{R_{n}}{\log n}\to1$（a.s.）を示せ。
+:::
+
+::: solution
+**1.** $\mu\defeq P_{X_{1}}$ とする。\ref{prb:independence-criteria.1} から $(X_{i},X_{j})$ の分布は $\mu\otimes\mu$ で、対角線 $\{(x,y):x=y\}$ は閉集合。\ref{meas:tonelli} から
+$$
+P(X_{i}=X_{j})=\int P(X_{1}=x)\,\mu(dx)=0.
+$$
+
+**2.** **Step 1（順位の一様性）.** $n$ を固定する。1 から $D\defeq\bigcup_{i<j\le n}\{X_{i}=X_{j}\}$ は零集合。$\{1,\dots,n\}$ の置換 $\sigma$ について $E_{\sigma}\defeq\{X_{\sigma(1)}<\dots<X_{\sigma(n)}\}$ とおくと、$E_{\sigma}$ は互いに素で、その和は $\Omega\setminus D$。$(X_{1},\dots,X_{n})$ の分布は $\mu^{\otimes n}$（\ref{prb:independence-criteria.1}）で、これは座標の置換で不変である（座標を置換した像測度も、直方体の上で $\prod\mu(B_{i})$ を与えるので、\ref{meas:measure-uniqueness} から $\mu^{\otimes n}$ に一致する）。$E_{\sigma}$ は $E_{\mathrm{id}}$ に対応する集合 $\{x_{1}<\dots<x_{n}\}$ を座標の置換で写したものの逆像なので、$P(E_{\sigma})$ は $\sigma$ によらず、和が $1$ なので $P(E_{\sigma})=\frac{1}{n!}$。
+
+**Step 2（相対順位）.** $r_{k}\defeq\#\{j\le k:X_{j}\le X_{k}\}\in\{1,\dots,k\}$（$X_{k}$ が $X_{1},\dots,X_{k}$ の中で小さい方から何番目か）とおく。$E_{\sigma}$ の上で $(r_{1},\dots,r_{n})$ は定数で、その値を $\rho(\sigma)\in\prod_{k=1}^{n}\{1,\dots,k\}$ とする。$\rho$ は単射：$(r_{1},\dots,r_{n})$ がわかれば、$X_{1}$ から順に「$X_{k}$ は $X_{1},\dots,X_{k-1}$ の中に入れて小さい方から $r_{k}$ 番目」と並べていくことで $X_{1},\dots,X_{n}$ の大小の順、すなわち $\sigma$ が復元できる。両辺の元の個数はともに $n!$ なので $\rho$ は全単射。よって $a_{k}\in\{1,\dots,k\}$ について
+$$
+P(r_{1}=a_{1},\dots,r_{n}=a_{n})=P(E_{\rho^{-1}(a)})=\frac{1}{n!}=\prod_{k=1}^{n}\frac1k.
+$$
+\ref{prb:ex-ln-2.1} の解答と同じく、他の座標について足すと $r_{k}$ は $\{1,\dots,k\}$ 上の一様分布に従い、同時分布が積になるので $r_{1},\dots,r_{n}$ は独立。
+
+**Step 3.** $\Omega\setminus D$ の上で $I_{k}=\mathbf{1}_{\{r_{k}=k\}}$ なので、\ref{prb:independence-criteria.2} から $I_{1},\dots,I_{n}$ は独立で $P(I_{k}=1)=P(r_{k}=k)=\frac1k$。独立性は有限個ずつの条件なので、$n$ は任意で、列全体が独立。
+
+**3.** **Step 1（平均と分散）.** 2 と \ref{prb:independence-criteria.3} から $E[R_{n}]=H_{n}$、$\operatorname{Var}(R_{n})=\sum_{k\le n}\frac1k\bigl(1-\frac1k\bigr)\le H_{n}$。
+
+**Step 2（部分列）.** $m\ge2$ について $n_{m}\defeq\lfloor e^{m^{2}}\rfloor$ とおく。$x\ge2$ なら $\lfloor x\rfloor\ge\frac x2$ なので $m^{2}-\log2\le\log n_{m}\le m^{2}$、また $e^{(m+1)^{2}}-e^{m^{2}}>1$ から $n_{m}<n_{m+1}$。$\varepsilon>0$ について、\ref{prb:basic-inequalities.2} と記法の確認の $H_{n}\ge\log n$ から
+$$
+P\bigl(|R_{n_{m}}-H_{n_{m}}|>\varepsilon H_{n_{m}}\bigr)\le\frac{1}{\varepsilon^{2}H_{n_{m}}}\le\frac{1}{\varepsilon^{2}(m^{2}-\log2)}\le\frac{2}{\varepsilon^{2}m^{2}}
+$$
+（$m\ge2$ で $\log2\le1\le\frac{m^{2}}{2}$）。和は有限なので、\ref{prb:borel-cantelli.1} と $\varepsilon=\frac1j$ についての共通部分から $\frac{R_{n_{m}}}{H_{n_{m}}}\to1$（a.s.）。$\frac{H_{n}}{\log n}\to1$ なので $\frac{R_{n_{m}}}{\log n_{m}}\to1$（a.s.）。
+
+**Step 3（間を埋める）.** $R_{n}$ は $n$ について単調増加なので、$n_{m}\le n\le n_{m+1}$ なら
+$$
+\frac{R_{n_{m}}}{\log n_{m}}\cdot\frac{\log n_{m}}{\log n_{m+1}}\le\frac{R_{n}}{\log n}\le\frac{R_{n_{m+1}}}{\log n_{m+1}}\cdot\frac{\log n_{m+1}}{\log n_{m}}.
+$$
+$1\le\frac{\log n_{m+1}}{\log n_{m}}\le\frac{(m+1)^{2}}{m^{2}-\log2}\to1$ なので、Step 2 の事象の上で $\frac{R_{n}}{\log n}\to1$。
+
+（記録は「これまでの最高を更新する」できごとで、$n$ 回の中におよそ $\log n$ 回しか起こらない。$F$ の形によらないのは、2 が順位だけの話だからである。$I_{k}$ は同分布でないので \ref{prb:strong-law} はそのまま使えないが、その証明の Step 3・4 と同じく、まばらな部分列でチェビシェフの評価と \ref{prb:borel-cantelli.1} を使い、単調性で間を埋めた。ここでは分散が $\log n$ 程度しか増えないので、部分列は $\lfloor\alpha^{m}\rfloor$ よりずっとまばらな $\lfloor e^{m^{2}}\rfloor$ にとった。）
+:::
+
+## 確率変数の収束 {#prb:sec-cv-exercises}
+
+対応するページ：\ref{prb:page-convergence}
+
+::: problem ★ 基本：幾何分布から指数分布へ・一様分布の最小値 {#prb:ex-cv-1}
+1. $0<p_{n}\le1$, $np_{n}\to\lambda\in(0,\infty)$ とし、$T_{n}\sim\mathrm{Ge}(p_{n})$ とする。$\frac{T_{n}}{n}\Rightarrow\mathrm{Exp}(\lambda)$ を示せ。
+2. $U_{1},U_{2},\dots$ を i.i.d. で $U(0,1)$ に従うとし、$V_{n}\defeq n\min_{k\le n}U_{k}$ とおく。$V_{n}\Rightarrow\mathrm{Exp}(1)$ を示せ。
+3. 1 で $E\bigl[\frac{T_{n}}{n}\bigr]\to\frac1\lambda$, $\operatorname{Var}\bigl(\frac{T_{n}}{n}\bigr)\to\frac{1}{\lambda^{2}}$ を示せ（\ref{prb:prob-rv-moments} の $\mathrm{Exp}(\lambda)$ の平均と分散に一致する）。
+:::
+
+::: solution
+**1.** $\mathrm{Exp}(\lambda)$ の分布関数 $F(x)=(1-e^{-\lambda x})\mathbf{1}_{[0,\infty)}(x)$ は連続なので、すべての $x$ で $P(\frac{T_{n}}{n}\le x)\to F(x)$ を示せばよい。$x<0$ なら両辺 $0$。$x\ge0$ とする。$T_{n}$ は整数値なので $\{T_{n}>nx\}=\{T_{n}>\lfloor nx\rfloor\}$ で、\ref{prb:ex-rv-1.1} から
+$$
+P\Bigl(\frac{T_{n}}{n}>x\Bigr)=(1-p_{n})^{\lfloor nx\rfloor}.
+$$
+$p_{n}=\frac{np_{n}}{n}\to0$ なので、十分大きな $n$ で $p_{n}<1$。記法の確認の不等式から
+$$
+-\lfloor nx\rfloor\frac{p_{n}}{1-p_{n}}\le\lfloor nx\rfloor\log(1-p_{n})\le-\lfloor nx\rfloor p_{n}.
+$$
+$\lfloor nx\rfloor p_{n}=\frac{\lfloor nx\rfloor}{n}\cdot np_{n}\to x\lambda$、$\frac{1}{1-p_{n}}\to1$ なので、両端は $-\lambda x$ に収束する。$\exp$ の連続性から $P(\frac{T_{n}}{n}>x)\to e^{-\lambda x}$、すなわち $P(\frac{T_{n}}{n}\le x)\to F(x)$。
+
+**2.** $0\le x\le n$ なら、独立性から
+$$
+P(V_{n}>x)=P\Bigl(U_{k}>\frac xn\ (k\le n)\Bigr)=\Bigl(1-\frac xn\Bigr)^{n}\to e^{-x}
+$$
+（\ref{calc:exp.5}）。$x\ge0$ を固定すれば $n\ge x$ のときこの式が使える。$x<0$ なら $P(V_{n}\le x)=0$。$\mathrm{Exp}(1)$ の分布関数は連続なので結論を得る。
+
+**3.** \ref{prb:ex-rv-1.1} から
+$$
+E\Bigl[\frac{T_{n}}{n}\Bigr]=\frac{1}{np_{n}}\to\frac1\lambda,\qquad\operatorname{Var}\Bigl(\frac{T_{n}}{n}\Bigr)=\frac{1-p_{n}}{n^{2}p_{n}^{2}}=\frac{1-p_{n}}{(np_{n})^{2}}\to\frac{1}{\lambda^{2}}.
+$$
+
+（1 は「離散時間の待ち時間を細かい時間刻みで見ると指数分布になる」こと、2 は「$n$ 個の一様な点のうち $0$ に最も近い点までの距離は $\frac1n$ の程度で、拡大すると指数分布になる」ことを言う。法則収束でモーメントが収束するとは限らないが（\ref{prb:convergence-relations.4} の例）、3 では収束している。その理由は \ref{prb:ex-cv-3.1} で扱う。）
+:::
+
+::: problem ★★ 標準：スルツキーの定理 {#prb:ex-cv-2}
+各 $n$ について $X_{n},Y_{n}$ は同じ確率空間の上の実数値確率変数とし、$X_{n}\Rightarrow X$、$c\in\mathbb{R}$ について $Y_{n}\to c$（確率収束）とする。
+1. $X_{n}+Y_{n}\Rightarrow X+c$ を示せ。
+2. $X_{n}Y_{n}\Rightarrow cX$ を示せ。
+3. さらに $V_{1},V_{2},\dots$ を、$X_{n}$ たちと同じ確率空間の上の i.i.d. で $E[|V_{1}|]<\infty$, $m\defeq E[V_{1}]\ne0$ とする。$W_{n}\defeq\frac{n}{V_{1}+\dots+V_{n}}$（分母が $0$ なら $W_{n}\defeq0$）とおくと $X_{n}W_{n}\Rightarrow\frac{X}{m}$ を示せ。
+:::
+
+::: solution
+$F\defeq F_{X}$ とし、$C(F)$ をその連続点の全体とする。$C(F)$ の補集合は可算である（\ref{prb:sec-cv-notation}）。
+
+**1.** $F_{X+c}(x)=F(x-c)$ なので、$x-c\in C(F)$ となる $x$ で $P(X_{n}+Y_{n}\le x)\to F(x-c)$ を示せばよい。$\varepsilon>0$ について、$|Y_{n}-c|\le\varepsilon$ の上では、$X_{n}+Y_{n}\le x\Rightarrow X_{n}\le x-c+\varepsilon$、また $X_{n}\le x-c-\varepsilon\Rightarrow X_{n}+Y_{n}\le x$。よって
+$$
+F_{X_{n}}(x-c-\varepsilon)-P(|Y_{n}-c|>\varepsilon)\le P(X_{n}+Y_{n}\le x)\le F_{X_{n}}(x-c+\varepsilon)+P(|Y_{n}-c|>\varepsilon).
+$$
+$C(F)$ の補集合は可算なので、$x-c\pm\varepsilon\in C(F)$ となる $\varepsilon$ をいくらでも小さくとれる。そのような $\varepsilon$ で $n\to\infty$ とすると
+$$
+F(x-c-\varepsilon)\le\liminf_{n}P(X_{n}+Y_{n}\le x)\le\limsup_{n}P(X_{n}+Y_{n}\le x)\le F(x-c+\varepsilon).
+$$
+$\varepsilon\downarrow0$ とすると、$x-c\in C(F)$ から左端は $F(x-c)$ に、右連続性から右端も $F(x-c)$ に収束する。
+
+**2.** **Step 1（$X_{n}$ の緊密性）.** $\eta>0$ とする。$F(-M)+1-F(M)<\eta$ かつ $\pm M\in C(F)$ となる $M>0$ をとる（$M\to\infty$ で左辺は $0$ に収束し、$C(F)$ は稠密）。$\{|X_{n}|>M\}\subset\{X_{n}\le-M\}\cup\{X_{n}>M\}$ なので
+$$
+\limsup_{n}P(|X_{n}|>M)\le\lim_{n}\bigl(F_{X_{n}}(-M)+1-F_{X_{n}}(M)\bigr)=F(-M)+1-F(M)<\eta.
+$$
+
+**Step 2（$X_{n}(Y_{n}-c)\to0$）.** $\delta>0$ について $\{|X_{n}(Y_{n}-c)|>\delta\}\subset\{|X_{n}|>M\}\cup\{|Y_{n}-c|>\frac{\delta}{M}\}$ なので、Step 1 から $\limsup_{n}P(|X_{n}(Y_{n}-c)|>\delta)\le\eta$。$\eta$ は任意なので $X_{n}(Y_{n}-c)\to0$（確率収束）。
+
+**Step 3.** $g(x)=cx$ は連続なので、\ref{prb:portmanteau.3} から $cX_{n}\Rightarrow cX$。$X_{n}Y_{n}=cX_{n}+X_{n}(Y_{n}-c)$ に、1 を（$X_{n}$ を $cX_{n}$、$Y_{n}$ を $X_{n}(Y_{n}-c)$、$c$ を $0$ として）使えば $X_{n}Y_{n}\Rightarrow cX$。
+
+**3.** \ref{prb:strong-law} から、ある確率 $1$ の事象の上で $\frac{V_{1}+\dots+V_{n}}{n}\to m\ne0$。その上では十分大きな $n$ で分母は $0$ でなく、$W_{n}=\bigl(\frac{V_{1}+\dots+V_{n}}{n}\bigr)^{-1}\to\frac1m$。よって $W_{n}\to\frac1m$（a.s.）で、\ref{prb:convergence-relations.1} から確率収束する。2 を $Y_{n}=W_{n}$, $c=\frac1m$ に使えばよい。
+
+（3 で $V_{k}$ と $X_{n}$ の独立性は要らない。$Y_{n}$ の極限が定数であることが本質的で、例えば $X\sim N(0,1)$ について $X_{n}\defeq X$, $Y_{n}\defeq-X$ とすると $Y_{n}\Rightarrow X$ だが $X_{n}+Y_{n}=0$ は $X+X=2X$ に法則収束しない。$Y_{n}$ が法則収束するだけでは $X_{n}$ との「組み合わせ方」がわからないのである。）
+:::
+
+::: problem ★★★ 発展：一様可積分性と法則収束 {#prb:ex-cv-3}
+1. $X_{n}\Rightarrow X$ で $\{X_{n}\}$ が一様可積分なら、$E[|X|]<\infty$ で $E[X_{n}]\to E[X]$ を示せ。
+2. $X_{n}\ge0$ が可積分で、$X_{n}\Rightarrow X$、$E[X_{n}]\to E[X]<\infty$ なら、$\{X_{n}\}$ は一様可積分であることを示せ。また、$X_{n}\ge0$ の仮定は外せないことを、$P(X_{n}=n)=P(X_{n}=-n)=\frac{1}{2n}$, $P(X_{n}=0)=1-\frac1n$ で示せ。
+3. $X_{1},X_{2},\dots$ が i.i.d. で $E[|X_{1}|]<\infty$, $m\defeq E[X_{1}]$ なら $E\bigl[\bigl|\frac{S_{n}}{n}-m\bigr|\bigr]\to0$ を示せ。
+:::
+
+::: solution
+**準備.** \ref{prb:change-of-variables} を $g(x)=|x|\mathbf{1}_{\{|x|>M\}}$ に使うと $E[|X_{n}|;|X_{n}|>M]=\int_{\{|x|>M\}}|x|\,P_{X_{n}}(dx)$ なので、一様可積分性は分布だけで決まる。
+
+**1.** \ref{prb:portmanteau.1} から、$([0,1),\lambda)$ 上の $Y_{n}\overset{d}{=}X_{n}$, $Y\overset{d}{=}X$ で $Y_{n}\to Y$（a.s.）となるものがある。準備から $\{Y_{n}\}$ は一様可積分で、\ref{prb:convergence-relations.1} から $Y_{n}\to Y$（確率収束）。\ref{prb:vitali-convergence} から $Y\in L^{1}$ で $E[Y_{n}]\to E[Y]$。分布が等しいので $E[|X|]=E[|Y|]<\infty$, $E[X_{n}]=E[Y_{n}]\to E[Y]=E[X]$。
+
+**2.** **一様可積分性.** 1 と同じく $Y_{n},Y$ をとる。$P(Y_{n}<0)=P(X_{n}<0)=0$ なので $Y_{n}\ge0$（a.s.）で、極限 $Y$ も $\ge0$（a.s.）。$E[Y_{n}]=E[X_{n}]\to E[X]=E[Y]<\infty$。$\min(Y_{n},Y)\to Y$（a.s.）で $0\le\min(Y_{n},Y)\le Y$ なので、\ref{meas:dominated-convergence} から $E[\min(Y_{n},Y)]\to E[Y]$。$|a-b|=a+b-2\min(a,b)$ から
+$$
+E[|Y_{n}-Y|]=E[Y_{n}]+E[Y]-2E[\min(Y_{n},Y)]\to E[Y]+E[Y]-2E[Y]=0.
+$$
+\ref{prb:vitali-convergence} の逆の部分から $\{Y_{n}\}$ は一様可積分で、準備から $\{X_{n}\}$ も一様可積分。
+
+**反例.** $P(X_{n}\ne0)=\frac1n\to0$ なので、$\varepsilon>0$ について $P(|X_{n}|>\varepsilon)\le\frac1n\to0$ で、\ref{prb:portmanteau.4} から（どの確率空間でも、定数 $0$ への確率収束から）$X_{n}\Rightarrow0$。$E[X_{n}]=\frac{n}{2n}-\frac{n}{2n}=0\to0=E[0]$。一方 $n>M$ なら $E[|X_{n}|;|X_{n}|>M]=n\cdot\frac1n=1$ なので、$\sup_{n}E[|X_{n}|;|X_{n}|>M]\ge1$ で一様可積分でない。
+
+**3.** **Step 1（$\{X_{k}\}$ は一様可積分）.** 同分布から $E[|X_{k}|;|X_{k}|>M]=E[|X_{1}|;|X_{1}|>M]$ で、右辺は \ref{meas:dominated-convergence} から $M\to\infty$ で $0$ に収束する（\ref{prb:ui-criteria.3} と同じ）。
+
+**Step 2（$\{\frac{S_{n}}{n}\}$ は一様可積分）.** \ref{prb:ui-criteria.4} を使う。$E[|\frac{S_{n}}{n}|]\le\frac1n\sum_{k\le n}E[|X_{k}|]=E[|X_{1}|]$ なので $L^{1}$ で有界。$\varepsilon>0$ について、Step 1 と \ref{prb:ui-criteria.4} から $P(A)<\delta\Rightarrow\sup_{k}E[|X_{k}|;A]<\varepsilon$ となる $\delta$ をとると、$P(A)<\delta$ なら
+$$
+E\Bigl[\Bigl|\frac{S_{n}}{n}\Bigr|;A\Bigr]\le\frac1n\sum_{k\le n}E[|X_{k}|;A]<\varepsilon.
+$$
+
+**Step 3.** \ref{prb:strong-law} と \ref{prb:convergence-relations.1} から $\frac{S_{n}}{n}\to m$（確率収束）。Step 2 と \ref{prb:vitali-convergence} から $E[|\frac{S_{n}}{n}-m|]\to0$。
+
+（1 から、\ref{prb:ex-cv-1.3} の収束は「$\sup_{n}E[(\frac{T_{n}}{n})^{2}]<\infty$ なので \ref{prb:ui-criteria.2} から一様可積分」という理由でも説明できる。2 の反例では、確率 $\frac1n$ の小さな事象に大きさ $n$ の質量が正負に置かれ、平均では打ち消し合うが、絶対値では消えない。3 は大数の強法則の $L^{1}$ 版で、i.i.d. の平均は概収束と $L^{1}$ 収束の両方の意味で期待値に近づく。）
+:::
+
+## 特性関数と中心極限定理 {#prb:sec-cl-exercises}
+
+対応するページ：\ref{prb:page-central-limit-theorem}
+
+::: problem ★ 基本：少数の法則 {#prb:ex-cl-1}
+1. 各 $n$ について $X_{n,1},\dots,X_{n,k_{n}}$ を独立で $P(X_{n,k}=1)=p_{n,k}$, $P(X_{n,k}=0)=1-p_{n,k}$ とし、$\max_{k}p_{n,k}\to0$, $\sum_{k}p_{n,k}\to\lambda\in(0,\infty)$ とする。$S_{n}\defeq\sum_{k}X_{n,k}\Rightarrow\mathrm{Po}(\lambda)$ を特性関数で示せ。
+2. $0\le p_{n}\le1$, $np_{n}\to\lambda\in(0,\infty)$ とし、$S_{n}\sim B(n,p_{n})$ とする。$S_{n}\Rightarrow\mathrm{Po}(\lambda)$ で、さらに各整数 $j\ge0$ で $P(S_{n}=j)\to e^{-\lambda}\frac{\lambda^{j}}{j!}$ を示せ。
+:::
+
+::: solution
+**1.** **Step 1（特性関数）.** $z_{k}\defeq p_{n,k}(e^{it}-1)$ とおくと $\varphi_{X_{n,k}}(t)=1-p_{n,k}+p_{n,k}e^{it}=1+z_{k}$ で、\ref{prb:characteristic-basic.3} から $\varphi_{S_{n}}(t)=\prod_{k}(1+z_{k})$。また \ref{prb:prob-cl-poisson} の解答の計算から $\mathrm{Po}(\lambda)$ の特性関数は $\exp(\lambda(e^{it}-1))$。
+
+**Step 2（指数との比較）.** $|1+z_{k}|\le1-p_{n,k}+p_{n,k}=1$、$|e^{z_{k}}|=e^{\operatorname{Re}z_{k}}=e^{p_{n,k}(\cos t-1)}\le1$。また $|z_{k}|\le2p_{n,k}\le2$ で、
+$$
+|e^{z}-1-z|=\Bigl|\sum_{j\ge2}\frac{z^{j}}{j!}\Bigr|\le|z|^{2}\sum_{j\ge2}\frac{|z|^{j-2}}{j!}\le|z|^{2}e^{|z|}.
+$$
+\ref{prb:product-comparison} から
+$$
+\Bigl|\prod_{k}(1+z_{k})-\prod_{k}e^{z_{k}}\Bigr|\le\sum_{k}|z_{k}|^{2}e^{2}\le4e^{2}\max_{k}p_{n,k}\sum_{k}p_{n,k}\to0.
+$$
+
+**Step 3.** $\prod_{k}e^{z_{k}}=\exp\bigl((\sum_{k}p_{n,k})(e^{it}-1)\bigr)\to\exp(\lambda(e^{it}-1))$（$\exp$ の加法定理と連続性、\ref{calc:complex-exp}）。よって $\varphi_{S_{n}}(t)\to\exp(\lambda(e^{it}-1))$ がすべての $t$ で成り立ち、極限は $\mathrm{Po}(\lambda)$ の特性関数なので $t=0$ で連続。\ref{prb:levy-continuity.2} からある $\mu$ に法則収束し、その特性関数は $\mathrm{Po}(\lambda)$ のものなので、\ref{prb:characteristic-uniqueness.2} から $\mu=\mathrm{Po}(\lambda)$。
+
+**2.** $B(n,p_{n})$ は独立な $B(1,p_{n})$ の $n$ 個の和と同分布（\ref{prb:bernstein-polynomials} の証明の Step 1）で、法則収束は分布だけで決まるので、$k_{n}=n$, $p_{n,k}=p_{n}$ として 1 を使う。$\sum_{k}p_{n,k}=np_{n}\to\lambda$、$\max_{k}p_{n,k}=p_{n}=\frac{np_{n}}{n}\to0$。よって $S_{n}\Rightarrow\mathrm{Po}(\lambda)$。$\mathrm{Po}(\lambda)$ の分布関数 $G$ は整数点でだけ跳ぶので $j\pm\frac12$ は連続点で、$S_{n}$ は整数値なので
+$$
+P(S_{n}=j)=F_{S_{n}}\Bigl(j+\frac12\Bigr)-F_{S_{n}}\Bigl(j-\frac12\Bigr)\to G\Bigl(j+\frac12\Bigr)-G\Bigl(j-\frac12\Bigr)=e^{-\lambda}\frac{\lambda^{j}}{j!}.
+$$
+
+（**少数の法則**：起こる確率の小さいできごとを多数回試すと、起こる回数はポアソン分布で近似される。1 では確率 $p_{n,k}$ がそろっていなくてもよく、各々が小さいこと（$\max_{k}p_{n,k}\to0$）だけが要る。中心極限定理で正規分布が出るのは分散 $\sum\sigma_{n,k}^{2}$ を保って各項を小さくした場合で、ここでは平均 $\sum p_{n,k}$ を保って各項を小さくしている。）
+:::
+
+::: problem ★★ 標準：デルタ法 {#prb:ex-cl-2}
+1. 確率変数 $T_{n}$、$\theta\in\mathbb{R}$、確率変数 $Z$ について $\sqrt n(T_{n}-\theta)\Rightarrow Z$ とし、$g\colon\mathbb{R}\to\mathbb{R}$ はボレル可測で $\theta$ で微分可能とする。$\sqrt n\bigl(g(T_{n})-g(\theta)\bigr)\Rightarrow g'(\theta)Z$ を示せ。
+2. $X_{1},X_{2},\dots$ を i.i.d. で $\mathrm{Exp}(\lambda)$ に従うとする。$\sqrt n\bigl(\frac{n}{S_{n}}-\lambda\bigr)\Rightarrow N(0,\lambda^{2})$ を示せ。
+3. $X_{1},X_{2},\dots$ を i.i.d. で $B(1,\frac12)$ に従うとし、$g(x)\defeq x(1-x)$、$\bar X_{n}\defeq\frac{S_{n}}{n}$ とする。1 からは $\sqrt n\bigl(g(\bar X_{n})-\frac14\bigr)\Rightarrow0$ しかわからないが、$n\bigl(g(\bar X_{n})-\frac14\bigr)\Rightarrow-\frac{W^{2}}{4}$（$W\sim N(0,1)$）を示せ。
+:::
+
+::: solution
+**1.** **Step 1（$T_{n}\to\theta$）.** $\frac{1}{\sqrt n}$ は定数の確率変数で $0$ に確率収束するので、\ref{prb:ex-cv-2.2} から $T_{n}-\theta=\frac{1}{\sqrt n}\cdot\sqrt n(T_{n}-\theta)\Rightarrow0\cdot Z=0$。\ref{prb:portmanteau.4} から $T_{n}-\theta\to0$（確率収束）。
+
+**Step 2（差分商）.** $x\ne\theta$ で $h(x)\defeq\frac{g(x)-g(\theta)}{x-\theta}$、$h(\theta)\defeq g'(\theta)$ とおく。$h$ はボレル可測で、微分可能性から $\theta$ で連続：$\varepsilon>0$ に $\delta>0$ があって $|x-\theta|<\delta\Rightarrow|h(x)-g'(\theta)|<\varepsilon$。よって $P(|h(T_{n})-g'(\theta)|\ge\varepsilon)\le P(|T_{n}-\theta|\ge\delta)\to0$、すなわち $h(T_{n})\to g'(\theta)$（確率収束）。
+
+**Step 3.** すべての点で（$T_{n}=\theta$ のときは両辺 $0$）
+$$
+\sqrt n\bigl(g(T_{n})-g(\theta)\bigr)=h(T_{n})\cdot\sqrt n(T_{n}-\theta)
+$$
+なので、\ref{prb:ex-cv-2.2} から $g'(\theta)Z$ に法則収束する。
+
+**2.** $\mathrm{Exp}(\lambda)$ の平均は $\frac1\lambda$、分散は $\frac{1}{\lambda^{2}}$（\ref{prb:prob-rv-moments}）。\ref{prb:clt} から $\frac{S_{n}-n/\lambda}{\sqrt n/\lambda}\Rightarrow Z\sim N(0,1)$ で、\ref{prb:portmanteau.3}（$x\mapsto\frac x\lambda$）から $\sqrt n\bigl(\frac{S_{n}}{n}-\frac1\lambda\bigr)\Rightarrow\frac Z\lambda$。$x>0$ で $g(x)\defeq\frac1x$、$x\le0$ で $g(x)\defeq0$ とおくと、$g$ はボレル可測で $\frac1\lambda$ で微分可能、$g'(\frac1\lambda)=-\lambda^{2}$。$S_{n}>0$（a.s.）なので $g(\frac{S_{n}}{n})=\frac{n}{S_{n}}$（a.s.）。1 から
+$$
+\sqrt n\Bigl(\frac{n}{S_{n}}-\lambda\Bigr)\Rightarrow-\lambda^{2}\cdot\frac{Z}{\lambda}=-\lambda Z.
+$$
+\ref{prb:characteristic-basic.2}, \ref{prb:characteristic-basic.4} から $-\lambda Z$ の特性関数は $e^{-\lambda^{2}t^{2}/2}$ で、\ref{prb:characteristic-uniqueness.2} から $-\lambda Z\sim N(0,\lambda^{2})$。
+
+**3.** $m=\frac12$, $\sigma^{2}=\frac14$ なので、\ref{prb:clt} と \ref{prb:portmanteau.3} から $\sqrt n(\bar X_{n}-\frac12)=\frac12\cdot\frac{S_{n}-n/2}{\sqrt n/2}\Rightarrow\frac W2$。$g'(\frac12)=0$ なので 1 から $\sqrt n(g(\bar X_{n})-\frac14)\Rightarrow0$。一方 $g(x)-\frac14=-(x-\frac12)^{2}$ なので
+$$
+n\Bigl(g(\bar X_{n})-\frac14\Bigr)=-\Bigl(\sqrt n\Bigl(\bar X_{n}-\frac12\Bigr)\Bigr)^{2},
+$$
+\ref{prb:portmanteau.3}（$x\mapsto-x^{2}$）から $-\frac{W^{2}}{4}$ に法則収束する。
+
+（2 の $\frac{n}{S_{n}}$ は、観測から $\lambda$ を推定する自然な量（最尤推定量）で、2 はその誤差がおよそ $\frac{\lambda}{\sqrt n}$ の正規分布に従うことを言う。デルタ法は「滑らかな関数は小さなずれを 1 次で写す」ことの確率版で、3 のように $g'(\theta)=0$ なら 2 次の項が主役になり、正規化も $\sqrt n$ から $n$ に変わる。）
+:::
+
+::: problem ★★★ 発展：リャプノフの条件と記録の数の中心極限定理 {#prb:ex-cl-3}
+1. \ref{prb:lindeberg-clt} の三角配列 $X_{n,k}$ について、ある $\delta>0$ で $\sum_{k}E[|X_{n,k}|^{2+\delta}]\to0$（**リャプノフの条件**）なら、リンデベルグの条件が成り立ち、$\sum_{k}X_{n,k}\Rightarrow N(0,1)$ であることを示せ。
+2. $X_{1},X_{2},\dots$ を独立で $X_{k}\sim U(-k,k)$ とし、$s_{n}^{2}\defeq\operatorname{Var}(S_{n})$ とする。$s_{n}^{2}=\frac{n(n+1)(2n+1)}{18}$ を示し、$\frac{S_{n}}{s_{n}}\Rightarrow N(0,1)$ と $\frac{S_{n}}{n^{3/2}}\Rightarrow N(0,\frac19)$ を示せ。
+3. $R_{n}$ を \ref{prb:ex-ln-3} の記録の数とする。$\frac{R_{n}-\log n}{\sqrt{\log n}}\Rightarrow N(0,1)$ を示せ。
+:::
+
+::: solution
+**1.** $\varepsilon>0$ とする。$|X|>\varepsilon$ なら $1<(\frac{|X|}{\varepsilon})^{\delta}$ なので
+$$
+\sum_{k}E\bigl[X_{n,k}^{2};|X_{n,k}|>\varepsilon\bigr]\le\sum_{k}E\Bigl[X_{n,k}^{2}\Bigl(\frac{|X_{n,k}|}{\varepsilon}\Bigr)^{\delta}\Bigr]=\varepsilon^{-\delta}\sum_{k}E\bigl[|X_{n,k}|^{2+\delta}\bigr]\to0.
+$$
+よってリンデベルグの条件が成り立ち、\ref{prb:lindeberg-clt} から結論を得る。
+
+**2.** **分散.** $X_{k}$ の密度は $\frac{1}{2k}\mathbf{1}_{[-k,k]}$ なので $E[X_{k}]=0$、
+$$
+E[X_{k}^{2}]=\frac{1}{2k}\int_{-k}^{k}x^{2}dx=\frac{k^{2}}{3},\qquad E[|X_{k}|^{3}]=\frac{1}{2k}\int_{-k}^{k}|x|^{3}dx=\frac{k^{3}}{4}.
+$$
+\ref{prb:independence-criteria.3} から $s_{n}^{2}=\frac13\sum_{k\le n}k^{2}=\frac{n(n+1)(2n+1)}{18}$。
+
+**リャプノフの条件.** $X_{n,k}\defeq\frac{X_{k}}{s_{n}}$（$k\le n$）は独立で平均 $0$、分散の和は $1$。$s_{n}^{2}\ge\frac{n\cdot n\cdot2n}{18}=\frac{n^{3}}{9}$ から $s_{n}^{3}\ge\frac{n^{9/2}}{27}$ で、$\sum_{k\le n}k^{3}\le n^{4}$ なので
+$$
+\sum_{k\le n}E\bigl[|X_{n,k}|^{3}\bigr]=\frac{1}{4s_{n}^{3}}\sum_{k\le n}k^{3}\le\frac{27n^{4}}{4n^{9/2}}=\frac{27}{4\sqrt n}\to0.
+$$
+1（$\delta=1$）から $\frac{S_{n}}{s_{n}}\Rightarrow N(0,1)$。
+
+**正規化の取り替え.** $\frac{s_{n}^{2}}{n^{3}}=\frac{(1+1/n)(2+1/n)}{18}\to\frac19$ なので $\frac{s_{n}}{n^{3/2}}\to\frac13$。定数の列は確率収束するので、\ref{prb:ex-cv-2.2} から $\frac{S_{n}}{n^{3/2}}=\frac{s_{n}}{n^{3/2}}\cdot\frac{S_{n}}{s_{n}}\Rightarrow\frac Z3$（$Z\sim N(0,1)$）で、\ref{prb:characteristic-basic.2}, \ref{prb:characteristic-basic.4}, \ref{prb:characteristic-uniqueness.2} から $\frac Z3\sim N(0,\frac19)$。
+
+**3.** **Step 1（三角配列）.** \ref{prb:ex-ln-3.2} から $I_{k}$ は独立で $B(1,\frac1k)$ に従う。$n\ge2$ で
+$$
+s_{n}^{2}\defeq\operatorname{Var}(R_{n})=\sum_{k\le n}\frac1k\Bigl(1-\frac1k\Bigr)=H_{n}-\sum_{k\le n}\frac{1}{k^{2}}
+$$
+とおくと、$\frac14\le s_{n}^{2}$ かつ $H_{n}-2\le s_{n}^{2}\le H_{n}$（$\sum_{k\ge1}\frac{1}{k^{2}}\le2$）なので $s_{n}\to\infty$。$X_{n,k}\defeq\frac{I_{k}-1/k}{s_{n}}$（$k\le n$）は独立で平均 $0$、分散の和は $1$ で、$|X_{n,k}|\le\frac{1}{s_{n}}$。
+
+**Step 2（リャプノフの条件）.** $\sum_{k\le n}E[|X_{n,k}|^{3}]\le\frac{1}{s_{n}}\sum_{k\le n}E[X_{n,k}^{2}]=\frac{1}{s_{n}}\to0$。1 から $\frac{R_{n}-H_{n}}{s_{n}}\Rightarrow N(0,1)$。
+
+**Step 3（正規化の取り替え）.** 記法の確認から $\frac{H_{n}}{\log n}\to1$ なので $\frac{s_{n}^{2}}{\log n}\to1$、$\frac{s_{n}}{\sqrt{\log n}}\to1$。また $0\le H_{n}-\log n\le1$ から $\frac{H_{n}-\log n}{\sqrt{\log n}}\to0$。
+$$
+\frac{R_{n}-\log n}{\sqrt{\log n}}=\frac{s_{n}}{\sqrt{\log n}}\cdot\frac{R_{n}-H_{n}}{s_{n}}+\frac{H_{n}-\log n}{\sqrt{\log n}}
+$$
+に \ref{prb:ex-cv-2.2} と \ref{prb:ex-cv-2.1}（定数の列は確率収束する）を使えば、$N(0,1)$ に法則収束する。
+
+（リャプノフの条件は高次のモーメントを要求する代わりに確かめやすい。2 では各項が同分布でなく、後の項ほど大きいが、どの一つの項も全体 $s_{n}\approx\frac{n^{3/2}}{3}$ に比べれば小さい（$\frac{n}{s_{n}}\to0$）ので正規分布が現れる。3 は \ref{prb:ex-ln-3.3} の大数の法則 $\frac{R_{n}}{\log n}\to1$ を精密化し、記録の数のゆらぎが $\sqrt{\log n}$ の程度であることを示す。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
