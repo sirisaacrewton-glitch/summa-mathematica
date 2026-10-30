@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>可測関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/01-measures/04-measurable-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 可測関数 {#meas:page-measurable-functions keywords="measurable map, measurability on generators, Borel measurable, continuous maps are Borel, extended real line, measurable functions criterion {f > a}, sums products max min of measurable functions, sup inf limsup liminf limits of measurable functions, simple functions, approximation by increasing simple functions, almost everywhere, complete measure spaces, Egorov's theorem, Lusin's theorem"}
+
+積分するには、関数の値がある範囲に入る点の集合が測れる必要がある。そのような関数が**可測関数**で、このページではその定義と、演算や極限で閉じていることを示す。とくに、可測関数の列の各点の極限は可測で、この「極限について閉じている」性質が、連続関数やリーマン積分可能な関数との大きな違いである。さらに、非負可測関数が単関数の増加列で近似できること（積分の定義の土台）、有限測度の上では各点収束が「ほとんど一様収束」になること（**エゴロフ**）、ルベーグ可測関数は大きなコンパクト集合の上では連続であること（**ルジン**）を示す。
+
+## 記法と定義の確認 {#meas:sec-mf-notation}
+
+::: notation
+- σ-加法族・生成・ボレル集合族・測度・完備・ほとんど至る所は \ref{meas:sigma-algebra}, \ref{meas:generated-sigma-algebra}, \ref{meas:measure}, \ref{meas:complete-measure}。ルベーグ測度とその正則性は \ref{meas:lebesgue-measure}, \ref{meas:lebesgue-regularity}。
+- $\overline{\mathbb{R}}\defeq[-\infty,\infty]$（拡大実数）。その上のボレル集合族 $\mathcal{B}(\overline{\mathbb{R}})$ を、$B\subset\overline{\mathbb{R}}$ で $B\cap\mathbb{R}\in\mathcal{B}(\mathbb{R})$ となるものの全体と定める（$\pm\infty$ は含んでも含まなくてもよい）。
+- 集合 $A$ の特性関数を $\mathbf{1}_{A}$ と書く。$\{f>a\}\defeq\{x:f(x)>a\}$ などと略記する。
+- 連続写像・開基・準開基は \ref{top:continuous}, \ref{top:base}, \ref{top:subbase}。延長には \ref{top:tietze} を使う。
+- **選択公理**：ルジンの定理でコンパクト集合を可算個選ぶところで可算選択公理を使う。
+:::
+
+## 可測写像 {#meas:sec-mf-maps}
+
+::: definition 可測写像と可測関数 {#meas:measurable-map keywords="measurable map between measurable spaces: preimages of measurable sets are measurable; Borel measurable; measurable function to the extended reals; Lebesgue measurable function" index="可測写像|かそくしゃぞう, 可測関数|かそくかんすう, ボレル可測|ぼれるかそく, ルベーグ可測関数|るべーぐかそくかんすう"}
+可測空間 $(X,\mathcal{M})$, $(Y,\mathcal{N})$ の間の写像 $f\colon X\to Y$ が、すべての $B\in\mathcal{N}$ について $f^{-1}(B)\in\mathcal{M}$ を満たすとき、**可測**（$(\mathcal{M},\mathcal{N})$ 可測）という。$Y=\mathbb{R}$ や $\overline{\mathbb{R}}$（ボレル集合族）のとき**可測関数**という。$X$, $Y$ が位相空間でどちらもボレル集合族を考えるとき**ボレル可測**、$X=\mathbb{R}^{n}$ に $\mathcal{L}_{n}$ を入れるとき**ルベーグ可測**という。
+:::
+
+::: proposition 生成元での判定 {#meas:measurability-generators keywords="f is measurable iff preimages of a generating family are measurable; continuous maps are Borel measurable; compositions of measurable maps are measurable" index="可測性の判定|かそくせいのはんてい"}
+1. $\mathcal{N}=\sigma(\mathcal{E})$ なら、$f$ が可測 $\iff$ すべての $E\in\mathcal{E}$ で $f^{-1}(E)\in\mathcal{M}$。
+2. 位相空間の間の連続写像はボレル可測。
+3. 可測写像の合成は可測。
+:::
+
+::: proof
+**1.** $\Rightarrow$ は明らか。$\Leftarrow$：$\mathcal{A}\defeq\{B\subset Y:f^{-1}(B)\in\mathcal{M}\}$ は σ-加法族（$f^{-1}(Y)=X$、$f^{-1}(B^{c})=f^{-1}(B)^{c}$、$f^{-1}(\bigcup B_{n})=\bigcup f^{-1}(B_{n})$）で $\mathcal{E}$ を含むので、\ref{meas:generated-properties.1} から $\mathcal{N}=\sigma(\mathcal{E})\subset\mathcal{A}$。
+
+**2.** 開集合の逆像は開集合（\ref{top:continuous}）でボレル集合なので、1 を $\mathcal{E}=$ 開集合全体で使う。
+
+**3.** $(g\circ f)^{-1}(C)=f^{-1}(g^{-1}(C))$。
+:::
+
+::: proposition 実数値・拡大実数値関数の判定 {#meas:measurable-function-criterion keywords="f: X -> extended reals is measurable iff {f > a} is measurable for all real a, equivalently {f >= a}, {f < a}, {f <= a}; it suffices to take a rational" index="可測関数の判定|かそくかんすうのはんてい"}
+$f\colon X\to\overline{\mathbb{R}}$ について次は同値。(a) $f$ は可測。(b) すべての $a\in\mathbb{Q}$ で $\{f>a\}\in\mathcal{M}$。(c) すべての $a\in\mathbb{R}$ で $\{f\ge a\}\in\mathcal{M}$。(d) すべての $a\in\mathbb{R}$ で $\{f<a\}\in\mathcal{M}$。(e) すべての $a\in\mathbb{R}$ で $\{f\le a\}\in\mathcal{M}$。実数値の $f$ についても同じ（$\overline{\mathbb{R}}$ への写像とみる）。
+:::
+
+::: proof
+**(a)⇒(b)〜(e).** $(a,\infty]$, $[a,\infty]$, $[-\infty,a)$, $[-\infty,a]$ はどれも $\mathcal{B}(\overline{\mathbb{R}})$ の元（$\mathbb{R}$ との共通部分が区間）。
+
+**(b)⇒(c).** $\{f\ge a\}=\bigcap_{k}\{f>q_{k}\}$（$q_{k}\in\mathbb{Q}$, $q_{k}\uparrow a$, $q_{k}<a$）。$x$ が右辺に属すれば $f(x)>q_{k}$ がすべての $k$ で成り立ち $f(x)\ge a$。
+
+**(c)⇒(d)⇒(e)⇒(b).** $\{f<a\}=\{f\ge a\}^{c}$、$\{f\le a\}=\bigcap_{k}\{f<a+\frac1k\}$、$\{f>a\}=\{f\le a\}^{c}$。
+
+**(b)〜(e)⇒(a).** $\{\infty\}=\bigcap_{k}(k,\infty]$、$\{-\infty\}=\bigcap_{k}[-\infty,-k)$ の逆像は可測。$B\in\mathcal{B}(\overline{\mathbb{R}})$ について $f^{-1}(B)=f^{-1}(B\cap\mathbb{R})\cup f^{-1}(B\cap\{\pm\infty\})$ なので、$B\subset\mathbb{R}$ がボレル集合のとき $f^{-1}(B)\in\mathcal{M}$ を示せばよい。$\{B\in\mathcal{B}(\mathbb{R}):f^{-1}(B)\in\mathcal{M}\}$ は σ-加法族で（\ref{meas:measurability-generators} の証明と同様。補集合は $f^{-1}(\mathbb{R}\setminus B)=f^{-1}(\mathbb{R})\setminus f^{-1}(B)$、$f^{-1}(\mathbb{R})=\{f<\infty\}\cap\{f>-\infty\}$ は可測）、半開区間 $(a,b]$ を含む（$f^{-1}((a,b])=\{f>a\}\cap\{f\le b\}$）。\ref{meas:borel-generators.1} から $\mathcal{B}(\mathbb{R})$ 全体を含む。
+:::
+
+## 演算と極限 {#meas:sec-mf-operations}
+
+::: proposition 可測関数の演算 {#meas:measurable-operations keywords="for real-valued measurable f, g: f+g, fg, cf, max, min, |f|, f^+ and f^- are measurable; (f,g): X -> R^2 is measurable; phi(f,g) is measurable for continuous phi" index="可測関数の演算|かそくかんすうのえんざん"}
+$f,g\colon X\to\mathbb{R}$ を可測関数とする。
+1. $(f,g)\colon X\to\mathbb{R}^{2}$ は $(\mathcal{M},\mathcal{B}(\mathbb{R}^{2}))$ 可測。
+2. 連続（またはボレル可測）な $\varphi\colon\mathbb{R}^{2}\to\mathbb{R}$ について $\varphi(f,g)$ は可測。とくに $f+g$, $fg$, $\max(f,g)$, $\min(f,g)$, $|f|$, $f^{+}\defeq\max(f,0)$, $f^{-}\defeq\max(-f,0)$ は可測。
+:::
+
+::: proof
+**1.** $(f,g)^{-1}((a_{1},b_{1}]\times(a_{2},b_{2}])=f^{-1}((a_{1},b_{1}])\cap g^{-1}((a_{2},b_{2}])\in\mathcal{M}$。半開直方体は $\mathcal{B}(\mathbb{R}^{2})$ を生成する（\ref{meas:borel-generators.1}）ので \ref{meas:measurability-generators.1}。
+
+**2.** $\varphi(f,g)=\varphi\circ(f,g)$ で、\ref{meas:measurability-generators.2}・\ref{meas:measurability-generators.3}。和・積・最大・最小・絶対値はどれも連続写像 $\mathbb{R}^{2}\to\mathbb{R}$（または $\mathbb{R}\to\mathbb{R}$）との合成。
+:::
+
+::: proposition 可測関数の極限 {#meas:measurable-limits keywords="sup, inf, limsup, liminf of a sequence of extended real valued measurable functions are measurable; the pointwise limit is measurable; the set where the limit exists is measurable" index="可測関数の極限|かそくかんすうのきょくげん"}
+$f_{n}\colon X\to\overline{\mathbb{R}}$ を可測関数の列とする。
+1. $\sup_{n}f_{n}$, $\inf_{n}f_{n}$, $\limsup_{n}f_{n}$, $\liminf_{n}f_{n}$ は可測。
+2. 各点で極限が（$\overline{\mathbb{R}}$ の中で）存在すれば、$\lim f_{n}$ は可測。
+3. 極限が存在する点の集合 $\{x:\lim f_{n}(x)\text{ が }\overline{\mathbb{R}}\text{ に存在}\}$ は可測。
+:::
+
+::: proof
+**1.** $\{\sup f_{n}>a\}=\bigcup_{n}\{f_{n}>a\}$、$\{\inf f_{n}<a\}=\bigcup_{n}\{f_{n}<a\}$ で、\ref{meas:measurable-function-criterion}。$\limsup f_{n}=\inf_{m}\sup_{n\ge m}f_{n}$, $\liminf f_{n}=\sup_{m}\inf_{n\ge m}f_{n}$。
+
+**2.** 極限が存在すれば $\lim f_{n}=\limsup f_{n}$。
+
+**3.** その集合は $\{\limsup f_{n}=\liminf f_{n}\}$。$u\defeq\limsup f_{n}$, $l\defeq\liminf f_{n}$（可測、$l\le u$）について、$\{l<u\}=\bigcup_{q\in\mathbb{Q}}\{l<q\}\cap\{q<u\}$ は可測なので、補集合も可測。
+:::
+
+::: remark
+各点収束の極限が可測関数のクラスに留まることは、連続関数（各点極限は連続とは限らない）やリーマン積分可能な関数（$\mathbb{Q}\cap[0,1]$ の有限部分集合の特性関数の増加列の極限 $\mathbf{1}_{\mathbb{Q}\cap[0,1]}$ はリーマン積分可能でない）との本質的な違いである。
+:::
+
+## 単関数による近似 {#meas:sec-mf-simple}
+
+::: definition 単関数 {#meas:simple-function keywords="simple function: measurable function with finitely many real values; canonical form sum of c_i 1_{A_i} with disjoint A_i" index="単関数|たんかんすう"}
+有限個の実数値しかとらない可測関数を**単関数**という。値を $c_{1},\dots,c_{m}$（相異なる）とすると $s=\sum_{i}c_{i}\mathbf{1}_{A_{i}}$（$A_{i}\defeq\{s=c_{i}\}\in\mathcal{M}$、互いに素で和は $X$）と書ける（**標準形**）。
+:::
+
+::: theorem 単関数による近似 {#meas:simple-approximation keywords="every nonnegative measurable function is the pointwise limit of an increasing sequence of nonnegative simple functions, uniformly on sets where f is bounded" index="単関数近似|たんかんすうきんじ"}
+$f\colon X\to[0,\infty]$ を可測関数とすると、非負の単関数の列 $0\le s_{1}\le s_{2}\le\cdots$ で各点で $s_{n}\to f$ となるものがある。さらに、$f\le M$ となる集合の上では一様に収束する。
+:::
+
+::: proof
+$$
+s_{n}\defeq\sum_{k=0}^{n2^{n}-1}\frac{k}{2^{n}}\mathbf{1}_{\{k2^{-n}\le f<(k+1)2^{-n}\}}+n\mathbf{1}_{\{f\ge n\}}
+$$
+とおく。各集合は可測（\ref{meas:measurable-function-criterion}）で、値は有限個なので $s_{n}$ は単関数。
+
+**Step 1（$s_{n}\le f$）.** $f(x)<n$ なら $s_{n}(x)=\lfloor2^{n}f(x)\rfloor2^{-n}\le f(x)$、$f(x)\ge n$ なら $s_{n}(x)=n\le f(x)$。
+
+**Step 2（単調）.** $f(x)<n$ のとき、$t\defeq2^{n}f(x)$ について $\lfloor2t\rfloor\ge2\lfloor t\rfloor$ なので $s_{n+1}(x)=\lfloor2t\rfloor2^{-n-1}\ge\lfloor t\rfloor2^{-n}=s_{n}(x)$（$f(x)<n<n+1$）。$f(x)\ge n$ のとき、$f(x)\ge n+1$ なら $s_{n+1}(x)=n+1>n$、$n\le f(x)<n+1$ なら $s_{n+1}(x)=\lfloor2^{n+1}f(x)\rfloor2^{-n-1}\ge\lfloor2^{n+1}n\rfloor2^{-n-1}=n$。
+
+**Step 3（収束）.** $f(x)<\infty$ なら、$n>f(x)$ で $0\le f(x)-s_{n}(x)<2^{-n}$。$f(x)=\infty$ なら $s_{n}(x)=n\to\infty$。$f\le M$ の集合の上では、$n>M$ で $\sup(f-s_{n})\le2^{-n}$（一様）。
+:::
+
+::: corollary 実数値関数の近似 {#meas:simple-approximation-real keywords="every real valued measurable function is a pointwise limit of simple functions s_n with |s_n| <= |f|" index="単関数近似（実数値）|たんかんすうきんじじっすうち"}
+可測関数 $f\colon X\to\mathbb{R}$ について、単関数の列 $s_{n}\to f$（各点）で $|s_{n}|\le|f|$ となるものがある。
+:::
+
+::: proof
+$f^{+}$, $f^{-}$（可測、\ref{meas:measurable-operations.2}）に \ref{meas:simple-approximation} を使い $s_{n}\defeq s_{n}^{+}-s_{n}^{-}$。$f^{+}$ と $f^{-}$ は同時に正にならないので $|s_{n}|=s_{n}^{+}+s_{n}^{-}\le f^{+}+f^{-}=|f|$。
+:::
+
+## ほとんど至る所と完備性 {#meas:sec-mf-ae}
+
+::: proposition 完備な測度空間での可測性 {#meas:ae-measurable keywords="in a complete measure space, a function equal a.e. to a measurable function is measurable; a.e. limits of measurable functions are measurable" index="ほとんど至る所等しい関数|ほとんどいたるところひとしいかんすう"}
+$(X,\mathcal{M},\mu)$ を完備とする。
+1. $f$ が可測で $g=f$（a.e.）なら $g$ は可測。
+2. 可測関数の列 $f_{n}$ がほとんど至る所 $f$ に収束すれば、$f$ は可測。
+:::
+
+::: proof
+**1.** 零集合 $N$ の外で $g=f$ とする。$\{g>a\}=(\{f>a\}\setminus N)\cup(\{g>a\}\cap N)$ で、第 1 項は可測、第 2 項は $N$ の部分集合なので（完備性から）可測。
+
+**2.** 零集合 $N$ の外で $f_{n}\to f$ とする。$f_{n}\mathbf{1}_{N^{c}}$ は可測で（$\{f_{n}\mathbf{1}_{N^{c}}>a\}$ は $\{f_{n}>a\}\setminus N$ か、それに $N$ を加えたもの）、各点で $f\mathbf{1}_{N^{c}}$ に収束するので \ref{meas:measurable-limits.2} から $f\mathbf{1}_{N^{c}}$ は可測。$f=f\mathbf{1}_{N^{c}}$（a.e.）なので 1 から $f$ は可測。
+
+::: hypcheck
+- **完備性**は 1 で第 2 項が可測であることに使った。完備でなければ偽：ボレル集合族上の $\lambda$ で、カントール集合の部分集合でボレルでないもの $Z$（前のページの補足）について、$\mathbf{1}_{Z}=0$（a.e.）だが $\mathbf{1}_{Z}$ はボレル可測でない。
+:::
+:::
+
+## エゴロフとルジン {#meas:sec-mf-egorov-lusin}
+
+::: theorem エゴロフの定理 {#meas:egorov keywords="Egorov's theorem: on a finite measure space, a.e. convergence of real valued measurable functions is uniform outside a set of arbitrarily small measure" index="エゴロフの定理|えごろふのていり, ほとんど一様収束|ほとんどいちようしゅうそく"}
+$\mu(X)<\infty$ とし、可測関数 $f_{n},f\colon X\to\mathbb{R}$ について $f_{n}\to f$（a.e.）とする。任意の $\varepsilon>0$ について、$E\in\mathcal{M}$ で $\mu(X\setminus E)<\varepsilon$ かつ $E$ 上で $f_{n}\to f$ が一様となるものがある。
+:::
+
+::: proof
+**Step 1.** $k,m\ge1$ について $B_{k,m}\defeq\bigcup_{n\ge m}\{|f_{n}-f|\ge\frac1k\}$（可測、\ref{meas:measurable-operations}）。$m$ について減少し、$\bigcap_{m}B_{k,m}$ は「$|f_{n}(x)-f(x)|\ge\frac1k$ となる $n$ が無限個ある」点の集合で、$f_{n}(x)\to f(x)$ の点を含まないので零集合に含まれる。$\mu(X)<\infty$ なので上からの連続性（\ref{meas:measure-properties.5}）から $\mu(B_{k,m})\to0$（$m\to\infty$）。
+
+**Step 2.** 各 $k$ で $m_{k}$ を $\mu(B_{k,m_{k}})<\varepsilon2^{-k}$ となる最小の自然数とし、$E\defeq X\setminus\bigcup_{k}B_{k,m_{k}}$。劣加法性から $\mu(X\setminus E)<\varepsilon$。$x\in E$ なら、すべての $k$ と $n\ge m_{k}$ で $|f_{n}(x)-f(x)|<\frac1k$ なので、$E$ 上で一様収束。
+
+::: hypcheck
+- **有限測度**は Step 1 の上からの連続性に使った。外すと偽：$\mathbb{R}$ 上で $f_{n}\defeq\mathbf{1}_{[n,n+1]}\to0$（各点）だが、$\lambda(\mathbb{R}\setminus E)<1$ なら $E$ は各 $[n,n+1]$ と交わり（交わらなければ $\lambda(\mathbb{R}\setminus E)\ge1$）、$\sup_{E}|f_{n}|=1$。
+- $f$ が**実数値**（有限）であることは $|f_{n}-f|$ が定義されるために使った。
+- 選択公理は使っていない（$m_{k}$ は最小元として選んだ）。
+:::
+:::
+
+::: theorem ルジンの定理 {#meas:lusin keywords="Lusin's theorem: a Lebesgue measurable function is continuous on a compact set whose complement in a set of finite measure has small measure; it agrees with a continuous function outside a set of small measure" index="ルジンの定理|るじんのていり"}
+$f\colon\mathbb{R}^{n}\to\mathbb{R}$ をルベーグ可測、$A\in\mathcal{L}_{n}$, $\lambda(A)<\infty$ とする。任意の $\varepsilon>0$ について、コンパクト集合 $K\subset A$ で $\lambda(A\setminus K)<\varepsilon$ かつ $f\restriction K$ が連続となるものがある。さらに、連続関数 $g\colon\mathbb{R}^{n}\to\mathbb{R}$ で $K$ 上 $g=f$ となるものがある。
+:::
+
+::: proof
+**Step 1.** 端点が有理数の開区間を $V_{1},V_{2},\dots$ と数え上げる（$\mathbb{R}$ の開基）。各 $j$ について $A_{j}\defeq A\cap f^{-1}(V_{j})$ と $A'_{j}\defeq A\setminus f^{-1}(V_{j})$ は可測で、内正則性（\ref{meas:lebesgue-regularity.2}）から、コンパクト集合 $K_{j}\subset A_{j}$, $K'_{j}\subset A'_{j}$ で $\lambda(A_{j}\setminus K_{j})+\lambda(A'_{j}\setminus K'_{j})<\varepsilon2^{-j}$ となるものを選ぶ（可算選択公理）。
+
+**Step 2.** $K\defeq\bigcap_{j}(K_{j}\cup K'_{j})$ はコンパクトで（閉集合の共通部分で、$K_{1}\cup K'_{1}$ に含まれる）、$K\subset A$。$A\setminus K\subset\bigcup_{j}\bigl((A_{j}\setminus K_{j})\cup(A'_{j}\setminus K'_{j})\bigr)$（$A=A_{j}\sqcup A'_{j}$）なので $\lambda(A\setminus K)<\varepsilon$。
+
+**Step 3（連続性）.** 各 $j$ で $K\subset K_{j}\cup K'_{j}$、$K_{j}\subset f^{-1}(V_{j})$、$K'_{j}\cap f^{-1}(V_{j})=\varnothing$ なので
+$$
+(f\restriction K)^{-1}(V_{j})=K\cap K_{j}=K\setminus K'_{j},
+$$
+これは $K$ の相対位相で開集合。$\{V_{j}\}$ は開基なので、任意の開集合の逆像は相対開集合の和で開集合、$f\restriction K$ は連続。
+
+**Step 4（延長）.** $K$ は $\mathbb{R}^{n}$ の閉集合なので、\ref{top:tietze} から連続な $g$ で $g\restriction K=f\restriction K$ となるものがある（$\mathbb{R}^{n}$ は距離空間で正規）。
+
+::: hypcheck
+- **内正則性**（コンパクト集合による近似）が Step 1 の本質。
+- **$\lambda(A)<\infty$** は内正則性で誤差を有限にするのに使った。$A=\mathbb{R}^{n}$ でも、$K$ を閉集合（コンパクトでなく）にすれば同じ結論が得られる（$(-m,m]^{n}$ ごとに $\varepsilon2^{-m}$ で近似して、局所有限な和をとる）。
+- 「$f\restriction K$ が連続」は「$f$ が $K$ の点で連続」より弱い：$\mathbf{1}_{\mathbb{Q}}$ はどこでも不連続だが、$K\subset\mathbb{R}\setminus\mathbb{Q}$ への制限は定数 $0$ で連続。
+:::
+:::
+
+::: supplement
+**高い視点：可測関数は「測れる観測量」.** σ-加法族を「測ってよい命題の族」とみると（\ref{meas:page-sigma-algebras} の補足）、可測関数は「その値についてのどんな問い（値がこの範囲にあるか）にも、測ってよい命題で答えられる観測量」である。可測性が生成元で判定できること（\ref{meas:measurability-generators}）は、$\{f>a\}$ という「しきい値の問い」に答えられれば十分であることを意味し、極限で閉じていることは、可算個の問いの組合せで極限についての問いにも答えられることの反映である。
+
+**圏論的な見方.** 可測空間と可測写像は圏 $\mathbf{Meas}$ をなし、集合 $X$ に σ-加法族 $\sigma(f^{-1}(\mathcal{N}))$ を入れる操作は、写像 $f$ を可測にする最小の σ-加法族（始 σ-加法族）を与える。位相空間の始位相と同じ形の普遍性をもつ。ルジンの定理は、ルベーグ可測関数がコンパクト集合という「位相的に良い部分」の上では位相的な対象（連続関数）に戻ることを言っていて、比喩で言えば「測度の目で見れば、可測関数は少しだけ穴の空いた連続関数」である。
+:::
+
+## 問題 {#meas:sec-mf-problems}
+
+::: problem {#meas:prob-mf-derivative}
+$f\colon\mathbb{R}\to\mathbb{R}$ がすべての点で微分可能なら、導関数 $f'$ はボレル可測であることを示せ。
+:::
+
+::: solution
+$f$ は微分可能なので連続で、$g_{n}(x)\defeq n\bigl(f(x+\frac1n)-f(x)\bigr)$ は連続関数、とくにボレル可測（\ref{meas:measurability-generators.2}）。各点で $g_{n}(x)\to f'(x)$ なので、\ref{meas:measurable-limits.2} から $f'$ はボレル可測。
+:::
+
+::: problem {#meas:prob-mf-monotone}
+単調増加な $f\colon\mathbb{R}\to\mathbb{R}$ はボレル可測であることを示せ。
+:::
+
+::: solution
+$a\in\mathbb{R}$ について $S\defeq\{f>a\}$ は「上に閉じた」集合（$x\in S$, $y>x$ なら $f(y)\ge f(x)>a$ で $y\in S$）。よって $S$ は $\varnothing$, $\mathbb{R}$, $(c,\infty)$, $[c,\infty)$（$c=\inf S$）のどれかで、いずれもボレル集合。\ref{meas:measurable-function-criterion} から可測。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
