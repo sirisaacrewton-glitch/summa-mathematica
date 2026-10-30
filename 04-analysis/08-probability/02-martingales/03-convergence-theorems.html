@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マルチンゲール収束定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/02-martingales/03-convergence-theorems.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# マルチンゲール収束定理 {#prb:page-convergence-theorems keywords="upcrossing inequality, martingale convergence theorem for L^1-bounded submartingales, nonnegative supermartingales converge, uniformly integrable martingales and closure E[X_infty | F_n], Levy's upward theorem, Levy's 0-1 law, L^p bounded martingales converge in L^p, backward martingales, strong law of large numbers via backward martingales"}
+
+マルチンゲールの理論の中心は**収束定理**である：$L^{1}$ で有界な（劣）マルチンゲールは、ほとんど確実に収束する。証明の鍵は、過程が区間 $[a,b]$ を下から上に横切る回数（**上向き横断数**）を期待値で抑える**ドゥーブの上向き横断不等式**で、「振動し続けるには無限回横断しなければならないが、横断の期待回数は有限」という議論である。このページでは、この定理を証明し、$L^{1}$ 収束が成り立つための条件（一様可積分性）、条件付き期待値の極限（**レヴィの上向き定理**）とその系としての**レヴィの 0-1 法則**、$L^{p}$ 収束を示す。最後に、時間を逆向きにした**逆マルチンゲール**の収束定理から、大数の強法則を別の方法で導く。
+
+## 記法と定義の確認 {#prb:sec-ct-notation}
+
+::: notation
+- マルチンゲール・停止時刻・マルチンゲール変換・ドゥーブの不等式は \ref{prb:page-martingales-stopping}、条件付けの性質は \ref{prb:page-conditional-expectation}。
+- 一様可積分性とヴィタリの収束定理は \ref{prb:uniform-integrability}, \ref{prb:vitali-convergence}。π-λ 定理は \ref{meas:pi-lambda}、ファトゥの補題は \ref{meas:fatou}。
+- $\mathcal{F}_{\infty}\defeq\sigma\bigl(\bigcup_{n}\mathcal{F}_{n}\bigr)$。
+- **選択公理**：使わない。
+:::
+
+## 上向き横断不等式と収束定理 {#prb:sec-ct-convergence}
+
+::: lemma 上向き横断不等式 {#prb:upcrossing-inequality keywords="Doob's upcrossing inequality: for a submartingale X and a < b, the number U_n[a,b] of upcrossings of [a,b] by time n satisfies (b - a) E U_n <= E (X_n - a)^+ - E (X_0 - a)^+" index="上向き横断不等式|うわむきおうだんふとうしき, 上向き横断数|うわむきおうだんすう"}
+$X$ を劣マルチンゲール、$a<b$ とする。停止時刻を $\sigma_{0}\defeq-1$ のあと、$j\ge1$ について
+$$
+\sigma_{j}\defeq\inf\{k>\tau_{j-1}:X_{k}\le a\},\qquad\tau_{j}\defeq\inf\{k>\sigma_{j}:X_{k}\ge b\}\qquad(\tau_{0}\defeq-1)
+$$
+と定め、$U_{n}[a,b]\defeq\max\{j:\tau_{j}\le n\}$（時刻 $n$ までの**上向き横断数**）とおく。このとき
+$$
+(b-a)E\bigl[U_{n}[a,b]\bigr]\le E[(X_{n}-a)^{+}]-E[(X_{0}-a)^{+}].
+$$
+:::
+
+::: proof
+**Step 1.** $Y_{n}\defeq(X_{n}-a)^{+}$ は劣マルチンゲール（\ref{prb:martingale-examples.4}、$x\mapsto(x-a)^{+}$ は凸で単調増加）。$X$ が $[a,b]$ を上向きに横断することと $Y$ が $[0,b-a]$ を横断することは同じで、$U_{n}$ も同じ。
+
+**Step 2（賭け方）.** $H_{k}\defeq\mathbf{1}\{\text{ある }j\text{ で }\sigma_{j}<k\le\tau_{j}\}$ とおく。$\{\sigma_{j}<k\le\tau_{j}\}=\{\sigma_{j}\le k-1\}\setminus\{\tau_{j}\le k-1\}\in\mathcal{F}_{k-1}$（$\sigma_{j},\tau_{j}$ は帰納的に停止時刻）なので $H$ は可予測で $0\le H\le1$。
+
+**Step 3（下からの評価）.** $(H\cdot Y)_{n}$ は、完了した横断 $j\le U_{n}$ ごとに $Y_{\tau_{j}}-Y_{\sigma_{j}}\ge(b-a)-0$（$X_{\sigma_{j}}\le a$ で $Y_{\sigma_{j}}=0$、$Y_{\tau_{j}}\ge b-a$）、時刻 $n$ で途中の横断があれば $Y_{n}-Y_{\sigma_{j}}=Y_{n}\ge0$ を足したもの。よって $(H\cdot Y)_{n}\ge(b-a)U_{n}$。
+
+**Step 4.** $1-H\ge0$ も可予測なので、\ref{prb:martingale-transform} から $((1-H)\cdot Y)$ は劣マルチンゲールで $E[((1-H)\cdot Y)_{n}]\ge0$。$(H\cdot Y)_{n}+((1-H)\cdot Y)_{n}=Y_{n}-Y_{0}$ から $E[(H\cdot Y)_{n}]\le E[Y_{n}-Y_{0}]$。Step 3 と合わせて結論。
+:::
+
+::: theorem マルチンゲール収束定理 {#prb:martingale-convergence keywords="Doob's martingale convergence theorem: a submartingale with sup_n E X_n^+ < infinity converges almost surely to an integrable limit; L^1-bounded martingales converge a.s.; nonnegative supermartingales converge a.s." index="マルチンゲール収束定理|まるちんげーるしゅうそくていり"}
+$X$ を劣マルチンゲールで $\sup_{n}E[X_{n}^{+}]<\infty$ とする。このとき $X_{n}$ はある $X_{\infty}\in L^{1}$ に a.s. 収束する。とくに $L^{1}$ で有界なマルチンゲールと、非負の優マルチンゲールは a.s. 収束する。
+:::
+
+::: proof
+**Step 1（横断数）.** $C\defeq\sup E[X_{n}^{+}]$。$(X_{n}-a)^{+}\le X_{n}^{+}+|a|$ なので、\ref{prb:upcrossing-inequality} から $E[U_{n}[a,b]]\le\frac{C+|a|}{b-a}$。$U_{n}$ は $n$ について増加するので、単調収束定理から $U_{\infty}[a,b]\defeq\lim U_{n}$ の期待値も有限で、$U_{\infty}[a,b]<\infty$（a.s.）。
+
+**Step 2（振動の排除）.** $\liminf X_{n}<a<b<\limsup X_{n}$ なら、$X$ は $a$ 以下と $b$ 以上を無限回行き来するので $U_{\infty}[a,b]=\infty$。よって
+$$
+P\bigl(\liminf X_{n}<\limsup X_{n}\bigr)\le\sum_{a<b,\ a,b\in\mathbb{Q}}P\bigl(U_{\infty}[a,b]=\infty\bigr)=0.
+$$
+したがって $X_{n}$ は a.s. で $\overline{\mathbb{R}}$ の中に極限 $X_{\infty}$ をもつ。
+
+**Step 3（可積分性）.** $|x|=2x^{+}-x$ と $E[X_{n}]\ge E[X_{0}]$ から $E[|X_{n}|]\le2C-E[X_{0}]$。ファトゥの補題から $E[|X_{\infty}|]\le\liminf E[|X_{n}|]<\infty$。とくに $X_{\infty}$ は a.s. 有限。
+
+**系.** マルチンゲールなら $X_{n}^{+}\le|X_{n}|$。非負の優マルチンゲール $X$ なら $-X$ は劣マルチンゲールで $(-X_{n})^{+}=0$。
+:::
+
+::: theorem 一様可積分なマルチンゲール {#prb:ui-martingale keywords="for a martingale the following are equivalent: uniformly integrable; converges in L^1; closed by an integrable Z with X_n = E[Z | F_n]; then X_n = E[X_infty | F_n]" index="一様可積分なマルチンゲール|いちようかせきぶんなまるちんげーる, 閉じたマルチンゲール|とじたまるちんげーる"}
+マルチンゲール $X$ について次は同値。
+1. $\{X_{n}\}$ は一様可積分。
+2. $X_{n}$ は $L^{1}$ で（ある $X_{\infty}$ に）収束する。
+3. ある $Z\in L^{1}$ で、すべての $n$ について $X_{n}=E[Z\mid\mathcal{F}_{n}]$。
+
+このとき $X_{n}\to X_{\infty}$（a.s. かつ $L^{1}$）で、$X_{n}=E[X_{\infty}\mid\mathcal{F}_{n}]$。
+:::
+
+::: proof
+**1 ⇒ 2.** 一様可積分なら $L^{1}$ で有界（\ref{prb:ui-criteria.1}）なので、\ref{prb:martingale-convergence} から a.s. 収束し、a.s. 収束は確率収束（\ref{prb:convergence-relations.1}）なので、\ref{prb:vitali-convergence} から $L^{1}$ 収束。
+
+**2 ⇒ 3.** $Z\defeq X_{\infty}$ とする。$A\in\mathcal{F}_{n}$, $m\ge n$ について $E[X_{m};A]=E[X_{n};A]$（マルチンゲール性）で、$|E[X_{m};A]-E[X_{\infty};A]|\le E[|X_{m}-X_{\infty}|]\to0$。よって $E[X_{\infty};A]=E[X_{n};A]$、すなわち $X_{n}=E[X_{\infty}\mid\mathcal{F}_{n}]$。
+
+**3 ⇒ 1.** $|X_{n}|\le E[|Z|\mid\mathcal{F}_{n}]$（\ref{prb:conditional-properties.2}）で $\{|X_{n}|>M\}\in\mathcal{F}_{n}$ なので
+$$
+E[|X_{n}|;|X_{n}|>M]\le E[|Z|;|X_{n}|>M],\qquad P(|X_{n}|>M)\le\frac{E[|X_{n}|]}{M}\le\frac{E[|Z|]}{M}.
+$$
+$\varepsilon>0$ について、\ref{prb:ui-criteria.4} を一つの $Z$ に使って $\delta$ をとり（$P(A)<\delta\Rightarrow E[|Z|;A]<\varepsilon$）、$M>\frac{E|Z|}{\delta}$ とすれば、すべての $n$ で $E[|X_{n}|;|X_{n}|>M]<\varepsilon$。
+
+最後の主張は 1 ⇒ 2 ⇒ 3 の証明から。
+:::
+
+::: theorem レヴィの上向き定理と 0-1 法則 {#prb:levy-upward keywords="Levy's upward theorem: for Z in L^1, E[Z | F_n] -> E[Z | F_infty] almost surely and in L^1; Levy's 0-1 law: P(A | F_n) -> 1_A for A in F_infty; Kolmogorov's 0-1 law as a corollary" index="レヴィの上向き定理|れう゛ぃのうわむきていり, レヴィの 0-1 法則|れう゛ぃの01ほうそく"}
+1. $Z\in L^{1}$ なら $E[Z\mid\mathcal{F}_{n}]\to E[Z\mid\mathcal{F}_{\infty}]$（a.s. かつ $L^{1}$）。
+2. $A\in\mathcal{F}_{\infty}$ なら $P(A\mid\mathcal{F}_{n})\to\mathbf{1}_{A}$（a.s.）。
+:::
+
+::: proof
+**1.** $X_{n}\defeq E[Z\mid\mathcal{F}_{n}]$ は 3 の形のマルチンゲールなので、\ref{prb:ui-martingale} から $X_{\infty}$ に a.s. かつ $L^{1}$ で収束し、$X_{\infty}$ は（各 $X_{n}$ が $\mathcal{F}_{\infty}$ 可測なので、極限として）$\mathcal{F}_{\infty}$ 可測にとれる。$E[X_{\infty};A]=E[Z;A]$ を $A\in\mathcal{F}_{\infty}$ について示せばよい。
+
+$\mathcal{D}\defeq\{A\in\mathcal{F}_{\infty}:E[X_{\infty};A]=E[Z;A]\}$ とおく。$A\in\mathcal{F}_{n}$ なら、\ref{prb:ui-martingale} の最後の主張から $E[X_{\infty};A]=E[X_{n};A]=E[Z;A]$ なので、$\bigcup_{n}\mathcal{F}_{n}\subset\mathcal{D}$。$\bigcup_{n}\mathcal{F}_{n}$ は（増大列の和なので）π 系。$\mathcal{D}$ は λ 系：$\Omega\in\mathcal{D}$、差は両辺の差、増大列の極限は優収束定理（$|X_{\infty}|,|Z|$ で抑える）。π-λ 定理から $\mathcal{F}_{\infty}\subset\mathcal{D}$。
+
+**2.** 1 を $Z=\mathbf{1}_{A}$ に使うと、$\mathbf{1}_{A}$ は $\mathcal{F}_{\infty}$ 可測なので $E[\mathbf{1}_{A}\mid\mathcal{F}_{\infty}]=\mathbf{1}_{A}$。
+:::
+
+（コルモゴロフの 0-1 法則（\ref{prb:kolmogorov-zero-one}）の別証明：独立な $\mathcal{G}_{k}$ について $\mathcal{F}_{n}\defeq\mathcal{G}_{1}\vee\dots\vee\mathcal{G}_{n}$ とし、末尾事象 $A$ をとると $A$ は $\mathcal{F}_{n}$ と独立なので $P(A\mid\mathcal{F}_{n})=P(A)$（\ref{prb:conditional-properties.6}）。2 から $P(A)=\mathbf{1}_{A}$ a.s.、よって $P(A)\in\{0,1\}$。）
+
+::: theorem Lᵖ で有界なマルチンゲール {#prb:lp-martingale-convergence keywords="for p > 1, a martingale bounded in L^p converges almost surely and in L^p; E sup_n |X_n|^p <= (p/(p-1))^p sup_n E |X_n|^p" index="Lp マルチンゲール収束定理|えるぴーまるちんげーるしゅうそくていり"}
+$p>1$ とし、マルチンゲール $X$ が $\sup_{n}E[|X_{n}|^{p}]<\infty$ を満たすとする。このとき $X_{n}$ は a.s. かつ $L^{p}$ で $X_{\infty}$ に収束し、$\bigl\|\sup_{n}|X_{n}|\bigr\|_{p}\le\frac{p}{p-1}\sup_{n}\|X_{n}\|_{p}$。
+:::
+
+::: proof
+$L^{p}$ 有界なら $L^{1}$ 有界（\ref{meas:lp-inclusions.1}）なので、\ref{prb:martingale-convergence} から a.s. 収束。\ref{prb:doob-inequalities.2} と単調収束定理から $Y\defeq\sup_{n}|X_{n}|$ について $\|Y\|_{p}=\lim_{n}\|\max_{k\le n}|X_{k}|\|_{p}\le\frac{p}{p-1}\sup\|X_{n}\|_{p}<\infty$。$|X_{n}-X_{\infty}|^{p}\le(2Y)^{p}\in L^{1}$ なので、優収束定理から $E[|X_{n}-X_{\infty}|^{p}]\to0$。
+:::
+
+## 逆マルチンゲール {#prb:sec-ct-backward}
+
+::: theorem 逆マルチンゲールの収束 {#prb:backward-martingale keywords="backward martingale: for decreasing sigma-algebras G_0 superset G_1 superset ... and Z in L^1, E[Z | G_n] -> E[Z | intersection G_n] almost surely and in L^1" index="逆マルチンゲール|ぎゃくまるちんげーる"}
+部分 σ-加法族の減少列 $\mathcal{G}_{0}\supset\mathcal{G}_{1}\supset\cdots$ と $Z\in L^{1}$ について、$\mathcal{G}_{\infty}\defeq\bigcap_{n}\mathcal{G}_{n}$ とおくと、$E[Z\mid\mathcal{G}_{n}]\to E[Z\mid\mathcal{G}_{\infty}]$（a.s. かつ $L^{1}$）。
+:::
+
+::: proof
+$X_{n}\defeq E[Z\mid\mathcal{G}_{n}]$ とする。
+
+**Step 1（a.s. 収束）.** $N$ を固定すると、$(X_{N},X_{N-1},\dots,X_{0})$ はフィルトレーション $(\mathcal{G}_{N},\dots,\mathcal{G}_{0})$ についてのマルチンゲール（塔の性質）。この有限列の $[a,b]$ の上向き横断数を $U^{(N)}$ とすると、\ref{prb:upcrossing-inequality} から $(b-a)E[U^{(N)}]\le E[(X_{0}-a)^{+}]\le E[|Z|]+|a|$。$U^{(N)}$ は $N$ について増加し、その極限は「$X_{n}$ を $n$ の減る向きに見たときの横断数」なので、\ref{prb:martingale-convergence} の Step 1・2 と同じ議論で、$X_{n}$ は（$n\to\infty$ で）a.s. で $\overline{\mathbb{R}}$ に極限 $X_{\infty}$ をもつ。
+
+**Step 2（$L^{1}$ 収束）.** $\{X_{n}\}=\{E[Z\mid\mathcal{G}_{n}]\}$ は \ref{prb:ui-martingale} の「3 ⇒ 1」と同じ議論で一様可積分（そこで使ったのは $X_{n}=E[Z\mid\cdot]$ の形だけ）。\ref{prb:vitali-convergence} から $X_{\infty}\in L^{1}$ で $L^{1}$ 収束。
+
+**Step 3（極限の同定）.** $X_{\infty}$ は、各 $m$ について $(X_{n})_{n\ge m}$ の極限なので $\mathcal{G}_{m}$ 可測、よって $\mathcal{G}_{\infty}$ 可測にとれる。$A\in\mathcal{G}_{\infty}\subset\mathcal{G}_{n}$ なら $E[X_{n};A]=E[Z;A]$ で、$L^{1}$ 収束から $E[X_{\infty};A]=E[Z;A]$。
+:::
+
+::: lemma 独立な情報の追加 {#prb:independent-information keywords="if sigma(X) v G is independent of H then E[X | G v H] = E[X | G]" index="独立な情報と条件付き期待値|どくりつなじょうほうとじょうけんつききたいち"}
+$X\in L^{1}$ とし、$\sigma(X)\vee\mathcal{G}$ と $\mathcal{H}$ が独立なら $E[X\mid\mathcal{G}\vee\mathcal{H}]=E[X\mid\mathcal{G}]$。
+:::
+
+::: proof
+$Y\defeq E[X\mid\mathcal{G}]$ は $\mathcal{G}\vee\mathcal{H}$ 可測。$\mathcal{P}\defeq\{G\cap H:G\in\mathcal{G},H\in\mathcal{H}\}$ は $\mathcal{G}\vee\mathcal{H}$ を生成する π 系で、$G\cap H\in\mathcal{P}$ について独立性から
+$$
+E[X;G\cap H]=E[X\mathbf{1}_{G}]P(H)=E[Y\mathbf{1}_{G}]P(H)=E[Y;G\cap H]
+$$
+（$X\mathbf{1}_{G}$ と $Y\mathbf{1}_{G}$ は $\sigma(X)\vee\mathcal{G}$ 可測で、$\mathbf{1}_{H}$ と独立）。\ref{prb:levy-upward} の証明と同じ π-λ の議論で、すべての $A\in\mathcal{G}\vee\mathcal{H}$ に延びる。
+:::
+
+::: corollary 逆マルチンゲールによる大数の強法則 {#prb:slln-backward keywords="strong law of large numbers for i.i.d. integrable variables via the backward martingale S_n / n = E[X_1 | S_n, X_{n+1}, X_{n+2}, ...] and the Kolmogorov 0-1 law; convergence also in L^1" index="大数の強法則（逆マルチンゲールによる証明）|たいすうのきょうほうそくぎゃくまるちんげーるによるしょうめい"}
+$X_{1},X_{2},\dots$ が i.i.d. で可積分なら、$\frac{S_{n}}{n}\to E[X_{1}]$（a.s. かつ $L^{1}$）。
+:::
+
+::: proof
+**Step 1.** $\mathcal{G}_{n}\defeq\sigma(S_{n},X_{n+1},X_{n+2},\dots)$ は減少列（$S_{n+1}=S_{n}+X_{n+1}$ なので $\mathcal{G}_{n+1}\subset\mathcal{G}_{n}$）。$\sigma(X_{1},S_{n})\subset\sigma(X_{1},\dots,X_{n})$ と $\mathcal{H}_{n}\defeq\sigma(X_{n+1},\dots)$ は独立（\ref{prb:pi-system-independence.2}）なので、\ref{prb:independent-information} と \ref{prb:symmetry-example} から
+$$
+E[X_{1}\mid\mathcal{G}_{n}]=E[X_{1}\mid\sigma(S_{n})\vee\mathcal{H}_{n}]=E[X_{1}\mid S_{n}]=\frac{S_{n}}{n}.
+$$
+
+**Step 2.** \ref{prb:backward-martingale} から $\frac{S_{n}}{n}$ は a.s. かつ $L^{1}$ で $L\defeq E[X_{1}\mid\mathcal{G}_{\infty}]$ に収束する。$L=\lim\frac{S_{n}}{n}$ は（a.s. で等しいものを選べば）末尾 σ-加法族 $\bigcap_{m}\sigma(X_{m},X_{m+1},\dots)$ に関して可測（\ref{prb:tail-examples}）なので、\ref{prb:kolmogorov-zero-one.2} から a.s. 定数。$L^{1}$ 収束から $E[L]=\lim E[\frac{S_{n}}{n}]=E[X_{1}]$、よって $L=E[X_{1}]$。
+:::
+
+::: hypcheck
+- 収束定理（\ref{prb:martingale-convergence}）は $L^{1}$ 収束を主張しない：$([0,1),\lambda)$ 上で $X_{n}\defeq2^{n}\mathbf{1}_{[0,2^{-n})}$ は（2 進区間のフィルトレーションについて）非負マルチンゲールで $X_{n}\to0$（a.s.）だが $E[X_{n}]=1$。一様可積分性（\ref{prb:ui-martingale}）が $L^{1}$ 収束の正確な条件である。
+- 上向き横断不等式は劣マルチンゲール性だけを使い、可積分性の一様性は使っていない。一様な評価 $\sup E[X_{n}^{+}]<\infty$ は、$n\to\infty$ で横断数の期待値を有限に保つためだけに使った。
+- \ref{prb:lp-martingale-convergence} は $p=1$ では偽（上の例）。$p>1$ ではドゥーブの $L^{p}$ 不等式が優関数 $\sup|X_{n}|\in L^{p}$ を与える。
+- 逆マルチンゲールの収束では、可積分性の仮定以外に何も要らない（$X_{n}=E[Z\mid\mathcal{G}_{n}]$ の形が自動的に一様可積分性を与える）。これが強法則を $L^{1}$ の仮定だけで出せる理由である。
+:::
+
+::: supplement
+**関連する結果.**
+- 連続時間版：右連続なマルチンゲールにも同じ収束定理が成り立つ（横断数を可算稠密集合の上で数える）。
+- **マルチンゲールの中心極限定理**：増分が条件付きで中心化され、条件付き分散の和が収束し、リンデベルグ型の条件を満たせば、正規分布に法則収束する。独立和の中心極限定理の一般化で、時系列解析で使われる。このサイトではまだ証明していない。
+- ラドン–ニコディムの定理の別証明：可分な σ-加法族を有限分割の増大列で近似し、各段の比 $\frac{\nu(B)}{\mu(B)}$ がつくるマルチンゲールの極限として導関数を得る。
+
+**高い視点：情報の極限.** レヴィの上向き定理は「情報が増え続けると、予測は全情報の下での予測に収束する」こと、逆マルチンゲールの定理は「情報が減り続けると、予測は残る共通の情報の下での予測に収束する」ことである。どちらも、条件付き期待値という射影の列 $P_{n}$ が、包含の単調な系列に沿って極限の射影に（$L^{2}$ では強収束、さらに a.s. で）収束することとして理解できる。比喩で言えば、マルチンゲール収束定理は「公平な賭けを続けて財産が有界にとどまるなら、財産はいずれどこかに落ち着く」——揺れ続けるには、無限回の上昇（横断）が要るが、それを賄う期待値がない——という定理である。
+:::
+
+## 問題 {#prb:sec-ct-problems}
+
+::: problem {#prb:prob-ct-polya}
+壺に赤玉 $1$ 個と白玉 $1$ 個が入っている。毎回 $1$ 個を無作為に取り出し、その色の玉を $2$ 個にして戻す（ポリアの壺）。$n$ 回後の赤玉の割合を $R_{n}$ とすると、$R_{n}$ はマルチンゲールで、ある $R_{\infty}$ に a.s. かつ $L^{1}$ で収束することを示せ。（$R_{\infty}$ が一様分布 $U(0,1)$ に従うことは演習で扱う。）
+:::
+
+::: solution
+$n$ 回後の玉の総数は $n+2$。赤玉の数を $r_{n}$ とすると $R_{n}=\frac{r_{n}}{n+2}$ で、$\mathcal{F}_{n}$ を $n$ 回目までの取り出しの結果が生成する σ-加法族とすると、次に赤が出る条件付き確率は $R_{n}$。よって
+$$
+E[R_{n+1}\mid\mathcal{F}_{n}]=R_{n}\frac{r_{n}+1}{n+3}+(1-R_{n})\frac{r_{n}}{n+3}=\frac{r_{n}+R_{n}}{n+3}=\frac{R_{n}(n+2)+R_{n}}{n+3}=R_{n}.
+$$
+$0\le R_{n}\le1$ なので $L^{2}$ で有界、\ref{prb:lp-martingale-convergence}（$p=2$）から a.s. かつ $L^{2}$（したがって $L^{1}$）で収束する。
+:::
+
+::: problem {#prb:prob-ct-random-signs}
+$\varepsilon_{1},\varepsilon_{2},\dots$ を i.i.d. で $P(\varepsilon_{k}=\pm1)=\frac12$、$(a_{k})$ を実数列で $\sum a_{k}^{2}<\infty$ とする。$\sum_{k}\varepsilon_{k}a_{k}$ は a.s. かつ $L^{2}$ で収束することを示せ。
+:::
+
+::: solution
+$X_{n}\defeq\sum_{k\le n}\varepsilon_{k}a_{k}$ は \ref{prb:martingale-examples.1} からマルチンゲールで、独立性から $E[X_{n}^{2}]=\sum_{k\le n}a_{k}^{2}\le\sum_{k}a_{k}^{2}$（\ref{prb:independence-criteria.3}）。\ref{prb:lp-martingale-convergence}（$p=2$）から結論。（例えば $\sum\pm\frac1k$ は a.s. で収束する。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
