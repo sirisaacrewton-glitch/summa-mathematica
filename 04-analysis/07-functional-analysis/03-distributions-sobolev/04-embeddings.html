@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ソボレフの埋め込み定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/03-distributions-sobolev/04-embeddings.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ソボレフの埋め込み定理 {#fa:page-embeddings keywords="Sobolev embedding theorems: density of C_c^infinity in W^{k,p}(R^n), generalized Holder inequality, Loomis-Whitney type inequality, Gagliardo-Nirenberg-Sobolev inequality ||u||_{p*} <= C ||grad u||_p for p < n, p* = np/(n-p), embedding W^{1,p} into L^q for p <= q <= p*, Morrey's inequality and Holder continuity for p > n, higher order embeddings W^{k,p} into L^q and into C^m_b, bounded C^1 domains"}
+
+ソボレフ空間の関数は、弱微分が $L^{p}$ に入るという「積分の意味での滑らかさ」しかもたない。**ソボレフの埋め込み定理**は、この積分の意味での滑らかさが、どれだけの可積分性や古典的な連続性を保証するかを述べる。次元 $n$ と指数 $p$ の大小で状況が分かれる：$p<n$ なら $W^{1,p}$ の関数は $L^{p^{*}}$（$p^{*}=\frac{np}{n-p}>p$）に入る（**ガリアルド–ニーレンバーグ–ソボレフの不等式**）。$p>n$ なら連続な代表元をもち、しかもヘルダー連続になる（**モレーの不等式**）。これを繰り返すと、$k$ 回微分可能な $W^{k,p}$ の関数が、$k>\frac np+m$ なら $m$ 回連続微分可能であることがわかる。偏微分方程式の弱解が古典解であることを示す（正則性）ときの基本的な道具である。
+
+## 記法と定義の確認 {#fa:sec-em-notation}
+
+::: notation
+- $W^{k,p}$, 弱微分、軟化、延長作用素は \ref{fa:page-sobolev-spaces}, \ref{fa:page-extension-trace}。$1\le p<\infty$ を基本とする。
+- $|\nabla u|\defeq(\sum_{j}|\partial_{j}u|^{2})^{1/2}$、$\|\nabla u\|_{p}\defeq\||\nabla u|\|_{p}$。$\|\nabla u\|_{p}\le\sum_{j}\|\partial_{j}u\|_{p}\le n\|u\|_{W^{1,p}}$。
+- $\hat x_{i}\in\mathbb{R}^{n-1}$ は $x$ から第 $i$ 座標を除いたもの。$|B(x,r)|=\omega_{n}r^{n}$（$\omega_{n}\defeq|B(0,1)|$、\ref{meas:lebesgue-linear}）。
+- $p<n$ のとき $p^{*}\defeq\frac{np}{n-p}$（**ソボレフ共役指数**）。$\frac{1}{p^{*}}=\frac1p-\frac1n$。
+- ヘルダーの不等式は \ref{meas:holder}、ファトゥの補題は \ref{meas:fatou}。
+- **選択公理**：使わない。
+:::
+
+## 準備 {#fa:sec-em-preliminaries}
+
+::: lemma ℝⁿ でのテスト関数の稠密性 {#fa:test-dense-rn keywords="C_c^infinity(R^n) is dense in W^{k,p}(R^n) for p < infinity; W^{k,p}_0(R^n) = W^{k,p}(R^n)" index="ℝn でのテスト関数の稠密性|あーるえぬでのてすとかんすうのちゅうみつせい"}
+$1\le p<\infty$ なら $C_{c}^{\infty}(\mathbb{R}^{n})$ は $W^{k,p}(\mathbb{R}^{n})$ で稠密。
+:::
+
+::: proof
+$\beta$ を \ref{mfd:bump-function} の関数とし、$u_{R}\defeq\beta(\cdot/R)u$ とする。\ref{fa:sobolev-product-rule} から $\partial^{\alpha}u_{R}=\beta(\cdot/R)\partial^{\alpha}u+\sum_{0<\gamma\le\alpha}\binom{\alpha}{\gamma}R^{-|\gamma|}(\partial^{\gamma}\beta)(\cdot/R)\partial^{\alpha-\gamma}u$。第 1 項は優収束定理で $\partial^{\alpha}u$ に、残りは $R^{-1}$ 倍で $0$ に $L^{p}$ 収束する。$u_{R}$ は台がコンパクトなので、\ref{fa:mollification-sobolev.3} から $C_{c}^{\infty}$ の元で近似できる。
+:::
+
+::: lemma 一般化されたヘルダーとルーミス–ホイットニー型の不等式 {#fa:loomis-whitney keywords="generalized Holder inequality int f_1 ... f_m <= prod ||f_i||_{p_i} for sum 1/p_i = 1; Loomis-Whitney type inequality int prod_i g_i(hat x_i)^{1/(n-1)} dx <= prod_i (int g_i)^{1/(n-1)}" index="一般化されたヘルダーの不等式|いっぱんかされたへるだーのふとうしき, ルーミス–ホイットニーの不等式|るーみすほいっとにーのふとうしき"}
+1. $f_{1},\dots,f_{m}\ge0$ が可測で $p_{i}\in[1,\infty]$, $\sum_{i}\frac{1}{p_{i}}=1$ なら $\int f_{1}\cdots f_{m}\le\prod_{i}\|f_{i}\|_{p_{i}}$。
+2. $n\ge2$ とし、$g_{i}\ge0$ を $\mathbb{R}^{n-1}$ 上の可測関数（$i=1,\dots,n$）とすると
+$$
+\int_{\mathbb{R}^{n}}\prod_{i=1}^{n}g_{i}(\hat x_{i})^{\frac{1}{n-1}}dx\le\prod_{i=1}^{n}\Bigl(\int_{\mathbb{R}^{n-1}}g_{i}\Bigr)^{\frac{1}{n-1}}.
+$$
+:::
+
+::: proof
+**1.** $m$ についての帰納法。$m=2$ はヘルダーの不等式。$m\ge3$ で $p_{m}<\infty$（そうでなければ $f_{m}\le\|f_{m}\|_{\infty}$ a.e. として $m-1$ 個に帰着）とし、$q$ を $\frac1q=1-\frac{1}{p_{m}}$ とすると、ヘルダーから $\int f_{1}\cdots f_{m}\le\|f_{1}\cdots f_{m-1}\|_{q}\|f_{m}\|_{p_{m}}$。$\|f_{1}\cdots f_{m-1}\|_{q}^{q}=\int f_{1}^{q}\cdots f_{m-1}^{q}$ に帰納法の仮定を指数 $\frac{p_{i}}{q}$（$\sum_{i<m}\frac{q}{p_{i}}=1$）で使えば $\le\prod_{i<m}\|f_{i}\|_{p_{i}}^{q}$。
+
+**2.** $n$ についての帰納法（トネリで積分の順序は自由）。$n=2$：左辺は $\int\int g_{1}(x_{2})g_{2}(x_{1})dx_{1}dx_{2}=\int g_{1}\int g_{2}$。$n\ge3$：$g_{n}(\hat x_{n})$ は $x_{n}$ によらないので、まず $x_{n}$ で積分し、1 を $n-1$ 個の関数 $g_{i}^{1/(n-1)}$（$i<n$、指数はすべて $n-1$）に使うと
+$$
+\int\prod_{i<n}g_{i}^{\frac{1}{n-1}}dx_{n}\le\prod_{i<n}h_{i}^{\frac{1}{n-1}},\qquad h_{i}\defeq\int g_{i}\,dx_{n}.
+$$
+$h_{i}$ は $x'=(x_{1},\dots,x_{n-1})$ から第 $i$ 座標を除いた $n-2$ 変数の関数。次に $x'$ で積分し、ヘルダー（指数 $n-1$ と $\frac{n-1}{n-2}$）を使うと
+$$
+\int g_{n}^{\frac{1}{n-1}}\prod_{i<n}h_{i}^{\frac{1}{n-1}}dx'\le\Bigl(\int g_{n}\Bigr)^{\frac{1}{n-1}}\Bigl(\int\prod_{i<n}h_{i}^{\frac{1}{n-2}}dx'\Bigr)^{\frac{n-2}{n-1}}.
+$$
+$n-1$ 次元の帰納法の仮定から $\int\prod_{i<n}h_{i}^{1/(n-2)}dx'\le\prod_{i<n}(\int h_{i})^{1/(n-2)}$ で、$\int h_{i}=\int g_{i}$。合わせて結論。
+:::
+
+## p < n：ガリアルド–ニーレンバーグ–ソボレフの不等式 {#fa:sec-em-gns}
+
+::: theorem ガリアルド–ニーレンバーグ–ソボレフの不等式 {#fa:gns-inequality keywords="Gagliardo-Nirenberg-Sobolev inequality: for 1 <= p < n there is C = C(n,p) with ||u||_{p*} <= C ||grad u||_p for all u in W^{1,p}(R^n); hence W^{1,p}(R^n) embeds continuously into L^q for p <= q <= p*" index="ガリアルド–ニーレンバーグ–ソボレフの不等式|がりあるどにーれんばーぐそぼれふのふとうしき, ソボレフの不等式|そぼれふのふとうしき, ソボレフ共役指数|そぼれふきょうやくしすう"}
+$n\ge2$, $1\le p<n$ とする。
+1. $u\in C_{c}^{1}(\mathbb{R}^{n})$ なら $\|u\|_{p^{*}}\le\frac{p(n-1)}{n-p}\|\nabla u\|_{p}$。
+2. 1 は $u\in W^{1,p}(\mathbb{R}^{n})$ でも成り立ち、$p\le q\le p^{*}$ について $\|u\|_{q}\le C\|u\|_{W^{1,p}}$。
+:::
+
+::: proof
+**Step 1（$p=1$）.** $u\in C_{c}^{1}$ とする。各 $i$ について、微積分の基本定理から $|u(x)|=\bigl|\int_{-\infty}^{x_{i}}\partial_{i}u\,dt\bigr|\le g_{i}(\hat x_{i})\defeq\int_{\mathbb{R}}|\nabla u|(x_{1},\dots,t,\dots,x_{n})\,dt$（$t$ は第 $i$ 座標）。掛け合わせて $|u(x)|^{\frac{n}{n-1}}\le\prod_{i}g_{i}(\hat x_{i})^{\frac{1}{n-1}}$。\ref{fa:loomis-whitney.2} と $\int_{\mathbb{R}^{n-1}}g_{i}=\|\nabla u\|_{1}$ から $\|u\|_{n/(n-1)}^{n/(n-1)}\le\|\nabla u\|_{1}^{n/(n-1)}$、すなわち $\|u\|_{1^{*}}\le\|\nabla u\|_{1}$。
+
+**Step 2（一般の $p$）.** $\gamma\defeq\frac{p(n-1)}{n-p}\ge1$ とし、$v\defeq|u|^{\gamma}$ とする。$\gamma>1$ なら $v\in C_{c}^{1}$ で $|\nabla v|\le\gamma|u|^{\gamma-1}|\nabla u|$（$u\ne0$ では合成関数の微分、$u=0$ では $|v(x+h)|\le|u(x+h)|^{\gamma}=O(|h|^{\gamma})$ から $\nabla v=0$）。$\gamma=1$ は Step 1。Step 1 を $v$ に使い、ヘルダーの不等式（$p'$ は共役指数）を使うと
+$$
+\Bigl(\int|u|^{\frac{\gamma n}{n-1}}\Bigr)^{\frac{n-1}{n}}\le\gamma\int|u|^{\gamma-1}|\nabla u|\le\gamma\Bigl(\int|u|^{(\gamma-1)p'}\Bigr)^{\frac{1}{p'}}\|\nabla u\|_{p}.
+$$
+$\gamma$ の選び方から $\frac{\gamma n}{n-1}=(\gamma-1)p'=p^{*}$。$u$ はコンパクト台で $\|u\|_{p^{*}}<\infty$ なので、左辺は $\|u\|_{p^{*}}^{p^{*}(n-1)/n}$、右辺は $\gamma\|u\|_{p^{*}}^{p^{*}/p'}\|\nabla u\|_{p}$ である。指数の差は $p^{*}\bigl(\frac{n-1}{n}-\frac{1}{p'}\bigr)=p^{*}\bigl(\frac1p-\frac1n\bigr)=1$ なので、両辺を $\|u\|_{p^{*}}^{p^{*}/p'}$ で割ると（$\|u\|_{p^{*}}=0$ なら自明）$\|u\|_{p^{*}}\le\gamma\|\nabla u\|_{p}$。
+
+**Step 3（$W^{1,p}$）.** \ref{fa:test-dense-rn} から $u_{k}\in C_{c}^{\infty}$, $u_{k}\to u$（$W^{1,p}$）をとり、部分列で a.e. 収束させる（\ref{meas:riesz-fischer}）。ファトゥの補題から $\|u\|_{p^{*}}\le\liminf\|u_{k}\|_{p^{*}}\le\gamma\lim\|\nabla u_{k}\|_{p}=\gamma\|\nabla u\|_{p}$。$p\le q\le p^{*}$ なら $\frac1q=\frac{\theta}{p}+\frac{1-\theta}{p^{*}}$（$\theta\in[0,1]$）と書け、ヘルダーから $\|u\|_{q}\le\|u\|_{p}^{\theta}\|u\|_{p^{*}}^{1-\theta}\le\max(\|u\|_{p},\|u\|_{p^{*}})$。
+:::
+
+::: corollary 有界領域での埋め込み {#fa:bounded-domain-embedding keywords="for a bounded C^1 domain and 1 <= p < n, W^{1,p}(Omega) embeds continuously into L^q(Omega) for 1 <= q <= p*; for W^{1,p}_0(Omega) no regularity of the boundary is needed" index="有界領域でのソボレフの埋め込み|ゆうかいりょういきでのそぼれふのうめこみ"}
+$1\le p<n$ とする。
+1. $u\in W_{0}^{1,p}(\Omega)$（$\Omega$ は任意の開集合）なら $\|u\|_{L^{p^{*}}(\Omega)}\le\gamma\|\nabla u\|_{L^{p}(\Omega)}$。
+2. $\Omega$ が $C^{1}$ 境界をもつ有界開集合なら、$1\le q\le p^{*}$ について $\|u\|_{L^{q}(\Omega)}\le C\|u\|_{W^{1,p}(\Omega)}$。
+:::
+
+::: proof
+**1.** $C_{c}^{\infty}(\Omega)$ の元を $\Omega$ の外で $0$ と延ばせば \ref{fa:gns-inequality.1} が使え、閉包をとるのは Step 3 と同じ。
+
+**2.** \ref{fa:extension-theorem} の $Eu\in W^{1,p}(\mathbb{R}^{n})$ に \ref{fa:gns-inequality.2} を使うと $\|u\|_{L^{p^{*}}(\Omega)}\le\|Eu\|_{p^{*}}\le C\|u\|_{W^{1,p}(\Omega)}$。$\Omega$ は有界なので $q\le p^{*}$ なら \ref{meas:lp-inclusions.1} から $\|u\|_{q}\le|\Omega|^{\frac1q-\frac{1}{p^{*}}}\|u\|_{p^{*}}$。
+:::
+
+## p > n：モレーの不等式 {#fa:sec-em-morrey}
+
+::: theorem モレーの不等式 {#fa:morrey-inequality keywords="Morrey's inequality: for n < p < infinity, u in W^{1,p}(R^n) has a continuous representative with |u(x) - u(y)| <= C |x - y|^{1 - n/p} ||grad u||_p and sup |u| <= C ||u||_{W^{1,p}}; Holder continuity of exponent 1 - n/p" index="モレーの不等式|もれーのふとうしき, ヘルダー連続性（ソボレフ関数）|へるだーれんぞくせいそぼれふかんすう"}
+$n<p<\infty$, $\alpha\defeq1-\frac np$ とする。$n$, $p$ だけで決まる $C$ があって：
+1. $u\in C^{1}(\mathbb{R}^{n})$、$x\in\mathbb{R}^{n}$, $r>0$ なら $\frac{1}{|B(x,r)|}\int_{B(x,r)}|u(y)-u(x)|\,dy\le Cr^{\alpha}\|\nabla u\|_{L^{p}(B(x,r))}$。
+2. $u\in C^{1}(\mathbb{R}^{n})$ なら $|u(x)-u(y)|\le C|x-y|^{\alpha}\|\nabla u\|_{p}$、$\sup|u|\le C\|u\|_{W^{1,p}}$。
+3. $u\in W^{1,p}(\mathbb{R}^{n})$ は 2 を満たす（有界でヘルダー連続な）代表元をもつ。
+:::
+
+::: proof
+**1.** 線分に沿った微積分の基本定理から $u(y)-u(x)=\int_{0}^{1}\nabla u(x+t(y-x))\cdot(y-x)\,dt$。$y$ について $B(x,r)$ で積分し、トネリと置き換え $z=x+t(y-x)$（$dy=t^{-n}dz$, $z\in B(x,tr)$, $|y-x|=\frac{|z-x|}{t}$）を使うと
+$$
+\int_{B(x,r)}|u(y)-u(x)|\,dy\le\int_{0}^{1}t^{-n-1}\int_{B(x,tr)}|\nabla u(z)|\,|z-x|\,dz\,dt.
+$$
+内側の積分にヘルダーの不等式を使い、$\int_{B(x,\rho)}|z-x|^{p'}dz=\rho^{n+p'}\int_{B(0,1)}|w|^{p'}dw$（\ref{meas:lebesgue-linear}）から、内側 $\le c\,\|\nabla u\|_{L^{p}(B(x,r))}(tr)^{\frac{n}{p'}+1}$。$t$ の積分は $\int_{0}^{1}t^{-n-1+\frac{n}{p'}+1}dt=\int_{0}^{1}t^{-n/p}dt=\frac{1}{\alpha}$（$p>n$ だから有限）。$|B(x,r)|=\omega_{n}r^{n}$ で割り、$\frac{n}{p'}+1-n=\alpha$ から結論。
+
+**2.** $r\defeq|x-y|$、$W\defeq B(x,r)\cap B(y,r)$ とする。$W$ は中点を中心とする半径 $\frac r2$ の球を含むので $|W|\ge\omega_{n}(r/2)^{n}$。$z\in W$ について $|u(x)-u(y)|\le|u(x)-u(z)|+|u(z)-u(y)|$ を $W$ で平均すると
+$$
+|u(x)-u(y)|\le\frac{|B(x,r)|}{|W|}\Bigl(\frac{1}{|B(x,r)|}\int_{B(x,r)}|u(x)-u(z)|dz+\frac{1}{|B(y,r)|}\int_{B(y,r)}|u(z)-u(y)|dz\Bigr)\le2^{n}\cdot2Cr^{\alpha}\|\nabla u\|_{p}.
+$$
+また $|u(x)|\le\frac{1}{|B(x,1)|}\int_{B(x,1)}|u|+\frac{1}{|B(x,1)|}\int_{B(x,1)}|u-u(x)|\le\omega_{n}^{-1/p}\|u\|_{p}+C\|\nabla u\|_{p}$（ヘルダー）。
+
+**3.** \ref{fa:test-dense-rn} から $u_{k}\in C_{c}^{\infty}$, $u_{k}\to u$（$W^{1,p}$）。2 から $\sup|u_{k}-u_{l}|\le C\|u_{k}-u_{l}\|_{W^{1,p}}\to0$ なので、$u_{k}$ は一様に連続関数 $\tilde u$ に収束し、$L^{p}$ の極限 $u$ と a.e. で一致する（部分列の a.e. 収束）。2 の不等式は一様収束の極限で保たれる。
+:::
+
+## 高階の埋め込み {#fa:sec-em-higher}
+
+::: corollary 高階のソボレフの埋め込み {#fa:higher-embeddings keywords="higher order Sobolev embeddings on R^n: if kp < n then W^{k,p} into L^q with 1/q = 1/p - k/n; if n/p is not an integer and m = k - floor(n/p) - 1 >= 0, then W^{k,p} into C^m_b with Holder continuous m-th derivatives" index="高階のソボレフの埋め込み|こうかいのそぼれふのうめこみ"}
+$k\ge1$, $1\le p<\infty$ とする。
+1. $kp<n$ なら $W^{k,p}(\mathbb{R}^{n})\subset L^{q}(\mathbb{R}^{n})$（連続な埋め込み）、$\frac1q=\frac1p-\frac kn$。より一般に $W^{k,p}\subset W^{k-j,q_{j}}$、$\frac{1}{q_{j}}=\frac1p-\frac jn$（$jp<n$）。
+2. $\frac np$ が整数でなく、$m\defeq k-\lfloor\frac np\rfloor-1\ge0$ なら、$u\in W^{k,p}(\mathbb{R}^{n})$ は $C^{m}$ 級の代表元をもち、$|\alpha|\le m$ の $\partial^{\alpha}u$ は有界かつ指数 $\lfloor\frac np\rfloor+1-\frac np$ でヘルダー連続で、$\sum_{|\alpha|\le m}\sup|\partial^{\alpha}u|\le C\|u\|_{W^{k,p}}$。
+:::
+
+::: proof
+**1.** $j$ についての帰納法。$u\in W^{k,p}$ で $|\beta|\le k-1$ なら $\partial^{\beta}u\in W^{1,p}$ なので、\ref{fa:gns-inequality.2} から $\partial^{\beta}u\in L^{q_{1}}$（$q_{1}=p^{*}$）、よって $u\in W^{k-1,q_{1}}$。これを $q_{1}$ について繰り返す（$\frac{1}{q_{j+1}}=\frac{1}{q_{j}}-\frac1n$ で、$jp<n$ の間は $q_{j}<n$ なので \ref{fa:gns-inequality} が使える）。
+
+**2.** $i\defeq\lfloor\frac np\rfloor$ とすると $ip<n<(i+1)p$。1 から $u\in W^{k-i,q}$, $\frac1q=\frac1p-\frac in\in(0,\frac1n)$、すなわち $q>n$（$i=0$ なら $q=p>n$）。$|\alpha|\le m=k-i-1$ なら $\partial^{\alpha}u\in W^{1,q}$ なので、\ref{fa:morrey-inequality.3} から $\partial^{\alpha}u$ は有界でヘルダー連続な代表元をもつ（指数 $1-\frac nq=i+1-\frac np$）。これらの代表元が $u$ の連続な代表元の古典的な偏導関数であること：$C_{c}^{\infty}$ の近似列 $u_{k}$（\ref{fa:test-dense-rn}）について、$|\alpha|\le m$ の $\partial^{\alpha}u_{k}$ は（モレーの評価から）一様に収束するので、極限は $C^{m}$ 級で、偏導関数は極限の偏導関数（一様収束と微分の交換）。
+:::
+
+::: hypcheck
+- ガリアルド–ニーレンバーグ–ソボレフの不等式で $p<n$ は本質的：$p^{*}=\frac{np}{n-p}$ は $p\uparrow n$ で $\infty$ に発散し、$p=n$ では $W^{1,n}\not\subset L^{\infty}$（例：$n\ge2$ で $\log\log(1+\frac{1}{|x|})$ を切り落としたもの）。
+- 指数 $p^{*}$ はスケーリングで決まる：$u_{\lambda}(x)\defeq u(\lambda x)$ について $\|u_{\lambda}\|_{q}=\lambda^{-n/q}\|u\|_{q}$, $\|\nabla u_{\lambda}\|_{p}=\lambda^{1-n/p}\|\nabla u\|_{p}$ で、$\|u\|_{q}\le C\|\nabla u\|_{p}$ がすべての $\lambda$ で成り立つには $-\frac nq=1-\frac np$、すなわち $q=p^{*}$ でなければならない。
+- モレーの不等式で $p>n$ は、$\int_{0}^{1}t^{-n/p}dt<\infty$ のところで使った。
+- 有界領域の 2（\ref{fa:bounded-domain-embedding.2}）では、境界の正則性を延長作用素のために使った。境界が悪いと埋め込みは成り立たない（尖った領域の例）。$W_{0}^{1,p}$ なら境界の仮定は要らない（1）。
+- 高階の埋め込みの 2 で $\frac np$ を整数でないとしたのは、$\frac np$ が整数のとき途中で $p_{j}=n$ となり、\ref{fa:gns-inequality} もモレーの不等式も使えないからである。
+:::
+
+::: supplement
+**関連する結果.**
+- $p=n$ の場合：$W^{1,n}(\mathbb{R}^{n})\subset L^{q}$（$n\le q<\infty$）で、さらに指数型の可積分性 $\int(e^{c|u|^{n/(n-1)}}-1)<\infty$（トルーディンガーの不等式）が成り立つ。$\frac np$ が整数の場合の高階の埋め込みは、これで補える。
+- 有界領域では埋め込み $W^{1,p}\subset L^{q}$（$q<p^{*}$）はコンパクトになる（次のページのレリッヒ–コンドラショフの定理）。$q=p^{*}$ ではコンパクトでない（スケーリングで集中する列）。
+- $H^{s}(\mathbb{R}^{n})$ の言葉では、$s>\frac n2$ なら $H^{s}\subset C_{b}$（\ref{fa:prob-so-hs-continuous}）、$s<\frac n2$ なら $H^{s}\subset L^{\frac{2n}{n-2s}}$。
+
+**高い視点：次元と滑らかさの交換.** ソボレフの埋め込みは、「微分 $1$ 回分」と「可積分性の指数」が、次元 $n$ を為替レートとして交換できることを述べる：$W^{k,p}$ の関数は、尺度 $\lambda$ の拡大で $\lambda^{k-n/p}$ 倍の大きさに見える。この「ソボレフ数」$k-\frac np$ が同じなら同程度の滑らかさで、$k-\frac np>m$ なら $C^{m}$ に入る。比喩で言えば、高次元の空間では関数は「尖り」を隠す場所が多いので、同じ量の微分の情報からわかる点ごとの性質が少なくなる。
+:::
+
+## 問題 {#fa:sec-em-problems}
+
+::: problem {#fa:prob-em-scaling}
+$n\ge2$, $1\le p<n$, $q\ne p^{*}$ とする。どんな定数 $C$ についても、すべての $u\in C_{c}^{\infty}(\mathbb{R}^{n})$ で $\|u\|_{q}\le C\|\nabla u\|_{p}$ が成り立つことはないことを示せ。
+:::
+
+::: solution
+$u\ne0$ を一つ固定し、$u_{\lambda}(x)\defeq u(\lambda x)$ とする。変数変換（\ref{meas:lebesgue-linear}）から $\|u_{\lambda}\|_{q}=\lambda^{-n/q}\|u\|_{q}$, $\|\nabla u_{\lambda}\|_{p}=\lambda^{1-n/p}\|\nabla u\|_{p}$（$\nabla u\ne0$：$u$ はコンパクト台で $0$ でないので定数でない）。不等式が成り立つと $\lambda^{-n/q-1+n/p}\le C\frac{\|\nabla u\|_{p}}{\|u\|_{q}}$ がすべての $\lambda>0$ で成り立つ。指数 $\frac np-1-\frac nq=\frac{n}{p^{*}}-\frac nq$ は $q\ne p^{*}$ なら $0$ でなく、$\lambda\to0$ か $\lambda\to\infty$ で左辺が発散して矛盾。
+:::
+
+::: problem {#fa:prob-em-1d}
+$n=1$, $1\le p<\infty$ なら $W^{1,p}(\mathbb{R})$ の元は有界で一様連続な代表元をもち、$\sup|u|\le2\|u\|_{W^{1,p}}$ を示せ。
+:::
+
+::: solution
+$u\in C_{c}^{1}(\mathbb{R})$ について $|u(x)|^{p}=\bigl|\int_{-\infty}^{x}(|u|^{p})'\bigr|\le\int p|u|^{p-1}|u'|\le(p-1)\|u\|_{p}^{p}+\|u'\|_{p}^{p}$（\ref{fa:trace-theorem} の証明の Step 1 と同じヤングの不等式、$p=1$ では直接）。よって $\sup|u|\le p^{1/p}\|u\|_{W^{1,p}}\le2\|u\|_{W^{1,p}}$（$p^{1/p}\le e^{1/e}<2$）。一様連続性は $|u(x)-u(y)|\le\int_{x}^{y}|u'|\le|x-y|^{1/p'}\|u'\|_{p}$（$p>1$）、$p=1$ では $\int_{x}^{y}|u'|\to0$（$|x-y|\to0$、積分の絶対連続性）。一般の $u$ へは \ref{fa:test-dense-rn} と一様収束で延ばす（\ref{fa:morrey-inequality.3} の証明と同じ）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
