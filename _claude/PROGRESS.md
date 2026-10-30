@@ -354,7 +354,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | FA-10 | （03-distributions-sobolev）/02-sobolev-spaces | 弱微分とソボレフ空間 | 弱微分、W^{k,p}(Ω) の完備性・回帰性、局所近似、マイヤーズ–セリン（H = W）、H^s(ℝⁿ) のフーリエによる特徴づけ | 完了 |
 | FA-11 | （03-distributions-sobolev）/03-extension-trace | 延長とトレース | W^{k,p}_0、リプシッツ（C¹）境界の延長作用素、トレース定理、部分積分の公式 | 完了 |
 | FA-12 | （03-distributions-sobolev）/04-embeddings | ソボレフの埋め込み定理 | ガリアルド–ニーレンバーグ–ソボレフ（p<n）、モレー（p>n）、一般の W^{k,p} ⊂ L^q・C^{m,α} | 完了 |
-| FA-13 | （03-distributions-sobolev）/05-compactness | レリッヒ–コンドラショフとポアンカレ | コンパクト埋め込み、ポアンカレの不等式 | 未着手 |
+| FA-13 | （03-distributions-sobolev）/05-compactness | レリッヒ–コンドラショフとポアンカレ | コンパクト埋め込み、ポアンカレの不等式 | 完了 |
 | FA-14 | （03-distributions-sobolev）/06-lax-milgram | ラックス–ミルグラムの定理 | 有界強圧的双線形形式、ラックス–ミルグラム、ガレルキン近似、ディリクレ問題の弱解の存在（例として） | 未着手 |
 | FA-15 | 04-analysis/07-functional-analysis/04-spectral-theory/01-functional-calculus | 連続関数計算 | 有界自己共役作用素の多項式・連続関数計算、スペクトル写像定理、正作用素と平方根、極分解 | 未着手 |
 | FA-16 | （04-spectral-theory）/02-spectral-measures | スペクトル測度とスペクトル定理 | リース–マルコフ（[a,b] 上）で得るスペクトル測度、射影値測度、有界自己共役・正規作用素のスペクトル定理（掛け算作用素形も） | 未着手 |
