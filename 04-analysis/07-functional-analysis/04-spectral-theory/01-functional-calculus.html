@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>連続関数計算 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/04-spectral-theory/01-functional-calculus.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 連続関数計算 {#fa:page-functional-calculus keywords="bounded self-adjoint operators, numerical range and spectrum in [m, M] with m, M in the spectrum, spectral mapping for polynomials, norm equals spectral radius for self-adjoint and normal operators, continuous functional calculus f(A) as an isometric *-homomorphism C(sigma(A)) -> B(H), spectral mapping theorem, positive operators, unique positive square root, absolute value |T|, polar decomposition with partial isometries"}
+
+コンパクトな自己共役作用素は固有ベクトルで対角化できた（\ref{fa:compact-selfadjoint-spectral}）。一般の有界な自己共役作用素 $A$ は固有ベクトルをもたないこともある（$L^{2}([0,1])$ 上の掛け算作用素 $f\mapsto xf$）が、それでも「$A$ の関数」$f(A)$ を定義することはできる。多項式 $p$ について $p(A)$ は明らかに意味をもち、そのノルムは $A$ のスペクトルの上での $p$ の最大値に等しい。そこで、連続関数を多項式で一様近似して極限をとれば、すべての連続関数 $f$ について $f(A)$ が定まる（**連続関数計算**）。このページでは、この構成と、$f\mapsto f(A)$ が積・共役・ノルムを保つことを示し、応用として正作用素の**平方根**、作用素の**絶対値** $|T|=\sqrt{T^{*}T}$、そして複素数の極形式 $z=e^{i\theta}|z|$ の作用素版である**極分解**を得る。
+
+## 記法と定義の確認 {#fa:sec-fc-notation}
+
+::: notation
+- $H$ は複素ヒルベルト空間、$B(H)$ は有界線形作用素の全体（バナッハ環）。共役作用素 $T^{*}$ と $\|T^{*}T\|=\|T\|^{2}$ は \ref{fa:adjoint}、自己共役作用素の性質は \ref{fa:selfadjoint}。
+- スペクトル $\sigma(T)$、スペクトル半径 $r(T)$ とその公式 $r(T)=\lim\|T^{n}\|^{1/n}$、スペクトルは空でないコンパクト集合であることは \ref{fa:spectrum}, \ref{fa:spectral-radius}, \ref{fa:spectrum-nonempty-compact}。
+- $T$ が**正規**とは $T^{*}T=TT^{*}$、自己共役 $A$ が**正**（$A\ge0$）とは、すべての $x$ で $\langle Ax,x\rangle\ge0$ となることをいう。$A\le B$ は $B-A\ge0$。
+- $C(K)$ はコンパクト集合 $K\subset\mathbb{C}$ 上の連続関数（一様ノルム $\|f\|_{\infty}\defeq\max_{K}|f|$）。多項式による一様近似は \ref{top:weierstrass-approximation}。
+- **選択公理**：使わない。
+:::
+
+## 自己共役作用素のスペクトル {#fa:sec-fc-spectrum}
+
+::: proposition 自己共役作用素のスペクトル {#fa:selfadjoint-spectrum keywords="for self-adjoint A with m = inf <Ax,x> and M = sup <Ax,x> over unit vectors: sigma(A) is contained in [m, M] and contains m and M; ||A|| = max(|m|, |M|) = r(A); for normal T, ||T|| = r(T)" index="自己共役作用素のスペクトル|じこきょうやくさようそのすぺくとる, 数域|すういき"}
+$A=A^{*}\in B(H)$ とし、$m\defeq\inf_{\|x\|=1}\langle Ax,x\rangle$, $M\defeq\sup_{\|x\|=1}\langle Ax,x\rangle$ とする。
+1. $\sigma(A)\subset[m,M]$ で、$m,M\in\sigma(A)$。
+2. $\|A\|=\max(|m|,|M|)=r(A)$。
+3. $T$ が正規なら $\|T\|=r(T)$。
+:::
+
+::: proof
+**1.** **Step 1（$[m,M]$ の外）.** $\lambda\in\mathbb{C}$ の $[m,M]$ からの距離を $d>0$ とする。単位ベクトル $x$ について $\langle Ax,x\rangle\in[m,M]$（実数、\ref{fa:selfadjoint.1}）なので
+$$
+\|(\lambda-A)x\|\ge|\langle(\lambda-A)x,x\rangle|=|\lambda-\langle Ax,x\rangle|\ge d.
+$$
+よって $\lambda-A$ は単射で値域は閉（\ref{fa:lax-milgram} の証明の Step 2 と同じ）。$(\lambda-A)^{*}=\bar\lambda-A$ も同じ評価を満たすので単射で、値域の直交補空間 $\ker(\bar\lambda-A)=0$ から値域は $H$ 全体。逆写像は有界（ノルム $\le\frac1d$）なので $\lambda\notin\sigma(A)$。
+
+**Step 2（$M\in\sigma(A)$）.** $B\defeq M-A\ge0$ とする。正の作用素について、半双線形形式 $[x,y]\defeq\langle Bx,y\rangle$ にコーシー–シュワルツの不等式（\ref{fa:cauchy-schwarz} と同じ証明、正定値性は不要）を使うと $|\langle Bx,y\rangle|^{2}\le\langle Bx,x\rangle\langle By,y\rangle$。$y=Bx$ として $\|Bx\|^{4}\le\langle Bx,x\rangle\|B\|\|Bx\|^{2}$、すなわち $\|Bx\|^{2}\le\|B\|\langle Bx,x\rangle$。$B$ が可逆なら $c\defeq\|B^{-1}\|^{-1}>0$ について $\|Bx\|\ge c\|x\|$ なので、単位ベクトル $x$ について $c^{2}\le\|B\|\langle Bx,x\rangle$、すなわち $\langle Ax,x\rangle\le M-\frac{c^{2}}{\|B\|}$（$B\ne0$；$B=0$ なら $B$ は可逆でない）。これは $M$ が上限であることに反する。よって $M\in\sigma(A)$。$m$ も $A$ を $-A$ に替えて同じ。
+
+**2.** \ref{fa:selfadjoint.3} から $\|A\|=\sup|\langle Ax,x\rangle|=\max(|m|,|M|)$。1 から $r(A)=\max(|m|,|M|)$。
+
+**3.** $T^{*}T$ は自己共役で、2 と \ref{fa:adjoint} から $\|T\|^{2}=\|T^{*}T\|$。正規なら $(T^{*}T)^{k}=(T^{k})^{*}T^{k}$ なので $\|T^{k}\|^{2}=\|(T^{*}T)^{k}\|$。$k=2^{j}$ とし、自己共役な $S$ について $\|S^{2}\|=\|S^{*}S\|=\|S\|^{2}$ を繰り返すと $\|(T^{*}T)^{2^{j}}\|=\|T^{*}T\|^{2^{j}}$。よって $\|T^{2^{j}}\|=\|T\|^{2^{j}}$ で、\ref{fa:spectral-radius} から $r(T)=\lim_{j}\|T^{2^{j}}\|^{2^{-j}}=\|T\|$。
+:::
+
+
+::: lemma 多項式のスペクトル写像 {#fa:polynomial-spectral-mapping keywords="spectral mapping for polynomials sigma(p(T)) = p(sigma(T)) in a Banach algebra; for self-adjoint A and a complex polynomial p, ||p(A)|| = max over sigma(A) of |p|" index="スペクトル写像定理（多項式）|すぺくとるしゃぞうていりたこうしき"}
+1. バナッハ環の元 $T$ と複素係数の多項式 $p$ について $\sigma(p(T))=p(\sigma(T))$。
+2. $A$ が自己共役なら、複素係数の多項式 $p$ について $\|p(A)\|=\max_{t\in\sigma(A)}|p(t)|$。
+:::
+
+::: proof
+**1.** $\mu\in\mathbb{C}$ について $p(z)-\mu=c\prod_{j}(z-z_{j})$（$c\ne0$、$p$ が定数なら自明）と因数分解すると $p(T)-\mu=c\prod_{j}(T-z_{j})$ で、因子は互いに可換。積が可逆であることと各因子が可逆であることは同値（可換な元の積：$xy$ が可逆なら $x\cdot y(xy)^{-1}=1$ かつ $(xy)^{-1}y\cdot x=1$ で、可換性から $y(xy)^{-1}=(xy)^{-1}y$ なので $x$ は可逆）。よって $\mu\in\sigma(p(T))$ $\iff$ ある $z_{j}\in\sigma(T)$ $\iff$ $\mu\in p(\sigma(T))$（$p(z)=\mu$ の解は $z_{j}$ たち）。
+
+**2.** $p(A)^{*}=\bar p(A)$（係数の共役）なので $p(A)$ は正規。\ref{fa:selfadjoint-spectrum.3} と 1 から $\|p(A)\|=r(p(A))=\max_{\sigma(A)}|p|$。
+:::
+
+## 連続関数計算 {#fa:sec-fc-calculus}
+
+::: theorem 連続関数計算 {#fa:continuous-functional-calculus keywords="continuous functional calculus: for self-adjoint A there is a unique isometric *-homomorphism C(sigma(A)) -> B(H), f -> f(A), extending polynomials; (fg)(A) = f(A) g(A), conj(f)(A) = f(A)*, ||f(A)|| = ||f||_infty, f >= 0 implies f(A) >= 0, f(A) commutes with every operator commuting with A, sigma(f(A)) = f(sigma(A))" index="連続関数計算|れんぞくかんすうけいさん, 関数計算|かんすうけいさん"}
+$A\in B(H)$ を自己共役とし、$K\defeq\sigma(A)\subset\mathbb{R}$ とする。写像 $\Phi\colon C(K)\to B(H)$, $f\mapsto f(A)$ で次を満たすものがただ一つある。
+1. 多項式 $p$ について $\Phi(p|_{K})=p(A)$。
+2. $\Phi$ は線形で、$\Phi(fg)=\Phi(f)\Phi(g)$, $\Phi(\bar f)=\Phi(f)^{*}$, $\|\Phi(f)\|=\|f\|_{\infty}$。
+
+さらに次が成り立つ。
+3. $f\ge0$ なら $f(A)\ge0$。とくに実数値の $f$ について $f(A)$ は自己共役。
+4. $S\in B(H)$ が $SA=AS$ を満たすなら $Sf(A)=f(A)S$。
+5. （スペクトル写像定理）$\sigma(f(A))=f(K)$。
+:::
+
+::: proof
+**Step 1（多項式の稠密性）.** $K\subset[m,M]$（\ref{fa:selfadjoint-spectrum.1}）。$f\in C(K)$ を $[m,M]$ に連続に延ばす：$K$ は閉集合なので $[m,M]\setminus K$ は互いに素な開区間の可算和で、各区間の上では両端（$K$ の点）の値を 1 次関数でつなぐ。\ref{top:weierstrass-approximation} から、$[m,M]$ 上で一様に $f$ に近づく多項式の列 $p_{k}$ がある。
+
+**Step 2（定義）.** \ref{fa:polynomial-spectral-mapping.2} から $\|p_{k}(A)-p_{l}(A)\|=\|p_{k}-p_{l}\|_{\infty,K}\to0$。$B(H)$ は完備なので $f(A)\defeq\lim p_{k}(A)$ が存在し、別の近似列でも同じ極限（交互に並べる）。$\|f(A)\|=\lim\|p_{k}\|_{\infty,K}=\|f\|_{\infty}$。一意性：1・2 を満たす $\Phi$ は等長なので連続で、多項式の上で決まり、多項式は稠密。
+
+**Step 3（代数的性質）.** 多項式については $(pq)(A)=p(A)q(A)$, $\bar p(A)=p(A)^{*}$ で、両辺はノルムについて連続なので極限で保たれる。
+
+**Step 4（3）.** $f\ge0$ なら $g\defeq\sqrt f\in C(K)$ は実数値で、$f(A)=g(A)^{2}=g(A)^{*}g(A)$ から $\langle f(A)x,x\rangle=\|g(A)x\|^{2}\ge0$。実数値なら $f(A)^{*}=\bar f(A)=f(A)$。
+
+**Step 5（4）.** $S$ は $p(A)$ と可換で、極限をとればよい。
+
+**Step 6（5）.** $\mu\notin f(K)$ なら $g\defeq\frac{1}{\mu-f}\in C(K)$ で、$g(A)(\mu-f(A))=(\mu-f(A))g(A)=1$ なので $\mu\notin\sigma(f(A))$。逆に $\mu=f(t_{0})$, $t_{0}\in K$ とする。$\mu-f(A)$ が可逆とし、$\varepsilon>0$ について連続関数 $h\ge0$ で $h(t_{0})=1$、$\|h\|_{\infty}=1$、$|t-t_{0}|\ge\varepsilon$ で $h(t)=0$ となるもの（山形）をとる。$\|(\mu-f)h\|_{\infty}\le\sup_{|t-t_{0}|<\varepsilon}|f(t_{0})-f(t)|\eqdef\eta(\varepsilon)\to0$。一方 $1=\|h\|_{\infty}=\|h(A)\|\le\|(\mu-f(A))^{-1}\|\|(\mu-f(A))h(A)\|\le\|(\mu-f(A))^{-1}\|\eta(\varepsilon)$ で、$\varepsilon\to0$ で矛盾。
+:::
+
+## 正作用素と極分解 {#fa:sec-fc-positive}
+
+::: theorem 平方根 {#fa:square-root keywords="a self-adjoint operator is positive iff its spectrum lies in [0, infinity); every positive operator has a unique positive square root, which commutes with every operator commuting with A" index="作用素の平方根|さようそのへいほうこん, 正作用素|せいさようそ"}
+$A$ を自己共役とする。
+1. $A\ge0$ $\iff$ $\sigma(A)\subset[0,\infty)$。
+2. $A\ge0$ なら、$B\ge0$ で $B^{2}=A$ となるものがただ一つある（$\sqrt A$ と書く）。$\sqrt A$ は $A$ と可換な作用素と可換。
+:::
+
+::: proof
+**1.** \ref{fa:selfadjoint-spectrum.1} から $\sigma(A)\subset[m,M]$ で $m\in\sigma(A)$。$A\ge0$ $\iff$ $m\ge0$ $\iff$ $\sigma(A)\subset[0,\infty)$。
+
+**2.** **存在.** $\sigma(A)\subset[0,\infty)$ の上で $f(t)\defeq\sqrt t$ とし $B\defeq f(A)$。\ref{fa:continuous-functional-calculus} の 2・3 から $B\ge0$, $B^{2}=A$、4 から可換性。
+
+**一意性.** $C\ge0$, $C^{2}=A$ とする。$CA=C^{3}=AC$ なので $C$ は $A$ と可換で、したがって $B$ と可換。$D\defeq C-B$（自己共役）とすると $D(C+B)=C^{2}-B^{2}=0$。よって $DCD+DBD=D(C+B)D=0$ で、両項は正（$\langle DCDx,x\rangle=\langle C(Dx),Dx\rangle\ge0$）なので $DCD=DBD=0$。差をとって $D^{3}=D(C-B)D=0$。$D$ は自己共役なので $\|D\|^{4}=\|D^{2}\|^{2}=\|D^{4}\|=\|D\cdot D^{3}\|=0$（\ref{fa:adjoint} の $\|S^{*}S\|=\|S\|^{2}$ を $S=D$, $S=D^{2}$ に）。よって $C=B$。
+:::
+
+::: theorem 極分解 {#fa:polar-decomposition keywords="polar decomposition: every T in B(H) can be written T = U |T| with |T| = sqrt(T* T) and a partial isometry U that is isometric on the closure of the range of |T| and zero on its orthogonal complement; ker U = ker T" index="極分解|きょくぶんかい, 部分等長作用素|ぶぶんとうちょうさようそ, 作用素の絶対値|さようそのぜったいち"}
+$T\in B(H)$ について $|T|\defeq\sqrt{T^{*}T}$ とおく。
+1. すべての $x$ で $\||T|x\|=\|Tx\|$。
+2. 作用素 $U\in B(H)$ で、$T=U|T|$、$U$ は $\overline{R(|T|)}$ の上で等長、$R(|T|)^{\perp}$ の上で $0$ となるもの（**部分等長作用素**）がただ一つある。
+:::
+
+::: proof
+**1.** $\||T|x\|^{2}=\langle|T|^{2}x,x\rangle=\langle T^{*}Tx,x\rangle=\|Tx\|^{2}$。
+
+**2.** $R(|T|)$ の上で $U_{0}(|T|x)\defeq Tx$ とおく。$|T|x=|T|y$ なら 1 から $\|Tx-Ty\|=\||T|(x-y)\|=0$ なので well-defined で、線形かつ等長。等長写像は閉包 $\overline{R(|T|)}$ に一意に延び（コーシー列は送られる）、直交補空間の上で $0$ とおいて $U$ を定める（\ref{fa:orthogonal-decomposition}）。$U|T|x=Tx$ は定義から。一意性：条件を満たす $U'$ は $R(|T|)$ の上で $U'|T|x=Tx$ で決まり、連続性で閉包の上、条件で補空間の上でも決まる。
+:::
+
+::: hypcheck
+- 連続関数計算は自己共役（あるいは正規）作用素に対してだけ作った。$\|p(A)\|=\max_{\sigma(A)}|p|$ が成り立つことが本質で、正規でない作用素では成り立たない：$H=\mathbb{C}^{2}$, $N=\begin{pmatrix}0&1\\0&0\end{pmatrix}$ は $\sigma(N)=\{0\}$ だが $\|N\|=1$。
+- 正規作用素 $T$ にも、$C(\sigma(T))$（$\sigma(T)\subset\mathbb{C}$）からの連続関数計算がある。その証明には、$z$ と $\bar z$ の多項式の稠密性（\ref{top:stone-weierstrass}）と、$T$, $T^{*}$ で生成される可換 C* 環のゲルファント理論が要る。このページでは扱っていない。
+- 平方根の一意性の証明では「$C$ が $A$ と可換なら $B=\sqrt A$ と可換」（4）を使った。これは $\sqrt A$ が $A$ の多項式の極限であることから来る。
+- 極分解の $U$ は一般にユニタリにはならない：右シフト $S$ では $|S|=1$、$U=S$ で、$S$ は等長だが全射でない。$T$ が可逆なら $U$ はユニタリ。
+:::
+
+::: supplement
+**関連する結果.**
+- 次のページでは、$f\mapsto\langle f(A)x,y\rangle$ が $C(\sigma(A))$ 上の有界線形汎関数であることから、リース–マルコフの定理で測度 $\mu_{x,y}$ を得て、有界ボレル関数 $f$ にまで関数計算を延ばす（スペクトル測度）。
+- 連続関数計算は、可換 C* 環 $C^{*}(A)$（$A$ と $1$ が生成する閉部分環）が $C(\sigma(A))$ と等長 * 同型であるという、ゲルファント–ナイマルクの定理の最も簡単な場合である。
+- 作用素単調関数：$0\le A\le B$ なら $\sqrt A\le\sqrt B$ だが、$A^{2}\le B^{2}$ とは限らない（行列の反例がある）。
+
+**高い視点：作用素を関数として読む.** 連続関数計算は、「$A$ のスペクトルの上の関数」と「$A$ から作られる作用素」の辞書である：関数の積・共役・最大値は、作用素の積・共役・ノルムに対応する。有限次元なら $A=\sum\lambda_{i}P_{i}$（スペクトル分解）として $f(A)=\sum f(\lambda_{i})P_{i}$ で、それを多項式近似と極限で無限次元に持ち込んだのが連続関数計算である。比喩で言えば、$A$ を「スペクトルという座標の上の掛け算」とみなす翻訳機を、目に見える固有ベクトルなしに作ったことになる。極分解は、複素数を「回転 $\times$ 大きさ」に分ける操作を作用素に持ち込んだもので、$|T|$ が大きさ、$U$ が向きを担う。
+:::
+
+## 問題 {#fa:sec-fc-problems}
+
+::: problem {#fa:prob-fc-multiplication}
+$H=L^{2}([0,1])$ 上の掛け算作用素 $(Ax)(t)\defeq tx(t)$ について、$\sigma(A)=[0,1]$、$f(A)$ は $f(t)$ による掛け算作用素であること（$f\in C([0,1])$）を示し、$A$ は固有値をもたないことを確かめよ。
+:::
+
+::: solution
+$A$ は自己共役で $\langle Ax,x\rangle=\int t|x|^{2}\in[0,\|x\|^{2}]$ なので、\ref{fa:selfadjoint-spectrum.1} から $\sigma(A)\subset[0,1]$。$\lambda\in[0,1]$ について $x_{k}\defeq\sqrt k\mathbf{1}_{[\lambda,\lambda+1/k]\cap[0,1]}$（$\lambda=1$ なら $[1-\frac1k,1]$）は $\|x_{k}\|\ge\frac{1}{\sqrt2}$（$k\ge2$）、$x_{k}$ の台の上で $|t-\lambda|\le\frac1k$ なので $\|(A-\lambda)x_{k}\|\le\frac1k\|x_{k}\|$。よって $A-\lambda$ は有界な逆をもたず、$\lambda\in\sigma(A)$。多項式 $p$ について $p(A)$ は $p(t)$ の掛け算で、$\|f(t)\cdot-p(t)\cdot\|\le\|f-p\|_{\infty}$ なので、近似の極限 $f(A)$ は $f(t)$ の掛け算。固有値：$tx(t)=\lambda x(t)$ a.e. なら $x=0$ a.e.（$\{t=\lambda\}$ は測度 $0$）。
+:::
+
+::: problem {#fa:prob-fc-matrix-polar}
+$T\defeq\begin{pmatrix}0&2\\0&0\end{pmatrix}$（$\mathbb{C}^{2}$ 上）の極分解を求めよ。
+:::
+
+::: solution
+$T^{*}T=\begin{pmatrix}0&0\\0&4\end{pmatrix}$ なので $|T|=\begin{pmatrix}0&0\\0&2\end{pmatrix}$。$R(|T|)=\operatorname{span}\{e_{2}\}$ で $U(|T|e_{2})=U(2e_{2})=Te_{2}=2e_{1}$、すなわち $Ue_{2}=e_{1}$、$Ue_{1}=0$。$U=\begin{pmatrix}0&1\\0&0\end{pmatrix}$ で $U|T|=T$。$U$ は $e_{2}$ 方向で等長、$e_{1}$ 方向で $0$ の部分等長作用素（ユニタリではない）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
