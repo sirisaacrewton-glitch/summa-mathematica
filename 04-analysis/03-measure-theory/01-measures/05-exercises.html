@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：測度 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/01-measures/05-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：測度 {#meas:page-exercises-measures keywords="exercises, Measures"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習と、いくつかのページの結果を組み合わせる問題である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#meas:sec-exme-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。とくに $\lambda$ は $\mathbb{R}^{n}$ のルベーグ測度、$\lambda^{*}$ はルベーグ外測度、$\mathcal{L}_{n}$ はルベーグ可測集合の全体（\ref{meas:lebesgue-measure}）、$\mathbf{1}_{A}$ は $A$ の特性関数である。
+- **選択公理**：可算選択公理を使う問題（\ref{meas:ex-cr-1}, \ref{meas:ex-cr-4}, \ref{meas:ex-fn-4}）と、選択公理そのものを使う問題（\ref{meas:ex-lb-4}）では、解答の中で使う箇所を明記する。それ以外の問題では使わない（引用する結果の証明の中で使われているものを除く）。
+:::
+
+## σ-加法族と測度 {#meas:sec-sg-exercises}
+
+対応するページ：\ref{meas:page-sigma-algebras}
+
+::: problem ★ 基本：集合列の上極限と下極限 {#meas:ex-sg-1}
+1. $\mathbb{R}$ の部分集合の列を、$n$ が偶数なら $A_{n}\defeq[0,1]$、$n$ が奇数なら $A_{n}\defeq[\frac1n,2)$ と定める。$\limsup_{n}A_{n}$ と $\liminf_{n}A_{n}$ を求めよ。
+2. 一般の測度空間 $(X,\mathcal{M},\mu)$ と $A_{n}\in\mathcal{M}$ について $\mu(\liminf_{n}A_{n})\le\liminf_{n}\mu(A_{n})$ を示せ。
+:::
+
+::: solution
+**1.** $\limsup_{n}A_{n}$ は無限個の $A_{n}$ に属する点の集合、$\liminf_{n}A_{n}$ は有限個を除くすべての $A_{n}$ に属する点の集合である（定義 $\bigcap_{m}\bigcup_{n\ge m}A_{n}$, $\bigcup_{m}\bigcap_{n\ge m}A_{n}$ をそのまま言い換えたもの）。
+
+- $x\in[0,1]$ なら、$x$ はすべての偶数番目の $A_{n}$ に属するので $x\in\limsup A_{n}$。
+- $x\in(1,2)$ なら、奇数 $n$ について $\frac1n\le1<x<2$ なので $x$ はすべての奇数番目の $A_{n}$ に属し、$x\in\limsup A_{n}$。
+- $x<0$ または $x\ge2$ なら、$x$ はどの $A_{n}$ にも属さない。
+
+よって $\limsup_{n}A_{n}=[0,2)$。
+
+次に $\liminf$。$x\in(1,2)$ は偶数番目の $A_{n}=[0,1]$ のどれにも属さないので $\liminf$ に入らない。$x=0$ は奇数番目の $A_{n}$（$\frac1n>0$）のどれにも属さないので入らない。$x\in(0,1]$ なら、偶数番目の $A_{n}$ にはすべて属し、奇数番目の $A_{n}$ には $n\ge\frac1x$ なら属する。よって $n\ge\frac1x$ のすべての $A_{n}$ に属し、$x\in\liminf A_{n}$。以上から $\liminf_{n}A_{n}=(0,1]$。
+
+**2.** $B_{m}\defeq\bigcap_{n\ge m}A_{n}$ とおくと $B_{m}\in\mathcal{M}$（\ref{meas:sigma-algebra-properties}）、$B_{m}\uparrow\liminf_{n}A_{n}$。$n\ge m$ なら $B_{m}\subset A_{n}$ なので、単調性（\ref{meas:measure-properties.2}）から $\mu(B_{m})\le\inf_{n\ge m}\mu(A_{n})$。下からの連続性（\ref{meas:measure-properties.4}）から
+$$
+\mu\bigl(\liminf_{n}A_{n}\bigr)=\lim_{m\to\infty}\mu(B_{m})\le\lim_{m\to\infty}\inf_{n\ge m}\mu(A_{n})=\liminf_{n}\mu(A_{n}).
+$$
+（右側の極限は、$m$ について単調増加な列の $[0,\infty]$ の中での極限である。）
+:::
+
+::: problem ★ 基本：分割が生成する σ-加法族 {#meas:ex-sg-2}
+1. $K$ を可算集合、$\{P_{k}\}_{k\in K}$ を $X$ の分割（$P_{k}$ は空でなく、互いに素で、和が $X$）とする。$\sigma(\{P_{k}:k\in K\})=\{\bigcup_{k\in J}P_{k}:J\subset K\}$ であり、$J\mapsto\bigcup_{k\in J}P_{k}$ は単射であることを示せ。
+2. $\mathbb{R}$ の部分集合 $A\defeq[0,2]$, $B\defeq[1,3]$ について、$\sigma(\{A,B\})$ の元の個数を求めよ。
+:::
+
+::: solution
+**1.** 右辺を $\mathcal{F}$ とおく。
+
+$\mathcal{F}$ は σ-加法族である：$X=\bigcup_{k\in K}P_{k}\in\mathcal{F}$。$J\subset K$ について、分割であることから $\bigl(\bigcup_{k\in J}P_{k}\bigr)^{c}=\bigcup_{k\in K\setminus J}P_{k}\in\mathcal{F}$。$J_{1},J_{2},\dots\subset K$ について $\bigcup_{n}\bigcup_{k\in J_{n}}P_{k}=\bigcup_{k\in\bigcup_{n}J_{n}}P_{k}\in\mathcal{F}$。
+
+$\mathcal{F}$ は各 $P_{k}$ を含む（$J=\{k\}$）ので、\ref{meas:generated-properties.1} から $\sigma(\{P_{k}\})\subset\mathcal{F}$。逆に $\mathcal{F}$ の元は $P_{k}$ の高々可算個の和（$K$ が可算）なので $\sigma(\{P_{k}\})$ に属する。よって等号が成り立つ。
+
+単射：$U=\bigcup_{k\in J}P_{k}$ なら、$P_{k}$ が空でなく互いに素なので $J=\{k\in K:P_{k}\subset U\}$ で、$J$ は $U$ から決まる。
+
+**2.** 次の 4 つの集合（**アトム**）を考える。
+$$
+A\cap B=[1,2],\quad A\setminus B=[0,1),\quad B\setminus A=(2,3],\quad (A\cup B)^{c}=\mathbb{R}\setminus[0,3].
+$$
+これらは空でなく、互いに素で、和は $\mathbb{R}$（各点は $A$ に属するか否か、$B$ に属するか否かでちょうど一つに入る）。アトムはどれも $\sigma(\{A,B\})$ に属し（\ref{meas:sigma-algebra-properties}）、逆に $A=(A\cap B)\cup(A\setminus B)$, $B=(A\cap B)\cup(B\setminus A)$ はアトムの生成する σ-加法族に属する。\ref{meas:generated-properties.2} を両向きに使って、$\sigma(\{A,B\})$ はアトムの生成する σ-加法族に等しい。1 から、その元は 4 つのアトムの部分集合族と一対一に対応するので、元の個数は $2^{4}=16$ である（例えば $A\triangle B=[0,1)\cup(2,3]$ はアトム 2 つの和）。
+:::
+
+::: problem ★★ 標準：測度の和と σ-有限性 {#meas:ex-sg-3}
+1. $I$ を可算集合、$\mu_{i}$（$i\in I$）を可測空間 $(X,\mathcal{M})$ 上の測度とする。$\nu(A)\defeq\sum_{i\in I}\mu_{i}(A)$ は測度であることを示せ。
+2. $\mathcal{B}(\mathbb{R})$ 上の測度 $\nu\defeq\sum_{q\in\mathbb{Q}}\delta_{q}$ は σ-有限だが、空でないすべての半開区間 $(a,b]$ で $\nu((a,b])=\infty$ であることを示せ。さらに、$\nu$ と $2\nu$ は $\mathcal{P}\defeq\{(a,b]:a<b\}\cup\{\varnothing\}$ の上で一致するが等しくないことを示し、\ref{meas:measure-uniqueness} のどの仮定が満たされていないか答えよ。
+:::
+
+::: solution
+**1.** $\nu(\varnothing)=\sum_{i}0=0$。互いに素な $A_{1},A_{2},\dots\in\mathcal{M}$ について、$a_{i,k}\defeq\mu_{i}(A_{k})\in[0,\infty]$ とおく。各 $\mu_{i}$ の可算加法性から $\nu(\bigsqcup_{k}A_{k})=\sum_{i}\sum_{k}a_{i,k}$。添字集合 $I\times\mathbb{N}$（可算）を $i$ ごとに分けても $k$ ごとに分けてもよいので、\ref{meas:extended-sums-properties.2} を二通りに使って
+$$
+\sum_{i\in I}\sum_{k}a_{i,k}=\sum_{(i,k)\in I\times\mathbb{N}}a_{i,k}=\sum_{k}\sum_{i\in I}a_{i,k}=\sum_{k}\nu(A_{k}).
+$$
+よって $\nu$ は可算加法的で、測度である。
+
+**2.** 1 から $\nu$ は測度で、$\nu(A)=\#(A\cap\mathbb{Q})$（$A\cap\mathbb{Q}$ が無限集合なら $\infty$）。
+
+- **σ-有限**：$\mathbb{R}=(\mathbb{R}\setminus\mathbb{Q})\cup\bigcup_{q\in\mathbb{Q}}\{q\}$ は可算個のボレル集合の和で、$\nu(\mathbb{R}\setminus\mathbb{Q})=0$, $\nu(\{q\})=1$ はどれも有限。
+- **区間の値**：$a<b$ なら $(a,b]$ は無限個の有理数を含むので $\nu((a,b])=\infty$。
+- **$\mathcal{P}$ 上で一致**：空集合では両方 $0$、空でない元では両方 $\infty$（$2\cdot\infty=\infty$）。
+- **等しくない**：$\nu(\{0\})=1\ne2=2\nu(\{0\})$。
+
+$\mathcal{P}$ は π 系で $\sigma(\mathcal{P})=\mathcal{B}(\mathbb{R})$（\ref{meas:borel-generators.1}）なので、\ref{meas:measure-uniqueness} の仮定のうち満たされていないのは「$X_{n}\uparrow X$ となる $X_{n}\in\mathcal{P}$ で $\nu(X_{n})<\infty$ のもの」の存在である。$\nu$ 自身は σ-有限だが、有限な値をとる集合が $\mathcal{P}$ の中にない（空集合だけ）ので、この仮定は満たされない。σ-有限性は、有限測度の集合を**生成元の π 系の中から**とれる形で必要になる。
+:::
+
+::: problem ★★★ 発展：可算無限個の元をもつ σ-加法族はない {#meas:ex-sg-4}
+σ-加法族 $\mathcal{M}$ が可算集合なら、$\mathcal{M}$ は有限集合で、元の個数はある $m\ge0$ について $2^{m}$ であることを示せ。（ヒント：$x\in X$ について $\bigcap\{A\in\mathcal{M}:x\in A\}$ を考える。）
+:::
+
+::: solution
+$x\in X$ について $T_{x}\defeq\bigcap\{A\in\mathcal{M}:x\in A\}$ とおく。$\mathcal{M}$ が可算なのでこれは可算個の共通部分で、$T_{x}\in\mathcal{M}$（\ref{meas:sigma-algebra-properties}）、$x\in T_{x}$。
+
+**Step 1（$T_{x}$ は等しいか互いに素）.** $x,y\in X$ とする。
+
+- $y\notin T_{x}$ なら、$x\in A$, $y\notin A$ となる $A\in\mathcal{M}$ がある。$y\in A^{c}\in\mathcal{M}$ なので $T_{y}\subset A^{c}$、また $T_{x}\subset A$。よって $T_{x}\cap T_{y}=\varnothing$。
+- $y\in T_{x}$ なら $T_{x}=T_{y}$ である。実際、$y$ を含む $A\in\mathcal{M}$ が $x$ を含まなければ、$x\in A^{c}$ から $T_{x}\subset A^{c}$ で $y\notin T_{x}$ となり矛盾。よって $y$ を含む $\mathcal{M}$ の元と $x$ を含む $\mathcal{M}$ の元は同じ（逆向きは $y\in T_{x}\subset A$ から）で、$T_{x}=T_{y}$。
+
+したがって $\mathcal{T}\defeq\{T_{x}:x\in X\}$ は $X$ の分割である。
+
+**Step 2（$\mathcal{M}$ はアトムの和の全体）.** $A\in\mathcal{M}$ なら、$x\in A$ について $T_{x}\subset A$ なので $A=\bigcup_{x\in A}T_{x}$。$\mathcal{T}\subset\mathcal{M}$ は可算集合なので、$\mathcal{T}$ は可算な分割で、\ref{meas:ex-sg-2.1} から $\sigma(\mathcal{T})=\{\bigcup\mathcal{J}:\mathcal{J}\subset\mathcal{T}\}$ で、$\mathcal{J}\mapsto\bigcup\mathcal{J}$ は単射。$\mathcal{T}\subset\mathcal{M}$ から $\sigma(\mathcal{T})\subset\mathcal{M}$、いま示したことから $\mathcal{M}\subset\sigma(\mathcal{T})$。よって $\mathcal{M}$ は $\mathcal{P}(\mathcal{T})$ と全単射である。
+
+**Step 3（結論）.** $\mathcal{T}$ が無限集合なら可算無限集合で、$\mathcal{P}(\mathcal{T})$ は非可算（可算なら全射 $\mathcal{T}\to\mathcal{P}(\mathcal{T})$ が作れて \ref{set:cantor} に反する）。これは $\mathcal{M}$ が可算であることに反する。よって $\mathcal{T}$ は有限集合で、その元の個数を $m$ とすると $\#\mathcal{M}=\#\mathcal{P}(\mathcal{T})=2^{m}$。
+
+選択公理は使っていない（$T_{x}$ は $x$ から一意に決まる）。
+:::
+
+## 外測度とカラテオドリの拡張定理 {#meas:sec-cr-exercises}
+
+対応するページ：\ref{meas:page-caratheodory}
+
+::: problem ★ 基本：可算か否かで測る外測度 {#meas:ex-cr-1}
+$X$ を非可算集合とし、$A\subset X$ について $\mu^{*}(A)\defeq0$（$A$ が可算）、$1$（$A$ が非可算）とおく。$\mu^{*}$ は外測度であり、$\mu^{*}$ 可測集合は「$A$ または $A^{c}$ が可算」となる $A$ に限ることを示せ。
+:::
+
+::: solution
+**外測度.** $\mu^{*}(\varnothing)=0$。$A\subset B$ で $A$ が非可算なら $B$ も非可算なので単調。可算劣加法性：$\bigcup_{n}A_{n}$ が可算なら左辺は $0$。非可算なら、ある $A_{n}$ が非可算である（すべて可算なら、可算個の可算集合の和として可算になる。ここで各 $A_{n}$ の数え上げを選ぶので可算選択公理を使う）ので、右辺 $\ge1=$ 左辺。
+
+**$A$ が可算のとき可測.** 任意の $E$ について $\mu^{*}(E\cap A)=0$ と単調性から $\mu^{*}(E\cap A)+\mu^{*}(E\setminus A)\le\mu^{*}(E)$。逆向きの不等式は劣加法性から常に成り立つ（\ref{meas:outer-measure.2}）。
+
+**$A^{c}$ が可算のとき可測.** カラテオドリの条件は $A$ と $A^{c}$ について対称（$E\setminus A=E\cap A^{c}$）なので、上の場合に帰着する。
+
+**$A$, $A^{c}$ がともに非可算なら可測でない.** $E=X$ とすると $\mu^{*}(X\cap A)+\mu^{*}(X\setminus A)=1+1=2>1=\mu^{*}(X)$。
+
+以上から $\mu^{*}$ 可測集合の全体は \ref{meas:prob-sa-countable-cocountable} の σ-加法族で、\ref{meas:caratheodory} が与える測度はそこで扱った測度（可算集合に $0$、補集合が可算な集合に $1$）に一致する。
+:::
+
+::: problem ★★ 標準：ディラック測度を前測度から作る {#meas:ex-cr-2}
+$\mathcal{S}\defeq\{(a,b]:a\le b\}$（$\mathbb{R}$ の半環、\ref{meas:semiring} の例 1）上で $\rho((a,b])\defeq1$（$0\in(a,b]$）、$0$（$0\notin(a,b]$）とおく。$\rho$ は前測度であること、\ref{meas:outer-measure-from-cover} で作った外測度は $\mu^{*}=\delta_{0}$（$\mathcal{P}(\mathbb{R})$ 上）であること、$\mathbb{R}$ のすべての部分集合が $\mu^{*}$ 可測であること、$\mathcal{B}(\mathbb{R})$ 上で $\rho$ を延長する測度は $\delta_{0}$ だけであることを示せ。
+:::
+
+::: solution
+**前測度.** $\rho(\varnothing)=0$（空集合は $0$ を含まない）。$I=\bigsqcup_{j}I_{j}$（$I,I_{j}\in\mathcal{S}$）とする。$0\in I$ なら $0$ はちょうど一つの $I_{j}$ に属するので $\sum_{j}\rho(I_{j})=1=\rho(I)$。$0\notin I$ ならどの $I_{j}$ も $0$ を含まないので $\sum_{j}\rho(I_{j})=0=\rho(I)$。
+
+**外測度の計算.** $0\notin A$ のとき：$\mathbb{R}\setminus\{0\}$ は $0$ を含まない $\mathcal{S}$ の元の可算和
+$$
+\mathbb{R}\setminus\{0\}=\bigcup_{k\ge0}(k,k+1]\cup\bigcup_{k\ge1}\Bigl(-k,-\frac1k\Bigr]
+$$
+で覆われる（$x>0$ は $k=\lceil x\rceil-1$ の区間 $(k,k+1]$ に、$x<0$ は $k>\max(-x,-1/x)$ となる $k$ の区間 $(-k,-\frac1k]$ に入る）。この被覆の $\rho$ の和は $0$ なので $\mu^{*}(A)=0$。
+
+$0\in A$ のとき：$A$ の任意の被覆 $\{C_{j}\}$ は $0$ を含む $C_{j}$ をもつので $\sum\rho(C_{j})\ge1$、よって $\mu^{*}(A)\ge1$。逆に上の被覆に $(-1,0]$ を加えると $A$ の被覆で和は $1$。よって $\mu^{*}(A)=1$。
+
+以上から、すべての $A\subset\mathbb{R}$ で $\mu^{*}(A)=\delta_{0}(A)$。
+
+**すべての集合が可測.** $A,E\subset\mathbb{R}$ について、$0$ は $E\cap A$, $E\setminus A$ の高々一方に属し、$0\in E$ のときちょうど一方に属するので、$\delta_{0}(E\cap A)+\delta_{0}(E\setminus A)=\delta_{0}(E)$。
+
+**一意性.** $\mathbb{R}=\bigcup_{n}(-n,n]$ で $\rho((-n,n])=1<\infty$ なので、\ref{meas:caratheodory-extension.2} から $\sigma(\mathcal{S})=\mathcal{B}(\mathbb{R})$（\ref{meas:borel-generators.1}）上で $\rho$ を延長する測度は $\mu^{*}\restriction\mathcal{B}(\mathbb{R})=\delta_{0}$ だけである。
+:::
+
+::: problem ★★ 標準：可測性は半環の元で試せば足りる {#meas:ex-cr-3}
+$\rho$ を半環 $\mathcal{S}$ 上の前測度、$\mu^{*}$ を \ref{meas:outer-measure-from-cover} で作った外測度とする。$A\subset X$ が $\mu^{*}$ 可測であるためには、すべての $S\in\mathcal{S}$ について $\mu^{*}(S)=\mu^{*}(S\cap A)+\mu^{*}(S\setminus A)$ が成り立つことが必要十分であることを示せ。
+:::
+
+::: solution
+必要性は定義（$E=S$ とおく）。十分性を示す。$E\subset X$ とし、$\mu^{*}(E)\ge\mu^{*}(E\cap A)+\mu^{*}(E\setminus A)$ を示せばよい（\ref{meas:outer-measure.2}）。$\mu^{*}(E)=\infty$ なら自明なので、$\mu^{*}(E)<\infty$ とし、$\varepsilon>0$ をとる。$\mu^{*}$ の定義から、$E\subset\bigcup_{j}C_{j}$, $C_{j}\in\mathcal{S}$, $\sum_{j}\rho(C_{j})\le\mu^{*}(E)+\varepsilon$ となる被覆がある。$E\cap A\subset\bigcup_{j}(C_{j}\cap A)$, $E\setminus A\subset\bigcup_{j}(C_{j}\setminus A)$ なので、外測度の単調性と可算劣加法性から
+$$
+\mu^{*}(E\cap A)+\mu^{*}(E\setminus A)\le\sum_{j}\bigl(\mu^{*}(C_{j}\cap A)+\mu^{*}(C_{j}\setminus A)\bigr)=\sum_{j}\mu^{*}(C_{j}).
+$$
+最後の等号は仮定（$S=C_{j}$）による。\ref{meas:caratheodory-extension.1} から $\mathcal{S}$ 上で $\mu^{*}=\rho$ なので、右辺は $\sum_{j}\rho(C_{j})\le\mu^{*}(E)+\varepsilon$。$\varepsilon\to0$ として結論を得る。
+
+被覆は一つの $\varepsilon$ について存在を使うだけなので、選択公理は使っていない。たとえばルベーグ外測度（\ref{meas:lebesgue-measure} を先取りしてよい）については、半開直方体 $S$ で試すだけで可測性が判定できる。
+:::
+
+::: problem ★★★ 発展：内測度による可測性の判定 {#meas:ex-cr-4}
+$\rho$ を半環 $\mathcal{S}$ 上の前測度、$\mu^{*}$ をそれから作った外測度、$\mu\defeq\mu^{*}\restriction\sigma(\mathcal{S})$ とし、$\mu^{*}(X)<\infty$ と仮定する。$A\subset X$ について $\mu_{*}(A)\defeq\mu^{*}(X)-\mu^{*}(A^{c})$（**内測度**）とおく。
+1. $\mu_{*}(A)\le\mu^{*}(A)$ を示せ。
+2. $A$ が $\mu^{*}$ 可測であることと $\mu_{*}(A)=\mu^{*}(A)$ は同値であることを示せ。
+:::
+
+::: solution
+$\mu^{*}(X)<\infty$ と単調性から、すべての集合の外測度は有限で、引き算は意味をもつ。
+
+**1.** 劣加法性から $\mu^{*}(X)\le\mu^{*}(A)+\mu^{*}(A^{c})$、移項して $\mu_{*}(A)\le\mu^{*}(A)$。
+
+**2.** $\mu_{*}(A)=\mu^{*}(A)$ は $\mu^{*}(A)+\mu^{*}(A^{c})=\mu^{*}(X)$ と同値である。
+
+**(⇒)** カラテオドリの条件を $E=X$ で使えばよい。
+
+**(⇐)** \ref{meas:caratheodory-completion.1} から、$A\subset B$, $\mu(B)=\mu^{*}(A)$ となる $B\in\sigma(\mathcal{S})$ と、$A^{c}\subset C$, $\mu(C)=\mu^{*}(A^{c})$ となる $C\in\sigma(\mathcal{S})$ がある（可測包の構成で可算選択公理を使う）。$B\cup C\supset A\cup A^{c}=X$ なので $B\cup C=X$。$\mu(X)=\mu^{*}(X)<\infty$ で、\ref{meas:measure-properties.6} から
+$$
+\mu(B\cap C)=\mu(B)+\mu(C)-\mu(B\cup C)=\mu^{*}(A)+\mu^{*}(A^{c})-\mu^{*}(X)=0.
+$$
+次に $A=(B\setminus C)\cup(A\cap B\cap C)$ を示す。$x\in A$ なら $x\in B$ で、$x\notin C$ なら第 1 項、$x\in C$ なら第 2 項に属する。逆に $x\in B\setminus C$ なら $x\notin C\supset A^{c}$ なので $x\in A$。
+
+$B\setminus C\in\sigma(\mathcal{S})\subset\mathcal{M}^{*}$（\ref{meas:caratheodory-extension.1}）。$A\cap B\cap C\subset B\cap C$ なので $\mu^{*}(A\cap B\cap C)\le\mu(B\cap C)=0$ で、外測度 $0$ の集合は $\mu^{*}$ 可測（任意の $E$ で $\mu^{*}(E\cap N)+\mu^{*}(E\setminus N)\le0+\mu^{*}(E)$）。$\mathcal{M}^{*}$ は σ-加法族（\ref{meas:caratheodory}）なので、和 $A$ も $\mu^{*}$ 可測である。
+:::
+
+## ルベーグ測度 {#meas:sec-lb-exercises}
+
+対応するページ：\ref{meas:page-lebesgue-measure}
+
+::: problem ★ 基本：具体的な集合の測度 {#meas:ex-lb-1}
+次の測度を求めよ。
+1. $\mathbb{R}$ の部分集合 $\bigcup_{n\ge1}[n,n+2^{-n}]$。
+2. $[0,1]\setminus\mathbb{Q}$。
+3. $\mathbb{R}^{2}$ の部分集合 $D\defeq\{(x,y):|x|\le y\le2-|x|\}$。
+:::
+
+::: solution
+**1.** $n+2^{-n}<n+1$ なので区間 $[n,n+2^{-n}]$ は互いに素。閉区間の測度は長さ（\ref{meas:lebesgue-basic.3}）なので、可算加法性から測度は $\sum_{n\ge1}2^{-n}=1$。
+
+**2.** $\mathbb{Q}\cap[0,1]$ は可算なので測度 $0$（\ref{meas:lebesgue-basic.3}）。\ref{meas:measure-properties.2} から $\lambda([0,1]\setminus\mathbb{Q})=\lambda([0,1])-\lambda([0,1]\cap\mathbb{Q})=1-0=1$。
+
+**3.** $T\defeq\begin{pmatrix}1&-1\\1&1\end{pmatrix}$ について $D=T([0,1]^{2})$ を示す。$T(s,t)=(s-t,s+t)$ で、$(x,y)=T(s,t)$ と $s=\frac{x+y}{2}$, $t=\frac{y-x}{2}$ は同値。$s,t\in[0,1]$ は $0\le x+y\le2$ かつ $0\le y-x\le2$ と同値で、前半の二つ $x+y\ge0$, $y-x\ge0$ は $y\ge|x|$ と、後半の二つ $x+y\le2$, $y-x\le2$ は $y\le2-|x|$ と同値。よって $D=T([0,1]^{2})$。$\det T=2$ と \ref{meas:lebesgue-linear}、\ref{meas:lebesgue-basic.3} から $\lambda(D)=2\lambda([0,1]^{2})=2$。
+:::
+
+::: problem ★★ 標準：太いカントール集合 {#meas:ex-lb-2}
+$C_{0}\defeq[0,1]$ とし、$k\ge1$ について、$C_{k-1}$ を構成する $2^{k-1}$ 個の閉区間それぞれから、中央にある長さ $4^{-k}$ の開区間を除いたものを $C_{k}$ とする。
+1. この操作が可能であること（各区間の長さが $4^{-k}$ より大きいこと）を確かめ、$F\defeq\bigcap_{k}C_{k}$ について $\lambda(F)=\frac12$ を示せ。
+2. $F$ は正の長さの区間を含まないことを示せ。
+3. $F$ はジョルダン可測でないことを示せ。
+:::
+
+::: solution
+**1.** 帰納法で「$C_{k}$ は長さ $\ell_{k}\defeq2^{-k-1}+2^{-2k-1}$ の互いに素な $2^{k}$ 個の閉区間の和」を示す。$k=0$ では $\ell_{0}=\frac12+\frac12=1$。$k-1$ で正しいとすると、$\ell_{k-1}=2^{-k}+2^{-2k+1}>2^{-2k}=4^{-k}$ なので各区間から中央の長さ $4^{-k}$ の開区間を除くことができ、長さ $\frac12(\ell_{k-1}-4^{-k})$ の閉区間が 2 つ残る（互いに素）。
+$$
+\frac12\bigl(2^{-k}+2^{-2k+1}-2^{-2k}\bigr)=2^{-k-1}+2^{-2k-1}=\ell_{k}.
+$$
+よって主張が成り立つ。閉区間の測度は長さ（\ref{meas:lebesgue-basic.3}）なので、有限加法性から $\lambda(C_{k})=2^{k}\ell_{k}=\frac12+2^{-k-1}$。$C_{k}\downarrow F$, $\lambda(C_{0})=1<\infty$ なので、上からの連続性（\ref{meas:measure-properties.5}）から $\lambda(F)=\lim_{k}\bigl(\frac12+2^{-k-1}\bigr)=\frac12$。$F$ は閉集合の共通部分で、有界なのでコンパクト。
+
+**2.** 区間 $J\subset F$ をとる。各 $k$ で $J\subset C_{k}$ で、$J$ は連結なので、$C_{k}$ を構成する互いに素な閉区間（有限個）のうちちょうど一つに含まれる（二つの区間と交われば、その間にある $C_{k}$ に属さない点を $J$ が含むことになる）。よって $J$ の長さは $\ell_{k}$ 以下で、$\ell_{k}\to0$ から長さは $0$。
+
+**3.** $F\subset[0,1]$ がジョルダン可測なら、\ref{meas:jordan-lebesgue} からジョルダン測度は $v(F)=\lambda(F)=\frac12$ である。一方、$[0,1]$ の任意の分割 $P$ について、小区間 $Q$（正の長さの閉区間）は 2 から $F$ に含まれないので $\inf_{Q}\mathbf{1}_{F}=0$、下和は $L(\mathbf{1}_{F},P)=0$（\ref{calc:box-partition}）。$\mathbf{1}_{F}$ が積分可能なら積分は下和の上限に等しい（\ref{calc:box-integral}）ので $v(F)=\int\mathbf{1}_{F}=0$ となり、$\frac12$ と矛盾する。よって $F$ はジョルダン可測でない（\ref{calc:jordan-measurable}）。
+:::
+
+::: problem ★★ 標準：ほとんど詰まった区間 {#meas:ex-lb-3}
+1. $A\in\mathcal{L}_{1}$, $\lambda(A)>0$, $0<\varepsilon<1$ とする。$a<b$ で $\lambda(A\cap(a,b))>(1-\varepsilon)(b-a)$ となるものがあることを示せ。
+2. $A\in\mathcal{L}_{1}$ がすべての $a<b$ について $\lambda(A\cap(a,b))\le\frac12(b-a)$ を満たすなら $\lambda(A)=0$ であることを示せ。
+:::
+
+::: solution
+**1.** $A_{m}\defeq A\cap(-m,m]\uparrow A$ なので、下からの連続性（\ref{meas:measure-properties.4}）から $\lambda(A_{m})>0$ となる $m$ がある。$\lambda(A_{m})\le2m<\infty$。$\lambda(A_{m})=\lambda^{*}(A_{m})$ は半開区間による被覆の長さの和の下限（\ref{meas:lebesgue-measure}, \ref{meas:outer-measure-from-cover}）で、$\lambda(A_{m})<\frac{\lambda(A_{m})}{1-\varepsilon}$ なので、被覆 $A_{m}\subset\bigcup_{j}I_{j}$（$I_{j}\in\mathcal{S}_{1}$）で
+$$
+\sum_{j}v(I_{j})<\frac{\lambda(A_{m})}{1-\varepsilon}
+$$
+となるものがある。すべての $j$ で $\lambda(A_{m}\cap I_{j})\le(1-\varepsilon)v(I_{j})$ と仮定すると、劣加法性（\ref{meas:measure-properties.3}）から
+$$
+\lambda(A_{m})\le\sum_{j}\lambda(A_{m}\cap I_{j})\le(1-\varepsilon)\sum_{j}v(I_{j})<\lambda(A_{m})
+$$
+となり矛盾。よってある $j$ で $\lambda(A_{m}\cap I_{j})>(1-\varepsilon)v(I_{j})\ge0$。とくに $I_{j}$ は空でなく $I_{j}=(a,b]$（$a<b$）と書ける。$(a,b]$ と $(a,b)$ の差は 1 点で測度 $0$ なので
+$$
+\lambda(A\cap(a,b))\ge\lambda(A_{m}\cap(a,b))=\lambda(A_{m}\cap(a,b])>(1-\varepsilon)(b-a).
+$$
+
+**2.** $\lambda(A)>0$ なら、1 を $\varepsilon=\frac12$ で使うと $\lambda(A\cap(a,b))>\frac12(b-a)$ となる $a<b$ があり、仮定に反する。
+
+（1 から、例えば正の測度をもつ可測集合は、ほとんど詰まった区間を必ずもつ。前ページの稠密な開集合（\ref{meas:prob-lm-dense-open}）のように「どこにでもあるが薄い」集合でも、この意味では局所的に濃い部分をもつ。）
+:::
+
+::: problem ★★★ 発展：正の測度の集合は非可測な部分集合を含む {#meas:ex-lb-4}
+（選択公理を仮定する。）$E\in\mathcal{L}_{1}$, $\lambda(E)>0$ なら、$E$ の部分集合でルベーグ可測でないものがあることを示せ。（ヒント：\ref{meas:vitali} の証明の集合 $V$ を使う。）
+:::
+
+::: solution
+\ref{meas:vitali} の証明のとおり、$[0,1)$ 上の同値関係 $x\sim y\iff x-y\in\mathbb{Q}$ の各同値類から一つずつ元を選んだ集合を $V\subset[0,1)$ とする（**ここで選択公理を使う**）。
+
+**Step 1（$\mathbb{R}=\bigsqcup_{q\in\mathbb{Q}}(V+q)$）.** 互いに素：$v+q=v'+q'$（$v,v'\in V$, $q,q'\in\mathbb{Q}$）なら $v-v'=q'-q\in\mathbb{Q}$ で $v\sim v'$、$V$ は各類から一つなので $v=v'$, $q=q'$。覆う：$x\in\mathbb{R}$ について $y\defeq x-\lfloor x\rfloor\in[0,1)$ で、$y\sim v$ となる $v\in V$ がある。$q\defeq x-v=(y-v)+\lfloor x\rfloor\in\mathbb{Q}$ で $x\in V+q$。
+
+**Step 2（$V+q$ の可測な部分集合は零集合）.** $F\subset V+q$ を可測とする。平行移動不変性（\ref{meas:translation-invariant-unique.1}）から $F'\defeq F-q\subset V$ は可測で $\lambda(F')=\lambda(F)$。$s\in\mathbb{Q}\cap[0,1)$ について $F'+s\subset V+s\subset[0,2)$ で、Step 1 から $V+s$ たちは互いに素なので $F'+s$ たちも互いに素。可算加法性と単調性から
+$$
+\sum_{s\in\mathbb{Q}\cap[0,1)}\lambda(F')=\lambda\Bigl(\bigsqcup_{s}(F'+s)\Bigr)\le\lambda([0,2))=2.
+$$
+左辺は同じ値 $\lambda(F')$ の無限個の和なので、$\lambda(F')=0$、よって $\lambda(F)=0$。
+
+**Step 3（結論）.** すべての $q\in\mathbb{Q}$ について $E\cap(V+q)$ が可測と仮定する。Step 2 からそれらは零集合で、Step 1 から $E=\bigsqcup_{q\in\mathbb{Q}}\bigl(E\cap(V+q)\bigr)$（可算個の互いに素な和）なので、$\lambda(E)=\sum_{q}0=0$ となり仮定に反する。よって、ある $q$ について $E\cap(V+q)\subset E$ はルベーグ可測でない。
+:::
+
+## 可測関数 {#meas:sec-fn-exercises}
+
+対応するページ：\ref{meas:page-measurable-functions}
+
+::: problem ★ 基本：具体的な関数の可測性 {#meas:ex-fn-1}
+次の関数 $\mathbb{R}\to\mathbb{R}$ がボレル可測であることを示せ。
+1. $f(x)\defeq\sin\frac1x$（$x\ne0$）、$f(0)\defeq5$。
+2. $g(x)\defeq\lim_{n\to\infty}\cos^{2n}(\pi x)$（この極限がすべての $x$ で存在することも示し、$g$ を具体的に書け）。
+:::
+
+::: solution
+**1.** $U\defeq\mathbb{R}\setminus\{0\}$ は開集合で、$h(x)\defeq\sin\frac1x$ は $U$ 上で連続。$a\in\mathbb{R}$ について
+$$
+\{f>a\}=\{x\in U:h(x)>a\}\cup\begin{cases}\{0\}&(a<5)\\\varnothing&(a\ge5)\end{cases}.
+$$
+第 1 項は $h^{-1}((a,\infty))$ で $U$ の開集合、$U$ が $\mathbb{R}$ で開なので $\mathbb{R}$ の開集合。1 点集合は閉集合。よって $\{f>a\}$ はボレル集合で、\ref{meas:measurable-function-criterion} から $f$ はボレル可測。
+
+**2.** $c\defeq\cos^{2}(\pi x)\in[0,1]$ について $\cos^{2n}(\pi x)=c^{n}$。$c=1\iff|\cos\pi x|=1\iff x\in\mathbb{Z}$ で、そのとき $c^{n}=1$。$x\notin\mathbb{Z}$ なら $0\le c<1$ で $c^{n}\to0$。よって極限は存在し $g=\mathbf{1}_{\mathbb{Z}}$。各 $x\mapsto\cos^{2n}(\pi x)$ は連続なのでボレル可測（\ref{meas:measurability-generators.2}）、その各点極限 $g$ はボレル可測（\ref{meas:measurable-limits.2}）。（直接にも、$\{g>a\}$ は $\varnothing$, $\mathbb{Z}$, $\mathbb{R}$ のどれかでボレル集合。）
+:::
+
+::: problem ★★ 標準：エゴロフの定理の具体例 {#meas:ex-fn-2}
+$X\defeq[0,1]$ に $\lambda$ を制限した測度空間で $f_{n}(x)\defeq x^{n}$ とする。
+1. $f_{n}$ の各点極限 $f$ を求め、$f=0$（a.e.）を確かめよ。
+2. 任意の $\varepsilon>0$ について、\ref{meas:egorov} の集合 $E$ を具体的に一つ与えよ。
+3. $\lambda(X\setminus E)=0$ となる可測集合 $E$ の上では、$f_{n}\to f$ は一様でないことを示せ。
+:::
+
+::: solution
+**1.** $0\le x<1$ なら $x^{n}\to0$、$x=1$ なら $x^{n}=1$。よって $f=\mathbf{1}_{\{1\}}$ で、$\{f\ne0\}=\{1\}$ は測度 $0$（\ref{meas:lebesgue-basic.3}）。
+
+**2.** $\delta\defeq\min(\varepsilon,1)/2$, $E\defeq[0,1-\delta]$ とする。$\lambda(X\setminus E)=\lambda((1-\delta,1])=\delta<\varepsilon$。$E$ 上では $f=0$ で
+$$
+\sup_{x\in E}|f_{n}(x)-f(x)|=\sup_{x\in E}x^{n}=(1-\delta)^{n}\to0,
+$$
+なので一様収束する。
+
+**3.** $\lambda(X\setminus E)=0$ とし、$n\ge1$ と $0<\eta<1$ をとる。$\lambda(E\cap(1-\eta,1))=\lambda((1-\eta,1))-\lambda((1-\eta,1)\setminus E)=\eta-0>0$ なので $E\cap(1-\eta,1)$ は空でなく、その点 $x$ で $|f_{n}(x)-f(x)|=x^{n}>(1-\eta)^{n}$。$\eta\to0$ として $\sup_{E}|f_{n}-f|\ge1$ がすべての $n$ で成り立つので、$E$ 上で一様収束しない。したがってエゴロフの定理の「$\mu(X\setminus E)<\varepsilon$」を「$\mu(X\setminus E)=0$」に強めることはできない。
+:::
+
+::: problem ★★ 標準：ディニ微分の可測性 {#meas:ex-fn-3}
+$f\colon\mathbb{R}\to\mathbb{R}$ を連続関数とし、$x\in\mathbb{R}$ について
+$$
+D^{+}f(x)\defeq\limsup_{h\to0+}\frac{f(x+h)-f(x)}{h}\defeq\inf_{\delta>0}\sup_{0<h<\delta}\frac{f(x+h)-f(x)}{h}\in\overline{\mathbb{R}}
+$$
+とおく。$D^{+}f\colon\mathbb{R}\to\overline{\mathbb{R}}$ がボレル可測であることを示せ。
+:::
+
+::: solution
+$q(x,h)\defeq\frac{f(x+h)-f(x)}{h}$（$h>0$）、$S_{\delta}(x)\defeq\sup_{0<h<\delta}q(x,h)$ とおく。
+
+**Step 1（有理数の $h$ で足りる）.** $x$ と $\delta>0$ を固定すると $S_{\delta}(x)=\sup\{q(x,h):h\in\mathbb{Q}\cap(0,\delta)\}$。「$\ge$」は明らか。「$\le$」：$h\in(0,\delta)$ について、有理数 $h_{k}\in(0,\delta)$ で $h_{k}\to h$ となるものをとると、$f$ の連続性から $q(x,h_{k})\to q(x,h)$ なので、$q(x,h)$ は右辺以下。
+
+**Step 2（$\delta$ も可算個で足りる）.** $S_{\delta}(x)$ は $\delta$ について単調非減少で、任意の $\delta>0$ について $\frac1m<\delta$ となる $m$ がある。よって $D^{+}f(x)=\inf_{m\ge1}S_{1/m}(x)$。
+
+**Step 3（可測性）.** 各 $h>0$ について $x\mapsto q(x,h)$ は連続なのでボレル可測（\ref{meas:measurability-generators.2}）。$\mathbb{Q}\cap(0,\frac1m)$ を数え上げて列とみると、Step 1 と \ref{meas:measurable-limits.1} から $S_{1/m}$ は（$\overline{\mathbb{R}}$ 値の）ボレル可測関数。Step 2 と \ref{meas:measurable-limits.1} から $D^{+}f=\inf_{m}S_{1/m}$ はボレル可測。
+
+（$f$ の連続性は Step 1 で、非可算個の $h$ についての上限を可算個に置き換えるために使った。可測関数の族の上限は、添字が非可算なら可測とは限らない。）
+:::
+
+::: problem ★★★ 発展：可測関数は連続関数の a.e. 極限 {#meas:ex-fn-4}
+ルベーグ可測な $f\colon\mathbb{R}\to\mathbb{R}$ について、連続関数の列 $g_{k}\colon\mathbb{R}\to\mathbb{R}$ で、ほとんど至る所 $g_{k}\to f$ となるものがあることを示せ。また逆に、連続関数の列のほとんど至る所の極限（実数値）はルベーグ可測であることを示せ。
+:::
+
+::: solution
+**Step 1（ルジンの定理を各 $k$ で使う）.** $k\ge1$ について、$A=[-k,k]$（$\lambda(A)=2k<\infty$）、$\varepsilon=2^{-k}$ に \ref{meas:lusin} を使うと、コンパクト集合 $K_{k}\subset[-k,k]$ と連続関数 $g_{k}\colon\mathbb{R}\to\mathbb{R}$ で
+$$
+\lambda([-k,k]\setminus K_{k})<2^{-k},\qquad g_{k}=f\ \text{（}K_{k}\text{ 上）}
+$$
+となるものがある。各 $k$ についてこの組を一つずつ選ぶ（**可算選択公理**）。
+
+**Step 2（ボレル–カンテリ）.** $B_{k}\defeq[-k,k]\setminus K_{k}\in\mathcal{L}_{1}$ とおくと $\sum_{k}\lambda(B_{k})<\sum_{k}2^{-k}=1<\infty$ なので、\ref{meas:borel-cantelli} から $N\defeq\limsup_{k}B_{k}$ は零集合。
+
+**Step 3（収束）.** $x\notin N$ とすると、$x$ は有限個の $B_{k}$ にしか属さないので、ある $k_{0}$ があって $k\ge k_{0}$ なら $x\notin B_{k}$。$k\ge\max(k_{0},|x|)$ なら $x\in[-k,k]$ かつ $x\notin B_{k}$ なので $x\in K_{k}$、よって $g_{k}(x)=f(x)$。したがって $g_{k}(x)\to f(x)$（ある番号から先は等しい）。$N$ は零集合なので、$g_{k}\to f$（a.e.）。
+
+**逆.** 連続関数はボレル可測（\ref{meas:measurability-generators.2}）なので、ボレル集合族を含む $\mathcal{L}_{1}$（\ref{meas:lebesgue-basic.1}）についても可測。$(\mathbb{R},\mathcal{L}_{1},\lambda)$ は完備（\ref{meas:lebesgue-basic.1}）なので、\ref{meas:ae-measurable.2} から、ほとんど至る所の極限はルベーグ可測である。
+
+以上から、ルベーグ可測関数とは、連続関数の列のほとんど至る所の極限（実数値）にほかならない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

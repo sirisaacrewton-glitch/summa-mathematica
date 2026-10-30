@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：ルベーグ積分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/02-integration/09-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：ルベーグ積分 {#meas:page-exercises-integration keywords="exercises, Lebesgue Integration"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは、積分と極限の交換・累次積分・具体的な測度の密度・変数変換などの計算練習と、いくつかのページの結果を組み合わせる問題である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#meas:sec-exin-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。$\lambda$ は $\mathbb{R}$ の、$\lambda_{2}$ は $\mathbb{R}^{2}$ のルベーグ測度で、$\int_{a}^{b}g\defeq\int_{[a,b]}g\,d\lambda$ と書く。
+- 有界閉区間上の連続関数のルベーグ積分はリーマン積分に等しい（\ref{meas:riemann-lebesgue}）ので、その値は原始関数で計算する。半開区間 $(a,b]$ 上で連続な $g\ge0$ については、$c_{k}\downarrow a$ として $g\mathbf{1}_{[c_{k},b]}\uparrow g\mathbf{1}_{(a,b]}$ なので、\ref{meas:monotone-convergence} から $\int_{(a,b]}g\,d\lambda=\lim_{c\downarrow a}\int_{c}^{b}g\in[0,\infty]$（左端での広義積分）。右側が無限の区間は \ref{meas:improper-lebesgue.1}。
+:::
+
+## ルベーグ積分と単調収束定理 {#meas:sec-ig-exercises}
+
+対応するページ：\ref{meas:page-integral}
+
+::: problem ★ 基本：階段関数の積分 {#meas:ex-ig-1}
+$(0,1]$ 上で $f(x)\defeq\lfloor1/x\rfloor$（$1/x$ を超えない最大の整数）とする。$\int_{(0,1]}f\,d\lambda=\infty$ と、$\int_{(0,1]}\frac{1}{f}\,d\lambda=\sum_{k=1}^{\infty}\frac{1}{k^{2}}-1$ を示せ。
+:::
+
+::: solution
+$I_{k}\defeq\bigl(\frac{1}{k+1},\frac1k\bigr]$（$k\ge1$）は互いに素で和が $(0,1]$、$x\in I_{k}$ なら $k\le1/x<k+1$ なので $f(x)=k$。よって $(0,1]$ 上で
+$$
+f=\sum_{k=1}^{\infty}k\mathbf{1}_{I_{k}},\qquad\frac1f=\sum_{k=1}^{\infty}\frac1k\mathbf{1}_{I_{k}}
+$$
+（各点で和の項は一つだけが $0$ でない）。\ref{meas:lebesgue-basic.2} から $\lambda(I_{k})=\frac1k-\frac{1}{k+1}=\frac{1}{k(k+1)}$。非負の単関数 $c\mathbf{1}_{I_{k}}$ の積分は $c\lambda(I_{k})$（\ref{meas:simple-integral}, \ref{meas:nonnegative-integral-basic.1}）なので、\ref{meas:termwise-integration.2} から
+$$
+\int_{(0,1]}f\,d\lambda=\sum_{k\ge1}\frac{k}{k(k+1)}=\sum_{k\ge1}\frac{1}{k+1}=\infty.
+$$
+同様に
+$$
+\int_{(0,1]}\frac1f\,d\lambda=\sum_{k\ge1}\frac{1}{k^{2}(k+1)}.
+$$
+$\frac{1}{k^{2}(k+1)}=\frac{1}{k^{2}}-\frac1k+\frac{1}{k+1}$（右辺を通分すると分子は $(k+1)-k(k+1)+k^{2}=1$）で、$\sum_{k\le K}\bigl(-\frac1k+\frac{1}{k+1}\bigr)=-1+\frac{1}{K+1}\to-1$。$\sum1/k^{2}$ は収束するので、和は $\sum_{k\ge1}\frac{1}{k^{2}}-1$（$=\frac{\pi^{2}}{6}-1$）。とくに $f$ はいたる所有限だが可積分でない。
+:::
+
+::: problem ★★ 標準：対数による近似 {#meas:ex-ig-2}
+可測関数 $f\colon X\to[0,\infty]$ について
+$$
+\lim_{n\to\infty}\int_{X}n\log\Bigl(1+\frac{f}{n}\Bigr)d\mu=\int_{X}f\,d\mu
+$$
+を示せ（$\log(1+\infty)\defeq\infty$。両辺が $\infty$ の場合も含む）。
+:::
+
+::: solution
+$g_{n}(t)\defeq n\log(1+t/n)$（$t\in[0,\infty]$）とおく。$g_{n}$ は $[0,\infty]$ 上の連続な増加関数なので、$\{g_{n}\circ f>a\}=\{f>g_{n}^{-1}(a)\}$（$a\ge0$ のとき）は可測で、$g_{n}\circ f$ は非負可測。
+
+**Step 1（$n$ について増加）.** $t\in(0,\infty)$ を固定し、$s>0$ について $\varphi(s)\defeq s\log(1+t/s)$ とおくと、$u\defeq t/s$ として
+$$
+\varphi'(s)=\log(1+u)-\frac{u}{1+u}\eqdef\psi(u).
+$$
+$\psi(0)=0$, $\psi'(u)=\frac{1}{1+u}-\frac{1}{(1+u)^{2}}=\frac{u}{(1+u)^{2}}>0$（$u>0$）なので $\psi(u)>0$、よって $\varphi$ は増加で、$g_{n}(t)=\varphi(n)\le\varphi(n+1)=g_{n+1}(t)$。$t=0$ では $g_{n}(0)=0$、$t=\infty$ では $g_{n}(\infty)=\infty$ で、やはり増加。
+
+**Step 2（極限）.** $0<t<\infty$ なら $u=t/n\to0$ で $g_{n}(t)=t\cdot\frac{\log(1+u)}{u}\to t$（$\log(1+u)/u\to1$）。$t=0,\infty$ では $g_{n}(t)=t$。よって $g_{n}\circ f\uparrow f$（各点）。
+
+**Step 3.** \ref{meas:monotone-convergence} から $\int g_{n}\circ f\,d\mu\to\int f\,d\mu$。
+:::
+
+::: problem ★★★ 発展：裾の評価 {#meas:ex-ig-3}
+可測関数 $f\colon X\to[0,\infty]$ が $\int f\,d\mu<\infty$ を満たすとする。
+1. $\lim_{t\to\infty}t\,\mu(\{f\ge t\})=0$ を示せ（\ref{meas:markov.1} の $\mu(\{f\ge t\})\le\frac1t\int f$ より強い）。
+2. $\sum_{n=1}^{\infty}\mu(\{f\ge n\})\le\int f\,d\mu$ を示せ。
+:::
+
+::: solution
+**1.** $N\defeq\{f=\infty\}$ は零集合（\ref{meas:markov.3}）。$t>0$ について $f=f\mathbf{1}_{\{f<t\}}+f\mathbf{1}_{\{f\ge t\}}$ なので、\ref{meas:termwise-integration.1} から
+$$
+\int f=\int f\mathbf{1}_{\{f<t\}}+\int f\mathbf{1}_{\{f\ge t\}}.
+$$
+$t_{k}\uparrow\infty$ を任意の増加列とすると、$f\mathbf{1}_{\{f<t_{k}\}}$ は増加して $f\mathbf{1}_{N^{c}}$ に収束する（$f(x)<\infty$ ならやがて $f(x)<t_{k}$）。\ref{meas:monotone-convergence} と \ref{meas:markov.4}（$f\mathbf{1}_{N^{c}}=f$ a.e.）から $\int f\mathbf{1}_{\{f<t_{k}\}}\to\int f$。すべて有限なので $\int f\mathbf{1}_{\{f\ge t_{k}\}}=\int f-\int f\mathbf{1}_{\{f<t_{k}\}}\to0$。$t\mapsto\int f\mathbf{1}_{\{f\ge t\}}$ は非増加なので、$t\to\infty$ の極限も $0$。最後に $t\mathbf{1}_{\{f\ge t\}}\le f\mathbf{1}_{\{f\ge t\}}$ と単調性（\ref{meas:nonnegative-integral-basic.2}）から
+$$
+0\le t\,\mu(\{f\ge t\})\le\int f\mathbf{1}_{\{f\ge t\}}\to0.
+$$
+
+**2.** 各 $x$ で $\sum_{n\ge1}\mathbf{1}_{\{f\ge n\}}(x)$ は $n\le f(x)$ となる自然数 $n\ge1$ の個数で、$f(x)<\infty$ なら $\lfloor f(x)\rfloor\le f(x)$、$f(x)=\infty$ なら両辺 $\infty$。よって $\sum_{n}\mathbf{1}_{\{f\ge n\}}\le f$ で、\ref{meas:termwise-integration.2} と単調性から
+$$
+\sum_{n\ge1}\mu(\{f\ge n\})=\int\sum_{n\ge1}\mathbf{1}_{\{f\ge n\}}\,d\mu\le\int f\,d\mu.
+$$
+:::
+
+## 可積分関数と優収束定理 {#meas:sec-dc-exercises}
+
+対応するページ：\ref{meas:page-dominated-convergence}
+
+::: problem ★ 基本：優関数を見つける {#meas:ex-dc-1}
+$$
+\lim_{n\to\infty}\int_{0}^{\infty}\frac{n\sin(x/n)}{x(1+x^{2})}\,dx=\frac{\pi}{2}
+$$
+を示せ（積分は $(0,\infty)$ 上のルベーグ積分）。
+:::
+
+::: solution
+$f_{n}(x)\defeq\frac{n\sin(x/n)}{x(1+x^{2})}$（$x>0$）は連続なので可測。$s\ge0$ で $|\sin s|\le s$ なので $|n\sin(x/n)|\le n\cdot\frac xn=x$、よって $|f_{n}(x)|\le\frac{1}{1+x^{2}}\eqdef g(x)$。$g$ は可積分で、\ref{meas:improper-lebesgue.1} から $\int_{(0,\infty)}g\,d\lambda=\lim_{b\to\infty}\arctan b=\frac\pi2$。各 $x>0$ で $u\defeq x/n\to0$、$n\sin(x/n)=x\cdot\frac{\sin u}{u}\to x$ なので $f_{n}(x)\to g(x)$。\ref{meas:dominated-convergence} から $\int f_{n}\to\int g=\frac\pi2$。
+:::
+
+::: problem ★★ 標準：ガウス積分のフーリエ変換 {#meas:ex-dc-2}
+$t\in\mathbb{R}$ について $F(t)\defeq\int_{0}^{\infty}e^{-x^{2}}\cos(tx)\,dx$ とおく。微分と積分の交換を正当化して $F'(t)=-\frac t2F(t)$ を示し、$F(t)=\frac{\sqrt\pi}{2}e^{-t^{2}/4}$ を導け。
+:::
+
+::: solution
+**Step 1（定義と微分）.** $f(x,t)\defeq e^{-x^{2}}\cos(tx)$ は $|f|\le e^{-x^{2}}\le e^{-x}+\mathbf{1}_{[0,1]}(x)$ で、各 $t$ で $[0,\infty)$ 上可積分。$\partial_{t}f(x,t)=-xe^{-x^{2}}\sin(tx)$ で $|\partial_{t}f|\le xe^{-x^{2}}\eqdef g(x)$、$\int_{0}^{\infty}g=\lim_{b}\bigl[-\frac12e^{-x^{2}}\bigr]_{0}^{b}=\frac12$（\ref{meas:improper-lebesgue.1}）。\ref{meas:parameter-integrals.2}（$T=\mathbb{R}$）から $F$ は微分可能で
+$$
+F'(t)=-\int_{0}^{\infty}xe^{-x^{2}}\sin(tx)\,dx.
+$$
+
+**Step 2（部分積分）.** $b>0$ について、\ref{calc:substitution-parts.2} で
+$$
+\int_{0}^{b}xe^{-x^{2}}\sin(tx)\,dx=\Bigl[-\tfrac12e^{-x^{2}}\sin(tx)\Bigr]_{0}^{b}+\frac t2\int_{0}^{b}e^{-x^{2}}\cos(tx)\,dx.
+$$
+$b\to\infty$（任意の列）とすると、境界項 $-\frac12e^{-b^{2}}\sin(tb)\to0$、両辺の積分は $\mathbf{1}_{[0,b]}$ を掛けた被積分関数がそれぞれ $g$, $e^{-x^{2}}$ で押さえられるので \ref{meas:dominated-convergence} から $[0,\infty)$ 上の積分に収束する。よって $F'(t)=-\frac t2F(t)$。
+
+**Step 3（解く）.** $G(t)\defeq e^{t^{2}/4}F(t)$ とすると $G'(t)=e^{t^{2}/4}\bigl(\frac t2F(t)+F'(t)\bigr)=0$ なので、\ref{calc:mean-value-theorem} から $G$ は定数 $G(0)=F(0)$。$F(0)=\int_{0}^{\infty}e^{-x^{2}}dx=\frac{\sqrt\pi}{2}$（\ref{meas:prob-fb-gaussian} を先取りしてよい）。よって $F(t)=\frac{\sqrt\pi}{2}e^{-t^{2}/4}$。
+:::
+
+::: problem ★★★ 発展：減衰因子つきのディリクレ積分 {#meas:ex-dc-3}
+$t>0$ について $F(t)\defeq\int_{(0,\infty)}\frac{\sin x}{x}e^{-tx}\,dx$ が定義され、$F(t)=\frac\pi2-\arctan t$ であることを示せ。（$t=0$ では被積分関数がルベーグ可積分でない（\ref{meas:improper-lebesgue.3}）ので、この節の方法では $t\downarrow0$ の極限はとれない。\ref{meas:ex-fb-3} 参照。）
+:::
+
+::: solution
+**Step 1（定義）.** $x>0$ で $|\sin x|\le x$ なので $\bigl|\frac{\sin x}{x}e^{-tx}\bigr|\le e^{-tx}$ で、$\int_{0}^{\infty}e^{-tx}dx=\frac1t$（\ref{meas:improper-lebesgue.1}）。被積分関数は連続なので、$F(t)$ は定義され $|F(t)|\le\frac1t$。
+
+**Step 2（補助の積分）.** $t\ge0$, $b>0$ について
+$$
+\int_{0}^{b}e^{-tx}\sin x\,dx=\frac{1-e^{-tb}(t\sin b+\cos b)}{1+t^{2}}.
+$$
+実際、$H(x)\defeq-\frac{e^{-tx}(t\sin x+\cos x)}{1+t^{2}}$ について $H'(x)=\frac{e^{-tx}\bigl(t^{2}\sin x+t\cos x-t\cos x+\sin x\bigr)}{1+t^{2}}=e^{-tx}\sin x$ で、$H(b)-H(0)$ が右辺。$t>0$ なら $b\to\infty$ で右辺は $\frac{1}{1+t^{2}}$ に収束し、$|e^{-tx}\sin x|\le e^{-tx}$ は可積分なので \ref{meas:improper-lebesgue.2} から $\int_{0}^{\infty}e^{-tx}\sin x\,dx=\frac{1}{1+t^{2}}$。
+
+**Step 3（微分）.** $a>0$ を固定し $T\defeq(a,\infty)$ とする。$f(x,t)\defeq\frac{\sin x}{x}e^{-tx}$ は $\partial_{t}f=-e^{-tx}\sin x$、$|\partial_{t}f|\le e^{-ax}$（可積分）。\ref{meas:parameter-integrals.2} と Step 2 から $T$ 上で $F'(t)=-\frac{1}{1+t^{2}}$。$a>0$ は任意なので $(0,\infty)$ 上で $(F+\arctan)'=0$、\ref{calc:mean-value-theorem} から $F(t)=C-\arctan t$（$C$ は定数）。
+
+**Step 4（定数）.** Step 1 から $F(t)\to0$（$t\to\infty$）、$\arctan t\to\frac\pi2$ なので $C=\frac\pi2$。
+:::
+
+## 積測度とフビニ–トネリの定理 {#meas:sec-fb-exercises}
+
+対応するページ：\ref{meas:page-fubini}
+
+::: problem ★ 基本：二重積分と級数 {#meas:ex-fb-1}
+$$
+\int_{[0,1]^{2}}\frac{d\lambda_{2}(x,y)}{1-xy}=\sum_{k=1}^{\infty}\frac{1}{k^{2}}
+$$
+を示せ（被積分関数は $(1,1)$ で $\infty$ とする）。
+:::
+
+::: solution
+$[0,1]^{2}$ 上で $h(x,y)\defeq\sum_{k\ge0}(xy)^{k}\in[0,\infty]$ とおくと、$xy<1$ では等比級数で $h=\frac{1}{1-xy}$、$(1,1)$ では $h=\infty$。各項 $(xy)^{k}$ は連続で非負なので、\ref{meas:termwise-integration.2} から
+$$
+\int_{[0,1]^{2}}h\,d\lambda_{2}=\sum_{k\ge0}\int_{[0,1]^{2}}x^{k}y^{k}\,d\lambda_{2}.
+$$
+\ref{meas:fubini-lebesgue}（非負）から
+$$
+\int_{[0,1]^{2}}x^{k}y^{k}\,d\lambda_{2}=\int_{0}^{1}\Bigl(\int_{0}^{1}x^{k}y^{k}\,dy\Bigr)dx=\int_{0}^{1}\frac{x^{k}}{k+1}\,dx=\frac{1}{(k+1)^{2}}.
+$$
+よって和は $\sum_{k\ge1}\frac{1}{k^{2}}$（有限なので $h$ は可積分）。\ref{meas:ex-ig-1} と比べると、$\int_{(0,1]}\lfloor1/x\rfloor^{-1}dx$ より $1$ 大きい。
+:::
+
+::: problem ★★ 標準：累次積分が一致しない例 {#meas:ex-fb-2}
+$[0,1]^{2}$ 上で $f(x,y)\defeq\frac{x^{2}-y^{2}}{(x^{2}+y^{2})^{2}}$（$f(0,0)\defeq0$）とする。
+$$
+\int_{0}^{1}\Bigl(\int_{0}^{1}f(x,y)\,dy\Bigr)dx=\frac\pi4,\qquad\int_{0}^{1}\Bigl(\int_{0}^{1}f(x,y)\,dx\Bigr)dy=-\frac\pi4
+$$
+を示し、$f$ が $[0,1]^{2}$ 上可積分でないことを導け。
+:::
+
+::: solution
+**Step 1（内側の積分）.** $x\in(0,1]$ を固定すると $y\mapsto f(x,y)$ は $[0,1]$ 上連続で、
+$$
+\frac{\partial}{\partial y}\frac{y}{x^{2}+y^{2}}=\frac{(x^{2}+y^{2})-2y^{2}}{(x^{2}+y^{2})^{2}}=f(x,y)
+$$
+なので $\int_{0}^{1}f(x,y)\,dy=\frac{1}{x^{2}+1}$。$x=0$ は零集合なので外側の積分に影響しない。
+
+**Step 2（外側）.** $\int_{0}^{1}\frac{dx}{1+x^{2}}=\arctan1=\frac\pi4$。$f(y,x)=-f(x,y)$ なので、逆の順序では同じ計算で $-\frac\pi4$。
+
+**Step 3（非可積分）.** $f$ は $[0,1]^{2}\setminus\{(0,0)\}$ 上連続なのでボレル可測。$f\in\mathcal{L}^{1}([0,1]^{2})$ なら（$[0,1]^{2}$ の外で $0$ と延ばして）\ref{meas:fubini-lebesgue} から二つの累次積分はともに $\int f\,d\lambda_{2}$ に等しいはずで、$\frac\pi4\ne-\frac\pi4$ に反する。よって $\int_{[0,1]^{2}}|f|\,d\lambda_{2}=\infty$。これは \ref{meas:fubini-counterexamples.2} の連続版で、「累次積分が両方存在する」ことは可積分性の代わりにならない。
+:::
+
+::: problem ★★★ 発展：ディリクレ積分 {#meas:ex-fb-3}
+$\frac1x=\int_{0}^{\infty}e^{-xy}\,dy$（$x>0$）とフビニの定理を使って
+$$
+\lim_{b\to\infty}\int_{0}^{b}\frac{\sin x}{x}\,dx=\frac\pi2
+$$
+を示せ（$\frac{\sin x}{x}$ は $x=0$ で $1$ とする）。
+:::
+
+::: solution
+**Step 1（可積分性）.** $b>0$ を固定し、$[0,b]\times[0,\infty)$ 上で $h(x,y)\defeq e^{-xy}\sin x$（連続なのでボレル可測）を考える。$x>0$ なら $\int_{0}^{\infty}e^{-xy}dy=\lim_{c}\frac{1-e^{-xc}}{x}=\frac1x$（\ref{meas:improper-lebesgue.1}）なので $\int_{0}^{\infty}|h(x,y)|\,dy=\frac{|\sin x|}{x}\le1$、$x=0$ では $h(0,\cdot)=0$。\ref{meas:fubini-lebesgue}（非負の $|h|$）から $\int|h|\,d\lambda_{2}\le b<\infty$ で、$h$ は可積分。
+
+**Step 2（二通りの累次積分）.** \ref{meas:fubini-lebesgue} から
+$$
+\int_{0}^{b}\frac{\sin x}{x}\,dx=\int_{0}^{b}\Bigl(\int_{0}^{\infty}h\,dy\Bigr)dx=\int_{0}^{\infty}\Bigl(\int_{0}^{b}e^{-xy}\sin x\,dx\Bigr)dy=\int_{0}^{\infty}\frac{1-e^{-by}(y\sin b+\cos b)}{1+y^{2}}\,dy.
+$$
+最後は \ref{meas:ex-dc-3} の Step 2（$t=y\ge0$）。左辺は $[0,b]$ 上の連続関数の積分なのでリーマン積分に等しい（\ref{meas:riemann-lebesgue}）。
+
+**Step 3（分ける）.** $y\ge0$ で $1+y\le2(1+y^{2})$（$2y^{2}-y+1>0$）なので
+$$
+\Bigl|\frac{e^{-by}(y\sin b+\cos b)}{1+y^{2}}\Bigr|\le\frac{(1+y)e^{-by}}{1+y^{2}}\le2e^{-by},
+$$
+これは可積分。$\frac{1}{1+y^{2}}$ も可積分で積分は $\frac\pi2$ なので、\ref{meas:integral-linearity.1} から
+$$
+\int_{0}^{b}\frac{\sin x}{x}\,dx=\frac\pi2-R(b),\qquad R(b)\defeq\int_{0}^{\infty}\frac{e^{-by}(y\sin b+\cos b)}{1+y^{2}}\,dy.
+$$
+
+**Step 4（$R(b)\to0$）.** $b_{k}\to\infty$（$b_{k}\ge1$）を任意の列とする。被積分関数は Step 3 から $2e^{-y}$（可積分）で押さえられ、各 $y>0$ で $|\cdot|\le2e^{-b_{k}y}\to0$。\ref{meas:dominated-convergence} から $R(b_{k})\to0$。よって主張が成り立つ。
+
+\ref{meas:ex-dc-3} の $F(t)=\frac\pi2-\arctan t$ も $t\downarrow0$ で $\frac\pi2$ に近づき、両者は整合する。
+:::
+
+## Lᵖ 空間 {#meas:sec-lp-exercises}
+
+対応するページ：\ref{meas:page-lp-spaces}
+
+::: problem ★ 基本：どの Lᵖ に属するか {#meas:ex-lp-1}
+$(0,\infty)$ 上で $f(x)\defeq\frac{1}{\sqrt{x}\,(1+x)}$ とする。$f\in L^{p}$ となる $p\in[1,\infty]$ をすべて求めよ。
+:::
+
+::: solution
+**べきの積分.** $s>0$ について、記法の項の左端での広義積分から $\int_{(0,1]}x^{-s}dx=\lim_{c\downarrow0}\int_{c}^{1}x^{-s}dx$ で、これは $s<1$ なら $\frac{1}{1-s}$、$s\ge1$ なら $\infty$（$s\ne1$ で $\frac{1-c^{1-s}}{1-s}$、$s=1$ で $-\log c$）。同様に \ref{meas:improper-lebesgue.1} から $\int_{[1,\infty)}x^{-s}dx<\infty\iff s>1$。
+
+**$1\le p<\infty$.** $(0,1]$ 上では $1\le1+x\le2$ なので $2^{-p}x^{-p/2}\le f^{p}\le x^{-p/2}$、よって $\int_{(0,1]}f^{p}<\infty\iff p/2<1\iff p<2$。$[1,\infty)$ 上では $f\le x^{-3/2}$ なので $f^{p}\le x^{-3p/2}$ で、$3p/2>1$ だから積分は有限。よって $f\in L^{p}\iff1\le p<2$。
+
+**$p=\infty$.** $M>0$ について $x<\min(1,(2M)^{-2})$ なら $f(x)\ge\frac{1}{2\sqrt x}>M$ で、この区間は正の測度をもつので $\|f\|_{\infty}=\infty$。
+
+答：$1\le p<2$。
+:::
+
+::: problem ★★ 標準：ヘルダーによる原点での評価 {#meas:ex-lp-2}
+$f\in L^{2}((0,1))$ と $F(x)\defeq\int_{0}^{x}f$（$0\le x\le1$）について、次を示せ。
+1. $|F(y)-F(x)|\le\|f\|_{2}\sqrt{|y-x|}$。
+2. $\lim_{x\downarrow0}F(x)/\sqrt{x}=0$。
+:::
+
+::: solution
+$\lambda((0,1))=1<\infty$ なので \ref{meas:lp-inclusions.1} から $f\in L^{1}$ で、$F$ は定義される。
+
+**1.** $x<y$ とする。$|F(y)-F(x)|=\bigl|\int f\mathbf{1}_{(x,y]}\bigr|\le\int|f|\mathbf{1}_{(x,y]}\cdot\mathbf{1}_{(x,y]}$（\ref{meas:integral-linearity.3}、端点は零集合）。\ref{meas:holder}（$p=q=2$）から
+$$
+|F(y)-F(x)|\le\|f\mathbf{1}_{(x,y]}\|_{2}\|\mathbf{1}_{(x,y]}\|_{2}\le\|f\|_{2}\sqrt{y-x}.
+$$
+
+**2.** 1 の途中の不等式を $[0,x]$ に使うと $|F(x)|/\sqrt x\le\|f\mathbf{1}_{[0,x]}\|_{2}$。$x_{k}\downarrow0$ を任意の列とすると、$|f|^{2}\mathbf{1}_{[0,x_{k}]}\le|f|^{2}$（可積分）で、各点 $t>0$ でやがて $0$ になるので、\ref{meas:dominated-convergence} から $\|f\mathbf{1}_{[0,x_{k}]}\|_{2}^{2}\to0$。よって $F(x)/\sqrt x\to0$。
+
+（$f\equiv1$ では $F(x)=x$ で、1 は $1/2$ 乗のヘルダー連続性を与えるが、$L^{2}$ 関数一般ではこれ以上の指数は保証されない：$f(t)=t^{-1/2+\varepsilon}$ を考えよ。）
+:::
+
+::: problem ★★★ 発展：Lᵖ 有界と a.e. 収束から L¹ 収束 {#meas:ex-lp-3}
+$\mu(X)<\infty$、$1<p<\infty$ とし、実数値可測関数 $f_{n},f$ が $f_{n}\to f$（a.e.）と $\sup_{n}\|f_{n}\|_{p}\le M<\infty$ を満たすとする。$\|f_{n}-f\|_{1}\to0$ を示せ。また $p=1$ では偽であることを例で示せ。
+:::
+
+::: solution
+$q$ を $p$ の共役指数（$1<q<\infty$）とする。
+
+**Step 1（$\|f\|_{p}\le M$）.** 零集合の上で $f_{n},f$ を $0$ に替えても積分は変わらない（\ref{meas:markov.4}）ので、各点で $|f_{n}|^{p}\to|f|^{p}$ としてよい。\ref{meas:fatou} から $\int|f|^{p}=\int\liminf|f_{n}|^{p}\le\liminf\int|f_{n}|^{p}\le M^{p}$。\ref{meas:minkowski} から $\|f_{n}-f\|_{p}\le2M$。
+
+**Step 2（小さい集合の上）.** $E\in\mathcal{M}$ について、\ref{meas:holder} から
+$$
+\int_{E}|f_{n}-f|=\|(f_{n}-f)\mathbf{1}_{E}\|_{1}\le\|f_{n}-f\|_{p}\|\mathbf{1}_{E}\|_{q}\le2M\mu(E)^{1/q}.
+$$
+
+**Step 3（エゴロフ）.** $\varepsilon>0$ について $\delta>0$ を $2M\delta^{1/q}<\varepsilon$ ととる。\ref{meas:egorov} から $E$ で $\mu(X\setminus E)<\delta$ かつ $E$ 上 $f_{n}\to f$ が一様となるものがある。
+$$
+\int|f_{n}-f|\le\mu(X)\sup_{E}|f_{n}-f|+2M\mu(X\setminus E)^{1/q}
+$$
+で、第 1 項 $\to0$、第 2 項 $<\varepsilon$。よって $\limsup_{n}\|f_{n}-f\|_{1}\le\varepsilon$、$\varepsilon$ は任意なので $\|f_{n}-f\|_{1}\to0$。
+
+**$p=1$ の反例.** $X=(0,1)$, $f_{n}\defeq n\mathbf{1}_{(0,1/n)}$ は $\|f_{n}\|_{1}=1$ で、各点で $0$ に収束するが $\|f_{n}-0\|_{1}=1$。（$p>1$ では $\|f_{n}\|_{p}=n^{1-1/p}\to\infty$ で仮定を満たさない。）Step 2 の「小さい集合の上の積分が一様に小さい」ことが、$p>1$ の仮定の役割である。
+:::
+
+## 符号付き測度とラドン–ニコディムの定理 {#meas:sec-rn-exercises}
+
+対応するページ：\ref{meas:page-radon-nikodym}
+
+::: problem ★ 基本：指数分布どうしの密度 {#meas:ex-rn-1}
+$\mathbb{R}$ のボレル集合族上で
+$$
+\mu(E)\defeq\int_{E\cap(0,\infty)}e^{-x}\,dx,\qquad\nu(E)\defeq\int_{E\cap(0,\infty)}2e^{-2x}\,dx
+$$
+とする。$\nu\ll\mu$, $\mu\ll\nu$ を示し、$\frac{d\nu}{d\mu}$ と $\frac{d\mu}{d\nu}$ を求めよ。
+:::
+
+::: solution
+両者は測度（\ref{meas:density-measure}）で、全質量はともに $1$（\ref{meas:improper-lebesgue.1}）なので有限。
+
+**$\frac{d\nu}{d\mu}$.** $h(x)\defeq2e^{-x}\mathbf{1}_{(0,\infty)}(x)$ とおく。\ref{meas:density-measure} の後半（$\int g\,d\mu=\int g\,e^{-x}\mathbf{1}_{(0,\infty)}\,d\lambda$）を $g=h\mathbf{1}_{E}$ に使うと
+$$
+\int_{E}h\,d\mu=\int_{E\cap(0,\infty)}2e^{-x}e^{-x}\,dx=\nu(E).
+$$
+$\mu(E)=0$ なら左辺は $0$（$h\mathbf{1}_{E}=0$ が $\mu$-a.e.、\ref{meas:markov.4}）なので $\nu(E)=0$、すなわち $\nu\ll\mu$ で、\ref{meas:radon-nikodym} の一意性から $\frac{d\nu}{d\mu}=2e^{-x}$（$\mu$-a.e.。$(-\infty,0]$ は $\mu$ 零集合なのでそこでの値は任意）。
+
+**$\frac{d\mu}{d\nu}$.** $\frac{d\nu}{d\mu}>0$（$\mu$-a.e.）なので、\ref{meas:prob-rn-change-of-measure} から $\mu\ll\nu$ で $\frac{d\mu}{d\nu}=\frac{e^{x}}{2}$（$\nu$-a.e.）。確かめ：$\int_{E}\frac{e^{x}}{2}\,d\nu=\int_{E\cap(0,\infty)}\frac{e^{x}}{2}2e^{-2x}\,dx=\mu(E)$。
+:::
+
+::: problem ★★ 標準：密度で与えた符号付き測度のハーン分解 {#meas:ex-rn-2}
+$g\in\mathcal{L}^{1}(\mu)$（実数値）について $\nu(E)\defeq\int_{E}g\,d\mu$ とする。
+1. $\nu$ は符号付き測度で、$P\defeq\{g\ge0\}$, $N\defeq\{g<0\}$ はハーン分解を与え、$\nu^{\pm}(E)=\int_{E}g^{\pm}\,d\mu$, $|\nu|(E)=\int_{E}|g|\,d\mu$ であることを示せ。
+2. $[0,2\pi]$ 上で $g=\sin$（$\mu=\lambda$）のとき、$\nu^{+}([0,2\pi])$, $|\nu|([0,2\pi])$ を求めよ。
+:::
+
+::: solution
+**1（符号付き測度）.** $\nu(E)\in\mathbb{R}$, $\nu(\varnothing)=0$。互いに素な $E_{j}$ について $g\mathbf{1}_{\bigsqcup E_{j}}=\sum_{j}g\mathbf{1}_{E_{j}}$ で、$\sum_{j}\int|g\mathbf{1}_{E_{j}}|=\int|g|\mathbf{1}_{\bigsqcup E_{j}}<\infty$（\ref{meas:termwise-integration.2}）。\ref{meas:series-dominated} から $\nu(\bigsqcup E_{j})=\sum_{j}\nu(E_{j})$。
+
+**1（ハーン分解）.** $E\subset P$ なら $g\mathbf{1}_{E}\ge0$ で $\nu(E)=\int g^{+}\mathbf{1}_{E}\ge0$、よって $P$ は正集合。同様に $N$ は負集合で、$X=P\sqcup N$。\ref{meas:jordan-decomposition} から $\nu^{+}(E)=\nu(E\cap P)=\int_{E}g\mathbf{1}_{P}=\int_{E}g^{+}$（$g\mathbf{1}_{P}=g^{+}$）、$\nu^{-}(E)=-\nu(E\cap N)=\int_{E}g^{-}$、$|\nu|(E)=\int_{E}(g^{+}+g^{-})=\int_{E}|g|$（\ref{meas:termwise-integration.1}）。
+
+**2.** $P=\{\sin\ge0\}=[0,\pi]\cup\{2\pi\}$。$\nu^{+}([0,2\pi])=\int_{0}^{\pi}\sin x\,dx=2$、$|\nu|([0,2\pi])=\int_{0}^{2\pi}|\sin x|\,dx=4$（$\nu([0,2\pi])=0$）。$P'\defeq(0,\pi)$ とその補集合も分解を与え、$P\triangle P'=\{0,\pi,2\pi\}$ は \ref{meas:hahn-decomposition} の一意性の主張どおり $\nu$ の値が $0$ の集合しか含まない。
+:::
+
+::: problem ★★★ 発展：粗い σ-加法族の上の密度 {#meas:ex-rn-3}
+$X=[0,1)$、$N\ge1$、$I_{k}\defeq[k/N,(k+1)/N)$（$0\le k<N$）とし、$\mathcal{G}$ を $I_{k}$ たちの和集合全体（$2^{N}$ 個の集合からなる σ-加法族）とする。可積分な $f\ge0$ について、$\mathcal{G}$ 上の測度 $\mu\defeq\lambda|_{\mathcal{G}}$, $\nu(E)\defeq\int_{E}f\,d\lambda$（$E\in\mathcal{G}$）を考える。
+1. $\nu\ll\mu$ で、$\mathcal{G}$ に関するラドン–ニコディム導関数は
+$$
+\frac{d\nu}{d\mu}=\sum_{k=0}^{N-1}a_{k}\mathbf{1}_{I_{k}},\qquad a_{k}\defeq N\int_{I_{k}}f\,d\lambda
+$$
+（区間ごとの平均）であり、これは $\mu$-a.e. ではなく各点で一意に決まることを示せ。
+2. $f(x)=x$, $N=2$ のとき $\frac{d\nu}{d\mu}$ を求めよ。また、$f$ 自身は $\nu(E)=\int_{E}f\,d\lambda$ を満たすのに $\frac{d\nu}{d\mu}$ でない理由を述べよ。
+:::
+
+::: solution
+**1（$\mathcal{G}$ 可測な関数）.** $h\colon X\to[0,\infty)$ が $\mathcal{G}$ 可測なら、各値 $c$ で $\{h=c\}\in\mathcal{G}$ は $I_{k}$ の和なので、$h$ は各 $I_{k}$ 上で定数：$h=\sum_{k}c_{k}\mathbf{1}_{I_{k}}$。逆にこの形の関数は $\mathcal{G}$ 可測（逆像は $I_{k}$ の和）。
+
+**1（絶対連続と存在）.** $\mathcal{G}$ の空でない元は少なくとも一つの $I_{k}$ を含み $\mu\ge\frac1N$ なので、$\mu(E)=0\Rightarrow E=\varnothing\Rightarrow\nu(E)=0$。$h\defeq\sum a_{k}\mathbf{1}_{I_{k}}$ と $E=\bigsqcup_{k\in S}I_{k}$ について、$h\mathbf{1}_{E}$ は $\mathcal{G}$ に関する単関数で
+$$
+\int_{E}h\,d\mu=\sum_{k\in S}a_{k}\mu(I_{k})=\sum_{k\in S}\int_{I_{k}}f\,d\lambda=\nu(E)
+$$
+（\ref{meas:simple-integral}, \ref{meas:termwise-integration.1}）。$\mu,\nu$ は有限なので \ref{meas:radon-nikodym} の一意性から $h=\frac{d\nu}{d\mu}$（$\mu$-a.e.）。
+
+**1（各点での一意性）.** 別の $\mathcal{G}$ 可測な $h'=\sum c_{k}\mathbf{1}_{I_{k}}$ が条件を満たせば $\nu(I_{k})=c_{k}/N$ から $c_{k}=a_{k}$。$\mathcal{G}$ の零集合は $\varnothing$ だけなので、「$\mu$-a.e.」は「各点」と同じである。
+
+**2.** $a_{0}=2\int_{0}^{1/2}x\,dx=\frac14$, $a_{1}=2\int_{1/2}^{1}x\,dx=\frac34$。よって $\frac{d\nu}{d\mu}=\frac14\mathbf{1}_{[0,1/2)}+\frac34\mathbf{1}_{[1/2,1)}$。$f(x)=x$ は $\mathcal{G}$ 可測でない（$I_{0}$ 上で定数でない）ので、可測空間 $(X,\mathcal{G})$ の上のラドン–ニコディム導関数の候補にならない。導関数は σ-加法族に依存し、$\mathcal{G}$ が粗いほど $f$ を平均でならしたものになる（確率論の条件付き期待値の原型）。
+:::
+
+## 微分定理 {#meas:sec-df-exercises}
+
+対応するページ：\ref{meas:page-differentiation}
+
+::: problem ★ 基本：四分円の密度 {#meas:ex-df-1}
+$A\defeq\{(x,y)\in\mathbb{R}^{2}:x>0,\ y>0\}$ とし、$d(p)\defeq\lim_{r\to0}\frac{\lambda_{2}(A\cap B(p,r))}{\lambda_{2}(B(p,r))}$ とおく。すべての $p\in\mathbb{R}^{2}$ で $d(p)$ が存在することを示して値を求め、$\mathbf{1}_{A}$ のルベーグ点をすべて答えよ。
+:::
+
+::: solution
+座標軸 $L\defeq\{xy=0\}$ は、退化した閉直方体 $[-m,m]\times\{0\}$, $\{0\}\times[-m,m]$ の可算和なので零集合（\ref{meas:lebesgue-basic.3}）。
+
+**内部と外部.** $p\in A$ なら小さい $r$ で $B(p,r)\subset A$ なので $d(p)=1$。$p\notin\overline{A}$ なら小さい $r$ で $B(p,r)\cap A=\varnothing$ なので $d(p)=0$。
+
+**軸上（原点以外）.** $p=(a,0)$, $a>0$ とし $r<a$ とすると $A\cap B(p,r)=B(p,r)\cap\{y>0\}$。鏡映 $S(x,y)\defeq(x,-y)$（$|\det S|=1$）は $B(p,r)$ を保ち、$\{y>0\}$ の部分と $\{y<0\}$ の部分を入れ替えるので、\ref{meas:lebesgue-linear} から両者の測度は等しく、和は $\lambda_{2}(B(p,r))$（$L$ は零集合）。よって比はつねに $\frac12$、$d(p)=\frac12$。$(0,b)$, $b>0$ も同様。
+
+**原点.** $90^{\circ}$ 回転 $R(x,y)\defeq(-y,x)$（$\det R=1$）は $B(0,r)$ を保ち、開いた四つの象限を順に写す。$B(0,r)\setminus L$ はそれらと $B(0,r)$ の共通部分の互いに素な和なので、四つは同じ測度をもち、比はつねに $\frac14$、$d(0)=\frac14$。
+
+**ルベーグ点.** $p\notin\partial A$ なら小さい $r$ で $\mathbf{1}_{A}$ は $B(p,r)$ 上定数なのでルベーグ点。$p\in\partial A=\overline{A}\cap L$ では $\mathbf{1}_{A}(p)=0$ で、$\frac{1}{\lambda_{2}(B)}\int_{B}|\mathbf{1}_{A}-0|=\frac{\lambda_{2}(A\cap B)}{\lambda_{2}(B)}\to d(p)\in\{\frac12,\frac14\}$ なので、ルベーグ点でない。ルベーグ点の全体は $\mathbb{R}^{2}\setminus\partial A$ で、例外集合は零集合（\ref{meas:lebesgue-differentiation}, \ref{meas:density-theorem} と整合）。
+:::
+
+::: problem ★★ 標準：連続点でないルベーグ点 {#meas:ex-df-2}
+1. $f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ の連続点はルベーグ点であることを示せ。
+2. $A\defeq\bigcup_{k\ge1}[2^{-k},2^{-k}+4^{-k}]\subset\mathbb{R}$, $f\defeq\mathbf{1}_{A}$ について、$0$ は $f$ のルベーグ点だが $f$ は $0$ で連続でないことを示せ。$F(x)\defeq\int_{0}^{x}f$ の $0$ での微分係数も求めよ。
+:::
+
+::: solution
+**1.** $f$ が $x$ で連続なら、$\varepsilon>0$ について $\delta>0$ があって $|y-x|<\delta\Rightarrow|f(y)-f(x)|<\varepsilon$。$r<\delta$ なら $\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}|f(y)-f(x)|\,dy\le\varepsilon$。
+
+**2（不連続）.** $f(0)=0$（$0\notin A$）だが $f(2^{-k})=1$ で $2^{-k}\to0$。
+
+**2（ルベーグ点）.** $4^{-k}<2^{-k}$ なので $2^{-k}+4^{-k}<2^{-k+1}$。$0<r<1$ とし、$2^{-m}\le r<2^{-m+1}$（$m\ge1$）とする。$k\le m-1$ の区間は $2^{-k}\ge2^{-m+1}>r$ から始まるので $(-r,r)$ と交わらない。よって
+$$
+\lambda(A\cap(-r,r))\le\sum_{k\ge m}4^{-k}=\frac43\cdot4^{-m},\qquad\frac{1}{2r}\int_{(-r,r)}|f-f(0)|=\frac{\lambda(A\cap(-r,r))}{2r}\le\frac{\frac43\cdot4^{-m}}{2\cdot2^{-m}}=\frac23\cdot2^{-m}.
+$$
+$r\to0$ で $m\to\infty$ なので $0$ に収束し、$0$ はルベーグ点。
+
+**2（$F'(0)$）.** \ref{meas:indefinite-integral-derivative} から $F'(0)=f(0)=0$。$0$ のどの近傍でも $A$ は正の測度をもつが、その割合が $0$ に近づくので微分係数は $0$ になる。
+:::
+
+::: problem ★★★ 発展：区間の極大関数 {#meas:ex-df-3}
+$\mathbb{R}$ 上で $f\defeq\mathbf{1}_{[-1,1]}$ とする。
+1. $Mf(x)=1$（$|x|<1$）、$Mf(x)=\frac{1}{|x|+1}$（$|x|\ge1$）を示せ。
+2. $0<t<1$ について $\lambda(\{Mf>t\})$ を求め、\ref{meas:maximal-inequality} の評価と比べよ。
+3. $Mf\notin L^{1}$ だが、$1<p\le\infty$ で $Mf\in L^{p}$ であることを示せ。
+:::
+
+::: solution
+$\varphi_{x}(r)\defeq\frac{\lambda([-1,1]\cap(x-r,x+r))}{2r}$ とおくと $Mf(x)=\sup_{r>0}\varphi_{x}(r)$ で、つねに $\varphi_{x}\le1$。$f$ と $Mf$ は偶関数なので $x\ge0$ とする。
+
+**1.** $0\le x<1$ なら $r\le1-x$ で $(x-r,x+r)\subset[-1,1]$、$\varphi_{x}(r)=1$。よって $Mf(x)=1$。$x\ge1$ とする。$r\le x-1$ なら交わりは空で $\varphi_{x}=0$。$x-1<r\le x+1$ なら交わりは $(x-r,1]$ で
+$$
+\varphi_{x}(r)=\frac{r-(x-1)}{2r}=\frac12-\frac{x-1}{2r},
+$$
+これは $r$ について非減少で、$r=x+1$ で $\frac{2}{2(x+1)}=\frac{1}{x+1}$。$r>x+1$ なら交わりは $[-1,1]$ で $\varphi_{x}(r)=\frac1r<\frac{1}{x+1}$。よって $Mf(x)=\frac{1}{x+1}$。
+
+**2.** $0<t<1$ とする。$|x|<1$ では $Mf>t$。$|x|\ge1$ では $\frac{1}{|x|+1}>t\iff|x|<\frac1t-1$。$t\ge\frac12$ なら $\frac1t-1\le1$ でそのような $x$ はなく、$\{Mf>t\}=(-1,1)$、測度 $2$。$t<\frac12$ なら $\{Mf>t\}=(-(\frac1t-1),\frac1t-1)$、測度 $\frac2t-2$。\ref{meas:maximal-inequality} の右辺は $\frac{3\|f\|_{1}}{t}=\frac6t$ で、$2\le\frac6t$, $\frac2t-2<\frac6t$ なので確かに成り立つ。$t\to0$ で $t\lambda(\{Mf>t\})\to2=\|f\|_{1}$ で、評価の $\frac1t$ の次数は改善できない。
+
+**3.** \ref{meas:improper-lebesgue.1} から
+$$
+\int_{\{|x|\ge1\}}(Mf)^{p}=2\int_{1}^{\infty}(x+1)^{-p}dx=\begin{cases}\frac{2^{2-p}}{p-1}&(p>1)\\ \infty&(p=1)\end{cases}
+$$
+（$p=1$ では $2\log(b+1)-2\log2\to\infty$）。$(-1,1)$ 上では $(Mf)^{p}=1$。よって $Mf\notin L^{1}$、$1<p<\infty$ で $Mf\in L^{p}$。また $Mf\le1$ なので $Mf\in L^{\infty}$。
+:::
+
+## ルベーグ–スティルチェス測度と単調関数 {#meas:sec-mo-exercises}
+
+対応するページ：\ref{meas:page-monotone-functions}
+
+::: problem ★ 基本：平方根は絶対連続 {#meas:ex-mo-1}
+$F(x)\defeq\sqrt{x}$（$0\le x\le1$）は絶対連続だがリプシッツ連続でないことを示せ。
+:::
+
+::: solution
+$g(t)\defeq\frac{1}{2\sqrt t}$（$0<t\le1$）とする。$0<x\le1$ について、記法の項の左端での広義積分から
+$$
+\int_{(0,x]}g\,d\lambda=\lim_{c\downarrow0}\bigl(\sqrt x-\sqrt c\bigr)=\sqrt x.
+$$
+とくに $x=1$ で $g$ は可積分。$\{0\}$ は零集合なので $\int_{0}^{x}g=\sqrt x=F(x)-F(0)$（$x=0$ でも成り立つ）。\ref{meas:ftc-lebesgue}（2⇒1）から $F$ は絶対連続。一方 $\frac{F(x)-F(0)}{x-0}=\frac{1}{\sqrt x}$ は $x\downarrow0$ で非有界なので、リプシッツ連続でない。絶対連続性はリプシッツ性（\ref{meas:prob-mo-lipschitz}）より真に弱い。
+:::
+
+::: problem ★★ 標準：振動する関数 {#meas:ex-mo-2}
+$[0,1]$ 上で $G(x)\defeq x\sin(1/x)$, $H(x)\defeq x^{2}\sin(1/x)$（$G(0)=H(0)=0$）とする。
+1. 絶対連続な関数は有界変動であることを示せ。
+2. $G$ は連続だが有界変動でなく、したがって絶対連続でないことを示せ。
+3. $H$ は絶対連続であることを示せ。
+:::
+
+::: solution
+**1.** $F$ が絶対連続なら \ref{meas:ftc-lebesgue}（1⇒3）から $F'$ は可積分で $F(x)=F(a)+\int_{a}^{x}F'$。分割 $a=x_{0}<\dots<x_{m}=b$ について（端点は零集合）
+$$
+\sum_{i}|F(x_{i})-F(x_{i-1})|=\sum_{i}\Bigl|\int_{[x_{i-1},x_{i}]}F'\Bigr|\le\int_{a}^{b}|F'|<\infty
+$$
+なので $V_{a}^{b}F\le\int_{a}^{b}|F'|$。
+
+**2.** $|G(x)|\le x$ なので $G$ は $0$ で連続、$x>0$ でも連続。$x_{k}\defeq\frac{1}{(k+\frac12)\pi}$（$k\ge0$）とすると $\sin(1/x_{k})=(-1)^{k}$ で $G(x_{k})=(-1)^{k}x_{k}$。$0<x_{K}<\dots<x_{0}=\frac2\pi<1$ に $0,1$ を加えた分割について
+$$
+\sum|G(x_{i})-G(x_{i-1})|\ge\sum_{k=0}^{K-1}|G(x_{k})-G(x_{k+1})|=\sum_{k=0}^{K-1}(x_{k}+x_{k+1})\ge\sum_{k=0}^{K-1}\frac{1}{(k+1)\pi}\to\infty.
+$$
+よって $V_{0}^{1}G=\infty$、1 から $G$ は絶対連続でない。
+
+**3.** $x>0$ で $H'(x)=2x\sin(1/x)-\cos(1/x)$ なので $|H'(x)|\le3$。$H'(0)=\lim_{h\downarrow0}h\sin(1/h)=0$。$H$ は $[0,1]$ 上（端点では片側）微分可能で $|H'|\le3$ なので、\ref{calc:mean-value-theorem} から $|H(x)-H(y)|\le3|x-y|$。\ref{meas:prob-mo-lipschitz} から $H$ は絶対連続。（$H'$ は $0$ で連続でないが、有界なので問題ない。）
+:::
+
+::: problem ★★★ 発展：カントール関数の平均 {#meas:ex-mo-3}
+\ref{meas:cantor-function} のカントール関数 $\Phi$ について、
+1. $\Phi(1-x)=1-\Phi(x)$（$0\le x\le1$）を示せ。
+2. $\int_{0}^{1}\Phi\,dx=\frac12$ を示せ。
+3. $\Phi$ を $x<0$ で $0$、$x>1$ で $1$ と延ばしたルベーグ–スティルチェス測度 $\mu_{\Phi}$ について、$\int_{\mathbb{R}}x\,d\mu_{\Phi}(x)=\frac12$ を示せ。
+:::
+
+::: solution
+**1.** $\sigma(x)\defeq1-x$ とする。$C_{k}$（\ref{meas:cantor-set}）は $\sigma$ で不変：$C_{0}=[0,1]$ は不変で、$C_{k-1}$ が不変なら、$\sigma$ は $C_{k-1}$ の各閉区間 $J$ を $C_{k-1}$ の閉区間 $\sigma(J)$ に、$J$ の中央の開区間を $\sigma(J)$ の中央の開区間に写すので $C_{k}$ も不変。$\Psi_{k}(x)\defeq1-\Phi_{k}(1-x)$ とおくと、$\Psi_{k}$ は連続で $\Psi_{k}(0)=1-\Phi_{k}(1)=0$、$C_{k}$ の各区間 $J$ の上では（$\Phi_{k}$ が $\sigma(J)$ 上で $2^{-k}$ だけ一次関数で増えるので）$2^{-k}$ だけ一次関数で増え、$[0,1]\setminus C_{k}$ の各区間上で定数。これらの性質をもつ関数は一つしかない（二つの差は連続で $0$ で $0$、有限個の各小区間の上で傾き $0$ なので定数 $0$）ので $\Psi_{k}=\Phi_{k}$。$k\to\infty$（各点収束）で $\Phi(1-x)=1-\Phi(x)$。
+
+**2.** $\Phi$ は連続なので、ルベーグ積分はリーマン積分に等しい（\ref{meas:riemann-lebesgue}）。\ref{calc:substitution-parts.1}（$\varphi(t)=1-t$）から $\int_{0}^{1}\Phi(1-t)\,dt=\int_{0}^{1}\Phi(x)\,dx\eqdef I$。1 から $I=\int_{0}^{1}(1-\Phi(1-t))\,dt=1-I$、よって $I=\frac12$。
+
+**3.** 延長した $\Phi$ は増加かつ連続なので \ref{meas:lebesgue-stieltjes.1} の $\mu_{\Phi}$ がある。$\mu_{\Phi}((-n,0])=\Phi(0)-\Phi(-n)=0$, $\mu_{\Phi}((1,n])=0$ と下からの連続性から $\mu_{\Phi}(\mathbb{R}\setminus(0,1])=0$。$E\defeq\{(t,x)\in\mathbb{R}^{2}:0\le t<x\le1\}$ はボレル集合で、$\mathcal{B}(\mathbb{R})\otimes\mathcal{B}(\mathbb{R})$ に属する（\ref{meas:sections-measurable.3}）。$\lambda$ と $\mu_{\Phi}$（ともに σ 有限）について \ref{meas:tonelli} を $\mathbf{1}_{E}$ に使う。
+- $x$ を固定：$\lambda(\{t:(t,x)\in E\})=x$（$0<x\le1$）、$0$（それ以外）。積分は $\int_{(0,1]}x\,d\mu_{\Phi}=\int_{\mathbb{R}}x\,d\mu_{\Phi}$（$\mathbb{R}\setminus(0,1]$ は $\mu_{\Phi}$ 零集合、\ref{meas:integral-linearity.4}。$x\mathbf{1}_{(0,1]}$ は有界なので可積分）。
+- $t$ を固定：$\mu_{\Phi}(\{x:(t,x)\in E\})=\mu_{\Phi}((t,1])=1-\Phi(t)$（$0\le t<1$）、$0$（それ以外）。積分は $\int_{0}^{1}(1-\Phi(t))\,dt=1-\frac12$（2）。
+
+よって $\int x\,d\mu_{\Phi}=\frac12$。確率論の言葉では、カントール分布（特異連続な分布）の平均は $\frac12$ である。
+:::
+
+## 変数変換公式 {#meas:sec-cv-exercises}
+
+対応するページ：\ref{meas:page-change-of-variables}
+
+::: problem ★ 基本：極座標で収束判定 {#meas:ex-cv-1}
+$a\in\mathbb{R}$ について
+$$
+\int_{\mathbb{R}^{2}}\frac{d\lambda_{2}(x,y)}{(1+x^{2}+y^{2})^{a}}
+$$
+を求めよ（$a\le1$ では $\infty$ となることを含めて）。
+:::
+
+::: solution
+\ref{meas:polar-coordinates} と \ref{meas:fubini-lebesgue}（非負）から
+$$
+\int_{\mathbb{R}^{2}}\frac{d\lambda_{2}}{(1+x^{2}+y^{2})^{a}}=\int_{0}^{\infty}\Bigl(\int_{0}^{2\pi}d\theta\Bigr)\frac{r}{(1+r^{2})^{a}}\,dr=2\pi\int_{0}^{\infty}\frac{r\,dr}{(1+r^{2})^{a}}.
+$$
+\ref{meas:improper-lebesgue.1} から右の積分は $\lim_{b\to\infty}\int_{0}^{b}$ で、$a\ne1$ なら
+$$
+\int_{0}^{b}\frac{r\,dr}{(1+r^{2})^{a}}=\frac{(1+b^{2})^{1-a}-1}{2(1-a)},
+$$
+これは $a>1$ なら $\frac{1}{2(a-1)}$ に、$a<1$ なら $\infty$ に収束する。$a=1$ なら $\frac12\log(1+b^{2})\to\infty$。よって値は $a>1$ で $\frac{\pi}{a-1}$、$a\le1$ で $\infty$。
+:::
+
+::: problem ★★ 標準：線形変換で三角形上の積分 {#meas:ex-cv-2}
+$D\defeq\{(x,y):x>0,\ y>0,\ x+y<1\}$ について
+$$
+\int_{D}e^{(y-x)/(y+x)}\,d\lambda_{2}(x,y)=\frac{e-e^{-1}}{4}
+$$
+を示せ。
+:::
+
+::: solution
+$\Phi(u,v)\defeq\bigl(\frac{v-u}{2},\frac{v+u}{2}\bigr)$ は $\mathbb{R}^{2}$ の可逆な線形写像で、$\det D\Phi=\det\begin{pmatrix}-\frac12&\frac12\\\frac12&\frac12\end{pmatrix}=-\frac12$、$J_{\Phi}=\frac12$。$(x,y)=\Phi(u,v)$ なら $u=y-x$, $v=x+y$ で、
+$$
+x>0\iff u<v,\quad y>0\iff u>-v,\quad x+y<1\iff v<1,
+$$
+よって $U\defeq\Phi^{-1}(D)=\{(u,v):|u|<v<1\}$（開集合）で、$\Phi\colon U\to D$ は $C^{1}$ 微分同相写像。$f(x,y)\defeq e^{(y-x)/(y+x)}$ は $D$ 上連続かつ非負で、$f(\Phi(u,v))=e^{u/v}$。\ref{meas:change-of-variables.2} と \ref{meas:fubini-lebesgue}（$v$ を外側に）から
+$$
+\int_{D}f\,d\lambda_{2}=\frac12\int_{U}e^{u/v}\,d\lambda_{2}(u,v)=\frac12\int_{0}^{1}\Bigl(\int_{-v}^{v}e^{u/v}du\Bigr)dv=\frac12\int_{0}^{1}v(e-e^{-1})\,dv=\frac{e-e^{-1}}{4}.
+$$
+（内側：$\int_{-v}^{v}e^{u/v}du=v\bigl[e^{u/v}\bigr]_{u=-v}^{u=v}=v(e-e^{-1})$。）
+:::
+
+::: problem ★★★ 発展：ベータ関数とガンマ関数 {#meas:ex-cv-3}
+$x,y>0$ について $\Gamma(x)=\int_{0}^{\infty}t^{x-1}e^{-t}dt$, $B(x,y)=\int_{0}^{1}v^{x-1}(1-v)^{y-1}dv$（\ref{calc:gamma}, \ref{calc:beta-function}）とする。
+1. トネリの定理と変数変換 $(s,t)=(uv,u(1-v))$ を使って $\Gamma(x)\Gamma(y)=\Gamma(x+y)B(x,y)$ を示せ。
+2. $B(\frac12,\frac12)=\pi$ を計算し、$\Gamma(\frac12)=\sqrt\pi$ を導け。
+:::
+
+::: solution
+**Step 0（広義積分とルベーグ積分）.** 被積分関数は開区間上の連続な正値関数である。$c_{k}\downarrow0$ について $t^{x-1}e^{-t}\mathbf{1}_{[c_{k},1/c_{k}]}\uparrow t^{x-1}e^{-t}\mathbf{1}_{(0,\infty)}$、$v^{x-1}(1-v)^{y-1}\mathbf{1}_{[c_{k},1-c_{k}]}\uparrow v^{x-1}(1-v)^{y-1}\mathbf{1}_{(0,1)}$ なので、\ref{meas:monotone-convergence} と \ref{meas:riemann-lebesgue} から、広義積分 $\Gamma(x)$, $B(x,y)$ はそれぞれ $\int_{(0,\infty)}t^{x-1}e^{-t}\,d\lambda(t)$, $\int_{(0,1)}v^{x-1}(1-v)^{y-1}\,d\lambda(v)$（値は $[0,\infty]$）に等しい。$\Gamma(x)$ は有限かつ正（\ref{calc:gamma-basic.1}）。
+
+**Step 1（積に直す）.** $V\defeq(0,\infty)^{2}$ 上の $f(s,t)\defeq s^{x-1}t^{y-1}e^{-s-t}\ge0$ に \ref{meas:fubini-lebesgue} を使うと
+$$
+\int_{V}f\,d\lambda_{2}=\int_{0}^{\infty}s^{x-1}e^{-s}\Bigl(\int_{0}^{\infty}t^{y-1}e^{-t}dt\Bigr)ds=\Gamma(x)\Gamma(y)
+$$
+（\ref{meas:nonnegative-integral-basic.3}）。
+
+**Step 2（変数変換）.** $U\defeq(0,\infty)\times(0,1)$、$\Phi(u,v)\defeq(uv,u(1-v))$ とする。$\Psi(s,t)\defeq\bigl(s+t,\frac{s}{s+t}\bigr)$ は $V\to U$ で、$\Phi(\Psi(s,t))=(s,t)$, $\Psi(\Phi(u,v))=(u,v)$ なので $\Phi\colon U\to V$ は全単射。$\Phi$, $\Psi$ はともに分母が $0$ にならない有理式で $C^{1}$ なので、$\Phi$ は $C^{1}$ 微分同相写像（\ref{calc:diffeomorphism}）。
+$$
+\det D\Phi=\det\begin{pmatrix}v&u\\1-v&-u\end{pmatrix}=-uv-u(1-v)=-u,\qquad J_{\Phi}=u.
+$$
+\ref{meas:change-of-variables.2} から
+$$
+\Gamma(x)\Gamma(y)=\int_{U}(uv)^{x-1}\bigl(u(1-v)\bigr)^{y-1}e^{-u}\,u\,d\lambda_{2}=\int_{U}u^{x+y-1}e^{-u}\,v^{x-1}(1-v)^{y-1}\,d\lambda_{2}(u,v).
+$$
+再び \ref{meas:fubini-lebesgue} で右辺は $\Gamma(x+y)B(x,y)$。左辺は有限なので $B(x,y)<\infty$ で、$\Gamma(x+y)>0$ で割れば $B(x,y)=\frac{\Gamma(x)\Gamma(y)}{\Gamma(x+y)}$。（\ref{calc:beta-function} の別証明。）
+
+**Step 3（$B(\frac12,\frac12)$）.** $0<\alpha<\beta<\frac\pi2$ について、\ref{calc:substitution-parts.1} を $\varphi(\theta)=\sin^{2}\theta$（$\varphi'(\theta)=2\sin\theta\cos\theta$）に使うと、$[\alpha,\beta]$ 上 $\sqrt{\varphi(1-\varphi)}=\sin\theta\cos\theta>0$ なので
+$$
+\int_{\sin^{2}\alpha}^{\sin^{2}\beta}\frac{dv}{\sqrt{v(1-v)}}=\int_{\alpha}^{\beta}\frac{2\sin\theta\cos\theta}{\sin\theta\cos\theta}d\theta=2(\beta-\alpha).
+$$
+$\alpha\downarrow0$, $\beta\uparrow\frac\pi2$（列で）とすると $[\sin^{2}\alpha,\sin^{2}\beta]\uparrow(0,1)$ なので、\ref{meas:monotone-convergence} から $B(\frac12,\frac12)=\pi$。Step 2 と $\Gamma(1)=1$（\ref{calc:gamma-basic.2}）から $\Gamma(\frac12)^{2}=\pi$、$\Gamma(\frac12)>0$ なので $\Gamma(\frac12)=\sqrt\pi$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
