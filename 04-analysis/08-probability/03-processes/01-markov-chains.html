@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マルコフ連鎖 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/03-processes/01-markov-chains.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# マルコフ連鎖 {#prb:page-markov-chains keywords="Markov chains on a countable state space, transition matrix, construction from i.i.d. uniforms, n-step transition probabilities P^n, Markov property and strong Markov property, return times, recurrence and transience, sum of p_ii^(n), communicating classes, Polya's theorem for simple random walk on Z^d via Fourier analysis, invariant (stationary) distributions, positive recurrence, pi_i = 1 / E_i T_i, aperiodicity, convergence theorem by coupling"}
+
+**マルコフ連鎖**は「次の状態の分布が現在の状態だけで決まり、過去の経緯によらない」確率過程である。このページでは可算集合の上のマルコフ連鎖を扱い、遷移確率の行列 $P$ と初期分布から連鎖を構成し、停止時刻で「未来を新しく始め直せる」こと（**強マルコフ性**）を示す。それを使って、各状態が確率 $1$ で何度でも戻ってくる（**再帰的**）か、有限回で去ってしまう（**過渡的**）かを、$\sum_{n}p_{ii}^{(n)}$ の発散で判定する。応用として、$\mathbb{Z}^{d}$ の単純ランダムウォークが $d\le2$ で再帰的、$d\ge3$ で過渡的であるという**ポリアの定理**をフーリエ解析で示す。最後に、**定常分布**の存在と一意性、そして既約・非周期的な連鎖の分布が定常分布に収束すること（**収束定理**）を、二つの連鎖を出会わせる**カップリング**で証明する。
+
+## 記法と定義の確認 {#prb:sec-mc-notation}
+
+::: notation
+- $S$ は空でない可算集合（**状態空間**）で、離散 σ-加法族（すべての部分集合）を入れる。
+- 停止時刻・任意抽出定理は \ref{prb:page-martingales-stopping}、独立な一様乱数列の存在は \ref{prb:independent-sequence-existence}、ボレル–カンテリの補題は \ref{prb:borel-cantelli}。
+- 特性関数（フーリエ係数）の直交性 $\frac{1}{(2\pi)^{d}}\int_{[-\pi,\pi]^{d}}e^{i\langle\theta,k\rangle}d\theta=\delta_{k,0}$（$k\in\mathbb{Z}^{d}$）を使う（\ref{four:page-coefficients-convolution} の $\int e_{n}\overline{e_{m}}=\delta_{nm}$ を $2\pi$ で拡大し、各座標でフビニ）。
+- **選択公理**：使わない。
+:::
+
+## 定義と構成 {#prb:sec-mc-definition}
+
+::: definition マルコフ連鎖 {#prb:markov-chain keywords="stochastic matrix P = (p_ij) on a countable set S; Markov chain with initial distribution nu and transition matrix P: P(X_0 = i_0, ..., X_n = i_n) = nu(i_0) p_{i_0 i_1} ... p_{i_{n-1} i_n}; P_i and E_i for the chain started at i" index="マルコフ連鎖|まるこふれんさ, 遷移確率|せんいかくりつ, 確率行列|かくりつぎょうれつ, 初期分布|しょきぶんぷ"}
+$p_{ij}\ge0$（$i,j\in S$）で各 $i$ について $\sum_{j}p_{ij}=1$ となる行列 $P=(p_{ij})$ を**確率行列**（遷移行列）という。$S$ 上の確率分布 $\nu$ について、$S$ に値をとる確率変数の列 $(X_{n})_{n\ge0}$ が、すべての $n$ と $i_{0},\dots,i_{n}\in S$ で
+$$
+P(X_{0}=i_{0},X_{1}=i_{1},\dots,X_{n}=i_{n})=\nu(i_{0})p_{i_{0}i_{1}}\cdots p_{i_{n-1}i_{n}}
+$$
+を満たすとき、初期分布 $\nu$、遷移行列 $P$ の**マルコフ連鎖**という。$\nu=\delta_{i}$ のときの確率と期待値を $P_{i}$, $E_{i}$ と書く。$P^{n}$ の成分を $p_{ij}^{(n)}$ と書く（$P^{0}=I$）。
+:::
+
+::: proposition マルコフ連鎖の構成と基本性質 {#prb:markov-construction keywords="construction of a Markov chain by X_{n+1} = phi(X_n, U_{n+1}) with i.i.d. uniforms; P(X_n = j) = (nu P^n)_j; the Markov property P(X_{n+1} = j | X_0, ..., X_n) = p_{X_n j}" index="マルコフ性|まるこふせい"}
+1. 任意の $\nu$, $P$ について、そのマルコフ連鎖が存在する。
+2. $P(X_{n}=j)=(\nu P^{n})_{j}\defeq\sum_{i}\nu(i)p_{ij}^{(n)}$。とくに $P_{i}(X_{n}=j)=p_{ij}^{(n)}$。
+3. （マルコフ性）$P(X_{0}=i_{0},\dots,X_{n}=i_{n})>0$ なら、$P(X_{n+1}=j\mid X_{0}=i_{0},\dots,X_{n}=i_{n})=p_{i_{n}j}$。
+:::
+
+::: proof
+**1.** $S=\{s_{1},s_{2},\dots\}$ と並べる。$i\in S$ について $[0,1)$ を長さ $p_{is_{1}},p_{is_{2}},\dots$ の左閉右開区間 $I_{i,s_{1}},I_{i,s_{2}},\dots$ に順に分割し（端の余りは測度 $0$）、$\varphi(i,u)\defeq j$（$u\in I_{i,j}$）とする。$\nu$ についても同様に $\psi(u)$ を作る。i.i.d. の $U(0,1)$ 列 $U_{0},U_{1},\dots$（\ref{prb:independent-sequence-existence}）について $X_{0}\defeq\psi(U_{0})$, $X_{n+1}\defeq\varphi(X_{n},U_{n+1})$ とおく。$\{X_{0}=i_{0},\dots,X_{n}=i_{n}\}=\{U_{0}\in I_{i_{0}}\}\cap\bigcap_{k\le n}\{U_{k}\in I_{i_{k-1},i_{k}}\}$ で、独立性から確率は $\nu(i_{0})\prod p_{i_{k-1}i_{k}}$。
+
+**2.** 定義の式を $i_{0},\dots,i_{n-1}$ について足す（行列の積の定義）。
+
+**3.** 定義の式の比。
+:::
+
+::: theorem 強マルコフ性 {#prb:strong-markov keywords="strong Markov property: for a stopping time T of the natural filtration, conditionally on T < infinity and X_T = i, the process (X_{T+n}) is a Markov chain started at i with transition matrix P, independent of F_T" index="強マルコフ性|きょうまるこふせい"}
+$\mathcal{F}_{n}\defeq\sigma(X_{0},\dots,X_{n})$ とし、$T$ を停止時刻、$i\in S$、$A\in\mathcal{F}_{T}$ とする。このとき、すべての $k$ と $j_{1},\dots,j_{k}\in S$ について
+$$
+P\bigl(A\cap\{T<\infty,X_{T}=i,X_{T+1}=j_{1},\dots,X_{T+k}=j_{k}\}\bigr)=P\bigl(A\cap\{T<\infty,X_{T}=i\}\bigr)\,p_{ij_{1}}p_{j_{1}j_{2}}\cdots p_{j_{k-1}j_{k}}.
+$$
+:::
+
+::: proof
+$T=n$ の場合に分けて $n$ について足せばよい。$B\defeq A\cap\{T=n\}\cap\{X_{n}=i\}\in\mathcal{F}_{n}$ で、$\mathcal{F}_{n}$ の元は可算個の「柱」$\{X_{0}=i_{0},\dots,X_{n}=i_{n}\}$ の互いに素な和（$\mathcal{F}_{n}$ は $(X_{0},\dots,X_{n})$ の値の分割が生成する）。$i_{n}=i$ の柱 $C$ について、定義の式から
+$$
+P(C\cap\{X_{n+1}=j_{1},\dots,X_{n+k}=j_{k}\})=P(C)\,p_{ij_{1}}\cdots p_{j_{k-1}j_{k}}.
+$$
+$B$ を構成する柱について足せば $P(B\cap\{\dots\})=P(B)p_{ij_{1}}\cdots$。
+:::
+
+## 再帰と過渡 {#prb:sec-mc-recurrence}
+
+::: definition 再帰と過渡 {#prb:recurrence keywords="return time T_i = inf{n >= 1: X_n = i}; state i is recurrent if P_i(T_i < infinity) = 1 and transient otherwise; communicating states; irreducible chains" index="再帰的|さいきてき, 過渡的|かとてき, 既約|きやく, 到達可能|とうたつかのう"}
+1. $T_{i}\defeq\inf\{n\ge1:X_{n}=i\}$（$i$ への**戻り時刻**）。$P_{i}(T_{i}<\infty)=1$ のとき状態 $i$ は**再帰的**、そうでないとき**過渡的**という。
+2. ある $n\ge0$ で $p_{ij}^{(n)}>0$ のとき $i\to j$ と書き、$i\to j$ かつ $j\to i$ のとき $i,j$ は**連結する**という。すべての $i,j$ が連結するとき $P$ は**既約**という。
+:::
+
+::: theorem 再帰性の判定 {#prb:recurrence-criterion keywords="i is recurrent iff sum_n p_ii^(n) = infinity iff the chain started at i returns infinitely often a.s.; for transient i the number of visits is geometric with mean 1/(1 - f_i); recurrence is a class property" index="再帰性の判定|さいきせいのはんてい"}
+$f_{i}\defeq P_{i}(T_{i}<\infty)$、$N_{i}\defeq\#\{n\ge0:X_{n}=i\}$（訪問回数）とする。
+1. $k\ge1$ で $P_{i}(N_{i}\ge k)=f_{i}^{k-1}$。
+2. $E_{i}[N_{i}]=\sum_{n\ge0}p_{ii}^{(n)}$。
+3. 次は同値：$i$ は再帰的。$P_{i}(N_{i}=\infty)=1$。$\sum_{n}p_{ii}^{(n)}=\infty$。過渡的なら $E_{i}[N_{i}]=\frac{1}{1-f_{i}}<\infty$。
+4. $i$ と $j$ が連結し、$i$ が再帰的なら $j$ も再帰的。
+:::
+
+::: proof
+**1.** $T^{(1)}\defeq T_{i}$、$T^{(k+1)}\defeq\inf\{n>T^{(k)}:X_{n}=i\}$（$k$ 回目の戻り）は停止時刻。$\{N_{i}\ge k+1\}=\{T^{(k)}<\infty\}$（$P_{i}$ の下、時刻 $0$ の訪問を含めて）。\ref{prb:strong-markov} を $T^{(k)}$ で使うと、$\{T^{(k)}<\infty\}$ の下で $X_{T^{(k)}+\cdot}$ は $i$ から始まる連鎖なので $P_{i}(T^{(k+1)}<\infty)=P_{i}(T^{(k)}<\infty)f_{i}$。（$\{T^{(k+1)}<\infty\}$ は「$T^{(k)}<\infty$ かつ再開後の連鎖が $i$ に戻る」で、後者は再開後の有限個の座標で書ける事象の可算和。）帰納法で $P_{i}(T^{(k)}<\infty)=f_{i}^{k}$。
+
+**2.** $N_{i}=\sum_{n}\mathbf{1}_{\{X_{n}=i\}}$ にトネリを使い、\ref{prb:markov-construction.2}。
+
+**3.** 1 から、$f_{i}=1$ なら $P_{i}(N_{i}=\infty)=\lim_{k}P_{i}(N_{i}\ge k)=1$ で $E_{i}[N_{i}]=\infty$。$f_{i}<1$ なら $E_{i}[N_{i}]=\sum_{k\ge1}P_{i}(N_{i}\ge k)=\frac{1}{1-f_{i}}<\infty$（\ref{prb:tail-formula.2}）で、$N_{i}<\infty$ a.s.。2 と合わせて同値。
+
+**4.** $p_{ij}^{(a)}>0$, $p_{ji}^{(b)}>0$ をとると $p_{jj}^{(a+n+b)}\ge p_{ji}^{(b)}p_{ii}^{(n)}p_{ij}^{(a)}$（行列の積の一つの項）。$\sum_{n}p_{ii}^{(n)}=\infty$ なら $\sum_{n}p_{jj}^{(n)}=\infty$。
+:::
+
+::: lemma 既約・再帰的な連鎖の到達 {#prb:recurrent-hitting keywords="for an irreducible recurrent chain, P_i(T_j < infinity) = 1 for all states i, j; hence the chain visits every state infinitely often from any initial distribution" index="再帰的な連鎖の到達|さいきてきなれんさのとうたつ"}
+$P$ が既約で、ある状態が再帰的なら、すべての $i,j\in S$ で $P_{i}(T_{j}<\infty)=1$。したがって任意の初期分布から、連鎖はすべての状態を確率 $1$ で（無限回）訪れる。
+:::
+
+::: proof
+\ref{prb:recurrence-criterion.4} からすべての状態が再帰的。$i\ne j$ とし、既約性から $p_{ji}^{(m)}>0$ となる $m\ge1$ をとる。$B_{k}\defeq\{X_{m}=i,X_{m+1}\ne j,\dots,X_{m+k}\ne j\}$ は有限個の座標で決まる事象で、\ref{prb:strong-markov}（定数時刻 $m$）を柱事象ごとに使って足すと $P_{j}(B_{k})=p_{ji}^{(m)}P_{i}(X_{1}\ne j,\dots,X_{k}\ne j)$。$k\to\infty$ とすると（減少列）
+$$
+P_{j}\bigl(X_{m}=i,\ X_{n}\ne j\ (n>m)\bigr)=p_{ji}^{(m)}P_{i}(T_{j}=\infty).
+$$
+左辺の事象の上で $j$ への訪問は時刻 $m$ までの有限回なので、\ref{prb:recurrence-criterion.3}（$P_{j}(N_{j}=\infty)=1$）から左辺は $0$。$p_{ji}^{(m)}>0$ なので $P_{i}(T_{j}=\infty)=0$。$i=j$ は再帰性そのもの。後半：初期分布について $P(T_{j}<\infty)=\sum_{i}\nu(i)P_{i}(T_{j}<\infty)=1$（$T_{j}$ を時刻 $0$ を含めた到達時刻にしても同じ）で、到達後は強マルコフ性と再帰性から無限回訪れる。
+:::
+
+::: theorem ポリアの定理 {#prb:polya-theorem keywords="Polya's theorem: the simple symmetric random walk on Z^d is recurrent for d = 1, 2 and transient for d >= 3; proof via P(S_{2n} = 0) = (2 pi)^{-d} int phi(theta)^{2n} d theta and integrability of 1/(1 - phi^2)" index="ポリアの定理|ぽりあのていり, ランダムウォークの再帰性|らんだむうぉーくのさいきせい"}
+$\mathbb{Z}^{d}$ の**単純ランダムウォーク**（各ステップで $2d$ 個の隣接点 $\pm e_{j}$ に等確率で動く）は、$d=1,2$ で再帰的、$d\ge3$ で過渡的である。
+:::
+
+::: proof
+**Step 1（フーリエ表示）.** $S_{n}=\xi_{1}+\dots+\xi_{n}$（$\xi_{k}$ は i.i.d. で一様に $\pm e_{j}$）とする。$\theta\in[-\pi,\pi]^{d}$ について $E[e^{i\langle\theta,\xi_{1}\rangle}]=\varphi(\theta)\defeq\frac1d\sum_{j}\cos\theta_{j}$ で、独立性から $E[e^{i\langle\theta,S_{n}\rangle}]=\varphi(\theta)^{n}$。直交性から
+$$
+p_{00}^{(n)}=P(S_{n}=0)=\sum_{k\in\mathbb{Z}^{d}}P(S_{n}=k)\frac{1}{(2\pi)^{d}}\int e^{i\langle\theta,k\rangle}d\theta=\frac{1}{(2\pi)^{d}}\int_{[-\pi,\pi]^{d}}\varphi(\theta)^{n}d\theta
+$$
+（有限和なので交換できる）。奇数の $n$ では $p_{00}^{(n)}=0$。$\varphi^{2n}\ge0$ なので単調収束定理から
+$$
+\sum_{n\ge0}p_{00}^{(2n)}=\frac{1}{(2\pi)^{d}}\int\frac{d\theta}{1-\varphi(\theta)^{2}}\in[0,\infty].
+$$
+（$\varphi^{2}=1$ となる $\theta$ は有限個で測度 $0$。）
+
+**Step 2（評価）.** $|x|\le\pi$ で $\frac{2x^{2}}{\pi^{2}}\le1-\cos x=2\sin^{2}\frac x2\le\frac{x^{2}}{2}$（$|\sin y|\ge\frac{2|y|}{\pi}$, $|y|\le\frac\pi2$）。よって
+$$
+\frac{2|\theta|^{2}}{d\pi^{2}}\le1-\varphi(\theta)\le\frac{|\theta|^{2}}{2d}.
+$$
+同様に $1+\cos x=1-\cos(\pi-|x|)$ から、$\theta^{*}_{j}\defeq\pi-|\theta_{j}|$ として $1+\varphi(\theta)\ge\frac{2|\theta^{*}|^{2}}{d\pi^{2}}$。$\frac{1}{1-\varphi^{2}}=\frac12\bigl(\frac{1}{1-\varphi}+\frac{1}{1+\varphi}\bigr)$。
+
+**Step 3（$\int_{|\theta|<1}|\theta|^{-2}d\theta<\infty\iff d\ge3$）.** 殻 $A_{k}\defeq\{2^{-k-1}\le|\theta|<2^{-k}\}$ の上で $|\theta|^{-2}$ は $2^{2k}$ と $2^{2k+2}$ の間、$\lambda(A_{k})=2^{-kd}\lambda(A_{0})$（\ref{meas:lebesgue-linear}）。よって積分は $\sum_{k\ge0}2^{k(2-d)}$ と同程度で、$d\ge3$ で有限、$d\le2$ で無限。
+
+**Step 4.** $d\ge3$：Step 2 から $\frac{1}{1-\varphi}\le\frac{d\pi^{2}}{2|\theta|^{2}}$ は可積分（$|\theta|\ge1$ の部分は有界）、$\frac{1}{1+\varphi}$ も $\theta\mapsto\theta^{*}$（各象限で平行移動と反転）で同じ評価に帰着して可積分。よって $\sum p_{00}^{(n)}<\infty$ で過渡的。$d\le2$：$\frac{1}{1-\varphi^{2}}\ge\frac{1}{2(1-\varphi)}\ge\frac{d}{|\theta|^{2}}$ は $\{|\theta|<1\}$ で可積分でないので $\sum p_{00}^{(n)}=\infty$、再帰的（\ref{prb:recurrence-criterion.3}）。
+:::
+
+## 定常分布と収束定理 {#prb:sec-mc-stationary}
+
+::: definition 定常分布と周期 {#prb:stationary-distribution keywords="invariant measure lambda P = lambda; stationary (invariant) distribution pi = pi P; positive recurrence E_i T_i < infinity; period d(i) = gcd{n: p_ii^(n) > 0}; aperiodic chains" index="定常分布|ていじょうぶんぷ, 不変測度（マルコフ連鎖）|ふへんそくどまるこふれんさ, 正再帰|せいさいき, 非周期的|ひしゅうきてき"}
+1. $\lambda\colon S\to[0,\infty)$ が $\lambda P=\lambda$（$\sum_{i}\lambda_{i}p_{ij}=\lambda_{j}$）を満たすとき**不変測度**、さらに $\sum\lambda_{i}=1$ のとき**定常分布**という。
+2. 再帰的な $i$ で $E_{i}[T_{i}]<\infty$ のとき**正再帰的**という。
+3. $d(i)\defeq\gcd\{n\ge1:p_{ii}^{(n)}>0\}$ を $i$ の**周期**といい、すべての $i$ で $d(i)=1$ のとき**非周期的**という。
+:::
+
+::: theorem 定常分布の存在と一意性 {#prb:stationary-existence keywords="for an irreducible chain: a stationary distribution exists iff some (all) states are positive recurrent; it is unique and pi_i = 1 / E_i T_i; the cycle measure gamma^k_j = E_k (number of visits to j before T_k) is invariant for recurrent chains" index="定常分布の存在|ていじょうぶんぷのそんざい"}
+$P$ を既約とする。
+1. $k$ が再帰的なら、$\gamma_{j}\defeq E_{k}\bigl[\sum_{n=0}^{T_{k}-1}\mathbf{1}_{\{X_{n}=j\}}\bigr]$ は不変測度で、$\gamma_{k}=1$, $0<\gamma_{j}<\infty$。
+2. $k$ が再帰的で $\lambda$ が不変測度、$\lambda_{k}=1$ なら $\lambda=\gamma$。
+3. 定常分布 $\pi$ が存在することと、ある（したがってすべての）状態が正再帰的であることは同値で、そのとき $\pi$ は一意で $\pi_{i}=\frac{1}{E_{i}[T_{i}]}$。
+:::
+
+::: proof
+**1.** **Step 1（不変性）.** $P_{k}$ の下で $T_{k}<\infty$、$X_{0}=X_{T_{k}}=k$ なので、$\gamma_{j}=E_{k}\bigl[\sum_{n=1}^{T_{k}}\mathbf{1}_{\{X_{n}=j\}}\bigr]=\sum_{n\ge1}P_{k}(X_{n}=j,n\le T_{k})$。$\{n\le T_{k}\}=\{T_{k}\le n-1\}^{c}\in\mathcal{F}_{n-1}$ なので、マルコフ性（\ref{prb:strong-markov} を定数時刻 $n-1$ に）から
+$$
+P_{k}(X_{n}=j,n\le T_{k})=\sum_{i}P_{k}(X_{n-1}=i,n\le T_{k})p_{ij}.
+$$
+$n$ について足し、$\sum_{n\ge1}P_{k}(X_{n-1}=i,n-1\le T_{k}-1)=\gamma_{i}$ を使うと $\gamma_{j}=\sum_{i}\gamma_{i}p_{ij}$。
+
+**Step 2（有限性と正値性）.** $\gamma_{k}=1$ は定義から。既約性から $p_{kj}^{(a)}>0$, $p_{jk}^{(b)}>0$ となる $a,b$ をとる。不変性を繰り返して $\gamma_{j}\ge\gamma_{k}p_{kj}^{(a)}>0$、$1=\gamma_{k}\ge\gamma_{j}p_{jk}^{(b)}$ から $\gamma_{j}<\infty$。
+
+**2.** **Step 1（$\lambda\ge\gamma$）.** $\lambda_{j}=\sum_{i_{1}}\lambda_{i_{1}}p_{i_{1}j}=p_{kj}+\sum_{i_{1}\ne k}\lambda_{i_{1}}p_{i_{1}j}$ で、$\lambda_{i_{1}}$ を繰り返し展開すると、$m$ 回後には
+$$
+\lambda_{j}\ge\sum_{n=1}^{m}P_{k}(X_{n}=j,n\le T_{k})
+$$
+（展開の各項は、$k$ から出発して途中で $k$ を通らずに $n$ 歩で $j$ に着く確率）。$m\to\infty$ で $\lambda_{j}\ge\gamma_{j}$。
+
+**Step 2.** $\mu\defeq\lambda-\gamma\ge0$ は不変測度で $\mu_{k}=0$。$\mu_{k}=\sum_{i}\mu_{i}p_{ik}^{(n)}\ge\mu_{j}p_{jk}^{(n)}$ で、既約性から $p_{jk}^{(n)}>0$ となる $n$ があるので $\mu_{j}=0$。
+
+**3.** （⇐）$k$ が正再帰的なら、1 の $\gamma$ は $\sum_{j}\gamma_{j}=E_{k}[T_{k}]<\infty$ なので、$\pi\defeq\gamma/E_{k}[T_{k}]$ は定常分布で $\pi_{k}=\frac{1}{E_{k}[T_{k}]}$。
+
+（⇒）$\pi$ を定常分布とする。**再帰性**：過渡的なら、すべての $j$ で $\sum_{n}p_{ij}^{(n)}<\infty$（\ref{prb:recurrence-criterion} の 2・3 を $j$ に、$i$ から $j$ に初めて着く時刻で強マルコフ性を使えば $\sum_{n}p_{ij}^{(n)}\le\sum_{n}p_{jj}^{(n)}$）なので $p_{ij}^{(n)}\to0$。$\pi_{j}=\sum_{i}\pi_{i}p_{ij}^{(n)}\to0$（優収束定理、$\pi_{i}$ で抑える）で、$\pi\equiv0$ となり矛盾。既約なので（\ref{prb:recurrence-criterion.4}）すべての状態が再帰的。**正再帰性と式**：$\pi_{k}>0$（Step 2 の議論）なので $\lambda\defeq\pi/\pi_{k}$ に 2 を使うと $\pi/\pi_{k}=\gamma$。和をとって $E_{k}[T_{k}]=\sum_{j}\gamma_{j}=\frac{1}{\pi_{k}}<\infty$。$k$ は任意なので、すべての状態が正再帰的で $\pi_{k}=\frac{1}{E_{k}[T_{k}]}$、一意性もこの式から。
+:::
+
+::: lemma 非周期性と十分大きな時刻 {#prb:aperiodic-lemma keywords="if i is aperiodic then p_ii^(n) > 0 for all sufficiently large n; for an irreducible aperiodic chain p_ij^(n) > 0 for all large n" index="非周期性の補題|ひしゅうきせいのほだい"}
+$i$ が $d(i)=1$ なら、十分大きなすべての $n$ で $p_{ii}^{(n)}>0$。$P$ が既約かつ非周期的なら、各 $i,j$ について十分大きなすべての $n$ で $p_{ij}^{(n)}>0$。
+:::
+
+::: proof
+$A\defeq\{n\ge1:p_{ii}^{(n)}>0\}$ は加法で閉じている（$p_{ii}^{(m+n)}\ge p_{ii}^{(m)}p_{ii}^{(n)}$）。最大公約数は有限部分集合で実現される（$A$ の元の最大公約数の列は減少し、いずれ定まる）ので、$n_{1},\dots,n_{r}\in A$ と整数 $c_{l}$ で $\sum c_{l}n_{l}=1$。$m\defeq\sum_{c_{l}<0}|c_{l}|n_{l}$ とすると $m+1=\sum_{c_{l}>0}c_{l}n_{l}$。$m=0$ なら $1\in A$ で $A=\mathbb{Z}_{\ge1}$。$m\ge1$ なら $m,m+1\in A$ で、$n\ge m^{2}$ を $n=qm+r$（$0\le r<m\le q$）と書くと $n=(q-r)m+r(m+1)\in A$。後半：$p_{ij}^{(a)}>0$ をとれば $p_{ij}^{(n+a)}\ge p_{ii}^{(n)}p_{ij}^{(a)}$。
+:::
+
+::: theorem マルコフ連鎖の収束定理 {#prb:markov-convergence keywords="convergence theorem: for an irreducible aperiodic chain with stationary distribution pi, P(X_n = j) -> pi_j for any initial distribution, and sum_j |P(X_n = j) - pi_j| -> 0; proof by coupling" index="マルコフ連鎖の収束定理|まるこふれんさのしゅうそくていり, カップリング|かっぷりんぐ"}
+$P$ が既約・非周期的で定常分布 $\pi$ をもつなら、任意の初期分布 $\nu$ について $\sum_{j}|P(X_{n}=j)-\pi_{j}|\to0$。とくに $p_{ij}^{(n)}\to\pi_{j}$。
+:::
+
+::: proof
+**Step 1（積連鎖）.** $(X_{n})$ を初期分布 $\nu$、$(Y_{n})$ を初期分布 $\pi$ の、互いに独立な遷移行列 $P$ の連鎖とする（\ref{prb:markov-construction.1} の構成を独立な二つの一様乱数列で行う）。$W_{n}\defeq(X_{n},Y_{n})$ は $S\times S$ 上の遷移行列 $\tilde p_{(i,k)(j,l)}\defeq p_{ij}p_{kl}$ のマルコフ連鎖で、\ref{prb:aperiodic-lemma} から十分大きな $n$ で $\tilde p^{(n)}_{(i,k)(j,l)}=p_{ij}^{(n)}p_{kl}^{(n)}>0$、よって既約。$\pi\otimes\pi$ は定常分布なので、\ref{prb:stationary-existence.3} から $W$ は再帰的。
+
+**Step 2（出会い）.** 状態 $b\in S$ を固定し、$\tau\defeq\inf\{n:X_{n}=Y_{n}=b\}$ とすると、$W$ は既約・再帰的なので \ref{prb:recurrent-hitting} から $\tau<\infty$（a.s.）。
+
+**Step 3（取り替え）.** $Z_{n}\defeq X_{n}$（$n<\tau$）、$Z_{n}\defeq Y_{n}$（$n\ge\tau$）とおくと、\ref{prb:strong-markov} を $W$ と $\tau$ に使うことで、$Z$ は $X$ と同じ分布（初期分布 $\nu$、遷移行列 $P$）をもつ（$\tau$ で $X$ と $Y$ は同じ状態 $b$ にあり、その後の推移の法則は同じなので、柱事象の確率が一致する）。よって
+$$
+|P(X_{n}=j)-\pi_{j}|=|P(Z_{n}=j)-P(Y_{n}=j)|\le P(Z_{n}=j,\tau>n)+P(Y_{n}=j,\tau>n),
+$$
+$j$ について足して $\sum_{j}|P(X_{n}=j)-\pi_{j}|\le2P(\tau>n)\to0$。
+:::
+
+::: hypcheck
+- 収束定理で非周期性は本質的：$S=\{1,2\}$, $p_{12}=p_{21}=1$ なら $\pi=(\frac12,\frac12)$ だが $p_{11}^{(n)}$ は $0,1$ を交互にとり収束しない。既約性も本質的：二つの閉じたクラスがあれば定常分布は一意でなく、極限は初期分布による。
+- ポリアの定理の証明は、フーリエ係数の直交性と単調収束定理、そして殻ごとの体積の比較だけを使った。スターリングの公式を使う組合せ的な証明もある。
+- 定常分布の存在（\ref{prb:stationary-existence.3}）で正再帰性は本質的：$\mathbb{Z}$ の単純ランダムウォークは再帰的だが（\ref{prb:random-walk-hitting}）、$E_{0}[T_{0}]=\infty$（\ref{prb:random-walk-hitting.2} から）で、定常分布をもたない（不変測度は数え上げ測度の定数倍）。
+- 収束定理の Step 2 で既約性を使った：積連鎖が既約でないと（周期的な連鎖の積など）、二つの連鎖が出会わないことがある。
+:::
+
+::: supplement
+**関連する結果.**
+- **エルゴード定理**：既約・正再帰的な連鎖では、$\frac1n\sum_{k<n}g(X_{k})\to\sum_{j}\pi_{j}g(j)$（a.s.、$\sum\pi_{j}|g(j)|<\infty$）。戻りのサイクルが i.i.d. になること（強マルコフ性）と大数の強法則から従う。
+- 有限状態空間では、既約なら必ず正再帰的で定常分布が一意に存在する（ペロン–フロベニウスの定理の確率的な形）。収束の速さは $P$ の 2 番目に大きな固有値の絶対値で決まる（スペクトルギャップ）。
+- マルコフ連鎖モンテカルロ法（MCMC）は、目標の分布 $\pi$ を定常分布にもつ連鎖を作り、収束定理とエルゴード定理を使って $\pi$ からの標本や積分を近似する。
+
+**高い視点：作用素としての遷移行列.** 遷移行列 $P$ は、関数には $Pg(i)=\sum_{j}p_{ij}g(j)=E_{i}[g(X_{1})]$ と左から、測度には $\nu\mapsto\nu P$ と右から作用する。定常分布は $P$ の（左）固有値 $1$ の固有ベクトルで、収束定理は「固有値 $1$ 以外の部分が $n\to\infty$ で消える」ことの確率的な証明である。カップリングは、二つの分布の差を「二つの確率変数が異なる確率」で抑える方法で、全変動距離 $\frac12\sum|\mu_{j}-\nu_{j}|=\min P(X\ne Y)$（$X\sim\mu$, $Y\sim\nu$ の結合についての最小値）という双対性に基づく。比喩で言えば、二人の旅人が同じ地図の上を独立にさまよい、一度出会ったら一緒に歩くことにすれば、出会った後の二人の行き先の分布は同じになる。
+:::
+
+## 問題 {#prb:sec-mc-problems}
+
+::: problem {#prb:prob-mc-two-state}
+$S=\{1,2\}$, $p_{12}=a$, $p_{21}=b$（$0<a,b<1$）とする。定常分布を求め、$p_{11}^{(n)}=\frac{b}{a+b}+\frac{a}{a+b}(1-a-b)^{n}$ を示せ。
+:::
+
+::: solution
+$\pi P=\pi$ は $\pi_{1}a=\pi_{2}b$ で、$\pi=(\frac{b}{a+b},\frac{a}{a+b})$。$x_{n}\defeq p_{11}^{(n)}$ とすると $p_{11}^{(n+1)}=x_{n}(1-a)+(1-x_{n})b$、すなわち $x_{n+1}-\frac{b}{a+b}=(1-a-b)(x_{n}-\frac{b}{a+b})$。$x_{0}=1$ から $x_{n}-\frac{b}{a+b}=(1-a-b)^{n}\frac{a}{a+b}$。
+:::
+
+::: problem {#prb:prob-mc-birth-death}
+$S=\mathbb{Z}_{\ge0}$ 上で $p_{i,i+1}=p$, $p_{i,i-1}=1-p$（$i\ge1$）、$p_{01}=p$, $p_{00}=1-p$（$0<p<\frac12$）とする。$\pi_{i}=(1-r)r^{i}$（$r\defeq\frac{p}{1-p}$）が定常分布であることを確かめ、$E_{0}[T_{0}]=\frac{1}{1-r}$ を導け。
+:::
+
+::: solution
+$j\ge1$：$\sum_{i}\pi_{i}p_{ij}=\pi_{j-1}p+\pi_{j+1}(1-p)=(1-r)r^{j-1}\bigl(p+r^{2}(1-p)\bigr)$。$r(1-p)=p$ なので $p+r^{2}(1-p)=p+rp=r(1-p)+rp=r$、よって $\pi_{j}$。$j=0$：$\pi_{0}(1-p)+\pi_{1}(1-p)=(1-r)(1-p)(1+r)=(1-r)\bigl((1-p)+p\bigr)=\pi_{0}$。和は $1$。連鎖は既約なので、\ref{prb:stationary-existence.3} から $E_{0}[T_{0}]=\frac{1}{\pi_{0}}=\frac{1}{1-r}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
