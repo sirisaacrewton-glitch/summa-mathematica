@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>条件付き期待値 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/02-martingales/01-conditional-expectation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 条件付き期待値 {#prb:page-conditional-expectation keywords="conditional expectation E[X | G] with respect to a sub-sigma-algebra: definition, existence by the Radon-Nikodym theorem, uniqueness, L^2 orthogonal projection, elementary cases (partitions, joint densities), properties: linearity, positivity, tower property, taking out what is known, independence, conditional monotone convergence, conditional Jensen inequality, L^p contraction, Doob-Dynkin lemma, E[X | Y] = h(Y), symmetry E[X_1 | S_n] = S_n / n"}
+
+「ある情報を知ったときの $X$ の平均」を表すのが**条件付き期待値**である。情報は部分 σ-加法族 $\mathcal{G}\subset\mathcal{F}$（「$\mathcal{G}$ の各事象が起きたかどうかを知っている」）で表し、$E[X\mid\mathcal{G}]$ は $\mathcal{G}$ の情報だけで決まる確率変数として定義される。確率 $0$ の事象で条件をつける（例えば連続な $Y$ の値 $Y=y$ で条件をつける）ことも、この定義で意味をもつ。このページでは、条件付き期待値の存在を**ラドン–ニコディムの定理**から示し、$L^{2}$ では直交射影であることを確かめ、その基本性質（塔の性質・既知のものの取り出し・条件付きイェンセンの不等式など）を証明する。これは次のページ以降のマルチンゲールの理論の土台である。
+
+## 記法と定義の確認 {#prb:sec-ce-notation}
+
+::: notation
+- 確率空間 $(\Omega,\mathcal{F},P)$、期待値・独立な確率変数の性質は \ref{prb:page-random-variables}, \ref{prb:page-independence} のとおり。$E[X;A]\defeq E[X\mathbf{1}_{A}]$。
+- **部分 σ-加法族** $\mathcal{G}\subset\mathcal{F}$ について、$L^{p}(\mathcal{G})\defeq L^{p}(\Omega,\mathcal{G},P|_{\mathcal{G}})$。これは $L^{p}(\mathcal{F})$ の部分空間とみなせる（$\mathcal{G}$ 可測な関数は $\mathcal{F}$ 可測で、ノルムは同じ）。
+- ラドン–ニコディムの定理は \ref{meas:radon-nikodym}、ヒルベルト空間の直交分解は \ref{fa:orthogonal-decomposition}、$L^{p}$ の完備性は \ref{meas:riesz-fischer}。
+- 確率変数の間の等式・不等式は、とくに断らなければ a.s. の意味。
+- **選択公理**：使わない。
+:::
+
+## 定義と存在 {#prb:sec-ce-definition}
+
+::: definition 条件付き期待値 {#prb:conditional-expectation keywords="conditional expectation E[X | G]: a G-measurable integrable Y with E[Y; G] = E[X; G] for all G in G; conditional probability P(A | G) = E[1_A | G]; E[X | Y] = E[X | sigma(Y)]" index="条件付き期待値|じょうけんつききたいち, 条件付き確率|じょうけんつきかくりつ"}
+$X\in L^{1}$, $\mathcal{G}\subset\mathcal{F}$ を部分 σ-加法族とする。確率変数 $Y$ が次を満たすとき、$Y$ を $\mathcal{G}$ に関する $X$ の**条件付き期待値**といい、$E[X\mid\mathcal{G}]$ と書く。
+1. $Y$ は $\mathcal{G}$ 可測で可積分。
+2. すべての $G\in\mathcal{G}$ について $E[Y;G]=E[X;G]$。
+
+$P(A\mid\mathcal{G})\defeq E[\mathbf{1}_{A}\mid\mathcal{G}]$ を**条件付き確率**、確率変数 $Z$ について $E[X\mid Z]\defeq E[X\mid\sigma(Z)]$ と書く。
+:::
+
+::: theorem 条件付き期待値の存在と一意性 {#prb:conditional-expectation-existence keywords="existence of conditional expectation via Radon-Nikodym applied to nu(G) = E[X; G] on (Omega, G); uniqueness up to null sets; for X in L^2 it is the orthogonal projection onto L^2(G)" index="条件付き期待値の存在|じょうけんつききたいちのそんざい"}
+1. $X\in L^{1}$ なら $E[X\mid\mathcal{G}]$ は存在し、a.s. で一意である。
+2. $X\in L^{2}$ なら $E[X\mid\mathcal{G}]$ は $X$ の閉部分空間 $L^{2}(\mathcal{G})$ への直交射影に等しい。すなわち $E[X\mid\mathcal{G}]$ は $\mathcal{G}$ 可測な $L^{2}$ の確率変数のうち $E[(X-Z)^{2}]$ を最小にする $Z$ である。
+:::
+
+::: proof
+**1.** **一意性.** $Y,Y'$ がともに条件を満たすとする。$G\defeq\{Y>Y'\}\in\mathcal{G}$ について $E[Y-Y';G]=E[X;G]-E[X;G]=0$ で、$G$ の上で $Y-Y'>0$ なので $P(G)=0$。同様に $P(Y<Y')=0$。
+
+**存在（$X\ge0$）.** $\nu(G)\defeq E[X;G]$（$G\in\mathcal{G}$）は $(\Omega,\mathcal{G})$ 上の有限測度で（可算加法性は単調収束定理）、$P(G)=0\Rightarrow\nu(G)=0$、すなわち $\nu\ll P|_{\mathcal{G}}$。\ref{meas:radon-nikodym} から $\mathcal{G}$ 可測な $Y\ge0$ で $\nu(G)=\int_{G}Y\,dP$（すべての $G\in\mathcal{G}$）となるものがある。$G=\Omega$ として $E[Y]=E[X]<\infty$。
+
+**存在（一般）.** $X=X^{+}-X^{-}$ とし、$E[X^{+}\mid\mathcal{G}]-E[X^{-}\mid\mathcal{G}]$ をとればよい。
+
+**2.** $L^{2}(\mathcal{G})$ は $L^{2}(\mathcal{F})$ の部分空間で、それ自身完備（\ref{meas:riesz-fischer}）なので閉。\ref{fa:orthogonal-decomposition.1} から射影 $Z\defeq P_{L^{2}(\mathcal{G})}X$ は $X-Z\perp L^{2}(\mathcal{G})$ を満たす。$G\in\mathcal{G}$ なら $\mathbf{1}_{G}\in L^{2}(\mathcal{G})$ なので $E[(X-Z)\mathbf{1}_{G}]=0$、すなわち $E[Z;G]=E[X;G]$。$Z\in L^{2}\subset L^{1}$ は $\mathcal{G}$ 可測。1 の一意性から $Z=E[X\mid\mathcal{G}]$。
+:::
+
+::: example 初等的な場合 {#prb:conditional-examples keywords="conditional expectation for a countable partition: E[X | G] = sum E[X; B_k]/P(B_k) 1_{B_k}; for a joint density f(x,y): E[X | Y] = int x f(x,Y) dx / int f(x,Y) dx; trivial sigma-algebra gives E X" index="条件付き密度|じょうけんつきみつど"}
+1. $\mathcal{G}=\{\emptyset,\Omega\}$ なら $E[X\mid\mathcal{G}]=E[X]$。
+2. $\Omega$ の可算分割 $\{B_{k}\}\subset\mathcal{F}$ が生成する $\mathcal{G}$ について、$E[X\mid\mathcal{G}]=\sum_{k:\,P(B_{k})>0}\frac{E[X;B_{k}]}{P(B_{k})}\mathbf{1}_{B_{k}}$。
+3. $(X,Y)$ が $\mathbb{R}^{2}$ 上の密度 $f(x,y)$ をもち $X\in L^{1}$ なら、$f_{Y}(y)\defeq\int f(x,y)\,dx$ として、$f_{Y}(y)>0$ で $h(y)\defeq\frac{\int xf(x,y)\,dx}{f_{Y}(y)}$、それ以外で $h(y)\defeq0$ とおくと $E[X\mid Y]=h(Y)$。
+:::
+
+::: proof
+**1.** 定数 $E[X]$ は $\{\emptyset,\Omega\}$ 可測で、$G=\emptyset,\Omega$ について条件を満たす。
+
+**2.** $\mathcal{G}$ の元は $B_{k}$ たちの和 $G=\bigcup_{k\in K}B_{k}$。右辺 $Y$ について $E[Y;G]=\sum_{k\in K,P(B_{k})>0}E[X;B_{k}]=E[X;G]$（$P(B_{k})=0$ なら $E[X;B_{k}]=0$）。
+
+**3.** $\sigma(Y)$ の元は $\{Y\in B\}$（$B$ ボレル）。トネリ・フビニと \ref{prb:change-of-variables} から
+$$
+E[h(Y);Y\in B]=\int_{B}h(y)f_{Y}(y)\,dy=\int_{B}\int xf(x,y)\,dx\,dy=E[X;Y\in B].
+$$
+（$f_{Y}(y)=0$ となる $y$ では $f(x,y)=0$ が a.e. $x$ で成り立つので、内側の積分も $0$。）$h$ はボレル可測で（フビニの可測性）、$h(Y)$ は $\sigma(Y)$ 可測、可積分性は $|h(y)|f_{Y}(y)\le\int|x|f(x,y)dx$ から。
+:::
+
+## 性質 {#prb:sec-ce-properties}
+
+::: theorem 条件付き期待値の基本性質 {#prb:conditional-properties keywords="properties of conditional expectation: linearity, positivity and monotonicity, E[E[X|G]] = E X, G-measurable X, taking out what is known E[ZX | G] = Z E[X | G], tower property, independence E[X | G] = E X, conditional monotone convergence" index="塔の性質|とうのせいしつ, 既知のものの取り出し|きちのもののとりだし"}
+$X,X'\in L^{1}$, $\mathcal{G}\subset\mathcal{F}$ とする。
+1. （線形性）$E[aX+bX'\mid\mathcal{G}]=aE[X\mid\mathcal{G}]+bE[X'\mid\mathcal{G}]$。
+2. （単調性）$X\le X'$ なら $E[X\mid\mathcal{G}]\le E[X'\mid\mathcal{G}]$。とくに $|E[X\mid\mathcal{G}]|\le E[|X|\mid\mathcal{G}]$。
+3. $E\bigl[E[X\mid\mathcal{G}]\bigr]=E[X]$。$X$ が $\mathcal{G}$ 可測なら $E[X\mid\mathcal{G}]=X$。
+4. （既知のものの取り出し）$Z$ が $\mathcal{G}$ 可測で $ZX\in L^{1}$ なら $E[ZX\mid\mathcal{G}]=ZE[X\mid\mathcal{G}]$。
+5. （塔の性質）$\mathcal{G}\subset\mathcal{H}\subset\mathcal{F}$ なら $E\bigl[E[X\mid\mathcal{H}]\bigm|\mathcal{G}\bigr]=E[X\mid\mathcal{G}]=E\bigl[E[X\mid\mathcal{G}]\bigm|\mathcal{H}\bigr]$。
+6. （独立性）$\sigma(X)$ と $\mathcal{G}$ が独立なら $E[X\mid\mathcal{G}]=E[X]$。
+7. （条件付き単調収束）$0\le X_{n}\uparrow X$, $X\in L^{1}$ なら $E[X_{n}\mid\mathcal{G}]\uparrow E[X\mid\mathcal{G}]$。
+:::
+
+::: proof
+**1.** 右辺は $\mathcal{G}$ 可測で可積分、$G\in\mathcal{G}$ 上の期待値は積分の線形性から $E[aX+bX';G]$。一意性から。
+
+**2.** $Y\defeq E[X'-X\mid\mathcal{G}]$ とし $G\defeq\{Y<0\}\in\mathcal{G}$ とすると、$E[Y;G]=E[X'-X;G]\ge0$ だが $G$ の上で $Y<0$ なので $P(G)=0$。1 と合わせて単調性。$\pm X\le|X|$ から後半。
+
+**3.** 定義で $G=\Omega$。後半は $X$ 自身が定義の条件を満たす。
+
+**4.** **Step 1（指示関数）.** $Z=\mathbf{1}_{B}$（$B\in\mathcal{G}$）なら、$G\in\mathcal{G}$ について $E[\mathbf{1}_{B}X;G]=E[X;B\cap G]=E[E[X\mid\mathcal{G}];B\cap G]=E[\mathbf{1}_{B}E[X\mid\mathcal{G}];G]$。線形性から $\mathcal{G}$ 可測な単関数 $Z$ でも成り立つ。
+
+**Step 2（非負）.** $X\ge0$, $Z\ge0$ とし、$\mathcal{G}$ 可測な単関数 $0\le Z_{n}\uparrow Z$ をとる（\ref{meas:simple-approximation}）。$G\in\mathcal{G}$ について Step 1 から $E[Z_{n}X;G]=E[Z_{n}E[X\mid\mathcal{G}];G]$。2 から $E[X\mid\mathcal{G}]\ge0$ なので、両辺に単調収束定理を使い $E[ZX;G]=E[ZE[X\mid\mathcal{G}];G]$。$G=\Omega$ から $ZE[X\mid\mathcal{G}]$ は可積分。
+
+**Step 3（一般）.** $Z=Z^{+}-Z^{-}$, $X=X^{+}-X^{-}$ に分ける。$Z^{\pm}X^{\pm}$ はどれも $|ZX|$ で抑えられて可積分なので、Step 2 を 4 通りに使い、線形性でまとめる（$E[X^{+}\mid\mathcal{G}]-E[X^{-}\mid\mathcal{G}]=E[X\mid\mathcal{G}]$）。
+
+**5.** 第 2 の等式：$E[X\mid\mathcal{G}]$ は $\mathcal{H}$ 可測なので 3 から。第 1 の等式：$G\in\mathcal{G}\subset\mathcal{H}$ について $E\bigl[E[X\mid\mathcal{H}];G\bigr]=E[X;G]$。
+
+**6.** 定数 $E[X]$ は $\mathcal{G}$ 可測で、$G\in\mathcal{G}$ について $E[X;G]=E[X\mathbf{1}_{G}]=E[X]P(G)$（$X$ と $\mathbf{1}_{G}$ は独立、\ref{prb:independence-criteria.3}）$=E[E[X];G]$。
+
+**7.** 2 から $Y_{n}\defeq E[X_{n}\mid\mathcal{G}]$ は増加列で $0\le Y_{n}\le E[X\mid\mathcal{G}]$。$Y\defeq\lim Y_{n}$ は $\mathcal{G}$ 可測で、$G\in\mathcal{G}$ について単調収束定理を両辺に使えば $E[Y;G]=\lim E[Y_{n};G]=\lim E[X_{n};G]=E[X;G]$。一意性から $Y=E[X\mid\mathcal{G}]$。
+:::
+
+::: theorem 条件付きイェンセンの不等式 {#prb:conditional-jensen keywords="conditional Jensen inequality phi(E[X|G]) <= E[phi(X)|G] for convex phi on R; consequently ||E[X|G]||_p <= ||X||_p for p >= 1" index="条件付きイェンセンの不等式|じょうけんつきいぇんせんのふとうしき"}
+1. $\varphi\colon\mathbb{R}\to\mathbb{R}$ を凸関数とし、$X,\varphi(X)\in L^{1}$ とする。このとき $\varphi(E[X\mid\mathcal{G}])\le E[\varphi(X)\mid\mathcal{G}]$。
+2. $1\le p<\infty$ で $X\in L^{p}$ なら $E[X\mid\mathcal{G}]\in L^{p}$ で $\|E[X\mid\mathcal{G}]\|_{p}\le\|X\|_{p}$。$p=\infty$ でも同じ。
+:::
+
+::: proof
+**1.** **Step 1（可算個の支持直線）.** 有理数 $q$ について $c_{q}\defeq\varphi'_{+}(q)$ とし、$\ell_{q}(x)\defeq\varphi(q)+c_{q}(x-q)$ とおく。\ref{prb:basic-inequalities} の証明の Step 2 から $\ell_{q}\le\varphi$。逆に $\varphi(x)=\sup_{q\in\mathbb{Q}}\ell_{q}(x)$：$q\to x$ のとき、$\varphi'_{+}$ は単調（\ref{calc:convex-properties.1}）なので $x$ の近くで有界で、$\ell_{q}(x)=\varphi(q)+c_{q}(x-q)\to\varphi(x)$（$\varphi$ の連続性、\ref{calc:convex-properties.2}）。
+
+**Step 2.** 各 $q$ について、\ref{prb:conditional-properties.2} と \ref{prb:conditional-properties.1} から $E[\varphi(X)\mid\mathcal{G}]\ge E[\ell_{q}(X)\mid\mathcal{G}]=\ell_{q}(E[X\mid\mathcal{G}])$（a.s.）。$q$ は可算個なので、確率 $1$ の事象の上で同時に成り立ち、上限をとると結論。
+
+**2.** $p<\infty$：$\varphi(x)=|x|^{p}$ に 1 を使い、期待値をとる（\ref{prb:conditional-properties.3}）。$p=\infty$：$|X|\le\|X\|_{\infty}$ と単調性から。
+:::
+
+::: lemma ドゥーブ–ディンキンの補題 {#prb:doob-dynkin keywords="Doob-Dynkin lemma: a sigma(Y)-measurable real random variable is of the form h(Y) for a Borel function h; hence E[X | Y] = h(Y)" index="ドゥーブ–ディンキンの補題|どぅーぶでぃんきんのほだい"}
+$Y$ を可測空間 $(S,\mathcal{S})$ に値をとる確率変数、$Z$ を $\sigma(Y)$ 可測な実数値確率変数とすると、可測関数 $h\colon S\to\mathbb{R}$ で $Z=h(Y)$ となるものがある。とくに $E[X\mid Y]=h(Y)$ と書ける。
+:::
+
+::: proof
+**Step 1（指示関数・単関数）.** $Z=\mathbf{1}_{A}$, $A\in\sigma(Y)$ なら $A=Y^{-1}(B)$（$B\in\mathcal{S}$）で $Z=\mathbf{1}_{B}(Y)$。線形性から単関数でも成り立つ。
+
+**Step 2（一般）.** $\sigma(Y)$ 可測な単関数 $Z_{n}\to Z$（各点）をとり（\ref{meas:simple-approximation} を $Z^{\pm}$ に）、Step 1 から $Z_{n}=h_{n}(Y)$。$C\defeq\{s\in S:\lim h_{n}(s)\text{ が存在する}\}\in\mathcal{S}$ とし、$h\defeq\lim h_{n}$（$C$ の上）、$h\defeq0$（$C$ の外）とおく。$Y(\omega)\in C$ はすべての $\omega$ で成り立ち（$h_{n}(Y(\omega))=Z_{n}(\omega)$ は収束する）、$h(Y)=\lim Z_{n}=Z$。
+:::
+
+::: example 対称性 {#prb:symmetry-example keywords="for i.i.d. integrable X_1, ..., X_n, E[X_1 | S_n] = S_n / n by exchangeability" index="交換可能性と条件付き期待値|こうかんかのうせいとじょうけんつききたいち"}
+$X_{1},\dots,X_{n}$ が i.i.d. で可積分なら $E[X_{1}\mid S_{n}]=\frac{S_{n}}{n}$。
+:::
+
+::: proof
+$B$ をボレル集合とする。$(X_{1},\dots,X_{n})$ の分布は積測度（\ref{prb:independence-criteria.1}）で座標の入れ替えで不変なので、$(X_{k},S_{n})$ の分布は $k$ によらない。よって $E[X_{k};S_{n}\in B]$ は $k$ によらず、$k$ について和をとると $nE[X_{1};S_{n}\in B]=E[S_{n};S_{n}\in B]$。$\frac{S_{n}}{n}$ は $\sigma(S_{n})$ 可測なので、これは定義の条件そのもの。
+:::
+
+::: hypcheck
+- 存在証明でラドン–ニコディムの定理を使うとき、$\nu$ と $P$ を $\mathcal{G}$ 上に制限したことが本質的である。$\mathcal{F}$ 上でとると導関数は $X$ 自身で、$\mathcal{G}$ 可測にならない。
+- 2 の $L^{2}$ の射影による構成は、ラドン–ニコディムの定理を使わない別証明になる：$X\ge0$ の $L^{1}$ の元を $X\wedge n\in L^{2}$ で近似し、7 の単調収束の議論で極限をとる。逆に、この構成からラドン–ニコディムの定理（有限測度の場合）を導くこともできる（フォン・ノイマンの証明）。
+- 4 の可積分性の仮定 $ZX\in L^{1}$ は省けない：$Z$ が可積分でないと $ZX$ の条件付き期待値は定義できない。
+- 条件付きイェンセンの不等式では、$\varphi$ を $\mathbb{R}$ 全体で定義された凸関数とした。可算個の支持直線で表すために $\varphi$ の連続性と片側微分係数の局所有界性を使った。
+:::
+
+::: supplement
+**関連する結果.**
+- 条件付き優収束定理・条件付きファトゥの補題も、7 と同じ議論で成り立つ。
+- **正則条件付き分布**：$X$ が実数値なら、$\omega\mapsto P(X\in\cdot\mid\mathcal{G})(\omega)$ を、各 $\omega$ で確率測度になるように選べる（$\mathbb{Q}$ 上の分布関数を作って右連続化する）。これは完備可分距離空間に値をとる場合に一般化される。このサイトではまだ証明していない。
+- 条件付き期待値は、$L^{1}$ 上のノルム $1$ の正値な射影で $E[\,\cdot\,]$ を保つもの、として特徴づけられる。
+
+**高い視点：射影と忘却.** $E[\,\cdot\mid\mathcal{G}]$ は $L^{2}$ では直交射影で、一般には「$\mathcal{G}$ が区別できない違いを平均して消す」操作である。σ-加法族の包含 $\mathcal{G}\subset\mathcal{H}$ は情報の多寡で、塔の性質は「詳しい情報で平均してから粗い情報で平均しても、最初から粗い情報で平均しても同じ」という射影の合成則 $P_{\mathcal{G}}P_{\mathcal{H}}=P_{\mathcal{G}}$ である。比喩で言えば、$E[X\mid\mathcal{G}]$ は、解像度 $\mathcal{G}$ の画面に $X$ を映したときのピクセルごとの平均の色であり、塔の性質は「高解像度で縮小してから低解像度に縮小しても、直接低解像度に縮小しても同じ画像になる」ことである。
+:::
+
+## 問題 {#prb:sec-ce-problems}
+
+::: problem {#prb:prob-ce-variance}
+$X\in L^{2}$ について、**条件付き分散** $\operatorname{Var}(X\mid\mathcal{G})\defeq E\bigl[(X-E[X\mid\mathcal{G}])^{2}\bigm|\mathcal{G}\bigr]$ とおくと、$\operatorname{Var}(X)=E[\operatorname{Var}(X\mid\mathcal{G})]+\operatorname{Var}(E[X\mid\mathcal{G}])$ を示せ。
+:::
+
+::: solution
+$Y\defeq E[X\mid\mathcal{G}]\in L^{2}$（\ref{prb:conditional-jensen.2}）、$m\defeq E[X]=E[Y]$ とする。$X-m=(X-Y)+(Y-m)$ で、$Y-m\in L^{2}(\mathcal{G})$ と $X-Y\perp L^{2}(\mathcal{G})$（\ref{prb:conditional-expectation-existence.2}）から $E[(X-Y)(Y-m)]=0$。よって $\operatorname{Var}(X)=E[(X-Y)^{2}]+E[(Y-m)^{2}]$。第 1 項は \ref{prb:conditional-properties.3} から $E[\operatorname{Var}(X\mid\mathcal{G})]$、第 2 項は $\operatorname{Var}(Y)$。
+:::
+
+::: problem {#prb:prob-ce-gaussian}
+$(X,Y)$ が密度 $f(x,y)=\frac{1}{2\pi\sqrt{1-\rho^{2}}}\exp\Bigl(-\frac{x^{2}-2\rho xy+y^{2}}{2(1-\rho^{2})}\Bigr)$（$|\rho|<1$）をもつとき、$E[X\mid Y]=\rho Y$ を示せ。
+:::
+
+::: solution
+$x^{2}-2\rho xy+y^{2}=(x-\rho y)^{2}+(1-\rho^{2})y^{2}$ なので
+$$
+f(x,y)=\frac{1}{\sqrt{2\pi}}e^{-y^{2}/2}\cdot\frac{1}{\sqrt{2\pi(1-\rho^{2})}}e^{-(x-\rho y)^{2}/(2(1-\rho^{2}))}.
+$$
+第 2 因子は $x$ について $N(\rho y,1-\rho^{2})$ の密度なので、$\int f(x,y)dx=\frac{1}{\sqrt{2\pi}}e^{-y^{2}/2}>0$, $\int xf(x,y)dx=\rho y\cdot\frac{1}{\sqrt{2\pi}}e^{-y^{2}/2}$。\ref{prb:conditional-examples.3} から $E[X\mid Y]=\rho Y$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
