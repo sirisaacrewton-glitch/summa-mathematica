@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大数の法則 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/01-foundations/03-law-of-large-numbers.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 大数の法則 {#prb:page-law-of-large-numbers keywords="weak law of large numbers for uncorrelated L^2 variables, Bernstein polynomials and the Weierstrass approximation theorem, strong law of large numbers for pairwise independent identically distributed integrable variables (Etemadi's proof by truncation and subsequences), converse of the strong law, Borel's normal number theorem, Monte Carlo integration, Glivenko-Cantelli theorem for empirical distribution functions"}
+
+コインを何度も投げると、表の出る割合は $\frac12$ に近づく。この経験則を数学的に表すのが**大数の法則**である：同じ分布に従う独立な確率変数の平均 $\frac{S_{n}}{n}=\frac{X_{1}+\dots+X_{n}}{n}$ は期待値 $E[X_{1}]$ に収束する。収束の意味を「確率収束」（大きくずれる確率が $0$ に近づく）にとったものを**弱法則**、「ほとんど確実な収束」にとったものを**強法則**という。このページでは、弱法則をチェビシェフの不等式から示し、その応用としてバーンスタイン多項式によるワイエルシュトラスの近似定理を証明する。続いて、期待値が有限であること**だけ**を仮定した強法則を、エテマディの方法（切り捨てと部分列）で証明し、その逆も示す。最後に、正規数定理・モンテカルロ法・経験分布関数の一様収束（グリヴェンコ–カンテリの定理）を導く。
+
+## 記法と定義の確認 {#prb:sec-ln-notation}
+
+::: notation
+- 確率変数・期待値・分散・裾の公式・チェビシェフの不等式は \ref{prb:page-random-variables}、ボレル–カンテリの補題などは \ref{prb:page-independence}。
+- 確率変数の列 $(X_{n})$ について $S_{n}\defeq X_{1}+\dots+X_{n}$。
+- $Y_{n}\to Y$ が**確率収束**するとは、任意の $\varepsilon>0$ で $P(|Y_{n}-Y|>\varepsilon)\to0$ となること。**概収束**（a.s. 収束）とは $P(Y_{n}\to Y)=1$ となること。
+- 確率変数 $X_{1},X_{2},\dots$ が **i.i.d.**（独立同分布）とは、独立で同じ分布に従うこと。**ペアごとに独立**とは、どの二つも独立なこと。
+- **選択公理**：使わない。
+:::
+
+## 弱法則 {#prb:sec-ln-weak}
+
+::: theorem 大数の弱法則 {#prb:weak-law keywords="weak law of large numbers: for uncorrelated X_n in L^2 with common mean m and bounded variances, S_n/n -> m in probability and in L^2" index="大数の弱法則|たいすうのじゃくほうそく"}
+$X_{1},X_{2},\dots\in L^{2}$ が、$E[X_{n}]=m$（すべての $n$）、$\sup_{n}\operatorname{Var}(X_{n})\le C$、$i\ne j$ で $\operatorname{Cov}(X_{i},X_{j})=0$ を満たすとする。このとき $E\bigl[\bigl(\frac{S_{n}}{n}-m\bigr)^{2}\bigr]\le\frac Cn$ で、とくに $\frac{S_{n}}{n}\to m$（確率収束）。
+:::
+
+::: proof
+$E[\frac{S_{n}}{n}]=m$ で、共分散が $0$ なので $\operatorname{Var}(S_{n})=\sum_{i}\operatorname{Var}(X_{i})+\sum_{i\ne j}\operatorname{Cov}(X_{i},X_{j})\le nC$。よって $E[(\frac{S_{n}}{n}-m)^{2}]=\frac{\operatorname{Var}(S_{n})}{n^{2}}\le\frac{C}{n}$。チェビシェフの不等式（\ref{prb:basic-inequalities.2}）から $P(|\frac{S_{n}}{n}-m|>\varepsilon)\le\frac{C}{n\varepsilon^{2}}\to0$。
+:::
+
+（独立な $L^{2}$ の確率変数は共分散が $0$ である：\ref{prb:independence-criteria.3}。）
+
+::: theorem バーンスタイン多項式 {#prb:bernstein-polynomials keywords="Bernstein polynomials B_n f(x) = sum f(k/n) C(n,k) x^k (1-x)^{n-k} converge uniformly to f for continuous f on [0,1]; probabilistic proof of the Weierstrass approximation theorem" index="バーンスタイン多項式|ばーんすたいんたこうしき"}
+$f\colon[0,1]\to\mathbb{R}$ を連続とし、$B_{n}f(x)\defeq\sum_{k=0}^{n}f\bigl(\frac kn\bigr)\binom nk x^{k}(1-x)^{n-k}$ とおく。このとき $B_{n}f\to f$（$[0,1]$ 上一様収束）。とくに多項式は $C([0,1])$ で一様ノルムについて稠密である。
+:::
+
+::: proof
+**Step 1（確率的な表示）.** $x\in[0,1]$ を固定し、$X_{1},\dots,X_{n}$ を独立で $P(X_{i}=1)=x$, $P(X_{i}=0)=1-x$ とする（\ref{prb:independent-sequence-existence}）。$S_{n}$ は二項分布 $B(n,x)$ に従うので、\ref{prb:change-of-variables} から $B_{n}f(x)=E[f(\frac{S_{n}}{n})]$。$E[X_{i}]=x$, $\operatorname{Var}(X_{i})=x(1-x)\le\frac14$。
+
+**Step 2（評価）.** $f$ は一様連続で有界：$\varepsilon>0$ について $|s-x|\le\delta\Rightarrow|f(s)-f(x)|<\varepsilon$ となる $\delta$ と $M\defeq\sup|f|$ をとる。
+$$
+|B_{n}f(x)-f(x)|\le E\Bigl[\Bigl|f\Bigl(\frac{S_{n}}{n}\Bigr)-f(x)\Bigr|\Bigr]\le\varepsilon+2M\,P\Bigl(\Bigl|\frac{S_{n}}{n}-x\Bigr|>\delta\Bigr)\le\varepsilon+\frac{2M}{4n\delta^{2}}
+$$
+（最後は \ref{prb:weak-law} の証明の評価）。右辺は $x$ によらないので一様収束。
+:::
+
+## 強法則 {#prb:sec-ln-strong}
+
+::: theorem 大数の強法則 {#prb:strong-law keywords="strong law of large numbers (Etemadi): if X_n are pairwise independent, identically distributed and integrable then S_n/n -> E X_1 almost surely" index="大数の強法則|たいすうのきょうほうそく, エテマディの定理|えてまでぃのていり"}
+$X_{1},X_{2},\dots$ がペアごとに独立で同分布、$E[|X_{1}|]<\infty$ なら、$\frac{S_{n}}{n}\to E[X_{1}]$（a.s.）。
+:::
+
+::: proof
+**Step 0（非負に帰着）.** $X_{n}=X_{n}^{+}-X_{n}^{-}$ と分ける。$X_{n}^{\pm}$ も（関数をとっても独立性は保たれるので）ペアごとに独立で同分布かつ可積分。両方で示せば差をとって結論が出る。以下 $X_{n}\ge0$、$\mu\defeq E[X_{1}]$ とする。
+
+**Step 1（切り捨て）.** $Y_{k}\defeq X_{k}\mathbf{1}_{\{X_{k}\le k\}}$, $T_{n}\defeq Y_{1}+\dots+Y_{n}$ とおく。同分布と \ref{prb:tail-formula.1} から
+$$
+\sum_{k\ge1}P(X_{k}\ne Y_{k})=\sum_{k\ge1}P(X_{1}>k)\le\int_{0}^{\infty}P(X_{1}>t)\,dt=\mu<\infty.
+$$
+（$t\in[k-1,k)$ で $P(X_{1}>t)\ge P(X_{1}>k)$。）\ref{prb:borel-cantelli.1} から a.s. で有限個の $k$ を除いて $X_{k}=Y_{k}$、したがって $\frac{S_{n}-T_{n}}{n}\to0$（a.s.）。$\frac{T_{n}}{n}\to\mu$（a.s.）を示せばよい。
+
+**Step 2（2 次モーメントの和）.** $\sum_{k\ge1}\frac{E[Y_{k}^{2}]}{k^{2}}\le4\mu$ を示す。\ref{prb:tail-formula.1}（$p=2$）から $E[Y_{k}^{2}]=\int_{0}^{\infty}2yP(Y_{k}>y)\,dy\le\int_{0}^{k}2yP(X_{1}>y)\,dy$（$Y_{k}\le k$ で、$Y_{k}>y$ なら $X_{k}>y$）。トネリから
+$$
+\sum_{k}\frac{E[Y_{k}^{2}]}{k^{2}}\le\int_{0}^{\infty}\Bigl(2y\sum_{k>y}\frac{1}{k^{2}}\Bigr)P(X_{1}>y)\,dy.
+$$
+$y\ge1$ なら $\sum_{k>y}\frac{1}{k^{2}}\le\frac{1}{y^{2}}+\int_{y}^{\infty}\frac{dt}{t^{2}}\le\frac{2}{y}$、$0\le y<1$ なら $\sum_{k\ge1}\frac{1}{k^{2}}\le2$。どちらでも括弧内は $\le4$ なので、右辺 $\le4\int_{0}^{\infty}P(X_{1}>y)dy=4\mu$。
+
+**Step 3（部分列での収束）.** $\alpha>1$ とし $k_{n}\defeq\lfloor\alpha^{n}\rfloor$ とおく。$Y_{k}$ もペアごとに独立なので共分散は $0$ で、$\operatorname{Var}(T_{m})=\sum_{k\le m}\operatorname{Var}(Y_{k})\le\sum_{k\le m}E[Y_{k}^{2}]$。$\varepsilon>0$ について、チェビシェフの不等式とトネリ（和の順序交換）から
+$$
+\sum_{n}P\bigl(|T_{k_{n}}-E[T_{k_{n}}]|>\varepsilon k_{n}\bigr)\le\frac{1}{\varepsilon^{2}}\sum_{n}\frac{1}{k_{n}^{2}}\sum_{k\le k_{n}}E[Y_{k}^{2}]=\frac{1}{\varepsilon^{2}}\sum_{k}E[Y_{k}^{2}]\sum_{n:\,k_{n}\ge k}\frac{1}{k_{n}^{2}}.
+$$
+$t\ge1$ で $\lfloor t\rfloor\ge\frac t2$ なので $k_{n}\ge\frac{\alpha^{n}}{2}$ で、$k_{n}\ge k$ なら $\alpha^{n}\ge k$。よって $n_{0}$ を $\alpha^{n}\ge k$ となる最小の $n$ として
+$$
+\sum_{n:\,k_{n}\ge k}\frac{1}{k_{n}^{2}}\le\sum_{n\ge n_{0}}\frac{4}{\alpha^{2n}}=\frac{4\alpha^{-2n_{0}}}{1-\alpha^{-2}}\le\frac{4}{(1-\alpha^{-2})k^{2}}.
+$$
+Step 2 と合わせて左辺の和は有限。\ref{prb:borel-cantelli.1} と $\varepsilon=\frac1j$（$j\ge1$）についての可算個の共通部分から、$\frac{T_{k_{n}}-E[T_{k_{n}}]}{k_{n}}\to0$（a.s.）。一方 $E[Y_{k}]=E[X_{1}\mathbf{1}_{\{X_{1}\le k\}}]\uparrow\mu$（単調収束定理）なので、チェザロ平均も $\frac{E[T_{m}]}{m}\to\mu$。よって $\frac{T_{k_{n}}}{k_{n}}\to\mu$（a.s.）。
+
+**Step 4（間を埋める）.** $Y_{k}\ge0$ なので $T_{m}$ は $m$ について単調増加。$k_{n}\le m\le k_{n+1}$ なら
+$$
+\frac{k_{n}}{k_{n+1}}\cdot\frac{T_{k_{n}}}{k_{n}}\le\frac{T_{m}}{m}\le\frac{k_{n+1}}{k_{n}}\cdot\frac{T_{k_{n+1}}}{k_{n+1}}.
+$$
+$\frac{k_{n+1}}{k_{n}}\to\alpha$ なので、Step 3 の事象の上で $\frac{\mu}{\alpha}\le\liminf\frac{T_{m}}{m}\le\limsup\frac{T_{m}}{m}\le\alpha\mu$。$\alpha=1+\frac1j$（$j\ge1$）についての可算個の確率 $1$ の事象の共通部分をとれば $\frac{T_{m}}{m}\to\mu$（a.s.）。
+:::
+
+::: theorem 強法則の逆 {#prb:strong-law-converse keywords="if X_n are i.i.d. and S_n/n converges almost surely to a finite limit then E|X_1| < infinity; if X_n >= 0 i.i.d. with E X_1 = infinity then S_n/n -> infinity a.s." index="大数の強法則の逆|たいすうのきょうほうそくのぎゃく"}
+$X_{1},X_{2},\dots$ を i.i.d. とする。
+1. $\frac{S_{n}}{n}$ が a.s. で有限の極限に収束するなら $E[|X_{1}|]<\infty$。
+2. $X_{n}\ge0$ で $E[X_{1}]=\infty$ なら $\frac{S_{n}}{n}\to\infty$（a.s.）。
+:::
+
+::: proof
+**1.** 極限を $L$ とすると $\frac{X_{n}}{n}=\frac{S_{n}}{n}-\frac{n-1}{n}\cdot\frac{S_{n-1}}{n-1}\to L-L=0$（a.s.）。よって $P(|X_{n}|>n\text{ i.o.})=0$。事象 $\{|X_{n}|>n\}$ は独立なので、\ref{prb:borel-cantelli.2} の対偶から $\sum_{n}P(|X_{1}|>n)=\sum_{n}P(|X_{n}|>n)<\infty$。\ref{prb:tail-formula.1} から $E[|X_{1}|]=\int_{0}^{\infty}P(|X_{1}|>t)\,dt\le1+\sum_{n\ge1}P(|X_{1}|>n)<\infty$。
+
+**2.** $M>0$ について $X_{n}\wedge M\defeq\min(X_{n},M)$ は i.i.d. で有界。\ref{prb:strong-law} から $\liminf\frac{S_{n}}{n}\ge\lim\frac1n\sum_{k\le n}(X_{k}\wedge M)=E[X_{1}\wedge M]$（a.s.）。単調収束定理から $E[X_{1}\wedge M]\uparrow\infty$（$M\to\infty$）で、$M=1,2,\dots$ について共通部分をとればよい。
+:::
+
+## 応用 {#prb:sec-ln-applications}
+
+::: corollary ボレルの正規数定理とモンテカルロ法 {#prb:normal-numbers keywords="Borel's normal number theorem: almost every x in [0,1) has asymptotic frequency 1/2 of binary digit 1; Monte Carlo integration (1/n) sum g(U_k) -> int_0^1 g for i.i.d. uniform U_k and integrable g" index="正規数|せいきすう, ボレルの正規数定理|ぼれるのせいきすうていり, モンテカルロ法|もんてかるろほう"}
+1. ルベーグ測度について、ほとんどすべての $x\in[0,1)$ で、2 進展開の最初の $n$ 桁のうち $1$ の個数の割合は $\frac12$ に収束する。
+2. $U_{1},U_{2},\dots$ が i.i.d. で一様分布 $U(0,1)$ に従い、$g\in L^{1}([0,1])$ なら $\frac1n\sum_{k\le n}g(U_{k})\to\int_{0}^{1}g$（a.s.）。
+:::
+
+::: proof
+**1.** \ref{prb:independent-sequence-existence.1} から桁 $d_{k}$ は $([0,1),\lambda)$ 上の i.i.d. で $E[d_{k}]=\frac12$。\ref{prb:strong-law} を使う。
+
+**2.** $g(U_{k})$ は i.i.d.（\ref{prb:independence-criteria.2}）で、\ref{prb:change-of-variables} から $E[|g(U_{1})|]=\int_{0}^{1}|g|<\infty$、$E[g(U_{1})]=\int_{0}^{1}g$。\ref{prb:strong-law} を使う。
+:::
+
+::: theorem グリヴェンコ–カンテリの定理 {#prb:glivenko-cantelli keywords="Glivenko-Cantelli theorem: the empirical distribution function F_n(x) = (1/n) #{k <= n: X_k <= x} of an i.i.d. sample converges to F uniformly in x almost surely" index="グリヴェンコ–カンテリの定理|ぐりう゛ぇんこかんてりのていり, 経験分布関数|けいけんぶんぷかんすう"}
+$X_{1},X_{2},\dots$ を i.i.d. の実数値確率変数、$F$ をその分布関数とし、$F_{n}(x)\defeq\frac1n\#\{k\le n:X_{k}\le x\}$（**経験分布関数**）とおく。このとき $\sup_{x\in\mathbb{R}}|F_{n}(x)-F(x)|\to0$（a.s.）。
+:::
+
+::: proof
+**Step 1（各点）.** $x$ を固定すると $\mathbf{1}_{\{X_{k}\le x\}}$ は i.i.d. で期待値 $F(x)$ なので、\ref{prb:strong-law} から $F_{n}(x)\to F(x)$（a.s.）。同様に $\mathbf{1}_{\{X_{k}<x\}}$ から $F_{n}(x-)\to F(x-)$（a.s.）。
+
+**Step 2（有限個の点）.** $m\ge1$ を固定し、$1\le j<m$ について $x_{j}\defeq\inf\{x:F(x)\ge\frac jm\}$、$x_{0}\defeq-\infty$, $x_{m}\defeq+\infty$ とおく（$F(-\infty)=0$, $F(+\infty)=1$, $F_{n}$ も同様と約束する）。右連続性から $F(x_{j})\ge\frac jm$ で、$x<x_{j}$ なら $F(x)<\frac jm$ なので $F(x_{j}-)\le\frac jm$。よって $F(x_{j}-)-F(x_{j-1})\le\frac jm-\frac{j-1}{m}=\frac1m$。
+
+**Step 3.** Step 1 の可算個の事象（$x=x_{j}$, $m\ge1$）の共通部分の上で考える。$x\in[x_{j-1},x_{j})$ なら単調性から
+$$
+F_{n}(x)-F(x)\le F_{n}(x_{j}-)-F(x_{j-1})\le F_{n}(x_{j}-)-F(x_{j}-)+\frac1m,
+$$
+$$
+F_{n}(x)-F(x)\ge F_{n}(x_{j-1})-F(x_{j}-)\ge F_{n}(x_{j-1})-F(x_{j-1})-\frac1m.
+$$
+よって $D_{n}\defeq\max_{j}\bigl(|F_{n}(x_{j})-F(x_{j})|+|F_{n}(x_{j}-)-F(x_{j}-)|\bigr)$ とおくと $\sup_{x}|F_{n}(x)-F(x)|\le D_{n}+\frac1m$（$x\ge x_{m-1}$ の場合も同様）。$D_{n}\to0$ なので $\limsup\sup_{x}|F_{n}-F|\le\frac1m$。$m$ は任意。
+:::
+
+::: hypcheck
+- 強法則（\ref{prb:strong-law}）では独立性をペアごとの独立性にまで弱めた。使ったのは「$Y_{k}$ たちの共分散が $0$」（Step 3）だけである。同分布の仮定は、Step 1・2 で $X_{k}$ の裾を $X_{1}$ の裾で抑えるのに使った。
+- 強法則の証明で 4 次モーメントなどを仮定しなかったのは、切り捨て（Step 1）と部分列 $\lfloor\alpha^{n}\rfloor$（Step 3）のおかげである。非負に帰着した（Step 0）のは、Step 4 で $T_{m}$ の単調性を使うためである。
+- 強法則の逆（\ref{prb:strong-law-converse.1}）では i.i.d.（完全な独立性）を使った：\ref{prb:borel-cantelli.2} に独立性が要るからである。
+- グリヴェンコ–カンテリの定理では $F$ の連続性を仮定していない。不連続点があっても、左極限 $F(x_{j}-)$ の収束を別に確保すれば足りる（Step 1・3）。
+:::
+
+::: supplement
+**関連する結果.**
+- 弱法則は、i.i.d. で $tP(|X_{1}|>t)\to0$ なら（$E[|X_{1}|]=\infty$ でも）$\frac{S_{n}}{n}-E[X_{1}\mathbf{1}_{\{|X_{1}|\le n\}}]\to0$（確率収束）という形に強められる（フェラーの弱法則）。このサイトではまだ証明していない。
+- 強法則は、独立だが同分布でない場合にも、$\sum_{n}\frac{\operatorname{Var}(X_{n})}{n^{2}}<\infty$ の下で成り立つ（コルモゴロフの強法則）。これはマルチンゲールの系列（3 級数定理）で扱う予定である。
+- 収束の速さは中心極限定理（$\sqrt n$ のずれ）と重複対数の法則（$\sqrt{2n\log\log n}$ の振れ幅）で精密化される。
+
+**高い視点：エルゴード性.** 大数の強法則は、「時間平均 $\frac1n\sum_{k<n}g(\theta^{k}\omega)$ が空間平均 $\int g\,dP$ に収束する」というエルゴード定理の特別な場合である（$\theta$ は i.i.d. 列の添字をずらす写像で、測度を保ち、不変集合の確率は 0-1 法則から $0$ か $1$）。線形代数の比喩では、平均をとる操作は「不変な部分空間（定数関数）への射影」で、強法則はその射影への収束が各点ごとに起こることを主張している。
+:::
+
+## 問題 {#prb:sec-ln-problems}
+
+::: problem {#prb:prob-ln-fourth-moment}
+$X_{1},X_{2},\dots$ を i.i.d. で $P(X_{1}=\pm1)=\frac12$ とする。$\frac{S_{n}}{n}\to0$（a.s.）を示せ。さらに、4 次モーメントが $E[S_{n}^{4}]=n+3n(n-1)$ であることを示し、それを使って $\beta>\frac34$ なら $\frac{S_{n}}{n^{\beta}}\to0$（a.s.）を示せ。
+:::
+
+::: solution
+前半は \ref{prb:strong-law}。$E[S_{n}^{4}]=\sum E[X_{i}X_{j}X_{k}X_{l}]$ で、独立性と $E[X_{i}]=E[X_{i}^{3}]=0$ から、$0$ でない項は $i=j=k=l$（$n$ 個、値 $1$）と、二つずつ等しい組（$\binom42\cdot\frac{n(n-1)}{2}=3n(n-1)$ 個、値 $1$）だけ。よって $E[S_{n}^{4}]=n+3n(n-1)\le3n^{2}$。マルコフの不等式（\ref{prb:basic-inequalities.1}、$\varphi(t)=t^{4}$）から
+$$
+P(|S_{n}|>\varepsilon n^{\beta})\le\frac{3n^{2}}{\varepsilon^{4}n^{4\beta}},
+$$
+$4\beta-2>1$（$\beta>\frac34$）なら和は有限で、\ref{prb:borel-cantelli.1} から a.s. で有限個を除いて $|S_{n}|\le\varepsilon n^{\beta}$。$\varepsilon=\frac1j$ について共通部分をとればよい。（$\frac12<\beta\le\frac34$ はより高次のモーメントで同様に示せる。）
+:::
+
+::: problem {#prb:prob-ln-renewal}
+$X_{1},X_{2},\dots$ を i.i.d. で $X_{1}>0$, $E[X_{1}]=\mu<\infty$ とし、$N(t)\defeq\#\{n\ge1:S_{n}\le t\}$ とおく。$\frac{N(t)}{t}\to\frac1\mu$（$t\to\infty$, a.s.）を示せ。
+:::
+
+::: solution
+$S_{n}\to\infty$（a.s.、\ref{prb:strong-law} から $\frac{S_{n}}{n}\to\mu>0$）なので $N(t)<\infty$ で、$N(t)\to\infty$（$t\to\infty$）。定義から $S_{N(t)}\le t<S_{N(t)+1}$（$S_{n}$ は単調増加）。よって
+$$
+\frac{S_{N(t)}}{N(t)}\le\frac{t}{N(t)}<\frac{S_{N(t)+1}}{N(t)+1}\cdot\frac{N(t)+1}{N(t)}.
+$$
+$N(t)\to\infty$ と $\frac{S_{n}}{n}\to\mu$ から両端は $\mu$ に収束し、$\frac{t}{N(t)}\to\mu$。（$N(t)\ge1$ となる十分大きな $t$ で考える。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
