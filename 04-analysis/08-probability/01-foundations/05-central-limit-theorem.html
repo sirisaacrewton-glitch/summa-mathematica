@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>特性関数と中心極限定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/01-foundations/05-central-limit-theorem.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 特性関数と中心極限定理 {#prb:page-central-limit-theorem keywords="characteristic function phi_X(t) = E e^{itX}, relation to the Fourier transform, characteristic function of sums of independent variables, moments and derivatives at 0, Taylor estimate for e^{ix}, uniqueness theorem via Gaussian smoothing, inversion formula for integrable characteristic functions, Levy's continuity theorem, tightness inequality, Lindeberg central limit theorem for triangular arrays, Lindeberg-Levy CLT, de Moivre-Laplace theorem"}
+
+独立な確率変数の和 $S_{n}$ の分布は畳み込みで与えられ、直接計算するのは難しい。ところが分布のフーリエ変換——確率論では**特性関数** $\varphi_{X}(t)=E[e^{itX}]$ と呼ぶ——をとると、畳み込みは積に変わる（\ref{four:convolution-rd.2} と同じ現象）。このページでは、特性関数が分布を一意に決めること、特性関数の各点収束が（極限が $0$ で連続なら）法則収束と同値であること（**レヴィの連続性定理**）を示し、それを使って**中心極限定理**を証明する：平均 $m$、分散 $\sigma^{2}$ の i.i.d. 列について、ずれ $S_{n}-nm$ を $\sigma\sqrt n$ で割ったものは、元の分布によらず標準正規分布に法則収束する。より一般に、各項が全体に比べて小さいという**リンデベルグの条件**の下で、独立だが同分布でない和でも同じことが成り立つ。
+
+## 記法と定義の確認 {#prb:sec-cl-notation}
+
+::: notation
+- 法則収束 $\Rightarrow$、緊密性、ヘリーの選出定理は \ref{prb:page-convergence}。期待値と変数変換の公式は \ref{prb:change-of-variables}、独立な確率変数の積の期待値は \ref{prb:independence-criteria.3}。
+- フーリエ変換とガウス関数の変換は \ref{four:fourier-transform}, \ref{four:gaussian-transform}。
+- $N(m,\sigma^{2})$ は正規分布、$\gamma_{\sigma}(x)\defeq\frac{1}{\sqrt{2\pi}\sigma}e^{-x^{2}/(2\sigma^{2})}$ はその密度（$m=0$）。
+- 複素数値の確率変数 $Z=U+iV$ の期待値は $E[Z]\defeq E[U]+iE[V]$。$|E[Z]|\le E[|Z|]$（\ref{meas:integral-linearity.3}）。
+- **選択公理**：使わない。
+:::
+
+## 特性関数 {#prb:sec-cl-characteristic}
+
+::: definition 特性関数 {#prb:characteristic-function keywords="characteristic function phi_X(t) = E e^{itX} = int e^{itx} dP_X(x); relation to the Fourier transform of the law: phi_X(t) = hat mu(-t/(2 pi))" index="特性関数|とくせいかんすう"}
+実数値確率変数 $X$（あるいは $\mathbb{R}$ 上の確率測度 $\mu$）について
+$$
+\varphi_{X}(t)\defeq E[e^{itX}]=\int_{\mathbb{R}}e^{itx}\,P_{X}(dx)\qquad(t\in\mathbb{R})
+$$
+を**特性関数**という。$\mu$ が密度 $f$ をもてば $\varphi(t)=\hat f\bigl(-\frac{t}{2\pi}\bigr)$（\ref{four:fourier-transform} の規格化で）。
+:::
+
+::: proposition 特性関数の基本性質 {#prb:characteristic-basic keywords="phi(0) = 1, |phi| <= 1, uniformly continuous, phi_{aX+b}(t) = e^{itb} phi_X(at), phi of a sum of independent variables is the product, conjugate phi(-t); characteristic function of N(0,1) is e^{-t^2/2}" index="正規分布の特性関数|せいきぶんぷのとくせいかんすう"}
+1. $\varphi_{X}(0)=1$, $|\varphi_{X}(t)|\le1$, $\varphi_{X}(-t)=\overline{\varphi_{X}(t)}$ で、$\varphi_{X}$ は一様連続。
+2. $\varphi_{aX+b}(t)=e^{itb}\varphi_{X}(at)$。
+3. $X,Y$ が独立なら $\varphi_{X+Y}=\varphi_{X}\varphi_{Y}$。
+4. $X\sim N(0,1)$ なら $\varphi_{X}(t)=e^{-t^{2}/2}$。$N(m,\sigma^{2})$ なら $e^{imt-\sigma^{2}t^{2}/2}$。
+:::
+
+::: proof
+**1.** $|e^{itX}|=1$。一様連続性：$|\varphi(t+h)-\varphi(t)|\le E[|e^{ihX}-1|]$ で、右辺は $t$ によらず、優収束定理から $h\to0$ で $0$。
+
+**2.** $e^{it(aX+b)}=e^{itb}e^{i(at)X}$。
+
+**3.** $e^{itX}$ と $e^{itY}$ の実部・虚部はそれぞれ独立な有界確率変数の関数なので（\ref{prb:independence-criteria.2}）、\ref{prb:independence-criteria.3} を実部・虚部に分けて使い $E[e^{itX}e^{itY}]=E[e^{itX}]E[e^{itY}]$。
+
+**4.** $y=\sqrt{2\pi}x$ と置き換えると $\int\frac{1}{\sqrt{2\pi}}e^{-y^{2}/2}e^{ity}dy=\int e^{-\pi x^{2}}e^{-2\pi ix(-t/\sqrt{2\pi})}dx$ で、\ref{four:gaussian-transform}（$d=1$, $a=1$）から $e^{-\pi t^{2}/(2\pi)}=e^{-t^{2}/2}$。一般の場合は $m+\sigma X$ に 2 を使う。
+:::
+
+::: lemma 指数関数のテイラー評価 {#prb:exponential-taylor keywords="|e^{ix} - sum_{k<=n} (ix)^k / k!| <= min(|x|^{n+1}/(n+1)!, 2|x|^n / n!); consequences for characteristic functions: |phi(t) - 1 - itE X + t^2 E X^2 /2| <= E min(|tX|^3/6, |tX|^2)" index="特性関数のテイラー展開|とくせいかんすうのていらーてんかい"}
+1. 実数 $x$ と $n\ge0$ について
+$$
+\Bigl|e^{ix}-\sum_{k=0}^{n}\frac{(ix)^{k}}{k!}\Bigr|\le\min\Bigl(\frac{|x|^{n+1}}{(n+1)!},\frac{2|x|^{n}}{n!}\Bigr).
+$$
+2. $X\in L^{2}$ なら $\bigl|\varphi_{X}(t)-1-itE[X]+\frac{t^{2}}{2}E[X^{2}]\bigr|\le E\bigl[\min\bigl(|tX|^{3},|tX|^{2}\bigr)\bigr]$。
+:::
+
+::: proof
+**1.** $R_{n}(x)\defeq e^{ix}-\sum_{k\le n}\frac{(ix)^{k}}{k!}$ とおく。$\frac{d}{ds}R_{n}(s)=iR_{n-1}(s)$（$n\ge1$）と $R_{n}(0)=0$ から $R_{n}(x)=i\int_{0}^{x}R_{n-1}(s)\,ds$。$|R_{0}(s)|=|e^{is}-1|\le\min(|s|,2)$（$|e^{is}-1|=|\int_{0}^{s}ie^{iu}du|$）。帰納法：$|R_{n-1}(s)|\le\frac{|s|^{n}}{n!}$ なら $|R_{n}(x)|\le\frac{|x|^{n+1}}{(n+1)!}$。また $R_{n}(x)=R_{n-1}(x)-\frac{(ix)^{n}}{n!}$ で、$|R_{n-1}(x)|\le\frac{|x|^{n}}{n!}$ から $|R_{n}(x)|\le\frac{2|x|^{n}}{n!}$。
+
+**2.** 1 を $n=2$, $x=tX$ に使って期待値をとる（$\frac{|x|^{3}}{6}\le|x|^{3}$, $\frac{2|x|^{2}}{2}=|x|^{2}$）。
+:::
+
+## 一意性と反転公式 {#prb:sec-cl-uniqueness}
+
+::: theorem 特性関数による一意性 {#prb:characteristic-uniqueness keywords="the characteristic function determines the distribution; Gaussian smoothing: mu * N(0, sigma^2) has density (1/2 pi) int phi(t) e^{-sigma^2 t^2/2} e^{-itx} dt; inversion formula f(x) = (1/2 pi) int phi(t) e^{-itx} dt when phi is integrable" index="特性関数の一意性|とくせいかんすうのいちいせい, 反転公式（特性関数）|はんてんこうしきとくせいかんすう"}
+$\mu$ を $\mathbb{R}$ 上の確率測度、$\varphi$ をその特性関数とする。
+1. $\sigma>0$ について、$\mu$ と $N(0,\sigma^{2})$ の畳み込み $\mu_{\sigma}(B)\defeq\iint\mathbf{1}_{B}(x+y)\gamma_{\sigma}(y)\,dy\,\mu(dx)$ は密度
+$$
+f_{\sigma}(x)=\frac{1}{2\pi}\int_{\mathbb{R}}\varphi(t)e^{-\sigma^{2}t^{2}/2}e^{-itx}\,dt
+$$
+をもつ。
+2. 特性関数が等しい二つの確率測度は等しい。
+3. $\varphi\in L^{1}(\mathbb{R})$ なら $\mu$ は有界連続な密度 $f(x)=\frac{1}{2\pi}\int\varphi(t)e^{-itx}dt$ をもつ。
+:::
+
+::: proof
+**1.** **Step 1（密度）.** トネリから $\mu_{\sigma}(B)=\int_{B}g(z)\,dz$, $g(z)\defeq\int\gamma_{\sigma}(z-x)\,\mu(dx)$（$y=z-x$ と置き換えた）。
+
+**Step 2（ガウス密度の表示）.** \ref{prb:characteristic-basic.4} を $N(0,\sigma^{-2})$ に使い（$t$ と $y$ の役割を入れ替えて）、$\int\frac{\sigma}{\sqrt{2\pi}}e^{-\sigma^{2}s^{2}/2}e^{isy}ds=e^{-y^{2}/(2\sigma^{2})}$。両辺を $\sqrt{2\pi}\sigma$ で割ると
+$$
+\gamma_{\sigma}(y)=\frac{1}{2\pi}\int e^{-\sigma^{2}s^{2}/2}e^{isy}\,ds.
+$$
+
+**Step 3.** Step 2 を $y=z-x$ で Step 1 に代入し、$(s,x)\mapsto e^{-\sigma^{2}s^{2}/2}$ が $ds\otimes\mu$ で可積分なのでフビニで順序を交換すると
+$$
+g(z)=\frac{1}{2\pi}\int e^{-\sigma^{2}s^{2}/2}e^{isz}\Bigl(\int e^{-isx}\mu(dx)\Bigr)ds=\frac{1}{2\pi}\int e^{-\sigma^{2}s^{2}/2}e^{isz}\varphi(-s)\,ds,
+$$
+$s\mapsto-s$ と置き換えれば $f_{\sigma}$ の式。
+
+**2.** $X\sim\mu$, $Z\sim N(0,1)$ を独立にとる（\ref{prb:independent-sequence-existence}）。$X+\sigma Z$ の分布は 1 の $\mu_{\sigma}$（積測度とトネリ）で、1 からその分布は $\varphi$ だけで決まる。$\sigma\to0$ で $X+\sigma Z\to X$（各点）なので、\ref{prb:portmanteau.4} から $\mu_{\sigma}\Rightarrow\mu$。法則収束の極限は（連続点での分布関数の値、したがって右連続性からすべての点での値が決まるので）一意。よって $\mu$ は $\varphi$ で決まる。
+
+**3.** 1 の $f_{\sigma}(x)$ は、優収束定理（$|\varphi|$ で抑える）から $\sigma\to0$ で $f(x)$ に各点収束し、$|f_{\sigma}|,|f|\le\frac{1}{2\pi}\|\varphi\|_{1}$。$f$ は連続（優収束定理）。$a<b$ について $\mu_{\sigma}((a,b])=\int_{a}^{b}f_{\sigma}\to\int_{a}^{b}f$（有界収束）。一方 $a,b$ が $\mu$ の分布関数の連続点なら $\mu_{\sigma}((a,b])\to\mu((a,b])$（2 の法則収束）。よって $\mu((a,b])=\int_{a}^{b}f$ が稠密な $a,b$ について成り立ち、右連続性からすべての $a<b$ で成り立つ。$f\ge0$ も従う（$f$ は連続で、すべての区間上の積分が $\ge0$）。\ref{meas:measure-uniqueness} から $\mu(B)=\int_{B}f$。
+:::
+
+## レヴィの連続性定理 {#prb:sec-cl-levy}
+
+::: lemma 裾と特性関数 {#prb:tail-characteristic keywords="P(|X| >= 2/u) <= (1/u) int_{-u}^{u} (1 - phi(t)) dt" index="特性関数による裾の評価|とくせいかんすうによるすそのひょうか"}
+$u>0$ について $P\bigl(|X|\ge\frac2u\bigr)\le\frac1u\int_{-u}^{u}(1-\varphi_{X}(t))\,dt$（右辺は実数）。
+:::
+
+::: proof
+$x\ne0$ なら $\frac1u\int_{-u}^{u}(1-e^{itx})\,dt=2-\frac{2\sin(ux)}{ux}$（$x=0$ では $0$）。$|\frac{\sin y}{y}|\le1$ なので右辺は $\ge0$ で、$|ux|\ge2$ なら $\ge2-\frac{2}{|ux|}\ge1$。よって $2-\frac{2\sin(uX)}{uX}\ge\mathbf{1}_{\{|X|\ge2/u\}}$。期待値をとり、フビニ（被積分関数は有界）で $\frac1u\int_{-u}^{u}E[1-e^{itX}]dt$ に書き直せばよい。
+:::
+
+::: theorem レヴィの連続性定理 {#prb:levy-continuity keywords="Levy's continuity theorem: X_n => X iff phi_n -> phi_X pointwise; if phi_n -> phi pointwise and phi is continuous at 0, then phi is the characteristic function of some X and X_n => X" index="レヴィの連続性定理|れう゛ぃのれんぞくせいていり"}
+1. $X_{n}\Rightarrow X$ なら、すべての $t$ で $\varphi_{X_{n}}(t)\to\varphi_{X}(t)$。
+2. すべての $t$ で $\varphi_{X_{n}}(t)$ がある $\varphi(t)$ に収束し、$\varphi$ が $t=0$ で連続なら、$\varphi$ はある確率測度 $\mu$ の特性関数で、$X_{n}\Rightarrow\mu$。
+:::
+
+::: proof
+**1.** $\cos(tx)$, $\sin(tx)$ は有界連続なので \ref{prb:portmanteau.2} から。
+
+**2.** **Step 1（緊密性）.** $\varphi_{n}(0)=1$ から $\varphi(0)=1$。$\varepsilon>0$ とし、$\varphi$ の $0$ での連続性から $u>0$ を $\frac1u\int_{-u}^{u}|1-\varphi(t)|\,dt<\varepsilon$ となるようにとる。優収束定理（$|1-\varphi_{n}|\le2$）から $\frac1u\int_{-u}^{u}(1-\varphi_{n})\to\frac1u\int_{-u}^{u}(1-\varphi)$ なので、ある $N$ から先 $\frac1u\int_{-u}^{u}(1-\varphi_{n})<2\varepsilon$。\ref{prb:tail-characteristic} から $n\ge N$ で $P(|X_{n}|\ge\frac2u)<2\varepsilon$。$n<N$ の有限個は $M$ を大きくとれば $P(|X_{n}|\ge M)<2\varepsilon$。よって列は緊密。
+
+**Step 2（極限の一意性）.** \ref{prb:helly-selection} から、任意の部分列はさらに部分列で、ある確率測度 $\nu$ に法則収束する。1 からその特性関数は $\lim\varphi_{n}=\varphi$。\ref{prb:characteristic-uniqueness.2} から $\nu$ は部分列によらず一つの $\mu$ で、$\varphi$ は $\mu$ の特性関数。\ref{prb:helly-selection.3} から列全体が $\mu$ に法則収束する。
+:::
+
+## 中心極限定理 {#prb:sec-cl-clt}
+
+::: lemma 積の比較 {#prb:product-comparison keywords="|prod a_k - prod b_k| <= sum |a_k - b_k| for complex numbers of modulus at most 1" index="複素数の積の比較|ふくそすうのせきのひかく"}
+$|a_{k}|,|b_{k}|\le1$（$k=1,\dots,m$）の複素数について $\bigl|\prod_{k}a_{k}-\prod_{k}b_{k}\bigr|\le\sum_{k}|a_{k}-b_{k}|$。
+:::
+
+::: proof
+$m$ についての帰納法：$\prod_{k\le m}a_{k}-\prod_{k\le m}b_{k}=a_{m}\bigl(\prod_{k<m}a_{k}-\prod_{k<m}b_{k}\bigr)+(a_{m}-b_{m})\prod_{k<m}b_{k}$ で、$|a_{m}|\le1$, $|\prod b_{k}|\le1$。
+:::
+
+::: theorem リンデベルグの中心極限定理 {#prb:lindeberg-clt keywords="Lindeberg CLT: for a triangular array of independent mean-zero X_{n,k} with sum of variances 1 and Lindeberg's condition sum E[X_{n,k}^2; |X_{n,k}| > eps] -> 0, the row sums converge in distribution to N(0,1)" index="リンデベルグの中心極限定理|りんでべるぐのちゅうしんきょくげんていり, リンデベルグの条件|りんでべるぐのじょうけん"}
+各 $n$ について $X_{n,1},\dots,X_{n,k_{n}}$ を独立な $L^{2}$ の確率変数で、$E[X_{n,k}]=0$、$\sum_{k}\sigma_{n,k}^{2}=1$（$\sigma_{n,k}^{2}\defeq E[X_{n,k}^{2}]$）とし、**リンデベルグの条件**
+$$
+\text{任意の }\varepsilon>0\text{ について}\quad\sum_{k=1}^{k_{n}}E\bigl[X_{n,k}^{2};|X_{n,k}|>\varepsilon\bigr]\to0\qquad(n\to\infty)
+$$
+を仮定する。このとき $S_{n}\defeq\sum_{k}X_{n,k}\Rightarrow N(0,1)$。
+:::
+
+::: proof
+$t\in\mathbb{R}$ を固定し、$\varphi_{n,k}\defeq\varphi_{X_{n,k}}$ とおく。\ref{prb:characteristic-basic.3} から $\varphi_{S_{n}}(t)=\prod_{k}\varphi_{n,k}(t)$。\ref{prb:levy-continuity} と \ref{prb:characteristic-basic.4} から、$\prod_{k}\varphi_{n,k}(t)\to e^{-t^{2}/2}$ を示せばよい。$L_{n}(\varepsilon)$ をリンデベルグの条件の和とする。
+
+**Step 1（分散の最大値）.** $\sigma_{n,k}^{2}\le\varepsilon^{2}+E[X_{n,k}^{2};|X_{n,k}|>\varepsilon]\le\varepsilon^{2}+L_{n}(\varepsilon)$ なので、$\max_{k}\sigma_{n,k}^{2}\to0$。
+
+**Step 2（各因子と 2 次近似）.** \ref{prb:exponential-taylor.2} から、$|X|\le\varepsilon$ の部分で $|tX|^{3}$、残りで $|tX|^{2}$ を使うと
+$$
+\Bigl|\varphi_{n,k}(t)-\Bigl(1-\frac{t^{2}\sigma_{n,k}^{2}}{2}\Bigr)\Bigr|\le\varepsilon|t|^{3}\sigma_{n,k}^{2}+t^{2}E\bigl[X_{n,k}^{2};|X_{n,k}|>\varepsilon\bigr].
+$$
+Step 1 から $n$ が大きければ $t^{2}\sigma_{n,k}^{2}\le2$ で、$|1-\frac{t^{2}\sigma_{n,k}^{2}}{2}|\le1$。\ref{prb:product-comparison} から
+$$
+\Bigl|\prod_{k}\varphi_{n,k}(t)-\prod_{k}\Bigl(1-\frac{t^{2}\sigma_{n,k}^{2}}{2}\Bigr)\Bigr|\le\varepsilon|t|^{3}+t^{2}L_{n}(\varepsilon).
+$$
+
+**Step 3（指数との比較）.** $0\le a\le1$ で $|e^{-a}-(1-a)|\le\frac{a^{2}}{2}$（\ref{prb:exponential-taylor.1} と同様に、$e^{-a}-1+a=\int_{0}^{a}(1-e^{-s})ds\le\int_{0}^{a}s\,ds$）。$a_{k}\defeq\frac{t^{2}\sigma_{n,k}^{2}}{2}$ に使い、再び \ref{prb:product-comparison} から
+$$
+\Bigl|\prod_{k}\Bigl(1-a_{k}\Bigr)-e^{-t^{2}/2}\Bigr|\le\sum_{k}\frac{a_{k}^{2}}{2}\le\frac{t^{4}}{8}\max_{k}\sigma_{n,k}^{2}\sum_{k}\sigma_{n,k}^{2}=\frac{t^{4}}{8}\max_{k}\sigma_{n,k}^{2}\to0.
+$$
+（$e^{-t^{2}/2}=\prod_{k}e^{-a_{k}}$、$|e^{-a_{k}}|\le1$。）
+
+Step 2・3 から $\limsup_{n}|\varphi_{S_{n}}(t)-e^{-t^{2}/2}|\le\varepsilon|t|^{3}$ で、$\varepsilon$ は任意。
+:::
+
+::: corollary リンデベルグ–レヴィの中心極限定理 {#prb:clt keywords="central limit theorem (Lindeberg-Levy): for i.i.d. X_n with mean m and variance sigma^2 in (0, infinity), (S_n - n m)/(sigma sqrt n) => N(0,1); de Moivre-Laplace for binomial distributions" index="中心極限定理|ちゅうしんきょくげんていり, ド・モアブル–ラプラスの定理|どもあぶるらぷらすのていり"}
+$X_{1},X_{2},\dots$ が i.i.d. で $E[X_{1}]=m$, $0<\sigma^{2}\defeq\operatorname{Var}(X_{1})<\infty$ なら
+$$
+\frac{S_{n}-nm}{\sigma\sqrt n}\Rightarrow N(0,1),\qquad\text{すなわち}\qquad P\Bigl(\frac{S_{n}-nm}{\sigma\sqrt n}\le x\Bigr)\to\int_{-\infty}^{x}\frac{1}{\sqrt{2\pi}}e^{-y^{2}/2}dy\quad(x\in\mathbb{R}).
+$$
+とくに $S_{n}\sim B(n,p)$（$0<p<1$）なら $\frac{S_{n}-np}{\sqrt{np(1-p)}}\Rightarrow N(0,1)$。
+:::
+
+::: proof
+$X_{n,k}\defeq\frac{X_{k}-m}{\sigma\sqrt n}$（$k\le n$）とおくと、独立で平均 $0$、分散の和は $1$。リンデベルグの条件：同分布から
+$$
+\sum_{k\le n}E\Bigl[X_{n,k}^{2};|X_{n,k}|>\varepsilon\Bigr]=\frac{1}{\sigma^{2}}E\bigl[(X_{1}-m)^{2};|X_{1}-m|>\varepsilon\sigma\sqrt n\bigr]\to0
+$$
+（優収束定理、$(X_{1}-m)^{2}$ で抑える）。\ref{prb:lindeberg-clt} から結論。$N(0,1)$ の分布関数は連続なので、すべての $x$ で収束する。二項分布はベルヌーイ分布 $B(1,p)$ の i.i.d. 和（\ref{prb:bernstein-polynomials} の証明の Step 1）で、$m=p$, $\sigma^{2}=p(1-p)$。
+:::
+
+::: hypcheck
+- 一意性の証明（\ref{prb:characteristic-uniqueness}）は、フーリエ変換の反転公式（\ref{four:inversion-theorem}）を確率測度に直接は使わず、ガウス関数での平滑化（1）と法則収束の極限の一意性（2）に置き換えた。確率測度のフーリエ変換は一般に可積分でないからである。
+- レヴィの連続性定理の 2 で「$\varphi$ が $0$ で連続」は本質的：$X_{n}\sim N(0,n)$ なら $\varphi_{n}(t)=e^{-nt^{2}/2}\to\mathbf{1}_{\{t=0\}}$ で、極限は $0$ で不連続、$X_{n}$ はどの分布にも法則収束しない（質量が無限遠に逃げる）。
+- 中心極限定理で分散の有限性は本質的：コーシー分布（密度 $\frac{1}{\pi(1+x^{2})}$、特性関数 $e^{-|t|}$）の i.i.d. 和では $\frac{S_{n}}{n}$ が再びコーシー分布に従い、$\sqrt n$ で割った正規化は収束しない。特性関数 $e^{-|t|}$ は \ref{four:prob-ip-cauchy} の計算から得られる。
+- リンデベルグの条件は、$\max_{k}\sigma_{n,k}^{2}\to0$ の下では中心極限定理の成立と同値である（フェラーの逆定理）。これは標準的な事実として知られているが、このサイトではまだ証明していない。
+:::
+
+::: supplement
+**関連する結果.**
+- 収束の速さ：$E[|X_{1}|^{3}]<\infty$ なら $\sup_{x}\bigl|P(\frac{S_{n}-nm}{\sigma\sqrt n}\le x)-\Phi(x)\bigr|\le\frac{CE[|X_{1}-m|^{3}]}{\sigma^{3}\sqrt n}$（ベリー–エセーンの定理、$C$ は普遍定数）。このサイトではまだ証明していない。
+- 多次元版：$\mathbb{R}^{d}$ 値の i.i.d. で共分散行列 $\Sigma$ をもつなら、$\frac{S_{n}-nm}{\sqrt n}\Rightarrow N(0,\Sigma)$。特性関数 $E[e^{i\langle t,X\rangle}]$ とクラメール–ウォルドの方法（すべての方向への射影の法則収束に帰着）で示せる。
+- ド・モアブル–ラプラスの定理は、スターリングの公式による局所的な形（$P(S_{n}=k)\approx\frac{1}{\sqrt{2\pi np(1-p)}}e^{-(k-np)^{2}/(2np(1-p))}$）でも示せる。
+
+**高い視点：正規分布という不動点.** 正規化された和の写像 $\mu\mapsto$（$\mu*\mu$ を $\sqrt2$ で縮めた分布）を考えると、正規分布はその不動点で、特性関数の言葉では $\varphi(t)=\varphi(t/\sqrt2)^{2}$ の解 $e^{-ct^{2}}$ である。中心極限定理は、分散が有限な分布の全体がこの写像で正規分布に吸い込まれる（「吸引域」）ことを述べている。特性関数の 2 次の項だけが生き残り、3 次以上の項（分布の個性）は $n^{-1/2}$ 以上の速さで消える。比喩で言えば、多数の小さな独立な揺らぎを足し合わせると、個々の揺らぎの形は忘れられ、平均と分散という二つの数だけを覚えた釣鐘形が残る。これは物理学の「普遍性」（くりこみ群の固定点）の最も簡単な例でもある。
+:::
+
+## 問題 {#prb:sec-cl-problems}
+
+::: problem {#prb:prob-cl-poisson}
+$X_{\lambda}\sim\mathrm{Po}(\lambda)$ について、$\frac{X_{\lambda}-\lambda}{\sqrt\lambda}\Rightarrow N(0,1)$（$\lambda\to\infty$）を特性関数で示せ。
+:::
+
+::: solution
+$\varphi_{X_{\lambda}}(t)=\sum_{k}e^{-\lambda}\frac{\lambda^{k}}{k!}e^{itk}=\exp(\lambda(e^{it}-1))$。\ref{prb:characteristic-basic.2} から
+$$
+\varphi_{(X_{\lambda}-\lambda)/\sqrt\lambda}(t)=\exp\bigl(\lambda(e^{it/\sqrt\lambda}-1)-it\sqrt\lambda\bigr).
+$$
+\ref{prb:exponential-taylor.1}（$n=2$）から $\lambda(e^{it/\sqrt\lambda}-1-\frac{it}{\sqrt\lambda})=-\frac{t^{2}}{2}+r$, $|r|\le\lambda\frac{|t|^{3}}{6\lambda^{3/2}}\to0$。よって特性関数は $e^{-t^{2}/2}$ に収束し、\ref{prb:levy-continuity.2} から結論（$\lambda$ は任意の列 $\lambda_{n}\to\infty$ に沿って考える）。
+:::
+
+::: problem {#prb:prob-cl-uniform-sum}
+$U_{1},U_{2},\dots$ を i.i.d. で $U(-1,1)$ に従うとする。$\varphi_{U_{1}}(t)=\frac{\sin t}{t}$ を確かめ、\ref{prb:clt} を使って $\Bigl(\frac{\sin(t/\sqrt n)}{t/\sqrt n}\Bigr)^{n}\to e^{-t^{2}/6}$ を導け。
+:::
+
+::: solution
+$\varphi(t)=\frac12\int_{-1}^{1}e^{itx}dx=\frac{e^{it}-e^{-it}}{2it}=\frac{\sin t}{t}$。$E[U_{1}]=0$, $\operatorname{Var}(U_{1})=\frac12\int_{-1}^{1}x^{2}dx=\frac13$。\ref{prb:clt} から $\frac{S_{n}}{\sqrt{n/3}}\Rightarrow N(0,1)$、すなわち $\frac{S_{n}}{\sqrt n}\Rightarrow N(0,\frac13)$。\ref{prb:levy-continuity.1} と \ref{prb:characteristic-basic.2}, \ref{prb:characteristic-basic.3} から $\varphi_{S_{n}/\sqrt n}(t)=\varphi(t/\sqrt n)^{n}\to e^{-t^{2}/6}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
