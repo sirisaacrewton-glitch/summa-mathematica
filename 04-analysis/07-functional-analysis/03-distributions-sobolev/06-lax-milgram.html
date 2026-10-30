@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ラックス–ミルグラムの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/03-distributions-sobolev/06-lax-milgram.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ラックス–ミルグラムの定理 {#fa:page-lax-milgram keywords="bounded coercive sesquilinear forms, Lax-Milgram theorem, symmetric case and the Dirichlet principle (energy minimization), Galerkin approximation and Cea's lemma, weak formulation of elliptic Dirichlet problems -div(A grad u) + c u = f with uniform ellipticity, existence and uniqueness of weak solutions in H^1_0, classical solutions are weak solutions, solution operator of the Dirichlet Laplacian is compact self-adjoint, eigenfunction expansion of the Dirichlet Laplacian"}
+
+楕円型の偏微分方程式 $-\Delta u=f$（境界で $u=0$）を、部分積分で「すべての試験関数 $v$ について $\int\nabla u\cdot\nabla v=\int fv$」という形（**弱形式**）に書き直すと、左辺はヒルベルト空間 $H_{0}^{1}(\Omega)$ 上の双線形形式、右辺は有界線形汎関数になる。**ラックス–ミルグラムの定理**は、双線形形式が有界かつ**強圧的**（$B(u,u)\ge\alpha\|u\|^{2}$）なら、このような方程式がただ一つの解をもつことを保証する。リースの表現定理（\ref{fa:riesz-representation}）の、対称とは限らない形式への一般化である。このページでは、この定理と、有限次元の部分空間で近似する**ガレルキン法**の誤差評価を示し、応用として一様楕円型の作用素についてのディリクレ問題の弱解の存在と一意性を得る。最後に、解作用素がコンパクトな自己共役作用素であることから、ディリクレ境界条件のラプラシアンの固有関数が $L^{2}(\Omega)$ の正規直交基底をなすことを導く。
+
+## 記法と定義の確認 {#fa:sec-lm-notation}
+
+::: notation
+- $H$ はヒルベルト空間（係数体 $\mathbb{K}=\mathbb{R}$ または $\mathbb{C}$）。内積は第 1 変数について線形（\ref{fa:inner-product}）。リースの表現定理は \ref{fa:riesz-representation}。
+- $B\colon H\times H\to\mathbb{K}$ が**半双線形形式**であるとは、第 1 変数について線形、第 2 変数について共役線形なことをいう（$\mathbb{K}=\mathbb{R}$ なら双線形）。
+- $\ell\colon H\to\mathbb{K}$ が**有界な共役線形汎関数**とは、共役線形で $|\ell(v)|\le C\|v\|$ となることをいう。例：$\ell(v)=\langle g,v\rangle$。
+- $\Omega\subset\mathbb{R}^{n}$ は有界な開集合。$H_{0}^{1}(\Omega)$、ポアンカレの不等式、レリッヒ–コンドラショフの定理は \ref{fa:page-compactness}。
+- 自己共役なコンパクト作用素のスペクトル定理は \ref{fa:compact-selfadjoint-spectral}。
+- **選択公理**：使わない。
+:::
+
+## ラックス–ミルグラムの定理 {#fa:sec-lm-theorem}
+
+::: theorem ラックス–ミルグラムの定理 {#fa:lax-milgram keywords="Lax-Milgram theorem: a bounded coercive sesquilinear form B on a Hilbert space (|B(u,v)| <= M ||u|| ||v||, Re B(u,u) >= alpha ||u||^2) gives, for every bounded conjugate-linear functional l, a unique u with B(u, v) = l(v) for all v, and ||u|| <= ||l|| / alpha" index="ラックス–ミルグラムの定理|らっくすみるぐらむのていり, 強圧的|きょうあつてき"}
+$B$ を $H$ 上の半双線形形式で、ある $M,\alpha>0$ について
+$$
+|B(u,v)|\le M\|u\|\|v\|\quad(\text{有界}),\qquad\operatorname{Re}B(u,u)\ge\alpha\|u\|^{2}\quad(\text{強圧的})
+$$
+を満たすものとする。このとき、任意の有界な共役線形汎関数 $\ell$ について、$u\in H$ で
+$$
+B(u,v)=\ell(v)\qquad(\text{すべての }v\in H)
+$$
+となるものがただ一つあり、$\|u\|\le\frac{\|\ell\|}{\alpha}$（$\|\ell\|\defeq\sup_{\|v\|\le1}|\ell(v)|$）。
+:::
+
+::: proof
+**Step 1（作用素への書き換え）.** $u$ を固定すると $v\mapsto\overline{B(u,v)}$ は有界線形汎関数なので、\ref{fa:riesz-representation} から $\overline{B(u,v)}=\langle v,Au\rangle$、すなわち $B(u,v)=\langle Au,v\rangle$ となる $Au\in H$ がただ一つある。一意性から $A$ は線形で、$\|Au\|=\sup_{\|v\|\le1}|B(u,v)|\le M\|u\|$。同様に $\ell(v)=\langle g,v\rangle$ となる $g$ がただ一つあり、$\|g\|=\|\ell\|$。方程式は $Au=g$ と同値。
+
+**Step 2（下からの評価）.** $\alpha\|u\|^{2}\le\operatorname{Re}\langle Au,u\rangle\le\|Au\|\|u\|$ から $\|Au\|\ge\alpha\|u\|$。よって $A$ は単射で、値域 $R(A)$ は閉：$Au_{k}\to w$ なら $(u_{k})$ はコーシー列で $u_{k}\to u$、$Au=w$。
+
+**Step 3（値域は全体）.** $w\perp R(A)$ なら $0=\operatorname{Re}\langle Aw,w\rangle\ge\alpha\|w\|^{2}$ で $w=0$。閉部分空間 $R(A)$ の直交補空間が $0$ なので $R(A)=H$（\ref{fa:orthogonal-decomposition}）。
+
+**Step 4.** $u\defeq A^{-1}g$ が唯一の解で、$\alpha\|u\|\le\|Au\|=\|g\|=\|\ell\|$。
+:::
+
+::: corollary 対称な場合とディリクレの原理 {#fa:dirichlet-principle keywords="if B is also Hermitian symmetric, the solution of B(u,v) = l(v) is the unique minimizer of the energy E(v) = B(v,v)/2 - Re l(v)" index="ディリクレの原理|でぃりくれのげんり, エネルギー最小化|えねるぎーさいしょうか"}
+\ref{fa:lax-milgram} で、さらに $B(v,u)=\overline{B(u,v)}$（エルミート対称）なら、解 $u$ は $E(v)\defeq\frac12B(v,v)-\operatorname{Re}\ell(v)$ を最小にするただ一つの $v$ である。
+:::
+
+::: proof
+$B(v,v)$ は実数。$w\in H$ について、$B(u,w)=\ell(w)$ と対称性から
+$$
+E(u+w)=E(u)+\operatorname{Re}\bigl(B(u,w)-\ell(w)\bigr)+\frac12B(w,w)=E(u)+\frac12B(w,w)\ge E(u)+\frac\alpha2\|w\|^{2}.
+$$
+（$\frac12B(u+w,u+w)=\frac12B(u,u)+\operatorname{Re}B(u,w)+\frac12B(w,w)$。）等号は $w=0$ のときだけ。
+:::
+
+::: theorem ガレルキン近似とセアの補題 {#fa:galerkin-cea keywords="Galerkin approximation: on a closed (e.g. finite-dimensional) subspace V, the Galerkin solution u_V exists uniquely, and Cea's lemma ||u - u_V|| <= (M / alpha) dist(u, V); convergence for increasing subspaces with dense union" index="ガレルキン近似|がれるきんきんじ, セアの補題|せあのほだい"}
+\ref{fa:lax-milgram} の状況で、$V\subset H$ を閉部分空間（例えば有限次元部分空間）とする。
+1. $u_{V}\in V$ で $B(u_{V},v)=\ell(v)$（すべての $v\in V$）となるものがただ一つある（**ガレルキン解**）。
+2. （セアの補題）$\|u-u_{V}\|\le\frac{M}{\alpha}\inf_{w\in V}\|u-w\|$。
+3. 閉部分空間の増大列 $V_{1}\subset V_{2}\subset\cdots$ で $\bigcup_{N}V_{N}$ が $H$ で稠密なら $u_{V_{N}}\to u$。
+:::
+
+::: proof
+**1.** $V$ はそれ自身ヒルベルト空間で、$B$ の $V$ への制限は有界・強圧的（同じ $M,\alpha$）なので \ref{fa:lax-milgram}。
+
+**2.** $v\in V$ について $B(u-u_{V},v)=\ell(v)-\ell(v)=0$（ガレルキン直交性）。$w\in V$ について $u_{V}-w\in V$ なので
+$$
+\alpha\|u-u_{V}\|^{2}\le\operatorname{Re}B(u-u_{V},u-u_{V})=\operatorname{Re}B(u-u_{V},u-w)\le M\|u-u_{V}\|\|u-w\|.
+$$
+
+**3.** $\varepsilon>0$ について $\|u-w\|<\varepsilon$ となる $w\in\bigcup V_{N}$ があり、$w\in V_{N_{0}}$ なら $N\ge N_{0}$ で 2 から $\|u-u_{V_{N}}\|\le\frac M\alpha\varepsilon$。
+:::
+
+## 楕円型方程式の弱解 {#fa:sec-lm-elliptic}
+
+::: definition 一様楕円型作用素と弱解 {#fa:weak-solution keywords="uniformly elliptic operator L u = - sum d_i (a_ij d_j u) + c u with bounded measurable coefficients, sum a_ij xi_i xi_j >= theta |xi|^2; weak solution of L u = f in Omega, u = 0 on the boundary: u in H^1_0 with B(u, v) = int f conj(v) for all v in H^1_0" index="一様楕円型|いちようだえんがた, 弱解|じゃくかい, 弱形式|じゃくけいしき"}
+有界可測な実数値関数 $a_{ij}=a_{ji}$, $c$ が、ある $\theta>0$ について a.e. で
+$$
+\sum_{i,j}a_{ij}(x)\xi_{i}\xi_{j}\ge\theta|\xi|^{2}\qquad(\xi\in\mathbb{R}^{n})
+$$
+（**一様楕円性**）を満たすとき、$Lu\defeq-\sum_{i,j}\partial_{i}(a_{ij}\partial_{j}u)+cu$ を一様楕円型作用素という。$f\in L^{2}(\Omega)$ について、$u\in H_{0}^{1}(\Omega)$ が
+$$
+B(u,v)\defeq\int_{\Omega}\Bigl(\sum_{i,j}a_{ij}\partial_{j}u\,\overline{\partial_{i}v}+cu\bar v\Bigr)dx=\int_{\Omega}f\bar v\,dx\qquad(v\in H_{0}^{1}(\Omega))
+$$
+を満たすとき、$u$ を境界値問題「$Lu=f$（$\Omega$ で）、$u=0$（$\partial\Omega$ で）」の**弱解**という。
+:::
+
+::: proposition 古典解は弱解 {#fa:classical-is-weak keywords="if a_ij in C^1(closure), u in C^2(Omega) cap C_c^1-type boundary condition, classical solutions are weak solutions; conversely a weak solution in C^2 with C^1 coefficients is a classical solution" index="古典解と弱解|こてんかいとじゃくかい"}
+$a_{ij}\in C^{1}(\Omega)$、$c$ が連続とする。
+1. $u\in C^{2}(\Omega)\cap H_{0}^{1}(\Omega)$ が $\Omega$ の各点で $Lu=f$（古典的な意味）を満たし $f\in L^{2}$ なら、$u$ は弱解。
+2. 逆に弱解 $u$ が $C^{2}(\Omega)$ に入り $f$ が連続なら、$\Omega$ の各点で $Lu=f$。
+:::
+
+::: proof
+**1.** $v\in C_{c}^{\infty}(\Omega)$ なら、$a_{ij}\partial_{j}u\in C^{1}$ と \ref{fa:distribution-operations-properties.2} から $\int\partial_{i}(a_{ij}\partial_{j}u)\bar v=-\int a_{ij}\partial_{j}u\,\overline{\partial_{i}v}$。よって $B(u,v)=\int(Lu)\bar v=\int f\bar v$。両辺は $v$ について $H^{1}$ で連続なので（$a_{ij},c$ は有界）、$C_{c}^{\infty}(\Omega)$ の閉包 $H_{0}^{1}$ 全体で成り立つ。
+
+**2.** 1 の計算を逆にたどると、すべての $v\in C_{c}^{\infty}(\Omega)$ で $\int(Lu-f)\bar v=0$。$Lu-f$ は連続なので、\ref{fa:fundamental-lemma} と連続性から各点で $0$。
+:::
+
+::: theorem ディリクレ問題の弱解の存在 {#fa:weak-dirichlet-existence keywords="for a uniformly elliptic operator with c >= 0 on a bounded open set, the Dirichlet problem L u = f, u = 0 on the boundary has a unique weak solution u in H^1_0 for every f in L^2, with ||u||_{H^1} <= C ||f||_2" index="ディリクレ問題の弱解|でぃりくれもんだいのじゃくかい"}
+$\Omega$ を有界な開集合、$L$ を一様楕円型で $c\ge0$（a.e.）とする。すべての $f\in L^{2}(\Omega)$ について弱解 $u\in H_{0}^{1}(\Omega)$ がただ一つ存在し、$f$ によらない $C$ で $\|u\|_{H^{1}}\le C\|f\|_{2}$。
+:::
+
+::: proof
+$H\defeq H_{0}^{1}(\Omega)$ とする。
+
+**有界性.** コーシー–シュワルツの不等式から $|B(u,v)|\le(\max_{ij}\|a_{ij}\|_{\infty}n+\|c\|_{\infty})\|u\|_{H^{1}}\|v\|_{H^{1}}$。
+
+**強圧性.** 一様楕円性を $\xi=\nabla u(x)$ の実部と虚部に使うと $\operatorname{Re}\sum a_{ij}\partial_{j}u\overline{\partial_{i}u}\ge\theta|\nabla u|^{2}$。$c\ge0$ と \ref{fa:poincare-inequality}（$\|u\|_{2}\le C_{P}\|\nabla u\|_{2}$）から
+$$
+\operatorname{Re}B(u,u)\ge\theta\|\nabla u\|_{2}^{2}\ge\frac{\theta}{1+C_{P}^{2}}\|u\|_{H^{1}}^{2}.
+$$
+
+**右辺.** $\ell(v)\defeq\int f\bar v$ は共役線形で $|\ell(v)|\le\|f\|_{2}\|v\|_{2}\le\|f\|_{2}\|v\|_{H^{1}}$。\ref{fa:lax-milgram} から結論。
+:::
+
+## ディリクレ・ラプラシアンの固有関数展開 {#fa:sec-lm-eigen}
+
+::: theorem ディリクレ・ラプラシアンの固有関数 {#fa:dirichlet-eigenfunctions keywords="the solution operator S: L^2 -> L^2 of -Delta u = f, u in H^1_0, is compact, self-adjoint, positive and injective; hence there is an orthonormal basis of L^2(Omega) of weak eigenfunctions e_k in H^1_0 with -Delta e_k = lambda_k e_k, 0 < lambda_1 <= lambda_2 <= ... -> infinity" index="ディリクレ・ラプラシアンの固有値|でぃりくれらぷらしあんのこゆうち, 固有関数展開（ラプラシアン）|こゆうかんすうてんかいらぷらしあん"}
+$\Omega$ を有界な開集合とし、$f\in L^{2}(\Omega)$ に $-\Delta u=f$（$a_{ij}=\delta_{ij}$, $c=0$）の弱解 $u\in H_{0}^{1}$ を対応させる写像を $S\colon L^{2}(\Omega)\to L^{2}(\Omega)$ とする。
+1. $S$ はコンパクトな自己共役作用素で、$\langle Sf,f\rangle_{L^{2}}\ge0$、$\ker S=0$。
+2. $L^{2}(\Omega)$ の正規直交基底 $(e_{k})_{k\ge1}$ と $0<\lambda_{1}\le\lambda_{2}\le\cdots\to\infty$ で、$e_{k}\in H_{0}^{1}(\Omega)$ かつ $e_{k}$ が $-\Delta e_{k}=\lambda_{k}e_{k}$ の弱解であるものがある。
+:::
+
+::: proof
+**1.** **コンパクト性.** \ref{fa:weak-dirichlet-existence} から $S\colon L^{2}\to H_{0}^{1}$ は有界。\ref{fa:rellich-kondrachov.3}（$p=2$, $q=2$）から埋め込み $H_{0}^{1}\hookrightarrow L^{2}$ はコンパクトなので、合成 $S$ はコンパクト。
+
+**自己共役性と正値性.** $B(u,v)=\int\nabla u\cdot\overline{\nabla v}$ はエルミート対称。$f,g\in L^{2}$ について、弱解の定義を $v=Sg$ と $v=Sf$ に使うと
+$$
+\langle f,Sg\rangle_{L^{2}}=B(Sf,Sg)=\overline{B(Sg,Sf)}=\overline{\langle g,Sf\rangle}=\langle Sf,g\rangle.
+$$
+$g=f$ として $\langle Sf,f\rangle=\overline{B(Sf,Sf)}=\|\nabla Sf\|_{2}^{2}\ge0$。
+
+**単射性.** $Sf=0$ なら、すべての $v\in H_{0}^{1}$ で $\int f\bar v=B(0,v)=0$。$C_{c}^{\infty}(\Omega)$ は $L^{2}$ で稠密（\ref{fa:test-function-density.1}）なので $f=0$。
+
+**2.** \ref{fa:compact-selfadjoint-spectral} と $\ker S=0$ から、$L^{2}$ の正規直交基底 $(e_{k})$ で $Se_{k}=\mu_{k}e_{k}$、$\mu_{k}\ne0$ 実数、$|\mu_{k}|\to0$（無限個のとき）となるものがある。$\mu_{k}=\langle Se_{k},e_{k}\rangle\ge0$ で $\ne0$ なので $\mu_{k}>0$。$L^{2}(\Omega)$ は無限次元（$\Omega$ は空でない開集合なので、互いに素な台をもつ無限個のテスト関数がある）なので無限個あり、$\mu_{k}\to0$。$\mu_{k}$ を減少順に並べ（各値の重複度は有限：コンパクト作用素の $0$ でない固有値の固有空間は有限次元）、$\lambda_{k}\defeq\frac1{\mu_{k}}\uparrow\infty$。$e_{k}=S(\lambda_{k}e_{k})\in H_{0}^{1}$ は $-\Delta e_{k}=\lambda_{k}e_{k}$ の弱解。
+:::
+
+::: hypcheck
+- ラックス–ミルグラムの定理で強圧性は本質的：$B(u,v)=\langle Au,v\rangle$ で $A$ が単射でも全射でない（例えば $\ell^{2}$ の右シフト）と解は存在しない。有界性は $A$ の定義（リースの表現定理）に使った。対称性は使っていない（使えばリースの表現定理だけで済む）。
+- 弱解の存在（\ref{fa:weak-dirichlet-existence}）で $c\ge0$ は強圧性のために使った。$c$ が負で大きいと一意性が崩れる：$c=-\lambda_{k}$（固有値）なら $-\Delta u-\lambda_{k}u=0$ は $u=e_{k}$ という $0$ でない解をもつ。
+- 古典的手法との比較：古典解（\ref{fa:classical-is-weak}）には $u\in C^{2}$、係数の微分可能性、$f$ の連続性が要るが、弱解には係数の有界可測性と $f\in L^{2}$ しか要らない。逆に、弱解が古典解になること（正則性）は、係数と $f$、境界の滑らかさを仮定して別に示す必要がある（偏微分方程式の系列で扱う予定）。
+- 固有関数展開では境界の正則性を仮定していない（$H_{0}^{1}$ のレリッヒの定理は境界によらない）。
+:::
+
+::: supplement
+**関連する結果.**
+- ガーディングの不等式：1 階の項 $\sum b_{i}\partial_{i}u$ を含む一様楕円型作用素では、$B(u,u)\ge\frac\theta2\|u\|_{H^{1}}^{2}-\gamma\|u\|_{2}^{2}$ が成り立ち、$\mu>\gamma$ なら $L+\mu$ にラックス–ミルグラムが使える。そこからフレドホルムの二者択一（\ref{fa:fredholm-alternative}）が得られる。
+- 固有値 $\lambda_{k}$ はミニマックス原理 $\lambda_{k}=\min_{\dim V=k}\max_{v\in V\setminus0}\frac{\|\nabla v\|_{2}^{2}}{\|v\|_{2}^{2}}$ で特徴づけられ（レイリー商）、ワイルの漸近公式 $\lambda_{k}\sim c_{n}(k/|\Omega|)^{2/n}$ に従う。
+- ノイマン境界条件は $H^{1}(\Omega)$（境界条件なし）で同じ議論をし、自然境界条件として現れる（このときはポアンカレ–ヴィルティンガーの不等式を使う）。
+
+**高い視点：方程式を内積に変える.** ラックス–ミルグラムの定理は、「方程式 $Au=g$ を解く」問題を「$B(u,\cdot)$ という線形汎関数を指定された汎関数 $\ell$ に一致させる」問題に変える。強圧性は $A$ が「ほぼ正定値」であることで、有限次元なら固有値が正の行列が可逆であることに対応する。弱形式は、方程式を点ごとに要求する代わりに「すべての試験関数との内積で」要求するので、解の候補の空間をヒルベルト空間に広げられ、そこでは存在が射影定理で保証される。比喩で言えば、点ごとに方程式を満たす関数を直接探すのは針を探すようなものだが、弱形式では「エネルギーが最小の状態」として解を探すので、谷底がどこかにあることが空間の完備性から保証される。
+:::
+
+## 問題 {#fa:sec-lm-problems}
+
+::: problem {#fa:prob-lm-1d}
+$\Omega=(0,1)$, $f\in L^{2}$ について、$-u''=f$, $u(0)=u(1)=0$ の弱解は $u(x)=\int_{0}^{1}G(x,y)f(y)\,dy$, $G(x,y)\defeq\min(x,y)-xy$ であることを示せ。
+:::
+
+::: solution
+$u$ を右辺で定めると $u(x)=(1-x)\int_{0}^{x}yf(y)dy+x\int_{x}^{1}(1-y)f(y)dy$ で、絶対連続で $u(0)=u(1)=0$、a.e. で $u'(x)=-\int_{0}^{x}yf+\int_{x}^{1}(1-y)f$（\ref{meas:ftc-lebesgue}、$xf(x)$ の項は打ち消す）、$u'\in L^{2}$。\ref{fa:sobolev-one-dimension} から $u\in H^{1}$ で、両端で $0$ なので $H_{0}^{1}$ に入る（\ref{fa:prob-cp-poincare-1d} の解答と同じ切り落としで近似できる）。$u'$ も絶対連続で $u''=-f$（a.e.）なので、$v\in C_{c}^{\infty}((0,1))$ について部分積分で $\int u'\bar v'=-\int u''\bar v=\int f\bar v$。$H_{0}^{1}$ への延長は連続性。一意性は \ref{fa:weak-dirichlet-existence}。
+:::
+
+::: problem {#fa:prob-lm-eigen-interval}
+$\Omega=(0,1)$ のディリクレ・ラプラシアンの固有値は $\lambda_{k}=k^{2}\pi^{2}$、固有関数は $\sqrt2\sin(k\pi x)$ であることを確かめよ（$\{\sqrt2\sin(k\pi x)\}$ が $L^{2}(0,1)$ の正規直交基底であることは \ref{fa:dirichlet-eigenfunctions} からも従う）。
+:::
+
+::: solution
+$e_{k}\defeq\sqrt2\sin(k\pi x)$ は $H_{0}^{1}$ に入り（\ref{fa:prob-cp-poincare-1d} の解答の近似）、$v\in C_{c}^{\infty}$ について部分積分で $\int e_{k}'\bar v'=-\int e_{k}''\bar v=k^{2}\pi^{2}\int e_{k}\bar v$、$H_{0}^{1}$ に延びる。正規直交性は $\int_{0}^{1}2\sin(k\pi x)\sin(l\pi x)dx=\delta_{kl}$。これらがすべての固有値を尽くすこと：まず $\{e_{k}\}$ は完全である。$g\in L^{2}(0,1)$ がすべての $e_{k}$ と直交するなら、$g$ を奇関数として $(-1,1)$ に延ばし周期 $2$ に延ばした $G$ のフーリエ係数 $\frac12\int_{-1}^{1}G(x)e^{-i\pi kx}dx=-i\int_{0}^{1}g(x)\sin(k\pi x)\,dx$ はすべて $0$ なので、\ref{four:uniqueness}（周期 $2$ に縮尺して）から $G=0$、$g=0$。ほかに固有値 $\lambda$ の固有関数 $e\ne0$ があれば、解作用素 $S$ の自己共役性から異なる固有値の固有関数は直交するので、$\lambda\notin\{k^{2}\pi^{2}\}$ なら $e$ はすべての $e_{k}$ と直交して $0$ になり矛盾。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
