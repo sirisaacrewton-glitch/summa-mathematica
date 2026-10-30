@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>フェイェールの定理と L² 理論 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/01-fourier-series/02-fejer.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# フェイェールの定理と L² 理論 {#four:page-fejer keywords="Dirichlet kernel, Fejer kernel, Cesaro means of Fourier series, Fejer's theorem (uniform convergence for continuous functions, L^p convergence), Weierstrass trigonometric approximation, uniqueness theorem for Fourier coefficients, absolutely convergent Fourier series, e_n orthonormal basis of L^2(T), Parseval and Plancherel identities, Riesz-Fischer isomorphism L^2(T) = l^2(Z), Basel problem"}
+
+フーリエ級数の部分和 $S_{N}f$ は一般には $f$ に収束しない（\ref{fa:fourier-divergence}）。ところが部分和の**算術平均**（チェザロ平均）$\sigma_{N}f$ をとると、核が非負の総和核（\ref{four:approximate-identity}）になり、$f$ が連続なら一様に、$f\in L^{p}$ なら $L^{p}$ で $f$ に収束する（**フェイェールの定理**）。$\sigma_{N}f$ は三角多項式なので、ここから「三角多項式は稠密」「フーリエ係数は関数を決める（一意性定理）」が直ちに従う。さらに $L^{2}$ では、$e_{n}$ たちが正規直交基底になることがわかり、ヒルベルト空間の一般論（\ref{fa:orthonormal-basis}）から**パーセヴァルの等式**と $L^{2}(\mathbb{T})\cong\ell^{2}(\mathbb{Z})$ が得られる。
+
+## 記法と定義の確認 {#four:sec-fj-notation}
+
+::: notation
+- $\mathbb{T}$, $L^{p}(\mathbb{T})$, $\|\cdot\|_{p}$, $e_{n}$, $|x|_{\mathbb{T}}$, フーリエ係数 $\hat f(n)$, 部分和 $S_{N}f$, 三角多項式, 畳み込み, 総和核は \ref{four:page-coefficients-convolution} のとおり。
+- $C(\mathbb{T})$ は周期 $1$ の連続関数 $\mathbb{R}\to\mathbb{C}$ 全体で、ノルムは $\|f\|_{\infty}\defeq\sup|f|$。
+- $L^{2}(\mathbb{T})$ の内積は $\langle f,g\rangle\defeq\int_{\mathbb{T}}f\bar g$。このとき $\hat f(n)=\langle f,e_{n}\rangle$。
+- $\ell^{2}(\mathbb{Z})$ は $\sum_{n}|c_{n}|^{2}<\infty$ となる複素数列 $(c_{n})_{n\in\mathbb{Z}}$ の空間。
+- 正規直交基底とパーセヴァルの等式は \ref{fa:orthonormal-basis}、ベッセルの不等式は \ref{fa:bessel}、$L^{p}$ の完備性は \ref{meas:riesz-fischer}。
+- **選択公理**：使わない（$L^{2}(\mathbb{T})$ の正規直交基底は具体的に与えるので、存在定理は不要）。
+:::
+
+## ディリクレ核とフェイェール核 {#four:sec-fj-kernels}
+
+::: definition ディリクレ核・フェイェール核・チェザロ平均 {#four:fejer-kernel keywords="Dirichlet kernel D_N = sum_{|n|<=N} e_n, S_N f = D_N * f; Fejer kernel F_N = (D_0 + ... + D_{N-1})/N; Cesaro means sigma_N f = F_N * f = sum_{|n|<N} (1-|n|/N) hat f(n) e_n" index="ディリクレ核|でぃりくれかく, フェイェール核|ふぇいぇーるかく, チェザロ平均|ちぇざろへいきん"}
+$N\ge0$ について $D_{N}\defeq\sum_{|n|\le N}e_{n}$ を**ディリクレ核**、$N\ge1$ について
+$$
+F_{N}\defeq\frac{1}{N}\sum_{k=0}^{N-1}D_{k}
+$$
+を**フェイェール核**という。$f\in L^{1}(\mathbb{T})$ について $\sigma_{N}f\defeq\frac{1}{N}\sum_{k=0}^{N-1}S_{k}f$ を**チェザロ平均**（フェイェール和）という。
+:::
+
+::: proposition 核の性質 {#four:kernel-formulas keywords="S_N f = D_N * f, sigma_N f = F_N * f; closed forms D_N(x) = sin((2N+1) pi x)/sin(pi x), F_N(x) = (1/N)(sin(N pi x)/sin(pi x))^2; F_N is a nonnegative approximate identity; coefficient formula for sigma_N f" index="フェイェール核の性質|ふぇいぇーるかくのせいしつ"}
+$f\in L^{1}(\mathbb{T})$, $N\ge1$ とする。
+1. $S_{N}f=D_{N}*f$、$\sigma_{N}f=F_{N}*f$。とくに $\sigma_{N}f=\sum_{|n|<N}\bigl(1-\frac{|n|}{N}\bigr)\hat f(n)e_{n}$ は三角多項式。
+2. $x\notin\mathbb{Z}$ で
+$$
+D_{N}(x)=\frac{\sin((2N+1)\pi x)}{\sin(\pi x)},\qquad F_{N}(x)=\frac{1}{N}\Bigl(\frac{\sin(N\pi x)}{\sin(\pi x)}\Bigr)^{2}.
+$$
+3. $F_{N}\ge0$、$\int_{\mathbb{T}}F_{N}=1$ で、$(F_{N})_{N\ge1}$ は総和核である。
+:::
+
+::: proof
+**1.** 畳み込みの定義と $e_{n}(x-y)=e_{n}(x)\overline{e_{n}(y)}$ から
+$$
+(D_{N}*f)(x)=\int_{\mathbb{T}}\sum_{|n|\le N}e_{n}(x-y)f(y)\,dy=\sum_{|n|\le N}e_{n}(x)\int_{\mathbb{T}}f(y)e^{-2\pi iny}\,dy=(S_{N}f)(x)
+$$
+（有限和なので積分と交換できる）。畳み込みは第 1 引数について線形なので $F_{N}*f=\frac1N\sum_{k<N}D_{k}*f=\sigma_{N}f$。係数の式は、$|n|<N$ について $e_{n}$ が $D_{k}$ に現れるのは $|n|\le k\le N-1$ の $N-|n|$ 個の $k$ なので
+$$
+F_{N}=\frac{1}{N}\sum_{|n|<N}(N-|n|)e_{n}=\sum_{|n|<N}\Bigl(1-\frac{|n|}{N}\Bigr)e_{n}
+$$
+となり、これを $f$ と畳み込んで 1 の前半を使えばよい。
+
+**2（$D_{N}$）.** $\sin(\pi x)=\frac{1}{2i}(e^{\pi ix}-e^{-\pi ix})$ なので
+$$
+\sin(\pi x)D_{N}(x)=\frac{1}{2i}\sum_{n=-N}^{N}\bigl(e^{(2n+1)\pi ix}-e^{(2n-1)\pi ix}\bigr)=\frac{1}{2i}\bigl(e^{(2N+1)\pi ix}-e^{-(2N+1)\pi ix}\bigr)=\sin((2N+1)\pi x).
+$$
+2 番目の等号は、和が隣り合う項で打ち消し合う（$n$ 番目の第 1 項と $n+1$ 番目の第 2 項が等しい）ことによる。$x\notin\mathbb{Z}$ なら $\sin(\pi x)\ne0$ なので割ってよい。
+
+**2（$F_{N}$）.** $D_{k}$ の式と積和公式 $2\sin a\sin b=\cos(a-b)-\cos(a+b)$ から
+$$
+\sin^{2}(\pi x)\cdot NF_{N}(x)=\sum_{k=0}^{N-1}\sin(\pi x)\sin((2k+1)\pi x)=\frac12\sum_{k=0}^{N-1}\bigl(\cos(2k\pi x)-\cos(2(k+1)\pi x)\bigr)=\frac12\bigl(1-\cos(2N\pi x)\bigr)=\sin^{2}(N\pi x).
+$$
+最後は半角公式。$\sin^{2}(\pi x)N$ で割ればよい。
+
+**3.** $F_{N}\ge0$ は 2 から（$x\in\mathbb{Z}$ では $F_{N}(x)=\frac1N\sum_{k<N}(2k+1)=N\ge0$）。$\int_{\mathbb{T}}e_{n}=\delta_{n0}$ から $\int D_{k}=1$、よって $\int F_{N}=1$。これが総和核の条件 1 で、$F_{N}\ge0$ から $\|F_{N}\|_{1}=\int F_{N}=1$（条件 2）。条件 3：$0<\delta<\frac12$ とする。$t\in[0,\frac12]$ で $\sin(\pi t)\ge2t$（$\sin$ は $[0,\frac{\pi}{2}]$ で凹なので弦の上にある）だから、$\delta\le|x|_{\mathbb{T}}\le\frac12$ で $\sin^{2}(\pi x)\ge4\delta^{2}$、$\sin^{2}(N\pi x)\le1$。よって
+$$
+\int_{\delta\le|y|_{\mathbb{T}}}F_{N}(y)\,dy\le\frac{1}{N}\cdot\frac{1}{4\delta^{2}}\to0\qquad(N\to\infty).
+$$
+:::
+
+## フェイェールの定理 {#four:sec-fj-fejer}
+
+::: theorem フェイェールの定理 {#four:fejer-theorem keywords="Fejer's theorem: Cesaro means of the Fourier series of a continuous function converge uniformly; for f in L^p, 1 <= p < infinity, sigma_N f -> f in L^p; ||sigma_N f||_p <= ||f||_p" index="フェイェールの定理|ふぇいぇーるのていり"}
+1. $f\in C(\mathbb{T})$ なら $\sigma_{N}f\to f$（一様収束）。
+2. $1\le p<\infty$, $f\in L^{p}(\mathbb{T})$ なら $\|\sigma_{N}f-f\|_{p}\to0$。
+3. $1\le p\le\infty$ で $\|\sigma_{N}f\|_{p}\le\|f\|_{p}$。
+:::
+
+::: proof
+\ref{four:kernel-formulas.1} から $\sigma_{N}f=F_{N}*f$ で、\ref{four:kernel-formulas.3} から $(F_{N})$ は総和核。よって 1・2 は \ref{four:approximate-identity-convergence} そのもの。3 は \ref{four:convolution.1} と $\|F_{N}\|_{1}=1$ から。
+:::
+
+::: corollary 三角多項式の稠密性 {#four:trigonometric-density keywords="Weierstrass approximation theorem for trigonometric polynomials: dense in C(T) with sup norm and in L^p(T), 1 <= p < infinity" index="ワイエルシュトラスの近似定理（三角多項式）|わいえるしゅとらすのきんじていりさんかくたこうしき, 三角多項式の稠密性|さんかくたこうしきのちゅうみつせい"}
+三角多項式全体は $C(\mathbb{T})$（一様ノルム）と $L^{p}(\mathbb{T})$（$1\le p<\infty$）で稠密である。
+:::
+
+::: proof
+$\sigma_{N}f$ は三角多項式（\ref{four:kernel-formulas.1}）なので、\ref{four:fejer-theorem.1}, \ref{four:fejer-theorem.2} から。
+:::
+
+::: theorem 一意性定理 {#four:uniqueness keywords="uniqueness theorem: if f in L^1(T) has all Fourier coefficients zero then f = 0 a.e.; functions with the same coefficients agree a.e.; continuous functions with the same coefficients are equal" index="一意性定理（フーリエ係数）|いちいせいていりふーりえけいすう"}
+$f,g\in L^{1}(\mathbb{T})$ で、すべての $n$ について $\hat f(n)=\hat g(n)$ なら $f=g$（a.e.）。$f,g$ が連続ならすべての点で $f=g$。
+:::
+
+::: proof
+$h\defeq f-g$ とすると $\hat h=0$（線形性）。\ref{four:kernel-formulas.1} の係数の式から $\sigma_{N}h=0$ で、\ref{four:fejer-theorem.2}（$p=1$）から $\|h\|_{1}=\lim\|\sigma_{N}h-h\|_{1}=0$、すなわち $h=0$ a.e.。連続なら $\{h\ne0\}$ は開集合で測度 $0$ なので空。
+:::
+
+::: corollary 絶対収束するフーリエ級数 {#four:absolutely-convergent keywords="if sum |hat f(n)| < infinity then S_N f converges uniformly to a continuous function equal to f a.e.; for continuous f, to f everywhere; C^2 functions have uniformly convergent Fourier series" index="絶対収束するフーリエ級数|ぜったいしゅうそくするふーりえきゅうすう"}
+$f\in L^{1}(\mathbb{T})$ で $\sum_{n\in\mathbb{Z}}|\hat f(n)|<\infty$ とする。$S_{N}f$ はある $g\in C(\mathbb{T})$ に一様収束し、$f=g$（a.e.）。$f$ が連続なら $S_{N}f\to f$（一様収束）。
+:::
+
+::: proof
+**Step 1（一様収束）.** $|\hat f(n)e_{n}(x)|=|\hat f(n)|$ なので、$M<N$ について $\|S_{N}f-S_{M}f\|_{\infty}\le\sum_{M<|n|\le N}|\hat f(n)|\to0$。よって各点で $(S_{N}f(x))$ はコーシー列で、極限 $g(x)$ への収束は一様（ワイエルシュトラスの $M$ 判定法と同じ議論）。連続関数の一様極限なので $g\in C(\mathbb{T})$。
+
+**Step 2（係数）.** $m$ を固定する。$\bigl|\int(S_{N}f-g)\overline{e_{m}}\bigr|\le\|S_{N}f-g\|_{\infty}\to0$ で、$N\ge|m|$ なら $\int S_{N}f\,\overline{e_{m}}=\hat f(m)$（\ref{four:coefficients-basic.3}）。よって $\hat g(m)=\hat f(m)$。
+
+**Step 3.** \ref{four:uniqueness} から $f=g$ a.e.、$f$ が連続ならすべての点で $f=g$。
+:::
+
+\ref{four:prob-cc-smoothness} と合わせると、$C^{2}$ 級の周期関数のフーリエ級数は一様に $f$ に収束する（$C^{1}$ 級でもよいことは \ref{four:sec-fj-problems} の問題で示す）。
+
+## L² 理論 {#four:sec-fj-l2}
+
+::: theorem L² のフーリエ級数 {#four:l2-theory keywords="{e_n} is an orthonormal basis of L^2(T); S_N f -> f in L^2; Parseval identity ||f||_2^2 = sum |hat f(n)|^2; Plancherel <f,g> = sum hat f(n) conj(hat g(n)); Riesz-Fischer: f -> hat f is a unitary isomorphism L^2(T) -> l^2(Z)" index="パーセヴァルの等式（フーリエ級数）|ぱーせう゛ぁるのとうしきふーりえきゅうすう, リース–フィッシャーの定理（フーリエ級数）|りーすふぃっしゃーのていりふーりえきゅうすう"}
+1. $\{e_{n}\}_{n\in\mathbb{Z}}$ は $L^{2}(\mathbb{T})$ の正規直交基底である。
+2. $f\in L^{2}(\mathbb{T})$ なら $\|S_{N}f-f\|_{2}\to0$ で、
+$$
+\|f\|_{2}^{2}=\sum_{n\in\mathbb{Z}}|\hat f(n)|^{2},\qquad\langle f,g\rangle=\sum_{n\in\mathbb{Z}}\hat f(n)\overline{\hat g(n)}\quad(g\in L^{2}(\mathbb{T})).
+$$
+3. 写像 $L^{2}(\mathbb{T})\to\ell^{2}(\mathbb{Z})$, $f\mapsto(\hat f(n))_{n}$ は全単射な線形等長写像（ユニタリ同型）である。
+:::
+
+::: proof
+**1.** $\langle e_{n},e_{m}\rangle=\int_{0}^{1}e^{2\pi i(n-m)x}dx=\delta_{nm}$ なので正規直交系。$L^{2}(\mathbb{T})$ は完備（\ref{meas:riesz-fischer}）でヒルベルト空間。三角多項式全体 $=\operatorname{span}\{e_{n}\}$ は \ref{four:trigonometric-density}（$p=2$）から稠密なので、\ref{fa:orthonormal-basis}（2 ⇒ 基底）から正規直交基底。
+
+**2.** \ref{fa:orthonormal-basis.4} がパーセヴァルの等式そのもの（$\langle f,e_{n}\rangle=\hat f(n)$）。$S_{N}f$ は $f$ の $V_{N}\defeq\operatorname{span}\{e_{n}\}_{|n|\le N}$ への直交射影なので、ピタゴラスの定理とパーセヴァルの等式から
+$$
+\|f-S_{N}f\|_{2}^{2}=\|f\|_{2}^{2}-\|S_{N}f\|_{2}^{2}=\sum_{|n|>N}|\hat f(n)|^{2}\to0
+$$
+（収束する級数の裾）。内積の式は、$\langle S_{N}f,S_{N}g\rangle=\sum_{|n|\le N}\hat f(n)\overline{\hat g(n)}$ で、内積の連続性（\ref{fa:cauchy-schwarz}）から $N\to\infty$ とすればよい（右辺の級数はコーシー–シュワルツの不等式から絶対収束する）。
+
+**3.** 線形性は明らか。等長性は 2 のパーセヴァルの等式。全射性：$(c_{n})\in\ell^{2}(\mathbb{Z})$ とし $P_{N}\defeq\sum_{|n|\le N}c_{n}e_{n}$ とおくと、$M<N$ で $\|P_{N}-P_{M}\|_{2}^{2}=\sum_{M<|n|\le N}|c_{n}|^{2}\to0$。$L^{2}$ の完備性から $P_{N}\to f$ となる $f$ がある。$\hat f(m)=\langle f,e_{m}\rangle=\lim_{N}\langle P_{N},e_{m}\rangle=c_{m}$（内積の連続性）。単射性は等長性から。
+:::
+
+::: example バーゼル問題 {#four:basel keywords="Parseval for the sawtooth function gives sum 1/n^2 = pi^2/6" index="バーゼル問題|ばーぜるもんだい"}
+\ref{four:prob-cc-sawtooth} の $f(x)=x$（$[0,1)$ 上）について、$\|f\|_{2}^{2}=\int_{0}^{1}x^{2}dx=\frac13$、$\hat f(0)=\frac12$、$n\ne0$ で $|\hat f(n)|^{2}=\frac{1}{4\pi^{2}n^{2}}$。パーセヴァルの等式（\ref{four:l2-theory.2}）から
+$$
+\frac13=\frac14+2\sum_{n=1}^{\infty}\frac{1}{4\pi^{2}n^{2}},\qquad\text{すなわち}\qquad\sum_{n=1}^{\infty}\frac{1}{n^{2}}=2\pi^{2}\Bigl(\frac13-\frac14\Bigr)=\frac{\pi^{2}}{6}.
+$$
+:::
+
+::: hypcheck
+- フェイェールの定理で本質的なのは $F_{N}\ge0$ である。これから $\|F_{N}\|_{1}=1$ が出て、総和核の条件 2 が自動的に満たされる。ディリクレ核では $\|D_{N}\|_{1}\to\infty$（\ref{fa:fourier-divergence}）で、同じ議論は通らない。
+- 一意性定理の証明に使ったのは $L^{1}$ 収束（$p=1$）だけで、$L^{2}$ の理論も選択公理も使っていない。
+- \ref{four:l2-theory} の 1 で \ref{fa:orthonormal-basis} の「2 ⇒ 基底」の向きだけを使った。正規直交基底の存在定理（ツォルンの補題）は使っていない。
+- 2 の $L^{2}$ 収束は対称な部分和 $S_{N}f$ についての主張。\ref{fa:bessel.2} から、実は和をとる順序によらない（無条件収束）。
+:::
+
+::: supplement
+**弱めた仮定・関連する結果.**
+- $1<p<\infty$ なら $\|S_{N}f-f\|_{p}\to0$ が成り立つ（M. リースの定理。共役関数の $L^{p}$ 有界性による）。$p=1$ と $p=\infty$（連続関数の一様収束）では偽である（後者は \ref{fa:fourier-divergence}）。これは標準的な事実として知られているが、このサイトではまだ証明していない。
+- $f\in L^{2}$ なら $S_{N}f\to f$ はほとんどすべての点でも成り立つ（カールソンの定理、1966）。$L^{1}$ では a.e. 収束も失敗しうる（コルモゴロフの例、1923）。どちらも深い結果で、ここでは扱わない。
+- チェザロ平均の代わりにアーベル平均 $\sum r^{|n|}\hat f(n)e_{n}$（$r\uparrow1$）をとると、核はポアソン核で、これも非負の総和核である。円板上の調和関数のディリクレ問題の解になる。
+
+**高い視点：ポントリャーギン双対とプランシュレル.** $\mathbb{T}$ の連続な準同型 $\mathbb{T}\to U(1)$ はちょうど $e_{n}$（$n\in\mathbb{Z}$）で、\ref{four:l2-theory.3} は「$L^{2}$（群）$\cong L^{2}$（双対群）」というプランシュレルの定理の $\mathbb{T}$ の場合である。線形代数の言葉では、平行移動作用素たちは互いに可換なユニタリ作用素で、$e_{n}$ はそれらの同時固有ベクトル（$f(\cdot-a)$ で $e_{n}$ は $e^{-2\pi ina}$ 倍）であり、フーリエ展開はこの可換族の同時対角化である。フェイェールの定理は、その対角化が「十分に多くの」固有ベクトルからなること（完全性）を、具体的な近似で保証する役割を果たしている。比喩で言えば、部分和は高音を突然切り落とすので境目で鳴り（ギブス現象）が出るが、チェザロ平均は高音を三角形の重み $1-|n|/N$ でなだらかに絞るので、鳴りが出ない。
+:::
+
+## 問題 {#four:sec-fj-problems}
+
+::: problem {#four:prob-fj-odd-squares}
+$f\defeq\mathbf{1}_{[0,1/2)}$（周期 $1$ に延ばす）について $\hat f(n)$ を求め、パーセヴァルの等式から $\sum_{k=0}^{\infty}\frac{1}{(2k+1)^{2}}=\frac{\pi^{2}}{8}$ を導け。
+:::
+
+::: solution
+$\hat f(0)=\frac12$。$n\ne0$ なら $\hat f(n)=\int_{0}^{1/2}e^{-2\pi inx}dx=\frac{1-e^{-\pi in}}{2\pi in}=\frac{1-(-1)^{n}}{2\pi in}$ で、$n$ が偶数なら $0$、奇数なら $\frac{1}{\pi in}$。$\|f\|_{2}^{2}=\frac12$ なので、\ref{four:l2-theory.2} から
+$$
+\frac12=\frac14+2\sum_{k=0}^{\infty}\frac{1}{\pi^{2}(2k+1)^{2}},\qquad\sum_{k=0}^{\infty}\frac{1}{(2k+1)^{2}}=\frac{\pi^{2}}{2}\Bigl(\frac12-\frac14\Bigr)=\frac{\pi^{2}}{8}.
+$$
+:::
+
+::: problem {#four:prob-fj-wirtinger}
+$f$ を $C^{1}$ 級の周期 $1$ の関数で $\int_{\mathbb{T}}f=0$ とする。$\|f\|_{2}\le\frac{1}{2\pi}\|f'\|_{2}$（ヴィルティンガーの不等式）を示し、等号が成り立つのは $f=ae_{1}+be_{-1}$ のときに限ることを示せ。
+:::
+
+::: solution
+$\hat f(0)=0$ で、\ref{four:coefficients-basic.4} から $\widehat{f'}(n)=2\pi in\hat f(n)$。パーセヴァルの等式（\ref{four:l2-theory.2}）を $f$ と $f'$ に使うと
+$$
+\|f'\|_{2}^{2}=\sum_{n\ne0}4\pi^{2}n^{2}|\hat f(n)|^{2}\ge4\pi^{2}\sum_{n\ne0}|\hat f(n)|^{2}=4\pi^{2}\|f\|_{2}^{2}.
+$$
+等号は $|n|\ge2$ のすべての $n$ で $(n^{2}-1)|\hat f(n)|^{2}=0$、すなわち $\hat f(n)=0$ のとき。そのとき $f$ と $\hat f(1)e_{1}+\hat f(-1)e_{-1}$ はフーリエ係数が一致し、どちらも連続なので \ref{four:uniqueness} から等しい。逆にこの形なら等号は直接の計算で成り立つ。
+:::
+
+::: problem {#four:prob-fj-c1}
+$f$ が $C^{1}$ 級（周期 $1$）なら $\sum_{n}|\hat f(n)|<\infty$ で、$S_{N}f\to f$ が一様に成り立つことを示せ。
+:::
+
+::: solution
+$n\ne0$ で $|\hat f(n)|=\frac{|\widehat{f'}(n)|}{2\pi|n|}\le\frac12\Bigl(\frac{1}{4\pi^{2}n^{2}}+|\widehat{f'}(n)|^{2}\Bigr)$（$ab\le\frac12(a^{2}+b^{2})$）。$f'\in L^{2}$ なので \ref{four:l2-theory.2} から $\sum|\widehat{f'}(n)|^{2}=\|f'\|_{2}^{2}<\infty$、また $\sum1/n^{2}<\infty$。よって $\sum|\hat f(n)|<\infty$ で、\ref{four:absolutely-convergent} から $S_{N}f\to f$（一様）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
