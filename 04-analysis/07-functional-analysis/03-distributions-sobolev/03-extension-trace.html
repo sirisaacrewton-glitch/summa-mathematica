@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>延長とトレース | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/03-distributions-sobolev/03-extension-trace.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 延長とトレース {#fa:page-extension-trace keywords="W^{k,p}_0(Omega) as the closure of test functions, bounded open sets with C^1 boundary given by finitely many graph charts, boundary measure and outer unit normal, Gauss-Green formula for C^1 functions, chain rule for Sobolev functions under C^1 diffeomorphisms, even reflection across a hyperplane, extension operator W^{1,p}(Omega) -> W^{1,p}(R^n), density of C_c^infinity(R^n) restricted to Omega, trace theorem, integration by parts for Sobolev functions, traces of W^{1,p}_0 vanish"}
+
+偏微分方程式の境界値問題では「境界での値」を指定する。ところが $W^{1,p}(\Omega)$ の元は a.e. でしか決まらず、測度 $0$ の境界 $\partial\Omega$ の上での値には直接の意味がない。このページでは、境界が $C^{1}$ 級のとき、$W^{1,p}$ の関数に境界での値（**トレース**）が意味をもつことを示す。鍵は二つの構成である。一つは、境界を局所的に平らにして超平面で折り返すことで、$\Omega$ の外まで関数を延ばす**延長作用素**。もう一つは、平らな境界の上で微積分の基本定理から得られる評価 $\int|u(x',0)|^{p}dx'\le C\|u\|_{W^{1,p}}^{p}$ である。延長から「$\overline\Omega$ の近くで滑らかな関数が $W^{1,p}(\Omega)$ で稠密」が従い、それを使ってトレースを連続に延ばし、ソボレフ関数の部分積分の公式（グリーンの公式）を得る。
+
+## 記法と定義の確認 {#fa:sec-et-notation}
+
+::: notation
+- $W^{k,p}(\Omega)$, 弱微分、軟化、マイヤーズ–セリンの定理、滑らかな関数との積は \ref{fa:page-sobolev-spaces}。1 の分割は \ref{fa:test-function-density.3}。
+- $1\le p<\infty$ とする（このページ全体）。
+- $x=(x',x_{n})\in\mathbb{R}^{n-1}\times\mathbb{R}$。$\mathbb{R}_{+}^{n}\defeq\{x_{n}>0\}$。$\nabla u\defeq(\partial_{1}u,\dots,\partial_{n}u)$ は弱勾配。
+- $C^{1}$ 微分同相写像による変数変換は \ref{meas:change-of-variables}、直交変換による測度の不変性は \ref{meas:lebesgue-linear}。
+- **選択公理**：使わない。
+:::
+
+## W₀ と C¹ 境界 {#fa:sec-et-boundary}
+
+::: definition W₀ とC¹ 境界 {#fa:c1-boundary keywords="W^{k,p}_0(Omega) closure of C_c^infinity(Omega) in W^{k,p}; bounded open set with C^1 boundary: finitely many charts in which, after an orthogonal change of coordinates, Omega is locally the region above the graph of a C^1 function; outer unit normal" index="W0kp|だぶりゅーぜろけーぴー, C1 境界|しーわんきょうかい, 外向き単位法線|そとむきたんいほうせん"}
+1. $W_{0}^{k,p}(\Omega)$ は $C_{c}^{\infty}(\Omega)$ の $W^{k,p}(\Omega)$ における閉包。$H_{0}^{k}\defeq W_{0}^{k,2}$。
+2. 有界な開集合 $\Omega$ の境界が **$C^{1}$ 級**であるとは、有限個の組 $(A_{i},W_{i},\gamma_{i},a_{i})$（$i=1,\dots,m$）で次を満たすものがあることをいう：$A_{i}$ は直交変換、$W_{i}\subset\mathbb{R}^{n-1}$ は有界な開集合、$\gamma_{i}$ は $\overline{W_{i}}$ の近傍で $C^{1}$ 級の実数値関数、$a_{i}>0$ で、
+$$
+U_{i}\defeq A_{i}^{-1}\{(x',x_{n}):x'\in W_{i},\ |x_{n}-\gamma_{i}(x')|<a_{i}\}
+$$
+とおくと $\partial\Omega\subset\bigcup_{i}U_{i}$ かつ $A_{i}(\Omega\cap U_{i})=\{x_{n}>\gamma_{i}(x')\}\cap A_{i}U_{i}$。
+3. このとき、$\partial\Omega\cap U_{i}$ の点 $A_{i}^{-1}(x',\gamma_{i}(x'))$ での**外向き単位法線**を $\nu\defeq A_{i}^{-1}\frac{(\nabla\gamma_{i}(x'),-1)}{\sqrt{1+|\nabla\gamma_{i}(x')|^{2}}}$ とする（$\Omega$ の外を向く単位ベクトルとして $\Omega$ だけで決まり、$i$ によらない）。
+:::
+
+（$\nu$ が $i$ によらないこと：$\nu$ は $\partial\Omega$ の接空間に直交し（接ベクトル $(e_{j},\partial_{j}\gamma_{i})$ との内積が $0$）、$x+t\nu\notin\Omega$（小さな $t>0$）となる向きの単位ベクトルとして一意に定まる。）
+
+以下、このページでは $\Omega$ を $C^{1}$ 境界をもつ有界な開集合とし、定義の組を一つ固定する。さらに $U_{0}\defeq\Omega$ とし、\ref{fa:test-function-density.3} から $\zeta_{i}\in C_{c}^{\infty}(U_{i})$（$i=0,\dots,m$）で、$\overline\Omega$ の近傍で $\sum_{i}\zeta_{i}=1$ となるものを固定する。
+
+::: definition 境界の測度 {#fa:boundary-measure keywords="surface measure on the C^1 boundary defined through the fixed charts and partition of unity: int f d sigma = sum_i int (zeta_i f)(A_i^{-1}(x', gamma_i(x'))) sqrt(1 + |grad gamma_i|^2) dx'" index="境界の測度|きょうかいのそくど, 面積要素|めんせきようそ"}
+$\partial\Omega$ 上のボレル可測な $f\ge0$ について
+$$
+\int_{\partial\Omega}f\,d\sigma\defeq\sum_{i=1}^{m}\int_{W_{i}}(\zeta_{i}f)\bigl(A_{i}^{-1}(x',\gamma_{i}(x'))\bigr)\sqrt{1+|\nabla\gamma_{i}(x')|^{2}}\,dx'
+$$
+と定める（$\zeta_{0}$ は $\partial\Omega$ の上で $0$）。これは $\partial\Omega$ のボレル集合族上の有限測度 $\sigma$ を定める。$L^{p}(\partial\Omega)\defeq L^{p}(\partial\Omega,\sigma)$。
+:::
+
+::: theorem ガウス–グリーンの公式 {#fa:gauss-green-c1 keywords="for u in C^1 on a neighborhood of the closure of a bounded C^1 domain, int_Omega d_j u dx = int_{dOmega} u nu_j d sigma" index="ガウス–グリーンの公式|がうすぐりーんのこうしき"}
+$u$ が $\overline\Omega$ の近傍で $C^{1}$ 級なら、$j=1,\dots,n$ について $\int_{\Omega}\partial_{j}u\,dx=\int_{\partial\Omega}u\,\nu_{j}\,d\sigma$。
+:::
+
+::: proof
+$\Omega$ の上で $u=\sum_{i}\zeta_{i}u$ なので、$w\defeq\zeta_{i}u$ ごとに示せばよい。
+
+**$i=0$.** $w\in C_{c}^{1}(\Omega)$ で、\ref{fa:distribution-operations-properties.2} の証明（各座標方向の微積分の基本定理）から $\int\partial_{j}w=0$。右辺も $0$。
+
+**$i\ge1$.** $\int\partial_{j}w$ と右辺はどちらも直交変換で座標を取り替えても形が変わらない（ベクトル $(\partial_{j}w)_{j}$ と $(\nu_{j})_{j}$ が同じ直交変換で移る）ので、$A_{i}=I$ としてよい。$w$ の台は $U_{i}$ のコンパクト部分集合で、$\Omega\cap U_{i}=\{x_{n}>\gamma(x')\}\cap U_{i}$（$\gamma\defeq\gamma_{i}$）。$w$ を $U_{i}$ の外で $0$ と延ばし、$F(x')\defeq\int_{\gamma(x')}^{\infty}w(x',t)\,dt$ とおく。
+
+$j=n$：微積分の基本定理から $\int_{\gamma(x')}^{\infty}\partial_{n}w\,dt=-w(x',\gamma(x'))$。$x'$ で積分し、フビニ。$\nu_{n}\sqrt{1+|\nabla\gamma|^{2}}=-1$ なので右辺と一致する。
+
+$j<n$：$F(x')=\int_{0}^{\infty}w(x',\gamma(x')+s)\,ds$ と書き直すと、$x'$ について $C^{1}$ で（積分記号下の微分、$w$ はコンパクト台の $C^{1}$）
+$$
+\partial_{j}F(x')=\int_{0}^{\infty}\bigl(\partial_{j}w+\partial_{n}w\,\partial_{j}\gamma\bigr)(x',\gamma(x')+s)\,ds=\int_{\gamma(x')}^{\infty}\partial_{j}w\,dt-w(x',\gamma(x'))\partial_{j}\gamma(x').
+$$
+$F$ はコンパクト台なので $\int_{\mathbb{R}^{n-1}}\partial_{j}F\,dx'=0$。よって $\int_{\Omega}\partial_{j}w=\int w(x',\gamma)\partial_{j}\gamma\,dx'=\int w\nu_{j}\sqrt{1+|\nabla\gamma|^{2}}dx'$。
+:::
+
+## 変数変換と折り返し {#fa:sec-et-reflection}
+
+::: lemma ソボレフ関数の変数変換 {#fa:sobolev-chain-rule keywords="if Phi: U -> V is a C^1 diffeomorphism whose derivatives and those of its inverse are bounded, then u in W^{1,p}(V) implies u o Phi in W^{1,p}(U) with grad(u o Phi) = (D Phi)^T (grad u) o Phi and comparable norms" index="ソボレフ関数の変数変換|そぼれふかんすうのへんすうへんかん"}
+$\Phi\colon U\to V$ を開集合の間の $C^{1}$ 微分同相写像で、$D\Phi$ と $D(\Phi^{-1})$ の成分が有界なものとする。$u\in W^{1,p}(V)$ なら $u\circ\Phi\in W^{1,p}(U)$ で、$\partial_{j}(u\circ\Phi)=\sum_{l}(\partial_{l}u\circ\Phi)\,\partial_{j}\Phi_{l}$。さらに $\Phi$ だけで決まる定数 $C$ で $\|u\circ\Phi\|_{W^{1,p}(U)}\le C\|u\|_{W^{1,p}(V)}$。
+:::
+
+::: proof
+**Step 1（ノルム）.** ヤコビアン $J_{\Phi^{-1}}$ は有界なので、\ref{meas:change-of-variables.2} から $\int_{U}|f\circ\Phi|^{p}=\int_{V}|f|^{p}J_{\Phi^{-1}}\le C\int_{V}|f|^{p}$。
+
+**Step 2（滑らかな場合）.** \ref{fa:meyers-serrin} から $u_{k}\in C^{\infty}(V)\cap W^{1,p}(V)$, $u_{k}\to u$（$W^{1,p}$）をとる。$u_{k}\circ\Phi$ は $C^{1}$ で、連鎖律から古典的な偏導関数は $\sum_{l}(\partial_{l}u_{k}\circ\Phi)\partial_{j}\Phi_{l}$。これは弱微分でもある（\ref{fa:distribution-operations-properties.2}）。
+
+**Step 3（極限）.** Step 1 と $\partial_{j}\Phi_{l}$ の有界性から、$u_{k}\circ\Phi\to u\circ\Phi$、$\sum_{l}(\partial_{l}u_{k}\circ\Phi)\partial_{j}\Phi_{l}\to\sum_{l}(\partial_{l}u\circ\Phi)\partial_{j}\Phi_{l}$（$L^{p}(U)$）。弱微分の等式は $L^{p}$ 極限で保たれる（\ref{fa:sobolev-complete} の証明）。ノルムの評価も Step 1 から。
+:::
+
+::: lemma 超平面での折り返し {#fa:even-reflection keywords="even reflection across x_n = 0: for u in W^{1,p}(R^n_+), u*(x', x_n) = u(x', |x_n|) is in W^{1,p}(R^n) with ||u*|| <= 2^{1/p} ||u||" index="偶な折り返し|ぐうなおりかえし"}
+$u\in W^{1,p}(\mathbb{R}_{+}^{n})$ について $u^{*}(x',x_{n})\defeq u(x',|x_{n}|)$ とおくと、$u^{*}\in W^{1,p}(\mathbb{R}^{n})$ で、$\partial_{j}u^{*}=(\partial_{j}u)^{*}$（$j<n$）、$\partial_{n}u^{*}(x)=\operatorname{sgn}(x_{n})(\partial_{n}u)(x',|x_{n}|)$。$\|u^{*}\|_{W^{1,p}}=2^{1/p}\|u\|_{W^{1,p}}$。
+:::
+
+::: proof
+$\varphi\in C_{c}^{\infty}(\mathbb{R}^{n})$ をとり、$\eta\in C^{\infty}(\mathbb{R})$ を $t\le\frac12$ で $0$、$t\ge1$ で $1$、$0\le\eta\le1$ とし、$\eta_{k}(t)\defeq\eta(kt)$ とする。
+
+**$j<n$.** $\psi(x)\defeq\varphi(x',x_{n})+\varphi(x',-x_{n})$ とすると、$\eta_{k}(x_{n})\psi(x)\in C_{c}^{\infty}(\mathbb{R}_{+}^{n})$ で、$\partial_{j}(\eta_{k}\psi)=\eta_{k}\partial_{j}\psi$。弱微分の定義から $\int_{\mathbb{R}_{+}^{n}}u\,\eta_{k}\partial_{j}\psi=-\int_{\mathbb{R}_{+}^{n}}\partial_{j}u\,\eta_{k}\psi$。$k\to\infty$ で優収束定理から $\int_{\mathbb{R}_{+}^{n}}u\,\partial_{j}\psi=-\int_{\mathbb{R}_{+}^{n}}\partial_{j}u\,\psi$。$x_{n}<0$ の部分を $x_{n}\mapsto-x_{n}$ で移せば、これは $\int_{\mathbb{R}^{n}}u^{*}\partial_{j}\varphi=-\int_{\mathbb{R}^{n}}(\partial_{j}u)^{*}\varphi$。
+
+**$j=n$.** $\chi(x)\defeq\varphi(x',x_{n})-\varphi(x',-x_{n})$ とすると $\chi(x',0)=0$ で、平均値の定理から $|\chi(x)|\le M|x_{n}|$（$M\defeq2\sup|\partial_{n}\varphi|$）。$\eta_{k}\chi\in C_{c}^{\infty}(\mathbb{R}_{+}^{n})$ なので
+$$
+\int_{\mathbb{R}_{+}^{n}}u\bigl(\eta_{k}\partial_{n}\chi+k\eta'(kx_{n})\chi\bigr)=-\int_{\mathbb{R}_{+}^{n}}\partial_{n}u\,\eta_{k}\chi.
+$$
+第 2 項は $\{0<x_{n}<\frac1k\}$ でしか $0$ でなく、そこで $|k\eta'(kx_{n})\chi|\le\sup|\eta'|\cdot kM\frac1k$ は有界で、$\varphi$ の台の上で考えると積分は $\sup|\eta'|M\int_{\{0<x_{n}<1/k\}\cap\operatorname{supp}}|u|\to0$。$k\to\infty$ で $\int_{\mathbb{R}_{+}^{n}}u\,\partial_{n}\chi=-\int_{\mathbb{R}_{+}^{n}}\partial_{n}u\,\chi$。$\partial_{n}\chi(x)=\partial_{n}\varphi(x',x_{n})+(\partial_{n}\varphi)(x',-x_{n})$ なので、折り返すと $\int_{\mathbb{R}^{n}}u^{*}\partial_{n}\varphi=-\int_{\mathbb{R}^{n}}\operatorname{sgn}(x_{n})(\partial_{n}u)(x',|x_{n}|)\varphi$。
+
+ノルムは $x_{n}\mapsto-x_{n}$ による不変性から。
+:::
+
+## 延長と稠密性 {#fa:sec-et-extension}
+
+::: theorem 延長定理 {#fa:extension-theorem keywords="extension theorem: for a bounded open set with C^1 boundary and 1 <= p < infinity there is a bounded linear E: W^{1,p}(Omega) -> W^{1,p}(R^n) with E u = u on Omega and supp E u in a fixed bounded set" index="延長作用素|えんちょうさようそ, 延長定理（ソボレフ空間）|えんちょうていりそぼれふくうかん"}
+有界線形作用素 $E\colon W^{1,p}(\Omega)\to W^{1,p}(\mathbb{R}^{n})$ で、$\Omega$ の上で $Eu=u$、$Eu$ の台が固定された有界集合 $\bigcup_{i}\operatorname{supp}\zeta_{i}$ に含まれるものがある。
+:::
+
+::: proof
+**Step 1（内部）.** $\zeta_{0}u\in W^{1,p}(\Omega)$ の台は $\Omega$ のコンパクト集合なので、$\Omega$ の外で $0$ と延ばしたもの $E_{0}u$ は $W^{1,p}(\mathbb{R}^{n})$ の元（台の近傍で $1$ のテスト関数を掛けて弱微分の定義を確かめる）で、ノルムは $\le C\|u\|$（\ref{fa:sobolev-product-rule}）。
+
+**Step 2（境界の近く）.** $i\ge1$ とし、$A_{i}=I$ と座標をとる（\ref{fa:sobolev-chain-rule} から直交変換で $W^{1,p}$ とノルムは保たれる）。$\Phi(x)\defeq(x',x_{n}-\gamma_{i}(x'))$ は $U_{i}$ から箱 $Q\defeq W_{i}\times(-a_{i},a_{i})$ への $C^{1}$ 微分同相で、$\Phi^{-1}(y)=(y',y_{n}+\gamma_{i}(y'))$、ヤコビ行列はどちらも有界（$\nabla\gamma_{i}$ は $\overline{W_{i}}$ 上で有界）、$\Phi(\Omega\cap U_{i})=Q_{+}\defeq Q\cap\{y_{n}>0\}$。$v\defeq(\zeta_{i}u)\circ\Phi^{-1}\in W^{1,p}(Q_{+})$（\ref{fa:sobolev-chain-rule}）の台は $Q$ のコンパクト部分集合と $\{y_{n}\ge0\}$ の共通部分の中にあるので、$\mathbb{R}_{+}^{n}$ の残りで $0$ と延ばすと $W^{1,p}(\mathbb{R}_{+}^{n})$ の元（Step 1 と同じ理由）。\ref{fa:even-reflection} で折り返した $v^{*}$ の台は $Q$ のコンパクト部分集合で、$E_{i}u\defeq v^{*}\circ\Phi$（$U_{i}$ の外で $0$）は $W^{1,p}(\mathbb{R}^{n})$ の元、$\Omega\cap U_{i}$ の上で $\zeta_{i}u$ に等しく、ノルムは $\le C_{i}\|u\|$。
+
+**Step 3.** $Eu\defeq\sum_{i=0}^{m}E_{i}u$ は線形・有界で、$\Omega$ の上では $\sum_{i}\zeta_{i}u=u$。
+:::
+
+::: corollary 滑らかな関数による近似 {#fa:smooth-up-to-boundary keywords="for bounded C^1 domains and p < infinity, restrictions of C_c^infinity(R^n) are dense in W^{1,p}(Omega)" index="境界まで滑らかな関数による近似|きょうかいまでなめらかなかんすうによるきんじ"}
+$\{\varphi|_{\Omega}:\varphi\in C_{c}^{\infty}(\mathbb{R}^{n})\}$ は $W^{1,p}(\Omega)$ で稠密である。
+:::
+
+::: proof
+$Eu$ は台がコンパクトな $W^{1,p}(\mathbb{R}^{n})$ の元なので、\ref{fa:mollification-sobolev.3}（$\Omega$ を $\mathbb{R}^{n}$ として）から $\rho_{\varepsilon}*Eu\in C_{c}^{\infty}(\mathbb{R}^{n})$ は $W^{1,p}(\mathbb{R}^{n})$ で $Eu$ に収束し、$\Omega$ に制限すれば $u$ に収束する。
+:::
+
+## トレース {#fa:sec-et-trace}
+
+::: theorem トレース定理 {#fa:trace-theorem keywords="trace theorem: there is a bounded linear T: W^{1,p}(Omega) -> L^p(dOmega) with T u = u restricted to the boundary for u continuous up to the boundary in W^{1,p}; T vanishes on W^{1,p}_0" index="トレース定理|とれーすていり, トレース作用素|とれーすさようそ"}
+有界線形作用素 $T\colon W^{1,p}(\Omega)\to L^{p}(\partial\Omega)$ で、$\varphi\in C_{c}^{\infty}(\mathbb{R}^{n})$ について $T(\varphi|_{\Omega})=\varphi|_{\partial\Omega}$ となるものがただ一つある。さらに $u\in W_{0}^{1,p}(\Omega)$ なら $Tu=0$。
+:::
+
+::: proof
+**Step 1（半空間の評価）.** $w\in C_{c}^{1}(\mathbb{R}^{n})$ とする。$x'$ を固定すると $t\mapsto|w(x',t)|^{p}$ は（$p\ge1$ で）局所リプシッツで、a.e. で $\bigl|\frac{d}{dt}|w|^{p}\bigr|\le p|w|^{p-1}|\partial_{n}w|$。微積分の基本定理（\ref{meas:ftc-lebesgue}、リプシッツ関数は絶対連続）とヤングの不等式 $p|a|^{p-1}|b|\le(p-1)|a|^{p}+|b|^{p}$ から
+$$
+|w(x',0)|^{p}=-\int_{0}^{\infty}\frac{d}{dt}|w(x',t)|^{p}dt\le(p-1)\int_{0}^{\infty}|w|^{p}dt+\int_{0}^{\infty}|\partial_{n}w|^{p}dt.
+$$
+$x'$ で積分して $\int_{\mathbb{R}^{n-1}}|w(x',0)|^{p}dx'\le p\|w\|_{W^{1,p}(\mathbb{R}_{+}^{n})}^{p}$。
+
+**Step 2（$\partial\Omega$ の評価）.** $\varphi\in C_{c}^{\infty}(\mathbb{R}^{n})$ とし、$i\ge1$ を固定する。\ref{fa:test-function-density.2} から $\chi_{i}\in C_{c}^{\infty}(U_{i})$ で $\operatorname{supp}\zeta_{i}$ の上で $\chi_{i}=1$、$0\le\chi_{i}\le1$ となるものをとる。\ref{fa:extension-theorem} の証明の Step 2 と同じ $\Phi$ について $w\defeq(\chi_{i}\varphi)\circ\Phi^{-1}$（$Q$ の外で $0$）は $C_{c}^{1}(\mathbb{R}^{n})$ の元で、$w(y',0)=(\chi_{i}\varphi)(y',\gamma_{i}(y'))$。$0\le\zeta_{i}\le\chi_{i}^{p}$（$\operatorname{supp}\zeta_{i}$ の上で $\chi_{i}=1$）なので、Step 1 と \ref{fa:sobolev-chain-rule}、\ref{fa:sobolev-product-rule} から
+$$
+\int_{W_{i}}\zeta_{i}|\varphi|^{p}\bigl(x',\gamma_{i}(x')\bigr)\sqrt{1+|\nabla\gamma_{i}|^{2}}\,dx'\le C_{i}\int|w(y',0)|^{p}dy'\le C_{i}'\|\chi_{i}\varphi\|_{W^{1,p}(\Omega)}^{p}\le C_{i}''\|\varphi\|_{W^{1,p}(\Omega)}^{p}.
+$$
+$i$ について足すと、$\sigma$ の定義から $\|\varphi|_{\partial\Omega}\|_{L^{p}(\partial\Omega)}\le C\|\varphi\|_{W^{1,p}(\Omega)}$。
+
+**Step 3（延長）.** \ref{fa:smooth-up-to-boundary} から $\{\varphi|_{\Omega}\}$ は稠密なので、Step 2 の有界線形写像は $W^{1,p}(\Omega)$ 全体に一意に延びる（稠密部分空間からの有界線形写像の延長）。$u\in W_{0}^{1,p}$ なら $\varphi_{k}\in C_{c}^{\infty}(\Omega)$ で $\varphi_{k}\to u$ となり、$T\varphi_{k}=0$ なので $Tu=0$。
+:::
+
+::: corollary ソボレフ関数の部分積分 {#fa:sobolev-integration-by-parts keywords="for u, v in W^{1,p} x W^{1,p'} on a bounded C^1 domain (p and p' conjugate, 1 < p < infinity) or u, v in H^1: int u d_j v = - int d_j u v + int_{dOmega} T u T v nu_j d sigma" index="ソボレフ関数の部分積分|そぼれふかんすうのぶぶんせきぶん, グリーンの公式（ソボレフ空間）|ぐりーんのこうしきそぼれふくうかん"}
+$1<p<\infty$, $p'$ を共役指数、$u\in W^{1,p}(\Omega)$, $v\in W^{1,p'}(\Omega)$ なら
+$$
+\int_{\Omega}u\,\partial_{j}v\,dx=-\int_{\Omega}\partial_{j}u\,v\,dx+\int_{\partial\Omega}Tu\,Tv\,\nu_{j}\,d\sigma.
+$$
+:::
+
+::: proof
+$u,v$ が $C_{c}^{\infty}(\mathbb{R}^{n})$ の制限なら、\ref{fa:gauss-green-c1} を $uv$ に使えばよい。一般には \ref{fa:smooth-up-to-boundary} から近似列をとり、両辺がそれぞれ $W^{1,p}\times W^{1,p'}$ で連続であること（ヘルダーの不等式と \ref{fa:trace-theorem} の有界性、$|\nu_{j}|\le1$）から極限をとる。
+:::
+
+::: hypcheck
+- 境界の $C^{1}$ 性は、延長（\ref{fa:extension-theorem}）では境界を平らにする写像 $\Phi$ が $C^{1}$ 微分同相であることに、トレース（\ref{fa:trace-theorem}）では面積要素 $\sqrt{1+|\nabla\gamma|^{2}}$ の有界性に使った。実はリプシッツ境界（$\gamma$ がリプシッツ連続）でも同じ結論が成り立つが、$\Phi$ が双リプシッツ写像になるので、変数変換の補題をリプシッツ写像に拡張する必要がある。
+- 有界性は、$\partial\Omega$ が有限個の座標近傍で覆えることと、$\sigma$ が有限測度であることに使った。
+- $p=\infty$ を除いたのは、マイヤーズ–セリンの定理と軟化による近似が $p=\infty$ で成り立たないからである（\ref{fa:page-sobolev-spaces} の前提条件の確認）。
+- 境界の測度 $\sigma$ は固定した座標近傍と 1 の分割で定義した。別の選び方で作った測度とは、面積要素の変数変換公式によって一致する（多様体上の積分が座標によらないことと同じ）が、このページの議論にはその一致は不要である（以下で使うのは評価と公式の形だけ）。
+- 選択公理を避けるため、$C^{1}$ 境界の定義に「有限個の座標近傍で覆える」ことを含めた。各点ごとに座標近傍がある、という定義から有限個を選び出すには、各点に一つずつ座標近傍を選ぶ操作が要る。
+:::
+
+::: supplement
+**関連する結果.**
+- $Tu=0$ と $u\in W_{0}^{1,p}(\Omega)$ は同値である（$C^{1}$ 境界）。逆向きの証明は、境界の近くで $u$ を平らな境界に移し、$x_{n}$ 方向に少しずらして台を内部に押し込む近似を作る。このサイトではまだ証明していない。
+- トレースの像は $L^{p}(\partial\Omega)$ 全体ではなく、分数階のソボレフ空間 $W^{1-1/p,p}(\partial\Omega)$（$p=2$ なら $H^{1/2}(\partial\Omega)$）にちょうど一致する（ガリアルドの定理）。
+- 高階の延長（$W^{k,p}$）は、境界が $C^{k}$ 級なら、高次の折り返し $\sum_{l}c_{l}u(x',-x_{n}/l)$ で同様に作れる。
+
+**高い視点：局所化と貼り合わせ.** このページの議論はすべて「1 の分割で局所化し、座標で平らにし、平らな場合に計算し、貼り合わせる」という同じ型をしている。これは多様体の上で微分形式を積分するときの型（\ref{mfd:page-integration-stokes}）と同じで、実際 $\overline\Omega$ は境界付き多様体、トレースは境界への制限、ガウス–グリーンの公式はストークスの定理の特別な場合である。比喩で言えば、曲がった岸辺を持つ湖の水を調べるには、岸辺を小さな区間に分け、各区間をまっすぐな岸に引き伸ばして調べ、結果を足し合わせればよい。
+:::
+
+## 問題 {#fa:sec-et-problems}
+
+::: problem {#fa:prob-et-interval-trace}
+$\Omega=(0,1)$ のとき、$T\colon W^{1,p}((0,1))\to\mathbb{C}^{2}$, $u\mapsto(\tilde u(0),\tilde u(1))$（$\tilde u$ は \ref{fa:sobolev-one-dimension} の絶対連続な代表元）が有界であることを、$|\tilde u(0)|\le\|u\|_{1}+\|u'\|_{1}$ を示して確かめよ。
+:::
+
+::: solution
+$\tilde u(0)=\tilde u(x)-\int_{0}^{x}u'$ なので $|\tilde u(0)|\le|\tilde u(x)|+\int_{0}^{1}|u'|$。$x\in(0,1)$ について積分すると $|\tilde u(0)|\le\int_{0}^{1}|u|+\int_{0}^{1}|u'|$。$\tilde u(1)$ も同様。$\|\cdot\|_{1}\le\|\cdot\|_{p}$（\ref{meas:lp-inclusions.1}、区間の長さは $1$）なので $|T u|\le C\|u\|_{W^{1,p}}$。
+:::
+
+::: problem {#fa:prob-et-not-in-w0}
+$\Omega=(0,1)$ で定数関数 $1$ は $W_{0}^{1,p}((0,1))$ に入らないことを示せ。
+:::
+
+::: solution
+$\varphi_{k}\in C_{c}^{\infty}((0,1))$, $\varphi_{k}\to1$（$W^{1,p}$）とすると、\ref{fa:prob-et-interval-trace} の評価から $|\varphi_{k}(0)-1|\le\|\varphi_{k}-1\|_{1}+\|\varphi_{k}'\|_{1}\to0$。しかし $\varphi_{k}(0)=0$ なので矛盾。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
