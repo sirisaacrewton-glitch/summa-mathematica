@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マルチンゲールの応用 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/02-martingales/04-applications.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# マルチンゲールの応用 {#prb:page-martingale-applications keywords="applications of martingales: Kolmogorov's three-series theorem (sufficiency via L^2 martingales, necessity via symmetrization and stopping), Kronecker's lemma, Kolmogorov's strong law for independent non-identically distributed variables, recurrence of the simple random walk on Z and infinite expected hitting time, Galton-Watson branching process, generating functions, extinction probability as the smallest fixed point, criticality mu <= 1"}
+
+このページでは、マルチンゲールの収束定理と任意抽出定理の三つの応用を述べる。一つ目は、独立な確率変数の級数 $\sum X_{n}$ が a.s. で収束するための必要十分条件を与える**コルモゴロフの 3 級数定理**と、そこから導かれる同分布でない場合の大数の強法則。二つ目は、直線上の単純ランダムウォークが必ず元の点の右に到達するが、そのための平均時間は無限大であること。三つ目は、各個体が独立に同じ分布で子を産む**ゴルトン–ワトソン過程**で、子の数の平均 $\mu$ が $1$ 以下なら（自明な場合を除き）家系は確率 $1$ で絶え、$\mu>1$ なら正の確率で生き残ること。
+
+## 記法と定義の確認 {#prb:sec-ma-notation}
+
+::: notation
+- マルチンゲール・停止時刻・任意抽出定理・ギャンブラーの破産は \ref{prb:page-martingales-stopping}、収束定理は \ref{prb:page-convergence-theorems}。
+- ボレル–カンテリの補題と独立な列の存在は \ref{prb:page-independence}。
+- **選択公理**：使わない。
+:::
+
+## コルモゴロフの 3 級数定理 {#prb:sec-ma-three-series}
+
+::: lemma 有界な独立和の分散 {#prb:bounded-sum-variance keywords="if Y_n are independent, |Y_n| <= C and sum Y_n converges almost surely, then sum Var Y_n < infinity" index="有界な独立和の分散|ゆうかいなどくりつわのぶんさん"}
+$Y_{1},Y_{2},\dots$ が独立で $|Y_{n}|\le C$、$\sum Y_{n}$ が a.s. で収束するなら、$\sum_{n}\operatorname{Var}(Y_{n})<\infty$。
+:::
+
+::: proof
+**Step 1（対称化）.** 確率空間を積に取り替えて（\ref{prb:independent-sequence-existence} と同様）、$(Y_{n})$ と同分布で独立なコピー $(Y'_{n})$ をとり（$(Y_{n})_{n}$ 全体と $(Y'_{n})_{n}$ 全体が独立）、$W_{n}\defeq Y_{n}-Y'_{n}$ とおく。$W_{n}$ は独立、$|W_{n}|\le2C$、$E[W_{n}]=0$、$\operatorname{Var}(W_{n})=2\operatorname{Var}(Y_{n})$、$\sum W_{n}$ は a.s. で収束する。
+
+**Step 2（停止）.** $T_{n}\defeq\sum_{k\le n}W_{k}$, $V_{n}\defeq\sum_{k\le n}\operatorname{Var}(W_{k})$（定数）とする。$T_{n}$ は a.s. で収束するので $\sup_{n}|T_{n}|<\infty$（a.s.）、よってある $K$ で $P(\sup_{n}|T_{n}|\le K)>0$（$K\to\infty$ で確率は $1$ に近づく）。$\tau\defeq\inf\{n:|T_{n}|>K\}$ は停止時刻で、$|T_{\tau\wedge n}|\le K+2C$。
+
+**Step 3.** $T_{n}^{2}-V_{n}$ はマルチンゲール（\ref{prb:martingale-examples.1} と同じ計算、分散が $k$ によるので $V_{n}$ に替える）なので、\ref{prb:optional-stopping.2} から $E[V_{\tau\wedge n}]=E[T_{\tau\wedge n}^{2}]\le(K+2C)^{2}$。$\{\tau=\infty\}$ の上では $V_{\tau\wedge n}=V_{n}$ なので $V_{n}P(\tau=\infty)\le(K+2C)^{2}$。$P(\tau=\infty)=P(\sup|T_{n}|\le K)>0$ なので $V_{n}$ は有界。
+:::
+
+::: theorem コルモゴロフの 3 級数定理 {#prb:three-series keywords="Kolmogorov's three-series theorem: for independent X_n and A > 0 with Y_n = X_n 1_{|X_n| <= A}, sum X_n converges a.s. iff sum P(|X_n| > A) < infinity, sum E Y_n converges and sum Var Y_n < infinity" index="3 級数定理|3きゅうすうていり, コルモゴロフの 3 級数定理|こるもごろふの3きゅうすうていり"}
+$X_{1},X_{2},\dots$ を独立な実数値確率変数、$A>0$、$Y_{n}\defeq X_{n}\mathbf{1}_{\{|X_{n}|\le A\}}$ とする。$\sum_{n}X_{n}$ が a.s. で収束することと、次の三つがすべて成り立つことは同値。
+1. $\sum_{n}P(|X_{n}|>A)<\infty$。
+2. $\sum_{n}E[Y_{n}]$ が収束する。
+3. $\sum_{n}\operatorname{Var}(Y_{n})<\infty$。
+:::
+
+::: proof
+**（⇐）** 3 と \ref{prb:prob-ct-random-signs} と同じ議論：$M_{n}\defeq\sum_{k\le n}(Y_{k}-E[Y_{k}])$ はマルチンゲールで $E[M_{n}^{2}]=\sum_{k\le n}\operatorname{Var}(Y_{k})$ が有界なので、\ref{prb:lp-martingale-convergence} から a.s. 収束する。2 と合わせて $\sum Y_{n}$ が a.s. 収束する。1 と \ref{prb:borel-cantelli.1} から a.s. で有限個の $n$ を除いて $X_{n}=Y_{n}$ なので、$\sum X_{n}$ も収束する。
+
+**（⇒）** $\sum X_{n}$ が収束するなら $X_{n}\to0$（a.s.）なので、$|X_{n}|>A$ は a.s. で有限回しか起こらない。事象 $\{|X_{n}|>A\}$ は独立なので、\ref{prb:borel-cantelli.2} の対偶から 1。1 と \ref{prb:borel-cantelli.1} から $\sum Y_{n}$ も a.s. で収束し、$|Y_{n}|\le A$ なので \ref{prb:bounded-sum-variance} から 3。3 から（⇐ の前半と同じく）$\sum(Y_{n}-E[Y_{n}])$ は a.s. で収束するので、差をとって $\sum E[Y_{n}]$ が収束する（定数の級数なので、ある $\omega$ で収束すれば収束）。
+:::
+
+::: lemma クロネッカーの補題 {#prb:kronecker-lemma keywords="Kronecker's lemma: if 0 < b_n increase to infinity and sum x_n / b_n converges, then (1/b_n) sum_{k<=n} x_k -> 0" index="クロネッカーの補題|くろねっかーのほだい"}
+$0<b_{1}\le b_{2}\le\cdots\to\infty$ とし、実数列 $(x_{n})$ について $\sum_{n}\frac{x_{n}}{b_{n}}$ が収束するなら、$\frac{1}{b_{n}}\sum_{k\le n}x_{k}\to0$。
+:::
+
+::: proof
+$u_{n}\defeq\sum_{k\le n}\frac{x_{k}}{b_{k}}$（$u_{0}=0$）、$u\defeq\lim u_{n}$ とする。$x_{k}=b_{k}(u_{k}-u_{k-1})$ を和の付け替え（アーベルの総和法）で書くと
+$$
+\sum_{k\le n}x_{k}=b_{n}u_{n}-\sum_{k=1}^{n-1}(b_{k+1}-b_{k})u_{k}-b_{1}u_{0}=b_{n}u_{n}-\sum_{k=1}^{n-1}(b_{k+1}-b_{k})u_{k}.
+$$
+$b_{n}$ で割ると、第 2 項は重み $\frac{b_{k+1}-b_{k}}{b_{n}}\ge0$（和は $\frac{b_{n}-b_{1}}{b_{n}}\to1$）による $u_{k}$ の加重平均で、$u_{k}\to u$ かつ $b_{n}\to\infty$ なので $u$ に収束する（有限個の $k$ の寄与は $b_{n}\to\infty$ で消える）。よって $\frac{1}{b_{n}}\sum_{k\le n}x_{k}\to u-u=0$。
+:::
+
+::: corollary コルモゴロフの強法則 {#prb:kolmogorov-slln keywords="Kolmogorov's strong law for independent L^2 variables with sum Var X_n / n^2 < infinity: (S_n - E S_n)/n -> 0 almost surely" index="コルモゴロフの強法則|こるもごろふのきょうほうそく"}
+$X_{1},X_{2},\dots$ が独立で $L^{2}$、$\sum_{n}\frac{\operatorname{Var}(X_{n})}{n^{2}}<\infty$ なら、$\frac{S_{n}-E[S_{n}]}{n}\to0$（a.s.）。
+:::
+
+::: proof
+$\sum_{n}\frac{X_{n}-E[X_{n}]}{n}$ はマルチンゲールの極限で、$L^{2}$ ノルムの 2 乗の和が $\sum\frac{\operatorname{Var}(X_{n})}{n^{2}}<\infty$ なので a.s. で収束する（\ref{prb:lp-martingale-convergence}）。\ref{prb:kronecker-lemma}（$b_{n}=n$）を各 $\omega$ に使う。
+:::
+
+## ランダムウォークの再帰 {#prb:sec-ma-random-walk}
+
+::: theorem 単純ランダムウォークの到達 {#prb:random-walk-hitting keywords="the simple symmetric random walk on Z hits every integer almost surely; limsup S_n = infinity, liminf S_n = -infinity; the hitting time of 1 is finite a.s. but has infinite expectation" index="ランダムウォークの再帰性（1 次元）|らんだむうぉーくのさいきせい1じげん"}
+$S_{n}$ を \ref{prb:gamblers-ruin} の単純ランダムウォークとし、$b\ge1$ について $\tau_{b}\defeq\inf\{n:S_{n}=b\}$ とする。
+1. $\tau_{b}<\infty$（a.s.）。したがって $\limsup S_{n}=\infty$, $\liminf S_{n}=-\infty$（a.s.）で、$S_{n}$ はすべての整数を無限回訪れる。
+2. $E[\tau_{1}]=\infty$。
+:::
+
+::: proof
+**1.** $a\ge1$ について \ref{prb:gamblers-ruin} から $P(\tau_{b}<\tau_{-a})=\frac{a}{a+b}$。$\{\tau_{b}<\tau_{-a}\}\subset\{\tau_{b}<\infty\}$ なので $P(\tau_{b}<\infty)\ge\frac{a}{a+b}\to1$（$a\to\infty$）。対称性（$-S$ も単純ランダムウォーク）から $\tau_{-b}<\infty$ も a.s.。すべての $b$ についての共通部分の上で $\sup S_{n}=\infty$, $\inf S_{n}=-\infty$。$S_{n}$ は 1 ずつ動くので、$\pm\infty$ の間を往復するたびにすべての整数を通り、どの整数も無限回訪れる。
+
+**2.** $E[\tau_{1}]<\infty$ とすると、\ref{prb:prob-ms-wald} から $E[S_{\tau_{1}}]=E[\tau_{1}]E[\xi_{1}]=0$。しかし $S_{\tau_{1}}=1$ なので矛盾。
+:::
+
+## ゴルトン–ワトソン過程 {#prb:sec-ma-branching}
+
+::: definition ゴルトン–ワトソン過程 {#prb:galton-watson keywords="Galton-Watson branching process: Z_0 = 1, Z_{n+1} = sum_{i=1}^{Z_n} xi_{n+1,i} with i.i.d. offspring numbers xi; offspring generating function f(s) = E s^xi; mean mu" index="ゴルトン–ワトソン過程|ごるとんわとそんかてい, 分枝過程|ぶんしかてい, 母関数|ぼかんすう"}
+$\{\xi_{n,i}\}_{n,i\ge1}$ を、非負整数値で i.i.d. な確率変数の族（共通の分布を $p_{k}\defeq P(\xi=k)$ と書く）とし、$Z_{0}\defeq1$,
+$$
+Z_{n+1}\defeq\sum_{i=1}^{Z_{n}}\xi_{n+1,i}
+$$
+で定める（空和は $0$）。$Z_{n}$ を第 $n$ 世代の個体数という。$\mu\defeq E[\xi]=\sum kp_{k}\in[0,\infty]$、$f(s)\defeq E[s^{\xi}]=\sum_{k}p_{k}s^{k}$（$0\le s\le1$）を子の数の**母関数**という。
+:::
+
+::: theorem 絶滅確率 {#prb:extinction-probability keywords="extinction probability q = P(Z_n = 0 for some n) is the smallest fixed point of f in [0,1]; q = 1 iff mu <= 1 (excluding p_1 = 1); Z_n / mu^n is a martingale" index="絶滅確率|ぜつめつかくりつ"}
+$\mathcal{F}_{n}\defeq\sigma(\xi_{k,i}:k\le n,i\ge1)$、$q\defeq P(\text{ある }n\text{ で }Z_{n}=0)$ とする。
+1. $E[s^{Z_{n+1}}\mid\mathcal{F}_{n}]=f(s)^{Z_{n}}$。とくに $E[s^{Z_{n}}]=f_{n}(s)$（$f$ の $n$ 回合成）で、$P(Z_{n}=0)=f_{n}(0)$。
+2. $q$ は方程式 $f(s)=s$ の $[0,1]$ の中の最小の解である。
+3. $p_{1}\ne1$ とする。$\mu\le1$ なら $q=1$、$\mu>1$ なら $q<1$。
+4. $0<\mu<\infty$ なら $W_{n}\defeq Z_{n}/\mu^{n}$ は非負マルチンゲールで、a.s. で有限の極限に収束する。
+:::
+
+::: proof
+**1.** $Z_{n}$ は $\mathcal{F}_{n}$ 可測で、$(\xi_{n+1,i})_{i}$ は $\mathcal{F}_{n}$ と独立。$\{Z_{n}=k\}$ の上で $s^{Z_{n+1}}=\prod_{i\le k}s^{\xi_{n+1,i}}$ なので、$G\in\mathcal{F}_{n}$ について独立性から
+$$
+E[s^{Z_{n+1}};G\cap\{Z_{n}=k\}]=P(G\cap\{Z_{n}=k\})f(s)^{k},
+$$
+$k$ について和をとれば $E[s^{Z_{n+1}};G]=E[f(s)^{Z_{n}};G]$。期待値をとると $E[s^{Z_{n+1}}]=E[f(s)^{Z_{n}}]=f_{n}(f(s))$（帰納法の仮定を $s$ の代わりに $f(s)$ で使う）$=f_{n+1}(s)$。$s=0$ とすれば（$0^{0}=1$）$P(Z_{n}=0)=f_{n}(0)$。
+
+**2.** $Z_{n}=0$ なら $Z_{n+1}=0$ なので、事象 $\{Z_{n}=0\}$ は増大し、$q=\lim f_{n}(0)$。$f$ は $[0,1]$ で連続（ベキ級数で $\sum p_{k}=1$、一様収束）かつ単調増加。$q_{n}\defeq f_{n}(0)$ とすると $q_{n+1}=f(q_{n})$ で、極限で $q=f(q)$。$r\in[0,1]$ が $f(r)=r$ なら、$q_{0}=0\le r$ から帰納法で $q_{n+1}=f(q_{n})\le f(r)=r$、よって $q\le r$。
+
+**3.** $f$ は $[0,1]$ で凸（係数が非負のベキ級数、$f''\ge0$）で $f(1)=1$。
+
+（$\mu\le1$）$s\in[0,1)$ で $f(s)>s$ を示す。$p_{0}+p_{1}=1$ なら $f(s)=p_{0}+p_{1}s$ で、$p_{1}<1$ から $f(s)-s=p_{0}(1-s)>0$。そうでなければある $k\ge2$ で $p_{k}>0$ なので、$f'(t)=\sum_{k}kp_{k}t^{k-1}$ は $(0,1)$ で狭義単調増加で、$f'(t)<f'(1-)=\mu\le1$（$f'(1-)=\mu$ は単調収束定理）。平均値の定理から $1-f(s)=f'(t)(1-s)<1-s$（ある $t\in(s,1)$）。どちらの場合も $[0,1]$ の不動点は $1$ だけで、2 から $q=1$。
+
+（$\mu>1$）$f'(1-)=\mu>1$ なので、$s<1$ が $1$ に十分近ければ $\frac{1-f(s)}{1-s}>1$、すなわち $f(s)<s$。$g(s)\defeq f(s)-s$ は連続で $g(0)=p_{0}\ge0$、$g(s)<0$ なので、中間値の定理から $[0,s)$ に不動点がある。2 から $q<1$。
+
+**4.** $E[Z_{n+1}\mid\mathcal{F}_{n}]=\mu Z_{n}$（1 と同じ議論で $s^{\xi}$ の代わりに $\xi$ を使う）なので $E[W_{n+1}\mid\mathcal{F}_{n}]=W_{n}$。$E[W_{n}]=1$ で非負なので、\ref{prb:martingale-convergence} から a.s. で有限の極限に収束する。
+:::
+
+::: hypcheck
+- 3 級数定理の（⇒）で独立性は 2 回使った：ボレル–カンテリの補題の 2（条件 1）と、対称化・停止による分散の評価（\ref{prb:bounded-sum-variance}）。条件 1〜3 のどれも省けない：例えば $X_{n}\defeq\pm1$（確率 $\frac12$ ずつ）は 2・3 を（$A\ge1$ で）満たさず、$\sum X_{n}$ は発散する。
+- ランダムウォークの 2 は、任意抽出定理が有界でない停止時刻で失敗する典型例でもある：$E[S_{\tau_{1}}]=1\ne0$。
+- 絶滅確率の 3 で $p_{1}\ne1$ を除いたのは、$p_{1}=1$ なら $Z_{n}\equiv1$ で $\mu=1$ だが絶滅しないからである。$\mu=1$（臨界）でも $p_{1}\ne1$ なら絶滅する。そのとき $W_{n}=Z_{n}\to0$（a.s.）だが $E[W_{n}]=1$ で、$W$ は一様可積分でない。
+- 4 の極限 $W_{\infty}$ が自明でない（$E[W_{\infty}]=1$）ための必要十分条件は $E[\xi\log^{+}\xi]<\infty$（ケステン–スティガムの定理）。このサイトではまだ証明していない。
+:::
+
+::: supplement
+**関連する結果.**
+- $\mathbb{Z}^{d}$ の単純ランダムウォークは $d\le2$ で再帰的（元の点に確率 $1$ で戻る）、$d\ge3$ で過渡的（ポリアの定理）。マルコフ連鎖のページで扱う予定。
+- 3 級数定理から「$\sum X_{n}$ が a.s. 収束 $\iff$ 確率収束 $\iff$ 法則収束」（独立な和についてのレヴィの同値定理）が導かれる。
+
+**高い視点：一つの道具で多くの問題を.** 三つの応用はどれも、問題から自然なマルチンゲール（部分和、$S_{n}^{2}-n$、$Z_{n}/\mu^{n}$、母関数 $f(s)^{Z_{n}}$）を見つけ、収束定理か任意抽出定理を当てはめる、という同じ型をしている。分枝過程の母関数の議論は、確率を「合成で閉じた関数の反復」に翻訳しており、絶滅確率は力学系 $s\mapsto f(s)$ の最小の不動点として現れる。比喩で言えば、マルチンゲールは確率現象の中に隠れた「保存量」で、保存量を見つけることが物理で運動を解く鍵であるように、適切なマルチンゲールを見つけることが確率の問題を解く鍵になる。
+:::
+
+## 問題 {#prb:sec-ma-problems}
+
+::: problem {#prb:prob-ma-harmonic-signs}
+$\varepsilon_{n}$ を i.i.d. で $P(\varepsilon_{n}=\pm1)=\frac12$ とする。$p>0$ について $\sum_{n}\frac{\varepsilon_{n}}{n^{p}}$ が a.s. で収束するのは $p>\frac12$ のときに限ることを、3 級数定理で示せ。
+:::
+
+::: solution
+$X_{n}\defeq\frac{\varepsilon_{n}}{n^{p}}$, $A\defeq1$ とすると $|X_{n}|\le1$ なので $Y_{n}=X_{n}$、条件 1 は自明、$E[Y_{n}]=0$ で条件 2 も成り立つ。条件 3 は $\sum\operatorname{Var}(Y_{n})=\sum n^{-2p}<\infty$、すなわち $p>\frac12$。\ref{prb:three-series} から結論。
+:::
+
+::: problem {#prb:prob-ma-geometric-offspring}
+子の数が $p_{k}=(1-r)r^{k}$（$k\ge0$, $0<r<1$）の幾何分布のとき、$\mu=\frac{r}{1-r}$ と絶滅確率 $q=\min(1,\frac{1-r}{r})$ を求めよ。
+:::
+
+::: solution
+$f(s)=\sum(1-r)r^{k}s^{k}=\frac{1-r}{1-rs}$、$\mu=f'(1)=\frac{r(1-r)}{(1-r)^{2}}=\frac{r}{1-r}$。$f(s)=s$ は $rs^{2}-s+(1-r)=0$、すなわち $(s-1)(rs-(1-r))=0$ で、解は $1$ と $\frac{1-r}{r}$。\ref{prb:extinction-probability.2} から $q$ は $[0,1]$ の最小の解なので、$\frac{1-r}{r}\le1$（$\mu\ge1$）なら $q=\frac{1-r}{r}$、そうでなければ $q=1$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
