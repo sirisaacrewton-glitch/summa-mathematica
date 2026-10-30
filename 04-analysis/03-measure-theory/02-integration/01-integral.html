@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ルベーグ積分と単調収束定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/03-measure-theory/02-integration/01-integral.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ルベーグ積分と単調収束定理 {#meas:page-integral keywords="integral of nonnegative simple functions, integral of nonnegative measurable functions as a supremum, monotone convergence theorem, additivity of the integral, termwise integration of nonnegative series, Markov inequality, integral zero iff function zero a.e., measures with density, Fatou's lemma, counting measure and sums"}
+
+ルベーグ積分は、関数のグラフを「縦に」細かく切るリーマン積分と違い、値の範囲を細かく切って「値が $c$ 前後の点の集合の測度 × $c$」を足し合わせる。このページでは、まず非負の単関数の積分を定め、次に非負可測関数の積分をそれで下から近似した値の上限として定義する。中心は**単調収束定理**（増加列では積分と極限が交換できる）で、そこから積分の加法性、級数の項別積分、**ファトゥの補題**が従う。符号をもつ関数の積分と優収束定理は次のページで扱う。
+
+## 記法と定義の確認 {#meas:sec-ig-notation}
+
+::: notation
+- $(X,\mathcal{M},\mu)$ は測度空間（\ref{meas:measure}）、可測関数・単関数・単関数近似は \ref{meas:measurable-map}, \ref{meas:simple-function}, \ref{meas:simple-approximation}。$[0,\infty]$ の和は \ref{meas:extended-sums}。
+- $[0,\infty]$ の積は、$a\cdot\infty=\infty\cdot a\defeq\infty$（$a>0$）、$0\cdot\infty=\infty\cdot0\defeq0$ と定める。この約束のもとで、$[0,\infty]$ の積は結合的・可換で、和に対して分配的であり、$a\le b$ なら $ac\le bc$。
+- 「ほとんど至る所」（a.e.）は \ref{meas:complete-measure}。
+- **選択公理**：使わない。
+:::
+
+## 単関数の積分 {#meas:sec-ig-simple}
+
+::: definition 非負の単関数の積分 {#meas:simple-integral keywords="integral of a nonnegative simple function: sum of c_i mu(A_i) over the canonical form" index="単関数の積分|たんかんすうのせきぶん"}
+非負の単関数 $s=\sum_{i=1}^{m}c_{i}\mathbf{1}_{A_{i}}$（$A_{i}$ は互いに素で和が $X$、$c_{i}\ge0$）について
+$$
+\int_{X}s\,d\mu\defeq\sum_{i}c_{i}\mu(A_{i})\in[0,\infty]
+$$
+と定める。$E\in\mathcal{M}$ について $\int_{E}s\,d\mu\defeq\int_{X}s\mathbf{1}_{E}\,d\mu$。
+:::
+
+::: lemma 単関数の積分の性質 {#meas:simple-integral-properties keywords="the integral of a nonnegative simple function does not depend on the partition; it is additive, positively homogeneous and monotone; E -> int_E s is a measure" index="単関数の積分の性質|たんかんすうのせきぶんのせいしつ"}
+$s,t$ を非負の単関数、$c\ge0$ とする。
+1. 定義の値は、$s$ を「互いに素で和が $X$ の可測集合族」と非負の係数で表す表し方によらない。
+2. $\int(s+t)=\int s+\int t$, $\int cs=c\int s$。
+3. $s\le t$ なら $\int s\le\int t$。
+4. $\nu(E)\defeq\int_{E}s\,d\mu$ は $\mathcal{M}$ 上の測度。
+:::
+
+::: proof
+**1.** $s=\sum_{i}c_{i}\mathbf{1}_{A_{i}}=\sum_{j}d_{j}\mathbf{1}_{B_{j}}$ を二つの表し方とする。$A_{i}\cap B_{j}\neq\varnothing$ ならその点で $c_{i}=s=d_{j}$。$\mu$ の有限加法性から
+$$
+\sum_{i}c_{i}\mu(A_{i})=\sum_{i,j}c_{i}\mu(A_{i}\cap B_{j})=\sum_{i,j}d_{j}\mu(A_{i}\cap B_{j})=\sum_{j}d_{j}\mu(B_{j})
+$$
+（中央の等号：$A_{i}\cap B_{j}=\varnothing$ の項は両辺 $0$）。
+
+**2.** $s=\sum c_{i}\mathbf{1}_{A_{i}}$, $t=\sum d_{j}\mathbf{1}_{B_{j}}$ とすると $s+t=\sum_{i,j}(c_{i}+d_{j})\mathbf{1}_{A_{i}\cap B_{j}}$ で、1 から $\int(s+t)=\sum_{i,j}(c_{i}+d_{j})\mu(A_{i}\cap B_{j})=\int s+\int t$。$cs=\sum cc_{i}\mathbf{1}_{A_{i}}$。
+
+**3.** 2 と同じ共通の分割で、$A_{i}\cap B_{j}\neq\varnothing$ なら $c_{i}\le d_{j}$。
+
+**4.** $s\mathbf{1}_{E}=\sum_{i}c_{i}\mathbf{1}_{A_{i}\cap E}+0\cdot\mathbf{1}_{E^{c}}$ なので $\nu(E)=\sum_{i}c_{i}\mu(A_{i}\cap E)$。各 $E\mapsto\mu(A_{i}\cap E)$ は測度で、非負の係数の有限和も可算加法的（\ref{meas:extended-sums-properties.2}）。
+:::
+
+## 非負可測関数の積分 {#meas:sec-ig-nonnegative}
+
+::: definition 非負可測関数の積分 {#meas:nonnegative-integral keywords="Lebesgue integral of a nonnegative measurable function: supremum of integrals of simple functions below it; integral over a measurable set" index="ルベーグ積分|るべーぐせきぶん, 積分（測度論）|せきぶんそくどろん"}
+可測関数 $f\colon X\to[0,\infty]$ について
+$$
+\int_{X}f\,d\mu\defeq\sup\Bigl\{\int_{X}s\,d\mu:s\text{ は単関数で }0\le s\le f\Bigr\}\in[0,\infty]
+$$
+と定める。$\int_{E}f\,d\mu\defeq\int_{X}f\mathbf{1}_{E}\,d\mu$。$\int f\,d\mu$, $\int f(x)\,\mu(dx)$ とも書く。$\mu=\lambda$（ルベーグ測度）のときは $\int f\,d\lambda=\int f(x)\,dx$ とも書く。
+:::
+
+::: proposition 定義の整合性と単調性 {#meas:nonnegative-integral-basic keywords="for simple functions the two definitions agree; the integral is monotone; scaling" index="積分の単調性|せきぶんのたんちょうせい"}
+1. 非負の単関数 $s$ について、\ref{meas:nonnegative-integral} の値は \ref{meas:simple-integral} の値に等しい。
+2. $0\le f\le g$ なら $\int f\le\int g$。$E\subset F$ なら $\int_{E}f\le\int_{F}f$。
+3. $c\ge0$ なら $\int cf=c\int f$。
+:::
+
+::: proof
+**1.** $0\le s'\le s$ なら \ref{meas:simple-integral-properties.3} から $\int s'\le\int s$ で、$s'=s$ のとき等号。**2.** $f$ の下の単関数は $g$ の下の単関数。$f\mathbf{1}_{E}\le f\mathbf{1}_{F}$。**3.** $c=0$ は両辺 $0$。$c>0$ なら $s\mapsto cs$ は「$f$ の下の単関数」と「$cf$ の下の単関数」の間の全単射で、\ref{meas:simple-integral-properties.2}。
+:::
+
+::: theorem 単調収束定理 {#meas:monotone-convergence keywords="monotone convergence theorem (Beppo Levi): for an increasing sequence of nonnegative measurable functions, the integral of the limit is the limit of the integrals" index="単調収束定理|たんちょうしゅうそくていり, ベッポ・レヴィの定理|べっぽれう゛ぃのていり"}
+可測関数 $0\le f_{1}\le f_{2}\le\cdots$ について $f\defeq\lim_{n}f_{n}$（$[0,\infty]$ の中の各点の極限）とすると
+$$
+\int f\,d\mu=\lim_{n\to\infty}\int f_{n}\,d\mu.
+$$
+:::
+
+::: proof
+**Step 1（$\le$ の向きは単調性）.** $f$ は可測（\ref{meas:measurable-limits.2}）。$f_{n}\le f_{n+1}\le f$ なので $\int f_{n}$ は増加列で、極限 $L$ は $\le\int f$。
+
+**Step 2（$\ge$）.** $0\le s\le f$ を単関数、$0<\alpha<1$ とし、$E_{n}\defeq\{f_{n}\ge\alpha s\}$ とおく（可測、\ref{meas:measurable-operations}）。$E_{n}$ は増加で、$\bigcup_{n}E_{n}=X$：$s(x)=0$ なら $x\in E_{1}$、$s(x)>0$ なら $f(x)\ge s(x)>\alpha s(x)$ で $f_{n}(x)\to f(x)$ なので、ある $n$ で $f_{n}(x)>\alpha s(x)$。$f_{n}\ge f_{n}\mathbf{1}_{E_{n}}\ge\alpha s\mathbf{1}_{E_{n}}$ と単調性から
+$$
+\int f_{n}\ge\int\alpha s\mathbf{1}_{E_{n}}=\alpha\int_{E_{n}}s\,d\mu.
+$$
+\ref{meas:simple-integral-properties.4} から $E\mapsto\int_{E}s$ は測度なので、下からの連続性（\ref{meas:measure-properties.4}）で右辺は $\alpha\int_{X}s$ に収束する。よって $L\ge\alpha\int s$。$\alpha\uparrow1$、次に $s$ について上限をとって $L\ge\int f$。
+
+::: hypcheck
+- **単調性**（増加列）は Step 2 で $E_{n}$ が増加することに使った。外すと偽：$f_{n}\defeq\mathbf{1}_{[n,n+1]}$（$\mathbb{R}$ 上）は $0$ に各点収束するが $\int f_{n}=1$。
+- **非負性**も本質：$f_{n}\defeq-\frac1n\mathbf{1}_{\mathbb{R}}$ は増加して $0$ に収束するが、$\int f_{n}$ は（次のページの意味でも）定義されない（$-\infty$）。
+- $\alpha<1$ を挟むのは、$f(x)=s(x)$ の点でも $\bigcup E_{n}=X$ を保証するため。
+:::
+:::
+
+::: corollary 積分の加法性と項別積分 {#meas:termwise-integration keywords="additivity of the integral of nonnegative measurable functions; termwise integration of series of nonnegative measurable functions" index="項別積分|こうべつせきぶん, 積分の加法性|せきぶんのかほうせい"}
+1. 非負可測関数 $f,g$ について $\int(f+g)=\int f+\int g$。
+2. 非負可測関数の列 $g_{k}$ について $\int\sum_{k=1}^{\infty}g_{k}=\sum_{k=1}^{\infty}\int g_{k}$。
+:::
+
+::: proof
+**1.** \ref{meas:simple-approximation} から単関数 $s_{n}\uparrow f$, $t_{n}\uparrow g$ をとると $s_{n}+t_{n}\uparrow f+g$。\ref{meas:monotone-convergence} と \ref{meas:simple-integral-properties.2} から $\int(f+g)=\lim\int(s_{n}+t_{n})=\lim(\int s_{n}+\int t_{n})=\int f+\int g$。
+
+**2.** 部分和 $\sum_{k\le n}g_{k}$ は増加して $\sum_{k}g_{k}$ に収束するので、1 と \ref{meas:monotone-convergence} から。
+:::
+
+::: proposition マルコフの不等式と零集合 {#meas:markov keywords="Markov's inequality mu{f >= t} <= (1/t) int f; int f = 0 iff f = 0 a.e.; finite integral implies f finite a.e.; functions equal a.e. have equal integrals" index="マルコフの不等式|まるこふのふとうしき, チェビシェフの不等式|ちぇびしぇふのふとうしき"}
+$f,g\colon X\to[0,\infty]$ を可測とする。
+1. （マルコフの不等式）$t>0$ について $\mu(\{f\ge t\})\le\frac1t\int f$。
+2. $\int f=0\iff f=0$（a.e.）。
+3. $\int f<\infty$ なら $f<\infty$（a.e.）。
+4. $f=g$（a.e.）なら $\int f=\int g$。
+:::
+
+::: proof
+**1.** $t\mathbf{1}_{\{f\ge t\}}\le f$ で単調性。
+
+**2.** $\Rightarrow$：1 から $\mu(\{f\ge\frac1k\})\le k\int f=0$ で、$\{f>0\}=\bigcup_{k}\{f\ge\frac1k\}$。$\Leftarrow$：$N\defeq\{f>0\}$ は零集合。$0\le s\le f$ なる単関数は $N$ の外で $0$ なので、$s\le(\max s)\mathbf{1}_{N}$ で $\int s\le(\max s)\mu(N)=0$。
+
+**3.** $\{f=\infty\}\subset\{f\ge t\}$ なので $\mu(\{f=\infty\})\le\frac1t\int f\to0$（$t\to\infty$）。
+
+**4.** $N\defeq\{f\neq g\}$（可測）は零集合で、2 から $\int f\mathbf{1}_{N}=\int g\mathbf{1}_{N}=0$。1 の加法性（\ref{meas:termwise-integration.1}）から $\int f=\int f\mathbf{1}_{N^{c}}+\int f\mathbf{1}_{N}=\int g\mathbf{1}_{N^{c}}=\int g$。
+:::
+
+::: proposition 密度をもつ測度 {#meas:density-measure keywords="for a nonnegative measurable f, E -> int_E f dmu is a measure; integrals against it are int g f dmu" index="密度（測度）|みつどそくど, 測度の密度|そくどのみつど"}
+非負可測関数 $f$ について $\nu(E)\defeq\int_{E}f\,d\mu$ は $\mathcal{M}$ 上の測度で、非負可測関数 $g$ について $\int g\,d\nu=\int gf\,d\mu$。
+:::
+
+::: proof
+$\nu(\varnothing)=0$。互いに素な $E_{k}$ について $f\mathbf{1}_{\bigsqcup E_{k}}=\sum_{k}f\mathbf{1}_{E_{k}}$ なので、\ref{meas:termwise-integration.2} から可算加法的。$g=\mathbf{1}_{E}$ なら等式は定義そのもの、単関数なら線形性（\ref{meas:simple-integral-properties.2}, \ref{meas:termwise-integration.1}）、一般の $g$ は単関数 $s_{n}\uparrow g$ で $s_{n}f\uparrow gf$ と \ref{meas:monotone-convergence} を両辺に使う。
+:::
+
+::: theorem ファトゥの補題 {#meas:fatou keywords="Fatou's lemma: for nonnegative measurable f_n, the integral of liminf f_n is at most liminf of the integrals; strict inequality is possible" index="ファトゥの補題|ふぁとぅのほだい"}
+非負可測関数の列 $f_{n}$ について
+$$
+\int\liminf_{n\to\infty}f_{n}\,d\mu\le\liminf_{n\to\infty}\int f_{n}\,d\mu.
+$$
+:::
+
+::: proof
+$g_{k}\defeq\inf_{n\ge k}f_{n}$ は可測で（\ref{meas:measurable-limits.1}）、増加して $\liminf f_{n}$ に収束する。$n\ge k$ なら $g_{k}\le f_{n}$ なので $\int g_{k}\le\inf_{n\ge k}\int f_{n}$。\ref{meas:monotone-convergence} から $\int\liminf f_{n}=\lim_{k}\int g_{k}\le\lim_{k}\inf_{n\ge k}\int f_{n}=\liminf\int f_{n}$。
+
+::: hypcheck
+- 等号は一般には成り立たない：$\mathbb{R}$ 上で $f_{n}\defeq n\mathbf{1}_{(0,1/n)}$ は各点で $0$ に収束するが $\int f_{n}=1$。質量が一点に集中して「消える」。
+- **非負性**は本質：$f_{n}\defeq-n\mathbf{1}_{(0,1/n)}$ では左辺 $0$、右辺 $-1$ で不等式が逆になる（右辺は次のページの積分の意味で）。
+:::
+:::
+
+::: supplement
+**高い視点：積分は単関数の上の線形汎関数の単調な延長.** 単関数の積分は、測度の値から「線形性」だけで決まる。非負可測関数の積分は、それを下からの上限で延ばしたもので、単調収束定理は「この延長が増加列の極限と両立する」ことを言っている。言い換えると、非負可測関数の空間は単関数の空間の「増加列の極限による完備化」で、積分は単関数の上の単調な線形汎関数の、この完備化への唯一の単調連続な延長である（ダニエル積分の見方）。比喩で言えば、リーマン積分は「横に並んだ柱の面積の和」で、ルベーグ積分は「同じ高さの層ごとに、その層が覆う地面の広さを測って積み上げたもの」である。層の地面が複雑な形でも、測度が測れれば積分できる。
+
+**和は積分.** 数え上げ測度 $\#$ について $\int_{X}f\,d\#=\sum_{x\in X}f(x)$（問題 \ref{meas:prob-ig-counting}）。とくに項別積分（\ref{meas:termwise-integration.2}）を $X=\mathbb{N}$ に使うと、非負の二重級数の和の順序交換（\ref{meas:extended-sums-properties.2}）の別証明になる。
+:::
+
+## 問題 {#meas:sec-ig-problems}
+
+::: problem {#meas:prob-ig-counting}
+集合 $X$ 上の数え上げ測度 $\#$（$\mathcal{M}=\mathcal{P}(X)$）と $f\colon X\to[0,\infty]$ について $\int f\,d\#=\sum_{x\in X}f(x)$（有限部分和の上限）であることを示せ。また、ディラック測度について $\int f\,d\delta_{a}=f(a)$ を示せ。
+:::
+
+::: solution
+**数え上げ測度.** 単関数 $0\le s\le f$ について、$s$ の値が正の点の集合 $S$ が無限なら $\int s=\infty$ で、そのとき $s\ge c>0$（$s$ の正の値の最小値）が $S$ 上で成り立つので $\sum_{x}f(x)\ge\sum_{x\in S}c=\infty$。$S$ が有限なら $\int s=\sum_{x\in S}s(x)\le\sum_{x\in S}f(x)\le\sum_{x}f(x)$。よって $\int f\le\sum f$。逆に有限集合 $F$ について、$s\defeq\sum_{x\in F}\min(f(x),n)\mathbf{1}_{\{x\}}$ は $f$ の下の単関数で $\int s=\sum_{x\in F}\min(f(x),n)$。$n\to\infty$ と $F$ についての上限で $\int f\ge\sum f$。
+
+**ディラック測度.** $0\le s\le f$ なら $\int s\,d\delta_{a}=s(a)\le f(a)$。単関数 $s_{n}\uparrow f$（\ref{meas:simple-approximation}）について $\int s_{n}\,d\delta_{a}=s_{n}(a)\to f(a)$ で、\ref{meas:monotone-convergence} から $\int f\,d\delta_{a}=f(a)$。
+:::
+
+::: problem {#meas:prob-ig-borel-cantelli}
+$\sum_{n}\mu(A_{n})<\infty$ なら、ほとんどすべての $x$ は有限個の $A_{n}$ にしか属さないことを、関数 $g\defeq\sum_{n}\mathbf{1}_{A_{n}}$ の積分を使って示せ（\ref{meas:borel-cantelli} の別証明）。
+:::
+
+::: solution
+$g(x)$ は $x$ が属する $A_{n}$ の個数（$[0,\infty]$）。\ref{meas:termwise-integration.2} から $\int g=\sum_{n}\mu(A_{n})<\infty$。\ref{meas:markov.3} から $g<\infty$（a.e.）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
