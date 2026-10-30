@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ブラウン運動 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/03-processes/03-brownian-motion.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ブラウン運動 {#prb:page-brownian-motion keywords="Brownian motion (Wiener process): definition by independent Gaussian increments and continuous paths, equivalence with the Gaussian process of covariance min(s,t), Haar orthonormal basis of L^2[0,1], Schauder functions, Levy-Ciesielski construction, Gaussian tail estimate, extension to [0, infinity), scaling and symmetry, simple Markov property, quadratic variation, paths are of unbounded variation and nowhere differentiable (Paley-Wiener-Zygmund)"}
+
+**ブラウン運動**は、時間とともに連続に動き、重ならない時間区間での変位が独立で正規分布に従う確率過程である。前のページでは、その有限次元分布をもつ過程の存在をコルモゴロフの拡張定理から得たが、拡張定理は「道が連続である」ことを保証しない（\ref{prb:kolmogorov-extension} の後の注意）。このページでは、$L^{2}([0,1])$ の**ハール基底**を使ってブラウン運動を連続関数の一様収束級数として直接構成する（**レヴィ–シエルスキの構成**）。続いて、ブラウン運動の基本的な性質——スケール不変性、単純マルコフ性——を示し、道の振る舞いの特異さを表す二つの定理を証明する：区間を細かく分けたときの増分の 2 乗和は区間の長さに収束し（**2 次変分**）、したがって道は有界変動でない。さらに、道はほとんど確実に**至る所微分不可能**である。
+
+## 記法と定義の確認 {#prb:sec-bm-notation}
+
+::: notation
+- 正規分布・多次元正規分布・特性関数による一意性は \ref{prb:page-central-limit-theorem}, \ref{prb:page-kolmogorov-extension}。ボレル–カンテリの補題は \ref{prb:borel-cantelli}。
+- $L^{2}([0,1])$ の内積 $\langle f,g\rangle\defeq\int_{0}^{1}fg\,dx$。正規直交基底とパーセヴァルの等式は \ref{fa:orthonormal-basis}。
+- 確率過程 $(B_{t})_{t\ge0}$ の**道**とは、各 $\omega$ について関数 $t\mapsto B_{t}(\omega)$ のこと。
+- **選択公理**：使わない。
+:::
+
+## 定義 {#prb:sec-bm-definition}
+
+::: definition ブラウン運動 {#prb:brownian-motion keywords="standard Brownian motion: B_0 = 0, independent increments, B_t - B_s ~ N(0, t - s) for s < t, continuous paths" index="ブラウン運動|ぶらうんうんどう, ウィーナー過程|うぃーなーかてい"}
+確率過程 $(B_{t})_{t\ge0}$ が（標準）**ブラウン運動**であるとは、次を満たすことをいう。
+1. $B_{0}=0$。
+2. $0\le t_{0}<t_{1}<\dots<t_{k}$ について、増分 $B_{t_{1}}-B_{t_{0}},\dots,B_{t_{k}}-B_{t_{k-1}}$ は独立。
+3. $s<t$ について $B_{t}-B_{s}\sim N(0,t-s)$。
+4. すべての $\omega$ で道 $t\mapsto B_{t}(\omega)$ は連続。
+:::
+
+::: proposition ガウス過程としての特徴づけ {#prb:brownian-gaussian keywords="a process with continuous paths and B_0 = 0 is a Brownian motion iff it is a centered Gaussian process with covariance E[B_s B_t] = min(s,t)" index="ブラウン運動の共分散|ぶらうんうんどうのきょうぶんさん"}
+連続な道をもち $B_{0}=0$ を満たす過程 $(B_{t})$ について、2・3 は「すべての $t_{1},\dots,t_{k}$ で $(B_{t_{1}},\dots,B_{t_{k}})\sim N(0,(\min(t_{j},t_{l}))_{j,l})$」と同値。
+:::
+
+::: proof
+（⇒）$t_{1}<\dots<t_{k}$, $t_{0}\defeq0$ とし、増分 $D_{j}\defeq B_{t_{j}}-B_{t_{j-1}}$ は独立で $N(0,t_{j}-t_{j-1})$。$D=(D_{j})$ の特性関数は積で、$N(0,\operatorname{diag}(t_{j}-t_{j-1}))$ のもの。$B_{t_{j}}=\sum_{l\le j}D_{l}$ は線形変換なので、\ref{prb:multivariate-normal-properties.2} から正規分布で、共分散は $E[B_{s}B_{t}]=\sum_{l\le j\wedge j'}(t_{l}-t_{l-1})=\min(s,t)$。
+
+（⇐）$t_{1}<\dots<t_{k}$, $t_{0}\defeq0$ とする。増分のベクトル $D$ は正規分布の線形変換なので正規分布で（\ref{prb:multivariate-normal-properties.2}）、共分散は $j<j'$ で $E[D_{j}D_{j'}]=t_{j}-t_{j}-t_{j-1}+t_{j-1}=0$、対角は $t_{j}-t_{j-1}$。対角な共分散の正規分布は、特性関数が積に分かれるので、\ref{prb:multivariate-uniqueness.2} から独立な正規分布の積（\ref{prb:prob-ke-gaussian-independence} と同じ議論）。
+:::
+
+## レヴィ–シエルスキの構成 {#prb:sec-bm-construction}
+
+::: lemma ハール基底 {#prb:haar-basis keywords="Haar functions h_0 = 1, h_{n,k} = 2^{n/2} (1 on the left half, -1 on the right half of the dyadic interval [k 2^{-n}, (k+1) 2^{-n})) form an orthonormal basis of L^2[0,1]; Schauder functions S_{n,k}(t) = int_0^t h_{n,k} are tents of height 2^{-n/2-1}" index="ハール基底|はーるきてい, シャウダー関数|しゃうだーかんすう"}
+$h_{0}\defeq\mathbf{1}_{[0,1)}$、$n\ge0$, $0\le k<2^{n}$ について
+$$
+h_{n,k}\defeq2^{n/2}\bigl(\mathbf{1}_{[k2^{-n},(k+\frac12)2^{-n})}-\mathbf{1}_{[(k+\frac12)2^{-n},(k+1)2^{-n})}\bigr)
+$$
+とおく（**ハール関数**）。
+1. $\{h_{0}\}\cup\{h_{n,k}\}$ は $L^{2}([0,1])$ の正規直交基底である。
+2. $S_{0}(t)\defeq t$, $S_{n,k}(t)\defeq\int_{0}^{t}h_{n,k}$（**シャウダー関数**）は、$[k2^{-n},(k+1)2^{-n}]$ を台とする高さ $2^{-n/2-1}$ の「山形」の連続関数で、$n$ を固定すると台は互いに重ならない。とくに $0\le\sum_{k}S_{n,k}(t)\le2^{-n/2-1}$。
+:::
+
+::: proof
+**1.** **正規直交性.** $\|h_{n,k}\|^{2}=2^{n}\cdot2^{-n}=1$。同じ $n$ の異なる $k$ は台が重ならない。$m<n$ なら $h_{m,k'}$ は $h_{n,k}$ の台の上で定数なので、$\int h_{n,k}h_{m,k'}=c\int h_{n,k}=0$。$h_{0}$ についても同様。
+
+**稠密性.** $V_{N}$ を、長さ $2^{-N}$ の 2 進区間の指示関数で張られる空間（次元 $2^{N}$）とする。$h_{0}$ と $h_{n,k}$（$n<N$）は $V_{N}$ に属する $1+\sum_{n<N}2^{n}=2^{N}$ 個の正規直交な（したがって一次独立な）元なので、$V_{N}$ を張る。$\bigcup_{N}V_{N}$ は $L^{2}([0,1])$ で稠密：連続関数 $f$ は一様連続なので、各 2 進区間の左端の値をとる階段関数で一様に近似でき、連続関数は $L^{2}$ で稠密（\ref{meas:cc-dense}、$[0,1]$ の外では $0$ として制限）。\ref{fa:orthonormal-basis}（2 ⇒ 基底）から結論。
+
+**2.** 定義から直接：$S_{n,k}$ は台の左端から中点まで傾き $2^{n/2}$ で増え、中点から右端まで同じ傾きで減って $0$ に戻る。高さは $2^{n/2}\cdot2^{-n-1}$。
+:::
+
+::: theorem ブラウン運動の存在 {#prb:brownian-existence keywords="Levy-Ciesielski construction: with i.i.d. standard normal xi, B_t = xi_0 t + sum_n sum_k xi_{n,k} S_{n,k}(t) converges uniformly on [0,1] almost surely and defines a Brownian motion; extension to [0, infinity) by concatenating independent copies" index="レヴィ–シエルスキの構成|れう゛ぃしえるすきのこうせい, ブラウン運動の存在|ぶらうんうんどうのそんざい"}
+$\xi_{0},\xi_{n,k}$（$n\ge0$, $0\le k<2^{n}$）を i.i.d. で $N(0,1)$ に従う確率変数とする。
+1. 確率 $1$ で、級数 $B_{t}\defeq\xi_{0}S_{0}(t)+\sum_{n\ge0}\sum_{k<2^{n}}\xi_{n,k}S_{n,k}(t)$ は $t\in[0,1]$ について一様に（絶対）収束し、$(B_{t})_{t\in[0,1]}$ は連続な道をもつ。
+2. $(B_{t})_{t\in[0,1]}$ は平均 $0$、共分散 $\min(s,t)$ のガウス過程で、したがって $[0,1]$ 上のブラウン運動である（\ref{prb:brownian-gaussian}）。
+3. $[0,\infty)$ 上のブラウン運動が存在する。
+:::
+
+::: proof
+**1.** **Step 1（ガウスの裾）.** $\xi\sim N(0,1)$, $x\ge1$ なら $P(|\xi|>x)=2\int_{x}^{\infty}\frac{e^{-y^{2}/2}}{\sqrt{2\pi}}dy\le2\int_{x}^{\infty}\frac{y}{x}\frac{e^{-y^{2}/2}}{\sqrt{2\pi}}dy=\frac{2e^{-x^{2}/2}}{\sqrt{2\pi}x}\le e^{-x^{2}/2}$。
+
+**Step 2.** $M_{n}\defeq\max_{k<2^{n}}|\xi_{n,k}|$ とすると、$n\ge1$ で $P(M_{n}>2\sqrt n)\le2^{n}e^{-2n}=(2/e^{2})^{n}$ で和は有限。\ref{prb:borel-cantelli.1} から a.s. で有限個の $n$ を除いて $M_{n}\le2\sqrt n$。
+
+**Step 3.** その事象の上で、\ref{prb:haar-basis.2} から $\sup_{t}\sum_{k}|\xi_{n,k}|S_{n,k}(t)\le M_{n}2^{-n/2-1}\le\sqrt n\,2^{-n/2}$（十分大きな $n$）で、$\sum_{n}\sqrt n2^{-n/2}<\infty$。ワイエルシュトラスの $M$ 判定法から一様絶対収束し、連続関数の一様極限なので連続。確率 $0$ の例外集合の上では $B\equiv0$ と定める。
+
+**2.** **Step 1（共分散）.** 部分和 $B_{t}^{(N)}$（$n<N$ までの和）は $L^{2}(P)$ でも収束する：$\xi$ たちは $L^{2}(P)$ の正規直交系で、係数 $S_{n,k}(t)=\langle\mathbf{1}_{[0,t]},h_{n,k}\rangle$ の 2 乗和はベッセルの不等式から有限。$L^{2}$ 極限と a.s. 極限は（部分列で）一致するので、$E[B_{s}B_{t}]=\langle\mathbf{1}_{[0,s]},h_{0}\rangle\langle\mathbf{1}_{[0,t]},h_{0}\rangle+\sum_{n,k}\langle\mathbf{1}_{[0,s]},h_{n,k}\rangle\langle\mathbf{1}_{[0,t]},h_{n,k}\rangle$。\ref{prb:haar-basis.1} とパーセヴァルの等式（\ref{fa:orthonormal-basis.4} の内積版）から、これは $\langle\mathbf{1}_{[0,s]},\mathbf{1}_{[0,t]}\rangle=\min(s,t)$。
+
+**Step 2（正規性）.** $u\in\mathbb{R}^{k}$, $t_{1},\dots,t_{k}$ について $Y\defeq\sum_{j}u_{j}B_{t_{j}}$ は、独立な正規変数の有限一次結合 $Y^{(N)}\defeq\sum_{j}u_{j}B_{t_{j}}^{(N)}\sim N(0,\sigma_{N}^{2})$ の a.s. 極限で、$\sigma_{N}^{2}=E[(Y^{(N)})^{2}]\to E[Y^{2}]\defeq\sigma^{2}$（$L^{2}$ 収束）。\ref{prb:portmanteau.4} と \ref{prb:levy-continuity.1} から $E[e^{iY}]=\lim e^{-\sigma_{N}^{2}/2}=e^{-\sigma^{2}/2}$。$\sigma^{2}=\langle u,\Sigma u\rangle$（$\Sigma=(\min(t_{j},t_{l}))$）なので、$(B_{t_{1}},\dots,B_{t_{k}})$ の特性関数は $e^{-\langle u,\Sigma u\rangle/2}$ で、$N(0,\Sigma)$ に従う。
+
+**3.** 1・2 の構成を独立な列で繰り返し、$[0,1]$ 上の独立なブラウン運動 $B^{(0)},B^{(1)},\dots$ を作る（可算個の i.i.d. 列は \ref{prb:independent-sequence-existence} で作れる）。$t\ge0$ について $m\defeq\lfloor t\rfloor$ として $B_{t}\defeq\sum_{l<m}B^{(l)}_{1}+B^{(m)}_{t-m}$。道は連続（整数点でつながる）で、$B_{0}=0$。増分は、各 $B^{(l)}$ の増分の和で、異なる $l$ の部分は独立、同じ $l$ の重ならない区間の部分は 2 から独立なので、\ref{prb:pi-system-independence.2} により定義の 2 を満たし、分散は長さの和で 3 も満たす（独立な正規分布の和は正規分布：特性関数の積）。
+:::
+
+## 基本性質 {#prb:sec-bm-properties}
+
+::: proposition ブラウン運動の不変性とマルコフ性 {#prb:brownian-invariance keywords="Brownian scaling c^{-1/2} B_{ct}, symmetry -B, simple Markov property: for s >= 0, (B_{s+t} - B_s)_{t >= 0} is a Brownian motion independent of sigma(B_r : r <= s)" index="ブラウン運動のスケール不変性|ぶらうんうんどうのすけーるふへんせい, 単純マルコフ性|たんじゅんまるこふせい"}
+$(B_{t})$ をブラウン運動とする。
+1. $c>0$ について $(c^{-1/2}B_{ct})_{t\ge0}$ と $(-B_{t})_{t\ge0}$ はブラウン運動。
+2. $s\ge0$ について $W_{t}\defeq B_{s+t}-B_{s}$ はブラウン運動で、$\sigma(W_{t}:t\ge0)$ は $\mathcal{F}_{s}\defeq\sigma(B_{r}:r\le s)$ と独立。
+:::
+
+::: proof
+**1.** どちらも連続な道をもち、平均 $0$ のガウス過程で（線形変換）、共分散は $c^{-1}\min(cs,ct)=\min(s,t)$、$(-1)^{2}\min(s,t)$。\ref{prb:brownian-gaussian} から。
+
+**2.** $W$ は連続で $W_{0}=0$、増分は $B$ の増分なので定義の 2・3 を満たす。独立性：$r_{1}<\dots<r_{a}\le s$ と $t_{1}<\dots<t_{b}$ について、$(B_{r_{1}},\dots,B_{r_{a}})$ は $[0,s]$ の増分の関数、$(W_{t_{1}},\dots,W_{t_{b}})$ は $[s,\infty)$ の増分の関数で、定義の 2 と \ref{prb:independence-criteria.2} から独立。このような事象 $\{(B_{r_{i}})\in A\}$、$\{(W_{t_{j}})\in C\}$ はそれぞれ $\mathcal{F}_{s}$ と $\sigma(W)$ を生成する π 系をなす（有限個の座標の事象は、座標を合併して同じ形に書ける）ので、\ref{prb:pi-system-independence.1} から結論。
+:::
+
+::: theorem 2 次変分 {#prb:quadratic-variation keywords="quadratic variation of Brownian motion: sum over dyadic partitions of [0,t] of squared increments converges to t almost surely and in L^2; Brownian paths have unbounded variation on every interval" index="2 次変分|2じへんぶん, 有界変動でないこと|ゆうかいへんどうでないこと"}
+$t>0$ とし、$Q_{n}\defeq\sum_{k=1}^{2^{n}}\bigl(B_{kt2^{-n}}-B_{(k-1)t2^{-n}}\bigr)^{2}$ とおく。
+1. $E[(Q_{n}-t)^{2}]=2t^{2}2^{-n}$ で、$Q_{n}\to t$（a.s.）。
+2. a.s. で、道は $[0,t]$ 上で有界変動でない。
+:::
+
+::: proof
+**1.** 増分 $D_{k}$ は独立で $N(0,t2^{-n})$。$E[D_{k}^{2}]=t2^{-n}$、$\operatorname{Var}(D_{k}^{2})=E[D_{k}^{4}]-(t2^{-n})^{2}=3(t2^{-n})^{2}-(t2^{-n})^{2}=2(t2^{-n})^{2}$（$N(0,\sigma^{2})$ の 4 次モーメントは $3\sigma^{4}$：部分積分 $\int y^{4}e^{-y^{2}/2}dy=3\int y^{2}e^{-y^{2}/2}dy$ から）。独立性から $E[(Q_{n}-t)^{2}]=\operatorname{Var}(Q_{n})=2^{n}\cdot2t^{2}4^{-n}$。チェビシェフの不等式から $P(|Q_{n}-t|>\varepsilon)\le\frac{2t^{2}2^{-n}}{\varepsilon^{2}}$ で和は有限なので、\ref{prb:borel-cantelli.1} から a.s. 収束（$\varepsilon=\frac1j$ について共通部分）。
+
+**2.** $Q_{n}\le\max_{k}|D_{k}|\cdot\sum_{k}|D_{k}|\le\max_{k}|D_{k}|\cdot V$（$V$ は道の $[0,t]$ 上の全変動）。道は一様連続なので $\max_{k}|D_{k}|\to0$。$V<\infty$ なら $Q_{n}\to0$ となり、1 の $Q_{n}\to t>0$ と矛盾（1 の確率 $1$ の事象の上で）。
+:::
+
+::: theorem 至る所微分不可能 {#prb:nowhere-differentiable keywords="Paley-Wiener-Zygmund theorem: almost surely, the Brownian path is not differentiable at any point of [0,1]; proof by three consecutive small increments" index="ブラウン運動の微分不可能性|ぶらうんうんどうのびぶんふかのうせい, ペイリー–ウィーナー–ジグムントの定理|ぺいりーうぃーなーじぐむんとのていり"}
+確率 $1$ の事象 $\Omega_{0}$ があって、$\omega\in\Omega_{0}$ なら道 $t\mapsto B_{t}(\omega)$ は $[0,1)$ のどの点でも微分可能でない。
+:::
+
+::: proof
+**Step 1（微分可能な点があるときの帰結）.** 道が $s\in[0,1)$ で微分可能とすると、ある $M\ge1$（整数）と $\delta>0$ で、$|t-s|\le\delta$ なら $|B_{t}-B_{s}|\le M|t-s|$（$M\ge|B'(s)|+1$ ととれる）。$n\ge\frac4\delta$ とし $k\defeq\lfloor ns\rfloor+1$ とすると、$j=k,k+1,k+2,k+3$ について $|\frac jn-s|\le\frac4n\le\delta$ なので、$j=k,k+1,k+2$ で
+$$
+\Bigl|B_{\frac{j+1}{n}}-B_{\frac jn}\Bigr|\le\Bigl|B_{\frac{j+1}{n}}-B_{s}\Bigr|+\Bigl|B_{s}-B_{\frac jn}\Bigr|\le\frac{8M}{n}.
+$$
+
+**Step 2（事象）.** $A_{M,n}\defeq\bigcup_{k=1}^{n}\bigcap_{j=k}^{k+2}\bigl\{|B_{(j+1)/n}-B_{j/n}|\le\frac{8M}{n}\bigr\}$ とおく（$B$ は $[0,\infty)$ 上で考える）。Step 1 から、$[0,1)$ のある点で微分可能な道の全体は $\bigcup_{M\ge1}\bigcup_{N\ge1}\bigcap_{n\ge N}A_{M,n}$ に含まれる。
+
+**Step 3（確率の評価）.** 増分 $B_{(j+1)/n}-B_{j/n}\sim N(0,\frac1n)$ の密度は $\le\frac{\sqrt n}{\sqrt{2\pi}}$ なので $P(|B_{(j+1)/n}-B_{j/n}|\le x)\le\frac{2x\sqrt n}{\sqrt{2\pi}}\le x\sqrt n$。3 つの増分は独立なので
+$$
+P(A_{M,n})\le n\Bigl(\frac{8M}{n}\sqrt n\Bigr)^{3}=\frac{512M^{3}}{\sqrt n}\to0.
+$$
+よって $P\bigl(\bigcap_{n\ge N}A_{M,n}\bigr)\le\inf_{n\ge N}P(A_{M,n})=0$ で、可算和をとって $P\bigl(\bigcup_{M,N}\bigcap_{n\ge N}A_{M,n}\bigr)=0$。$\Omega_{0}$ をこの事象の補集合とすればよい。
+:::
+
+::: hypcheck
+- 構成（\ref{prb:brownian-existence}）では、ハール基底の完全性（パーセヴァルの等式）が共分散 $\min(s,t)$ を与え、ガウスの裾の評価とボレル–カンテリの補題が一様収束（道の連続性）を与えた。コルモゴロフの拡張定理は使っていない。
+- 微分不可能性の証明で、増分を 1 つや 2 つではなく 3 つ使ったのは、確率の評価 $n\cdot(M/\sqrt n)^{r}$ が $r=3$ で初めて $0$ に収束するからである（$r=2$ では $n\cdot\frac{M^{2}}{n}$ で有界にとどまる）。
+- 微分可能な点をもつ道の全体が可測かどうかは問題にしていない：確率 $0$ の事象に含まれることを示した。
+- 反射原理 $P(\max_{s\le t}B_{s}\ge a)=2P(B_{t}\ge a)$ には、停止時刻での強マルコフ性（連続時間版）が要る。このページでは示していない。
+:::
+
+::: supplement
+**関連する結果.**
+- **強マルコフ性と反射原理**：停止時刻 $\tau$ について $(B_{\tau+t}-B_{\tau})$ は $\mathcal{F}_{\tau}$ と独立なブラウン運動。これから反射原理と、最大値 $\max_{s\le t}B_{s}$ が $|B_{t}|$ と同分布であることが従う。このサイトではまだ証明していない。
+- **重複対数の法則**：$\limsup_{t\to\infty}\frac{B_{t}}{\sqrt{2t\log\log t}}=1$（a.s.）。**レヴィの連続度**：$\limsup_{h\to0}\sup_{t}\frac{|B_{t+h}-B_{t}|}{\sqrt{2h\log(1/h)}}=1$。
+- **ドンスカーの不変原理**：単純ランダムウォークを $S_{\lfloor nt\rfloor}/\sqrt n$ と縮めた道は、連続関数の空間の上の法則としてブラウン運動に収束する。中心極限定理の関数版である。
+- 伊藤の確率積分 $\int H\,dB$ と確率微分方程式は、2 次変分 $(dB)^{2}=dt$（\ref{prb:quadratic-variation}）を出発点とする。
+
+**高い視点：白色雑音の積分.** 構成の式 $B_{t}=\sum\xi_{n,k}\langle\mathbf{1}_{[0,t]},h_{n,k}\rangle$ は、「正規直交基底の各方向に独立な標準正規の係数を与えた」形式的な対象 $\dot B=\sum\xi_{n,k}h_{n,k}$（**白色雑音**）を $[0,t]$ で積分したものである。白色雑音は $L^{2}$ の元ではない（係数の 2 乗和が発散する）が、$L^{2}$ の任意の関数 $f$ との「内積」$\sum\xi_{n,k}\langle f,h_{n,k}\rangle$ は $N(0,\|f\|^{2})$ として意味をもち、$f\mapsto\int f\,dB$ は $L^{2}([0,1])$ から確率変数の $L^{2}$ への等長写像（ウィーナー積分）になる。基底の選び方によらないこの等長性が、ブラウン運動の普遍性の源である。比喩で言えば、ブラウン運動は「あらゆる時間スケールで同じように揺れる」道で、ハール基底のそれぞれの段 $n$ が時間スケール $2^{-n}$ の揺れを独立に担当している。
+:::
+
+## 問題 {#prb:sec-bm-problems}
+
+::: problem {#prb:prob-bm-martingales}
+$(B_{t})$ をブラウン運動、$\mathcal{F}_{s}\defeq\sigma(B_{r}:r\le s)$ とする。$s<t$ について $E[B_{t}\mid\mathcal{F}_{s}]=B_{s}$、$E[B_{t}^{2}-t\mid\mathcal{F}_{s}]=B_{s}^{2}-s$、$\theta\in\mathbb{R}$ について $E[e^{\theta B_{t}-\theta^{2}t/2}\mid\mathcal{F}_{s}]=e^{\theta B_{s}-\theta^{2}s/2}$ を示せ。
+:::
+
+::: solution
+$W\defeq B_{t}-B_{s}\sim N(0,t-s)$ は $\mathcal{F}_{s}$ と独立（\ref{prb:brownian-invariance.2}）。\ref{prb:conditional-properties} の 4・6 から $E[B_{t}\mid\mathcal{F}_{s}]=B_{s}+E[W]=B_{s}$。$B_{t}^{2}=B_{s}^{2}+2B_{s}W+W^{2}$ から $E[B_{t}^{2}\mid\mathcal{F}_{s}]=B_{s}^{2}+0+(t-s)$。最後は $E[e^{\theta W}]=e^{\theta^{2}(t-s)/2}$（$N(0,\sigma^{2})$ の積率母関数：$\int e^{\theta y}\frac{e^{-y^{2}/(2\sigma^{2})}}{\sqrt{2\pi}\sigma}dy$ で $y-\theta\sigma^{2}$ と平方完成）と \ref{prb:conditional-properties.4} から $E[e^{\theta B_{t}}\mid\mathcal{F}_{s}]=e^{\theta B_{s}}e^{\theta^{2}(t-s)/2}$。
+:::
+
+::: problem {#prb:prob-bm-integral}
+$Y\defeq\int_{0}^{1}B_{t}\,dt$（道ごとのリーマン積分）は $N(0,\frac13)$ に従うことを示せ。
+:::
+
+::: solution
+道は連続なので $Y=\lim_{n}\frac1n\sum_{k=1}^{n}B_{k/n}$（各点）。右辺 $Y_{n}$ は正規分布 $N(0,\sigma_{n}^{2})$ で、$\sigma_{n}^{2}=\frac{1}{n^{2}}\sum_{j,k}\min(\frac jn,\frac kn)\to\int_{0}^{1}\int_{0}^{1}\min(s,t)\,ds\,dt=\frac13$（リーマン和）。\ref{prb:levy-continuity.1} から $E[e^{iuY}]=\lim e^{-\sigma_{n}^{2}u^{2}/2}=e^{-u^{2}/6}$ で、\ref{prb:characteristic-uniqueness.2} から $Y\sim N(0,\frac13)$。（$\int_{0}^{1}\int_{0}^{1}\min(s,t)=2\int_{0}^{1}\int_{0}^{t}s\,ds\,dt=\int_{0}^{1}t^{2}dt=\frac13$。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
