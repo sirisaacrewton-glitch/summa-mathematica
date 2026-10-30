@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ヒルベルト空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/01-banach-hilbert/02-hilbert-spaces.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ヒルベルト空間 {#fa:page-hilbert-spaces keywords="inner product space, Cauchy-Schwarz inequality, parallelogram law, Hilbert space, l^2 and L^2, closest point in a closed convex set, orthogonal projection, orthogonal complement, Riesz representation theorem, orthonormal systems, Bessel's inequality, orthonormal basis, Parseval's identity, existence of orthonormal bases by Zorn's lemma, Gram-Schmidt, separable Hilbert spaces are isomorphic to l^2"}
+
+内積から作ったノルムで完備な空間が**ヒルベルト空間**で、無限次元でもユークリッド空間とほとんど同じ幾何（直交性、最短距離の点、正規直交基底による展開）が成り立つ。その源は**中線定理**で、そこから閉凸集合への最短距離の点がただ一つ存在すること（**射影定理**）が従う。これを使って、すべての有界線形汎関数が内積で表されること（**リースの表現定理**）と、すべてのベクトルが正規直交基底で展開できること（**パーセヴァルの等式**）を示す。
+
+## 記法と定義の確認 {#fa:sec-hs-notation}
+
+::: notation
+- ノルム空間・バナッハ空間・有界線形作用素・双対空間は \ref{fa:normed-space}, \ref{fa:bounded-operator}, \ref{fa:continuity-boundedness}。$L^{p}$ とヘルダーの不等式・完備性は \ref{meas:lp-space}, \ref{meas:holder}, \ref{meas:riesz-fischer}。
+- 添字集合 $I$ が非可算でも、$a_{i}\ge0$ について $\sum_{i\in I}a_{i}$ は有限部分和の上限とする（\ref{meas:extended-sums} と同じ定義）。和が有限なら $a_{i}\ne0$ となる $i$ は可算個（$\{i:a_{i}>\frac1k\}$ は有限）。
+- 極大元の存在には \ref{set:zorn} を使う。
+- **選択公理**：正規直交基底の存在（ツォルンの補題）で使う。
+:::
+
+## 内積空間 {#fa:sec-hs-inner}
+
+::: definition 内積とヒルベルト空間 {#fa:inner-product keywords="inner product on a real or complex vector space: linear in the first variable, conjugate symmetric, positive definite; induced norm; Hilbert space" index="内積空間|ないせきくうかん, ヒルベルト空間|ひるべるとくうかん"}
+$\mathbb{K}$ 上のベクトル空間 $H$ の**内積**とは、$\langle\cdot,\cdot\rangle\colon H\times H\to\mathbb{K}$ で、第 1 変数について線形、$\langle y,x\rangle=\overline{\langle x,y\rangle}$、$\langle x,x\rangle>0$（$x\ne0$）を満たすものをいう。$\|x\|\defeq\sqrt{\langle x,x\rangle}$ とおく。この $\|\cdot\|$ について完備な内積空間を**ヒルベルト空間**という。$\langle x,y\rangle=0$ のとき $x\perp y$ と書く。
+:::
+
+::: proposition コーシー–シュワルツと中線定理 {#fa:cauchy-schwarz keywords="Cauchy-Schwarz |<x,y>| <= ||x|| ||y||; ||.|| is a norm; parallelogram law; Pythagoras; continuity of the inner product" index="コーシー–シュワルツの不等式（内積空間）|こーしーしゅわるつのふとうしきないせきくうかん, 中線定理|ちゅうせんていり"}
+内積空間 $H$ について、
+1. $|\langle x,y\rangle|\le\|x\|\|y\|$。
+2. $\|\cdot\|$ はノルムで、内積は $H\times H$ 上連続。
+3. （中線定理）$\|x+y\|^{2}+\|x-y\|^{2}=2\|x\|^{2}+2\|y\|^{2}$。
+4. （ピタゴラス）$x\perp y$ なら $\|x+y\|^{2}=\|x\|^{2}+\|y\|^{2}$。
+:::
+
+::: proof
+**1.** $y=0$ なら自明。$y\ne0$ なら $t\defeq\langle x,y\rangle/\|y\|^{2}$ について $0\le\|x-ty\|^{2}=\|x\|^{2}-2\operatorname{Re}(\bar t\langle x,y\rangle)+|t|^{2}\|y\|^{2}=\|x\|^{2}-|\langle x,y\rangle|^{2}/\|y\|^{2}$。
+
+**2.** 三角不等式は $\|x+y\|^{2}=\|x\|^{2}+2\operatorname{Re}\langle x,y\rangle+\|y\|^{2}\le(\|x\|+\|y\|)^{2}$（1 から）。連続性は $|\langle x,y\rangle-\langle x',y'\rangle|\le\|x-x'\|\|y\|+\|x'\|\|y-y'\|$。
+
+**3・4.** $\|x\pm y\|^{2}=\|x\|^{2}\pm2\operatorname{Re}\langle x,y\rangle+\|y\|^{2}$ を足す。直交なら中央の項は $0$。
+:::
+
+::: example
+1. $\ell^{2}(I)$（$I$ 上の数え上げ測度の $L^{2}$）は $\langle a,b\rangle\defeq\sum a_{i}\overline{b_{i}}$ でヒルベルト空間。
+2. $L^{2}(\mu)$ は $\langle f,g\rangle\defeq\int f\bar g\,d\mu$ でヒルベルト空間（積分はヘルダーの不等式 $p=q=2$ で有限、\ref{meas:holder}。完備性は \ref{meas:riesz-fischer}）。
+3. $1\le p\le\infty$, $p\ne2$ の $\ell^{p}$（2 次元以上）は中線定理を満たさない：$x=e_{1}$, $y=e_{2}$ で $\|x\pm y\|_{p}^{2}=2^{2/p}$ と $2\|x\|^{2}+2\|y\|^{2}=4$。$2\cdot2^{2/p}=4\iff p=2$。したがって内積から来るノルムでない。
+:::
+
+## 射影定理 {#fa:sec-hs-projection}
+
+::: theorem 最短距離の点 {#fa:closest-point keywords="in a Hilbert space every nonempty closed convex set has a unique point of minimal norm; unique closest point to any x" index="最短距離の点|さいたんきょりのてん, 射影定理|しゃえいていり"}
+$C$ をヒルベルト空間 $H$ の空でない閉凸集合、$x\in H$ とすると、$\|x-c_{0}\|=\operatorname{dist}(x,C)$ となる $c_{0}\in C$ がただ一つある。
+:::
+
+::: proof
+$d\defeq\operatorname{dist}(x,C)$、$c_{n}\in C$ を $\|x-c_{n}\|^{2}<d^{2}+\frac1n$ となる列とする（可算選択公理）。中線定理を $x-c_{n}$, $x-c_{m}$ に使うと
+$$
+\|c_{n}-c_{m}\|^{2}=2\|x-c_{n}\|^{2}+2\|x-c_{m}\|^{2}-4\Bigl\|x-\frac{c_{n}+c_{m}}{2}\Bigr\|^{2}\le2\Bigl(d^{2}+\frac1n\Bigr)+2\Bigl(d^{2}+\frac1m\Bigr)-4d^{2}
+$$
+（$\frac{c_{n}+c_{m}}{2}\in C$ は凸性から、よって最後の項は $\ge4d^{2}$）。右辺 $\to0$ なのでコーシー列で、極限 $c_{0}\in C$（$C$ は閉、$H$ は完備）、$\|x-c_{0}\|=d$。二つの最短点 $c_{0},c_{0}'$ に同じ式を使うと $\|c_{0}-c_{0}'\|^{2}\le2d^{2}+2d^{2}-4d^{2}=0$。
+
+::: hypcheck
+- **完備性**：極限の存在に使った。**凸性**：中点が $C$ に入ることに使った。凸でなければ一意性が崩れる（円周上の点と中心）。
+- $\ell^{1}$ や $\ell^{\infty}$ のようなバナッハ空間では、最短点は存在しても一意でないことがある（中線定理がない）。
+:::
+:::
+
+::: theorem 直交分解 {#fa:orthogonal-decomposition keywords="for a closed subspace M of a Hilbert space, H = M direct sum M-perp; the orthogonal projection P_M is linear, bounded with norm at most 1, idempotent and characterized by x - P_M x perpendicular to M; M-perp-perp = M" index="直交分解|ちょっこうぶんかい, 直交射影|ちょっこうしゃえい, 直交補空間|ちょっこうほくうかん"}
+$M$ をヒルベルト空間 $H$ の閉部分空間、$M^{\perp}\defeq\{y:y\perp M\}$ とする。
+1. $x\in H$ の $M$ の最短点 $P_{M}x$ は、$x-P_{M}x\perp M$ となる $M$ のただ一つの点。
+2. $H=M\oplus M^{\perp}$（$x=P_{M}x+(x-P_{M}x)$）で、$P_{M}$ は線形、$\|P_{M}\|\le1$、$P_{M}^{2}=P_{M}$。
+3. $M^{\perp\perp}=M$。一般の部分空間 $N$ について $N^{\perp\perp}=\overline{N}$。
+:::
+
+::: proof
+**1.** $m_{0}\defeq P_{M}x$、$m\in M$、$t\in\mathbb{K}$ について $\|x-m_{0}-tm\|^{2}\ge\|x-m_{0}\|^{2}$ なので $-2\operatorname{Re}(\bar t\langle x-m_{0},m\rangle)+|t|^{2}\|m\|^{2}\ge0$。$t=s\langle x-m_{0},m\rangle$（$s>0$ 小）とすると $-2s|\langle x-m_{0},m\rangle|^{2}+O(s^{2})\ge0$ なので $\langle x-m_{0},m\rangle=0$。逆に $x-m_{0}\perp M$ なら、$m\in M$ についてピタゴラスから $\|x-m\|^{2}=\|x-m_{0}\|^{2}+\|m_{0}-m\|^{2}\ge\|x-m_{0}\|^{2}$ で最短点。
+
+**2.** $M\cap M^{\perp}=0$（$\langle x,x\rangle=0$）。線形性は 1 の特徴づけ（$ax+by-(aP_{M}x+bP_{M}y)\perp M$）から。ピタゴラスから $\|x\|^{2}=\|P_{M}x\|^{2}+\|x-P_{M}x\|^{2}$ で $\|P_{M}x\|\le\|x\|$。$M$ の点は自分自身が最短点。
+
+**3.** $M\subset M^{\perp\perp}$ は定義から。$x\in M^{\perp\perp}$ なら $x-P_{M}x\in M^{\perp}\cap M^{\perp\perp}=0$（$M^{\perp\perp}$ は部分空間で $P_{M}x\in M\subset M^{\perp\perp}$）。$N$ については $N^{\perp}=\overline{N}^{\perp}$（内積の連続性）。
+:::
+
+::: theorem リースの表現定理 {#fa:riesz-representation keywords="Riesz representation theorem for Hilbert spaces: every bounded linear functional is phi(x) = <x,y> for a unique y, with ||phi|| = ||y||; H is conjugate-linearly isometric to H*" index="リースの表現定理|りーすのひょうげんていり"}
+$\varphi\in H^{*}$ について、$\varphi(x)=\langle x,y\rangle$（すべての $x$）となる $y\in H$ がただ一つあり、$\|\varphi\|=\|y\|$。写像 $y\mapsto\langle\cdot,y\rangle$ は $H$ から $H^{*}$ への共役線形な等長全単射。
+:::
+
+::: proof
+$\varphi=0$ なら $y=0$。そうでなければ $M\defeq\ker\varphi$ は閉部分空間（連続性）で $M\ne H$。\ref{fa:orthogonal-decomposition.2} から $z\in M^{\perp}$, $\|z\|=1$ をとる。任意の $x$ について $\varphi(x)z-\varphi(z)x\in M$ なので $z$ との内積は $0$：$\varphi(x)-\varphi(z)\langle x,z\rangle=0$。よって $y\defeq\overline{\varphi(z)}z$ で $\varphi(x)=\langle x,y\rangle$。一意性：$\langle x,y-y'\rangle=0$ を $x=y-y'$ で使う。ノルム：コーシー–シュワルツから $\|\varphi\|\le\|y\|$、$x=y$ で等号。共役線形性は $\langle x,ay+by'\rangle=\bar a\langle x,y\rangle+\bar b\langle x,y'\rangle$。
+:::
+
+## 正規直交基底 {#fa:sec-hs-orthonormal}
+
+::: proposition ベッセルの不等式 {#fa:bessel keywords="Bessel's inequality: sum |<x,e_i>|^2 <= ||x||^2 for an orthonormal system; only countably many coefficients are nonzero; sum <x,e_i> e_i converges unconditionally" index="ベッセルの不等式|べっせるのふとうしき, 正規直交系|せいきちょっこうけい"}
+$\{e_{i}\}_{i\in I}$ を正規直交系（$\langle e_{i},e_{j}\rangle=\delta_{ij}$）とする。
+1. $\sum_{i\in I}|\langle x,e_{i}\rangle|^{2}\le\|x\|^{2}$。とくに $\langle x,e_{i}\rangle\ne0$ となる $i$ は可算個。
+2. $H$ がヒルベルト空間なら、$\sum_{i}\langle x,e_{i}\rangle e_{i}$（$0$ でない項を任意の順に並べた級数）は収束し、和は並べ方によらず、$x$ の $\overline{\operatorname{span}}\{e_{i}\}$ への直交射影に等しい。
+:::
+
+::: proof
+**1.** 有限集合 $F\subset I$ について $y\defeq\sum_{i\in F}\langle x,e_{i}\rangle e_{i}$ とすると $x-y\perp e_{j}$（$j\in F$）なので $x-y\perp y$、ピタゴラスから $\|x\|^{2}=\|x-y\|^{2}+\sum_{F}|\langle x,e_{i}\rangle|^{2}\ge\sum_{F}|\langle x,e_{i}\rangle|^{2}$。上限をとる。
+
+**2.** $0$ でない係数の $i$ を $i_{1},i_{2},\dots$ と並べると、ピタゴラスから $\|\sum_{k=n+1}^{m}\langle x,e_{i_{k}}\rangle e_{i_{k}}\|^{2}=\sum_{k=n+1}^{m}|\langle x,e_{i_{k}}\rangle|^{2}$ で、1 からコーシー列、極限 $y$ がある。内積の連続性から $\langle x-y,e_{j}\rangle=\langle x,e_{j}\rangle-\langle x,e_{j}\rangle=0$ がすべての $j$ で成り立つので $x-y\perp M\defeq\overline{\operatorname{span}}\{e_{i}\}$、$y\in M$。\ref{fa:orthogonal-decomposition.1} から $y=P_{M}x$ で、並べ方によらない。
+:::
+
+::: theorem 正規直交基底とパーセヴァルの等式 {#fa:orthonormal-basis keywords="for an orthonormal system in a Hilbert space, the following are equivalent: maximal; the span is dense; x = sum <x,e_i> e_i for all x; Parseval's identity; such orthonormal bases exist by Zorn's lemma" index="正規直交基底|せいきちょっこうきてい, パーセヴァルの等式|ぱーせう゛ぁるのとうしき, 完全正規直交系|かんぜんせいきちょっこうけい"}
+ヒルベルト空間 $H$ の正規直交系 $\{e_{i}\}_{i\in I}$ について次は同値。
+1. （極大）$x\perp e_{i}$（すべての $i$）なら $x=0$。
+2. $\operatorname{span}\{e_{i}\}$ は $H$ で稠密。
+3. すべての $x$ で $x=\sum_{i}\langle x,e_{i}\rangle e_{i}$。
+4. （パーセヴァル）すべての $x$ で $\|x\|^{2}=\sum_{i}|\langle x,e_{i}\rangle|^{2}$。
+
+これらを満たす正規直交系を**正規直交基底**という。$H\ne0$ なら正規直交基底は存在する（選択公理）。
+:::
+
+::: proof
+**1⇒2.** $M\defeq\overline{\operatorname{span}}\{e_{i}\}$ について $M^{\perp}=0$（1）なので $M=M^{\perp\perp}=H$（\ref{fa:orthogonal-decomposition.3}）。**2⇒3.** \ref{fa:bessel.2} から和は $P_{M}x$ で、$M=H$。**3⇒4.** 部分和のピタゴラスと極限（ノルムの連続性）。**4⇒1.** すべての係数が $0$ なら $\|x\|=0$。
+
+**存在.** 正規直交系の全体を包含で順序づけると、鎖の和集合は正規直交系（二つの元はある一つの元に含まれる）で上界。\ref{set:zorn} から極大元があり、それは 1 を満たす（$x\ne0$ が全部と直交すれば $x/\|x\|$ を加えられる）。$H\ne0$ なら $\{x/\|x\|\}$ が正規直交系なので族は空でない。
+:::
+
+::: corollary 可分なヒルベルト空間 {#fa:separable-hilbert keywords="a Hilbert space is separable iff it has a countable orthonormal basis (Gram-Schmidt); every infinite dimensional separable Hilbert space is isometrically isomorphic to l^2" index="可分なヒルベルト空間|かぶんなひるべるとくうかん, グラム–シュミットの直交化（ヒルベルト空間）|ぐらむしゅみっとのちょっこうかひるべるとくうかん"}
+ヒルベルト空間 $H$ が可分（可算稠密部分集合をもつ）なら、可算な正規直交基底をもち（選択公理を使わずに作れる）、$H$ が無限次元なら $x\mapsto(\langle x,e_{k}\rangle)_{k}$ は $H$ から $\ell^{2}(\mathbb{N})$ への線形な等長同型。
+:::
+
+::: proof
+**基底.** 稠密な列 $(y_{k})$ から、それまでの元の張る空間に入るものを除き（一次独立性の判定は有限次元の問題）、残りにグラム–シュミットの直交化を施すと、正規直交列 $(e_{k})$ で各段の張る空間が一致するものが得られる。その張る空間は $\{y_{k}\}$ を含み稠密なので、\ref{fa:orthonormal-basis} の 2 から基底。
+
+**同型.** $U x\defeq(\langle x,e_{k}\rangle)_{k}$ はパーセヴァルから等長（とくに単射）で、線形。全射：$(a_{k})\in\ell^{2}$ について $\sum a_{k}e_{k}$ は（部分和のピタゴラスから）コーシー列で収束し、和 $x$ について $\langle x,e_{k}\rangle=a_{k}$。
+:::
+
+::: supplement
+**フーリエ級数.** $L^{2}([0,1])$ で $e_{n}(x)\defeq e^{2\pi inx}$（$n\in\mathbb{Z}$）は正規直交系で、三角多項式が $L^{2}$ で稠密であることから正規直交基底になる（フーリエ解析で扱う予定）。このときパーセヴァルの等式は $\int_{0}^{1}|f|^{2}=\sum_{n}|\hat f(n)|^{2}$ で、展開 3 は「フーリエ級数は $L^{2}$ で $f$ に収束する」ことを意味する。
+
+**高い視点：自己双対性.** リースの表現定理は、ヒルベルト空間が（共役を除いて）自分自身の双対空間であることを言っている。バナッハ空間では $X$ と $X^{*}$ は一般に異なり（$\ell^{1}$ の双対は $\ell^{\infty}$）、双対の理解そのものが問題になる（次のページ以降のハーン–バナッハの定理、$L^{p}$ の双対）。直交射影は「最短距離」という幾何的な操作が線形になるという、内積空間に特有の現象で、最小二乗法・条件付き期待値（$L^{2}$ の部分空間への射影）・ガラーキン法などの共通の土台である。比喩で言えば、ヒルベルト空間は「無限次元の方眼紙」で、正規直交基底は無限本の直交する目盛り、パーセヴァルの等式は無限次元のピタゴラスの定理である。
+:::
+
+## 問題 {#fa:sec-hs-problems}
+
+::: problem {#fa:prob-hs-least-squares}
+$L^{2}([0,1])$（実数値）で、$x^{2}$ に最も近い一次関数 $a+bx$ を求めよ。
+:::
+
+::: solution
+$M\defeq\{a+bx\}$ は 2 次元で閉（\ref{fa:finite-dim-norms-equivalent.3}）。\ref{fa:orthogonal-decomposition.1} から、$x^{2}-a-bx\perp1$ かつ $\perp x$ が条件：$\int_{0}^{1}(x^{2}-a-bx)dx=\frac13-a-\frac b2=0$、$\int_{0}^{1}(x^{3}-ax-bx^{2})dx=\frac14-\frac a2-\frac b3=0$。第 1 式から $a=\frac13-\frac b2$、代入して $\frac14-\frac16+\frac b4-\frac b3=0$、$\frac1{12}=\frac b{12}$、$b=1$, $a=-\frac16$。答えは $x-\frac16$。
+:::
+
+::: problem {#fa:prob-hs-orthonormal-sequence}
+ヒルベルト空間の正規直交列 $(e_{n})$ について、すべての $y$ で $\langle e_{n},y\rangle\to0$ だが、$(e_{n})$ はノルムで収束する部分列をもたないことを示せ。
+:::
+
+::: solution
+\ref{fa:bessel.1} から $\sum_{n}|\langle y,e_{n}\rangle|^{2}\le\|y\|^{2}<\infty$ なので $\langle y,e_{n}\rangle\to0$、共役をとって $\langle e_{n},y\rangle\to0$。$n\ne m$ ならピタゴラスから $\|e_{n}-e_{m}\|^{2}=2$ なので、どの部分列もコーシー列でない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
