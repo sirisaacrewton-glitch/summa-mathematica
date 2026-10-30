@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：フーリエ級数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/01-fourier-series/05-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：フーリエ級数 {#four:page-exercises-series keywords="exercises, Fourier Series"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは、具体的な関数のフーリエ係数と級数の値の計算、具体的な核（ポアソン核・フェイェール核）の性質、係数の減衰と収束の関係、熱方程式・一様分布・等周不等式の計算練習と、いくつかのページの結果を組み合わせる問題である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#four:sec-exfs-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。とくに $\mathbb{T}=\mathbb{R}/\mathbb{Z}$、$e_{n}(x)=e^{2\pi inx}$、$\hat f(n)=\int_{\mathbb{T}}f(x)e^{-2\pi inx}\,dx$、$S_{N}f=\sum_{|n|\le N}\hat f(n)e_{n}$、ディリクレ核 $D_{N}$、フェイェール核 $F_{N}$、チェザロ平均 $\sigma_{N}f$ は \ref{four:fourier-coefficients}, \ref{four:fejer-kernel} のとおり。
+- 区間 $[c,c+1)$ の上で式を与えた関数は、周期 $1$ に延ばしたものを同じ記号で表す。
+- 有界閉区間上の連続関数の積分は原始関数で計算する（\ref{meas:riemann-lebesgue}, \ref{calc:fundamental-theorem.2}）。複素数値の関数は実部と虚部に分けて同じ計算をする。
+- **選択公理**：使わない。
+:::
+
+## フーリエ係数と畳み込み {#four:sec-cc-exercises}
+
+対応するページ：\ref{four:page-coefficients-convolution}
+
+::: problem ★ 基本：具体的な関数のフーリエ係数 {#four:ex-cc-1}
+1. $f(x)\defeq|\sin(\pi x)|$ について $\hat f(n)=\frac{2}{\pi(1-4n^{2})}$（$n\in\mathbb{Z}$）を示せ。
+2. $[0,1)$ 上で $g(x)\defeq e^{x}$ とする。$\hat g(n)=\frac{e-1}{1-2\pi in}$ を示せ。
+3. 1 の $f$ は $|n|\hat f(n)\to0$ を満たすが、周期 $1$ の $C^{1}$ 級関数とほとんど至る所で一致することはないことを示せ（\ref{four:prob-cc-smoothness} の $k=1$ の場合の逆は成り立たない）。一方、2 の $g$ は周期 $1$ の $C^{1}$ 級関数とほとんど至る所で一致することはないことを、係数から示せ。
+:::
+
+::: solution
+**1.** $f$ は周期 $1$ で、$[0,1)$ 上 $f(x)=\sin(\pi x)=\frac{1}{2i}(e^{\pi ix}-e^{-\pi ix})$。整数 $m$ について $e^{\pi im}=(-1)^{m}$ なので、奇数 $m$ について
+$$
+\int_{0}^{1}e^{\pi imx}\,dx=\frac{e^{\pi im}-1}{\pi im}=\frac{-2}{\pi im}.
+$$
+$1-2n$ と $-(1+2n)$ は奇数なので
+$$
+\hat f(n)=\frac{1}{2i}\Bigl(\int_{0}^{1}e^{\pi i(1-2n)x}dx-\int_{0}^{1}e^{-\pi i(1+2n)x}dx\Bigr)=\frac{1}{2i}\cdot\frac{-2}{\pi i}\Bigl(\frac{1}{1-2n}+\frac{1}{1+2n}\Bigr)=\frac{1}{\pi}\cdot\frac{2}{1-4n^{2}}.
+$$
+
+**2.** $1-2\pi in\ne0$ で、$e^{-2\pi in}=1$ なので
+$$
+\hat g(n)=\int_{0}^{1}e^{(1-2\pi in)x}\,dx=\frac{e^{1-2\pi in}-1}{1-2\pi in}=\frac{e-1}{1-2\pi in}.
+$$
+
+**3.** 1 から $|n\hat f(n)|=\frac{2|n|}{\pi(4n^{2}-1)}\to0$（$n\ne0$）。一方 $f$ は $x=0$ で微分可能でない：$h\downarrow0$ で $\frac{f(h)-f(0)}{h}=\frac{\sin(\pi h)}{h}\to\pi$、$\frac{f(-h)-f(0)}{-h}=-\frac{\sin(\pi h)}{h}\to-\pi$。$f=\varphi$（a.e.）となる連続な $\varphi$ があれば、$\{f\ne\varphi\}$ は開集合で測度 $0$ なので空であり、$f=\varphi$ がすべての点で成り立つ。よって $f$ は $C^{1}$ 級関数とほとんど至る所で一致しない。
+
+$g$ について：$g=\varphi$（a.e.）となる周期 $1$ の $C^{1}$ 級関数 $\varphi$ があるとすると、積分は零集合の上の値によらないので $\hat\varphi(n)=\hat g(n)$。\ref{four:prob-cc-smoothness}（$k=1$）から $|n\hat\varphi(n)|\to0$ のはずだが、2 から
+$$
+|n\hat g(n)|=\frac{(e-1)|n|}{\sqrt{1+4\pi^{2}n^{2}}}\to\frac{e-1}{2\pi}\ne0\qquad(|n|\to\infty)
+$$
+となり矛盾。（$g$ は $x=0$ で $g(0-)=e$ から $g(0+)=1$ への跳びをもつ。係数の減衰が $\frac{1}{|n|}$ 程度にとどまるのは、この跳びの反映である。）
+:::
+
+::: problem ★★ 標準：指示関数の畳み込み {#four:ex-cc-2}
+$0<a\le\frac12$ とし、$[-\frac12,\frac12)$ 上で $\chi_{a}\defeq\mathbf{1}_{[-a/2,a/2)}$ とする。
+1. すべての $x$ で $(\chi_{a}*\chi_{a})(x)=\Lambda_{a}(x)$ を示せ。ここで $\Lambda_{a}(x)\defeq\max(a-|x|_{\mathbb{T}},0)$。
+2. $\hat\chi_{a}$ と $\hat\Lambda_{a}$ を求め、$\hat\Lambda_{a}(n)=\hat\chi_{a}(n)^{2}$ を直接の計算で確かめよ。
+3. $e*f=f$ をすべての $f\in L^{1}(\mathbb{T})$ について満たす $e\in L^{1}(\mathbb{T})$ は存在しないことを示せ。一方、$a_{N}\in(0,\frac12]$, $a_{N}\to0$ について $K_{N}\defeq a_{N}^{-2}\Lambda_{a_{N}}$ は総和核であり、各 $n$ で $\hat K_{N}(n)\to1$ となることを示せ。
+:::
+
+::: solution
+**1.** $\chi_{a}$ は有界なので、$(\chi_{a}*\chi_{a})(x)=\int_{-1/2}^{1/2}\chi_{a}(x-y)\chi_{a}(y)\,dy$ はすべての $x$ で定まり、$x$ について周期 $1$。よって $x\in[-\frac12,\frac12)$ で示せばよく、そこでは $|x|_{\mathbb{T}}=|x|$。$y\in[-\frac a2,\frac a2)$ なら
+$$
+-\frac12-\frac a2<x-y<\frac12+\frac a2 .
+$$
+$a\le\frac12$ から $-1+\frac a2\le-\frac12-\frac a2$, $\frac12+\frac a2\le1-\frac a2$ なので、$x-y$ は $[-\frac a2,\frac a2)+k$（$k\ne0$）のどれにも入らない。よって $\chi_{a}(x-y)=1\iff-\frac a2\le x-y<\frac a2\iff x-\frac a2<y\le x+\frac a2$ で、
+$$
+(\chi_{a}*\chi_{a})(x)=\lambda\Bigl(\Bigl[-\frac a2,\frac a2\Bigr)\cap\Bigl(x-\frac a2,x+\frac a2\Bigr]\Bigr)=\max(a-|x|,0).
+$$
+（長さ $a$ の二つの区間の中心が $|x|$ だけずれているので、重なりの長さは $\max(a-|x|,0)$。）とくに $\Lambda_{a}$ は連続で、\ref{four:convolution.3} と整合する。
+
+**2.** $\hat\chi_{a}(0)=a$、$n\ne0$ なら
+$$
+\hat\chi_{a}(n)=\int_{-a/2}^{a/2}e^{-2\pi inx}dx=\frac{e^{\pi ina}-e^{-\pi ina}}{2\pi in}=\frac{\sin(\pi na)}{\pi n}.
+$$
+\ref{four:convolution.2} から $\hat\Lambda_{a}(n)=\hat\chi_{a}(n)^{2}$、すなわち $\hat\Lambda_{a}(0)=a^{2}$, $\hat\Lambda_{a}(n)=\frac{\sin^{2}(\pi na)}{\pi^{2}n^{2}}$（$n\ne0$）となるはずである。直接計算する。$\hat\Lambda_{a}(0)=\int_{-a}^{a}(a-|x|)\,dx=a^{2}$。$n\ne0$ なら $\Lambda_{a}$ は偶関数なので、部分積分で
+$$
+\hat\Lambda_{a}(n)=2\int_{0}^{a}(a-x)\cos(2\pi nx)\,dx=2\Bigl[\frac{(a-x)\sin(2\pi nx)}{2\pi n}\Bigr]_{0}^{a}+\frac{1}{\pi n}\int_{0}^{a}\sin(2\pi nx)\,dx=\frac{1-\cos(2\pi na)}{2\pi^{2}n^{2}}=\frac{\sin^{2}(\pi na)}{\pi^{2}n^{2}}
+$$
+（最後は半角公式）。両者は一致する。
+
+**3.** **単位元はない.** そのような $e$ があるとする。$n\in\mathbb{Z}$ について $f=e_{n}$ とすると、\ref{four:convolution.2} と \ref{four:coefficients-basic.3} から
+$$
+1=\hat e_{n}(n)=\widehat{e*e_{n}}(n)=\hat e(n)\hat e_{n}(n)=\hat e(n).
+$$
+よってすべての $n$ で $\hat e(n)=1$ となり、\ref{four:riemann-lebesgue} の $\hat e(n)\to0$ に反する。
+
+**総和核.** $K_{N}\ge0$ で、2 から $\int_{\mathbb{T}}K_{N}=a_{N}^{-2}\hat\Lambda_{a_{N}}(0)=1$。$K_{N}\ge0$ なので $\|K_{N}\|_{1}=1$。$0<\delta<\frac12$ について、$a_{N}<\delta$ となる $N$ では $|y|_{\mathbb{T}}\ge\delta$ で $K_{N}(y)=0$ なので $\int_{\delta\le|y|_{\mathbb{T}}}|K_{N}|=0$。よって \ref{four:approximate-identity} の条件 1–3 が成り立つ。係数は、$n\ne0$ について $t\defeq\pi na_{N}\to0$ なので
+$$
+\hat K_{N}(n)=\Bigl(\frac{\sin(\pi na_{N})}{\pi na_{N}}\Bigr)^{2}=\Bigl(\frac{\sin t}{t}\Bigr)^{2}\to1,
+$$
+$n=0$ では $\hat K_{N}(0)=1$。
+
+（単位元 $e$ があれば $\hat e\equiv1$ となるはずだが、それはリーマン–ルベーグの補題に反する。総和核は、係数が各 $n$ ごとに $1$ に近づく（ただし $n$ について一様にではない）という意味での「近似的な単位元」である。）
+:::
+
+::: problem ★★★ 発展：ポアソン核 {#four:ex-cc-3}
+$0\le r<1$ について $P_{r}(x)\defeq\sum_{n\in\mathbb{Z}}r^{|n|}e_{n}(x)$ とおく。
+1. 級数は $x$ について一様絶対収束し、
+$$
+P_{r}(x)=\frac{1-r^{2}}{1-2r\cos(2\pi x)+r^{2}}>0
+$$
+となることを示せ。
+2. $r_{N}\in[0,1)$ を $r_{N}\to1$ となる任意の数列とすると、$(P_{r_{N}})_{N}$ は総和核であることを示せ。
+3. $f\in L^{1}(\mathbb{T})$ について、すべての $x$ で $(P_{r}*f)(x)=\sum_{n\in\mathbb{Z}}r^{|n|}\hat f(n)e_{n}(x)$（右辺は絶対収束）を示せ。さらに $f\in C(\mathbb{T})$ なら、$r\uparrow1$ のとき右辺は $f$ に一様収束することを示せ。
+:::
+
+::: solution
+**1.** $|r^{|n|}e_{n}(x)|=r^{|n|}$ で $\sum_{n}r^{|n|}=1+\frac{2r}{1-r}<\infty$ なので、\ref{calc:uniform-limit-theorems.3} から一様絶対収束する。$z\defeq re^{2\pi ix}$ とおくと $|z|=r<1$ で、等比級数から
+$$
+P_{r}(x)=\sum_{n\ge0}z^{n}+\sum_{n\ge1}\bar z^{n}=\frac{1}{1-z}+\frac{\bar z}{1-\bar z}=\frac{(1-\bar z)+\bar z(1-z)}{|1-z|^{2}}=\frac{1-|z|^{2}}{|1-z|^{2}}.
+$$
+$|1-z|^{2}=1-2r\cos(2\pi x)+r^{2}$ なので式が従う。$|1-z|\ge1-r>0$ なので分母は正で、分子 $1-r^{2}>0$。
+
+**2.** 条件 1：1 の一様収束から項別に積分でき（\ref{calc:uniform-limit-theorems.4}）、$\int_{\mathbb{T}}e_{n}=\delta_{n0}$ から $\int_{\mathbb{T}}P_{r}=1$。条件 2：$P_{r}>0$ なので $\|P_{r}\|_{1}=\int P_{r}=1$。条件 3：$0<\delta<\frac12$ とする。
+$$
+1-2r\cos(2\pi x)+r^{2}=(1-r)^{2}+2r\bigl(1-\cos(2\pi x)\bigr)=(1-r)^{2}+4r\sin^{2}(\pi x)
+$$
+で、$\delta\le|x|_{\mathbb{T}}\le\frac12$ なら $\sin^{2}(\pi x)\ge\sin^{2}(\pi\delta)>0$（$\sin$ は $[0,\frac\pi2]$ で増加）。よって $r>0$ のとき
+$$
+\int_{\delta\le|y|_{\mathbb{T}}}P_{r}(y)\,dy\le\frac{1-r^{2}}{4r\sin^{2}(\pi\delta)}.
+$$
+$r=r_{N}\to1$ で右辺は $0$ に収束する（$r_{N}>\frac12$ となる $N$ から先で使う）。よって $(P_{r_{N}})$ は総和核である。
+
+**3.** **級数表示.** $P_{r}$ は連続で有界なので、$(P_{r}*f)(x)=\int_{\mathbb{T}}P_{r}(x-y)f(y)\,dy$ はすべての $x$ で定まる。$y$ の関数として、部分和 $\sum_{|n|\le M}r^{|n|}e_{n}(x-y)f(y)$ は $M\to\infty$ で $P_{r}(x-y)f(y)$ に収束し、絶対値は $\bigl(\sum_{n}r^{|n|}\bigr)|f(y)|$（可積分）で抑えられる。\ref{meas:dominated-convergence} から和と積分を交換でき、$e_{n}(x-y)=e_{n}(x)e^{-2\pi iny}$ なので
+$$
+(P_{r}*f)(x)=\lim_{M\to\infty}\sum_{|n|\le M}r^{|n|}e_{n}(x)\int_{\mathbb{T}}f(y)e^{-2\pi iny}dy=\sum_{n\in\mathbb{Z}}r^{|n|}\hat f(n)e_{n}(x).
+$$
+$|\hat f(n)|\le\|f\|_{1}$（\ref{four:coefficients-basic.1}）なので右辺は絶対収束する。
+
+**一様収束.** $f\in C(\mathbb{T})$ とし、$\|P_{r}*f-f\|_{\infty}\to0$（$r\uparrow1$）を示す。そうでないとすると、$\varepsilon>0$ と $r_{N}\in[0,1)$, $r_{N}\to1$ で $\|P_{r_{N}}*f-f\|_{\infty}\ge\varepsilon$（すべての $N$）となるものがある。ところが 2 から $(P_{r_{N}})$ は総和核なので、\ref{four:approximate-identity-convergence.1} から $\|P_{r_{N}}*f-f\|_{\infty}\to0$ となり矛盾。
+
+（同様に、$1\le p<\infty$, $f\in L^{p}(\mathbb{T})$ なら \ref{four:approximate-identity-convergence.2} から $\|P_{r}*f-f\|_{p}\to0$。また $P_{r}>0$, $\int P_{r}=1$ から $|(P_{r}*f)(x)|\le\|f\|_{\infty}$。$u(re^{2\pi ix})\defeq(P_{r}*f)(x)$ は単位円板上の調和関数で、境界値 $f$ のディリクレ問題の解になることが知られているが、ここでは示さない。）
+:::
+
+## フェイェールの定理と L² 理論 {#four:sec-fj-exercises}
+
+対応するページ：\ref{four:page-fejer}
+
+::: problem ★ 基本：級数の値と核のノルム {#four:ex-fj-1}
+1. $f(x)\defeq|\sin(\pi x)|$ について、\ref{four:ex-cc-1} の係数を使って、すべての $x$ で
+$$
+|\sin(\pi x)|=\frac{2}{\pi}-\frac{4}{\pi}\sum_{n=1}^{\infty}\frac{\cos(2\pi nx)}{4n^{2}-1}
+$$
+を示し、$\sum_{n=1}^{\infty}\frac{1}{4n^{2}-1}=\frac12$, $\sum_{n=1}^{\infty}\frac{(-1)^{n}}{4n^{2}-1}=\frac12-\frac{\pi}{4}$ を導け。
+2. 同じ $f$ について $\sum_{n=1}^{\infty}\frac{1}{(4n^{2}-1)^{2}}=\frac{\pi^{2}-8}{16}$ を示せ。
+3. $\|D_{N}\|_{2}^{2}=2N+1$, $\|F_{N}\|_{2}^{2}=\frac{2N^{2}+1}{3N}$ を示せ。
+:::
+
+::: solution
+**1.** $f$ は連続で、\ref{four:ex-cc-1} から $|\hat f(n)|=\frac{2}{\pi(4n^{2}-1)}\le\frac{2}{3\pi n^{2}}$（$n\ne0$）なので $\sum_{n}|\hat f(n)|<\infty$。\ref{four:absolutely-convergent} から $S_{N}f\to f$（一様収束）で、とくにすべての $x$ で $S_{N}f(x)\to f(x)$。$\hat f(n)=\hat f(-n)$ なので $n$ と $-n$ を組にすると $\hat f(n)e_{n}+\hat f(-n)e_{-n}=2\hat f(n)\cos(2\pi nx)$ で、
+$$
+S_{N}f(x)=\frac{2}{\pi}+\sum_{n=1}^{N}\frac{4}{\pi(1-4n^{2})}\cos(2\pi nx)=\frac{2}{\pi}-\frac{4}{\pi}\sum_{n=1}^{N}\frac{\cos(2\pi nx)}{4n^{2}-1}.
+$$
+$N\to\infty$ として式を得る。$x=0$ では $0=\frac2\pi-\frac4\pi\sum\frac{1}{4n^{2}-1}$ から $\sum\frac{1}{4n^{2}-1}=\frac12$。$x=\frac12$ では $\cos(\pi n)=(-1)^{n}$ で $1=\frac2\pi-\frac4\pi\sum\frac{(-1)^{n}}{4n^{2}-1}$ から
+$$
+\sum_{n=1}^{\infty}\frac{(-1)^{n}}{4n^{2}-1}=\frac{\pi}{4}\Bigl(\frac{2}{\pi}-1\Bigr)=\frac12-\frac{\pi}{4}.
+$$
+（前者は $\frac{1}{4n^{2}-1}=\frac12\bigl(\frac{1}{2n-1}-\frac{1}{2n+1}\bigr)$ の打ち消し合う和からも確かめられる。）
+
+**2.** $\|f\|_{2}^{2}=\int_{0}^{1}\sin^{2}(\pi x)\,dx=\int_{0}^{1}\frac{1-\cos(2\pi x)}{2}dx=\frac12$。\ref{four:l2-theory.2} から
+$$
+\frac12=\sum_{n\in\mathbb{Z}}\frac{4}{\pi^{2}(4n^{2}-1)^{2}}=\frac{4}{\pi^{2}}\Bigl(1+2\sum_{n=1}^{\infty}\frac{1}{(4n^{2}-1)^{2}}\Bigr).
+$$
+よって $1+2\sum_{n\ge1}\frac{1}{(4n^{2}-1)^{2}}=\frac{\pi^{2}}{8}$、$\sum_{n\ge1}\frac{1}{(4n^{2}-1)^{2}}=\frac{\pi^{2}-8}{16}$。
+
+**3.** $D_{N}=\sum_{|n|\le N}e_{n}$ と、\ref{four:kernel-formulas} の証明の式 $F_{N}=\sum_{|n|<N}\bigl(1-\frac{|n|}{N}\bigr)e_{n}$ から、\ref{four:coefficients-basic.3} で係数がわかる。\ref{four:l2-theory.2}（または $e_{n}$ の正規直交性）から $\|D_{N}\|_{2}^{2}=\sum_{|n|\le N}1=2N+1$、
+$$
+\|F_{N}\|_{2}^{2}=\sum_{|n|<N}\Bigl(1-\frac{|n|}{N}\Bigr)^{2}=1+\frac{2}{N^{2}}\sum_{n=1}^{N-1}(N-n)^{2}=1+\frac{2}{N^{2}}\cdot\frac{(N-1)N(2N-1)}{6}=\frac{2N^{2}+1}{3N}.
+$$
+（どちらも $N$ の 1 次で増えるが、$\|F_{N}\|_{1}=1$ は有界で $\|D_{N}\|_{1}\to\infty$ である。$L^{2}$ ノルムでは二つの核の違いは見えない。）
+:::
+
+::: problem ★★ 標準：端点で消える関数のヴィルティンガーの不等式 {#four:ex-fj-2}
+$f\colon[0,1]\to\mathbb{C}$ を $C^{1}$ 級（端点では片側微分）で $f(0)=f(1)=0$ とする。
+$$
+\int_{0}^{1}|f|^{2}\le\frac{1}{\pi^{2}}\int_{0}^{1}|f'|^{2}
+$$
+を示し、等号が成り立つのは、ある $c\in\mathbb{C}$ について $f(x)=c\sin(\pi x)$ のときに限ることを示せ。（周期性も $\int f=0$ も仮定しないので、\ref{four:prob-fj-wirtinger} とは定数が異なる。）
+:::
+
+::: solution
+**Step 1（奇関数への延長）.** $[-\frac12,\frac12)$ 上で
+$$
+g(x)\defeq\begin{cases}f(2x)&(0\le x<\tfrac12)\\-f(-2x)&(-\tfrac12\le x<0)\end{cases}
+$$
+とし、周期 $1$ に延ばす。$g$ が周期 $1$ の $C^{1}$ 級関数であることを確かめる。$(0,\frac12)$ で $g'(x)=2f'(2x)$、$(-\frac12,0)$ で $g'(x)=2f'(-2x)$。
+
+- $x=0$：$f(0)=0$ から $g(0\pm)=0=g(0)$。$h\downarrow0$ で $\frac{g(h)-g(0)}{h}=\frac{f(2h)}{h}\to2f'(0)$、$\frac{g(-h)-g(0)}{-h}=\frac{f(2h)}{h}\to2f'(0)$ なので $g'(0)=2f'(0)$。また $x\to0\pm$ で $g'(x)\to2f'(0)$。
+- $x=\frac12$（$\equiv-\frac12$）：$f(1)=0$ から $g(\frac12-)=f(1)=0$、$g(-\frac12)=-f(1)=0$。$h\downarrow0$ で、左から $\frac{g(\frac12-h)-g(\frac12)}{-h}=\frac{f(1-2h)-f(1)}{-h}\to2f'(1)$、右から（周期性で $-\frac12$ の右）$\frac{g(-\frac12+h)-g(-\frac12)}{h}=\frac{-f(1-2h)+f(1)}{h}\to2f'(1)$。また $x\to\frac12-$ で $g'(x)=2f'(2x)\to2f'(1)$、$x\to-\frac12+$ で $g'(x)=2f'(-2x)\to2f'(1)$。
+
+よって $g$ は至る所微分可能で $g'$ は連続。$g$ は奇関数（$g(-x)=-g(x)$）なので、置換 $x\mapsto-x$ から $\int_{\mathbb{T}}g=\int_{-1/2}^{1/2}g=0$、また $\hat g(-n)=\int_{-1/2}^{1/2}g(x)e^{2\pi inx}dx=\int_{-1/2}^{1/2}g(-x)e^{-2\pi inx}dx=-\hat g(n)$。
+
+**Step 2（ノルム）.** 置換 $u=2x$ と奇関数性から
+$$
+\|g\|_{2}^{2}=2\int_{0}^{1/2}|f(2x)|^{2}dx=\int_{0}^{1}|f|^{2},\qquad\|g'\|_{2}^{2}=2\int_{0}^{1/2}4|f'(2x)|^{2}dx=4\int_{0}^{1}|f'|^{2}.
+$$
+
+**Step 3（不等式）.** \ref{four:prob-fj-wirtinger} を $g$ に使うと $\|g\|_{2}^{2}\le\frac{1}{4\pi^{2}}\|g'\|_{2}^{2}$、すなわち $\int_{0}^{1}|f|^{2}\le\frac{1}{4\pi^{2}}\cdot4\int_{0}^{1}|f'|^{2}=\frac{1}{\pi^{2}}\int_{0}^{1}|f'|^{2}$。
+
+**Step 4（等号）.** 等号なら $g$ についても等号なので、\ref{four:prob-fj-wirtinger} から $g=ae_{1}+be_{-1}$。Step 1 から $b=\hat g(-1)=-\hat g(1)=-a$ なので $g(x)=a(e^{2\pi ix}-e^{-2\pi ix})=2ia\sin(2\pi x)$。$x\in[0,1]$ で $f(x)=g(\frac x2)=2ia\sin(\pi x)$ で、$c\defeq2ia$ とおけばよい（$x=1$ では $f(1)=0=c\sin\pi$）。逆に $f=c\sin(\pi x)$ なら
+$$
+\int_{0}^{1}|f|^{2}=\frac{|c|^{2}}{2},\qquad\int_{0}^{1}|f'|^{2}=\pi^{2}|c|^{2}\int_{0}^{1}\cos^{2}(\pi x)\,dx=\frac{\pi^{2}|c|^{2}}{2}
+$$
+で等号が成り立つ。
+:::
+
+::: problem ★★★ 発展：係数が 1/n で抑えられる連続関数 {#four:ex-fj-3}
+1. $f\in C(\mathbb{T})$ で、ある $C\ge0$ についてすべての $n\ne0$ で $|n\hat f(n)|\le C$ とする。$S_{N}f\to f$（一様収束）を示せ。
+2. 1 で $f$ の連続性は外せないことを、$[0,1)$ 上の $f(x)=x$（\ref{four:prob-cc-sawtooth}）で示せ。
+:::
+
+::: solution
+**1.** **Step 1（平均の差）.** $M\ge1$ について、\ref{four:kernel-formulas.1} から $M\sigma_{M}f=\sum_{|n|<M}(M-|n|)\hat f(n)e_{n}$。$N,k\ge1$ について
+$$
+V_{N,k}\defeq\frac{(N+k)\sigma_{N+k}f-N\sigma_{N}f}{k}
+$$
+とおく。$e_{n}$ の係数は、$|n|<N$ では $\frac{(N+k-|n|)-(N-|n|)}{k}\hat f(n)=\hat f(n)$、$N\le|n|<N+k$ では $\frac{N+k-|n|}{k}\hat f(n)$ なので
+$$
+V_{N,k}=S_{N-1}f+R_{N,k},\qquad R_{N,k}\defeq\sum_{N\le|n|<N+k}\frac{N+k-|n|}{k}\hat f(n)e_{n}.
+$$
+$0<\frac{N+k-|n|}{k}\le1$、$|\hat f(n)|\le\frac{C}{|n|}\le\frac CN$ で、和の項数は $2k$ なので $\|R_{N,k}\|_{\infty}\le\frac{2kC}{N}$。
+
+**Step 2（評価）.** $\varepsilon_{M}\defeq\|\sigma_{M}f-f\|_{\infty}$ とおくと、\ref{four:fejer-theorem.1} から $\varepsilon_{M}\to0$。$\frac{(N+k)-N}{k}=1$ なので
+$$
+V_{N,k}-f=\frac{N+k}{k}\bigl(\sigma_{N+k}f-f\bigr)-\frac{N}{k}\bigl(\sigma_{N}f-f\bigr),
+$$
+よって
+$$
+\|S_{N-1}f-f\|_{\infty}\le\|V_{N,k}-f\|_{\infty}+\|R_{N,k}\|_{\infty}\le\frac{N+k}{k}\varepsilon_{N+k}+\frac{N}{k}\varepsilon_{N}+\frac{2kC}{N}.
+$$
+
+**Step 3（$k$ の選び方）.** $0<\eta\le1$ を固定し、$k\defeq\lceil\eta N\rceil$ とする。$\eta N\le k\le\eta N+1$ から $\frac Nk\le\frac1\eta$, $\frac{N+k}{k}\le\frac1\eta+1$, $\frac{2kC}{N}\le2C\eta+\frac{2C}{N}$。$N\to\infty$ で $\varepsilon_{N+k},\varepsilon_{N}\to0$ なので
+$$
+\limsup_{N\to\infty}\|S_{N-1}f-f\|_{\infty}\le2C\eta.
+$$
+$\eta$ は任意なので $\|S_{N}f-f\|_{\infty}\to0$。
+
+**2.** \ref{four:prob-cc-sawtooth} から $|n\hat f(n)|=\frac{1}{2\pi}$（$n\ne0$）で、1 の係数の条件は満たされる。$S_{N}f$ がある $g$ に一様収束したとする。$g$ は連続（\ref{calc:uniform-limit-theorems.2}）で周期 $1$。$\|S_{N}f-g\|_{2}\le\|S_{N}f-g\|_{\infty}\to0$ と \ref{four:l2-theory.2} の $\|S_{N}f-f\|_{2}\to0$ から $\|f-g\|_{2}=0$、すなわち $f=g$（a.e.）。$(0,1)$ 上で $g$ と $x$ はともに連続なので、$\{x\in(0,1):g(x)\ne x\}$ は測度 $0$ の開集合で空、すなわち $(0,1)$ 上 $g(x)=x$。すると $g(0)=\lim_{x\downarrow0}g(x)=0$, $g(1)=\lim_{x\uparrow1}g(x)=1$ となり、周期性 $g(0)=g(1)$ に反する。よって $S_{N}f$ は一様収束しない。
+
+（1 の証明の要点は、$\sigma_{N}$ と $\sigma_{N+k}$ の組み合わせで、$|n|<N$ の係数をそのまま残し、$N\le|n|<N+k$ の係数だけを三角形の重みで残すことにある。チェザロ平均の収束と係数の小ささから部分和の収束を引き出すこの種の結果を、タウバー型定理という。）
+:::
+
+## 各点収束 {#four:sec-pw-exercises}
+
+対応するページ：\ref{four:page-pointwise}
+
+::: problem ★ 基本：収束定理による級数の計算 {#four:ex-pw-1}
+1. $[0,1)$ 上の $f(x)=\frac12-x$（\ref{four:gibbs}）の $x=\frac14$ での収束から、$\sum_{k=0}^{\infty}\frac{(-1)^{k}}{2k+1}=\frac{\pi}{4}$ を導け。
+2. $[0,1)$ 上の $g(x)=e^{x}$（\ref{four:ex-cc-1}）の $x=0$ と $x=\frac12$ での収束から、
+$$
+\sum_{n=1}^{\infty}\frac{1}{1+4\pi^{2}n^{2}}=\frac{3-e}{4(e-1)},\qquad\sum_{n=1}^{\infty}\frac{(-1)^{n}}{1+4\pi^{2}n^{2}}=\frac12\Bigl(\frac{\sqrt e}{e-1}-1\Bigr)
+$$
+を導け。
+:::
+
+::: solution
+**1.** \ref{four:gibbs} から $S_{N}f(x)=\sum_{n=1}^{N}\frac{\sin(2\pi nx)}{\pi n}$ で、$x\notin\mathbb{Z}$ で $S_{N}f(x)\to f(x)$。$x=\frac14$ では $\sin(\frac{\pi n}{2})$ は $n$ が偶数なら $0$、$n=2k+1$ なら $(-1)^{k}$ なので
+$$
+S_{2K+1}f\Bigl(\frac14\Bigr)=\frac1\pi\sum_{k=0}^{K}\frac{(-1)^{k}}{2k+1}\to f\Bigl(\frac14\Bigr)=\frac14\qquad(K\to\infty).
+$$
+よって $\sum_{k=0}^{\infty}\frac{(-1)^{k}}{2k+1}=\frac\pi4$。
+
+**2.** \ref{four:ex-cc-1} から $\hat g(n)=\frac{e-1}{1-2\pi in}$ で、$\frac{1}{1-2\pi in}+\frac{1}{1+2\pi in}=\frac{2}{1+4\pi^{2}n^{2}}$ なので、$n$ と $-n$ を組にして
+$$
+S_{N}g(x)=(e-1)\Bigl(1+\sum_{n=1}^{N}\Bigl(\frac{e_{n}(x)}{1-2\pi in}+\frac{e_{-n}(x)}{1+2\pi in}\Bigr)\Bigr).
+$$
+$g$ は $[0,1)$ の内部で $C^{1}$ 級で、$x=0$ で $g(0+)=1$, $g(0-)=e$、$g'$ も左右の極限をもつので、区分的に $C^{1}$ 級である。
+
+$x=0$：\ref{four:dini-consequences.3} から $S_{N}g(0)\to\frac{1+e}{2}$。$e_{\pm n}(0)=1$ なので
+$$
+(e-1)\Bigl(1+2\sum_{n=1}^{\infty}\frac{1}{1+4\pi^{2}n^{2}}\Bigr)=\frac{e+1}{2},\qquad\sum_{n=1}^{\infty}\frac{1}{1+4\pi^{2}n^{2}}=\frac12\Bigl(\frac{e+1}{2(e-1)}-1\Bigr)=\frac{3-e}{4(e-1)}.
+$$
+$x=\frac12$：$g$ は $\frac12$ で微分可能なので、\ref{four:dini-consequences.2} から $S_{N}g(\frac12)\to e^{1/2}$。$e_{\pm n}(\frac12)=(-1)^{n}$ なので
+$$
+(e-1)\Bigl(1+2\sum_{n=1}^{\infty}\frac{(-1)^{n}}{1+4\pi^{2}n^{2}}\Bigr)=\sqrt e,\qquad\sum_{n=1}^{\infty}\frac{(-1)^{n}}{1+4\pi^{2}n^{2}}=\frac12\Bigl(\frac{\sqrt e}{e-1}-1\Bigr).
+$$
+（第 1 式は、\ref{four:l2-theory.2} を $g$ に使って $\|g\|_{2}^{2}=\frac{e^{2}-1}{2}=\sum_{n}\frac{(e-1)^{2}}{1+4\pi^{2}n^{2}}$ からも得られる。）
+:::
+
+::: problem ★★ 標準：のこぎり波の部分和 {#four:ex-pw-2}
+$[0,1)$ 上で $f(x)\defeq\frac12-x$ とし（\ref{four:gibbs}）、$A$ を \ref{four:dirichlet-integral-bound.2} の定数とする。
+1. $0\le x\le\frac12$ で $S_{N}f(x)=\int_{0}^{x}D_{N}(y)\,dy-x$ を示し、$0<x\le\frac12$ で $S_{N}f(x)-f(x)=-\int_{x}^{1/2}D_{N}(y)\,dy$ を導け。
+2. すべての $N$ と $x$ で $|S_{N}f(x)|\le A+\frac12$ を示せ。
+3. $0<\delta<\frac12$ について、$S_{N}f\to f$ は $[\delta,1-\delta]$ 上で一様であることを示せ。
+:::
+
+::: solution
+**1.** \ref{four:gibbs} から $S_{N}f(x)=\sum_{n=1}^{N}\frac{\sin(2\pi nx)}{\pi n}$。微分すると
+$$
+(S_{N}f)'(x)=\sum_{n=1}^{N}2\cos(2\pi nx)=\sum_{1\le|n|\le N}e_{n}(x)=D_{N}(x)-1.
+$$
+$S_{N}f(0)=0$ なので、\ref{calc:fundamental-theorem.2} から $S_{N}f(x)=\int_{0}^{x}(D_{N}-1)=\int_{0}^{x}D_{N}-x$。$D_{N}$ は偶関数で $\int_{-1/2}^{1/2}D_{N}=1$ なので $\int_{0}^{1/2}D_{N}=\frac12$。よって $0<x\le\frac12$ で
+$$
+S_{N}f(x)-f(x)=\int_{0}^{x}D_{N}-x-\Bigl(\frac12-x\Bigr)=\int_{0}^{x}D_{N}-\int_{0}^{1/2}D_{N}=-\int_{x}^{1/2}D_{N}.
+$$
+
+**2.** $0\le x\le\frac12$ では 1 と \ref{four:dirichlet-integral-bound.2} から $|S_{N}f(x)|\le\bigl|\int_{0}^{x}D_{N}\bigr|+x\le A+\frac12$。$S_{N}f$ は正弦の和なので奇関数で、$-\frac12\le x\le0$ でも同じ評価が成り立つ。周期性からすべての $x$ で成り立つ。
+
+**3.** **$[\delta,\frac12]$ の上.** $x\in[\delta,\frac12]$ について $g_{x}(y)\defeq\frac{\mathbf{1}_{[x,1/2]}(y)}{\sin(\pi y)}$ とおくと、$D_{N}$ の式（\ref{four:kernel-formulas.2}）と 1 から
+$$
+S_{N}f(x)-f(x)=-\int_{-1/2}^{1/2}g_{x}(y)\sin((2N+1)\pi y)\,dy.
+$$
+$y\ge\delta$ で $\sin(\pi y)\ge2y\ge2\delta$ なので $0\le g_{x}\le\frac{1}{2\delta}$ で、$x,x'\in[\delta,\frac12]$ について $\|g_{x}-g_{x'}\|_{1}\le\frac{|x-x'|}{2\delta}$。$\varepsilon>0$ について $[\delta,\frac12]$ を間隔 $2\delta\varepsilon$ 以下の有限個の点 $x_{1},\dots,x_{m}$ で分ければ、各 $g_{x}$ はある $g_{x_{j}}$ と $L^{1}$ 距離 $\varepsilon$ 以下にあり、$\{g_{x}:x\in[\delta,\frac12]\}$ は全有界。\ref{four:half-integer-rl.2} から $\sup_{x\in[\delta,1/2]}|S_{N}f(x)-f(x)|\to0$。
+
+**$[\frac12,1-\delta]$ の上.** $0<x<1$ で $f(1-x)=-f(x)$、また $S_{N}f$ は奇関数で周期 $1$ なので $S_{N}f(1-x)=S_{N}f(-x)=-S_{N}f(x)$。よって $x\in[\frac12,1-\delta]$ について $|S_{N}f(x)-f(x)|=|S_{N}f(1-x)-f(1-x)|$ で、$1-x\in[\delta,\frac12]$ なので前半に帰着する。
+
+（2 は部分和が跳びの近くでも一様に有界であることを、3 は跳びから離れると一様収束することを言う。\ref{four:gibbs} のはみ出しは、この有界性と両立する。）
+:::
+
+::: problem ★★★ 発展：リーマン–ルベーグの補題の逆は成り立たない {#four:ex-pw-3}
+1. $g\in L^{1}(\mathbb{T})$ なら、級数 $\sum_{n=1}^{\infty}\frac{\hat g(n)-\hat g(-n)}{n}$ は収束することを示せ。
+2. $c_{n}\defeq\frac{1}{\log n}$, $c_{-n}\defeq-\frac{1}{\log n}$（$n\ge2$）、$c_{0}=c_{1}=c_{-1}\defeq0$ とする。$c_{n}\to0$（$|n|\to\infty$）だが、$\hat g(n)=c_{n}$（すべての $n$）となる $g\in L^{1}(\mathbb{T})$ は存在しないことを示せ。
+:::
+
+::: solution
+**1.** $f$ を \ref{four:ex-pw-2} ののこぎり波 $f(x)=\frac12-x$（$[0,1)$ 上）とする。$S_{N}f(x)=\sum_{n=1}^{N}\frac{\sin(2\pi nx)}{\pi n}$ と $\sin(2\pi nx)=\frac{1}{2i}(e_{n}(x)-e_{-n}(x))$、$\int_{\mathbb{T}}g\,e_{\pm n}=\hat g(\mp n)$ から
+$$
+\int_{\mathbb{T}}g\,S_{N}f=\sum_{n=1}^{N}\frac{\hat g(-n)-\hat g(n)}{2\pi in}=\frac{i}{2\pi}\sum_{n=1}^{N}\frac{\hat g(n)-\hat g(-n)}{n}.
+$$
+\ref{four:gibbs} から $x\notin\mathbb{Z}$ で $S_{N}f(x)\to f(x)$、すなわちほとんどすべての $x$ で $g(x)S_{N}f(x)\to g(x)f(x)$。\ref{four:ex-pw-2.2} から $|g\,S_{N}f|\le(A+\frac12)|g|$ で、右辺は可積分。\ref{meas:dominated-convergence} から左辺は $\int_{\mathbb{T}}gf$ に収束し、
+$$
+\sum_{n=1}^{\infty}\frac{\hat g(n)-\hat g(-n)}{n}=-2\pi i\int_{\mathbb{T}}g(x)f(x)\,dx
+$$
+（左辺の級数が収束し、この値をもつ）。
+
+**2.** $c_{n}\to0$ は明らか。$\hat g=c$ となる $g\in L^{1}(\mathbb{T})$ があるとすると、1 から $\sum_{n\ge2}\frac{c_{n}-c_{-n}}{n}=2\sum_{n\ge2}\frac{1}{n\log n}$ が収束するはずである。ところが $\frac{1}{x\log x}$ は $x\ge2$ で減少するので、$n\le x\le n+1$ で $\frac{1}{n\log n}\ge\frac{1}{x\log x}$、
+$$
+\sum_{n=2}^{N}\frac{1}{n\log n}\ge\int_{2}^{N+1}\frac{dx}{x\log x}=\log\log(N+1)-\log\log2\to\infty
+$$
+となり矛盾。よってそのような $g$ はない。
+
+（\ref{four:riemann-lebesgue} から、$f\mapsto\hat f$ は $L^{1}(\mathbb{T})$ を $|n|\to\infty$ で $0$ に収束する数列の空間に写すが、2 はこの写像が全射でないことを示す。$L^{2}$ では \ref{four:l2-theory.3} から $f\mapsto\hat f$ は $\ell^{2}(\mathbb{Z})$ への全射であったことと対照的である。）
+:::
+
+## フーリエ級数の応用 {#four:sec-ap-exercises}
+
+対応するページ：\ref{four:page-applications}
+
+::: problem ★ 基本：折れ線の初期値に対する熱方程式 {#four:ex-ap-1}
+$[-\frac12,\frac12)$ 上で $f(x)\defeq|x|$ とし（\ref{four:prob-pw-leibniz}）、$u$ を \ref{four:heat-equation} の解とする。
+1. $t>0$ で
+$$
+u(t,x)=\frac14-\frac{2}{\pi^{2}}\sum_{k=0}^{\infty}\frac{e^{-4\pi^{2}(2k+1)^{2}t}\cos(2\pi(2k+1)x)}{(2k+1)^{2}}
+$$
+を示し、$t\downarrow0$ で $u(t,\cdot)\to f$ が一様であることを示せ。
+2. $t>0$ で
+$$
+\sup_{x}\Bigl|u(t,x)-\frac14+\frac{2}{\pi^{2}}e^{-4\pi^{2}t}\cos(2\pi x)\Bigr|\le\Bigl(\frac14-\frac{2}{\pi^{2}}\Bigr)e^{-36\pi^{2}t}
+$$
+を示し、$\sup_{x}|u(t,x)-\frac14|\le\frac14e^{-4\pi^{2}t}$ と $e^{4\pi^{2}t}\bigl(u(t,0)-\frac14\bigr)\to-\frac{2}{\pi^{2}}$（$t\to\infty$）を導け。
+3. $\int_{\mathbb{T}}u(t,x)\,dx=\frac14$ と $\bigl\|u(t,\cdot)-\frac14\bigr\|_{2}\le\frac{1}{4\sqrt3}e^{-4\pi^{2}t}$ を示せ。
+:::
+
+::: solution
+**1.** \ref{four:prob-pw-leibniz} から $\hat f(0)=\frac14$、$n$ が偶数（$\ne0$）なら $\hat f(n)=0$、奇数なら $\hat f(n)=-\frac{2}{2\pi^{2}n^{2}}=-\frac{1}{\pi^{2}n^{2}}$。$\hat f(n)=\hat f(-n)$ なので、\ref{four:heat-equation} の級数（絶対収束）で $n$ と $-n$ を組にすると $e_{n}+e_{-n}=2\cos(2\pi nx)$ から式を得る。$\sum_{n}|\hat f(n)|<\infty$ なので、\ref{four:heat-equation.2} から $u(t,\cdot)$ は $t\downarrow0$ で連続関数 $\sum_{n}\hat f(n)e_{n}$ に一様収束し、これは \ref{four:absolutely-convergent} から $f$（$f$ は連続）に等しい。
+
+**2.** 1 の級数の $k=0$ の項を除いた残りは、$k\ge1$ で $e^{-4\pi^{2}(2k+1)^{2}t}\le e^{-36\pi^{2}t}$, $|\cos|\le1$ なので
+$$
+\frac{2}{\pi^{2}}\sum_{k\ge1}\frac{e^{-36\pi^{2}t}}{(2k+1)^{2}}=\frac{2}{\pi^{2}}\Bigl(\frac{\pi^{2}}{8}-1\Bigr)e^{-36\pi^{2}t}=\Bigl(\frac14-\frac{2}{\pi^{2}}\Bigr)e^{-36\pi^{2}t}
+$$
+以下（$\sum_{k\ge0}\frac{1}{(2k+1)^{2}}=\frac{\pi^{2}}{8}$ は \ref{four:prob-fj-odd-squares}）。これが最初の評価。三角不等式と $e^{-36\pi^{2}t}\le e^{-4\pi^{2}t}$ から
+$$
+\Bigl|u(t,x)-\frac14\Bigr|\le\frac{2}{\pi^{2}}e^{-4\pi^{2}t}+\Bigl(\frac14-\frac{2}{\pi^{2}}\Bigr)e^{-4\pi^{2}t}=\frac14e^{-4\pi^{2}t}.
+$$
+$x=0$ では最初の評価から $\bigl|e^{4\pi^{2}t}(u(t,0)-\frac14)+\frac{2}{\pi^{2}}\bigr|\le(\frac14-\frac{2}{\pi^{2}})e^{-32\pi^{2}t}\to0$。（温度は平均値 $\frac14$ に $e^{-4\pi^{2}t}$ の速さで近づき、この速さは改良できない。）
+
+**3.** $u(t,\cdot)$ のフーリエ係数は $\hat f(n)e^{-4\pi^{2}n^{2}t}$（\ref{four:heat-equation} の証明の Step 2）なので、$\int_{\mathbb{T}}u(t,\cdot)=\hat f(0)=\frac14$。\ref{four:l2-theory.2} を $u(t,\cdot)-\frac14$ に使うと、$n$ が奇数のとき $e^{-8\pi^{2}n^{2}t}\le e^{-8\pi^{2}t}$ なので
+$$
+\Bigl\|u(t,\cdot)-\frac14\Bigr\|_{2}^{2}=\sum_{n\ne0}|\hat f(n)|^{2}e^{-8\pi^{2}n^{2}t}\le e^{-8\pi^{2}t}\sum_{n\ne0}|\hat f(n)|^{2}=e^{-8\pi^{2}t}\Bigl(\|f\|_{2}^{2}-\frac{1}{16}\Bigr).
+$$
+$\|f\|_{2}^{2}=2\int_{0}^{1/2}x^{2}dx=\frac{1}{12}$ なので右辺は $\frac{1}{48}e^{-8\pi^{2}t}$ で、平方根をとって主張を得る。
+:::
+
+::: problem ★★ 標準：log n は一様分布しない {#four:ex-ap-2}
+$k\ne0$ を整数とし、$x\ge1$ について $\varphi(x)\defeq e^{2\pi ik\log x}$ とおく。
+1. $N\ge2$ について
+$$
+\Bigl|\frac1N\sum_{n=1}^{N}\varphi(n)-\frac{\varphi(N)}{1+2\pi ik}\Bigr|\le\frac{2\pi|k|(1+\log N)+2}{N}
+$$
+を示せ。
+2. $\bigl|\frac1N\sum_{n=1}^{N}e^{2\pi ik\log n}\bigr|\to\frac{1}{\sqrt{1+4\pi^{2}k^{2}}}$ を示し、数列 $(\log n)_{n\ge1}$ は mod 1 で一様分布しないことを導け。
+:::
+
+::: solution
+**1.** $s\defeq2\pi ik$ とおく。$\varphi$ は $C^{1}$ 級で $\varphi'(x)=\frac{s}{x}\varphi(x)$、$|\varphi|=1$ なので $|\varphi'(x)|=\frac{2\pi|k|}{x}$。$n\ge1$, $n\le x\le n+1$ について、\ref{calc:fundamental-theorem.2}（実部と虚部ごと）から
+$$
+|\varphi(x)-\varphi(n)|=\Bigl|\int_{n}^{x}\varphi'\Bigr|\le\frac{2\pi|k|}{n}(x-n)\le\frac{2\pi|k|}{n},\qquad\Bigl|\int_{n}^{n+1}\varphi-\varphi(n)\Bigr|\le\frac{2\pi|k|}{n}.
+$$
+$n=1,\dots,N-1$ について足すと、$\sum_{n=1}^{N-1}\frac1n\le1+\int_{1}^{N}\frac{dx}{x}=1+\log N$（$n\ge2$ で $\frac1n\le\int_{n-1}^{n}\frac{dx}{x}$）から
+$$
+\Bigl|\int_{1}^{N}\varphi-\sum_{n=1}^{N-1}\varphi(n)\Bigr|\le2\pi|k|(1+\log N).
+$$
+$\frac{d}{dx}\frac{x\varphi(x)}{1+s}=\frac{\varphi(x)+s\varphi(x)}{1+s}=\varphi(x)$ なので $\int_{1}^{N}\varphi=\frac{N\varphi(N)-1}{1+s}$。$|1+s|\ge1$ と $|\varphi(N)|=1$ から
+$$
+\Bigl|\sum_{n=1}^{N}\varphi(n)-\frac{N\varphi(N)}{1+s}\Bigr|\le2\pi|k|(1+\log N)+\frac{1}{|1+s|}+|\varphi(N)|\le2\pi|k|(1+\log N)+2.
+$$
+$N$ で割ればよい。
+
+**2.** $e^{2\pi ik\log n}=\varphi(n)$ で、$\bigl|\frac{\varphi(N)}{1+s}\bigr|=\frac{1}{|1+2\pi ik|}=\frac{1}{\sqrt{1+4\pi^{2}k^{2}}}$ は $N$ によらない。1 の右辺は $\frac{\log N}{N}\to0$ から $0$ に収束するので、三角不等式から $\bigl|\frac1N\sum_{n\le N}\varphi(n)\bigr|\to\frac{1}{\sqrt{1+4\pi^{2}k^{2}}}\ne0$。とくに $\frac1N\sum_{n\le N}e^{2\pi ik\log n}$ は $0$ に収束しない。$(\log n)$ が mod 1 で一様分布するなら、\ref{four:weyl-criterion}（1 ⇒ 3）からこれは $0$ に収束するはずなので、$(\log n)$ は一様分布しない。
+
+（平均 $\frac1N\sum_{n\le N}e^{2\pi ik\log n}$ はおおよそ $\frac{N^{2\pi ik}}{1+2\pi ik}$ で、絶対値を保ったまま $\log N$ とともに回り続ける。$\log n$ の増え方が遅すぎて、小数部分の分布が $N$ のとり方によって揺れ続けるのである。）
+:::
+
+::: problem ★★★ 発展：等周不等式の安定性 {#four:ex-ap-3}
+$\gamma\colon\mathbb{R}\to\mathbb{C}$ を \ref{four:isoperimetric} の曲線（周期 $1$、$C^{1}$ 級、$|\gamma'|\equiv L$）とし、$A$ をそこでの面積、$c_{n}\defeq\hat\gamma(n)$、$\rho\defeq\gamma-c_{0}-c_{1}e_{1}$ とする。
+1. $\frac{L^{2}}{4\pi}-A\ge2\pi\|\rho\|_{2}^{2}$ を示せ。
+2. すべての $t$ で
+$$
+|\rho(t)|\le\varepsilon\defeq\frac{\sqrt{L^{2}-4\pi A}}{\sqrt2\,\pi}
+$$
+を示し、$\gamma$ の像は円環 $\{z:|c_{1}|-\varepsilon\le|z-c_{0}|\le|c_{1}|+\varepsilon\}$ に含まれることを導け。
+3. 半径 $R>0$ の円を 2 周する曲線 $\gamma(t)=Re^{4\pi it}$ について、1 で等号が成り立つことを確かめよ。
+:::
+
+::: solution
+**1.** \ref{four:isoperimetric} の証明の Step 2–4 から
+$$
+\frac{L^{2}}{4\pi}-A=\pi\sum_{n\in\mathbb{Z}}n(n-1)|c_{n}|^{2}.
+$$
+$n\notin\{0,1\}$ なら $n(n-1)\ge2$（$n\ge2$ なら $n(n-1)\ge2\cdot1$、$n\le-1$ なら $n(n-1)=|n|(|n|+1)\ge2$）。一方、\ref{four:coefficients-basic.1}, \ref{four:coefficients-basic.3} から $\hat\rho(n)=c_{n}$（$n\notin\{0,1\}$）、$\hat\rho(0)=\hat\rho(1)=0$ で、\ref{four:l2-theory.2} から $\|\rho\|_{2}^{2}=\sum_{n\notin\{0,1\}}|c_{n}|^{2}$。よって
+$$
+\frac{L^{2}}{4\pi}-A\ge2\pi\sum_{n\notin\{0,1\}}|c_{n}|^{2}=2\pi\|\rho\|_{2}^{2}.
+$$
+
+**2.** $\gamma$ は $C^{1}$ 級なので $\sum_{n}|c_{n}|<\infty$（\ref{four:prob-fj-c1}）で、\ref{four:absolutely-convergent} からすべての $t$ で $\gamma(t)=\sum_{n}c_{n}e_{n}(t)$。よって $\rho(t)=\sum_{n\notin\{0,1\}}c_{n}e_{n}(t)$ で、コーシー–シュワルツの不等式から
+$$
+|\rho(t)|\le\sum_{n\notin\{0,1\}}|c_{n}|\le\Bigl(\sum_{n\notin\{0,1\}}\frac{1}{n(n-1)}\Bigr)^{1/2}\Bigl(\sum_{n\notin\{0,1\}}n(n-1)|c_{n}|^{2}\Bigr)^{1/2}.
+$$
+第 1 因子の和は、$n\ge2$ について $\sum_{n\ge2}\bigl(\frac{1}{n-1}-\frac1n\bigr)=1$、$n=-m$（$m\ge1$）について $\sum_{m\ge1}\frac{1}{m(m+1)}=\sum_{m\ge1}\bigl(\frac1m-\frac{1}{m+1}\bigr)=1$ で、合計 $2$。第 2 因子の中身は 1 の式から $\frac1\pi\bigl(\frac{L^{2}}{4\pi}-A\bigr)=\frac{L^{2}-4\pi A}{4\pi^{2}}$。よって
+$$
+|\rho(t)|\le\sqrt2\cdot\frac{\sqrt{L^{2}-4\pi A}}{2\pi}=\frac{\sqrt{L^{2}-4\pi A}}{\sqrt2\,\pi}=\varepsilon.
+$$
+$\gamma(t)-c_{0}=c_{1}e_{1}(t)+\rho(t)$ で $|c_{1}e_{1}(t)|=|c_{1}|$ なので、三角不等式から $\bigl||\gamma(t)-c_{0}|-|c_{1}|\bigr|\le|\rho(t)|\le\varepsilon$。
+
+**3.** $\gamma=Re_{2}$ は周期 $1$、$C^{1}$ 級で $|\gamma'|=4\pi R$ なので $L=4\pi R$。$x+iy=Re^{4\pi it}$ について $xy'-yx'=\operatorname{Im}(\bar\gamma\gamma')=\operatorname{Im}(R e^{-4\pi it}\cdot4\pi iRe^{4\pi it})=4\pi R^{2}$ なので $A=2\pi R^{2}$。$c_{2}=R$ で他の係数は $0$（\ref{four:coefficients-basic.3}）なので $\rho=\gamma$, $\|\rho\|_{2}^{2}=R^{2}$。
+$$
+\frac{L^{2}}{4\pi}-A=4\pi R^{2}-2\pi R^{2}=2\pi R^{2}=2\pi\|\rho\|_{2}^{2}.
+$$
+よって 1 の定数 $2\pi$ は改良できない。
+
+（\ref{four:isoperimetric} の等号の場合は「$L^{2}=4\pi A$ なら円」と述べるが、1・2 は「$L^{2}$ が $4\pi A$ に近ければ、$\gamma$ は $L^{2}$ の意味でも一様にも円に近い」という量的な形である。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
