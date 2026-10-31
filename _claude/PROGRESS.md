@@ -358,7 +358,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | FA-14 | （03-distributions-sobolev）/06-lax-milgram | ラックス–ミルグラムの定理 | 有界強圧的双線形形式、ラックス–ミルグラム、ガレルキン近似、ディリクレ問題の弱解の存在（例として） | 完了 |
 | FA-15 | 04-analysis/07-functional-analysis/04-spectral-theory/01-functional-calculus | 連続関数計算 | 有界自己共役作用素の多項式・連続関数計算、スペクトル写像定理、正作用素と平方根、極分解 | 完了 |
 | FA-16 | （04-spectral-theory）/02-spectral-measures | スペクトル測度とスペクトル定理 | リース–マルコフ（[a,b] 上）で得るスペクトル測度、射影値測度、有界自己共役・正規作用素のスペクトル定理（掛け算作用素形も） | 完了 |
-| FA-17 | （04-spectral-theory）/03-unbounded-operators | 非有界作用素 | 閉作用素・可閉作用素、共役、対称と自己共役、自己共役性の基本判定、ラプラシアンの例 | 未着手 |
+| FA-17 | （04-spectral-theory）/03-unbounded-operators | 非有界作用素 | 閉作用素・可閉作用素、共役、対称と自己共役、自己共役性の基本判定、ラプラシアンの例 | 完了 |
 | FA-18 | （04-spectral-theory）/04-unbounded-spectral | 非有界自己共役作用素のスペクトル定理 | ケーリー変換、スペクトル定理、関数計算、フリードリクス拡大 | 未着手 |
 | FA-19 | （04-spectral-theory）/05-semigroups | 作用素半群 | C₀ 半群、生成作用素、ヒレ–吉田の定理、ルーマー–フィリップス、ストーンの定理 | 未着手 |
 | FA-E2 | 各系列の最後 | 演習 | 系列 03・04 の演習 | 未着手 |

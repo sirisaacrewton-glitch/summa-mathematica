@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>非有界作用素 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/04-spectral-theory/03-unbounded-operators.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 非有界作用素 {#fa:page-unbounded-operators keywords="unbounded operators with domains, graphs, closed and closable operators, closure, adjoint of a densely defined operator, graph characterization G(T*) = (J G(T))^perp, T closable iff T* densely defined and then closure = T**, symmetric, self-adjoint and essentially self-adjoint operators, basic criterion of self-adjointness ran(T +- i) = H, spectrum and resolvent of closed operators, real spectrum of self-adjoint operators, multiplication operators, momentum operator on an interval, Dirichlet Laplacian as an unbounded self-adjoint operator"}
+
+量子力学の運動量 $-i\frac{d}{dx}$ や、偏微分方程式のラプラシアン $-\Delta$ は、$L^{2}$ の上の**有界でない**作用素で、空間全体では定義できない（微分できない関数がある）。そのため、作用素を「定義域」と組にして扱う必要がある。このページでは、定義域が稠密な作用素の**共役作用素**を定義し、グラフが閉集合である**閉作用素**、$T=T^{*}$（定義域も含めて一致）となる**自己共役作用素**を扱う。有界な場合と違い、「対称」（$\langle Tx,y\rangle=\langle x,Ty\rangle$）であることと「自己共役」であることは一致せず、その差は定義域の選び方（偏微分方程式では境界条件）に現れる。自己共役性の**基本判定**——$T\pm i$ の値域が全体であること——を証明し、掛け算作用素、区間上の微分作用素、そしてディリクレ境界条件のラプラシアンの例でこれを確かめる。
+
+## 記法と定義の確認 {#fa:sec-ub-notation}
+
+::: notation
+- $H$ は複素ヒルベルト空間。$H\times H$ には内積 $\langle(x,y),(x',y')\rangle\defeq\langle x,x'\rangle+\langle y,y'\rangle$ を入れ、ヒルベルト空間とみる。$J(x,y)\defeq(-y,x)$ はユニタリで $J^{2}=-1$。
+- 直交補空間と $N^{\perp\perp}=\overline N$ は \ref{fa:orthogonal-decomposition}、閉グラフ定理は \ref{fa:closed-graph}、リースの表現定理は \ref{fa:riesz-representation}。
+- ディリクレ問題の弱解の解作用素 $S$ は \ref{fa:dirichlet-eigenfunctions}。
+- **選択公理**：使わない。
+:::
+
+## 作用素・グラフ・共役 {#fa:sec-ub-definitions}
+
+::: definition 非有界作用素と閉作用素 {#fa:unbounded-operator keywords="operator T with domain D(T), graph G(T), extension S contains T, closed operator (graph closed), closable operator (closure of the graph is a graph), closure T-bar" index="非有界作用素|ひゆうかいさようそ, 閉作用素|へいさようそ, 可閉作用素|かへいさようそ, 定義域（作用素）|ていぎいきさようそ"}
+1. $H$ の部分空間 $D(T)$ から $H$ への線形写像 $T$ を（$H$ 上の）**作用素**、$D(T)$ を**定義域**という。$G(T)\defeq\{(x,Tx):x\in D(T)\}$ を**グラフ**という。$G(S)\subset G(T)$ のとき $S\subset T$（$T$ は $S$ の**拡張**）と書く。
+2. $G(T)$ が $H\times H$ の閉集合のとき**閉作用素**という。$\overline{G(T)}$ がある作用素のグラフ（$(0,y)\in\overline{G(T)}\Rightarrow y=0$）のとき**可閉**といい、その作用素を**閉包** $\overline T$ という。
+3. $D(T)$ が $H$ で稠密なとき**稠密に定義された**作用素という。
+:::
+
+::: definition 共役作用素 {#fa:unbounded-adjoint keywords="adjoint of a densely defined operator: D(T*) = {y : x -> <Tx, y> is bounded on D(T)}, <Tx, y> = <x, T* y>; symmetric (T subset T*), self-adjoint (T = T*), essentially self-adjoint (closure self-adjoint)" index="共役作用素（非有界）|きょうやくさようそひゆうかい, 対称作用素|たいしょうさようそ, 本質的自己共役|ほんしつてきじこきょうやく"}
+$T$ を稠密に定義された作用素とする。$D(T^{*})\defeq\{y\in H:x\mapsto\langle Tx,y\rangle\text{ は }D(T)\text{ 上有界}\}$ とし、$y\in D(T^{*})$ について、$\langle Tx,y\rangle=\langle x,T^{*}y\rangle$（$x\in D(T)$）となる $T^{*}y$ を定める（有界な汎関数を稠密な $D(T)$ から $H$ へ延ばしてリースの表現定理を使う。$D(T)$ が稠密なので $T^{*}y$ は一意）。$T\subset T^{*}$ のとき**対称**、$T=T^{*}$ のとき**自己共役**、$\overline T$ が自己共役のとき**本質的自己共役**という。
+:::
+
+::: proposition 共役とグラフ {#fa:adjoint-graph keywords="G(T*) = (J G(T))^perp, so T* is closed; S subset T implies T* subset S*; ker T* = ran(T)^perp; T closable iff T* densely defined, and then closure(T) = T**; symmetric operators are closable" index="共役とグラフ|きょうやくとぐらふ"}
+$T$ を稠密に定義された作用素とする。
+1. $G(T^{*})=(JG(T))^{\perp}$。とくに $T^{*}$ は閉作用素。
+2. $S\subset T$（$S$ も稠密に定義）なら $T^{*}\subset S^{*}$。$\ker T^{*}=R(T)^{\perp}$（$R(T)$ は値域）。
+3. $T$ が可閉 $\iff$ $D(T^{*})$ が稠密。そのとき $\overline T=T^{**}$。とくに対称作用素は可閉で、$\overline T$ も対称。
+:::
+
+::: proof
+**1.** $(y,z)\in(JG(T))^{\perp}$ $\iff$ すべての $x\in D(T)$ で $\langle(-Tx,x),(y,z)\rangle=0$、すなわち $\langle Tx,y\rangle=\langle x,z\rangle$ $\iff$ $y\in D(T^{*})$, $z=T^{*}y$。直交補空間は閉集合。
+
+**2.** $y\in D(T^{*})$ なら $x\mapsto\langle Sx,y\rangle=\langle Tx,y\rangle$ は $D(S)$ 上有界で、$S^{*}y=T^{*}y$。$y\in\ker T^{*}$ $\iff$ すべての $x$ で $\langle Tx,y\rangle=\langle x,0\rangle=0$ $\iff$ $y\perp R(T)$。
+
+**3.** $\overline{G(T)}=G(T)^{\perp\perp}$。$J$ はユニタリで $J^{2}=-1$ なので、1 から $(JG(T^{*}))^{\perp}=(J(JG(T))^{\perp})^{\perp}=(G(T)^{\perp})^{\perp}=\overline{G(T)}$（$J(M^{\perp})=(JM)^{\perp}$）。（⇐）$D(T^{*})$ が稠密なら $T^{**}$ が定義でき、1 を $T^{*}$ に使うと $G(T^{**})=(JG(T^{*}))^{\perp}=\overline{G(T)}$。よって $\overline{G(T)}$ はグラフで、$\overline T=T^{**}$。（⇒）$z\perp D(T^{*})$ とすると $(0,z)\perp JG(T^{*})$（$\langle(0,z),(-T^{*}y,y)\rangle=\langle z,y\rangle=0$）なので $(0,z)\in(JG(T^{*}))^{\perp}=\overline{G(T)}$。可閉なら $z=0$。対称なら $D(T^{*})\supset D(T)$ は稠密で、$\overline T=T^{**}\subset T^{*}=\overline{T}^{*}$（2 と $T^{***}=\overline{T}^{*}$：$G(\overline T^{*})=(J\overline{G(T)})^{\perp}=(JG(T))^{\perp}=G(T^{*})$）。
+:::
+
+::: proposition 有界性との関係 {#fa:closed-everywhere-bounded keywords="a closed operator defined on all of H is bounded (closed graph theorem); Hellinger-Toeplitz: a symmetric operator defined everywhere is bounded; hence unbounded self-adjoint operators are never defined on all of H" index="ヘリンジャー–テープリッツの定理|へりんじゃーてーぷりっつのていり"}
+1. 閉作用素で $D(T)=H$ なら $T$ は有界。
+2. （ヘリンジャー–テープリッツ）対称な作用素で $D(T)=H$ なら有界。
+:::
+
+::: proof
+**1.** \ref{fa:closed-graph}（$H\times H$ のノルム $\|x\|+\|y\|$ は内積のノルムと同値）。**2.** $T\subset T^{*}$ で、$D(T)=H$ なので $T=T^{*}$ は閉（\ref{fa:adjoint-graph.1}）、1 から有界。
+:::
+
+## 自己共役性の判定とスペクトル {#fa:sec-ub-criterion}
+
+::: theorem 自己共役性の基本判定 {#fa:self-adjointness-criterion keywords="basic criterion for self-adjointness: for a symmetric operator T, ||(T +- i) x||^2 = ||T x||^2 + ||x||^2; T is self-adjoint iff ran(T + i) = ran(T - i) = H iff T is closed and ker(T* +- i) = 0; T is essentially self-adjoint iff ran(T +- i) are dense" index="自己共役性の基本判定|じこきょうやくせいのきほんはんてい"}
+$T$ を稠密に定義された対称作用素とする。
+1. $x\in D(T)$ について $\|(T\pm i)x\|^{2}=\|Tx\|^{2}+\|x\|^{2}$。
+2. 次は同値：(a) $T$ は自己共役。(b) $T$ は閉で、$\ker(T^{*}+i)=\ker(T^{*}-i)=0$。(c) $R(T+i)=R(T-i)=H$。
+3. $T$ が本質的自己共役 $\iff$ $R(T\pm i)$ がともに稠密。
+:::
+
+::: proof
+**1.** $\|(T\pm i)x\|^{2}=\|Tx\|^{2}+\|x\|^{2}\pm2\operatorname{Re}\langle Tx,ix\rangle$ で、$\langle Tx,ix\rangle=-i\langle Tx,x\rangle$、$\langle Tx,x\rangle$ は対称性から実数なので実部は $0$。
+
+**2.** (a)⇒(b)：$T=T^{*}$ は閉（\ref{fa:adjoint-graph.1}）。$T^{*}y=\mp iy$ なら $\langle T y,y\rangle=\mp i\|y\|^{2}$ は実数なので $y=0$。
+
+(b)⇒(c)：\ref{fa:adjoint-graph.2} から $R(T\pm i)^{\perp}=\ker(T^{*}\mp i)=0$ なので $R(T\pm i)$ は稠密。閉性：$(T\pm i)x_{k}\to z$ なら 1 から $(x_{k})$, $(Tx_{k})$ はコーシー列で、$x_{k}\to x$, $Tx_{k}\to w$、$T$ が閉なので $x\in D(T)$, $Tx=w$、$z=(T\pm i)x$。よって値域は閉で $H$ に等しい。
+
+(c)⇒(a)：$T\subset T^{*}$ なので $D(T^{*})\subset D(T)$ を示せばよい。$y\in D(T^{*})$ について、(c) から $(T-i)x=(T^{*}-i)y$ となる $x\in D(T)$ がある。$T\subset T^{*}$ から $(T^{*}-i)(y-x)=0$。$\ker(T^{*}-i)=R(T+i)^{\perp}=0$ なので $y=x\in D(T)$。
+
+**3.** $\overline T$ は対称で閉（\ref{fa:adjoint-graph.3}）、$\overline T^{*}=T^{*}$。2 を $\overline T$ に使い、$R(\overline T\pm i)=\overline{R(T\pm i)}$（1 の等長性から、2 の (b)⇒(c) の閉性の議論と同じ）。
+:::
+
+::: definition 閉作用素のスペクトル {#fa:unbounded-spectrum keywords="resolvent set of a closed operator: lambda such that T - lambda: D(T) -> H is bijective (its inverse is then bounded by the closed graph theorem); spectrum; self-adjoint operators have real spectrum and ||(T - lambda)^{-1}|| <= 1/|Im lambda|" index="閉作用素のスペクトル|へいさようそのすぺくとる"}
+閉作用素 $T$ について、$T-\lambda\colon D(T)\to H$ が全単射となる $\lambda\in\mathbb{C}$ の全体を**レゾルベント集合** $\rho(T)$、その補集合を**スペクトル** $\sigma(T)$ という。$\lambda\in\rho(T)$ なら $(T-\lambda)^{-1}$ は閉作用素（グラフは $G(T-\lambda)$ の成分の入れ替え）で $H$ 全体で定義されるので、\ref{fa:closed-everywhere-bounded.1} から有界。
+:::
+
+::: proposition 自己共役作用素のスペクトルは実 {#fa:unbounded-selfadjoint-spectrum keywords="the spectrum of a self-adjoint operator is real, and for Im lambda != 0, ||(T - lambda)^{-1}|| <= 1/|Im lambda|" index="自己共役作用素のスペクトルは実|じこきょうやくさようそのすぺくとるはじつ"}
+$T$ が自己共役なら $\sigma(T)\subset\mathbb{R}$ で、$\operatorname{Im}\lambda\ne0$ について $\|(T-\lambda)^{-1}\|\le\frac{1}{|\operatorname{Im}\lambda|}$。
+:::
+
+::: proof
+$\lambda=\alpha+i\beta$, $\beta\ne0$ とする。$T-\alpha$ も自己共役なので、\ref{fa:self-adjointness-criterion} を $\frac{T-\alpha}{|\beta|}$ に使うと（1 の計算は $\pm i$ を $\pm i|\beta|$ に替えても同じ）、$\|(T-\lambda)x\|\ge|\beta|\|x\|$ で $T-\lambda$ は単射、値域は全体。よって $\lambda\in\rho(T)$ で評価が成り立つ。
+:::
+
+## 例 {#fa:sec-ub-examples}
+
+::: example 掛け算作用素 {#fa:multiplication-operator keywords="multiplication by a real measurable function phi on L^2(mu) with maximal domain {f : phi f in L^2} is self-adjoint" index="掛け算作用素（非有界）|かけざんさようそひゆうかい"}
+$(X,\mu)$ を σ 有限な測度空間、$\varphi\colon X\to\mathbb{R}$ を可測関数とし、$D(M_{\varphi})\defeq\{f\in L^{2}(\mu):\varphi f\in L^{2}\}$, $M_{\varphi}f\defeq\varphi f$ とおくと、$M_{\varphi}$ は自己共役。
+:::
+
+::: proof
+**稠密性.** $X_{k}\defeq\{|\varphi|\le k\}\uparrow X$ で、$f\mathbf{1}_{X_{k}}\in D(M_{\varphi})$, $f\mathbf{1}_{X_{k}}\to f$（優収束定理）。**対称性**は $\varphi$ が実数値であることから。**判定.** $g\in L^{2}$ について $f\defeq\frac{g}{\varphi\pm i}$ は $|f|\le|g|$ で $L^{2}$、$|\varphi f|\le|g|$ なので $f\in D(M_{\varphi})$、$(M_{\varphi}\pm i)f=g$。\ref{fa:self-adjointness-criterion.2} の (c)。
+:::
+
+::: example 区間上の微分作用素 {#fa:momentum-interval keywords="on L^2(0,1), T = -i d/dx with domain H^1_0 is closed and symmetric but not self-adjoint: T* = -i d/dx on H^1 and ker(T* - i) contains e^{-x}" index="運動量作用素|うんどうりょうさようそ"}
+$H=L^{2}((0,1))$、$D(T)\defeq H_{0}^{1}((0,1))$, $Tu\defeq-iu'$（弱微分）とする。$T$ は閉で対称、$T^{*}$ は $D(T^{*})=H^{1}((0,1))$ 上の $-i\frac{d}{dx}$ で、$T$ は自己共役でない。
+:::
+
+::: proof
+**対称性.** $u,v\in C_{c}^{\infty}$ なら部分積分で $\langle-iu',v\rangle=\langle u,-iv'\rangle$（境界項なし）。両辺は $H^{1}$ ノルムで連続なので $H_{0}^{1}$ 全体で成り立つ。**閉性.** $u_{k}\to u$, $-iu_{k}'\to w$（$L^{2}$）なら $(u_{k})$ は $H^{1}$ のコーシー列で、$H_{0}^{1}$ は閉なので $u\in H_{0}^{1}$, $-iu'=w$。
+
+**$T^{*}$.** $v\in H^{1}$ なら、$u\in C_{c}^{\infty}$ について $\langle-iu',v\rangle=\langle u,-iv'\rangle$（弱微分の定義）で、$H_{0}^{1}$ へ延びるので $v\in D(T^{*})$, $T^{*}v=-iv'$。逆に $v\in D(T^{*})$, $w\defeq T^{*}v$ なら、$u\in C_{c}^{\infty}$ について $-i\int u'\bar v=\int u\bar w$、すなわち $\int u'\bar v=i\int u\bar w=-\int u\,\overline{iw}$。これは $\bar v$ の弱微分が $\overline{iw}$ であること、すなわち $v$ の弱微分が $iw\in L^{2}$ であることを意味する。よって $v\in H^{1}$ で $-iv'=-i\cdot iw=w$。
+
+**自己共役でない.** $v(x)\defeq e^{-x}\in H^{1}$ は $T^{*}v=-i(-e^{-x})=iv$、すなわち $v\in\ker(T^{*}-i)\ne0$。\ref{fa:self-adjointness-criterion.2} から $T$ は自己共役でない（$H^{1}\ne H_{0}^{1}$ なので直接にもわかる）。
+:::
+
+::: theorem ディリクレ・ラプラシアン {#fa:dirichlet-laplacian keywords="the Dirichlet Laplacian -Delta_D with domain {u in H^1_0 : Delta u in L^2} is the inverse of the compact solution operator S and is a positive self-adjoint operator with compact resolvent and spectrum {lambda_k}" index="ディリクレ・ラプラシアン|でぃりくれらぷらしあん"}
+$\Omega\subset\mathbb{R}^{n}$ を有界な開集合とし、
+$$
+D(-\Delta_{D})\defeq\{u\in H_{0}^{1}(\Omega):\Delta u\in L^{2}(\Omega)\ (\text{超関数の意味})\},\qquad-\Delta_{D}u\defeq-\Delta u
+$$
+とおく。$-\Delta_{D}$ は \ref{fa:dirichlet-eigenfunctions} の解作用素 $S$ の逆写像で、自己共役、$\langle-\Delta_{D}u,u\rangle=\|\nabla u\|_{2}^{2}\ge0$、$\sigma(-\Delta_{D})=\{\lambda_{k}\}$。
+:::
+
+::: proof
+**Step 1（$S$ の値域）.** $u=Sf$ $\iff$ $u\in H_{0}^{1}$ かつすべての $v\in H_{0}^{1}$ で $\int\nabla u\cdot\overline{\nabla v}=\int f\bar v$。$v\in C_{c}^{\infty}$ に制限すると、これは超関数の意味で $-\Delta u=f$。逆に $u\in H_{0}^{1}$ で $-\Delta u=f\in L^{2}$ なら、等式は $v\in C_{c}^{\infty}$ で成り立ち、両辺は $v$ について $H^{1}$ で連続なので $H_{0}^{1}$ に延びる。よって $R(S)=D(-\Delta_{D})$ で、$S$ は単射（\ref{fa:dirichlet-eigenfunctions.1}）、$-\Delta_{D}=S^{-1}$。
+
+**Step 2（自己共役）.** $D(-\Delta_{D})=R(S)$ は稠密：$R(S)^{\perp}=\ker S^{*}=\ker S=0$。$G(S^{-1})$ は $G(S)$ の成分の入れ替え $W(x,y)\defeq(y,x)$ による像で、$JW=-WJ$ から $(JG(S^{-1}))^{\perp}=(JWG(S))^{\perp}=W(JG(S))^{\perp}=WG(S^{*})=WG(S)=G(S^{-1})$（$S=S^{*}$ は有界自己共役）。\ref{fa:adjoint-graph.1} から $(S^{-1})^{*}=S^{-1}$。
+
+**Step 3.** $u=Sf$ なら $\langle-\Delta_{D}u,u\rangle=\langle f,Sf\rangle=\|\nabla Sf\|_{2}^{2}$（\ref{fa:dirichlet-eigenfunctions} の証明）。スペクトル：$\lambda\ne0$ について $S^{-1}-\lambda=(1-\lambda S)S^{-1}$ で、$S^{-1}-\lambda$ が全単射 $\iff$ $1-\lambda S$ が全単射 $\iff$ $\frac1\lambda\notin\sigma(S)$。$\sigma(S)\setminus\{0\}=\{\frac{1}{\lambda_{k}}\}$（固有値、\ref{fa:compact-spectrum}）なので $\sigma(-\Delta_{D})\setminus\{0\}=\{\lambda_{k}\}$。$0\in\rho$：$S^{-1}$ の逆 $S$ は有界。
+:::
+
+::: hypcheck
+- 共役作用素の定義で $D(T)$ の稠密性は、$T^{*}y$ の一意性に使った。
+- 基本判定（\ref{fa:self-adjointness-criterion}）では対称性を 1 の計算（$\langle Tx,x\rangle$ が実数）に使った。$\pm i$ は、$\operatorname{Im}\lambda\ne0$ の任意の $\lambda,\bar\lambda$ の組でよい。
+- 区間上の微分作用素の例は、対称作用素と自己共役作用素の差が「境界条件の付け方」であることを示す：$D(T)=H_{0}^{1}$ は条件を課しすぎ（$u(0)=u(1)=0$）、$D(T^{*})=H^{1}$ は課さなすぎ。その中間の $\{u\in H^{1}:u(1)=e^{i\theta}u(0)\}$ では自己共役になる（演習で扱う）。
+- ディリクレ・ラプラシアンの自己共役性は、境界の正則性を何も仮定せずに得られた。一方、$D(-\Delta_{D})=H^{2}\cap H_{0}^{1}$（楕円型の正則性）を示すには境界の正則性が要る。
+:::
+
+::: supplement
+**関連する結果.**
+- **フォン・ノイマンの不足指数**：閉対称作用素 $T$ について $n_{\pm}\defeq\dim\ker(T^{*}\mp i)$ とすると、$T$ が自己共役拡張をもつ $\iff$ $n_{+}=n_{-}$ で、拡張は $\ker(T^{*}-i)$ から $\ker(T^{*}+i)$ へのユニタリ写像と一対一に対応する。区間の例では $n_{\pm}=1$ で、拡張は $\theta\in[0,2\pi)$ で径数付けられる。
+- **カトー–レリッヒの定理**：$V$ が $T$-有界で相対限界が $1$ より小さい対称作用素なら、$T+V$ は $D(T)$ 上で自己共役。シュレディンガー作用素 $-\Delta+V$（$V\in L^{2}+L^{\infty}$、$n\le3$）の自己共役性はこれから従う。
+- 半有界な対称作用素は、二次形式の閉包から得られる**フリードリクス拡大**という自己共役拡張を必ずもつ。ディリクレ・ラプラシアンは $-\Delta$（$C_{c}^{\infty}(\Omega)$ 上）のフリードリクス拡大である。
+
+**高い視点：定義域は物理の一部.** 有限次元では「エルミート行列」は一つの条件だが、無限次元では作用素の公式（例えば $-i\frac{d}{dx}$）だけでは自己共役かどうかが決まらず、定義域——偏微分方程式の言葉では境界条件——を指定して初めて決まる。自己共役性は、スペクトル定理とユニタリな時間発展 $e^{-itT}$（ストーンの定理、このシリーズの後半）の存在を保証する条件であり、物理的には「確率が保存される」ことにあたる。比喩で言えば、作用素の公式は楽器の形、定義域は弦の両端の留め方で、留め方を決めて初めて鳴る音（スペクトル）が決まる。
+:::
+
+## 問題 {#fa:sec-ub-problems}
+
+::: problem {#fa:prob-ub-not-closable}
+$H=L^{2}((0,1))$、$D(T)\defeq C([0,1])$（連続関数）、$Tu\defeq u(0)\cdot\mathbf{1}$（定数関数 $u(0)$）とする。$T$ は稠密に定義されているが可閉でないことを示し、$D(T^{*})$ を求めよ。
+:::
+
+::: solution
+$C([0,1])$ は $L^{2}$ で稠密（\ref{meas:cc-dense} を区間に制限）。$u_{k}(x)\defeq\max(0,1-kx)$ とすると $u_{k}\to0$（$L^{2}$）だが $Tu_{k}=\mathbf{1}$ なので $(0,\mathbf{1})\in\overline{G(T)}$、可閉でない。$y\in D(T^{*})$ なら $u\mapsto\langle Tu,y\rangle=u(0)\langle\mathbf{1},y\rangle$ が $L^{2}$ ノルムについて有界で、$u_{k}$ を代入すると $|\langle\mathbf{1},y\rangle|\le C\|u_{k}\|_{2}\to0$ なので $\langle\mathbf{1},y\rangle=0$。逆に $\langle\mathbf{1},y\rangle=0$ なら汎関数は $0$ で $T^{*}y=0$。よって $D(T^{*})=\{\mathbf{1}\}^{\perp}$ で、稠密でない（\ref{fa:adjoint-graph.3} と整合）。
+:::
+
+::: problem {#fa:prob-ub-resolvent-laplacian}
+\ref{fa:dirichlet-laplacian} の $-\Delta_{D}$ について、$\lambda\notin\{\lambda_{k}\}$ ならレゾルベント $(-\Delta_{D}-\lambda)^{-1}$ がコンパクトであることを示せ。
+:::
+
+::: solution
+\ref{fa:dirichlet-laplacian} の証明の Step 3 から $(-\Delta_{D}-\lambda)^{-1}=S(1-\lambda S)^{-1}$（$\lambda\ne0$；$\lambda=0$ なら $S$）。$S$ はコンパクト（\ref{fa:dirichlet-eigenfunctions.1}）で $(1-\lambda S)^{-1}$ は有界なので、積はコンパクト（\ref{fa:compact-ideal}）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
