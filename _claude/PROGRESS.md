@@ -412,7 +412,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | RV-03 | 03-real-variable/04-hilbert-transform | カルデロン–ジグムント分解とヒルベルト変換 | 2 進立方体と CZ 分解、ヒルベルト変換の乗数・L² 理論、弱 (1,1)、Lᵖ 有界性 | 完了 |
 | RV-03b | 03-real-variable/05-conjugate-function | 共役関数とフーリエ級数の Lᵖ 収束 | 円周への転移、M. リースの定理、部分和の Lᵖ 収束（FS-02 の補足を回収）、p=1 で成り立たないこと（2026-11-04 に RV-03 から分割） | 完了 |
 | RV-04 | 03-real-variable/06-singular-integrals | 特異積分作用素 | CZ 核、リース変換、Lᵖ 有界性、∂ᵢ∂ⱼu の評価（CZ 評価） | 完了 |
-| RV-05 | 03-real-variable/07-multipliers-lp | フーリエ乗数とリトルウッド–ペイリー | ミフリンの乗数定理、リトルウッド–ペイリーの二乗関数 | 未着手 |
+| RV-05 | 03-real-variable/07-multipliers-lp | フーリエ乗数とリトルウッド–ペイリー | ミフリンの乗数定理、リトルウッド–ペイリーの二乗関数 | 完了 |
 | RV-06 | 03-real-variable/08-fractional-integration | 分数積分 | ハーディ–リトルウッド–ソボレフの不等式、ベッセル・ポテンシャル、Lᵖ 型のソボレフ空間 | 完了 |
 | RV-E | 系列の最後 | 演習 | 系列の演習 | 未着手 |
 
