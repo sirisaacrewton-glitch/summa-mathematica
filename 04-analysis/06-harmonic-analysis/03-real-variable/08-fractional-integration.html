@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分数積分とソボレフの不等式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/03-real-variable/08-fractional-integration.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 分数積分とソボレフの不等式 {#four:page-fractional-integration keywords="fractional integration: Riesz potential, multiplier (2 pi |xi|)^{-alpha}, Hardy-Littlewood-Sobolev inequality, Hedberg's inequality, weak type (1, n/(n-alpha)), Sobolev inequality via |u| <= C I_1 |grad u|, Bessel potential, Bessel potential spaces L^{s,p}"}
+
+$|x|^{\alpha-n}$ との畳み込みは、フーリエ変換の側では $|\xi|^{-\alpha}$ を掛けることにあたり、「$\alpha$ 回積分する」作用素とみなせる。これを**リース・ポテンシャル**（分数積分）という。このページではまず、その定数をガウス関数の重ね合わせで計算し、次に $L^{p}$ から $L^{q}$ への有界性（ハーディ–リトルウッド–ソボレフの不等式）を、前のページの極大関数（\ref{four:maximal-lp}, \ref{four:majorant-bound}）だけを使って示す。応用として、関数を勾配のリース・ポテンシャルで押さえ、ソボレフの不等式を導く。最後に、原点での特異性を和らげた**ベッセル・ポテンシャル**を導入し、$L^{p}$ 型のソボレフ空間を定める。特異積分作用素（後のページ）には依存しない。
+
+## 記法と定義の確認 {#four:sec-fi-notation}
+
+::: notation
+- $\lambda$ は $\mathbb{R}^{n}$ のルベーグ測度、$B(x,r)\defeq\{y:|y-x|<r\}$、$\omega_{n}\defeq\lambda(B(0,1))$、$n\omega_{n}=\frac{2\pi^{n/2}}{\Gamma(n/2)}$（\ref{four:radial-integral.2}）。非増加な $\psi\colon[0,\infty)\to[0,\infty]$ について $\int\psi(|y|)\,dy=n\omega_{n}\int_{0}^{\infty}\psi(r)r^{n-1}dr$（\ref{four:radial-integral.1}）。これを非増加な $\min(r,R)^{-\beta}$ に使い、$\int_{|y|<R}R^{-\beta}dy=\omega_{n}R^{n-\beta}$ を引くと、$\beta>0$, $R>0$ について
+$$
+\int_{|y|\ge R}|y|^{-\beta}dy=n\omega_{n}\int_{R}^{\infty}r^{n-1-\beta}dr
+\label{four:eq-fi-tail}
+$$
+（$\beta\le n$ なら両辺 $+\infty$、$\beta>n$ なら $\frac{n\omega_{n}}{\beta-n}R^{n-\beta}$）。
+- 極大関数 $Mf$ と $\|Mf\|_{p}\le A_{p}\|f\|_{p}$（$1<p\le\infty$）は \ref{four:maximal-lp}、弱 $(1,1)$ 評価は \ref{meas:maximal-inequality}、弱 $L^{p}$ と $[f]_{q}$ は \ref{four:weak-lp}。放射的に減少する可積分な優関数と $\int|K(x-y)||f(y)|dy\le\|\varphi\|_{1}Mf(x)$ は \ref{four:radial-majorant}, \ref{four:majorant-bound}。
+- フーリエ変換は $\hat f(\xi)=\int f(x)e^{-2\pi ix\cdot\xi}dx$（\ref{four:fourier-transform}）、$L^{2}$ への延長は $\mathcal{F}$（\ref{four:plancherel}）、$\langle u,v\rangle\defeq\int u\bar v$。シュワルツ空間 $\mathcal{S}$ は \ref{four:schwartz-space}。畳み込みは \ref{four:convolution-rd}。
+- $\Gamma(b)=\int_{0}^{\infty}e^{-s}s^{b-1}ds$（\ref{calc:gamma}）。$b,c>0$ について、置き換え $s=ct$、$s=c/t$ から
+$$
+\int_{0}^{\infty}e^{-ct}t^{b-1}dt=\Gamma(b)c^{-b}=\int_{0}^{\infty}e^{-c/t}t^{-b-1}dt.
+\label{four:eq-fi-gamma}
+$$
+- ソボレフ空間 $W^{k,p}$ は \ref{fa:sobolev-space}、$H^{s}$ は \ref{fa:fractional-sobolev}。$|\nabla u|\defeq(\sum_{j}|\partial_{j}u|^{2})^{1/2}$、$1\le p<n$ について $p^{*}\defeq\frac{np}{n-p}$。$p'$ は $p$ の共役指数。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## リース・ポテンシャル {#four:sec-fi-riesz}
+
+::: definition リース・ポテンシャル {#four:fi-riesz-potential keywords="Riesz potential, fractional integral I_alpha f(x) = gamma(alpha)^{-1} int |x-y|^{alpha-n} f(y) dy, gamma(alpha) = pi^{n/2} 2^alpha Gamma(alpha/2) / Gamma((n-alpha)/2)" index="リース・ポテンシャル|りーすぽてんしゃる, 分数積分|ぶんすうせきぶん"}
+$0<\alpha<n$ とし、$\gamma(\alpha)\defeq\pi^{n/2}2^{\alpha}\Gamma(\frac{\alpha}{2})/\Gamma(\frac{n-\alpha}{2})$ とおく。可測関数 $f$ について、積分が絶対収束する点 $x$ で
+$$
+I_{\alpha}f(x)\defeq\frac{1}{\gamma(\alpha)}\int_{\mathbb{R}^{n}}|x-y|^{\alpha-n}f(y)\,dy
+$$
+と定め、$I_{\alpha}f$ を $f$ の**リース・ポテンシャル**（**分数積分**）という。$f\ge0$ なら値 $+\infty$ も許してすべての $x$ で定める。
+:::
+
+::: intuition
+$f$ を、原点で $|x|^{\alpha-n}$ のように発散する重みでならしたものである。$\alpha$ が大きいほど重みの特異性は弱く、遠くまで裾を引く。定数 $\gamma(\alpha)$ は、次の定理で乗数がちょうど $(2\pi|\xi|)^{-\alpha}$ になるように選んだ。
+:::
+
+::: theorem リース・ポテンシャルのフーリエ乗数 {#four:fi-riesz-multiplier keywords="Fourier transform of the Riesz kernel: for f, g in S, <I_alpha f, g> = int (2 pi |xi|)^{-alpha} hat f conj(hat g) d xi; I_alpha = (-Delta)^{-alpha/2}; proof by writing |x|^{alpha-n} as a superposition of Gaussians" index="リース・ポテンシャルの乗数|りーすぽてんしゃるのじょうすう"}
+$0<\alpha<n$, $f,g\in\mathcal{S}$ とする。$I_{\alpha}f(x)$ はすべての $x$ で絶対収束し、
+$$
+\int I_{\alpha}f(x)\,\overline{g(x)}\,dx=\int(2\pi|\xi|)^{-\alpha}\hat f(\xi)\,\overline{\hat g(\xi)}\,d\xi.
+$$
+:::
+
+::: intuition
+リース・ポテンシャルは、フーリエ変換に $(2\pi|\xi|)^{-\alpha}$ を掛ける作用素である。$-\Delta$ は $4\pi^{2}|\xi|^{2}$ を掛ける作用素なので、$I_{\alpha}$ は $(-\Delta)^{-\alpha/2}$、つまり「$\alpha$ 回の積分」と思える。
+:::
+
+::: proof
+$k(z)\defeq|z|^{\alpha-n}$ とし、$k=k\mathbf{1}_{B(0,1)}+k\mathbf{1}_{B(0,1)^{c}}\eqdef k_{0}+k_{\infty}$ と分ける。\ref{four:radial-integral.1} から $\|k_{0}\|_{1}=n\omega_{n}/\alpha$（$\alpha>0$ を使う）、$k_{\infty}\le1$。
+
+**Step 1（絶対収束）.** 【主張：$\int k(x-y)|f(y)|dy\le\frac{n\omega_{n}}{\alpha}\|f\|_{\infty}+\|f\|_{1}$、および $\iint k(x-y)|f(y)||g(x)|dy\,dx<\infty$】 第 1 式は $k_{0}$ の部分を $\|f\|_{\infty}\|k_{0}\|_{1}$、$k_{\infty}$ の部分を $\|f\|_{1}$ で押さえる。第 2 式は第 1 式を $|g|$ と積分して $\le(\frac{n\omega_{n}}{\alpha}\|f\|_{\infty}+\|f\|_{1})\|g\|_{1}$（$\mathcal{S}\subset L^{1}\cap L^{\infty}$、\ref{four:schwartz-basic.3}）。
+
+**Step 2（ガウス関数の重ね合わせ）.** 【主張：$h_{t}(z)\defeq e^{-t|z|^{2}}$ とすると $\gamma(\alpha)\langle I_{\alpha}f,g\rangle=\frac{1}{\Gamma(\frac{n-\alpha}{2})}\int_{0}^{\infty}t^{\frac{n-\alpha}{2}-1}\langle h_{t}*f,g\rangle\,dt$】 \eqref{four:eq-fi-gamma} を $c=|z|^{2}$, $b=\frac{n-\alpha}{2}>0$（$\alpha<n$ を使う）に使うと、$z\ne0$ で
+$$
+|z|^{\alpha-n}=\frac{1}{\Gamma(\frac{n-\alpha}{2})}\int_{0}^{\infty}e^{-t|z|^{2}}t^{\frac{n-\alpha}{2}-1}dt.
+$$
+これを $\iint k(x-y)f(y)\overline{g(x)}\,dy\,dx$ に代入する。$(t,x,y)$ についての被積分関数の絶対値の積分は、トネリの定理（\ref{meas:tonelli}）で先に $t$ について積分すれば Step 1 の第 2 式になり有限なので、\ref{meas:fubini} で $t$ の積分を外に出せる。
+
+**Step 3（各ガウス関数の乗数）.** 【主張：$\langle h_{t}*f,g\rangle=(\pi/t)^{n/2}\int e^{-\pi^{2}|\xi|^{2}/t}\hat f(\xi)\overline{\hat g(\xi)}\,d\xi$】 \ref{four:gaussian-transform} を $a=t/\pi$ に使うと $\hat h_{t}(\xi)=(\pi/t)^{n/2}e^{-\pi^{2}|\xi|^{2}/t}$。$h_{t}*f\in L^{1}\cap L^{2}$（\ref{four:convolution-rd.1} を $p=1,2$ で）で $\widehat{h_{t}*f}=\hat h_{t}\hat f$（\ref{four:convolution-rd.2}）。\ref{four:plancherel.2} の $\langle u,v\rangle=\langle\mathcal{F}u,\mathcal{F}v\rangle$ を $u=h_{t}*f$, $v=g$ に使えばよい。
+
+**Step 4（$t$ について積分）.** 【主張：$\int_{0}^{\infty}t^{\frac{n-\alpha}{2}-1}(\pi/t)^{n/2}e^{-\pi^{2}|\xi|^{2}/t}dt=\pi^{n/2}\Gamma(\tfrac{\alpha}{2})(\pi|\xi|)^{-\alpha}$（$\xi\ne0$）で、主張の等式が従う】 左辺は $\pi^{n/2}\int_{0}^{\infty}e^{-\pi^{2}|\xi|^{2}/t}t^{-\frac{\alpha}{2}-1}dt$ で、\eqref{four:eq-fi-gamma} の右の等式（$c=\pi^{2}|\xi|^{2}$, $b=\frac{\alpha}{2}$）から右辺になる。Step 2・3 の式で $t$ と $\xi$ の積分を入れ替える：$\hat f,\hat g\in\mathcal{S}$（\ref{four:schwartz-fourier.1}）は有界かつ可積分で、$|\xi|^{-\alpha}\mathbf{1}_{B(0,1)}$ は可積分（$\alpha<n$、\ref{four:radial-integral.1}）なので、絶対値の積分 $\pi^{n/2-\alpha}\Gamma(\frac{\alpha}{2})\int|\xi|^{-\alpha}|\hat f||\hat g|$ は有限で \ref{meas:fubini} が使える。結果は
+$$
+\gamma(\alpha)\langle I_{\alpha}f,g\rangle=\frac{\pi^{n/2-\alpha}\Gamma(\frac{\alpha}{2})}{\Gamma(\frac{n-\alpha}{2})}\int|\xi|^{-\alpha}\hat f\,\overline{\hat g}\,d\xi
+=\gamma(\alpha)\int(2\pi|\xi|)^{-\alpha}\hat f\,\overline{\hat g}\,d\xi
+$$
+（$\gamma(\alpha)(2\pi)^{-\alpha}=\pi^{n/2-\alpha}\Gamma(\frac{\alpha}{2})/\Gamma(\frac{n-\alpha}{2})$）。
+
+::: hypcheck
+- **$\alpha<n$**：Step 2 で $b=\frac{n-\alpha}{2}>0$（$\Gamma$ の積分の収束）に、Step 4 で $|\xi|^{-\alpha}$ の局所可積分性に使った。$\alpha=n$ なら核 $|x|^{0}=1$ は乗数をもたない。
+- **$\alpha>0$**：Step 1 で $k_{0}$ の可積分性に、Step 4 で $\Gamma(\frac{\alpha}{2})$ の収束に使った。
+- **$f,g\in\mathcal{S}$**：Step 1・4 で積分の入れ替えを正当化するためだけに使った。
+:::
+:::
+
+## ハーディ–リトルウッド–ソボレフの不等式 {#four:sec-fi-hls}
+
+::: lemma ヘドベリの不等式 {#four:fi-hedberg keywords="Hedberg's inequality: int |x-y|^{alpha-n} |f(y)| dy <= C (Mf(x))^{1 - alpha p/n} ||f||_p^{alpha p/n} for 1 <= p < n/alpha" index="ヘドベリの不等式|へどべりのふとうしき"}
+$0<\alpha<n$, $1\le p<n/\alpha$, $f\in L^{p}(\mathbb{R}^{n})$ とする。すべての $x$ で
+$$
+\int|x-y|^{\alpha-n}|f(y)|\,dy\le C_{1}\,Mf(x)^{1-\frac{\alpha p}{n}}\|f\|_{p}^{\frac{\alpha p}{n}},
+$$
+ここで $C_{1}\defeq\frac{n\omega_{n}}{\alpha}+C_{2}$、$C_{2}\defeq\bigl(\frac{n\omega_{n}}{(n-\alpha)p'-n}\bigr)^{1/p'}$（$p>1$）、$C_{2}\defeq1$（$p=1$）。右辺は $\|f\|_{p}>0$, $Mf(x)=\infty$ なら $+\infty$ とする。
+:::
+
+::: proof
+$x$ を固定する。$\|f\|_{p}=0$ なら両辺 $0$、$Mf(x)=\infty$ なら右辺が $\infty$。$Mf(x)=0$ ならすべての球で $\int_{B(x,r)}|f|=0$ なので $f=0$ a.e. で左辺は $0$。以下 $0<Mf(x)<\infty$, $\|f\|_{p}>0$ とし、$R>0$ で近い部分と遠い部分に分ける。
+
+**Step 1（近い部分）.** 【主張：$\int_{|x-y|<R}|x-y|^{\alpha-n}|f(y)|dy\le\frac{n\omega_{n}}{\alpha}R^{\alpha}Mf(x)$】 $K(z)\defeq|z|^{\alpha-n}\mathbf{1}_{\{|z|<R\}}$ は、$r\mapsto r^{\alpha-n}\mathbf{1}_{\{r<R\}}$ が非増加なので放射的に減少し、$\|K\|_{1}=n\omega_{n}\int_{0}^{R}r^{\alpha-1}dr=\frac{n\omega_{n}}{\alpha}R^{\alpha}$（\ref{four:radial-integral.1}）。有限値の $K_{\varepsilon}\defeq\min(K,\varepsilon^{-1})$ も放射的に減少し $\|K_{\varepsilon}\|_{1}\le\|K\|_{1}$ なので、\ref{four:majorant-bound}（$t=1$, $\varphi=K_{\varepsilon}$）から $\int K_{\varepsilon}(x-y)|f(y)|dy\le\|K\|_{1}Mf(x)$。$\varepsilon\to0$ で単調収束定理（\ref{meas:monotone-convergence}）を使う。
+
+**Step 2（遠い部分）.** 【主張：$\int_{|x-y|\ge R}|x-y|^{\alpha-n}|f(y)|dy\le C_{2}R^{\alpha-\frac{n}{p}}\|f\|_{p}$】 $p=1$ なら $|x-y|^{\alpha-n}\le R^{\alpha-n}$ から。$p>1$ ならヘルダーの不等式（\ref{meas:holder}）と \eqref{four:eq-fi-tail}（$\beta=(n-\alpha)p'$）から、左辺は次の値以下である：
+$$
+\|f\|_{p}\Bigl(\int_{|z|\ge R}|z|^{-(n-\alpha)p'}dz\Bigr)^{1/p'}=\|f\|_{p}\Bigl(\frac{n\omega_{n}R^{n-(n-\alpha)p'}}{(n-\alpha)p'-n}\Bigr)^{1/p'}.
+$$
+ここで $(n-\alpha)p'>n\iff1-\frac{\alpha}{n}>\frac{1}{p'}=1-\frac1p\iff p<\frac{n}{\alpha}$（前提を使う）。$R$ の指数は $\frac{n}{p'}-(n-\alpha)=\alpha-\frac{n}{p}$。
+
+**Step 3（$R$ を選ぶ）.** 【主張：$R\defeq(\|f\|_{p}/Mf(x))^{p/n}$ とおくと主張が従う】 この $R$ では $R^{n/p}Mf(x)=\|f\|_{p}$、すなわち $R^{\alpha-n/p}\|f\|_{p}=R^{\alpha}Mf(x)$ なので、Step 1・2 の和は $C_{1}R^{\alpha}Mf(x)=C_{1}\|f\|_{p}^{\alpha p/n}Mf(x)^{1-\alpha p/n}$。
+:::
+
+::: theorem ハーディ–リトルウッド–ソボレフの不等式 {#four:fi-hls keywords="Hardy-Littlewood-Sobolev inequality, fractional integration theorem: ||I_alpha f||_q <= C ||f||_p for 1 < p < q < infinity, 1/q = 1/p - alpha/n; weak type (1, n/(n-alpha)); the relation of exponents is forced by scaling" index="ハーディ–リトルウッド–ソボレフの不等式|はーでぃりとるうっどそぼれふのふとうしき, 分数積分の定理|ぶんすうせきぶんのていり"}
+$0<\alpha<n$ とする。
+1. $1<p<\frac{n}{\alpha}$, $\frac1q=\frac1p-\frac{\alpha}{n}$ なら、$f\in L^{p}$ について $I_{\alpha}f(x)$ はほとんどすべての $x$ で絶対収束し、$\|I_{\alpha}f\|_{q}\le C\|f\|_{p}$（$C$ は $n,\alpha,p$ だけによる）。
+2. $p=1$, $q=\frac{n}{n-\alpha}$ なら $[I_{\alpha}f]_{q}\le C\|f\|_{1}$（弱 $(1,q)$ 型）。
+3. $1\le p,q<\infty$ で、すべての $0\le f\in C_{c}(\mathbb{R}^{n})$ について $\|I_{\alpha}f\|_{q}\le C\|f\|_{p}$ なら、$\frac1q=\frac1p-\frac{\alpha}{n}$。
+:::
+
+::: intuition
+$\alpha$ 回積分すると関数は「なめらかになる」が、$\mathbb{R}^{n}$ 全体では大きさは減らず、かわりに可積分性の指数が $p$ から $q>p$ に上がる。上がる量 $\frac1p-\frac1q$ は $\frac{\alpha}{n}$ に限られ、それは拡大縮小で決まる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\|I_{\alpha}f\|_{q}\le\gamma(\alpha)^{-1}C_{1}A_{p}^{p/q}\|f\|_{p}$】 \ref{four:fi-hedberg} と \ref{four:maximal-lp}（$p>1$ を使う）から $Mf<\infty$ a.e. で、そこで $I_{\alpha}f$ は絶対収束する（$x\mapsto I_{\alpha}f(x)$ の可測性は \ref{meas:fubini}）。$\frac{q}{p}=\frac{1}{1-\alpha p/n}$ なので $q(1-\frac{\alpha p}{n})=p$。\ref{four:fi-hedberg} を $q$ 乗して積分すると
+$$
+\gamma(\alpha)^{q}\|I_{\alpha}f\|_{q}^{q}\le C_{1}^{q}\|f\|_{p}^{\frac{\alpha pq}{n}}\int(Mf)^{p}\le C_{1}^{q}A_{p}^{p}\|f\|_{p}^{\frac{\alpha pq}{n}+p}.
+$$
+指数は $\frac{\alpha pq}{n}+p=q(\frac{\alpha p}{n}+1-\frac{\alpha p}{n})=q$。
+
+**Step 2（2）.** 【主張：$\lambda(\{|I_{\alpha}f|>s\})\le3^{n}(C_{1}/\gamma(\alpha))^{q}(\|f\|_{1}/s)^{q}$】 \ref{four:fi-hedberg}（$p=1$）から、$|I_{\alpha}f(x)|>s$ なら $Mf(x)^{1-\frac{\alpha}{n}}>\gamma(\alpha)s/(C_{1}\|f\|_{1}^{\alpha/n})$、すなわち $Mf(x)>\beta\defeq(\gamma(\alpha)s/C_{1})^{q}\|f\|_{1}^{-\alpha q/n}$（$q=\frac{n}{n-\alpha}$）。\ref{meas:maximal-inequality} から測度は $\le3^{n}\|f\|_{1}/\beta$ で、$1+\frac{\alpha q}{n}=q$ から主張の形になる。$q$ 乗根をとって $s$ について上限をとれば $[I_{\alpha}f]_{q}\le3^{n/q}C_{1}\gamma(\alpha)^{-1}\|f\|_{1}$。
+
+**Step 3（3）.** 【主張：$f_{\delta}(x)\defeq f(\delta x)$（$\delta>0$）について $I_{\alpha}f_{\delta}(x)=\delta^{-\alpha}I_{\alpha}f(\delta x)$】 置き換え $y=z/\delta$（\ref{meas:lebesgue-linear}）で $\int|x-y|^{\alpha-n}f(\delta y)dy=\delta^{-n}\int|x-z/\delta|^{\alpha-n}f(z)dz$ で、$|x-z/\delta|^{\alpha-n}=\delta^{n-\alpha}|\delta x-z|^{\alpha-n}$。
+
+**Step 4（3 の結論）.** 【主張：$\frac1q=\frac1p-\frac{\alpha}{n}$】 $0\le f\in C_{c}$, $f\ne0$ を固定すると $I_{\alpha}f>0$ なので $0<\|I_{\alpha}f\|_{q}\le C\|f\|_{p}<\infty$。Step 3 と置き換えから $\|I_{\alpha}f_{\delta}\|_{q}=\delta^{-\alpha-\frac{n}{q}}\|I_{\alpha}f\|_{q}$、$\|f_{\delta}\|_{p}=\delta^{-\frac{n}{p}}\|f\|_{p}$。前提を $f_{\delta}$ に使うと $\delta^{\frac{n}{p}-\frac{n}{q}-\alpha}\le C\|f\|_{p}/\|I_{\alpha}f\|_{q}$ がすべての $\delta>0$ で成り立つ。指数が $0$ でなければ $\delta\to0$ か $\delta\to\infty$ で左辺が発散する。
+
+::: hypcheck
+- **$p<\frac{n}{\alpha}$**：\ref{four:fi-hedberg} の Step 2（遠い部分の収束）で使った。$q<\infty$ と同値。
+- **$p>1$**：Step 1 で \ref{four:maximal-lp} に使った。$p=1$ では強型は成り立たない（\ref{four:prob-fi-endpoint}）ので、Step 2 の弱型が最良である。
+- **指数の関係**：Step 1 の $q(1-\frac{\alpha p}{n})=p$ に使い、Step 4 でそれが必要なことを示した。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $p=\frac{n}{\alpha}$（$q=\infty$）では成り立たない：$f(y)=|y|^{-\alpha}(\log\frac{1}{|y|})^{-\frac{\alpha}{n}(1+\varepsilon)}\mathbf{1}_{\{|y|<1/e\}}$（$\frac{\alpha}{n}(1+\varepsilon)\le1$）は $L^{n/\alpha}$ に入るが $I_{\alpha}f(0)=\infty$ で（どちらも \ref{four:radial-integral.1} で $\int_{0}^{1/e}r^{-1}(\log\frac1r)^{-a}dr$ に帰着する）、$I_{\alpha}f$ は \ref{meas:fatou} から下半連続なので $0$ の近くで本質的に有界でない。
+
+**似た定理.** \ref{four:young-inequality} で $L^{r}$ の核を使うと同じ形の評価が出るが、$|x|^{\alpha-n}$ はどの $L^{r}$ にも入らず（$r=\frac{n}{n-\alpha}$ でちょうど弱 $L^{r}$）、ヤングの不等式では届かない。ヘドベリの方法は、核を「近い部分は極大関数、遠い部分はヘルダー」に分け、分け目 $R$ を点ごとに最適化してこの欠落を埋める。
+
+**高い視点：次元の勘定.** $x$ に長さ $1$ の次元を与えると、$\|f\|_{p}$ は長さ$^{n/p}$、$I_{\alpha}$ は長さ$^{\alpha}$ を掛ける。不等式の両辺の次元が釣り合うことが Step 4 の条件で、物理の次元解析と同じである。
+:::
+
+## ソボレフの不等式 {#four:sec-fi-sobolev}
+
+::: lemma 勾配のリース・ポテンシャルによる評価 {#four:fi-gradient-potential keywords="for u in C_c^1(R^n), n >= 2: |u(x)| <= (1/(n omega_n)) int |x-y|^{1-n} |grad u(y)| dy = (gamma(1)/(n omega_n)) I_1(|grad u|)(x); averaging the fundamental theorem of calculus over directions" index="勾配のリース・ポテンシャル表示|こうばいのりーすぽてんしゃるひょうじ"}
+$n\ge2$, $u\in C_{c}^{1}(\mathbb{R}^{n})$ なら、すべての $x$ で
+$$
+|u(x)|\le\frac{1}{n\omega_{n}}\int|x-y|^{1-n}|\nabla u(y)|\,dy=\frac{\gamma(1)}{n\omega_{n}}I_{1}(|\nabla u|)(x).
+$$
+:::
+
+::: intuition
+$x$ から出るどの半直線に沿っても、$u$ は無限遠で $0$ なので $u(x)$ は勾配の線積分で書ける。これを全方向について平均すると、$x$ から距離 $r$ の点の勾配が球面の大きさ $r^{n-1}$ で割られて寄与し、重み $|x-y|^{1-n}$ が現れる。
+:::
+
+::: proof
+$x$ を固定する。
+
+**Step 1（方向について平均）.** 【主張：$|u(x)|\le\frac{1}{\omega_{n}}\int_{0}^{\infty}\int_{B(0,1)}|\nabla u(x+ty)||y|\,dy\,dt$】 $y\ne0$ について $g(t)\defeq u(x+ty)$ は $C^{1}$ 級で、$u$ の台がコンパクトなので大きな $t$ で $0$。微積分の基本定理と連鎖律から $u(x)=-\int_{0}^{\infty}g'(t)dt=-\int_{0}^{\infty}\nabla u(x+ty)\cdot y\,dt$。よって $|u(x)|\le\int_{0}^{\infty}|\nabla u(x+ty)||y|dt$。両辺を $y\in B(0,1)$ について平均し（$y=0$ は零集合）、右辺の積分順序を \ref{meas:tonelli} で入れ替える（被積分関数は連続で非負）。
+
+**Step 2（拡大縮小）.** 【主張：$\int_{B(0,1)}|\nabla u(x+ty)||y|dy=t^{-n-1}\int_{B(0,t)}|\nabla u(x+z)||z|dz$】 置き換え $z=ty$（\ref{meas:lebesgue-linear}、$dy=t^{-n}dz$）と $|y|=|z|/t$ から。
+
+**Step 3（$t$ について積分）.** 【主張：主張の不等式】 Step 1・2 と \ref{meas:tonelli} から
+$$
+|u(x)|\le\frac{1}{\omega_{n}}\int|\nabla u(x+z)||z|\Bigl(\int_{|z|}^{\infty}t^{-n-1}dt\Bigr)dz=\frac{1}{n\omega_{n}}\int|\nabla u(x+z)||z|^{1-n}dz.
+$$
+$z=y-x$ と置き換えれば主張になる。$n\ge2$ なので $\alpha=1<n$ で、後半は \ref{four:fi-riesz-potential} の定義から。
+
+::: hypcheck
+- **コンパクト台**：Step 1 で $g(t)\to0$ に使った。定数関数では成り立たない。
+- **$n\ge2$**：$I_{1}$ を定義するためだけに使った（$n=1$ でも不等式自体は $|u(x)|\le\frac12\int|u'|$ として正しい）。
+:::
+:::
+
+::: supplement
+**球面平均との関係.** 球面上の面積要素 $\sigma$ を使えば $u(x)=-\frac{1}{n\omega_{n}}\int_{S^{n-1}}\int_{0}^{\infty}\partial_{r}u(x+r\omega)\,dr\,d\sigma(\omega)$（方向についての球面平均）と書け、極座標で同じ式になる。ここでは面積要素を用意していないので、Step 1 で単位球の上の平均で代用した。$\int_{B(0,1)}F(\frac{y}{|y|})|y|\,dy$ は方向についての平均に比例するので、内容は同じである。
+:::
+
+::: corollary ソボレフの不等式（分数積分による証明） {#four:fi-sobolev-inequality keywords="Sobolev inequality ||u||_{p*} <= C ||grad u||_p for 1 < p < n via the Hardy-Littlewood-Sobolev inequality" index="ソボレフの不等式（分数積分）|そぼれふのふとうしきぶんすうせきぶん"}
+$n\ge2$, $1<p<n$ とする。$n,p$ だけによる $C$ があって、$u\in W^{1,p}(\mathbb{R}^{n})$ について $\|u\|_{p^{*}}\le C\|\nabla u\|_{p}$。
+:::
+
+::: proof
+$u\in C_{c}^{1}$ とする。$\alpha=1$ とすると $1<p<n=\frac{n}{\alpha}$ で、$\frac1{p^{*}}=\frac1p-\frac1n$。\ref{four:fi-gradient-potential} と \ref{four:fi-hls.1}（$f=|\nabla u|\in L^{p}$）から $\|u\|_{p^{*}}\le\frac{\gamma(1)}{n\omega_{n}}\|I_{1}(|\nabla u|)\|_{p^{*}}\le C\|\nabla u\|_{p}$。$W^{1,p}$ へは、\ref{fa:test-dense-rn} で $u_{k}\in C_{c}^{\infty}$, $u_{k}\to u$ をとり、部分列で a.e. 収束させ（\ref{meas:riesz-fischer}）、\ref{meas:fatou} で極限をとる。
+:::
+
+::: supplement
+**\ref{fa:gns-inequality} との比較.** そこでは、まず $p=1$ を座標ごとの微積分の基本定理と \ref{fa:loomis-whitney} で示し、$|u|^{\gamma}$ に当てはめて一般の $p$ を出した。定数 $\frac{p(n-1)}{n-p}$ も具体的で、$p=1$ も含む。ここでは点ごとの表示 $|u|\le cI_{1}|\nabla u|$ を経由し、残りを分数積分の一般論に任せる。$p=1$ では \ref{four:fi-hls.2} の弱型しか得られないが、$u$ を値の範囲ごとに切り詰めて弱型を足し合わせると $p=1$ の強型も復元できることが知られている（ここでは証明しない）。
+:::
+
+## ベッセル・ポテンシャルと Lᵖ 型のソボレフ空間 {#four:sec-fi-bessel}
+
+乗数 $(2\pi|\xi|)^{-\alpha}$ は $\xi=0$ で発散し、核は遠くで遅く減衰する。乗数を $(1+4\pi^{2}|\xi|^{2})^{-s/2}$ に替えると、核は可積分になる。
+
+::: definition ベッセル核 {#four:fi-bessel-kernel keywords="Bessel kernel G_s(x) = ((4 pi)^{s/2} Gamma(s/2))^{-1} int_0^infinity e^{-pi |x|^2/delta} e^{-delta/(4 pi)} delta^{(s-n)/2} d delta / delta; Bessel potential G_s * f" index="ベッセル核|べっせるかく, ベッセル・ポテンシャル|べっせるぽてんしゃる"}
+$s>0$ について
+$$
+G_{s}(x)\defeq\frac{1}{(4\pi)^{s/2}\Gamma(\frac{s}{2})}\int_{0}^{\infty}e^{-\pi|x|^{2}/\delta}e^{-\delta/(4\pi)}\delta^{\frac{s-n}{2}}\frac{d\delta}{\delta}\in(0,\infty]
+$$
+を**ベッセル核**、$G_{s}*f$ を $f$ の**ベッセル・ポテンシャル**という。
+:::
+
+::: intuition
+幅 $\sqrt{\delta}$ のガウス関数を、大きな幅ほど $e^{-\delta/(4\pi)}$ で強く抑えて重ね合わせたものである。リース核も同じ重ね合わせで書けるが（\ref{four:fi-riesz-multiplier} の Step 2）、そこには抑えがないので裾が重い。
+:::
+
+::: theorem ベッセル核の性質 {#four:fi-bessel-properties keywords="G_s is positive, integrable with integral 1, hat G_s = (1 + 4 pi^2 |xi|^2)^{-s/2}, G_s * G_t = G_{s+t}, f -> G_s * f is an injective contraction on L^p" index="ベッセル核の性質|べっせるかくのせいしつ"}
+$s,t>0$ とする。
+1. $G_{s}$ は可測、正値、可積分で $\int G_{s}=1$。
+2. $\hat G_{s}(\xi)=(1+4\pi^{2}|\xi|^{2})^{-s/2}$。
+3. $G_{s}*G_{t}=G_{s+t}$。
+4. $1\le p\le\infty$, $f\in L^{p}$ なら $\|G_{s}*f\|_{p}\le\|f\|_{p}$ で、$G_{s}*f=0$（a.e.）なら $f=0$（a.e.）。
+:::
+
+::: intuition
+ベッセル・ポテンシャルは、総量 $1$ の正の重みによる平均（ぼかし）なので $L^{p}$ ノルムを増やさない。乗数が決してゼロにならないので、ぼかしても情報は失われない。
+:::
+
+::: proof
+$c_{s}\defeq((4\pi)^{s/2}\Gamma(\frac{s}{2}))^{-1}$ とおく。
+
+**Step 1（1）.** 【主張：$\int G_{s}=1$】 被積分関数は $(x,\delta)$ について連続で正なので、$G_{s}$ は可測で正（\ref{meas:tonelli}）。\ref{four:gaussian-transform}（$\xi=0$, $a=1/\delta$）から $\int e^{-\pi|x|^{2}/\delta}dx=\delta^{n/2}$。トネリの定理と \eqref{four:eq-fi-gamma}（$c=\frac{1}{4\pi}$, $b=\frac{s}{2}$）から
+$$
+\int G_{s}=c_{s}\int_{0}^{\infty}e^{-\delta/(4\pi)}\delta^{\frac{s}{2}-1}d\delta=c_{s}\Gamma(\tfrac{s}{2})(4\pi)^{s/2}=1.
+$$
+
+**Step 2（2）.** 【主張：$\hat G_{s}(\xi)=(1+4\pi^{2}|\xi|^{2})^{-s/2}$】 Step 1 から $(x,\delta)$ についての絶対値の積分は $1$ なので、\ref{meas:fubini} で $x$ の積分を先にしてよい。\ref{four:gaussian-transform}（$a=1/\delta$）から $\int e^{-\pi|x|^{2}/\delta}e^{-2\pi ix\cdot\xi}dx=\delta^{n/2}e^{-\pi\delta|\xi|^{2}}$ なので、\eqref{four:eq-fi-gamma}（$c=\frac{1}{4\pi}+\pi|\xi|^{2}$）から
+$$
+\hat G_{s}(\xi)=c_{s}\int_{0}^{\infty}e^{-\delta(\frac{1}{4\pi}+\pi|\xi|^{2})}\delta^{\frac{s}{2}-1}d\delta=\Bigl(4\pi\bigl(\tfrac{1}{4\pi}+\pi|\xi|^{2}\bigr)\Bigr)^{-s/2}.
+$$
+
+**Step 3（3 と 4 の前半）.** 【主張：$G_{s}*G_{t}=G_{s+t}$、$\|G_{s}*f\|_{p}\le\|f\|_{p}$】 \ref{four:convolution-rd.2} と Step 2 から $\widehat{G_{s}*G_{t}}=\hat G_{s}\hat G_{t}=\hat G_{s+t}$ で、\ref{four:inversion-theorem.2} から等しい。後半は \ref{four:convolution-rd.1} と $\|G_{s}\|_{1}=1$ から。
+
+**Step 4（4 の後半）.** 【主張：$G_{s}*f=0$ なら、すべての $\psi\in C_{c}^{\infty}$ で $\int f\psi=0$】 $m(\xi)\defeq(1+4\pi^{2}|\xi|^{2})^{s/2}$ は $C^{\infty}$ 級で、$\partial^{\beta}m$ は多項式と $(1+4\pi^{2}|\xi|^{2})^{s/2-j}$（$j\le|\beta|$）の積の和なので多項式で抑えられる。$\psi\in C_{c}^{\infty}\subset\mathcal{S}$ について $m\hat\psi\in\mathcal{S}$（\ref{four:schwartz-basic.2}, \ref{four:schwartz-fourier.1}）で、\ref{four:schwartz-fourier.3} から $\hat\varphi=m\hat\psi$ となる $\varphi\in\mathcal{S}$ がある。$\widehat{G_{s}*\varphi}=\hat G_{s}m\hat\psi=\hat\psi$ なので $G_{s}*\varphi=\psi$（\ref{four:inversion-theorem.2}）。$G_{s}$ は偶関数で、$\iint G_{s}(x-y)|f(y)||\varphi(x)|dy\,dx\le\|f\|_{p}\|G_{s}*|\varphi|\|_{p'}<\infty$（\ref{meas:holder}）なので、\ref{meas:fubini} から $0=\int(G_{s}*f)\varphi=\int f\,(G_{s}*\varphi)=\int f\psi$。\ref{fa:fundamental-lemma} から $f=0$ a.e.
+
+::: hypcheck
+- **$s>0$**：Step 1 で $\Gamma(\frac{s}{2})$ の積分の収束（$\int G_{s}<\infty$）に使った。
+- **因子 $e^{-\delta/(4\pi)}$**：Step 1 で $\delta\to\infty$ での収束に使った。これがなければリース核の重ね合わせになり、可積分でない。
+- 4 の単射性は Step 4 で、乗数が零点をもたず逆数 $m$ が多項式程度に増えることだけを使った。
+:::
+:::
+
+::: definition ベッセル・ポテンシャル空間 {#four:fi-bessel-space keywords="Bessel potential space, L^p Sobolev space of fractional order L^{s,p} = G_s(L^p) with norm ||G_s * f||_{L^{s,p}} = ||f||_p" index="ベッセル・ポテンシャル空間|べっせるぽてんしゃるくうかん, Lp 型のソボレフ空間|えるぴーがたのそぼれふくうかん"}
+$s>0$, $1\le p\le\infty$ について $L^{s,p}(\mathbb{R}^{n})\defeq\{G_{s}*f:f\in L^{p}\}$ とし、$\|G_{s}*f\|_{L^{s,p}}\defeq\|f\|_{p}$ とおく（\ref{four:fi-bessel-properties.4} の単射性から、$u$ に対して $f$ はただ一つに定まる）。$L^{s,p}$ を**ベッセル・ポテンシャル空間**（$L^{p}$ 型のソボレフ空間）という。$f\mapsto G_{s}*f$ は $L^{p}$ からの等長同型なので $L^{s,p}$ はバナッハ空間で、\ref{four:fi-bessel-properties.4} から $\|u\|_{p}\le\|u\|_{L^{s,p}}$。$0<s<t$ なら $G_{t}*f=G_{s}*(G_{t-s}*f)$（\ref{four:fi-bessel-properties.3}、畳み込みの結合則は絶対収束する積分の入れ替え）から $L^{t,p}\subset L^{s,p}$、$\|u\|_{L^{s,p}}\le\|u\|_{L^{t,p}}$。
+:::
+
+::: intuition
+「$s$ 階の微分 $(1-\Delta)^{s/2}u$ が $L^{p}$ に入る」関数 $u$ の空間である。$s$ が大きいほど条件は強く、空間は小さい。
+:::
+
+::: proposition p = 2 では Hˢ と一致する {#four:fi-bessel-l2 keywords="L^{s,2} = H^s with (2 pi)^{-s} ||u||_{L^{s,2}} <= ||u||_{H^s} <= ||u||_{L^{s,2}}" index="ベッセル・ポテンシャル空間と Hs|べっせるぽてんしゃるくうかんとえいちえす"}
+$s>0$ なら $L^{s,2}(\mathbb{R}^{n})=H^{s}(\mathbb{R}^{n})$ で、$(2\pi)^{-s}\|u\|_{L^{s,2}}\le\|u\|_{H^{s}}\le\|u\|_{L^{s,2}}$。
+:::
+
+::: proof
+**Step 1.** 【主張：$G\in L^{1}$, $f\in L^{2}$ なら $\mathcal{F}(G*f)=\hat G\,\mathcal{F}f$】 $f_{R}\defeq f\mathbf{1}_{\{|x|\le R\}}\in L^{1}\cap L^{2}$ なら $G*f_{R}\in L^{1}\cap L^{2}$ で $\widehat{G*f_{R}}=\hat G\hat f_{R}$（\ref{four:convolution-rd.2}）。$R\to\infty$ で $G*f_{R}\to G*f$（\ref{four:convolution-rd.1}）、$\hat G\hat f_{R}\to\hat G\mathcal{F}f$（$|\hat G|\le\|G\|_{1}$ と \ref{four:plancherel.3}）がともに $L^{2}$ で成り立ち、$\mathcal{F}$ は連続なので等しい。
+
+**Step 2（⊂）.** 【主張：$u=G_{s}*f$（$f\in L^{2}$）なら $u\in H^{s}$ でノルムの評価が成り立つ】 Step 1 と \ref{four:fi-bessel-properties.2} から $(1+4\pi^{2}|\xi|^{2})^{s/2}\mathcal{F}u=\mathcal{F}f$。$1\le\frac{1+4\pi^{2}|\xi|^{2}}{1+|\xi|^{2}}\le4\pi^{2}$ なので $(2\pi)^{-s}|\mathcal{F}f|\le(1+|\xi|^{2})^{s/2}|\mathcal{F}u|\le|\mathcal{F}f|$。$L^{2}$ ノルムをとり \ref{four:plancherel.2} の $\|\mathcal{F}f\|_{2}=\|f\|_{2}$ を使う。
+
+**Step 3（⊃）.** 【主張：$u\in H^{s}$ なら $u\in L^{s,2}$】 $(1+4\pi^{2}|\xi|^{2})^{s/2}\mathcal{F}u\le(2\pi)^{s}(1+|\xi|^{2})^{s/2}|\mathcal{F}u|$ は $L^{2}$ に入るので、\ref{four:plancherel.2} から $\mathcal{F}f=(1+4\pi^{2}|\xi|^{2})^{s/2}\mathcal{F}u$ となる $f\in L^{2}$ がある。Step 1 から $\mathcal{F}(G_{s}*f)=\mathcal{F}u$ で、$\mathcal{F}$ の単射性から $u=G_{s}*f$。
+:::
+
+::: supplement
+**整数階では $W^{k,p}$ と一致する.** $k$ が正の整数で $1<p<\infty$ なら $L^{k,p}=W^{k,p}$ で、ノルムは同値である。$p=2$ では上の命題と \ref{fa:sobolev-fourier.2} からわかるが、一般の $p$ では、$\partial_{j}\partial_{l}G_{2}*f$ のような「乗数が $0$ 次斉次に近い」作用素の $L^{p}$ 有界性、とくにリース変換の $L^{p}$ 有界性が要る。これは後のページの特異積分作用素の理論で得られる結果で、ここでは証明しない。
+
+**分数積分との関係.** $0<s<n$ なら $G_{s}\le\gamma(s)^{-1}|x|^{s-n}$ で、$L^{s,p}$ の埋め込みが \ref{four:fi-hls} から従う（\ref{four:prob-fi-bessel-embedding}）。
+
+**高い視点.** $I_{\alpha}=(-\Delta)^{-\alpha/2}$、$G_{s}*{}=(1-\Delta)^{-s/2}$ は、ともに熱核（ガウス関数）によるぼかしを時間について重みつきで積分したもので、\eqref{four:eq-fi-gamma} の $\lambda^{-b}=\Gamma(b)^{-1}\int_{0}^{\infty}e^{-t\lambda}t^{b-1}dt$ に $\lambda=-\Delta$, $1-\Delta$ を代入することにあたる。ぼかしの重ね合わせが逆べきを作る。
+:::
+
+## 問題 {#four:sec-fi-problems}
+
+::: problem {#four:prob-fi-endpoint}
+$0<\alpha<n$, $f\defeq\mathbf{1}_{B(0,1)}$ とする。$I_{\alpha}f\notin L^{n/(n-\alpha)}$ を示し、\ref{four:fi-hls.2} の弱型を強型 $(1,\frac{n}{n-\alpha})$ に強められないことを確かめよ。
+:::
+
+::: solution
+$|x|\ge1$, $|y|<1$ なら $|x-y|\le|x|+1\le2|x|$ で、$\alpha-n<0$ から $|x-y|^{\alpha-n}\ge(2|x|)^{\alpha-n}$。よって $I_{\alpha}f(x)\ge\gamma(\alpha)^{-1}\omega_{n}(2|x|)^{\alpha-n}$。$q\defeq\frac{n}{n-\alpha}$ とすると $(\alpha-n)q=-n$ なので
+$$
+\int(I_{\alpha}f)^{q}\ge\Bigl(\frac{\omega_{n}}{\gamma(\alpha)}\Bigr)^{q}2^{-n}\int_{|x|\ge1}|x|^{-n}dx=\infty
+$$
+（\eqref{four:eq-fi-tail} で $\beta=n$）。$\|f\|_{1}=\omega_{n}<\infty$ なので、強型の評価 $\|I_{\alpha}f\|_{q}\le C\|f\|_{1}$ は成り立たない。原因は遠方の裾 $|x|^{\alpha-n}$ で、これはちょうど弱 $L^{q}$ に入る。
+:::
+
+::: problem {#four:prob-fi-bessel-embedding}
+$0<s<n$ とする。
+1. $G_{s}(x)\le\gamma(s)^{-1}|x|^{s-n}$ を示せ。
+2. $1<p<\frac{n}{s}$, $\frac1q=\frac1p-\frac{s}{n}$ なら、$u\in L^{s,p}$ について $\|u\|_{q}\le C\|u\|_{L^{s,p}}$ を示せ。
+:::
+
+::: solution
+**1.** $c_{s}\defeq((4\pi)^{s/2}\Gamma(\frac{s}{2}))^{-1}$ とする。$e^{-\delta/(4\pi)}\le1$ を落とし、\eqref{four:eq-fi-gamma} の右の等式（$c=\pi|x|^{2}$, $b=\frac{n-s}{2}>0$）を使うと
+$$
+G_{s}(x)\le c_{s}\int_{0}^{\infty}e^{-\pi|x|^{2}/\delta}\delta^{-\frac{n-s}{2}-1}d\delta=\frac{\Gamma(\frac{n-s}{2})(\pi|x|^{2})^{\frac{s-n}{2}}}{(4\pi)^{s/2}\Gamma(\frac{s}{2})}.
+$$
+右辺の定数は $\frac{\Gamma(\frac{n-s}{2})}{2^{s}\pi^{n/2}\Gamma(\frac{s}{2})}=\gamma(s)^{-1}$。
+
+**2.** $u=G_{s}*f$（$f\in L^{p}$）とすると、1 から $|u(x)|\le\int G_{s}(x-y)|f(y)|dy\le I_{s}(|f|)(x)$。\ref{four:fi-hls.1}（$\alpha=s$）から $\|u\|_{q}\le\|I_{s}|f|\|_{q}\le C\|f\|_{p}=C\|u\|_{L^{s,p}}$。$s=1$ なら、\ref{four:fi-sobolev-inequality} の $L^{s,p}$ 版である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
