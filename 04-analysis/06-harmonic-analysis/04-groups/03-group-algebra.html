@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>群環と畳み込み | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/04-groups/03-group-algebra.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 群環と畳み込み {#four:page-group-algebra keywords="group algebra L^1(G), convolution on locally compact groups, continuity of translation, involution, Banach *-algebra, approximate identity, unitary representation, regular representation, 群環, 畳み込み, 対合, 近似単位元, ユニタリ表現"}
+
+局所コンパクト群 $G$ の上の可積分関数は、**畳み込み** $f*g(x)=\int f(y)g(y^{-1}x)\,d\mu(y)$ を積としてバナッハ環 $L^{1}(G)$ になる。$\mathbb{R}^{n}$ や円周の畳み込み（\ref{four:convolution-rd}, \ref{four:convolution}）の一般化であり、有限群の群環（\ref{mod:group-ring}）の連続版でもある。ハール測度（\ref{four:hm-existence-uniqueness}）を使って平行移動の連続性・畳み込み・対合・近似単位元を調べ、$G$ のユニタリ表現が $L^{1}(G)$ の表現を生むことを示す。
+
+## 記法と定義の確認 {#four:sec-ga-notation}
+
+::: notation
+- $G$ は**局所コンパクト・ハウスドルフな位相群**、$\mu$ は固定した左ハール測度（\ref{four:hm-haar-measure}）、$\Delta$ はモジュラー関数（\ref{four:hm-modular-function}）。$L_{s}f(x)=f(s^{-1}x)$, $R_{s}f(x)=f(xs)$ は前のページの記法。$C_{c}(G)$, $C_{c}(G)^{+}$, $K\prec f\prec U$ は \ref{four:rm-radon-measure} のとおり。
+- $L^{p}(G)\defeq L^{p}(G,\mathcal{B}(G),\mu)$（複素数値、\ref{meas:lp-space}）。バナッハ空間である（\ref{meas:riesz-fischer}）。$1\le p<\infty$ の共役指数を $q$ と書く。
+- 積 σ-加法族 $\mathcal{B}(G)\otimes\mathcal{B}(G)$ は \ref{meas:product-sigma-algebra}、積分の順序交換は \ref{meas:tonelli}, \ref{meas:fubini}（σ 有限性が前提）。
+- ヒルベルト空間と内積（第 1 変数について線形）、$B(H)$、共役作用素は \ref{fa:inner-product}, \ref{fa:bounded-operator}, \ref{fa:adjoint}。
+- **選択公理**：\ref{four:rm-urysohn}・\ref{four:rm-cc-dense} を通じて従属選択公理（DC）を使う。近似する列を選ぶ箇所（\ref{four:ga-measurability}, \ref{four:ga-inversion-null}）と \ref{meas:absolute-continuity-epsilon-delta} で可算選択公理を使う。
+:::
+
+## 積分の順序交換の準備 {#four:sec-ga-measurability}
+
+$\mu$ は σ 有限とは限らず（非可算な離散群の数え上げ測度）、$\mathcal{B}(G)\otimes\mathcal{B}(G)\subset\mathcal{B}(G\times G)$ なので連続関数 $(x,y)\mapsto\varphi(y^{-1}x)$ が積 σ-加法族について可測かも自明でない。そこで σ コンパクト（コンパクト集合の可算和）な台をもつ代表を使う。
+
+::: lemma 扱いやすい関数 {#four:ga-measurability keywords="product measurability of h(y^{-1}x), sigma-compact supports, Fubini-Tonelli for non sigma-finite Haar measure" index="扱いやすい関数（群上）|あつかいやすいかんすうぐんじょう"}
+ボレル可測な $h\colon G\to\mathbb{C}$ が、ある σ コンパクト集合の外で $0$ で、各コンパクト集合 $L$ について $(x,y)\mapsto\mathbf{1}_{L}(y)h(y^{-1}x)$ が $\mathcal{B}(G)\otimes\mathcal{B}(G)$ 可測であるとき、このページでは $h$ を**扱いやすい**といい、その全体を $\mathcal{G}$ と書く。
+1. $C_{c}(G)\subset\mathcal{G}$。
+2. $\mathcal{G}$ は線形空間である。$h\in\mathcal{G}$ と、$\Phi(0)=0$ となるボレル可測な $\Phi\colon\mathbb{C}\to\mathbb{C}$ について $\Phi\circ h\in\mathcal{G}$。$h_{n}\in\mathcal{G}$ で、$A$ を $(h_{n}(x))_{n}$ が収束する点の集合とすると、$\mathbf{1}_{A}\lim_{n}h_{n}\in\mathcal{G}$。
+3. $1\le p<\infty$ なら、$L^{p}(G)$ の各元は $\mathcal{G}$ の元を代表にもつ。
+4. $h\in\mathcal{G}$ で、$b\colon G\to\mathbb{C}$ がボレル可測で σ コンパクト集合の外で $0$ なら、$(x,y)\mapsto b(y)h(y^{-1}x)$ は $\mathcal{B}(G)\otimes\mathcal{B}(G)$ 可測。
+5. $\mathcal{B}(G)\otimes\mathcal{B}(G)$ 可測な $F$ が σ コンパクト集合 $T,S$ について $T\times S$ の外で $0$ なら、$F\ge0$ のとき、および $\iint|F|\,d\mu\,d\mu<\infty$ のとき、$\mu$ について \ref{meas:tonelli}・\ref{meas:fubini} の結論（積分の順序交換）が成り立つ。
+:::
+
+::: proof
+**Step 1.** 【主張：項目 1】 $\varphi\in C_{c}(G)$, コンパクトな $L$, $\varepsilon>0$ をとる。\ref{four:hm-uniform-continuity.2} から、$z'z^{-1}\in U$ なら $|\varphi(z)-\varphi(z')|<\varepsilon$ となる対称な開近傍 $U$ をとり、$L$ を $y_{1}U,\dots,y_{m}U$ で覆い、\ref{four:rm-partition-of-unity} で $h_{i}\prec y_{i}U$, $L$ 上 $\sum_{i}h_{i}=1$ とする。$\Phi_{\varepsilon}(x,y)\defeq\mathbf{1}_{L}(y)\sum_{i}h_{i}(y)\varphi(y_{i}^{-1}x)$ は一方の変数だけのボレル関数の積の和なので $\mathcal{B}(G)\otimes\mathcal{B}(G)$ 可測。$y\in L$, $h_{i}(y)\ne0$ なら $z\defeq y^{-1}x$, $z'\defeq y_{i}^{-1}x$ について $z'z^{-1}=y_{i}^{-1}y\in U$ なので
+$$
+\bigl|\mathbf{1}_{L}(y)\varphi(y^{-1}x)-\Phi_{\varepsilon}(x,y)\bigr|\le\sum_{i}h_{i}(y)\,\varepsilon=\varepsilon.
+$$
+$\varepsilon=1/n$ の $\Phi_{1/n}$ を選べば（可算選択）一様収束の極限なので可測（\ref{meas:measurable-limits.2}）。台 $\supp\varphi$ はコンパクト。
+
+**Step 2.** 【主張：項目 2】 σ コンパクト集合の可算和は σ コンパクト。$\Phi(0)=0$ から $\mathbf{1}_{L}(y)\Phi(h(y^{-1}x))=\Phi(\mathbf{1}_{L}(y)h(y^{-1}x))$。極限については $H_{n}(x,y)\defeq\mathbf{1}_{L}(y)h_{n}(y^{-1}x)$ とおくと、$\mathbf{1}_{L}(y)(\mathbf{1}_{A}\lim h_{n})(y^{-1}x)$ は「$(H_{n})$ が収束する点の集合」の指示関数と $\lim H_{n}$ の積で、\ref{meas:measurable-limits.3}（実部・虚部に分ける）から可測。
+
+**Step 3.** 【主張：項目 3】 $f\in L^{p}(G)$ とし、\ref{four:rm-cc-dense} から $\|\varphi_{n}-f\|_{p}<1/n$ となる $\varphi_{n}\in C_{c}(G)$ を選ぶ（可算選択）。\ref{meas:riesz-fischer} から部分列 $\varphi_{n_{k}}$ が a.e. に $f$ に収束する。$\tilde f\defeq\mathbf{1}_{A}\lim_{k}\varphi_{n_{k}}$ は 1・2 から $\mathcal{G}$ に属し、a.e. に $f$ と等しい。
+
+**Step 4.** 【主張：項目 4・5】 $b$ が $0$ でない集合を含む $S=\bigcup_{n}L_{n}$（$L_{n}$ はコンパクトの増大列）をとると、$b(y)h(y^{-1}x)=\sum_{n}\mathbf{1}_{L_{n}\setminus L_{n-1}}(y)b(y)\cdot\mathbf{1}_{L_{n}}(y)h(y^{-1}x)$（$L_{0}=\varnothing$）で可測。5：$\mu_{S}(E)\defeq\mu(E\cap S)$ は $\mathcal{B}(G)$ 上の σ 有限な測度（\ref{four:rm-radon-measure.2} の (a)）で、$S$ の外で $0$ のボレル関数 $u\ge0$ について $\int u\,d\mu=\int u\,d\mu_{S}$（指示関数で確かめ、単関数と \ref{meas:monotone-convergence} で延ばす）。$\mu_{T}\otimes\mu_{S}$ に \ref{meas:tonelli}・\ref{meas:fubini} を使う。
+:::
+
+::: lemma 逆元と零集合 {#four:ga-inversion-null keywords="inversion preserves Haar null sets" index="逆元と零集合|ぎゃくげんとれいしゅうごう"}
+ボレル集合 $N$ が $\mu(N)=0$ なら $\mu(N^{-1})=0$。
+:::
+
+::: proof
+開集合 $U$ について、逆元は同相写像なので $f\prec U^{-1}\iff\check f\prec U$（$\check f(x)=f(x^{-1})$）。\ref{four:rm-riesz-markov-kakutani.3} と \ref{four:hm-modular-function.4}（$\check f$ に使う）から
+$$
+\mu(U^{-1})=\sup_{f\prec U^{-1}}\int\check f(x^{-1})\,d\mu(x)=\sup_{f\prec U^{-1}}\int\check f(x)\Delta(x^{-1})\,d\mu(x)\le\int_{U}\Delta(x^{-1})\,d\mu(x).
+$$
+$k\in\mathbb{Z}$ について開集合 $O_{k}\defeq\{2^{k-1}<\Delta(x^{-1})<2^{k+1}\}$（$\Delta$ は連続）は $G$ を覆う。$\varepsilon>0$ について、外部正則性から開集合 $W_{k}$ で $N\cap O_{k}\subset W_{k}\subset O_{k}$, $\mu(W_{k})<\varepsilon2^{-|k|-k-3}$ となるものを選ぶ（可算選択）。上の評価から $\mu((N\cap O_{k})^{-1})\le\mu(W_{k}^{-1})\le2^{k+1}\mu(W_{k})<\varepsilon2^{-|k|-2}$ で、$k$ について足して $\mu(N^{-1})<\varepsilon$。
+:::
+
+## 平行移動の連続性 {#four:sec-ga-translation}
+
+::: proposition 平行移動の連続性 {#four:ga-translation-continuity keywords="continuity of translation in L^p(G); ||R_s f||_p = Delta(s)^{-1/p} ||f||_p" index="平行移動の連続性（局所コンパクト群）|へいこういどうのれんぞくせいきょくしょこんぱくとぐん"}
+$1\le p<\infty$, $f\in L^{p}(G)$ とする。
+1. $\|L_{s}f\|_{p}=\|f\|_{p}$ で、$s\mapsto L_{s}f$ は $G$ から $L^{p}(G)$ への連続写像である。
+2. $\|R_{s}f\|_{p}=\Delta(s)^{-1/p}\|f\|_{p}$ で、$s\mapsto R_{s}f$ も連続である。
+:::
+
+::: intuition
+関数を少しずらすと、$L^{p}$ の意味で少ししか変わらない。左にずらしても大きさは変わらないが、右にずらすとモジュラー関数の分だけ伸び縮みする。
+:::
+
+::: proof
+$\mu(sN)=\mu(N)$, $\mu(Ns^{-1})=\Delta(s^{-1})\mu(N)$ なので $L_{s}$, $R_{s}$ は零集合を零集合に移し、$L^{p}$ の元に作用する。ノルムの等式は $|f|^{p}$ に \ref{four:hm-transport}（$T(x)=s^{-1}x$）と \ref{four:hm-modular-function.2} を使う（$\Delta(s^{-1})^{1/p}=\Delta(s)^{-1/p}$）。
+
+**Step 1.** 【主張：$\varphi\in C_{c}(G)$ なら、$s\to e$ で $\|L_{s}\varphi-\varphi\|_{p}\to0$, $\|R_{s}\varphi-\varphi\|_{p}\to0$】 $K\defeq\supp\varphi$ と $e$ のコンパクトな近傍 $V_{0}$ をとる（\ref{four:rm-shrink}）。$s\in V_{0}$ なら $L_{s}\varphi$, $R_{s}\varphi$, $\varphi$ の台はコンパクト集合 $K'\defeq V_{0}K\cup KV_{0}^{-1}$ に入る（$\supp R_{s}\varphi=Ks^{-1}$）。\ref{four:hm-uniform-continuity} の最後の主張から、$s$ が $e$ の近傍 $V\subset V_{0}$ にあれば $\|L_{s}\varphi-\varphi\|_{\infty}\le\varepsilon$, $\|R_{s}\varphi-\varphi\|_{\infty}\le\varepsilon$ で、$p$ 乗して積分すると $\|L_{s}\varphi-\varphi\|_{p}\le\varepsilon\mu(K')^{1/p}$（右も同じ）。
+
+**Step 2.** 【主張：$s\to e$ で $\|L_{s}f-f\|_{p}\to0$, $\|R_{s}f-f\|_{p}\to0$】 \ref{four:rm-cc-dense} から $\|f-\varphi\|_{p}<\varepsilon$ の $\varphi\in C_{c}(G)$ をとると
+$$
+\|L_{s}f-f\|_{p}\le\|L_{s}(f-\varphi)\|_{p}+\|L_{s}\varphi-\varphi\|_{p}+\|\varphi-f\|_{p}<2\varepsilon+\|L_{s}\varphi-\varphi\|_{p}.
+$$
+右では第 1 項が $\Delta(s)^{-1/p}\varepsilon$ で、$\Delta$ は連続で $\Delta(e)=1$（\ref{four:hm-modular-function.3}）なので $s$ が $e$ に近ければ $2\varepsilon$ 以下。Step 1 で結論を得る。
+
+**Step 3.** 【主張：$t\in G$ での連続性】 $L_{s}f-L_{t}f=L_{t}(L_{t^{-1}s}f-f)$ なので $\|L_{s}f-L_{t}f\|_{p}=\|L_{t^{-1}s}f-f\|_{p}$。$R_{s}R_{t}=R_{st}$ から $R_{s}f-R_{t}f=R_{t}(R_{t^{-1}s}f-f)$ で、ノルムは $\Delta(t)^{-1/p}\|R_{t^{-1}s}f-f\|_{p}$。$s\to t$ なら $t^{-1}s\to e$（\ref{top:tg-neighbourhoods.1}）なので Step 2 から従う。
+
+::: hypcheck
+- **$p<\infty$**：Step 1 の評価と Step 2 の稠密性で使った。$p=\infty$ では偽：$G=\mathbb{R}$, $f=\mathbf{1}_{[0,\infty)}$ なら $s\ne0$ で $\|L_{s}f-f\|_{\infty}=1$。
+- **選択公理**：\ref{four:rm-cc-dense} の DC。
+:::
+:::
+
+## 畳み込みと群環 {#four:sec-ga-convolution}
+
+::: theorem 畳み込み {#four:ga-convolution keywords="convolution on a locally compact group, ||f*g||_p <= ||f||_1 ||g||_p, associativity" index="畳み込み（局所コンパクト群）|たたみこみきょくしょこんぱくとぐん"}
+$1\le p<\infty$, $f\in L^{1}(G)$, $g\in L^{p}(G)$ とし、$\tilde f,\tilde g\in\mathcal{G}$ を代表とする（\ref{four:ga-measurability.3}）。
+1. ほとんどすべての $x$ で $\int|\tilde f(y)||\tilde g(y^{-1}x)|\,d\mu(y)<\infty$ で、
+$$
+f*g(x)\defeq\int\tilde f(y)\tilde g(y^{-1}x)\,d\mu(y)
+$$
+は代表の選び方によらない $L^{p}(G)$ の元を定め、$\|f*g\|_{p}\le\|f\|_{1}\|g\|_{p}$。
+2. $f,g\in C_{c}(G)$ なら、上の式はすべての $x$ で定義され、$f*g\in C_{c}(G)$, $\supp(f*g)\subset\supp f\cdot\supp g$。
+3. $L^{1}(G)$ 上の畳み込みは双線形で結合的：$(f*g)*h=f*(g*h)$。
+:::
+
+::: intuition
+$f*g$ は、$g$ を $y$ だけ左にずらしたもの $L_{y}g$ を重み $f(y)$ で平均したものである。重みの総量が $\|f\|_{1}$ なので、大きさは高々 $\|f\|_{1}$ 倍にしかならない。
+:::
+
+::: proof
+$\tilde f$, $\tilde g$ はそれぞれ σ コンパクト集合 $S_{f}=\bigcup_{n}L_{n}$, $S_{g}=\bigcup_{m}M_{m}$ の外で $0$ とする。
+
+**Step 1.** 【主張：$F(x,y)\defeq\tilde f(y)\tilde g(y^{-1}x)$ は $\mathcal{B}(G)\otimes\mathcal{B}(G)$ 可測で、$(S_{f}S_{g})\times S_{f}$ の外で $0$。$S_{f}S_{g}$ は σ コンパクト】 可測性は \ref{four:ga-measurability.4}。$F(x,y)\ne0$ なら $y\in S_{f}$, $y^{-1}x\in S_{g}$ なので $x\in S_{f}S_{g}=\bigcup_{n,m}L_{n}M_{m}$ で、$L_{n}M_{m}$ はコンパクト集合 $L_{n}\times M_{m}$ の連続写像（積）による像なのでコンパクト。
+
+**Step 2.** 【主張：$\int\bigl(\int|F(x,y)|\,d\mu(y)\bigr)d\mu(x)=\|f\|_{1}\|g\|_{1}$（$p=1$ のとき）】 \ref{four:ga-measurability.5} で順序を交換し、内側に \ref{four:hm-transport}（$T(x)=y^{-1}x$）を使う：
+$$
+\int|\tilde f(y)|\Bigl(\int|\tilde g(y^{-1}x)|\,d\mu(x)\Bigr)d\mu(y)=\int|\tilde f(y)|\,\|g\|_{1}\,d\mu(y).
+$$
+よって a.e. の $x$ で内側の積分は有限（\ref{meas:markov.3}）。$F$ の実部・虚部の正負の部分に \ref{four:ga-measurability.5} を使えば $x\mapsto f*g(x)$ は可測で、$|f*g(x)|\le\int|F(x,y)|\,d\mu(y)$ から $\|f*g\|_{1}\le\|f\|_{1}\|g\|_{1}$。
+
+**Step 3.** 【主張：$1<p<\infty$ でも $M(x)\defeq\int|\tilde f(y)||\tilde g(y^{-1}x)|\,d\mu(y)$ について $\|M\|_{p}\le\|f\|_{1}\|g\|_{p}$】 $|\tilde f|=|\tilde f|^{1/p}|\tilde f|^{1/q}$ と \ref{meas:holder} から
+$$
+M(x)\le\Bigl(\int|\tilde f(y)||\tilde g(y^{-1}x)|^{p}\,d\mu(y)\Bigr)^{1/p}\|f\|_{1}^{1/q}.
+$$
+$|\tilde g|^{p}\in\mathcal{G}$（\ref{four:ga-measurability.2}）で $\||\tilde g|^{p}\|_{1}=\|g\|_{p}^{p}$ なので、Step 2 の計算から右辺の $p$ 乗の $x$ についての積分は $\|f\|_{1}\|g\|_{p}^{p}\|f\|_{1}^{p/q}=\|f\|_{1}^{p}\|g\|_{p}^{p}$。よって $M<\infty$ a.e. で、$|f*g|\le M$ から 1 の評価を得る。
+
+**Step 4.** 【主張：代表によらない】 $\tilde f'\in\mathcal{G}$ も $f$ の代表なら $D\defeq\tilde f-\tilde f'\in\mathcal{G}$, $\|D\|_{1}=0$ で、Step 2・3 を $(D,\tilde g)$ に使うと $\int|D(y)||\tilde g(y^{-1}x)|\,d\mu(y)$ の $L^{p}$ ノルムは $0$、すなわち a.e. の $x$ で $0$。この $x$ で二つの式は一致する。$\tilde g$ の取り替えも同様。
+
+**Step 5.** 【主張：項目 2】 $y\mapsto f(y)g(y^{-1}x)$ は $C_{c}(G)$ に属し、$x\notin\supp f\cdot\supp g$（コンパクト）なら $0$。\ref{four:hm-uniform-continuity.1} から、$x^{-1}x'\in V$ なら $|g(z)-g(z')|<\varepsilon$（$z^{-1}z'\in V$）となる $V$ をとると、$(y^{-1}x)^{-1}(y^{-1}x')=x^{-1}x'$ なので $|f*g(x)-f*g(x')|\le\varepsilon\|f\|_{1}$。$C_{c}(G)\subset\mathcal{G}$ なので 1 の定義と一致する。
+
+**Step 6.** 【主張：項目 3】 双線形性は積分の線形性から。$f,g,h\in C_{c}(G)$ のとき、\ref{four:hm-transport}（$w=z^{-1}y$）から
+$$
+f*(g*h)(x)=\int f(z)\Bigl(\int g(z^{-1}y)h(y^{-1}x)\,d\mu(y)\Bigr)d\mu(z).
+$$
+被積分関数 $(y,z)\mapsto f(z)g(z^{-1}y)h(y^{-1}x)$ は \ref{four:ga-measurability.4} から可測、有界で、コンパクト集合 $(\supp f\cdot\supp g)\times\supp f$ の外で $0$ なので積分可能。\ref{four:ga-measurability.5} で順序を交換すると $\int(f*g)(y)h(y^{-1}x)\,d\mu(y)=(f*g)*h(x)$。一般の場合、両辺は 1 から $\|\cdot\|_{1}\le\|f\|_{1}\|g\|_{1}\|h\|_{1}$ を満たす三重線形写像なので連続で、\ref{four:rm-cc-dense} から $C_{c}(G)$ の等式が $L^{1}(G)$ に延びる。
+
+::: hypcheck
+- **左不変性**：Step 2 の $\int|\tilde g(y^{-1}x)|\,d\mu(x)=\|g\|_{1}$ と Step 6 の置換で使った。
+- **σ コンパクトな台**：Step 1 の可測性と、Step 2 で σ 有限な $\mu_{S}$ に \ref{meas:tonelli} を使うために使った。
+- **$p<\infty$**：代表の存在（\ref{four:ga-measurability.3}）に使った。
+- **順序**：$g*f$（$g\in L^{p}$, $f\in L^{1}$, $p>1$）の評価には \ref{four:ga-translation-continuity.2} の因子 $\Delta$ が現れ、単模でなければ $\|f\|_{1}\|g\|_{p}$ では抑えられない（ここでは証明しない）。
+- **選択公理**：\ref{four:ga-measurability} の可算選択と DC。
+:::
+:::
+
+::: definition バナッハ $*$-環 {#four:ga-banach-star-algebra keywords="non-unital Banach algebra, involution, Banach *-algebra, *-representation, nondegenerate" index="バナッハ*-環|ばなっはすたーかん, 対合|たいごう, *-表現|すたーひょうげん, 非退化な表現|ひたいかなひょうげん"}
+1. 複素バナッハ空間 $A$ に結合的で双線形な積があって $\|ab\|\le\|a\|\|b\|$ を満たすとき、$A$ を**単位元をもつとは限らないバナッハ環**という（単位元 $1$ をもち $\|1\|=1$ なら \ref{fa:banach-algebra} の意味のバナッハ環）。
+2. $a\mapsto a^{*}$ が $(a+b)^{*}=a^{*}+b^{*}$, $(ca)^{*}=\bar ca^{*}$, $(ab)^{*}=b^{*}a^{*}$, $a^{**}=a$, $\|a^{*}\|=\|a\|$ を満たすとき**対合**といい、対合をもつ 1 の $A$ を**バナッハ $*$-環**という。
+3. バナッハ $*$-環 $A$ からヒルベルト空間 $H$ の $B(H)$ への線形写像 $\rho$ で $\rho(ab)=\rho(a)\rho(b)$, $\rho(a^{*})=\rho(a)^{*}$ となるものを **$*$-表現**といい、$\{\rho(a)v:a\in A,v\in H\}$ の張る部分空間が $H$ で稠密なとき**非退化**という。
+:::
+
+::: intuition
+作用素の環で、積・ノルムに加えて「共役をとる」操作をもつもの。$B(H)$ と共役作用素が典型例である。
+:::
+
+::: proposition L¹(G) の対合 {#four:ga-involution keywords="involution on L^1(G), f*(x) = Delta(x^{-1}) conj f(x^{-1}), (f*g)* = g* * f*" index="対合（群環）|たいごうぐんかん"}
+$f\in L^{1}(G)$ について $f^{*}(x)\defeq\Delta(x^{-1})\overline{f(x^{-1})}$ とおく。
+1. $f^{*}$ は $L^{1}(G)$ の元として定まり、$\|f^{*}\|_{1}=\|f\|_{1}$, $f^{**}=f$, $\int f^{*}\,d\mu=\overline{\int f\,d\mu}$。
+2. $f,g\in L^{1}(G)$ なら $(f*g)^{*}=g^{*}*f^{*}$。
+:::
+
+::: proof
+**Step 1.** 【主張：$f^{*}$ は定まり、$\varphi\in C_{c}(G)$ では $\|\varphi^{*}\|_{1}=\|\varphi\|_{1}$, $\int\varphi^{*}=\overline{\int\varphi}$】 $f^{*}$ は可測。$N$ の外で $f=f'$ なら $N^{-1}$ の外で $f^{*}=f'^{*}$ で、\ref{four:ga-inversion-null} から $\mu(N^{-1})=0$。$u\defeq\Delta\bar\varphi\in C_{c}(G)$ に \ref{four:hm-modular-function.4} を使うと $\int\varphi^{*}=\int u(x^{-1})\,d\mu=\int u\,\Delta(x^{-1})\,d\mu=\int\bar\varphi$。$|\varphi|$ で同じ計算をすれば $\|\varphi^{*}\|_{1}=\|\varphi\|_{1}$。
+
+**Step 2.** 【主張：項目 1】 $f^{**}(x)=\Delta(x^{-1})\overline{\Delta(x)\overline{f(x)}}=f(x)$。\ref{four:rm-cc-dense} と \ref{meas:riesz-fischer} から、$L^{1}$ でも零集合 $N$ の外でも $f$ に収束する $\varphi_{n}\in C_{c}(G)$ をとる。$\varphi_{n}^{*}\to f^{*}$ は $N^{-1}$ の外で成り立つので、\ref{meas:fatou} から $\|f^{*}\|_{1}\le\liminf\|\varphi_{n}^{*}\|_{1}=\|f\|_{1}$。$f^{*}$ に使えば $\|f\|_{1}=\|f^{**}\|_{1}\le\|f^{*}\|_{1}$。積分は、$\bigl|\int f^{*}-\int\varphi_{n}^{*}\bigr|\le\|(f-\varphi_{n})^{*}\|_{1}=\|f-\varphi_{n}\|_{1}\to0$ と Step 1 から。
+
+**Step 3.** 【主張：項目 2】 $f,g\in C_{c}(G)$ では、$\Delta(y^{-1})\Delta(x^{-1}y)=\Delta(x^{-1})$ と \ref{four:hm-transport}（$y\mapsto xy$）から
+$$
+\begin{aligned}
+g^{*}*f^{*}(x)&=\Delta(x^{-1})\int\overline{f(x^{-1}y)}\,\overline{g(y^{-1})}\,d\mu(y)\\
+&=\Delta(x^{-1})\overline{\int f(y)g(y^{-1}x^{-1})\,d\mu(y)}=(f*g)^{*}(x).
+\end{aligned}
+$$
+両辺は $(f,g)$ について連続（1 と \ref{four:ga-convolution.1}）なので、稠密性から $L^{1}(G)$ に延びる。
+:::
+
+::: theorem 群環 L¹(G) {#four:ga-group-algebra keywords="group algebra L^1(G) is a Banach *-algebra, commutative for abelian G, unital for discrete G" index="群環（局所コンパクト群）|ぐんかんきょくしょこんぱくとぐん, 群環 L1(G)|ぐんかんえるわんじー"}
+1. $L^{1}(G)$ は畳み込みと $f\mapsto f^{*}$ についてバナッハ $*$-環である（$G$ の**群環**という）。
+2. $G$ が可換なら $L^{1}(G)$ は可換である。
+3. $G$ が離散で $\mu$ が数え上げ測度なら、$\delta_{e}\defeq\mathbf{1}_{\{e\}}$ は $L^{1}(G)$ の単位元で $\|\delta_{e}\|_{1}=1$。
+:::
+
+::: intuition
+可積分関数どうしの畳み込みはまた可積分で、結合法則と「裏返し」の操作をもつ。群が可換なら掛ける順序によらず、群が離散なら一点に集中した関数が単位元になる。
+:::
+
+::: proof
+**1.** \ref{meas:riesz-fischer}, \ref{four:ga-convolution.1}・\ref{four:ga-convolution.3}, \ref{four:ga-involution}（共役線形性は定義の式から）。
+
+**2.** $G$ は単模（\ref{four:hm-unimodular-examples.1}）なので、\ref{four:hm-modular-function.4} から $C_{c}(G)$ の $u$ で $\int u(y^{-1})\,d\mu=\int u\,d\mu$。$f,g\in C_{c}(G)$ について、これと \ref{four:hm-transport}（$y\mapsto x^{-1}y$）から
+$$
+f*g(x)=\int f(y^{-1})g(yx)\,d\mu(y)=\int f(y^{-1}x)g(x^{-1}yx)\,d\mu(y)=g*f(x)
+$$
+（最後に $x^{-1}yx=y$）。$L^{1}(G)$ へは稠密性で延ばす。
+
+**3.** 数え上げ測度の積分は和なので $\delta_{e}*f(x)=\sum_{y}\delta_{e}(y)f(y^{-1}x)=f(x)$、$f*\delta_{e}(x)=\sum_{y}f(y)\delta_{e}(y^{-1}x)=f(x)$。
+:::
+
+::: example 群環の例 {#four:ga-examples}
+1. $G=\mathbb{R}^{n}$（ルベーグ測度）では $f*g(x)=\int f(y)g(x-y)\,dy$ で、\ref{four:convolution-rd} の畳み込み。$\Delta=1$ なので $f^{*}(x)=\overline{f(-x)}$。円周では \ref{four:convolution}。
+2. $G=\mathbb{Z}$ では $L^{1}(\mathbb{Z})=\ell^{1}(\mathbb{Z})$, $(a*b)_{n}=\sum_{m}a_{m}b_{n-m}$。$\delta_{1}^{*k}=\delta_{k}$ で、$\sum a_{n}z^{n}$ の形式的な積と同じ規則。
+:::
+
+## 近似単位元 {#four:sec-ga-approximate-identity}
+
+::: theorem 近似単位元 {#four:ga-approximate-identity keywords="approximate identity in L^1(G), psi*f -> f in L^p" index="近似単位元|きんじたんいげん"}
+$1\le p<\infty$, $f\in L^{p}(G)$, $\varepsilon>0$ とする。$e$ の近傍 $V$ があり、$\int\psi\,d\mu=1$, $\supp\psi\subset V$ となるすべての $\psi\in C_{c}(G)^{+}$ について $\|\psi*f-f\|_{p}\le\varepsilon$。また、$e$ のどの近傍 $V$ にもこのような $\psi$ がある。
+:::
+
+::: intuition
+単位元のごく近くに集中した、総量 $1$ の山 $\psi$ で畳み込んでも、関数はほとんど変わらない。$L^{1}(G)$ は一般に単位元をもたないが、この山の族が単位元の代わりをする。
+:::
+
+::: proof
+存在：$V$ の内部 $U\ni e$ について \ref{four:rm-urysohn} から $\{e\}\prec\theta\prec U$ をとり、$\int\theta>0$（\ref{four:hm-open-positive}）なので $\psi\defeq\theta/\int\theta$。
+
+**Step 1.** 【主張：$\|\psi*f-f\|_{p}^{p}\le\int\psi(y)\|L_{y}f-f\|_{p}^{p}\,d\mu(y)$】 $\tilde f\in\mathcal{G}$ を代表とする。$\int\psi=1$ から a.e. の $x$ で $\psi*f(x)-f(x)=\int\psi(y)(\tilde f(y^{-1}x)-\tilde f(x))\,d\mu(y)$。$p>1$ では $\psi=\psi^{1/p}\psi^{1/q}$ と \ref{meas:holder}、$\int\psi=1$ から
+$$
+|\psi*f(x)-f(x)|^{p}\le\int\psi(y)|\tilde f(y^{-1}x)-\tilde f(x)|^{p}\,d\mu(y)
+$$
+（$p=1$ では三角不等式）。右辺の被積分関数は \ref{four:ga-measurability.4} から可測で、$(S_{f}\cup\supp\psi\cdot S_{f})\times\supp\psi$ の外で $0$ なので、$x$ で積分して \ref{four:ga-measurability.5} で順序を交換すると、内側は $\|L_{y}f-f\|_{p}^{p}$。
+
+**Step 2.** 【主張：結論】 \ref{four:ga-translation-continuity.1} から、$y\in V$ なら $\|L_{y}f-f\|_{p}\le\varepsilon$ となる近傍 $V$ をとる。$\supp\psi\subset V$ なら Step 1 の右辺は $\le\varepsilon^{p}\int\psi=\varepsilon^{p}$。
+
+::: hypcheck
+- **$\psi\ge0$, $\int\psi=1$**：Step 1 で $\psi\,d\mu$ を確率測度として使った。
+- **$\supp\psi\subset V$**：Step 2 で使った。
+- **$p<\infty$**：\ref{four:ga-translation-continuity} で使った。
+- **選択公理**：近傍ごとに $\psi_{V}$ を選ばずに済む形に述べた。
+:::
+:::
+
+::: supplement
+**単位元.** \ref{four:ga-group-algebra.3} の逆も成り立つ：$L^{1}(G)$ が単位元をもてば $G$ は離散である（\ref{four:prob-ga-unit-discrete}）。
+
+**比喩.** 単位元は「$e$ に置いた点の重り」だが、離散でない群では一点の測度が $0$ なので $L^{1}$ に入らない。近似単位元はそれを細い山で近似したもので、円周や $\mathbb{R}^{n}$ の総和核（\ref{four:approximate-identity}, \ref{four:approximate-identity-rd}）がその例である。
+:::
+
+## ユニタリ表現と L¹(G) の表現 {#four:sec-ga-unitary}
+
+::: definition ユニタリ表現 {#four:ga-unitary-representation keywords="unitary operator, unitary representation, strongly continuous" index="ユニタリ作用素|ゆにたりさようそ, ユニタリ表現|ゆにたりひょうげん, 強連続|きょうれんぞく"}
+$H$ を複素ヒルベルト空間とする。$U\in B(H)$ が $U^{*}U=UU^{*}=I$ を満たすとき**ユニタリ作用素**といい、その全体（群）を $\mathcal{U}(H)$ と書く。群準同型 $\pi\colon G\to\mathcal{U}(H)$ を $G$ の**ユニタリ表現**といい、各 $v\in H$ について $x\mapsto\pi(x)v$ が $G$ から $H$ への連続写像であるとき**強連続**という。
+:::
+
+::: intuition
+ユニタリ表現は群の元をヒルベルト空間の「回転」として実現するもので、強連続性は、群の元を少し動かしても各ベクトルの行き先が少ししか動かないことを言う。有限次元の表現（\ref{rep:representation}）の無限次元版である。
+:::
+
+全射な等長作用素 $U$ はユニタリ（偏極恒等式から $U^{*}U=I$、全射なので $UU^{*}=I$）。とくに $\|\pi(x)v\|=\|v\|$, $\pi(x)^{*}=\pi(x^{-1})$。
+
+::: theorem L¹(G) の表現 {#four:ga-integrated-representation keywords="integrated representation pi(f) = int f(x) pi(x) dmu(x), weak integral, *-representation of L^1(G), nondegenerate" index="L1(G) の表現|えるわんじーのひょうげん, 積分された表現|せきぶんされたひょうげん"}
+$\pi$ を $G$ の強連続なユニタリ表現とし、$f\in L^{1}(G)$ とする。
+1. $\pi(f)\in B(H)$ で、すべての $v,w\in H$ について次を満たすものがただ一つあり、$\|\pi(f)\|\le\|f\|_{1}$：
+$$
+\langle\pi(f)v,w\rangle=\int f(x)\langle\pi(x)v,w\rangle\,d\mu(x).
+$$
+2. $f\mapsto\pi(f)$ は $L^{1}(G)$ の $*$-表現である：$\pi(f*g)=\pi(f)\pi(g)$, $\pi(f^{*})=\pi(f)^{*}$。
+3. $\pi(L_{s}f)=\pi(s)\pi(f)$。
+4. この $*$-表現は非退化である。さらに $v\in H$, $\varepsilon>0$ に $e$ の近傍 $V$ があり、\ref{four:ga-approximate-identity} の形の $\psi$（$\supp\psi\subset V$）について $\|\pi(\psi)v-v\|\le\varepsilon$。
+:::
+
+::: intuition
+群の表現を関数 $f$ で「平均」すると、$L^{1}(G)$ の表現が得られる。畳み込みは作用素の積に、対合は共役作用素に移る。
+:::
+
+::: proof
+**Step 1.** 【主張：項目 1】 $c(x)\defeq\langle\pi(x)v,w\rangle$ は連続（強連続性と内積の連続性、\ref{fa:cauchy-schwarz}）で $|c|\le\|v\|\|w\|$。よって $fc\in L^{1}(G)$ で、$B(v,w)\defeq\int fc\,d\mu$ は $v$ について線形、$w$ について共役線形、$|B(v,w)|\le\|f\|_{1}\|v\|\|w\|$。$v$ を固定すると $w\mapsto\overline{B(v,w)}$ は有界線形汎関数なので、\ref{fa:riesz-representation} から $B(v,w)=\langle u,w\rangle$ となる $u$ がただ一つある。$\pi(f)v\defeq u$ とおくと、一意性から線形で、$\|\pi(f)v\|=\sup_{\|w\|\le1}|B(v,w)|\le\|f\|_{1}\|v\|$。値は $f$ の代表によらない。
+
+**Step 2.** 【主張：$\pi(f^{*})=\pi(f)^{*}$】 $h(x)\defeq f(x)\langle\pi(x)w,v\rangle\in L^{1}(G)$ とおくと、$\langle\pi(x^{-1})w,v\rangle=\langle w,\pi(x)v\rangle$ から $h^{*}(x)=f^{*}(x)\langle\pi(x)v,w\rangle$。\ref{four:ga-involution.1} から
+$$
+\langle\pi(f^{*})v,w\rangle=\int h^{*}\,d\mu=\overline{\int h\,d\mu}=\overline{\langle\pi(f)w,v\rangle}=\langle\pi(f)^{*}v,w\rangle.
+$$
+
+**Step 3.** 【主張：$\pi(f*g)=\pi(f)\pi(g)$】 $F(x,y)\defeq\tilde f(y)\tilde g(y^{-1}x)\langle\pi(x)v,w\rangle$ は \ref{four:ga-measurability.4} から可測、$|F|\le\|v\|\|w\||\tilde f(y)||\tilde g(y^{-1}x)|$ は \ref{four:ga-convolution} の Step 2 から積分可能で、σ コンパクトな長方形の外で $0$。\ref{four:ga-measurability.5} で順序を交換し、\ref{four:hm-transport}（$x\mapsto yx$）を使うと
+$$
+\begin{aligned}
+\langle\pi(f*g)v,w\rangle&=\int\tilde f(y)\Bigl(\int\tilde g(x)\langle\pi(x)v,\pi(y)^{*}w\rangle\,d\mu(x)\Bigr)d\mu(y)\\
+&=\int\tilde f(y)\langle\pi(y)\pi(g)v,w\rangle\,d\mu(y)=\langle\pi(f)\pi(g)v,w\rangle.
+\end{aligned}
+$$
+
+**Step 4.** 【主張：項目 3】 \ref{four:hm-transport}（$x\mapsto sx$）から $\langle\pi(L_{s}f)v,w\rangle=\int f(x)\langle\pi(x)v,\pi(s)^{*}w\rangle\,d\mu(x)=\langle\pi(s)\pi(f)v,w\rangle$。
+
+**Step 5.** 【主張：項目 4】 強連続性から、$x\in V$ なら $\|\pi(x)v-v\|\le\varepsilon$ となる近傍 $V$ をとる。$\int\psi=1$ から $\langle\pi(\psi)v-v,w\rangle=\int\psi(x)\langle\pi(x)v-v,w\rangle\,d\mu(x)$ で、絶対値は $\varepsilon\|w\|$ 以下。$\|w\|\le1$ で上限をとる。よって各 $v$ は $\{\pi(f)u\}$ の張る空間の閉包に入る。
+
+::: hypcheck
+- **強連続性**：Step 1 で $c$ の可測性に、Step 5 で非退化性に使った。
+- **ユニタリ性**：Step 1 の評価 $|c|\le\|v\|\|w\|$、Step 2 の $\pi(x^{-1})=\pi(x)^{*}$ に使った。
+- **左不変性**：Step 3・4 の置換。対合の $\Delta$ は Step 2 の $\int h^{*}=\overline{\int h}$ のためにある。
+- **弱積分**：$\pi(f)$ を内積で定義したので、$H$ の可分性は要らない。
+:::
+:::
+
+::: example 左正則表現 {#four:ga-regular-representation keywords="left regular representation lambda(s) f = L_s f on L^2(G); lambda(f) g = f*g" index="正則表現（局所コンパクト群）|せいそくひょうげんきょくしょこんぱくとぐん, 左正則表現|ひだりせいそくひょうげん"}
+$\lambda(s)\defeq L_{s}$ を $L^{2}(G)$ 上で考える（**左正則表現**）。$L_{s}$ は等長（\ref{four:ga-translation-continuity.1}）で逆 $L_{s^{-1}}$ をもつのでユニタリ、$L_{s}L_{t}=L_{st}$ から準同型、\ref{four:ga-translation-continuity.1}（$p=2$）から強連続。$f\in L^{1}(G)$, $g,h\in L^{2}(G)$ について、$\langle\lambda(y)g,h\rangle=\int\tilde g(y^{-1}x)\overline{\tilde h(x)}\,d\mu(x)$ を代入し、
+$$
+\iint|\tilde f(y)||\tilde g(y^{-1}x)||\tilde h(x)|\,d\mu(y)\,d\mu(x)\le\|f\|_{1}\|g\|_{2}\|h\|_{2}
+$$
+（\ref{four:ga-convolution.1} を $|\tilde f|$, $|\tilde g|$ に使い \ref{meas:holder}）なので順序を交換すると $\langle\lambda(f)g,h\rangle=\langle f*g,h\rangle$、すなわち $\lambda(f)g=f*g$。
+:::
+
+::: supplement
+**逆向きの対応.** 逆に、$L^{1}(G)$ の非退化な $*$-表現 $\rho$ は、ただ一つの強連続なユニタリ表現 $\pi$ から \ref{four:ga-integrated-representation} の形で得られる（$\rho(f)=\pi(f)$）ことが知られている（3 を手がかりに $\pi(s)\rho(f)v\defeq\rho(L_{s}f)v$ と定め、矛盾なく延びることを近似単位元で確かめる。ここでは証明しない）。こうして $G$ のユニタリ表現と $L^{1}(G)$ の非退化な $*$-表現は同じものになる。
+
+**高い視点：群環の解析版.** 有限群 $G$ では $L^{1}(G)$ は複素群環 $\mathbb{C}[G]$（\ref{mod:group-ring}）そのもので（数え上げ測度、$\delta_{s}*\delta_{t}=\delta_{st}$）、群の表現と群環の加群が対応する（\ref{mod:group-ring-modules}）。一般には $\delta_{s}$ が $L^{1}$ に入らないので、近似単位元と $L_{s}$ で置き換えたものが上の対応である。
+:::
+
+## 問題 {#four:sec-ga-problems}
+
+::: problem {#four:prob-ga-commutative}
+$L^{1}(G)$ が可換なら $G$ が可換であることを示せ（\ref{four:ga-group-algebra.2} の逆）。
+:::
+
+::: solution
+$\varphi,\psi\in C_{c}(G)$ とする。\ref{four:hm-transport}（$y\mapsto xy$）と、$u(y)\defeq\psi(xy^{-1})\varphi(y)$ への \ref{four:hm-modular-function.4} から
+$$
+\psi*\varphi(x)=\int\psi(xy)\varphi(y^{-1})\,d\mu(y)=\int\varphi(y)\psi(xy^{-1})\Delta(y^{-1})\,d\mu(y).
+$$
+$\varphi*\psi$ と $\psi*\varphi$ は連続（\ref{four:ga-convolution.2}）で a.e. に等しいので、異なる点の集合は測度 $0$ の開集合で、\ref{four:hm-open-positive} から空。よって連続関数 $k(y)\defeq\psi(y^{-1}x)-\psi(xy^{-1})\Delta(y^{-1})$ はすべての $\varphi$ で $\int\varphi k\,d\mu=0$ を満たす。$\theta\in C_{c}(G)^{+}$ について $\varphi=\theta\bar k$ とすると $\int\theta|k|^{2}=0$ で、\ref{four:hm-open-positive} から $\theta|k|^{2}\equiv0$。\ref{four:rm-urysohn} で任意の点 $y$ に $\theta(y)=1$ の $\theta$ がとれるので $k\equiv0$。$y=x$ とし $\psi(e)=1$ の $\psi$ をとると $\Delta\equiv1$。すると $\psi(y^{-1}x)=\psi(xy^{-1})$ がすべての $\psi$ で成り立ち、$y^{-1}x\ne xy^{-1}$ なら $\{y^{-1}x\}\prec\psi\prec G\setminus\{xy^{-1}\}$ に反する。よって $y^{-1}x=xy^{-1}$ で、$y$ を $y^{-1}$ に替えて $yx=xy$。
+:::
+
+::: problem {#four:prob-ga-unit-discrete}
+$L^{1}(G)$ が単位元 $u$（すべての $f$ で $u*f=f*u=f$）をもてば、$G$ は離散であることを示せ。
+:::
+
+::: solution
+$G$ が離散でないとすると $\mu(\{e\})=0$（\ref{four:prob-hm-discrete}）。$\nu(E)\defeq\int_{E}|u|\,d\mu$ は $\mu$ に絶対連続な有限測度なので、\ref{meas:absolute-continuity-epsilon-delta} から、$\mu(E)<\delta$ なら $\nu(E)<\frac12$ となる $\delta$ がある。外部正則性から $\mu(U)<\delta$ となる $e$ の開近傍 $U$ をとる。\ref{four:ga-approximate-identity}（$p=1$, $f=u$, $\varepsilon=\frac14$）の $V$ について、$\int\psi=1$, $\supp\psi\subset V\cap U$ の $\psi\in C_{c}(G)^{+}$ をとると、$\psi*u=\psi$ なので $\|\psi-u\|_{1}\le\frac14$。よって
+$$
+1=\int_{U}\psi\,d\mu\le\int_{U}|u|\,d\mu+\|\psi-u\|_{1}<\frac12+\frac14
+$$
+となり矛盾。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
