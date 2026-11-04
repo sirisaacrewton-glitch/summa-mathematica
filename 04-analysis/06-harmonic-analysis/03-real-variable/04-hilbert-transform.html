@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>カルデロン–ジグムント分解とヒルベルト変換 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/03-real-variable/04-hilbert-transform.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# カルデロン–ジグムント分解とヒルベルト変換 {#four:page-hilbert-transform keywords="Calderon-Zygmund decomposition, dyadic cubes, stopping time argument, Hilbert transform, principal value 1/(pi x), Fourier multiplier -i sgn(xi), L^2 isometry, Hormander condition, weak type (1,1), L^p boundedness of the Hilbert transform, conjugate function on the circle, M. Riesz theorem, Riesz projection, transference, L^p convergence of Fourier series, カルデロン・ジグムント分解, ヒルベルト変換, 共役関数, M. リースの定理"}
+
+**ヒルベルト変換** $Hf(x)=\frac1\pi\,\mathrm{p.v.}\!\int\frac{f(x-y)}{y}dy$ は、フーリエ変換で見ると乗数 $-i\operatorname{sgn}\xi$ を掛けるだけの作用素である。乗数の絶対値が $1$ なので $L^{2}$ では等長だが、核 $\frac{1}{\pi y}$ は可積分でないので、$L^{p}$（$p\ne2$）での有界性は自明でない。このページでは、関数を「高さ $\alpha$ 以下の良い部分」と「平均 $0$ の小さな塊の和」に分ける**カルデロン–ジグムント分解**を 2 進立方体の停止時刻論法で作り、それと核の滑らかさから $H$ が**弱 $(1,1)$ 型**であることを示す。あとは \ref{four:page-interpolation} の結果と双対性で $1<p<\infty$ の $L^{p}$ 有界性が出る。円周上の共役関数と、フーリエ級数の部分和の $L^{p}$ 収束は次のページで扱う。
+
+## 記法と定義の確認 {#four:sec-ht-notation}
+
+::: notation
+- ルベーグ測度を $|E|$ と書く。$\mathbb{R}^{n}$ の開球 $B(x,r)$、局所可積分関数、ルベーグ点は \ref{meas:page-differentiation} のとおり。可測集合 $Q$（$0<|Q|<\infty$）と $f\in L^{1}(Q)$ について平均を $f_{Q}\defeq\frac{1}{|Q|}\int_{Q}f$ と書く。
+- $\mathbb{R}$ 上のフーリエ変換 $\hat f(\xi)=\int f(x)e^{-2\pi ix\xi}dx$、逆変換 $\check g$、変調 $M_{\eta}$ は \ref{four:fourier-transform}, \ref{four:page-inversion-plancherel} のとおり。$L^{2}$ 上の $\mathcal{F}$ は \ref{four:plancherel} の延長で、$L^{1}\cap L^{2}$ の上では $\mathcal{F}f=\hat f$。$L^{2}$ の内積は $\langle f,g\rangle\defeq\int f\bar g$。シュワルツ空間 $\mathcal{S}$ は \ref{four:schwartz-space}。
+- $\operatorname{sgn}\xi\defeq1,0,-1$（$\xi>0,=0,<0$）。複素数 $z$ については $\operatorname{sgn}z\defeq z/|z|$（$z\ne0$）、$\operatorname{sgn}0\defeq0$。
+- 円周 $\mathbb{T}=\mathbb{R}/\mathbb{Z}$、$L^{p}(\mathbb{T})$、$e_{n}(x)=e^{2\pi inx}$、フーリエ係数 $\hat f(n)$、部分和 $S_{N}f$、三角多項式は \ref{four:page-coefficients-convolution} のとおり。ディリクレ核 $D_{N}$、フェイェール核 $F_{N}$ は \ref{four:fejer-kernel}。
+- 分布関数・弱 $L^{p}$・弱型・劣線形は \ref{four:weak-lp}。
+- **選択公理**：本文の構成（極大な 2 進立方体の選び出し、部分列の選び出し）では使わない。引用する測度論の結果は \ref{meas:page-differentiation} などの約束に従う。
+:::
+
+## カルデロン–ジグムント分解 {#four:sec-ht-cz}
+
+::: definition 2 進立方体 {#four:ht-dyadic-cubes keywords="dyadic cubes D_k = {2^{-k}(m + [0,1)^n)}, side length, parent cube" index="2 進立方体|にしんりっぽうたい, 親（2 進立方体）|おやにしんりっぽうたい"}
+$k\in\mathbb{Z}$ について $\mathcal{D}_{k}\defeq\{2^{-k}(m+[0,1)^{n}):m\in\mathbb{Z}^{n}\}$ とし、$\mathcal{D}\defeq\bigcup_{k\in\mathbb{Z}}\mathcal{D}_{k}$ の元を **2 進立方体**という。$Q\in\mathcal{D}_{k}$ の辺の長さは $2^{-k}$、$|Q|=2^{-kn}$。$Q\in\mathcal{D}_{k}$ を含む $\mathcal{D}_{k-1}$ の立方体（下の補題でただ一つ）を $Q$ の**親**という。$x\in\mathbb{R}^{n}$ を含む $\mathcal{D}_{k}$ の立方体を $Q_{k}(x)$ と書く。
+:::
+
+::: intuition
+辺の長さが $2$ の冪の、格子に沿った半開の立方体である。異なる大きさのものどうしは「入れ子か、離れているか」のどちらかで、斜めに重なることがない。
+:::
+
+::: lemma 2 進立方体の性質 {#four:ht-dyadic-properties keywords="dyadic cubes are nested or disjoint; each generation partitions R^n; D is countable; a dyadic cube of side 2^{-k} containing x lies in B(x, sqrt(n) 2^{-k})" index="2 進立方体の性質|にしんりっぽうたいのせいしつ"}
+1. 各 $k$ について $\mathcal{D}_{k}$ は $\mathbb{R}^{n}$ の分割で、$\mathcal{D}$ は可算集合である。
+2. $Q\in\mathcal{D}_{k}$, $Q'\in\mathcal{D}_{k'}$, $k'\le k$ なら、$Q\subset Q'$ か $Q\cap Q'=\emptyset$ のどちらか。とくに $Q$ を含む $\mathcal{D}_{k'}$ の立方体はただ一つで、親の測度は $2^{n}|Q|$。
+3. $x\in Q\in\mathcal{D}_{k}$ なら $Q\subset B(x,\sqrt{n}\,2^{-k})$。
+:::
+
+::: proof
+**1.** 実数 $t$ は $m=\lfloor2^{k}t\rfloor$ についての区間 $[2^{-k}m,2^{-k}(m+1))$ のただ一つに属する。これを座標ごとに使えばよい。$(k,m)\mapsto2^{-k}(m+[0,1)^{n})$ は $\mathbb{Z}\times\mathbb{Z}^{n}$ からの全射なので $\mathcal{D}$ は可算。
+
+**2.** 座標ごとに示せばよい。$2^{-k'}\mathbb{Z}\subset2^{-k}\mathbb{Z}$ なので、開区間 $(2^{-k}m,2^{-k}(m+1))$ は $2^{-k'}\mathbb{Z}$ の点を含まない。よって $t\mapsto\lfloor2^{k'}t\rfloor$ は $[2^{-k}m,2^{-k}(m+1))$ の上で一定で、この区間は $\mathcal{D}_{k'}$ の区間のただ一つに含まれ、他とは交わらない（1 から $\mathcal{D}_{k'}$ は分割）。測度は $|Q|=2^{-kn}$ から。
+
+**3.** $y\in Q$ なら各座標で $|y_{i}-x_{i}|<2^{-k}$ なので $|y-x|<\sqrt{n}\,2^{-k}$。
+:::
+
+::: lemma 2 進立方体についての微分定理 {#four:ht-dyadic-differentiation keywords="dyadic Lebesgue differentiation: for locally integrable f, the averages of |f - f(x)| over the dyadic cubes Q_k(x) tend to 0 for almost every x" index="2 進立方体についての微分定理|にしんりっぽうたいについてのびぶんていり"}
+$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ なら、ほとんどすべての $x$ で
+$$
+\lim_{k\to\infty}\frac{1}{|Q_{k}(x)|}\int_{Q_{k}(x)}|f(y)-f(x)|\,dy=0,\qquad\text{とくに}\qquad\lim_{k\to\infty}f_{Q_{k}(x)}=f(x).
+$$
+:::
+
+::: proof
+2 進版を直接示すのではなく、球についての \ref{meas:lebesgue-differentiation} から導く。$x$ を $f$ のルベーグ点とし、$r_{k}\defeq\sqrt{n}\,2^{-k}$ とおく。\ref{four:ht-dyadic-properties.3} から $Q_{k}(x)\subset B(x,r_{k})$ で、$|B(x,r_{k})|=\omega_{n}n^{n/2}2^{-kn}=\omega_{n}n^{n/2}|Q_{k}(x)|$（$\omega_{n}$ は単位球の測度）。よって
+$$
+\frac{1}{|Q_{k}(x)|}\int_{Q_{k}(x)}|f-f(x)|\le\omega_{n}n^{n/2}\cdot\frac{1}{|B(x,r_{k})|}\int_{B(x,r_{k})}|f-f(x)|\xrightarrow[k\to\infty]{}0.
+$$
+平均については $|f_{Q}-f(x)|\le\frac{1}{|Q|}\int_{Q}|f-f(x)|$。ルベーグ点はほとんどすべての点である。
+:::
+
+::: theorem カルデロン–ジグムント分解 {#four:ht-cz-decomposition keywords="Calderon-Zygmund decomposition: for f in L^1(R^n) and alpha > 0 there are disjoint dyadic cubes Q_j with alpha < average of |f| on Q_j <= 2^n alpha, sum |Q_j| <= ||f||_1/alpha, |f| <= alpha a.e. off their union; f = g + sum b_j with |g| <= 2^n alpha, ||g||_1 <= ||f||_1, ||g||_2^2 <= 2^n alpha ||f||_1, b_j supported in Q_j with mean zero" index="カルデロン–ジグムント分解|かるでろんじぐむんとぶんかい, 良い部分|よいぶぶん, 悪い部分|わるいぶぶん, 停止時刻論法|ていしじこくろんぽう"}
+$f\in L^{1}(\mathbb{R}^{n})$, $\alpha>0$ とする。互いに素な 2 進立方体の有限列または無限列 $(Q_{j})$ があって、$\Omega\defeq\bigcup_{j}Q_{j}$ とおくと次が成り立つ。
+1. 各 $j$ で $\alpha<\frac{1}{|Q_{j}|}\int_{Q_{j}}|f|\le2^{n}\alpha$。
+2. $\sum_{j}|Q_{j}|\le\frac{1}{\alpha}\|f\|_{1}$。
+3. $\mathbb{R}^{n}\setminus\Omega$ のほとんどすべての点で $|f|\le\alpha$。
+4. $g\defeq f\mathbf{1}_{\mathbb{R}^{n}\setminus\Omega}+\sum_{j}f_{Q_{j}}\mathbf{1}_{Q_{j}}$（**良い部分**）、$b_{j}\defeq(f-f_{Q_{j}})\mathbf{1}_{Q_{j}}$ とおくと $f=g+\sum_{j}b_{j}$（各点で、和の項は高々一つが $0$ でない）。$b\defeq\sum_{j}b_{j}$ を**悪い部分**という。
+5. $|g|\le2^{n}\alpha$（a.e.）、$\|g\|_{1}\le\|f\|_{1}$、$\|g\|_{2}^{2}\le2^{n}\alpha\|f\|_{1}$。
+6. $b_{j}$ は $Q_{j}$ の外で $0$、$\int b_{j}=0$、$\|b_{j}\|_{1}\le2\int_{Q_{j}}|f|$、$\sum_{j}\|b_{j}\|_{1}\le2\|f\|_{1}$。
+:::
+
+::: intuition
+関数を高さ $\alpha$ で見て、平均が $\alpha$ を超える場所を、なるべく大きな 2 進立方体で囲む。囲まれた外では関数は $\alpha$ 以下で、囲みの中では関数を平均で置き換えたもの（良い部分）と、平均 $0$ の揺らぎ（悪い部分）に分ける。囲みの総体積は $\|f\|_{1}/\alpha$ 以下である。
+:::
+
+::: proof
+$\mathcal{S}\defeq\{Q\in\mathcal{D}:\frac{1}{|Q|}\int_{Q}|f|>\alpha\}$ とおき、$Q\in\mathcal{S}$ で、$Q$ を真に含む 2 進立方体がどれも $\mathcal{S}$ に入らないものを**極大**という。
+
+**Step 1.** 【$\mathcal{S}$ の各元は、ただ一つの極大な元に含まれる】 $Q\in\mathcal{D}_{k}$ なら $\frac{1}{|Q|}\int_{Q}|f|\le2^{kn}\|f\|_{1}$ なので、$2^{kn}\|f\|_{1}\le\alpha$ となる $k$ の $\mathcal{D}_{k}$ は $\mathcal{S}$ と交わらない（ここで $f\in L^{1}$ を使う）。$Q\in\mathcal{S}\cap\mathcal{D}_{k}$ について、$Q$ を含む $\mathcal{D}_{k-i}$ の立方体を $Q^{(i)}$（$i\ge0$）とする（\ref{four:ht-dyadic-properties.2} でただ一つ）。$Q$ を真に含む 2 進立方体は $Q^{(i)}$（$i\ge1$）のどれかである（$\mathcal{D}_{k'}$, $k'\ge k$ の立方体の測度は $|Q|$ 以下なので真に含めない）。$\{i\ge0:Q^{(i)}\in\mathcal{S}\}$ は $0$ を含み、上の観察から有界なので、最大元 $i^{*}$ がある。$Q^{(i^{*})}$ は極大で、$Q$ を含む極大な元は $Q^{(i)}$ の形なのでこれだけである。極大な元の全体は可算集合 $\mathcal{D}$ の部分集合なので、$\mathbb{Z}\times\mathbb{Z}^{n}$ の一つの固定した数え上げの順に並べて $Q_{1},Q_{2},\dots$ とする。最大元をとり、固定した数え上げを使うだけなので、選択公理は使わない。
+
+**Step 2.** 【1・2 と、$Q_{j}$ たちが互いに素なこと】 異なる極大な $Q_{i},Q_{j}$ が交われば \ref{four:ht-dyadic-properties.2} から一方が他方を真に含み、小さい方の極大性に反する。$Q_{j}\in\mathcal{S}$ から左の不等式。$Q_{j}$ の親 $\hat Q$ は $\mathcal{S}$ に入らないので $\int_{Q_{j}}|f|\le\int_{\hat Q}|f|\le\alpha|\hat Q|=2^{n}\alpha|Q_{j}|$。2 は $|Q_{j}|<\frac1\alpha\int_{Q_{j}}|f|$ を $j$ について足し、$Q_{j}$ たちが互いに素なことを使う。
+
+**Step 3.** 【3】 $x\notin\Omega$ なら、どの $k$ についても $Q_{k}(x)\notin\mathcal{S}$（もし $\mathcal{S}$ に入れば、Step 1 からある極大な $Q_{j}\supset Q_{k}(x)\ni x$ があり $x\in\Omega$）。よって $\frac{1}{|Q_{k}(x)|}\int_{Q_{k}(x)}|f|\le\alpha$（すべての $k$）。$\bigl||f|_{Q}-|f(x)|\bigr|\le\frac{1}{|Q|}\int_{Q}|f-f(x)|$ と \ref{four:ht-dyadic-differentiation} から、ほとんどすべての $x\notin\Omega$ で $|f(x)|=\lim_{k}\frac{1}{|Q_{k}(x)|}\int_{Q_{k}(x)}|f|\le\alpha$。
+
+**Step 4.** 【4〜6】 4 は定義から（$\Omega$ の外では $b_{j}=0$, $g=f$、$Q_{j}$ の上では $g=f_{Q_{j}}$, $b_{j}=f-f_{Q_{j}}$）。$Q_{j}$ の上で $|g|=|f_{Q_{j}}|\le\frac{1}{|Q_{j}|}\int_{Q_{j}}|f|\le2^{n}\alpha$（Step 2）、$\Omega$ の外で $|g|=|f|\le\alpha$（Step 3）。また
+$$
+\|g\|_{1}=\int_{\mathbb{R}^{n}\setminus\Omega}|f|+\sum_{j}|f_{Q_{j}}||Q_{j}|\le\int_{\mathbb{R}^{n}\setminus\Omega}|f|+\sum_{j}\int_{Q_{j}}|f|=\|f\|_{1},
+$$
+$\|g\|_{2}^{2}\le\|g\|_{\infty}\|g\|_{1}\le2^{n}\alpha\|f\|_{1}$。$\int b_{j}=\int_{Q_{j}}f-f_{Q_{j}}|Q_{j}|=0$、$\|b_{j}\|_{1}\le\int_{Q_{j}}|f|+|f_{Q_{j}}||Q_{j}|\le2\int_{Q_{j}}|f|$ で、和をとって $\sum_{j}\|b_{j}\|_{1}\le2\|f\|_{1}$。
+
+::: hypcheck
+- **$f\in L^{1}$**：Step 1 で「十分大きな立方体では平均が $\alpha$ 以下」に使った（極大な立方体の存在）。$f\in L^{p}$（$1<p<\infty$）でも、ヘルダーの不等式から $\frac{1}{|Q|}\int_{Q}|f|\le|Q|^{-1/p}\|f\|_{p}$ なので同じ構成ができる（ただし 2 は $\|f\|_{1}$ を含むので、そのままの形では使えない）。
+- **$\alpha>0$**：Step 1 と 2 で $\alpha$ で割るのに使った。
+- **2 進であること**：Step 1・2 で「入れ子か互いに素」を使った。一般の立方体の族では極大なものが互いに素にならず、\ref{meas:vitali-covering} のような選び出しが必要になる。定数 $2^{n}$ は親と子の体積比で、Step 2 だけに現れる。
+- **選択公理**：使わない（Step 1 の注意）。Step 3 の微分定理は \ref{meas:lebesgue-differentiation} から導いた。
+:::
+:::
+
+## ヒルベルト変換と L² 理論 {#four:sec-ht-hilbert}
+
+::: lemma 正弦積分 {#four:ht-sine-integral keywords="sine integral Si(T) = int_0^T sin t / t dt: 0 <= Si(T) <= pi and Si(T) -> pi/2, derived from the integral of (sin x / x)^2" index="正弦積分の極限|せいげんせきぶんのきょくげん"}
+$\operatorname{Si}(T)\defeq\int_{0}^{T}\frac{\sin t}{t}dt$（$T\ge0$）とおく。
+1. $0\le\operatorname{Si}(T)\le\pi$。
+2. $\lim_{T\to\infty}\operatorname{Si}(T)=\frac\pi2$。
+:::
+
+::: proof
+**1.** \ref{four:dirichlet-integral-bound.1} そのもの。
+
+**2.** $0<\delta<R$ とする。$\frac{d}{dx}\bigl(-\frac{\sin^{2}x}{x}\bigr)=\frac{\sin^{2}x}{x^{2}}-\frac{2\sin x\cos x}{x}$ と $2\sin x\cos x=\sin2x$ から
+$$
+\int_{\delta}^{R}\frac{\sin^{2}x}{x^{2}}dx=\frac{\sin^{2}\delta}{\delta}-\frac{\sin^{2}R}{R}+\int_{\delta}^{R}\frac{\sin2x}{x}dx=\frac{\sin^{2}\delta}{\delta}-\frac{\sin^{2}R}{R}+\int_{2\delta}^{2R}\frac{\sin u}{u}du.
+$$
+$\frac{\sin^{2}\delta}{\delta}\le\delta\to0$（$\delta\to0$）なので $\operatorname{Si}(2R)=\int_{0}^{R}\frac{\sin^{2}x}{x^{2}}dx+\frac{\sin^{2}R}{R}$。$R\to\infty$ で、被積分関数は偶関数なので \ref{four:sinc-squared} と単調収束定理から第 1 項は $\frac12\cdot\pi$ に、第 2 項は $0$ に収束する。
+:::
+
+::: lemma 主値の存在 {#four:ht-pv-exists keywords="for f in the Schwartz space the principal value integral p.v. (1/pi) int f(x-y)/y dy exists for every x" index="主値積分|しゅちせきぶん"}
+$f\in\mathcal{S}(\mathbb{R})$ と $x\in\mathbb{R}$ について、$0<\varepsilon<R$ を $\varepsilon\to0$, $R\to\infty$ とすると（どのような列についても）
+$$
+\frac1\pi\int_{\varepsilon<|y|<R}\frac{f(x-y)}{y}dy\longrightarrow\frac1\pi\int_{|y|<1}\frac{f(x-y)-f(x)}{y}dy+\frac1\pi\int_{|y|\ge1}\frac{f(x-y)}{y}dy,
+$$
+右辺の二つの積分は絶対収束する。$R=\infty$ としても（$\int_{|y|>\varepsilon}$ で）同じ極限になる。
+:::
+
+::: proof
+$\varepsilon<1<R$ とする。$\int_{\varepsilon<|y|<1}\frac{dy}{y}=0$（奇関数）なので、左辺は
+$$
+\frac1\pi\int_{\varepsilon<|y|<1}\frac{f(x-y)-f(x)}{y}dy+\frac1\pi\int_{1\le|y|<R}\frac{f(x-y)}{y}dy.
+$$
+平均値の定理から $|f(x-y)-f(x)|\le\|f'\|_{\infty}|y|$ なので、第 1 項の被積分関数は $\|f'\|_{\infty}$ で抑えられる。第 2 項の被積分関数は $|f(x-y)|$ で抑えられ、$f\in L^{1}$（\ref{four:schwartz-basic.3}）。優収束定理から、それぞれ $\varepsilon\to0$, $R\to\infty$ で右辺の積分に収束する。$R=\infty$ でも第 2 項がはじめから右辺の積分になるだけである。
+:::
+
+::: definition ヒルベルト変換 {#four:ht-definition keywords="Hilbert transform Hf(x) = p.v. (1/pi) int f(x-y)/y dy on Schwartz functions; truncated kernels k_{eps,R}(y) = 1/(pi y) on eps < |y| < R; truncated Hilbert transforms; multiplier m(xi) = -i sgn xi" index="ヒルベルト変換|ひるべるとへんかん, 切断ヒルベルト変換|せつだんひるべるとへんかん"}
+1. $f\in\mathcal{S}(\mathbb{R})$ の**ヒルベルト変換**を
+$$
+Hf(x)\defeq\lim_{\varepsilon\to0}\frac1\pi\int_{|y|>\varepsilon}\frac{f(x-y)}{y}dy=\mathrm{p.v.}\frac1\pi\int\frac{f(x-y)}{y}dy
+$$
+で定める（\ref{four:ht-pv-exists} から極限は存在する）。
+2. $0<\varepsilon<R<\infty$ について $k_{\varepsilon,R}(y)\defeq\frac{1}{\pi y}\mathbf{1}_{\{\varepsilon<|y|<R\}}$ とおく。$k_{\varepsilon,R}\in L^{1}\cap L^{\infty}$ なので、$f\in L^{p}$（$1\le p\le\infty$）について $H_{\varepsilon,R}f\defeq k_{\varepsilon,R}*f\in L^{p}$ が a.e. で定まる（\ref{four:convolution-rd.1}）。これを**切断ヒルベルト変換**という。
+3. $m(\xi)\defeq-i\operatorname{sgn}\xi$ とおく。
+:::
+
+::: intuition
+$Hf(x)$ は、$x$ の右側と左側の値の差 $f(x-y)-f(x+y)$ を距離 $y$ の逆数で重みづけて足し合わせたものである。核が奇関数なので、$x$ のすぐ近くでは打ち消し合いが起きて積分が意味をもつ。
+:::
+
+::: lemma 切断された核のフーリエ変換 {#four:ht-truncated-multiplier keywords="Fourier transform of the truncated kernel: hat k_{eps,R}(xi) = -(2i/pi) sgn(xi) (Si(2 pi |xi| R) - Si(2 pi |xi| eps)), bounded by 2, converging to -i sgn xi" index="切断された核のフーリエ変換|せつだんされたかくのふーりえへんかん"}
+$\xi\in\mathbb{R}$ について
+$$
+\widehat{k_{\varepsilon,R}}(\xi)=-\frac{2i}{\pi}\operatorname{sgn}\xi\,\bigl(\operatorname{Si}(2\pi|\xi|R)-\operatorname{Si}(2\pi|\xi|\varepsilon)\bigr).
+$$
+とくに $|\widehat{k_{\varepsilon,R}}(\xi)|\le2$ で、各 $\xi$ について $\varepsilon\to0$, $R\to\infty$ のとき $\widehat{k_{\varepsilon,R}}(\xi)\to m(\xi)$。
+:::
+
+::: proof
+$y$ と $-y$ の寄与をまとめると、$e^{-i\theta}-e^{i\theta}=-2i\sin\theta$ から
+$$
+\widehat{k_{\varepsilon,R}}(\xi)=\int_{\varepsilon}^{R}\frac{e^{-2\pi iy\xi}-e^{2\pi iy\xi}}{\pi y}dy=-\frac{2i}{\pi}\int_{\varepsilon}^{R}\frac{\sin(2\pi\xi y)}{y}dy.
+$$
+$\xi=0$ なら両辺 $0$。$\xi\ne0$ なら $\sin(2\pi\xi y)=\operatorname{sgn}\xi\,\sin(2\pi|\xi|y)$ で、$t=2\pi|\xi|y$ と置き換えると $\frac{dy}{y}=\frac{dt}{t}$ なので主張の式になる。\ref{four:ht-sine-integral.1} から $\operatorname{Si}$ の二つの値は $[0,\pi]$ にあり、差の絶対値は $\pi$ 以下なので $|\widehat{k_{\varepsilon,R}}|\le\frac2\pi\cdot\pi=2$。$\xi\ne0$ なら \ref{four:ht-sine-integral.2} と $\operatorname{Si}$ の連続性（$\operatorname{Si}(0)=0$）から括弧の中は $\frac\pi2$ に収束し、全体は $-\frac{2i}{\pi}\cdot\frac\pi2\operatorname{sgn}\xi=m(\xi)$ に収束する。
+:::
+
+::: theorem ヒルベルト変換のフーリエ乗数 {#four:ht-multiplier keywords="for f in S, Hf is in L^2 and its Fourier transform is -i sgn(xi) hat f(xi); truncated Hilbert transforms converge to Hf in L^2" index="ヒルベルト変換の乗数|ひるべるとへんかんのじょうすう"}
+$f\in\mathcal{S}(\mathbb{R})$ なら $Hf\in L^{2}$ で、$\mathcal{F}(Hf)=m\hat f$、すなわち $\mathcal{F}(Hf)(\xi)=-i\operatorname{sgn}\xi\,\hat f(\xi)$（a.e.）。さらに $\varepsilon\to0$, $R\to\infty$ で $\|H_{\varepsilon,R}f-Hf\|_{2}\to0$。
+:::
+
+::: intuition
+ヒルベルト変換は、正の周波数の成分に $-i$ を、負の周波数の成分に $i$ を掛ける操作である。$\cos$ を $\sin$ に、$\sin$ を $-\cos$ に移す「位相を $90^{\circ}$ ずらす」作用素と言ってよい。
+:::
+
+::: proof
+**Step 1.** 【$H_{\varepsilon,R}f\in L^{1}\cap L^{2}$ で $\widehat{H_{\varepsilon,R}f}=\widehat{k_{\varepsilon,R}}\,\hat f$】 $f\in L^{1}\cap L^{2}$（\ref{four:schwartz-basic.3}）と $k_{\varepsilon,R}\in L^{1}$ に \ref{four:convolution-rd.1}（$p=1,2$）と \ref{four:convolution-rd.2} を使う。
+
+**Step 2.** 【$u\defeq\mathcal{F}^{-1}(m\hat f)$ について $\|H_{\varepsilon,R}f-u\|_{2}\to0$】 $|m|\le1$ なので $m\hat f\in L^{2}$ で $u\in L^{2}$ が定まる。$\mathcal{F}$ はユニタリで、$L^{1}\cap L^{2}$ の上では $\mathcal{F}=\hat{\ }$（\ref{four:plancherel.1}・\ref{four:plancherel.2}）なので、Step 1 から
+$$
+\|H_{\varepsilon,R}f-u\|_{2}^{2}=\int\bigl|\widehat{k_{\varepsilon,R}}(\xi)-m(\xi)\bigr|^{2}|\hat f(\xi)|^{2}d\xi.
+$$
+被積分関数は $9|\hat f|^{2}\in L^{1}$ で抑えられ（\ref{four:ht-truncated-multiplier} から $|\widehat{k_{\varepsilon,R}}-m|\le3$）、各点で $0$ に収束する（同じ補題）。$\varepsilon,R$ の任意の列について優収束定理を使えばよい。
+
+**Step 3.** 【$Hf=u$（a.e.）】 $\varepsilon_{k}\defeq\frac1k$, $R_{k}\defeq k$（$k\ge2$）とする。Step 2 と \ref{meas:riesz-fischer} から、部分列で $H_{\varepsilon_{k},R_{k}}f\to u$（a.e.）。一方 \ref{four:ht-pv-exists} から、すべての $x$ で $H_{\varepsilon_{k},R_{k}}f(x)=\frac1\pi\int_{\varepsilon_{k}<|y|<R_{k}}\frac{f(x-y)}{y}dy\to Hf(x)$（$k_{\varepsilon,R}\in L^{1}$, $f$ は有界なので畳み込みはすべての $x$ で絶対収束する）。よって $Hf=u$（a.e.）で、$\mathcal{F}(Hf)=\mathcal{F}u=m\hat f$。最後の主張は Step 2 そのもの。
+
+::: hypcheck
+- **$f\in\mathcal{S}$**：\ref{four:ht-pv-exists} で $f'$ の有界性と $f\in L^{1}$ を、Step 1 で $f\in L^{1}\cap L^{2}$ を使った。
+- **$\operatorname{Si}$ の有界性**（\ref{four:ht-sine-integral.1}）は Step 2 の優関数に本質的：切断の仕方によらず乗数が一様に有界であることが、$L^{2}$ 収束の鍵である。
+- 超関数を経由する計算（\see{four:ex-sd-2}）は使わず、切断した核の具体的な計算で済ませた。
+:::
+:::
+
+::: theorem L² 上のヒルベルト変換 {#four:ht-l2 keywords="the Hilbert transform extends uniquely from S to a unitary operator on L^2(R), Hf = F^{-1}(-i sgn xi F f); H^2 = -I; H* = -H; truncated Hilbert transforms converge in L^2" index="L2 上のヒルベルト変換|えるにじょうのひるべるとへんかん"}
+$f\in L^{2}(\mathbb{R})$ について $Hf\defeq\mathcal{F}^{-1}(m\,\mathcal{F}f)$ とおく。
+1. $f\in\mathcal{S}$ ならこれは \ref{four:ht-definition.1} の $Hf$ と a.e. で一致し、$H$ は $\mathcal{S}$ 上の $H$ の、$L^{2}$ 上の有界線形作用素への**ただ一つの**延長である。
+2. $\|Hf\|_{2}=\|f\|_{2}$、$H^{2}=-I$（とくに $H$ は全単射で $H^{-1}=-H$）、$\langle Hf,g\rangle=-\langle f,Hg\rangle$（$f,g\in L^{2}$）。
+3. $\varepsilon\to0$, $R\to\infty$ で $\|H_{\varepsilon,R}f-Hf\|_{2}\to0$。
+:::
+
+::: intuition
+$L^{2}$ ではヒルベルト変換は「回転」であり、長さを変えず、2 回施すと符号が反転する。切断した積分は $L^{2}$ の意味でこの作用素に近づく。
+:::
+
+::: proof
+**Step 1.** 【2】 $\xi\ne0$ で $|m(\xi)|=1$、$m(\xi)^{2}=-1$、$\overline{m(\xi)}=-m(\xi)$。\ref{four:plancherel.2} から $\|Hf\|_{2}=\|m\mathcal{F}f\|_{2}=\|\mathcal{F}f\|_{2}=\|f\|_{2}$、$H^{2}f=\mathcal{F}^{-1}(m^{2}\mathcal{F}f)=-f$。また
+$$
+\langle Hf,g\rangle=\langle m\mathcal{F}f,\mathcal{F}g\rangle=\int\mathcal{F}f\,\overline{\bar m\,\mathcal{F}g}=-\langle\mathcal{F}f,m\mathcal{F}g\rangle=-\langle f,Hg\rangle.
+$$
+
+**Step 2.** 【1】 一致は \ref{four:ht-multiplier}。一意性のために $\mathcal{S}$ が $L^{2}$ で稠密なことを示す。$g\in L^{2}$ が $\mathcal{S}$ のすべての元と直交すれば、$\varphi\in\mathcal{S}$ について $\bar\varphi\in\mathcal{S}$ なので $\int g\varphi=\langle g,\bar\varphi\rangle=0$。$L^{2}$ の元は緩増加な関数なので（\ref{four:tempered-examples.1}）、\ref{four:distribution-injective} から $g=0$。よって $\mathcal{S}^{\perp}=\{0\}$ で、\ref{fa:orthogonal-decomposition.3} から $\overline{\mathcal{S}}=\mathcal{S}^{\perp\perp}=L^{2}$。稠密な部分空間の上で一致する二つの有界線形作用素は一致する。
+
+**Step 3.** 【$f\in L^{2}$ なら $\mathcal{F}(k_{\varepsilon,R}*f)=\widehat{k_{\varepsilon,R}}\,\mathcal{F}f$】 $k\defeq k_{\varepsilon,R}$ と書く。$f\in L^{1}\cap L^{2}$ なら \ref{four:ht-multiplier} の Step 1 と同じ。一般の $f$ には $f_{j}\defeq f\mathbf{1}_{[-j,j]}\in L^{1}\cap L^{2}$ をとる（$\|f_{j}-f\|_{2}\to0$、優収束定理）。$\|k*f_{j}-k*f\|_{2}\le\|k\|_{1}\|f_{j}-f\|_{2}$（\ref{four:convolution-rd.1}）と $\mathcal{F}$ の連続性から左辺は $\mathcal{F}(k*f)$ に、$|\hat k|\le2$ から右辺は $\hat k\,\mathcal{F}f$ に、$L^{2}$ で収束する。
+
+**Step 4.** 【3】 Step 3 から $\|H_{\varepsilon,R}f-Hf\|_{2}^{2}=\int|\widehat{k_{\varepsilon,R}}-m|^{2}|\mathcal{F}f|^{2}$ で、\ref{four:ht-multiplier} の Step 2 と同じく優収束定理から $0$ に収束する。
+
+::: hypcheck
+- 2 で使ったのは $|m|=1$, $m^{2}=-1$, $\bar m=-m$ だけである。$|m|\le1$ だけなら有界性（ノルム $\le1$）は残る。
+- 3 は $L^{2}$ の収束であって、各点の収束ではない。$f\in L^{p}$（$1\le p<\infty$）について $H_{\varepsilon,\infty}f(x)\to Hf(x)$ が a.e. で成り立つことも知られているが、その証明には切断の最大作用素の評価が要り、ここでは扱わない。
+:::
+:::
+
+## 弱 (1,1) 型評価 {#four:sec-ht-weak}
+
+::: lemma 台の外での積分表示 {#four:ht-off-support keywords="if h in L^2 vanishes outside a bounded interval I then Hh(x) = (1/pi) int h(y)/(x-y) dy for almost every x outside the closure of I" index="ヒルベルト変換の台の外での表示|ひるべるとへんかんのだいのそとでのひょうじ"}
+$h\in L^{2}(\mathbb{R})$ が有界区間 $I$ の外で $0$（a.e.）なら、$\operatorname{dist}(x,I)>0$ となるほとんどすべての $x$ で
+$$
+Hh(x)=\frac1\pi\int_{I}\frac{h(y)}{x-y}dy\qquad\text{（右辺は絶対収束する）}.
+$$
+:::
+
+::: proof
+$h\in L^{1}$（$I$ は有界なのでコーシー–シュワルツの不等式から）。$x$ について $d\defeq\operatorname{dist}(x,I)>0$ なら $\frac{|h(y)|}{|x-y|}\le\frac{|h(y)|}{d}$ なので右辺は絶対収束する。\ref{four:ht-l2.3} と \ref{meas:riesz-fischer} から、ある部分列 $k_{i}\to\infty$ について $H_{1/k_{i},k_{i}}h\to Hh$（a.e.）。$M\defeq\sup_{z\in I}|z|$ とおくと、$h(x-y)\ne0$ なら $x-y\in I$ なので $d\le|y|\le|x|+M$。よって $\frac{1}{k_{i}}<d$ かつ $k_{i}>|x|+M$ のとき
+$$
+H_{1/k_{i},k_{i}}h(x)=\frac1\pi\int\frac{h(x-y)}{y}dy=\frac1\pi\int_{I}\frac{h(z)}{x-z}dz\qquad(z=x-y)
+$$
+で、$i$ によらない。極限をとればよい。
+:::
+
+::: lemma ヘルマンダー条件 {#four:ht-hormander keywords="Hormander condition for the Hilbert kernel K(x) = 1/(pi x): int_{|x| >= 2|y|} |K(x-y) - K(x)| dx <= 2/pi" index="ヘルマンダー条件|へるまんだーじょうけん"}
+$K(x)\defeq\frac{1}{\pi x}$ とおくと、$y\ne0$ について
+$$
+\int_{|x|\ge2|y|}|K(x-y)-K(x)|\,dx\le\frac{2}{\pi}.
+$$
+:::
+
+::: proof
+$|x|\ge2|y|$ なら $|x-y|\ge|x|-|y|\ge\frac{|x|}{2}>0$ なので
+$$
+|K(x-y)-K(x)|=\frac{|y|}{\pi|x-y||x|}\le\frac{2|y|}{\pi x^{2}},\qquad\int_{|x|\ge2|y|}\frac{2|y|}{\pi x^{2}}dx=\frac{2|y|}{\pi}\cdot\frac{2}{2|y|}=\frac{2}{\pi}.
+$$
+:::
+
+::: theorem ヒルベルト変換の弱 (1,1) 型評価 {#four:ht-weak-type keywords="the Hilbert transform is of weak type (1,1): |{|Hf| > alpha}| <= C ||f||_1 / alpha for f in L^1 cap L^2, C = 10 + 8/pi, proved by the Calderon-Zygmund decomposition and the Hormander condition" index="弱 (1,1) 型評価（ヒルベルト変換）|じゃくいちいちがたひょうかひるべるとへんかん"}
+$C\defeq10+\frac{8}{\pi}$ とおく。$f\in L^{1}(\mathbb{R})\cap L^{2}(\mathbb{R})$, $\alpha>0$ なら
+$$
+|\{|Hf|>\alpha\}|\le\frac{C}{\alpha}\|f\|_{1}.
+$$
+:::
+
+::: intuition
+$\|Hf\|_{1}\le C\|f\|_{1}$ は成り立たないが（\see{four:ht-lp.4}）、「$|Hf|$ が $\alpha$ を超える場所の長さ」は $\|f\|_{1}/\alpha$ の定数倍で抑えられる。$Hf$ が大きくなるのは $f$ の塊のすぐそばだけで、遠くでは平均 $0$ の打ち消し合いで小さい。
+:::
+
+::: proof
+\ref{four:ht-cz-decomposition} を $n=1$ と高さ $\alpha$ で使い、$Q_{j}$, $g$, $b_{j}$, $b$ をとる。$g$ は有界で可積分なので $g\in L^{2}$、$b=f-g\in L^{2}$ で、$H$ は $L^{2}$ 上で線形なので $Hf=Hg+Hb$、
+$$
+\{|Hf|>\alpha\}\subset\{|Hg|>\tfrac\alpha2\}\cup\{|Hb|>\tfrac\alpha2\}.
+$$
+
+**Step 1.** 【$|\{|Hg|>\frac\alpha2\}|\le\frac{8}{\alpha}\|f\|_{1}$】 \ref{meas:markov.1} を $|Hg|^{2}$ に使い、\ref{four:ht-l2.2} と \ref{four:ht-cz-decomposition.5}（$n=1$）から
+$$
+|\{|Hg|>\tfrac\alpha2\}|\le\frac{4}{\alpha^{2}}\|Hg\|_{2}^{2}=\frac{4}{\alpha^{2}}\|g\|_{2}^{2}\le\frac{4}{\alpha^{2}}\cdot2\alpha\|f\|_{1}.
+$$
+
+**Step 2.** 【$|Hb|\le\sum_{j}|Hb_{j}|$（a.e.）】 $|b_{j}|\le|b|$ なので $b_{j}\in L^{2}$。$Q_{j}$ たちは互いに素で $b=\sum_{j}b_{j}$（各点）だから $|b-\sum_{j\le J}b_{j}|\le|b|$ で、優収束定理から $\sum_{j\le J}b_{j}\to b$（$L^{2}$）。$H$ は $L^{2}$ 上で連続なので $\sum_{j\le J}Hb_{j}\to Hb$（$L^{2}$）で、部分列で a.e. 収束する（\ref{meas:riesz-fischer}）。$|\sum_{j\le J}Hb_{j}|\le\sum_{j}|Hb_{j}|$ の極限をとる（$Q_{j}$ が有限個ならこの Step は不要）。
+
+**Step 3.** 【$Q_{j}^{*}$ を $Q_{j}$ と同じ中心 $c_{j}$ で長さ $2|Q_{j}|$ の開区間とすると $\int_{\mathbb{R}\setminus Q_{j}^{*}}|Hb_{j}|\le\frac2\pi\|b_{j}\|_{1}$】 $\ell_{j}\defeq|Q_{j}|$ とおく。$x\notin Q_{j}^{*}$ なら $|x-c_{j}|\ge\ell_{j}$ で $\operatorname{dist}(x,Q_{j})\ge\frac{\ell_{j}}{2}>0$ なので、\ref{four:ht-off-support} と $\int b_{j}=0$（\ref{four:ht-cz-decomposition.6}）から、ほとんどすべての $x\notin Q_{j}^{*}$ で
+$$
+Hb_{j}(x)=\int_{Q_{j}}b_{j}(y)K(x-y)\,dy=\int_{Q_{j}}b_{j}(y)\bigl(K(x-y)-K(x-c_{j})\bigr)dy.
+$$
+トネリの定理から $\int_{\mathbb{R}\setminus Q_{j}^{*}}|Hb_{j}|\le\int_{Q_{j}}|b_{j}(y)|\bigl(\int_{|x-c_{j}|\ge\ell_{j}}|K(x-y)-K(x-c_{j})|dx\bigr)dy$。内側の積分は、$x'=x-c_{j}$, $y'=y-c_{j}$（$|y'|\le\frac{\ell_{j}}{2}$）と平行移動不変性（\ref{meas:translation-continuity.1}）で $\int_{|x'|\ge\ell_{j}}|K(x'-y')-K(x')|dx'$ になり、$\{|x'|\ge\ell_{j}\}\subset\{|x'|\ge2|y'|\}$ なので \ref{four:ht-hormander} から $\frac2\pi$ 以下（$y'=0$ なら $0$）。
+
+**Step 4.** 【$|\{|Hb|>\frac\alpha2\}|\le(2+\frac8\pi)\frac{\|f\|_{1}}{\alpha}$】 $\Omega^{*}\defeq\bigcup_{j}Q_{j}^{*}$ とおくと、\ref{four:ht-cz-decomposition.2} から $|\Omega^{*}|\le\sum_{j}2|Q_{j}|\le\frac{2}{\alpha}\|f\|_{1}$。$\Omega^{*}$ の外では、マルコフの不等式、Step 2、単調収束定理、Step 3、\ref{four:ht-cz-decomposition.6} から
+$$
+|\{x\notin\Omega^{*}:|Hb(x)|>\tfrac\alpha2\}|\le\frac2\alpha\sum_{j}\int_{\mathbb{R}\setminus Q_{j}^{*}}|Hb_{j}|\le\frac2\alpha\cdot\frac2\pi\sum_{j}\|b_{j}\|_{1}\le\frac{8}{\pi\alpha}\|f\|_{1}.
+$$
+Step 1 と合わせて $|\{|Hf|>\alpha\}|\le(8+2+\frac8\pi)\frac{\|f\|_{1}}{\alpha}$。
+
+::: hypcheck
+- **$f\in L^{1}$**：カルデロン–ジグムント分解（Step 1・4 の $\|f\|_{1}$）に使った。**$f\in L^{2}$**：$Hf$ を $L^{2}$ 理論で定義するのに使っただけで、評価には現れない。これを外すのが次の \see{four:ht-l1-extension} である。
+- **$\int b_{j}=0$**（悪い部分の打ち消し）：Step 3 で $K(x-c_{j})$ を引くのに本質的。これがないと、$Q_{j}$ から遠いところで $Hb_{j}(x)\approx\frac{1}{\pi x}\int b_{j}$ となり、$\mathbb{R}\setminus Q_{j}^{*}$ 上で可積分でない。
+- **核について使ったこと**は二つだけ：$L^{2}$ 有界性（Step 1）とヘルマンダー条件（Step 3）。したがって同じ証明は、この二つを満たす畳み込み型の作用素すべてに通用する。
+- **$Q_{j}$ を 2 倍に広げること**：Step 3 で $x$ と $Q_{j}$ を離し、ヘルマンダー条件の領域 $|x'|\ge2|y'|$ に入れるのに使った。広げた分の測度は Step 4 で $\|f\|_{1}/\alpha$ の定数倍として払う。
+- **選択公理**：使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $\|Hf\|_{1}\le C\|f\|_{1}$ の形の強い評価は偽である（\see{four:ht-lp.4}）。その代わりに、$L^{1}$ を**ハーディ空間** $H^{1}$（$f$ と $Hf$ がともに可積分な $f$ の空間）に替えると $H$ は $H^{1}\to L^{1}$ で有界になり、双対的に $L^{\infty}$ は有界平均振動の空間 BMO に移されることが知られている（ハーディ空間と BMO の理論）。ここでは証明しない。
+
+**似た定理.** \ref{meas:maximal-inequality} も弱 $(1,1)$ 型評価で、証明は被覆補題による「悪い場所の測度の評価」だけからなる。ここでの証明は、悪い場所の測度の評価（$|\Omega^{*}|$）に加えて、悪い場所の外での打ち消し（Step 3）を使う点が異なる。$\mathbb{R}^{n}$ のリース変換など、高次元の特異積分も同じ分解で扱える。
+
+**高い視点：良い部分と悪い部分の会計.** カルデロン–ジグムント分解は、作用素の性質を二つの「得意な場面」に振り分ける仕組みである。良い部分 $g$ は有界なので $L^{2}$ 理論（プランシュレル）で処理でき、悪い部分 $b$ は平均 $0$ の局在した塊なので、核の滑らかさだけで遠方の寄与を抑えられる。比喩で言えば、悪い部分の各塊は正負の電荷が釣り合った小さな双極子で、遠くから見ると全電荷 $0$ のため電場が $\frac1{x}$ ではなく $\frac{1}{x^{2}}$ でしか届かない。双極子のすぐ近く（$\Omega^{*}$）だけは諦めて測度で払い、それ以外は積分で払う——これが弱 $(1,1)$ 評価の会計である。
+:::
+
+::: proposition L¹ と L¹+L² への延長 {#four:ht-l1-extension keywords="extension of the Hilbert transform to L^1 as a weak type (1,1) operator, by Cauchy sequences in measure; uniqueness; consistent definition on L^1 + L^2" index="ヒルベルト変換の L1 への延長|ひるべるとへんかんのえるわんへのえんちょう"}
+$C$ を \ref{four:ht-weak-type} の定数とする。
+1. 線形写像 $H\colon L^{1}(\mathbb{R})\to L^{0}$（$L^{0}$ は a.e. で等しいものを同一視した可測関数の空間）で、$L^{1}\cap L^{2}$ の上では \ref{four:ht-l2} の $H$ と一致し、すべての $f\in L^{1}$, $\alpha>0$ について $|\{|Hf|>\alpha\}|\le\frac{C}{\alpha}\|f\|_{1}$ を満たすものがある。$L^{1}\cap L^{2}$ の上で $H$ と一致し、ある定数で弱 $(1,1)$ 型評価を満たす線形写像は、これに限る。
+2. $f=f_{1}+f_{2}$（$f_{1}\in L^{1}$, $f_{2}\in L^{2}$）について $Hf\defeq Hf_{1}+Hf_{2}$ とおくと、これは分け方によらず、$L^{1}+L^{2}$ 上の線形写像である。
+:::
+
+::: proof
+**Step 1.** 【$f\in L^{1}$ に対して、$L^{1}\cap L^{2}$ の列 $\varphi_{j}$ で $\|f-\varphi_{j}\|_{1}\le4^{-j}$、かつ $H\varphi_{j}$ がある集合 $F_{J}$（$|F_{J}|\le4C2^{-J}$）の外で $|H\varphi_{j}-H\varphi_{J}|\le2^{1-J}$（$j\ge J$）を満たすものがある】 $f^{(k)}\defeq f\mathbf{1}_{\{|f|\le k\}\cap[-k,k]}$ は有界で台が有界なので $L^{1}\cap L^{2}$ に入り、優収束定理から $\|f-f^{(k)}\|_{1}\to0$（$k$ について単調減少）。$k_{j}$ を $\|f-f^{(k)}\|_{1}\le4^{-j}$ となる最小の $k$ とし、$\varphi_{j}\defeq f^{(k_{j})}$ とする。$\|\varphi_{j+1}-\varphi_{j}\|_{1}\le2\cdot4^{-j}$ なので、$E_{j}\defeq\{|H\varphi_{j+1}-H\varphi_{j}|>2^{-j}\}$ について \ref{four:ht-weak-type} から $|E_{j}|\le C2^{j}\cdot2\cdot4^{-j}=2C2^{-j}$。$F_{J}\defeq\bigcup_{j\ge J}E_{j}$ とおけば $|F_{J}|\le4C2^{-J}$ で、$F_{J}$ の外では $\sum_{j\ge J}|H\varphi_{j+1}-H\varphi_{j}|\le\sum_{j\ge J}2^{-j}=2^{1-J}$。
+
+**Step 2.** 【定義と弱 $(1,1)$ 評価】 Step 1 から、$\bigcap_{J}F_{J}$（測度 $0$）の外で $H\varphi_{j}(x)$ はコーシー列なので、$Hf(x)\defeq\lim_{j}H\varphi_{j}(x)$（収束しない点では $0$）とおく。$F_{J}$ の外で $|Hf-H\varphi_{J}|\le2^{1-J}$。$0<\eta<1$ とし、$2^{1-J}\le\eta\alpha$ となる $J$ について
+$$
+|\{|Hf|>\alpha\}|\le|F_{J}|+|\{|H\varphi_{J}|>(1-\eta)\alpha\}|\le4C2^{-J}+\frac{C\|\varphi_{J}\|_{1}}{(1-\eta)\alpha}.
+$$
+$J\to\infty$ で右辺は $\frac{C\|f\|_{1}}{(1-\eta)\alpha}$ に収束し、$\eta\to0$ とすればよい。
+
+**Step 3.** 【$h_{k}\in L^{1}\cap L^{2}$, $\|h_{k}-f\|_{1}\to0$ なら $Hh_{k}\to Hf$（測度収束）】 $\beta>0$ と $2^{1-J}\le\beta$ となる $J$ について、\ref{four:ht-weak-type} を $h_{k}-\varphi_{J}\in L^{1}\cap L^{2}$ に使うと
+$$
+|\{|Hh_{k}-Hf|>2\beta\}|\le|\{|H(h_{k}-\varphi_{J})|>\beta\}|+|F_{J}|\le\frac{C}{\beta}\bigl(\|h_{k}-f\|_{1}+4^{-J}\bigr)+4C2^{-J}.
+$$
+$J$ を大きくとってから $k\to\infty$ とすれば、左辺は $0$ に収束する。
+
+**Step 4.** 【1 の残り】 測度収束の極限は a.e. で一意である（$|\{|u-v|>2\beta\}|\le|\{|u-w_{k}|>\beta\}|+|\{|w_{k}-v|>\beta\}|$ で、$\beta=\frac1m$ について和をとる）。$f\in L^{1}\cap L^{2}$ なら定数列 $h_{k}=f$ に Step 3 を使い、新しい $Hf$ は $L^{2}$ の $Hf$ と一致する。$f,f'\in L^{1}$, $c\in\mathbb{C}$ について、$f$, $f'$ の Step 1 の列 $\varphi_{j}$, $\varphi'_{j}$ から作った $\varphi_{j}+c\varphi'_{j}$ に Step 3 を使えば $H(f+cf')=Hf+cHf'$。一意性：$H'$ も線形で $L^{1}\cap L^{2}$ 上 $H$ と一致し、定数 $C'$ で弱 $(1,1)$ 型評価を満たすなら
+$$
+|\{|H'f-Hf|>2\beta\}|\le|\{|H'(f-\varphi_{j})|>\beta\}|+|\{|H(\varphi_{j}-f)|>\beta\}|\le\frac{C'+C}{\beta}\|f-\varphi_{j}\|_{1}\to0.
+$$
+
+**Step 5.** 【2】 $f_{1}+f_{2}=g_{1}+g_{2}$（$f_{1},g_{1}\in L^{1}$, $f_{2},g_{2}\in L^{2}$）なら $f_{1}-g_{1}=g_{2}-f_{2}\in L^{1}\cap L^{2}$ で、1 からこの関数の上で二つの定義は一致するので、$Hf_{1}-Hg_{1}=H(f_{1}-g_{1})=H(g_{2}-f_{2})=Hg_{2}-Hf_{2}$。線形性は $L^{1}$, $L^{2}$ それぞれでの線形性から。
+
+::: hypcheck
+- Step 1 で列を「条件を満たす最小の $k$」として選んだので、選択公理（可算選択を含む）は使わない。
+- 弱 $(1,1)$ 型評価は、$L^{1}$ から（測度収束の位相の）可測関数の空間への連続性を意味する。連続な延長が一意であることが Step 4 の一意性の中身である。
+:::
+:::
+
+## Lᵖ 有界性 {#four:sec-ht-lp}
+
+::: theorem ヒルベルト変換の Lᵖ 有界性 {#four:ht-lp keywords="L^p boundedness of the Hilbert transform for 1 < p < infinity: Marcinkiewicz interpolation between weak (1,1) and L^2 for 1 < p <= 2, duality and antisymmetry for 2 < p < infinity; unboundedness on L^1 and L^infinity, example of the indicator of [0,1]" index="ヒルベルト変換の Lp 有界性|ひるべるとへんかんのえるぴーゆうかいせい, M. リースの定理（実数直線）|えむりーすのていりじっすうちょくせん"}
+$C$ を \ref{four:ht-weak-type} の定数とし、$1<p<2$ について $A_{p}\defeq\bigl(p\bigl(\frac{2C}{p-1}+\frac{4}{2-p}\bigr)\bigr)^{1/p}$、$A_{2}\defeq1$、$2<p<\infty$ について $A_{p}\defeq A_{p'}$（$p'$ は共役指数）とおく。
+1. $1<p\le2$ なら、すべての $f\in L^{p}$（$\subset L^{1}+L^{2}$）について $\|Hf\|_{p}\le A_{p}\|f\|_{p}$（$H$ は \ref{four:ht-l1-extension.2} のもの）。
+2. $2<p<\infty$ なら、すべての $f\in L^{2}\cap L^{p}$ について $\|Hf\|_{p}\le A_{p}\|f\|_{p}$。
+3. $1<p<\infty$ について、$L^{2}\cap L^{p}$ 上の $H$ は、$L^{p}$ 上の有界線形作用素（ノルム $\le A_{p}$）にただ一つに延びる。$1<p<2$ ではそれは 1 の $H$ である。
+4. $p=1,\infty$ では有界でない：$f\defeq\mathbf{1}_{[0,1]}$ について、ほとんどすべての $x\notin[0,1]$ で $Hf(x)=\frac1\pi\log\bigl|\frac{x}{x-1}\bigr|$ であり、$f\in L^{1}\cap L^{2}\cap L^{\infty}$ だが $Hf\notin L^{1}$, $Hf\notin L^{\infty}$。
+:::
+
+::: intuition
+ヒルベルト変換は $1<p<\infty$ のすべての $L^{p}$ で有界だが、両端の $L^{1}$ と $L^{\infty}$ では有界でない。$L^{1}$ では遠方で $\frac{1}{x}$ の裾が残り、$L^{\infty}$ では跳びの近くで対数的に発散する。
+:::
+
+::: proof
+**Step 1.** 【1】 $f\in L^{p}$（$1<p<2$）は $f=f\mathbf{1}_{\{|f|>1\}}+f\mathbf{1}_{\{|f|\le1\}}$ と分けると、第 1 項は $|f|\le|f|^{p}$ から $L^{1}$、第 2 項は $|f|^{2}\le|f|^{p}$ から $L^{2}$ に入る。\ref{four:ht-l1-extension.2} の $H$ は $L^{1}+L^{2}$ 上で線形（とくに劣線形）で、\ref{four:ht-l1-extension.1} から弱 $(1,1)$ 型（定数 $C$）、\ref{four:ht-l2.2} と \ref{four:layer-cake.2} から $[Hf]_{2}\le\|Hf\|_{2}=\|f\|_{2}$ で弱 $(2,2)$ 型（定数 $1$）。\ref{four:marcinkiewicz} を $p_{0}=1$, $p_{1}=2$, $A_{0}=C$, $A_{1}=1$ で使う。定数はその証明（$p_{1}<\infty$ の場合）の $p\bigl(\frac{(2A_{0})^{p_{0}}}{p-p_{0}}+\frac{(2A_{1})^{p_{1}}}{p_{1}-p}\bigr)$ である。$p=2$ は \ref{four:ht-l2.2}。
+
+**Step 2.** 【2】 $2<p<\infty$, $f\in L^{2}\cap L^{p}$ とし、$h\defeq Hf\in L^{2}$ とおく。$k\in\mathbb{N}$ について $E_{k}\defeq\{x:|x|\le k,\ |h(x)|\le k\}$、$h_{k}\defeq h\mathbf{1}_{E_{k}}$、$g_{k}\defeq|h_{k}|^{p-1}\operatorname{sgn}h_{k}$ とおく。$g_{k}$ は有界で台が有界なので $g_{k}\in L^{2}\cap L^{p'}$、$h\overline{g_{k}}=|h|^{p}\mathbf{1}_{E_{k}}$、$\|g_{k}\|_{p'}^{p'}=\int|h_{k}|^{(p-1)p'}=\|h_{k}\|_{p}^{p}$。\ref{four:ht-l2.2} の反対称性、ヘルダーの不等式、$1<p'<2$ についての 1 から
+$$
+\|h_{k}\|_{p}^{p}=\langle Hf,g_{k}\rangle=|\langle f,Hg_{k}\rangle|\le\|f\|_{p}\|Hg_{k}\|_{p'}\le A_{p'}\|f\|_{p}\|h_{k}\|_{p}^{p/p'}.
+$$
+$\|h_{k}\|_{p}<\infty$ なので、$\|h_{k}\|_{p}\ne0$ なら $p-\frac{p}{p'}=1$ から $\|h_{k}\|_{p}\le A_{p'}\|f\|_{p}$（$=0$ なら自明）。$E_{k}\uparrow\mathbb{R}$（$h$ は a.e. で有限）なので、単調収束定理から $\|Hf\|_{p}\le A_{p'}\|f\|_{p}$。
+
+**Step 3.** 【3】 有限測度の集合の上の単関数は $L^{2}\cap L^{p}$ に入り、$L^{p}$ で稠密（\ref{meas:lp-simple-dense}）。よって $L^{2}\cap L^{p}$ は $L^{p}$ で稠密で、1・2 から、そこでの $H$ は $L^{p}$ の完備性（\ref{meas:riesz-fischer}）によって有界線形作用素にただ一つに延びる（\ref{four:plancherel} の Step 1 と同じ議論）。$1<p<2$ では、1 の $H$ が $L^{p}$ 上の有界線形作用素で、\ref{four:ht-l1-extension.2} から $L^{2}\cap L^{p}$ の上で $L^{2}$ の $H$ と一致するので、一意性からこの延長である。
+
+**Step 4.** 【4】 $f\in L^{2}$ は有界区間 $[0,1]$ の外で $0$ なので、\ref{four:ht-off-support} から、ほとんどすべての $x\notin[0,1]$ で
+$$
+Hf(x)=\frac1\pi\int_{0}^{1}\frac{dy}{x-y}=\frac1\pi\bigl(\log|x|-\log|x-1|\bigr)=\frac1\pi\log\Bigl|\frac{x}{x-1}\Bigr|.
+$$
+$x>1$ なら $-\log(1-t)\ge t$（$0<t<1$）を $t=\frac1x$ に使って $Hf(x)=-\frac1\pi\log(1-\frac1x)\ge\frac{1}{\pi x}$ なので $\int_{1}^{\infty}|Hf|=\infty$。$x<0$ なら $|Hf(x)|=\frac1\pi\log\frac{1-x}{|x|}\to\infty$（$x\to0-$）なので、どの $M$ についても $\{|Hf|>M\}$ は $(-\delta,0)$ の形の区間をほとんど含み、$Hf\notin L^{\infty}$。したがって $\|Hf\|_{1}\le c\|f\|_{1}$（$f\in L^{1}\cap L^{2}$）や $\|Hf\|_{\infty}\le c\|f\|_{\infty}$（$f\in L^{2}\cap L^{\infty}$）を満たす定数 $c$ はない。
+
+::: hypcheck
+- **$1<p$**：Step 1 で \ref{four:marcinkiewicz} の $p_{0}<p$ に使った（定数は $p\to1$ で発散する。実際 $\|H\|_{L^{p}\to L^{p}}\to\infty$ であることは \see{four:prob-ht-blowup}）。**$p<\infty$**：Step 2 で $p'>1$ として 1 を使い、Step 3 で単関数の稠密性に使った。
+- 反対称性 $\langle Hf,g\rangle=-\langle f,Hg\rangle$ は Step 2 で、双対の指数 $p'$ の評価を $p$ に移すのに本質的。それは乗数が純虚数（$\bar m=-m$）であることの言い換えである。
+- 4 の例は、端点では評価そのものが偽であることを示す。Step 4 の $\frac{1}{\pi x}$ の裾は $\int f=1\ne0$ から来る：$Hf\in L^{1}$ となるには $\int f=0$ が必要である（$Hf\in L^{1}$ なら $\widehat{Hf}=m\hat f$ は連続なので、$\xi=0$ での左右の極限 $\mp i\hat f(0)$ が一致して $\hat f(0)=0$）。
+- **選択公理**：使わない。
+:::
+:::
+
+::: supplement
+**最良定数.** $1<p<\infty$ での $H$ の $L^{p}$ 作用素ノルムは、$p\le2$ で $\tan\frac{\pi}{2p}$、$p\ge2$ で $\cot\frac{\pi}{2p}$ であることが知られている（ピコリデスの定理）。ここで得た $A_{p}$ はこれよりずっと大きいが、$p\to1$, $p\to\infty$ で発散するという振る舞いは正しい。
+
+**別の道筋.** 複素解析による古典的な証明は、$f$ が実数値のとき $f+iHf$ が上半平面の正則関数の境界値になることを使い、$(f+iHf)^{2k}$ の積分が $0$ になることから $p=2k$ の評価を出し、\ref{four:riesz-thorin} と双対性で全体を得る。実解析的な証明（このページ）は複素解析を使わないので、$\mathbb{R}^{n}$ の特異積分にそのまま一般化する。
+:::
+
+
+## 問題 {#four:sec-ht-problems}
+
+::: problem {#four:prob-ht-cauchy}
+$P(x)\defeq\frac{1}{\pi(1+x^{2})}$ について $HP(x)=\frac{x}{\pi(1+x^{2})}$ を示せ。とくに $P\in L^{1}\cap L^{2}$ だが $HP\notin L^{1}$ である。（ヒント：\ref{four:transform-examples.2} と反転公式から $\hat P(\xi)=e^{-2\pi|\xi|}$。）
+:::
+
+::: solution
+$u(x)\defeq e^{-2\pi|x|}$ は可積分で、\ref{four:transform-examples.2} から $\hat u=\pi^{-1}(1+\xi^{2})^{-1}=P$ も可積分。\ref{four:inversion-theorem.1}（$u$ は連続）から $u(x)=\int P(\xi)e^{2\pi ix\xi}d\xi=\hat P(-x)$、$u$ は偶関数なので $\hat P=u$。$P\in L^{1}\cap L^{2}$ なので $\mathcal{F}P=\hat P$、$m\hat P\in L^{1}\cap L^{2}$ なので $\mathcal{F}^{-1}$ は逆変換の積分で与えられ（\ref{four:plancherel.1}・\ref{four:plancherel.2}）
+$$
+HP(x)=\int(-i\operatorname{sgn}\xi)e^{-2\pi|\xi|}e^{2\pi ix\xi}d\xi=-i\Bigl(\int_{0}^{\infty}e^{-2\pi\xi(1-ix)}d\xi-\int_{0}^{\infty}e^{-2\pi\xi(1+ix)}d\xi\Bigr)=\frac{-i}{2\pi}\Bigl(\frac{1}{1-ix}-\frac{1}{1+ix}\Bigr)
+$$
+（負の側は $\xi\mapsto-\xi$ と置き換えた）。$\frac{1}{1-ix}-\frac{1}{1+ix}=\frac{2ix}{1+x^{2}}$ なので $HP(x)=\frac{x}{\pi(1+x^{2})}$。これは $|x|\to\infty$ で $\frac{1}{\pi x}$ のように振る舞うので可積分でない。（$P$ は上半平面のポアソン核の $y=1$ での値で、$HP$ はその共役核である。）
+:::
+
+::: problem {#four:prob-ht-blowup}
+$1<p<2$ について、$H$ の $L^{p}$ 作用素ノルム $\|H\|_{p}$ は $\frac{1}{\pi}(p-1)^{-1/p}$ 以上であることを示せ。とくに $p\to1$ で $\|H\|_{p}\to\infty$。また \ref{four:ht-lp} の証明の Step 2 の議論から $\|H\|_{p}=\|H\|_{p'}$ を導き、$p\to\infty$ でも発散することを示せ。
+:::
+
+::: solution
+$f\defeq\mathbf{1}_{[0,1]}$ とすると $\|f\|_{p}=1$。\ref{four:ht-lp.4}（の証明）から、$x>1$ で $Hf(x)\ge\frac{1}{\pi x}$ なので
+$$
+\|Hf\|_{p}^{p}\ge\int_{1}^{\infty}\frac{dx}{(\pi x)^{p}}=\frac{\pi^{-p}}{p-1},\qquad\|H\|_{p}\ge\frac1\pi(p-1)^{-1/p}.
+$$
+$(p-1)^{-1/p}=e^{-\frac1p\log(p-1)}\to\infty$（$p\to1$）。双対性：Step 2 で $A_{p'}$ の代わりに $\|H\|_{p'}$ を使うと $\|H\|_{p}\le\|H\|_{p'}$（$p>2$）。逆向きも、$1<p<2$ と $f\in L^{2}\cap L^{p}$, $g\in L^{2}\cap L^{p'}$ について $|\langle Hf,g\rangle|=|\langle f,Hg\rangle|\le\|f\|_{p}\|H\|_{p'}\|g\|_{p'}$ に同じ $g_{k}$ を使えば $\|H\|_{p}\le\|H\|_{p'}$。よって $\|H\|_{p}=\|H\|_{p'}$ で、$p\to\infty$ なら $p'\to1$ なので発散する。
+:::
+
+::: problem {#four:prob-ht-real}
+$f\in L^{2}(\mathbb{R})$ が実数値なら、$Hf$ も実数値で、$\int f\,Hf=0$、$\mathcal{F}(f+iHf)=2\cdot\mathbf{1}_{(0,\infty)}\mathcal{F}f$（a.e.）であることを示せ。
+:::
+
+::: solution
+$L^{1}\cap L^{2}$ の上で $\widehat{\bar g}(\xi)=\overline{\hat g(-\xi)}$（\ref{four:transform-basic.4}）で、両辺は $g$ について $L^{2}$ で連続なので、$g\in L^{2}$ について $\mathcal{F}\bar g(\xi)=\overline{\mathcal{F}g(-\xi)}$。$f$ が実数値なら $\mathcal{F}f(-\xi)=\overline{\mathcal{F}f(\xi)}$。$m(-\xi)=-m(\xi)$, $\bar m=-m$ から
+$$
+\mathcal{F}\bigl(\overline{Hf}\bigr)(\xi)=\overline{m(-\xi)\mathcal{F}f(-\xi)}=\overline{m(-\xi)}\,\mathcal{F}f(\xi)=m(\xi)\mathcal{F}f(\xi)=\mathcal{F}(Hf)(\xi).
+$$
+$\mathcal{F}$ は単射なので $\overline{Hf}=Hf$。次に $\int f\,Hf=\langle Hf,f\rangle$（$f$ は実数値）で、\ref{four:ht-l2.2} から $\langle Hf,f\rangle=-\langle f,Hf\rangle=-\overline{\langle Hf,f\rangle}$。左辺は実数なので $0$。最後に $\mathcal{F}(f+iHf)=(1+im)\mathcal{F}f=(1+\operatorname{sgn}\xi)\mathcal{F}f$ で、これは $\xi>0$ で $2\mathcal{F}f$、$\xi<0$ で $0$（$\xi=0$ は零集合）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

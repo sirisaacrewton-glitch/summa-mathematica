@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>極大関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/03-real-variable/02-maximal-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 極大関数 {#four:page-maximal-functions keywords="maximal functions: L^p boundedness of the Hardy-Littlewood maximal function, failure of strong type (1,1), uncentered maximal function, maximal function over cubes, dyadic maximal function, maximal dyadic cubes, stopping time, radially decreasing integrable majorant, approximate identity, maximal principle for almost everywhere convergence, Poisson kernel of the upper half-space, Gauss kernel, heat kernel, Fejer means converge almost everywhere, Abel-Poisson means"}
+
+点 $x$ を中心とする球の上の $|f|$ の平均を、あらゆる半径について上から押さえた関数 $Mf$ を極大関数という（\ref{meas:maximal-function}）。測度論では、その弱 $(1,1)$ 評価（\ref{meas:maximal-inequality}）からルベーグの微分定理を導いた。このページでは、極大関数を調和解析の道具として整える。まず前のページの補間定理から $1<p\le\infty$ での $L^{p}$ 有界性を得て、$p=1$ では強い評価が成り立たないことを確かめる。次に、球の代わりに立方体や **2 進立方体**を使った変種を比べ、2 進極大関数の弱 $(1,1)$ 評価を「極大な 2 進立方体」への分解で直接示す。中心となる結果は、放射的に減少する可積分な優関数をもつ核 $K$ について、$\sup_{t>0}|K_{t}*f|$ が $Mf$ の定数倍で押さえられることである。これと「稠密な部分集合で収束すれば全体でほとんど至る所収束する」という**極大原理**を組み合わせると、総和核による平均が $f$ にほとんど至る所収束することが一度に得られる。ポアソン核・ガウス核と円周上の平均への応用は次のページで扱う。
+
+## 記法と定義の確認 {#four:sec-mf-notation}
+
+::: notation
+- $\lambda$ は $\mathbb{R}^{n}$ のルベーグ測度。$B(x,r)\defeq\{y:|y-x|<r\}$、$\omega_{n}\defeq\lambda(B(0,1))$、$\lambda(B(x,r))=\omega_{n}r^{n}$。閉球 $\bar B(x,r)$ の測度も $\omega_{n}r^{n}$（$\bar B(x,r)\subset B(x,r+\varepsilon)$ から）。
+- **極大関数**：$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ について $Mf(x)\defeq\sup_{r>0}\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}|f|$（\ref{meas:maximal-function}）。$\{Mf>\alpha\}$ は開集合。弱 $(1,1)$ 評価 $\lambda(\{Mf>\alpha\})\le\frac{3^{n}}{\alpha}\|f\|_{1}$ は \ref{meas:maximal-inequality}、ルベーグ点とルベーグの微分定理は \ref{meas:lebesgue-differentiation}。
+- 分布関数・弱 $L^{p}$・劣線形作用素・弱型と強型は \ref{four:weak-lp}、層の公式は \ref{four:layer-cake}、補間定理は \ref{four:marcinkiewicz}。
+- **拡大縮小**：$K\in L^{1}(\mathbb{R}^{n})$, $t>0$ について $K_{t}(x)\defeq t^{-n}K(x/t)$。$\int K_{t}=\int K$、$\|K_{t}\|_{1}=\|K\|_{1}$（\ref{meas:lebesgue-linear}）。フーリエ変換のページでは次元を $d$ と書いたが、ここでは $n$ と書く。畳み込みは \ref{four:convolution-rd}、実数空間上の総和核は \ref{four:approximate-identity-rd}。
+- 円周 $\mathbb{T}=\mathbb{R}/\mathbb{Z}$、$|x|_{\mathbb{T}}$、$L^{p}(\mathbb{T})$、円周上の畳み込み、総和核、フェイェール核 $F_{N}$ とチェザロ平均 $\sigma_{N}f=F_{N}*f$ は \ref{four:page-coefficients-convolution}、\ref{four:fejer-kernel}, \ref{four:kernel-formulas} のとおり。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。2 進立方体の族は可算で具体的に並べられるので、選び出しに選択は要らない。
+:::
+
+## 極大関数の Lᵖ 有界性 {#four:sec-mf-lp}
+
+::: theorem 極大関数の Lᵖ 有界性 {#four:maximal-lp keywords="Hardy-Littlewood maximal theorem: M is bounded on L^p(R^n) for 1 < p <= infinity, ||Mf||_p <= 2 (3^n p/(p-1))^{1/p} ||f||_p; M is of weak type (1,1)" index="極大定理|きょくだいていり, ハーディ–リトルウッドの極大定理|はーでぃりとるうっどのきょくだいていり"}
+$1<p\le\infty$, $f\in L^{p}(\mathbb{R}^{n})$ なら $Mf\in L^{p}$ で
+$$
+\|Mf\|_{p}\le A_{p}\|f\|_{p},\qquad A_{p}\defeq2\Bigl(\frac{3^{n}p}{p-1}\Bigr)^{1/p}\quad(p<\infty),\qquad A_{\infty}\defeq1.
+$$
+とくに $Mf<\infty$ がほとんど至る所で成り立つ。
+:::
+
+::: intuition
+$L^{p}$（$p>1$）の関数なら、各点で「まわりの平均の最大値」をとっても $L^{p}$ からはみ出さない。$p$ が $1$ に近づくと定数は大きくなり、$p=1$ では本当に破綻する（次の命題）。
+:::
+
+::: proof
+**Step 1.** 【主張：$M$ は $L^{1}+L^{\infty}$ 上の劣線形作用素である】 $L^{1}+L^{\infty}\subset L^{1}_{\mathrm{loc}}$ なので $Mf$ は定義され、\ref{meas:maximal-function} からボレル可測。各球 $B$ で $\int_{B}|f+g|\le\int_{B}|f|+\int_{B}|g|$ なので、両辺を $\lambda(B)$ で割って上限をとると $M(f+g)\le Mf+Mg$（すべての点で）。$M(cf)=|c|Mf$ は定義から。これが \ref{four:weak-lp.3} の劣線形性である。
+
+**Step 2.** 【主張：$M$ は弱 $(1,1)$ 型（定数 $3^{n}$）かつ強 $(\infty,\infty)$ 型（定数 $1$）】 \ref{meas:maximal-inequality} から $\sup_{\alpha>0}\alpha\lambda(\{Mf>\alpha\})\le3^{n}\|f\|_{1}$、すなわち $[Mf]_{1}\le3^{n}\|f\|_{1}$。$f\in L^{\infty}$ なら $|f|\le\|f\|_{\infty}$（a.e.）なので、どの球でも平均は $\|f\|_{\infty}$ 以下で、$\|Mf\|_{\infty}\le\|f\|_{\infty}$。これで $p=\infty$ の主張も示された。
+
+**Step 3.** 【主張：$1<p<\infty$ で $\|Mf\|_{p}^{p}\le\frac{2^{p}3^{n}p}{p-1}\|f\|_{p}^{p}$】 \ref{four:marcinkiewicz} を $p_{0}=1$, $p_{1}=\infty$, $A_{0}=3^{n}$, $A_{1}=1$ で使う。その証明の場合 $p_{1}=\infty$ の計算から、定数は
+$$
+\frac{p(2A_{0})^{p_{0}}(2A_{1})^{p-p_{0}}}{p-p_{0}}=\frac{p\cdot2\cdot3^{n}\cdot2^{p-1}}{p-1}=\frac{2^{p}3^{n}p}{p-1}.
+$$
+$p$ 乗根をとると $A_{p}$ になる。$Mf\in L^{p}$ から $(Mf)^{p}$ は可積分で、\ref{meas:markov.3} から $Mf<\infty$（a.e.）。
+
+::: hypcheck
+- **$p>1$**：Step 3 で \ref{four:marcinkiewicz} の $p_{0}<p$ として使い、定数の分母 $p-1$ に現れる。$p=1$ では結論が偽（\ref{four:maximal-not-l1}）。
+- **劣線形性**は Step 1 で示し、補間定理の前提として使った。$M$ は線形でないので、\ref{four:riesz-thorin} は使えない。
+- 端点の評価のうち $L^{\infty}$ 側は自明で、本当の情報は弱 $(1,1)$ 評価（ヴィタリの被覆補題）にある。
+:::
+:::
+
+::: proposition 極大関数は可積分でない {#four:maximal-not-l1 keywords="M is not of strong type (1,1): if f in L^1 is not zero a.e. then Mf(x) >= c |x|^{-n} for large |x| and Mf is not integrable; example f = indicator of a ball" index="強 (1,1) 型の不成立|きょういちいちがたのふせいりつ"}
+$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ がほとんど至る所 $0$ ではないとする。$R>0$ を $a\defeq\int_{B(0,R)}|f|>0$ となるようにとると、$|x|\ge R$ で $Mf(x)\ge\frac{a}{2^{n}\omega_{n}}|x|^{-n}$ であり、$\int_{\mathbb{R}^{n}}Mf=\infty$。とくに $f=\mathbf{1}_{B(0,1)}\in L^{1}$ について $Mf\notin L^{1}$ で、$M$ は強 $(1,1)$ 型ではない。
+:::
+
+::: proof
+**Step 1.** 【主張：そのような $R$ がある】 $\int_{B(0,k)}|f|$ は $k$ について増加し、\ref{meas:monotone-convergence} から $\int|f|$（$+\infty$ もありうる）に収束する。$f$ はほとんど至る所 $0$ ではないので \ref{meas:markov.2} から $\int|f|>0$、よってある $k$ で $\int_{B(0,k)}|f|>0$。
+
+**Step 2.** 【主張：$|x|\ge R$ で $Mf(x)\ge\frac{a}{2^{n}\omega_{n}}|x|^{-n}$】 $y\in B(0,R)$ なら $|y-x|\le|y|+|x|<R+|x|$ なので $B(0,R)\subset B(x,|x|+R)$。よって
+$$
+Mf(x)\ge\frac{1}{\omega_{n}(|x|+R)^{n}}\int_{B(x,|x|+R)}|f|\ge\frac{a}{\omega_{n}(|x|+R)^{n}}\ge\frac{a}{\omega_{n}(2|x|)^{n}}.
+$$
+
+**Step 3.** 【主張：$\int_{\{|x|\ge R\}}|x|^{-n}dx=\infty$】 $k\ge0$ について $S_{k}\defeq\{2^{k}R\le|x|<2^{k+1}R\}$ の上では $|x|^{-n}>(2^{k+1}R)^{-n}$ で、$\lambda(S_{k})=\omega_{n}R^{n}(2^{(k+1)n}-2^{kn})$。よって
+$$
+\int_{S_{k}}|x|^{-n}dx\ge\frac{\omega_{n}R^{n}(2^{(k+1)n}-2^{kn})}{2^{(k+1)n}R^{n}}=\omega_{n}(1-2^{-n}).
+$$
+$S_{k}$ は互いに素で、和は $k$ について発散する。Step 2 と合わせて $\int Mf=\infty$。$f=\mathbf{1}_{B(0,1)}$ なら $\|f\|_{1}=\omega_{n}<\infty$ なので、$\|Mf\|_{1}\le C\|f\|_{1}$ となる定数 $C$ はない。
+:::
+
+::: supplement
+**前提を変えると.**
+- 上の命題は「大きな $|x|$ で $Mf$ が $|x|^{-n}$ のように減る」ことによる大域的な障害である。局所的にも障害がある：$f$ の台が球 $B$ に含まれるとき、$Mf$ が $B$ 上可積分であることと $\int_{B}|f|\log(e+|f|)<\infty$（$f\in L\log L(B)$）が同値であることが知られている（スタインによる。証明はここでは扱わない）。
+- 弱 $(1,1)$ の定数 $3^{n}$ は最良ではない。$n=1$ では中心化しない極大関数（\ref{four:maximal-variants.1}）の最良定数は $2$、中心化した $M$ の最良定数は $\frac{11+\sqrt{61}}{12}$ であることが知られている（後者はメラスによる）。問題 \ref{four:prob-mf-indicator} から、$n=1$ で $M$ の定数は $1$ より小さくできない。
+- $p>1$ の $L^{p}$ 評価の定数は、球を使う限り次元 $n$ によらずにとれることが知られている（スタインによる）。上の $A_{p}$ は $3^{n/p}$ を含み、次元とともに増える。
+
+**似た定理.** \ref{four:maximal-lp} の証明は、弱 $(1,1)$ 評価と $L^{\infty}$ 評価だけを使っている。同じ二つが言える作用素（次節の 2 進極大関数や、後で扱う特異積分の一部）は、同じ議論で $1<p<\infty$ の $L^{p}$ で有界になる。
+:::
+
+## 極大関数の変種 {#four:sec-mf-variants}
+
+::: definition 中心化しない極大関数・立方体の極大関数・2 進極大関数 {#four:maximal-variants keywords="uncentered maximal function over balls containing x; maximal function over cubes containing x; dyadic cubes 2^{-k}([0,1)^n + m); dyadic maximal function" index="中心化しない極大関数|ちゅうしんかしないきょくだいかんすう, 立方体の極大関数|りっぽうたいのきょくだいかんすう, 2 進立方体|にしんりっぽうたい, 2 進極大関数|にしんきょくだいかんすう"}
+$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ とする。可測集合 $E$（$0<\lambda(E)<\infty$）について $\langle f\rangle_{E}\defeq\frac{1}{\lambda(E)}\int_{E}|f|$ と書く。
+1. **中心化しない極大関数**：$\widetilde{M}f(x)\defeq\sup\{\langle f\rangle_{B}:B\text{ は }x\text{ を含む開球}\}$。
+2. **立方体**とは $Q=\prod_{i=1}^{n}[a_{i},a_{i}+\ell)$（$\ell>0$ を辺の長さという）の形の集合のこと。**立方体の極大関数**：$M_{\square}f(x)\defeq\sup\{\langle f\rangle_{Q}:Q\text{ は }x\text{ を含む立方体}\}$。
+3. $k\in\mathbb{Z}$ について $\mathcal{D}_{k}\defeq\{2^{-k}([0,1)^{n}+m):m\in\mathbb{Z}^{n}\}$ の元を**第 $k$ 世代の 2 進立方体**、$\mathcal{D}\defeq\bigcup_{k}\mathcal{D}_{k}$ とする。**2 進極大関数**：$M_{d}f(x)\defeq\sup\{\langle f\rangle_{Q}:Q\in\mathcal{D},\ x\in Q\}$。
+:::
+
+::: intuition
+どれも「$x$ を含む図形の上の平均の最大値」で、違いは図形の選び方だけである。2 進立方体は、どの二つも「入れ子か交わらないか」になるという特別な性質をもち、被覆補題なしで扱える。
+:::
+
+::: proposition 極大関数の比較 {#four:maximal-comparison keywords="pointwise comparison: Mf <= uncentered <= 2^n Mf; Mf <= (2^n/omega_n) M_cube f; M_dyadic f <= M_cube f <= n^{n/2} omega_n Mf; dyadic cubes are nested or disjoint; no pointwise reverse inequality for the dyadic maximal function" index="極大関数の比較|きょくだいかんすうのひかく"}
+$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ とする。
+1. $Mf\le\widetilde{M}f\le2^{n}Mf$。
+2. $Mf\le\frac{2^{n}}{\omega_{n}}M_{\square}f$、$M_{\square}f\le n^{n/2}\omega_{n}Mf$。
+3. $M_{d}f\le M_{\square}f$。
+4. 二つの 2 進立方体は、一方が他方を含むか、互いに素である。各 $k$ について $\mathcal{D}_{k}$ の元は互いに素で、和は $\mathbb{R}^{n}$。
+5. $M_{d}f\ge cMf$ となる定数 $c>0$ はない。
+:::
+
+::: proof
+**1.** $B(x,r)$ は $x$ を含むので $Mf\le\widetilde{M}f$。$x\in B(z,r)$ なら、$y\in B(z,r)$ について $|y-x|\le|y-z|+|z-x|<2r$ なので $B(z,r)\subset B(x,2r)$、よって $\langle f\rangle_{B(z,r)}\le\frac{\lambda(B(x,2r))}{\lambda(B(z,r))}\langle f\rangle_{B(x,2r)}=2^{n}\langle f\rangle_{B(x,2r)}\le2^{n}Mf(x)$。
+
+**2.** $|y_{i}-x_{i}|\le|y-x|$ なので $B(x,r)\subset Q\defeq\prod_{i}[x_{i}-r,x_{i}+r)$ で、$Q$ は $x$ を含む辺 $2r$ の立方体。$\langle f\rangle_{B(x,r)}\le\frac{(2r)^{n}}{\omega_{n}r^{n}}\langle f\rangle_{Q}\le\frac{2^{n}}{\omega_{n}}M_{\square}f(x)$。逆に $Q$ を $x$ を含む辺 $\ell$ の立方体とすると、$y\in Q$ について $|y_{i}-x_{i}|<\ell$ なので $|y-x|<\sqrt n\,\ell$、$Q\subset B(x,\sqrt n\,\ell)$。よって $\langle f\rangle_{Q}\le\frac{\omega_{n}n^{n/2}\ell^{n}}{\ell^{n}}\langle f\rangle_{B(x,\sqrt n\ell)}\le n^{n/2}\omega_{n}Mf(x)$。
+
+**3.** 2 進立方体は立方体である。
+
+**4.** 1 次元の区間で示せば、座標ごとに考えて立方体についても従う。$\mathcal{D}_{k}$ の区間 $[m2^{-k},(m+1)2^{-k})$ たちが互いに素で $\mathbb{R}$ を覆うのは、各 $x$ について $m=\lfloor2^{k}x\rfloor$ がただ一つ決まるから。$j\ge k$ と $I'=[m'2^{-j},(m'+1)2^{-j})$ について $m\defeq\lfloor m'2^{k-j}\rfloor$ とおくと $m2^{-k}\le m'2^{-j}$。また $m'2^{k-j}<m+1$ で、両辺は $2^{k-j}$ の整数倍（$m+1$ は整数で、$2^{j-k}$ は整数なので整数は $2^{k-j}$ の整数倍）だから $m'2^{k-j}+2^{k-j}\le m+1$、すなわち $(m'+1)2^{-j}\le(m+1)2^{-k}$。よって $I'\subset I\defeq[m2^{-k},(m+1)2^{-k})$。$\mathcal{D}_{k}$ の他の区間は $I$ と交わらないので $I'$ とも交わらない。
+
+**5.** $n=1$, $f=\mathbf{1}_{[0,1)}$ とする。$x<0$ を含む 2 進区間 $[m2^{-k},(m+1)2^{-k})$ では $m2^{-k}\le x<0$ から $m\le-1$、よって右端 $(m+1)2^{-k}\le0$ で、区間は $[0,1)$ と交わらない。したがって $M_{d}f(x)=0$。一方 $Mf(x)\ge\frac{1}{2(|x|+1)}\cdot1>0$（$B(x,|x|+1)\supset[0,1)$）。$n$ 次元でも $f=\mathbf{1}_{[0,1)^{n}}$ と $x_{1}<0$ の点で同じ。
+:::
+
+::: theorem 2 進極大関数の弱 (1,1) 評価 {#four:dyadic-maximal keywords="dyadic maximal function is of weak type (1,1) with constant 1: {M_d f > alpha} is the disjoint union of the maximal dyadic cubes Q_j with average of |f| > alpha; alpha < average over Q_j <= 2^n alpha; |f| <= alpha a.e. outside; stopping time argument" index="2 進極大関数の弱型評価|にしんきょくだいかんすうのじゃくがたひょうか, 極大 2 進立方体|きょくだいにしんりっぽうたい, 停止時刻|ていしじこく"}
+$f\in L^{1}(\mathbb{R}^{n})$, $\alpha>0$ とし、$\Omega_{\alpha}\defeq\{M_{d}f>\alpha\}$ とおく。
+1. $\Omega_{\alpha}$ は、$\langle f\rangle_{Q}>\alpha$ となる 2 進立方体 $Q$ のうち包含関係について極大なもの $Q_{1},Q_{2},\dots$（有限個または可算個）の互いに素な和である。
+2. $\lambda(\Omega_{\alpha})\le\frac{1}{\alpha}\|f\|_{1}$。
+3. 各 $j$ について $\alpha<\langle f\rangle_{Q_{j}}\le2^{n}\alpha$。
+4. ほとんどすべての $x\notin\Omega_{\alpha}$ で $|f(x)|\le\alpha$。
+:::
+
+::: intuition
+平均が $\alpha$ を超える 2 進立方体を、大きい方から見て最初に超えたところで止めて集めると、それらは互いに重ならず、測度の合計は $\frac1\alpha\|f\|_{1}$ 以下になる。止めた立方体の上の平均は $\alpha$ の $2^{n}$ 倍を超えず、その外では $|f|\le\alpha$。
+:::
+
+::: proof
+$\langle f\rangle_{Q}>\alpha$ となる $Q\in\mathcal{D}$ を**重い**立方体と呼ぶ。
+
+**Step 1.** 【主張：重い立方体 $Q$ は $\lambda(Q)<\frac1\alpha\|f\|_{1}$ を満たす】 $\alpha\lambda(Q)<\int_{Q}|f|\le\|f\|_{1}$。
+
+**Step 2.** 【主張：重い立方体は、ただ一つの極大な重い立方体に含まれる】 $Q\in\mathcal{D}_{k}$ とし、$j\ge0$ について $Q^{(j)}$ を $Q$ を含む $\mathcal{D}_{k-j}$ の元とする（\ref{four:maximal-comparison.4} からただ一つ）。$Q$ を含む 2 進立方体はこれらで尽きる（世代 $k$ 以下のものに限られ、各世代で一つ）。$\lambda(Q^{(j)})=2^{jn}\lambda(Q)$ なので、Step 1 から重い $Q^{(j)}$ の $j$ は有界で、重いもののうち $j$ が最大のもの $\widehat Q$ がある。$\widehat Q$ を真に含む重い立方体は $Q^{(j')}$（$j'$ はより大きい）の形なので存在せず、$\widehat Q$ は極大。二つの極大な重い立方体が交われば \ref{four:maximal-comparison.4} から一方が他方を含み、極大性から等しい。
+
+**Step 3.** 【主張：1 と 2】 $x\in\Omega_{\alpha}$ $\iff$ $x$ を含む重い立方体がある $\iff$（Step 2）$x$ を含む極大な重い立方体がある。極大な重い立方体は Step 2 から互いに素で、$\mathcal{D}$ は可算なので高々可算個。これを $Q_{1},Q_{2},\dots$ と並べる（$\mathcal{D}$ の具体的な番号付けの順に。選択は要らない）。$\Omega_{\alpha}$ は可測で、
+$$
+\lambda(\Omega_{\alpha})=\sum_{j}\lambda(Q_{j})<\sum_{j}\frac{1}{\alpha}\int_{Q_{j}}|f|\le\frac{1}{\alpha}\|f\|_{1}
+$$
+（$\Omega_{\alpha}=\varnothing$ なら両辺 $0$ で、等号を含めて成り立つ）。最後の不等号で $Q_{j}$ が互いに素であることを使った。
+
+**Step 4.** 【主張：3】 $Q_{j}$ は重いので $\langle f\rangle_{Q_{j}}>\alpha$。$Q_{j}$ を含む一つ上の世代の立方体 $Q_{j}^{(1)}$ は、$Q_{j}$ の極大性から重くない。$\lambda(Q_{j}^{(1)})=2^{n}\lambda(Q_{j})$ なので
+$$
+\int_{Q_{j}}|f|\le\int_{Q_{j}^{(1)}}|f|\le\alpha\lambda(Q_{j}^{(1)})=2^{n}\alpha\lambda(Q_{j}).
+$$
+
+**Step 5.** 【主張：4】 $x\notin\Omega_{\alpha}$ を $f$ のルベーグ点とする（\ref{meas:lebesgue-differentiation} から、そうでない $x$ は零集合）。$Q_{k}(x)$ を $x$ を含む $\mathcal{D}_{k}$ の元とすると、\ref{four:maximal-comparison} の 2 の証明と同じく $Q_{k}(x)\subset B(x,\sqrt n\,2^{-k})$ なので
+$$
+\bigl|\langle f\rangle_{Q_{k}(x)}-|f(x)|\bigr|\le\frac{1}{\lambda(Q_{k}(x))}\int_{Q_{k}(x)}|f(y)-f(x)|\,dy\le\frac{n^{n/2}\omega_{n}}{\lambda(B_{k})}\int_{B_{k}}|f(y)-f(x)|\,dy\to0
+$$
+（$B_{k}\defeq B(x,\sqrt n\,2^{-k})$、$k\to\infty$）。$x\notin\Omega_{\alpha}$ なので $\langle f\rangle_{Q_{k}(x)}\le\alpha$ で、極限をとって $|f(x)|\le\alpha$。
+
+::: hypcheck
+- **$f\in L^{1}$**：Step 1 で重い立方体の大きさを抑えるのに使った。これがないと極大な重い立方体が存在しないことがある（$f\equiv1$, $\alpha<1$ ならすべての立方体が重い）。
+- **2 進であること**：Step 2・3 で「入れ子か互いに素」（\ref{four:maximal-comparison.4}）を使い、被覆補題なしで互いに素な族を得た。一般の立方体や球ではこの性質がなく、ヴィタリの被覆補題で定数 $3^{n}$ を払う。
+- Step 4 の上からの評価は、親の立方体の測度が $2^{n}$ 倍であることだけを使う。
+- 選択公理は使っていない：$\mathcal{D}$ は $\mathbb{Z}\times\mathbb{Z}^{n}$ で添字づけられる可算集合で、極大な立方体は条件で一意に決まる。
+:::
+:::
+
+::: supplement
+**一般化と関連.**
+- \ref{four:dyadic-maximal.2} と $\|M_{d}f\|_{\infty}\le\|f\|_{\infty}$ に \ref{four:marcinkiewicz} を使うと、$1<p<\infty$ で $\|M_{d}f\|_{p}\le2(\frac{p}{p-1})^{1/p}\|f\|_{p}$。確率論の言葉では、$\mathcal{D}_{k}$ が生成する σ 加法族についての条件付き期待値の列はマルチンゲールで、$M_{d}f$ はその最大値である。この見方からはドゥーブの不等式 $\|M_{d}f\|_{p}\le\frac{p}{p-1}\|f\|_{p}$ が得られることが知られている。
+- \ref{four:maximal-comparison.5} のとおり、$M_{d}f$ は $Mf$ を各点では押さえない。しかし、適当にずらした有限個の 2 進格子を合わせると、任意の球はどれかの格子の立方体で大きさが比較できるものに含まれることが知られており（「$\frac13$ ずらしの技法」）、これを使えば $Mf$ は有限個の「ずらした 2 進極大関数」の和で押さえられる。
+- \ref{four:dyadic-maximal} の分解（$\Omega_{\alpha}$ の外では $|f|\le\alpha$、各 $Q_{j}$ の上では平均が $\alpha$ と $2^{n}\alpha$ の間）は、$f$ を「良い部分」と「悪い部分」に分ける**カルデロン–ジグムント分解**の出発点になる。
+:::
+
+## 総和核の極大関数による評価 {#four:sec-mf-kernels}
+
+::: definition 放射的に減少する可積分な優関数 {#four:radial-majorant keywords="radially decreasing integrable majorant: |K(x)| <= phi(x) = psi(|x|) with psi nonincreasing on [0, infinity) and phi integrable" index="放射的に減少する優関数|ほうしゃてきにげんしょうするゆうかんすう, 優関数（核）|ゆうかんすうかく"}
+$\mathbb{R}^{n}$ 上の関数 $\varphi$ が**放射的に減少する**とは、非増加な $\psi\colon[0,\infty)\to[0,\infty)$ によって $\varphi(x)=\psi(|x|)$ と書けることをいう（$\psi$ は単調なのでボレル可測、したがって $\varphi$ もボレル可測）。可測関数 $K$ について、放射的に減少する可積分な $\varphi$ で $|K|\le\varphi$（a.e.）となるものを、$K$ の**放射的に減少する可積分な優関数**という。
+:::
+
+::: intuition
+核の絶対値を、原点から離れるにつれて減っていく山形の可積分な関数で上から押さえられる、という条件である。このとき $\varphi_{t}$ も同じ形の山で、総量 $\|\varphi_{t}\|_{1}=\|\varphi\|_{1}$ は $t$ によらない。
+:::
+
+::: theorem 総和核の極大関数による評価 {#four:majorant-bound keywords="if |K| <= phi with phi radially decreasing and integrable, then for f locally integrable, every x and t > 0: int |K_t(x-y)| |f(y)| dy <= ||phi||_1 Mf(x); hence sup_t |K_t * f| <= ||phi||_1 Mf; proof by the layer cake decomposition of phi into indicators of balls" index="総和核の極大評価|そうわかくのきょくだいひょうか"}
+$K$ が放射的に減少する可積分な優関数 $\varphi$ をもつとする。$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ と、すべての $x\in\mathbb{R}^{n}$, $t>0$ について
+$$
+\int|K_{t}(x-y)|\,|f(y)|\,dy\le\|\varphi\|_{1}Mf(x)
+$$
+（右辺は $[0,\infty]$ の積で $0\cdot\infty=0$）。とくに $Mf(x)<\infty$ なら、すべての $t>0$ で $(K_{t}*f)(x)$ の積分は絶対収束し、$\sup_{t>0}|(K_{t}*f)(x)|\le\|\varphi\|_{1}Mf(x)$。
+:::
+
+::: intuition
+山形の重みでぼかした平均は、球の上の平均（$Mf$）を重みの量だけ混ぜ合わせたものにすぎないので、$Mf$ の $\|\varphi\|_{1}$ 倍を超えない。ぼかしの幅 $t$ をどう選んでもこの評価は変わらない。
+:::
+
+::: proof
+$x$ を固定し、$F(y)\defeq|f(x-y)|$ とおく。置き換え $y\mapsto x-y$（\ref{meas:lebesgue-linear} を $-I$ に使い、平行移動 \ref{meas:translation-continuity.1}）から左辺は $\int|K_{t}(y)|F(y)\,dy$ で、$|K_{t}|\le\varphi_{t}$（a.e.）なので、$\int\varphi_{t}F\le\|\varphi\|_{1}Mf(x)$ を示せばよい。$\varphi_{t}(y)=t^{-n}\psi(|y|/t)$ も放射的に減少し、$\|\varphi_{t}\|_{1}=\|\varphi\|_{1}$ なので、$\Phi\defeq\varphi_{t}$, $\Psi(r)\defeq t^{-n}\psi(r/t)$ と書く。
+
+**Step 1.** 【主張：$s>0$ について $E_{s}\defeq\{y:\Phi(y)>s\}$ は、原点を中心とする半径 $\rho(s)<\infty$ の開球か閉球で、$\lambda(E_{s})=\omega_{n}\rho(s)^{n}$】 $y\in E_{s}$, $|y'|\le|y|$ なら $\Psi(|y'|)\ge\Psi(|y|)>s$ なので $y'\in E_{s}$（ここで $\Psi$ の非増加性を使う）。よって $\rho(s)\defeq\sup\{|y|:y\in E_{s}\}$（$E_{s}=\varnothing$ なら $0$）について $B(0,\rho(s))\subset E_{s}\subset\bar B(0,\rho(s))$。\ref{meas:markov.1} から $\lambda(E_{s})\le\frac1s\|\Phi\|_{1}<\infty$ なので $\rho(s)<\infty$（$\Phi$ の可積分性を使う）。開球と閉球の測度はともに $\omega_{n}\rho(s)^{n}$。
+
+**Step 2.** 【主張：$\int_{E_{s}}F\le\lambda(E_{s})Mf(x)$】 $\rho\defeq\rho(s)$ とする。$\rho=0$ なら $E_{s}\subset\{0\}$ で両辺 $0$。$\rho>0$ なら、任意の $\varepsilon>0$ について $E_{s}\subset B(0,\rho+\varepsilon)$ なので
+$$
+\int_{E_{s}}F\le\int_{B(0,\rho+\varepsilon)}|f(x-y)|\,dy=\int_{B(x,\rho+\varepsilon)}|f|\le\omega_{n}(\rho+\varepsilon)^{n}Mf(x).
+$$
+$\varepsilon\to0$ とすればよい。
+
+**Step 3.** 【主張：$\int\Phi F\le\|\Phi\|_{1}Mf(x)$】 $\Phi(y)=\int_{0}^{\infty}\mathbf{1}_{\{s<\Phi(y)\}}\,ds$ で、$(y,s)\mapsto\mathbf{1}_{\{s<\Phi(y)\}}F(y)$ は積の σ 加法族について可測（\ref{four:layer-cake} の証明と同じ）。\ref{meas:tonelli}、Step 2、\ref{four:layer-cake.1}（$p=1$）の順に使うと
+$$
+\int\Phi F\,dy=\int_{0}^{\infty}\int_{E_{s}}F\,dy\,ds\le Mf(x)\int_{0}^{\infty}\lambda(E_{s})\,ds=\|\Phi\|_{1}Mf(x).
+$$
+$\|\Phi\|_{1}=\|\varphi\|_{1}$ なので主張が従う。後半は $|(K_{t}*f)(x)|\le\int|K_{t}(x-y)||f(y)|dy$ から。
+
+::: hypcheck
+- **放射性と非増加性**：Step 1 で、上位集合 $E_{s}$ が原点中心の球になることに使った。これで $\Phi$ は「球の指示関数 $\mathbf{1}_{E_{s}}$ を $s$ について重ね合わせたもの」になり、Step 2 で各球の上の平均を $Mf(x)$ で押さえられる。
+- **可積分性**：Step 1 で $\rho(s)<\infty$ に、Step 3 で右辺の定数に使った。
+- $K$ 自身の可積分性・符号・$\int K$ の値は使っていない。$|K|\le\varphi$ だけを使う。
+- 定数 $\|\varphi\|_{1}$ は最良：$K=\varphi$, $f\equiv1$ なら両辺とも $\|\varphi\|_{1}$。
+:::
+:::
+
+::: example 典型的な核 {#four:majorant-examples keywords="examples of kernels with radially decreasing integrable majorants: normalized indicator of the unit ball, Gauss kernel, Poisson kernel, bounded compactly supported kernels; a non-example" index=""}
+1. $K=\frac{1}{\omega_{n}}\mathbf{1}_{B(0,1)}$ なら $(K_{t}*f)(x)=\frac{1}{\lambda(B(x,t))}\int_{B(x,t)}f$ で、$\sup_{t}|K_{t}*f|\le Mf$ は定義そのもの。
+2. ガウス関数 $G(x)=e^{-\pi|x|^{2}}$ は放射的に減少し、$\int G=1$（\ref{four:gaussian-transform} で $\xi=0$）。$G_{t}=W_{t}$ はガウス核で、$\sup_{t}|W_{t}*f|\le Mf$。
+3. 次節のポアソン核 $P$ も放射的に減少し、$\int P=1$。
+4. $K$ が有界で台が $\bar B(0,R)$ に含まれるなら、$\varphi\defeq\|K\|_{\infty}\mathbf{1}_{\bar B(0,R)}$ が優関数で、$\|\varphi\|_{1}=\|K\|_{\infty}\omega_{n}R^{n}$。
+5. （当てはまらない例）$n=1$, $K\defeq\sum_{k\ge1}\mathbf{1}_{[k,k+k^{-2})}$ は可積分（$\int K=\sum k^{-2}$）だが、放射的に減少する優関数は $[0,k]$ 上で $1$ 以上（各 $k$）、すなわち至る所 $1$ 以上になり、可積分でない。
+:::
+
+## ほとんど至る所の収束 {#four:sec-mf-ae}
+
+::: lemma ほとんど至る所の収束の極大原理 {#four:maximal-principle keywords="maximal principle for almost everywhere convergence: if T_t g -> g a.e. for g in a dense class and the maximal operator sup_t |T_t f| is controlled by a function of weak type (p,p), then T_t f -> f a.e. for all f in L^p" index="極大原理（概収束）|きょくだいげんりがいしゅうそく, 概収束の極大原理|がいしゅうそくのきょくだいげんり"}
+$X$ を $\mathbb{R}^{n}$ または $[0,1)$（$\mathbb{T}$ と同一視）とし、$\mu$ をその上のルベーグ測度、$1\le p<\infty$、$I\subset(0,\infty)$ を $0$ を集積点にもつ集合とする。各 $f\in L^{p}(X)$ に零集合 $N_{f}$ と、$X\setminus N_{f}$ 上の複素数値関数 $T_{t}f$（$t\in I$）が対応していて、次を満たすとする。
+1. $f,g\in L^{p}$ について、$X\setminus(N_{f}\cup N_{g}\cup N_{f-g})$ 上で、すべての $t\in I$ について $T_{t}(f-g)=T_{t}f-T_{t}g$。
+2. 定数 $A$ があり、各 $h\in L^{p}$ に可測関数 $Sh\colon X\to[0,\infty]$ で、$X\setminus N_{h}$ 上 $\sup_{t\in I}|T_{t}h|\le Sh$、かつすべての $\alpha>0$ で $\mu(\{Sh>\alpha\})\le\bigl(\frac{A\|h\|_{p}}{\alpha}\bigr)^{p}$ となるものがある。
+3. 定数 $c\in\mathbb{C}$ と $L^{p}$ で稠密な部分集合 $D$ があり、$g\in D$ ならほとんどすべての $x$ で $T_{t}g(x)\to cg(x)$（$t\to0$, $t\in I$）。
+
+このとき、すべての $f\in L^{p}$ について、ほとんどすべての $x$ で $T_{t}f(x)\to cf(x)$（$t\to0$, $t\in I$）。
+:::
+
+::: intuition
+収束を示したい作用素の族が無数にあっても、それらの上限を一つの関数で弱型に押さえられれば、扱いやすい関数（連続関数など）で収束を確かめるだけで、すべての関数でほとんど至る所の収束が得られる。
+:::
+
+::: proof
+$f\in L^{p}$ を固定し、$x\in X\setminus N_{f}$ について $\Omega f(x)\defeq\limsup_{t\to0,\,t\in I}|T_{t}f(x)-cf(x)|\in[0,\infty]$ とおく。$\mu^{*}$ はルベーグ外測度。
+
+**Step 1.** 【主張：$g\in D$ について、ある零集合 $Z_{g}$ の外で $\Omega f\le S(f-g)+|c||f-g|$】 $Z_{g}$ を $N_{f}\cup N_{g}\cup N_{f-g}$ と、$T_{t}g\to cg$ が成り立たない点の集合（前提 3 から零集合）の和とする。$x\notin Z_{g}$ なら前提 1 から
+$$
+T_{t}f(x)-cf(x)=\bigl(T_{t}(f-g)(x)-c(f-g)(x)\bigr)+\bigl(T_{t}g(x)-cg(x)\bigr).
+$$
+第 1 項の絶対値は前提 2 から $S(f-g)(x)+|c||(f-g)(x)|$ 以下、第 2 項は $t\to0$ で $0$ に収束する。上極限をとればよい。
+
+**Step 2.** 【主張：$\alpha>0$ について $E_{\alpha}\defeq\{x\in X\setminus N_{f}:\Omega f(x)>2\alpha\}$ は外測度 $0$】 Step 1 から $E_{\alpha}\subset Z_{g}\cup\{S(f-g)>\alpha\}\cup\{|c||f-g|>\alpha\}$ で、右辺は可測。$\{|c||f-g|>\alpha\}\subset\{|c|^{p}|f-g|^{p}\ge\alpha^{p}\}$ と \ref{meas:markov.1}、前提 2 から
+$$
+\mu^{*}(E_{\alpha})\le\Bigl(\frac{A\|f-g\|_{p}}{\alpha}\Bigr)^{p}+\frac{|c|^{p}\|f-g\|_{p}^{p}}{\alpha^{p}}=\frac{(A^{p}+|c|^{p})\|f-g\|_{p}^{p}}{\alpha^{p}}.
+$$
+$D$ は稠密なので右辺はいくらでも小さくでき（前提 3）、$\mu^{*}(E_{\alpha})=0$。
+
+**Step 3.** 【主張：$\Omega f=0$（a.e.）】 外測度 $0$ の集合はルベーグ可測な零集合（ルベーグ測度は完備）。$\{\Omega f>0\}\subset N_{f}\cup\bigcup_{k\ge1}E_{1/k}$ は可算個の零集合の和に含まれる。$\Omega f(x)=0$ は $T_{t}f(x)\to cf(x)$ と同じ。
+
+::: hypcheck
+- **前提 2（弱型の極大評価）**：Step 2 で例外集合の測度を $\|f-g\|_{p}$ で押さえるのに使った。上限 $\sup_{t}|T_{t}h|$ そのものの可測性は仮定せず、可測な $Sh$ で上から押さえることにした（$t$ が非可算個あるため）。
+- **前提 3**：Step 1 で第 2 項を消すのに、稠密性は Step 2 で使った。
+- **$p<\infty$**：稠密性とマルコフの不等式の形に使った。$L^{\infty}$ では有界連続関数の族さえ稠密でないので、この補題は直接は使えない（定理では局所化で $L^{1}$ に帰着させる）。
+- **完備性**：Step 3 で外測度 $0$ の集合を可測にするのに使った。一般の完備な測度空間でも同じ議論が通るが、$\mu^{*}(E)=0$ から $E$ を含む零集合を作るところで可算個の集合を選ぶ（可算選択）。ルベーグ測度では外測度 $0$ の集合がそのまま可測なので、選択は要らない。
+:::
+:::
+
+::: theorem 総和核によるほとんど至る所の収束 {#four:approximate-identity-ae keywords="if K has a radially decreasing integrable majorant and c = int K, then for f in L^p, 1 <= p <= infinity, K_t * f -> c f almost everywhere as t -> 0, in fact at every Lebesgue point of f" index="総和核による概収束|そうわかくによるがいしゅうそく"}
+$K$ が放射的に減少する可積分な優関数 $\varphi$ をもつとし、$c\defeq\int K$ とおく。$1\le p\le\infty$, $f\in L^{p}(\mathbb{R}^{n})$ とする。
+1. ほとんどすべての $x$ で $(K_{t}*f)(x)\to cf(x)$（$t\to0$）。
+2. さらに、$f$ のすべてのルベーグ点 $x$ で $(K_{t}*f)(x)\to cf(x)$。
+:::
+
+::: intuition
+山形の優関数をもつ核でぼかした平均は、ぼかしの幅を $0$ に近づけると、ほとんどすべての点で元の値（の $\int K$ 倍）に戻る。どの点で戻るかも具体的にわかり、ルベーグ点ではすべて戻る。
+:::
+
+::: proof
+$|K|\le\varphi$ から $K$ は可積分。$L^{p}\subset L^{1}_{\mathrm{loc}}$（\ref{meas:holder}）なので $Mf$ は定義される。
+
+**Step 1（1：$1\le p<\infty$）.** 【主張：\ref{four:maximal-principle} の前提が満たされる】 $N_{h}\defeq\{Mh=\infty\}$ とする。\ref{four:maximal-lp}（$p>1$）または \ref{meas:maximal-inequality}（$p=1$、$\lambda(\{Mh=\infty\})\le\lambda(\{Mh>k\})\le\frac{3^{n}}{k}\|h\|_{1}\to0$）から $N_{h}$ は零集合で、\ref{four:majorant-bound} から $x\notin N_{h}$ ではすべての $t$ で $T_{t}h(x)\defeq(K_{t}*h)(x)$ の積分が絶対収束する。絶対収束する積分は線形なので前提 1 が成り立つ。$Sh\defeq\|\varphi\|_{1}Mh$ はボレル可測で、\ref{four:majorant-bound} から $\sup_{t}|T_{t}h|\le Sh$。$p>1$ なら \ref{four:layer-cake.2} と \ref{four:maximal-lp} から $\alpha\lambda(\{Sh>\alpha\})^{1/p}\le\|Sh\|_{p}\le\|\varphi\|_{1}A_{p}\|h\|_{p}$、$p=1$ なら \ref{meas:maximal-inequality} から $\lambda(\{Sh>\alpha\})\le\frac{3^{n}\|\varphi\|_{1}}{\alpha}\|h\|_{1}$。これが前提 2。前提 3 には $D\defeq C_{c}(\mathbb{R}^{n})$（\ref{meas:cc-dense}）をとる：$g\in C_{c}$ なら $\int K_{t}=c$ と置き換え $y=tz$ から
+$$
+(K_{t}*g)(x)-cg(x)=\int\bigl(g(x-tz)-g(x)\bigr)K(z)\,dz
+$$
+で、被積分関数は $2\|g\|_{\infty}|K(z)|$ で押さえられ、$g$ の連続性から各 $z$ で $0$ に収束する。\ref{meas:dominated-convergence}（$t$ の列に使う）から、すべての $x$ で $(K_{t}*g)(x)\to cg(x)$。以上から \ref{four:maximal-principle}（$X=\mathbb{R}^{n}$, $I=(0,\infty)$、定数 $c=\int K$）が使え、主張が従う。
+
+**Step 2（1：$p=\infty$）.** 【主張：$|x|<R$ のほとんどすべての $x$ で収束する】 $R>0$ について $f=f_{1}+f_{2}$, $f_{1}\defeq f\mathbf{1}_{B(0,2R)}\in L^{1}$, $f_{2}\defeq f\mathbf{1}_{B(0,2R)^{c}}$ と分ける。$f_{1}$ には Step 1 が使える。$|x|<R$ なら $|y|<R$ のとき $x-y\in B(0,2R)$ で $f_{2}(x-y)=0$ なので
+$$
+|(K_{t}*f_{2})(x)|\le\|f\|_{\infty}\int_{|y|\ge R}|K_{t}(y)|\,dy=\|f\|_{\infty}\int_{|z|\ge R/t}|K(z)|\,dz\to0
+$$
+（優収束定理）。また $f_{2}(x)=0$。よって $|x|<R$ のほとんどすべての $x$ で $K_{t}*f=K_{t}*f_{1}+K_{t}*f_{2}\to cf_{1}(x)=cf(x)$。$R=1,2,\dots$ について合わせればよい。
+
+**Step 3（2：近い部分）.** 【主張：$\delta>0$ について $\int_{|y|<\delta}\varphi_{t}(y)|f(x-y)-f(x)|\,dy\le\|\varphi\|_{1}\eta(\delta)$、ここで $\eta(\delta)\defeq\sup_{0<r\le\delta}\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}|f-f(x)|$】 $x$ をルベーグ点とし、$g\defeq|f-f(x)|\mathbf{1}_{B(x,\delta)}\in L^{1}_{\mathrm{loc}}$ とおく。$r>\delta$ なら $\int_{B(x,r)}g=\int_{B(x,\delta)}|f-f(x)|$ で $\lambda(B(x,r))>\lambda(B(x,\delta))$ なので、$Mg(x)\le\eta(\delta)$。\ref{four:majorant-bound} を $K=\varphi$ と $g$ に使えば、左辺は $\int\varphi_{t}(y)g(x-y)\,dy\le\|\varphi\|_{1}Mg(x)$。
+
+**Step 4（2：遠い部分）.** 【主張：$\delta>0$ を固定すると $\int_{|y|\ge\delta}\varphi_{t}(y)|f(x-y)-f(x)|\,dy\to0$（$t\to0$）】 まず $\varphi(y)=\psi(|y|)$ について $r^{n}\psi(r)\to0$（$r\to\infty$）：$\frac r2\le|y|<r$ で $\varphi(y)\ge\psi(r)$ なので $\psi(r)\omega_{n}r^{n}(1-2^{-n})\le\int_{|y|\ge r/2}\varphi\to0$（優収束定理）。よって
+$$
+\sup_{|y|\ge\delta}\varphi_{t}(y)=t^{-n}\psi(\delta/t)=\delta^{-n}\bigl(\tfrac{\delta}{t}\bigr)^{n}\psi(\delta/t)\to0.
+$$
+$p'$ を共役指数とする。$|f(x)|\int_{|y|\ge\delta}\varphi_{t}=|f(x)|\int_{|z|\ge\delta/t}\varphi\to0$。$p=\infty$ なら $\int_{|y|\ge\delta}\varphi_{t}(y)|f(x-y)|dy\le\|f\|_{\infty}\int_{|y|\ge\delta}\varphi_{t}\to0$。$p<\infty$ ならヘルダーの不等式から $\le\|f\|_{p}\|\varphi_{t}\mathbf{1}_{\{|y|\ge\delta\}}\|_{p'}$ で、$p'=\infty$ なら上の上限、$p'<\infty$ なら $\int_{|y|\ge\delta}\varphi_{t}^{p'}\le(\sup_{|y|\ge\delta}\varphi_{t})^{p'-1}\|\varphi\|_{1}$ なので、どちらも $0$ に収束する。
+
+**Step 5（2 の結論）.** $\int K_{t}=c$ から $(K_{t}*f)(x)-cf(x)=\int K_{t}(y)(f(x-y)-f(x))\,dy$ で、$|K_{t}|\le\varphi_{t}$。Step 3・4 から $\limsup_{t\to0}|(K_{t}*f)(x)-cf(x)|\le\|\varphi\|_{1}\eta(\delta)$。ルベーグ点では $\eta(\delta)\to0$（$\delta\to0$）なので極限は $0$。ルベーグ点でない点は零集合（\ref{meas:lebesgue-differentiation}）なので、2 は 1 を含む。
+
+::: hypcheck
+- **優関数の存在**：Step 1 で前提 2（極大評価）を、Step 3 で近い部分の評価を、Step 4 で $\sup_{|y|\ge\delta}\varphi_{t}\to0$ を得るのに使った。可積分性だけでは Step 4 の各点の減衰が得られない（\ref{four:majorant-examples.5} の核は可積分だが減衰しない）。
+- **$\int K=c$**：Step 1 の稠密な部分集合での収束と Step 5 の書き換えに使った。$c=0$ でもよい（極限は $0$）。
+- 1 の証明（Step 1・2）は \ref{four:maximal-principle} だけを使い、ルベーグの微分定理を使わない。2 の証明（Step 3〜5）はルベーグの微分定理を使うが、収束する点が具体的にわかる。
+:::
+:::
+
+::: supplement
+**高い視点：極大原理.** \ref{four:maximal-principle} は、「作用素の族 $T_{t}$ のほとんど至る所の収束」という、$t$ が非可算個あって直接は扱いにくい性質を、「一つの作用素 $\sup_{t}|T_{t}f|$ の弱型評価」という量的な性質に置き換える。逆向きも成り立つことがあり、コンパクト群上の平行移動と可換な作用素の列については、$p\le2$ なら、ほとんど至る所の収束から極大作用素の弱型評価が従うことが知られている（スタインの定理）。この意味で、ほとんど至る所の収束と極大関数の評価はほぼ同じものである。比喩で言えば、無数の門（各 $t$）をそれぞれ見張る代わりに、すべての門を見下ろす一つの見張り台（$Mf$）を建て、その見張り台が「怪しい場所の広さ」を量的に保証すれば、門の一つ一つを点検しなくても町全体の安全が言える。
+
+**似た定理.** \ref{meas:lebesgue-differentiation} は、\ref{four:approximate-identity-ae} で $K=\frac{1}{\omega_{n}}\mathbf{1}_{B(0,1)}$ とした場合であり（\ref{four:majorant-examples.1}）、その証明（連続関数で確かめ、極大関数で例外集合を制御する）は \ref{four:maximal-principle} の特別な場合である。
+:::
+
+## 問題 {#four:sec-mf-problems}
+
+::: problem {#four:prob-mf-indicator}
+$n=1$, $f\defeq\mathbf{1}_{[0,1]}$ とする。$Mf(x)=1$（$0<x<1$）、$Mf(x)=\frac{1}{2x}$（$x\ge1$）、$Mf(x)=\frac{1}{2(1-x)}$（$x\le0$）を示せ。さらに $\sup_{\alpha>0}\alpha\lambda(\{Mf>\alpha\})=1=\|f\|_{1}$ を示し、$n=1$ の \ref{meas:maximal-inequality} の定数 $3$ は $1$ より小さくできないことを確かめよ。
+:::
+
+::: solution
+$0<x<1$ では、平均は $1$ 以下で、$r\le\min(x,1-x)$ なら $1$ に等しいので $Mf(x)=1$。$x\ge1$ とする。$r\le x-1$ なら $(x-r,x+r)$ は $[0,1]$ と（端点を除いて）交わらず平均は $0$。$x-1<r\le x$ なら共通部分は $(x-r,1]$ で、平均は $\frac{1-x+r}{2r}$。$r$ についての導関数は $\frac{2r-2(1-x+r)}{4r^{2}}=\frac{x-1}{2r^{2}}\ge0$ なので非減少で、$r=x$ で $\frac{1}{2x}$。$r\ge x$ なら共通部分は $[0,1]$ で平均は $\frac{1}{2r}\le\frac{1}{2x}$。よって $Mf(x)=\frac{1}{2x}$。$x\le0$ は $x\mapsto1-x$ の対称性から。
+
+$0<\alpha<\frac12$ なら $\{Mf>\alpha\}=(1-\frac{1}{2\alpha},\frac{1}{2\alpha})$ で測度は $\frac1\alpha-1$、$\alpha\lambda=1-\alpha$。$\frac12\le\alpha<1$ なら $\{Mf>\alpha\}=(0,1)$（端点では $Mf=\frac12$）で $\alpha\lambda=\alpha$。$\alpha\ge1$ なら空。上限は $1$（$\alpha\to0$ で近づく）。もし $\lambda(\{Mf>\alpha\})\le\frac{C}{\alpha}\|f\|_{1}$ が $C<1$ で成り立てば、$1-\alpha\le C$ がすべての $\alpha\in(0,\frac12)$ で成り立つことになり矛盾。
+:::
+
+::: problem {#four:prob-mf-radial-decay}
+$\varphi(x)=\psi(|x|)$ を放射的に減少する可積分な関数とする。$|x|^{n}\varphi(x)\to0$ が $|x|\to0$ と $|x|\to\infty$ の両方で成り立つことを示せ。また、すべての $x\ne0$ で $\varphi(x)\le\frac{\|\varphi\|_{1}}{\omega_{n}|x|^{n}}$ を示せ。
+:::
+
+::: solution
+$|y|<r$ なら $\varphi(y)\ge\psi(r)$ なので $\psi(r)\omega_{n}r^{n}\le\int_{B(0,r)}\varphi$。右辺は $\le\|\varphi\|_{1}$ なので後半が従う。$r\to0$ では $\int_{B(0,r)}\varphi\to0$（優収束定理、$\mathbf{1}_{B(0,r)}\varphi\to0$ が $0$ 以外の点で成り立つ）。$r\to\infty$ では、$\frac r2\le|y|<r$ で $\varphi(y)\ge\psi(r)$ なので $\psi(r)\omega_{n}r^{n}(1-2^{-n})\le\int_{\{|y|\ge r/2\}}\varphi\to0$（優収束定理）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

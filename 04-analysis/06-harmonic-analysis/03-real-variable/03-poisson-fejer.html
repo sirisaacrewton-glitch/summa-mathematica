@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ポアソン積分とフェイェール平均 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/03-real-variable/03-poisson-fejer.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ポアソン積分とフェイェール平均 {#four:page-poisson-fejer keywords="Poisson kernel of the upper half-space, Fourier transform of the Poisson kernel, Poisson integral is harmonic, boundary values almost everywhere, heat kernel almost everywhere convergence, maximal function on the circle, Fejer means converge almost everywhere for L^1 functions, Abel-Poisson means, nontangential convergence"}
+
+前のページ \ref{four:page-maximal-functions} では、放射的に減少する可積分な優関数をもつ核 $K$ について $\sup_{t>0}|K_{t}*f|\le\|\varphi\|_{1}Mf$ を示し（\ref{four:majorant-bound}）、極大原理（\ref{four:maximal-principle}）と合わせて $K_{t}*f\to(\int K)f$ がほとんど至る所で成り立つことを得た（\ref{four:approximate-identity-ae}）。このページではその枠組みを具体的な核に当てはめる。まず上半空間のポアソン核を定め、その定数・積分・フーリエ変換・調和性を計算し、$L^{p}$ の関数のポアソン積分が上半空間の調和関数で、境界でほとんど至る所 $f$ に戻ることを示す。ガウス核（熱核）も同じ枠組みに入る。次に円周上の極大関数を定め、フェイェール核とポアソン核を山形の関数で押さえることで、$L^{1}(\mathbb{T})$ の関数のフェイェール平均とアーベル–ポアソン平均がほとんど至る所収束することを示す。
+
+## 記法と定義の確認 {#four:sec-pf-notation}
+
+::: notation
+- $\lambda$ は $\mathbb{R}^{n}$ のルベーグ測度。$B(x,r)\defeq\{y:|y-x|<r\}$、$\omega_{n}\defeq\lambda(B(0,1))$、$\lambda(B(x,r))=\omega_{n}r^{n}$。閉球 $\bar B(x,r)$ の測度も $\omega_{n}r^{n}$（$\bar B(x,r)\subset B(x,r+\varepsilon)$ から）。
+- **極大関数**：$f\in L^{1}_{\mathrm{loc}}(\mathbb{R}^{n})$ について $Mf(x)\defeq\sup_{r>0}\frac{1}{\lambda(B(x,r))}\int_{B(x,r)}|f|$（\ref{meas:maximal-function}）。$\{Mf>\alpha\}$ は開集合。弱 $(1,1)$ 評価 $\lambda(\{Mf>\alpha\})\le\frac{3^{n}}{\alpha}\|f\|_{1}$ は \ref{meas:maximal-inequality}、ルベーグ点とルベーグの微分定理は \ref{meas:lebesgue-differentiation}。
+- 分布関数・弱 $L^{p}$・劣線形作用素・弱型と強型は \ref{four:weak-lp}、層の公式は \ref{four:layer-cake}、補間定理は \ref{four:marcinkiewicz}。
+- **拡大縮小**：$K\in L^{1}(\mathbb{R}^{n})$, $t>0$ について $K_{t}(x)\defeq t^{-n}K(x/t)$。$\int K_{t}=\int K$、$\|K_{t}\|_{1}=\|K\|_{1}$（\ref{meas:lebesgue-linear}）。フーリエ変換のページでは次元を $d$ と書いたが、ここでは $n$ と書く。畳み込みは \ref{four:convolution-rd}、実数空間上の総和核は \ref{four:approximate-identity-rd}。
+- 円周 $\mathbb{T}=\mathbb{R}/\mathbb{Z}$、$|x|_{\mathbb{T}}$、$L^{p}(\mathbb{T})$、円周上の畳み込み、総和核、フェイェール核 $F_{N}$ とチェザロ平均 $\sigma_{N}f=F_{N}*f$ は \ref{four:page-coefficients-convolution}、\ref{four:fejer-kernel}, \ref{four:kernel-formulas} のとおり。
+- 1 次元の非負連続関数の積分（ガンマ関数・ベータ関数を含む）は、広義リーマン積分として計算してよい（\ref{meas:riemann-lebesgue}, \ref{meas:improper-lebesgue.1}、端点の近くは \ref{meas:monotone-convergence}）。$\Gamma$ と $B(x,y)=\frac{\Gamma(x)\Gamma(y)}{\Gamma(x+y)}$、$\Gamma(\frac12)=\sqrt\pi$ は \ref{calc:gamma}, \ref{calc:beta-function}。
+- 開集合 $U\subset\mathbb{R}^{N}$ 上の $C^{2}$ 級関数 $u$ が $\Delta u\defeq\sum_{j=1}^{N}\partial_{j}^{2}u=0$ を満たすとき**調和**という（$N=2$ では \see{cx:harmonic} と同じ約束）。上半空間を $\mathbb{R}^{n+1}_{+}\defeq\{(x,t):x\in\mathbb{R}^{n},\ t>0\}$ と書く。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。2 進立方体の族は可算で具体的に並べられるので、選び出しに選択は要らない。
+:::
+
+## ポアソン核と上半空間 {#four:sec-mf-poisson}
+
+::: lemma 放射的な関数の積分 {#four:radial-integral keywords="for psi nonincreasing on [0, infinity), int_{R^n} psi(|x|) dx = n omega_n int_0^infinity psi(r) r^{n-1} dr, via the layer cake formula; n omega_n = 2 pi^{n/2} / Gamma(n/2)" index="放射的な関数の積分|ほうしゃてきなかんすうのせきぶん"}
+1. $\psi\colon[0,\infty)\to[0,\infty]$ が非増加なら $\int_{\mathbb{R}^{n}}\psi(|x|)\,dx=n\omega_{n}\int_{0}^{\infty}\psi(r)r^{n-1}\,dr$（両辺 $+\infty$ もありうる）。
+2. $n\omega_{n}=\frac{2\pi^{n/2}}{\Gamma(n/2)}$。
+:::
+
+::: proof
+**1.** $s\ge0$ について $A_{s}\defeq\{r\ge0:\psi(r)>s\}$ は（非増加性から）$[0,\rho(s))$ か $[0,\rho(s)]$ の形の区間（または空）で、$\rho(s)\in[0,\infty]$。$\{x:\psi(|x|)>s\}=\{x:|x|\in A_{s}\}$ は半径 $\rho(s)$ の開球か閉球（$\rho(s)=\infty$ なら $\mathbb{R}^{n}$）で、測度は $\omega_{n}\rho(s)^{n}$。一方 $\nu(dr)\defeq n\omega_{n}r^{n-1}dr$ とおくと $\nu(A_{s})=n\omega_{n}\int_{0}^{\rho(s)}r^{n-1}dr=\omega_{n}\rho(s)^{n}$。\ref{four:layer-cake.1}（$p=1$）を $\lambda$ と $\nu$ の両方に使うと
+$$
+\int\psi(|x|)\,dx=\int_{0}^{\infty}\omega_{n}\rho(s)^{n}\,ds=\int_{0}^{\infty}\psi(r)\,\nu(dr).
+$$
+
+**2.** \ref{calc:ball-volume} と \ref{meas:riemann-lebesgue} から $\omega_{n}=\frac{\pi^{n/2}}{\Gamma(n/2+1)}$（閉球と開球の測度は等しい）。\ref{calc:gamma-basic.2} から $\Gamma(\frac n2+1)=\frac n2\Gamma(\frac n2)$ なので $n\omega_{n}=\frac{2\pi^{n/2}}{\Gamma(n/2)}$。
+:::
+
+::: definition ポアソン核（上半空間） {#four:poisson-kernel-rd keywords="Poisson kernel of the upper half-space P_t(x) = c_n t / (t^2 + |x|^2)^{(n+1)/2}, c_n = Gamma((n+1)/2) / pi^{(n+1)/2}; Poisson integral u(x,t) = P_t * f" index="ポアソン核（上半空間）|ぽあそんかくじょうはんくうかん, ポアソン積分（上半空間）|ぽあそんせきぶんじょうはんくうかん"}
+$c_{n}\defeq\Gamma(\frac{n+1}{2})/\pi^{(n+1)/2}$ とし、
+$$
+P(x)\defeq\frac{c_{n}}{(1+|x|^{2})^{(n+1)/2}},\qquad P_{t}(x)=t^{-n}P(x/t)=\frac{c_{n}\,t}{(t^{2}+|x|^{2})^{(n+1)/2}}\quad(t>0)
+$$
+を**ポアソン核**という。$f\in L^{p}(\mathbb{R}^{n})$（$1\le p\le\infty$）について $u(x,t)\defeq(P_{t}*f)(x)$ を $f$ の**ポアソン積分**という。$n=1$ では $c_{1}=\frac1\pi$, $P_{t}(x)=\frac{1}{\pi}\frac{t}{t^{2}+x^{2}}$。
+:::
+
+::: intuition
+上半空間の点 $(x,t)$ から境界 $\mathbb{R}^{n}$ を見たときの「重み」で、境界の点 $y$ が $(x,t)$ に近いほど重い。高さ $t$ が小さいほど重みは $x$ の近くに集中する。
+:::
+
+::: proposition ポアソン核の性質 {#four:poisson-kernel-basic keywords="the Poisson kernel has integral 1 (via the radial integral and the Beta function), is radially decreasing, its Fourier transform for n = 1 is e^{-2 pi t |xi|}, and (x,t) -> P_t(x) is harmonic in the upper half-space" index="ポアソン核の性質（上半空間）|ぽあそんかくのせいしつじょうはんくうかん"}
+1. $P>0$ は放射的に減少し、$\int_{\mathbb{R}^{n}}P=1$。
+2. $n=1$ なら $\widehat{P_{t}}(\xi)=e^{-2\pi t|\xi|}$。
+3. $(x,t)\mapsto P_{t}(x)$ は $\mathbb{R}^{n+1}_{+}$ 上 $C^{\infty}$ 級で調和。
+:::
+
+::: proof
+**Step 1.** 【主張：1】 $r\mapsto c_{n}(1+r^{2})^{-(n+1)/2}$ は正で非増加。$n=1$ なら $\int\frac{dx}{\pi(1+x^{2})}=\frac1\pi[\arctan x]_{-\infty}^{\infty}=1$。一般の $n$ では \ref{four:radial-integral.1} から $\int P=c_{n}n\omega_{n}\int_{0}^{\infty}r^{n-1}(1+r^{2})^{-(n+1)/2}dr$。$\Phi(u)\defeq\bigl(\frac{u}{1-u}\bigr)^{1/2}$ は $(0,1)$ から $(0,\infty)$ への $C^{1}$ 微分同相で、$\Phi'(u)=\frac12u^{-1/2}(1-u)^{-3/2}$、$1+\Phi(u)^{2}=\frac{1}{1-u}$。\ref{meas:change-of-variables.2}（1 次元）から
+$$
+\int_{0}^{\infty}\frac{r^{n-1}dr}{(1+r^{2})^{(n+1)/2}}=\int_{0}^{1}\Bigl(\frac{u}{1-u}\Bigr)^{\frac{n-1}{2}}(1-u)^{\frac{n+1}{2}}\cdot\frac{u^{-1/2}(1-u)^{-3/2}}{2}\,du=\frac12\int_{0}^{1}u^{\frac n2-1}(1-u)^{-\frac12}du=\frac12B\bigl(\tfrac n2,\tfrac12\bigr).
+$$
+\ref{calc:beta-function} から $\frac12B(\frac n2,\frac12)=\frac{\Gamma(n/2)\sqrt\pi}{2\Gamma((n+1)/2)}$。\ref{four:radial-integral.2} と合わせて
+$$
+\int P=c_{n}\cdot\frac{2\pi^{n/2}}{\Gamma(n/2)}\cdot\frac{\Gamma(n/2)\sqrt\pi}{2\Gamma((n+1)/2)}=c_{n}\frac{\pi^{(n+1)/2}}{\Gamma((n+1)/2)}=1.
+$$
+
+**Step 2.** 【主張：$n=1$ で $\int e^{-2\pi t|\xi|}e^{2\pi ix\xi}d\xi=P_{t}(x)$】 $g(\xi)\defeq e^{-2\pi t|\xi|}$ は偶関数なので
+$$
+\int g(\xi)e^{2\pi ix\xi}d\xi=2\operatorname{Re}\int_{0}^{\infty}e^{-2\pi\xi(t-ix)}d\xi=2\operatorname{Re}\frac{1}{2\pi(t-ix)}=\frac{1}{\pi}\frac{t}{t^{2}+x^{2}}.
+$$
+
+**Step 3.** 【主張：2】 Step 2 と $g$ が偶関数であることから $\hat g=P_{t}$。$g$ は可積分で連続、$\hat g=P_{t}$ も可積分なので、\ref{four:inversion-theorem.1} からすべての $\xi$ で $g(\xi)=\int P_{t}(x)e^{2\pi ix\xi}dx=\widehat{P_{t}}(-\xi)$。$g$ は偶関数なので $\widehat{P_{t}}(\xi)=g(\xi)$。
+
+**Step 4.** 【主張：3】 $s\defeq t^{2}+|x|^{2}$, $m\defeq\frac{n+1}{2}$ とおくと $P_{t}(x)=c_{n}ts^{-m}$ で、$s>0$ の範囲で $C^{\infty}$ 級。各 $j$ について
+$$
+\partial_{x_{j}}^{2}(ts^{-m})=-2mts^{-m-1}+4m(m+1)tx_{j}^{2}s^{-m-2},\qquad\partial_{t}^{2}(ts^{-m})=-6mts^{-m-1}+4m(m+1)t^{3}s^{-m-2}
+$$
+（$\partial_{x_{j}}s=2x_{j}$, $\partial_{t}s=2t$ と積の微分）。和をとると
+$$
+\Delta(ts^{-m})=4m(m+1)t(|x|^{2}+t^{2})s^{-m-2}-2m(n+3)ts^{-m-1}=2mts^{-m-1}\bigl(2m+2-n-3\bigr)=0
+$$
+（$2m=n+1$）。
+
+::: hypcheck
+- 定数 $c_{n}$ は Step 1 で $\int P=1$ となるように決まる。Step 1 で使った道具は、層の公式による放射的な関数の積分（\ref{four:radial-integral}）、1 次元の変数変換、ベータ関数とガンマ関数の関係、球の体積である。
+- Step 4 の計算で、指数 $m=\frac{n+1}{2}$ が調和性に本質的：一般の $m$ では $\Delta(ts^{-m})=2mts^{-m-1}(2m-n-1)$ で、$0$ になるのは $m=\frac{n+1}{2}$ のときだけ。
+:::
+:::
+
+::: fact 一般次元のポアソン核のフーリエ変換 {#four:poisson-fourier-rd keywords="Fourier transform of the Poisson kernel in R^n: (P_t)^(xi) = e^{-2 pi t |xi|}" index=""}
+すべての $n\ge1$ について $\widehat{P_{t}}(\xi)=e^{-2\pi t|\xi|}$。（出典：Stein–Weiss『Introduction to Fourier Analysis on Euclidean Spaces』。ここでは証明しない。$e^{-\beta}=\frac{1}{\sqrt\pi}\int_{0}^{\infty}\frac{e^{-u}}{\sqrt u}e^{-\beta^{2}/(4u)}du$ により $e^{-2\pi t|\xi|}$ をガウス関数の重ね合わせで表し、\ref{four:gaussian-transform} を使うのが標準的な方法である。）
+:::
+
+::: theorem 上半空間のディリクレ問題と境界値 {#four:poisson-boundary keywords="Poisson integral u = P_t * f of f in L^p, 1 <= p <= infinity, is harmonic in the upper half-space, sup_t |u(x,t)| <= Mf(x), u(x,t) -> f(x) as t -> 0 at every Lebesgue point (vertical convergence), and in L^p for p < infinity" index="上半空間のディリクレ問題|じょうはんくうかんのでぃりくれもんだい, 境界値（ポアソン積分）|きょうかいちぽあそんせきぶん"}
+$1\le p\le\infty$, $f\in L^{p}(\mathbb{R}^{n})$ とし、$u(x,t)\defeq(P_{t}*f)(x)$ とする。
+1. $u$ は $\mathbb{R}^{n+1}_{+}$ 上で（各点で絶対収束する積分として定義され）$C^{2}$ 級で調和。
+2. $\sup_{t>0}|u(x,t)|\le Mf(x)$（すべての $x$）。
+3. $f$ のすべてのルベーグ点で、とくにほとんどすべての $x$ で $u(x,t)\to f(x)$（$t\to0$）。
+4. $p<\infty$ なら $\|u(\cdot,t)-f\|_{p}\to0$（$t\to0$）。
+:::
+
+::: intuition
+境界に $L^{p}$ の関数 $f$ を与えると、ポアソン核で平均した $u$ は上半空間で調和で、真上から境界に降りていくと、ほとんどすべての点で境界の値 $f$ に近づく。
+:::
+
+::: proof
+**Step 1.** 【主張：$0<a<b$, $R>0$ と $|\alpha|\le2$ について、$K\defeq\{(x,t):|x|\le R,\ a\le t\le b\}$ 上で $|\partial^{\alpha}_{(x,t)}P_{t}(x-y)|\le C(1+|y|)^{-(n+1)}$（$C$ は $a,b,R,n$ による）】 $z=(z_{1},\dots,z_{n+1})\defeq(x-y,t)$、$s\defeq|z|^{2}$, $m\defeq\frac{n+1}{2}$ とする。帰納法で $\partial^{\alpha}(ts^{-m})=Q_{\alpha}(z)s^{-m-|\alpha|}$、$Q_{\alpha}$ は次数 $|\alpha|+1$ 以下の多項式：$\partial_{j}(Qs^{-m-k})=(s\,\partial_{j}Q-2(m+k)z_{j}Q)s^{-m-k-1}$ で、次数は高々 $1$ 増える。$K$ 上では、$|y|\ge2R+1$ なら $|x-y|\ge|y|-R\ge\frac{1+|y|}{4}$、$|y|<2R+1$ なら $t\ge a\ge\frac{a(1+|y|)}{2R+2}$ なので、$s\ge c(1+|y|)^{2}$（$c>0$）。また $|Q_{\alpha}(z)|\le C'(1+|y|)^{|\alpha|+1}$。$|\alpha|\ge1$ なら $|\partial^{\alpha}P|\le C(1+|y|)^{|\alpha|+1-(n+1)-2|\alpha|}\le C(1+|y|)^{-(n+1)}$。$\alpha=0$ なら直接 $P_{t}(x-y)=c_{n}ts^{-m}\le c_{n}bc^{-m}(1+|y|)^{-(n+1)}$。
+
+**Step 2.** 【主張：1】 $w(y)\defeq(1+|y|)^{-(n+1)}$ は有界で、\ref{four:radial-integral.1} から可積分（$\int_{0}^{\infty}r^{n-1}(1+r)^{-n-1}dr<\infty$）なので、すべての $q\in[1,\infty]$ で $w\in L^{q}$。ヘルダーの不等式から $w|f|\in L^{1}$。$f$ を実部と虚部に分け、Step 1 の優関数 $Cw|f|$ のもとで \ref{meas:parameter-integrals.2} を各変数 $x_{1},\dots,x_{n},t$ について（他の変数を固定して）2 回使うと、$u$ は 2 階まで偏微分でき、$\partial^{\alpha}u(x,t)=\int\partial^{\alpha}_{(x,t)}P_{t}(x-y)f(y)\,dy$。$(x_{k},t_{k})\to(x,t)$ となる列について優収束定理を使えば、これらは連続。よって $u$ は $C^{2}$ 級で、\ref{four:poisson-kernel-basic.3} から $\Delta u=\int(\Delta P)(x-y,t)f(y)\,dy=0$。
+
+**Step 3.** 【主張：2〜4】 \ref{four:poisson-kernel-basic.1} から $P$ は自分自身が放射的に減少する可積分な優関数で $\|P\|_{1}=1$。2 は \ref{four:majorant-bound}、3 は \ref{four:approximate-identity-ae.2}（$c=\int P=1$）と \ref{meas:lebesgue-differentiation}、4 は \ref{four:approximate-identity-rd.1}（$K=P$）から。
+
+::: hypcheck
+- **$f\in L^{p}$**：Step 2 で $w|f|\in L^{1}$（ヘルダー）に、Step 3 で極大関数の評価に使った。$p=\infty$ でも 1〜3 は成り立つが、4 は偽（不連続な有界関数は $L^{\infty}$ ノルムでは近似されない）。
+- Step 1 で $t\ge a>0$ を使った：境界 $t=0$ の近くでは評価が崩れ、境界での振る舞いは極大関数の議論（Step 3）で別に扱う。
+- 3 は**垂直な**極限 $t\to0$ についての主張。円錐 $|x-x_{0}|<\alpha t$ の中からの極限（**非接的極限**）でも同じことが成り立つ（問題 \ref{four:prob-mf-nontangential}）。接線方向から近づくと一般には成り立たない。
+:::
+:::
+
+::: example ガウス核と熱方程式 {#four:heat-kernel-ae keywords="Gauss kernel W_t and heat kernel h_s = (4 pi s)^{-n/2} e^{-|x|^2/(4s)} = W_{sqrt(4 pi s)}: sup over s of |h_s * f| <= Mf and h_s * f -> f almost everywhere" index="熱核|ねつかく, ガウス核|がうすかく"}
+熱核 $h_{s}(x)\defeq(4\pi s)^{-n/2}e^{-|x|^{2}/(4s)}$（$s>0$）は、$\tau\defeq\sqrt{4\pi s}$ とおくと $h_{s}=W_{\tau}=G_{\tau}$（$G(x)=e^{-\pi|x|^{2}}$）。$G$ は放射的に減少し $\int G=1$ なので、\ref{four:majorant-bound} と \ref{four:approximate-identity-ae} から、$f\in L^{p}$（$1\le p\le\infty$）について $\sup_{s>0}|h_{s}*f|\le Mf$、$f$ のすべてのルベーグ点で $(h_{s}*f)(x)\to f(x)$（$s\to0$）。$v(x,s)\defeq(h_{s}*f)(x)$ は熱方程式 $\partial_{s}v=\Delta_{x}v$ の解で、初期値 $f$ をほとんど至る所でとる（$\partial_{s}h_{s}=\Delta h_{s}$ の計算と、\ref{four:poisson-boundary} の Step 1・2 と同じ積分記号下の微分による）。
+:::
+
+::: supplement
+**一般化.** ポアソン積分では、非接的極限（問題 \ref{four:prob-mf-nontangential}）も成り立つ。さらに、上半空間の有界な調和関数は、ある $f\in L^{\infty}$ のポアソン積分として表され、したがってほとんどすべての境界点で非接的極限をもつことが知られている（ファトゥの定理の上半空間版）。$n=1$ では $u=\operatorname{Re}F$（$F$ は上半平面で正則）と書け、虚部の境界値を与える作用素が次のページの主題であるヒルベルト変換になる。
+
+**高い視点：二つの見方.** \ref{four:poisson-kernel-basic.2} から、フーリエ側ではポアソン積分は乗数 $e^{-2\pi t|\xi|}$ を掛けることであり、$P_{t}*P_{s}=P_{t+s}$（半群性）が成り立つ（$n=1$ で $\widehat{P_{t}*P_{s}}=\widehat{P_{t}}\widehat{P_{s}}$ と \ref{four:inversion-theorem.2}）。熱核 $h_{s}$ の乗数 $e^{-4\pi^{2}s|\xi|^{2}}$ が $e^{s\Delta}$ であるのに対し、$e^{-2\pi t|\xi|}$ は $e^{-t\sqrt{-\Delta}}$ で、ポアソン積分は「$\partial_{t}^{2}u=-\Delta_{x}u$ の減衰する解」になる。実空間の側では、どちらも放射的に減少する山形の核で、境界での振る舞いは極大関数だけで決まる。
+:::
+
+## 円周上の極大関数とフェイェール平均 {#four:sec-mf-circle}
+
+::: definition 円周上の極大関数 {#four:circle-maximal-function keywords="maximal function on the circle M_T f(x) = sup over 0 < h <= 1/2 of (1/2h) int_{-h}^{h} |f(x-y)| dy" index="円周上の極大関数|えんしゅうじょうのきょくだいかんすう"}
+$f\in L^{1}(\mathbb{T})$ について
+$$
+M_{\mathbb{T}}f(x)\defeq\sup_{0<h\le1/2}\frac{1}{2h}\int_{-h}^{h}|f(x-y)|\,dy.
+$$
+$h=\frac12$ の項は $\|f\|_{1}$ なので $M_{\mathbb{T}}f\ge\|f\|_{1}$。
+:::
+
+::: proposition 円周上の極大関数の弱 (1,1) 評価 {#four:circle-maximal-weak keywords="the circle maximal function is lower semicontinuous and of weak type (1,1): lambda{M_T f > alpha} <= 6 ||f||_1 / alpha, by comparison with the maximal function on R" index="円周上の極大不等式|えんしゅうじょうのきょくだいふとうしき"}
+$f\in L^{1}(\mathbb{T})$ について、$\{M_{\mathbb{T}}f>\alpha\}$ は開集合で、$\lambda(\{x\in[0,1):M_{\mathbb{T}}f(x)>\alpha\})\le\frac{6}{\alpha}\|f\|_{1}$（$\alpha>0$）。
+:::
+
+::: proof
+**Step 1.** 【主張：$\{M_{\mathbb{T}}f>\alpha\}$ は開集合】 $M_{\mathbb{T}}f(x)>\alpha$ とし、$h\le\frac12$ で $\int_{x-h}^{x+h}|f|>2h\alpha$ とする（$f$ を周期関数として $\mathbb{R}$ 上で見る）。$h=\frac12$ なら積分は $x$ によらないので、すべての $x'$ で $M_{\mathbb{T}}f(x')>\alpha$。$h<\frac12$ なら $\delta>0$ を $h+\delta\le\frac12$ かつ $\int_{x-h}^{x+h}|f|>2(h+\delta)\alpha$ となるようにとる。$|x'-x|<\delta$ なら $(x-h,x+h)\subset(x'-h-\delta,x'+h+\delta)$ なので $M_{\mathbb{T}}f(x')>\alpha$。
+
+**Step 2.** 【主張：弱 (1,1) 評価】 $g\defeq|f|\mathbf{1}_{[-1/2,3/2)}$（$f$ は周期関数として）とすると $g\in L^{1}(\mathbb{R})$ で、\ref{four:circle-translation.1} から $\|g\|_{1}=2\|f\|_{1}$。$x\in[0,1)$, $0<h\le\frac12$ なら $(x-h,x+h)\subset[-\frac12,\frac32)$ なので
+$$
+\frac{1}{2h}\int_{-h}^{h}|f(x-y)|\,dy=\frac{1}{\lambda(B(x,h))}\int_{B(x,h)}g\le Mg(x)
+$$
+（$B(x,h)$ は $\mathbb{R}$ の区間）。よって $\{x\in[0,1):M_{\mathbb{T}}f(x)>\alpha\}\subset\{Mg>\alpha\}$ で、\ref{meas:maximal-inequality}（$n=1$）から測度は $\frac{3}{\alpha}\|g\|_{1}=\frac{6}{\alpha}\|f\|_{1}$ 以下。
+:::
+
+::: lemma 円周上の核の極大評価 {#four:circle-majorant keywords="if |K(y)| <= psi(|y|_T) with psi nonincreasing on [0,1/2], then int_T |K(y)| |f(x-y)| dy <= (int_T psi(|y|_T) dy) M_T f(x)" index=""}
+$K$ を $\mathbb{T}$ 上の可測関数とし、非増加な $\psi\colon[0,\frac12]\to[0,\infty)$ についてほとんどすべての $y$ で $|K(y)|\le\psi(|y|_{\mathbb{T}})$ とする。$f\in L^{1}(\mathbb{T})$ と、すべての $x$ について
+$$
+\int_{\mathbb{T}}|K(y)|\,|f(x-y)|\,dy\le\Bigl(\int_{-1/2}^{1/2}\psi(|y|)\,dy\Bigr)M_{\mathbb{T}}f(x).
+$$
+:::
+
+::: proof
+\ref{four:majorant-bound} の証明を、積分範囲を $[-\frac12,\frac12)$（\ref{four:circle-translation.1}）にして繰り返す。$F(y)\defeq|f(x-y)|$、$\Phi(y)\defeq\psi(|y|)$（$|y|\le\frac12$）とおき、$s>0$ について $E_{s}\defeq\{y\in[-\frac12,\frac12):\Phi(y)>s\}$、$\rho\defeq\sup\{|y|:y\in E_{s}\}\le\frac12$ とする。
+
+**Step 1.** 【主張：$\int_{E_{s}}F\le\lambda(E_{s})M_{\mathbb{T}}f(x)$】 $\psi$ の非増加性から $(-\rho,\rho)\subset E_{s}\subset[-\rho,\rho]$ で $\lambda(E_{s})=2\rho$。$\rho=0$ なら両辺 $0$。$0<\rho<\frac12$ なら、$\rho<h\le\frac12$ について $\int_{E_{s}}F\le\int_{-h}^{h}F\le2hM_{\mathbb{T}}f(x)$ で、$h\downarrow\rho$ とする。$\rho=\frac12$ なら $\lambda(E_{s})=1$ で、$\int_{E_{s}}F\le\int_{-1/2}^{1/2}F=\|f\|_{1}\le M_{\mathbb{T}}f(x)$。
+
+**Step 2.** 【主張：結論】 \ref{meas:tonelli} と \ref{four:layer-cake.1} から
+$$
+\int_{-1/2}^{1/2}\Phi F\,dy=\int_{0}^{\infty}\int_{E_{s}}F\,dy\,ds\le M_{\mathbb{T}}f(x)\int_{0}^{\infty}\lambda(E_{s})\,ds=M_{\mathbb{T}}f(x)\int_{-1/2}^{1/2}\Phi.
+$$
+$|K|\le\Phi$（a.e.）なので左辺は $\int|K(y)||f(x-y)|dy$ 以上。
+:::
+
+::: definition 円周上のポアソン核 {#four:circle-poisson-kernel keywords="Poisson kernel on the circle P_r(x) = sum r^{|n|} e_n(x) = (1 - r^2)/(1 - 2r cos 2 pi x + r^2), 0 <= r < 1; Abel-Poisson means P_r * f" index="ポアソン核（円周）|ぽあそんかくえんしゅう, アーベル–ポアソン平均|あーべるぽあそんへいきん"}
+$0\le r<1$ について $P_{r}(x)\defeq\sum_{n\in\mathbb{Z}}r^{|n|}e_{n}(x)$ を円周上の**ポアソン核**、$f\in L^{1}(\mathbb{T})$ について $P_{r}*f$ を**アーベル–ポアソン平均**という。
+:::
+
+::: theorem フェイェール平均とアーベル–ポアソン平均の概収束 {#four:fejer-ae keywords="maximal estimates sup_N |sigma_N f| <= 2 M_T f and sup_r |P_r * f| <= 3 M_T f via F_N(x) <= min(N, 1/(4N x^2)); for f in L^1(T) the Fejer means and the Abel-Poisson means converge to f almost everywhere" index="フェイェール平均の概収束|ふぇいぇーるへいきんのがいしゅうそく, アーベル–ポアソン平均の概収束|あーべるぽあそんへいきんのがいしゅうそく"}
+$f\in L^{1}(\mathbb{T})$ とする。
+1. $|x|_{\mathbb{T}}\le\frac12$ について $0\le F_{N}(x)\le\min\bigl(N,\frac{1}{4Nx^{2}}\bigr)$（$x$ は $[-\frac12,\frac12]$ の代表）で、すべての $x$ で $\sup_{N\ge1}|\sigma_{N}f(x)|\le2M_{\mathbb{T}}f(x)$。
+2. $P_{r}(x)=\frac{1-r^{2}}{1-2r\cos(2\pi x)+r^{2}}>0$、$\int_{\mathbb{T}}P_{r}=1$ で、すべての $x$ で $\sup_{0\le r<1}|(P_{r}*f)(x)|\le3M_{\mathbb{T}}f(x)$。
+3. ほとんどすべての $x$ で $\sigma_{N}f(x)\to f(x)$（$N\to\infty$）かつ $(P_{r}*f)(x)\to f(x)$（$r\uparrow1$）。とくに $f\in L^{p}(\mathbb{T})$（$1\le p\le\infty$）でも同じ。
+:::
+
+::: intuition
+フーリエ級数の部分和の平均（フェイェール平均）や、係数に $r^{|n|}$ を掛けて和をとったもの（アーベル–ポアソン平均）は、可積分な関数でありさえすれば、ほとんどすべての点で元の関数に収束する。
+:::
+
+::: proof
+**Step 1.** 【主張：$F_{N}(x)\le\min(N,\frac{1}{4Nx^{2}})$】 $|e_{n}|=1$ から $|D_{k}|\le2k+1$ なので、定義（\ref{four:fejer-kernel}）から $|F_{N}|\le\frac1N\sum_{k=0}^{N-1}(2k+1)=\frac{N^{2}}{N}=N$。\ref{four:kernel-formulas.2} と、$t\in[0,\frac12]$ で $\sin(\pi t)\ge2t$（$\sin$ は $[0,\frac\pi2]$ で凹なので弦の上にある）から、$0<|x|\le\frac12$ で $F_{N}(x)\le\frac{1}{N\sin^{2}(\pi x)}\le\frac{1}{4Nx^{2}}$。$F_{N}\ge0$ は \ref{four:kernel-formulas.3}。
+
+**Step 2.** 【主張：1 の極大評価】 $\psi_{N}(r)\defeq\min(N,\frac{1}{4Nr^{2}})$ は $[0,\frac12]$ 上非増加（$r=\frac{1}{2N}$ で切り替わる）で、
+$$
+\int_{-1/2}^{1/2}\psi_{N}(|y|)\,dy=2\Bigl(\int_{0}^{1/(2N)}N\,dr+\int_{1/(2N)}^{1/2}\frac{dr}{4Nr^{2}}\Bigr)=2\Bigl(\frac12+\frac{2N-2}{4N}\Bigr)=2-\frac1N\le2.
+$$
+\ref{four:circle-majorant}（$K=F_{N}$）から $|(F_{N}*f)(x)|\le2M_{\mathbb{T}}f(x)$、$\sigma_{N}f=F_{N}*f$（\ref{four:kernel-formulas.1}）。
+
+**Step 3.** 【主張：$P_{r}$ の閉じた形と $\int P_{r}=1$】 $\sum_{n}r^{|n|}<\infty$ なので級数は一様絶対収束する。$z\defeq re^{2\pi ix}$ とおくと等比級数から
+$$
+P_{r}(x)=\sum_{n\ge0}z^{n}+\sum_{n\ge1}\bar z^{n}=\frac{1}{1-z}+\frac{\bar z}{1-\bar z}=\frac{1-|z|^{2}}{|1-z|^{2}}=\frac{1-r^{2}}{1-2r\cos(2\pi x)+r^{2}}>0.
+$$
+項別に積分すると（\ref{meas:series-dominated}）$\int_{\mathbb{T}}e_{n}=\delta_{n0}$ から $\int P_{r}=1$。
+
+**Step 4.** 【主張：$P_{r}$ の上からの評価】 $1-2r\cos(2\pi x)+r^{2}=(1-r)^{2}+4r\sin^{2}(\pi x)$。$r<\frac12$ なら $P_{r}\le\frac{1-r^{2}}{(1-r)^{2}}=\frac{1+r}{1-r}<3$。$\frac12\le r<1$ なら $\delta\defeq1-r\in(0,\frac12]$ とおき、$P_{r}\le\frac{1+r}{1-r}\le\frac2\delta$、また $4r\ge2$, $\sin^{2}(\pi x)\ge4x^{2}$, $1-r^{2}\le2\delta$ から $P_{r}(x)\le\frac{2\delta}{8x^{2}}=\frac{\delta}{4x^{2}}$。
+
+**Step 5.** 【主張：2 の極大評価】 $r<\frac12$ なら $\psi\equiv3$ で $\int\psi=3$。$r\ge\frac12$ なら $\psi(\rho)\defeq\min(\frac2\delta,\frac{\delta}{4\rho^{2}})$（$\rho_{0}\defeq\frac{\delta}{2\sqrt2}\le\frac12$ で切り替わる、非増加）について
+$$
+\int_{-1/2}^{1/2}\psi(|y|)\,dy=2\Bigl(\frac{2\rho_{0}}{\delta}+\frac{\delta}{4}\Bigl(\frac{1}{\rho_{0}}-2\Bigr)\Bigr)=2\Bigl(\frac{1}{\sqrt2}+\frac{1}{\sqrt2}-\frac\delta2\Bigr)=2\sqrt2-\delta<3.
+$$
+\ref{four:circle-majorant} から、どちらの場合も $|(P_{r}*f)(x)|\le3M_{\mathbb{T}}f(x)$。
+
+**Step 6.** 【主張：3（フェイェール平均）】 \ref{four:maximal-principle} を $X=[0,1)$, $p=1$, $I=\{\frac1N:N\ge1\}$, $T_{1/N}h\defeq\sigma_{N}h$ で使う。$N_{h}\defeq\{M_{\mathbb{T}}h=\infty\}$ は \ref{four:circle-maximal-weak} から零集合で、$x\notin N_{h}$ では \ref{four:circle-majorant} からすべての $N$ で $\sigma_{N}h(x)$ の積分が絶対収束し、線形（前提 1）。$Sh\defeq2M_{\mathbb{T}}h$ は可測（\ref{four:circle-maximal-weak} から $\{M_{\mathbb{T}}h>\alpha\}$ は開集合）で、$\lambda(\{Sh>\alpha\})\le\frac{12}{\alpha}\|h\|_{1}$（前提 2）。$D$ を三角多項式全体とすると $L^{1}(\mathbb{T})$ で稠密（\ref{four:trigonometric-density}）で、$g\in D$ なら $\sigma_{N}g\to g$ は一様収束（\ref{four:fejer-theorem.1}）（前提 3、$c=1$）。
+
+**Step 7.** 【主張：3（アーベル–ポアソン平均）】 $I=(0,1]$, $T_{1-r}h\defeq P_{r}*h$, $Sh\defeq3M_{\mathbb{T}}h$ として同様。前提 3 には $D=C(\mathbb{T})$ をとる（三角多項式を含むので稠密）。$r_{k}\uparrow1$ となる任意の列について $(P_{r_{k}})$ は総和核（\ref{four:approximate-identity}）：条件 1 は Step 3、条件 2 は $P_{r}>0$ から $\|P_{r}\|_{1}=1$、条件 3 は Step 4 から $0<\delta'<\frac12$ について $\int_{\delta'\le|y|_{\mathbb{T}}}P_{r}\le2\int_{\delta'}^{1/2}\frac{1-r}{4y^{2}}dy\le\frac{1-r}{2\delta'}\to0$。よって \ref{four:approximate-identity-convergence.1} から $P_{r_{k}}*g\to g$ は一様収束し、列が任意なので $r\uparrow1$ で一様収束。$L^{p}(\mathbb{T})\subset L^{1}(\mathbb{T})$（$\mathbb{T}$ の測度は $1$）なので最後の主張も従う。
+
+::: hypcheck
+- **$f\in L^{1}(\mathbb{T})$**：極大評価（1・2）はすべての $x$ で成り立ち、3 では \ref{four:circle-maximal-weak} の弱 (1,1) 評価を通して $p=1$ の極大原理に使った。
+- **核の評価**：Step 1・4 の $\min(N,\frac{1}{4Nx^{2}})$、$\min(\frac2\delta,\frac{\delta}{4x^{2}})$ が、$\mathbb{T}$ 上の「放射的に減少する優関数」の役をする。ディリクレ核 $D_{N}$ にはこの形の評価がなく（$\|D_{N}\|_{1}\to\infty$、\ref{fa:fourier-divergence}）、部分和 $S_{N}f$ のほとんど至る所の収束はこの方法では示せない。
+- Step 6・7 では、稠密な部分集合での一様収束（\ref{four:fejer-theorem.1}, \ref{four:approximate-identity-convergence.1}）だけを使い、ルベーグの微分定理は使っていない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** フェイェール平均の代わりに部分和 $S_{N}f$ をとると、$L^{1}(\mathbb{T})$ ではほとんど至る所の収束は失敗しうる（コルモゴロフの例）。$L^{p}$（$p>1$）では成り立つが（カールソン–ハントの定理）、その証明は部分和の極大作用素 $\sup_{N}|S_{N}f|$ の弱型評価で、核に放射的な優関数がないため、ここの議論よりはるかに難しい（\see{four:fejer-theorem} の補足も参照）。
+
+**似た定理.** \ref{four:approximate-identity-ae.2} と同じ議論で、$\sigma_{N}f(x)\to f(x)$ と $(P_{r}*f)(x)\to f(x)$ は $f$（を周期関数として見たもの）のすべてのルベーグ点で成り立つ。$z=re^{2\pi ix}$ とおくと $(P_{r}*f)(x)$ は単位円板上の調和関数で（\see{cx:poisson-kernel} の核で $t=2\pi y$ と置き換えたもの）、上の 3 は「$L^{1}$ の境界値をもつ円板上のポアソン積分は、ほとんどすべての方向で動径に沿って境界値に収束する」と言い換えられる（ファトゥの定理の一部）。
+:::
+
+
+## 問題 {#four:sec-pf-problems}
+
+::: problem {#four:prob-mf-nontangential}
+$\alpha>0$, $x_{0}\in\mathbb{R}^{n}$ とし、$\Gamma_{\alpha}(x_{0})\defeq\{(x,t)\in\mathbb{R}^{n+1}_{+}:|x-x_{0}|<\alpha t\}$ とする。
+1. $(x,t)\in\Gamma_{\alpha}(x_{0})$ なら、すべての $y$ で $P_{t}(x-y)\le C_{\alpha}P_{t}(x_{0}-y)$、$C_{\alpha}\defeq\max(1+2\alpha^{2},2)^{(n+1)/2}$ を示せ。
+2. $f\in L^{p}$（$1\le p\le\infty$）のポアソン積分 $u$ について $\sup_{(x,t)\in\Gamma_{\alpha}(x_{0})}|u(x,t)|\le C_{\alpha}Mf(x_{0})$ を示せ。
+3. ほとんどすべての $x_{0}$ で、$(x,t)\to(x_{0},0)$（$(x,t)\in\Gamma_{\alpha}(x_{0})$）のとき $u(x,t)\to f(x_{0})$ となることを示せ（$p<\infty$ とする）。
+:::
+
+::: solution
+**1.** $|x_{0}-y|\le|x-y|+\alpha t$ と $(a+b)^{2}\le2a^{2}+2b^{2}$ から $t^{2}+|x_{0}-y|^{2}\le(1+2\alpha^{2})t^{2}+2|x-y|^{2}\le\max(1+2\alpha^{2},2)(t^{2}+|x-y|^{2})$。$P_{t}(z)=c_{n}t(t^{2}+|z|^{2})^{-(n+1)/2}$ に代入する。
+
+**2.** $|u(x,t)|\le\int P_{t}(x-y)|f(y)|dy\le C_{\alpha}\int P_{t}(x_{0}-y)|f(y)|dy\le C_{\alpha}Mf(x_{0})$（最後は \ref{four:majorant-bound}、$\|P\|_{1}=1$）。
+
+**3.** \ref{four:maximal-principle} の証明と同じ議論を、$\Omega f(x_{0})\defeq\limsup_{(x,t)\to(x_{0},0),\,(x,t)\in\Gamma_{\alpha}(x_{0})}|u(x,t)-f(x_{0})|$ について行う。$g\in C_{c}$ なら $P_{t}*g\to g$ は一様収束（\ref{four:approximate-identity-rd.2}）で $g$ は連続なので、$|(P_{t}*g)(x)-g(x_{0})|\le\sup|P_{t}*g-g|+|g(x)-g(x_{0})|\to0$。よって $\Omega f\le C_{\alpha}M(f-g)+|f-g|$（2 を $f-g$ に使う）で、\ref{four:maximal-lp} または \ref{meas:maximal-inequality} と \ref{meas:cc-dense} から $\lambda^{*}(\{\Omega f>2\beta\})=0$（$\beta>0$）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

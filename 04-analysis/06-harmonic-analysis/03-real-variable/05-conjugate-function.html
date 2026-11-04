@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>共役関数とフーリエ級数の Lᵖ 収束 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/03-real-variable/05-conjugate-function.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 共役関数とフーリエ級数の Lᵖ 収束 {#four:page-conjugate-function keywords="conjugate function on the circle, Riesz projection, transference from the line to the circle, M. Riesz theorem on L^p of the circle, L^p convergence of Fourier series partial sums for 1<p<infinity, failure for p=1 and p=infinity"}
+
+前のページ \ref{four:page-hilbert-transform} では、実数直線上のヒルベルト変換 $H$（乗数 $-i\operatorname{sgn}\xi$）が $1<p<\infty$ で $L^{p}$ 有界であることを示した（\ref{four:ht-lp}）。このページでは、その円周版である**共役関数**（フーリエ係数に $-i\operatorname{sgn}n$ を掛ける作用素）を定め、直線上の評価を円周に**転移**して、共役関数が $L^{p}(\mathbb{T})$（$1<p<\infty$）で有界であること（**M. リースの定理**）を示す。その帰結として、フーリエ級数の部分和 $S_{N}f$ が $L^{p}(\mathbb{T})$（$1<p<\infty$）で $f$ に収束することを証明する。これは \ref{four:l2-theory} の後の補足で、証明を後回しにしていた主張である。$p=1$ と $p=\infty$ では成り立たないことも確かめる。
+
+## 記法と定義の確認 {#four:sec-cj-notation}
+
+::: notation
+- ルベーグ測度を $|E|$ と書く。$\mathbb{R}^{n}$ の開球 $B(x,r)$、局所可積分関数、ルベーグ点は \ref{meas:page-differentiation} のとおり。可測集合 $Q$（$0<|Q|<\infty$）と $f\in L^{1}(Q)$ について平均を $f_{Q}\defeq\frac{1}{|Q|}\int_{Q}f$ と書く。
+- $\mathbb{R}$ 上のフーリエ変換 $\hat f(\xi)=\int f(x)e^{-2\pi ix\xi}dx$、逆変換 $\check g$、変調 $M_{\eta}$ は \ref{four:fourier-transform}, \ref{four:page-inversion-plancherel} のとおり。$L^{2}$ 上の $\mathcal{F}$ は \ref{four:plancherel} の延長で、$L^{1}\cap L^{2}$ の上では $\mathcal{F}f=\hat f$。$L^{2}$ の内積は $\langle f,g\rangle\defeq\int f\bar g$。シュワルツ空間 $\mathcal{S}$ は \ref{four:schwartz-space}。
+- $\operatorname{sgn}\xi\defeq1,0,-1$（$\xi>0,=0,<0$）。複素数 $z$ については $\operatorname{sgn}z\defeq z/|z|$（$z\ne0$）、$\operatorname{sgn}0\defeq0$。
+- 円周 $\mathbb{T}=\mathbb{R}/\mathbb{Z}$、$L^{p}(\mathbb{T})$、$e_{n}(x)=e^{2\pi inx}$、フーリエ係数 $\hat f(n)$、部分和 $S_{N}f$、三角多項式は \ref{four:page-coefficients-convolution} のとおり。ディリクレ核 $D_{N}$、フェイェール核 $F_{N}$ は \ref{four:fejer-kernel}。
+- 分布関数・弱 $L^{p}$・弱型・劣線形は \ref{four:weak-lp}。
+- **選択公理**：本文の構成では使わない。引用する測度論の結果は \ref{meas:page-differentiation} などの約束に従う。\see{four:ht-partial-sums-endpoint} だけは一様有界性原理を通して従属選択公理を使う。
+:::
+
+
+## 円周上の共役関数と M. リースの定理 {#four:sec-ht-circle}
+
+::: definition 共役関数 {#four:ht-conjugate-function keywords="conjugate function on the circle: for a trigonometric polynomial P = sum c_n e_n, tilde P = sum -i sgn(n) c_n e_n; Riesz projection P_+" index="共役関数|きょうやくかんすう, 共役三角多項式|きょうやくさんかくたこうしき"}
+三角多項式 $P=\sum_{|n|\le N}c_{n}e_{n}$ について
+$$
+\tilde P\defeq\sum_{|n|\le N}(-i\operatorname{sgn}n)\,c_{n}e_{n}
+$$
+を $P$ の**共役関数**という。$P\mapsto\tilde P$ は三角多項式の空間の上の線形写像である。
+:::
+
+::: intuition
+円周の上で、正の振動数の成分に $-i$、負の振動数の成分に $i$ を掛け、定数項を消す。$\cos2\pi nx$ は $\sin2\pi nx$ に、$\sin2\pi nx$ は $-\cos2\pi nx$ に移る。$P$ が実数値なら $\tilde P$ も実数値で、$P+i\tilde P=c_{0}+2\sum_{n>0}c_{n}e_{n}$ は正の振動数だけをもつ。
+:::
+
+::: lemma 実数直線からの転移 {#four:ht-transference keywords="transference: for a trigonometric polynomial P with mean zero, ||tilde P||_{L^p(T)} <= A_p ||P||_{L^p(T)}, proved via H(P psi) = (tilde P) psi for psi with Fourier transform supported in [-1/4,1/4] and averaging over translations" index="転移（ヒルベルト変換）|てんいひるべるとへんかん"}
+$1<p<\infty$ とし、$A_{p}$ を \ref{four:ht-lp} の定数とする。$\hat P(0)=0$ となる三角多項式 $P$ について $\|\tilde P\|_{L^{p}(\mathbb{T})}\le A_{p}\|P\|_{L^{p}(\mathbb{T})}$。
+:::
+
+::: proof
+**Step 1.** 【$\mathcal{S}(\mathbb{R})$ の元 $\psi\ne0$ で、$\hat\psi$ が $[-\frac14,\frac14]$ の外で $0$ のものがある】 \ref{calc:non-analytic-smooth.2} の $C^{\infty}$ 級関数（$|x|\ge1$ で $0$、$|x|\le\frac12$ で $1$）を $\rho$ とし、$\chi(\xi)\defeq\rho(4\xi)$ とおく。$\chi$ は台がコンパクトな $C^{\infty}$ 級関数なので $\chi\in\mathcal{S}$（\ref{four:schwartz-basic.1}）で、$|\xi|\ge\frac14$ で $0$、$\chi(0)=1$。$\psi\defeq\check\chi\in\mathcal{S}$ とおくと \ref{four:schwartz-fourier.3} から $\hat\psi=\chi\ne0$、よって $\psi\ne0$。$\psi$ は連続なので $\|\psi\|_{p}>0$。
+
+**Step 2.** 【$P=\sum_{0<|n|\le N}c_{n}e_{n}$ を周期 $1$ の関数とみると $H(P\psi)=\tilde P\psi$（a.e.）】 $P\psi=\sum_{n}c_{n}M_{n}\psi\in\mathcal{S}$（\ref{four:schwartz-basic.2}）で、\ref{four:transform-basic.2} から $\widehat{M_{n}\psi}(\xi)=\chi(\xi-n)$。$n\ge1$ なら、$\chi(\xi-n)\ne0$ のとき $|\xi-n|<\frac14$ なので $\xi>0$、$m(\xi)=-i$。$n\le-1$ なら同様に $m(\xi)=i$。よってすべての $\xi$ で $m(\xi)\widehat{M_{n}\psi}(\xi)=-i\operatorname{sgn}n\,\widehat{M_{n}\psi}(\xi)$ で、
+$$
+\mathcal{F}\bigl(H(P\psi)\bigr)=m\,\widehat{P\psi}=\sum_{n}(-i\operatorname{sgn}n)c_{n}\widehat{M_{n}\psi}=\widehat{\tilde P\psi}.
+$$
+$\mathcal{F}$ は $L^{2}$ 上で単射なので $H(P\psi)=\tilde P\psi$。ここで $\hat P(0)=0$ を使った（$n=0$ の項は $\chi$ の台が $0$ をまたぐので、こうはならない）。
+
+**Step 3.** 【すべての $s\in[0,1)$ で $\int|\tilde P(x+s)|^{p}|\psi(x)|^{p}dx\le A_{p}^{p}\int|P(x+s)|^{p}|\psi(x)|^{p}dx$】 $P_{s}(x)\defeq P(x+s)=\sum_{n}c_{n}e^{2\pi ins}e_{n}(x)$ も定数項 $0$ の三角多項式で、定義から $\widetilde{P_{s}}=(\tilde P)(\cdot+s)$。Step 2 を $P_{s}$ に使い、$P_{s}\psi\in\mathcal{S}\subset L^{2}\cap L^{p}$ に \ref{four:ht-lp.1}・\ref{four:ht-lp.2} を使えば $\|\widetilde{P_{s}}\psi\|_{p}=\|H(P_{s}\psi)\|_{p}\le A_{p}\|P_{s}\psi\|_{p}$。
+
+**Step 4.** 【結論】 Step 3 を $s\in[0,1)$ で積分する。被積分関数は $(x,s)$ の連続関数で非負なので、トネリの定理と \ref{four:circle-translation.1}（各 $x$ で $\int_{0}^{1}|\tilde P(x+s)|^{p}ds=\|\tilde P\|_{L^{p}(\mathbb{T})}^{p}$）から
+$$
+\|\tilde P\|_{L^{p}(\mathbb{T})}^{p}\,\|\psi\|_{L^{p}(\mathbb{R})}^{p}\le A_{p}^{p}\,\|P\|_{L^{p}(\mathbb{T})}^{p}\,\|\psi\|_{L^{p}(\mathbb{R})}^{p}.
+$$
+$\|\psi\|_{p}>0$ で割ればよい。
+
+::: hypcheck
+- **$\hat\psi$ の台が小さいこと**：Step 2 で、各 $M_{n}\psi$ の周波数が $n$ の符号と同じ側に収まり、乗数 $m$ が定数として働くのに使った。そのため $H(P\psi)=\tilde P\psi$ が誤差なしに成り立つ。
+- **平行移動について平均すること**（Step 4）：$|\psi|^{p}$ の重みを消すのに使った。$\psi$ を引き伸ばして極限をとる方法もあるが、平均をとれば極限は要らない。
+- **定数項 $0$**：Step 2 で使った。一般の $P$ は次の定理で定数項を引いて扱う。
+:::
+:::
+
+::: theorem M. リースの定理 {#four:ht-m-riesz keywords="M. Riesz theorem: the conjugate function is bounded on L^p(T) for 1 < p < infinity; the Riesz projection onto nonnegative frequencies is bounded on L^p(T)" index="M. リースの定理|えむりーすのていり, リース射影|りーすしゃえい"}
+$1<p<\infty$ とし、$A_{p}$ を \ref{four:ht-lp} の定数とする。
+1. 三角多項式 $P$ について $\|\tilde P\|_{p}\le2A_{p}\|P\|_{p}$。
+2. $P\mapsto\tilde P$ は $L^{p}(\mathbb{T})$ 上の有界線形作用素 $f\mapsto\tilde f$（ノルム $\le2A_{p}$）にただ一つに延び、すべての $f\in L^{p}(\mathbb{T})$, $n\in\mathbb{Z}$ について $\widehat{\tilde f}(n)=-i\operatorname{sgn}n\,\hat f(n)$。
+3. **リース射影** $P_{+}f\defeq\frac12(f+i\tilde f)+\frac12\hat f(0)$ は $L^{p}(\mathbb{T})$ 上の有界線形作用素で、$\|P_{+}f\|_{p}\le(1+A_{p})\|f\|_{p}$、$\widehat{P_{+}f}(n)=\hat f(n)$（$n\ge0$）、$=0$（$n<0$）。
+:::
+
+::: intuition
+円周上の共役関数も、$1<p<\infty$ の $L^{p}$ で有界である。言い換えると、関数のフーリエ級数から負の振動数の部分を切り捨てる操作（リース射影）は $L^{p}$ のノルムを定数倍しか増やさない。
+:::
+
+::: proof
+**Step 1.** 【1】 $c_{0}\defeq\hat P(0)$ とおくと $\tilde P=\widetilde{P-c_{0}}$ で、$P-c_{0}$ は定数項 $0$。\ref{four:coefficients-basic.1} とヘルダーの不等式（$\mathbb{T}$ の測度は $1$）から $|c_{0}|\le\|P\|_{1}\le\|P\|_{p}$。\ref{four:ht-transference} から $\|\tilde P\|_{p}\le A_{p}\|P-c_{0}\|_{p}\le A_{p}(\|P\|_{p}+|c_{0}|)\le2A_{p}\|P\|_{p}$。
+
+**Step 2.** 【2】 三角多項式は $L^{p}(\mathbb{T})$ で稠密（\ref{four:trigonometric-density}、$p<\infty$）なので、1 と $L^{p}$ の完備性から有界線形作用素にただ一つに延びる。$f\mapsto\hat f(n)$ は $|\hat f(n)|\le\|f\|_{1}\le\|f\|_{p}$ で $L^{p}$ 上連続。三角多項式 $P$ については \ref{four:coefficients-basic.3} から $\widehat{\tilde P}(n)=-i\operatorname{sgn}n\,\hat P(n)$ で、$P\to f$（$L^{p}$）の極限をとればよい。
+
+**Step 3.** 【3】 有界性は $\|P_{+}f\|_{p}\le\frac12\|f\|_{p}+\frac12\cdot2A_{p}\|f\|_{p}+\frac12|\hat f(0)|\le(1+A_{p})\|f\|_{p}$。係数は 2 から $\widehat{P_{+}f}(n)=\frac12(1+\operatorname{sgn}n)\hat f(n)+\frac12\hat f(0)\mathbf{1}_{\{n=0\}}$ で、$n>0$ で $\hat f(n)$、$n=0$ で $\frac12\hat f(0)+\frac12\hat f(0)$、$n<0$ で $0$。
+
+::: hypcheck
+- **$1<p<\infty$**：Step 1 で \ref{four:ht-transference} を通して \ref{four:ht-lp} を使い、Step 2 で三角多項式の稠密性（$p<\infty$）を使った。$p=1,\infty$ では偽である（\see{four:ht-partial-sums-endpoint} と同じく、もし $P_{+}$ が有界なら部分和が一様有界になってしまう）。
+- 円周の上で直接カルデロン–ジグムント分解を行う方法もある（核は $\cot(\pi y)$ で、$\frac{1}{\pi y}$ との差は $|y|\le\frac12$ で有界）。ここでは、実数直線の結果を誤差なしに移せる転移を選んだ。
+- **選択公理**：使わない。
+:::
+:::
+
+::: supplement
+**共役関数の積分表示.** 三角多項式 $P$ について $\tilde P(x)=\mathrm{p.v.}\int_{-1/2}^{1/2}P(x-y)\cot(\pi y)\,dy$ が成り立つ（$\cot(\pi y)$ は形式的に $\sum_{n\ne0}(-i\operatorname{sgn}n)e_{n}(y)=2\sum_{n\ge1}\sin2\pi ny$ の和で、$e_{n}$ ごとに確かめられる）。
+
+**高い視点：解析的な部分を取り出す射影.** $f$ が実数値なら $f+i\tilde f=\hat f(0)+2\sum_{n>0}\hat f(n)e_{n}$ は、単位円板の正則関数 $\hat f(0)+2\sum_{n>0}\hat f(n)z^{n}$ の境界値であり、$\tilde f$ は、$f$ の調和拡張に \see{cx:harmonic-conjugate} の意味で対応する調和関数の境界値である。M. リースの定理は、「$L^{p}$ 関数から正則な部分を取り出す射影 $P_{+}$ が有界である」こと、すなわち $L^{p}(\mathbb{T})$ がハーディ空間 $H^{p}$ とその共役の直和に分かれることを述べている。実数直線では、$H$ は平行移動と正の拡大縮小と可換で、鏡映 $x\mapsto-x$ とは反可換な $L^{2}$ 上の有界作用素として、定数倍を除いてただ一つであることが知られている。比喩で言えば、$H$ は音の各成分の位相を $90^{\circ}$ だけ回す移相器であり、振幅は変えないので $L^{2}$ のエネルギーは保たれるが、波形の尖り（$L^{p}$ の大きさ）は変わりうる。$1<p<\infty$ ではその変化が定数倍に収まる、というのがこのページの結論である。
+:::
+
+## フーリエ級数の Lᵖ 収束 {#four:sec-ht-partial-sums}
+
+::: theorem 部分和の Lᵖ 収束 {#four:ht-partial-sums keywords="for 1 < p < infinity the partial sums S_N f of the Fourier series of f in L^p(T) are uniformly bounded on L^p and converge to f in L^p; S_N f = e_{-N} P_+(e_N f) - e_{N+1} P_+(e_{-N-1} f)" index="フーリエ級数の Lp 収束|ふーりえきゅうすうのえるぴーしゅうそく"}
+$1<p<\infty$, $f\in L^{p}(\mathbb{T})$ とし、$A_{p}$ を \ref{four:ht-lp} の定数とする。
+1. すべての $N\ge0$ で $\|S_{N}f\|_{p}\le2(1+A_{p})\|f\|_{p}$。
+2. $\|S_{N}f-f\|_{p}\to0$（$N\to\infty$）。
+:::
+
+::: intuition
+$1<p<\infty$ なら、$L^{p}$ 関数のフーリエ級数は（対称な部分和の意味で）$L^{p}$ ノルムで元の関数に収束する。部分和をとる操作は、振動数をずらしてからリース射影で片側を切る操作を二回組み合わせたものなので、一様に有界である。
+:::
+
+::: proof
+**Step 1.** 【$S_{N}f=e_{-N}P_{+}(e_{N}f)-e_{N+1}P_{+}(e_{-N-1}f)$】 フーリエ係数の定義から $\widehat{e_{k}g}(n)=\hat g(n-k)$。\ref{four:ht-m-riesz.3} から、右辺の第 1 項の $n$ 番目の係数は $\widehat{P_{+}(e_{N}f)}(n+N)=\mathbf{1}_{\{n\ge-N\}}\hat f(n)$、第 2 項は $\mathbf{1}_{\{n\ge N+1\}}\hat f(n)$。差は $\mathbf{1}_{\{|n|\le N\}}\hat f(n)=\widehat{S_{N}f}(n)$（\ref{four:coefficients-basic.3}）。両辺は $L^{1}(\mathbb{T})$ の元で係数がすべて等しいので、\ref{four:uniqueness} から a.e. で等しい。
+
+**Step 2.** 【1】 $|e_{k}|=1$ なので $e_{k}$ を掛ける操作は $L^{p}$ のノルムを変えない。Step 1 と \ref{four:ht-m-riesz.3} から $\|S_{N}f\|_{p}\le2(1+A_{p})\|f\|_{p}$。
+
+**Step 3.** 【2】 $\varepsilon>0$ とし、\ref{four:trigonometric-density} から $\|f-Q\|_{p}<\varepsilon$ となる三角多項式 $Q=\sum_{|n|\le M}c_{n}e_{n}$ をとる。$N\ge M$ なら $S_{N}Q=Q$（\ref{four:coefficients-basic.3}）なので、Step 2 から
+$$
+\|S_{N}f-f\|_{p}\le\|S_{N}(f-Q)\|_{p}+\|Q-f\|_{p}\le\bigl(2(1+A_{p})+1\bigr)\varepsilon.
+$$
+
+::: hypcheck
+- **$1<p$ と $p<\infty$**：Step 2 で \ref{four:ht-m-riesz} を使うのに両方が必要で、Step 3 の稠密性に $p<\infty$ を使った。端点では偽である（\see{four:ht-partial-sums-endpoint}）。
+- 証明の骨格は「一様有界性＋稠密な集合での収束 ⇒ 全体での収束」で、本質は 1 の一様有界性にある。逆に、一様有界性原理から、収束がすべての $f$ で成り立つことは一様有界性と同値である。
+- $p=2$ では 1 は $\|S_{N}f\|_{2}\le\|f\|_{2}$（ベッセルの不等式）で自明で、2 は \ref{four:l2-theory.2}。$p\ne2$ の場合が、\ref{four:l2-theory} の後の補足で証明を後回しにしていた主張である。
+- **選択公理**：使わない。
+:::
+:::
+
+::: proposition 端点での失敗 {#four:ht-partial-sums-endpoint keywords="L^1 convergence of Fourier series fails: the operator norm of S_N on L^1(T) is at least the Lebesgue constant ||D_N||_1, which tends to infinity; by uniform boundedness there is f in L^1 with unbounded ||S_N f||_1; uniform convergence fails for continuous functions" index="フーリエ級数の L1 収束の失敗|ふーりえきゅうすうのえるわんしゅうそくのしっぱい"}
+1. $L^{1}(\mathbb{T})$ 上の作用素として $\|S_{N}\|\ge\|D_{N}\|_{1}\to\infty$。したがって $f\in L^{1}(\mathbb{T})$ で $\sup_{N}\|S_{N}f\|_{1}=\infty$ となるもの、とくに $S_{N}f$ が $L^{1}$ で収束しないものがある。
+2. 連続関数 $f$ で $\sup_{N}\|S_{N}f\|_{\infty}=\infty$ となるものがある。とくに $p=\infty$ でも $L^{p}$ 収束は成り立たない。
+:::
+
+::: proof
+**Step 1.** 【$\|S_{N}\|_{L^{1}\to L^{1}}\ge\|D_{N}\|_{1}$】 $M>N$ とする。\ref{four:kernel-formulas.1} と \ref{four:convolution.2} から $S_{N}F_{M}=D_{N}*F_{M}=F_{M}*D_{N}=\sigma_{M}D_{N}=\sum_{|n|\le N}(1-\frac{|n|}{M})e_{n}$（$\widehat{D_{N}}(n)=\mathbf{1}_{\{|n|\le N\}}$）。よって
+$$
+\|S_{N}F_{M}-D_{N}\|_{1}\le\sup_{x}\Bigl|\sum_{|n|\le N}\frac{|n|}{M}e_{n}(x)\Bigr|\le\frac{N(N+1)}{M}\xrightarrow[M\to\infty]{}0.
+$$
+$\|F_{M}\|_{1}=1$（\ref{four:kernel-formulas.3}）なので $\|S_{N}\|\ge\|S_{N}F_{M}\|_{1}\to\|D_{N}\|_{1}$。
+
+**Step 2.** 【1 の残り】 $\|D_{N}\|_{1}\to\infty$ は \ref{fa:fourier-divergence} の証明の Step 2 で示した。$S_{N}$ は $L^{1}(\mathbb{T})$ 上の有界作用素で（\ref{four:convolution.1} から $\|S_{N}f\|_{1}\le\|D_{N}\|_{1}\|f\|_{1}$）、$L^{1}(\mathbb{T})$ はバナッハ空間（\ref{meas:riesz-fischer}）。すべての $f$ で $\sup_{N}\|S_{N}f\|_{1}<\infty$ なら、\ref{fa:uniform-boundedness} から $\sup_{N}\|S_{N}\|<\infty$ となり、Step 1 に反する。収束する列は有界なので、そのような $f$ では $S_{N}f$ は収束しない。
+
+**Step 3.** 【2】 \ref{fa:fourier-divergence} の連続関数 $f$ について、$S_{N}f$ は連続なので $|S_{N}f(0)|\le\|S_{N}f\|_{\infty}$。
+
+::: hypcheck
+- **選択公理**：Step 2 の一様有界性原理はベールのカテゴリー定理を経由し、従属選択公理を使う。Step 1 は選択公理を使わない。
+- Step 1 は $p=1$ で $\|S_{N}\|=\|D_{N}\|_{1}$（等号）を示す議論の半分である。$1<p<\infty$ では \ref{four:ht-partial-sums.1} から $\|S_{N}\|$ は有界にとどまる。
+:::
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
