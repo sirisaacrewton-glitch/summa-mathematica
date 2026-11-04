@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>作用素半群 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/07-functional-analysis/04-spectral-theory/05-semigroups.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 作用素半群 {#fa:page-semigroups keywords="strongly continuous (C_0) semigroups on Banach spaces, exponential bound, infinitesimal generator, density and closedness of the generator, Cauchy problem u' = Au, resolvent as Laplace transform, Hille-Yosida theorem for contraction semigroups via Yosida approximation, dissipative operators and the Lumer-Phillips theorem, adjoint semigroups, Stone's theorem on unitary groups, heat semigroup of the Dirichlet Laplacian, Schrodinger group"}
+
+熱方程式 $u_{t}=\Delta u$ や シュレディンガー方程式 $i\psi_{t}=H\psi$ のような発展方程式は、抽象的には $u'(t)=Au(t)$（$A$ は非有界作用素）と書ける。有限次元なら解は $u(t)=e^{tA}u(0)$ で、$e^{tA}$ は $e^{(s+t)A}=e^{sA}e^{tA}$ を満たす。無限次元で「$e^{tA}$」にあたるのが**強連続半群** $T(t)$ で、$A$ はその**生成作用素**である。このページでは、半群から生成作用素を作り、その性質（稠密・閉、レゾルベントは半群のラプラス変換）を示したあと、逆向きに「どんな作用素が縮小半群を生成するか」を特徴づける**ヒレ–吉田の定理**とそのヒルベルト空間版（**ルーマー–フィリップスの定理**）を証明する。最後に、ユニタリ群が自己共役作用素 $T$ によって $e^{itT}$ と書けることを示す**ストーンの定理**を得る。量子力学の時間発展が自己共役作用素（ハミルトニアン）で決まることの数学的な根拠である。
+
+## 記法と定義の確認 {#fa:sec-sg-notation}
+
+::: notation
+- $X$ は複素バナッハ空間、$B(X)$ は有界線形作用素の全体。閉作用素とレゾルベント集合は \ref{fa:page-unbounded-operators} と同じ定義をバナッハ空間で使う。一様有界性原理は \ref{fa:uniform-boundedness}、ノイマン級数は \ref{fa:neumann-series}。
+- **ベクトル値の積分**：区間 $[a,b]$ 上の連続関数 $f\colon[a,b]\to X$ について $\int_{a}^{b}f(t)\,dt$ をリーマン和の極限で定める（一様連続性から極限は存在する）。$\|\int f\|\le\int\|f\|$、有界作用素と交換し、$\frac1h\int_{t}^{t+h}f\to f(t)$（$h\to0$）。$\int_{0}^{\infty}$ は $\int_{0}^{R}$ の $R\to\infty$ の極限（$\int_{0}^{\infty}\|f\|<\infty$ なら存在）。
+- 自己共役作用素の関数計算とユニタリ群 $e^{itT}$ は \ref{fa:unbounded-spectral-theorem}, \ref{fa:unitary-group-from-selfadjoint}。
+- **選択公理**：\ref{fa:semigroup-basic.1} でベールの定理（従属選択公理を使う）を使う。それ以外では使わない。
+:::
+
+## 強連続半群と生成作用素 {#fa:sec-sg-semigroups}
+
+::: definition 強連続半群と生成作用素 {#fa:c0-semigroup keywords="C_0 semigroup T(t) in B(X): T(0) = I, T(s+t) = T(s) T(t), T(t)x -> x as t -> 0+; contraction semigroup ||T(t)|| <= 1; infinitesimal generator A x = lim (T(t)x - x)/t" index="強連続半群|きょうれんぞくはんぐん, C0 半群|しーぜろはんぐん, 生成作用素|せいせいさようそ, 縮小半群|しゅくしょうはんぐん"}
+$T\colon[0,\infty)\to B(X)$ が $T(0)=I$、$T(s+t)=T(s)T(t)$、すべての $x$ で $\lim_{t\to0+}T(t)x=x$ を満たすとき**強連続半群**（$C_{0}$ 半群）という。$\|T(t)\|\le1$ のとき**縮小半群**という。極限 $Ax\defeq\lim_{t\to0+}\frac{T(t)x-x}{t}$ が存在する $x$ の全体を $D(A)$ とし、$A$ を $T$ の**生成作用素**という。
+:::
+
+::: proposition 半群の基本性質 {#fa:semigroup-basic keywords="for a C_0 semigroup: ||T(t)|| <= M e^{omega t}; t -> T(t)x is continuous; int_0^t T(s)x ds is in D(A) with A int = T(t)x - x; for x in D(A), T(t)x is in D(A), d/dt T(t)x = A T(t)x = T(t) A x; D(A) is dense and A is closed" index="半群の基本性質|はんぐんのきほんせいしつ"}
+$T$ を強連続半群、$A$ をその生成作用素とする。
+1. 定数 $M\ge1$, $\omega\ge0$ で $\|T(t)\|\le Me^{\omega t}$（$t\ge0$）。$t\mapsto T(t)x$ は連続。
+2. $x\in X$, $t>0$ について $\int_{0}^{t}T(s)x\,ds\in D(A)$ で $A\int_{0}^{t}T(s)x\,ds=T(t)x-x$。
+3. $x\in D(A)$ なら $T(t)x\in D(A)$ で、$t\mapsto T(t)x$ は微分可能、$\frac{d}{dt}T(t)x=AT(t)x=T(t)Ax$。とくに $T(t)x-x=\int_{0}^{t}T(s)Ax\,ds$。
+4. $D(A)$ は稠密で、$A$ は閉作用素。
+:::
+
+::: proof
+**1.** **Step 1.** $n\ge1$ について $F_{n}\defeq\{x\in X:\|T(t)x\|\le n\ (0\le t\le\frac1n)\}$ とおく。各 $T(t)$ は連続なので $F_{n}$ は閉集合。$x\in X$ について、強連続性から $t\le\frac1m$ で $\|T(t)x-x\|\le1$ となる $m$ があり、$n\ge\max(m,\|x\|+1)$ なら $x\in F_{n}$。よって $\bigcup_{n}F_{n}=X$。\ref{fa:uniform-boundedness} の証明と同じくベールの定理を使うと、ある $F_{n}$ が球 $\overline{B(x_{0},r)}$ を含み、$\|x\|\le r$ なら $\|T(t)x\|\le\|T(t)(x_{0}+x)\|+\|T(t)x_{0}\|\le2n$（$t\le\frac1n$）。よって $\delta\defeq\frac1n$ について $\sup_{t\le\delta}\|T(t)\|\le\frac{2n}{r}$。
+
+**Step 2.** $M\defeq\sup_{t\le\delta}\|T(t)\|\ge1$、$\omega\defeq\frac{\log M}{\delta}$ とする。$t=n\delta+r$（$0\le r<\delta$）なら $\|T(t)\|\le M^{n+1}\le Me^{\omega t}$。連続性：右側は $\|T(t+h)x-T(t)x\|\le\|T(t)\|\|T(h)x-x\|$、左側は $\|T(t-h)x-T(t)x\|\le\|T(t-h)\|\|x-T(h)x\|\le Me^{\omega t}\|x-T(h)x\|$。
+
+**2.** $h>0$ について
+$$
+\frac{T(h)-I}{h}\int_{0}^{t}T(s)x\,ds=\frac1h\int_{0}^{t}\bigl(T(s+h)x-T(s)x\bigr)ds=\frac1h\int_{t}^{t+h}T(s)x\,ds-\frac1h\int_{0}^{h}T(s)x\,ds\to T(t)x-x.
+$$
+
+**3.** $\frac{T(h)-I}{h}T(t)x=T(t)\frac{T(h)x-x}{h}\to T(t)Ax$ なので $T(t)x\in D(A)$、$AT(t)x=T(t)Ax$、右微分は $T(t)Ax$。左微分：$\frac{T(t)x-T(t-h)x}{h}-T(t)Ax=T(t-h)\bigl(\frac{T(h)x-x}{h}-Ax\bigr)+(T(t-h)Ax-T(t)Ax)\to0$（1 の一様な評価と連続性）。導関数が連続なので微積分の基本定理（ベクトル値でも、汎関数を施して実数値に帰着）から積分の式。
+
+**4.** 稠密性：2 から $x_{t}\defeq\frac1t\int_{0}^{t}T(s)x\,ds\in D(A)$ で $x_{t}\to x$。閉性：$x_{k}\in D(A)$, $x_{k}\to x$, $Ax_{k}\to y$ なら、3 から $T(h)x_{k}-x_{k}=\int_{0}^{h}T(s)Ax_{k}ds$。$k\to\infty$ で $T(h)x-x=\int_{0}^{h}T(s)y\,ds$、$h$ で割って $h\to0$ で $Ax=y$。
+:::
+
+::: proposition レゾルベントとラプラス変換 {#fa:semigroup-resolvent keywords="if ||T(t)|| <= M e^{omega t} then every lambda > omega is in the resolvent set of A and (lambda - A)^{-1} x = int_0^infinity e^{-lambda t} T(t)x dt, with ||(lambda - A)^{-n}|| <= M/(lambda - omega)^n" index="半群のレゾルベント|はんぐんのれぞるべんと"}
+$\|T(t)\|\le Me^{\omega t}$ とする。$\lambda>\omega$ なら $\lambda\in\rho(A)$ で
+$$
+(\lambda-A)^{-1}x=\int_{0}^{\infty}e^{-\lambda t}T(t)x\,dt,\qquad\|(\lambda-A)^{-1}\|\le\frac{M}{\lambda-\omega}.
+$$
+:::
+
+::: proof
+$R_{\lambda}x$ を右辺とする（被積分関数のノルムは $Me^{(\omega-\lambda)t}\|x\|$ で可積分）。$\|R_{\lambda}\|\le\frac{M}{\lambda-\omega}$。$e^{-\lambda t}T(t)$ も強連続半群で、その生成作用素は $A-\lambda$（定義から直接）。\ref{fa:semigroup-basic.2} をこの半群に使うと $(A-\lambda)\int_{0}^{R}e^{-\lambda t}T(t)x\,dt=e^{-\lambda R}T(R)x-x$。$R\to\infty$ で右辺は $-x$ に収束し、$A$ は閉なので $R_{\lambda}x\in D(A)$, $(\lambda-A)R_{\lambda}x=x$。$x\in D(A)$ なら \ref{fa:semigroup-basic.3} から $R_{\lambda}(\lambda-A)x=(\lambda-A)R_{\lambda}x$（積分と $A$ を交換：$\int e^{-\lambda t}T(t)Ax\,dt=\int e^{-\lambda t}AT(t)x$ で、閉作用素と積分の交換は 2 と同じ極限の議論）$=x$。よって $\lambda-A$ は全単射で逆が $R_{\lambda}$。
+:::
+
+## ヒレ–吉田の定理 {#fa:sec-sg-hille-yosida}
+
+::: theorem ヒレ–吉田の定理 {#fa:hille-yosida keywords="Hille-Yosida theorem: a linear operator A generates a contraction semigroup iff A is closed, densely defined, (0, infinity) is in the resolvent set and ||lambda (lambda - A)^{-1}|| <= 1 for lambda > 0; proof by the Yosida approximation A_lambda = lambda A (lambda - A)^{-1}" index="ヒレ–吉田の定理|ひれよしだのていり, 吉田近似|よしだきんじ"}
+作用素 $A$ が縮小半群の生成作用素であることと、次の三つが成り立つことは同値。
+1. $A$ は閉で、$D(A)$ は稠密。
+2. すべての $\lambda>0$ が $\rho(A)$ に属する。
+3. $\lambda>0$ で $\|\lambda(\lambda-A)^{-1}\|\le1$。
+:::
+
+::: proof
+**（⇒）** \ref{fa:semigroup-basic.4} と \ref{fa:semigroup-resolvent}（$M=1$, $\omega=0$）。
+
+**（⇐）Step 1（吉田近似）.** $\lambda>0$ について $J_{\lambda}\defeq\lambda(\lambda-A)^{-1}$、$A_{\lambda}\defeq AJ_{\lambda}=\lambda^{2}(\lambda-A)^{-1}-\lambda$（有界）とおく。$\|J_{\lambda}\|\le1$。$x\in D(A)$ なら $J_{\lambda}x-x=(\lambda-A)^{-1}Ax$ で $\|J_{\lambda}x-x\|\le\frac{\|Ax\|}{\lambda}\to0$。$\|J_{\lambda}\|\le1$ と稠密性から、すべての $x$ で $J_{\lambda}x\to x$（$\lambda\to\infty$）。よって $x\in D(A)$ なら $A_{\lambda}x=J_{\lambda}Ax\to Ax$。
+
+**Step 2（近似半群）.** $T_{\lambda}(t)\defeq e^{tA_{\lambda}}\defeq\sum_{k}\frac{(tA_{\lambda})^{k}}{k!}$（有界作用素の指数関数）。$e^{tA_{\lambda}}=e^{-\lambda t}e^{t\lambda J_{\lambda}}$ で $\|e^{t\lambda J_{\lambda}}\|\le e^{t\lambda\|J_{\lambda}\|}\le e^{\lambda t}$ なので $\|T_{\lambda}(t)\|\le1$。
+
+**Step 3（コーシー性）.** $\lambda,\mu>0$ について $A_{\lambda}$, $A_{\mu}$, $T_{\lambda}$, $T_{\mu}$ は互いに可換（レゾルベントは可換）。$x\in D(A)$ について
+$$
+T_{\lambda}(t)x-T_{\mu}(t)x=\int_{0}^{t}\frac{d}{ds}\bigl(T_{\mu}(t-s)T_{\lambda}(s)x\bigr)ds=\int_{0}^{t}T_{\mu}(t-s)T_{\lambda}(s)(A_{\lambda}x-A_{\mu}x)\,ds,
+$$
+よって $\|T_{\lambda}(t)x-T_{\mu}(t)x\|\le t\|A_{\lambda}x-A_{\mu}x\|\to0$（$\lambda,\mu\to\infty$、$[0,t_{0}]$ 上一様）。$\|T_{\lambda}(t)\|\le1$ と稠密性から、すべての $x$ で $T_{\lambda}(t)x$ は一様収束し、極限 $T(t)x$ は線形・縮小・半群性・強連続性（一様極限）をもつ。
+
+**Step 4（生成作用素は $A$）.** $B$ を $T$ の生成作用素とする。$x\in D(A)$ について $T_{\lambda}(t)x-x=\int_{0}^{t}T_{\lambda}(s)A_{\lambda}x\,ds$ で、$T_{\lambda}(s)A_{\lambda}x\to T(s)Ax$（一様）なので $T(t)x-x=\int_{0}^{t}T(s)Ax\,ds$。$t$ で割って $t\to0$ とすれば $x\in D(B)$, $Bx=Ax$。よって $A\subset B$。$1-A$ は全射（2）で、$1-B$ は単射（\ref{fa:semigroup-resolvent}）なので、$x\in D(B)$ について $(1-B)x=(1-A)y$ となる $y\in D(A)$ をとると $(1-B)(x-y)=0$、$x=y\in D(A)$。よって $A=B$。
+:::
+
+::: theorem ルーマー–フィリップスの定理 {#fa:lumer-phillips keywords="Lumer-Phillips theorem in Hilbert space: a densely defined dissipative operator A (Re <Ax, x> <= 0) with ran(lambda_0 - A) = H for some lambda_0 > 0 generates a contraction semigroup; maximal dissipative operators" index="ルーマー–フィリップスの定理|るーまーふぃりっぷすのていり, 散逸作用素|さんいつさようそ"}
+$H$ をヒルベルト空間、$A$ を稠密に定義された作用素で、**散逸的**（すべての $x\in D(A)$ で $\operatorname{Re}\langle Ax,x\rangle\le0$）、かつある $\lambda_{0}>0$ で $R(\lambda_{0}-A)=H$ とする。このとき $A$ は縮小半群を生成する。
+:::
+
+::: proof
+**Step 1（評価）.** $\lambda>0$, $x\in D(A)$ について $\|(\lambda-A)x\|\|x\|\ge\operatorname{Re}\langle(\lambda-A)x,x\rangle\ge\lambda\|x\|^{2}$ なので $\|(\lambda-A)x\|\ge\lambda\|x\|$。
+
+**Step 2（閉性と $\lambda_{0}$）.** $\lambda_{0}-A$ は単射で全射、逆は有界（ノルム $\le\frac{1}{\lambda_{0}}$）なので、$\lambda_{0}-A$ の逆は閉作用素で、$A$ も閉。
+
+**Step 3（すべての $\lambda>0$）.** $\Lambda\defeq\{\lambda>0:R(\lambda-A)=H\}$ は開：$\lambda\in\Lambda$, $|\mu-\lambda|<\lambda$ なら $\mu-A=(1-(\lambda-\mu)(\lambda-A)^{-1})(\lambda-A)$ で、$\|(\lambda-\mu)(\lambda-A)^{-1}\|\le\frac{|\lambda-\mu|}{\lambda}<1$ からノイマン級数（\ref{fa:neumann-series}）で可逆。閉：$\lambda_{k}\in\Lambda$, $\lambda_{k}\to\lambda>0$ なら、十分大きな $k$ で $|\lambda-\lambda_{k}|<\lambda_{k}$ なので前段から $\lambda\in\Lambda$。$(0,\infty)$ は連結で $\lambda_{0}\in\Lambda$ なので $\Lambda=(0,\infty)$。Step 1 から $\|\lambda(\lambda-A)^{-1}\|\le1$。\ref{fa:hille-yosida} から結論。
+:::
+
+## ストーンの定理 {#fa:sec-sg-stone}
+
+::: lemma 共役半群 {#fa:adjoint-semigroup keywords="in a Hilbert space, if T(t) is a C_0 semigroup with generator A then T(t)* is a C_0 semigroup with generator A* (proved here for semigroups of the type arising from unitary groups and contractions)" index="共役半群|きょうやくはんぐん"}
+$H$ をヒルベルト空間、$T$ を縮小半群、$A$ をその生成作用素とし、$T(t)^{*}$ も強連続半群とする。その生成作用素 $B$ は $A^{*}$ に等しい。
+:::
+
+::: proof
+$x\in D(A)$, $y\in D(B)$ について $\langle Ax,y\rangle=\lim\langle\frac{T(t)x-x}{t},y\rangle=\lim\langle x,\frac{T(t)^{*}y-y}{t}\rangle=\langle x,By\rangle$ なので $B\subset A^{*}$。$\|T(t)^{*}\|=\|T(t)\|\le1$ なので \ref{fa:semigroup-resolvent} から $1-B$ は全射。$1-A^{*}$ は単射：$\ker(1-A^{*})=R(1-A)^{\perp}=0$（\ref{fa:adjoint-graph.2}、$1-A$ は全射）。\ref{fa:hille-yosida} の証明の Step 4 と同じ議論で $B=A^{*}$。
+:::
+
+::: theorem ストーンの定理 {#fa:stone-theorem keywords="Stone's theorem: strongly continuous one-parameter unitary groups U(t) on a Hilbert space correspond exactly to self-adjoint operators T via U(t) = e^{itT}; the generator of U is iT" index="ストーンの定理|すとーんのていり, 1 径数ユニタリ群|1けいすうゆにたりぐん"}
+$H$ をヒルベルト空間とする。
+1. $T$ が自己共役なら $U(t)\defeq e^{itT}$ は強連続なユニタリ群で、その生成作用素（$t\ge0$ の半群として）は $iT$。
+2. 逆に $U\colon\mathbb{R}\to B(H)$ がユニタリ作用素の群（$U(0)=I$, $U(s+t)=U(s)U(t)$）で強連続なら、ただ一つの自己共役作用素 $T$ で $U(t)=e^{itT}$ となるものがある。
+:::
+
+::: proof
+**1.** \ref{fa:unitary-group-from-selfadjoint} の 1・2。
+
+**2.** **Step 1.** $t\ge0$ の部分 $U(t)$ は縮小（ユニタリ）半群で、生成作用素を $A$ とする。$U(t)^{*}=U(-t)$ も強連続な縮小半群で、その生成作用素は定義から $-A$（$\frac{U(-t)x-x}{t}=-U(-t)\frac{U(t)x-x}{t}$）。\ref{fa:adjoint-semigroup} から $A^{*}=-A$。
+
+**Step 2.** $T\defeq-iA$ とおくと $T^{*}=iA^{*}=-iA=T$（$(cA)^{*}=\bar cA^{*}$）で、$T$ は自己共役。1 から $e^{itT}$ は生成作用素 $iT=A$ の縮小半群。
+
+**Step 3（一意性）.** 同じ生成作用素をもつ二つの強連続半群 $S_{1}$, $S_{2}$ は等しい：$x\in D(A)$ について $s\mapsto S_{1}(t-s)S_{2}(s)x$ は微分可能で導関数は $-S_{1}(t-s)AS_{2}(s)x+S_{1}(t-s)AS_{2}(s)x=0$（\ref{fa:semigroup-basic.3}）なので、$S_{2}(t)x=S_{1}(t)x$。稠密性から全体で等しい。よって $t\ge0$ で $U(t)=e^{itT}$、$t<0$ では $U(t)=U(-t)^{*}=(e^{-itT})^{*}=e^{itT}$。$T$ の一意性は $iT$ が生成作用素として決まることから。
+:::
+
+::: example 熱半群とシュレディンガー群 {#fa:heat-schrodinger-examples keywords="the Dirichlet Laplacian generates the heat contraction semigroup e^{t Delta_D} on L^2(Omega); for a self-adjoint Hamiltonian H, e^{-itH} solves the Schrodinger equation and preserves norms" index="熱半群|ねつはんぐん, シュレディンガー群|しゅれでぃんがーぐん"}
+1. $\Omega$ を有界な開集合とする。$\Delta_{D}\defeq-(-\Delta_{D})$（\ref{fa:dirichlet-laplacian}）は散逸的で $R(1-\Delta_{D})=L^{2}(\Omega)$ なので、縮小半群 $e^{t\Delta_{D}}$ を生成する。$u_{0}\in D(\Delta_{D})$ なら $u(t)\defeq e^{t\Delta_{D}}u_{0}$ は $u'=\Delta_{D}u$ の解で、$\|u(t)\|_{2}$ は単調減少する。
+2. 自己共役作用素 $H$（ハミルトニアン）について、$\psi(t)\defeq e^{-itH}\psi_{0}$（$\psi_{0}\in D(H)$）は $i\psi'(t)=H\psi(t)$ を満たし、$\|\psi(t)\|=\|\psi_{0}\|$（確率の保存）。
+:::
+
+::: proof
+**1.** $\langle\Delta_{D}u,u\rangle=-\|\nabla u\|_{2}^{2}\le0$（\ref{fa:dirichlet-laplacian}）。$1-\Delta_{D}=1+(-\Delta_{D})$ で、$-\Delta_{D}$ は自己共役で $\sigma\subset(0,\infty)$ なので $-1\in\rho(-\Delta_{D})$、すなわち $1-\Delta_{D}$ は全射。\ref{fa:lumer-phillips} から縮小半群を生成し、\ref{fa:semigroup-basic.3} から微分方程式。ノルムの単調性は $\frac{d}{dt}\|u\|^{2}=2\operatorname{Re}\langle\Delta_{D}u,u\rangle\le0$。
+
+**2.** \ref{fa:stone-theorem.1} を $-H$ に使うと、$e^{-itH}$ の生成作用素は $-iH$ で、\ref{fa:semigroup-basic.3} から $\psi'=-iH\psi$。ユニタリ性からノルムの保存。
+:::
+
+::: hypcheck
+- \ref{fa:semigroup-basic.1} の Step 1 では、$\|T(t)\|$ が $0$ の近くで有界であることをベールの定理から示した。ベールの定理の証明は従属選択公理を使う（\ref{fa:uniform-boundedness} と同じ）。
+- ヒレ–吉田の定理の条件 3 の「$\le1$」は縮小半群に対応する。一般の $\|T(t)\|\le Me^{\omega t}$ では $\|(\lambda-A)^{-n}\|\le\frac{M}{(\lambda-\omega)^{n}}$（すべての $n$）が必要十分で、$n=1$ だけでは足りない。
+- ルーマー–フィリップスの定理では、散逸性だけでなく値域の条件 $R(\lambda_{0}-A)=H$ が本質的である（定義域を小さくとった作用素は散逸的でも生成作用素にならない：区間上の $\frac{d}{dx}$ を $H_{0}^{1}$ に制限したもの）。
+- ストーンの定理で強連続性は本質的：可測なユニタリ群は可分なヒルベルト空間では自動的に強連続になる（フォン・ノイマンの定理）が、ここでは仮定した。
+:::
+
+::: supplement
+**関連する結果.**
+- **解析的半群**：$-\Delta_{D}$ のような下に有界な自己共役作用素が生成する半群は、$t$ について複素数の扇形に正則に延び、$t>0$ で $e^{t\Delta_{D}}u_{0}\in D(\Delta_{D}^{k})$（すべての $k$）となる（平滑化効果）。熱方程式の解の滑らかさの抽象的な根拠である。
+- **トロッター–加藤の積公式**：$e^{t(A+B)}=\lim_{n}(e^{tA/n}e^{tB/n})^{n}$（適当な条件の下で）。量子力学の経路積分の数学的な出発点。
+- 非線形の発展方程式には、単調作用素の理論（クランダル–リゲット）や不動点定理を使う。
+
+**高い視点：指数関数の一般化.** 半群の理論は、指数関数 $e^{ta}$ を「微分方程式 $u'=au$ の解の作り手」として無限次元に一般化したものである。ヒレ–吉田の定理は「$e^{tA}$ が存在して縮小的であること」を「$A$ のレゾルベントの評価」という、時間を含まない作用素の性質に翻訳する：ラプラス変換 $\int_{0}^{\infty}e^{-\lambda t}e^{tA}dt=(\lambda-A)^{-1}$ が、時間の世界と周波数（レゾルベント）の世界をつなぐ辞書である。比喩で言えば、半群は「時間を進める機械」、生成作用素はその機械の「一瞬の動き」で、ヒレ–吉田の定理は、どんな一瞬の動きなら、それを積み重ねて暴走しない機械が組み立てられるかを判定する。
+:::
+
+## 問題 {#fa:sec-sg-problems}
+
+::: problem {#fa:prob-sg-translation}
+$X=L^{2}(\mathbb{R})$ 上の平行移動 $(T(t)f)(x)\defeq f(x+t)$ は強連続な縮小半群（ユニタリ群）で、生成作用素は $D(A)=H^{1}(\mathbb{R})$ 上の $\frac{d}{dx}$ であることを、フーリエ変換で示せ。
+:::
+
+::: solution
+プランシュレルの定理（\ref{four:plancherel}）から $\mathcal{F}T(t)\mathcal{F}^{-1}$ は $e^{2\pi it\xi}$ の掛け算（\ref{four:transform-basic.2} を $L^{1}\cap L^{2}$ で確かめて延ばす）。よって $T(t)$ はユニタリで、$\|T(t)f-f\|_{2}^{2}=\int|e^{2\pi it\xi}-1|^{2}|\hat f|^{2}d\xi\to0$（優収束定理）。$\frac{T(t)f-f}{t}$ の変換は $\frac{e^{2\pi it\xi}-1}{t}\hat f$ で、\ref{fa:unitary-group-from-selfadjoint.2} と同じ議論（$|\frac{e^{2\pi it\xi}-1}{t}|\le2\pi|\xi|$、ファトゥの補題）から、極限が $L^{2}$ に存在する $\iff$ $\xi\hat f\in L^{2}$ $\iff$ $f\in H^{1}$（\ref{fa:sobolev-fourier}）、そのとき極限の変換は $2\pi i\xi\hat f$、すなわち $f'$。
+:::
+
+::: problem {#fa:prob-sg-matrix}
+$X=\mathbb{C}^{n}$, $A$ を行列とすると、$e^{tA}$ は強連続半群で生成作用素は $A$、$\|e^{tA}\|\le1$（すべての $t\ge0$）$\iff$ $A+A^{*}\le0$ を示せ（エルミート内積で）。
+:::
+
+::: solution
+$e^{tA}$ は冪級数で定義され、$\frac{e^{tA}-I}{t}\to A$（ノルム収束）なので生成作用素は $A$（$D(A)=\mathbb{C}^{n}$）。（⇐）$\frac{d}{dt}\|e^{tA}x\|^{2}=\langle(A+A^{*})e^{tA}x,e^{tA}x\rangle\le0$。（⇒）$\|e^{tA}x\|^{2}\le\|x\|^{2}$ を $t=0$ で微分すると $\langle(A+A^{*})x,x\rangle\le0$。（\ref{fa:lumer-phillips} の散逸性と一致する。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
