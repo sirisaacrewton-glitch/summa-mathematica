@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>補間定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/03-real-variable/01-interpolation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 補間定理 {#four:page-interpolation keywords="interpolation of operators on L^p spaces: distribution function, layer cake formula, weak L^p spaces, sublinear operators of weak type, Marcinkiewicz interpolation theorem, Hadamard three lines lemma, Riesz-Thorin interpolation theorem, Hausdorff-Young inequality, Young's convolution inequality"}
+
+作用素が二つの「端」の空間、例えば $L^{1}$ と $L^{\infty}$ や $L^{1}$ と $L^{2}$ で有界であることがわかると、その「間」の $L^{p}$ でも有界であることが自動的に従う——これが**補間定理**である。調和解析では、端点の評価はしばしば簡単（$L^{2}$ ならプランシュレルの定理、$L^{\infty}$ なら自明な評価）なのに、中間の $L^{p}$ の評価を直接示すのは難しい。このページでは二つの補間定理を示す。一つは、端点で「弱い」評価（チェビシェフの不等式の形）しかなくても中間で本当の $L^{p}$ 評価が得られる**マルチンキェヴィチの補間定理**で、証明は関数を「大きい部分」と「小さい部分」に切り分けるだけの実解析的なものである。もう一つは、線形作用素について指数を同時に動かせる**リース–ソーリンの補間定理**で、証明には複素解析（**アダマールの三線定理**）を使う。応用としてフーリエ変換の**ハウスドルフ–ヤングの不等式**と、畳み込みの**ヤングの不等式**を得る。
+
+## 記法と定義の確認 {#four:sec-ip2-notation}
+
+::: notation
+- $(X,\mu)$, $(Y,\nu)$ は σ 有限な測度空間。$L^{p}=L^{p}(X,\mu)$ は複素数値。$1\le p\le\infty$ の共役指数を $p'$ と書く（$\frac1p+\frac1{p'}=1$）。
+- ヘルダーの不等式、$L^{p}$ の双対は \ref{meas:holder}, \ref{fa:lp-dual}。トネリの定理は \ref{meas:tonelli}。
+- **単関数**：有限個の測度有限な集合の指示関数の一次結合。単関数の全体は $1\le p<\infty$ で $L^{p}$ に稠密（\ref{meas:lp-simple-dense}）。
+- 三線定理で使う複素解析の結果：\ref{cx:maximum-principle}。
+- フーリエ変換とプランシュレルの定理は \ref{four:fourier-transform}, \ref{four:plancherel}、畳み込みは \ref{four:convolution-rd}。
+- **選択公理**：使わない。
+:::
+
+## 分布関数と弱 Lᵖ {#four:sec-ip2-weak}
+
+::: definition 分布関数と弱 Lᵖ {#four:weak-lp keywords="distribution function lambda_f(t) = mu(|f| > t); weak L^p with quasinorm [f]_p = sup_t t lambda_f(t)^{1/p}; Chebyshev: L^p subset weak L^p; sublinear operators of strong type and weak type (p,q)" index="分布関数（測度）|ぶんぷかんすうそくど, 弱 Lp 空間|じゃくえるぴーくうかん, 弱型|じゃくがた, 強型|きょうがた, 劣線形作用素|れつせんけいさようそ"}
+1. 可測関数 $f$ について $\lambda_{f}(t)\defeq\mu(\{|f|>t\})$（$t\ge0$）を $f$ の**分布関数**という。
+2. $1\le p<\infty$ について $[f]_{p}\defeq\sup_{t>0}t\lambda_{f}(t)^{1/p}$ とおき、$[f]_{p}<\infty$ となる $f$ の全体を**弱 $L^{p}$** という。
+3. $L^{p}$ のある部分空間で定義され可測関数に値をとる写像 $T$ が**劣線形**とは、$|T(f+g)|\le|Tf|+|Tg|$, $|T(cf)|=|c||Tf|$（a.e.）を満たすことをいう。$\|Tf\|_{q}\le A\|f\|_{p}$ のとき**強 $(p,q)$ 型**、$[Tf]_{q}\le A\|f\|_{p}$ のとき**弱 $(p,q)$ 型**という（$q=\infty$ の弱型は強型と同じとする）。
+:::
+
+::: proposition 層の公式 {#four:layer-cake keywords="layer cake formula ||f||_p^p = p int_0^infinity t^{p-1} lambda_f(t) dt; Chebyshev inequality [f]_p <= ||f||_p" index="層の公式|そうのこうしき"}
+1. $0<p<\infty$ について $\|f\|_{p}^{p}=p\int_{0}^{\infty}t^{p-1}\lambda_{f}(t)\,dt$。
+2. $[f]_{p}\le\|f\|_{p}$。
+:::
+
+::: proof
+**1.** $|f(x)|^{p}=\int_{0}^{\infty}pt^{p-1}\mathbf{1}_{\{t<|f(x)|\}}dt$ をトネリで積分する（可測性は \ref{prb:tail-formula} の証明と同じ）。**2.** $t\mathbf{1}_{\{|f|>t\}}\le|f|$ の $p$ 乗を積分する。
+:::
+
+## マルチンキェヴィチの補間定理 {#four:sec-ip2-marcinkiewicz}
+
+::: theorem マルチンキェヴィチの補間定理 {#four:marcinkiewicz keywords="Marcinkiewicz interpolation theorem: a sublinear operator of weak type (p0,p0) and (p1,p1), 1 <= p0 < p1 <= infinity, defined on L^{p0} + L^{p1}, is of strong type (p,p) for p0 < p < p1" index="マルチンキェヴィチの補間定理|まるちんきぇう゛ぃちのほかんていり"}
+$1\le p_{0}<p_{1}\le\infty$ とし、$T$ を $L^{p_{0}}+L^{p_{1}}$ 上の劣線形作用素で、弱 $(p_{0},p_{0})$ 型（定数 $A_{0}$）かつ弱 $(p_{1},p_{1})$ 型（定数 $A_{1}$）とする。このとき $p_{0}<p<p_{1}$ について、$p,p_{0},p_{1},A_{0},A_{1}$ だけで決まる $A_{p}$ で $\|Tf\|_{p}\le A_{p}\|f\|_{p}$。
+:::
+
+::: proof
+$f\in L^{p}$ とする。$t>0$ と定数 $c>0$（後で選ぶ）について、$f$ を切り分ける：
+$$
+f_{0}^{t}\defeq f\mathbf{1}_{\{|f|>ct\}},\qquad f_{1}^{t}\defeq f\mathbf{1}_{\{|f|\le ct\}}.
+$$
+$|f_{0}^{t}|^{p_{0}}\le(ct)^{p_{0}-p}|f|^{p}$ なので $f_{0}^{t}\in L^{p_{0}}$、同様に $f_{1}^{t}\in L^{p_{1}}$（$p_{1}=\infty$ なら $|f_{1}^{t}|\le ct$）。劣線形性から $|Tf|\le|Tf_{0}^{t}|+|Tf_{1}^{t}|$ なので
+$$
+\lambda_{Tf}(t)\le\lambda_{Tf_{0}^{t}}(t/2)+\lambda_{Tf_{1}^{t}}(t/2).
+$$
+
+**場合 $p_{1}<\infty$.** $c=1$ とする。弱型の評価から
+$$
+\lambda_{Tf}(t)\le\Bigl(\frac{2A_{0}}{t}\Bigr)^{p_{0}}\int_{\{|f|>t\}}|f|^{p_{0}}+\Bigl(\frac{2A_{1}}{t}\Bigr)^{p_{1}}\int_{\{|f|\le t\}}|f|^{p_{1}}.
+$$
+\ref{four:layer-cake.1} とトネリから
+$$
+\|Tf\|_{p}^{p}\le p(2A_{0})^{p_{0}}\int|f|^{p_{0}}\int_{0}^{|f|}t^{p-1-p_{0}}dt\,d\mu+p(2A_{1})^{p_{1}}\int|f|^{p_{1}}\int_{|f|}^{\infty}t^{p-1-p_{1}}dt\,d\mu.
+$$
+$p>p_{0}$ なので $\int_{0}^{|f|}t^{p-1-p_{0}}dt=\frac{|f|^{p-p_{0}}}{p-p_{0}}$、$p<p_{1}$ なので $\int_{|f|}^{\infty}t^{p-1-p_{1}}dt=\frac{|f|^{p-p_{1}}}{p_{1}-p}$。よって $\|Tf\|_{p}^{p}\le p\bigl(\frac{(2A_{0})^{p_{0}}}{p-p_{0}}+\frac{(2A_{1})^{p_{1}}}{p_{1}-p}\bigr)\|f\|_{p}^{p}$。
+
+**場合 $p_{1}=\infty$.** $c\defeq\frac{1}{2A_{1}}$ とすると $\|Tf_{1}^{t}\|_{\infty}\le A_{1}ct=\frac t2$ なので $\lambda_{Tf_{1}^{t}}(t/2)=0$。残りは前の場合と同じ計算で $\|Tf\|_{p}^{p}\le p(2A_{0})^{p_{0}}\int|f|^{p_{0}}\int_{0}^{|f|/c}t^{p-1-p_{0}}dt\,d\mu=\frac{p(2A_{0})^{p_{0}}(2A_{1})^{p-p_{0}}}{p-p_{0}}\|f\|_{p}^{p}$。
+:::
+
+## リース–ソーリンの補間定理 {#four:sec-ip2-riesz-thorin}
+
+::: lemma アダマールの三線定理 {#four:three-lines keywords="Hadamard three lines lemma: if F is bounded and continuous on the strip 0 <= Re z <= 1, holomorphic inside, |F| <= M0 on Re z = 0 and |F| <= M1 on Re z = 1, then |F(theta + iy)| <= M0^{1-theta} M1^theta" index="アダマールの三線定理|あだまーるのさんせんていり"}
+$S\defeq\{z:0\le\operatorname{Re}z\le1\}$ とし、$F$ を $S$ 上の有界連続関数で $S$ の内部で正則、$|F(iy)|\le M_{0}$, $|F(1+iy)|\le M_{1}$（$y\in\mathbb{R}$、$M_{0},M_{1}>0$）とする。このとき $0\le\theta\le1$ について $|F(\theta+iy)|\le M_{0}^{1-\theta}M_{1}^{\theta}$。
+:::
+
+::: proof
+**Step 1（正規化）.** $G(z)\defeq F(z)M_{0}^{z-1}M_{1}^{-z}$ とすると $|M_{0}^{z-1}M_{1}^{-z}|=M_{0}^{\operatorname{Re}z-1}M_{1}^{-\operatorname{Re}z}$ は $S$ で有界なので $G$ も有界で、$|G|\le1$（$\operatorname{Re}z=0,1$）。$|G(\theta+iy)|\le1$ を示せばよい。
+
+**Step 2（減衰因子）.** $\varepsilon>0$ について $G_{\varepsilon}(z)\defeq G(z)e^{\varepsilon z^{2}}$ とおく。$z=x+iy\in S$ なら $|e^{\varepsilon z^{2}}|=e^{\varepsilon(x^{2}-y^{2})}\le e^{\varepsilon}e^{-\varepsilon y^{2}}$。よって $|G_{\varepsilon}|\le e^{\varepsilon}$（$\operatorname{Re}z=0,1$）、かつ $|y|\to\infty$ で $G_{\varepsilon}\to0$（$G$ は有界）。
+
+**Step 3（最大値原理）.** $z_{0}=\theta+iy_{0}$ を固定し、$R>|y_{0}|$ を $|y|\ge R$ で $|G_{\varepsilon}(z)|\le e^{\varepsilon}$ となるようにとる。長方形 $\{0\le x\le1,|y|\le R\}$ の境界上で $|G_{\varepsilon}|\le e^{\varepsilon}$ なので、\ref{cx:maximum-principle.2} から $|G_{\varepsilon}(z_{0})|\le e^{\varepsilon}$。$\varepsilon\to0$ で $|G(z_{0})|\le1$。
+:::
+
+::: theorem リース–ソーリンの補間定理 {#four:riesz-thorin keywords="Riesz-Thorin interpolation theorem: a linear operator bounded L^{p0} -> L^{q0} with norm M0 and L^{p1} -> L^{q1} with norm M1 is bounded L^{p_theta} -> L^{q_theta} with norm <= M0^{1-theta} M1^theta, where 1/p_theta = (1-theta)/p0 + theta/p1" index="リース–ソーリンの補間定理|りーすそーりんのほかんていり"}
+$1\le p_{0},p_{1}<\infty$、$1<q_{0},q_{1}\le\infty$ とする。$T$ を $X$ 上の単関数の空間から $Y$ 上の可測関数への線形写像で、単関数 $f$ について
+$$
+\|Tf\|_{q_{0}}\le M_{0}\|f\|_{p_{0}},\qquad\|Tf\|_{q_{1}}\le M_{1}\|f\|_{p_{1}}
+$$
+とする。$0<\theta<1$ について $\frac{1}{p_{\theta}}\defeq\frac{1-\theta}{p_{0}}+\frac{\theta}{p_{1}}$, $\frac{1}{q_{\theta}}\defeq\frac{1-\theta}{q_{0}}+\frac{\theta}{q_{1}}$ とおくと、単関数 $f$ について $\|Tf\|_{q_{\theta}}\le M_{0}^{1-\theta}M_{1}^{\theta}\|f\|_{p_{\theta}}$。したがって $T$ は $L^{p_{\theta}}$ から $L^{q_{\theta}}$ への有界作用素に（ノルム $\le M_{0}^{1-\theta}M_{1}^{\theta}$ で）一意に延びる。
+:::
+
+::: proof
+$p\defeq p_{\theta}$, $q\defeq q_{\theta}$ と書く。$q>1$ なので $q'<\infty$。
+
+**Step 1（双対性への帰着）.** $h\in L^{q}(Y)$ について $\|h\|_{q}=\sup\{|\int hg\,d\nu|:g\text{ は単関数},\ \|g\|_{q'}=1\}$（\ref{fa:lp-dual} の証明と同じく、$q<\infty$ なら $g$ を $\overline{\operatorname{sgn}h}|h|^{q-1}$ の単関数近似に、$q=\infty$ なら $\{|h|>\|h\|_{\infty}-\varepsilon\}$ の測度有限な部分集合の上の単関数にとる。σ 有限性を使う）。よって、単関数 $f$, $g$ で $\|f\|_{p}=\|g\|_{q'}=1$ のものについて $|\int Tf\,g\,d\nu|\le M_{0}^{1-\theta}M_{1}^{\theta}$ を示せばよい。
+
+**Step 2（複素指数の族）.** $f=\sum_{k}a_{k}e^{i\alpha_{k}}\mathbf{1}_{A_{k}}$, $g=\sum_{j}b_{j}e^{i\beta_{j}}\mathbf{1}_{B_{j}}$（$a_{k},b_{j}>0$、$A_{k}$ たちは互いに素、$B_{j}$ たちも互いに素）と書く。$z\in S$ について $\frac{1}{p(z)}\defeq\frac{1-z}{p_{0}}+\frac{z}{p_{1}}$, $\frac{1}{q'(z)}\defeq\frac{1-z}{q_{0}'}+\frac{z}{q_{1}'}$ とし、
+$$
+f_{z}\defeq\sum_{k}a_{k}^{p/p(z)}e^{i\alpha_{k}}\mathbf{1}_{A_{k}},\qquad g_{z}\defeq\sum_{j}b_{j}^{q'/q'(z)}e^{i\beta_{j}}\mathbf{1}_{B_{j}},\qquad F(z)\defeq\int Tf_{z}\,g_{z}\,d\nu.
+$$
+線形性から $F(z)=\sum_{k,j}a_{k}^{p/p(z)}b_{j}^{q'/q'(z)}e^{i(\alpha_{k}+\beta_{j})}\int T(\mathbf{1}_{A_{k}})\mathbf{1}_{B_{j}}d\nu$ は、$z$ の 1 次式の指数関数の有限和なので整関数で、$S$ 上有界（実部が有界な 1 次式）。$F(\theta)=\int Tf\,g$（$p(\theta)=p$, $q'(\theta)=q'$）。
+
+**Step 3（端での評価）.** $\operatorname{Re}z=0$ なら $\operatorname{Re}\frac{p}{p(z)}=\frac{p}{p_{0}}$ なので $|f_{z}|=|f|^{p/p_{0}}$、$\|f_{z}\|_{p_{0}}^{p_{0}}=\|f\|_{p}^{p}=1$。同様に $|g_{z}|=|g|^{q'/q_{0}'}$ で $\|g_{z}\|_{q_{0}'}=1$（$q_{0}'=\infty$ のとき、すなわち $q_{0}=1$ は仮定から除いた；$q_{0}'$ が有限でないのは $q_{0}=1$ のときだけ）。ヘルダーの不等式と仮定から $|F(z)|\le\|Tf_{z}\|_{q_{0}}\|g_{z}\|_{q_{0}'}\le M_{0}$。$\operatorname{Re}z=1$ でも同様に $|F(z)|\le M_{1}$。\ref{four:three-lines} から $|F(\theta)|\le M_{0}^{1-\theta}M_{1}^{\theta}$。
+
+**Step 4（延長）.** $p<\infty$ なので単関数は $L^{p}$ で稠密で、有界線形写像は一意に延びる。
+:::
+
+（Step 3 で $q_{0}'=1$、すなわち $q_{0}=\infty$ のときは $|g_{z}|=|g|^{q'}$ で $\|g_{z}\|_{1}=\|g\|_{q'}^{q'}=1$ となり、同じ議論が通る。）
+
+## 応用 {#four:sec-ip2-applications}
+
+::: corollary ハウスドルフ–ヤングの不等式 {#four:hausdorff-young keywords="Hausdorff-Young inequality: for 1 <= p <= 2, the Fourier transform extends to a bounded map L^p(R^n) -> L^{p'}(R^n) with ||hat f||_{p'} <= ||f||_p; similarly for Fourier coefficients on the circle" index="ハウスドルフ–ヤングの不等式|はうすどるふやんぐのふとうしき"}
+$1\le p\le2$ なら、単関数 $f$ について $\|\hat f\|_{p'}\le\|f\|_{p}$。したがってフーリエ変換は $L^{p}(\mathbb{R}^{n})$ から $L^{p'}(\mathbb{R}^{n})$ への有界作用素（ノルム $\le1$）に延びる。
+:::
+
+::: proof
+$p=1$：$\|\hat f\|_{\infty}\le\|f\|_{1}$（\ref{four:transform-basic.1}）。$p=2$：$\|\hat f\|_{2}=\|f\|_{2}$（\ref{four:plancherel-identity}、単関数は $L^{1}\cap L^{2}$）。$1<p<2$ なら $\frac1p=\frac{1-\theta}{1}+\frac{\theta}{2}$ となる $\theta\in(0,1)$ について $\frac{1}{p'}=1-\frac1p=\frac{1-\theta}{\infty}+\frac{\theta}{2}$。\ref{four:riesz-thorin}（$p_{0}=1$, $q_{0}=\infty$, $p_{1}=q_{1}=2$, $M_{0}=M_{1}=1$）から。
+:::
+
+::: corollary ヤングの不等式 {#four:young-inequality keywords="Young's convolution inequality ||f * g||_r <= ||f||_p ||g||_q for 1 + 1/r = 1/p + 1/q, by Riesz-Thorin" index="ヤングの不等式（畳み込み）|やんぐのふとうしきたたみこみ"}
+$1\le p,q,r\le\infty$, $1+\frac1r=\frac1p+\frac1q$ とする。$f\in L^{p}(\mathbb{R}^{n})$, $g\in L^{q}(\mathbb{R}^{n})$ について $\|f*g\|_{r}\le\|f\|_{p}\|g\|_{q}$。
+:::
+
+::: proof
+$f\in L^{p}$ を固定し、$T_{f}g\defeq f*g$ とする。$q=1$：$\|f*g\|_{p}\le\|f\|_{p}\|g\|_{1}$（\ref{four:convolution-rd.1}）。$q=p'$：ヘルダーの不等式と平行移動不変性から $|f*g(x)|\le\|f\|_{p}\|g\|_{p'}$、すなわち $\|f*g\|_{\infty}\le\|f\|_{p}\|g\|_{p'}$。$1<q<p'$ のとき $\frac1q=\frac{1-\theta}{1}+\frac{\theta}{p'}$ とおくと $\frac1r=\frac1p+\frac1q-1=\frac{1-\theta}{p}+\frac{\theta}{\infty}$。$p<\infty$, $p'>1$ なら \ref{four:riesz-thorin}（$p_{0}=1,q_{0}=p$, $p_{1}=p',q_{1}=\infty$; $q_{0}=p>1$ が必要）から単関数 $g$ について成り立ち、稠密性で延ばす。$p=1$ なら $r=q$ で \ref{four:convolution-rd.1}、$p=\infty$ なら $q=1$, $r=\infty$ で直接。
+:::
+
+::: hypcheck
+- マルチンキェヴィチの定理では $T$ の劣線形性と端点の弱型評価だけを使い、$T$ が線形である必要はない（極大関数のような非線形な作用素にも使える）。一方、指数は $p\to p$ の対角に限られる（$p\ne q$ の版もあるが、$p_{i}\le q_{i}$ の条件が要る）。
+- リース–ソーリンの定理では線形性が本質的（複素指数の族 $f_{z}$ を $T$ で移して正則関数を作るところ）。代わりに定数が $M_{0}^{1-\theta}M_{1}^{\theta}$ と最良の形で得られ、$p\ne q$ も扱える。
+- リース–ソーリンの定理は複素数値の $L^{p}$ で成り立つ。実数値の $L^{p}$ では定数に $2$ 倍が付くことがある。
+- 三線定理で $F$ の有界性は本質的：$F(z)=\exp(-ie^{\pi iz})$ は端で $|F|=1$ だが、帯の中で非有界になる。減衰因子 $e^{\varepsilon z^{2}}$ は、この有界性を使って最大値原理を無限の帯に持ち込むための工夫である。
+:::
+
+::: supplement
+**関連する結果.**
+- ハウスドルフ–ヤングの不等式の最良定数は $1$ ではなく、ガウス関数で達成される $(p^{1/p}/p'^{1/p'})^{n/2}$（ベックナーの定理）。
+- $p>2$ では、フーリエ変換は $L^{p}$ から関数の空間へ有界に延びない（緩増加超関数にはなる）。
+- 補間の抽象論：複素補間法 $[X_{0},X_{1}]_{\theta}$ と実補間法 $(X_{0},X_{1})_{\theta,q}$ があり、それぞれリース–ソーリンとマルチンキェヴィチの一般化である。ソボレフ空間の補間で分数階の空間が得られる。
+
+**高い視点：凸性としての補間.** リース–ソーリンの定理は、「$(\frac1p,\frac1q)$ の平面の点ごとの作用素ノルムの対数は凸関数である」と言い換えられる（ソーリンの元の形）。正則関数の対数絶対値が劣調和であること（三線定理）が、その凸性の源である。マルチンキェヴィチの定理は、関数を「高さ」で切り分けて、低いところは強い指数、高いところは弱い指数で測るという、層ごとの会計の仕組みである。比喩で言えば、二つの端の橋が丈夫であることを確かめれば、その間に架け渡した吊り橋のどこを歩いても落ちないことが保証される。
+:::
+
+## 問題 {#four:sec-ip2-problems}
+
+::: problem {#four:prob-ip2-weak-not-strong}
+$\mathbb{R}$ 上の $f(x)\defeq\frac{1}{|x|}$ は弱 $L^{1}$ に入るが $L^{1}$ に入らないことを示せ。また $[f+g]_{1}\le2([f]_{1}+[g]_{1})$ を示せ（弱 $L^{1}$ の三角不等式は定数倍でしか成り立たない）。
+:::
+
+::: solution
+$\lambda_{f}(t)=\lambda(\{|x|<\frac1t\})=\frac2t$ なので $[f]_{1}=\sup_{t}t\cdot\frac2t=2$。$\int\frac{dx}{|x|}=\infty$。三角不等式：$\{|f+g|>t\}\subset\{|f|>\frac t2\}\cup\{|g|>\frac t2\}$ なので $t\lambda_{f+g}(t)\le2\cdot\frac t2\lambda_{f}(\frac t2)+2\cdot\frac t2\lambda_{g}(\frac t2)\le2([f]_{1}+[g]_{1})$。
+:::
+
+::: problem {#four:prob-ip2-hy-circle}
+$1\le p\le2$ なら、$f\in L^{p}(\mathbb{T})$ のフーリエ係数について $\bigl(\sum_{n}|\hat f(n)|^{p'}\bigr)^{1/p'}\le\|f\|_{p}$ を示せ（$p'=\infty$ のときは $\sup$）。
+:::
+
+::: solution
+$T\colon f\mapsto(\hat f(n))_{n}$ は線形で、$L^{1}(\mathbb{T})\to\ell^{\infty}(\mathbb{Z})$ でノルム $\le1$（\ref{four:coefficients-basic.1}）、$L^{2}\to\ell^{2}$ でノルム $1$（\ref{four:l2-theory.2}）。$Y=\mathbb{Z}$（数え上げ測度、σ 有限）として \ref{four:riesz-thorin} を \ref{four:hausdorff-young} の証明と同じ指数で使う。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
