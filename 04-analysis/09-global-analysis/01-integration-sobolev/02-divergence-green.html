@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>発散定理とグリーンの公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/01-integration-sobolev/02-divergence-green.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 発散定理とグリーンの公式 {#gl:page-divergence-green keywords="divergence of a vector field without orientation, outward unit normal, normal derivative, divergence theorem on Riemannian manifolds with boundary, Green's first and second identities, Laplace-Beltrami operator is symmetric and nonnegative on closed manifolds, harmonic functions on closed manifolds are constant, compatibility condition for the Poisson equation, Laplacian of the sphere and the torus"}
+
+前のページの \ref{gl:riemannian-measure} で作った測度 $\mu_{g}$ を使うと、$n$ 形式についての \ref{mfd:stokes-theorem} を、関数とベクトル場の言葉に書き直せる。それが**発散定理** $\int_{D}\operatorname{div}X=\int_{\partial D}\langle X,\nu\rangle$ で、形式の積分と違い、多様体の向きを仮定しなくてよい（局所的に向きをとり、1 の分割で貼り合わせる）。その帰結として**グリーンの公式**を得て、閉多様体の上でラプラス–ベルトラミ作用素が対称・非負であること、調和関数が定数であること、ポアソン方程式 $\Delta u=f$ が解けるには $\int f=0$ が必要であることを示す。これらは、後のページで $\Delta$ を $L^{2}$ の上の自己共役作用素として扱うときの出発点になる。
+
+## 記法と定義の確認 {#gl:sec-dg-notation}
+
+::: notation
+- $(M,g)$ は $n$ 次元のリーマン多様体（$n\ge1$）で、向きは仮定しない。リーマン測度 $\mu_{g}$、その積分の公式・基本性質は \ref{gl:riemannian-measure}, \ref{gl:rm-integral-formulas}, \ref{gl:rm-basic-properties}。$0$ 次元の多様体のリーマン測度は数え上げ測度と約束する。「境界つきの多様体」は多様体 $M$ の中の境界つき領域 $D$（\ref{mfd:regular-domain}）として扱う（前のページの記法の約束）。
+- 境界の性質・境界の向きは \ref{mfd:boundary-properties}, \ref{mfd:boundary-orientation}。発散定理は \ref{mfd:stokes-theorem} から導く。滑らかなウリゾーンの補題は \ref{mfd:smooth-urysohn}。
+- 音楽同型と勾配は \ref{riem:musical-gradient}、発散・余微分・ラプラシアンは \ref{riem:divergence}, \ref{riem:codifferential}, \ref{riem:laplace-beltrami}。座標では $\sqrt{g}\defeq\sqrt{\det(g_{ij})}$。
+- **ラプラシアンの符号**：\ref{riem:laplace-beltrami} に合わせて $\Delta u\defeq-\operatorname{div}\operatorname{grad}u$ とする（$\mathbb{R}^{n}$ では $\Delta=-\sum_{i}\partial_{i}^{2}$、非負の作用素）。解析学で普通の $\Delta_{0}\defeq\sum\partial_{i}^{2}$ とその一般化 $\operatorname{div}\operatorname{grad}$ は $-\Delta$ である。$\operatorname{grad}u$ を $\nabla u$ とも書く。
+- 関数はとくに断らなければ実数値。
+- **選択公理**：発散定理の証明で 1 の分割（\ref{mfd:smooth-partition-of-unity}）を、グリーンの公式で滑らかなウリゾーンの補題を使うので、従属選択公理（DC）を使う。
+:::
+
+## 発散定理 {#gl:sec-dg-divergence}
+
+\ref{riem:divergence} は向きづけられた多様体の上で $d(i_{X}\mathrm{vol}_{g})=(\operatorname{div}X)\mathrm{vol}_{g}$ によって発散を定義した。向きを逆にすると $\mathrm{vol}_{g}$ は $-\mathrm{vol}_{g}$ になり、両辺が $-1$ 倍されるだけなので、発散は向きによらない。これを向きのない多様体に広げておく。
+
+::: lemma 向きによらない発散 {#gl:divergence-unoriented keywords="divergence of a vector field on a possibly non-orientable Riemannian manifold via the coordinate formula (1/sqrt g) d_i(sqrt g X^i); Leibniz rule div(fX) = f div X + <grad f, X>" index="発散（向きのない多様体）|はっさんむきのないたようたい"}
+滑らかなベクトル場 $X$ について、各座標近傍 $(U;x)$ の上で $X=\sum_{i}X^{i}\partial_{i}$ とし
+$$
+\operatorname{div}X\defeq\frac{1}{\sqrt{g}}\sum_{i}\partial_{i}\bigl(\sqrt{g}\,X^{i}\bigr)
+$$
+とおく。
+1. これは座標近傍によらず、$M$ 上の滑らかな関数 $\operatorname{div}X$ を定める。$M$ の開集合 $W$ に向きが与えられていれば、$W$ の上で \ref{riem:divergence} の発散と一致する。
+2. $\operatorname{div}$ は線形で、$f\in C^{\infty}(M)$ について $\operatorname{div}(fX)=f\operatorname{div}X+\langle\operatorname{grad}f,X\rangle$。
+:::
+
+::: proof
+**1.** 座標近傍 $(U;x)$ に、$x$ が正になる向きを入れると、\ref{riem:divergence} の後の計算から、$U$ の上で \ref{riem:divergence} の発散 $\operatorname{div}^{(x)}X$ は上の式で与えられる。二つの座標近傍 $(U;x)$, $(V;y)$ について、$U\cap V$ の連結成分 $O$ をとる（多様体の連結成分は開、\ref{mfd:topological-manifold-properties.2}）。$O$ の上では $y$ の定める向きについて、$x$ が正であるか、$x_{1}$ を $-x_{1}$ に替えると正になるか（\ref{mfd:orientable-equivalents} の最後の主張）なので、$x$ と $y$ の定める体積形式は $O$ 上で $\mathrm{vol}^{(x)}=\pm\mathrm{vol}^{(y)}$。$d(i_{X}\mathrm{vol})=(\operatorname{div}X)\mathrm{vol}$ は $\mathrm{vol}\mapsto-\mathrm{vol}$ で両辺が $-1$ 倍になるだけなので、$\operatorname{div}^{(x)}X=\operatorname{div}^{(y)}X$ が $O$ 上で成り立つ。$W$ の向きについても同じ議論（$y$ の代わりに $W$ の正の座標近傍）で一致する。
+
+**2.** 線形性は式から。$\partial_{i}(\sqrt{g}fX^{i})=f\partial_{i}(\sqrt{g}X^{i})+\sqrt{g}X^{i}\partial_{i}f$ を $i$ について足して $\sqrt{g}$ で割ると、$\operatorname{div}(fX)=f\operatorname{div}X+\sum_{i}X^{i}\partial_{i}f=f\operatorname{div}X+df(X)$ で、$df(X)=\langle\operatorname{grad}f,X\rangle$（\ref{riem:musical-gradient}）。
+:::
+
+したがって、向きのない多様体でも $\Delta u\defeq-\operatorname{div}\operatorname{grad}u=-\frac{1}{\sqrt{g}}\sum_{i,j}\partial_{i}(\sqrt{g}\,g^{ij}\partial_{j}u)$ と定めれば、向きづけられた開集合の上では \ref{riem:laplace-beltrami.2} の $\Delta$ と一致する。
+
+次に境界の法線を用意する。$D\subset M$ を境界つき領域とすると、$\partial D$ は $(n-1)$ 次元の部分多様体で（\ref{mfd:boundary-properties.2}）、誘導計量 $\iota^{*}g$ によりリーマン多様体になる（\ref{riem:pullback-metric}）。そのリーマン測度を $\mu_{\partial D}$ と書く。
+
+::: lemma 外向き単位法線 {#gl:outward-normal keywords="outward unit normal vector field nu along the boundary of a regular domain: unit, orthogonal to T(partial D), outward; nu = grad x_n / |grad x_n| in a half-space chart; normal derivative" index="外向き単位法線ベクトル|そとむきたんいほうせんべくとる, 単位法線（境界）|たんいほうせんきょうかい, 法線微分|ほうせんびぶん"}
+各 $m\in\partial D$ について、$T_{m}M$ の単位ベクトル $\nu_{m}$ で、$T_{m}\partial D$ に直交し外向き（\ref{mfd:boundary-properties.3}）であるものがただ一つある。半空間型の座標近傍 $(U;x)$ の上では
+$$
+\nu=\frac{\operatorname{grad}x_{n}}{|\operatorname{grad}x_{n}|}\quad(\partial D\cap U\text{ 上})
+$$
+で、とくに $\nu$ は $\partial D$ に沿う滑らかなベクトル場である。$\nu$ を**外向き単位法線ベクトル**、$u\in C^{\infty}(M)$ について $\partial_{\nu}u\defeq du(\nu)=\langle\operatorname{grad}u,\nu\rangle$ を**法線微分**という。
+:::
+
+::: proof
+半空間型の座標近傍では $U\cap\partial D=\{x_{n}=0\}$（\ref{mfd:boundary-properties.1}）なので、$T_{m}\partial D$ は $\partial_{1},\dots,\partial_{n-1}$ で張られ、$dx_{n}$ で消える。次元を比べて $T_{m}\partial D=\ker(dx_{n})_{m}$。$v\in\ker dx_{n}$ について $\langle\operatorname{grad}x_{n},v\rangle=dx_{n}(v)=0$ なので $\operatorname{grad}x_{n}$ は $T_{m}\partial D$ に直交し、$dx_{n}(\operatorname{grad}x_{n})=|\operatorname{grad}x_{n}|^{2}>0$ なので外向き。$T_{m}\partial D$ の直交補空間は 1 次元なので、そこの単位ベクトルは $\pm\nu_{m}$ の二つで、$dx_{n}(-\nu_{m})<0$ なので外向きは $\nu_{m}$ だけ。外向きの概念は半空間型の座標近傍によらない（\ref{mfd:boundary-properties.3}）ので、$\nu_{m}$ も座標近傍によらない。
+:::
+
+::: lemma 境界での内部積 {#gl:boundary-interior-product keywords="iota^*(i_X vol_g) = <X, nu> vol_{partial D} for the induced orientation and metric on the boundary" index="境界での内部積と体積形式|きょうかいでのないぶせきとたいせきけいしき"}
+$M$ が向きづけられているとし、$\partial D$ に誘導された向き（\ref{mfd:boundary-orientation}）と誘導計量を入れ、その体積形式を $\mathrm{vol}_{\partial D}$ とする。滑らかなベクトル場 $X$ について、$\iota\colon\partial D\to M$ を包含写像として
+$$
+\iota^{*}(i_{X}\mathrm{vol}_{g})=\langle X,\nu\rangle\,\mathrm{vol}_{\partial D}.
+$$
+:::
+
+::: proof
+$n\ge2$ とし、$m\in\partial D$ で $T_{m}\partial D$ の正の正規直交基底 $(e_{1},\dots,e_{n-1})$ をとる。$\nu_{m}$ は外向きの単位ベクトルで $e_{i}$ に直交するので、$(\nu_{m},e_{1},\dots,e_{n-1})$ は $T_{m}M$ の正規直交基底で、誘導された向きの定義からこれは正である。よって $\mathrm{vol}_{g}(\nu_{m},e_{1},\dots,e_{n-1})=1$（\ref{riem:volume-form}）。$X_{m}=\langle X,\nu\rangle\nu_{m}+w$（$w\in T_{m}\partial D$）と分けると、$w,e_{1},\dots,e_{n-1}$ は $n-1$ 次元の空間の $n$ 個のベクトルで一次従属なので $\mathrm{vol}_{g}(w,e_{1},\dots,e_{n-1})=0$。よって
+$$
+\iota^{*}(i_{X}\mathrm{vol}_{g})(e_{1},\dots,e_{n-1})=\mathrm{vol}_{g}(X_{m},e_{1},\dots,e_{n-1})=\langle X,\nu\rangle(m),
+$$
+これは右辺の $(e_{1},\dots,e_{n-1})$ での値に等しい。$(n-1)$ 形式は一つの基底での値で決まる。$n=1$ では、$\partial D$ の点 $m$ の向き $\epsilon_{m}=\pm1$ は「$\nu_{m}$ が正なら $+1$」で、$\mathrm{vol}_{\partial D}$ は値 $\epsilon_{m}$ の $0$ 形式であり、$i_{X}\mathrm{vol}_{g}=\mathrm{vol}_{g}(X_{m})=\langle X,\nu\rangle\mathrm{vol}_{g}(\nu_{m})=\langle X,\nu\rangle\epsilon_{m}$。
+:::
+
+::: theorem 発散定理 {#gl:divergence-theorem keywords="divergence theorem on Riemannian manifolds (Gauss-Green): int_D div X d mu_g = int_{partial D} <X, nu> d mu_{partial D} for compactly supported smooth vector fields, no orientation needed" index="発散定理（リーマン多様体）|はっさんていりりーまんたようたい, ガウスの発散定理（多様体）|がうすのはっさんていりたようたい" refname="リーマン多様体上の発散定理"}
+$(M,g)$ を $n$ 次元のリーマン多様体（$n\ge1$。向きは仮定しない）、$D\subset M$ を境界つき領域、$\nu$ を外向き単位法線ベクトル、$X$ を台がコンパクトな滑らかなベクトル場とすると
+$$
+\int_{D}\operatorname{div}X\,d\mu_{g}=\int_{\partial D}\langle X,\nu\rangle\,d\mu_{\partial D}.
+$$
+とくに $\partial D=\varnothing$（たとえば $D=M$）なら $\int_{D}\operatorname{div}X\,d\mu_{g}=0$。
+:::
+
+::: intuition
+領域の中で湧き出す量（発散）を全部足すと、境界から外へ流れ出る量（流れの法線成分の境界での和）に等しい。多様体の向きは関係ない。
+:::
+
+::: proof
+両辺の被積分関数は台がコンパクトな連続関数（$\langle X,\nu\rangle$ の台は $\operatorname{supp}X\cap\partial D$ に含まれ、$\partial D$ は閉なのでコンパクト）なので、どちらの積分も有限である（\ref{gl:riemannian-measure.3}）。
+
+**Step 1（向きづけられた場合）.** 【主張：$M$ が向きづけられていれば等式が成り立つ】$\omega\defeq i_{X}\mathrm{vol}_{g}$ は台がコンパクトな滑らかな $(n-1)$ 形式で、$d\omega=(\operatorname{div}X)\mathrm{vol}_{g}$（\ref{riem:divergence}）。\ref{mfd:stokes-theorem} と \ref{gl:boundary-interior-product} から
+$$
+\int_{D}(\operatorname{div}X)\,\mathrm{vol}_{g}=\int_{\partial D}\langle X,\nu\rangle\,\mathrm{vol}_{\partial D}.
+$$
+\ref{gl:rm-integral-formulas.3} を $M$ と $D$ に、また $\partial D$（それ自身を境界のない境界つき領域とみる）に使うと、両辺はそれぞれ $\int_{D}\operatorname{div}X\,d\mu_{g}$, $\int_{\partial D}\langle X,\nu\rangle\,d\mu_{\partial D}$ に等しい（$n=1$ では右辺は $\sum_{m\in\partial D}\epsilon_{m}\cdot\epsilon_{m}\langle X,\nu\rangle(m)$ で、数え上げ測度による積分に等しい）。
+
+**Step 2（局所化）.** 【主張：$X$ は、台がコンパクトでそれぞれ一つの座標近傍の定義域に含まれる、有限個のベクトル場の和に書ける】座標近傍の定義域からなる開被覆に従属する 1 の分割 $(\rho_{j})$ をとる（\ref{mfd:smooth-partition-of-unity.1}：$\operatorname{supp}\rho_{j}$ はコンパクトで、ある座標近傍の定義域 $U_{j}$ に含まれ、台の族は局所有限）。$\operatorname{supp}X$ はコンパクトなので、それと交わる $\operatorname{supp}\rho_{j}$ は有限個で（各点の近傍が有限個の台としか交わらず、有限個の近傍で覆える）、その $j$ について $X_{j}\defeq\rho_{j}X$ とおくと $X=\sum_{j}X_{j}$（有限和）。
+
+**Step 3（一つの座標近傍の場合）.** 【主張：台がコンパクトで座標近傍の定義域 $U$ に含まれる $Y$ について等式が成り立つ】$U$ に座標の定める向きを入れると、$(U,g\restr{U})$ は向きづけられたリーマン多様体で、$D\cap U$ は $U$ の境界つき領域、$\partial(D\cap U)=\partial D\cap U$、外向き単位法線は $\nu$ の制限である（どれも定義が局所的）。$\partial D\cap U$ は $\partial D$ の開集合で、その誘導計量は $\partial D$ の誘導計量の制限である。\ref{gl:rm-basic-properties.1} から、$U$ と $\partial D\cap U$ のリーマン測度は $\mu_{g}$, $\mu_{\partial D}$ の制限で、$U$ 上の発散は \ref{gl:divergence-unoriented.1} の発散の制限。$Y$ の台は $U$ に含まれるので、両辺の積分は $U$ の上の積分に等しく、Step 1 を $U$ に使えばよい。
+
+**Step 4（足し合わせ）.** 【主張：一般の場合に等式が成り立つ】\ref{gl:divergence-unoriented.2} の線形性から $\operatorname{div}X=\sum_{j}\operatorname{div}X_{j}$、また $\langle X,\nu\rangle=\sum_{j}\langle X_{j},\nu\rangle$。Step 3 を各 $X_{j}$ に使って足す（有限和なので積分の線形性だけを使う）。
+
+::: hypcheck
+- **台がコンパクト**：積分の有限性、Step 1 のストークスの定理、Step 2 で和を有限にすることに使った。外すと偽：$M=D=\mathbb{R}$, $X=\tanh(x)\,\partial_{x}$ は $\operatorname{div}X=\cosh^{-2}x$ で $\int_{\mathbb{R}}\operatorname{div}X\,dx=2$ だが、$\partial D=\varnothing$。実際には $\operatorname{supp}X\cap D$ がコンパクトであれば十分である（\ref{mfd:smooth-urysohn.1} で $\operatorname{supp}X\cap D$ の近傍で $1$ の、台がコンパクトな関数 $\chi$ をとり $\chi X$ に使う。$D$ の上では $\chi X$ と $X$ の発散も法線成分も一致する）。
+- **向き**：Step 1 は向きを使うが、Step 3 で座標近傍ごとの向きしか使わない。したがって定理に向きの仮定は要らない。
+- **境界つき領域であること**：Step 1 でストークスの定理を使うのに使った。角のある領域や、リプシッツ境界の領域でも（外向き法線をほとんど至る所で定義して）同じ等式が成り立つことが知られている（ここでは証明しない）。
+- **滑らかさ**：$X$ は $C^{1}$ 級で十分（Step 1 で \ref{mfd:stokes-theorem} を $C^{1}$ 級の形式に使う。その証明の検査欄を参照）。
+- **公理**：Step 2 の 1 の分割の存在で DC を使う。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 台がコンパクトでなくても、$M$ が完備なリーマン多様体で $|X|\in L^{1}(M)$ かつ $\operatorname{div}X\in L^{1}(M)$ なら $\int_{M}\operatorname{div}X\,d\mu_{g}=0$ となることが知られている（ガフニーの定理。ここでは証明しない）。上の $\tanh$ の例では $|X|$ が可積分でない。また境界がある場合、法線成分を $\langle X,\nu\rangle$ と書けるのは計量のおかげで、計量なしでは境界項は $(n-1)$ 形式 $\iota^{*}(i_{X}\omega)$ としてしか書けない（\ref{mfd:stokes-theorem}）。
+
+**似た定理.** $\mathbb{R}^{3}$ の領域については \see{vec:gauss-divergence}（立方体の像で分割できる領域）、$\mathbb{R}^{n}$ の $C^{1}$ 境界の領域については \see{fa:gauss-green-c1} がある。このページの定理は、それらを曲がった空間と向きのない空間に広げたものである。また $\operatorname{div}X$ は、$X$ の流れ $\Phi_{t}$ について $\frac{d}{dt}\big|_{t=0}\mu_{g}(\Phi_{t}(E))=\int_{E}\operatorname{div}X\,d\mu_{g}$（$E$ が相対コンパクトなボレル集合のとき）を満たし、流れによる体積の伸び率である（リウヴィルの定理の一般形。\ref{riem:divergence} の $L_{X}\mathrm{vol}_{g}=(\operatorname{div}X)\mathrm{vol}_{g}$ から）。
+
+**高い視点：保存則.** 発散定理は「量は勝手に増えも減りもしない」という保存則の数学的な形である。部屋（$D$）の中の人数の増え方（湧き出しの総和）は、ドア（$\partial D$）を出入りする人数（法線方向の流れ）の差し引きに等しい。閉じた部屋（境界なし）では、中で生まれる人と消える人が全体で釣り合っていなければならない——これが次節の「ポアソン方程式の両立条件」である。向きは部屋の壁に「表と裏」を決めるのに要りそうに見えるが、外向きの法線という向きの代わりの情報が境界にはいつもあるので、全体の向きは要らない。
+:::
+
+## グリーンの公式とラプラシアン {#gl:sec-dg-green}
+
+::: corollary グリーンの公式 {#gl:green-formulas keywords="Green's first and second identities on Riemannian manifolds with the sign convention Delta = -div grad: int_D u Delta v = int_D <grad u, grad v> - int_{partial D} u d_nu v; int_D (u Delta v - v Delta u) = -int_{partial D} (u d_nu v - v d_nu u)" index="グリーンの公式（リーマン多様体）|ぐりーんのこうしきりーまんたようたい, グリーンの第一公式|ぐりーんのだいいちこうしき, グリーンの第二公式|ぐりーんのだいにこうしき"}
+$D\subset M$ を境界つき領域、$u,v\in C^{\infty}(M)$ とし、$u$ か $v$ の台がコンパクトであるか、$D$ がコンパクトであるとする。$\Delta=-\operatorname{div}\operatorname{grad}$ について
+1. （第一公式）$\displaystyle\int_{D}u\,\Delta v\,d\mu_{g}=\int_{D}\langle\operatorname{grad}u,\operatorname{grad}v\rangle\,d\mu_{g}-\int_{\partial D}u\,\partial_{\nu}v\,d\mu_{\partial D}$。
+2. （第二公式）$\displaystyle\int_{D}(u\,\Delta v-v\,\Delta u)\,d\mu_{g}=-\int_{\partial D}(u\,\partial_{\nu}v-v\,\partial_{\nu}u)\,d\mu_{\partial D}$。
+
+解析学の符号 $\Delta_{0}\defeq\sum\partial_{i}^{2}$ の一般化 $-\Delta=\operatorname{div}\operatorname{grad}$ で書けば、2 は古典的な形 $\int_{D}(u\,\Delta_{0}v-v\,\Delta_{0}u)=\int_{\partial D}(u\,\partial_{\nu}v-v\,\partial_{\nu}u)$ になる。
+:::
+
+::: proof
+**台がコンパクトな場合.** $u$ の台がコンパクトとする（$v$ の場合も同じ）。$X\defeq u\operatorname{grad}v$ は台がコンパクトな滑らかなベクトル場で、\ref{gl:divergence-unoriented.2} から
+$$
+\operatorname{div}X=u\operatorname{div}\operatorname{grad}v+\langle\operatorname{grad}u,\operatorname{grad}v\rangle=-u\,\Delta v+\langle\operatorname{grad}u,\operatorname{grad}v\rangle.
+$$
+$\langle X,\nu\rangle=u\langle\operatorname{grad}v,\nu\rangle=u\,\partial_{\nu}v$。\ref{gl:divergence-theorem} から $\int_{D}(-u\Delta v+\langle\operatorname{grad}u,\operatorname{grad}v\rangle)=\int_{\partial D}u\,\partial_{\nu}v$ で、移項すると 1。1 で $u$ と $v$ を入れ替えたもの（$X=v\operatorname{grad}u$ の台も $\operatorname{supp}u$ に含まれる）を 1 から引くと、$\langle\operatorname{grad}u,\operatorname{grad}v\rangle$ の項が消えて 2。
+
+**$D$ がコンパクトな場合.** 【主張：$D$ のある開近傍で $1$ になる、台がコンパクトな滑らかな関数 $\chi$ がある】閉包がコンパクトな開集合（\ref{gl:riemannian-measure} の証明の $\mathcal{W}$ の元）の有限個の和で $D$ を覆って開集合 $G_{1}$ とし、同様に $\overline{G_{1}}$（コンパクト）を覆って $G_{2}$ とする。$\overline{G_{1}}\subset G_{2}$ で $\overline{G_{2}}$ はコンパクト。\ref{mfd:smooth-urysohn.1} を $A=\overline{G_{1}}$, $G=G_{2}$ に使えば、$G_{1}$ 上 $\chi=1$ で $\operatorname{supp}\chi\subset\overline{G_{2}}$ はコンパクト。$\chi u$ は台がコンパクトで、$D$ の近傍で $u$ と一致するので、$D$ と $\partial D$ の上で $\chi u$ と $u$ の値・勾配・ラプラシアンは等しい。前の場合を $\chi u$, $v$ に使えばよい。
+:::
+
+::: corollary 閉多様体上のラプラシアン {#gl:closed-manifold-laplacian keywords="on a closed Riemannian manifold (compact without boundary, orientation not needed): Delta is symmetric and nonnegative on C^infinity, int u Delta u = int |grad u|^2, int Delta u = 0, harmonic functions are constant on connected manifolds, Poisson equation Delta u = f requires int f = 0, uniqueness up to constants" index="閉多様体上のラプラシアン|へいたようたいじょうのらぷらしあん, 調和関数（閉多様体）|ちょうわかんすうへいたようたい, ポアソン方程式の両立条件|ぽあそんほうていしきのりょうりつじょうけん"}
+$M$ を閉多様体（コンパクトで境界のない多様体）とし、リーマン計量 $g$ を入れる。向きは仮定しない。$u,v\in C^{\infty}(M)$ について次が成り立つ。
+1. （対称性）$\displaystyle\int_{M}u\,\Delta v\,d\mu_{g}=\int_{M}\langle\operatorname{grad}u,\operatorname{grad}v\rangle\,d\mu_{g}=\int_{M}v\,\Delta u\,d\mu_{g}$。
+2. （非負性）$\displaystyle\int_{M}u\,\Delta u\,d\mu_{g}=\int_{M}|\operatorname{grad}u|^{2}\,d\mu_{g}\ge0$（解析学の符号では $\int u(-\Delta_{0}u)=\int|\nabla u|^{2}$）。
+3. $\displaystyle\int_{M}\Delta u\,d\mu_{g}=0$。
+4. $M$ が連結で $\Delta u=0$ なら $u$ は定数である。
+5. $f\in C^{\infty}(M)$ について $\Delta u=f$ となる $u\in C^{\infty}(M)$ があれば、$\int_{M}f\,d\mu_{g}=0$。さらに $M$ が連結なら、そのような $u$ は定数の差を除いて一つしかない。
+:::
+
+::: intuition
+閉じた多様体の上では、ラプラシアンは「左右を入れ替えても同じ」対称な作用素で、$u$ との内積は $u$ の傾きの大きさの二乗の積分に等しいので負にならない。そのため、ラプラシアンが $0$ の関数は傾きがどこでも $0$、つまり定数しかない。また、ラプラシアンの値の全体での和はいつも $0$ なので、方程式 $\Delta u=f$ が解けるには $f$ の全体での和が $0$ でなければならない。
+:::
+
+::: proof
+**Step 1.** 【主張：1 と 2】$M$ は $M$ 自身の境界つき領域で $\partial M=\varnothing$、$M$ はコンパクト。\ref{gl:green-formulas.1} の境界項は $0$ なので、第一の等号が成り立つ。中辺は $u,v$ について対称なので第二の等号も成り立つ。$v=u$ として 2。
+
+**Step 2.** 【主張：3】1 で $u=1$ とすると $\operatorname{grad}1=0$ なので $\int_{M}\Delta v\,d\mu_{g}=0$（これは \ref{gl:divergence-theorem} を $X=\operatorname{grad}v$ に使っても得られる）。
+
+**Step 3.** 【主張：$\Delta u=0$ なら $\operatorname{grad}u=0$、したがって $M$ が連結なら $u$ は定数（4）】2 から $\int_{M}|\operatorname{grad}u|^{2}\,d\mu_{g}=0$。$|\operatorname{grad}u|^{2}$ は非負の連続関数なので、$\{|\operatorname{grad}u|^{2}>0\}$ は開集合で測度 $0$、\ref{gl:riemannian-measure.2} から空集合。よって $du=(\operatorname{grad}u)^{\flat}=0$。座標近傍の上では偏導関数がすべて $0$ なので、$u$ は座標の像の各連結成分で定数、したがって $u$ は局所定数。局所定数関数の等位集合 $\{u=c\}$ は開かつ閉なので、$M$ が連結なら $u$ は定数。
+
+**Step 4.** 【主張：5】$\Delta u=f$ なら 3 から $\int_{M}f\,d\mu_{g}=\int_{M}\Delta u\,d\mu_{g}=0$。$\Delta u_{1}=\Delta u_{2}=f$ なら $\Delta(u_{1}-u_{2})=0$ で、4 から $u_{1}-u_{2}$ は定数。
+
+::: hypcheck
+- **コンパクト**：Step 1 で \ref{gl:green-formulas} の前提（$D=M$ がコンパクト）に使った。外すと 4 は偽：$M=\mathbb{R}$ で $u(x)=x$ は $\Delta u=-u''=0$ だが定数でない。5 の必要条件も偽：$\mathbb{R}$ 上で $u=-\frac{x^{2}}{2}$ は $\Delta u=1$ を満たすが、$\int_{\mathbb{R}}1=\infty$ で「積分 $0$」の条件は意味をなさない（$f$ が台コンパクトでも、$u(x)=-\int_{0}^{x}\int_{0}^{s}f$ は $\Delta u=f$ を解き、$\int f\neq0$ でもよい）。
+- **境界がない**：Step 1 で境界項が消えることに使った。境界があると、\ref{gl:green-formulas.1} の境界項が残り、$\Delta$ は対称でない。$u=0$（ディリクレ条件）または $\partial_{\nu}u=0$（ノイマン条件）を課した関数の空間に制限すると、境界項が消えて対称性と非負性が回復する（\ref{gl:prob-dg-dirichlet-uniqueness}）。
+- **連結**：Step 3 の最後と Step 4 の後半に使った。連結でなければ「局所定数」までしか言えず、5 の条件は各連結成分ごとに $\int f=0$ が必要になる（各成分に 3 を使う）。
+- **向き**：使っていない。向きづけられた場合の 4 は \ref{riem:harmonic-forms} にもある。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 5 の逆（$M$ が連結で $\int_{M}f\,d\mu_{g}=0$ なら $\Delta u=f$ が滑らかな解をもつ）も正しい。これはポアソン方程式の可解性で、ソボレフ空間と楕円正則性を使って、この分野のホッジの定理のページで示す（向きづけられた場合の主張は \see{riem:hodge-theorem}）。有限次元の線形代数で、対称行列 $A$ について $Ax=b$ が解ける $\iff$ $b\perp\ker A$ であることの無限次元版で、ここでは $\ker\Delta$ が定数関数の空間なので、条件は $f\perp1$、すなわち $\int f=0$ になる。必要性（このページ）は部分積分だけで済むが、十分性には解の存在という解析の本格的な道具が要る。
+
+**似た定理.** 微分形式については $(\Delta\alpha,\alpha)=\|d\alpha\|^{2}+\|\delta\alpha\|^{2}$（\ref{riem:harmonic-forms}）が 2 の一般化である。平面領域の調和関数の一意性（\see{cx:harmonic-uniqueness}）は、最大値原理による証明だが、\ref{gl:prob-dg-dirichlet-uniqueness} のようにグリーンの公式（エネルギー）でも示せる。2 の右辺 $\frac12\int|\operatorname{grad}u|^{2}$ は**ディリクレ・エネルギー**と呼ばれ、$\Delta u=f$ は汎関数 $\frac12\int|\operatorname{grad}u|^{2}-\int fu$ の臨界点の方程式である。
+
+**高い視点：$\Delta=d^{*}d$.** 1 は、$L^{2}$ 内積について $\Delta=\operatorname{grad}^{*}\operatorname{grad}=d^{*}d$（$d$ の形式的随伴は $-\operatorname{div}$）と書けることを言っている。「$A^{*}A$ の形の作用素は非負で、その核は $A$ の核」という線形代数の事実がそのまま 2 と 4 になる。比喩で言えば、閉じた多様体は熱の逃げ道のない部屋で、$\Delta u=f$ は「熱源 $f$ のもとでの温度 $u$ の平衡」である。逃げ道がないので、熱源と吸い込みの総和が $0$ でなければ平衡には達しない（5）。熱源がまったくなければ、平衡の温度はどこでも同じ（4）。
+:::
+
+## 例：球面とトーラスのラプラシアン {#gl:sec-dg-examples}
+
+::: example 球面とトーラスのラプラシアン {#gl:laplacian-examples keywords="Laplace-Beltrami operator of the round sphere S^2 in spherical coordinates, Delta z = 2z; flat torus T^n with Delta = -sum d^2/dt_i^2 and eigenfunctions e^{i k t}; torus of revolution" index="球面のラプラシアン|きゅうめんのらぷらしあん, 平坦トーラスのラプラシアン|へいたんとーらすのらぷらしあん, 回転トーラスのラプラシアン|かいてんとーらすのらぷらしあん"}
+座標は \ref{gl:rm-examples} のものを使う。どの場合も、座標近傍の定義域は測度 $0$ の集合を除いた稠密な開集合なので、連続関数の等式はその上で確かめれば全体で成り立つ。
+1. **球面 $S^{2}$.** $\sqrt{g}=\sin\theta$, $g^{\theta\theta}=1$, $g^{\phi\phi}=\sin^{-2}\theta$ を \ref{riem:laplace-beltrami.2} の式（向きのない場合は \ref{gl:divergence-unoriented} の後の式）に入れると
+$$
+\Delta f=-\frac{1}{\sin\theta}\partial_{\theta}\bigl(\sin\theta\,\partial_{\theta}f\bigr)-\frac{1}{\sin^{2}\theta}\partial_{\phi}^{2}f.
+$$
+高さ関数 $z=\cos\theta$ は $\Delta z=2z$ を満たし（\ref{riem:ex-hd-1}）、\ref{gl:closed-manifold-laplacian.3} と合わせて $\int_{S^{2}}z\,d\mu_{g}=\frac12\int\Delta z\,d\mu_{g}=0$。これは $\int_{0}^{\pi}\cos\theta\sin\theta\,d\theta=0$ と一致する。
+2. **平坦トーラス $T^{n}$.** $g_{ij}=\delta_{ij}$ なので $\Delta=-\sum_{j}\partial^{2}/\partial t_{j}^{2}$。$k\in\mathbb{Z}^{n}$ について $e_{k}\defeq e^{ik\cdot t}$ は $T^{n}$ 上の滑らかな関数で $\Delta e_{k}=|k|^{2}e_{k}$。$k\neq0$ なら $\int_{T^{n}}e_{k}\,d\mu_{g}=\int_{(0,2\pi)^{n}}e^{ik\cdot t}\,dt=0$ で、\ref{gl:closed-manifold-laplacian.3} と整合する。
+3. **回転トーラス.** $\sqrt{g}g^{uu}=\frac{r}{R+r\cos v}$, $\sqrt{g}g^{vv}=\frac{R+r\cos v}{r}$ から
+$$
+\Delta f=-\frac{1}{(R+r\cos v)^{2}}\partial_{u}^{2}f-\frac{1}{r^{2}(R+r\cos v)}\partial_{v}\bigl((R+r\cos v)\,\partial_{v}f\bigr).
+$$
+$u$ だけによる関数 $f=\cos u$ について $\Delta f=\frac{\cos u}{(R+r\cos v)^{2}}$ は $f$ の定数倍でない。平坦トーラスでは $\cos t_{1}$ は固有関数だったので、同じ位相の多様体でも、計量によってラプラシアンの固有関数は変わる。
+:::
+
+## 問題 {#gl:sec-dg-problems}
+
+::: problem {#gl:prob-dg-eigenvalues}
+$M$ を連結な閉多様体、$g$ をリーマン計量とする。
+1. $u\in C^{\infty}(M)$, $u\neq0$ が実数 $\lambda$ について $\Delta u=\lambda u$ を満たすなら $\lambda\ge0$ で、$\lambda=0$ となるのは $u$ が定数のときに限ることを示せ。
+2. $\Delta u=\lambda u$, $\Delta v=\lambda'v$, $\lambda\neq\lambda'$ なら $\int_{M}uv\,d\mu_{g}=0$ を示せ。
+3. \ref{gl:laplacian-examples.2} の $T^{n}$ で、$\cos(k\cdot t)$, $\sin(k\cdot t)$（$k\in\mathbb{Z}^{n}$）がこれらの性質をもつことを確かめよ。
+:::
+
+::: solution
+**1.** \ref{gl:closed-manifold-laplacian.2} から $\lambda\int u^{2}=\int u\Delta u=\int|\operatorname{grad}u|^{2}\ge0$。$u\neq0$ は連続なので $\int u^{2}>0$（\ref{gl:riemannian-measure.2}）、よって $\lambda\ge0$。$\lambda=0$ なら $\Delta u=0$ で \ref{gl:closed-manifold-laplacian.4} から定数。逆に定数なら $\Delta u=0$。
+
+**2.** \ref{gl:closed-manifold-laplacian.1} から $\lambda\int uv=\int(\Delta u)v=\int u\Delta v=\lambda'\int uv$ なので $(\lambda-\lambda')\int uv=0$。
+
+**3.** $\Delta\cos(k\cdot t)=|k|^{2}\cos(k\cdot t)$（$\sin$ も同じ）で固有値 $|k|^{2}\ge0$、$0$ になるのは $k=0$（定数）のときだけ。$|k|\neq|l|$ なら $\int_{(0,2\pi)^{n}}\cos(k\cdot t)\cos(l\cdot t)\,dt=0$ などは積和の公式とトネリの定理から直接確かめられ、2 と一致する。
+:::
+
+::: problem {#gl:prob-dg-dirichlet-uniqueness}
+$D\subset M$ をコンパクトな境界つき領域で、内部 $\operatorname{int}D$ が連結かつ $\partial D\neq\varnothing$ のものとする。$u\in C^{\infty}(M)$ が $D$ の上で $\Delta u=0$、$\partial D$ の上で $u=0$ を満たすなら、$D$ の上で $u=0$ であることを示せ。これから、ディリクレ問題「$D$ で $\Delta u=f$、$\partial D$ で $u=\varphi$」の滑らかな解は（あれば）一つしかないことを導け。
+:::
+
+::: solution
+\ref{gl:green-formulas.1} を $v=u$ に使う（$D$ はコンパクト）：$0=\int_{D}u\Delta u=\int_{D}|\operatorname{grad}u|^{2}-\int_{\partial D}u\,\partial_{\nu}u=\int_{D}|\operatorname{grad}u|^{2}$（$\partial D$ 上 $u=0$）。$|\operatorname{grad}u|^{2}$ は連続で非負なので、開集合 $\operatorname{int}D$ の上では \ref{gl:closed-manifold-laplacian} の Step 3 と同じ議論で $\operatorname{grad}u=0$、$\operatorname{int}D$ は連結なので $u$ はそこで定数 $c$。$m\in\partial D$ について、半空間型の座標近傍で $\varphi(m)$ に $\{r_{n}<0\}$ の点列が近づくので（\ref{mfd:boundary-properties.1}）、$m$ は $\operatorname{int}D$ の閉包に属し、連続性から $u(m)=c$。$\partial D\neq\varnothing$ で $u=0$ なので $c=0$、よって $D=\operatorname{int}D\cup\partial D$ の上で $u=0$。
+
+二つの解 $u_{1},u_{2}$ の差 $w=u_{1}-u_{2}$ は $D$ で $\Delta w=0$、$\partial D$ で $w=0$ なので、前半から $D$ 上 $w=0$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

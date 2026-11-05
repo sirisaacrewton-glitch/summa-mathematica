@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>リーマン測度と Lᵖ 空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/01-integration-sobolev/01-riemannian-measure.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# リーマン測度と Lᵖ 空間 {#gl:page-riemannian-measure keywords="Riemannian measure, Riemannian volume measure without orientation, sqrt(det g) dx, compatibility under change of charts, Radon measure on a manifold, integral via partition of unity, comparison with the integral of f vol_g, isometry invariance, null submanifolds, L^p spaces on a Riemannian manifold, area of the sphere and the torus, surface measure on the sphere"}
+
+多様体論では、向きづけられた多様体の上で $n$ 形式を積分した（\ref{mfd:integral}）。リーマン計量があれば、向きがなくても**関数**を積分できる：座標では $\sqrt{\det(g_{ij})}\,dx$ という重みでルベーグ積分し、座標を取り替えても変数変換公式に現れるのは $|\det D\tau|$ なので、向きをそろえる必要がない。こうして得られる測度が**リーマン測度**である。このページでは、リーマン測度が座標によらずにただ一つ定まり、ボレル集合の上のラドン測度になることを示し、座標と 1 の分割による積分の公式、向きづけられた場合の体積形式の積分との一致、等長写像での不変性を調べる。これで多様体の上の $L^{p}$ 空間が定義でき、以後のソボレフ空間・楕円型作用素・ホッジの定理の舞台になる。最後に、球面とトーラスの測度を計算し、球面のリーマン測度がルベーグ測度の極座標分解に現れる球面測度と一致することを示す。発散定理とグリーンの公式は次のページで扱う。
+
+## 記法と定義の確認 {#gl:sec-rm-notation}
+
+::: notation
+- 可微分多様体（ハウスドルフ・第二可算）と座標近傍は \ref{mfd:smooth-manifold}、多様体の位相的性質は \ref{mfd:manifold-topology}、滑らかな 1 の分割は \ref{mfd:smooth-partition-of-unity}、部分多様体は \ref{mfd:submanifold}。
+- 向き・境界つき領域・$n$ 形式の積分は \ref{mfd:orientation}, \ref{mfd:regular-domain}, \ref{mfd:integral}。閉半空間は $\mathbb{H}^{n}=\{r_{n}\le0\}$ とする。
+- **境界つき多様体について**：本サイトでは抽象的な境界つき多様体を定義していないので、「境界つきの多様体」は、（境界のない）多様体 $M$ の中の境界つき領域 $D$ として扱う。たとえば閉球は $\mathbb{R}^{n}$ の、半球面は $S^{n}$ の境界つき領域である。$D$ の上の測度・積分は、$M$ のリーマン測度を $D$（閉集合なのでボレル集合）に制限したもので考える。
+- リーマン計量・成分 $g_{ij}$・等長写像・引き戻し計量・誘導計量は \ref{riem:riemannian-metric}, \ref{riem:isometry}, \ref{riem:pullback-metric}、リーマン体積形式 $\mathrm{vol}_{g}$ は \ref{riem:volume-form}。
+- 座標近傍 $(U,\varphi)$（座標 $x_{1},\dots,x_{n}$）について、計量の成分を $\varphi(U)$ 上の関数とみて
+$$
+\gamma_{\varphi}\defeq\sqrt{\det\bigl(g_{ij}\circ\varphi^{-1}\bigr)}\colon\varphi(U)\to(0,\infty)
+$$
+と書く（$\det(g_{ij})>0$ なので滑らかで正）。$\sqrt{g}\defeq\gamma_{\varphi}\circ\varphi=\sqrt{\det(g_{ij})}$ とも書く。
+- ルベーグ測度 $\lambda$、変数変換公式（$J_{\Phi}=|\det D\Phi|$）、密度をもつ測度、単調収束定理、トネリの定理、$L^{p}$ 空間は \ref{meas:lebesgue-measure}, \ref{meas:change-of-variables}, \ref{meas:density-measure}, \ref{meas:monotone-convergence}, \ref{meas:tonelli}, \ref{meas:lp-space}。位相空間 $X$ のボレル集合族を $\mathcal{B}(X)$ と書く。
+- **選択公理**：リーマン測度の構成と一意性では使わない（可算な開基を一つ固定するだけで、座標近傍は「どれをとっても値が同じ」ことを示してから使う）。正則性の証明（\ref{gl:riemannian-measure.3}）で可算個の開集合を選ぶので可算選択公理を使い、1 の分割（\ref{mfd:smooth-partition-of-unity}）を使う箇所（\ref{gl:rm-integral-formulas}、\ref{gl:rm-sphere-measure}）では従属選択公理（DC）を使う。
+:::
+
+## リーマン測度 {#gl:sec-rm-measure}
+
+以下 $(M,g)$ は $n$ 次元のリーマン多様体（$n\ge1$）で、向きは仮定しない。$0$ 次元の多様体（離散集合）については、リーマン測度を数え上げ測度と約束する（$0\times0$ 行列の行列式は $1$）。
+
+::: lemma 座標による測度の両立性 {#gl:rm-chart-compatibility keywords="compatibility of the local measures gamma_phi d lambda under change of charts: gamma_phi = (gamma_psi o tau) |det D tau|" index="座標による測度の両立性|ざひょうによるそくどのりょうりつせい"}
+$(U,\varphi)$, $(V,\psi)$ を座標近傍とし、$\tau\defeq\psi\circ\varphi^{-1}\colon\varphi(U\cap V)\to\psi(U\cap V)$ を座標変換とする。
+1. $\varphi(U\cap V)$ 上で $\gamma_{\varphi}=(\gamma_{\psi}\circ\tau)\,|\det D\tau|$。
+2. ボレル集合 $E\subset U\cap V$ について
+$$
+\int_{\varphi(E)}\gamma_{\varphi}\,d\lambda=\int_{\psi(E)}\gamma_{\psi}\,d\lambda.
+\label{gl:eq-rm-compatibility}
+$$
+:::
+
+::: proof
+**1.** 座標を $x=\varphi$, $y=\psi$ とすると、計量の成分の変換則（\ref{riem:riemannian-metric} の後の注意）は $g^{(x)}_{ij}=\sum_{k,l}\frac{\partial y_{k}}{\partial x_{i}}\frac{\partial y_{l}}{\partial x_{j}}g^{(y)}_{kl}$ で、$\varphi(U\cap V)$ の上の行列で書くと $(g^{(x)}_{ij}\circ\varphi^{-1})=D\tau^{\mathsf{T}}\,\bigl((g^{(y)}_{kl}\circ\psi^{-1})\circ\tau\bigr)\,D\tau$。行列式をとると $\gamma_{\varphi}^{2}=(\gamma_{\psi}\circ\tau)^{2}(\det D\tau)^{2}$ で、両辺の正の平方根をとる。
+
+**2.** $\varphi$ は同相写像なので $\varphi(E)$ はボレル集合（\ref{meas:measurability-generators.2} を $\varphi^{-1}$ に使う）。同様に $\psi(E)=\tau(\varphi(E))$ もボレル集合。$f\defeq\mathbf{1}_{\psi(E)}\gamma_{\psi}$ は $\psi(U\cap V)$ 上の非負ボレル関数で、$f\circ\tau=\mathbf{1}_{\varphi(E)}(\gamma_{\psi}\circ\tau)$。$\tau$ は開集合の間の $C^{\infty}$ 微分同相写像なので、\ref{meas:change-of-variables.2} と 1 から
+$$
+\int_{\psi(E)}\gamma_{\psi}\,d\lambda=\int_{\varphi(U\cap V)}\mathbf{1}_{\varphi(E)}(\gamma_{\psi}\circ\tau)|\det D\tau|\,d\lambda=\int_{\varphi(E)}\gamma_{\varphi}\,d\lambda.
+$$
+:::
+
+座標変換で現れるのが $\det D\tau$ ではなく $|\det D\tau|$ であることが要点で、ここで向きの仮定が要らなくなる。
+
+::: theorem リーマン測度 {#gl:riemannian-measure keywords="Riemannian measure: the unique Borel measure mu_g with mu_g(E) = int_{phi(E)} sqrt(det g_ij) d lambda for E inside a chart; no orientation needed; Radon, sigma-finite, positive on open sets" index="リーマン測度|りーまんそくど, 体積測度（リーマン多様体）|たいせきそくどりーまんたようたい, リーマン体積|りーまんたいせき" refname="リーマン測度の存在と一意性"}
+$(M,g)$ を $n$ 次元のリーマン多様体（$n\ge1$）とする。
+1. $\mathcal{B}(M)$ 上の測度 $\mu_{g}$ で、すべての座標近傍 $(U,\varphi)$ とボレル集合 $E\subset U$ について
+$$
+\mu_{g}(E)=\int_{\varphi(E)}\gamma_{\varphi}\,d\lambda
+\label{gl:eq-rm-chart}
+$$
+となるものが、ただ一つある。$\mu_{g}$ を $(M,g)$ の**リーマン測度**という。$\int_{M}f\,d\mu_{g}$ を $\int_{M}f\,dV_{g}$ とも書き、$M$ がコンパクトなら $\operatorname{vol}(M)\defeq\mu_{g}(M)$ を**体積**という。
+2. $\mu_{g}$ は σ 有限で、空でない開集合の測度は正である。
+3. $\mu_{g}$ はラドン測度である：(a) コンパクト集合の測度は有限、(b) ボレル集合 $E$ について $\mu_{g}(E)=\inf\{\mu_{g}(O):O\supset E\text{ は開集合}\}$、(c) 開集合 $G$ について $\mu_{g}(G)=\sup\{\mu_{g}(K):K\subset G\text{ はコンパクト}\}$（\see{four:rm-radon-measure} の意味）。
+:::
+
+::: intuition
+リーマン多様体の上では、座標ごとに「$\sqrt{\det(g_{ij})}$ を重みにしたルベーグ測度」で集合の大きさを測ると、どの座標で測っても同じ値になり、それらは全体で一つの測度に貼り合わさる。向きは要らない。
+:::
+
+::: proof
+可算な開基 $\mathcal{U}$ を一つ固定し、$\mathcal{W}$ を「$\overline{B}$ がコンパクトで、ある座標近傍の定義域に $\overline{B}$ が含まれる」$B\in\mathcal{U}$ の全体とする。
+
+**Step 1.** 【主張：$\mathcal{W}$ は $M$ を覆い、$M$ の各開集合 $G$ は、$\overline{B}\subset G$ となる $B\in\mathcal{W}$ の和である】$m\in G$ について、\ref{mfd:manifold-topology.1} を $O=G$ に使って $m$ を中心とする座標近傍 $(V,\tau)$ とコンパクト集合 $K\subset V\subset G$（$m\in\operatorname{int}K$、$K$ は閉）をとる。$m\in B\subset\operatorname{int}K$ となる $B\in\mathcal{U}$ をとると、$\overline{B}\subset K$ はコンパクト集合の閉部分集合なのでコンパクトで、$\overline{B}\subset V$。よって $B\in\mathcal{W}$, $\overline{B}\subset G$。$G=M$ とすれば前半。
+
+$\mathcal{W}$ は可算なので $W_{1},W_{2},\dots$ と番号を付け（有限なら途中で止める）、$\overline{W_{k}}$ を含む座標近傍 $(U,\varphi)$ を **$W_{k}$ に適した座標近傍**と呼ぶ。ボレル集合 $E\subset W_{k}$ について $\nu_{k}(E)\defeq\int_{\varphi(E)}\gamma_{\varphi}\,d\lambda$ は、適した座標近傍の選び方によらない（\eqref{gl:eq-rm-compatibility}）。
+
+**Step 2（存在）.** 【主張：$\mu_{g}(E)\defeq\sum_{k}\nu_{k}(E_{k})$, $E_{k}\defeq(E\cap W_{k})\setminus\bigcup_{j<k}W_{j}$ は測度で、\eqref{gl:eq-rm-chart} を満たす】$\nu_{k}$ は $\mathcal{B}(W_{k})$ 上の測度である：$\varphi$ は互いに素なボレル集合の可算和を互いに素なボレル集合の可算和に写し、$A\mapsto\int_{A}\gamma_{\varphi}\,d\lambda$ は測度（\ref{meas:density-measure}）。$E\mapsto E_{k}$ は互いに素な和を保つので、測度の可算和として $\mu_{g}$ は測度。座標近傍 $(V,\psi)$ とボレル集合 $E\subset V$ をとると、$E_{k}\subset W_{k}\cap V$ なので \eqref{gl:eq-rm-compatibility}（$W_{k}$ に適した座標近傍と $(V,\psi)$ に使う）から $\nu_{k}(E_{k})=\int_{\psi(E_{k})}\gamma_{\psi}\,d\lambda$。$E=\bigsqcup_{k}E_{k}$ と $A\mapsto\int_{\psi(A)}\gamma_{\psi}\,d\lambda$ の可算加法性から $\mu_{g}(E)=\int_{\psi(E)}\gamma_{\psi}\,d\lambda$。
+
+**Step 3（一意性と 2）.** 【主張：\eqref{gl:eq-rm-chart} を満たす測度 $\mu'$ は $\mu_{g}$ に等しく、$\mu_{g}$ は σ 有限で、空でない開集合の測度は正】$\mu'(E)=\sum_{k}\mu'(E_{k})$ で、各 $E_{k}$ は一つの座標近傍に含まれるので $\mu'(E_{k})=\nu_{k}(E_{k})$。σ 有限性：$W_{k}$ に適した $(U,\varphi)$ について $\mu_{g}(W_{k})\le\int_{\varphi(\overline{W_{k}})}\gamma_{\varphi}\,d\lambda\le C_{k}\lambda(\varphi(\overline{W_{k}}))<\infty$、ここで $C_{k}\defeq\max_{\varphi(\overline{W_{k}})}\gamma_{\varphi}$（コンパクト集合 $\varphi(\overline{W_{k}})$ 上の連続関数の最大値。$\lambda$ の有限性は \ref{meas:lebesgue-basic.4}）。正値性：空でない開集合 $G$ は、ある座標近傍 $(U,\varphi)$ と交わり、$\mu_{g}(G\cap U)=\int_{\varphi(G\cap U)}\gamma_{\varphi}\,d\lambda>0$（空でない開集合 $\varphi(G\cap U)$ の上で $\gamma_{\varphi}>0$、\ref{meas:lebesgue-basic.4}）。
+
+**Step 4（(a) と (c)）.** 【主張：コンパクト集合の測度は有限で、開集合 $G$ は内からコンパクト集合で近似される】コンパクト集合は有限個の $W_{k}$ で覆え、各 $\mu_{g}(W_{k})<\infty$（Step 3）。開集合 $G$ については、Step 1 から $\overline{B}\subset G$ となる $B\in\mathcal{W}$ の全体 $B_{1},B_{2},\dots$ が $G$ を覆うので、$K_{l}\defeq\overline{B_{1}}\cup\dots\cup\overline{B_{l}}$ はコンパクトで $K_{l}\uparrow G$。測度の下からの連続性で $\mu_{g}(K_{l})\to\mu_{g}(G)$。
+
+**Step 5（(b)）.** 【主張：ボレル集合 $E$ と $\varepsilon>0$ について、開集合 $O\supset E$ で $\mu_{g}(O\setminus E)\le\varepsilon$ となるものがある】各 $k$ について $W_{k}$ に適した $(U,\varphi)$ をとり、$\varphi(E_{k})$（測度有限）に \ref{meas:lebesgue-regularity.1} を使って、開集合 $O'_{k}\supset\varphi(E_{k})$ で $\lambda(O'_{k})\le\lambda(\varphi(E_{k}))+\varepsilon2^{-k}/C_{k}$ となるものをとる（$C_{k}>0$ は Step 3 のもの）。$O_{k}\defeq\varphi^{-1}(O'_{k}\cap\varphi(W_{k}))$ は $E_{k}$ を含む開集合で、\eqref{gl:eq-rm-chart} から
+$$
+\mu_{g}(O_{k}\setminus E_{k})=\int_{\varphi(O_{k})\setminus\varphi(E_{k})}\gamma_{\varphi}\,d\lambda\le C_{k}\,\lambda(O'_{k}\setminus\varphi(E_{k}))\le\varepsilon2^{-k}.
+$$
+$O\defeq\bigcup_{k}O_{k}$ は $E=\bigsqcup E_{k}$ を含み、$O\setminus E\subset\bigcup_{k}(O_{k}\setminus E_{k})$ なので $\mu_{g}(O\setminus E)\le\varepsilon$。よって $\mu_{g}(O)\le\mu_{g}(E)+\varepsilon$。
+
+::: hypcheck
+- **第二可算性**：Step 1 で $\mathcal{W}$ を可算にし、測度を可算個の局所測度の和として定義するのに使った（σ 有限性もここから）。第二可算でない「長い直線」でも各点の近くでは同じ構成ができるが、全体を可算個の座標近傍で覆えないので、この定義は使えない。
+- **ハウスドルフ性**：Step 1 で、コンパクト集合 $K$ が閉であること（\ref{mfd:manifold-topology.1}）に使った。
+- **計量の滑らかさ**：使ったのは $\gamma_{\varphi}$ が連続で正であることだけで、連続なリーマン計量でも同じ測度ができる。正値性を外して半正定値にすると \eqref{gl:eq-rm-chart} は測度を定めるが、Step 3 の「開集合の測度は正」が崩れる（$g=0$ なら $\mu_{g}=0$）。
+- **向き**：使っていない。\ref{gl:rm-chart-compatibility} で $|\det D\tau|$ が現れることがその理由である。
+- **公理**：Step 1〜4 は選択公理を使わない（座標近傍は「適したものならどれでも同じ」なので選ばずに済む）。Step 5 では各 $k$ に座標近傍と開集合 $O'_{k}$ を選ぶので、可算選択公理を使う。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 向き付け不可能な多様体でも $\mu_{g}$ はできるが、$n$ 形式としての体積形式はない（\ref{mfd:orientable-equivalents}）。たとえばメビウスの帯や実射影平面にも面積はあるが、それは「符号つきの量（形式）の積分」ではなく「符号のない量（測度）」として定まる。計量を捨てて可微分構造だけにすると、測度は決まらないが、**零集合の族**は決まる：二つの計量の測度は互いに連続な正の密度で移り合う（\ref{gl:rm-basic-properties.2}）。
+
+**似た定理.** 局所コンパクト群のハール測度（\see{four:hm-haar-measure}）も「局所的な物差しを不変性で一つに決める」構成であり、リー群に左不変なリーマン計量を入れたときのリーマン測度は左ハール測度である（不変性は \ref{gl:rm-basic-properties.1} から）。また、$\mathbb{R}^{N}$ の部分多様体に誘導計量を入れたときのリーマン測度は、$n$ 次元ハウスドルフ測度に一致することが知られている（面積公式。ここでは証明しない）。
+
+**高い視点：密度.** $\sqrt{\det(g_{ij})}\,|dx_{1}\wedge\cdots\wedge dx_{n}|$ のように、座標変換で $|\det|$ 倍される量を**密度**という。密度は向きと無関係に定義される直線束 $|\Lambda^{n}|T^{*}M$ の切断で、台がコンパクトな連続な密度は向きなしで積分できる。リーマン計量は、各点で「正規直交基底の張る平行体の大きさを $1$ とする」密度を一つ選ぶ。比喩で言えば、$n$ 形式は「右回りか左回りか」まで記録した面積の帳簿で、密度は「広さ」だけを記録した帳簿である。裏表の区別のない紙（メビウスの帯）にも、広さの帳簿はつけられる。
+:::
+
+::: proposition 積分の公式 {#gl:rm-integral-formulas keywords="integral against the Riemannian measure in a chart; via a partition of unity; agrees with the integral of f vol_g on oriented manifolds and regular domains" index="リーマン測度による積分|りーまんそくどによるせきぶん"}
+1. 座標近傍 $(U,\varphi)$ と、$U$ 上のボレル可測な $h\colon U\to[0,\infty]$ について $\displaystyle\int_{U}h\,d\mu_{g}=\int_{\varphi(U)}(h\circ\varphi^{-1})\,\gamma_{\varphi}\,d\lambda$。$h$ が $\mu_{g}$ 可積分なら（$h\circ\varphi^{-1}\gamma_{\varphi}$ は可積分で）同じ等式が成り立つ。
+2. 座標近傍 $(U_{j},\varphi_{j})$ と滑らかな 1 の分割 $(\rho_{j})$ で $\operatorname{supp}\rho_{j}\subset U_{j}$ となるものについて、ボレル可測な $h\colon M\to[0,\infty]$ は
+$$
+\int_{M}h\,d\mu_{g}=\sum_{j}\int_{\varphi_{j}(U_{j})}\bigl((\rho_{j}h)\circ\varphi_{j}^{-1}\bigr)\gamma_{\varphi_{j}}\,d\lambda.
+$$
+3. $M$ が向きづけられているとき、境界つき領域 $D$ と、台がコンパクトな連続関数 $f\colon M\to\mathbb{R}$ について $\displaystyle\int_{D}f\,\mathrm{vol}_{g}=\int_{D}f\,d\mu_{g}$（左辺は \ref{mfd:integral}）。
+:::
+
+::: proof
+**1.** $h=\mathbf{1}_{E}$ なら \eqref{gl:eq-rm-chart} そのもの。両辺は非負の単関数について線形で、一般の $h$ には単関数の増加列 $s_{l}\uparrow h$（\ref{meas:simple-approximation}）をとると $s_{l}\circ\varphi^{-1}\uparrow h\circ\varphi^{-1}$ なので、\ref{meas:monotone-convergence} から従う。可積分な $h$ は実部・虚部の正負の部分に分ける。
+
+**2.** $\rho_{j}h$ の台は $U_{j}$ に含まれるので $\int_{M}\rho_{j}h\,d\mu_{g}=\int_{U_{j}}\rho_{j}h\,d\mu_{g}$ で、1 を使う。$\sum_{j}\rho_{j}h=h$ なので、非負関数の級数の項別積分（\ref{meas:termwise-integration}）から和が $\int_{M}h\,d\mu_{g}$ になる。
+
+**3.** \ref{mfd:integral.2} の正の座標近傍 $(U_{i},\varphi_{i})$ と 1 の分割 $(\rho_{i})$ をとると、左辺は $\sum_{i}\int_{D}\rho_{i}f\,\mathrm{vol}_{g}$、右辺も（有限和の線形性から）$\sum_{i}\int_{D}\rho_{i}f\,d\mu_{g}$ なので、台が一つの正の座標近傍 $(U,\varphi)$ に含まれる場合に示せばよい。そのとき \ref{riem:volume-form} から $(f\mathrm{vol}_{g})^{\varphi}=h\,dr_{1}\wedge\cdots\wedge dr_{n}$, $h\defeq(f\circ\varphi^{-1})\gamma_{\varphi}$（$\varphi(U)$ の外では $0$）で、左辺は $\int_{R\cap S}h$（リーマン積分。$R$ は台を含む閉直方体、$S$ は \ref{mfd:integral.1} の $\varnothing$, $\mathbb{R}^{n}$, $\mathbb{H}^{n}$）。$R\cap S$ は閉直方体か空集合で、$h$ はその上で連続なので、\ref{meas:riemann-lebesgue} からこれは $\int_{R\cap S}h\,d\lambda=\int_{\varphi(U)\cap S}h\,d\lambda$ に等しい。三つの場合のどれでも $\varphi(U)\cap S=\varphi(U\cap D)$（外点だけなら $U\cap D=\varnothing$、内点だけなら $U\subset D$、半空間型なら定義そのもの）なので、1 から $\int_{\varphi(U\cap D)}h\,d\lambda=\int_{U\cap D}f\,d\mu_{g}=\int_{D}f\,d\mu_{g}$。
+:::
+
+::: proposition リーマン測度の基本性質 {#gl:rm-basic-properties keywords="isometries preserve Riemannian measure; change of metric gives a continuous positive density; submanifolds of lower dimension are null; Euclidean metric gives Lebesgue measure; restriction to open subsets" index="リーマン測度の基本性質|りーまんそくどのきほんせいしつ, 等長写像の測度不変性|とうちょうしゃぞうのそくどふへんせい"}
+1. 等長写像 $F\colon(M,g)\to(N,h)$ とボレル集合 $E\subset M$ について $\mu_{h}(F(E))=\mu_{g}(E)$。開集合 $W\subset M$ の上の計量 $g\restr{W}$ のリーマン測度は $\mu_{g}$ の制限である。$\mathbb{R}^{n}$ のユークリッド計量のリーマン測度は $\mathcal{B}(\mathbb{R}^{n})$ 上のルベーグ測度である。
+2. $g'$ を $M$ のもう一つのリーマン計量とすると、連続関数 $\theta\colon M\to(0,\infty)$ があって $\mu_{g'}(E)=\int_{E}\theta\,d\mu_{g}$。座標では $\theta=\sqrt{\det(g'_{ij})/\det(g_{ij})}$。
+3. $N\subset M$ が次元 $k<n$ の部分多様体なら $\mu_{g}(N)=0$。
+:::
+
+::: proof
+**1.** $(V,\psi)$ を $N$ の座標近傍とすると、$(F^{-1}(V),\psi\circ F)$ は $M$ の座標近傍で、$F^{*}h=g$ から $g$ のこの座標での成分は $h$ の $\psi$ での成分を $F$ で引き戻したものである（$dF$ は座標ベクトル場を座標ベクトル場に写す）。よって $\gamma_{\psi\circ F}=\gamma_{\psi}$ で、$E\subset F^{-1}(V)$ なら $\mu_{g}(E)=\int_{\psi(F(E))}\gamma_{\psi}\,d\lambda=\mu_{h}(F(E))$。$M$ の座標近傍 $(U',\varphi')$ はすべてこの形（$\psi\defeq\varphi'\circ F^{-1}$）なので、$E\mapsto\mu_{h}(F(E))$ は \eqref{gl:eq-rm-chart} を満たす測度で、\ref{gl:riemannian-measure.1} の一意性から全体で等しい。開集合 $W$ の座標近傍は $M$ の座標近傍でもあるので、$\mu_{g}$ の制限は $g\restr{W}$ について \eqref{gl:eq-rm-chart} を満たす。ユークリッド計量では恒等写像の座標で $\gamma=1$。
+
+**2.** 座標近傍の上で $\theta\defeq\sqrt{\det(g'_{ij})/\det(g_{ij})}$ とおくと、\ref{gl:rm-chart-compatibility.1} から $g$ と $g'$ の $\gamma$ はどちらも $|\det D\tau|$ 倍で変わるので、$\theta$ は座標によらず $M$ 上の正の連続関数を定める。$E\subset U$ なら $\mu_{g'}(E)=\int_{\varphi(E)}(\theta\circ\varphi^{-1})\gamma_{\varphi}\,d\lambda=\int_{E}\theta\,d\mu_{g}$（\ref{gl:rm-integral-formulas.1}）で、両辺は測度（\ref{meas:density-measure}）なので一意性から全体で等しい。
+
+**3.** $\mathcal{W}'$ を、あるスライス座標近傍（$\varphi(U\cap N)=\varphi(U)\cap(\mathbb{R}^{k}\times\{0\})$ となる座標近傍、\ref{mfd:submanifold}）の定義域に含まれる開基の元の全体とする。$N$ の各点はスライス座標近傍の定義域に含まれるので、$\mathcal{W}'$ の元の和は $N$ を含む。$B\in\mathcal{W}'$ がスライス座標近傍 $(U,\varphi)$ に含まれれば、$\varphi(B\cap N)=\varphi(B)\cap(\mathbb{R}^{k}\times\{0\})$ はボレル集合で（したがって $B\cap N$ もボレル集合）、超平面 $\{r_{n}=0\}$ に含まれる。超平面は退化した閉直方体の可算和なのでルベーグ零集合で（\ref{meas:lebesgue-basic.3}）、$\mu_{g}(B\cap N)=\int_{\varphi(B\cap N)}\gamma_{\varphi}\,d\lambda=0$。$N=\bigcup_{B\in\mathcal{W}'}(B\cap N)$ は可算和なので、$N$ はボレル集合で $\mu_{g}(N)=0$。
+:::
+
+::: definition 多様体上の Lᵖ 空間 {#gl:lp-manifold keywords="L^p(M) = L^p(M, B(M), mu_g) for a Riemannian manifold; independent of the metric for compact M with equivalent norms" index="Lp 空間（リーマン多様体）|えるぴーくうかんりーまんたようたい"}
+$1\le p\le\infty$ について、$L^{p}(M)\defeq L^{p}(M,\mathcal{B}(M),\mu_{g})$（\ref{meas:lp-space}）とし、$\|f\|_{p}=\bigl(\int_{M}|f|^{p}\,d\mu_{g}\bigr)^{1/p}$ と書く。$p=2$ の内積は $(u,v)\defeq\int_{M}u\bar{v}\,d\mu_{g}$。
+:::
+
+::: intuition
+多様体の上の $p$ 乗可積分関数とは、リーマン測度で $|f|^{p}$ を積分して有限になる関数のことである。
+:::
+
+$M$ がコンパクトなら、\ref{gl:rm-basic-properties.2} の $\theta$ は正の最小値 $c$ と最大値 $C$ をもち、$c\,\mu_{g}\le\mu_{g'}\le C\,\mu_{g}$ なので、$L^{p}(M)$ は集合として計量によらず、ノルムは同値（$c^{1/p}\|f\|_{p,g}\le\|f\|_{p,g'}\le C^{1/p}\|f\|_{p,g}$、$p=\infty$ ではノルムも等しい：零集合が同じため）。非コンパクトなら一般には計量による（$\mathbb{R}$ 上の $dx^{2}$ と $e^{2x}dx^{2}$ では $\theta=e^{x}$）。
+
+## 例：球面とトーラス {#gl:sec-rm-examples}
+
+::: example 球面とトーラスの面積 {#gl:rm-examples keywords="Riemannian measure of the round sphere S^2 in spherical coordinates, area 4 pi; flat torus T^n = (S^1)^n with volume (2 pi)^n; torus of revolution with area 4 pi^2 R r" index="球面の面積（リーマン測度）|きゅうめんのめんせきりーまんそくど, 平坦トーラス|へいたんとーらす, 回転トーラスの面積|かいてんとーらすのめんせき"}
+1. **球面 $S^{2}$.** 球面座標 $(\theta,\phi)\in(0,\pi)\times(0,2\pi)\mapsto(\sin\theta\cos\phi,\sin\theta\sin\phi,\cos\theta)$ の逆は、$S^{2}$ から閉じた半大円 $C\defeq\{(x,0,z)\in S^{2}:x\ge0\}$ を除いた開集合の上の座標近傍で、標準計量は $d\theta^{2}+\sin^{2}\theta\,d\phi^{2}$（\ref{riem:ex-rm-1}）、$\sqrt{g}=\sin\theta$。$C$ は二点（極）と 1 次元の部分多様体（開いた半大円）の和なので \ref{gl:rm-basic-properties.3} から $\mu_{g}(C)=0$。よって、ボレル可測な $f\ge0$ について
+$$
+\int_{S^{2}}f\,d\mu_{g}=\int_{0}^{\pi}\!\!\int_{0}^{2\pi}f(\theta,\phi)\sin\theta\,d\phi\,d\theta,\qquad\operatorname{vol}(S^{2})=4\pi
+$$
+（\ref{gl:rm-integral-formulas.1} とトネリの定理。左辺の $f$ を座標で表したものを右辺に書いた）。
+2. **平坦トーラス $T^{n}$.** $T^{n}\defeq(S^{1})^{n}\subset\mathbb{C}^{n}$ に誘導計量を入れる。$t\in(a_{1},a_{1}+2\pi)\times\cdots\times(a_{n},a_{n}+2\pi)\mapsto(e^{it_{1}},\dots,e^{it_{n}})$ は単射なはめ込みで像の上への同相写像なので、その逆は座標近傍で（\ref{mfd:embedding-image-submanifold}）、$|d(e^{it_{j}})|^{2}=dt_{j}^{2}$ から $g_{ij}=\delta_{ij}$, $\sqrt{g}=1$。$a_{j}=0$ のとき、除かれる集合 $\bigcup_{j}\{z_{j}=1\}$ は有限個の $(n-1)$ 次元部分多様体の和なので測度 $0$ で、
+$$
+\mu_{g}(E)=\lambda\bigl(\{t\in(0,2\pi)^{n}:(e^{it_{j}})_{j}\in E\}\bigr),\qquad\operatorname{vol}(T^{n})=(2\pi)^{n}.
+$$
+3. **回転トーラス.** $0<r<R$ について $(u,v)\in(0,2\pi)^{2}\mapsto\bigl((R+r\cos v)\cos u,(R+r\cos v)\sin u,r\sin v\bigr)$ の逆は、$\mathbb{R}^{3}$ の回転トーラスから二つの円を除いた開集合の座標近傍で、誘導計量は $(R+r\cos v)^{2}du^{2}+r^{2}dv^{2}$、$\sqrt{g}=r(R+r\cos v)$。除いた円は測度 $0$ なので、面積は $\int_{0}^{2\pi}\!\int_{0}^{2\pi}r(R+r\cos v)\,du\,dv=4\pi^{2}Rr$。回転トーラスと平坦トーラス $T^{2}$ は角度座標 $(u,v)\leftrightarrow(t_{1},t_{2})$ で微分同相だが、そう同一視したとき二つの計量の測度の比（\ref{gl:rm-basic-properties.2} の $\theta$）は $r(R+r\cos v)$ で、定数でない。
+:::
+
+球面の測度は、ルベーグ測度の極座標分解に現れる球面測度（\ref{meas:polar-sphere-measure}）と一致する。
+
+::: proposition 球面のリーマン測度と球面測度 {#gl:rm-sphere-measure keywords="the Riemannian measure of the round sphere S^{n-1} with the induced metric equals the surface measure sigma of polar coordinates" index="球面のリーマン測度|きゅうめんのりーまんそくど"}
+$n\ge2$ とし、$S^{n-1}\subset\mathbb{R}^{n}$ に誘導計量を入れたリーマン測度を $\mu_{S}$ とすると、$\mu_{S}=\sigma$（\ref{meas:polar-sphere-measure}）。とくに $\operatorname{vol}(S^{n-1})=n\omega_{n}$（$\omega_{n}$ は単位球の体積）。
+:::
+
+::: proof
+**Step 1.** 【主張：$S^{n-1}$ の座標近傍 $(U,\varphi)$ について、$\Psi(r,y)\defeq r\,\varphi^{-1}(y)$ は $(0,\infty)\times\varphi(U)$ から開集合 $C_{U}\defeq\{r\theta:r>0,\theta\in U\}$ への $C^{\infty}$ 微分同相写像で、$|\det D\Psi(r,y)|=r^{n-1}\gamma_{\varphi}(y)$】$C_{U}$ は連続写像 $x\mapsto x/|x|$ による $U$ の逆像なので開集合で、逆写像は $x\mapsto(|x|,\varphi(x/|x|))$（滑らか）。$\vartheta\defeq\varphi^{-1}$ を $\mathbb{R}^{n}$ 値の関数とみると、$D\Psi$ の列は $\vartheta,r\partial_{1}\vartheta,\dots,r\partial_{n-1}\vartheta$。$\vartheta\cdot\vartheta=1$ を微分して $\vartheta\cdot\partial_{i}\vartheta=0$、誘導計量の定義から $\partial_{i}\vartheta\cdot\partial_{j}\vartheta=g_{ij}\circ\varphi^{-1}$。よって $D\Psi^{\mathsf{T}}D\Psi$ は対角ブロック $1$ と $r^{2}(g_{ij}\circ\varphi^{-1})$ からなり、$(\det D\Psi)^{2}=r^{2(n-1)}\gamma_{\varphi}^{2}$。
+
+**Step 2.** 【主張：ボレル可測な $h\ge0$ で $\{h\neq0\}\subset C_{U}$ なら $\int_{\mathbb{R}^{n}}h\,d\lambda=\int_{0}^{\infty}\bigl(\int_{S^{n-1}}h(r\theta)\,d\mu_{S}(\theta)\bigr)r^{n-1}dr$】\ref{meas:change-of-variables.2} と Step 1 から $\int h\,d\lambda=\int_{(0,\infty)\times\varphi(U)}h(r\vartheta(y))\,r^{n-1}\gamma_{\varphi}(y)\,d\lambda(r,y)$。トネリの定理で $y$ の積分を内側にし、\ref{gl:rm-integral-formulas.1}（$U$ 上の関数 $\theta\mapsto h(r\theta)$）で内側を $\int_{U}h(r\theta)\,d\mu_{S}(\theta)$ に書き直す。$h(r\theta)=0$（$\theta\notin U$）なので、これは $S^{n-1}$ 全体の積分に等しい。
+
+**Step 3.** 【主張：すべてのボレル可測な $h\ge0$ で Step 2 の等式が成り立つ】$S^{n-1}$ の座標近傍からなる被覆に従属する 1 の分割 $(\rho_{j})$ をとり（\ref{mfd:smooth-partition-of-unity.1}）、$x\neq0$ で $h_{j}(x)\defeq\rho_{j}(x/|x|)h(x)$、$h_{j}(0)\defeq0$ とおく。$h_{j}$ は Step 2 の条件を満たし、$\{0\}$ の外で $\sum_{j}h_{j}=h$（$\lambda(\{0\})=0$ で、右辺の $r$ の積分は $r>0$ だけを見る）。Step 2 の等式を $j$ について足し、両辺で項別積分（\ref{meas:termwise-integration}）を使う。
+
+Step 3 は \ref{meas:polar-decomposition.2} と同じ等式なので、\ref{meas:polar-decomposition.4} の一意性から $\mu_{S}=\sigma$。体積は \ref{meas:polar-sphere-measure-basic.1}。
+:::
+
+::: supplement
+**向き付け不可能な例.** 実射影平面 $\mathbb{RP}^{2}=S^{2}/\{\pm1\}$ には、商写像 $\pi\colon S^{2}\to\mathbb{RP}^{2}$ が局所等長写像になる計量が入る（対蹠写像が等長写像なので、局所的な逆写像による引き戻しが一致する）。$\mathbb{RP}^{2}$ は向き付け不可能なので体積形式はないが、リーマン測度はあり、$\pi$ で二重に覆われる開集合 $V$ の中のボレル集合 $E$ について $\pi^{-1}(E)$ は等長に写る二つの部分に分かれるので（\ref{gl:rm-basic-properties.1}）$\mu_{S^{2}}(\pi^{-1}(E))=2\mu(E)$、したがって $\operatorname{vol}(\mathbb{RP}^{2})=2\pi$。
+:::
+
+## 問題 {#gl:sec-rm-problems}
+
+::: problem {#gl:prob-rm-graph-area}
+$\Omega\subset\mathbb{R}^{n}$ を開集合、$f\colon\Omega\to\mathbb{R}$ を滑らかな関数とし、グラフ $\Gamma\defeq\{(x,f(x)):x\in\Omega\}\subset\mathbb{R}^{n+1}$ に誘導計量を入れる。ボレル集合 $E\subset\Omega$ について
+$$
+\mu_{\Gamma}\bigl(\{(x,f(x)):x\in E\}\bigr)=\int_{E}\sqrt{1+|\nabla f|^{2}}\,d\lambda
+$$
+を示せ（$\nabla f$ はユークリッドの勾配）。
+:::
+
+::: solution
+$F(x)\defeq(x,f(x))$ は単射なはめ込みで、逆写像は射影 $(x,y)\mapsto x$ の制限（連続）なので、$\Gamma$ は部分多様体で $F^{-1}$ は $\Gamma$ 全体を覆う座標近傍である（\ref{mfd:embedding-image-submanifold}）。誘導計量の成分は $g_{ij}=\partial_{i}F\cdot\partial_{j}F=\delta_{ij}+\partial_{i}f\,\partial_{j}f$、行列で $I+aa^{\mathsf{T}}$（$a\defeq\nabla f$）。$a\neq0$ なら $a$ は固有値 $1+|a|^{2}$ の固有ベクトルで、$a^{\perp}$（$n-1$ 次元）の上では $I+aa^{\mathsf{T}}$ は恒等写像なので、$\det(I+aa^{\mathsf{T}})=1+|a|^{2}$（$a=0$ でも成り立つ）。よって $\gamma_{F^{-1}}=\sqrt{1+|\nabla f|^{2}}$ で、\eqref{gl:eq-rm-chart} から主張が従う。
+:::
+
+::: problem {#gl:prob-rm-conformal-scaling}
+$(M,g)$ を $n$ 次元のリーマン多様体、$w\in C^{\infty}(M)$ とする。
+1. $\tilde{g}\defeq e^{2w}g$ のリーマン測度は $\mu_{\tilde{g}}(E)=\int_{E}e^{nw}\,d\mu_{g}$ であることを示せ。
+2. 半径 $\rho>0$ の球面 $S^{n}_{\rho}\defeq\{x\in\mathbb{R}^{n+1}:|x|=\rho\}$ に誘導計量を入れると $\operatorname{vol}(S^{n}_{\rho})=\rho^{n}\operatorname{vol}(S^{n})$ であることを示せ。
+:::
+
+::: solution
+**1.** 座標では $\tilde{g}_{ij}=e^{2w}g_{ij}$ なので $\det(\tilde{g}_{ij})=e^{2nw}\det(g_{ij})$、\ref{gl:rm-basic-properties.2} の $\theta$ は $e^{nw}$。
+
+**2.** $F\colon S^{n}\to S^{n}_{\rho}$, $F(x)\defeq\rho x$ は微分同相写像で、$dF=\rho\cdot$ なので、$S^{n}_{\rho}$ の誘導計量 $h$ について $F^{*}h=\rho^{2}g$（$g$ は $S^{n}$ の標準計量）。よって $F$ は $(S^{n},\rho^{2}g)$ から $(S^{n}_{\rho},h)$ への等長写像で、\ref{gl:rm-basic-properties.1} と 1（$w=\log\rho$）から $\operatorname{vol}(S^{n}_{\rho})=\mu_{\rho^{2}g}(S^{n})=\rho^{n}\mu_{g}(S^{n})$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
