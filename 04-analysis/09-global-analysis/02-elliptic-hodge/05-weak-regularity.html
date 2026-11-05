@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>弱解の正則性と核の有限次元性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/02-elliptic-hodge/05-weak-regularity.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 弱解の正則性と核の有限次元性 {#gl:page-weak-regularity keywords="elliptic regularity on closed manifolds, weak solutions of elliptic systems between vector bundles, formal transpose with respect to fibre metrics, weak solutions are smooth, Weyl lemma, Lax-Milgram and the Laplacian, Rellich theorem for sections, kernel of an elliptic operator is finite dimensional and smooth, closed range, 楕円正則性, 弱解の滑らかさ, ワイルの補題, 核の有限次元性, 像の閉性"}
+
+前のページ \ref{gl:page-elliptic-regularity} では、閉多様体の上の楕円型作用素について評価 $\|u\|_{H^{s+k}}\le C(\|Pu\|_{H^{s}}+\|u\|_{L^{2}})$ を示し、トーラスの係数空間の上で、差分商による局所的な正則性の議論を行った。このページでは、それを閉多様体の上の弱解に適用する。ベクトル束の間の作用素の弱解をファイバー計量で定め、方程式を局所化してトーラスへ移すと、右辺は一段ずつよくなり、$L^{2}$ の弱解 $u$ は $Pu\in H^{s}$ なら $H^{s+k}$ に入る（**楕円正則性**）。とくに $Pu$ が滑らかなら $u$ も滑らかで、ラックス–ミルグラムの定理で得たラプラシアンの弱解も滑らかになる。最後に、楕円型評価とレリッヒの定理から、核が有限次元で滑らかな切断からなり、像が閉じていることを示す。これらはスペクトル理論とホッジの定理の基礎になる。
+
+## 記法と定義の確認 {#gl:sec-er-weak-notation}
+
+::: notation
+- $M$, $g$, $\mu_{g}$、ベクトル束 $E$, $F$ と複素係数の約束、$H^{s}(M;E)$ とノルム、微分作用素・主表象・楕円型作用素、トーラスの記号（$p$, $Q$, $o$, $W_{\rho}$, $\breve{w}$）は \ref{gl:sec-er-notation} のとおり。$k\ge1$、$s\ge0$ は整数。
+- トーラスの係数空間 $\mathcal{H}^{t}$、ノルム $\|\cdot\|_{(t)}$、演算と対合 $\langle c,\varphi\rangle$ は \ref{gl:torus-scale}, \ref{gl:torus-scale-operations}、滑らかな関数を掛ける評価は \ref{gl:torus-multiplication-estimate}。正規化された座標近傍、$L_{1}=\bar{B}(0,3/2)$、$\mathcal{T}_{y,\Phi}$、作用素のトーラスでの姿 $\breve{P}$ は \ref{gl:sec-er-garding} のとおりで、埋め込みの性質は \ref{gl:torus-transplant}、局所正則性は \ref{gl:local-regularity-torus}、交換子は \ref{gl:commutator-lower-order}。
+- 閉多様体の上の評価は \ref{gl:elliptic-estimate} と \ref{gl:elliptic-estimate-l2}。
+- **ファイバー計量.** 実ベクトル束 $E$, $F$ に滑らかなファイバー計量 $h_{E}$, $h_{F}$ を一つずつ固定し、複素双線形に $E^{\mathbb{C}}$, $F^{\mathbb{C}}$ へ延ばす。局所自明化 $\Phi$ で $h_{E}(e,e')=(\Phi_{m}e)^{\mathsf{T}}H_{E}(m)\,\Phi_{m}e'$ と書き、$H_{E}$ は滑らかな正定値対称行列値関数である（$H_{F}$ も同様）。$L^{2}(M;E)$ の内積は $(u,u')\defeq\int_{M}h_{E}(u,\overline{u'})\,d\mu_{g}$ で、$h_{E}(w,\bar{w})=|\operatorname{Re}w|_{h}^{2}+|\operatorname{Im}w|_{h}^{2}\ge0$（等号は $w=0$ のとき）。$u\in L^{2}$ と滑らかな $v$ について $|\int h_{E}(u,v)\,d\mu_{g}|\le\|u\|_{L^{2}}\|v\|_{L^{2}}$。
+- **選択公理**：1 の分割で DC を使う点は前のページと同じ。核の有限次元性（DC）と像の閉性の評価（可算選択）で新しく使い、その箇所に明記する。
+:::
+
+## ベクトル束の間の弱解 {#gl:sec-er-weak}
+
+関数の場合の形式的転置（\ref{gl:formal-transpose}）と弱解（\ref{gl:weak-solution-manifold}）を、ファイバー計量を使ってベクトル束の間の作用素に広げる。
+
+::: proposition 形式的転置（ベクトル束） {#gl:formal-transpose-bundle keywords="formal transpose of a differential operator between vector bundles with respect to fibre metrics: int h_F(P u, v) = int h_E(u, P^t v); local formula with gamma, the fibre metric matrices and transposed coefficients; transpose of compositions" index="形式的転置（ベクトル束）|けいしきてきてんちべくとるそく"}
+$M$ を閉多様体、$P\colon\Gamma(M,E)\to\Gamma(M,F)$ を $k$ 階以下の微分作用素とする。
+1. $k$ 階以下の微分作用素 $P^{t}\colon\Gamma(M,F)\to\Gamma(M,E)$ で、すべての滑らかな切断 $u$, $v$ について
+$$
+\int_{M}h_{F}(Pu,v)\,d\mu_{g}=\int_{M}h_{E}(u,P^{t}v)\,d\mu_{g}
+$$
+となるものがただ一つある。
+2. 座標近傍 $(U,x)$ と局所自明化 $\Phi$, $\Psi$ での $P$ の係数を $A_{\alpha}$ とし、$\gamma\defeq\gamma_{x}$、$\tilde{H}_{E}\defeq H_{E}\circ x^{-1}$, $\tilde{H}_{F}\defeq H_{F}\circ x^{-1}$、$V\defeq v_{\Psi}\circ x^{-1}$ とすると、$x(U)$ の上で
+$$
+\gamma\tilde{H}_{E}\,\bigl((P^{t}v)_{\Phi}\circ x^{-1}\bigr)=\sum_{|\alpha|\le k}(-1)^{|\alpha|}\partial^{\alpha}\bigl(\gamma A_{\alpha}^{\mathsf{T}}\tilde{H}_{F}V\bigr).
+$$
+3. 合成について $(PQ)^{t}=Q^{t}P^{t}$。$\psi\in C^{\infty}(M)$ を掛ける作用素は $\psi^{t}=\psi$。$E=F=M\times\mathbb{C}$、$h$ が積のとき、$P^{t}$ は \ref{gl:formal-transpose} の形式的転置である。
+4. 1 の等式は $u\in H^{k}(M;E)$（$P$ は \ref{gl:differential-operator-sobolev.3} の延長）と滑らかな $v$ についても成り立つ。
+:::
+
+::: proof
+**Step 1.** 【主張：台が $U$ に含まれる滑らかな $v$ について、2 の右辺から決まる切断を $Q_{U}v$（$U$ の外で $0$）とすると、すべての滑らかな $u$ で $\int h_{F}(Pu,v)=\int h_{E}(u,Q_{U}v)$】$W\defeq u_{\Phi}\circ x^{-1}$ とする。\ref{gl:rm-integral-formulas.1} から
+$$
+\int_{M}h_{F}(Pu,v)\,d\mu_{g}=\sum_{\alpha}\int_{x(U)}(A_{\alpha}\partial^{\alpha}W)^{\mathsf{T}}\tilde{H}_{F}V\,\gamma\,d\lambda=\sum_{\alpha}\int_{x(U)}\partial^{\alpha}W\cdot\bigl(\gamma A_{\alpha}^{\mathsf{T}}\tilde{H}_{F}V\bigr)d\lambda.
+$$
+$\gamma A_{\alpha}^{\mathsf{T}}\tilde{H}_{F}V$ の成分は $C_{c}^{\infty}(x(U))$ に入るので、\ref{gl:formal-transpose} の証明の Step 1 と同じく部分積分で $\partial^{\alpha}$ を移せて、和は $\int W\cdot\sum_{\alpha}(-1)^{|\alpha|}\partial^{\alpha}(\gamma A_{\alpha}^{\mathsf{T}}\tilde{H}_{F}V)\,d\lambda=\int W^{\mathsf{T}}\tilde{H}_{E}\,(Q_{U}v)_{\Phi}\circ x^{-1}\,\gamma\,d\lambda$（$\tilde{H}_{E}$ は対称）。これは $\int h_{E}(u,Q_{U}v)\,d\mu_{g}$ に等しい。
+
+**Step 2.** 【主張：滑らかな $w$ がすべての滑らかな $u$ について $\int h_{E}(u,w)=0$ を満たせば $w=0$】$u=\bar{w}$ とすると $\int h_{E}(\bar{w},w)\,d\mu_{g}=0$ で、被積分関数は連続で非負なので、$\{h_{E}(\bar{w},w)>0\}$ は測度 $0$ の開集合で空（\ref{gl:riemannian-measure.2}）。
+
+**Step 3.** 【主張：1・2】局所化のデータ $(U_{j},x_{j},\rho_{j})$ について $P^{t}v\defeq\sum_{j}Q_{U_{j}}(\rho_{j}v)$ とおくと、Step 1 から 1 の等式が成り立ち、一意性は Step 2 から。2 の式と $P^{t}$ が $k$ 階以下であることは、\ref{gl:formal-transpose} の証明の Step 3 と同じ議論（局所性と一意性で $U$ の上で $P^{t}v=Q_{U}v$ を示し、右辺をライプニッツ則で展開する。$\tilde{H}_{E}^{-1}$ は滑らか）で出る。
+
+**Step 4.** 【主張：3・4】$\int h_{G}(PQu,v)=\int h_{F}(Qu,P^{t}v)=\int h_{E}(u,Q^{t}P^{t}v)$ と一意性から $(PQ)^{t}=Q^{t}P^{t}$。$h$ は双線形なので $\int h_{F}(\psi u,v)=\int h_{F}(u,\psi v)$ で $\psi^{t}=\psi$。関数の場合は、1 の等式が \ref{gl:formal-transpose.1} の等式そのものなので、一意性から一致する。4 は、両辺が $u\in H^{k}(M;E)$ について $L^{2}$ で連続（\ref{gl:differential-operator-sobolev.3} と冒頭の記法の不等式）で、滑らかな切断が稠密（\ref{gl:sobolev-sections-properties.3}）であることから。
+:::
+
+::: definition 弱解（ベクトル束） {#gl:weak-solution-bundle keywords="weak solution of P u = f between vector bundles: int h_E(u, P^t v) = int h_F(f, v) for all smooth sections v" index="弱解（ベクトル束）|じゃくかいべくとるそく"}
+$P\colon\Gamma(M,E)\to\Gamma(M,F)$ を微分作用素、$u\in L^{2}(M;E)$, $f\in L^{2}(M;F)$ とする。すべての $v\in\Gamma(M,F)$ について
+$$
+\int_{M}h_{E}(u,P^{t}v)\,d\mu_{g}=\int_{M}h_{F}(f,v)\,d\mu_{g}
+$$
+となるとき、$u$ を $Pu=f$ の**弱解**という。
+:::
+
+::: intuition
+弱解とは、方程式の両辺を滑らかな切断と（ファイバー計量で）組んで積分し、微分を相手に移したときに等しくなる切断である。関数の場合と同じく、$u$ 自身は微分できなくてよい。
+:::
+
+関数（$E=F=M\times\mathbb{C}$、$h$ は積）では、\ref{gl:formal-transpose-bundle.3} からこれは \ref{gl:weak-solution-manifold} の弱解である。$u\in H^{k}(M;E)$ が弱解なら、$L^{2}$ の元として $Pu=f$ である：\ref{gl:formal-transpose-bundle.4} から、すべての滑らかな $v$ で $\int h_{F}(Pu-f,v)=0$。滑らかな $v_{i}\to\overline{Pu-f}$（$L^{2}$、\ref{gl:sobolev-sections-properties.3}）をとって極限をとると $\int h_{F}(Pu-f,\overline{Pu-f})=0$ で、$Pu-f=0$（a.e.）。
+
+## 楕円正則性 {#gl:sec-er-regularity}
+
+弱解の方程式を正規化された座標近傍で局所化し、トーラスへ移す。$P$ を $k$ 階以下の微分作用素、$\psi\in C^{\infty}(M)$ とし、$Q\defeq[P,\psi]$（$k-1$ 階以下、\ref{gl:commutator-lower-order.1}）とする。$Q$ のトーラスでの姿 $\breve{Q}$ は、$Q$ を $k-1$ 階以下の作用素とみた係数から作るので、$D^{\alpha}$ は $|\alpha|\le k-1$ のものしか現れない。
+
+::: lemma 局所化した弱解の方程式 {#gl:localized-weak-equation keywords="localizing a weak solution: the torus picture of psi u satisfies P(psi u) = psi f + [P, psi](psi' u) as formal Fourier series, with the commutator of order k - 1" index="弱解の局所化|じゃくかいのきょくしょか"}
+$(U,y)$ を正規化された座標近傍、$\Phi$, $\Psi$ を $U$ の上の $E$, $F$ の局所自明化とし、$\breve{P}$, $\breve{Q}$ をトーラスでの姿とする。$u\in L^{2}(M;E)$ が $Pu=f$（$f\in L^{2}(M;F)$）の弱解で、$\psi,\psi'\in C^{\infty}(M)$ は台が $y^{-1}(B(0,1))$ に含まれ、$\operatorname{supp}\psi$ の近傍で $\psi'=1$ とする。このとき $\mathcal{H}^{-\infty}$ で
+$$
+\breve{P}\,\mathcal{T}_{y,\Phi}(\psi u)=\mathcal{T}_{y,\Psi}(\psi f)+\breve{Q}\,\mathcal{T}_{y,\Phi}(\psi'u).
+$$
+:::
+
+::: proof
+$\chi_{1}\in C_{c}^{\infty}(B(0,3/2))$ を $\bar{B}(0,5/4)$ の上で $1$ となるものとする。$F$ の階数を $r'$ とし、$\varphi\in C^{\infty}(T^{n};\mathbb{C}^{r'})$ について $\tilde{\varphi}\defeq\chi_{1}\cdot(\varphi\circ p)\in C_{c}^{\infty}(B(0,3/2))^{r'}$、$V\defeq\gamma_{y}^{-1}\tilde{H}_{F}^{-1}\tilde{\varphi}$、$v\defeq(y,\Psi)^{*}V\in\Gamma(M,F)$ とおく（記号は \ref{gl:formal-transpose-bundle.2} のもの）。
+
+**Step 1.** 【主張：$R$ を $\Gamma(M,E)\to\Gamma(M,F)$ の $k$ 階以下の作用素、$\breve{R}$ をそのトーラスでの姿、$\omega\in L^{2}(M;E)$ を $y^{-1}(\bar{B}(0,1))$ の外で $0$ とすると、$\langle\breve{R}\,\mathcal{T}_{y,\Phi}\omega,\varphi\rangle=\int_{M}h_{E}(\omega,R^{t}v)\,d\mu_{g}$】$R$ の係数を $A_{\alpha}$、$\breve{R}=\sum B_{\alpha}D^{\alpha}$ とする。\ref{gl:torus-scale-operations.5} から左辺は $\langle\mathcal{T}_{y,\Phi}\omega,\breve{R}^{\mathsf{T}}\varphi\rangle$、$\breve{R}^{\mathsf{T}}\varphi\defeq\sum_{\alpha}(-D)^{\alpha}(B_{\alpha}^{\mathsf{T}}\varphi)$ で、さらに $\int_{T^{n}}\breve{w}\cdot\breve{R}^{\mathsf{T}}\varphi\,d\mu_{g}$（$w\defeq\omega^{y,\Phi}$）。$\breve{w}$ は $p(\bar{B}(0,1))$ の外で $0$ で、$B(0,5/4)$ の上では $B_{\alpha}\circ p=A_{\alpha}$, $\varphi\circ p=\tilde{\varphi}$ なので、微分作用素の局所性から $(\breve{R}^{\mathsf{T}}\varphi)\circ p=\sum_{\alpha}(-\partial)^{\alpha}(A_{\alpha}^{\mathsf{T}}\tilde{\varphi})$ が $B(0,5/4)$ の上で成り立つ。$x_{a}$ では $\gamma_{x_{a}}=1$ なので、左辺は $\int_{\mathbb{R}^{n}}w\cdot\sum_{\alpha}(-1)^{|\alpha|}\partial^{\alpha}(A_{\alpha}^{\mathsf{T}}\tilde{\varphi})\,d\lambda$。$\tilde{\varphi}=\gamma_{y}\tilde{H}_{F}V$ なので、\ref{gl:formal-transpose-bundle.2} からこの被積分関数は $w^{\mathsf{T}}\gamma_{y}\tilde{H}_{E}(R^{t}v)_{\Phi}\circ y^{-1}$ で、\ref{gl:rm-integral-formulas.1} から積分は $\int_{M}h_{E}(\omega,R^{t}v)\,d\mu_{g}$。
+
+**Step 2.** 【主張：$\langle\breve{P}\mathcal{T}_{y,\Phi}(\psi u),\varphi\rangle=\int h_{F}(\psi f,v)-\int h_{E}(\psi'u,[P^{t},\psi]v)$】Step 1（$R=P$, $\omega=\psi u$）と $h_{E}$ の双線形性から、左辺は $\int h_{E}(u,\psi P^{t}v)=\int h_{E}(u,P^{t}(\psi v))-\int h_{E}(u,[P^{t},\psi]v)$。弱解の定義（$\psi v$ を試験切断にする）から第一項は $\int h_{F}(f,\psi v)=\int h_{F}(\psi f,v)$。$[P^{t},\psi]v$ は滑らかで、開集合 $M\setminus\operatorname{supp}\psi$ の上では局所性から $P^{t}(\psi v)=0=\psi P^{t}v$ なので $0$。そこ以外では $\psi'=1$ なので、第二項の $u$ を $\psi'u$ に替えてよい。
+
+**Step 3.** 【主張：$\int h_{F}(\psi f,v)=\langle\mathcal{T}_{y,\Psi}(\psi f),\varphi\rangle$、$-\int h_{E}(\psi'u,[P^{t},\psi]v)=\langle\breve{Q}\mathcal{T}_{y,\Phi}(\psi'u),\varphi\rangle$】前者：$\psi f$ は $y^{-1}(\bar{B}(0,1))$ の外で $0$ で、\ref{gl:rm-integral-formulas.1} から $\int h_{F}(\psi f,v)=\int(\psi f)^{y,\Psi}\cdot\gamma_{y}\tilde{H}_{F}V\,d\lambda=\int(\psi f)^{y,\Psi}\cdot\tilde{\varphi}\,d\lambda$。$\tilde{\varphi}=\varphi\circ p$ が $(\psi f)^{y,\Psi}$ の台の近くで成り立つので、これは $\int_{T^{n}}\breve{(\cdot)}\cdot\varphi\,d\mu_{g}=\langle\mathcal{T}_{y,\Psi}(\psi f),\varphi\rangle$（\ref{gl:torus-scale-operations.5}）。後者：\ref{gl:formal-transpose-bundle.3} から $Q^{t}=(P\psi-\psi P)^{t}=\psi P^{t}-P^{t}\psi=-[P^{t},\psi]$。$\psi'u$ は $y^{-1}(\bar{B}(0,1))$ の外で $0$ なので、Step 1（$R=Q$, $\omega=\psi'u$）から $\langle\breve{Q}\mathcal{T}_{y,\Phi}(\psi'u),\varphi\rangle=\int h_{E}(\psi'u,Q^{t}v)=-\int h_{E}(\psi'u,[P^{t},\psi]v)$。
+
+**Step 4.** 【主張：補題】Step 2・3 から、両辺の形式的フーリエ級数はすべての $\varphi$ との対合が等しい。\ref{gl:torus-scale-operations.5} の最後の主張から等しい。
+
+::: hypcheck
+- **弱解であること**：Step 2 で、試験切断 $\psi v$ に弱解の定義を使った。$u$ の微分はどこにも現れず、微分はすべて試験切断と係数の側にある。
+- **$\psi'=1$ が $\operatorname{supp}\psi$ の近傍で成り立つこと**：Step 2 で交換子の項を局所化するのに使った。
+- **公理**：選択は使わない。
+:::
+:::
+
+::: theorem 楕円正則性 {#gl:elliptic-regularity refname="楕円正則性定理" keywords="elliptic regularity on closed manifolds: if u in L^2 is a weak solution of P u = f with P elliptic of order k and f in H^s, then u is in H^{s+k}, P u = f and ||u||_{H^{s+k}} <= C(||f||_{H^s} + ||u||_{L^2}); bootstrapping one derivative at a time" index="楕円正則性|だえんせいそくせい, 楕円型正則性定理|だえんがたせいそくせいていり, 弱解の正則性|じゃくかいのせいそくせい"}
+$M$ を閉多様体、$P\colon\Gamma(M,E)\to\Gamma(M,F)$ を $k$ 階（$k\ge1$）の楕円型作用素、$s\ge0$ を整数とする。$u\in L^{2}(M;E)$ が $Pu=f$ の弱解（\ref{gl:weak-solution-bundle}）で $f\in H^{s}(M;F)$ なら、$u\in H^{s+k}(M;E)$ で、$H^{s}$ の元として $Pu=f$、さらに $u$, $f$ によらない定数 $C$ について
+$$
+\|u\|_{H^{s+k}}\le C\bigl(\|f\|_{H^{s}}+\|u\|_{L^{2}}\bigr).
+$$
+:::
+
+::: intuition
+楕円型作用素の方程式では、解は右辺より必ず作用素の階数ぶん滑らかである。二乗可積分という最も弱い意味の解でも、右辺が $s$ 回微分できれば、解は $s+k$ 回微分できる。
+:::
+
+::: proof
+**Step 1.** 【主張：\ref{gl:elliptic-estimate} の証明の Step 1 の正規化された座標近傍 $(U_{l},y_{l})$、$\Phi_{l}$, $\Psi_{l}$、$\delta_{l}$、1 の分割 $(\psi_{l})$ に加えて、$\psi_{l}'\in C^{\infty}(M)$ で台が $y_{l}^{-1}(B(0,1))$ に含まれ、$\operatorname{supp}\psi_{l}$ の近傍で $1$ となるものがある】$y_{l}(\operatorname{supp}\psi_{l})$ は $B(0,\delta_{l}/2)\subset B(0,1)$ のコンパクト集合なので、\ref{fa:test-function-density.2} で $B(0,1)$ に台をもちその近傍で $1$ となる関数をとり、$y_{l}$ で引き戻す（$U_{l}$ の外では $0$ とする）。
+
+**Step 2.** 【主張：整数 $0\le\tau\le s+k-1$ について $u\in H^{\tau}(M;E)$ なら、各 $l$ で $c_{l}\defeq\mathcal{T}_{y_{l},\Phi_{l}}(\psi_{l}u)\in\mathcal{H}^{\tau}$ は $W_{\delta_{l}/2}$ の外で $0$ で、$\breve{P}_{l}c_{l}\in\mathcal{H}^{\tau-k+1}$】$\psi_{l}u$, $\psi_{l}'u\in H^{\tau}$（$0$ 階の作用素の有界性、\ref{gl:differential-operator-sobolev.3}）で、\ref{gl:torus-transplant.1} から $c_{l}\in\mathcal{H}^{\tau}$, $\mathcal{T}_{y_{l},\Phi_{l}}(\psi_{l}'u)\in\mathcal{H}^{\tau}$。$W_{\delta_{l}/2}$ の外で $0$ であることは \ref{gl:elliptic-estimate} の証明の Step 2 と同じ。\ref{gl:localized-weak-equation} から $\breve{P}_{l}c_{l}=\mathcal{T}_{y_{l},\Psi_{l}}(\psi_{l}f)+\breve{Q}_{l}\mathcal{T}_{y_{l},\Phi_{l}}(\psi_{l}'u)$。第一項は $\psi_{l}f\in H^{s}$ と \ref{gl:torus-transplant.1} から $\mathcal{H}^{s}\subset\mathcal{H}^{\tau-k+1}$（$\tau-k+1\le s$）に入る。第二項は、$\breve{Q}_{l}$ が $|\alpha|\le k-1$ の $D^{\alpha}$ と滑らかな係数の積の和なので、$D^{\alpha}\colon\mathcal{H}^{\tau}\to\mathcal{H}^{\tau-|\alpha|}\subset\mathcal{H}^{\tau-k+1}$ と \ref{gl:torus-multiplication-estimate.2} から $\mathcal{H}^{\tau-k+1}$ に入る。
+
+**Step 3.** 【主張：$0\le\tau\le s+k-1$ で $u\in H^{\tau}$ なら $u\in H^{\tau+1}$】Step 2 と \ref{gl:local-regularity-torus}（$\tau-k$ は負でもよい）から $c_{l}\in\mathcal{H}^{\tau+1}$。$\psi_{l}u$ は $y_{l}^{-1}(L_{1})$ の外で $0$ なので、\ref{gl:torus-transplant.1}（$j=\tau+1$）から $\psi_{l}u\in H^{\tau+1}(M;E)$。$u=\sum_{l}\psi_{l}u$ なので $u\in H^{\tau+1}$。
+
+**Step 4.** 【主張：定理】$u\in L^{2}=H^{0}$ から始めて Step 3 を $\tau=0,1,\dots,s+k-1$ と繰り返すと $u\in H^{s+k}$。$s+k\ge k$ なので、弱解の定義の後の注意から $Pu=f$（$L^{2}$ の元として、したがって $H^{s}$ の元として）。評価は \ref{gl:elliptic-estimate-l2} に $Pu=f$ を入れたもの。
+
+::: hypcheck
+- **楕円性**：Step 1 で $\delta_{l}$ を選ぶとき（各点での楕円性）と、Step 3 で \ref{gl:local-regularity-torus} を使うときに使った。外すと偽：$T^{2}$ の波動作用素 $D_{1}^{2}-D_{2}^{2}$ の $L^{2}$ の弱解 $u(p(z))=\mathfrak{g}(z_{1}+z_{2})$ は、$Pu=0$ なのに $H^{1}$ に入らないことがある（\ref{gl:prob-el-wave-weak-solution}）。
+- **$f\in H^{s}$**：Step 2 で、局所化した右辺が $\mathcal{H}^{\tau-k+1}$ に入ることに使った。$\tau=s+k$ では右辺は $\mathcal{H}^{s+1}$ に入るとは限らないので、そこで止まる。
+- **$u\in L^{2}$**：出発点 $\tau=0$ として使った。局所正則性（\ref{gl:local-regularity-torus}）は負の $\tau$ でも成り立つので、負の階数の切断のソボレフ空間と弱解を定めれば、同じ議論で $u\in H^{-m}$ から出発できる（ここではその空間を切断について定めていないので扱わない）。
+- **閉多様体であること**：有限個の座標近傍で覆うこと（コンパクト性）と、形式的転置に境界項が出ないこと（\ref{gl:formal-transpose-bundle}）に使った。
+- **公理**：1 の分割で DC を使う（\ref{gl:elliptic-estimate} と同じ）。それ以外の選択は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 係数が滑らかでなく $C^{m}$ 級程度なら、正則性も有限の段数で止まる（差分商の議論で係数の微分が要る。\ref{gl:local-regularity-torus} の証明の Step 2）。楕円型でなくても正則性が成り立つ作用素はあり、熱作用素 $D_{1}-D_{2}^{2}$ はその例である（\ref{gl:torus-elliptic-estimate} の後の補足の準楕円型）。境界つきの領域では、境界条件（ディリクレ条件など）を課したときに境界まで含めた正則性が成り立つが、その証明には境界での評価が別に要り、ここでは扱わない。非コンパクトな多様体でも、正則性は局所的な性質なので、台がコンパクトな切り落としを掛けて同じ議論が通る（内部正則性）。
+
+**似た定理.** ラプラシアンの場合の「$L^{2}$ の弱解 $u$ が $\Delta u=0$ を満たせば滑らか」は**ワイルの補題**と呼ばれる。古典的には、平均値の性質や軟化子を使って $\mathbb{R}^{n}$ の上で示される。ヘルダー空間での正則性（$f\in C^{s,\alpha}$ なら $u\in C^{s+k,\alpha}$）はシャウダー理論で、偏微分方程式論の系列で古典的手法として扱い、このページの関数解析的な手法と対比する。
+
+**高い視点：一段ずつ登るはしご.** 証明は、滑らかさのはしごを一段ずつ登る形をしている。今いる段 $\tau$ で解を局所化すると、作用素の像は右辺と「一段低い階数の交換子」の和になり、どちらも $\tau-k+1$ 段にいる。楕円型作用素は死角がないので、像が $\tau-k+1$ 段にいれば元は $\tau+1$ 段にいる。こうして右辺の滑らかさが許す限り、解は自動的に登り続ける。楕円型の方程式では、解の特異性は右辺の特異性からしか生まれない。
+:::
+
+::: corollary 滑らかな右辺の弱解は滑らか {#gl:elliptic-smooth keywords="if P is elliptic and P u = f weakly with f smooth, then u has a smooth representative; smooth sections are the intersection of all H^s(M;E)" index="弱解の滑らかさ|じゃくかいのなめらかさ"}
+\ref{gl:elliptic-regularity} の状況で $f$ が滑らかなら、$u$ は滑らかな代表元をただ一つもち、古典的な意味で $Pu=f$ を満たす。
+:::
+
+::: proof
+**Step 1.** 【主張：$u\in H^{s}(M;E)$ がすべての $s$ で成り立つ】滑らかな切断はすべての $H^{s}(M;F)$ に入る（片の成分が $C_{c}^{\infty}(\mathbb{R}^{n})$ に入るので、\ref{gl:sobolev-manifold} の後の注意と同じ）ので、\ref{gl:elliptic-regularity} をすべての $s$ に使う。
+
+**Step 2.** 【主張：すべての $H^{s}(M;E)$ に入る切断は滑らかな代表元をもつ】局所化のデータ $(U_{j},x_{j},\Phi_{j},\rho_{j})$ をとり、$(\rho_{j}u)^{x_{j},\Phi_{j}}$ の第 $a$ 成分を $w_{ja}$ とする。$w_{ja}$ はすべての $H^{s}(\mathbb{R}^{n})$ に入り、コンパクト集合 $x_{j}(\operatorname{supp}\rho_{j})$ の外で $0$ なので、\ref{gl:sm-localization.2} から関数 $g_{ja}\defeq x_{j}^{*}w_{ja}$ はすべての $H^{s}(M)$ に入り、\ref{gl:hk-smooth.2} から滑らかな代表元 $\tilde{g}_{ja}$ をもつ。$\tilde{g}_{ja}$ は開集合 $M\setminus\operatorname{supp}\rho_{j}$ の上で a.e. $0$ で連続なので、そこで $0$（\ref{gl:riemannian-measure.2}）。よって $U_{j}$ の上で $\Phi_{j}^{-1}(m,(\tilde{g}_{ja}(m))_{a})$、外で $0$ と定めた切断は滑らかで（二つの開集合 $U_{j}$ と $M\setminus\operatorname{supp}\rho_{j}$ の上でそれぞれ滑らか）、$\rho_{j}u$ と a.e. で等しい。$j$ について足せばよい。一意性は、連続な切断が a.e. で等しければ等しいことから。
+
+**Step 3.** 【主張：古典的な意味で $Pu=f$】滑らかな代表元 $\tilde{u}$ について $P\tilde{u}$ は（延長の意味でも古典的な意味でも同じ）$L^{2}$ の元として $f$ に等しく、どちらも連続なので至る所等しい。
+:::
+
+関数解析的に得た弱解が、楕円正則性で滑らかになる典型例を挙げる。
+
+::: example ラプラシアンの弱解 {#gl:laplacian-weak-regular keywords="Lax-Milgram gives a weak solution u in H^1 of (Delta + lambda) u = f for lambda > 0; elliptic regularity upgrades it to H^{s+2}, and to a smooth solution when f is smooth" index="ラプラシアンの弱解の正則性|らぷらしあんのじゃくかいのせいそくせい"}
+$(M,g)$ を閉リーマン多様体、$\lambda>0$、$f\in L^{2}(M)$ とする。$u,v\in C^{\infty}(M)$ について
+$$
+B(u,v)\defeq\int_{M}\Bigl(\sum_{i,l}g^{il}\partial_{i}u\,\overline{\partial_{l}v}+\lambda u\bar{v}\Bigr)d\mu_{g}
+$$
+（座標によらない式で $g(\operatorname{grad}u,\operatorname{grad}\bar{v})+\lambda u\bar{v}$ の積分）とおく。\ref{gl:sm-metric-h1} から $|B(u,v)|\le C\|u\|_{H^{1}}\|v\|_{H^{1}}$（コーシー–シュワルツの不等式を各点と積分で使う）、$\operatorname{Re}B(u,u)=\int(|\nabla u|^{2}+\lambda|u|^{2})\ge\min(1,\lambda)c\|u\|_{H^{1}}^{2}$ なので、$B$ は稠密性（\ref{gl:sobolev-manifold-density}）で $H^{1}(M)$ の上の有界で強圧的な半双線形形式に延びる。\ref{fa:lax-milgram} を $\ell(v)\defeq\int f\bar{v}$ に使うと、$u\in H^{1}(M)$ で、すべての $v\in H^{1}$ について $B(u,v)=\int f\bar{v}$ となるものがただ一つある。
+
+滑らかな $u$, $v$ では \ref{gl:closed-manifold-laplacian.1}（実部と虚部に分けて使う）から $B(u,v)=\int u\,\overline{(\Delta+\lambda)v}$ で、両辺は $u\in H^{1}$ について連続なので、この等式は $u\in H^{1}$ と滑らかな $v$ で成り立つ。よって $\int u\,\overline{(\Delta+\lambda)v}=\int f\bar{v}$ がすべての滑らかな $v$ で成り立ち、$v$ を $\bar{v}$ に替えると（$\Delta$ は実の係数）、$(\Delta+\lambda)^{t}=\Delta+\lambda$（\ref{gl:formal-transpose-examples.1}）から $u$ は $(\Delta+\lambda)u=f$ の弱解（\ref{gl:weak-solution-manifold}）である。$\Delta+\lambda$ は $2$ 階の楕円型（\ref{gl:elliptic-examples.1}）なので、\ref{gl:elliptic-regularity} から、$f\in H^{s}$ なら $u\in H^{s+2}$、$f$ が滑らかなら $u$ は滑らかで、古典的な意味で $(\Delta+\lambda)u=f$ を満たす。
+:::
+
+ラックス–ミルグラムの定理は $H^{1}$ の解しか与えないが、楕円正則性がそれを滑らかな解に引き上げる。「存在は弱い空間で、滑らかさは正則性で」というのが関数解析的手法の型で、$\lambda=0$ の場合（$\int f=0$ の下でのポアソン方程式）は、ポアンカレの不等式（\ref{gl:poincare-manifold}）で平均 $0$ の関数の空間に強圧性を回復して同じように扱える。
+
+## 核と像 {#gl:sec-er-kernel}
+
+::: lemma レリッヒの定理（切断） {#gl:rellich-sections keywords="Rellich theorem for sections of vector bundles on a closed manifold: bounded sequences in H^a(M;E) have subsequences converging in H^b(M;E) for a > b >= 0" index="レリッヒの定理（ベクトル束の切断）|れりっひのていりべくとるそくのせつだん"}
+$M$ を閉多様体、$a>b\ge0$ を整数とする。$H^{a}(M;E)$ の有界列は、$H^{b}(M;E)$ で収束する部分列をもつ。
+:::
+
+::: proof
+$(u_{i})$ を有界列とし、局所化のデータ $(U_{j},x_{j},\Phi_{j},\rho_{j})$ の片 $(\rho_{j}u_{i})^{x_{j},\Phi_{j}}$ の第 $c$ 成分を $f_{ijc}$ とする。$\|f_{ijc}\|_{H^{a}}\le\|u_{i}\|_{a,2}$ で、$f_{ijc}$ はコンパクト集合 $x_{j}(\operatorname{supp}\rho_{j})$ の外で $0$。$|\alpha|\le b$ について $\partial^{\alpha}f_{ijc}$ は $H^{1}(\mathbb{R}^{n})$ で有界（$a\ge b+1$）で同じ集合の外で $0$ なので、\ref{gl:rellich-manifold} の証明の Step 1 を有限個の組 $(j,c,\alpha)$ について順に使うと、すべての組で $(\partial^{\alpha}f_{ijc})_{i}$ が $L^{2}$ のコーシー列となる部分列がとれる。$\|u_{i}-u_{i'}\|_{b,2}=\sum_{j,c}\|f_{ijc}-f_{i'jc}\|_{H^{b}}\le\sum_{j,c}\sum_{|\alpha|\le b}\|\partial^{\alpha}(f_{ijc}-f_{i'jc})\|_{L^{2}}$ なので部分列は $H^{b}(M;E)$ のコーシー列で、完備性（\ref{gl:sobolev-sections-properties.3}）から収束する。部分列の取り方は \ref{gl:rellich-manifold} の証明と同じく具体的な手順の有限回の繰り返しで、新しい選択は使わない。
+:::
+
+::: theorem 楕円型作用素の核と像 {#gl:elliptic-kernel-range keywords="for an elliptic operator on a closed manifold: the kernel (weak L^2 solutions of P u = 0) is finite dimensional and consists of smooth sections; ||u||_{H^{s+k}} <= C ||P u||_{H^s} on the orthogonal complement of the kernel; the range of P: H^{s+k} -> H^s is closed" index="楕円型作用素の核|だえんがたさようそのかく, 像の閉性|ぞうのへいせい"}
+$M$ を閉多様体、$P\colon\Gamma(M,E)\to\Gamma(M,F)$ を $k$ 階（$k\ge1$）の楕円型作用素とし、$\ker P\defeq\{u\in L^{2}(M;E):u\text{ は }Pu=0\text{ の弱解}\}$ とおく。$s\ge0$ を整数とする。
+1. $\ker P$ は有限次元で、滑らかな切断からなり、有界作用素 $P\colon H^{s+k}(M;E)\to H^{s}(M;F)$ の核に等しい。
+2. $\ker P$ の $H^{s+k}$ の内積についての直交補空間を $K_{s}^{\perp}$ とすると、定数 $C$（$P$, $s$ とノルムの取り方で決まる）があって、すべての $u\in K_{s}^{\perp}$ について $\|u\|_{H^{s+k}}\le C\|Pu\|_{H^{s}}$。
+3. $P(H^{s+k}(M;E))$ は $H^{s}(M;F)$ の閉部分空間である。
+:::
+
+::: intuition
+閉多様体の上の楕円型方程式 $Pu=0$ の解は、有限個の滑らかな解の一次結合しかない。そして、核と直交する解の大きさは像の大きさで抑えられ、像として現れる右辺の全体は極限をとっても外に出ない。
+:::
+
+::: proof
+**Step 1.** 【主張：1 のうち、滑らかなこと、作用素の核と等しいこと】$u\in\ker P$ なら \ref{gl:elliptic-smooth}（$f=0$）から $u$ は滑らかで、とくに $H^{s+k}$ に入り $Pu=0$。逆に $u\in H^{s+k}$, $Pu=0$ なら、\ref{gl:formal-transpose-bundle.4} から $\int h_{E}(u,P^{t}v)=\int h_{F}(Pu,v)=0$ で、$u$ は弱解。
+
+**Step 2.** 【主張：$\ker P$ は $L^{2}(M;E)$ の閉部分空間で、その上で $\|u\|_{H^{k}}\le C_{0}\|u\|_{L^{2}}$】$u_{i}\in\ker P$, $u_{i}\to u$（$L^{2}$）なら、各 $v$ で $\int h_{E}(u_{i},P^{t}v)\to\int h_{E}(u,P^{t}v)$（記法の不等式）なので $u\in\ker P$。評価は \ref{gl:elliptic-estimate-l2}（$s=0$）に $Pu=0$ を入れたもの。
+
+**Step 3.** 【主張：$\ker P$ は有限次元】$\ker P$ に $L^{2}$ ノルムを入れたノルム空間の閉単位球 $\mathcal{B}$ の点列 $(u_{i})$ は、Step 2 から $H^{k}$ で有界なので、\ref{gl:rellich-sections}（$a=k$, $b=0$）から $L^{2}$ で収束する部分列をもち、極限は Step 2 から $\ker P$ に、ノルムの連続性から $\mathcal{B}$ に入る。$\ker P$ が無限次元なら、\ref{fa:compact-unit-ball} の証明（\ref{fa:riesz-lemma} を繰り返し使う。ここで DC を使う）から、$\mathcal{B}$ の点列で互いの距離が $\frac12$ 以上のものがあり、収束する部分列をもたないので矛盾する。
+
+**Step 4.** 【主張：2】成り立たないとすると、各 $i$ について $u_{i}\in K_{s}^{\perp}$ で $\|u_{i}\|_{H^{s+k}}=1$, $\|Pu_{i}\|_{H^{s}}<1/i$ となるものがある（$u_{i}$ を一つずつ選ぶのに可算選択を使う）。\ref{gl:rellich-sections}（$a=s+k$, $b=s+k-1$）から、部分列が $H^{s+k-1}$ のコーシー列になる。\ref{gl:elliptic-estimate} から
+$$
+\|u_{i}-u_{i'}\|_{H^{s+k}}\le C\bigl(\|Pu_{i}\|_{H^{s}}+\|Pu_{i'}\|_{H^{s}}+\|u_{i}-u_{i'}\|_{H^{s+k-1}}\bigr)\to0
+$$
+なので部分列は $H^{s+k}$ で $u$ に収束し、$\|u\|_{H^{s+k}}=1$、$Pu=\lim Pu_{i}=0$（$P$ は有界）。Step 1 から $u\in\ker P$、一方 $K_{s}^{\perp}$ は閉なので $u\in K_{s}^{\perp}$、よって $\langle u,u\rangle_{H^{s+k}}=0$ で $u=0$。$\|u\|=1$ に矛盾する。
+
+**Step 5.** 【主張：3】$f_{i}=Pu_{i}\to f$（$H^{s}$）とする。$\ker P$ は $H^{s+k}$ の有限次元部分空間なので閉で、\ref{fa:orthogonal-decomposition} の直交射影で $u_{i}=\kappa_{i}+u_{i}^{\perp}$（$\kappa_{i}\in\ker P$, $u_{i}^{\perp}\in K_{s}^{\perp}$）と分けると $Pu_{i}^{\perp}=f_{i}$。2 から $\|u_{i}^{\perp}-u_{i'}^{\perp}\|_{H^{s+k}}\le C\|f_{i}-f_{i'}\|_{H^{s}}\to0$ で、極限 $u$ について $Pu=f$。
+
+::: hypcheck
+- **楕円性**：Step 1 で正則性（核が滑らかで $H^{s+k}$ に入ること）、Step 2・4 で楕円型評価に使った。外すと 1 は偽：$T^{2}$ の波動作用素では $e_{(N,N)}$（$N\in\mathbb{Z}$）がすべて核に入り、核は無限次元（\ref{gl:nonelliptic-examples.1}）。
+- **$M$ がコンパクト**：Step 3・4 でレリッヒの定理に使った。$\mathbb{R}^{n}$ の上の $\Delta\colon H^{2}(\mathbb{R}^{n})\to L^{2}(\mathbb{R}^{n})$ は単射だが、フーリエ変換で見ると乗数 $4\pi^{2}|\xi|^{2}$ が $0$ に近づくので $\|u\|_{L^{2}}\le C\|\Delta u\|_{L^{2}}$ は成り立たず、像は閉じていない（閉なら \ref{fa:open-mapping} から逆が有界になる）。
+- **公理**：Step 3 で DC（リースの補題の繰り返し）、Step 4 で可算選択（DC から従う）を使う。Step 5 の直交射影は選択を使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 の像の閉性は、核の有限次元性と組み合わせて「余次元も有限」になることが期待されるが、それには転置作用素の核が要る。実際、$P(H^{s+k})$ の $H^{s}$ での余次元は、$P^{t}$（$F$ から $E$ への楕円型作用素。\ref{gl:formal-transpose-bundle.2} の最高階の項から、主表象は $h_{E}$, $h_{F}$ についての転置の $(-1)^{k}$ 倍）の核の次元に等しく、$P$ は**フレドホルム作用素**になる。これは次のページ（楕円型作用素のスペクトル）で、自己共役な場合のスペクトル分解とともに示す。下の階数の項を変えても核の次元は一般に変わる（\ref{gl:prob-er-circle-kernel}）が、核の次元から余核の次元を引いた指数は主表象だけで決まることが知られている（ここでは証明しない）。
+
+**似た定理.** 1 と 3 は、コンパクト作用素 $K$ について $I-K$ の核が有限次元で像が閉じているという \ref{fa:riesz-schauder} の構造とよく似ている。実際、楕円型作用素には、合成が恒等写像とコンパクト作用素の差になる「パラメトリクス」があり、その意味で $P$ は「可逆な作用素のコンパクトな摂動」として振る舞う（ここでは扱わない）。ホッジの定理では、$P$ をホッジのラプラシアンとして、1 から調和形式の空間が有限次元であることが従う（\see{riem:hodge-theorem}）。
+
+**高い視点：有限の自由度.** 楕円型方程式 $Pu=0$ の解は、評価から「$L^{2}$ で小さければ $H^{k}$ でも小さい」ので、閉多様体という有限の部屋の中では、高い周波数に逃げる余地がない。逃げ場のない解の集まりは、少数の基本的な形の組み合わせでしか作れず、有限次元になる。像が閉じているのも同じ理由で、右辺を少し動かしたときに解が高い周波数へ逃げて消えることがないので、右辺の極限には必ず解の極限が対応する。
+:::
+
+## 問題 {#gl:sec-er-weak-problems}
+
+::: problem {#gl:prob-er-cauchy-riemann-torus}
+$T^{2}$ の上の関数に作用する $P\defeq D_{1}+iD_{2}$ を考える（\ref{gl:prob-el-first-order-scalar.3} から $1$ 階の楕円型）。
+1. $P^{t}=-P$ を示し、$u\in L^{2}(T^{2})$ が $Pu=f$（$f\in L^{2}$）の弱解なら $i(m_{1}+im_{2})\hat{u}(m)=\hat{f}(m)$（すべての $m$）であることを示せ。
+2. 1 を使って、$f\in H^{s}$ なら $u\in H^{s+1}$ であることを直接確かめよ（\ref{gl:elliptic-regularity} の特別な場合）。
+3. $\ker P$ と $P(H^{1}(T^{2}))$ を求め、\ref{gl:elliptic-kernel-range.1}・\ref[3]{gl:elliptic-kernel-range.3} を確かめよ。
+:::
+
+::: solution
+**1.** 平坦トーラスでは $\gamma_{x_{a}}=1$ で係数は定数なので、\ref{gl:formal-transpose.2} から $P^{t}=-D_{1}-iD_{2}=-P$。$v=e_{-m}$ を弱解の定義に使うと $Pe_{-m}=(-im_{1}+m_{2})e_{-m}$ から $P^{t}e_{-m}=(im_{1}-m_{2})e_{-m}=i(m_{1}+im_{2})e_{-m}$ で、$\int ue_{-m}\,d\mu_{g}=(2\pi)^{2}\hat{u}(m)$ から $i(m_{1}+im_{2})\hat{u}(m)=\hat{f}(m)$。
+
+**2.** $m\neq0$ なら $|m_{1}+im_{2}|=|m|$ なので $|\hat{u}(m)|=|\hat{f}(m)|/|m|$、$1+|m|^{2}\le2|m|^{2}$ から
+$$
+\sum_{m}(1+|m|^{2})^{s+1}|\hat{u}(m)|^{2}\le|\hat{u}(0)|^{2}+2\sum_{m\neq0}(1+|m|^{2})^{s}|\hat{f}(m)|^{2}<\infty,
+$$
+\ref{gl:torus-sobolev.1} から $u\in H^{s+1}$。
+
+**3.** $f=0$ なら $m\neq0$ で $\hat{u}(m)=0$ なので、$\ker P$ は定数関数の全体（$1$ 次元で滑らか）。$m=0$ では 1 から $\hat{f}(0)=0$ が必要で、逆に $f\in L^{2}$, $\hat{f}(0)=0$ なら $\hat{u}(m)\defeq\hat{f}(m)/(i(m_{1}+im_{2}))$（$m\neq0$）、$\hat{u}(0)\defeq0$ で 2 と同じ計算から $u\in H^{1}$、\ref{gl:torus-sobolev.2} から $Pu=f$。よって $P(H^{1})=\{f\in L^{2}:\hat{f}(0)=0\}=\{f:\int f\,d\mu_{g}=0\}$ で、これは連続な線形汎関数 $f\mapsto\hat{f}(0)$ の核なので閉じている。余次元は $1$ で、$P^{t}=-P$ の核（定数）の次元に一致する（補足で予告したフレドホルム性の例）。
+:::
+
+::: problem {#gl:prob-er-circle-kernel}
+$T^{1}=S^{1}$ の上の関数に作用する $P_{a}\defeq\Delta-a$（$a\in\mathbb{C}$、$\Delta=-D_{1}^{2}$）を考える。
+1. $\ker P_{a}$ を求めよ。とくに、$a=j^{2}$（$j\ge1$ は整数）なら $\dim\ker P_{a}=2$、$a=0$ なら $1$、それ以外なら $0$ であることを示せ。
+2. 1 の核の元がすべて滑らかであることを確かめ、$P_{a}(H^{2}(S^{1}))$ の余次元が $\dim\ker P_{a}$ に等しいことを示せ。
+:::
+
+::: solution
+**1.** $P_{a}^{t}=P_{a}$（$\Delta^{t}=\Delta$、\ref{gl:formal-transpose-examples.1}）で、$P_{a}e_{-m}=(m^{2}-a)e_{-m}$。$u\in L^{2}$ が $P_{a}u=0$ の弱解なら、$v=e_{-m}$ を使って $(m^{2}-a)\hat{u}(m)=0$。よって $\hat{u}$ は $\{m\in\mathbb{Z}:m^{2}=a\}$ の外で $0$。$a=j^{2}$, $j\ge1$ ならこの集合は $\{j,-j\}$ で、\ref{gl:torus-fourier-basis.2} から $u=\hat{u}(j)e_{j}+\hat{u}(-j)e_{-j}$、逆にこの形の関数は滑らかで $P_{a}u=0$ を満たす（\ref{gl:elliptic-kernel-range.1} の後半）。よって $\ker P_{a}=\operatorname{span}\{e_{j},e_{-j}\}$ は $2$ 次元。$a=0$ なら集合は $\{0\}$ で核は定数（$1$ 次元）、それ以外では集合は空で核は $0$。
+
+**2.** 核の元は三角多項式なので滑らか。$u\in H^{2}$ について $\widehat{P_{a}u}(m)=(m^{2}-a)\hat{u}(m)$（\ref{gl:torus-sobolev.2}）なので、$P_{a}(H^{2})\subset\{f\in L^{2}:m^{2}=a\text{ なら }\hat{f}(m)=0\}\mathrel{=:}Z$。逆に $f\in Z$ なら、$\hat{u}(m)\defeq\hat{f}(m)/(m^{2}-a)$（$m^{2}\neq a$）、$0$（$m^{2}=a$）とおく。$m^{2}\neq a$ となる $m$ について $|m^{2}-a|$ は正で、$|m|\to\infty$ では $|m^{2}-a|\ge m^{2}/2$ なので、$\inf_{m^{2}\neq a}|m^{2}-a|(1+m^{2})^{-1}>0$。よって $\sum(1+m^{2})^{2}|\hat{u}(m)|^{2}\le C\sum|\hat{f}(m)|^{2}<\infty$ で $u\in H^{2}$、$P_{a}u=f$。したがって $P_{a}(H^{2})=Z$ で、$Z$ は有限個の連続な線形汎関数 $f\mapsto\hat{f}(m)$（$m^{2}=a$）の共通の核なので閉じていて、余次元はその個数 $\#\{m:m^{2}=a\}=\dim\ker P_{a}$ に等しい。$P_{a}^{t}=P_{a}$ なので、これは余次元が転置の核の次元に等しいことの例でもある。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
