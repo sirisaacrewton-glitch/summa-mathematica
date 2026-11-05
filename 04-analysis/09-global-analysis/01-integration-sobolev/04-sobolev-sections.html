@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ベクトル束の切断と微分作用素 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/01-integration-sobolev/04-sobolev-sections.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+
+# ベクトル束の切断と微分作用素 {#gl:page-sobolev-sections keywords="Sobolev spaces of sections of vector bundles, Sobolev spaces of differential forms, fibre metrics, differential operators on manifolds and between vector bundles, boundedness H^{s+k} -> H^s, formal transpose and formal adjoint"}
+
+前のページ（\ref{gl:page-sobolev-manifolds}）では、閉多様体 $M$ の上のソボレフ空間 $W^{k,p}(M)$ を 1 の分割と座標で定義し、それが座標・1 の分割・計量によらない完備な空間で、$C^{\infty}(M)$ が稠密であることを示した。このページでは、その上で解析を始めるための道具を二つそろえる。一つ目は、関数の代わりにベクトル束の切断（とくに微分形式）を扱うためのソボレフ空間で、関数の場合の証明を成分ごとに読み替えればよい。二つ目は微分作用素で、$k$ 階の微分作用素が $H^{s+k}$ から $H^{s}$ への有界作用素になること、そして部分積分で微分を相手に移した**形式的転置**があることを示す。形式的転置を使って負の階数のソボレフ空間と弱解を定義し、トーラスの上でフーリエ係数による特徴づけを調べるのは、次のページで行う。
+
+## 記法と定義の確認 {#gl:sec-ss-notation}
+
+::: notation
+- $M$ は $n$ 次元の閉多様体（$n\ge1$）、$g$ はリーマン計量、$\mu_{g}$ はリーマン測度（\ref{gl:riemannian-measure}）、$L^{p}(M)$ は \ref{gl:lp-manifold}。$L^{2}$ 内積は $(u,v)\defeq\int_{M}u\bar{v}\,d\mu_{g}$。関数は複素数値とする。座標での積分は \ref{gl:rm-integral-formulas}、座標での密度は $\gamma_{x}\defeq\sqrt{\det(g_{ij}\circ x^{-1})}$。
+- 前のページの記法：座標近傍 $(U,x)$ について $f^{x}$ は $x(U)$ 上で $f\circ x^{-1}$、外で $0$ とした関数、$x^{*}w$ は $U$ 上で $w\circ x$、外で $0$ とした関数。局所化のデータ $\mathfrak{A}=(U_{j},x_{j},\rho_{j})$、$W^{k,p}(M)$ とノルム $\|\cdot\|_{k,p}$、$H^{k}(M)$ と内積 $\langle\cdot,\cdot\rangle_{H^{k}}$（ノルム $\|\cdot\|_{H^{k}}$）は \ref{gl:sobolev-manifold}。座標変換での不変性は \ref{gl:sobolev-diffeo-invariance}、局所的な操作（制限・零延長）は \ref{gl:sobolev-local-operations}、座標と $L^{p}$ ノルムの比較は \ref{gl:sm-chart-lp}、切り出しと貼り付けは \ref{gl:sm-localization}、座標によらないことは \ref{gl:sobolev-manifold-independence}、完備性は \ref{gl:sobolev-manifold-complete}、滑らかな関数の稠密性は \ref{gl:sobolev-manifold-density}。
+- $\mathbb{R}^{n}$ の開集合の上の $W^{k,p}$ と積の法則は \ref{fa:sobolev-space}, \ref{fa:sobolev-product-rule}、超関数の微分と古典的な微分の一致は \ref{fa:distribution-operations-properties}、テスト関数の存在は \ref{fa:test-function-density}。
+- ラプラシアンの符号は前のページまでと同じく $\Delta\defeq-\operatorname{div}\operatorname{grad}$（\ref{gl:divergence-unoriented} の後の式）。
+- $s,k\ge0$ は整数、$1\le p<\infty$。
+- **選択公理**：局所化のデータの 1 の分割（\ref{mfd:smooth-partition-of-unity}）で DC を使う。それ以外に新しい選択は使わない（引用する測度論・関数解析の結果がそれぞれの系列で使う範囲を除く）。
+:::
+
+## ベクトル束の切断のソボレフ空間 {#gl:sec-ss-bundles}
+
+ホッジの定理では、関数の代わりに微分形式、すなわちベクトル束 $\Lambda^{k}T^{*}M$ の切断を扱う。ベクトル束と局所自明化は \ref{mfd:vector-bundle}、推移関数は \ref{mfd:vector-bundle-gl}、切断と局所フレームは \ref{mfd:local-frame}, \ref{mfd:local-frame-trivialization}、微分形式とその座標成分は \ref{mfd:differential-form}。ベクトル束は実ベクトル束で、階数を $r$ とする。
+
+$\pi\colon E\to M$ の写像 $u\colon M\to E$ で $\pi\circ u=\mathrm{id}_{M}$ となるもの（連続とは限らない）を（粗い）切断という。$U$ の上の局所自明化 $\Phi$ について $u_{\Phi}\defeq\mathrm{pr}_{2}\circ\Phi\circ u\colon U\to\mathbb{R}^{r}$ を $u$ の成分という。推移関数は連続なので、成分がボレル可測かどうかは局所自明化によらず、成分がすべてボレル可測な切断を可測な切断という。ほとんど至る所で等しい可測な切断は同一視する。座標近傍 $(U,x)$ と $U$ の上の局所自明化 $\Phi$ について、$u^{x,\Phi}\colon\mathbb{R}^{n}\to\mathbb{R}^{r}$ を $x(U)$ 上で $u_{\Phi}\circ x^{-1}$、外で $0$ と定め、逆に $w\colon\mathbb{R}^{n}\to\mathbb{R}^{r}$ について、切断 $(x,\Phi)^{*}w$ を $U$ 上で $\Phi^{-1}(m,w(x(m)))$、外で $0$ と定める。
+
+::: definition 切断のソボレフ空間 {#gl:sobolev-sections keywords="Sobolev spaces W^{k,p}(M;E) of sections of a vector bundle defined by a finite atlas, local trivializations and a partition of unity; H^k(M; Lambda^k T*M) for differential forms" index="切断のソボレフ空間|せつだんのそぼれふくうかん, 微分形式のソボレフ空間|びぶんけいしきのそぼれふくうかん"}
+$M$ を閉多様体、$E$ を階数 $r$ のベクトル束とする。
+1. $M$ を覆う有限個の座標近傍 $(U_{j},x_{j})$ と、各 $U_{j}$ の上のベクトル束の局所自明化 $\Phi_{j}$ と、滑らかな 1 の分割 $(\rho_{j})$ で $\operatorname{supp}\rho_{j}\subset U_{j}$ となるものの組 $\mathfrak{A}=(U_{j},x_{j},\Phi_{j},\rho_{j})$ を $E$ の**局所化のデータ**という。
+2. $(\rho_{j}u)^{x_{j},\Phi_{j}}$ の $r$ 個の成分がすべて $W^{k,p}(\mathbb{R}^{n})$ に入る可測な切断 $u$ の全体を $W^{k,p}(M;E)$ と書き、$\|u\|_{k,p;\mathfrak{A}}$ を、すべての $j$ と成分についての $W^{k,p}(\mathbb{R}^{n})$ ノルムの和と定める。$H^{k}(M;E)\defeq W^{k,2}(M;E)$ には、\ref{gl:sobolev-manifold} と同様に成分ごとの内積の和を入れる。
+:::
+
+::: intuition
+ベクトル束の切断がソボレフ空間に入るとは、局所自明化で成分（数の組）として書いたとき、各成分が関数としてソボレフ空間に入ることである。
+:::
+
+$E=\Lambda^{k}T^{*}M$ では、座標近傍 $(U,x)$ の上の余接フレーム $(dx_{I})_{I\in\mathcal{I}_{k}}$ は局所フレームなので（\ref{mfd:differential-form} の係数 $f_{I}$ の一意性と滑らかさ）、\ref{mfd:local-frame-trivialization} から局所自明化 $\Phi$ を定め、そのときの成分は $\omega=\sum_{I}f_{I}\,dx_{I}$ の係数 $(f_{I})_{I}$ である。この自明化を使えば、$\omega\in H^{s}(M;\Lambda^{k}T^{*}M)$ とは、各 $(\rho_{j}f_{I})\circ x_{j}^{-1}$（外で $0$）が $H^{s}(\mathbb{R}^{n})$ に入ることである。
+
+::: theorem 切断のソボレフ空間の基本性質 {#gl:sobolev-sections-properties keywords="W^{k,p}(M;E) is independent of the atlas, trivializations and partition of unity; localization estimates for sections; Banach (Hilbert for p = 2); smooth sections are dense; with a fibre metric, W^{0,p}(M;E) is the space of p-integrable sections" index="切断のソボレフ空間の基本性質|せつだんのそぼれふくうかんのきほんせいしつ"}
+$M$ を閉多様体、$E$ を階数 $r$ のベクトル束、$1\le p<\infty$ とする。
+1. $W^{k,p}(M;E)$ は局所化のデータによらず、データを替えてもノルムは同値である。
+2. （切り出しと貼り付け）$(U,x)$ を座標近傍、$\Phi$ を $U$ の上の局所自明化とする。台が $U$ に含まれる $\theta\in C^{\infty}(M)$ について $u\mapsto(\theta u)^{x,\Phi}$ は $W^{k,p}(M;E)$ から $W^{k,p}(\mathbb{R}^{n};\mathbb{R}^{r})$ への有界線形写像である。コンパクト集合 $L\subset x(U)$ について、$L$ の外で $0$ となる $w\in W^{k,p}(\mathbb{R}^{n};\mathbb{R}^{r})$ は $(x,\Phi)^{*}w\in W^{k,p}(M;E)$ を満たし、$w\mapsto(x,\Phi)^{*}w$ は有界である。
+3. $W^{k,p}(M;E)$ はバナッハ空間、$H^{k}(M;E)$ はヒルベルト空間で、滑らかな切断の全体 $\Gamma(M,E)$ は $W^{k,p}(M;E)$ で稠密である。
+4. $h$ を $E$ のファイバー計量（各ファイバーの内積で、局所自明化で見て成分が連続なもの）とすると、$W^{0,p}(M;E)$ は $\int_{M}|u|_{h}^{p}\,d\mu_{g}<\infty$ となる可測な切断の全体に等しく、$\|u\|_{0,p}$ は $\bigl(\int_{M}|u|_{h}^{p}d\mu_{g}\bigr)^{1/p}$ と同値である。
+:::
+
+::: intuition
+ベクトル束の切断のソボレフ空間も、関数の場合と同じく局所座標と局所自明化の選び方によらず、完備で、滑らかな切断で近似できる。ファイバー計量で長さを測って $p$ 乗積分しても、同じ $L^{p}$ 空間になる。
+:::
+
+::: proof
+関数の場合の証明（\ref{gl:sm-localization}、\ref{gl:sobolev-manifold-independence}、\ref{gl:sobolev-manifold-complete}、\ref{gl:sobolev-manifold-density}）を、成分ごとに読み替える。変わるのは \ref{gl:sm-localization} の Step 1 だけである。
+
+**Step 1.** 【主張：$(U,x)$, $(V,y)$ を座標近傍、$\Phi$, $\Psi$ をその上の局所自明化、$L\subset x(U)$ をコンパクト集合、$b\in C^{\infty}(M)$ を台が $V$ に含まれる関数とすると、$L$ の外で $0$ となる $w\in W^{k,p}(\mathbb{R}^{n};\mathbb{R}^{r})$ について $(b\cdot(x,\Phi)^{*}w)^{y,\Psi}\in W^{k,p}(\mathbb{R}^{n};\mathbb{R}^{r})$ で、ノルムは $w$ によらない定数 $C$ について $\le C\|w\|_{W^{k,p}}$】\ref{mfd:vector-bundle-gl.1} から滑らかな $G\colon U\cap V\to\mathrm{GL}(r)$ があって、$s\defeq(x,\Phi)^{*}w$ について $(bs)_{\Psi}=b\,G\,(w\circ x)$（$U\cap V$ 上）。関数の場合の Step 1 の $a=\theta'\cdot(b\circ x^{-1})$ を行列値の $A\defeq\theta'\cdot(b\circ x^{-1})\cdot(G\circ x^{-1})$ に替えると、$A$ の成分は $C_{c}^{\infty}(\mathbb{R}^{n})$ の元で、$h\defeq Aw$ の各成分 $\sum_{c}A_{ac}w_{c}$ は \ref{fa:sobolev-product-rule} から $W^{k,p}(\mathbb{R}^{n})$ に入る。あとは各成分に \ref{gl:sobolev-diffeo-invariance} と零延長（\ref{gl:sobolev-local-operations.3}）を使えばよい。
+
+**Step 2.** 【主張：1・2・3】Step 1 から、2 は \ref{gl:sm-localization} の Step 2・3 と同じ議論で成り立つ（$x^{*}w$ を $(x,\Phi)^{*}w$ に、$(\theta u)^{x}$ を $(\theta u)^{x,\Phi}$ に替える）。それを使えば、1 は \ref{gl:sobolev-manifold-independence} の Step 1 と同じ。完備性は \ref{gl:sobolev-manifold-complete} の証明を成分ごとに行う（$L^{p}(M)$ の代わりに、成分が $L^{p}$ に入る切断の空間を使い、$L^{p}$ の比較は \ref{gl:sm-chart-lp.2} を成分ごとに使う）。稠密性は \ref{gl:sobolev-manifold-density} の証明で、各成分を軟化し、$x_{j}^{*}$ の代わりに $(x_{j},\Phi_{j})^{*}$ で切断に戻す（成分が $C_{c}^{\infty}$ で台が $x_{j}(U_{j})$ のコンパクト集合に含まれれば、滑らかな切断ができる）。
+
+**Step 3.** 【主張：4（ファイバー計量の $L^{p}$ ノルムとの同値）】局所自明化 $\Phi_{j}$ で見ると $|\Phi_{j}^{-1}(m,v)|_{h}^{2}=v^{\mathsf{T}}H_{j}(m)v$ で、$H_{j}(m)$ は正定値対称行列、成分は連続。$(m,v)\mapsto v^{\mathsf{T}}H_{j}(m)v$ はコンパクト集合 $\operatorname{supp}\rho_{j}\times\{|v|=1\}$ の上で正の最小値 $a_{j}$ と最大値 $b_{j}$ をとるので、$\operatorname{supp}\rho_{j}$ の上で $a_{j}|v|^{2}\le|\Phi_{j}^{-1}(m,v)|_{h}^{2}\le b_{j}|v|^{2}$。$\mathbb{R}^{r}$ のノルム $|v|$ と $\sum_{c}|v_{c}|$ は同値なので、\ref{gl:sm-chart-lp.2} を成分ごとに使って $\|(\rho_{j}u)^{x_{j},\Phi_{j}}\|_{0,p}$ と $\bigl(\int|\rho_{j}u|_{h}^{p}d\mu_{g}\bigr)^{1/p}$ は同値。$|\rho_{j}u|_{h}\le|u|_{h}$ と $u=\sum_{j}\rho_{j}u$（ミンコフスキーの不等式）から、\ref{gl:sobolev-manifold-independence} の Step 3 と同様に結論が出る。
+
+::: hypcheck
+- **推移関数が滑らか**：Step 1 で $G$ の成分に積の法則を使うのに使った。連続な推移関数しかない（位相的なベクトル束）と $k\ge1$ では定義が自明化による：$M=S^{1}$ の自明な直線束で、二つの自明化が角度座標 $t$ の近くで連続関数 $G(t)=2+|t|^{1/2}$ 倍だけずれているとすると、一方の自明化で定数 $1$ の切断は、他方では成分 $G$ をもち、$G'=\frac12|t|^{-1/2}\operatorname{sgn}t$ は $L^{2}$ に入らない。
+- **$M$ がコンパクト・$p<\infty$**：関数の場合と同じ箇所で使った。
+- **ファイバー計量の連続性**：Step 3 で $a_{j}>0$, $b_{j}<\infty$ を得るのに使った。
+:::
+:::
+
+::: supplement
+**前提を変えると.** ファイバー計量は 1 の分割で作れる（各 $\Phi_{j}$ で $\mathbb{R}^{r}$ の標準内積を引き戻したものを $\rho_{j}$ で重みづけて足す）。$\Lambda^{k}T^{*}M$ では、リーマン計量から決まる内積（\ref{riem:hodge-star-properties.2} の $\langle\alpha,\beta\rangle$）を使うのが自然で、そのとき $L^{2}$ 内積 $\int_{M}\langle\alpha,\beta\rangle\,d\mu_{g}$ は、向きづけられた場合の $\int_{M}\alpha\wedge\star\beta$ に等しい（\ref{gl:rm-integral-formulas.3}）。4 から、$H^{0}(M;\Lambda^{k}T^{*}M)$ はこの内積による $L^{2}$ 空間で、ノルムだけが同値なものに替わる。
+
+**似た定理.** 関数の場合は自明な直線束 $M\times\mathbb{R}$ の場合である（成分が $1$ つで、推移関数は $1$）。外微分 $d$、余微分 $\delta$、ホッジのラプラシアン（\ref{riem:codifferential}）が $H^{s+1}$ から $H^{s}$（ラプラシアンは $H^{s+2}$ から $H^{s}$）への有界作用素になることは \ref{gl:differential-operator-sobolev.3} で示す。これらの空間は、この分野の後の系列でホッジの定理（\see{riem:hodge-theorem}）を示すときの舞台になる。
+
+**高い視点：ファイバーごとの物差し.** 局所自明化を取り替えるのは、各点のファイバー（ベクトル空間）で、成分を読むための物差し（基底）を取り替えることである。物差しの取り替えは各点で可逆な行列で、それが点について滑らかに変わるなら、成分の「滑らかさの度合い」は変わらない。物差しが連続にしか変わらないと、物差し自身のぎざぎざが成分に写り込み、滑らかな切断さえぎざぎざに見えてしまう（上の $2+|t|^{1/2}$ の例）。
+:::
+
+## 微分作用素の有界性 {#gl:sec-ss-operators}
+
+::: definition 多様体上の微分作用素 {#gl:differential-operator-manifold keywords="linear differential operator of order at most k on a manifold: in every chart Pu = sum_{|alpha| <= k} a_alpha d^alpha u with smooth coefficients; operators between vector bundles with matrix-valued coefficients" index="微分作用素（多様体）|びぶんさようそたようたい, 微分作用素の階数|びぶんさようそのかいすう"}
+1. 線形写像 $P\colon C^{\infty}(M)\to C^{\infty}(M)$ が **$k$ 階以下の微分作用素**であるとは、$M$ の各座標近傍 $(U,x)$ について $a_{\alpha}\in C^{\infty}(x(U))$（$|\alpha|\le k$、複素数値）があって、すべての $u\in C^{\infty}(M)$ について $x(U)$ の上で
+$$
+(Pu)\circ x^{-1}=\sum_{|\alpha|\le k}a_{\alpha}\,\partial^{\alpha}(u\circ x^{-1})
+$$
+となることである。$a_{\alpha}$ を $(U,x)$ での**係数**という。
+2. ベクトル束 $E$, $F$（階数 $r$, $r'$）について、線形写像 $P\colon\Gamma(M,E)\to\Gamma(M,F)$ が $k$ 階以下の微分作用素であるとは、各座標近傍 $(U,x)$ と、$U$ の上の $E$, $F$ の局所自明化 $\Phi$, $\Psi$ について、$r'\times r$ 行列値の $A_{\alpha}\in C^{\infty}(x(U))$ があって $(Pu)_{\Psi}\circ x^{-1}=\sum_{|\alpha|\le k}A_{\alpha}\,\partial^{\alpha}(u_{\Phi}\circ x^{-1})$ となることである。
+:::
+
+::: intuition
+多様体の上の $k$ 階の微分作用素とは、どの座標で見ても、$k$ 階までの偏微分に滑らかな係数を掛けて足したものとして書ける線形写像である。
+:::
+
+1 の式から $P$ は**局所的**である：$u$ が開集合 $W$ の上で $0$ なら $Pu$ も $W$ の上で $0$。2 で、同じ $U$ の上の別の局所自明化に替えると、成分は滑らかな可逆行列を掛けて変わるだけなので（\ref{mfd:vector-bundle-gl.1}）、ライプニッツ則で同じ形の式が成り立つ。$k$ 階以下と $l$ 階以下の微分作用素の合成は、ライプニッツ則から $k+l$ 階以下の微分作用素である。
+
+::: example 微分作用素の例 {#gl:differential-operator-examples keywords="multiplication by a smooth function, vector fields, Laplace-Beltrami operator, exterior derivative, Hodge star, codifferential and Hodge Laplacian as differential operators" index="微分作用素の例|びぶんさようそのれい"}
+1. $f\in C^{\infty}(M)$ を掛ける写像は $0$ 階（係数 $a_{0}=f\circ x^{-1}$）。
+2. 滑らかなベクトル場 $X=\sum_{i}X^{i}\partial_{i}$ について $u\mapsto Xu$ は $1$ 階（係数 $X^{i}\circ x^{-1}$）。
+3. ラプラシアン $\Delta u=-\frac{1}{\sqrt{g}}\sum_{i,j}\partial_{i}(\sqrt{g}\,g^{ij}\partial_{j}u)$（\ref{gl:divergence-unoriented} の後の式。どの座標近傍でも成り立つ）は、展開すると $2$ 階で、2 階の係数は $-g^{ij}\circ x^{-1}$。
+4. 外微分 $d\colon\Omega^{k}(M)\to\Omega^{k+1}(M)$ は、余接フレーム $dx_{I}$ による自明化で $d\bigl(\sum_{I}f_{I}dx_{I}\bigr)=\sum_{I}\sum_{i}\partial_{i}f_{I}\,dx_{i}\wedge dx_{I}$ なので $1$ 階。$M$ が向きづけられていれば、星作用素 $\star$ は $C^{\infty}(M)$ 線形で滑らか（\ref{riem:hodge-star-properties.1}）なので $0$ 階、余微分 $\delta=\pm\star d\star$ は $1$ 階、ホッジのラプラシアン $d\delta+\delta d$ は $2$ 階（\ref{riem:codifferential}）。
+:::
+
+::: theorem 微分作用素の有界性 {#gl:differential-operator-sobolev keywords="a differential operator of order k on a closed manifold extends to a bounded operator W^{s+k,p}(M) -> W^{s,p}(M), in particular H^{s+k} -> H^s; local formula for the extension; the same for operators between vector bundles" index="微分作用素の有界性（ソボレフ空間）|びぶんさようそのゆうかいせいそぼれふくうかん"}
+$M$ を閉多様体、$P$ を $k$ 階以下の微分作用素、$s\ge0$ を整数、$1\le p<\infty$ とする。
+1. 定数 $C$ があって、すべての $u\in C^{\infty}(M)$ について $\|Pu\|_{s,p}\le C\|u\|_{s+k,p}$。したがって $P$ は有界線形作用素 $W^{s+k,p}(M)\to W^{s,p}(M)$ にただ一通りに延び、$s$ の異なる延長は（包含 $W^{s+k+1,p}\subset W^{s+k,p}$ の上で）一致する。
+2. $u\in W^{s+k,p}(M)$、座標近傍 $(U,x)$ とその係数 $a_{\alpha}$、台が $U$ に含まれる $\theta,\theta'\in C^{\infty}(M)$ で $\operatorname{supp}\theta$ の近傍で $\theta'=1$ となるものについて、$b_{\alpha}\defeq(\theta\circ x^{-1})a_{\alpha}$（$x(U)$ の外で $0$）は $C_{c}^{\infty}(\mathbb{R}^{n})$ の元で、弱微分について
+$$
+(\theta\,Pu)^{x}=\sum_{|\alpha|\le k}b_{\alpha}\,\partial^{\alpha}\bigl((\theta'u)^{x}\bigr).
+$$
+3. ベクトル束の間の $k$ 階以下の微分作用素 $P\colon\Gamma(M,E)\to\Gamma(M,F)$ も、有界線形作用素 $W^{s+k,p}(M;E)\to W^{s,p}(M;F)$ にただ一通りに延びる。
+:::
+
+::: intuition
+$k$ 階の微分作用素を掛けると、関数の滑らかさはちょうど $k$ 段だけ下がり、それより悪くはならない。ソボレフ・ノルムで言えば、$k$ 階の作用素は $H^{s+k}$ のノルムで抑えられる大きさの $H^{s}$ の関数を返す。
+:::
+
+::: proof
+**Step 1.** 【主張：$u\in C^{\infty}(M)$ なら 2 の式が成り立つ】$b_{\alpha}$ は $x(U)$ の上で滑らかで、台はコンパクト集合 $x(\operatorname{supp}\theta)$（$\mathbb{R}^{n}$ の閉集合）に含まれるので $C_{c}^{\infty}(\mathbb{R}^{n})$ の元。$\theta'=1$ となる $\operatorname{supp}\theta$ の開近傍を $O\subset U$ とすると、開集合 $x(O)$ の上で $u\circ x^{-1}=(\theta'u)\circ x^{-1}$ なので、両者の偏導関数は $x(O)$ の上で一致する。$\theta\circ x^{-1}$ は $x(O)$ の外で $0$ なので、$x(U)$ の上で $(\theta\circ x^{-1})\sum a_{\alpha}\partial^{\alpha}(u\circ x^{-1})=\sum b_{\alpha}\partial^{\alpha}((\theta'u)^{x})$。$x(U)$ の外では両辺とも $0$。
+
+**Step 2.** 【主張：$u\in C^{\infty}(M)$ なら $\|(\theta Pu)^{x}\|_{W^{s,p}}\le C\|u\|_{s+k,p}$（$C$ は $u$ によらない）】$w\defeq(\theta'u)^{x}$ とする。\ref{fa:sobolev-product-rule} のライプニッツ則の各項を $\sup|\partial^{\gamma}b_{\alpha}|$ で評価して $\|b_{\alpha}\partial^{\alpha}w\|_{W^{s,p}}\le C\|\partial^{\alpha}w\|_{W^{s,p}}\le C\|w\|_{W^{s+k,p}}$（$|\alpha|\le k$）。\ref{gl:sm-localization.1} から $\|w\|_{W^{s+k,p}}\le C\|u\|_{s+k,p}$。Step 1 の式に使えばよい。
+
+**Step 3.** 【主張：1】局所化のデータ $(U_{j},x_{j},\rho_{j})$ の各 $j$ について、\ref{fa:test-function-density.2} から $\varphi_{j}\in C_{c}^{\infty}(x_{j}(U_{j}))$ で $x_{j}(\operatorname{supp}\rho_{j})$ の近傍で $1$ となるものをとり、$\theta_{j}\defeq x_{j}^{*}\varphi_{j}$ とおく（台はコンパクトで $U_{j}$ に含まれ、滑らか）。Step 2 を $(\theta,\theta')=(\rho_{j},\theta_{j})$ に使って $j$ について足すと $\|Pu\|_{s,p}=\sum_{j}\|(\rho_{j}Pu)^{x_{j}}\|_{W^{s,p}}\le C\|u\|_{s+k,p}$。$C^{\infty}(M)$ は $W^{s+k,p}(M)$ で稠密（\ref{gl:sobolev-manifold-density}、ここで $p<\infty$ を使う）で $W^{s,p}(M)$ は完備（\ref{gl:sobolev-manifold-complete.1}）なので、$u_{m}\to u$ となる滑らかな列について $(Pu_{m})$ はコーシー列で、その極限は列によらない。こうして有界な延長がただ一つ決まる。$s$ と $s+1$ の延長は、どちらも $C^{\infty}(M)$ の上で $P$ に等しく $W^{s+k+1,p}(M)$ から $W^{s,p}(M)$ への連続写像（\ref{gl:sobolev-manifold-independence.3} の包含は連続）なので、稠密性から一致する。
+
+**Step 4.** 【主張：一般の $u\in W^{s+k,p}(M)$ で 2 の式が成り立つ】両辺は $u$ について $W^{s+k,p}(M)$ から $L^{p}(\mathbb{R}^{n})$ への連続線形写像である：左辺は 1 と \ref{gl:sm-chart-lp.2}（$\theta Pu$ は $\operatorname{supp}\theta$ の外で $0$）から、右辺は \ref{gl:sm-localization.1}、弱微分 $W^{s+k,p}\to L^{p}$、有界な $b_{\alpha}$ を掛けることの合成だから。Step 1 から $C^{\infty}(M)$ の上で一致するので、稠密性から全体で一致する。
+
+**Step 5.** 【主張：3】ベクトル束では、Step 1 の式を $(\theta Pu)^{x,\Psi}=\sum B_{\alpha}\partial^{\alpha}((\theta'u)^{x,\Phi})$（$B_{\alpha}\defeq(\theta\circ x^{-1})A_{\alpha}$ は成分が $C_{c}^{\infty}$ の行列）とし、積の法則を成分ごとに、\ref{gl:sm-localization.1} の代わりに \ref{gl:sobolev-sections-properties.2} を、稠密性と完備性に \ref{gl:sobolev-sections-properties.3} を使えば、Step 2・3 と同じ。
+
+::: hypcheck
+- **$M$ がコンパクト**：Step 3 で局所化のデータを有限個にし、Step 2 で $b_{\alpha}$ の導関数を有界にするのに使った。外すと偽：$M=\mathbb{R}$ で $0$ 階の作用素 $Pu=e^{t^{2}}u$ は、$L^{2}(\mathbb{R})$ の上で有界でない（$u$ を遠くへ平行移動した隆起関数とすればノルムの比はいくらでも大きい）。
+- **係数が滑らか**：Step 2 の積の法則に使った。$W^{s+k,p}\to W^{s,p}$ には係数が $C^{s}$ 級程度あれば足りるが、係数が連続なだけだと $s\ge1$ では偽：$M=S^{1}$, $P=a(t)\frac{d}{dt}$ で $a$ が連続だが $W^{1,2}$ に入らない（$a(t)=|t|^{1/2}$ の近く）とき、$u=\sin t$ について $Pu=a\cos t$ は $t=0$ の近くで $H^{1}$ に入らない。
+- **$p<\infty$**：Step 3 で稠密性に使った。
+- **公理**：新しい選択は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 非整数の階数 $H^{s}$ についても $P$ は $H^{s+k}\to H^{s}$ で有界であることが知られている（ここでは証明しない）。境界つき領域では、内部の $W^{s,p}$ の間の有界性は同じ証明（半空間型の座標近傍）で成り立つが、境界条件は作用素の有界性とは別に扱う必要がある。
+
+**似た定理.** $\mathbb{R}^{n}$ の定数係数の作用素 $P=\sum a_{\alpha}\partial^{\alpha}$ では、\ref{fa:sobolev-fourier} から $\mathcal{F}(Pu)=\bigl(\sum a_{\alpha}(2\pi i\xi)^{\alpha}\bigr)\mathcal{F}u$ で、$\bigl|\sum a_{\alpha}(2\pi i\xi)^{\alpha}\bigr|\le C(1+|\xi|^{2})^{k/2}$ から直ちに $H^{s+k}\to H^{s}$ の有界性が出る。多様体の上では、係数が場所によるので、局所化して積の法則を使うこのページの方法になる。トーラスの上で、フーリエ係数を使って同じことを見るのは次のページで行う。
+
+**高い視点：レンズの度数.** 関数の滑らかさを「解像度」にたとえれば、$k$ 階の微分作用素は、解像度をちょうど $k$ 段だけ落とすレンズである。係数の滑らかさはレンズの研磨の精度で、精度が悪いと（連続なだけの係数）、レンズ自身の傷が像に写り込み、$k$ 段より多く解像度が落ちる。
+:::
+
+## 形式的転置 {#gl:sec-ss-transpose}
+
+::: proposition 形式的転置 {#gl:formal-transpose keywords="formal transpose P^t of a differential operator on a closed Riemannian manifold: int (Pu) v = int u (P^t v); local formula P^t v = gamma^{-1} sum (-1)^{|alpha|} d^alpha (gamma a_alpha v); formal adjoint P^*; Delta^t = Delta, X^t = -X - div X" index="形式的転置|けいしきてきてんち, 形式的随伴作用素|けいしきてきずいはんさようそ"}
+$M$ を閉多様体、$P$ を $k$ 階以下の微分作用素とする。
+1. $k$ 階以下の微分作用素 $P^{t}$ で、すべての $u,v\in C^{\infty}(M)$ について
+$$
+\int_{M}(Pu)\,v\,d\mu_{g}=\int_{M}u\,(P^{t}v)\,d\mu_{g}
+$$
+となるものがただ一つある。これを $P$ の**形式的転置**という。
+2. 座標近傍 $(U,x)$ の上で、$V\defeq v\circ x^{-1}$ として $(P^{t}v)\circ x^{-1}=\gamma_{x}^{-1}\sum_{|\alpha|\le k}(-1)^{|\alpha|}\partial^{\alpha}(\gamma_{x}a_{\alpha}V)$。
+3. $(P^{t})^{t}=P$。1 の等式は $u,v\in H^{k}(M)$（$P$, $P^{t}$ は \ref{gl:differential-operator-sobolev.1} の延長）でも成り立つ。$P^{*}v\defeq\overline{P^{t}\bar{v}}$（**形式的随伴**）とおくと $(Pu,v)=(u,P^{*}v)$。
+:::
+
+::: proof
+**Step 1.** 【主張：座標近傍 $(U,x)$ と、台が $U$ に含まれる $v\in C^{\infty}(M)$ について、$Q_{U}v$ を $U$ の上で 2 の右辺を $x$ で引き戻したもの、$U$ の外で $0$ とすると、$Q_{U}v\in C^{\infty}(M)$ で、すべての $u\in C^{\infty}(M)$ について $\int(Pu)v=\int u\,Q_{U}v$】$V$ は $C_{c}^{\infty}(x(U))$ の元なので、$Q_{U}v$ は台が $\operatorname{supp}v$ に含まれる滑らかな関数。\ref{gl:rm-integral-formulas.1} から $\int_{M}(Pu)v\,d\mu_{g}=\sum_{\alpha}\int_{x(U)}\partial^{\alpha}(u\circ x^{-1})\,a_{\alpha}V\gamma_{x}\,d\lambda$。$a_{\alpha}V\gamma_{x}\in C_{c}^{\infty}(x(U))$ なので、古典的な偏導関数は超関数の微分に等しい（\ref{fa:distribution-operations-properties.2} を繰り返し使う）ことから、各項は $(-1)^{|\alpha|}\int(u\circ x^{-1})\,\partial^{\alpha}(a_{\alpha}V\gamma_{x})\,d\lambda$ に等しく、和は $\int_{x(U)}(u\circ x^{-1})\,(Q_{U}v\circ x^{-1})\,\gamma_{x}\,d\lambda=\int_{M}u\,Q_{U}v\,d\mu_{g}$。
+
+**Step 2.** 【主張：$w\in C^{\infty}(M)$ がすべての $u\in C^{\infty}(M)$ について $\int uw\,d\mu_{g}=0$ を満たせば $w=0$】$u=\bar{w}$ とすると $\int|w|^{2}=0$。$\{|w|>0\}$ は測度 $0$ の開集合なので、\ref{gl:riemannian-measure.2} から空。
+
+**Step 3.** 【主張：$P^{t}v\defeq\sum_{j}Q_{U_{j}}(\rho_{j}v)$（局所化のデータを使う）は 1 の等式を満たす $k$ 階以下の微分作用素で、2 の式で与えられる】等式は Step 1 を $\rho_{j}v$ に使って足せば出る。一意性は Step 2 から（二つの候補の差を $w$ とする）。座標近傍 $(U,x)$ と $m\in U$ について、台が $U$ に含まれ $m$ の開近傍 $W$ で $1$ となる $\theta\in C^{\infty}(M)$ をとる（\ref{fa:test-function-density.2} を座標で使う）。各 $Q_{U_{j}}$ は座標での微分の式なので局所的で、$P^{t}$ も局所的。よって $W$ の上で $P^{t}v=P^{t}(\theta v)$。$\theta v$ の台は $U$ に含まれるので、Step 1 と Step 2 から $P^{t}(\theta v)=Q_{U}(\theta v)$、さらに $Q_{U}$ も局所的なので $W$ の上で $Q_{U}(\theta v)=Q_{U}v$。したがって $U$ の上で $P^{t}v=Q_{U}v$ で、2 の右辺をライプニッツ則で展開すると、係数が $C^{\infty}(x(U))$ の元の $\sum_{|\beta|\le k}c_{\beta}\partial^{\beta}V$ の形になる。
+
+**Step 4.** 【主張：3】1 の等式の両辺を入れ替えると、$P$ は $P^{t}$ の転置の条件を満たすので、一意性から $(P^{t})^{t}=P$。$u,v\in H^{k}(M)$ には、滑らかな $u_{m}\to u$, $v_{m}\to v$（$H^{k}$）をとると、\ref{gl:differential-operator-sobolev.1} から $Pu_{m}\to Pu$, $P^{t}v_{m}\to P^{t}v$（$L^{2}$）、また $u_{m}\to u$, $v_{m}\to v$（$L^{2}$、\ref{gl:sobolev-manifold-independence.3}）なので、$L^{2}$ の内積の連続性から等式が保たれる。$P^{*}$ の式は $\bar{v}$ に 1 を使って共役をとる。
+
+::: hypcheck
+- **境界がない**：Step 1 で、$V$ の台が $x(U)$ のコンパクト集合に含まれるので部分積分の境界項が出ないことに使った（閉多様体ではどの点も内点）。境界つき領域 $D=[0,1]\subset\mathbb{R}$ では $\int_{0}^{1}u'v=-\int_{0}^{1}uv'+u(1)v(1)-u(0)v(0)$ で、境界項が残る。
+- **計量**：$P^{t}$ は $\mu_{g}$ による積分で定めたので計量による（2 の $\gamma_{x}$）。$P$ 自身の定義には計量は要らない。
+:::
+:::
+
+::: example 転置の例 {#gl:formal-transpose-examples keywords="transpose of the Laplacian and of a vector field" index="転置の例（微分作用素）|てんちのれいびぶんさようそ"}
+1. $\Delta^{t}=\Delta$：\ref{gl:closed-manifold-laplacian.1} の対称性（実数値の $u,v$。複素数値は実部と虚部に分けて線形性から）と一意性。
+2. ベクトル場 $X$ について $X^{t}=-X-\operatorname{div}X$：\ref{gl:divergence-unoriented.2} から $\operatorname{div}(uvX)=uv\operatorname{div}X+u\,Xv+v\,Xu$ で、\ref{gl:divergence-theorem}（$D=M$, $\partial M=\varnothing$）からその積分は $0$。よって $\int(Xu)v=\int u(-Xv-v\operatorname{div}X)$。
+:::
+
+## 問題 {#gl:sec-ss-problems}
+
+::: problem {#gl:prob-ss-transpose-composition}
+$M$ を閉多様体とする。
+1. 微分作用素 $P$, $Q$ について $(PQ)^{t}=Q^{t}P^{t}$ を示せ。
+2. 滑らかなベクトル場 $X$ について $P\defeq\Delta+X$ の形式的転置を求め、$P^{t}=P$ となるのは $X=0$ のときに限ることを示せ。
+:::
+
+::: solution
+**1.** $PQ$ は微分作用素で（合成）、$u,v\in C^{\infty}(M)$ について \ref{gl:formal-transpose.1} を二回使うと $\int(PQu)v=\int(Qu)(P^{t}v)=\int u\,(Q^{t}P^{t}v)$。$Q^{t}P^{t}$ は微分作用素なので、転置の一意性から $(PQ)^{t}=Q^{t}P^{t}$。
+
+**2.** 転置は線形に振る舞う（$\int((P_{1}+P_{2})u)v=\int u(P_{1}^{t}+P_{2}^{t})v$ と一意性）ので、\ref{gl:formal-transpose-examples} から $P^{t}=\Delta-X-\operatorname{div}X$。$P^{t}=P$ なら $2X+\operatorname{div}X=0$（作用素として）。定数関数 $1$ に作用させると $X1=0$ から $\operatorname{div}X=0$、すると $2Xu=0$ がすべての $u$ で成り立つ。座標近傍で $u$ を座標関数 $x_{i}$ に一致する滑らかな関数（\ref{fa:test-function-density.2} の切り落としを掛けたもの）にとると $X^{i}=0$ がわかるので $X=0$。逆に $X=0$ なら $P=\Delta$ で、$\Delta^{t}=\Delta$。
+:::
+
+::: problem {#gl:prob-ss-exterior-derivative}
+$M$ を閉多様体、$s\ge0$ を整数とし、外微分 $d$ を \ref{gl:differential-operator-sobolev.3} で $H^{s+1}(M;\Lambda^{k}T^{*}M)\to H^{s}(M;\Lambda^{k+1}T^{*}M)$ に延ばす。
+1. $\omega\in H^{s+2}(M;\Lambda^{k}T^{*}M)$ なら $d(d\omega)=0$ を示せ。
+2. $f\in C^{\infty}(M)$, $\omega\in H^{s+1}(M;\Lambda^{k}T^{*}M)$ なら $d(f\omega)=df\wedge\omega+f\,d\omega$ を示せ（左辺の $f\omega$ も $H^{s+1}$ に入ることを含めて）。
+:::
+
+::: solution
+**1.** $d\circ d$ は有界作用素 $H^{s+2}\to H^{s+1}\to H^{s}$ の合成なので有界で、滑らかな形式の上では $dd=0$。滑らかな形式は $H^{s+2}$ で稠密（\ref{gl:sobolev-sections-properties.3}）なので、連続性から $H^{s+2}$ 全体で $0$。
+
+**2.** $\omega\mapsto f\omega$ と $\omega\mapsto df\wedge\omega$ は $0$ 階の微分作用素（局所自明化で、成分に滑らかな関数を掛けて足すだけ）なので、\ref{gl:differential-operator-sobolev.3}（$k=0$）から $H^{s+1}\to H^{s+1}$ で有界。よって $f\omega\in H^{s+1}$ で、$\omega\mapsto d(f\omega)$ と $\omega\mapsto df\wedge\omega+f\,d\omega$ はどちらも $H^{s+1}(M;\Lambda^{k})$ から $H^{s}(M;\Lambda^{k+1})$ への有界線形写像（$H^{s+1}\subset H^{s}$ は連続）。滑らかな $\omega$ では外微分のライプニッツ則から両者は等しいので、稠密性から全体で等しい。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
