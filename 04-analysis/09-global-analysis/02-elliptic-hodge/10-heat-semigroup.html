@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熱半群と熱方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/02-elliptic-hodge/10-heat-semigroup.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 熱半群と熱方程式 {#gl:page-heat-semigroup keywords="heat equation on closed Riemannian manifolds, heat semigroup e^{-tP} defined by the eigensection expansion, contraction C_0 semigroup with generator -P and domain H^k, smoothing property of the heat semigroup, existence and uniqueness of solutions of the heat equation by the energy method, polynomial bounds for eigensections and eigenvalue counting, weak Weyl law, backward heat equation is ill-posed, 熱方程式, 熱半群, 熱作用素, 平滑化作用, エネルギー法, 固有値の増え方"}
+
+前のページまでに、閉多様体の上の形式的に自己共役で非負な楕円型作用素 $P$ について、滑らかな固有切断からなる $L^{2}$ の正規直交基底があること（\ref{gl:elliptic-spectral-decomposition}）を示し、それを使って \ref{gl:hodge-theorem} を証明した。この系列の最後の 3 ページでは、同じ固有切断の展開を使って熱方程式 $\partial_{t}u+Pu=0$ を調べる。このページでは、各固有切断の成分を $e^{-t\lambda_{j}}$ 倍して減衰させる作用素 $e^{-tP}$ を定め、これが関数解析の意味の縮小な強連続半群で、その生成作用素が $-P$ であることを確かめる。$t>0$ では $e^{-tP}$ は二乗可積分な切断を滑らかな切断に写し、熱方程式の解は滑らかで、初期値からただ一つに決まる。その途中で、固有切断の大きさと固有値の個数を固有値の多項式で評価する。この評価は次のページ \see{gl:page-heat-kernel} で、$e^{-tP}$ が滑らかな積分核（**熱核**）をもつことを示すのにも使う。熱核の正値性はそのページで、$t\to\infty$ と $t\to0$ での振る舞いと指数定理との関係はその次のページ \see{gl:page-heat-asymptotics} で扱う。
+
+## 記法と定義の確認 {#gl:sec-hk-notation}
+
+::: notation
+- $M$ は $n$ 次元の閉多様体（$n\ge1$）、$g$ はリーマン計量、$\mu_{g}$ はリーマン測度（\ref{gl:riemannian-measure}）、$\operatorname{vol}(M)\defeq\mu_{g}(M)$。$E$ は階数 $r\ge1$ のベクトル束で、ファイバー計量 $h_{E}$ を入れ、複素係数の約束・切断のソボレフ空間 $H^{s}(M;E)$（$s\ge0$ は整数）とノルム $\|\cdot\|_{H^{s}}$、$L^{2}$ の内積 $(u,u')=\int_{M}h_{E}(u,\overline{u'})\,d\mu_{g}$ は \ref{gl:sec-sp-notation} のとおり。各ファイバーのエルミート内積を $\langle v,w\rangle_{h}\defeq h_{E}(v,\bar{w})$、その長さを $|v|_{h}$ と書く。
+- $P\colon\Gamma(M,E)\to\Gamma(M,E)$ は形式的に自己共役で非負な $k$ 階（$k\ge1$）の楕円型作用素とする（\ref{gl:formal-adjoint-bundle}, \ref{gl:elliptic-resolvent}）。主な例は関数の上のラプラシアン $\Delta=-\operatorname{div}\operatorname{grad}$（$k=2$、\ref{gl:sec-sp-resolvent} の冒頭）と、向きづけられた $M$ の上のホッジのラプラシアン $\Delta=d\delta+\delta d$（$k=2$、\ref{gl:hodge-laplacian-spectrum}）である。ラプラシアンの符号は非負になるように選んでいる（\ref{gl:sec-dg-notation}）ので、熱方程式は $\partial_{t}u+\Delta u=0$ と書かれる。
+- $(\varphi_{j},\lambda_{j})_{j\ge0}$ は \ref{gl:elliptic-spectral-decomposition.2} の意味の固有切断の正規直交基底（滑らかな切断からなり、$P\varphi_{j}=\lambda_{j}\varphi_{j}$）、$u\in L^{2}$ の係数を $c_{j}\defeq(u,\varphi_{j})$ と書く。とくに断らない限り、\ref{gl:elliptic-spectral-decomposition.1} のように $0\le\lambda_{0}\le\lambda_{1}\le\cdots\to\infty$ と並べたものをとる。係数とノルム・内積の関係（パーセヴァルの等式 \ref{fa:orthonormal-basis.4}、$(x,y)=\sum_{j}(x,\varphi_{j})\overline{(y,\varphi_{j})}$）と、ソボレフ・ノルムの係数による表示 \ref{gl:spectral-sobolev-norms} を何度も使う。
+- **級数の優収束.** 複素数列の列 $a_{j}(t)$ について、各 $j$ で $a_{j}(t)\to a_{j}$（$t\to t_{0}$）、かつ $t$ によらない $b_{j}\ge0$ で $|a_{j}(t)|\le b_{j}$, $\sum_{j}b_{j}<\infty$ なら、$\sum_{j}a_{j}(t)\to\sum_{j}a_{j}$。これは数え上げ測度についての優収束定理（\ref{meas:dominated-convergence}）である。
+- 強連続半群・縮小半群・生成作用素は \ref{fa:c0-semigroup} のとおり。関数の級数の項別微分は \ref{calc:uniform-derivative} を一変数ずつ使う。
+- **選択公理**：前の系列の 1 の分割（局所化のデータの存在と滑らかなウリゾーンの補題 \ref{mfd:smooth-urysohn}）で従属選択公理（DC）を、スペクトル分解（\ref{gl:elliptic-spectral-decomposition}）の証明で DC を使う点は前のページまでと同じで、このページではそれらの結果を通して使う。このページで新しく使う選択はない。基底は一つ固定して使い、結果が基底によらないことは証明の中で確かめる。
+:::
+
+## 熱半群 {#gl:sec-hk-semigroup}
+
+固有切断の展開では、$P$ は $j$ 番目の係数に $\lambda_{j}$ を掛ける作用素である。熱方程式 $\partial_{t}u=-Pu$ を係数ごとに見ると $\frac{d}{dt}c_{j}(t)=-\lambda_{j}c_{j}(t)$ で、解は $c_{j}(t)=e^{-t\lambda_{j}}c_{j}(0)$ である。これを作用素として定める。
+
+::: definition 熱作用素 {#gl:heat-operator keywords="heat operator e^{-tP} u = sum e^{-t lambda_j} (u, phi_j) phi_j for a formally self-adjoint nonnegative elliptic operator on a closed manifold; heat semigroup" index="熱作用素|ねつさようそ, 熱半群（閉多様体）|ねつはんぐんへいたようたい"}
+$P$ を記法の節の作用素、$(\varphi_{j},\lambda_{j})$ を \ref{gl:elliptic-spectral-decomposition.1} の基底とする。$t\ge0$ と $u\in L^{2}(M;E)$ について
+$$
+e^{-tP}u\defeq\sum_{j=0}^{\infty}e^{-t\lambda_{j}}(u,\varphi_{j})\,\varphi_{j}
+$$
+と定める。$\lambda_{j}\ge0$ なので $|e^{-t\lambda_{j}}(u,\varphi_{j})|\le|(u,\varphi_{j})|$ で、係数は二乗総和可能だから、右辺は $L^{2}$ で収束する（\ref{fa:orthonormal-basis.3}）。$e^{-tP}$ を $P$ の**熱作用素**、族 $(e^{-tP})_{t\ge0}$ を**熱半群**という。
+:::
+
+::: intuition
+熱作用素は、切断を固有振動に分解し、振動数の高い成分ほど速く減衰させてから足し戻す作用素である。固有値 $0$ の成分（ラプラシアンなら定数）は減衰しない。
+:::
+
+::: theorem 熱半群は縮小な強連続半群 {#gl:heat-semigroup keywords="the heat semigroup e^{-tP} on L^2(M;E) of a formally self-adjoint nonnegative elliptic operator on a closed manifold is independent of the eigenbasis, consists of positive self-adjoint contractions, is a strongly continuous contraction semigroup, and its generator is -P with domain H^k; e^{-tP} commutes with P" index="熱半群の生成作用素|ねつはんぐんのせいせいさようそ, 熱半群の基本性質|ねつはんぐんのきほんせいしつ"}
+$P$ を記法の節の作用素とする。
+1. $e^{-tP}u$ は基底のとり方によらない。すなわち、\ref{gl:elliptic-spectral-decomposition.2} の任意の基底 $(\psi_{i},\mu_{i})$ について $(e^{-tP}u,\psi_{i})=e^{-t\mu_{i}}(u,\psi_{i})$ がすべての $i$ で成り立つ。とくに $\varphi\in\ker(P-\lambda)$ なら $e^{-tP}\varphi=e^{-t\lambda}\varphi$。
+2. 各 $t\ge0$ で $e^{-tP}$ は $L^{2}(M;E)$ の上の有界な自己共役作用素で、$(e^{-tP}u,u)\ge0$、$\|e^{-tP}\|\le1$。
+3. $e^{-0P}=I$、$e^{-(t+s)P}=e^{-tP}e^{-sP}$（$s,t\ge0$）、すべての $u$ で $e^{-tP}u\to u$（$t\to0+$）。したがって $(e^{-tP})_{t\ge0}$ は縮小な強連続半群である。
+4. この半群の生成作用素は $-P$ で、その定義域は $H^{k}(M;E)$ である。すなわち、$u\in L^{2}$ について $L^{2}$ での極限 $\lim_{t\to0+}\frac{1}{t}(e^{-tP}u-u)$ が存在することと $u\in H^{k}$ は同値で、そのとき極限は $-Pu$ である。
+5. $u\in H^{k}$ なら $e^{-tP}u\in H^{k}$ で、$Pe^{-tP}u=e^{-tP}Pu$。
+:::
+
+::: intuition
+固有切断の展開で定めた熱作用素は、時間を足せば作用素の積になり、時間 $0$ に近づけば恒等写像に近づく。二乗積分（エネルギー）を増やすことはなく、時間についての微分係数（生成作用素）はちょうど $-P$ で、それが意味をもつのは $P$ を $L^{2}$ の中で施せる切断（$H^{k}$ の元）に限る。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$u\in L^{2}$ と $t\ge0$ を固定し、$v\defeq e^{-tP}u$ とおく。定義の級数の各項は互いに直交し、係数をとる写像 $x\mapsto(x,\varphi_{j})$ は連続なので、$(v,\varphi_{j})=e^{-t\lambda_{j}}(u,\varphi_{j})$。$\psi_{i}$ は $\ker(P-\mu_{i})$ に属し、\ref{gl:elliptic-spectral-decomposition.2} から $\ker(P-\mu_{i})$ は有限個の $\{\varphi_{j}:\lambda_{j}=\mu_{i}\}$ で張られるので、$\psi_{i}=\sum_{\lambda_{j}=\mu_{i}}a_{j}\varphi_{j}$ と書ける。よって
+$$
+(v,\psi_{i})=\sum_{\lambda_{j}=\mu_{i}}\overline{a_{j}}\,e^{-t\mu_{i}}(u,\varphi_{j})=e^{-t\mu_{i}}(u,\psi_{i}).
+$$
+\ref{fa:orthonormal-basis.3} から $v=\sum_{i}(v,\psi_{i})\psi_{i}$ なので、$v$ は基底 $(\psi_{i})$ で定義の式を書いたものと一致する。$\varphi\in\ker(P-\lambda)$ には $(\psi_{i})=(\varphi_{j})$ のまま同じ計算をすると、$\lambda_{j}\ne\lambda$ の $j$ で $(\varphi,\varphi_{j})=0$ なので $e^{-tP}\varphi=\sum_{\lambda_{j}=\lambda}e^{-t\lambda}(\varphi,\varphi_{j})\varphi_{j}=e^{-t\lambda}\varphi$。
+
+**Step 2.** 【主張：2】$e^{-tP}$ は線形で、パーセヴァルの等式から $\|e^{-tP}u\|^{2}=\sum_{j}e^{-2t\lambda_{j}}|c_{j}|^{2}\le\sum_{j}|c_{j}|^{2}=\|u\|^{2}$。$d_{j}\defeq(u',\varphi_{j})$ とすると、$e^{-t\lambda_{j}}$ が実数なので
+$$
+(e^{-tP}u,u')=\sum_{j}e^{-t\lambda_{j}}c_{j}\overline{d_{j}}=\sum_{j}c_{j}\overline{e^{-t\lambda_{j}}d_{j}}=(u,e^{-tP}u'),
+$$
+$u'=u$ とすれば $(e^{-tP}u,u)=\sum_{j}e^{-t\lambda_{j}}|c_{j}|^{2}\ge0$。
+
+**Step 3.** 【主張：3】係数を比べる。$e^{-0P}u$ の係数は $c_{j}$ で、\ref{fa:orthonormal-basis.3} から $e^{-0P}u=u$。$e^{-tP}(e^{-sP}u)$ の係数は Step 1 から $e^{-t\lambda_{j}}e^{-s\lambda_{j}}c_{j}=e^{-(t+s)\lambda_{j}}c_{j}$ で、$e^{-(t+s)P}u$ の係数と同じ。強連続性：
+$$
+\|e^{-tP}u-u\|^{2}=\sum_{j}\bigl(1-e^{-t\lambda_{j}}\bigr)^{2}|c_{j}|^{2}
+$$
+の各項は $t\to0+$ で $0$ に収束し、$t$ によらない $|c_{j}|^{2}$（総和は $\|u\|^{2}$）で抑えられるので、級数の優収束から $0$ に収束する。2 と合わせて \ref{fa:c0-semigroup} の縮小な強連続半群である。
+
+**Step 4.** 【主張：$u\in H^{k}$ なら $(Pu,\varphi_{j})=\lambda_{j}c_{j}$、$\sum_{j}\lambda_{j}^{2}|c_{j}|^{2}<\infty$ で、$\frac1t(e^{-tP}u-u)\to-Pu$】\ref{gl:spectral-sobolev-norms.1}（$l=1$）から $((P+1)u,\varphi_{j})=(1+\lambda_{j})c_{j}$ なので $(Pu,\varphi_{j})=\lambda_{j}c_{j}$、パーセヴァルの等式から $\sum_{j}\lambda_{j}^{2}|c_{j}|^{2}=\|Pu\|^{2}<\infty$。$x\ge0$ で $0\le1-e^{-x}\le x$ なので $0\le\frac{1-e^{-t\lambda}}{t}\le\lambda$（$\lambda\ge0$, $t>0$）で、
+$$
+\Bigl\|\frac{e^{-tP}u-u}{t}+Pu\Bigr\|^{2}=\sum_{j}\Bigl(\lambda_{j}-\frac{1-e^{-t\lambda_{j}}}{t}\Bigr)^{2}|c_{j}|^{2}
+$$
+の各項は $\le\lambda_{j}^{2}|c_{j}|^{2}$ で抑えられ、$t\to0+$ で $0$ に収束する（$\frac{1-e^{-t\lambda}}{t}\to\lambda$）。級数の優収束から左辺は $0$ に収束する。
+
+**Step 5.** 【主張：極限 $w$ が存在すれば $u\in H^{k}$。したがって 4】$(w,\varphi_{j})=\lim_{t\to0+}\frac{e^{-t\lambda_{j}}-1}{t}c_{j}=-\lambda_{j}c_{j}$（係数をとる写像の連続性）。パーセヴァルの等式から $\sum_{j}\lambda_{j}^{2}|c_{j}|^{2}=\|w\|^{2}<\infty$ で、$(1+\lambda_{j})^{2}\le2(1+\lambda_{j}^{2})$ から $\sum_{j}(1+\lambda_{j})^{2}|c_{j}|^{2}<\infty$。\ref{gl:spectral-sobolev-norms.1}（$l=1$）から $u\in H^{k}$ で、Step 4 から $w=-Pu$。
+
+**Step 6.** 【主張：5】$e^{-tP}u$ の係数 $e^{-t\lambda_{j}}c_{j}$ について $\sum_{j}(1+\lambda_{j})^{2}e^{-2t\lambda_{j}}|c_{j}|^{2}\le\sum_{j}(1+\lambda_{j})^{2}|c_{j}|^{2}<\infty$ なので、\ref{gl:spectral-sobolev-norms.1} から $e^{-tP}u\in H^{k}$。Step 4 を $e^{-tP}u$ と $u$ に使うと、$Pe^{-tP}u$ と $e^{-tP}Pu$ の係数はどちらも $\lambda_{j}e^{-t\lambda_{j}}c_{j}$ で、\ref{fa:orthonormal-basis.3} から等しい。
+
+::: hypcheck
+- **形式的自己共役**：スペクトル分解（実の固有値と固有切断の正規直交基底）を通して、定義と Step 2 の自己共役性に使った。
+- **非負性**：$\lambda_{j}\ge0$ として、定義の収束、Step 2 の $\|e^{-tP}\|\le1$、Step 4 の評価 $0\le\frac{1-e^{-t\lambda}}{t}\le\lambda$ に使った。下に有界（$\lambda_{j}\ge-c$）なだけなら、同じ定義で $\|e^{-tP}\|\le e^{ct}$ の強連続半群になり（縮小ではない）、4 も同様に成り立つ。下に有界でなければ（$d+\delta$ のように $\lambda_{j}\to-\infty$ となる部分列があれば）、$e^{-t\lambda_{j}}$ は有界でなく $e^{-tP}$ は $L^{2}$ の上で定まらない。
+- **楕円性と $M$ が閉じていること**：スペクトル分解の存在と、Step 4・5 で $H^{k}$ を係数で特徴づけること（\ref{gl:spectral-sobolev-norms}）に使った。
+- **公理**：新しい選択は使わない。基底の取り替えは Step 1 の有限和の計算だけである。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $-P$ を定義域 $H^{k}$ の作用素とみると、1 から $\operatorname{Re}(-Pu,u)\le0$（散逸的）で、\ref{gl:elliptic-resolvent.2} から $1+P\colon H^{k}\to L^{2}$ は全射なので、\ref{fa:lumer-phillips} からも $-P$ は縮小半群を生成する。同じ生成作用素をもつ強連続半群は一つしかない（\see{fa:stone-theorem} の証明の一意性の部分）ので、それはここの $e^{-tP}$ に一致する。ここでは一般論を経ずに、固有切断の展開で半群を直接作った。有界な領域のディリクレ・ラプラシアンの熱半群（\see{fa:heat-schrodinger-examples}）も、ディリクレ条件の固有関数で同じように展開できる。$t\mapsto e^{-tP}$ は作用素ノルムでは $t=0$ で連続でない：$\|e^{-tP}-I\|\ge\sup_{j}(1-e^{-t\lambda_{j}})=1$（$\lambda_{j}\to\infty$）なので、強連続性は「各 $u$ ごとの」連続性である。
+
+**似た定理.** 同じ固有切断の展開で、$e^{-itP}u\defeq\sum_{j}e^{-it\lambda_{j}}c_{j}\varphi_{j}$ はユニタリ作用素の群で、シュレディンガー方程式 $i\partial_{t}u=Pu$ を解く（\see{fa:stone-theorem}）。$P=\Delta$ のとき $\cos(t\sqrt{\Delta})u\defeq\sum_{j}\cos(t\sqrt{\lambda_{j}})c_{j}\varphi_{j}$ は波動方程式 $\partial_{t}^{2}u+\Delta u=0$ の解を与える。一般に有界な関数 $f$ について $f(P)u\defeq\sum_{j}f(\lambda_{j})c_{j}\varphi_{j}$ と定めるのが関数計算で、自己共役作用素のスペクトル定理（\see{fa:unbounded-spectral-theorem}）の、固有値だけからなる場合にあたる。
+
+**高い視点：音を弱める装置.** 前のページで多様体を楽器にたとえたとき、固有切断は固有振動、$\lambda_{j}$ はその高さの二乗だった。熱作用素は、高い音ほど強く弱めるフィルタで、時間 $t$ が長いほど多くの高音を消す。フィルタを二度かけることは時間を足すことで、弱める前の音を取り戻す逆の装置（$e^{+tP}$）は、どんなに小さい高音成分も途方もなく増幅してしまうので、一般の音には使えない（\ref{gl:prob-hk-backward}）。
+:::
+
+熱作用素は高い振動数の成分を指数関数的に減衰させるので、正の時間では切断を滑らかにする。
+
+::: proposition 熱半群の平滑化作用 {#gl:heat-smoothing keywords="smoothing property of the heat semigroup: for t > 0, e^{-tP} maps L^2 into every Sobolev space H^{kl} with ||e^{-tP}u||_{H^{kl}} <= C_l (1 + t^{-l}) ||u||_{L^2}, hence into smooth sections; continuity of t -> e^{-tP}u in H^{kl} for u in H^{kl}" index="熱半群の平滑化作用|ねつはんぐんのへいかつかさよう, 平滑化作用|へいかつかさよう"}
+$P$ を記法の節の作用素とする。
+1. 整数 $l\ge0$ について定数 $C_{l}$ があって、すべての $t>0$, $u\in L^{2}(M;E)$ で $e^{-tP}u\in H^{kl}(M;E)$、$\|e^{-tP}u\|_{H^{kl}}\le C_{l}(1+t^{-l})\|u\|_{L^{2}}$。
+2. $t>0$ なら $e^{-tP}u$ は滑らかな代表元をもつ。
+3. $u\in H^{kl}$ なら、$t\mapsto e^{-tP}u$ は $[0,\infty)$ から $H^{kl}$ への連続写像である。とくに $u$ が滑らかなら、$e^{-tP}u\to u$（$t\to0+$）がすべての $H^{s}$ で成り立つ。
+:::
+
+::: intuition
+正の時間だけ熱を流すと、どんなに荒い初期値もすべての階数の意味で滑らかになる。滑らかさの度合い（ソボレフ・ノルム）は、時間が短いほど大きくなりうるが、時間の負の冪で抑えられる。
+:::
+
+::: proof
+**Step 1.** 【主張：$x\ge0$, $t>0$ について $(1+x)^{l}e^{-tx}\le B_{l}(t)\defeq2^{l}\bigl(1+(\tfrac{l}{et})^{l}\bigr)$】$l=0$ なら左辺は $\le1$。$l\ge1$ なら、$s\mapsto s^{l}$ の凸性から $(1+x)^{l}\le2^{l-1}(1+x^{l})$。$x\mapsto x^{l}e^{-tx}$ は $x=l/t$ で最大値 $(l/t)^{l}e^{-l}$ をとる（導関数 $x^{l-1}e^{-tx}(l-tx)$ の符号から）。$e^{-tx}\le1$ と合わせて $(1+x)^{l}e^{-tx}\le2^{l-1}\bigl(1+(\frac{l}{et})^{l}\bigr)\le B_{l}(t)$。
+
+**Step 2.** 【主張：1】$e^{-tP}u$ の係数は $e^{-t\lambda_{j}}c_{j}$（\ref{gl:heat-semigroup.1}）で、Step 1 から
+$$
+\begin{aligned}\sum_{j}(1+\lambda_{j})^{2l}e^{-2t\lambda_{j}}|c_{j}|^{2}&\le B_{l}(t)^{2}\sum_{j}|c_{j}|^{2}\\&=B_{l}(t)^{2}\|u\|_{L^{2}}^{2}<\infty.\end{aligned}
+$$
+\ref{gl:spectral-sobolev-norms.1} から $e^{-tP}u\in H^{kl}$ で、その定数 $c$ について $\|e^{-tP}u\|_{H^{kl}}\le c^{-1/2}B_{l}(t)\|u\|_{L^{2}}$。$B_{l}(t)\le2^{l}(1+l^{l})(1+t^{-l})$ なので $C_{l}\defeq c^{-1/2}2^{l}(1+l^{l})$ とおけばよい。
+
+**Step 3.** 【主張：2】Step 2 の和はすべての $l$ で有限なので、\ref{gl:spectral-sobolev-norms.2} から $e^{-tP}u$ は滑らかな代表元をもつ。
+
+**Step 4.** 【主張：3】$t,t'\ge0$ について、差 $e^{-tP}u-e^{-t'P}u$ の係数は $(e^{-t\lambda_{j}}-e^{-t'\lambda_{j}})c_{j}$ なので、\ref{gl:spectral-sobolev-norms.1} から
+$$
+\begin{aligned}&c\,\|e^{-tP}u-e^{-t'P}u\|_{H^{kl}}^{2}\\&\quad\le\sum_{j}(1+\lambda_{j})^{2l}\bigl(e^{-t\lambda_{j}}-e^{-t'\lambda_{j}}\bigr)^{2}|c_{j}|^{2}.\end{aligned}
+$$
+$u\in H^{kl}$ なので $\sum_{j}(1+\lambda_{j})^{2l}|c_{j}|^{2}<\infty$ で、各項は $t'\to t$ で $0$ に収束し $(1+\lambda_{j})^{2l}|c_{j}|^{2}$ で抑えられる。級数の優収束から右辺は $0$ に収束する。滑らかな $u$ はすべての $H^{s}$ に入り、$\|\cdot\|_{H^{s}}\le\|\cdot\|_{H^{kl}}$（$s\le kl$）なので、後半が従う。
+
+::: hypcheck
+- **$t>0$**：Step 1 の $B_{l}(t)$ が有限であることに使った。$t=0$ では $e^{-0P}=I$ で、平滑化は起きない。
+- **楕円性**：係数の減衰とソボレフ空間の対応（\ref{gl:spectral-sobolev-norms}）に使った。楕円型でない作用素、たとえば $T^{2}$ の上の $P=-D_{1}^{2}$（形式的に自己共役で非負）では、$e^{-tP}$ は $t_{2}$ 方向に何もしないので、$t_{2}$ だけによる荒い関数は荒いまま残る（スペクトル分解もそもそも成り立たない）。
+- **非負性**：Step 1 で $x=\lambda_{j}\ge0$ としたところに使った。
+- **公理**：新しい選択は使わない。
+:::
+:::
+
+## 固有切断の大きさと固有値の増え方 {#gl:sec-hk-growth}
+
+熱方程式の解の級数 $\sum_{j}e^{-t\lambda_{j}}c_{j}\varphi_{j}(x)$ や、次のページの熱核の級数 $\sum_{j}e^{-t\lambda_{j}}\varphi_{j}(x)\otimes\varphi_{j}(y)^{*}$ が各点で、しかも微分まで込めて収束することを示すには、二つのことが要る。固有切断の値や導関数の大きさが固有値の多項式で抑えられることと、固有値が番号の正の冪くらいの速さで増えることである。どちらもソボレフの埋め込みとスペクトル分解から出る。
+
+以下、$E$ の局所化のデータ $\mathfrak{A}=(U_{i},x_{i},\Phi_{i},\rho_{i})_{i=1}^{N}$（\ref{gl:sobolev-sections.1}）を一つ固定し、ノルム $\|\cdot\|_{H^{s}}$ はこれで測る。$V_{i}\defeq\{m\in M:\rho_{i}(m)>0\}$ は開集合で、$\sum_{i}\rho_{i}=1$ から $V_{1},\dots,V_{N}$ は $M$ を覆い、$\overline{V_{i}}\subset\operatorname{supp}\rho_{i}\subset U_{i}$ はコンパクトである。切断 $u$ の $\Phi_{i}$ による成分を座標で表したものを $u_{(i)}^{a}\colon x_{i}(U_{i})\to\mathbb{C}$（$a=1,\dots,r$）と書く。すなわち $U_{i}$ の上で $u(m)=\Phi_{i}^{-1}\bigl(m,(u_{(i)}^{a}(x_{i}(m)))_{a}\bigr)$。また $H_{i}(m)$ を、$\Phi_{i}$ の標準的な基底についての $h_{E}$ の行列（実対称で正定値、$m\in U_{i}$ について滑らか）とする。
+
+::: lemma 切断の局所的な Cᵐ 評価 {#gl:local-cm-sections keywords="local C^m estimates for smooth sections: the derivatives up to order m of the components of a smooth section on x_i(V_i) are bounded by C ||u||_{H^s} when s > n/2 + m; sup of the pointwise norm |u|_h bounded by C ||u||_{H^s} for s > n/2" index="切断の Cm 評価|せつだんのしーえむひょうか"}
+$m\ge0$, $s$ を整数とし、$s>\frac n2+m$ とする。定数 $C$ があって、すべての滑らかな切断 $u\in\Gamma(M,E)$ について次が成り立つ。
+1. 各 $i$, $a$ と $|\alpha|\le m$ について $\sup_{x_{i}(V_{i})}|\partial^{\alpha}u_{(i)}^{a}|\le C\|u\|_{H^{s}}$。
+2. $m=0$ のとき、さらに $\sup_{M}|u|_{h}\le C\|u\|_{H^{s}}$。
+:::
+
+::: proof
+**Step 1.** 【主張：$U_{i}$ に台をもち $\operatorname{supp}\rho_{i}$ の上で $1$ となる滑らかな $\theta_{i}$ があって、$w\defeq(\theta_{i}u)^{x_{i},\Phi_{i}}$ は $x_{i}(V_{i})$ の上で $(u_{(i)}^{a})_{a}$ に一致し、$\|w\|_{H^{s}(\mathbb{R}^{n};\mathbb{C}^{r})}\le C_{1}\|u\|_{H^{s}}$】\ref{mfd:smooth-urysohn.1}（閉集合 $\operatorname{supp}\rho_{i}$ と開集合 $U_{i}$）から $\theta_{i}$ をとる。$\operatorname{supp}\theta_{i}$ はコンパクトな $M$ の閉集合なのでコンパクトで、$U_{i}$ に含まれる。開集合 $V_{i}$ の上で $\theta_{i}=1$ なので、$x_{i}(V_{i})$ の上で $w=(u_{(i)}^{a})_{a}$。評価は \ref{gl:sobolev-sections-properties.2}（$p=2$）。
+
+**Step 2.** 【主張：1】$w$ の各成分は $H^{s}(\mathbb{R}^{n})$ の元で、コンパクト集合 $x_{i}(\operatorname{supp}\theta_{i})$ の外で $0$ である。$s-\frac n2>m$ なので \ref{gl:em-rn-continuous}（$p=2$, $k=s$）から、成分の $C^{m}$ 級の代表元について $\sum_{|\alpha|\le m}\sup|\partial^{\alpha}w^{a}|\le C_{2}\|w^{a}\|_{H^{s}}$。$w$ は滑らかなので代表元は $w$ 自身で、Step 1 と合わせて $x_{i}(V_{i})$ の上で $|\partial^{\alpha}u_{(i)}^{a}|\le C_{2}C_{1}\|u\|_{H^{s}}$。$i$, $a$ は有限個なので、定数の最大をとればよい。
+
+**Step 3.** 【主張：2】$K\defeq\{(m,\xi):m\in\operatorname{supp}\rho_{i},\ \xi\in\mathbb{C}^{r},\ |\xi|=1\}$ はコンパクトで、$(m,\xi)\mapsto|\Phi_{i}^{-1}(m,\xi)|_{h}=(\xi^{\mathsf{T}}H_{i}(m)\bar{\xi})^{1/2}$ は連続なので最大値 $b_{i}$ をもつ。よって $m\in V_{i}$ なら $|u(m)|_{h}\le b_{i}|(u_{(i)}^{a}(x_{i}(m)))_{a}|\le b_{i}\sum_{a}|u_{(i)}^{a}(x_{i}(m))|\le b_{i}rC\|u\|_{H^{s}}$（1 の $m=0$）。$V_{i}$ は $M$ を覆うので、$\max_{i}b_{i}rC$ を新しい $C$ とすればよい。
+
+::: hypcheck
+- **$s>\frac n2+m$**：Step 2 の埋め込みに使った。最良であることはトーラスで見た（\ref{gl:hk-smooth} の後の補足）。
+- **$M$ がコンパクト**：$\operatorname{supp}\theta_{i}$ と $K$ のコンパクト性、有限個のデータに使った。
+- **公理**：\ref{mfd:smooth-urysohn} を通して DC（前の系列と同じ）。
+:::
+:::
+
+::: lemma 固有切断の大きさと固有値の増え方 {#gl:eigen-growth keywords="polynomial bounds for eigensections and eigenvalues of a formally self-adjoint nonnegative elliptic operator on a closed manifold: derivatives of eigensections bounded by C (1 + lambda_j)^{l}, sup |phi_j| <= C (1 + lambda_j)^{l_0}, counting function N(lambda) <= A (1 + lambda)^{2 l_0}, lower bound 1 + lambda_j >= ((j+1)/A)^{1/(2 l_0)}, summability of (1 + lambda_j)^q e^{-t lambda_j}; weak form of Weyl's law" index="固有値の増え方|こゆうちのふえかた, 固有値の個数関数|こゆうちのこすうかんすう, 固有切断の上限ノルム|こゆうせつだんのじょうげんのるむ"}
+$P$ と $(\varphi_{j},\lambda_{j})$ を記法の節のとおりとし（$\lambda_{j}$ は小さい順）、整数 $m\ge0$ について $l_{m}$ を $kl_{m}>\frac n2+m$ となる最小の整数とする。
+1. 各 $m$ について定数 $C_{m}$ があって、すべての $j$, $i$, $a$ と $|\alpha|\le m$ で $\sup_{x_{i}(V_{i})}|\partial^{\alpha}(\varphi_{j})_{(i)}^{a}|\le C_{m}(1+\lambda_{j})^{l_{m}}$。また $\sup_{M}|\varphi_{j}|_{h}\le C_{0}(1+\lambda_{j})^{l_{0}}$。
+2. 定数 $A\ge1$ があって、すべての $\lambda\ge0$ で $N(\lambda)\defeq\#\{j:\lambda_{j}\le\lambda\}\le A(1+\lambda)^{2l_{0}}$。
+3. すべての $j$ で $1+\lambda_{j}\ge\bigl(\frac{j+1}{A}\bigr)^{1/(2l_{0})}$。
+4. すべての $t>0$ と $q\ge0$ について $\sum_{j}(1+\lambda_{j})^{q}e^{-t\lambda_{j}}<\infty$。
+:::
+
+::: intuition
+固有切断は、固有値が大きいほど激しく振動しうるが、その値や導関数の大きさは固有値の多項式でしか増えない。また、ある高さ以下の固有値の個数は高さの多項式でしか増えないので、固有値は番号の正の冪の速さで大きくなっていく。したがって、指数関数的に減衰する重み $e^{-t\lambda_{j}}$ を掛ければ、どんな多項式の重みを付けても和は有限である。
+:::
+
+::: proof
+**Step 1.** 【主張：1】\ref{gl:spectral-sobolev-norms.1}（$l=l_{m}$）を $u=\varphi_{j}$ に使うと、係数は $j$ 番目だけが $1$ なので、その定数 $c$ について $c\|\varphi_{j}\|_{H^{kl_{m}}}^{2}\le(1+\lambda_{j})^{2l_{m}}$。$kl_{m}>\frac n2+m$ なので、\ref{gl:local-cm-sections}（$s=kl_{m}$）から $|\partial^{\alpha}(\varphi_{j})_{(i)}^{a}|\le Cc^{-1/2}(1+\lambda_{j})^{l_{m}}$ が $x_{i}(V_{i})$ の上で成り立つ。後半は \ref{gl:local-cm-sections.2}（$m=0$）から同様。
+
+**Step 2.** 【主張：$J\defeq\{j:\lambda_{j}\le\lambda\}$ とすると、$\operatorname{span}\{\varphi_{j}:j\in J\}$ のすべての元 $v$ について $\sup_{M}|v|_{h}\le C_{0}'(1+\lambda)^{l_{0}}\|v\|_{L^{2}}$（$C_{0}'$ は $\lambda$ によらない）】$J$ は $\lambda_{j}\to\infty$ から有限集合で、$v$ は滑らかである。$v$ の係数は $J$ の外で $0$ なので、\ref{gl:spectral-sobolev-norms.1}（$l=l_{0}$）から $c\|v\|_{H^{kl_{0}}}^{2}\le\sum_{j\in J}(1+\lambda_{j})^{2l_{0}}|(v,\varphi_{j})|^{2}\le(1+\lambda)^{2l_{0}}\|v\|_{L^{2}}^{2}$。\ref{gl:local-cm-sections.2} と合わせればよい。
+
+**Step 3.** 【主張：各点 $m$ で $S(m)\defeq\sum_{j\in J}|\varphi_{j}(m)|_{h}^{2}\le rC_{0}'^{2}(1+\lambda)^{2l_{0}}$】$E_{m}$ の $\langle\cdot,\cdot\rangle_{h}$ についての正規直交基底 $e_{1},\dots,e_{r}$ をとる（$\Phi_{i}$ の標準的な基底にグラム–シュミットの直交化を施す）。$s_{a}\defeq\sum_{j\in J}|\langle\varphi_{j}(m),e_{a}\rangle_{h}|^{2}$ とおくと $S(m)=\sum_{a}s_{a}$。$v_{a}\defeq\sum_{j\in J}\overline{\langle\varphi_{j}(m),e_{a}\rangle_{h}}\,\varphi_{j}$ について、正規直交性から $\|v_{a}\|_{L^{2}}^{2}=s_{a}$、また $\langle v_{a}(m),e_{a}\rangle_{h}=s_{a}$。コーシー–シュワルツの不等式と Step 2 から
+$$
+s_{a}=\langle v_{a}(m),e_{a}\rangle_{h}\le|v_{a}(m)|_{h}\le C_{0}'(1+\lambda)^{l_{0}}s_{a}^{1/2},
+$$
+よって $s_{a}\le C_{0}'^{2}(1+\lambda)^{2l_{0}}$（$s_{a}=0$ のときも成り立つ）。$a$ について足せばよい。
+
+**Step 4.** 【主張：2】正規直交性から $\int_{M}|\varphi_{j}|_{h}^{2}\,d\mu_{g}=1$ なので、Step 3 を積分して
+$$
+N(\lambda)=\#J=\int_{M}S\,d\mu_{g}\le rC_{0}'^{2}\operatorname{vol}(M)(1+\lambda)^{2l_{0}}.
+$$
+$A\defeq\max(1,rC_{0}'^{2}\operatorname{vol}(M))$ とおけばよい。
+
+**Step 5.** 【主張：3・4】$\lambda_{0},\dots,\lambda_{j}$ はどれも $\lambda_{j}$ 以下なので $j+1\le N(\lambda_{j})\le A(1+\lambda_{j})^{2l_{0}}$ で、3 が出る。4：$q'\defeq2l_{0}$、$y_{j}\defeq\frac t2\bigl(\frac{j+1}{A}\bigr)^{1/q'}$ とおくと、3 から $e^{-t\lambda_{j}/2}\le e^{t/2}e^{-y_{j}}$。$e^{y}\ge\frac{y^{2q'}}{(2q')!}$（$y\ge0$）から $e^{-y_{j}}\le(2q')!\,(\tfrac{2}{t})^{2q'}A^{2}(j+1)^{-2}$ で、$\sum_{j}e^{-t\lambda_{j}/2}<\infty$。また Step 1 の議論と同じく $x\mapsto(1+x)^{q}e^{-tx/2}$ は $[0,\infty)$ で有界なので（その最大を $B$ とする）、$\sum_{j}(1+\lambda_{j})^{q}e^{-t\lambda_{j}}\le B\sum_{j}e^{-t\lambda_{j}/2}<\infty$。
+
+::: hypcheck
+- **楕円性と自己共役性**：スペクトル分解と、係数によるソボレフ・ノルムの評価（\ref{gl:spectral-sobolev-norms}）に使った。
+- **ソボレフの埋め込み**：Step 1・2 で $kl_{m}>\frac n2+m$ として使った。これが固有値の個数の評価の出どころで、指数 $2l_{0}$ は埋め込みの指数から来る。
+- **$M$ がコンパクト**：Step 4 で $\operatorname{vol}(M)<\infty$ に使った。$\mathbb{R}^{n}$ では $L^{2}$ の固有関数がなく、主張は意味をもたない。
+- **公理**：Step 3 の正規直交基底は具体的な直交化で作るので、選択は要らない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 は固有値の増え方の弱い形である。関数の上のラプラシアン（$k=2$）では、$l_{0}$ は $l_{0}>\frac n4$ となる最小の整数なので、3 は $\lambda_{j}\gtrsim j^{1/(2l_{0})}$ を与える。正しい速さは**ワイルの漸近公式** $\lambda_{j}\sim c_{n}\operatorname{vol}(M)^{-2/n}j^{2/n}$（\ref{gl:elliptic-spectral-decomposition} の後の補足。ここでは証明しない）で、$n\le3$ では $l_{0}=1$ となり指数 $\frac12$ は $\frac2n$ 以下、一般にも $\frac{1}{2l_{0}}\le\frac{2}{n}$ なので、3 はワイルの公式と矛盾しないが、それより弱い。熱方程式の解や熱核の級数の収束にはこの弱い形で足りる。逆に、熱核の短い時間での振る舞いから、タウバー型の定理を使ってワイルの公式そのものを導く方法が知られている（\see{gl:page-heat-asymptotics} の補足）。
+
+**似た定理.** Step 3 の量 $\sum_{\lambda_{j}\le\lambda}|\varphi_{j}(m)|^{2}$ は、固有値 $\lambda$ 以下の固有空間への射影の積分核の対角成分（スペクトル関数）である。トーラスでは $|e_{m}|=1$ なので固有関数は一様に有界だが、球面の帯球関数のように $\sup|\varphi_{j}|$ が固有値の正の冪で増える例もあり、ヘルマンダーの評価 $\sup|\varphi_{j}|\le C\lambda_{j}^{(n-1)/4}$（ラプラシアンの $L^{2}$ 正規化された固有関数）がその最良の形として知られている（ここでは証明しない）。1 の指数 $l_{0}$ はこれよりずっと粗い。
+
+**高い視点：数えることと測ること.** Step 3・4 は「有限次元の空間の次元は、各点での値の大きさの積分として数えられる」という発想である。固有値 $\lambda$ 以下の固有切断の張る空間では、各点の値が $L^{2}$ ノルムの $(1+\lambda)^{l_{0}}$ 倍までしか大きくなれないので、次元（＝独立な振動の個数）も多くはとれない。小さな箱に入る独立な音の数が、箱の大きさと許される音の高さで決まるのと同じである。
+:::
+
+## 熱方程式 {#gl:sec-hk-equation}
+
+::: theorem 熱方程式の解の存在と一意性 {#gl:heat-equation keywords="existence and uniqueness for the heat equation d_t u + P u = 0 on a closed manifold: u(t) = e^{-tP} u_0 is smooth on (0, infinity) x M, solves the equation classically and attains the initial value in L^2 (in H^s if u_0 is in H^s, uniformly with derivatives if u_0 is smooth); uniqueness by the energy method; the L^2 norm is nonincreasing" index="熱方程式（閉多様体）|ねつほうていしきへいたようたい, 熱方程式の解の一意性|ねつほうていしきのかいのいちいせい, エネルギー法|えねるぎーほう"}
+$P$ を記法の節の作用素、$u_{0}\in L^{2}(M;E)$ とし、$t>0$ について $u(t)$ を $e^{-tP}u_{0}$ の滑らかな代表元（\ref{gl:heat-smoothing.2}）とする。
+1. $(t,m)\mapsto u(t)(m)$ は $(0,\infty)\times M$ の上の滑らかな切断で、古典的な意味で $\partial_{t}u+Pu=0$ を満たす。
+2. $t\to0+$ で $u(t)\to u_{0}$（$L^{2}$）。$u_{0}\in H^{s}$ なら $H^{s}$ でも収束し、$u_{0}$ が滑らかなら、各 $m\ge0$ について $u(t)$ の成分は $m$ 階までの導関数を込めて $x_{i}(V_{i})$ の上で一様に $u_{0}$ の成分に収束する。
+3. $t\mapsto\|u(t)\|_{L^{2}}$ は単調非増加である。
+4. （一意性）$T>0$ とし、$v$ を $(0,T)\times M$ の上の滑らかな切断で $\partial_{t}v+Pv=0$ を満たし、$t\mapsto v(t)$ が $[0,T)$ から $L^{2}$ への連続写像（$v(0)\in L^{2}$ は与えられた元）であるものとする。$v(0)=u_{0}$ なら、$0<t<T$ で $v(t)=u(t)$。
+:::
+
+::: intuition
+閉多様体の上では、二乗可積分などんな初期値からも熱方程式の解がただ一つ流れ出し、正の時間ではすぐに滑らかになる。解のエネルギー（二乗積分）は時間とともに減るので、同じ初期値から出た二つの解の差は、最初に $0$ なら $0$ のままである。
+:::
+
+::: proof
+**Step 1.** 【主張：$t\ge t_{0}>0$ で、級数 $\sum_{j}e^{-t\lambda_{j}}c_{j}(\varphi_{j})_{(i)}^{a}(\xi)$ を $t$ について $p$ 回、$\xi$ について $\alpha$ だけ項別に微分したものは、$[t_{0},\infty)\times x_{i}(V_{i})$ の上で一様絶対収束する】項別に微分した $j$ 番目の項は $(-\lambda_{j})^{p}e^{-t\lambda_{j}}c_{j}\,\partial^{\alpha}(\varphi_{j})_{(i)}^{a}(\xi)$ で、$|c_{j}|\le\|u_{0}\|_{L^{2}}$ と \ref{gl:eigen-growth.1}（$m=|\alpha|$）から、その絶対値は
+$$
+\|u_{0}\|_{L^{2}}\,C_{m}\,(1+\lambda_{j})^{p+l_{m}}e^{-t_{0}\lambda_{j}}
+$$
+以下である。\ref{gl:eigen-growth.4} からこれは $j$ について総和可能で、ワイエルシュトラスの $M$ 判定法から主張が出る。
+
+**Step 2.** 【主張：1】Step 1 と \ref{calc:uniform-derivative}（各変数について一つずつ使う）から、級数の和 $U^{a}_{(i)}(t,\xi)$ は $(t_{0},\infty)\times x_{i}(V_{i})$ の上で滑らかで、偏導関数は項別の微分で与えられる。各 $t$ で、この級数の部分和は $L^{2}$ で $e^{-tP}u_{0}$ に収束する切断の成分で、\ref{gl:sobolev-sections-properties.2}（$k=0$）から成分も $x_{i}(V_{i})$ の上で $L^{2}$ 収束するので、部分列が a.e. で収束する。よって一様収束の極限 $U_{(i)}^{a}(t,\cdot)$ は $u(t)$ の成分と a.e. で、したがって（どちらも連続なので）至る所等しい。$t_{0}>0$ と $i$ は任意で、$V_{i}$ は $M$ を覆うので、$u$ は $(0,\infty)\times M$ で滑らかである。$P$ は成分で見ると滑らかな係数の微分作用素なので、項別の微分から $Pu(t)=\sum_{j}e^{-t\lambda_{j}}c_{j}\lambda_{j}\varphi_{j}=-\partial_{t}u(t)$（各点で、成分ごとに）。
+
+**Step 3.** 【主張：2・3】$L^{2}$ と $H^{s}$ での収束は \ref{gl:heat-semigroup.3} と \ref{gl:heat-smoothing.3}（$s$ 以上の $k$ の倍数 $kl$ を一つとり、$\|\cdot\|_{H^{s}}\le\|\cdot\|_{H^{kl}}$ を使う）。$u_{0}$ が滑らかなら、$s>\frac n2+m$ として $u(t)-u_{0}$（$t>0$ で滑らか）に \ref{gl:local-cm-sections.1} を使えば、$H^{s}$ での収束から導関数を込めた一様収束が出る。3 は $\|u(t)\|^{2}=\sum_{j}e^{-2t\lambda_{j}}|c_{j}|^{2}$ の各項が $t$ について非増加であることから。
+
+**Step 4.** 【主張：$w\defeq v-u$ について $\mathcal{E}(t)\defeq\|w(t)\|_{L^{2}}^{2}$ は $(0,T)$ で微分可能で $\mathcal{E}'(t)=-2\operatorname{Re}(Pw(t),w(t))\le0$】$w$ は $(0,T)\times M$ で滑らかで $\partial_{t}w+Pw=0$。$[a,b]\subset(0,T)$ を固定すると、$\partial_{t}w$ の成分は $[a,b]\times\overline{V_{i}}$（コンパクト）の上で一様連続なので、平均値の定理から差分商 $\frac1h(w(t+h)-w(t))$ は $M$ の上で一様に $\partial_{t}w(t)$ に収束し、とくに $L^{2}$ で収束する。内積の連続性から
+$$
+\mathcal{E}'(t)=2\operatorname{Re}(\partial_{t}w(t),w(t))=-2\operatorname{Re}(Pw(t),w(t)),
+$$
+$w(t)$ は滑らかなので非負性から右辺は $\le0$。
+
+**Step 5.** 【主張：4】Step 4 から $\mathcal{E}$ は $(0,T)$ で単調非増加。$v$ の仮定と 2 から $w(t)\to v(0)-u_{0}=0$（$L^{2}$, $t\to0+$）で、$\mathcal{E}(t)\to0$。よって $0\le\mathcal{E}(t)\le\lim_{s\to0+}\mathcal{E}(s)=0$ で、$w(t)=0$（$L^{2}$ の元として、したがって滑らかな切断として）。
+
+::: hypcheck
+- **非負性**：Step 4 の $\operatorname{Re}(Pw,w)\ge0$ と、3 に使った。下に有界（$(Pu,u)\ge-c\|u\|^{2}$）なだけなら、$\mathcal{E}'\le2c\mathcal{E}$ から $(e^{-2ct}\mathcal{E})'\le0$ で、同じく一意性が出る。
+- **楕円性・$M$ がコンパクト**：Step 1 の評価（\ref{gl:eigen-growth}）と、Step 4 のコンパクト性（一様連続性）に使った。
+- **一意性の仮定「$v$ は $t=0$ で $L^{2}$ に連続」**：Step 5 に使った。$\mathbb{R}^{n}$ の上では、増大度の条件を課さないと、初期値 $0$ から出る $0$ でない滑らかな解が存在すること（チホノフの例）が知られている（ここでは証明しない）。閉多様体では空間の無限遠がないので、この種の非一意性は起きない。
+- **公理**：新しい選択は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 時間を逆向きにした方程式 $\partial_{t}u-Pu=0$（後ろ向き熱方程式）は、初期値が十分速く減衰する係数をもたない限り解をもたず、解があっても初期値に連続に依存しない（\ref{gl:prob-hk-backward}）。熱方程式は「未来へは解けるが、過去へは解けない」方程式で、これが放物型と呼ばれる方程式の特徴である。境界つきの多様体では、ディリクレ条件やノイマン条件の固有関数で同じ構成ができ、その場合の熱方程式の解も同じ形の級数で表される。
+
+**似た定理.** $\mathbb{R}^{n}$ では、熱方程式 $\partial_{t}u=\Delta_{0}u$ の解はガウス核 $(4\pi t)^{-n/2}e^{-|x-y|^{2}/4t}$ との畳み込みで与えられ（\see{four:heat-kernel-ae}）、ここでの固有切断の和の役割をフーリエ変換が果たす。一意性のエネルギー法は、境界つきの領域や係数が時間による場合にもそのまま使える。関数の場合の最大値原理は次のページで扱う。
+
+**高い視点：坂を下るだけの流れ.** 熱方程式はエネルギー $\frac12\|u\|^{2}$ を一番速く減らす向き（$L^{2}$ での勾配 $Pu$ の逆向き）に $u$ を流す、と読める（$P=\Delta$ なら、$\frac12\int|\nabla u|^{2}$ の勾配流でもある）。坂を下るだけの流れなので、二つの解の差は広がらず（一意性）、谷底（$\ker P$）に向かって進む。逆向きに坂を登るのは、どこから下りてきたかを細部まで覚えていないとできないので、後ろ向きの方程式は解けない。
+:::
+
+## 問題 {#gl:sec-hk-problems}
+
+::: problem {#gl:prob-hk-backward}
+$P$ と $(\varphi_{j},\lambda_{j})$ を記法の節のとおりとし、$T>0$, $u_{0}\in L^{2}(M;E)$, $c_{j}\defeq(u_{0},\varphi_{j})$ とする。
+1. $e^{-TP}v=u_{0}$ となる $v\in L^{2}$ が存在することと $\sum_{j}e^{2T\lambda_{j}}|c_{j}|^{2}<\infty$ は同値で、そのとき $v$ はただ一つであることを示せ。とくに $u_{0}$ が滑らかな代表元をもたなければ、そのような $v$ はないことを示せ。
+2. 円周 $S^{1}=T^{1}$ の上の $\Delta=-D_{1}^{2}$ と $u_{0}\defeq\sum_{m\in\mathbb{Z}}e^{-m^{2}}e_{m}$ について、$e^{-T\Delta}v=u_{0}$ となる $v\in L^{2}$ があるのは $T<1$ のときに限ることを示せ。
+3. $\|v\|_{L^{2}}$ が $\|e^{-T\Delta}v\|_{L^{2}}$ の定数倍で抑えられないこと（後ろ向きの熱方程式が初期値に連続に依存しないこと）を、$v=e_{m}$ で確かめよ。
+:::
+
+::: solution
+**1.** $v$ の係数を $d_{j}$ とすると、\ref{gl:heat-semigroup.1} から $e^{-TP}v$ の係数は $e^{-T\lambda_{j}}d_{j}$ なので、$e^{-TP}v=u_{0}$ はすべての $j$ で $d_{j}=e^{T\lambda_{j}}c_{j}$ と同値である（\ref{fa:orthonormal-basis.3}）。そのような $v\in L^{2}$ が存在することは、パーセヴァルの等式から $\sum_{j}|d_{j}|^{2}=\sum_{j}e^{2T\lambda_{j}}|c_{j}|^{2}<\infty$ と同値で、$v$ は係数で決まるのでただ一つ。そのとき $u_{0}=e^{-TP}v$ は \ref{gl:heat-smoothing.2} から滑らかな代表元をもつので、後半は対偶である。
+
+**2.** \ref{gl:spectrum-torus.1} の基底 $(2\pi)^{-1/2}e_{m}$ について $c_{m}=(2\pi)^{1/2}e^{-m^{2}}$、$\lambda=m^{2}$。1 の条件は $\sum_{m}e^{2Tm^{2}}\cdot2\pi e^{-2m^{2}}=2\pi\sum_{m}e^{-2(1-T)m^{2}}<\infty$ で、これは $T<1$ のとき（公比 $<1$ の等比級数で抑えられる）に限って成り立つ（$T\ge1$ なら各項が $2\pi$ 以上）。
+
+**3.** $\|e_{m}\|_{L^{2}}=(2\pi)^{1/2}$、$e^{-T\Delta}e_{m}=e^{-Tm^{2}}e_{m}$（\ref{gl:heat-semigroup.1}）なので、比 $\|v\|/\|e^{-T\Delta}v\|=e^{Tm^{2}}$ は $m\to\infty$ で発散する。終状態 $e^{-T\Delta}v$ をわずかに変えただけで、初期値は大きく変わりうる。
+:::
+
+
+::: problem {#gl:prob-hk-energy-decay}
+$(M,g)$ を連結な閉リーマン多様体、$\Delta$ を関数の上のラプラシアン、$\lambda_{1}>0$ をその最小の正の固有値（\ref{gl:poincare-best-constant.1}）とする。$u_{0}\in L^{2}(M)$ について $u(t)\defeq e^{-t\Delta}u_{0}$、$a\defeq\operatorname{vol}(M)^{-1}\int_{M}u_{0}\,d\mu_{g}$ とおく。
+1. すべての $t\ge0$ で $\int_{M}u(t)\,d\mu_{g}=\int_{M}u_{0}\,d\mu_{g}$ を示せ（熱の総量の保存）。
+2. 固有関数展開を使わずに、エネルギー法で $\|u(t)-a\|_{L^{2}}\le e^{-\lambda_{1}t}\|u_{0}-a\|_{L^{2}}$ を示せ。$\|u-u_{M}\|_{L^{2}}^{2}\le\lambda_{1}^{-1}\|\nabla u\|_{L^{2}}^{2}$（\ref{gl:poincare-best-constant.2}）は使ってよい。
+3. 2 の減衰の速さ $e^{-\lambda_{1}t}$ は改善できないことを示せ。
+:::
+
+::: solution
+**1.** 定数関数 $1$ は $\ker\Delta$ に属するので、\ref{gl:heat-semigroup.1}・\ref{gl:heat-semigroup.2} から $(u(t),1)=(u_{0},e^{-t\Delta}1)=(u_{0},1)$。
+
+**2.** $w(t)\defeq u(t)-a$ とおく。$e^{-t\Delta}a=a$（1 と同じ理由）なので $w(t)=e^{-t\Delta}(u_{0}-a)$ で、\ref{gl:heat-equation.1} から $w$ は $t>0$ で滑らかで $\partial_{t}w+\Delta w=0$。\ref{gl:heat-equation} の証明の Step 4 と同じく $\mathcal{E}(t)\defeq\|w(t)\|^{2}$ は $t>0$ で微分可能で、$\mathcal{E}'(t)=-2\operatorname{Re}(\Delta w,w)$。滑らかな $w$ では $(\Delta w,w)=q(w,w)=\|\nabla w\|^{2}$（\ref{gl:sec-sp-ex-notation} の $q$）なので $\mathcal{E}'=-2\|\nabla w\|^{2}$。1 から $\int w(t)=0$、つまり $w(t)$ の平均は $0$ なので、ポアンカレの評価から $\|\nabla w\|^{2}\ge\lambda_{1}\|w\|^{2}$ で、$\mathcal{E}'\le-2\lambda_{1}\mathcal{E}$。よって $(e^{2\lambda_{1}t}\mathcal{E}(t))'=e^{2\lambda_{1}t}(\mathcal{E}'+2\lambda_{1}\mathcal{E})\le0$ で、$e^{2\lambda_{1}t}\mathcal{E}(t)$ は $(0,\infty)$ で単調非増加。$t\to0+$ で $\mathcal{E}(t)\to\|u_{0}-a\|^{2}$（\ref{gl:heat-semigroup.3}）なので、$e^{2\lambda_{1}t}\mathcal{E}(t)\le\|u_{0}-a\|^{2}$。平方根をとればよい。
+
+**3.** $\varphi$ を固有値 $\lambda_{1}$ の固有関数（$\|\varphi\|=1$）とし $u_{0}\defeq\varphi$ とすると、$\varphi$ は定数と直交するので $a=0$、\ref{gl:heat-semigroup.1} から $u(t)=e^{-\lambda_{1}t}\varphi$ で、2 は等号で成り立つ。$e^{-\lambda_{1}t}$ を $e^{-\mu t}$（$\mu>\lambda_{1}$）に替えた不等式はこの $u_{0}$ で成り立たない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

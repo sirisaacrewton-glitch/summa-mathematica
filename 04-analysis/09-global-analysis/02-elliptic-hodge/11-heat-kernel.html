@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熱核 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/02-elliptic-hodge/11-heat-kernel.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 熱核 {#gl:page-heat-kernel keywords="heat kernel on closed Riemannian manifolds, K_t(x,y) = sum e^{-t lambda_j} phi_j(x) phi_j(y)^*, smoothness of the heat kernel, integral representation of the heat semigroup, symmetry and semigroup property of the heat kernel, heat trace, heat kernel of the flat torus as a periodized Gaussian, Poisson summation, weak maximum principle for the heat equation on closed manifolds, positivity of the heat kernel, stochastic completeness int K_t(x,y) dy = 1, L^p contraction of the heat semigroup, infinite speed of propagation, 熱核, 熱トレース, 最大値原理, 熱核の正値性, 確率保存, 確率的完備性"}
+
+前のページ \ref{gl:page-heat-semigroup} では、閉多様体の上の形式的に自己共役で非負な楕円型作用素 $P$ について、固有切断の展開で熱半群 $e^{-tP}$ を定め、熱方程式 $\partial_{t}u+Pu=0$ の解が存在してただ一つであることを示した。このページでは、$t>0$ の熱作用素が滑らかな積分核
+$$
+K_{t}(x,y)=\sum_{j}e^{-t\lambda_{j}}\varphi_{j}(x)\otimes\varphi_{j}(y)^{*}
+$$
+をもつこと、すなわち $(e^{-tP}u)(x)=\int_{M}K_{t}(x,y)u(y)\,d\mu_{g}(y)$ と書けることを示す。この $K_{t}$ が**熱核**で、級数の収束には前のページの固有切断と固有値の多項式の評価（\ref{gl:eigen-growth}）を使う。平坦トーラスでは熱核はガウス関数を周期的に並べたものになる。後半では、関数の上のラプラシアンについて、閉多様体での熱方程式の弱い最大値原理を示し、そこから熱核が非負で、$y$ について積分すると $1$ になること（確率の保存）を導く。$t\to\infty$ と $t\to0$ での振る舞いは次のページ \see{gl:page-heat-asymptotics} で扱う。
+
+## 記法と定義の確認 {#gl:sec-hk-kernel-notation}
+
+::: notation
+- $M$, $g$, $\mu_{g}$, $\operatorname{vol}(M)$、ベクトル束 $E$（階数 $r\ge1$）とファイバー計量、$\langle\cdot,\cdot\rangle_{h}$, $|\cdot|_{h}$、$L^{2}$ の内積、作用素 $P$（形式的に自己共役で非負な $k$ 階の楕円型）、固有切断の基底 $(\varphi_{j},\lambda_{j})$ と係数 $c_{j}$、級数の優収束は \ref{gl:sec-hk-notation} のとおり。局所化のデータ $\mathfrak{A}=(U_{i},x_{i},\Phi_{i},\rho_{i})$、$V_{i}=\{\rho_{i}>0\}$、成分 $u_{(i)}^{a}$、ファイバー計量の行列 $H_{i}$ は \ref{gl:sec-hk-growth} の冒頭のとおり。
+- 熱作用素 $e^{-tP}$ とその性質は \ref{gl:heat-operator}, \ref{gl:heat-semigroup}, \ref{gl:heat-smoothing}、熱方程式の解は \ref{gl:heat-equation}、固有切断と固有値の評価は \ref{gl:local-cm-sections}, \ref{gl:eigen-growth}。$t>0$ では $e^{-tP}u$ をいつも滑らかな代表元で表す。
+- 関数の上のラプラシアン $\Delta=-\operatorname{div}\operatorname{grad}$ は非負の符号で（\ref{gl:sec-dg-notation}）、座標では $\Delta f=-\frac{1}{\sqrt{g}}\sum_{i,j}\partial_{i}\bigl(\sqrt{g}\,g^{ij}\partial_{j}f\bigr)$（\ref{riem:laplace-beltrami.2}）。関数の場合は $E=M\times\mathbb{C}$、$h$ は積、$\Phi_{i}$ は恒等的な自明化とし、切断の成分は関数そのものである。
+- **選択公理**：前のページと同じく、1 の分割（滑らかなウリゾーンの補題 \ref{mfd:smooth-urysohn} を含む）とスペクトル分解を通して DC を使う。このページで新しく使う選択はない（コンパクト集合の上の連続関数の最小値の存在は選択なしに示せる）。
+:::
+
+## 熱核 {#gl:sec-hk-kernel}
+
+$y\in M$ と $\varphi\in\Gamma(M,E)$ について、$E_{y}$ の上の線形形式 $\varphi(y)^{*}\colon e\mapsto\langle e,\varphi(y)\rangle_{h}$ を考え、$x,y\in M$ について $\varphi(x)\otimes\varphi(y)^{*}\in\operatorname{Hom}(E_{y},E_{x})$ を $e\mapsto\langle e,\varphi(y)\rangle_{h}\,\varphi(x)$ と定める。$\operatorname{Hom}(E_{y},E_{x})$ に値をとる $(t,x,y)$ の関数 $K$ が**滑らか**であるとは、各 $i$, $i'$ について、$\Phi_{i}$ と $\Phi_{i'}$ の標準的な基底で表した行列の成分が $(0,\infty)\times x_{i}(U_{i})\times x_{i'}(U_{i'})$ の上で滑らかであることをいう（局所自明化の取り替えは滑らかな行列の掛け算なので、覆う族で確かめれば足りる）。
+
+::: theorem 熱核 {#gl:heat-kernel keywords="heat kernel of a formally self-adjoint nonnegative elliptic operator on a closed manifold: K_t(x,y) = sum e^{-t lambda_j} phi_j(x) phi_j(y)^* converges with all derivatives uniformly for t >= t_0 > 0 and is smooth on (0, infinity) x M x M; e^{-tP} u(x) = int K_t(x,y) u(y) dy; independent of the eigenbasis; K_t(y,x) = K_t(x,y)^*; real and symmetric for the Laplacian on functions; semigroup property K_{t+s}(x,z) = int K_t(x,y) K_s(y,z) dy; (d_t + P_x) K = 0; heat trace int tr K_t(x,x) dx = sum e^{-t lambda_j}" index="熱核|ねつかく, 熱核の半群性|ねつかくのはんぐんせい, 熱トレース|ねつとれーす, 熱核の対称性|ねつかくのたいしょうせい"}
+$P$ と $(\varphi_{j},\lambda_{j})$ を記法の節のとおりとし、$t>0$, $x,y\in M$ について
+$$
+K_{t}(x,y)\defeq\sum_{j=0}^{\infty}e^{-t\lambda_{j}}\,\varphi_{j}(x)\otimes\varphi_{j}(y)^{*}\in\operatorname{Hom}(E_{y},E_{x})
+$$
+とおく。
+1. 各 $t_{0}>0$ について、この級数は成分で見て、$(t,x,y)$ についてのすべての偏導関数を項別にとったものも込めて、$[t_{0},\infty)\times V_{i}\times V_{i'}$ の上で一様絶対収束する。とくに $K$ は $(0,\infty)\times M\times M$ の上で滑らかで、$x$ について $(\partial_{t}+P_{x})K_{t}(x,y)=0$（$P_{x}$ は $x$ の関数として $P$ を施すこと）。
+2. すべての $u\in L^{2}(M;E)$, $t>0$, $x\in M$ について、$(e^{-tP}u)(x)=\int_{M}K_{t}(x,y)u(y)\,d\mu_{g}(y)$（左辺は滑らかな代表元）。
+3. $K$ は基底 $(\varphi_{j})$ のとり方によらない（\ref{gl:elliptic-spectral-decomposition.2} の任意の基底で同じ式が成り立つ）。
+4. $K_{t}(y,x)=K_{t}(x,y)^{*}$（$\langle\cdot,\cdot\rangle_{h}$ についての随伴）。とくに関数の上のラプラシアンの熱核は実数値で、$K_{t}(x,y)=K_{t}(y,x)$。
+5. $s,t>0$ について $K_{t+s}(x,z)=\int_{M}K_{t}(x,y)K_{s}(y,z)\,d\mu_{g}(y)$。
+6. $\sum_{j}e^{-t\lambda_{j}}<\infty$ で、$\int_{M}\operatorname{tr}K_{t}(x,x)\,d\mu_{g}(x)=\sum_{j}e^{-t\lambda_{j}}$。
+:::
+
+::: intuition
+熱作用素は、滑らかな関数（行列値の関数）$K_{t}(x,y)$ を重みにした積分として書ける。$K_{t}(x,y)$ は「時刻 $0$ に点 $y$ に置いた単位の熱が、時刻 $t$ に点 $x$ でどれだけになるか」を表し、$x$ と $y$ を入れ替えると随伴になり、時間 $s$ と $t$ の分の流れを続けると時間 $s+t$ の流れになる。対角線の上の値を積分すると、固有値の指数関数の和が得られる。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$e\in E_{y}$ の $\Phi_{i'}$ による成分を $(e^{b})_{b}$ とすると $\langle e,\varphi_{j}(y)\rangle_{h}=\sum_{b,c}e^{b}H_{i',bc}(y)\overline{(\varphi_{j})_{(i')}^{c}}$ なので、$K_{t}(x,y)$ の行列の $(a,b)$ 成分の $j$ 番目の項は
+$$
+e^{-t\lambda_{j}}\,(\varphi_{j})_{(i)}^{a}(\xi)\sum_{c}H_{i',bc}(\eta)\,\overline{(\varphi_{j})_{(i')}^{c}(\eta)}
+$$
+である（$\xi=x_{i}(x)$, $\eta=x_{i'}(y)$ で、$H_{i'}$ も $x_{i'}$ の座標で表す）。これを $t$ で $p$ 回、$\xi$ で $\alpha$、$\eta$ で $\beta$ だけ微分すると、ライプニッツ則と \ref{gl:eigen-growth.1}（$m=\max(|\alpha|,|\beta|)$）、$H_{i'}$ の $|\beta|$ 階までの導関数がコンパクト集合 $\overline{V_{i'}}$ の上で有界であることから、$x_{i}(V_{i})\times x_{i'}(V_{i'})$ の上で $C(1+\lambda_{j})^{p+2l_{m}}e^{-t_{0}\lambda_{j}}$（$t\ge t_{0}$）で抑えられる。\ref{gl:eigen-growth.4} から総和可能で、\ref{gl:heat-equation} の証明の Step 1・2 と同じく、ワイエルシュトラスの $M$ 判定法と項別微分（\ref{calc:uniform-derivative}）から滑らかさが出る。熱方程式は、各項 $e^{-t\lambda_{j}}\varphi_{j}(x)\otimes\varphi_{j}(y)^{*}$ が $x$ について $(\partial_{t}+P_{x})(\cdot)=0$ を満たすことと項別微分から。
+
+**Step 2.** 【主張：2】$u\in L^{2}$ とする。$y\mapsto K_{t}(x,y)u(y)$ の級数 $\sum_{j}e^{-t\lambda_{j}}\langle u(y),\varphi_{j}(y)\rangle_{h}\varphi_{j}(x)$ について、$|\langle u(y),\varphi_{j}(y)\rangle_{h}|\le|u(y)|_{h}\sup|\varphi_{j}|_{h}$ と \ref{gl:eigen-growth.1}・\ref{gl:eigen-growth.4} から、項の絶対値の和は $|u(y)|_{h}\sum_{j}e^{-t\lambda_{j}}C_{0}^{2}(1+\lambda_{j})^{2l_{0}}$ で抑えられる。$|u|_{h}$ は可積分（$\operatorname{vol}(M)<\infty$ とコーシー–シュワルツの不等式）なので、項別に積分してよく（\ref{meas:dominated-convergence}）、
+$$
+\int_{M}K_{t}(x,y)u(y)\,d\mu_{g}(y)=\sum_{j}e^{-t\lambda_{j}}(u,\varphi_{j})\,\varphi_{j}(x).
+$$
+右辺は \ref{gl:heat-equation} の証明の Step 2 の級数で、各点で $(e^{-tP}u)(x)$ に収束する。
+
+**Step 3.** 【主張：3】別の基底 $(\psi_{i})$ で作った $K'$ も、Step 1・2 と同じ議論で滑らかで 2 を満たす。$\Theta\defeq K_{t}-K'_{t}$ とすると、\ref{gl:heat-semigroup.1}（$e^{-tP}$ は基底によらない）からすべての $u\in L^{2}$ で $\int_{M}\Theta(x,y)u(y)\,d\mu_{g}(y)=0$。$x$ と $e\in E_{x}$ を固定し、$u(y)\defeq\Theta(x,y)^{*}e$（$y$ について連続）を入れると $0=\langle\int\Theta(x,y)\Theta(x,y)^{*}e\,d\mu_{g},e\rangle_{h}=\int|\Theta(x,y)^{*}e|_{h}^{2}\,d\mu_{g}(y)$ で、被積分関数は連続なので（空でない開集合の測度は正、\ref{gl:riemannian-measure.2}）$\Theta(x,y)^{*}e=0$ がすべての $y$ で成り立つ。よって $\Theta=0$。
+
+**Step 4.** 【主張：4】$e\in E_{y}$, $f\in E_{x}$ について、各項を比べる。$\langle(\varphi_{j}(x)\otimes\varphi_{j}(y)^{*})e,f\rangle_{h}=\langle e,\varphi_{j}(y)\rangle_{h}\langle\varphi_{j}(x),f\rangle_{h}$、$\langle e,(\varphi_{j}(y)\otimes\varphi_{j}(x)^{*})f\rangle_{h}=\overline{\langle f,\varphi_{j}(x)\rangle_{h}}\,\langle e,\varphi_{j}(y)\rangle_{h}$ で、二つは等しい。$e^{-t\lambda_{j}}$ は実数なので、和をとって $\langle K_{t}(x,y)e,f\rangle_{h}=\langle e,K_{t}(y,x)f\rangle_{h}$。関数のラプラシアンでは、$\Delta$ は実の係数をもつので $\overline{\varphi_{j}}$ も同じ固有値の固有関数で、$(\overline{\varphi_{j}})$ は \ref{gl:elliptic-spectral-decomposition.2} の基底である。3 から $K_{t}(x,y)=\sum_{j}e^{-t\lambda_{j}}\varphi_{j}(x)\overline{\varphi_{j}(y)}$ を基底 $(\overline{\varphi_{j}})$ で書いても同じで、それは $\overline{K_{t}(x,y)}$ なので $K$ は実数値。前半から $K_{t}(y,x)=\overline{K_{t}(x,y)}=K_{t}(x,y)$。
+
+**Step 5.** 【主張：5】$z\in M$, $e\in E_{z}$ を固定し、$v(y)\defeq K_{s}(y,z)e$ とおく。$v$ は滑らかで、Step 2 と同様に項別積分して $(v,\varphi_{j})=e^{-s\lambda_{j}}\langle e,\varphi_{j}(z)\rangle_{h}$。2 を $v$ に使い、\ref{gl:heat-equation} の証明の Step 2 の級数で書くと
+$$
+\begin{aligned}\int_{M}K_{t}(x,y)K_{s}(y,z)e\,d\mu_{g}(y)&=\sum_{j}e^{-t\lambda_{j}}e^{-s\lambda_{j}}\langle e,\varphi_{j}(z)\rangle_{h}\varphi_{j}(x)\\&=K_{t+s}(x,z)e.\end{aligned}
+$$
+
+**Step 6.** 【主張：6】$\operatorname{tr}(\varphi_{j}(x)\otimes\varphi_{j}(x)^{*})=\langle\varphi_{j}(x),\varphi_{j}(x)\rangle_{h}=|\varphi_{j}(x)|_{h}^{2}$（$e\mapsto\langle e,w\rangle v$ のトレースは $\langle v,w\rangle$）。$\sum_{j}e^{-t\lambda_{j}}<\infty$ は \ref{gl:eigen-growth.4}（$q=0$）。1 から $\operatorname{tr}K_{t}(x,x)=\sum_{j}e^{-t\lambda_{j}}|\varphi_{j}(x)|_{h}^{2}$ は $x$ について一様収束し、各項の積分は $e^{-t\lambda_{j}}$ なので、項別に積分すればよい。
+
+::: hypcheck
+- **固有切断の評価と固有値の増え方**：Step 1・2・6 の収束に \ref{gl:eigen-growth} を使った。そこから楕円性・自己共役性・非負性・$M$ のコンパクト性をすべて受け継いでいる。
+- **$t>0$**：Step 1 の総和可能性に使った。$t=0$ では級数は収束せず、形式的には $K_{0}(x,y)$ は「$x=y$ に集中したデルタ関数」で、滑らかな核ではない（\ref{gl:prob-hk-circle-trace}）。
+- **非負性**：収束には $\lambda_{j}\ge-c$ で足りる（$e^{-t\lambda_{j}}\le e^{ct}e^{-t(\lambda_{j}+c)}$）。下に有界でない作用素では $K$ は定義できない。
+- **公理**：新しい選択は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 熱核の正値性 $K_{t}(x,y)\ge0$ と $\int K_{t}(x,y)\,dy=1$ は、関数の上のラプラシアンに特有で、下の \ref{gl:sec-hk-positivity} で最大値原理から示す。微分形式の上のホッジのラプラシアンの熱核は行列値で、「正」という言葉自体が意味をもたない。$P$ を $P+c$（$c>0$）に替えると $K$ は $e^{-ct}$ 倍になるだけである。非コンパクトな完備リーマン多様体でも熱核は存在するが、固有切断の展開ではなく、コンパクトな領域での熱核の極限として作る必要がある（ここでは証明しない）。
+
+**似た定理.** 6 の $Z(t)\defeq\sum_{j}e^{-t\lambda_{j}}$ を**熱トレース**という。$Z$ はスペクトルだけで決まり、逆にラプラス変換の一意性からスペクトルを決める。次のページ \see{gl:page-heat-asymptotics} で、$t\to0$ での $Z(t)$ の振る舞いから多様体の次元と体積が読み取れること、ホッジのラプラシアンの熱トレースの交代和がオイラー標数になること（マッキーン–シンガーの公式）を扱う。確率論では、関数の上のラプラシアンの熱核 $K_{t}(x,y)$ は、$M$ の上のブラウン運動（時間を $2$ 倍に伸ばしたもの）の推移確率密度である（$\mathbb{R}^{n}$ の場合は \see{prb:brownian-motion}。多様体の上のブラウン運動はここでは扱わない）。
+
+**高い視点：作用素を関数で書く.** 有限次元では、行列 $A$ は成分 $A_{xy}$ の表で、作用は $\sum_{y}A_{xy}u_{y}$ である。熱核は、無限次元の作用素 $e^{-tP}$ の「成分の表」が滑らかな関数として書けることを言っていて、行列の積が成分の和 $\sum_{y}A_{xy}B_{yz}$ であるのと同じく、5 は半群性を成分の積分として書いたものである。作用素を「よい関数を成分とする行列」として扱えることが、トレースをとる・対角線の上で漸近展開する、といった次のページの議論の出発点になる。
+:::
+
+平坦トーラスでは、熱核はガウス関数を周期的に並べたものとして書ける。
+
+::: example 平坦トーラスの熱核 {#gl:torus-heat-kernel keywords="heat kernel of the flat torus T^n: K_t(s,s') = (2 pi)^{-n} sum_m e^{-|m|^2 t} e^{i m (s - s')} = sum over k in Z^n of (4 pi t)^{-n/2} exp(-|s - s' + 2 pi k|^2 / 4t), periodization of the Gaussian via Poisson summation; positivity; heat trace and volume" index="平坦トーラスの熱核|へいたんとーらすのねつかく, ガウス核の周期化|がうすかくのしゅうきか"}
+平坦トーラス $T^{n}$ の関数の上のラプラシアン $\Delta=-\sum_{j}D_{j}^{2}$ を考える（記号は \ref{gl:sec-nt-torus} のとおりで、点を $s=(s_{1},\dots,s_{n})\in\mathbb{R}^{n}$ の類で表す）。
+1. 基底 $\{(2\pi)^{-n/2}e_{m}\}_{m\in\mathbb{Z}^{n}}$（\ref{gl:spectrum-torus.1}）で熱核を書くと
+$$
+K_{t}(s,s')=(2\pi)^{-n}\sum_{m\in\mathbb{Z}^{n}}e^{-|m|^{2}t}e^{im\cdot(s-s')}.
+$$
+2. この級数は、ガウス関数の周期化と等しい：
+$$
+K_{t}(s,s')=\sum_{q\in\mathbb{Z}^{n}}(4\pi t)^{-n/2}\exp\Bigl(-\frac{|s-s'+2\pi q|^{2}}{4t}\Bigr).
+$$
+とくに $K_{t}>0$ である。
+3. 熱トレースは $Z(t)=\bigl(\sum_{m\in\mathbb{Z}}e^{-m^{2}t}\bigr)^{n}$ で、$t\to0+$ で $Z(t)\sim(4\pi t)^{-n/2}(2\pi)^{n}=(4\pi t)^{-n/2}\operatorname{vol}(T^{n})$。
+:::
+
+1 は定義の式に $\varphi_{m}=(2\pi)^{-n/2}e_{m}$ を入れたものである（\ref{gl:heat-kernel.3} から基底のとり方によらない）。2：両辺は $s_{j}-s'_{j}$ ごとの $1$ 変数の式の積なので、$n=1$ に帰着する。$n=1$ で $x\defeq\frac{s-s'}{2\pi}$, $\tau\defeq\frac{t}{4\pi^{2}}$ とおくと、1 の右辺は $(2\pi)^{-1}\sum_{m}e^{-4\pi^{2}m^{2}\tau}e^{2\pi imx}$ で、円周 $\mathbb{R}/\mathbb{Z}$ の熱核 $H_{\tau}(x)$ の $(2\pi)^{-1}$ 倍である。\see{four:circle-heat-kernel}（ポアソン和公式 \see{four:poisson-summation} の帰結）から $H_{\tau}(x)=\sum_{q}(4\pi\tau)^{-1/2}e^{-(x+q)^{2}/4\tau}$ で、$(2\pi)^{-1}(4\pi\tau)^{-1/2}=(4\pi t)^{-1/2}$、$\frac{(x+q)^{2}}{4\tau}=\frac{(s-s'+2\pi q)^{2}}{4t}$ を入れれば 2 が出る。3 の前半は \ref{gl:heat-kernel.6} と $(2\pi)^{-n}\int_{T^{n}}d\mu_{g}=1$ から。後半：2 の対角成分は $K_{t}(s,s)=(4\pi t)^{-n/2}\sum_{q}e^{-\pi^{2}|q|^{2}/t}$ で、$Z(t)=(2\pi)^{n}K_{t}(s,s)$。和の $q\ne0$ の項は $t\to0+$ で $0$ に収束し、$0<t\le1$ では $e^{-\pi^{2}|q|^{2}}$（総和可能）で抑えられるので、級数の優収束から $\sum_{q\ne0}e^{-\pi^{2}|q|^{2}/t}\to0$（$n=1$ の場合の初等的な評価は \ref{gl:prob-hk-circle-trace}）。
+
+$\mathbb{R}^{n}$ の熱核 $(4\pi t)^{-n/2}e^{-|x-y|^{2}/4t}$ と比べると、2 は、トーラスの上の熱は「被覆空間 $\mathbb{R}^{n}$ の上で拡がった熱を、$2\pi\mathbb{Z}^{n}$ の平行移動で重ねたもの」であることを示している。$t$ が小さいときは $q=0$ の項だけが効き、熱核はユークリッド空間のものとほとんど同じになる。この「短い時間では局所的な幾何だけが見える」という性質が、一般の多様体での短時間の漸近展開（\see{gl:page-heat-asymptotics}）の原型である。
+
+## 最大値原理と熱核の正値性 {#gl:sec-hk-positivity}
+
+ここからは関数の上のラプラシアン $\Delta$ だけを考える。熱は温度の高いところから低いところへ流れるので、最も冷たい点の温度は時間とともに下がらないはずである。これを微分の符号の議論で示すのが最大値原理で、まず一点での符号を確かめる。
+
+::: lemma 最小点でのラプラシアンの符号 {#gl:laplacian-at-minimum keywords="at a local minimum of a C^2 function on a Riemannian manifold the (nonnegative) Laplacian is <= 0, and at a local maximum >= 0; trace of the product of a positive definite and a positive semidefinite matrix is nonnegative" index="最小点でのラプラシアン|さいしょうてんでのらぷらしあん"}
+$(M,g)$ をリーマン多様体、$f\colon M\to\mathbb{R}$ を $C^{2}$ 級の関数とし、$f$ が点 $x_{0}$ で極小値をとるとする。このとき $\Delta f(x_{0})\le0$。極大値なら $\Delta f(x_{0})\ge0$。
+:::
+
+::: proof
+**Step 1.** 【主張：座標では $\Delta f=-\sum_{i,j}g^{ij}\partial_{i}\partial_{j}f-\sum_{j}b^{j}\partial_{j}f$（$b^{j}\defeq\frac{1}{\sqrt{g}}\sum_{i}\partial_{i}(\sqrt{g}\,g^{ij})$ は $f$ によらない）】記法の節の座標の式をライプニッツ則で展開すればよい。
+
+**Step 2.** 【主張：$x_{0}$ の座標 $\xi_{0}$ で $\partial_{j}f(\xi_{0})=0$ で、ヘッセ行列 $A\defeq(\partial_{i}\partial_{j}f(\xi_{0}))$ は半正定値】$f$ の座標表示は $\xi_{0}$ で極小なので、各 $v\in\mathbb{R}^{n}$ について $s\mapsto f(\xi_{0}+sv)$ は $s=0$ で極小で、その 1 階微分 $\sum_{j}v_{j}\partial_{j}f(\xi_{0})$ は $0$、2 階微分 $v^{\mathsf{T}}Av$ は $0$ 以上である。
+
+**Step 3.** 【主張：$\sum_{i,j}g^{ij}A_{ij}\ge0$。したがって $\Delta f(x_{0})\le0$】$G^{-1}=(g^{ij}(\xi_{0}))$ は正定値対称なので、直交行列で対角化して固有値の平方根をとることで $G^{-1}=BB^{\mathsf{T}}$ と書ける。$\sum_{i,j}g^{ij}A_{ij}=\operatorname{tr}(G^{-1}A)=\operatorname{tr}(B^{\mathsf{T}}AB)=\sum_{l}(Be_{l})^{\mathsf{T}}A(Be_{l})\ge0$（Step 2）。Step 1・2 から $\Delta f(x_{0})=-\operatorname{tr}(G^{-1}A)\le0$。極大値の場合は $-f$ に使う。
+:::
+
+::: lemma 熱方程式の弱い最大値原理 {#gl:heat-maximum-principle keywords="weak maximum principle for the heat equation on a closed Riemannian manifold: if u is smooth and real on (0,T) x M with d_t u + Delta u >= 0, then t -> min_M u(t, .) is nondecreasing; for subsolutions the maximum is nonincreasing" index="熱方程式の最大値原理|ねつほうていしきのさいだいちげんり, 弱い最大値原理（熱方程式）|よわいさいだいちげんりねつほうていしき"}
+$(M,g)$ を閉リーマン多様体、$T>0$ とし、$u$ を $(0,T)\times M$ の上の実数値の滑らかな関数とする。
+1. $\partial_{t}u+\Delta u\ge0$ なら、$m(t)\defeq\min_{M}u(t,\cdot)$ は $(0,T)$ の上で単調非減少である。
+2. $\partial_{t}u+\Delta u\le0$ なら、$\max_{M}u(t,\cdot)$ は $(0,T)$ の上で単調非増加である。
+:::
+
+::: intuition
+閉じた多様体の上で熱が拡散するだけなら（熱源がなければ）、一番冷たい点の温度は上がることはあっても下がることはなく、一番熱い点の温度は下がることはあっても上がることはない。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立たないとすると、$0<t_{1}<t_{2}<T$ と $\varepsilon>0$ で、$w\defeq u+\varepsilon(t-t_{1})$ の $[t_{1},t_{2}]\times M$ での最小値が $t>t_{1}$ の点 $(s,x_{0})$ でとられるものがある】$m(t_{2})<m(t_{1})$ となる $t_{1}<t_{2}$ をとり、$0<\varepsilon(t_{2}-t_{1})<m(t_{1})-m(t_{2})$ となる $\varepsilon$ をとる。$[t_{1},t_{2}]\times M$ はコンパクトなので $w$ は最小値をとる。$t=t_{1}$ での $w$ の最小値は $m(t_{1})$、$t=t_{2}$ での最小値は $m(t_{2})+\varepsilon(t_{2}-t_{1})<m(t_{1})$ なので、全体の最小値は $m(t_{1})$ より小さく、$t=t_{1}$ ではとられない。
+
+**Step 2.** 【主張：その点で $\partial_{t}w(s,x_{0})\le0$ かつ $\Delta w(s,x_{0})\le0$】$x_{0}$ は $w(s,\cdot)$ の最小点なので、\ref{gl:laplacian-at-minimum} から $\Delta w(s,x_{0})\le0$。$s\in(t_{1},t_{2}]$ は $[t_{1},t_{2}]$ の上の $\tau\mapsto w(\tau,x_{0})$ の最小点なので、左からの差分商 $\frac{w(s,x_{0})-w(s-h,x_{0})}{h}$（$0<h<s-t_{1}$）は $\le0$ で、極限をとって $\partial_{t}w(s,x_{0})\le0$。
+
+**Step 3.** 【主張：矛盾。したがって 1】$\partial_{t}w+\Delta w=\partial_{t}u+\Delta u+\varepsilon\ge\varepsilon>0$（$\Delta$ は $t$ だけの関数 $\varepsilon(t-t_{1})$ を $0$ に写す）だが、Step 2 からその点で $\partial_{t}w+\Delta w\le0$。2 は $-u$ に 1 を使えばよい。
+
+::: hypcheck
+- **$M$ がコンパクトで境界がない**：Step 1 で最小値の存在に、Step 2 で最小点が「内部の点」で \ref{gl:laplacian-at-minimum} が使えることに使った。境界つきの領域では、最小値が境界でとられうるので、結論は「最小値は時刻 $0$ か境界でとられる」という形になる（ディリクレ条件の熱方程式の最大値原理）。$\mathbb{R}^{n}$ では最小値がとられるとは限らず、増大度の条件がないと結論は成り立たない（\ref{gl:heat-equation} の hypcheck のチホノフの例）。
+- **実数値**：最小・最大を考えるために使った。複素数値の解には実部と虚部に分けて使う。
+- **$\varepsilon$ をずらすこと**：Step 3 で狭義の不等式を作るために使った。$\varepsilon=0$ では $\partial_{t}u+\Delta u=0$ と Step 2 の非正性は矛盾しない。
+- **公理**：選択は使わない。
+:::
+:::
+
+::: theorem 熱核の正値性と確率の保存 {#gl:heat-kernel-positivity keywords="positivity of the heat kernel of the Laplacian on a closed Riemannian manifold: K_t(x,y) >= 0, int K_t(x,y) dy = 1 (stochastic completeness, conservation of probability), comparison min u_0 <= e^{-t Delta} u_0 <= max u_0, L^p contraction ||e^{-t Delta} u||_p <= ||u||_p for 1 <= p <= infinity; Markov semigroup" index="熱核の正値性|ねつかくのせいちせい, 確率の保存|かくりつのほぞん, 確率的完備性|かくりつてきかんびせい, マルコフ半群|まるこふはんぐん"}
+$(M,g)$ を閉リーマン多様体、$K$ を関数の上のラプラシアン $\Delta$ の熱核（\ref{gl:heat-kernel}）とする。$t>0$ について次が成り立つ。
+1. すべての $x,y\in M$ で $K_{t}(x,y)\ge0$。
+2. すべての $x\in M$ で $\int_{M}K_{t}(x,y)\,d\mu_{g}(y)=1$、すべての $y$ で $\int_{M}K_{t}(x,y)\,d\mu_{g}(x)=1$。
+3. $u_{0}\in L^{2}(M)$ が実数値で、実数 $\alpha\le\beta$ について a.e. で $\alpha\le u_{0}\le\beta$ なら、すべての $x$ で $\alpha\le(e^{-t\Delta}u_{0})(x)\le\beta$。
+4. $1\le p\le\infty$ と $u_{0}\in L^{2}(M)$ について $\|e^{-t\Delta}u_{0}\|_{L^{p}}\le\|u_{0}\|_{L^{p}}$（右辺が $\infty$ なら自明）。
+:::
+
+::: intuition
+閉多様体の上の熱核は、点 $y$ に置いた単位の熱が時刻 $t$ にどう分布するかを表す確率密度である。値は負にならず、総量は $1$ のまま保たれる。したがって熱を流した後の温度は、初めの温度の重みつき平均で、初めの最小値と最大値の間に収まり、どの $L^{p}$ ノルムも増えない。
+:::
+
+::: proof
+**Step 1.** 【主張：$u_{0}$ が実数値で滑らかなら、$t>0$ で $e^{-t\Delta}u_{0}$ は実数値で $\min_{M}e^{-t\Delta}u_{0}\ge\min_{M}u_{0}$】\ref{gl:heat-kernel.4} から $K$ は実数値なので、\ref{gl:heat-kernel.2} から $u(t)\defeq e^{-t\Delta}u_{0}$ は実数値。\ref{gl:heat-equation.1} から $u$ は $(0,\infty)\times M$ で滑らかで $\partial_{t}u+\Delta u=0$ なので、\ref{gl:heat-maximum-principle.1} から $m(t)\defeq\min u(t,\cdot)$ は単調非減少。\ref{gl:heat-equation.2}（$m=0$）から $u(s)\to u_{0}$ は $M$ の上で一様なので、$m(s)\to\min u_{0}$（$s\to0+$）。単調性から $m(t)\ge m(s)$（$0<s<t$）で、$s\to0+$ として $m(t)\ge\min u_{0}$。
+
+**Step 2.** 【主張：1】ある $x$, $y_{0}$ で $K_{t}(x,y_{0})<0$ とする。$y\mapsto K_{t}(x,y)$ は連続なので、$y_{0}$ の開近傍 $W$ と $\eta>0$ で $W$ の上 $K_{t}(x,\cdot)<-\eta$ となるものがある。\ref{mfd:smooth-urysohn.1}（$A=\{y_{0}\}$, $G=W$）から、滑らかな $f\colon M\to[0,1]$ で $f(y_{0})=1$, $\operatorname{supp}f\subset W$ となるものをとる。$O\defeq\{f>\frac12\}$ は $y_{0}$ を含む開集合で、\ref{gl:riemannian-measure.2} から $\mu_{g}(O)>0$。被積分関数は $W$ の外で $0$、$W$ の上で $\le0$、$O$ の上で $<-\eta/2$ なので
+$$
+(e^{-t\Delta}f)(x)=\int_{M}K_{t}(x,y)f(y)\,d\mu_{g}(y)\le-\frac{\eta}{2}\mu_{g}(O)<0 .
+$$
+これは Step 1（$\min f\ge0$）に反する。
+
+**Step 3.** 【主張：2】定数関数 $1$ は $\Delta1=0$ を満たすので、\ref{gl:heat-semigroup.1} から $e^{-t\Delta}1=1$。\ref{gl:heat-kernel.2} から $\int K_{t}(x,y)\,d\mu_{g}(y)=1$。後半は対称性 $K_{t}(x,y)=K_{t}(y,x)$（\ref{gl:heat-kernel.4}）から。
+
+**Step 4.** 【主張：3】$K$ は実数値で $u_{0}$ も実数値なので、$e^{-t\Delta}u_{0}$ は実数値。1・2 から $K_{t}(x,\cdot)\,d\mu_{g}$ は確率測度で、$(e^{-t\Delta}u_{0})(x)=\int K_{t}(x,y)u_{0}(y)\,d\mu_{g}(y)$ は $\int K_{t}(x,y)\alpha\,d\mu_{g}(y)=\alpha$ 以上、同様に $\beta$ 以下。
+
+**Step 5.** 【主張：4】$p=\infty$ は $|\int K_{t}(x,y)u_{0}(y)\,dy|\le\int K_{t}(x,y)|u_{0}(y)|\,dy\le\|u_{0}\|_{L^{\infty}}$（1・2）。$1\le p<\infty$ では、確率測度 $\nu_{x}\defeq K_{t}(x,y)\,d\mu_{g}(y)$ についての \ref{meas:holder}（$|u_{0}|$ と $1$ に指数 $p$, $p'$ で使う）から $|(e^{-t\Delta}u_{0})(x)|^{p}\le\int K_{t}(x,y)|u_{0}(y)|^{p}\,d\mu_{g}(y)$。$x$ について積分し、\ref{meas:tonelli} で積分の順序を入れ替えて 2 の後半を使うと
+$$
+\begin{aligned}\|e^{-t\Delta}u_{0}\|_{L^{p}}^{p}&\le\int_{M}|u_{0}(y)|^{p}\Bigl(\int_{M}K_{t}(x,y)\,d\mu_{g}(x)\Bigr)d\mu_{g}(y)\\&=\|u_{0}\|_{L^{p}}^{p}.\end{aligned}
+$$
+
+::: hypcheck
+- **最大値原理**：Step 1 で使い、そこで $M$ が閉じていることを使った。
+- **滑らかな初期値での一様収束**：Step 1 で $m(s)\to\min u_{0}$ に使った。$L^{2}$ の初期値で直接最大値原理を使うと、$t\to0$ での $\min$ の振る舞いがわからないので、滑らかな初期値で 1 を示してから、積分表示で一般の初期値に移した。
+- **関数の上のラプラシアンであること**：\ref{gl:laplacian-at-minimum} と $\Delta1=0$ に使った。ホッジのラプラシアンでは 1・2 は意味をもたない（熱核は行列値）。関数の上でも、$\Delta+V$（$V$ は滑らかな関数）の熱核は $V\ge0$ なら非負だが、$\int K\,dy=1$ は $V=0$ でなければ一般に成り立たない（$1$ が解でなくなる）。
+- **公理**：Step 2 の滑らかなウリゾーンの補題で DC（前の系列と同じ）。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $M$ が連結なら、実は $K_{t}(x,y)>0$ がすべての $x,y$ と $t>0$ で成り立つ（強い最大値原理、またはハルナックの不等式による。ここでは証明しない）。円周では周期化したガウス関数の式から直接わかる（\ref{gl:prob-hk-propagation}）。これは、点 $y$ に置いた熱が、どんなに短い時間でも多様体全体に（ごくわずかずつ）届くこと、つまり熱方程式の**伝播速度が無限大**であることを意味し、有限の速さで伝わる波動方程式と対照的である。非コンパクトな完備リーマン多様体の熱核では、曲率が負に大きく発散する例で $\int K_{t}(x,y)\,dy<1$ となることが知られている（確率の保存の破れ。ここでは証明しない）。閉多様体で 2 が成り立つのは、$1$ が $L^{2}$ に入る固有関数だからである。
+
+**似た定理.** \ref{gl:closed-manifold-laplacian.4}（連結な閉多様体の調和関数は定数）は、時間によらない場合の強い最大値原理（最大値をとる点の集合が開かつ閉になること）からも導ける。このサイトでは発散定理による証明を与えた。$\mathbb{R}^{n}$ のガウス核（\see{four:heat-kernel-ae}）も正で積分 $1$ の確率密度で、ブラウン運動 $B$ について $B_{2t}$ の分布の密度である（\see{prb:brownian-motion}。$\Delta_{0}$ と、ブラウン運動の生成作用素 $\frac12\Delta_{0}$ の係数の違いが時間の $2$ 倍になる）。2・3 をもつ半群（正の関数を正の関数に写し、定数 $1$ を保つ）を**マルコフ半群**といい、確率過程の推移の半群として現れる。
+
+**高い視点：熱は混ぜるだけ.** 3 は「熱を流した後の温度は、初めの温度の重みつき平均である」と言っている。コーヒーにミルクを注いでかき混ぜると、どの点の濃さも初めの最も濃いところと最も薄いところの間に収まるように、平均をとる操作は新しい極端を作らない。$K_{t}(x,y)$ は、点 $x$ にいる粒子が時間 $t$ の間にランダムに動いて点 $y$ から来た確率の密度で、確率の総和が $1$ であることが熱の総量の保存にあたる。
+:::
+
+## 問題 {#gl:sec-hk-kernel-problems}
+
+::: problem {#gl:prob-hk-propagation}
+円周 $S^{1}=T^{1}$ の上の関数のラプラシアン $\Delta=-D_{1}^{2}$ の熱核 $K_{t}$ を考える。
+1. \ref{gl:torus-heat-kernel.2} を使って、すべての $s,s'$ と $t>0$ で $K_{t}(s,s')\ge(4\pi t)^{-1/2}e^{-\pi^{2}/4t}$ を示せ。
+2. $u_{0}\in L^{2}(S^{1})$ が実数値で、a.e. で $u_{0}\ge0$、かつ $\int_{S^{1}}u_{0}\,d\mu_{g}>0$ なら、すべての $t>0$ と $s$ で $(e^{-t\Delta}u_{0})(s)>0$ であることを示せ。$u_{0}$ の台が小さな弧に含まれていても結論が変わらないことの意味を述べよ。
+:::
+
+::: solution
+**1.** $s-s'$ を $2\pi$ の整数倍だけずらして $d\in[-\pi,\pi]$ とし、$s-s'=d-2\pi q_{0}$（$q_{0}\in\mathbb{Z}$）とする。\ref{gl:torus-heat-kernel.2} の和の各項は正で、$q=q_{0}$ の項は $(4\pi t)^{-1/2}e^{-d^{2}/4t}\ge(4\pi t)^{-1/2}e^{-\pi^{2}/4t}$。
+
+**2.** \ref{gl:heat-kernel.2} と 1 から
+$$
+\begin{aligned}(e^{-t\Delta}u_{0})(s)&=\int_{S^{1}}K_{t}(s,s')u_{0}(s')\,d\mu_{g}(s')\\&\ge(4\pi t)^{-1/2}e^{-\pi^{2}/4t}\int_{S^{1}}u_{0}\,d\mu_{g}>0 .\end{aligned}
+$$
+初めに熱が小さな弧にしかなくても、どんなに短い時間の後にも円周のすべての点の温度が正になる。熱方程式では影響が無限の速さで伝わる（ただし遠くへ届く量は $e^{-\pi^{2}/4t}$ 程度で、$t\to0$ で非常に小さい）。波動方程式 $\partial_{t}^{2}u=D_{1}^{2}u$ の解 $\frac12(f(s+t)+f(s-t))$ では、台は時間 $t$ の間に距離 $t$ しか広がらないのと対照的である。
+:::
+
+::: problem {#gl:prob-hk-circle-trace}
+円周 $S^{1}=T^{1}$ の上の $\Delta=-D_{1}^{2}$ の熱核 $K_{t}$ を考え、$Z(t)\defeq\sum_{m\in\mathbb{Z}}e^{-m^{2}t}$ とおく。
+1. $K_{t}(s,s)=Z(t)/2\pi$ を示せ。
+2. 単調減少な関数の和と積分を比べて、すべての $t>0$ で $|Z(t)-\sqrt{\pi/t}|\le1$ を示せ。$\int_{-\infty}^{\infty}e^{-x^{2}t}\,dx=\sqrt{\pi/t}$ は使ってよい。
+3. 2 から $K_{t}(s,s)\sim(4\pi t)^{-1/2}$（$t\to0+$）を導き、$K_{t}(s,s)\to\infty$ であることが「$t=0$ で熱核が滑らかな関数にならない」ことにあたる理由を、$\int_{S^{1}}K_{t}(s,s')\,ds'$ の値と合わせて説明せよ。
+:::
+
+::: solution
+**1.** \ref{gl:torus-heat-kernel.1}（$n=1$）で $s'=s$ とすれば $K_{t}(s,s)=(2\pi)^{-1}\sum_{m}e^{-m^{2}t}$。
+
+**2.** $f(x)\defeq e^{-x^{2}t}$ は $[0,\infty)$ で単調減少なので、$m\ge1$ について $f(m)\le\int_{m-1}^{m}f\le f(m-1)$。$m=1,\dots,M$ について足して $M\to\infty$ とすると $\sum_{m\ge1}f(m)\le\int_{0}^{\infty}f\le\sum_{m\ge0}f(m)$。$f$ は偶関数なので $2\int_{0}^{\infty}f=\sqrt{\pi/t}$、$Z(t)=1+2\sum_{m\ge1}f(m)$ で、
+$$
+Z(t)-1\le\sqrt{\pi/t}\le Z(t)+1 .
+$$
+
+**3.** 2 から $Z(t)\sqrt{t/\pi}\to1$ なので $K_{t}(s,s)=\frac{Z(t)}{2\pi}\sim\frac{1}{2\pi}\sqrt{\frac{\pi}{t}}=(4\pi t)^{-1/2}$（これは \ref{gl:torus-heat-kernel.3} の $n=1$ の場合で、$\operatorname{vol}(S^{1})=2\pi$）。一方、1 の式で項別に積分すると $m\ne0$ の項は消えて $\int_{S^{1}}K_{t}(s,s')\,ds'=1$ がすべての $t>0$ で成り立つ。積分が $1$ のまま対角線の上の値が $\infty$ に発散するので、$t\to0+$ で $K_{t}(s,\cdot)$ は点 $s$ に集中していく。$t=0$ での「核」は $u\mapsto u(s)$ を表すデルタ関数で、どんな関数の積分としても書けない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
