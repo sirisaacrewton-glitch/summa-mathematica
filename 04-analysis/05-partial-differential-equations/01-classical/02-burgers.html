@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>バーガース方程式と衝撃波 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/02-burgers.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# バーガース方程式と衝撃波 {#pde:page-burgers keywords="inviscid Burgers equation u_t + u u_x = 0, crossing of characteristics, breaking time -1/min g', gradient blow-up, nonexistence of global classical solutions, conservation law, weak solution in integral form, Rankine-Hugoniot condition, Riemann problem, shock wave, rarefaction wave, non-uniqueness of weak solutions, Lax entropy condition, Oleinik entropy condition, fully nonlinear first order equations, characteristic strips, Hamilton-Jacobi equation, 衝撃波, 弱解, ランキン–ユゴニオ条件, エントロピー条件, 希薄波, 特性帯, ハミルトン–ヤコビ方程式"}
+
+前のページ \ref{pde:page-characteristics} では、1 階の方程式を特性曲線に沿った常微分方程式に帰着させ、非特性条件の下で局所的な古典解を作った。このページでは、その「局所的」が本質的であることを、最も簡単な非線形の方程式である**バーガース方程式** $\partial_{t}u+u\,\partial_{x}u=0$ で確かめる。この方程式では解の値が特性曲線の速さになるので、速い特性曲線が遅い特性曲線に追いついて交わり、初期値がどれほど滑らかでも、時刻 $-1/\min g'$ で解の傾きが無限大になって古典解が壊れる（**衝撃波の形成**）。その先へ解を延ばすために、方程式を積分の形に書き直した**弱解**を導入し、不連続な弱解が満たすべき**ランキン–ユゴニオ条件**を導く。弱解は一意でないことを例で示し、一意性を回復する**エントロピー条件**を紹介する。最後に、完全非線形の 1 階方程式（ハミルトン–ヤコビ方程式など）の特性帯に触れる。
+
+## 記法と定義の確認 {#pde:sec-ch-burgers-notation}
+
+::: notation
+- 準線形方程式・コーシーデータ・非特性条件・特性曲線の連立系は \ref{pde:quasilinear-cauchy}, \ref{pde:characteristic-system}、局所可解性は \ref{pde:quasilinear-local-existence}。バーガース方程式は $x=(t,x)$, $a(t,x,z)=(1,z)$, $c=0$ の準線形方程式で、初期曲線 $\{t=0\}$ の上のデータはどこでも非特性的である。
+- 最大解と逃避補題は \ref{ode:maximal-solution}, \ref{ode:escape-lemma}、\ref{ode:c1-locally-lipschitz}。陰関数については \ref{calc:implicit-function-theorem}、連続な単射と単調性は \ref{calc:continuous-inverse}、\ref{top:intermediate-value}、\ref{calc:mean-value-theorem}、ライプニッツの積分法則は \ref{calc:leibniz-rule}、部分積分は \ref{calc:substitution-parts}。
+- 以下 $t\ge0$ を時間、$x\in\mathbb{R}$ を空間の変数とし、$F(z)\defeq z^{2}/2$ とおく。$C^{1}$ 級の $u$ について $\partial_{x}F(u)=u\,\partial_{x}u$ なので、バーガース方程式は**保存則** $\partial_{t}u+\partial_{x}F(u)=0$ の形に書ける。
+- $C_{c}^{1}(\mathbb{R}^{2})$ は台がコンパクトな $C^{1}$ 級関数の全体。$T\in(0,\infty]$ について、台が $(-\infty,T)\times\mathbb{R}$ に含まれる $\varphi\in C_{c}^{1}(\mathbb{R}^{2})$ を**試験関数**と呼ぶ。
+- **選択公理**：弱解の定義にはルベーグ積分とフビニ–トネリの定理（\ref{meas:fubini-lebesgue}）を使い、その一般論で可算選択を使う箇所は測度論の系列の注記どおりである。それ以外では使わない。このページで実際に計算する関数は区分的に連続で、積分はリーマン積分（\ref{meas:riemann-lebesgue}）と一致する。
+:::
+
+## 衝撃波の形成 {#pde:sec-ch-burgers}
+
+::: definition バーガース方程式の古典解 {#pde:burgers-classical-solution keywords="classical solution of the Cauchy problem for the inviscid Burgers equation on [0, T) x R: continuous on [0, T) x R, C^1 on (0, T) x R" index="バーガース方程式|ばーがーすほうていしき, 非粘性バーガース方程式|ひねんせいばーがーすほうていしき"}
+$g\colon\mathbb{R}\to\mathbb{R}$ を連続、$T\in(0,\infty]$ とする。$u\colon[0,T)\times\mathbb{R}\to\mathbb{R}$ が連続で、$(0,T)\times\mathbb{R}$ 上で $C^{1}$ 級で
+$$
+\partial_{t}u+u\,\partial_{x}u=0\quad((0,T)\times\mathbb{R}),\qquad u(0,x)=g(x)\quad(x\in\mathbb{R})
+$$
+を満たすとき、$u$ を**バーガース方程式**のコーシー問題の $[0,T)\times\mathbb{R}$ 上の**古典解**という。
+:::
+
+::: intuition
+直線上を流れる粒子の速度場 $u$ で、各粒子が自分の速度を保ったまま進むとき、速度場が満たす方程式である。
+:::
+
+$u$ が古典解なら、特性曲線 $X'(s)=u(s,X(s))$ に沿って $\frac{d}{ds}u(s,X(s))=\partial_{t}u+u\,\partial_{x}u=0$ なので、$u$ は特性曲線に沿って一定で、特性曲線は直線になる。時刻 $0$ に $\xi$ を出る特性曲線は $x=\xi+tg(\xi)$ で、その上で $u=g(\xi)$ のはずである。そこで $\chi_{t}(\xi)\defeq\xi+tg(\xi)$ とおく。
+
+::: theorem 衝撃波の形成 {#pde:burgers-shock-formation keywords="for C^1 initial data g, with m = inf g', the Burgers equation has a classical solution on [0, T) x R iff T <= T* = -1/m (T* = infinity if m >= 0); the solution is unique, u = g(xi) with x = xi + t g(xi); u_x = g'/(1 + t g') blows up at the breaking time while u stays bounded" index="衝撃波の形成|しょうげきはのけいせい, 衝撃波|しょうげきは, 砕波時刻|さいはじこく, 勾配の爆発|こうばいのばくはつ" refname="衝撃波の形成定理"}
+$g\colon\mathbb{R}\to\mathbb{R}$ を $C^{1}$ 級とし、$m\defeq\inf_{\xi}g'(\xi)\in[-\infty,\infty)$ とおく。$m\ge0$ なら $T^{*}\defeq\infty$、$-\infty<m<0$ なら $T^{*}\defeq-1/m$、$m=-\infty$ なら $T^{*}\defeq0$ とする。
+1. $0<T\le T^{*}$ なら、$[0,T)\times\mathbb{R}$ 上の古典解がただ一つある。それは、各 $(t,x)$ について $\chi_{t}(\xi)=x$ となるただ一つの $\xi\eqdef\Xi(t,x)$ を使って $u(t,x)=g(\Xi(t,x))$ と書け、
+$$
+\partial_{x}u(t,x)=\frac{g'(\Xi)}{1+tg'(\Xi)}.
+$$
+2. $T>T^{*}$ なら、$[0,T)\times\mathbb{R}$ 上の古典解はない。
+3. $T^{*}<\infty$ で、ある $\xi_{0}$ で $g'(\xi_{0})=m$ となるなら、1 の解について $|u|\le\sup|g|$ のまま、$t\uparrow T^{*}$ で
+$$
+\partial_{x}u\bigl(t,\chi_{t}(\xi_{0})\bigr)=\frac{m}{1+tm}\to-\infty.
+$$
+:::
+
+::: intuition
+高さ $g(\xi)$ の点は速さ $g(\xi)$ で右へ進むので、後ろの点が前の点より速い所（$g'<0$ の所）では波が前のめりになる。最も急な所が追いつくまでの時間が $-1/\min g'$ で、その時刻に波は切り立ち、なめらかな解はそれ以上続かない。
+:::
+
+::: proof
+**Step 1.** 【主張：$v$ が $[0,T)\times\mathbb{R}$ 上の古典解で $0<t<T$ なら、$w\defeq v(t,x)$, $\xi\defeq x-tw$ について $g(\xi)=w$。とくに $\chi_{t}(\xi)=x$ で、$v(t,x)=g(\xi)$】$v$ は $D\defeq(0,T)\times\mathbb{R}$ 上で $C^{1}$ 級なので、$X'=v(s,X)$ の右辺は $X$ について局所リプシッツで（\ref{ode:c1-locally-lipschitz}）、$X(t)=x$ の最大解 $X$（定義域 $(\alpha,\beta)$）がある。連鎖律から $\frac{d}{ds}v(s,X(s))=\partial_{t}v+v\,\partial_{x}v=0$ なので $v(s,X(s))=w$ が一定で、$X'=w$、$X(s)=x+(s-t)w$。もし $\alpha>0$ なら、$s\in(\alpha,t]$ で $(s,X(s))$ はコンパクト集合 $[\alpha,t]\times[x-t|w|,x+t|w|]\subset D$ に入り、\ref{ode:escape-lemma}（$\alpha$ の側）に反する。よって $s\in(0,t]$ で $v(s,x+(s-t)w)=w$。$v$ は $[0,T)\times\mathbb{R}$ で連続なので、$s\downarrow0$ として $v(0,x-tw)=w$、つまり $g(\xi)=w$。
+
+**Step 2.** 【主張：古典解 $v$ があれば、$0<t<T$ について $\chi_{t}$ は $\mathbb{R}$ 上で狭義単調増加】$\eta_{t}(x)\defeq x-tv(t,x)$ とおくと、Step 1 から $\chi_{t}(\eta_{t}(x))=x$ で、$\eta_{t}$ は連続な単射なので狭義単調（\ref{calc:continuous-inverse.1}）。$x<y$ を固定すると、$d(t)\defeq\eta_{t}(y)-\eta_{t}(x)$ は $[0,T)$ で連続、$(0,T)$ で $0$ にならず、$d(0)=y-x>0$ なので、\ref{top:intermediate-value} から $d>0$：$\eta_{t}$ は増加。$\eta_{t}(\mathbb{R})$ が上に有界なら、上限 $b$ について $x\to\infty$ で $\eta_{t}(x)\uparrow b$ となり、$\chi_{t}$ の連続性から $x=\chi_{t}(\eta_{t}(x))\to\chi_{t}(b)$ となって矛盾する。下も同様で、$\eta_{t}(\mathbb{R})$ は区間（\ref{calc:continuous-inverse.3}）なので $\mathbb{R}$。よって $\eta_{t}$ は全単射で、$\chi_{t}=\eta_{t}^{-1}$ は狭義単調増加（\ref{calc:continuous-inverse.3}）。
+
+**Step 3.** 【主張：2】$T>T^{*}$ とし、古典解があるとする。$m<0$ である（$m\ge0$ なら $T^{*}=\infty$）。$t_{1}\in(T^{*},T)$, $t_{1}>0$ をとると $t_{1}m<-1$（$m=-\infty$ でも）なので、下限の定義から $t_{1}g'(\xi_{1})<-1$ となる $\xi_{1}$ がある。すると $\chi_{t_{1}}'(\xi_{1})=1+t_{1}g'(\xi_{1})<0$ で、差分商 $(\chi_{t_{1}}(\xi_{1}+h)-\chi_{t_{1}}(\xi_{1}))/h$ は小さい $h>0$ で負になり、Step 2 に反する。
+
+**Step 4.** 【主張：$0<T\le T^{*}$ なら、$t\in[0,T)$ ごとに $\chi_{t}$ は全単射で、$\Xi$ は $[0,T)\times\mathbb{R}$ の各点の（$\mathbb{R}^{2}$ での）近傍で $C^{1}$ 級に延び、$\partial_{t}\Xi=-g(\Xi)/(1+tg'(\Xi))$, $\partial_{x}\Xi=1/(1+tg'(\Xi))$】$\kappa_{t}\defeq1+t\min(m,0)$ とおくと、$t<T\le T^{*}$ から $\kappa_{t}>0$ で、$\chi_{t}'=1+tg'\ge\kappa_{t}$。\ref{calc:mean-value-theorem} から $\xi>0$ で $\chi_{t}(\xi)-\chi_{t}(0)\ge\kappa_{t}\xi$、$\xi<0$ で $\le\kappa_{t}\xi$ なので、$\chi_{t}$ は狭義増加で $\pm\infty$ に発散し、\ref{top:intermediate-value} から全単射。$P(t,x,\xi)\defeq\xi+tg(\xi)-x$ は $\mathbb{R}^{3}$ 上で $C^{1}$ 級で、$(t,x,\Xi(t,x))$ で $\partial_{\xi}P=1+tg'(\Xi)\ge\kappa_{t}>0$。\ref{calc:implicit-function-theorem} から、$(t,x)$ の近傍 $A$ 上の $C^{1}$ 級関数 $\psi$ で $P(t',x',\psi(t',x'))=0$ となるものがある。$t'\ge0$ なら $\chi_{t'}$ の零点はただ一つなので $\psi(t',x')=\Xi(t',x')$。微分の式は \ref{calc:implicit-function-theorem.3}。
+
+**Step 5.** 【主張：1】$u\defeq g\circ\Xi$ は Step 4 から $[0,T)\times\mathbb{R}$ で連続、$(0,T)\times\mathbb{R}$ で $C^{1}$ 級で、
+$$
+\partial_{t}u+u\,\partial_{x}u=g'(\Xi)\,\frac{-g(\Xi)}{1+tg'(\Xi)}+g(\Xi)\,\frac{g'(\Xi)}{1+tg'(\Xi)}=0.
+$$
+$\Xi(0,x)=x$ なので $u(0,x)=g(x)$。一意性：古典解 $v$ と $0<t<T$ について、Step 1 から $v(t,x)=g(\xi)$, $\chi_{t}(\xi)=x$ で、$\chi_{t}$ は単射なので $\xi=\Xi(t,x)$、$v(t,x)=u(t,x)$。$t=0$ では両方 $g$。
+
+**Step 6.** 【主張：3】$\Xi(t,\chi_{t}(\xi_{0}))=\xi_{0}$ なので、1 の式から $\partial_{x}u(t,\chi_{t}(\xi_{0}))=m/(1+tm)$ で、$t\uparrow T^{*}=-1/m$ で分母は $+0$ に近づき、$m<0$ なので $-\infty$ に発散する。$|u|=|g(\Xi)|\le\sup|g|$。
+
+::: hypcheck
+- **$g\in C^{1}$**：Step 4 で陰関数定理を使うとき（$P$ が $C^{1}$ 級）と、Step 3・4 で $\chi_{t}'$ を考えるときに使った。$g$ が連続なだけなら公式 $u=g\circ\Xi$ は（$\chi_{t}$ が全単射である限り）連続な関数を与えるが、古典解ではない。
+- **$T\le T^{*}$**：Step 4 で $\kappa_{t}>0$、つまり特性曲線が交わらないこと（$\chi_{t}$ が単射）と、$\chi_{t}$ が全射であることに使った。$T>T^{*}$ では古典解はない（2）。
+- **解の連続性（$t=0$ を含む）**：Step 1 で $s\downarrow0$ として初期値につなぐのに、Step 2 で $d(t)$ の連続性に使った。$(0,T)\times\mathbb{R}$ 上の $C^{1}$ 級だけでは初期値とのつながりが言えない。
+- **$g'$ の下限が到達されること**：3 でだけ使った。到達されないとき（例：$g'$ が $|\xi|\to\infty$ で $m$ に近づくとき）は、$t=T^{*}$ でも $\chi_{T^{*}}$ は狭義増加で、古典解は $[0,T^{*}]\times\mathbb{R}$ まで延びることがあるが、2 からそれより先へは延びない。
+- **$g$ の有界性**：仮定していない。3 の $|u|\le\sup|g|$ は $g$ が有界なら意味をもつ。
+- **公理**：選択は使わない。
+:::
+:::
+
+::: example 衝撃波の形成の例 {#pde:burgers-examples keywords="g(x) = -x: u = -x/(1-t), all characteristics meet at t = 1; g(x) = 1/(1+x^2): breaking time 8/(3 sqrt 3); increasing g (e.g. tanh): global classical solution, rarefaction; g(x) = -x^3: T* = 0" index="衝撃波の形成の例|しょうげきはのけいせいのれい"}
+1. $g(x)=-x$：$m=-1$, $T^{*}=1$。$\chi_{t}(\xi)=(1-t)\xi$ から $\Xi=x/(1-t)$、$u(t,x)=-x/(1-t)$（$0\le t<1$）。すべての特性曲線が点 $(1,0)$ に集まり、$u$ 自身が発散する（$g$ が有界でないため）。
+2. $g(x)=1/(1+x^{2})$：$g'(x)=-2x/(1+x^{2})^{2}$ は $x=1/\sqrt{3}$ で最小値 $-3\sqrt{3}/8$ をとるので、$T^{*}=8/(3\sqrt{3})\approx1.540$。$g(1/\sqrt{3})=3/4$ なので、$0<u\le1$ のまま、地点 $x=\chi_{T^{*}}(1/\sqrt{3})=1/\sqrt{3}+\frac{3}{4}T^{*}=\sqrt{3}$ で傾きが $-\infty$ になる（山の前側が切り立つ）。
+3. $g$ が単調増加（たとえば $g=\tanh$）：$m\ge0$, $T^{*}=\infty$ で、古典解はすべての $t\ge0$ で存在する。特性曲線は広がっていき、傾き $g'/(1+tg')$ は $t\to\infty$ で $0$ に近づく（**希薄波**）。
+4. $g(x)=-x^{3}$：$m=-\infty$, $T^{*}=0$ で、どんなに短い時間 $[0,T)$ でも古典解はない。遠くの特性曲線ほど速く、どんな $t>0$ でも $\chi_{t}(\xi)=\xi-t\xi^{3}$ は単射でない。
+:::
+
+::: supplement
+**前提を変えると.** 時間を負の向きに解くと、$\sup g'$ が同じ役割を果たし、古典解は $(-1/\sup g',T^{*})$ の上でだけ存在する（$\sup g'\le0$ なら左端は $-\infty$）。一般の保存則 $\partial_{t}u+\partial_{x}F(u)=0$（$F\in C^{2}$）では、特性曲線の速さが $F'(u)$ になり、$\chi_{t}(\xi)=\xi+tF'(g(\xi))$ について同じ議論が通って、$T^{*}=-1/\inf_{\xi}(F'\circ g)'(\xi)$（下限が負のとき）となる。線形の輸送方程式（速さが $u$ によらない）では特性曲線は交わらず、こうした破綻は起きない（\ref{pde:transport-variable}）。小さな粘性を加えた**粘性バーガース方程式** $\partial_{t}u+u\,\partial_{x}u=\varepsilon\,\partial_{x}^{2}u$ はホップ–コール変換で熱方程式に帰着し、すべての時刻で滑らかな解をもつ。粘性 $\varepsilon\to0$ の極限が、下で述べるエントロピー解を与えることが知られている（ここでは証明しない）。
+
+**似た定理.** \ref{pde:quasilinear-blowup} では解の値が特性曲線に沿って爆発したが、ここでは値は有界のまま、特性曲線の射影が交わって**傾き**が爆発する。準線形方程式の局所解（\ref{pde:quasilinear-local-existence}）が大域解にならない二つの典型である。圧縮性流体のオイラー方程式でも、滑らかな初期値からの滑らかな解が有限時間で壊れる場合があることが知られている（ここでは扱わない）。
+
+**高い視点：渋滞の最後尾.** 道路上の車の速さが場所ごとに決まっていて、各車が速さを変えずに走ると考える。後ろの車が前の車より速い区間では車間が詰まり続け、ついに追突が起きる。追突の時刻は、最も急に速さが落ちる場所で車間がなくなる時刻 $-1/\min g'$ である。追突の後は「各車が速さを保つ」という仮定そのものが成り立たず、車は渋滞の最後尾で急に減速する。この最後尾が衝撃波で、それを記述するには、速さが不連続に変わることを許す新しい解の概念（弱解）が要る。
+:::
+
+## 弱解とランキン–ユゴニオ条件 {#pde:sec-ch-weak}
+
+衝撃波の後も解を考えるため、微分を試験関数に移した積分の形で方程式を書く。
+
+::: definition バーガース方程式の弱解 {#pde:burgers-weak-solution keywords="weak (integral) solution of u_t + (u^2/2)_x = 0, u(0) = g: int int (u phi_t + F(u) phi_x) dx dt + int g phi(0, x) dx = 0 for all test functions; locally bounded measurable u" index="弱解（保存則）|じゃくかいほぞんそく, 積分解|せきぶんかい, 保存則|ほぞんそく"}
+$T\in(0,\infty]$、$g\colon\mathbb{R}\to\mathbb{R}$ と $u\colon[0,T)\times\mathbb{R}\to\mathbb{R}$ をルベーグ可測で、有界集合の上で有界なものとする。すべての試験関数 $\varphi$ について
+$$
+\int_{0}^{T}\!\!\int_{\mathbb{R}}\bigl(u\,\partial_{t}\varphi+F(u)\,\partial_{x}\varphi\bigr)\,dx\,dt+\int_{\mathbb{R}}g(x)\varphi(0,x)\,dx=0
+\label{pde:eq-weak-burgers}
+$$
+となるとき、$u$ をバーガース方程式のコーシー問題の $[0,T)\times\mathbb{R}$ 上の**弱解**という。台が $(\tau,T)\times\mathbb{R}$（$0\le\tau<T$）に含まれる試験関数について \eqref{pde:eq-weak-burgers} の第一項が $0$ になる（第二項は $0$）とき、$u$ は $(\tau,T)\times\mathbb{R}$ で方程式を**弱い意味で満たす**という。
+:::
+
+::: intuition
+方程式に滑らかな関数を掛けて積分し、微分をすべて試験関数の側に移した式である。これなら $u$ は微分できなくても、不連続でもよい。初期条件も同じ式の境界項として入っている。
+:::
+
+計算はすべて次の恒等式に帰着する。$u$ が有限個の滑らかな曲線を境にして滑らかな解をつないだものとする。
+
+::: lemma 区分的に滑らかな解の積分公式 {#pde:weak-identity keywords="for u piecewise C^1 across curves x = sigma_j(t), each piece a classical solution, int_tau^T int (u phi_t + F(u) phi_x) = - int u(tau, x) phi(tau, x) dx + sum_j int defect_j(t) phi(t, sigma_j(t)) dt, defect_j = [F(u)] - sigma_j' [u]" index="区分的に滑らかな弱解|くぶんてきになめらかなじゃくかい"}
+$0<\tau<T\le\infty$、$k\ge0$ とし、$\sigma_{1},\dots,\sigma_{k}$ を $[\tau,T)$ を含む開区間の上の $C^{1}$ 級関数で、$[\tau,T)$ の上で $\sigma_{1}<\dots<\sigma_{k}$ となるものとする。$\sigma_{0}\defeq-\infty$, $\sigma_{k+1}\defeq+\infty$、
+$$
+D_{j}\defeq\{(t,x):\tau\le t<T,\ \sigma_{j}(t)\le x\le\sigma_{j+1}(t)\}\quad(0\le j\le k)
+$$
+とし、$u^{j}$ を $D_{j}$ を含む開集合の上の $C^{1}$ 級関数で $\partial_{t}u^{j}+u^{j}\partial_{x}u^{j}=0$ を満たすものとする。$u\colon[\tau,T)\times\mathbb{R}\to\mathbb{R}$ を、$D_{j}$ の点のうち曲線 $x=\sigma_{j}(t)$, $x=\sigma_{j+1}(t)$ の上にないものでは $u^{j}$ に等しく、曲線の上では有界集合の上で有界な任意の値をとる関数とする。このとき、試験関数 $\varphi$ について
+$$
+\begin{aligned}
+\int_{\tau}^{T}\!\!\int_{\mathbb{R}}\bigl(u\,\partial_{t}\varphi+F(u)\,\partial_{x}\varphi\bigr)\,dx\,dt
+&=-\int_{\mathbb{R}}u(\tau,x)\varphi(\tau,x)\,dx\\
+&\quad+\sum_{j=1}^{k}\int_{\tau}^{T}\delta_{j}(t)\,\varphi(t,\sigma_{j}(t))\,dt.
+\end{aligned}
+$$
+ここで $u(\tau,x)$ は $x\neq\sigma_{j}(\tau)$ での値で、曲線 $\sigma_{j}$ の上の両側の値 $u^{j-1}$, $u^{j}$ について
+$$
+\delta_{j}(t)\defeq\bigl(F(u^{j-1})-F(u^{j})\bigr)-\sigma_{j}'(t)\bigl(u^{j-1}-u^{j}\bigr)
+$$
+（右辺の $u^{j-1}$, $u^{j}$ は $(t,\sigma_{j}(t))$ で評価する）。
+:::
+
+::: proof
+$\varphi$ の台が $[\tau,T']\times[-R,R]$（$T'<T$）に含まれ、$t\in[\tau,T']$ で $|\sigma_{j}(t)|<R$ となるように $T'$, $R$ をとる（$\sigma_{j}$ は連続なので $[\tau,T']$ で有界）。被積分関数は有界で、曲線の外で連続なので可測であり、\ref{meas:fubini-lebesgue} から左辺は $t$ ごとの $x$ の積分を $t$ で積分したものに等しい。$t\in[\tau,T']$ を固定し、$\sigma_{0}(t)$, $\sigma_{k+1}(t)$ を $-R$, $R$ に置き換えて、$I_{j}\defeq[\sigma_{j}(t),\sigma_{j+1}(t)]$ とする。
+
+**Step 1.** 【主張：$\int_{\mathbb{R}}F(u)\partial_{x}\varphi\,dx=\sum_{j=1}^{k}\bigl(F(u^{j-1})-F(u^{j})\bigr)\varphi(t,\sigma_{j}(t))-\int_{\mathbb{R}}\partial_{x}F(u)\,\varphi\,dx$】各 $I_{j}$ の上で \ref{calc:substitution-parts.2} を使うと、$\int_{I_{j}}F(u^{j})\partial_{x}\varphi\,dx=\bigl[F(u^{j})\varphi\bigr]_{\sigma_{j}}^{\sigma_{j+1}}-\int_{I_{j}}\partial_{x}F(u^{j})\varphi\,dx$。$\varphi(t,\pm R)=0$ なので、$j$ について足すと境界項は内側の曲線の上の差だけが残る。
+
+**Step 2.** 【主張：$P_{j}(t)\defeq\int_{I_{j}}u^{j}\varphi\,dx$ について、$\sum_{j}P_{j}'(t)=\sum_{j=1}^{k}\sigma_{j}'(u^{j-1}-u^{j})\varphi(t,\sigma_{j})+\int_{\mathbb{R}}(\partial_{t}u\,\varphi+u\,\partial_{t}\varphi)\,dx$】$u^{j}$ は $D_{j}$ を含む開集合で定義されているので、コンパクト性から、各 $t_{0}$ の近くの $t$ について、$I_{j}$（$t$ に応じて動く）を含む一定の閉区間 $[c,d]$ と $t_{0}$ の近傍との積の上で $u^{j}\varphi$ とその $t$ についての偏導関数が定義されて連続である。\ref{calc:leibniz-rule} から
+$$
+P_{j}'=\bigl(u^{j}\varphi\bigr)\big|_{\sigma_{j+1}}\sigma_{j+1}'-\bigl(u^{j}\varphi\bigr)\big|_{\sigma_{j}}\sigma_{j}'+\int_{I_{j}}\partial_{t}(u^{j}\varphi)\,dx
+$$
+（端 $\pm R$ では $\varphi=0$）。$j$ について足すと、曲線 $\sigma_{j}$ の上で $u^{j-1}$ の項と $u^{j}$ の項が組になる。
+
+**Step 3.** 【主張：$t$ ごとに $\int(u\,\partial_{t}\varphi+F(u)\,\partial_{x}\varphi)\,dx=\bigl(\sum_{j}P_{j}\bigr)'(t)+\sum_{j=1}^{k}\delta_{j}(t)\varphi(t,\sigma_{j}(t))$】Step 2 から $\int u\,\partial_{t}\varphi\,dx$ を求めて Step 1 と足すと、
+$$
+\begin{aligned}
+&\Bigl(\sum_{j}P_{j}\Bigr)'+\sum_{j=1}^{k}\Bigl[\bigl(F(u^{j-1})-F(u^{j})\bigr)-\sigma_{j}'\bigl(u^{j-1}-u^{j}\bigr)\Bigr]\varphi(t,\sigma_{j})\\
+&\quad-\int_{\mathbb{R}}\bigl(\partial_{t}u+\partial_{x}F(u)\bigr)\varphi\,dx,
+\end{aligned}
+$$
+最後の積分は各片で $\partial_{t}u^{j}+u^{j}\partial_{x}u^{j}=0$ なので $0$。
+
+$\sum_{j}P_{j}$ は Step 2 から $C^{1}$ 級で、$t\ge T'$ の近くで $0$ なので、Step 3 を $\tau$ から $T'$ まで積分すると（\ref{calc:fundamental-theorem.2}）、$\bigl(\sum P_{j}\bigr)$ の項は $-\sum_{j}P_{j}(\tau)=-\int u(\tau,x)\varphi(\tau,x)\,dx$ になる。
+:::
+
+::: proposition 古典解と弱解 {#pde:weak-classical keywords="a classical solution of the Burgers equation is a weak solution; a weak solution which is continuous on [0,T) x R and C^1 on (0,T) x R is a classical solution (with continuous g)" index="古典解と弱解|こてんかいとじゃくかい"}
+$T\in(0,\infty]$、$g$ を連続とする。
+1. $[0,T)\times\mathbb{R}$ 上の古典解は弱解である。
+2. $u$ が $[0,T)\times\mathbb{R}$ で連続、$(0,T)\times\mathbb{R}$ で $C^{1}$ 級の弱解なら、古典解である。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$\varphi$ を試験関数とし、台を $[0,T']\times[-R,R]$（$T'<T$）に含める。$0<\tau<T'$ について \ref{pde:weak-identity}（$k=0$, $u^{0}=u$）から
+$$
+\int_{\tau}^{T}\!\!\int_{\mathbb{R}}\bigl(u\,\partial_{t}\varphi+F(u)\,\partial_{x}\varphi\bigr)\,dx\,dt=-\int_{\mathbb{R}}u(\tau,x)\varphi(\tau,x)\,dx.
+$$
+$u$ と $\varphi$ はコンパクト集合 $[0,T']\times[-R,R]$ の上で連続なので有界で一様連続（\ref{top:heine-cantor}）。$\tau\downarrow0$ で左辺は $[0,T)$ での積分に、右辺は $-\int g(x)\varphi(0,x)\,dx$ に近づく。これが \eqref{pde:eq-weak-burgers} である。
+
+**Step 2.** 【主張：2 の方程式】台が $(0,T)\times\mathbb{R}$ に含まれる試験関数 $\varphi$ では \eqref{pde:eq-weak-burgers} の第二項は $0$ で、第一項はフビニの定理（\ref{meas:fubini-lebesgue}）と、$t$ ごと・$x$ ごとの部分積分（\ref{calc:substitution-parts.2}。$\varphi$ は台の端で $0$）から $-\int\!\!\int(\partial_{t}u+u\,\partial_{x}u)\varphi\,dx\,dt$ に等しい。よってこれが $0$。$w\defeq\partial_{t}u+u\,\partial_{x}u$ は連続で、ある点 $(t_{0},x_{0})$ で $w>0$ なら、$\varphi(t,x)\defeq\psi((t-t_{0})/r)\,\psi((x-x_{0})/r)$（$\psi$ は \ref{calc:non-analytic-smooth.2} のもの、$r$ は小さい正の数）で積分が正になって矛盾する。$w<0$ も同様なので $w=0$。
+
+**Step 3.** 【主張：2 の初期条件】Step 2 から $u$ は方程式を満たすので、Step 1 の計算を $g$ の代わりに $u(0,\cdot)$ で行うと $\int\!\!\int(u\,\partial_{t}\varphi+F(u)\,\partial_{x}\varphi)+\int u(0,x)\varphi(0,x)\,dx=0$。\eqref{pde:eq-weak-burgers} と引くと $\int(g(x)-u(0,x))\varphi(0,x)\,dx=0$ がすべての試験関数で成り立ち、Step 2 と同じ議論で連続関数 $g-u(0,\cdot)$ は $0$。
+:::
+
+::: theorem ランキン–ユゴニオ条件 {#pde:rankine-hugoniot keywords="Rankine-Hugoniot jump condition: a function which is a classical solution on both sides of a C^1 curve x = sigma(t) satisfies the equation weakly iff sigma' = (u_- + u_+)/2 on the curve where u jumps; shock speed equals the jump of the flux over the jump of u" index="ランキン–ユゴニオ条件|らんきんゆごにおじょうけん, ランキン・ユゴニオ条件|らんきんゆごにおじょうけん, 跳躍条件|ちょうやくじょうけん, 衝撃波の速さ|しょうげきはのはやさ" refname="ランキン–ユゴニオ条件"}
+\ref{pde:weak-identity} の状況で、$u$ が $(\tau,T)\times\mathbb{R}$ で方程式を弱い意味で満たすための必要十分条件は、各 $j$ と各 $t\in(\tau,T)$ について、$(t,\sigma_{j}(t))$ での両側の値 $u_{-}\defeq u^{j-1}$, $u_{+}\defeq u^{j}$ が
+$$
+\sigma_{j}'(t)\,(u_{-}-u_{+})=F(u_{-})-F(u_{+})
+$$
+を満たすことである。$u_{-}\neq u_{+}$ の点では、これは $\sigma_{j}'(t)=(u_{-}+u_{+})/2$ と同じである。
+:::
+
+::: intuition
+不連続な解の飛び目は、左右の値の平均の速さで動かなければならない。保存される量が飛び目を通って出入りする量の収支が合う速さは、これしかない。
+:::
+
+::: proof
+**Step 1.** 【主張：十分性】台が $(\tau,T)\times\mathbb{R}$ に含まれる $\varphi$ は $\varphi(\tau,\cdot)=0$ なので、\ref{pde:weak-identity} の右辺は $\sum_{j}\int\delta_{j}(t)\varphi(t,\sigma_{j}(t))\,dt$ で、条件は $\delta_{j}=0$ そのものなので $0$。
+
+**Step 2.** 【主張：必要性】ある $j$, $t_{0}\in(\tau,T)$ で $\delta_{j}(t_{0})\neq0$ とする。$\delta_{j}$ は連続なので、$t_{0}$ の近くで符号が一定。曲線どうしは $[\tau,T)$ で交わらないので、$(t_{0},\sigma_{j}(t_{0}))$ を中心とする小さな円板で、ほかの曲線と交わらず、$\delta_{j}$ の符号が一定な時刻の範囲に収まるものがとれる。そこに台をもつ非負で中心で正の $\varphi$ をとると、右辺は $\int\delta_{j}(t)\varphi(t,\sigma_{j}(t))\,dt\neq0$ となり、弱い意味で満たさない。最後の言い換えは $F(u_{-})-F(u_{+})=(u_{-}-u_{+})(u_{-}+u_{+})/2$ から。
+:::
+
+::: proposition リーマン問題 {#pde:riemann-problem keywords="Riemann problem for Burgers: g = u_- for x < 0, u_+ for x > 0; the jump with speed (u_- + u_+)/2 is a weak solution; for u_- < u_+ the rarefaction fan u = x/t is another weak solution, so weak solutions are not unique" index="リーマン問題|りーまんもんだい, 希薄波|きはくは, 膨張波|ぼうちょうは, 弱解の非一意性|じゃくかいのひいちいせい"}
+$u_{-},u_{+}\in\mathbb{R}$ とし、$g(x)\defeq u_{-}$（$x<0$）、$u_{+}$（$x>0$）とする。
+1. $\sigma\in\mathbb{R}$ について $u(t,x)\defeq u_{-}$（$x<\sigma t$）、$u_{+}$（$x>\sigma t$）とおく。$u$ が $[0,\infty)\times\mathbb{R}$ 上の弱解であるための必要十分条件は、$u_{-}=u_{+}$ または $\sigma=(u_{-}+u_{+})/2$ である。
+2. $u_{-}<u_{+}$ なら、$t>0$ で
+$$
+u(t,x)\defeq\begin{cases}u_{-}&(x\le u_{-}t)\\x/t&(u_{-}t\le x\le u_{+}t)\\u_{+}&(x\ge u_{+}t)\end{cases}
+$$
+（$t=0$ では $g$）とおいた $u$ も弱解である（**希薄波**）。とくに $u_{-}<u_{+}$ なら、1 の $\sigma=(u_{-}+u_{+})/2$ の解と 2 の解という異なる二つの弱解がある。
+:::
+
+::: proof
+$M\defeq\max(|u_{-}|,|u_{+}|,|\sigma|)$ とする（2 では $\sigma=0$ とみる）。どちらの $u$ も $|u|\le M$ で、$t=\tau>0$ では $|x|>M\tau$ なら $u(\tau,x)=g(x)$。
+
+**Step 1.** 【主張：試験関数 $\varphi$ について、$\tau\downarrow0$ で $\int u(\tau,x)\varphi(\tau,x)\,dx\to\int g(x)\varphi(0,x)\,dx$】差は $\int(u(\tau,x)-g(x))\varphi(\tau,x)\,dx+\int g(x)(\varphi(\tau,x)-\varphi(0,x))\,dx$ で、第一項の被積分関数は $|x|\le M\tau$ の外で $0$、絶対値は $2M\sup|\varphi|$ 以下なので、第一項は $4M^{2}\tau\sup|\varphi|$ 以下。第二項は $\varphi$ の一様連続性から $0$ に近づく。
+
+**Step 2.** 【主張：1】$u_{-}\neq u_{+}$ のときを考える（等しいときは $u$ は定数の古典解で、\ref{pde:weak-classical.1} から弱解。$g$ の $x=0$ での値は積分に影響しない）。$0<\tau$ について \ref{pde:weak-identity}（$k=1$, $\sigma_{1}(t)=\sigma t$, $u^{0}=u_{-}$, $u^{1}=u_{+}$）から
+$$
+\begin{aligned}
+\int_{\tau}^{\infty}\!\!\int_{\mathbb{R}}\bigl(u\,\partial_{t}\varphi+F(u)\,\partial_{x}\varphi\bigr)
+&=-\int u(\tau,x)\varphi(\tau,x)\,dx\\
+&\quad+\delta\int_{\tau}^{\infty}\varphi(t,\sigma t)\,dt,
+\end{aligned}
+$$
+$\delta\defeq(u_{-}-u_{+})\bigl((u_{-}+u_{+})/2-\sigma\bigr)$。$\tau\downarrow0$ とすると、Step 1 から \eqref{pde:eq-weak-burgers} の左辺は $\delta\int_{0}^{\infty}\varphi(t,\sigma t)\,dt$ に等しい。$\delta=0$ ならすべての $\varphi$ で $0$。$\delta\neq0$ なら、$(1,\sigma)$ の近くに台をもつ非負で $(1,\sigma)$ で正の $\varphi$ で $0$ でない。
+
+**Step 3.** 【主張：2】$\tau>0$ について \ref{pde:weak-identity}（$k=2$, $\sigma_{1}(t)=u_{-}t<\sigma_{2}(t)=u_{+}t$, $u^{0}=u_{-}$, $u^{1}=x/t$, $u^{2}=u_{+}$）を使う。$x/t$ は $t>0$ で $C^{\infty}$ 級で、$\partial_{t}(x/t)+(x/t)\,\partial_{x}(x/t)=-x/t^{2}+x/t^{2}=0$。曲線 $x=u_{\pm}t$ の上で両側の値は等しい（$x/t=u_{\pm}$）ので $\delta_{1}=\delta_{2}=0$。よって左辺は $-\int u(\tau,x)\varphi(\tau,x)\,dx$ で、$\tau\downarrow0$ と Step 1 から \eqref{pde:eq-weak-burgers} が成り立つ。二つの解は、たとえば $t=1$, $u_{-}<x<(u_{-}+u_{+})/2$ で値が異なる（$u_{-}$ と $x>u_{-}$）。
+
+::: hypcheck
+- **$u_{-}<u_{+}$**：2 で、扇形の領域 $u_{-}t\le x\le u_{+}t$ が空でないことに使った。$u_{-}>u_{+}$ では $x/t$ の扇は作れず、1 の衝撃波が自然な解になる。
+- **方程式が各片で古典的に成り立つこと**：\ref{pde:weak-identity} の証明の Step 3 で使った。2 では扇の中で直接確かめた。
+- **公理**：ルベーグ積分の一般論の範囲（記法の注記）。それ以外の選択は使わない。
+:::
+:::
+
+$u_{-}<u_{+}$ のときの 1 の解（**非物理的な衝撃波**）では、両側の特性曲線（速さ $u_{-}$ と $u_{+}$）が飛び目から**出ていく**。逆に $u_{-}>u_{+}$ の衝撃波では、両側の特性曲線が飛び目に**入ってくる**。後者だけを許すのがエントロピー条件である。
+
+::: fact エントロピー解の存在と一意性 {#pde:entropy-uniqueness keywords="Lax entropy condition u_- > u_+ at shocks; Oleinik entropy condition u(t, x + z) - u(t, x) <= C (1 + 1/t) z; existence and uniqueness of entropy solutions of the Burgers equation for bounded initial data; Lax-Oleinik formula; vanishing viscosity" index="エントロピー条件|えんとろぴーじょうけん, エントロピー解|えんとろぴーかい, ラックスのエントロピー条件|らっくすのえんとろぴーじょうけん, オレイニクの条件|おれいにくのじょうけん"}
+1. （ラックスのエントロピー条件）\ref{pde:weak-identity} の状況の飛び目では、$u_{-}>u_{+}$ を要求する。これは、飛び目の速さ $(u_{-}+u_{+})/2$ が左の特性速度 $u_{-}$ より小さく、右の特性速度 $u_{+}$ より大きいこと、つまり両側の特性曲線が飛び目に流れ込むことと同じである。
+2. （オレイニクのエントロピー条件）有界な $g$ について、弱解 $u$ で、定数 $C$ があってほとんどすべての $t>0$, $x\in\mathbb{R}$, $z>0$ について
+$$
+u(t,x+z)-u(t,x)\le C\Bigl(1+\frac{1}{t}\Bigr)z
+$$
+となるもの（**エントロピー解**）は、ほとんど至る所の意味でただ一つ存在する。
+
+区分的に滑らかな弱解では、2 の条件は 1 を含む。証明はこのページの範囲を超えるので、ここでは証明しない（Evans『Partial Differential Equations』第 3 章に、陽な表示（ラックス–オレイニクの公式）による存在と、この条件による一意性の証明がある）。
+:::
+
+::: supplement
+**前提を変えると.** \ref{pde:riemann-problem.2} の希薄波は連続でオレイニクの条件を満たし（$\partial_{x}u=1/t$）、$u_{-}<u_{+}$ の非物理的な衝撃波は満たさない（右の値が左より大きく飛ぶので、$z\to0$ で左辺は正のまま、右辺は $0$ に近づく）。$u_{-}>u_{+}$ なら衝撃波が条件を満たす唯一の解である。古典解（\ref{pde:burgers-shock-formation}）は存在する間はエントロピー解に一致し、$T^{*}$ の後は衝撃波を含むエントロピー解に引き継がれる。一般の 1 次元の保存則ではランキン–ユゴニオ条件は $\sigma'=(F(u_{-})-F(u_{+}))/(u_{-}-u_{+})$、多次元の保存則や連立の保存則でも同じ形の跳躍条件が成り立つ。多次元のスカラー保存則のエントロピー解の一意性はクルジコフの理論として知られている（ここでは扱わない）。
+
+**似た定理.** 「微分を試験関数に移して方程式を弱める」という操作は、楕円型方程式の弱解（\see{fa:weak-solution}）や超関数（\see{fa:distribution}）と同じ発想である。ただし楕円型方程式では弱解は一意で、正則性定理で自動的に滑らかになるのに対し、保存則の弱解は一意でなく、不連続のまま残る。弱解の概念は同じでも、方程式の型によって、弱めた後に何を足せば一意性が戻るか（楕円型では何も要らない、保存則ではエントロピー条件）が違う。この対比は、関数解析的手法の系列で扱う。
+
+**高い視点：物理が選ぶ解.** 積分の形の方程式は、「区間の中の量の増減は、両端から出入りする流量で決まる」という保存の法則そのもので、微分方程式よりも根本的である。しかし保存則だけでは解は決まらない（\ref{pde:riemann-problem}）。足りない情報は「時間の矢」で、エントロピー条件は、情報（特性曲線）が飛び目に吸い込まれて失われることだけを許し、飛び目から情報が湧き出すことを禁じる。粘性をわずかに加えて消す極限がエントロピー解を選ぶのも、粘性が不可逆性（エントロピーの増大）を持ち込むからである。
+:::
+
+## 完全非線形の場合と特性帯 {#pde:sec-ch-nonlinear}
+
+完全非線形の 1 階方程式 $F(x,u,\nabla u)=0$（$F=F(x,z,p)$、$x,p\in\mathbb{R}^{n}$, $z\in\mathbb{R}$）では、特性曲線の連立系に $\nabla u$ の値 $p$ も未知数として加える必要がある。ここでは、解があるときに $(x,u,\nabla u)$ が満たす連立系だけを導く。
+
+::: proposition 特性帯の方程式 {#pde:characteristic-strip keywords="characteristic strip equations for F(x, u, Du) = 0: x' = D_p F, z' = p . D_p F, p' = - D_x F - D_z F p, satisfied by (x(s), u(x(s)), Du(x(s))) along x' = D_p F for a C^2 solution u" index="特性帯|とくせいたい, 完全非線形 1 階方程式|かんぜんひせんけいいっかいほうていしき, 特性曲線（完全非線形）|とくせいきょくせんかんぜんひせんけい"}
+$F$ を開集合 $\mathcal{O}\subset\mathbb{R}^{n}\times\mathbb{R}\times\mathbb{R}^{n}$ 上の $C^{1}$ 級関数、$u$ を開集合 $W\subset\mathbb{R}^{n}$ 上の $C^{2}$ 級関数で、$(x,u(x),\nabla u(x))\in\mathcal{O}$ かつ $F(x,u(x),\nabla u(x))=0$（$x\in W$）とする。$x(s)$ が $x'=D_{p}F(x,u(x),\nabla u(x))$ の解なら、$z(s)\defeq u(x(s))$, $p(s)\defeq\nabla u(x(s))$ は
+$$
+\begin{aligned}
+x'&=D_{p}F(x,z,p),\qquad z'=p\cdot D_{p}F(x,z,p),\\
+p'&=-D_{x}F(x,z,p)-D_{z}F(x,z,p)\,p
+\end{aligned}
+$$
+を満たす。
+:::
+
+::: proof
+$z'=\nabla u(x)\cdot x'=p\cdot D_{p}F$ は連鎖律。$F(x,u(x),\nabla u(x))=0$ を $x_{i}$ で偏微分すると（$u\in C^{2}$ なので $\nabla u$ は $C^{1}$ 級）
+$$
+\partial_{x_{i}}F+\partial_{z}F\,\partial_{i}u+\sum_{j}\partial_{p_{j}}F\,\partial_{i}\partial_{j}u=0.
+$$
+一方 $p_{i}'=\sum_{j}\partial_{j}\partial_{i}u(x)\,x_{j}'=\sum_{j}\partial_{i}\partial_{j}u\,\partial_{p_{j}}F$（\ref{calc:schwarz-theorem} で偏微分の順序を入れ替えた）で、上の式からこれは $-\partial_{x_{i}}F-\partial_{z}F\,p_{i}$ に等しい。
+:::
+
+準線形の場合（$F=\sum_{i}a_{i}(x,z)p_{i}-c(x,z)$）では、$D_{p}F=a$ で、$z'=p\cdot a=c$ となり、$x$, $z$ の方程式は $p$ を含まずに閉じて \eqref{pde:eq-characteristic-system} に戻る。完全非線形では $p$ の方程式が切り離せず、$(x,z,p)$ の $2n+1$ 個の未知数の系になる。$(x,z,p)$ を、点 $x$ とそこでの接平面の情報の組とみて**特性帯**という。
+
+::: supplement
+**存在定理について.** 逆に、初期曲面の上で $F(x,z,p)=0$ と $p$ の接方向の成分がデータと両立するように $p$ の初期値を選び（これは $p$ についての陰関数の問題になる）、非特性条件 $D_{p}F$ が初期曲面に横断的であることを仮定すると、特性帯を束ねて $C^{2}$ 級の局所解が作れる。証明は \ref{pde:quasilinear-local-existence} と同じ逆関数定理の議論に、$p$ の成分が実際に $\nabla u$ に等しいことの確認が加わったものである。ここでは証明しない（Evans『Partial Differential Equations』第 3 章に証明がある）。
+
+**ハミルトン–ヤコビ方程式.** $u(t,x)$ についての $\partial_{t}u+H(x,\nabla u)=0$ は、$F=q+H(x,p)$（$q$ は $\partial_{t}u$ に対応する変数）の場合で、特性帯の方程式の $x$, $p$ の部分は
+$$
+x'=D_{p}H(x,p),\qquad p'=-D_{x}H(x,p)
+$$
+という**ハミルトンの方程式**になる。古典力学の運動方程式と、作用関数の満たす偏微分方程式が、特性帯で結ばれている（\see{symp:hamiltonian-vector-field}）。$n=1$ で $H=p^{2}/2$ のとき、$C^{2}$ 級の解 $u$ について $w\defeq\partial_{x}u$ は $\partial_{t}w+w\,\partial_{x}w=0$ を満たし、バーガース方程式になる。したがってハミルトン–ヤコビ方程式の解も有限時間で壊れ、$w$ の衝撃波に対応して $u$ には角ができる。角を許す解として**粘性解**（クランドールとリオンスによる）が導入され、$H$ が $p$ だけの凸関数のときはホップ–ラックスの公式で表されることが知られている（ここでは扱わない）。
+
+**高い視点：光線と波面.** アイコナール方程式 $|\nabla u|=1$ では特性帯の射影は直線（光線）で、$u$ の等高面は波面である。光線が交わる所（焦点・コースティク）で波面は尖り、$u$ は微分できなくなる。距離関数 $u(x)=\operatorname{dist}(x,K)$ がその典型で、二つ以上の最近点をもつ点で角をもつ。衝撃波・角・焦点は、どれも「特性曲線が交わると古典解が壊れる」という 1 階の方程式の共通の現象の別の顔である。
+:::
+
+## 問題 {#pde:sec-ch-burgers-problems}
+
+::: problem {#pde:prob-ch-burgers-sine}
+$g(x)=-\sin x$ とする。
+1. \ref{pde:burgers-shock-formation} の $T^{*}$ を求め、$[0,T^{*})\times\mathbb{R}$ 上の古典解 $u$ について $u(t,0)=0$ と $\partial_{x}u(t,0)=-1/(1-t)$ を示せ。
+2. $t\in[0,T^{*})$ で $u(t,\cdot)$ は奇関数で、$|u|\le1$ であることを示せ。
+:::
+
+::: solution
+**1.** $g'(x)=-\cos x$ の下限は $-1$（$x=0$ で到達）なので $T^{*}=1$。$\chi_{t}(0)=0+tg(0)=0$ なので $\Xi(t,0)=0$、$u(t,0)=g(0)=0$。\ref{pde:burgers-shock-formation.1} の式から $\partial_{x}u(t,0)=g'(0)/(1+tg'(0))=-1/(1-t)$ で、$t\uparrow1$ で $-\infty$ に発散する（\ref{pde:burgers-shock-formation.3}）。
+
+**2.** $g$ は奇関数なので $\chi_{t}(-\xi)=-\xi-tg(\xi)=-\chi_{t}(\xi)$。よって $\chi_{t}(\xi)=x$ なら $\chi_{t}(-\xi)=-x$ で、$\Xi(t,-x)=-\Xi(t,x)$（$\chi_{t}$ は単射）。$u(t,-x)=g(-\Xi(t,x))=-u(t,x)$。$|u|=|\sin\Xi|\le1$。
+:::
+
+::: problem {#pde:prob-ch-box-data}
+$g(x)\defeq1$（$0<x<1$）、$0$（それ以外）とする。
+1. $0<t<2$ で
+$$
+u(t,x)\defeq\begin{cases}0&(x<0)\\x/t&(0\le x\le t)\\1&(t<x<1+t/2)\\0&(x>1+t/2)\end{cases}
+$$
+（$t=0$ では $g$）とおくと、$u$ は $[0,2)\times\mathbb{R}$ 上の弱解であることを示せ。
+2. 1 の解の飛び目がラックスのエントロピー条件（\ref{pde:entropy-uniqueness.1}）を満たすことを確かめよ。$t=2$ で何が起きるか。$t\ge2$ で $u(t,x)\defeq x/t$（$0<x<\sqrt{2t}$）、$0$（それ以外）が飛び目でランキン–ユゴニオ条件を満たすことを確かめ、$\int u(t,x)\,dx$ が時間によらないことを確かめよ。
+:::
+
+::: solution
+**1.** $0<\tau<2$ について \ref{pde:weak-identity} を $T=2$, $k=3$, $\sigma_{1}(t)=0$, $\sigma_{2}(t)=t$, $\sigma_{3}(t)=1+t/2$、$u^{0}=0$, $u^{1}=x/t$, $u^{2}=1$, $u^{3}=0$ で使う（$t\in[\tau,2)$ で $0<t<1+t/2$ なので順序が保たれる）。各片は方程式の古典解（$x/t$ は \ref{pde:riemann-problem} の証明の Step 3 の計算）。$\sigma_{1}$, $\sigma_{2}$ の上では両側の値が等しく（$0=0/t$, $t/t=1$）$\delta_{1}=\delta_{2}=0$。$\sigma_{3}$ の上では $u^{2}=1$, $u^{3}=0$ で $\delta_{3}=(\tfrac12-0)-\tfrac12(1-0)=0$。よって左辺は $-\int u(\tau,x)\varphi(\tau,x)\,dx$。$u(\tau,x)$ と $g(x)$ は $0<x<\tau$ と $1\le x<1+\tau/2$ でだけ異なり、そこで差は $1$ 以下なので、\ref{pde:riemann-problem} の証明の Step 1 と同じく $\tau\downarrow0$ で $\int g(x)\varphi(0,x)\,dx$ に近づく。よって \eqref{pde:eq-weak-burgers} が成り立つ。
+
+**2.** 飛び目 $x=1+t/2$ で $u_{-}=1>0=u_{+}$ なので、ラックスの条件を満たす。$t=2$ で扇の右端 $x=t$ が飛び目 $x=1+t/2$ に追いつく（$t=1+t/2\iff t=2$、位置 $x=2$）。$t\ge2$ の解の飛び目 $\sigma(t)=\sqrt{2t}$ では $u_{-}=\sigma/t=\sqrt{2/t}$, $u_{+}=0$ で、$\sigma'(t)=1/\sqrt{2t}=\frac12\sqrt{2/t}=(u_{-}+u_{+})/2$ なので、\ref{pde:rankine-hugoniot} を満たす（$\sigma(2)=2$ で 1 の解とつながり、扇の中では \ref{pde:riemann-problem} と同じく古典解）。$\int u\,dx$ は、$t<2$ で $\int_{0}^{t}\frac{x}{t}dx+(1+\frac{t}{2}-t)=\frac{t}{2}+1-\frac{t}{2}=1$、$t\ge2$ で $\int_{0}^{\sqrt{2t}}\frac{x}{t}dx=\frac{2t}{2t}=1$ で、$\int g=1$ に等しい（保存則）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

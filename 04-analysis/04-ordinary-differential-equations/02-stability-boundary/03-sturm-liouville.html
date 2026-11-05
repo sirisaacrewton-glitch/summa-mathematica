@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>境界値問題とスツルム–リウヴィル理論 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/02-stability-boundary/03-sturm-liouville.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 境界値問題とスツルム–リウヴィル理論 {#ode:page-sturm-liouville keywords="Sturm-Liouville operator Lu = -(pu')' + qu with weight w, separated boundary conditions, Robin boundary condition, Dirichlet and Neumann conditions, Lagrange identity, Green's formula, symmetry, Wronskian, boundary value problem, Green's function, jump condition, Fredholm alternative, solvability condition, eigenvalue problem Lu = lambda w u, real simple eigenvalues tending to infinity, lower bound, compact self-adjoint integral operator, Hilbert-Schmidt, orthonormal basis of eigenfunctions in L^2(w), eigenfunction expansion, uniform convergence, Fourier sine, cosine and exponential series, sum 1/n^4 = pi^4/90, スツルム・リウヴィル, ストゥルム–リウヴィル, シュトゥルム–リウヴィル, グリーン関数, 固有関数展開, 境界値問題"}
+
+これまでの常微分方程式は、時刻 $t_{0}$ で値と速度を与える**初期値問題**だった。このページでは、区間 $[a,b]$ の両端に一つずつ条件を課す**境界値問題**
+$$
+-(pu')'+qu=h,\qquad \alpha_{1}u(a)+\alpha_{2}p(a)u'(a)=0,\qquad \beta_{1}u(b)+\beta_{2}p(b)u'(b)=0
+$$
+を扱う。両端に条件が分かれるので、初期値問題と違って解はいつも存在するとは限らない。まず、同次方程式 $-(pu')'+qu=0$ が境界条件を満たす $0$ でない解をもたなければ、両端の条件を一つずつ満たす解を組み合わせて**グリーン関数** $G(x,y)$ を作り、解が $u(x)=\int_{a}^{b}G(x,y)h(y)\,dy$ とただ一つに書けることを示す（\ref{ode:green-function}）。$0$ でない解があるときは、右辺がその解と直交することが解ける条件になる（\ref{ode:sl-alternative}）。次に、固有値問題 $-(pu')'+qu=\lambda wu$ を考える。グリーン関数を核とする積分作用素は $L^{2}(w\,dx)$ の上のコンパクトな自己共役作用素なので、関数解析のスペクトル定理から、固有値は実数で単純、下に有界で $+\infty$ に発散する列をなし、固有関数は $L^{2}(w\,dx)$ の正規直交基底になる（\ref{ode:sl-eigen}）。固有関数展開が一様に収束するための条件、$-u''=\lambda u$ でフーリエ正弦級数・余弦級数・指数関数の級数に戻ること、$n$ 番目の固有関数の零点の個数（スツルムの振動定理）は次のページで扱う。
+
+このページはこの系列の前のページ（平衡点の安定性・平面の力学系）には依存せず、線形方程式の基本事項と関数解析だけを使う。ここで得る固有関数の完全性は、後の偏微分方程式の系列で、変数分離による解法の土台になる。
+
+## 記法と定義の確認 {#ode:sec-sl-notation}
+
+::: notation
+- 線形方程式：係数が連続な線形系の解は区間全体にただ一つ存在し（\ref{ode:linear-existence}）、斉次方程式の解空間は次元が未知関数の個数に等しく、各点での値への写像が線形同型である（\ref{ode:solution-space}）。基本行列は \ref{ode:fundamental-matrix}、定数変化法は \ref{ode:variation-of-constants}、高階の方程式のロンスキアンは \ref{ode:higher-order-linear}。区間は閉区間 $J=[a,b]$ でよい（端点では片側微分）。
+- 微分積分：\ref{calc:fundamental-theorem}、一様収束のコーシーの判定法と一様極限の連続性は \ref{calc:uniform-limit-theorems}、一様連続性は \ref{top:heine-cantor}、多項式による一様近似は \ref{top:weierstrass-approximation}。
+- 測度と $L^{2}$：ルベーグ測度の上で、連続関数 $w>0$ を密度とする測度 $w\,dx$（\ref{meas:density-measure}）について $L^{2}(w)\defeq L^{2}([a,b],w\,dx)$ とし、内積を $\langle f,g\rangle_{w}\defeq\int_{a}^{b}f\bar{g}\,w\,dx$、ノルムを $\|f\|_{w}$ と書く。$L^{2}(w)$ は完備（\ref{meas:riesz-fischer}）で、複素ヒルベルト空間である。重みのない内積 $(f,g)\defeq\int_{a}^{b}f\bar{g}\,dx$ も使う。$0<w_{0}\le w\le w_{1}$ なら $w_{0}\int|f|^{2}dx\le\|f\|_{w}^{2}\le w_{1}\int|f|^{2}dx$。コンパクト台の連続関数の稠密性は \ref{meas:cc-dense}、単調収束定理は \ref{meas:monotone-convergence}。
+- 関数解析：コンパクト作用素 \ref{fa:compact-operator}、ヒルベルト–シュミット積分作用素 \ref{fa:hilbert-schmidt}、自己共役作用素の性質 \ref{fa:selfadjoint}、自己共役コンパクト作用素のスペクトル定理 \ref{fa:compact-selfadjoint-spectral}、ベッセルの不等式 \ref{fa:bessel}、正規直交基底とパーセヴァルの等式 \ref{fa:orthonormal-basis}。
+- 関数は複素数値も許し、$C^{k}[a,b]$ は端点で片側微分した $C^{k}$ 級の関数の全体、$\|\cdot\|_{\infty}$ は最大値ノルム。係数 $p,q,w$ と境界条件の係数 $\alpha_{i},\beta_{i}$ は実数値である。
+- **選択公理**：スペクトル定理の証明で固有ベクトルを帰納的に選ぶ所と、コンパクト性の議論で部分列を選ぶ所で従属選択公理（DC）を使い、このページではそれらを引用して使う。正規直交基底の存在（ツォルンの補題）は使わない：ここでは積分作用素の核が $0$ であることを示すので、固有ベクトルだけで基底になる。それ以外の構成（基本解の選び方、カットオフ関数、多項式近似）は具体的で、選択を使わない。
+:::
+
+## スツルム–リウヴィル作用素と境界条件 {#ode:sec-sl-operator}
+
+::: definition スツルム–リウヴィル作用素 {#ode:sturm-liouville-operator keywords="Sturm-Liouville operator Lu = -(pu')' + qu on [a,b] with p in C^1, p > 0, q continuous, weight w > 0 continuous; separated (Robin) boundary conditions alpha_1 u(a) + alpha_2 p(a) u'(a) = 0, beta_1 u(b) + beta_2 p(b) u'(b) = 0; Dirichlet and Neumann conditions; domain D; eigenvalue and eigenfunction of Lu = lambda w u; first order system for (u, pu')" index="スツルム–リウヴィル作用素|すつるむりうう゛ぃるさようそ, 分離型境界条件|ぶんりがたきょうかいじょうけん, ディリクレ境界条件|でぃりくれきょうかいじょうけん, ノイマン境界条件|のいまんきょうかいじょうけん, ロバン境界条件|ろばんきょうかいじょうけん, 固有値（スツルム–リウヴィル）|こゆうちすつるむりうう゛ぃる, 固有関数|こゆうかんすう, 重み関数|おもみかんすう"}
+$a<b$ とし、$p\in C^{1}[a,b]$, $q,w\in C[a,b]$ を実数値で $p>0$, $w>0$ とする。
+1. $u\in C^{2}[a,b]$ に対して $Lu\defeq-(pu')'+qu$ と定め、$L$ を**スツルム–リウヴィル作用素**、$w$ を**重み関数**という。
+2. 実数 $(\alpha_{1},\alpha_{2})\neq(0,0)$, $(\beta_{1},\beta_{2})\neq(0,0)$ について
+$$
+B_{a}u\defeq\alpha_{1}u(a)+\alpha_{2}p(a)u'(a),\qquad B_{b}u\defeq\beta_{1}u(b)+\beta_{2}p(b)u'(b)
+$$
+とおき、条件 $B_{a}u=0$, $B_{b}u=0$ を**分離型境界条件**という。$\alpha_{2}=0$ のときの $u(a)=0$ を**ディリクレ境界条件**、$\alpha_{1}=0$ のときの $u'(a)=0$ を**ノイマン境界条件**、両方とも $0$ でないときを**ロバン境界条件**という（$b$ でも同様）。
+3. $D\defeq\{u\in C^{2}[a,b]:B_{a}u=0,\ B_{b}u=0\}$ とする。$\lambda\in\mathbb{C}$ について、$Lu=\lambda wu$ を満たす $u\in D$, $u\neq0$ があるとき、$\lambda$ を（$L$, $w$ と境界条件の）**固有値**、$u$ を**固有関数**という。
+:::
+
+::: intuition
+$p$ は弦の張力、$w$ は弦の線密度、$q$ は弦を元の位置に引き戻すばねの強さのようなもので、固有関数は両端の留め方（境界条件）を守ったまま形を変えずに振動する形、固有値はその振動数の二乗にあたる。
+:::
+
+::: example $-u''$ の固有値 {#ode:sl-laplacian-eigenvalues keywords="eigenvalues of -u'' = lambda u on [0, pi]: Dirichlet conditions give n^2 with sin nx (n >= 1), Neumann conditions give n^2 with cos nx (n >= 0)" index="ディリクレ条件の固有値|でぃりくれじょうけんのこゆうち, ノイマン条件の固有値|のいまんじょうけんのこゆうち"}
+$p=w=1$, $q=0$, $Lu=-u''$ とする。$\lambda=k^{2}>0$（$k>0$）なら $-u''=\lambda u$ の解は $A\cos kx+B\sin kx$、$\lambda=0$ なら $A+Bx$、$\lambda=-k^{2}<0$ なら $A\cosh kx+B\sinh kx$ である（\ref{ode:solution-space} から解空間は $2$ 次元で、これらは一次独立な $2$ つの解の組み合わせ）。固有値が実数であることは \ref{ode:sl-symmetry.4} で示す。
+1. （ディリクレ条件 $u(0)=u(\pi)=0$）$u(0)=0$ から $A=0$。$u(\pi)=0$ から、$\lambda<0$ では $\sinh k\pi\neq0$ なので $B=0$、$\lambda=0$ でも $B=0$、$\lambda=k^{2}$ では $\sin k\pi=0$。よって固有値は $n^{2}$（$n\ge1$）で、固有関数は $\sin nx$ の定数倍。
+2. （ノイマン条件 $u'(0)=u'(\pi)=0$）$u'(0)=0$ から $B=0$。$u'(\pi)=0$ から、$\lambda<0$ では $A=0$、$\lambda=k^{2}$ では $\sin k\pi=0$、$\lambda=0$ では定数が解。よって固有値は $n^{2}$（$n\ge0$）で、固有関数は $\cos nx$ の定数倍（$n=0$ では定数）。
+:::
+
+**1 階の系への書き換え.** $u\in C^{2}[a,b]$ と $h\in C[a,b]$, $\lambda\in\mathbb{R}$ について、$U\defeq(u,pu')$ とおくと
+$$
+Lu=\lambda wu+h\iff U'=\begin{pmatrix}0&1/p\\ q-\lambda w&0\end{pmatrix}U+\begin{pmatrix}0\\-h\end{pmatrix}.
+$$
+逆に、この系の $C^{1}$ 級の解 $U=(U_{1},U_{2})$ について $u\defeq U_{1}$ は $u'=U_{2}/p\in C^{1}$ なので $C^{2}$ 級で、$pu'=U_{2}$ である。係数は実数値で連続なので、\ref{ode:linear-existence} から、各 $x_{0}\in[a,b]$ と $(u(x_{0}),p(x_{0})u'(x_{0}))$ の値を与えると $[a,b]$ 全体の解がただ一つ決まり、$h=0$ なら実数値の解の全体は $2$ 次元で、$u\mapsto(u(x_{0}),p(x_{0})u'(x_{0}))$ は線形同型である（\ref{ode:solution-space}）。複素数値の解は、実部と虚部がそれぞれ実数値の解である（$h$ も実部と虚部に分ける）。
+
+次の補題の $\mathcal{W}$ は、ロンスキアン（\ref{ode:higher-order-linear}）に $p$ を掛けたものである。
+
+::: proposition ラグランジュの恒等式と対称性 {#ode:sl-symmetry keywords="Lagrange identity conj(v) Lu - u L conj(v) = (W(u, conj v))' with W(u,v) = p(uv' - u'v); Green's formula; symmetry (Lu, v) = (u, Lv) on D; p times the Wronskian is constant for solutions; eigenvalues are real and simple, eigenfunctions can be chosen real and are orthogonal in L^2(w)" index="ラグランジュの恒等式|らぐらんじゅのこうとうしき, グリーンの公式（スツルム–リウヴィル）|ぐりーんのこうしきすつるむりうう゛ぃる, 固有値の単純性|こゆうちのたんじゅんせい"}
+$u,v\in C^{2}[a,b]$ について $\mathcal{W}(u,v)\defeq p\,(uv'-u'v)$ とおく。
+1. （ラグランジュの恒等式とグリーンの公式）$\bar{v}\,Lu-u\,\overline{Lv}=\mathcal{W}(u,\bar{v})'$ で、
+$$
+\int_{a}^{b}\bigl((Lu)\bar{v}-u\,\overline{Lv}\bigr)dx=\mathcal{W}(u,\bar{v})(b)-\mathcal{W}(u,\bar{v})(a).
+$$
+2. $u,v$ がともに $B_{a}u=0$, $B_{a}v=0$ を満たせば $\mathcal{W}(u,\bar{v})(a)=0$（$b$ でも同様）。とくに $u,v\in D$ なら $(Lu,v)=(u,Lv)$。
+3. $\lambda\in\mathbb{R}$ で、$u,v$ が実数値で $Lu=\lambda wu$, $Lv=\lambda wv$ を満たせば、$\mathcal{W}(u,v)$ は定数で、$\mathcal{W}(u,v)=0$ と $u,v$ の一次従属は同値である。
+4. 固有値は実数である。各固有値の固有関数の全体に $0$ を加えたものは $1$ 次元で、実数値の固有関数で張られる。異なる固有値の固有関数は $L^{2}(w)$ で直交する。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$L$ の係数は実数なので $L\bar{v}=\overline{Lv}$。$q$ の項は打ち消し合い、積の微分から
+$$
+\mathcal{W}(u,\bar{v})'=\bigl(u\,(p\bar{v}')-\bar{v}\,(pu')\bigr)'=u\,(p\bar{v}')'-\bar{v}\,(pu')'=\bar{v}\,Lu-u\,L\bar{v}
+$$
+（$u'p\bar{v}'$ と $\bar{v}'pu'$ が打ち消し合う）。$\mathcal{W}(u,\bar{v})$ は $C^{1}$ 級なので、\ref{calc:fundamental-theorem.2} で積分すれば公式を得る。
+
+**Step 2.** 【主張：2】$B_{a}$ の係数は実数なので $B_{a}\bar{v}=\overline{B_{a}v}=0$。よって $\mathbb{C}^{2}$ の $2$ つのベクトル $(u(a),p(a)u'(a))$ と $(\bar{v}(a),p(a)\bar{v}'(a))$ は、どちらも $0$ でないベクトル $(\alpha_{1},\alpha_{2})$ との双線形な積が $0$ になる。そのようなベクトルの全体は $\mathbb{C}^{2}$ の $1$ 次元部分空間なので、$2$ つは一次従属で、それを並べた行列式 $u(a)\,p(a)\bar{v}'(a)-p(a)u'(a)\,\bar{v}(a)=\mathcal{W}(u,\bar{v})(a)$ は $0$。$u,v\in D$ なら両端の項が消えるので、1 から $(Lu,v)=\int(Lu)\bar{v}\,dx=\int u\,\overline{Lv}\,dx=(u,Lv)$。
+
+**Step 3.** 【主張：3】Step 1 の計算（実数値なので共役は要らない）で $\mathcal{W}(u,v)'=u\,(pv')'-v\,(pu')'=u(q-\lambda w)v-v(q-\lambda w)u=0$ なので定数。一次従属なら明らかに $0$ である。逆に $\mathcal{W}(u,v)(x_{0})=0$ なら、$(u,pu')(x_{0})$ と $(v,pv')(x_{0})$ を並べた行列式が $0$ なので、$(c,d)\neq(0,0)$ で $c\,(u,pu')(x_{0})+d\,(v,pv')(x_{0})=0$ となる実数がある。$cu+dv$ は同じ方程式の解で $x_{0}$ での値が $0$ なので、1 階の系の解の一意性（\ref{ode:solution-space}）から恒等的に $0$。
+
+**Step 4.** 【主張：4】$u\in D$, $u\neq0$, $Lu=\lambda wu$ なら、2 から $\lambda\|u\|_{w}^{2}=(Lu,u)=(u,Lu)=\bar{\lambda}\|u\|_{w}^{2}$ で $\lambda\in\mathbb{R}$。係数・境界条件が実数なので $\operatorname{Re}u$, $\operatorname{Im}u$ も $D$ に入り同じ方程式を満たす。実数値の固有関数 $u_{1},u_{2}$ について、Step 2 から $\mathcal{W}(u_{1},u_{2})(a)=0$、3 から一次従属。よって実数値の固有関数は $0$ でない一つの $e$ の実数倍で、$u=\operatorname{Re}u+i\operatorname{Im}u$ は $e$ の複素数倍である。異なる固有値 $\lambda\neq\mu$ の固有関数 $u,v$ について、$\lambda\langle u,v\rangle_{w}=(Lu,v)=(u,Lv)=\mu\langle u,v\rangle_{w}$（$\mu$ は実数）なので $\langle u,v\rangle_{w}=0$。
+
+::: hypcheck
+- **分離型境界条件**：Step 2 で、両端それぞれで境界の項が消えることに使った。単純性（Step 4）は左端の条件だけから出る。周期境界条件 $u(0)=u(2\pi)$, $u'(0)=u'(2\pi)$ のような分離していない条件では、2 の対称性は成り立つが、$-u''$ の $\cos x$, $\sin x$ が同じ固有値 $1$ をもつので単純性は崩れる（\see{ode:sl-fourier-examples}）。
+- **係数と境界条件の係数が実数**：Step 1 の $L\bar{v}=\overline{Lv}$ と Step 2 の $B_{a}\bar{v}=\overline{B_{a}v}$ に使った。$\alpha_{1}$, $\alpha_{2}$ が複素数で比が実数でなければ、対称性が崩れ、固有値が実数とは限らない。
+- **$p>0$**：1 階の系の係数 $1/p$ の連続性（Step 3 の一意性）に使った。
+:::
+:::
+
+次の評価は、固有値が下に有界であることと、適当な $c$ について $L+cw$ が $0$ を固有値にもたないことを保証する。
+
+::: lemma 下からの評価 {#ode:sl-lower-bound keywords="Sturm-Liouville operator with separated boundary conditions is bounded below: (Lu, u) >= -C_0 ||u||_w^2 on D; integration by parts formula (Lu,u) = int p|u'|^2 + q|u|^2 + sigma_b |u(b)|^2 - sigma_a |u(a)|^2; trace inequality |u(x)|^2 <= eps int |u'|^2 + (1/eps + 1/(b-a)) int |u|^2" index="下に有界（スツルム–リウヴィル作用素）|したにゆうかいすつるむりうう゛ぃるさようそ"}
+$\sigma_{a}\defeq\alpha_{1}/\alpha_{2}$（$\alpha_{2}\neq0$ のとき）、$\sigma_{a}\defeq0$（$\alpha_{2}=0$ のとき）、$\sigma_{b}$ も $\beta$ について同様に定め、$\sigma\defeq|\sigma_{a}|+|\sigma_{b}|$, $p_{0}\defeq\min p$, $w_{0}\defeq\min w$ とする。
+1. $u\in D$ について
+$$
+(Lu,u)=\int_{a}^{b}\bigl(p|u'|^{2}+q|u|^{2}\bigr)dx+\sigma_{b}|u(b)|^{2}-\sigma_{a}|u(a)|^{2}.
+$$
+2. $C_{0}\defeq\bigl(\|q\|_{\infty}+\sigma^{2}/p_{0}+\sigma/(b-a)\bigr)/w_{0}$ とおくと、$u\in D$ について $(Lu,u)\ge-C_{0}\|u\|_{w}^{2}$。とくに固有値はすべて $-C_{0}$ 以上である。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$pu'\bar{u}$ は $C^{1}$ 級なので、\ref{calc:fundamental-theorem.2} から $\int_{a}^{b}-(pu')'\bar{u}\,dx=-\bigl[pu'\bar{u}\bigr]_{a}^{b}+\int_{a}^{b}p|u'|^{2}dx$。$\beta_{2}\neq0$ なら $p(b)u'(b)=-\sigma_{b}u(b)$ なので $-p(b)u'(b)\bar{u}(b)=\sigma_{b}|u(b)|^{2}$、$\beta_{2}=0$ なら $\beta_{1}\neq0$ で $u(b)=0$ なので両辺とも $0$。$a$ でも同様に $p(a)u'(a)\bar{u}(a)=-\sigma_{a}|u(a)|^{2}$。
+
+**Step 2.** 【主張：すべての $x\in[a,b]$ と $\varepsilon>0$ で $|u(x)|^{2}\le\varepsilon\int|u'|^{2}dx+\bigl(\frac{1}{\varepsilon}+\frac{1}{b-a}\bigr)\int|u|^{2}dx$】$x,y\in[a,b]$ について、$(|u|^{2})'=2\operatorname{Re}(u'\bar{u})\le2|u||u'|\le\varepsilon|u'|^{2}+\varepsilon^{-1}|u|^{2}$ を $y$ から $x$ まで積分して $|u(x)|^{2}\le|u(y)|^{2}+\varepsilon\int_{a}^{b}|u'|^{2}+\varepsilon^{-1}\int_{a}^{b}|u|^{2}$。これを $y$ について $[a,b]$ で積分し $b-a$ で割る。
+
+**Step 3.** 【主張：2】1 と Step 2 から、$\sigma>0$ のとき $\varepsilon\defeq p_{0}/\sigma$ として
+$$
+(Lu,u)\ge p_{0}\!\int|u'|^{2}-\|q\|_{\infty}\!\int|u|^{2}-\sigma\Bigl(\varepsilon\!\int|u'|^{2}+\Bigl(\frac{1}{\varepsilon}+\frac{1}{b-a}\Bigr)\!\int|u|^{2}\Bigr)=-w_{0}C_{0}\!\int|u|^{2}dx.
+$$
+$\sigma=0$ なら境界の項がなく、同じ不等式が成り立つ。$w_{0}\int|u|^{2}dx\le\|u\|_{w}^{2}$ から主張を得る。固有値 $\lambda$ と固有関数 $u$ については $\lambda\|u\|_{w}^{2}=(Lu,u)\ge-C_{0}\|u\|_{w}^{2}$。
+:::
+
+::: example
+$q\ge0$ で、ディリクレ条件か、$\sigma_{a}\le0\le\sigma_{b}$（たとえば $u'(a)=hu(a)$, $h\ge0$ は $\alpha_{1}=h$, $\alpha_{2}=-1/p(a)$ で $\sigma_{a}=-hp(a)\le0$）なら、1 から $(Lu,u)\ge0$ で、固有値はすべて $0$ 以上である。両端がディリクレ条件なら、$(Lu,u)=0$ から $u'=0$ と $u(a)=0$ で $u=0$ となるので、固有値はすべて正である。
+:::
+
+## グリーン関数 {#ode:sec-sl-green}
+
+::: theorem グリーン関数 {#ode:green-function keywords="Green's function of a Sturm-Liouville boundary value problem when 0 is not an eigenvalue: G(x,y) = phi_a(min(x,y)) phi_b(max(x,y)) / omega with phi_a satisfying the left and phi_b the right boundary condition, omega = p(phi_b phi_a' - phi_b' phi_a) nonzero constant; G is continuous, real and symmetric, solves LG = 0 off the diagonal, satisfies the boundary conditions, and p d_x G jumps by -1 across the diagonal; u = int G h is the unique solution in D of Lu = h" index="グリーン関数|ぐりーんかんすう, 跳びの条件|とびのじょうけん, 境界値問題の解の存在と一意性|きょうかいちもんだいのかいのそんざいといちいせい"}
+$0$ は固有値でないとする。$\varphi_{a}$, $\varphi_{b}$ を $L\varphi=0$ の解で
+$$
+\bigl(\varphi_{a}(a),\,p(a)\varphi_{a}'(a)\bigr)=(-\alpha_{2},\,\alpha_{1}),\qquad\bigl(\varphi_{b}(b),\,p(b)\varphi_{b}'(b)\bigr)=(\beta_{2},\,-\beta_{1})
+$$
+となるものとする。
+1. $\varphi_{a}$, $\varphi_{b}$ は実数値で $0$ でなく、$B_{a}\varphi_{a}=0$, $B_{b}\varphi_{b}=0$。$\omega\defeq\mathcal{W}(\varphi_{b},\varphi_{a})$ は $0$ でない定数である。
+2. $G(x,y)\defeq\varphi_{a}(\min\{x,y\})\,\varphi_{b}(\max\{x,y\})/\omega$ とおくと、$G$ は $[a,b]^{2}$ の上で連続、実数値で $G(x,y)=G(y,x)$。
+3. 各 $y\in[a,b]$ について、$x\mapsto G(x,y)$ は $[a,y]$ と $[y,b]$ の上でそれぞれ $C^{2}$ 級で $LG(\cdot,y)=0$、$B_{a}G(\cdot,y)=0$, $B_{b}G(\cdot,y)=0$ を満たし、$a<y<b$ なら**跳びの条件** $p(y)\bigl(\partial_{x}G(y+0,y)-\partial_{x}G(y-0,y)\bigr)=-1$ を満たす。
+4. $h\in C[a,b]$ について、$Lu=h$ を満たす $u\in D$ はただ一つで、
+$$
+u(x)=\int_{a}^{b}G(x,y)h(y)\,dy,\qquad \|u\|_{\infty}\le(b-a)\|G\|_{\infty}\|h\|_{\infty}.
+$$
+:::
+
+::: intuition
+両端の条件が一つずつ分かれているので、左端の条件だけを満たす解と右端の条件だけを満たす解を別々に作り、点 $y$ でつなげば、「$y$ に単位の力を加えたときの応答」が得られる。一般の右辺に対する解は、その応答を右辺の重みで足し合わせたものである。
+:::
+
+::: example
+$[0,1]$ で $Lu=-u''$、ディリクレ条件 $u(0)=u(1)=0$ なら、$\varphi_{a}(x)=x$, $\varphi_{b}(x)=1-x$, $\omega=(1-x)\cdot1-(-1)\cdot x=1$ で、$G(x,y)=\min\{x,y\}\,(1-\max\{x,y\})$。$u(0)=0$, $u'(1)=0$ なら $\varphi_{b}=1$, $\omega=1$ で $G(x,y)=\min\{x,y\}$ である（この核の積分作用素の固有関数は \see{fa:min-kernel-eigen} で直接計算した）。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$\varphi_{a}$, $\varphi_{b}$ は、1 階の系に実数の初期値を与えた解として $[a,b]$ 全体にただ一つあり（\ref{ode:linear-existence}）、実数値である。初期値は $0$ でないので $0$ でない。$B_{a}\varphi_{a}=\alpha_{1}(-\alpha_{2})+\alpha_{2}\alpha_{1}=0$、同様に $B_{b}\varphi_{b}=\beta_{1}\beta_{2}-\beta_{2}\beta_{1}=0$。$\omega$ は \ref{ode:sl-symmetry.3} から定数である。$\omega=0$ なら、同じ補題から $\varphi_{b}=c\varphi_{a}$（$c\ne0$）となり、$\varphi_{a}$ は $B_{a}\varphi_{a}=0$ と $B_{b}\varphi_{a}=c^{-1}B_{b}\varphi_{b}=0$ を満たす $D$ の $0$ でない元で $L\varphi_{a}=0$、つまり $0$ が固有値になり、仮定に反する。
+
+**Step 2.** 【主張：2・3】$G$ は $x\le y$ と $x\ge y$ の閉集合の上でそれぞれ連続な式で与えられ、対角線 $x=y$ で両方の式が $\varphi_{a}(x)\varphi_{b}(x)/\omega$ に一致するので連続。対称性は定義の $\min$, $\max$ が対称なことから。$x\mapsto G(x,y)$ は $[a,y]$ で $\varphi_{b}(y)\varphi_{a}(x)/\omega$、$[y,b]$ で $\varphi_{a}(y)\varphi_{b}(x)/\omega$ なので、それぞれ $L\varphi=0$ の解の定数倍で、左端・右端の境界条件を満たす（$y=a$ や $y=b$ のときも同じ式）。跳びは
+$$
+p(y)\,\frac{\varphi_{a}(y)\varphi_{b}'(y)-\varphi_{a}'(y)\varphi_{b}(y)}{\omega}=\frac{-\mathcal{W}(\varphi_{b},\varphi_{a})(y)}{\omega}=-1.
+$$
+
+**Step 3.** 【主張：$u\defeq\int G(\cdot,y)h(y)\,dy$ は $C^{2}$ 級で $Lu=h$】$A(x)\defeq\int_{a}^{x}\varphi_{a}h\,dy$, $B(x)\defeq\int_{x}^{b}\varphi_{b}h\,dy$ とおくと $u=(\varphi_{b}A+\varphi_{a}B)/\omega$。\ref{calc:fundamental-theorem.1} から $A'=\varphi_{a}h$, $B'=-\varphi_{b}h$ なので
+$$
+\omega u'=\varphi_{b}'A+\varphi_{b}\varphi_{a}h+\varphi_{a}'B-\varphi_{a}\varphi_{b}h=\varphi_{b}'A+\varphi_{a}'B.
+$$
+よって $\omega\,pu'=(p\varphi_{b}')A+(p\varphi_{a}')B$ は $C^{1}$ 級で、$(p\varphi')'=q\varphi$ を使うと
+$$
+\omega\,(pu')'=q\varphi_{b}A+q\varphi_{a}B+p\varphi_{b}'\varphi_{a}h-p\varphi_{a}'\varphi_{b}h=\omega\,qu-\mathcal{W}(\varphi_{b},\varphi_{a})\,h=\omega\,(qu-h).
+$$
+したがって $Lu=-(pu')'+qu=h$。
+
+**Step 4.** 【主張：$u\in D$】$A(a)=0$ なので $u(a)=\varphi_{a}(a)B(a)/\omega$, $p(a)u'(a)=p(a)\varphi_{a}'(a)B(a)/\omega$ で、$B_{a}u=B(a)B_{a}\varphi_{a}/\omega=0$。同様に $B(b)=0$ から $B_{b}u=A(b)B_{b}\varphi_{b}/\omega=0$。
+
+**Step 5.** 【主張：一意性と評価】$u_{1},u_{2}\in D$ がともに $Lu=h$ を満たせば、$u_{1}-u_{2}\in D$ で $L(u_{1}-u_{2})=0$ なので、$0$ が固有値でないことから $u_{1}=u_{2}$。評価は $|u(x)|\le\int_{a}^{b}|G(x,y)||h(y)|\,dy$ から。
+
+::: hypcheck
+- **$0$ が固有値でない**：Step 1 で $\omega\neq0$ に、Step 5 で一意性に使った。外すと偽：$[0,\pi]$ のディリクレ条件の $Lu=-u''-u$（$q=-1$）では $\sin x$ が固有値 $0$ の固有関数で、$\varphi_{a}=\sin x$, $\varphi_{b}=\sin x$ となり $\omega=0$、$-u''-u=h$ は $\int_{0}^{\pi}h\sin x\,dx\neq0$ なら解けない（\ref{ode:sl-alternative}）。
+- **分離型境界条件**：Step 1・4 で、左右の条件をそれぞれ一つの基本解に負わせることに使った。周期条件のような分離していない条件でもグリーン関数は作れるが、この形（$\min$ と $\max$ の積）にはならない（\see{ode:sl-fourier-examples}）。
+- **$p\in C^{1}$, $p>0$, $q$ 連続**：1 階の系の係数の連続性（Step 1 の解の存在）と、Step 3 の微分の計算に使った。
+- **$h$ が連続**：Step 3 で \ref{calc:fundamental-theorem.1} を使うのに使った。$h\in L^{1}$ でも公式は意味をもつが、$u$ は $C^{2}$ 級とは限らず、方程式はほとんど至る所でしか成り立たない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $p$ が端点で $0$ になる（たとえばルジャンドルの方程式 $-((1-x^{2})u')'=\lambda u$ の $[-1,1]$）と、端点は方程式の特異点になり、境界条件の代わりに「端点で有界」のような条件を課す**特異スツルム–リウヴィル問題**になる。区間が非有界な場合も同様で、グリーン関数の連続性や積分作用素のコンパクト性が崩れ、連続スペクトルが現れうる（ここでは扱わない）。$0$ が固有値なら、上の構成は $\omega=0$ で破綻し、可解条件が現れる（次の定理）。
+
+**似た定理.** 初期値問題の定数変化法（\ref{ode:variation-of-constants}）では、解は $\int_{t_{0}}^{t}\Phi(t,s)b(s)\,ds$、つまり「$s<t$ でだけ $0$ でない核」で書けた。これは時刻 $s$ に加えた力が未来にだけ影響する因果的なグリーン関数である。境界値問題では両端の条件が同時に効くので、核は $y$ の両側で $0$ でなく、対称になる。偏微分方程式では、ラプラシアンのグリーン関数が同じ役割を果たす（後の系列で扱う）。閉多様体の楕円型作用素では、$(P+1)^{-1}$ がこの積分作用素にあたる（\see{gl:elliptic-resolvent}）。
+
+**高い視点：弦を一点で押す.** 両端を留めた弦の点 $y$ を単位の力で押すと、弦は $y$ で折れ曲がった形になる。$y$ の左右では力がないので弦は方程式 $Lu=0$ に従い、$y$ では張力 $p$ と傾きの変化が押した力に釣り合う。これが跳びの条件で、$G(\cdot,y)$ はその形である。分布した力 $h$ で押したときの形は、各点で押した形を $h$ の重みで重ね合わせたもの $\int G(\cdot,y)h(y)\,dy$ になる。$G(x,y)=G(y,x)$ は、「$y$ を押して $x$ で測った変位」と「$x$ を押して $y$ で測った変位」が等しいという相反性である。
+:::
+
+$0$ が固有値のときは、解けるための条件が一つ現れる。
+
+::: theorem フレドホルムの二者択一（スツルム–リウヴィル） {#ode:sl-alternative keywords="Fredholm alternative for Sturm-Liouville boundary value problems: either 0 is not an eigenvalue and Lu = h has a unique solution in D for every continuous h, or 0 is a simple eigenvalue with real eigenfunction phi_0, and Lu = h is solvable in D iff int h phi_0 dx = 0, the solutions being u_1 + C phi_0; resonance" index="フレドホルムの二者択一（スツルム–リウヴィル）|ふれどほるむのにしゃたくいつすつるむりうう゛ぃる, 可解条件|かかいじょうけん, 共振|きょうしん"}
+次のどちらか一方だけが成り立つ。
+1. $0$ は固有値でなく、すべての $h\in C[a,b]$ について $Lu=h$ を満たす $u\in D$ がただ一つある。
+2. $0$ は固有値で、実数値の固有関数 $\varphi_{0}$ があって $\{u\in D:Lu=0\}=\mathbb{C}\varphi_{0}$。$h\in C[a,b]$ について、$Lu=h$ を満たす $u\in D$ があることと
+$$
+\int_{a}^{b}h\,\varphi_{0}\,dx=0
+$$
+は同値で、そのとき解の全体は $u_{1}+C\varphi_{0}$（$u_{1}$ は一つの解、$C\in\mathbb{C}$）である。
+:::
+
+::: intuition
+同次方程式が境界条件を満たす $0$ でない解をもたなければ、どんな右辺でもただ一通りに解ける。もつときは、右辺がその解と直交するときに限って解け、解はその解の分だけ不定になる。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$0$ が固有値でなければ \ref{ode:green-function.4} そのもの。$0$ が固有値なら $h=0$ で解が一つではないので、1 と 2 は同時には成り立たない。以下 $0$ は固有値とする。\ref{ode:sl-symmetry.4} から $\{u\in D:Lu=0\}$ は実数値の固有関数 $\varphi_{0}$ で張られる $1$ 次元の空間である。
+
+**Step 2.** 【主張：解があれば $\int h\varphi_{0}=0$】$u\in D$, $Lu=h$ なら、\ref{ode:sl-symmetry.2} から $\int h\varphi_{0}\,dx=(Lu,\varphi_{0})=(u,L\varphi_{0})=0$（$\varphi_{0}$ は実数値）。
+
+**Step 3.** 【主張：$\mathcal{W}(\varphi_{0},\psi)=1$ となる実数値の解 $\psi$ があり、$B_{a}\psi\neq0$, $B_{b}\psi\neq0$】$r\defeq\varphi_{0}(a)^{2}+(p\varphi_{0}')(a)^{2}>0$ とし、$\psi$ を $L\psi=0$, $(\psi(a),p(a)\psi'(a))=(-p(a)\varphi_{0}'(a),\varphi_{0}(a))/r$ の解とすると、$\mathcal{W}(\varphi_{0},\psi)(a)=\varphi_{0}(a)\,p(a)\psi'(a)-p(a)\varphi_{0}'(a)\,\psi(a)=1$ で、\ref{ode:sl-symmetry.3} から恒等的に $1$。$B_{a}\psi=0$ なら \ref{ode:sl-symmetry.2} の議論で $\mathcal{W}(\varphi_{0},\psi)(a)=0$ となり矛盾する。$b$ でも同じ。
+
+**Step 4.** 【主張：$u_{p}(x)\defeq\int_{a}^{x}\bigl(\psi(y)\varphi_{0}(x)-\varphi_{0}(y)\psi(x)\bigr)h(y)\,dy$ は $Lu_{p}=h$, $B_{a}u_{p}=0$, $B_{b}u_{p}=-B_{b}\psi\int_{a}^{b}\varphi_{0}h\,dy$ を満たす】$\Psi(x)\defeq\int_{a}^{x}\psi h$, $\Phi(x)\defeq\int_{a}^{x}\varphi_{0}h$ とおくと $u_{p}=\varphi_{0}\Psi-\psi\Phi$。\ref{ode:green-function} の Step 3 と同じ計算で $u_{p}'=\varphi_{0}'\Psi-\psi'\Phi$、
+$$
+(pu_{p}')'=q\varphi_{0}\Psi-q\psi\Phi+p\varphi_{0}'\psi h-p\psi'\varphi_{0}h=qu_{p}-\mathcal{W}(\varphi_{0},\psi)\,h=qu_{p}-h
+$$
+なので $Lu_{p}=h$。$\Psi(a)=\Phi(a)=0$ から $u_{p}(a)=0$, $p(a)u_{p}'(a)=0$ で $B_{a}u_{p}=0$。$B_{b}u_{p}=\Psi(b)B_{b}\varphi_{0}-\Phi(b)B_{b}\psi=-\Phi(b)B_{b}\psi$。
+
+**Step 5.** 【主張：$\int h\varphi_{0}=0$ なら解があり、解の全体は $u_{p}+C\varphi_{0}$】$C^{2}$ 級の $u$ が $Lu=h$ を満たすことは、$u-u_{p}$ が $L(u-u_{p})=0$ を満たすこと、つまり（実部と虚部に分けて \ref{ode:solution-space} を使い）$u=u_{p}+c_{1}\varphi_{0}+c_{2}\psi$（$c_{1},c_{2}\in\mathbb{C}$）と書けることと同値である。$B_{a}u=c_{2}B_{a}\psi$ なので $B_{a}u=0\iff c_{2}=0$。そのとき $B_{b}u=-B_{b}\psi\int\varphi_{0}h$ で、Step 3 から $B_{b}\psi\neq0$。よって $u\in D$ となる $u$ は、$\int\varphi_{0}h=0$ のときに限りあって、$u_{p}+c_{1}\varphi_{0}$ の形である。
+
+::: hypcheck
+- **分離型境界条件**：Step 1 で核が $1$ 次元であること（\ref{ode:sl-symmetry.4}）、Step 3 で $B_{a}\psi\ne0$, $B_{b}\psi\ne0$、Step 4 で $u_{p}$ が左端の条件を満たすことに使った。周期条件では核が $2$ 次元になりうる（$-u''$ の $\cos x$, $\sin x$）ので、条件は二つになる。
+- **右辺の直交条件が重みなしであること**：Step 2 の対称性は重みのない内積 $(\cdot,\cdot)$ で成り立つので、可解条件は $\int h\varphi_{0}\,dx=0$ である。方程式を $Lu=wg$ と書けば $\langle g,\varphi_{0}\rangle_{w}=0$ になる。
+- **連続性**：$h$ の連続性は $u_{p}$ が $C^{2}$ 級であること（\ref{calc:fundamental-theorem.1}）に使った。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $[0,\pi]$ のノイマン条件で $-u''=h$ なら $\varphi_{0}=1$ で、可解条件は $\int_{0}^{\pi}h\,dx=0$ である。これは、両端で熱の出入りがない棒の定常温度分布が存在するには、熱源の総量が $0$ でなければならないことを表している（\ref{ode:prob-sl-neumann}）。
+
+**似た定理.** 関数解析のフレドホルムの二者択一（\ref{fa:fredholm-alternative}）は、コンパクト作用素 $T$ について「$\lambda-T$ が可逆か、核が $0$ でないか」の二択を述べる。$L+cw$ の逆を使って $Lu=h$ を $(1-cK)u=K(h/w)$ の形に書き直すと、ここの定理はその具体形になっている（ここでは直接証明した）。閉多様体の楕円型作用素でも、像が形式的随伴の核の直交補空間になるという同じ形の結果が成り立つ（\see{gl:elliptic-fredholm}）。
+
+**高い視点：共振.** $0$ が固有値であるとは、外から力を加えなくても境界条件を守ったまま釣り合う形 $\varphi_{0}$ がある、つまり系がその形に「共振」できることである。力 $h$ がその形と同じ向きの成分 $\int h\varphi_{0}$ をもつと、ブランコを固有振動数で押し続けるように応答がいくらでも大きくなり、釣り合いの状態（解）は存在しない。その成分が $0$ のときだけ釣り合いがあり、共振する形 $\varphi_{0}$ をいくら足しても釣り合いは崩れない。
+:::
+
+## 固有値問題 {#ode:sec-sl-eigen}
+
+固有関数が $L^{2}(w)$ の基底になることを示すには、積分作用素の核が $0$ であることを言う必要がある。そのために、境界条件を満たす関数が $L^{2}(w)$ で稠密であることを確かめておく。
+
+::: lemma 端の近くで消える関数の稠密性 {#ode:sl-density keywords="C^2 functions vanishing near both endpoints are dense in L^2([a,b], w dx); cut-off function from the C^2 step t^3(10 - 15t + 6t^2) and Weierstrass approximation" index="稠密性（境界条件を満たす関数）|ちゅうみつせいきょうかいじょうけんをみたすかんすう"}
+$a$ と $b$ のそれぞれの近傍で恒等的に $0$ になる $C^{2}[a,b]$ の関数の全体 $D_{0}$ は $D$ に含まれ、$L^{2}(w)$ で稠密である。
+:::
+
+::: proof
+**Step 1.** 【主張：$D_{0}\subset D$ で、$C[a,b]$ は $L^{2}(w)$ で稠密】$u\in D_{0}$ は端点で $u=u'=0$ なので、どんな境界条件も満たす。$f\in L^{2}(w)$ を $[a,b]$ の外で $0$ として $\mathbb{R}$ に延ばしたものは $L^{2}(\mathbb{R})$ に入る（$\int|f|^{2}dx\le\|f\|_{w}^{2}/w_{0}$）。\ref{meas:cc-dense} から $g\in C_{c}(\mathbb{R})$ で $\int_{\mathbb{R}}|f-g|^{2}dx<\varepsilon^{2}$ となるものがあり、$g$ を $[a,b]$ に制限すると $\|f-g\|_{w}^{2}\le w_{1}\varepsilon^{2}$（$w_{1}\defeq\max w$）。
+
+**Step 2.** 【主張：$0\le\chi_{\delta}\le1$ で、$[a,a+\delta]\cup[b-\delta,b]$ で $0$、$[a+2\delta,b-2\delta]$ で $1$ の $C^{2}$ 級の関数 $\chi_{\delta}$ がある（$0<\delta<(b-a)/4$）】$s(t)\defeq0$（$t\le0$）、$t^{3}(10-15t+6t^{2})$（$0\le t\le1$）、$1$（$t\ge1$）とおくと、$s'(t)=30t^{2}(1-t)^{2}\ge0$, $s''(t)=60t(1-t)(1-2t)$ は $t=0,1$ で $0$ なので $s$ は $C^{2}$ 級で $0\le s\le1$。$\chi_{\delta}(x)\defeq s\bigl((x-a-\delta)/\delta\bigr)\,s\bigl((b-\delta-x)/\delta\bigr)$ とすればよい。
+
+**Step 3.** 【主張：$g\in C[a,b]$ は $D_{0}$ の元で $L^{2}(w)$ 近似できる】\ref{top:weierstrass-approximation.1}（実部と虚部に分ける）から多項式 $P$ で $\|g-P\|_{\infty}<\varepsilon$ となるものをとる。$\chi_{\delta}P\in D_{0}$ で、$1-\chi_{\delta}$ は長さ $4\delta$ の集合の外で $0$ なので
+$$
+\|g-\chi_{\delta}P\|_{w}\le\|g-P\|_{w}+\|(1-\chi_{\delta})P\|_{w}\le\varepsilon\sqrt{w_{1}(b-a)}+\|P\|_{\infty}\sqrt{4w_{1}\delta}.
+$$
+$\delta\to0$ として右辺を $2\varepsilon\sqrt{w_{1}(b-a)}$ 未満にできる。Step 1 と合わせて主張を得る。
+:::
+
+::: theorem スツルム–リウヴィルの固有値問題 {#ode:sl-eigen keywords="Sturm-Liouville eigenvalue problem with separated boundary conditions: eigenvalues are real, simple, form an increasing sequence lambda_1 < lambda_2 < ... tending to +infinity, bounded below; normalized real eigenfunctions form an orthonormal basis of L^2(w); the Green's function G_c of L + cw defines a compact self-adjoint Hilbert-Schmidt operator K on L^2(w) with eigenvalues 1/(lambda_n + c); sum 1/(lambda_n + c)^2 = double integral of G_c^2 w w" index="スツルム–リウヴィルの固有値問題|すつるむりうう゛ぃるのこゆうちもんだい, 固有関数の完全性|こゆうかんすうのかんぜんせい, 固有値の漸近（スツルム–リウヴィル）|こゆうちのぜんきんすつるむりうう゛ぃる" refname="スツルム–リウヴィルの固有値問題"}
+$L$, $w$ と分離型境界条件を \ref{ode:sturm-liouville-operator} のとおりとし、$C_{0}$ を \ref{ode:sl-lower-bound.2} の定数とする。
+1. 固有値は実数で単純で、無限個あり、$-C_{0}\le\lambda_{1}<\lambda_{2}<\cdots\to+\infty$ と並べられる。
+2. 各 $n$ について実数値で $\|e_{n}\|_{w}=1$ の固有関数 $e_{n}$（固有値 $\lambda_{n}$）を選ぶと、$(e_{n})_{n\ge1}$ は $L^{2}(w)$ の正規直交基底である。
+3. $-c$ が固有値でない実数 $c$ について、$L+cw$ のグリーン関数を $G_{c}$ とすると
+$$
+\sum_{n=1}^{\infty}\frac{1}{(\lambda_{n}+c)^{2}}=\int_{a}^{b}\!\!\int_{a}^{b}G_{c}(x,y)^{2}\,w(x)w(y)\,dx\,dy<\infty.
+$$
+:::
+
+::: intuition
+両端を留めた弦の固有振動は、低い音から高い音へ一列に並び、同じ高さの音を出す形は一つしかなく、音はいくらでも高くなる。しかも、どんな形の弦の変位も、固有振動の形の重ね合わせとして書ける。
+:::
+
+::: proof
+以下、$c\defeq C_{0}+1$ とし、$L_{c}\defeq L+cw$（$q$ を $q+cw$ に替えたスツルム–リウヴィル作用素）と書く。
+
+**Step 1.** 【主張：$0$ は $L_{c}$ の固有値でなく、$L_{c}$ のグリーン関数 $G_{c}$ がある】$u\in D$, $L_{c}u=0$ なら \ref{ode:sl-lower-bound.2} から $0=(Lu,u)+c\|u\|_{w}^{2}\ge(c-C_{0})\|u\|_{w}^{2}=\|u\|_{w}^{2}$ で $u=0$。\ref{ode:green-function} を $L_{c}$ に使う。
+
+**Step 2.** 【主張：$Kf(x)\defeq\int_{a}^{b}G_{c}(x,y)f(y)w(y)\,dy$ は $L^{2}(w)$ の上のコンパクトな自己共役作用素で、$Kf$ は連続】測度 $w\,dx$ は有限なので σ 有限で、$G_{c}$ は有界な実数値の連続関数なので $G_{c}\in L^{2}(w\,dx\otimes w\,dx)$、$G_{c}(x,y)=\overline{G_{c}(y,x)}$。\ref{fa:hilbert-schmidt.1}・\ref[3]{fa:hilbert-schmidt.3}・\ref[4]{fa:hilbert-schmidt.4} から主張の前半を得る。$x,x'\in[a,b]$ について、コーシー–シュワルツの不等式から
+$$
+|Kf(x)-Kf(x')|\le\sup_{y}|G_{c}(x,y)-G_{c}(x',y)|\,\Bigl(\int_{a}^{b}w\,dy\Bigr)^{1/2}\|f\|_{w}
+$$
+で、$G_{c}$ は一様連続（\ref{top:heine-cantor}）なので $Kf$ は（すべての点で定義された関数として）連続。
+
+**Step 3.** 【主張：$g\in C[a,b]$ なら $Kg\in D$ で $L_{c}Kg=wg$。$u\in D$ なら $u=K(L_{c}u/w)$】前半は \ref{ode:green-function.4} を $h=wg$ に使う。後半は、$g\defeq L_{c}u/w$ が連続で、前半から $Kg\in D$, $L_{c}Kg=L_{c}u$ なので、一意性（\ref{ode:green-function.4}）から $Kg=u$。
+
+**Step 4.** 【主張：$\ker K=0$】$Kf=0$ とする。$u\in D$ について、Step 3 と $K$ の自己共役性から $\langle f,u\rangle_{w}=\langle f,K(L_{c}u/w)\rangle_{w}=\langle Kf,L_{c}u/w\rangle_{w}=0$。とくに $f$ は $D_{0}$ と直交し、$D_{0}$ は稠密（\ref{ode:sl-density}）なので、内積の連続性から $\langle f,f\rangle_{w}=0$。
+
+**Step 5.** 【主張：$\mu\ne0$ と $f\in L^{2}(w)$, $f\ne0$ について、$Kf=\mu f$ であることと、$f$ がほとんど至る所で固有値 $\mu^{-1}-c$ の固有関数 $u$ に等しいことは同値。固有値 $\lambda$ について $\lambda+c>0$】$Kf=\mu f$ なら $u\defeq\mu^{-1}Kf$ は連続で、ほとんど至る所 $u=f$ なので $Ku=Kf=\mu u$（$K$ は関数のほとんど至る所での値しか使わない）。よって $u=K(\mu^{-1}u)$ で、$\mu^{-1}u$ は連続なので Step 3 から $u\in D$, $L_{c}u=\mu^{-1}wu$、すなわち $Lu=(\mu^{-1}-c)wu$。逆に $u\in D$, $Lu=\lambda wu$, $u\neq0$ なら、\ref{ode:sl-lower-bound.2} から $\lambda\ge-C_{0}$ で $\lambda+c\ge1$。$L_{c}u=(\lambda+c)wu$ と Step 3 から $u=K((\lambda+c)u)$、つまり $Ku=(\lambda+c)^{-1}u$。
+
+**Step 6.** 【主張：1・2】\ref{fa:compact-selfadjoint-spectral} から、$K$ の固有ベクトルからなる有限または可算の正規直交系 $(f_{k})$ と実数 $\mu_{k}\neq0$（$|\mu_{1}|\ge|\mu_{2}|\ge\cdots$、無限個なら $\to0$）で、$L^{2}(w)=\ker K\oplus\overline{\operatorname{span}}\{f_{k}\}=\overline{\operatorname{span}}\{f_{k}\}$（Step 4）となるものがある。Step 5 から各 $f_{k}$ は固有値 $\lambda_{k}\defeq\mu_{k}^{-1}-c$ の固有関数（の同値類）で、$\lambda_{k}+c>0$ なので $\mu_{k}>0$。$\mu_{k}=\mu_{j}$（$k\neq j$）なら $f_{k}$, $f_{j}$ は同じ固有値の直交する固有関数になり、\ref{ode:sl-symmetry.4} の $1$ 次元性に反するので、$\mu_{1}>\mu_{2}>\cdots$、つまり $\lambda_{1}<\lambda_{2}<\cdots$。$L^{2}(w)$ は無限次元である（$[a,b]$ を $N$ 等分した小区間の指示関数は $N$ 個の直交する $0$ でない元）から、正規直交基底 $(f_{k})$ は無限個で、$\mu_{k}\to0$ から $\lambda_{k}\to+\infty$。$L$ の任意の固有値 $\lambda$ の固有関数 $u$ は Step 5 から $Ku=(\lambda+c)^{-1}u$ を満たし、$(\lambda+c)^{-1}$ がどの $\mu_{k}$ とも違えば $u\perp f_{k}$（\ref{fa:selfadjoint.1}）がすべての $k$ で成り立って $u=0$（\ref{fa:orthonormal-basis.1}）となり矛盾するので、$\lambda$ はある $\lambda_{k}$ に等しい。最後に、\ref{ode:sl-symmetry.4} から $f_{k}$ は実数値の固有関数 $e_{k}$ の絶対値 $1$ の定数倍なので、$f_{k}$ を $e_{k}$ に替えても正規直交基底である。$\lambda_{1}\ge-C_{0}$ は \ref{ode:sl-lower-bound.2}。
+
+**Step 7.** 【主張：3】$-c'$ が固有値でない実数 $c'$ について、$L_{c'}\defeq L+c'w$ も $0$ を固有値にもたないので、グリーン関数 $G_{c'}$ と作用素 $K'$ が Step 2 と同様に定まり、Step 3 と Step 5 の後半の議論（$\lambda_{n}+c'\neq0$ だけを使う）から $K'e_{n}=(\lambda_{n}+c')^{-1}e_{n}$。各 $x$ について $G_{c'}(x,\cdot)\in L^{2}(w)$ の係数は、$G_{c'}$ と $e_{n}$ が実数値なので
+$$
+\langle G_{c'}(x,\cdot),e_{n}\rangle_{w}=\int_{a}^{b}G_{c'}(x,y)e_{n}(y)w(y)\,dy=(K'e_{n})(x)=\frac{e_{n}(x)}{\lambda_{n}+c'}.
+$$
+パーセヴァルの等式（\ref{fa:orthonormal-basis.4}）から $\int G_{c'}(x,y)^{2}w(y)\,dy=\sum_{n}e_{n}(x)^{2}/(\lambda_{n}+c')^{2}$。両辺に $w(x)$ を掛けて $x$ で積分し、右辺は非負の項の和なので単調収束定理（\ref{meas:monotone-convergence}）で項別に積分すると、$\int e_{n}^{2}w\,dx=1$ から主張を得る。
+
+::: hypcheck
+- **分離型境界条件**：Step 6 の単純性（\ref{ode:sl-symmetry.4}）に使った。対称性と下からの評価は、周期条件でも同じように成り立つので、1 の単純性以外と 2・3 は周期条件でも成り立つ（\see{ode:sl-fourier-examples}）。
+- **$p>0$, $w>0$ が閉区間の上で連続（正則な問題）**：Step 2 で $G_{c}$ の有界性と一様連続性（コンパクト性と $Kf$ の連続性）に、Step 1 で下からの評価の定数 $p_{0}$, $w_{0}>0$ に使った。$p$ や $w$ が端点で $0$ になる特異な問題では、別の扱いが要る。
+- **$w>0$**：$L^{2}(w)$ の内積が正定値であることに使った。$w$ が符号を変える（不定値の重み）と、固有値は実数とは限らず、上下両方に発散しうる（ここでは扱わない）。
+- **下からの評価**：Step 1 で $c$ を選ぶことと、Step 5・6 で $\mu_{k}>0$ を示すことに使った。そのおかげで固有値は $-\infty$ に発散しない。
+- **公理**：\ref{fa:compact-selfadjoint-spectral} と \ref{fa:hilbert-schmidt} を通して DC を使う。$\ker K=0$（Step 4）なので、正規直交基底の存在定理（ツォルンの補題）は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 から $\lambda_{n}\to\infty$ の速さについて $\sum_{n}\lambda_{n}^{-2}<\infty$ がわかる。実際にはもっと詳しく、$\lambda_{n}$ は $n\to\infty$ で $\bigl(n\pi/\int_{a}^{b}\sqrt{w/p}\,dx\bigr)^{2}$ に漸近することが知られている（ここでは証明しない）。境界条件を変えると個々の固有値は変わるが、この漸近の主要項は変わらない。最小の固有値はレイリー商 $(Lu,u)/\|u\|_{w}^{2}$（$u\in D$, $u\neq0$）の下限に等しく、これは 2 の展開から $(Lu,u)=\sum_{n}\lambda_{n}|\langle u,e_{n}\rangle_{w}|^{2}$ を示せば従う（次のページの展開係数の公式を使う。\see{ode:sl-expansion}）。
+
+**似た定理.** 有界な開集合のディリクレ・ラプラシアンの固有関数が $L^{2}$ の正規直交基底をなすこと（\see{fa:dirichlet-eigenfunctions}）は、多次元の同じ結果で、そこではソボレフ空間とラックス–ミルグラムの定理で解作用素を作り、レリッヒの定理でコンパクト性を得た。$1$ 次元では解作用素がグリーン関数で具体的に書けるので、コンパクト性は連続な核からすぐに出る。ただし多次元では固有値の単純性は一般に成り立たない（正方形の $\sin x\sin2y$ と $\sin2x\sin y$）。閉多様体の楕円型作用素の固有切断の展開（\see{gl:elliptic-resolvent}）も同じ構造である。
+
+**高い視点：逆にすると行列になる.** 微分作用素 $L$ は関数を荒くし、$L^{2}(w)$ の上では有界でもなく、スペクトル定理を直接は使えない。逆のグリーン作用素 $K=(L+cw)^{-1}$ は関数を滑らかにし、連続な核をもつのでコンパクト、つまり「有限次元の対称行列の極限」である。対称行列が直交行列で対角化できるのと同じように $K$ は対角化され、その固有ベクトルがそのまま $L$ の固有関数になる。望遠鏡を逆さにのぞくと遠くの景色が手のひらに収まるように、$+\infty$ へ広がる固有値 $\lambda_{n}$ は、逆にすると $0$ に集まる列 $1/(\lambda_{n}+c)$ になって扱いやすくなる。
+:::
+
+## 問題 {#ode:sec-sl-problems}
+
+::: problem {#ode:prob-sl-neumann}
+$[0,1]$ で $-u''=h$（$h\in C[0,1]$）、$u'(0)=u'(1)=0$ を考える。
+1. この問題が解をもつための必要十分条件は $\int_{0}^{1}h\,dx=0$ であることを示せ。
+2. $h(x)=x-\frac12$ のとき、解をすべて求めよ。
+:::
+
+::: solution
+1. $\varphi$ が $-\varphi''=0$, $\varphi'(0)=\varphi'(1)=0$ を満たすなら $\varphi=A+Bx$ で $B=0$ なので、$0$ は固有値で、固有関数は定数 $\varphi_{0}=1$ である（$\alpha=\beta=(0,1)$ のノイマン条件）。\ref{ode:sl-alternative.2} から、解があることと $\int_{0}^{1}h\cdot1\,dx=0$ は同値。直接にも、解があれば $\int_{0}^{1}h=-\int_{0}^{1}u''=u'(0)-u'(1)=0$。
+2. $\int_{0}^{1}(x-\frac12)dx=0$ なので解がある。$u''=\frac12-x$ を積分して $u'=\frac{x}{2}-\frac{x^{2}}{2}+C_{1}$、$u'(0)=0$ から $C_{1}=0$ で、$u'(1)=\frac12-\frac12=0$ も満たす。もう一度積分して $u=\frac{x^{2}}{4}-\frac{x^{3}}{6}+C$（$C$ は任意の定数）。解の全体が「一つの解 $+$ 定数」であることは \ref{ode:sl-alternative.2} のとおりである。
+:::
+
+::: problem {#ode:prob-sl-zeta4}
+$[0,1]$ の $-u''=\lambda u$, $u(0)=u(1)=0$ の固有値が $\lambda_{n}=n^{2}\pi^{2}$ であることを使い、\ref{ode:sl-eigen.3} を $c=0$ で適用して $\sum_{n=1}^{\infty}\frac{1}{n^{4}}=\frac{\pi^{4}}{90}$ を示せ。
+:::
+
+::: solution
+固有値は \ref{ode:sl-laplacian-eigenvalues.1} と同じ計算（区間を $[0,1]$ に替える）で $n^{2}\pi^{2}$（$n\ge1$）なので、$0$ は固有値でなく $c=0$ がとれる。グリーン関数は \ref{ode:green-function} の例のとおり $G(x,y)=\min\{x,y\}(1-\max\{x,y\})$。$w=1$ なので \ref{ode:sl-eigen.3} から
+$$
+\sum_{n=1}^{\infty}\frac{1}{n^{4}\pi^{4}}=\int_{0}^{1}\!\!\int_{0}^{1}G(x,y)^{2}\,dx\,dy=2\int_{0}^{1}(1-y)^{2}\int_{0}^{y}x^{2}\,dx\,dy=\frac23\int_{0}^{1}y^{3}(1-y)^{2}\,dy.
+$$
+（$G$ の対称性から $x<y$ の部分の $2$ 倍。）$\int_{0}^{1}y^{3}(1-y)^{2}dy=\int_{0}^{1}(y^{3}-2y^{4}+y^{5})dy=\frac14-\frac25+\frac16=\frac{1}{60}$ なので、右辺は $\frac{1}{90}$。よって $\sum_{n}n^{-4}=\pi^{4}/90$。同じ方法で、$\sum_{n}\lambda_{n}^{-1}$ はグリーン関数の対角線上の積分 $\int G(x,x)\,dx$ に等しいこと（マーサーの定理による。ここでは証明しない）を使えば $\sum_{n}n^{-2}=\pi^{2}\int_{0}^{1}x(1-x)\,dx=\pi^{2}/6$ も得られる（\see{four:basel}）。
+:::
+
+固有関数展開の一様収束、フーリエ級数との比較、スツルムの比較定理と振動定理は、次のページ（\see{ode:page-eigenfunction-expansion}）で扱う。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

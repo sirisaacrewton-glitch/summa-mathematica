@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>調和関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/03-harmonic-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 調和関数 {#pde:page-harmonic-functions keywords="harmonic functions in R^n, Laplace equation, spherical mean and ball mean, mean value property, divergence theorem on balls via polar coordinates, derivative of spherical means, converse of the mean value property via radial mollifiers, harmonic functions are C^infinity, strong maximum principle, weak maximum principle, uniqueness for the Dirichlet problem, comparison principle, continuous dependence on boundary values, exterior domains, subharmonic functions, ラプラス方程式, 球面平均"}
+
+ラプラス方程式 $\Delta u=\sum_{i}\partial_{i}^{2}u=0$ の解を**調和関数**という。平面の場合は複素解析で正則関数の実部として扱った（\ref{cx:page-harmonic}）が、$n$ 次元では正則関数の助けがないので、性質を方程式そのものから引き出さなければならない。その出発点が**平均値の性質**である：調和関数の値は、その点を中心とする球面（あるいは球）の上の平均に等しい。このページでは、球面平均を半径で微分してこれを示し、逆に、連続で平均値の性質をもつ関数は自動的に $C^{\infty}$ 級の調和関数であることを、放射的な軟化子との畳み込みで示す。帰結として、強最大値原理と弱最大値原理、ディリクレ問題の解の一意性と境界値への連続依存を得る。導関数の評価・解析性・ハルナックの不等式・調和関数の列の収束は次のページで扱う。
+
+## 記法と定義の確認 {#pde:sec-hf-notation}
+
+::: notation
+- $n\ge1$、$\Omega\subset\mathbb{R}^{n}$ は開集合、$\lambda$ はルベーグ測度、$dy$ はそれによる積分。$B(x,r)\defeq\{y:|y-x|<r\}$、$\overline{B}(x,r)\defeq\{y:|y-x|\le r\}$、$\partial B(x,r)\defeq\{y:|y-x|=r\}$、$\omega_{n}\defeq\lambda(B(0,1))$。\ref{meas:lebesgue-linear} と平行移動不変性（\ref{meas:translation-invariant-unique.1}。積分についても単関数で近似して同じ）から $\lambda(B(x,r))=\omega_{n}r^{n}$。$\overline{B}(x,r)\subset B(x,r+\delta)$（$\delta>0$）から $\lambda(\overline{B}(x,r))=\omega_{n}r^{n}$ でもあり、とくに球面 $\partial B(x,r)$ は零集合である。
+- 球面 $S^{n-1}$ 上の測度 $\sigma$ は \ref{meas:polar-sphere-measure} のもので、$\sigma(S^{n-1})=n\omega_{n}$（\ref{meas:polar-sphere-measure-basic.1}）、$n=1$ では $S^{0}=\{1,-1\}$ の数え上げ測度（\ref{meas:polar-sphere-measure-basic.2}）。極座標の公式は \ref{meas:polar-decomposition}、$\sigma$ の回転不変性と放射関数の積分は \ref{meas:polar-radial}。
+- 積分記号下の微分は \ref{meas:parameter-integrals}、優収束定理は \ref{meas:dominated-convergence}、フビニの定理は \tref{meas:fubini}。連続関数の区間上の積分はリーマン積分と一致し、微積分学の基本定理が使える（\ref{meas:riemann-lebesgue}, \tref{calc:fundamental-theorem}）。
+- $C^{k}(\Omega)$ は $\Omega$ 上の実数値 $C^{k}$ 級関数の全体、$C(\overline{\Omega})$ は閉包 $\overline{\Omega}$ 上の連続関数の全体。ベクトル場 $F=(F_{1},\dots,F_{n})\in C^{1}(\Omega;\mathbb{R}^{n})$ の発散は $\operatorname{div}F\defeq\sum_{i}\partial_{i}F_{i}$、勾配は $\nabla u\defeq(\partial_{1}u,\dots,\partial_{n}u)$、内積は $a\cdot b$。
+- **ラプラシアンの符号**：このページでは解析学の普通の約束 $\Delta u\defeq\sum_{i}\partial_{i}^{2}u=\operatorname{div}\nabla u$ を使う。多様体上の解析（\see{gl:page-divergence-green}）の $\Delta=-\operatorname{div}\operatorname{grad}$ とは符号が逆である。$n=2$ では \ref{cx:harmonic} の $\Delta$ と同じ。
+- 軟化子 $\rho_{\varepsilon}$ と軟化 $f_{\varepsilon}=\rho_{\varepsilon}*f$ は \ref{fa:mollifier}、$\Omega_{\varepsilon}\defeq\{x\in\Omega:\operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)>\varepsilon\}$（$\Omega=\mathbb{R}^{n}$ なら $\mathbb{R}^{n}$）。
+- 開集合の連結成分は開集合である（$\mathbb{R}^{n}$ は球が連結なので局所連結。\ref{top:locally-connected-components}）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。コンパクト集合の有限部分被覆などで選ぶのは有限個だけである。
+:::
+
+## 平均値の性質 {#pde:sec-hf-mean-value}
+
+::: definition 調和関数 {#pde:harmonic-function keywords="harmonic function on an open subset of R^n: u in C^2 with Laplacian zero; Laplace equation" index="調和関数（n 次元）|ちょうわかんすうえぬじげん, ラプラス方程式|らぷらすほうていしき, ラプラシアン|らぷらしあん"}
+$u\in C^{2}(\Omega)$ が $\Omega$ の各点で $\Delta u=\sum_{i=1}^{n}\partial_{i}^{2}u=0$ を満たすとき、$u$ は $\Omega$ で**調和**である、または $\Omega$ 上の**調和関数**であるという。方程式 $\Delta u=0$ を**ラプラス方程式**という。
+:::
+
+::: intuition
+調和関数は、各座標方向の曲がり具合（2 階微分）を足すと打ち消し合って 0 になる関数である。どの点も、周りより一方的に盛り上がったりへこんだりしていない。
+:::
+
+::: example
+1. $n=1$ では $u''=0$ なので、調和関数は区間ごとに 1 次関数 $ax+b$ である。
+2. 1 次関数 $a\cdot x+b$、$n\ge2$ で $x_{1}^{2}-x_{2}^{2}$、$x_{1}x_{2}$ は $\mathbb{R}^{n}$ で調和。$n=2$ では正則関数の実部（\ref{cx:real-part-harmonic}）、たとえば $\operatorname{Re}e^{z}=e^{x}\cos y$ も調和。
+3. $n\ge3$ で $u(x)=|x|^{2-n}$ は $\mathbb{R}^{n}\setminus\{0\}$ で調和。$u=g(|x|)$ の形の関数では $\partial_{i}u=g'(|x|)x_{i}/|x|$、$\partial_{i}^{2}u=g''(|x|)\frac{x_{i}^{2}}{|x|^{2}}+g'(|x|)\bigl(\frac{1}{|x|}-\frac{x_{i}^{2}}{|x|^{3}}\bigr)$ なので $\Delta u=g''(r)+\frac{n-1}{r}g'(r)$（$r=|x|$）。$g(r)=r^{a}$ なら $\Delta u=a(a+n-2)r^{a-2}$ で、$a=2-n$ のとき $0$。$n=2$ では同様に $\log|x|$ が調和（$g=\log r$ で $g''+g'/r=-r^{-2}+r^{-2}=0$）。
+4. $|x|^{2}$ は $\Delta|x|^{2}=2n$ なので調和でない。
+:::
+
+::: definition 球面平均と平均値の性質 {#pde:spherical-mean keywords="spherical mean S_r u(x) and ball mean A_r u(x) of a continuous function; mean value property on spheres and on balls" index="球面平均|きゅうめんへいきん, 球平均|きゅうへいきん, 平均値の性質（n 次元）|へいきんちのせいしつえぬじげん"}
+$u\in C(\Omega)$、$x\in\Omega$、$r>0$、$\overline{B}(x,r)\subset\Omega$ とする。
+$$
+S_{r}u(x)\defeq\frac{1}{n\omega_{n}}\int_{S^{n-1}}u(x+r\theta)\,d\sigma(\theta),\qquad A_{r}u(x)\defeq\frac{1}{\omega_{n}r^{n}}\int_{B(x,r)}u(y)\,dy
+$$
+をそれぞれ $u$ の**球面平均**、**球平均**といい、$S_{0}u(x)\defeq u(x)$ とおく（被積分関数はコンパクト集合の上の連続関数なので有界ボレル可測で、積分は有限）。$\overline{B}(x,r)\subset\Omega$ となるすべての $x$ と $r>0$ について $u(x)=S_{r}u(x)$ が成り立つとき、$u$ は**球面についての平均値の性質**をもつといい、$u(x)=A_{r}u(x)$ が成り立つとき、**球についての平均値の性質**をもつという。
+:::
+
+::: intuition
+球面平均は、点 $x$ から距離 $r$ の所にある値を、どの方向も同じ重みで平均したもの。球平均は、半径 $r$ までの中身全体を平均したもの。平均値の性質とは、中心の値がそれらの平均にいつも等しいことである。
+:::
+
+まず、二つの平均の関係を確かめる。
+
+::: lemma 球面平均と球平均 {#pde:means-relation keywords="continuity of r -> S_r u(x); ball mean as weighted integral of spherical means A_r u = (n / r^n) int_0^r s^{n-1} S_s u ds; the two mean value properties are equivalent for continuous functions" index="球面平均と球平均の関係|きゅうめんへいきんときゅうへいきんのかんけい"}
+$u\in C(\Omega)$、$\overline{B}(x,R)\subset\Omega$（$R>0$）とする。
+1. $r\mapsto S_{r}u(x)$ は $[0,R]$ で連続。
+2. $0<r\le R$ なら $\displaystyle A_{r}u(x)=\frac{n}{r^{n}}\int_{0}^{r}s^{n-1}S_{s}u(x)\,ds$。
+3. $u$ が球面についての平均値の性質をもつことと、球についての平均値の性質をもつことは同値である。
+:::
+
+::: proof
+**1.** $f(\theta,r)\defeq u(x+r\theta)$ は、各 $\theta$ について $r$ の連続関数で、$|f|\le\max_{\overline{B}(x,R)}|u|$。定数は有限測度 $\sigma$ について可積分なので、\ref{meas:parameter-integrals.1} から $r\mapsto\int f(\theta,r)\,d\sigma(\theta)$ は $[0,R]$ で連続。$r=0$ での値は $\frac{1}{n\omega_{n}}\int u(x)\,d\sigma=u(x)=S_{0}u(x)$。
+
+**2.** $g(z)\defeq u(x+z)\mathbf{1}_{B(0,r)}(z)$（$B(0,r)$ の外では $0$）は有界なボレル可測関数で台が有界なので可積分。平行移動不変性から $\int_{B(x,r)}u\,dy=\int g\,dz$。$g$ の正の部分と負の部分に \ref{meas:polar-decomposition.2} を使って引くと（どちらも有限）、$s\theta\in B(0,r)\iff s<r$ なので
+$$
+\int g\,dz=\int_{0}^{r}\Bigl(\int_{S^{n-1}}u(x+s\theta)\,d\sigma(\theta)\Bigr)s^{n-1}ds=n\omega_{n}\int_{0}^{r}s^{n-1}S_{s}u(x)\,ds.
+$$
+両辺を $\omega_{n}r^{n}$ で割る。
+
+**3.** 球面についての性質を仮定すると、2 の右辺は $\frac{n}{r^{n}}u(x)\int_{0}^{r}s^{n-1}ds=u(x)$。逆に球についての性質を仮定し、$\overline{B}(x,r)\subset\Omega$ とする。$0<s\le r$ では $\overline{B}(x,s)\subset\Omega$ なので、2 から $\int_{0}^{s}t^{n-1}S_{t}u(x)\,dt=\frac{s^{n}}{n}u(x)$。1 から被積分関数は連続なので、微積分学の基本定理で $s$ について微分して $s^{n-1}S_{s}u(x)=s^{n-1}u(x)$、$s=r$ として $S_{r}u(x)=u(x)$。
+:::
+
+平均値の性質を示す鍵は、球の上の発散定理である。ここでは、球面測度 $\sigma$ と相性のよい形で、極座標だけから直接示しておく。
+
+::: lemma 球の上の発散定理 {#pde:ball-divergence keywords="divergence theorem on a ball in R^n via polar coordinates and a radial cutoff: int_{B(x,r)} div F = r^{n-1} int_{S^{n-1}} F(x + r theta) . theta d sigma(theta)" index="球の上の発散定理|きゅうのうえのはっさんていり, ガウスの発散定理（球）|がうすのはっさんていりきゅう"}
+$F\in C^{1}(\Omega;\mathbb{R}^{n})$、$r>0$、$\overline{B}(x,r)\subset\Omega$ なら
+$$
+\int_{B(x,r)}\operatorname{div}F\,dy=r^{n-1}\int_{S^{n-1}}F(x+r\theta)\cdot\theta\,d\sigma(\theta).
+$$
+:::
+
+::: intuition
+球の中の湧き出しの総量は、球面から外向きに流れ出る量の総和に等しい。右辺の $\theta$ は球面の外向き単位法線、$r^{n-1}d\sigma$ は半径 $r$ の球面の面積要素である。
+:::
+
+::: proof
+$F$ を $F(x+\cdot)$ に替えれば $x=0$ としてよい。$\overline{B}(0,r)$ はコンパクトなので $\mathbb{R}^{n}\setminus\Omega$ との距離は正で（$\Omega=\mathbb{R}^{n}$ なら任意）、$R>r$ を $\overline{B}(0,R)\subset\Omega$ となるようにとる。$h(t)\defeq0$（$t\le0$）、$3t^{2}-2t^{3}$（$0\le t\le1$）、$1$（$t\ge1$）は $C^{1}$ 級で（つなぎ目で値も $h'(t)=6t(1-t)$ も一致する）、$h'\ge0$、$h(1)-h(0)=1$。$0<\varepsilon<R-r$ について
+$$
+\psi_{\varepsilon}(y)\defeq1-h\Bigl(\frac{|y|-r}{\varepsilon}\Bigr)
+$$
+とおく。$|y|<r$ では $\psi_{\varepsilon}=1$、$|y|\ge r+\varepsilon$ では $\psi_{\varepsilon}=0$ で、$y\ne0$ では $|y|$ が $C^{\infty}$ 級なので、$\psi_{\varepsilon}\in C^{1}(\mathbb{R}^{n})$、$\nabla\psi_{\varepsilon}(y)=-k_{\varepsilon}(|y|)\,\frac{y}{|y|}$（$k_{\varepsilon}(s)\defeq\varepsilon^{-1}h'((s-r)/\varepsilon)$。$|y|<r$ では $0$）。
+
+**Step 1（部分積分）.** 【主張：$\displaystyle\int\psi_{\varepsilon}\operatorname{div}F\,dy=\int k_{\varepsilon}(|y|)\,F(y)\cdot\frac{y}{|y|}\,dy$】$G\defeq\psi_{\varepsilon}F$ を $\Omega$ の外で $0$ と延ばすと、台は $\overline{B}(0,r+\varepsilon)\subset B(0,R)$ に含まれ、$G\in C^{1}(\mathbb{R}^{n};\mathbb{R}^{n})$ で台がコンパクト。各 $j$ について、$y_{j}$ 以外の座標を固定すると $y_{j}\mapsto G_{j}$ は有界区間の外で $0$ なので、微積分学の基本定理から $\int_{\mathbb{R}}\partial_{j}G_{j}\,dy_{j}=0$。$\partial_{j}G_{j}$ は台がコンパクトな連続関数で可積分なので、フビニの定理から $\int_{\mathbb{R}^{n}}\partial_{j}G_{j}\,dy=0$。$\operatorname{div}G=\psi_{\varepsilon}\operatorname{div}F+\nabla\psi_{\varepsilon}\cdot F$ を積分して移項する。
+
+**Step 2（右辺の極限）.** 【主張：$\varepsilon\to0$ で右辺は $\displaystyle g(r)\defeq r^{n-1}\int_{S^{n-1}}F(r\theta)\cdot\theta\,d\sigma(\theta)$ に収束する】右辺の被積分関数は有界なボレル可測関数で台がコンパクトなので、正の部分と負の部分に \ref{meas:polar-decomposition.2} を使い（$y=s\theta$ で $y/|y|=\theta$）、$k_{\varepsilon}$ が $[r,r+\varepsilon]$ の外で $0$ であることから
+$$
+\int k_{\varepsilon}(|y|)F(y)\cdot\frac{y}{|y|}\,dy=\int_{r}^{r+\varepsilon}k_{\varepsilon}(s)\,g(s)\,ds,\qquad g(s)=s^{n-1}\int_{S^{n-1}}F(s\theta)\cdot\theta\,d\sigma(\theta).
+$$
+$|F(s\theta)\cdot\theta|\le\max_{\overline{B}(0,R)}|F|$ なので、\ref{meas:parameter-integrals.1} から $g$ は $(0,R)$ で連続。$k_{\varepsilon}\ge0$、$\int_{r}^{r+\varepsilon}k_{\varepsilon}(s)\,ds=h(1)-h(0)=1$ なので
+$$
+\Bigl|\int_{r}^{r+\varepsilon}k_{\varepsilon}(s)g(s)\,ds-g(r)\Bigr|=\Bigl|\int_{r}^{r+\varepsilon}k_{\varepsilon}(s)\bigl(g(s)-g(r)\bigr)\,ds\Bigr|\le\max_{r\le s\le r+\varepsilon}|g(s)-g(r)|\to0.
+$$
+
+**Step 3（左辺の極限）.** 【主張：$\varepsilon\to0$ で左辺は $\int_{B(0,r)}\operatorname{div}F\,dy$ に収束する】$|y|\le r$ なら $\psi_{\varepsilon}(y)=1$、$|y|>r$ なら $\varepsilon<|y|-r$ で $\psi_{\varepsilon}(y)=0$ なので、$\psi_{\varepsilon}\to\mathbf{1}_{\overline{B}(0,r)}$（各点）。$|\psi_{\varepsilon}\operatorname{div}F|\le|\operatorname{div}F|\mathbf{1}_{\overline{B}(0,R)}$ は可積分なので、優収束定理（$\varepsilon$ を 0 に収束する任意の列で動かす）から左辺は $\int_{\overline{B}(0,r)}\operatorname{div}F$ に収束し、球面は零集合なのでこれは $\int_{B(0,r)}\operatorname{div}F$ に等しい。Step 1〜3 から等式が従う。
+:::
+
+::: theorem 平均値の性質 {#pde:mean-value-property keywords="mean value property of harmonic functions in R^n: u(x) equals its spherical mean and its ball mean; derivative of the spherical mean d/dr S_r u(x) = (r/n) A_r(Delta u)(x)" index="平均値の性質（調和関数）|へいきんちのせいしつちょうわかんすう, 球面平均の微分|きゅうめんへいきんのびぶん" refname="調和関数の平均値の性質（n 次元）"}
+$u\in C^{2}(\Omega)$、$\overline{B}(x,R)\subset\Omega$（$R>0$）とする。
+1. $\varphi(r)\defeq S_{r}u(x)$ は $(0,R]$ で微分可能で
+$$
+\varphi'(r)=\frac{1}{n\omega_{n}}\int_{S^{n-1}}\nabla u(x+r\theta)\cdot\theta\,d\sigma(\theta)=\frac{r}{n}\,A_{r}(\Delta u)(x).
+$$
+2. $u$ が $\Omega$ で調和なら、$u$ は球面と球の両方についての平均値の性質をもつ：$\overline{B}(x,r)\subset\Omega$ なら $u(x)=S_{r}u(x)=A_{r}u(x)$。
+:::
+
+::: intuition
+調和関数の値は、その点を中心とするどの球面の上の平均とも、どの球の上の平均とも等しい。一般の関数では、球面平均を半径について微分すると、球の中のラプラシアンの平均に比例する。
+:::
+
+::: example
+1. $u=|x|^{2}$ では $|x+r\theta|^{2}=|x|^{2}+2r\,x\cdot\theta+r^{2}$ で、$\int_{S^{n-1}}\theta\,d\sigma=0$（$\sigma$ は $\theta\mapsto-\theta$ で不変、\ref{meas:polar-radial.1}）なので $S_{r}u(x)=|x|^{2}+r^{2}$。$\varphi'(r)=2r$ で、$\Delta u=2n$ から $\frac{r}{n}A_{r}(\Delta u)=2r$ と一致する。$u(x)<S_{r}u(x)$ なので平均値の性質はもたない。
+2. $n\ge2$、$u=x_{1}^{2}-x_{2}^{2}$ では、座標の入れ替え（直交変換）で $\sigma$ は不変なので $\int\theta_{1}^{2}\,d\sigma=\int\theta_{2}^{2}\,d\sigma$、上と同様に $\int\theta_{i}\,d\sigma=0$。よって $S_{r}u(x)=x_{1}^{2}-x_{2}^{2}+r^{2}\frac{1}{n\omega_{n}}\int(\theta_{1}^{2}-\theta_{2}^{2})\,d\sigma=u(x)$ で、調和関数の平均値の性質と合う。
+:::
+
+::: proof
+$f(\theta,r)\defeq u(x+r\theta)$ とおく。
+
+**Step 1（積分記号下の微分）.** 【主張：$\varphi$ は $[0,R]$ で微分可能で $\varphi'(r)=\frac{1}{n\omega_{n}}\int_{S^{n-1}}\nabla u(x+r\theta)\cdot\theta\,d\sigma(\theta)$】連鎖律から $\partial_{r}f(\theta,r)=\nabla u(x+r\theta)\cdot\theta$ で、$|\theta|=1$ から $|\partial_{r}f|\le\max_{\overline{B}(x,R)}|\nabla u|$（$\nabla u$ はコンパクト集合 $\overline{B}(x,R)$ で連続なので有界）。定数は $\sigma$ 可積分なので、\ref{meas:parameter-integrals.2} を区間 $[0,R]$ に使えばよい（$r=0$ では片側微分）。
+
+**Step 2（発散定理）.** 【主張：$0<r\le R$ なら $\varphi'(r)=\frac{r}{n}A_{r}(\Delta u)(x)$（1）】$u\in C^{2}$ なので $F\defeq\nabla u\in C^{1}(\Omega;\mathbb{R}^{n})$ で $\operatorname{div}F=\Delta u$。\ref{pde:ball-divergence} から
+$$
+\int_{S^{n-1}}\nabla u(x+r\theta)\cdot\theta\,d\sigma(\theta)=r^{1-n}\int_{B(x,r)}\Delta u\,dy=r^{1-n}\,\omega_{n}r^{n}A_{r}(\Delta u)(x).
+$$
+Step 1 の式に代入すると $\varphi'(r)=\frac{\omega_{n}r}{n\omega_{n}}A_{r}(\Delta u)(x)=\frac{r}{n}A_{r}(\Delta u)(x)$。
+
+**Step 3（調和なら定数）.** 【主張：$\Delta u=0$ なら $\varphi$ は $[0,R]$ で定数 $u(x)$ に等しい】Step 2 から $(0,R]$ で $\varphi'=0$。Step 1 から $\varphi$ は $[0,R]$ で微分可能、とくに連続なので、$0<r\le R$ について \ref{calc:mean-value-theorem} を $[0,r]$ に使うと $\varphi(r)-\varphi(0)=\varphi'(\xi)r=0$（$0<\xi<r$）。$\varphi(0)=S_{0}u(x)=u(x)$ なので $S_{r}u(x)=u(x)$。
+
+$\overline{B}(x,r)\subset\Omega$ となる任意の $x,r$ について、$R=r$ として Step 3 を使えば球面についての平均値の性質を得る。球についての性質は \ref{pde:means-relation.3} から従う（2）。
+
+::: hypcheck
+- **$u\in C^{2}(\Omega)$**：Step 1 で $\nabla u$ の連続性（積分記号下の微分の優関数）、Step 2 で $\nabla u\in C^{1}$（発散定理を使うため）に使った。2 で調和性を $C^{2}$ の意味で仮定するのはこのためで、実は連続性だけから調和性を言い直せる（\see{pde:mean-value-converse}）。
+- **$\overline{B}(x,R)\subset\Omega$**：$\nabla u$ が $\overline{B}(x,R)$ で有界であること（Step 1）と、発散定理の仮定（Step 2）に使った。開球 $B(x,R)\subset\Omega$ だけなら、$r<R$ のすべてで等式が成り立ち、$u$ が $\overline{B}(x,R)$ で連続なら \ref{pde:means-relation.1} で $r\to R$ として $r=R$ でも成り立つ。
+- **調和性**：Step 3 だけで使った。1 の公式は任意の $C^{2}$ 関数で成り立つ。$\Delta u\ge0$ なら $\varphi$ は増加し $u(x)\le S_{r}u(x)$ となる（\see{pde:prob-hf-subharmonic}）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 1 の公式から、$\Delta u$ の符号と平均の大小が対応する：$\Delta u\ge0$（**劣調和**）なら $u(x)\le S_{r}u(x)$、$\Delta u\le0$（優調和）なら $u(x)\ge S_{r}u(x)$。劣調和関数はペロンの方法でディリクレ問題の解を作るときの主役になる（この系列の後のページ）。また $\varphi(r)=u(x)+\frac{r^{2}}{2n}\Delta u(x)+o(r^{2})$（$r\to0$）が 1 と $A_{r}(\Delta u)(x)\to\Delta u(x)$ から従い、「ラプラシアンは、球面平均が中心の値からどれだけずれるかの 2 次の係数」と読める。これを $C^{2}$ を仮定しない $\Delta$ の定義（$\lim_{r\to0}2n(S_{r}u(x)-u(x))/r^{2}$）として使うこともある。
+
+**似た定理.** 平面では \ref{cx:harmonic-mean-value} が同じ主張で、そこでは正則関数のコーシーの積分公式から示した（\ref{cx:mean-value}）。$n$ 次元には正則関数がないので、このページでは発散定理で代用した。発散定理そのものは、$\mathbb{R}^{3}$ の領域については \see{vec:gauss-divergence}、$C^{1}$ 境界をもつ $\mathbb{R}^{n}$ の有界領域については \see{fa:gauss-green-c1}、リーマン多様体については \see{gl:divergence-theorem} がある。ここでは球面測度 $\sigma$ を \ref{meas:polar-sphere-measure} の錐による定義のまま使いたいので、球に限って極座標だけから示した（\ref{pde:ball-divergence}）。多様体の上では、平均値の性質は曲率の分だけずれた形でしか成り立たない。
+
+**高い視点：平衡の温度.** 調和関数は、熱源のない部屋の平衡状態の温度分布である。熱は温度の高い所から低い所へ、温度差に比例して流れる（熱流は $-\nabla u$）。平衡では、どの小さな球についても出入りの熱量が釣り合う（\ref{pde:ball-divergence} で $\int_{B}\Delta u=0$）。1 の公式は、この釣り合いの帳簿を半径ごとにつけたもので、「球面平均の増え方 $=$ 中に含まれる熱源の量」と言っている。熱源がなければ、どの半径で見ても球面の平均温度は中心の温度から動かない。確率論の言葉では、調和関数の値は、その点から出発したブラウン運動が初めて球面に当たる位置での値の期待値で、出口の分布が球面上の一様分布であることが平均値の性質に当たる（離散版はランダムウォークの吸収確率、\see{prb:ex-mc-3}）。
+:::
+
+次の定理は、平均値の性質が調和性を特徴づけることを示す。注目すべきは、仮定が連続性だけで、微分可能性を仮定しないのに、結論は $C^{\infty}$ 級であることである。
+
+::: theorem 平均値の性質の逆 {#pde:mean-value-converse keywords="converse of the mean value property: a continuous function with the mean value property is C^infinity and harmonic; proof by convolution with a radial mollifier; regularity for free" index="平均値の性質の逆|へいきんちのせいしつのぎゃく, 調和関数の滑らかさ|ちょうわかんすうのなめらかさ"}
+$u\in C(\Omega)$ が球面（または球）についての平均値の性質をもてば、$u\in C^{\infty}(\Omega)$ で、$u$ は $\Omega$ で調和である。とくに、$\Omega$ の調和関数（\ref{pde:harmonic-function} の意味で $C^{2}$ 級）はすべて $C^{\infty}$ 級である。
+:::
+
+::: intuition
+どの点でも「周りの平均と等しい」連続関数は、自動的に何回でも微分できて、ラプラス方程式を満たす。平均値の性質だけで、調和関数であることが決まってしまう。
+:::
+
+::: proof
+\ref{pde:means-relation.3} から、球面についての平均値の性質を仮定してよい。\ref{fa:mollifier} の $\rho$ は $\rho(z)=\beta(2z)/\int\beta(2y)\,dy$ で、隆起関数 $\beta$ は $|z|^{2}$ を通して定義されている（\ref{mfd:bump-function} の証明）ので、$\rho$ は $|z|$ だけの関数である：$\rho_{\varepsilon}(z)=R_{\varepsilon}(|z|)$ となる関数 $R_{\varepsilon}\colon[0,\infty)\to[0,\infty)$ があり、$R_{\varepsilon}(s)=0$（$s>\varepsilon$）。
+
+**Step 1（軟化しても変わらない）.** 【主張：$x\in\Omega_{\varepsilon}$ なら $u_{\varepsilon}(x)=u(x)$】$\operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)>\varepsilon$ なので $\overline{B}(x,\varepsilon)\subset\Omega$。$y=x+z$ と平行移動し、$\rho_{\varepsilon}(-z)=R_{\varepsilon}(|z|)$ を使うと
+$$
+u_{\varepsilon}(x)=\int_{\Omega}\rho_{\varepsilon}(x-y)u(y)\,dy=\int_{\overline{B}(0,\varepsilon)}R_{\varepsilon}(|z|)\,u(x+z)\,dz.
+$$
+被積分関数は有界ボレル可測で台がコンパクトなので、正の部分と負の部分に \ref{meas:polar-decomposition.2} を使い、$0<s\le\varepsilon$ での球面についての平均値の性質 $\int_{S^{n-1}}u(x+s\theta)\,d\sigma=n\omega_{n}u(x)$ を代入すると
+$$
+u_{\varepsilon}(x)=\int_{0}^{\varepsilon}R_{\varepsilon}(s)\Bigl(\int_{S^{n-1}}u(x+s\theta)\,d\sigma(\theta)\Bigr)s^{n-1}ds=u(x)\cdot n\omega_{n}\int_{0}^{\infty}R_{\varepsilon}(s)s^{n-1}ds.
+$$
+一方 \ref{meas:polar-radial.2} から $1=\int\rho_{\varepsilon}=n\omega_{n}\int_{0}^{\infty}R_{\varepsilon}(s)s^{n-1}ds$。よって $u_{\varepsilon}(x)=u(x)$。
+
+**Step 2（滑らかさ）.** 【主張：$u\in C^{\infty}(\Omega)$】\ref{fa:mollification.1} から $u_{\varepsilon}\in C^{\infty}(\Omega_{\varepsilon})$ で、Step 1 から $\Omega_{\varepsilon}$ の上で $u=u_{\varepsilon}$。$\Omega_{\varepsilon}$ は開集合（距離関数は連続）で、各 $x\in\Omega$ は $\varepsilon<\operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)$ となる $\Omega_{\varepsilon}$ に入るので、$u$ は各点の近傍で $C^{\infty}$ 級である。
+
+**Step 3（調和性）.** 【主張：$\Delta u=0$】$x\in\Omega$ と $\overline{B}(x,R)\subset\Omega$ をとる。Step 2 から $u\in C^{2}$ なので \ref{pde:mean-value-property.1} が使え、平均値の性質から $\varphi(r)=S_{r}u(x)=u(x)$ は定数なので、$0<r\le R$ で $\frac{r}{n}A_{r}(\Delta u)(x)=\varphi'(r)=0$、すなわち $A_{r}(\Delta u)(x)=0$。$\Delta u$ は連続なので
+$$
+|A_{r}(\Delta u)(x)-\Delta u(x)|\le\frac{1}{\omega_{n}r^{n}}\int_{B(x,r)}|\Delta u(y)-\Delta u(x)|\,dy\le\max_{\overline{B}(x,r)}|\Delta u-\Delta u(x)|\to0\quad(r\to0),
+$$
+よって $\Delta u(x)=\lim_{r\to0}A_{r}(\Delta u)(x)=0$。
+
+「とくに」の部分は、$C^{2}$ 級の調和関数が \ref{pde:mean-value-property.2} から平均値の性質をもつことによる。
+
+::: hypcheck
+- **平均値の性質**：Step 1 で軟化しても変わらないことに、Step 3 で $\varphi$ が定数であることに使った。Step 1 で使ったのは $\Omega_{\varepsilon}$ の点での半径 $\varepsilon$ 以下の球面だけなので、「各コンパクト集合 $K\subset\Omega$ に $\delta_{K}>0$ があり、$K$ の点では半径 $\delta_{K}$ 未満の球面について平均値の性質が成り立つ」で十分である（Step 3 は小さい $r$ しか使わない）。
+- **連続性**：Step 1 で積分が意味をもつことに使った。じつは球についての平均値の性質を**すべての点で**仮定するなら、$u\in L_{\mathrm{loc}}^{1}(\Omega)$ で十分である：$\overline{B}(x_{0},2r)\subset\Omega$、$|x-x_{0}|<r$ なら $u(x)=\frac{1}{\omega_{n}r^{n}}\int\mathbf{1}_{B(x,r)}u$ で、$x\to x_{0}$ のとき $\mathbf{1}_{B(x,r)}\to\mathbf{1}_{B(x_{0},r)}$ が球面 $\partial B(x_{0},r)$（零集合）の外で成り立ち、$|\mathbf{1}_{B(x,r)}u|\le\mathbf{1}_{B(x_{0},2r)}|u|$ なので、優収束定理から $u$ は $x_{0}$ で連続になる。
+- **$C^{2}$ を仮定しない形の意味**：結論の $C^{\infty}$ 級は仮定からは何も要求していない。平均値の性質は積分だけで書かれた条件で、「方程式を積分の形で満たす連続関数は、自動的に滑らかな古典解である」という**正則性**の最初の例になっている。関数解析的手法では、方程式を「すべてのテスト関数 $\phi$ について $\int u\,\Delta\phi=0$」という弱い形で解いてから、解が滑らかであることを示す。ラプラス方程式についてはその正則性がこの定理と同じ仕組み（放射的な軟化子で $u$ が変わらないこと）で示せ、一般の楕円型方程式では差分商や楕円評価が要る（関数解析的手法の系列、閉多様体では \see{gl:elliptic-regularity}）。古典的手法が「$C^{2}$ の解」を前提にし、関数解析的手法が「弱解」から出発する違いを、系列の最後で対比する材料である。
+- **放射的な軟化子**：Step 1 で $\rho_{\varepsilon}$ が $|z|$ だけの関数であることを使った（\ref{fa:mollification.1} の滑らかさは $\rho\in C_{c}^{\infty}$ だけによるので、放射的な $C_{c}^{\infty}$ の核なら何でもよい）。放射的でない核では、平均値の性質から $u_{\varepsilon}=u$ は出ない（極座標で球面平均にまとめられない）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 平均値の性質を「各点 $x$ について、ある $\delta(x)>0$ があって半径 $\delta(x)$ 未満のすべての球面で成り立つ」に弱めても、連続関数なら調和であることが知られている。証明には、球の上のディリクレ問題をポアソン積分で解き、その解と $u$ の差に最大値原理（この性質は局所的な平均値の性質だけで示せる）を使う（ここでは証明しない）。一方、連続性を外し、ほとんど至る所でだけ等しいことを許すと、結論も「調和関数とほとんど至る所等しい」に弱まる。$L_{\mathrm{loc}}^{1}$ の関数 $u$ が $\int u\,\Delta\phi=0$（$\phi\in C_{c}^{\infty}(\Omega)$）を満たせば、$u$ はある調和関数とほとんど至る所等しい（**ワイルの補題**。ここでは証明しない）。
+
+**似た定理.** 複素解析では、連続関数がすべての三角形の周での積分 $0$ を満たせば正則である（モレラの定理。\ref{cx:weierstrass-convergence} の証明で使った）。これも「積分で書かれた条件から微分可能性が出る」型の定理で、平均値の性質の逆と同じ役割を果たす。一方、常微分方程式 $u''=0$ の「平均値の性質」$u(x)=\frac12(u(x-r)+u(x+r))$ は、この定理の $n=1$ の場合（$S^{0}=\{\pm1\}$）で、連続関数の中点凸かつ中点凹の関数は 1 次関数であるという事実に当たる。
+
+**高い視点：ならしの不動点.** 軟化 $u\mapsto\rho_{\varepsilon}*u$ は関数をならす操作で、ならした結果はいつも滑らかである。平均値の性質をもつ関数は、すべての放射的なならしで動かない**不動点**なので、「ならした結果」そのものであり、滑らかでなければならない。比喩で言えば、どんなに細かいやすりをかけても形の変わらない木材には、最初から角もささくれもない。この「ならしの操作で不変なら滑らか」という仕組みは、熱方程式の解が時間 $t>0$ で滑らかになることや、楕円型方程式の正則性の原型である。
+:::
+
+## 最大値原理 {#pde:sec-hf-maximum}
+
+平均値の性質の最も直接的な帰結は、調和関数が内部で最大値をとれないことである。
+
+::: theorem 強最大値原理 {#pde:strong-maximum-principle keywords="strong maximum principle for harmonic functions and continuous functions with the mean value property on a connected open set: an interior maximum or minimum forces u to be constant" index="強最大値原理|きょうさいだいちげんり, 最大値原理（調和関数、強）|さいだいちげんりちょうわかんすうきょう" refname="強最大値原理"}
+$\Omega$ を連結な開集合、$u\in C(\Omega)$ を平均値の性質をもつ関数（たとえば $\Omega$ の調和関数）とする。ある $x_{0}\in\Omega$ で $u(x_{0})=\sup_{\Omega}u$ なら、$u$ は $\Omega$ で定数である。$\inf$ についても同じ。
+:::
+
+::: intuition
+つながった領域の調和関数は、内部のどこかで最大値（または最小値）をとるなら、定数しかありえない。定数でなければ、最大・最小は境界の方へ逃げていく。
+:::
+
+::: proof
+$M\defeq u(x_{0})=\sup_{\Omega}u$、$E\defeq\{x\in\Omega:u(x)=M\}$ とおく。$x_{0}\in E$ なので $E\ne\varnothing$、$u$ の連続性から $E$ は $\Omega$ の中で閉。
+
+**Step 1（$E$ は開）.** 【主張：$x\in E$ と $\overline{B}(x,r)\subset\Omega$ について $B(x,r)\subset E$】球についての平均値の性質（\ref{pde:means-relation.3}）から
+$$
+0=M-u(x)=\frac{1}{\omega_{n}r^{n}}\int_{B(x,r)}\bigl(M-u(y)\bigr)\,dy,
+$$
+で、$w\defeq M-u\ge0$ は連続。$w(y_{1})>0$ となる $y_{1}\in B(x,r)$ があれば、連続性から $y_{1}$ のある近傍 $B(y_{1},\delta)\subset B(x,r)$ で $w>w(y_{1})/2$ となり、$\int_{B(x,r)}w\ge\frac{w(y_{1})}{2}\omega_{n}\delta^{n}>0$ で矛盾。よって $B(x,r)$ の上で $u=M$。
+
+**Step 2（連結性）.** 【主張：$E=\Omega$】$E$ は $\Omega$ の空でない開かつ閉な部分集合で、$\Omega$ は連結なので $E=\Omega$（\ref{top:connected}）。
+
+$\inf$ については、$-u$ も平均値の性質をもつ（平均は線形）ので、$-u$ に上を使う。
+
+::: hypcheck
+- **平均値の性質**：Step 1 だけで使った。とくに $u\in C^{2}$ も $\Delta u=0$ も直接は使っていない。球についての不等式 $u(x)\le A_{r}u(x)$（劣調和関数。\see{pde:prob-hf-subharmonic}）だけでも $\sup$ についての主張は成り立つ（Step 1 で $0\le\int w\le0$ となるため）。
+- **連結性**：Step 2 で使った。外すと偽：$\Omega=B(0,1)\cup B(3e_{1},1)$ で、$u=0$（$B(0,1)$ 上）、$u=1$（$B(3e_{1},1)$ 上）は調和で、$B(3e_{1},1)$ の各点で最大値をとるが定数でない。
+- **$x_{0}$ が内部の点であること**：最大値を境界でしかとらない調和関数（$u=x_{1}$ を $B(0,1)$ で考えるなど）では何も言えない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem 弱最大値原理 {#pde:weak-maximum-principle keywords="weak maximum principle on bounded open sets: max over the closure equals max over the boundary for u in C(closure) with the mean value property; |u| <= max over the boundary of |u|" index="弱最大値原理|じゃくさいだいちげんり, 最大値原理（調和関数、弱）|さいだいちげんりちょうわかんすうじゃく" refname="弱最大値原理"}
+$\Omega$ を空でない有界な開集合、$u\in C(\overline{\Omega})$ とし、$u$ は $\Omega$ で平均値の性質をもつ（たとえば $u\in C^{2}(\Omega)\cap C(\overline{\Omega})$ が $\Omega$ で調和）とする。このとき
+$$
+\max_{\overline{\Omega}}u=\max_{\partial\Omega}u,\qquad\min_{\overline{\Omega}}u=\min_{\partial\Omega}u.
+$$
+とくに $\max_{\overline{\Omega}}|u|=\max_{\partial\Omega}|u|$。
+:::
+
+::: intuition
+有界な領域の調和関数の最大値と最小値は、境界の上で達成される。中の値は、境界の値の範囲からはみ出さない。
+:::
+
+::: proof
+**Step 1（最大値の存在）.** 【主張：$\partial\Omega$ は空でないコンパクト集合で、$u$ は $\overline{\Omega}$ のある点 $x_{0}$ で最大値 $M$ をとる】$\overline{\Omega}$ は有界閉集合なのでコンパクトで、連続な $u$ は最大値をとる。$\partial\Omega=\overline{\Omega}\setminus\Omega$ は閉で有界。$\Omega$ は空でなく、有界なので $\mathbb{R}^{n}$ と異なり、$\mathbb{R}^{n}$ は連結なので $\Omega$ は閉でない。よって $\overline{\Omega}\ne\Omega$、$\partial\Omega\ne\varnothing$。
+
+**Step 2（内部で最大なら成分の上で定数）.** 【主張：$x_{0}\in\Omega$ なら、$x_{0}$ を含む $\Omega$ の連結成分 $U$ の閉包 $\overline{U}$ の上で $u=M$】$U$ は開集合で連結（記法の確認）。$U$ の上で $u$ は平均値の性質をもち（$\overline{B}(x,r)\subset U$ なら $\overline{B}(x,r)\subset\Omega$）、$u(x_{0})=M\ge\sup_{U}u$。\ref{pde:strong-maximum-principle} から $U$ の上で $u=M$、連続性から $\overline{U}$ の上でも $u=M$。
+
+**Step 3（境界に達する）.** 【主張：$x_{0}\in\Omega$ でも $\partial\Omega$ に $u=M$ となる点がある】$U$ は空でなく有界なので、Step 1 と同じ理由で $\partial U\ne\varnothing$。$p\in\partial U$ をとる。$p\in\Omega$ と仮定すると、$p$ を含む $\Omega$ の連結成分 $V$ は $p$ の開近傍で、$p\in\overline{U}$ から $V\cap U\ne\varnothing$、異なる連結成分は交わらない（\ref{top:components-properties}）ので $V=U$、$p\in U$。$U$ は開なので $p\notin\partial U$ となり矛盾。よって $p\in\overline{\Omega}\setminus\Omega=\partial\Omega$ で、Step 2 から $u(p)=M$。
+
+Step 1〜3 から $\max_{\overline{\Omega}}u=M=\max_{\partial\Omega}u$（$\ge$ は $\partial\Omega\subset\overline{\Omega}$ から）。最小値は $-u$ に使う。$|u|$ の式は $\max|u|=\max(\max u,-\min u)$ から。
+
+::: hypcheck
+- **有界性**：Step 1 で最大値の存在と $\partial\Omega\ne\varnothing$ に、Step 3 で $\partial U\ne\varnothing$ に使った。外すと偽：半空間 $\Omega=\{x_{n}>0\}$ で $u=x_{n}$ は境界で $0$ だが $\Omega$ では正。有界な関数でも偽：$n\ge3$、$\Omega=\{|x|>1\}$ で $u=1-|x|^{2-n}$ は調和（\ref{pde:harmonic-function} の例 3）、$|u|<1$、境界で $0$ だが $\Omega$ では正。
+- **$u\in C(\overline{\Omega})$**：Step 1 で最大値の存在に、Step 2 で $\overline{U}$ への延長に使った。境界の 1 点で連続性が崩れるだけで偽になる：$n=2$、$\Omega=B(0,1)$ で $u(z)=\frac{1-|z|^{2}}{|1-z|^{2}}$（ポアソン核 \ref{cx:poisson-kernel} の $t=0$）は $\Omega$ で調和、$\partial\Omega\setminus\{1\}$ の上で $u$ は $0$ に連続に延びるが、$\Omega$ では正で、$z=1$ の近くで非有界。
+- **連結性**：要らない（Step 2 で連結成分ごとに強最大値原理を使った）。
+- **平均値の性質**：Step 2 で強最大値原理を通して使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: proof 別証明（ヘッセ行列による。$u\in C^{2}(\Omega)\cap C(\overline{\Omega})$ が調和な場合）
+**Step 1.** 【主張：$v\in C^{2}(\Omega)$ が $y\in\Omega$ で極大なら $\Delta v(y)\le0$】各 $i$ について $g(t)\defeq v(y+te_{i})$ は $t=0$ の近くで $C^{2}$ 級で $t=0$ で極大なので $g'(0)=0$。$g''(0)>0$ と仮定すると、連続性から $0$ の近くで $g''>0$ で、テイラーの定理（\ref{calc:taylor-lagrange}）から小さな $t\ne0$ で $g(t)=g(0)+\frac{1}{2}g''(\xi)t^{2}>g(0)$ となり矛盾。よって $\partial_{i}^{2}v(y)=g''(0)\le0$、足して $\Delta v(y)\le0$。
+
+**Step 2.** 【主張：$\varepsilon>0$ について $v_{\varepsilon}\defeq u+\varepsilon|x|^{2}$ は $\max_{\overline{\Omega}}v_{\varepsilon}=\max_{\partial\Omega}v_{\varepsilon}$ を満たす】$\Delta v_{\varepsilon}=2n\varepsilon>0$ なので、Step 1 から $v_{\varepsilon}$ は $\Omega$ のどの点でも極大にならない。$\overline{\Omega}$ はコンパクトなので $v_{\varepsilon}$ はどこかで最大値をとり、それは $\partial\Omega$ の点である。
+
+**Step 3.** 【主張：$\max_{\overline{\Omega}}u=\max_{\partial\Omega}u$】$D\defeq\max_{\overline{\Omega}}|x|$ とすると、Step 2 から $\max_{\overline{\Omega}}u\le\max_{\overline{\Omega}}v_{\varepsilon}=\max_{\partial\Omega}v_{\varepsilon}\le\max_{\partial\Omega}u+\varepsilon D^{2}$。$\varepsilon\to0$。
+
+この証明は平均値の性質を使わず、2 階の項の符号だけを使う。そのため、係数が変わる作用素 $\sum_{i,j}a_{ij}(x)\partial_{i}\partial_{j}+\sum_{i}b_{i}(x)\partial_{i}$（$(a_{ij})$ は正定値）にもほぼそのまま通じる。
+:::
+
+::: supplement
+**前提を変えると.** 非有界な領域では、無限遠を「境界の一部」として扱う条件が要る。$n=2$ の外部領域 $\Omega=\{|x|>1\}$ では、有界な調和関数 $u\in C(\overline{\Omega})$ について弱最大値原理が成り立つ：$\varepsilon>0$ について $u-\max_{|x|=1}u-\varepsilon\log|x|$ は、$|x|=1$ で $\le0$、$|x|=R$（$R$ が大きい）でも $\le0$ なので、有界領域 $\{1<|x|<R\}$ での弱最大値原理から $u\le\max_{|x|=1}u+\varepsilon\log|x|$、$\varepsilon\to0$。$n\ge3$ では \ref{pde:weak-maximum-principle} の検査欄の $1-|x|^{2-n}$ が示すように成り立たず、$|x|^{2-n}$ が $0$ に減衰するか $\log|x|$ が増大するかという次元の違いがそのまま表れる。半空間では、境界で連続かつ $0$ の**有界な**調和関数は $0$ に限ることが知られている（鏡像の原理と次のページのリウヴィルの定理から。ここでは証明しない）。
+
+**似た定理.** 平面では \ref{cx:harmonic-maximum} が同じ主張で、正則関数の絶対値についての \ref{cx:maximum-principle} の兄弟である。閉多様体の上の熱方程式の最大値原理（\see{gl:heat-maximum-principle}）は別証明と同じく「最小点でのラプラシアンの符号」（\see{gl:laplacian-at-minimum}）で示される。一般の楕円型作用素では、別証明を精密にした**ホップの最大値原理**（境界での法線微分の符号まで言う）が知られている（ここでは証明しない）。
+
+**高い視点：平均と順序.** 最大値原理の本質は「平均は最大を超えない」という当たり前の不等式である。グラフの上の関数で、各頂点の値が隣の頂点の値の平均に等しいという離散の調和関数でも、まったく同じ議論で最大値原理が成り立つ。比喩で言えば、どの人の意見も近所の人の意見のちょうど平均になっている町では、最も極端な意見の持ち主は町の真ん中にはいられず、外から意見を持ち込む町の端（境界）にしかいない。解析学ではこれが「解の作用素 $g\mapsto u$（境界値から解へ）は順序を保ち、最大値ノルムを増やさない」という形になり、次の系の比較原理と連続依存として現れる。
+:::
+
+::: corollary ディリクレ問題の一意性と連続依存 {#pde:dirichlet-uniqueness keywords="uniqueness for the Dirichlet problem for the Poisson equation on bounded domains, comparison principle, strict positivity, continuous dependence on boundary values in the sup norm" index="ディリクレ問題の一意性|でぃりくれもんだいのいちいせい, 比較原理|ひかくげんり, 境界値への連続依存|きょうかいちへのれんぞくいぞん"}
+$\Omega$ を有界な開集合とする。
+1. （一意性）$f\in C(\Omega)$、$g\in C(\partial\Omega)$ について、$u\in C^{2}(\Omega)\cap C(\overline{\Omega})$ で $\Omega$ で $\Delta u=f$、$\partial\Omega$ で $u=g$ となるもの（**ディリクレ問題**の古典解）は高々一つである。
+2. （比較原理）$u_{1},u_{2}\in C^{2}(\Omega)\cap C(\overline{\Omega})$ が $\Omega$ で調和で、$\partial\Omega$ の上で $u_{1}\le u_{2}$ なら、$\overline{\Omega}$ の上で $u_{1}\le u_{2}$。さらに $\Omega$ が連結で、$\partial\Omega$ のある点で $u_{1}<u_{2}$ なら、$\Omega$ の上で $u_{1}<u_{2}$。
+3. （連続依存）2 と同じ $u_{1},u_{2}$（境界での大小は仮定しない）について $\max_{\overline{\Omega}}|u_{1}-u_{2}|=\max_{\partial\Omega}|u_{1}-u_{2}|$。とくに、調和な $u_{k}\in C^{2}(\Omega)\cap C(\overline{\Omega})$ の境界値が $\partial\Omega$ の上で一様にコーシー列なら、$u_{k}$ は $\overline{\Omega}$ の上で一様収束する。
+:::
+
+::: intuition
+有界な領域では、境界の値を決めれば調和関数（ポアソン方程式の解）は一つに決まる。境界で小さい方は中でも小さく、境界の値を少し動かしても、中の値は同じだけしか動かない。
+:::
+
+::: proof
+**1.** 二つの解 $u,\tilde u$ の差 $w=u-\tilde u$ は $C^{2}(\Omega)\cap C(\overline{\Omega})$ に入り、$\Omega$ で $\Delta w=0$、$\partial\Omega$ で $w=0$。\ref{pde:weak-maximum-principle} から $\max_{\overline{\Omega}}|w|=\max_{\partial\Omega}|w|=0$（$\Omega=\varnothing$ なら主張は自明）。
+
+**2.** $w\defeq u_{2}-u_{1}$ は調和で $\partial\Omega$ の上で $w\ge0$ なので、最小値についての \ref{pde:weak-maximum-principle} から $\min_{\overline{\Omega}}w=\min_{\partial\Omega}w\ge0$。後半：ある $x_{0}\in\Omega$ で $w(x_{0})=0$ とすると、$w\ge0$ から $w(x_{0})=\inf_{\Omega}w$ で、\ref{pde:strong-maximum-principle} から $\Omega$ で $w=0$。$\partial\Omega\subset\overline{\Omega}$ の各点は $\Omega$ の点列の極限なので、連続性から $\partial\Omega$ でも $w=0$ となり、仮定に反する。
+
+**3.** $w=u_{1}-u_{2}$ に \ref{pde:weak-maximum-principle} の最後の式を使う。後半は、これを $u_{k}-u_{l}$ に使うと $\overline{\Omega}$ の上で一様にコーシー列になり、一様収束する（\ref{calc:uniform-limit-theorems.1} と同じ議論を $\overline{\Omega}$ で行う）。
+
+::: hypcheck
+- **有界性と $C(\overline{\Omega})$**：すべて \ref{pde:weak-maximum-principle} を通して使った。外したときの反例はその検査欄と同じで、たとえば $n\ge3$ の外部領域 $\{|x|>1\}$ のディリクレ問題「$\Delta u=0$、$|x|=1$ で $u=0$」は、有界な解に限っても $u=0$ と $u=1-|x|^{2-n}$ の二つをもつ。
+- **連結性**：2 の後半（強最大値原理）だけで使った。$\Omega$ が二つの球の和で、一方の球の境界でだけ $u_{1}<u_{2}$ なら、もう一方の球では $u_{1}=u_{2}$ でありうる。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** この系が言うのは解の**一意性**と**安定性**だけで、**存在**は言っていない。一意性・存在・連続依存の三つがそろうことをハダマールの意味で**適切**（well-posed）という。有界領域のディリクレ問題の古典解は、境界がひどく尖っていると存在しないことがある（$n=3$ のルベーグの棘。この系列のペロンの方法のページで扱う）。また、$f$ が連続なだけでは $\Delta u=f$ の $C^{2}$ 解がないことがあり、ヘルダー連続性が要る（この系列の基本解とグリーン関数のページ）。逆に、ラプラス方程式で境界の一部にディリクレ条件とノイマン条件を両方課す**コーシー問題**は、一意だが連続依存が崩れる（ハダマールの例。系列 02 の最後で扱う）。
+
+**似た定理.** 多様体の上では、グリーンの公式（エネルギー）でも一意性が示せる（\see{gl:prob-dg-dirichlet-uniqueness}）。エネルギーの方法は $\int|\nabla u|^{2}$ の有限性を要求し、最大値原理は境界での連続性を要求する。この「どの前提で一意性を言うか」の違いは、古典解と弱解の違いそのものである。熱方程式の一意性にも最大値原理による証明とエネルギーによる証明があり、全空間では増大条件がないと一意性が崩れる（ティホノフの例。熱方程式のページ）。
+
+**高い視点：境界が中身を決める.** 有界領域の調和関数は、境界の値という「$n-1$ 次元の情報」だけで $n$ 次元の中身が決まる。比喩で言えば、太鼓の皮の縁の高さを決めて張った膜の形（ピンと張った膜は面積が最小になり、小さな変位では調和関数で近似される）は、縁の形だけで決まり、縁を少し持ち上げれば膜もせいぜい同じ高さだけ持ち上がる（3）。線形代数の言葉では、境界値から解への写像は、最大値ノルムについて**ノルム 1 の正の線形作用素**であり、この「正値性」がラプラス方程式の古典論全体を支えている。
+:::
+
+導関数の評価・リウヴィルの定理・解析性・ハルナックの不等式・調和関数の列の収束は次のページ（\see{pde:page-harmonic-estimates}）で扱う。
+
+## 問題 {#pde:sec-hf-problems}
+
+::: problem {#pde:prob-hf-subharmonic}
+$u\in C^{2}(\Omega)$ が $\Omega$ で $\Delta u\ge0$ を満たすとき、$u$ は**劣調和**であるという。
+1. $\overline{B}(x,r)\subset\Omega$ なら $u(x)\le S_{r}u(x)$ かつ $u(x)\le A_{r}u(x)$ であることを示せ。
+2. $\Omega$ が有界で $u\in C^{2}(\Omega)\cap C(\overline{\Omega})$ が劣調和なら $\max_{\overline{\Omega}}u=\max_{\partial\Omega}u$ であることを示せ。
+3. $v$ が $\Omega$ で調和なら、$v^{2}$ と $|\nabla v|^{2}$ は劣調和であることを示せ。
+:::
+
+::: solution
+**1.** \ref{pde:mean-value-property.1} から $\varphi(r)=S_{r}u(x)$ について（$R=r$ として）$\varphi'(s)=\frac{s}{n}A_{s}(\Delta u)(x)\ge0$（$0<s\le r$）。\ref{pde:mean-value-property} の証明の Step 1 から $\varphi$ は $[0,r]$ で連続なので、平均値の定理から $\varphi$ は増加で、$S_{r}u(x)=\varphi(r)\ge\varphi(0)=u(x)$。球平均は \ref{pde:means-relation.2} から $A_{r}u(x)=\frac{n}{r^{n}}\int_{0}^{r}s^{n-1}S_{s}u(x)\,ds\ge\frac{n}{r^{n}}\int_{0}^{r}s^{n-1}u(x)\,ds=u(x)$。
+
+**2.** \ref{pde:strong-maximum-principle} の証明の Step 1 を、等式 $u(x)=A_{r}u(x)$ の代わりに 1 の不等式で行う：$M=u(x)=\sup u$ なら $0\le\frac{1}{\omega_{n}r^{n}}\int_{B(x,r)}(M-u)=M-A_{r}u(x)\le M-u(x)=0$ なので、同じ議論で $B(x,r)$ の上で $u=M$。よって「連結な開集合の上で内部で最大値をとれば定数」が劣調和関数でも成り立ち、\ref{pde:weak-maximum-principle} の証明の Step 1〜3 がそのまま通る（そこで使ったのは $\sup$ についての強最大値原理だけである）。
+
+**3.** \ref{pde:mean-value-converse} から $v\in C^{\infty}$ で、偏微分の順序は交換できる（\ref{calc:schwarz-theorem}）。$\partial_{i}^{2}(v^{2})=2(\partial_{i}v)^{2}+2v\,\partial_{i}^{2}v$ を足して $\Delta(v^{2})=2|\nabla v|^{2}+2v\Delta v=2|\nabla v|^{2}\ge0$。また $\Delta\partial_{j}v=\partial_{j}\Delta v=0$ なので各 $\partial_{j}v$ は調和で、いま示したことから $\Delta\bigl((\partial_{j}v)^{2}\bigr)=2|\nabla\partial_{j}v|^{2}\ge0$。$j$ について足して $\Delta|\nabla v|^{2}\ge0$。
+:::
+
+::: problem {#pde:prob-hf-ball-harnack}
+$R>0$ とし、$u\ge0$ を $B(0,R)$ の調和関数とする。
+1. $\int_{B(0,R)}u\,dy=\omega_{n}R^{n}u(0)$ を示せ（とくに $u$ は $B(0,R)$ で可積分）。
+2. $|x|=s<R$ なら $u(x)\le\bigl(\frac{R}{R-s}\bigr)^{n}u(0)$ を示せ。
+3. $|x|=s<R/2$ なら $u(x)\ge\bigl(\frac{R-2s}{R-s}\bigr)^{n}u(0)$ を示せ。
+4. $\mathbb{R}^{n}$ 全体で調和な $u\ge0$ は定数であることを導け。
+:::
+
+::: solution
+**1.** $0<r<R$ なら $\overline{B}(0,r)\subset B(0,R)$ なので、球についての平均値の性質（\ref{pde:mean-value-property.2}）から $\int_{B(0,r)}u=\omega_{n}r^{n}u(0)$。$r\uparrow R$ で $\mathbf{1}_{B(0,r)}u\uparrow\mathbf{1}_{B(0,R)}u$（$u\ge0$）なので、単調収束定理（\ref{meas:monotone-convergence}）から $\int_{B(0,R)}u=\lim_{r\uparrow R}\omega_{n}r^{n}u(0)=\omega_{n}R^{n}u(0)<\infty$。
+
+**2.** $0<t<R-s$ なら $\overline{B}(x,t)\subset B(0,R)$。$u\ge0$ と 1 から
+$$
+u(x)=\frac{1}{\omega_{n}t^{n}}\int_{B(x,t)}u\le\frac{1}{\omega_{n}t^{n}}\int_{B(0,R)}u=\Bigl(\frac{R}{t}\Bigr)^{n}u(0).
+$$
+$t\uparrow R-s$ とする。
+
+**3.** $s<t<R-s$ をとる（$s<R/2$ なのでとれる）。$|y|<t-s$ なら $|y-x|\le|y|+s<t$ なので $B(0,t-s)\subset B(x,t)$、また $\overline{B}(0,t-s)\subset B(0,R)$。$u\ge0$ と平均値の性質から
+$$
+u(x)=\frac{1}{\omega_{n}t^{n}}\int_{B(x,t)}u\ge\frac{1}{\omega_{n}t^{n}}\int_{B(0,t-s)}u=\Bigl(\frac{t-s}{t}\Bigr)^{n}u(0).
+$$
+$t\uparrow R-s$ とすると $\bigl(\frac{R-2s}{R-s}\bigr)^{n}u(0)$。
+
+**4.** $x$ を固定し、$R>2|x|$ について 2 と 3 を使うと $\bigl(\frac{R-2|x|}{R-|x|}\bigr)^{n}u(0)\le u(x)\le\bigl(\frac{R}{R-|x|}\bigr)^{n}u(0)$。$R\to\infty$ で両端は $u(0)$ に収束するので $u(x)=u(0)$。
+
+（$n=2$ では、ポアソン積分を使った \ref{cx:harnack} の評価 $\frac{R-s}{R+s}u(0)\le u(x)\le\frac{R+s}{R-s}u(0)$ の方が強い。実際 $\bigl(\frac{R}{R-s}\bigr)^{2}\ge\frac{R+s}{R-s}$ は $R^{2}\ge R^{2}-s^{2}$ と同値である。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

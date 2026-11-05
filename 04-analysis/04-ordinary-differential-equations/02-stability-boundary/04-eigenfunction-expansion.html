@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>固有関数展開とスツルムの振動定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/02-stability-boundary/04-eigenfunction-expansion.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 固有関数展開とスツルムの振動定理 {#ode:page-eigenfunction-expansion keywords="eigenfunction expansion of Sturm-Liouville problems, uniform convergence for functions satisfying the boundary conditions, decay of coefficients, Fourier sine, cosine and exponential series as special cases, periodic boundary conditions, Sturm comparison theorem, Picone identity, Sturm separation theorem, interlacing zeros, distance between zeros, Prufer transformation, Prufer angle, Sturm oscillation theorem: the n-th eigenfunction has exactly n-1 zeros in the open interval, nodes, スツルムの比較定理, スツルムの分離定理, スツルムの振動定理, プリューファー変換, 固有関数展開"}
+
+前のページ \ref{ode:page-sturm-liouville} では、区間 $[a,b]$ のスツルム–リウヴィル作用素 $Lu=-(pu')'+qu$ と分離型境界条件について、固有値が $\lambda_{1}<\lambda_{2}<\cdots\to+\infty$ と単純に並び、正規化した固有関数 $(e_{n})$ が $L^{2}(w)$ の正規直交基底になることを示した（\ref{ode:sl-eigen}）。このページでは、まず展開 $f=\sum_{n}\langle f,e_{n}\rangle_{w}e_{n}$ が、$f$ が $C^{2}$ 級で境界条件を満たせば一様に収束することを、グリーン関数の表示から示し（\ref{ode:sl-expansion}）、$-u''=\lambda u$ ではそれがフーリエ正弦級数・余弦級数・指数関数の級数に戻ることを見る。
+
+後半では、固有関数の**零点**を調べる。二つの方程式のうち「より強く振動させる」方の解は、もう一方の解の隣り合う零点の間に必ず零点をもつ（\tref{ode:sturm-comparison}。**スツルムの比較定理**）。証明はピコーンの恒等式による。次に、解 $u$ を位相平面の点 $(u,pu')$ の角度 $\theta$ で表す**プリューファー変換**を使い、角度が $\lambda$ について単調に増えることから、$n$ 番目の固有関数が区間の内部にちょうど $n-1$ 個の零点をもつこと（\tref{ode:sturm-oscillation}。**スツルムの振動定理**）を示す。弦の $n$ 番目の固有振動が $n-1$ 個の節をもつことの一般化である。
+
+## 記法と定義の確認 {#ode:sec-sl-osc-notation}
+
+::: notation
+- スツルム–リウヴィル作用素 $L$、重み $w$、分離型境界条件 $B_{a}u=0$, $B_{b}u=0$、定義域 $D$、固有値と固有関数は \ref{ode:sturm-liouville-operator} のとおり。$p\in C^{1}[a,b]$, $q,w\in C[a,b]$ は実数値で $p>0$, $w>0$、$p_{0}\defeq\min p$, $w_{0}\defeq\min w$。$L^{2}(w)$, $\langle\cdot,\cdot\rangle_{w}$, $\|\cdot\|_{w}$ と重みのない内積 $(\cdot,\cdot)$ も前のページの記法に従う。
+- $\mathcal{W}(u,v)\defeq p(uv'-u'v)$、対称性と単純性は \ref{ode:sl-symmetry}、下からの評価は \ref{ode:sl-lower-bound}、グリーン関数は \ref{ode:green-function}、固有値問題の結果は \ref{ode:sl-eigen}、$-u''$ の固有値は \ref{ode:sl-laplacian-eigenvalues}。$(\lambda_{n})$ は固有値を小さい順に並べたもの、$e_{n}$ は $\lambda_{n}$ の実数値の固有関数で $\|e_{n}\|_{w}=1$ のもの、$c$ は $-c$ が固有値でない実数、$G_{c}$ は $L+cw$ のグリーン関数とする。
+- 方程式 $Lu=\lambda wu$ は $(pu')'=(q-\lambda w)u$ と同じである。後半では、区間 $J$ の上の $C^{1}$ 級の関数 $p>0$ と連続関数 $r$ について、方程式 $(pu')'=ru$ を考える（$L$ の記法では $q=r$, $\lambda=0$）。その実数値の解は、$(u,pu')$ についての 1 階の線形系の解で、各点での $(u,pu')$ の値でただ一つに決まる（\ref{ode:linear-existence}, \ref{ode:solution-space}）。恒等的に $0$ でない解を**自明でない解**という。
+- 解析の道具：\ref{calc:fundamental-theorem}、\ref{calc:uniform-limit-theorems}、\ref{calc:differentiation-under-integral}、\ref{top:intermediate-value}、\ref{top:bolzano-weierstrass}。微分方程式の解の大域存在と一意性は \ref{ode:linear-growth-global}, \ref{ode:uniqueness}、偏微分が連続なら局所リプシッツであることは \ref{ode:c1-locally-lipschitz}、$1$ 次元の定数変化法は \ref{ode:variation-of-constants}。関数解析はベッセルの不等式 \ref{fa:bessel} と \ref{fa:orthonormal-basis}。
+- **選択公理**：固有関数展開は前のページの \ref{ode:sl-eigen} を通して従属選択公理（DC）を使う。比較定理とプリューファー変換の議論は具体的で選択を使わないが、振動定理の証明では固有値が無限個あること（\ref{ode:sl-eigen.1}）を引用するので、そこを通して DC を使う（補足に、選択を使わない別の道を書いた）。
+:::
+
+## 固有関数展開 {#ode:sec-sl-expansion}
+
+::: theorem 固有関数展開 {#ode:sl-expansion keywords="eigenfunction expansion for Sturm-Liouville problems: convergence in L^2(w) for f in L^2(w); absolute and uniform convergence for f in C^2 satisfying the boundary conditions; coefficients <f, e_n> = <(L+cw)f/w, e_n>/(lambda_n + c); sum (lambda_n + c)^2 |<f,e_n>|^2 finite; Bessel bound sum e_n(x)^2/(lambda_n+c)^2 <= max int G_c(x,y)^2 w dy" index="固有関数展開|こゆうかんすうてんかい, 一様収束（固有関数展開）|いちようしゅうそくこゆうかんすうてんかい"}
+\ref{ode:sl-eigen} の $(\lambda_{n},e_{n})$ について、$S_{N}f\defeq\sum_{n=1}^{N}\langle f,e_{n}\rangle_{w}e_{n}$ とおく。
+1. $f\in L^{2}(w)$ なら $\|S_{N}f-f\|_{w}\to0$ で、$\|f\|_{w}^{2}=\sum_{n}|\langle f,e_{n}\rangle_{w}|^{2}$。
+2. $f\in D$ なら、$\sum_{n}|\langle f,e_{n}\rangle_{w}|\,|e_{n}(x)|$ は $[a,b]$ で一様に収束し、$S_{N}f\to f$（$[a,b]$ で一様収束）。
+3. $f\in D$ と、$-c$ が固有値でない実数 $c$ について、$g\defeq(L+cw)f/w$ とおくと $\langle f,e_{n}\rangle_{w}=\langle g,e_{n}\rangle_{w}/(\lambda_{n}+c)$ で、$\sum_{n}(\lambda_{n}+c)^{2}|\langle f,e_{n}\rangle_{w}|^{2}=\|g\|_{w}^{2}$。とくに $\sum_{n}\lambda_{n}^{2}|\langle f,e_{n}\rangle_{w}|^{2}<\infty$。
+:::
+
+::: intuition
+二乗可積分なだけの関数でも、固有関数の重ね合わせで二乗平均の意味では近似できる。関数が滑らかで境界条件を満たしていれば、重ね合わせはすべての点で一様に元の関数に近づき、高い固有値の成分ほど係数が速く小さくなる。
+:::
+
+::: proof
+**Step 1.** 【主張：1】\ref{ode:sl-eigen.2} と \ref{fa:orthonormal-basis.3}・\ref[4]{fa:orthonormal-basis.4}。
+
+**Step 2.** 【主張：3】$L_{c}\defeq L+cw$ もスツルム–リウヴィル作用素で、$e_{n}\in D$ は $L_{c}e_{n}=(\lambda_{n}+c)we_{n}$ を満たす。\ref{ode:sl-symmetry.2} を $L_{c}$ に使うと、$e_{n}$ が実数値なので
+$$
+(\lambda_{n}+c)\langle f,e_{n}\rangle_{w}=\int_{a}^{b}f\,L_{c}e_{n}\,dx=(f,L_{c}e_{n})=(L_{c}f,e_{n})=\langle g,e_{n}\rangle_{w}.
+$$
+$g$ は連続なので $L^{2}(w)$ に入り、パーセヴァルの等式（Step 1）から $\sum_{n}|\langle g,e_{n}\rangle_{w}|^{2}=\|g\|_{w}^{2}$。$\lambda_{n}\to\infty$ なので、有限個を除いて $\lambda_{n}^{2}\le4(\lambda_{n}+c)^{2}$ で、最後の主張が従う。
+
+**Step 3.** 【主張：$M^{2}\defeq\max_{x}\int_{a}^{b}G_{c}(x,y)^{2}w(y)\,dy$ について、すべての $x$ で $\sum_{n}e_{n}(x)^{2}/(\lambda_{n}+c)^{2}\le M^{2}$】\ref{ode:sl-eigen} の証明の Step 7 と同じく $\langle G_{c}(x,\cdot),e_{n}\rangle_{w}=e_{n}(x)/(\lambda_{n}+c)$ なので、ベッセルの不等式（\ref{fa:bessel.1}）から。最大値は、$x\mapsto\int G_{c}(x,y)^{2}w(y)\,dy$ の連続性（$G_{c}$ の一様連続性）から存在する。
+
+**Step 4.** 【主張：$\sum_{n}|\langle f,e_{n}\rangle_{w}||e_{n}(x)|$ は一様に収束し、$S_{N}f$ は連続関数 $F$ に一様収束する】$N\le N'$ について、Step 2・3 とコーシー–シュワルツの不等式から、すべての $x$ で
+$$
+\sum_{n=N}^{N'}|\langle f,e_{n}\rangle_{w}||e_{n}(x)|=\sum_{n=N}^{N'}|\langle g,e_{n}\rangle_{w}|\,\frac{|e_{n}(x)|}{|\lambda_{n}+c|}\le M\Bigl(\sum_{n\ge N}|\langle g,e_{n}\rangle_{w}|^{2}\Bigr)^{1/2}.
+$$
+右辺は $x$ によらず、$N\to\infty$ で $0$ に近づく（収束級数の残り）。\ref{calc:uniform-limit-theorems.1}・\ref[2]{calc:uniform-limit-theorems.2} から主張を得る。
+
+**Step 5.** 【主張：$F=f$】$\|S_{N}f-F\|_{w}\le\|S_{N}f-F\|_{\infty}\bigl(\int w\,dx\bigr)^{1/2}\to0$ と 1 から、$L^{2}(w)$ の極限の一意性で $F=f$（ほとんど至る所）。$F-f$ は連続なので、$0$ でない点があればその近くの区間（正の測度）で $0$ でなく矛盾する。よって $F=f$ がすべての点で成り立つ。
+
+::: hypcheck
+- **$f\in D$（$C^{2}$ 級で境界条件を満たす）**：Step 2 で $L_{c}f$ が連続であることと、対称性の境界の項が消えることに使った。境界条件を外すと、ディリクレ条件では偽：$[0,\pi]$ の $f=1$ の正弦級数は $L^{2}$ では収束するが、部分和はすべて $x=0$ で $0$ なので一様には収束しない（\ref{ode:sl-fourier-examples.1}）。
+- **グリーン関数の有界性**：Step 3 で、点ごとの値 $e_{n}(x)$ を $L^{2}$ の情報で抑えるのに使った（係数 $1/(\lambda_{n}+c)$ がその代償である）。
+- **公理**：\ref{ode:sl-eigen} を通して DC。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 2 の前提は弱められる：ノイマン条件やロバン条件では、境界条件を満たさない $C^{1}$ 級の関数でも展開は一様に収束する（たとえば余弦級数では、偶関数として周期的に延ばした関数がリプシッツ連続になるので、\see{four:holder-uniform} から従う）。一方ディリクレ条件の端点では固有関数がすべて $0$ なので、一様収束には $f(a)=0$ が必要である。$f\in L^{2}$ だけでは、点ごとの収束は一般には保証されない。
+
+**似た定理.** 3 は、「$f$ が滑らかで境界条件を満たすほど、展開係数が速く減衰する」という原理の最初の段階で、フーリエ級数で $f'$ の係数が $in\hat{f}(n)$ の形になることにあたる。$f$ が $L$ を何回作用させても境界条件を満たすなら、係数は $\lambda_{n}$ のどんな累乗よりも速く減衰する。後の偏微分方程式の系列では、熱方程式や波動方程式を変数分離で解くとき、級数解が古典解になるための条件としてこの減衰を使う。
+
+**高い視点：音を倍音に分ける.** 弦の固有振動を、その楽器に固有の「倍音」と思うと、展開は任意の形を倍音の和に分解することにあたる。均一な弦（$p=w=1$, $q=0$）では倍音は正弦波で、展開はフーリエ級数そのものになる。不均一な弦では倍音の形は正弦波からゆがむが、互いに直交し、全体で完全であるという性質はそのまま残る。フーリエ級数は「均一な弦」という特別な楽器の場合だったのである。
+:::
+
+::: example 正弦級数・余弦級数・指数関数の級数 {#ode:sl-fourier-examples keywords="eigenfunctions of -u'' = lambda u on [0, pi] with Dirichlet conditions (sin nx, Fourier sine series), Neumann conditions (cos nx, cosine series), and on [0, 2 pi] with periodic conditions (e^{inx}, double eigenvalues, Green's function cosh(pi - |x-y|)/(2 sinh pi))" index="フーリエ正弦級数|ふーりえせいげんきゅうすう, フーリエ余弦級数|ふーりえよげんきゅうすう, 周期境界条件|しゅうききょうかいじょうけん"}
+$p=w=1$, $q=0$, $Lu=-u''$ とする。固有値と固有関数は \ref{ode:sl-laplacian-eigenvalues} で求めた。
+1. （ディリクレ条件、$[0,\pi]$）固有値は $\lambda_{n}=n^{2}$（$n\ge1$）、$e_{n}=\sqrt{2/\pi}\,\sin nx$（$\int_{0}^{\pi}\sin^{2}nx\,dx=\pi/2$）。\ref{ode:sl-expansion.2} から、$f\in C^{2}[0,\pi]$, $f(0)=f(\pi)=0$ なら
+$$
+f(x)=\sum_{n=1}^{\infty}b_{n}\sin nx,\qquad b_{n}=\frac{2}{\pi}\int_{0}^{\pi}f(x)\sin nx\,dx
+$$
+が一様収束する（フーリエ正弦級数）。$f$ を奇関数として周期 $2\pi$ に延ばしたもののフーリエ級数と同じものである。
+2. （ノイマン条件、$[0,\pi]$）固有値は $(n-1)^{2}$（$n\ge1$）で、$e_{1}=1/\sqrt{\pi}$, $e_{n}=\sqrt{2/\pi}\cos(n-1)x$。$0$ が固有値なので、グリーン関数は $L+c$（$c>0$）について作る（\ref{ode:sl-lower-bound.1} から $(Lu,u)=\int|u'|^{2}\ge0$ で $C_{0}=0$ にとれる）。展開はフーリエ余弦級数で、偶関数として延ばしたもののフーリエ級数と同じである。
+3. （周期条件、$[0,2\pi]$）$u(0)=u(2\pi)$, $u'(0)=u'(2\pi)$ は分離型でないが、\ref{ode:sl-symmetry.1} の境界の項は両端で打ち消し合い、対称性が成り立つ。固有値は $n^{2}$（$n\ge0$）で、固有関数は $e^{\pm inx}$ である（$(Lu,u)=\int|u'|^{2}dx\ge0$ から負の固有値はなく、$\lambda=k^{2}>0$ では、$A\cos kx+B\sin kx$ が周期条件を満たす $(A,B)\neq0$ があるための条件が、係数行列の行列式 $(\cos2\pi k-1)^{2}+\sin^{2}2\pi k=2-2\cos2\pi k=0$、つまり $k$ が整数であることになる）。$n\ge1$ では $\cos nx$, $\sin nx$ の $2$ 次元で、単純性は成り立たない。$-u''+u$ の周期条件のグリーン関数は
+$$
+G(x,y)=\frac{\cosh(\pi-|x-y|)}{2\sinh\pi}\qquad(x,y\in[0,2\pi])
+$$
+である：$x\neq y$ では $-\partial_{x}^{2}G+G=0$、$\partial_{x}G(y\pm0,y)=\mp\frac12$ で跳びの条件を満たし、$G(0,y)=G(2\pi,y)$, $\partial_{x}G(0,y)=\partial_{x}G(2\pi,y)=\sinh(\pi-y)/(2\sinh\pi)$。\ref{ode:sl-eigen} の証明は、単純性を除いて、対称性・グリーン関数・\ref{ode:sl-density}（$D_{0}$ の元は周期条件も満たす）しか使わないので、そのまま通り、$\{e^{inx}/\sqrt{2\pi}\}_{n\in\mathbb{Z}}$ が $L^{2}[0,2\pi]$ の正規直交基底であることが従う。これは円周上のフーリエ級数の $L^{2}$ 理論（\see{four:l2-theory}。そこでは周期を $1$ に正規化している）を、三角多項式の稠密性を使わずに示したことになる。
+:::
+
+## スツルムの比較定理 {#ode:sec-sl-comparison}
+
+::: lemma 零点は単純で有限個 {#ode:sl-zeros-simple keywords="zeros of a nontrivial solution of (pu')' = ru are simple (u' nonzero there), isolated, and finite in number on a compact interval" index="零点（線形 2 階方程式）|れいてんせんけいにかいほうていしき"}
+$J=[c,d]$ を有界閉区間、$u$ を $J$ の上の $(pu')'=ru$ の自明でない実数値の解とする。
+1. $u(x_{0})=0$ なら $u'(x_{0})\neq0$。とくに $u$ は $x_{0}$ で符号を変える。
+2. $u$ の $J$ の中の零点は有限個である。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$u(x_{0})=u'(x_{0})=0$ なら、$(u,pu')$ は $x_{0}$ で $0$ になる 1 階の線形系の解なので、一意性（\ref{ode:solution-space}）から $u\equiv0$ となり矛盾。$u'(x_{0})\neq0$ なら、$u(x)/(x-x_{0})\to u'(x_{0})$ から、$x_{0}$ の両側の近くで $u$ は逆の符号をとる。
+
+**Step 2.** 【主張：2】零点が無限個なら、相異なる零点の列 $(x_{k})$ がとれ、\ref{top:bolzano-weierstrass} から収束する部分列 $x_{k}\to x^{*}\in J$（$x_{k}\neq x^{*}$）がある。連続性から $u(x^{*})=0$、さらに $u'(x^{*})=\lim_{k}\bigl(u(x_{k})-u(x^{*})\bigr)/(x_{k}-x^{*})=0$ で、1 に反する。
+:::
+
+::: theorem スツルムの比較定理 {#ode:sturm-comparison keywords="Sturm comparison theorem (Sturm-Picone): if p_1 >= p_2 > 0 and r_1 >= r_2, u solves (p_1 u')' = r_1 u with zeros x_1 < x_2, and v solves (p_2 v')' = r_2 v, then v has a zero in (x_1, x_2) unless v is a constant multiple of u on [x_1, x_2]; Picone identity" index="スツルムの比較定理|すつるむのひかくていり, ピコーンの恒等式|ぴこーんのこうとうしき, スツルム–ピコーンの比較定理|すつるむぴこーんのひかくていり" refname="スツルムの比較定理"}
+$J$ を区間、$p_{1},p_{2}$ を $J$ の上の $C^{1}$ 級の関数、$r_{1},r_{2}$ を連続関数とし、$J$ の上で
+$$
+p_{1}\ge p_{2}>0,\qquad r_{1}\ge r_{2}
+$$
+とする。$u$ を $(p_{1}u')'=r_{1}u$ の、$v$ を $(p_{2}v')'=r_{2}v$ の、自明でない実数値の解とし、$x_{1}<x_{2}$ を $J$ の中の $u$ の零点とする。このとき次のどちらかが成り立つ。
+1. $v$ は開区間 $(x_{1},x_{2})$ に零点をもつ。
+2. $v$ は $[x_{1},x_{2}]$ の上で $u$ の定数倍で、$(x_{1},x_{2})$ の上で $(p_{1}-p_{2})u'^{2}=0$ かつ $(r_{1}-r_{2})u^{2}=0$。
+:::
+
+::: intuition
+$r$ が小さいほど（負に大きいほど）、また $p$ が小さいほど、解は激しく振動する。振動が激しい方程式の解は、穏やかな方程式の解の隣り合う零点の間に、必ず零点をもつ。
+:::
+
+::: example
+$(p_{1},r_{1})=(1,-1)$, $u=\sin x$ の零点 $0,\pi$ と、$(p_{2},r_{2})=(1,-4)$, $v=\sin(2x+\beta)$ を比べると、$v$ は $(0,\pi)$ に零点をもつ（$2x+\beta$ は長さ $2\pi$ の区間を動く）。逆向きの $(p_{2},r_{2})=(1,-\frac14)$, $v=\sin\frac{x}{2}$ は $(0,\pi)$ に零点をもたない。
+:::
+
+::: proof
+$v$ が $(x_{1},x_{2})$ に零点をもたないとして、2 を示す。
+
+**Step 1.** 【主張：$(x_{1},x_{2})$ の上で $A\defeq\dfrac{u}{v}\bigl(p_{1}u'v-p_{2}uv'\bigr)$ は $C^{1}$ 級で、$A'=(p_{1}-p_{2})u'^{2}+(r_{1}-r_{2})u^{2}+p_{2}\Bigl(u'-\dfrac{uv'}{v}\Bigr)^{2}$（ピコーンの恒等式）】$A=p_{1}uu'-p_{2}u^{2}v'/v$ と書き、$(p_{1}u')'=r_{1}u$, $(p_{2}v')'=r_{2}v$ を使うと
+$$
+A'=p_{1}u'^{2}+r_{1}u^{2}-r_{2}u^{2}-\frac{2p_{2}uu'v'}{v}+\frac{p_{2}u^{2}v'^{2}}{v^{2}}.
+$$
+$p_{2}(u'-uv'/v)^{2}=p_{2}u'^{2}-2p_{2}uu'v'/v+p_{2}u^{2}v'^{2}/v^{2}$ なので、右辺は主張の形になる。
+
+**Step 2.** 【主張：$x\to x_{1}+0$ と $x\to x_{2}-0$ で $A(x)\to0$】$v(x_{1})\neq0$ なら、$A$ は $x_{1}$ の近くで連続な式で与えられ、$u(x_{1})=0$ から $A\to0$。$v(x_{1})=0$ なら \ref{ode:sl-zeros-simple.1} から $v'(x_{1})\neq0$ で、
+$$
+\frac{u(x)}{v(x)}=\frac{(u(x)-u(x_{1}))/(x-x_{1})}{(v(x)-v(x_{1}))/(x-x_{1})}\to\frac{u'(x_{1})}{v'(x_{1})}
+$$
+は有界にとどまり、$p_{1}u'v-p_{2}uv'\to p_{1}u'(x_{1})\cdot0-p_{2}\cdot0\cdot v'(x_{1})=0$ なので $A\to0$。$x_{2}$ でも同じ。
+
+**Step 3.** 【主張：$(x_{1},x_{2})$ の上で $A'\equiv0$】$x_{1}<s<t<x_{2}$ について $\int_{s}^{t}A'\,dx=A(t)-A(s)$（\ref{calc:fundamental-theorem.2}）。前提 $p_{1}\ge p_{2}$, $r_{1}\ge r_{2}$ から $A'\ge0$ なので、左辺は $s$ を小さく $t$ を大きくすると増え、Step 2 から $s\to x_{1}$, $t\to x_{2}$ で $0$ に近づく。非負で増加して $0$ に近づくので、すべての $s<t$ で $\int_{s}^{t}A'=0$。$A'$ は連続で非負なので恒等的に $0$。
+
+**Step 4.** 【主張：2】Step 3 から、$A'$ の三つの非負の項はどれも $0$。とくに $u'v-uv'=0$、つまり $(u/v)'=0$ で、$(x_{1},x_{2})$ の上で $u=\kappa v$（$\kappa$ は定数）。$\kappa=0$ なら $u$ は区間 $(x_{1},x_{2})$ で $0$ で、その内部の点で $u=u'=0$ となり \ref{ode:sl-zeros-simple.1} に反する。よって $v=\kappa^{-1}u$ が $(x_{1},x_{2})$ で、連続性から $[x_{1},x_{2}]$ で成り立つ。残りの二項が $0$ であることが 2 の後半である。
+
+::: hypcheck
+- **$p_{1}\ge p_{2}$, $r_{1}\ge r_{2}$**：Step 3 で $A'\ge0$ に使った。逆向きなら偽：上の例の $v=\sin\frac{x}{2}$。
+- **$p_{2}>0$**：Step 1 の第 3 項の符号と、$v$ の方程式が 1 階の系として扱えること（Step 2 の \ref{ode:sl-zeros-simple}）に使った。
+- **$u(x_{1})=u(x_{2})=0$**：Step 2 で境界の値 $A\to0$ に使った。$x_{1}$, $x_{2}$ は隣り合う零点でなくてもよい。
+- **2 の場合が実際に起こること**：$p_{1}=p_{2}$, $r_{1}=r_{2}$ で $v=u$ なら $v$ は $x_{1}$, $x_{2}$ でしか $0$ にならないこともある（$\sin x$ と $0,\pi$）。$(x_{1},x_{2})$ のある点で $r_{1}>r_{2}$ かつ $u\neq0$ なら（たとえば $x_{1}$, $x_{2}$ が隣り合う零点で、$r_{1}>r_{2}$ となる点がその間にあれば）、2 は起こらず 1 が成り立つ。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $p_{1}=p_{2}$ のときは、ピコーンの恒等式の代わりに $\mathcal{W}(u,v)=p(uv'-u'v)$ の微分 $\mathcal{W}'=(r_{2}-r_{1})uv$ を零点の間で積分する、より短い証明がある（ここでは一般の $p$ を扱うためにピコーンの恒等式を使った）。係数が行列値の連立方程式では、零点の代わりに「共役点」を数える比較定理があり、変分法のヤコビの条件や、リーマン幾何の指数写像の特異点（\see{riem:exponential-map}）を調べる道具になる（ここでは扱わない）。
+
+**似た定理.** 同じ方程式の一次独立な二つの解の零点が交互に並ぶこと（\ref{ode:sturm-separation}）は、この定理の $p_{1}=p_{2}$, $r_{1}=r_{2}$ の場合である。リーマン幾何のラウチの比較定理は、断面曲率の大小からヤコビ場の零点（共役点）の位置を比べるもので、この定理の幾何学版にあたる（ここでは扱わない）。
+
+**高い視点：ばねの強さと揺れの速さ.** $u''=-ku$ の解は、ばね定数 $k$ が大きいほど速く振動し、零点の間隔は $\pi/\sqrt{k}$ になる。比較定理は、ばね定数が場所によって変わる一般の場合でも、「どこでも相手より強いばねにつながれた方が、相手より早く一往復の半分を終える」ことを言っている。比べる量は解そのものではなく、零点（いつ原点を通るか）だけなので、方程式が解けなくても結論が出る。
+:::
+
+::: corollary スツルムの分離定理 {#ode:sturm-separation keywords="Sturm separation theorem: zeros of two linearly independent solutions of (pu')' = ru strictly interlace; no common zeros; exactly one zero of one between consecutive zeros of the other" index="スツルムの分離定理|すつるむのぶんりていり, 零点の交互性|れいてんのこうごせい" refname="スツルムの分離定理"}
+$u,v$ を $(pu')'=ru$ の一次独立な実数値の解とする。$u$ と $v$ は共通の零点をもたず、$u$ の隣り合う零点 $x_{1}<x_{2}$ の間に、$v$ の零点がちょうど一つある。
+:::
+
+::: intuition
+同じ方程式の本質的に異なる二つの解は、零点を互いに譲り合うように交互に並ぶ。$\sin x$ と $\cos x$ の零点が交互に並ぶのと同じである。
+:::
+
+::: proof
+共通の零点 $x_{0}$ があれば $\mathcal{W}(u,v)(x_{0})=0$ で、\ref{ode:sl-symmetry.3}（$q=r$, $\lambda=0$）から一次従属となり矛盾する。\ref{ode:sturm-comparison} を $p_{1}=p_{2}=p$, $r_{1}=r_{2}=r$ で使うと、$v$ は $u$ の定数倍ではないので、$v$ は $(x_{1},x_{2})$ に零点をもつ。二つの零点 $y_{1}<y_{2}$ が $(x_{1},x_{2})$ にあれば、$u$ と $v$ の役を入れ替えて同じ定理を使うと $u$ が $(y_{1},y_{2})\subset(x_{1},x_{2})$ に零点をもち、$x_{1}$, $x_{2}$ が隣り合う零点であることに反する。
+:::
+
+比較の相手に定数係数の方程式をとると、零点の間隔が評価できる。
+
+::: corollary 零点の間隔 {#ode:sl-zero-spacing keywords="distance between zeros of solutions of (pu')' = ru: if p <= P and r <= -P k^2 then every interval of length pi/k contains a zero; if p >= m and r >= -m k^2 then distinct zeros are at distance at least pi/k" index="零点の間隔|れいてんのかんかく"}
+$J$ を区間、$u$ を $J$ の上の $(pu')'=ru$ の自明でない実数値の解、$k>0$ とする。
+1. 定数 $P>0$ があって $J$ の上で $p\le P$, $r\le-Pk^{2}$ なら、$J$ に含まれる長さ $\pi/k$ の閉区間はどれも $u$ の零点を含む。
+2. 定数 $m>0$ があって $J$ の上で $p\ge m$, $r\ge-mk^{2}$ なら、$u$ の相異なる零点の距離は $\pi/k$ 以上である。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$[x_{0},x_{0}+\pi/k]\subset J$ とし、$\tilde{u}(x)\defeq\sin k(x-x_{0})$ とおくと $(P\tilde{u}')'=-Pk^{2}\tilde{u}$ で、$\tilde{u}$ の零点は $x_{0}$, $x_{0}+\pi/k$。\ref{ode:sturm-comparison} を $(p_{1},r_{1})=(P,-Pk^{2})$ の解 $\tilde{u}$ と $(p_{2},r_{2})=(p,r)$ の解 $u$ に使う（$P\ge p$, $-Pk^{2}\ge r$）。$u$ は開区間に零点をもつか、$\tilde{u}$ の定数倍で $u(x_{0})=0$ となるかなので、どちらでも閉区間に零点がある。
+
+**Step 2.** 【主張：2】零点 $x_{1}<x_{2}$ で $x_{2}-x_{1}<\pi/k$ となるものがあったとする。$0<\delta<\pi-k(x_{2}-x_{1})$ をとり $v(x)\defeq\sin\bigl(k(x-x_{1})+\delta\bigr)$ とおくと、$[x_{1},x_{2}]$ で $k(x-x_{1})+\delta\in(0,\pi)$ なので $v>0$、また $(mv')'=-mk^{2}v$。\ref{ode:sturm-comparison} を $(p_{1},r_{1})=(p,r)$ の解 $u$ と $(p_{2},r_{2})=(m,-mk^{2})$ の解 $v$ に使う（$p\ge m$, $r\ge-mk^{2}$）と、$v$ は $(x_{1},x_{2})$ に零点をもつか、$[x_{1},x_{2}]$ で $u$ の定数倍で $v(x_{1})=0$ となるかだが、どちらも $v>0$ に反する。
+:::
+
+::: example
+$u''+xu=0$（エアリー型の方程式）の自明でない解は、$x\ge1$ で無限個の零点をもち、零点の間隔は $0$ に近づく。実際、$[X,X+\ell]$（$X\ge1$）では $p=1$, $r=-x$ で、1 を $k=\sqrt{X}$ で使うと長さ $\pi/\sqrt{X}$ の閉区間ごとに零点があり、2 を $k=\sqrt{X+\ell}$ で使うと相異なる零点の距離は $\pi/\sqrt{X+\ell}$ 以上である。$-u''=\lambda u$（$\lambda>0$）では 1 と 2 が同じ $k=\sqrt{\lambda}$ で使え、零点の間隔はちょうど $\pi/\sqrt{\lambda}$ である。
+:::
+
+## プリューファー変換と振動定理 {#ode:sec-sl-oscillation}
+
+固有関数の零点を数えるために、自明でない解 $u$ を位相平面の点 $(u,pu')$ の極座標で表す。$(u,pu')$ は決して原点を通らない（\ref{ode:sl-zeros-simple.1}）ので、角度が連続にとれる。以下、$\lambda\in\mathbb{R}$ について
+$$
+F_{\lambda}(x,\theta)\defeq\frac{\cos^{2}\theta}{p(x)}+\bigl(\lambda w(x)-q(x)\bigr)\sin^{2}\theta
+$$
+とおく。
+
+::: lemma プリューファー変換 {#ode:pruefer-transform keywords="Prufer transformation u = rho sin theta, pu' = rho cos theta; Prufer angle equation theta' = cos^2 theta / p + (lambda w - q) sin^2 theta; zeros of u correspond to theta in pi Z and theta crosses multiples of pi only upward; counting zeros by the Prufer angle" index="プリューファー変換|ぷりゅーふぁーへんかん, プリューファー角|ぷりゅーふぁーかく"}
+$\lambda\in\mathbb{R}$, $\theta_{0}\in\mathbb{R}$ とする。
+1. $\theta'=F_{\lambda}(x,\theta)$, $\theta(a)=\theta_{0}$ を満たす $C^{1}$ 級の $\theta\colon[a,b]\to\mathbb{R}$ がただ一つある。
+2. $\rho_{0}>0$ について $\rho(x)\defeq\rho_{0}\exp\int_{a}^{x}\sin\theta\cos\theta\,\bigl(1/p+q-\lambda w\bigr)dt$ とおくと、$u\defeq\rho\sin\theta$ は $Lu=\lambda wu$ を満たし、$pu'=\rho\cos\theta$。$Lu=\lambda wu$ の自明でない実数値の解はすべて、$(u(a),p(a)u'(a))=\rho_{0}(\sin\theta_{0},\cos\theta_{0})$ となる $\rho_{0}>0$, $\theta_{0}$ についてこの形に書ける。
+3. 2 の $u$ について、$u(x_{0})=0\iff\theta(x_{0})\in\pi\mathbb{Z}$ で、そのとき $\theta'(x_{0})=1/p(x_{0})>0$。整数 $k$ について $\theta(x_{0})\ge k\pi$ なら、$x_{0}<x\le b$ で $\theta(x)>k\pi$。
+4. $0\le\theta_{0}<\pi$ なら、$a<x\le b$ について $\theta(x)>0$ で、$u$ の開区間 $(a,x)$ の中の零点の個数は、$k\pi<\theta(x)$ を満たす整数 $k\ge1$ の個数に等しい。
+:::
+
+::: intuition
+解 $u$ と $pu'$ を組にした点は、平面の原点のまわりを時計の針と逆向きにだけ回る（針が真上・真下を通るときに $u$ が $0$ になる）。だから、針が何回半回転したかを数えれば、$u$ の零点の個数がわかる。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$p,q,w$ を $[a,b]$ の外へ端点の値で定数として延ばすと、$\mathbb{R}$ の上の連続関数で $p>0$ のままである。$F_{\lambda}$ は $\mathbb{R}\times\mathbb{R}$ の上で連続、$|F_{\lambda}|\le1/p_{0}+|\lambda|\|w\|_{\infty}+\|q\|_{\infty}$ で有界、$\partial_{\theta}F_{\lambda}=\sin2\theta\,(\lambda w-q-1/p)$ は連続なので、\ref{ode:c1-locally-lipschitz} から $\theta$ について局所リプシッツ。\ref{ode:linear-growth-global}（増大度 $a(t)$ が定数、$b(t)=0$）から最大解は $\mathbb{R}$ 全体で定義され、\ref{ode:uniqueness} から一意である。$[a,b]$ に制限する。
+
+**Step 2.** 【主張：2】$\rho'=\rho\sin\theta\cos\theta(1/p+q-\lambda w)$ と $\theta'=F_{\lambda}$ から
+$$
+(\rho\sin\theta)'=\rho'\sin\theta+\rho\cos\theta\,\theta'=\rho\Bigl(\frac{\sin^{2}\theta\cos\theta+\cos^{3}\theta}{p}\Bigr)=\frac{\rho\cos\theta}{p},
+$$
+（$(q-\lambda w)$ の項は $\sin^{2}\theta\cos\theta$ の係数が打ち消し合う）また
+$$
+(\rho\cos\theta)'=\rho'\cos\theta-\rho\sin\theta\,\theta'=\rho\sin\theta\,(q-\lambda w)(\cos^{2}\theta+\sin^{2}\theta)=(q-\lambda w)\rho\sin\theta
+$$
+（$1/p$ の項は打ち消し合う）。よって $U\defeq(\rho\sin\theta,\rho\cos\theta)$ は $U_{1}'=U_{2}/p$, $U_{2}'=(q-\lambda w)U_{1}$ を満たし、$u=U_{1}$ は $C^{2}$ 級で $pu'=U_{2}$, $(pu')'=(q-\lambda w)u$、つまり $Lu=\lambda wu$。自明でない解 $\tilde{u}$ については $(\tilde{u}(a),p(a)\tilde{u}'(a))\neq0$ なので極座標で $\rho_{0}(\sin\theta_{0},\cos\theta_{0})$ と書け、作った $u$ と $a$ での $(u,pu')$ が一致するので、1 階の系の一意性（\ref{ode:linear-existence}）から $\tilde{u}=u$。
+
+**Step 3.** 【主張：3】$\rho>0$ なので $u(x_{0})=0\iff\sin\theta(x_{0})=0$。そのとき $\cos^{2}\theta=1$, $\sin^{2}\theta=0$ で $\theta'(x_{0})=1/p(x_{0})$。$\theta(x_{0})\ge k\pi$ とする。$\theta(x_{0})=k\pi$ なら $\theta'(x_{0})>0$ から、$\theta(x_{0})>k\pi$ なら連続性から、$x_{0}$ の右の近くで $\theta>k\pi$。$\theta(x)\le k\pi$ となる $x\in(x_{0},b]$ があったとし、その下限を $x_{1}$ とすると $x_{1}>x_{0}$, $\theta(x_{1})=k\pi$ で、$(x_{0},x_{1})$ では $\theta>k\pi$。すると $x\to x_{1}-0$ の差分商 $(\theta(x)-\theta(x_{1}))/(x-x_{1})$ は負で、$\theta'(x_{1})\le0$ となり、$\theta'(x_{1})=1/p(x_{1})>0$ に反する。
+
+**Step 4.** 【主張：4】$\theta(a)=\theta_{0}\ge0$ なので、3 を $k=0$ で使うと $x>a$ で $\theta(x)>0$。$a<t<x$ で $u(t)=0$ とすると $\theta(t)=k\pi$ となる整数 $k$ があり、$\theta(t)>0$ から $k\ge1$、3 から $\theta(x)>k\pi$。逆に $k\ge1$, $k\pi<\theta(x)$ なら、$\theta(a)<\pi\le k\pi$ なので \ref{top:intermediate-value} から $\theta(t)=k\pi$ となる $t\in(a,x)$ があり、3 からそのような $t$ はただ一つ（二つあれば、小さい方の後で $\theta>k\pi$ が続くことに反する）。よって零点と整数 $k$ が一対一に対応する。
+:::
+
+角度 $\theta$ は $\lambda$ について単調に増える。これが振動定理の鍵である。
+
+::: lemma プリューファー角の単調性 {#ode:pruefer-monotone keywords="the Prufer angle theta(x, lambda) with fixed initial value is strictly increasing in lambda for x > a, locally Lipschitz in lambda, and tends to 0 as lambda tends to minus infinity" index="プリューファー角の単調性|ぷりゅーふぁーかくのたんちょうせい"}
+$\theta_{0}\in\mathbb{R}$ を固定し、$\theta(x,\lambda)$ を \ref{ode:pruefer-transform.1} の解（$\theta(a,\lambda)=\theta_{0}$）とする。
+1. $\lambda<\lambda'$ なら、$a<x\le b$ で $\theta(x,\lambda)<\theta(x,\lambda')$。
+2. $\Lambda>0$, $|\lambda|,|\lambda'|\le\Lambda$ について、$\ell\defeq1/p_{0}+\Lambda\|w\|_{\infty}+\|q\|_{\infty}$ とおくと $|\theta(b,\lambda')-\theta(b,\lambda)|\le|\lambda'-\lambda|\,\|w\|_{\infty}(b-a)e^{\ell(b-a)}$。とくに $\lambda\mapsto\theta(b,\lambda)$ は連続。
+3. $0\le\theta_{0}<\pi$ とし、$0<\eta\le\pi/2$, $\eta<\pi-\theta_{0}$ とする。十分小さいすべての $\lambda$ について $\theta(b,\lambda)<\eta$。
+:::
+
+::: proof
+**Step 1.** 【主張：$\delta\defeq\theta(\cdot,\lambda')-\theta(\cdot,\lambda)$ は $|g|\le\ell$ となる連続関数 $g$ を使って $\delta'=g\delta+(\lambda'-\lambda)w\sin^{2}\theta(\cdot,\lambda)$, $\delta(a)=0$ を満たす】$g(x)\defeq\int_{0}^{1}\partial_{\theta}F_{\lambda'}\bigl(x,\theta(x,\lambda)+s\delta(x)\bigr)ds$ とおく。被積分関数は $(x,s)$ について連続なので $g$ は連続（\ref{calc:differentiation-under-integral.1}）で、$|\partial_{\theta}F_{\lambda'}|\le\ell$ から $|g|\le\ell$。$s$ についての微分積分学の基本定理から $F_{\lambda'}(x,\theta(x,\lambda'))-F_{\lambda'}(x,\theta(x,\lambda))=g\delta$ で、$F_{\lambda'}-F_{\lambda}=(\lambda'-\lambda)w\sin^{2}\theta$ を足せばよい。
+
+**Step 2.** 【主張：$\delta(x)=(\lambda'-\lambda)\int_{a}^{x}e^{\int_{t}^{x}g}\,w(t)\sin^{2}\theta(t,\lambda)\,dt$】$1$ 次元の線形方程式 $y'=gy$ の推移行列は $e^{\int_{t}^{x}g}$ なので、定数変化法（\ref{ode:variation-of-constants}）と $\delta(a)=0$ から。
+
+**Step 3.** 【主張：1・2】$\lambda<\lambda'$ なら Step 2 の被積分関数は連続で非負、$\sin\theta(t,\lambda)=0$ となるのは \ref{ode:pruefer-transform.3} から解 $u$ の零点だけで、それは有限個（\ref{ode:sl-zeros-simple.2}）なので、それ以外では正。よって $x>a$ で $\delta(x)>0$。2 は $e^{\int_{t}^{x}g}\le e^{\ell(b-a)}$, $w\sin^{2}\theta\le\|w\|_{\infty}$ から。
+
+**Step 4.** 【主張：$\lambda<0$, $\lambda w_{0}+\|q\|_{\infty}\le0$ のとき、$\eta\le\theta\le\pi-\eta$ なら $F_{\lambda}(x,\theta)\le-M(\lambda)\defeq\frac{1}{p_{0}}-\bigl(|\lambda|w_{0}-\|q\|_{\infty}\bigr)\sin^{2}\eta$】$\lambda<0$, $w\ge w_{0}$ から $\lambda w-q\le\lambda w_{0}+\|q\|_{\infty}\le0$、$\sin^{2}\theta\ge\sin^{2}\eta$ なので $(\lambda w-q)\sin^{2}\theta\le(\lambda w_{0}+\|q\|_{\infty})\sin^{2}\eta$。$\cos^{2}\theta/p\le1/p_{0}$ と合わせる。$M(\lambda)\to+\infty$（$\lambda\to-\infty$）である。
+
+**Step 5.** 【主張：3】$\lambda$ を Step 4 の条件を満たし $M\defeq M(\lambda)>\pi/(b-a)$ となるようにとる。(i) $\theta<\pi-\eta$ が $[a,b]$ で成り立つ：$\theta_{0}<\pi-\eta$ で、$\theta=\pi-\eta$ となる最初の点 $x^{*}$ があれば、そこまで $\theta<\pi-\eta$ なので $\theta'(x^{*})\ge0$ だが、Step 4 から $\theta'(x^{*})\le-M<0$。(ii) $\theta(x_{0})<\eta$ となる $x_{0}\in[a,a+\pi/M]$ がある：$[a,s]$ でずっと $\theta\ge\eta$ なら、(i) と Step 4 から $\theta'\le-M$ で、$0<\eta\le\theta(s)\le\theta_{0}-M(s-a)<\pi-M(s-a)$、つまり $s-a<\pi/M$。(iii) $x\ge x_{0}$ でずっと $\theta<\eta$：$\theta(x)\ge\eta$ となる $x>x_{0}$ の下限 $x_{1}$ では $\theta(x_{1})=\eta$ で、その左では $\theta<\eta$ なので $\theta'(x_{1})\ge0$ だが、Step 4 から $\theta'(x_{1})<0$。$a+\pi/M<b$ なので $\theta(b)<\eta$。
+:::
+
+::: theorem スツルムの振動定理 {#ode:sturm-oscillation keywords="Sturm oscillation theorem: for a regular Sturm-Liouville problem with separated boundary conditions, the n-th eigenfunction has exactly n-1 zeros in the open interval (a,b); eigenvalues are characterized by the Prufer angle theta(b, lambda_n) = theta_b + (n-1) pi" index="スツルムの振動定理|すつるむのしんどうていり, 節（固有関数）|ふしこゆうかんすう, 固有関数の零点|こゆうかんすうのれいてん" refname="スツルムの振動定理"}
+分離型境界条件について、$\alpha_{1}\sin\theta_{a}+\alpha_{2}\cos\theta_{a}=0$ となる $\theta_{a}\in[0,\pi)$ と、$\beta_{1}\sin\theta_{b}+\beta_{2}\cos\theta_{b}=0$ となる $\theta_{b}\in(0,\pi]$ をとり、$\theta(x,\lambda)$ を $\theta(a,\lambda)=\theta_{a}$ のプリューファー角（\ref{ode:pruefer-transform.1}）とする。
+1. $\lambda$ が固有値であることと、ある整数 $m\ge0$ で $\theta(b,\lambda)=\theta_{b}+m\pi$ となることは同値で、$n$ 番目の固有値 $\lambda_{n}$ は $\theta(b,\lambda)=\theta_{b}+(n-1)\pi$ となるただ一つの $\lambda$ である。
+2. $n$ 番目の固有関数 $e_{n}$ は、開区間 $(a,b)$ にちょうど $n-1$ 個の零点をもつ（すべて単純）。
+:::
+
+::: intuition
+一番低い固有振動は区間の内部で一度も $0$ にならず、二番目はちょうど一回、$n$ 番目はちょうど $n-1$ 回 $0$ になる。弦の $n$ 番目の倍音が $n-1$ 個の節をもつのと同じである。
+:::
+
+::: proof
+**Step 1.** 【主張：$\theta_{a}$, $\theta_{b}$ はただ一つに定まり、$\lambda$ が固有値であることと $\theta(b,\lambda)\in\theta_{b}+\pi\mathbb{Z}$ は同値】$\alpha_{1}s+\alpha_{2}t=0$ となる単位ベクトル $(s,t)$ は $\pm(-\alpha_{2},\alpha_{1})/|(\alpha_{1},\alpha_{2})|$ の二つで、互いに角度が $\pi$ だけ違うので、$\alpha_{1}\sin\theta+\alpha_{2}\cos\theta=0$ の解の全体は $\theta_{a}+\pi\mathbb{Z}$ の形で、$[0,\pi)$ にただ一つの代表がある。$\theta_{b}$ も同様。固有値は実数（\ref{ode:sl-symmetry.4}）なので $\lambda\in\mathbb{R}$ としてよい。\ref{ode:pruefer-transform.2} の $u_{\lambda}\defeq\rho\sin\theta(\cdot,\lambda)$ は $B_{a}u_{\lambda}=\rho(a)(\alpha_{1}\sin\theta_{a}+\alpha_{2}\cos\theta_{a})=0$ を満たし、$B_{a}$ を満たす実数値の解はすべて $u_{\lambda}$ の定数倍である（\ref{ode:sl-symmetry} の Step 2・3 の議論）。固有関数は実数値の固有関数の定数倍（\ref{ode:sl-symmetry.4}）なので、$\lambda$ が固有値であることは $B_{b}u_{\lambda}=\rho(b)\bigl(\beta_{1}\sin\theta(b,\lambda)+\beta_{2}\cos\theta(b,\lambda)\bigr)=0$、つまり $\theta(b,\lambda)\in\theta_{b}+\pi\mathbb{Z}$ と同値。
+
+**Step 2.** 【主張：$\Theta(\lambda)\defeq\theta(b,\lambda)$ は連続で狭義単調増加、値域 $I$ は $(0,\infty)$ に含まれる区間で、$\theta_{b}$ より小さい値を含む】\ref{ode:pruefer-monotone.1}・\ref[2]{ode:pruefer-monotone.2} と \ref{top:intermediate-value} から $I$ は区間。\ref{ode:pruefer-transform.4} から $\Theta>0$。$\eta\defeq\frac12\min\{\theta_{b},\pi-\theta_{a},\pi/2\}>0$ として \ref{ode:pruefer-monotone.3} を使うと、$\Theta(\lambda)<\eta<\theta_{b}$ となる $\lambda$ がある。
+
+**Step 3.** 【主張：すべての整数 $m\ge0$ について $\Theta(\lambda)=\theta_{b}+m\pi$ となる $\lambda$ がただ一つある】$m\le-1$ では $\theta_{b}+m\pi\le0$ なので、Step 1・2 から固有値は $\Theta(\lambda)=\theta_{b}+m\pi$（$m\ge0$）となる $\lambda$ だけで、狭義単調性から各 $m$ に高々一つ。\ref{ode:sl-eigen.1} から固有値は無限個あるので、$I$ は $\theta_{b}+m\pi$ の形の値を無限個、つまりいくらでも大きな値を含む。$I$ は区間で $\theta_{b}$ より小さい値も含むので、$\theta_{b}+m\pi$（$m\ge0$）をすべて含む。
+
+**Step 4.** 【主張：1】Step 3 の $\lambda$ を $\mu_{m}$ とすると、$\Theta$ の狭義単調性から $\mu_{0}<\mu_{1}<\cdots$ で、Step 1–3 からこれが固有値の全体なので、$\lambda_{n}=\mu_{n-1}$。
+
+**Step 5.** 【主張：2】$e_{n}$ は $u_{\lambda_{n}}$ の $0$ でない定数倍なので零点は同じで、\ref{ode:pruefer-transform.4} から $(a,b)$ の中の零点の個数は $k\pi<\theta_{b}+(n-1)\pi$ を満たす整数 $k\ge1$ の個数である。$0<\theta_{b}\le\pi$ なので、これは $k=1,\dots,n-1$ の $n-1$ 個。零点が単純であることは \ref{ode:sl-zeros-simple.1}。
+
+::: hypcheck
+- **分離型境界条件**：Step 1 で、左端の条件が $\lambda$ によらない初期角 $\theta_{a}$ を決め、右端の条件が終端の角の条件になることに使った。周期条件では偽：$[0,2\pi]$ の $-u''$ の固有値 $n^{2}$（$n\ge1$）の固有関数 $\sin nx$ は $(0,2\pi)$ に $2n-1$ 個、$\cos nx$ は $2n$ 個の零点をもち、「$n-1$ 個」の形にはならない。
+- **$w>0$**：\ref{ode:pruefer-monotone} の狭義単調性（Step 2）と $\lambda\to-\infty$ での振る舞いに使った。
+- **$p>0$**：\ref{ode:pruefer-transform.3} の「角度は $\pi$ の倍数を上向きにしか横切らない」（$\theta'=1/p>0$）に使った。これが零点を数えられる理由である。
+- **固有値が無限個あること**：Step 3 で値域が上に有界でないことに使った（\ref{ode:sl-eigen.1}、DC を通す）。補足のように零点の間隔の評価でも示せる。
+:::
+:::
+
+::: supplement
+**前提を変えると.** Step 3 で使った「$\Theta(\lambda)\to\infty$」は、関数解析を使わずに \ref{ode:sl-zero-spacing.1} からも出る：$\lambda>0$ が大きいと $r=q-\lambda w\le\|q\|_{\infty}-\lambda w_{0}=-Pk^{2}$（$P\defeq\max p$, $k^{2}\defeq(\lambda w_{0}-\|q\|_{\infty})/P$）なので、$u_{\lambda}$ は長さ $\pi/k$ の閉区間ごとに零点をもち、零点の個数、したがって $\Theta(\lambda)/\pi$ は $\lambda\to\infty$ でいくらでも大きくなる。この道をとると、固有値が無限個あって $+\infty$ に発散することまで、選択公理なしで示せる（固有関数の完全性は示せない）。同じ評価を \ref{ode:sl-zero-spacing.2} と組み合わせると、$n\ge2$ について $c_{1}n^{2}-C\le\lambda_{n}\le c_{2}n^{2}+C$（$c_{1},c_{2},C>0$ は $p,q,w,a,b$ だけで決まる定数）の形の評価も得られる。多次元のディリクレ・ラプラシアンでは零点の個数の代わりに「節領域」（固有関数が $0$ にならない連結成分）を数え、$n$ 番目の固有関数の節領域は $n$ 個以下であることが知られている（クーラン；ここでは証明しない）。
+
+**似た定理.** \ref{ode:sturm-comparison} を $(p,q-\lambda_{n}w)$ と $(p,q-\lambda_{n+1}w)$ に使うと、$e_{n+1}$ は $e_{n}$ の隣り合う零点の間に必ず零点をもつ（\ref{ode:prob-sl-interlacing}）。プリューファー角の比較で、係数 $q$ を大きくすると各固有値が増えることも示せる（\ref{ode:prob-sl-eigen-bounds}）。実閉体の理論で扱う \see{model:page-sturm} は、多項式の実根を符号の変化で数えるもので、名前は同じスツルムに由来するが、こちらは微分方程式の解の零点を角度の回転数で数える。
+
+**高い視点：時計の針を数える.** プリューファー角 $\theta$ は、位相平面の点 $(u,pu')$ を指す時計の針である。針は左回りにしか真上・真下を通過できないので、針が回った半回転の数がそのまま零点の数になる。$\lambda$ を大きくすると針はどの時刻でも速く回り、左端で決まった向きから出発した針が、右端でちょうど指定された向きを指すとき、その $\lambda$ が固有値である。一番目の固有値では針は半回転未満、$n$ 番目ではちょうど $n-1$ 回余分に半回転してから目標の向きに着く。固有値の番号が零点の数になるのは、この「回転数の数え上げ」のためである。
+:::
+
+## 問題 {#ode:sec-sl-osc-problems}
+
+::: problem {#ode:prob-sl-interlacing}
+$x_{1}<x_{2}$ を $[a,b]$ の中の $e_{n}$ の隣り合う零点（間に $e_{n}$ の零点がない）とする。$e_{n+1}$ は $(x_{1},x_{2})$ に零点をもつことを示せ。両端がディリクレ条件のとき、これと \ref{ode:sturm-oscillation.2} が整合することを確かめよ。
+:::
+
+::: solution
+$u\defeq e_{n}$ は $(pu')'=(q-\lambda_{n}w)u$、$v\defeq e_{n+1}$ は $(pv')'=(q-\lambda_{n+1}w)v$ を満たす。$p_{1}=p_{2}=p$, $r_{1}\defeq q-\lambda_{n}w$, $r_{2}\defeq q-\lambda_{n+1}w$ とすると $r_{1}-r_{2}=(\lambda_{n+1}-\lambda_{n})w>0$。\ref{ode:sturm-comparison} の 2 が起これば $(r_{1}-r_{2})u^{2}=0$ が $(x_{1},x_{2})$ で成り立ち、$u=0$ がその区間で成り立つが、$x_{1}$, $x_{2}$ は隣り合う零点なので $(x_{1},x_{2})$ で $u\neq0$ で矛盾する。よって 1 が成り立つ。
+
+両端がディリクレ条件なら、$e_{n}$ の $[a,b]$ の中の零点は $a$, $b$ と内部の $n-1$ 個で、$a=z_{0}<z_{1}<\cdots<z_{n}=b$ と並ぶ。$n$ 個の開区間 $(z_{j-1},z_{j})$ のそれぞれに $e_{n+1}$ の零点があるので、$e_{n+1}$ は内部に少なくとも $n$ 個の零点をもつ。\ref{ode:sturm-oscillation.2} からちょうど $n$ 個なので、各区間にちょうど一つずつあり、$e_{n}$ と $e_{n+1}$ の内部の零点は交互に並ぶ。
+:::
+
+::: problem {#ode:prob-sl-eigen-bounds}
+$[0,\pi]$ で $-u''+qu=\lambda u$, $u(0)=u(\pi)=0$ を考える。$q$ は連続で、定数 $Q$ について $0\le q\le Q$ とする。$n$ 番目の固有値 $\lambda_{n}(q)$ について $n^{2}\le\lambda_{n}(q)\le n^{2}+Q$ を示せ。（ヒント：プリューファー角を $q$ について比べる。）
+:::
+
+::: solution
+$p=w=1$ で、ディリクレ条件では $\theta_{a}=0$, $\theta_{b}=\pi$。$\theta^{q}(x,\lambda)$ を $\theta'=\cos^{2}\theta+(\lambda-q)\sin^{2}\theta$, $\theta(0)=0$ の解とする。
+
+**比較.** $q_{1}\le q_{2}$ なら $\theta^{q_{1}}(x,\lambda)\ge\theta^{q_{2}}(x,\lambda)$：$\delta\defeq\theta^{q_{1}}-\theta^{q_{2}}$ は、\ref{ode:pruefer-monotone} の証明の Step 1・2 と同じく、連続関数 $g$ を使って $\delta'=g\delta+(q_{2}-q_{1})\sin^{2}\theta^{q_{2}}$, $\delta(0)=0$ を満たし、$\delta(x)=\int_{0}^{x}e^{\int_{t}^{x}g}(q_{2}-q_{1})\sin^{2}\theta^{q_{2}}\,dt\ge0$。
+
+**下からの評価.** $q\equiv0$ の固有値は $n^{2}$（\ref{ode:sl-laplacian-eigenvalues.1}）なので、\ref{ode:sturm-oscillation.1} から $\theta^{0}(\pi,n^{2})=\pi+(n-1)\pi=n\pi$、同様に $\theta^{q}(\pi,\lambda_{n}(q))=n\pi$。比較から $\theta^{0}(\pi,\lambda_{n}(q))\ge\theta^{q}(\pi,\lambda_{n}(q))=n\pi=\theta^{0}(\pi,n^{2})$ で、$\theta^{0}(\pi,\cdot)$ は狭義単調増加（\ref{ode:pruefer-monotone.1}）なので $\lambda_{n}(q)\ge n^{2}$。
+
+**上からの評価.** 定数 $Q$ では $\theta^{Q}(x,\lambda)=\theta^{0}(x,\lambda-Q)$（同じ方程式）なので $\theta^{Q}(\pi,n^{2}+Q)=n\pi$。比較から $\theta^{Q}(\pi,\lambda_{n}(q))\le\theta^{q}(\pi,\lambda_{n}(q))=n\pi=\theta^{Q}(\pi,n^{2}+Q)$ で、狭義単調性から $\lambda_{n}(q)\le n^{2}+Q$。
+
+（とくに $q$ が小さな連続関数なら、$\lambda_{n}$ は $n^{2}$ から $\|q\|_{\infty}$ 以上ずれない。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

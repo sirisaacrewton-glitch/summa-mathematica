@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1 階偏微分方程式と特性曲線 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/01-characteristics.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 1 階偏微分方程式と特性曲線 {#pde:page-characteristics keywords="first order partial differential equations, classification of PDE (order, linear, semilinear, quasilinear, fully nonlinear), transport equation, method of characteristics, Duhamel formula, classical solution, existence and uniqueness, Cauchy problem for quasilinear equations, characteristic system, noncharacteristic condition, local existence via the inverse function theorem, 偏微分方程式の分類, 輸送方程式, 特性曲線法, 準線形方程式, 非特性条件"}
+
+偏微分方程式の分野はこのページから始まる。この分野では、まず**古典的手法**（特性曲線・グリーン関数・最大値原理・ペロンの方法・フーリエの方法）で方程式の解を具体的に作り、次に**関数解析的手法**（弱解・ラックス–ミルグラムの定理・差分商による正則性・ガレルキン法・半群）で同じ問題を一般化し、最後に二つの手法が要求する前提（解の滑らかさ、係数の正則性、境界の正則性）を対比する。そのため各定理の証明の最後の hypcheck には、どの前提がどこで使われたかを細かく書いておく。
+
+最初に扱うのは 1 階の方程式である。1 階の方程式は、**特性曲線**と呼ばれる曲線に沿って見ると常微分方程式になる。したがって解の存在・一意性・滑らかさは、常微分方程式の基礎の系列の結果（解の存在と一意性 \ref{ode:local-existence-uniqueness}、初期値への滑らかな依存性 \ref{ode:c1-dependence}、流れ \ref{ode:flow-theorem}）から従う。まず線形の**輸送方程式** $\partial_{t}u+b\cdot\nabla u=f$ の解の公式と、古典解の存在と一意性を示し、各前提を外すと何が起きるかを例で確かめる。次に**準線形方程式** $\sum_{i}a_{i}(x,u)\partial_{i}u=c(x,u)$ のコーシー問題を、特性曲線の連立系と逆関数定理で局所的に解く。ここで初期曲面が特性曲線に接しないという**非特性条件**が要り、それが崩れると解がないか一意でないことを例で見る。非線形の方程式で解が有限時間で壊れる現象（バーガース方程式の衝撃波）は、次のページ \see[バーガース方程式と衝撃波]{pde:page-burgers} で扱う。
+
+## 記法と定義の確認 {#pde:sec-ch-notation}
+
+::: notation
+- 常微分方程式の解・初期値問題は \ref{ode:ode-solution}、リプシッツ条件は \ref{ode:lipschitz-condition}、偏導関数が連続なら局所リプシッツであることは \ref{ode:c1-locally-lipschitz}。最大解と逃避補題は \ref{ode:maximal-solution}, \ref{ode:escape-lemma}、線形増大の下での大域解は \ref{ode:linear-growth-global}。
+- **一般解.** 開集合 $D\subset\mathbb{R}\times\mathbb{R}^{n}$ 上の連続で $x$ について局所リプシッツな $f$ について、$(t_{0},\xi)\in D$ を初期値とする最大解の時刻 $t$ での値を $\phi(t,t_{0},\xi)$、その定義域を $\Omega$ と書く（\ref{ode:sec-dp-notation} の記法）。連続依存性と $C^{1}$ 依存性は \ref{ode:continuous-dependence}, \ref{ode:c1-dependence}、$C^{k}$ 依存性は \ref{ode:ck-dependence}。自励系の流れ $\Phi_{s}$ とその性質は \ref{ode:flow-def}, \ref{ode:flow-theorem}。
+- 多変数の微分：$C^{k}$ 級は \ref{calc:ck-map}、連鎖律は \ref{calc:multivariable-chain-rule}、逆関数については \ref{calc:inverse-function-theorem}、積分記号下の微分は \ref{calc:differentiation-under-integral}、積分と微分の関係は \ref{calc:fundamental-theorem}。
+- 時間と空間の変数をもつ関数 $u(t,x)$（$t\in\mathbb{R}$, $x\in\mathbb{R}^{n}$）について、$\partial_{t}u$ は $t$ についての偏導関数、$\nabla u=(\partial_{1}u,\dots,\partial_{n}u)$ は $x$ についての勾配、$b\cdot\nabla u=\sum_{i}b_{i}\partial_{i}u$ とする。ベクトル値の $\phi$ について $D_{x}\phi$ は $x$ についてのヤコビ行列。関数は実数値とする。
+- 多重指数 $\alpha=(\alpha_{1},\dots,\alpha_{n})$ について $\partial^{\alpha}=\partial_{1}^{\alpha_{1}}\cdots\partial_{n}^{\alpha_{n}}$, $|\alpha|=\alpha_{1}+\dots+\alpha_{n}$。
+- **選択公理**：このページの議論では使わない（引用する常微分方程式と逆関数定理の結果は、逐次近似と縮小写像による構成で示されている）。
+:::
+
+::: definition 偏微分方程式の階数と線形性 {#pde:classification keywords="order of a PDE; linear, semilinear, quasilinear and fully nonlinear equations; second order: elliptic, parabolic, hyperbolic" index="偏微分方程式|へんびぶんほうていしき, 階数（偏微分方程式）|かいすうへんびぶんほうていしき, 線形偏微分方程式|せんけいへんびぶんほうていしき, 半線形|はんせんけい, 準線形|じゅんせんけい, 完全非線形|かんぜんひせんけい"}
+$U\subset\mathbb{R}^{n}$ を開集合とする。未知関数 $u\colon U\to\mathbb{R}$ とその $k$ 階以下の偏導関数の間の関係式
+$$
+F\bigl(x,u(x),(\partial^{\alpha}u(x))_{1\le|\alpha|\le k}\bigr)=0
+$$
+で、$k$ 階の偏導関数が実際に現れるものを **$k$ 階の偏微分方程式**という。
+1. 未知関数とその偏導関数について 1 次式 $\sum_{|\alpha|\le k}a_{\alpha}(x)\partial^{\alpha}u=f(x)$ のとき**線形**という。
+2. $\sum_{|\alpha|=k}a_{\alpha}(x)\partial^{\alpha}u+a_{0}\bigl(x,u,(\partial^{\beta}u)_{|\beta|<k}\bigr)=0$ の形のとき**半線形**という。
+3. $\sum_{|\alpha|=k}a_{\alpha}\bigl(x,u,(\partial^{\beta}u)_{|\beta|<k}\bigr)\partial^{\alpha}u+a_{0}\bigl(x,u,(\partial^{\beta}u)_{|\beta|<k}\bigr)=0$ の形のとき**準線形**という。
+4. どれでもないとき（最高階の偏導関数について非線形）、**完全非線形**という。
+:::
+
+::: intuition
+方程式が最高階の微分について 1 次式かどうかで分ける。線形 ⊂ 半線形 ⊂ 準線形で、最高階の係数が解そのものに依存するほど、解は壊れやすくなる。
+:::
+
+::: example
+1 階では、輸送方程式 $\partial_{t}u+b(t,x)\cdot\nabla u=f$ は線形、$\partial_{t}u+\partial_{x}u=u^{2}$ は半線形、バーガース方程式 $\partial_{t}u+u\,\partial_{x}u=0$ は準線形、アイコナール方程式 $|\nabla u|^{2}=1$ は完全非線形である。2 階の線形方程式は、最高階の係数（主表象）の符号で楕円型（ラプラス方程式 $\sum_{i}\partial_{i}^{2}u=0$）・放物型（熱方程式 $\partial_{t}u=\sum_{i}\partial_{i}^{2}u$）・双曲型（波動方程式 $\partial_{t}^{2}u=\sum_{i}\partial_{i}^{2}u$）に分けられる。この三つの型は、この系列の後のページで一つずつ扱う。主表象と楕円性の一般的な定義は \see{gl:principal-symbol}, \see{gl:elliptic-operator}。
+:::
+
+## 線形の輸送方程式 {#pde:sec-ch-transport}
+
+変数係数の場合の証明で、積分の上端と被積分関数の両方が動く積分を微分する。その形を先に補題にしておく。
+
+::: lemma 上端が動く積分の微分 {#pde:integral-upper-limit keywords="K(r, w) = int_0^r k(s, w) ds is C^1 if k and D_w k are continuous; d_r K = k(r, w), D_w K = int_0^r D_w k(s, w) ds" index="上端が動く積分|じょうたんがうごくせきぶん"}
+$O\subset\mathbb{R}^{m}$ を開集合、$k\colon\mathbb{R}\times O\to\mathbb{R}$ を連続とし、$w$ についての偏導関数 $D_{w}k$ が $\mathbb{R}\times O$ 上で存在して連続とする。$K(r,w)\defeq\int_{0}^{r}k(s,w)\,ds$ は $\mathbb{R}\times O$ 上で $C^{1}$ 級で、
+$$
+\partial_{r}K(r,w)=k(r,w),\qquad D_{w}K(r,w)=\int_{0}^{r}D_{w}k(s,w)\,ds.
+$$
+:::
+
+::: proof
+**Step 1.** 【主張：$\partial_{r}K=k$ で、$D_{w}K$ は上の式で与えられる】前者は \ref{calc:fundamental-theorem.1}（$s\mapsto k(s,w)$ は連続）。後者：$r$ を固定する。$r>0$ なら $B=[0,r]$、$r<0$ なら $B=[r,0]$（このとき $K=-\int_{B}$）として \ref{calc:differentiation-under-integral.2} を使う。$r=0$ では $K(0,\cdot)=0$ なので $D_{w}K(0,w)=0$ で、式の右辺も $0$。
+
+**Step 2.** 【主張：$h$ が $\mathbb{R}\times O$ 上で連続なら、$H(r,w)\defeq\int_{0}^{r}h(s,w)\,ds$ は $\mathbb{R}\times O$ 上で連続】$(r_{0},w_{0})$ をとり、$R>|r_{0}|+1$、$\bar{B}(w_{0},\rho)\subset O$ とする。$h$ はコンパクト集合 $[-R,R]\times\bar{B}(w_{0},\rho)$ の上で有界（上界 $M$）かつ一様連続（\ref{top:heine-cantor}）。$|r|\le R$, $w\in\bar{B}(w_{0},\rho)$ なら
+$$
+|H(r,w)-H(r_{0},w_{0})|\le M|r-r_{0}|+R\sup_{|s|\le R}|h(s,w)-h(s,w_{0})|
+$$
+で、右辺は $(r,w)\to(r_{0},w_{0})$ で $0$ に近づく。
+
+Step 1 の偏導関数 $k$ と $\int_{0}^{r}D_{w}k\,ds$ は、Step 2（$h=k$ や $h$ を $D_{w}k$ の各成分としたもの）から連続なので、$K$ は $C^{1}$ 級である（\ref{calc:ck-map}）。
+:::
+
+まず係数が定数の場合を、座標の取り替えで直接解く。
+
+::: proposition 定数係数の輸送方程式 {#pde:transport-constant keywords="transport equation with constant velocity b: u_t + b . grad u = f, u(0, x) = g(x); solution u(t,x) = g(x - t b) + int_0^t f(s, x + (s - t) b) ds; existence and uniqueness of C^1 solutions" index="輸送方程式（定数係数）|ゆそうほうていしきていすうけいすう, 移流方程式|いりゅうほうていしき"}
+$b\in\mathbb{R}^{n}$ を定数、$g\colon\mathbb{R}^{n}\to\mathbb{R}$ を $C^{1}$ 級、$f\colon\mathbb{R}\times\mathbb{R}^{n}\to\mathbb{R}$ を連続で $D_{x}f$ が連続なものとする。
+$$
+u(t,x)\defeq g(x-tb)+\int_{0}^{t}f\bigl(s,x+(s-t)b\bigr)\,ds
+$$
+とおく。
+1. $u$ は $\mathbb{R}\times\mathbb{R}^{n}$ 上で $C^{1}$ 級で、$\partial_{t}u+b\cdot\nabla u=f$, $u(0,x)=g(x)$ を満たす。
+2. $J$ を $0$ を含む開区間とし、$v$ が $J\times\mathbb{R}^{n}$ 上の $C^{1}$ 級関数で $\partial_{t}v+b\cdot\nabla v=f$, $v(0,x)=g(x)$ を満たすなら、$J\times\mathbb{R}^{n}$ 上で $v=u$。
+:::
+
+::: intuition
+速度 $b$ で一様に流れる川に初期の濃度 $g$ を流すと、時刻 $t$ の濃度は $g$ を $tb$ だけずらしたものになる。湧き出し $f$ があれば、それを流れに沿って足し合わせたものが加わる。
+:::
+
+::: proof
+**Step 1.** 【主張：$J\times\mathbb{R}^{n}$ 上の $C^{1}$ 級関数 $v$ について $V(t,y)\defeq v(t,y+tb)$ とおくと、$V$ は $C^{1}$ 級で $\partial_{t}V(t,y)=(\partial_{t}v+b\cdot\nabla v)(t,y+tb)$】$(t,y)\mapsto(t,y+tb)$ は $C^{\infty}$ 級なので、連鎖律（\ref{calc:multivariable-chain-rule.2}）から $V$ は $C^{1}$ 級で、$t$ についての偏導関数は $\partial_{t}v+\sum_{i}b_{i}\partial_{i}v$ を $(t,y+tb)$ で評価したもの。
+
+**Step 2.** 【主張：2】$v$ が方程式を満たすなら、Step 1 から $\partial_{t}V(t,y)=f(t,y+tb)$、$V(0,y)=g(y)$。$y$ を固定して \ref{calc:fundamental-theorem.2} を $t\mapsto V(t,y)$ に使うと、$t\in J$ で $V(t,y)=g(y)+\int_{0}^{t}f(s,y+sb)\,ds$。$y=x-tb$ を代入すると $v(t,x)=u(t,x)$。
+
+**Step 3.** 【主張：1】$k(s,y)\defeq f(s,y+sb)$ は連続で、$D_{y}k(s,y)=D_{x}f(s,y+sb)$ も連続なので、\ref{pde:integral-upper-limit} から $V(t,y)\defeq g(y)+\int_{0}^{t}k(s,y)\,ds$ は $C^{1}$ 級で $\partial_{t}V(t,y)=f(t,y+tb)$。$u(t,x)=V(t,x-tb)$ なので $u$ も $C^{1}$ 級で、$u(t,y+tb)=V(t,y)$ に Step 1 を使うと $(\partial_{t}u+b\cdot\nabla u)(t,y+tb)=f(t,y+tb)$。$y$ は任意なので方程式が成り立ち、$u(0,x)=V(0,x)=g(x)$。
+
+::: hypcheck
+- **$g$ が $C^{1}$ 級**：Step 3 で $V$ が $C^{1}$ 級であることに使った。逆に $C^{1}$ 級の解があれば $g=u(0,\cdot)$ は $C^{1}$ 級なので、この前提は古典解の存在に必要十分である。
+- **$D_{x}f$ が連続**：Step 3 で \ref{pde:integral-upper-limit} を使うときに使った。$f$ の $t$ についての微分可能性は要らない。外すと $C^{1}$ 級の解がないことがある（\ref{pde:transport-counterexamples.4}）。
+- **一意性**：Step 2 は $v$ が $C^{1}$ 級であることだけを使い、$g$, $f$ の滑らかさを使わない。
+- **公理**：選択は使わない。
+:::
+:::
+
+係数 $b$ が $(t,x)$ に依存すると、流れの道筋は直線ではなくなる。道筋を常微分方程式で定める。
+
+::: definition 輸送方程式の古典解と特性曲線 {#pde:transport-definitions keywords="Cauchy problem for the transport equation u_t + b(t,x) . grad u = f, u(0,x) = g(x); classical (C^1) solution on J x R^n; characteristic curves X' = b(s, X); the derivative of u along a characteristic equals u_t + b . grad u" index="輸送方程式|ゆそうほうていしき, 古典解|こてんかい, 特性曲線（輸送方程式）|とくせいきょくせんゆそうほうていしき, コーシー問題（輸送方程式）|こーしーもんだいゆそうほうていしき"}
+$b\colon\mathbb{R}\times\mathbb{R}^{n}\to\mathbb{R}^{n}$, $f\colon\mathbb{R}\times\mathbb{R}^{n}\to\mathbb{R}$ を連続、$g\colon\mathbb{R}^{n}\to\mathbb{R}$ とし、$J$ を $0$ を含む開区間とする。
+1. $J\times\mathbb{R}^{n}$ 上の $C^{1}$ 級関数 $u$ で
+$$
+\partial_{t}u+b(t,x)\cdot\nabla u=f(t,x),\qquad u(0,x)=g(x)
+$$
+をすべての $(t,x)\in J\times\mathbb{R}^{n}$ と $x\in\mathbb{R}^{n}$ で満たすものを、この**コーシー問題**の $J\times\mathbb{R}^{n}$ 上の**古典解**という。
+2. 常微分方程式 $X'(s)=b(s,X(s))$ の解 $X$ を（あるいは曲線 $s\mapsto(s,X(s))$ を）**特性曲線**という。
+:::
+
+::: intuition
+特性曲線は、速度場 $b$ に乗って流される粒子の道筋である。輸送方程式の左辺は、解を粒子の道筋に沿って見たときの変化率になっている。
+:::
+
+実際、$u$ が $C^{1}$ 級で $X$ が特性曲線なら、連鎖律から
+$$
+\frac{d}{ds}u(s,X(s))=\partial_{t}u(s,X(s))+b(s,X(s))\cdot\nabla u(s,X(s))
+\label{pde:eq-along-characteristic}
+$$
+である。したがって $u$ が方程式を満たすことは、どの特性曲線に沿っても $u$ の変化率が $f$ に等しいことと同じである。以下、$\phi(s,t,x)$ は $X'=b(s,X)$ の一般解（時刻 $t$ に $x$ を通る最大解の時刻 $s$ での値）とする。
+
+::: theorem 変数係数の輸送方程式 {#pde:transport-variable keywords="method of characteristics for the transport equation with variable coefficients: if b is C^1 in x with linear growth, f is continuous with continuous D_x f and g is C^1, then u(t,x) = g(phi(0,t,x)) + int_0^t f(s, phi(s,t,x)) ds is the unique C^1 solution; d_t phi + D_x phi b = 0" index="特性曲線法|とくせいきょくせんほう, 輸送方程式の解の公式|ゆそうほうていしきのかいのこうしき, デュアメルの原理（輸送方程式）|でゅあめるのげんりゆそうほうていしき"}
+次を仮定する。
+- (a) $b$ は連続で、$D_{x}b$ が $\mathbb{R}\times\mathbb{R}^{n}$ 上で存在して連続。
+- (b) $\mathbb{R}$ 上の連続関数 $\alpha,\beta\ge0$ があって $|b(t,x)|\le\alpha(t)+\beta(t)|x|$。
+- (c) $f$ は連続で、$D_{x}f$ が存在して連続。
+- (d) $g$ は $C^{1}$ 級。
+
+このとき次が成り立つ。
+1. 一般解 $\phi$ は $\mathbb{R}\times\mathbb{R}\times\mathbb{R}^{n}$ 全体で定義された $C^{1}$ 級の写像で、
+$$
+\partial_{t}\phi(s,t,x)+D_{x}\phi(s,t,x)\,b(t,x)=0.
+$$
+2. $J$ を $0$ を含む開区間とする。$J\times\mathbb{R}^{n}$ 上の古典解 $v$ は
+$$
+u(t,x)\defeq g\bigl(\phi(0,t,x)\bigr)+\int_{0}^{t}f\bigl(s,\phi(s,t,x)\bigr)\,ds
+$$
+に $J\times\mathbb{R}^{n}$ 上で等しい。
+3. $u$ は $\mathbb{R}\times\mathbb{R}^{n}$ 上の古典解である。
+:::
+
+::: intuition
+点 $(t,x)$ での解の値を知るには、その点を通る特性曲線を時刻 $0$ までさかのぼり、出発点での初期値に、道中で受け取った湧き出し $f$ を足せばよい。特性曲線がどこからでも一本ずつ時刻 $0$ まで滑らかにさかのぼれることが、解の存在と一意性を保証する。
+:::
+
+::: proof
+**Step 1.** 【主張：1】(a) と \ref{ode:c1-locally-lipschitz} から $b$ は $x$ について局所リプシッツなので、一般解 $\phi$ とその定義域 $\Omega$ が定まる。(b) と \ref{ode:linear-growth-global}（$I=\mathbb{R}$）から、すべての最大解は $\mathbb{R}$ 全体で定義されるので、$\Omega=\mathbb{R}\times\mathbb{R}\times\mathbb{R}^{n}$。(a) と \ref{ode:c1-dependence} から $\phi$ は $C^{1}$ 級で、変分方程式の解 $Y$ を使って $D_{x}\phi(s,t,x)=Y(s)$, $\partial_{t}\phi(s,t,x)=-Y(s)\,b(t,x)$（\ref{ode:c1-dependence} の式で、時刻の変数を $s$、初期時刻を $t$、初期値を $x$ と読む）。二つを合わせると 1 の等式になる。
+
+**Step 2.** 【主張：2】$(t,x)\in J\times\mathbb{R}^{n}$ を固定し、$X(s)\defeq\phi(s,t,x)$ とおく。$X$ は特性曲線で $X(t)=x$。$0$ と $t$ の間の $s$ は $J$ に入るので、$z(s)\defeq v(s,X(s))$ が定まり、\eqref{pde:eq-along-characteristic} から $z'(s)=f(s,X(s))$（連続）。\ref{calc:fundamental-theorem.2} から
+$$
+v(t,x)=z(t)=z(0)+\int_{0}^{t}f(s,X(s))\,ds=g(\phi(0,t,x))+\int_{0}^{t}f(s,\phi(s,t,x))\,ds.
+$$
+
+**Step 3.** 【主張：$u$ は $C^{1}$ 級で、$I(t,x)\defeq\int_{0}^{t}f(s,\phi(s,t,x))\,ds$ について $\partial_{t}I=f(t,x)+\int_{0}^{t}D_{x}f(s,\phi)\,\partial_{t}\phi\,ds$, $\nabla I=\int_{0}^{t}D_{x}f(s,\phi)\,D_{x}\phi\,ds$】$g\circ\phi(0,\cdot,\cdot)$ は (d) と Step 1 と連鎖律から $C^{1}$ 級。$w=(t,x)\in\mathbb{R}^{1+n}$ として $k(s,w)\defeq f(s,\phi(s,w))$ とおくと、$k$ は連続で、(c) と連鎖律から $D_{w}k(s,w)=D_{x}f(s,\phi(s,w))\,D_{w}\phi(s,w)$ も連続。\ref{pde:integral-upper-limit} から $K(r,w)\defeq\int_{0}^{r}k(s,w)\,ds$ は $C^{1}$ 級で、$I(t,x)=K(t,(t,x))$ なので、連鎖律から $I$ も $C^{1}$ 級で
+$$
+\partial_{t}I(t,x)=\partial_{r}K+\partial_{t}K=f(t,\phi(t,t,x))+\int_{0}^{t}D_{x}f(s,\phi)\,\partial_{t}\phi\,ds.
+$$
+$\phi(t,t,x)=x$ なので第一項は $f(t,x)$。$\nabla I$ も同様。
+
+**Step 4.** 【主張：3】$L\defeq\partial_{t}+b(t,x)\cdot\nabla$ と書く。連鎖律と Step 1 から
+$$
+L\bigl[g(\phi(0,t,x))\bigr]=Dg(\phi(0,t,x))\bigl(\partial_{t}\phi+D_{x}\phi\,b(t,x)\bigr)(0,t,x)=0.
+$$
+Step 3 と Step 1 から
+$$
+\begin{aligned}
+LI(t,x)&=f(t,x)+\int_{0}^{t}D_{x}f(s,\phi)\bigl(\partial_{t}\phi+D_{x}\phi\,b(t,x)\bigr)(s,t,x)\,ds\\
+&=f(t,x).
+\end{aligned}
+$$
+よって $Lu=f$。$\phi(0,0,x)=x$ から $u(0,x)=g(x)$。
+
+::: hypcheck
+- **(a) $D_{x}b$ の連続性**：Step 1 で、特性曲線が一意に定まること（局所リプシッツ）と、$\phi$ が $C^{1}$ 級で 1 の等式を満たすこと（\ref{ode:c1-dependence}）に使った。リプシッツでもない $b$ では特性曲線が合流して古典解がなくなり（\ref{pde:transport-counterexamples.1}）、リプシッツだが $C^{1}$ 級でない $b$ では一意な候補 $u$ が $C^{1}$ 級にならない（\ref{pde:transport-counterexamples.2}）。
+- **(b) 線形増大**：Step 1 で、特性曲線がどの点からも時刻 $0$ までさかのぼれる（$\Omega$ が全体）ことにだけ使った。外すと、時刻 $0$ に届かない特性曲線の上で解が決まらず、一意性が崩れる（\ref{pde:transport-counterexamples.3}）。本当に要るのは「すべての最大解が $\mathbb{R}$ 全体で定義される」ことで、(b) はその十分条件である。
+- **(c) $D_{x}f$ の連続性**：Step 3 で湧き出しの項 $I$ を微分するのに使った。$t$ についての微分可能性は要らない。外すと古典解がないことがある（\ref{pde:transport-counterexamples.4}）。
+- **(d) $g\in C^{1}$**：Step 4 の最初の式（連鎖律）で使った。古典解があれば $g=u(0,\cdot)$ は $C^{1}$ 級なので必要でもある（\ref{pde:transport-counterexamples.5}）。
+- **一意性の証明（Step 2）** は (b) と、特性曲線が一意に定まること（(a) の局所リプシッツ性）だけを使い、(c)・(d) を使わない。
+- **公理**：選択は使わない。
+:::
+:::
+
+::: counterexample 輸送方程式で前提が外れる例 {#pde:transport-counterexamples keywords="non-Lipschitz velocity: characteristics merge and no C^1 solution; Lipschitz but non-C^1 velocity |x|: the candidate is not C^1; velocity x^2: characteristics come from infinity in finite time and uniqueness fails; non-differentiable source; continuous initial data: singularities propagate along characteristics" index="輸送方程式の反例|ゆそうほうていしきのはんれい"}
+以下 $n=1$ で、$J$ は $0$ を含む開区間とする。
+1. $b(t,x)=-2\operatorname{sgn}(x)\sqrt{|x|}$, $f=0$, $g(x)=x$ のとき、$J$ が正の数を含むなら、$J\times\mathbb{R}$ 上の古典解はない。$b$ は連続で線形増大だが、$0$ の近くでリプシッツでない。
+2. $b(t,x)=|x|$, $f=0$, $g(x)=x$ のとき、どの $J\times\mathbb{R}$ 上にも古典解はない。$b$ はリプシッツ連続だが $x=0$ で微分できない。
+3. $b(t,x)=x^{2}$, $f=0$, $g=0$ のとき、$u=0$ のほかに、$\mathbb{R}\times\mathbb{R}$ 上の $C^{\infty}$ 級の古典解
+$$
+u(t,x)\defeq\begin{cases}H(t+1/x)&(x<0)\\0&(x\ge0)\end{cases}
+$$
+がある。ここで $H(y)\defeq e^{-1/y}$（$y>0$）、$H(y)\defeq0$（$y\le0$）。
+4. $b=0$, $f(t,x)=|x|$, $g=0$ のとき、$J\times\mathbb{R}$ 上の古典解はない。
+5. $g$ が連続だが $C^{1}$ 級でないとき、古典解はない。\ref{pde:transport-variable} の公式の $u$ は連続で、$g$ の角や不連続は特性曲線に沿ってそのまま運ばれる。
+:::
+
+::: proof
+**1.** 古典解 $v$ があるとし、$\tau\in J$, $\tau>0$ をとる。$X_{1}(s)\defeq(\tau-s)^{2}$ は $s\le\tau$ で $X_{1}'(s)=-2(\tau-s)=-2\sqrt{X_{1}(s)}=b(s,X_{1}(s))$ を満たす特性曲線で（$s=\tau$ では両辺 $0$）、$X_{2}\defeq0$ も特性曲線である（$b(s,0)=0$）。\eqref{pde:eq-along-characteristic} から $v$ は両方に沿って一定なので、$v(\tau,0)=v(0,X_{1}(0))=g(\tau^{2})=\tau^{2}$ かつ $v(\tau,0)=v(0,0)=0$。$\tau>0$ なので矛盾。二本の特性曲線が点 $(\tau,0)$ で合流し、そこへ異なる初期値を運んでくることが原因である。
+
+**2.** 特性曲線は $X'=|X|$ の解で、$b$ はリプシッツなので一意に定まる：時刻 $t$ に $x$ を通るものは $x>0$ なら $xe^{s-t}$、$x<0$ なら $xe^{-(s-t)}$、$x=0$ なら $0$。古典解 $v$ があれば、1 と同じく $v$ は特性曲線に沿って一定なので、$v(t,x)=xe^{-t}$（$x>0$）、$xe^{t}$（$x<0$）、$v(t,0)=0$。$t\in J$, $t\neq0$ をとると、$x=0$ での右微分係数 $e^{-t}$ と左微分係数 $e^{t}$ が異なり、$v$ は微分できない。矛盾。
+
+**3.** $x<0$ では $u$ は $C^{\infty}$ 級の関数の合成で（$H$ が $C^{\infty}$ 級であることは \ref{calc:non-analytic-smooth.1}）、
+$$
+\partial_{t}u+x^{2}\partial_{x}u=H'(t+1/x)\Bigl(1+x^{2}\cdot\Bigl(-\frac{1}{x^{2}}\Bigr)\Bigr)=0.
+$$
+$x>0$ では $u=0$。点 $(t_{0},0)$ の近くでは、$|t-t_{0}|<1$ かつ $-1/(|t_{0}|+1)<x<0$ なら $t+1/x<(|t_{0}|+1)-(|t_{0}|+1)=0$ で $u=0$ なので、$u$ は $(t_{0},0)$ の近傍で恒等的に $0$。よって $u$ は $C^{\infty}$ 級で方程式を満たす。$x<0$ で $1/x<0$ なので $u(0,x)=0$。一方 $u(1,-2)=H(1/2)=e^{-2}\neq0$。$x<0$ の点 $(t,x)$ を通る特性曲線は、$c\defeq t+1/x$ として $X(s)=1/(c-s)$（$s>c$）で、時刻 $c$ に $-\infty$ から現れる。$t>0$, $x<-1/t$ なら $c>0$ なので、この特性曲線は時刻 $0$ に届かず、そこでの解の値は初期値で決まらない。
+
+**4.** 古典解 $v$ があれば $\partial_{t}v=|x|$, $v(0,x)=0$ なので、\ref{calc:fundamental-theorem.2} から $v(t,x)=t|x|$。$t\in J$, $t\neq0$ ではこれは $x=0$ で微分できない。矛盾。
+
+**5.** 古典解 $v$ は $C^{1}$ 級なので $g=v(0,\cdot)$ も $C^{1}$ 級。公式の $u$ が連続であることは、$\phi$ と $I$ の連続性（\ref{pde:transport-variable} の証明の Step 1・3）から。$b=1$, $f=0$, $g(x)=|x|$ なら $u(t,x)=|x-t|$ で、角は直線 $x=t$ に沿って動き、滑らかにならない。
+:::
+
+::: supplement
+**前提を変えると.** $b$, $f$, $g$ が $C^{k}$ 級（$1\le k\le\infty$）なら、\ref{ode:ck-dependence} から $\phi$ が $C^{k}$ 級で、\ref{pde:integral-upper-limit} を繰り返し使うと $u$ も $C^{k}$ 級になる。解は初期値と係数より滑らかにはならず、初期値の特異性は特性曲線に沿って運ばれるだけで消えない（\ref{pde:transport-counterexamples.5}）。これは、熱方程式の解が時刻 $t>0$ で直ちに滑らかになることと対照的である。$0$ 階の項 $c(t,x)u$ が加わっても、特性曲線に沿って線形の常微分方程式 $z'+cz=f$ を解けばよい（\ref{pde:prob-ch-damped-transport}）。$b$ がリプシッツ連続でしかないときは、公式の $u$ は一般に $C^{1}$ 級にならないが、連続で特性曲線に沿って方程式を満たす「一般化された解」として意味をもつ。さらに弱い $b$（ソボレフ空間に入る程度）に対しては、ディペルナとリオンスによる理論があることが知られている（ここでは扱わない）。
+
+**似た定理.** $b$ が時間によらないとき、1 の等式は流れの群の性質（\ref{ode:flow-theorem.2}）の微分版で、$f=0$ の解は $u(t,\cdot)=g\circ\Phi_{-t}$ である。多様体の上でも同じで、輸送方程式の作用素 $b\cdot\nabla$ はベクトル場 $b$ による方向微分（リー微分）にあたる（\see{mfd:flow-theorem}）。湧き出しの項 $\int_{0}^{t}f(s,\phi(s,t,x))\,ds$ は、「時刻 $s$ に加えた $f(s,\cdot)$ を、時刻 $s$ から $t$ まで斉次方程式で運んで足し合わせる」という形をしている。これは**デュアメルの原理**と呼ばれ、後のページの熱方程式・波動方程式の非斉次項でも同じ形で現れる。
+
+**高い視点：ベルトコンベアに乗せた荷物.** 特性曲線は、時空の中を走るベルトコンベアの束である。荷物（解の値）はコンベアに乗って運ばれ、途中で $f$ だけ荷が積み増される。偏微分方程式の問題は、コンベアごとの常微分方程式の問題に分解され、コンベアが互いにぶつからず（(a)）、どれも出発点まで途切れずにさかのぼれる（(b)）限り、解はただ一つに決まる。輸送方程式が「解く」のでなく「運ぶ」方程式であることが、1 階の方程式全体の性格を決めている。
+:::
+
+## 準線形方程式のコーシー問題 {#pde:sec-ch-quasilinear}
+
+係数が未知関数 $u$ にも依存すると、特性曲線は $u$ の値を知らないと描けない。そこで $x$ と $u$ の値を同時に未知数とする連立の常微分方程式を考える。以下 $n\ge2$ とし、$G\subset\mathbb{R}^{n}\times\mathbb{R}$ を開集合、$a=(a_{1},\dots,a_{n})\colon G\to\mathbb{R}^{n}$, $c\colon G\to\mathbb{R}$ を $C^{1}$ 級とする。
+
+::: definition 準線形方程式のコーシー問題 {#pde:quasilinear-cauchy keywords="first order quasilinear equation sum a_i(x,u) d_i u = c(x,u); C^1 solution with graph in G; Cauchy data on a parametrized hypersurface (gamma, h); noncharacteristic condition: d_1 gamma, ..., d_{n-1} gamma, a(gamma, h) linearly independent" index="準線形方程式（1 階）|じゅんせんけいほうていしきいっかい, コーシー問題|こーしーもんだい, 初期曲面|しょききょくめん, 非特性条件|ひとくせいじょうけん, 特性的（初期曲面）|とくせいてきしょききょくめん"}
+1. 開集合 $W\subset\mathbb{R}^{n}$ 上の $C^{1}$ 級関数 $u$ で、すべての $x\in W$ について $(x,u(x))\in G$ かつ
+$$
+\sum_{i=1}^{n}a_{i}(x,u(x))\,\partial_{i}u(x)=c(x,u(x))
+\label{pde:eq-quasilinear}
+$$
+となるものを、\eqref{pde:eq-quasilinear} の $W$ 上の **$C^{1}$ 解**という。
+2. **コーシーデータ**とは、開集合 $\Sigma\subset\mathbb{R}^{n-1}$ と $C^{1}$ 級写像 $\gamma\colon\Sigma\to\mathbb{R}^{n}$, $h\colon\Sigma\to\mathbb{R}$ の組で、すべての $y\in\Sigma$ で $(\gamma(y),h(y))\in G$ となるものをいう。$\gamma$ は**初期曲面**のパラメータ表示で、問題は「$u(\gamma(y))=h(y)$ となる解を求めよ」である。
+3. $y_{0}\in\Sigma$ で $n$ 個のベクトル
+$$
+\partial_{1}\gamma(y_{0}),\ \dots,\ \partial_{n-1}\gamma(y_{0}),\ a\bigl(\gamma(y_{0}),h(y_{0})\bigr)
+$$
+が一次独立であるとき、データは $y_{0}$ で**非特性的**であるという（**非特性条件**）。$a(\gamma(y),h(y))$ が $\partial_{1}\gamma(y),\dots,\partial_{n-1}\gamma(y)$ の張る空間に入るとき、$y$ で**特性的**という。
+:::
+
+::: intuition
+非特性条件は、方程式が微分を指定している方向 $a$ が、初期曲面を横切ることをいう。初期曲面に沿った方向の微分はデータ $h$ から決まってしまうので、方程式が新しい情報を与えるのは、曲面を横切る方向だけである。
+:::
+
+::: definition 特性曲線の連立系 {#pde:characteristic-system keywords="characteristic system X' = a(X, Z), Z' = c(X, Z) in (x, z)-space; characteristic curves; projected characteristics; the map Psi(s, y) = flow at time s of (gamma(y), h(y))" index="特性曲線|とくせいきょくせん, 特性方程式|とくせいほうていしき, 特性曲線の射影|とくせいきょくせんのしゃえい"}
+$G$ 上の自励系
+$$
+X'(s)=a(X(s),Z(s)),\qquad Z'(s)=c(X(s),Z(s))
+\label{pde:eq-characteristic-system}
+$$
+を \eqref{pde:eq-quasilinear} の**特性曲線の連立系**といい、その解 $(X,Z)$ を**特性曲線**、$X$ をその**射影**という。ベクトル場 $(a,c)$ の流れ（\ref{ode:flow-def}）を $\Phi$、その定義域を $\mathcal{D}$ とし、コーシーデータ $(\gamma,h)$ について
+$$
+\mathcal{E}\defeq\{(s,y)\in\mathbb{R}\times\Sigma:(s,(\gamma(y),h(y)))\in\mathcal{D}\},\qquad\Psi(s,y)\defeq\Phi_{s}(\gamma(y),h(y))
+$$
+とおき、$\Psi=(X,Z)$（$X\in\mathbb{R}^{n}$, $Z\in\mathbb{R}$）と成分に分ける。
+:::
+
+::: intuition
+初期曲面の各点から、$x$ と $u$ の値を同時に動かす特性曲線を出発させる。解のグラフは、これらの曲線を束ねてできる曲面になるはずである。
+:::
+
+この定義の動機は次の計算にある。$u$ が \eqref{pde:eq-quasilinear} の $C^{1}$ 解で、$X$ が $X'=a(X,u(X))$ の解なら、$Z\defeq u\circ X$ について連鎖律から $Z'=\sum_{i}\partial_{i}u(X)\,a_{i}(X,u(X))=c(X,Z)$ となり、$(X,Z)$ は \eqref{pde:eq-characteristic-system} を満たす。逆に、特性曲線を束ねて解を作るのが次の定理である。
+
+::: theorem 準線形方程式のコーシー問題の局所可解性 {#pde:quasilinear-local-existence keywords="local existence and uniqueness of C^1 solutions of the Cauchy problem for first order quasilinear equations under the noncharacteristic condition; u = Z o X^{-1} by the inverse function theorem; C^k data give C^k solutions" index="準線形方程式の局所可解性|じゅんせんけいほうていしきのきょくしょかかいせい, 特性曲線法（準線形）|とくせいきょくせんほうじゅんせんけい"}
+コーシーデータ $(\gamma,h)$ が $y_{0}\in\Sigma$ で非特性的であるとし、$x_{0}\defeq\gamma(y_{0})$ とおく。
+1. （存在）$(0,y_{0})$ の開近傍 $V\subset\mathcal{E}$ と $x_{0}$ の開近傍 $W$ があって、$X\restriction V\colon V\to W$ は全単射で逆写像は $C^{1}$ 級。$u\defeq Z\circ(X\restriction V)^{-1}$ は $W$ 上の $C^{1}$ 解で、$\Sigma_{0}\defeq\{y\in\Sigma:(0,y)\in V\}$（$y_{0}$ の開近傍）の各 $y$ について $\gamma(y)\in W$, $u(\gamma(y))=h(y)$。
+2. （一意性）$v$ が $x_{0}$ の開近傍 $W'$ 上の $C^{1}$ 解で、$y_{0}$ のある近傍の $y$ について $v(\gamma(y))=h(y)$ なら、$x_{0}$ のある近傍で $v=u$。
+3. （滑らかさ）$a$, $c$, $\gamma$, $h$ が $C^{k}$ 級（$1\le k\le\infty$）なら $u$ も $C^{k}$ 級。
+:::
+
+::: intuition
+初期曲面が特性曲線と横に交わっていれば、曲面から出る特性曲線は曲面の近くを隙間なく、重ならずに埋めつくす。各点に届く特性曲線が運んできた値を解の値とすれば、それが曲面の近くでただ一つの解になる。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathcal{E}$ は $\mathbb{R}\times\Sigma$ の開集合で $\{0\}\times\Sigma$ を含み、$\Psi$ は $C^{1}$ 級、$\Psi(0,y)=(\gamma(y),h(y))$、$\partial_{s}\Psi(s,y)=(a,c)(\Psi(s,y))$】$(a,c)$ は $G$ 上の $C^{1}$ 級のベクトル場なので、\ref{ode:flow-theorem.1}（$k=1$）から $\mathcal{D}$ は $\mathbb{R}\times G$ の開集合で $\{0\}\times G$ を含み、$\Phi$ は $C^{1}$ 級。$\mathcal{E}$ は連続写像 $(s,y)\mapsto(s,\gamma(y),h(y))$ による $\mathcal{D}$ の逆像なので開集合で、$\Psi$ は $C^{1}$ 級写像の合成なので $C^{1}$ 級（\ref{calc:multivariable-chain-rule.2}）。$s\mapsto\Phi_{s}(p)$ は \eqref{pde:eq-characteristic-system} の解で $\Phi_{0}(p)=p$ なので残りが成り立つ。
+
+**Step 2.** 【主張：$V$, $W$ と $C^{1}$ 級の逆写像がある】$X(0,y)=\gamma(y)$ なので $\partial_{y_{j}}X(0,y_{0})=\partial_{j}\gamma(y_{0})$、Step 1 から $\partial_{s}X(0,y_{0})=a(\gamma(y_{0}),h(y_{0}))$。よって $X\colon\mathcal{E}\to\mathbb{R}^{n}$ の $(0,y_{0})$ でのヤコビ行列の列はこの $n$ 個のベクトルで、非特性条件から可逆。\ref{calc:inverse-function-theorem}（$k=1$）から $V$, $W$ がとれる。
+
+**Step 3.** 【主張：$u$ は $W$ 上の $C^{1}$ 解】$u$ は $C^{1}$ 級写像の合成で $C^{1}$ 級。$(s,y)\in V$ について $u(X(s,y))=Z(s,y)$ で、$(X,Z)(s,y)=\Psi(s,y)\in G$ なので、$x\in W$ について $(x,u(x))\in G$。$u(X(s,y))=Z(s,y)$ を $s$ で微分すると、連鎖律と Step 1 から
+$$
+\sum_{i=1}^{n}\partial_{i}u(X)\,a_{i}(X,Z)=\partial_{s}Z=c(X,Z)\qquad((s,y)\in V).
+$$
+$Z=u(X)$ を代入すると、$x=X(s,y)$ で \eqref{pde:eq-quasilinear} が成り立つ。$X(V)=W$ なので $W$ 全体で成り立つ。
+
+**Step 4.** 【主張：初期条件】$\Sigma_{0}$ は開集合 $V$ の、連続写像 $y\mapsto(0,y)$ による逆像なので開集合で、$y_{0}$ を含む。$y\in\Sigma_{0}$ なら $\gamma(y)=X(0,y)\in W$ で、$(X\restriction V)^{-1}(\gamma(y))=(0,y)$ なので $u(\gamma(y))=Z(0,y)=h(y)$。
+
+**Step 5.** 【主張：2】$\delta>0$ を小さくとって、$V'\defeq(-\delta,\delta)\times B(y_{0},\delta)$ の閉包 $\overline{V'}$ が $V\cap X^{-1}(W')$ に含まれ、$B(y_{0},\delta)$ の上で $v(\gamma(y))=h(y)$ となるようにする（$V\cap X^{-1}(W')$ は $(0,y_{0})$ を含む開集合）。$K\defeq X(\overline{V'})$ は $W'$ のコンパクト集合である。$y\in B(y_{0},\delta)$ を固定し、$W'$ 上の $C^{1}$ 級のベクトル場 $A(x)\defeq a(x,v(x))$ について、$\xi'=A(\xi)$, $\xi(0)=\gamma(y)$ の最大解 $\xi$（定義域 $(\alpha,\beta)$、\ref{ode:maximal-solution}）をとる。動機の計算から $(\xi,v\circ\xi)$ は \eqref{pde:eq-characteristic-system} の解で、初期値は $(\gamma(y),h(y))$。\ref{ode:maximal-solution} の最後の主張から、これは流れの積分曲線の制限なので、$s\in(\alpha,\beta)$ で $\xi(s)=X(s,y)$, $v(\xi(s))=Z(s,y)$。もし $\beta<\delta$ なら、$s\in[0,\beta)$ で $(s,\xi(s))=(s,X(s,y))\in[0,\beta]\times K$ となり、コンパクト集合 $[0,\beta]\times K\subset\mathbb{R}\times W'$ から出ないので \ref{ode:escape-lemma} に反する。よって $\beta\ge\delta$、同様に $\alpha\le-\delta$。したがって $(s,y)\in V'$ について $v(X(s,y))=Z(s,y)=u(X(s,y))$。$X\restriction V$ は開集合 $W$ への同相写像なので $X(V')$ は $x_{0}$ の開近傍で、そこで $v=u$。
+
+**Step 6.** 【主張：3】\ref{ode:flow-theorem.1} から $\Phi$ は $C^{k}$ 級なので $\Psi$ も $C^{k}$ 級で、\ref{calc:inverse-function-theorem} から逆写像も $C^{k}$ 級。$u$ はその合成なので $C^{k}$ 級（\ref{calc:ck-composition}）。
+
+::: hypcheck
+- **$a$, $c$ が $C^{1}$ 級**：Step 1 で流れが $C^{1}$ 級であること（\ref{ode:flow-theorem.1}）に、Step 5 で $A=a(\cdot,v(\cdot))$ が $C^{1}$ 級で最大解と逃避補題が使えることに使った。$a$, $c$ が連続なだけでは特性曲線が一意に定まらず、輸送方程式の場合と同じく解がなくなることがある（\ref{pde:transport-counterexamples.1}。輸送方程式は $x=(t,x')$, $a=(1,b)$, $c=f$ とした準線形方程式の特別な場合）。
+- **$\gamma$, $h$ が $C^{1}$ 級**：Step 1 で $\Psi$ が $C^{1}$ 級であること、Step 2 でヤコビ行列の列 $\partial_{j}\gamma(y_{0})$ に使った。
+- **非特性条件**：Step 2 で逆関数定理を使うためだけに使った。$y_{0}$ 一点での条件で、結論も $x_{0}$ の近くだけの局所的なものである。崩れると解がないか一意でない（\ref{pde:characteristic-data-necessary}, \ref{pde:noncharacteristic-failure}）。
+- **局所性**：非特性条件が初期曲面全体で成り立っても、解は初期曲面の近くにしか作れない。原因は二つあり、特性曲線の $Z$ 成分が爆発すること（\ref{pde:quasilinear-blowup}）と、射影 $X$ が単射でなくなり特性曲線の射影が交わること（次のページのバーガース方程式）である。
+- **一意性（Step 5）** は、$v$ が $C^{1}$ 級であることを、$\xi'=a(\xi,v(\xi))$ の最大解と逃避補題を使うために使った。
+- **公理**：選択は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 非特性条件を外した場合は次の二つの例で見る。$a$, $c$, $\gamma$, $h$ が実解析的なら、高階の方程式の非特性的なコーシー問題に対しても実解析的な局所解がただ一つ存在する（**コーシー–コワレフスカヤの定理**。ここでは扱わない）。一方、係数が $C^{\infty}$ 級でも実解析的でない線形方程式には、局所解さえもたないものがある（ルーイの例として知られる。ここでは扱わない）。1 階の方程式では、特性曲線という常微分方程式への帰着があるので、実解析性なしに $C^{1}$ の枠組みで局所可解性が得られる。
+
+**似た定理.** $c=0$ で $a$ が $u$ によらない（$a=a(x)$）とき、$Z$ は一定で、証明は整流定理（\ref{ode:flow-box}）の証明と同じ構成（横断的な超曲面を流れで動かして逆関数定理を使う）である。実際、整流定理で得た座標 $y$ では方程式は $\partial_{y_{1}}u=0$ になり、解は $y_{1}$ によらない任意の関数である。輸送方程式の公式（\ref{pde:transport-variable}）は、初期曲面が $\{t=0\}$ の場合に、時刻 $t$ そのものが特性曲線のパラメータになり、大域的に逆写像が書ける特別な場合である。
+
+**高い視点：特性曲線で織る曲面.** $(x,z)$ 空間で考えると、$u$ が \eqref{pde:eq-quasilinear} の解であることは、ベクトル場 $(a,c)$ が $u$ のグラフ $\{(x,u(x))\}$ に接していることと同じである（グラフの法線 $(\nabla u,-1)$ と $(a,c)$ の内積が \eqref{pde:eq-quasilinear} の両辺の差）。したがって解のグラフとは、このベクトル場の流れで不変な曲面にほかならない。コーシー問題は、初期データの $(n-1)$ 次元の「布の縁」$\{(\gamma(y),h(y))\}$ から特性曲線という「糸」を引き出して、$n$ 次元の布を織る作業である。非特性条件は、糸が縁から横向きに出ていく条件で、そうなっていれば織り上がった布は少なくとも縁の近くではグラフになる。縁そのものが糸の方向に沿っていると（特性的）、糸は縁の上を滑るだけで布にならない。
+:::
+
+非特性条件が崩れる場合を見る。$n=2$ で、初期曲面が至る所で特性的な曲線であるときは、データ自身が特性曲線の方程式を満たさなければならない。
+
+::: proposition 特性的な初期曲線に課される条件 {#pde:characteristic-data-necessary keywords="if the initial curve is characteristic everywhere, gamma' = lambda a(gamma, h), then any C^1 solution with u o gamma = h forces h' = lambda c(gamma, h); otherwise no solution exists" index="特性的な初期曲線|とくせいてきなしょききょくせん, 両立条件（コーシー問題）|りょうりつじょうけんこーしーもんだい"}
+$n=2$、$\Sigma$ を開区間とし、連続関数 $\lambda\colon\Sigma\to\mathbb{R}$ があって、すべての $y\in\Sigma$ で $\gamma'(y)=\lambda(y)\,a(\gamma(y),h(y))$ とする。$\gamma(\Sigma)$ を含む開集合 $W$ 上の $C^{1}$ 解 $v$ が $v\circ\gamma=h$ を満たすなら、すべての $y\in\Sigma$ で
+$$
+h'(y)=\lambda(y)\,c\bigl(\gamma(y),h(y)\bigr).
+$$
+:::
+
+::: proof
+連鎖律と $v(\gamma(y))=h(y)$、\eqref{pde:eq-quasilinear} から
+$$
+h'(y)=\nabla v(\gamma(y))\cdot\gamma'(y)=\lambda(y)\sum_{i=1}^{2}a_{i}(\gamma(y),v(\gamma(y)))\,\partial_{i}v(\gamma(y))=\lambda(y)\,c(\gamma(y),h(y)).
+$$
+:::
+
+::: example 非特性条件が崩れる例 {#pde:noncharacteristic-failure keywords="d_1 u = 0 with data on the x_1-axis: no solution unless the data are constant, infinitely many solutions if they are" index="非特性条件が崩れる例|ひとくせいじょうけんがくずれるれい"}
+$n=2$、$G=\mathbb{R}^{3}$、方程式 $\partial_{1}u=0$（$a=(1,0)$, $c=0$）、初期曲線 $\gamma(y)=(y,0)$（$y\in\mathbb{R}$）、データ $h$ とする。$\gamma'(y)=(1,0)=a$ なので、至る所で特性的である（$\lambda=1$）。
+1. $h'(y_{0})\neq0$ なら、$x_{0}=(y_{0},0)$ の近傍で $v\circ\gamma=h$（$y_{0}$ の近く）となる $C^{1}$ 解はない。実際、\ref{pde:characteristic-data-necessary} を $y_{0}$ を含む小さな開区間に使うと、そこで $h'=\lambda c=0$ となり矛盾する。
+2. $h$ が定数 $\kappa$ なら、$C^{1}$ 級の関数 $w$ で $w(0)=0$ となるものごとに $v(x)\defeq\kappa+w(x_{2})$ は $\mathbb{R}^{2}$ 上の $C^{1}$ 解で、$v(y,0)=\kappa$。$w(x_{2})=0$ と $w(x_{2})=x_{2}$ の解は $x_{0}$ のどの近傍でも異なるので、局所的な一意性もない。
+:::
+
+非特性条件が初期曲面全体で成り立っていても、解は一般に初期曲面の近くにしかない。
+
+::: example 特性曲線に沿った爆発 {#pde:quasilinear-blowup keywords="d_1 u + d_2 u = u^2 with data on the x_1-axis: u = h(x_1 - x_2)/(1 - x_2 h(x_1 - x_2)); for h = 1 the solution 1/(1 - x_2) blows up at x_2 = 1" index="特性曲線に沿った爆発|とくせいきょくせんにそったばくはつ"}
+$n=2$、$G=\mathbb{R}^{3}$、方程式 $\partial_{1}u+\partial_{2}u=u^{2}$（$a=(1,1)$, $c(x,z)=z^{2}$）、初期曲線 $\gamma(y)=(y,0)$、$C^{1}$ 級のデータ $h$ とする。$\det\begin{pmatrix}1&1\\0&1\end{pmatrix}=1$ なので、データはすべての $y$ で非特性的である。特性曲線の連立系は $X_{1}'=X_{2}'=1$, $Z'=Z^{2}$ で、$X(s,y)=(y+s,s)$、$Z(s,y)=h(y)/(1-sh(y))$（$1-sh(y)>0$ となる $s$ の区間で）。$s=x_{2}$, $y=x_{1}-x_{2}$ と逆に解けるので、
+$$
+u(x)=\frac{h(x_{1}-x_{2})}{1-x_{2}\,h(x_{1}-x_{2})}\qquad\bigl(1-x_{2}h(x_{1}-x_{2})>0\bigr).
+$$
+$h=1$ なら $u(x)=1/(1-x_{2})$ で、$x_{2}\uparrow1$ で発散する。このとき、点 $(y,0)$ と $(y+1,1)$ を結ぶ線分を含む開集合の上に、$v(y,0)=1$ となる $C^{1}$ 解 $v$ はない：$z(s)\defeq v(y+s,s)$ は連鎖律から $z'=z^{2}$, $z(0)=1$ を $[0,1]$ で満たし、一意性（\ref{ode:uniqueness}）から $[0,1)$ で $z(s)=1/(1-s)$ となって、$z$ の $s=1$ での連続性に反する。
+:::
+
+ここで起きているのは、特性曲線の $Z$ 成分（解の値そのもの）が常微分方程式として有限時間で爆発する現象で、射影 $X$ は大域的に単射のままである。次のページでは、解の値は有界なのに、射影が単射でなくなって解が壊れる、もう一つの現象を扱う。
+
+## 問題 {#pde:sec-ch-problems}
+
+::: problem {#pde:prob-ch-damped-transport}
+$b$, $f$ は \ref{pde:transport-variable} の (a)〜(c) を満たし、$c\colon\mathbb{R}\times\mathbb{R}^{n}\to\mathbb{R}$ は連続とする。
+1. $J$ を $0$ を含む開区間とする。$J\times\mathbb{R}^{n}$ 上の $C^{1}$ 級関数 $v$ が $\partial_{t}v+b\cdot\nabla v+cv=f$, $v(0,x)=g(x)$ を満たすなら、$X(s)\defeq\phi(s,t,x)$ と $C(s)\defeq\int_{0}^{s}c(r,X(r))\,dr$ について
+$$
+v(t,x)=e^{-C(t)}g(X(0))+\int_{0}^{t}e^{C(s)-C(t)}f(s,X(s))\,ds
+$$
+であることを示せ。
+2. $n=1$ で $\partial_{t}u+x\,\partial_{x}u+u=0$, $u(0,x)=g(x)$（$g$ は $C^{1}$ 級）の古典解を 1 の公式で求め、それが実際に $\mathbb{R}\times\mathbb{R}$ 上の古典解であることを確かめよ。
+:::
+
+::: solution
+**1.** $z(s)\defeq v(s,X(s))$ とおくと、\eqref{pde:eq-along-characteristic} と方程式から $z'(s)=f(s,X(s))-c(s,X(s))z(s)$。$C'(s)=c(s,X(s))$（\ref{calc:fundamental-theorem.1}）なので
+$$
+\frac{d}{ds}\bigl(e^{C(s)}z(s)\bigr)=e^{C(s)}\bigl(z'(s)+c(s,X(s))z(s)\bigr)=e^{C(s)}f(s,X(s)).
+$$
+$0$ から $t$ まで積分すると（\ref{calc:fundamental-theorem.2}）、$C(0)=0$, $z(0)=g(X(0))$, $z(t)=v(t,x)$ から $e^{C(t)}v(t,x)-g(X(0))=\int_{0}^{t}e^{C(s)}f(s,X(s))\,ds$ で、両辺に $e^{-C(t)}$ を掛ければよい。
+
+**2.** $b(t,x)=x$ は (a)・(b)（$\alpha=0$, $\beta=1$）を満たし、特性曲線 $X'=X$, $X(t)=x$ は $X(s)=xe^{s-t}$。$c=1$ なので $C(t)=t$、$f=0$ なので、1 から $u(t,x)=e^{-t}g(xe^{-t})$。これは $C^{1}$ 級で、
+$$
+\begin{aligned}
+\partial_{t}u&=-e^{-t}g(xe^{-t})-xe^{-2t}g'(xe^{-t}),\\
+x\,\partial_{x}u&=xe^{-2t}g'(xe^{-t}),
+\end{aligned}
+$$
+なので $\partial_{t}u+x\,\partial_{x}u+u=0$、$u(0,x)=g(x)$。1 からこれが唯一の古典解である。
+:::
+
+::: problem {#pde:prob-ch-euler-equation}
+$n=2$、$G=\mathbb{R}^{3}$ で、方程式 $x_{1}\partial_{1}u+x_{2}\partial_{2}u=2u$（$a(x,z)=x$, $c(x,z)=2z$）を考える。
+1. 初期曲線 $\gamma(y)=(\cos y,\sin y)$、$C^{1}$ 級のデータ $h$（周期 $2\pi$）について、データはすべての $y$ で非特性的であることを示し、特性曲線の連立系を解いて、局所解 $u$ を極座標 $x=(r\cos\theta,r\sin\theta)$ で表せ。
+2. 初期曲線 $\gamma(y)=(y,0)$（$y>0$）、データ $h$ について、データは至る所で特性的であることを示せ。さらに、$\gamma(\Sigma)$ を含む開集合の上に $v\circ\gamma=h$ となる $C^{1}$ 解があるなら、定数 $\kappa$ があって $h(y)=\kappa y^{2}$ となることを示せ。
+:::
+
+::: solution
+**1.** $\gamma'(y)=(-\sin y,\cos y)$ と $a(\gamma(y),h(y))=(\cos y,\sin y)$ の行列式は $-\sin^{2}y-\cos^{2}y=-1\neq0$ なので、すべての $y$ で非特性的。特性曲線の連立系 $X'=X$, $Z'=2Z$, $X(0)=\gamma(y)$, $Z(0)=h(y)$ の解は $X(s,y)=e^{s}(\cos y,\sin y)$, $Z(s,y)=e^{2s}h(y)$ で、すべての $s\in\mathbb{R}$ で定義される。$X$ は $r=e^{s}$, $\theta=y$ という極座標そのものなので、\ref{pde:quasilinear-local-existence} の $u=Z\circ X^{-1}$ は $u(r\cos\theta,r\sin\theta)=r^{2}h(\theta)$。（実際これは $\mathbb{R}^{2}\setminus\{0\}$ 全体の $C^{1}$ 解で、$h$ が周期 $2\pi$ なので矛盾なく定まる。オイラーの関係式から 2 次の斉次関数が解であることとも合う。）
+
+**2.** $\gamma'(y)=(1,0)$ で $a(\gamma(y),h(y))=(y,0)=y\gamma'(y)$ なので、至る所で特性的で、\ref{pde:characteristic-data-necessary} の $\lambda(y)=1/y$（$y>0$ で連続）。同命題から $h'(y)=\frac{1}{y}\cdot2h(y)$。$(h(y)/y^{2})'=(y^{2}h'(y)-2yh(y))/y^{4}=0$ なので、\ref{calc:mvt-consequences.1} から $h(y)/y^{2}$ は区間 $(0,\infty)$ で定数 $\kappa$。逆に $h(y)=\kappa y^{2}$ なら $v(x)=\kappa x_{1}^{2}+w(x_{2}/x_{1})x_{1}^{2}$（$x_{1}>0$、$w$ は $C^{1}$ 級で $w(0)=0$）がすべて解になり、一意性は成り立たない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>調和関数の評価と解析性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/04-harmonic-estimates.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 調和関数の評価と解析性 {#pde:page-harmonic-estimates keywords="interior derivative estimates for harmonic functions |D^alpha u(x)| <= C_k r^{-n-k} ||u||_{L^1(B(x,r))}, Liouville theorem for harmonic functions, harmonic functions are real analytic, convergence of the Taylor series, unique continuation, Harnack inequality on compact connected sets, one-sided Liouville theorem, locally uniform limits of harmonic functions, Harnack principle for increasing sequences, 導関数の評価, 実解析性"}
+
+前のページ \ref{pde:page-harmonic-functions} では、ラプラス方程式の解が平均値の性質をもち、それだけで $C^{\infty}$ 級になることを見た。このページでは平均値の性質を**量的に**使う。まず、点 $x$ での $k$ 階導関数が、半径 $r$ の球の上の $|u|$ の積分の $r^{-n-k}$ 倍で押さえられることを示す（**導関数の評価**）。この一つの不等式から、有界な調和関数が定数であること（リウヴィルの定理）、調和関数がテイラー級数で表せること（実解析性）、調和関数の列の一様収束が導関数の収束を引き起こすことが従う。もう一つの柱は、非負の調和関数の値がコンパクトな範囲で互いに比べられるという**ハルナックの不等式**で、そこから単調な列の収束についてのハルナックの原理を得る。
+
+## 記法と定義の確認 {#pde:sec-hf-est-notation}
+
+::: notation
+- 前のページの記法をそのまま使う：$\Omega\subset\mathbb{R}^{n}$ は開集合（$n\ge1$）、$\Delta=\sum_{i}\partial_{i}^{2}$、調和関数（\ref{pde:harmonic-function}）、$\omega_{n}=\lambda(B(0,1))$、球面平均 $S_{r}u$ と球平均 $A_{r}u$（\ref{pde:spherical-mean}）、球の上の発散定理（\ref{pde:ball-divergence}）。調和関数は $C^{\infty}$ 級で平均値の性質をもつ（\ref{pde:mean-value-property.2}, \ref{pde:mean-value-converse}）。
+- **多重指数**：$\alpha=(\alpha_{1},\dots,\alpha_{n})\in\mathbb{Z}_{\ge0}^{n}$ について $|\alpha|\defeq\sum\alpha_{i}$、$\alpha!\defeq\prod\alpha_{i}!$、$h^{\alpha}\defeq\prod h_{i}^{\alpha_{i}}$、$\partial^{\alpha}\defeq\partial_{1}^{\alpha_{1}}\cdots\partial_{n}^{\alpha_{n}}$（\ref{calc:multivariable-taylor} と同じ）。$e_{i}$ は第 $i$ 基本ベクトル。
+- $\|u\|_{L^{1}(B)}\defeq\int_{B}|u|\,dy$（$\infty$ もありうる）。コンパクト集合 $K\subset\Omega$ について $\operatorname{dist}(K,\mathbb{R}^{n}\setminus\Omega)>0$（$\Omega=\mathbb{R}^{n}$ なら $\infty$ とみる）。
+- 関数の列が $\Omega$ で**広義一様収束**するとは、$\Omega$ の各コンパクト集合の上で一様収束することをいう（\ref{cx:weierstrass-convergence} と同じ）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。コンパクト集合の有限部分被覆と、有限個の点の選び出ししか使わない。
+:::
+
+## 導関数の評価とリウヴィルの定理 {#pde:sec-hf-estimates}
+
+::: lemma 調和関数の導関数は調和 {#pde:harmonic-derivatives keywords="derivatives of harmonic functions are harmonic" index="調和関数の導関数|ちょうわかんすうのどうかんすう"}
+$u$ が $\Omega$ で調和なら、すべての多重指数 $\alpha$ について $\partial^{\alpha}u$ も $\Omega$ で調和である。
+:::
+
+::: proof
+\ref{pde:mean-value-converse} から $u\in C^{\infty}(\Omega)$ で、偏微分の順序は交換できる（\ref{calc:schwarz-theorem}）。よって $\partial^{\alpha}u\in C^{\infty}$ で $\Delta\partial^{\alpha}u=\partial^{\alpha}\Delta u=0$。
+:::
+
+::: lemma 勾配の球面評価 {#pde:gradient-sphere-estimate keywords="gradient estimate |d_i v(x0)| <= (n/s) max over the sphere of |v| for harmonic v, via the mean value property for d_i v and the divergence theorem on a ball" index="勾配の評価（調和関数）|こうばいのひょうかちょうわかんすう"}
+$v$ が $\Omega$ で調和、$s>0$、$\overline{B}(x_{0},s)\subset\Omega$ なら、各 $i$ について
+$$
+|\partial_{i}v(x_{0})|\le\frac{n}{s}\max_{\partial B(x_{0},s)}|v|.
+$$
+:::
+
+::: proof
+\ref{pde:harmonic-derivatives} から $\partial_{i}v$ は調和なので、球についての平均値の性質から $\partial_{i}v(x_{0})=\frac{1}{\omega_{n}s^{n}}\int_{B(x_{0},s)}\partial_{i}v\,dy$。$F\defeq v\,e_{i}\in C^{1}(\Omega;\mathbb{R}^{n})$ は $\operatorname{div}F=\partial_{i}v$ なので、\ref{pde:ball-divergence} から
+$$
+\int_{B(x_{0},s)}\partial_{i}v\,dy=s^{n-1}\int_{S^{n-1}}v(x_{0}+s\theta)\,\theta_{i}\,d\sigma(\theta).
+$$
+$|\theta_{i}|\le1$、$\sigma(S^{n-1})=n\omega_{n}$ から右辺の絶対値は $s^{n-1}n\omega_{n}\max_{\partial B(x_{0},s)}|v|$ 以下。$\omega_{n}s^{n}$ で割ればよい。
+:::
+
+::: theorem 導関数の評価 {#pde:derivative-estimates keywords="interior estimates for derivatives of harmonic functions: |D^alpha u(x0)| <= C_k / r^{n+k} ||u||_{L^1(B(x0,r))} with C_0 = 1/omega_n, C_k = (2^{n+1} n k)^k / omega_n" index="導関数の評価（調和関数）|どうかんすうのひょうかちょうわかんすう, 内部評価|ないぶひょうか" refname="調和関数の導関数の評価"}
+$u$ が $\Omega$ で調和、$r>0$、$B(x_{0},r)\subset\Omega$ なら、$|\alpha|=k$ となる各多重指数 $\alpha$ について
+$$
+|\partial^{\alpha}u(x_{0})|\le\frac{C_{k}}{r^{n+k}}\|u\|_{L^{1}(B(x_{0},r))},\qquad C_{0}\defeq\frac{1}{\omega_{n}},\quad C_{k}\defeq\frac{(2^{n+1}nk)^{k}}{\omega_{n}}\ (k\ge1).
+$$
+とくに $|\partial^{\alpha}u(x_{0})|\le\omega_{n}C_{k}\,r^{-k}\sup_{B(x_{0},r)}|u|$。
+:::
+
+::: intuition
+調和関数の $k$ 階の導関数は、半径 $r$ の球の上の関数の大きさ（の平均）を $r^{k}$ で割ったもので押さえられる。広い範囲で小さい調和関数は、中心の近くでは導関数も小さい。
+:::
+
+::: proof
+**Step 1（$k=0$）.** 【主張：$|u(x_{0})|\le\frac{1}{\omega_{n}r^{n}}\|u\|_{L^{1}(B(x_{0},r))}$】$0<r'<r$ なら $\overline{B}(x_{0},r')\subset B(x_{0},r)\subset\Omega$ なので、球についての平均値の性質から $|u(x_{0})|=|A_{r'}u(x_{0})|\le\frac{1}{\omega_{n}r'^{n}}\int_{B(x_{0},r')}|u|\le\frac{1}{\omega_{n}r'^{n}}\|u\|_{L^{1}(B(x_{0},r))}$。$r'\uparrow r$ とする。
+
+**Step 2（$k=1$）.** 【主張：$|\partial_{i}u(x_{0})|\le\frac{2^{n+1}n}{\omega_{n}r^{n+1}}\|u\|_{L^{1}(B(x_{0},r))}$】$\overline{B}(x_{0},r/2)\subset B(x_{0},r)$ なので、\ref{pde:gradient-sphere-estimate}（$s=r/2$）から $|\partial_{i}u(x_{0})|\le\frac{2n}{r}\max_{\partial B(x_{0},r/2)}|u|$。$|y-x_{0}|=r/2$ なら $B(y,r/2)\subset B(x_{0},r)$（$|z-x_{0}|\le|z-y|+|y-x_{0}|<r$）なので、Step 1 を $y$ と半径 $r/2$ に使うと $|u(y)|\le\frac{2^{n}}{\omega_{n}r^{n}}\|u\|_{L^{1}(B(x_{0},r))}$。掛け合わせる。
+
+**Step 3（帰納法の一歩）.** 【主張：$k\ge2$ で $|\beta|=k-1$ について主張が成り立てば、$|\alpha|=k$ について $|\partial^{\alpha}u(x_{0})|\le nk\,C_{k-1}\bigl(\frac{k}{k-1}\bigr)^{n+k-1}r^{-n-k}\|u\|_{L^{1}(B(x_{0},r))}$】$\alpha=\beta+e_{i}$（$|\beta|=k-1$）と書く。$\partial^{\beta}u$ は調和（\ref{pde:harmonic-derivatives}）で $\overline{B}(x_{0},r/k)\subset B(x_{0},r)$ なので、\ref{pde:gradient-sphere-estimate}（$s=r/k$）から $|\partial^{\alpha}u(x_{0})|\le\frac{nk}{r}\max_{\partial B(x_{0},r/k)}|\partial^{\beta}u|$。$|y-x_{0}|=r/k$ なら $B\bigl(y,\frac{(k-1)r}{k}\bigr)\subset B(x_{0},r)$ なので、仮定を $y$ と半径 $\frac{(k-1)r}{k}$ に使うと
+$$
+|\partial^{\beta}u(y)|\le C_{k-1}\Bigl(\frac{k}{(k-1)r}\Bigr)^{n+k-1}\|u\|_{L^{1}(B(x_{0},r))}.
+$$
+掛け合わせる。
+
+**Step 4（定数の確認）.** 【主張：$k\ge2$ なら $nk\,C_{k-1}\bigl(\frac{k}{k-1}\bigr)^{n+k-1}\le C_{k}$】左辺の $\omega_{n}$ 倍は
+$$
+nk\,(2^{n+1}n)^{k-1}(k-1)^{k-1}\frac{k^{n+k-1}}{(k-1)^{n+k-1}}=(2^{n+1}nk)^{k}\cdot\frac{1}{2^{n+1}}\Bigl(\frac{k}{k-1}\Bigr)^{n}.
+$$
+$k\ge2$ なら $\frac{k}{k-1}\le2$ なので、これは $(2^{n+1}nk)^{k}\cdot\frac{2^{n}}{2^{n+1}}\le(2^{n+1}nk)^{k}=\omega_{n}C_{k}$。
+
+Step 1・2 が $k=0,1$ の場合で、Step 3・4 から $k\ge2$ は帰納法で従う。最後の不等式は $\|u\|_{L^{1}(B(x_{0},r))}\le\omega_{n}r^{n}\sup_{B(x_{0},r)}|u|$ から。
+
+::: hypcheck
+- **調和性**：Step 1 で平均値の性質に、Step 2・3 で \ref{pde:gradient-sphere-estimate}（導関数も調和であること）に使った。調和でなければ偽：$u=\sin(mx_{1})$ は $|u|\le1$ だが $\partial_{1}u(0)=m$ はいくらでも大きい。
+- **$B(x_{0},r)\subset\Omega$**：開球でよい。閉球が要るのは平均値の性質を使う小さい球（Step 1 の $r'$、Step 2・3 の $r/2$, $r/k$ と、その周りの球）だけで、それらはすべて $B(x_{0},r)$ に含まれる。
+- **定数**：$C_{k}$ は最良ではない。重要なのは $C_{k}$ が $u$ にも $r$ にもよらず、$k$ について $(\text{定数})^{k}k^{k}$ の程度でしか増えないことで、これが次節の解析性に効く。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 同じ型の内部評価は、一般の楕円型方程式の解についても成り立つ（係数の滑らかさに応じた階数まで）。ただし定数は係数に依存し、平均値の性質がないので証明はずっと重く、関数解析的手法では差分商と $L^{2}$ のエネルギー評価を繰り返す（関数解析的手法の系列）。一方、波動方程式にはこの種の評価がない：$u(t,x)=f(x-t)$（$n=1$）は任意の $C^{2}$ の $f$ について解であり、$u$ が小さくても導関数は大きくなりうる。導関数の評価は、ラプラス方程式が楕円型であることの量的な表れである。
+
+**似た定理.** 正則関数についてのコーシーの評価式 \ref{cx:cauchy-estimates}（$|f^{(k)}(a)|\le k!\,r^{-k}\max_{|z-a|=r}|f|$）が直接の類似で、そこでは $k!$ だったものが、ここでは $(2^{n+1}nk)^{k}$ に悪くなっている。$k^{k}$ と $k!$ はスターリングの公式の意味で $e^{k}$ 倍程度しか違わないので、次節の解析性の証明には十分である。
+
+**高い視点：尺度不変性.** 評価の両辺は、$u_{\lambda}(x)\defeq u(\lambda x)$ という拡大縮小で同じように変わる（$u_{\lambda}$ も調和で、$\partial^{\alpha}u_{\lambda}=\lambda^{k}(\partial^{\alpha}u)(\lambda\,\cdot)$、$\|u_{\lambda}\|_{L^{1}(B(0,r/\lambda))}=\lambda^{-n}\|u\|_{L^{1}(B(0,r))}$）。したがって $r^{-n-k}$ という冪は次元の勘定だけで決まり、半径 1 の場合を示せばすべての半径で成り立つ。比喩で言えば、調和関数を拡大鏡で見ても縮小して見ても「平らさ」の基準は同じで、見る範囲が広いほど細かいうねりは許されない。
+:::
+
+::: theorem リウヴィルの定理（調和関数） {#pde:liouville keywords="Liouville theorem for harmonic functions: a bounded harmonic function on R^n is constant" index="リウヴィルの定理（調和関数）|りうゔぃるのていりちょうわかんすう" refname="調和関数のリウヴィルの定理"}
+$\mathbb{R}^{n}$ 全体で調和な有界関数は定数である。
+:::
+
+::: intuition
+空間全体で調和で、値がある範囲に収まっている関数は、定数しかない。
+:::
+
+::: proof
+$|u|\le M$ とする。$x_{0}\in\mathbb{R}^{n}$、$r>0$ について \ref{pde:derivative-estimates}（$k=1$）から
+$$
+|\partial_{i}u(x_{0})|\le\frac{C_{1}}{r^{n+1}}\|u\|_{L^{1}(B(x_{0},r))}\le\frac{C_{1}}{r^{n+1}}\omega_{n}r^{n}M=\frac{C_{1}\omega_{n}M}{r}.
+$$
+$r\to\infty$ として $\partial_{i}u(x_{0})=0$。$\mathbb{R}^{n}$ は連結な開集合で $\nabla u=0$ なので、\ref{calc:zero-derivative-constant} から $u$ は定数。
+
+::: hypcheck
+- **有界性**：$r\to\infty$ の極限で $\|u\|_{L^{1}(B(x_{0},r))}=O(r^{n})$ として使った。片側だけの有界性でも十分（\see{pde:liouville-one-sided}）。多項式の増大なら多項式に限られる（\see{pde:prob-hf-polynomial-growth}）。指数的に増大してよければ $e^{x_{1}}\cos x_{2}$ のような定数でない例がある。
+- **定義域が $\mathbb{R}^{n}$ 全体**：$r\to\infty$ に使った。外すと偽：上半平面 $\{(x,y):y>0\}$ で $u=\frac{1}{\pi}\arg(x+iy)\in(0,1)$ は有界な調和関数（$\log(x+iy)$ の虚部）で定数でない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 定義域から 1 点を除くと、$n\ge3$ では $|x|^{2-n}$ が $\mathbb{R}^{n}\setminus\{0\}$ の定数でない調和関数で、無限遠では $0$ に減衰するが、原点の近くで非有界である。孤立特異点のまわりで有界な調和関数は、特異点を除去できることが知られており（ここでは証明しない）、$\mathbb{R}^{n}\setminus\{0\}$ で有界な調和関数も定数である。
+
+**似た定理.** 正則関数についての \ref{cx:liouville} は、実部と虚部が調和なので、$n=2$ のこの定理から従う（有界な正則関数の実部と虚部は有界な調和関数）。閉多様体の上では、調和関数は有界性を仮定しなくても定数である（\see{gl:closed-manifold-laplacian}）：コンパクトさが有界性を自動的に与え、最大値原理（あるいはエネルギー）で定数になる。ここでの $\mathbb{R}^{n}$ はコンパクトでないので、有界性を仮定として補う必要がある。
+
+**高い視点：無限に広い部屋.** 熱源のない無限に広い部屋で、温度が上下どちらにも際限なく振れることがないなら、部屋中どこでも同じ温度である。有限の部屋なら壁（境界）の温度に応じていくらでも定数でない平衡がありうるが、壁を無限遠に追いやると、温度の勾配を支えるものがなくなる。証明はこの直感を量にしたもので、半径 $r$ の範囲で温度差が $2M$ 以内なら、勾配は $M/r$ の程度以下で、$r$ を大きくすれば $0$ になる。
+:::
+
+## 実解析性 {#pde:sec-hf-analytic}
+
+::: definition 実解析関数（多変数） {#pde:real-analytic-rn keywords="real analytic function of several variables: locally the sum of an absolutely convergent power series sum c_alpha (x - x0)^alpha" index="実解析関数（多変数）|じつかいせきかんすうたへんすう"}
+開集合 $\Omega\subset\mathbb{R}^{n}$ 上の関数 $f$ が**実解析的**であるとは、各 $x_{0}\in\Omega$ に $\rho>0$ と実数の族 $(c_{\alpha})_{\alpha\in\mathbb{Z}_{\ge0}^{n}}$ があって、$|h|<\rho$ なら $x_{0}+h\in\Omega$、$\sum_{\alpha}|c_{\alpha}||h^{\alpha}|<\infty$ かつ
+$$
+f(x_{0}+h)=\sum_{\alpha}c_{\alpha}h^{\alpha}
+$$
+となることをいう（絶対収束する可算個の和なので、和は足す順序によらない）。
+:::
+
+::: intuition
+各点の近くで、その点を中心とする（多変数の）冪級数の和として書ける関数を実解析的という。
+:::
+
+$n=1$ では、冪級数が $|h|<\rho$ で収束すれば収束半径は $\rho$ 以上で、その内側では絶対収束する（\ref{calc:cauchy-hadamard}）ので、\ref{calc:real-analytic} と同じ概念である。
+
+::: theorem 調和関数は実解析的 {#pde:harmonic-analytic keywords="harmonic functions are real analytic: the Taylor series at x0 converges absolutely to u on the ball of radius dist(x0, boundary) / (2^{n+4} n^2 e); proof from the derivative estimates" index="調和関数の解析性|ちょうわかんすうのかいせきせい, 実解析性（調和関数）|じつかいせきせいちょうわかんすう" refname="調和関数の実解析性"}
+$u$ が $\Omega$ で調和なら、$u$ は $\Omega$ で実解析的である。より詳しく、$x_{0}\in\Omega$、$d>0$ を $B(x_{0},d)\subset\Omega$ となる数とすると、$|h|<\frac{d}{2^{n+4}n^{2}e}$ ならテイラー級数は絶対収束して
+$$
+u(x_{0}+h)=\sum_{\alpha}\frac{\partial^{\alpha}u(x_{0})}{\alpha!}h^{\alpha}.
+$$
+:::
+
+::: intuition
+調和関数は、各点のまわりでテイラー級数に展開でき、その級数は境界までの距離に比例する範囲で本当に関数に収束する。
+:::
+
+::: proof
+$r\defeq d/4$ とおく。$\overline{B}(x_{0},2r)\subset B(x_{0},d)\subset\Omega$ はコンパクトで $u$ はそこで連続なので
+$$
+M\defeq\frac{1}{\omega_{n}r^{n}}\|u\|_{L^{1}(B(x_{0},2r))}<\infty.
+$$
+
+**Step 1（導関数の一様な評価）.** 【主張：$x\in B(x_{0},r)$、$|\alpha|=k$ なら $|\partial^{\alpha}u(x)|\le M\bigl(\frac{2^{n+1}nk}{r}\bigr)^{k}$（$k=0$ では $M$）】$B(x,r)\subset B(x_{0},2r)\subset\Omega$ なので、\ref{pde:derivative-estimates} から $|\partial^{\alpha}u(x)|\le\frac{C_{k}}{r^{n+k}}\|u\|_{L^{1}(B(x_{0},2r))}=\omega_{n}C_{k}\,r^{-k}M$。$\omega_{n}C_{k}=(2^{n+1}nk)^{k}$（$k=0$ では $1$）。
+
+**Step 2（階乗で書き直す）.** 【主張：$K\defeq\frac{2^{n+1}n^{2}e}{r}$ とおくと、$x\in B(x_{0},r)$ で $|\partial^{\alpha}u(x)|\le M K^{|\alpha|}\alpha!$】$k\defeq|\alpha|$。$e^{k}=\sum_{j\ge0}\frac{k^{j}}{j!}\ge\frac{k^{k}}{k!}$ から $k^{k}\le e^{k}k!$。多項定理 $n^{k}=(1+\dots+1)^{k}=\sum_{|\beta|=k}\frac{k!}{\beta!}\ge\frac{k!}{\alpha!}$ から $k!\le n^{k}\alpha!$。Step 1 に代入して $|\partial^{\alpha}u(x)|\le M\bigl(\frac{2^{n+1}n}{r}\bigr)^{k}e^{k}n^{k}\alpha!=MK^{k}\alpha!$。
+
+**Step 3（剰余項が $0$ に収束する）.** 【主張：$|h|<\frac{1}{2K}$ なら $\displaystyle u(x_{0}+h)=\lim_{N\to\infty}\sum_{|\alpha|\le N-1}\frac{\partial^{\alpha}u(x_{0})}{\alpha!}h^{\alpha}$】$\frac{1}{2K}=\frac{r}{2^{n+2}n^{2}e}<r$ なので、線分 $[x_{0},x_{0}+h]$ は $B(x_{0},r)$ に含まれる。\ref{calc:multivariable-taylor.1}（$C^{N}$ 級、$k=N-1$）から、ある $\theta\in(0,1)$ について、剰余項は $R_{N}\defeq\sum_{|\alpha|=N}\frac{\partial^{\alpha}u(x_{0}+\theta h)}{\alpha!}h^{\alpha}$。$|h^{\alpha}|=\prod|h_{i}|^{\alpha_{i}}\le|h|^{|\alpha|}$ と Step 2 から各項は $MK^{N}|h|^{N}$ 以下。$|\alpha|=N$ となる $\alpha$ の個数は $\binom{N+n-1}{n-1}\le2^{N+n-1}$（二項係数はその行の和 $2^{N+n-1}$ 以下）なので
+$$
+|R_{N}|\le M\,2^{N+n-1}(K|h|)^{N}=2^{n-1}M\,(2K|h|)^{N}\to0\quad(N\to\infty).
+$$
+
+**Step 4（絶対収束）.** 【主張：$|h|<\frac{1}{2K}$ なら $\sum_{\alpha}\frac{|\partial^{\alpha}u(x_{0})|}{\alpha!}|h^{\alpha}|<\infty$ で、和は $u(x_{0}+h)$】Step 2（$x=x_{0}$）と Step 3 と同じ数え方から、$|\alpha|=N$ の項の和は $2^{n-1}M(2K|h|)^{N}$ 以下で、$N$ について足すと等比級数で有限。絶対収束する族の和は並べ方によらないので、$|\alpha|$ の小さい順に足した Step 3 の極限 $u(x_{0}+h)$ に等しい。
+
+$\frac{1}{2K}=\frac{r}{2^{n+2}n^{2}e}=\frac{d}{2^{n+4}n^{2}e}$ なので主張が従う。$x_{0}$ は任意なので $u$ は実解析的（$c_{\alpha}=\partial^{\alpha}u(x_{0})/\alpha!$、$\rho=\frac{d}{2^{n+4}n^{2}e}$）。
+
+::: hypcheck
+- **導関数の評価**：Step 1 で使った。とくに定数 $C_{k}$ が $k^{k}$ の程度でしか増えないことが Step 2 で $\alpha!$ の形に直すのに効いている。単に $C^{\infty}$ 級であるだけでは解析性は出ない：$e^{-1/t}$（$t>0$）、$0$（$t\le0$）は $C^{\infty}$ 級だが $0$ で解析的でない（\ref{calc:non-analytic-smooth}）。
+- **$B(x_{0},d)\subset\Omega$**：$M<\infty$ と Step 1 の球の包含に使った。収束半径が境界までの距離に縛られるのは避けられない（下の例）。
+- **剰余項の評価**：テイラーの定理は Step 3 で使った。$C^{\infty}$ 級でテイラー級数が収束しても関数と一致するとは限らない（上の $e^{-1/t}$ では級数は $0$）ので、収束だけでなく剰余項が $0$ に行くことを確かめる必要がある。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example
+収束半径が境界までの距離で縛られること。$n=2$、$\Omega=\mathbb{R}^{2}\setminus\{0\}$ で $u(x,y)=\frac{x}{x^{2}+y^{2}}=\operatorname{Re}\frac{1}{z}$ は調和で、$a>0$ について $x_{0}=(a,0)$ では $d=a$。$x$ 軸の上では $u(x,0)=1/x$ なので $\partial_{x}^{k}u(a,0)=\frac{(-1)^{k}k!}{a^{k+1}}$。テイラー級数が $h=(t,0)$ で絶対収束すれば、$\alpha=(k,0)$ の項だけを見ても $\sum_{k}\frac{|t|^{k}}{a^{k+1}}<\infty$ で、$|t|<a$ でなければならない。したがって、テイラー級数が絶対収束する範囲の半径は $d=a$ を超えない。
+:::
+
+::: corollary 一致の定理（調和関数） {#pde:harmonic-unique-continuation keywords="unique continuation: a harmonic function on a connected open set vanishing on a nonempty open subset vanishes identically; two harmonic functions agreeing on an open set agree everywhere" index="一致の定理（調和関数）|いっちのていりちょうわかんすう, 一意接続|いちいせつぞく"}
+$\Omega$ を連結な開集合、$u$ を $\Omega$ の調和関数とする。$u$ が $\Omega$ の空でない開集合の上で $0$ なら、$u$ は $\Omega$ 全体で $0$ である。
+:::
+
+::: proof
+$E\defeq\{x\in\Omega:\text{すべての }\alpha\text{ について }\partial^{\alpha}u(x)=0\}$ とおく。仮定の開集合は $E$ に含まれるので $E\ne\varnothing$。各 $\partial^{\alpha}u$ は連続なので、$E$ は閉集合の共通部分として $\Omega$ の中で閉。$x_{0}\in E$ なら、\ref{pde:harmonic-analytic} から $x_{0}$ のある近傍で $u(x_{0}+h)=\sum_{\alpha}\frac{\partial^{\alpha}u(x_{0})}{\alpha!}h^{\alpha}=0$ で、その近傍では $u$ も導関数もすべて $0$、つまり近傍は $E$ に含まれる。よって $E$ は開でもあり、連結性から $E=\Omega$（\ref{top:connected}）。
+:::
+
+::: supplement
+**前提を変えると.** 熱方程式 $\partial_{t}u=\Delta u$ の解は、空間変数 $x$ については実解析的だが、時間変数 $t$ については一般に実解析的でないことが知られている（熱方程式のページで扱うティホノフの例の解がそうである。ここでは証明しない）。波動方程式の解は初期値と同じ程度にしか滑らかでない。調和関数の解析性は、楕円型方程式に特有の性質で、係数が実解析的な楕円型方程式の解は実解析的であることが知られている（ここでは証明しない）。係数が $C^{\infty}$ 級なだけなら、解は $C^{\infty}$ 級までしか言えない。
+
+**似た定理.** 正則関数については \ref{cx:holomorphic-analytic} がある。そこではコーシーの積分公式で直接級数展開できたが、ここでは導関数の評価から剰余項を押さえた。一致の定理も正則関数の一致の定理の類似だが、正則関数では「零点が集積点をもてば $0$」と言えるのに対し、調和関数では零点の集合は一般に超曲面（$x_{1}$ の零点は超平面）で、開集合の上で $0$ という仮定が要る。
+
+**高い視点：楕円型方程式は情報をならす.** 調和関数の値は周りの平均なので、1 点の近くの小さな揺らぎは周りに薄められて消える。その結果、関数は各点でテイラー級数という「無限に精密な設計図」で完全に決まり、小さな開集合の上の値から全体が決まる（一致の定理）。比喩で言えば、調和関数は職人の手で一枚の板から削り出された彫刻のようなもので、どの小片を見ても全体の曲面の続き方が読み取れる。それに対し $C^{\infty}$ 級の一般の関数は、滑らかに貼り合わせた寄せ木細工で、一部分を見ても他の部分はわからない。
+:::
+
+## ハルナックの不等式 {#pde:sec-hf-harnack}
+
+::: theorem ハルナックの不等式 {#pde:harnack-inequality keywords="Harnack inequality for nonnegative harmonic functions in R^n: for a compact connected K in Omega there is C depending only on K, Omega, n with sup_K u <= C inf_K u; in particular on connected open V with compact closure in Omega" index="ハルナックの不等式（n 次元）|はるなっくのふとうしきえぬじげん" refname="ハルナックの不等式（n 次元）"}
+$K\subset\Omega$ を空でない連結なコンパクト集合とする。$K$, $\Omega$, $n$ だけで決まる定数 $C\ge1$ があって、$\Omega$ の非負の調和関数 $u$ はすべて
+$$
+\sup_{K}u\le C\inf_{K}u
+$$
+を満たす。とくに、$V$ が連結な開集合で $\overline{V}$ がコンパクトかつ $\overline{V}\subset\Omega$ なら、$\sup_{V}u\le C\inf_{V}u$（$C$ は $V$, $\Omega$, $n$ による）。
+:::
+
+::: intuition
+非負の調和関数は、境界から離れたつながった範囲では、どこでも同じくらいの大きさである。最大値と最小値の比は、関数によらない定数で押さえられる。
+:::
+
+::: proof
+$r\defeq\frac14\operatorname{dist}(K,\mathbb{R}^{n}\setminus\Omega)$（$\Omega=\mathbb{R}^{n}$ なら $r\defeq1$）、$K_{r}\defeq\{y:\operatorname{dist}(y,K)<r\}$ とおく。
+
+**Step 1（近い 2 点の比較）.** 【主張：$a\in\mathbb{R}^{n}$、$b\in K_{r}$、$|a-b|<r$ なら $u(a)\le2^{n}u(b)$】$\operatorname{dist}(b,\mathbb{R}^{n}\setminus\Omega)>4r-r=3r$ なので $\overline{B}(b,2r)\subset\Omega$。$\operatorname{dist}(a,K)<2r$ なので同様に $\overline{B}(a,r)\subset\Omega$。$|z-a|<r$ なら $|z-b|<2r$ なので $B(a,r)\subset B(b,2r)$。$u\ge0$ と球についての平均値の性質から
+$$
+u(b)=\frac{1}{\omega_{n}(2r)^{n}}\int_{B(b,2r)}u\ge\frac{1}{\omega_{n}2^{n}r^{n}}\int_{B(a,r)}u=2^{-n}u(a).
+$$
+
+**Step 2（被覆の連結性）.** 【主張：$K\subset\bigcup_{i=1}^{N}B(x_{i},r)$（$x_{i}\in K$）となる有限個の球をとると、どの二つの球 $B_{i}\defeq B(x_{i},r)$, $B_{j}$ も、隣どうしが交わる球の列 $B_{i}=B_{i_{0}},B_{i_{1}},\dots,B_{i_{m}}=B_{j}$（$m\le N-1$）で結べる】有限個の球で覆えるのは $K$ のコンパクト性から。球を頂点とし、交わる二つの球を辺で結んだグラフを考える。$B_{i}$ を含む連結成分の球の和を $W_{1}$、残りの球の和を $W_{2}$ とすると、$W_{1}$ と $W_{2}$ は交わらない開集合で（異なる成分の球は交わらない）、$K\subset W_{1}\cup W_{2}$。$W_{2}$ に球があれば、その中心は $K\cap W_{2}$ に入るので、$K\cap W_{1}$ と $K\cap W_{2}$ は $K$ を二つの空でない開集合に分け、$K$ の連結性に反する。よってグラフは連結で、$B_{i}$ と $B_{j}$ は長さ $N-1$ 以下の道で結べる（同じ球を二度通らない道を選べばよい）。
+
+**Step 3（鎖でつなぐ）.** 【主張：$x,y\in K$ なら $u(y)\le2^{2nN}u(x)$】$y\in B_{j}$, $x\in B_{i}$ となる $i,j$ をとり、Step 2 の列 $B_{j}=B_{i_{m}},\dots,B_{i_{0}}=B_{i}$ と、隣り合う球の共通部分の点 $z_{l}\in B_{i_{l}}\cap B_{i_{l+1}}$ をとって、点の列
+$$
+y,\ x_{i_{m}},\ z_{m-1},\ x_{i_{m-1}},\ z_{m-2},\ \dots,\ z_{0},\ x_{i_{0}},\ x
+$$
+を作る。隣り合う 2 点の距離は $r$ 未満（どちらかが球の中心で、もう一方がその球の点）で、どの点も $K$ のある点から距離 $r$ 未満なので $K_{r}$ に入る。Step 1 を隣り合う 2 点に順に使うと、点の個数は $2m+3\le2N+1$、比較の回数は $2m+2\le2N$ なので $u(y)\le2^{2nN}u(x)$。
+
+$C\defeq2^{2nN}$ は $K$, $\Omega$, $n$（と、それらから決めた $r$ と被覆）だけで決まる。Step 3 で $y$ について上限、$x$ について下限をとれば主張が従う。「とくに」の部分は、$\overline{V}$ が連結（連結集合の閉包）なコンパクト集合であることから、$K=\overline{V}$ に使えばよい。
+
+::: hypcheck
+- **$u\ge0$**：Step 1 で、大きな球の積分を小さな球の積分で下から押さえるのに使った。外すと偽：$\Omega=B(0,2)$、$K=\overline{B}(0,1)$、$u=x_{1}$ では $\sup_{K}u=1$、$\inf_{K}u=-1$ で、$1\le C\cdot(-1)$ となる $C\ge1$ はない。
+- **$K$ の連結性**：Step 2 で使った。外すと偽：$\Omega=B(0,1)\cup B(3e_{1},1)$、$K=\{0,3e_{1}\}$、$u=1$（$B(0,1)$ 上）、$u=t$（$B(3e_{1},1)$ 上、$t>0$）では $\sup_{K}u/\inf_{K}u=1/t$ はいくらでも大きい。
+- **$K\subset\Omega$ でコンパクト**：$r>0$ と有限被覆に使った。$C$ は $K$ が境界に近づくと大きくなる：$n=2$、$\Omega=B(0,1)$ でポアソン核 $u(z)=\frac{1-|z|^{2}}{|1-z|^{2}}$（\ref{cx:poisson-kernel}、$t=0$）は正の調和関数で、$K_{s}=[-s,s]$（実軸上の線分）では $u(s)/u(-s)=\bigl(\frac{1+s}{1-s}\bigr)^{2}\to\infty$（$s\to1$）。
+- **公理**：選択公理は使わない（有限個の球と有限個の点 $z_{l}$ を選ぶだけ）。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 球の場合には定数を具体的に書ける：$u\ge0$ が $B(0,R)$ で調和なら、$|x|<R$ で $\frac{R^{n-2}(R-|x|)}{(R+|x|)^{n-1}}u(0)\le u(x)\le\frac{R^{n-2}(R+|x|)}{(R-|x|)^{n-1}}u(0)$ が成り立つことが、球のポアソン積分から示される（この系列の基本解とグリーン関数のページ。ここでは証明しない）。平均値の性質だけからは、少し弱い評価 \ref{pde:prob-hf-ball-harnack} が出る。一般の楕円型方程式でも、係数が有界可測なだけでハルナックの不等式が成り立つことが知られている（発散形ではモーザー、非発散形ではクリロフ–サファノフによる。ここでは証明しない）。これは解の正則性の理論の中心的な道具である。
+
+**似た定理.** 平面では \ref{cx:harnack} がポアソン積分による最良の形である。ハルナックの不等式は「非負の解は内部で $0$ にならない（$0$ になれば恒等的に $0$）」という性質（\ref{pde:strong-maximum-principle} の最小値の場合）の量的な強化になっている。
+
+**高い視点：正値性の伝播.** 非負の調和関数は、1 点で大きければ近くでも大きく、1 点で小さければ近くでも小さい。熱の比喩では、平衡状態の温度分布（の、ある基準からの上昇分）は、部屋の奥の方ではどこもほぼ同じで、極端な差は壁（境界）の近くでしか生じない。確率論の言葉では、ブラウン運動がある点から出発して遠くの壁のある部分に当たる確率は、出発点を少し動かしても一定の比率以上には変わらない。この「比で比べられる」性質は、差の評価（一様連続性）よりも強く、正の解の空間を有限次元的に扱うときの基本になる。
+:::
+
+::: corollary 片側に有界な調和関数 {#pde:liouville-one-sided keywords="one-sided Liouville theorem: a harmonic function on R^n bounded from below (or above) is constant" index="片側リウヴィルの定理|かたがわりうゔぃるのていり"}
+$\mathbb{R}^{n}$ 全体で調和で、下に（または上に）有界な関数は定数である。
+:::
+
+::: proof
+下に有界なら $v\defeq u-\inf u\ge0$ は調和（上に有界なら $\sup u-u$ を使う）。$x,y\in\mathbb{R}^{n}$、$R>0$ とし、$\rho\defeq|x-y|$ とおく。$B(x,R)\subset B(y,R+\rho)$ と $v\ge0$、球についての平均値の性質から
+$$
+v(x)=\frac{1}{\omega_{n}R^{n}}\int_{B(x,R)}v\le\frac{1}{\omega_{n}R^{n}}\int_{B(y,R+\rho)}v=\Bigl(\frac{R+\rho}{R}\Bigr)^{n}v(y).
+$$
+$R\to\infty$ として $v(x)\le v(y)$。$x,y$ を入れ替えて $v(x)=v(y)$。
+:::
+
+## 調和関数の列の収束 {#pde:sec-hf-convergence}
+
+::: theorem 調和関数の列の広義一様収束 {#pde:harmonic-uniform-limit keywords="a locally uniform limit of harmonic functions is harmonic, and all derivatives converge locally uniformly" index="調和関数の列の収束|ちょうわかんすうのれつのしゅうそく, 広義一様収束（調和関数）|こうぎいちようしゅうそくちょうわかんすう"}
+$u_{k}$ を $\Omega$ の調和関数の列とし、$u_{k}$ が $\Omega$ で関数 $u$ に広義一様収束するとする。このとき $u$ は $\Omega$ で調和で、すべての多重指数 $\alpha$ について $\partial^{\alpha}u_{k}$ は $\partial^{\alpha}u$ に広義一様収束する。
+:::
+
+::: intuition
+調和関数の列が各コンパクト集合の上で一様に収束すれば、極限も調和関数で、導関数も何階まででもそろって収束する。
+:::
+
+::: proof
+**Step 1（極限の連続性）.** 【主張：$u\in C(\Omega)$】各 $x\in\Omega$ は、$\overline{B}(x,r)\subset\Omega$ となるコンパクトな近傍をもち、その上で連続関数 $u_{k}$ が $u$ に一様収束するので、$u$ もそこで連続（\ref{calc:uniform-limit-theorems.2} と同じ議論）。
+
+**Step 2（平均値の性質）.** 【主張：$u$ は球面についての平均値の性質をもち、したがって調和】$\overline{B}(x,r)\subset\Omega$ とする。$\partial B(x,r)$ はコンパクトなので $\varepsilon_{k}\defeq\max_{\partial B(x,r)}|u_{k}-u|\to0$ で、$|S_{r}u_{k}(x)-S_{r}u(x)|\le\frac{1}{n\omega_{n}}\int\varepsilon_{k}\,d\sigma=\varepsilon_{k}$。$S_{r}u_{k}(x)=u_{k}(x)\to u(x)$ と合わせて $S_{r}u(x)=u(x)$。\ref{pde:mean-value-converse} から $u$ は $C^{\infty}$ 級で調和。
+
+**Step 3（導関数の収束）.** 【主張：コンパクト集合 $K\subset\Omega$ の上で $\partial^{\alpha}u_{k}\to\partial^{\alpha}u$ は一様】$r\defeq\frac12\operatorname{dist}(K,\mathbb{R}^{n}\setminus\Omega)$（$\Omega=\mathbb{R}^{n}$ なら $1$）、$L\defeq\{y:\operatorname{dist}(y,K)\le r\}$ とおくと、$L$ は有界閉集合でコンパクト、$L\subset\Omega$。$x\in K$ なら $B(x,r)\subset L$。$u_{k}-u$ は調和なので、\ref{pde:derivative-estimates} の最後の不等式（$|\alpha|=j$）から
+$$
+\sup_{x\in K}|\partial^{\alpha}u_{k}(x)-\partial^{\alpha}u(x)|\le\omega_{n}C_{j}\,r^{-j}\max_{L}|u_{k}-u|\to0.
+$$
+
+::: hypcheck
+- **広義一様収束**：Step 1 で連続性、Step 2 で球面上の積分と極限の交換、Step 3 で $L$ の上の一様収束として使った。導関数の評価は $L^{1}$ ノルムで書かれているので、Step 3 は $\|u_{k}-u\|_{L^{1}(L)}\to0$ だけで通る。実際、調和関数の列が $L_{\mathrm{loc}}^{1}$ で収束すれば、\ref{pde:derivative-estimates}（$k=0$）から広義一様収束もする。
+- **各点収束では足りない**：調和関数（たとえば多項式の実部）の列で、各点では収束するが極限が連続でないものがあることが知られている（ルンゲの近似定理を使う例。ここでは証明しない）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 収束を仮定せず、「各コンパクト集合の上で一様に有界」とだけ仮定すると、広義一様収束する部分列がとれる（モンテルの定理の調和関数版）。\ref{pde:derivative-estimates}（$k=1$）から、各コンパクト集合の上で勾配も一様に有界で、\ref{calc:mean-value-inequality} により同等連続になるので、\ref{top:ascoli-classical} と対角線論法で部分列がとれる（細部はここでは略す）。
+
+**似た定理.** 正則関数の列についての \ref{cx:weierstrass-convergence} が同じ主張で、そこでは導関数の収束をコーシーの積分公式で示した。ここでは導関数の評価がその役を果たす。どちらも「方程式の解の空間では、弱い収束（一様収束、さらには $L^{1}$ 収束）が強い収束（すべての導関数の収束）を引き起こす」という楕円型方程式の特徴の表れである。
+
+**高い視点：解の空間の閉性.** 調和関数の全体は、$C(\Omega)$ の広義一様収束の位相で閉じた部分空間で、しかもその上では広義一様収束の位相と $C^{\infty}$ 級の位相（すべての導関数の広義一様収束）が一致する。比喩で言えば、調和関数は「見た目（値）が近づけば中身（導関数）も勝手に近づく」素直な関数たちで、値だけを監視していれば十分である。この閉性が、ペロンの方法などで調和関数を極限として作るときの土台になる。
+:::
+
+単調な列については、収束を仮定しなくても、1 点で有界なら全体が収束する。
+
+::: theorem ハルナックの原理 {#pde:harnack-principle keywords="Harnack principle: an increasing sequence of harmonic functions on a connected open set either diverges to +infinity locally uniformly or converges locally uniformly to a harmonic function" index="ハルナックの原理|はるなっくのげんり" refname="ハルナックの原理"}
+$\Omega$ を連結な開集合、$u_{1}\le u_{2}\le\cdots$ を $\Omega$ の調和関数の増加列とする。次のどちらか一方が成り立つ。
+1. $u_{k}$ は $\Omega$ の各コンパクト集合の上で一様に $+\infty$ に発散する（$\min_{K}u_{k}\to\infty$）。
+2. $u_{k}$ は $\Omega$ のある調和関数に広義一様収束する。
+:::
+
+::: intuition
+調和関数の増加列は、どこか 1 点で有界にとどまれば全体で調和関数に収束し、そうでなければ至る所で無限大に発散する。中間はない。
+:::
+
+::: proof
+$L(x)\defeq\lim_{k}u_{k}(x)\in(-\infty,\infty]$（増加列なので存在）、$A\defeq\{x\in\Omega:L(x)<\infty\}$ とおく。$j>k$ なら $u_{j}-u_{k}\ge0$ は調和なので、閉球 $\overline{B}\subset\Omega$（連結なコンパクト集合）に \ref{pde:harnack-inequality} を使うと、$\overline{B}$ だけで決まる $C_{\overline{B}}$ について
+$$
+\sup_{\overline{B}}(u_{j}-u_{k})\le C_{\overline{B}}\inf_{\overline{B}}(u_{j}-u_{k}).\label{pde:eq-harnack-increments}
+$$
+
+**Step 1（$A$ は開かつ閉）.** 【主張：$x_{0}\in\Omega$、$\overline{B}\defeq\overline{B}(x_{0},r)\subset\Omega$ について、$\overline{B}$ は $A$ に含まれるか、$A$ と交わらないかのどちらか】$\overline{B}$ のある点 $y$ で $L(y)<\infty$ とする。\eqref{pde:eq-harnack-increments}（$k=1$）から、$\overline{B}$ の各点 $z$ と $j$ について $u_{j}(z)-u_{1}(z)\le C_{\overline{B}}(u_{j}(y)-u_{1}(y))\le C_{\overline{B}}(L(y)-u_{1}(y))$ で、右辺は $j$ によらないので $L(z)<\infty$。よって $\overline{B}\subset A$。したがって $A$ も $\Omega\setminus A$ も、各点の近傍の球を含み開である。$\Omega$ は連結なので $A=\Omega$ か $A=\varnothing$。
+
+**Step 2（$A=\varnothing$ の場合）.** 【主張：1 が成り立つ】コンパクト集合 $K$ は有限個の閉球 $\overline{B}(x_{i},r_{i})\subset\Omega$ の内部で覆える。各球の上で、\eqref{pde:eq-harnack-increments}（$k=1$）から $C$ を各球の定数 $C_{\overline{B}(x_{i},r_{i})}$ の最大とすると、$\inf_{\overline{B}(x_{i},r_{i})}(u_{j}-u_{1})\ge C^{-1}(u_{j}(x_{i})-u_{1}(x_{i}))\to\infty$（$j\to\infty$）。$u_{1}$ は $K$ の上で有界なので、$\min_{K}u_{j}\to\infty$。
+
+**Step 3（$A=\Omega$ の場合）.** 【主張：2 が成り立つ】Step 2 と同じ球について、\eqref{pde:eq-harnack-increments} から $j>k$ で $\sup_{\overline{B}(x_{i},r_{i})}(u_{j}-u_{k})\le C(u_{j}(x_{i})-u_{k}(x_{i}))$。$u_{k}(x_{i})$ は収束列なのでコーシー列で、右辺は $j,k\to\infty$ で $0$ に行く。よって $u_{k}$ は各球の上で、したがって $K$ の上で一様にコーシー列であり、一様収束する。極限は \ref{pde:harmonic-uniform-limit} から調和である。
+
+::: hypcheck
+- **単調性**：$u_{j}-u_{k}\ge0$ としてハルナックの不等式を使うのに、すべての Step で使った。外すと偽：$u_{k}=(-1)^{k}k\,x_{1}$ は原点で $0$ に収束するが、$x_{1}\ne0$ では発散も収束もしない。
+- **連結性**：Step 1 で使った。外すと偽：$\Omega=B(0,1)\cup B(3e_{1},1)$、$u_{k}=0$（$B(0,1)$ 上）、$u_{k}=k$（$B(3e_{1},1)$ 上）は増加列で、どちらの結論も満たさない。
+- **ハルナックの不等式**：閉球の上での形だけを使った（球は連結なコンパクト集合）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 増加列の代わりに、有向族（任意の二つの元より大きい元を含む調和関数の族）でも、上限について同じ二者択一が成り立つ。これは劣調和関数の上限として調和関数を作るペロンの方法（この系列の後のページ）の要の一つである。また、$u_{k}\ge0$ の級数 $\sum u_{k}$ に使えば、「非負の調和関数の級数は 1 点で収束すれば広義一様収束し、和は調和で項別に何回でも微分できる」ことがわかる（\see{pde:prob-hf-harmonic-series}）。
+
+**似た定理.** 測度論の単調収束定理（\ref{meas:monotone-convergence}）は「単調な列なら極限と積分を交換できる」と言い、ここでは「単調な列なら各点の収束が広義一様収束に格上げされる」と言う。どちらも単調性が収束の質を上げる例である。関数解析的手法では、同じ役割を弱コンパクト性（有界列の弱収束する部分列）が担う。
+
+**高い視点：正の錐の硬さ.** 非負の調和関数の全体は凸錐をなし、ハルナックの不等式はこの錐が「1 点での値で正規化すると、コンパクト集合の上で一様に有界」という強い硬さをもつことを言っている。比喩で言えば、正の調和関数は一本の背骨で全身が支えられた生き物のようなもので、1 点（背骨）の高さを押さえれば全身の高さが押さえられ、どこか 1 点が無限に伸びれば全身が伸びる。
+:::
+
+## 問題 {#pde:sec-hf-est-problems}
+
+::: problem {#pde:prob-hf-polynomial-growth}
+$u$ を $\mathbb{R}^{n}$ の調和関数とし、定数 $C>0$ と整数 $m\ge0$ について $|u(x)|\le C(1+|x|)^{m}$（すべての $x$）が成り立つとする。$u$ は次数 $m$ 以下の多項式であることを示せ。$m=0$ の場合は何を言っているか。
+:::
+
+::: solution
+$|\alpha|=m+1$ とする。$x_{0}\in\mathbb{R}^{n}$、$r>0$ について、$B(x_{0},r)$ の上では $|u|\le C(1+|x_{0}|+r)^{m}$ なので、\ref{pde:derivative-estimates} の最後の不等式から
+$$
+|\partial^{\alpha}u(x_{0})|\le\omega_{n}C_{m+1}\,r^{-(m+1)}\,C(1+|x_{0}|+r)^{m}.
+$$
+$r\to\infty$ で右辺は $r^{-1}$ の程度で $0$ に行くので $\partial^{\alpha}u(x_{0})=0$。よって $m+1$ 階の導関数はすべて恒等的に $0$。\ref{calc:multivariable-taylor.1}（$a=0$、$k=m$）から、各 $h$ について剰余項は $0$ で
+$$
+u(h)=\sum_{|\alpha|\le m}\frac{\partial^{\alpha}u(0)}{\alpha!}h^{\alpha},
+$$
+これは次数 $m$ 以下の多項式。$m=0$ では $|u|\le C$ で、結論は「定数」なので \ref{pde:liouville} そのものである。
+:::
+
+::: problem {#pde:prob-hf-harmonic-series}
+$\Omega$ を連結な開集合とする。
+1. $v_{k}\ge0$（$k=1,2,\dots$）を $\Omega$ の調和関数とし、ある $x_{0}\in\Omega$ で $\sum_{k}v_{k}(x_{0})<\infty$ とする。$\sum_{k}v_{k}$ は $\Omega$ で広義一様収束し、和 $v$ は調和で、すべての $\alpha$ について $\partial^{\alpha}v=\sum_{k}\partial^{\alpha}v_{k}$（広義一様収束）であることを示せ。
+2. 仮定 $v_{k}\ge0$ を外すと、1 点での収束から何も言えないことを例で示せ。
+:::
+
+::: solution
+**1.** 部分和 $s_{N}\defeq\sum_{k\le N}v_{k}$ は調和で、$v_{k}\ge0$ から増加列。$s_{N}(x_{0})$ は有界なので、\ref{pde:harnack-principle.1} は成り立たない（$K=\{x_{0}\}$ で $\min_{K}s_{N}\not\to\infty$）。よって \ref{pde:harnack-principle.2} から $s_{N}$ はある調和関数 $v$ に広義一様収束する。\ref{pde:harmonic-uniform-limit} から $\partial^{\alpha}s_{N}=\sum_{k\le N}\partial^{\alpha}v_{k}$ は $\partial^{\alpha}v$ に広義一様収束する。
+
+**2.** $n\ge1$、$\Omega=\mathbb{R}^{n}$、$x_{0}=0$ とし、$v_{k}\defeq x_{1}$（すべての $k$）とする。各 $v_{k}$ は調和で $\sum_{k}v_{k}(0)=0$ は収束するが、$x_{1}\ne0$ では $\sum_{k}v_{k}(x)=\sum_{k}x_{1}$ は発散する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
