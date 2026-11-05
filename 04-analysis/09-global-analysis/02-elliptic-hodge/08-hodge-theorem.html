@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ホッジの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/02-elliptic-hodge/08-hodge-theorem.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ホッジの定理 {#gl:page-hodge-theorem keywords="Hodge theorem on closed oriented Riemannian manifolds, harmonic forms, harmonic projection, Green operator of the Hodge Laplacian, Hodge decomposition Omega^k = H^k + d Omega^{k-1} + delta Omega^{k+1}, L^2 Hodge decomposition, solvability of the Poisson equation on closed manifolds, unique harmonic representative of a de Rham cohomology class, harmonic forms minimize the L^2 norm in their class, finite dimensionality of de Rham cohomology, ホッジ分解, 調和形式, 調和代表元, グリーン作用素, 調和射影, ポアソン方程式の可解性"}
+
+この系列の目標は、リーマン幾何のページ \see{riem:page-hodge} で予告したホッジの定理を証明することだった。前のページまでに、閉多様体の上の楕円型作用素について、弱解の正則性（\ref{gl:elliptic-regularity}）、核の有限次元性と像の閉性（\ref{gl:elliptic-kernel-range}）、フレドホルム性（\ref{gl:elliptic-fredholm}）を示し、ホッジのラプラシアン $\Delta=d\delta+\delta d$ が形式的に自己共役で非負な $2$ 階の楕円型作用素であることを確かめた（\ref{gl:hodge-laplacian-spectrum}）。このページでは、それらを組み合わせて、まず関数のポアソン方程式 $\Delta u=f$ が $\int f=0$ のときに解けることを示し、次に調和形式の方向を除いて $\Delta$ を逆にした**グリーン作用素** $G$ を作る。$G$ を使うと、滑らかな $k$ 形式の空間が、調和形式・完全形式・余完全形式の三つの互いに直交する部分に分かれ（**ホッジ分解**）、そこから、各ド・ラーム・コホモロジー類が調和形式をただ一つ含むこと（**ホッジの定理**）が従う。位相不変量であるコホモロジーが、計量を一つ選ぶと楕円型方程式の解の空間として具体的に実現されるわけである。ポアンカレ双対性・オイラー標数・具体例などの帰結は次のページで扱う。
+
+## 記法と定義の確認 {#gl:sec-ho-notation}
+
+::: notation
+- $(M,g)$ は向きづけられた $n$ 次元の閉リーマン多様体（$n\ge1$）、$\mu_{g}$ はリーマン測度、$\mathrm{vol}_{g}$ はリーマン体積形式（\ref{riem:volume-form}）。ベクトル束と複素係数の約束、切断のソボレフ空間 $H^{s}$（$s\ge0$ は整数）、微分作用素・楕円型作用素・形式的転置と形式的随伴は \ref{gl:sec-sp-notation} のとおり。
+- $\Lambda^{k}\defeq\Lambda^{k}T^{*}M$ に \ref{lin:exterior-inner-product.1} の内積をファイバー計量として入れ、$L^{2}(\Lambda^{k})\defeq L^{2}(M;\Lambda^{k})$, $H^{s}(\Lambda^{k})\defeq H^{s}(M;\Lambda^{k})$ と略す。$\Omega^{k}(M)$ は滑らかな（実の）$k$ 形式の全体（\ref{mfd:differential-form}）、$\Omega^{k}_{\mathbb{C}}(M)\defeq\Gamma(M,\Lambda^{k})=\Omega^{k}(M)\oplus i\,\Omega^{k}(M)$ は複素係数の滑らかな $k$ 形式の全体で、$\Omega^{-1}=\Omega^{n+1}=0$ とする。$L^{2}$ の内積を $(\alpha,\beta)\defeq\int_{M}h(\alpha,\bar{\beta})\,d\mu_{g}$、ノルムを $\|\alpha\|_{L^{2}}$ と書く。実の形式については $(\alpha,\beta)=\int_{M}\alpha\wedge\star\beta$ で、これは \ref{riem:codifferential-adjoint} の内積である（\ref{gl:rm-integral-formulas.3}）。
+- 外微分 $d$、星作用素 $\star$、余微分 $\delta$、ホッジのラプラシアン $\Delta=d\delta+\delta d$ は \ref{riem:hodge-star}, \ref{riem:codifferential} のとおりで、複素線形に延ばす。これらは実の係数をもつので複素共役と可換である。複素係数の滑らかな形式についても $(d\alpha,\beta)=(\alpha,\delta\beta)$（次数の合うもの）が成り立つ（\ref{riem:codifferential-adjoint} を実部と虚部に分けて使う。\ref{gl:hodge-laplacian-spectrum} の証明の 1）。$d$, $\delta$ は $H^{s+1}$ から $H^{s}$ へ、$\Delta$ は $H^{s+2}$ から $H^{s}$ への有界作用素に延びる（\ref{gl:differential-operator-sobolev.3}）。
+- $\Delta$ は $\Lambda^{k}$ の上の $2$ 階の楕円型作用素（\ref{gl:hodge-laplacian-symbol.4}）で、形式的に自己共役で非負である（\ref{gl:hodge-laplacian-spectrum.1}）。$\mathcal{H}^{k}_{\mathbb{C}}\defeq\ker\Delta$（$\Delta u=0$ の $L^{2}$ の弱解の全体。前のページの $\mathcal{H}^{k}$ のこと）とおき、その実の元の全体 $\mathcal{H}^{k}\defeq\mathcal{H}^{k}_{\mathbb{C}}\cap\Omega^{k}(M)$ を調和 $k$ 形式の空間と呼ぶ（\ref{riem:codifferential} の調和形式のうち $k$ 次のもの。下の \ref{gl:harmonic-projection.1}）。
+- ド・ラーム・コホモロジー $H^{k}_{\mathrm{dR}}(M)$ は \ref{mfd:de-rham-cohomology} の $H^{k}(M)$ で、$b_{k}(M)\defeq\dim H^{k}_{\mathrm{dR}}(M)$ をベッチ数という（有限であることは \ref{mfd:compact-finite-dimensional}。このページでは解析的な別証明を与える）。閉形式 $\omega$ の類を $[\omega]$ と書く。
+- **選択公理**：前の系列の 1 の分割で DC、核の有限次元性で DC、像の閉性の評価で可算選択を使う点は前のページまでと同じで、このページではそれらの結果（\ref{gl:elliptic-kernel-range}, \ref{gl:elliptic-fredholm}）を通して使う。新しく使う選択は、有限次元の空間 $\mathcal{H}^{k}$ の基底を一つとることだけで、有限個の選択なので $\ZF$ で行える。
+:::
+
+## 調和形式とポアソン方程式 {#gl:sec-ho-harmonic}
+
+まず、調和形式の空間への直交射影と、三つの部分空間の直交性を確かめる。
+
+::: lemma 調和形式と調和射影 {#gl:harmonic-projection keywords="harmonic forms on a closed oriented Riemannian manifold are smooth, closed and coclosed, form a finite dimensional space stable under complex conjugation; the harmonic projection H onto harmonic forms preserves real forms and is smoothing; harmonic, exact and coexact forms are mutually L^2 orthogonal" index="調和射影|ちょうわしゃえい, 調和形式の空間|ちょうわけいしきのくうかん, 余完全形式|よかんぜんけいしき"}
+$(M,g)$ を向きづけられた閉リーマン多様体、$0\le k\le n$ とする。
+1. $\mathcal{H}^{k}_{\mathbb{C}}$ は有限次元で、滑らかな形式からなり、$h\in\mathcal{H}^{k}_{\mathbb{C}}$ であることと「$h$ は滑らかで $dh=0$ かつ $\delta h=0$」は同値である。$\mathcal{H}^{k}_{\mathbb{C}}$ は共役で閉じていて、$\mathcal{H}^{k}_{\mathbb{C}}=\mathcal{H}^{k}\oplus i\,\mathcal{H}^{k}$、$\dim_{\mathbb{R}}\mathcal{H}^{k}=\dim_{\mathbb{C}}\mathcal{H}^{k}_{\mathbb{C}}<\infty$。
+2. $L^{2}(\Lambda^{k})$ から $\mathcal{H}^{k}_{\mathbb{C}}$ への直交射影を $H$（**調和射影**）とする。$\mathcal{H}^{k}$ の実の内積についての正規直交基底 $h_{1},\dots,h_{N}$ をとると $Hf=\sum_{i}(f,h_{i})h_{i}$ で、各整数 $s\ge0$ について $f$ によらない定数 $C_{s}$ があって $\|Hf\|_{H^{s}}\le c_{s}\|f\|_{L^{2}}$。また $\overline{Hf}=H\bar{f}$ で、$H$ は $\Omega^{k}(M)$ を $\mathcal{H}^{k}$ に写す。
+3. $\alpha\in\Omega^{k-1}_{\mathbb{C}}(M)$, $\beta\in\Omega^{k+1}_{\mathbb{C}}(M)$, $h\in\mathcal{H}^{k}_{\mathbb{C}}$ について
+$$
+(d\alpha,\delta\beta)=0,\qquad(h,d\alpha)=0,\qquad(h,\delta\beta)=0.
+$$
+また滑らかな $u\in\Omega^{k}_{\mathbb{C}}(M)$ について $(\Delta u,h)=0$。
+:::
+
+::: proof
+**Step 1.** 【主張：1】有限次元であること、滑らかであること、$dh=\delta h=0$ との同値は \ref{gl:hodge-laplacian-spectrum.3} である。$h\in\mathcal{H}^{k}_{\mathbb{C}}$ は滑らかで $\Delta h=0$ なので、$\Delta$ が実の係数をもつことから $\Delta\bar{h}=\overline{\Delta h}=0$ で、$\bar{h}$ は古典解、したがって弱解（\ref{gl:formal-transpose-bundle.4}）で $\bar{h}\in\mathcal{H}^{k}_{\mathbb{C}}$。よって $\operatorname{Re}h=\frac12(h+\bar{h})$ と $\operatorname{Im}h=\frac{1}{2i}(h-\bar{h})$ は $\mathcal{H}^{k}$ に入り、$h=\operatorname{Re}h+i\operatorname{Im}h$。$\mathcal{H}^{k}\cap i\mathcal{H}^{k}$ は実でも純虚でもある形式なので $0$。$\mathcal{H}^{k}$ の（実の）基底 $e_{1},\dots,e_{N}$ は $\mathcal{H}^{k}_{\mathbb{C}}$ を複素数係数で張り、$\sum_{j}(a_{j}+ib_{j})e_{j}=0$（$a_{j},b_{j}\in\mathbb{R}$）なら実部と虚部から $\sum a_{j}e_{j}=\sum b_{j}e_{j}=0$ で $a_{j}=b_{j}=0$。よって複素の基底でもあり、次元は等しい。
+
+**Step 2.** 【主張：2】実の形式どうしの内積は実数なので、$\mathcal{H}^{k}$ は実内積空間である。その基底（有限個の選択）にグラム–シュミットの直交化を施して正規直交基底 $h_{1},\dots,h_{N}$ を作ると、Step 1 からこれは $\mathcal{H}^{k}_{\mathbb{C}}$ の正規直交基底でもある。有限次元の部分空間は閉じているので、直交射影は \ref{fa:orthogonal-decomposition.1} の点で、$f-\sum_{i}(f,h_{i})h_{i}$ が各 $h_{j}$ と直交することから $Hf=\sum_{i}(f,h_{i})h_{i}$。コーシー–シュワルツの不等式から $\|Hf\|_{H^{s}}\le\sum_{i}|(f,h_{i})|\,\|h_{i}\|_{H^{s}}\le\bigl(\sum_{i}\|h_{i}\|_{H^{s}}\bigr)\|f\|_{L^{2}}$（$h_{i}$ は滑らかなので $\|h_{i}\|_{H^{s}}<\infty$）。$h_{i}$ は実なので $\overline{(f,h_{i})}=\int h(\bar{f},h_{i})\,d\mu_{g}=(\bar{f},h_{i})$ で、$\overline{Hf}=\sum_{i}(\bar{f},h_{i})h_{i}=H\bar{f}$。$f$ が実なら係数 $(f,h_{i})$ は実数で、$Hf\in\mathcal{H}^{k}$。
+
+**Step 3.** 【主張：3】随伴性を使う。$(d\alpha,\delta\beta)=(d(d\alpha),\beta)=0$（$d\alpha\in\Omega^{k}_{\mathbb{C}}$ と $\beta$ に随伴性、$dd=0$）。$(h,d\alpha)=(\delta h,\alpha)=0$、$(h,\delta\beta)=(dh,\beta)=0$（1 から $dh=\delta h=0$）。最後の式は形式的自己共役性から $(\Delta u,h)=(u,\Delta h)=0$。
+:::
+
+関数（$k=0$）では向きを使わずに同じことができる。閉多様体の上のポアソン方程式の可解性は、\ref{gl:closed-manifold-laplacian.5} で必要条件だけを示し、十分性をここまで持ち越していた。
+
+::: corollary 閉多様体上のポアソン方程式 {#gl:poisson-closed-manifold keywords="solvability of the Poisson equation on a closed connected Riemannian manifold (orientation not needed): Delta u = f has a solution u in H^{s+2} iff the integral of f vanishes, unique up to constants, smooth when f is smooth" index="ポアソン方程式の可解性（閉多様体）|ぽあそんほうていしきのかかいせいへいたようたい, ポアソン方程式（閉多様体）|ぽあそんほうていしきへいたようたい"}
+$M$ を連結な閉多様体、$g$ をリーマン計量とする（向きは仮定しない）。整数 $s\ge0$ と $f\in H^{s}(M)$ について次が成り立つ。
+1. $\Delta u=f$ となる $u\in H^{s+2}(M)$ があることと、$\int_{M}f\,d\mu_{g}=0$ は同値である。
+2. 1 の解は定数の差を除いてただ一つで、$f$ が滑らかなら $u$ も滑らかである。$f$ が実数値なら $u$ も実数値にとれる。
+:::
+
+::: proof
+**Step 1.** 【主張：$\ker\Delta$ は定数関数の全体】関数の上のラプラシアンは形式的に自己共役で非負な $2$ 階の楕円型作用素である（\ref{gl:sec-sp-resolvent} の冒頭。向きは使わない）。$u\in\ker\Delta$ は \ref{gl:elliptic-kernel-range.1} から滑らかで $\Delta u=0$ を古典的に満たし、実部と虚部も $\Delta$ の実の係数から $\Delta$ で $0$ になるので、\ref{gl:closed-manifold-laplacian.4} から定数である。逆に定数は滑らかで $\Delta1=0$ なので弱解である。
+
+**Step 2.** 【主張：1】\ref{gl:elliptic-fredholm.2} を $P=\Delta$（$P^{*}=P$）に使うと、$f\in\Delta(H^{s+2}(M))$ であることと、すべての $w\in\ker\Delta$ について $(f,w)=0$ であることは同値である。Step 1 から $w$ は定数 $c$ で、$(f,c)=\bar{c}\int_{M}f\,d\mu_{g}$ なので、条件は $\int_{M}f\,d\mu_{g}=0$ と同値である。
+
+**Step 3.** 【主張：2】二つの解の差 $v$ は $\Delta v=0$ を満たす $H^{s+2}$ の元で、\ref{gl:elliptic-kernel-range.1} と Step 1 から定数である。$f$ が滑らかなら、$u\in H^{2}$ は \ref{gl:formal-transpose-bundle.4} から $\Delta u=f$ の弱解なので、\ref{gl:elliptic-smooth} から滑らかな代表元をもつ。$f$ が実数値なら、$\Delta$ の係数が実なので $\Delta(\operatorname{Re}u)=\operatorname{Re}f=f$ で、$\operatorname{Re}u$ も解である。
+
+::: hypcheck
+- **連結性**：Step 1 で核が定数だけであることに使った。$M$ が $c$ 個の連結成分 $M_{1},\dots,M_{c}$ をもつなら、核は各成分の上で定数の関数の全体（$c$ 次元）で、条件は「各成分の上で $\int_{M_{j}}f=0$」の $c$ 個になる。
+- **閉多様体であること**：\ref{gl:elliptic-fredholm} とその前提（レリッヒの定理）を通して使った。$\mathbb{R}^{n}$ では $\int f=0$ でも $L^{2}$ の範囲で解けるとは限らない（\ref{gl:elliptic-fredholm} の hypcheck）。境界つきの多様体では、境界条件を課さないと解は一意でない。
+- **向き**：使わなかった。関数のラプラシアンの楕円性（\ref{gl:principal-symbol-examples.3}）と \ref{gl:closed-manifold-laplacian} は、リーマン測度だけで書けて向きを使わない。
+- **公理**：\ref{gl:elliptic-fredholm} を通して DC と可算選択を使う。新しい選択は使わない。
+:::
+:::
+
+形式の上でも、$\Delta u=f$ が滑らかな解をもつ条件は $f\perp\mathcal{H}^{k}$ である（下の \ref{gl:hodge-decomposition.3}）。関数の場合は、$\mathcal{H}^{0}$ が定数関数の全体なので、条件が $\int f=0$ になる。
+
+## グリーン作用素 {#gl:sec-ho-green}
+
+$\Delta$ は $\mathcal{H}^{k}_{\mathbb{C}}$ の上で $0$ なので逆をもたないが、その直交補空間の上では逆が作れる。
+
+::: proposition グリーン作用素 {#gl:green-operator keywords="Green operator of the Hodge Laplacian on a closed oriented Riemannian manifold: G f is the unique u in H^2 orthogonal to harmonic forms with Delta u = f - H f; G maps H^s to H^{s+2} boundedly, preserves smooth and real forms, f = H f + Delta G f, G is compact self-adjoint nonnegative, G phi_j = phi_j / lambda_j, G commutes with d and delta" index="グリーン作用素|ぐりーんさようそ, ホッジのラプラシアンのグリーン作用素|ほっじのらぷらしあんのぐりーんさようそ"}
+$(M,g)$ を向きづけられた閉リーマン多様体、$0\le k\le n$、$H$ を $\Lambda^{k}$ の上の調和射影（\ref{gl:harmonic-projection.2}）とする。
+1. 各 $f\in L^{2}(\Lambda^{k})$ について、$u\in H^{2}(\Lambda^{k})$ で $u\perp\mathcal{H}^{k}_{\mathbb{C}}$ かつ $\Delta u=f-Hf$ となるものがただ一つある。これを $Gf$ と書き、$G$ を $\Lambda^{k}$ の上の**グリーン作用素**という。
+2. 各整数 $s\ge0$ について定数 $C_{s}$ があって、$f\in H^{s}(\Lambda^{k})$ なら $Gf\in H^{s+2}(\Lambda^{k})$、$\|Gf\|_{H^{s+2}}\le C_{s}\|f\|_{H^{s}}$。$f$ が滑らかなら $Gf$ も滑らかで、$\overline{Gf}=G\bar{f}$、とくに $G$ は $\Omega^{k}(M)$ を $\Omega^{k}(M)$ に写す。
+3. $f\in L^{2}(\Lambda^{k})$ について $f=Hf+\Delta Gf$、$u\in H^{2}(\Lambda^{k})$ について $u=Hu+G\Delta u$。また $HG=GH=0$。
+4. $G$ は $L^{2}(\Lambda^{k})$ の上のコンパクトな自己共役作用素で、$(Gf,f)\ge0$。$\Delta$ の滑らかな固有形式からなる正規直交基底 $(\varphi_{j})$（$\Delta\varphi_{j}=\lambda_{j}\varphi_{j}$、\ref{gl:hodge-laplacian-spectrum.2}）について、$\lambda_{j}=0$ なら $G\varphi_{j}=0$、$\lambda_{j}>0$ なら $G\varphi_{j}=\lambda_{j}^{-1}\varphi_{j}$。
+5. 滑らかな $\omega\in\Omega^{k}_{\mathbb{C}}(M)$ について $dG\omega=Gd\omega$, $\delta G\omega=G\delta\omega$（右辺の $G$ はそれぞれ $\Lambda^{k+1}$, $\Lambda^{k-1}$ の上のグリーン作用素）。
+:::
+
+::: intuition
+ラプラシアンは調和形式の方向をつぶしてしまうので、そのままでは逆が作れない。そこで、右辺から調和形式の成分を取り除き、解も調和形式と直交するものに限ると、方程式はただ一通りに解ける。その解を対応させる作用素がグリーン作用素で、固有値で言えば「$0$ でない固有値をすべて逆数にし、$0$ の固有値は $0$ のままにする」作用素である。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$f-Hf\perp\mathcal{H}^{k}_{\mathbb{C}}$ で、$\Delta^{*}=\Delta$ から $\ker\Delta^{*}=\mathcal{H}^{k}_{\mathbb{C}}$ なので、\ref{gl:elliptic-fredholm.2}（$s=0$、(c) ⇒ (a)）から $v\in H^{2}$ で $\Delta v=f-Hf$ となるものがある。$Hv$ は滑らかで $\Delta Hv=0$ なので、$u\defeq v-Hv$ は $H^{2}$ に入り、$\Delta u=f-Hf$、$u\perp\mathcal{H}^{k}_{\mathbb{C}}$。$u'$ も同じ性質をもてば、$\Delta(u-u')=0$ で、$u-u'$ は有界作用素 $\Delta\colon H^{2}\to L^{2}$ の核、つまり $\mathcal{H}^{k}_{\mathbb{C}}$ に入る（\ref{gl:elliptic-kernel-range.1}）。これが $\mathcal{H}^{k}_{\mathbb{C}}$ と直交するので $u=u'$。
+
+**Step 2.** 【主張：2 の評価】$f\in H^{s}$ とする。$Hf$ は滑らかなので $f-Hf\in H^{s}$ で、$\|f-Hf\|_{H^{s}}\le\|f\|_{H^{s}}+c_{s}\|f\|_{L^{2}}\le C'\|f\|_{H^{s}}$（\ref{gl:harmonic-projection.2} と、$L^{2}$ と $H^{0}$ のノルムの同値性 \ref{gl:sobolev-sections-properties.4}、$\|\cdot\|_{H^{0}}\le\|\cdot\|_{H^{s}}$）。\ref{gl:elliptic-fredholm.2} から $v\in H^{s+2}$ で $\Delta v=f-Hf$ となるものがあり、$H^{s+2}$ の内積で $\ker\Delta=\mathcal{H}^{k}_{\mathbb{C}}$ に直交する成分 $w$ をとると（$\mathcal{H}^{k}_{\mathbb{C}}$ は有限次元なので閉、\ref{fa:orthogonal-decomposition.2}）、$v-w\in\ker\Delta$ から $\Delta w=f-Hf$ で、\ref{gl:elliptic-kernel-range.2} から $\|w\|_{H^{s+2}}\le C\|f-Hf\|_{H^{s}}$。$w-Hw$ は $H^{2}$ に入り、$\mathcal{H}^{k}_{\mathbb{C}}$ と（$L^{2}$ で）直交し、$\Delta(w-Hw)=f-Hf$ なので、1 の一意性から $Gf=w-Hw$。よって
+$$
+\|Gf\|_{H^{s+2}}\le\|w\|_{H^{s+2}}+c_{s+2}\|w\|_{L^{2}}\le C''\|w\|_{H^{s+2}}\le C''CC'\|f\|_{H^{s}}.
+$$
+
+**Step 3.** 【主張：2 の残り】$f$ が滑らかなら、$Gf\in H^{2}$ は \ref{gl:formal-transpose-bundle.4} から $\Delta u=f-Hf$ の弱解で、右辺は滑らかなので \ref{gl:elliptic-smooth} から $Gf$ は滑らかである。共役については、$\overline{Gf}\in H^{2}$ は $\mathcal{H}^{k}_{\mathbb{C}}$ と直交し（$(\overline{Gf},h)=\overline{(Gf,\bar{h})}$ と、\ref{gl:harmonic-projection.1} から $\bar{h}\in\mathcal{H}^{k}_{\mathbb{C}}$）、$\Delta$ は実の係数なので（滑らかな形式で可換なことと、稠密性 \ref{gl:sobolev-sections-properties.3} と $\Delta\colon H^{2}\to L^{2}$ の連続性から）$\Delta\overline{Gf}=\overline{\Delta Gf}=\overline{f-Hf}=\bar{f}-H\bar{f}$（\ref{gl:harmonic-projection.2}）。1 の一意性から $\overline{Gf}=G\bar{f}$。$f$ が実なら $\overline{Gf}=Gf$ で、$Gf$ は実である。
+
+**Step 4.** 【主張：3】最初の式は定義そのものである。$u\in H^{2}$ について $v\defeq u-Hu$ は $H^{2}$ に入り、$\mathcal{H}^{k}_{\mathbb{C}}$ と直交し、$\Delta v=\Delta u$。一方 \ref{gl:elliptic-resolvent.1} から $(\Delta u,h)=(u,\Delta h)=0$（$h\in\mathcal{H}^{k}_{\mathbb{C}}$）なので $H\Delta u=0$、つまり $\Delta v=\Delta u-H\Delta u$。1 の一意性から $v=G\Delta u$。$Gf\perp\mathcal{H}^{k}_{\mathbb{C}}$ から $HG=0$。$Hf$ については $Hf-H(Hf)=0$ なので、1 の $u=0$ が条件を満たし、$GHf=0$。
+
+**Step 5.** 【主張：$G$ は自己共役で $(Gf,f)\ge0$、コンパクト】$f,f'\in L^{2}$ について、3 と $Gf\perp\mathcal{H}^{k}_{\mathbb{C}}$、\ref{gl:elliptic-resolvent.1}（$H^{2}$ での対称性）から
+$$
+(Gf,f')=(Gf,Hf'+\Delta Gf')=(Gf,\Delta Gf')=(\Delta Gf,Gf')=(f-Hf,Gf')=(f,Gf').
+$$
+$f'=f$ として $(Gf,f)=(Gf,\Delta Gf)\ge0$（\ref{gl:elliptic-resolvent.1}）。2（$s=0$）とノルムの同値性から $G$ は $L^{2}$ から $H^{2}$ への有界作用素で、$L^{2}$ の有界列 $(f_{i})$ の像 $(Gf_{i})$ は $H^{2}$ で有界、\ref{gl:rellich-sections}（$a=2$, $b=0$）から $L^{2}$ で収束する部分列をもつ。よって $G$ はコンパクトである（\ref{fa:compact-operator}）。
+
+**Step 6.** 【主張：4 の固有形式の式】\ref{gl:elliptic-spectral-decomposition.2} から $\mathcal{H}^{k}_{\mathbb{C}}=\ker\Delta$ は $\{\varphi_{j}:\lambda_{j}=0\}$ の張る空間である。$\lambda_{j}=0$ なら $H\varphi_{j}=\varphi_{j}$ で、3 から $G\varphi_{j}=GH\varphi_{j}=0$。$\lambda_{j}>0$ なら $\varphi_{j}$ は正規直交性から $\mathcal{H}^{k}_{\mathbb{C}}$ と直交し、$H\varphi_{j}=0$。$\lambda_{j}^{-1}\varphi_{j}$ は滑らかで $\mathcal{H}^{k}_{\mathbb{C}}$ と直交し、$\Delta(\lambda_{j}^{-1}\varphi_{j})=\varphi_{j}=\varphi_{j}-H\varphi_{j}$ なので、1 の一意性から $G\varphi_{j}=\lambda_{j}^{-1}\varphi_{j}$。
+
+**Step 7.** 【主張：5】$u\defeq G\omega$ は 2 から滑らかである。$du$ は滑らかで、$\Delta d=d\delta d=d\Delta$（$dd=0$）から $\Delta(du)=d\Delta u=d(\omega-H\omega)=d\omega$（$H\omega$ は閉形式）。\ref{gl:harmonic-projection.3} から $du\perp\mathcal{H}^{k+1}_{\mathbb{C}}$、また $d\omega\perp\mathcal{H}^{k+1}_{\mathbb{C}}$ なので $H(d\omega)=0$。よって $du$ は $\Lambda^{k+1}$ の上の 1 の条件「$\Delta(du)=d\omega-H(d\omega)$、$du\perp\mathcal{H}^{k+1}_{\mathbb{C}}$」を満たし、一意性から $du=G(d\omega)$。$\delta$ についても、$\Delta\delta=\delta d\delta=\delta\Delta$（$\delta\delta=0$）、$\delta H\omega=0$、$\delta u\perp\mathcal{H}^{k-1}_{\mathbb{C}}$、$\delta\omega\perp\mathcal{H}^{k-1}_{\mathbb{C}}$ から同じ議論で $\delta u=G(\delta\omega)$。
+
+::: hypcheck
+- **楕円性**：Step 1・2 でフレドホルム性と核の評価（\ref{gl:elliptic-fredholm}, \ref{gl:elliptic-kernel-range}）に、Step 3 で正則性に使った。
+- **形式的自己共役性と非負性**：Step 1 で $\ker\Delta^{*}=\ker\Delta$ に、Step 4・5 で $H^{2}$ での対称性に使った。非負性は 4 の $(Gf,f)\ge0$ にだけ使った。
+- **閉多様体であること**：前のページの結果を通して、また Step 5 のレリッヒの定理に使った。$\mathbb{R}^{n}$ では関数の上の $\Delta$ は単射だが、$L^{2}$ の上の有界な逆をもたない（\ref{gl:elliptic-kernel-range} の hypcheck）。
+- **$d$, $\delta$ が $\Delta$ と可換であること**：Step 7 だけで使った。一般に、$\Delta$ と可換で調和形式を調和形式に写す微分作用素は、同じ議論で $G$ と可換になる。
+- **公理**：前の結果を通した DC と可算選択のほか、$\mathcal{H}^{k}$ の基底（有限個の選択）だけを使う。
+:::
+:::
+
+::: example
+平坦トーラス $T^{n}$ の関数（$k=0$）では、$\{(2\pi)^{-n/2}e_{m}\}$ が固有関数の正規直交基底で $\Delta e_{m}=|m|^{2}e_{m}$（\ref{gl:spectrum-torus}）。4 から、$f\in L^{2}(T^{n})$ について
+$$
+Hf=\hat{f}(0),\qquad Gf=\sum_{m\neq0}\frac{\hat{f}(m)}{|m|^{2}}\,e_{m}
+$$
+（$L^{2}$ の収束）。つまり $G$ はフーリエ係数に $|m|^{-2}$ を掛け、平均を $0$ にする作用素で、$\Delta Gf=f-\hat{f}(0)$ は「$f$ から平均を引いたもの」である。
+:::
+
+::: supplement
+**前提を変えると.** $\mathbb{R}^{n}$（$n\ge3$）では、関数の上のラプラシアンの逆は**ニュートン・ポテンシャル** $u=\Gamma*f$（$\Gamma(x)=c_{n}|x|^{2-n}$、$c_{n}>0$ は定数）で与えられるが、これは $L^{2}$ の上の有界作用素ではなく（フーリエ乗数 $(4\pi^{2}|\xi|^{2})^{-1}$ が $\xi\to0$ で発散する）、$f$ に減衰を課して初めて意味をもつ。閉多様体では $\Delta$ の固有値が $0$ を除いて正の数 $\lambda_{\min}>0$ 以上にあるので、$\|G\|=\lambda_{\min}^{-1}$ の有界な作用素になる（4 と \ref{fa:orthonormal-basis} から）。境界つきの領域では、ディリクレ条件を課すと核が $0$ になり、射影 $H$ なしに解作用素が作れる（\see{fa:dirichlet-eigenfunctions}）。
+
+**似た定理.** 有限次元では、エルミート行列 $A$ の**ムーア–ペンローズの擬逆行列** $A^{+}$ が同じ役割をもつ：$A^{+}$ は $\ker A$ の上で $0$、$(\ker A)^{\perp}$ の上で $A$ の逆で、$I=P_{\ker A}+AA^{+}$ が 3 の式 $f=Hf+\Delta Gf$ にあたる。グリーン作用素は積分核（**グリーン関数**）$G(x,y)$ で $Gf(x)=\int G(x,y)f(y)\,d\mu_{g}(y)$ と書け、対角線の近くで $\mathbb{R}^{n}$ のニュートン・ポテンシャルと同じ特異性をもつことが知られている（ここでは証明しない）。
+
+**高い視点：壊れた鍵盤を外した逆.** $\Delta$ を各固有振動（\ref{gl:elliptic-spectral-decomposition}）の音量を $\lambda_{j}$ 倍する装置と思うと、$\lambda_{j}=0$ の鍵盤（調和形式）だけは音が出ないので、装置全体を逆に回すことはできない。グリーン作用素は、その鳴らない鍵盤を外したうえで、残りの鍵盤の音量を $\lambda_{j}^{-1}$ 倍する逆回しの装置である。外した鍵盤の音（調和成分）は射影 $H$ が別に拾うので、$f=Hf+\Delta Gf$ のように、元の音が過不足なく再現される。
+:::
+
+## ホッジ分解 {#gl:sec-ho-decomposition}
+
+::: theorem ホッジ分解 {#gl:hodge-decomposition refname="ホッジ分解定理" keywords="Hodge decomposition on a closed oriented Riemannian manifold: Omega^k = H^k + d Omega^{k-1} + delta Omega^{k+1}, L^2 orthogonal; omega = H omega + d delta G omega + delta d G omega; closed forms = harmonic + exact, coclosed forms = harmonic + coexact; the image of Delta is the orthogonal complement of harmonic forms; L^2 version with closures" index="ホッジ分解|ほっじぶんかい, ホッジ分解定理|ほっじぶんかいていり"}
+$(M,g)$ を向きづけられた閉リーマン多様体、$0\le k\le n$ とし、$H$, $G$ を $\Lambda^{k}$ の上の調和射影とグリーン作用素とする。
+1. $\Omega^{k}(M)=\mathcal{H}^{k}\oplus d\Omega^{k-1}(M)\oplus\delta\Omega^{k+1}(M)$ で、三つの部分空間は $L^{2}$ の内積について互いに直交する。$\omega\in\Omega^{k}(M)$ の分解は
+$$
+\omega=H\omega+d(\delta G\omega)+\delta(dG\omega).
+$$
+2. $\{\omega\in\Omega^{k}(M):d\omega=0\}=\mathcal{H}^{k}\oplus d\Omega^{k-1}(M)$、$\{\omega\in\Omega^{k}(M):\delta\omega=0\}=\mathcal{H}^{k}\oplus\delta\Omega^{k+1}(M)$。
+3. $\Delta\Omega^{k}(M)=\{\omega\in\Omega^{k}(M):\omega\perp\mathcal{H}^{k}\}$ で、$\Omega^{k}(M)=\mathcal{H}^{k}\oplus\Delta\Omega^{k}(M)$。とくに滑らかな $\omega$ について、$\Delta u=\omega$ となる滑らかな $u$ があることと $\omega\perp\mathcal{H}^{k}$ は同値で、そのとき $u=G\omega$ は解の一つである。
+4. $L^{2}(\Lambda^{k})=\mathcal{H}^{k}_{\mathbb{C}}\oplus\overline{d\Omega^{k-1}_{\mathbb{C}}(M)}\oplus\overline{\delta\Omega^{k+1}_{\mathbb{C}}(M)}$（閉包は $L^{2}$ でとる。互いに直交する閉部分空間の直和）。
+
+1〜3 は複素係数の $\Omega^{k}_{\mathbb{C}}$, $\mathcal{H}^{k}_{\mathbb{C}}$ でも同じ形で成り立つ。
+:::
+
+::: intuition
+閉じた多様体の上の微分形式は、「何かの外微分になっている部分」「何かの余微分になっている部分」「どちらでもなく、外微分も余微分も $0$ の調和な部分」の三つに、互いに直交するようにただ一通りに分けられる。外微分が $0$ の形式（閉形式）は、そのうち調和な部分と外微分の部分だけからなる。
+:::
+
+::: example
+$\mathbb{R}^{3}$ のベクトル解析の言葉では、$k=1$ の分解は、ベクトル場を「勾配」「回転」「どちらでもない部分」に分けることにあたる。平坦トーラス $T^{3}$ では、$1$ 形式 $X^{\flat}$ の $d\Omega^{0}$ の成分は勾配場、$\delta\Omega^{2}$ の成分は発散が $0$ の場（$\delta X^{\flat}=-\operatorname{div}X$、\ref{riem:laplace-beltrami.1}）のうち回転で書けるもの、調和な成分は定数ベクトル場（次のページで示す）で、三次元トーラスを一様に流れる流れである。星形領域の上で同じことを述べたのが \see{vec:helmholtz-decomposition} で、そこには調和な成分が現れない（星形領域のコホモロジーは自明）。
+:::
+
+::: proof
+**Step 1.** 【主張：三つの部分空間は互いに直交し、和は直和】直交性は \ref{gl:harmonic-projection.3} である。$h+d\alpha+\delta\beta=0$（$h\in\mathcal{H}^{k}$ など）なら、$h$ との内積をとると直交性から $\|h\|_{L^{2}}^{2}=0$、同様に $\|d\alpha\|_{L^{2}}^{2}=\|\delta\beta\|_{L^{2}}^{2}=0$ で、どれも $0$（滑らかな形式の $L^{2}$ ノルムが $0$ なら形式は $0$）。
+
+**Step 2.** 【主張：1 の分解の式】$\omega\in\Omega^{k}(M)$ とする。\ref{gl:green-operator.2} から $G\omega\in\Omega^{k}(M)$ なので、$\delta G\omega\in\Omega^{k-1}(M)$, $dG\omega\in\Omega^{k+1}(M)$。\ref{gl:green-operator.3} と $\Delta=d\delta+\delta d$ から
+$$
+\omega=H\omega+\Delta G\omega=H\omega+d(\delta G\omega)+\delta(dG\omega),
+$$
+で、\ref{gl:harmonic-projection.2} から $H\omega\in\mathcal{H}^{k}$。Step 1 と合わせて 1 が成り立つ。
+
+**Step 3.** 【主張：2】$d\omega=0$ なら、\ref{gl:green-operator.5} から $dG\omega=Gd\omega=0$ で、Step 2 の式は $\omega=H\omega+d(\delta G\omega)\in\mathcal{H}^{k}\oplus d\Omega^{k-1}$ になる。逆に調和形式は閉で（\ref{gl:harmonic-projection.1}）、$d(d\alpha)=0$ なので、右辺は閉形式からなる。$\delta\omega=0$ なら $\delta G\omega=G\delta\omega=0$ で $\omega=H\omega+\delta(dG\omega)$、逆も $\delta h=0$, $\delta\delta=0$ から。
+
+**Step 4.** 【主張：3】滑らかな $u$ について $\Delta u\perp\mathcal{H}^{k}_{\mathbb{C}}$（\ref{gl:harmonic-projection.3}）。逆に $\omega\in\Omega^{k}(M)$ が $\mathcal{H}^{k}$ と直交すれば、\ref{gl:harmonic-projection.1} から $\mathcal{H}^{k}_{\mathbb{C}}=\mathcal{H}^{k}+i\mathcal{H}^{k}$ とも直交し、$H\omega=0$。よって $\omega=\Delta(G\omega)$ で、$G\omega\in\Omega^{k}(M)$。任意の $\omega$ は $H\omega+(\omega-H\omega)$ と分かれ、$\omega-H\omega\perp\mathcal{H}^{k}$ なので、$\Omega^{k}=\mathcal{H}^{k}+\Delta\Omega^{k}$ で、和は直交するので直和。
+
+**Step 5.** 【主張：4】$V\defeq\overline{d\Omega^{k-1}_{\mathbb{C}}}$, $W\defeq\overline{\delta\Omega^{k+1}_{\mathbb{C}}}$ とおく。内積の連続性と \ref{gl:harmonic-projection.3} から $\mathcal{H}^{k}_{\mathbb{C}}$, $V$, $W$ は互いに直交する。$S\defeq\mathcal{H}^{k}_{\mathbb{C}}+V+W$ は閉じている：$s_{i}=a_{i}+v_{i}+w_{i}\to s$ なら、ピタゴラスの等式 $\|s_{i}-s_{j}\|^{2}=\|a_{i}-a_{j}\|^{2}+\|v_{i}-v_{j}\|^{2}+\|w_{i}-w_{j}\|^{2}$ から各成分がコーシー列で、閉部分空間 $\mathcal{H}^{k}_{\mathbb{C}}$（有限次元）, $V$, $W$ の中の極限をもち、$s$ はその和である。1 を実部と虚部に使うと $\Omega^{k}_{\mathbb{C}}\subset S$ で、滑らかな形式は $L^{2}(\Lambda^{k})$ で稠密（\ref{gl:sobolev-sections-properties.3} の $k=0$ とノルムの同値性 \ref{gl:sobolev-sections-properties.4}）なので、$S=L^{2}(\Lambda^{k})$。直和であることは Step 1 と同じく直交性から。
+
+::: hypcheck
+- **閉多様体であること**：随伴性 $(d\alpha,\beta)=(\alpha,\delta\beta)$（境界項が消えること、\ref{riem:codifferential-adjoint}）を通して Step 1 の直交性に、グリーン作用素の存在（フレドホルム性）を通して Step 2 に使った。外すと偽：閉円板 $D\subset\mathbb{R}^{2}$ では、調和関数 $x$ の微分 $dx$ は完全形式で、$\delta dx=\Delta x=0$, $d(dx)=0$ から調和でもあり、和は直和にならない。$\mathbb{R}^{n}$ では、像が閉じず、4 の閉包を外せない。
+- **向き**：$\star$ と $\delta$ の定義を通して使った。向き付けを仮定しない場合は、ホッジの定理の後の補足を見よ。
+- **計量の滑らかさ**：$\Delta$ が滑らかな係数の楕円型作用素であることに使った。
+- **公理**：\ref{gl:green-operator} を通して前の結果の DC・可算選択と、有限個の選択を使う。Step 5 は選択を使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 境界つきのコンパクトなリーマン多様体では、境界条件をつけた形の分解（「絶対」境界条件と「相対」境界条件。**ホッジ–モーリー–フリードリクス分解**と呼ばれる）が成り立ち、調和形式の空間は相対・絶対のド・ラーム・コホモロジーと同型になることが知られている（ここでは証明しない）。上の円板の例は、境界条件なしでは $\mathcal{H}^{k}$ が無限次元になることを示している。完備な非コンパクト多様体では、台がコンパクトな形式 $\Omega^{k}_{c}$ を使って閉包をとった 4 の形の分解が成り立つことが知られているが（ここでは証明しない）、$L^{2}$ の調和形式の空間はド・ラーム・コホモロジーと一般に一致しない。たとえば $\mathbb{R}^{n}$ には $0$ でない $L^{2}$ の調和関数がない（\ref{gl:elliptic-spectral-decomposition} の hypcheck の議論で $\lambda=0$ とする）が、$H^{0}_{\mathrm{dR}}(\mathbb{R}^{n})=\mathbb{R}$ である。
+
+**似た定理.** 有限次元の実内積空間の複体 $C^{k-1}\xrightarrow{d}C^{k}\xrightarrow{d}C^{k+1}$（$dd=0$）では、随伴 $d^{*}$ と $L=dd^{*}+d^{*}d$ について $C^{k}=\ker L\oplus\operatorname{im}d\oplus\operatorname{im}d^{*}$ が、次元の数え上げだけで成り立つ（\ref{gl:prob-ho-finite-hodge}）。グラフ（$C^{0}\to C^{1}$ だけの複体）では、辺の上の流れが「電位差から来る流れ」と「どの頂点でも湧き出しのない循環」に直交分解されることになり、電気回路のキルヒホッフの法則の背後にある構造として知られている。ホッジ分解は、その無限次元版を楕円型の評価によって正当化したものである。$\mathbb{R}^{3}$ のヘルムホルツ分解（\see{vec:helmholtz-decomposition}）は $k=1$ の場合の古典的な形である。
+
+**高い視点：三方向への直交射影.** $\Omega^{k}$ の中で、$d\Omega^{k-1}$ は「位置エネルギーから来る」形式、$\delta\Omega^{k+1}$ は「渦から来る」形式で、この二つは計量の下で直角に交わる。両者のどちらにも直交する残りの方向は、局所的な原因（湧き出しや渦）を何ももたないのに消えない形式で、その数が多様体の「穴」の数（ベッチ数）を数えていることが、次のホッジの定理の内容である。地形にたとえれば、斜面を下る流れ（勾配）と、渦を巻く流れ（回転）を取り除いても残る流れは、ドーナツの穴を一周する川のように、地形そのものの形が生む流れである。
+:::
+
+## ホッジの定理 {#gl:sec-ho-theorem}
+
+::: theorem ホッジの定理 {#gl:hodge-theorem refname="ホッジの定理" keywords="Hodge theorem: on a closed oriented Riemannian manifold every de Rham cohomology class contains exactly one harmonic form, namely H omega; H^k_dR(M) is isomorphic to the space of harmonic k-forms, hence finite dimensional with b_k = dim H^k; the harmonic representative minimizes the L^2 norm in its class" index="ホッジの定理|ほっじのていり, 調和代表元|ちょうわだいひょうげん, 調和形式とド・ラーム・コホモロジー|ちょうわけいしきとどらーむこほもろじー"}
+$(M,g)$ を向きづけられた閉リーマン多様体、$0\le k\le n$ とする。
+1. 各ド・ラーム・コホモロジー類 $c\in H^{k}_{\mathrm{dR}}(M)$ は、調和形式をただ一つ含む。$c=[\omega]$ なら、それは $H\omega$ である。
+2. $h\mapsto[h]$ は線形同型 $\mathcal{H}^{k}\to H^{k}_{\mathrm{dR}}(M)$ である。とくに $H^{k}_{\mathrm{dR}}(M)$ は有限次元で、$b_{k}(M)=\dim\mathcal{H}^{k}$。
+3. 閉形式 $\omega$ の類の中で、$L^{2}$ ノルムを最小にする形式は調和形式 $H\omega$ ただ一つである：すべての $\eta\in\Omega^{k-1}(M)$ について $\|H\omega\|_{L^{2}}\le\|\omega+d\eta\|_{L^{2}}$ で、等号は $\omega+d\eta=H\omega$ のときに限る。
+:::
+
+::: intuition
+閉じた多様体に計量を一つ決めると、ド・ラーム・コホモロジーの各類（閉形式を完全形式の差を除いて見たもの）の中に、ラプラシアンで $0$ になる「調和な」代表がちょうど一つある。それは類の中で一番「小さい」（二乗積分が最小の）代表である。したがって、コホモロジーを計算することと、調和形式という方程式の解を数えることは同じになる。
+:::
+
+::: example
+円周 $S^{1}=T^{1}$（平坦な計量、向きは $dt$）では、$1$ 形式 $f\,dt$ の上で $\Delta(f\,dt)=-(D_{1}^{2}f)\,dt$ なので、調和 $1$ 形式は定数倍の $dt$ だけで、$\mathcal{H}^{1}=\mathbb{R}\,dt$。ホッジの定理から $b_{1}(S^{1})=1$ で、$f\,dt$ の類の調和代表元は $H(f\,dt)=\hat{f}(0)\,dt$、つまり $f$ をその平均値 $\frac{1}{2\pi}\int_{0}^{2\pi}f$ で置き換えたものである（\ref{gl:prob-ho-circle}）。$f\,dt$ が完全であることと平均が $0$ であることが同値になり、\ref{mfd:top-de-rham} と一致する。
+:::
+
+::: proof
+**Step 1.** 【主張：各類は調和形式 $H\omega$ を含む】$c=[\omega]$、$d\omega=0$ とする。\ref{gl:hodge-decomposition.1} の式で $dG\omega=Gd\omega=0$（\ref{gl:green-operator.5}）なので $\omega=H\omega+d(\delta G\omega)$ で、$\delta G\omega\in\Omega^{k-1}(M)$ なので $[\omega]=[H\omega]$。\ref{gl:harmonic-projection.2} から $H\omega\in\mathcal{H}^{k}$。
+
+**Step 2.** 【主張：一つの類に含まれる調和形式は一つだけ】$h,h'\in\mathcal{H}^{k}$ が同じ類に入れば $h-h'=d\eta$（$\eta\in\Omega^{k-1}(M)$）。$h-h'\in\mathcal{H}^{k}$ は $d\Omega^{k-1}$ と直交する（\ref{gl:harmonic-projection.3}）ので、$\|h-h'\|_{L^{2}}^{2}=(h-h',d\eta)=0$ で、$h=h'$。
+
+**Step 3.** 【主張：2】調和形式は閉なので（\ref{gl:harmonic-projection.1}）、$h\mapsto[h]$ は $\mathcal{H}^{k}$ から $H^{k}_{\mathrm{dR}}(M)$ への線形写像として定まる。Step 1 から全射で、$[h]=0=[0]$ なら Step 2（$h'=0$）から $h=0$ なので単射。\ref{gl:harmonic-projection.1} から $\mathcal{H}^{k}$ は有限次元なので、$H^{k}_{\mathrm{dR}}(M)$ も同じ次元の有限次元空間である。
+
+**Step 4.** 【主張：3】$\omega+d\eta=H\omega+d(\delta G\omega+\eta)$ で、$H\omega\perp d\Omega^{k-1}$ なのでピタゴラスの等式から
+$$
+\begin{aligned}
+\|\omega+d\eta\|_{L^{2}}^{2}&=\|H\omega\|_{L^{2}}^{2}+\|d(\delta G\omega+\eta)\|_{L^{2}}^{2}\\
+&\ge\|H\omega\|_{L^{2}}^{2},
+\end{aligned}
+$$
+等号は $d(\delta G\omega+\eta)=0$、つまり $\omega+d\eta=H\omega$ のときに限る。
+
+::: hypcheck
+- **閉多様体であること**：Step 1 でホッジ分解（グリーン作用素の存在）に、Step 2・4 で調和形式と完全形式の直交性に使った。外すと偽：$\mathbb{R}^{n}$ では $H^{0}_{\mathrm{dR}}=\mathbb{R}$ だが $L^{2}$ の調和関数は $0$ だけで、$0$ でない定数の類には $L^{2}$ の調和代表元がない。$\mathbb{R}^{2}\setminus\{0\}$ の $d\theta$ は調和だが $L^{2}$ に入らない。
+- **向き**：$\delta$ と $\star$ の定義を通してだけ使った。下の補足のとおり、向き付け不可能でも 1・2 は成り立つ。
+- **計量**：調和形式の空間 $\mathcal{H}^{k}$ は計量によって変わるが、2 からその次元は計量によらない。Step 4 の最小性も計量で決まる $L^{2}$ ノルムについてのものである。
+- **公理**：\ref{gl:hodge-decomposition} を通した選択だけを使う。$H^{k}_{\mathrm{dR}}(M)$ の有限次元性は、ここでは \ref{mfd:compact-finite-dimensional}（有限の良い被覆）を使わずに、解析的に（レリッヒの定理を通して）得ている。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 向き付けを仮定しなくても 1・2 は成り立つ。$\delta=\pm\star d\star$ は星作用素を二回含むので、局所的に向きを選んで定めれば向きの選び方によらず、$M$ 全体の作用素になる。$M$ が連結で向き付け不可能なら、向きの二重被覆（\see{at:orientation-cover}）$\pi\colon\tilde{M}\to M$ に計量 $\pi^{*}g$ を入れると、$\tilde{M}$ は向きづけられた閉リーマン多様体で、被覆変換 $\tau$ は等長写像である。$\tau^{*}$ は $d$, $\delta$, $\Delta$ と可換なので、一意性から $\tilde{M}$ の上の $H$, $G$ とも可換で、$M$ の形式は $\tilde{M}$ の $\tau$ 不変な形式と同じものだから、$\tilde{M}$ でのホッジ分解を $\tau$ 不変な形式に制限すれば $M$ でのホッジ分解とホッジの定理が得られる（細部はここでは省く）。ただし星作用素は $M$ の上で定まらないので、次のページで示すポアンカレ双対性 $b_{k}=b_{n-k}$ は崩れる：$\mathbb{RP}^{2}$ では $b_{0}=1$, $b_{2}=0$（\ref{mfd:prob-dr-rp2}）。境界つきの場合は、境界条件をつけた調和形式が相対・絶対のコホモロジーを表す（ホッジ分解の補足）。
+
+**似た定理.** 複素多様体では、$\bar{\partial}$ とその随伴から作るラプラシアンについて同じ議論が通り、ドルボー・コホモロジーが $\bar{\partial}$ 調和形式で表される。コンパクトなケーラー多様体ではこの二つのラプラシアンが定数倍で一致し、ド・ラーム・コホモロジーの $(p,q)$ 型への分解が得られる（\see{symp:kahler-facts}。ここでは証明しない）。より一般に、楕円型の複体（$0$ でない余接ベクトルごとに主表象の列が完全になる微分作用素の複体）のコホモロジーは、同じ方法で調和な切断の空間として実現され、有限次元になることが知られている（ここでは証明しない）。\ref{mfd:de-rham-theorem} と合わせると、調和形式の空間は実係数の特異コホモロジーとも同型である。
+
+**高い視点：類の中で一番まっすぐな代表.** 閉形式の類は「どの穴をどれだけ回るか」という位相的な情報だけを決めていて、代表の選び方には完全形式の分だけの自由がある。3 は、計量を決めるとその中で $L^{2}$ ノルム（エネルギー）が最小の代表がただ一つ決まり、それが調和形式だと言っている。輪ゴムを柱にかけて縮ませると、柱を回る回数を保ったまま一番短い形に落ち着くように、調和形式は類の中でエネルギーを一番減らした「まっすぐな」形である。最小化の条件（変分の式）が $\delta\omega=0$ であり、もともと閉じているので $\Delta\omega=0$ になる。
+:::
+
+## 問題 {#gl:sec-ho-problems}
+
+::: problem {#gl:prob-ho-circle}
+円周 $S^{1}=T^{1}$ に平坦な計量と向き $dt$ を入れる（$dt$ は各座標近傍 $x_{a}$ で座標の微分。座標変換は平行移動なので大域的に定まり、$|dt|=1$ で $\mathrm{vol}_{g}=dt$）。$f\in C^{\infty}(S^{1})$ は実数値とし、$\omega\defeq f\,dt$ とする。
+1. $\delta(u\,dt)=-D_{1}u$、$\Delta(u\,dt)=-(D_{1}^{2}u)\,dt$ を示し、$\mathcal{H}^{0}=\mathbb{R}$, $\mathcal{H}^{1}=\mathbb{R}\,dt$ を確かめよ。
+2. $\Lambda^{1}$ の上の調和射影とグリーン作用素について $H\omega=\hat{f}(0)\,dt$, $G\omega=\sum_{m\neq0}m^{-2}\hat{f}(m)\,e_{m}\,dt$ を示し、$\delta G\omega=\sum_{m\neq0}(im)^{-1}\hat{f}(m)e_{m}$ を求めよ。
+3. ホッジ分解 $\omega=H\omega+d(\delta G\omega)$ を確かめ、$\delta G\omega$ が $f-\hat{f}(0)$ の原始関数のうち平均が $0$ のものであることを見よ。
+:::
+
+::: solution
+**1.** $\star1=dt$, $\star dt=1$（\ref{riem:hodge-star-properties.2}）。$n=k=1$ では $\delta$ の符号は $(-1)^{1\cdot2+1}=-1$ なので $\delta(u\,dt)=-\star d\star(u\,dt)=-\star du=-\star((D_{1}u)\,dt)=-D_{1}u$。$\Delta(u\,dt)=d\delta(u\,dt)+\delta d(u\,dt)=-d(D_{1}u)+0=-(D_{1}^{2}u)\,dt$（$2$ 形式は $0$）。関数の上では $\Delta=-D_{1}^{2}$。\ref{gl:harmonic-projection.1} から調和形式は滑らかで $d$, $\delta$ で $0$ になるので、$\mathcal{H}^{0}$ は $du=0$ の関数、つまり定数（$S^{1}$ は連結）。$u\,dt\in\mathcal{H}^{1}$ なら $\delta(u\,dt)=-D_{1}u=0$ で $u$ は定数、逆に定数の $c\,dt$ は $d$, $\delta$ で $0$。
+
+**2.** $\{(2\pi)^{-1/2}e_{m}\}$ は $L^{2}(S^{1})$ の正規直交基底（\ref{gl:torus-fourier-basis.2}）で、$|dt|=1$ なので $\{(2\pi)^{-1/2}e_{m}\,dt\}$ は $L^{2}(\Lambda^{1})$ の正規直交基底である。1 から $\Delta(e_{m}\,dt)=m^{2}e_{m}\,dt$。$f$ の展開 $f=\sum_{m}\hat{f}(m)e_{m}$（$L^{2}$ の収束）から $\omega=\sum_{m}\hat{f}(m)e_{m}\,dt$ で、\ref{gl:green-operator.4} と $G$ の連続性から $G\omega=\sum_{m\neq0}m^{-2}\hat{f}(m)e_{m}\,dt$、$\lambda=0$ の固有空間 $\mathbb{C}\,dt$ への射影が $H\omega=\hat{f}(0)\,dt$。$G\omega$ は滑らか（\ref{gl:green-operator.2}）で、係数は \ref{gl:torus-fourier-basis.3} から $\widehat{D_{1}v}(m)=im\,\hat{v}(m)$ を満たすので、$\delta G\omega=-D_{1}(\sum_{m\neq0}m^{-2}\hat{f}(m)e_{m})$ のフーリエ係数は $-im\cdot m^{-2}\hat{f}(m)=(im)^{-1}\hat{f}(m)$（$m\neq0$）、$0$（$m=0$）。
+
+**3.** $F\defeq\delta G\omega$ とおくと、$\widehat{D_{1}F}(m)=im\cdot(im)^{-1}\hat{f}(m)=\hat{f}(m)$（$m\neq0$）、$0$（$m=0$）なので、フーリエ係数の一意性（\ref{gl:torus-fourier-basis.1}）から $D_{1}F=f-\hat{f}(0)$、すなわち $dF=(f-\hat{f}(0))\,dt=\omega-H\omega$。$k=n=1$ なので $\delta(dG\omega)=0$ で、分解は $\omega=H\omega+dF$。$\hat{F}(0)=0$ なので $F$ は平均 $0$ の原始関数である。とくに $\omega$ が完全 $\iff$ $H\omega=0$ $\iff$ $\hat{f}(0)=\frac{1}{2\pi}\int_{0}^{2\pi}f=0$。
+:::
+
+::: problem {#gl:prob-ho-finite-hodge}
+有限次元の実内積空間と線形写像の列 $C^{k-1}\xrightarrow{d_{k-1}}C^{k}\xrightarrow{d_{k}}C^{k+1}$（$d_{k}d_{k-1}=0$）を考え、$d^{*}$ を随伴、$L\defeq d_{k-1}d_{k-1}^{*}+d_{k}^{*}d_{k}\colon C^{k}\to C^{k}$ とする。
+1. $\ker L=\ker d_{k}\cap\ker d_{k-1}^{*}$ を示せ。
+2. $C^{k}=\ker L\oplus\operatorname{im}d_{k-1}\oplus\operatorname{im}d_{k}^{*}$（直交直和）を示せ。
+3. $\ker L$ が商空間 $\ker d_{k}/\operatorname{im}d_{k-1}$ と同型であることを示し、ホッジの定理のどの部分にあたるかを述べよ。また、閉多様体の場合にこの議論をそのまま使えない理由を一つ挙げよ。
+:::
+
+::: solution
+**1.** $\langle Lx,x\rangle=\|d_{k-1}^{*}x\|^{2}+\|d_{k}x\|^{2}$ なので、$Lx=0$ なら $d_{k}x=0$ かつ $d_{k-1}^{*}x=0$。逆は定義から。
+
+**2.** 直交性：$\langle d_{k-1}y,d_{k}^{*}z\rangle=\langle d_{k}d_{k-1}y,z\rangle=0$、$x\in\ker L$ について $\langle x,d_{k-1}y\rangle=\langle d_{k-1}^{*}x,y\rangle=0$、$\langle x,d_{k}^{*}z\rangle=\langle d_{k}x,z\rangle=0$。和が全体であること：有限次元では部分空間 $U$ について $C^{k}=U\oplus U^{\perp}$ なので、$U\defeq\operatorname{im}d_{k-1}+\operatorname{im}d_{k}^{*}$ について $U^{\perp}=\ker L$ を示せばよい。$x$ が両方の像に直交することは、$\langle x,d_{k-1}y\rangle=\langle d_{k-1}^{*}x,y\rangle=0$（すべての $y$）と $\langle x,d_{k}^{*}z\rangle=\langle d_{k}x,z\rangle=0$（すべての $z$）、つまり $d_{k-1}^{*}x=0$ かつ $d_{k}x=0$ と同値で、1 からこれは $x\in\ker L$。
+
+**3.** 2 から $\ker d_{k}=\ker L\oplus\operatorname{im}d_{k-1}$：右辺は $\ker d_{k}$ に含まれ（$d_{k}d_{k-1}=0$ と 1）、$x\in\ker d_{k}$ を 2 で $x=a+d_{k-1}y+d_{k}^{*}z$ と分けると $0=\langle d_{k}x,z\rangle=\|d_{k}^{*}z\|^{2}$ で第 3 成分は $0$。よって $\ker L\to\ker d_{k}/\operatorname{im}d_{k-1}$, $a\mapsto a+\operatorname{im}d_{k-1}$ は同型で、これは \ref{gl:hodge-theorem.2}（と \ref{gl:hodge-decomposition.2}）にあたる。無限次元では「$(\operatorname{im}d_{k-1}+\operatorname{im}d_{k}^{*})^{\perp}=0$ なら和が全体」が成り立たない（像が閉じているとは限らず、直交補空間の直交補空間は閉包になる。\ref{fa:orthogonal-decomposition.3}）。閉多様体では、楕円型の評価とレリッヒの定理から得たグリーン作用素が、像が閉じていることと滑らかな形式の範囲で分解できることを保証している。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
