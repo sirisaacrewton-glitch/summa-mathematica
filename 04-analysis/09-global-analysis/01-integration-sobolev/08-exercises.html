@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：多様体上の積分と関数空間 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/09-global-analysis/01-integration-sobolev/08-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：多様体上の積分と関数空間 {#gl:page-exercises-function-spaces keywords="exercises, integration and Sobolev spaces on manifolds"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは、双曲円板・回転面・球面・回転トーラスの面積要素とラプラシアンの座標計算、発散定理の具体的な検算、球面上の関数の $H^{1}$ ノルムと特異点のある関数の判定、形式的転置の計算、のこぎり波と三角波のフーリエ係数によるソボレフ空間の判定と負の階数での微分、埋め込みの指数の計算とその最良性、ポアンカレ商の計算と円周上の最良のソボレフの不等式と、いくつかのページの結果を組み合わせる問題（球面上の回転対称な関数とルジャンドル多項式、トーラス上のポアソン方程式）である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#gl:sec-exfs-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。とくにラプラシアンは $\Delta=-\operatorname{div}\operatorname{grad}$ で、座標では $\Delta u=-\frac{1}{\sqrt{g}}\sum_{i,j}\partial_{i}(\sqrt{g}\,g^{ij}\partial_{j}u)$（\ref{gl:divergence-unoriented} の後の式）、$\mathbb{R}^{n}$ では $-\sum_{i}\partial_{i}^{2}$ である。
+- 部分多様体には誘導計量を入れる。単位球面 $S^{2}\subset\mathbb{R}^{3}$ では球面座標 $(\theta,\phi)\in(0,\pi)\times(0,2\pi)$ を使い、$\sqrt{g}=\sin\theta$, $g^{\theta\theta}=1$, $g^{\phi\phi}=\sin^{-2}\theta$, $g^{\theta\phi}=0$（\ref{gl:rm-examples.1}）、$\Delta$ の式は \ref{gl:laplacian-examples.1}。$x,y,z$ は座標関数の $S^{2}$ への制限で、$x=\sin\theta\cos\phi$, $y=\sin\theta\sin\phi$, $z=\cos\theta$。勾配の長さは $|\nabla f|^{2}=|\partial_{\theta}f|^{2}+\sin^{-2}\theta\,|\partial_{\phi}f|^{2}$（複素数値の $f$ は \ref{gl:sm-metric-h1} の約束）。
+- 回転トーラス $T_{R,r}$（$0<r<R$）では \ref{gl:rm-examples.3} の座標 $(u,v)$ を使い、$W\defeq R+r\cos v$ とおく：$g_{uu}=W^{2}$, $g_{vv}=r^{2}$, $g_{uv}=0$, $\sqrt{g}=rW$。
+- 上の座標近傍は、測度 $0$ の集合を除いた稠密な開集合を定義域とするので、積分は座標で計算でき、連続関数の等式は座標の中で確かめれば全体で成り立つ（\ref{gl:laplacian-examples} の冒頭と同じ）。
+- 平坦トーラス $T^{n}$、$p(t)=(e^{it_{1}},\dots,e^{it_{n}})$、$e_{m}$、フーリエ係数 $\hat{u}(m)$、ベクトル場 $D_{j}$ は \ref{gl:sec-nt-torus} のとおり。$n=1$ では関数 $u$ を $2\pi$ 周期関数 $u\circ p$ と同一視する。一周期の積分は区間の位置によらないので、$\hat{u}(m)=\frac{1}{2\pi}\int_{-\pi}^{\pi}(u\circ p)(t)e^{-imt}\,dt$ と計算してよい。
+- 閉リーマン多様体上の滑らかな関数 $u$ について $I(u)\defeq\int_{M}(|u|^{2}+|\nabla u|^{2})\,d\mu_{g}$ とおく。$I^{1/2}$ は $C^{\infty}(M)$ の上で $\|\cdot\|_{H^{1}}$ と同値なノルムである（\ref{gl:sm-metric-h1}）。
+- **選択公理**：引用する各ページの結果に含まれるもの（1 の分割の従属選択公理など）のほかには使わない。近似の列はすべて具体的に与える。
+:::
+
+## リーマン測度と Lᵖ 空間 {#gl:sec-rm-exercises}
+
+対応するページ：\ref{gl:page-riemannian-measure}
+
+::: problem ★ 基本：双曲円板の面積と円周 {#gl:ex-rm-1}
+単位円板 $D\defeq\{w\in\mathbb{R}^{2}:|w|<1\}$ に計量 $g\defeq\lambda^{2}(dw_{1}^{2}+dw_{2}^{2})$, $\lambda(w)\defeq\frac{2}{1-|w|^{2}}$ を入れる（双曲円板）。$0<a<1$ について $D_{a}\defeq\{|w|\le a\}$, $C_{a}\defeq\{|w|=a\}$ とする。
+1. $\mu_{g}(D_{a})=\dfrac{4\pi a^{2}}{1-a^{2}}$ を示し、$\mu_{g}(D)=\infty$ を導け。
+2. $C_{a}$ に誘導計量を入れたリーマン測度による全測度（円周の長さ）が $\dfrac{4\pi a}{1-a^{2}}$ であることを示せ。
+3. 線分 $\{(t,0):0<t<a\}$ の誘導計量によるリーマン測度を $\rho(a)$ とする。$\rho(a)=\log\frac{1+a}{1-a}$ を示し、1・2 の値が $4\pi\sinh^{2}\frac{\rho}{2}$, $2\pi\sinh\rho$ と書けること、面積を $\rho$ で微分すると円周になることを確かめよ。
+:::
+
+::: solution
+恒等写像は $D$ 全体を覆う座標近傍で、$g_{ij}=\lambda^{2}\delta_{ij}$ なので $\gamma=\sqrt{\det(g_{ij})}=\lambda^{2}$。
+
+**1.** \eqref{gl:eq-rm-chart} と \ref{meas:polar-radial.2}（$n=2$ で $n\omega_{n}=2\pi$）から
+$$
+\mu_{g}(D_{a})=\int_{D_{a}}\frac{4\,d\lambda}{(1-|w|^{2})^{2}}=2\pi\int_{0}^{a}\frac{4r\,dr}{(1-r^{2})^{2}}=2\pi\Bigl[\frac{2}{1-r^{2}}\Bigr]_{0}^{a}=\frac{4\pi a^{2}}{1-a^{2}}.
+$$
+$D=\bigcup_{k}D_{1-1/k}$ なので、測度の下からの連続性から $\mu_{g}(D)=\lim_{a\uparrow1}\frac{4\pi a^{2}}{1-a^{2}}=\infty$。
+
+**2.** $\psi(\phi)\defeq a(\cos\phi,\sin\phi)$ は $(0,2\pi)$ 上の単射なはめ込みで、$C_{a}\setminus\{(a,0)\}$ の上への同相写像（逆写像は偏角）なので、その逆は $C_{a}$ の座標近傍である（\ref{mfd:embedding-image-submanifold}）。誘導計量の成分は $g(\psi',\psi')=\lambda(a)^{2}|\psi'|^{2}=\lambda(a)^{2}a^{2}$ なので $\gamma=\frac{2a}{1-a^{2}}$。一点 $\{(a,0)\}$ は $0$ 次元の部分多様体なので測度 $0$（\ref{gl:rm-basic-properties.3}）で、全測度は $2\pi\cdot\frac{2a}{1-a^{2}}$。
+
+**3.** 同様に $t\mapsto(t,0)$ の逆は線分の座標近傍で、$\gamma(t)=\lambda(t,0)=\frac{2}{1-t^{2}}$ なので
+$$
+\rho(a)=\int_{0}^{a}\frac{2\,dt}{1-t^{2}}=\int_{0}^{a}\Bigl(\frac{1}{1-t}+\frac{1}{1+t}\Bigr)dt=\log\frac{1+a}{1-a}.
+$$
+$e^{\rho}=\frac{1+a}{1-a}$ から $\sinh\rho=\frac12\bigl(\frac{1+a}{1-a}-\frac{1-a}{1+a}\bigr)=\frac{2a}{1-a^{2}}$、$\cosh\rho=\frac{1+a^{2}}{1-a^{2}}$。よって円周は $2\pi\sinh\rho$、面積は $4\pi\cdot\frac{a^{2}}{1-a^{2}}=2\pi(\cosh\rho-1)=4\pi\sinh^{2}\frac{\rho}{2}$。$\frac{d}{d\rho}4\pi\sinh^{2}\frac{\rho}{2}=4\pi\sinh\frac{\rho}{2}\cosh\frac{\rho}{2}=2\pi\sinh\rho$。$\rho$ が小さいと面積 $\approx\pi\rho^{2}$、円周 $\approx2\pi\rho$ で平面と同じだが、$\rho\to\infty$ では面積と円周がどちらも $e^{\rho}$ の程度で増える。
+:::
+
+::: problem ★★ 標準：回転面の面積要素とアルキメデスの定理 {#gl:ex-rm-2}
+$-\infty\le a<b\le\infty$、$f\colon(a,b)\to(0,\infty)$ を滑らかな関数とし、$S_{f}\defeq\{(x,y,z)\in\mathbb{R}^{3}:a<z<b,\ x^{2}+y^{2}=f(z)^{2}\}$ とする。
+1. $S_{f}$ は $\mathbb{R}^{3}$ の 2 次元の部分多様体で、$\Psi(z,\phi)\defeq(f(z)\cos\phi,f(z)\sin\phi,z)$ の $(a,b)\times(0,2\pi)$ への制限の逆は座標近傍であり、$\sqrt{g}=f\sqrt{1+f'^{2}}$ であることを示せ。これから $a\le c<d\le b$ について $\mu(S_{f}\cap\{c<z<d\})=2\pi\int_{c}^{d}f\sqrt{1+f'^{2}}\,dz$ を導け。
+2. $f(z)=\sqrt{1-z^{2}}$, $(a,b)=(-1,1)$ のとき $S_{f}$ は $S^{2}$ から両極を除いたもので、ボレル可測な $G\colon(-1,1)\to[0,\infty]$ について $\int_{S^{2}}G(z)\,d\mu=2\pi\int_{-1}^{1}G(s)\,ds$ であることを示せ。とくに帯 $\{c<z<d\}$ の面積は $2\pi(d-c)$ で、$\int_{S^{2}}z^{2}\,d\mu=\frac{4\pi}{3}$, $\int_{S^{2}}z^{4}\,d\mu=\frac{4\pi}{5}$。さらに $\int_{S^{2}}x^{2}\,d\mu=\int_{S^{2}}z^{2}\,d\mu$ を等長写像で示せ。
+3. 懸垂面の一部（$f=\cosh$, $(a,b)=(-c,c)$）の面積が $\pi(2c+\sinh2c)$ であることを示せ。
+:::
+
+::: solution
+**1.** 開集合 $O\defeq\mathbb{R}^{2}\times(a,b)$ の上で $F(x,y,z)\defeq x^{2}+y^{2}-f(z)^{2}$ とおくと $S_{f}=F^{-1}(0)$, $dF=(2x,2y,-2ff')$。$S_{f}$ の上では $x^{2}+y^{2}=f(z)^{2}>0$ なので $dF\neq0$ で、\ref{mfd:regular-value-theorem} から $S_{f}$ は 2 次元の部分多様体。$\partial_{z}\Psi=(f'\cos\phi,f'\sin\phi,1)$, $\partial_{\phi}\Psi=(-f\sin\phi,f\cos\phi,0)$ は一次独立（第 3 成分と $f>0$ から）なので、$\Psi$ は 2 次元の多様体 $S_{f}$ へのはめ込みで、逆関数定理から局所微分同相写像。$z$ と $(\cos\phi,\sin\phi)$ が像の点から決まるので単射で、像 $S_{f}\setminus N$, $N\defeq\{(f(z),0,z)\}$ は $S_{f}$ の開集合。よって $\Psi$ は像の上への微分同相写像で、$\Psi^{-1}$ は座標近傍。誘導計量は
+$$
+g_{zz}=|\partial_{z}\Psi|^{2}=1+f'^{2},\quad g_{z\phi}=\partial_{z}\Psi\cdot\partial_{\phi}\Psi=0,\quad g_{\phi\phi}=f^{2}
+$$
+なので $\sqrt{g}=f\sqrt{1+f'^{2}}$。$N$ は $z\mapsto(f(z),0,z)$（単射なはめ込みで、逆は第 3 座標への射影）の像なので 1 次元の部分多様体（\ref{mfd:embedding-image-submanifold}）で、測度 $0$（\ref{gl:rm-basic-properties.3}）。\eqref{gl:eq-rm-chart} とトネリの定理から主張の式が出る。
+
+**2.** $f'=-z/\sqrt{1-z^{2}}$ なので $1+f'^{2}=\frac{1}{1-z^{2}}$、$\sqrt{g}=1$。$S_{f}=\{x^{2}+y^{2}+z^{2}=1,\ |z|<1\}$ で、両極は $0$ 次元の部分多様体なので測度 $0$。\ref{gl:rm-integral-formulas.1} を $h=G(z)$ と座標近傍 $\Psi^{-1}$ に使い、トネリの定理で $\phi$ を先に積分すると $\int_{S^{2}}G(z)\,d\mu=\int_{(-1,1)\times(0,2\pi)}G(s)\,d\lambda=2\pi\int_{-1}^{1}G(s)\,ds$。$G=\mathbf{1}_{(c,d)}$ で帯の面積 $2\pi(d-c)$、$G=s^{2},s^{4}$ で $2\pi\cdot\frac23$, $2\pi\cdot\frac25$。$\sigma(x,y,z)\defeq(z,y,x)$ は $\mathbb{R}^{3}$ の直交変換で $S^{2}$ を保ち、$d\sigma$ はユークリッド内積を保つので、$\sigma\restr{S^{2}}$ は誘導計量について等長写像。\ref{gl:rm-basic-properties.1} から $\mu(\sigma(E))=\mu(E)$ で、単関数近似と \ref{meas:monotone-convergence} から $\int h\circ\sigma\,d\mu=\int h\,d\mu$（$h\ge0$ ボレル可測）。$h=z^{2}$ とすると $z\circ\sigma=x$ なので $\int x^{2}=\int z^{2}=\frac{4\pi}{3}$。$y$ も同様で、$\int(x^{2}+y^{2}+z^{2})=4\pi=\operatorname{vol}(S^{2})$ と合う。
+
+**3.** $1+\sinh^{2}z=\cosh^{2}z$ なので $\sqrt{g}=\cosh^{2}z$ で、面積は $2\pi\int_{-c}^{c}\cosh^{2}z\,dz=\pi\int_{-c}^{c}(1+\cosh2z)\,dz=\pi(2c+\sinh2c)$。
+:::
+
+## 発散定理とグリーンの公式 {#gl:sec-dg-exercises}
+
+対応するページ：\ref{gl:page-divergence-green}
+
+::: problem ★ 基本：双曲円板のラプラシアンと発散定理の検算 {#gl:ex-dg-1}
+単位円板 $D$ に計量 $\lambda^{2}(dw_{1}^{2}+dw_{2}^{2})$, $\lambda=\frac{2}{1-r^{2}}$, $r\defeq|w|$ を入れる。
+1. $\Delta u=-\frac{(1-r^{2})^{2}}{4}(\partial_{1}^{2}+\partial_{2}^{2})u$ を示し、$\Delta(r^{2})=-(1-r^{2})^{2}$ を求めよ。
+2. $\rho\defeq\log\frac{1+r}{1-r}$ は $D\setminus\{0\}$ で滑らかで、$\Delta\rho=-\coth\rho$ を示せ。
+3. $0<a<1$, $D_{a}\defeq\{r\le a\}$, $X\defeq\operatorname{grad}(r^{2})$ とする。$\int_{D_{a}}\operatorname{div}X\,d\mu$ と $\int_{\partial D_{a}}\langle X,\nu\rangle\,d\mu_{\partial D_{a}}$ を別々に計算し、どちらも $4\pi a^{2}$ であることを確かめよ。
+:::
+
+::: solution
+**1.** 恒等写像の座標で $\sqrt{g}=\lambda^{2}$, $g^{ij}=\lambda^{-2}\delta_{ij}$ なので $\sqrt{g}\,g^{ij}=\delta_{ij}$ で、$\Delta u=-\lambda^{-2}\sum_{i}\partial_{i}^{2}u$。$\lambda^{-2}=\frac{(1-r^{2})^{2}}{4}$ と $(\partial_{1}^{2}+\partial_{2}^{2})(w_{1}^{2}+w_{2}^{2})=4$ から $\Delta(r^{2})=-(1-r^{2})^{2}$。
+
+**2.** $r>0$ で滑らかな $h(r)$ について $\partial_{i}h=h'\frac{w_{i}}{r}$, $\partial_{i}^{2}h=h''\frac{w_{i}^{2}}{r^{2}}+h'\bigl(\frac1r-\frac{w_{i}^{2}}{r^{3}}\bigr)$ なので $\sum_{i}\partial_{i}^{2}h=h''+\frac{h'}{r}$。$\rho'=\frac{2}{1-r^{2}}$, $\rho''=\frac{4r}{(1-r^{2})^{2}}$ から
+$$
+\rho''+\frac{\rho'}{r}=\frac{4r^{2}+2(1-r^{2})}{r(1-r^{2})^{2}}=\frac{2(1+r^{2})}{r(1-r^{2})^{2}},\qquad\Delta\rho=-\frac{1+r^{2}}{2r}.
+$$
+$e^{\rho}=\frac{1+r}{1-r}$ から $\cosh\rho=\frac{1+r^{2}}{1-r^{2}}$, $\sinh\rho=\frac{2r}{1-r^{2}}$ で、$\coth\rho=\frac{1+r^{2}}{2r}$。（平面では $\Delta|w|=-\frac{1}{|w|}$ で、$\rho\to0$ では $\coth\rho\approx\frac1\rho$ と一致する。）
+
+**3.** $D_{a}$ はコンパクトな境界つき領域で、\ref{gl:green-formulas.1} を $u=1$, $v=r^{2}$ に使えば $\int_{D_{a}}\operatorname{div}X=\int_{\partial D_{a}}\langle X,\nu\rangle$ が成り立つ。両辺を別々に計算する。
+
+左辺：$\operatorname{div}X=-\Delta(r^{2})=(1-r^{2})^{2}$、$d\mu=\lambda^{2}d\lambda$（\ref{gl:rm-integral-formulas.1}）なので、被積分関数は $(1-r^{2})^{2}\cdot\frac{4}{(1-r^{2})^{2}}=4$ で、積分は $4\cdot\pi a^{2}$。
+
+右辺：$\partial D_{a}=C_{a}$ の接ベクトルは $(-w_{2},w_{1})$ の方向で、動径方向 $\partial_{r}\defeq(w_{1},w_{2})/r$ は（$g$ がユークリッド計量の定数倍なので）それと直交し外向きで、$|\partial_{r}|_{g}=\lambda(a)$。\ref{gl:outward-normal} の一意性から $\nu=\lambda(a)^{-1}\partial_{r}=\frac{1-a^{2}}{2}\partial_{r}$、$\langle X,\nu\rangle=d(r^{2})(\nu)=\frac{1-a^{2}}{2}\cdot2a=a(1-a^{2})$。$C_{a}$ の座標 $\phi\mapsto a(\cos\phi,\sin\phi)$ で $\gamma=\lambda(a)a$ なので、$\mu_{\partial D_{a}}(C_{a})=\frac{4\pi a}{1-a^{2}}$（一点は測度 $0$）。積は $a(1-a^{2})\cdot\frac{4\pi a}{1-a^{2}}=4\pi a^{2}$。
+:::
+
+::: problem ★★ 標準：球面の 2 次の球面調和関数と半球での検算 {#gl:ex-dg-2}
+$S^{2}$ の上で考える。
+1. $\Delta(z^{2})=6z^{2}-2$, $\Delta(xz)=6xz$ を球面座標で示せ。
+2. 1 と \ref{gl:closed-manifold-laplacian.3} から、積分を直接計算せずに $\int_{S^{2}}z^{2}\,d\mu=\frac{4\pi}{3}$ を導け（$\operatorname{vol}(S^{2})=4\pi$ は使ってよい）。
+3. $|\nabla z|^{2}=1-z^{2}$ を示し、$\int_{S^{2}}|\nabla z|^{2}\,d\mu$ をグリーンの公式による方法と直接の積分で求めよ。
+4. 上半球 $H\defeq\{z\ge0\}$ と $X\defeq\operatorname{grad}z$ について、発散定理の両辺がどちらも $-2\pi$ であることを確かめよ。
+:::
+
+::: solution
+**1.** $z^{2}=\cos^{2}\theta$ は $\phi$ によらず、$\sin\theta\,\partial_{\theta}\cos^{2}\theta=-2\sin^{2}\theta\cos\theta$, $\partial_{\theta}(-2\sin^{2}\theta\cos\theta)=-4\sin\theta\cos^{2}\theta+2\sin^{3}\theta$ なので $\Delta(z^{2})=4\cos^{2}\theta-2\sin^{2}\theta=6z^{2}-2$。$xz=h(\theta)\cos\phi$, $h\defeq\sin\theta\cos\theta$ では $h'=\cos2\theta$、$\partial_{\theta}(\sin\theta\cos2\theta)=\cos\theta\cos2\theta-2\sin\theta\sin2\theta$、$-\sin^{-2}\theta\,\partial_{\phi}^{2}(h\cos\phi)=\frac{\cos\theta\cos\phi}{\sin\theta}$ なので
+$$
+\begin{aligned}\Delta(xz)&=\cos\phi\Bigl(\frac{\cos\theta(1-\cos2\theta)}{\sin\theta}+2\sin2\theta\Bigr)\\&=\cos\phi\,(2\sin\theta\cos\theta+4\sin\theta\cos\theta)=6xz.\end{aligned}
+$$
+両辺は $S^{2}$ 上の滑らかな関数（多項式の制限）なので、座標近傍で一致すれば全体で一致する。
+
+**2.** $0=\int\Delta(z^{2})=6\int z^{2}-2\operatorname{vol}(S^{2})$ から $\int z^{2}=\frac{8\pi}{6}=\frac{4\pi}{3}$。
+
+**3.** $|\nabla z|^{2}=|\partial_{\theta}\cos\theta|^{2}=\sin^{2}\theta=1-z^{2}$。グリーンの公式：\ref{gl:closed-manifold-laplacian.2} と $\Delta z=2z$（\ref{gl:laplacian-examples.1}）から $\int|\nabla z|^{2}=\int z\Delta z=2\int z^{2}=\frac{8\pi}{3}$。直接：$\int|\nabla z|^{2}=\int_{0}^{2\pi}\!\!\int_{0}^{\pi}\sin^{3}\theta\,d\theta\,d\phi=2\pi\cdot\frac43=\frac{8\pi}{3}$。
+
+**4.** $H=\{-z\le0\}$ で、赤道 $E\defeq\{z=0\}$ の上で $dz\neq0$ なので $H$ は境界つき領域、$\partial H=E$（\ref{mfd:regular-domain}）。左辺：$\operatorname{div}\operatorname{grad}z=-\Delta z=-2z$ で、$H$ は座標の中では測度 $0$ の差を除いて $\{\theta\le\frac\pi2\}$ なので $\int_{H}(-2z)\,d\mu=-2\cdot2\pi\int_{0}^{\pi/2}\cos\theta\sin\theta\,d\theta=-2\pi$。右辺：$E$ の上（$\theta=\frac\pi2$）で $T E$ は $\partial_{\phi}$ で張られ、$\partial_{\theta}$ は単位ベクトルでそれと直交し（$g_{\theta\phi}=0$）、$dz(\partial_{\theta})=-\sin\theta=-1<0$ なので $H=\{z\ge0\}$ から外を向く。よって $\nu=\partial_{\theta}$ で $\langle\operatorname{grad}z,\nu\rangle=dz(\nu)=-1$。$E$ の座標 $\phi\mapsto(\cos\phi,\sin\phi,0)$ で $\gamma=1$ なので長さ $2\pi$、右辺は $-2\pi$。
+:::
+
+## 多様体上のソボレフ空間 {#gl:sec-sm-exercises}
+
+対応するページ：\ref{gl:page-sobolev-manifolds}
+
+::: problem ★ 基本：球面上の関数の計量による H¹ ノルム {#gl:ex-sm-1}
+$S^{2}$ の上で次を示せ。
+1. $I(z)=4\pi$, $I(z^{2})=\frac{44\pi}{15}$, $I(x+iy)=8\pi$。
+2. $k\ge1$ について $I(z^{k})=\frac{4\pi}{2k+1}+\frac{8\pi k^{2}}{4k^{2}-1}$。$\|z^{k}\|_{L^{2}}\to0$ だが $I(z^{k})\to2\pi$ であることを確かめ、$\|u\|_{H^{1}}\le C\|u\|_{L^{2}}$（$u\in C^{\infty}(S^{2})$）となる定数 $C$ はないことを導け。
+:::
+
+::: solution
+$\phi$ によらない $u=F(\cos\theta)$（$F$ は滑らか）では $\partial_{\theta}u=-\sin\theta F'(\cos\theta)$ なので $|\nabla u|^{2}=(1-z^{2})|F'(z)|^{2}$。球面座標で積分し $s=\cos\theta$ と置換すると
+$$
+I(u)=2\pi\int_{-1}^{1}\bigl(|F(s)|^{2}+(1-s^{2})|F'(s)|^{2}\bigr)\,ds.
+$$
+
+**1.** $F(s)=s$：$2\pi\int_{-1}^{1}(s^{2}+1-s^{2})\,ds=4\pi$。$F(s)=s^{2}$：$2\pi\int_{-1}^{1}(s^{4}+4s^{2}-4s^{4})\,ds=2\pi\bigl(\frac25+\frac83-\frac85\bigr)=\frac{44\pi}{15}$。$u=x+iy=\sin\theta\,e^{i\phi}$ では $|\partial_{\theta}u|^{2}=\cos^{2}\theta$, $\sin^{-2}\theta|\partial_{\phi}u|^{2}=1$ なので $|u|^{2}+|\nabla u|^{2}=\sin^{2}\theta+\cos^{2}\theta+1=2$ で、$I(u)=2\operatorname{vol}(S^{2})=8\pi$。
+
+**2.** $F(s)=s^{k}$ について
+$$
+\begin{aligned}I(z^{k})&=2\pi\int_{-1}^{1}\bigl(s^{2k}+k^{2}s^{2k-2}-k^{2}s^{2k}\bigr)ds\\&=\frac{4\pi}{2k+1}+4\pi k^{2}\Bigl(\frac{1}{2k-1}-\frac{1}{2k+1}\Bigr),\end{aligned}
+$$
+第 2 項は $\frac{8\pi k^{2}}{4k^{2}-1}\to2\pi$。$\|z^{k}\|_{L^{2}}^{2}=\frac{4\pi}{2k+1}\to0$。そのような $C$ があれば \ref{gl:sm-metric-h1} の定数 $C'$ について $I(z^{k})\le C'\|z^{k}\|_{H^{1}}^{2}\le C'C^{2}\|z^{k}\|_{L^{2}}^{2}\to0$ となり矛盾する。$z^{k}$ は極の近くに集まり、そこでの傾きが $L^{2}$ ノルムに比べて小さくならない。
+:::
+
+::: problem ★★ 標準：極で特異な関数の H¹ 判定 {#gl:ex-sm-2}
+$\alpha\in\mathbb{R}$ について、$S^{2}$ の両極の外で $u_{\alpha}\defeq(1-z^{2})^{\alpha/2}=\sin^{\alpha}\theta$ とおく（両極は測度 $0$）。
+1. $u_{\alpha}\in L^{2}(S^{2})$ $\iff$ $\alpha>-1$ を示せ。
+2. $\alpha>0$ なら、$u_{\alpha,\varepsilon}\defeq(1-z^{2}+\varepsilon^{2})^{\alpha/2}$（$0<\varepsilon\le1$）が $\varepsilon\to0$ で $H^{1}(S^{2})$ において $u_{\alpha}$ に収束することを示せ。とくに $u_{\alpha}\in H^{1}(S^{2})$。$\alpha=1$ のとき $I(u_{1,\varepsilon})\to4\pi$ を示せ。
+3. $-1<\alpha<0$ なら $u_{\alpha}\notin H^{1}(S^{2})$ を示せ。
+:::
+
+::: solution
+**1.** $\int u_{\alpha}^{2}\,d\mu=2\pi\int_{0}^{\pi}\sin^{2\alpha+1}\theta\,d\theta$。$(0,\frac\pi2]$ で $\frac{2\theta}{\pi}\le\sin\theta\le\theta$（$\pi-\theta$ についても同様）なので、これが有限 $\iff$ $\int_{0}^{\pi/2}\theta^{2\alpha+1}d\theta<\infty$ $\iff$ $2\alpha+1>-1$。
+
+**2.** $1-z^{2}+\varepsilon^{2}=x^{2}+y^{2}+\varepsilon^{2}$ は $\mathbb{R}^{3}$ 上で正の滑らかな関数なので $u_{\alpha,\varepsilon}\in C^{\infty}(S^{2})$。$0<\theta<\pi$ で
+$$
+\partial_{\theta}u_{\alpha,\varepsilon}=\alpha(\sin^{2}\theta+\varepsilon^{2})^{\frac{\alpha}{2}-1}\sin\theta\cos\theta\ \longrightarrow\ \alpha\sin^{\alpha-1}\theta\cos\theta\eqdef\partial_{\theta}u_{\alpha}
+$$
+で、$u_{\alpha,\varepsilon}\to u_{\alpha}$。評価：$|u_{\alpha,\varepsilon}|\le2^{\alpha/2}$、$\frac{\sin\theta}{(\sin^{2}\theta+\varepsilon^{2})^{1/2}}\le1$ から $|\partial_{\theta}u_{\alpha,\varepsilon}|\le\alpha(\sin^{2}\theta+\varepsilon^{2})^{\frac{\alpha-1}{2}}\le B(\theta)$。ここで $B\defeq\alpha2^{(\alpha-1)/2}$（$\alpha\ge1$）、$B\defeq\alpha\sin^{\alpha-1}\theta$（$0<\alpha<1$、指数が負なので）で、$\int_{0}^{\pi}B^{2}\sin\theta\,d\theta<\infty$（$2\alpha-1>-1$）。$\phi$ によらない関数について $q(w)\defeq\bigl(\int(|w|^{2}+|\partial_{\theta}w|^{2})\,d\mu\bigr)^{1/2}$ とおくと、\ref{meas:dominated-convergence} から $q(u_{\alpha,\varepsilon}-u_{\alpha})\to0$。滑らかな関数では $q=I^{1/2}$ で、ミンコフスキーの不等式から $I(u_{\alpha,\varepsilon}-u_{\alpha,\delta})^{1/2}\le q(u_{\alpha,\varepsilon}-u_{\alpha})+q(u_{\alpha,\delta}-u_{\alpha})$。よって $\varepsilon_{j}\defeq1/j$ の列は $I^{1/2}$ について、したがって $H^{1}$ について（\ref{gl:sm-metric-h1}）コーシー列で、\ref{gl:sobolev-manifold-complete.2} から $H^{1}$ のある $v$ に収束する。包含 $H^{1}\to L^{2}$ は連続（\ref{gl:sobolev-manifold-independence.3}）で、$L^{2}$ では $u_{\alpha,\varepsilon}\to u_{\alpha}$（優収束）なので $v=u_{\alpha}$。$\alpha=1$ では $I(u_{1,\varepsilon})^{1/2}\to q(u_{1})$ で、$q(u_{1})^{2}=\int(\sin^{2}\theta+\cos^{2}\theta)\,d\mu=4\pi$。
+
+**3.** $u\defeq u_{\alpha}\in H^{1}$ と仮定する。$U\defeq\{z>0\}$ の上の座標 $\xi\defeq(x,y)$（逆は $\xi\mapsto(\xi,\sqrt{1-|\xi|^{2}})$）では $\sin\theta=|\xi|$。$\beta\in C^{\infty}(\mathbb{R})$ を $(-\infty,\frac14]$ で $1$、$[\frac12,\infty)$ で $0$ とし、$\chi\defeq\beta(x^{2}+y^{2})$（$z>0$）, $\chi\defeq0$（$z\le0$）とおくと、$|z|<2^{-1/2}$ では $x^{2}+y^{2}>\frac12$ なので $\chi$ は滑らかで台は $U$ に含まれる。\ref{gl:sobolev-manifold-independence.2} から $(\chi u)^{\xi}\in H^{1}(\mathbb{R}^{2})$。開集合 $B^{*}\defeq\{0<|\xi|<\frac12\}$ の上で $(\chi u)^{\xi}=|\xi|^{\alpha}$ は滑らかなので、\ref{gl:sobolev-local-operations.1} と \ref{fa:distribution-operations-properties.2} から、そこでの弱微分は古典的な $\partial_{j}|\xi|^{\alpha}=\alpha|\xi|^{\alpha-2}\xi_{j}$ に等しい。しかし \ref{meas:polar-radial.2} から
+$$
+\int_{B^{*}}\sum_{j}|\partial_{j}|\xi|^{\alpha}|^{2}\,d\xi=2\pi\alpha^{2}\int_{0}^{1/2}r^{2\alpha-1}\,dr=\infty\quad(2\alpha-1<-1)
+$$
+で、弱微分が $L^{2}$ に入ることに反する。（2 次元では、点の特異性 $|\xi|^{\alpha}$ は $\alpha>0$ なら $H^{1}$ に入り、$-1<\alpha<0$ なら $L^{2}$ には入るが $H^{1}$ には入らない。）
+:::
+
+::: problem ★★★ 発展：球面上の回転対称な関数とルジャンドル多項式 {#gl:ex-sm-3}
+$F\in C^{\infty}(\mathbb{R})$ について $u_{F}\defeq F(z)\in C^{\infty}(S^{2})$ とおく。
+1. $\Delta u_{F}=-(1-z^{2})F''(z)+2zF'(z)$、$I(u_{F})=2\pi\int_{-1}^{1}(|F|^{2}+(1-s^{2})|F'|^{2})\,ds$ を示せ。
+2. $P_{0}=1$, $P_{1}=s$, $P_{2}=\frac{3s^{2}-1}{2}$, $P_{3}=\frac{5s^{3}-3s}{2}$ について、$\Delta P_{l}(z)=l(l+1)P_{l}(z)$、$l\neq k$ なら $\int_{S^{2}}P_{l}(z)P_{k}(z)\,d\mu=0$、$\int_{S^{2}}P_{l}(z)^{2}\,d\mu=\frac{4\pi}{2l+1}$、$\int_{S^{2}}|\nabla P_{l}(z)|^{2}\,d\mu=\frac{4\pi l(l+1)}{2l+1}$ を示せ。
+3. 実数 $c_{1},c_{2},c_{3}$ と $u\defeq\sum_{l=1}^{3}c_{l}P_{l}(z)$ について、$\int u\,d\mu=0$ かつ $\int|\nabla u|^{2}\ge2\int u^{2}$ で、等号は $c_{2}=c_{3}=0$ のときに限ることを示せ。
+4. $|z|\in H^{1}(S^{2})$ を $u_{\varepsilon}\defeq(z^{2}+\varepsilon^{2})^{1/2}$ による近似で示し、$I(u_{\varepsilon})\to4\pi$ を示せ。
+:::
+
+::: solution
+**Step 1.** 【主張：1】$u_{F}=F(\cos\theta)$ で、$\sin\theta\,\partial_{\theta}u_{F}=-\sin^{2}\theta F'$, $\partial_{\theta}(-\sin^{2}\theta F'(\cos\theta))=-2\sin\theta\cos\theta F'+\sin^{3}\theta F''$。$\sin\theta$ で割って符号を変えると $\Delta u_{F}=2\cos\theta F'-\sin^{2}\theta F''$。$|\nabla u_{F}|^{2}=\sin^{2}\theta|F'|^{2}=(1-z^{2})|F'(z)|^{2}$ で、球面座標の積分を $s=\cos\theta$ と置換すれば $I(u_{F})$ の式が出る（同じ置換で $\int_{S^{2}}G(z)\,d\mu=2\pi\int_{-1}^{1}G(s)\,ds$）。
+
+**Step 2.** 【主張：$\Delta P_{l}(z)=l(l+1)P_{l}(z)$】1 から、$(1-s^{2})P_{l}''-2sP_{l}'+l(l+1)P_{l}=0$ を確かめればよい。$l=0,1$ は直接わかる。$l=2$：$3(1-s^{2})-6s^{2}+3(3s^{2}-1)=0$。$l=3$：$P_{3}'=\frac{15s^{2}-3}{2}$, $P_{3}''=15s$ で $15s(1-s^{2})-s(15s^{2}-3)+6(5s^{3}-3s)=0$。
+
+**Step 3.** 【主張：2 の残り】\ref{gl:closed-manifold-laplacian.1} から $l(l+1)\int P_{l}P_{k}=\int(\Delta P_{l})P_{k}=\int P_{l}\Delta P_{k}=k(k+1)\int P_{l}P_{k}$ で、$0\le l\neq k\le3$ なら $l(l+1)\neq k(k+1)$ なので $\int P_{l}P_{k}=0$。$\int_{-1}^{1}P_{l}^{2}\,ds$ は $2$, $\frac23$, $\frac14\int(9s^{4}-6s^{2}+1)=\frac14(\frac{18}{5}-4+2)=\frac25$, $\frac14\int(25s^{6}-30s^{4}+9s^{2})=\frac14(\frac{50}{7}-12+6)=\frac27$ で、どれも $\frac{2}{2l+1}$。$2\pi$ 倍して $\frac{4\pi}{2l+1}$。\ref{gl:closed-manifold-laplacian.2} から $\int|\nabla P_{l}(z)|^{2}=\int P_{l}\Delta P_{l}=\frac{4\pi l(l+1)}{2l+1}$。
+
+**Step 4.** 【主張：3】$P_{0}=1$ との直交性から $\int P_{l}(z)\,d\mu=0$（$l\ge1$）なので $\int u=0$。\ref{gl:closed-manifold-laplacian.2} と Step 2・3 から
+$$
+\int|\nabla u|^{2}=\int u\,\Delta u=\sum_{l,k}c_{l}c_{k}\,k(k+1)\int P_{l}P_{k}=\sum_{l=1}^{3}\frac{4\pi l(l+1)}{2l+1}c_{l}^{2},
+$$
+同様に $\int u^{2}=\sum_{l}\frac{4\pi}{2l+1}c_{l}^{2}$。差は $\sum_{l}(l(l+1)-2)\frac{4\pi}{2l+1}c_{l}^{2}\ge0$ で、$l(l+1)-2>0$（$l=2,3$）なので等号は $c_{2}=c_{3}=0$ のときに限る。
+
+**Step 5.** 【主張：4】$G_{\varepsilon}(s)\defeq(s^{2}+\varepsilon^{2})^{1/2}$ は滑らかで $u_{\varepsilon}=u_{G_{\varepsilon}}$。$|G_{\varepsilon}(s)-|s||\le\varepsilon$、$G_{\varepsilon}'(s)=\frac{s}{(s^{2}+\varepsilon^{2})^{1/2}}\to\sgn s$（$s\neq0$）、$|G_{\varepsilon}'|\le1$。$\tilde{q}(F,F_{1})\defeq\bigl(2\pi\int_{-1}^{1}(|F|^{2}+(1-s^{2})|F_{1}|^{2})\,ds\bigr)^{1/2}$ とおくと、\ref{meas:dominated-convergence} から $\tilde{q}(G_{\varepsilon}-|s|,\,G_{\varepsilon}'-\sgn s)\to0$。1 から $I(u_{\varepsilon}-u_{\delta})^{1/2}=\tilde{q}(G_{\varepsilon}-G_{\delta},G_{\varepsilon}'-G_{\delta}')$ で、ミンコフスキーの不等式から $\varepsilon,\delta\to0$ で $0$ に近づく。\ref{gl:sm-metric-h1} と \ref{gl:sobolev-manifold-complete.2} から $u_{1/j}$ は $H^{1}$ のある $v$ に収束し、$H^{1}\to L^{2}$ の連続性と $u_{\varepsilon}\to|z|$（一様）から $v=|z|$。$I(u_{\varepsilon})^{1/2}\to\tilde{q}(|s|,\sgn s)$ で、$\tilde{q}(|s|,\sgn s)^{2}=2\pi\int_{-1}^{1}(s^{2}+1-s^{2})\,ds=4\pi$。
+
+3 は、回転対称な 3 次以下の多項式の範囲では、平均 $0$ の関数について $\|u\|_{L^{2}}\le2^{-1/2}\|\nabla u\|_{L^{2}}$ が成り立ち、定数 $2^{-1/2}$ が最良であることを示している（等号は $u=c_{1}z$）。
+:::
+
+## ベクトル束の切断と微分作用素 {#gl:sec-ss-exercises}
+
+対応するページ：\ref{gl:page-sobolev-sections}
+
+::: problem ★ 基本：回転トーラス上の作用素の係数と転置 {#gl:ex-ss-1}
+$T_{R,r}$ のパラメータ表示は $u$, $v$ について周期 $2\pi$ の局所微分同相写像なので、座標ベクトル場 $\partial_{u}$, $\partial_{v}$ は $T_{R,r}$ 全体の滑らかなベクトル場 $Y$, $X$ を定める。
+1. $\Delta=-W^{-2}\partial_{u}^{2}-r^{-2}\partial_{v}^{2}+\frac{\sin v}{rW}\partial_{v}$ を示し、係数 $a_{\alpha}$（\ref{gl:differential-operator-manifold.1}）を書け。
+2. \ref{gl:formal-transpose.2} の局所式から $Y^{t}=-Y$, $X^{t}=-X+\frac{r\sin v}{W}$ を示し、\ref{gl:formal-transpose-examples.2} と比べよ。
+3. $\int X^{t}1\,d\mu=0$ を直接の積分で確かめ、形式的転置の定義からも説明せよ。
+:::
+
+::: solution
+**1.** $\sqrt{g}\,g^{uu}=\frac{rW}{W^{2}}=\frac{r}{W}$, $\sqrt{g}\,g^{vv}=\frac{W}{r}$, $\partial_{v}W=-r\sin v$ なので
+$$
+\begin{aligned}\Delta f&=-\frac{1}{rW}\Bigl(\partial_{u}\Bigl(\frac{r}{W}\partial_{u}f\Bigr)+\partial_{v}\Bigl(\frac{W}{r}\partial_{v}f\Bigr)\Bigr)\\&=-\frac{\partial_{u}^{2}f}{W^{2}}-\frac{\partial_{v}^{2}f}{r^{2}}+\frac{\sin v}{rW}\partial_{v}f.\end{aligned}
+$$
+係数は $a_{(2,0)}=-W^{-2}$, $a_{(0,2)}=-r^{-2}$, $a_{(0,1)}=\frac{\sin v}{rW}$、他は $0$。2 階の部分は $-\sum g^{ij}\partial_{i}\partial_{j}$ で、\ref{gl:differential-operator-examples.3} と合う。
+
+**2.** $\gamma=rW$ は $u$ によらない。$Y$ は $a_{(1,0)}=1$ なので $Y^{t}\varphi=\gamma^{-1}(-\partial_{u}(\gamma\varphi))=-\partial_{u}\varphi$。$X$ は $a_{(0,1)}=1$ なので $X^{t}\varphi=-\gamma^{-1}\partial_{v}(\gamma\varphi)=-\partial_{v}\varphi-\frac{\partial_{v}W}{W}\varphi=-\partial_{v}\varphi+\frac{r\sin v}{W}\varphi$。一方 \ref{gl:divergence-unoriented} の式で $\operatorname{div}Y=\gamma^{-1}\partial_{u}\gamma=0$, $\operatorname{div}X=\gamma^{-1}\partial_{v}\gamma=-\frac{r\sin v}{W}$ で、$X^{t}=-X-\operatorname{div}X$ と一致する。
+
+**3.** $\int X^{t}1\,d\mu=\int_{0}^{2\pi}\!\!\int_{0}^{2\pi}\frac{r\sin v}{W}\,rW\,du\,dv=2\pi r^{2}\int_{0}^{2\pi}\sin v\,dv=0$。定義（\ref{gl:formal-transpose.1}）で $u=v=1$ とすると $\int X^{t}1\,d\mu=\int(X1)\cdot1\,d\mu=0$（定数の微分は $0$）。
+:::
+
+::: problem ★★ 標準：ラプラシアンの転置の局所計算と回転の場 {#gl:ex-ss-2}
+$M$ を閉リーマン多様体とする。
+1. \ref{gl:formal-transpose.2} の局所式に $\Delta$ の係数を入れて、$\Delta^{t}=\Delta$ を（\ref{gl:closed-manifold-laplacian.1} を使わずに）示せ。
+2. ベクトル場 $X$ について $X^{t}X=-X^{2}-(\operatorname{div}X)X$ を示し、実数値の滑らかな $u,w$ について $\int(X^{t}Xu)w\,d\mu=\int(Xu)(Xw)\,d\mu$ を示せ。$\operatorname{div}X=0$ なら $-X^{2}$ は対称で非負である。
+3. $S^{2}$ で $X\defeq\partial_{\phi}$（$(-y,x,0)$ の制限）とする。$\operatorname{div}X=0$、$q\defeq x^{2}-y^{2}$ について $Xq=-4xy$, $-X^{2}q=4q$ を示し、$\int q(-X^{2}q)\,d\mu=\int(Xq)^{2}\,d\mu=\frac{64\pi}{15}$ を直接の積分で確かめよ。
+:::
+
+::: solution
+**1.** 座標近傍 $(U,x)$ で $\gamma\defeq\gamma_{x}$, $G^{ij}\defeq g^{ij}\circ x^{-1}$（対称）とすると、$\Delta=\sum_{i,j}(-G^{ij})\partial_{i}\partial_{j}+\sum_{j}b_{j}\partial_{j}$, $\gamma b_{j}=-\sum_{i}\partial_{i}(\gamma G^{ij})$。局所式は係数について線形で $\partial_{i}\partial_{j}=\partial^{e_{i}+e_{j}}$ なので、項ごとに使ってよく
+$$
+\gamma\,\Delta^{t}V=-\sum_{i,j}\partial_{j}\partial_{i}(\gamma G^{ij}V)+\sum_{j}\partial_{j}\Bigl(\sum_{i}\partial_{i}(\gamma G^{ij})V\Bigr).
+$$
+第 1 項は $-\sum_{j}\partial_{j}\bigl(\sum_{i}\partial_{i}(\gamma G^{ij})V+\sum_{i}\gamma G^{ij}\partial_{i}V\bigr)$ なので、和は $-\sum_{i,j}\partial_{j}(\gamma G^{ji}\partial_{i}V)$、すなわち $\Delta^{t}V=\Delta V$（添字の名前を入れ替えれば $\Delta$ の座標の式そのもの）。どの座標近傍でも一致するので $\Delta^{t}=\Delta$。
+
+**2.** \ref{gl:formal-transpose-examples.2} を $Xu$ に使えば $X^{t}(Xu)=-X(Xu)-(\operatorname{div}X)Xu$。\ref{gl:formal-transpose.1} を $P=X^{t}$ に使い、\ref{gl:formal-transpose.3} の $(X^{t})^{t}=X$ を使うと $\int(X^{t}(Xu))w=\int(Xu)(Xw)$。右辺は $u,w$ について対称で、$w=u$ なら $\int(Xu)^{2}\ge0$。$\operatorname{div}X=0$ なら $X^{t}X=-X^{2}$。
+
+**3.** $\partial_{\phi}(\sin\theta\cos\phi,\sin\theta\sin\phi,\cos\theta)=(-y,x,0)$ で、$(-y,x,0)$ は $S^{2}$ に接する滑らかなベクトル場なので、座標近傍の外まで含めて $X$ が定まる。$\operatorname{div}X=\frac{1}{\sin\theta}\partial_{\phi}(\sin\theta)=0$。$q=\sin^{2}\theta\cos2\phi$ から $Xq=-2\sin^{2}\theta\sin2\phi=-4xy$, $-X^{2}q=4\sin^{2}\theta\cos2\phi=4q$。$\int_{0}^{\pi}\sin^{5}\theta\,d\theta=\int_{-1}^{1}(1-s^{2})^{2}ds=\frac{16}{15}$ を使うと
+$$
+\begin{aligned}\int q(-X^{2}q)&=4\int_{0}^{\pi}\sin^{5}\theta\,d\theta\int_{0}^{2\pi}\cos^{2}2\phi\,d\phi=4\cdot\frac{16}{15}\cdot\pi=\frac{64\pi}{15},\\\int(Xq)^{2}&=16\int_{0}^{\pi}\sin^{5}\theta\,d\theta\int_{0}^{2\pi}\cos^{2}\phi\sin^{2}\phi\,d\phi=16\cdot\frac{16}{15}\cdot\frac{\pi}{4}=\frac{64\pi}{15}.\end{aligned}
+$$
+:::
+
+## 負の階数のソボレフ空間とトーラス {#gl:sec-nt-exercises}
+
+対応するページ：\ref{gl:page-negative-sobolev-torus}
+
+::: problem ★ 基本：のこぎり波のフーリエ係数と負の階数の微分 {#gl:ex-nt-1}
+$T^{1}$ の上で $(w\circ p)(t)\defeq t$（$-\pi<t<\pi$）とする。
+1. $\hat{w}(0)=0$, $\hat{w}(m)=\frac{i(-1)^{m}}{m}$（$m\neq0$）を示せ。
+2. パーセヴァルの等式から $\sum_{m\ge1}\frac{1}{m^{2}}=\frac{\pi^{2}}{6}$ を導け。
+3. $w\notin H^{1}(T^{1})$ を示せ。
+4. \ref{gl:operator-negative-extension.1} の $Dw\in H^{-1}(T^{1})$（$D=D_{1}$）について、$v\in C^{\infty}(T^{1})$ なら $\langle Dw,v\rangle=\int_{T^{1}}v\,d\mu-2\pi v(p(\pi))$ を示せ。
+:::
+
+::: solution
+**1.** $t$ は奇関数なので $\hat{w}(0)=0$。$m\neq0$ なら部分積分で
+$$
+\int_{-\pi}^{\pi}te^{-imt}dt=\Bigl[\frac{te^{-imt}}{-im}\Bigr]_{-\pi}^{\pi}+\frac{1}{im}\int_{-\pi}^{\pi}e^{-imt}dt=\frac{2\pi(-1)^{m}}{-im}=\frac{2\pi i(-1)^{m}}{m}.
+$$
+
+**2.** \ref{gl:torus-fourier-basis.2} から $\frac{2\pi^{3}}{3}=\int_{-\pi}^{\pi}t^{2}dt=\|w\|_{L^{2}}^{2}=2\pi\sum_{m\neq0}\frac{1}{m^{2}}=4\pi\sum_{m\ge1}\frac{1}{m^{2}}$。
+
+**3.** $\sum_{m}(1+m^{2})|\hat{w}(m)|^{2}=\sum_{m\neq0}\frac{1+m^{2}}{m^{2}}\ge\sum_{m\neq0}1=\infty$ なので、\ref{gl:torus-sobolev.1} から $w\notin H^{1}$。
+
+**4.** 平坦な計量では $\gamma=1$ なので、\ref{gl:formal-transpose.2} から $D^{t}=-D$。$V\defeq v\circ p$ とすると、\ref{gl:operator-negative-extension.1}（$s=0$）と部分積分から
+$$
+\langle Dw,v\rangle=\int wD^{t}v\,d\mu=-\int_{-\pi}^{\pi}tV'(t)\,dt=-\pi\bigl(V(\pi)+V(-\pi)\bigr)+\int_{-\pi}^{\pi}V\,dt,
+$$
+$V(-\pi)=V(\pi)$ なので主張が従う。$Dw$ は「傾き $1$」と「$t=\pi$ での高さ $-2\pi$ の跳び」の和で、後者は関数ではない。
+:::
+
+::: problem ★★ 標準：三角波：H¹ に入り H² に入らない関数と点の汎関数 {#gl:ex-nt-2}
+$T^{1}$ の上で $(u\circ p)(t)\defeq|t|$（$|t|\le\pi$）、$(h\circ p)(t)\defeq\sgn t$（$0<|t|<\pi$）とする。
+1. $\hat{u}(0)=\frac\pi2$, $\hat{u}(m)=\frac{(-1)^{m}-1}{\pi m^{2}}$（$m\neq0$）を示し、$u\in H^{1}\setminus H^{2}$ を示せ。
+2. $Du=h$（$L^{2}$ の元として）を示せ。
+3. $u$ と $Du$ のパーセヴァルの等式から $\sum_{m\text{ 奇数}\ge1}\frac{1}{m^{2}}=\frac{\pi^{2}}{8}$, $\sum_{m\text{ 奇数}\ge1}\frac{1}{m^{4}}=\frac{\pi^{4}}{96}$ を導き、$\sum_{m\ge1}\frac{1}{m^{4}}=\frac{\pi^{4}}{90}$ を示せ。
+4. $a\in\mathbb{R}$ と $v\in C^{\infty}(T^{1})$ について $|v(p(a))|\le C\|v\|_{H^{1}}$（$C$ は $v$ によらない）を示し、点の値 $\delta_{a}$ が $H^{-1}(T^{1})$ の元にただ一通りに延びることを導け。さらに $H^{-1}$ で $D(Du)=2\delta_{0}-2\delta_{\pi}$ を示せ。
+:::
+
+::: solution
+**1.** $\hat{u}(0)=\frac{1}{2\pi}\int_{-\pi}^{\pi}|t|\,dt=\frac\pi2$。$m\neq0$ なら
+$$
+\int_{-\pi}^{\pi}|t|e^{-imt}dt=2\int_{0}^{\pi}t\cos mt\,dt=2\Bigl[\frac{t\sin mt}{m}+\frac{\cos mt}{m^{2}}\Bigr]_{0}^{\pi}=\frac{2((-1)^{m}-1)}{m^{2}}.
+$$
+$m$ が偶数なら $0$、奇数なら $|\hat{u}(m)|=\frac{2}{\pi m^{2}}$。$\sum_{m}(1+m^{2})^{k}|\hat{u}(m)|^{2}<\infty$ $\iff$ $\sum_{m\text{ 奇数}}m^{2k-4}<\infty$ $\iff$ $2k-4<-1$ なので、\ref{gl:torus-sobolev.1} から $u\in H^{1}$, $u\notin H^{2}$。
+
+**2.** $\hat{h}(0)=0$、$m\neq0$ なら $\int_{-\pi}^{\pi}\sgn t\,e^{-imt}dt=-2i\int_{0}^{\pi}\sin mt\,dt=\frac{-2i(1-(-1)^{m})}{m}$ なので $\hat{h}(m)=\frac{i((-1)^{m}-1)}{\pi m}$。\ref{gl:torus-sobolev.2} から $\widehat{Du}(m)=im\,\hat{u}(m)=\hat{h}(m)$。$Du-h\in L^{2}\subset L^{1}$ のフーリエ係数はすべて $0$ なので、\ref{gl:torus-fourier-basis.1} から $Du=h$。
+
+**3.** \ref{gl:torus-fourier-basis.2} から $2\pi=\|h\|^{2}=2\pi\cdot2\sum_{m\text{ 奇数}\ge1}\frac{4}{\pi^{2}m^{2}}$ なので $\sum\frac{1}{m^{2}}=\frac{\pi^{2}}{8}$（奇数）。$\frac{2\pi^{3}}{3}=\|u\|^{2}=2\pi\bigl(\frac{\pi^{2}}{4}+2\sum_{m\text{ 奇数}\ge1}\frac{4}{\pi^{2}m^{4}}\bigr)$ から $\sum_{m\text{ 奇数}}\frac{1}{m^{4}}=\frac{\pi^{2}}{8}\bigl(\frac{\pi^{2}}{3}-\frac{\pi^{2}}{4}\bigr)=\frac{\pi^{4}}{96}$。$Z\defeq\sum_{m\ge1}m^{-4}$ は偶数の項の和が $Z/16$ なので $Z=\frac{\pi^{4}}{96}+\frac{Z}{16}$、$Z=\frac{\pi^{4}}{90}$。
+
+**4.** $V\defeq v\circ p$ とする。$b\in[a-\pi,a+\pi]$ について $V(a)=V(b)+\int_{b}^{a}V'(t)\,dt$ を $b$ について平均すると
+$$
+V(a)=\frac{1}{2\pi}\int_{a-\pi}^{a+\pi}V(b)\,db+\frac{1}{2\pi}\int_{a-\pi}^{a+\pi}\!\!\int_{b}^{a}V'(t)\,dt\,db.
+$$
+コーシー–シュワルツの不等式と周期性から、第 1 項は $(2\pi)^{-1/2}\|v\|_{L^{2}}$ 以下、第 2 項は $\int_{a-\pi}^{a+\pi}|V'|\le(2\pi)^{1/2}\|Dv\|_{L^{2}}$ 以下。パーセヴァルの等式と \ref{gl:torus-sobolev.2} から $\|v\|^{2}+\|Dv\|^{2}=2\pi\sum(1+m^{2})|\hat{v}(m)|^{2}\le2\pi C_{1}\|v\|_{H^{1}}^{2}$ なので、$|v(p(a))|\le C\|v\|_{H^{1}}$。$C^{\infty}(T^{1})$ は $H^{1}$ で稠密（\ref{gl:sobolev-manifold-density}）なので、$\delta_{a}$ は $H^{1}$ 上の有界線形汎関数にただ一通りに延びる。
+
+$Du=h\in L^{2}$ なので、\ref{gl:operator-negative-extension.1}（階数 $0$ の場合）と $D^{t}=-D$（$\gamma=1$ と \ref{gl:formal-transpose.2}）から、$v\in C^{\infty}$ について
+$$
+\begin{aligned}\langle Dh,v\rangle&=-\int_{-\pi}^{\pi}\sgn t\,V'(t)\,dt=-(V(\pi)-V(0))+(V(0)-V(-\pi))\\&=2V(0)-2V(\pi).\end{aligned}
+$$
+両辺は $v\in H^{1}$ について有界線形なので、稠密性から $H^{-1}$ で $D(Du)=2\delta_{0}-2\delta_{\pi}$。$|t|$ の傾きは $0$ で $+2$、$\pi$ で $-2$ 跳ぶ。
+:::
+
+## ソボレフの埋め込みとレリッヒの定理 {#gl:sec-em-exercises}
+
+対応するページ：\ref{gl:page-embeddings}
+
+::: problem ★ 基本：埋め込みの指数の計算 {#gl:ex-em-1}
+$M$ を $n$ 次元の閉多様体とする。\ref{gl:sobolev-embedding-manifold}, \ref{gl:hk-smooth}, \ref{gl:rellich-manifold} から言えることとして、次に答えよ。
+1. $n=3$：$W^{1,2}(M)\subset L^{q}(M)$ となる $q$ と、包含 $W^{1,2}(M)\to L^{q}(M)$ がコンパクトになる $q$。
+2. $n=4$ の $W^{2,3/2}(M)$、$n=5$ の $H^{2}(M)$ が入る $L^{q}$ の最大の $q$。
+3. $n=3$：$H^{2}(M)\subset C^{0}(M)$ だが、定理からは $C^{1}$ は言えないこと。$H^{3}(M)\subset C^{1}(M)$。
+4. $n=4$ の $H^{2}(M)$、$n=2$ の $W^{2,1}(M)$ について言えること。
+5. $n=1,2,3,4$ について $H^{k}(M)\subset C^{2}(M)$ が言える最小の $k$。
+6. $n=5$ で $W^{3,p}(M)\subset C^{1}(M)$ が言える $p$。
+:::
+
+::: solution
+**1.** $kp=2<3$, $\frac{1}{p_{1}}=\frac12-\frac13=\frac16$ なので $1\le q\le6$（\ref{gl:sobolev-embedding-manifold.1}）。$p=2<n$, $p^{*}=6$ なので、コンパクトなのは $1\le q<6$（\ref{gl:rellich-manifold.1}）。
+
+**2.** $n=4$, $k=2$, $p=\frac32$：$kp=3<4$, $\frac{1}{p_{2}}=\frac23-\frac24=\frac16$ で $q\le6$。$n=5$, $k=p=2$：$kp=4<5$, $\frac{1}{p_{2}}=\frac12-\frac25=\frac{1}{10}$ で $q\le10$。
+
+**3.** $k-\frac np=2-\frac32=\frac12>0$ なので $C^{0}$（\ref{gl:sobolev-embedding-manifold.3} の $m=0$）。$m=1$ には $\frac12>1$ が要り、成り立たない。$k=3$ なら $3-\frac32=\frac32>1$ で $C^{1}$。
+
+**4.** $n=4$, $H^{2}$：$kp=4=n$ なので \ref{gl:sobolev-embedding-manifold.2} からすべての $q<\infty$ で $H^{2}\subset L^{q}$。$k-\frac np=0$ は $0$ より大きくないので、$C^{0}$ は定理からは言えない。$n=2$, $W^{2,1}$：$p=1$, $k-n=0\ge0$ なので（等号が許される場合）$W^{2,1}(M)\subset C^{0}(M)$。
+
+**5.** \ref{gl:hk-smooth.1} の条件 $k>\frac n2+2$ から、$n=1$：$k>2.5$ で $3$。$n=2$：$k>3$ で $4$。$n=3$：$k>3.5$ で $4$。$n=4$：$k>4$ で $5$。
+
+**6.** $p>1$ なら $3-\frac5p>1$ $\iff$ $p>\frac52$。$p=1$ では $k-n=-2<1$ で条件を満たさない。よって $p>\frac52$。
+
+どれも定理の十分条件から読んだもので、1 の上限 $6$ が改良できないことは \see{gl:ex-em-2} で見る。
+:::
+
+::: problem ★★ 標準：埋め込みの指数 p* は改良できない {#gl:ex-em-2}
+$n\ge2$, $1\le p<n$, $p^{*}\defeq\frac{np}{n-p}$ とする。$\beta\in C_{c}^{\infty}(\mathbb{R}^{n})$ を $0\le\beta\le1$、$|\xi|\le\frac12$ で $\beta=1$、台が開単位球に含まれるものとし、$a>0$ について $w_{a}(\xi)\defeq\beta(\xi)|\xi|^{-a}$（$\xi\neq0$）とおく。
+1. $1\le q<\infty$ について $w_{a}\in L^{q}(\mathbb{R}^{n})$ $\iff$ $aq<n$ を示せ。
+2. $w_{a}\in W^{1,p}(\mathbb{R}^{n})$ $\iff$ $(a+1)p<n$ を示せ。
+3. $M$ を $n$ 次元の閉多様体とする。$q>p^{*}$ なら $W^{1,p}(M)\not\subset L^{q}(M)$ を示せ。したがって \ref{gl:sobolev-embedding-manifold.1}（$k=1$）の指数 $p^{*}$ は最良である。$n=3$, $p=2$, $q=7$ で具体的な $a$ を挙げよ。
+:::
+
+::: solution
+**1.** $\mathbf{1}_{\{|\xi|\le1/2\}}|\xi|^{-aq}\le|w_{a}|^{q}\le\mathbf{1}_{\{|\xi|<1\}}|\xi|^{-aq}$ で、\ref{meas:polar-radial.2} から $\int_{|\xi|<c}|\xi|^{-aq}d\xi=n\omega_{n}\int_{0}^{c}r^{n-1-aq}dr$ は $n-1-aq>-1$ のとき、そのときに限り有限。
+
+**2.** ⇐：$w_{\varepsilon}(\xi)\defeq\beta(\xi)(|\xi|^{2}+\varepsilon^{2})^{-a/2}\in C_{c}^{\infty}(\mathbb{R}^{n})$ とする。$\xi\neq0$ で $w_{\varepsilon}\to w_{a}$、
+$$
+\partial_{j}w_{\varepsilon}=\partial_{j}\beta\,(|\xi|^{2}+\varepsilon^{2})^{-\frac a2}-a\beta\,\xi_{j}(|\xi|^{2}+\varepsilon^{2})^{-\frac a2-1}\to\partial_{j}w_{a}
+$$
+（右辺は $\xi\neq0$ での古典的な偏導関数）。$(|\xi|^{2}+\varepsilon^{2})^{-a/2}\le|\xi|^{-a}$、$|\xi_{j}|(|\xi|^{2}+\varepsilon^{2})^{-a/2-1}\le|\xi|^{-a-1}$ なので $|w_{\varepsilon}|\le\mathbf{1}_{\{|\xi|<1\}}|\xi|^{-a}$, $|\partial_{j}w_{\varepsilon}|\le\mathbf{1}_{\{|\xi|<1\}}(\sup|\partial_{j}\beta|\,|\xi|^{-a}+a|\xi|^{-a-1})$ で、$ap<(a+1)p<n$ と 1 からこれらの $p$ 乗は可積分。\ref{meas:dominated-convergence} から $w_{1/i}\to w_{a}$, $\partial_{j}w_{1/i}\to\partial_{j}w_{a}$（$L^{p}$）なので、$(w_{1/i})$ は $W^{1,p}$ のコーシー列で、\ref{fa:sobolev-complete.1} から $h\in W^{1,p}$ に収束し、$L^{p}$ の極限の一意性から $h=w_{a}$。
+
+⇒：$w_{a}\in W^{1,p}$ なら、開集合 $B^{*}\defeq\{0<|\xi|<\frac12\}$ への制限の弱微分は $|\xi|^{-a}$ の弱微分で（\ref{gl:sobolev-local-operations.1}）、$|\xi|^{-a}$ は $B^{*}$ で滑らかなので古典的な $-a\xi_{j}|\xi|^{-a-2}$ に等しい（\ref{fa:distribution-operations-properties.2}）。$a|\xi|^{-a-1}=|\nabla|\xi|^{-a}|\le\sum_{j}|\partial_{j}|\xi|^{-a}|$ が $L^{p}(B^{*})$ に入るので、1 と同じ計算で $(a+1)p<n$。
+
+**3.** $q>p^{*}$ $\iff$ $\frac1q<\frac1p-\frac1n$ $\iff$ $\frac nq<\frac np-1$ なので、$\frac nq<a<\frac np-1$ となる $a>0$ がとれ、1・2 から $w_{a}\in W^{1,p}(\mathbb{R}^{n})$, $w_{a}\notin L^{q}$。座標近傍 $(U,x)$ を一つとり、$x$ に平行移動と拡大を合成して $x(U)$ が閉単位球を含むようにする（合成したものも座標近傍）。$u\defeq x^{*}w_{a}$ とすると、\ref{gl:sm-localization.2}（$L=\operatorname{supp}\beta$）から $u\in W^{1,p}(M)$。$u$ はコンパクト集合 $x^{-1}(\operatorname{supp}\beta)$ の外で $0$ で $u^{x}=w_{a}$ なので、$u\in L^{q}(M)$ なら \ref{gl:sm-chart-lp.2}（指数 $q$）から $w_{a}\in L^{q}$ となり矛盾する。$n=3$, $p=2$ では $p^{*}=6$ で、$q=7$ なら $\frac37<a<\frac12$、たとえば $a=\frac{9}{20}$（$(a+1)p=\frac{29}{10}<3$, $aq=\frac{63}{20}>3$）。
+:::
+
+## ポアンカレの不等式とトーラスでの直接の証明 {#gl:sec-pw-exercises}
+
+対応するページ：\ref{gl:page-poincare-torus}
+
+::: problem ★ 基本：ポアンカレ商の計算 {#gl:ex-pw-1}
+連結な閉リーマン多様体の上の、平均 $0$ で $0$ でない実数値の滑らかな関数 $f$ について $Q(f)\defeq\|f\|_{L^{2}}^{2}/\|\nabla f\|_{L^{2}}^{2}$ とおく。\ref{gl:poincare-manifold.1} の定数 $C$ は $C^{2}\ge Q(f)$ を満たす。
+1. 平坦トーラス $T^{2}$ で $U\defeq\cos t_{1}+2\sin(t_{1}+t_{2})+3\cos2t_{2}$ について $\|U\|^{2}=28\pi^{2}$, $\|\nabla U\|^{2}=90\pi^{2}$ を示し、\ref{gl:torus-direct.3} と比べよ。
+2. $S^{2}$ で $Q(z)=\frac12$, $Q(z^{2}-\frac13)=\frac16$ を示せ。
+3. 回転トーラス $T_{R,r}$ で $f\defeq\cos u$ は平均 $0$ で、$Q(f)=R\sqrt{R^{2}-r^{2}}$ であることを示せ。
+:::
+
+::: solution
+**1.** $U$ は $e_{m}$（$m=\pm(1,0),\pm(1,1),\pm(0,2)$）の一次結合で、$m=0$ の項がないので平均 $0$。異なる $m$ の $e_{m}$ は直交し（\ref{gl:torus-fourier-basis.2}）、$k\neq0$ なら $\int_{(0,2\pi)^{2}}\cos^{2}(k\cdot t)\,dt=\int\sin^{2}(k\cdot t)\,dt=2\pi^{2}$ なので $\|U\|^{2}=2\pi^{2}(1+4+9)=28\pi^{2}$。平坦な計量では $|\nabla U|^{2}=(D_{1}U)^{2}+(D_{2}U)^{2}$ で、$D_{1}U=-\sin t_{1}+2\cos(t_{1}+t_{2})$, $D_{2}U=2\cos(t_{1}+t_{2})-6\sin2t_{2}$ から $\|\nabla U\|^{2}=2\pi^{2}(1+4)+2\pi^{2}(4+36)=90\pi^{2}$。$Q(U)=\frac{14}{45}\le1$ で、最良の定数 $1$ と矛盾しない。
+
+**2.** $\int_{S^{2}}z^{2j}d\mu=2\pi\int_{0}^{\pi}\cos^{2j}\theta\sin\theta\,d\theta=\frac{4\pi}{2j+1}$。$z$：平均 $0$、$\|z\|^{2}=\frac{4\pi}{3}$、$|\nabla z|^{2}=\sin^{2}\theta$ から $\|\nabla z\|^{2}=4\pi-\frac{4\pi}{3}=\frac{8\pi}{3}$ で $Q=\frac12$。$z^{2}$ の平均は $\frac13$、$\|z^{2}-\frac13\|^{2}=\frac{4\pi}{5}-\frac23\cdot\frac{4\pi}{3}+\frac{4\pi}{9}=\frac{16\pi}{45}$、$|\nabla z^{2}|^{2}=4z^{2}(1-z^{2})$ から $\|\nabla z^{2}\|^{2}=4(\frac{4\pi}{3}-\frac{4\pi}{5})=\frac{96\pi}{45}$ で $Q=\frac16$。よって $S^{2}$ では $C\ge2^{-1/2}$。
+
+**3.** $\int f\,d\mu=\int_{0}^{2\pi}\!\!\int_{0}^{2\pi}\cos u\,rW\,du\,dv=0$、$\|f\|^{2}=\int\!\!\int\cos^{2}u\,rW=\pi\cdot2\pi rR=2\pi^{2}Rr$。$|\nabla f|^{2}=g^{uu}(\partial_{u}f)^{2}=\frac{\sin^{2}u}{W^{2}}$ なので $\|\nabla f\|^{2}=\pi r\,J$, $J\defeq\int_{0}^{2\pi}\frac{dv}{R+r\cos v}$。周期性から $(-\pi,\pi)$ で積分し $\tau=\tan\frac v2$ と置換すると、$\cos v=\frac{1-\tau^{2}}{1+\tau^{2}}$, $dv=\frac{2\,d\tau}{1+\tau^{2}}$ から
+$$
+J=\int_{-\infty}^{\infty}\frac{2\,d\tau}{(R+r)+(R-r)\tau^{2}}=\frac{2\pi}{\sqrt{(R+r)(R-r)}}.
+$$
+よって $\|\nabla f\|^{2}=\frac{2\pi^{2}r}{\sqrt{R^{2}-r^{2}}}$, $Q(f)=R\sqrt{R^{2}-r^{2}}$。$r$ を止めて $R\to\infty$ とすると $Q\approx R^{2}$ で、ポアンカレの定数は少なくとも $R$ 程度になる（半径 $R$ の大きな円の方向に、ゆっくり変化する関数がある）。
+:::
+
+::: problem ★★ 標準：円周上の最良のソボレフの不等式 {#gl:ex-pw-2}
+平坦な $T^{1}$ の上で考える。$[0,2\pi]$ の上で $B(t)\defeq2\bigl(\frac{\pi^{2}}{6}-\frac{\pi t}{2}+\frac{t^{2}}{4}\bigr)$ とし、$B(0)=B(2\pi)$ なので $B$ を $T^{1}$ 上の連続関数とみる。
+1. $\hat{B}(0)=0$, $\hat{B}(m)=\frac{1}{m^{2}}$（$m\neq0$）、$B\in H^{1}$, $DB=t-\pi$（$0<t<2\pi$）を示し、$\sum_{m\ge1}\frac1{m^{2}}=\frac{\pi^{2}}{6}$ を導け。
+2. $u\in H^{1}(T^{1})$, $\int u\,d\mu=0$ とし、$\tilde{u}$ を連続な代表元とする（\ref{gl:torus-direct.1}）。$\sup|\tilde{u}|\le\sqrt{\pi/6}\,\|\nabla u\|_{L^{2}}$ を示せ。
+3. $u(p(t))\defeq B(t-t_{0})$（周期的に延ばす）で 2 の等号が成り立つことを示せ。
+:::
+
+::: solution
+**1.** $\int_{0}^{2\pi}B\,dt=2\bigl(\frac{\pi^{3}}{3}-\pi^{3}+\frac{2\pi^{3}}{3}\bigr)=0$。$m\neq0$ では、$B(0)=B(2\pi)$, $B'(t)=t-\pi$, $B''=1$ から 2 回の部分積分で
+$$
+\int_{0}^{2\pi}Be^{-imt}dt=\frac{1}{im}\int_{0}^{2\pi}B'e^{-imt}dt=\frac{1}{im}\cdot\frac{B'(2\pi)-B'(0)}{-im}=\frac{2\pi}{m^{2}}
+$$
+（$\int_{0}^{2\pi}B''e^{-imt}dt=0$）。$\sum(1+m^{2})m^{-4}<\infty$ なので $B\in H^{1}$（\ref{gl:torus-sobolev.1}）。$t-\pi$ の係数は同じ部分積分で $\frac{i}{m}$（$m\neq0$）、$0$（$m=0$）で、\ref{gl:torus-sobolev.2} の $im\hat{B}(m)$ と一致するので、\ref{gl:torus-fourier-basis.1} から $DB=t-\pi$。パーセヴァルの等式から $\int_{0}^{2\pi}(t-\pi)^{2}dt=\frac{2\pi^{3}}{3}=2\pi\sum_{m\neq0}\frac{1}{m^{2}}$。
+
+**2.** 平坦な $T^{1}$ では滑らかな $v$ について $|\nabla v|=|Dv|$ で、両辺の $L^{2}$ ノルムは $H^{1}$ 上で連続（\ref{gl:poincare-manifold.2}）なので、稠密性から $\|\nabla u\|=\|Du\|$。\ref{gl:torus-direct.1}（$n=1$, $k=1$, $r=0$）から $\tilde{u}(t)=\sum_{m}\hat{u}(m)e^{imt}$（絶対収束）で、$\hat{u}(0)=0$。コーシー–シュワルツの不等式と 1、パーセヴァルの等式（$\widehat{Du}(m)=im\hat{u}(m)$）から
+$$
+|\tilde{u}(t)|\le\sum_{m\neq0}\frac{1}{|m|}\,|m\hat{u}(m)|\le\Bigl(\frac{\pi^{2}}{3}\Bigr)^{1/2}\Bigl(\frac{\|Du\|^{2}}{2\pi}\Bigr)^{1/2}=\sqrt{\frac\pi6}\,\|\nabla u\|.
+$$
+
+**3.** 平行移動で係数は $e^{-imt_{0}}m^{-2}$ になるだけなので、$u\in H^{1}$, 平均 $0$, $\|\nabla u\|^{2}=\frac{2\pi^{3}}{3}$、$\tilde{u}(p(t_{0}))=B(0)=\frac{\pi^{2}}{3}$。$\sqrt{\frac\pi6}\cdot\sqrt{\frac{2\pi^{3}}{3}}=\frac{\pi^{2}}{3}$ なので等号。\ref{gl:torus-direct.3} と合わせると、平均 $0$ を仮定しない $u\in H^{1}(T^{1})$ について $\sup|\tilde{u}-u_{M}|\le\sqrt{\pi/6}\,\|\nabla u\|$。
+:::
+
+::: problem ★★★ 発展：トーラス上のポアソン方程式 {#gl:ex-pw-3}
+平坦トーラス $T^{n}$ と $f\in L^{2}(T^{n})$ について、$H^{2}(T^{n})$ の $u$ で $\Delta u=f$（$L^{2}$ の元として。$\Delta$ は \ref{gl:differential-operator-sobolev.1} の延長）となるものを考える。
+1. そのような $u$ があれば $\int f\,d\mu=0$ で、$u$ は定数の差を除いて一つしかないことを示せ。
+2. $\int f\,d\mu=0$ なら、$\int u\,d\mu=0$ の解 $u$ がただ一つあり、$\hat{u}(m)=\frac{\hat{f}(m)}{|m|^{2}}$（$m\neq0$）で、$\|u\|_{L^{2}}\le\|\nabla u\|_{L^{2}}\le\|f\|_{L^{2}}$ であることを示せ。両方の等号が成り立つ $f\neq0$ を挙げよ。
+3. $f\in H^{k}$ なら $u\in H^{k+2}$、$f$ が滑らかなら $u$ は滑らかな代表元をもつことを示せ。
+4. $n=1$, $(f\circ p)(t)=|t|-\frac\pi2$（$|t|\le\pi$）のとき、解は $(u\circ p)(t)=-\frac{|t|^{3}}{6}+\frac{\pi t^{2}}{4}-\frac{\pi^{3}}{24}$ で、$u\in H^{3}\setminus H^{4}$ であることを示せ。
+:::
+
+::: solution
+**Step 1.** 【主張：$v\in H^{2}$ なら $\widehat{\Delta v}(m)=|m|^{2}\hat{v}(m)$】\ref{gl:laplacian-examples.2} から $\Delta=-\sum_{j}D_{j}^{2}$ で、有界な延長はただ一通りなので延長どうしも同じ等式を満たす。\ref{gl:torus-sobolev.2}（$\beta=2e_{j}$）から $\widehat{D_{j}^{2}v}(m)=(im_{j})^{2}\hat{v}(m)$ で、$j$ について足す。
+
+**Step 2.** 【主張：1】$m=0$ として $\hat{f}(0)=0$、すなわち $\int f=(2\pi)^{n}\hat{f}(0)=0$（\ref{gl:closed-manifold-laplacian.5} の $L^{2}$ 版）。$\Delta u_{1}=\Delta u_{2}$ なら $w\defeq u_{1}-u_{2}$ は $|m|^{2}\hat{w}(m)=0$ なので $m\neq0$ で $\hat{w}(m)=0$、\ref{gl:torus-fourier-basis.1} を $w-\hat{w}(0)$ に使って $w$ は定数。
+
+**Step 3.** 【主張：2 の存在と一意性】$c_{m}\defeq\hat{f}(m)/|m|^{2}$（$m\neq0$）, $c_{0}\defeq0$ とすると $|c_{m}|\le|\hat{f}(m)|$。$\sum_{|m|_{\infty}\le N}c_{m}e_{m}$ は直交性とピタゴラスの定理から $L^{2}$ のコーシー列で、\ref{meas:riesz-fischer} から $u\in L^{2}$ に収束し、フーリエ係数の $L^{2}$ での連続性から $\hat{u}=c$。$m\neq0$ では $1+|m|^{2}\le2|m|^{2}$ なので $\sum(1+|m|^{2})^{2}|\hat{u}(m)|^{2}\le4\sum|\hat{f}(m)|^{2}<\infty$ で、\ref{gl:torus-sobolev.1} から $u\in H^{2}$。Step 1 から $\widehat{\Delta u}=\hat{f}$（$m=0$ では両辺 $0$）なので $\Delta u=f$。$\int u=(2\pi)^{n}\hat{u}(0)=0$ で、一意性は Step 2 から（差は定数で、平均 $0$ なので $0$）。
+
+**Step 4.** 【主張：2 の評価】平坦な計量では滑らかな $v$ について $|\nabla v|^{2}=\sum_{j}|D_{j}v|^{2}$ で、両辺の積分は $H^{1}$ 上で連続（\ref{gl:poincare-manifold.2}）なので $u\in H^{1}$ でも成り立つ。パーセヴァルの等式と \ref{gl:torus-sobolev.2} から
+$$
+\|\nabla u\|^{2}=(2\pi)^{n}\sum_{m\neq0}|m|^{2}|\hat{u}(m)|^{2}=(2\pi)^{n}\sum_{m\neq0}\frac{|\hat{f}(m)|^{2}}{|m|^{2}}\le\|f\|^{2}.
+$$
+$u_{M}=\hat{u}(0)=0$ なので \ref{gl:torus-direct.3} から $\|u\|\le\|\nabla u\|$。$f=e_{(1,0,\dots,0)}$ なら $u=f$ で、三つの量はどれも $(2\pi)^{n/2}$。
+
+**Step 5.** 【主張：3】$\sum(1+|m|^{2})^{k+2}|\hat{u}(m)|^{2}=\sum_{m\neq0}\bigl(\frac{1+|m|^{2}}{|m|^{2}}\bigr)^{2}(1+|m|^{2})^{k}|\hat{f}(m)|^{2}\le4\sum(1+|m|^{2})^{k}|\hat{f}(m)|^{2}$ と \ref{gl:torus-sobolev.1}。$f$ が滑らかならすべての $H^{k}$ に入り、$u$ もすべての $H^{k}$ に入るので、\ref{gl:hk-smooth.2} から滑らかな代表元をもつ。これは $T^{n}$ での \ref{gl:closed-manifold-laplacian.5} の逆である。
+
+**Step 6.** 【主張：4】$\hat{f}(0)=\frac\pi2-\frac\pi2=0$。$m\neq0$ では定数の係数は $0$ で、$\frac{1}{2\pi}\int_{-\pi}^{\pi}|t|e^{-imt}dt=\frac{(-1)^{m}-1}{\pi m^{2}}$（$2\int_{0}^{\pi}t\cos mt\,dt$ を部分積分）。よって $\hat{u}(m)=\frac{(-1)^{m}-1}{\pi m^{4}}$ で、$\sum(1+m^{2})^{k}|\hat{u}(m)|^{2}<\infty$ $\iff$ $\sum_{m\text{ 奇数}}m^{2k-8}<\infty$ $\iff$ $k\le3$ なので $u\in H^{3}\setminus H^{4}$。式の確認：$\varphi(t)\defeq-\frac{|t|^{3}}{6}+\frac{\pi t^{2}}{4}-\frac{\pi^{3}}{24}$ について $\varphi'=-\frac{t|t|}{2}+\frac{\pi t}{2}$, $\varphi''=-|t|+\frac\pi2$ は $[-\pi,\pi]$ で連続、$\varphi$ と $\varphi''$ は偶関数、$\varphi'(\pm\pi)=0$ なので、周期的に延ばした $\Phi$ は $C^{2}$ 級。一周期で 2 回部分積分すると（境界項は周期性で消える）$\widehat{\Phi''}(m)=-m^{2}\hat{\Phi}(m)$ で、$\Phi''=-(f\circ p)$ から $m^{2}\hat{\Phi}(m)=\hat{f}(m)$。また $\hat{\Phi}(0)=\frac1\pi\int_{0}^{\pi}\bigl(-\frac{t^{3}}{6}+\frac{\pi t^{2}}{4}\bigr)dt-\frac{\pi^{3}}{24}=\frac{\pi^{3}}{24}-\frac{\pi^{3}}{24}=0$。係数が一致するので \ref{gl:torus-fourier-basis.1} から $u\circ p=\Phi$。$u$ は $C^{2}$ 級だが、$\Phi''=-|t|+\frac\pi2$ は $t=0$ で微分できない（左右の微分係数が $1$ と $-1$）ので $C^{3}$ 級でなく、$H^{3}\subset C^{2}$（\ref{gl:hk-smooth.1}、$3>\frac12+2$）と合う。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
