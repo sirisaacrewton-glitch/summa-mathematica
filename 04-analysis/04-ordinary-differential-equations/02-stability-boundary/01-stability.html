@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平衡点の安定性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/02-stability-boundary/01-stability.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 平衡点の安定性 {#ode:page-stability keywords="stability of equilibria, Lyapunov stability, asymptotic stability, exponential stability, instability, linear systems x' = Ax and eigenvalues, spectral abscissa, Lyapunov function, orbital derivative, Lyapunov stability theorem, Chetaev instability theorem, Lyapunov matrix equation PA + A^T P = -I, linearization, principle of linearized stability, hyperbolic equilibrium, Hartman-Grobman theorem, リアプノフ, 安定性, 線形化"}
+
+自励系 $x'=f(x)$ の平衡点 $x_{0}$（$f(x_{0})=0$ となる点）のまわりで、近くから出発した解がどう振る舞うかを調べる。近くに留まり続けるなら**安定**、さらに $x_{0}$ に吸い込まれるなら**漸近安定**という。まず線形系 $x'=Ax$ では、$e^{tA}$ をジョルダン標準形で書くことで、安定性が固有値の実部の符号でほぼ完全に決まることを示す（\ref{ode:stab-linear}）。次に、解を求めずに、解に沿って減る関数（**リャプノフ関数**）から安定性を導く方法を述べ（\ref{ode:lyapunov-theorem}）、その裏返しとして、解に沿って増える関数から不安定性を導く（\ref{ode:lyapunov-chetaev}）。この二つを二次形式 $\langle Px,x\rangle$ に適用すると、非線形の系でも、線形化 $Df(x_{0})$ の固有値の実部がすべて負なら漸近安定（\ref{ode:stab-linearization}）、実部が正の固有値が一つでもあれば不安定（\ref{ode:stab-linearization-unstable}）であることがわかる。実部が $0$ の固有値があると線形化だけでは何も言えない。ω 極限集合とラサールの不変性原理、勾配系とハミルトン系の例は次のページ（\see{ode:page-lasalle}）で扱う。
+
+## 記法と定義の確認 {#ode:sec-st-notation}
+
+::: notation
+- 流れ・平衡点は \ref{ode:flow-def}、流れの基本性質は \ref{ode:flow-theorem}。最大解の存在と一意性は \ref{ode:maximal-solution}、逃避補題とその帰結は \ref{ode:escape-lemma}, \ref{ode:escape-corollaries}。定数係数の線形系と $e^{tA}$ のジョルダン細胞ごとの式は \ref{ode:constant-coefficients}。
+- 行列の指数関数は \ref{lin:matrix-exponential}、ジョルダン標準形は \ref{lin:jordan-normal-form}、ケーリー–ハミルトンの定理は \tref{lin:cayley-hamilton}。連鎖律は \ref{calc:multivariable-chain-rule}、中間値の定理は \tref{top:intermediate-value}、作用素ノルム $\|X\|\defeq\sup_{|z|=1}|Xz|$ とその性質は \ref{calc:operator-norm}, \ref{calc:operator-norm-properties}。有界閉集合はコンパクト（\ref{top:heine-borel}）で、その上の連続関数は最大値・最小値をとる（\ref{top:extreme-value}）。
+- **このページの設定**：$W\subset\mathbb{R}^{n}$ は開集合、$f\colon W\to\mathbb{R}^{n}$ は $C^{1}$ 級、$x'=f(x)$ の流れを $\Phi_{t}(\xi)$、$\xi$ を通る最大解の定義域を $I_{\xi}$、$W_{t}\defeq\{\xi:t\in I_{\xi}\}$ と書く。$x_{0}\in W$ は平衡点 $f(x_{0})=0$ とし、$A\defeq Df(x_{0})$ を $x_{0}$ での**線形化**という。$|\cdot|$ はユークリッドノルム、$\langle\cdot,\cdot\rangle$ は標準内積、$B(x,r)$, $\overline{B}(x,r)$ は開球・閉球、$X^{\mathsf{T}}$ は転置。
+- 複素行列 $X\in M_{n}(\mathbb{C})$ には $|X|_{F}\defeq(\sum_{i,j}|x_{ij}|^{2})^{1/2}$ を使う。コーシー–シュワルツの不等式から $|Xz|\le|X|_{F}|z|$（$z\in\mathbb{C}^{n}$、$|z|^{2}=\sum|z_{i}|^{2}$）、$|XY|_{F}\le|X|_{F}|Y|_{F}$、$|x_{ij}|\le|X|_{F}$。実行列なら $\|X\|\le|X|_{F}\le\sqrt{n}\,\|X\|$（左は \ref{calc:operator-norm-properties.1}、右は各列 $Xe_{j}$ の長さが $\|X\|$ 以下だから）。
+- $A\in M_{n}(\mathbb{R})$ の（複素）固有値の実部の最大値を $\mu(A)$ と書く（**スペクトル横座標**）。$A^{\mathsf{T}}$ は $A$ と同じ固有多項式をもつ（$\det(tI-A^{\mathsf{T}})=\det(tI-A)^{\mathsf{T}}$）ので $\mu(A^{\mathsf{T}})=\mu(A)$。
+- **選択公理**：使わない。コンパクト性の議論で選ぶのは有限個の点（有限部分被覆）だけである。
+:::
+
+## 安定性の定義と線形系 {#ode:sec-st-definitions}
+
+::: definition 平衡点の安定性 {#ode:stab-def keywords="Lyapunov stable equilibrium, asymptotically stable, attractive, exponentially stable, unstable equilibrium" index="安定（平衡点）|あんていへいこうてん, リャプノフ安定|りゃぷのふあんてい, 漸近安定|ぜんきんあんてい, 指数安定|しすうあんてい, 不安定（平衡点）|ふあんていへいこうてん, 吸引的|きゅういんてき"}
+平衡点 $x_{0}$ について次のように定める。
+1. $x_{0}$ が（**リャプノフの意味で**）**安定**であるとは、任意の $\varepsilon>0$ に $\delta>0$ があって、$|\xi-x_{0}|<\delta$ なら $[0,\infty)\subset I_{\xi}$ かつすべての $t\ge0$ で $|\Phi_{t}(\xi)-x_{0}|<\varepsilon$ となることをいう。
+2. $x_{0}$ が**漸近安定**であるとは、安定で、さらに $\eta>0$ があって、$|\xi-x_{0}|<\eta$ なら $[0,\infty)\subset I_{\xi}$ かつ $t\to\infty$ で $\Phi_{t}(\xi)\to x_{0}$ となることをいう（後半の性質だけを**吸引的**という）。
+3. $x_{0}$ が**指数安定**であるとは、$\eta,C,\beta>0$ があって、$|\xi-x_{0}|<\eta$ なら $[0,\infty)\subset I_{\xi}$ かつすべての $t\ge0$ で $|\Phi_{t}(\xi)-x_{0}|\le Ce^{-\beta t}|\xi-x_{0}|$ となることをいう。
+4. 安定でないとき、$x_{0}$ は**不安定**であるという。つまり、ある $\varepsilon>0$ について、$x_{0}$ のいくらでも近くに、解が $[0,\infty)$ で定義されないか、ある $t\ge0$ で $|\Phi_{t}(\xi)-x_{0}|\ge\varepsilon$ となる $\xi$ がある。
+:::
+
+::: intuition
+安定とは、少しだけずらしたとき、いつまでも少ししか離れないことである。漸近安定とは、さらに時間がたつと元の平衡点に戻ってくることで、指数安定は、その戻り方が一定の割合で指数関数的に速いことである。
+:::
+
+::: example 安定性の例 {#ode:stab-def-examples}
+1. 指数安定なら漸近安定：$|\xi-x_{0}|<\min(\eta,\varepsilon/C)$ なら $|\Phi_{t}(\xi)-x_{0}|\le C|\xi-x_{0}|<\varepsilon$。
+2. $n=1$, $x'=-x$ の $0$ は指数安定（$\Phi_{t}(\xi)=e^{-t}\xi$）、$x'=x$ の $0$ は不安定（$|\xi|$ がどれほど小さくても $e^{t}|\xi|\to\infty$）、$x'=0$ の $0$ は安定だが漸近安定でない。
+3. （吸引的だが安定でない例）$W=\mathbb{R}^{2}\setminus\{0\}$ で、極座標 $(r,\theta)$ を使って $r'=r(1-r)$, $\theta'=1-\cos\theta$ と書かれる系を考える。直交座標では $x=r\cos\theta$, $y=r\sin\theta$ として
+$$
+x'=x(1-r)-y\Bigl(1-\frac{x}{r}\Bigr),\qquad y'=y(1-r)+x\Bigl(1-\frac{x}{r}\Bigr)\qquad(r=\sqrt{x^{2}+y^{2}})
+$$
+で、右辺は $W$ の上で $C^{\infty}$ 級。$p\defeq(1,0)$ は平衡点である。$r(0)>0$ なら $r(t)\to1$（$r=1$ の前後で $r'$ の符号が変わる 1 次元の方程式）、$\theta(0)\in(0,2\pi)$ なら $\theta(t)$ は $(0,2\pi)$ に留まって単調に増え（$0$ と $2\pi$ は平衡点で、一意性から越えない）、極限は $1-\cos\theta$ の零点なので $2\pi$。よってすべての解が $p$ に収束し、$p$ は吸引的である。しかし $\theta(0)>0$ が小さい解は、$\theta=\pi$ を通るので点 $(-r,0)$ の近くまで遠回りする。$p$ のいくらでも近くにそういう点があるので $p$ は安定でない。漸近安定の定義に「安定」を含めるのはこのためである。
+:::
+
+線形系 $x'=Ax$（$A\in M_{n}(\mathbb{R})$）の流れは $\Phi_{t}=e^{tA}$ で、すべての $t$ で定義される（\ref{ode:constant-coefficients}）。安定性は $e^{tA}$ の大きさで決まるので、まずそれを評価する。
+
+::: lemma 行列の指数関数の評価 {#ode:stab-exp-bound keywords="growth bound ||e^{tA}|| <= C e^{gamma t} for every gamma > spectral abscissa; boundedness of e^{tA} on t >= 0 iff Re lambda <= 0 and eigenvalues on the imaginary axis are semisimple; real and imaginary parts of e^{lambda t} v" index="行列の指数関数の評価|ぎょうれつのしすうかんすうのひょうか, スペクトル横座標|すぺくとるよこざひょう"}
+$A\in M_{n}(\mathbb{R})$ とする。
+1. 任意の $\gamma>\mu(A)$ について、定数 $C\ge1$ があってすべての $t\ge0$ で $\|e^{tA}\|\le Ce^{\gamma t}$。
+2. $\sup_{t\ge0}\|e^{tA}\|<\infty$ であることと、「$\mu(A)\le0$ で、実部が $0$ の各固有値のジョルダン細胞の大きさがすべて $1$」は同値である。
+3. $\lambda=a+ib$ を $A$ の固有値、$v=u+iw$（$u,w\in\mathbb{R}^{n}$）をその固有ベクトルとすると、すべての $t$ で $|e^{tA}u|^{2}+|e^{tA}w|^{2}=e^{2at}\bigl(|u|^{2}+|w|^{2}\bigr)$。
+:::
+
+::: proof
+\ref{lin:jordan-normal-form.1}（$\mathbb{C}$ の上で）から、可逆な $P\in M_{n}(\mathbb{C})$ とジョルダン細胞の直和 $J$ で $A=PJP^{-1}$ となるものがある。\ref{lin:matrix-exponential.2} から $e^{tA}=Pe^{tJ}P^{-1}$、$e^{tJ}$ は細胞ごとの $e^{tJ_{m}(\lambda)}$ の直和で、\ref{ode:constant-coefficients} の式から、大きさ $m$ の細胞 $J_{m}(\lambda)$ の $e^{tJ_{m}(\lambda)}$ は、対角から $k$ 番目の上の斜めの列（$0\le k<m$）の成分がすべて $e^{\lambda t}t^{k}/k!$ で、それ以外は $0$ の上三角行列である。
+
+**1.** $\gamma>\mu(A)$、$\lambda$ を固有値、$\beta\defeq\gamma-\operatorname{Re}\lambda>0$ とすると、$t\ge0$ で
+$$
+\Bigl|\frac{e^{\lambda t}t^{k}}{k!}\Bigr|=e^{\gamma t}\frac{t^{k}e^{-\beta t}}{k!}\le e^{\gamma t}\frac{1}{k!}\Bigl(\frac{k}{e\beta}\Bigr)^{k}
+$$
+（$k\ge1$ のとき $t^{k}e^{-\beta t}$ の最大値は $t=k/\beta$ でとる。$k=0$ では右辺を $e^{\gamma t}$ と読む）。固有値と $k<n$ は有限個なので、すべての成分が $C_{0}e^{\gamma t}$ 以下となる $C_{0}$ があり、$|e^{tJ}|_{F}\le nC_{0}e^{\gamma t}$。よって $\|e^{tA}\|\le|e^{tA}|_{F}\le|P|_{F}|P^{-1}|_{F}\,nC_{0}e^{\gamma t}$。
+
+**2.** （⇐）実部が負の固有値の細胞の成分は 1 と同じ評価（$\gamma=0$）で有界、実部が $0$ で大きさ $1$ の細胞の成分は $|e^{\lambda t}|=1$。よって $|e^{tJ}|_{F}$ は $t\ge0$ で有界で、1 と同じく $\|e^{tA}\|$ も有界。（⇒）$\|e^{tA}\|\le M$ なら $|e^{tJ}|_{F}=|P^{-1}e^{tA}P|_{F}\le|P^{-1}|_{F}\sqrt{n}M|P|_{F}$ は有界なので、すべての成分が有界。対角成分 $|e^{\lambda t}|=e^{t\operatorname{Re}\lambda}$ が有界なので $\operatorname{Re}\lambda\le0$。$\operatorname{Re}\lambda=0$ で大きさ $m\ge2$ の細胞があれば、その成分 $|e^{\lambda t}t|=t$ が有界でなく矛盾。
+
+**3.** $A^{m}v=\lambda^{m}v$ を級数に入れて $e^{tA}v=e^{\lambda t}v$。$A$ と $t$ は実なので $e^{tA}u=\operatorname{Re}(e^{\lambda t}v)$、$e^{tA}w=\operatorname{Im}(e^{\lambda t}v)$（成分ごとの実部・虚部）。$z\in\mathbb{C}^{n}$ について $|\operatorname{Re}z|^{2}+|\operatorname{Im}z|^{2}=|z|^{2}$ なので、和は $|e^{\lambda t}v|^{2}=e^{2at}|v|^{2}=e^{2at}(|u|^{2}+|w|^{2})$。
+:::
+
+::: theorem 線形系の安定性 {#ode:stab-linear keywords="stability of x' = Ax: asymptotically stable iff all eigenvalues have negative real part, then exponentially stable; unstable if some eigenvalue has positive real part; stable iff Re <= 0 and imaginary-axis eigenvalues are semisimple" index="線形系の安定性|せんけいけいのあんていせい, 固有値と安定性|こゆうちとあんていせい"}
+$A\in M_{n}(\mathbb{R})$ とし、$x'=Ax$ の平衡点 $0$ を考える。
+1. 次は同値である：(a) $\mu(A)<0$（すべての固有値の実部が負）。(b) $0$ は漸近安定。(c) すべての $\xi$ で $e^{tA}\xi\to0$（$t\to\infty$）。(d) $0$ は指数安定。このとき、$\mu(A)<\gamma<0$ となる任意の $\gamma$ について $|e^{tA}\xi|\le Ce^{\gamma t}|\xi|$（$t\ge0$）。
+2. $\mu(A)>0$（実部が正の固有値がある）なら $0$ は不安定。
+3. $0$ が安定であることと、$\mu(A)\le0$ で実部が $0$ の各固有値のジョルダン細胞の大きさがすべて $1$ であることは同値。
+:::
+
+::: intuition
+線形系では、解は $t^{k}e^{\lambda t}$ の組み合わせなので、固有値の実部が負なら指数関数的に縮み、正なら指数関数的に伸びる。実部がちょうど $0$ なら回転するだけか、ジョルダン細胞があれば $t$ に比例してゆっくり伸びる。
+:::
+
+::: proof
+**Step 1.** 【主張：$0$ が安定 $\iff\sup_{t\ge0}\|e^{tA}\|<\infty$】$\|e^{tA}\|\le M$ なら、$\varepsilon$ に $\delta\defeq\varepsilon/M$ をとれば $|e^{tA}\xi|\le M|\xi|<\varepsilon$。逆に安定なら、$\varepsilon=1$ の $\delta$ について、$|\zeta|\le1$ なら $|e^{tA}(\delta\zeta/2)|<1$、線形性から $|e^{tA}\zeta|<2/\delta$。よって $\|e^{tA}\|\le2/\delta$。これと \ref{ode:stab-exp-bound.2} から 3 が従う。
+
+**Step 2.** 【主張：$\mu(A)\ge0$ なら (c) は成り立たない】$\operatorname{Re}\lambda=a\ge0$ の固有値と固有ベクトル $v=u+iw\ne0$ をとる。\ref{ode:stab-exp-bound.3} から $|e^{tA}u|^{2}+|e^{tA}w|^{2}=e^{2at}|v|^{2}\ge|v|^{2}>0$ なので、$e^{tA}u$ と $e^{tA}w$ がともに $0$ に収束することはない。
+
+**Step 3.** 【主張：$\mu(A)<0$ なら、$\mu(A)<\gamma<0$ について $|e^{tA}\xi|\le Ce^{\gamma t}|\xi|$】\ref{ode:stab-exp-bound.1} と $|e^{tA}\xi|\le\|e^{tA}\||\xi|$（\ref{calc:operator-norm-properties.2}）。
+
+**1** の同値：(a)⇒(d) は Step 3（$\beta=-\gamma$, $\eta$ は任意）、(d)⇒(b) は \ref{ode:stab-def-examples.1}、(b)⇒(c) は線形性（$\eta$ の中に縮めた $s\xi$ で収束するなら $\xi$ でも収束）、(c)⇒(a) は Step 2 の対偶。
+
+**2.** $a>0$ とし、Step 2 の $u,w$ をとる。任意の $\delta>0$ に $s>0$ を $s|v|<\delta$ ととれば、$|su|,|sw|<\delta$ で、$|e^{tA}su|^{2}+|e^{tA}sw|^{2}=s^{2}e^{2at}|v|^{2}\to\infty$。よってある $t$ で $su$ か $sw$ の解の長さが $1$ を超え、$\varepsilon=1$ について安定の条件が破れる。
+
+::: hypcheck
+- **係数が定数であること**：Step 1〜3 で $e^{tA}$ の式（ジョルダン標準形）を使った。係数が時間に依存する $x'=A(t)x$ では、各時刻の $A(t)$ の固有値の実部がすべて負でも不安定になりうる（\ref{ode:stab-linearization} の補足）。
+- **実部が $0$ の固有値**：3 のとおり、ジョルダン細胞の大きさで安定か不安定かが分かれる。下の例を参照。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example 実部 0 の固有値と一時的な増大 {#ode:stab-linear-examples}
+1. $A=\begin{pmatrix}0&-1\\1&0\end{pmatrix}$（固有値 $\pm i$）では $e^{tA}$ は角 $t$ の回転で $|e^{tA}\xi|=|\xi|$。$0$ は安定だが漸近安定でない。
+2. $A=\begin{pmatrix}0&1\\0&0\end{pmatrix}$（固有値 $0$、大きさ $2$ の細胞）では $e^{tA}=\begin{pmatrix}1&t\\0&1\end{pmatrix}$、$e^{tA}\xi=(\xi_{1}+t\xi_{2},\xi_{2})$。$\xi_{2}\ne0$ ならいくら小さくても $|e^{tA}\xi|\to\infty$ で、$0$ は不安定。実部が正の固有値はないので、2 の逆は成り立たない。
+3. $A=\begin{pmatrix}-1&4\\0&-1\end{pmatrix}$ では $e^{tA}=e^{-t}\begin{pmatrix}1&4t\\0&1\end{pmatrix}$。$\mu(A)=-1$ なので漸近安定だが、$\xi=(0,1)$ の解は $|e^{tA}\xi|=e^{-t}\sqrt{16t^{2}+1}$ で $t=1/2$ では $|\xi|=1$ より大きい。$|x|$ は単調に減るとは限らず、$C\ge1$ が要る。
+:::
+
+::: supplement
+**前提を変えると.** 時間に依存する線形系 $x'=A(t)x$ では、固有値は安定性を決めない。たとえば（マーカス–山辺の例）
+$$
+A(t)=\begin{pmatrix}-1+\frac32\cos^{2}t&1-\frac32\cos t\sin t\\-1-\frac32\sin t\cos t&-1+\frac32\sin^{2}t\end{pmatrix}
+$$
+は $\operatorname{tr}A(t)=-\frac12$, $\det A(t)=\frac12$ なので、各時刻の固有値は $\frac{-1\pm i\sqrt7}{4}$（実部 $-\frac14$）で一定だが、$x(t)=e^{t/2}(-\cos t,\sin t)$ は解で（微分して確かめられる）、$|x(t)|=e^{t/2}\to\infty$。周期係数の場合は、1 周期の推移行列（**モノドロミー行列**）の固有値で安定性が決まる（フロケの理論。ここでは扱わない）。
+
+**似た定理.** 離散時間の系 $x_{k+1}=Mx_{k}$ では「固有値の絶対値がすべて $1$ 未満」が漸近安定の条件で、$M=e^{A}$ なら $|e^{\lambda}|=e^{\operatorname{Re}\lambda}<1\iff\operatorname{Re}\lambda<0$ と一致する。\see{fa:spectral-radius} の $\lim\|M^{k}\|^{1/k}=$（スペクトル半径）はその定量的な形である。
+
+**高い視点.** \ref{ode:stab-exp-bound.1} は「$e^{tA}$ の増大率はスペクトル横座標 $\mu(A)$ で決まる」という主張で、無限次元の半群では一般に成り立たない（スペクトルだけでは増大率が決まらない例がある）。有限次元で成り立つのは、ジョルダン標準形のおかげで、冪零部分の寄与が多項式 $t^{k}$ にとどまり、指数関数に負けるからである。比喩で言えば、固有値は各方向の「金利」で、ジョルダン細胞は利息を別の口座に回す仕組みである。金利が負なら、回された分も最後は指数関数的に目減りする。
+:::
+
+## リャプノフ関数 {#ode:sec-st-lyapunov}
+
+非線形の系では解を具体的に求められない。そこで、解に沿った変化だけが計算できる関数を使う。
+
+::: definition リャプノフ関数 {#ode:lyapunov-function keywords="orbital derivative (Lie derivative along f) dot V = <grad V, f>; Lyapunov function: positive definite with nonpositive orbital derivative; strict Lyapunov function" index="リャプノフ関数|りゃぷのふかんすう, 軌道微分|きどうびぶん, 狭義のリャプノフ関数|きょうぎのりゃぷのふかんすう"}
+$U\subset W$ を開集合、$V\colon U\to\mathbb{R}$ を $C^{1}$ 級とする。$x\in U$ について
+$$
+\dot V(x)\defeq DV(x)f(x)=\langle\nabla V(x),f(x)\rangle
+$$
+を $V$ の（$f$ に沿った）**軌道微分**という。$U$ が $x_{0}$ を含み、$V(x_{0})=0$、$U\setminus\{x_{0}\}$ で $V>0$、$U$ で $\dot V\le0$ のとき、$V$ を $x_{0}$ の**リャプノフ関数**という。さらに $U\setminus\{x_{0}\}$ で $\dot V<0$ なら**狭義の**リャプノフ関数という。
+:::
+
+::: intuition
+軌道微分は、解に沿って $V$ がどれだけの速さで変わるかを、解を求めずに $f$ だけから計算したものである。リャプノフ関数は平衡点を底とするお椀で、解はお椀を登ることがない。
+:::
+
+連鎖律（\ref{calc:multivariable-chain-rule}）から、解 $x$ が $U$ の中にある間 $\frac{d}{dt}V(x(t))=DV(x(t))x'(t)=\dot V(x(t))$。これがすべての議論の出発点である。
+
+::: theorem リャプノフの安定性定理 {#ode:lyapunov-theorem keywords="Lyapunov's direct (second) method: a Lyapunov function implies stability, a strict Lyapunov function implies asymptotic stability" index="リャプノフの安定性定理|りゃぷのふのあんていせいていり, リャプノフの直接法|りゃぷのふのちょくせつほう, リャプノフの第二の方法|りゃぷのふのだいにのほうほう" refname="リャプノフの安定性定理"}
+1. $x_{0}$ のリャプノフ関数があれば、$x_{0}$ は安定である。
+2. $x_{0}$ の狭義のリャプノフ関数があれば、$x_{0}$ は漸近安定である。
+:::
+
+::: intuition
+お椀の底の近くから出た解は、お椀の縁より高い所へは登れないので、底の近くに留まる。お椀の斜面のどこでも必ず下るなら、最後は底まで下りてくる。
+:::
+
+::: proof
+$V\colon U\to\mathbb{R}$ をリャプノフ関数とする。
+
+**Step 1（障壁の高さ）.** 【主張：$0<\varepsilon$, $\overline{B}(x_{0},\varepsilon)\subset U$ について $m_{\varepsilon}\defeq\min\{V(x):|x-x_{0}|=\varepsilon\}>0$ で、$\delta\in(0,\varepsilon)$ を $B(x_{0},\delta)$ の上で $V<m_{\varepsilon}$ となるようにとれる】球面 $\{|x-x_{0}|=\varepsilon\}$ は有界閉集合でコンパクト、$V$ はその上で連続で正なので、最小値は正（\ref{top:extreme-value}）。$V$ は $x_{0}$ で連続で $V(x_{0})=0$ なので $\delta$ がとれる。
+
+**Step 2（安定性）.** 【主張：$|\xi-x_{0}|<\delta$ なら、$[0,\infty)\subset I_{\xi}$ で、すべての $t\ge0$ で $|\Phi_{t}(\xi)-x_{0}|<\varepsilon$】$x(t)\defeq\Phi_{t}(\xi)$、$I_{\xi}\cap[0,\infty)=[0,\beta)$ とする。ある $t\in[0,\beta)$ で $|x(t)-x_{0}|\ge\varepsilon$ と仮定すると、$|x(t)-x_{0}|$ は連続で $t=0$ で $\varepsilon$ 未満なので、中間値の定理と連続性から $|x(t_{1})-x_{0}|=\varepsilon$ となる最初の $t_{1}>0$ がある。$[0,t_{1}]$ で $x(t)\in\overline{B}(x_{0},\varepsilon)\subset U$ なので $\frac{d}{dt}V(x(t))=\dot V(x(t))\le0$、よって $V(x(t_{1}))\le V(\xi)<m_{\varepsilon}$。これは $m_{\varepsilon}$ の定義に反する。したがって $x$ はコンパクト集合 $\overline{B}(x_{0},\varepsilon)\subset W$ に留まり、\ref{ode:escape-corollaries.3} から $\beta=\infty$。$\varepsilon$ は小さくしてよいので 1 が示された。
+
+**Step 3（極限の値）.** 【主張：$V$ が狭義なら、$\overline{B}(x_{0},\varepsilon_{0})\subset U$ と Step 1 の $\delta_{0}$ について、$|\xi-x_{0}|<\delta_{0}$ なら $V(\Phi_{t}(\xi))\to0$】Step 2 から解 $x(t)$ は $t\ge0$ で $B(x_{0},\varepsilon_{0})$ にあり、$V(x(t))$ は単調非増加で $0$ 以上なので極限 $c\ge0$ をもつ。$c>0$ と仮定する。$V$ の連続性から $\rho\in(0,\varepsilon_{0})$ を $B(x_{0},\rho)$ で $V<c$ となるようにとると、$V(x(t))\ge c$ から $x(t)$ はいつもコンパクト集合 $K\defeq\{\rho\le|x-x_{0}|\le\varepsilon_{0}\}$ にある。$K$ の上で $\dot V<0$ なので、最大値 $-\kappa<0$ がある。すると $V(x(t))\le V(\xi)-\kappa t\to-\infty$ で、$V\ge0$ に矛盾。よって $c=0$。
+
+**Step 4（収束）.** 【主張：Step 3 の $\xi$ について $\Phi_{t}(\xi)\to x_{0}$】$0<\varepsilon'<\varepsilon_{0}$ について $m'\defeq\min\{V(x):\varepsilon'\le|x-x_{0}|\le\varepsilon_{0}\}>0$（Step 1 と同じ理由）。Step 3 から、ある $T$ 以降 $V(x(t))<m'$ で、$x(t)\in B(x_{0},\varepsilon_{0})$ なので $|x(t)-x_{0}|<\varepsilon'$。$\eta\defeq\delta_{0}$ として 2 が示された。
+
+::: hypcheck
+- **$V(x)>0$（$x\ne x_{0}$）**：Step 1 で $m_{\varepsilon}>0$ に、Step 4 で $m'>0$ に使った。外すと偽：$x'=x$（$n=1$）で $V(x)=-x^{2}$ は $\dot V=-2x^{2}\le0$ だが、$0$ は不安定。
+- **$\dot V\le0$**：Step 2 で $V$ が解に沿って増えないことに使った。
+- **狭義（$\dot V<0$）**：Step 3 で $\kappa>0$ に使った。$\dot V\le0$ だけでは漸近安定は従わない：$x'=-y$, $y'=x$ で $V=x^{2}+y^{2}$ は $\dot V=0$。ただし、$\dot V=0$ となる集合に解が留まれないことがわかれば漸近安定が従う（\see{ode:lyapunov-barbashin}）。
+- **$f$ の滑らかさ**：連続で局所リプシッツなら同じ証明が通る（解の一意性と逃避補題に使っただけ）。$V$ は $C^{1}$ 級であれば十分。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 逆に、$f$ が $C^{1}$ 級で $x_{0}$ が漸近安定なら、$x_{0}$ の近くで狭義のリャプノフ関数が存在することが知られている（**逆リャプノフ定理**。マッセラ、クルツヴァイルらによる。ここでは証明しない）。線形化の固有値の実部がすべて負の場合には、次の節で二次形式のリャプノフ関数を具体的に作る。
+
+**似た定理.** 熱方程式のエネルギー $\int|\nabla u|^{2}$ や、勾配系 $x'=-\nabla V$ の $V$（\see{ode:stab-gradient}）は、方程式から自然に出てくるリャプノフ関数である。
+
+**高い視点：解かずに解の性質を知る.** リャプノフの方法の要点は、解 $x(t)$ を知らなくても、$f$ と $\nabla V$ の内積の符号という**各点で確かめられる条件**から、時間について大域的な結論（いつまでも近くに留まる）を引き出す点にある。物理では $V$ はエネルギー、熱力学ではエントロピーの符号を変えたもの、最適化では目的関数に当たる。比喩で言えば、地図に描かれた等高線（$V$ の等位面）と、各地点の水の流れる向き（$f$）だけを見て、「この谷に落ちた水はこの谷から出られない」と判定する方法である。
+:::
+
+不安定性については、逆に、解に沿って増える関数を使う。
+
+::: theorem チェタエフの不安定性定理 {#ode:lyapunov-chetaev keywords="Chetaev instability theorem: if V > 0 at points arbitrarily close to x_0 and dot V > 0 wherever V > 0 near x_0, then x_0 is unstable" index="チェタエフの不安定性定理|ちぇたえふのふあんていせいていり, チェタエフ関数|ちぇたえふかんすう" refname="チェタエフの不安定性定理"}
+$U\subset W$ を $x_{0}$ を含む開集合、$V\colon U\to\mathbb{R}$ を $C^{1}$ 級、$r>0$ を $\overline{B}(x_{0},r)\subset U$ となる数とし、次を仮定する。
+1. $x_{0}$ のどんな近傍にも $V(x)>0$ となる点 $x$ がある。
+2. $x\in\overline{B}(x_{0},r)$ かつ $V(x)>0$ なら $\dot V(x)>0$。
+
+このとき、$|\xi-x_{0}|<r$, $V(\xi)>0$ となる各 $\xi$ について、ある $t\in I_{\xi}$, $t\ge0$ で $|\Phi_{t}(\xi)-x_{0}|\ge r$ となる。とくに $x_{0}$ は不安定である。
+:::
+
+::: intuition
+平衡点のすぐ近くに「$V$ が正の領域」があり、その中では解に沿って $V$ が必ず増えるなら、その領域から出発した解は $V$ を増やし続けるしかなく、有界な球の中に留まることはできない。
+:::
+
+::: proof
+$x(t)\defeq\Phi_{t}(\xi)$、$I_{\xi}\cap[0,\infty)=[0,\beta)$ とし、すべての $t\in[0,\beta)$ で $|x(t)-x_{0}|<r$ と仮定して矛盾を導く。このとき $x$ はコンパクト集合 $\overline{B}(x_{0},r)\subset W$ に留まるので、\ref{ode:escape-corollaries.3} から $\beta=\infty$。
+
+**Step 1.** 【主張：すべての $t\ge0$ で $V(x(t))\ge V(\xi)$】$t_{1}\defeq\sup\{t\ge0:[0,t]\text{ の上で }V(x(s))>0\}$ とおく（$V(\xi)>0$ と連続性から $t_{1}>0$）。$[0,t_{1})$ では仮定 2 から $\frac{d}{dt}V(x(t))=\dot V(x(t))>0$ なので $V(x(t))\ge V(\xi)$。$t_{1}<\infty$ なら連続性から $V(x(t_{1}))\ge V(\xi)>0$ で、$t_{1}$ の少し先まで $V>0$ が続き、$t_{1}$ の定義に反する。
+
+**Step 2.** 【主張：$V(x(t))\ge V(\xi)+\kappa t$ となる $\kappa>0$ がある】$K\defeq\{x\in\overline{B}(x_{0},r):V(x)\ge V(\xi)\}$ は有界閉集合でコンパクト、Step 1 からすべての $t\ge0$ で $x(t)\in K$。$K$ の上で $V>0$ なので仮定 2 から $\dot V>0$ で、最小値 $\kappa>0$ がある（\ref{top:extreme-value}）。積分すれば主張を得る。
+
+Step 2 の右辺は $t\to\infty$ で発散するが、$V$ はコンパクト集合 $\overline{B}(x_{0},r)$ の上で有界なので矛盾。最後の主張：$\varepsilon\defeq r$ とすると、仮定 1 から任意の $\delta\in(0,r)$ について $|\xi-x_{0}|<\delta$, $V(\xi)>0$ となる $\xi$ があり、その解は $|\Phi_{t}(\xi)-x_{0}|\ge\varepsilon$ となる時刻をもつ。
+
+::: hypcheck
+- **仮定 1**：最後の段落で、$x_{0}$ のいくらでも近くから出発点をとるのに使った。外すと結論は空になる（$V\le0$ の近傍があれば何も言えない）。
+- **仮定 2**：Step 1・2 で使った。$\overline{B}(x_{0},r)$ 全体ではなく $\{V>0\}$ の上だけで仮定すればよい点が、リャプノフ関数との違いである。$V(x_{0})=0$ や $V$ の符号の対称性は要らない。
+- **閉球 $\overline{B}(x_{0},r)$ の上で仮定すること**：Step 2 で $K$ をコンパクトにするのに使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example
+$n=2$, $x'=x$, $y'=-y$（原点は鞍点）。$V(x,y)\defeq x^{2}-y^{2}$ とすると $\dot V=2x\cdot x-2y\cdot(-y)=2(x^{2}+y^{2})$ で、$V>0$ の点では $\dot V>0$。$(s,0)$（$s\ne0$）で $V>0$ なので、\ref{ode:lyapunov-chetaev} から原点は不安定である。$V$ は $y$ 軸の近くで負になり、リャプノフ関数ではない。
+:::
+
+## 線形化による安定性 {#ode:sec-st-linearization}
+
+線形系の安定性を二次形式のリャプノフ関数で捉え直すと、非線形の項が小さい範囲にそのまま持ち込める。鍵になるのが次の行列方程式である。
+
+::: lemma リャプノフ方程式 {#ode:lyapunov-equation keywords="Lyapunov matrix equation PA + A^T P = -I: if all eigenvalues of A have negative real part, the unique solution is P = int_0^infty e^{s A^T} e^{s A} ds, symmetric positive definite" index="リャプノフ方程式|りゃぷのふほうていしき, リアプノフ方程式|りあぷのふほうていしき"}
+$A\in M_{n}(\mathbb{R})$ が $\mu(A)<0$ を満たすとする。
+1. $P\defeq\int_{0}^{\infty}e^{sA^{\mathsf{T}}}e^{sA}\,ds$（成分ごとの広義積分）は収束し、対称行列で、$PA+A^{\mathsf{T}}P=-I$ を満たす。
+2. $c>0$ があって、すべての $x$ で $c|x|^{2}\le\langle Px,x\rangle\le\|P\||x|^{2}$。
+3. $PA+A^{\mathsf{T}}P=-I$ を満たす行列 $P$ は 1 のものだけである。
+:::
+
+::: proof
+**Step 1（収束と対称性）.** 【主張：積分は絶対収束し、$P$ は対称】級数の項ごとに転置して $(e^{sA})^{\mathsf{T}}=e^{sA^{\mathsf{T}}}$。$\mu(A^{\mathsf{T}})=\mu(A)<0$ なので、$\mu(A)<\gamma<0$ をとると、\ref{ode:stab-exp-bound.1} から $\|e^{sA}\|\le Ce^{\gamma s}$, $\|e^{sA^{\mathsf{T}}}\|\le C'e^{\gamma s}$。被積分関数の各成分の絶対値は $\|e^{sA^{\mathsf{T}}}e^{sA}\|\le CC'e^{2\gamma s}$ 以下（\ref{calc:operator-norm-properties.1}・\ref{calc:operator-norm-properties.4}）で、$[0,\infty)$ で可積分。被積分関数は $(e^{sA^{\mathsf{T}}}e^{sA})^{\mathsf{T}}=e^{sA^{\mathsf{T}}}e^{sA}$ なので対称で、$P$ も対称。
+
+**Step 2（方程式）.** 【主張：$PA+A^{\mathsf{T}}P=-I$】$A$ と $e^{sA}$ は可換なので、積の微分と \ref{lin:matrix-exponential.5} から
+$$
+\frac{d}{ds}\bigl(e^{sA^{\mathsf{T}}}e^{sA}\bigr)=A^{\mathsf{T}}e^{sA^{\mathsf{T}}}e^{sA}+e^{sA^{\mathsf{T}}}e^{sA}A.
+$$
+$[0,T]$ で積分すると、$P_{T}\defeq\int_{0}^{T}e^{sA^{\mathsf{T}}}e^{sA}ds$ について $e^{TA^{\mathsf{T}}}e^{TA}-I=A^{\mathsf{T}}P_{T}+P_{T}A$。$T\to\infty$ で左辺は $-I$ に、右辺は $A^{\mathsf{T}}P+PA$ に収束する。
+
+**Step 3（正定値性）.** 【主張：2 が成り立つ】$\langle Px,x\rangle=\int_{0}^{\infty}x^{\mathsf{T}}e^{sA^{\mathsf{T}}}e^{sA}x\,ds=\int_{0}^{\infty}|e^{sA}x|^{2}ds$。$x\ne0$ なら被積分関数は連続で $\ge0$、$s=0$ で $|x|^{2}>0$ なので積分は正。$x\mapsto\langle Px,x\rangle$ は連続で、単位球面（コンパクト）の上の最小値 $c$ は正。$x\ne0$ なら $x/|x|$ に使って $\langle Px,x\rangle=|x|^{2}\langle P\tfrac{x}{|x|},\tfrac{x}{|x|}\rangle\ge c|x|^{2}$。上からの評価はコーシー–シュワルツと \ref{calc:operator-norm-properties.2}。
+
+**Step 4（一意性）.** 【主張：$DA+A^{\mathsf{T}}D=0$ なら $D=0$】Step 2 と同じ計算で $\frac{d}{ds}(e^{sA^{\mathsf{T}}}De^{sA})=e^{sA^{\mathsf{T}}}(A^{\mathsf{T}}D+DA)e^{sA}=0$ なので、$e^{sA^{\mathsf{T}}}De^{sA}=D$（$s=0$ の値）。左辺のノルムは $CC'e^{2\gamma s}\|D\|\to0$ なので $D=0$。二つの解の差に使う。
+:::
+
+::: intuition
+$\langle Px,x\rangle$ は、$x$ から出発した線形系の解の長さの 2 乗を、未来全体にわたって足し合わせたものである。時間がたつと解は短くなるので、出発点を進めるほどこの総和は減る。その減り方がちょうど $|x|^{2}$ であることを式にしたのが $PA+A^{\mathsf{T}}P=-I$ である。
+:::
+
+::: theorem 線形化による漸近安定性 {#ode:stab-linearization keywords="principle of linearized stability: if all eigenvalues of Df(x_0) have negative real part, x_0 is exponentially (hence asymptotically) stable; proof by the quadratic Lyapunov function <P(x - x_0), x - x_0>" index="線形化による安定性|せんけいかによるあんていせい, 線形化安定性の原理|せんけいかあんていせいのげんり" refname="線形化による漸近安定性"}
+$\mu(Df(x_{0}))<0$（$Df(x_{0})$ のすべての固有値の実部が負）なら、$x_{0}$ は指数安定であり、とくに漸近安定である。
+:::
+
+::: intuition
+平衡点のごく近くでは、非線形の項は線形の項に比べて小さい。線形の部分が解を指数関数的に縮めるなら、小さな非線形の項はそれを覆せない。
+:::
+
+::: proof
+平行移動 $x\mapsto x-x_{0}$ で $x_{0}=0$ としてよい。$A\defeq Df(0)$, $g(x)\defeq f(x)-Ax$ とおくと、$f(0)=0$ と微分可能性から $|g(x)|/|x|\to0$（$x\to0$）。\ref{ode:lyapunov-equation} の $P$ と $c_{1}\defeq c$, $c_{2}\defeq\|P\|$ をとり、$V(x)\defeq\langle Px,x\rangle$ とおく（$c_{1}|x|^{2}\le V(x)\le c_{2}|x|^{2}$）。
+
+**Step 1（軌道微分の評価）.** 【主張：$r>0$ があって、$\overline{B}(0,r)\subset W$ かつ $|x|\le r$ で $\dot V(x)\le-\frac{1}{2}|x|^{2}\le-\kappa V(x)$（$\kappa\defeq1/(2c_{2})$）】$P$ は対称なので $DV(x)h=2\langle Px,h\rangle$、よって
+$$
+\dot V(x)=2\langle Px,Ax+g(x)\rangle=\langle(PA+A^{\mathsf{T}}P)x,x\rangle+2\langle Px,g(x)\rangle\le-|x|^{2}+2c_{2}|x||g(x)|.
+$$
+$r$ を、$\overline{B}(0,r)\subset W$ で $|x|\le r$ なら $|g(x)|\le|x|/(4c_{2})$ となるようにとれば、右辺は $-\frac{1}{2}|x|^{2}$ 以下で、$|x|^{2}\ge V(x)/c_{2}$。
+
+**Step 2（球からの不脱出と減衰）.** 【主張：$V(\xi)<c_{1}r^{2}$ なら、$[0,\infty)\subset I_{\xi}$ で、$t\ge0$ について $\Phi_{t}(\xi)\in B(0,r)$, $V(\Phi_{t}(\xi))\le e^{-\kappa t}V(\xi)$】$x(t)\defeq\Phi_{t}(\xi)$、$I_{\xi}\cap[0,\infty)=[0,\beta)$、$T\defeq\sup\{s<\beta:x([0,s])\subset B(0,r)\}$ とする（$|\xi|^{2}\le V(\xi)/c_{1}<r^{2}$ なので $T>0$）。$[0,T)$ では Step 1 から $\frac{d}{dt}\bigl(e^{\kappa t}V(x(t))\bigr)=e^{\kappa t}(\kappa V+\dot V)(x(t))\le0$ なので $V(x(t))\le e^{-\kappa t}V(\xi)$。$T<\beta$ なら連続性から $V(x(T))\le V(\xi)<c_{1}r^{2}$、$|x(T)|<r$ で、$T$ の少し先まで $B(0,r)$ に留まり $T$ の定義に反する。よって $T=\beta$ で、$x$ はコンパクト集合 $\overline{B}(0,r)$ に留まるので \ref{ode:escape-corollaries.3} から $\beta=\infty$。
+
+**Step 3（指数安定）.** 【主張：$\eta\defeq r\sqrt{c_{1}/c_{2}}$ について、$|\xi|<\eta$ なら $|\Phi_{t}(\xi)|\le\sqrt{c_{2}/c_{1}}\,e^{-\kappa t/2}|\xi|$】$V(\xi)\le c_{2}|\xi|^{2}<c_{1}r^{2}$ なので Step 2 が使え、$|\Phi_{t}(\xi)|^{2}\le V(\Phi_{t}(\xi))/c_{1}\le e^{-\kappa t}V(\xi)/c_{1}\le(c_{2}/c_{1})e^{-\kappa t}|\xi|^{2}$。
+
+漸近安定であることは \ref{ode:stab-def-examples.1} から従う。
+
+::: hypcheck
+- **$f$ が $C^{1}$ 級**：$x_{0}$ で微分可能であること（$|g(x)|=o(|x|)$）は Step 1 で、解の一意性と逃避補題（局所リプシッツ）は Step 2 で使った。$f$ が $x_{0}$ で微分可能で、局所リプシッツでありさえすれば同じ証明が通る。
+- **$\mu(Df(x_{0}))<0$**：\ref{ode:lyapunov-equation} を通して Step 1 の $PA+A^{\mathsf{T}}P=-I$ に使った。実部 $0$ の固有値があると結論は成り立つとは限らない（\ref{ode:stab-critical-examples}）。
+- **「近くでは」**：$\eta$ は $r$、つまり非線形の項が線形の項より小さい範囲で決まり、大域的な結論は出ない：$x'=-x+x^{2}$（$n=1$）で $Df(0)=-1$ だが、$\xi>1$ の解は有限時間で爆発する。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 係数が時間によって変わる線形系 $x'=A(t)x$ では、すべての $t$ で $\mu(A(t))<0$ でも漸近安定とは限らない。このページの方法が通らないのは、$P$ が $A$ ごとに違い、時間とともに $\langle P(t)x,x\rangle$ が変わるからである。
+
+**似た定理.** 不安定性の側は次の \ref{ode:stab-linearization-unstable}。両者を合わせると、固有値の実部が $0$ でない（**双曲型**の）平衡点では、安定性は線形化だけで決まる。さらに強く、双曲型の平衡点の近くでは、流れそのものが線形化の流れと位相的に同じ形をしている（\ref{ode:stab-hartman-grobman}）。
+
+**高い視点：平衡点に合わせた計量.** $\langle Px,x\rangle$ を新しい内積とみると、そのノルム $|x|_{P}\defeq\langle Px,x\rangle^{1/2}$ では、線形系の解は $\frac{d}{dt}|x|_{P}^{2}=-|x|^{2}<0$ を満たし、常に短くなる。ユークリッドノルムでは一時的に伸びることもある（\ref{ode:stab-linear-examples.3}）が、うまく選んだ計量では単調に縮むということである。比喩で言えば、まっすぐ下っているようには見えない谷底への道も、谷に合わせた等高線（$P$ の等位面の楕円）を描けば、常に下り坂になっている。
+:::
+
+不安定性を示すには、実部が正の固有値の方向と、それ以外の方向に空間を分ける。
+
+::: lemma 実部の符号による分解 {#ode:stab-spectral-splitting keywords="real block decomposition S^{-1} B S = diag(B_+, B_-) of a real matrix without imaginary-axis eigenvalues into parts with positive and negative real parts" index="スペクトル分解（実部の符号）|すぺくとるぶんかいじつぶのふごう"}
+$B\in M_{n}(\mathbb{R})$ は実部が $0$ の固有値をもたず、実部が正の固有値をもつとする。実の可逆行列 $S$ と $k\ge1$ があって
+$$
+S^{-1}BS=\begin{pmatrix}B_{+}&0\\0&B_{-}\end{pmatrix}\qquad(B_{+}\in M_{k}(\mathbb{R}),\ B_{-}\in M_{n-k}(\mathbb{R}))
+$$
+で、$B_{+}$ の固有値の実部はすべて正、$B_{-}$ の固有値の実部はすべて負（$k=n$ なら $B_{-}$ はない）。
+:::
+
+::: proof
+**Step 1.** 【主張：$B$ の固有多項式は $\chi_{B}=p_{+}p_{-}$（$p_{\pm}$ は実係数で、共通の複素根をもたず、$p_{+}$ の根は実部が正の固有値、$p_{-}$ の根は実部が負の固有値）と分解する】$p_{+}\defeq\prod_{\operatorname{Re}\lambda>0}(t-\lambda)^{m_{\lambda}}$（$m_{\lambda}$ は重複度）、$p_{-}\defeq\chi_{B}/p_{+}$ とする。$\chi_{B}$ は実係数なので、虚の根は複素共役と同じ重複度で現れ、共役は実部を変えない。よって $p_{+}$ の係数の複素共役をとっても $p_{+}$ のままで、$p_{+}$ は実係数、$p_{-}$ も実係数。
+
+**Step 2.** 【主張：$E_{\pm}\defeq\ker p_{\pm}(B)\subset\mathbb{R}^{n}$ について $\mathbb{R}^{n}=E_{+}\oplus E_{-}$ で、各 $E_{\pm}$ は $B$ で保たれる】$p_{+},p_{-}$ の最大公約多項式は、根があればそれが共通の根になるので $1$。実係数多項式の互除法から $ap_{+}+bp_{-}=1$ となる実係数多項式 $a,b$ がある。ケーリー–ハミルトンの定理から $p_{+}(B)p_{-}(B)=\chi_{B}(B)=0$。$x=a(B)p_{+}(B)x+b(B)p_{-}(B)x$ の第 1 項は $p_{-}(B)$ で消えるので $E_{-}$ に、第 2 項は $E_{+}$ に入る。$x\in E_{+}\cap E_{-}$ なら右辺の両項が $0$ で $x=0$。$B$ は $p_{\pm}(B)$ と可換なので $E_{\pm}$ を保つ。
+
+**Step 3.** 【主張：$E_{+}$ と $E_{-}$ の基底を並べた $S$ について、$B_{\pm}$ の固有値は $p_{\pm}$ の根で、$k\defeq\dim E_{+}\ge1$】$B_{+}$ は $B|_{E_{+}}$ の行列なので $p_{+}(B_{+})=0$。$B_{+}$ の固有値 $\nu$ と固有ベクトル $z\ne0$（$\mathbb{C}^{k}$ の中）について $0=p_{+}(B_{+})z=p_{+}(\nu)z$、よって $p_{+}(\nu)=0$ で $\operatorname{Re}\nu>0$。$B_{-}$ も同じ。$E_{+}=\{0\}$ なら $p_{-}(B)=0$ で、同じ議論から $B$ の固有値はすべて $p_{-}$ の根になり、仮定に反する。
+:::
+
+::: theorem 線形化による不安定性 {#ode:stab-linearization-unstable keywords="if Df(x_0) has an eigenvalue with positive real part, x_0 is unstable; proof by a Chetaev function built from Lyapunov equations on the unstable and the remaining parts after shifting by sigma" index="線形化による不安定性|せんけいかによるふあんていせい" refname="線形化による不安定性"}
+$Df(x_{0})$ が実部が正の固有値をもつなら、$x_{0}$ は不安定である。
+:::
+
+::: intuition
+実部が正の固有値の方向には、線形の部分が解を指数関数的に押し出す。平衡点のごく近くでは非線形の項はそれに比べて小さく、押し出しを止められない。実部が $0$ の固有値が混じっていても、押し出す方向の速さが少しでも勝っていればよい。
+:::
+
+::: proof
+$x_{0}=0$ とし、$A\defeq Df(0)$, $g(x)\defeq f(x)-Ax$ とおく（$|g(x)|=o(|x|)$）。
+
+**Step 1（ずらして分解）.** 【主張：$\sigma>0$ と実の可逆行列 $S$、正定値対称行列 $P_{+},P_{-}$ があって、$\Pi\defeq\operatorname{diag}(P_{+},-P_{-})$, $\tilde B\defeq S^{-1}(A-\sigma I)S$ について $\Pi\tilde B+\tilde B^{\mathsf{T}}\Pi=I$】$\sigma$ を、$0<\sigma<\min\{\operatorname{Re}\lambda:\operatorname{Re}\lambda>0\}$ ととる。$B\defeq A-\sigma I$ の固有値は $\lambda-\sigma$ で、$\operatorname{Re}\lambda>0$ なら実部は正、$\operatorname{Re}\lambda\le0$ なら負。よって \ref{ode:stab-spectral-splitting} の $S$ で $\tilde B=\operatorname{diag}(B_{+},B_{-})$。\ref{ode:lyapunov-equation} を $B_{-}$ と $-B_{+}$（固有値の実部が負）に使い、$P_{-}B_{-}+B_{-}^{\mathsf{T}}P_{-}=-I$、$P_{+}(-B_{+})+(-B_{+})^{\mathsf{T}}P_{+}=-I$ となる正定値対称行列をとる。ブロックごとに計算すれば主張の式になる。
+
+**Step 2（チェタエフ関数）.** 【主張：$V(x)\defeq\langle\Pi S^{-1}x,S^{-1}x\rangle$ について、$r>0$ があって、$|x|\le r$, $V(x)>0$ なら $\dot V(x)\ge\frac{1}{2}|S^{-1}x|^{2}>0$】$y\defeq S^{-1}x$、$h(y)\defeq S^{-1}g(Sy)$ とおくと $S^{-1}f(Sy)=(\tilde B+\sigma I)y+h(y)$ なので
+$$
+\dot V(x)=2\langle\Pi y,S^{-1}f(x)\rangle=\langle(\Pi\tilde B+\tilde B^{\mathsf{T}}\Pi)y,y\rangle+2\sigma\langle\Pi y,y\rangle+2\langle\Pi y,h(y)\rangle\ge|y|^{2}+2\sigma V(x)-2\|\Pi\||y||h(y)|.
+$$
+$|h(y)|\le\|S^{-1}\||g(x)|$, $|x|\le\|S\||y|$ と $|g(x)|=o(|x|)$ から、$r$ を小さくとれば $\overline{B}(0,r)\subset W$ かつ $|x|\le r$ で $|h(y)|\le|y|/(4\|\Pi\|)$。このとき $V(x)>0$ なら右辺は $\frac{1}{2}|y|^{2}$ 以上で、$V(x)>0$ から $y\ne0$。
+
+**Step 3（正の点が近くにある）.** 【主張：$0$ のどんな近傍にも $V>0$ の点がある】$u\in\mathbb{R}^{k}\setminus\{0\}$、$s>0$ について $x\defeq S(su,0)$ は $V(x)=s^{2}\langle P_{+}u,u\rangle>0$ で、$|x|\le s\|S\||u|\to0$（$s\to0$）。
+
+Step 2・3 は \ref{ode:lyapunov-chetaev} の仮定 2・1 なので、$0$ は不安定である。
+
+::: hypcheck
+- **$f$ が $C^{1}$ 級**：$|g(x)|=o(|x|)$ を Step 2 で、解の一意性と逃避補題を \ref{ode:lyapunov-chetaev} を通して使った。
+- **実部が正の固有値**：Step 1 で $\sigma$ をとり、Step 3 で $k\ge1$（$u$ の存在）に使った。
+- **$\sigma$ によるずらし**：Step 1 で、実部が $0$ の固有値を「負の側」に移すために使った（実部 $0$ の固有値にはリャプノフ方程式が解けない）。その代わりに Step 2 に $2\sigma V$ の項が出るが、$V>0$ の所では正なので邪魔にならない。チェタエフの定理が $\{V>0\}$ の上だけで条件を課すことが効いている。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example 線形化で決まらない例 {#ode:stab-critical-examples keywords="examples where the linearization has eigenvalues on the imaginary axis: x' = -x^3, x' = x^3, x' = 0; planar systems with linear part a rotation and cubic terms a x r^2" index="線形化で決まらない例|せんけいかできまらないれい, 臨界の場合（安定性）|りんかいのばあいあんていせい"}
+1. $n=1$ の $x'=-x^{3}$, $x'=x^{3}$, $x'=0$ はどれも $Df(0)=0$ である。$x'=-x^{3}$ の解は $\Phi_{t}(\xi)=\xi/\sqrt{1+2\xi^{2}t}$ で、$0$ は漸近安定だが、減衰は $t^{-1/2}$ の速さでしかなく指数安定ではない。$x'=x^{3}$ の解は $\xi/\sqrt{1-2\xi^{2}t}$ で、$t=1/(2\xi^{2})$ で爆発し、$0$ は不安定。$x'=0$ では $0$ は安定だが漸近安定でない。
+2. $a\in\mathbb{R}$ について $n=2$ の系
+$$
+x'=-y+ax(x^{2}+y^{2}),\qquad y'=x+ay(x^{2}+y^{2})
+$$
+の線形化は回転 $\begin{pmatrix}0&-1\\1&0\end{pmatrix}$（固有値 $\pm i$）で、$a$ によらない。$\rho\defeq x^{2}+y^{2}$ とすると $\rho'=2(xx'+yy')=2a\rho^{2}$ なので、$\rho(t)=\rho_{0}/(1-2a\rho_{0}t)$。$a<0$ なら $\rho\to0$ で、$V=\rho$ は狭義のリャプノフ関数（$\dot V=2a\rho^{2}<0$）なので漸近安定。$a>0$ なら $\rho$ は有限時間で爆発し、$V=\rho$ が \ref{ode:lyapunov-chetaev} の条件を満たすので不安定。$a=0$ なら安定だが漸近安定でない。
+:::
+
+::: fact ハートマン–グロブマンの定理 {#ode:stab-hartman-grobman keywords="Hartman-Grobman theorem: near a hyperbolic equilibrium the flow of a C^1 vector field is locally topologically conjugate to the linear flow e^{tA}" index="ハートマン–グロブマンの定理|はーとまんぐろぶまんのていり, 双曲型平衡点|そうきょくがたへいこうてん, 位相共役|いそうきょうやく" refname="ハートマン–グロブマンの定理"}
+平衡点 $x_{0}$ が**双曲型**である、つまり $A\defeq Df(x_{0})$ が実部 $0$ の固有値をもたないとする。このとき、$x_{0}$ の開近傍 $U$、$0$ の開近傍 $U'$ と同相写像 $h\colon U\to U'$ で $h(x_{0})=0$ となるものがあって、$\xi\in U$ と $t\in\mathbb{R}$ について、$0$ と $t$ の間のすべての $s$ で $s\in I_{\xi}$ かつ $\Phi_{s}(\xi)\in U$ なら
+$$
+h(\Phi_{t}(\xi))=e^{tA}h(\xi).
+$$
+（出典：P. Hartman『Ordinary Differential Equations』、L. Perko『Differential Equations and Dynamical Systems』。証明は、$f$ を遠方で線形化に一致するように修正し、時刻 $1$ の写像の共役を縮小写像の原理で作る長いものなので、ここでは証明しない。）
+:::
+
+::: intuition
+双曲型の平衡点の近くでは、非線形の流れは、座標を連続的に（ただし滑らかとは限らずに）ゆがめれば、線形化の流れとまったく同じ形に見える。
+:::
+
+::: supplement
+**このページの定理との関係.** 位相共役は「近くに留まる」「収束する」を保つので、\ref{ode:stab-hartman-grobman} と \ref{ode:stab-linear} から、双曲型の平衡点の安定性（漸近安定か不安定か）は線形化で決まる。ただし $h$ は同相写像にすぎないので、減衰が指数的であること（\ref{ode:stab-linearization} の評価）までは従わない。このページでは、リャプノフ関数による直接の証明で、より定量的な結論を得た。
+
+**前提を変えると.** 双曲型の仮定は外せない：\ref{ode:stab-critical-examples.1} の $x'=-x^{3}$ と線形化 $x'=0$ は、$0$ のどんな近傍の上でも位相共役でない（後者ではすべての点が平衡点だが、前者の平衡点は $0$ だけである）。また $h$ を滑らかにとれるとは限らず、滑らかな線形化には固有値の間の**非共鳴条件**が要る（シュテルンベルクの定理。ここでは扱わない）。
+
+**高い視点：構造安定性.** 双曲型の平衡点は、$f$ を $C^{1}$ の意味で少し動かしても消えず（逆関数定理から近くに平衡点がただ一つ残る）、線形化の固有値も少ししか動かないので、近くの流れの位相的な形も変わらない。比喩で言えば、山頂（不安定）と谷底（安定）と峠（鞍点）は、地形を少し削っても形を保つ。平らな尾根や平らな盆地（実部 $0$ の固有値）だけが、わずかな削り方で山にも谷にもなる。
+:::
+
+## 問題 {#ode:sec-st-problems}
+
+::: problem {#ode:prob-st-lyapunov-matrix}
+$A=\begin{pmatrix}0&1\\-2&-3\end{pmatrix}$ とする。
+1. $PA+A^{\mathsf{T}}P=-I$ を満たす対称行列 $P$ を求め、正定値であることを確かめよ。
+2. $x'=Ax$ について、$V(x)=|x|^{2}$ の軌道微分は正になる点があることを示せ（つまり $|x|^{2}$ はこの系のリャプノフ関数ではない）。
+:::
+
+::: solution
+**1.** $P=\begin{pmatrix}a&b\\b&c\end{pmatrix}$ とおくと、$PA+A^{\mathsf{T}}P=\begin{pmatrix}-4b&a-3b-2c\\a-3b-2c&2b-6c\end{pmatrix}$。これが $-I$ に等しい条件は $-4b=-1$, $a-3b-2c=0$, $2b-6c=-1$ で、$b=\frac14$, $c=\frac14$, $a=\frac54$。$P=\frac14\begin{pmatrix}5&1\\1&1\end{pmatrix}$ は $\langle Px,x\rangle=\frac14(5x_{1}^{2}+2x_{1}x_{2}+x_{2}^{2})=\frac14(4x_{1}^{2}+(x_{1}+x_{2})^{2})$ で、$x\ne0$ なら正。固有多項式は $(t+1)(t+2)$ で $\mu(A)=-1<0$ なので、\ref{ode:lyapunov-equation.3} からこれが積分で与えられる $P$ と一致する。
+
+**2.** $\dot V(x)=2\langle x,Ax\rangle=2(x_{1}x_{2}+x_{2}(-2x_{1}-3x_{2}))=-2x_{1}x_{2}-6x_{2}^{2}$。$x=(1,-\frac{1}{10})$ で $\dot V=\frac{2}{10}-\frac{6}{100}>0$。原点は指数安定（\ref{ode:stab-linear.1}）だが、この点から出た解は最初、原点から遠ざかる。
+:::
+
+::: problem {#ode:prob-st-cubic-damping}
+$x'=-y-x^{3}$, $y'=x-y^{3}$ の原点は漸近安定であることを示せ。また、線形化だけでは判定できないことを確かめよ。
+:::
+
+::: solution
+線形化は $\begin{pmatrix}0&-1\\1&0\end{pmatrix}$ で固有値 $\pm i$ なので、\ref{ode:stab-linearization}・\ref{ode:stab-linearization-unstable} はどちらも使えない（\ref{ode:stab-critical-examples.2} のように、同じ線形化で漸近安定・安定・不安定のどれも起こる）。$V(x,y)\defeq x^{2}+y^{2}$ とすると
+$$
+\dot V=2x(-y-x^{3})+2y(x-y^{3})=-2(x^{4}+y^{4}),
+$$
+で、原点以外で負。$V$ は $\mathbb{R}^{2}$ 全体で狭義のリャプノフ関数なので、\ref{ode:lyapunov-theorem.2} から原点は漸近安定である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

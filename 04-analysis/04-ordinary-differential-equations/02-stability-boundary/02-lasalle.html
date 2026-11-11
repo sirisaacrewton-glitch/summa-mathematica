@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ラサールの不変性原理と勾配系・ハミルトン系 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/02-stability-boundary/02-lasalle.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ラサールの不変性原理と勾配系・ハミルトン系 {#ode:page-lasalle keywords="omega-limit set, invariance of omega-limit sets, LaSalle invariance principle, Barbashin-Krasovskii theorem, asymptotic stability from a non-strict Lyapunov function, gradient systems x' = -grad V, strict local minimum, nondegenerate minimum, Hamiltonian systems, conservation of energy, divergence-free vector fields preserve volume, Liouville theorem, no asymptotically stable equilibria in Hamiltonian systems, Lagrange-Dirichlet stability, damped pendulum, ω極限集合, リアプノフ"}
+
+前のページ（\ref{ode:page-stability}）では、解に沿って真に減る関数（狭義のリャプノフ関数）から漸近安定性を導いた。しかし物理の系に自然に現れるエネルギーは、減衰振り子のように「減るが、真に減るとは限らない」ことが多い。このページでは、解の行く末を集めた **ω 極限集合**が流れで不変であることを示し、それを使って、関数が減らない場所に解が留まれないことさえわかれば収束が従うこと（**ラサールの不変性原理**、\tref{ode:lyapunov-lasalle}）を証明する。応用として、**勾配系** $x'=-\nabla V$ ではポテンシャル $V$ の極小点が漸近安定になること、反対に**ハミルトン系**ではエネルギーが保存され、流れが体積を保つので、漸近安定な平衡点が存在しえないことを示し、減衰振り子でこれらを比べる。
+
+## 記法と定義の確認 {#ode:sec-st-b-notation}
+
+::: notation
+- 平衡点の安定・漸近安定・指数安定・不安定は \ref{ode:stab-def}、軌道微分 $\dot V=\langle\nabla V,f\rangle$ とリャプノフ関数は \ref{ode:lyapunov-function}。\ref{ode:lyapunov-theorem}、\ref{ode:lyapunov-chetaev}、\ref{ode:stab-linearization}、\ref{ode:stab-linearization-unstable}。
+- 流れ・平衡点は \ref{ode:flow-def}、流れの基本性質（定義域 $\mathcal{D}_{F}$ が開集合で流れが連続、群の性質、$\Phi_{t}$ は微分同相写像、$D\Phi_{t}$ は変分方程式の解）は \ref{ode:flow-theorem}。逃避補題とその帰結は \ref{ode:escape-lemma}, \ref{ode:escape-corollaries}。第一積分は \ref{ode:first-integral}、\ref{ode:liouville-formula}。
+- $\mathbb{R}^{n}$ の有界な点列は収束する部分列をもつ（\ref{top:bolzano-weierstrass}）。有界閉集合はコンパクト（\ref{top:heine-borel}）。ヘッセ行列・臨界点・極小は \ref{calc:hessian}、\ref{calc:second-derivative-test}、偏導関数の対称性は \ref{calc:ck-symmetric}。ジョルダン可測集合と体積 $v(E)$ は \ref{calc:jordan-measurable}、\ref{calc:change-of-variables}、\ref{calc:linear-volume}。
+- **設定**は前のページと同じ：$W\subset\mathbb{R}^{n}$ は開集合、$f\colon W\to\mathbb{R}^{n}$ は $C^{1}$ 級、流れ $\Phi_{t}$、最大解の定義域 $I_{\xi}$、$W_{t}\defeq\{\xi:t\in I_{\xi}\}$。点と集合の距離 $\operatorname{dist}(x,M)\defeq\inf_{y\in M}|x-y|$。
+- **選択公理**：使わない。ボルツァーノ–ワイエルシュトラスの定理は区間を二等分して左半分を優先する規則で部分列を具体的に選べるので $\mathsf{ZF}$ で成り立ち、ω 極限集合の議論で時刻を選ぶ所は、条件を満たす時刻の集合が開集合であることを使って有理数の固定した番号付けの最初のものを選ぶ。
+:::
+
+## ω 極限集合とラサールの不変性原理 {#ode:sec-st-lasalle}
+
+::: definition ω 極限集合 {#ode:stab-omega-limit keywords="omega-limit set omega(xi) of a forward complete solution: limits of Phi_{t_k}(xi) along t_k -> infinity; positive semi-orbit; invariant set; positively invariant set" index="ω 極限集合|おめがきょくげんしゅうごう, 正の半軌道|せいのはんきどう, 不変集合（流れ）|ふへんしゅうごうながれ, 正不変集合|せいふへんしゅうごう"}
+$\xi\in W$ で $[0,\infty)\subset I_{\xi}$ とする。$\gamma^{+}(\xi)\defeq\{\Phi_{t}(\xi):t\ge0\}$ を $\xi$ の**正の半軌道**、
+$$
+\omega(\xi)\defeq\{y\in W:\ t_{k}\to\infty\text{ となる列で }\Phi_{t_{k}}(\xi)\to y\text{ となるものがある}\}
+$$
+を $\xi$ の **ω 極限集合**という。集合 $M\subset W$ が**不変**であるとは、各 $y\in M$ について $I_{y}=\mathbb{R}$ かつすべての $t\in\mathbb{R}$ で $\Phi_{t}(y)\in M$ となることをいい、**正不変**であるとは、各 $y\in M$ について $[0,\infty)\subset I_{y}$ かつ $t\ge0$ で $\Phi_{t}(y)\in M$ となることをいう。
+:::
+
+::: intuition
+ω 極限集合は、解が十分時間がたったあとで何度でも近づいてくる点の全体、つまり解の「行き着く先」である。平衡点に収束する解ならその 1 点、周期解に巻きつく解なら周期軌道になる。
+:::
+
+::: lemma ω 極限集合の性質 {#ode:stab-omega-limit-properties keywords="if the positive semi-orbit lies in a compact subset K of W, omega(xi) is nonempty, compact, invariant, and dist(Phi_t(xi), omega(xi)) -> 0" index="ω 極限集合の不変性|おめがきょくげんしゅうごうのふへんせい"}
+$K\subset W$ をコンパクト集合とし、$\xi\in W$ について $I_{\xi}\cap[0,\infty)$ の各 $t$ で $\Phi_{t}(\xi)\in K$ とする。このとき $[0,\infty)\subset I_{\xi}$ で、
+1. $\omega(\xi)$ は $K$ に含まれる空でないコンパクト集合である。
+2. $\omega(\xi)$ は不変である。
+3. $t\to\infty$ で $\operatorname{dist}(\Phi_{t}(\xi),\omega(\xi))\to0$。
+:::
+
+::: proof
+$[0,\infty)\subset I_{\xi}$ は \ref{ode:escape-corollaries.3} から。
+
+**Step 1.** 【主張：$\omega(\xi)=\bigcap_{T\ge0}\overline{\{\Phi_{t}(\xi):t\ge T\}}$ で、これは $K$ に含まれる空でないコンパクト集合】右辺を $\Omega'$ とする。$y\in\omega(\xi)$ なら、各 $T$ について $t_{k}\ge T$ となる $k$ から先の点で近似されるので $y\in\Omega'$。逆に $y\in\Omega'$ なら、各 $k$ について $\{t\ge k:|\Phi_{t}(\xi)-y|<1/k\}$ は空でない開集合（$t\mapsto\Phi_{t}(\xi)$ の連続性）なので有理数を含み、その一つを $t_{k}$ とすれば $t_{k}\to\infty$, $\Phi_{t_{k}}(\xi)\to y$。各閉包は閉集合 $K$ に含まれるので、$\Omega'$ は $K$ の閉部分集合でコンパクト。点列 $\Phi_{k}(\xi)$（$k\in\mathbb{N}$）は有界なので収束する部分列をもち、その極限は $\omega(\xi)$ に入る。
+
+**Step 2.** 【主張：$y\in\omega(\xi)$, $t\in I_{y}$ なら $\Phi_{t}(y)\in\omega(\xi)$】$\Phi_{t_{k}}(\xi)\to y$, $t_{k}\to\infty$ とする。$(t,y)$ は開集合 $\mathcal{D}_{F}$ の点なので、十分大きな $k$ で $(t,\Phi_{t_{k}}(\xi))\in\mathcal{D}_{F}$。\ref{ode:flow-theorem.2} から $\Phi_{t}(\Phi_{t_{k}}(\xi))=\Phi_{t+t_{k}}(\xi)$ で、流れの連続性（\ref{ode:flow-theorem.1}）から左辺は $\Phi_{t}(y)$ に収束する。$t+t_{k}\to\infty$ なので $\Phi_{t}(y)\in\omega(\xi)$。
+
+**Step 3.** 【主張：$y\in\omega(\xi)$ なら $I_{y}=\mathbb{R}$】Step 1・2 から $t\in I_{y}$ なら $\Phi_{t}(y)\in K$。正の側は \ref{ode:escape-corollaries.3}。$I_{y}$ の左端 $\alpha$ が有限なら、$\mathbb{R}\times W$ のコンパクト集合 $[\alpha,0]\times K$ に $(t,\Phi_{t}(y))$（$\alpha<t\le0$）が留まり、\ref{ode:escape-lemma} の $\alpha$ の側に反する。
+
+**Step 4.** 【主張：3 が成り立つ】そうでないとすると、$\varepsilon>0$ と $t_{k}\to\infty$ で $\operatorname{dist}(\Phi_{t_{k}}(\xi),\omega(\xi))\ge\varepsilon$ となるものがある。$\Phi_{t_{k}}(\xi)\in K$ は有界なので収束する部分列があり、その極限 $y$ は $\omega(\xi)$ の点で、部分列の点と $y$ の距離が $0$ に近づくことに反する。
+
+::: hypcheck
+- **コンパクト集合 $K$ に留まること**：Step 1 で空でないことに、Step 3 で $I_{y}=\mathbb{R}$ に使った。外すと偽：$x'=x$（$n=1$）の $\xi=1$ では $\omega(\xi)=\varnothing$。
+- **$f$ の滑らかさ**：流れの連続性と群の性質（Step 2）、逃避補題（Step 3）に使った。$f$ が局所リプシッツなら同じ。
+- **公理**：Step 1 で有理数を選ぶのは、有理数の固定した番号付けで最初のものをとればよく、選択公理は要らない。
+:::
+:::
+
+::: theorem ラサールの不変性原理 {#ode:lyapunov-lasalle keywords="LaSalle invariance principle: if dot V <= 0 on U and K in U is compact and positively invariant, then every solution starting in K approaches the largest invariant subset M of {x in K : dot V(x) = 0}" index="ラサールの不変性原理|らさーるのふへんせいげんり, 不変性原理|ふへんせいげんり" refname="ラサールの不変性原理"}
+$U\subset W$ を開集合、$V\colon U\to\mathbb{R}$ を $C^{1}$ 級で $U$ の上で $\dot V\le0$ とし、$K\subset U$ をコンパクトな正不変集合とする。$E\defeq\{x\in K:\dot V(x)=0\}$ とし、$M$ を $E$ に含まれる不変集合すべての和集合（$E$ に含まれる最大の不変集合）とする。このとき各 $\xi\in K$ について $\omega(\xi)\subset M$ で、$t\to\infty$ で $\operatorname{dist}(\Phi_{t}(\xi),M)\to0$。
+:::
+
+::: intuition
+$V$ は解に沿って減るか一定なので、最後には一定の値に落ち着く。落ち着いた先では $V$ が変化しないので、解の行き着く先は「$V$ が減らない点」だけでできていて、しかもそこを流れに沿って動き続けられる集合でなければならない。
+:::
+
+::: proof
+**Step 1.** 【主張：$V$ は $\omega(\xi)$ の上で一定】$x(t)\defeq\Phi_{t}(\xi)$ は $t\ge0$ で $K\subset U$ にあるので、$V(x(t))$ は単調非増加（$\frac{d}{dt}V(x(t))=\dot V\le0$）で、コンパクト集合 $K$ 上の連続関数 $V$ の最小値で下から抑えられ、極限 $c$ をもつ。$y\in\omega(\xi)$、$x(t_{k})\to y$ なら、連続性から $V(y)=\lim V(x(t_{k}))=c$。
+
+**Step 2.** 【主張：$\omega(\xi)\subset M$】\ref{ode:stab-omega-limit-properties.2} から $\omega(\xi)$ は不変で、\ref{ode:stab-omega-limit-properties.1} から $K$ に含まれる。$y\in\omega(\xi)$ について、すべての $t\in\mathbb{R}$ で $\Phi_{t}(y)\in\omega(\xi)$ なので Step 1 から $V(\Phi_{t}(y))=c$。$t$ で微分して $\dot V(\Phi_{t}(y))=0$、とくに $\omega(\xi)\subset E$。$\omega(\xi)$ は $E$ に含まれる不変集合なので $M$ に含まれる。
+
+最後に、$\operatorname{dist}(\Phi_{t}(\xi),M)\le\operatorname{dist}(\Phi_{t}(\xi),\omega(\xi))\to0$（\ref{ode:stab-omega-limit-properties.3}）。
+
+::: hypcheck
+- **$\dot V\le0$**：Step 1 で $V(x(t))$ の単調性に使った。$V$ の正値性は**使っていない**。
+- **$K$ のコンパクト性と正不変性**：Step 1 で $V$ の下界と解が $U$ に留まることに、Step 2 で \ref{ode:stab-omega-limit-properties} を使うのに使った。外すと偽：$n=1$, $x'=1$, $V(x)=-x$ は $\dot V=-1\le0$ で $E=\varnothing$ だが、解は無限遠へ行く（$\omega(\xi)=\varnothing$ で、「$M$ に近づく」は意味を失う）。
+- **$f$ の滑らかさ**：\ref{ode:stab-omega-limit-properties} を通して使った（局所リプシッツで十分）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 不変性原理による漸近安定性 {#ode:lyapunov-barbashin keywords="Barbashin-Krasovskii theorem: a Lyapunov function whose zero set of dot V contains no entire orbit other than the equilibrium gives asymptotic stability" index="バルバシン–クラソフスキーの定理|ばるばしんくらそふすきーのていり, 不変性原理による漸近安定性|ふへんせいげんりによるぜんきんあんていせい"}
+$V\colon U\to\mathbb{R}$ を $x_{0}$ のリャプノフ関数（\ref{ode:lyapunov-function}）とし、$r>0$ を $\overline{B}(x_{0},r)\subset U$ となる数とする。$y\in\overline{B}(x_{0},r)$ で $I_{y}=\mathbb{R}$ かつすべての $t$ で $\Phi_{t}(y)\in\overline{B}(x_{0},r)$, $\dot V(\Phi_{t}(y))=0$ となるものが $y=x_{0}$ だけなら、$x_{0}$ は漸近安定である。
+:::
+
+::: proof
+\ref{ode:lyapunov-theorem.1} から $x_{0}$ は安定。$m\defeq\min\{V(x):|x-x_{0}|=r\}>0$、$K\defeq\{x\in\overline{B}(x_{0},r):V(x)\le m/2\}$ とする。
+
+**Step 1.** 【主張：$K$ はコンパクトな正不変集合で、ある $\rho>0$ について $B(x_{0},\rho)\subset K$】$K$ は有界閉集合。$V$ は $x_{0}$ で連続で $V(x_{0})=0$ なので $\rho$ がとれる。$\xi\in K$ の解が $|\Phi_{t}(\xi)-x_{0}|=r$ となる最初の時刻 $t_{1}$ をもつとすると、$[0,t_{1}]$ で $V$ は増えないので $V(\Phi_{t_{1}}(\xi))\le m/2<m$ となり矛盾。よって解は $B(x_{0},r)$ に留まり、$V\le m/2$ のままで、\ref{ode:escape-corollaries.3} から $t\ge0$ で定義される。
+
+**Step 2.** 【主張：$\xi\in K$ なら $\Phi_{t}(\xi)\to x_{0}$】\ref{ode:lyapunov-lasalle} の $M$ は、仮定から $\{x_{0}\}$ に含まれる（$M$ の点 $y$ は $K\subset\overline{B}(x_{0},r)$ の中で全時間の軌道が $\dot V=0$ の上にある）。$\omega(\xi)\ne\varnothing$ なので $M=\{x_{0}\}$ で、$|\Phi_{t}(\xi)-x_{0}|=\operatorname{dist}(\Phi_{t}(\xi),M)\to0$。
+
+$\eta\defeq\rho$ とすれば漸近安定である。
+:::
+
+::: supplement
+**前提を変えると.** 不変性原理は自励系に固有のもので、$\omega(\xi)$ の不変性（Step 2 の時間の平行移動）を使う。時間に依存する系では、代わりにバルバラの補題（一様連続な可積分関数は $0$ に収束する）を使う議論が知られている（ここでは扱わない）。
+
+**似た定理.** 平面の系では、ω 極限集合がさらに詳しく分類でき、平衡点を含まないコンパクトな ω 極限集合は周期軌道になる（ポアンカレ–ベンディクソンの定理。この系列の平面の力学系のページで扱う）。
+
+**高い視点：「減らない所」だけを調べればよい.** 狭義のリャプノフ関数を見つけるのは難しいが、物理のエネルギーは素直に計算できる。不変性原理は、エネルギーが減らない例外的な集合 $\{\dot V=0\}$ の上で、方程式がさらに何を強いるかを調べれば十分だと言っている。比喩で言えば、ブレーキのかかり方にむらがある車でも、「ブレーキがかからない状態で走り続けることはできない」ことさえ確かめれば、最後には止まる。
+:::
+
+## 勾配系とハミルトン系 {#ode:sec-st-gradient-hamilton}
+
+::: theorem 勾配系の平衡点 {#ode:stab-gradient keywords="gradient system x' = -grad V: V decreases along solutions, strict local minima are stable, isolated strict minima are asymptotically stable, nondegenerate minima are exponentially stable, isolated critical points that are not local minima are unstable" index="勾配系|こうばいけい, 勾配流|こうばいりゅう, ポテンシャルの極小点の安定性|ぽてんしゃるのきょくしょうてんのあんていせい"}
+$V\colon W\to\mathbb{R}$ を $C^{2}$ 級とし、**勾配系** $x'=-\nabla V(x)$ を考える。
+1. $\dot V=-|\nabla V|^{2}\le0$ で、平衡点は $V$ の臨界点に一致する。平衡点でない解に沿って $V$ は狭義に減少する。
+2. $x_{0}$ が $V$ の狭義の極小点なら $x_{0}$ は安定。さらに $x_{0}$ が孤立した臨界点（近くにほかの臨界点がない）なら漸近安定。
+3. $x_{0}$ が臨界点で、ヘッセ行列 $HV(x_{0})$ が正定値（**非退化な極小点**）なら、$x_{0}$ は指数安定。
+4. $x_{0}$ が孤立した臨界点で、$V$ の極小点でないなら、$x_{0}$ は不安定。
+:::
+
+::: intuition
+勾配系の解は、ポテンシャル $V$ の地形を最も急な下り坂に沿って下りていく。だから谷底（極小点）は安定で、谷底でない平らな点からは、どこか下り坂の方へ転がり落ちていく。
+:::
+
+::: proof
+**1.** $\dot V=\langle\nabla V,-\nabla V\rangle=-|\nabla V|^{2}$。平衡点は $\nabla V=0$ の点。解 $x$ について $t_{1}<t_{2}$ で $V(x(t_{1}))=V(x(t_{2}))$ なら、$V(x(t))$ は単調非増加なので $[t_{1},t_{2}]$ で一定、$\nabla V(x(t))=0$、つまり $x'=0$ で $x$ は $[t_{1},t_{2}]$ で定数 $p$。$p$ は平衡点で、一意性から $x$ は定値である。
+
+**2.** $r>0$ を $\overline{B}(x_{0},r)\subset W$ で $0<|x-x_{0}|\le r$ なら $V(x)>V(x_{0})$ となるようにとる。$L(x)\defeq V(x)-V(x_{0})$ は $U\defeq B(x_{0},r)$ の上で $x_{0}$ のリャプノフ関数（$\dot L=\dot V\le0$）なので、\ref{ode:lyapunov-theorem.1} から安定。$r$ をさらに小さくして $U$ に $x_{0}$ 以外の臨界点がないようにできれば、$U\setminus\{x_{0}\}$ で $\dot L=-|\nabla V|^{2}<0$ で、\ref{ode:lyapunov-theorem.2} から漸近安定。
+
+**3.** $H\defeq HV(x_{0})$ とする。$f=-\nabla V$ は $C^{1}$ 級で $Df(x_{0})=-H$。【主張：$-H$ の固有値は負の実数】$-Hz=\lambda z$（$z=a+ib\ne0$, $a,b\in\mathbb{R}^{n}$）とする。$H$ は実対称（\ref{calc:ck-symmetric}）なので $a^{\mathsf{T}}Hb=b^{\mathsf{T}}Ha$ で、
+$$
+\bar z^{\mathsf{T}}Hz=(a-ib)^{\mathsf{T}}H(a+ib)=a^{\mathsf{T}}Ha+b^{\mathsf{T}}Hb>0.
+$$
+一方 $\bar z^{\mathsf{T}}Hz=-\lambda\bar z^{\mathsf{T}}z=-\lambda|z|^{2}$ なので $\lambda=-\bar z^{\mathsf{T}}Hz/|z|^{2}<0$。よって $\mu(Df(x_{0}))<0$ で、\ref{ode:stab-linearization} から指数安定。
+
+**4.** $r>0$ を $\overline{B}(x_{0},r)\subset W$ で、$\overline{B}(x_{0},r)$ に $x_{0}$ 以外の臨界点がないようにとり、$Q(x)\defeq V(x_{0})-V(x)$ とおく。$x_{0}$ は極小点でないので、$x_{0}$ のどんな近傍にも $V(x)<V(x_{0})$、つまり $Q(x)>0$ の点がある。$\dot Q=|\nabla V|^{2}$ で、$Q(x)>0$ なら $x\ne x_{0}$ なので $\nabla V(x)\ne0$、$\dot Q(x)>0$。\ref{ode:lyapunov-chetaev} から $x_{0}$ は不安定。
+
+::: hypcheck
+- **$V$ が $C^{2}$ 級**：$f=-\nabla V$ が $C^{1}$ 級であること（流れの存在と一意性、3 の線形化）に使った。
+- **狭義の極小**（2）：リャプノフ関数の正値性に使った。狭義でない極小では 2 の証明は使えない（$V$ が定数なら全点が平衡点で、どれも安定だが漸近安定でない）。
+- **孤立した臨界点**（2 の後半・4）：外すと 2 の漸近安定は偽：$n=1$, $V(x)=x^{6}(2+\sin\frac{1}{x})$（$V(0)=0$）は $C^{2}$ 級（$V''(0)=0$ で、$V''$ は $0$ で連続）、$V(x)\ge x^{6}$ なので $0$ は狭義の極小点だが、$V'(x)=x^{4}\bigl(6x(2+\sin\frac1x)-\cos\frac1x\bigr)$ の零点は $0$ に集積する。$0$ のいくらでも近くに平衡点があるので、$0$ は漸近安定でない。
+- **非退化**（3）：線形化の固有値が負であることに使った。退化した極小点 $V=x^{4}$（$n=1$）では $x'=-4x^{3}$ で、漸近安定だが指数安定でない（\ref{ode:stab-critical-examples.1} と同じ）。なお、極小点のヘッセ行列は半正定値（\ref{calc:second-derivative-test.1}）なので、極小点で $HV(x_{0})$ が可逆なら正定値である（半正定値の $H$ で $h^{\mathsf{T}}Hh=0$ なら、すべての $k$, $s$ で $(h+sk)^{\mathsf{T}}H(h+sk)=2sk^{\mathsf{T}}Hh+s^{2}k^{\mathsf{T}}Hk\ge0$ から $k^{\mathsf{T}}Hh=0$、よって $Hh=0$）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**似た定理.** 1 から、勾配系には周期解がない（周期解に沿って $V$ が狭義に減りながら元の値に戻ることはできない）。有界な解の ω 極限集合は臨界点からなる（\ref{ode:lyapunov-lasalle} を $V$ に使う）。臨界点が孤立していれば、有界な解は一つの臨界点に収束する（ω 極限集合は連結であることが知られているので。ここでは証明しない）。
+
+**前提を変えると.** 臨界点が孤立していなくても、$V$ が実解析的なら有界な解は一点に収束する（ロヤシェヴィッチの不等式による。ここでは扱わない）。$C^{\infty}$ 級でも一点に収束しない例（解が臨界点の円の周りを回りながら近づく「メキシコ帽子」型の例）が知られている。
+
+**高い視点：最急降下法.** 勾配系は、関数 $V$ を最小化する**最急降下法**の連続時間版である。数値最適化の勾配降下 $x_{k+1}=x_{k}-h\nabla V(x_{k})$ は、その時間刻み $h$ のオイラー近似で、非退化な極小点の近くでの収束の速さは $HV(x_{0})$ の固有値（条件数）で決まる。比喩で言えば、霧の中で足もとの傾きだけを頼りに谷へ下りる登山者で、谷底の形がきれいなお椀なら一定の割合で近づき、平らな盆地では近づくのが遅くなる。
+:::
+
+ハミルトン系の性質のうち、体積の保存は発散が $0$ のベクトル場一般について成り立つ。
+
+::: theorem 発散が 0 のベクトル場 {#ode:stab-divergence-free keywords="for a divergence-free C^1 vector field the flow has Jacobian determinant 1 and preserves Jordan volume (Liouville); consequently no equilibrium is asymptotically stable" index="発散が 0 のベクトル場|はっさんがぜろのべくとるば, 体積保存（流れ）|たいせきほぞんながれ, リウヴィルの定理（常微分方程式）|りうゔぃるのていりじょうびぶんほうていしき"}
+$\operatorname{div}f\defeq\operatorname{tr}Df=\sum_{i}\partial_{i}f_{i}$ が $W$ の上で恒等的に $0$ とする。
+1. $(t,\xi)\in\mathcal{D}_{F}$ なら $\det D\Phi_{t}(\xi)=1$。$E\subset W_{t}$ がコンパクトなジョルダン可測集合なら、$\Phi_{t}(E)$ はジョルダン可測で $v(\Phi_{t}(E))=v(E)$。
+2. $f$ のどの平衡点も漸近安定ではない。
+:::
+
+::: intuition
+発散は各点での湧き出しの量なので、それが $0$ なら流れは水のように縮まない。漸近安定な平衡点があれば、そのまわりの小さな球が流れで 1 点に吸い込まれて体積が減るはずなので、そういう平衡点はありえない。
+:::
+
+::: proof
+**Step 1（ヤコビ行列式）.** 【主張：$\det D\Phi_{t}(\xi)=1$】\ref{ode:flow-theorem.4} から $Y(t)\defeq D\Phi_{t}(\xi)$ は $I_{\xi}$ の上で $Y'=Df(\Phi_{t}(\xi))Y$, $Y(0)=I$ を満たす。係数 $t\mapsto Df(\Phi_{t}(\xi))$ は連続で、トレースは $\operatorname{div}f(\Phi_{t}(\xi))=0$。リウヴィルの公式 \tref{ode:liouville-formula} から $\det Y(t)=\det Y(0)\exp\int_{0}^{t}0\,ds=1$。
+
+**Step 2（体積）.** 【主張：1 の後半】$\Phi_{t}\colon W_{t}\to W_{-t}$ は開集合 $W_{t}$ の上の $C^{1}$ 級の単射で（\ref{ode:flow-theorem.3}）、Step 1 から $\det D\Phi_{t}=1\ne0$。\ref{calc:change-of-variables} を $f\equiv1$ に使えば、$\Phi_{t}(E)$ はジョルダン可測で $v(\Phi_{t}(E))=\int_{E}1=v(E)$。
+
+**Step 3（一様に吸い込まれる）.** 【主張：$x_{0}$ が漸近安定なら、$R>0$ と $T\ge0$ があって、$B\defeq\overline{B}(x_{0},R)$ について $B\subset W_{T}$, $\Phi_{T}(B)\subset\overline{B}(x_{0},R/2)$】漸近安定の定義の $\eta$ について、$R<\eta$ を $\overline{B}(x_{0},R)\subset W$ となるようにとる。安定性から、$\varepsilon=R/2$ について $\delta>0$ を、$|\zeta-x_{0}|<\delta$ なら $t\ge0$ で $|\Phi_{t}(\zeta)-x_{0}|<R/2$ となるようにとる。各 $z\in B$ について $\Phi_{t}(z)\to x_{0}$ なので、$|\Phi_{s_{z}}(z)-x_{0}|<\delta$ となる $s_{z}\ge0$ がある。$W_{s_{z}}$ は開集合で $\Phi_{s_{z}}$ はその上で連続なので、$z$ の開近傍 $N_{z}\subset W_{s_{z}}$ で $\Phi_{s_{z}}(N_{z})\subset B(x_{0},\delta)$ となるものがある。$B$ はコンパクトなので有限個の $N_{z_{1}},\dots,N_{z_{N}}$ で覆われる。$T\defeq\max_{i}s_{z_{i}}$ とする。$z\in B$ なら $z\in N_{z_{i}}$ となる $i$ があり、$\zeta\defeq\Phi_{s_{z_{i}}}(z)\in B(x_{0},\delta)$ の解は $t\ge0$ で定義されて $B(x_{0},R/2)$ に留まるので、\ref{ode:flow-theorem.2} から $T\in I_{z}$ で $\Phi_{T}(z)=\Phi_{T-s_{z_{i}}}(\zeta)\in B(x_{0},R/2)$。
+
+**Step 4（矛盾）.** 【主張：2 が成り立つ】漸近安定な平衡点 $x_{0}$ があるとして Step 3 の $R,T$ をとる。Step 2 と体積の単調性（$E\subset E'$ なら $v(E)\le v(E')$。特性関数の積分の単調性）から $v(B)=v(\Phi_{T}(B))\le v(\overline{B}(x_{0},R/2))$。一方、閉球は平行移動と相似変換 $x\mapsto x_{0}+\frac12(x-x_{0})$ で写りあい、平行移動は直方体の体積を変えず、相似変換は体積を $2^{-n}$ 倍する（\ref{calc:linear-volume}）ので $v(\overline{B}(x_{0},R/2))=2^{-n}v(B)$。$B$ は辺の長さ $R/\sqrt{n}$ の立方体を含むので $v(B)>0$、よって $v(B)\le2^{-n}v(B)<v(B)$ となり矛盾。
+
+::: hypcheck
+- **$\operatorname{div}f=0$**：Step 1 でリウヴィルの公式の指数を $0$ にするのに使った。外すと偽：$x'=-x$ は $\operatorname{div}=-n$ で、原点は漸近安定。一般には $v(\Phi_{t}(E))=\int_{E}\exp\bigl(\int_{0}^{t}\operatorname{div}f(\Phi_{s}(\xi))ds\bigr)d\xi$ となる（Step 1・2 と同じ計算）。
+- **$f$ が $C^{1}$ 級**：$D\Phi_{t}$ が変分方程式を満たすこと（Step 1）と、$\Phi_{t}$ が $C^{1}$ 級の微分同相写像であること（Step 2）に使った。
+- **漸近安定の「安定」の部分**：Step 3 で、近くに来た解がそのまま近くに留まることに使った。
+- **公理**：Step 3 で選ぶのは有限個の近傍だけで、選択公理は使わない。
+:::
+:::
+
+::: theorem ハミルトン系の平衡点 {#ode:stab-hamiltonian keywords="Hamiltonian system q' = dH/dp, p' = -dH/dq: H is a first integral, the vector field is divergence-free, no equilibrium is asymptotically stable, strict local extrema of H are stable (Lagrange-Dirichlet)" index="ハミルトン系|はみるとんけい, ハミルトニアン（常微分方程式）|はみるとにあんじょうびぶんほうていしき, エネルギー保存（常微分方程式）|えねるぎーほぞんじょうびぶんほうていしき, ラグランジュ–ディリクレの定理|らぐらんじゅでぃりくれのていり"}
+$W\subset\mathbb{R}^{2m}$ を開集合、$H\colon W\to\mathbb{R}$ を $C^{2}$ 級とし、$x=(q,p)\in\mathbb{R}^{m}\times\mathbb{R}^{m}$ について**ハミルトン系**
+$$
+q'=\frac{\partial H}{\partial p}(q,p),\qquad p'=-\frac{\partial H}{\partial q}(q,p)
+$$
+を考える（$f(x)=J\nabla H(x)$, $J\defeq\begin{pmatrix}0&I_{m}\\-I_{m}&0\end{pmatrix}$）。
+1. $H$ は第一積分で、$\operatorname{div}f=0$。
+2. どの平衡点も漸近安定ではない。
+3. $x_{0}$ が $H$ の狭義の極小点（または狭義の極大点）なら、$x_{0}$ は安定である。
+:::
+
+::: intuition
+摩擦のない力学系ではエネルギーが保存されるので、解は同じエネルギーの面の上を動き続け、平衡点に吸い込まれることはない。一方、エネルギーの谷底にある平衡点のまわりでは、解は谷底を囲む等エネルギー面に閉じ込められるので、近くに留まる。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】$\dot H=\langle\nabla H,J\nabla H\rangle=\sum_{i}\bigl(\partial_{q_{i}}H\,\partial_{p_{i}}H-\partial_{p_{i}}H\,\partial_{q_{i}}H\bigr)=0$ なので $H$ は第一積分（\ref{ode:first-integral}）。また
+$$
+\operatorname{div}f=\sum_{i}\Bigl(\frac{\partial}{\partial q_{i}}\frac{\partial H}{\partial p_{i}}-\frac{\partial}{\partial p_{i}}\frac{\partial H}{\partial q_{i}}\Bigr)=0
+$$
+（$H$ は $C^{2}$ 級なので偏導関数の順序を交換できる。\ref{calc:ck-symmetric}）。
+
+**2** は Step 1 と \ref{ode:stab-divergence-free.2}。**3**：$H$ が $x_{0}$ で狭義の極小なら、$x_{0}$ は臨界点で $f(x_{0})=J\nabla H(x_{0})=0$。$L\defeq H-H(x_{0})$ は $x_{0}$ の小さな球の上で $x_{0}$ のリャプノフ関数（$\dot L=0$）なので、\ref{ode:lyapunov-theorem.1} から安定。狭義の極大なら $-L$ を使う。
+
+::: hypcheck
+- **$H$ が $C^{2}$ 級**：Step 1 で偏導関数の順序の交換と、$f$ が $C^{1}$ 級であること（流れと \ref{ode:stab-divergence-free}）に使った。
+- **ハミルトン系の形**：$\dot H=0$ は $J$ が交代行列（$\langle v,Jv\rangle=0$）であることだけを、$\operatorname{div}f=0$ は $J$ が定数行列であることも使った。
+- **狭義の極値**（3）：外すと偽になりうる：$m=1$, $H=p^{2}/2-q^{2}/2$（原点は鞍点）では $q'=p$, $p'=q$ で原点は不安定。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: proof 別証明（2 を第一積分だけから示す）
+$x_{0}$ が漸近安定で、$\eta$ を定義のものとし、$\overline{B}(x_{0},\eta)\subset W$ としてよい。$\xi\in B(x_{0},\eta)$ なら $H$ は解に沿って一定で、$\Phi_{t}(\xi)\to x_{0}$ と $H$ の連続性から $H(\xi)=\lim_{t\to\infty}H(\Phi_{t}(\xi))=H(x_{0})$。よって $H$ は開球 $B(x_{0},\eta)$ の上で定数で、そこで $\nabla H=0$、$f=0$。すると $B(x_{0},\eta)$ のすべての点が平衡点で、$\xi\ne x_{0}$ なら $\Phi_{t}(\xi)=\xi$ は $x_{0}$ に収束しない。矛盾。
+
+この証明は、$x_{0}$ のどんな近傍でも定数にならない連続な第一積分がある系なら、そのまま通る。
+:::
+
+::: supplement
+**似た定理.** 1 の体積保存は、シンプレクティック形式の言葉では、ハミルトン流がシンプレクティック形式とその最高次の外冪（リウヴィル測度）を保つという主張になる（\see{symp:hamiltonian-conservation}）。3 は**ラグランジュ–ディリクレの定理**と呼ばれ、ポテンシャルエネルギーの狭義の極小点が力学的に安定であることを述べる。
+
+**前提を変えると.** 3 の逆（安定なら極値点）は成り立たない：$H=\frac12(q_{1}^{2}+p_{1}^{2})-\frac12(q_{2}^{2}+p_{2}^{2})$（$m=2$）では、解は二つの独立な回転で原点は安定だが、原点は $H$ の鞍点である。
+
+**高い視点：散逸と保存.** 安定性の理論には二つの極がある。勾配系や減衰のある系はエネルギーを失い（散逸系）、解は平衡点や小さな集合に吸い込まれる。ハミルトン系はエネルギーと体積を保ち（保存系）、何も吸い込まれず、解は等エネルギー面の上を回り続ける。前者の自然な道具は不変性原理、後者の道具は第一積分と体積保存である。比喩で言えば、散逸系は坂を転がって止まるボール、保存系は摩擦のない振り子で、後者は決して止まらない代わりに、最初のエネルギーをいつまでも覚えている。
+:::
+
+::: example 減衰振り子 {#ode:stab-damped-pendulum keywords="damped pendulum theta'' + k theta' + sin theta = 0: energy decreases, the bottom is asymptotically stable by LaSalle with an explicit basin, exponentially stable by linearization, the top is unstable; undamped case k = 0 is Hamiltonian" index="減衰振り子|げんすいふりこ, 振り子の方程式|ふりこのほうていしき"}
+$k\ge0$ について、振り子の方程式 $\theta''+k\theta'+\sin\theta=0$ を 1 階化した系
+$$
+\theta'=\omega,\qquad\omega'=-\sin\theta-k\omega
+$$
+を $W=\mathbb{R}^{2}$ で考える。平衡点は $(j\pi,0)$（$j\in\mathbb{Z}$）。エネルギー $E(\theta,\omega)\defeq\frac{1}{2}\omega^{2}+1-\cos\theta$ について $\dot E=\omega(-\sin\theta-k\omega)+\sin\theta\cdot\omega=-k\omega^{2}\le0$。
+1. （$k>0$、下の平衡点・線形化）$Df(0,0)=\begin{pmatrix}0&1\\-1&-k\end{pmatrix}$ の固有値は $\frac{-k\pm\sqrt{k^{2}-4}}{2}$ で、$k<2$ なら実部 $-k/2$、$k\ge2$ なら $\sqrt{k^{2}-4}<k$ から二つとも負の実数。\ref{ode:stab-linearization} から $(0,0)$ は指数安定。
+2. （$k>0$、下の平衡点・不変性原理）$0<c<2$ について $K_{c}\defeq\{(\theta,\omega):|\theta|\le\pi,\ E\le c\}$ はコンパクトで、$|\theta|=\pi$ の点では $E\ge2>c$ なので $K_{c}$ の点は $|\theta|<\pi$ を満たす。$K_{c}$ から出た解は $E\le c$ のまま $|\theta|=\pi$ に達することができない（中間値の定理）ので、$K_{c}$ は正不変。$\{\dot E=0\}\cap K_{c}=\{\omega=0\}\cap K_{c}$ に全時間留まる解は $\omega\equiv0$ なので $\omega'=-\sin\theta=0$、$|\theta|<\pi$ から $\theta=0$。\ref{ode:lyapunov-lasalle} から、$K_{c}$ から出たすべての解は $(0,0)$ に収束する。とくに、$|\theta|<\pi$ かつ $E<2$ の点はすべて $(0,0)$ に吸い込まれる。線形化（1）は収束する範囲について何も言わないが、こちらは具体的な範囲を与える。ただし $E$ は狭義のリャプノフ関数ではない（$\omega=0$ の点で $\dot E=0$）ので、\ref{ode:lyapunov-theorem.2} は直接には使えない。
+3. （上の平衡点）$Df(\pi,0)=\begin{pmatrix}0&1\\1&-k\end{pmatrix}$ の固有値 $\frac{-k\pm\sqrt{k^{2}+4}}{2}$ の一方は正なので、$k\ge0$ によらず \ref{ode:stab-linearization-unstable} から $(\pi,0)$ は不安定。
+4. （$k=0$）系は $H=E$, $q=\theta$, $p=\omega$ のハミルトン系で、$(0,0)$ は $H$ の狭義の極小点なので、\ref{ode:stab-hamiltonian.3} から安定だが、\ref{ode:stab-hamiltonian.2} から漸近安定ではない。線形化の固有値は $\pm i$ で、\ref{ode:stab-linearization}・\ref{ode:stab-linearization-unstable} では判定できない。
+:::
+
+## 問題 {#ode:sec-st-b-problems}
+
+::: problem {#ode:prob-st-nonlinear-damping}
+$x'=y$, $y'=-x-y^{3}$ の原点は漸近安定であることを、$V(x,y)=x^{2}+y^{2}$ を使って示せ。
+:::
+
+::: solution
+$\dot V=2xy+2y(-x-y^{3})=-2y^{4}\le0$ で、$V$ は原点のリャプノフ関数だが、$y=0$ の点で $\dot V=0$ なので狭義ではない。$\{\dot V=0\}=\{y=0\}$ に全時間留まる解は $y\equiv0$ なので $y'=-x-y^{3}=-x=0$、つまり原点だけ。\ref{ode:lyapunov-barbashin}（任意の $r>0$ で仮定が成り立つ）から原点は漸近安定。なお線形化は回転 $\begin{pmatrix}0&1\\-1&0\end{pmatrix}$ で、線形化では判定できない。
+:::
+
+::: problem {#ode:prob-st-double-well}
+$V(x,y)\defeq(x^{2}-1)^{2}+y^{2}$ の勾配系 $x'=-\partial_{x}V$, $y'=-\partial_{y}V$ の平衡点をすべて求め、それぞれの安定性を判定せよ。
+:::
+
+::: solution
+$\nabla V=(4x(x^{2}-1),\,2y)$ なので、平衡点は $(0,0)$, $(\pm1,0)$。ヘッセ行列は $HV=\operatorname{diag}(12x^{2}-4,\,2)$。$(\pm1,0)$ では $\operatorname{diag}(8,2)$ で正定値なので、\ref{ode:stab-gradient.3} から指数安定。$(0,0)$ では $\operatorname{diag}(-4,2)$ で、線形化 $Df=-HV=\operatorname{diag}(4,-2)$ は正の固有値 $4$ をもつので、\ref{ode:stab-linearization-unstable} から不安定（$(0,0)$ は孤立した臨界点で、$V(x,0)=(x^{2}-1)^{2}<1=V(0,0)$（$0<|x|<\sqrt2$）から極小点でないので、\ref{ode:stab-gradient.4} からも従う）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

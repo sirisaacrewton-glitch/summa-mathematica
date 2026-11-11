@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>楕円型方程式の弱解 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/01-weak-elliptic.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 楕円型方程式の弱解 {#pde:page-weak-elliptic keywords="weak solutions of elliptic equations in divergence form, bounded measurable coefficients, uniform ellipticity, H^{-1}, energy estimates, Garding inequality, Lax-Milgram, Fredholm alternative, adjoint operator, discreteness of eigenvalues, 弱解, 弱形式, ガルディングの不等式, ガーディングの不等式, フレドホルムの二者択一, 随伴作用素, 発散形"}
+
+古典的手法の系列では、方程式を満たす関数そのもの（$C^{2}$ 解）を公式で作った。調和関数の理論（\tref{pde:page-harmonic-functions}）は解が $C^{2}$ 級であることを前提にし、ポアソン方程式 $-\Delta u=f$ の古典解には右辺のヘルダー連続性（より弱くディニ連続性）が要り（\ref{pde:newton-holder}）、連続なだけでは古典解がないことさえある（\ref{pde:newton-continuous-counterexample}）。ディリクレ問題を公式で解けたのは球や半空間のような特別な領域だけで（\ref{pde:page-poisson-integrals}）、一般の領域では境界点ごとに障壁を作る必要がある（ペロンの方法。系列 01 で扱う予定）。しかもこれらはどれも、基本解が書ける定数係数の作用素の話だった。この系列では方針を変える。方程式を「すべての試験関数との積分で」満たすという**弱い形**に書き直し、解をソボレフ空間 $H_{0}^{1}(\Omega)$ の中で探す。そうすると、係数は有界可測で十分、境界の正則性は要らず、右辺も $L^{2}$ どころか $H^{-1}$ でよくなる。代わりに得られる解は $H^{1}$ にしか入らず、それが古典解かどうかは別に調べなければならない（次のページの正則性理論の主題）。
+
+このページでは、関数解析の系列で示した対称な場合の結果（\ref{fa:weak-dirichlet-existence}, \ref{fa:dirichlet-eigenfunctions}）を、1 階の項を含む一般の発散形の作用素に広げる。道具は 3 つで、(1) 双線形形式の有界性と**ガルディングの不等式**（エネルギー評価）、(2) ラックス–ミルグラムの定理（\ref{fa:lax-milgram}）による存在、(3) レリッヒ–コンドラショフの定理（\ref{fa:rellich-kondrachov}）によるコンパクト性とリース–シャウダー理論（\ref{fa:riesz-schauder}）による**フレドホルムの二者択一**である。
+
+## 記法と定義の確認 {#pde:sec-we-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$（$n\ge1$）は**有界な開集合**。境界の正則性は仮定しない。関数はすべて**実数値**とする。
+- ソボレフ空間 $H^{1}(\Omega)$ とその内積・ノルム $\|u\|_{H^{1}}^{2}=\|u\|_{2}^{2}+\|\nabla u\|_{2}^{2}$ は \ref{fa:sobolev-space}、$H_{0}^{1}(\Omega)$（$C_{c}^{\infty}(\Omega)$ の $H^{1}$ での閉包）は \ref{fa:c1-boundary.1}、$H^{1}$ がヒルベルト空間であることは \ref{fa:sobolev-complete.2}。$H_{0}^{1}$ は閉部分空間なので、それ自身ヒルベルト空間である。
+- $L^{2}$ の内積を $(u,v)\defeq\int_{\Omega}uv\,dx$、ノルムを $\|u\|_{2}$ と書く。
+- ポアンカレの不等式（\ref{fa:poincare-inequality}）：$\Omega\subset\{|x_{1}|<a\}$ となる $a$ をとり $C_{P}\defeq2a$ とおくと、$u\in H_{0}^{1}(\Omega)$ について $\|u\|_{2}\le C_{P}\|\partial_{1}u\|_{2}\le C_{P}\|\nabla u\|_{2}$。
+- 埋め込み $H_{0}^{1}(\Omega)\hookrightarrow L^{2}(\Omega)$ がコンパクトであること：\ref{fa:rellich-kondrachov.3}（$p=q=2$。$n\ge3$ なら $2<2^{*}=\frac{2n}{n-2}$、$n\le2$ なら $p=2\ge n$ なので条件を満たす）。
+- ヒルベルト空間 $H$（実）の内積は $\langle\cdot,\cdot\rangle$。リースの表現定理 \ref{fa:riesz-representation}、直交分解 \ref{fa:orthogonal-decomposition}、共役作用素 $T^{*}$ \ref{fa:adjoint}。ラックス–ミルグラムの定理 \ref{fa:lax-milgram} は実ヒルベルト空間で使う（このとき「共役線形」は「線形」、$\operatorname{Re}$ は不要）。
+- コンパクト作用素 \ref{fa:compact-operator}、その性質 \ref{fa:compact-ideal}、リース–シャウダー理論 \ref{fa:riesz-schauder}, \ref{fa:fredholm-alternative}（実バナッハ空間でも成り立つ）。
+- 関数解析の系列での対称な場合：一様楕円型作用素と弱解 \ref{fa:weak-solution}、古典解は弱解 \ref{fa:classical-is-weak}、存在 \ref{fa:weak-dirichlet-existence}、ディリクレ・ラプラシアンの固有関数 \ref{fa:dirichlet-eigenfunctions}。このページの双線形形式は $B[u,v]$ と角括弧で書いて区別する。
+- 初等的な不等式：$s,t\ge0$, $\varepsilon>0$ について $st\le\varepsilon s^{2}+\frac{t^{2}}{4\varepsilon}$（$(\sqrt{\varepsilon}s-\frac{t}{2\sqrt{\varepsilon}})^{2}\ge0$ を展開）。
+- **選択公理**：第 3 節（存在定理）までは使わない。第 4 節は、コンパクト作用素の理論（\ref{fa:compact-ideal}, \ref{fa:riesz-schauder}）が従属選択公理を使うのでそれに依存し、固有値の離散性の証明でも可算個の固有ベクトルを選ぶ（可算選択公理）。
+:::
+
+## 発散形の作用素と弱解 {#pde:sec-we-definition}
+
+::: definition 発散形の一様楕円型作用素 {#pde:bilinear-elliptic-form keywords="second order operator in divergence form with bounded measurable coefficients a^{ij}, b^i, c; uniform ellipticity sum a^{ij} xi_i xi_j >= theta |xi|^2; associated bilinear form B[u,v] = int (a^{ij} d_i u d_j v + b^i d_i u v + c u v)" index="発散形|はっさんけい, 一様楕円性|いちようだえんせい, 楕円型作用素の双線形形式|だえんがたさようそのそうせんけいけいしき"}
+1. 有界可測な実数値関数 $a^{ij},b^{i},c$（$1\le i,j\le n$）について、
+$$
+Lu\defeq-\sum_{i,j=1}^{n}\partial_{j}\bigl(a^{ij}\partial_{i}u\bigr)+\sum_{i=1}^{n}b^{i}\partial_{i}u+cu
+$$
+を**発散形**の 2 階作用素という。$a^{ij}=a^{ji}$ は仮定しない。
+2. ある $\theta>0$ について、a.e. の $x\in\Omega$ とすべての $\xi\in\mathbb{R}^{n}$ で
+$$
+\sum_{i,j}a^{ij}(x)\xi_{i}\xi_{j}\ge\theta|\xi|^{2}
+$$
+が成り立つとき、$L$ は**一様楕円型**であるという。
+3. 定数を $\Lambda\defeq\operatorname*{ess\,sup}_{x}\bigl(\sum_{i,j}a^{ij}(x)^{2}\bigr)^{1/2}$、$b_{\infty}\defeq\operatorname*{ess\,sup}_{x}|b(x)|$（$b=(b^{1},\dots,b^{n})$）、$c_{\infty}\defeq\|c\|_{\infty}$、$c_{-}\defeq\|\max(-c,0)\|_{\infty}$ とおく。
+4. $u,v\in H^{1}(\Omega)$ について、$L$ に付随する**双線形形式**を
+$$
+B[u,v]\defeq\int_{\Omega}\Bigl(\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}v+\sum_{i}b^{i}\partial_{i}u\,v+cuv\Bigr)dx
+\label{pde:eq-we-bilinear}
+$$
+と定める（被積分関数の可積分性は \see{pde:bilinear-energy-estimates} の証明で確かめる）。
+:::
+
+::: intuition
+係数は測れて有界でありさえすればよく、微分できなくてもよい。「楕円型」とは、2 階の部分がどの方向にも一定以上の強さで効いていることである。双線形形式は、方程式に試験関数 $v$ を掛けて 1 回部分積分した形である。
+:::
+
+$u\in C^{2}$, $a^{ij}\in C^{1}$ で $v\in C_{c}^{\infty}(\Omega)$ なら、部分積分から $\int(Lu)v=B[u,v]$ となる（\ref{pde:weak-elliptic-classical} の証明）。右辺は $u$ の 1 階の弱微分しか使わないので、右辺だけを要求するのが弱解の考え方である。右辺のデータの空間として、$H_{0}^{1}$ の双対を用意する。
+
+::: definition 空間 H⁻¹ {#pde:weak-dual-space keywords="H^{-1}(Omega): the dual space of H^1_0(Omega), bounded linear functionals with the dual norm; pairing <f, v>" index="H-1|えいちまいなすいち, 負の階数のソボレフ空間|ふのかいすうのそぼれふくうかん"}
+$H_{0}^{1}(\Omega)$ 上の有界線形汎関数の全体を $H^{-1}(\Omega)$ と書き、$f\in H^{-1}$ の $v$ での値を $\langle f,v\rangle$、ノルムを $\|f\|_{H^{-1}}\defeq\sup\{|\langle f,v\rangle|:\|v\|_{H^{1}}\le1\}$ とする。
+:::
+
+::: intuition
+$H^{-1}$ は、境界で消える $H^{1}$ の関数に「かけて積分する」ことで値が決まる対象の全体で、$L^{2}$ の関数のほか、$L^{2}$ の関数の 1 階の導関数（超関数として）も含む。
+:::
+
+::: proposition H⁻¹ の元の表示 {#pde:weak-dual-representation keywords="every f in H^{-1} is f^0 - sum d_i f^i with f^0,...,f^n in L^2, <f,v> = int f^0 v + sum f^i d_i v, and ||f||_{H^{-1}} is the infimum of (sum ||f^i||^2)^{1/2}; L^2 embeds in H^{-1}" index="H-1 の表示|えいちまいなすいちのひょうじ"}
+1. $f^{0},f^{1},\dots,f^{n}\in L^{2}(\Omega)$ について、$\langle f,v\rangle\defeq\int_{\Omega}\bigl(f^{0}v+\sum_{i}f^{i}\partial_{i}v\bigr)dx$ は $H^{-1}$ の元で、$\|f\|_{H^{-1}}\le\bigl(\sum_{i=0}^{n}\|f^{i}\|_{2}^{2}\bigr)^{1/2}$。$C_{c}^{\infty}(\Omega)$ に制限すると、超関数 $f^{0}-\sum_{i}\partial_{i}f^{i}$ に等しい。
+2. 逆に、任意の $f\in H^{-1}$ は 1 の形に書け、$\sum_{i=0}^{n}\|f^{i}\|_{2}^{2}=\|f\|_{H^{-1}}^{2}$ となる表示がとれる。
+3. $f\in L^{2}$ に $\langle f,v\rangle\defeq(f,v)$ を対応させる写像（1 で $f^{0}=f$, $f^{i}=0$）は単射で、$\|f\|_{H^{-1}}\le\|f\|_{2}$。以後これで $L^{2}\subset H^{-1}$ とみなす。$H^{-1}$ の元は $C_{c}^{\infty}(\Omega)$ での値で決まる。
+:::
+
+::: proof
+**1.** コーシー–シュワルツの不等式を $L^{2}$ と $\mathbb{R}^{n+1}$ で順に使うと
+$$
+|\langle f,v\rangle|\le\|f^{0}\|_{2}\|v\|_{2}+\sum_{i}\|f^{i}\|_{2}\|\partial_{i}v\|_{2}\le\Bigl(\sum_{i=0}^{n}\|f^{i}\|_{2}^{2}\Bigr)^{1/2}\|v\|_{H^{1}}.
+$$
+$v\in C_{c}^{\infty}$ のとき、超関数の微分の定義から $(-\partial_{i}f^{i})(v)=\int f^{i}\partial_{i}v$。
+
+**2.** $H_{0}^{1}$ はヒルベルト空間なので、\ref{fa:riesz-representation} から $w\in H_{0}^{1}$ で $\langle f,v\rangle=\langle w,v\rangle_{H^{1}}=\int(wv+\sum_{i}\partial_{i}w\,\partial_{i}v)$（すべての $v\in H_{0}^{1}$）、$\|w\|_{H^{1}}=\|f\|_{H^{-1}}$ となるものがある。$f^{0}\defeq w$, $f^{i}\defeq\partial_{i}w$ とすればよい。
+
+**3.** 評価は 1 から。$(f,v)=0$ がすべての $v\in C_{c}^{\infty}(\Omega)$ で成り立てば、\ref{fa:fundamental-lemma} から $f=0$ a.e.。後半：$C_{c}^{\infty}(\Omega)$ は $H_{0}^{1}$ で稠密で $f$ は連続なので、そこでの値が $H_{0}^{1}$ 全体での値を決める。
+:::
+
+::: definition 弱解 {#pde:weak-elliptic-solution keywords="weak solution of the Dirichlet problem L u = f in Omega, u = 0 on the boundary: u in H^1_0 with B[u,v] = <f,v> for all v in H^1_0, f in H^{-1}" index="弱解（楕円型方程式）|じゃくかいだえんがたほうていしき, 弱形式（ディリクレ問題）|じゃくけいしきでぃりくれもんだい"}
+$f\in H^{-1}(\Omega)$ とする。$u\in H_{0}^{1}(\Omega)$ が
+$$
+B[u,v]=\langle f,v\rangle\qquad(\text{すべての }v\in H_{0}^{1}(\Omega))
+\label{pde:eq-we-weak}
+$$
+を満たすとき、$u$ を境界値問題「$Lu=f$（$\Omega$ で）、$u=0$（$\partial\Omega$ で）」の**弱解**という。$f\in L^{2}$ なら右辺は $(f,v)$。
+:::
+
+::: intuition
+方程式を点ごとに要求する代わりに、どの試験関数とかけて積分しても両辺が一致することを要求する。境界条件「$u=0$」は、解を $H_{0}^{1}$（境界で消える滑らかな関数で近似できる関数）から探すことで、弱い形で課している。
+:::
+
+::: example
+- $a^{ij}=a^{ji}$, $b=0$ の場合が \ref{fa:weak-solution} の弱解である（そこでは $f\in L^{2}$）。
+- **超関数としての方程式.** 弱解 $u$ について $a^{ij}\partial_{i}u\in L^{2}$ なので、$v\in C_{c}^{\infty}$ に制限すると \eqref{pde:eq-we-weak} は、超関数として $-\sum_{i,j}\partial_{j}(a^{ij}\partial_{i}u)+\sum_{i}b^{i}\partial_{i}u+cu=f$ が成り立つことを言っている。係数が微分できなくても、発散形なら意味をもつ。
+- **0 でない境界値.** $g\in H^{1}(\Omega)$ について「$Lu=f$, $u=g$（$\partial\Omega$ で）」の弱解を、$u-g\in H_{0}^{1}$ かつ \eqref{pde:eq-we-weak} を満たす $u\in H^{1}$ と定める。$w\defeq u-g$ とおくと、$w$ は右辺 $\langle f,v\rangle-B[g,v]$ の弱解になる。$v\mapsto B[g,v]$ は $H^{-1}$ の元である（\ref{pde:bilinear-energy-estimates.1} の証明は $H^{1}\times H^{1}$ でそのまま通る）ので、問題はこのページの形に帰着する。$\partial\Omega$ が $C^{1}$ なら、$u-g\in H_{0}^{1}$ はトレースの意味で $u=g$ を含む（\see{fa:trace-theorem}）。
+:::
+
+::: proposition 古典解と弱解 {#pde:weak-elliptic-classical keywords="if a^{ij} in C^1(Omega) and b^i, c continuous and bounded, a C^2 solution in H^1_0 is a weak solution; a weak solution in C^2(Omega) with continuous f is a classical solution" index="古典解と弱解（楕円型方程式）|こてんかいとじゃくかいだえんがたほうていしき"}
+\ref{pde:bilinear-elliptic-form} の作用素で、さらに $a^{ij}\in C^{1}(\Omega)$、$b^{i},c\in C(\Omega)$ とする（どれも有界のまま）。
+1. $u\in C^{2}(\Omega)\cap H_{0}^{1}(\Omega)$ が $\Omega$ の各点で $Lu=f$ を満たし、$f\in L^{2}(\Omega)$ なら、$u$ は弱解。
+2. 弱解 $u$ が $C^{2}(\Omega)$ に入り、$f\in L^{2}$ が連続なら、$\Omega$ の各点で $Lu=f$。
+:::
+
+::: proof
+**Step 1.** 【主張：$u\in C^{2}(\Omega)$, $v\in C_{c}^{\infty}(\Omega)$ なら $\int(Lu)v=B[u,v]$】$w_{j}\defeq\sum_{i}a^{ij}\partial_{i}u\in C^{1}(\Omega)$ なので $w_{j}v\in C_{c}^{1}(\Omega)$ で、$\Omega$ の外で $0$ と延ばして $\mathbb{R}^{n}$ 上の $C_{c}^{1}$ 関数とみると、$x_{j}$ について微積分学の基本定理とフビニの定理から $\int\partial_{j}(w_{j}v)=0$。よって $-\int\partial_{j}w_{j}\,v=\int w_{j}\partial_{j}v$。1 階と 0 階の項はそのまま。被積分関数はどれも $v$ の台の上で連続なので可積分。
+
+**Step 2（1 の証明）.** 【主張：$B[u,v]=(f,v)$ がすべての $v\in H_{0}^{1}$ で成り立つ】Step 1 と $Lu=f$ から $v\in C_{c}^{\infty}$ で成り立つ。両辺は $v$ について $H^{1}$ ノルムで連続（左辺は \ref{pde:bilinear-energy-estimates.1}、右辺は \ref{pde:weak-dual-representation.3}）なので、閉包 $H_{0}^{1}$ に延びる。
+
+**Step 3（2 の証明）.** 【主張：$Lu=f$ が各点で成り立つ】Step 1 と弱解の定義から $\int(Lu-f)v=0$（$v\in C_{c}^{\infty}$）。$Lu-f$ は連続なので、\ref{fa:fundamental-lemma} から a.e. で $0$、連続性から各点で $0$。
+
+::: hypcheck
+- **係数の $C^{1}$ 性**：Step 1 の $w_{j}\in C^{1}$ にだけ使った。有界可測な係数では $Lu$ を各点で定義できず、古典解という概念自体がない。
+- **$u\in H_{0}^{1}$**：境界条件を弱い形で課すために仮定した。$u\in C^{1}(\overline{\Omega})$ で $\partial\Omega$ の上で $u=0$ でも、境界が悪いと $H_{0}^{1}$ に入るかどうかは別の問題で、$\partial\Omega$ が $C^{1}$ ならトレースが $0$ の関数は $H_{0}^{1}$ に入る（\see{fa:ex-et-3}）。
+- **境界の正則性**：使っていない。
+:::
+:::
+
+\ref{fa:classical-is-weak} は $a^{ij}=a^{ji}$, $b=0$ の場合で、証明は同じである。
+
+## エネルギー評価 {#pde:sec-we-energy}
+
+::: theorem エネルギー評価（ガルディングの不等式） {#pde:bilinear-energy-estimates keywords="energy estimates for the bilinear form of a uniformly elliptic operator: boundedness |B[u,v]| <= alpha ||u|| ||v|| on H^1_0, Garding inequality beta ||u||_{H^1}^2 <= B[u,u] + gamma ||u||_2^2 with beta = theta/(2(1+C_P^2)), gamma = b_inf^2/(2 theta) + c_-, coercivity when gamma C_P^2 < theta/2" index="エネルギー評価|えねるぎーひょうか, ガルディングの不等式|がるでぃんぐのふとうしき, ガーディングの不等式|がーでぃんぐのふとうしき"}
+$L$ を一様楕円型とし、記号は \ref{pde:bilinear-elliptic-form} のとおりとする。$u,v\in H_{0}^{1}(\Omega)$ について次が成り立つ。
+1. （有界性）$|B[u,v]|\le\alpha\|u\|_{H^{1}}\|v\|_{H^{1}}$、$\alpha\defeq\Lambda+b_{\infty}+c_{\infty}$。
+2. （ガルディングの不等式）$\beta\|u\|_{H^{1}}^{2}\le B[u,u]+\gamma\|u\|_{2}^{2}$、ここで
+$$
+\beta\defeq\frac{\theta}{2(1+C_{P}^{2})},\qquad\gamma\defeq\frac{b_{\infty}^{2}}{2\theta}+c_{-}.
+$$
+3. （強圧性）$\gamma C_{P}^{2}<\frac{\theta}{2}$ なら $B[u,u]\ge\beta'\|u\|_{H^{1}}^{2}$、$\beta'\defeq\frac{\theta/2-\gamma C_{P}^{2}}{1+C_{P}^{2}}>0$。とくに $b=0$, $c\ge0$ なら $\gamma=0$ で成り立つ。
+:::
+
+::: intuition
+2 階の部分は楕円性のおかげで $\|\nabla u\|^{2}$ を下から押さえ、1 階・0 階の部分はそれを $\|u\|_{2}^{2}$ の分だけしか損なわない。だから $L^{2}$ ノルムを少し足せば、エネルギーは $H^{1}$ ノルムの 2 乗と同じ大きさになる。
+:::
+
+::: proof
+**Step 1（有界性）.** 【主張：1 が成り立ち、\eqref{pde:eq-we-bilinear} の被積分関数は可積分】a.e. の $x$ で、$\mathbb{R}^{n^{2}}$ と $\mathbb{R}^{n}$ のコーシー–シュワルツの不等式から
+$$
+\Bigl|\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}v\Bigr|\le\Bigl(\sum_{i,j}(a^{ij})^{2}\Bigr)^{1/2}\Bigl(\sum_{i,j}(\partial_{i}u)^{2}(\partial_{j}v)^{2}\Bigr)^{1/2}\le\Lambda|\nabla u||\nabla v|.
+$$
+同様に $|\sum_{i}b^{i}\partial_{i}u\,v|\le b_{\infty}|\nabla u||v|$、$|cuv|\le c_{\infty}|u||v|$。右辺はどれも $L^{2}$ の関数の積なので可積分で、$L^{2}$ のコーシー–シュワルツ（\ref{fa:cauchy-schwarz.1}）から
+$$
+|B[u,v]|\le\Lambda\|\nabla u\|_{2}\|\nabla v\|_{2}+b_{\infty}\|\nabla u\|_{2}\|v\|_{2}+c_{\infty}\|u\|_{2}\|v\|_{2}\le\alpha\|u\|_{H^{1}}\|v\|_{H^{1}}.
+$$
+
+**Step 2（2 階の部分）.** 【主張：$\int\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}u\ge\theta\|\nabla u\|_{2}^{2}$】一様楕円性を a.e. の $x$ で $\xi=\nabla u(x)$ に使って積分する。
+
+**Step 3（低階の部分）.** 【主張：$B[u,u]\ge\frac{\theta}{2}\|\nabla u\|_{2}^{2}-\gamma\|u\|_{2}^{2}$】記法の初等的な不等式を $\varepsilon=\frac{\theta}{2b_{\infty}}$（$b_{\infty}>0$ のとき）で使うと、各点で $b_{\infty}|\nabla u||u|\le\frac{\theta}{2}|\nabla u|^{2}+\frac{b_{\infty}^{2}}{2\theta}u^{2}$（$b_{\infty}=0$ なら左辺は $0$）。また $cu^{2}\ge-c_{-}u^{2}$。Step 2 と合わせて
+$$
+B[u,u]\ge\theta\|\nabla u\|_{2}^{2}-\frac{\theta}{2}\|\nabla u\|_{2}^{2}-\frac{b_{\infty}^{2}}{2\theta}\|u\|_{2}^{2}-c_{-}\|u\|_{2}^{2}.
+$$
+
+**Step 4（ポアンカレの不等式）.** 【主張：2 と 3 が成り立つ】ポアンカレの不等式から $\|u\|_{H^{1}}^{2}=\|u\|_{2}^{2}+\|\nabla u\|_{2}^{2}\le(1+C_{P}^{2})\|\nabla u\|_{2}^{2}$、つまり $\frac{\theta}{2}\|\nabla u\|_{2}^{2}\ge\beta\|u\|_{H^{1}}^{2}$。これを Step 3 に入れると 2。3 は、Step 3 の右辺で $\|u\|_{2}^{2}\le C_{P}^{2}\|\nabla u\|_{2}^{2}$ を使うと $B[u,u]\ge(\frac{\theta}{2}-\gamma C_{P}^{2})\|\nabla u\|_{2}^{2}\ge\beta'\|u\|_{H^{1}}^{2}$。
+
+::: hypcheck
+- **一様楕円性**：Step 2 で使った。外すと 2 は成り立たない：$n=1$, $a^{11}=-1$, $b=c=0$ なら $B[u,u]=-\|u'\|_{2}^{2}$ で、$u_{k}(x)=\sin(kx)$（$\Omega=(0,\pi)$）について $B[u_{k},u_{k}]+\gamma\|u_{k}\|_{2}^{2}=\frac{\pi}{2}(\gamma-k^{2})$ はどんな $\gamma$ でも $k$ が大きいと負になる。楕円性の「一様」（$\theta>0$ が $x$ によらない）も、$\beta>0$ を得るのに要る。
+- **係数の有界性**：Step 1（$\Lambda,b_{\infty},c_{\infty}$）と Step 3（$b_{\infty},c_{-}$）で使った。可測性は積分の意味のためだけ。**係数の微分可能性は一度も使っていない**。
+- **$\Omega$ の有界性**：Step 4 のポアンカレの不等式だけで使った。2 は有界性なしでも、$\frac{\theta}{2}\|\nabla u\|_{2}^{2}=\frac{\theta}{2}\|u\|_{H^{1}}^{2}-\frac{\theta}{2}\|u\|_{2}^{2}$ と書き直せば $\beta=\frac{\theta}{2}$, $\gamma+\frac{\theta}{2}$ で成り立つ。ポアンカレの不等式は定数を良くし、3 の強圧性を得るのに使う。
+- **境界の正則性**：使っていない（$H_{0}^{1}$ のポアンカレの不等式は境界によらない）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 定数 $\gamma$ は 1 階の項を最悪の場合として評価したもので、最良ではない。$b$ が定数ベクトル（より一般に発散が $0$）なら $\int\sum b^{i}\partial_{i}u\,u=0$ となり、$b$ がどれほど大きくても $c\ge0$ なら強圧的である（\ref{pde:prob-we-drift}）。一方、$c$ が負で大きいと強圧性は本当に失われる（\ref{pde:weak-elliptic-existence} の hypcheck）。
+
+**似た定理.** 閉多様体の上の楕円型作用素の評価 \ref{gl:elliptic-estimate} は同じ形（$\|u\|_{H^{s+m}}\le C(\|Pu\|_{H^{s}}+\|u\|_{H^{s}})$）で、低い階のノルムを足せば高い階のノルムが押さえられる、という構造が共通する。常微分方程式のスツルム–リウヴィル作用素の下からの評価 \see{ode:sl-lower-bound} はその 1 次元版にあたる。
+
+**高い視点：エネルギーと漏れ.** $B[u,u]$ は、膜の変形にたくわえられる弾性エネルギー（2 階の部分）に、流れによる運搬（1 階の部分）と、ばねや吸収（0 階の部分）を加えたものと読める。ガルディングの不等式は「弾性エネルギーは必ず形の険しさ $\|\nabla u\|^{2}$ に比例してたまり、運搬や吸収で漏れ出す分は、形の高さ $\|u\|_{2}^{2}$ の分しかない」と言っている。高さの分の漏れは、$\mu u$ という余分なばねを足せば埋め合わせられる。これが次の節の出発点である。
+:::
+
+## 存在定理 {#pde:sec-we-existence}
+
+::: theorem 弱解の存在と一意性 {#pde:weak-elliptic-existence keywords="existence and uniqueness of weak solutions: for mu >= gamma, L u + mu u = f has a unique weak solution in H^1_0 for every f in H^{-1}, ||u||_{H^1} <= ||f||_{H^{-1}} / beta; if gamma C_P^2 < theta/2 (e.g. b = 0, c >= 0) then L u = f itself is uniquely solvable; proof by Lax-Milgram" index="弱解の存在（楕円型方程式）|じゃくかいのそんざいだえんがたほうていしき"}
+$L$ を一様楕円型とし、$\alpha,\beta,\gamma,\beta'$ を \ref{pde:bilinear-energy-estimates} のとおりとする。
+1. $\mu\ge\gamma$ なら、すべての $f\in H^{-1}(\Omega)$ について、$Lu+\mu u=f$, $u=0$（$\partial\Omega$）の弱解、すなわち
+$$
+B_{\mu}[u,v]\defeq B[u,v]+\mu(u,v)=\langle f,v\rangle\qquad(v\in H_{0}^{1})
+$$
+となる $u\in H_{0}^{1}(\Omega)$ がただ一つあり、$\|u\|_{H^{1}}\le\frac{1}{\beta}\|f\|_{H^{-1}}$。
+2. $\gamma C_{P}^{2}<\frac{\theta}{2}$（とくに $b=0$ かつ $c\ge0$）なら、すべての $f\in H^{-1}$ について $Lu=f$ の弱解がただ一つあり、$\|u\|_{H^{1}}\le\frac{1}{\beta'}\|f\|_{H^{-1}}$。
+:::
+
+::: intuition
+吸収の項 $\mu u$ を十分大きく足せば、どんな右辺に対しても弱解がちょうど一つある。1 階の項がなく 0 階の係数が負でなければ、何も足さなくてよい。
+:::
+
+::: proof
+**Step 1.** 【主張：$B_{\mu}$ は $H_{0}^{1}$ 上の有界な双線形形式で、$B_{\mu}[u,u]\ge\beta\|u\|_{H^{1}}^{2}$】有界性は \ref{pde:bilinear-energy-estimates.1} と $|(u,v)|\le\|u\|_{H^{1}}\|v\|_{H^{1}}$ から定数 $\alpha+\mu$ で。\ref{pde:bilinear-energy-estimates.2} から $B_{\mu}[u,u]\ge\beta\|u\|_{H^{1}}^{2}+(\mu-\gamma)\|u\|_{2}^{2}\ge\beta\|u\|_{H^{1}}^{2}$。
+
+**Step 2.** 【主張：1 が成り立つ】$v\mapsto\langle f,v\rangle$ は $H_{0}^{1}$ 上の有界線形汎関数でノルムは $\|f\|_{H^{-1}}$。実ヒルベルト空間 $H_{0}^{1}$ で \ref{fa:lax-milgram} を $B_{\mu}$ に使えば、解がただ一つあり $\|u\|_{H^{1}}\le\|f\|_{H^{-1}}/\beta$。
+
+**Step 3.** 【主張：2 が成り立つ】\ref{pde:bilinear-energy-estimates.3} から $B$ 自身が定数 $\beta'$ で強圧的なので、Step 2 と同じく \ref{fa:lax-milgram} を $B$ に使う。
+
+::: hypcheck
+- **一様楕円性**：Step 1 でガルディングの不等式を通して使った。外すと、どれだけ大きい $\mu$ をとっても一意性が崩れうる：$\Omega=(0,\pi)$ で $Lu=u''$（$a^{11}=-1$）なら、$\mu=k^{2}$ のとき $u''+k^{2}u=0$ は弱解 $\sin(kx)\ne0$ をもつ（部分積分で $B_{\mu}[\sin kx,v]=0$ を確かめられる）。
+- **$\mu\ge\gamma$、2 の小ささの条件**：強圧性のため。$c$ が負だと一意性が崩れる：$\Omega=(0,\pi)$, $Lu=-u''-u$（$c=-1$, $\gamma=1$）なら $u=\sin x$ が $Lu=0$ の弱解。このとき 2 の条件は（満たされれば一意性が従うので）満たされていない。
+- **係数の正則性**：有界可測しか使っていない。**データの正則性**：$f\in H^{-1}$ で十分。$f$ が点のディラック測度のように $H^{-1}$ に入らないもの（$n\ge2$）は扱えない。
+- **境界の正則性**：使っていない。境界条件は $u\in H_{0}^{1}$ という形で入っている。
+- **$\Omega$ の有界性**：2 でポアンカレの不等式を通して使った。1 は、\ref{pde:bilinear-energy-estimates} の hypcheck のとおり $\gamma$ を $\gamma+\frac{\theta}{2}$ に替えれば有界性なしで成り立つ。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 2 の条件は十分条件にすぎない。$c\ge0$ なら $b$ があっても一意性は成り立ち（弱最大値原理による。系列の後のページで扱う）、次の節のフレドホルムの二者択一と合わせると存在も従う（Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 8 章）。$b$ が定数の場合は \ref{pde:prob-we-drift} で直接確かめる。$a^{ij}$ が対称で $b=0$ なら $B_{\mu}$ は対称で、解はエネルギー $\frac12B_{\mu}[v,v]-\langle f,v\rangle$ の最小点として特徴づけられる（\ref{fa:dirichlet-principle}）。対称でなければこの変分的な特徴づけはなく、ラックス–ミルグラムの定理が射影定理の代わりをする。
+
+**似た定理.** \ref{fa:weak-dirichlet-existence} は $a^{ij}$ 対称、$b=0$, $c\ge0$, $f\in L^{2}$ の特別な場合である。古典的手法でのディリクレ問題の解の存在は、球では \ref{pde:poisson-ball-dirichlet}、一般の領域ではペロンの方法によるが、どちらも $L=-\Delta$ で、境界の各点に障壁がある（外部球条件など）ことを要した。
+
+**高い視点：解は「見えない境界」を無視する.** 弱解の理論が境界の正則性を問わないのは、境界の小さすぎる部分を最初から無視するからでもある。$n\ge3$ で $\Omega=B(0,1)\setminus\{0\}$ とすると $H_{0}^{1}(\Omega)=H_{0}^{1}(B(0,1))$ である：$\varphi\in C_{c}^{\infty}(B(0,1))$ と、原点の近くで $1$ の $\eta\in C_{c}^{\infty}(B(0,1))$ について、$\varphi_{\varepsilon}\defeq(1-\eta(x/\varepsilon))\varphi\in C_{c}^{\infty}(\Omega)$ は $\|\varphi-\varphi_{\varepsilon}\|_{H^{1}}\to0$ を満たす（$\|\eta(\cdot/\varepsilon)\varphi\|_{2}\to0$、勾配の主要部は $\|\varepsilon^{-1}(\nabla\eta)(\cdot/\varepsilon)\|_{2}^{2}=\varepsilon^{n-2}\|\nabla\eta\|_{2}^{2}\to0$）。だから「原点で $u=1$」という境界条件は弱い形では課せず、弱解は $B(0,1)$ の問題の解と同じになる。古典的にも、原点で $1$、球面で $0$ をとる調和関数は存在しない（除去可能な特異点 \ref{pde:gf-removable-singularity} から、有界な調和関数は原点まで調和に延び、最大値原理で $0$ になる）。比喩で言えば、弱解の理論は、指でつまめないほど細い境界の針には耳を貸さない。古典理論はそこで「解がない」と答え、弱解の理論は「その条件は最初から無意味だ」と答える。
+:::
+
+## フレドホルムの二者択一 {#pde:sec-we-fredholm}
+
+$\gamma>0$ のとき（1 階の項がある、または $c$ が負になりうるとき）、$Lu=f$ そのものはいつでも解けるとは限らない。そこで $Lu+\mu u$ の解作用素を使って方程式を「恒等写像 $-$ コンパクト作用素」の形に書き直し、リース–シャウダー理論を使う。必要になる随伴作用素との関係を、まずヒルベルト空間で整理しておく。
+
+::: lemma ヒルベルト空間でのフレドホルムの二者択一 {#pde:weak-hilbert-fredholm keywords="for a compact operator K on a Hilbert space: K* is compact, dim ker(I-K) = dim ker(I-K*) < infinity, and the range of I-K is the orthogonal complement of ker(I-K*)" index="フレドホルムの二者択一（ヒルベルト空間）|ふれどほるむのにしゃたくいつひるべるとくうかん"}
+$H$ を実ヒルベルト空間、$K\colon H\to H$ をコンパクト作用素とし、$S\defeq I-K$ とおく。
+1. $K^{*}$ はコンパクトで、$S^{*}=I-K^{*}$。
+2. $\operatorname{im}S=(\ker S^{*})^{\perp}$。
+3. $\dim\ker S=\dim\ker S^{*}<\infty$。
+:::
+
+::: proof
+**Step 1.** 【主張：$K^{*}$ はコンパクト】$(x_{k})$ を $\|x_{k}\|\le M$ の列とする。$KK^{*}$ はコンパクト（\ref{fa:compact-ideal.3}）なので、部分列に移って $(KK^{*}x_{k})$ は収束するとしてよい。$z\defeq x_{k}-x_{m}$ について
+$$
+\|K^{*}z\|^{2}=\langle KK^{*}z,z\rangle\le2M\|KK^{*}x_{k}-KK^{*}x_{m}\|\to0
+$$
+なので $(K^{*}x_{k})$ はコーシー列で収束する。$S^{*}=I-K^{*}$ は共役作用素の線形性（\ref{fa:adjoint} の一意性）から。
+
+**Step 2.** 【主張：2 が成り立つ】$y\in(\operatorname{im}S)^{\perp}$ $\iff$ すべての $x$ で $\langle x,S^{*}y\rangle=\langle Sx,y\rangle=0$ $\iff$ $S^{*}y=0$。よって $(\operatorname{im}S)^{\perp}=\ker S^{*}$。\ref{fa:riesz-schauder.2}（$\lambda=1$, $T=K$）から $\operatorname{im}S$ は閉なので、\ref{fa:orthogonal-decomposition} から $\operatorname{im}S=((\operatorname{im}S)^{\perp})^{\perp}=(\ker S^{*})^{\perp}$。
+
+**Step 3.** 【主張：$d\defeq\dim\ker S$, $d^{*}\defeq\dim\ker S^{*}$ について $d\ge d^{*}$】どちらも有限（\ref{fa:riesz-schauder.1} を $K$ と、Step 1 から $K^{*}$ に使う）。$d<d^{*}$ と仮定する。基底を選んで単射な線形写像 $\Lambda\colon\ker S\to\ker S^{*}$ をとり、$P$ を $\ker S$ への直交射影（\ref{fa:orthogonal-decomposition}）とする。$K'\defeq K+\Lambda P$ は有限階数の有界作用素を足したものなのでコンパクト（\ref{fa:compact-ideal.1}・\ref[2]{fa:compact-ideal.2}）。$I-K'=S-\Lambda P$ は単射である：$Su=\Lambda Pu$ なら、左辺は $\operatorname{im}S$、右辺は $\ker S^{*}$ に入り、Step 2 からこの二つは直交するので両辺は $0$。$\Lambda$ の単射性から $Pu=0$、$Su=0$ から $u\in\ker S$ なので $u=Pu=0$。\ref{fa:riesz-schauder.3} から $S-\Lambda P$ は全射。一方 $\dim\operatorname{im}\Lambda=d<d^{*}$ なので、$\ker S^{*}$ の中に $\operatorname{im}\Lambda$ と直交する $y\ne0$ がある。$y=Su-\Lambda Pu$ と書くと、$\langle Su,y\rangle=0$（Step 2）と $\langle\Lambda Pu,y\rangle=0$ から $\|y\|^{2}=0$ となり矛盾。
+
+Step 3 を Step 1 のコンパクト作用素 $K^{*}$ に使うと、$K^{**}=K$（\ref{fa:adjoint}）から $d^{*}\ge d$。よって 3。
+
+::: hypcheck
+- **$K$ のコンパクト性**：Step 1・2・3 のすべてで使った（像が閉であること、単射なら全射であること）。外すと、$\ell^{2}$ の右シフト $R$ で $K\defeq I-R$ とおくと $S=R$ は単射で $\dim\ker S=0$ だが、$S^{*}$（左シフト）の核は 1 次元で、3 が崩れる。
+- **ヒルベルト空間であること**：直交射影と直交補空間（Step 2・3）に使った。バナッハ空間では共役作用素を双対空間の上で考えれば同じ結論が成り立つが、ここでは要らない。
+- **公理**：Step 1 の部分列の選び出しとリース–シャウダー理論で従属選択公理を使う。Step 3 の基底の選択は有限次元なので選択公理は要らない。
+:::
+:::
+
+$B$ の**随伴形式**を $B^{*}[v,w]\defeq B[w,v]$ とする。これは形式的な**随伴作用素**
+$$
+L^{*}v\defeq-\sum_{i,j}\partial_{i}\bigl(a^{ij}\partial_{j}v\bigr)-\sum_{i}\partial_{i}\bigl(b^{i}v\bigr)+cv
+$$
+に付随する形式で、$v\in H_{0}^{1}$ が $B^{*}[v,w]=\langle g,w\rangle$（すべての $w\in H_{0}^{1}$）を満たすとき、$v$ を $L^{*}v=g$ の弱解という。$L^{*}$ の 1 階の項は発散形なので \ref{pde:bilinear-elliptic-form} の形には書けないが（$b$ がリプシッツなら書ける）、$B^{*}[u,u]=B[u,u]$ と $|B^{*}[v,w]|=|B[w,v]|$ から、\ref{pde:bilinear-energy-estimates} と \ref{pde:weak-elliptic-existence.1} は $B^{*}$ にも同じ定数でそのまま成り立つ。
+
+::: theorem 楕円型方程式のフレドホルムの二者択一 {#pde:weak-fredholm-alternative keywords="Fredholm alternative for weak solutions of L u = f: the spaces N of weak solutions of L u = 0 and N* of L* v = 0 have the same finite dimension; L u = f is solvable iff <f, v> = 0 for all v in N*; either unique solvability for all f in H^{-1} with a bound, or a nontrivial kernel" index="フレドホルムの二者択一（楕円型方程式）|ふれどほるむのにしゃたくいつだえんがたほうていしき, 随伴作用素（楕円型）|ずいはんさようそだえんがた, 可解条件|かかいじょうけん"}
+$L$ を一様楕円型とし、
+$$
+N\defeq\{u\in H_{0}^{1}:B[u,v]=0\ (v\in H_{0}^{1})\},\qquad N^{*}\defeq\{v\in H_{0}^{1}:B[w,v]=0\ (w\in H_{0}^{1})\}
+$$
+（$Lu=0$ と $L^{*}v=0$ の弱解の空間）とおく。
+1. $\dim N=\dim N^{*}<\infty$。
+2. $f\in H^{-1}$ について、$Lu=f$ が弱解をもつための必要十分条件は、すべての $v\in N^{*}$ で $\langle f,v\rangle=0$ となること。
+3. 次のどちらか一方だけが成り立つ。
+   - (a) $N=0$ で、すべての $f\in H^{-1}$ について $Lu=f$ の弱解がただ一つあり、$f$ によらない $C$ で $\|u\|_{H^{1}}\le C\|f\|_{H^{-1}}$。
+   - (b) $N\ne0$（$Lu=0$ が $0$ でない弱解をもつ）。
+:::
+
+::: intuition
+弱解の問題は、有限次元の連立一次方程式と同じようにふるまう。斉次方程式の解が $0$ だけなら、どんな右辺でもちょうど一つ解ける。そうでなければ、右辺が随伴方程式の解のすべてと「直交」するときに限って解ける。
+:::
+
+::: proof
+$\mu\defeq\gamma+1>0$ とし、\ref{pde:weak-elliptic-existence.1} の解作用素を $G\colon H^{-1}\to H_{0}^{1}$（$B_{\mu}[Gf,v]=\langle f,v\rangle$）、$B^{*}$ についての解作用素を $G^{*}$ とする。どちらも有界線形でノルムは $\frac1\beta$ 以下（線形性は一意性から）。$\iota\colon L^{2}\to H^{-1}$ を \ref{pde:weak-dual-representation.3} の埋め込みとする（$\|\iota g\|_{H^{-1}}\le\|g\|_{2}$）。
+
+**Step 1.** 【主張：$f\in H^{-1}$, $g\in L^{2}$ について $(Gf,g)=\langle f,G^{*}\iota g\rangle$】$v\defeq G^{*}\iota g$ は、すべての $w$ で $B_{\mu}[w,v]=B_{\mu}^{*}[v,w]=(g,w)$ を満たす。$w=Gf$ とおくと $(g,Gf)=B_{\mu}[Gf,v]=\langle f,v\rangle$。
+
+**Step 2.** 【主張：$K\defeq\mu G\iota$ は $L^{2}$ 上のコンパクト作用素で、$K^{*}=\mu G^{*}\iota$】$G\iota\colon L^{2}\to H_{0}^{1}$ は有界で、埋め込み $H_{0}^{1}\hookrightarrow L^{2}$ はコンパクト（記法の \ref{fa:rellich-kondrachov.3}）なので、合成はコンパクト（\ref{fa:compact-ideal.3}）。$h,g\in L^{2}$ について Step 1 を $f=\iota h$ に使うと $(Kh,g)=\mu\langle\iota h,G^{*}\iota g\rangle=(h,\mu G^{*}\iota g)$。\ref{fa:adjoint} の一意性から $K^{*}=\mu G^{*}\iota$。
+
+**Step 3.** 【主張：$u$ が $Lu=f$ の弱解 $\iff$ $u\in L^{2}$ が $u-Ku=Gf$ を満たす。とくに $N=\ker(I-K)$, $N^{*}=\ker(I-K^{*})$】$u\in H_{0}^{1}$ について、\eqref{pde:eq-we-weak} は $B_{\mu}[u,v]=\langle f+\mu\iota u,v\rangle$ と同値で、解作用素の一意性からこれは $u=G(f+\mu\iota u)=Gf+Ku$ と同値。逆に $u\in L^{2}$ が $u=Ku+Gf$ を満たせば、右辺は $G$ の像に入るので $u\in H_{0}^{1}$ で、前半が使える。$f=0$ とすれば $N=\ker(I-K)$。$B^{*}$ について同じ議論をすれば $N^{*}=\ker(I-\mu G^{*}\iota)=\ker(I-K^{*})$。
+
+**Step 4（1 と 3）.** 【主張：1 と 3 が成り立つ】1 は Step 3 と \ref{pde:weak-hilbert-fredholm.3}。3 で $N=0$ なら $I-K$ は単射で、\ref{fa:fredholm-alternative.1} から全単射で逆は有界。Step 3 から $u\defeq(I-K)^{-1}Gf$ がただ一つの弱解で、$\|u\|_{2}\le\|(I-K)^{-1}\|\,\|Gf\|_{2}\le\|(I-K)^{-1}\|\frac{1}{\beta}\|f\|_{H^{-1}}$。さらに $u=G(f+\mu\iota u)$ から $\|u\|_{H^{1}}\le\frac1\beta(\|f\|_{H^{-1}}+\mu\|u\|_{2})$ で、$H^{1}$ の評価が出る。(a) と (b) は $N=0$ かどうかで分かれるので、ちょうど一方が成り立つ。
+
+**Step 5（2）.** 【主張：$Lu=f$ が可解 $\iff$ $\langle f,v\rangle=0$（$v\in N^{*}$）】Step 3 から、可解であることは $Gf\in\operatorname{im}(I-K)$ と同値で、\ref{pde:weak-hilbert-fredholm.2} からこれは「すべての $v\in N^{*}$ で $(Gf,v)=0$」と同値。$v\in N^{*}$ なら $v=K^{*}v=\mu G^{*}\iota v$ なので、Step 1 から $(Gf,v)=\langle f,G^{*}\iota v\rangle=\frac1\mu\langle f,v\rangle$。
+
+::: hypcheck
+- **一様楕円性**：Step 1 以前の解作用素 $G$, $G^{*}$ の存在（ガルディングの不等式）に使った。
+- **$\Omega$ の有界性**：Step 2 のコンパクト性（レリッヒ–コンドラショフ）で本質的に使った。$\Omega=\mathbb{R}$ では埋め込み $H^{1}\hookrightarrow L^{2}$ はコンパクトでない：$\varphi\in C_{c}^{\infty}(\mathbb{R})$, $\varphi\ne0$ の平行移動 $\varphi_{k}\defeq\varphi(\cdot-k)$ は $H^{1}$ で有界だが、台が離れれば $\|\varphi_{k}-\varphi_{m}\|_{2}=\sqrt2\|\varphi\|_{2}$ で、$L^{2}$ で収束する部分列をもたない。
+- **境界の正則性**：使っていない。\ref{fa:rellich-kondrachov.3} は $H_{0}^{1}$ については境界によらない。
+- **係数の正則性**：有界可測だけ。随伴 $L^{*}$ も、係数を微分せずに形式 $B^{*}$ だけで扱った。
+- **データの正則性**：$f\in H^{-1}$ で十分。
+- **公理**：Step 2・4・5 でコンパクト作用素の理論を通じて従属選択公理を使う。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 の (a) で、対応 $f\mapsto u$ は $H^{-1}\to H_{0}^{1}$ の有界な同型である。ここで解が $H^{1}$ より良くならないのは、データが $H^{-1}$ だからであり、係数が有界可測なだけなら $f\in L^{2}$ でも一般には良くならない。係数と境界が滑らかで $f\in L^{2}$ なら $u\in H^{2}$ になる（次のページ）。
+
+**似た定理.** 1 次元の境界値問題では \ref{ode:sl-alternative} が同じ形の二者択一で、そこではグリーン関数を具体的に作った。閉多様体の楕円型作用素がフレドホルム作用素であること（\ref{gl:elliptic-fredholm}）は、指数 $\dim\ker-\dim\operatorname{coker}$ が $0$ とは限らない一般の楕円型作用素についての結果で、ここでの 1（指数 $0$）は「恒等写像 $-$ コンパクト」という形から来ている。
+
+**高い視点：有限次元の線形代数の生き残り.** 正方行列 $A$ については、$\dim\ker A=\dim\ker A^{\mathsf{T}}$ で、$Ax=y$ が解けるのは $y$ が $A^{\mathsf{T}}$ の核と直交するときに限る。無限次元ではこれは一般に崩れる（hypcheck の右シフト）が、「恒等写像 $-$ コンパクト」は無限次元のうち有限次元の部分でしか恒等写像からずれていないので、線形代数がそのまま生き残る。比喩で言えば、$L$ は無限に多くの自由度をもつ巨大な機械だが、$\mu$ を足したもの（よく効くブレーキ）との差はコンパクト、つまり実質的に有限個のつまみの違いにすぎない。故障（核）があるかどうかも、どの入力が受けつけられないか（可解条件）も、その有限個のつまみを調べればわかる。
+:::
+
+$L-\lambda$（$c$ を $c-\lambda$ に替えた作用素）も一様楕円型なので、\ref{pde:weak-fredholm-alternative} をそれに使うと固有値問題がわかる。$\lambda\in\mathbb{R}$ について、$Lu=\lambda u$ が $0$ でない弱解 $u\in H_{0}^{1}$（すなわち $B[u,v]=\lambda(u,v)$, $v\in H_{0}^{1}$）をもつとき、$\lambda$ を $L$ の（ディリクレ境界条件の）**実固有値**、その全体を $\Sigma$ と書く。
+
+::: theorem 実固有値の離散性 {#pde:weak-elliptic-spectrum keywords="the real eigenvalues of a uniformly elliptic operator with Dirichlet condition form a discrete set Sigma in (-gamma, infinity), finite or a sequence tending to infinity; for lambda not in Sigma, L u = lambda u + f is uniquely solvable; for lambda in Sigma, solvable iff f is orthogonal to the eigenspace of L*" index="固有値の離散性（楕円型作用素）|こゆうちのりさんせいだえんがたさようそ, 実固有値|じつこゆうち"}
+$L$ を一様楕円型とする。
+1. $\Sigma\subset(-\gamma,\infty)$ で、各 $R$ について $\Sigma\cap(-\infty,R]$ は有限集合。したがって $\Sigma$ は有限か、$\lambda_{1}<\lambda_{2}<\cdots\to\infty$ と並べられる。
+2. $\lambda\notin\Sigma$ なら、すべての $f\in H^{-1}$ について $Lu=\lambda u+f$ の弱解がただ一つあり、$\|u\|_{H^{1}}\le C_{\lambda}\|f\|_{H^{-1}}$。
+3. $\lambda\in\Sigma$ なら、$Lu=\lambda u$ と $L^{*}v=\lambda v$ の弱解の空間 $N_{\lambda}$, $N_{\lambda}^{*}$ は同じ有限次元をもち、$Lu=\lambda u+f$ が弱解をもつのはすべての $v\in N_{\lambda}^{*}$ で $\langle f,v\rangle=0$ のときに限る。
+:::
+
+::: intuition
+$Lu=\lambda u$ が $0$ でない解をもつ $\lambda$ は飛び飛びにしかなく、下には限りがあり、上へ無限に続くとしても無限大へ逃げていく。それ以外の $\lambda$ では $Lu=\lambda u+f$ はいつでもただ一つ解ける。
+:::
+
+::: proof
+2・3 は \ref{pde:weak-fredholm-alternative} を $L-\lambda$ に使ったもので、$L-\lambda$ の双線形形式は $B[u,v]-\lambda(u,v)$、その随伴は $B^{*}[v,w]-\lambda(v,w)$ である（2 は \ref{pde:weak-fredholm-alternative.3} の (a)、3 は同じ定理の 1・2）。1 を示す。$\mu\defeq\gamma+1$, $T\defeq G\iota\colon L^{2}\to L^{2}$（\ref{pde:weak-fredholm-alternative} の証明の記号。$T=K/\mu$ はコンパクト）とする。
+
+**Step 1.** 【主張：$\lambda\le-\gamma$ なら $\lambda\notin\Sigma$】$B[u,u]=\lambda\|u\|_{2}^{2}$ なら、ガルディングの不等式から $\beta\|u\|_{H^{1}}^{2}\le(\lambda+\gamma)\|u\|_{2}^{2}\le0$ で $u=0$。
+
+**Step 2.** 【主張：$\lambda>-\gamma$ について、$\lambda\in\Sigma\iff\nu\defeq\frac{1}{\mu+\lambda}\in(0,1)$ が $T$ の固有値】$B[u,v]=\lambda(u,v)$ は $B_{\mu}[u,v]=(\mu+\lambda)(u,v)$ と同値で、解作用素の一意性からこれは $u=(\mu+\lambda)Tu$、すなわち $Tu=\nu u$ と同値（逆向きでは、$T$ の像が $H_{0}^{1}$ に入るので $u=\nu^{-1}Tu\in H_{0}^{1}$）。$\mu+\lambda>1$ なので $\nu\in(0,1)$。
+
+**Step 3.** 【主張：$\varepsilon>0$ について、$T$ の固有値 $\nu\ge\varepsilon$ は有限個】相異なる固有値 $\nu_{1},\nu_{2},\dots\ge\varepsilon$ が無限にあるとし、固有ベクトル $x_{k}$ を選ぶ。相異なる固有値の固有ベクトルは一次独立なので、$X_{k}\defeq\operatorname{span}\{x_{1},\dots,x_{k}\}$ は狭義に増大する。グラム–シュミットの直交化で $y_{k}\in X_{k}$, $\|y_{k}\|_{2}=1$, $y_{k}\perp X_{k-1}$ をとる。$y_{k}=\sum_{j\le k}c_{j}x_{j}$ と書くと $Ty_{k}-\nu_{k}y_{k}=\sum_{j<k}c_{j}(\nu_{j}-\nu_{k})x_{j}\in X_{k-1}$ なので、$m<k$ について $Ty_{k}-Ty_{m}=\nu_{k}y_{k}+z$, $z\in X_{k-1}$ となり、$\|Ty_{k}-Ty_{m}\|_{2}\ge\nu_{k}\ge\varepsilon$。$(Ty_{k})$ は収束する部分列をもたず、$T$ のコンパクト性に反する。
+
+Step 2 から、$\lambda\in\Sigma\cap(-\gamma,R]$ は $T$ の固有値 $\frac{1}{\mu+\lambda}\ge\frac{1}{\mu+R}$ と一対一に対応するので、Step 3 から有限個。Step 1 と合わせて 1 が従う。
+
+::: hypcheck
+- **一様楕円性**：Step 1 のガルディングの不等式と、$T$ の構成に使った。
+- **$\Omega$ の有界性**：$T$ のコンパクト性（Step 3）に本質的に使った。$\Omega=\mathbb{R}$ では、\ref{pde:weak-fredholm-alternative} の hypcheck の平行移動の例のとおり埋め込みがコンパクトでなく、$T$ がコンパクトになる理由がなくなり、Step 3 の議論は使えない。
+- **境界・係数の正則性**：使っていない。
+- **実固有値に限ったこと**：関数を実数値にしたため。複素数値の関数で同じ議論をすると、複素固有値についても離散性が成り立つ（\ref{fa:compact-spectrum} は複素バナッハ空間の結果）。$a^{ij}$ が対称でなかったり $b\ne0$ だったりすると、実でない固有値もありうる。
+- **公理**：Step 3 で可算個の固有ベクトルを選ぶ（可算選択公理）。コンパクト性の議論で従属選択公理。
+:::
+:::
+
+::: example
+$\Omega=(0,\pi)$, $Lu=-u''+bu'$（$b$ は定数）とする。$u=e^{bx/2}\sin(kx)$ について $-u''+bu'=(k^{2}+\frac{b^{2}}{4})u$ で、$v=e^{-bx/2}\sin(kx)$ は $L^{*}v=-v''-bv'=(k^{2}+\frac{b^{2}}{4})v$ を満たす。実際、弱形式で試験関数を $\varphi=e^{-bx/2}\chi$ に、未知関数を $u=e^{bx/2}w$ に取り替えると、$B[u,\varphi]=\lambda(u,\varphi)$ は $\int w'\chi'=(\lambda-\frac{b^{2}}{4})\int w\chi$（$\chi\in H_{0}^{1}$）と同値になる（交差項 $\frac b2\int(w\chi)'$ は $H_{0}^{1}$ なので $0$）。したがって \ref{fa:prob-lm-eigen-interval}（区間 $(0,\pi)$ に縮尺）から $\Sigma=\{k^{2}+\frac{b^{2}}{4}:k\ge1\}$ で、$N_{\lambda}$ と $N_{\lambda}^{*}$ はどちらも 1 次元だが、別の関数で張られる。\ref{pde:weak-elliptic-spectrum.1} の下からの評価 $-\gamma=-\frac{b^{2}}{2}$ は、実際の最小固有値 $1+\frac{b^{2}}{4}$ からかけ離れていて、この例では粗い。
+:::
+
+::: corollary 対称な作用素の固有関数展開 {#pde:weak-symmetric-eigen keywords="if a^{ij} is symmetric and b = 0 (c bounded of any sign), there is an orthonormal basis of L^2(Omega) of weak Dirichlet eigenfunctions e_k in H^1_0 with L e_k = lambda_k e_k, -gamma < lambda_1 <= lambda_2 <= ... -> infinity" index="固有関数展開（対称な楕円型作用素）|こゆうかんすうてんかいたいしょうなだえんがたさようそ"}
+$L$ を一様楕円型で $a^{ij}=a^{ji}$, $b=0$ とする（$c$ は有界で符号は任意）。$L^{2}(\Omega)$ の正規直交基底 $(e_{k})_{k\ge1}$ と、$-\gamma<\lambda_{1}\le\lambda_{2}\le\cdots\to\infty$ で、$e_{k}\in H_{0}^{1}$ が $Le_{k}=\lambda_{k}e_{k}$ の弱解であるものがある。
+:::
+
+::: proof
+$T=G\iota$ を上のとおりとする。$B_{\mu}$ は対称なので $B^{*}=B$, $G^{*}=G$ で、\ref{pde:weak-fredholm-alternative} の証明の Step 2 から $T^{*}=T$。$(Tf,f)=B_{\mu}[Tf,Tf]\ge\beta\|Tf\|_{H^{1}}^{2}\ge0$（$v=Tf$ を $Tf$ の定義式に入れた）。$Tf=0$ なら、すべての $v\in H_{0}^{1}$ で $(f,v)=B_{\mu}[0,v]=0$ で、$C_{c}^{\infty}$ の $L^{2}$ での稠密性（\ref{fa:test-function-density.1}）から $f=0$。あとは \ref{fa:dirichlet-eigenfunctions} の証明の 2 と同じである：\ref{fa:compact-selfadjoint-spectral} から固有ベクトルの正規直交基底 $(e_{k})$ と固有値 $\nu_{k}>0$ をとり（$\ker T=0$ と正値性）、$L^{2}(\Omega)$ は無限次元なので無限個あって $\nu_{k}\to0$。減少順に並べて $\lambda_{k}\defeq\frac{1}{\nu_{k}}-\mu$ とすれば、\ref{pde:weak-elliptic-spectrum} の証明の Step 2 から $e_{k}$ は $Le_{k}=\lambda_{k}e_{k}$ の弱解で、Step 1 から $\lambda_{k}>-\gamma$。
+:::
+
+\ref{fa:dirichlet-eigenfunctions} は $L=-\Delta$ の場合である。$c$ が負になりうる場合でも、$\mu$ だけずらせば同じ議論が通るのが要点である。最小固有値の特徴づけ（レイリー商）と固有関数の符号は、系列の後のページで弱最大値原理と合わせて扱う。
+
+ここまでで得た弱解は $H_{0}^{1}$ に入るだけで、2 回微分できるかどうかも、境界で本当に $0$ になるかどうかもわからない。係数が滑らかなら弱解は滑らかになり、境界も滑らかなら境界まで滑らかになって、\ref{pde:weak-elliptic-classical.2} から古典解に戻る。これが次のページの正則性の理論で、古典的手法が最初から仮定していた前提（解の滑らかさ）を、関数解析的手法は最後に係数と境界の滑らかさから取り戻すことになる。
+
+## 問題 {#pde:sec-we-problems}
+
+::: problem {#pde:prob-we-interval}
+$\Omega=(0,1)$, $\lambda\in\mathbb{R}$, $f\in L^{2}(0,1)$ とし、$-u''=\lambda u+f$, $u(0)=u(1)=0$ の弱解を考える。
+1. $\lambda\notin\{k^{2}\pi^{2}:k\ge1\}$ なら、弱解がただ一つあることを示せ。
+2. $\lambda=k^{2}\pi^{2}$ なら、弱解が存在するための必要十分条件は $\int_{0}^{1}f(x)\sin(k\pi x)\,dx=0$ であることを示せ。
+3. $-u''-\pi^{2}u=1$, $u(0)=u(1)=0$ は弱解をもたないことを、2 と、解を直接求める方法の両方で確かめよ。
+:::
+
+::: solution
+$Lu=-u''$ は $a^{11}=1$, $b=c=0$ で対称、$L^{*}=L$, $N_{\lambda}^{*}=N_{\lambda}$。
+
+**1・2.** \ref{fa:prob-lm-eigen-interval} から、$L$ の固有値は $k^{2}\pi^{2}$ だけで、固有値 $k^{2}\pi^{2}$ の弱い固有関数は $\sin(k\pi x)$ の定数倍だけである（別の固有関数 $e$ があれば、\ref{fa:dirichlet-eigenfunctions} の自己共役性から $e$ は $j\ne k$ の $\sin(j\pi x)$ と直交し、$\{\sqrt2\sin(j\pi x)\}$ の完全性から $\sin(k\pi x)$ の定数倍）。よって $\Sigma=\{k^{2}\pi^{2}\}$, $N_{k^{2}\pi^{2}}=\mathbb{R}\sin(k\pi x)$。1 は \ref{pde:weak-elliptic-spectrum.2}、2 は \ref{pde:weak-elliptic-spectrum.3}（$\langle f,v\rangle=(f,v)$）。
+
+**3.** $\int_{0}^{1}\sin(\pi x)\,dx=\frac{2}{\pi}\ne0$ なので、2 から弱解はない。直接には：弱解 $u$ があれば、$v\in C_{c}^{\infty}$ について $\int u'v'=\int(\pi^{2}u+1)v$ なので $u'$ の弱微分は $-(\pi^{2}u+1)\in H^{1}$ で、\ref{fa:sobolev-one-dimension} から $u'$ は（修正して）$C^{1}$、$u\in C^{2}([0,1])$ で $u''+\pi^{2}u=-1$ が各点で成り立つ。一般解は $u=-\frac{1}{\pi^{2}}+A\cos\pi x+B\sin\pi x$ で、$u(0)=0$ から $A=\frac{1}{\pi^{2}}$、すると $u(1)=-\frac{2}{\pi^{2}}\ne0$。端点での値は $H^{1}$ ノルムについて連続（\ref{fa:prob-et-interval-trace}）で $C_{c}^{\infty}$ では $0$ なので、$H_{0}^{1}((0,1))$ の連続な代表は両端で $0$ であり、矛盾。
+:::
+
+::: problem {#pde:prob-we-drift}
+$b\in\mathbb{R}^{n}$ を定数ベクトルとし、$Lu=-\Delta u+\sum_{i}b^{i}\partial_{i}u+cu$（$c$ は有界可測）を考える。
+1. $u\in H_{0}^{1}(\Omega)$ について $\int_{\Omega}\sum_{i}b^{i}\partial_{i}u\,u\,dx=0$ を示せ。
+2. $c\ge0$ なら、$|b|$ がどれほど大きくても、すべての $f\in H^{-1}$ について $Lu=f$ の弱解がただ一つあることを示せ。\ref{pde:bilinear-energy-estimates} の $\gamma=\frac{|b|^{2}}{2}$ と比べよ。
+3. $n=1$, $\Omega=(0,1)$, $b>0$, $c=0$ のとき、$-u''+bu'=1$ の弱解が $u(x)=\frac{x}{b}-\frac{e^{bx}-1}{b(e^{b}-1)}$ であることを確かめよ。
+:::
+
+::: solution
+**1.** $u\in C_{c}^{\infty}(\Omega)$ なら $\sum_{i}b^{i}\partial_{i}u\,u=\frac12\sum_{i}\partial_{i}(b^{i}u^{2})$ で、$\Omega$ の外で $0$ と延ばして各 $x_{i}$ について微積分学の基本定理を使えば積分は $0$。$Q(u)\defeq\int\sum b^{i}\partial_{i}u\,u$ は $|Q(u)-Q(w)|\le|b|(\|\nabla u-\nabla w\|_{2}\|u\|_{2}+\|\nabla w\|_{2}\|u-w\|_{2})$ から $H^{1}$ ノルムで連続なので、閉包 $H_{0}^{1}$ でも $0$。
+
+**2.** 1 から $B[u,u]=\|\nabla u\|_{2}^{2}+\int cu^{2}\ge\|\nabla u\|_{2}^{2}\ge\frac{1}{1+C_{P}^{2}}\|u\|_{H^{1}}^{2}$（ポアンカレの不等式）。$B$ は有界（\ref{pde:bilinear-energy-estimates.1}）なので、\ref{fa:lax-milgram} から一意な弱解がある。\ref{pde:bilinear-energy-estimates.3} の条件 $\gamma C_{P}^{2}<\frac{1}{2}$（$\theta=1$）は $|b|$ が大きいと成り立たないので、ガルディングの不等式の $\gamma$ は 1 階の項の打ち消し合いを見逃している。
+
+**3.** $u\in C^{\infty}([0,1])$ で $u(0)=0$、$u(1)=\frac1b-\frac1b=0$。$u'=\frac1b-\frac{e^{bx}}{e^{b}-1}$, $u''=-\frac{be^{bx}}{e^{b}-1}$ から $-u''+bu'=\frac{be^{bx}}{e^{b}-1}+1-\frac{be^{bx}}{e^{b}-1}=1$。$u$ は $[0,1]$ で $C^{1}$ で両端で $0$ なので、\ref{fa:prob-lm-1d} の解答と同じ理由で $H_{0}^{1}$ に入り、\ref{pde:weak-elliptic-classical.1} から弱解で、2 から唯一の弱解である。$b$ が大きいと、$u$ はほとんどの区間で $\frac{x}{b}$ に近く、$x=1$ の近くの幅 $\frac1b$ 程度の層で急に $0$ へ落ちる（境界層）。流れ $b$ が右向きに運んだものが右端でせき止められる様子である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
