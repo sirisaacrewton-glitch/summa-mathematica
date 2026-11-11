@@ -37,7 +37,7 @@ import deepseek_api  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TRACKER_DIR = "verifications"
-PAGE_RE = re.compile(r"^0[1-5]-[^/]+/(?:[^/_][^/]*/)*(?!index\.html$)[^/_][^/]*\.html$")
+PAGE_RE = re.compile(r"^0[1-9]-[^/]+/(?:[^/_][^/]*/)*(?!index\.html$)[^/_][^/]*\.html$")
 SRC_RE = re.compile(r"^src/.+\.(?:md|tex)$")
 TRACKER_RE = re.compile(r"^verifications/.+_tracker\.md$")
 SOURCE_RE = re.compile(r'<script type="text/markdown" id="source">([\s\S]*?)</script>')

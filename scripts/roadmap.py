@@ -80,10 +80,10 @@ def load_json(path):
 
 
 def all_series():
-    """series id -> (folder, meta) for every _meta.json in 0[1-5]-*."""
+    """series id -> (folder, meta) for every _meta.json in 0[1-9]-*."""
     out = {}
     for top in sorted(os.listdir(ROOT)):
-        if not re.match(r"^0[1-5]-", top):
+        if not re.match(r"^0[1-9]-", top):
             continue
         for dirpath, dirnames, filenames in os.walk(os.path.join(ROOT, top)):
             dirnames.sort()
