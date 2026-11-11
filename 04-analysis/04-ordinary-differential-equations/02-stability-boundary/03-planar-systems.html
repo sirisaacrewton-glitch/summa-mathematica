@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平面の力学系 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/02-stability-boundary/03-planar-systems.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 平面の力学系 {#ode:page-planar-systems keywords="planar dynamical systems, autonomous systems in the plane, orbits, periodic orbits, minimal period, omega-limit set, alpha-limit set, invariant sets, positively invariant sets, transversal (local section), monotonicity of intersections along a transversal, Jordan curve theorem, Poincare-Bendixson theorem, trapping region, 極限集合, 横断線, 局所切断, ポアンカレ・ベンディクソン"}
+
+自励系 $x'=F(x)$ の解が時間とともにどこへ行き着くかは、一般の次元ではきわめて複雑になりうる。ところが平面では、解の曲線は自分自身とも他の解とも交わらず、平面の閉曲線は平面を内と外に分ける（ジョルダンの曲線定理）ので、行き着く先の候補はひどく限られる。このページでは、解が行き着く先を表す **$\omega$ 極限集合**を定義してその基本性質（前方軌道が有界なら空でなく、コンパクトで、連結で、不変）を示し、**横断線**を軌道が横切る点が横断線の上で単調に並ぶことをジョルダンの曲線定理から丁寧に導く。その帰結として、前方軌道が有界で $\omega$ 極限集合が平衡点を含まなければ、$\omega$ 極限集合は周期軌道であるという**ポアンカレ–ベンディクソンの定理**（\tref{ode:poincare-bendixson}）を証明する。リミットサイクル、ファン・デル・ポール方程式の周期解、周期軌道が存在しないためのベンディクソン–デュラックの判定法、3 次元以上でこの定理が成り立たないことは次のページ（\see{ode:page-limit-cycles}）で扱う。
+
+## 記法と定義の確認 {#ode:sec-pl-notation}
+
+::: notation
+- このページでは $W\subset\mathbb{R}^{2}$ は開集合、$F\colon W\to\mathbb{R}^{2}$ は $C^{1}$ 級のベクトル場で、自励系 $x'=F(x)$ を考える。前のページ（\ref{ode:page-flows}）と同じく、$\xi$ を時刻 $0$ に通る最大解の定義域を $I_{\xi}$（開区間）、流れを $\Phi_{t}(\xi)=\Phi(t,\xi)$、その定義域を $\mathcal{D}_{F}$ と書く（\ref{ode:flow-def}）。$F(\xi)=0$ となる点が**平衡点**である。
+- 流れの性質：$\mathcal{D}_{F}$ は開集合で $\Phi$ は $C^{1}$ 級（\ref{ode:flow-theorem.1}）、群の性質 $\Phi_{s}(\Phi_{t}(\xi))=\Phi_{s+t}(\xi)$ と $I_{\Phi_{t}(\xi)}=I_{\xi}-t$（\ref{ode:flow-theorem.2}）。最大解の一意性（\ref{ode:maximal-solution}）から、二つの最大の積分曲線は、ある時刻に同じ点を通れば時間の平行移動を除いて一致する（\ref{ode:time-translation}）。コンパクト集合に留まる解は大域的である（\ref{ode:escape-corollaries.3}。時間を逆向きにした $\alpha$ の側も同様）。
+- **時間の反転**：$-F$ の流れは $\Phi_{-t}$ で、その最大の定義域は $-I_{\xi}$ である（$y(t)\defeq\Phi_{-t}(\xi)$ は $y'=-F(y)$ を満たす）。
+- $\langle a,b\rangle$ は内積、$\det(a,b)$ は列 $a,b$ を並べた $2\times2$ 行列の行列式、$\operatorname{dist}(y,A)\defeq\inf_{a\in A}|y-a|$。$a\neq b$ のとき $[a,b]\defeq\{a+s(b-a):0\le s\le1\}$ を閉線分、端点を除いたものを開線分 $(a,b)$ と書く。$B(p,r)$ は開円板。
+- ジョルダン曲線（$S^{1}$ と同相な部分集合）と弧（$[0,1]$ と同相な部分集合）は \ref{mfd:arc-jordan-curve}。\ref{at:jordan-curve}：平面のジョルダン曲線 $C$ について、$\mathbb{R}^{2}\setminus C$ はちょうど 2 つの連結成分をもち、一方（$\operatorname{int}C$）は有界、他方（$\operatorname{ext}C$）は非有界で、どちらも開集合（\ref{at:jordan-brouwer}）で、どちらの境界も $C$ である。とくに $C$ の各点のどの近傍も $\operatorname{int}C$ と $\operatorname{ext}C$ の両方と交わる。
+- 位相の道具：連結集合はただ一つの連結成分に含まれ、連結成分は空間を分割する（\ref{top:components-properties}）。連結性は連続像・閉包で保たれる（\ref{top:connected-preservation}）。連結空間の開かつ閉な部分集合は空集合か全体（\ref{top:connected-equivalents.2}）。$\mathbb{R}^{n}$ の有界閉集合はコンパクト（\ref{top:heine-borel.2}）、有界な点列は収束部分列をもつ（\ref{top:bolzano-weierstrass}）、交わらないコンパクト集合と閉集合の距離は正（\ref{top:compact-closed-distance}）、コンパクト空間からハウスドルフ空間への連続な単射は像への同相写像（\ref{top:compact-to-hausdorff}）。逆関数定理は \tref{calc:inverse-function-theorem}。
+- **選択公理**：使わない。点列を一つずつ選ぶ箇所は、選ぶ時刻の範囲が $\mathbb{R}$ の空でない開集合なので、有理数を一つ固定した順に並べて最初のものを取れば具体的に選べる。収束部分列も区間の二分法で具体的に取り出せる。
+:::
+
+## 軌道と極限集合 {#ode:sec-pl-limit-sets}
+
+::: definition 軌道・不変集合・周期軌道 {#ode:planar-orbit keywords="orbit, forward orbit, backward orbit, invariant set, positively invariant set, periodic point, periodic orbit (closed orbit)" index="軌道（力学系）|きどうりきがくけい, 前方軌道|ぜんぽうきどう, 後方軌道|こうほうきどう, 不変集合|ふへんしゅうごう, 正の不変集合|せいのふへんしゅうごう, 周期点|しゅうきてん, 周期軌道|しゅうききどう, 閉軌道|へいきどう"}
+$\xi\in W$ について次のように定める。
+1. $\mathcal{O}(\xi)\defeq\{\Phi_{t}(\xi):t\in I_{\xi}\}$ を $\xi$ の**軌道**、$\mathcal{O}^{+}(\xi)\defeq\{\Phi_{t}(\xi):t\in I_{\xi},\ t\ge0\}$ を**前方軌道**、$\mathcal{O}^{-}(\xi)\defeq\{\Phi_{t}(\xi):t\in I_{\xi},\ t\le0\}$ を**後方軌道**という。
+2. $A\subset W$ が、すべての $\xi\in A$ について $\mathcal{O}(\xi)\subset A$ を満たすとき**不変**、$\mathcal{O}^{+}(\xi)\subset A$ を満たすとき**正の不変**であるという。
+3. $F(\xi)\neq0$ で、ある $T>0$（$T\in I_{\xi}$）について $\Phi_{T}(\xi)=\xi$ となるとき、$\xi$ を**周期点**、その軌道を**周期軌道**（閉軌道）という。
+:::
+
+::: intuition
+軌道は、解がたどる道筋を時刻を忘れて点の集合として見たものである。不変集合は、そこから出発した解が過去にも未来にも外へ出ない集合で、周期軌道は、同じ道筋を一定の時間ごとに繰り返す閉じた道筋である。
+:::
+
+群の性質から、$\eta\in\mathcal{O}(\xi)$ なら $\mathcal{O}(\eta)=\mathcal{O}(\xi)$ であり（$\eta=\Phi_{t}(\xi)$ なら $I_{\eta}=I_{\xi}-t$ で $\Phi_{s}(\eta)=\Phi_{s+t}(\xi)$）、二つの軌道は一致するか交わらない。不変集合の補集合も不変である。
+
+::: lemma 最小周期と周期軌道の形 {#ode:planar-period keywords="the periods of a periodic point form T Z with T > 0 the minimal period; a periodic orbit is a compact Jordan curve without equilibria, parametrized by [0, T)" index="最小周期|さいしょうしゅうき"}
+$\xi$ を周期点とする。
+1. $I_{\xi}=\mathbb{R}$ で、ある $T>0$ について $\{t\in\mathbb{R}:\Phi_{t}(\xi)=\xi\}=T\mathbb{Z}$。この $T$ を**最小周期**という。
+2. 周期軌道 $\Gamma\defeq\mathcal{O}(\xi)$ は $\Phi_{[0,T]}(\xi)$ に等しく、コンパクトなジョルダン曲線で、平衡点を含まない。
+:::
+
+::: proof
+**1.** $\Phi_{T_{0}}(\xi)=\xi$（$T_{0}>0$）とする。$I_{\xi}=I_{\Phi_{T_{0}}(\xi)}=I_{\xi}-T_{0}$（\ref{ode:flow-theorem.2}）なので、開区間 $I_{\xi}$ は $T_{0}$ だけの平行移動で変わらず、$I_{\xi}=\mathbb{R}$。$P\defeq\{t:\Phi_{t}(\xi)=\xi\}$ は群の性質から $\mathbb{R}$ の部分群で、$t\mapsto\Phi_{t}(\xi)$ の連続性から閉集合。$P$ がいくらでも小さい正の元をもつとすると、その整数倍で $\mathbb{R}$ の任意の区間に $P$ の元があり、$P$ は稠密な閉集合なので $P=\mathbb{R}$。すると $\Phi_{t}(\xi)=\xi$ がすべての $t$ で成り立ち、微分して $F(\xi)=0$ となり、周期点の定義に反する。よって $T\defeq\inf(P\cap(0,\infty))>0$ で、$P$ は閉なので $T\in P$。$t\in P$ なら $t-\lfloor t/T\rfloor T\in P\cap[0,T)$ なので、$T$ の最小性からこれは $0$ で、$P=T\mathbb{Z}$。
+
+**2.** $\Phi_{t}(\xi)=\Phi_{t-\lfloor t/T\rfloor T}(\xi)$ なので $\Gamma=\Phi_{[0,T]}(\xi)$ で、連続像としてコンパクト。$h(\cos(2\pi s/T),\sin(2\pi s/T))\defeq\Phi_{s}(\xi)$ は、$\Phi_{s}(\xi)=\Phi_{s'}(\xi)\iff s-s'\in T\mathbb{Z}$（1 と群の性質）から、$S^{1}$ 上で矛盾なく定まる連続な単射で、像は $\Gamma$。$S^{1}$ はコンパクトなので $h$ は $\Gamma$ への同相写像（\ref{top:compact-to-hausdorff}）。$\Gamma$ の点 $\eta$ が平衡点なら $\mathcal{O}(\eta)=\{\eta\}$ で、$\mathcal{O}(\eta)=\mathcal{O}(\xi)$ から $\xi=\eta$ も平衡点になり、矛盾。
+:::
+
+::: definition ω 極限集合と α 極限集合 {#ode:limit-set keywords="omega-limit set: limits of Phi_{t_k}(xi) along t_k -> infinity; alpha-limit set: limits along t_k -> -infinity; equivalently the intersection of the closures of the tails of the orbit" index="ω 極限集合|おめがきょくげんしゅうごう, オメガ極限集合|おめがきょくげんしゅうごう, α 極限集合|あるふぁきょくげんしゅうごう, アルファ極限集合|あるふぁきょくげんしゅうごう, 極限集合|きょくげんしゅうごう"}
+$[0,\infty)\subset I_{\xi}$ のとき、
+$$
+\omega(\xi)\defeq\{\eta\in W:\ t_{k}\to\infty,\ \Phi_{t_{k}}(\xi)\to\eta\ \text{となる列}\ (t_{k})\ \text{がある}\}
+$$
+を $\xi$ の **$\omega$ 極限集合**という。$(-\infty,0]\subset I_{\xi}$ のとき、$t_{k}\to-\infty$ で同様に定めたものを **$\alpha$ 極限集合** $\alpha(\xi)$ という。時間の反転から、$\alpha(\xi)$ は $-F$ についての $\omega(\xi)$ である。
+:::
+
+::: intuition
+$\omega$ 極限集合は、解が遠い未来に何度でも近づいてくる場所の全体で、解の「行き着く先」である。$\alpha$ 極限集合は遠い過去について同じものである。
+:::
+
+::: example
+1. $\xi$ が平衡点なら $\omega(\xi)=\alpha(\xi)=\{\xi\}$。$\xi$ が周期点なら、$\Gamma=\mathcal{O}(\xi)$ の各点 $\Phi_{s}(\xi)$ は $t_{k}=s+kT\to\infty$ で到達されるので $\omega(\xi)=\alpha(\xi)=\Gamma$（逆に $\Gamma$ はコンパクトなので極限は $\Gamma$ に入る）。
+2. $F(x,y)=(-x,-2y)$ では $\Phi_{t}(\xi)=(e^{-t}\xi_{1},e^{-2t}\xi_{2})$ で、$\omega(\xi)=\{0\}$。$\xi\neq0$ なら $|\Phi_{t}(\xi)|\to\infty$（$t\to-\infty$）なので $\alpha(\xi)=\varnothing$。
+3. $F(x,y)=(1,0)$ では $\Phi_{t}(\xi)=\xi+(t,0)$ で、$\omega(\xi)=\varnothing$。前方軌道が有界でないと、$\omega$ 極限集合は空でありうる。
+:::
+
+$\eta\in\omega(\xi)$ であることは、すべての $T\ge0$ について $\eta$ が $\Phi_{[T,\infty)}(\xi)$ の $W$ における閉包に入ることと同値である（$\Rightarrow$ は定義から。$\Leftarrow$：各 $k$ で $t_{k}\ge k$, $|\Phi_{t_{k}}(\xi)-\eta|<1/k$ となる $t_{k}$ がとれる）。したがって
+$$
+\omega(\xi)=\bigcap_{T\ge0}\overline{\Phi_{[T,\infty)}(\xi)}\qquad(\text{閉包は}\ W\ \text{の中でとる})
+\label{ode:eq-limit-set-intersection}
+$$
+
+::: theorem 極限集合の基本性質 {#ode:limit-set-properties keywords="omega-limit sets are closed and invariant; if the forward orbit lies in a compact set, the omega-limit set is nonempty, compact, connected, invariant, consists of complete orbits, and attracts the orbit; same for alpha-limit sets" index="極限集合の基本性質|きょくげんしゅうごうのきほんせいしつ"}
+$[0,\infty)\subset I_{\xi}$ とする。
+1. $\omega(\xi)$ は $W$ の閉集合で、$\eta\in\omega(\xi)$ なら $\mathcal{O}(\eta)\subset\omega(\xi)$。
+
+さらに、$\mathcal{O}^{+}(\xi)$ が $W$ のコンパクト集合 $K$ に含まれるとする（$W=\mathbb{R}^{2}$ なら、前方軌道が有界であることと同値）。このとき
+2. $\omega(\xi)$ は空でないコンパクト集合で、$K$ に含まれる。
+3. $\eta\in\omega(\xi)$ なら $I_{\eta}=\mathbb{R}$ で、すべての $t$ について $\Phi_{t}(\omega(\xi))=\omega(\xi)$。
+4. $\omega(\xi)$ は連結である。
+5. $t\to\infty$ で $\operatorname{dist}(\Phi_{t}(\xi),\omega(\xi))\to0$。
+6. 後方軌道と $\alpha(\xi)$ についても同じことが成り立つ（$t\to-\infty$）。
+:::
+
+::: intuition
+有界な軌道の行き着く先は、空でなく、ひとつながりで、流れで動かしても変わらない集合である。軌道はそこへいくらでも近づいていく。
+:::
+
+::: proof
+**1.** \eqref{ode:eq-limit-set-intersection} から閉集合の共通部分として閉。$\eta\in\omega(\xi)$, $t\in I_{\eta}$ とし、$t_{k}\to\infty$, $\Phi_{t_{k}}(\xi)\to\eta$ とする。$(t,\eta)\in\mathcal{D}_{F}$ で $\mathcal{D}_{F}$ は開なので、十分大きい $k$ で $(t,\Phi_{t_{k}}(\xi))\in\mathcal{D}_{F}$。群の性質と $\Phi$ の連続性から $\Phi_{t+t_{k}}(\xi)=\Phi_{t}(\Phi_{t_{k}}(\xi))\to\Phi_{t}(\eta)$ で、$t+t_{k}\to\infty$ なので $\Phi_{t}(\eta)\in\omega(\xi)$。
+
+**2.** 点列 $\Phi_{k}(\xi)$（$k=1,2,\dots$）は有界な $K$ に入るので収束部分列をもち（\ref{top:bolzano-weierstrass}）、極限は閉集合 $K$ に入るから $\omega(\xi)$ の点。$\omega(\xi)$ の点は $K$ の点列の極限なので $\omega(\xi)\subset K$。$\omega(\xi)$ は $W$ の閉集合で $K$ に含まれるから $K$ の閉集合で、コンパクト。
+
+**3.** 1 から $\mathcal{O}(\eta)\subset\omega(\xi)\subset K$。解 $t\mapsto\Phi_{t}(\eta)$ は両方向にコンパクト集合 $K$ に留まるので、\ref{ode:escape-corollaries.3}（と時間の反転）から $I_{\eta}=\mathbb{R}$。1 から $\Phi_{t}(\omega(\xi))\subset\omega(\xi)$ がすべての $t$ で成り立ち、$\omega(\xi)=\Phi_{t}(\Phi_{-t}(\omega(\xi)))\subset\Phi_{t}(\omega(\xi))$。
+
+**4.** 【主張：$\omega(\xi)$ を交わらない空でない閉集合 $A,B$ の和に分けることはできない】そう分けられたとする。$A,B$ はコンパクト $\omega(\xi)$ の閉集合なのでコンパクトで、$\delta\defeq\min\{|a-b|:a\in A,b\in B\}>0$（\ref{top:compact-closed-distance}）。$h(t)\defeq\operatorname{dist}(\Phi_{t}(\xi),A)-\operatorname{dist}(\Phi_{t}(\xi),B)$ は連続。$a\in A$ に近づく大きな時刻 $t$ では $\operatorname{dist}(\Phi_{t}(\xi),A)<\delta/3$ かつ $\operatorname{dist}(\Phi_{t}(\xi),B)>2\delta/3$ なので $h(t)<0$、同様に $B$ に近づく時刻では $h(t)>0$。このような時刻はいくらでも大きくとれるので、中間値の定理（\tref{top:intermediate-value}）から $s_{k}\to\infty$ で $h(s_{k})=0$ となる列がある。$p\defeq\Phi_{s_{k}}(\xi)$ について、$a\in A$, $b\in B$ を $|p-a|=\operatorname{dist}(p,A)$, $|p-b|=\operatorname{dist}(p,B)$ ととれば $\delta\le|a-b|\le|p-a|+|p-b|=2\operatorname{dist}(p,A)$ なので、$\operatorname{dist}(\Phi_{s_{k}}(\xi),A)=\operatorname{dist}(\Phi_{s_{k}}(\xi),B)\ge\delta/2$。$\Phi_{s_{k}}(\xi)\in K$ の収束部分列の極限 $z$ は $\omega(\xi)$ の点で、距離関数の連続性から $\operatorname{dist}(z,A)\ge\delta/2$, $\operatorname{dist}(z,B)\ge\delta/2$ となり、$z\notin A\cup B=\omega(\xi)$。矛盾。
+
+**5.** 成り立たないとすると、$\varepsilon>0$ と $t_{k}\to\infty$ で $\operatorname{dist}(\Phi_{t_{k}}(\xi),\omega(\xi))\ge\varepsilon$ となるものがある。$K$ の中の収束部分列の極限は $\omega(\xi)$ の点で、距離が $\varepsilon$ 以上であることに反する。
+
+**6.** $-F$ に 1〜5 を使う。
+
+::: hypcheck
+- **$\mathcal{O}^{+}(\xi)\subset K$（コンパクト）**：2 の収束部分列、3 の大域性、4・5 の収束部分列に使った。外すと 2 は崩れる（例の 3）。4 も崩れる：前方軌道が有界でなければ、$\omega(\xi)$ は平行な 2 本の直線のような連結でない集合になりうる。
+- **$F$ が $C^{1}$ 級**：流れの存在・一意性と $\mathcal{D}_{F}$ が開であること（1）にだけ使った。局所リプシッツで十分である。
+- **次元**：この定理では平面であることを使っていない。$\mathbb{R}^{n}$ でもそのまま成り立つ。
+- **公理**：選択公理は使わない（記法の節）。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $W$ のコンパクト集合に含まれるという条件は、単に有界であることより強い。$W=\mathbb{R}^{2}\setminus\{0\}$, $F(x)=-x$ では前方軌道は有界だが $\omega(\xi)=\varnothing$（極限 $0$ が $W$ にない）。
+
+**高い視点：時間の無限遠での振る舞い.** \eqref{ode:eq-limit-set-intersection} は、軌道の「尻尾」の閉包の減少列の共通部分である。コンパクト空間の中の空でない閉集合の減少列の共通部分は空でなく（有限交叉性）、連結な閉集合の減少列の共通部分は連結である。2 と 4 はこの一般論の特別な場合とみることができる。比喩で言えば、$\omega$ 極限集合は軌道が「永遠に通い続ける場所」で、2 次元ではこの場所の形が強く制限される、というのがこのページの主題である。
+:::
+
+## 横断線 {#ode:sec-pl-transversal}
+
+平面の位相がはじめて効くのは、軌道を横切る線分の上での交点の並び方である。
+
+::: definition 横断線 {#ode:transversal keywords="transversal (local section) of a planar vector field: a closed segment on which F is nowhere parallel to the segment; the positive side" index="横断線|おうだんせん, 局所切断|きょくしょせつだん, 横断的な線分|おうだんてきなせんぶん"}
+閉線分 $L=[q',q'']\subset W$（$q'\neq q''$）が、すべての $q\in L$ について $\det(q''-q',F(q))\neq0$ を満たすとき、$L$ を $F$ の**横断線**という。$L$ を含む直線を $\ell$ と書く。
+:::
+
+::: intuition
+横断線は、ベクトル場がどこでも斜めに横切っている短い線分である。軌道は横断線に沿って進むことはなく、横断線をいつも同じ向きに横切る。
+:::
+
+$v\defeq q''-q'$ とすると、$\det(v,F(q))$ は連結な $L$ の上で連続で $0$ にならないので符号が一定である（\ref{top:intermediate-value}）。したがって $\ell$ の単位法線 $n$ を、$L$ の各点で $\langle n,F(q)\rangle>0$ となるようにとれる（$n=\pm(-v_{2},v_{1})/|v|$ で、$\langle n,F\rangle=\pm\det(v,F)/|v|$）。$\langle n,y-q\rangle>0$ となる側を $L$ の**正の側**と呼ぶ。$L$ の端点以外の点の全体を $L$ の**相対的内部**という。
+
+::: lemma 横断線の存在と延長 {#ode:transversal-exists keywords="through every non-equilibrium point there is a transversal having it in its relative interior; every transversal extends to a slightly longer transversal" index="横断線の存在|おうだんせんのそんざい"}
+1. $F(p)\neq0$ とし、$w\in\mathbb{R}^{2}$ を $F(p)$ と平行でない零でないベクトルとする。十分小さい $a>0$ について $L\defeq[p-aw,p+aw]$ は横断線で、$p$ はその相対的内部にある。
+2. 横断線 $L=[q',q'']$ について、$\delta>0$ を十分小さくとると、$L'\defeq[q'-\delta v,q''+\delta v]$（$v=q''-q'$）も横断線で、$L$ は $L'$ の相対的内部に含まれる。
+:::
+
+::: proof
+**1.** $u\mapsto\det(w,F(p+uw))$ は $u=0$ の近くで定義された連続関数で、$u=0$ で $0$ でないので、$|u|\le a$ で $p+uw\in W$ かつ $0$ でない $a>0$ がある。
+
+**2.** $U\defeq\{u\in\mathbb{R}:q'+uv\in W,\ \det(v,F(q'+uv))\neq0\}$ は $\mathbb{R}$ の開集合で $[0,1]$ を含む。コンパクト集合 $[0,1]$ と閉集合 $\mathbb{R}\setminus U$ の距離は正（\ref{top:compact-closed-distance}。$U=\mathbb{R}$ なら何でもよい）なので、$[-\delta,1+\delta]\subset U$ となる $\delta>0$ がある。
+:::
+
+次の補題は、横断線の点の近くで、流れの時間と横断線上の位置を座標にとれることを言う。整流定理（\ref{ode:flow-box}）の、横断線に合わせた形である。
+
+::: lemma 横断線のまわりの座標 {#ode:transversal-box keywords="near a point q of a transversal, G(s,u) = Phi_s(q + u v) is a C^1 diffeomorphism of a small square onto a neighbourhood of q; G(s,u) lies on the line of the transversal iff s = 0, and on its positive side iff s > 0" index="横断線のまわりの座標|おうだんせんのまわりのざひょう"}
+$L$ を横断線、$q\in L$、$v$ を $\ell$ の方向の単位ベクトル、$n$ を上の単位法線とする。$\varepsilon>0$ を十分小さくとると、$Q_{\varepsilon}\defeq(-\varepsilon,\varepsilon)^{2}$ の上で
+$$
+G(s,u)\defeq\Phi_{s}(q+uv)
+$$
+が定義されて、$Q_{\varepsilon}$ から $q$ の開近傍 $N_{\varepsilon}\defeq G(Q_{\varepsilon})$ への $C^{1}$ 級の微分同相写像になり、次が成り立つ。
+1. $(s,u)\in Q_{\varepsilon}$ について、$\langle n,G(s,u)-q\rangle$ は $s$ と同じ符号をもつ。とくに $G(s,u)\in\ell\iff s=0$。
+2. $(s,u)\in Q_{\varepsilon}$, $|s+t|<\varepsilon$ なら $\Phi_{t}(G(s,u))=G(s+t,u)$。
+:::
+
+::: proof
+$(0,q)\in\mathcal{D}_{F}$ で $\mathcal{D}_{F}$ は開なので、$G$ は $(0,0)$ の近傍で定義され、$C^{1}$ 級（\ref{ode:flow-theorem.1}）。$\partial_{s}G(s,u)=F(G(s,u))$、$G(0,u)=q+uv$ から $\partial_{u}G(0,0)=v$ なので、$DG(0,0)$ の列は $F(q),v$ で、$\det(v,F(q))\neq0$ から可逆。逆関数定理（\tref{calc:inverse-function-theorem}）から、$(0,0)$ の開近傍で $G$ は開集合への $C^{1}$ 級微分同相写像になる。さらに $\langle n,F(q)\rangle>0$ と連続性から、$\varepsilon$ を小さくとって、$Q_{\varepsilon}$ がその近傍に含まれ、$Q_{\varepsilon}$ の上で $\langle n,F(G(s,u))\rangle>0$ とする。
+
+**1.** $k(s)\defeq\langle n,G(s,u)-q\rangle$ は $k(0)=\langle n,uv\rangle=0$、$k'(s)=\langle n,F(G(s,u))\rangle>0$ なので、狭義増加で、$s$ と同じ符号をもつ。
+
+**2.** 群の性質（\ref{ode:flow-theorem.2}）から $\Phi_{t}(\Phi_{s}(q+uv))=\Phi_{s+t}(q+uv)$。
+:::
+
+::: lemma 横断線との交わり {#ode:transversal-crossing keywords="an orbit crosses a transversal from the negative to the positive side, at isolated times; finitely many crossings in a bounded time interval; limits of the orbit at relative interior points of a transversal are limits of crossing points" index="横断線との交わり|おうだんせんとのまじわり"}
+$L$ を横断線とする。
+1. $\Phi_{t_{0}}(\xi)\in L$ なら、$\delta>0$ があって、$0<|t-t_{0}|<\delta$ のとき $\Phi_{t}(\xi)\notin\ell$ で、$\langle n,\Phi_{t}(\xi)-\Phi_{t_{0}}(\xi)\rangle$ は $t-t_{0}$ と同じ符号をもつ。したがって、有界閉区間 $J\subset I_{\xi}$ の中で $\Phi_{t}(\xi)\in L$ となる $t$ は有限個である。
+2. $q$ を $L$ の相対的内部の点とし、$t_{k}\in I_{\xi}$ で $\Phi_{t_{k}}(\xi)\to q$ とする。十分大きい $k$ について $s_{k}\in I_{\xi}$ で、$\Phi_{s_{k}}(\xi)\in L$, $s_{k}-t_{k}\to0$, $\Phi_{s_{k}}(\xi)\to q$ となるものがある。
+:::
+
+::: proof
+**1.** $q\defeq\Phi_{t_{0}}(\xi)$ で \ref{ode:transversal-box} の $G$ をとる。$|t-t_{0}|<\varepsilon$ なら $\Phi_{t}(\xi)=\Phi_{t-t_{0}}(G(0,0))=G(t-t_{0},0)$ で、\ref{ode:transversal-box.1} から主張が $\delta=\varepsilon$ で成り立つ。後半：$Z\defeq\{t\in J:\Phi_{t}(\xi)\in L\}$ は（$L$ が閉で $\Phi$ が連続なので）コンパクトで、前半から各点は $Z$ の孤立点である。各点の孤立近傍の族は $Z$ の開被覆で、有限部分被覆の各集合は $Z$ の点を一つしか含まないので、$Z$ は有限集合。
+
+**2.** $q$ で \ref{ode:transversal-box} の $G$ をとり、$\varepsilon'\defeq\varepsilon/2$ とする。$q$ は相対的内部の点なので、$\varepsilon$ を小さくとり直して、$|u|<\varepsilon$ なら $q+uv\in L$ とする。$G(Q_{\varepsilon'})$ は $q$ の開近傍なので、大きい $k$ で $\Phi_{t_{k}}(\xi)=G(\sigma_{k},u_{k})$, $(\sigma_{k},u_{k})\in Q_{\varepsilon'}$ と書け、$G^{-1}$ の連続性から $(\sigma_{k},u_{k})\to(0,0)$。$s_{k}\defeq t_{k}-\sigma_{k}$ とすると、\ref{ode:transversal-box.2} から $\Phi_{s_{k}}(\xi)=\Phi_{-\sigma_{k}}(G(\sigma_{k},u_{k}))=G(0,u_{k})=q+u_{k}v\in L$（$s_{k}\in I_{\xi}$ もここから従う）で、これは $q$ に収束する。
+:::
+
+### 交点の単調性 {#ode:sec-pl-monotone}
+
+次が、このページでジョルダンの曲線定理を使う唯一の場所であり、ポアンカレ–ベンディクソンの定理の核心である。
+
+::: lemma 横断線上の交点の単調性 {#ode:transversal-monotone keywords="monotonicity lemma: if an orbit meets a transversal at x_0 and next at x_1 != x_0, then afterwards it never meets the closed segment [x_0, x_1] or the orbit arc again, every later crossing lies beyond x_1, and the orbit is not periodic; proof by the Jordan curve theorem" index="交点の単調性（横断線）|こうてんのたんちょうせいおうだんせん"}
+$L$ を横断線、$t_{0}<t_{1}$ を $I_{\xi}$ の点で、$x_{0}\defeq\Phi_{t_{0}}(\xi)\in L$, $x_{1}\defeq\Phi_{t_{1}}(\xi)\in L$, $x_{0}\neq x_{1}$、かつ $t_{0}<t<t_{1}$ では $\Phi_{t}(\xi)\notin L$ とする（$t_{0}$ と $t_{1}$ は続けて起こる交わりの時刻）。$A\defeq\Phi_{[t_{0},t_{1}]}(\xi)$、$S\defeq[x_{0},x_{1}]$ とおく。
+1. $t>t_{1}$（$t\in I_{\xi}$）なら $\Phi_{t}(\xi)\notin A\cup S$。とくに $\xi$ は周期点でない。
+2. $t_{2}>t_{1}$ で $x_{2}\defeq\Phi_{t_{2}}(\xi)\in L$ なら、$x_{1}$ は $x_{0}$ と $x_{2}$ の間にある：$x_{1}\in(x_{0},x_{2})$。
+:::
+
+::: intuition
+軌道が横断線を $x_{0}$ で横切り、次に $x_{1}$ で横切ったとする。軌道の弧と線分 $[x_{0},x_{1}]$ は閉じた輪を作り、軌道はこの輪の線分の部分を一方向にしか通れず、弧の部分は（解の一意性から）通れない。だから $x_{1}$ を過ぎた軌道は輪の片側に閉じ込められ、次に横断線に戻ってくる点は $x_{1}$ のさらに先になる。
+:::
+
+::: proof
+$v\defeq(x_{1}-x_{0})/|x_{1}-x_{0}|$ を $\ell$ の向きにとり、$x_{0}+uv$ の $u$ を $\ell$ の上の座標とする（$x_{0}$ は $u=0$、$x_{1}$ は $u=d\defeq|x_{1}-x_{0}|$）。$n$ は $L$ の上で $\langle n,F\rangle>0$ となる単位法線。
+
+**Step 1（輪を作る）.** 【主張：$A$ は弧で、$A\cap S=\{x_{0},x_{1}\}$、$\Sigma\defeq A\cup S$ はジョルダン曲線】$t\mapsto\Phi_{t}(\xi)$ が $[t_{0},t_{1}]$ で単射でないとすると、$\Phi_{s}(\xi)=\Phi_{s'}(\xi)$（$t_{0}\le s<s'\le t_{1}$）から $\xi$ は周期点で、最小周期 $T\le t_{1}-t_{0}$（\ref{ode:planar-period.1}）をもつ。すると $\Phi_{t_{0}+T}(\xi)=x_{0}\in L$ で $t_{0}<t_{0}+T\le t_{1}$ なので、仮定から $t_{0}+T=t_{1}$, $x_{1}=x_{0}$ となり矛盾。よって単射で、\ref{top:compact-to-hausdorff} から $A$ は $x_{0},x_{1}$ を端点とする弧。$t_{0}<t<t_{1}$ の点は $L\supset S$ に入らないので $A\cap S=\{x_{0},x_{1}\}$。端点だけを共有する二つの弧をつなげば、$[0,1]$ の両端を同一視した円周からの連続な単射が得られるので、$\Sigma$ はジョルダン曲線（\ref{top:compact-to-hausdorff}）。\ref{at:jordan-curve} から $\mathbb{R}^{2}\setminus\Sigma$ は二つの開連結成分 $\operatorname{int}\Sigma$, $\operatorname{ext}\Sigma$ に分かれ、$\Sigma$ の各点のどの近傍も両方と交わる。
+
+**Step 2（開線分の両側）.** 【主張：$\operatorname{int}\Sigma,\operatorname{ext}\Sigma$ の一方 $R$ があって、開線分 $(x_{0},x_{1})$ の各点 $q$ について、$q$ の十分小さい開円板 $B$ の中の正の側 $B^{+}\defeq\{y\in B:\langle n,y-q\rangle>0\}$ は $R$ に、負の側 $B^{-}$ は他方の成分 $R'$ に含まれる】$q\in(x_{0},x_{1})$ について $r_{q}\defeq\min\{|q-x_{0}|,|q-x_{1}|,\operatorname{dist}(q,A)\}>0$（$A$ はコンパクトで $q\notin A$）。$B=B(q,r)$, $r\le r_{q}$ なら $B\cap\Sigma=B\cap\ell$ で、$B\setminus\Sigma=B^{+}\sqcup B^{-}$。$B^{\pm}$ は凸なので連結で、それぞれ一つの成分に含まれる。$q\in\Sigma$ なので $B$ は両方の成分と交わり、その交わりは $B^{+}\cup B^{-}$ の中にあるから、$B^{+}$ と $B^{-}$ は異なる成分に入る。$B^{+}$ を含む成分を $R(q)$ とする。$q,\tilde q\in(x_{0},x_{1})$ が近ければ、二つの円板の正の側は交わるので $R(q)=R(\tilde q)$。$q\mapsto R(q)$ は連結な開線分の上で局所定数なので定数（\ref{top:connected-equivalents.2}）。これを $R$ とする（$r$ をさらに小さくしても $B^{\pm}$ の含まれる成分は変わらない）。とくに、\ref{ode:transversal-crossing.1} から、開線分の点 $q$ を通る軌道は、$q$ の直後には $R$ に、直前には $R'$ にある。
+
+**Step 3（$x_{0}$ のまわり）.** 【主張：$0<h$ が小さければ $\Phi_{t_{0}-h}(\xi)\in R'$ で、$\ell$ の点 $x_{0}+uv$（$u<0$ で $|u|$ が小さい）も $R'$ に入る】$x_{0}$ で \ref{ode:transversal-box} の $G$ と $\varepsilon$ をとり、$\varepsilon<\min\{t_{1}-t_{0},d\}$ とする。$A_{1}\defeq\Phi_{[t_{0}+\varepsilon/2,t_{1}]}(\xi)$ はコンパクトで $x_{0}$ を含まない（Step 1 の単射性）ので、$\rho\defeq\min\{\operatorname{dist}(x_{0},A_{1}),\varepsilon/2\}>0$。$G$ の連続性から $\varepsilon'\le\varepsilon/2$ を $N'\defeq G(Q_{\varepsilon'})\subset B(x_{0},\rho)$ となるようにとる。このとき
+$$
+\Sigma\cap N'=G(\{(s,0):0\le s<\varepsilon'\})\cup G(\{(0,u):0\le u<\varepsilon'\}).
+$$
+実際、$A\cap N'$ の点は $A_{1}$ に入らないので時刻が $[t_{0},t_{0}+\varepsilon/2)$ にあり、$\Phi_{t_{0}+s}(\xi)=G(s,0)$ は（$G$ が $Q_{\varepsilon}$ で単射なので）$s<\varepsilon'$ のときだけ $N'$ に入る。$S$ の点 $x_{0}+uv$ は、$u\ge\rho$ なら $B(x_{0},\rho)$ の外にあり、$u<\varepsilon$ なら $G(0,u)$ に等しく、$u<\varepsilon'$ のときだけ $N'$ に入る。よって $N'\setminus\Sigma=G(P)\sqcup G(M)$、ただし $P\defeq\{(s,u)\in Q_{\varepsilon'}:s>0,u>0\}$、$M\defeq\{(s,u)\in Q_{\varepsilon'}:s<0\ \text{または}\ u<0\}$。$P$ は凸、$M$ は交わる二つの凸集合の和なので、どちらも連結で、その像もそれぞれ一つの成分に入る。$x_{0}\in\Sigma$ なので $N'$ は両方の成分と交わり、$G(P)$ と $G(M)$ は異なる成分に入る。$(s,u)\in P$ なら $q\defeq x_{0}+uv\in(x_{0},x_{1})$ で、$G(s,u)=\Phi_{s}(q)$ は $\langle n,G(s,u)-q\rangle=\langle n,G(s,u)-x_{0}\rangle>0$（\ref{ode:transversal-box.1}）を満たし、$s\to0$ で $q$ に近づくので、小さい $s$ では Step 2 の $B^{+}\subset R$ に入る。よって $G(P)\subset R$、$G(M)\subset R'$。$\Phi_{t_{0}-h}(\xi)=G(-h,0)$ と $x_{0}+uv=G(0,u)$（$u<0$）はどちらも $G(M)$ の点である。
+
+**Step 4（$x_{1}$ のまわり）.** 【主張：$0<h$ が小さければ $\Phi_{t_{1}+h}(\xi)\in R$】$x_{1}$ で同じ構成をする（時間の向きと $u$ の向きが逆になる）。$\Sigma\cap N''=G(\{(s,0):-\varepsilon''<s\le0\})\cup G(\{(0,u):-\varepsilon''<u\le0\})$ で、$N''\setminus\Sigma=G(P')\sqcup G(M')$、$P'\defeq\{s<0,u<0\}$、$M'\defeq\{s>0\ \text{または}\ u>0\}$（どちらも $Q_{\varepsilon''}$ の中）。$s>0>u$ の点 $G(s,u)$ は開線分の点 $x_{1}+uv$ を通った直後の点なので、Step 3 と同じ理由で $R$ に入る。それは $G(M')$ の点なので $G(M')\subset R$ で、$\Phi_{t_{1}+h}(\xi)=G(h,0)\in G(M')$。
+
+**Step 5（閉じ込め）.** 【主張：$t>t_{1}$ なら $\Phi_{t}(\xi)\in R$】$\tau\defeq\sup\{t\in I_{\xi}:t>t_{1},\ \Phi_{s}(\xi)\in R\ (t_{1}<s\le t)\}$ とおく（Step 4 から集合は空でない）。$\tau<\sup I_{\xi}$ と仮定する。$R$ は開集合なので $p\defeq\Phi_{\tau}(\xi)\notin R$（$p\in R$ なら $\tau$ の少し先まで $R$ に留まる）だが $p\in\overline{R}$、よって $p\in\overline{R}\setminus R\subset\Sigma$。
+- $p\in A$ のとき：$p=\Phi_{w}(\xi)$（$w\in[t_{0},t_{1}]$）で、$\xi$ は周期 $\tau-w>0$ の周期点。小さい $h>0$ について $\Phi_{\tau-h}(\xi)=\Phi_{w-h}(\xi)$ は、$w>t_{0}$ なら $A\subset\Sigma$ の点、$w=t_{0}$ なら Step 3 から $R'$ の点で、どちらも $R$ に入らない。$\tau-h\in(t_{1},\tau)$ なのでこれは $\tau$ の定義に反する。
+- $p\in(x_{0},x_{1})$ のとき：\ref{ode:transversal-crossing.1} から、小さい $h>0$ では $\langle n,\Phi_{\tau-h}(\xi)-p\rangle<0$ で、$\Phi_{\tau-h}(\xi)\to p$ なので、Step 2 の $B^{-}\subset R'$ に入る。やはり $\tau$ の定義に反する。
+
+よって $\tau=\sup I_{\xi}$ で、主張が成り立つ。
+
+**Step 6（結論）.** 1：$R\cap\Sigma=\varnothing$ なので Step 5 から $t>t_{1}$ で $\Phi_{t}(\xi)\notin\Sigma=A\cup S$。$\xi$ が周期 $T$ の周期点なら $\Phi_{t_{1}+T}(\xi)=x_{1}\in S$ となり矛盾。2：$L\setminus S$ は、$x_{0}$ の側の部分 $L_{-}\defeq\{x_{0}+uv\in L:u<0\}$ と $x_{1}$ の先の部分 $L_{+}\defeq\{x_{0}+uv\in L:u>d\}$ に分かれ、それぞれ空か連結で、$\Sigma$ と交わらない（$A\cap L=\{x_{0},x_{1}\}$）。$L_{-}$ が空でなければ、$x_{0}$ の近くの点を含み、それは Step 3 から $R'$ に入るので、$L_{-}\subset R'$。$x_{2}\in L$ は Step 5 から $R$ の点で $S$ に入らないので、$x_{2}\in L_{+}$、つまり $x_{1}\in(x_{0},x_{2})$。
+
+::: hypcheck
+- **平面であること（ジョルダンの曲線定理）**：Step 1 で $\Sigma$ が平面を二つの成分に分けることに使い、Step 2〜5 のすべてがこれに依存する。トーラスの上では閉曲線が面を分けないことがあり、この補題は成り立たない（\ref{ode:poincare-bendixson} の後の補足）。
+- **$F$ が $C^{1}$ 級（解の一意性）**：Step 1 の単射性と、Step 5 の「別の時刻に弧 $A$ の点を通るなら周期的」に使った。一意性がなければ、軌道は弧 $A$ に合流して輪の外へ抜けられる。
+- **$L$ が横断線**：Step 2 で、開線分の各点で軌道が同じ向き（負の側から正の側）に横切ることに使った。ベクトル場が線分と平行になる点があると、そこから逆向きに横切る軌道がありうる。
+- **$t_{0},t_{1}$ が続けて起こる交わりの時刻**：Step 1 の $A\cap S=\{x_{0},x_{1}\}$ と Step 6 の $A\cap L=\{x_{0},x_{1}\}$ に使った。
+:::
+:::
+
+::: corollary 交点の列と周期軌道 {#ode:transversal-sequence keywords="the successive crossing points of an orbit with a transversal form a strictly monotone sequence along it; a periodic orbit meets a transversal in exactly one point or not at all" index="交点の列（横断線）|こうてんのれつおうだんせん"}
+$L$ を横断線とする。
+1. $\xi$ が周期点でなければ、$\Phi_{t}(\xi)\in L$ となる時刻を小さい順に $\cdots<t_{k}<t_{k+1}<\cdots$ と並べたとき、点 $\Phi_{t_{k}}(\xi)=q'+u_{k}(q''-q')$（$L=[q',q'']$）の座標 $u_{k}$ は狭義単調な列である。
+2. 周期軌道と $L$ の共通部分は、空かただ一点である。
+:::
+
+::: proof
+\ref{ode:transversal-crossing.1} から、交わりの時刻は有界閉区間の中に有限個しかないので、小さい順に並べられ、隣り合う二つの間に交わりはない。
+
+**1.** $\Phi_{t_{k}}(\xi)=\Phi_{t_{k+1}}(\xi)$ なら $\xi$ は周期点になるので、隣り合う交点は異なる。\ref{ode:transversal-monotone.2} を $t_{k}<t_{k+1}$ と $t_{k+2}$ に使うと $u_{k+1}$ は $u_{k}$ と $u_{k+2}$ の間にあるので、$u_{k+1}-u_{k}$ と $u_{k+2}-u_{k+1}$ は同じ符号で、帰納法から全体が同じ符号。
+
+**2.** 周期点 $\xi$（最小周期 $T$）の軌道が $L$ と異なる 2 点で交わるとする。交わりの時刻は $[0,T]$ に有限個で、周期軌道上の $L$ の点はすべてこの範囲の時刻に現れるので、その中に隣り合う時刻 $s<s'$ で $\Phi_{s}(\xi)\neq\Phi_{s'}(\xi)$ となるものがある（隣り合う点がすべて等しければ交点は一つしかない）。\ref{ode:transversal-monotone.1} から $\xi$ は周期点でないことになり、矛盾。
+:::
+
+::: corollary ω 極限集合と横断線 {#ode:limit-set-transversal keywords="an omega-limit set meets a transversal in at most one point" index="ω 極限集合と横断線|おめがきょくげんしゅうごうとおうだんせん"}
+$[0,\infty)\subset I_{\xi}$ とし、$L$ を横断線とする。$\omega(\xi)\cap L$ は高々一点である。
+:::
+
+::: proof
+$y_{1}\neq y_{2}$ がともに $\omega(\xi)\cap L$ にあるとする。\ref{ode:transversal-exists.2} の $L'\supset L$ をとると、$y_{1},y_{2}$ は $L'$ の相対的内部にある。$t_{k}\to\infty$, $\Phi_{t_{k}}(\xi)\to y_{1}$ に \ref{ode:transversal-crossing.2} を使うと、$L'$ との交わりの時刻 $s_{k}\to\infty$ で $\Phi_{s_{k}}(\xi)\to y_{1}$ となるものがあり、同様に $r_{k}\to\infty$ で $\Phi_{r_{k}}(\xi)\in L'$, $\Phi_{r_{k}}(\xi)\to y_{2}$ となるものがある。$\xi$ が周期点なら、\ref{ode:transversal-sequence.2} から軌道と $L'$ の交点は一つしかなく、$y_{1}=y_{2}$ となって矛盾。周期点でなければ、時刻 $0$ 以降の $L'$ との交点の座標は \ref{ode:transversal-sequence.1} から有界な単調列で、一つの値 $u^{*}$ に収束する。$\Phi_{s_{k}}(\xi)$ と $\Phi_{r_{k}}(\xi)$ はこの列の部分列なので、どちらも $L'$ の座標 $u^{*}$ の点に収束し、$y_{1}=y_{2}$ となって矛盾。
+:::
+
+## ポアンカレ–ベンディクソンの定理 {#ode:sec-pl-pb}
+
+::: theorem ポアンカレ–ベンディクソンの定理 {#ode:poincare-bendixson refname="ポアンカレ–ベンディクソンの定理" keywords="Poincare-Bendixson theorem: for a C^1 vector field on an open subset of the plane, if the forward orbit of xi lies in a compact set and omega(xi) contains no equilibrium, then omega(xi) is a periodic orbit" index="ポアンカレ–ベンディクソンの定理|ぽあんかれべんでぃくそんのていり"}
+$W\subset\mathbb{R}^{2}$ を開集合、$F\colon W\to\mathbb{R}^{2}$ を $C^{1}$ 級とし、$\xi\in W$ の前方軌道 $\mathcal{O}^{+}(\xi)$ が $W$ のコンパクト集合に含まれる（$W=\mathbb{R}^{2}$ なら、有界である）とする。$\omega(\xi)$ が平衡点を含まなければ、$\omega(\xi)$ は周期軌道である。
+:::
+
+::: intuition
+平面の中で有界な範囲に留まり、止まる場所（平衡点）にも近づかない解は、最終的には一つの閉じた輪の上をぐるぐる回る運動に近づく。
+:::
+
+::: proof
+\ref{ode:limit-set-properties.2} から $\omega(\xi)$ は空でないコンパクト集合。
+
+**Step 1（極限集合の中の周期軌道）.** 【主張：$\omega(\xi)$ は周期軌道 $\Gamma$ を含む】$\eta\in\omega(\xi)$ をとる。\ref{ode:limit-set-properties.3} から $I_{\eta}=\mathbb{R}$, $\mathcal{O}(\eta)\subset\omega(\xi)$ で、$\mathcal{O}^{+}(\eta)$ はコンパクト集合 $\omega(\xi)$ に含まれるので、$\omega(\eta)$ は空でなく、$\omega(\xi)$ は閉なので $\omega(\eta)\subset\omega(\xi)$。$z\in\omega(\eta)$ をとると、仮定から $F(z)\neq0$ なので、$z$ を相対的内部にもつ横断線 $L$ がある（\ref{ode:transversal-exists.1}）。$t_{k}\to\infty$, $\Phi_{t_{k}}(\eta)\to z$ に \ref{ode:transversal-crossing.2} を使うと、$s_{k}\to\infty$ で $\Phi_{s_{k}}(\eta)\in L$, $\Phi_{s_{k}}(\eta)\to z$ となるものがある。これらの点は $\mathcal{O}(\eta)\subset\omega(\xi)$ にも入るので、\ref{ode:limit-set-transversal} から $\omega(\xi)\cap L$ の同じ一点で、極限 $z$ に等しい。とくに $s_{1}\neq s_{2}$ について $\Phi_{s_{1}}(\eta)=\Phi_{s_{2}}(\eta)$ となり、$F(\eta)\neq0$ なので $\eta$ は周期点。$\Gamma\defeq\mathcal{O}(\eta)\subset\omega(\xi)$ とする。
+
+**Step 2（一致）.** 【主張：$\omega(\xi)=\Gamma$】$\Gamma\neq\omega(\xi)$ とする。$\Gamma$ はコンパクト（\ref{ode:planar-period.2}）なので $\omega(\xi)$ の閉集合で、$\omega(\xi)$ は連結（\ref{ode:limit-set-properties.4}）なので、$\Gamma$ は $\omega(\xi)$ の開集合ではない（\ref{top:connected-equivalents.2}）。よって $\Gamma$ の点 $p$ と、$\omega(\xi)\setminus\Gamma$ の点列 $p_{k}\to p$ がある。$F(p)\neq0$ なので $p$ を相対的内部にもつ横断線 $L$ をとり（\ref{ode:transversal-exists.1}）、$p$ で \ref{ode:transversal-box} の $G$ と $\varepsilon$ を、$|u|<\varepsilon$ なら $p+uv\in L$ となるようにとる。$G(Q_{\varepsilon/2})$ は $p$ の開近傍なので、大きい $k$ で $p_{k}=G(\sigma_{k},u_{k})$（$(\sigma_{k},u_{k})\in Q_{\varepsilon/2}$）と書け、\ref{ode:transversal-box.2} から $\Phi_{-\sigma_{k}}(p_{k})=G(0,u_{k})=p+u_{k}v\in L$。$\omega(\xi)$ と $\omega(\xi)\setminus\Gamma$ はどちらも不変（\ref{ode:limit-set-properties.3} と、不変集合 $\Gamma$ の補集合）なので、$\Phi_{-\sigma_{k}}(p_{k})\in(\omega(\xi)\setminus\Gamma)\cap L$。一方 $p\in\omega(\xi)\cap L$ で、$p\in\Gamma$ だから $\Phi_{-\sigma_{k}}(p_{k})\neq p$。これは $\omega(\xi)\cap L$ が高々一点であること（\ref{ode:limit-set-transversal}）に反する。
+
+::: hypcheck
+- **$\omega(\xi)$ が平衡点を含まない**：Step 1 で $z$ を通る横断線を、Step 2 で $p$ を通る横断線をとるのに使った。外すと結論は偽：$F(x)=-x$ では $\omega(\xi)=\{0\}$（平衡点）。平衡点とそこから出てそこへ戻る軌道（ホモクリニック軌道）の和が $\omega$ 極限集合になる例もある。
+- **前方軌道がコンパクト集合に含まれる**：$\omega(\xi)$ が空でなくコンパクトで連結であること（\ref{ode:limit-set-properties}）を通して、Step 1・2 で使った。外すと $\omega(\xi)=\varnothing$ になりうる。
+- **平面であること**：\ref{ode:limit-set-transversal}（その元の \ref{ode:transversal-monotone}）を通して、Step 1・2 の両方で使った。3 次元以上や平面でない曲面では偽である（下の補足）。
+- **$F$ が $C^{1}$ 級**：流れの存在・連続性・一意性に使った。局所リプシッツで十分である。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**一般化（平衡点を許す場合）.** 平衡点が有限個しかなく、前方軌道がコンパクト集合に含まれるなら、$\omega(\xi)$ は (a) 一つの平衡点、(b) 一つの周期軌道、(c) 有限個の平衡点と、$t\to\pm\infty$ でそれらに近づく軌道の和、のいずれかである。証明は同じ横断線の議論の延長で、標準的な教科書（Perko『Differential Equations and Dynamical Systems』など）にある。ここでは証明しない。
+
+**前提を変えると.** 平面でない 2 次元の場合、トーラス $\mathbb{R}^{2}/\mathbb{Z}^{2}$ の上の一定のベクトル場 $(1,\theta)$（$\theta$ は無理数）では、どの軌道も稠密で、$\omega$ 極限集合はトーラス全体である。平衡点はないが周期軌道でもない。トーラスの上では閉曲線が面を二つに分けるとは限らない（ジョルダンの曲線定理が成り立たない）ことが、\ref{ode:transversal-monotone} を壊している。3 次元以上の例は次のページの補足で述べる。
+
+**似た定理.** 1 次元の自励系 $x'=F(x)$ では、有界な解は単調で、平衡点に収束する。平面の定理はその「一段上」で、行き着く先は平衡点か周期軌道（とそれらを結ぶ軌道）である。3 次元からは、行き着く先がカオス的な集合（ストレンジアトラクター）になりうる。
+
+**高い視点：位相が力学を縛る.** 証明で使った力学の情報は「解の一意性」と「横断線を同じ向きに横切る」だけで、残りはすべて平面の位相（ジョルダンの曲線定理）である。比喩で言えば、平面の上の軌道は、自分の通った跡を横切れない一筆書きの線で、横断線の上に点を打つたびに、自分で作った柵の内側か外側に閉じ込められていく。だから行き場は狭まる一方で、最後は輪に巻きつくしかない。
+:::
+
+::: corollary 捕獲領域の中の周期軌道 {#ode:trapping-region keywords="a nonempty compact positively invariant set without equilibria contains a periodic orbit; trapping region; annulus" index="捕獲領域|ほかくりょういき"}
+$K\subset W$ を空でないコンパクトな正の不変集合とし、$K$ は平衡点を含まないとする。このとき $K$ は周期軌道を含む。
+:::
+
+::: proof
+$\xi\in K$ をとると $\mathcal{O}^{+}(\xi)\subset K$ で、$[0,\infty)\subset I_{\xi}$（\ref{ode:escape-corollaries.3}）。\ref{ode:limit-set-properties.2} から $\omega(\xi)\subset K$ なので、$\omega(\xi)$ は平衡点を含まない。\ref{ode:poincare-bendixson} から $\omega(\xi)$ は周期軌道で、$K$ に含まれる。
+:::
+
+このような $K$ を**捕獲領域**ということがある。典型的には、二つの閉曲線で囲まれた円環状の領域で、境界の上でベクトル場が内向きを向くものである。次のページでは、ファン・デル・ポール方程式に対して捕獲領域を作って周期解の存在を示す（\see{ode:page-limit-cycles}）。
+
+## 問題 {#ode:sec-pl-problems}
+
+::: problem {#ode:prob-pl-polar-limit-sets}
+$F(x,y)\defeq\bigl(x-y-x(x^{2}+y^{2}),\ x+y-y(x^{2}+y^{2})\bigr)$ を $\mathbb{R}^{2}$ 上のベクトル場とする。
+1. $r=|(x,y)|$ と偏角 $\theta$ について、$0$ でない解は $r'=r(1-r^{2})$, $\theta'=1$ を満たすことを示せ。
+2. $\xi\neq0$, $r_{0}\defeq|\xi|$ について、$r(t)^{2}=\dfrac{1}{1+(r_{0}^{-2}-1)e^{-2t}}$ を示し、$\omega(\xi)$ を求めよ。
+3. $0<r_{0}<1$ なら $\alpha(\xi)=\{0\}$ であり、$r_{0}>1$ なら $(-\infty,0]\not\subset I_{\xi}$ であることを示せ。
+:::
+
+::: solution
+**1.** $xx'+yy'=(x^{2}+y^{2})-(x^{2}+y^{2})^{2}$、$xy'-yx'=x^{2}+y^{2}$（交差項は打ち消し合う）。$r^{2}=x^{2}+y^{2}$ を微分して $rr'=xx'+yy'=r^{2}(1-r^{2})$。$r\neq0$（原点は平衡点で、一意性から $0$ でない解は原点を通らない）なので $r'=r(1-r^{2})$。偏角は局所的に $\theta=\arctan(y/x)$ などと書け、$\theta'=(xy'-yx')/r^{2}=1$。
+
+**2.** $\rho\defeq r^{2}$ は $\rho'=2\rho(1-\rho)$, $\rho(0)=r_{0}^{2}$ を満たす。右辺の $\rho(t)=1/(1+(r_{0}^{-2}-1)e^{-2t})$ は、$\rho'=2(r_{0}^{-2}-1)e^{-2t}\rho^{2}=2\rho^{2}(1/\rho-1)=2\rho(1-\rho)$ と初期値を満たすので、一意性から一致する（$t\ge0$ では、$r_{0}\le1$ なら分母は $1$ 以上、$r_{0}>1$ でも分母は $1+(r_{0}^{-2}-1)=r_{0}^{-2}$ 以上で正）。$t\to\infty$ で $\rho\to1$ で、$\theta(t)=\theta_{0}+t$。単位円の点 $(\cos\varphi,\sin\varphi)$ には、$t_{k}=\varphi-\theta_{0}+2\pi k$ で $\Phi_{t_{k}}(\xi)=\sqrt{\rho(t_{k})}(\cos\varphi,\sin\varphi)\to(\cos\varphi,\sin\varphi)$ と近づく。逆に $\omega(\xi)$ の点は $|\cdot|=\lim\sqrt{\rho(t_{k})}=1$ を満たす。よって $\omega(\xi)$ は単位円 $\Gamma$（$r_{0}=1$ なら $\xi$ 自身の周期軌道）。
+
+**3.** $0<r_{0}<1$ なら分母はすべての $t$ で正で、$t\to-\infty$ で $e^{-2t}\to\infty$ なので $\rho\to0$、$\alpha(\xi)=\{0\}$。$r_{0}>1$ なら $r_{0}^{-2}-1<0$ で、分母は $t^{*}\defeq-\tfrac12\log\bigl(1/(1-r_{0}^{-2})\bigr)<0$ で $0$ になる。$t\downarrow t^{*}$ で $\rho\to\infty$ なので、解は $t^{*}$ より前に延びず（\ref{ode:escape-corollaries.3}）、$I_{\xi}\subset(t^{*},\infty)$。
+:::
+
+::: problem {#ode:prob-pl-gradient}
+$V\colon W\to\mathbb{R}$ を $C^{2}$ 級とし、勾配系 $x'=-\nabla V(x)$ を考える（$W\subset\mathbb{R}^{2}$ は開集合）。
+1. この系には周期軌道がないことを示せ。
+2. $\mathcal{O}^{+}(\xi)$ が $W$ のコンパクト集合に含まれるなら、$\omega(\xi)$ のすべての点は平衡点（$\nabla V=0$ の点）であることを示せ。
+:::
+
+::: solution
+解 $x(t)$ に沿って $\frac{d}{dt}V(x(t))=\langle\nabla V(x),x'\rangle=-|\nabla V(x(t))|^{2}\le0$ なので、$V(x(t))$ は単調減少で、$\nabla V(x(t))\neq0$ となる時刻では狭義に減少する。
+
+**1.** 周期点 $\xi$（周期 $T$）があるとすると、$V(\Phi_{T}(\xi))=V(\xi)$ だが、周期軌道は平衡点を含まない（\ref{ode:planar-period.2}）ので $[0,T]$ でつねに $\nabla V\neq0$、$V(\Phi_{T}(\xi))-V(\xi)=-\int_{0}^{T}|\nabla V(\Phi_{t}(\xi))|^{2}dt<0$。矛盾。
+
+**2.** $V(\Phi_{t}(\xi))$ は単調減少で、コンパクト集合上の連続関数 $V$ の値なので下に有界、極限 $c$ をもつ。$\eta\in\omega(\xi)$ なら $\Phi_{t_{k}}(\xi)\to\eta$ から $V(\eta)=c$。\ref{ode:limit-set-properties.3} から $\Phi_{t}(\eta)\in\omega(\xi)$ がすべての $t$ で成り立つので $V(\Phi_{t}(\eta))=c$ は $t$ によらず、微分して $-|\nabla V(\eta)|^{2}=0$（$t=0$）。よって $\eta$ は平衡点。
+:::
+
+（この問題はポアンカレ–ベンディクソンの定理を使わず、次元にもよらない。）
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ペロンの方法 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/08-perron.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ペロンの方法 {#pde:page-perron keywords="Perron method for the Dirichlet problem on bounded domains, continuous subharmonic and superharmonic functions, sub-mean value property, maximum principle for subharmonic functions, harmonic lifting by the Poisson integral, Perron family and Perron function, Harnack principle, barrier, regular boundary point, exterior sphere condition, C^2 boundary, 劣調和関数, 優調和関数, 障壁, バリア, 正則な境界点, 外部球条件, ペロン解"}
+
+\ref{pde:page-poisson-integrals} では、球の上ではポアソン積分によってディリクレ問題がいつでも解けることを示した。一般の有界領域 $\Omega$ ではグリーン関数を具体的に書けないので、別の作り方が要る。**ペロンの方法**は、境界で $g$ 以下になる**劣調和関数**（球の上で、同じ境界値の調和関数より下にある連続関数）を全部集め、その上限 $u$ をとる。こうして作った $u$ は、領域がどんな形でも $\Omega$ の中では調和になる。これを、球の上でのポアソン積分による「持ち上げ」と、調和関数の増加列についての \ref{pde:harnack-principle} で示すのがこのページの第一の目標である。一方、$u$ が境界で本当に $g$ に連続につながるかどうかは、境界の幾何で決まる。その判定に使うのが**障壁**で、境界の点 $\xi$ に障壁があることと、すべての連続な $g$ について $u(x)\to g(\xi)$ となることが同値であることを示す。外部球条件をみたす点には障壁が具体的に書け、とくに $C^{2}$ 境界をもつ有界領域ではディリクレ問題がいつでも古典解をもつ。外部錐条件・凸領域と、解けない例（穴あき球・ルベーグの棘）は次のページで扱う。
+
+## 記法と定義の確認 {#pde:sec-pr-notation}
+
+::: notation
+- $n\ge2$、$\Omega\subset\mathbb{R}^{n}$ は開集合。球 $B(a,r)$, $\overline{B}(a,r)$, $\partial B(a,r)$、$\omega_{n}$、球面平均 $S_{r}u(x)$ と球平均 $A_{r}u(x)$ は \ref{pde:spherical-mean}（$\overline{B}(x,r)\subset\Omega$ のときに定義される）、両者の関係は \ref{pde:means-relation}。調和関数は \ref{pde:harmonic-function}、平均値の性質は \ref{pde:mean-value-property}・\ref{pde:mean-value-converse}、\ref{pde:strong-maximum-principle}、\ref{pde:weak-maximum-principle}。
+- 基本解 $\Phi(x)=\Psi(|x|)$ は \ref{pde:gf-fundamental-solution}。$\Psi$ は $(0,\infty)$ で狭義減少（\ref{pde:gf-fundamental-properties.1} の $\Psi'<0$）、$\Psi(s)\to+\infty$（$s\to0$）。
+- **ポアソン積分**：球 $B(a,r)$ と $\partial B(a,r)$ の上の連続関数 $\varphi$ について
+$$
+P_{a,r}[\varphi](x)\defeq\int_{\partial B(0,r)}K_{r}(x-a,y)\,\varphi(a+y)\,dS(y)\qquad(|x-a|<r)
+$$
+とおく（\ref{pde:poisson-kernel-ball} を中心 $a$ に平行移動したもの）。\ref{pde:poisson-ball-dirichlet} から、$P_{a,r}[\varphi]$ は $B(a,r)$ で調和で、球面上で $\varphi$ とおけば $\overline{B}(a,r)$ で連続になる。$K_{r}>0$（\ref{pde:poisson-kernel-ball-properties.1}）なので、$\varphi_{1}\le\varphi_{2}$ なら $P_{a,r}[\varphi_{1}]\le P_{a,r}[\varphi_{2}]$（**単調性**）。中心では $K_{r}(0,y)=\frac{1}{n\omega_{n}r^{n-1}}$ なので $P_{a,r}[\varphi](a)=\frac{1}{n\omega_{n}}\int_{S^{n-1}}\varphi(a+r\theta)\,d\sigma(\theta)$。
+- $\eta\in\partial\Omega$ と $\Omega$ 上の関数 $v$ について、$\limsup_{x\to\eta}v(x)$ は $x\in\Omega$ から近づくときの上極限（$\inf_{\delta>0}\sup_{\Omega\cap B(\eta,\delta)}v$）を表す。$\liminf$ も同様。
+- 開集合の連結成分は開集合で連結。$\Omega$ が有界で空でなければ $\partial\Omega$ は空でないコンパクト集合で、連結成分 $U$ の境界は $\partial U\ne\varnothing$, $\partial U\subset\partial\Omega$（\ref{pde:weak-maximum-principle} の証明の Step 1・3）。
+- **選択公理**：ペロン族の上限が調和であることの証明（\ref{pde:perron-harmonic}）で、関数の列を選ぶのに**可算選択公理**を使う。それ以外では使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 劣調和関数 {#pde:sec-pr-subharmonic}
+
+調和関数を「球の上で同じ境界値をもつ調和関数と等しい」関数と見ると、それを不等式に緩めたものが劣調和関数である。微分可能性は仮定しない。
+
+::: definition 劣調和関数と優調和関数 {#pde:subharmonic keywords="continuous subharmonic function: below every harmonic function on a ball that dominates it on the sphere; superharmonic function" index="劣調和関数|れつちょうわかんすう, 優調和関数|ゆうちょうわかんすう, 劣調和|れつちょうわ, 優調和|ゆうちょうわ"}
+$u\in C(\Omega)$ が $\Omega$ で**劣調和**であるとは、$\overline{B}(a,r)\subset\Omega$ となるすべての閉球と、$B(a,r)$ で調和で $\overline{B}(a,r)$ で連続なすべての $h$ について、
+$$
+\partial B(a,r)\text{ の上で }u\le h\ \Longrightarrow\ B(a,r)\text{ の上で }u\le h
+$$
+が成り立つことをいう。$-u$ が劣調和なとき、$u$ は**優調和**であるという。
+:::
+
+::: intuition
+劣調和関数とは、どの球の上でも、球面で自分より上にある調和関数（ぴんと張った膜）に、中でも下から押さえられている関数である。調和関数が「たるみのない膜」なら、劣調和関数は「下にたるんだ膜」に当たる。
+:::
+
+劣調和性を確かめるには、平均値の不等式が局所的に成り立つことを見ればよい（\ref{pde:subharmonic-equivalent}）。その鍵になるのが次の最大値原理である。
+
+::: lemma 局所的な劣平均値の性質と最大値原理 {#pde:subharmonic-local-maximum keywords="strong and weak maximum principle for continuous functions with the local sub-mean value property u(x) <= S_r u(x) for small r" index="劣平均値の性質|れつへいきんちのせいしつ, 最大値原理（劣調和関数）|さいだいちげんりれつちょうわかんすう"}
+$w\in C(\Omega)$ が**局所的な劣平均値の性質**をもつ、すなわち各 $x\in\Omega$ に $r_{x}>0$ があって $\overline{B}(x,r_{x})\subset\Omega$ かつ $0<r\le r_{x}$ で $w(x)\le S_{r}w(x)$ となるとする。
+1. $\Omega$ が連結で、ある $x_{0}\in\Omega$ で $w(x_{0})=\sup_{\Omega}w$ なら、$w$ は $\Omega$ で定数である。
+2. $\Omega$ が有界で空でなく、$w$ が $\overline{\Omega}$ の連続関数に延びるなら、$\max_{\overline{\Omega}}w=\max_{\partial\Omega}w$。
+:::
+
+::: proof
+**Step 1（球平均の不等式）.** 【主張：$x\in\Omega$, $0<r\le r_{x}$ なら $w(x)\le A_{r}w(x)$】\ref{pde:means-relation.2} と仮定から
+$$
+A_{r}w(x)=\frac{n}{r^{n}}\int_{0}^{r}s^{n-1}S_{s}w(x)\,ds\ge\frac{n}{r^{n}}\int_{0}^{r}s^{n-1}w(x)\,ds=w(x).
+$$
+
+**Step 2（1 の証明）.** 【主張：$E\defeq\{x\in\Omega:w(x)=M\}$（$M\defeq w(x_{0})$）は $\Omega$ の空でない開かつ閉な部分集合】$x_{0}\in E$、$E$ は $w$ の連続性から $\Omega$ の中で閉。$x\in E$, $0<r\le r_{x}$ なら、Step 1 から $\frac{1}{\omega_{n}r^{n}}\int_{B(x,r)}(M-w)\,dy=M-A_{r}w(x)\le M-w(x)=0$。被積分関数は連続で $\ge0$ なので、\ref{pde:strong-maximum-principle} の証明の Step 1 と同じく $B(x,r)$ の上で $w=M$、よって $E$ は開。$\Omega$ は連結なので $E=\Omega$。
+
+**Step 3（2 の証明）.** 【主張：$\max_{\overline{\Omega}}w=\max_{\partial\Omega}w$】\ref{pde:weak-maximum-principle} の証明の Step 1〜3 で使ったのは、連結成分の上での $\sup$ についての強最大値原理だけである。それを 1 で置き換えれば、同じ議論がそのまま通る（局所的な劣平均値の性質は、開部分集合である連結成分に制限しても成り立つ）。
+
+::: hypcheck
+- **局所的な劣平均値の性質**：Step 1 で球平均の不等式に直し、Step 2 で使った。$r_{x}$ は点ごとに違ってよく、小さな球だけで足りることがこの補題の要点である。
+- **連続性**：Step 2 で $E$ が閉であることと、積分が 0 の非負関数が 0 であることに使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem 劣調和関数の同値な言い換え {#pde:subharmonic-equivalent keywords="equivalent definitions of continuous subharmonic functions: comparison with harmonic functions on balls, u <= Poisson integral of u on every ball, sub-mean value property on spheres, local sub-mean value property" index="劣調和関数の特徴づけ|れつちょうわかんすうのとくちょうづけ, 劣平均値の性質|れつへいきんちのせいしつ"}
+$u\in C(\Omega)$ について次は同値である。
+1. $u$ は $\Omega$ で劣調和。
+2. $\overline{B}(a,r)\subset\Omega$ なら、$B(a,r)$ の上で $u\le P_{a,r}[u|_{\partial B(a,r)}]$。
+3. $\overline{B}(x,r)\subset\Omega$ なら $u(x)\le S_{r}u(x)$（**劣平均値の性質**）。
+4. $u$ は局所的な劣平均値の性質（\ref{pde:subharmonic-local-maximum}）をもつ。
+:::
+
+::: intuition
+劣調和であることは、「どの点の値も、その点を中心とする球面の平均以下」と言い換えられ、さらにそれを十分小さな球面で確かめるだけでよい。劣調和性は局所的な性質である。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2）.** 【主張：1 なら 2】$h\defeq P_{a,r}[u|_{\partial B(a,r)}]$ を球面上で $u$ とおくと、$h$ は $B(a,r)$ で調和、$\overline{B}(a,r)$ で連続（\ref{pde:poisson-ball-dirichlet}）で、球面上で $u=h$。劣調和の定義から $B(a,r)$ の上で $u\le h$。
+
+**Step 2（2 ⇒ 3 ⇒ 4）.** 【主張：2 なら 3、3 なら 4】2 を中心 $x=a$ で使うと、記法の確認の中心での値の式から $u(a)\le\frac{1}{n\omega_{n}}\int_{S^{n-1}}u(a+r\theta)\,d\sigma=S_{r}u(a)$。3 から 4 は、$\overline{B}(x,r_{x})\subset\Omega$ となる $r_{x}$ をとればよい。
+
+**Step 3（4 ⇒ 1）.** 【主張：4 なら 1】$\overline{B}\defeq\overline{B}(a,r)\subset\Omega$ とし、$h$ を $B\defeq B(a,r)$ で調和、$\overline{B}$ で連続、$\partial B$ で $u\le h$ とする。$w\defeq u-h$ は $\overline{B}$ で連続。$x\in B$ について $r'_{x}\defeq\min\{r_{x},\frac12(r-|x-a|)\}$ とおくと、$0<s\le r'_{x}$ で $\overline{B}(x,s)\subset B$ なので、平均値の性質（\ref{pde:mean-value-property.2}）から $S_{s}h(x)=h(x)$、したがって $w(x)\le S_{s}w(x)$（$S_{s}$ は線形）。よって $w$ は $B$ で局所的な劣平均値の性質をもち、\ref{pde:subharmonic-local-maximum.2} から $\max_{\overline{B}}w=\max_{\partial B}w\le0$。
+
+::: hypcheck
+- **ポアソン積分による球のディリクレ問題の可解性**：Step 1 で、球面上の $u$ を境界値とする調和関数を作るのに使った。定義 1 は「比べる相手の $h$」がたくさんあって初めて意味をもつ。
+- **調和関数の平均値の性質**：Step 3 で $h$ の平均が中心の値に等しいことに使った。
+- **$u$ の連続性**：Step 3 で最大値原理を $\overline{B}$ の上の連続関数に使った。上半連続な関数まで広げる流儀もある（補足）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example
+1. 調和関数は 3 の等号が成り立つので、劣調和かつ優調和である。逆に劣調和かつ優調和な連続関数は球面についての平均値の性質をもち、\ref{pde:mean-value-converse} から調和。
+2. $u\in C^{2}(\Omega)$ が $\Delta u\ge0$ をみたせば劣調和：\ref{pde:mean-value-property.1} から $r\mapsto S_{r}u(x)$ の導関数は $\frac{r}{n}A_{r}(\Delta u)(x)\ge0$ で、$r=0$ で連続（\ref{pde:means-relation.1}）なので $S_{r}u(x)\ge u(x)$（\ref{pde:prob-hf-subharmonic.1} と同じ）。たとえば $|x|^{2}$。同様に $\Delta u\le0$ なら優調和。
+3. $h$ が調和なら $|h|$ と $\max\{h,0\}$ は劣調和：$|h(x)|=|S_{r}h(x)|\le S_{r}|h|(x)$。$|h|$ は一般に $C^{2}$ でない（$n=2$ で $|x_{1}|$）。
+4. $\Phi$ は $\mathbb{R}^{n}\setminus\{0\}$ で調和なので、$-\Phi$ も $\Phi$ もそこで劣調和かつ優調和。
+:::
+
+::: supplement
+**前提を変えると.** 多くの本では、劣調和関数を**上半連続**（\ref{calc:semicontinuous}）で値 $-\infty$ を許す関数に広げて定義する。そうすると $\log|f|$（$f$ は正則関数）や、劣調和関数の減少列の極限も劣調和になり、ポテンシャル論が整う。このページでは連続な劣調和関数だけで足りるように議論を組んだ。
+
+**似た定理.** $n=1$ では、調和関数は 1 次関数で、劣調和関数は凸関数である（\ref{pde:prob-pr-convex-1d}）。劣平均値の性質 $u(x)\le\frac12(u(x-r)+u(x+r))$ は中点凸性にほかならない。
+
+**高い視点：たるんだ膜.** 調和関数が「張力だけで釣り合った膜」なら、劣調和関数は「下向きの力（重り）がかかって、たるんだ膜」である（$\Delta u\ge0$ は、下から引っ張る力の密度が非負という意味）。たるんだ膜は、同じ枠に張ったぴんと張った膜より必ず下にある。これが定義 1 の比較であり、ペロンの方法は「境界の枠より下にあるたるんだ膜の、いちばん上の包み」としてぴんと張った膜を取り出す。
+:::
+
+境界での上極限を使った最大値原理も用意しておく。ペロンの方法では、境界まで連続とは限らない関数を比べる必要があるからである。
+
+::: lemma 境界での上極限による最大値原理 {#pde:subharmonic-limsup-maximum keywords="maximum principle with boundary limsup: if w has the local sub-mean value property on a bounded open set and limsup of w at every boundary point is <= 0, then w <= 0" index="最大値原理（境界の上極限）|さいだいちげんりきょうかいのじょうきょくげん"}
+$\Omega$ を有界な開集合、$w\in C(\Omega)$ を局所的な劣平均値の性質をもつ関数とし、すべての $\eta\in\partial\Omega$ で $\limsup_{x\to\eta}w(x)\le0$ とする。このとき $\Omega$ の上で $w\le0$。
+:::
+
+::: proof
+$\Omega=\varnothing$ なら示すことはない。$\varepsilon>0$ を固定する。
+
+**Step 1（境界の近傍）.** 【主張：$\partial\Omega$ を含む開集合 $V$ で、$\Omega\cap V$ の上で $w<\varepsilon$ となるものがある】「$\Omega\cap B$ の上で $w<\varepsilon$」となる開球 $B$ 全体を考える。仮定から、各 $\eta\in\partial\Omega$ はこのような開球（中心 $\eta$）に含まれる。$\partial\Omega$ はコンパクトなので有限個で覆え、その和を $V$ とする。
+
+**Step 2（内部の最大）.** 【主張：$\Omega$ の上で $w<\varepsilon$】$K\defeq\Omega\setminus V=\overline{\Omega}\setminus V$ は有界閉集合でコンパクト。$w(x)\ge\varepsilon$ となる $x\in\Omega$ があると仮定すると $x\in K$ なので、$w$ は $K$ のある点 $x_{0}$ で最大値 $s\ge\varepsilon$ をとり、$\Omega\setminus K$ では $w<\varepsilon\le s$ なので $s=\sup_{\Omega}w$。$x_{0}$ を含む連結成分を $U$ とすると、\ref{pde:subharmonic-local-maximum.1} から $U$ の上で $w=s$。$p\in\partial U\subset\partial\Omega\subset V$ をとると、$V$ は $p$ の開近傍なので $U$ と交わり、そこで $w<\varepsilon\le s$ となって矛盾。
+
+$\varepsilon>0$ は任意なので $w\le0$。
+
+::: hypcheck
+- **有界性**：Step 1 で $\partial\Omega$ のコンパクト性に、Step 2 で $K$ のコンパクト性と $\partial U\ne\varnothing$ に使った。外すと偽（半空間で $w=x_{n}$）。
+- **境界の全部の点での上極限**：Step 1 で使った。1 点でも外すと偽になりうる：穴あき球 $B(0,1)\setminus\{0\}$ で $w=\Phi-\Psi(1)$ は調和で、$|x|=1$ では $0$ だが、$0$ での上極限は $+\infty$（次のページの穴あき球の例は、逆に上極限が有界なら 1 点を無視できることを使う）。
+- **公理**：選択公理は使わない（選ぶのは有限個の開球だけ）。
+:::
+:::
+
+::: corollary 比較原理（劣調和関数） {#pde:subharmonic-comparison keywords="comparison principle: subharmonic u, superharmonic v on a bounded open set with limsup (u - v) <= 0 at the boundary implies u <= v; maximum principle for subharmonic functions" index="比較原理（劣調和関数）|ひかくげんりれつちょうわかんすう"}
+$\Omega$ を有界な開集合とする。
+1. $u$ が $\Omega$ で劣調和、$v$ が $\Omega$ で優調和で、すべての $\eta\in\partial\Omega$ で $\limsup_{x\to\eta}(u(x)-v(x))\le0$ なら、$\Omega$ の上で $u\le v$。とくに $u,v\in C(\overline{\Omega})$ で $\partial\Omega$ の上で $u\le v$ ならよい。
+2. $\Omega\ne\varnothing$ で $u\in C(\overline{\Omega})$ が $\Omega$ で劣調和なら $\max_{\overline{\Omega}}u=\max_{\partial\Omega}u$。
+:::
+
+::: proof
+**1.** \ref{pde:subharmonic-equivalent.3} を $u$ と $-v$ に使って足すと、$\overline{B}(x,r)\subset\Omega$ で $u(x)-v(x)\le S_{r}(u-v)(x)$。よって $u-v$ は局所的な劣平均値の性質をもち、\ref{pde:subharmonic-limsup-maximum} から $u-v\le0$。後半は、$u-v$ が $\eta$ で連続なので上極限が $u(\eta)-v(\eta)\le0$ になるから。
+
+**2.** \ref{pde:subharmonic-equivalent.4} と \ref{pde:subharmonic-local-maximum.2} から。
+:::
+
+::: proposition 劣調和関数の演算と調和な持ち上げ {#pde:subharmonic-operations keywords="max of finitely many subharmonic functions is subharmonic; harmonic lifting: replacing u on a ball by the Poisson integral of its boundary values gives a larger subharmonic function harmonic in the ball" index="調和な持ち上げ|ちょうわなもちあげ, ポアソンの修正|ぽあそんのしゅうせい"}
+$u,u_{1},\dots,u_{k}$ を $\Omega$ で劣調和とする。
+1. $\max\{u_{1},\dots,u_{k}\}$、$u_{1}+u_{2}$、$cu$（$c\ge0$）は劣調和。
+2. $\overline{B}(a,r)\subset\Omega$ とし、$\Omega$ 上の関数 $u_{B}$ を、$B(a,r)$ では $P_{a,r}[u|_{\partial B(a,r)}]$、$\Omega\setminus B(a,r)$ では $u$ と定める（$u$ の球 $B(a,r)$ での**調和な持ち上げ**）。このとき $u_{B}\in C(\Omega)$ は劣調和で、$B(a,r)$ で調和、$\Omega$ の上で $u_{B}\ge u$。さらに $u\le\tilde u$ なら $u_{B}\le\tilde u_{B}$（$\tilde u$ も劣調和）。
+:::
+
+::: proof
+**1.** \ref{pde:subharmonic-equivalent.3} を使う。$\overline{B}(x,r)\subset\Omega$ なら、各 $i$ で $u_{i}(x)\le S_{r}u_{i}(x)\le S_{r}\max_{j}u_{j}(x)$（$S_{r}$ は単調）なので、$\max_{i}u_{i}(x)\le S_{r}\max_{j}u_{j}(x)$。和と正の定数倍は $S_{r}$ の線形性から。
+
+**2.** $B\defeq B(a,r)$ とする。連続性：\ref{pde:poisson-ball-dirichlet} から、$u_{B}$ の $\overline{B}$ への制限は連続（球面上で $u$ に一致する）。$\Omega\setminus B$ への制限は $u$ なので連続。$\overline{B}$ と $\Omega\setminus B$ は $\Omega$ の閉集合で $\Omega$ を覆い、共通部分 $\partial B$ の上で値が一致するので、$u_{B}$ は $\Omega$ で連続（\ref{top:pasting-lemma}）。$u_{B}\ge u$：$B$ の上では \ref{pde:subharmonic-equivalent.2}、外では等号。劣調和性：局所的な劣平均値の性質（\ref{pde:subharmonic-equivalent.4}）を確かめる。$x\in B$ では $u_{B}$ は $x$ の近傍で調和なので、小さい $s$ で $u_{B}(x)=S_{s}u_{B}(x)$。$x\in\Omega\setminus B$ では、$\overline{B}(x,s)\subset\Omega$ なら $u_{B}(x)=u(x)\le S_{s}u(x)\le S_{s}u_{B}(x)$（$u\le u_{B}$）。最後の主張は、球面上で $u\le\tilde u$ とポアソン積分の単調性から $B$ の上で $u_{B}\le\tilde u_{B}$、外では $u\le\tilde u$ そのもの。
+:::
+
+::: example
+**劣調和関数の族の上限は連続とは限らない.** $n=2$、$\Omega=B(0,1)$ とし、$k\ge1$ について
+$$
+u_{k}(x)\defeq\max\Bigl\{\frac1k\log|x|,\,-1\Bigr\}\quad(x\ne0),\qquad u_{k}(0)\defeq-1
+$$
+とおく。$|x|<e^{-k}$ では $\frac1k\log|x|<-1$ なので $u_{k}=-1$ で、$u_{k}$ は $\Omega$ で連続。$0$ の近くでは定数、$x\ne0$ の近くでは二つの調和関数の最大なので、\ref{pde:subharmonic-operations.1} と劣調和性の局所性（\ref{pde:subharmonic-equivalent.4}）から $u_{k}$ は劣調和。$0<|x|<1$ では $\log|x|<0$ なので $\frac1k\log|x|$ は $k$ について増加して $0$ に近づき、$\sup_{k}u_{k}(x)=0$。一方 $\sup_{k}u_{k}(0)=-1$。上限は原点で不連続である。調和関数の増加列では、\ref{pde:harnack-principle} からこのようなことは起こらない。ペロンの方法では、上限をとる族が持ち上げと最大について閉じていることを使って、上限が調和であることを示す。
+:::
+
+## ペロンの方法 {#pde:sec-pr-perron}
+
+::: definition ペロン族とペロン関数 {#pde:perron-family keywords="Perron family of subfunctions: continuous subharmonic v with limsup v <= g at every boundary point; Perron function u_g = sup of the family" index="ペロン族|ぺろんぞく, ペロン関数|ぺろんかんすう, ペロン解|ぺろんかい, 下関数|かかんすう"}
+$\Omega$ を空でない有界な開集合、$g\colon\partial\Omega\to\mathbb{R}$ を有界な関数とする。
+$$
+\mathcal{S}_{g}\defeq\Bigl\{v\in C(\Omega):v\text{ は }\Omega\text{ で劣調和で、すべての }\eta\in\partial\Omega\text{ で }\limsup_{x\to\eta}v(x)\le g(\eta)\Bigr\}
+$$
+を $g$ の**ペロン族**、その元を**下関数**といい、$u_{g}(x)\defeq\sup\{v(x):v\in\mathcal{S}_{g}\}$（$x\in\Omega$）を $g$ の**ペロン関数**（ペロン解）という。
+:::
+
+::: intuition
+境界で $g$ を超えない「たるんだ膜」を全部集めて、各点でいちばん高いものをとる。それがペロン関数である。
+:::
+
+::: lemma ペロン族の性質 {#pde:perron-family-properties keywords="basic properties of the Perron family: constants, upper bound sup g, closed under max and harmonic lifting; the Perron function coincides with the classical solution when it exists" index="ペロン族の性質|ぺろんぞくのせいしつ"}
+$\Omega$, $g$ を \ref{pde:perron-family} のとおりとし、$m\defeq\inf_{\partial\Omega}g$, $M\defeq\sup_{\partial\Omega}g$ とおく。
+1. 定数 $m$ は $\mathcal{S}_{g}$ に入り、$v\in\mathcal{S}_{g}$ は $\Omega$ の上で $v\le M$。とくに $m\le u_{g}\le M$。
+2. $v_{1},v_{2}\in\mathcal{S}_{g}$ なら $\max\{v_{1},v_{2}\}\in\mathcal{S}_{g}$。
+3. $v\in\mathcal{S}_{g}$, $\overline{B}(a,r)\subset\Omega$ なら、持ち上げ $v_{B}$（\ref{pde:subharmonic-operations.2}）は $\mathcal{S}_{g}$ に入る。
+4. $h\in C(\overline{\Omega})$ が $\Omega$ で調和で $\partial\Omega$ の上で $h=g$ なら、$\Omega$ の上で $u_{g}=h$。
+:::
+
+::: proof
+**1.** 定数は調和なので劣調和で、上極限は $m\le g(\eta)$。$v\in\mathcal{S}_{g}$ について $v-M$ は劣調和で、上極限は $g(\eta)-M\le0$ 以下なので、\ref{pde:subharmonic-limsup-maximum} から $v\le M$。
+
+**2.** \ref{pde:subharmonic-operations.1} と、$\limsup\max\{v_{1},v_{2}\}=\max\{\limsup v_{1},\limsup v_{2}\}$ から。
+
+**3.** \ref{pde:subharmonic-operations.2} から $v_{B}$ は連続で劣調和。$\overline{B}(a,r)$ はコンパクトで $\partial\Omega$ と交わらないので、$\delta\defeq\operatorname{dist}(\overline{B}(a,r),\partial\Omega)>0$ で、各 $\eta\in\partial\Omega$ の近く（$B(\eta,\delta)\cap\Omega$）では $v_{B}=v$。よって上極限は変わらない。
+
+**4.** $h$ は調和なので劣調和で、$\eta$ での上極限は $h(\eta)=g(\eta)$。よって $h\in\mathcal{S}_{g}$ で $u_{g}\ge h$。逆に $v\in\mathcal{S}_{g}$ なら、$h$ は優調和で、$\limsup_{x\to\eta}(v(x)-h(x))=\limsup_{x\to\eta}v(x)-h(\eta)\le0$（$h$ は $\eta$ で連続）なので、\ref{pde:subharmonic-comparison.1} から $v\le h$。よって $u_{g}\le h$。
+:::
+
+ペロンの方法の中心は、$u_{g}$ が領域の形によらずに調和になることである。
+
+::: theorem ペロン関数は調和 {#pde:perron-harmonic keywords="Perron's theorem: for a bounded open set and bounded boundary data g, the Perron function u_g is harmonic; proof by harmonic lifting on balls and the Harnack principle" index="ペロンの方法|ぺろんのほうほう, ペロンの定理|ぺろんのていり"}
+$\Omega$ を空でない有界な開集合、$g\colon\partial\Omega\to\mathbb{R}$ を有界な関数とする。ペロン関数 $u\defeq u_{g}$ は $\Omega$ で調和である。
+:::
+
+::: intuition
+境界で $g$ を超えない劣調和関数をすべて集めて上限をとると、その上限は、境界の形がどんなにひどくても、領域の中では調和関数になっている。
+:::
+
+::: proof
+調和性は局所的な性質なので、$\overline{B}(a,r)\subset\Omega$ を固定し、$B\defeq B(a,r)$ の上で $u$ が調和であることを示す。$m,M$ は \ref{pde:perron-family-properties} のとおり。
+
+**Step 1（1 点で上限に近づく増加列）.** 【主張：$y\in B$ を固定すると、$\mathcal{S}_{g}$ の元の列 $W_{1}\le W_{2}\le\cdots$ で、各 $W_{k}$ が $B$ で調和、$W_{k}(y)\to u(y)$ となるものがある】$u(y)$ は上限なので、各 $k$ について $v_{k}(y)>u(y)-\frac1k$ となる $v_{k}\in\mathcal{S}_{g}$ がある。**可算選択公理**でこのような列 $(v_{k})$ を一つ選ぶ。$w_{k}\defeq\max\{m,v_{1},\dots,v_{k}\}$ は \ref{pde:perron-family-properties.1}・\ref{pde:perron-family-properties.2} から $\mathcal{S}_{g}$ に入り、$k$ について増加し、$v_{k}(y)\le w_{k}(y)\le u(y)$。$W_{k}\defeq(w_{k})_{B}$（$B$ での持ち上げ）とおくと、\ref{pde:perron-family-properties.3} から $W_{k}\in\mathcal{S}_{g}$、\ref{pde:subharmonic-operations.2} から $W_{k}$ は $B$ で調和、$W_{k}\le W_{k+1}$、$W_{k}\ge w_{k}$。よって $u(y)-\frac1k<w_{k}(y)\le W_{k}(y)\le u(y)$。
+
+**Step 2.** 【主張：$W_{k}$ は $B$ のある調和関数 $W$ に広義一様収束し、$B$ の上で $W\le u$、$W(y)=u(y)$】$B$ は連結な開集合で、$W_{k}|_{B}$ は調和関数の増加列。\ref{pde:perron-family-properties.1} から $W_{k}\le M$ なので、\ref{pde:harnack-principle.1} の発散は起こらず、\ref{pde:harnack-principle.2} から調和関数 $W$ に広義一様収束する。$W_{k}\in\mathcal{S}_{g}$ から $W_{k}\le u$、極限をとって $W\le u$。Step 1 から $W(y)=\lim W_{k}(y)=u(y)$。
+
+**Step 3（別の点も同じ極限）.** 【主張：$z\in B$ なら $W(z)=u(z)$】Step 1 と同じく、$v'_{k}(z)>u(z)-\frac1k$ となる列 $v'_{k}\in\mathcal{S}_{g}$ を選び、$w'_{k}\defeq\max\{w_{k},v'_{1},\dots,v'_{k}\}\in\mathcal{S}_{g}$、$W'_{k}\defeq(w'_{k})_{B}$ とおく。$w'_{k}$ は増加し $w'_{k}\ge w_{k}$ なので、\ref{pde:subharmonic-operations.2} から $W'_{k}$ は増加し $W'_{k}\ge W_{k}$。Step 2 と同じく $W'_{k}$ は $B$ の調和関数 $W'$ に収束し、$W\le W'\le u$、$W'(z)=u(z)$。とくに $u(y)=W(y)\le W'(y)\le u(y)$ なので $W'(y)=W(y)$。$W-W'$ は $B$ で調和で $\le0$、$y$ で値 $0=\sup_{B}(W-W')$ をとるので、\ref{pde:strong-maximum-principle} から $B$ の上で $W=W'$。よって $W(z)=W'(z)=u(z)$。
+
+Step 3 から $B$ の上で $u=W$ は調和である。$\overline{B}(a,r)\subset\Omega$ は任意なので、$u$ は $\Omega$ で調和。
+
+::: hypcheck
+- **$\Omega$ の有界性**：\ref{pde:perron-family-properties.1} の上界 $u\le M$（\ref{pde:subharmonic-limsup-maximum}）を通して、Step 2 でハルナックの原理の発散の場合を除くのに使った。
+- **$g$ の有界性**：同じく Step 2 の上界 $M$ と、族が空でないこと（定数 $m$）に使った。**$g$ の連続性はまったく使っていない**。境界値に連続につながるかどうかは、次の節の障壁の問題である。
+- **ポアソン積分（球のディリクレ問題）**：Step 1・3 の持ち上げで使った。持ち上げの単調性（$K_{r}>0$）が、列を増加列に保つ。
+- **ハルナックの原理**：Step 2 で、増加列の極限が（有界なら）調和であることに使った。劣調和関数の列ではこれは偽である（前の節の例）。持ち上げで調和関数の列に置き換えることが証明の要である。
+- **強最大値原理**：Step 3 で、二つの極限が 1 点で一致すれば一致することに使った。
+- **公理**：Step 1・3 で列 $(v_{k})$, $(v'_{k})$ を選ぶのに可算選択公理を使った。
+:::
+:::
+
+::: supplement
+**前提を変えると.** この定理は、$\Omega$ の境界の形を何も仮定していない。穴あき球やルベーグの棘（次のページ）のような領域でも $u_{g}$ は調和である。うまくいかないのは境界での振る舞いだけである。逆に、領域が非有界なら、$g$ が有界でも $\mathcal{S}_{g}$ の元が上に有界とは限らず（半空間の $x_{n}$）、族の条件に無限遠での増大の制限を加える必要がある。
+
+**似た定理.** ペロン族の上限が調和であることは、上に有界な調和関数の有向族（任意の二つより大きい元を含む族）の上限が調和であるという事実（\see{pde:harnack-principle} の補足）の姿をしている。ここでは可算選択公理で列を取り出して、列の版だけで済ませた。リーマン面の一意化定理の証明でも、同じペロンの方法で調和関数（グリーン関数）を作る。
+
+**高い視点：下からの最良近似.** ペロン関数は「境界条件を破らない劣解の中で最大のもの」で、一種の障害物問題・最適化問題の解である。劣解の集合が最大と持ち上げで閉じていることが、上限そのものが解になる理由である。粘性解の存在証明（ペロンの方法の非線形版）も同じ骨組みで、比較原理と「劣解の上限が解」という二つの柱で立っている。比喩で言えば、たくさんの人が、決められた天井（境界値）にぶつからないように風船を下から押し上げ、全員が押し上げ終わったときの最も高い位置をなぞった面が、ぴんと張った膜（調和関数）になる。
+:::
+
+## 障壁と正則な境界点 {#pde:sec-pr-barrier}
+
+ペロン関数が境界で $g$ に近づくかどうかは、境界の点ごとの問題である。それを判定する道具が障壁である。
+
+::: definition 障壁と正則な境界点 {#pde:barrier keywords="barrier at a boundary point: positive continuous superharmonic function tending to 0 at the point and bounded away from 0 away from it; regular boundary point" index="障壁|しょうへき, バリア|ばりあ, 正則な境界点|せいそくなきょうかいてん, 正則点（ディリクレ問題）|せいそくてんでぃりくれもんだい"}
+$\Omega$ を有界な開集合、$\xi\in\partial\Omega$ とする。$w\in C(\Omega)$ が $\xi$ での**障壁**（バリア）であるとは、次をみたすことをいう。
+1. $w$ は $\Omega$ で優調和で、$\Omega$ の上で $w>0$。
+2. $x\to\xi$（$x\in\Omega$）のとき $w(x)\to0$。
+3. すべての $\delta>0$ について $\inf\{w(x):x\in\Omega,\ |x-\xi|\ge\delta\}>0$（集合が空なら $+\infty$ とみる）。
+
+$\xi$ に障壁があるとき、$\xi$ は（ディリクレ問題について）**正則**であるという。
+:::
+
+::: intuition
+障壁は、問題の境界点でだけ 0 になり、そこから離れると一様に正の値をもつ「優調和なくぼみ」である。境界の点に障壁があれば、そこでは境界値がしっかり伝わる。
+:::
+
+::: example
+$w\in C(\overline{\Omega})$ が $\Omega$ で優調和、$w(\xi)=0$、$\overline{\Omega}\setminus\{\xi\}$ の上で $w>0$ なら、$w|_{\Omega}$ は障壁である：2 は連続性から、3 は、$\overline{\Omega}\setminus B(\xi,\delta)$ がコンパクトで、その上の正の連続関数 $w$ の最小値が正であることから。多くの本はこの形の障壁を使う。
+:::
+
+::: theorem 障壁と境界での連続性 {#pde:barrier-regular keywords="a boundary point is regular (has a barrier) iff the Perron function u_g tends to g(xi) at xi for every continuous boundary function g" index="正則な境界点の特徴づけ|せいそくなきょうかいてんのとくちょうづけ, 障壁の判定法|しょうへきのはんていほう"}
+$\Omega$ を空でない有界な開集合、$\xi\in\partial\Omega$ とする。次は同値である。
+1. $\xi$ に障壁がある。
+2. すべての $g\in C(\partial\Omega)$ について $\displaystyle\lim_{x\to\xi,\ x\in\Omega}u_{g}(x)=g(\xi)$。
+:::
+
+::: intuition
+境界の点に障壁があることと、どんな連続な境界値を与えても、ペロン関数がその点で境界値に連続につながることは同じである。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2：準備）.** 【主張：$\varepsilon>0$ について、定数 $k\ge0$ があって、$\Omega$ 上の $U\defeq g(\xi)+\varepsilon+kw$ と $L\defeq g(\xi)-\varepsilon-kw$ が、すべての $\eta\in\partial\Omega$ で $\liminf_{x\to\eta}U(x)\ge g(\eta)$, $\limsup_{x\to\eta}L(x)\le g(\eta)$ をみたす】$w$ を障壁、$G\defeq\max_{\partial\Omega}|g|$（$\partial\Omega$ はコンパクト）とする。$g$ の $\xi$ での連続性から、$\delta>0$ を「$\eta\in\partial\Omega$, $|\eta-\xi|<\delta$ なら $|g(\eta)-g(\xi)|<\varepsilon$」ととる。\ref{pde:barrier.3} の $\mu\defeq\inf\{w(x):|x-\xi|\ge\delta/2\}>0$ について $k\defeq2G/\mu$（$\mu=+\infty$ なら $k=0$）。$|\eta-\xi|<\delta$ なら $w>0$ から $U\ge g(\xi)+\varepsilon>g(\eta)$, $L\le g(\xi)-\varepsilon<g(\eta)$。$|\eta-\xi|\ge\delta$ なら、$|x-\eta|<\delta/2$ の $x\in\Omega$ は $|x-\xi|>\delta/2$ をみたすので $kw(x)\ge2G$、よってそこで $U\ge-G+\varepsilon+2G>g(\eta)$, $L\le G-\varepsilon-2G<g(\eta)$。
+
+**Step 2（1 ⇒ 2：上下からはさむ）.** 【主張：$\Omega$ の上で $L\le u_{g}\le U$】$L$ は $\Omega$ で連続な劣調和関数（$-w$ が劣調和、\ref{pde:subharmonic-operations.1}）で、Step 1 から $L\in\mathcal{S}_{g}$、よって $L\le u_{g}$。$v\in\mathcal{S}_{g}$ なら $U$ は優調和で、$\limsup_{x\to\eta}(v-U)\le\limsup v-\liminf U\le g(\eta)-g(\eta)=0$ なので、\ref{pde:subharmonic-comparison.1} から $v\le U$。上限をとって $u_{g}\le U$。
+
+Step 2 から $|u_{g}(x)-g(\xi)|\le\varepsilon+kw(x)$ で、\ref{pde:barrier.2} から $\limsup_{x\to\xi}|u_{g}(x)-g(\xi)|\le\varepsilon$。$\varepsilon$ は任意なので 2 が成り立つ。
+
+**Step 3（2 ⇒ 1）.** 【主張：$g(\eta)\defeq|\eta-\xi|$ のペロン関数 $w\defeq u_{g}$ は $\xi$ での障壁】$D\defeq\operatorname{diam}\overline{\Omega}>0$ とし、$0<\delta$ について $v_{\delta}(x)\defeq\frac1D\bigl(|x-\xi|^{2}-\frac{\delta^{2}}{4}\bigr)$ を考える。$v_{\delta}$ は $C^{2}$ で $\Delta v_{\delta}=2n/D>0$ なので劣調和（\ref{pde:subharmonic-equivalent} の後の例 2）で、$\overline{\Omega}$ で連続。$\eta\in\partial\Omega$ について、$|\eta-\xi|\le\delta/2$ なら $v_{\delta}(\eta)\le0\le g(\eta)$、そうでなければ $v_{\delta}(\eta)\le\frac1D|\eta-\xi|^{2}\le|\eta-\xi|=g(\eta)$。よって $v_{\delta}\in\mathcal{S}_{g}$ で $w\ge v_{\delta}$。$|x-\xi|\ge\delta$ なら $w(x)\ge v_{\delta}(x)\ge\frac{3\delta^{2}}{4D}>0$ なので \ref{pde:barrier.3} が成り立ち、各 $x\in\Omega$ は $|x-\xi|>0$ なので $w>0$。$w$ は \ref{pde:perron-harmonic} から調和、とくに優調和。仮定 2 から $w(x)\to g(\xi)=0$。
+
+::: hypcheck
+- **障壁の条件 3**：Step 1 で、$\xi$ から離れた所で $kw$ が $2G$ を超えることに使った。条件 2 は最後の極限に使った。
+- **$g$ の連続性**：Step 1 で $\xi$ での連続性を、$G<\infty$ に $\partial\Omega$ 上の有界性を使った。連続性を外すと 2 は一般に偽（$g$ が $\xi$ で跳ぶとき）。
+- **ペロン族を「境界での上極限」で定義したこと**：Step 2 で、境界まで連続とは限らない $L$ を下関数として使えた。族を $C(\overline{\Omega})$ に限る流儀では、障壁にも $C(\overline{\Omega})$ を要求する（例の形）。
+- **ペロン関数の調和性**：Step 3 で、$u_{g}$ 自身を障壁にするのに使った（可算選択公理はそこから入る。1 ⇒ 2 は選択公理を使わない）。
+- **領域の有界性**：Step 3 の $D<\infty$ と、比較原理に使った。
+:::
+:::
+
+::: corollary ディリクレ問題の可解性と正則性 {#pde:perron-dirichlet-solvable keywords="the Dirichlet problem on a bounded open set is solvable for every continuous boundary function iff every boundary point is regular; the solution is the Perron function" index="ディリクレ問題の可解性|でぃりくれもんだいのかかいせい"}
+$\Omega$ を空でない有界な開集合とする。次は同値である。
+1. すべての $g\in C(\partial\Omega)$ について、$\Omega$ で調和で $\overline{\Omega}$ で連続、$\partial\Omega$ で $u=g$ となる $u$（ディリクレ問題の古典解）が存在する。
+2. $\partial\Omega$ のすべての点が正則である。
+
+このとき解はただ一つで、$\Omega$ の上でペロン関数 $u_{g}$ に一致する。
+:::
+
+::: proof
+**1 ⇒ 2.** $g\in C(\partial\Omega)$ の解を $h$ とすると、\ref{pde:perron-family-properties.4} から $u_{g}=h$ で、$h$ の連続性から各 $\xi\in\partial\Omega$ で $u_{g}(x)\to g(\xi)$。$g$ は任意なので、\ref{pde:barrier-regular} から $\xi$ は正則。
+
+**2 ⇒ 1.** $u$ を $\Omega$ では $u_{g}$、$\partial\Omega$ では $g$ と定める。\ref{pde:perron-harmonic} から $u$ は $\Omega$ で調和。$\xi\in\partial\Omega$ に $\overline{\Omega}$ の点列 $x_{k}$ が近づくとき、$x_{k}\in\Omega$ の項では \ref{pde:barrier-regular} から、$x_{k}\in\partial\Omega$ の項では $g$ の連続性から、$u(x_{k})\to g(\xi)$。よって $u\in C(\overline{\Omega})$。一意性は \ref{pde:dirichlet-uniqueness.1}。
+:::
+
+障壁は $\xi$ の近くだけで作れば十分である。
+
+::: lemma 局所的な障壁 {#pde:barrier-local keywords="a local barrier at a boundary point can be extended to a global barrier by taking min with a constant" index="局所障壁|きょくしょしょうへき"}
+$\Omega$ を有界な開集合、$\xi\in\partial\Omega$、$\rho>0$ とし、$\Omega_{\rho}\defeq\Omega\cap B(\xi,\rho)$ の上の関数 $w\in C(\Omega_{\rho})$ が次をみたすとする：$\Omega_{\rho}$ で優調和かつ $w>0$、$x\to\xi$ で $w(x)\to0$、$0<\delta<\rho$ について $\inf\{w(x):x\in\Omega_{\rho},\ |x-\xi|\ge\delta\}>0$。このとき $\xi$ は正則である。
+:::
+
+::: proof
+$m\defeq\min\{1,\inf\{w(x):x\in\Omega,\ \rho/2\le|x-\xi|<\rho\}\}>0$（空なら $m=1$）とし、$x\in\Omega$ について $W(x)\defeq\min\{m,w(x)\}$（$|x-\xi|<\rho$）、$W(x)\defeq m$（$|x-\xi|\ge\rho$）とおく。$\rho/2\le|x-\xi|<\rho$ では $w\ge m$ なので、$W$ は開集合 $\Omega\setminus\overline{B}(\xi,\rho/2)$ の上で定数 $m$、開集合 $\Omega_{\rho}$ の上で $\min\{m,w\}$ である。二つの開集合は $\Omega$ を覆うので、$W$ は連続。優調和性は局所的な性質（\ref{pde:subharmonic-equivalent.4} を $-W$ に使う）なので、各開集合の上で確かめればよい。定数は優調和。$\Omega_{\rho}$ の上では、$x$ と小さい $s$ について、$\min\{m,w\}\le w$ と $\le m$ から $S_{s}\min\{m,w\}(x)\le\min\{S_{s}w(x),m\}\le\min\{w(x),m\}$（$w$ は優調和なので \ref{pde:subharmonic-equivalent.3} から $S_{s}w(x)\le w(x)$）。$W>0$、$W\le w$ から $W(x)\to0$（$x\to\xi$）。$\delta>0$ について、$|x-\xi|\ge\delta$ の点では $W\ge\min\{m,\inf_{\delta\le|x-\xi|<\rho}w\}>0$（$\delta\ge\rho$ なら $W=m$）。よって $W$ は障壁。
+:::
+
+::: proposition 外部球条件と障壁 {#pde:barrier-exterior-sphere keywords="exterior sphere condition: if there is an open ball disjoint from Omega whose boundary contains xi, then w(x) = Psi(R) - Psi(|x - y|) gives a barrier at xi" index="外部球条件|がいぶきゅうじょうけん"}
+$\Omega$ を有界な開集合、$\xi\in\partial\Omega$ とし、$\Omega$ と交わらない開球 $B(y_{0},R_{0})$ で $|\xi-y_{0}|=R_{0}$ となるものがある（**外部球条件**）とする。$y\defeq\frac12(y_{0}+\xi)$, $R\defeq R_{0}/2$ とおくと、
+$$
+w(x)\defeq\Psi(R)-\Psi(|x-y|)
+$$
+は $\overline{\Omega}$ で連続、$\Omega$ で調和、$w(\xi)=0$、$\overline{\Omega}\setminus\{\xi\}$ の上で $w>0$ である。とくに $\xi$ は正則である。
+:::
+
+::: proof
+**Step 1（小さい球は 1 点で接する）.** 【主張：$\overline{B}(y,R)\cap\overline{\Omega}=\{\xi\}$】$|\xi-y|=\frac12|\xi-y_{0}|=R$ なので $\xi\in\overline{B}(y,R)$。$x\in\overline{B}(y,R)$, $x\ne\xi$ なら $|x-y_{0}|\le|x-y|+|y-y_{0}|\le R+R=R_{0}$ で、等号は $x-y$ と $y-y_{0}$ が同じ向きで $|x-y|=R$ のとき、つまり $x=y+R\frac{y-y_{0}}{|y-y_{0}|}=\xi$ のときだけなので、$x\in B(y_{0},R_{0})$。$B(y_{0},R_{0})$ は $\Omega$ と交わらない開集合なので $\overline{\Omega}$ とも交わらない。
+
+**Step 2（障壁の性質）.** 【主張：$w$ は主張の性質をもつ】Step 1 から $y\notin\overline{\Omega}$ で、$\Phi(\cdot-y)$ は $\mathbb{R}^{n}\setminus\{y\}$ で $C^{\infty}$ 級かつ調和（\ref{pde:gf-fundamental-properties.1}）なので、$w$ は $\overline{\Omega}$ で連続、$\Omega$ で調和。$w(\xi)=\Psi(R)-\Psi(R)=0$。$x\in\overline{\Omega}\setminus\{\xi\}$ なら Step 1 から $|x-y|>R$ で、$\Psi$ は狭義減少なので $w(x)>0$。最後の主張は \ref{pde:barrier} の後の例から。
+:::
+
+::: corollary C² 境界をもつ領域のディリクレ問題 {#pde:perron-c2-boundary keywords="bounded open sets with C^2 boundary satisfy the exterior sphere condition at every boundary point, hence the Dirichlet problem is solvable for every continuous boundary function" index="C2 境界のディリクレ問題|しーつーきょうかいのでぃりくれもんだい"}
+$\Omega$ を有界な開集合で、境界が **$C^{2}$ 級**（\ref{fa:c1-boundary.2} で $\gamma_{i}$ を $C^{2}$ 級としたもの）であるとする。このとき $\partial\Omega$ の各点で外部球条件が成り立ち、すべての $g\in C(\partial\Omega)$ についてディリクレ問題は古典解をただ一つもつ。
+:::
+
+::: proof
+$\xi\in\partial\Omega\cap U_{i}$ とし、$A\defeq A_{i}$, $\gamma\defeq\gamma_{i}$, $W\defeq W_{i}$ とする。$A$ は直交変換なので球を同じ半径の球に写し、$z\defeq Ax$ の座標で考えてよい。$A(\Omega\cap U_{i})=\{z_{n}>\gamma(z')\}\cap AU_{i}$ なので、境界の点 $\zeta\defeq A\xi$ は $\zeta=(\zeta',\gamma(\zeta'))$, $\zeta'\in W$ の形である。
+
+**Step 1（定数の準備）.** 【主張：$r>0$ と $K\ge0$ を、$B(\zeta,r)\subset AU_{i}$、$\{|z'-\zeta'|\le r\}\subset W$、$|z'-\zeta'|\le r$ で $\|D^{2}\gamma(z')\|\le K$（作用素ノルム）となるようにとれる】$AU_{i}$ と $W$ は開集合で、$D^{2}\gamma$ はコンパクトな閉球の上で連続なので有界。
+
+**Step 2（下に接する球）.** 【主張：$p\defeq\nabla\gamma(\zeta')$, $s\defeq\sqrt{1+|p|^{2}}$, $\nu\defeq(p,-1)/s$, $R\defeq\min\{r/3,s/K\}$（$K=0$ なら $R=r/3$）とすると、$B(\zeta+R\nu,R)\cap A\Omega=\varnothing$】$z\in B(\zeta+R\nu,R)$ とし $h\defeq z-\zeta$ とおく。$|h-R\nu|<R$ は $|h|^{2}<2Rh\cdot\nu=\frac{2R}{s}(p\cdot h'-h_{n})$ と同値なので、
+$$
+h_{n}<p\cdot h'-\frac{s}{2R}|h|^{2}\le p\cdot h'-\frac{K}{2}|h'|^{2}.
+$$
+$|h|<2R<r$ なので $z\in AU_{i}$, $|h'|<r$ で、\ref{calc:multivariable-taylor.1}（$k=1$）から $\gamma(z')=\gamma(\zeta')+p\cdot h'+\frac12h'^{\top}D^{2}\gamma(\zeta'+\theta h')h'\ge\gamma(\zeta')+p\cdot h'-\frac K2|h'|^{2}$。よって $z_{n}=\gamma(\zeta')+h_{n}<\gamma(z')$ で、$z\notin A(\Omega\cap U_{i})$、$z\in AU_{i}$ なので $z\notin A\Omega$。
+
+$|\zeta-(\zeta+R\nu)|=R$ なので、$A^{-1}B(\zeta+R\nu,R)=B(A^{-1}(\zeta+R\nu),R)$ が $\xi$ での外部球を与える。\ref{pde:barrier-exterior-sphere} から $\partial\Omega$ の各点は正則で、\ref{pde:perron-dirichlet-solvable} から主張が従う。
+
+::: hypcheck
+- **境界の $C^{2}$ 性**：Step 1 で $D^{2}\gamma$ の有界性に、Step 2 のテイラー展開に使った。外部球の半径 $R\le s/K$ は境界の曲率の逆数程度である。
+- **$C^{1}$ 境界では**：外部球条件は一般に成り立たない（$n=2$ で $\gamma(t)=-|t|^{3/2}$ の上側の領域 $\{z_{2}>-|z_{1}|^{3/2}\}$ は、原点で外部球をもたない：原点で接する下側の球は $z_{2}\approx-z_{1}^{2}/(2R)$ のように振る舞い、$-|z_{1}|^{3/2}$ より上にはみ出す）。ただし $C^{1}$ 境界では外部錐条件が成り立ち、ディリクレ問題はやはり解ける（次のページ。\see{pde:prob-pr-c1-cone}）。
+- **公理**：選択公理は、ペロン関数の調和性（\ref{pde:perron-harmonic}）を通して可算選択公理を使う。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 古典的手法では、**解の存在が境界の幾何で決まる**。境界値 $g$ をどれほど滑らかにしても、境界に正則でない点があれば、それだけでディリクレ問題が解けない $g$ がある（\ref{pde:barrier-regular} の 2 ⇒ 1 の対偶）。逆に、すべての境界点が正則なら、連続なだけの $g$ でも解ける。境界値の滑らかさではなく、境界の形が可解性を決めるのである。これは、関数解析的手法と対照的である：$H^{1}$ の弱解は、どんな有界な開集合でも（境界の正則性をまったく仮定せずに）存在する（\see{fa:weak-dirichlet-existence}。$g$ が $\mathbb{R}^{n}$ の $C^{2}$ 関数 $G$ の制限なら、$-\Delta w=\Delta G$, $w\in H_{0}^{1}(\Omega)$ の弱解 $w$ をとって $u\defeq G+w$ とする）。その代わり、弱解が境界値を「$u-G\in H_{0}^{1}$」という弱い意味でしかとらず、各点で連続につながるかどうかは、やはり境界点の正則性の問題に戻ってくる。
+
+**似た定理.** $n=2$ の単連結領域では、リーマンの写像定理で円板に写せば、複素解析の円板のディリクレ問題（\ref{cx:dirichlet-disk}）に帰着できる。ただし境界まで連続に延びる写像が要るので、境界がジョルダン曲線であるといった仮定（カラテオドリの定理）が必要になり、ここでの障壁の議論の方が一般的である。
+
+**高い視点：酔歩は境界に吸い込まれるか.** ポアソン積分がブラウン運動の出口の分布だったように（\ref{pde:poisson-ball-dirichlet} の補足）、一般の領域のディリクレ問題の解も「$x$ から出発したブラウン運動が初めて境界に当たった点での $g$ の値の期待値」である。境界の点 $\xi$ が正則とは、$\xi$ の近くから出発した粒子が、ほぼ確実にすぐ $\xi$ の近くで境界に当たることである。外部球があれば、$\xi$ の近くの粒子は球に吸い込まれるようにすぐ境界にぶつかる。比喩で言えば、障壁は「$\xi$ の近くに落ちた水は、遠くへ流れずに $\xi$ の近くの排水口に吸い込まれる」ことを保証する地形のくぼみである。
+:::
+
+外部錐条件・凸領域での可解性と、解けない例は次のページ（\see{pde:page-perron-irregular}）で扱う。
+
+## 問題 {#pde:sec-pr-problems}
+
+::: problem {#pde:prob-pr-convex-1d}
+$n=1$ とし、開区間 $I$ の上の連続関数 $u$ について、\ref{pde:subharmonic} の定義をそのまま適用する（球は区間 $[a-r,a+r]$、調和関数は 1 次関数）。$u$ が劣調和であることと、$u$ が凸関数であることが同値であることを示せ。
+:::
+
+::: solution
+$n=1$ では $\Delta h=h''=0$ の解は 1 次関数 $h(x)=\alpha x+\beta$ で、閉区間 $[a-r,a+r]$ で連続かつ $(a-r,a+r)$ で 1 次関数なら、両端の値で決まる線分そのものである。
+
+**劣調和 ⇒ 凸.** $p<q$ を $I$ の点とし、$h$ を $(p,u(p))$ と $(q,u(q))$ を結ぶ 1 次関数とする。$a\defeq\frac{p+q}{2}$, $r\defeq\frac{q-p}{2}$ とすると、両端で $u=h$ なので、定義から $(p,q)$ の上で $u\le h$。これは $u(tp+(1-t)q)\le tu(p)+(1-t)u(q)$（$0\le t\le1$）にほかならず、$u$ は凸。
+
+**凸 ⇒ 劣調和.** $[a-r,a+r]\subset I$、$h$ を 1 次関数で両端で $u\le h$ とする。区間の点 $x=t(a-r)+(1-t)(a+r)$ について、凸性と $h$ の 1 次性から $u(x)\le tu(a-r)+(1-t)u(a+r)\le th(a-r)+(1-t)h(a+r)=h(x)$。
+
+（劣平均値の性質 $u(x)\le\frac12(u(x-r)+u(x+r))$ は中点凸性で、連続関数では凸性と同値である。$n=1$ では $S^{0}=\{\pm1\}$ の数え上げ測度で $n\omega_{1}=2$ なので、$S_{r}u(x)$ はちょうどこの平均である。）
+:::
+
+::: problem {#pde:prob-pr-perron-monotone}
+$\Omega$ を空でない有界な開集合、$g_{1},g_{2}\colon\partial\Omega\to\mathbb{R}$ を有界な関数、$c\in\mathbb{R}$ とする。
+1. $g_{1}\le g_{2}$ なら $u_{g_{1}}\le u_{g_{2}}$。
+2. $u_{g_{1}+c}=u_{g_{1}}+c$。
+3. $\sup_{\Omega}|u_{g_{1}}-u_{g_{2}}|\le\sup_{\partial\Omega}|g_{1}-g_{2}|$。
+:::
+
+::: solution
+**1.** $\mathcal{S}_{g_{1}}\subset\mathcal{S}_{g_{2}}$（上極限が $g_{1}(\eta)\le g_{2}(\eta)$ 以下）なので、上限も大小が保たれる。
+
+**2.** $v\mapsto v+c$ は $\mathcal{S}_{g_{1}}$ から $\mathcal{S}_{g_{1}+c}$ への全単射（定数を足しても劣調和で、上極限は $c$ だけずれる。逆は $-c$ を足す）。上限をとる。
+
+**3.** $\delta\defeq\sup|g_{1}-g_{2}|$ とすると $g_{1}\le g_{2}+\delta$ なので、1・2 から $u_{g_{1}}\le u_{g_{2}+\delta}=u_{g_{2}}+\delta$。$g_{1},g_{2}$ を入れ替える。
+
+（3 は、ペロン関数が境界値に連続に依存することを言っている。古典解の連続依存（\ref{pde:dirichlet-uniqueness.3}）の、境界の正則性を仮定しない形である。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

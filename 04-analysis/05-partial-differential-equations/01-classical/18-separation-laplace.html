@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>フーリエの方法：ラプラス方程式とスツルム–リウヴィル展開 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/18-separation-laplace.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# フーリエの方法：ラプラス方程式とスツルム–リウヴィル展開 {#pde:page-separation-laplace keywords="separation of variables for the Laplace equation, Dirichlet problem on a rectangle, sinh series, bilinear correction at the corners, corner compatibility, Dirichlet problem on the disk, Poisson integral as Abel summation of the Fourier series, separation in polar coordinates, heat equation with variable coefficients, Sturm-Liouville eigenfunction expansion, energy uniqueness, 変数分離, フーリエの方法, 長方形のディリクレ問題, 円板のディリクレ問題, ポアソン積分, アーベル総和, 変数係数の熱方程式, 固有関数展開"}
+
+前のページ（\ref{pde:page-separation}）では、区間の熱方程式と弦の振動を変数分離で解き、級数解が古典解になるかどうかが**係数の減衰**と**端点での両立条件**で決まることを見た。このページでは同じ方法を二つの方向に広げる。一つはラプラス方程式で、長方形では一方の変数に正弦関数、他方に双曲線関数を使い、円板では極座標で変数を分けて $r^{k}\cos k\theta$, $r^{k}\sin k\theta$ の級数を作る。円板の級数解は、ポアソン積分（\tref{pde:poisson-ball-dirichlet} の $n=2$ の場合）と一致し、境界値のフーリエ級数そのものが収束しなくても、因子 $r^{k}$ のおかげで内部では収束する。もう一つは係数が場所によって変わる 1 次元の熱方程式で、正弦関数の代わりにスツルム–リウヴィル作用素の固有関数（\ref{ode:sl-eigen}）で展開する。どちらの場合も、級数を項別に微分してよいことを示す部分で、減衰と両立条件がどう効くかを hypcheck に記録する。
+
+## 記法と定義の確認 {#pde:sec-sp-b-notation}
+
+::: notation
+- 調和関数は \ref{pde:harmonic-function}、弱最大値原理は \tref{pde:weak-maximum-principle}、ディリクレ問題の一意性は \ref{pde:dirichlet-uniqueness}、球のポアソン核とポアソン積分は \ref{pde:poisson-kernel-ball}、その解は \ref{pde:poisson-ball-dirichlet}。
+- 前のページの記法：$a_{k}(f)$, $b_{k}(f)$ は $[0,\pi]$ の余弦係数・正弦係数、その性質は \ref{pde:sep-sine-cosine}、区間の熱方程式の級数解は \ref{pde:sep-heat-dirichlet}。区間 $[0,\ell]$ では $x\mapsto\pi x/\ell$ と変数を変えて同じ結果を使う：$\mu_{k}\defeq k\pi/\ell$、$\beta_{k}(f)\defeq\frac{2}{\ell}\int_{0}^{\ell}f(x)\sin\mu_{k}x\,dx$ とすると、\ref{pde:sep-sine-cosine.2}・\ref[3]{pde:sep-sine-cosine.3} はそのまま成り立ち、\ref{pde:sep-heat-dirichlet.3} は「$f\in C[0,\ell]$, $f(0)=f(\ell)=0$ なら $\sum_{k}\beta_{k}(f)e^{-\mu_{k}^{2}s}\sin\mu_{k}x\to f(x)$（$s\to0$、$[0,\ell]$ で一様）」となる（時間も $t=(\pi/\ell)^{2}s$ と変える）。
+- 一様収束・項別微分・項別積分は \ref{calc:uniform-limit-theorems}, \ref{calc:uniform-derivative} と前のページの記法の約束（2 変数の級数の項別微分）。2 変数の $C^{k}$ を、閉じた長方形などの上でも前のページと同じ意味で使う。
+- 球面測度は \ref{meas:polar-sphere-measure}、平面の極座標は \ref{meas:polar-coordinates}、極座標の一意性は \ref{meas:polar-decomposition.4}。
+- スツルム–リウヴィル作用素 $Lu=-(pu')'+qu$、重み $w$、分離型境界条件 $B_{a}u=B_{b}u=0$、定義域 $D$ は \ref{ode:sturm-liouville-operator}（$p\in C^{1}[a,b]$, $q,w\in C[a,b]$, $p,w>0$）。$L^{2}(w)$、内積 $\langle f,g\rangle_{w}=\int_{a}^{b}f\bar g\,w\,dx$、重みなしの内積 $(f,g)$ は \ref{ode:page-sturm-liouville} の記法。下からの評価の定数 $C_{0}$ は \ref{ode:sl-lower-bound.2}、グリーン関数は \ref{ode:green-function}、固有値 $\lambda_{1}<\lambda_{2}<\cdots$ と実数値の正規直交な固有関数 $e_{n}$ は \ref{ode:sl-eigen}、展開は \ref{ode:sl-expansion}。このページでは関数は実数値とする。
+- **選択公理**：長方形と円板の節では使わない（測度論の基礎の結果に含まれるものを除く）。変数係数の熱方程式の節では、\ref{ode:sl-eigen} を通して従属選択公理（DC）を使う（その証明の中のスペクトル定理とコンパクト性の議論で）。
+:::
+
+## 長方形のディリクレ問題 {#pde:sec-sp-rectangle}
+
+長方形 $R\defeq(0,\ell)\times(0,m)$ で、まず下の辺だけに境界値を与える。$u=X(x)Y(y)$ が調和で、左右の辺と上の辺で $0$ なら、$-X''/X=Y''/Y$ は定数で、$X(0)=X(\ell)=0$ から $X=\sin\mu_{k}x$, $Y''=\mu_{k}^{2}Y$, $Y(m)=0$ から $Y=\sinh\mu_{k}(m-y)$ である。
+
+::: lemma 一辺に境界値をもつ長方形の問題 {#pde:sep-rectangle-side keywords="Dirichlet problem on a rectangle with data on one side: u = sum beta_k sinh(mu_k (m - y))/sinh(mu_k m) sin(mu_k x); smooth and harmonic inside for any continuous data vanishing at the corners, continuous up to the boundary; proof by approximation and the maximum principle" index="長方形のディリクレ問題|ちょうほうけいのでぃりくれもんだい"}
+$f\in C[0,\ell]$, $f(0)=f(\ell)=0$, $\beta_{k}\defeq\beta_{k}(f)$ とし、$0\le x\le\ell$, $0<y\le m$ について
+$$
+u(x,y)\defeq\sum_{k=1}^{\infty}\beta_{k}\,\frac{\sinh\mu_{k}(m-y)}{\sinh\mu_{k}m}\,\sin\mu_{k}x,\qquad u(x,0)\defeq f(x)
+$$
+とおく。
+1. 各 $y_{0}>0$ について、級数とその項別のすべての偏導関数は $[0,\ell]\times[y_{0},m]$ で一様絶対収束し、$u$ は $R$ で $C^{\infty}$ 級の調和関数である。
+2. $u\in C(\overline{R})$ で、$u$ は下の辺で $f$、他の三辺で $0$ である。
+3. $\sum_{k}\lvert\beta_{k}\rvert<\infty$ なら、級数は $\overline{R}$ の上で（$y=0$ も含めて）一様絶対収束する。
+:::
+
+::: proof
+**Step 1.** 【主張：$k\ge1$, $0\le y\le m$ について $0\le\frac{\sinh\mu_{k}(m-y)}{\sinh\mu_{k}m}\le e^{-\mu_{k}y}$、$0<\frac{\cosh\mu_{k}(m-y)}{\sinh\mu_{k}m}\le\frac{2e^{-\mu_{k}y}}{1-e^{-2\mu_{1}m}}$】分母と分子を $e^{\mu_{k}m}$ と $e^{\mu_{k}(m-y)}$ でくくると
+$$
+\frac{\sinh\mu_{k}(m-y)}{\sinh\mu_{k}m}=e^{-\mu_{k}y}\,\frac{1-e^{-2\mu_{k}(m-y)}}{1-e^{-2\mu_{k}m}},\qquad\frac{\cosh\mu_{k}(m-y)}{\sinh\mu_{k}m}=e^{-\mu_{k}y}\,\frac{1+e^{-2\mu_{k}(m-y)}}{1-e^{-2\mu_{k}m}}.
+$$
+$m-y\le m$ なので第 1 式の分数は $1$ 以下、第 2 式の分数は $2/(1-e^{-2\mu_{1}m})$ 以下（$\mu_{k}\ge\mu_{1}$）。
+
+**Step 2.** 【主張：1 と、$u$ が左右と上の辺で $0$】$\lvert\beta_{k}\rvert\le2\max\lvert f\rvert$。項の $\partial_{x}^{i}\partial_{y}^{j}$ は、$\sinh$ または $\cosh$ が現れるだけなので、Step 1 から $[0,\ell]\times[y_{0},m]$ で絶対値が $C\mu_{k}^{i+j}e^{-\mu_{k}y_{0}}$ 以下（$C$ は $k$ によらない）で、これは $k$ について総和可能。M 判定法と項別微分から $u$ は $C^{\infty}$ 級で、各項が $\partial_{x}^{2}\sin\mu_{k}x=-\mu_{k}^{2}\sin\mu_{k}x$, $\partial_{y}^{2}\sinh\mu_{k}(m-y)=\mu_{k}^{2}\sinh\mu_{k}(m-y)$ から調和なので $u$ も調和。各項は $x=0,\ell$ と $y=m$ で $0$。
+
+**Step 3.** 【主張：3、および $\sum\lvert\beta_{k}\rvert<\infty$ なら 2】Step 1 から項の絶対値は $\overline{R}$ で $\lvert\beta_{k}\rvert$ 以下なので、M 判定法で一様絶対収束し、和は $\overline{R}$ で連続。$y=0$ での値は $\sum\beta_{k}\sin\mu_{k}x$ で、\ref{pde:sep-sine-cosine.3}（区間 $[0,\ell]$ 版）から $f(x)$ に等しい。
+
+**Step 4.** 【主張：一般の $f$ で 2】$f_{j}(x)\defeq\sum_{k}\beta_{k}e^{-\mu_{k}^{2}/j}\sin\mu_{k}x$ とおく（記法の熱方程式の解の時刻 $s=1/j$）。$f_{j}$ は連続で $f_{j}(0)=f_{j}(\ell)=0$、係数 $\beta_{k}e^{-\mu_{k}^{2}/j}$ は総和可能で、$\max\lvert f_{j}-f\rvert\to0$（記法の \ref{pde:sep-heat-dirichlet.3} の区間 $[0,\ell]$ 版）。$f_{j}$ に対する Step 3 の関数 $u_{j}$ は $R$ で調和で $\overline{R}$ で連続なので、$u_{j}-u_{i}$ に \ref{pde:weak-maximum-principle} を使うと
+$$
+\max_{\overline{R}}\lvert u_{j}-u_{i}\rvert=\max_{\partial R}\lvert u_{j}-u_{i}\rvert=\max_{[0,\ell]}\lvert f_{j}-f_{i}\rvert\to0\quad(i,j\to\infty).
+$$
+よって $u_{j}$ は $\overline{R}$ 上の連続関数 $U$ に一様収束し（\ref{calc:uniform-limit-theorems.1}・\ref[2]{calc:uniform-limit-theorems.2}）、$U$ は下の辺で $f$、他の辺で $0$。
+
+**Step 5.** 【主張：$R$ で $U=u$】$y>0$ を固定すると、Step 1 から
+$$
+\lvert u_{j}(x,y)-u(x,y)\rvert\le2\max\lvert f\rvert\sum_{k}\bigl(1-e^{-\mu_{k}^{2}/j}\bigr)e^{-\mu_{k}y}.
+$$
+$\sum_{k}e^{-\mu_{k}y}<\infty$ なので、$\varepsilon>0$ に対して残り $\sum_{k>N}e^{-\mu_{k}y}$ を小さくとり、有限個の項は $j\to\infty$ で $0$ に近づくので、右辺は $0$ に近づく。よって $U=u$ で、$u$（下の辺では $f$）は $\overline{R}$ で連続。
+
+::: hypcheck
+- **$f(0)=f(\ell)=0$**：$u$ が角で連続であるために必要（他の辺の値 $0$ と一致する）。Step 3 の正弦級数の一様収束と Step 4 の近似に使った。
+- **$f$ の連続性**：Step 4 の近似と最大値原理に使った。内部の滑らかさ（1）には係数の有界性しか使わない（$f\in L^{1}$ で足りる）：減衰 $e^{-\mu_{k}y}$ は方程式が与える。熱方程式の $e^{-k^{2}t}$ と同じく、ラプラス方程式も内部を滑らかにする。
+- **境界での係数の減衰**：$y=0$ では減衰の因子が $1$ になるので、級数が辺まで一様に収束するかどうかは $f$ の係数そのもので決まる（3）。一般の連続な $f$ では正弦級数が一様収束するとは限らないので、Step 4・5 で最大値原理による近似に切り替えた。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem 長方形のディリクレ問題 {#pde:sep-rectangle-dirichlet keywords="Dirichlet problem on a rectangle with arbitrary continuous boundary data: subtract the bilinear interpolation of the corner values and add four one-sided sinh series; existence and uniqueness of u in C^2(R) cap C(closure R)" index="長方形のディリクレ問題（一般の境界値）|ちょうほうけいのでぃりくれもんだいいっぱんのきょうかいち, 双一次補間|そういちじほかん"}
+$g\in C(\partial R)$ とする。$R$ で調和で、$u\in C^{2}(R)\cap C(\overline{R})$、$\partial R$ で $u=g$ となる $u$ がただ一つ存在する。それは、角の値の双一次補間
+$$
+P(x,y)\defeq\sum_{\epsilon,\delta\in\{0,1\}}g(\epsilon\ell,\delta m)\Bigl(\epsilon\frac{x}{\ell}+(1-\epsilon)\Bigl(1-\frac{x}{\ell}\Bigr)\Bigr)\Bigl(\delta\frac{y}{m}+(1-\delta)\Bigl(1-\frac{y}{m}\Bigr)\Bigr)
+$$
+と、$g-P$ の四つの辺の値に対する \ref{pde:sep-rectangle-side} の解（辺に合わせて回したもの）の和である。
+:::
+
+::: intuition
+長方形の縁にどんな連続な温度分布を与えても、内部の定常な温度分布がただ一つ決まり、それは四つの辺ごとの正弦級数の解を足し合わせて作れる。四つの角では二つの辺の値が重なるので、角の値は先に双一次関数で取り除いておく。
+:::
+
+::: proof
+**Step 1.** 【主張：$P$ は調和で、四つの角で $g$ に等しい】$P$ は $x$ について 1 次、$y$ について 1 次の多項式なので $\partial_{x}^{2}P=\partial_{y}^{2}P=0$。角 $(\epsilon\ell,\delta m)$ では、その項の二つの因子が $1$、他の項のどちらかの因子が $0$ になる。
+
+**Step 2.** 【主張：$\tilde g\defeq g-P$ の各辺への制限は、その辺の両端で $0$ の連続関数で、それぞれに対して、$R$ で調和、$\overline{R}$ で連続で、その辺で $\tilde g$、他の三辺で $0$ となる関数 $u_{1},\dots,u_{4}$ がある】下の辺は \ref{pde:sep-rectangle-side} を $f(x)=\tilde g(x,0)$ に使う。上の辺は $f(x)=\tilde g(x,m)$ の解 $v$ について $v(x,m-y)$。左の辺は、長方形 $(0,m)\times(0,\ell)$ で $f(y)=\tilde g(0,y)$ の解 $v$ をとり $v(y,x)$、右の辺はさらに $x\mapsto\ell-x$。座標の入れ替えと鏡映はラプラシアンを保つので、どれも調和である。
+
+**Step 3.** 【主張：結論】$u\defeq P+u_{1}+u_{2}+u_{3}+u_{4}$ は調和で $\overline{R}$ で連続、各辺の上では $P+\tilde g=g$（その辺の $u_{i}$ だけが $\tilde g$ で、他は $0$）。一意性は \ref{pde:dirichlet-uniqueness.1}。
+
+::: hypcheck
+- **$g$ の連続性**：Step 2 で各辺の関数が連続であること、角で二つの辺の値が一致することに使った。$u\in C(\overline{R})$ を求める以上、必要でもある。
+- **角での両立**：$C(\overline{R})$ の解を求めるだけなら、角の条件は $g$ の連続性に含まれていて、余分な条件はいらない（Step 1 で角の値を取り除いたので）。しかし $u$ が $\overline{R}$ の上で $C^{2}$ 級であることを求めると、角で新しい両立条件が要る：角 $(0,0)$ で $\Delta u=0$ を極限まで延ばすと、下の辺の値 $g_{\mathrm{b}}(x)=g(x,0)$ と左の辺の値 $g_{\mathrm{l}}(y)=g(0,y)$ について $g_{\mathrm{b}}''(0)+g_{\mathrm{l}}''(0)=0$（\ref{pde:prob-sp-rectangle-corner}）。長方形は角をもつので、境界が滑らかな領域より、境界まで滑らかな解を得る条件が多い。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 長方形は境界が滑らかでない領域だが、すべての連続な境界値についてディリクレ問題が解けた。これは長方形の各境界点が「外から円錐で触れられる」性質をもつことの具体的な現れで、一般の領域で同じことを問うのは \see{pde:page-harmonic-functions} の系列の後の話題（劣調和関数による方法）である。境界まで $C^{2}$ 級の解を得るには、境界値の滑らかさに加えて角での両立条件が要る。区間の熱方程式で放物境界の角 $(0,0)$ に両立条件が現れたのと同じ構造である。
+
+**似た定理.** 3 次元の直方体でも同じ方法が使え、$\sin\mu_{j}x\sin\nu_{k}y\,\sinh\bigl(\sqrt{\mu_{j}^{2}+\nu_{k}^{2}}\,(c-z)\bigr)$ の二重級数になる。ここで、二つの方向の正弦関数系の積が長方形の $L^{2}$ の正規直交基底になることを使う。
+
+**高い視点：減衰は変数の向きで決まる.** 長方形の解では、辺に平行な方向には振動（$\sin\mu_{k}x$）、辺から離れる方向には指数関数的な減衰（$e^{-\mu_{k}y}$）が現れる。細かい模様ほど早く減衰するので、境界から少し離れると細部は見えなくなる。熱方程式の $e^{-k^{2}t}$ で時間が果たした役割を、ラプラス方程式では境界からの距離が果たす。
+:::
+
+## 円板のディリクレ問題 {#pde:sec-sp-disk}
+
+単位円板 $B\defeq B(0,1)\subset\mathbb{R}^{2}$ で、点を極座標 $(r\cos\theta,r\sin\theta)$ で表す。$C^{2}$ 級の関数について、連鎖律から $r>0$ で $\Delta u=\partial_{r}^{2}u+\frac1r\partial_{r}u+\frac{1}{r^{2}}\partial_{\theta}^{2}u$ である。$u=R(r)\Theta(\theta)$ とおくと $\Theta''=-\kappa\Theta$ で、$\Theta$ が周期 $2\pi$ をもつことから $\kappa=k^{2}$, $\Theta=\cos k\theta,\sin k\theta$（\ref{ode:sl-fourier-examples.3}）。$R$ はオイラー型の方程式 $r^{2}R''+rR'-k^{2}R=0$ の解 $r^{\pm k}$（$k=0$ では $1,\log r$）で、原点で有界なものは $r^{k}$ である。こうして $r^{k}\cos k\theta$, $r^{k}\sin k\theta$ の重ね合わせを考える（これらは $(x+iy)^{k}$ の実部と虚部で、調和多項式である）。この動機づけは証明には使わない。
+
+$g\in C(\partial B)$ について $\gamma(\varphi)\defeq g(\cos\varphi,\sin\varphi)$ とおき、
+$$
+\alpha_{k}\defeq\frac1\pi\int_{0}^{2\pi}\gamma(\varphi)\cos k\varphi\,d\varphi,\qquad\beta_{k}\defeq\frac1\pi\int_{0}^{2\pi}\gamma(\varphi)\sin k\varphi\,d\varphi
+$$
+とする。
+
+::: theorem 円板のディリクレ問題の級数解 {#pde:sep-disk keywords="Dirichlet problem on the unit disk by separation in polar coordinates: u = alpha_0/2 + sum r^k (alpha_k cos k theta + beta_k sin k theta) converges for r < 1 for every continuous boundary function and equals the two-dimensional Poisson integral; expansion (1 - r^2)/(1 - 2r cos a + r^2) = 1 + 2 sum r^k cos ka; uniform convergence on the closed disk when the Fourier coefficients are absolutely summable" index="円板のディリクレ問題|えんばんのでぃりくれもんだい, ポアソン積分（円板）|ぽあそんせきぶんえんばん, アーベル総和|あーべるそうわ"}
+$g\in C(\partial B)$ とし、$0\le r<1$ について
+$$
+u(r\cos\theta,r\sin\theta)\defeq\frac{\alpha_{0}}{2}+\sum_{k=1}^{\infty}r^{k}\bigl(\alpha_{k}\cos k\theta+\beta_{k}\sin k\theta\bigr)
+\label{pde:eq-sep-disk-series}
+$$
+とおく。
+1. 各 $r_{0}<1$ について、級数は $r\le r_{0}$ で一様絶対収束し、$B$ の上で $u=P_{1}[g]$（\ref{pde:poisson-kernel-ball} で $n=2$, $r=1$）。
+2. $u$（$\partial B$ では $g$ とおく）は $B$ で $C^{\infty}$ 級の調和関数で、$\overline{B}$ で連続であり、$r\to1$ のとき $\sup_{\theta}\lvert u(r\cos\theta,r\sin\theta)-\gamma(\theta)\rvert\to0$。$C^{2}(B)\cap C(\overline{B})$ の調和関数で境界値 $g$ をもつものは $u$ だけである。
+3. $\sum_{k}(\lvert\alpha_{k}\rvert+\lvert\beta_{k}\rvert)<\infty$ なら、級数は $r\le1$ で一様絶対収束し、$r=1$ での和は $\gamma(\theta)$ に等しい。
+:::
+
+::: intuition
+円板の縁に連続な温度分布を与えたときの内部の定常な温度は、縁の分布をフーリエ級数に分け、$k$ 番目の成分に $r^{k}$ を掛けて足し合わせたものになる。縁の上ではフーリエ級数そのものが収束しないこともあるが、内部では $r^{k}$ が高い振動数の成分を抑えるので、いつも収束し、それはポアソン積分に一致する。
+:::
+
+::: proof
+**Step 1.** 【主張：$\partial B=S^{1}$ の球面測度 $\sigma$ は、$\varphi\mapsto(\cos\varphi,\sin\varphi)$ による $(0,2\pi)$ のルベーグ測度の像に等しい】像測度を $\nu$ とする。\ref{meas:polar-coordinates} は、ボレル可測な $h\ge0$ について $\int_{\mathbb{R}^{2}}h=\int_{0}^{\infty}\bigl(\int_{S^{1}}h(r\theta)\,d\nu(\theta)\bigr)r\,dr$ が成り立つことを言っている（トネリの定理で積分の順序を替える）。\ref{meas:polar-decomposition.4} の一意性から $\nu=\sigma$。（$\varphi=0$ に対応する 1 点は両方の測度で $0$。）
+
+**Step 2.** 【主張：$0\le r<1$ について、$\alpha$ について一様に $\displaystyle\frac{1-r^{2}}{1-2r\cos\alpha+r^{2}}=1+2\sum_{k\ge1}r^{k}\cos k\alpha$】$z\defeq re^{i\alpha}$ とおくと $\lvert z\rvert<1$ で、等比級数から $\frac{1+z}{1-z}=1+2\sum_{k\ge1}z^{k}$（$\lvert z^{k}\rvert=r^{k}$ なので $\alpha$ について一様に絶対収束）。左辺の実部は $\frac{(1+z)(1-\bar z)}{\lvert1-z\rvert^{2}}$ の実部で $\frac{1-\lvert z\rvert^{2}}{\lvert1-z\rvert^{2}}=\frac{1-r^{2}}{1-2r\cos\alpha+r^{2}}$、右辺の実部は $1+2\sum r^{k}\cos k\alpha$。
+
+**Step 3.** 【主張：1】$\lvert\alpha_{k}\rvert,\lvert\beta_{k}\rvert\le2\max\lvert g\rvert$ なので、項の絶対値は $r\le r_{0}$ で $4\max\lvert g\rvert\,r_{0}^{k}$ 以下で、M 判定法から一様絶対収束する。$x=(r\cos\theta,r\sin\theta)$、$y=(\cos\varphi,\sin\varphi)$ なら $\lvert x-y\rvert^{2}=1-2r\cos(\theta-\varphi)+r^{2}$ で、$n=2$ では $n\omega_{n}=2\pi$ なので $K_{1}(x,y)=\frac{1-r^{2}}{2\pi(1-2r\cos(\theta-\varphi)+r^{2})}$。Step 1 から
+$$
+P_{1}[g](x)=\frac{1}{2\pi}\int_{0}^{2\pi}\frac{1-r^{2}}{1-2r\cos(\theta-\varphi)+r^{2}}\,\gamma(\varphi)\,d\varphi.
+$$
+Step 2 の級数は $\varphi$ について一様に収束するので項別積分でき、$\cos k(\theta-\varphi)=\cos k\theta\cos k\varphi+\sin k\theta\sin k\varphi$ から、右辺は \eqref{pde:eq-sep-disk-series} の右辺に等しい。
+
+**Step 4.** 【主張：2・3】2 の前半と一意性は、1 と \ref{pde:poisson-ball-dirichlet}（$n=2$, $r=1$）から。$u$ は $\overline{B}$ で連続なので一様連続（\ref{top:heine-cantor}）で、$\lvert u(r\cos\theta,r\sin\theta)-u(\cos\theta,\sin\theta)\rvert$ は $r\to1$ で $\theta$ について一様に $0$ に近づく。3 では項の絶対値が $r\le1$ で $\lvert\alpha_{k}\rvert+\lvert\beta_{k}\rvert$ 以下なので、M 判定法から和は $\overline{B}$ で連続で、$r<1$ では $u$ に等しい。$\overline{B}$ の上の二つの連続関数が $B$ で一致すれば、$B$ が $\overline{B}$ で稠密なので境界でも一致し、和は $r=1$ で $u=\gamma$。
+
+::: hypcheck
+- **$g$ の連続性**：Step 4 で \ref{pde:poisson-ball-dirichlet} を使い、境界まで連続な解を得るのに使った。1 の収束と $u=P_{1}[g]$ は、係数の有界性だけを使うので、$g$ が有界可測（さらに $\gamma\in L^{1}$）でも成り立つ。
+- **境界での両立条件**：不要。円周は滑らかで角がないので、長方形の角や区間の端点のような、二つの条件が出会う点がない。周期性（$\gamma(0)=\gamma(2\pi)$）が、両立条件の代わりに自動的に成り立っている。
+- **係数の減衰**：内部での収束には $r^{k}$ の減衰で足り、係数には有界性しか要らない（Step 3）。境界 $r=1$ まで級数が一様収束するには、係数そのものの減衰（3 の $\sum(\lvert\alpha_{k}\rvert+\lvert\beta_{k}\rvert)<\infty$ など）が要る。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example
+$\gamma(\varphi)=\cos^{2}\varphi=\frac12+\frac12\cos2\varphi$ なら $\alpha_{0}=1$, $\alpha_{2}=\frac12$, 他は $0$ で、$u=\frac12+\frac12r^{2}\cos2\theta=\frac12+\frac12(x^{2}-y^{2})$。実際これは調和で、$x^{2}+y^{2}=1$ の上で $\frac12+\frac12(x^{2}-(1-x^{2}))=x^{2}=\cos^{2}\varphi$。
+:::
+
+::: supplement
+**前提を変えると（境界でのフーリエ級数）.** $r=1$ で級数 \eqref{pde:eq-sep-disk-series} は $\gamma$ のフーリエ級数そのものになる。連続関数のフーリエ級数は一般には各点で収束するとは限らない（各点収束の判定法は \see{four:dini-test} などで、連続性だけでは足りない）。それでも $r\to1$ の極限として $\gamma$ に一様に戻ることが 2 で示された。級数に $r^{k}$ を掛けてから $r\to1$ とする和の取り方を**アーベル総和**といい、2 はフーリエ級数がアーベル総和の意味で一様に $\gamma$ に収束することを言っている（\see{four:circle-poisson-kernel}）。
+
+**似た定理.** 区間の熱方程式の級数解（\ref{pde:sep-heat-dirichlet}）では $e^{-k^{2}t}$ が、ここでは $r^{k}=e^{-k\log(1/r)}$ が減衰の因子で、熱核とポアソン核が対応する。どちらも、初期値・境界値が連続なだけで内部では滑らかな解を与え、初期値・境界値には一様に戻る。円板の外部 $\lvert x\rvert>1$ では $r^{-k}$ を使い、$k=0$ の $\log r$ を捨てると有界な解が得られる。
+
+**高い視点：円周の上の熱の流れ.** $r=e^{-s}$ とおくと、$r^{k}$ は $e^{-ks}$ で、$s$ を時間と思えば、円板の解は「$k$ 番目の成分を $e^{-ks}$ で減衰させる」流れで、$\sqrt{-\partial_{\theta}^{2}}$ を生成作用素とする半群である。比喩で言えば、縁の模様を内側に向かって写していくとき、半径が小さくなるほど細かい模様から順に消えていき、中心では平均（$\alpha_{0}/2$、\ref{pde:mean-value-property}）だけが残る。
+:::
+
+## 変数係数の熱方程式 {#pde:sec-sp-sturm}
+
+密度・比熱・熱伝導率が場所によって変わる棒の温度は、$w(x)\partial_{t}u=\partial_{x}\bigl(p(x)\partial_{x}u\bigr)-q(x)u$、つまり $w\,\partial_{t}u=-Lu$ に従う。$u=X(x)T(t)$ とおくと $LX=\lambda wX$, $T'=-\lambda T$ で、$X$ はスツルム–リウヴィルの固有関数になる。以下 $c\defeq C_{0}+1$ とおく。\ref{ode:sl-eigen.1} から $\lambda_{n}+c\ge1$ で、とくに $-c$ は固有値でない。
+
+::: lemma 固有関数の評価 {#pde:sep-sl-bounds keywords="bounds for normalized Sturm-Liouville eigenfunctions: |e_n|, |e_n'| <= M (lambda_n + c), |e_n''| <= M (lambda_n + c)^2 via the Green's function representation; lower bound lambda_n + c >= sqrt(n/S) from the Hilbert-Schmidt sum" index="固有関数の評価|こゆうかんすうのひょうか"}
+定数 $M$ と $S\defeq\sum_{n}(\lambda_{n}+c)^{-2}$ があって、すべての $n$ と $x\in[a,b]$ について
+1. $\lvert e_{n}(x)\rvert\le M(\lambda_{n}+c)$, $\lvert e_{n}'(x)\rvert\le M(\lambda_{n}+c)$, $\lvert e_{n}''(x)\rvert\le M(\lambda_{n}+c)^{2}$。
+2. $\lambda_{n}+c\ge\sqrt{n/S}$。
+:::
+
+::: proof
+**Step 1.** 【主張：$e_{n}(x)=(\lambda_{n}+c)\int_{a}^{b}G_{c}(x,y)w(y)e_{n}(y)\,dy$（$G_{c}$ は $L+cw$ のグリーン関数）】$L_{c}\defeq L+cw$ はスツルム–リウヴィル作用素（$q$ を $q+cw$ に替えたもの）で、$0$ は固有値でない。$e_{n}\in D$ は $L_{c}e_{n}=(\lambda_{n}+c)we_{n}$ を満たすので、\ref{ode:green-function.4} の一意性から、$h=(\lambda_{n}+c)we_{n}$ についての解の表示に一致する。
+
+**Step 2.** 【主張：1】\ref{ode:green-function.2} の形 $G_{c}(x,y)=\varphi_{a}(\min\{x,y\})\varphi_{b}(\max\{x,y\})/\omega$ から、$h\defeq we_{n}$ について
+$$
+e_{n}(x)=\frac{\lambda_{n}+c}{\omega}\Bigl(\varphi_{b}(x)\int_{a}^{x}\varphi_{a}h\,dy+\varphi_{a}(x)\int_{x}^{b}\varphi_{b}h\,dy\Bigr).
+$$
+微積分学の基本定理で微分すると、$\varphi_{b}(x)\varphi_{a}(x)h(x)$ の二つの項が打ち消し合い、$e_{n}'(x)=\frac{\lambda_{n}+c}{\omega}\bigl(\varphi_{b}'(x)\int_{a}^{x}\varphi_{a}h+\varphi_{a}'(x)\int_{x}^{b}\varphi_{b}h\bigr)$。コーシー–シュワルツの不等式から $\int_{a}^{b}\lvert h\rvert\le\bigl(\int w\bigr)^{1/2}\|e_{n}\|_{w}=\bigl(\int w\bigr)^{1/2}$ なので、$\varphi_{a},\varphi_{b}\in C^{2}[a,b]$ の最大値で $e_{n}$, $e_{n}'$ の評価を得る。$e_{n}''$ は方程式 $pe_{n}''=-p'e_{n}'+(q-\lambda_{n}w)e_{n}$ から、$\lvert\lambda_{n}\rvert\le(\lambda_{n}+c)+c\le(1+c)(\lambda_{n}+c)$ を使って評価する。
+
+**Step 3.** 【主張：2】$\lambda_{1}<\lambda_{2}<\cdots$ なので $j\le n$ で $(\lambda_{j}+c)^{-2}\ge(\lambda_{n}+c)^{-2}$。\ref{ode:sl-eigen.3} から $S<\infty$ で、$n(\lambda_{n}+c)^{-2}\le\sum_{j\le n}(\lambda_{j}+c)^{-2}\le S$。
+
+::: hypcheck
+- **係数の正則性**：Step 2 で、$\varphi_{a},\varphi_{b}$ が $C^{2}$ 級であること（$p\in C^{1}$, $q\in C$ と \ref{ode:sturm-liouville-operator}）と、$e_{n}''$ を方程式で書くのに $p>0$, $p\in C^{1}$ を使った。
+- **評価の粗さ**：$p=w=1$, $q=0$ のディリクレ条件では $\lambda_{n}=n^{2}$, $e_{n}=\sqrt{2/\pi}\sin nx$ で、実際には $e_{n}$ は有界、$e_{n}'$ は $n$ 程度である。補題の評価はずっと粗いが、熱方程式では $e^{-\lambda_{n}t}$ がどんな多項式の増大にも勝つので、これで足りる。
+- **公理**：\ref{ode:sl-eigen} を通して DC。
+:::
+:::
+
+::: theorem 変数係数の熱方程式の級数解 {#pde:sep-sl-heat keywords="heat equation w u_t = (p u_x)_x - q u on [a,b] with separated boundary conditions: eigenfunction expansion solution sum <f,e_n>_w e^{-lambda_n t} e_n converges with two x-derivatives and all t-derivatives for t > 0 for L^2(w) data; L^2 convergence to f; uniform convergence when f is in D; uniqueness by an energy estimate using the lower bound of L" index="変数係数の熱方程式|へんすうけいすうのねつほうていしき, 固有関数展開による解|こゆうかんすうてんかいによるかい"}
+$f\in L^{2}(w)$（実数値）、$c_{n}\defeq\langle f,e_{n}\rangle_{w}$ とし、$x\in[a,b]$, $t>0$ について
+$$
+u(x,t)\defeq\sum_{n=1}^{\infty}c_{n}e^{-\lambda_{n}t}e_{n}(x)
+$$
+とおく。
+1. $0<t_{0}<T$ について、級数とその項別の $\partial_{t}^{j}\partial_{x}^{i}$（$j\ge0$, $i\le2$）は $[a,b]\times[t_{0},T]$ で一様絶対収束する。$u$ と偏導関数 $\partial_{t}^{j}\partial_{x}^{i}u$（$i\le2$）は $[a,b]\times(0,\infty)$ で存在して連続で、$w\,\partial_{t}u=\partial_{x}(p\,\partial_{x}u)-qu$、各 $t>0$ で $B_{a}u(\cdot,t)=B_{b}u(\cdot,t)=0$。
+2. $t\to0$ のとき $\|u(\cdot,t)-f\|_{w}\to0$。
+3. $f\in D$ なら、$t\to0$ のとき $\sup_{a\le x\le b}\lvert u(x,t)-f(x)\rvert\to0$。
+4. （一意性）$T>0$ とし、$v\in C([a,b]\times[0,T])$ で、$\partial_{t}v$, $\partial_{x}v$, $\partial_{x}^{2}v$ が $[a,b]\times(0,T]$ で存在して連続、そこで $w\,\partial_{t}v=\partial_{x}(p\,\partial_{x}v)-qv$ と境界条件を満たし、$v(\cdot,0)=f$ とする（このとき $f$ は連続）。$f\in D$ なら $[a,b]\times[0,T]$ で $v=u$（$u(\cdot,0)\defeq f$）。
+:::
+
+::: intuition
+不均一な棒でも、温度分布はその棒に固有の「冷え方の型」（固有関数）に分解でき、各型は固有値の速さで指数関数的に冷える。初期の分布が 2 乗積分できるだけで、一瞬後には方程式を満たす滑らかな分布になる。境界条件を満たす滑らかな初期分布なら、一様に初期分布に戻る。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$\lvert c_{n}\rvert\le\|f\|_{w}$（ベッセルの不等式）。\ref{pde:sep-sl-bounds.1} と $\lvert\lambda_{n}\rvert\le(1+c)(\lambda_{n}+c)$ から、$s_{n}\defeq\lambda_{n}+c$ とおくと $[a,b]\times[t_{0},T]$ で
+$$
+\bigl\lvert\partial_{t}^{j}\partial_{x}^{i}\bigl(c_{n}e^{-\lambda_{n}t}e_{n}(x)\bigr)\bigr\rvert\le\|f\|_{w}(1+c)^{j}M\,e^{cT}\,s_{n}^{j+2}e^{-s_{n}t_{0}}.
+$$
+$\sigma\mapsto\sigma^{j+2}e^{-\sigma t_{0}/2}$ は $\sigma\ge1$ で有界なので、右辺は定数倍の $e^{-s_{n}t_{0}/2}\le e^{-t_{0}\sqrt{n/S}/2}$（\ref{pde:sep-sl-bounds.2}）以下で、これは $n$ について総和可能（$e^{-\kappa\sqrt n}\le C_{\kappa}n^{-2}$）。M 判定法と項別微分から偏導関数の存在・連続性と項別の表示を得る。各項は $L e_{n}=\lambda_{n}we_{n}$ から $w\,\partial_{t}=-L$ を満たし、$e_{n}\in D$ なので境界条件を満たす。$B_{a}$, $B_{b}$ は値と 1 階微分の 1 次結合なので一様収束する級数と交換できる。
+
+**Step 2.** 【主張：2】$u(\cdot,t)$ は一様収束する級数なので $L^{2}(w)$ でも収束し、$\langle u(\cdot,t),e_{n}\rangle_{w}=c_{n}e^{-\lambda_{n}t}$。\ref{ode:sl-expansion.1} のパーセヴァルの等式を $u(\cdot,t)-f$ に使うと $\|u(\cdot,t)-f\|_{w}^{2}=\sum_{n}(1-e^{-\lambda_{n}t})^{2}c_{n}^{2}$。$0<t\le1$ では $(1-e^{-\lambda_{n}t})^{2}\le(1+e^{C_{0}})^{2}$ で、各項は $t\to0$ で $0$ に近づくので、残りの和を小さくとる議論（\ref{pde:sep-heat-dirichlet} の Step 2 と同じ）で $0$ に近づく。
+
+**Step 3.** 【主張：3】\ref{ode:sl-expansion.2} から $\sum_{n}\lvert c_{n}\rvert\lvert e_{n}(x)\rvert$ は一様に収束し、$f(x)=\sum_{n}c_{n}e_{n}(x)$。$\varepsilon>0$ に対して $\sup_{x}\sum_{n>N}\lvert c_{n}\rvert\lvert e_{n}(x)\rvert<\varepsilon$ となる $N$ をとると（一様収束のコーシーの判定法）、$0<t\le1$ で
+$$
+\lvert u(x,t)-f(x)\rvert\le\sum_{n\le N}\lvert1-e^{-\lambda_{n}t}\rvert\,\lvert c_{n}\rvert\,\|e_{n}\|_{\infty}+(1+e^{C_{0}})\varepsilon,
+$$
+第 1 項は $t\to0$ で $0$ に近づく。
+
+**Step 4.** 【主張：4】3 と 1 から $u$ も $v$ と同じクラスに入る。$z\defeq v-u$、$E(t)\defeq\|z(\cdot,t)\|_{w}^{2}=\int_{a}^{b}wz^{2}dx$ とおく。$E$ は $[0,T]$ で連続、$E(0)=0$。$t>0$ では、\ref{meas:parameter-integrals.2} で微分と積分を交換し、$z(\cdot,t)\in D$ なので \ref{ode:sl-lower-bound.2} から
+$$
+E'(t)=2\int_{a}^{b}wz\,\partial_{t}z\,dx=-2(Lz(\cdot,t),z(\cdot,t))\le2C_{0}E(t).
+$$
+$\bigl(e^{-2C_{0}t}E(t)\bigr)'\le0$ なので、平均値の定理から $0<s<t$ で $e^{-2C_{0}t}E(t)\le e^{-2C_{0}s}E(s)$、$s\to0$ で $E(t)\le0$。よって $E=0$ で、$z(\cdot,t)$ は連続で $w>0$ なので $0$。
+
+::: hypcheck
+- **$f\in L^{2}(w)$**：Step 1 では係数が有界なことだけを使い、Step 2 でパーセヴァルの等式を使った。$t>0$ での滑らかさの元は $e^{-\lambda_{n}t}$ の減衰で、初期値の滑らかさは関係しない（定数係数の \ref{pde:sep-heat-dirichlet.1} と同じ）。
+- **係数の正則性（$p\in C^{1}$, $q,w\in C$, $p,w>0$）**：Step 1 の固有関数の評価（\ref{pde:sep-sl-bounds}）と、固有関数展開そのもの（\ref{ode:sl-eigen}）に使った。$x$ について $C^{2}$ 級までしか言えないのは、係数が連続なだけなので $e_{n}$ が $C^{2}$ 級までしかないからで、係数が $C^{\infty}$ 級なら（同じ評価を高階に延ばして）$u$ も $C^{\infty}$ 級になる。定数係数で $C^{\infty}$ 級だったのは係数の滑らかさのおかげである。
+- **3 の $f\in D$（滑らかさと境界条件の両立）**：Step 3 で \ref{ode:sl-expansion.2} の一様収束を使うのに使った。ディリクレ条件では $f(a)=f(b)=0$ は一様収束に必要（\ref{pde:sep-heat-dirichlet.4} と同じ理由）。$C^{2}$ 級は証明の方法（展開の一様収束を \ref{ode:sl-expansion.3} の係数の減衰から得る）が要求するもので、定数係数では連続性で足りた（\ref{pde:sep-heat-dirichlet.3}）。
+- **4 の端点までの滑らかさ**：Step 4 で $z(\cdot,t)\in D$ として \ref{ode:sl-lower-bound.2} を使うのに、$\partial_{x}^{2}z$ が端点まで連続であることを使った。ロバン条件では境界の項が $(Lz,z)$ に現れるので、最大値原理より、この下からの評価による議論が自然である。
+- **公理**：\ref{ode:sl-eigen} を通して DC。
+:::
+:::
+
+::: example
+$p=w=1$, $q=0$, $[a,b]=[0,\pi]$, ディリクレ条件では $\lambda_{n}=n^{2}$, $e_{n}=\sqrt{2/\pi}\sin nx$（\ref{ode:sl-fourier-examples.1}）で、$c_{n}e_{n}=b_{n}(f)\sin nx$ なので、\ref{pde:sep-heat-dirichlet} の級数に戻る。$q=\kappa$（正の定数）にすると固有値は $n^{2}+\kappa$ に、解は $e^{-\kappa t}$ 倍になる：棒が側面から一様に熱を失う場合である。
+:::
+
+::: supplement
+**前提を変えると.** 係数 $p$ が $0$ に近づく点（たとえば端点で $p(a)=0$）があると、\ref{ode:sturm-liouville-operator} の正則な問題の枠から外れ、固有関数展開の理論そのものが変わる（ルジャンドル多項式やベッセル関数による展開など）。そのような特異な問題は、ここでは扱わない。
+
+**似た定理.** 同じ方法で、変数係数の波動方程式 $w\,\partial_{t}^{2}u=-Lu$ の級数解 $\sum\bigl(c_{n}\cos\sqrt{\lambda_{n}}t+\dots\bigr)e_{n}$ も書けるが、熱方程式と違って時間の因子が減衰しないので、級数が古典解になるためには、弦の振動（\ref{pde:sep-string-series}）と同じく初期値の係数の減衰（$Lf$, $L^{2}f$ が境界条件を満たすことなど）が必要になる。多次元の有界領域でも、ディリクレ・ラプラシアンの固有関数展開を使えば同じ形の解が書ける。固有関数の存在と完全性は、関数解析的手法の系列で弱い意味の固有値問題として示す。
+
+**高い視点：楽器ごとの倍音.** 定数係数の棒の冷え方の型が正弦波だったのは、均一な楽器の倍音が正弦波であることと同じである。不均一な棒では型がゆがむが、互いに直交して全体で完全であるという性質（\ref{ode:sl-eigen.2}）が保たれる限り、フーリエの方法はそのまま働く。変数分離は、作用素を対角化する基底を見つけ、各成分では常微分方程式を解く、という一つの考え方である。
+:::
+
+## 前提のまとめ {#pde:sec-sp-b-conditions}
+
+::: table フーリエの方法と前提（ラプラス方程式・変数係数） {#pde:sep-conditions-table-laplace}
+| 問題 | 内部での減衰の因子 | 内部で古典解になる条件 | 境界まで連続になる条件 | 境界での両立条件 |
+|---|---|---|---|---|
+| 長方形（一辺） | $e^{-\mu_{k}y}$ | 係数が有界 | 境界値が連続で角で $0$ | 角の値の一致（連続性） |
+| 長方形（全周） | 同上 | 同上 | 境界値が連続 | $C^{2}(\overline{R})$ には角で $g_{\mathrm{b}}''+g_{\mathrm{l}}''=0$ など |
+| 円板 | $r^{k}$ | 係数が有界 | 境界値が連続 | 不要（境界に角がない） |
+| 変数係数の熱方程式 | $e^{-\lambda_{n}t}$ | $f\in L^{2}(w)$ と係数の正則性 | $f\in D$（証明の方法による） | 境界条件 $B_{a}f=B_{b}f=0$ |
+:::
+
+前のページの表（\ref{pde:sep-conditions-table}）と合わせると、古典的手法で級数解が古典解になるための前提は、(i) 方程式が与える減衰（熱・ラプラス）か初期値が与える減衰（波動）、(ii) 境界や角での両立条件、(iii) 固有関数の性質を引き出すための係数の正則性、の三つに整理できる。関数解析的手法では、(i) をエネルギー空間での収束に、(ii) を $H^{1}_{0}$ のような空間に入ることに置き換え、(iii) は弱い意味の固有値問題で係数の正則性を下げる。
+
+## 問題 {#pde:sec-sp-b-problems}
+
+::: problem {#pde:prob-sp-rectangle-corner}
+$R=(0,\pi)\times(0,\pi)$ とし、$u\in C^{2}(\overline{R})$ が $R$ で調和で、$\partial R$ で $g$ に等しいとする。$g_{\mathrm{b}}(x)\defeq g(x,0)$, $g_{\mathrm{l}}(y)\defeq g(0,y)$ とおく。
+1. $g_{\mathrm{b}}''(0)+g_{\mathrm{l}}''(0)=0$ を示せ（片側の 2 階微分）。
+2. 下の辺で $g=x(\pi-x)$、他の三辺で $0$ のディリクレ問題の解（\ref{pde:sep-rectangle-side}）は、$C^{2}(R)\cap C(\overline{R})$ には入るが $C^{2}(\overline{R})$ には入らないことを示せ。
+:::
+
+::: solution
+**1.** $0<x<\pi$ で $u(x,0)=g_{\mathrm{b}}(x)$ なので、$\partial_{x}^{2}u(x,0)=g_{\mathrm{b}}''(x)$。$\partial_{x}^{2}u$ は $\overline{R}$ で連続なので、$x\to0$ として $\partial_{x}^{2}u(0,0)=g_{\mathrm{b}}''(0)$（片側微分係数は、記法の約束から片側の極限に等しい）。同様に $\partial_{y}^{2}u(0,0)=g_{\mathrm{l}}''(0)$。$R$ で $\partial_{x}^{2}u+\partial_{y}^{2}u=0$ なので、連続性から $(0,0)$ でも和は $0$。
+
+**2.** $g$ は連続で角で $0$ なので、\ref{pde:sep-rectangle-side} から解は $C^{\infty}(R)\cap C(\overline{R})$ に入る。角 $(0,0)$ で $g_{\mathrm{b}}''(0)=-2$, $g_{\mathrm{l}}''(0)=0$ で和が $0$ でないので、1 から $C^{2}(\overline{R})$ には入らない。境界値は滑らかで角で連続でも、角で 2 階の両立条件が欠けると、解は角まで滑らかにはならない。
+:::
+
+::: problem {#pde:prob-sp-disk-abs-sine}
+$\gamma(\varphi)=\lvert\sin\varphi\rvert$ を境界値とする円板のディリクレ問題の解を $u$ とする。
+1. $\alpha_{0}=\frac4\pi$、$k\ge1$ について $\alpha_{2k}=-\frac{4}{\pi(4k^{2}-1)}$、それ以外の $\alpha_{k}$ と $\beta_{k}$ は $0$ を示せ。
+2. \eqref{pde:eq-sep-disk-series} の級数が閉じた円板の上で一様収束することを示し、$u(0)=\frac2\pi$ が $\gamma$ の平均に等しいことを確かめよ。
+:::
+
+::: solution
+**1.** $\gamma$ は偶関数なので $\beta_{k}=0$。$\gamma(\varphi+\pi)=\gamma(\varphi)$ なので $\alpha_{k}=\frac{1+(-1)^{k}}{\pi}\int_{0}^{\pi}\sin\varphi\cos k\varphi\,d\varphi$ で、$k$ が奇数なら $0$。$\sin\varphi\cos k\varphi=\frac12\bigl(\sin(1+k)\varphi+\sin(1-k)\varphi\bigr)$ から、$k$ が偶数なら $\int_{0}^{\pi}\sin\varphi\cos k\varphi\,d\varphi=\frac12\bigl(\frac{2}{1+k}+\frac{2}{1-k}\bigr)=\frac{2}{1-k^{2}}$。よって $\alpha_{k}=\frac{4}{\pi(1-k^{2})}$（$k$ 偶数）で、$k=0$ なら $\frac4\pi$、$k=2j$ なら $-\frac{4}{\pi(4j^{2}-1)}$。
+
+**2.** $\sum_{j}\frac{4}{\pi(4j^{2}-1)}<\infty$ なので、\ref{pde:sep-disk.3} から一様収束する。$u(0)=\frac{\alpha_{0}}{2}=\frac2\pi$ で、$\frac{1}{2\pi}\int_{0}^{2\pi}\lvert\sin\varphi\rvert\,d\varphi=\frac{4}{2\pi}=\frac2\pi$ に等しい（\tref{pde:mean-value-property} の通り）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

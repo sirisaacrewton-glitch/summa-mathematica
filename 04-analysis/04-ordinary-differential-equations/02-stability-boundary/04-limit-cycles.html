@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>リミットサイクルとベンディクソン–デュラックの判定法 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/04-ordinary-differential-equations/02-stability-boundary/04-limit-cycles.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# リミットサイクルとベンディクソン–デュラックの判定法 {#ode:page-limit-cycles keywords="limit cycles, trapping regions, criteria for positive invariance, van der Pol equation, Lienard plane, existence of a periodic solution of the van der Pol equation, Lienard theorem, Bendixson criterion, Dulac function, Bendixson-Dulac criterion, Liouville formula and area, Green theorem, failure of Poincare-Bendixson in dimension three, Lorenz equations, irrational flow on a torus, リミットサイクル, 極限周期軌道, ファンデルポール, ベンディクソン, デュラック"}
+
+前のページでは、平面の有界な軌道は、平衡点に近づかなければ周期軌道に近づくこと（\ref{ode:poincare-bendixson}）を示した。このページではその使い方を二つの方向から見る。一つは周期軌道が**ある**ことの証明で、境界でベクトル場が内向きになる領域（捕獲領域）を作れば、その中に周期軌道が見つかる。これを使って、ファン・デル・ポール方程式がすべての $\mu>0$ で周期解をもつことを、具体的な六角形と円板を組み合わせた捕獲領域で示す。もう一つは周期軌道が**ない**ことの証明で、発散の符号から周期軌道を排除する**ベンディクソン–デュラックの判定法**を、流れが面積をどう変えるか（リウヴィルの公式）から示し、グリーンの定理による別証明も与える。最後に、3 次元以上ではポアンカレ–ベンディクソンの定理が成り立たないことを例で述べる。
+
+## 記法と定義の確認 {#ode:sec-pl2-notation}
+
+::: notation
+- 前のページと同じく、$W\subset\mathbb{R}^{2}$ は開集合、$F\colon W\to\mathbb{R}^{2}$ は $C^{1}$ 級で、流れは $\Phi_{t}$、$\xi$ を通る最大解の定義域は $I_{\xi}$（\ref{ode:flow-def}, \ref{ode:flow-theorem}）。軌道・前方軌道・正の不変集合・周期軌道は \ref{ode:planar-orbit}、最小周期と周期軌道がジョルダン曲線であることは \ref{ode:planar-period}、$\omega$ 極限集合・$\alpha$ 極限集合は \ref{ode:limit-set} と \ref{ode:limit-set-properties}、捕獲領域の中の周期軌道は \ref{ode:trapping-region}。
+- ジョルダンの曲線定理（\tref{at:jordan-curve}）：周期軌道 $\Gamma$ について $\mathbb{R}^{2}\setminus\Gamma=\operatorname{int}\Gamma\sqcup\operatorname{ext}\Gamma$ で、$\operatorname{int}\Gamma$ は有界、$\operatorname{ext}\Gamma$ は非有界、どちらも空でない開集合（\ref{at:jordan-brouwer}）で、境界はどちらも $\Gamma$。とくに $\overline{\operatorname{int}\Gamma}=\operatorname{int}\Gamma\cup\Gamma$ はコンパクト。
+- $C^{1}$ 級関数 $V$ の解に沿った微分を $\dot V(x)\defeq\langle\nabla V(x),F(x)\rangle$ と書く（解 $x(t)$ について $\frac{d}{dt}V(x(t))=\dot V(x(t))$）。ベクトル場 $G=(G_{1},G_{2})$ の発散は $\operatorname{div}G\defeq\partial_{1}G_{1}+\partial_{2}G_{2}$ で、これはヤコビ行列 $DG$ のトレースである。
+- リウヴィルの公式 \ref{ode:liouville-formula}、流れのヤコビ行列が変分方程式を満たすこと \ref{ode:flow-theorem.4}、ルベーグ測度 $\lambda$ の変数変換公式 \ref{meas:change-of-variables}、グリーンの定理 \tref{vec:green-theorem} とそれが前提とする「鎖で分割される領域」 \ref{vec:cube-decomposed-region}、線積分 \ref{vec:line-integral}。
+- 連結集合は一つの連結成分に含まれる（\ref{top:components-properties}）。
+- **選択公理**：使わない。
+:::
+
+## リミットサイクルと捕獲領域 {#ode:sec-pl2-limit-cycles}
+
+::: definition リミットサイクル {#ode:limit-cycle keywords="limit cycle: a periodic orbit that is the omega- or alpha-limit set of a point not on it" index="リミットサイクル|りみっとさいくる, 極限周期軌道|きょくげんしゅうききどう, 極限閉軌道|きょくげんへいきどう"}
+周期軌道 $\Gamma$ が、$\Gamma$ に属さないある点 $\xi$ について $\omega(\xi)=\Gamma$ または $\alpha(\xi)=\Gamma$ となるとき、$\Gamma$ を**リミットサイクル**（極限周期軌道）という。
+:::
+
+::: intuition
+リミットサイクルは、まわりの解が巻きついてくる（あるいは過去にさかのぼると巻きついてくる）孤立した周期運動である。調和振動子の円のように、周期軌道がびっしり並んでいる場合はリミットサイクルではない。
+:::
+
+::: example
+1. 前のページの問題（\ref{ode:prob-pl-polar-limit-sets}）の系 $r'=r(1-r^{2})$, $\theta'=1$ では、単位円は内側の点と外側の点の両方の $\omega$ 極限集合で、リミットサイクルである。
+2. 調和振動子 $F(x,y)=(y,-x)$ では、すべての軌道は原点を中心とする円で、どの点の $\omega$ 極限集合もその点を通る円自身なので、リミットサイクルはない。
+:::
+
+ポアンカレ–ベンディクソンの定理で $\xi$ が $\omega(\xi)$ に属さなければ、その周期軌道はリミットサイクルである。捕獲領域を作るには、関数の値や不等式で書かれた集合が正の不変であることを確かめる必要がある。そのための判定法をまとめておく。
+
+::: lemma 正の不変性の判定 {#ode:invariance-criterion keywords="sublevel sets {V <= c} are positively invariant if dV/dt <= 0 on {V > c}; superlevel sets similarly; an intersection of sets {g_i <= 0} is positively invariant if each g_i strictly decreases at the points where it vanishes" index="正の不変性の判定|せいのふへんせいのはんてい"}
+$V,g_{1},\dots,g_{m}\colon W\to\mathbb{R}$ を $C^{1}$ 級、$c\in\mathbb{R}$ とする。
+1. $\{V>c\}$ の各点で $\dot V\le0$ なら、$\{V\le c\}$ は正の不変。
+2. $\{V<c\}$ の各点で $\dot V\ge0$ なら、$\{V\ge c\}$ は正の不変。
+3. $K\defeq\{x\in W:g_{i}(x)\le0\ (i=1,\dots,m)\}$ とし、$K$ の点 $p$ で $g_{i}(p)=0$ となるものについてはつねに $\dot g_{i}(p)<0$ とする。このとき $K$ は正の不変。
+:::
+
+::: proof
+**1.** $V(\Phi_{t_{0}}(\xi))\le c$, $t_{1}>t_{0}$ で $V(\Phi_{t_{1}}(\xi))>c$ とする。$s\defeq\sup\{t\in[t_{0},t_{1}]:V(\Phi_{t}(\xi))\le c\}$ とすると、連続性から $V(\Phi_{s}(\xi))\le c$ で $s<t_{1}$、$(s,t_{1}]$ では $V>c$ なので $\dot V\le0$。平均値の定理から $V(\Phi_{t_{1}}(\xi))\le V(\Phi_{s}(\xi))\le c$ となり矛盾。
+
+**2.** $-V$ と $-c$ に 1 を使う。
+
+**3.** $\Phi_{t_{0}}(\xi)\in K$ とし、$\tau\defeq\sup\{t\in I_{\xi}:t\ge t_{0},\ \Phi_{s}(\xi)\in K\ (t_{0}\le s\le t)\}<\sup I_{\xi}$ と仮定する。$K$ は $W$ の閉集合なので $p\defeq\Phi_{\tau}(\xi)\in K$。$g_{i}(p)<0$ の $i$ については連続性から、$g_{i}(p)=0$ の $i$ については $\frac{d}{dt}g_{i}(\Phi_{t}(\xi))\big|_{t=\tau}=\dot g_{i}(p)<0$ から、十分小さい $h>0$ で $g_{i}(\Phi_{\tau+h}(\xi))<0$。よって $\tau$ の少し先まで $K$ に留まり、$\tau$ の定義に反する。
+:::
+
+## ファン・デル・ポール方程式 {#ode:sec-pl2-van-der-pol}
+
+$\mu>0$ を定数とする。2 階の方程式
+$$
+x''-\mu(1-x^{2})x'+x=0
+\label{ode:eq-van-der-pol}
+$$
+を**ファン・デル・ポール方程式**という。振幅 $|x|$ が小さいときは $-\mu(1-x^{2})x'$ が負の摩擦（エネルギーを注入する）として、大きいときは正の摩擦として働くので、小さい振動は大きくなり、大きい振動は小さくなる。その間に周期的な振動があると期待される。
+
+$F_{\mathrm{L}}(x)\defeq x^{3}/3-x$ とおき、$y\defeq x'+\mu F_{\mathrm{L}}(x)$ とすると、$y'=x''+\mu(x^{2}-1)x'=-x$ なので、\eqref{ode:eq-van-der-pol} は平面の自励系
+$$
+x'=y-\mu F_{\mathrm{L}}(x),\qquad y'=-x
+\label{ode:eq-lienard-plane}
+$$
+と同値になる（逆に \eqref{ode:eq-lienard-plane} の解では $x'=y-\mu F_{\mathrm{L}}(x)$ が $C^{1}$ 級なので $x$ は $C^{2}$ 級で、$x''=y'-\mu F_{\mathrm{L}}'(x)x'=-x+\mu(1-x^{2})x'$）。この座標を**リエナール平面**という。右辺は多項式で、平衡点は $x=0$, $y=\mu F_{\mathrm{L}}(0)=0$ の原点だけである。
+
+::: theorem ファン・デル・ポール方程式の周期解 {#ode:van-der-pol-periodic keywords="for every mu > 0 the van der Pol equation x'' - mu (1 - x^2) x' + x = 0 has a nonconstant periodic solution; proof by the Poincare-Bendixson theorem with a trapping region made of a hexagon minus a disk in the Lienard plane" index="ファン・デル・ポール方程式|ふぁんでるぽーるほうていしき, ファン・デル・ポール方程式の周期解|ふぁんでるぽーるほうていしきのしゅうきかい, リエナール平面|りえなーるへいめん"}
+すべての $\mu>0$ について、\eqref{ode:eq-van-der-pol} は定数でない周期解をもつ。リエナール平面 \eqref{ode:eq-lienard-plane} では、点 $(1,0)$ の $\omega$ 極限集合は原点を含まない周期軌道である。
+:::
+
+::: intuition
+原点のまわりの小さな円板からは解が外へ押し出され、大きな六角形の境界では解が内へ押し戻される。その間の、止まる点のない輪の形の領域に閉じ込められた解は、ポアンカレ–ベンディクソンの定理から周期軌道に巻きつく。
+:::
+
+::: proof
+\eqref{ode:eq-lienard-plane} のベクトル場を $f(x,y)\defeq(y-\mu F_{\mathrm{L}}(x),-x)$ とする。
+
+**Step 1（内側の円板）.** 【主張：$V_{0}(x,y)\defeq(x^{2}+y^{2})/2$ について $\{V_{0}\ge1/2\}$ は正の不変】$\dot V_{0}=x(y-\mu F_{\mathrm{L}}(x))+y(-x)=-\mu xF_{\mathrm{L}}(x)=\mu x^{2}\bigl(1-\tfrac{x^{2}}{3}\bigr)$。$V_{0}<1/2$ なら $x^{2}<1$ なので $\dot V_{0}\ge0$。\ref{ode:invariance-criterion.2} から従う。
+
+**Step 2（外側の六角形の選び方）.** $\mu F_{\mathrm{L}}(X)-2X\to\infty$（$X\to\infty$）なので、$X\ge2$ を
+$$
+\mu F_{\mathrm{L}}(X)>2X+1+\tfrac{2\mu}{3}
+$$
+となるようにとり、$H$ を $2X+1+\frac{2\mu}{3}<H<\mu F_{\mathrm{L}}(X)$ にとる（例：$\mu=1$ なら $X=4$, $H=12$。$F_{\mathrm{L}}(4)=52/3$）。六つの 1 次関数
+$$
+\begin{aligned}
+g_{T}&\defeq y-H, & g_{S}&\defeq y-x-(H-1), & g_{R}&\defeq x-X,\\
+g_{B}&\defeq -y-H, & g_{S'}&\defeq -y+x-(H-1), & g_{L}&\defeq -x-X
+\end{aligned}
+$$
+がすべて $\le0$ となる点の集合を $K$ とする。$K$ は有界閉集合でコンパクト。$K$ は円板 $\{V_{0}\le1\}$ を含む（$X\ge2>\sqrt{2}$、$H>3$ で、直線 $g_{S}=0$ と原点の距離 $(H-1)/\sqrt{2}$ は $\sqrt{2}$ より大きい。$g_{S'}$ も同様）。
+
+**Step 3（上の三辺）.** 【主張：$p\in K$ で $g_{T}(p)=0$, $g_{S}(p)=0$, $g_{R}(p)=0$ のそれぞれについて、その関数の $\dot g$ は負】
+- $g_{T}(p)=0$：$y=H$ と $g_{S}(p)\le0$ から $x\ge1$。$\dot g_{T}=y'=-x\le-1<0$。
+- $g_{S}(p)=0$：$y=x+H-1$ と $g_{T}(p)\le0$ から $x\le1$、$g_{L}(p)\le0$ から $x\ge-X$。$\dot g_{S}=y'-x'=-\bigl(x+y-\mu F_{\mathrm{L}}(x)\bigr)$ なので、$x+y-\mu F_{\mathrm{L}}(x)>0$ を示せばよい。$0\le x\le1$ なら $y\ge H-1>0$、$-\mu F_{\mathrm{L}}(x)=\mu x(1-x^{2}/3)\ge0$、$x\ge0$ で、和は正。$-X\le x<0$ なら $y\ge H-X-1$、$F_{\mathrm{L}}(x)-\tfrac23=\tfrac13(x+1)^{2}(x-2)\le0$ から $-\mu F_{\mathrm{L}}(x)\ge-\tfrac{2\mu}{3}$、$x\ge-X$ で、和は $H-2X-1-\tfrac{2\mu}{3}>0$ 以上。
+- $g_{R}(p)=0$：$x=X$ と $g_{T}(p)\le0$ から $y\le H$。$\dot g_{R}=x'=y-\mu F_{\mathrm{L}}(X)\le H-\mu F_{\mathrm{L}}(X)<0$。
+
+**Step 4（対称性と正の不変性）.** 【主張：$K$ は正の不変】$\sigma(x,y)\defeq(-x,-y)$ とすると、$F_{\mathrm{L}}$ は奇関数なので $f(\sigma(p))=-f(p)=D\sigma\,f(p)$。よって $(x(t),y(t))$ が解なら $\sigma(x(t),y(t))$ も解で、$g_{B}=g_{T}\circ\sigma$, $g_{S'}=g_{S}\circ\sigma$, $g_{L}=g_{R}\circ\sigma$、$\sigma(K)=K$。$p\in K$ で $g_{B}(p)=0$ なら $\sigma(p)\in K$ で $g_{T}(\sigma(p))=0$、そして $\dot g_{B}(p)=\langle\nabla g_{T}(\sigma p),D\sigma f(p)\rangle=\langle\nabla g_{T}(\sigma p),f(\sigma p)\rangle=\dot g_{T}(\sigma p)<0$（Step 3）。残りの二辺も同様。\ref{ode:invariance-criterion.3} から $K$ は正の不変。
+
+**Step 5（周期軌道）.** 【主張：$\omega((1,0))$ は原点を含まない周期軌道】$\xi\defeq(1,0)$ は $K$ に入り、$V_{0}(\xi)=1/2$。Step 1・4 から $\mathcal{O}^{+}(\xi)\subset K_{0}\defeq K\cap\{V_{0}\ge1/2\}$ で、$K_{0}$ はコンパクトなので $[0,\infty)\subset I_{\xi}$（\ref{ode:escape-corollaries.3}）、$\omega(\xi)\subset K_{0}$（閉集合 $K_{0}$ の点列の極限）。$K_{0}$ は唯一の平衡点である原点を含まないので、\ref{ode:poincare-bendixson} から $\omega(\xi)$ は周期軌道 $\Gamma$。
+
+**Step 6（元の方程式へ）.** $\Gamma$ 上の解 $(x(t),y(t))$ は周期的で、$x$ は \eqref{ode:eq-van-der-pol} の周期解。$x$ が定数なら $y'=-x$ も定数で、$y$ は周期的なので $y'=0$、$x=0$、さらに $x'=y-\mu F_{\mathrm{L}}(0)=y=0$ となり、$\Gamma$ が平衡点になって矛盾。$\xi\notin\Gamma$ なら $\Gamma$ はリミットサイクルで、$\xi\in\Gamma$ なら $\xi$ 自身が周期点である。
+
+::: hypcheck
+- **$\mu>0$**：Step 1 の $\dot V_{0}\ge0$ と、Step 2 で $\mu F_{\mathrm{L}}(X)\to\infty$ となる $X$ をとることに使った。$\mu=0$ では調和振動子で、すべての軌道が周期的になり、リミットサイクルはない（例の 2）。$\mu<0$ では、$x(-t)$ が係数 $-\mu$ の方程式を満たすので、時間を逆にして同じ結論（周期解の存在）が得られ、周期軌道は $\alpha$ 極限集合として現れる。
+- **非線形項 $x^{2}x'$**：Step 2・3 で、$|x|$ が大きいところで $\mu F_{\mathrm{L}}(x)$ が $3$ 次で増えることに使った。線形の $x''-\mu x'+x=0$（$\mu>0$）では原点以外のすべての解が発散し、周期解はない。
+- **平面であること**：Step 5 でポアンカレ–ベンディクソンの定理を使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**一般化：リエナールの定理.** $x''+f(x)x'+g(x)=0$ の形の方程式（**リエナール方程式**）について、$f$ は偶関数、$g$ は奇関数で $x>0$ のとき $g(x)>0$、$F(x)=\int_{0}^{x}f$ が $F'(0)=f(0)<0$ を満たし、ただ一つの正の零点 $a$ をもち、$x\ge a$ で単調に増加して $x\to\infty$ で $F(x)\to\infty$ となるなら（$f,g$ は $C^{1}$ 級）、この方程式（のリエナール平面）は**ただ一つ**のリミットサイクルをもち、それは安定である。ファン・デル・ポール方程式は $f(x)=\mu(x^{2}-1)$, $g(x)=x$, $F=\mu F_{\mathrm{L}}$, $a=\sqrt{3}$ の場合である。存在の部分は上の証明と同じ方針でも示せるが、一意性には、リミットサイクルを一周するときの $V_{0}$ の増減を細かく評価する議論が要る。ここでは証明しない（Perko『Differential Equations and Dynamical Systems』のリエナールの定理の節を参照）。
+
+**前提を変えると.** 捕獲領域を作るときに、内側の円板を抜くことが本質的である。$K$ だけでは原点（平衡点）を含むので、\ref{ode:trapping-region} は使えない。$K$ の中の解は原点に近づくかもしれず、それを Step 1 の円板が防いでいる。
+
+**高い視点：自励振動.** ファン・デル・ポール方程式は真空管の発振回路のモデルとして導かれた。外から周期的な力を加えなくても、系自身が一定の振幅と周期の振動を作り出す（**自励振動**）。比喩で言えば、ブランコを小さく揺らすと漕ぎ手が勢いを足し、大きく揺れすぎると空気抵抗が勝って、ちょうどよい揺れ幅に落ち着く。リミットサイクルは、この「ちょうどよい揺れ」が初期値によらずに決まる、ということの数学的な表現である。
+:::
+
+## ベンディクソン–デュラックの判定法 {#ode:sec-pl2-dulac}
+
+周期軌道が**ない**ことを示すには、周期軌道の内側の面積を考える。周期軌道の内側は流れで動かしても変わらないので、流れで面積が増えも減りもしないはずだが、発散が正なら流れは面積を増やしてしまう。
+
+::: theorem ベンディクソン–デュラックの判定法 {#ode:bendixson-dulac refname="ベンディクソン–デュラックの判定法" keywords="Bendixson-Dulac criterion: if div(g F) has one sign and vanishes on no open set in a region Omega without holes, there is no periodic orbit in Omega; Dulac function" index="ベンディクソン–デュラックの判定法|べんでぃくそんでゅらっくのはんていほう, デュラック関数|でゅらっくかんすう, ベンディクソンの判定法|べんでぃくそんのはんていほう"}
+$\Omega\subset W$ を開集合で、$\mathbb{R}^{2}\setminus\Omega$ の各連結成分が非有界であるもの（$\Omega=\mathbb{R}^{2}$ でもよい）とする。$C^{1}$ 級関数 $g\colon\Omega\to\mathbb{R}$ があって、
+1. $\Omega$ の各点で $\operatorname{div}(gF)\ge0$、
+2. $\operatorname{div}(gF)$ は $\Omega$ のどの空でない開部分集合の上でも恒等的に $0$ ではない
+
+とする。このとき、$\Omega$ に含まれる周期軌道は存在しない。1 の不等号を $\le0$ にしても同じである。
+:::
+
+::: intuition
+穴のない領域で、ある正の重み $g$ を掛けたベクトル場がいつも湧き出している（発散が正）なら、その領域の中を一周して戻ってくる軌道はない。一周する軌道の内側は流れで保たれるのに、湧き出しがあれば内側の面積は増えてしまうからである。
+:::
+
+::: proof
+$\Gamma\subset\Omega$ を周期軌道とし、$D\defeq\operatorname{int}\Gamma$ とする（$\Gamma$ はジョルダン曲線、\ref{ode:planar-period.2}）。$\operatorname{div}(gF)\le0$ の場合は $g$ を $-g$ に替えればよいので、1・2 を仮定する。
+
+**Step 1（内側は $\Omega$ に入る）.** 【主張：$\overline{D}=D\cup\Gamma$ は $\Omega$ に含まれるコンパクト集合】$p\notin\Omega$ とし、$C$ を $\mathbb{R}^{2}\setminus\Omega$ の $p$ を含む連結成分とする。$C$ は連結で $\Gamma\subset\Omega$ と交わらないので、$\mathbb{R}^{2}\setminus\Gamma$ の一つの成分に含まれ（\ref{top:components-properties}）、非有界なので有界な $D$ には含まれない。よって $C\subset\operatorname{ext}\Gamma$ で $p\notin D$。したがって $D\subset\Omega$、$\overline{D}=D\cup\Gamma\subset\Omega$ で、$\overline{D}$ は有界閉集合。
+
+**Step 2（重みを掛けた流れでも $\Gamma$ は不変）.** 【主張：$G\defeq gF$（$\Omega$ 上の $C^{1}$ 級ベクトル場）の流れ $\psi_{t}$ について、$\Gamma$ の各点の $G$ の最大解は $\mathbb{R}$ 上で定義され、$\Gamma$ に留まる】$\eta\in\Gamma$、$\gamma(s)\defeq\Phi_{s}(\eta)$（$T$ 周期）とする。$\gamma$ は $C^{1}$ 級なので $k(\sigma)\defeq g(\gamma(\sigma))$ は $\mathbb{R}$ 上の有界な $C^{1}$ 級関数で、1 次元の方程式 $\sigma'=k(\sigma)$, $\sigma(0)=s_{0}$ の最大解は $\mathbb{R}$ 上で定義される（\ref{ode:linear-growth-global}）。$x(t)\defeq\gamma(\sigma(t))$ とおくと $x'=\gamma'(\sigma)\sigma'=F(\gamma(\sigma))\,g(\gamma(\sigma))=G(x)$、$x(0)=\gamma(s_{0})$。一意性から $\psi_{t}(\gamma(s_{0}))=x(t)\in\Gamma$ がすべての $t$ で成り立つ。
+
+**Step 3（内側も不変）.** 【主張：$p\in D$ なら $\psi_{t}(p)$ はすべての $t\in\mathbb{R}$ で定義されて $D$ に入り、$\psi_{t}(D)=D$】$t_{1}$ で $\psi_{t_{1}}(p)\in\Gamma$ なら、Step 2 から $p=\psi_{-t_{1}}(\psi_{t_{1}}(p))\in\Gamma$ となり $p\in D$ に反する。よって $p$ の $G$ についての軌道は $\mathbb{R}^{2}\setminus\Gamma$ の中にあり、$0$ と $t$ の間の時刻の部分は連結で $p$ を含むので $D$ に入る。軌道はコンパクト集合 $\overline{D}\subset\Omega$ に留まるので、\ref{ode:escape-corollaries.3}（と時間の反転）から定義域は $\mathbb{R}$。よって $\psi_{t}(D)\subset D$ がすべての $t$ で成り立ち、$D=\psi_{t}(\psi_{-t}(D))\subset\psi_{t}(D)$。
+
+**Step 4（面積の変化率）.** 【主張：$p\in D$ について $J_{t}(p)\defeq\det D\psi_{t}(p)=\exp\Bigl(\int_{0}^{t}\operatorname{div}G(\psi_{s}(p))\,ds\Bigr)$】\ref{ode:flow-theorem.4} から $Y(t)\defeq D\psi_{t}(p)$ は $Y'=DG(\psi_{t}(p))Y$, $Y(0)=I$ の解。リウヴィルの公式（\ref{ode:liouville-formula}）と $\operatorname{tr}DG=\operatorname{div}G$ から従う。
+
+**Step 5（矛盾）.** 【主張：$\lambda(D)=\int_{D}J_{1}\,d\lambda>\lambda(D)$】Step 3 から $\psi_{1}$ は開集合 $D$ から $D$ への $C^{1}$ 級の微分同相写像（逆写像 $\psi_{-1}$、\ref{ode:flow-theorem.3}）で、$J_{1}>0$。変数変換公式（\ref{meas:change-of-variables.1}）から $\lambda(D)=\lambda(\psi_{1}(D))=\int_{D}J_{1}\,d\lambda$。仮定 1 から $J_{1}\ge1$。$D$ は空でない開集合なので、仮定 2 から $U\defeq\{p\in D:\operatorname{div}G(p)>0\}$ は空でない開集合。$p\in U$ なら $s\mapsto\operatorname{div}G(\psi_{s}(p))$ は $[0,1]$ で連続、$\ge0$、$s=0$ で正なので積分は正で、$J_{1}(p)>1$。$J_{1}-1$ は $U$ の上で正の連続関数なので、$U$ に含まれる小さい円板の上で正の定数以上で、$\int_{D}(J_{1}-1)\,d\lambda>0$。$D$ は有界で $\lambda(D)<\infty$ なので、$\int_{D}J_{1}\,d\lambda>\lambda(D)$。これは等式に矛盾する。
+
+::: hypcheck
+- **$\mathbb{R}^{2}\setminus\Omega$ の成分が非有界（穴がない）**：Step 1 で、周期軌道の内側が $\Omega$ に入ることに使った。外すと偽：$\Omega=\mathbb{R}^{2}\setminus\{0\}$, $F(x,y)=(-y,x)+(x,y)(1-x^{2}-y^{2})$, $g(x,y)=1/(x^{2}+y^{2})$ では $\operatorname{div}(gF)=-2<0$ だが、単位円は $\Omega$ の中の周期軌道（内側に原点がある）。
+- **仮定 1（符号が一定）**：Step 5 の $J_{1}\ge1$ に使った。調和振動子では $\operatorname{div}F=0$ で、周期軌道は無数にある。
+- **仮定 2（開集合の上で恒等的に $0$ でない）**：Step 5 の真の不等号に使った。
+- **$g$ と $F$ が $C^{1}$ 級**：$G$ の流れの存在と一意性（Step 2・3）と、ヤコビ行列の連続性（Step 4・5）に使った。
+- **ジョルダンの曲線定理**：Step 1・3 で、周期軌道の内側という不変な有界開集合を作るのに使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: proof 別証明（グリーンの定理、内側が鎖で分割される場合）
+上の Step 1 までは同じで、さらに $\overline{D}$ が 2 鎖 $c$ で分割され（\ref{vec:cube-decomposed-region}）、$\partial c$ の上の 1 形式の積分が $\Gamma$ を一周する線積分（の $\pm1$ 倍）に等しいとする。たとえば $D$ が点 $p$ について星形で、$\Gamma$ が $p$ を中心とする極座標で $r=\rho(\theta)$（$\rho$ は正の $C^{1}$ 級）と表されるなら、$c(r,\theta)\defeq p+r\rho(2\pi\theta)(\cos2\pi\theta,\sin2\pi\theta)$ がそのような鎖である（円板の例と同じ計算）。
+
+$G=gF$ に、$P\defeq-G_{2}$, $Q\defeq G_{1}$ としてグリーンの定理（\tref{vec:green-theorem}）を使うと、$Q_{x}-P_{y}=\operatorname{div}G$ なので
+$$
+\int_{\overline{D}}\operatorname{div}G\,dx\,dy=\pm\int_{0}^{T}\bigl(-G_{2}(\gamma)\gamma_{1}'+G_{1}(\gamma)\gamma_{2}'\bigr)\,dt
+$$
+（$\gamma(t)=\Phi_{t}(\eta)$ は $\Gamma$ を一周する）。$\gamma'=F(\gamma)$ なので被積分関数は $g(\gamma)\bigl(-F_{2}F_{1}+F_{1}F_{2}\bigr)=0$ で、右辺は $0$。一方、左辺の被積分関数は $\ge0$ で、空でない開集合 $U$（上の Step 5）の上で正なので、左辺は正。矛盾。
+
+この証明では、周期軌道の上で $G$ が接線方向を向くので、$G$ を $90^{\circ}$ 回したベクトル場の線積分（境界を横切る流量）が $0$ になる、という幾何がそのまま見える。ただし \ref{vec:green-theorem} は鎖で分割される領域についての定理で、一般のジョルダン曲線の内側をそのように分割できることはここでは示していないため、主証明では面積の保存（リウヴィルの公式）を使った。
+:::
+
+::: corollary ベンディクソンの判定法 {#ode:bendixson-criterion keywords="Bendixson criterion: if div F has one sign and vanishes on no open subset of a region without holes, there is no periodic orbit in it" index="ベンディクソンの判定法|べんでぃくそんのはんていほう"}
+$\Omega$ を \ref{ode:bendixson-dulac} と同じ開集合とする。$\Omega$ の上で $\operatorname{div}F\ge0$（または $\le0$）で、$\operatorname{div}F$ がどの空でない開部分集合の上でも恒等的に $0$ でなければ、$\Omega$ に含まれる周期軌道はない。
+:::
+
+::: proof
+$g=1$ として \ref{ode:bendixson-dulac} を使う。
+:::
+
+::: example
+1. **摩擦のある振り子** $\theta''+k\theta'+\sin\theta=0$（$k>0$）は $F(\theta,\omega)=(\omega,-k\omega-\sin\theta)$ で、$\operatorname{div}F=-k<0$。$\Omega=\mathbb{R}^{2}$ で \ref{ode:bendixson-criterion} が使え、周期軌道はない。
+2. **ファン・デル・ポール方程式**のリエナール平面 \eqref{ode:eq-lienard-plane} では $\operatorname{div}f=-\mu F_{\mathrm{L}}'(x)=\mu(1-x^{2})$。帯 $\Omega\defeq\{|x|<1\}$ の補集合は二つの半平面で、どちらも非有界。$\Omega$ では $\operatorname{div}f>0$ なので、周期軌道はすべて $\{|x|\ge1\}$ と交わる。\ref{ode:van-der-pol-periodic} の周期軌道は、振幅が $1$ 以上である。
+:::
+
+::: supplement
+**前提を変えると.** 判定法は、周期軌道が**ない**ことしか言わない。逆に発散が符号を変えることは周期軌道の存在を意味しない。また、仮定は周期軌道の内側全体で使うので、「穴のない」という条件を外すと、上の検査欄の例のように穴のまわりを回る周期軌道を見逃す。穴が一つの領域（円環）では、同じ議論から周期軌道は高々一つ（穴を囲むもの）であることが示せる。
+
+**似た定理.** 勾配系 $x'=-\nabla V$ に周期軌道がないこと（\ref{ode:prob-pl-gradient}）は、関数 $V$ が軌道に沿って減ることによる別の型の排除法で、次元によらない。ベンディクソン–デュラックは平面に特有の、面積（2 次元の体積）を使う排除法である。高次元でもリウヴィルの公式は成り立つ（発散が正なら流れは体積を増やす）が、周期軌道は体積をもつ領域を囲まないので、そのままでは周期軌道を排除できない。
+
+**高い視点：流れと面積.** Step 4 は、流れのヤコビ行列式（面積の拡大率）の対数微分が発散であることを言っている。発散が $0$ のベクトル場（たとえばハミルトン系 $x'=H_{y}$, $y'=-H_{x}$）の流れは面積を保ち、周期軌道は族をなして並ぶことが多い。デュラック関数 $g$ を掛けることは、軌道は変えずに時間の進み方と面積の測り方を取り替えることにあたる。比喩で言えば、一周して戻ってくる川の流れが囲む池は、いつも同じ大きさのはずなのに、川のどこでも水が湧き出しているなら池は膨らんでしまう、という矛盾である。
+:::
+
+## 3 次元以上では {#ode:sec-pl2-higher}
+
+ポアンカレ–ベンディクソンの定理の証明は、ジョルダンの曲線定理（\ref{ode:transversal-monotone}）に依存していた。3 次元以上では、閉曲線は空間を分けず、軌道は自分の過去の跡を避けてどこへでも回り込める。
+
+::: supplement
+**例 1（トーラスの上の無理数の流れ）.** $\mathbb{R}^{3}$ の中のトーラス $\{((2+\cos\varphi)\cos\vartheta,(2+\cos\varphi)\sin\vartheta,\sin\varphi)\}$ の近傍に、角度の座標で $\vartheta'=1$, $\varphi'=\alpha$（$\alpha$ は無理数）となり、トーラスに接する $C^{1}$ 級（実は $C^{\infty}$ 級）のベクトル場を作ることができる。トーラスの各点の軌道はトーラスの中で稠密で、$\omega$ 極限集合はトーラス全体になる。これは有界で、平衡点を含まず、周期軌道でもない。ここでは証明しない（稠密性はクロネッカーの定理、すなわち無理数回転の軌道が円周で稠密であることに帰着する）。
+
+**例 2（ローレンツ方程式）.** $x'=\sigma(y-x)$, $y'=x(\rho-z)-y$, $z'=xy-\beta z$ は、大気の対流の簡単なモデルとして導かれた方程式で、$\sigma=10$, $\beta=8/3$, $\rho=28$ では、すべての解は有界な領域に入り、ほとんどの解は平衡点にも周期軌道にも近づかず、蝶の形をした複雑な集合（**ローレンツ・アトラクター**）のまわりを不規則に回り続けることが数値計算で観察される。この集合が本当に「ストレンジアトラクター」であることは、計算機を援用した証明（W. Tucker, 2002）で示された。ここでは主張を述べるだけで証明しない。
+
+**例 3（高次元の線形系との対比）.** 線形系 $x'=Ax$ では、有界な軌道の $\omega$ 極限集合は原点か、純虚数の固有値に対応する回転の重ね合わせで、周期の比が無理数なら例 1 と同じくトーラス（の一部）を稠密に埋める。たとえば $\mathbb{R}^{4}$ で二つの回転 $(x_{1},x_{2})$ を角速度 $1$、$(x_{3},x_{4})$ を角速度 $\sqrt{2}$ で回す系では、$|(x_{1},x_{2})|$ と $|(x_{3},x_{4})|$ が保存され、軌道はトーラス $\{|(x_{1},x_{2})|=r_{1},|(x_{3},x_{4})|=r_{2}\}$ の中で稠密になる（これも例 1 と同じくクロネッカーの定理に帰着する）。
+
+**高い視点.** 2 次元では「一筆書きの線が自分の跡を横切れない」ことが行き先を輪に限定したが、3 次元では線は跡の上や下をくぐり抜けられる。行き先の形の自由さが、カオスを可能にする。逆に、2 次元でも平面でない面（トーラス）の上では、ジョルダンの曲線定理が成り立たないために、例 1 の 2 次元版（トーラスそのものの上の流れ）がすでに反例になる。
+:::
+
+## 問題 {#ode:sec-pl2-problems}
+
+::: problem {#ode:prob-pl-annulus}
+$F(x,y)\defeq\bigl(x-y-x(x^{2}+2y^{2}),\ x+y-y(x^{2}+2y^{2})\bigr)$ とする。
+1. 極座標で $r'=r\bigl(1-r^{2}(1+\sin^{2}\theta)\bigr)$, $\theta'=1$ となることを示せ。
+2. 円環 $K\defeq\{1/2\le x^{2}+y^{2}\le1\}$ が正の不変で平衡点を含まないことを示し、$K$ の中に周期軌道があることを導け。
+:::
+
+::: solution
+**1.** $xx'+yy'=(x^{2}+y^{2})-(x^{2}+y^{2})(x^{2}+2y^{2})$、$xy'-yx'=x^{2}+y^{2}$（交差項は打ち消し合う）。$x^{2}+2y^{2}=r^{2}(1+\sin^{2}\theta)$ なので、$rr'=r^{2}(1-r^{2}(1+\sin^{2}\theta))$、$\theta'=(xy'-yx')/r^{2}=1$。
+
+**2.** $V\defeq x^{2}+y^{2}$ とすると $\dot V=2V\bigl(1-(x^{2}+2y^{2})\bigr)$。$V>1$ では $x^{2}+2y^{2}\ge V>1$ なので $\dot V<0$、\ref{ode:invariance-criterion.1} から $\{V\le1\}$ は正の不変。$V<1/2$ では $x^{2}+2y^{2}\le2V<1$ なので $\dot V>0$、\ref{ode:invariance-criterion.2} から $\{V\ge1/2\}$ は正の不変。共通部分 $K$ も正の不変で、コンパクト。平衡点では $xy'-yx'=x^{2}+y^{2}=0$ なので、平衡点は原点だけで、$K$ に入らない。\ref{ode:trapping-region} から $K$ は周期軌道を含む。
+:::
+
+::: problem {#ode:prob-pl-competition}
+$a,b,c,d,e,f>0$ とし、二つの種の競争のモデル
+$$
+x'=x(a-bx-cy),\qquad y'=y(d-ex-fy)
+$$
+を考える。
+1. 座標軸は不変集合であることを示し、周期軌道が開いた第 1 象限 $Q\defeq\{x>0,y>0\}$ と交わるなら $Q$ に含まれることを示せ。
+2. $g(x,y)\defeq1/(xy)$ をデュラック関数として、$Q$ に周期軌道がないことを示せ。
+:::
+
+::: solution
+**1.** $x$ 軸の点 $(\xi_{1},0)$ について、1 次元の方程式 $x'=x(a-bx)$ の最大解 $x(t)$ をとると $(x(t),0)$ は系の解なので、一意性からこの点の軌道は $x$ 軸に含まれる。$y$ 軸も同様で、座標軸の和 $A$ は不変、その補集合も不変。周期軌道 $\Gamma$ が $Q$ と交われば $\Gamma\cap A=\varnothing$ で、$\Gamma$ は連結（連続像）なので、$\mathbb{R}^{2}\setminus A$ の連結成分 $Q$ に含まれる。
+
+**2.** $Q$ の上で
+$$
+\operatorname{div}(gF)=\partial_{x}\frac{a-bx-cy}{y}+\partial_{y}\frac{d-ex-fy}{x}=-\frac{b}{y}-\frac{f}{x}<0.
+$$
+$\mathbb{R}^{2}\setminus Q=\{x\le0\}\cup\{y\le0\}$ は交わる二つの連結な半平面の和で連結（\ref{top:connected-preservation.2}）、非有界。\ref{ode:bendixson-dulac}（不等号 $\le0$ の版）から $Q$ に含まれる周期軌道はなく、1 から $Q$ と交わる周期軌道もない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

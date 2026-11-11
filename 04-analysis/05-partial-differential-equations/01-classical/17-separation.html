@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>変数分離とフーリエの方法 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/17-separation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 変数分離とフーリエの方法 {#pde:page-separation keywords="separation of variables, Fourier method, eigenfunction expansion, heat equation on an interval, Dirichlet and Neumann boundary conditions, Fourier sine series, Fourier cosine series, method of images, vibrating string, string with fixed ends, compatibility conditions, decay of Fourier coefficients, termwise differentiation, 変数分離, 変数分離法, フーリエの方法, 正弦級数, 余弦級数, 弦の振動, 両立条件, 鏡像法"}
+
+これまでのページでは、熱方程式と波動方程式を全空間（または半直線）で、解の公式を使って解いた（\ref{pde:heat-cauchy-solution}, \ref{pde:wave-dalembert}）。このページでは、空間が有界な区間 $(0,\pi)$ で両端に境界条件が付いた問題を、**変数分離**（**フーリエの方法**）で解く。$u(x,t)=X(x)T(t)$ の形の解を探すと、$X$ は $-X''=\lambda X$ と境界条件を満たす固有関数（\ref{ode:sl-laplacian-eigenvalues}）で、$T$ は 1 階または 2 階の定数係数の常微分方程式の解になる。初期値を固有関数で展開し、その係数でこれらの特殊解を重ね合わせたものが**級数解**である。
+
+級数を書くことはやさしいが、それが本当に方程式を満たす（項別に微分してよい）か、初期値にどの意味で戻るかは、初期値の**フーリエ係数の減衰**と、**端点での両立条件**で決まる。熱方程式では係数 $e^{-k^{2}t}$ が減衰を自動的に与えるので、初期値が $L^{2}$ に入るだけで $t>0$ では $C^{\infty}$ 級の解になり、初期値への戻り方だけが初期値の条件で変わる。波動方程式では減衰はまったく得られず、初期値そのものの滑らかさと端点での両立条件が、級数が古典解になるかどうかを決める。これは全空間で見た「熱方程式は滑らかにし、波動方程式は滑らかさを運ぶだけ」（\ref{pde:wave-comparison-table}）の、有界区間での姿である。次のページでは同じ方法をラプラス方程式（長方形と円板）と変数係数の方程式（スツルム–リウヴィル展開）に使う（\see{pde:page-separation-laplace}）。
+
+## 記法と定義の確認 {#pde:sec-sp-notation}
+
+::: notation
+- 熱方程式（\ref{pde:heat-equation}）では \tref{pde:page-heat-equation} と同じく点を $(x,t)$ と書き、$C^{2,1}$ は空間に 2 回・時間に 1 回連続微分可能な関数の全体。波動方程式（\ref{pde:wave-cauchy-problem}）では \tref{pde:page-wave-equation} と同じく時間を先に $(t,x)$ と書き、$J$ はいつも $0$ を含む開区間。ページの中で二つの約束が混ざるが、それぞれの方程式の前のページと合わせるためである。
+- 熱核 $\Phi$ は \ref{pde:heat-kernel}（性質は \ref{pde:heat-kernel-properties}）、有界連続な初期値の解は \ref{pde:heat-cauchy-solution}、放物境界は \ref{pde:heat-parabolic-boundary}、熱方程式の弱最大値原理は \tref{pde:heat-weak-maximum}、初期境界値問題の一意性は \ref{pde:heat-cylinder-uniqueness}。ダランベールの公式は \tref{pde:wave-dalembert}（式 \eqref{pde:eq-dalembert}）、半直線の問題は \ref{pde:wave-half-line}。
+- $C^{k}[0,\pi]$ は端点で片側微分した $C^{k}$ 級関数の全体。$\varphi$ が $[0,\pi]$ で連続、$(0,\pi)$ で微分可能で、$\varphi'$ が $[0,\pi]$ 上の連続関数に延びるなら、平均値の定理（\tref{calc:mean-value-theorem}）から端点の片側微分係数が存在してその延長の値に等しい。したがって「内部で $C^{k}$ 級で、$k$ 階までの導関数が端点まで連続に延びる」ことと $C^{k}[0,\pi]$ に入ることは同じである。2 変数の関数についても、$J\times[0,\pi]$ や $[0,\pi]\times(0,T]$ の上の $C^{k}$ を同じ意味で使う。
+- 一様収束：M 判定法・一様極限の連続性・項別積分は \ref{calc:uniform-limit-theorems}、項別微分は \ref{calc:uniform-derivative}。2 変数の級数 $\sum_{k}v_{k}$ で、各 $v_{k}$ が $C^{\infty}$ 級で、すべての偏導関数の項別の級数 $\sum_{k}\partial_{t}^{j}\partial_{x}^{m}v_{k}$ が局所一様に収束するなら、項別微分を一つの変数ずつ使って、和は $C^{\infty}$ 級で偏導関数は項別にとれる（偏導関数がすべて存在して連続なので）。$C^{2}$ 級なども同様。
+- 積分：微積分学の基本定理と部分積分は \tref{calc:fundamental-theorem}, \ref{calc:substitution-parts}、パラメータ積分の連続性と微分は \ref{meas:parameter-integrals}、フビニの定理は \tref{meas:fubini}。$L^{2}(0,\pi)$ は実数値の 2 乗可積分関数の空間で、$\|f\|_{2}\defeq\bigl(\int_{0}^{\pi}f^{2}dx\bigr)^{1/2}$。
+- フーリエ級数：周期 $1$ の円周 $\mathbb{T}$ 上のフーリエ係数は \ref{four:fourier-coefficients}、$L^{2}$ 理論は \ref{four:l2-theory}。正規直交系とベッセルの不等式は \ref{fa:bessel}。区間 $[0,\pi]$ の正弦関数・余弦関数による展開は、\ref{ode:sl-fourier-examples} でスツルム–リウヴィル理論から得た。このページでは、選択公理を避けるために \ref{four:l2-theory} から示し直す（\ref{pde:sep-sine-cosine}）。
+- 関数は実数値とする。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 正弦級数・余弦級数と周期的な延長 {#pde:sec-sp-series}
+
+$f\in L^{2}(0,\pi)$（$L^{1}$ でもよい）と整数 $k\ge0$ について
+$$
+a_{k}(f)\defeq\frac{2}{\pi}\int_{0}^{\pi}f(x)\cos kx\,dx,\qquad b_{k}(f)\defeq\frac{2}{\pi}\int_{0}^{\pi}f(x)\sin kx\,dx
+$$
+とおく。級数 $\sum_{k\ge1}b_{k}(f)\sin kx$ を $f$ の**正弦級数**、$\frac{a_{0}(f)}{2}+\sum_{k\ge1}a_{k}(f)\cos kx$ を**余弦級数**という。
+
+::: lemma 正弦級数と余弦級数の基本性質 {#pde:sep-sine-cosine keywords="Fourier sine and cosine series on [0, pi]: completeness and Parseval identity, uniqueness for continuous functions, absolutely summable coefficients give uniform convergence to f, integration by parts formulas b_k(f) = a_k(f')/k when f(0) = f(pi) = 0 and a_k(f) = -b_k(f')/k, Bessel inequality" index="正弦級数|せいげんきゅうすう, 余弦級数|よげんきゅうすう"}
+$f\in L^{2}(0,\pi)$ とする。
+1. $\displaystyle\frac{2}{\pi}\|f\|_{2}^{2}=\sum_{k\ge1}b_{k}(f)^{2}=\frac{a_{0}(f)^{2}}{2}+\sum_{k\ge1}a_{k}(f)^{2}$ で、正弦級数と余弦級数の部分和はどちらも $L^{2}(0,\pi)$ で $f$ に収束する。
+2. $f,g\in C[0,\pi]$ で、すべての $k\ge1$ について $b_{k}(f)=b_{k}(g)$ なら $f=g$。すべての $k\ge0$ について $a_{k}(f)=a_{k}(g)$ でも $f=g$。
+3. $f\in C[0,\pi]$ で $\sum_{k}\lvert b_{k}(f)\rvert<\infty$ なら、$[0,\pi]$ で一様に $f(x)=\sum_{k\ge1}b_{k}(f)\sin kx$。余弦級数でも同様。
+4. $f\in C^{1}[0,\pi]$ なら $k\ge1$ について $a_{k}(f)=-b_{k}(f')/k$。さらに $f(0)=f(\pi)=0$ なら $b_{k}(f)=a_{k}(f')/k$。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$f$ を奇関数として $(-\pi,\pi)$ に延ばしたものを $F$ とし、$\psi(s)\defeq F(2\pi s-\pi)$（$0<s<1$）を周期 $1$ の関数とみる。$\psi$ の \ref{four:fourier-coefficients} の意味の係数は、変数変換 $x=2\pi s-\pi$ で
+$$
+\hat\psi(n)=\frac{(-1)^{n}}{2\pi}\int_{-\pi}^{\pi}F(x)e^{-inx}dx=\frac{(-1)^{n}}{2\pi}\Bigl(-i\int_{-\pi}^{\pi}F\sin nx\,dx\Bigr)=\frac{(-1)^{n+1}i}{2}\,b_{n}(f)
+$$
+（$F\cos nx$ は奇関数で積分が $0$、$F\sin nx$ は偶関数で積分が $\pi b_{n}(f)$。$b_{-n}=-b_{n}$, $b_{0}=0$ と約束する）。\ref{four:l2-theory.2} のパーセヴァルの等式 $\int_{0}^{1}\psi^{2}ds=\sum_{n}\lvert\hat\psi(n)\rvert^{2}$ の左辺は $\frac{1}{2\pi}\int_{-\pi}^{\pi}F^{2}=\frac1\pi\|f\|_{2}^{2}$、右辺は $\frac12\sum_{k\ge1}b_{k}(f)^{2}$ なので、最初の等式を得る。部分和の収束は、$\psi$ の対称な部分和 $S_{N}\psi$ が $(-1)^{n}e^{2\pi ins}=e^{in x}$ を通して $\sum_{k\le N}b_{k}(f)\sin kx$ に対応するので、\ref{four:l2-theory.2} の $\|S_{N}\psi-\psi\|_{2}\to0$ を $(0,\pi)$ に制限して得る。余弦級数は偶関数への延長で同じ計算をする（$\hat\psi(n)=\frac{(-1)^{n}}{2}a_{\lvert n\rvert}(f)$）。
+
+**Step 2.** 【主張：2・3】2 は、$f-g$ に 1 を使うと $\|f-g\|_{2}=0$ で、$f-g$ は連続なので、$0$ でない点があればその近くの区間で $0$ でなく積分が正になって矛盾することから。3 では、M 判定法から $\sum b_{k}(f)\sin kx$ は連続関数 $g$ に一様収束する。$\int_{0}^{\pi}\sin kx\sin mx\,dx=\frac{\pi}{2}\delta_{km}$ と項別積分から $b_{m}(g)=b_{m}(f)$ がすべての $m$ で成り立ち、2 から $g=f$。
+
+**Step 3.** 【主張：4】部分積分（\ref{calc:substitution-parts.2}）から
+$$
+\begin{aligned}a_{k}(f)&=\frac{2}{\pi}\Bigl[\frac{f\sin kx}{k}\Bigr]_{0}^{\pi}-\frac{2}{\pi k}\int_{0}^{\pi}f'\sin kx\,dx=-\frac{b_{k}(f')}{k},\\b_{k}(f)&=\frac{2}{\pi}\Bigl[-\frac{f\cos kx}{k}\Bigr]_{0}^{\pi}+\frac{2}{\pi k}\int_{0}^{\pi}f'\cos kx\,dx.\end{aligned}
+$$
+1 行目の境界の項は $\sin0=\sin k\pi=0$ で消え、2 行目の境界の項は $f(0)=f(\pi)=0$ のとき消える。
+
+::: hypcheck
+- **$f\in L^{2}$**：1 でパーセヴァルの等式を使うのに使った。$f\in L^{1}$ でも係数は定義でき、2 は $L^{1}$ の一意性定理（\ref{four:uniqueness}）から同じく成り立つ。
+- **4 の $f(0)=f(\pi)=0$**：正弦係数の部分積分で境界の項を消すのに使った。外すと $b_{k}(f)=\frac{2}{\pi k}\bigl(f(0)-(-1)^{k}f(\pi)\bigr)+\frac{a_{k}(f')}{k}$ で、第 1 項は $1/k$ の速さでしか減衰しない（例：$f=1$ なら $b_{k}=\frac{2}{\pi k}(1-(-1)^{k})$）。余弦係数の部分積分にはこの条件はいらない。これが、ディリクレ条件では両立条件が、ノイマン条件では（1 階までは）それがいらない理由である。
+- **公理**：選択公理は使わない（\ref{four:l2-theory} は選択公理を使わずに示されている）。
+:::
+:::
+
+正弦級数は「奇関数として周期 $2\pi$ に延ばした関数」のフーリエ級数である。延ばした関数の滑らかさは、端点での条件で決まる。
+
+::: lemma 奇関数・偶関数としての周期的な延長 {#pde:sep-periodic-extension keywords="odd and even 2 pi-periodic extension of a function on [0, pi]; the odd extension is C^m iff all even-order derivatives up to m vanish at 0 and pi; the even extension is C^m iff all odd-order derivatives up to m vanish at 0 and pi" index="奇関数への延長|きかんすうへのえんちょう, 偶関数への延長|ぐうかんすうへのえんちょう, 周期的な延長|しゅうきてきなえんちょう"}
+$\varphi\colon[0,\pi]\to\mathbb{R}$ について、$\varphi_{\mathrm{odd}}$ を「$[0,\pi]$ で $\varphi$、$[-\pi,0)$ で $-\varphi(-x)$」を周期 $2\pi$ に延ばした関数、$\varphi_{\mathrm{ev}}$ を「$[-\pi,0)$ で $\varphi(-x)$」を周期 $2\pi$ に延ばした関数とする（$\varphi_{\mathrm{odd}}$ が矛盾なく定まるには $\varphi(0)=\varphi(\pi)=0$ が要る。そうでないときは $0$, $\pi$ の整数倍の点の値を $0$ とする）。$m\ge0$ とし、$\varphi\in C^{m}[0,\pi]$ とする。
+1. $\varphi_{\mathrm{odd}}\in C^{m}(\mathbb{R})$ であるための必要十分条件は、$m$ 以下の偶数 $j$ すべてについて $\varphi^{(j)}(0)=\varphi^{(j)}(\pi)=0$。
+2. $\varphi_{\mathrm{ev}}\in C^{m}(\mathbb{R})$ であるための必要十分条件は、$m$ 以下の奇数 $j$ すべてについて $\varphi^{(j)}(0)=\varphi^{(j)}(\pi)=0$。
+:::
+
+::: proof
+1 を示す（2 も同じ）。$\Phi\defeq\varphi_{\mathrm{odd}}$ は、各区間 $[\ell\pi,(\ell+1)\pi]$（$\ell\in\mathbb{Z}$）の上で $\pm\varphi(\pm x+c)$ の形なので、その閉区間の上で $C^{m}$ 級である。
+
+**Step 1.** 【主張：$x=0$ での $j$ 階の右微分係数は $\varphi^{(j)}(0)$、左微分係数は $(-1)^{j+1}\varphi^{(j)}(0)$。$x=\pi$ でも、左が $\varphi^{(j)}(\pi)$、右が $(-1)^{j+1}\varphi^{(j)}(\pi)$】$x\le0$ の近くで $\Phi(x)=-\varphi(-x)$ を $j$ 回微分すると $(-1)^{j+1}\varphi^{(j)}(-x)$。$\pi$ の右では、周期性から $\Phi(\pi+s)=\Phi(s-\pi)=-\varphi(\pi-s)$（$0\le s\le\pi$）で、$s$ について $j$ 回微分すると $(-1)^{j+1}\varphi^{(j)}(\pi-s)$。他の接ぎ目 $\ell\pi$ は周期性からこのどちらかに帰着する。
+
+**Step 2.** 【主張：区間ごとに $C^{m}$ 級で、接ぎ目で $m$ 階までの左右の微分係数が一致する関数は $C^{m}(\mathbb{R})$ に属する。逆に $C^{m}(\mathbb{R})$ なら一致する】$j<m$ まで示したとし、$\Phi^{(j)}$ が接ぎ目で連続な関数として定まっているとする。接ぎ目で $\Phi^{(j)}$ の左右の微分係数が一致するので $\Phi^{(j)}$ はそこで微分可能で、$\Phi^{(j+1)}$ は区間ごとの導関数をつないだものになり、接ぎ目で左右の値が一致するので連続である。逆向きは、微分係数が存在すれば左右の微分係数がそれに等しいことから。
+
+Step 1・2 から、$\Phi\in C^{m}$ と、$j\le m$ について $\varphi^{(j)}(0)=(-1)^{j+1}\varphi^{(j)}(0)$, $\varphi^{(j)}(\pi)=(-1)^{j+1}\varphi^{(j)}(\pi)$ が同値である。$j$ が奇数なら自動的に成り立ち、偶数なら $\varphi^{(j)}(0)=\varphi^{(j)}(\pi)=0$ と同じである（$j=0$ は $\Phi$ の連続性で、$\varphi(0)=\varphi(\pi)=0$ のときに値の約束が両側と一致する）。
+:::
+
+## 区間の熱方程式 {#pde:sec-sp-heat}
+
+両端を温度 $0$ に保った長さ $\pi$ の棒の温度を考える。$u(x,t)=X(x)T(t)$ が $\partial_{t}u=\partial_{x}^{2}u$ と $u(0,t)=u(\pi,t)=0$ を満たし $0$ でないなら、$T'(t)/T(t)=X''(x)/X(x)$ は $x$ にも $t$ にもよらない定数 $-\lambda$ で、$-X''=\lambda X$, $X(0)=X(\pi)=0$。\ref{ode:sl-laplacian-eigenvalues.1} から $\lambda=k^{2}$, $X=\sin kx$（$k\ge1$）で、$T=e^{-k^{2}t}$。これらを重ね合わせたものが級数解である。
+
+::: lemma 熱核による表示（鏡像法） {#pde:sep-heat-images keywords="method of images for the heat equation on (0, pi): the sine series solution equals the heat kernel convolution with the odd 2 pi-periodic extension of the initial data, and the cosine series solution with the even extension; computation of sine coefficients via Fubini and the Fourier transform of the heat kernel" index="鏡像法（熱方程式）|きょうぞうほうねつほうていしき"}
+$f$ を $(0,\pi)$ 上の有界な可測関数とし、$t>0$, $x\in\mathbb{R}$ について
+$$
+u_{\mathrm{D}}(x,t)\defeq\sum_{k\ge1}b_{k}(f)e^{-k^{2}t}\sin kx,\qquad u_{\mathrm{N}}(x,t)\defeq\frac{a_{0}(f)}{2}+\sum_{k\ge1}a_{k}(f)e^{-k^{2}t}\cos kx
+$$
+とする（$\lvert a_{k}\rvert,\lvert b_{k}\rvert\le2\sup\lvert f\rvert$ なので、どちらも絶対収束する）。このとき
+$$
+u_{\mathrm{D}}(x,t)=\int_{\mathbb{R}}\Phi(x-y,t)f_{\mathrm{odd}}(y)\,dy,\qquad u_{\mathrm{N}}(x,t)=\int_{\mathbb{R}}\Phi(x-y,t)f_{\mathrm{ev}}(y)\,dy.
+$$
+:::
+
+::: intuition
+端で温度を $0$ に保つことは、棒の外に、符号を反転させた「鏡の中の棒」を無限に並べて全空間の熱方程式を解くことと同じである。鏡の中の熱がちょうど端で打ち消し合う。端を断熱する（ノイマン条件）なら、鏡の中の棒は符号を変えずに並べる。
+:::
+
+::: proof
+$D$ の場合を示す（$N$ も同じ）。$F\defeq f_{\mathrm{odd}}$、$v(x,t)\defeq\int_{\mathbb{R}}\Phi(x-y,t)F(y)\,dy$ とおき、$t>0$ を固定する。
+
+**Step 1.** 【主張：$v(\cdot,t)$ は連続な奇関数】$\lvert x-x_{0}\rvert\le1$ なら $\Phi(x-y,t)\lvert F(y)\rvert\le\sup\lvert f\rvert\,(4\pi t)^{-1/2}e^{-(\lvert x_{0}-y\rvert-1)_{+}^{2}/4t}$ で右辺は $y$ について可積分なので、\ref{meas:parameter-integrals.1} から連続。$\Phi$ が $x$ について偶関数で $F$ が奇関数なので、$y\mapsto-y$ と変数を変えて $v(-x,t)=-v(x,t)$。
+
+**Step 2.** 【主張：$b_{k}(v(\cdot,t))=b_{k}(f)\,e^{-k^{2}t}$】Step 1 から $v(\cdot,t)\sin kx$ は偶関数なので $b_{k}(v(\cdot,t))=\frac1\pi\int_{-\pi}^{\pi}v(x,t)\sin kx\,dx$。$y=x-z$ と変数を変え、$\lvert\Phi(z,t)F(x-z)\sin kx\rvert\le\sup\lvert f\rvert\,\Phi(z,t)$ が $[-\pi,\pi]\times\mathbb{R}$ で可積分なのでフビニの定理で積分の順序を替えると
+$$
+b_{k}(v(\cdot,t))=\frac1\pi\int_{\mathbb{R}}\Phi(z,t)\Bigl(\int_{-\pi}^{\pi}F(x-z)\sin kx\,dx\Bigr)dz.
+$$
+内側の積分は、$s=x-z$ とおき、被積分関数 $F(s)\sin k(s+z)$ が周期 $2\pi$ をもつので積分区間を $[-\pi,\pi]$ に移せて、$\cos kz\int_{-\pi}^{\pi}F\sin ks\,ds+\sin kz\int_{-\pi}^{\pi}F\cos ks\,ds=\pi b_{k}(f)\cos kz$（$F\cos ks$ は奇関数）。最後に \ref{pde:heat-kernel-properties.4} で $\xi=k/2\pi$ とすると $\int\Phi(z,t)e^{-ikz}dz=e^{-k^{2}t}$ で、$\Phi$ が偶関数なので $\int\Phi(z,t)\cos kz\,dz=e^{-k^{2}t}$。
+
+**Step 3.** 【主張：$v(\cdot,t)=u_{\mathrm{D}}(\cdot,t)$】$u_{\mathrm{D}}(\cdot,t)$ は M 判定法から連続で、項別積分から $b_{k}(u_{\mathrm{D}}(\cdot,t))=b_{k}(f)e^{-k^{2}t}$。Step 2 と \ref{pde:sep-sine-cosine.2} から $[0,\pi]$ の上で一致する。どちらも奇関数で周期 $2\pi$ をもつ（$v$ は $F$ の周期性と平行移動不変性から）ので、$\mathbb{R}$ 全体で一致する。
+
+::: hypcheck
+- **$f$ が有界**：Step 1・2 の可積分性の評価に使った。$f\in L^{2}(0,\pi)$ でも、$F$ は局所 2 乗可積分で周期的なので $\int\Phi(x-y,t)\lvert F(y)\rvert dy<\infty$ となり同じ表示が成り立つが、このページでは使わない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem 区間の熱方程式（ディリクレ条件） {#pde:sep-heat-dirichlet keywords="heat equation on (0, pi) with Dirichlet boundary conditions u(0,t) = u(pi,t) = 0: the series sum b_k e^{-k^2 t} sin kx is C^infinity for t > 0 for any L^2 initial data, converges to f in L^2; uniformly if f is continuous with f(0) = f(pi) = 0; locally uniformly in the interior if f is only continuous; uniqueness by the maximum principle" index="区間の熱方程式|くかんのねつほうていしき, 初期境界値問題（区間の熱方程式）|しょききょうかいちもんだいくかんのねつほうていしき, フーリエの方法（熱方程式）|ふーりえのほうほうねつほうていしき"}
+$f\in L^{2}(0,\pi)$, $b_{k}\defeq b_{k}(f)$ とし、$x\in\mathbb{R}$, $t>0$ について
+$$
+u(x,t)\defeq\sum_{k=1}^{\infty}b_{k}e^{-k^{2}t}\sin kx
+\label{pde:eq-sep-heat-series}
+$$
+とおく。
+1. 各 $t_{0}>0$ について、右辺とその項別のすべての偏導関数は $\mathbb{R}\times[t_{0},\infty)$ で一様絶対収束する。$u\in C^{\infty}(\mathbb{R}\times(0,\infty))$ で、$\partial_{t}u=\partial_{x}^{2}u$、$u(0,t)=u(\pi,t)=0$（$t>0$）。
+2. $t\to0$ のとき $\|u(\cdot,t)-f\|_{2}\to0$。
+3. $f\in C[0,\pi]$ かつ $f(0)=f(\pi)=0$ なら、$t\to0$ のとき $\sup_{0\le x\le\pi}\lvert u(x,t)-f(x)\rvert\to0$。したがって $u(x,0)\defeq f(x)$ とおくと $u\in C([0,\pi]\times[0,\infty))$ で、$\min f\le u\le\max f$。
+4. $f\in C[0,\pi]$ なら、各 $0<\delta<\pi/2$ について $t\to0$ のとき $\sup_{\delta\le x\le\pi-\delta}\lvert u(x,t)-f(x)\rvert\to0$。$[0,\pi]$ の上での一様収束は、$f(0)=f(\pi)=0$ のとき、そのときに限り成り立つ。
+5. （一意性）3 の場合、$T>0$ と $v\in C^{2,1}((0,\pi)\times(0,T))\cap C([0,\pi]\times[0,T])$ が $\partial_{t}v=\partial_{x}^{2}v$、$v(0,t)=v(\pi,t)=0$、$v(x,0)=f(x)$ を満たせば、$[0,\pi]\times[0,T]$ の上で $v=u$。
+:::
+
+::: intuition
+両端を冷やした棒の温度は、初期の温度分布が 2 乗積分できるだけでも、一瞬後には無限回微分できる滑らかな分布になる。高い振動数の成分 $\sin kx$ ほど $e^{-k^{2}t}$ で急速に消えるからである。初期の分布に戻るのは、少なくとも 2 乗平均の意味では必ず成り立ち、初期の分布が連続で両端の値が $0$（境界条件と両立する）なら一様に戻る。
+:::
+
+::: example
+1. $f(x)=\sin x+\frac13\sin3x$ なら $u=e^{-t}\sin x+\frac13e^{-9t}\sin3x$。$t$ が大きいと、いちばん低い振動数の成分 $e^{-t}\sin x$ だけが残る。
+2. $f=1$（両端で $0$ でない）なら $b_{k}=\frac{2}{\pi k}(1-(-1)^{k})$ で、$u=\frac4\pi\sum_{k\text{ 奇数}}\frac{e^{-k^{2}t}\sin kx}{k}$。$t>0$ では滑らかな解で、内部の各点で $t\to0$ のとき $1$ に近づくが、端点ではいつも $0$ なので、一様収束はしない（4）。端点の近くに、幅が $\sqrt{t}$ 程度の急な層ができる。
+:::
+
+::: proof
+**Step 1.** 【主張：1】コーシー–シュワルツの不等式から $\lvert b_{k}\rvert\le\frac2\pi\int_{0}^{\pi}\lvert f\rvert\le\frac{2}{\sqrt\pi}\|f\|_{2}\eqdef B$。$j,m\ge0$ について、項 $b_{k}e^{-k^{2}t}\sin kx$ の $\partial_{t}^{j}\partial_{x}^{m}$ は $t\ge t_{0}$ で絶対値が $Bk^{2j+m}e^{-k^{2}t_{0}}$ 以下で、$k^{N}e^{-k^{2}t_{0}}\le C_{N,t_{0}}k^{-2}$（$s^{N+2}e^{-s^{2}t_{0}}$ は $s\ge0$ で有界）なので $\sum_{k}Bk^{2j+m}e^{-k^{2}t_{0}}<\infty$。M 判定法と記法の約束の項別微分から $u\in C^{\infty}$ で、偏導関数は項別にとれる。各項は $\partial_{t}=\partial_{x}^{2}$ を満たすので $u$ も満たし、各項が $x=0,\pi$ で $0$ なので $u$ も $0$。
+
+**Step 2.** 【主張：2】$u(\cdot,t)$ の正弦係数は（項別積分で）$b_{k}e^{-k^{2}t}$ なので、\ref{pde:sep-sine-cosine.1} を $u(\cdot,t)-f$ に使うと
+$$
+\frac{2}{\pi}\|u(\cdot,t)-f\|_{2}^{2}=\sum_{k\ge1}\bigl(1-e^{-k^{2}t}\bigr)^{2}b_{k}^{2}.
+$$
+$\varepsilon>0$ に対して $\sum_{k>N}b_{k}^{2}<\varepsilon$ となる $N$ をとると（$\sum b_{k}^{2}<\infty$）、右辺は $\sum_{k\le N}(1-e^{-k^{2}t})^{2}b_{k}^{2}+\varepsilon$ 以下で、第 1 項は有限和なので $t\to0$ で $0$ に近づく。
+
+**Step 3.** 【主張：3】$f$ は連続なので有界で、\ref{pde:sep-heat-images} から $u(x,t)=\int\Phi(x-y,t)F(y)\,dy$（$F\defeq f_{\mathrm{odd}}$）。$f(0)=f(\pi)=0$ なので \ref{pde:sep-periodic-extension.1}（$m=0$）から $F$ は $\mathbb{R}$ 上連続で、周期的なので一様連続（\ref{top:heine-cantor} を $[-\pi,\pi]$ で使う）で有界。\ref{pde:heat-cauchy-solution.4} から $\sup_{x}\lvert u(x,t)-F(x)\rvert\to0$。$[0,\pi]$ の上では $F=f$。$u$ は $[0,\pi]\times(0,\infty)$ では Step 1 から連続で、$t=0$ の点でもこの一様収束から連続である。最後の不等式は、$T>0$ ごとに \ref{pde:heat-weak-maximum.1}・\ref[2]{pde:heat-weak-maximum.2} を $\Omega=(0,\pi)$ に使うと、放物境界の上の $u$ の値は $f$ と $0$ で、$f(0)=0$ から $\min f\le0\le\max f$ なので従う。
+
+**Step 4.** 【主張：4】$\delta\le x\le\pi-\delta$ と $\lvert z\rvert<\delta/2$ では $x-z\in[\delta/2,\pi-\delta/2]$ で、そこでは $F=f$。$\omega(r)\defeq\sup\{\lvert f(s)-f(s')\rvert:s,s'\in[0,\pi],\lvert s-s'\rvert\le r\}$ とおくと、一様連続性から $r\to0$ で $\omega(r)\to0$。$\int\Phi=1$ と \ref{pde:sep-heat-images} から
+$$
+\lvert u(x,t)-f(x)\rvert\le\int_{\lvert z\rvert<\eta}\Phi(z,t)\,\omega(\eta)\,dz+2\max\lvert f\rvert\int_{\lvert z\rvert\ge\eta}\Phi(z,t)\,dz
+$$
+（$0<\eta<\delta/2$）。第 1 項は $\omega(\eta)$ 以下、第 2 項は \ref{pde:heat-kernel-properties.3} から $t\to0$ で $0$ に近づくので、$\limsup_{t\to0}\sup_{x}\lvert u-f\rvert\le\omega(\eta)$。$\eta\to0$ で主張を得る。後半：$f(0)=f(\pi)=0$ なら 3。$f(0)\ne0$ なら、すべての $t>0$ で $\sup_{x}\lvert u(x,t)-f(x)\rvert\ge\lvert u(0,t)-f(0)\rvert=\lvert f(0)\rvert$ なので一様収束しない（$f(\pi)\ne0$ でも同じ）。
+
+**Step 5.** 【主張：5】3 から $u$ は $C^{2,1}((0,\pi)\times(0,T))\cap C([0,\pi]\times[0,T])$ に入り、$v$ と同じ方程式・境界値・初期値をもつ。放物境界 $\Gamma_{T}$ の上で $u=v$ なので、\ref{pde:heat-cylinder-uniqueness.1}（$\Omega=(0,\pi)$, $f=0$）から $u=v$。
+
+::: hypcheck
+- **$f\in L^{2}$**：Step 1 では係数が有界なこと（$f\in L^{1}$ で足りる）だけを使い、Step 2 でパーセヴァルの等式を使った。したがって 1 は $f\in L^{1}(0,\pi)$ で成り立つ。**係数の減衰は $e^{-k^{2}t}$ が与える**ので、初期値の滑らかさは $t>0$ での滑らかさにまったく関係しない。
+- **3 の $f(0)=f(\pi)=0$（両立条件）**：Step 3 で $F$ が連続になるのに使った。必要でもある（4 の後半）。これは「$t=0$ の初期値と $x=0,\pi$ の境界値が放物境界の角で一致する」という条件で、$u$ が閉じた長方形の上で連続であるための条件そのものである。高い階数の両立条件（$f''(0)=0$ など）は、$t=0$ まで含めて $u$ が $C^{2,1}$ 級であることを求めるときに初めて要る（補足）。
+- **3 の $f$ の連続性**：Step 3 で \ref{pde:heat-cauchy-solution.4} を使うのに使った。$f$ が不連続な点では、どんな解も $t=0$ まで連続には延びない（$u(\cdot,t)$ が一様収束すれば極限は連続だから）。
+- **5 の解のクラス**：$v$ が $[0,\pi]\times[0,T]$ で連続であることを、最大値原理を使うのに使った。初期値に 2 乗平均の意味でしか戻らない解の一意性には別の議論が要る（\ref{pde:prob-sp-l2-uniqueness}）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると（$t=0$ までの滑らかさ）.** 3 の解は $t=0$ で連続だが、そこで $C^{2,1}$ 級とは限らない。$u$ が $[0,\pi]\times[0,T]$ で $C^{2,1}$ 級なら、境界で $\partial_{t}u(0,t)=0$ から $\partial_{x}^{2}u(0,0)=\partial_{t}u(0,0)=0$、つまり $f''(0)=0$ が必要になる。一般に $u$ が角 $(0,0)$ まで $C^{2j,j}$ 級であるためには $f^{(2i)}(0)=0$（$i<j$ で、方程式から $\partial_{t}^{i}u=\partial_{x}^{2i}u$）が必要で、正弦級数では \ref{pde:sep-sine-cosine.4} を繰り返して、この条件の下で係数が $k^{-2j}$ 程度で減衰することに対応する。熱方程式は内部を滑らかにするが、角の不整合は消せない。
+
+**似た定理.** 円周上の熱方程式（\ref{four:heat-equation}）は、境界のない周期的な場合の同じ定理で、そこでは $\sum\lvert\hat f(n)\rvert<\infty$ のときに一様収束を示した。ここの 3 は、絶対収束を仮定せず、熱核による表示（\ref{pde:sep-heat-images}）を通して連続性だけで一様収束を得ている。\ref{pde:heat-cauchy-solution} の全空間の結果を、鏡像法で区間に移したことになる。
+
+**高い視点：固有値の分だけ早く忘れる.** 解は「初期値の $k$ 番目の成分に $e^{-k^{2}t}$ を掛ける」という対角的な作用素 $e^{t\Delta_{\mathrm{D}}}$ で書ける（$\Delta_{\mathrm{D}}$ はディリクレ条件の $\partial_{x}^{2}$）。比喩で言えば、熱は細かな模様（高い振動数）ほど早く忘れる記憶で、時間 $t$ の後に残る模様は、振動数がおよそ $1/\sqrt t$ 以下のものだけである。この見方は関数解析的手法の系列で半群として一般化される。
+:::
+
+断熱した端（熱の流れ $\partial_{x}u$ が $0$）では、固有関数は $\cos kx$（\ref{ode:sl-laplacian-eigenvalues.2}）になり、両立条件はいらなくなる。
+
+::: proposition 区間の熱方程式（ノイマン条件） {#pde:sep-heat-neumann keywords="heat equation on (0, pi) with Neumann conditions u_x(0,t) = u_x(pi,t) = 0: cosine series solution, smooth for t > 0, L^2 convergence, uniform convergence for every continuous f without compatibility conditions, conservation of the mean, uniqueness by energy" index="区間の熱方程式（ノイマン条件）|くかんのねつほうていしきのいまんじょうけん, 断熱境界条件|だんねつきょうかいじょうけん"}
+$f\in L^{2}(0,\pi)$, $a_{k}\defeq a_{k}(f)$ とし、$u(x,t)\defeq\frac{a_{0}}{2}+\sum_{k\ge1}a_{k}e^{-k^{2}t}\cos kx$（$t>0$）とおく。
+1. $u\in C^{\infty}(\mathbb{R}\times(0,\infty))$ で、$\partial_{t}u=\partial_{x}^{2}u$、$\partial_{x}u(0,t)=\partial_{x}u(\pi,t)=0$。平均 $\frac1\pi\int_{0}^{\pi}u(x,t)\,dx=\frac{a_{0}}{2}$ は $t$ によらない。
+2. $t\to0$ のとき $\|u(\cdot,t)-f\|_{2}\to0$。
+3. $f\in C[0,\pi]$ なら（端点の条件なしに）$\sup_{0\le x\le\pi}\lvert u(x,t)-f(x)\rvert\to0$。
+4. （一意性）$T>0$ とし、$v\in C([0,\pi]\times[0,T])$ が $[0,\pi]\times(0,T]$ の上で $C^{2,1}$ 級（端点では記法の約束の意味）で、$\partial_{t}v=\partial_{x}^{2}v$、$\partial_{x}v(0,t)=\partial_{x}v(\pi,t)=0$、$v(\cdot,0)=f$ を満たすなら（このとき $f$ は連続）、$t\in(0,T]$ で $v(\cdot,t)=u(\cdot,t)$。
+:::
+
+::: proof
+**Step 1.** 【主張：1・2・3】1・2 は \ref{pde:sep-heat-dirichlet} の Step 1・2 で $\sin kx$ を $\cos kx$ に、\ref{pde:sep-sine-cosine.1} の正弦の式を余弦の式に替えればよい（$\partial_{x}\cos kx=-k\sin kx$ が $0,\pi$ で $0$）。平均は、$k\ge1$ の項の積分が $0$ であることと項別積分から。3 は Step 3 と同じで、\ref{pde:sep-periodic-extension.2}（$m=0$、条件なし）から $f_{\mathrm{ev}}$ はいつも連続なので、\ref{pde:sep-heat-images} と \ref{pde:heat-cauchy-solution.4} から従う。
+
+**Step 2.** 【主張：$w\defeq v-u$ について、$E(t)\defeq\int_{0}^{\pi}w(x,t)^{2}dx$ は $(0,T]$ で単調非増加】3 と 1 から $u$ も $v$ と同じクラスに入る。$[s,T]\times[0,\pi]$（$s>0$）の上で $\partial_{t}(w^{2})=2w\,\partial_{t}w$ は連続で有界なので、\ref{meas:parameter-integrals.2} から $E'(t)=2\int_{0}^{\pi}w\,\partial_{x}^{2}w\,dx$。部分積分で
+$$
+E'(t)=2\bigl[w\,\partial_{x}w\bigr]_{x=0}^{x=\pi}-2\int_{0}^{\pi}(\partial_{x}w)^{2}dx\le0
+$$
+（境界の項はノイマン条件で消える）。
+
+**Step 3.** 【主張：$w=0$】$E$ は $[0,T]$ で連続（$w$ が一様連続）で $E(0)=0$、$E\ge0$。Step 2 と平均値の定理から $0<s<t$ で $E(t)\le E(s)$ で、$s\to0$ として $E(t)\le0$。よって $E=0$ で、$w(\cdot,t)$ は連続なので $0$。
+
+::: hypcheck
+- **端点の条件がないこと**：Step 1 で、偶関数への延長が $m=0$ では無条件に連続であること（\ref{pde:sep-periodic-extension.2}）を使った。ノイマン条件は解の値ではなく傾きについての条件なので、$t=0$ と $x=0$ の角で値の不整合が起きない。$t=0$ まで $C^{2,1}$ 級を求めるなら、$f'(0)=f'(\pi)=0$ が必要になる。
+- **4 の端点までの滑らかさ**：Step 2 の部分積分の境界の項に、$\partial_{x}v$ が端点まで連続であることを使った。ディリクレ条件の \ref{pde:sep-heat-dirichlet.5} では最大値原理を使ったので、境界までの微分可能性は要らなかった。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## 弦の振動 {#pde:sec-sp-string}
+
+両端を固定した長さ $\pi$ の弦の振動を考える。$u=X(x)T(t)$ とおくと、熱方程式と同じく $X=\sin kx$ で、$T''=-k^{2}T$ から $T=\cos kt$ または $\sin kt$ である。こんどは時間の因子は減衰しない。
+
+::: definition 弦の振動の問題 {#pde:sep-string-problem keywords="vibrating string with fixed ends: wave equation on J x [0, pi] with u(t,0) = u(t,pi) = 0, initial position g and velocity h; classical solution in C^2(J x [0, pi])" index="弦の振動|げんのしんどう, 両端を固定した弦|りょうたんをこていしたげん"}
+$g,h\colon[0,\pi]\to\mathbb{R}$ とする。$u\in C^{2}(J\times[0,\pi])$（記法の約束の意味）で
+$$
+\begin{aligned}&\partial_{t}^{2}u=\partial_{x}^{2}u\ \ (J\times(0,\pi)\text{ 上}),\qquad u(t,0)=u(t,\pi)=0\ \ (t\in J),\\&u(0,x)=g(x),\quad\partial_{t}u(0,x)=h(x)\ \ (0\le x\le\pi)\end{aligned}
+$$
+を満たすものを、**弦の振動の問題**の $J$ 上の**古典解**という。
+:::
+
+::: intuition
+両端を留めた長さ $\pi$ の弦の小さな振動で、$u$ は変位、$g$ は最初の形、$h$ は最初の速度である。端点では弦はいつも動かない。
+:::
+
+::: theorem 弦の振動の古典解 {#pde:sep-string keywords="vibrating string with fixed ends: a classical solution exists iff g in C^2, h in C^1 and the compatibility conditions g(0) = g(pi) = g''(0) = g''(pi) = 0, h(0) = h(pi) = 0 hold; then it is given by d'Alembert's formula for the odd 2 pi-periodic extensions and equals the uniformly convergent Fourier series sum (b_k cos kt + c_k/k sin kt) sin kx; uniqueness by energy" index="弦の振動の古典解|げんのしんどうのこてんかい, 両立条件（弦の振動）|りょうりつじょうけんげんのしんどう"}
+$g,h\colon[0,\pi]\to\mathbb{R}$ とする。
+1. （必要条件）古典解が存在すれば、$g\in C^{2}[0,\pi]$, $h\in C^{1}[0,\pi]$ で、**両立条件**
+$$
+g(0)=g(\pi)=0,\qquad g''(0)=g''(\pi)=0,\qquad h(0)=h(\pi)=0
+\label{pde:eq-sep-string-compat}
+$$
+が成り立つ。
+2. （存在）逆に $g\in C^{2}[0,\pi]$, $h\in C^{1}[0,\pi]$ が \eqref{pde:eq-sep-string-compat} を満たせば、$G\defeq g_{\mathrm{odd}}$, $H\defeq h_{\mathrm{odd}}$ は $G\in C^{2}(\mathbb{R})$, $H\in C^{1}(\mathbb{R})$ で、$(G,H)$ に対する \eqref{pde:eq-dalembert} の解 $u$ の $\mathbb{R}\times[0,\pi]$ への制限は古典解である。
+3. （一意性）古典解は高々一つである。
+4. （級数表示）2 の仮定の下で、$b_{k}\defeq b_{k}(g)$, $c_{k}\defeq b_{k}(h)$ について $\sum_{k}\bigl(\lvert b_{k}\rvert+\lvert c_{k}\rvert/k\bigr)<\infty$ で、$\mathbb{R}\times[0,\pi]$ の上で一様に
+$$
+u(t,x)=\sum_{k=1}^{\infty}\Bigl(b_{k}\cos kt+\frac{c_{k}}{k}\sin kt\Bigr)\sin kx.
+\label{pde:eq-sep-string-series}
+$$
+:::
+
+::: intuition
+端を固定した弦が古典的に振動できるのは、最初の形と速度が 1 回分の滑らかさ（形は 2 回、速度は 1 回微分可能）をもち、端で弦の位置・速度・加速度（$=g''$）が $0$ と両立しているとき、そのときに限る。そのとき解は、弦を端で裏返して無限に並べた「鏡像」をダランベールの公式で動かしたもので、各倍音 $\sin kx$ の単振動の重ね合わせでもある。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$g=u(0,\cdot)$, $h=\partial_{t}u(0,\cdot)$ は $C^{2}(J\times[0,\pi])$ の関数とその偏導関数の制限なので $g\in C^{2}[0,\pi]$, $h\in C^{1}[0,\pi]$。$t\mapsto u(t,0)$ は恒等的に $0$ で、$u$ の $t$ についての偏導関数は $x=0$ まで連続に延びるので（記法の約束、$x\to0$ の一様な極限をとって）$\partial_{t}u(t,0)=\partial_{t}^{2}u(t,0)=0$。よって $g(0)=0$, $h(0)=\partial_{t}u(0,0)=0$、方程式を $x\to0$ の極限まで延ばして $g''(0)=\partial_{x}^{2}u(0,0)=\partial_{t}^{2}u(0,0)=0$。$x=\pi$ でも同じ。
+
+**Step 2.** 【主張：2】\ref{pde:sep-periodic-extension.1} を $g$（$m=2$：$j=0,2$ の条件）と $h$（$m=1$：$j=0$ の条件）に使うと $G\in C^{2}(\mathbb{R})$, $H\in C^{1}(\mathbb{R})$。\ref{pde:wave-dalembert.1} から $u$ は $\mathbb{R}\times\mathbb{R}$ 上の古典解で、$u(0,\cdot)=G$, $\partial_{t}u(0,\cdot)=H$ は $[0,\pi]$ で $g,h$。$G,H$ が奇関数なので、\eqref{pde:eq-dalembert} で $x$ を $-x$ にし積分で $y\mapsto-y$ とすると $u(t,-x)=-u(t,x)$、とくに $u(t,0)=0$。$G,H$ が周期 $2\pi$ をもつので $u(t,x+2\pi)=u(t,x)$（$\int_{x-t+2\pi}^{x+t+2\pi}H=\int_{x-t}^{x+t}H$）。よって $u(t,\pi)=u(t,-\pi)=-u(t,\pi)$ で $u(t,\pi)=0$。$\mathbb{R}^{2}$ 上の $C^{2}$ 級関数の制限なので $u\in C^{2}(\mathbb{R}\times[0,\pi])$。
+
+**Step 3.** 【主張：3】二つの古典解の差 $w$ は $g=h=0$ の古典解である。$E(t)\defeq\frac12\int_{0}^{\pi}\bigl((\partial_{t}w)^{2}+(\partial_{x}w)^{2}\bigr)dx$ とおく。被積分関数の $t$ 微分 $\partial_{t}w\,\partial_{t}^{2}w+\partial_{x}w\,\partial_{t}\partial_{x}w$ は $J$ のコンパクトな部分区間と $[0,\pi]$ の積の上で連続で有界なので、\ref{meas:parameter-integrals.2} から微分と積分を交換でき（$\partial_{t}\partial_{x}w=\partial_{x}\partial_{t}w$ は \ref{calc:schwarz-theorem}）、$\partial_{x}w\,\partial_{x}\partial_{t}w$ を部分積分し方程式を使うと
+$$
+E'(t)=\int_{0}^{\pi}\partial_{t}w\,(\partial_{t}^{2}w-\partial_{x}^{2}w)\,dx+\bigl[\partial_{t}w\,\partial_{x}w\bigr]_{x=0}^{x=\pi}=0.
+$$
+境界の項は Step 1 と同じく $\partial_{t}w(t,0)=\partial_{t}w(t,\pi)=0$ で消える。$E(0)=0$ なので $E\equiv0$、よって $\partial_{x}w=0$ で $w(t,x)=w(t,0)=0$。
+
+**Step 4.** 【主張：$\sum\lvert b_{k}\rvert<\infty$, $\sum\lvert c_{k}\rvert/k<\infty$ で、$\mathbb{R}$ の上で一様に $G(s)=\sum b_{k}\sin ks$, $H(s)=\sum c_{k}\sin ks$】\ref{pde:sep-sine-cosine.4} を 2 回使うと、$g(0)=g(\pi)=0$ から $b_{k}=a_{k}(g')/k=-b_{k}(g'')/k^{2}$、$h(0)=h(\pi)=0$ から $c_{k}=a_{k}(h')/k$。\ref{pde:sep-sine-cosine.1}（ベッセルの不等式で足りる）から $\sum b_{k}(g'')^{2}<\infty$, $\sum a_{k}(h')^{2}<\infty$ なので、コーシー–シュワルツの不等式で $\sum\lvert b_{k}\rvert\le(\sum b_{k}(g'')^{2})^{1/2}(\sum k^{-4})^{1/2}<\infty$、また $\sum\lvert c_{k}\rvert\le(\sum a_{k}(h')^{2})^{1/2}(\sum k^{-2})^{1/2}<\infty$。\ref{pde:sep-sine-cosine.3} から $[0,\pi]$ で $g=\sum b_{k}\sin kx$, $h=\sum c_{k}\sin kx$。両辺とも奇関数で周期 $2\pi$ をもつので $\mathbb{R}$ で一致する。
+
+**Step 5.** 【主張：4】三角関数の加法定理から $\frac12\bigl(\sin k(x+t)+\sin k(x-t)\bigr)=\sin kx\cos kt$、また $\frac12\int_{x-t}^{x+t}\sin ky\,dy=\frac{\sin kx\sin kt}{k}$。Step 4 の一様収束する級数を \eqref{pde:eq-dalembert} に代入し、積分は項別積分すると \eqref{pde:eq-sep-string-series} を得る。各項の絶対値は $\lvert b_{k}\rvert+\lvert c_{k}\rvert/k$ 以下なので、M 判定法から一様絶対収束する。
+
+::: hypcheck
+- **$g\in C^{2}$, $h\in C^{1}$**：Step 2 でダランベールの公式が古典解を与えるのに使った。1 から必要でもある。
+- **両立条件 \eqref{pde:eq-sep-string-compat}**：Step 2 で $G\in C^{2}$, $H\in C^{1}$ を得るのに使った（$g(0)=0$ は $G$ の連続性、$g''(0)=0$ は $G''$ の連続性、$h(0)=0$ は $H$ の連続性）。$g'(0)$ や $h'(0)$ には条件がない（奇関数への延長では奇数階の微分は自動的につながる）。1 から必要でもあるので、**古典解が存在するための必要十分条件**である。半直線の場合の \ref{pde:wave-half-line.2} を両端に課したものである。
+- **4 の係数の減衰**：Step 4 では両立条件のうち $g(0)=g(\pi)=0$ と $h(0)=h(\pi)=0$ だけを使い、$\lvert b_{k}\rvert$ は $k^{-2}$ 程度、$\lvert c_{k}\rvert/k$ も $k^{-2}$ 程度の減衰を得た。これは級数 \eqref{pde:eq-sep-string-series} が一様収束するには十分だが、**項別に 2 回微分した級数が収束するには足りない**。古典解であることは、級数ではなくダランベールの公式から示した。級数だけで示すには、もう 1 階分の減衰が要る（\ref{pde:sep-string-series}）。
+- **一意性**：Step 3 では古典解の性質だけを使い、増大条件などはいらない。$J$ が負の時刻を含んでもよい。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+級数 \eqref{pde:eq-sep-string-series} を項別に 2 回微分すると、各項に $k^{2}$ が掛かる。級数だけで古典解であることを確かめるには、係数が $k^{-3}$ より速く（$\sum k^{2}(\lvert b_{k}\rvert+\lvert c_{k}\rvert/k)<\infty$ となるように）減衰する必要があり、そのためには初期値に 1 階分余計な滑らかさが要る。
+
+::: corollary 項別微分できる級数解 {#pde:sep-string-series keywords="if g in C^3, h in C^2 satisfy the compatibility conditions then sum k^2 (|b_k| + |c_k|/k) < infinity and the Fourier series of the vibrating string can be differentiated termwise twice; the series is a classical solution by direct verification" index="項別微分できる級数解|こうべつびぶんできるきゅうすうかい"}
+$g\in C^{3}[0,\pi]$, $h\in C^{2}[0,\pi]$ が \eqref{pde:eq-sep-string-compat} を満たすとする。このとき $\sum_{k}k^{2}\bigl(\lvert b_{k}\rvert+\lvert c_{k}\rvert/k\bigr)<\infty$ で、\eqref{pde:eq-sep-string-series} の級数とそれを項別に 2 階まで偏微分した級数はすべて $\mathbb{R}\times[0,\pi]$ で一様絶対収束する。したがって級数の和は項別に微分でき、各項が方程式・境界条件を満たすことから、それが古典解であることが級数だけで確かめられる。
+:::
+
+::: proof
+**Step 1.** 【主張：$\lvert b_{k}\rvert=\lvert a_{k}(g''')\rvert/k^{3}$, $\lvert c_{k}\rvert/k=\lvert b_{k}(h'')\rvert/k^{3}$】\ref{pde:sep-sine-cosine.4} を繰り返す。$g$ については $g(0)=g(\pi)=0$ から $b_{k}(g)=a_{k}(g')/k$、条件なしに $a_{k}(g')=-b_{k}(g'')/k$、$g''(0)=g''(\pi)=0$ から $b_{k}(g'')=a_{k}(g''')/k$。$h$ については $h(0)=h(\pi)=0$ から $c_{k}=a_{k}(h')/k$、条件なしに $a_{k}(h')=-b_{k}(h'')/k$。
+
+**Step 2.** 【主張：結論】Step 1 とコーシー–シュワルツの不等式、\ref{pde:sep-sine-cosine.1} から
+$$
+\sum_{k}k^{2}\Bigl(\lvert b_{k}\rvert+\frac{\lvert c_{k}\rvert}{k}\Bigr)=\sum_{k}\frac{\lvert a_{k}(g''')\rvert+\lvert b_{k}(h'')\rvert}{k}\le\Bigl(\sum_{k}\frac{1}{k^{2}}\Bigr)^{1/2}\Bigl(\bigl(\textstyle\sum a_{k}(g''')^{2}\bigr)^{1/2}+\bigl(\textstyle\sum b_{k}(h'')^{2}\bigr)^{1/2}\Bigr)<\infty.
+$$
+項 $\bigl(b_{k}\cos kt+\frac{c_{k}}{k}\sin kt\bigr)\sin kx$ の 2 階までの偏導関数は絶対値が $k^{2}(\lvert b_{k}\rvert+\lvert c_{k}\rvert/k)$ 以下なので、M 判定法と記法の約束の項別微分から主張を得る。
+
+::: hypcheck
+- **$g\in C^{3}$, $h\in C^{2}$**：Step 1 で 3 回・2 回の部分積分をするのに使った。\ref{pde:sep-string} と比べて 1 階ずつ多いが、それは古典解の存在には不要で、**級数を項別に微分するという証明の方法**が要求するものである。
+- **両立条件**：Step 1 の 3 回の部分積分のうち正弦係数への 2 回で、境界の項を消すのに使った。$g''(0)=0$ を外すと $b_{k}(g'')$ に $\frac{2}{\pi k}\bigl(g''(0)-(-1)^{k}g''(\pi)\bigr)$ が加わり、$k^{2}b_{k}$ は $1/k$ 程度にしか減衰しない（\ref{pde:sep-string-counterexample}）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: counterexample 両立条件が欠けた級数解 {#pde:sep-string-counterexample keywords="plucked string g(x) = x(pi - x), h = 0: g is smooth and vanishes at the ends but g''(0) = -2 is not 0; the Fourier series sum 8/(pi k^3) cos kt sin kx (k odd) converges uniformly to a C^1 function which is not C^2; no classical solution exists" index="両立条件が欠けた例|りょうりつじょうけんがかけたれい"}
+$g(x)=x(\pi-x)$, $h=0$ とする。$g$ は $C^{\infty}$ 級で $g(0)=g(\pi)=0$ だが、$g''=-2$ なので $g''(0)=g''(\pi)=0$ が成り立たない。
+1. $b_{k}(g)=\frac{4}{\pi k^{3}}\bigl(1-(-1)^{k}\bigr)$、つまり $k$ が奇数なら $\frac{8}{\pi k^{3}}$、偶数なら $0$。
+2. 級数 $u(t,x)\defeq\sum_{k}b_{k}\cos kt\sin kx$ は一様絶対収束し、$u=\frac12\bigl(G(x+t)+G(x-t)\bigr)$（$G=g_{\mathrm{odd}}$）で、$u\in C^{1}(\mathbb{R}^{2})$。
+3. $u$ は $C^{2}$ 級でない。この初期値に対する弦の振動の問題の古典解は（どの $J$ の上でも）存在しない。
+:::
+
+::: proof
+1 は \ref{pde:sep-sine-cosine.4} を 2 回使い（$g(0)=g(\pi)=0$）、$b_{k}(g)=-b_{k}(g'')/k^{2}=\frac{2}{k^{2}}b_{k}(1)=\frac{2}{k^{2}}\cdot\frac{2}{\pi k}\bigl(1-(-1)^{k}\bigr)$。2：$\sum\lvert b_{k}\rvert<\infty$ なので一様絶対収束する。\ref{pde:sep-periodic-extension.1}（$m=1$：条件は $j=0$ だけ）から $G\in C^{1}(\mathbb{R})$。\ref{pde:sep-sine-cosine.3} から $\mathbb{R}$ で一様に $G(s)=\sum b_{k}\sin ks$（両辺とも奇関数で周期 $2\pi$）なので、\ref{pde:sep-string} の Step 5 と同じ計算で $u=\frac12(G(x+t)+G(x-t))$、これは $C^{1}$ 級。3：$x=0$ で $G''$ の右極限は $g''(0)=-2$、左極限は $-g''(0)=2$ なので、$G'$ は $0$ で微分可能でない。$t_{0}\in(0,\pi/2)$ を一つとり、$x$ の関数 $\partial_{x}u(t_{0},x)=\frac12\bigl(G'(x+t_{0})+G'(x-t_{0})\bigr)$ を $x=t_{0}$ の近くで見ると、第 2 項は $x=t_{0}$ で微分可能でなく、第 1 項は $x+t_{0}$ が $(0,\pi)$ の中にあり $G'$ がそこで $C^{1}$ 級なので微分可能で、和は微分可能でない。よって $u\notin C^{2}$。古典解がないことは \ref{pde:sep-string.1} から（$g''(0)\ne0$）。
+:::
+
+::: supplement
+**前提を変えると.** 両立条件が欠けても、級数 \eqref{pde:eq-sep-string-series} は（係数が $\sum\lvert b_{k}\rvert<\infty$ などを満たせば）連続関数を定め、それは \ref{pde:wave-dalembert} の後の補足の意味の弱い解である。$g''$ の端点での跳びは、特性線 $x\pm t\in\pi\mathbb{Z}$ に沿って運ばれ、消えることも滑らかになることもない（\ref{pde:wave-no-smoothing} と同じ現象）。熱方程式で $f(0)\ne0$ の不整合が $t>0$ で直ちに消えたのとは対照的である。
+
+**似た定理.** 半直線の弦（\ref{pde:wave-half-line}）では両立条件 $g(0)=h(0)=g''(0)=0$ を一方の端だけに課した。区間では両端に課し、鏡像も一つではなく周期的に無限に並ぶ。ノイマン条件（自由端 $\partial_{x}u=0$）では偶関数に延ばし、両立条件は $g'(0)=g'(\pi)=0$, $h'(0)=h'(\pi)=0$ になる（\ref{pde:sep-periodic-extension.2} を $m=2$, $m=1$ で使う）。
+
+**高い視点：倍音が減衰しない楽器.** 弦の音は倍音 $\sin kx$ の単振動の重ね合わせで、理想的な弦では高い倍音も永久に鳴り続ける（係数に $e^{-k^{2}t}$ のような減衰がない）。そのため、最初の形の小さな角や端での不整合は、高い倍音の大きさとしていつまでも残り、解の滑らかさは初期値の滑らかさで頭打ちになる。熱は角を一瞬で丸める鉋（かんな）だが、波は角をそのまま運ぶ搬送台である。
+:::
+
+## 級数解が古典解になる条件 {#pde:sec-sp-conditions}
+
+このページの結果を、級数解が古典解になるために必要な二つの量、すなわち**係数の減衰**と**境界条件の両立**に分けてまとめる。両立条件は「初期値を境界条件と矛盾しないように周期的に延ばしたとき、延ばした関数が十分滑らかであること」と言い換えられる（\ref{pde:sep-periodic-extension}）。
+
+::: table 区間での級数解と前提 {#pde:sep-conditions-table}
+| 問題 | 係数の減衰をどこから得るか | 古典解に要る初期値の条件 | 両立条件 | 初期値への戻り方 |
+|---|---|---|---|---|
+| 熱・ディリクレ | 方程式（$e^{-k^{2}t}$） | $f\in L^{1}$（$t>0$ で $C^{\infty}$） | 一様に戻るには $f(0)=f(\pi)=0$ | $L^{2}$ なら $L^{2}$、連続なら内部で局所一様 |
+| 熱・ノイマン | 方程式（$e^{-k^{2}t}$） | $f\in L^{1}$ | 連続性には不要 | 連続なら一様 |
+| 弦（両端固定） | 初期値の滑らかさだけ | $g\in C^{2}$, $h\in C^{1}$ | $g=g''=h=0$（両端）が必要十分 | 解は $t=0$ を含めて $C^{2}$ |
+| 弦の級数の項別微分 | 初期値の滑らかさだけ | $g\in C^{3}$, $h\in C^{2}$ | 同上 | 同上 |
+:::
+
+::: supplement
+**前提の対比（後の比較の材料）.** 古典的手法では、解を具体的な級数や積分で書き、それを**項別に微分してよいこと**を示して初めて古典解が得られる。そのために、係数の減衰（$\sum k^{2}\lvert c_{k}\rvert<\infty$ のような条件）と、境界条件との両立（周期的な延長の滑らかさ）という二つの強い前提が、証明の方法そのものから要求される。熱方程式では減衰は方程式が与え、波動方程式では初期値から得るしかない。関数解析的手法では、級数を「エネルギー空間の中で収束する」という弱い意味で扱い、$\sum k^{2}\lvert c_{k}\rvert^{2}<\infty$（つまり初期値が $H^{1}_{0}$ に入ること）だけで解を定め、古典解であるかどうかは正則性の問題として後から別に扱う。この分野の関数解析的手法の系列と、その最後の比較のページで、ここの表と対比する。
+
+**似た定理.** 円周上のフーリエ級数では、係数の減衰と滑らかさの対応は \ref{four:coefficients-basic.4} の $\widehat{f'}(n)=2\pi in\hat f(n)$ で表された。区間では、同じ計算に境界の項が加わり（\ref{pde:sep-sine-cosine.4}）、それを消す条件が両立条件である。一般のスツルム–リウヴィル展開では \ref{ode:sl-expansion.3} がこれにあたる：$f$ が境界条件を満たす $C^{2}$ 級関数（$D$ の元）なら、係数に固有値を掛けたものが 2 乗総和可能になる。
+:::
+
+## 問題 {#pde:sec-sp-problems}
+
+::: problem {#pde:prob-sp-heat-parabola}
+$f(x)=x(\pi-x)$ を初期値とする \ref{pde:sep-heat-dirichlet} の解を $u$ とする。
+1. $u(x,t)=\frac{8}{\pi}\sum_{k\text{ 奇数}}\frac{e^{-k^{2}t}\sin kx}{k^{3}}$ を示せ。
+2. $[0,\pi]\times[0,\infty)$ の上で $0\le u\le\pi^{2}/4$ を示せ。
+3. $t\to\infty$ のとき $e^{t}u(x,t)\to\frac{8}{\pi}\sin x$（$x$ について一様）を示せ。
+:::
+
+::: solution
+**1.** \ref{pde:sep-string-counterexample.1} の計算から $b_{k}(f)=\frac{8}{\pi k^{3}}$（$k$ 奇数）、$0$（$k$ 偶数）。
+
+**2.** $f$ は連続で $f(0)=f(\pi)=0$ なので \ref{pde:sep-heat-dirichlet.3} から $\min f\le u\le\max f$。$\min f=0$, $\max f=f(\pi/2)=\pi^{2}/4$。
+
+**3.** $\bigl\lvert e^{t}u(x,t)-\frac8\pi\sin x\bigr\rvert\le\frac{8}{\pi}\sum_{k\ge3\text{ 奇数}}\frac{e^{-(k^{2}-1)t}}{k^{3}}\le\frac{8}{\pi}e^{-8t}\sum_{k\ge3}\frac{1}{k^{3}}$（$k\ge3$ で $k^{2}-1\ge8$）で、右辺は $x$ によらず $0$ に近づく。棒の温度は、長い時間の後には最も低い倍音の形 $\sin x$ のまま、$e^{-t}$ の速さで冷える。
+:::
+
+::: problem {#pde:prob-sp-l2-uniqueness}
+$f\in L^{2}(0,\pi)$ とし、$v\in C^{\infty}([0,\pi]\times(0,T])$ が $\partial_{t}v=\partial_{x}^{2}v$、$v(0,t)=v(\pi,t)=0$ を満たし、$t\to0$ で $\|v(\cdot,t)-f\|_{2}\to0$ とする。$\beta_{k}(t)\defeq b_{k}(v(\cdot,t))$ について $\beta_{k}'(t)=-k^{2}\beta_{k}(t)$ を示し、$v$ が \eqref{pde:eq-sep-heat-series} の $u$ に等しいことを示せ。
+:::
+
+::: solution
+$[s,T]\times[0,\pi]$（$s>0$）の上で $\partial_{t}v\sin kx$ は連続で有界なので、\ref{meas:parameter-integrals.2} から $\beta_{k}'(t)=\frac2\pi\int_{0}^{\pi}\partial_{x}^{2}v\sin kx\,dx$。2 回部分積分すると、境界の項は $\bigl[\partial_{x}v\sin kx\bigr]_{0}^{\pi}=0$ と $\bigl[-k\,v\cos kx\bigr]_{0}^{\pi}=0$（$v=0$ が端で）で消え、$\beta_{k}'(t)=-k^{2}\beta_{k}(t)$。よって $\beta_{k}(t)e^{k^{2}t}$ は定数で、$\lvert\beta_{k}(t)-b_{k}(f)\rvert\le\frac{2}{\sqrt\pi}\|v(\cdot,t)-f\|_{2}\to0$（コーシー–シュワルツ）なので $\beta_{k}(t)=b_{k}(f)e^{-k^{2}t}$。$v(\cdot,t)$ と $u(\cdot,t)$ は連続で正弦係数が等しいので、\ref{pde:sep-sine-cosine.2} から等しい。初期値に 2 乗平均の意味でしか戻らない解も、境界まで滑らかなら一意である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
