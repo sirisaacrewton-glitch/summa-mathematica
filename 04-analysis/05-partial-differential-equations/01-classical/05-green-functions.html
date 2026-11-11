@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>基本解とグリーン関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/05-green-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 基本解とグリーン関数 {#pde:page-green-functions keywords="fundamental solution of the Laplace equation in R^n, Phi(x) = -(1/2pi) log|x| for n = 2 and 1/(n(n-2)omega_n |x|^{n-2}) for n >= 3, local integrability, divergence theorem on punctured domains, Newton potential u = Phi * f, Poisson equation -Delta u = f for f in C^2_c, weak form of the Newton potential, Hoelder continuity, Green representation formula, Green's function of a bounded domain, corrector function, symmetry of the Green function, representation of the solution of the Dirichlet problem, ポアソン方程式, ニュートン・ポテンシャル, グリーンの表現公式"}
+
+前の二つのページ（\ref{pde:page-harmonic-functions}, \ref{pde:page-harmonic-estimates}）では、ラプラス方程式の解がもつ性質を調べたが、解を**作る**ことはしなかった。このページから、解を具体的な積分で書き表す古典的な方法に入る。鍵は、原点だけに特異点をもつ放射的な調和関数 $\Phi$（**基本解**）である。$\Phi$ を $f$ と畳み込んだ**ニュートン・ポテンシャル** $\Phi*f$ は、$f$ が $C^{2}$ 級で台がコンパクトならポアソン方程式 $-\Delta u=f$ の古典解になる。ただし、$f$ が連続なだけでは足りず、ヘルダー連続なら足りることを、この先のページ（\see{pde:page-holder-poisson}）で証明する。後半では、有界な領域の上の $C^{2}$ 関数を、境界の値・境界での法線微分・ラプラシアンの三つで書き表す**グリーンの表現公式**を示し、それを補正して**グリーン関数**を定義する。グリーン関数があれば、ディリクレ問題の解は境界値と右辺の積分で書ける。グリーン関数を実際に作れる球と半空間の場合（ポアソン積分）は次のページで扱う。
+
+## 記法と定義の確認 {#pde:sec-gf-notation}
+
+::: notation
+- このページでは $n\ge2$ とする（$n=1$ は補足で触れる）。$\Delta=\sum_{i}\partial_{i}^{2}$、調和性（\ref{pde:harmonic-function}）、$B(x,r)$, $\overline{B}(x,r)$, $\partial B(x,r)$, $\omega_{n}=\lambda(B(0,1))$、球面 $S^{n-1}$ 上の測度 $\sigma$（$\sigma(S^{n-1})=n\omega_{n}$）、球面平均 $S_{r}u$ と球平均 $A_{r}u$（\ref{pde:spherical-mean}）は \ref{pde:page-harmonic-functions} と同じ。球の上の発散定理は \ref{pde:ball-divergence}、平均値の性質は \ref{pde:mean-value-property}、最大値原理とディリクレ問題の一意性は \ref{pde:weak-maximum-principle}, \ref{pde:dirichlet-uniqueness}。
+- 極座標の公式は \ref{meas:polar-decomposition}、放射関数の積分 $\int_{\mathbb{R}^{n}}g(|x|)\,dx=n\omega_{n}\int_{0}^{\infty}g(s)s^{n-1}ds$ は \ref{meas:polar-radial.2}、積分記号下の微分は \ref{meas:parameter-integrals}、優収束定理は \ref{meas:dominated-convergence}、フビニの定理は \tref{meas:fubini}。ルベーグ測度は平行移動と $y\mapsto-y$ で不変である（\ref{meas:lebesgue-linear}）。
+- $C_{c}^{k}(\mathbb{R}^{n})$ は台がコンパクトな $C^{k}$ 級関数の全体、$C_{c}(\mathbb{R}^{n})=C_{c}^{0}(\mathbb{R}^{n})$。$\|f\|_{\infty}\defeq\sup|f|$。軟化子は \ref{fa:mollifier}。
+- 関数 $u$ が**$\overline{\Omega}$ の近傍で $C^{k}$ 級**であるとは、$\overline{\Omega}$ を含むある開集合 $U$ があって $u\in C^{k}(U)$ であることをいう。
+- **境界積分の約束**：このページで境界の上の積分を考える有界な開集合 $\Omega$ は、次のどちらかとする。
+  1. 球 $\Omega=B(a,R)$。このとき $\partial\Omega$ 上の関数 $h$ について $\displaystyle\int_{\partial\Omega}h\,dS\defeq R^{n-1}\int_{S^{n-1}}h(a+R\theta)\,d\sigma(\theta)$、外向き単位法線は $\nu(a+R\theta)\defeq\theta$。
+  2. $C^{1}$ 境界をもつ有界な開集合（\ref{fa:c1-boundary.2}）。このとき $dS$ は境界の測度（\ref{fa:boundary-measure}）、$\nu$ は外向き単位法線（\ref{fa:c1-boundary.3}）。ガウス–グリーンの公式 $\int_{\Omega}\partial_{j}w\,dx=\int_{\partial\Omega}w\,\nu_{j}\,dS$（$w$ は $\overline{\Omega}$ の近傍で $C^{1}$ 級）は \ref{fa:gauss-green-c1}。
+
+  球は $C^{1}$ 境界をもつ有界な開集合でもあり、二つの約束の $dS$ は一致することが確かめられるが（ここでは証明しない）、このページでは球についてはいつも 1 を使う。$u$ が $\partial\Omega$ の近傍で $C^{1}$ 級のとき、$\partial_{\nu}u\defeq\nabla u\cdot\nu$ を**外向き法線微分**という。
+- **ヘルダー連続**：$0<\alpha\le1$ とする。$f$ が **$\alpha$ 次ヘルダー連続**であるとは、定数 $C$ があってすべての $x,y$ で $|f(x)-f(y)|\le C|x-y|^{\alpha}$ となることをいう（$\alpha=1$ はリプシッツ連続）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 基本解 {#pde:sec-gf-fundamental}
+
+ラプラス方程式の放射的な解 $u=\Psi(|x|)$ は、\ref{pde:harmonic-function} の後の例 3 の計算から常微分方程式 $\Psi''(s)+\frac{n-1}{s}\Psi'(s)=0$ を満たし、$(s^{n-1}\Psi')'=0$ から $\Psi'(s)=c\,s^{1-n}$ となる。定数 $c$ を、球面を通る流量がちょうど $1$ になるように選んだものが基本解である。
+
+::: definition 基本解 {#pde:gf-fundamental-solution keywords="fundamental solution of the Laplace equation: Phi(x) = -(1/(2 pi)) log|x| (n = 2), Phi(x) = 1/(n(n-2) omega_n |x|^{n-2}) (n >= 3); radial profile Psi" index="基本解（ラプラス方程式）|きほんかいらぷらすほうていしき, ラプラス方程式の基本解|らぷらすほうていしきのきほんかい"}
+$s>0$ について
+$$
+\Psi(s)\defeq\begin{cases}-\dfrac{1}{2\pi}\log s & (n=2),\\[2mm] \dfrac{1}{n(n-2)\omega_{n}}\,s^{2-n} & (n\ge3)\end{cases}
+$$
+とおき、$x\in\mathbb{R}^{n}\setminus\{0\}$ について $\Phi(x)\defeq\Psi(|x|)$ を**ラプラス方程式の基本解**という。
+:::
+
+::: intuition
+基本解は、原点に置いた単位の量の熱源（または電荷）が全空間につくる平衡状態の温度（電位）である。原点で無限大になり、遠くでは $n\ge3$ なら $0$ に減衰し、$n=2$ なら対数的に $-\infty$ に向かう。
+:::
+
+::: example
+$n=2$ では $\omega_{2}=\pi$ なので、$n\ge3$ の式で $n(n-2)\omega_{n}$ の代わりに $n\omega_{n}=2\pi$ を使い、$s^{2-n}/(n-2)$ を $-\log s$ に替えたものになっている。$n=3$ では $\omega_{3}=\frac43\pi$ なので $\Phi(x)=\dfrac{1}{4\pi|x|}$ で、これはクーロンの法則・万有引力の法則のポテンシャルである（\ref{calc:ball-volume}）。
+:::
+
+::: proposition 基本解の性質 {#pde:gf-fundamental-properties keywords="properties of the fundamental solution: smooth and harmonic away from the origin, gradient -x/(n omega_n |x|^n), unit outward flux through spheres, local integrability of Phi and grad Phi with explicit integrals over small balls" index="基本解の性質|きほんかいのせいしつ"}
+1. $\Phi\in C^{\infty}(\mathbb{R}^{n}\setminus\{0\})$ で、$\mathbb{R}^{n}\setminus\{0\}$ で調和。$s>0$ で $\Psi'(s)=-\dfrac{1}{n\omega_{n}s^{n-1}}$、$x\ne0$ で $\nabla\Phi(x)=-\dfrac{x}{n\omega_{n}|x|^{n}}$。
+2. すべての $\varepsilon>0$ について $\displaystyle\varepsilon^{n-1}\int_{S^{n-1}}\nabla\Phi(\varepsilon\theta)\cdot\theta\,d\sigma(\theta)=-1$。
+3. $\Phi$ と $|\nabla\Phi|$ は局所可積分である。さらに $\varepsilon>0$ について $\int_{B(0,\varepsilon)}|\nabla\Phi|\,dy=\varepsilon$、
+$$
+\int_{B(0,\varepsilon)}|\Phi|\,dy=\begin{cases}\dfrac{\varepsilon^{2}(2|\log\varepsilon|+1)}{4} & (n=2,\ \varepsilon\le1),\\[2mm] \dfrac{\varepsilon^{2}}{2(n-2)} & (n\ge3).\end{cases}
+$$
+:::
+
+::: intuition
+基本解は原点以外ではラプラス方程式を満たし、どの半径の球面を通しても、外へ向かう $-\nabla\Phi$ の流量の総和はちょうど $1$ である。原点での特異性は弱く、$\Phi$ も勾配も原点の近くで積分できる。
+:::
+
+::: proof
+**1.** $x\ne0$ で $|x|$ は $C^{\infty}$ 級、$\Psi$ は $(0,\infty)$ で $C^{\infty}$ 級なので $\Phi$ は $C^{\infty}$ 級。$\Psi'(s)$ は $n=2$ で $-\frac{1}{2\pi s}=-\frac{1}{n\omega_{n}s^{n-1}}$（$2\omega_{2}=2\pi$）、$n\ge3$ で $\frac{2-n}{n(n-2)\omega_{n}}s^{1-n}=-\frac{1}{n\omega_{n}s^{n-1}}$。連鎖律と $\nabla|x|=x/|x|$ から $\nabla\Phi(x)=\Psi'(|x|)\frac{x}{|x|}=-\frac{x}{n\omega_{n}|x|^{n}}$。$\Delta\Phi(x)=\Psi''(r)+\frac{n-1}{r}\Psi'(r)$（$r=|x|$。\ref{pde:harmonic-function} の後の例 3）で、$\Psi'(r)=-\frac{r^{1-n}}{n\omega_{n}}$ から $\Psi''(r)=\frac{(n-1)r^{-n}}{n\omega_{n}}$、よって $\Delta\Phi=\frac{(n-1)r^{-n}}{n\omega_{n}}-\frac{(n-1)r^{-n}}{n\omega_{n}}=0$。
+
+**2.** 1 から $\nabla\Phi(\varepsilon\theta)\cdot\theta=\Psi'(\varepsilon)|\theta|^{2}=-\frac{1}{n\omega_{n}\varepsilon^{n-1}}$（$|\theta|=1$）。$\sigma(S^{n-1})=n\omega_{n}$ を掛けて $\varepsilon^{n-1}$ 倍すると $-1$。
+
+**3.** \ref{meas:polar-radial.2} を $g(s)=|\Psi(s)|\mathbf{1}_{(0,\varepsilon)}(s)$ と $g(s)=|\Psi'(s)|\mathbf{1}_{(0,\varepsilon)}(s)$（原点は零集合）に使う。$|\nabla\Phi|$ は $n\omega_{n}\int_{0}^{\varepsilon}\frac{s^{n-1}}{n\omega_{n}s^{n-1}}ds=\varepsilon$。$n\ge3$ では $n\omega_{n}\int_{0}^{\varepsilon}\frac{s^{2-n}s^{n-1}}{n(n-2)\omega_{n}}ds=\frac{1}{n-2}\cdot\frac{\varepsilon^{2}}{2}$。$n=2$、$\varepsilon\le1$ では $|\log s|=-\log s$ で、$\frac{d}{ds}\bigl(-\frac{s^{2}\log s}{2}+\frac{s^{2}}{4}\bigr)=-s\log s$、$s^{2}\log s\to0$（$s\to0$）なので
+$$
+2\pi\int_{0}^{\varepsilon}\frac{-\log s}{2\pi}\,s\,ds=-\frac{\varepsilon^{2}\log\varepsilon}{2}+\frac{\varepsilon^{2}}{4}=\frac{\varepsilon^{2}(2|\log\varepsilon|+1)}{4}.
+$$
+$\varepsilon>1$ でも、$1\le s\le\varepsilon$ の部分は有界な関数の有界区間上の積分なので有限。コンパクト集合は原点中心のある球に含まれ、平行移動で中心をずらしても同じなので、$\Phi$, $|\nabla\Phi|$ は局所可積分。
+:::
+
+::: supplement
+**前提を変えると.** $n=1$ では同じ考え方で $\Psi''=0$ の解 $\Phi(x)=-\frac{|x|}{2}$ が基本解になる（$\Phi'(x)=-\frac12\operatorname{sgn}x$ で、原点で $\Phi'$ が $1$ だけ跳ぶ）。これは 1 階の導関数まで原点で有界で、$n\ge2$ との違いは、$n\ge2$ では $\nabla\Phi$ が原点で $|x|^{1-n}$ の速さで発散することである。それでも $|x|^{1-n}$ は $n$ 次元では局所可積分（3）なので、以下の議論が成り立つ。$\nabla\nabla\Phi$（2 階導関数）は $|x|^{-n}$ の大きさで、局所可積分**でない**。ポアソン方程式の解の 2 階導関数を扱うときの難しさ（ヘルダー連続性の必要性。\see{pde:page-holder-poisson}）はここから来る。
+
+**似た定理.** $n\ge3$ の基本解は、リース・ポテンシャルの核 $|x|^{-(n-2)}$ の定数倍で（\see{four:fi-riesz-potential}）、そこで示したソボレフの不等式は「$\Phi*f$ の勾配の大きさ」を測るものだった。熱方程式・波動方程式にもそれぞれの基本解があり（この系列の後のページ）、どれも「1 点に集中した源への応答」として同じ役割を果たす。
+
+**高い視点：点源への応答.** 2 は、$-\nabla\Phi$ という流れが原点から湧き出し、どの球面を通しても総量 $1$ が流れ出ることを言っている。原点以外では湧き出しがない（1）ので、湧き出しは原点に集中した量 $1$ の点源で、超関数の言葉では $-\Delta\Phi=\delta_{0}$（ディラックのデルタ。\see{fa:distribution}）となる。比喩で言えば、基本解は「単位の力で 1 点を突いたときの膜のたわみ」で、一般の荷重 $f$ に対するたわみは、各点の荷重 $f(y)\,dy$ に対する応答 $\Phi(x-y)f(y)\,dy$ を重ね合わせたもの（線形性）として得られるはずである。これが次の節のニュートン・ポテンシャルである。
+:::
+
+基本解を使うには、原点（特異点）の周りに小さな穴をあけた領域で発散定理を使う必要がある。境界積分の約束の 1・2 の両方を一度に扱える形で示しておく。
+
+::: lemma 穴のあいた領域の発散定理 {#pde:gf-punctured-divergence keywords="divergence theorem on a domain with small balls removed around finitely many singular points; flux through small spheres" index="穴のあいた領域の発散定理|あなのあいたりょういきのはっさんていり"}
+$\Omega$ を境界積分の約束の 1 または 2 の有界な開集合、$U\supset\overline{\Omega}$ を開集合、$P\subset\Omega$ を有限集合（空でもよい）、$F\in C^{1}(U\setminus P;\mathbb{R}^{n})$ とする。$\varepsilon>0$ を、閉球 $\overline{B}(p,\varepsilon)$（$p\in P$）が $\Omega$ に含まれ互いに交わらないようにとり、$\Omega_{\varepsilon}\defeq\Omega\setminus\bigcup_{p\in P}\overline{B}(p,\varepsilon)$ とおく。このとき $\operatorname{div}F$ は $\Omega_{\varepsilon}$ で可積分で
+$$
+\int_{\Omega_{\varepsilon}}\operatorname{div}F\,dy=\int_{\partial\Omega}F\cdot\nu\,dS-\sum_{p\in P}\varepsilon^{n-1}\int_{S^{n-1}}F(p+\varepsilon\theta)\cdot\theta\,d\sigma(\theta).
+$$
+:::
+
+::: intuition
+特異点の周りに小さな球の穴をあけると、穴のあいた領域の湧き出しの総量は、外側の境界から出ていく流量から、各穴の球面から（穴の中へ向かって）出ていく流量を引いたものになる。
+:::
+
+::: proof
+$h$ を \ref{pde:ball-divergence} の証明の $C^{1}$ 関数（$t\le0$ で $0$、$t\ge1$ で $1$、間は $3t^{2}-2t^{3}$）とし、$p\in P$ について
+$$
+\eta_{p}(y)\defeq1-h\Bigl(\frac{3|y-p|}{\varepsilon}-1\Bigr)
+$$
+とおく。$|y-p|\le\varepsilon/3$ で $\eta_{p}=1$、$|y-p|\ge2\varepsilon/3$ で $\eta_{p}=0$ で、$y\ne p$ で $|y-p|$ は $C^{\infty}$ 級、$p$ の近くで $\eta_{p}$ は定数なので、$\eta_{p}\in C^{1}(\mathbb{R}^{n})$。
+
+**Step 1（特異点を消す）.** 【主張：$G\defeq\bigl(1-\sum_{p}\eta_{p}\bigr)F$（$P$ の点では $0$）は $G\in C^{1}(U;\mathbb{R}^{n})$ で、$\displaystyle\int_{\Omega}\operatorname{div}G\,dy=\int_{\partial\Omega}F\cdot\nu\,dS$】$|y-p|<\varepsilon/3$ では $1-\sum\eta_{q}=0$（球は交わらない）なので $G$ は $p$ の近傍で $0$、それ以外では $C^{1}$ 関数の積で $C^{1}$。$\overline{B}(p,\varepsilon)\subset\Omega$ なので、$\partial\Omega$ の近傍では $\eta_{p}=0$、$G=F$。$\Omega$ が約束 2 なら、成分ごとに \ref{fa:gauss-green-c1} を使って $\int_{\Omega}\partial_{j}G_{j}=\int_{\partial\Omega}G_{j}\nu_{j}\,dS$ を $j$ について足す。約束 1（$\Omega=B(a,R)$）なら、$G\in C^{1}(U)$, $\overline{B}(a,R)\subset U$ なので \ref{pde:ball-divergence} から $\int_{\Omega}\operatorname{div}G=R^{n-1}\int_{S^{n-1}}G(a+R\theta)\cdot\theta\,d\sigma=\int_{\partial\Omega}G\cdot\nu\,dS$。どちらも右辺は $\int_{\partial\Omega}F\cdot\nu\,dS$。
+
+**Step 2（穴の上の積分）.** 【主張：$\displaystyle\int_{B(p,\varepsilon)}\operatorname{div}G\,dy=\varepsilon^{n-1}\int_{S^{n-1}}F(p+\varepsilon\theta)\cdot\theta\,d\sigma(\theta)$】$G\in C^{1}(U)$, $\overline{B}(p,\varepsilon)\subset U$ なので \ref{pde:ball-divergence} が使え、右辺の被積分関数は $|y-p|=\varepsilon$ での値で、そこでは $\eta_{q}=0$（すべての $q$）から $G=F$。
+
+**Step 3（引き算）.** 【主張：結論の等式】$\operatorname{div}G$ はコンパクト集合 $\overline{\Omega}$ の上で連続なので有界で、$\Omega$ で可積分。$\Omega$ は $\Omega_{\varepsilon}$、開球 $B(p,\varepsilon)$、球面 $\partial B(p,\varepsilon)$（零集合）の互いに素な和で、$\Omega_{\varepsilon}$ の上では $G=F$。よって $\operatorname{div}F$ は $\Omega_{\varepsilon}$ で可積分で
+$$
+\int_{\Omega}\operatorname{div}G=\int_{\Omega_{\varepsilon}}\operatorname{div}F+\sum_{p\in P}\int_{B(p,\varepsilon)}\operatorname{div}G.
+$$
+Step 1・2 を代入して移項する。
+
+::: hypcheck
+- **$F\in C^{1}(U\setminus P)$、$U\supset\overline{\Omega}$**：Step 1 でガウス–グリーンの公式（境界の近傍で $C^{1}$ が要る）と球の上の発散定理に使った。
+- **$\overline{B}(p,\varepsilon)\subset\Omega$ で互いに交わらない**：Step 1 で $\partial\Omega$ の近くで $G=F$ となること、Step 1・2 で各穴の切り落としが互いに干渉しないことに使った。
+- **$\Omega$ の種類**：Step 1 だけで使った。境界の上で発散定理が成り立つ有界領域なら何でもよい。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## ニュートン・ポテンシャル {#pde:sec-gf-newton}
+
+::: theorem ニュートン・ポテンシャルとポアソン方程式 {#pde:newton-potential keywords="Newton potential u = Phi * f solves the Poisson equation -Delta u = f for f in C^2_c(R^n); u is C^2 and D^alpha u = Phi * D^alpha f for |alpha| <= 2" index="ニュートン・ポテンシャル|にゅーとんぽてんしゃる, ポアソン方程式|ぽあそんほうていしき, 体積ポテンシャル|たいせきぽてんしゃる" refname="ニュートン・ポテンシャルによるポアソン方程式の解"}
+$f\in C_{c}^{2}(\mathbb{R}^{n})$ とし、
+$$
+u(x)\defeq(\Phi*f)(x)=\int_{\mathbb{R}^{n}}\Phi(x-y)f(y)\,dy
+$$
+とおく（$f$ の**ニュートン・ポテンシャル**）。
+1. $u\in C^{2}(\mathbb{R}^{n})$ で、$|\alpha|\le2$ の多重指数 $\alpha$ について $\partial^{\alpha}u=\Phi*\partial^{\alpha}f$。
+2. $\mathbb{R}^{n}$ の各点で $-\Delta u=f$。
+:::
+
+::: intuition
+基本解を右辺の関数と畳み込むと、ポアソン方程式 $-\Delta u=f$ の解ができる。右辺が 2 回連続微分できて有界な範囲の外で $0$ なら、こうして作った解は本当に 2 回連続微分できる。
+:::
+
+::: proof
+$f$ の台を $\overline{B}(0,\rho)$ に含める。平行移動と $y\mapsto-y$ による不変性から $u(x)=\int\Phi(z)f(x-z)\,dz$ で、積分は \ref{pde:gf-fundamental-properties.3} から絶対収束する。
+
+**Step 1（積分記号下の微分）.** 【主張：$u\in C^{2}(\mathbb{R}^{n})$、$|\alpha|\le2$ で $\partial^{\alpha}u(x)=\int\Phi(z)\,\partial^{\alpha}f(x-z)\,dz$】$M>0$ とし、$|x|<M$ で考える。$f(x-z)\ne0$ なら $|z|\le|x|+\rho<M+\rho$ なので、$|\beta|\le2$ について
+$$
+|\Phi(z)\,\partial^{\beta}f(x-z)|\le\|\partial^{\beta}f\|_{\infty}\,|\Phi(z)|\,\mathbf{1}_{B(0,M+\rho)}(z),
+$$
+右辺は $x$ によらず可積分（\ref{pde:gf-fundamental-properties.3}）。座標 $x_{i}$ 以外を固定して \ref{meas:parameter-integrals.2} を使うと、$\partial_{i}u$ が存在して $\int\Phi(z)\partial_{i}f(x-z)\,dz$ に等しい。これを $\partial_{i}f\in C_{c}^{1}$ についてもう一度行えば 2 階の偏導関数も同じ形になる。各 $\partial^{\beta}u$ の連続性は、$x_{k}\to x$ となる列に優収束定理を使えばよい（$\partial^{\beta}f$ は連続で、上の優関数が使える。\ref{meas:parameter-integrals.1} の証明と同じ）。
+
+**Step 2（小さな球の寄与）.** 【主張：$I_{\varepsilon}\defeq\int_{B(0,\varepsilon)}\Phi(z)\,\Delta f(x-z)\,dz\to0$（$\varepsilon\to0$）】$|I_{\varepsilon}|\le\|\Delta f\|_{\infty}\int_{B(0,\varepsilon)}|\Phi|$ で、\ref{pde:gf-fundamental-properties.3} からこれは $n\ge3$ で $\|\Delta f\|_{\infty}\frac{\varepsilon^{2}}{2(n-2)}$、$n=2$（$\varepsilon\le1$）で $\|\Delta f\|_{\infty}\frac{\varepsilon^{2}(2|\log\varepsilon|+1)}{4}$。どちらも $0$ に収束する（$\varepsilon^{2}\log\varepsilon\to0$）。
+
+**Step 3（穴のあいた領域で部分積分）.** 【主張：$J_{\varepsilon}\defeq\int_{|z|>\varepsilon}\Phi(z)\,\Delta f(x-z)\,dz=-\varepsilon^{n-1}\Psi(\varepsilon)\int_{S^{n-1}}\nabla w(\varepsilon\theta)\cdot\theta\,d\sigma-\frac{1}{n\omega_{n}}\int_{S^{n-1}}w(\varepsilon\theta)\,d\sigma$（$w(z)\defeq f(x-z)$）】$w\in C_{c}^{2}(\mathbb{R}^{n})$ で、台は $\overline{B}(x,\rho)$ に含まれ、連鎖律から $\Delta w(z)=(\Delta f)(x-z)$。$R>|x|+\rho+1$ と $0<\varepsilon<1$ をとり、$\mathbb{R}^{n}\setminus\{0\}$ の上の $C^{1}$ ベクトル場
+$$
+F\defeq\Phi\nabla w-w\nabla\Phi
+$$
+に \ref{pde:gf-punctured-divergence} を $\Omega=B(0,R)$, $U=\mathbb{R}^{n}$, $P=\{0\}$ で使う。$\operatorname{div}F=\nabla\Phi\cdot\nabla w+\Phi\Delta w-\nabla w\cdot\nabla\Phi-w\Delta\Phi=\Phi\,\Delta w$（\ref{pde:gf-fundamental-properties.1} から $\Delta\Phi=0$）。$\partial B(0,R)$ の近くで $w=0$ なので境界項は $0$。$|z|\ge R$ では被積分関数が $0$ なので
+$$
+J_{\varepsilon}=\int_{\varepsilon<|z|<R}\Phi\,\Delta w\,dz=-\varepsilon^{n-1}\int_{S^{n-1}}\bigl(\Psi(\varepsilon)\nabla w(\varepsilon\theta)-w(\varepsilon\theta)\Psi'(\varepsilon)\theta\bigr)\cdot\theta\,d\sigma(\theta).
+$$
+$\varepsilon^{n-1}\Psi'(\varepsilon)=-\frac{1}{n\omega_{n}}$（\ref{pde:gf-fundamental-properties.1}）を代入すると主張の式になる。
+
+**Step 4（極限）.** 【主張：$J_{\varepsilon}\to-f(x)$（$\varepsilon\to0$）】第 1 項は $|\nabla w|\le\|\nabla f\|_{\infty}$、$\sigma(S^{n-1})=n\omega_{n}$ から絶対値が $n\omega_{n}\|\nabla f\|_{\infty}\varepsilon^{n-1}|\Psi(\varepsilon)|$ 以下で、これは $n\ge3$ で $\frac{\|\nabla f\|_{\infty}}{n-2}\varepsilon$、$n=2$ で $\|\nabla f\|_{\infty}\varepsilon|\log\varepsilon|$ なので $0$ に収束する。第 2 項は、$f$ が一様連続なので $\max_{\theta}|w(\varepsilon\theta)-f(x)|=\max_{\theta}|f(x-\varepsilon\theta)-f(x)|\to0$ となり、$\frac{1}{n\omega_{n}}\int_{S^{n-1}}w(\varepsilon\theta)\,d\sigma\to f(x)$。
+
+Step 1 から $\Delta u(x)=\int\Phi(z)\Delta f(x-z)\,dz=I_{\varepsilon}+J_{\varepsilon}$（原点を含む球面は零集合）がすべての $\varepsilon\in(0,1)$ で成り立ち、左辺は $\varepsilon$ によらない。Step 2・4 から $\Delta u(x)=-f(x)$。
+
+::: hypcheck
+- **$f\in C^{2}$**：Step 1 で $\partial^{\alpha}f$（$|\alpha|\le2$）の連続性と有界性を、Step 3 で $w\in C^{2}$（ベクトル場 $F$ が $C^{1}$）を使った。2 階の導関数を $f$ の側に移したことが証明の要で、$\Phi$ の 2 階導関数（局所可積分でない）を直接積分しないで済んだ。$f$ が連続なだけでは結論が崩れる（後のページの \see{pde:newton-continuous-counterexample}）。
+- **台がコンパクト**：Step 1 の優関数（$\Phi$ は無限遠で可積分でない）と、Step 3 で境界項が消えることに使った。台がなくても、$f$ と導関数が十分速く減衰すれば同じ結論が成り立つ。$n=2$ では $\Phi$ が対数的に増大するので、$f$ の減衰の条件は $n\ge3$ より厳しい。
+- **基本解の正規化**：Step 3 の $\varepsilon^{n-1}\Psi'(\varepsilon)=-\frac{1}{n\omega_{n}}$（\ref{pde:gf-fundamental-properties.2} の単位流量）がちょうど $f(x)$ の係数を $1$ にした。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 解 $u=\Phi*f$ は一意ではない。調和関数（たとえば 1 次関数）を足しても $-\Delta u=f$ を満たすからである。$n\ge3$ では、$u(x)\to0$（$|x|\to\infty$）を課せば一意になる：二つの解の差は $\mathbb{R}^{n}$ の調和関数で、無限遠で $0$ に近づくので有界であり、\ref{pde:liouville} から定数、無限遠での値から $0$ である。$\Phi*f$ が実際に無限遠で $0$ に近づくことは、$|x|\to\infty$ で $\Phi(x-y)\to0$ が $y\in\operatorname{supp}f$ について一様であることから従う。$n=2$ では $\Phi*f(x)=-\frac{1}{2\pi}\bigl(\int f\bigr)\log|x|+o(1)$ となり、$\int f\ne0$ なら有界な解は存在しない（解と $\Phi*f$ の差は高々対数的に増える調和関数なので 1 次以下の多項式に限られ（\ref{pde:prob-hf-polynomial-growth}）、$\log|x|$ の増大を打ち消せない）。また、$f$ の正則性について：$f$ が連続なだけでは $\Phi*f$ が $C^{2}$ 級にならない例がある（後のページの \see{pde:newton-continuous-counterexample}）。$f$ がヘルダー連続なら $C^{2}$ 級になる（後のページの \see{pde:newton-holder}）。
+
+**似た定理.** 閉多様体の上では、ポアソン方程式 $\Delta u=f$ は $\int f=0$ のときだけ解けて、解はグリーン作用素で与えられる（\see{gl:poisson-closed-manifold}, \see{gl:green-operator}）。そこでは関数解析的手法（楕円正則性）で解の滑らかさを示した。ここでは積分の式が具体的にあるので、微分を $f$ に移すだけで済んだ。関数解析的手法では、ディリクレ問題の弱解をラックス–ミルグラムの定理で作る（\see{fa:weak-dirichlet-existence}）。
+
+**高い視点：重ね合わせ.** ニュートン・ポテンシャルは、重力や静電気の古典物理そのものである：質量（電荷）密度 $f$ の分布がつくるポテンシャルは、各点 $y$ の質量 $f(y)\,dy$ がつくる点源のポテンシャル $\Phi(x-y)f(y)\,dy$ の和である。比喩で言えば、膜の上に砂をまいたときのたわみは、砂粒一つひとつの「1 点を突いたたわみ」を足し合わせたものになる。数学的には、$f\mapsto\Phi*f$ は $-\Delta$ の右逆作用素で、$-\Delta(\Phi*f)=f$ は「$-\Delta\Phi=\delta_{0}$ と畳み込みの微分の性質 $\Delta(\Phi*f)=\Phi*\Delta f$」を、超関数を使わずに確かめたものである。
+:::
+
+$f$ が連続なだけのときでも、ニュートン・ポテンシャルは方程式を「積分の意味で」満たす。
+
+::: proposition ニュートン・ポテンシャルの弱い形 {#pde:newton-weak keywords="for f in C_c(R^n) the Newton potential Phi * f is continuous and satisfies int (Phi * f) Delta zeta = - int f zeta for all test functions zeta; if Phi * f is C^2 on an open set V then -Delta(Phi * f) = f on V" index="ニュートン・ポテンシャル（弱い形）|にゅーとんぽてんしゃるよわいかたち"}
+$f\in C_{c}(\mathbb{R}^{n})$ とし、$u\defeq\Phi*f$ とおく。
+1. $u$ は $\mathbb{R}^{n}$ で連続。
+2. すべての $\zeta\in C_{c}^{\infty}(\mathbb{R}^{n})$ について $\displaystyle\int u\,\Delta\zeta\,dx=-\int f\zeta\,dx$。
+3. 開集合 $V$ の上で $u\in C^{2}(V)$ なら、$V$ の上で $-\Delta u=f$。
+:::
+
+::: proof
+$f$ の台を $\overline{B}(0,\rho)$ に含める。
+
+**Step 1（連続性）.** 【主張：1】$u(x)=\int\Phi(z)f(x-z)\,dz$ で、$x_{k}\to x$, $|x_{k}|<M$ なら $f(x_{k}-z)\to f(x-z)$（$f$ は連続）、$|\Phi(z)f(x_{k}-z)|\le\|f\|_{\infty}|\Phi(z)|\mathbf{1}_{B(0,M+\rho)}(z)$ は可積分。優収束定理から $u(x_{k})\to u(x)$。
+
+**Step 2（積分の順序交換）.** 【主張：$\displaystyle\int u\,\Delta\zeta\,dx=\int f(y)\,(\Phi*\Delta\zeta)(y)\,dy$】$\zeta$ の台を $\overline{B}(0,\rho')$ に含める。$|\Phi(x-y)f(y)\Delta\zeta(x)|$ は $|y|\le\rho$, $|x|\le\rho'$ でしか $0$ でなく、そこで $|x-y|\le\rho+\rho'$ なので、トネリの定理と平行移動不変性から
+$$
+\iint|\Phi(x-y)f(y)\Delta\zeta(x)|\,dx\,dy\le\|f\|_{\infty}\|\Delta\zeta\|_{\infty}\,\lambda(B(0,\rho))\int_{B(0,\rho+\rho')}|\Phi|<\infty.
+$$
+よってフビニの定理で積分の順序を交換でき、$\Phi(x-y)=\Phi(y-x)$ から内側は $\int\Phi(y-x)\Delta\zeta(x)\,dx=(\Phi*\Delta\zeta)(y)$。
+
+**Step 3（2）.** 【主張：$\Phi*\Delta\zeta=-\zeta$】$\zeta\in C_{c}^{\infty}\subset C_{c}^{2}$ なので、\ref{pde:newton-potential.1} から $\Phi*\Delta\zeta=\Delta(\Phi*\zeta)$、\ref{pde:newton-potential.2} からこれは $-\zeta$。Step 2 に代入して 2 を得る。
+
+**Step 4（3）.** 【主張：$V$ の上で $\Delta u+f=0$】$\zeta\in C_{c}^{\infty}(V)$（$V$ の外で $0$ と延ばす）について、ベクトル場 $u\nabla\zeta-\zeta\nabla u$ は $V$ で $C^{1}$、$\operatorname{supp}\zeta$ の外では $0$ と延ばして $C^{1}(\mathbb{R}^{n})$ で台がコンパクト。台を含む大きな球に \ref{pde:ball-divergence} を使うと、境界項は $0$ で、$\int(u\Delta\zeta-\zeta\Delta u)\,dx=0$。2 と合わせて $\int(\Delta u+f)\zeta\,dx=0$。$h\defeq\Delta u+f$ は $V$ で連続なので、ある $x_{0}\in V$ で $h(x_{0})>0$ とすると、$\overline{B}(x_{0},\delta)\subset V$ で $h>h(x_{0})/2$ となる $\delta>0$ があり、$\zeta(x)\defeq\rho_{\delta}(x-x_{0})$（\ref{fa:mollifier}。$\zeta\ge0$, $\int\zeta=1$, 台は $\overline{B}(x_{0},\delta)$）について $\int h\zeta\ge h(x_{0})/2>0$ となり矛盾。$h(x_{0})<0$ も同様。
+
+::: hypcheck
+- **$f$ の連続性**：Step 1 と Step 4（$h$ の連続性）で使った。2 は $f$ が有界可測で台が有界なら成り立つ（Step 2・3 は可積分性しか使わない）。
+- **3 の仮定 $u\in C^{2}(V)$**：Step 4 で部分積分に使った。結論はこの仮定のもとでの方程式で、$u$ が $C^{2}$ 級であること自体は主張しない。実際、$f$ が連続なだけでは $u$ は $C^{2}$ 級とは限らない（後のページの \see{pde:newton-continuous-counterexample}）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提の対比（この系列の材料）.** ポアソン方程式 $-\Delta u=f$ の古典解（$C^{2}$ 解）を得るための $f$ の条件は、次のように並ぶ。
+1. $f\in C_{c}^{2}$：\ref{pde:newton-potential} で証明した（このページ）。
+2. $f$ がヘルダー連続（さらに弱くディニ連続）：$C^{2}$ 解が得られる（後のページの \see{pde:newton-holder} で証明する）。証明では $\partial_{i}\partial_{j}u(x)$ を「$\partial_{i}\partial_{j}\Phi(x-y)\bigl(f(y)-f(x)\bigr)$ の積分」に書き換え、ヘルダー連続性の $|f(y)-f(x)|\le C|x-y|^{\alpha}$ で 2 階導関数の特異性 $|x-y|^{-n}$ を $|x-y|^{-n+\alpha}$（局所可積分）に弱める。
+3. $f$ が連続なだけ：$C^{2}$ 解がないことがある（後のページの \see{pde:newton-continuous-counterexample}）。それでも 2 の弱い形の方程式は満たす（\ref{pde:newton-weak}）。
+
+関数解析的手法では、方程式を初めから弱い形で解き、解の滑らかさを後から調べる（$f\in L^{2}$ なら $u\in H_{\mathrm{loc}}^{2}$ となり、2 階導関数は $L^{2}$ の意味で存在する）。「連続では足りず、ヘルダー連続なら足りる」という古典的手法の条件と、「$L^{2}$ なら $H^{2}$」という関数解析的手法の条件の対比は、系列 02 の最後のページ（古典的手法と関数解析的手法）で行う。
+
+**似た定理.** ヘルダー空間での評価 $\|u\|_{C^{2,\alpha}}\lesssim\|f\|_{C^{0,\alpha}}$ は**シャウダー評価**と呼ばれ、係数が変わる楕円型方程式の古典解の存在（シャウダーの方法）の土台になる。一方、$f\in L^{p}$（$1<p<\infty$）なら $u$ の 2 階導関数は $L^{p}$ に入る（カルデロン–ジグムントの評価。特異積分の理論による）。どちらも「$p=\infty$（連続・有界）や $\alpha=0$ の端点では成り立たない」という共通の性質をもつ（どちらもここでは証明しない）。
+
+**高い視点：端点の失敗.** 2 階導関数 $\partial_{i}\partial_{j}u=\partial_{i}\partial_{j}\Phi*f$ を作る作用素は、核が $|x|^{-n}$ の大きさの特異積分作用素で、ちょうど「積分がぎりぎり対数的に発散する」境目にある。比喩で言えば、針の先のように細い山（核）を、表面が少しでも滑らか（ヘルダー連続）な板で押さえれば支えられるが、表面がでこぼこ（連続なだけ）だと、どこかで突き抜けてしまう。$f$ の滑らかさを $\alpha$ だけ上げれば $u$ の滑らかさも同じ $\alpha$ だけ上がるという「2 階の得」は、端点 $\alpha=0$ を除いてしか成り立たない。
+:::
+
+## グリーンの表現公式とグリーン関数 {#pde:sec-gf-green}
+
+ニュートン・ポテンシャルは全空間の方程式の解を与えた。有界な領域では境界の値を指定したいので、まず領域の中の $C^{2}$ 関数を、境界のデータで書き表す。
+
+::: theorem グリーンの表現公式 {#pde:green-representation keywords="Green representation formula: for u in C^2 on a neighborhood of the closure of Omega and x in Omega, u(x) = int_{dOmega} (Phi(y-x) du/dnu - u dPhi(y-x)/dnu) dS - int_Omega Phi(y-x) Delta u dy; Green's second identity" index="グリーンの表現公式|ぐりーんのひょうげんこうしき, グリーンの第 2 公式|ぐりーんのだいにこうしき" refname="グリーンの表現公式"}
+$\Omega$ を境界積分の約束の 1 または 2 の有界な開集合とする。
+1. （グリーンの第 2 公式）$u,v$ が $\overline{\Omega}$ の近傍で $C^{2}$ 級なら
+$$
+\int_{\Omega}(v\,\Delta u-u\,\Delta v)\,dy=\int_{\partial\Omega}(v\,\partial_{\nu}u-u\,\partial_{\nu}v)\,dS.
+$$
+2. （表現公式）$u$ が $\overline{\Omega}$ の近傍で $C^{2}$ 級なら、$x\in\Omega$ について $y\mapsto\Phi(y-x)\Delta u(y)$ は $\Omega$ で可積分で
+$$
+u(x)=\int_{\partial\Omega}\bigl(\Phi(y-x)\,\partial_{\nu}u(y)-u(y)\,\partial_{\nu_{y}}\Phi(y-x)\bigr)\,dS(y)-\int_{\Omega}\Phi(y-x)\,\Delta u(y)\,dy.
+$$
+ここで $\partial_{\nu_{y}}\Phi(y-x)\defeq\nabla\Phi(y-x)\cdot\nu(y)$。
+:::
+
+::: intuition
+領域の中の関数の値は、境界の上の値と、境界での法線微分（外へ向かう傾き）と、中でのラプラシアンの三つで完全に決まり、基本解を重みにした積分で書ける。
+:::
+
+::: proof
+$u,v\in C^{2}(U)$（$U\supset\overline{\Omega}$ は開集合）とする。
+
+**1.** $F\defeq v\nabla u-u\nabla v\in C^{1}(U;\mathbb{R}^{n})$ で $\operatorname{div}F=\nabla v\cdot\nabla u+v\Delta u-\nabla u\cdot\nabla v-u\Delta v=v\Delta u-u\Delta v$。\ref{pde:gf-punctured-divergence} を $P=\varnothing$ で使えばよい（$F\cdot\nu=v\partial_{\nu}u-u\partial_{\nu}v$）。
+
+以下 2 を示す。$\Phi_{x}(y)\defeq\Phi(y-x)$ とおき、$\overline{B}(x,\varepsilon_{0})\subset\Omega$ となる $\varepsilon_{0}\in(0,1)$ をとる。
+
+**Step 1（可積分性）.** 【主張：$\Phi_{x}\Delta u$ は $\Omega$ で可積分で、$0<\varepsilon<\varepsilon_{0}$ について $\int_{\Omega\setminus\overline{B}(x,\varepsilon)}\Phi_{x}\Delta u\to\int_{\Omega}\Phi_{x}\Delta u$（$\varepsilon\to0$）】$\Delta u$ はコンパクト集合 $\overline{\Omega}$ の上で連続なので $|\Delta u|\le M$。$\Omega\subset B(x,D)$（$D$ は十分大きい）として、$|\Phi_{x}\Delta u|\mathbf{1}_{\Omega}\le M|\Phi_{x}|\mathbf{1}_{B(x,D)}$ は可積分（\ref{pde:gf-fundamental-properties.3}）。$\varepsilon\to0$ で $\mathbf{1}_{\Omega\setminus\overline{B}(x,\varepsilon)}\to\mathbf{1}_{\Omega\setminus\{x\}}$（各点）なので、優収束定理（$\varepsilon$ を $0$ に収束する任意の列で動かす）から従う。1 点 $\{x\}$ は零集合。
+
+**Step 2（穴のあいた領域）.** 【主張：$\displaystyle\int_{\Omega\setminus\overline{B}(x,\varepsilon)}\Phi_{x}\Delta u\,dy=\int_{\partial\Omega}(\Phi_{x}\partial_{\nu}u-u\,\partial_{\nu}\Phi_{x})\,dS-\varepsilon^{n-1}\Psi(\varepsilon)\int_{S^{n-1}}\nabla u(x+\varepsilon\theta)\cdot\theta\,d\sigma-\frac{1}{n\omega_{n}}\int_{S^{n-1}}u(x+\varepsilon\theta)\,d\sigma$】$F\defeq\Phi_{x}\nabla u-u\nabla\Phi_{x}\in C^{1}(U\setminus\{x\};\mathbb{R}^{n})$ で、$y\ne x$ では $\Delta\Phi_{x}=0$ から $\operatorname{div}F=\Phi_{x}\Delta u$。\ref{pde:gf-punctured-divergence}（$P=\{x\}$）を使い、球面の上で $\nabla\Phi_{x}(x+\varepsilon\theta)=\Psi'(\varepsilon)\theta$、$\varepsilon^{n-1}\Psi'(\varepsilon)=-\frac{1}{n\omega_{n}}$（\ref{pde:gf-fundamental-properties.1}）を代入する。
+
+**Step 3（$\varepsilon\to0$）.** 【主張：Step 2 の右辺の第 2 項は $0$ に、第 3 項は $-u(x)$ に収束する】$|\nabla u|$ は $\overline{B}(x,\varepsilon_{0})$ で有界（$\le M'$）なので、第 2 項の絶対値は $n\omega_{n}M'\varepsilon^{n-1}|\Psi(\varepsilon)|$ 以下で、\ref{pde:newton-potential} の証明の Step 4 と同じく $0$ に収束する。第 3 項は、$u$ の連続性から $\frac{1}{n\omega_{n}}\int u(x+\varepsilon\theta)\,d\sigma=S_{\varepsilon}u(x)\to u(x)$（\ref{pde:means-relation.1}）。
+
+Step 1〜3 から $\int_{\Omega}\Phi_{x}\Delta u=\int_{\partial\Omega}(\Phi_{x}\partial_{\nu}u-u\partial_{\nu}\Phi_{x})\,dS-u(x)$。移項すれば 2 が従う。
+
+::: hypcheck
+- **$\overline{\Omega}$ の近傍で $C^{2}$**：Step 1 で $\Delta u$ の有界性、Step 2 で $F$ が $\partial\Omega$ の近くまで $C^{1}$ であること（発散定理）、Step 3 で $\nabla u$ の有界性に使った。$\Omega$ の中だけで $C^{2}$ だと、境界積分が意味をもたないことがある。
+- **$\Omega$ の有界性と境界の種類**：$\Omega$ の有界性は Step 1 の可積分性に、境界の種類は \ref{pde:gf-punctured-divergence} を通して使った。
+- **基本解の正規化**：Step 3 で第 3 項がちょうど $u(x)$ になることに使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example
+1. $u$ が $\overline{\Omega}$ の近傍で $C^{2}$ 級で $\Omega$ で調和なら、$u(x)=\int_{\partial\Omega}\bigl(\Phi(y-x)\partial_{\nu}u-u\,\partial_{\nu_{y}}\Phi(y-x)\bigr)\,dS(y)$。右辺は $x\in\Omega$ について $C^{\infty}$ 級で（被積分関数が $x$ について滑らかで、$x$ が $\partial\Omega$ から離れていれば積分記号下で何回でも微分できる）、調和関数の滑らかさ（\ref{pde:mean-value-converse}）の別証明になる。
+2. $\Omega=B(x,r)$ で $u$ が調和なら、$\partial\Omega$ の上で $\Phi(y-x)=\Psi(r)$ は定数、$\partial_{\nu}\Phi(y-x)=\Psi'(r)$。グリーンの第 2 公式（$v=1$）から $\int_{\partial\Omega}\partial_{\nu}u\,dS=\int_{\Omega}\Delta u=0$ なので、1 は $u(x)=-\Psi'(r)\,r^{n-1}\int_{S^{n-1}}u(x+r\theta)\,d\sigma=S_{r}u(x)$ となり、平均値の性質（\ref{pde:mean-value-property.2}）が再び得られる。
+3. $u\in C_{c}^{2}(\mathbb{R}^{n})$ なら、台を含む大きな球を $\Omega$ にとると境界項が消えて $u=\Phi*(-\Delta u)$。\ref{pde:newton-potential} は $-\Delta(\Phi*f)=f$ を、こちらは $\Phi*(-\Delta u)=u$ を言っており、$\Phi*$ が $-\Delta$ の左右両方からの逆であることを示す。
+:::
+
+表現公式は、ディリクレ問題の解の公式にはまだなっていない。右辺には、ディリクレ問題では与えられない境界での法線微分 $\partial_{\nu}u$ が残っているからである。これを消すために、$\Phi(y-x)$ から、境界で $\Phi(y-x)$ と同じ値をとる調和関数を引く。
+
+::: definition グリーン関数 {#pde:green-function keywords="Green's function of a bounded domain for the Dirichlet problem: G(x,y) = Phi(y-x) - phi^x(y) where the corrector phi^x is harmonic in Omega, C^2 near the closure, and equals Phi(y-x) on the boundary" index="グリーン関数|ぐりーんかんすう, 補正関数|ほせいかんすう"}
+$\Omega$ を境界積分の約束の 1 または 2 の有界な開集合とする。各 $x\in\Omega$ について、$\overline{\Omega}$ の近傍で $C^{2}$ 級の関数 $\varphi^{x}$ で
+$$
+\Delta\varphi^{x}=0\ \ (\Omega\text{ の上}),\qquad\varphi^{x}(y)=\Phi(y-x)\ \ (y\in\partial\Omega)
+$$
+を満たすもの（**補正関数**）が存在するとき、
+$$
+G(x,y)\defeq\Phi(y-x)-\varphi^{x}(y)\qquad(x\in\Omega,\ y\in\overline{\Omega},\ y\ne x)
+$$
+を $\Omega$ の（ディリクレ問題についての）**グリーン関数**という。$\varphi^{x}$ が定義された近傍の $y\ne x$ でも同じ式で $G(x,y)$ を考える。
+:::
+
+::: intuition
+グリーン関数は、境界を温度 $0$ に保った部屋の中の 1 点 $x$ に単位の熱源を置いたときの、平衡状態の温度分布である。全空間の基本解から、境界で温度を $0$ にそろえるための補正を引いたものになっている。
+:::
+
+::: example
+1. 補正関数は、あれば一つだけである：二つの補正関数の差は $C^{2}(\Omega)\cap C(\overline{\Omega})$ に入る調和関数で境界で $0$ なので、\ref{pde:dirichlet-uniqueness.1} から $0$。よってグリーン関数も、あれば一つに決まる。
+2. 存在は一般には仮定である。境界が十分滑らか（たとえば $C^{2,\alpha}$ 級）な有界領域では補正関数が存在することが、シャウダーの理論で示される（Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 6 章。ここでは証明しない）。球と半空間では、鏡像の方法で $\varphi^{x}$ を具体的に書ける（次のページ）。
+3. $G(x,\cdot)$ は $\Omega\setminus\{x\}$ で調和で、$\partial\Omega$ の上で $0$。
+:::
+
+::: theorem グリーン関数の対称性 {#pde:green-symmetry keywords="symmetry of the Green function G(x,y) = G(y,x) for x != y in Omega; G(., y) is harmonic in x" index="グリーン関数の対称性|ぐりーんかんすうのたいしょうせい" refname="グリーン関数の対称性"}
+$\Omega$ がグリーン関数 $G$ をもてば、$x,y\in\Omega$, $x\ne y$ について $G(x,y)=G(y,x)$。とくに、各 $y\in\Omega$ について $x\mapsto G(x,y)$ は $\Omega\setminus\{y\}$ で調和である。
+:::
+
+::: intuition
+点 $x$ に熱源を置いて点 $y$ で測った温度と、点 $y$ に熱源を置いて点 $x$ で測った温度は等しい。源と観測点を入れ替えても応答は変わらない。
+:::
+
+::: proof
+$v(z)\defeq G(x,z)$, $w(z)\defeq G(y,z)$ とおく。$\varphi^{x}$, $\varphi^{y}$ は $\overline{\Omega}$ の近傍で $C^{2}$ 級なので、共通の開集合 $U\supset\overline{\Omega}$ をとると $v\in C^{2}(U\setminus\{x\})$, $w\in C^{2}(U\setminus\{y\})$ で、$v,w$ は $\Omega$ からそれぞれ $x$, $y$ を除いた所で調和、$\partial\Omega$ の上で $0$。$\varepsilon_{0}>0$ を、$\overline{B}(x,\varepsilon_{0})$ と $\overline{B}(y,\varepsilon_{0})$ が $\Omega$ に含まれ交わらないようにとり、$0<\varepsilon<\varepsilon_{0}$ とする。$M$ を、$|w|$, $|\nabla w|$, $|\varphi^{x}|$, $|\nabla\varphi^{x}|$ の $\overline{B}(x,\varepsilon_{0})$ の上の最大値と、$|v|$, $|\nabla v|$, $|\varphi^{y}|$, $|\nabla\varphi^{y}|$ の $\overline{B}(y,\varepsilon_{0})$ の上の最大値のうち最大のものとする（どれも連続関数のコンパクト集合の上の最大値）。
+
+**Step 1（発散定理）.** 【主張：$\displaystyle\varepsilon^{n-1}\int_{S^{n-1}}(v\nabla w-w\nabla v)(x+\varepsilon\theta)\cdot\theta\,d\sigma+\varepsilon^{n-1}\int_{S^{n-1}}(v\nabla w-w\nabla v)(y+\varepsilon\theta)\cdot\theta\,d\sigma=0$】$F\defeq v\nabla w-w\nabla v\in C^{1}(U\setminus\{x,y\};\mathbb{R}^{n})$ で、$\operatorname{div}F=v\Delta w-w\Delta v=0$（$\Omega\setminus\{x,y\}$ の上）。$\partial\Omega$ の上で $v=w=0$ なので $F=0$。\ref{pde:gf-punctured-divergence}（$P=\{x,y\}$）から従う。
+
+**Step 2（$x$ の周りの項）.** 【主張：$x$ の周りの項は $\varepsilon\to0$ で $w(x)$ に収束する】$v(z)=\Psi(|z-x|)-\varphi^{x}(z)$ なので、$|v(x+\varepsilon\theta)|\le|\Psi(\varepsilon)|+M$、よって $\varepsilon^{n-1}\int|v\nabla w\cdot\theta|\,d\sigma\le n\omega_{n}\varepsilon^{n-1}(|\Psi(\varepsilon)|+M)M\to0$。また $\nabla v(x+\varepsilon\theta)\cdot\theta=\Psi'(\varepsilon)-\nabla\varphi^{x}(x+\varepsilon\theta)\cdot\theta$ なので
+$$
+-\varepsilon^{n-1}\int w\nabla v\cdot\theta\,d\sigma=\frac{1}{n\omega_{n}}\int_{S^{n-1}}w(x+\varepsilon\theta)\,d\sigma+\varepsilon^{n-1}\int w\,\nabla\varphi^{x}\cdot\theta\,d\sigma.
+$$
+第 1 項は $S_{\varepsilon}w(x)\to w(x)$（\ref{pde:means-relation.1}）、第 2 項は絶対値が $n\omega_{n}\varepsilon^{n-1}M^{2}$ 以下で $0$ に収束する。
+
+**Step 3（$y$ の周りの項）.** 【主張：$y$ の周りの項は $\varepsilon\to0$ で $-v(y)$ に収束する】Step 2 で $v$ と $w$、$x$ と $y$ の役割を入れ替えると、$\varepsilon^{n-1}\int(w\nabla v-v\nabla w)(y+\varepsilon\theta)\cdot\theta\,d\sigma\to v(y)$。符号を変えればよい。
+
+Step 1〜3 で $\varepsilon\to0$ とすると $w(x)-v(y)=0$、すなわち $G(y,x)=G(x,y)$。「とくに」は、$G(\cdot,y)=G(y,\cdot)$ が $\Omega\setminus\{y\}$ で調和であること（グリーン関数の例 3）から。
+
+::: hypcheck
+- **補正関数が $\overline{\Omega}$ の近傍で $C^{2}$**：Step 1 でベクトル場が境界の近くまで $C^{1}$ であることに、Step 2・3 で $\nabla\varphi^{x}$ の有界性に使った。
+- **境界で $G=0$**：Step 1 で境界項が消えることに使った。ノイマン条件に対応するグリーン関数（境界で法線微分が一定）でも同じ議論で対称性が得られるが、境界項の扱いが変わる。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem グリーン関数によるディリクレ問題の解の表示 {#pde:green-dirichlet keywords="representation of the solution of the Dirichlet problem -Delta u = f in Omega, u = g on dOmega via the Green function: u(x) = - int_{dOmega} g dG/dnu dS + int_Omega G f dy" index="グリーン関数による表示|ぐりーんかんすうによるひょうじ, ディリクレ問題の解の公式|でぃりくれもんだいのかいのこうしき" refname="グリーン関数によるディリクレ問題の解の表示"}
+$\Omega$ がグリーン関数 $G$ をもつとし、$u$ は $\overline{\Omega}$ の近傍で $C^{2}$ 級で
+$$
+-\Delta u=f\ \ (\Omega\text{ の上}),\qquad u=g\ \ (\partial\Omega\text{ の上})
+$$
+を満たすとする。このとき $x\in\Omega$ について
+$$
+u(x)=-\int_{\partial\Omega}g(y)\,\partial_{\nu_{y}}G(x,y)\,dS(y)+\int_{\Omega}G(x,y)f(y)\,dy.
+$$
+:::
+
+::: intuition
+グリーン関数がわかっていれば、ディリクレ問題の解は、境界の値をグリーン関数の法線微分で重み付けした積分と、右辺をグリーン関数で重み付けした積分の和として書ける。
+:::
+
+::: proof
+**Step 1（補正関数についての第 2 公式）.** 【主張：$\displaystyle0=\int_{\partial\Omega}(\varphi^{x}\partial_{\nu}u-u\,\partial_{\nu}\varphi^{x})\,dS-\int_{\Omega}\varphi^{x}\Delta u\,dy$】\ref{pde:green-representation.1} を $u$ と $v=\varphi^{x}$（どちらも $\overline{\Omega}$ の近傍で $C^{2}$ 級）に使い、$\Delta\varphi^{x}=0$ を代入する。
+
+**Step 2（引き算）.** 【主張：$\displaystyle u(x)=-\int_{\partial\Omega}u\,\partial_{\nu_{y}}G(x,\cdot)\,dS-\int_{\Omega}G(x,\cdot)\Delta u\,dy$】\ref{pde:green-representation.2} から Step 1 の式を引く。境界積分では $\Phi(y-x)-\varphi^{x}(y)=G(x,y)$ が $\partial\Omega$ の上で $0$ なので $\partial_{\nu}u$ の項が消え、$u$ の項は $-u\,\partial_{\nu}(\Phi(\cdot-x)-\varphi^{x})=-u\,\partial_{\nu_{y}}G(x,\cdot)$。体積積分は $-\int(\Phi(\cdot-x)-\varphi^{x})\Delta u=-\int G(x,\cdot)\Delta u$（$\varphi^{x}\Delta u$ は有界で、$\Phi(\cdot-x)\Delta u$ は可積分なので、差も可積分）。
+
+$\partial\Omega$ の上で $u=g$、$\Omega$ の上で $-\Delta u=f$ を代入すれば主張の式になる。
+
+::: hypcheck
+- **$u$ が $\overline{\Omega}$ の近傍で $C^{2}$**：表現公式とグリーンの第 2 公式を使うのに必要だった。この定理は、そのような解が**あれば**それが公式で書けるという「表示」で、解の存在は主張しない。
+- **グリーン関数の存在**：仮定した。存在すれば、右辺は $g$ と $f$ だけで決まるので、解の一意性（\ref{pde:dirichlet-uniqueness.1}）の別証明にもなる。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 逆向き、すなわち「右辺の公式で $u$ を定義すれば、それがディリクレ問題の解になるか」は別の問題である。そのためには、$-\partial_{\nu_{y}}G(x,y)$（**ポアソン核**）を境界値 $g$ に掛けた積分が、$x$ が境界の点 $y_{0}$ に近づくとき $g(y_{0})$ に近づくことを示さなければならない。次のページでは、球と半空間についてこれを直接確かめる。一般の領域では、グリーン関数の存在そのものが境界の正則性に依存し、境界がひどく尖っているとディリクレ問題の古典解が存在しないことさえある（ペロンの方法のページ）。古典的手法では「解は境界まで $C^{2}$」という強い前提を置いて公式を導き、その公式が本当に解を与えることは、個々の領域で確かめる必要がある。
+
+**似た定理.** 常微分方程式の境界値問題にもグリーン関数があり、そこでは 1 次元なので具体的に構成でき、対称性は作用素の自己共役性の表れだった（\see{ode:page-sturm-liouville}）。閉多様体では境界がないので補正は不要だが、定数関数（調和関数）の分だけ方程式が解けず、その分を射影で除いたものがグリーン作用素である（\see{gl:green-operator}）。
+
+**高い視点：逆行列の成分.** グリーン関数は、境界条件 $u|_{\partial\Omega}=0$ をつけた $-\Delta$ の逆作用素の「行列の成分」である：$f\mapsto\int G(\cdot,y)f(y)\,dy$ は $-\Delta u=f$, $u|_{\partial\Omega}=0$ の解を返す。対称性 $G(x,y)=G(y,x)$ は、$-\Delta$ が（ディリクレ条件のもとで）対称な作用素であること（グリーンの第 2 公式）が逆行列に遺伝したものである。比喩で言えば、$G(x,y)$ は「$y$ を突いたときの $x$ の揺れ」を表にした応答表で、対称性は「どちらを突いても、もう一方の揺れは同じ」という相反性（物理ではマクスウェル–ベッティの相反定理と呼ばれるものの類似）である。
+:::
+
+球と半空間のグリーン関数とポアソン積分は次のページ（\see{pde:page-poisson-integrals}）で扱う。
+
+## 問題 {#pde:sec-gf-problems}
+
+::: problem {#pde:prob-gf-newton-ball}
+$n\ge3$、$a>0$ とし、$f\defeq\mathbf{1}_{B(0,a)}$、$u\defeq\Phi*f$ とおく。
+1. $|x|>a$ なら $u(x)=\omega_{n}a^{n}\Phi(x)=\dfrac{a^{n}}{n(n-2)|x|^{n-2}}$ を示せ。
+2. $|x|<a$ なら $u(x)=\dfrac{a^{2}}{2(n-2)}-\dfrac{|x|^{2}}{2n}$ を示せ。
+3. $-\Delta u=f$ が $|x|\ne a$ で成り立つが、$u$ は球面 $|x|=a$ のどの点の近傍でも $C^{2}$ 級でないことを示せ。
+:::
+
+::: solution
+**1.** $|x|>a$ なら、$y\mapsto\Phi(x-y)$ は $B(0,|x|)$ で調和（\ref{pde:gf-fundamental-properties.1}。$\Phi(x-y)=\Phi(y-x)$）で、$\overline{B}(0,a)\subset B(0,|x|)$。球についての平均値の性質（\ref{pde:mean-value-property.2}）から $\int_{B(0,a)}\Phi(x-y)\,dy=\omega_{n}a^{n}\Phi(x)$。
+
+**2.** $|x|<a$ とする。極座標（\ref{meas:polar-decomposition.2}、正の関数 $\Phi(x-y)\mathbf{1}_{B(0,a)}(y)$ に使う。$n\ge3$ では $\Phi>0$）から
+$$
+u(x)=\int_{0}^{a}s^{n-1}m(s)\,ds,\qquad m(s)\defeq\int_{S^{n-1}}\Phi(x-s\theta)\,d\sigma(\theta).
+$$
+$s<|x|$ なら、$y\mapsto\Phi(x-y)$ は $\overline{B}(0,s)$ の近傍で調和なので、球面についての平均値の性質から $m(s)=n\omega_{n}\Phi(x)$。$s>|x|$ なら、$m(s)$ を $x\in B(0,s)$ の関数とみると、積分記号下の微分（$x$ が $B(0,s)$ のコンパクト部分集合を動くとき、$\Phi(x-s\theta)$ の $x$ についての 2 階までの導関数は $\theta$ について一様に有界）から $x\mapsto m(s)$ は $B(0,s)$ で調和で、$\sigma$ の回転不変性（\ref{meas:polar-radial.1}）から $|x|$ だけの関数である。放射的な調和関数 $\tilde m$ は、平均値の性質から $\tilde m(0)=S_{t}\tilde m(0)=\tilde m(x)$（$|x|=t$）なので定数で、$m(s)=n\omega_{n}\Psi(s)$（$x=0$ の値）。$s=|x|$ は零集合なので
+$$
+u(x)=\omega_{n}|x|^{n}\Psi(|x|)+n\omega_{n}\int_{|x|}^{a}s^{n-1}\Psi(s)\,ds=\frac{|x|^{2}}{n(n-2)}+\frac{a^{2}-|x|^{2}}{2(n-2)}=\frac{a^{2}}{2(n-2)}-\frac{|x|^{2}}{2n}.
+$$
+
+**3.** $|x|<a$ では $\Delta u=-\frac{2n}{2n}=-1=-f$、$|x|>a$ では $u$ は $\Phi$ の定数倍で調和、$f=0$。$g(t)\defeq u(te_{1})$（$t>0$）とおくと、$t<a$ で $g''(t)=-\frac1n$、$t>a$ で $g(t)=\frac{a^{n}}{n(n-2)}t^{2-n}$ から $g''(t)=\frac{(n-1)a^{n}}{n}t^{-n}\to\frac{n-1}{n}$（$t\downarrow a$）。$u$ が点 $ae_{1}$ の近傍で $C^{2}$ 級なら $g$ は $t=a$ の近くで $C^{2}$ 級で、$g''$ は $t=a$ で連続になるが、左右の極限 $-\frac1n$ と $\frac{n-1}{n}$ が異なるので矛盾する。回転不変性から、球面の他の点でも同じ。（$f$ は球面で不連続であり、$f$ の不連続性が $u$ の 2 階導関数の跳びとして現れている。1・2 の式は $|x|=a$ で値も勾配も一致する。）
+:::
+
+::: problem {#pde:prob-gf-green-positive}
+$n\ge3$、$\Omega$ を境界積分の約束の 1 または 2 の連結な有界開集合で、グリーン関数 $G$ をもつものとする。$x,y\in\Omega$, $x\ne y$ について $0<G(x,y)<\Phi(y-x)$ を示せ。
+:::
+
+::: solution
+**$G<\Phi$.** $\varphi^{x}$ は $\Omega$ で調和、$C(\overline{\Omega})$ に入り、$\partial\Omega$ の上で $\varphi^{x}(y)=\Phi(y-x)\ge m\defeq\min_{y\in\partial\Omega}\Psi(|y-x|)>0$（$n\ge3$ では $\Psi>0$。$\partial\Omega$ はコンパクトで空でない）。\ref{pde:weak-maximum-principle} の最小値の式から $\varphi^{x}\ge m>0$ が $\overline{\Omega}$ で成り立ち、$G(x,y)=\Phi(y-x)-\varphi^{x}(y)<\Phi(y-x)$。
+
+**$G\ge0$.** $M\defeq\max_{\overline{\Omega}}\varphi^{x}$ とし、$\varepsilon>0$ を $\overline{B}(x,\varepsilon)\subset\Omega$ かつ $\Psi(\varepsilon)>M$ となるようにとる。$V_{\varepsilon}\defeq\Omega\setminus\overline{B}(x,\varepsilon)$ は有界な開集合で、$G(x,\cdot)$ は $V_{\varepsilon}$ で調和、$\overline{V_{\varepsilon}}$ で連続。$\partial V_{\varepsilon}\subset\partial\Omega\cup\partial B(x,\varepsilon)$ で、$\partial\Omega$ の上で $G=0$、$\partial B(x,\varepsilon)$ の上で $G\ge\Psi(\varepsilon)-M>0$。弱最大値原理（最小値）から $V_{\varepsilon}$ で $G(x,\cdot)\ge0$。$\varepsilon$ を小さくすれば $\Omega\setminus\{x\}$ 全体で $G(x,\cdot)\ge0$。
+
+**$G>0$.** $G(x,y_{0})=0$ となる $y_{0}\in\Omega\setminus\{x\}$ があったとし、$\varepsilon<|y_{0}-x|$ として $y_{0}$ を含む $V_{\varepsilon}$ の連結成分を $W$ とする。$G(x,\cdot)\ge0$ が $W$ の内部の点で最小値 $0$ をとるので、\ref{pde:strong-maximum-principle}から $W$ で $G(x,\cdot)=0$。$W$ の境界の点で $\Omega$ に入るものは $\partial B(x,\varepsilon)$ に入る（$V_{\varepsilon}$ の連結成分の境界は $\partial V_{\varepsilon}$ に含まれる。\ref{pde:weak-maximum-principle} の証明の Step 3 と同じ議論）。そのような点がなければ $W$ は $\Omega$ の中で開かつ閉で、$\Omega$ の連結性から $W=\Omega$ となり $x\in W$ に反する。よって $W$ の閉包は $\partial B(x,\varepsilon)$ の点 $z$ を含み、連続性から $G(x,z)=0$ となるが、$\partial B(x,\varepsilon)$ の上で $G>0$ だったので矛盾。
+
+（$\Omega$ が連結でなければ、$x$ を含まない成分の上では $G(x,\cdot)=0$ である。$n=2$ でも $G>0$ は同じ議論で示せるが、$\Phi$ が負になりうるので $G<\Phi$ の議論は $\Psi>0$ を使えない。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

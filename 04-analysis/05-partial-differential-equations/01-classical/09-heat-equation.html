@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熱方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/09-heat-equation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 熱方程式 {#pde:page-heat-equation keywords="heat equation, diffusion equation, heat kernel, fundamental solution of the heat equation, Gauss-Weierstrass kernel, Gaussian kernel, Cauchy problem for the heat equation, initial value problem, convolution with the heat kernel, smoothing, return to the initial data, Duhamel's principle, inhomogeneous heat equation, 拡散方程式, 熱伝導方程式, ガウス核, 熱核, 基本解, コーシー問題"}
+
+**熱方程式** $\partial_{t}u=\Delta u$ は、熱や物質が濃い所から薄い所へ広がっていく様子を表す方程式である。\ref{pde:page-harmonic-functions}は、時間がたって釣り合った後の熱方程式の解（時間によらない解）にあたる。このページでは全空間 $\mathbb{R}^{n}\times(0,\infty)$ の上で熱方程式を解く。中心になるのは**熱核** $\Phi(x,t)=(4\pi t)^{-n/2}e^{-|x|^{2}/4t}$ で、点に置いた単位の熱が時間 $t$ の後にどう広がっているかを表す。フーリエ解析で見たように、これは $t\to0$ で総和核になる（\ref{four:approximate-identity-rd}）。初期値 $g$ が有界連続なら、畳み込み $u=\Phi(\cdot,t)*g$ は $t>0$ で $C^{\infty}$ 級の解で、$t\to0$ で $g$ に連続につながることを丁寧に示す。後半では、熱源 $f$ がある方程式 $\partial_{t}u-\Delta u=f$ を、熱源を短い時間ごとの初期値の重ね合わせと見る**デュアメルの原理**で解き、そのために $f$ に要求される正則性を明記する。解の一意性（最大値原理と増大条件）、一意性が崩れる例、平滑化は次のページ（\see{pde:page-heat-uniqueness}）で、熱源の正則性の要求をどこまで弱められるか（ヘルダー連続性で足り、連続性では足りないこと）と内部正則性はその次のページ（\see{pde:page-heat-regularity}）で扱う。
+
+## 記法と定義の確認 {#pde:sec-he-notation}
+
+::: notation
+- $n\ge1$。$\mathbb{R}^{n}\times\mathbb{R}$ の点を $(x,t)$（$x$ は空間、$t$ は時間）と書く。$\Delta\defeq\sum_{i=1}^{n}\partial_{x_{i}}^{2}$ と勾配 $\nabla$ は**空間変数 $x$ だけ**に作用する。ラプラシアンの符号は前のページ（\ref{pde:harmonic-function}）と同じ解析学の約束で、多様体上の解析の $\Delta=-\operatorname{div}\operatorname{grad}$（\see{gl:heat-equation} の熱方程式は $\partial_{t}u+\Delta u=0$ と書かれる）とは逆である。$\partial_{i}\defeq\partial_{x_{i}}$。多重指数 $\alpha$ について $\partial^{\alpha}$ は空間変数についての偏微分（\ref{pde:page-harmonic-estimates} の記法）。
+- $U\subset\mathbb{R}^{n}\times\mathbb{R}$ を開集合とする。$C^{2,1}(U)$ は、$u$, $\partial_{t}u$, $\partial_{i}u$, $\partial_{i}\partial_{j}u$（$1\le i,j\le n$）が $U$ の上で存在して連続な実数値関数 $u$ の全体（空間に 2 回、時間に 1 回連続微分可能）。$C^{\infty}(U)$ はすべての偏導関数が存在して連続な関数の全体。
+- $L^{p}=L^{p}(\mathbb{R}^{n})$、$\|\cdot\|_{p}$、畳み込み $(f*g)(x)\defeq\int f(x-y)g(y)\,dy$ とその基本性質は \ref{four:convolution-rd}、ヘルダーの不等式は \ref{meas:holder}。$K\in L^{1}$, $\tau>0$ について $K_{\tau}(x)\defeq\tau^{-n}K(x/\tau)$、$G(x)\defeq e^{-\pi|x|^{2}}$（フーリエ変換の系列の記法。そこでは次元を $d$ と書く）。ガウス関数のフーリエ変換は \ref{four:gaussian-transform}、フーリエ変換 $\hat f(\xi)=\int f(x)e^{-2\pi ix\cdot\xi}dx$ の一意性は \ref{four:inversion-theorem.2}、総和核の収束は \ref{four:approximate-identity-rd}。
+- パラメータ積分の連続性と微分は \ref{meas:parameter-integrals}、優収束定理は \ref{meas:dominated-convergence}、フビニの定理は \tref{meas:fubini}（非負関数ではトネリの形）。積分の値を比べるだけの変数変換 $y\mapsto x-y$、$y\mapsto\sqrt{t}\,y$ はルベーグ測度の平行移動不変性と \ref{meas:lebesgue-linear}（$\lambda(\sqrt t\,A)=t^{n/2}\lambda(A)$）による。
+- $\sup g$、$\inf g$ は $\mathbb{R}^{n}$ 全体での上限・下限。$(r)_{+}\defeq\max(r,0)$。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 熱核 {#pde:sec-he-kernel}
+
+::: definition 熱方程式 {#pde:heat-equation keywords="heat equation d_t u = Delta u on an open subset of R^n x R; classical solution in C^{2,1}; inhomogeneous heat equation d_t u - Delta u = f; diffusion equation" index="熱方程式|ねつほうていしき, 拡散方程式|かくさんほうていしき, 熱伝導方程式|ねつでんどうほうていしき"}
+$U\subset\mathbb{R}^{n}\times\mathbb{R}$ を開集合とする。$u\in C^{2,1}(U)$ が $U$ の各点で
+$$
+\partial_{t}u=\Delta u
+$$
+を満たすとき、$u$ は $U$ で**熱方程式**の（古典）解であるという。関数 $f$ が与えられたとき $\partial_{t}u-\Delta u=f$ を**非斉次**の熱方程式といい、$f$ を**熱源**という。
+:::
+
+::: intuition
+熱方程式は「温度の時間変化は、その点の温度が周りの平均からどれだけずれているかに比例する」と言っている。周りより冷たい点は温まり、周りより熱い点は冷める。
+:::
+
+::: example
+1. 時間によらない解は調和関数である（$\partial_{t}u=0$ なので $\Delta u=0$）。
+2. $u=|x|^{2}+2nt$ は $\partial_{t}u=2n=\Delta u$ を満たす。$u=e^{-t}\sin x_{1}$ は $\partial_{t}u=-e^{-t}\sin x_{1}=\Delta u$、$u=e^{x_{1}+t}$ は $\partial_{t}u=u=\Delta u$ を満たす。
+3. $u=t$ は $\partial_{t}u-\Delta u=1$ を満たす。一様な熱源 $f=1$ は、空間のどこでも同じ割合で温度を上げる。
+:::
+
+熱核の形は二通りに見当がつく。一つは**相似性**である：$u(x,t)$ が解なら、$\lambda>0$ について $u(\lambda x,\lambda^{2}t)$ も解である（時間は空間の 2 乗で伸びる）。そこで、全体の熱量 $\int u\,dx$ を保つ形 $u=t^{-n/2}v(x/\sqrt t)$ を探すと、$v(z)=ce^{-|z|^{2}/4}$ に行き着く。もう一つは**フーリエ変換**である：$x$ について変換すると方程式は $\partial_{t}\hat u(\xi,t)=-4\pi^{2}|\xi|^{2}\hat u(\xi,t)$ という $\xi$ ごとの常微分方程式になり、$\hat u(\xi,t)=e^{-4\pi^{2}t|\xi|^{2}}\hat g(\xi)$。$e^{-4\pi^{2}t|\xi|^{2}}$ の逆変換が次の $\Phi(\cdot,t)$ で、積の逆変換は畳み込みなので $u=\Phi(\cdot,t)*g$ となる。以下ではこの見当を出発点にして、結果を直接確かめる。
+
+::: definition 熱核 {#pde:heat-kernel keywords="heat kernel on R^n, Gauss-Weierstrass kernel, fundamental solution of the heat equation Phi(x,t) = (4 pi t)^{-n/2} exp(-|x|^2/(4t))" index="熱核（ℝⁿ）|ねつかくあーるえぬ, 基本解（熱方程式）|きほんかいねつほうていしき, ガウス–ワイエルシュトラス核|がうすわいえるしゅとらすかく"}
+$x\in\mathbb{R}^{n}$, $t>0$ について
+$$
+\Phi(x,t)\defeq\frac{1}{(4\pi t)^{n/2}}\exp\Bigl(-\frac{|x|^{2}}{4t}\Bigr)
+$$
+を $\mathbb{R}^{n}$ の**熱核**、または熱方程式の**基本解**という。
+:::
+
+::: intuition
+熱核は、原点に置いた量 1 の熱が時間 $t$ の後にどう分布しているかを表す釣鐘形の関数である。時間とともに裾が広がり（幅はおよそ $\sqrt t$）、山は低くなる（高さは $t^{-n/2}$）が、全体の量はいつも 1 である。
+:::
+
+::: proposition 熱核の性質 {#pde:heat-kernel-properties keywords="properties of the heat kernel: smooth, solves the heat equation, positive, integral one, parabolic scaling, Phi(.,t) = G_tau with tau = sqrt(4 pi t) is an approximate identity as t -> 0, Fourier transform exp(-4 pi^2 t |xi|^2), semigroup property Phi(.,t) * Phi(.,s) = Phi(.,t+s)" index="熱核の性質|ねつかくのせいしつ, 熱核の半群性（ℝⁿ）|ねつかくのはんぐんせいあーるえぬ"}
+1. $\Phi\in C^{\infty}(\mathbb{R}^{n}\times(0,\infty))$ で、$\mathbb{R}^{n}\times(0,\infty)$ の上で $\partial_{t}\Phi=\Delta\Phi$。
+2. $\Phi>0$、$\displaystyle\int_{\mathbb{R}^{n}}\Phi(x,t)\,dx=1$、$\Phi(x,t)=t^{-n/2}\Phi(x/\sqrt t,1)$（$t>0$）。
+3. $\tau\defeq\sqrt{4\pi t}$ とおくと $\Phi(\cdot,t)=G_{\tau}$。したがって $t\to0$ のとき、各 $\delta>0$ について $\int_{|y|\ge\delta}\Phi(y,t)\,dy\to0$ であり、$1\le p<\infty$, $g\in L^{p}$ なら $\|\Phi(\cdot,t)*g-g\|_{p}\to0$、$g$ が有界可測で点 $x$ で連続なら $(\Phi(\cdot,t)*g)(x)\to g(x)$。
+4. $\widehat{\Phi(\cdot,t)}(\xi)=e^{-4\pi^{2}t|\xi|^{2}}$ で、$s,t>0$ について $\Phi(\cdot,t)*\Phi(\cdot,s)=\Phi(\cdot,t+s)$（すべての点で）。
+:::
+
+::: intuition
+熱核は熱方程式を満たす正の関数で、総量はいつも 1。時間が 0 に近づくと 1 点に集中し、関数との畳み込みはその関数自身に近づく。時間 $t$ だけ広げてから $s$ だけ広げることは、$t+s$ だけ一度に広げることと同じである。
+:::
+
+::: proof
+**Step 1（熱方程式）.** 【主張：$\partial_{t}\Phi=\Delta\Phi$】$\Phi$ は $t^{-n/2}$ と、$C^{\infty}$ 級の関数 $(x,t)\mapsto-|x|^{2}/4t$ の指数関数との積なので $C^{\infty}$ 級。積と合成の微分から
+$$
+\partial_{t}\Phi=\Bigl(-\frac{n}{2t}+\frac{|x|^{2}}{4t^{2}}\Bigr)\Phi,\qquad\partial_{i}\Phi=-\frac{x_{i}}{2t}\Phi,\qquad\partial_{i}^{2}\Phi=\Bigl(-\frac{1}{2t}+\frac{x_{i}^{2}}{4t^{2}}\Bigr)\Phi.
+$$
+$i$ について足すと $\Delta\Phi=\bigl(-\frac{n}{2t}+\frac{|x|^{2}}{4t^{2}}\bigr)\Phi=\partial_{t}\Phi$（1）。
+
+**Step 2（$G_{\tau}$ との一致と積分）.** 【主張：$\Phi(\cdot,t)=G_{\tau}$ で、$\int\Phi(x,t)\,dx=1$】$\tau^{2}=4\pi t$ なので $G_{\tau}(x)=\tau^{-n}e^{-\pi|x|^{2}/\tau^{2}}=(4\pi t)^{-n/2}e^{-|x|^{2}/4t}=\Phi(x,t)$。\ref{four:gaussian-transform} で $\xi=0$, $a=1$ とすると $\int G=1$、変数変換 $x=\tau z$ で $\int G_{\tau}=\int G=1$。正値性は指数関数の正値性から、$\Phi(x,t)=t^{-n/2}(4\pi)^{-n/2}e^{-|x/\sqrt t|^{2}/4}=t^{-n/2}\Phi(x/\sqrt t,1)$ は定義の書き換えである（2）。
+
+**Step 3（総和核）.** 【主張：3 の三つの収束が成り立つ】$\int_{|y|\ge\delta}G_{\tau}(y)\,dy=\int_{|z|\ge\delta/\tau}G(z)\,dz$（$y=\tau z$）で、$t\to0$ のとき $\tau\to0$、$\delta/\tau\to\infty$。$\mathbf{1}_{\{|z|\ge\delta/\tau\}}G\le G$ は各点で $0$ に収束し $G$ は可積分なので、優収束定理から $0$ に収束する。残りの二つは、$G\in L^{1}$, $\int G=1$ なので \ref{four:approximate-identity-rd.1} と \ref{four:approximate-identity-rd.3}（$t\to0$ と $\tau\to0$ は同値）そのものである。
+
+**Step 4（フーリエ変換と半群性）.** 【主張：$\widehat{\Phi(\cdot,t)}(\xi)=e^{-4\pi^{2}t|\xi|^{2}}$ で、$\Phi(\cdot,t)*\Phi(\cdot,s)=\Phi(\cdot,t+s)$】$a\defeq1/(4\pi t)$ とおくと $\pi a=1/4t$ なので $\Phi(x,t)=(4\pi t)^{-n/2}e^{-\pi a|x|^{2}}$。\ref{four:gaussian-transform} から
+$$
+\widehat{\Phi(\cdot,t)}(\xi)=(4\pi t)^{-n/2}a^{-n/2}e^{-\pi|\xi|^{2}/a}=e^{-4\pi^{2}t|\xi|^{2}}.
+$$
+\ref{four:convolution-rd.2} から $\widehat{\Phi(\cdot,t)*\Phi(\cdot,s)}=e^{-4\pi^{2}t|\xi|^{2}}e^{-4\pi^{2}s|\xi|^{2}}=\widehat{\Phi(\cdot,t+s)}$ なので、\ref{four:inversion-theorem.2} から両者はほとんど至る所等しい。$\Phi(\cdot,t)$ は有界なので \ref{four:convolution-rd.3} から左辺は連続、右辺も連続で、ほとんど至る所等しい連続関数は（差の零でない点の集合が開集合で、空でない開集合は測度が正なので）至る所等しい（4）。
+
+::: hypcheck
+- **$t>0$**：すべての Step で使った。$\Phi$ は $t\le0$ では定義していない。$t<0$ に $(4\pi|t|)^{-n/2}e^{-|x|^{2}/4t}$ と延ばすと Step 1 の計算はそのまま通る（熱方程式を満たす）が、$x$ について増大して可積分でなくなる。これは次のページで一意性の証明に使う比較関数の形である（\see{pde:heat-barrier}）。
+- **次元**：どの $n\ge1$ でも同じ。Step 1 で各座標の寄与 $-\frac{1}{2t}$ が $n$ 個足されて $-\frac{n}{2t}$ になり、これが前の因子 $(4\pi t)^{-n/2}$ の微分と釣り合う。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 の各点の収束は、$g$ の連続点でしか言えない。不連続点では、たとえば $n=1$、$g=\mathbf{1}_{(0,\infty)}$ で $(\Phi(\cdot,t)*g)(0)=\int_{-\infty}^{0}\Phi(y,t)\,dy=\frac12$（$\Phi$ は偶関数）となり、$g(0)=0$ にも $\lim_{x\downarrow0}g(x)=1$ にも収束しない（\see{pde:prob-he-step}）。可積分な $g$ なら、ほとんどすべての点（ルベーグ点）で収束することが極大関数を使って示される（\see{four:heat-kernel-ae}）。
+
+**似た定理.** 円周の上の熱方程式では、熱核はフーリエ級数 $\sum_{k}e^{-4\pi^{2}k^{2}t}e^{2\pi ikx}$ で与えられる（\see{four:heat-equation}）。これは $\Phi(\cdot,t)$ を周期 1 で足し合わせた $\sum_{m\in\mathbb{Z}}\Phi(x+m,t)$ に等しい（ポアソンの和公式の一例。ここでは証明しない）。閉リーマン多様体の上でも、固有関数展開で熱核が作られ、半群性と正値性をもつ（\see{gl:heat-kernel}, \see{gl:heat-kernel-positivity}）。上半空間のポアソン核も「$t\to0$ で総和核になる、方程式の解」という同じ役割をもつ（\see{four:poisson-kernel-rd}）。
+
+**高い視点：インクのしずく.** 静かな水に落としたインクのしずくは、ぼやけながら広がり、色は薄まるがインクの総量は変わらない。熱核はこの「しずく 1 滴」の時間変化で、4 はそれを「$t$ だけ待ってから $s$ だけ待つのは、$t+s$ 待つのと同じ」と言っている。$t$ ごとの畳み込み作用素 $P_{t}g\defeq\Phi(\cdot,t)*g$ は $P_{t}P_{s}=P_{t+s}$ を満たし、関数解析の言葉では**半群**をなす（\see{fa:heat-schrodinger-examples}）。フーリエ変換で見ると、$P_{t}$ は周波数 $\xi$ の成分に $e^{-4\pi^{2}t|\xi|^{2}}$ を掛ける操作で、細かい振動（$|\xi|$ が大きい成分）ほど速く消える。確率論の言葉では、$\Phi(\cdot,t)$ は $\sqrt2B_{t}$（$B_{t}$ はブラウン運動、\see{prb:brownian-motion}）の密度で、半群性は独立な正規分布の和がまた正規分布であることにあたる。インクの分子 1 個 1 個が酔歩をしている、という見方である。
+:::
+
+畳み込みを微分するには、熱核の導関数が $y$ について一様に可積分な関数で押さえられることが要る。
+
+::: lemma 熱核の導関数の評価 {#pde:heat-kernel-derivatives keywords="derivatives of the heat kernel have the form t^{-m/2} Q(x/sqrt t) exp(-|x|^2/4t) with a polynomial Q; locally uniform domination |d_x^alpha d_t^k Phi(x-y,t)| <= H(y) with H bounded and integrable" index="熱核の導関数|ねつかくのどうかんすう"}
+多重指数 $\alpha$ と $k\ge0$ について、次が成り立つ。
+1. 多項式 $Q$ があって、$m\defeq n+|\alpha|+2k$ とおくと $\partial^{\alpha}\partial_{t}^{k}\Phi(x,t)=t^{-m/2}Q(x/\sqrt t)\,e^{-|x|^{2}/4t}$（$x\in\mathbb{R}^{n}$, $t>0$）。
+2. $0<a\le b$, $R\ge0$ について、有界かつ可積分な関数 $H\ge0$ があって、$|x|\le R$, $a\le t\le b$, $y\in\mathbb{R}^{n}$ のとき $|\partial^{\alpha}\partial_{t}^{k}\Phi(x-y,t)|\le H(y)$。$H$ はすべての $1\le q\le\infty$ について $L^{q}$ に入る。
+:::
+
+::: proof
+**Step 1（形が保たれる）.** 【主張：整数 $m$ と多項式 $Q$ による $F=t^{-m/2}Q(x/\sqrt t)e^{-|x|^{2}/4t}$ の形の関数の $\partial_{i}F$ と $\partial_{t}F$ は、それぞれ $m+1$, $m+2$ と別の多項式による同じ形である】$z\defeq x/\sqrt t$ と書くと、積と合成の微分から
+$$
+\partial_{i}F=t^{-(m+1)/2}\Bigl(\partial_{i}Q(z)-\frac{z_{i}}{2}Q(z)\Bigr)e^{-|x|^{2}/4t},
+$$
+$$
+\partial_{t}F=t^{-(m+2)/2}\Bigl(-\frac{m}{2}Q(z)-\frac12z\cdot\nabla Q(z)+\frac{|z|^{2}}{4}Q(z)\Bigr)e^{-|x|^{2}/4t}.
+$$
+（$t$ での微分では、$t^{-m/2}$ から $-\frac m2t^{-m/2-1}$、$Q(xt^{-1/2})$ から $-\frac12t^{-1}z\cdot\nabla Q(z)$、指数から $\frac{|x|^{2}}{4t^{2}}=t^{-1}\frac{|z|^{2}}{4}$ が出る。）括弧の中はどちらも $z$ の多項式である。$\Phi$ 自身は $m=n$, $Q=(4\pi)^{-n/2}$ の形なので、微分を 1 回ずつ施すと 1 を得る。
+
+**Step 2（一様な優関数）.** 【主張：2 の $H$ がとれる】$Q$ の次数を $N$ とすると、ある $C_{Q}$ で $|Q(z)|\le C_{Q}(1+|z|)^{N}$。$a\le t\le b$ なら $t^{-m/2}\le a^{-m/2}$（$m\ge0$）、$|z|=|x-y|/\sqrt t\le|x-y|/\sqrt a$、$e^{-|x-y|^{2}/4t}\le e^{-|x-y|^{2}/4b}$。$|x|\le R$ なら $|x-y|\le R+|y|$ かつ $|x-y|\ge(|y|-R)_{+}$ なので
+$$
+|\partial^{\alpha}\partial_{t}^{k}\Phi(x-y,t)|\le H(y)\defeq a^{-m/2}C_{Q}\Bigl(1+\frac{R+|y|}{\sqrt a}\Bigr)^{N}e^{-(|y|-R)_{+}^{2}/4b}.
+$$
+$H$ は連続。$|y|\ge2R$ なら $(|y|-R)_{+}\ge|y|/2$ なので $H(y)\le C'(1+|y|)^{N}e^{-|y|^{2}/16b}$。$r\mapsto(1+r)^{N}e^{-r^{2}/32b}$ は $[0,\infty)$ で連続で $r\to\infty$ で $0$ に収束するので有界で、$|y|\ge2R$ では $H(y)\le C''e^{-|y|^{2}/32b}$。$|y|\le2R$ では $H$ はコンパクト集合上の連続関数として有界。よって $H$ は有界で、$e^{-|y|^{2}/32b}$ は可積分（\ref{four:gaussian-transform} で $\xi=0$, $a=1/32\pi b$ とすると積分は $(32\pi b)^{n/2}$）なので $H$ も可積分。$1\le q<\infty$ では $H^{q}\le\|H\|_{\infty}^{q-1}H$ から $H\in L^{q}$。
+
+::: hypcheck
+- **$t$ が $0$ から離れていること（$a>0$）**：Step 2 で $t^{-m/2}\le a^{-m/2}$ に使った。$t\to0$ では $\partial^{\alpha}\Phi(\cdot,t)$ の $L^{1}$ ノルムは $t^{-|\alpha|/2}$ の速さで発散する（次のページの平滑化の評価 \see{pde:heat-smoothing}）。
+- **$t$ が上に有界（$b<\infty$）**：Step 2 で指数の減衰を $t$ によらず $e^{-|x-y|^{2}/4b}$ で押さえるのに使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## 初期値問題 {#pde:sec-he-cauchy}
+
+::: definition 熱方程式の初期値問題 {#pde:heat-cauchy-problem keywords="Cauchy problem / initial value problem for the heat equation on R^n x (0,T): u in C^{2,1}(R^n x (0,T)) cap C(R^n x [0,T)), d_t u - Delta u = f, u(x,0) = g(x); classical solution" index="初期値問題（熱方程式）|しょきちもんだいねつほうていしき, コーシー問題（熱方程式）|こーしーもんだいねつほうていしき, 初期値|しょきち"}
+$0<T\le\infty$、$g\in C(\mathbb{R}^{n})$、$f\colon\mathbb{R}^{n}\times(0,T)\to\mathbb{R}$ とする。$u\in C^{2,1}(\mathbb{R}^{n}\times(0,T))\cap C(\mathbb{R}^{n}\times[0,T))$ が
+$$
+\partial_{t}u-\Delta u=f\quad(\mathbb{R}^{n}\times(0,T)),\qquad u(x,0)=g(x)\quad(x\in\mathbb{R}^{n})
+$$
+を満たすとき、$u$ を熱方程式の**初期値問題**（コーシー問題）の古典解といい、$g$ を**初期値**という。$f=0$ のときは斉次の初期値問題という。
+:::
+
+::: intuition
+初期値問題は、時刻 0 の温度分布 $g$（と熱源 $f$）から、その後の温度分布を求める問題である。解は時刻 0 まで連続につながっていなければならない。
+:::
+
+::: theorem 熱方程式の初期値問題の解 {#pde:heat-cauchy-solution keywords="solution of the Cauchy problem for the heat equation with bounded continuous initial data: u = Phi(.,t) * g is C^infinity in R^n x (0,infinity), solves the heat equation, satisfies inf g <= u <= sup g, and u(x,t) -> g(x0) as (x,t) -> (x0,0); uniform convergence for uniformly continuous g" index="熱方程式の解の公式|ねつほうていしきのかいのこうしき"}
+$g\in C(\mathbb{R}^{n})$ を有界とし、
+$$
+\begin{aligned}u(x,t)&\defeq\int_{\mathbb{R}^{n}}\Phi(x-y,t)\,g(y)\,dy=\frac{1}{(4\pi t)^{n/2}}\int_{\mathbb{R}^{n}}e^{-|x-y|^{2}/4t}g(y)\,dy\quad(t>0),\\u(x,0)&\defeq g(x)\end{aligned}
+$$
+とおく。
+1. $u\in C^{\infty}(\mathbb{R}^{n}\times(0,\infty))$ で、すべての偏導関数は積分記号下の微分で得られる：$\partial^{\alpha}\partial_{t}^{k}u(x,t)=\int\partial^{\alpha}\partial_{t}^{k}\Phi(x-y,t)\,g(y)\,dy$。とくに $\partial_{t}u=\Delta u$。
+2. $\mathbb{R}^{n}\times(0,\infty)$ の上で $\inf g\le u\le\sup g$。
+3. 各 $x_{0}\in\mathbb{R}^{n}$ について、$(x,t)\to(x_{0},0)$（$t>0$）のとき $u(x,t)\to g(x_{0})$。したがって $u\in C(\mathbb{R}^{n}\times[0,\infty))$ で、$u$ は $T=\infty$, $f=0$ の初期値問題の古典解である。
+4. $g$ が一様連続なら、$t\to0$ のとき $\sup_{x}|u(x,t)-g(x)|\to0$。
+:::
+
+::: intuition
+有界で連続な初期温度 $g$ を熱核でならしたものは、時刻が正ならいくらでも微分できる熱方程式の解で、初期温度の最高と最低の間に収まり、時刻 0 に近づくと（位置を同時に動かしても）元の温度に連続に戻っていく。
+:::
+
+::: proof
+$M\defeq\sup|g|$ とおく。被積分関数 $y\mapsto\Phi(x-y,t)g(y)$ は連続で、$|\Phi(x-y,t)g(y)|\le M\Phi(x-y,t)$、$\int\Phi(x-y,t)\,dy=1$（\ref{pde:heat-kernel-properties.2} と平行移動）なので可積分で、$u$ は定義される。
+
+**Step 1（積分記号下の微分）.** 【主張：$\partial^{\alpha}\partial_{t}^{k}u(x,t)=\int\partial^{\alpha}\partial_{t}^{k}\Phi(x-y,t)g(y)\,dy$ がすべての $\alpha,k$ で成り立ち、右辺は $\mathbb{R}^{n}\times(0,\infty)$ で連続】$|\alpha|+k$ についての帰納法。$|\alpha|+k=0$ は定義。ある $\alpha,k$ で等式が成り立つとし、$\Psi\defeq\partial^{\alpha}\partial_{t}^{k}\Phi$ とおく。点 $(x_{0},t_{0})$（$t_{0}>0$）を固定し、$R\defeq|x_{0}|+1$, $a\defeq t_{0}/2$, $b\defeq2t_{0}$ として、\ref{pde:heat-kernel-derivatives.2} を $\Psi$ と $\partial_{i}\Psi$, $\partial_{t}\Psi$ に使い、それらをまとめて押さえる有界可積分な $H$ をとる（三つの $H$ の和）。近傍 $V\defeq\{|x|<R,\ a<t<b\}$ の上で $|\partial_{i}\Psi(x-y,t)g(y)|\le MH(y)$ で $MH$ は可積分。$x$ の第 $i$ 座標だけを $V$ の中で動かし、ほかを固定して \ref{meas:parameter-integrals.2} を使うと、$\partial_{i}\int\Psi(x-y,t)g(y)\,dy=\int\partial_{i}\Psi(x-y,t)g(y)\,dy$（$\Psi(x-y,t)$ の $x_{i}$ による微分は $(\partial_{i}\Psi)(x-y,t)$）。$t$ についても同様に $\partial_{t}$ を中に入れられる。右辺の連続性：$V$ の中で $(x_{j},t_{j})\to(x,t)$ とすると、被積分関数は各 $y$ で収束し（$\partial_{i}\Psi$ は連続）、$MH$ で押さえられるので、優収束定理から積分も収束する。$(x_{0},t_{0})$ は任意なので帰納法が進む。
+
+**Step 2（滑らかさと方程式）.** 【主張：$u\in C^{\infty}(\mathbb{R}^{n}\times(0,\infty))$ で $\partial_{t}u=\Delta u$】Step 1 からすべての偏導関数が存在して連続なので $C^{\infty}$ 級。Step 1 の式で $\partial_{t}u-\Delta u=\int(\partial_{t}\Phi-\Delta\Phi)(x-y,t)g(y)\,dy=0$（\ref{pde:heat-kernel-properties.1}）（1）。
+
+**Step 3（上下の評価）.** 【主張：$\inf g\le u\le\sup g$】$\Phi>0$ と $\int\Phi(x-y,t)\,dy=1$ から $u(x,t)-\inf g=\int\Phi(x-y,t)(g(y)-\inf g)\,dy\ge0$。上からも同様（2）。
+
+**Step 4（初期値への連続な接続）.** 【主張：$(x,t)\to(x_{0},0)$, $t>0$ のとき $u(x,t)\to g(x_{0})$】$y$ を $x-y$ に置き換えると $u(x,t)=\int\Phi(y,t)g(x-y)\,dy$ で、$\int\Phi(y,t)\,dy=1$ から
+$$
+u(x,t)-g(x_{0})=\int_{\mathbb{R}^{n}}\Phi(y,t)\bigl(g(x-y)-g(x_{0})\bigr)\,dy.
+$$
+$\varepsilon>0$ とする。$g$ は $x_{0}$ で連続なので、$\delta>0$ を $|z-x_{0}|<2\delta\Rightarrow|g(z)-g(x_{0})|<\varepsilon$ となるようにとる。$|x-x_{0}|<\delta$ とする。$|y|<\delta$ の部分では $|(x-y)-x_{0}|<2\delta$ なので、被積分関数の絶対値は $\varepsilon\Phi(y,t)$ 以下で、積分は $\varepsilon$ 以下。$|y|\ge\delta$ の部分では $|g(x-y)-g(x_{0})|\le2M$ なので、積分は $2M\int_{|y|\ge\delta}\Phi(y,t)\,dy$ 以下。\ref{pde:heat-kernel-properties.3} から $t_{1}>0$ があって $0<t<t_{1}$ ならこれは $\varepsilon$ 以下。よって $|x-x_{0}|<\delta$, $0<t<t_{1}$ なら $|u(x,t)-g(x_{0})|\le2\varepsilon$。$t=0$ の点では $u(x,0)=g(x)\to g(x_{0})$ なので、$u$ は $(x_{0},0)$ で連続である（3）。
+
+4 は、$g$ が一様連続なら Step 4 の $\delta$ が $x_{0}$ によらずとれることから同じ議論で従う（\ref{four:approximate-identity-rd.2} でもある）。
+
+::: hypcheck
+- **$g$ の有界性**：最初の段落で積分が定義されることに、Step 1 で優関数 $MH$ に、Step 4 で $|y|\ge\delta$ の部分の評価に使った。弱められる：$|g(y)|\le Ae^{a|y|^{2}}$ なら、$t<1/4a$ の範囲で同じ証明が通る（$e^{-|x-y|^{2}/4t}e^{a|y|^{2}}$ が $y$ について可積分になるのは $\frac{1}{4t}>a$ のとき）。この範囲を超えると一般には解がない：$n=1$、$g(y)=e^{y^{2}}$ なら $t\ge1/4$ で積分は発散する。実際、$0<t<1/4$ では平方完成で積分が計算でき（\ref{pde:prob-he-explicit.1} と同じ計算）、$u=(1-4t)^{-1/2}e^{x^{2}/(1-4t)}$ という熱方程式の解になって $t\uparrow1/4$ で爆発する。
+- **$g$ の連続性**：Step 4 だけで使った。Step 1〜3 は有界可測な $g$ でそのまま通り、$t>0$ では不連続な $g$ からでも $C^{\infty}$ 級の解ができる（次のページで $L^{p}$ の初期値に広げる。\see{pde:heat-smoothing}）。外すと 3 は偽：$g=\mathbf{1}_{(0,\infty)}$（$n=1$）では $u(0,t)=\frac12$ がすべての $t>0$ で成り立つ（\ref{pde:heat-kernel-properties} の補足）。
+- **$\Phi$ の性質**：Step 1 で導関数の評価（\ref{pde:heat-kernel-derivatives}）、Step 2 で熱方程式、Step 3 で正値性と積分 1、Step 4 で裾の積分が $0$ に収束することを使った。
+- **この解だけが解か**：ここでは存在だけを示した。有界な解に限れば一意であること、増大条件を外すと一意でないことは次のページで示す（\see{pde:heat-uniqueness-rn}, \see{pde:heat-tychonoff}）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 初期値を測度に広げることもできる。原点に置いた単位の点質量（ディラック測度）を初期値とすると、解は熱核 $\Phi$ そのものである。これが $\Phi$ を**基本解**と呼ぶ理由で、超関数の言葉では、$\Phi$ を $t\le0$ で $0$ と延ばした関数 $E$ が $(\partial_{t}-\Delta)E=\delta_{(0,0)}$ を満たす（ここでは証明しない。$E$ が原点の外で $C^{\infty}$ 級であることは \see{pde:heat-kernel-extended} で示す）。初期値が $L^{p}$ の元なら、$u(\cdot,t)\to g$ は $L^{p}$ ノルムで（$p<\infty$, \ref{pde:heat-kernel-properties.3}）、ほとんど至る所で（\see{four:heat-kernel-ae}）成り立つ。
+
+**似た定理.** 1 階の輸送方程式 $\partial_{t}u+b\cdot\nabla u=0$ の解 $u(x,t)=g(x-tb)$（\ref{pde:transport-constant}。そこでは変数を $(t,x)$ の順に書く）は初期値をそのまま平行移動するだけで、$g$ の角や不連続はいつまでも残る。熱方程式の解は、同じ初期値を熱核で平均するので、どんなに粗い $g$ でも $t>0$ では $C^{\infty}$ 級になる。調和関数が平均値の性質から滑らかになったこと（\ref{pde:mean-value-converse}）と同じ「平均すると滑らかになる」仕組みである。閉多様体の上では、同じ初期値問題が熱半群で解かれる（\see{gl:heat-equation}, \see{gl:heat-smoothing}）。
+
+**高い視点：ぼかしフィルター.** 画像処理の「ガウスぼかし」は、画素の値を周りの画素のガウス関数による重み付き平均に置き換える操作で、まさに $g\mapsto\Phi(\cdot,t)*g$ である。ぼかしの強さが時間 $t$ にあたり、ぼかした画像は輪郭がなめらかになり（1）、元の明るさの範囲を超えず（2）、ぼかしを弱めれば元の画像に戻る（3）。確率論では、$u(x,t)$ は点 $x$ から出発して時間 $t$ だけ酔歩した粒子（$x+\sqrt2B_{t}$）の位置での $g$ の値の期待値である（\see{prb:brownian-motion}）。
+:::
+
+## 非斉次方程式とデュアメルの原理 {#pde:sec-he-duhamel}
+
+熱源 $f$ があるときは、「時刻 $s$ に短い時間 $ds$ の間に加わった熱 $f(\cdot,s)\,ds$ を、時刻 $s$ での初期値とみて残りの時間 $t-s$ だけ広げ、すべての $s$ について足し合わせる」と考える：
+$$
+u(x,t)=\int_{0}^{t}\bigl(\Phi(\cdot,t-s)*f(\cdot,s)\bigr)(x)\,ds.
+$$
+これを**デュアメルの原理**という。常微分方程式 $u'=Au+f$ の定数変化法 $u(t)=\int_{0}^{t}e^{(t-s)A}f(s)\,ds$ と同じ形である。ただし、ここでは $\Phi(\cdot,t-s)$ の 2 階導関数が $s\to t$ で強く特異になる（$\|\partial_{i}\partial_{j}\Phi(\cdot,\sigma)\|_{1}$ は $\sigma^{-1}$ の大きさで、$\int_{0}^{t}\sigma^{-1}d\sigma=\infty$）ので、2 階の空間微分をそのまま $\Phi$ に移すことはできず、$f$ の側に正則性が要る。このページでは、証明の易しい十分条件（$f$ が空間に 2 回・時間に 1 回、有界に連続微分可能）で示す。要求をヘルダー連続性まで弱めた形と、連続性だけでは足りない例は、一意性を準備した後のページで証明する（\see{pde:heat-duhamel-holder}, \see{pde:heat-continuous-source-fails}）。まず、部分積分を用意する。
+
+::: lemma 全空間での部分積分 {#pde:heat-parts keywords="integration by parts on R^n: int phi Delta psi = int Delta phi psi for phi with Gaussian decay of derivatives up to order two and psi with bounded derivatives up to order two" index="部分積分（全空間）|ぶぶんせきぶんぜんくうかん"}
+$\varphi,\psi\in C^{2}(\mathbb{R}^{n})$ とし、定数 $C,c>0$ があって $|\varphi|,|\partial_{i}\varphi|,|\partial_{i}^{2}\varphi|\le Ce^{-c|y|^{2}}$（$1\le i\le n$）、$\psi$, $\partial_{i}\psi$, $\partial_{i}^{2}\psi$ は有界とする。このとき
+$$
+\int_{\mathbb{R}^{n}}\varphi\,\Delta\psi\,dy=\int_{\mathbb{R}^{n}}\Delta\varphi\,\psi\,dy.
+$$
+:::
+
+::: proof
+各 $i$ について $\int\varphi\,\partial_{i}^{2}\psi=\int\partial_{i}^{2}\varphi\,\psi$ を示して足せばよい。両辺の被積分関数は $C'e^{-c|y|^{2}}$（$C'$ は $C$ と $\psi$ の上界の積）で押さえられ可積分。$y_{i}$ 以外の座標 $y'$ を固定し、$h(r)\defeq\varphi(y'+re_{i})$, $k(r)\defeq\psi(y'+re_{i})$（$y'+re_{i}$ は第 $i$ 座標を $r$ にした点）とおく。$[-L,L]$ で積の微分と微積分学の基本定理を 2 回使うと
+$$
+\int_{-L}^{L}hk''\,dr=\bigl[hk'-h'k\bigr]_{-L}^{L}+\int_{-L}^{L}h''k\,dr.
+$$
+$|h(\pm L)|,|h'(\pm L)|\le Ce^{-cL^{2}}\to0$ で $k,k'$ は有界なので境界項は $0$ に収束し、$hk''$, $h''k$ は $\mathbb{R}$ で可積分なので（優収束定理で $L\to\infty$）$\int_{\mathbb{R}}hk''=\int_{\mathbb{R}}h''k$。これを $y'\in\mathbb{R}^{n-1}$ について積分し、フビニの定理で $\mathbb{R}^{n}$ 上の積分に直す（$n=1$ なら不要）。
+:::
+
+::: theorem デュアメルの原理 {#pde:heat-duhamel keywords="Duhamel's principle for the inhomogeneous heat equation: if f, d_t f, d_i f, d_i d_j f are bounded and continuous on R^n x [0, infinity), then u(x,t) = int_0^t int Phi(x-y,t-s) f(y,s) dy ds is in C^{2,1}, solves d_t u - Delta u = f, and |u| <= t sup |f|" index="デュアメルの原理|でゅあめるのげんり, 非斉次熱方程式|ひせいじねつほうていしき" refname="デュアメルの原理（熱方程式）"}
+$f\colon\mathbb{R}^{n}\times[0,\infty)\to\mathbb{R}$ について、$f$ と $\partial_{t}f$, $\partial_{i}f$, $\partial_{i}\partial_{j}f$（$1\le i,j\le n$。$t=0$ では $\partial_{t}$ は右側からの微分）が $\mathbb{R}^{n}\times[0,\infty)$ の上で存在し、**連続かつ有界**であるとする。$t>0$ について
+$$
+u(x,t)\defeq\int_{0}^{t}\int_{\mathbb{R}^{n}}\Phi(x-y,t-s)\,f(y,s)\,dy\,ds,\qquad u(x,0)\defeq0
+$$
+とおく。このとき
+1. $u\in C^{2,1}(\mathbb{R}^{n}\times(0,\infty))$ で、$\mathbb{R}^{n}\times(0,\infty)$ の上で $\partial_{t}u-\Delta u=f$。
+2. $|u(x,t)|\le t\sup|f|$。とくに $u\in C(\mathbb{R}^{n}\times[0,\infty))$ で、$u$ は初期値 $0$、熱源 $f$ の初期値問題の古典解である。
+3. 有界な $g\in C(\mathbb{R}^{n})$ について、\ref{pde:heat-cauchy-solution} の解と 1 の $u$ の和は、初期値 $g$、熱源 $f$ の初期値問題の古典解である。
+:::
+
+::: intuition
+熱源があるときの温度は、各時刻に加わった熱をそれぞれ熱核で広げて足し合わせれば得られる。ただしそれが本当に方程式を満たすことを示すには、熱源にある程度のなめらかさが要る（ここでは空間について 2 回、時間について 1 回なめらかに微分できることを仮定する）。
+:::
+
+::: proof
+$M_{0}\defeq\sup|f|$、$M_{1}\defeq\sup|\partial_{t}f|$、$M_{2}\defeq\max_{i,j}\sup|\partial_{i}\partial_{j}f|$（$\partial_{i}f$ の上界も同様に使う）とおく。
+
+**Step 1（変数の置き換えと 2）.** 【主張：$u(x,t)=\int_{0}^{t}\int\Phi(y,s)f(x-y,t-s)\,dy\,ds$ で、$|u(x,t)|\le M_{0}t$】$(y,s)\mapsto\Phi(x-y,t-s)f(y,s)$ は $\mathbb{R}^{n}\times(0,t)$ で連続で、絶対値は $M_{0}\Phi(x-y,t-s)$ 以下。トネリの形のフビニの定理と $\int\Phi(x-y,t-s)\,dy=1$ から、この優関数の積分は $M_{0}t$ で、被積分関数は可積分。$y\mapsto x-y$, $s\mapsto t-s$ と置き換えると最初の式、評価から 2。
+
+**Step 2（空間微分）.** 【主張：$|\beta|\le2$ の多重指数 $\beta$ について $\partial^{\beta}u(x,t)=\int_{0}^{t}\int\Phi(y,s)\,\partial^{\beta}f(x-y,t-s)\,dy\,ds$ で、これは $\mathbb{R}^{n}\times(0,\infty)$ で連続】Step 1 の式で、$x_{i}$ をパラメータ、$\mathbb{R}^{n}\times(0,t)$ を測度空間とみる。$x_{i}$ による微分は $\Phi(y,s)\partial_{i}f(x-y,t-s)$ で、その絶対値は $x$ によらない可積分関数 $(\sup|\partial_{i}f|)\Phi(y,s)$ 以下なので、\ref{meas:parameter-integrals.2} から微分を積分の中に入れられる。もう一度同じことをして $|\beta|=2$ の式を得る。連続性：$\mathbf{1}_{\{s<t\}}\Phi(y,s)\partial^{\beta}f(x-y,t-s)$ を $\mathbb{R}^{n}\times(0,\infty)$ の上の関数とみる。$(x_{j},t_{j})\to(x,t)$ とすると、$s\ne t$ の各点で被積分関数は収束し、$t_{j}<t+1$ なら $\mathbf{1}_{\{s<t+1\}}\Phi(y,s)\sup|\partial^{\beta}f|$ で押さえられるので、優収束定理から積分は収束する。
+
+**Step 3（時間微分）.** 【主張：$\partial_{t}u(x,t)=\int\Phi(y,t)f(x-y,0)\,dy+\int_{0}^{t}\int\Phi(y,s)\,\partial_{t}f(x-y,t-s)\,dy\,ds$ で、これは連続】$0<s\le\tau$ について $F(s,\tau)\defeq\int\Phi(y,s)f(x-y,\tau-s)\,dy$ とおくと、$u(x,\tau)=\int_{0}^{\tau}F(s,\tau)\,ds$。$h\ne0$, $t+h>0$ とし、$t'\defeq\min(t,t+h)$ とおくと
+$$
+\begin{aligned}\frac{u(x,t+h)-u(x,t)}{h}&=\int_{0}^{t'}\frac{F(s,t+h)-F(s,t)}{h}\,ds\\&\quad+\frac{1}{h}\int_{t}^{t+h}F(s,\max(t,t+h))\,ds.\end{aligned}
+$$
+（$h<0$ のときの最後の項は $\frac{1}{h}\int_{t}^{t+h}F(s,t)\,ds=\frac{1}{|h|}\int_{t+h}^{t}F(s,t)\,ds$ の意味。）第 1 項：$s<t'$ では $t-s$ と $t+h-s$ はどちらも正で、平均値の定理から $\bigl|\frac{f(z,t+h-s)-f(z,t-s)}{h}\bigr|\le M_{1}$。よって $\frac{F(s,t+h)-F(s,t)}{h}=\int\Phi(y,s)\frac{f(x-y,t+h-s)-f(x-y,t-s)}{h}dy$ の被積分関数は $M_{1}\Phi(y,s)$ で押さえられ、$h\to0$ で $\Phi(y,s)\partial_{t}f(x-y,t-s)$ に収束する。$\mathbb{R}^{n}\times(0,t)$ の上の優収束定理（$\mathbf{1}_{\{s<t'\}}\to\mathbf{1}_{\{s<t\}}$）から、第 1 項は主張の第 2 項に収束する。第 2 項：$s\in[t/2,2t]$ なら $\Phi(y,s)\le(2\pi t)^{-n/2}e^{-|y|^{2}/8t}$ で、右辺は可積分。$f$ は連続なので、優収束定理から $(s,\tau)\mapsto F(s,\tau)$ は $\{t/2\le s\le\tau\le2t\}$ の上で連続。$|h|$ が小さければ第 2 項は長さ $|h|$ の区間での $F$ の平均で、$(s,\tau)$ は $(t,t)$ に近いので $F(t,t)=\int\Phi(y,t)f(x-y,0)\,dy$ に収束する。連続性は、第 1 項は Step 2 と同じ議論、第 2 項は $\Phi(y,t)$ についての優収束定理による。
+
+**Step 4（方程式）.** 【主張：$0<\varepsilon<t$ について $\partial_{t}u-\Delta u=J_{\varepsilon}+\int\Phi(y,\varepsilon)f(x-y,t-\varepsilon)\,dy$、ただし $|J_{\varepsilon}|\le\varepsilon(M_{1}+nM_{2})$】Step 2・3 から
+$$
+\begin{aligned}\partial_{t}u-\Delta u&=\int\Phi(y,t)f(x-y,0)\,dy\\&\quad+\int_{0}^{t}\int\Phi(y,s)\bigl[(\partial_{t}f-\Delta f)(x-y,t-s)\bigr]dy\,ds.\end{aligned}
+$$
+最後の積分を $s<\varepsilon$ の部分 $J_{\varepsilon}$ と $s\ge\varepsilon$ の部分 $I_{\varepsilon}$ に分ける。$\int_{0}^{\varepsilon}\int\Phi=\varepsilon$ から $|J_{\varepsilon}|\le\varepsilon(M_{1}+nM_{2})$。$I_{\varepsilon}$ の被積分関数は $(M_{1}+nM_{2})\Phi$ で押さえられるので、フビニの定理で積分の順序を自由に入れ替えてよい。$y$ を固定すると $\partial_{t}f(x-y,t-s)=-\frac{d}{ds}\bigl[f(x-y,t-s)\bigr]$ で、$s\mapsto f(x-y,t-s)$ は $[\varepsilon,t]$ で $C^{1}$ 級（$\partial_{t}f$ が $t=0$ まで連続なので）だから、$[\varepsilon,t]$ での部分積分で
+$$
+\begin{aligned}\int_{\varepsilon}^{t}\Phi(y,s)\partial_{t}f(x-y,t-s)\,ds&=\Phi(y,\varepsilon)f(x-y,t-\varepsilon)-\Phi(y,t)f(x-y,0)\\&\quad+\int_{\varepsilon}^{t}\partial_{s}\Phi(y,s)f(x-y,t-s)\,ds.\end{aligned}
+$$
+また $s$ を固定すると、$\Delta_{x}[f(x-y,\cdot)]=\Delta_{y}[f(x-y,\cdot)]$（符号は 2 回の微分で消える）で、$\varphi=\Phi(\cdot,s)$（$s\ge\varepsilon$）は \ref{pde:heat-kernel-derivatives.1} から $|\varphi|,|\partial_{i}\varphi|,|\partial_{i}^{2}\varphi|\le Ce^{-|y|^{2}/8s}$ を満たし（$(1+|z|)^{N}e^{-|z|^{2}/8}$ は有界）、$\psi=f(x-\cdot,t-s)$ は 2 階まで有界な導関数をもつので、\ref{pde:heat-parts} から $\int\Phi(y,s)\Delta f(x-y,t-s)\,dy=\int\Delta\Phi(y,s)f(x-y,t-s)\,dy$。$|\partial_{s}\Phi(y,s)|$ と $|\Delta\Phi(y,s)|$ は $\varepsilon\le s\le t$ で $y$ の可積分関数で押さえられる（\ref{pde:heat-kernel-derivatives.2}）ので、これらの積分もフビニの定理で順序を入れ替えてよく、
+$$
+\begin{aligned}I_{\varepsilon}&=\int\Phi(y,\varepsilon)f(x-y,t-\varepsilon)\,dy-\int\Phi(y,t)f(x-y,0)\,dy\\&\quad+\int_{\varepsilon}^{t}\int(\partial_{s}\Phi-\Delta\Phi)(y,s)f(x-y,t-s)\,dy\,ds.\end{aligned}
+$$
+最後の項は \ref{pde:heat-kernel-properties.1} から $0$。最初の式に代入すると $\Phi(y,t)f(x-y,0)$ の項が打ち消し合い、主張の式になる。
+
+**Step 5（$\varepsilon\to0$）.** 【主張：$\int\Phi(y,\varepsilon)f(x-y,t-\varepsilon)\,dy\to f(x,t)$】\ref{pde:heat-cauchy-solution} の Step 4 と同じ議論を、$f$ の $(x,t)$ での連続性で行う：$\eta>0$ に対し $\delta>0$ を $|z-x|<\delta$, $|\sigma-t|<\delta$ なら $|f(z,\sigma)-f(x,t)|<\eta$ となるようにとる。$\varepsilon<\delta$ なら、$|y|<\delta$ の部分の寄与は $\eta$ 以下、$|y|\ge\delta$ の部分は $2M_{0}\int_{|y|\ge\delta}\Phi(y,\varepsilon)\,dy\to0$（\ref{pde:heat-kernel-properties.3}）。Step 4 の式で $\varepsilon\to0$ とすると $J_{\varepsilon}\to0$ で、$\partial_{t}u-\Delta u=f(x,t)$（1）。
+
+3 は、二つの解の和について方程式が線形であることと、初期値がそれぞれ $g$ と $0$ であることから従う。
+
+::: hypcheck
+- **$\partial_{i}\partial_{j}f$ の存在・連続・有界**：Step 2 で $\Delta u$ を作り、Step 4 で部分積分するのに使った。2 階の空間微分をそのまま $\Phi$ の側に移すと、$\int|\partial_{i}\partial_{j}\Phi(y,s)|\,dy$ が $s^{-1}$ の大きさなので $s\to0$ で積分できない（導入の段落）。1 階なら $\Phi$ に移せる：$\int|\partial_{i}\Phi(y,s)|\,dy=(\pi s)^{-1/2}$（\see{pde:prob-he-gradient}）は $(0,t)$ で可積分なので、$f$ が有界連続なだけでも $u$ は $x$ について $C^{1}$ 級である。
+- **$\partial_{t}f$ の存在・連続・有界**：Step 3 で時間微分を中に入れ、Step 4 で $s$ について部分積分するのに使った。
+- **$f$ の連続性**：Step 3 で $F$ の連続性に、Step 5 で $f(x,t)$ への収束に使った。
+- **有界性**：すべての優関数に使った。
+- **正則性の要求はどこまで弱められるか**：この定理の仮定は証明の都合で強くしてある。$f$ が有界連続で、$x$ について一様にヘルダー連続（$|f(x,s)-f(y,s)|\le L|x-y|^{\gamma}$, $0<\gamma\le1$）なら、時間についての微分可能性なしで同じ結論が成り立つ（\see{pde:heat-duhamel-holder}。証明は 2 階導関数を $\int\partial_{i}\partial_{j}\Phi(x-y,t-s)[f(y,s)-f(x,s)]\,dy\,ds$ と表し、ヘルダー連続性で $s^{-1}$ の特異性を $s^{-1+\gamma/2}$ に弱める）。一方、$f$ が連続なだけでは足りない：$n=2$ で、有界連続な $f$ でデュアメルの公式の $u$ が $C^{2,1}$ 級にならない例がある（\see{pde:heat-continuous-source-fails}）。ポアソン方程式 $\Delta u=f$ でも、連続な $f$ では足りずヘルダー連続性が要るという同じ現象が起こる（この系列の基本解とグリーン関数のページ）。この「古典解を作るのに $f$ の正則性が要る」ことは、関数解析的手法で弱解を作るときにはほとんど要求されず、系列の最後で対比する。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $f$ の正則性を落としても、デュアメルの公式の $u$ そのものはいつも定義でき（$f$ が有界可測なら Step 1 の積分は意味をもつ）、方程式を「積分した形」で満たす。関数解析的手法では、これを**半群による弱い解**（mild solution）とよび、熱半群 $P_{t}$ を使って $u(t)=P_{t}g+\int_{0}^{t}P_{t-s}f(s)\,ds$ と書く（\see{fa:hille-yosida}）。古典解であるかどうかは、それとは別に $f$ の正則性で決まる。
+
+**似た定理.** 常微分方程式の定数変化法（導入の段落）、ポアソン方程式のニュートン・ポテンシャル（熱源が時間によらないときの釣り合い）、波動方程式の非斉次項についての同名の原理（この系列の波動方程式のページ）は、いずれも「斉次方程式の解作用素で熱源を運んで積分する」という同じ形をしている。違いは解作用素の性質で、熱方程式では $P_{t}$ が平滑化するので、$u$ は $f$ より滑らかになる（ヘルダー連続な $f$ から $C^{2,1}$ 級の $u$ ができる）。
+
+**高い視点：たき火の連続写真.** 冷えた部屋で小さなたき火を燃やし続けると、各瞬間に生まれた熱はその瞬間から広がり始める。部屋の温度は、各瞬間の熱が「生まれてから今までの時間 $t-s$」だけ広がったものの総和である。デュアメルの原理は、この連続写真を重ね焼きする規則である。数学的には、線形方程式の熱源に対する応答が初期値に対する応答（$P_{t}$）だけで決まる、という重ね合わせの原理であり、$(\partial_{t}-\Delta)^{-1}$ を「$\Phi$ との時空の畳み込み」として表している。
+:::
+
+一意性（最大値原理）、一意性の前提が外れた例、平滑化は次のページ（\see{pde:page-heat-uniqueness}）で扱う。
+
+## 問題 {#pde:sec-he-problems}
+
+::: problem {#pde:prob-he-explicit}
+$b\in\mathbb{R}^{n}$ とする。
+1. $u(x,t)\defeq\int\Phi(x-y,t)e^{b\cdot y}\,dy$ は $t>0$ で収束し、$u(x,t)=e^{b\cdot x+|b|^{2}t}$ であることを示せ（初期値 $e^{b\cdot x}$ は有界でないが、\ref{pde:heat-cauchy-solution} の公式はこの場合も解を与える）。
+2. $\int\Phi(y,t)y_{i}y_{j}\,dy=2t\,\delta_{ij}$ を示し、$\int\Phi(x-y,t)|y|^{2}\,dy=|x|^{2}+2nt$ を導け。
+3. 1・2 の関数が熱方程式を満たすことを直接確かめよ。
+:::
+
+::: solution
+**1.** $y=x-z$ とおくと $\int\Phi(z,t)e^{b\cdot(x-z)}\,dz=e^{b\cdot x}\int\Phi(z,t)e^{-b\cdot z}\,dz$。平方完成 $-\frac{|z|^{2}}{4t}-b\cdot z=-\frac{|z+2tb|^{2}}{4t}+t|b|^{2}$ から、被積分関数は $e^{t|b|^{2}}\Phi(z+2tb,t)$ で、平行移動と \ref{pde:heat-kernel-properties.2} から積分は $e^{t|b|^{2}}$。非負関数の積分として有限なので収束し、$u=e^{b\cdot x+|b|^{2}t}$。
+
+**2.** $\Phi(y,t)=\prod_{k}\phi(y_{k})$, $\phi(r)\defeq(4\pi t)^{-1/2}e^{-r^{2}/4t}$ と分かれ、$\int_{\mathbb{R}}\phi=1$（$n=1$ の \ref{pde:heat-kernel-properties.2}）。$\phi$ は偶関数で $|r|\phi(r)$ は可積分なので $\int r\phi(r)\,dr=0$。$\phi'(r)=-\frac{r}{2t}\phi(r)$ から $r^{2}\phi(r)=-2t\,r\phi'(r)$ で、$[-L,L]$ での部分積分
+$$
+\int_{-L}^{L}r^{2}\phi\,dr=-2t\bigl[r\phi\bigr]_{-L}^{L}+2t\int_{-L}^{L}\phi\,dr
+$$
+で $L\to\infty$ とすると（$L\phi(L)\to0$）$\int r^{2}\phi=2t$。フビニの定理から、$i\ne j$ なら $\int y_{i}y_{j}\Phi=\int r\phi\cdot\int r\phi=0$、$i=j$ なら $\int y_{i}^{2}\Phi=2t$。後半は $y=x-z$ で $|x-z|^{2}=|x|^{2}-2x\cdot z+|z|^{2}$ を積分し、$\int z_{i}\Phi(z,t)\,dz=0$ と前半を使うと $|x|^{2}+2nt$。
+
+**3.** $u=e^{b\cdot x+|b|^{2}t}$ は $\partial_{t}u=|b|^{2}u$、$\partial_{i}^{2}u=b_{i}^{2}u$ で $\Delta u=|b|^{2}u$。$u=|x|^{2}+2nt$ は $\partial_{t}u=2n=\Delta u$。（1 で $n=1$, $b$ を虚数 $ik$ に置き換えた形式的な計算は $e^{-k^{2}t}e^{ikx}$ を与え、その実部・虚部 $e^{-k^{2}t}\cos kx$, $e^{-k^{2}t}\sin kx$ は確かに解である。周波数 $k$ の成分が $e^{-k^{2}t}$ で減衰することが読み取れる。）
+:::
+
+::: problem {#pde:prob-he-step}
+$n=1$、$g\defeq\mathbf{1}_{(0,\infty)}$（有界だが $0$ で不連続）とし、$u(x,t)\defeq\int\Phi(x-y,t)g(y)\,dy$（$t>0$）とおく。
+1. $\displaystyle u(x,t)=\frac{1}{\sqrt\pi}\int_{-\infty}^{x/2\sqrt t}e^{-r^{2}}\,dr$ を示せ。
+2. $u\in C^{\infty}(\mathbb{R}\times(0,\infty))$ で $\partial_{t}u=\partial_{x}^{2}u$ であること、$x_{0}\ne0$ なら $(x,t)\to(x_{0},0)$ で $u\to g(x_{0})$ となることを示せ。
+3. $c\in\mathbb{R}$ について、曲線 $x=2c\sqrt t$ に沿って $t\to0$ とすると $u\to\frac{1}{\sqrt\pi}\int_{-\infty}^{c}e^{-r^{2}}dr$ となることを示し、$u$ を $t=0$ まで連続に延ばせないことを説明せよ。
+:::
+
+::: solution
+**1.** $u(x,t)=\int_{0}^{\infty}(4\pi t)^{-1/2}e^{-(x-y)^{2}/4t}\,dy$ で、$r=(y-x)/2\sqrt t$ と置き換えると（$dy=2\sqrt t\,dr$、$y=0$ は $r=-x/2\sqrt t$）$u=\frac{1}{\sqrt\pi}\int_{-x/2\sqrt t}^{\infty}e^{-r^{2}}dr$。$e^{-r^{2}}$ は偶関数なので、$r\mapsto-r$ で主張の形になる。
+
+**2.** \ref{pde:heat-cauchy-solution} の証明の Step 1・2 は $g$ の連続性を使わず、有界可測な $g$ でそのまま通る（その hypcheck）ので、$u$ は $C^{\infty}$ 級で熱方程式を満たす。$x_{0}>0$ なら $g$ は $x_{0}$ の近傍で連続（定数 1）なので、同じ証明の Step 4 がそのまま通り $u\to1$。$x_{0}<0$ でも同様に $u\to0$。（1 の式からも、$x\to x_{0}>0$, $t\to0$ で上端 $x/2\sqrt t\to\infty$ となり、\ref{calc:gaussian-integral} から $u\to\frac{1}{\sqrt\pi}\sqrt\pi=1$ と確かめられる。）
+
+**3.** $x=2c\sqrt t$ なら 1 の上端は定数 $c$ なので、$u$ は $t$ によらず $\frac{1}{\sqrt\pi}\int_{-\infty}^{c}e^{-r^{2}}dr$ に等しい。この値は $c$ とともに $0$ から $1$ まで連続に変わる（$c\to\pm\infty$ で $1$ と $0$ に近づく）。もし $u$ が $(0,0)$ で連続な延長をもてば、どの曲線に沿った極限も同じ値になるはずなので矛盾する。とくに $c=0$ で $u(0,t)=\frac12$ がすべての $t>0$ で成り立つ。初期値の不連続は $t>0$ では瞬時に滑らかにされるが、$t\to0$ では幅 $\sqrt t$ の遷移層として残る。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>波動方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/12-wave-equation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 波動方程式 {#pde:page-wave-equation keywords="wave equation, Cauchy problem for the wave equation, classical solution, one-dimensional wave equation, general solution F(x+t)+G(x-t), d'Alembert formula, half-line problem, method of reflection, odd extension, compatibility conditions, domain of dependence, domain of influence, finite speed of propagation in one dimension, weak solutions of the one-dimensional wave equation, propagation of singularities along characteristics, Duhamel principle, 波動方程式, ダランベールの公式, 鏡像法, 両立条件, 依存領域, 影響領域, 弦の振動"}
+
+2 階の線形方程式のうち双曲型の代表である**波動方程式** $\partial_{t}^{2}u=\Delta u$（\ref{pde:classification} の後の例）を、初期値 $u(0,\cdot)=g$, $\partial_{t}u(0,\cdot)=h$ を与えて解く。このページでは空間が 1 次元の場合を扱う。1 次元の方程式は二つの輸送方程式（\ref{pde:page-characteristics}）に分解でき、解は左右に進む二つの形の和 $F(x+t)+G(x-t)$ に限られる。これから初期値問題の解が**ダランベールの公式**で書けることと、その一意性がわかる。端を固定した半直線の弦は、初期値を奇関数に延ばす**鏡像法**で解け、端での**両立条件**が古典解の存在に必要十分であることを見る。最後に、公式から解の値が初期値のどの範囲で決まるか（**依存領域**と**影響領域**）を読み取る：波は速さ $1$ でしか伝わらない。
+
+各定理では、解の公式が古典解を与えるために初期値にどれだけの滑らかさが要るかを、hypcheck で細かく見る。1 次元では「解が $C^{2}$ 級であるために初期値に必要な滑らかさ」がそのまま十分で、初期値の角は角のまま運ばれる。ラプラス方程式の解が自動的に $C^{\infty}$ 級になった（\ref{pde:mean-value-converse}）のと対照的に、波動方程式は滑らかさを運ぶだけで、良くはしない。3 次元では、球面平均を使ってキルヒホッフの公式を導き、初期値より 1 階滑らかさを失う例を見る（次のページ）。エネルギーによる一意性と一般の次元の有限伝播速度はその次のページで、一般の次元の解の公式とホイヘンスの原理はさらにその次のページで扱う。
+
+## 記法と定義の確認 {#pde:sec-wv-notation}
+
+::: notation
+- 時間と空間の変数をもつ関数 $u(t,x)$（$t\in\mathbb{R}$, $x\in\mathbb{R}^{n}$）について、$\partial_{t}u$ は $t$ についての偏導関数、$\nabla u=(\partial_{1}u,\dots,\partial_{n}u)$ と $\Delta u=\sum_{i}\partial_{i}^{2}u$ は $x$ についての勾配とラプラシアン（\ref{pde:page-characteristics} と同じく時間を先に書く）。関数は実数値とする。$C^{k}$ 級は \ref{calc:ck-map}、偏微分の順序交換は \ref{calc:schwarz-theorem}、連鎖律は \ref{calc:multivariable-chain-rule}、平均値の定理は \tref{calc:mean-value-theorem}。
+- $J$ はいつも $0$ を含む開区間を表す。
+- 連続関数の区間上の積分には微積分学の基本定理が使える（\ref{meas:riemann-lebesgue}, \ref{calc:fundamental-theorem}）。上端が動く積分の微分は \ref{pde:integral-upper-limit}。補足では、フビニ–トネリの定理（\ref{meas:fubini-lebesgue}）と線形変換による積分の変換（\ref{meas:lebesgue-linear}。積分についても単関数で近似して同じ）を使う。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 1 次元の波動方程式 {#pde:sec-wv-one-dim}
+
+::: definition 波動方程式の初期値問題 {#pde:wave-cauchy-problem keywords="wave equation u_tt = Laplacian u on J x R^n, Cauchy problem with u(0,x) = g(x), u_t(0,x) = h(x), classical solution in C^2(J x R^n); necessary regularity g in C^2, h in C^1" index="波動方程式|はどうほうていしき, 初期値問題（波動方程式）|しょきちもんだいはどうほうていしき, 古典解（波動方程式）|こてんかいはどうほうていしき"}
+$g,h\colon\mathbb{R}^{n}\to\mathbb{R}$ とする。$J\times\mathbb{R}^{n}$ 上の $C^{2}$ 級関数 $u$ で
+$$
+\partial_{t}^{2}u=\Delta u\quad(J\times\mathbb{R}^{n}\text{ 上}),\qquad u(0,x)=g(x),\quad\partial_{t}u(0,x)=h(x)\quad(x\in\mathbb{R}^{n})
+$$
+を満たすものを、**波動方程式**の**初期値問題**の $J\times\mathbb{R}^{n}$ 上の**古典解**という。$g,h$ を**初期値**という。
+:::
+
+::: intuition
+弦や膜の小さな振動の方程式で、$u$ は変位、$g$ は最初の形、$h$ は最初の速度である。加速度 $\partial_{t}^{2}u$ が、周りからの引っ張りの釣り合いのずれ $\Delta u$ に等しい。波の速さは $1$ に正規化してある（速さ $c$ の方程式 $\partial_{t}^{2}v=c^{2}\Delta v$ は $v(t,x)=u(ct,x)$ でこれに帰着する）。
+:::
+
+::: example
+1. 古典解があれば、$g=u(0,\cdot)$ は $C^{2}$ 級、$h=\partial_{t}u(0,\cdot)$ は $C^{1}$ 級である（$u\in C^{2}$ の偏導関数を $t=0$ に制限したものだから）。したがって $g\in C^{2}$, $h\in C^{1}$ は古典解が存在するための**必要条件**である。
+2. $n=1$ で $u(t,x)=\sin t\cos x$ は $\mathbb{R}\times\mathbb{R}$ 上の古典解で、$g=0$, $h=\cos x$。形を変えずに振幅だけが振動する解で、**定在波**と呼ばれる。
+:::
+
+1 次元の方程式 $\partial_{t}^{2}w=\partial_{x}^{2}w$ は、$(\partial_{t}+\partial_{x})(\partial_{t}-\partial_{x})w=0$ と二つの 1 階の作用素の積に分解できる。これを使って、解をすべて求める。
+
+::: lemma 1 次元の一般解 {#pde:wave-1d-general keywords="every C^2 solution of w_tt = w_xx on a convex open subset of the (t,x)-plane is F(x+t) + G(x-t) with F, G in C^2; factorization into two transport operators" index="1 次元の波動方程式の一般解|いちじげんのはどうほうていしきのいっぱんかい"}
+$D\subset\mathbb{R}^{2}$ を凸な開集合、$I_{\pm}\defeq\{x\pm t:(t,x)\in D\}$ とする（$\mathbb{R}$ の開区間）。$w\in C^{2}(D)$ が $D$ で $\partial_{t}^{2}w=\partial_{x}^{2}w$ を満たすことと、$F\in C^{2}(I_{+})$, $G\in C^{2}(I_{-})$ があって $D$ 上で $w(t,x)=F(x+t)+G(x-t)$ となることは同値である。
+:::
+
+::: intuition
+1 次元の波は、左へ進む形 $F(x+t)$ と右へ進む形 $G(x-t)$ の重ね合わせに限られる。どちらの形も、速さ $1$ で形を変えずに運ばれる。
+:::
+
+::: proof
+$I_{\pm}$ は凸集合 $D$ の線形写像 $(t,x)\mapsto x\pm t$ による像なので区間で、$D$ が開集合なので開区間である。$F(x+t)+G(x-t)$ が方程式を満たすことは、連鎖律で $\partial_{t}^{2}$ も $\partial_{x}^{2}$ も $F''(x+t)+G''(x-t)$ になることからわかる。逆を示す。
+
+**Step 1.** 【主張：$a\defeq\partial_{t}w-\partial_{x}w\in C^{1}(D)$ は $\partial_{t}a+\partial_{x}a=0$ を満たす】$w\in C^{2}$ なので \ref{calc:schwarz-theorem} から $\partial_{x}\partial_{t}w=\partial_{t}\partial_{x}w$ で、$\partial_{t}a+\partial_{x}a=\partial_{t}^{2}w-\partial_{t}\partial_{x}w+\partial_{x}\partial_{t}w-\partial_{x}^{2}w=0$。
+
+**Step 2.** 【主張：$C^{1}$ 級の $\alpha\colon I_{-}\to\mathbb{R}$ があって $D$ 上で $a(t,x)=\alpha(x-t)$】$s\in I_{-}$ について $T_{s}\defeq\{t:(t,s+t)\in D\}$ は、凸な開集合と直線の交わりを $t$ 軸に写したものなので空でない開区間である。$\varphi(t)\defeq a(t,s+t)$ は連鎖律と Step 1 から $\varphi'(t)=\partial_{t}a+\partial_{x}a=0$ なので、\ref{calc:mean-value-theorem} から $T_{s}$ の上で定数で、その値を $\alpha(s)$ とおく。$s_{0}\in I_{-}$ と $t_{0}\in T_{s_{0}}$ を固定すると、$D$ が開集合なので $s_{0}$ の近くの $s$ では $t_{0}\in T_{s}$ で $\alpha(s)=a(t_{0},s+t_{0})$。右辺は $s$ の $C^{1}$ 級関数なので $\alpha\in C^{1}(I_{-})$。
+
+**Step 3.** 【主張：$G$ を $-\alpha/2$ の原始関数（$I_{-}$ 上）とすると、$z\defeq w-G(x-t)$ について $C^{2}$ 級の $F\colon I_{+}\to\mathbb{R}$ があって $z(t,x)=F(x+t)$】$G\in C^{2}(I_{-})$ で、$\partial_{t}z-\partial_{x}z=a(t,x)+G'(x-t)+G'(x-t)=\alpha(x-t)-\alpha(x-t)=0$。Step 2 と同じ議論を直線 $x+t=c$ の上で行う：$\psi(t)\defeq z(t,c-t)$ は $\psi'=\partial_{t}z-\partial_{x}z=0$ なので定数で、その値を $F(c)$ とおくと、局所的に $F(c)=z(t_{0},c-t_{0})$ と書けるので $F\in C^{2}(I_{+})$。よって $w=F(x+t)+G(x-t)$。
+
+::: hypcheck
+- **$D$ が凸**：Step 2・3 で、直線と $D$ の交わりが区間（連結）であることに使った。交わりが二つ以上の区間に分かれると、区間ごとに別の定数をとれるので、$F,G$ が一つの関数として定まらない。凸でなくても、すべての直線 $x\pm t=\text{一定}$ との交わりが区間なら同じ証明が通る。
+- **$w\in C^{2}$**：Step 1 の偏微分の順序交換に使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem ダランベールの公式 {#pde:wave-dalembert keywords="d'Alembert formula u(t,x) = (g(x+t) + g(x-t))/2 + (1/2) int_{x-t}^{x+t} h(y) dy; existence and uniqueness of C^2 solutions of the one-dimensional wave equation for g in C^2 and h in C^1" index="ダランベールの公式|だらんべーるのこうしき" refname="ダランベールの公式"}
+$n=1$、$g\in C^{2}(\mathbb{R})$, $h\in C^{1}(\mathbb{R})$ とし、
+$$
+u(t,x)\defeq\frac{g(x+t)+g(x-t)}{2}+\frac{1}{2}\int_{x-t}^{x+t}h(y)\,dy
+\label{pde:eq-dalembert}
+$$
+とおく。
+1. $u$ は $\mathbb{R}\times\mathbb{R}$ 上の古典解である。
+2. $v$ が $J\times\mathbb{R}$ 上の古典解なら、$J\times\mathbb{R}$ 上で $v=u$。
+:::
+
+::: intuition
+1 次元では、時刻 $t$ に点 $x$ で見える変位は、最初の形を左右に $t$ ずらした二つの値の平均と、区間 $[x-t,x+t]$ の上の最初の速度の積分の半分である。初期値が $C^{2}$, $C^{1}$ 級なら、それだけで古典解がちょうど一つある。
+:::
+
+::: example
+1. $g(x)=e^{-x^{2}}$, $h=0$ なら $u(t,x)=\frac12\bigl(e^{-(x+t)^{2}}+e^{-(x-t)^{2}}\bigr)$。山は高さ半分の二つの山に分かれ、左右に速さ $1$ で離れていく。
+2. $g=0$, $h=\cos x$ なら $u=\frac12\bigl(\sin(x+t)-\sin(x-t)\bigr)=\sin t\cos x$ で、\ref{pde:wave-cauchy-problem} の後の例の定在波に一致する。
+:::
+
+::: proof
+**Step 1.** 【主張：$u\in C^{2}(\mathbb{R}^{2})$ で、$\partial_{t}^{2}u=\partial_{x}^{2}u$】$H(s)\defeq\int_{0}^{s}h(y)\,dy$ は、微積分学の基本定理から $H'=h\in C^{1}$ なので $C^{2}$ 級で、$u=\frac12\bigl(g(x+t)+g(x-t)\bigr)+\frac12\bigl(H(x+t)-H(x-t)\bigr)$。これは $C^{2}$ 級の 1 変数関数と 1 次式の合成の和なので $C^{2}$ 級で、連鎖律から
+$$
+\partial_{t}^{2}u=\partial_{x}^{2}u=\frac{g''(x+t)+g''(x-t)}{2}+\frac{h'(x+t)-h'(x-t)}{2}.
+$$
+
+**Step 2.** 【主張：$u(0,x)=g(x)$, $\partial_{t}u(0,x)=h(x)$】$t=0$ では積分の区間がつぶれるので $u(0,x)=g(x)$。$\partial_{t}u=\frac12\bigl(g'(x+t)-g'(x-t)\bigr)+\frac12\bigl(h(x+t)+h(x-t)\bigr)$ に $t=0$ を代入すると $h(x)$。以上で 1 が示された。
+
+**Step 3.** 【主張：$J\times\mathbb{R}$ 上の古典解 $v$ は $u$ に等しい】$w\defeq v-u$ は $J\times\mathbb{R}$ 上の古典解で初期値は $0$。$D=J\times\mathbb{R}$ は凸な開集合で $I_{+}=I_{-}=\mathbb{R}$ なので、\ref{pde:wave-1d-general} から $w=F(x+t)+G(x-t)$（$F,G\in C^{2}(\mathbb{R})$）。$t=0$ で $F(x)+G(x)=0$, $F'(x)-G'(x)=0$（すべての $x$）。前者を微分すると $F'+G'=0$ なので $F'=G'=0$、よって $F=c$ は定数で $G=-c$。したがって $w=0$。
+
+::: hypcheck
+- **$g\in C^{2}$, $h\in C^{1}$**：Step 1 で $u\in C^{2}$ を示すのに使った。\ref{pde:wave-cauchy-problem} の後の例のとおり、これは古典解が存在するための必要条件でもあるので、1 次元では**必要な滑らかさがそのまま十分**である。どちらかを外すと古典解はない（存在すれば必要条件を満たしてしまう）。例えば $g(x)=x\vert x\vert$（$C^{1}$ 級だが $C^{2}$ 級でない）、$h=0$ では公式の $u=\frac12\bigl((x+t)\vert x+t\vert+(x-t)\vert x-t\vert\bigr)$ は直線 $x=\pm t$ の上で 2 階微分をもたない。
+- **一意性**：Step 3 では $v\in C^{2}$ と方程式と初期値しか使っていない。増大条件（無限遠での振る舞いの制限）はいらない。これは有限伝播速度（\see{pde:wave-1d-domains}）の反映で、増大条件がないと一意性が崩れる熱方程式との違いである。
+- **時間の向き**：$J$ は負の時刻を含んでよく、公式は $t<0$ でも解を与える。波動方程式は $t\mapsto-t$ で不変なので、過去にも未来にも同じように解ける。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると（弱い意味の解）.** $g$ が連続で $h$ が局所可積分なだけでも、公式 \eqref{pde:eq-dalembert} は連続関数 $u=F(x+t)+G(x-t)$（$F\defeq\frac12(g+H)$, $G\defeq\frac12(g-H)$, $H(s)=\int_{0}^{s}h$）を定める。これは微分できないこともあるが、方程式を**弱い意味で**満たす：台がコンパクトな $C^{2}$ 級関数 $\varphi$ について
+$$
+\iint_{\mathbb{R}^{2}}u\,(\partial_{t}^{2}\varphi-\partial_{x}^{2}\varphi)\,dx\,dt=0.
+$$
+実際、変数を $\xi=x+t$, $\eta=x-t$ に変え（$\lvert\det\rvert=2$ の線形変換、\ref{meas:lebesgue-linear}）、$\psi(\xi,\eta)\defeq\varphi\bigl(\frac{\xi-\eta}{2},\frac{\xi+\eta}{2}\bigr)$ とおくと、連鎖律から $\partial_{t}^{2}\varphi-\partial_{x}^{2}\varphi=-4\,\partial_{\xi}\partial_{\eta}\psi$ である。$F(\xi)$ の項は、フビニの定理で $\eta$ について先に積分すると $\int_{\mathbb{R}}\partial_{\eta}(\partial_{\xi}\psi)\,d\eta=0$（台がコンパクトな $C^{1}$ 級関数の導関数の積分）なので $0$、$G(\eta)$ の項も $\xi$ について先に積分して $0$ になる。さらに、$g_{k}\to g$ と $h_{k}\to h$ がコンパクト集合の上で一様に収束すれば、\eqref{pde:eq-dalembert} から $\lvert t\rvert\le T$, $\lvert x\rvert\le R$ で $\lvert u_{k}-u\rvert\le\max_{\lvert y\rvert\le R+T}\lvert g_{k}-g\rvert+T\max_{\lvert y\rvert\le R+T}\lvert h_{k}-h\rvert$ となり、古典解の列が $u$ に広義一様収束する。$g$ の角（$x\vert x\vert$ の $0$ での 2 階微分の跳び）は、特性線 $x\pm t=\text{一定}$ に沿ってそのまま運ばれ、消えも増えもしない。バーガース方程式の弱解（\ref{pde:burgers-weak-solution}）と違って方程式が線形なので、弱い意味の解は初期値から一意に決まり、衝撃波のような新しい特異性も生まれない。
+
+**似た定理.** 1 次元の公式は、二つの輸送方程式の公式（\ref{pde:transport-constant}）を続けて使ったものと同じである：$a=\partial_{t}w-\partial_{x}w$ は速度 $+1$ の輸送方程式を満たし、$w$ は $a$ を湧き出しとする速度 $-1$ の輸送方程式を満たす。また $n=1$ の球面平均は $M_{h}(x,s)=\frac12\bigl(h(x+s)+h(x-s)\bigr)$ なので、公式は $u=M_{g}(x,t)+\int_{0}^{t}M_{h}(x,s)\,ds$ とも書ける（\see{pde:wave-mean-smoothness}）。3 次元のキルヒホッフの公式 $u=\partial_{t}(tM_{g})+tM_{h}$（\tref{pde:wave-kirchhoff}）と比べると、1 次元では速度の項が球面平均の時間積分、つまり区間全体の積分になっている。これが後で見る「ホイヘンスの原理が 1 次元では成り立たない」ことの理由である。
+
+**高い視点：二本の動く歩道.** $(t,x)$ 平面には、右へ進む直線 $x-t=\text{一定}$ と左へ進む直線 $x+t=\text{一定}$ の二つの族がある（**特性線**）。1 次元の波は、この二つの族の上を速さ $1$ で流れる二本の動く歩道に、それぞれ荷物（$F$ と $G$）を載せたものである。荷物の形は歩道の上で変わらないので、荷物が角張っていれば角張ったまま運ばれる。波動方程式が滑らかさを「良くも悪くもしない」ことは、この絵からすでに見えている。
+:::
+
+境界のある場合の最も簡単な例として、半直線 $x>0$ で端を固定した弦を考える。初期値を奇関数に延ばすと、端での条件 $u=0$ が自動的に満たされる（**鏡像法**）。
+
+::: proposition 半直線の問題と鏡像法 {#pde:wave-half-line keywords="wave equation on the half-line x > 0 with Dirichlet condition u(t,0) = 0; uniqueness; odd reflection of the data; compatibility conditions g(0) = h(0) = g''(0) = 0 are necessary and sufficient for a classical solution" index="鏡像法（波動方程式）|きょうぞうほうはどうほうていしき, 両立条件|りょうりつじょうけん, 半直線の波動方程式|はんちょくせんのはどうほうていしき"}
+$g\in C^{2}([0,\infty))$, $h\in C^{1}([0,\infty))$（端点 $0$ では右側の微分）とし、$D\defeq\{(t,x):t\in\mathbb{R},\ x>0\}$ とする。$v\in C^{2}(D)$ で、$v$ が $\{(t,x):x\ge0\}$ 上の連続関数に延び、
+$$
+\begin{aligned}&\partial_{t}^{2}v=\partial_{x}^{2}v\ (D\text{ 上}),\qquad v(t,0)=0\ (t\in\mathbb{R}),\\&v(0,x)=g(x),\quad\partial_{t}v(0,x)=h(x)\ (x>0)\end{aligned}
+$$
+を満たすものを、この問題の解という。
+1. 解は高々一つである。
+2. 解が存在するための必要十分条件は $g(0)=h(0)=g''(0)=0$（**両立条件**）である。
+3. 両立条件が成り立つとき、$g,h$ の奇関数への延長 $\breve{g}(x)\defeq-g(-x)$, $\breve{h}(x)\defeq-h(-x)$（$x<0$）は $\breve{g}\in C^{2}(\mathbb{R})$, $\breve{h}\in C^{1}(\mathbb{R})$ を満たし、解は $(\breve{g},\breve{h})$ に対する \eqref{pde:eq-dalembert} の $D$ への制限である。$0<x<t$ では
+$$
+v(t,x)=\frac{g(x+t)-g(t-x)}{2}+\frac{1}{2}\int_{t-x}^{x+t}h(y)\,dy.
+$$
+:::
+
+::: intuition
+端を固定した弦の波は、壁の向こうに上下を逆さにした鏡の中の弦を想像し、全直線の問題として解けばよい。壁に当たった波は、上下が反転して跳ね返ってくる。ただし壁の位置で初期値が条件を満たしていないと、角が生まれて古典解にならない。
+:::
+
+::: proof
+**Step 1.** 【主張：$F,G\in C^{2}(\mathbb{R})$ があって $D$ 上で $v=F(x+t)+G(x-t)$、かつ $(0,\infty)$ 上で $F'=\frac12(g'+h)$, $G'=\frac12(g'-h)$、すべての $s\in\mathbb{R}$ で $G(s)=-F(-s)$】$D$ は凸な開集合で、$I_{+}=I_{-}=\mathbb{R}$（$x>0$ を動かせば $x\pm t$ はすべての値をとる）なので、\ref{pde:wave-1d-general} から表示を得る。$x>0$ で $F(x)+G(x)=g(x)$ と $F'(x)-G'(x)=h(x)$ が成り立ち、前者を微分して後者と連立すると $F'$, $G'$ の式を得る。$t\in\mathbb{R}$ を固定して $x\downarrow0$ とすると、$v$ の連続性と $F,G$ の連続性から $0=v(t,0)=F(t)+G(-t)$。$s=-t$ とおけばよい。
+
+**Step 2.** 【主張：解は高々一つ（1）】二つの解の差 $w$ は $g=h=0$ の場合の解なので、Step 1 から $(0,\infty)$ で $F'=G'=0$。$F,G$ は連続なので $[0,\infty)$ の上でそれぞれ定数 $c$, $d$ で、$F(x)+G(x)=0$（$x>0$）から $d=-c$。$s<0$ なら Step 1 の関係から $G(s)=-F(-s)=-c$, $F(s)=-G(-s)=c$。よって $F\equiv c$, $G\equiv-c$ で $w\equiv0$。
+
+**Step 3.** 【主張：解があれば両立条件が成り立つ（2 の必要性）】Step 1 の $F,G$ について、$F',F'',G',G''$ は $\mathbb{R}$ で連続なので、$0$ での値は $(0,\infty)$ からの極限で、$g',g'',h,h'$ が $[0,\infty)$ で連続なことから $F'(0)=\frac12(g'(0)+h(0))$, $G'(0)=\frac12(g'(0)-h(0))$, $F''(0)=\frac12(g''(0)+h'(0))$, $G''(0)=\frac12(g''(0)-h'(0))$。一方 $G(s)=-F(-s)$ を微分して $G'(s)=F'(-s)$, $G''(s)=-F''(-s)$ なので、$s=0$ で $G'(0)=F'(0)$ から $h(0)=0$、$G''(0)=-F''(0)$ から $g''(0)=0$。また $G(0)=-F(0)$ と $F(0)+G(0)=\lim_{x\downarrow0}g(x)=g(0)$ から $g(0)=0$。
+
+**Step 4.** 【主張：両立条件の下で $\breve{g}\in C^{2}(\mathbb{R})$, $\breve{h}\in C^{1}(\mathbb{R})$】$g(0)=0$ から $\breve{g}$ は $0$ で連続。$x<0$ で $\breve{g}'(x)=g'(-x)$ なので、$0$ での左右の微分係数はどちらも $g'(0)$（左側は平均値の定理で $\frac{\breve{g}(x)-\breve{g}(0)}{x}=\breve{g}'(\xi)\to g'(0)$）で、$\breve{g}'$ は連続。$x<0$ で $\breve{g}''(x)=-g''(-x)$ なので、同様に $\breve{g}'$ の $0$ での右側の微分係数は $g''(0)$、左側は $-g''(0)$ で、$g''(0)=0$ のときに限り一致して $\breve{g}''$ は連続になる。$\breve{h}$ についても $h(0)=0$ から同様に $C^{1}$ 級。
+
+**Step 5.** 【主張：両立条件の下で、3 の関数は解である（2 の十分性と 3）】Step 4 と \ref{pde:wave-dalembert.1} から、$(\breve{g},\breve{h})$ に対する \eqref{pde:eq-dalembert} の $u$ は $\mathbb{R}^{2}$ 上の古典解で、とくに $D$ で $C^{2}$ 級、$\{x\ge0\}$ で連続。$x=0$ では $\breve{g}$ が奇関数なので $\breve{g}(t)+\breve{g}(-t)=0$、$\breve{h}$ が奇関数なので $\int_{-t}^{t}\breve{h}=0$、よって $u(t,0)=0$。$x>0$ での初期値は $g,h$ である。$0<x<t$ では $\breve{g}(x-t)=-g(t-x)$、$\int_{x-t}^{x+t}\breve{h}=\int_{x-t}^{t-x}\breve{h}+\int_{t-x}^{x+t}h=\int_{t-x}^{x+t}h$ なので 3 の式を得る。
+
+::: hypcheck
+- **$v$ の境界までの連続性**：Step 1 で、境界条件を $F(t)+G(-t)=0$ に翻訳するのに使った。境界で連続性を課さないと、境界条件は意味をもたない。
+- **両立条件**：Step 3 のとおり必要で、Step 4 で延長の滑らかさに使った。例えば $g(x)=x^{2}$（$g''(0)=2$）, $h=0$ では、3 の式は $0<x<t$ で $v=\frac12\bigl((x+t)^{2}-(t-x)^{2}\bigr)=2xt$、$x>t>0$ で $v=x^{2}+t^{2}$ となり、直線 $x=t$ の上で $\partial_{x}^{2}v$ が $0$ と $2$ の間で跳ぶ。角は時刻 $0$ に端点 $x=0$ で生まれ、特性線 $x=t$ に沿って運ばれる。
+- **一意性（1）**：$g,h$ の両立条件も増大条件も使っていない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 端を固定する代わりに端を自由にする（$\partial_{x}v(t,0)=0$、ノイマン条件）と、初期値を**偶関数**に延ばせばよく、両立条件は $g'(0)=h'(0)=0$ に変わる（$g$ の偶関数への延長が $C^{2}$ 級であるためには $g'(0)=0$ が要り、$g''$ の連続性は自動的に保たれる）。有界な区間 $[0,L]$ の両端を固定した弦では、奇関数への延長をさらに周期 $2L$ で繰り返せばよい（\see{pde:prob-wv-string}）。
+
+**似た定理.** 鏡像法は、半空間のグリーン関数を作るときにも使う（調和関数の場合、点電荷とその鏡像の電荷を逆符号で置く）。どちらも、方程式が鏡映 $x\mapsto-x$ で不変であることと、奇関数が鏡の上で $0$ になることの組み合わせである。
+
+**高い視点：鏡の国の弦.** 壁で跳ね返る波を、壁の向こうから逆さまにやって来る鏡像の波とすれ違ったものと見る。比喩で言えば、合わせ鏡の中の部屋で、壁にぶつかるボールの代わりに、壁をすり抜けて鏡の部屋へ行くボールと、鏡の部屋から出てくるボールを考えるようなものである。境界条件を対称性に置き換えるこの考え方は、より一般には「境界のある空間を、対称性で貼り合わせた境界のない空間の商と見る」ことに当たる。
+:::
+
+公式 \eqref{pde:eq-dalembert} から、時刻 $t$ の点 $x$ での値がどの範囲の初期値で決まるかが読み取れる。
+
+::: corollary 依存領域と影響領域（1 次元） {#pde:wave-1d-domains keywords="domain of dependence: u on the backward/forward triangle depends only on the data on [x0 - t0, x0 + t0]; domain of influence: data supported in [a,b] influence only a - |t| <= x <= b + |t|; finite speed of propagation in one dimension; no Huygens principle for h" index="依存領域|いぞんりょういき, 影響領域|えいきょうりょういき, 有限伝播速度（1 次元）|ゆうげんでんぱそくどいちじげん"}
+$n=1$、$g\in C^{2}(\mathbb{R})$, $h\in C^{1}(\mathbb{R})$ とし、$u$ を \eqref{pde:eq-dalembert} の解とする。
+1. $x_{0}\in\mathbb{R}$, $t_{0}>0$ とし、$K\defeq\{(t,x):\lvert x-x_{0}\rvert\le t_{0}-\lvert t\rvert\}$ とおく。初期値 $(\tilde{g},\tilde{h})$ が区間 $[x_{0}-t_{0},x_{0}+t_{0}]$ の上で $(g,h)$ と一致すれば、対応する解 $\tilde{u}$ は $K$ の上で $u$ と一致する。
+2. $g,h$ が区間 $[a,b]$ の外で $0$ なら、$x<a-\lvert t\rvert$ または $x>b+\lvert t\rvert$ で $u(t,x)=0$。
+3. 2 の仮定の下で $t>0$ かつ $b-t\le x\le a+t$ なら $u(t,x)=\frac12\int_{a}^{b}h(y)\,dy$。とくに $h=0$ なら、$t>\frac{b-a}{2}$ のとき $u(t,\cdot)$ は二つの区間 $[a-t,b-t]$ と $[a+t,b+t]$ の外で $0$。
+:::
+
+::: intuition
+点 $(t_{0},x_{0})$ の値は、初期時刻の区間 $[x_{0}-t_{0},x_{0}+t_{0}]$ の中の初期値だけで決まる（この区間の上の三角形を**依存領域**という）。逆に、初期時刻の区間 $[a,b]$ の中の乱れは、速さ $1$ で広がる範囲 $a-\lvert t\rvert\le x\le b+\lvert t\rvert$（**影響領域**）にしか届かない。ただし初速 $h$ による変位は、波が通り過ぎた後も一定の値で残る。
+:::
+
+::: proof
+**1.** $(t,x)\in K$ なら $x\pm t$ と、その間の区間はすべて $[x_{0}-t_{0},x_{0}+t_{0}]$ に含まれる（$\lvert x\pm t-x_{0}\rvert\le\lvert x-x_{0}\rvert+\lvert t\rvert\le t_{0}$）。\eqref{pde:eq-dalembert} の右辺はこれらの点と区間の上の初期値しか使わないので、$\tilde{u}(t,x)=u(t,x)$。
+
+**2.** $x>b+\lvert t\rvert$ なら $x\pm t>b$ で、$x-t$ と $x+t$ の間の区間も $(b,\infty)$ に含まれる。$g,h$ はそこで $0$ なので $u(t,x)=0$。$x<a-\lvert t\rvert$ も同様。
+
+**3.** $t>0$、$x-t\le a$、$b\le x+t$ なら、$x\pm t$ は $(a,b)$ の外にあるか端点で、$g$ は連続なので端点でも $0$。よって $g(x\pm t)=0$ で、$h$ は $[a,b]$ の外で $0$ なので $\int_{x-t}^{x+t}h=\int_{a}^{b}h$。$h=0$ のときは、$t>\frac{b-a}{2}$ なら $b-t<a+t$ で、2 と合わせて、$u(t,x)\ne0$ となりうるのは $x\in[a-t,b-t]$（$x+t\in[a,b]$）か $x\in[a+t,b+t]$（$x-t\in[a,b]$）だけである。
+
+::: hypcheck
+- **公式 \eqref{pde:eq-dalembert}**：すべての項で、点 $(t,x)$ から引いた二本の特性線が $t=0$ と交わる点と、その間の区間しか使わないことを使った。古典解はこの公式で与えられるもの以外にない（\ref{pde:wave-dalembert.2}）ので、1〜3 はすべての古典解について成り立つ。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 の後半は $h=0$ のときにだけ言える。$h\ne0$ なら、波が通り過ぎた後の区間 $[b-t,a+t]$ に一定の変位 $\frac12\int_{a}^{b}h$ が残る。つまり 1 次元では、乱れの影響が「波面が通るときだけ」には限られない（**ホイヘンスの原理**が成り立たない）。3 次元では逆に、初期値の台が有界なら、波面が通り過ぎた後は完全に静かに戻る（\see{pde:prob-wv-huygens}）。
+
+**似た定理.** 輸送方程式では、依存領域は 1 本の特性曲線（\ref{pde:transport-variable}）だった。波動方程式では二本の特性線に挟まれた三角形になる。熱方程式では依存領域が全空間になり、乱れは一瞬で至る所に届く（伝播速度が無限）。$n$ 次元の波動方程式でも依存領域は円錐 $\{\lvert x-x_{0}\rvert\le t_{0}-\lvert t\rvert\}$ で、これはエネルギーの方法で示す（\see{pde:wave-finite-speed}）。
+
+**高い視点：光円錐.** 時空 $(t,x)$ の中の円錐 $\lvert x-x_{0}\rvert\le\lvert t-t_{0}\rvert$ は、特殊相対論の光円錐そのものである。比喩で言えば、点 $(t_{0},x_{0})$ にいる観測者は、過去の光円錐の中で起きたことしか知らず、未来の光円錐の中にしか影響を及ぼせない。波動方程式は、ローレンツ変換 $(t,x)\mapsto(t\cosh s+x\sinh s,\ t\sinh s+x\cosh s)$ で形を変えない（連鎖律で、この変換で $\partial_{t}^{2}-\partial_{x}^{2}$ が変わらないことを確かめられる）。依存領域と影響領域はこの対称性と相性のよい、方程式に固有の幾何である。
+:::
+
+## 問題 {#pde:sec-wv-problems}
+
+::: problem {#pde:prob-wv-string}
+$L>0$ とし、$g\in C^{2}([0,L])$, $h\in C^{1}([0,L])$ が $g(0)=g(L)=h(0)=h(L)=g''(0)=g''(L)=0$ を満たすとする。$g,h$ を $[-L,L]$ 上の奇関数に延ばし、さらに周期 $2L$ の関数として $\mathbb{R}$ 全体に延ばしたものを $G,H$ とする。
+1. $G\in C^{2}(\mathbb{R})$, $H\in C^{1}(\mathbb{R})$ を示せ。
+2. $(G,H)$ に対するダランベールの公式の解 $u$ は、すべての $t$ で $u(t,0)=u(t,L)=0$ を満たし、$t$ について周期 $2L$ であることを示せ。
+3. $g(x)=\sin(\pi x/L)$, $h=0$ のとき $u$ を求めよ。
+:::
+
+::: solution
+**1.** $[-L,L]$ 上の奇関数への延長 $\breve{g}$ は、\ref{pde:wave-half-line} の証明の Step 4 と同じく $g(0)=g''(0)=0$ から $0$ の近くで $C^{2}$ 級。$G$ は奇関数で周期 $2L$ なので、すべての $y$ で $G(L+y)=G(y-L)=-G(L-y)$、つまり $G$ は点 $L$ について奇対称で、$0\le y\le L$ では $G(L-y)=g(L-y)$。したがって点 $L$ の近くでも、同じ議論を $g(L)=g''(L)=0$ について行えば $C^{2}$ 級。周期性から他の点 $kL$ でも同じ。$H$ も $h(0)=h(L)=0$ から同様に $C^{1}$ 級。
+
+**2.** $G,H$ は奇関数なので、\ref{pde:wave-half-line} の証明の Step 5 と同じく $u(t,0)=0$。$G,H$ は点 $L$ について奇対称なので、$y=x-L$ と置き換えれば同じ計算で $u(t,L)=0$。$G$ は周期 $2L$ なので $G(x\pm(t+2L))=G(x\pm t)$。$H$ は周期 $2L$ の奇関数なので $\int_{-L}^{L}H=0$ で、周期関数の 1 周期の積分は区間の位置によらないから、$\int_{x-t-2L}^{x+t+2L}H=\int_{x-t}^{x+t}H+\int_{x+t}^{x+t+2L}H+\int_{x-t-2L}^{x-t}H=\int_{x-t}^{x+t}H$。よって $u(t+2L,x)=u(t,x)$。（$[0,L]$ で端を固定した弦の解がこれ以外にないことは、この系列のエネルギー法のページで示す。）
+
+**3.** $\sin(\pi x/L)$ はもともと奇関数で周期 $2L$ なので $G(x)=\sin(\pi x/L)$、$H=0$。\eqref{pde:eq-dalembert} から $u(t,x)=\frac12\bigl(\sin\frac{\pi(x+t)}{L}+\sin\frac{\pi(x-t)}{L}\bigr)=\sin\frac{\pi x}{L}\cos\frac{\pi t}{L}$。端は動かず、形を保ったまま周期 $2L$ で振動する定在波である（\see{pde:wave-cauchy-problem}）。
+:::
+
+::: problem {#pde:prob-wv-duhamel}
+$n=1$ とし、$f\colon\mathbb{R}^{2}\to\mathbb{R}$ を $C^{1}$ 級とする。
+$$
+u(t,x)\defeq\frac12\int_{0}^{t}\int_{x-(t-s)}^{x+(t-s)}f(s,y)\,dy\,ds
+$$
+とおく。
+1. $u\in C^{2}(\mathbb{R}^{2})$ で、$\partial_{t}^{2}u-\partial_{x}^{2}u=f$, $u(0,x)=0$, $\partial_{t}u(0,x)=0$ を満たすことを示せ（ヒント：内側の積分を $(t,x)$ の関数と見ると、時刻 $s$ に初期値 $0$, $f(s,\cdot)$ をもつ斉次方程式の解である）。
+2. $g\in C^{2}(\mathbb{R})$, $h\in C^{1}(\mathbb{R})$ とする。$\partial_{t}^{2}v-\partial_{x}^{2}v=f$, $v(0,\cdot)=g$, $\partial_{t}v(0,\cdot)=h$ を満たす $v\in C^{2}(J\times\mathbb{R})$ は、\eqref{pde:eq-dalembert} の $u_{0}$ と 1 の $u$ の和に限ることを示せ。
+:::
+
+::: solution
+**1.** $\Phi(s,y)\defeq\int_{0}^{y}f(s,\eta)\,d\eta$、$w(s;t,x)\defeq\frac12\bigl(\Phi(s,x+t-s)-\Phi(s,x-t+s)\bigr)$ とおくと $u(t,x)=\int_{0}^{t}w(s;t,x)\,ds$。$\partial_{y}\Phi=f$, $\partial_{y}^{2}\Phi=\partial_{y}f$ は連続で、$\Phi$ も連続なので、$w$ は $(s,t,x)$ について連続で、$(t,x)$ についての 2 階までの偏導関数
+$$
+\begin{aligned}\partial_{t}w&=\tfrac12\bigl(f(s,x+t-s)+f(s,x-t+s)\bigr),\\\partial_{x}w&=\tfrac12\bigl(f(s,x+t-s)-f(s,x-t+s)\bigr),\end{aligned}
+$$
+$\partial_{t}^{2}w=\partial_{x}^{2}w=\frac12\bigl(\partial_{y}f(s,x+t-s)-\partial_{y}f(s,x-t+s)\bigr)$、$\partial_{t}\partial_{x}w=\frac12\bigl(\partial_{y}f(s,x+t-s)+\partial_{y}f(s,x-t+s)\bigr)$ はどれも $(s,t,x)$ について連続である。また $w(t;t,x)=0$, $\partial_{t}w(t;t,x)=f(t,x)$。
+$K(r,t,x)\defeq\int_{0}^{r}w(s;t,x)\,ds$ に \ref{pde:integral-upper-limit}（$O=\mathbb{R}^{2}$ の変数 $(t,x)$）を使うと $K$ は $C^{1}$ 級で、$u(t,x)=K(t,t,x)$ に連鎖律を使って
+$$
+\partial_{t}u=w(t;t,x)+\int_{0}^{t}\partial_{t}w\,ds=\int_{0}^{t}\partial_{t}w(s;t,x)\,ds,\qquad\partial_{x}u=\int_{0}^{t}\partial_{x}w(s;t,x)\,ds.
+$$
+$\partial_{t}w$, $\partial_{x}w$ に同じ議論をもう一度使うと、$u\in C^{2}$ で
+$$
+\partial_{t}^{2}u=\partial_{t}w(t;t,x)+\int_{0}^{t}\partial_{t}^{2}w\,ds=f(t,x)+\int_{0}^{t}\partial_{x}^{2}w\,ds=f(t,x)+\partial_{x}^{2}u.
+$$
+$t=0$ では積分区間がつぶれるので $u(0,x)=0$, $\partial_{t}u(0,x)=0$。
+
+**2.** $u_{0}+u$ は 1 と \ref{pde:wave-dalembert.1} と方程式の線形性から条件を満たす。逆に $v$ が条件を満たせば、$v-u$ は $J\times\mathbb{R}$ 上で斉次方程式の初期値 $g,h$ の古典解なので、\ref{pde:wave-dalembert.2} から $v-u=u_{0}$。
+
+1 では $f\in C^{1}$ を $\partial_{y}^{2}\Phi=\partial_{y}f$ の連続性に使った。外から加える力 $f$ についても、解の 2 階微分には $f$ の 1 階微分が要る。各時刻 $s$ に加えた力 $f(s,\cdot)$ を初速として斉次方程式で運び、足し合わせるという作り方（**デュアメルの原理**）は、輸送方程式の湧き出しの項（\ref{pde:transport-constant}）と同じ形である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

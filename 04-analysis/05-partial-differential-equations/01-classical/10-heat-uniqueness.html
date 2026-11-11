@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熱方程式の一意性と平滑化 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/10-heat-uniqueness.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 熱方程式の一意性と平滑化 {#pde:page-heat-uniqueness keywords="weak maximum principle for the heat equation on parabolic cylinders, parabolic boundary, uniqueness for the initial-boundary value problem, maximum principle on R^n under the growth condition |u| <= A exp(a|x|^2), uniqueness of the Cauchy problem, Tychonoff's example of non-uniqueness, infinite speed of propagation, ill-posedness of the backward heat equation, smoothing effect, L^p initial data, 放物境界, 放物型円柱, ティホノフの例, 無限の伝播速度, 後退熱方程式, 平滑化作用"}
+
+前のページ（\ref{pde:page-heat-equation}）では、有界連続な初期値 $g$ から熱核との畳み込みで初期値問題の解を作った。このページでは、それが**ただ一つの**解かどうかを調べる。有界な領域では、解の最大値は時刻 0 か側面（**放物境界**）でとられるという弱最大値原理から一意性が従う。全空間では無限遠を境界の代わりに扱う必要があり、$|u|\le Ae^{a|x|^{2}}$ という**増大条件**の下で最大値原理と一意性が成り立つ。この条件を外すと、初期値 0 なのに恒等的に 0 でない解があるという**ティホノフの例**が現れる。さらに、熱が一瞬で全空間に伝わること（無限の伝播速度）、時間を逆向きに解く後退熱方程式が不適切であること、そして解が初期値の粗さによらず $t>0$ で $C^{\infty}$ 級になること（**平滑化**）を示す。最後の性質は、古典的手法と関数解析的手法の前提を系列の最後で対比するときの、「前提が弱くても解が滑らか」になる典型例である。熱源の正則性の要求と、任意の局所的な解の滑らかさ（内部正則性）は次のページ（\see{pde:page-heat-regularity}）で扱う。
+
+## 記法と定義の確認 {#pde:sec-he-uniq-notation}
+
+::: notation
+- 前のページの記法をそのまま使う：$\Delta$ と $\nabla$ は空間変数だけに作用し、$C^{2,1}(U)$ は空間に 2 回・時間に 1 回連続微分可能な関数の全体。熱方程式は \ref{pde:heat-equation}、熱核 $\Phi$ は \ref{pde:heat-kernel}（性質は \ref{pde:heat-kernel-properties}、導関数の評価は \ref{pde:heat-kernel-derivatives}）、初期値問題は \ref{pde:heat-cauchy-problem}、有界連続な初期値の解 $\Phi(\cdot,t)*g$ は \ref{pde:heat-cauchy-solution}、熱源についての解は \ref{pde:heat-duhamel}。
+- $\Omega\subset\mathbb{R}^{n}$ は開集合、$\overline{\Omega}$ は閉包、$\partial\Omega=\overline{\Omega}\setminus\Omega$。$B(x,r)$, $\overline{B}(x,r)$, $\omega_{n}=\lambda(B(0,1))$ は \ref{pde:page-harmonic-functions} の記法。
+- $1\le p\le\infty$ の共役指数を $p'$（$\frac1p+\frac1{p'}=1$）と書く。ヘルダーの不等式は \ref{meas:holder}。
+- 複素解析からコーシーの評価式（\ref{cx:cauchy-estimates}）を、ティホノフの例でだけ使う。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 有界な領域での最大値原理 {#pde:sec-he-maximum}
+
+::: definition 放物型円柱と放物境界 {#pde:heat-parabolic-boundary keywords="parabolic cylinder Omega_T = Omega x (0,T] and parabolic boundary Gamma_T = closure minus Omega_T = bottom and lateral boundary" index="放物型円柱|ほうぶつがたえんちゅう, 放物境界|ほうぶつきょうかい"}
+$\Omega$ を有界な開集合、$T>0$ とする。$\Omega_{T}\defeq\Omega\times(0,T]$ を**放物型円柱**、
+$$
+\Gamma_{T}\defeq\overline{\Omega_{T}}\setminus\Omega_{T}=\bigl(\overline{\Omega}\times\{0\}\bigr)\cup\bigl(\partial\Omega\times[0,T]\bigr)
+$$
+を**放物境界**という（$\overline{\Omega_{T}}=\overline{\Omega}\times[0,T]$ なので、$\overline{\Omega_{T}}$ から $\Omega\times(0,T]$ を除くと、$t=0$ の底面か $x\in\partial\Omega$ の側面の点が残る）。
+:::
+
+::: intuition
+放物境界は、円柱の底（最初の時刻）と側面（領域の縁）を合わせたもので、ふた（最後の時刻）は含まない。熱方程式では、底と側面の温度が決まれば中の温度が決まり、ふたの温度は結果として決まるものだからである。
+:::
+
+::: theorem 熱方程式の弱最大値原理 {#pde:heat-weak-maximum keywords="weak maximum principle for the heat equation on a bounded parabolic cylinder: subsolutions attain their maximum on the parabolic boundary, supersolutions their minimum, solutions satisfy max |u| = max over Gamma_T of |u|" index="弱最大値原理（熱方程式）|じゃくさいだいちげんりねつほうていしき, 最大値原理（熱方程式）|さいだいちげんりねつほうていしき" refname="熱方程式の弱最大値原理"}
+$\Omega$ を空でない有界な開集合、$T>0$、$u\in C^{2,1}(\Omega\times(0,T))\cap C(\overline{\Omega}\times[0,T])$ とする。
+1. $\Omega\times(0,T)$ で $\partial_{t}u-\Delta u\le0$ なら $\displaystyle\max_{\overline{\Omega}\times[0,T]}u=\max_{\Gamma_{T}}u$。
+2. $\Omega\times(0,T)$ で $\partial_{t}u-\Delta u\ge0$ なら $\displaystyle\min_{\overline{\Omega}\times[0,T]}u=\min_{\Gamma_{T}}u$。
+3. $u$ が $\Omega\times(0,T)$ で熱方程式を満たせば $\displaystyle\max_{\overline{\Omega}\times[0,T]}|u|=\max_{\Gamma_{T}}|u|$。
+:::
+
+::: intuition
+熱源のない（あるいは熱を吸い取るだけの）有界な部屋では、温度の最高値は、最初の時刻の温度か、壁の温度のどちらかに現れる。部屋の中で途中から新しい最高温度が生まれることはない。
+:::
+
+::: proof
+$\Gamma_{T}$ は有界閉集合でコンパクト、$\overline{\Omega}\times\{0\}$ を含むので空でない。$u$ は連続なので、両辺の最大値は存在する。$\Gamma_{T}\subset\overline{\Omega}\times[0,T]$ から「$\ge$」は成り立つので、「$\le$」を示す。
+
+**Step 1（狭義の劣解は中で最大にならない）.** 【主張：$v\in C^{2,1}(\Omega\times(0,T))\cap C(\overline{\Omega}\times[0,T])$ が $\Omega\times(0,T)$ で $\partial_{t}v-\Delta v<0$ を満たし、$0<T'<T$ なら、$v$ の $\overline{\Omega}\times[0,T']$ での最大値は $\Gamma_{T'}$ の点でとられる】最大値をとる点 $(x_{0},t_{0})$ が $\Omega\times(0,T']$ にあると仮定する。$t_{0}\le T'<T$ なので $v$ はその近くで $C^{2,1}$ 級。時間について：$0<t<t_{0}$ なら $v(x_{0},t)\le v(x_{0},t_{0})$ なので、差分商 $\frac{v(x_{0},t)-v(x_{0},t_{0})}{t-t_{0}}$ は分子が $\le0$、分母が $<0$ で $\ge0$。$t\uparrow t_{0}$ として $\partial_{t}v(x_{0},t_{0})\ge0$（$t_{0}=T'$ でも、$\partial_{t}v$ は存在するので左からの極限に等しい）。空間について：$k(r)\defeq v(x_{0}+re_{i},t_{0})$ は $r=0$ の近くで $C^{2}$ 級で $r=0$ で極大なので $k'(0)=0$。$k''(0)>0$ なら、連続性から $0$ の近くで $k''>0$ で、テイラーの定理（\ref{calc:taylor-lagrange}）から小さな $r\ne0$ で $k(r)=k(0)+\frac12k''(\xi)r^{2}>k(0)$ となり矛盾。よって $\partial_{i}^{2}v(x_{0},t_{0})=k''(0)\le0$、足して $\Delta v(x_{0},t_{0})\le0$。合わせて $\partial_{t}v-\Delta v\ge0$ となり仮定に反する。したがって最大点は $(\overline{\Omega}\times[0,T'])\setminus(\Omega\times(0,T'])=\Gamma_{T'}$ にある。
+
+**Step 2（$\varepsilon t$ を引く）.** 【主張：1 の仮定の下で、$0<T'<T$ なら $\max_{\overline{\Omega}\times[0,T']}u\le\max_{\Gamma_{T}}u$】$\varepsilon>0$ について $v\defeq u-\varepsilon t$ は $\partial_{t}v-\Delta v=\partial_{t}u-\Delta u-\varepsilon\le-\varepsilon<0$。Step 1 と $\Gamma_{T'}\subset\Gamma_{T}$ から
+$$
+\max_{\overline{\Omega}\times[0,T']}u\le\max_{\overline{\Omega}\times[0,T']}v+\varepsilon T'=\max_{\Gamma_{T'}}v+\varepsilon T'\le\max_{\Gamma_{T}}u+\varepsilon T.
+$$
+$\varepsilon\to0$ とする。
+
+**Step 3（ふたの上）.** 【主張：1 が成り立つ】$t<T$ の点では Step 2 から $u(x,t)\le\max_{\Gamma_{T}}u$。$t=T$ の点では、$u$ の連続性から $u(x,T)=\lim_{T'\uparrow T}u(x,T')\le\max_{\Gamma_{T}}u$。
+
+2 は $-u$ に 1 を使えばよい。3 は 1・2 を合わせ、$\max|u|=\max(\max u,-\min u)$ を使う。
+
+::: hypcheck
+- **劣解であること（$\partial_{t}u-\Delta u\le0$）**：Step 2 で $v$ が狭義の劣解になることに使った。正の熱源があると偽：$\Omega=(0,\pi)$, $u=t\sin x$ は $\partial_{t}u-\Delta u=(1+t)\sin x\ge0$ で、放物境界では $0$ だが中では正。
+- **有界性**：最大値の存在（最初の段落）と Step 1 で使った。外すと偽：\ref{pde:heat-tychonoff} は $\mathbb{R}^{n}\times[0,T]$ の上の解で、底面 $t=0$ では $0$（全空間なので側面はない）だが、中では正の値をとる。
+- **放物境界の両方の部分が要る**：底面だけでは足りない：$\Omega=(0,1)$, $u=x^{2}+2t$ は解で、底面での最大値は $1$、側面 $x=1$ では $1+2T$。側面だけでも足りない：$\Omega=(0,\pi)$, $u=e^{-t}\sin x$ は側面で $0$、底面で最大値 $1$。
+- **$u\in C^{2,1}(\Omega\times(0,T))$**：Step 1 で $\partial_{t}v$ と $\partial_{i}^{2}v$ の符号に使った。ふた $t=T$ での微分可能性も、境界での微分可能性も要らない（Step 3 は連続性だけ）。導関数の連続性も本質的でない（Step 1 で使ったのは存在と、$k''$ の $0$ での符号だけで、平均値の定理を使えば $k''$ の連続性なしでも示せる）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 時間の向きを逆にした**後退熱方程式** $\partial_{t}u+\Delta u=0$ では、同じ証明で最大値は「最後の時刻のふたと側面」でとられる。最大値原理は時間の向きを区別する：熱方程式は過去から未来へしか情報を運ばない（\ref{pde:heat-backward}）。また、領域が連結なら**強最大値原理**が成り立つことが知られている：解が $\overline{\Omega}\times[0,T]$ での最大値を中の点 $(x_{0},t_{0})$（$t_{0}>0$）でとれば、$u$ は $\overline{\Omega}\times[0,t_{0}]$ の上で定数である（熱方程式についての「熱球」の上の平均値の性質から示される。ここでは証明しない）。結論が $t\le t_{0}$ だけなのは、その後で側面の温度を変えれば解が変わるからである。
+
+**似た定理.** 調和関数についての \ref{pde:weak-maximum-principle} の別証明と同じく、ここでも「最大点では 2 階の項の符号が決まる」ことだけを使った。閉リーマン多様体の上の熱方程式の最大値原理（\see{gl:heat-maximum-principle}）も同じ考え方で、境界がない代わりに最小点でのラプラシアンの符号（\see{gl:laplacian-at-minimum}）を使う。一意性はエネルギー $\int_{\Omega}w^{2}\,dx$ が減ることからも示せる（$\frac{d}{dt}\int w^{2}=-2\int|\nabla w|^{2}$。部分積分に境界の正則性が要る。閉多様体の場合は \see{gl:heat-equation}）。
+
+**高い視点：時間の矢.** 調和関数では、境界全体が中身を決めた。熱方程式では、時空の円柱の「底と側面」だけが中身を決め、ふたは決められる側に回る。比喩で言えば、鍋のスープの温度は、最初の温度と鍋肌の温度の履歴から決まり、最後の時刻の温度を勝手に指定することはできない。最大値原理が放物境界だけを見ることは、熱方程式に組み込まれた時間の非対称性（不可逆性）の数学的な表れである。
+:::
+
+::: corollary 初期境界値問題の一意性と比較原理 {#pde:heat-cylinder-uniqueness keywords="uniqueness for the initial-boundary value problem of the heat equation on a bounded cylinder, comparison principle, stability in the sup norm with respect to initial and boundary data" index="初期境界値問題（熱方程式）|しょききょうかいちもんだいねつほうていしき, 比較原理（熱方程式）|ひかくげんりねつほうていしき"}
+$\Omega$ を有界な開集合、$T>0$ とし、関数はすべて $C^{2,1}(\Omega\times(0,T))\cap C(\overline{\Omega}\times[0,T])$ に属するとする。
+1. （一意性）$f\colon\Omega\times(0,T)\to\mathbb{R}$, $g\colon\Gamma_{T}\to\mathbb{R}$ について、$\Omega\times(0,T)$ で $\partial_{t}u-\Delta u=f$、$\Gamma_{T}$ で $u=g$ となる $u$（**初期境界値問題**の古典解）は高々一つ。
+2. （比較原理）$\partial_{t}u_{1}-\Delta u_{1}\le\partial_{t}u_{2}-\Delta u_{2}$（$\Omega\times(0,T)$）かつ $\Gamma_{T}$ で $u_{1}\le u_{2}$ なら、$\overline{\Omega}\times[0,T]$ で $u_{1}\le u_{2}$。
+3. （安定性）$\partial_{t}u_{1}-\Delta u_{1}=\partial_{t}u_{2}-\Delta u_{2}$ なら $\max_{\overline{\Omega}\times[0,T]}|u_{1}-u_{2}|=\max_{\Gamma_{T}}|u_{1}-u_{2}|$。
+:::
+
+::: proof
+**2.** $w\defeq u_{1}-u_{2}$ は $\partial_{t}w-\Delta w\le0$ で、\ref{pde:heat-weak-maximum.1} から $\max w=\max_{\Gamma_{T}}w\le0$（$\Omega=\varnothing$ なら主張は空）。**3.** $w$ に \ref{pde:heat-weak-maximum.3}。**1.** 二つの解の差に 3 を使うと、右辺が $0$。
+:::
+
+## 全空間での最大値原理と一意性 {#pde:sec-he-whole-space}
+
+全空間には側面がないので、無限遠での振る舞いを制限する。比較関数として、熱核を負の時刻に延ばした形の解を使う。
+
+::: lemma 増大する比較解 {#pde:heat-barrier keywords="barrier for the heat equation W(x,t) = (1 - 4bt)^{-n/2} exp(b|x|^2/(1 - 4bt)) for t < 1/(4b): smooth solution of the heat equation with W >= exp(b|x|^2) for 0 <= t < 1/(4b)" index="比較関数（熱方程式）|ひかくかんすうねつほうていしき"}
+$b>0$ について、$x\in\mathbb{R}^{n}$, $t<\frac{1}{4b}$ で
+$$
+W_{b}(x,t)\defeq(1-4bt)^{-n/2}\exp\Bigl(\frac{b|x|^{2}}{1-4bt}\Bigr)
+$$
+とおく。$W_{b}$ は $\mathbb{R}^{n}\times(-\infty,\frac{1}{4b})$ で $C^{\infty}$ 級で熱方程式を満たし、$0\le t<\frac{1}{4b}$ なら $W_{b}(x,t)\ge e^{b|x|^{2}}$。
+:::
+
+::: proof
+$\sigma\defeq1-4bt>0$ とおくと $\partial_{t}\sigma=-4b$。合成と積の微分から
+$$
+\begin{aligned}\partial_{t}W_{b}&=\Bigl(\frac{2nb}{\sigma}+\frac{4b^{2}|x|^{2}}{\sigma^{2}}\Bigr)W_{b},\qquad\partial_{i}W_{b}=\frac{2bx_{i}}{\sigma}W_{b},\\\partial_{i}^{2}W_{b}&=\Bigl(\frac{2b}{\sigma}+\frac{4b^{2}x_{i}^{2}}{\sigma^{2}}\Bigr)W_{b}.\end{aligned}
+$$
+$i$ について足すと $\Delta W_{b}=\partial_{t}W_{b}$。$0\le t<\frac{1}{4b}$ なら $0<\sigma\le1$ なので $\sigma^{-n/2}\ge1$、$\frac{b|x|^{2}}{\sigma}\ge b|x|^{2}$。
+:::
+
+（$s\defeq t-\frac{1}{4b}<0$ とおくと $4\pi|s|=\frac{\pi}{b}(1-4bt)$ なので $W_{b}(x,t)=(\pi/b)^{n/2}(4\pi|s|)^{-n/2}e^{-|x|^{2}/4s}$ で、\ref{pde:heat-kernel-properties} の hypcheck で触れた、熱核の式の負の時刻への延長の定数倍である。）
+
+::: theorem 全空間での最大値原理 {#pde:heat-maximum-rn keywords="maximum principle for the Cauchy problem of the heat equation on R^n under the growth condition u(x,t) <= A exp(a|x|^2): sup u <= sup u(.,0) for subsolutions" index="最大値原理（熱方程式、全空間）|さいだいちげんりねつほうていしきぜんくうかん, 増大条件|ぞうだいじょうけん"}
+$T>0$、$u\in C^{2,1}(\mathbb{R}^{n}\times(0,T))\cap C(\mathbb{R}^{n}\times[0,T])$ が $\mathbb{R}^{n}\times(0,T)$ で $\partial_{t}u-\Delta u\le0$ を満たし、定数 $A,a>0$ があって
+$$
+u(x,t)\le Ae^{a|x|^{2}}\qquad(x\in\mathbb{R}^{n},\ 0\le t\le T)
+$$
+とする。このとき $\displaystyle\sup_{\mathbb{R}^{n}\times[0,T]}u\le\sup_{\mathbb{R}^{n}}u(\cdot,0)$。
+:::
+
+::: intuition
+温度が無限遠で $e^{a|x|^{2}}$ より速く上がっていかない限り、熱源のない全空間の温度は、最初の時刻の最高温度を超えない。
+:::
+
+::: proof
+$M\defeq\sup u(\cdot,0)$ とおく。$M=\infty$ なら示すことはないので $M<\infty$ とする。$T_{0}\defeq\frac{1}{16a}$ とおく。
+
+**Step 1（短い時間）.** 【主張：$0\le s_{0}<T$ で $u(\cdot,s_{0})\le M$ なら、$T_{1}\defeq\min(s_{0}+T_{0},T)$ について $\mathbb{R}^{n}\times[s_{0},T_{1}]$ で $u\le M$】$b\defeq2a$ とすると $\frac{1}{4b}=\frac{1}{8a}>T_{0}$ なので、$s_{0}\le t\le T_{1}$ で $W_{2a}(x,t-s_{0})$ が定義され、\ref{pde:heat-barrier} から $W_{2a}(x,t-s_{0})\ge e^{2a|x|^{2}}$。$\mu>0$ を固定し $v(x,t)\defeq u(x,t)-\mu W_{2a}(x,t-s_{0})$ とおくと、$v$ は $\mathbb{R}^{n}\times(s_{0},T_{1})$ で $\partial_{t}v-\Delta v=\partial_{t}u-\Delta u\le0$ を満たす。$Ae^{aR^{2}}-\mu e^{2aR^{2}}=e^{aR^{2}}(A-\mu e^{aR^{2}})\to-\infty$（$R\to\infty$）なので、$R_{0}$ があって $R\ge R_{0}$ なら $Ae^{aR^{2}}-\mu e^{2aR^{2}}\le M$。$R\ge R_{0}$ について円柱 $B(0,R)\times(s_{0},T_{1}]$ を考える（時刻を $s_{0}$ だけずらせば \ref{pde:heat-parabolic-boundary} の形）。放物境界の底面 $t=s_{0}$ では $v\le u(\cdot,s_{0})\le M$、側面 $|x|=R$ では $v\le Ae^{aR^{2}}-\mu e^{2aR^{2}}\le M$。\ref{pde:heat-weak-maximum.1} から $\overline{B}(0,R)\times[s_{0},T_{1}]$ で $v\le M$。$R$ は $R_{0}$ 以上なら任意なので、$\mathbb{R}^{n}\times[s_{0},T_{1}]$ で $u\le M+\mu W_{2a}(x,t-s_{0})$。各点で $\mu\to0$ として $u\le M$。
+
+**Step 2（繰り返し）.** 【主張：$\mathbb{R}^{n}\times[0,T]$ で $u\le M$】$s_{0}=0$ では仮定から $u(\cdot,0)\le M$ なので、Step 1 から $[0,\min(T_{0},T)]$ で $u\le M$。とくに $T_{0}<T$ なら $u(\cdot,T_{0})\le M$ で、Step 1 を $s_{0}=T_{0}$ で使える。これを繰り返すと、$k$ 回目で $[0,\min(kT_{0},T)]$ で $u\le M$。$k\ge T/T_{0}$ で全体に達する。増大条件の定数 $A,a$ はどの区間でも同じなので、$T_{0}$ は区間によらない。
+
+::: hypcheck
+- **増大条件**：Step 1 で、側面 $|x|=R$ の上で比較解 $\mu W_{2a}$ が $u$ を上回ることに使った。$e^{2a|x|^{2}}$ が $e^{a|x|^{2}}$ より速く増えることが要点で、そのために比較解が使える時間の長さ $T_{0}$ が $a$ に反比例して短くなり、Step 2 の繰り返しが要る。外すと偽：\ref{pde:heat-tychonoff} は初期値が $0$ だが正の値をとり、$|u(x,t)|\le e^{2|x|^{2}/t}$ という、$t\to0$ で係数が発散する増大しか満たさない。
+- **増大条件が上からだけでよいこと**：使ったのは $u\le Ae^{a|x|^{2}}$ だけである。
+- **$t=0$ での連続性**：Step 1（$s_{0}=0$）で、\ref{pde:heat-weak-maximum} を使うのに必要だった。外すと偽：熱核 $\Phi$ 自身は $\mathbb{R}^{n}\times(0,\infty)$ の解で、$x\ne0$ では $t\to0$ で $\Phi(x,t)\to0$ だが、原点の近くで正の大きな値をとる（$\Phi$ は原点で $t=0$ まで連続に延びない）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 初期値問題の解の一意性 {#pde:heat-uniqueness-rn keywords="uniqueness for the Cauchy problem of the heat equation in the class |u| <= A exp(a|x|^2); bounded solutions; the bounded solution is Phi * g; stability sup |u1 - u2| <= sup |g1 - g2|" index="一意性（熱方程式の初期値問題）|いちいせいねつほうていしきのしょきちもんだい"}
+$0<T\le\infty$ とする。
+1. （一意性）熱源 $f$ と初期値 $g$ を共有する初期値問題（\ref{pde:heat-cauchy-problem}）の古典解 $u_{1},u_{2}$ が、ある定数 $A,a>0$ について $|u_{k}(x,t)|\le Ae^{a|x|^{2}}$（$\mathbb{R}^{n}\times[0,T)$）を満たせば $u_{1}=u_{2}$。
+2. （有界な解）$g\in C(\mathbb{R}^{n})$ が有界なら、斉次の初期値問題の有界な古典解は \ref{pde:heat-cauchy-solution} の $\Phi(\cdot,t)*g$ だけである。有界な古典解 $u_{1},u_{2}$ の初期値が $g_{1},g_{2}$ なら $\sup|u_{1}-u_{2}|\le\sup|g_{1}-g_{2}|$。
+3. \ref{pde:heat-duhamel} の仮定の下で、同じ定理の 3 の解は、増大条件 1 を満たす解の中でただ一つである。
+:::
+
+::: proof
+**1.** $w\defeq u_{1}-u_{2}$ は斉次の熱方程式を満たし、$w(\cdot,0)=0$、$|w|\le2Ae^{a|x|^{2}}$。$0<T'<T$ について、$w$ と $-w$ は $\mathbb{R}^{n}\times[0,T']$ で \ref{pde:heat-maximum-rn} の仮定を満たすので、$w\le0$ かつ $-w\le0$。$T'$ は任意なので $w=0$。
+
+**2.** $\Phi(\cdot,t)*g$ は有界な古典解（\ref{pde:heat-cauchy-solution.2}, \ref{pde:heat-cauchy-solution.3}）で、有界な関数は $a$ を任意にとった増大条件を満たすので、1 から一意。後半：$w=u_{1}-u_{2}$ は有界で、$\pm w$ に \ref{pde:heat-maximum-rn} を $[0,T']$ で使うと $\pm w\le\sup(\pm(g_{1}-g_{2}))\le\sup|g_{1}-g_{2}|$。
+
+**3.** \ref{pde:heat-duhamel.2} から $|u|\le\sup|g|+t\sup|f|$ なので、有限の $T$ では有界で、1 を使う（$T=\infty$ なら各 $T'<\infty$ について $[0,T')$ で使う）。
+:::
+
+::: supplement
+**前提を変えると.** 増大条件は、解の**符号**の条件に置き換えられる：$\mathbb{R}^{n}\times(0,T)$ の非負の古典解で $t=0$ まで連続なものは、初期値で一意に決まることが知られている（ワイダーの定理。ここでは証明しない）。ティホノフの例は正負に大きく振動するので、これと矛盾しない。逆に、増大の指数を $|x|^{2}$ から $|x|^{4}$ に上げると一意性は崩れる：ティホノフの例は $|u|\le e^{9|x|^{4}/2}$ を満たす（\tref{pde:heat-tychonoff.3}）。
+
+**似た定理.** 調和関数の外部領域や半空間でも、無限遠の増大を制限しないと一意性が崩れた（\ref{pde:weak-maximum-principle} の hypcheck の $1-|x|^{2-n}$）。\ref{pde:liouville} は「有界」という増大条件の下での一意性の一種である。熱方程式の増大条件 $e^{a|x|^{2}}$ が許す増大は、調和関数の場合よりはるかに大きい。これは熱核のガウス型の減衰 $e^{-|x|^{2}/4t}$ がちょうど打ち消せる限界で、\ref{pde:heat-cauchy-solution} の hypcheck で見たように、$|g|\le Ae^{a|x|^{2}}$ の初期値から短い時間 $t<1/4a$ だけ解が作れることと対をなしている。
+
+**高い視点：無限遠からの熱の流入.** 有界な部屋では、壁の温度を指定すれば解は一つに決まった。全空間では「無限遠という壁」の温度を指定できないので、無限遠から熱が流れ込んでくる解を排除する条件が要る。増大条件は「無限遠からの流入は、熱核が運べる速さ以下」という制限である。比喩で言えば、町の境界を見張る代わりに「町の外から来る人の数は、歩いて来られる人数以下」と仮定するようなものである。ティホノフの例は、無限遠から一瞬で巨大な熱を運び込み、また運び出す解で、その流入量が $e^{a|x|^{2}}$ の制限を破っている。
+:::
+
+## 一意性の前提を外すと {#pde:sec-he-failures}
+
+ティホノフの例では、$t>0$ で作った解を $t\le0$ で $0$ と延ばす。そのための判定法を先に用意する（次のページでも熱核の延長に使う）。
+
+::: lemma 0 による延長の滑らかさ {#pde:heat-zero-extension keywords="extension by zero across t = 0: if F is smooth for t > 0, zero for t <= 0, and all partial derivatives tend to 0 at points of t = 0, then F is smooth" index="0 による延長|ぜろによるえんちょう"}
+$V\subset\mathbb{R}^{n}\times\mathbb{R}$ を開集合、$F\colon V\to\mathbb{R}$ とし、$V\cap\{t\le0\}$ で $F=0$、$F\in C^{\infty}(V\cap\{t>0\})$ で、すべての $\alpha,k$ と $V\cap\{t=0\}$ の各点 $(x_{0},0)$ について、$(x,t)\to(x_{0},0)$, $t>0$ のとき $\partial^{\alpha}\partial_{t}^{k}F(x,t)\to0$ とする。このとき $F\in C^{\infty}(V)$ で、$F$ のすべての偏導関数は $V\cap\{t\le0\}$ で $0$ である。
+:::
+
+::: proof
+$V\cap\{t>0\}$ では\ref{calc:schwarz-theorem}から偏微分の順序によらないので、偏導関数を $\partial^{\alpha}\partial_{t}^{k}F$ の形で書いてよい。「$D\defeq\partial^{\alpha}\partial_{t}^{k}F$ が $V$ 全体で存在して連続で、$t\le0$ で $0$」を $|\alpha|+k$ についての帰納法で示す。$D$ は $t>0$ では連続、$V\cap\{t<0\}$（開集合）では $0$、$(x_{0},0)$ では仮定から $t>0$ 側の極限が $0=D(x_{0},0)$ なので連続。次に $D$ を 1 回微分する。$t\ne0$ の点では明らか。$(x_{0},0)\in V$ では、$D(\cdot,0)=0$ が $x_{0}$ の近くで成り立つので $\partial_{i}D(x_{0},0)=0$。$\partial_{t}$ については、$h<0$ の差分商は $0$、$h>0$ では $D(x_{0},\cdot)$ が $[0,h]$ で連続、$(0,h)$ で微分可能なので平均値の定理から $\frac{D(x_{0},h)}{h}=\partial_{t}D(x_{0},\xi)$（$0<\xi<h$）で、仮定から $h\to0$ で $0$。よって $\partial_{i}D$, $\partial_{t}D$ は $V$ で存在し、$t\le0$ で $0$、$t=0$ での連続性は仮定から従う。
+:::
+
+::: counterexample ティホノフの例 {#pde:heat-tychonoff keywords="Tychonoff's example of non-uniqueness for the heat equation: u(x,t) = sum g^{(k)}(t) x^{2k}/(2k)! with g(t) = exp(-1/t^2) solves the heat equation with zero initial data and is not identically zero; it extends by zero to a smooth solution on R x R" index="ティホノフの例|てぃほのふのれい, 非一意性（熱方程式）|ひいちいせいねつほうていしき" refname="ティホノフの例"}
+$n=1$ とし、$t>0$ について $g(t)\defeq\exp(-t^{-2})$、
+$$
+u(x,t)\defeq\sum_{k=0}^{\infty}g^{(k)}(t)\,\frac{x^{2k}}{(2k)!}\quad(x\in\mathbb{R},\ t>0),\qquad u(x,t)\defeq0\quad(t\le0)
+$$
+とおく。
+1. 級数は収束し、$u\in C^{\infty}(\mathbb{R}\times\mathbb{R})$ で、$\mathbb{R}\times\mathbb{R}$ の上で $\partial_{t}u=\partial_{x}^{2}u$。とくに $u$ は初期値 $0$ の初期値問題（$T=\infty$）の古典解である。
+2. $u(0,t)=g(t)>0$（$t>0$）なので、$u$ は恒等的に $0$ でない。
+3. $|u(x,t)|\le\exp\bigl(\frac{2x^{2}}{t}-\frac{2}{9t^{2}}\bigr)\le e^{9x^{4}/2}$（$t>0$）。
+$\tilde u(x,t)\defeq u(x_{1},t)$ とおけば、$\mathbb{R}^{n}$ でも同じ性質の解を得る。
+:::
+
+::: intuition
+全空間の熱方程式では、最初の温度がどこでも 0 なのに、その後 0 でない温度になる解がある。それどころか、過去のすべての時刻で 0 だったのに、ある時刻から急に温度が生まれる解すらある。そのような解は無限遠で極端に大きく振動していて、普通の意味での「温度」とは言えない。
+:::
+
+::: proof
+**Step 1（$g$ の導関数の評価）.** 【主張：$t>0$, $k\ge0$ について $|g^{(k)}(t)|\le k!\,(2/t)^{k}\,e^{-2/9t^{2}}$】$G(z)\defeq\exp(-z^{-2})$ は $\{\operatorname{Re}z>0\}$ で正則で、実軸の上で $g$ に一致するので、$g^{(k)}(t)=G^{(k)}(t)$（実軸方向の微分）。閉円板 $\overline{D}(t,t/2)$ は $\{\operatorname{Re}z\ge t/2\}$ に含まれる。円周上の点は $z=t(1+w/2)$（$|w|=1$）と書け、$1+w/2$ は中心 1・半径 $\frac12$ の円周上にあるので、絶対値は $[\frac12,\frac32]$ に、偏角は $[-\frac{\pi}{6},\frac{\pi}{6}]$ に入る。よって $(1+w/2)^{-2}$ の絶対値は $\frac49$ 以上、偏角は $[-\frac{\pi}{3},\frac{\pi}{3}]$ に入り、実部は $\frac49\cos\frac{\pi}{3}=\frac29$ 以上。$z^{-2}=t^{-2}(1+w/2)^{-2}$ なので $|G(z)|=e^{-\operatorname{Re}z^{-2}}\le e^{-2/9t^{2}}$。\ref{cx:cauchy-estimates} を半径 $t/2$ で使えば主張を得る。
+
+**Step 2（級数の評価）.** 【主張：$k$ 番目の項の絶対値は $\frac{1}{k!}\bigl(\frac{2x^{2}}{t}\bigr)^{k}e^{-2/9t^{2}}$ 以下で、3 の評価が成り立つ】$(2k)!=k!\cdot(k+1)\cdots(2k)\ge(k!)^{2}$ なので $\frac{k!}{(2k)!}\le\frac{1}{k!}$。Step 1 から $|g^{(k)}(t)|\frac{x^{2k}}{(2k)!}\le\frac{k!}{(2k)!}\frac{2^{k}x^{2k}}{t^{k}}e^{-2/9t^{2}}\le\frac{1}{k!}\bigl(\frac{2x^{2}}{t}\bigr)^{k}e^{-2/9t^{2}}$。指数関数の級数で足すと最初の不等式。$s\defeq1/t$ とおくと指数は $2x^{2}s-\frac29s^{2}$ で、これは $s=\frac92x^{2}$ で最大値 $\frac92x^{4}$ をとるので 2 番目の不等式（3）。
+
+**Step 3（導関数の級数の評価）.** 【主張：$L\ge1$, $m,j\ge0$ について、項を $x$ で $m$ 回・$t$ で $j$ 回微分した級数は $|x|\le L$, $t>0$ で絶対収束し、その和の絶対値は $C_{m,j,L}\,t^{-j}\exp\bigl(\frac{4eL^{2}}{t}-\frac{2}{9t^{2}}\bigr)$ 以下】$k$ 番目の項の微分は $2k\ge m$ のとき $g^{(k+j)}(t)\frac{x^{2k-m}}{(2k-m)!}$、それ以外は $0$。Step 1 と $(k+j)!\le2^{k+j}k!\,j!$（二項係数 $\binom{k+j}{k}\le2^{k+j}$）、$(2k-m)!\ge(2k)!/(2k)^{m}\ge(k!)^{2}/(2k)^{m}$、$|x|^{2k-m}\le L^{2k}$（$L\ge1$）から、その絶対値は
+$$
+j!\Bigl(\frac{4}{t}\Bigr)^{j}(2k)^{m}\,\frac{1}{k!}\Bigl(\frac{4L^{2}}{t}\Bigr)^{k}e^{-2/9t^{2}}
+$$
+以下。$\frac{k^{m}}{m!}\le e^{k}$ から $(2k)^{m}\le2^{m}m!\,e^{k}$ で、$k$ について足すと $\sum_{k}\frac{1}{k!}\bigl(\frac{4eL^{2}}{t}\bigr)^{k}=e^{4eL^{2}/t}$。
+
+**Step 4（$t>0$ での滑らかさと方程式）.** 【主張：$u\in C^{\infty}(\mathbb{R}\times(0,\infty))$ で $\partial_{t}u=\partial_{x}^{2}u$】コンパクト集合 $[-L,L]\times[t_{1},t_{2}]$（$t_{1}>0$）の上では、Step 3 の各項の評価は $t$ を $t_{1}$ や $t_{2}$ で置き換えた定数の列で押さえられ、その和は有限なので、M 判定法（\ref{calc:uniform-limit-theorems.3}）から、どの階数の項別微分の級数も一様収束する。$t$ を固定して $x$ について、$x$ を固定して $t$ について項別微分（\ref{calc:uniform-derivative}）を繰り返すと、$u$ のすべての偏導関数が存在して項別微分の級数に等しく、連続関数の一様収束極限として連続（\ref{calc:uniform-limit-theorems.2}）。$k\ge1$ の項の $x$ による 2 回微分は $g^{(k)}(t)\frac{x^{2k-2}}{(2k-2)!}$ で、番号を $j=k-1$ と付け替えると $g^{(j+1)}(t)\frac{x^{2j}}{(2j)!}$、これはちょうど第 $j$ 項の $t$ による微分なので、級数として $\partial_{t}u=\partial_{x}^{2}u$。
+
+**Step 5（$t\le0$ への延長）.** 【主張：$u\in C^{\infty}(\mathbb{R}\times\mathbb{R})$ で、熱方程式は $\mathbb{R}\times\mathbb{R}$ 全体で成り立つ】Step 3 の右辺は、$s=1/t$ とおくと $C s^{j}\exp(4eL^{2}s-\frac29s^{2})$ で、$s\to\infty$ で $0$ に収束する。よって $|x|\le L$ の上で一様に、$t\to0+$ で $u$ のすべての偏導関数が $0$ に収束する。\ref{pde:heat-zero-extension} から $u\in C^{\infty}(\mathbb{R}\times\mathbb{R})$ で、$t\le0$ ではすべての偏導関数が $0$ なので方程式は $0=0$ として成り立つ（1）。
+
+2 は $x=0$ で $k=0$ の項だけが残ることから。$\tilde u$ は $x_{2},\dots,x_{n}$ によらないので $\Delta\tilde u=\partial_{x_{1}}^{2}u$。
+
+::: hypcheck
+- **一意性の定理のどの前提が崩れているか**：\ref{pde:heat-uniqueness-rn.1} の増大条件である。Step 2 の評価は $e^{2x^{2}/t}$ で、係数 $2/t$ が $t\to0$ で発散するので、一つの $a$ で $|u|\le Ae^{ax^{2}}$ と押さえることはできない（押さえられたら一意性の定理から $u=0$ となり矛盾する）。$t$ について一様な評価は 3 の $e^{9x^{4}/2}$ で、増大の指数が $2$ を超えている。
+- **$g$ の選び方**：Step 1 で使ったのは、$g$ が右半平面で正則で、円板 $\overline{D}(t,t/2)$ の上で $e^{-c/t^{2}}$ と非常に小さいことだけである。$\alpha>1$ について $g(t)=\exp(-t^{-\alpha})$ でも、円板の半径を $\theta t$（$\theta$ を小さくとる）にすれば同様に構成できる。$\alpha=1$ では減衰が $e^{-c/t}$ にとどまり、Step 2 の $e^{Cx^{2}/t}$ を打ち消せるのは $|x|$ の小さい範囲だけなので、$t\to0$ での収束（Step 5）が得られない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 1 から、$t\le0$ で $0$ なのに $t>0$ で $0$ でない解、つまり「何もない所から熱が湧き出す」解が得られる。この解は $t$ について実解析的ではない（$u(0,t)$ は $t=0$ のすべての導関数が $0$ だが恒等的に $0$ でない）。熱方程式の解は時間変数については一般に実解析的にならないことの例でもある。また、時間を $t\mapsto-t$ と反転した $u(x,-t)$ は後退熱方程式の解で、$t\ge0$ で $0$ なので、後退熱方程式の側でも一意性が崩れる。
+
+**似た定理.** 常微分方程式の一意性は、リプシッツ条件のような**局所的な**正則性で保証された。偏微分方程式の全空間での一意性には、それに加えて**無限遠での**条件が要る。ラプラス方程式の外部領域の一意性（\ref{pde:dirichlet-uniqueness} の hypcheck）も同じ型の現象である。
+
+**高い視点：無限遠の隠し財産.** 一意性の証明は、熱の総量（あるいは最大値）を有限の領域の帳簿でつけ、無限遠からの出入りを無視できると仮定していた。ティホノフの例は、無限遠に「隠し財産」をもつ解で、帳簿の外から一瞬で熱を持ち込む。比喩で言えば、密室だと思っていた部屋に、壁の向こうの無限に遠い所から熱が光速を超えて流れ込んでくるようなもので、物理的には意味がないが、方程式だけでは禁止されていない。増大条件は、この隠し財産を禁じる会計規則である。
+:::
+
+::: proposition 無限の伝播速度 {#pde:heat-infinite-speed keywords="infinite speed of propagation for the heat equation: if g >= 0 is bounded continuous and not identically zero, then Phi(.,t) * g > 0 everywhere for t > 0" index="無限の伝播速度|むげんのでんぱそくど, 伝播速度（熱方程式）|でんぱそくどねつほうていしき"}
+$g\in C(\mathbb{R}^{n})$ を有界で $g\ge0$、恒等的に $0$ でない（たとえば台がコンパクトで非負、どこかで正）とし、$u$ を初期値 $g$ の斉次の初期値問題の有界な古典解（\ref{pde:heat-uniqueness-rn.2} から $u=\Phi(\cdot,t)*g$）とする。このとき、すべての $x\in\mathbb{R}^{n}$, $t>0$ で $u(x,t)>0$。より詳しく、$g>c$ が $B(y_{0},r)$ の上で成り立つ（$c,r>0$）なら
+$$
+u(x,t)\ge c\,\omega_{n}r^{n}(4\pi t)^{-n/2}\exp\Bigl(-\frac{(|x-y_{0}|+r)^{2}}{4t}\Bigr).
+$$
+:::
+
+::: intuition
+最初にどこか一か所だけが温かければ、ほんの一瞬後には、どんなに遠い所でもわずかに温かくなっている。熱方程式では、影響が無限の速さで伝わる。
+:::
+
+::: proof
+$g(y_{0})>0$ となる $y_{0}$ をとり、$c\defeq g(y_{0})/2$ とすると、連続性から $r>0$ があって $B(y_{0},r)$ の上で $g>c$。$g\ge0$, $\Phi>0$ から
+$$
+u(x,t)=\int\Phi(x-y,t)g(y)\,dy\ge c\int_{B(y_{0},r)}\Phi(x-y,t)\,dy.
+$$
+$y\in B(y_{0},r)$ なら $|x-y|\le|x-y_{0}|+r$ なので $\Phi(x-y,t)\ge(4\pi t)^{-n/2}e^{-(|x-y_{0}|+r)^{2}/4t}$、$\lambda(B(y_{0},r))=\omega_{n}r^{n}$ から評価を得る。右辺は正である。
+
+::: hypcheck
+- **$\Phi>0$（至る所で正）**：唯一の本質的な点である。熱核の台は全空間で、点の熱はどの距離にも一瞬で届く。
+- **$g\ge0$**：符号が変わる $g$ では打ち消し合いで $u(x,t)=0$ となる点がありうる（$g=\sin x_{1}$ なら $u=e^{-t}\sin x_{1}$）。
+- **台がコンパクト**：使っていない。台がコンパクトなら「影響が台の外に出ていく速さ」が問題になるので、例として述べた。
+- **一意性**：「解」を $\Phi*g$ と同一視するのに \ref{pde:heat-uniqueness-rn.2} を使った。\ref{pde:heat-tychonoff} を足せば、正でない点をもつ（増大条件を破る）解も作れる。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 有界な領域でも、強最大値原理（\ref{pde:heat-weak-maximum} の補足）から同じ現象が起こる：連結な $\Omega$ で側面の温度が $0$、初期温度が $g\ge0$ で恒等的に $0$ でなければ、$t>0$ では $\Omega$ 全体で $u>0$ となることが知られている（強最大値原理と同じく、ここでは証明しない）。
+
+**似た定理.** 定数係数の輸送方程式の解 $g(x-tb)$（\ref{pde:transport-constant}）は速さ $|b|$ でしか動かず、台は時間 $t$ の間に $t|b|$ しか広がらない。波動方程式も有限の伝播速度をもつ（この系列の波動方程式のページ）。熱方程式の無限の伝播速度は、2 階の空間微分と 1 階の時間微分という**階数の不釣り合い**（放物型）から来ている。相似性 $x\sim\sqrt t$ から、典型的な広がりの距離は $\sqrt t$ で、「速さ」$\sqrt t/t=t^{-1/2}$ は $t\to0$ で無限大になる。
+
+**高い視点：うわさの広まり方.** うわさが「確率的に」広まるとき、ほとんどの人には時間 $t$ の間に $\sqrt t$ 程度の距離までしか届かないが、とても低い確率でなら、どんなに遠くの人にもすでに届いている。ブラウン運動の言葉では、時間 $t$ の後の粒子の位置 $\sqrt2B_{t}$ は正規分布に従い、どの領域にも正の確率で入る（\see{prb:brownian-motion}）。無限の伝播速度は「ありえないほど速い粒子が、ありえないほど少しだけいる」ことの表れで、評価の $e^{-|x|^{2}/4t}$ はその「少しだけ」の量を正確に与えている。物理的な熱伝導がこのモデルの理想化であることも、この量の小ささから納得できる。
+:::
+
+::: proposition 後退熱方程式の不適切性 {#pde:heat-backward keywords="the backward heat equation is ill-posed: no continuous dependence (e^{-k^2 t} sin(k x_1)/k) and no bounded solution reaching a non-smooth final state" index="後退熱方程式|こうたいねつほうていしき, 不適切問題（熱方程式）|ふてきせつもんだいねつほうていしき"}
+1. （連続依存の破れ）$k\ge1$ について $u_{k}(x,t)\defeq k^{-1}e^{-k^{2}t}\sin(kx_{1})$ は $\mathbb{R}^{n}\times\mathbb{R}$ で熱方程式を満たし、$\sup_{x}|u_{k}(x,0)|=\frac1k\to0$ だが $\sup_{x}|u_{k}(x,-1)|=\frac{e^{k^{2}}}{k}\to\infty$。
+2. （解の非存在）$T>0$、$h\in C(\mathbb{R}^{n})$ を有界で $C^{\infty}$ 級でない関数（たとえば $h(x)=\min(|x_{1}|,1)$）とする。$u\in C^{2,1}(\mathbb{R}^{n}\times(0,T))\cap C(\mathbb{R}^{n}\times[0,T])$ で、有界で熱方程式を満たし、$u(\cdot,T)=h$ となるものは存在しない。
+:::
+
+::: intuition
+熱方程式を時間の逆向きに解こうとすると、今のわずかな違いが過去では爆発的に大きな違いになり、また、角のある今の温度分布にはそもそもそれを生む過去がない。
+:::
+
+::: proof
+**1.** $\partial_{t}u_{k}=-k^{2}u_{k}$、$\partial_{1}^{2}u_{k}=-k^{2}u_{k}$、ほかの $\partial_{i}^{2}u_{k}=0$ なので熱方程式を満たす。$\sin(kx_{1})$ の上限は $1$ なので値は主張のとおり。後退熱方程式の言葉で言えば、$v_{k}(x,s)\defeq u_{k}(x,-s)$ は $\partial_{s}v_{k}=-\Delta v_{k}$ を満たし、$s=0$ の値は一様に $0$ に近いのに、$s=1$ の値は一様ノルムで発散する。
+
+**2.** そのような $u$ があったとし、$g\defeq u(\cdot,0)$ とおくと、$g$ は有界連続。$w\defeq\Phi(\cdot,t)*g$（\ref{pde:heat-cauchy-solution}）も有界な古典解で、各 $T'<T$ について $u$ と $w$ は $[0,T']$ で同じ初期値の有界な解なので、\ref{pde:heat-uniqueness-rn.2} から $\mathbb{R}^{n}\times[0,T)$ で $u=w$。$u$ は $t=T$ で連続、$w$ は $\mathbb{R}^{n}\times(0,\infty)$ で連続なので、$t\uparrow T$ として $h=u(\cdot,T)=w(\cdot,T)$。\ref{pde:heat-cauchy-solution.1} から $w(\cdot,T)$ は $C^{\infty}$ 級なので矛盾。$h(x)=\min(|x_{1}|,1)$ は $x_{1}=0$ で $x_{1}$ について微分できないので $C^{\infty}$ 級でない。
+
+::: hypcheck
+- **1 のノルム**：一様ノルムで述べたが、周期の 1 区間で測った $L^{p}$ ノルムでも同じく発散する。$u_{k}$ は、周波数 $k$ の成分が後ろ向きに $e^{k^{2}}$ 倍されることを示しており、高い周波数ほど増幅が大きい。
+- **2 の有界性**：一意性の定理（\ref{pde:heat-uniqueness-rn.2}）を使うのに必要だった。増大条件 $|u|\le Ae^{a|x|^{2}}$ でも同じ議論が通る。増大条件をまったく外すと一意性が崩れる（\ref{pde:heat-tychonoff}）ので、この議論は使えない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 解の存在を仮定し、その大きさに先験的な上限 $\|u(\cdot,0)\|\le E$ を課すと、後退問題にも弱い形の連続依存が戻ることが知られている（対数凸性による評価。ここでは証明しない）。これは逆問題の「正則化」の考え方の出発点である。
+
+**似た定理.** ハダマールは、存在・一意性・連続依存の三つがそろう問題を**適切**と呼んだ（\ref{pde:dirichlet-uniqueness} の補足）。ラプラス方程式のコーシー問題（境界の一部に値と法線微分の両方を課す）も、1 と同じ形で連続依存が崩れる：$n=2$ で $u_{k}\defeq k^{-1}e^{-\sqrt k}\sin(kx)\sinh(ky)$ は調和で、$y=0$ での $u_{k}=0$, $\partial_{y}u_{k}=e^{-\sqrt k}\sin kx$ はすべての階数の導関数まで込めて一様に $0$ に収束するのに、$y>0$ を固定すると $\sup_{x}|u_{k}|$ は発散する（系列 02 の最後で扱う）。
+
+**高い視点：混ぜたコーヒーは戻らない.** ミルクを混ぜたコーヒーから、混ぜる前のミルクの形を復元することはできない。熱方程式は、周波数 $\xi$ の成分を $e^{-4\pi^{2}t|\xi|^{2}}$ 倍に縮めて細部を忘れていく。時間を戻すにはそれを $e^{4\pi^{2}t|\xi|^{2}}$ 倍に拡大しなければならず、測定誤差のような細かい成分ほど莫大に増幅される（1）。さらに、一度ぼかした画像は必ず滑らかなので、角のある画像はどんな画像をぼかしても得られない（2）。次の節の平滑化と、後退方程式の不適切性は、同じ一つの性質の表と裏である。
+:::
+
+## 平滑化 {#pde:sec-he-smoothing}
+
+前のページの \ref{pde:heat-cauchy-solution.1} では、初期値の連続性を使わずに滑らかさを示した。ここでは初期値を $L^{p}$ の元にまで広げ、導関数の大きさが $t\to0$ でどう発散するかを正確に述べる。
+
+::: theorem 熱方程式の平滑化作用 {#pde:heat-smoothing keywords="smoothing effect of the heat equation: for g in L^p, u = Phi(.,t) * g is C^infinity in R^n x (0, infinity) and |d^alpha u(x,t)| <= C t^{-|alpha|/2 - n/(2p)} ||g||_p" index="平滑化作用（熱方程式）|へいかつかさようねつほうていしき, 平滑化|へいかつか" refname="熱方程式の平滑化作用"}
+$1\le p\le\infty$、$g\in L^{p}(\mathbb{R}^{n})$ とし、$u(x,t)\defeq\int\Phi(x-y,t)g(y)\,dy$（$t>0$）とおく。
+1. 積分はすべての $(x,t)\in\mathbb{R}^{n}\times(0,\infty)$ で絶対収束し、$u\in C^{\infty}(\mathbb{R}^{n}\times(0,\infty))$、偏導関数は積分記号下の微分で得られ、$\partial_{t}u=\Delta u$。
+2. 多重指数 $\alpha$ について $C_{\alpha,p}\defeq\|\partial^{\alpha}\Phi(\cdot,1)\|_{p'}<\infty$ とおくと
+$$
+|\partial^{\alpha}u(x,t)|\le C_{\alpha,p}\,t^{-|\alpha|/2-n/2p}\,\|g\|_{p}\qquad(x\in\mathbb{R}^{n},\ t>0).
+$$
+3. $p<\infty$ なら $t\to0$ で $\|u(\cdot,t)-g\|_{p}\to0$。
+:::
+
+::: intuition
+初期値がどんなに粗くても（連続でなくても、積分できるだけでも）、熱方程式の解はほんの少し時間がたてばいくらでも微分できる。その代わり、時刻 0 に近いほど導関数は大きくなりうる。
+:::
+
+::: proof
+**Step 1（絶対収束）.** 【主張：$\int\Phi(x-y,t)|g(y)|\,dy\le\|\Phi(\cdot,t)\|_{p'}\|g\|_{p}<\infty$】$\Phi(\cdot,t)$ は有界かつ可積分なので、$1\le p'\le\infty$ について $\|\Phi(\cdot,t)\|_{p'}<\infty$（$q<\infty$ では $|\Phi|^{q}\le\|\Phi(\cdot,t)\|_{\infty}^{q-1}\Phi$）。平行移動で $L^{p'}$ ノルムは変わらないので、\ref{meas:holder} から主張を得る。
+
+**Step 2（滑らかさ）.** 【主張：1 が成り立つ】\ref{pde:heat-cauchy-solution} の証明の Step 1・2 を、優関数だけ取り替えて繰り返す。そこでの $MH(y)$ の代わりに $H(y)|g(y)|$ を使う。$H$ は \ref{pde:heat-kernel-derivatives.2} から $L^{p'}$ に入るので、ヘルダーの不等式から $H|g|$ は可積分で、\ref{meas:parameter-integrals.2} と優収束定理がそのまま使える。
+
+**Step 3（尺度の変換）.** 【主張：$\|\partial^{\alpha}\Phi(\cdot,t)\|_{p'}=t^{-|\alpha|/2-n/2p}\,C_{\alpha,p}$】\ref{pde:heat-kernel-properties.2} の $\Phi(z,t)=t^{-n/2}\Phi(z/\sqrt t,1)$ を $z$ で微分すると、合成の微分から $\partial^{\alpha}\Phi(z,t)=t^{-(n+|\alpha|)/2}(\partial^{\alpha}\Phi(\cdot,1))(z/\sqrt t)$。$p'<\infty$ なら変数変換 $z=\sqrt t\,w$（$dz=t^{n/2}dw$）で
+$$
+\int|\partial^{\alpha}\Phi(z,t)|^{p'}dz=t^{-(n+|\alpha|)p'/2}\,t^{n/2}\int|\partial^{\alpha}\Phi(w,1)|^{p'}dw,
+$$
+$p'$ 乗根をとって指数は $-\frac{n+|\alpha|}{2}+\frac{n}{2p'}=-\frac{|\alpha|}{2}-\frac{n}{2p}$。$p'=\infty$（$p=1$）では上限ノルムで同じ式が直接従う。$C_{\alpha,p}<\infty$ は \ref{pde:heat-kernel-derivatives.2}（$R=0$, $a=b=1$）から。
+
+**Step 4（評価）.** 【主張：2 が成り立つ】Step 2 から $\partial^{\alpha}u(x,t)=\int\partial^{\alpha}\Phi(x-y,t)g(y)\,dy$。ヘルダーの不等式と Step 3 から $|\partial^{\alpha}u(x,t)|\le\|\partial^{\alpha}\Phi(\cdot,t)\|_{p'}\|g\|_{p}=C_{\alpha,p}t^{-|\alpha|/2-n/2p}\|g\|_{p}$。
+
+3 は \ref{pde:heat-kernel-properties.3} である。
+
+::: hypcheck
+- **初期値に要求したもの**：$g\in L^{p}$（可測で $p$ 乗可積分、または本質的に有界）だけで、連続性も微分可能性も使っていない。それでも結論は $C^{\infty}$ 級である。**前提が弱くても解が滑らか**になる典型例で、古典解を作るのに熱源の正則性を要求した \ref{pde:heat-duhamel}（その hypcheck）や、ポアソン方程式の場合と対照的である。系列の最後で、古典的手法と関数解析的手法の前提を対比するときの材料になる。
+- **滑らかさの代償**：Step 3 の $t^{-|\alpha|/2-n/2p}$ は $t\to0$ で発散し、時刻 0 での連続性は 3 の $L^{p}$ 収束に弱まる（$p=\infty$ ではそれも成り立たない。\ref{pde:prob-he-step} の階段関数）。指数 $-|\alpha|/2$ は改善できない：$n=1$, $g=\operatorname{sgn}$ では $\partial_{x}u(0,t)=(\pi t)^{-1/2}$（\ref{pde:prob-he-gradient.3}）。
+- **$\Phi$ の性質**：Step 2 で導関数の評価、Step 3 で尺度の性質を使った。平滑化の源は、$\Phi(\cdot,t)$ とそのすべての導関数が $t>0$ で可積分かつ有界であることにある。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 有界な解の滑らかさ {#pde:heat-bounded-smooth keywords="every bounded classical solution of the homogeneous Cauchy problem for the heat equation is C^infinity for t > 0 and satisfies |d^alpha u| <= C t^{-|alpha|/2} sup |g|" index="有界な解の滑らかさ（熱方程式）|ゆうかいなかいのなめらかさねつほうていしき"}
+$0<T\le\infty$、$g\in C(\mathbb{R}^{n})$ を有界とし、$u$ を初期値 $g$ の斉次の初期値問題の有界な古典解とする。このとき $u\in C^{\infty}(\mathbb{R}^{n}\times(0,T))$ で、$|\partial^{\alpha}u(x,t)|\le C_{\alpha,\infty}t^{-|\alpha|/2}\sup|g|$。
+:::
+
+::: proof
+\ref{pde:heat-uniqueness-rn.2} から $\mathbb{R}^{n}\times[0,T)$ で $u=\Phi(\cdot,t)*g$。$g\in L^{\infty}$, $\|g\|_{\infty}\le\sup|g|$ なので、\ref{pde:heat-smoothing.1} と \ref{pde:heat-smoothing.2}（$p=\infty$）を使う。
+:::
+
+::: supplement
+**前提を変えると.** 有界性も初期値も仮定せず、開集合 $U\subset\mathbb{R}^{n}\times\mathbb{R}$ の上の任意の $C^{2,1}$ 級の解が $U$ で $C^{\infty}$ 級であること（**内部正則性**）も成り立つ。これは次のページで、切り落とし関数を掛けた $\zeta u$ を熱核の積分で表すことによって証明する（\see{pde:heat-interior-regularity}。調和関数の \ref{pde:mean-value-converse} の時空版）。さらに**係数が粗くても**平滑化の一部は残る：$\partial_{t}u=\sum_{i,j}\partial_{i}(a_{ij}(x,t)\partial_{j}u)$ で、係数 $a_{ij}$ が有界可測で一様に正定値なだけなら、弱解はヘルダー連続になることが知られている（ナッシュ、およびデ・ジョルジ–モーザーの理論。弱解の言葉を要するので、ここでは証明しない）。係数が粗い分だけ $C^{\infty}$ にはならないが、「解は係数より滑らかになりうる」という形で平滑化が生き残る。
+
+**似た定理.** 調和関数は平均値の性質だけから $C^{\infty}$ 級になり（\ref{pde:mean-value-converse}）、閉多様体の上の熱半群も $t>0$ で $L^{2}$ の元を滑らかな関数に写す（\see{gl:heat-smoothing}）。楕円型方程式の正則性（\see{gl:elliptic-regularity}）も同じ仲間である。対照的に、輸送方程式（\ref{pde:transport-constant}）や波動方程式（この系列の波動方程式のページ）は初期値の特異性を保ったまま運ぶので、解は初期値以上には滑らかにならない。
+
+**高い視点：忘れる方程式.** 熱方程式は「細部を忘れる」方程式である。フーリエ変換で見ると、周波数 $\xi$ の成分は $e^{-4\pi^{2}t|\xi|^{2}}$ 倍に縮み、角や不連続を作っている高い周波数の成分ほど速く消える。比喩で言えば、すりガラス越しの景色はどんなに細かい模様も一瞬でぼやけるが、ぼやけ具合はすりガラスの厚さ（時間 $t$）で決まり、厚さが 0 に近いほど元の模様（大きな導関数）が透けて見える。2 の $t^{-|\alpha|/2}$ はこの「厚さとぼやけの関係」を表し、その裏返しが、ぼやけた景色から元の模様を復元できないという後退熱方程式の不適切性（\ref{pde:heat-backward}）である。
+:::
+
+## 問題 {#pde:sec-he-uniq-problems}
+
+::: problem {#pde:prob-he-decay}
+$\Omega$ を有界な開集合とし、$u\in C^{2,1}(\Omega\times(0,\infty))\cap C(\overline{\Omega}\times[0,\infty))$ が $\Omega\times(0,\infty)$ で熱方程式を満たし、$\partial\Omega\times[0,\infty)$ で $u=0$ とする。
+1. $m(t)\defeq\max_{\overline{\Omega}}|u(\cdot,t)|$ は $[0,\infty)$ で単調非増加であることを示せ。
+2. $u(\cdot,0)\ge0$ なら $\overline{\Omega}\times[0,\infty)$ で $u\ge0$ であることを示せ。
+3. $n=1$, $\Omega=(0,\pi)$、$k\ge1$ について $u_{k}=e^{-k^{2}t}\sin kx$ が仮定を満たすことを確かめ、$m(t)$ を求めよ。
+:::
+
+::: solution
+**1.** $0\le t_{1}<t_{2}$ とする。時刻を $t_{1}$ だけずらした $\tilde u(x,s)\defeq u(x,t_{1}+s)$（$0\le s\le t_{2}-t_{1}$）は $C^{2,1}(\Omega\times(0,t_{2}-t_{1}))\cap C(\overline{\Omega}\times[0,t_{2}-t_{1}])$ に入り熱方程式を満たすので、\ref{pde:heat-weak-maximum.3} から $\max|\tilde u|$ は放物境界でとられる。側面では $\tilde u=0$、底面では $|\tilde u(\cdot,0)|=|u(\cdot,t_{1})|\le m(t_{1})$ なので、$\overline{\Omega}\times[0,t_{2}-t_{1}]$ で $|\tilde u|\le m(t_{1})$。とくに $m(t_{2})\le m(t_{1})$。
+
+**2.** \ref{pde:heat-weak-maximum.2} を $[0,T]$（$T>0$ は任意）で使うと、$\min u=\min_{\Gamma_{T}}u$。$\Gamma_{T}$ の上では $u(\cdot,0)\ge0$ か $u=0$ なので $\min_{\Gamma_{T}}u\ge0$。
+
+**3.** $\partial_{t}u_{k}=-k^{2}u_{k}=\partial_{x}^{2}u_{k}$、$\sin0=\sin k\pi=0$ で、$u_{k}$ は $\overline{\Omega}\times[0,\infty)$ で $C^{\infty}$ 級。$\max_{[0,\pi]}|\sin kx|=1$（$x=\frac{\pi}{2k}$）なので $m(t)=e^{-k^{2}t}$。振動の細かい（$k$ の大きい）初期値ほど速く減衰する。
+:::
+
+::: problem {#pde:prob-he-gradient}
+1. $t>0$, $1\le i\le n$ について $\displaystyle\int_{\mathbb{R}^{n}}|\partial_{i}\Phi(y,t)|\,dy=\frac{1}{\sqrt{\pi t}}$ を示せ。
+2. $g\in L^{\infty}(\mathbb{R}^{n})$、$u=\Phi(\cdot,t)*g$ なら $|\partial_{i}u(x,t)|\le\frac{\|g\|_{\infty}}{\sqrt{\pi t}}$ を示せ。
+3. $n=1$, $g=\operatorname{sgn}$（$x>0$ で $1$、$x<0$ で $-1$、$g(0)=0$）なら $\partial_{x}u(0,t)=\frac{1}{\sqrt{\pi t}}$ となり、2 の定数が改善できないことを示せ。
+:::
+
+::: solution
+**1.** $\partial_{i}\Phi(y,t)=-\frac{y_{i}}{2t}\Phi(y,t)$（\ref{pde:heat-kernel-properties} の証明の Step 1）。$\Phi(y,t)=\prod_{k}\phi(y_{k})$, $\phi(r)\defeq(4\pi t)^{-1/2}e^{-r^{2}/4t}$ と分かれ、$\int\phi=1$ なので、フビニの定理から $\int|\partial_{i}\Phi|=\frac{1}{2t}\int_{\mathbb{R}}|r|\phi(r)\,dr$。$\phi$ は偶関数で、$\frac{d}{dr}\bigl(-2te^{-r^{2}/4t}\bigr)=re^{-r^{2}/4t}$ から
+$$
+\int_{\mathbb{R}}|r|\phi(r)\,dr=\frac{2}{\sqrt{4\pi t}}\int_{0}^{\infty}re^{-r^{2}/4t}\,dr=\frac{2}{\sqrt{4\pi t}}\cdot2t=\frac{2\sqrt t}{\sqrt\pi}.
+$$
+よって $\int|\partial_{i}\Phi|=\frac{1}{2t}\cdot\frac{2\sqrt t}{\sqrt\pi}=\frac{1}{\sqrt{\pi t}}$。
+
+**2.** \ref{pde:heat-smoothing.1}（$p=\infty$）から $\partial_{i}u(x,t)=\int\partial_{i}\Phi(x-y,t)g(y)\,dy$ で、絶対値は $\|g\|_{\infty}\int|\partial_{i}\Phi(x-y,t)|\,dy=\frac{\|g\|_{\infty}}{\sqrt{\pi t}}$ 以下（平行移動と 1）。（\ref{pde:heat-smoothing.2} の定数 $C_{e_{i},\infty}=\|\partial_{i}\Phi(\cdot,1)\|_{1}$ が $\pi^{-1/2}$ であることを言っている。）
+
+**3.** $\partial_{x}\Phi(x-y,t)$ を $x=0$ で評価すると $-\frac{-y}{2t}\Phi(-y,t)=\frac{y}{2t}\Phi(y,t)$（$\Phi$ は偶関数）。よって $\partial_{x}u(0,t)=\int\frac{y}{2t}\Phi(y,t)\operatorname{sgn}(y)\,dy=\int\frac{|y|}{2t}\Phi(y,t)\,dy=\frac{1}{\sqrt{\pi t}}$（1）。$\|g\|_{\infty}=1$ なので 2 で等号が成り立つ。とくに導関数の評価の指数 $t^{-1/2}$ は改善できない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ヘルダー連続な右辺とポアソン方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/07-holder-poisson.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ヘルダー連続な右辺とポアソン方程式 {#pde:page-holder-poisson keywords="regularity of the Newton potential, Phi * f is C^1 for bounded measurable f with compact support, second derivatives of the fundamental solution, cancellation on spheres, modulus of continuity, Dini continuity, Hoelder continuous right-hand side gives a C^2 solution of -Delta u = f, formula for D^2 u with f(y) - f(x), continuous right-hand side without C^2 solution, counterexample (x_1^2 - x_2^2)(log 1/|x|)^{1/2}, ディニ連続, ヘルダー連続, ポアソン方程式の古典解"}
+
+ポアソン方程式 $-\Delta u=f$ の古典解（$C^{2}$ 解）を得るには、右辺 $f$ にどれだけの滑らかさが要るか。\ref{pde:page-green-functions} では、$f\in C_{c}^{2}$ ならニュートン・ポテンシャル $\Phi*f$ が $C^{2}$ 解になることを、微分を $f$ の側に移して示した（\ref{pde:newton-potential}）。このページでは、微分を $f$ に移さずに $\Phi$ の側で処理し、$f$ が**ヘルダー連続**（さらに弱く**ディニ連続**）でありさえすれば $\Phi*f$ が $C^{2}$ 級になることを証明する。鍵は、$\Phi$ の 2 階導関数は原点で局所可積分でないが、球面の上で平均すると打ち消し合う（積分が $0$ になる）ことである。逆に、$f$ が連続なだけでは、ニュートン・ポテンシャルに限らずどんな $C^{2}$ 解も存在しないことがある例を構成する。こうして「連続では足りず、ヘルダー連続なら足りる」という、古典的手法が右辺に要求する前提の境目がはっきりする。
+
+## 記法と定義の確認 {#pde:sec-gf-hp-notation}
+
+::: notation
+- $n\ge2$。基本解 $\Phi(x)=\Psi(|x|)$（\ref{pde:gf-fundamental-solution}）とその性質（\ref{pde:gf-fundamental-properties}。とくに $\nabla\Phi(z)=-\frac{z}{n\omega_{n}|z|^{n}}$、$\int_{B(0,\varepsilon)}|\nabla\Phi|=\varepsilon$、$\int_{B(0,\varepsilon)}|\Phi|$ は $\varepsilon^{2}|\log\varepsilon|$ 程度以下）、ニュートン・ポテンシャル（\ref{pde:newton-potential}）とその弱い形（\ref{pde:newton-weak}）、ヘルダー連続の定義は \ref{pde:page-green-functions} の記法のとおり。$\|f\|_{\infty}\defeq\sup|f|$。
+- 球の上の発散定理は \ref{pde:ball-divergence}、球面測度 $\sigma$ の回転不変性と放射関数の積分は \ref{meas:polar-radial}、積分記号下の微分は \ref{meas:parameter-integrals}、優収束定理は \ref{meas:dominated-convergence}、微積分学の基本定理は \tref{calc:fundamental-theorem}、関数列の一様極限は \ref{calc:uniform-limit-theorems}。
+- **切り落とし関数**：$h$ を \ref{pde:ball-divergence} の証明の $C^{1}$ 関数（$t\le0$ で $0$、$t\ge1$ で $1$、間は $3t^{2}-2t^{3}$。$0\le h'\le\frac32$）とし、$\varepsilon>0$ について $\eta_{\varepsilon}(s)\defeq h(s/\varepsilon-1)$ とおく。$s\le\varepsilon$ で $\eta_{\varepsilon}=0$、$s\ge2\varepsilon$ で $\eta_{\varepsilon}=1$、$0\le\eta_{\varepsilon}'\le\frac{3}{2\varepsilon}$。$z\mapsto\eta_{\varepsilon}(|z|)$ は原点の近くで $0$ なので $C^{1}(\mathbb{R}^{n})$ に入る。
+- 除去可能な特異点は \ref{pde:gf-removable-singularity}（前のページ）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## ニュートン・ポテンシャルの 1 階導関数 {#pde:sec-gf-hp-first}
+
+1 階導関数については、$f$ に連続性すら要らない。$\nabla\Phi$ が局所可積分だからである。
+
+::: lemma ニュートン・ポテンシャルは C¹ 級 {#pde:newton-c1 keywords="for bounded measurable f with bounded support, the Newton potential Phi * f is C^1 and its gradient is (grad Phi) * f; proof by cutting off the singularity" index="ニュートン・ポテンシャルの 1 階導関数|にゅーとんぽてんしゃるのいっかいどうかんすう"}
+$f$ を有界なボレル可測関数で、ある $\rho>0$ について $|y|>\rho$ で $f(y)=0$ となるものとする。このとき $u\defeq\Phi*f\in C^{1}(\mathbb{R}^{n})$ で、
+$$
+\partial_{i}u(x)=\int_{\mathbb{R}^{n}}\partial_{i}\Phi(x-y)\,f(y)\,dy\qquad(i=1,\dots,n)
+$$
+（右辺は絶対収束する）。
+:::
+
+::: intuition
+右辺が有界で有界な範囲の外で $0$ なら、ニュートン・ポテンシャルは連続的に 1 回微分でき、その導関数は基本解の導関数との畳み込みで書ける。
+:::
+
+::: proof
+$\Phi_{\varepsilon}(z)\defeq\eta_{\varepsilon}(|z|)\Phi(z)$、$u_{\varepsilon}\defeq\Phi_{\varepsilon}*f$、$v_{i}\defeq(\partial_{i}\Phi)*f$ とおく。$v_{i}$ は、$|\partial_{i}\Phi|$ が局所可積分（\ref{pde:gf-fundamental-properties.3}）で $f$ が有界かつ台が有界なので絶対収束する。
+
+**Step 1（切り落とした核）.** 【主張：$u_{\varepsilon}\in C^{1}(\mathbb{R}^{n})$ で $\partial_{i}u_{\varepsilon}=(\partial_{i}\Phi_{\varepsilon})*f$】$\Phi_{\varepsilon}$ は $|z|\le\varepsilon$ で $0$、それ以外では $C^{1}$ 関数の積なので $\Phi_{\varepsilon}\in C^{1}(\mathbb{R}^{n})$。$|x|<M$ なら、$f(y)\ne0$ となる $y$ について $|x-y|<M+\rho$ なので、$|\partial_{i}\Phi_{\varepsilon}(x-y)f(y)|\le\|f\|_{\infty}\max_{\overline{B}(0,M+\rho)}|\partial_{i}\Phi_{\varepsilon}|\cdot\mathbf{1}_{B(0,\rho)}(y)$ は $x$ によらない可積分関数。座標 $x_{i}$ 以外を固定して \ref{meas:parameter-integrals.2} を使い、連続性は $x_{k}\to x$ となる列に優収束定理を使う。
+
+**Step 2（一様収束）.** 【主張：$\varepsilon\to0$ で $u_{\varepsilon}\to u$, $\partial_{i}u_{\varepsilon}\to v_{i}$ が $\mathbb{R}^{n}$ の上で一様】$\Phi-\Phi_{\varepsilon}=(1-\eta_{\varepsilon})\Phi$ は $|z|\ge2\varepsilon$ で $0$ なので、$|u(x)-u_{\varepsilon}(x)|\le\|f\|_{\infty}\int_{B(0,2\varepsilon)}|\Phi|$。また $\partial_{i}\Phi_{\varepsilon}(z)=\eta_{\varepsilon}(|z|)\partial_{i}\Phi(z)+\eta_{\varepsilon}'(|z|)\frac{z_{i}}{|z|}\Phi(z)$ なので $|\partial_{i}\Phi-\partial_{i}\Phi_{\varepsilon}|\le\bigl(|\nabla\Phi|+\frac{3}{2\varepsilon}|\Phi|\bigr)\mathbf{1}_{B(0,2\varepsilon)}$、よって
+$$
+|v_{i}(x)-\partial_{i}u_{\varepsilon}(x)|\le\|f\|_{\infty}\Bigl(2\varepsilon+\frac{3}{2\varepsilon}\int_{B(0,2\varepsilon)}|\Phi|\Bigr).
+$$
+\ref{pde:gf-fundamental-properties.3} から $\int_{B(0,2\varepsilon)}|\Phi|$ は $n\ge3$ で $\frac{2\varepsilon^{2}}{n-2}$、$n=2$（$2\varepsilon\le1$）で $\varepsilon^{2}(2|\log2\varepsilon|+1)$ なので、右辺はどちらも $\varepsilon\to0$ で $0$ に収束する。
+
+**Step 3（極限の微分）.** 【主張：$u\in C^{1}$ で $\partial_{i}u=v_{i}$】$v_{i}$ は連続関数の一様極限なので連続。$x\in\mathbb{R}^{n}$, $t\in\mathbb{R}$ について微積分学の基本定理から $u_{\varepsilon}(x+te_{i})-u_{\varepsilon}(x)=\int_{0}^{t}\partial_{i}u_{\varepsilon}(x+se_{i})\,ds$。Step 2 の一様収束で極限をとると $u(x+te_{i})-u(x)=\int_{0}^{t}v_{i}(x+se_{i})\,ds$。被積分関数は連続なので、ふたたび微積分学の基本定理から $\partial_{i}u(x)=v_{i}(x)$。偏導関数がすべて連続なので $u\in C^{1}$。
+
+::: hypcheck
+- **$f$ の有界性と台の有界性**：Step 1 の優関数と Step 2 の一様評価に使った。連続性は使っていない。
+- **$\nabla\Phi$ の局所可積分性**：$v_{i}$ の定義と Step 2（$\int_{B(0,2\varepsilon)}|\nabla\Phi|=2\varepsilon$）に使った。2 階導関数 $\partial_{i}\partial_{j}\Phi$ は局所可積分でないので、同じ議論で $C^{2}$ を示すことはできない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## ディニ連続な右辺 {#pde:sec-gf-hp-dini}
+
+2 階導関数には $|z|^{-n}$ の特異性があるが、球面の上の積分で打ち消し合う。
+
+::: lemma 基本解の 2 階導関数 {#pde:gf-second-derivatives keywords="second derivatives of the fundamental solution d_i d_j Phi(z) = (n z_i z_j - delta_ij |z|^2)/(n omega_n |z|^{n+2}), bound |z|^{-n}/omega_n, int_{S^{n-1}} theta_i theta_j d sigma = delta_ij omega_n, flux of d_i Phi through spheres" index="基本解の 2 階導関数|きほんかいのにかいどうかんすう"}
+1. $z\ne0$ で $\displaystyle\partial_{i}\partial_{j}\Phi(z)=\frac{n\,z_{i}z_{j}-\delta_{ij}|z|^{2}}{n\omega_{n}|z|^{n+2}}$、$|\partial_{i}\partial_{j}\Phi(z)|\le\dfrac{1}{\omega_{n}|z|^{n}}$。
+2. $\displaystyle\int_{S^{n-1}}\theta_{i}\theta_{j}\,d\sigma(\theta)=\delta_{ij}\,\omega_{n}$。
+3. $R>0$ について $\displaystyle R^{n-1}\int_{S^{n-1}}\partial_{i}\Phi(R\theta)\,\theta_{j}\,d\sigma(\theta)=-\frac{\delta_{ij}}{n}$。
+4. $0<a<b$ について $\displaystyle\int_{a<|z|<b}\partial_{i}\partial_{j}\Phi(z)\,dz=0$。
+:::
+
+::: proof
+**1.** $\partial_{j}\Phi(z)=-\frac{z_{j}}{n\omega_{n}}|z|^{-n}$ を $z_{i}$ で微分すると $-\frac{1}{n\omega_{n}}\bigl(\delta_{ij}|z|^{-n}-nz_{j}z_{i}|z|^{-n-2}\bigr)$。$i\ne j$ なら $n|z_{i}z_{j}|\le\frac n2|z|^{2}$、$i=j$ なら $-(n-1)|z|^{2}\le nz_{i}^{2}-|z|^{2}\le(n-1)|z|^{2}$ なので、分子の絶対値は $n|z|^{2}$ 以下。
+
+**2.** $i\ne j$ なら、第 $i$ 座標の符号を変える直交変換で $\sigma$ は不変（\ref{meas:polar-radial.1}。積分についても単関数で近似して同じ）で、$\theta_{i}\theta_{j}$ は符号を変えるので積分は $0$。$i=j$ なら、座標を入れ替える直交変換から $\int\theta_{i}^{2}\,d\sigma$ は $i$ によらず、和は $\int|\theta|^{2}d\sigma=\sigma(S^{n-1})=n\omega_{n}$ なので各々 $\omega_{n}$。
+
+**3.** $\partial_{i}\Phi(R\theta)=-\frac{\theta_{i}}{n\omega_{n}R^{n-1}}$ と 2 から。
+
+**4.** 1 の被積分関数は $a\le|z|\le b$ で有界なので可積分。極座標（\ref{meas:polar-decomposition.3}）で $\int_{a}^{b}\bigl(\int_{S^{n-1}}\partial_{i}\partial_{j}\Phi(s\theta)\,d\sigma\bigr)s^{n-1}ds$ と書け、内側は 1・2 から $\frac{s^{-n}}{n\omega_{n}}\int(n\theta_{i}\theta_{j}-\delta_{ij})\,d\sigma=\frac{s^{-n}}{n\omega_{n}}(n\delta_{ij}\omega_{n}-\delta_{ij}n\omega_{n})=0$。
+:::
+
+::: definition 連続性の係数とディニ連続 {#pde:gf-dini-continuous keywords="modulus of continuity omega_f(t) = sup_{|x-y| <= t} |f(x) - f(y)|; Dini continuity int_0^1 omega_f(t)/t dt < infinity; Hoelder continuous functions are Dini continuous" index="連続性の係数|れんぞくせいのけいすう, ディニ連続|でぃにれんぞく"}
+有界な関数 $f\colon\mathbb{R}^{n}\to\mathbb{R}$ について、$t\ge0$ に対し
+$$
+\omega_{f}(t)\defeq\sup\{|f(x)-f(y)|:|x-y|\le t\}\ (\le2\|f\|_{\infty})
+$$
+を $f$ の**連続性の係数**という。$\omega_{f}$ は単調非減少（したがってボレル可測）である。$\displaystyle\int_{0}^{1}\frac{\omega_{f}(t)}{t}\,dt<\infty$ のとき、$f$ は**ディニ連続**であるという。
+:::
+
+::: intuition
+連続性の係数は、距離 $t$ 以内の 2 点で関数の値がどれだけ違いうるかの上限である。ディニ連続とは、その違いが小さい $t$ で十分速く $0$ に近づき、$1/t$ で割っても積分できることをいう。
+:::
+
+::: example
+1. $f$ が $\alpha$ 次ヘルダー連続（$|f(x)-f(y)|\le H|x-y|^{\alpha}$, $0<\alpha\le1$）なら $\omega_{f}(t)\le Ht^{\alpha}$ で $\int_{0}^{1}\frac{\omega_{f}(t)}{t}dt\le\frac{H}{\alpha}$、よってディニ連続。
+2. ディニ連続なら一様連続である：$\omega_{f}$ は非減少なので $\omega_{f}(t)\log2\le\int_{t}^{2t}\frac{\omega_{f}(s)}{s}ds\to0$（$t\to0$）。
+3. 連続でもディニ連続でないものがある。次の節の例の右辺 $F$ は、$\omega_{F}(t)$ が $(\log\frac1t)^{-1/2}$ 程度で、$\int_{0}\frac{dt}{t(\log\frac1t)^{1/2}}=\infty$ となる。
+:::
+
+::: theorem ディニ連続な右辺のニュートン・ポテンシャル {#pde:newton-holder keywords="if f in C_c(R^n) is Dini continuous (in particular Hoelder continuous) then the Newton potential u = Phi * f is C^2, d_i d_j u(x) = int_{B(x,R)} d_i d_j Phi(x-y)(f(y)-f(x)) dy - delta_ij f(x)/n, and -Delta u = f classically" index="ヘルダー連続（ポアソン方程式）|へるだーれんぞくぽあそんほうていしき, ディニ連続（ポアソン方程式）|でぃにれんぞくぽあそんほうていしき" refname="ヘルダー連続な右辺のポアソン方程式"}
+$f\in C_{c}(\mathbb{R}^{n})$ がディニ連続であるとし、$u\defeq\Phi*f$ とおく。
+1. $u\in C^{2}(\mathbb{R}^{n})$ で、各 $x$ と、$\operatorname{supp}f\subset B(x,R)$ となる任意の $R>0$ について
+$$
+\partial_{i}\partial_{j}u(x)=\int_{B(x,R)}\partial_{i}\partial_{j}\Phi(x-y)\bigl(f(y)-f(x)\bigr)\,dy-\frac{\delta_{ij}}{n}f(x)
+\label{pde:eq-newton-second-derivative}
+$$
+（右辺の積分は絶対収束する）。
+2. $\mathbb{R}^{n}$ の各点で $-\Delta u=f$。
+3. とくに、$f\in C_{c}(\mathbb{R}^{n})$ が $\alpha$ 次ヘルダー連続（$0<\alpha\le1$）なら 1・2 が成り立つ。
+:::
+
+::: intuition
+右辺が連続で、しかもその連続性がある程度の速さ（ヘルダー連続、さらに弱くディニ連続）を保証されていれば、ニュートン・ポテンシャルは 2 回連続微分でき、ポアソン方程式の古典解になる。2 階導関数は、右辺の値の差 $f(y)-f(x)$ を基本解の 2 階導関数で重み付けした積分で書ける。
+:::
+
+::: proof
+$\omega\defeq\omega_{f}$、$\operatorname{supp}f\subset\overline{B}(0,\rho)$ とする。\ref{pde:newton-c1} から $u\in C^{1}$ で $v_{i}\defeq\partial_{i}u=(\partial_{i}\Phi)*f$。$i,j$ を固定し、$k_{\varepsilon}(z)\defeq\eta_{\varepsilon}(|z|)\,\partial_{i}\Phi(z)$、$v_{i,\varepsilon}\defeq k_{\varepsilon}*f$ とおく。$x_{0}\in\mathbb{R}^{n}$ を固定し、$R_{0}\defeq|x_{0}|+1+\rho$ とすると、$|x-x_{0}|<1$ なら $\operatorname{supp}f\subset B(x,R_{0})$。以下 $x\in B(x_{0},1)$、$0<2\varepsilon<R$、$\operatorname{supp}f\subset B(x,R)$ とする。
+
+**Step 1（切り落とした核の微分）.** 【主張：$v_{i,\varepsilon}\in C^{1}$ で、$\displaystyle\partial_{j}v_{i,\varepsilon}(x)=\int_{B(x,R)}\partial_{j}k_{\varepsilon}(x-y)\bigl(f(y)-f(x)\bigr)dy-\frac{\delta_{ij}}{n}f(x)$】$k_{\varepsilon}\in C^{1}(\mathbb{R}^{n})$（原点の近くで $0$）なので、\ref{pde:newton-c1} の証明の Step 1 と同じく $v_{i,\varepsilon}\in C^{1}$, $\partial_{j}v_{i,\varepsilon}(x)=\int\partial_{j}k_{\varepsilon}(x-y)f(y)\,dy$。$f$ は $B(x,R)$ の外で $0$ なので、積分は $B(x,R)$ の上だけでよく、$f(y)=(f(y)-f(x))+f(x)$ と分けると、第 2 の部分は（$z=x-y$ と置換して）$f(x)\int_{B(0,R)}\partial_{j}k_{\varepsilon}(z)\,dz$。ベクトル場 $k_{\varepsilon}e_{j}\in C^{1}$ に \ref{pde:ball-divergence} を使い、$R>2\varepsilon$ から球面上で $k_{\varepsilon}=\partial_{i}\Phi$ なので、\ref{pde:gf-second-derivatives.3} から
+$$
+\int_{B(0,R)}\partial_{j}k_{\varepsilon}\,dz=R^{n-1}\int_{S^{n-1}}\partial_{i}\Phi(R\theta)\,\theta_{j}\,d\sigma=-\frac{\delta_{ij}}{n}.
+$$
+
+**Step 2（核の差の評価）.** 【主張：$z\ne0$ で $|\partial_{j}k_{\varepsilon}(z)-\partial_{i}\partial_{j}\Phi(z)|\le\dfrac{5}{\omega_{n}|z|^{n}}\mathbf{1}_{B(0,2\varepsilon)}(z)$】$|z|\ge2\varepsilon$ では $\eta_{\varepsilon}=1$, $\eta_{\varepsilon}'=0$（$h'(1)=0$）なので差は $0$。$|z|<\varepsilon$ では $k_{\varepsilon}=0$ で、差は $|\partial_{i}\partial_{j}\Phi(z)|\le\frac{1}{\omega_{n}|z|^{n}}$（\ref{pde:gf-second-derivatives.1}）。$\varepsilon\le|z|<2\varepsilon$ では $\partial_{j}k_{\varepsilon}=\eta_{\varepsilon}\partial_{i}\partial_{j}\Phi+\eta_{\varepsilon}'(|z|)\frac{z_{j}}{|z|}\partial_{i}\Phi$ で、$|\partial_{i}\Phi(z)|\le\frac{1}{n\omega_{n}|z|^{n-1}}$、$\eta_{\varepsilon}'\le\frac{3}{2\varepsilon}\le\frac{3}{|z|}$ なので、差は $\frac{1}{\omega_{n}|z|^{n}}+\frac{3}{n\omega_{n}|z|^{n}}\le\frac{5}{\omega_{n}|z|^{n}}$ 以下。
+
+**Step 3（右辺の積分の収束）.** 【主張：\eqref{pde:eq-newton-second-derivative} の右辺の積分は絶対収束する】\ref{pde:gf-second-derivatives.1} と $|f(y)-f(x)|\le\omega(|x-y|)$ から、被積分関数の絶対値は $\frac{\omega(|x-y|)}{\omega_{n}|x-y|^{n}}$ 以下で、\ref{meas:polar-radial.2} から
+$$
+\int_{B(x,R)}\frac{\omega(|x-y|)}{\omega_{n}|x-y|^{n}}\,dy=n\int_{0}^{R}\frac{\omega(s)}{s}\,ds\le n\int_{0}^{1}\frac{\omega(s)}{s}\,ds+2n\|f\|_{\infty}\log^{+}R<\infty
+$$
+（ディニ連続性と $\omega\le2\|f\|_{\infty}$）。この右辺の積分を $w_{ij}(x)$ と書く（$-\frac{\delta_{ij}}{n}f(x)$ を足す前のもの）。
+
+**Step 4（一様収束）.** 【主張：$x\in B(x_{0},1)$ について一様に $\partial_{j}v_{i,\varepsilon}(x)\to w_{ij}(x)-\frac{\delta_{ij}}{n}f(x)$（$\varepsilon\to0$）】$R=R_{0}$ として Step 1・2 から
+$$
+\Bigl|\partial_{j}v_{i,\varepsilon}(x)-w_{ij}(x)+\frac{\delta_{ij}}{n}f(x)\Bigr|\le\int_{B(x,2\varepsilon)}\frac{5\,\omega(|x-y|)}{\omega_{n}|x-y|^{n}}dy=5n\int_{0}^{2\varepsilon}\frac{\omega(s)}{s}\,ds,
+$$
+右辺は $x$ によらず、ディニ連続性から $0$ に収束する。
+
+**Step 5（$C^{2}$ 級と公式）.** 【主張：$v_{i}\in C^{1}(B(x_{0},1))$ で $\partial_{j}v_{i}=w_{ij}-\frac{\delta_{ij}}{n}f$】\ref{pde:newton-c1} の証明の Step 2 と同じく $|v_{i}-v_{i,\varepsilon}|\le\|f\|_{\infty}\int_{B(0,2\varepsilon)}|\nabla\Phi|=2\varepsilon\|f\|_{\infty}$ なので $v_{i,\varepsilon}\to v_{i}$ は一様。Step 4 から $\partial_{j}v_{i,\varepsilon}$ は $B(x_{0},1)$ の上で一様収束し、極限は連続関数の一様極限として連続。\ref{pde:newton-c1} の証明の Step 3 と同じく、微積分学の基本定理を線分 $x+se_{j}$ の上で使って極限をとれば、$\partial_{j}v_{i}$ が存在してその極限に等しい。$x_{0}$ は任意なので $u\in C^{2}(\mathbb{R}^{n})$。公式が $\operatorname{supp}f\subset B(x,R)$ となる任意の $R$ で成り立つのは、Step 1 の等式が任意のそのような $R$（$>2\varepsilon$）で成り立ち、Step 4 の評価も同じだからである（差は \ref{pde:gf-second-derivatives.4} の打ち消しによる）。
+
+**Step 6（ポアソン方程式）.** 【主張：$-\Delta u=f$】\eqref{pde:eq-newton-second-derivative} で $i=j$ について足すと、$x\ne y$ で $\sum_{i}\partial_{i}^{2}\Phi(x-y)=\Delta\Phi(x-y)=0$（\ref{pde:gf-fundamental-properties.1}）なので積分の部分は $0$、残りは $-\sum_{i}\frac1nf(x)=-f(x)$。
+
+3 は、ヘルダー連続な関数がディニ連続であること（\ref{pde:gf-dini-continuous} の後の例 1）から従う。
+
+::: hypcheck
+- **ディニ連続性**：Step 3 で積分の絶対収束に、Step 4 で一様収束に使った。どちらも $\int_{0}\frac{\omega(s)}{s}ds$ の有限性だけを使い、Step 4 では $x$ の近くの $\omega$ しか使わないので、「各点の近くでディニ連続」でも $C^{2}$ 級が局所的に従う。ディニ条件が崩れると Step 4 の右辺が有限でなくなり、実際に結論が崩れる例がある（\ref{pde:newton-continuous-counterexample}）。
+- **打ち消し**：Step 1 で、$f(x)$ の項を球面上の積分 \ref{pde:gf-second-derivatives.3} で処理した。これがなければ $\int\partial_{i}\partial_{j}\Phi(x-y)f(y)\,dy$ は絶対収束しない（$|z|^{-n}$ は局所可積分でない）。値の差 $f(y)-f(x)$ を作ることで特異性を $\omega(|z|)|z|^{-n}$ に弱めたのが要点である。
+- **台がコンパクト**：\ref{pde:newton-c1} の適用と、$\operatorname{supp}f\subset B(x,R)$ となる $R$ の存在に使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $f\in C_{c}^{2}$ の場合（\ref{pde:newton-potential}）は、微分を $f$ に移すので $\Phi$ の 2 階導関数は現れなかった。ここでは微分を $\Phi$ に残し、その特異性を $f$ の連続性の速さで打ち消した。$f$ が $\alpha$ 次ヘルダー連続（$0<\alpha<1$）なら、さらに $\partial_{i}\partial_{j}u$ 自身が各有界集合の上で $\alpha$ 次ヘルダー連続になることが知られている（**シャウダー評価**の出発点。Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 4 章。ここでは証明しない）。$\alpha=1$（リプシッツ連続）ではこれが崩れ、$\partial_{i}\partial_{j}u$ はリプシッツ連続とは限らない。$f$ の台がコンパクトでなくても、$f$ が有界かつ可積分で十分速く減衰すれば、同じ議論が局所的に通る。
+
+**似た定理.** 公式 \eqref{pde:eq-newton-second-derivative} の積分は、$\varepsilon\to0$ での極限 $\lim\int_{|x-y|>\varepsilon}\partial_{i}\partial_{j}\Phi(x-y)f(y)\,dy$（**主値積分**）と一致する（Step 1 の打ち消しによる）。1 次元でこれに当たるのがヒルベルト変換で（\see{four:ht-definition}）、核 $\frac{1}{\pi x}$ も原点で可積分でないが、正負の打ち消しで主値が存在する。$f\in L^{p}$（$1<p<\infty$）なら $\partial_{i}\partial_{j}(\Phi*f)\in L^{p}$ となる（カルデロン–ジグムントの評価。ここでは証明しない）ことは、ヒルベルト変換の $L^{p}$ 有界性の高次元版である。
+
+**高い視点：差をとって打ち消す.** 2 階導関数の核 $\partial_{i}\partial_{j}\Phi$ は、どの球面の上でも平均が $0$ になる（\ref{pde:gf-second-derivatives.4}）。だから定数関数との畳み込みは $0$ で、核が「見る」のは $f$ の値そのものではなく、近くの値との**差**だけである。比喩で言えば、四方八方から同じ強さで引っ張られる綱引きは釣り合っていて、勝負を決めるのは引く力の**ばらつき**だけである。ばらつきが距離とともに十分速く小さくなれば（ディニ連続）、中心に近い無数の引き手の効果は有限にとどまる。
+:::
+
+## 連続なだけの右辺 {#pde:sec-gf-continuous}
+
+前の節では、$f$ がディニ連続（とくにヘルダー連続）ならニュートン・ポテンシャルが $-\Delta u=f$ の $C^{2}$ 解であることを示した。ここでは、$f$ が連続なだけでは、ニュートン・ポテンシャルに限らず**どんな** $C^{2}$ 解も原点の近くに存在しないことがある例を作る。証明には、前のページの除去可能な特異点（\ref{pde:gf-removable-singularity}）を使う。
+
+::: counterexample 連続な右辺で古典解のないポアソン方程式 {#pde:newton-continuous-counterexample keywords="a continuous compactly supported f such that -Delta v = f has no C^2 solution in any neighborhood of the origin; built from u = (x_1^2 - x_2^2)(-log|x|)^{1/2}; the Newton potential of a continuous function need not be C^2" index="ポアソン方程式の古典解が存在しない例|ぽあそんほうていしきのこてんかいがそんざいしないれい"}
+$n\ge2$ とし、$P(x)\defeq x_{1}^{2}-x_{2}^{2}$、$0<|x|<1$ で $\ell(x)\defeq-\log|x|>0$、
+$$
+u_{0}(x)\defeq P(x)\,\ell(x)^{1/2}\quad(0<|x|<1),\qquad u_{0}(0)\defeq0
+$$
+とおく。$\chi\in C_{c}^{\infty}(B(0,\frac12))$ を、$\overline{B}(0,\frac14)$ の近傍で $\chi=1$、$0\le\chi\le1$ となるものとし（\ref{fa:test-function-density.2}）、$U\defeq\chi u_{0}$（$B(0,\frac12)$ の外で $0$）とおく。
+1. $F\defeq-\Delta U$（$x\ne0$）、$F(0)\defeq0$ は $C_{c}(\mathbb{R}^{n})$ に入り、$0<|x|<\frac14$ では
+$$
+F(x)=\frac{P(x)}{|x|^{2}}\Bigl(\frac{n+2}{2\,\ell(x)^{1/2}}+\frac{1}{4\,\ell(x)^{3/2}}\Bigr).
+$$
+2. $0$ を含むどの開集合 $V$ の上にも、$-\Delta v=F$ を満たす $v\in C^{2}(V)$ は存在しない。
+3. とくに、ニュートン・ポテンシャル $\Phi*F$ は $0$ のどの近傍でも $C^{2}$ 級でない。
+:::
+
+::: proof
+$h_{0}(s)\defeq(-\log s)^{1/2}$（$0<s<1$）とおくと $u_{0}(x)=P(x)h_{0}(|x|)$。$L\defeq-\log s$ と書くと
+$$
+h_{0}'(s)=-\frac{1}{2sL^{1/2}},\qquad h_{0}''(s)=\frac{1}{2s^{2}L^{1/2}}-\frac{1}{4s^{2}L^{3/2}}.
+$$
+
+**Step 1（ラプラシアンの計算）.** 【主張：$0<|x|<1$ で $\Delta u_{0}=P\bigl(h_{0}''+\frac{n+3}{s}h_{0}'\bigr)=-\frac{P}{s^{2}}\bigl(\frac{n+2}{2L^{1/2}}+\frac{1}{4L^{3/2}}\bigr)$（$s=|x|$）】$P$ は調和な 2 次の同次多項式なので $\Delta P=0$, $x\cdot\nabla P=2P$。$\nabla h_{0}(|x|)=h_{0}'(s)\frac{x}{s}$、$\Delta h_{0}(|x|)=h_{0}''+\frac{n-1}{s}h_{0}'$（\ref{pde:harmonic-function} の後の例 3）。積の微分から
+$$
+\Delta u_{0}=P\Delta h_{0}+2\nabla P\cdot\nabla h_{0}+h_{0}\Delta P=P\Bigl(h_{0}''+\frac{n-1}{s}h_{0}'\Bigr)+\frac{2h_{0}'}{s}\cdot2P.
+$$
+$h_{0}''+\frac{n+3}{s}h_{0}'=\frac{1}{s^{2}}\bigl(\frac{1}{2L^{1/2}}-\frac{1}{4L^{3/2}}-\frac{n+3}{2L^{1/2}}\bigr)$ を整理すればよい。
+
+**Step 2（$F$ の連続性）.** 【主張：1】$u_{0}$ は $0<|x|<1$ で $C^{\infty}$ 級、$\chi$ の台は $B(0,\frac12)$ のコンパクト部分集合なので、$U$ は $\mathbb{R}^{n}\setminus\{0\}$ で $C^{\infty}$ 級、$F$ もそこで $C^{\infty}$ 級で、台は $\operatorname{supp}\chi$ に含まれる。$0<|x|<\frac14$ では $U=u_{0}$ なので Step 1 から 1 の式。$|P(x)|\le|x|^{2}$ なので $|F(x)|\le\frac{n+2}{2\ell(x)^{1/2}}+\frac{1}{4\ell(x)^{3/2}}\to0$（$x\to0$。$\ell(x)\to\infty$）で、$F$ は $0$ でも連続。
+
+**Step 3（$U$ は原点の近傍で $C^{2}$ でない）.** 【主張：$U$ は $0$ で連続だが、$\partial_{1}^{2}U(te_{1})\to\infty$（$t\downarrow0$）】$|u_{0}(x)|\le|x|^{2}\ell(x)^{1/2}\to0$ から連続。$0<|x|<\frac14$ で
+$$
+\partial_{1}u_{0}=2x_{1}h_{0}+P\,h_{0}'\frac{x_{1}}{s},\qquad\partial_{1}^{2}u_{0}=2h_{0}+4x_{1}h_{0}'\frac{x_{1}}{s}+P\Bigl(h_{0}''\frac{x_{1}^{2}}{s^{2}}+h_{0}'\Bigl(\frac1s-\frac{x_{1}^{2}}{s^{3}}\Bigr)\Bigr).
+$$
+$x=te_{1}$（$0<t<\frac14$）では $x_{1}=s=t$, $P=t^{2}$ なので、$\partial_{1}^{2}u_{0}(te_{1})=2h_{0}(t)+4th_{0}'(t)+t^{2}h_{0}''(t)=2L^{1/2}-\frac{2}{L^{1/2}}+\frac{1}{2L^{1/2}}-\frac{1}{4L^{3/2}}$（$L=-\log t$）で、$t\downarrow0$ のとき $L\to\infty$ なので $+\infty$ に発散する。
+
+**Step 4（2）.** 【主張：$v\in C^{2}(V)$, $-\Delta v=F$ となる $v$ はない】あったとし、$\overline{B}(0,\rho)\subset V$, $\rho<\frac14$ をとる。$w\defeq U-v$ は $B(0,\rho)\setminus\{0\}$ で $C^{2}$ 級で、$\Delta w=-F+F=0$。$U$ と $v$ は $\overline{B}(0,\rho)$ で連続なので $w$ は $0$ の近くで有界で、\ref{pde:gf-removable-singularity} から、$B(0,\rho)$ の調和関数 $\tilde w$ で $0$ 以外で $w$ に等しいものがある。$U$ と $v+\tilde w$ は $B(0,\rho)$ で連続で、$0$ 以外で一致するので、$0$ でも一致する。よって $U=v+\tilde w\in C^{2}(B(0,\rho))$ で、$\partial_{1}^{2}U$ はコンパクト集合 $\overline{B}(0,\rho/2)$ の上で有界でなければならないが、これは Step 3 に反する。
+
+**Step 5（3）.** 【主張：3】$\Phi*F$ が $0$ のある開近傍 $V$ で $C^{2}$ 級なら、\ref{pde:newton-weak.3} から $V$ で $-\Delta(\Phi*F)=F$ となり、2 に反する。
+
+::: hypcheck
+- **$F$ の連続性の「遅さ」**：Step 2 から $F(x)$ は $(\log\frac{1}{|x|})^{-1/2}$ の速さでしか $0$ に近づかない。これはどんな $\alpha>0$ の $|x|^{\alpha}$ よりも遅いので、$F$ は原点でヘルダー連続でなく、ディニ連続でもない（下の補足）。ディニ連続なら $C^{2}$ 解がある（\ref{pde:newton-holder}）ことと整合する。
+- **除去可能な特異点**：Step 4 で、仮想的な解 $v$ と具体的な $U$ の差が原点を越えて調和に延びることに使った。これがないと「$U$ は $C^{2}$ でないが、別の $C^{2}$ 解があるかもしれない」という可能性を排除できない。
+- **$n\ge2$**：$P=x_{1}^{2}-x_{2}^{2}$ を使うのに 2 変数が要る。$n=1$ では $-v''=F$ は $F$ を 2 回積分すれば連続な $F$ についていつも $C^{2}$ 解をもつ。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 例の $F$ の連続性の係数 $\omega_{F}$（\ref{pde:gf-dini-continuous}）は、$x=te_{1}$, $y=0$ を比べると $\omega_{F}(t)\ge F(te_{1})\ge\frac{n+2}{2}(\log\frac1t)^{-1/2}$（$0<t<\frac14$）なので、$\int_{0}\frac{\omega_{F}(t)}{t}dt\ge\frac{n+2}{2}\int_{0}\frac{dt}{t(\log\frac1t)^{1/2}}=\infty$ となり、$F$ はディニ連続でない。\ref{pde:newton-holder} はディニ連続なら $\Phi*F$ が $C^{2}$ 級であることを示したので、$C^{2}$ 解の存在の境目は「連続」と「ヘルダー連続」の間の、ディニ条件のあたりにある。（ディニ条件は十分条件として示したもので、必要条件かどうかはここでは扱わない。）
+
+**似た定理.** 同じ現象は、$f\in L^{\infty}$ で $u\in W^{2,\infty}$ とは限らないこと（2 階導関数が有界でない）、$f\in L^{1}$ で $u\in W^{2,1}$ とは限らないことにも現れる。これらは特異積分作用素 $f\mapsto\partial_{i}\partial_{j}(\Phi*f)$ が $L^{\infty}$, $L^{1}$ の上で有界でないことの表れで、$1<p<\infty$ では有界（カルデロン–ジグムントの評価）、ヘルダー空間 $C^{0,\alpha}$（$0<\alpha<1$）でも有界（シャウダー評価）である（どれもここでは証明しない）。古典的手法と関数解析的手法の前提の対比（系列 02 の最後のページ）では、この「端点で失敗する」ことが、古典解の理論にヘルダー空間を使う理由として現れる。
+
+**高い視点：対数の階段.** 例の $u_{0}=P\,(\log\frac1{|x|})^{1/2}$ は、2 次の調和多項式 $P$ に、ほんのわずかに増大する因子 $(\log\frac1{|x|})^{1/2}$ を掛けたものである。2 回微分すると、$P$ の 2 階導関数（定数）に因子がそのまま掛かって発散し、一方ラプラシアンでは $P$ が調和なので主要部分が打ち消し合い、因子の微分（対数の階段を一段下りた、$0$ に近づく量）だけが残る。比喩で言えば、2 階導関数の個々の成分は嵐のように揺れているのに、その和（ラプラシアン）だけは凪いでいる。$\Delta u$ という「和」の情報だけからは個々の 2 階導関数を制御できないことが、連続な $f$ の失敗の正体である。
+:::
+
+## 問題 {#pde:sec-gf-hp-problems}
+
+::: problem {#pde:prob-gf-hp-not-integrable}
+1. $\displaystyle\int_{B(0,1)}|\partial_{1}^{2}\Phi(z)|\,dz=\infty$ を示せ。
+2. それにもかかわらず、$f\in C_{c}^{1}(\mathbb{R}^{n})$（リプシッツ連続）なら $\Phi*f\in C^{2}$ となる理由を、\ref{pde:gf-second-derivatives} と \ref{pde:newton-holder} の証明の言葉で説明せよ。
+:::
+
+::: solution
+**1.** \ref{pde:gf-second-derivatives.1} から $|\partial_{1}^{2}\Phi(s\theta)|=\frac{|n\theta_{1}^{2}-1|}{n\omega_{n}s^{n}}$。極座標（\ref{meas:polar-decomposition.2}、正の関数）から
+$$
+\int_{B(0,1)}|\partial_{1}^{2}\Phi|=\int_{0}^{1}\frac{s^{n-1}}{n\omega_{n}s^{n}}ds\cdot\int_{S^{n-1}}|n\theta_{1}^{2}-1|\,d\sigma=\frac{c}{n\omega_{n}}\int_{0}^{1}\frac{ds}{s},\qquad c\defeq\int_{S^{n-1}}|n\theta_{1}^{2}-1|\,d\sigma.
+$$
+$c>0$ である：$A\defeq\{\theta:\theta_{1}^{2}>\frac{2}{n+1}\}$ の上で $|n\theta_{1}^{2}-1|>\frac{n-1}{n+1}$、$A$ は $e_{1}$ を含む $S^{n-1}$ の相対開集合で、錐 $C_{A}$ は $\mathbb{R}^{n}$ の空でない開集合を含むので $\sigma(A)=n\lambda(C_{A})>0$（\ref{meas:polar-sphere-measure} の定義）。$\int_{0}^{1}\frac{ds}{s}=\infty$ なので積分は $\infty$。
+
+**2.** $\partial_{i}\partial_{j}\Phi$ は絶対値では $|z|^{-n}$ の大きさで可積分でないが、各球面の上の積分が $0$（\ref{pde:gf-second-derivatives.4}）で、定数への作用は打ち消される。\ref{pde:newton-holder} の証明では、この打ち消しで $f(y)$ を $f(y)-f(x)$ に置き換え、被積分関数を $\omega_{f}(|x-y|)|x-y|^{-n}$ で押さえた。$f\in C_{c}^{1}$ なら\ref{calc:mean-value-inequality}から $\omega_{f}(t)\le\|\nabla f\|_{\infty}t$ で、$1$ 次ヘルダー連続、したがってディニ連続なので、\ref{pde:newton-holder.3} から $\Phi*f\in C^{2}$。（$f\in C_{c}^{2}$ の場合の \ref{pde:newton-potential} とは、微分を $f$ に移すか $\Phi$ に残すかが違う。）
+:::
+
+::: problem {#pde:prob-gf-hp-gradient-bound}
+$f$ を有界なボレル可測関数で、$|y|>\rho$ で $f(y)=0$ とする。$u=\Phi*f$ について、すべての $x$ で $|\nabla u(x)|\le\rho\,\|f\|_{\infty}$ を示せ。また、\ref{pde:prob-gf-newton-ball} の $u$（$f=\mathbf{1}_{B(0,a)}$, $n\ge3$）の $\sup|\nabla u|$ をこの評価と比べよ。
+:::
+
+::: solution
+\ref{pde:newton-c1} から $|\nabla u(x)|\le\|f\|_{\infty}\int_{B(0,\rho)}|\nabla\Phi(x-y)|\,dy=\|f\|_{\infty}\int_{B(x,\rho)}g(|z|)\,dz$（$z=x-y$、$g(s)\defeq\frac{1}{n\omega_{n}s^{n-1}}$ は減少関数）。$D_{1}\defeq B(0,\rho)\setminus B(x,\rho)$, $D_{2}\defeq B(x,\rho)\setminus B(0,\rho)$ は、$\lambda(B(0,\rho))=\lambda(B(x,\rho))$ から同じ測度をもつ。$D_{1}$ の上では $|z|<\rho$ なので $g(|z|)\ge g(\rho)$、$D_{2}$ の上では $|z|\ge\rho$ なので $g(|z|)\le g(\rho)$。よって
+$$
+\int_{B(x,\rho)}g(|z|)\,dz=\int_{B(0,\rho)}g-\int_{D_{1}}g+\int_{D_{2}}g\le\int_{B(0,\rho)}g(|z|)\,dz=\int_{B(0,\rho)}|\nabla\Phi|=\rho
+$$
+（\ref{pde:gf-fundamental-properties.3}）。したがって $|\nabla u(x)|\le\rho\|f\|_{\infty}$。
+
+\ref{pde:prob-gf-newton-ball} の式から、$|x|<a$ で $\nabla u=-\frac{x}{n}$、$|x|>a$ で $\nabla u=-\frac{a^{n}x}{n|x|^{n}}$ で、$|x|\to a$ のときどちらも大きさ $\frac an$ に近づく（$u\in C^{1}$（\ref{pde:newton-c1}）なので $|x|=a$ でも $|\nabla u|=\frac an$）。$|\nabla u|$ は $|x|\le a$ で $\frac{|x|}{n}$、$|x|\ge a$ で $\frac{a^{n}}{n|x|^{n-1}}$ なので $\sup|\nabla u|=\frac an$。$\rho=a$, $\|f\|_{\infty}=1$ の評価 $a$ と比べると $\frac an<a$ で、等号は成り立たない。評価は、$f$ の台全体の上で $\nabla\Phi(x-\cdot)$ が同じ向きを向くという最悪の場合に合わせたもので、球の指示関数では向きの打ち消しがあるため $n$ 倍の余裕がある。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

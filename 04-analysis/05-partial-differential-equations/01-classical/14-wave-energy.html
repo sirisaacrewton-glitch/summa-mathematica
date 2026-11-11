@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>エネルギー法と有限伝播速度 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/14-wave-energy.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# エネルギー法と有限伝播速度 {#pde:page-wave-energy keywords="energy method for the wave equation, energy conservation on bounded domains with Dirichlet boundary condition, uniqueness for the initial-boundary value problem, local energy in a backward light cone, finite speed of propagation, domain of dependence and domain of influence in R^n, uniqueness without growth conditions, conservation of total energy for compactly supported data, no smoothing for the wave equation, comparison of wave, heat and Laplace equations, エネルギー法, エネルギー保存, 有限伝播速度, 光円錐, 依存領域, 影響領域"}
+
+前の二つのページ（\tref{pde:page-wave-equation}, \ref{pde:page-wave-kirchhoff}）では、波動方程式の解を公式で書き、その一意性も公式から導いた。このページでは公式を使わずに、**エネルギー**
+$$
+E(t)=\frac12\int\bigl((\partial_{t}u)^{2}+\lvert\nabla u\rvert^{2}\bigr)\,dx
+$$
+（運動エネルギーと、弦や膜の伸びによる位置エネルギーの和）の振る舞いから解の性質を引き出す。有界な領域で境界の値を $0$ に固定すると $E$ は時間によらず（**エネルギー保存**）、そこから初期値・境界値問題の解の一意性が出る。全空間では、過去に向かって縮む球の上のエネルギーが時間とともに増えないことを示し、乱れが速さ $1$ より速く伝わらないこと（**有限伝播速度**）と、すべての次元での一意性を得る。この方法は解の公式を必要としないので、係数が変わる方程式や、関数解析的手法で扱う弱い解にもそのまま広がる。ここで得る一意性は、次のページで一般の次元の解の公式を立てるときに使う。最後に、波動方程式・熱方程式・ラプラス方程式が要求する前提と、解の性質を対比する。
+
+## 記法と定義の確認 {#pde:sec-wv-en-notation}
+
+::: notation
+- 波動方程式の初期値問題と古典解は \ref{pde:wave-cauchy-problem}。時間を先に書き、$\nabla$, $\Delta$ は空間変数についてのもの、$J$ はいつも $0$ を含む開区間。$C^{k}$ 級は \ref{calc:ck-map}、偏微分の順序交換は \ref{calc:schwarz-theorem}、平均値の定理は \tref{calc:mean-value-theorem}。
+- $C^{1}$ 境界をもつ有界開集合、境界の測度 $\sigma$ と外向き単位法線 $\nu$ は \ref{fa:c1-boundary}, \ref{fa:boundary-measure}、ガウス–グリーンの公式は \ref{fa:gauss-green-c1}（$\overline{\Omega}$ の近傍で $C^{1}$ 級の関数について $\int_{\Omega}\partial_{j}F\,dx=\int_{\partial\Omega}F\nu_{j}\,d\sigma$）。球の上では、極座標だけから示した \ref{pde:ball-divergence} を使う。
+- 球面測度と極座標は \ref{meas:polar-sphere-measure}, \ref{meas:polar-decomposition}。積分記号下の微分は \ref{meas:parameter-integrals}、積分範囲が動く場合は \ref{calc:leibniz-rule}、優収束定理は \ref{meas:dominated-convergence}。
+- 有界開集合 $\Omega$ について、$C^{2}(J\times\overline{\Omega})$ は、$\overline{\Omega}$ を含むある開集合 $U$ について $J\times U$ 上の $C^{2}$ 級関数の $J\times\overline{\Omega}$ への制限の全体とする（ガウス–グリーンの公式を使うための約束）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 有界な領域でのエネルギー保存 {#pde:sec-wv-energy}
+
+::: theorem エネルギー保存 {#pde:wave-energy-conservation keywords="energy conservation for the wave equation on a bounded C^1 domain with Dirichlet boundary condition: E(t) = (1/2) int_Omega (u_t^2 + |grad u|^2) dx is constant; proof by differentiating under the integral and the Gauss-Green formula" index="エネルギー保存（波動方程式）|えねるぎーほぞんはどうほうていしき, エネルギー（波動方程式）|えねるぎーはどうほうていしき, エネルギー法|えねるぎーほう"}
+$\Omega\subset\mathbb{R}^{n}$ を $C^{1}$ 境界をもつ有界開集合とし、$u\in C^{2}(J\times\overline{\Omega})$ が $J\times\Omega$ で $\partial_{t}^{2}u=\Delta u$ を満たし、$J\times\partial\Omega$ で $u=0$ とする。
+$$
+E(t)\defeq\frac12\int_{\Omega}\bigl((\partial_{t}u(t,x))^{2}+\lvert\nabla u(t,x)\rvert^{2}\bigr)\,dx\qquad(t\in J)
+$$
+は $J$ の上で定数である。
+:::
+
+::: intuition
+端を固定した弦や膜の振動では、運動エネルギーと伸びのエネルギーの和は時間がたっても変わらない。境界が動かないので、外から仕事をされることも、外へエネルギーが逃げることもない。
+:::
+
+::: proof
+$Q\defeq(\partial_{t}u)^{2}+\lvert\nabla u\rvert^{2}$ とおく。
+
+**Step 1.** 【主張：$E$ は $J$ で微分可能で $E'(t)=\int_{\Omega}\bigl(\partial_{t}u\,\partial_{t}^{2}u+\nabla u\cdot\nabla\partial_{t}u\bigr)\,dx$】$u$ は $J\times U$ で $C^{2}$ 級なので、$Q$ と $\partial_{t}Q=2\partial_{t}u\,\partial_{t}^{2}u+2\nabla u\cdot\partial_{t}\nabla u$ は $J\times U$ で連続。$J$ の中の有界閉区間 $[t_{1},t_{2}]$ をとると、$[t_{1},t_{2}]\times\overline{\Omega}$ はコンパクトなので $\lvert\partial_{t}Q\rvert$ はそこで有界で、$\Omega$ は有界なので定数は $\Omega$ 上で可積分。\ref{meas:parameter-integrals.2} から $E$ は $(t_{1},t_{2})$ で微分可能で、微分を積分の中に入れられる。$\partial_{t}\nabla u=\nabla\partial_{t}u$ は \ref{calc:schwarz-theorem}。
+
+**Step 2.** 【主張：被積分関数は $\operatorname{div}(\partial_{t}u\,\nabla u)$ に等しい】方程式 $\partial_{t}^{2}u=\Delta u$ と積の微分から
+$$
+\partial_{t}u\,\partial_{t}^{2}u+\nabla u\cdot\nabla\partial_{t}u=\sum_{j}\bigl(\partial_{t}u\,\partial_{j}^{2}u+\partial_{j}u\,\partial_{j}\partial_{t}u\bigr)=\sum_{j}\partial_{j}\bigl(\partial_{t}u\,\partial_{j}u\bigr).
+$$
+
+**Step 3.** 【主張：$E'(t)=0$】$F_{j}\defeq\partial_{t}u(t,\cdot)\,\partial_{j}u(t,\cdot)$ は $U$ で $C^{1}$ 級なので、\ref{fa:gauss-green-c1} から $\int_{\Omega}\partial_{j}F_{j}\,dx=\int_{\partial\Omega}\partial_{t}u\,\partial_{j}u\,\nu_{j}\,d\sigma$。$y\in\partial\Omega$ を固定すると $t\mapsto u(t,y)$ は $J$ で恒等的に $0$ なので $\partial_{t}u(t,y)=0$。よって境界の積分は $0$ で、Step 1・2 から $E'=0$。$J$ は区間なので、\ref{calc:mean-value-theorem} から $E$ は定数。
+
+::: hypcheck
+- **境界条件 $u=0$**：Step 3 で、境界の上で $\partial_{t}u=0$ を得るのに使った。境界条件がないと、境界を通ってエネルギーが出入りし、$E$ は保存されない（例：$n=1$、$\Omega=(0,\pi)$、$u=\sin t\sin x+t$ は方程式を満たすが端で $u=t\ne0$ で、$E(t)=\frac12\int_{0}^{\pi}\bigl((\cos t\sin x+1)^{2}+\sin^{2}t\cos^{2}x\bigr)dx=\frac{3\pi}{4}+2\cos t$ は時間によって変わる）。
+- **$C^{1}$ 境界と $\overline{\Omega}$ の近傍での $C^{2}$**：Step 3 でガウス–グリーンの公式を使うために使った。球なら \ref{pde:ball-divergence} で足りる。境界の正則性を落とす（リプシッツ境界など）には、より一般の発散定理か、関数解析的手法（弱解のエネルギー等式）が要る。
+- **$u\in C^{2}$**：Step 1 の積分記号下の微分と、Step 2 の積の微分・順序交換に使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 初期値・境界値問題の一意性 {#pde:wave-uniqueness-bounded keywords="uniqueness for the initial-boundary value problem for the wave equation with Dirichlet data on a bounded C^1 domain, by energy conservation" index="初期値・境界値問題の一意性（波動方程式）|しょきちきょうかいちもんだいのいちいせいはどうほうていしき"}
+$\Omega$ を $C^{1}$ 境界をもつ有界開集合とする。$u_{1},u_{2}\in C^{2}(J\times\overline{\Omega})$ がどちらも $J\times\Omega$ で $\partial_{t}^{2}u=\Delta u+f$（$f$ は与えられた関数）を満たし、$J\times\partial\Omega$ で同じ値をとり、$t=0$ で同じ初期値 $u(0,\cdot)$, $\partial_{t}u(0,\cdot)$ をもてば、$u_{1}=u_{2}$。
+:::
+
+::: proof
+$w\defeq u_{1}-u_{2}$ は $J\times\Omega$ で $\partial_{t}^{2}w=\Delta w$、$J\times\partial\Omega$ で $w=0$、$w(0,\cdot)=\partial_{t}w(0,\cdot)=0$ を満たす。\ref{pde:wave-energy-conservation} から $w$ のエネルギーは $E(t)=E(0)=0$（$t=0$ で $\partial_{t}w=0$、$w(0,\cdot)=0$ から $\nabla w(0,\cdot)=0$）。被積分関数 $(\partial_{t}w)^{2}+\lvert\nabla w\rvert^{2}$ は $\Omega$ で連続で非負、積分が $0$ なので $\Omega$ で恒等的に $0$（正になる点があれば、その近くの小さな球の上で正で積分が正になる）。とくに $\partial_{t}w=0$ が $J\times\Omega$ で成り立ち、各 $x\in\Omega$ で $t\mapsto w(t,x)$ は定数 $w(0,x)=0$。$\overline{\Omega}$ の上でも連続性から $w=0$。
+:::
+
+::: supplement
+**前提を変えると.** 境界条件を $\partial_{\nu}u=\nabla u\cdot\nu=0$（ノイマン条件、端が自由な膜）に替えても、Step 3 の境界の積分は $\partial_{t}u\,\partial_{\nu}u=0$ で消え、エネルギーは保存される。ただし一意性の証明では、$E=0$ から $\nabla w=0$, $\partial_{t}w=0$ を得ても、$w(0,\cdot)=0$ を使って初めて $w=0$ がわかる。方程式に摩擦の項を加えた $\partial_{t}^{2}u+a\,\partial_{t}u=\Delta u$（$a>0$）ではエネルギーは減り（\see{pde:prob-wv-damped}）、$a<0$ では増えうるが、それでも指数関数で押さえられ、一意性は保たれる。
+
+**似た定理.** ラプラス方程式の一意性（\ref{pde:dirichlet-uniqueness}）は最大値原理で示したが、ディリクレ積分 $\int_{\Omega}\lvert\nabla u\rvert^{2}$ を使っても示せる：$\partial\Omega$ で $u=0$ となる調和関数なら、同じ部分積分で $\int\lvert\nabla u\rvert^{2}=-\int u\Delta u=0$。波動方程式には最大値原理がない（解は境界と初期値の最大値を超えうる：$n=1$、$\Omega=(0,\pi)$、$u=\sin t\sin x$ は初期値 $u(0,\cdot)=0$ と境界値 $0$ をもつが内部で $1$ に達する）ので、2 乗積分によるエネルギーの議論が主な道具になる。関数解析的手法では、このエネルギー等式をガレルキン近似に使って弱解を作る（この分野の関数解析的手法の系列）。
+
+**高い視点：時間の平行移動とエネルギー.** 方程式の係数が時間によらない（時間の平行移動で不変な）とき、それに対応してエネルギーが保存される。これは力学のネーターの定理の一例で、ばねにつながれた多数の質点の系（弦を細かく区切ったもの）では、運動エネルギーとばねのエネルギーの和が保存されることの連続版である。比喩で言えば、エネルギーは閉じた部屋の中の水の量で、波はその水を部屋の中で揺らし続けるが、壁（境界条件）に穴がない限り一滴も減らない。
+:::
+
+## 有限伝播速度 {#pde:sec-wv-propagation}
+
+全空間では、解が無限遠で減衰するとは限らないので、エネルギーを全空間で積分すると無限大になりうる。そこで、点 $(t_{0},x_{0})$ に向かって縮んでいく球の上だけでエネルギーを見る。
+
+::: theorem 有限伝播速度 {#pde:wave-finite-speed keywords="finite speed of propagation for the wave equation: the local energy e(t) = (1/2) int_{B(x0, t0 - t)} (u_t^2 + |grad u|^2) dx in a backward light cone is nonincreasing; data vanishing on B(x0,t0) force u = 0 in the cone; proof by the divergence theorem on balls and Cauchy-Schwarz" index="有限伝播速度|ゆうげんでんぱそくど, 光円錐|こうえんすい, 局所エネルギー|きょくしょえねるぎー" refname="有限伝播速度"}
+$u\in C^{2}(J\times\mathbb{R}^{n})$ が $\partial_{t}^{2}u=\Delta u$ を満たすとする。$x_{0}\in\mathbb{R}^{n}$, $t_{0}>0$ とし、開区間 $J'\defeq J\cap(-\infty,t_{0})$ の上で
+$$
+e(t)\defeq\frac12\int_{B(x_{0},t_{0}-t)}\bigl((\partial_{t}u)^{2}+\lvert\nabla u\rvert^{2}\bigr)\,dx
+$$
+とおく。
+1. $e$ は $J'$ の上で単調非増加である。
+2. $u(0,\cdot)$ と $\partial_{t}u(0,\cdot)$ が $B(x_{0},t_{0})$ の上で $0$ なら、円錐 $K\defeq\{(t,x):t\in J,\ 0\le t<t_{0},\ \lvert x-x_{0}\rvert<t_{0}-t\}$ の上で $u=0$。
+:::
+
+::: intuition
+点 $x_{0}$ のまわりの球を、半径が速さ $1$ で縮むように時間とともに小さくしていくと、その中のエネルギーは増えない。球面から入ってくるエネルギーは、球面が光の速さで逃げていくので追いつけないからである。とくに、最初に静かだった球の中は、縮んでいく円錐の中でずっと静かなままである。
+:::
+
+::: proof
+$Q\defeq(\partial_{t}u)^{2}+\lvert\nabla u\rvert^{2}$ とし、$t\in J'$ について $R(t)\defeq t_{0}-t>0$ とおく。
+
+**Step 1.** 【主張：$q(t,\rho)\defeq\rho^{n-1}\int_{S^{n-1}}Q(t,x_{0}+\rho\theta)\,d\sigma(\theta)$ について $e(t)=\frac12\int_{0}^{R(t)}q(t,\rho)\,d\rho$ で、$q$ と $\partial_{t}q$ は $J\times[0,\infty)$ で連続】$Q(t,\cdot)\mathbf{1}_{B(x_{0},R)}$ は非負のボレル可測関数なので、平行移動して \ref{meas:polar-decomposition.2} を使えば第一の等式。$Q$ と $\partial_{t}Q$ は連続で、$J$ のコンパクト集合と有界な $\rho$ の上で有界なので、\ref{meas:parameter-integrals} と優収束定理（列で）から $q$ は連続で $\partial_{t}q(t,\rho)=\rho^{n-1}\int_{S^{n-1}}\partial_{t}Q(t,x_{0}+\rho\theta)\,d\sigma$ も連続。
+
+**Step 2.** 【主張：$e$ は $J'$ で微分可能で $\displaystyle e'(t)=\int_{B(x_{0},R)}\bigl(\partial_{t}u\,\partial_{t}^{2}u+\nabla u\cdot\nabla\partial_{t}u\bigr)dx-\frac{R^{n-1}}{2}\int_{S^{n-1}}Q(t,x_{0}+R\theta)\,d\sigma(\theta)$（$R=R(t)$）】$t_{1}\in J'$ をとり、閉包が $J'$ に含まれ $t_{1}$ を含む開区間 $(\alpha,\beta)$ を選ぶ。$(\alpha,\beta)\times[0,t_{0}-\alpha]$ の上で $\frac12q$ と $\frac12\partial_{t}q$ は連続で、$t\in(\alpha,\beta)$ なら $R(t)\in[0,t_{0}-\alpha]$。\ref{calc:leibniz-rule}（下端 $0$、上端 $R(t)$、$R'=-1$）から
+$$
+e'(t)=-\frac12q\bigl(t,R(t)\bigr)+\frac12\int_{0}^{R(t)}\partial_{t}q(t,\rho)\,d\rho.
+$$
+第二項は Step 1 の極座標を逆にたどると $\frac12\int_{B(x_{0},R)}\partial_{t}Q\,dx$ で、$\frac12\partial_{t}Q=\partial_{t}u\,\partial_{t}^{2}u+\nabla u\cdot\nabla\partial_{t}u$（\ref{calc:schwarz-theorem}）。
+
+**Step 3.** 【主張：$e'(t)=R^{n-1}\int_{S^{n-1}}\bigl(\partial_{t}u\,\nabla u\cdot\theta-\tfrac12Q\bigr)(t,x_{0}+R\theta)\,d\sigma(\theta)$】\ref{pde:wave-energy-conservation} の証明の Step 2 と同じく、方程式から第一項の被積分関数は $\operatorname{div}(\partial_{t}u\,\nabla u)$ に等しい。$F\defeq\partial_{t}u(t,\cdot)\nabla u(t,\cdot)\in C^{1}(\mathbb{R}^{n};\mathbb{R}^{n})$ に \ref{pde:ball-divergence} を使うと、第一項は $R^{n-1}\int_{S^{n-1}}\partial_{t}u\,\nabla u\cdot\theta\,d\sigma$。
+
+**Step 4.** 【主張：$e'\le0$、したがって 1】$\lvert\theta\rvert=1$ なので、コーシー–シュワルツの不等式と $ab\le\frac12(a^{2}+b^{2})$ から
+$$
+\partial_{t}u\,\nabla u\cdot\theta\le\lvert\partial_{t}u\rvert\,\lvert\nabla u\rvert\le\frac12\bigl((\partial_{t}u)^{2}+\lvert\nabla u\rvert^{2}\bigr)=\frac12Q.
+$$
+よって Step 3 の被積分関数は $0$ 以下で $e'\le0$。$J'$ は区間なので、\ref{calc:mean-value-theorem} から $e$ は単調非増加。
+
+**Step 5.** 【主張：2】仮定から $B(x_{0},t_{0})$ の上で $\partial_{t}u(0,\cdot)=0$、また $u(0,\cdot)=0$ なので $\nabla u(0,\cdot)=0$、よって $e(0)=0$。1 から $0\le t<t_{0}$, $t\in J$ で $0\le e(t)\le e(0)=0$。被積分関数 $Q(t,\cdot)$ は連続で非負なので、$B(x_{0},t_{0}-t)$ の上で $Q(t,\cdot)=0$、とくに $\partial_{t}u=0$ が $K$ の上で成り立つ。$(t,x)\in K$ なら、$0\le s\le t$ について $\lvert x-x_{0}\rvert<t_{0}-t\le t_{0}-s$ なので線分 $\{(s,x):0\le s\le t\}$ は $K$ に含まれ、$u(t,x)=u(0,x)+\int_{0}^{t}\partial_{t}u(s,x)\,ds=0$。
+
+::: hypcheck
+- **速さ $1$**：Step 2 の $R'=-1$ と Step 4 の不等式 $\partial_{t}u\,\nabla u\cdot\theta\le\frac12Q$ がちょうど釣り合うことに使った。球を速さ $c<1$ で縮めると $-\frac{c}{2}Q$ が残り、不等式が成り立たない（実際、速さ $1$ の波は速さ $c<1$ の円錐の外から入ってくる）。速さ $c>1$ で縮めるのは許される（主張が弱くなるだけ）。
+- **$u\in C^{2}$**：Step 2 の積分記号下の微分と、Step 3 で $F\in C^{1}$ として球の上の発散定理を使うのに使った。無限遠での増大条件はまったく使っていない：$e$ は有界な球の上の積分だからである。
+- **初期値が球の上で $0$**：Step 5 で $e(0)=0$ に使った。球の外の初期値は何でもよい。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 一意性・依存領域・影響領域（$n$ 次元） {#pde:wave-uniqueness-rn keywords="uniqueness of classical solutions of the Cauchy problem for the wave equation in all dimensions without growth conditions; domain of dependence: the double cone |x - x0| < t0 - |t|; domain of influence: data supported in the closed ball of radius R influence only |x| <= R + |t|; conservation of total energy for compactly supported data" index="一意性（波動方程式）|いちいせいはどうほうていしき, 依存領域（n 次元）|いぞんりょういきえぬじげん, 影響領域（n 次元）|えいきょうりょういきえぬじげん"}
+$n\ge1$ とする。
+1. 初期値 $g,h$ の $J\times\mathbb{R}^{n}$ 上の古典解は高々一つである。
+2. 二つの古典解 $u,\tilde{u}$（$J\times\mathbb{R}^{n}$ 上）の初期値が球 $B(x_{0},t_{0})$ の上で一致すれば、両側の円錐 $\{(t,x):t\in J,\ \lvert x-x_{0}\rvert<t_{0}-\lvert t\rvert\}$ の上で $u=\tilde{u}$。
+3. 古典解 $u$ の初期値 $g,h$ が閉球 $\overline{B}(0,R)$ の外で $0$ なら、$\lvert x\rvert>R+\lvert t\rvert$ で $u(t,x)=0$。
+4. 3 の仮定の下で、$E(t)\defeq\frac12\int_{\mathbb{R}^{n}}\bigl((\partial_{t}u)^{2}+\lvert\nabla u\rvert^{2}\bigr)dx$ は有限で、$J$ の上で定数。
+:::
+
+::: proof
+**2.** $w\defeq u-\tilde{u}$ は古典解で、初期値は $B(x_{0},t_{0})$ の上で $0$。\ref{pde:wave-finite-speed.2} から $0\le t<t_{0}$ の円錐の上で $w=0$。負の時刻については $\check{w}(t,x)\defeq w(-t,x)$ が $(-J)\times\mathbb{R}^{n}$ で $\partial_{t}^{2}\check{w}=\Delta\check{w}$ を満たし、$\check{w}(0,\cdot)=w(0,\cdot)$, $\partial_{t}\check{w}(0,\cdot)=-\partial_{t}w(0,\cdot)$ も $B(x_{0},t_{0})$ で $0$ なので、同じ定理から $0\le t<t_{0}$ の円錐の上で $\check{w}=0$。
+
+**1.** $(t,x)\in J\times\mathbb{R}^{n}$ を任意にとり、2 を $x_{0}=x$, $t_{0}>\lvert t\rvert$ で使う（二つの解の初期値はどこでも一致する）。
+
+**3.** $\lvert x\rvert>R+\lvert t\rvert$ とし、$x_{0}\defeq x$, $t_{0}\defeq\lvert x\rvert-R>\lvert t\rvert$ とおく。$\lvert y-x\rvert<t_{0}$ なら $\lvert y\rvert>\lvert x\rvert-t_{0}=R$ なので、初期値は $B(x,t_{0})$ の上で $0$。恒等的に $0$ の解と比べて 2 から $u(t,x)=0$。
+
+**4.** $t_{1}\in J$ をとり、$T\defeq\lvert t_{1}\rvert+1$、$J''\defeq J\cap(-T,T)$、$\Omega\defeq B(0,R+T)$ とおく。3 から、$t\in J''$ なら $\lvert x\rvert\ge R+T>R+\lvert t\rvert$ で $u(t,x)=0$ なので、$J''\times\partial\Omega$ で $u=0$ で、被積分関数は $\Omega$ の外で $0$。$u$ は $J''\times\mathbb{R}^{n}$ で $C^{2}$ 級なので、球 $\Omega$（$C^{1}$ 境界をもつ）に \ref{pde:wave-energy-conservation} を使うと、$E(t)=\frac12\int_{\Omega}\bigl((\partial_{t}u)^{2}+\lvert\nabla u\rvert^{2}\bigr)dx$ は $J''$ で定数、とくに $E(t_{1})=E(0)<\infty$。
+:::
+
+::: supplement
+**前提を変えると.** 熱方程式では、初期値が球の外で $0$ でも、$t>0$ の解は（初期値が非負で $0$ でなければ）至る所で正になり、伝播速度は無限大である（熱方程式のページ）。また熱方程式の全空間での一意性には無限遠での増大条件が要るが、波動方程式では 1 のとおり何の条件も要らない。速さ $c(x)$ が場所によって変わる方程式 $\partial_{t}^{2}u=\operatorname{div}(c(x)^{2}\nabla u)$ でも、球を速さ $\sup c$ で縮めれば同じ議論が通り、乱れは $\sup c$ より速くは伝わらない。
+
+**似た定理.** 1 次元では、同じ結論をダランベールの公式から直接読み取った（\ref{pde:wave-1d-domains}）。3 次元では\ref{pde:wave-kirchhoff}からさらに強く、$u(t,x)$ が円錐の**表面**、つまり球面 $\lvert y-x\rvert=\lvert t\rvert$ の上の初期値だけで決まることがわかる。エネルギー法の結論は円錐の**中身**全体についてのもので弱いが、公式を使わないので、係数が変わる方程式や非線形の方程式にも広がる。4 は、台がコンパクトな初期値ではエネルギーが全空間で保存されることを言い、フーリエ変換で見ると $\hat{u}(t,\xi)=\cos(t\lvert\xi\rvert)\hat{g}(\xi)+\frac{\sin(t\lvert\xi\rvert)}{\lvert\xi\rvert}\hat{h}(\xi)$ から、プランシュレルの定理（\ref{four:plancherel}）による等式 $\int(\lvert\partial_{t}\hat{u}\rvert^{2}+\lvert\xi\rvert^{2}\lvert\hat{u}\rvert^{2})d\xi=\int(\lvert\xi\rvert^{2}\lvert\hat{g}\rvert^{2}+\lvert\hat{h}\rvert^{2})d\xi$ にあたる（この見方はここでは形式的なものにとどめる）。
+
+**高い視点：砂時計の上半分.** 円錐 $K$ は、上に向かって細くなる砂時計の上半分のような形をしている。比喩で言えば、点 $(t_{0},x_{0})$ の出来事に関わる情報は、すべてこの円錐の底（初期時刻の球）から円錐の中を通って届き、円錐の側面からは何も入ってこない。側面は光の速さで動く壁で、どんな信号もそれに追いつけないからである。Step 4 の不等式 $\lvert\partial_{t}u\,\nabla u\cdot\theta\rvert\le\frac12Q$ は「エネルギーの流れの速さ（エネルギー流束をエネルギー密度で割ったもの）は $1$ 以下」という主張で、この壁の正体である。
+:::
+
+## 前提の対比：波動・熱・ラプラス {#pde:sec-wv-comparison}
+
+最後に、この系列で扱ってきた三つの代表的な方程式を、解の滑らかさと情報の伝わり方で比べる。まず、波動方程式が滑らかさを良くしないことを、1 次元で正確に述べる。
+
+::: proposition 滑らかさは運ばれるだけ（1 次元） {#pde:wave-no-smoothing keywords="the wave equation does not smooth: in one dimension, (u(t), u_t(t)) is in C^k x C^{k-1} for one time t1 if and only if (g, h) is in C^k x C^{k-1}; proof by time reversal and d'Alembert" index="滑らかさの伝播（波動方程式）|なめらかさのでんぱはどうほうていしき"}
+$n=1$、$k\ge2$、$g\in C^{2}(\mathbb{R})$, $h\in C^{1}(\mathbb{R})$ とし、$u$ をダランベールの公式の解とする。$t_{1}\in\mathbb{R}$ について、次は同値である。
+1. $g\in C^{k}(\mathbb{R})$ かつ $h\in C^{k-1}(\mathbb{R})$。
+2. $u(t_{1},\cdot)\in C^{k}(\mathbb{R})$ かつ $\partial_{t}u(t_{1},\cdot)\in C^{k-1}(\mathbb{R})$。
+:::
+
+::: proof
+**1⇒2.** $H(s)=\int_{0}^{s}h$ は $C^{k}$ 級で、$u(t_{1},x)=\frac12\bigl(g(x+t_{1})+g(x-t_{1})\bigr)+\frac12\bigl(H(x+t_{1})-H(x-t_{1})\bigr)$ は $x$ の $C^{k}$ 級関数、$\partial_{t}u(t_{1},x)=\frac12\bigl(g'(x+t_{1})-g'(x-t_{1})\bigr)+\frac12\bigl(h(x+t_{1})+h(x-t_{1})\bigr)$ は $C^{k-1}$ 級。
+
+**2⇒1.** $v(s,x)\defeq u(t_{1}-s,x)$ は $\mathbb{R}^{2}$ 上の古典解で、初期値は $v(0,\cdot)=u(t_{1},\cdot)\in C^{k}$, $\partial_{s}v(0,\cdot)=-\partial_{t}u(t_{1},\cdot)\in C^{k-1}$。\tref{pde:wave-dalembert.2} から $v$ はこの初期値のダランベールの公式の解なので、いま示した 1⇒2 を $v$ と時刻 $t_{1}$ に使うと、$g=v(t_{1},\cdot)\in C^{k}$, $h=-\partial_{s}v(t_{1},\cdot)\in C^{k-1}$。
+:::
+
+::: example
+$g(x)=\lvert x\rvert^{3}$（$C^{2}$ 級だが $0$ で $C^{3}$ 級でない）, $h=0$ なら、$u(t,x)=\frac12\bigl(\lvert x+t\rvert^{3}+\lvert x-t\rvert^{3}\bigr)$ はどの時刻 $t$ でも $C^{3}$ 級でない：$t\ne0$ では点 $x=\pm t$ の近くで一方の項だけが角をもち、もう一方は滑らかである。角は消えず、二つに分かれて運ばれる。
+:::
+
+::: table 三つの方程式の対比 {#pde:wave-comparison-table}
+| 性質 | 波動方程式 | 熱方程式 | ラプラス方程式 |
+|---|---|---|---|
+| 解が与えたデータより滑らかになる | :no:（\ref{pde:wave-no-smoothing}。3 次元では 1 階失う場合もある） | :yes:（$t>0$ で $C^{\infty}$） | :yes:（内部で $C^{\infty}$、実解析的） |
+| 乱れの伝わる速さが有限 | :yes:（速さ $1$。\ref{pde:wave-finite-speed}） | :no:（一瞬で至る所に届く） | 時間がないので該当しない |
+| 時間を逆向きに解ける | :yes:（$t\mapsto-t$ で不変） | :no:（逆向きの問題は一般に解をもたない） | 該当しない |
+| 全空間の初期値問題の一意性に増大条件が要らない | :yes:（\ref{pde:wave-uniqueness-rn.1}） | :no:（増大条件がないと一意でない） | 該当しない（有界な調和関数は定数：\ref{pde:liouville}） |
+| 古典解には「解に必要な滑らかさ」のデータで足りる | 1 次元で :yes:、3 次元で :no:（\ref{pde:wave-kirchhoff-loss}） | :yes:（有界連続な初期値で足りる） | 境界値については :yes:（球なら連続な境界値で足りる）、右辺 $f$ については :no:（連続では足りない） |
+| 解の主な道具 | 公式・エネルギー | 公式（ガウス核）・最大値原理 | 平均値の性質・最大値原理・グリーン関数 |
+:::
+
+::: supplement
+**前提を変えると.** 対比の要は、方程式が時間について 2 階か 1 階か、そして時間の向きを区別するかである。波動方程式は $t\mapsto-t$ で不変なので、未来へ解けることと過去へ解けることが同じになり、\ref{pde:wave-no-smoothing} の証明のとおり、未来で滑らかになるなら過去でも滑らかでなければならず、結局滑らかさは変われない。熱方程式は時間の向きをもち、未来へは滑らかにするが、その代わり過去へは解けない。ラプラス方程式には時間がなく、すべての方向が対等に「内部」を挟むので、内部の解は境界の情報を平均した滑らかなものになる。関数解析的手法に移ると、前提は $C^{k}$ からソボレフ空間へ移り、波動方程式の「1 階の損失」は消える（エネルギー空間 $H^{1}\times L^{2}$ の中で解は保存的に動く）。この対比は、この分野の最後で古典的手法と関数解析的手法の前提を比べるときの材料になる。
+
+**似た定理.** 2 階の線形方程式の型（\ref{pde:classification}）は、主表象の符号でこの三つに分かれた。双曲型は「特性的な方向（光円錐）をもつ」型で、特異性が特性線に沿って運ばれ、楕円型は特性的な方向をもたないので特異性が生き残れない。1 階の方程式でも、特異性は特性曲線に沿って運ばれた（\ref{pde:page-characteristics}）。
+
+**高い視点：郵便・拡散・合議.** 比喩で言えば、波動方程式は**郵便**である：手紙（初期値の情報）は決まった速さで運ばれ、角の折れた手紙は折れたまま届き、届く前には何も知らされない。熱方程式は**噂の拡散**である：一瞬で至る所に薄く広まり、細部（角）はぼやけ、誰が言い出したかを逆にたどることはできない。ラプラス方程式は**合議**である：時間をかけずに、全員が周りの平均に合わせた一つの穏やかな結論を出す。
+:::
+
+## 問題 {#pde:sec-wv-en-problems}
+
+::: problem {#pde:prob-wv-damped}
+$\Omega\subset\mathbb{R}^{n}$ を $C^{1}$ 境界をもつ有界開集合、$a\in\mathbb{R}$ とし、$u\in C^{2}(J\times\overline{\Omega})$ が $J\times\Omega$ で $\partial_{t}^{2}u+a\,\partial_{t}u=\Delta u$、$J\times\partial\Omega$ で $u=0$ を満たすとする。$E(t)$ を \ref{pde:wave-energy-conservation} と同じ式で定める。
+1. $E'(t)=-a\int_{\Omega}(\partial_{t}u)^{2}\,dx$ を示せ。とくに $a\ge0$ なら $E$ は単調非増加。
+2. $t\ge0$, $t\in J$ について $E(t)\le e^{2\lvert a\rvert t}E(0)$ を示せ。
+3. この方程式の初期値・境界値問題の解は（$t\ge0$ の側で）一意であることを示せ。
+:::
+
+::: solution
+**1.** \ref{pde:wave-energy-conservation} の証明の Step 1 から $E'(t)=\int_{\Omega}(\partial_{t}u\,\partial_{t}^{2}u+\nabla u\cdot\nabla\partial_{t}u)\,dx$。方程式から $\partial_{t}^{2}u=\Delta u-a\,\partial_{t}u$ なので、被積分関数は $\operatorname{div}(\partial_{t}u\,\nabla u)-a(\partial_{t}u)^{2}$。Step 3 と同じく発散の項の積分は境界条件から $0$。
+
+**2.** 1 から $E'(t)\le\lvert a\rvert\int(\partial_{t}u)^{2}\le2\lvert a\rvert E(t)$。$\bigl(e^{-2\lvert a\rvert t}E(t)\bigr)'=e^{-2\lvert a\rvert t}\bigl(E'(t)-2\lvert a\rvert E(t)\bigr)\le0$ なので、平均値の定理から $e^{-2\lvert a\rvert t}E(t)\le E(0)$（$t\ge0$）。
+
+**3.** 二つの解の差 $w$ は同じ方程式を満たし、境界値と初期値が $0$ なので $E(0)=0$。2 から $t\ge0$ で $E(t)=0$ で、\ref{pde:wave-uniqueness-bounded} の証明と同じく $w=0$。（$t\le0$ の側も、$t\mapsto-t$ で $a$ を $-a$ に替えた方程式になるので、2 が $\lvert a\rvert$ で書かれていることから同様に一意。）
+:::
+
+::: problem {#pde:prob-wv-equipartition}
+$n=1$ とし、$g\in C^{2}(\mathbb{R})$, $h\in C^{1}(\mathbb{R})$ が区間 $[a,b]$ の外で $0$ とする。$u$ をダランベールの公式の解とし、運動エネルギー $K(t)\defeq\frac12\int(\partial_{t}u)^{2}dx$ と位置エネルギー $P(t)\defeq\frac12\int(\partial_{x}u)^{2}dx$ を考える。
+1. $u=F(x+t)+G(x-t)$, $F'=\frac12(g'+h)$, $G'=\frac12(g'-h)$ と書けることを確かめ、$K(t)+P(t)=\int(F')^{2}+\int(G')^{2}$（時間によらない）を示せ。
+2. $\lvert t\rvert>\frac{b-a}{2}$ なら $K(t)=P(t)$（**エネルギーの等分配**）を示せ。
+:::
+
+::: solution
+**1.** \eqref{pde:eq-dalembert} で $H(s)=\int_{0}^{s}h$ とすると $u=\frac12(g+H)(x+t)+\frac12(g-H)(x-t)$ なので、$F=\frac12(g+H)$, $G=\frac12(g-H)$ で $F'=\frac12(g'+h)$, $G'=\frac12(g'-h)$。これらは $[a,b]$ の外で $0$。$\partial_{t}u=F'(x+t)-G'(x-t)$, $\partial_{x}u=F'(x+t)+G'(x-t)$ なので $(\partial_{t}u)^{2}+(\partial_{x}u)^{2}=2F'(x+t)^{2}+2G'(x-t)^{2}$。積分して平行移動不変性を使うと $K+P=\int F'^{2}+\int G'^{2}$。
+
+**2.** $(\partial_{t}u)^{2}-(\partial_{x}u)^{2}=-4F'(x+t)G'(x-t)$。$F'(x+t)\ne0$ なら $x\in[a-t,b-t]$、$G'(x-t)\ne0$ なら $x\in[a+t,b+t]$。$t>\frac{b-a}{2}$ なら $b-t<a+t$ でこの二つの区間は交わらない（$t<-\frac{b-a}{2}$ でも同様に $b+t<a-t$）。よって被積分関数 $-4F'(x+t)G'(x-t)$ は恒等的に $0$ で、$K(t)-P(t)=\frac12\int\bigl((\partial_{t}u)^{2}-(\partial_{x}u)^{2}\bigr)dx=0$。右へ進む波と左へ進む波が分かれた後は、それぞれの波で運動と伸びのエネルギーが等しい。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

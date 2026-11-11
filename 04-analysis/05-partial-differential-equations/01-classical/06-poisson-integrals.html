@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>球と半空間のポアソン積分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/06-poisson-integrals.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 球と半空間のポアソン積分 {#pde:page-poisson-integrals keywords="Green function of a ball by the method of images (Kelvin inversion), Poisson kernel of the ball K(x,y) = (r^2 - |x|^2)/(n omega_n r |x-y|^n), Poisson integral solves the Dirichlet problem on a ball with continuous boundary data, Poisson representation of harmonic functions, removable singularities of harmonic functions, Green function and Poisson kernel of the half-space 2 x_n/(n omega_n |x-y|^n), bounded continuous boundary data, reflection principle, 鏡像法, ポアソン核, 除去可能な特異点"}
+
+前のページ \ref{pde:page-green-functions} では、グリーン関数があれば、ディリクレ問題の（境界まで滑らかな）解が境界値と右辺の積分で書けることを示した。ただしそこでは、グリーン関数の存在と、解の存在の両方を仮定していた。このページでは、グリーン関数を具体的に書ける二つの領域、**球**と**半空間**を扱う。どちらも、領域の外の「鏡像の点」に符号を変えた点源を置いて境界の値を打ち消す**鏡像法**でグリーン関数が得られる。そこから出てくるポアソン核を境界値に掛けて積分すると、今度は仮定なしに、連続な境界値をもつディリクレ問題の古典解（閉包で連続、内部で調和）が**作れる**ことを直接確かめる。応用として、調和関数の除去可能な特異点を調べる。これは次のページで、右辺 $f$ が連続なだけではポアソン方程式 $-\Delta u=f$ の $C^{2}$ 解が存在しないことがある例を示すときに使う。
+
+## 記法と定義の確認 {#pde:sec-gf-pi-notation}
+
+::: notation
+- 前のページの記法をそのまま使う：$n\ge2$、基本解 $\Phi(x)=\Psi(|x|)$（\ref{pde:gf-fundamental-solution}）とその性質（\ref{pde:gf-fundamental-properties}）、境界積分の約束（とくに球 $B(a,R)$ では $\int_{\partial B(a,R)}h\,dS=R^{n-1}\int_{S^{n-1}}h(a+R\theta)\,d\sigma(\theta)$, $\nu(a+R\theta)=\theta$）、グリーン関数（\ref{pde:green-function}）、グリーン関数による表示（\ref{pde:green-dirichlet}）。
+- 基本事項は \ref{pde:page-harmonic-functions}・\ref{pde:page-harmonic-estimates} のもの：平均値の性質（\ref{pde:mean-value-property}）、\ref{pde:weak-maximum-principle}、ディリクレ問題の一意性（\ref{pde:dirichlet-uniqueness}）。
+- $\Psi$ は $(0,\infty)$ で狭義減少である（$\Psi'(s)=-\frac{1}{n\omega_{n}s^{n-1}}<0$）。
+- **半空間**：$\mathbb{R}_{+}^{n}\defeq\{x=(x',x_{n}):x'\in\mathbb{R}^{n-1},\ x_{n}>0\}$、その閉包 $\overline{\mathbb{R}_{+}^{n}}=\{x_{n}\ge0\}$、境界 $\partial\mathbb{R}_{+}^{n}=\{x_{n}=0\}$ を $\mathbb{R}^{n-1}$ と同一視する。$x=(x',x_{n})$ の**鏡像**を $x^{*}\defeq(x',-x_{n})$ とする。$\mathbb{R}^{n-1}$ 上の積分は $(n-1)$ 次元ルベーグ測度 $dy'$ による。
+- $\omega_{k}=\pi^{k/2}/\Gamma(\frac k2+1)$（\ref{calc:ball-volume}。開球と閉球のルベーグ測度は等しい）、ベータ関数 $B(a,b)=\Gamma(a)\Gamma(b)/\Gamma(a+b)$ と $\Gamma(\frac12)=\sqrt\pi$（\ref{calc:beta-function}）。
+- 積分記号下の微分は \ref{meas:parameter-integrals}、優収束定理は \ref{meas:dominated-convergence}、放射関数の積分は \ref{meas:polar-radial.2}（$n-1$ 次元でも使う。$n-1=1$ では $\int_{\mathbb{R}}g(|w|)\,dw=2\int_{0}^{\infty}g(s)\,ds$）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 球のグリーン関数とポアソン積分 {#pde:sec-gf-ball}
+
+球 $B(0,r)$ の点 $x\ne0$ について、$\tilde x\defeq\frac{r^{2}}{|x|^{2}}x$ を球面についての**反転**（鏡像）という。$|\tilde x|=r^{2}/|x|>r$ なので $\tilde x$ は閉球の外にある。鍵になるのは、球面上の点 $y$ について $|y-\tilde x|$ と $|y-x|$ が比例することである。
+
+::: proposition 球のグリーン関数 {#pde:green-ball keywords="Green function of the ball B(0,r) by inversion: G(x,y) = Psi(|y-x|) - Psi(rho_x(y)) with rho_x(y)^2 = |x|^2|y|^2/r^2 - 2x.y + r^2 = (|x|/r)^2 |y - x~|^2; symmetric; normal derivative gives the Poisson kernel" index="球のグリーン関数|きゅうのぐりーんかんすう, 鏡像法|きょうぞうほう, 反転（球面）|はんてんきゅうめん"}
+$r>0$、$x\in B(0,r)$ とし、$y\in\mathbb{R}^{n}$ について
+$$
+\rho_{x}(y)\defeq\Bigl(\frac{|x|^{2}|y|^{2}}{r^{2}}-2x\cdot y+r^{2}\Bigr)^{1/2}
+$$
+とおく。
+1. $x\ne0$ なら $\rho_{x}(y)=\frac{|x|}{r}|y-\tilde x|$、$x=0$ なら $\rho_{0}(y)=r$。とくに $\rho_{x}>0$ が $\overline{B}(0,r)$ のある近傍 $U_{x}$ の上で成り立つ。
+2. $\varphi^{x}(y)\defeq\Psi(\rho_{x}(y))$ は $U_{x}$ で $C^{\infty}$ 級かつ調和で、$|y|=r$ なら $\rho_{x}(y)=|y-x|$、したがって $\varphi^{x}(y)=\Phi(y-x)$。よって $B(0,r)$ はグリーン関数
+$$
+G(x,y)=\Psi(|y-x|)-\Psi(\rho_{x}(y))
+$$
+をもつ。式から $\rho_{x}(y)=\rho_{y}(x)$ なので、$G(x,y)=G(y,x)$ が直接わかる。
+3. $|y|=r$ なら $\displaystyle-\partial_{\nu_{y}}G(x,y)=\frac{r^{2}-|x|^{2}}{n\omega_{n}r\,|x-y|^{n}}$。
+:::
+
+::: intuition
+球の中の点 $x$ に熱源を置いたとき、球の外の反転の位置に適当な強さの「吸い込み」を置くと、球面の上で温度がちょうど打ち消し合う。球面上の点から見ると、元の点までの距離と反転の点までの距離の比がどこでも同じだからである。
+:::
+
+::: proof
+**1.** $x\ne0$ なら、$\frac{|x|^{2}}{r^{2}}|y-\tilde x|^{2}=\frac{|x|^{2}}{r^{2}}\bigl(|y|^{2}-2\frac{r^{2}}{|x|^{2}}x\cdot y+\frac{r^{4}}{|x|^{2}}\bigr)=\frac{|x|^{2}|y|^{2}}{r^{2}}-2x\cdot y+r^{2}$。$x=0$ は定義から。$x\ne0$ なら $\rho_{x}>0$ は $y\ne\tilde x$ で成り立ち、$|\tilde x|>r$ なので $U_{x}\defeq B(0,r')$（$r<r'<|\tilde x|$）でよい。$x=0$ なら $U_{0}\defeq\mathbb{R}^{n}$。
+
+**2.** $x=0$ なら $\varphi^{0}=\Psi(r)$ は定数。$x\ne0$ なら、$c\defeq|x|/r$ について $\varphi^{x}(y)=\Psi(c|y-\tilde x|)$ で、$n\ge3$ なら $\Psi(cs)=c^{2-n}\Psi(s)$、$n=2$ なら $\Psi(cs)=\Psi(s)-\frac{1}{2\pi}\log c$。どちらも $\varphi^{x}$ は $\Phi(\cdot-\tilde x)$ の定数倍に定数を足したもので、\ref{pde:gf-fundamental-properties.1} から $y\ne\tilde x$ で $C^{\infty}$ 級かつ調和。$|y|=r$ なら $\rho_{x}(y)^{2}=|x|^{2}-2x\cdot y+|y|^{2}=|y-x|^{2}$。よって $\varphi^{x}$ は補正関数の条件（$\overline{B}(0,r)$ の近傍 $U_{x}$ で $C^{2}$、$B(0,r)$ で調和、球面で $\Phi(y-x)$）を満たす。対称性は $\rho_{x}(y)$ の式が $x,y$ について対称であることから。
+
+**3.** $|y|=r$ とする。$\nabla_{y}\Psi(|y-x|)=\Psi'(|y-x|)\frac{y-x}{|y-x|}=-\frac{y-x}{n\omega_{n}|y-x|^{n}}$。また $\nabla_{y}\rho_{x}^{2}=2\bigl(\frac{|x|^{2}}{r^{2}}y-x\bigr)$ から $\nabla_{y}\rho_{x}=\frac{1}{\rho_{x}}\bigl(\frac{|x|^{2}}{r^{2}}y-x\bigr)$ で、球面の上では $\rho_{x}=|y-x|$ なので
+$$
+\nabla_{y}\varphi^{x}(y)=\Psi'(\rho_{x})\nabla_{y}\rho_{x}=-\frac{1}{n\omega_{n}|y-x|^{n}}\Bigl(\frac{|x|^{2}}{r^{2}}y-x\Bigr).
+$$
+引くと $\nabla_{y}G(x,y)=-\frac{1}{n\omega_{n}|y-x|^{n}}\bigl(1-\frac{|x|^{2}}{r^{2}}\bigr)y$。$\nu(y)=y/r$ との内積をとり $|y|^{2}=r^{2}$ を使うと $\partial_{\nu_{y}}G(x,y)=-\frac{r^{2}-|x|^{2}}{n\omega_{n}r|y-x|^{n}}$。
+:::
+
+::: definition 球のポアソン核とポアソン積分 {#pde:poisson-kernel-ball keywords="Poisson kernel of the ball K(x,y) = (r^2 - |x|^2)/(n omega_n r |x - y|^n) for |x| < r, |y| = r; Poisson integral of a continuous function on the sphere" index="ポアソン核（球）|ぽあそんかくきゅう, ポアソン積分（球）|ぽあそんせきぶんきゅう"}
+$r>0$ とする。$|x|<r$, $|y|=r$ について
+$$
+K_{r}(x,y)\defeq\frac{r^{2}-|x|^{2}}{n\omega_{n}r\,|x-y|^{n}}
+$$
+を球 $B(0,r)$ の**ポアソン核**という。$g\in C(\partial B(0,r))$ について
+$$
+P_{r}[g](x)\defeq\int_{\partial B(0,r)}K_{r}(x,y)g(y)\,dS(y)=r^{n-1}\int_{S^{n-1}}K_{r}(x,r\theta)\,g(r\theta)\,d\sigma(\theta)\qquad(|x|<r)
+$$
+を $g$ の**ポアソン積分**という（被積分関数は $\theta$ の連続関数で、積分は有限）。
+:::
+
+::: intuition
+ポアソン核は、球の中の点 $x$ から見た球面上の各点の「重み」である。$x$ が球面に近づくと、すぐ近くの境界の点の重みが非常に大きくなり、遠くの点の重みはほとんど 0 になる。
+:::
+
+::: example
+1. $x=0$ では $K_{r}(0,y)=\frac{1}{n\omega_{n}r^{n-1}}$ は一定で、$P_{r}[g](0)=\frac{1}{n\omega_{n}}\int_{S^{n-1}}g(r\theta)\,d\sigma$ は $g$ の球面平均である。
+2. $n=2$, $r=1$ では $K_{1}(x,y)=\frac{1-|x|^{2}}{2\pi|x-y|^{2}}$ で、$y=e^{it}$ と書くと $P_{1}[g](x)=\frac{1}{2\pi}\int_{0}^{2\pi}\frac{1-|x|^{2}}{|e^{it}-x|^{2}}g(e^{it})\,dt$。これは複素解析のポアソン積分（\ref{cx:poisson-kernel}）と同じものである。
+:::
+
+::: lemma ポアソン核の性質 {#pde:poisson-kernel-ball-properties keywords="properties of the Poisson kernel of the ball: positivity, harmonicity in x, total mass one, concentration near boundary points" index="ポアソン核の性質（球）|ぽあそんかくのせいしつきゅう"}
+$r>0$ とする。
+1. $|x|<r$, $|y|=r$ なら $K_{r}(x,y)>0$。
+2. $|y|=r$ を固定すると、$x\mapsto K_{r}(x,y)$ は $\mathbb{R}^{n}\setminus\{y\}$ で $C^{\infty}$ 級かつ調和（$K_{r}$ の式をそのまま $\mathbb{R}^{n}\setminus\{y\}$ で考える）。
+3. $|x|<r$ なら $\displaystyle\int_{\partial B(0,r)}K_{r}(x,y)\,dS(y)=1$。
+4. $|y_{0}|=r$, $\delta>0$, $|x|<r$, $|x-y_{0}|<\delta/2$ なら
+$$
+\int_{\{|y|=r,\ |y-y_{0}|\ge\delta\}}K_{r}(x,y)\,dS(y)\le\frac{2^{n}r^{n-2}(r^{2}-|x|^{2})}{\delta^{n}}.
+$$
+:::
+
+::: proof
+**1.** 分子 $r^{2}-|x|^{2}>0$、分母 $>0$（$x\ne y$）。
+
+**2.** $f(x)\defeq r^{2}-|x|^{2}$, $q(x)\defeq|x-y|^{-n}$ とおくと $\Delta f=-2n$, $\nabla f=-2x$, $\nabla q=-n|x-y|^{-n-2}(x-y)$、$\Delta q=(-n)(-n+n-2)|x-y|^{-n-2}=2n|x-y|^{-n-2}$（\ref{pde:harmonic-function} の後の例 3 の $\Delta r^{a}=a(a+n-2)r^{a-2}$ を $a=-n$ で、中心を $y$ にずらして使う）。積の微分から
+$$
+\Delta(fq)=f\Delta q+2\nabla f\cdot\nabla q+q\Delta f=2n|x-y|^{-n-2}\bigl(r^{2}-|x|^{2}+2x\cdot(x-y)-|x-y|^{2}\bigr).
+$$
+括弧の中は $r^{2}-|x|^{2}+2|x|^{2}-2x\cdot y-|x|^{2}+2x\cdot y-|y|^{2}=r^{2}-|y|^{2}=0$。$C^{\infty}$ 級は $x\ne y$ で $|x-y|$ が $C^{\infty}$ 級であることから。
+
+**3.** \ref{pde:green-ball.2} から $B(0,r)$ はグリーン関数をもつ。$u\equiv1$ は $\mathbb{R}^{n}$ で $C^{2}$ 級で $-\Delta u=0$, 境界値 $1$ なので、\ref{pde:green-dirichlet} と \ref{pde:green-ball.3} から $1=-\int_{\partial B(0,r)}\partial_{\nu_{y}}G(x,y)\,dS(y)=\int_{\partial B(0,r)}K_{r}(x,y)\,dS(y)$。
+
+**4.** $|y-y_{0}|\ge\delta$ なら $|y-x|\ge|y-y_{0}|-|x-y_{0}|>\delta/2$ なので $K_{r}(x,y)\le\frac{(r^{2}-|x|^{2})2^{n}}{n\omega_{n}r\delta^{n}}$。$\int_{\partial B(0,r)}1\,dS=r^{n-1}\sigma(S^{n-1})=n\omega_{n}r^{n-1}$ を掛ける。
+:::
+
+::: theorem 球のディリクレ問題 {#pde:poisson-ball-dirichlet keywords="Dirichlet problem on a ball: for continuous boundary data g the Poisson integral P_r[g] is C^infinity and harmonic in the ball and extends continuously to the closed ball with boundary values g; it is the unique such solution" index="球のディリクレ問題|きゅうのでぃりくれもんだい, ポアソンの公式（n 次元）|ぽあそんのこうしきえぬじげん" refname="球のディリクレ問題（ポアソン積分）"}
+$r>0$、$g\in C(\partial B(0,r))$ とし、
+$$
+u(x)\defeq\begin{cases}P_{r}[g](x) & (|x|<r),\\ g(x) & (|x|=r)\end{cases}
+$$
+とおく。このとき $u\in C^{\infty}(B(0,r))$ は $B(0,r)$ で調和で、$u\in C(\overline{B}(0,r))$。$C^{2}(B(0,r))\cap C(\overline{B}(0,r))$ に入る調和関数で境界値 $g$ をもつものは、この $u$ だけである。
+:::
+
+::: intuition
+球面の上に連続な温度分布を与えると、ポアソン積分で計算した球の中の温度は、中で調和（平衡状態）で、境界に近づくと与えた温度に連続につながる。しかもそのような温度分布はこれしかない。
+:::
+
+::: proof
+**Step 1（滑らかさと調和性）.** 【主張：$u\in C^{\infty}(B(0,r))$ で $\Delta u=0$】$0<\delta<r$ とし、$|x|<r-\delta$ で考える。$|y|=r$ なら $|x-y|>\delta$ なので、$K_{r}$ の $x$ についてのすべての偏導関数 $\partial_{x}^{\alpha}K_{r}(x,y)$ は $(x,y)\in\overline{B}(0,r-\delta)\times\partial B(0,r)$ で連続（\ref{pde:poisson-kernel-ball-properties.2}）、したがって有界（$\le M_{\alpha}$）。$|\partial_{x}^{\alpha}K_{r}(x,r\theta)g(r\theta)|\le M_{\alpha}\|g\|_{\infty}$ で、定数は有限測度 $\sigma$ について可積分なので、各座標方向に \ref{meas:parameter-integrals.2} を繰り返し使うと、すべての $\alpha$ について $\partial^{\alpha}u(x)=\int_{\partial B(0,r)}\partial_{x}^{\alpha}K_{r}(x,y)g(y)\,dS(y)$ が存在し、優収束定理から連続。よって $u\in C^{\infty}(B(0,r-\delta))$、$\delta$ は任意。$\Delta u(x)=\int\Delta_{x}K_{r}(x,y)g(y)\,dS(y)=0$（\ref{pde:poisson-kernel-ball-properties.2}）。
+
+**Step 2（境界の点での評価）.** 【主張：$|y_{0}|=r$, $\varepsilon>0$ とし、$\delta>0$ を「$|y|=r$, $|y-y_{0}|<\delta$ なら $|g(y)-g(y_{0})|<\varepsilon$」となるようにとると、$|x|<r$, $|x-y_{0}|<\delta/2$ なら $|u(x)-g(y_{0})|\le\varepsilon+2\|g\|_{\infty}\frac{2^{n}r^{n-2}(r^{2}-|x|^{2})}{\delta^{n}}$】$\delta$ がとれるのは $g$ が $y_{0}$ で連続だから。\ref{pde:poisson-kernel-ball-properties.3} から $g(y_{0})=\int K_{r}(x,y)g(y_{0})\,dS(y)$ なので、$K_{r}>0$（\ref{pde:poisson-kernel-ball-properties.1}）を使って
+$$
+|u(x)-g(y_{0})|\le\int_{|y-y_{0}|<\delta}K_{r}(x,y)|g(y)-g(y_{0})|\,dS+\int_{|y-y_{0}|\ge\delta}K_{r}(x,y)|g(y)-g(y_{0})|\,dS.
+$$
+第 1 項は $\varepsilon\int K_{r}\,dS=\varepsilon$ 以下、第 2 項は $|g(y)-g(y_{0})|\le2\|g\|_{\infty}$ と \ref{pde:poisson-kernel-ball-properties.4} で押さえる。
+
+**Step 3（閉球での連続性）.** 【主張：$u\in C(\overline{B}(0,r))$】$B(0,r)$ の点では Step 1 から連続。$|y_{0}|=r$ とし、$x_{k}\to y_{0}$（$x_{k}\in\overline{B}(0,r)$）とする。$|x_{k}|<r$ の項については、$r^{2}-|x_{k}|^{2}=(r-|x_{k}|)(r+|x_{k}|)\le2r(|y_{0}|-|x_{k}|)\le2r|x_{k}-y_{0}|\to0$ なので、Step 2 から $\limsup|u(x_{k})-g(y_{0})|\le\varepsilon$。$|x_{k}|=r$ の項については $u(x_{k})=g(x_{k})\to g(y_{0})$（$g$ の連続性）。$\varepsilon$ は任意なので $u(x_{k})\to g(y_{0})=u(y_{0})$。
+
+一意性は \ref{pde:dirichlet-uniqueness.1} から。
+
+::: hypcheck
+- **$g$ の連続性**：Step 2 で $y_{0}$ での連続性を、Step 3 で境界の上での連続性を使った。Step 1 は $g$ が有界で可測なら成り立つ。$g$ が有界可測なら、$g$ が連続な点 $y_{0}$ で $u(x)\to g(y_{0})$（$x\to y_{0}$, $|x|<r$）となることが、Step 2 と同じ議論でわかる。
+- **ポアソン核の性質**：正値性（1）と全質量 1（3）は Step 2 の評価に、集中（4）は Step 2 の第 2 項に使った。全質量 1 はグリーン関数による表示から得たが、そこで使ったのは $u\equiv1$ という境界まで滑らかな関数だけである。
+- **解の存在の証明に、前のページの「解の存在の仮定」は使っていない**：前のページで公式を導くときには解の存在を仮定したが、ここでは公式で定義した $u$ が解であることを直接確かめた。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 境界値 $g$ が有界可測なだけなら、$u=P_{r}[g]$ は調和で、$g$ が連続な境界の点では $g$ に連続につながる（検査欄）が、不連続な点では境界値をとらないことがある：$n=2$ で $g$ を上半円で $1$、下半円で $0$ とすると、$\pm r$ の近くでは $u$ は近づき方によって $0$ と $1$ の間のいろいろな値に近づく。$g\in L^{1}$ にまで弱めても $u$ は調和で、ほとんどすべての境界の点で、境界に接しない近づき方なら $u$ は $g$ に収束する（ファトゥの定理。ここでは証明しない）。半空間の場合のこの種の結果は \see{four:poisson-boundary}。逆に、領域を球から一般の有界領域に変えると、鏡像の点が作れないのでグリーン関数は具体的に書けない。一般の領域のディリクレ問題は、ペロンの方法（この系列の後のページ）で、劣調和関数の上限として解を作る。
+
+**似た定理.** $n=2$ では \ref{cx:dirichlet-disk} が同じ主張で、そこではポアソン核を正則関数 $\frac{\zeta+z}{\zeta-z}$ の実部として扱った。ここでは調和性を直接の計算（\ref{pde:poisson-kernel-ball-properties.2}）で確かめ、全質量 1 をグリーン関数から得た。円周上のポアソン積分はフーリエ級数のアーベル総和と同じものであり（\see{four:circle-poisson-kernel}）、この定理はフェイェールの定理と同じく「総和核が正で質量 1 で集中する」ことだけから従う（**近似単位元**の議論）。
+
+**高い視点：出口の分布.** ポアソン核 $K_{r}(x,\cdot)\,dS$ は、球面の上の確率測度で、点 $x$ から出発したブラウン運動が初めて球面に当たる位置の分布（**調和測度**）である。ポアソン積分 $u(x)=\int g\,K_{r}(x,\cdot)\,dS$ は「出口で受け取る賞金 $g$ の期待値」で、$x$ が中心なら出口は一様（平均値の性質）、$x$ が境界に近いと、ほとんど確実にすぐ近くの境界から出てしまうので、賞金の期待値はその点の $g$ の値に近づく（境界での連続性）。比喩で言えば、球の中で酔っ払いが歩き回り、壁にぶつかった所の値札を受け取るゲームの期待値が、ディリクレ問題の解である。
+:::
+
+::: corollary ポアソンの表現 {#pde:poisson-ball-representation keywords="a harmonic function continuous on the closed ball equals the Poisson integral of its boundary values; in particular for u harmonic on a neighborhood of a closed ball" index="ポアソンの表現|ぽあそんのひょうげん"}
+$u\in C^{2}(B(0,r))\cap C(\overline{B}(0,r))$ が $B(0,r)$ で調和なら、$|x|<r$ で $u(x)=P_{r}[u|_{\partial B(0,r)}](x)$。とくに、$u$ が開集合 $\Omega$ で調和で $\overline{B}(a,r)\subset\Omega$ なら、$|x-a|<r$ で $u(x)=\int_{\partial B(0,r)}K_{r}(x-a,y)\,u(a+y)\,dS(y)$。
+:::
+
+::: proof
+\ref{pde:poisson-ball-dirichlet} の $u$（境界値 $u|_{\partial B(0,r)}$）と与えられた $u$ は、どちらも $C^{2}(B(0,r))\cap C(\overline{B}(0,r))$ に入る調和関数で境界値が等しいので、\ref{pde:dirichlet-uniqueness.1} から一致する。後半は $u(a+\cdot)$ に使う。
+:::
+
+## 除去可能な特異点 {#pde:sec-gf-removable}
+
+ポアソン積分で球の上のディリクレ問題がいつでも解けることから、調和関数の孤立特異点について、複素解析の除去可能な特異点定理（\ref{cx:removable-singularity}）の類似が得られる。
+
+::: proposition 調和関数の除去可能な特異点 {#pde:gf-removable-singularity keywords="removable singularity theorem for harmonic functions: if u is harmonic in a punctured ball and u(x) = o(Phi(x)) as x -> 0 (in particular if u is bounded near 0), then u extends to a harmonic function on the ball" index="除去可能な特異点（調和関数）|じょきょかのうなとくいてんちょうわかんすう"}
+$r>0$ とし、$u$ を $B(0,r)\setminus\{0\}$ の調和関数で、$x\to0$ のとき $u(x)/\Phi(x)\to0$ となるもの（とくに、$0$ の近くで有界なもの）とする。このとき $B(0,r)$ の調和関数 $\tilde u$ で、$B(0,r)\setminus\{0\}$ の上で $\tilde u=u$ となるものがある。
+:::
+
+::: intuition
+孤立した 1 点を除いて調和な関数は、その点の近くで基本解よりゆっくりしか大きくならなければ（とくに有界なら）、その点にうまく値を定めて、点を含めて調和にできる。
+:::
+
+::: proof
+$\Phi(x)\to+\infty$（$x\to0$）なので、仮定は意味をもつ。$0<\rho<r$ をとり、$v\defeq P_{\rho}[u|_{\partial B(0,\rho)}]$（\ref{pde:poisson-ball-dirichlet}。$u$ は球面 $\partial B(0,\rho)$ の上で連続）とおき、$v$ を閉球に連続に延ばしたものも $v$ と書く。$M\defeq\max_{\overline{B}(0,\rho)}|v|$。
+
+**Step 1（比較関数）.** 【主張：$\varepsilon>0$ と十分小さい $\delta\in(0,\rho)$ について、$\delta\le|x|\le\rho$ で $|u(x)-v(x)|\le\varepsilon\bigl(\Phi(x)-\Psi(\rho)\bigr)$】$w\defeq u-v$ と $b\defeq\varepsilon(\Phi-\Psi(\rho))$ は円環 $A_{\delta}\defeq\{\delta<|x|<\rho\}$ で調和で、$\overline{A_{\delta}}$ で連続。$|x|=\rho$ では $w=0=b$。$|x|=\delta$ では、仮定から $\delta$ が小さければ $|u(x)|\le\frac{\varepsilon}{2}\Phi(x)$、また $\Phi(x)=\Psi(\delta)\to\infty$ から $M+\varepsilon\Psi(\rho)\le\frac{\varepsilon}{2}\Psi(\delta)$ としてよいので、$|w(x)|\le|u(x)|+M\le\varepsilon\Psi(\delta)-\varepsilon\Psi(\rho)=b(x)$。$b-w$ と $b+w$ は $A_{\delta}$ で調和、$\partial A_{\delta}$ で $\ge0$ なので、\ref{pde:weak-maximum-principle}（最小値）から $\overline{A_{\delta}}$ で $\ge0$。
+
+**Step 2（$\varepsilon\to0$）.** 【主張：$0<|x|\le\rho$ で $u(x)=v(x)$】$x$ を固定する。各 $\varepsilon>0$ について、Step 1 の $\delta$ を $|x|$ より小さくとれるので $|u(x)-v(x)|\le\varepsilon(\Phi(x)-\Psi(\rho))$。$\varepsilon\to0$ とする。
+
+$\tilde u\defeq v$（$|x|<\rho$）、$\tilde u\defeq u$（$\rho\le|x|<r$）とおくと、Step 2 から $0<|x|<\rho$ でも $\tilde u=u$ で、$\tilde u$ は $0$ の近くでは $v$、それ以外では $u$ に等しいので、$B(0,r)$ の各点の近傍で調和である。
+
+::: hypcheck
+- **増大の条件 $u=o(\Phi)$**：Step 1 で $|x|=\delta$ での比較に使った。外すと偽：$\Phi$ 自身は $B(0,r)\setminus\{0\}$ で調和だが、$0$ で有限の値に延ばせない。$\Phi$ の定数倍を足しても同じなので、条件は最良である。
+- **ポアソン積分による解の存在**：$v$ を作るのに使った。比較の議論は、境界の値 $u|_{\partial B(0,\rho)}$ をもつ「穴のない」調和関数が存在することに依存している。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 1 点の代わりに、もっと大きな集合を除いても同じことが言える場合がある。有界な調和関数について除去可能な閉集合は、ちょうど「容量 0」の集合であることが知られている。$n\ge3$ では、たとえば $(n-2)$ 次元ハウスドルフ測度が有限なコンパクト集合（$n=3$ の線分など）は容量 0 である（どちらもここでは証明しない）。一方 $\Phi$ のように基本解の大きさで発散するものは除去できない。正の調和関数については、$u-c\Phi$ が除去可能になる定数 $c\ge0$ があることが知られている（ここでは証明しない）。
+
+**似た定理.** 複素解析では、正則関数の孤立特異点の近くで有界なら除去可能だった（\ref{cx:removable-singularity}）。そこではローラン展開（または $z^{2}f(z)$ の微分可能性）を使い、ここでは最大値原理と比較関数を使った。正則関数では「有界」を「$o(1/|z|)$」まで弱められ、調和関数では「$o(\Phi)$」まで弱められる。どちらも「最も弱い特異性（$1/z$ と $\Phi$）より弱ければ除去可能」という同じ形をしている。
+
+**高い視点：見えない点.** 調和関数にとって 1 点は「見えない」：1 点は容量（熱が逃げていく能力）が 0 なので、そこに境界条件を課しても解は変わらない。比喩で言えば、針の先ほどの点に温度計を当てて温度を固定しようとしても、熱の出入りが無限に小さいので、部屋の平衡温度は影響を受けない。基本解ほどの強さの点源（$\Phi$ の大きさの特異性）になって初めて、点が温度分布に影響を与える。この考え方は、ペロンの方法でルベーグの棘（尖った境界点でディリクレ問題が解けない例）を理解するときにも現れる。
+:::
+
+::: supplement
+**ポアソン積分のほかの帰結.** ポアソンの表現（\ref{pde:poisson-ball-representation}）は、前の二つのページで平均値の性質から示した結果に、別の、しばしばより精密な証明を与える。
+1. **ハルナックの不等式の別証明.** 非負の調和関数 $u$ が $\overline{B}(0,\rho)$ の近傍で調和なら、ポアソン核の評価 $\frac{\rho-|x|}{(\rho+|x|)^{n-1}}\rho^{n-2}\le n\omega_{n}\rho^{n-1}K_{\rho}(x,y)\le\frac{\rho+|x|}{(\rho-|x|)^{n-1}}\rho^{n-2}$ と平均値の性質から、$|x|<\rho$ で $\frac{\rho^{n-2}(\rho-|x|)}{(\rho+|x|)^{n-1}}u(0)\le u(x)\le\frac{\rho^{n-2}(\rho+|x|)}{(\rho-|x|)^{n-1}}u(0)$ が得られる（\ref{pde:prob-gf-sharp-harnack}）。とくに $|x|\le\rho/2$ なら $u(x)\le3\cdot2^{n-2}u(0)$, $u(0)\le3^{n-1}2^{2-n}u(x)$ という、次元だけで決まる定数での比較が得られ、これを \ref{pde:harnack-inequality} の証明の Step 1 の代わりに使えば、球の鎖で同じ結論が出る。
+2. **実解析性の別証明.** $K_{\rho}(x,y)$ は $|x|<\rho$ で $x$ について実解析的で、そのべき級数展開は $y$ について一様に収束するので、ポアソン積分も実解析的である（\ref{pde:harmonic-analytic} の別証明。細部はここでは略す）。
+3. **導関数の評価.** $\partial_{x}^{\alpha}K_{\rho}$ を直接評価すると、\ref{pde:derivative-estimates} と同じ形の内部評価が、境界の上の $\max|u|$ で得られる。
+:::
+
+## 半空間のグリーン関数とポアソン積分 {#pde:sec-gf-halfspace}
+
+半空間では、平面 $\{x_{n}=0\}$ についての折り返し $x\mapsto x^{*}$ が鏡像を与える。半空間は有界でないので、前のページの表示（\ref{pde:green-dirichlet}）はそのままでは使えない。そこで、グリーン関数から形式的に得られるポアソン核を使って解を定義し、それが本当に解であることを直接確かめる。
+
+::: proposition 半空間のグリーン関数 {#pde:green-halfspace keywords="Green function of the half-space by reflection: G(x,y) = Phi(y - x) - Phi(y - x*), vanishing on the boundary hyperplane, symmetric; its inward normal derivative gives the Poisson kernel 2 x_n / (n omega_n |x - y|^n)" index="半空間のグリーン関数|はんくうかんのぐりーんかんすう, ポアソン核（半空間）|ぽあそんかくはんくうかん"}
+$x\in\mathbb{R}_{+}^{n}$ について $G(x,y)\defeq\Phi(y-x)-\Phi(y-x^{*})$（$y\ne x,x^{*}$）とおく。
+1. $y\mapsto G(x,y)$ は $\mathbb{R}^{n}\setminus\{x,x^{*}\}$ で調和で、$y_{n}=0$ なら $G(x,y)=0$。$x^{*}\notin\overline{\mathbb{R}_{+}^{n}}$。
+2. $x,y\in\mathbb{R}_{+}^{n}$, $x\ne y$ なら $G(x,y)=G(y,x)$。
+3. 外向き単位法線は $\nu=-e_{n}$ で、$y=(y',0)$ について
+$$
+K_{+}(x,y')\defeq-\partial_{\nu_{y}}G(x,y)=\partial_{y_{n}}G(x,y)\Big|_{y_{n}=0}=\frac{2x_{n}}{n\omega_{n}|x-(y',0)|^{n}}.
+$$
+$K_{+}$ を半空間の**ポアソン核**という。
+:::
+
+::: proof
+**1.** $\Phi(\cdot-x)$, $\Phi(\cdot-x^{*})$ はそれぞれ $x$, $x^{*}$ の外で調和（\ref{pde:gf-fundamental-properties.1}）。$y_{n}=0$ なら $|y-x^{*}|^{2}=|y'-x'|^{2}+x_{n}^{2}=|y-x|^{2}$。$x^{*}$ の第 $n$ 成分は $-x_{n}<0$。
+
+**2.** $|y-x^{*}|^{2}=|y'-x'|^{2}+(y_{n}+x_{n})^{2}$ は $x,y$ について対称で、$|y-x|$ も対称。
+
+**3.** $\nabla\Phi(z)=-\frac{z}{n\omega_{n}|z|^{n}}$ から $\partial_{y_{n}}\Phi(y-x)=-\frac{y_{n}-x_{n}}{n\omega_{n}|y-x|^{n}}$, $\partial_{y_{n}}\Phi(y-x^{*})=-\frac{y_{n}+x_{n}}{n\omega_{n}|y-x^{*}|^{n}}$。$y_{n}=0$ で $|y-x^{*}|=|y-x|$ を使って引くと $\frac{x_{n}+x_{n}}{n\omega_{n}|y-x|^{n}}$。
+:::
+
+::: lemma 半空間のポアソン核の全質量 {#pde:gf-halfspace-kernel-mass keywords="the half-space Poisson kernel has total mass one: int_{R^{n-1}} 2 x_n / (n omega_n (|x'-y'|^2 + x_n^2)^{n/2}) dy' = 1, via scaling, polar coordinates in R^{n-1} and the Beta function" index="ポアソン核の全質量（半空間）|ぽあそんかくのぜんしつりょうはんくうかん"}
+$x\in\mathbb{R}_{+}^{n}$ なら $\displaystyle\int_{\mathbb{R}^{n-1}}K_{+}(x,y')\,dy'=1$。
+:::
+
+::: proof
+**Step 1（拡大縮小）.** 【主張：積分は $\displaystyle\frac{2}{n\omega_{n}}\int_{\mathbb{R}^{n-1}}(1+|w|^{2})^{-n/2}dw$ に等しい】$|x-(y',0)|^{2}=|y'-x'|^{2}+x_{n}^{2}$。$y'=x'+x_{n}w$ と変数変換すると（平行移動と \ref{meas:lebesgue-linear}。$dy'=x_{n}^{n-1}dw$）、$\frac{2x_{n}\cdot x_{n}^{n-1}}{n\omega_{n}x_{n}^{n}(|w|^{2}+1)^{n/2}}$ の積分になる。
+
+**Step 2（極座標とベータ関数）.** 【主張：$\displaystyle\int_{\mathbb{R}^{n-1}}(1+|w|^{2})^{-n/2}dw=\frac{\pi^{n/2}}{\Gamma(n/2)}$】\ref{meas:polar-radial.2}（$n-1$ 次元）から左辺は $(n-1)\omega_{n-1}\int_{0}^{\infty}s^{n-2}(1+s^{2})^{-n/2}ds$。$s=\sqrt{t/(1-t)}$（$0<t<1$）と置換すると $1+s^{2}=\frac{1}{1-t}$、$ds=\frac12t^{-1/2}(1-t)^{-3/2}dt$ なので
+$$
+\int_{0}^{\infty}\frac{s^{n-2}\,ds}{(1+s^{2})^{n/2}}=\frac12\int_{0}^{1}t^{\frac{n-3}{2}}(1-t)^{-\frac12}dt=\frac12B\Bigl(\frac{n-1}{2},\frac12\Bigr)=\frac{\Gamma(\frac{n-1}{2})\sqrt\pi}{2\Gamma(\frac n2)}.
+$$
+$\omega_{n-1}=\pi^{(n-1)/2}/\Gamma(\frac{n+1}{2})$ と $\Gamma(\frac{n+1}{2})=\frac{n-1}{2}\Gamma(\frac{n-1}{2})$ から、$(n-1)\omega_{n-1}\cdot\frac{\Gamma(\frac{n-1}{2})\sqrt\pi}{2\Gamma(\frac n2)}=\frac{\pi^{n/2}}{\Gamma(\frac n2)}$。
+
+Step 1・2 と $n\omega_{n}=\frac{n\pi^{n/2}}{\Gamma(\frac n2+1)}=\frac{2\pi^{n/2}}{\Gamma(\frac n2)}$ から、積分は $\frac{2}{n\omega_{n}}\cdot\frac{\pi^{n/2}}{\Gamma(n/2)}=1$。
+:::
+
+::: theorem 半空間のディリクレ問題 {#pde:poisson-halfspace-dirichlet keywords="Dirichlet problem on the half-space with bounded continuous boundary data: the Poisson integral u(x) = int K_+(x,y') g(y') dy' is C^infinity, harmonic, bounded by sup|g|, and continuous up to the boundary with boundary values g" index="半空間のディリクレ問題|はんくうかんのでぃりくれもんだい, ポアソン積分（半空間）|ぽあそんせきぶんはんくうかん" refname="半空間のディリクレ問題（ポアソン積分）"}
+$g\in C(\mathbb{R}^{n-1})$ を有界とし、
+$$
+u(x)\defeq\int_{\mathbb{R}^{n-1}}K_{+}(x,y')\,g(y')\,dy'\quad(x\in\mathbb{R}_{+}^{n}),\qquad u(x',0)\defeq g(x')
+$$
+とおく。このとき $u\in C^{\infty}(\mathbb{R}_{+}^{n})$ は $\mathbb{R}_{+}^{n}$ で調和で、$u\in C(\overline{\mathbb{R}_{+}^{n}})$、$\sup|u|\le\sup|g|$。
+:::
+
+::: intuition
+平面の上に有界で連続な温度分布を与えると、ポアソン核で平均した上半空間の温度は、平衡状態にあり、平面に近づくと与えた温度に連続につながる。温度は与えた範囲からはみ出さない。
+:::
+
+::: proof
+$y=(y',0)$ と書き、$\|g\|_{\infty}\defeq\sup|g|$。
+
+**Step 1（核の調和性）.** 【主張：$y'$ を固定すると $x\mapsto K_{+}(x,y')$ は $x\ne y$ で $C^{\infty}$ 級かつ調和】$q(x)\defeq|x-y|^{-n}$ について $\Delta q=2n|x-y|^{-n-2}$, $\partial_{n}q=-n(x_{n}-y_{n})|x-y|^{-n-2}=-nx_{n}|x-y|^{-n-2}$（$y_{n}=0$）。$\Delta(x_{n}q)=x_{n}\Delta q+2\partial_{n}q=2nx_{n}|x-y|^{-n-2}-2nx_{n}|x-y|^{-n-2}=0$。
+
+**Step 2（積分記号下の微分）.** 【主張：$u\in C^{\infty}(\mathbb{R}_{+}^{n})$ で $\Delta u=0$】$0<\delta\le1\le M$ とし、$E\defeq\{x:|x'|<M,\ \delta<x_{n}<M\}$ で考える。$\partial^{\alpha}q$ は $\mathbb{R}^{n}\setminus\{y\}$ で連続で、$x-y$ について $-n-|\alpha|$ 次の同次関数なので $|\partial^{\alpha}q(x)|\le c_{\alpha}|x-y|^{-n-|\alpha|}$（$c_{\alpha}$ は $\partial^{\alpha}|z|^{-n}$ の $S^{n-1}$ 上の最大値）。$x\in E$ なら $|x-y|\ge x_{n}>\delta$ かつ $|x-y|\ge|y'|-M$ なので、$|y'|\le2M$ では $|x-y|\ge\delta\ge\frac{\delta}{1+2M}(1+|y'|)$、$|y'|>2M$（$\ge2$）では $|x-y|\ge\frac{|y'|}{2}\ge\frac{1+|y'|}{4}$。よって $c_{E}\defeq\min\{\frac{\delta}{1+2M},\frac14\}$ について $|x-y|\ge c_{E}(1+|y'|)$。ライプニッツの公式 $\partial^{\alpha}(x_{n}q)=x_{n}\partial^{\alpha}q+\alpha_{n}\partial^{\alpha-e_{n}}q$（$\alpha_{n}=0$ なら第 2 項はない）と $|x-y|>\delta$ から
+$$
+|\partial_{x}^{\alpha}K_{+}(x,y')|\le C_{\alpha,E}\,(1+|y'|)^{-n}\qquad(x\in E),
+$$
+右辺は $\mathbb{R}^{n-1}$ で可積分（\ref{meas:polar-radial.2} から $(n-1)\omega_{n-1}\int_{0}^{\infty}s^{n-2}(1+s)^{-n}ds<\infty$）。$|\partial^{\alpha}_{x}K_{+}\,g|\le\|g\|_{\infty}C_{\alpha,E}(1+|y'|)^{-n}$ を優関数として、\ref{pde:poisson-ball-dirichlet} の証明の Step 1 と同様に積分記号下で何回でも微分でき、$\Delta u=\int\Delta_{x}K_{+}\,g\,dy'=0$（Step 1）。$\mathbb{R}_{+}^{n}$ の各点は、$\delta$ を小さく $M$ を大きくとった $E$（開集合）に含まれるので、$u$ は各点の近傍で $C^{\infty}$ 級である。
+
+**Step 3（有界性）.** 【主張：$|u(x)|\le\|g\|_{\infty}$】$K_{+}>0$ と \ref{pde:gf-halfspace-kernel-mass} から $|u(x)|\le\|g\|_{\infty}\int K_{+}\,dy'=\|g\|_{\infty}$。
+
+**Step 4（境界での連続性）.** 【主張：$x_{0}'\in\mathbb{R}^{n-1}$, $\varepsilon>0$ について、$\delta>0$ を「$|y'-x_{0}'|<\delta$ なら $|g(y')-g(x_{0}')|<\varepsilon$」ととると、$x\in\mathbb{R}_{+}^{n}$, $|x-(x_{0}',0)|<\delta/2$ なら $|u(x)-g(x_{0}')|\le\varepsilon+\|g\|_{\infty}\frac{2^{n+2}(n-1)\omega_{n-1}}{n\omega_{n}\delta}\,x_{n}$】\ref{pde:gf-halfspace-kernel-mass} から $g(x_{0}')=\int K_{+}(x,y')g(x_{0}')\,dy'$ なので、\ref{pde:poisson-ball-dirichlet} の証明の Step 2 と同じく $|u(x)-g(x_{0}')|\le\varepsilon+2\|g\|_{\infty}\int_{|y'-x_{0}'|\ge\delta}K_{+}(x,y')\,dy'$。$|y'-x_{0}'|\ge\delta$ なら $|x-y|\ge|x'-y'|\ge|y'-x_{0}'|-|x'-x_{0}'|\ge\frac12|y'-x_{0}'|$ なので
+$$
+\int_{|y'-x_{0}'|\ge\delta}K_{+}\,dy'\le\frac{2x_{n}2^{n}}{n\omega_{n}}\int_{|w|\ge\delta}|w|^{-n}dw=\frac{2^{n+1}x_{n}}{n\omega_{n}}(n-1)\omega_{n-1}\int_{\delta}^{\infty}s^{-2}ds=\frac{2^{n+1}(n-1)\omega_{n-1}}{n\omega_{n}\delta}x_{n}.
+$$
+$2\|g\|_{\infty}$ を掛ける。
+
+Step 4 で $x\to(x_{0}',0)$（$x\in\mathbb{R}_{+}^{n}$）とすると $x_{n}\to0$ なので $\limsup|u(x)-g(x_{0}')|\le\varepsilon$。境界の上の点からの近づき方は $g$ の連続性で済むので、\ref{pde:poisson-ball-dirichlet} の証明の Step 3 と同様に $u\in C(\overline{\mathbb{R}_{+}^{n}})$。
+
+::: hypcheck
+- **$g$ の有界性**：Step 2 の優関数と Step 3・4 で使った。外すと積分が収束しないことがある（$g(y')=|y'|$ では $K_{+}g\sim|y'|^{1-n}$ は $\mathbb{R}^{n-1}$ で可積分でない）。$\int|g(y')|(1+|y'|)^{-n}dy'<\infty$ なら Step 1・2 は通る。
+- **$g$ の連続性**：Step 4 で $x_{0}'$ での連続性を使った。$g\in L^{p}$ では、ほとんどすべての点での垂直方向の収束になる（\see{four:poisson-boundary}）。
+- **全質量 1**：Step 3・4 で使った。球の場合と違い、グリーン関数による表示からではなく直接計算した（\ref{pde:gf-halfspace-kernel-mass}）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 半空間のディリクレ問題は、有界性を課さないと一意でない：$u(x)=x_{n}$ は調和で境界値 $0$ をもつ。有界な解の中では一意である：二つの有界な解の差 $w$ は、境界で $0$ の有界な調和関数で、折り返し $w(x^{*})\defeq-w(x)$ で $\mathbb{R}^{n}$ に延ばしたものは、平面上の点を中心とする各球で調和（\ref{pde:prob-gf-reflection} を拡大・平行移動したもの）、したがって $\mathbb{R}^{n}$ で有界な調和関数になり、\ref{pde:liouville} から定数、境界値から $0$ である。前のページの最大値原理が非有界な領域では使えなかったこと（\ref{pde:weak-maximum-principle} の検査欄の $u=x_{n}$）の、有界性による救済である。
+
+**似た定理.** 調和解析の系列では、半空間の次元を一つ上げた $\mathbb{R}^{n+1}_{+}$ で、同じポアソン核（\see{four:poisson-kernel-rd}。正規化定数 $\frac{2}{(n+1)\omega_{n+1}}=\frac{\Gamma(\frac{n+1}{2})}{\pi^{(n+1)/2}}$ が一致する）を $L^{p}$ の境界値に使い、極大関数でほとんど至る所の収束を示した。そこでは調和性をフーリエ変換で見ることもできた。ここでの連続な境界値の場合は、その最も素朴な場合である。
+
+**高い視点：無限遠という境界点.** 半空間の解の一意性に有界性が要るのは、半空間には「無限遠」というもう一つの境界点があり、そこでの値を指定していないからである。比喩で言えば、地平線まで続く平原の地表の温度を決めても、地中の温度は「地中深くから上がってくる熱」（$x_{n}$ の項）の分だけ決まらない。有界性は「地中深くに熱源はない」という条件で、これを課すと温度分布が決まる。反転 $x\mapsto x/|x|^{2}$（ケルビン変換）を使うと、半空間は球に、無限遠は球面上の 1 点に写り、二つの問題は互いに移り合う。
+:::
+
+右辺 $f$ の正則性とポアソン方程式の古典解の関係は、次のページ（\see{pde:page-holder-poisson}）で扱う。
+
+## 問題 {#pde:sec-gf-pi-problems}
+
+::: problem {#pde:prob-gf-sharp-harnack}
+$R>0$ とし、$u\ge0$ を $B(0,R)$ の調和関数とする。$|x|<R$ なら
+$$
+\frac{R^{n-2}(R-|x|)}{(R+|x|)^{n-1}}\,u(0)\le u(x)\le\frac{R^{n-2}(R+|x|)}{(R-|x|)^{n-1}}\,u(0)
+$$
+であることを示せ。$n=2$ ではこれは何になるか。
+:::
+
+::: solution
+$s\defeq|x|$ とし、$s<\rho<R$ をとる。$\overline{B}(0,\rho)\subset B(0,R)$ なので、\ref{pde:poisson-ball-representation} から $u(x)=\int_{\partial B(0,\rho)}K_{\rho}(x,y)u(y)\,dS(y)$。$|y|=\rho$ なら $\rho-s\le|x-y|\le\rho+s$ なので
+$$
+\frac{\rho^{2}-s^{2}}{n\omega_{n}\rho(\rho+s)^{n}}\le K_{\rho}(x,y)\le\frac{\rho^{2}-s^{2}}{n\omega_{n}\rho(\rho-s)^{n}}.
+$$
+$u\ge0$ なので、これを $u(y)\,dS(y)$ で積分し、球面についての平均値の性質 $\int_{\partial B(0,\rho)}u\,dS=\rho^{n-1}\int_{S^{n-1}}u(\rho\theta)\,d\sigma=n\omega_{n}\rho^{n-1}u(0)$（\ref{pde:mean-value-property.2}）を使うと
+$$
+\frac{\rho^{n-2}(\rho-s)}{(\rho+s)^{n-1}}u(0)\le u(x)\le\frac{\rho^{n-2}(\rho+s)}{(\rho-s)^{n-1}}u(0)
+$$
+（$\rho^{2}-s^{2}=(\rho-s)(\rho+s)$ で約分した）。$\rho\uparrow R$ とすればよい（両端は $\rho$ について連続）。$n=2$ では $\frac{R-s}{R+s}u(0)\le u(x)\le\frac{R+s}{R-s}u(0)$ となり、複素解析の\ref{cx:harnack}と一致する。これは平均値の性質だけから得た \ref{pde:prob-hf-ball-harnack} の評価より強い。
+:::
+
+::: problem {#pde:prob-gf-reflection}
+$B^{+}\defeq B(0,1)\cap\mathbb{R}_{+}^{n}$ とし、$u\in C(\overline{B^{+}})$ は $B^{+}$ で調和で、$\overline{B^{+}}\cap\{x_{n}=0\}$ の上で $u=0$ とする。$B(0,1)$ の上で $v(x)\defeq u(x)$（$x_{n}\ge0$）、$v(x)\defeq-u(x^{*})$（$x_{n}<0$）とおくと、$v$ は $B(0,1)$ で調和であることを示せ（**鏡像の原理**）。
+:::
+
+::: solution
+$v$ は $B(0,1)$ で連続である（$x_{n}=0$ では両側の定義がともに $0$ に近づく）。$0<\rho<1$ とし、$w$ を境界値 $v|_{\partial B(0,\rho)}$ の \ref{pde:poisson-ball-dirichlet} の解（$\overline{B}(0,\rho)$ で連続、$B(0,\rho)$ で調和）とする。
+
+**$w$ は奇.** $\tilde w(x)\defeq-w(x^{*})$ も $B(0,\rho)$ で調和（折り返しは $\Delta$ を変えない）で $\overline{B}(0,\rho)$ で連続、$|x|=\rho$ では $\tilde w(x)=-v(x^{*})=v(x)$（$v$ は奇）。\ref{pde:dirichlet-uniqueness.1} から $\tilde w=w$。とくに $x_{n}=0$ なら $w(x)=-w(x)$、$w(x)=0$。
+
+**上半分で $w=v$.** $D^{+}\defeq B(0,\rho)\cap\mathbb{R}_{+}^{n}$ は有界な開集合で、$w-v$ は $D^{+}$ で調和（$v=u$）、$\overline{D^{+}}$ で連続。$\partial D^{+}$ は球面の部分（そこで $w=v$）と平面の部分（そこで $w=0=v$）からなるので、$\partial D^{+}$ で $w-v=0$。\ref{pde:dirichlet-uniqueness.1} から $D^{+}$ で $w=v$。
+
+**下半分.** $D^{-}\defeq B(0,\rho)\cap\{x_{n}<0\}$ では $v(x)=-u(x^{*})$ は調和で、同じ議論で $w=v$。平面の上では両方 $0$。
+
+よって $B(0,\rho)$ で $v=w$ は調和。$\rho<1$ は任意なので、$v$ は $B(0,1)$ で調和である。（$u$ が $B^{+}$ で調和なことしか仮定していないのに、$v$ は平面を越えて調和に延びる。これは複素解析の\ref{cx:schwarz-reflection}の $n$ 次元の調和関数版である。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

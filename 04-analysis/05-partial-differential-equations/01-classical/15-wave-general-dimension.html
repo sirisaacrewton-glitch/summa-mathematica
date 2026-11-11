@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一般の次元の波動方程式とホイヘンスの原理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/15-wave-general-dimension.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 一般の次元の波動方程式とホイヘンスの原理 {#pde:page-wave-general-dimension keywords="wave equation in odd dimensions, solution formula (1/gamma_n) [d_t (t^{-1} d_t)^{(n-3)/2} (t^{n-2} M_g) + (t^{-1} d_t)^{(n-3)/2} (t^{n-2} M_h)], gamma_n = 1 . 3 ... (n-2), operator (r^{-1} d_r)^{k-1} r^{2k-1} turning the Euler-Poisson-Darboux equation into the one-dimensional wave equation, even dimensions by the method of descent, regularity g in C^{m+1}, h in C^m with m = (n+1)/2 or (n+2)/2, strong Huygens principle in odd dimensions, failure of the Huygens principle in even dimensions, lacuna, 奇数次元, 偶数次元, 降下法, ホイヘンスの原理"}
+
+3 次元では\ref{pde:wave-kirchhoff}を、球面平均 $M$ に半径を掛けた $rM$ が 1 次元の波動方程式を満たすことから導いた。このページでは一般の奇数次元 $n=2k+1$ で、$rM$ の代わりに $\bigl(\frac1r\frac{d}{dr}\bigr)^{k-1}(r^{2k-1}M)$ が同じ役割を果たすことを示し、解の公式を立てて古典解であることを確かめる。偶数次元 $n=2k$ の解は、$n+1$ 次元の公式から降下法（\ref{pde:wave-descent-mean}）で得る。一意性は前のページのエネルギー法（\ref{pde:wave-uniqueness-rn}）による。
+
+公式からは次の二つがわかる。第一に、古典解を得るには、初期値に次元のおよそ半分の階数だけ余分な滑らかさが要る（$n=3$ の 1 階の損失 \ref{pde:wave-kirchhoff-loss} の一般化）。第二に、奇数次元 $n\ge3$ では、時刻 $t$ の点 $x$ の値は球面 $\lvert y-x\rvert=\lvert t\rvert$ の近くの初期値だけで決まり、台が有界な初期値の波は通り過ぎた後に完全に静まる（**強いホイヘンスの原理**）。偶数次元ではこれが成り立たず、波の後ろに「尾」が残ることを、尾の値を具体的に計算して示す。
+
+## 記法と定義の確認 {#pde:sec-wv-gd-notation}
+
+::: notation
+- 波動方程式の初期値問題と古典解は \ref{pde:wave-cauchy-problem}、全空間での一意性は \ref{pde:wave-uniqueness-rn.1}。時間を先に書き、$J$ はいつも $0$ を含む開区間。$C^{k}$ 級は \ref{calc:ck-map}、偏微分の順序交換は \ref{calc:schwarz-theorem}。
+- 球面平均 $M_{f}(x,r)$ とその滑らかさは \ref{pde:wave-mean-smoothness}（$f\in C^{m}$ なら $M_{f}\in C^{m}(\mathbb{R}^{n}\times\mathbb{R})$、$r$ について偶関数、$\partial_{x}^{\alpha}\partial_{r}^{j}M_{f}=\partial_{r}^{j}M_{\partial^{\alpha}f}$）、ダルブーの方程式は \ref{pde:wave-darboux}、降下法の積分 $N_{f}$ と定数 $c_{n}=\frac{2}{(n+1)\omega_{n+1}}$ は \ref{pde:wave-descent-mean}。
+- $r>0$ の関数 $\varphi$ について $D\varphi\defeq\frac{1}{r}\varphi'$ とおき、$D^{0}\varphi=\varphi$、$D^{i+1}=D\circ D^{i}$ とする。時間変数に使うときも同じ記号を使う（$D\varphi=\frac1t\partial_{t}\varphi$）。
+- 二重階乗：奇数 $p\ge1$ について $p!!\defeq1\cdot3\cdots p$、$(-1)!!\defeq1$。
+- 積分記号下の微分は \ref{meas:parameter-integrals}、線形変換による積分の変換は \ref{meas:lebesgue-linear}、放射関数の積分は \ref{meas:polar-radial.2}。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 奇数次元の解の公式 {#pde:sec-wv-odd}
+
+::: lemma 球面平均を 1 次元の波に変える作用素 {#pde:wave-radial-operator keywords="identities for D = r^{-1} d/dr: (d/dr)^2 D^{k-1} (r^{2k-1} phi) = D^k (r^{2k} phi') = D^{k-1} (r^{2k-1} (phi'' + (2k/r) phi')); D^{k-1}(r^{2k-1} phi) = sum_{j<k} beta_j r^{j+1} phi^{(j)} with beta_0 = (2k-1)!!, beta_{k-1} = 1" index="ダルブーの方程式を波動方程式に変える作用素|だるぶーのほうていしきをはどうほうていしきにかえるさようそ"}
+$k\ge1$ とする。
+1. $\varphi\in C^{k-1}((0,\infty))$ について、$\varphi$ によらない定数 $\beta_{0}^{(k)},\dots,\beta_{k-1}^{(k)}$ があって
+$$
+\begin{aligned}&D^{k-1}\bigl(r^{2k-1}\varphi\bigr)=\sum_{j=0}^{k-1}\beta_{j}^{(k)}r^{j+1}\varphi^{(j)},\\&\beta_{0}^{(k)}=(2k-1)!!,\quad\beta_{k-1}^{(k)}=1.\end{aligned}
+$$
+2. $\varphi\in C^{k+1}((0,\infty))$ について
+$$
+\frac{d^{2}}{dr^{2}}D^{k-1}\bigl(r^{2k-1}\varphi\bigr)=D^{k}\bigl(r^{2k}\varphi'\bigr)=D^{k-1}\Bigl(r^{2k-1}\Bigl(\varphi''+\frac{2k}{r}\varphi'\Bigr)\Bigr).
+$$
+:::
+
+::: intuition
+$\varphi''+\frac{2k}{r}\varphi'$ は $2k+1$ 次元の放射方向のラプラシアンである。2 は、$\varphi$ にこの作用素を施してから $D^{k-1}(r^{2k-1}\,\cdot\,)$ で変換したものが、先に変換してから 1 次元の 2 階微分をとったものに等しいと言っている。つまりこの変換は、$2k+1$ 次元の放射方向の波を 1 次元の波に写す。
+:::
+
+::: proof
+**1.** $0\le i\le k-1$ について、定数 $b_{i,0},\dots,b_{i,i}$ があって $D^{i}(r^{2k-1}\varphi)=\sum_{j=0}^{i}b_{i,j}r^{2k-1-2i+j}\varphi^{(j)}$、$b_{i,0}=\prod_{l=0}^{i-1}(2k-1-2l)$、$b_{i,i}=1$ となることを $i$ についての帰納法で示す。$i=0$ は明らか。$a\defeq2k-1-2i$ とおくと、積の微分から
+$$
+D\bigl(r^{a+j}\varphi^{(j)}\bigr)=(a+j)\,r^{(a-2)+j}\varphi^{(j)}+r^{(a-2)+(j+1)}\varphi^{(j+1)}
+$$
+なので、$D^{i+1}(r^{2k-1}\varphi)$ も $r^{(a-2)+j}\varphi^{(j)}$（$0\le j\le i+1$）の 1 次結合で、$j=0$ の係数は $a\,b_{i,0}$、$j=i+1$ の係数は $b_{i,i}=1$。$i=k-1$ では $a=1$ で冪は $r^{1+j}$ になり、$b_{k-1,0}=(2k-1)(2k-3)\cdots3=(2k-1)!!$。ここで $\varphi$ の $k-1$ 階までの導関数しか使っていない。
+
+**2.** 第二の等式は、$D\bigl(r^{2k}\varphi'\bigr)=\frac{1}{r}\bigl(2kr^{2k-1}\varphi'+r^{2k}\varphi''\bigr)=r^{2k-1}\bigl(\varphi''+\frac{2k}{r}\varphi'\bigr)$ に $D^{k-1}$ を施したものである。第一の等式を $k$ についての帰納法で示す。$k=1$ では $(r\varphi)''=r\varphi''+2\varphi'=\frac1r\bigl(r^{2}\varphi'\bigr)'$。$k\ge2$ とし、$k-1$ で成り立つとする。$\chi\defeq(2k-1)\varphi+r\varphi'\in C^{k}((0,\infty))$ とおくと $D(r^{2k-1}\varphi)=(2k-1)r^{2k-3}\varphi+r^{2k-2}\varphi'=r^{2k-3}\chi$ なので、$D^{k-1}(r^{2k-1}\varphi)=D^{k-2}\bigl(r^{2(k-1)-1}\chi\bigr)$。帰納法の仮定（$k-1$ と $\chi$）から
+$$
+\frac{d^{2}}{dr^{2}}D^{k-1}\bigl(r^{2k-1}\varphi\bigr)=D^{k-1}\bigl(r^{2k-2}\chi'\bigr).
+$$
+$\chi'=2k\varphi'+r\varphi''$ なので $r^{2k-2}\chi'=2kr^{2k-2}\varphi'+r^{2k-1}\varphi''=D\bigl(r^{2k}\varphi'\bigr)$。よって右辺は $D^{k}(r^{2k}\varphi')$。
+:::
+
+::: example
+$k=2$（$n=5$）では $D(r^{3}\varphi)=3r\varphi+r^{2}\varphi'$ で、$\beta_{0}^{(2)}=3$, $\beta_{1}^{(2)}=1$。$k=3$（$n=7$）では $D^{2}(r^{5}\varphi)=15r\varphi+9r^{2}\varphi'+r^{3}\varphi''$。
+:::
+
+::: theorem 奇数次元の解の公式 {#pde:wave-odd-dimension keywords="solution formula for the wave equation in odd dimensions n = 2k+1 >= 3: W_f(t,x) = (1/gamma_n) sum_j beta_j t^{j+1} d_r^j M_f(x,t), equal to (1/gamma_n) (t^{-1} d_t)^{k-1}(t^{2k-1} M_f) for t > 0; u = d_t W_g + W_h is a classical solution for g in C^{m+1}, h in C^m, m = (n+1)/2; uniqueness" index="奇数次元の波動方程式の解の公式|きすうじげんのはどうほうていしきのかいのこうしき" refname="奇数次元の波動方程式の解の公式"}
+$n=2k+1\ge3$、$m\defeq k+1=\frac{n+1}{2}$、$\gamma_{n}\defeq(2k-1)!!=1\cdot3\cdots(n-2)$ とし、$\beta_{j}=\beta_{j}^{(k)}$ を \ref{pde:wave-radial-operator.1} の定数とする。$f\in C^{k-1}(\mathbb{R}^{n})$ について
+$$
+W_{f}(t,x)\defeq\frac{1}{\gamma_{n}}\sum_{j=0}^{k-1}\beta_{j}\,t^{j+1}\,\partial_{r}^{j}M_{f}(x,t)\qquad\bigl((t,x)\in\mathbb{R}\times\mathbb{R}^{n}\bigr)
+$$
+とおく。$t>0$ では $W_{f}(t,x)=\frac{1}{\gamma_{n}}D^{k-1}\bigl(t^{n-2}M_{f}(x,t)\bigr)$（$D=\frac1t\partial_{t}$）である。
+1. $g\in C^{m+1}(\mathbb{R}^{n})$, $h\in C^{m}(\mathbb{R}^{n})$ なら、$u\defeq\partial_{t}W_{g}+W_{h}$ は初期値 $g,h$ の $\mathbb{R}\times\mathbb{R}^{n}$ 上の古典解である。
+2. 1 の仮定の下で、初期値 $g,h$ の $J\times\mathbb{R}^{n}$ 上の古典解は $u$ だけである。
+3. $n=3$ では $W_{f}=tM_{f}$ で、1 はキルヒホッフの公式 \eqref{pde:eq-kirchhoff} に一致する。
+:::
+
+::: intuition
+奇数次元では、点 $x$ の時刻 $t$ の値は、半径 $\lvert t\rvert$ の球面の上の球面平均と、その半径についての $k$ 階までの導関数で書ける。古典解を得るには、初期値に次元のおよそ半分（$\frac{n+1}{2}$ 階）の滑らかさが要る。
+:::
+
+::: proof
+$t>0$ での表示は、\ref{pde:wave-radial-operator.1} を $\varphi=M_{f}(x,\cdot)$（$C^{k-1}$ 級、\ref{pde:wave-mean-smoothness.2}）に使えばよい（$2k-1=n-2$）。
+
+**Step 1.** 【主張：$f\in C^{p}(\mathbb{R}^{n})$（$p\ge k-1$）なら $W_{f}\in C^{p-k+1}(\mathbb{R}\times\mathbb{R}^{n})$、$W_{f}$ は $t$ について奇関数、$W_{f}(0,\cdot)=0$。さらに $p\ge k$ なら $\partial_{t}W_{f}(0,\cdot)=f$】\ref{pde:wave-mean-smoothness.2} から $M_{f}\in C^{p}$ なので、$j\le k-1$ について $\partial_{r}^{j}M_{f}\in C^{p-j}\subset C^{p-k+1}$。$M_{f}$ は $r$ について偶関数なので $\partial_{r}^{j}M_{f}(x,t)$ の偶奇は $(-1)^{j}$ で、$t^{j+1}$ を掛けると奇関数。$t=0$ ではどの項も $0$。$p\ge k$ なら各項は $t$ について微分でき、$\partial_{t}\bigl(t^{j+1}\partial_{r}^{j}M_{f}\bigr)=(j+1)t^{j}\partial_{r}^{j}M_{f}+t^{j+1}\partial_{r}^{j+1}M_{f}$ は $t=0$ で $j\ge1$ なら $0$、$j=0$ なら $M_{f}(x,0)=f(x)$。$\beta_{0}=\gamma_{n}$ なので $\partial_{t}W_{f}(0,x)=f(x)$。
+
+**Step 2.** 【主張：$f\in C^{k+1}(\mathbb{R}^{n})$ なら $\partial_{t}^{2}W_{f}=\Delta W_{f}$（$\mathbb{R}\times\mathbb{R}^{n}$ 上）】$x$ を固定し $\varphi(r)\defeq M_{f}(x,r)$ とおくと、$\varphi\in C^{k+1}$ で、\ref{pde:wave-darboux.2}（$n-1=2k$）から $\varphi''+\frac{2k}{r}\varphi'=M_{\Delta f}(x,r)$（$r>0$）。$t>0$ では \ref{pde:wave-radial-operator.2} から
+$$
+\begin{aligned}\partial_{t}^{2}W_{f}(t,x)&=\frac{1}{\gamma_{n}}D^{k-1}\Bigl(t^{2k-1}\Bigl(\varphi''+\frac{2k}{t}\varphi'\Bigr)\Bigr)\\&=\frac{1}{\gamma_{n}}D^{k-1}\bigl(t^{2k-1}M_{\Delta f}(x,t)\bigr)=W_{\Delta f}(t,x)\end{aligned}
+$$
+（最後は $\Delta f\in C^{k-1}$ についての $t>0$ での表示）。一方、\ref{pde:wave-mean-smoothness.2} から $\Delta_{x}\partial_{r}^{j}M_{f}=\partial_{r}^{j}M_{\Delta f}$（階数 $j+2\le k+1$）なので、$W_{f}$ の定義の各項に $\Delta$ を施して $\Delta W_{f}=W_{\Delta f}$。よって $t>0$ で成り立つ。$W_{f}$ は $t$ について奇関数なので、\ref{pde:wave-kirchhoff} の証明の Step 2 と同じく $\partial_{t}^{2}W_{f}$ と $\Delta W_{f}$ も奇関数で $t<0$ でも成り立ち、$t=0$ では連続性（Step 1 から $W_{f}\in C^{2}$）で成り立つ。
+
+**Step 3.** 【主張：1】$h\in C^{k+1}$ なので、Step 1・2 から $W_{h}$ は初期値 $0,h$ の古典解。$g\in C^{k+2}$ なので Step 1 から $W_{g}\in C^{3}$ で、$z\defeq\partial_{t}W_{g}\in C^{2}$。\ref{calc:schwarz-theorem} と Step 2 から $\partial_{t}^{2}z=\partial_{t}\Delta W_{g}=\Delta z$。初期値は Step 1 から $z(0,\cdot)=g$、$\partial_{t}z(0,\cdot)=\partial_{t}^{2}W_{g}(0,\cdot)=\Delta W_{g}(0,\cdot)=0$。線形性から $u=z+W_{h}$ は初期値 $g,h$ の古典解。
+
+**2・3.** 2 は 1 と \ref{pde:wave-uniqueness-rn.1}。3 は $k=1$ で和が $j=0$ の項 $\beta_{0}tM_{f}=tM_{f}$（$\gamma_{3}=1$）だけになることから。
+
+::: hypcheck
+- **$h\in C^{m}$, $g\in C^{m+1}$（$m=k+1$）**：Step 2 で \ref{pde:wave-radial-operator.2} を $C^{k+1}$ 級の $\varphi$ に使い、$\Delta W_{f}=W_{\Delta f}$ で $k+1$ 階の導関数を使った。$g$ にもう 1 階要るのは、Step 3 で $\partial_{t}W_{g}$ をとるためである。古典解の必要条件は $g\in C^{2}$, $h\in C^{1}$ だけなので、公式の要求する滑らかさとの差はおよそ $\frac{n-1}{2}$ 階で、次元とともに増える。$n=3$ ではこの差が実際に埋められないこと（\ref{pde:wave-kirchhoff-loss}）を見た。
+- **奇数次元**：$\varphi''+\frac{n-1}{r}\varphi'$ の係数 $n-1=2k$ が偶数であることを、\ref{pde:wave-radial-operator.2} が使える形にするのに使った。$n$ が偶数だと $r^{n-2}$ の冪が合わず、有限回の $D$ では 1 次元の波動方程式に変えられない。偶数次元は降下法で扱う（\ref{pde:wave-even-dimension}）。
+- **一意性（2）**：前のページのエネルギー法による。3 次元のときのように公式の導出から一意性を得るには、解に $C^{k+1}$ 程度の滑らかさを仮定しなければならない（$D^{k-1}$ を解の球面平均に施すため）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 公式は $C^{k}$ の滑らかさでは 1 階ずつ損をするが、2 乗可積分な導関数（ソボレフ空間）で測ると損失はない：エネルギー（\ref{pde:wave-uniqueness-rn.4}）は保存され、より高い導関数のエネルギーも、方程式を空間で微分したものに同じ議論を使えば保存される。$C^{k}$ の滑らかさを $L^{2}$ 型の滑らかさに置き換え、ソボレフの埋め込み（\see{fa:morrey-inequality}）で戻ると、古典解を得るのに必要な階数はやはり次元の半分程度になる。初期値の滑らかさの損失は「方程式の欠陥」ではなく、$C^{k}$ というものさしが波動方程式の保存量と合っていないことの現れである。
+
+**似た定理.** 奇数次元の公式は、$n=3$ の場合（\ref{pde:wave-kirchhoff}）と同じ二段構えでできている：$W_{h}$ は「初速 $h$ に対する解」で、$\partial_{t}W_{g}$ は「初期の形 $g$ に対する解」である。この関係（初速に対する解を時間で微分すると初期の形に対する解になる）は 1 次元のダランベールの公式でも同じで、$\int_{0}^{t}M_{h}(x,s)\,ds$ を $t$ で微分すると $M_{g}$ の形の項が出る。
+
+**高い視点：玉ねぎの皮むき.** 作用素 $D=\frac1r\frac{d}{dr}$ は、球面平均を「半径の 2 乗の関数」として微分する操作である。比喩で言えば、$n$ 次元の球を同心の球殻（玉ねぎの皮）の重なりと見て、皮を一枚むくごとに次元が 2 つ下がる：$D$ を 1 回施すと $n$ 次元の放射方向のラプラシアンが $n-2$ 次元のものに移る（\ref{pde:wave-radial-operator.2} の帰納法の一段）。奇数次元から始めると、$k-1$ 回むいて 3 次元、最後に $rM$ で 1 次元に着く。偶数次元から始めると 2 次元で止まってしまうので、一つ上の奇数次元に上がってから降りてくる（降下法）。
+:::
+
+## 偶数次元の解の公式 {#pde:sec-wv-even}
+
+::: theorem 偶数次元の解の公式 {#pde:wave-even-dimension keywords="solution formula for the wave equation in even dimensions n = 2k by Hadamard's method of descent from n+1: V_f(t,x) = (1/gamma_{n+1}) sum_j beta_j t^{j+1} d_t^j N_f(x,t), equal to (1/gamma_{n+1}) (t^{-1} d_t)^{k-1}(t^{n-1} N_f) for t > 0; u = d_t V_g + V_h is a classical solution for g in C^{m+1}, h in C^m, m = (n+2)/2; uniqueness" index="偶数次元の波動方程式の解の公式|ぐうすうじげんのはどうほうていしきのかいのこうしき" refname="偶数次元の波動方程式の解の公式"}
+$n=2k\ge2$、$m\defeq k+1=\frac{n+2}{2}$ とし、$\gamma_{n+1}=(2k-1)!!$, $\beta_{j}=\beta_{j}^{(k)}$, $N_{f}$ を上のとおりとする。$f\in C^{k-1}(\mathbb{R}^{n})$ について
+$$
+V_{f}(t,x)\defeq\frac{1}{\gamma_{n+1}}\sum_{j=0}^{k-1}\beta_{j}\,t^{j+1}\,\partial_{t}^{j}N_{f}(x,t)
+$$
+とおく。$t>0$ では $V_{f}(t,x)=\frac{1}{\gamma_{n+1}}D^{k-1}\bigl(t^{n-1}N_{f}(x,t)\bigr)$。
+1. $g\in C^{m+1}(\mathbb{R}^{n})$, $h\in C^{m}(\mathbb{R}^{n})$ なら、$u\defeq\partial_{t}V_{g}+V_{h}$ は初期値 $g,h$ の $\mathbb{R}\times\mathbb{R}^{n}$ 上の古典解である。
+2. 1 の仮定の下で、初期値 $g,h$ の $J\times\mathbb{R}^{n}$ 上の古典解は $u$ だけである。
+3. $n=2$ では $V_{f}=tN_{f}$ で、1 はポアソンの公式（\ref{pde:wave-poisson-2d}）に一致する。
+:::
+
+::: intuition
+偶数次元では、点 $x$ の時刻 $t$ の値は、半径 $\lvert t\rvert$ の球の内部全体の初期値に、縁に近いほど大きな重み $1/\sqrt{t^{2}-\lvert y-x\rvert^{2}}$ を付けた積分で決まる。一つ上の奇数次元の解のうち、最後の座標によらないものとして作る。
+:::
+
+::: proof
+$\bar{f}(y',y_{n+1})\defeq f(y')$ とおき、$n+1=2k+1$ 次元の \ref{pde:wave-odd-dimension} の記号を $W$ と書く（定数 $\gamma_{n+1}$, $\beta_{j}^{(k)}$ は同じ $k$ のもの）。
+
+**Step 1.** 【主張：すべての $x_{n+1}$ と $t$ で $M_{\bar{f}}\bigl((x,x_{n+1}),t\bigr)=N_{f}(x,t)$。とくに $f\in C^{p}$ なら $N_{f}\in C^{p}(\mathbb{R}^{n}\times\mathbb{R})$、$V_{f}(t,x)=W_{\bar{f}}(t,(x,x_{n+1}))$】$\bar{f}$ は最後の座標の平行移動で不変なので $M_{\bar{f}}((x,x_{n+1}),t)=M_{\bar{f}}((x,0),t)$ で、これは \ref{pde:wave-descent-mean.2} から $N_{f}(x,t)$。$\bar{f}\in C^{p}(\mathbb{R}^{n+1})$ なので左辺は $C^{p}$ 級（\ref{pde:wave-mean-smoothness.2}）で、$t$ についての導関数も一致するので、定義を比べて $V_{f}=W_{\bar{f}}$。$t>0$ での表示は \ref{pde:wave-radial-operator.1} を $\varphi=N_{f}(x,\cdot)$ に使えばよい（$2k-1=n-1$）。
+
+**Step 2.** 【主張：1】$\bar{g}\in C^{m+1}(\mathbb{R}^{n+1})$, $\bar{h}\in C^{m}(\mathbb{R}^{n+1})$ で、$n+1$ 次元での $\frac{(n+1)+1}{2}=k+1=m$ なので、\ref{pde:wave-odd-dimension.1} から $\bar{u}\defeq\partial_{t}W_{\bar{g}}+W_{\bar{h}}$ は $\mathbb{R}\times\mathbb{R}^{n+1}$ 上の古典解。Step 1 から $\bar{u}(t,x,x_{n+1})=u(t,x)$ は $x_{n+1}$ によらないので、$u(t,x)=\bar{u}(t,x,0)$ は $C^{2}$ 級で、$\partial_{n+1}^{2}\bar{u}=0$ から $\partial_{t}^{2}u=\Delta u$。初期値は $\bar{u}(0,x,0)=g(x)$, $\partial_{t}\bar{u}(0,x,0)=h(x)$。
+
+**2・3.** 2 は 1 と \ref{pde:wave-uniqueness-rn.1}。3 は $k=1$ で $V_{f}=tN_{f}$（$\gamma_{3}=1$）、$c_{2}=\frac{1}{2\pi}$（\ref{pde:wave-descent-mean.3}）から。
+
+::: hypcheck
+- **$h\in C^{m}$, $g\in C^{m+1}$（$m=\frac{n+2}{2}$）**：Step 2 で $n+1$ 次元の奇数次元の定理の仮定として使った。奇数次元 $n$ の $m=\frac{n+1}{2}$ より半階分多いのは、一つ上の次元から降りてくるためである。
+- **降下法**：Step 1 で、$N_{f}$ の滑らかさを直接調べずに、$n+1$ 次元の球面平均と等しいことから得た。$N_{f}$ の積分は縁で重みが発散するので、直接の微分には注意が要るが、この等式で避けられる。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## ホイヘンスの原理 {#pde:sec-wv-huygens}
+
+::: theorem ホイヘンスの原理 {#pde:wave-huygens keywords="strong Huygens principle: in odd dimensions n >= 3 the value u(t,x) depends only on the data near the sphere |y - x| = |t|, so waves from compactly supported data leave no trace behind (lacuna |x| < |t| - R); in even dimensions the tail u(t,0) = (-1)^{k-1} (2k-3)!! (c_n / gamma_{n+1}) int h(y) (t^2 - |y|^2)^{-(n-1)/2} dy never vanishes" index="ホイヘンスの原理|ほいへんすのげんり, 強いホイヘンスの原理|つよいほいへんすのげんり, 空隙（波動方程式）|くうげきはどうほうていしき" refname="ホイヘンスの原理"}
+1. $n\ge3$ を奇数、$g\in C^{m+1}(\mathbb{R}^{n})$, $h\in C^{m}(\mathbb{R}^{n})$（$m=\frac{n+1}{2}$）とし、$u$ を初期値 $g,h$ の古典解とする。$t\ne0$ とし、$g$ と $h$ が球面 $\lvert y-x\rvert=\lvert t\rvert$ を含むある開集合の上で $0$ なら、$u(t,x)=0$。とくに $g,h$ が $\overline{B}(0,R)$ の外で $0$ なら、$\lvert x\rvert<\lvert t\rvert-R$ でも $\lvert x\rvert>\lvert t\rvert+R$ でも $u(t,x)=0$。
+2. $n=2k\ge2$ を偶数、$h\in C^{m}(\mathbb{R}^{n})$（$m=\frac{n+2}{2}$）を $h\ge0$、$\lvert y\rvert\ge1$ で $h(y)=0$、$h(0)>0$ とし、$g=0$ とする。初期値 $0,h$ の古典解 $u$ は、$t>1$ で
+$$
+\begin{aligned}u(t,0)&=(-1)^{k-1}(2k-3)!!\,\frac{c_{n}}{\gamma_{n+1}}\\&\quad\times\int_{\lvert y\rvert<1}\frac{h(y)}{(t^{2}-\lvert y\rvert^{2})^{(n-1)/2}}\,dy\ne0\end{aligned}
+$$
+を満たし、$t^{n-1}u(t,0)\to(-1)^{k-1}(2k-3)!!\,\frac{c_{n}}{\gamma_{n+1}}\int h$（$t\to\infty$）。
+:::
+
+::: intuition
+3 次元、5 次元などの奇数次元では、点 $x$ にいる人は、初期の乱れから距離がちょうど $\lvert t\rvert$ の所の情報だけを時刻 $t$ に受け取る：音は鳴った瞬間の形で届き、後に響きを残さない。偶数次元（と 1 次元）では、波面が通り過ぎた後も、中心の値はゆっくり減りながら $0$ でない値をとり続ける。
+:::
+
+::: proof
+**Step 1.** 【主張：1 の前半】\ref{pde:wave-odd-dimension.2} から $u=\partial_{t}W_{g}+W_{h}$。$(t,x)$ での値は $t^{j}$ と $\partial_{r}^{j}M_{g}(x,t)$（$j\le k$）、$\partial_{r}^{j}M_{h}(x,t)$（$j\le k-1$）の 1 次結合である（$\partial_{t}W_{g}$ を積の微分で展開した）。\ref{pde:wave-mean-smoothness.2} から
+$$
+\partial_{r}^{j}M_{f}(x,t)=\frac{1}{n\omega_{n}}\int_{S^{n-1}}\sum_{\lvert\alpha\rvert=j}\frac{j!}{\alpha!}\,\theta^{\alpha}\,(\partial^{\alpha}f)(x+t\theta)\,d\sigma(\theta)
+$$
+で、$x+t\theta$ は球面 $\lvert y-x\rvert=\lvert t\rvert$ の上にある。$f=g,h$ はその球面を含む開集合の上で $0$ なので、そこで導関数もすべて $0$ で、被積分関数は $0$。よって $u(t,x)=0$。
+
+**Step 2.** 【主張：1 の後半】$\lvert x\rvert<\lvert t\rvert-R$ なら、球面上の $y$ について $\lvert y\rvert\ge\lvert t\rvert-\lvert x\rvert>R$、$\lvert x\rvert>\lvert t\rvert+R$ なら $\lvert y\rvert\ge\lvert x\rvert-\lvert t\rvert>R$。どちらの場合も球面は開集合 $\{\lvert y\rvert>R\}$ に含まれ、$g,h$ はそこで $0$ なので、Step 1 から $u(t,x)=0$。
+
+**Step 3.** 【主張：$t>1$ で $t^{n-1}N_{h}(0,t)=\Lambda(t)\defeq c_{n}\int_{\lvert y\rvert<1}h(y)(t^{2}-\lvert y\rvert^{2})^{-1/2}dy$】$y=tz$ と変数を変えると（$dz=t^{-n}dy$）、$h$ の台が単位球に含まれることから
+$$
+\begin{aligned}N_{h}(0,t)&=c_{n}t^{-n}\int_{\lvert y\rvert<t}\frac{h(y)}{\sqrt{1-\lvert y\rvert^{2}/t^{2}}}\,dy\\&=c_{n}t^{1-n}\int_{\lvert y\rvert<1}\frac{h(y)}{\sqrt{t^{2}-\lvert y\rvert^{2}}}\,dy.\end{aligned}
+$$
+
+**Step 4.** 【主張：$t>1$, $0\le i\le k-1$ で $D^{i}\Lambda(t)=(-1)^{i}(2i-1)!!\,c_{n}\int h(y)(t^{2}-\lvert y\rvert^{2})^{-(2i+1)/2}dy$、したがって 2 の式】$\lvert y\rvert<1<t_{1}\le t$ では $t^{2}-\lvert y\rvert^{2}\ge t_{1}^{2}-1>0$ なので、被積分関数の $t$ についての導関数は有界で、\ref{meas:parameter-integrals.2} から積分の中で微分できる。$D(t^{2}-a)^{-q}=\frac1t\cdot(-q)(2t)(t^{2}-a)^{-q-1}=-2q\,(t^{2}-a)^{-q-1}$ を $q=\frac{2i+1}{2}$ に使うと、係数が $-(2i+1)$ 倍になり、$i$ についての帰納法で主張を得る。\ref{pde:wave-even-dimension} から $u(t,0)=V_{h}(t,0)=\frac{1}{\gamma_{n+1}}D^{k-1}\Lambda(t)$ で、$i=k-1$, $2k-1=n-1$ として 2 の式。被積分関数は連続で非負、$0$ の近くで正なので積分は正。
+
+**Step 5.** 【主張：2 の極限】$t^{n-1}(t^{2}-\lvert y\rvert^{2})^{-(n-1)/2}=(1-\lvert y\rvert^{2}/t^{2})^{-(n-1)/2}$ は $t\ge2$ で $(3/4)^{-(n-1)/2}$ 以下、$t\to\infty$ で $1$ に収束するので、優収束定理から。
+
+::: hypcheck
+- **奇数次元（1）**：公式 \ref{pde:wave-odd-dimension} が球面平均とその有限階の導関数だけで書けることを Step 1 で使った。偶数次元の公式は球の内部全体の積分 $N_{f}$ を含むので、この議論は通らず、実際に 2 のとおり成り立たない。$n=1$ でも成り立たない（\ref{pde:wave-1d-domains.3}）。
+- **開集合の上で $0$**：Step 1 では $g,h$ の導関数（$k$ 階まで）も球面の上で $0$ であることが要る。$g,h$ が球面の上だけで $0$ でも、導関数が $0$ でなければ $u(t,x)\ne0$ でありうる。
+- **$h\ge0$, $h(0)>0$（2）**：Step 4 で積分が $0$ でないことに使った。符号の変わる $h$ では、2 の積分がある時刻で $0$ になることもある。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** \ref{pde:wave-finite-speed}はすべての次元で成り立つ：乱れは光円錐の**外**には出ない。これを弱い意味のホイヘンスの原理と見ると、強いホイヘンスの原理は、乱れが光円錐の**内部**にも残らず、表面だけを伝わることを言っている。強い原理は奇数次元 $n\ge3$ の波動方程式に特有で、偶数次元や 1 次元では 2 や \ref{pde:wave-1d-domains.3} のとおり成り立たない。尾の符号は次元によって変わり、$n=2$ では初速と同じ符号、$n=4$ では逆の符号になる（$(-1)^{k-1}$）。方程式に低階の項や変数係数を加えると、奇数次元でも一般には強い原理が崩れる。どの方程式で強い原理が成り立つかという問題は、ここでは扱わない。
+
+**似た定理.** 3 次元の場合は、キルヒホッフの公式から直接読み取った（\see{pde:prob-wv-huygens}）。2 次元の尾は \ref{pde:wave-no-huygens-2d} で計算したもので、2 の $n=2$ の場合（$(-1)^{0}(-1)!!\,c_{2}/\gamma_{3}=\frac{1}{2\pi}$）に一致する。尾の減り方 $t^{-(n-1)}$ は、波のエネルギーが半径 $t$ の球面（面積が $t^{n-1}$ に比例）に広がることと合っている。
+
+**高い視点：鐘の音と太鼓の余韻.** 比喩で言えば、奇数次元の空間は、叩いた瞬間の音だけを正確に届ける「残響のないホール」で、偶数次元の空間は、音が通り過ぎた後もかすかな余韻が鳴り続けるホールである。私たちが言葉や音楽をはっきり聞き分けられるのは、住んでいる空間が 3 次元で、強いホイヘンスの原理が成り立つからだ、という説明がよく与えられる。降下法の言葉では、偶数次元の点の乱れは一つ上の奇数次元では無限に長い直線状の音源にあたり、直線上の遠い部分から遅れて届く音が余韻になる。
+:::
+
+## 問題 {#pde:sec-wv-gd-problems}
+
+::: problem {#pde:prob-wv-five-dim}
+$n=5$ とする。
+1. $W_{f}=tM_{f}+\frac{t^{2}}{3}\partial_{r}M_{f}$ を確かめ、$g\in C^{4}$, $h\in C^{3}$ に対する解の公式を、$M_{g},M_{h}$ とその $r$ についての導関数で書け。
+2. $g=0$, $h=\lvert x\rvert^{2}$ のとき $u=t\lvert x\rvert^{2}+\frac53t^{3}$ を導き、直接 $\partial_{t}^{2}u=\Delta u$ を確かめよ（\see{pde:prob-wv-quadratic}）。
+3. $g=0$、$h(y)=\psi(\lvert y\rvert)$（$\psi\in C^{3}(\mathbb{R})$、$[1,\infty)$ と $0$ の近くで $\psi=0$）のとき、$t>1$ で $u(t,0)=0$ を確かめよ。
+:::
+
+::: solution
+**1.** $k=2$ で $\gamma_{5}=3$、\ref{pde:wave-radial-operator} の後の例から $\beta_{0}=3$, $\beta_{1}=1$。よって $W_{f}=\frac13\bigl(3tM_{f}+t^{2}\partial_{r}M_{f}\bigr)=tM_{f}+\frac{t^{2}}{3}\partial_{r}M_{f}$（$M_{f}$ と $\partial_{r}M_{f}$ は $(x,t)$ で評価する）。\ref{pde:wave-odd-dimension.1} から
+$$
+u=\partial_{t}W_{g}+W_{h}=M_{g}+\frac{5t}{3}\partial_{r}M_{g}+\frac{t^{2}}{3}\partial_{r}^{2}M_{g}+tM_{h}+\frac{t^{2}}{3}\partial_{r}M_{h}.
+$$
+
+**2.** \ref{pde:prob-wv-quadratic} の 1 と同じ計算で $M_{h}(x,r)=\lvert x\rvert^{2}+r^{2}$（$\int_{S^{4}}\theta\,d\sigma=0$）、$\partial_{r}M_{h}=2r$。よって $u=t(\lvert x\rvert^{2}+t^{2})+\frac{t^{2}}{3}\cdot2t=t\lvert x\rvert^{2}+\frac53t^{3}$。$\partial_{t}^{2}u=10t$、$\Delta u=t\cdot2\cdot5=10t$ で一致し、$u(0,\cdot)=0$, $\partial_{t}u(0,\cdot)=\lvert x\rvert^{2}$。
+
+**3.** $h\in C^{3}(\mathbb{R}^{5})$ である（$\lvert y\rvert$ は $y\ne0$ で滑らかで、$0$ の近くで $h=0$）。$M_{h}(0,t)=\psi(\lvert t\rvert)$ なので、$t>1$ では $\partial_{r}M_{h}(0,t)=\psi'(t)=0$、$M_{h}(0,t)=0$。よって 1 から $u(t,0)=t\psi(t)+\frac{t^{2}}{3}\psi'(t)=0$。これは \ref{pde:wave-huygens.1} の特別な場合である。
+:::
+
+::: problem {#pde:prob-wv-even-tail}
+$n=4$ とし、$h$ と $u$ を \ref{pde:wave-huygens.2} のとおりとする。
+1. $c_{4}=\frac{3}{8\omega_{4}}$ を示せ（ヒント：\ref{pde:wave-descent-mean.1} と \ref{meas:polar-radial.2}）。
+2. $t>1$ で $u(t,0)=-\frac{1}{8\omega_{4}}\int_{\lvert y\rvert<1}h(y)\,(t^{2}-\lvert y\rvert^{2})^{-3/2}\,dy<0$ を示せ。初速が正なのに、波が通り過ぎた後の中心の変位は負である。
+3. $V_{h}(t,0)=\frac13\bigl(3tN_{h}(0,t)+t^{2}\partial_{t}N_{h}(0,t)\bigr)$ から、2 を直接確かめよ。
+:::
+
+::: solution
+**1.** \ref{pde:wave-descent-mean.1} から $1/c_{4}=\int_{B(0,1)}(1-\lvert z\rvert^{2})^{-1/2}dz$。\ref{meas:polar-radial.2}（$n=4$）から、これは $4\omega_{4}\int_{0}^{1}\rho^{3}(1-\rho^{2})^{-1/2}d\rho=4\omega_{4}\cdot\frac23=\frac{8\omega_{4}}{3}$（$w=1-\rho^{2}$ と置き換えて $\frac12\int_{0}^{1}(1-w)w^{-1/2}dw=\frac12(2-\frac23)=\frac23$）。
+
+**2.** \ref{pde:wave-huygens.2} で $k=2$、$(-1)^{1}(1)!!=-1$、$\gamma_{5}=3$ なので、係数は $-\frac{c_{4}}{3}=-\frac{1}{8\omega_{4}}$、冪は $\frac{n-1}{2}=\frac32$。積分は正なので $u(t,0)<0$。
+
+**3.** \ref{pde:wave-huygens} の証明の Step 3 から $t>1$ で $N_{h}(0,t)=t^{-3}\Lambda(t)$、$\Lambda(t)=c_{4}\int h(y)(t^{2}-\lvert y\rvert^{2})^{-1/2}dy$。$\partial_{t}N_{h}=-3t^{-4}\Lambda+t^{-3}\Lambda'$、$\Lambda'(t)=-c_{4}\int h(y)\,t\,(t^{2}-\lvert y\rvert^{2})^{-3/2}dy$。よって
+$$
+\begin{aligned}3tN_{h}+t^{2}\partial_{t}N_{h}&=3t^{-2}\Lambda-3t^{-2}\Lambda+t^{-1}\Lambda'\\&=t^{-1}\Lambda'(t)=-c_{4}\int\frac{h(y)}{(t^{2}-\lvert y\rvert^{2})^{3/2}}\,dy,\end{aligned}
+$$
+これを $3$ で割ると 2 の式になる。$t^{-1}\Lambda'=D\Lambda$ で、$V_{h}=\frac13D(t^{3}N_{h})$ という $t>0$ での表示とも一致する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

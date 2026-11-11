@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>熱源の正則性と内部正則性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/11-heat-regularity.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 熱源の正則性と内部正則性 {#pde:page-heat-regularity keywords="regularity of the source in Duhamel's principle, Hoelder continuous source term, second derivatives of the heat potential, continuous source is not enough, counterexample with logarithmic modulus, interior regularity of the heat equation, solutions are smooth, cutoff and representation formula, extension of the heat kernel by zero, ヘルダー連続, 内部正則性, 熱ポテンシャル"}
+
+\ref{pde:heat-duhamel} では、熱源 $f$ が空間に 2 回・時間に 1 回、有界に連続微分可能であると仮定して、$u(x,t)=\int_{0}^{t}\int\Phi(x-y,t-s)f(y,s)\,dy\,ds$ が古典解になることを示した。このページでは、その仮定がどこまで弱められるかを決着させる。$f$ が有界連続で空間変数について一様に**ヘルダー連続**なら、時間についての微分可能性はまったく要らずに $u$ は古典解になる。一方、$f$ が連続なだけでは足りず、$u$ の 2 階導関数が非有界になる例がある。後半では、熱方程式の任意の局所的な古典解が $C^{\infty}$ 級であること（**内部正則性**）を、切り落とし関数と熱核による表示で示す。前のページの \ref{pde:heat-smoothing} は初期値問題の解についてのものだったが、こちらは初期値も有界性も仮定しない。熱源のある方程式では解の滑らかさが熱源の正則性に縛られ、熱源のない方程式では解が自動的に滑らかになる、という対比が、この系列の最後で古典的手法と関数解析的手法の前提を比べるときの材料になる。
+
+## 記法と定義の確認 {#pde:sec-he-reg-notation}
+
+::: notation
+- 熱方程式の記法は \tref{pde:page-heat-equation} と \ref{pde:page-heat-uniqueness} のとおり：$\Delta$, $\nabla$ は空間変数だけに作用し、$C^{2,1}(U)$ は空間に 2 回・時間に 1 回連続微分可能な関数の全体。熱核 $\Phi$（\ref{pde:heat-kernel}）、その性質（\ref{pde:heat-kernel-properties}）と導関数の評価（\ref{pde:heat-kernel-derivatives}）、全空間での部分積分（\ref{pde:heat-parts}）、有界な解の一意性（\ref{pde:heat-uniqueness-rn}）、0 による延長の滑らかさ（\ref{pde:heat-zero-extension}）を使う。
+- 熱源 $f\colon\mathbb{R}^{n}\times[0,\infty)\to\mathbb{R}$ について、**熱ポテンシャル**（デュアメルの公式）を $\mathcal{D}f(x,t)\defeq\int_{0}^{t}\int_{\mathbb{R}^{n}}\Phi(x-y,t-s)f(y,s)\,dy\,ds$（$t>0$）、$\mathcal{D}f(x,0)\defeq0$ と書く。$f$ が有界可測なら、トネリの形のフビニの定理と $\int\Phi(x-y,\sigma)\,dy=1$ から積分は絶対収束し、$|\mathcal{D}f(x,t)|\le t\sup|f|$（\ref{pde:heat-duhamel} の証明の Step 1 と同じ）。$\mathcal{D}$ は線形である。
+- 平均値の不等式は \tref{calc:mean-value-inequality}、項別微分は \ref{calc:uniform-derivative}、一様収束の基本定理は \ref{calc:uniform-limit-theorems}、隆起関数は \ref{mfd:bump-function}（$\mathbb{R}^{d}$ の $C^{\infty}$ 級関数で、閉単位球の上で $1$、半径 $2$ の球の外で $0$、値は $[0,1]$）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## ヘルダー連続な熱源 {#pde:sec-he-holder}
+
+2 階導関数の特異性 $\|\partial_{i}\partial_{j}\Phi(\cdot,\sigma)\|_{1}\sim\sigma^{-1}$ を、熱源の差 $f(y,s)-f(x,s)$ の小ささで打ち消すのが方針である。そのために、熱核の導関数の積分についての二つの事実を用意する。
+
+::: lemma 熱核の導関数の積分 {#pde:heat-kernel-moments keywords="integrals of derivatives of the heat kernel vanish; weighted L^1 norms int |d^beta Phi(z,s)| |z|^gamma dz = c s^{(gamma - |beta|)/2}" index="熱核の導関数の積分|ねつかくのどうかんすうのせきぶん"}
+$\sigma>0$、多重指数 $\beta$、$\gamma\ge0$ とする。
+1. $|\beta|\ge1$ なら $\displaystyle\int_{\mathbb{R}^{n}}\partial^{\beta}\Phi(z,\sigma)\,dz=0$。
+2. $c_{\beta,\gamma}\defeq\int|\partial^{\beta}\Phi(w,1)||w|^{\gamma}\,dw<\infty$ で、$\displaystyle\int_{\mathbb{R}^{n}}|\partial^{\beta}\Phi(z,\sigma)|\,|z|^{\gamma}\,dz=c_{\beta,\gamma}\,\sigma^{(\gamma-|\beta|)/2}$。
+:::
+
+::: proof
+\ref{pde:heat-kernel-derivatives.1} から、$\partial^{\beta}\Phi(z,\sigma)=\sigma^{-m/2}Q(z/\sqrt\sigma)e^{-|z|^{2}/4\sigma}$（$Q$ は多項式、$m=n+|\beta|$）で、$(1+|w|)^{N}e^{-|w|^{2}/8}$ が有界なことから $|\partial^{\beta}\Phi(z,\sigma)|(1+|z|)^{\gamma}\le Ce^{-|z|^{2}/8\sigma}$。とくにどれも可積分。
+
+**1.** $\beta_{i}\ge1$ となる $i$ をとり $\psi\defeq\partial^{\beta-e_{i}}\Phi(\cdot,\sigma)$ とおくと $\partial^{\beta}\Phi=\partial_{i}\psi$。$z_{i}$ 以外を固定すると、微積分学の基本定理から $\int_{-L}^{L}\partial_{i}\psi\,dz_{i}$ は $z_{i}=\pm L$ での $\psi$ の値の差で、$|\psi|\le Ce^{-|z|^{2}/8\sigma}$ から $L\to\infty$ で $0$ に収束する。優収束定理で $\int_{\mathbb{R}}\partial_{i}\psi\,dz_{i}=0$、残りの変数について積分しフビニの定理を使う。
+
+**2.** \ref{pde:heat-kernel-properties.2} の $\Phi(z,\sigma)=\sigma^{-n/2}\Phi(z/\sqrt\sigma,1)$ を微分して $\partial^{\beta}\Phi(z,\sigma)=\sigma^{-(n+|\beta|)/2}(\partial^{\beta}\Phi(\cdot,1))(z/\sqrt\sigma)$。$z=\sqrt\sigma\,w$（$dz=\sigma^{n/2}dw$, $|z|^{\gamma}=\sigma^{\gamma/2}|w|^{\gamma}$）と置き換えると指数は $-\frac{n+|\beta|}{2}+\frac{n}{2}+\frac{\gamma}{2}$。$c_{\beta,\gamma}<\infty$ は冒頭の評価から。
+:::
+
+::: theorem ヘルダー連続な熱源のデュアメルの原理 {#pde:heat-duhamel-holder keywords="Duhamel's principle with a Hoelder continuous source: if f is bounded, continuous, and uniformly Hoelder continuous in x, then the heat potential is C^{2,1} and solves d_t u - Delta u = f; no time differentiability of f is needed; second derivatives via f(y,s) - f(x,s)" index="ヘルダー連続な熱源|へるだーれんぞくなねつげん, 熱ポテンシャル|ねつぽてんしゃる"}
+$f\colon\mathbb{R}^{n}\times[0,\infty)\to\mathbb{R}$ を連続で $|f|\le M$ とし、定数 $L\ge0$, $0<\gamma\le1$ があって
+$$
+|f(x,s)-f(y,s)|\le L|x-y|^{\gamma}\qquad(x,y\in\mathbb{R}^{n},\ s\ge0)
+$$
+とする。$u\defeq\mathcal{D}f$ とおく。
+1. $u\in C^{2,1}(\mathbb{R}^{n}\times(0,\infty))\cap C(\mathbb{R}^{n}\times[0,\infty))$ で、$\partial_{t}u-\Delta u=f$、$|u|\le Mt$。とくに $u$ は初期値 $0$、熱源 $f$ の初期値問題の古典解である。
+2. $\displaystyle\partial_{i}u(x,t)=\int_{0}^{t}\int\partial_{i}\Phi(x-y,t-s)f(y,s)\,dy\,ds$。
+3. $\displaystyle\partial_{i}\partial_{j}u(x,t)=\int_{0}^{t}\int\partial_{i}\partial_{j}\Phi(x-y,t-s)\bigl(f(y,s)-f(x,s)\bigr)\,dy\,ds$。
+2・3 の積分は絶対収束する。
+:::
+
+::: intuition
+熱源が場所について少しでも（ヘルダーの意味で）なめらかなら、時間についてはでこぼこでも、デュアメルの公式は本当の解を与える。2 階微分の公式で、熱源の「その点での値との差」を使うのがこつである。
+:::
+
+::: proof
+$0<\delta$ について、$t>\delta$ で $u_{\delta}(x,t)\defeq\int_{0}^{t-\delta}\int\Phi(x-y,t-s)f(y,s)\,dy\,ds$ とおく（時刻 $t$ の直前 $\delta$ の熱源を除いたもの）。$V_{i}$, $W_{ij}$ をそれぞれ 2, 3 の右辺とする。
+
+**Step 1（切り落とした積分は滑らか）.** 【主張：$\{t>\delta\}$ の上で $u_{\delta}$ は空間に 2 回連続微分可能で、$|\beta|\le2$ について $\partial^{\beta}u_{\delta}=\int_{0}^{t-\delta}\int\partial^{\beta}\Phi(x-y,t-s)f(y,s)\,dy\,ds$。$|\beta|=2$ ではこれは $f(y,s)$ を $f(y,s)-f(x,s)$ に替えた積分に等しく、どれも $(x,t)$ について連続】点 $(x_{0},t_{0})$（$t_{0}>\delta$）の近傍 $|x|<|x_{0}|+1$, $\delta<t<t_{0}+1$ を考える。$\sigma=t-s\in[\delta,t_{0}+1]$ なので、\ref{pde:heat-kernel-derivatives.2}（$a=\delta$, $b=t_{0}+1$）の可積分な $H$ で $|\partial^{\beta}\Phi(x-y,\sigma)f(y,s)|\le MH(y)$。$(y,s)\in\mathbb{R}^{n}\times(0,t_{0}+1)$ の上の可積分関数 $MH(y)$ を優関数として \ref{meas:parameter-integrals.2} を $x_{i}$ について使えば微分を中に入れられ、$\mathbf{1}_{\{s<t-\delta\}}$ の跳びは $s=t-\delta$ の零集合だけなので、優収束定理から $(x,t)$ について連続。$|\beta|=2$ では \ref{pde:heat-kernel-moments.1} から $\int\partial^{\beta}\Phi(x-y,\sigma)f(x,s)\,dy=f(x,s)\cdot0=0$ を引けばよい。
+
+**Step 2（$\delta\to0$ の一様評価）.** 【主張：$V_{i}$, $W_{ij}$ は絶対収束し、$t>\delta$ で $|u-u_{\delta}|\le M\delta$、$|\partial_{i}u_{\delta}-V_{i}|\le2Mc_{e_{i},0}\delta^{1/2}$、$|\partial_{i}\partial_{j}u_{\delta}-W_{ij}|\le\frac{2Lc}{\gamma}\delta^{\gamma/2}$（$c\defeq c_{e_{i}+e_{j},\gamma}$）】差はどれも $s\in(t-\delta,t)$ の部分の積分である。$\sigma=t-s$ と書くと、\ref{pde:heat-kernel-moments.2} から
+$$
+\int|\partial_{i}\Phi(x-y,\sigma)||f(y,s)|\,dy\le Mc_{e_{i},0}\sigma^{-1/2},
+$$
+$$
+\begin{aligned}\int|\partial_{i}\partial_{j}\Phi(x-y,\sigma)||f(y,s)-f(x,s)|\,dy&\le L\int|\partial_{i}\partial_{j}\Phi(z,\sigma)||z|^{\gamma}dz\\&=Lc\,\sigma^{-1+\gamma/2}.\end{aligned}
+$$
+$\int_{0}^{\delta}\sigma^{-1/2}d\sigma=2\delta^{1/2}$、$\int_{0}^{\delta}\sigma^{-1+\gamma/2}d\sigma=\frac{2}{\gamma}\delta^{\gamma/2}$（$\gamma>0$ なので有限）から評価を得る。$\delta$ を $t$ に替えた同じ計算で $V_{i}$, $W_{ij}$ の絶対収束もわかる。$|u-u_{\delta}|\le M\delta$ は $\int\Phi=1$ から。
+
+**Step 3（空間微分）.** 【主張：$u$ は $\mathbb{R}^{n}\times(0,\infty)$ で連続、$\partial_{i}u=V_{i}$, $\partial_{j}\partial_{i}u=W_{ij}$ で、これらは連続（2・3）】$t_{0}>0$ を固定し、$\delta<t_{0}$ を $0$ に近づける。Step 2 から、$\{t>t_{0}\}$ の上で $u_{\delta}\to u$, $\partial_{i}u_{\delta}\to V_{i}$, $\partial_{i}\partial_{j}u_{\delta}\to W_{ij}$ はすべて一様収束で、Step 1 から近似する関数は連続なので、極限 $u$, $V_{i}$, $W_{ij}$ も連続（\ref{calc:uniform-limit-theorems.2}）。$t$ とほかの座標を固定して $x_{i}$ の区間で \ref{calc:uniform-derivative} を使うと $\partial_{i}u=V_{i}$。同じく $\partial_{i}u_{\delta}\to\partial_{i}u$ と $\partial_{j}\partial_{i}u_{\delta}\to W_{ij}$ から $\partial_{j}\partial_{i}u=W_{ij}$。$t_{0}$ は任意。
+
+**Step 4（切り落とした積分の時間微分）.** 【主張：$t>\delta$ で $\partial_{t}u_{\delta}(x,t)=\int\Phi(x-y,\delta)f(y,t-\delta)\,dy+\Delta u_{\delta}(x,t)$】$x$ を固定し、$t-s\ge\delta/2$ で $G(s,t)\defeq\int\Phi(x-y,t-s)f(y,s)\,dy$ とおくと $u_{\delta}(x,t)=\int_{0}^{t-\delta}G(s,t)\,ds$。Step 1 と同じ優関数の議論で、$G$ は $\{t-s\ge\delta/2\}$ で連続、$\partial_{t}G(s,t)=\int\partial_{t}\Phi(x-y,t-s)f(y,s)\,dy$ が存在して有界かつ連続。$0<|h|<\delta/2$ について
+$$
+\begin{aligned}\frac{u_{\delta}(x,t+h)-u_{\delta}(x,t)}{h}&=\int_{0}^{t-\delta}\frac{G(s,t+h)-G(s,t)}{h}\,ds\\&\quad+\frac{1}{h}\int_{t-\delta}^{t+h-\delta}G(s,t+h)\,ds.\end{aligned}
+$$
+第 1 項は、平均値の定理で被積分関数が $\sup|\partial_{t}G|$ で押さえられ各 $s$ で $\partial_{t}G(s,t)$ に収束するので、優収束定理から $\int_{0}^{t-\delta}\partial_{t}G(s,t)\,ds$ に収束する。第 2 項は長さ $|h|$ の区間での $G$ の平均で、$G$ の連続性から $G(t-\delta,t)=\int\Phi(x-y,\delta)f(y,t-\delta)\,dy$ に収束する。$\partial_{t}\Phi=\Delta\Phi$（\ref{pde:heat-kernel-properties.1}）と Step 1 から $\int_{0}^{t-\delta}\partial_{t}G\,ds=\int_{0}^{t-\delta}\int\Delta\Phi(x-y,t-s)f(y,s)\,dy\,ds=\Delta u_{\delta}(x,t)$。
+
+**Step 5（時間微分と方程式）.** 【主張：$\partial_{t}u=f+\Delta u$ で、これは連続】$x$ と $0<t_{1}<t_{2}$ を固定し、$\delta<t_{1}$ とする。$[t_{1},t_{2}]$ の上で
+$$
+\begin{aligned}&\Bigl|\int\Phi(x-y,\delta)f(y,t-\delta)\,dy-f(x,t)\Bigr|\\&\le\int\Phi(x-y,\delta)|f(y,t-\delta)-f(x,t-\delta)|\,dy+|f(x,t-\delta)-f(x,t)|.\end{aligned}
+$$
+第 1 項はヘルダー連続性と \ref{pde:heat-kernel-moments.2}（$\beta=0$）から $Lc_{0,\gamma}\delta^{\gamma/2}$ 以下。第 2 項は、$f(x,\cdot)$ がコンパクト区間 $[0,t_{2}]$ で一様連続なので、$t\in[t_{1},t_{2}]$ について一様に $0$ に収束する。Step 3 から $\Delta u_{\delta}\to\Delta u$ も一様。よって Step 4 から $\partial_{t}u_{\delta}(x,\cdot)\to f(x,\cdot)+\Delta u(x,\cdot)$ が $[t_{1},t_{2}]$ で一様に成り立ち、$u_{\delta}(x,\cdot)\to u(x,\cdot)$ も一様なので、\ref{calc:uniform-derivative} から $\partial_{t}u=f+\Delta u$。右辺は連続（Step 3）。$t=0$ での連続性は $|u|\le Mt$ から（1）。
+
+::: hypcheck
+- **空間についてのヘルダー連続性（$\gamma>0$）**：Step 2 で 2 階導関数の特異性 $\sigma^{-1}$ を $\sigma^{-1+\gamma/2}$ に弱めて積分可能にするのに、Step 5 で $\int\Phi(x-y,\delta)f(y,t-\delta)\,dy\to f(x,t)$ の一様性に使った。$\gamma=0$（有界なだけ・連続なだけ）では偽：\ref{pde:heat-continuous-source-fails}。
+- **時間についての正則性**：Step 5 で $f(x,\cdot)$ の連続性を使っただけで、時間微分は一度も使っていない。\ref{pde:heat-duhamel} は時間微分 $\partial_{t}f$ を要求したが、それは証明の都合だった（\ref{pde:prob-he-time-rough}）。
+- **ヘルダー定数 $L$ が $s$ によらないこと**：Step 2 の評価を $(x,t)$ について一様にするのに使った（一様収束から連続性と項別微分を得るため）。
+- **有界性**：Step 1 の優関数と Step 2 の評価に使った。
+- **\ref{pde:heat-duhamel} との関係**：そこでの仮定（$\partial_{i}f$ が有界）からは、平均値の不等式から $|f(x,s)-f(y,s)|\le\sqrt n\,(\max_{i}\sup|\partial_{i}f|)|x-y|$ で、$\gamma=1$ の場合にあたる。したがってこの定理はそれを含む。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 の式から、$|\partial_{i}\partial_{j}u|$ は $\frac{2Lc}{\gamma}t^{\gamma/2}$ 以下で、$\gamma\to0$ で評価が崩れる。逆に、さらに評価を精密にすると、$\partial_{i}\partial_{j}u$ も空間について指数 $\gamma$ のヘルダー連続になることが知られている（放物型のシャウダー評価。ここでは証明しない）。熱源から解へ「2 階分の微分」がちょうど得られるのはヘルダー空間の中であり、連続関数の空間では 2 階分には少し足りない（次の節）。
+
+**似た定理.** ポアソン方程式 $\Delta u=f$ のニュートン・ポテンシャルでも、$f$ がヘルダー連続なら 2 階導関数が $\int\partial_{i}\partial_{j}\Gamma(x-y)(f(y)-f(x))\,dy$ の形に書けて古典解になる（この系列の基本解とグリーン関数のページ）。「差を取って特異性を打ち消す」という同じ技巧である。
+
+**高い視点：むらの打ち消し.** 2 階導関数の核 $\partial_{i}\partial_{j}\Phi$ は、正の部分と負の部分がちょうど打ち消し合う（積分 0）「くし」のような形をしている。熱源が一定ならくしの歯の寄与は相殺され、熱源の**むら**だけが 2 階導関数に寄与する。比喩で言えば、平らな床ならどんなに目の細かい物差しで測っても傾きの変化は出てこないが、床のむらが細かすぎると物差しの目盛りが追いつかない。ヘルダー連続性は「むらの細かさに上限がある」という条件で、それがあれば 2 階導関数という細かい物差しでも測定値が有限にとどまる。
+:::
+
+## 連続な熱源では足りない {#pde:sec-he-continuous-fails}
+
+連続性だけでは足りないことを、$n=2$ の具体例で示す。鍵は、ラプラシアンは連続なのに 2 階導関数が非有界な関数である。
+
+::: lemma 対数の因子をもつ関数 {#pde:heat-log-example keywords="U(x) = (x_1^2 - x_2^2) (log 1/|x|)^{1/2} near the origin in R^2: Delta U is continuous but d_1^2 U is unbounded; smooth approximations U_epsilon with U_epsilon -> U and Delta U_epsilon -> Delta U uniformly" index="ラプラシアンが連続でも C² でない関数|らぷらしあんがれんぞくでもしーにでないかんすう"}
+$n=2$ とする。\ref{mfd:bump-function}（$d=2$）の関数 $\beta$ を使って $\psi(x)\defeq\beta(e^{2}x)$ とおく（$|x|\le e^{-2}$ で $1$、$|x|\ge2e^{-2}$ で $0$）。$0\le\varepsilon\le\frac14$ について
+$$
+\ell_{\varepsilon}(x)\defeq-\frac12\log\bigl(|x|^{2}+\varepsilon^{2}\bigr),\qquad U_{\varepsilon}(x)\defeq\psi(x)\,(x_{1}^{2}-x_{2}^{2})\,\ell_{\varepsilon}(x)^{1/2}
+$$
+とおく（$\varepsilon=0$ では $x\ne0$ で定め、$U_{0}(0)\defeq0$。$U\defeq U_{0}$）。
+1. $\varepsilon>0$ なら $U_{\varepsilon}\in C^{\infty}(\mathbb{R}^{2})$ で台はコンパクト。$U$ は $\mathbb{R}^{2}$ で連続、$\mathbb{R}^{2}\setminus\{0\}$ で $C^{\infty}$ 級で、$\Delta U$ は $\Delta U(0)\defeq0$ とおくと $\mathbb{R}^{2}$ で連続。
+2. $\varepsilon\to0$ のとき $\sup|U_{\varepsilon}-U|\to0$、$\sup|\Delta U_{\varepsilon}-\Delta U|\to0$。
+3. $0<x_{1}<e^{-2}$ で $\partial_{1}^{2}U(x_{1},0)=2\Lambda^{1/2}-\frac32\Lambda^{-1/2}-\frac14\Lambda^{-3/2}$（$\Lambda\defeq-\log x_{1}$）。とくに $x_{1}\downarrow0$ で $\partial_{1}^{2}U(x_{1},0)\to\infty$。
+:::
+
+::: proof
+$|x|\le2e^{-2}$, $\varepsilon\le\frac14$ では $|x|^{2}+\varepsilon^{2}\le4e^{-4}+\frac1{16}<1$ なので $\ell_{\varepsilon}>0$。$\rho\defeq|x|$, $P\defeq x_{1}^{2}-x_{2}^{2}$ と書く。
+
+**Step 1（滑らかさ）.** 【主張：1 の滑らかさの部分】$\varepsilon>0$ では $\ell_{\varepsilon}$ は $|x|^{2}+\varepsilon^{2}>0$ の対数なので $C^{\infty}$ 級、正の値の平方根も $C^{\infty}$ 級。$\varepsilon=0$ でも $x\ne0$ なら同じ。台は $\psi$ の台に含まれる。
+
+**Step 2（ラプラシアンの評価）.** 【主張：$\rho<e^{-2}$ では（$\varepsilon=0$ なら $\rho>0$ で）$|U_{\varepsilon}|\le\rho^{2}(-\log\rho)^{1/2}$、$|\Delta U_{\varepsilon}|\le3\ell_{\varepsilon}^{-1/2}+\frac14\ell_{\varepsilon}^{-3/2}$】ここでは $\psi=1$ で、$h\defeq\ell_{\varepsilon}^{1/2}$ は $\rho$ だけの関数。$\Delta P=0$, $\nabla P\cdot x=2P$ と $\nabla h=h'(\rho)x/\rho$, $\Delta h=h''+h'/\rho$（$n=2$）から
+$$
+\Delta U_{\varepsilon}=2\nabla P\cdot\nabla h+P\Delta h=P\Bigl(h''+\frac{5h'}{\rho}\Bigr).
+$$
+$\rho$ の関数として $\ell'=-\frac{\rho}{\rho^{2}+\varepsilon^{2}}$, $\ell''=\frac{\rho^{2}-\varepsilon^{2}}{(\rho^{2}+\varepsilon^{2})^{2}}$, $h'=\frac12\ell^{-1/2}\ell'$, $h''=\frac12\ell^{-1/2}\ell''-\frac14\ell^{-3/2}(\ell')^{2}$。$|P|\le\rho^{2}$ と $\rho^{2}|\ell'|/\rho\le1$, $\rho^{2}|\ell''|\le1$, $\rho^{2}(\ell')^{2}\le1$ から $|Ph'/\rho|\le\frac12\ell^{-1/2}$, $|Ph''|\le\frac12\ell^{-1/2}+\frac14\ell^{-3/2}$。足して評価を得る。$|U_{\varepsilon}|$ は $\ell_{\varepsilon}\le-\log\rho$ から。
+
+**Step 3（1 の連続性と 2）.** 【主張：1 の残りと 2】$0<\eta\le e^{-2}$ とする。$\rho<\eta$, $\varepsilon\le\eta$ なら $\rho^{2}+\varepsilon^{2}<2\eta^{2}$ なので $\ell_{\varepsilon}>\Lambda(\eta)\defeq\log\frac1\eta-\frac12\log2$ で、Step 2 から $|\Delta U_{\varepsilon}|\le3\Lambda(\eta)^{-1/2}+\frac14\Lambda(\eta)^{-3/2}$、$|U_{\varepsilon}|\le\eta^{2}(\log\frac1\eta)^{1/2}$（$\varepsilon=0$ も含む）。$\eta\to0$ で右辺は $0$ に収束するので、$U$ と $\Delta U$ は原点で連続（値 $0$）。一方、コンパクト集合 $K\defeq\{\eta\le\rho\le2e^{-2}\}$ の近傍と $\varepsilon\in[0,\frac14]$ の上で $(x,\varepsilon)\mapsto U_{\varepsilon}(x)$ は $C^{\infty}$ 級（$\rho^{2}+\varepsilon^{2}>0$）なので、$U_{\varepsilon}$ と $\Delta U_{\varepsilon}$ は $K\times[0,\frac14]$ の上で連続、したがって一様連続で、$\varepsilon\to0$ で $K$ 上一様に $U$, $\Delta U$ に収束する。$\rho\ge2e^{-2}$ ではすべて $0$。$\rho<\eta$ の部分は上の評価で $2(3\Lambda(\eta)^{-1/2}+\frac14\Lambda(\eta)^{-3/2})$ 以下の差しかないので、先に $\eta$、次に $\varepsilon$ を小さくとれば 2 が従う。
+
+**Step 4（2 階導関数）.** 【主張：3 の式】$x_{2}=0$, $\rho=x_{1}$ の上では $\partial_{1}P=2\rho$, $\partial_{1}h=h'$, $\partial_{1}^{2}h=h''$（$\partial_{1}^{2}h=h''\frac{x_{1}^{2}}{\rho^{2}}+h'\bigl(\frac1\rho-\frac{x_{1}^{2}}{\rho^{3}}\bigr)$ で $x_{1}=\rho$）なので $\partial_{1}^{2}U=2h+4\rho h'+\rho^{2}h''$。$\varepsilon=0$ では $\ell=\Lambda$, $\ell'=-1/\rho$, $\ell''=1/\rho^{2}$ なので $h=\Lambda^{1/2}$, $\rho h'=-\frac12\Lambda^{-1/2}$, $\rho^{2}h''=\frac12\Lambda^{-1/2}-\frac14\Lambda^{-3/2}$。代入して 3 の式。$\Lambda\to\infty$ で $2\Lambda^{1/2}\to\infty$。
+:::
+
+::: counterexample 連続な熱源で古典解にならない例 {#pde:heat-continuous-source-fails keywords="a bounded continuous source with compact support in x for which the heat potential is not C^{2,1}: f = U - min(t,1) Delta U, u = t U near t in [0,1], d_1^2 u unbounded" index="連続な熱源の反例|れんぞくなねつげんのはんれい"}
+$n=2$ とし、\ref{pde:heat-log-example} の $U$ を使って
+$$
+f(x,t)\defeq U(x)-\min(t,1)\,\Delta U(x)\qquad(x\in\mathbb{R}^{2},\ t\ge0)
+$$
+とおく。$f$ は $\mathbb{R}^{2}\times[0,\infty)$ で有界かつ連続で、$x$ について台が一様にコンパクトである。しかし $u=\mathcal{D}f$ は $\mathbb{R}^{2}\times[0,1)$ の上で $u(x,t)=tU(x)$ に等しく、$0<t<1$ について $\partial_{1}^{2}u(x_{1},0,t)\to\infty$（$x_{1}\downarrow0$）。とくに $u\notin C^{2,1}(\mathbb{R}^{2}\times(0,1))$ で、$\partial_{t}u-\Delta u=f$ の古典解ではない。
+:::
+
+::: intuition
+熱源が連続でも、場所によって変わり方が対数的に急すぎると、デュアメルの公式で作った温度は 2 回微分できない点をもつ。熱源の側の「なめらかさの不足」は、熱で均しても完全には回復しない。
+:::
+
+::: proof
+$f$ の連続性と有界性、台は \ref{pde:heat-log-example.1} と $U$, $\Delta U$ の台が $\{|x|\le2e^{-2}\}$ に入ることから。$\varepsilon\in(0,\frac14]$ について $f_{\varepsilon}\defeq U_{\varepsilon}-\min(t,1)\Delta U_{\varepsilon}$, $u_{\varepsilon}\defeq\mathcal{D}f_{\varepsilon}$, $w_{\varepsilon}(x,t)\defeq tU_{\varepsilon}(x)$ とおく。
+
+**Step 1（なめらかな近似の熱ポテンシャル）.** 【主張：$u_{\varepsilon}$ は初期値 $0$、熱源 $f_{\varepsilon}$ の初期値問題の有界な古典解である（$t\le1$ で）】$U_{\varepsilon}$, $\Delta U_{\varepsilon}$ は台がコンパクトな $C^{\infty}$ 級関数なので有界で勾配も有界、平均値の不等式から $x$ について一様にリプシッツ連続。$\min(t,1)$ は連続で有界な因子なので、$f_{\varepsilon}$ は \ref{pde:heat-duhamel-holder} の仮定（$\gamma=1$）を満たす（$\min(t,1)$ は $t=1$ で微分できないので、\ref{pde:heat-duhamel} は使えない）。よって $u_{\varepsilon}\in C^{2,1}$, $\partial_{t}u_{\varepsilon}-\Delta u_{\varepsilon}=f_{\varepsilon}$, $|u_{\varepsilon}|\le t\sup|f_{\varepsilon}|$。
+
+**Step 2（一意性で正体を決める）.** 【主張：$\mathbb{R}^{2}\times[0,1)$ で $u_{\varepsilon}=w_{\varepsilon}$】$w_{\varepsilon}$ は $C^{\infty}$ 級で有界（$t<1$）、$w_{\varepsilon}(\cdot,0)=0$、$0<t<1$ で $\partial_{t}w_{\varepsilon}-\Delta w_{\varepsilon}=U_{\varepsilon}-t\Delta U_{\varepsilon}=f_{\varepsilon}$。$u_{\varepsilon}$ と $w_{\varepsilon}$ は熱源と初期値を共有する有界な古典解なので、\ref{pde:heat-uniqueness-rn.1}（$T=1$）から等しい。
+
+**Step 3（極限）.** 【主張：$\mathbb{R}^{2}\times[0,1)$ で $u=tU$】$\mathcal{D}$ の線形性と評価から $|u-u_{\varepsilon}|=|\mathcal{D}(f-f_{\varepsilon})|\le t\bigl(\sup|U-U_{\varepsilon}|+\sup|\Delta U-\Delta U_{\varepsilon}|\bigr)$ で、\ref{pde:heat-log-example.2} から $0$ に収束する。$w_{\varepsilon}\to tU$ も一様なので、Step 2 から $0\le t<1$ で $u=tU$。
+
+**Step 4（2 階導関数）.** 【主張：結論】$0<t<1$ を固定すると $u(\cdot,t)=tU$ で、\ref{pde:heat-log-example.3} から $\partial_{1}^{2}u(x_{1},0,t)=t\,\partial_{1}^{2}U(x_{1},0)\to\infty$（$x_{1}\downarrow0$）。$u\in C^{2,1}$ なら $\partial_{1}^{2}u$ は $(0,0,t)$ で連続、とくにその近くで有界のはずなので矛盾。
+
+::: hypcheck
+- **どの前提が欠けているか**：\ref{pde:heat-duhamel-holder} のヘルダー連続性である。$f(\cdot,t)$ は $\Delta U$ の項をもち、原点の近くで $\Delta U\approx-2\cos2\theta\,(\log\frac1\rho)^{-1/2}$（$\theta$ は偏角。\ref{pde:heat-log-example} の Step 2 の式で $\varepsilon=0$）と、どんな正の指数 $\gamma$ のヘルダー連続性よりも遅い対数の速さでしか $0$ に近づかない。もしヘルダー連続なら、定理から $u\in C^{2,1}$ となって結論と矛盾するので、$f$ は実際にどの $\gamma>0$ でもヘルダー連続でない。
+- **時間についての正則性**：$f$ は $t<1$ で $t$ について 1 次式で、時間の正則性は十分にある。崩れているのは空間の正則性だけである。
+- **次元**：$n=2$ で構成した。$n\ge3$ でも、$x_{3},\dots,x_{n}$ によらない形に延ばした $\tilde f(x,t)\defeq f(x_{1},x_{2},t)$ を考え、$\mathcal{D}\tilde f(x,t)=\mathcal{D}f(x_{1},x_{2},t)$（$\Phi$ は座標ごとの 1 次元の熱核の積で、残りの座標の積分は 1）とすれば同じ結論になる（ただし台は $x$ について有界でなくなる）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $U$ そのものは、ラプラシアン $\Delta U$ が連続なのに $C^{2}$ 級でない関数であり、ポアソン方程式 $\Delta U=F$ で $F$ が連続なだけでは $C^{2}$ 級の解が得られないことの例にもなっている（解の一意性まで含めた議論はこの系列の基本解とグリーン関数のページ）。対数の指数 $\frac12$ は、「$\Delta U$ は $0$ に近づくが $\partial_{1}^{2}U$ は発散する」ちょうどよい速さとして選んだ：$P\,(\log\frac1\rho)^{a}$ で $0<a<1$ ならどれでも同じ現象が起こる（$a=1$ では $\Delta U=-4\cos2\theta$ が有界だが原点で連続でなく、$a>1$ では $\Delta U$ が有界でない）。
+
+**似た定理.** 1 階の輸送方程式では、熱源が連続なら解も $C^{1}$ 級になった（\ref{pde:transport-constant} の仮定）。2 階の方程式で 2 階分の正則性を回復するには、連続性よりわずかに強い条件が要る。これは、ヒルベルト変換やリース変換のような特異積分作用素が連続関数の空間を保たないことと同じ現象である（\see{four:ht-lp}。$L^{p}$（$1<p<\infty$）やヘルダー空間は保たれる）。
+
+**高い視点：あと一歩足りない.** 熱で均す操作は「2 階分の微分」をほぼ取り戻すが、連続関数の世界では、その「ほぼ」が対数一つ分だけ足りない。比喩で言えば、ぎりぎりの予算で家を建てると、たいていはうまくいくが、資材の質（熱源の正則性）がわずかに悪いだけで最後の柱（2 階導関数）が立たない。ヘルダー連続性はそのわずかな余裕であり、関数解析的手法がソボレフ空間を使ってこの問題自体を避けるのは、系列の最後で見るとおりである。
+:::
+
+## 内部正則性 {#pde:sec-he-interior}
+
+熱源がない方程式の解については、初期値も有界性も仮定せずに、局所的な解がいつも $C^{\infty}$ 級であることを示す。熱核を原点以外の時空全体に延ばしたものを使う。
+
+::: lemma 熱核の 0 による延長 {#pde:heat-kernel-extended keywords="the heat kernel extended by zero for t <= 0 is smooth on space-time minus the origin and solves the heat equation there" index="熱核の延長|ねつかくのえんちょう"}
+$\tilde\Phi(x,t)\defeq\Phi(x,t)$（$t>0$）、$\tilde\Phi(x,t)\defeq0$（$t\le0$）とおく。$\tilde\Phi$ は $(\mathbb{R}^{n}\times\mathbb{R})\setminus\{(0,0)\}$ で $C^{\infty}$ 級で熱方程式を満たす。
+:::
+
+::: proof
+\ref{pde:heat-zero-extension} を $V\defeq(\mathbb{R}^{n}\times\mathbb{R})\setminus\{(0,0)\}$ に使う。$V\cap\{t=0\}$ の点 $(x_{0},0)$ は $x_{0}\ne0$。$d\defeq|x_{0}|/2$, $D\defeq2|x_{0}|$ とおくと、$(x_{0},0)$ の近くでは $d\le|x|\le D$。\ref{pde:heat-kernel-derivatives.1} の形 $t^{-m/2}Q(x/\sqrt t)e^{-|x|^{2}/4t}$ と $|Q(z)|\le C(1+|z|)^{N}$ から、$s\defeq1/t$ とおいて
+$$
+|\partial^{\alpha}\partial_{t}^{k}\Phi(x,t)|\le Cs^{m/2}(1+D\sqrt s)^{N}e^{-d^{2}s/4}\to0\quad(s\to\infty).
+$$
+よって仮定が満たされ、$\tilde\Phi\in C^{\infty}(V)$。熱方程式は $t>0$ では \ref{pde:heat-kernel-properties.1}、$t\le0$ ではすべての偏導関数が $0$ なので成り立つ。
+:::
+
+::: lemma 台がコンパクトな関数の表示 {#pde:heat-representation keywords="representation formula: a compactly supported C^{2,1} function v with v(.,t_1) = 0 equals the heat potential of (d_t - Delta) v" index="熱ポテンシャルによる表示|ねつぽてんしゃるによるひょうじ"}
+$t_{1}<t_{2}$ とし、$v\colon\mathbb{R}^{n}\times[t_{1},t_{2}]\to\mathbb{R}$ について、$v$, $\partial_{t}v$, $\partial_{i}v$, $\partial_{i}\partial_{j}v$ が $\mathbb{R}^{n}\times[t_{1},t_{2}]$ の上で存在して連続（端では片側の微分）、コンパクト集合 $K$ の外では $v=0$、$v(\cdot,t_{1})=0$ とする。$F\defeq\partial_{t}v-\Delta v$ とおくと、$t_{1}<t\le t_{2}$ について
+$$
+v(x,t)=\int_{t_{1}}^{t}\int_{\mathbb{R}^{n}}\Phi(x-y,t-s)F(y,s)\,dy\,ds.
+$$
+:::
+
+::: proof
+$F$ は連続で $K\times[t_{1},t_{2}]$ の外では $0$ なので有界。$(x,t)$ を固定する。
+
+**Step 1（部分積分）.** 【主張：$0<\varepsilon<t-t_{1}$ なら $\displaystyle\int_{t_{1}}^{t-\varepsilon}\int\Phi(x-y,t-s)F(y,s)\,dy\,ds=\int\Phi(x-y,\varepsilon)v(y,t-\varepsilon)\,dy$】$t-s\ge\varepsilon$ では $\Phi(x-y,t-s)\le(4\pi\varepsilon)^{-n/2}$ で、被積分関数はどれも有界で $y\in K$ に台をもつので、フビニの定理で順序を自由に入れ替えてよい。$y$ を固定すると、$\frac{d}{ds}\bigl[\Phi(x-y,t-s)\bigr]=-(\partial_{t}\Phi)(x-y,t-s)$ と $v(y,t_{1})=0$ から、$[t_{1},t-\varepsilon]$ での部分積分で
+$$
+\begin{aligned}\int_{t_{1}}^{t-\varepsilon}\Phi(x-y,t-s)\partial_{s}v(y,s)\,ds&=\Phi(x-y,\varepsilon)v(y,t-\varepsilon)\\&\quad+\int_{t_{1}}^{t-\varepsilon}(\partial_{t}\Phi)(x-y,t-s)v(y,s)\,ds.\end{aligned}
+$$
+$s$ を固定すると、$\varphi\defeq\Phi(x-\cdot,t-s)$ は \ref{pde:heat-kernel-derivatives.1} からガウス型に減衰する導関数をもち、$\psi\defeq v(\cdot,s)$ は台がコンパクトな $C^{2}$ 級関数なので、\ref{pde:heat-parts} から $\int\Phi(x-y,t-s)\Delta v(y,s)\,dy=\int(\Delta\Phi)(x-y,t-s)v(y,s)\,dy$。引き算すると、左辺は $\int\Phi(x-y,\varepsilon)v(y,t-\varepsilon)\,dy+\int_{t_{1}}^{t-\varepsilon}\int(\partial_{t}\Phi-\Delta\Phi)(x-y,t-s)v(y,s)\,dy\,ds$ で、最後の項は $0$。
+
+**Step 2（$\varepsilon\to0$）.** 【主張：両辺の極限が主張の両辺】左辺の残りの部分は $\int_{t-\varepsilon}^{t}\int\Phi|F|\le\varepsilon\sup|F|\to0$。右辺は、$v$ がコンパクト集合 $K\times[t_{1},t_{2}]$ の外で $0$ の連続関数なので一様連続で、\ref{pde:heat-duhamel} の証明の Step 5 と同じ議論（$|x-y|<\delta$ と $|x-y|\ge\delta$ に分ける）から $v(x,t)$ に収束する。
+:::
+
+::: theorem 熱方程式の内部正則性 {#pde:heat-interior-regularity keywords="interior regularity for the heat equation: every C^{2,1} solution on an open subset of space-time is C^infinity; proof by a cutoff and the representation with the heat kernel extended by zero" index="内部正則性（熱方程式）|ないぶせいそくせいねつほうていしき" refname="熱方程式の内部正則性"}
+$U\subset\mathbb{R}^{n}\times\mathbb{R}$ を開集合、$u\in C^{2,1}(U)$ を $U$ での熱方程式の解とする。このとき $u\in C^{\infty}(U)$。
+:::
+
+::: intuition
+熱方程式を満たす関数は、どこで考えても、初期値や遠くの様子と関係なく、自動的にいくらでも微分できる。滑らかさは局所的な性質として、方程式だけから出てくる。
+:::
+
+::: proof
+$(x_{0},t_{0})\in U$ を固定する。$U$ は開なので、$r>0$ を $Q\defeq\overline{B}(x_{0},2r)\times[t_{0}-4r^{2},t_{0}+r^{2}]\subset U$ となるようにとる。$t_{1}\defeq t_{0}-4r^{2}$, $t_{2}\defeq t_{0}+r^{2}$。
+
+**Step 1（切り落とし）.** 【主張：$C^{\infty}$ 級の $\zeta$ で、$0\le\zeta\le1$、$\overline{B}(x_{0},r)\times[t_{0}-2r^{2},\infty)$ で $\zeta=1$、$|x-x_{0}|\ge2r$ または $t\le t_{0}-3r^{2}$ で $\zeta=0$ となるものがある】\ref{mfd:bump-function} の $\beta$（$d=n$）と $\beta_{1}$（$d=1$）を使い、$\lambda(t)\defeq\beta_{1}\bigl(\frac{t-(t_{0}-2r^{2})}{r^{2}/2}\bigr)$（$t<t_{0}-2r^{2}$）、$\lambda(t)\defeq1$（$t\ge t_{0}-2r^{2}$）とおく。$t\in[t_{0}-\frac52r^{2},t_{0}-2r^{2}]$ では $\beta_{1}$ の引数は $[-1,0]$ にあり値は $1$ なので、$\lambda$ は $C^{\infty}$ 級で、$t\le t_{0}-3r^{2}$ では引数が $-2$ 以下で $\lambda=0$。$\zeta(x,t)\defeq\beta\bigl(\frac{x-x_{0}}{r}\bigr)\lambda(t)$ とすればよい。
+
+**Step 2（表示）.** 【主張：$\overline{B}(x_{0},r/2)\times[t_{0}-r^{2},t_{2}]$ の点 $(x,t)$ で、$u(x,t)=\int_{t_{1}}^{t_{2}}\int K(x,t,y,s)u(y,s)\,dy\,ds$、ただし $K\defeq\tilde\Phi(x-y,t-s)(\partial_{t}\zeta+\Delta\zeta)(y,s)-2\nabla\tilde\Phi(x-y,t-s)\cdot\nabla\zeta(y,s)$ で、$K$ は $(y,s)$ が集合 $S\defeq\{(y,s)\in Q:r\le|y-x_{0}|\le2r\ \text{または}\ s\le t_{0}-2r^{2}\}$ の外では $0$】$v\defeq\zeta u$（$Q$ の外では $0$）は \ref{pde:heat-representation} の仮定を満たす（$\zeta$ は $|x-x_{0}|\ge2r$ の近くで $0$ なので $C^{2,1}$ 級に延び、$v(\cdot,t_{1})=0$）。$\partial_{t}u=\Delta u$ から
+$$
+F=\partial_{t}v-\Delta v=u\,\partial_{t}\zeta-u\,\Delta\zeta-2\nabla\zeta\cdot\nabla u
+$$
+で、$F$ は $\nabla\zeta$, $\Delta\zeta$, $\partial_{t}\zeta$ のどれかが $0$ でない所、つまり $S$ の中にしか台をもたない。$\nabla u$ の項は、$y_{i}$ についての 1 次元の部分積分（$\partial_{i}\zeta\,u$ は $y$ について台がコンパクトな $C^{1}$ 級関数）で
+$$
+\begin{aligned}&\int\Phi(x-y,t-s)\partial_{i}\zeta\,\partial_{i}u\,dy\\&=\int\bigl[(\partial_{i}\Phi)(x-y,t-s)\partial_{i}\zeta-\Phi(x-y,t-s)\partial_{i}^{2}\zeta\bigr]u\,dy\end{aligned}
+$$
+と書き直せる（$s<t$）。$s\ge t$ では $\tilde\Phi(x-y,t-s)=0$ なので積分範囲を $[t_{1},t_{2}]$ に広げてよく、まとめると主張の $K$ を得る。$(x,t)$ の範囲では $\zeta(x,t)=1$ なので $v(x,t)=u(x,t)$。
+
+**Step 3（核の滑らかさ）.** 【主張：$N\defeq\overline{B}(x_{0},r/2)\times[t_{0}-r^{2},t_{2}]$, $(y,s)\in S$ なら $(x-y,t-s)$ は原点を含まないコンパクト集合 $C$ に入る】$r\le|y-x_{0}|$ なら $|x-y|\ge r/2$。$s\le t_{0}-2r^{2}$ なら $t-s\ge r^{2}$。よって $(x-y,t-s)$ は $C\defeq\{(z,\tau):|z|\le3r,\ |\tau|\le5r^{2},\ |z|\ge r/2\ \text{または}\ \tau\ge r^{2}\}$ に入り、$C$ は有界閉集合で原点を含まない。
+
+**Step 4（微分）.** 【主張：$u$ は $N$ の内部で $C^{\infty}$ 級】\ref{pde:heat-kernel-extended} から $\tilde\Phi$ と $\nabla\tilde\Phi$ は $C$ の近傍で $C^{\infty}$ 級なので、そのすべての偏導関数はコンパクト集合 $C$ の上で有界。$\zeta$ の導関数も有界なので、$K$ の $(x,t)$ についてのどの偏導関数も、$(x,t)\in N$, $(y,s)\in S$ で定数 $C_{D}$ 以下、$(y,s)\notin S$ では $0$。$u$ は $Q$ で有界なので、$C_{D}\mathbf{1}_{S}|u|$ は可積分な優関数になる。\ref{meas:parameter-integrals.2} を 1 変数ずつ繰り返し使い、連続性は優収束定理から得ると、Step 2 の積分は $N$ の内部で $C^{\infty}$ 級。これは $u$ に等しく、$N$ の内部は $(x_{0},t_{0})$ を含む。$(x_{0},t_{0})$ は任意なので $u\in C^{\infty}(U)$。
+
+::: hypcheck
+- **方程式が $U$ の各点で成り立つこと**：Step 2 で $F$ の台を $S$（$\zeta$ が一定でない所）に閉じ込めるのに使った。熱源のある方程式では $F$ に $\zeta f$ の項が加わり、台が $(x_{0},t_{0})$ の近くに入るので、解の滑らかさは $f$ の滑らかさに縛られる（\ref{pde:heat-continuous-source-fails}）。
+- **$u\in C^{2,1}(U)$**：Step 2 で \ref{pde:heat-representation} の部分積分に使った。時間の向き：Step 1 の切り落としは過去（$t\le t_{0}-3r^{2}$）だけを切り、表示には $(x_{0},t_{0})$ より過去の $u$ の値しか現れない。熱方程式の解は過去から決まる、という性質の局所版である。
+- **有界性・増大条件・初期値**：まったく使っていない。たとえば \ref{pde:heat-tychonoff} のように増大条件を破る解も $C^{\infty}$ 級である（その 1 と矛盾しない）。
+- **熱核の延長**：Step 3・4 で、$t-s$ が $0$ に近くても $|x-y|$ が離れていれば $\tilde\Phi$ が滑らかであることを使った。これがないと、$t=s$ を横切る所で微分を積分の中に入れられない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 解を古典解でなく超関数の意味の解（$\int u\,(\partial_{t}\phi+\Delta\phi)=0$ がすべてのテスト関数 $\phi$ について成り立つ局所可積分関数）にまで広げても、ある $C^{\infty}$ 級の解とほとんど至る所等しいことが知られている（熱作用素についてのワイルの補題の類似。ここでは証明しない）。これは関数解析的手法で弱解を作ったあとの正則性の議論の原型である。
+
+**似た定理.** 調和関数の \ref{pde:mean-value-converse} は、放射的な軟化子との畳み込みで解が変わらないことから滑らかさを示した。ここでは、切り落とした解を熱核の積分で表し、特異性が切り落とし関数の縁にしか現れないことを使った。どちらも「方程式の解は、自分自身を滑らかな核で平均したものに等しい」という同じ構造である。閉多様体の上の熱方程式の解の滑らかさ（\see{gl:heat-equation}）や、楕円型方程式の正則性（\see{gl:elliptic-regularity}）も同じ系統の結果である。
+
+**高い視点：縁にしかない傷.** 切り落とし関数 $\zeta$ で解を切り取ると、方程式が崩れるのは切り口（$\zeta$ が変化する所）だけで、そこが新しい熱源 $F$ になる。中心の点から見ると、その熱源は離れた所（または十分過去）にあり、熱核で運ばれてくる間に滑らかになる。比喩で言えば、布を切り取っても切り口のほつれは端にしかなく、真ん中の織り目は元のままである。解の滑らかさが局所的な性質であるのは、熱方程式の「遠くの影響は必ず均されて届く」性質による。
+:::
+
+## 問題 {#pde:sec-he-reg-problems}
+
+::: problem {#pde:prob-he-time-rough}
+$a\colon[0,\infty)\to\mathbb{R}$ を有界な連続関数とし、$f(x,t)\defeq a(t)$（$x\in\mathbb{R}^{n}$）とおく。
+1. $\mathcal{D}f(x,t)=\int_{0}^{t}a(s)\,ds$ を示せ。
+2. $\mathcal{D}f$ が初期値 $0$、熱源 $f$ の初期値問題の古典解であることを直接確かめ、これが \ref{pde:heat-duhamel-holder} の結論と合うことを説明せよ。
+3. $a$ が微分可能でないとき（たとえば $a(t)=|t-1|$）、\ref{pde:heat-duhamel} は使えないが、解は存在することを確かめよ。解は時間について $C^{1}$ 級より滑らかになるか。
+:::
+
+::: solution
+**1.** $\int\Phi(x-y,t-s)a(s)\,dy=a(s)\int\Phi(x-y,t-s)\,dy=a(s)$（\ref{pde:heat-kernel-properties.2}）なので、$\mathcal{D}f(x,t)=\int_{0}^{t}a(s)\,ds$。
+
+**2.** $u(x,t)\defeq\int_{0}^{t}a(s)\,ds$ は $x$ によらないので $\Delta u=0$、微積分学の基本定理（\ref{calc:fundamental-theorem}）から $\partial_{t}u=a(t)$ は連続。よって $u\in C^{2,1}$ で $\partial_{t}u-\Delta u=a=f$、$u(x,0)=0$ で連続。$f$ は $x$ について定数なので、任意の $\gamma$ と $L=0$ でヘルダーの条件を満たし、\ref{pde:heat-duhamel-holder} の仮定を満たす。その 3 の式でも $f(y,s)-f(x,s)=0$ から $\partial_{i}\partial_{j}u=0$ で一致する。
+
+**3.** $a(t)=|t-1|$ は $t=1$ で微分できないので、$\partial_{t}f$ の存在を要求する \ref{pde:heat-duhamel} は使えないが、1・2 から $u=\int_{0}^{t}|s-1|\,ds$ は古典解である。$\partial_{t}u=|t-1|$ は $t=1$ で微分できないので、$u$ は時間について $C^{2}$ 級ではない。熱方程式は熱源の時間方向のでこぼこを均さない（空間方向に広げる作用しかもたない）ことがわかる。
+:::
+
+::: problem {#pde:prob-he-derivatives-solutions}
+1. $u\in C^{2,1}(U)$ が開集合 $U$ で熱方程式を満たせば、すべての $\alpha$, $k$ について $\partial^{\alpha}\partial_{t}^{k}u$ も $U$ で熱方程式を満たすことを示せ。
+2. \ref{pde:heat-kernel-extended} の $\tilde\Phi$ は $(\mathbb{R}^{n}\times\mathbb{R})\setminus\{(0,0)\}$ で熱方程式を満たすが、原点を含む開集合の上の熱方程式の解に延ばせないことを示せ。
+:::
+
+::: solution
+**1.** \ref{pde:heat-interior-regularity} から $u\in C^{\infty}(U)$ で、偏微分の順序は交換できる（\ref{calc:schwarz-theorem}）。よって $\partial_{t}(\partial^{\alpha}\partial_{t}^{k}u)-\Delta(\partial^{\alpha}\partial_{t}^{k}u)=\partial^{\alpha}\partial_{t}^{k}(\partial_{t}u-\Delta u)=0$。
+
+**2.** 延長 $w$ があれば、$w$ は原点で連続なので原点の近くで有界。しかし $t>0$ で $w(0,t)=\Phi(0,t)=(4\pi t)^{-n/2}\to\infty$（$t\to0$）なので矛盾。（\ref{pde:heat-interior-regularity} は解が定義された各点で滑らかさを言うだけで、定義されていない点を埋めることはしない。$\tilde\Phi$ の原点は、点に置いた熱源 $\delta$ のある所で、熱源のない方程式は成り立っていない。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

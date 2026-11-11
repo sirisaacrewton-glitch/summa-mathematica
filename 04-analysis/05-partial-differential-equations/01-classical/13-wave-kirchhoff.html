@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>球面平均とキルヒホッフの公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/01-classical/13-wave-kirchhoff.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 球面平均とキルヒホッフの公式 {#pde:page-wave-kirchhoff keywords="wave equation in higher dimensions, spherical means as functions of center and radius, Darboux equation, Euler-Poisson-Darboux equation, Kirchhoff formula for n = 3, loss of smoothness and focusing, method of descent, Poisson formula for the two-dimensional wave equation, Huygens principle, lacunas, 球面平均, ダルブーの方程式, オイラー–ポアソン–ダルブー方程式, キルヒホッフの公式, 降下法, ポアソンの公式, ホイヘンスの原理"}
+
+前のページ（\tref{pde:page-wave-equation}）では、1 次元の波動方程式を二つの輸送方程式に分解して解いた。$n\ge2$ ではこの分解ができないので、解を点 $x$ を中心とする球面の上で平均し、半径 $r$ を新しい変数とする。すると球面平均は、時間と半径の 2 変数の方程式（**オイラー–ポアソン–ダルブー方程式**）に従う。$n=3$ では、球面平均に半径を掛けたものが 1 次元の波動方程式を満たすので、ダランベールの公式から**キルヒホッフの公式**が導かれ、解の一意性も同時に得られる。2 次元の解は、3 次元の解で第 3 座標によらないものとして取り出す（**降下法**）。道具は、調和関数のページ（\tref{pde:page-harmonic-functions}）の球面平均と、その半径についての微分の公式である。
+
+1 次元と違い、3 次元では初期値に必要な滑らかさ（$g\in C^{2}$, $h\in C^{1}$）だけでは古典解が存在しないことがある：球面状に集まる波が中心で 1 階の滑らかさを失う（\ref{pde:wave-kirchhoff-loss}）。また、3 次元では乱れの影響が波面の上にしか現れない（**ホイヘンスの原理**）のに対し、2 次元では波が通り過ぎた後も揺れが残る。エネルギーによる一意性と一般の次元の有限伝播速度は次のページで、一般の次元の解の公式とホイヘンスの原理の証明はその次のページで扱う。
+
+## 記法と定義の確認 {#pde:sec-wv-kh-notation}
+
+::: notation
+- 波動方程式の初期値問題と古典解は \ref{pde:wave-cauchy-problem}、1 次元の一般解は \ref{pde:wave-1d-general}、ダランベールの公式とその一意性は \tref{pde:wave-dalembert}。時間を先に書き、$\nabla$, $\Delta$ は空間変数 $x$ についてのもの。$J$ はいつも $0$ を含む開区間。$C^{k}$ 級は \ref{calc:ck-map}、偏微分の順序交換は \ref{calc:schwarz-theorem}。
+- $B(x,r)$, $\omega_{n}=\lambda(B(0,1))$、球面 $S^{n-1}$ 上の測度 $\sigma$（$\sigma(S^{n-1})=n\omega_{n}$。$n=1$ では $S^{0}=\{1,-1\}$ の数え上げ測度。\ref{meas:polar-sphere-measure-basic.1}・\ref[2]{meas:polar-sphere-measure-basic.2}）、球面平均 $S_{r}u(x)$ と球平均 $A_{r}u(x)$ は \ref{pde:spherical-mean} のもの。二つの平均の関係は \ref{pde:means-relation}、球面平均の半径についての微分は \ref{pde:mean-value-property.1}。$\sigma$ は直交変換で不変（\ref{meas:polar-radial.1}。積分についても単関数で近似して同じ）で、とくに $\int_{S^{n-1}}f(-\theta)\,d\sigma(\theta)=\int_{S^{n-1}}f(\theta)\,d\sigma(\theta)$。$n=3$ では $\omega_{3}=4\pi/3$、$n\omega_{n}=4\pi$。
+- 極座標の公式は \ref{meas:polar-decomposition}、放射関数の積分は \ref{meas:polar-radial.2}、線形変換による積分の変換は \ref{meas:lebesgue-linear}（積分についても単関数で近似して同じ：$\int f(sz)\,dz=s^{-n}\int f(y)\,dy$, $s>0$）。積分記号下の微分は \ref{meas:parameter-integrals}、優収束定理は \ref{meas:dominated-convergence}、フビニ–トネリの定理は \ref{meas:fubini-lebesgue}、連続関数の区間上の積分には微積分学の基本定理が使える（\ref{meas:riemann-lebesgue}, \ref{calc:fundamental-theorem}）。
+- **選択公理**：使わない（測度論の基礎の結果に含まれるものを除く）。
+:::
+
+## 球面平均とオイラー–ポアソン–ダルブー方程式 {#pde:sec-wv-spherical-means}
+
+解を球面の上で平均し、半径 $r$ を新しい変数として 1 次元の問題に移す。そのために、球面平均を負の半径にも偶関数として延ばしておく。
+
+::: lemma 球面平均の滑らかさ {#pde:wave-mean-smoothness keywords="spherical mean M_h(x,r) of a C^k function as a function of (x,r) in R^n x R: even in r, C^k, derivatives under the integral, M_{Delta h} = Delta_x M_h" index="球面平均の滑らかさ|きゅうめんへいきんのなめらかさ"}
+$h\in C^{k}(\mathbb{R}^{n})$（$k\ge0$）について、$(x,r)\in\mathbb{R}^{n}\times\mathbb{R}$ に対し
+$$
+M_{h}(x,r)\defeq\frac{1}{n\omega_{n}}\int_{S^{n-1}}h(x+r\theta)\,d\sigma(\theta)
+$$
+とおく。
+1. $r>0$ なら $M_{h}(x,r)=S_{r}h(x)$、また $M_{h}(x,0)=h(x)$, $M_{h}(x,-r)=M_{h}(x,r)$。
+2. $M_{h}\in C^{k}(\mathbb{R}^{n}\times\mathbb{R})$ で、$\lvert\alpha\rvert+j\le k$ なら $\partial_{x}^{\alpha}\partial_{r}^{j}M_{h}(x,r)=\frac{1}{n\omega_{n}}\int_{S^{n-1}}\partial_{r}^{j}\bigl[(\partial^{\alpha}h)(x+r\theta)\bigr]\,d\sigma(\theta)$。とくに $\partial_{x}^{\alpha}\partial_{r}^{j}M_{h}=\partial_{r}^{j}M_{\partial^{\alpha}h}$、$k\ge1$ なら $\partial_{r}M_{h}(x,r)=\frac{1}{n\omega_{n}}\int_{S^{n-1}}\nabla h(x+r\theta)\cdot\theta\,d\sigma(\theta)$、$k\ge2$ なら $\Delta_{x}M_{h}=M_{\Delta h}$。
+:::
+
+::: proof
+**1.** $r>0$ では \ref{pde:spherical-mean} の定義そのもの（$\Omega=\mathbb{R}^{n}$）。$r=0$ では被積分関数が定数 $h(x)$ で、$\sigma(S^{n-1})=n\omega_{n}$。$\sigma$ は $\theta\mapsto-\theta$ で不変なので $\int h(x-r\theta)\,d\sigma=\int h(x+r\theta)\,d\sigma$。
+
+**2.** $f(x,r,\theta)\defeq h(x+r\theta)$ とおく。連鎖律から、$(x,r)$ についての $k$ 階以下の偏導関数は、$\theta$ の成分の多項式と $h$ の $k$ 階以下の偏導関数 $(\partial^{\beta}h)(x+r\theta)$ の積の和で（例えば $\partial_{r}f=\sum_{i}\theta_{i}(\partial_{i}h)(x+r\theta)$）、$(x,r,\theta)$ について連続、したがって $\lvert x\rvert\le R$, $\lvert r\rvert\le R$ の上で一様に有界である。定数は有限測度 $\sigma$ について可積分なので、\ref{meas:parameter-integrals.2} を一つの変数ずつ使うと、偏微分を積分の中に入れられる。得られる積分の $(x,r)$ についての連続性は、$(x_{m},r_{m})\to(x,r)$ となる列について優収束定理を使えばわかる。これを階数について帰納的に繰り返すと、$k$ 階以下のすべての偏導関数が存在して連続なので、\ref{calc:ck-map} から $M_{h}\in C^{k}$。$\partial_{x}^{\alpha}\bigl[h(x+r\theta)\bigr]=(\partial^{\alpha}h)(x+r\theta)$ なので $\partial_{x}^{\alpha}\partial_{r}^{j}M_{h}=\partial_{r}^{j}M_{\partial^{\alpha}h}$ で、これを $\alpha=2e_{i}$, $j=0$ について足すと $\Delta_{x}M_{h}=M_{\Delta h}$ を得る。
+:::
+
+::: lemma ダルブーの方程式 {#pde:wave-darboux keywords="Darboux equation for spherical means: d_r^2 M_h + ((n-1)/r) d_r M_h = Delta_x M_h for h in C^2; r^{n-1} d_r M_h = int_0^r s^{n-1} M_{Delta h} ds" index="ダルブーの方程式|だるぶーのほうていしき"}
+$h\in C^{2}(\mathbb{R}^{n})$、$x\in\mathbb{R}^{n}$, $r>0$ とする。
+1. $\displaystyle\partial_{r}M_{h}(x,r)=r^{1-n}\int_{0}^{r}s^{n-1}M_{\Delta h}(x,s)\,ds$。
+2. $\displaystyle\partial_{r}^{2}M_{h}(x,r)+\frac{n-1}{r}\partial_{r}M_{h}(x,r)=\Delta_{x}M_{h}(x,r)$。
+:::
+
+::: intuition
+球面平均を半径の関数と見ると、その半径についての「$n$ 次元の放射方向のラプラシアン」が、中心を動かしたときのラプラシアンに等しい。関数 $h$ のラプラシアンを、中心と半径の二通りの見方で計算できるということである。
+:::
+
+::: proof
+**1.** $\overline{B}(x,r)\subset\mathbb{R}^{n}$ なので、\ref{pde:mean-value-property.1}（$\Omega=\mathbb{R}^{n}$, $R=r$）から $\partial_{r}M_{h}(x,r)=\frac{r}{n}A_{r}(\Delta h)(x)$。$\Delta h$ は連続なので \ref{pde:means-relation.2} から $A_{r}(\Delta h)(x)=\frac{n}{r^{n}}\int_{0}^{r}s^{n-1}S_{s}(\Delta h)(x)\,ds$ で、$s>0$ では $S_{s}(\Delta h)(x)=M_{\Delta h}(x,s)$。代入すればよい。
+
+**2.** 1 の右辺の被積分関数は、\ref{pde:wave-mean-smoothness.2}（$k=0$ を $\Delta h$ に使う）から $s$ について連続なので、微積分学の基本定理から $\partial_{r}\bigl(r^{n-1}\partial_{r}M_{h}\bigr)=r^{n-1}M_{\Delta h}(x,r)=r^{n-1}\Delta_{x}M_{h}(x,r)$（最後は \ref{pde:wave-mean-smoothness.2}）。$M_{h}\in C^{2}$ なので左辺は積の微分で $(n-1)r^{n-2}\partial_{r}M_{h}+r^{n-1}\partial_{r}^{2}M_{h}$。$r^{n-1}$ で割る。
+:::
+
+::: proposition オイラー–ポアソン–ダルブー方程式 {#pde:wave-epd keywords="Euler-Poisson-Darboux equation: spherical means U(t,x,r) of a C^2 solution of the wave equation satisfy U_tt = U_rr + ((n-1)/r) U_r for r > 0, with data M_g, M_h" index="オイラー–ポアソン–ダルブー方程式|おいらーぽあそんだるぶーほうていしき, 球面平均（波動方程式の解の）|きゅうめんへいきんはどうほうていしきのかいの"}
+$u$ を初期値 $g,h$ の $J\times\mathbb{R}^{n}$ 上の古典解とし、$U(t,x,r)\defeq M_{u(t,\cdot)}(x,r)$ とおく。
+1. $U\in C^{2}(J\times\mathbb{R}^{n}\times\mathbb{R})$ で、$U$ は $r$ について偶関数、$U(t,x,0)=u(t,x)$。
+2. $r>0$ で $\displaystyle\partial_{t}^{2}U=\partial_{r}^{2}U+\frac{n-1}{r}\partial_{r}U$。
+3. $U(0,x,r)=M_{g}(x,r)$, $\partial_{t}U(0,x,r)=M_{h}(x,r)$。
+:::
+
+::: intuition
+波動方程式の解を、ある点のまわりの球面で平均すると、時間と半径だけの方程式に従う。半径の方向の 1 次元の波動方程式に、球面の広がりによる項 $\frac{n-1}{r}\partial_{r}U$ が付いたものである。
+:::
+
+::: proof
+**1.** \ref{pde:wave-mean-smoothness} の証明の 2 と同じく、$u(t,x+r\theta)$ の $(t,x,r)$ についての 2 階以下の偏導関数は、$u$ の 2 階以下の偏導関数と $\theta$ の成分の多項式の積の和で、$J\times\mathbb{R}^{n}\times\mathbb{R}$ のコンパクト集合と $S^{n-1}$ の積の上で連続、したがって有界なので、偏微分を積分の中に入れられて $U\in C^{2}$。偶関数であることと $r=0$ での値は \ref{pde:wave-mean-smoothness.1}。
+
+**2.** 1 から $\partial_{t}^{2}U=M_{\partial_{t}^{2}u(t,\cdot)}=M_{\Delta u(t,\cdot)}$（方程式）。$u(t,\cdot)\in C^{2}(\mathbb{R}^{n})$ なので \ref{pde:wave-mean-smoothness.2} から $M_{\Delta u(t,\cdot)}=\Delta_{x}U$ で、\ref{pde:wave-darboux.2} から $\Delta_{x}U=\partial_{r}^{2}U+\frac{n-1}{r}\partial_{r}U$。
+
+**3.** 1 で積分の中に入れた微分に $t=0$ を代入する。
+:::
+
+## 3 次元：キルヒホッフの公式 {#pde:sec-wv-kirchhoff}
+
+$n=3$ では $\partial_{r}^{2}(rU)=r\partial_{r}^{2}U+2\partial_{r}U=r\bigl(\partial_{r}^{2}U+\frac{2}{r}\partial_{r}U\bigr)$ なので、\ref{pde:wave-epd.2} は $rU$ が 1 次元の波動方程式を満たすことを言っている。これとダランベールの公式から、次の公式が導かれる。
+
+::: theorem キルヒホッフの公式 {#pde:wave-kirchhoff keywords="Kirchhoff formula for the three-dimensional wave equation: u(t,x) = d/dt (t M_g(x,t)) + t M_h(x,t) = (1/4pi) int_{S^2} [g(x+t theta) + t grad g(x+t theta) . theta + t h(x+t theta)] d sigma; existence of C^2 solutions for g in C^3 and h in C^2; uniqueness; loss of one derivative" index="キルヒホッフの公式|きるひほっふのこうしき" refname="キルヒホッフの公式"}
+$n=3$ とする。
+1. $g\in C^{3}(\mathbb{R}^{3})$, $h\in C^{2}(\mathbb{R}^{3})$ なら
+$$
+\begin{aligned}
+u(t,x)&\defeq\partial_{t}\bigl(tM_{g}(x,t)\bigr)+tM_{h}(x,t)\\
+&=\frac{1}{4\pi}\int_{S^{2}}\bigl(g(x+t\theta)+t\,\nabla g(x+t\theta)\cdot\theta+t\,h(x+t\theta)\bigr)\,d\sigma(\theta)
+\end{aligned}
+\label{pde:eq-kirchhoff}
+$$
+は $\mathbb{R}\times\mathbb{R}^{3}$ 上の古典解である。
+2. $v$ が初期値 $g,h$ の $J\times\mathbb{R}^{3}$ 上の古典解なら、$J\times\mathbb{R}^{3}$ 上で $v(t,x)=\partial_{t}\bigl(tM_{g}(x,t)\bigr)+tM_{h}(x,t)$（右辺は $g\in C^{2}$, $h\in C^{1}$ だけで意味をもつ）。
+:::
+
+::: intuition
+3 次元では、時刻 $t$ に点 $x$ で見える値は、$x$ を中心とする半径 $\lvert t\rvert$ の球面の上の初期値（と $g$ の勾配）だけで決まる。ただし、古典解を得るには、初期値を解よりも 1 階余分に滑らかにしておく必要がある。
+:::
+
+::: proof
+$w_{f}(t,x)\defeq tM_{f}(x,t)$ とおく。
+
+**Step 1.** 【主張：$f\in C^{k}(\mathbb{R}^{3})$ なら $w_{f}\in C^{k}(\mathbb{R}\times\mathbb{R}^{3})$、$w_{f}(0,x)=0$, $\partial_{t}w_{f}(0,x)=f(x)$、$w_{f}$ は $t$ について奇関数】\ref{pde:wave-mean-smoothness} から $M_{f}\in C^{k}$ で $r$ について偶関数なので、$w_{f}$ は $C^{k}$ 級の奇関数。$\partial_{t}w_{f}=M_{f}(x,t)+t\,\partial_{r}M_{f}(x,t)$ に $t=0$ を代入して $M_{f}(x,0)=f(x)$。
+
+**Step 2.** 【主張：$f\in C^{2}$ なら $\partial_{t}^{2}w_{f}=\Delta w_{f}$（$\mathbb{R}\times\mathbb{R}^{3}$ 上）】$t>0$ では、\ref{pde:wave-darboux.2}（$n=3$）に $t$ を掛けて
+$$
+\partial_{t}^{2}w_{f}=t\,\partial_{r}^{2}M_{f}+2\,\partial_{r}M_{f}=t\,\Delta_{x}M_{f}=\Delta w_{f}.
+$$
+$w_{f}(-t,x)=-w_{f}(t,x)$ を $t$ で 2 回微分すると $\partial_{t}^{2}w_{f}(-t,x)=-\partial_{t}^{2}w_{f}(t,x)$、$x$ で微分すると $\Delta w_{f}(-t,x)=-\Delta w_{f}(t,x)$ なので、$t<0$ でも成り立つ。$t=0$ では、両辺が連続（Step 1）なので $t\to0$ の極限で成り立つ。
+
+**Step 3.** 【主張：$g\in C^{3}$ なら $z\defeq\partial_{t}w_{g}\in C^{2}$ は初期値 $g,0$ の $\mathbb{R}\times\mathbb{R}^{3}$ 上の古典解】Step 1 から $w_{g}\in C^{3}$ なので $z\in C^{2}$ で、\ref{calc:schwarz-theorem} から 3 階までの偏微分の順序は交換できる。Step 2 から $\partial_{t}^{2}z=\partial_{t}\bigl(\partial_{t}^{2}w_{g}\bigr)=\partial_{t}\Delta w_{g}=\Delta\partial_{t}w_{g}=\Delta z$。初期値は、Step 1 から $z(0,x)=g(x)$、Step 2 と $w_{g}(0,\cdot)=0$ から $\partial_{t}z(0,x)=\partial_{t}^{2}w_{g}(0,x)=\Delta w_{g}(0,x)=0$。
+
+以上から、$u=z+w_{h}$ は $C^{2}$ 級で、方程式の線形性から初期値 $g,h$ の古典解である（1）。\eqref{pde:eq-kirchhoff} の 2 行目は、$\partial_{t}(tM_{g})=M_{g}+t\,\partial_{r}M_{g}$ と \ref{pde:wave-mean-smoothness.2} の $\partial_{r}M_{g}$ の式、$n\omega_{n}=4\pi$ から従う。
+
+**Step 4.** 【主張：古典解 $v$ は $v(t,x)=\partial_{t}\bigl(tM_{g}(x,t)\bigr)+tM_{h}(x,t)$ を満たす（2）】$V(t,x,r)\defeq M_{v(t,\cdot)}(x,r)$ とし、$x$ を固定して $\tilde{V}(t,r)\defeq rV(t,x,r)$ とおく。\ref{pde:wave-epd.1} から $\tilde{V}\in C^{2}(J\times\mathbb{R})$ で、$r$ について奇関数。$r>0$ では \ref{pde:wave-epd.2}（$n=3$）から $\partial_{r}^{2}\tilde{V}=r\bigl(\partial_{r}^{2}V+\frac{2}{r}\partial_{r}V\bigr)=r\,\partial_{t}^{2}V=\partial_{t}^{2}\tilde{V}$。Step 2 と同じく、奇関数であることと連続性から $r\le0$ でも成り立つ。初期値は \ref{pde:wave-epd.3} から $\tilde{G}(r)\defeq rM_{g}(x,r)$（$C^{2}$ 級、$g=v(0,\cdot)\in C^{2}$ なので）と $\tilde{H}(r)\defeq rM_{h}(x,r)$（$C^{1}$ 級）。よって \ref{pde:wave-dalembert.2} から
+$$
+\tilde{V}(t,r)=\frac{\tilde{G}(r+t)+\tilde{G}(r-t)}{2}+\frac{1}{2}\int_{r-t}^{r+t}\tilde{H}(y)\,dy.
+$$
+$\partial_{r}\tilde{V}=V+r\,\partial_{r}V$ なので $v(t,x)=V(t,x,0)=\partial_{r}\tilde{V}(t,0)=\frac12\bigl(\tilde{G}'(t)+\tilde{G}'(-t)\bigr)+\frac12\bigl(\tilde{H}(t)-\tilde{H}(-t)\bigr)$。$\tilde{G}$ は奇関数なので $\tilde{G}'$ は偶関数、$\tilde{H}$ は奇関数なので、これは $\tilde{G}'(t)+\tilde{H}(t)=\partial_{t}\bigl(tM_{g}(x,t)\bigr)+tM_{h}(x,t)$ に等しい。
+
+::: hypcheck
+- **$h\in C^{2}$**：Step 2 でダルブーの方程式（$C^{2}$ を要する）を使い、$w_{h}\in C^{2}$ を得るのに使った。
+- **$g\in C^{3}$**：Step 3 で、$z=\partial_{t}w_{g}$ が $C^{2}$ 級であり、$\partial_{t}$ と $\Delta$ を交換するのに使った。$g$ の項は $\partial_{t}(tM_{g})=M_{g}+t\,\partial_{r}M_{g}$ と $g$ の勾配を含むので、$u\in C^{2}$ には $g$ の 3 階の微分が要る。
+- **必要条件との差**：古典解が存在するための必要条件は $g\in C^{2}$, $h\in C^{1}$ だけである（\ref{pde:wave-cauchy-problem} の後の例）が、それでは足りない：$g\in C^{2}$, $h=0$ でも、$h\in C^{1}$, $g=0$ でも古典解のない例がある（\ref{pde:wave-kirchhoff-loss}）。1 次元（\ref{pde:wave-dalembert}）では必要条件で十分だったのと対照的である。
+- **一意性（2）**：Step 4 は $v\in C^{2}$ と方程式と初期値しか使わず、無限遠での増大条件はいらない。Step 4 で使った 1 次元の一意性（\ref{pde:wave-dalembert.2}）が増大条件を要しないためである。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: counterexample 滑らかさの損失（3 次元） {#pde:wave-kirchhoff-loss keywords="loss of derivatives for the three-dimensional wave equation: radial data g in C^2 (or h in C^1) for which no classical solution exists up to time 1; focusing at the center" index="滑らかさの損失（波動方程式）|なめらかさのそんしつはどうほうていしき, 焦点（波動方程式）|しょうてんはどうほうていしき"}
+$s\in\mathbb{R}$ について $\phi(s)\defeq\max(s-1,0)^{5/2}$, $\psi(s)\defeq\max(s-1,0)^{3/2}$ とし、$x\in\mathbb{R}^{3}$ について $g(x)\defeq\phi(\lvert x\rvert)$, $h(x)\defeq\psi(\lvert x\rvert)$ とおく。$J$ を $1\in J$ となる開区間とする。
+1. $g\in C^{2}(\mathbb{R}^{3})$ で、初期値 $g,0$ の $J\times\mathbb{R}^{3}$ 上の古典解は存在しない。
+2. $h\in C^{1}(\mathbb{R}^{3})$ で、初期値 $0,h$ の $J\times\mathbb{R}^{3}$ 上の古典解は存在しない。
+:::
+
+::: proof
+**Step 1.** 【主張：$g\in C^{2}(\mathbb{R}^{3})$, $h\in C^{1}(\mathbb{R}^{3})$】$s>1$ で $\phi'(s)=\frac52(s-1)^{3/2}$, $\phi''(s)=\frac{15}{4}(s-1)^{1/2}$ で、これらは $s\downarrow1$ で $0$ に近づくので、$\phi\in C^{2}(\mathbb{R})$（$s\le1$ では $0$）。同様に $\psi'(s)=\frac32(s-1)^{1/2}$ で $\psi\in C^{1}(\mathbb{R})$。$x\mapsto\lvert x\rvert$ は $x\ne0$ で $C^{\infty}$ 級なので、連鎖律から $g$ は $x\ne0$ で $C^{2}$ 級、$h$ は $C^{1}$ 級。$\lvert x\rvert<1$ では $g=h=0$ なので $x=0$ の近くでも問題ない。
+
+**Step 2.** 【主張：古典解 $v$ があれば、$t\in J$, $t>0$ で $v(t,0)=\phi(t)+t\phi'(t)$（1 の場合）、$v(t,0)=t\psi(t)$（2 の場合）】$\lvert0+t\theta\rvert=t$ なので $M_{g}(0,t)=\phi(t)$, $M_{h}(0,t)=\psi(t)$。\ref{pde:wave-kirchhoff.2} から、1 の場合 $v(t,0)=\partial_{t}(t\phi(t))=\phi(t)+t\phi'(t)$、2 の場合 $v(t,0)=t\psi(t)$。
+
+**Step 3.** 【主張：これらの関数は $t=1$ で 2 回微分可能でない】$v\in C^{2}$ なら $t\mapsto v(t,0)$ は $C^{2}$ 級なので、矛盾が出る。1 の場合 $q(t)\defeq\phi(t)+t\phi'(t)$ は $q'(t)=2\phi'(t)+t\phi''(t)$、$q'(1)=0$ で、$t>1$ では $\phi'\ge0$ から
+$$
+\frac{q'(t)-q'(1)}{t-1}\ge\frac{t\,\phi''(t)}{t-1}=\frac{15}{4}\,t\,(t-1)^{-1/2}\to\infty\quad(t\downarrow1).
+$$
+2 の場合 $p(t)\defeq t\psi(t)$ は $p'(t)=\psi(t)+t\psi'(t)$、$p'(1)=0$ で、$t>1$ では $\frac{p'(t)-p'(1)}{t-1}\ge\frac{t\psi'(t)}{t-1}=\frac32\,t\,(t-1)^{-1/2}\to\infty$。
+:::
+
+::: supplement
+**前提を変えると.** 例の初期値は、単位球面 $\lvert x\rvert=1$ の上にだけ滑らかさの欠けた所をもつ。その欠けは球面として内側にも外側にも速さ $1$ で運ばれ、内向きの球面が時刻 $1$ に中心 $x=0$ に集まる（**焦点**）。中心では球面全体の寄与が一点に重なるので、滑らかさが 1 階失われる。時刻 $\lvert t\rvert<1$ だけを考えれば、焦点に達する前なので、この例でも古典解はありうる（ここでは調べない）。一般に、$g\in C^{k+1}$, $h\in C^{k}$（$k\ge2$）ならキルヒホッフの公式の解は $C^{k}$ 級である（\tref{pde:wave-kirchhoff} の証明の Step 1〜3 を $k$ 階まで繰り返す）が、この例が示すように、初期値と同じ階数の滑らかさは一般には保証されない。
+
+**似た定理.** 滑らかさを $C^{k}$ ではなく 2 乗可積分な導関数（ソボレフ空間）で測ると、損失は消える：$\int(\lvert\partial_{t}u\rvert^{2}+\lvert\nabla u\rvert^{2})\,dx$ は時間によらない（次のページのエネルギー保存）。これは、焦点で値が大きくなっても、その範囲が小さいので 2 乗積分は増えないためである。関数解析的手法で波動方程式を扱うとき、エネルギー空間を使うのはこのためである。
+
+**高い視点：虫眼鏡.** 球面状の波面が中心に集まる様子は、虫眼鏡で日光を一点に集めるのと同じである。比喩で言えば、球面の上に薄く広がっていた「角」が一点に集められて、焦点では鋭くなる。波動方程式はエネルギーを保存するが、各点の値の大きさや滑らかさは保存しない。この差が、$C^{k}$ で測った滑らかさの損失として現れる。
+:::
+
+## 2 次元：降下法とポアソンの公式 {#pde:sec-wv-descent}
+
+2 次元の解は、3 次元の解で第 3 座標によらないものと見る。そのために、最後の座標によらない関数の球面平均を、1 次元低い球の上の積分で書き直す。後で一般の偶数次元にも使うので、次元 $n$ で示しておく。
+
+::: lemma 球面平均の射影 {#pde:wave-descent-mean keywords="method of descent: the (n+1)-dimensional spherical mean of a function independent of the last coordinate equals c_n int_{|z|<1} f(x + t z) / sqrt(1 - |z|^2) dz over the n-dimensional unit ball, c_n = 2 / ((n+1) omega_{n+1}); for n = 2, c_2 = 1/(2 pi)" index="降下法|こうかほう, 球面平均の射影|きゅうめんへいきんのしゃえい"}
+$n\ge1$、$f\in C(\mathbb{R}^{n})$ とし、$\bar{f}(y',y_{n+1})\defeq f(y')$（$y'\in\mathbb{R}^{n}$）とおく。$c_{n}\defeq\frac{2}{(n+1)\omega_{n+1}}$ とし、$x\in\mathbb{R}^{n}$, $t\in\mathbb{R}$ について
+$$
+N_{f}(x,t)\defeq c_{n}\int_{B(0,1)}\frac{f(x+tz)}{\sqrt{1-\lvert z\rvert^{2}}}\,dz
+$$
+（$B(0,1)\subset\mathbb{R}^{n}$）とおく。
+1. $\int_{B(0,1)}(1-\lvert z\rvert^{2})^{-1/2}dz=1/c_{n}$ で、$N_{f}$ は $\mathbb{R}^{n}\times\mathbb{R}$ で連続、$t$ について偶関数、$N_{f}(x,0)=f(x)$。
+2. $M_{\bar{f}}\bigl((x,0),t\bigr)=N_{f}(x,t)$（左辺は $n+1$ 次元の球面平均）。
+3. $n=2$ では $c_{2}=\frac{1}{2\pi}$。
+:::
+
+::: intuition
+最後の座標の方向に一様な関数を球面で平均することは、球面を真上から押しつぶして、1 次元低い球の上で平均することと同じである。押しつぶすと球の縁の近くに球面が密に重なるので、重み $1/\sqrt{1-\lvert z\rvert^{2}}$ がつく。
+:::
+
+::: proof
+$f$ を $f(x+\cdot)$ に替えれば $x=0$ としてよい。$T>0$ とし、$I(T)\defeq\int_{B(0,T)}\bar{f}\,dy$（$n+1$ 次元の球）とおく。
+
+**Step 1.** 【主張：$I(T)=\int_{\lvert y'\rvert<T}f(y')\cdot2\sqrt{T^{2}-\lvert y'\rvert^{2}}\,dy'$】$\bar{f}\mathbf{1}_{B(0,T)}$ は有界で台が有界なボレル可測関数なので可積分。$y=(y',y_{n+1})$ とすると、$\lvert y'\rvert<T$ のとき $y_{n+1}$ 方向の切り口は区間 $\lvert y_{n+1}\rvert<\sqrt{T^{2}-\lvert y'\rvert^{2}}$ で、その上で $\bar{f}=f(y')$ は一定。\ref{meas:fubini-lebesgue}（$\mathbb{R}^{n+1}=\mathbb{R}^{n}\times\mathbb{R}$）を使えばよい。
+
+**Step 2.** 【主張：$I(T)=(n+1)\omega_{n+1}\int_{0}^{T}s^{n}M_{\bar{f}}(0,s)\,ds$】\ref{pde:means-relation.2}（次元 $n+1$）から $A_{T}\bar{f}(0)=\frac{n+1}{T^{n+1}}\int_{0}^{T}s^{n}S_{s}\bar{f}(0)\,ds$ で、$I(T)=\omega_{n+1}T^{n+1}A_{T}\bar{f}(0)$。
+
+**Step 3.** 【主張：$P(s)\defeq2s^{n}\int_{B(0,1)}f(sz)(1-\lvert z\rvert^{2})^{-1/2}dz$ は $[0,T]$ で連続で、$\int_{0}^{T}P(s)\,ds=I(T)$】$0\le\rho<T$ について、$\varepsilon\downarrow0$ での単調収束から
+$$
+\int_{\rho}^{T}\frac{2s}{\sqrt{s^{2}-\rho^{2}}}\,ds=\lim_{\varepsilon\downarrow0}\Bigl[2\sqrt{s^{2}-\rho^{2}}\Bigr]_{\rho+\varepsilon}^{T}=2\sqrt{T^{2}-\rho^{2}}.
+$$
+よって $(s,y')\mapsto\lvert f(y')\rvert\frac{2s}{\sqrt{s^{2}-\lvert y'\rvert^{2}}}\mathbf{1}_{\lvert y'\rvert<s<T}$ の積分は、トネリの定理から $\int_{\lvert y'\rvert<T}\lvert f(y')\rvert\,2\sqrt{T^{2}-\lvert y'\rvert^{2}}\,dy'<\infty$。$s>0$ について、内側の $y'$ についての積分は $y'=sz$ と変数を変えて（$dy'=s^{n}dz$）$P(s)$ に等しい。とくに $f=1$ のときを見ると $\int_{0}^{T}2s^{n}ds\cdot\int_{B(0,1)}(1-\lvert z\rvert^{2})^{-1/2}dz<\infty$ なので、$(1-\lvert z\rvert^{2})^{-1/2}$ は $B(0,1)$ で可積分。$P$ の連続性は、$\lvert f(sz)\rvert(1-\lvert z\rvert^{2})^{-1/2}\le\max_{\lvert y\rvert\le T}\lvert f\rvert\cdot(1-\lvert z\rvert^{2})^{-1/2}$ による優収束定理から。フビニの定理から $\int_{0}^{T}P(s)\,ds$ は Step 1 の右辺に等しい。
+
+**Step 4.** 【主張：$(n+1)\omega_{n+1}T^{n}M_{\bar{f}}(0,T)=P(T)$、したがって $t>0$ での 2】Step 2・3 から、すべての $T>0$ で $\int_{0}^{T}\bigl((n+1)\omega_{n+1}s^{n}M_{\bar{f}}(0,s)-P(s)\bigr)\,ds=0$。被積分関数は連続（\ref{pde:wave-mean-smoothness.2} と Step 3）なので、微積分学の基本定理で $T$ について微分して等式を得る。両辺を $(n+1)\omega_{n+1}T^{n}$ で割ると $M_{\bar{f}}(0,T)=N_{f}(0,T)$。
+
+**残り.** 2 を $f=1$, $t=1$ に使うと $1=c_{n}\int_{B(0,1)}(1-\lvert z\rvert^{2})^{-1/2}dz$。$N_{f}$ の連続性は Step 3 と同じ優収束定理による。$z\mapsto-z$ の変数変換で $N_{f}$ は $t$ について偶関数、左辺も偶関数（\ref{pde:wave-mean-smoothness.1}）なので 2 は $t<0$ でも成り立ち、$t=0$ では両辺 $f(0)$（右辺は 1 から）。$n=2$ では $\omega_{3}=\frac{4\pi}{3}$ から $c_{2}=\frac{2}{4\pi}=\frac{1}{2\pi}$（\ref{meas:polar-radial.2} から直接 $\int_{B(0,1)}(1-\lvert z\rvert^{2})^{-1/2}dz=2\pi\int_{0}^{1}\rho(1-\rho^{2})^{-1/2}d\rho=2\pi$ とも確かめられる）。
+:::
+
+::: theorem ポアソンの公式（2 次元の波動方程式） {#pde:wave-poisson-2d keywords="Poisson formula for the two-dimensional wave equation by Hadamard's method of descent: u(t,x) = d/dt (t N_g(x,t)) + t N_h(x,t) = (1/2pi) int_{|z|<1} [g(x+tz) + t grad g(x+tz) . z + t h(x+tz)] / sqrt(1-|z|^2) dz; existence for g in C^3, h in C^2 and uniqueness" index="ポアソンの公式（波動方程式）|ぽあそんのこうしきはどうほうていしき" refname="ポアソンの公式（2 次元の波動方程式）"}
+$n=2$ とし、$N_{f}$ を \ref{pde:wave-descent-mean} のもの（$c_{2}=\frac{1}{2\pi}$）とする。
+1. $g\in C^{3}(\mathbb{R}^{2})$, $h\in C^{2}(\mathbb{R}^{2})$ なら
+$$
+\begin{aligned}
+u(t,x)&\defeq\partial_{t}\bigl(tN_{g}(x,t)\bigr)+tN_{h}(x,t)\\
+&=\frac{1}{2\pi}\int_{B(0,1)}\frac{g(x+tz)+t\,\nabla g(x+tz)\cdot z+t\,h(x+tz)}{\sqrt{1-\lvert z\rvert^{2}}}\,dz
+\end{aligned}
+$$
+は $\mathbb{R}\times\mathbb{R}^{2}$ 上の古典解である。
+2. $v$ が初期値 $g,h$ の $J\times\mathbb{R}^{2}$ 上の古典解なら、$J\times\mathbb{R}^{2}$ 上で $v(t,x)=\partial_{t}\bigl(tN_{g}(x,t)\bigr)+tN_{h}(x,t)$。
+:::
+
+::: intuition
+2 次元では、点 $x$ の時刻 $t$ の値は、半径 $\lvert t\rvert$ の円周の上だけでなく、円板の内部全体の初期値で決まる。2 次元の波を、上下方向に一様な 3 次元の波として解けば、この公式が出てくる。
+:::
+
+::: proof
+$\bar{g}(y',y_{3})\defeq g(y')$, $\bar{h}(y',y_{3})\defeq h(y')$ とおく（$y'\in\mathbb{R}^{2}$）。
+
+**Step 1.** 【主張：$\bar{g}\in C^{3}(\mathbb{R}^{3})$, $\bar{h}\in C^{2}(\mathbb{R}^{3})$ で、すべての $x_{3}$ について $M_{\bar{g}}\bigl((x,x_{3}),t\bigr)=N_{g}(x,t)$, $M_{\bar{h}}\bigl((x,x_{3}),t\bigr)=N_{h}(x,t)$】滑らかさは $\bar{g}$ が $g$ と射影 $(y',y_{3})\mapsto y'$ の合成であることから。$\bar{g}(y+(0,0,x_{3}))=\bar{g}(y)$ なので $M_{\bar{g}}((x,x_{3}),t)=M_{\bar{g}}((x,0),t)$ で、これは \ref{pde:wave-descent-mean.2} から $N_{g}(x,t)$。$\bar{h}$ も同じ。
+
+**Step 2.** 【主張：$u$ は $C^{2}$ 級で、初期値 $g,h$ の $\mathbb{R}\times\mathbb{R}^{2}$ 上の古典解（1 の 1 行目）】\ref{pde:wave-kirchhoff.1} を $\bar{g},\bar{h}$ に使うと、$\bar{u}(t,y)\defeq\partial_{t}(tM_{\bar{g}}(y,t))+tM_{\bar{h}}(y,t)$ は $\mathbb{R}\times\mathbb{R}^{3}$ 上の古典解で、Step 1 から $\bar{u}(t,x,x_{3})=u(t,x)$（$x_{3}$ によらない）。よって $u(t,x)=\bar{u}(t,x,0)$ は $C^{2}$ 級で、$\partial_{3}^{2}\bar{u}=0$ から $\partial_{t}^{2}u=\partial_{1}^{2}u+\partial_{2}^{2}u$。初期値は $\bar{u}(0,x,0)=\bar{g}(x,0)=g(x)$, $\partial_{t}\bar{u}(0,x,0)=h(x)$。
+
+**Step 3.** 【主張：1 の 2 行目の表示】$\partial_{t}(tN_{g})=N_{g}+t\,\partial_{t}N_{g}$。被積分関数の $t$ についての偏導関数 $\nabla g(x+tz)\cdot z\,(1-\lvert z\rvert^{2})^{-1/2}$ は、$\lvert t\rvert\le T$ で $\max_{\lvert y-x\rvert\le T}\lvert\nabla g(y)\rvert\cdot(1-\lvert z\rvert^{2})^{-1/2}$（可積分、\ref{pde:wave-descent-mean.1}）で押さえられるので、\ref{meas:parameter-integrals.2} から $\partial_{t}N_{g}(x,t)=\frac{1}{2\pi}\int_{B(0,1)}\nabla g(x+tz)\cdot z\,(1-\lvert z\rvert^{2})^{-1/2}dz$。
+
+**Step 4.** 【主張：古典解 $v$ は 2 の式を満たす】$\bar{v}(t,x,x_{3})\defeq v(t,x)$ は $C^{2}$ 級で、$\partial_{3}^{2}\bar{v}=0$ なので初期値 $\bar{g},\bar{h}$ の $J\times\mathbb{R}^{3}$ 上の古典解である。\ref{pde:wave-kirchhoff.2} から $\bar{v}(t,y)=\partial_{t}(tM_{\bar{g}}(y,t))+tM_{\bar{h}}(y,t)$ で、$y=(x,0)$ とおいて Step 1 を使う。
+
+::: hypcheck
+- **$g\in C^{3}$, $h\in C^{2}$**：Step 2 で \ref{pde:wave-kirchhoff.1} の仮定として使った（3 次元と同じだけの滑らかさが要る）。2 次元でも、必要条件 $g\in C^{2}$, $h\in C^{1}$ だけでは古典解がないことがある。\ref{pde:wave-kirchhoff-loss} と同じ型の放射対称な例が作れるが、円板の上の積分の計算が要るのでここでは扱わない。
+- **一意性（2）**：Step 4 で 3 次元の一意性に帰着した。2 次元の古典解を 3 次元の古典解と見るには $\bar{v}\in C^{2}$ だけが要る。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example 2 次元ではホイヘンスの原理が成り立たない {#pde:wave-no-huygens-2d}
+$h\in C^{2}(\mathbb{R}^{2})$ を $h\ge0$、$\lvert y\rvert\ge1$ で $h(y)=0$、$h(0)>0$ とし、$g=0$ とする。$t>1$ では、ポアソンの公式で $y=tz$ と変数を変えて
+$$
+u(t,0)=tN_{h}(0,t)=\frac{1}{2\pi}\int_{\lvert y\rvert<1}\frac{h(y)}{\sqrt{t^{2}-\lvert y\rvert^{2}}}\,dy>0
+$$
+（被積分関数は連続で非負、$0$ の近くで正）。波面 $\lvert x\rvert=\lvert t\rvert\pm1$ が原点を通り過ぎた後も、原点の変位は $0$ に戻らない。$t\to\infty$ では $\sqrt{t^{2}-\lvert y\rvert^{2}}\ge\sqrt{t^{2}-1}$ と優収束定理から $t\,u(t,0)\to\frac{1}{2\pi}\int h$ で、変位は $1/t$ の速さでゆっくり減る。これに対し 3 次元では、$g=0$ で $h$ の台が単位球に含まれるなら、$t>1$ で $u(t,0)=tM_{h}(0,t)=0$ である（半径 $t$ の球面は台と交わらない）。
+:::
+
+::: supplement
+**前提を変えると.** 次元を変えると、初期値の「どこ」を見るかが変わる。$n=1$ では区間 $[x-t,x+t]$ 全体（$h$ の積分）、$n=3$ では球面 $\lvert y-x\rvert=\lvert t\rvert$ の上だけ、$n=2$ では円板 $\lvert y-x\rvert\le\lvert t\rvert$ 全体。奇数次元 $n\ge3$ では球面の上だけ（**強いホイヘンスの原理**）、偶数次元では球の全体に依存する。一般の次元の解の公式とこの違いの証明は、エネルギー法のページの後のページで扱う（\see{pde:wave-huygens}）。
+
+**似た定理.** 降下法は、次元の高い問題の解から次元の低い問題の解を作る一般的な方法で、熱方程式の基本解（$n$ 次元のガウス関数は 1 次元のガウス関数の積）やラプラス方程式の基本解の比較でも同じ発想が使える。逆向きに、3 次元の解を 2 次元から作ることはできない：2 次元の解の公式は円板全体の積分なので、球面だけに依存する性質は降りてくる途中で失われる。
+
+**高い視点：雷鳴と池の波紋.** 3 次元では、雷が一瞬だけ光れば、雷鳴も一瞬だけ聞こえて止む：音の波面は薄い球殻で、その後ろは静かである。比喩で言えば、3 次元の空間は「後を引かない」楽器である。池の水面（2 次元）に石を投げると、波紋の輪が通り過ぎた後も水面はしばらく揺れ続ける。これは 2 次元の波が、3 次元の中の「上下に無限に長い線状の音源」から出た波と同じものだからで、線のあちこちから遅れて届く音が後を引く。3 次元の空間で、音の信号が後を引かずに届くのはこの性質による。
+:::
+
+## 問題 {#pde:sec-wv-kh-problems}
+
+::: problem {#pde:prob-wv-huygens}
+$h$ を、$\lvert y\rvert\ge1$ で $0$ になる $C^{2}$ 級関数とし、$g=0$ とする。$u$ は初期値 $g,h$ の古典解（1 ではダランベールの公式、2・3 ではキルヒホッフの公式によるもの）とする。
+1. $n=1$ のとき、$t>1+\lvert x\rvert$ なら $u(t,x)=\frac12\int_{-1}^{1}h$ であることを示せ。
+2. $n=3$ のとき、$t>0$ について、$\lvert x\rvert<t-1$ または $\lvert x\rvert>t+1$ なら $u(t,x)=0$ であることを示せ。
+3. $n=3$ で $h(y)=\psi(\lvert y\rvert)$ が放射対称なとき、$x\ne0$, $t>0$ について $u(t,x)=\frac{1}{2\lvert x\rvert}\int_{\lvert\lvert x\rvert-t\rvert}^{\lvert x\rvert+t}s\,\psi(s)\,ds$ であることを示せ（ヒント：$M_{h}(x,t)$ を、$\sigma$ の回転不変性と \ref{pde:wave-descent-mean} を使って計算する）。
+:::
+
+::: solution
+**1.** $t>1+\lvert x\rvert$ なら $x-t<-1$ かつ $x+t>1$ なので、\ref{pde:wave-1d-domains.3}（$a=-1$, $b=1$）から $u(t,x)=\frac12\int_{-1}^{1}h$。
+
+**2.** \ref{pde:wave-kirchhoff.1} から $u(t,x)=tM_{h}(x,t)=\frac{t}{4\pi}\int_{S^{2}}h(x+t\theta)\,d\sigma(\theta)$。$\lvert x+t\theta\rvert\ge t-\lvert x\rvert>1$（$\lvert x\rvert<t-1$ のとき）または $\lvert x+t\theta\rvert\ge\lvert x\rvert-t>1$（$\lvert x\rvert>t+1$ のとき）なので、被積分関数は $0$。
+
+**3.** 直交行列 $U$ について、$h(Ux+t\theta)=\psi(\lvert x+tU^{-1}\theta\rvert)$ と $\sigma$ の回転不変性から $M_{h}(Ux,t)=M_{h}(x,t)$ なので、$x=(\rho,0,0)$（$\rho=\lvert x\rvert>0$）としてよい。$\lvert x+t\theta\rvert^{2}=\rho^{2}+t^{2}+2\rho t\,\theta_{1}\ge(\rho-t)^{2}$ なので、$k(c)\defeq\psi\bigl(\sqrt{\rho^{2}+t^{2}+2\rho tc}\bigr)$（$\lvert c\rvert\le1$。外側では $k(\pm1)$ で定数に延ばす）は連続で、$M_{h}(x,t)=\frac{1}{4\pi}\int_{S^{2}}k(\theta_{1})\,d\sigma(\theta)$。$f(y_{1},y_{2})\defeq k(y_{1})$ に \ref{pde:wave-descent-mean.2}（$n=2$、中心 $0$、$t=1$）を使い、フビニの定理で $z_{2}$ について先に積分すると（$a=\sqrt{1-z_{1}^{2}}$ として $\int_{-a}^{a}(a^{2}-z_{2}^{2})^{-1/2}dz_{2}=\pi$）
+$$
+\frac{1}{4\pi}\int_{S^{2}}k(\theta_{1})\,d\sigma=\frac{1}{2\pi}\int_{B(0,1)}\frac{k(z_{1})}{\sqrt{1-\lvert z\rvert^{2}}}\,dz=\frac12\int_{-1}^{1}k(c)\,dc.
+$$
+$s=\sqrt{\rho^{2}+t^{2}+2\rho tc}$ と置き換えると $s\,ds=\rho t\,dc$ で、$c=\mp1$ に $s=\lvert\rho-t\rvert$, $\rho+t$ が対応するので
+$$
+M_{h}(x,t)=\frac{1}{2\rho t}\int_{\lvert\rho-t\rvert}^{\rho+t}s\,\psi(s)\,ds.
+$$
+$u=tM_{h}$ に代入すればよい。$\psi$ は $[1,\infty)$ で $0$ なので、$\lvert\rho-t\rvert\ge1$ なら積分は $0$ になり、2 の結果（$\rho<t-1$ または $\rho>t+1$ で $u=0$）がここからも読み取れる。
+:::
+
+::: problem {#pde:prob-wv-quadratic}
+$g=0$, $h(x)=\lvert x\rvert^{2}$ とする。
+1. $n=3$ のとき、キルヒホッフの公式から $u(t,x)=t\lvert x\rvert^{2}+t^{3}$ を導け。
+2. $n=2$ のとき、ポアソンの公式から $u(t,x)=t\lvert x\rvert^{2}+\frac23t^{3}$ を導け。
+3. $n=1$ のとき、ダランベールの公式から $u(t,x)=tx^{2}+\frac13t^{3}$ を導け。
+4. 一般の $n$ について、$u=t\lvert x\rvert^{2}+ct^{3}$ の形の古典解（初期値 $0$, $\lvert x\rvert^{2}$）は $c=n/3$ のときに限ることを直接確かめ、1〜3 と比べよ。
+:::
+
+::: solution
+**1.** $\lvert x+t\theta\rvert^{2}=\lvert x\rvert^{2}+2t\,x\cdot\theta+t^{2}$（$\lvert\theta\rvert=1$）で、$\sigma$ は $\theta\mapsto-\theta$ で不変なので $\int_{S^{2}}\theta\,d\sigma=0$。よって $M_{h}(x,t)=\lvert x\rvert^{2}+t^{2}$ で、\ref{pde:wave-kirchhoff.1}（$g=0$）から $u=tM_{h}(x,t)=t\lvert x\rvert^{2}+t^{3}$。
+
+**2.** $\lvert x+tz\rvert^{2}=\lvert x\rvert^{2}+2t\,x\cdot z+t^{2}\lvert z\rvert^{2}$。$z\mapsto-z$ の変数変換から $\int_{B(0,1)}z\,(1-\lvert z\rvert^{2})^{-1/2}dz=0$。\ref{meas:polar-radial.2}（$n=2$, $2\omega_{2}=2\pi$）と $w=1-\rho^{2}$ の置き換えから
+$$
+\begin{aligned}\int_{B(0,1)}\frac{\lvert z\rvert^{2}}{\sqrt{1-\lvert z\rvert^{2}}}\,dz&=2\pi\int_{0}^{1}\frac{\rho^{3}}{\sqrt{1-\rho^{2}}}\,d\rho\\&=\pi\int_{0}^{1}(1-w)w^{-1/2}\,dw=\pi\Bigl(2-\frac23\Bigr)=\frac{4\pi}{3}.\end{aligned}
+$$
+$\int_{B(0,1)}(1-\lvert z\rvert^{2})^{-1/2}dz=2\pi$（\ref{pde:wave-descent-mean.1}、$1/c_{2}=2\pi$）と合わせて $N_{h}(x,t)=\lvert x\rvert^{2}+\frac23t^{2}$、\ref{pde:wave-poisson-2d.1} から $u=tN_{h}=t\lvert x\rvert^{2}+\frac23t^{3}$。
+
+**3.** \eqref{pde:eq-dalembert} から $u=\frac12\int_{x-t}^{x+t}y^{2}\,dy=\frac{(x+t)^{3}-(x-t)^{3}}{6}=\frac{6x^{2}t+2t^{3}}{6}=tx^{2}+\frac13t^{3}$。
+
+**4.** $u=t\lvert x\rvert^{2}+ct^{3}$ は $u(0,x)=0$, $\partial_{t}u(0,x)=\lvert x\rvert^{2}$ を満たし、$\partial_{t}^{2}u=6ct$, $\Delta u=t\,\Delta\lvert x\rvert^{2}=2nt$ なので、方程式が成り立つのは $6c=2n$、つまり $c=n/3$ のときに限る。$n=3,2,1$ で $c=1,\frac23,\frac13$ となり 1〜3 と一致する。一意性（\ref{pde:wave-kirchhoff.2}, \ref{pde:wave-poisson-2d.2}, \ref{pde:wave-dalembert.2}）から、公式の答えはこの多項式解以外にありえない。降下法で $n=3$ から $n=2$ に降りても答えが $t\lvert x\rvert^{2}+t^{3}$ にならないのは、2 次元の $\lvert x\rvert^{2}=x_{1}^{2}+x_{2}^{2}$ を 3 次元に延ばした関数が $\lvert y\rvert^{2}$ ではなく $y_{1}^{2}+y_{2}^{2}$ だからである（その $\Delta$ は $6$ ではなく $4$）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
