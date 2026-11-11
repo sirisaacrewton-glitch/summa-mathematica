@@ -4,6 +4,7 @@
 > 1 トークで書くのは 1〜2 ページ。書き終えたら、そのページの行を「完了」に移し、「次の作業」を更新する。
 
 ## 次の作業
+* **（2026-11-11 ユーザー指示）修士レベルの空白を埋める計画**：下の「修士レベルの空白を埋める計画」の段階の順に進める（段階 0 の常・偏微分方程式論の後、段階 1 の組合せ論の CE-01 から）。資料は `math_books/raw_ocr/` の OCR も使ってよい（START.md 第 2.1 節）。段階の順は 2026-11-11 にユーザー承認（「応用数学が後になってるから大丈夫」）。
 * **（2026-10-28 ユーザー判断）DeepSeek は用語リンクの検証だけに使う**。報告（`verifications/termlinks/`）の NG を確かめて直す。記事の数学的な見直しは、過去の記事を見直す機会に Claude が自分で行う（START.md §12 の改定）。（2026-10-28）全面の確認（run18、多義語 2235 組、NG 645）を処理：NG の文を一つずつ読み、DeepSeek の「fits」の提案は採らずに判断して、tools/terms.json の noAuto（フォルダの許可・除外）と xfDeny（フォルダ単位）で約 60 語を直した。DeepSeek の NG には誤判定（「偏導関数が連続」「位数 6」など正しい結びつき）も多い。規則で消えたリンクのうち DeepSeek が見ていないもの（候補が一つの語など）も確かめ、正しかった分野は許可に戻した。残りの NG は意味の近い候補どうし（有限生成・準同型・定義域など）か、出現ごとの区別が要るもの（集合論の「推移的」、線形代数の「正規」など）で、記事の見直しの際に `\term` で指定する。（2026-10-28）全件の確認（run19、9297 組、NG 1257）も処理：定義で太字にした日常語（従う・要求・選択・係数・一つでも・証人・強制・普遍性など）が他の系列で結ばれていたものを、定義した系列だけに限った（noAuto の「!系列」）。基本語（全射・コンパクト・近傍など）の NG は DeepSeek の誤判定が多く、変えていない。
 * **（2026-10-28 ユーザー指示）OCR・DeepSeek パイプライン（導入済み、START.md §12）**：記事を書く・直すときは、そのページの `verifications/*_tracker.md` の `[Open]`（特に補足・注意・事実の誤り）と `*_assist.md`（Step の短い主張・別証明・別定義の案）を読み、正しいものを日本語で反映する。系列の構成・順序・割り当て表は `scripts/roadmap.py <分野>`（`verifications/roadmap/`）の案を確かめ、ユーザーに日本語で提案して承認を得てから変える。`structure_ocr.py` はユーザーが「このファイルを要約して」と頼んだときだけ。
 * **（2026-10-23 ユーザー指示）直感と【主張】の書き足し**：**定義と主要な定理**（theorem、または refname をもつもの）に、主張の内容をやさしい日本語で言い直す `::: intuition` を付け、**主要な定理の証明**のステップに【主張：…】を付ける（START.md §6。証明のステップごとの直感は不要）。`INTUITION_REPORT=1 node tools/build.js` で系列ごとの残りを見て、系列単位で足す。**進め方：微分幾何の新しいページの執筆（DC-01 から）と交互に行う**（1 ページ書いたら、書き足しを 1 系列ほど進める）。
@@ -38,6 +39,7 @@
 * **（2026-10-15 ユーザー要望）アルゴリズムが出てきたら、その計算量・計算可能性のクラス（多項式時間・原始再帰的・計算可能・決定不能など）を補足（supplement の「計算の観点」）に書く。** 確かでない文献・結果は「知られている（未収録）」とし、自作の構成はそう明記する。
 
 ## ユーザーの判断待ち（作業前に確認する）
+- （2026-11-11）組合せ論の割り当て表（CE・GR・EX・DM・AC・PL）のページの分け方と題は未確認（書きながら直してよい）。
 - （2026-10-15 ユーザー指示、時期は未定）初学者・工学部向けのイメージ記事、物理数学（理論のみ・厳密）の新分野。SCOPE.md 末尾「今後の方針」。始める時期と範囲は割り当て表を作って確認する。
 - 圏論の訳語：codomain を「余域」とした（レンスター訳の「値域」は集合論の range と紛れるため）。基礎は ZFC＋宇宙一つ（Mac Lane 流）。圏論の割り当て表（ページの分け方）も未確認。
 - 証明体系・カット除去（pt-sequent）の資料（一階述語論理と同じく参考書なしで自力で組み立てる方針でよいか。一階述語論理についてはユーザーがそう指示した）。
@@ -550,6 +552,160 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | SO-2 | 06-social-sciences/02-power | 権力と政治体制のモデル | 権力指数（シャプレー–シュービック）、政権交代と権力集中のジレンマ（ゲーム理論的モデル）、政治体制の比較表（数学的帰結・実証研究・推測を区別） | 未着手 |
 | SO-3 | 06-social-sciences/03-ethics-systems | 社会・倫理システムの比較 | 功利主義・ロールズの正義論などの公理的定式化、公平分配（ケーキ分割）、各システムの長所と問題点の比較表 | 未着手 |
 
+## 修士レベルの空白を埋める計画（2026-11-11 ユーザー指示「今議論した新分野全ての位置や参考資料と、組合せ論の割当表、どの順序で書いていくかを加えて」。表と順序は Claude の案）
+
+経緯：2026-11-11 にユーザーが「大学院修士レベルで扱っていない内容」を尋ね、Claude が全 938 ページの題名と割り当て表から空白を挙げた。同じ日にユーザーが**組合せ論を大分野にすることを承認**し、名前は Claude に任せた。
+* **名前は「組合せ論」（`07-combinatorics`）にした**。「離散数学」にすると、すでに基礎論にある論理・計算論、応用にある符号理論・アルゴリズムと範囲が重なり、どこに置くかの基準がぼやけるため。MSC 05（Combinatorics）にも一致する。
+* 組合せ論を応用数学の下に置かない理由：組合せ論の定理は純粋数学の定理で、基礎論（分割関係・識別不能列・逆数学のラムゼーの定理）からも引用される。応用の下に置くと、基礎論から応用への参照になる。符号理論とグラフのアルゴリズムだけは応用数学に置く。
+* 離散幾何（凸多面体）は `05-geometry-topology` に置く案もあるが、オイラーの関係式とデーン–ソマーヴィルの関係式が組合せ論の道具なので `07-combinatorics` に置いた（2026-11-11 ユーザー承認）。
+* 「空白」の判定は、題名と割り当て表によるもの。本文の補足で触れている題材もある（「スペクトル系列」5 ページ、「ゲルファント」16 ページなど）。系列を書き始める前に `labels.js find` で重なりを確かめる。
+* 資料の「raw_ocr」は `math_books/raw_ocr/` の OCR の Markdown（使い方は START.md 第 2.1 節。ファイル名は math_books/BOOKS.md）。「本棚」は `_text/` のテキスト。「なし」は本棚にも raw_ocr にも主な資料がない（2026-11-11 時点。OCR は今も追加されているので、書き始める前に探し直す）。
+
+### 書く順序（2026-11-11 ユーザー承認。段階の中は上から順に）
+
+| 段階 | 内容 | 理由 |
+|---|---|---|
+| 0 | 進行中の常・偏微分方程式論（OD・PD）を終える | 既定の順序（2026-11-04 ユーザー指示「A 案」）のまま |
+| 1 | **組合せ論**（下の割り当て表。CE → GR → EX → DM → PL → AC） | 2026-11-11 にユーザーが承認。資料（Diestel など）がそろっている。既存ページへの依存が少ない（冪級数環・群の作用・ジョルダン曲線定理・確率の基礎だけ） |
+| 2 | **数論の空白**（初等 → 局所体 → 解析 → アデールと類体論 → 2 次形式 → 楕円曲線・モジュラー形式） | 分野ページだけの分野が 2 つある。資料が最もそろっている（雪江『整数論』・GTM 7・67・74・84・Neukirch） |
+| 3 | **確率解析・大偏差** | 応用数学の EC-4（伊藤の補題）・ST の前提。ただし資料がない（下の表） |
+| 4 | **応用数学**（既存の割り当て表 ACS〜SO と、新しい符号理論・数値解析・最適化・情報理論） | 符号理論は組合せ論と有限体を、金融工学は確率解析を使うので、段階 1・3 の後 |
+| 5 | **幾何・位相の発展**：ホモロジー代数（スペクトル系列 → 群コホモロジー → 導来圏）→ 代数的位相（スペクトル系列 → 特性類 → コホモロジー作用素 → K 理論）→ 微分位相 → リーマン幾何（比較定理 → チャーン–ヴェイユ）→ 代数幾何（射と微分 → 双対性と曲面） | 代数的なスペクトル系列を先に書き、位相の側から引用する。特性類はファイバー束・ド・ラームの既存ページの上に積む |
+| 6 | **代数の残り**：中心的単純環とブラウアー群 → 対称群の表現 → 幾何学的群論 → リー環 → コンパクトリー群 | リー環とコンパクトリー群は資料が足りない |
+| 7 | **解析の残り**：局所凸空間 → 作用素環 → フレドホルム作用素 → リーマン面 → 多変数複素関数論 → ハウスドルフ測度 → 力学系とエルゴード理論 → 変分法 | 関数解析の既存の系列の続き |
+| 8 | **基礎論の残りと低次元位相**：記述集合論 → 巨大基数 → 安定性理論 → モデル圏 → 結び目と 3 次元多様体 | 主な資料（Kechris・Kanamori・Hovey など）がない。資料が届いたら前へ動かしてよい |
+
+* 段階 1〜3 を応用数学より前に入れた。2026-11-04 の「解析 → 応用数学」は保たれ、応用数学がさらに後になるだけなので問題ない（2026-11-11 ユーザー判断）。
+
+### 新しい分野・系列の位置と資料（組合せ論以外）
+
+一つの分野の系列は 10 個までの目安（START.md 第 8.1 節）。追加後の系列の数を括弧に書いた。
+
+| 段階 | 置き場所（系列フォルダ） | 接頭辞 | 主な内容 | 資料 |
+|---|---|---|---|---|
+| 2 | `03-number-theory/02-elementary-number-theory/01-congruences`、`02-primitive-roots-reciprocity`、`03-arithmetic-functions`、`04-continued-fractions` | `nt` | 合同式、原始根、平方剰余（相互法則は代数体のページを参照）、数論的関数、連分数とペル方程式 | 本棚：雪江『整数論 1』。raw_ocr：Ireland–Rosen（GTM 84） |
+| 2 | `03-number-theory/01-algebraic-number-theory/02-local-fields`（系列 2） | `nt` | 局所体、分岐の高次群、局所類体論 | raw_ocr：Serre *Local Fields*（GTM 67）、Neukirch *Algebraic Number Theory* |
+| 2 | `03-number-theory/03-analytic-number-theory/01-zeta-l-functions`、`02-prime-number-theorem`、`03-dedekind-zeta` | `nt` | ゼータ関数と L 関数、ディリクレの算術級数定理、素数定理（ウィーナー–池原の方法）、デデキントゼータ関数と類数公式 | 本棚：雪江『整数論 3』。raw_ocr：Davenport *Multiplicative Number Theory*（GTM 74）、Apostol（GTM 41） |
+| 2 | `03-number-theory/01-algebraic-number-theory/03-adeles-class-field-theory`（系列 3） | `nt` | アデールとイデール、大域類体論 | raw_ocr：Neukirch（類体論の章）。本棚：雪江『整数論 3』第 5 章 |
+| 2 | `03-number-theory/04-quadratic-forms`（新分野） | `nt` | ヴィットの定理、ハッセ–ミンコフスキーの定理 | raw_ocr：Serre *A Course in Arithmetic*（GTM 7） |
+| 2 | `03-number-theory/05-elliptic-curves-modular-forms`（新分野） | `nt` | 楕円曲線とモーデル–ヴェイユの定理、モジュラー形式 | raw_ocr：GTM 7 の後半、Apostol（GTM 41）、Koblitz（GTM 58）。楕円曲線の専門書（Silverman）はなし |
+| 3 | `04-analysis/08-probability/04-stochastic-calculus`（系列 4） | `prb` | 伊藤積分、伊藤の公式、確率微分方程式、ギルサノフの定理 | なし（Loève GTM 45・46、Rosenblatt GTM 17 はマルチンゲールまで） |
+| 3 | `04-analysis/08-probability/05-large-deviations`（系列 5） | `prb` | クラメールの定理、大偏差原理 | なし |
+| 4 | `06-applied-mathematics/07-information-coding`（新分野） | `info` / `code` | エントロピーと情報源符号化、通信路符号化定理、線形符号・BCH 符号・リード–ソロモン符号・限界式 | raw_ocr：van Lint *Introduction to Coding Theory*（GTM 86）。情報理論の本はなし |
+| 4 | `06-applied-mathematics/08-numerical-analysis`（新分野） | `num` | 誤差と条件数、数値線形代数、補間と数値積分、常微分方程式の数値解法 | なし |
+| 4 | `06-applied-mathematics/09-optimization`（新分野） | `opt` | 線形計画と双対定理（凸多面体の系列を参照）、凸最適化、KKT 条件 | 一部：Brøndsted（GTM 90）の多面的集合の節 |
+| 5 | `02-algebra/06-homological-algebra/03-spectral-sequences`（系列 3） | `ha` | フィルター付き複体のスペクトル系列、二重複体、グロタンディークのスペクトル系列 | raw_ocr：Hilton–Stammbach（GTM 4）第 8 章 |
+| 5 | `02-algebra/06-homological-algebra/04-group-cohomology`（系列 4） | `ha` | 群のホモロジーとコホモロジー、H¹・H² と拡大、ホッホシルト–セールのスペクトル系列 | raw_ocr：Brown *Cohomology of Groups*（GTM 87）、GTM 4 第 6 章 |
+| 5 | `02-algebra/06-homological-algebra/05-derived-categories`（系列 5） | `ha` | ホモトピー圏、三角圏、導来圏、導来関手の再定義 | なし（Weibel は目次だけ） |
+| 5 | `05-geometry-topology/02-algebraic-topology/04-spectral-sequences`（系列 4） | `at` | ルレー–セールのスペクトル系列と計算例 | raw_ocr：Bott–Tu（GTM 82）、Whitehead *Elements of Homotopy Theory*（GTM 61） |
+| 5 | `…/02-algebraic-topology/05-characteristic-classes`（系列 5） | `at` | 分類空間、スティーフェル–ホイットニー類、チャーン類、ポントリャーギン類、オイラー類 | raw_ocr：Husemoller *Fibre Bundles*（GTM 20）、GTM 61、Bott–Tu。Milnor–Stasheff はなし |
+| 5 | `…/02-algebraic-topology/06-cohomology-operations`（系列 6） | `at` | アイレンバーグ–マックレーン空間、スティーンロッド平方、障害理論 | raw_ocr：GTM 61（スティーンロッド平方の有無は書く前に確かめる） |
+| 5 | `…/02-algebraic-topology/07-k-theory`（系列 7） | `at` | 位相的 K 理論、ボット周期性 | raw_ocr：GTM 20 |
+| 5 | `05-geometry-topology/04-manifolds/05-transversality`（系列 5） | `mfd` | 横断性定理、写像度と交点数 | raw_ocr：Hirsch *Differential Topology*（GTM 33）、Golubitsky–Guillemin（GTM 14） |
+| 5 | `…/04-manifolds/06-morse-theory`（系列 6） | `mfd` | モース関数、ハンドル分解、h 同境定理の入口 | raw_ocr：GTM 33 |
+| 5 | `05-geometry-topology/05-differential-geometry/05-comparison-geometry`（系列 5） | `riem` | ヤコビ場、ホップ–リノウの定理、ボネ–マイヤーズの定理、カルタン–アダマールの定理、ラウホの比較定理 | 本棚と raw_ocr：Lee *Introduction to Riemannian Manifolds*（GTM 176） |
+| 5 | `…/05-differential-geometry/06-connections-chern-weil`（系列 6） | `riem` | 主束の接続と曲率、チャーン–ヴェイユ理論（特性類の系列と結ぶ） | raw_ocr：Dubrovin–Fomenko–Novikov（GTM 93・104）、Bott–Tu。一部のみ |
+| 5 | `05-geometry-topology/03-algebraic-geometry/03-morphisms-differentials`（系列 3） | `ag` | 平坦射・滑らかな射・エタール射、微分加群 Ω | raw_ocr：Hartshorne *Algebraic Geometry*（GTM 52）第 2・3 章 |
+| 5 | `…/03-algebraic-geometry/04-duality-surfaces`（系列 4） | `ag` | セール双対性、曲面と交叉理論 | raw_ocr：GTM 52 第 3・5 章、Iitaka（GTM 76） |
+| 6 | `02-algebra/04-associative-rings/03-central-simple-algebras`（系列 3） | `mod` | 中心的単純環、スコーレム–ネーターの定理、ブラウアー群 | raw_ocr：Pierce *Associative Algebras* |
+| 6 | `02-algebra/02-group-theory/08-symmetric-group-representations`（系列 8） | `rep` | ヤング図形、シュペヒト加群、フック長公式 | 書く前に探す（Serre GTM 42 にはない） |
+| 6 | `02-algebra/02-group-theory/09-geometric-group-theory`（系列 9） | `grp` | ケイリーグラフ、擬等長写像、双曲群、バス–セール理論 | 一部：Stillwell（GTM 72）、Beardon（GTM 91） |
+| 6 | `02-algebra/07-lie-algebras`（新分野。MSC 17） | `lalg` | 可解・冪零リー環、キリング形式、半単純リー環、ルート系とディンキン図形による分類、最高ウェイト、ワイルの指標公式 | なし（Hochschild GTM 75 は代数群が中心で、ルート系がない。Humphreys GTM 9 が欲しい） |
+| 6 | `05-geometry-topology/06-lie-groups/03-compact-lie-groups`（系列 3） | `lie` | 極大トーラス、ワイル群、コンパクトリー群の表現 | 一部：Warner（GTM 94） |
+| 7 | `04-analysis/07-functional-analysis/05-locally-convex`（系列 5） | `fa` | 局所凸空間、クレイン–ミルマンの定理、マッキー位相 | raw_ocr：Rudin *Functional Analysis*、Schaefer（GTM 3）、Kelley–Namioka（GTM 36） |
+| 7 | `…/07-functional-analysis/06-operator-algebras`（系列 6） | `fa` | C\* 環、ゲルファント–ナイマルクの定理、GNS 構成、フォン・ノイマン環の入口 | raw_ocr：Arveson（GTM 39）、Rudin *Functional Analysis* |
+| 7 | `…/07-functional-analysis/07-fredholm`（系列 7） | `fa` | フレドホルム作用素と指数（楕円型作用素の指数の入口） | raw_ocr：Rudin *Functional Analysis*、Berberian（GTM 15） |
+| 7 | `04-analysis/02-complex-analysis/04-riemann-surfaces`（系列 4） | `cx` | リーマン面、正則微分、解析的なリーマン–ロッホの定理、アーベルの定理 | raw_ocr：Farkas–Kra *Riemann Surfaces*（GTM 71）、Freitag–Busam |
+| 7 | `…/02-complex-analysis/05-several-variables`（系列 5） | `cx` | ハルトークスの定理、正則凸性、∂̄ 問題 | raw_ocr：Grauert–Fritzsche（GTM 38）、Wermer（GTM 35） |
+| 7 | `04-analysis/03-measure-theory/03-hausdorff-measures`（系列 3） | `meas` | ハウスドルフ測度と次元、被覆定理、面積公式 | なし |
+| 7 | `04-analysis/10-dynamical-systems`（新分野。MSC 37） | `dyn` | 測度保存変換、エルゴード定理、混合性、測度論的エントロピー、位相的エントロピー | raw_ocr：Walters *An Introduction to Ergodic Theory*（GTM 79） |
+| 7 | `04-analysis/11-calculus-of-variations`（新分野。MSC 49） | `var` | オイラー–ラグランジュ方程式、直接法、凸解析の基礎 | なし（凸集合は Brøndsted GTM 90 の第 1 章が使える） |
+| 8 | `01-foundations/04-set-theory/09-descriptive-set-theory`（系列 9） | `set` | ポーランド空間、ボレル集合と解析集合、ルジン–ススリンの定理、完全集合性、ボレル決定性 | 一部：Oxtoby *Measure and Category*（GTM 2）。Kechris はなし |
+| 8 | `01-foundations/04-set-theory/10-large-cardinals`（系列 10。この分野の上限） | `set` | 可測基数、V の超冪、スコットの定理、弱コンパクト基数、0# | 書く前に Takeuti–Zaring（GTM 1・8）を確かめる。Kanamori・Jech はなし |
+| 8 | `01-foundations/02-model-theory/05-stability-theory`（系列 5） | `model` | 分岐、安定理論、NIP | なし（Marker は目次だけ） |
+| 8 | `01-foundations/06-category-theory/10-model-categories`（系列 10。この分野の上限） | `cat` | モデル圏、ホモトピー圏、キレンの随伴 | なし |
+| 8 | `05-geometry-topology/07-low-dimensional-topology`（新分野） | `ldt` | 結び目とその不変量、3 次元多様体、写像類群 | raw_ocr：Crowell–Fox *Introduction to Knot Theory*（GTM 57）、Moise（GTM 47）、Stillwell（GTM 72） |
+
+## 組合せ論（大分野 07-combinatorics）の割り当て（2026-11-11 ユーザー承認：大分野にすること。表は Claude の案、ユーザー未確認）
+
+* **大分野** `07-combinatorics`（組合せ論、Combinatorics）。分野は次の 6 つ。
+  * `01-enumerative-combinatorics`（数え上げ組合せ論、MSC 05A、接頭辞 `comb`）
+  * `02-graph-theory`（グラフ理論、05C、`graph`）
+  * `03-extremal-probabilistic`（極値組合せ論と確率的方法、05D・05C35・05C80、`comb`）
+  * `04-designs-matroids`（デザインとマトロイド、05B、`comb`）
+  * `05-algebraic-combinatorics`（代数的組合せ論、05E、`comb`）
+  * `06-discrete-geometry`（離散幾何と凸多面体、52A・52B、`poly`）
+* **フォルダの作成**：2026-11-11 に大分野と 6 つの分野の `_meta.json` だけ作った（応用数学と同じく、ページができるまでトップページの「準備中の分野」に名前が出る）。系列フォルダは、その系列の最初のページを書くときに作る（`_meta.json` の `id`・`prereq` を忘れない）。
+* **資料**（すべて raw_ocr）：
+  * **D** = Diestel *Graph Theory*（GTM 173）
+  * **BM** = Bondy–Murty *Graph Theory*（GTM 244）
+  * **B** = Bollobás *Graph Theory: An Introductory Course*（GTM 63）
+  * **GW** = Graver–Watkins *Combinatorics with Emphasis on the Theory of Graphs*（GTM 54）
+  * **Br** = Brøndsted *An Introduction to Convex Polytopes*（GTM 90）
+  * **PP** = Hughes–Piper *Projective Planes*（GTM 6）
+  * 「行」は 2026-11-11 時点の raw_ocr の行番号（目安。OCR をやり直すと変わる）。
+* **無限の組合せ論**（分割関係、ススリン木など）は集合論の `02-infinitary-combinatorics` に残し、有限版のページから相互に参照する。
+* **本の内容をそのまま並べない**。Diestel の無限グラフ（第 8 章）とグラフマイナー定理の証明（第 12.7 節）は長すぎるので、主張と証明の構成だけにとどめる。
+
+| ID | 分野 / 系列 / ファイル | 題（案） | 主な内容 | 資料（節・行） | 参照する既存ページ | 状態 |
+|---|---|---|---|---|---|---|
+| CE-01 | 01-enumerative-combinatorics/01-basic-counting/01-binomial-inclusion-exclusion | 二項係数と包除原理 | 二項係数・多項係数、鳩の巣原理、包除原理、完全順列 | GW §IB・§IC（行 332〜784） | — | 未着手 |
+| CE-02 | 01/01-basic-counting/02-twelvefold-way | 写像の数え上げ | 単射・全射の数、第 2 種スターリング数、ベル数、整数の分割数（十二通りの数え方） | GW §IC、§XIB | — | 未着手 |
+| CE-03 | 01/02-generating-functions/01-formal-power-series | 形式的冪級数と母関数 | 形式的冪級数の環、通常型・指数型の母関数、線形漸化式、カタラン数 | GW §XIA・§XIB（行 8832〜9265） | ring:page-polynomial-rings | 未着手 |
+| CE-04 | 01/02-generating-functions/02-partitions | 整数の分割 | 分割の母関数、オイラーの恒等式（奇数部分と相異なる部分）、五角数定理 | GW §XIB。足りなければ標準的な議論で組み立てる | CE-03 | 未着手 |
+| CE-05 | 01/03-posets-mobius/01-mobius-inversion | 半順序集合のメビウス反転 | 局所有限半順序集合、接続代数、メビウス関数、メビウス反転、包除原理と数論のメビウス関数の再解釈 | GW §XID（行 9438〜） | CE-01 | 未着手 |
+| CE-06 | 01/04-polya/01-polya-counting | ポリアの数え上げ定理 | 循環指数、重み付きのバーンサイドの補題、ポリアの定理、グラフの数え上げ | GW §XIC（行 9266〜9437） | grp:page-burnside-counting | 未着手 |
+| CE-E | 01/の最後 | 演習 | 分野 01 の演習 | GW 第 1・11 章の演習 | — | 未着手 |
+| GR-01 | 02-graph-theory/01-basics/01-graphs | グラフと次数・道・閉路 | グラフ、次数、握手補題、道と閉路、連結性、距離と直径 | D §1.1–1.4（行 341〜722） | — | 未着手 |
+| GR-02 | 02/01-basics/02-trees-bipartite | 木・二部グラフ・オイラー回路 | 木の同値な定義、全域木、二部グラフの奇閉路による特徴づけ、オイラーの定理 | D §1.5・1.6・1.8（行 723〜975） | — | 未着手 |
+| GR-03 | 02/01-basics/03-cycle-space | 閉路空間とカット空間 | 辺空間、閉路空間とカット空間の直交、次元、接続行列 | D §1.9（行 976〜1129） | lin:page-spaces-bases | 未着手 |
+| GR-04 | 02/01-basics/04-minors | 縮約とマイナー | 縮約、マイナーと位相的マイナー、その間の関係 | D §1.7（行 880〜951） | — | 未着手 |
+| GR-05 | 02/02-matching-flows/01-bipartite-matching | 二部グラフのマッチング | ケーニッヒの定理、ホールの結婚定理、安定マッチング | D §2.1（行 1312〜1444） | — | 未着手 |
+| GR-06 | 02/02-matching-flows/02-general-matching | 一般グラフのマッチング | タットの 1 因子定理、ピーターセンの定理、ガライ–エドモンズの構造定理 | D §2.2（行 1445〜1584） | GR-05 | 未着手 |
+| GR-07 | 02/02-matching-flows/03-network-flows | ネットワークフロー | 循環、最大流最小カット定理、整数性 | D §6.1–6.2（行 4245〜4410）、GW 第 4 章 | GR-05 | 未着手 |
+| GR-08 | 02/02-matching-flows/04-menger | 連結度とメンガーの定理 | 2 連結グラフの耳分解、メンガーの定理（3 通りの証明のうち 1 つ。ほかは補足）、最大流最小カットとの同値 | D §3.1・3.3（行 1894〜1957、2082〜2258） | GR-07 | 未着手 |
+| GR-09 | 02/02-matching-flows/05-dilworth | 道被覆とディルワースの定理 | ガライ–ミルグラムの定理、ディルワースの定理、ミルスキーの定理 | D §2.5（行 1756〜） | GR-05 | 未着手 |
+| GR-10 | 02/03-planarity/01-plane-graphs | 平面グラフとオイラーの公式 | 平面グラフ、面、オイラーの公式、辺の数の上界、K₅ と K₃,₃ が平面的でないこと | D §4.1–4.2（行 2646〜2931） | mfd:page-polygonal-schoenflies | 未着手 |
+| GR-11 | 02/03-planarity/02-kuratowski | クラトフスキーの定理 | クラトフスキーの定理、ワグナーの定理 | D §4.4（行 3027〜3154） | GR-04 | 未着手 |
+| GR-12 | 02/03-planarity/03-duality | 平面双対と代数的な平面性の判定 | 平面双対、マックレーンの判定法、ホイットニーの定理 | D §4.5–4.6（行 3155〜3462） | GR-03 | 未着手 |
+| GR-13 | 02/04-coloring/01-vertex-coloring | 頂点彩色 | 5 色定理（4 色定理は主張と歴史だけ）、ブルックスの定理、大きい内周と彩色数（エルデシュ）、ハジョスの定理 | D §5.1–5.2（行 3463〜3654） | GR-10 | 未着手 |
+| GR-14 | 02/04-coloring/02-edge-list-coloring | 辺彩色とリスト彩色 | ケーニッヒの辺彩色定理、ヴィジングの定理、トマセンの 5 リスト彩色定理、ガルヴィンの定理 | D §5.3–5.4（行 3655〜3858） | GR-05 | 未着手 |
+| GR-15 | 02/04-coloring/03-perfect-graphs | 完全グラフ | 弦グラフ、ロヴァースの完全グラフ定理、強完全グラフ定理（主張だけ） | D §5.5（行 3859〜） | GR-13 | 未着手 |
+| GR-16 | 02/04-coloring/04-flows-coloring | 群に値をとるフローと彩色の双対性 | フロー多項式、k フロー、平面グラフでの彩色とフローの双対、タットの予想（主張だけ） | D §6.3–6.6（行 4411〜4946） | GR-07, GR-12 | 未着手 |
+| GR-17 | 02/05-hamilton-infinite/01-hamilton-cycles | ハミルトン閉路 | ディラックの定理、オーレの定理、ホヴァータルの次数列の条件 | D §10.1–10.2（行 8121〜8308） | — | 未着手 |
+| GR-18 | 02/05-hamilton-infinite/02-infinite-graphs | 無限グラフの基本 | ケーニッヒの無限補題、ド・ブライン–エルデシュの定理（コンパクト性による証明） | D §8.1（行 5870〜6070） | logic:page-rm-wkl0, top:page-tychonoff | 未着手 |
+| GR-19 | 02/06-minors-wqo/01-well-quasi-ordering | 整擬順序とクラスカルの木定理 | 整擬順序、ヒグマンの補題、クラスカルの木定理（順序数解析・逆数学との関係は補足） | D §12.1–12.2（行 9158〜9255） | — | 未着手 |
+| GR-20 | 02/06-minors-wqo/02-tree-width | 木分解と木幅 | 木分解、木幅、格子の定理（主張）、木幅と禁止マイナー | D §12.3–12.4・12.6（行 9256〜9546、9820〜） | GR-04 | 未着手 |
+| GR-21 | 02/06-minors-wqo/03-graph-minor-theorem | グラフマイナー定理の概観 | ロバートソン–シーモアの定理の主張、証明の構成、アルゴリズム的帰結（計算量のページと結ぶ） | D §12.7（行 9981〜） | GR-19, GR-20 | 未着手 |
+| GR-E | 02/の最後 | 演習 | 分野 02 の演習 | D・BM の演習 | — | 未着手 |
+| EX-01 | 03-extremal-probabilistic/01-extremal/01-turan | ターンの定理とエルデシュ–ストーンの定理 | ターンの定理、エルデシュ–ストーンの定理、彩色数との関係 | D §7.1（行 5028〜5162） | GR-13 | 未着手 |
+| EX-02 | 03/01-extremal/02-regularity-lemma | セメレディの正則性補題 | ε 正則な対、正則性補題の証明（指数の増加の評価）、数え上げ補題 | D §7.4（行 5337〜5596） | — | 未着手 |
+| EX-03 | 03/01-extremal/03-regularity-applications | 正則性補題の応用 | エルデシュ–ストーンの定理の別証明、除去補題、ロスの定理（3 項等差数列） | D §7.5（行 5597〜） | EX-02 | 未着手 |
+| EX-04 | 03/02-ramsey/01-ramsey-numbers | 有限ラムゼー理論 | 有限ラムゼーの定理、ラムゼー数の上界、確率的な下界の予告、無限版からの導出（コンパクト性） | D §9.1–9.2（行 7508〜7706） | set:page-partition-relations, logic:page-rm-ramsey | 未着手 |
+| EX-05 | 03/02-ramsey/02-van-der-waerden | ファン・デル・ヴェルデンの定理とヘイルズ–ジュエットの定理 | ファン・デル・ヴェルデンの定理、ヘイルズ–ジュエットの定理、シューアの定理 | B 第 VI 章 §3（行 2553〜2700） | EX-04 | 未着手 |
+| EX-06 | 03/02-ramsey/03-induced-ramsey | 誘導ラムゼー定理 | 誘導ラムゼー定理、ラムゼー性と連結性 | D §9.3–9.4（行 7707〜8110） | EX-04 | 未着手 |
+| EX-07 | 03/03-probabilistic/01-probabilistic-method | 確率的方法 | ランダムグラフ G(n,p)、期待値の方法、ラムゼー数の下界、大きい内周と彩色数 | D §11.1–11.2（行 8520〜8765） | prb:page-random-variables, prb:page-independence | 未着手 |
+| EX-08 | 03/03-probabilistic/02-thresholds | ほとんどすべてのグラフと閾値関数 | ほとんどすべてのグラフの性質、2 次モーメント法、閾値関数 | D §11.3–11.4（行 8766〜） | EX-07, model:page-random-graph | 未着手 |
+| EX-E | 03/の最後 | 演習 | 分野 03 の演習 | D の演習 | — | 未着手 |
+| DM-01 | 04-designs-matroids/01-designs/01-block-designs | ブロックデザイン | BIBD のパラメータ、フィッシャーの不等式、t デザイン | GW §IXA–IXC（行 6645〜7219） | — | 未着手 |
+| DM-02 | 04/01-designs/02-projective-planes | 有限射影平面 | 有限射影平面と BIBD、位数 q の体からの構成、ブルック–ライザーの定理 | GW §IXD（行 7220〜7297）、PP | fld:page-finite-fields | 未着手 |
+| DM-03 | 04/02-matroids/01-matroid-axioms | マトロイドの公理 | 独立集合・基・階数・閉包の公理の同値性、グラフ的マトロイド、線形マトロイド | GW §XA–XC（行 7630〜8222） | GR-03 | 未着手 |
+| DM-04 | 04/02-matroids/02-duality-greedy | マトロイドの双対と貪欲法 | 双対マトロイド、マイナー、貪欲法がマトロイドを特徴づけること、横断マトロイド | GW §XD–XE（行 8223〜8628） | DM-03 | 未着手 |
+| DM-E | 04/の最後 | 演習 | 分野 04 の演習 | GW 第 9・10 章の演習 | — | 未着手 |
+| AC-01 | 05-algebraic-combinatorics/01-spectral/01-graph-spectra | グラフのスペクトル | 隣接行列とラプラシアン、固有値と正則性、行列木定理、強正則グラフ | BM（固有値の節）。足りなければ書く前に資料を探す | lin:page-eigenvalues, GR-03 | 未着手 |
+| AC-02 | 05/02-tableaux/01-young-tableaux | ヤング図形と RSK 対応 | ヤング図形、標準タブロー、ロビンソン–シェンステッド–クヌース対応、フック長公式 | なし（書く前に探す。Stanley *Enumerative Combinatorics* が欲しい） | CE-02 | 未着手 |
+| PL-01 | 06-discrete-geometry/01-convex-sets/01-convex-sets | 凸集合と相対的内部 | アフィン構造、凸包、カラテオドリの定理、相対的内部 | Br §1–3（行 142〜904） | — | 未着手 |
+| PL-02 | 06/01-convex-sets/02-faces-polarity | 支持超平面・面・極 | 支持超平面、面と露出面、極集合 | Br §4–6（行 905〜1493） | PL-01 | 未着手 |
+| PL-03 | 06/02-polytopes/01-polytopes-polyhedra | 凸多面体と多面的集合 | ミンコフスキー–ワイルの定理（V 表示と H 表示）、面の束、極双対 | Br §7–10（行 1498〜2328） | PL-02 | 未着手 |
+| PL-04 | 06/02-polytopes/02-simple-cyclic | 単純多面体・巡回多面体・近隣多面体 | 頂点図形、単純・単体的多面体、巡回多面体とゲールの偶数性条件、多面体のグラフ | Br §11–15（行 2329〜3300） | PL-03 | 未着手 |
+| PL-05 | 06/03-face-numbers/01-euler-dehn-sommerville | オイラーの関係式とデーン–ソマーヴィルの関係式 | f ベクトル、オイラーの関係式（シェリングによる証明）、デーン–ソマーヴィルの関係式、h ベクトル | Br §16–17（行 3303〜3831） | PL-04, GR-10 | 未着手 |
+| PL-06 | 06/03-face-numbers/02-upper-lower-bound | 上限定理と下限定理 | マクマレンの上限定理、下限定理、マクマレンの条件（g 定理。主張と必要性の側の概略） | Br §18–20（行 3832〜） | PL-05 | 未着手 |
+| PL-E | 06/の最後 | 演習 | 分野 06 の演習 | Br の演習 | — | 未着手 |
+
+* 分野 05（代数的組合せ論）は資料が足りないので、AC-01 以外は資料が見つかってから行を足す。対称群の表現（`02-algebra/02-group-theory/08-symmetric-group-representations`）と AC-02 は内容が重なるので、片方に本体を置き、もう片方からは参照する（どちらに置くかは書く前に決める）。
+* グラフの計算量（最短路・最大流のアルゴリズムなど）は、ここでは主張だけ書き、計算量の詳しい話は `01-foundations/03-computation/04-complexity` と応用数学の計算機科学へ案内する（2026-10-15 ユーザー要望：アルゴリズムが出てきたら計算量のクラスも書く）。
+* **初めてページを公開するときは、START.md 第 8.2 節の 6 か所をすべて確かめる**（2026-11-11 のフォルダ作成時にも確かめた）。
+
 ## 他の分野（未着手。始めるときに上と同じ形の表を作る）
 * **分野ごとの到達目標と参考書は `_claude/SCOPE.md`**（2026-10-08 ユーザー指定）。新しい分野を始めるときは、まずその節を読み、到達目標までの割り当て表をここに作る。
 * 着手の順番（SCOPE.md 末尾。2026-10-09 ユーザーが承認）：群論 → 環論（保存表）→ 体論・ガロア理論 → 圏論の残り（アーベル圏・モノイダル圏）→ 実解析 → 微分幾何 → 代数的位相幾何。
@@ -956,6 +1112,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | TP-02 | 54H/01/02-group-uniformities | 左一様構造・完全正則性・一様連続な準同型・バーコフ–角谷の定理 | — | 完了 |
 
 ## 完了ログ（新しいものを上に。1 行ずつ）
+- 2026-11-11 修士レベルの空白を埋める計画（段階 0〜8）と組合せ論の割り当て表（CE・GR・EX・DM・AC・PL）を追加。大分野 07-combinatorics と 6 分野の _meta.json を作成（第 8.2 節の 6 か所を確認：応用数学と同じく、ページができるまでトップページの「準備中の分野」にだけ出る）。START.md に第 2.1 節（raw_ocr の使い方）と接頭辞 comb・graph・poly などを追加。SCOPE.md に第 11 節（組合せ論）。scripts/roadmap.py・verify.py の大分野の範囲を 0[1-9] に広げた。
 - 2026-10-28 MF-05・MF-06 微分幾何/03-manifolds（mfd:page-polygonal-schoenflies, mfd:page-schoenflies）：θ 補題、多角形のシェーンフリース、長さと面積の議論によるカラテオドリの定理、シェーンフリースの定理。ラドーの定理（MF-07）の準備。
 - 2026-10-28 MF-07 微分幾何/03-manifolds（mfd:page-tame-arcs）：球面と平面全体のシェーンフリース、到達可能性、平面の均質性、平方写像の二重被覆による弧の馴らし。資料がないため自前の構成（ラドーの定理の計画は MF-07〜09 に分割）。
 - 2026-10-28 MF-08・MF-09 微分幾何/03-manifolds（mfd:page-plane-graphs, mfd:page-rado）：有限平面グラフの馴らし、煉瓦積みの多角形、面の凸分割、ラドーの三角形分割定理（コンパクト曲面）。at:manifold-triangulation-facts と surf:triangulation-facts の「予定」を更新。演習を 10-exercises に改名。

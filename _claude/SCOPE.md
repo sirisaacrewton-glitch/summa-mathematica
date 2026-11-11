@@ -156,6 +156,28 @@
 
 ---
 
+## 11. 組合せ論（05・52B。大分野 07-combinatorics、2026-11-11 ユーザー承認）
+
+* **到達目標**（Claude の案。ユーザー未確認）
+  1. 数え上げ：包除原理、形式的冪級数と母関数、半順序集合のメビウス反転、ポリアの数え上げ定理。
+  2. グラフ理論：ホール・ケーニッヒ・タットのマッチング定理、最大流最小カット定理とメンガーの定理、クラトフスキーの定理、ブルックス・ヴィジングの定理、ロヴァースの完全グラフ定理、ハミルトン閉路の十分条件、木幅とグラフマイナー定理の主張。
+  3. 極値組合せ論と確率的方法：ターンの定理、エルデシュ–ストーンの定理、正則性補題とその応用、有限ラムゼー理論とファン・デル・ヴェルデンの定理、確率的方法と閾値関数。
+  4. デザインとマトロイド：フィッシャーの不等式、有限射影平面、マトロイドの公理の同値性と貪欲法。
+  5. 凸多面体：ミンコフスキー–ワイルの定理、オイラーの関係式、デーン–ソマーヴィルの関係式、上限定理。
+* **現状**：割り当て表は PROGRESS.md「組合せ論（大分野 07-combinatorics）の割り当て」。大分野と分野のフォルダ（`_meta.json`）だけ作成済み。
+* 参考書（すべて `math_books/raw_ocr/` の OCR。START.md 第 2.1 節）
+  * ☆ R. Diestel, *Graph Theory*（GTM 173）：グラフ理論・極値・ラムゼー・確率的方法・マイナーの主な資料
+  * ☆ J. A. Bondy, U. S. R. Murty, *Graph Theory*（GTM 244）：例と演習、スペクトル
+  * ☆ B. Bollobás, *Graph Theory: An Introductory Course*（GTM 63）：ファン・デル・ヴェルデンの定理
+  * ☆ J. E. Graver, M. E. Watkins, *Combinatorics with Emphasis on the Theory of Graphs*（GTM 54）：数え上げ・デザイン・マトロイド
+  * ☆ A. Brøndsted, *An Introduction to Convex Polytopes*（GTM 90）：凸多面体
+  * ☆ D. R. Hughes, F. C. Piper, *Projective Planes*（GTM 6）：有限射影平面
+  * 本棚にないが欲しい本：R. P. Stanley, *Enumerative Combinatorics*（代数的組合せ論・ヤング図形）、N. Alon, J. H. Spencer, *The Probabilistic Method*
+* 訳語用の日本語の本：本棚にない（2026-11-11）。訳語は既存の TERMS.md と、集合論・群論の和書での使われ方で決める。
+* 発展：スペクトルグラフ理論、ヤング図形と RSK 対応、対称関数、加法的組合せ論（セメレディの定理の主張）、符号理論（応用数学に置く）。
+
+---
+
 ## 着手の順番（2026-10-09 ユーザーが承認）
 
 依存関係から、次の順が自然である。
