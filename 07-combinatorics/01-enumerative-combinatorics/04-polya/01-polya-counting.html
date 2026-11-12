@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ポリアの数え上げ定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/04-polya/01-polya-counting.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ポリアの数え上げ定理 {#comb:page-polya keywords="Polya enumeration theorem, cycle index, weighted Burnside lemma, pattern inventory, counting graphs up to isomorphism, cycle index of the symmetric group"}
+
+対称性で重なるものを同じとみなして数える問題は、\ref{grp:burnside-lemma} を使えば軌道の個数として数えられる。しかし「黒い玉がちょうど 2 個のネックレス」のように、塗り方の内訳ごとに数えたいときは、各元の固定点を数えるだけでは足りない。**ポリアの数え上げ定理**は、群の作用を**巡回指数**という一つの多項式にまとめ、そこに色の重みを代入するだけで、内訳ごとの個数を一度に与える。このページでは、重み付きのバーンサイドの補題からポリアの定理を示し、ネックレス・立方体の塗り分け・同型を除いたグラフの数え上げに使う。最後に、対称群の巡回指数の母関数が指数関数で書けることを示す。
+
+## 記法と定義の確認 {#comb:sec-po-notation}
+
+::: notation
+- 有限群 $G$ の集合への作用、軌道 $G\cdot x$、安定化群 $G_{x}$ は \ref{grp:orbit-stabilizer-def} のとおりで、$\abs{G\cdot x}\,\abs{G_{x}}=\abs{G}$（\ref{grp:orbit-stabilizer}）。
+- 置換 $\sigma$ の巡回とは $\ang{\sigma}$ の軌道のこと（\ref{comb:page-twelvefold-way} の記法）。
+- $A$ は $\Q$ を含む可換環で、**重み**はその元とする（典型的には多項式環 $\Q[y_{1},\dots,y_{s}]$）。形式的冪級数の $\exp$, $\log$ は \ref{comb:fps-exp-log} のとおり。
+- $D$（**位置**の集合）と $R$（**色**の集合）は有限集合で、**塗り方**とは写像 $f\colon D\to R$ のことである。
+:::
+
+## 重み付きのバーンサイドの補題 {#comb:sec-po-weighted-burnside}
+
+$G$ が $D$ に作用するとき、塗り方の集合 $R^{D}$ に $(g\cdot f)(d)\defeq f(g^{-1}\cdot d)$ で作用する（$((gh)\cdot f)(d)=f(h^{-1}g^{-1}d)=(g\cdot(h\cdot f))(d)$）。各色 $r$ に重み $w(r)\in A$ を与え、塗り方の重みを $W(f)\defeq\prod_{d\in D}w(f(d))$ と定める。$W(g\cdot f)=\prod_{d}w(f(g^{-1}d))=W(f)$（$d\mapsto g^{-1}d$ は $D$ の全単射）なので、$W$ は軌道の上で一定であり、軌道 $O$ の重み $W(O)$ が定まる。
+
+::: lemma 重み付きのバーンサイドの補題 {#comb:weighted-burnside keywords="weighted Burnside lemma, weighted orbit counting" index="重み付きのバーンサイドの補題|おもみつきのばーんさいどのほだい"}
+有限群 $G$ が有限集合 $X$ に作用し、$W\colon X\to A$ が軌道の上で一定なら
+$$
+\sum_{O\in X/G}W(O)=\frac{1}{\abs{G}}\sum_{g\in G}\ \sum_{x\in X^{g}}W(x),
+$$
+ここで $X^{g}\defeq\{x : g\cdot x=x\}$。$W\equiv1$ のとき \ref{grp:burnside-lemma} である。
+:::
+
+::: proof
+**Step 1（二重数え上げ）.** 【主張：右辺の $\abs{G}$ 倍は $\sum_{x\in X}\abs{G_{x}}W(x)$】組 $(g,x)$, $g\cdot x=x$ を重み $W(x)$ で数える。$g$ ごとに数えれば右辺の $\abs{G}$ 倍、$x$ ごとに数えれば $\sum_{x}\abs{G_{x}}W(x)$（\ref{comb:double-counting}）。
+
+**Step 2（軌道ごとにまとめる）.** 【主張：これは $\abs{G}\sum_{O}W(O)$】\ref{grp:orbit-stabilizer} より $\abs{G_{x}}=\abs{G}/\abs{G\cdot x}$。$X$ を軌道に分けると（\ref{grp:orbits-partition.3}）、各軌道 $O$ の上で $\sum_{x\in O}\frac{\abs{G}}{\abs{O}}W(O)=\abs{G}W(O)$。
+:::
+
+## 巡回指数とポリアの定理 {#comb:sec-po-cycle-index}
+
+::: definition 巡回指数 {#comb:cycle-index keywords="cycle index, cycle type" index="巡回指数|じゅんかいしすう, 巡回型|じゅんかいがた"}
+有限群 $G$ が $n$ 元集合 $D$ に作用するとする。$g\in G$ が $D$ に引き起こす置換の、長さ $k$ の巡回の個数を $c_{k}(g)$ とし、$(c_{1}(g),\dots,c_{n}(g))$ を $g$ の**巡回型**という（$\sum_{k}k\,c_{k}(g)=n$）。不定元 $p_{1},\dots,p_{n}$ の多項式
+$$
+Z_{G}(p_{1},\dots,p_{n})\defeq\frac{1}{\abs{G}}\sum_{g\in G}p_{1}^{c_{1}(g)}p_{2}^{c_{2}(g)}\cdots p_{n}^{c_{n}(g)}\in\Q[p_{1},\dots,p_{n}]
+$$
+を作用の**巡回指数**という。
+:::
+
+::: intuition
+群の各元が位置をどのような長さの巡回に分けるかを、単項式として記録して平均したものである。
+:::
+
+::: theorem ポリアの数え上げ定理 {#comb:polya-theorem keywords="Polya enumeration theorem, Redfield-Polya theorem, pattern inventory" index="ポリアの数え上げ定理|ぽりあのかぞえあげていり, パターン目録|ぱたーんもくろく" refname="ポリアの数え上げ定理"}
+上の状況で、軌道の重みの和は、巡回指数に $p_{k}=\sum_{r\in R}w(r)^{k}$ を代入したものに等しい：
+$$
+\sum_{O\in R^{D}/G}W(O)=Z_{G}\Bigl(\sum_{r}w(r),\ \sum_{r}w(r)^{2},\ \dots,\ \sum_{r}w(r)^{n}\Bigr).
+$$
+特に、軌道の個数は $Z_{G}(\abs{R},\dots,\abs{R})$ である。
+:::
+
+::: intuition
+色 $r$ に重み（たとえば $r$ 色の玉の個数を記録する変数）を付けて代入すると、左辺は「対称性で重なるものを同一視した塗り方」を、各色の使用数ごとに数えた多項式になる。
+:::
+
+::: proof
+**Step 1（固定される塗り方）.** 【主張：$g\cdot f=f\iff f$ は $g$ の各巡回の上で一定】$g\cdot f=f$ はすべての $d$ で $f(g^{-1}d)=f(d)$、すなわち $f(gd)=f(d)$（$d$ を $gd$ に置き換える）と同値。$m\ge0$ の帰納法で $f(g^{m}d)=f(d)$、$g$ の位数は有限なので負の冪でも成り立ち、$f$ は $\ang{g}$ の軌道の上で一定である。逆に巡回の上で一定なら $f(gd)=f(d)$。
+
+**Step 2（固定点の重みの和）.** 【主張：$\sum_{f\in(R^{D})^{g}}W(f)=\prod_{k}\bigl(\sum_{r}w(r)^{k}\bigr)^{c_{k}(g)}$】Step 1 より、固定される $f$ は、$g$ の各巡回 $Y$ に色 $r_{Y}$ を一つずつ選ぶことと一対一に対応し、その重みは $\prod_{Y}w(r_{Y})^{\abs{Y}}$ である。巡回ごとの選び方は独立なので、和は巡回ごとの和 $\sum_{r}w(r)^{\abs{Y}}$ の積になる（有限和の分配法則）。
+
+**Step 3.** Step 2 を \ref{comb:weighted-burnside} に代入すれば、右辺は $Z_{G}$ の定義そのものである。$w\equiv1$ とおけば後半を得る。
+:::
+
+::: example ネックレス {#comb:polya-necklaces keywords="cycle index of the cyclic group, necklaces with given colour counts" index="巡回群の巡回指数|じゅんかいぐんのじゅんかいしすう"}
+巡回群 $C_{n}=\ang{r}$ が $\Z/n\Z$ に回転で作用するとき（\ref{grp:necklace-def}）、$r^{j}$ は長さ $n/\gcd(n,j)$ の巡回 $\gcd(n,j)$ 個に分かれ、$\gcd(n,j)=n/d$ となる $j\in\{0,\dots,n-1\}$ は $\varphi(d)$ 個ある（\ref{grp:necklace-count} の証明）。よって
+$$
+Z_{C_{n}}=\frac1n\sum_{d\mid n}\varphi(d)\,p_{d}^{n/d}.
+$$
+$n=6$ で、黒 $b$・白 $w$ の重みを付けて $p_{k}=b^{k}+w^{k}$ を代入すると、$Z_{C_{6}}=\frac16(p_{1}^{6}+p_{2}^{3}+2p_{3}^{2}+2p_{6})$ の $b^{2}w^{4}$ の係数は $\frac16(15+3+0+0)=3$。黒玉 2 個のネックレスは、黒玉の間隔が $1,2,3$ の 3 通りである。
+:::
+
+## 立方体と同型を除いたグラフ {#comb:sec-po-examples}
+
+::: example 立方体の面の塗り分け {#comb:polya-cube keywords="colourings of the faces of a cube" index="立方体の塗り分け|りっぽうたいのぬりわけ"}
+立方体の回転群（位数 24）の元が 6 面に引き起こす置換の巡回型は、\ref{grp:prob-cube-colorings} の解答のとおりで、巡回指数は
+$$
+Z=\frac{1}{24}\bigl(p_{1}^{6}+6p_{1}^{2}p_{4}+3p_{1}^{2}p_{2}^{2}+6p_{2}^{3}+8p_{3}^{2}\bigr).
+$$
+$p_{k}=1+y^{k}$（$y$ は黒い面の個数を記録する）を代入すると $1+y+2y^{2}+2y^{3}+2y^{4}+y^{5}+y^{6}$。黒い面が 2 枚の塗り方は、2 枚が隣り合うか向かい合うかの 2 通りで、総数は $y=1$ として $10$（\ref{grp:prob-cube-colorings} と一致）。
+:::
+
+::: theorem 4 頂点のグラフの個数 {#comb:graphs-on-four-vertices keywords="number of graphs on four vertices up to isomorphism, pair group" index="同型を除いたグラフの数え上げ|どうけいをのぞいたぐらふのかぞえあげ"}
+頂点集合 $[n]$ 上のグラフ（単純無向グラフ）を、辺の集合 $E\subseteq\mathcal{P}_{2}([n])$ と同一視し、$\Sym([n])$ の作用で移り合うもの（同型なもの）を同じとみなす。$n=4$ では、辺が $0,1,\dots,6$ 本のものがそれぞれ $1,1,2,3,2,1,1$ 個、合計 $11$ 個ある。
+:::
+
+::: intuition
+4 頂点のグラフは、頂点の名前を付け替えて重なるものを同じとみなすと 11 種類しかない。辺の本数ごとの内訳は、巡回指数に $1+y^{k}$ を代入するだけで得られる。
+:::
+
+::: proof
+**Step 1（グラフは 2 色の塗り方）.** 【主張：同型類は $\Sym([4])$ の $\{0,1\}^{\mathcal{P}_{2}([4])}$ への作用の軌道】$E$ を特性関数 $\mathcal{P}_{2}([4])\to\{0,1\}$ と同一視すると、$\sigma\in\Sym([4])$ が $E$ を $\sigma[E]=\{\sigma[e] : e\in E\}$ に移すことは、位置の集合 $D=\mathcal{P}_{2}([4])$（6 元）への作用 $e\mapsto\sigma[e]$ から上の規則で導かれる作用である。重み $w(1)=y$, $w(0)=1$ を付けると $W(E)=y^{\abs{E}}$。
+
+**Step 2（巡回型）.** 【主張：$Z=\frac{1}{24}(p_{1}^{6}+9p_{1}^{2}p_{2}^{2}+8p_{3}^{2}+6p_{2}p_{4})$】$\Sym([4])$ の元を巡回分解の形で分ける（\ref{grp:cycle-decomposition}）。恒等置換（1 個）は 6 本の対を固定。互換、たとえば $(1\,2)$（6 個）は $\{1,2\}$, $\{3,4\}$ を固定し、$\{1,3\}\leftrightarrow\{2,3\}$, $\{1,4\}\leftrightarrow\{2,4\}$ を入れ替える：$p_{1}^{2}p_{2}^{2}$。$(1\,2)(3\,4)$ の形（3 個）は $\{1,2\}$, $\{3,4\}$ を固定し、$\{1,3\}\leftrightarrow\{2,4\}$, $\{1,4\}\leftrightarrow\{2,3\}$：$p_{1}^{2}p_{2}^{2}$。3 巡回置換 $(1\,2\,3)$ の形（8 個）は $\{1,2\}\to\{2,3\}\to\{1,3\}$ と $\{1,4\}\to\{2,4\}\to\{3,4\}$：$p_{3}^{2}$。4 巡回置換 $(1\,2\,3\,4)$ の形（6 個）は $\{1,2\}\to\{2,3\}\to\{3,4\}\to\{1,4\}$ と $\{1,3\}\leftrightarrow\{2,4\}$：$p_{2}p_{4}$。個数の和は $1+6+3+8+6=24$。
+
+**Step 3（代入）.** \ref{comb:polya-theorem} に $p_{k}=1+y^{k}$ を代入して展開すると
+$$
+\frac{1}{24}\bigl((1+y)^{6}+9(1+y)^{2}(1+y^{2})^{2}+8(1+y^{3})^{2}+6(1+y^{2})(1+y^{4})\bigr)=1+y+2y^{2}+3y^{3}+2y^{4}+y^{5}+y^{6}.
+$$
+たとえば $y^{3}$ の係数は $\frac{1}{24}(20+9\cdot4+8\cdot2+0)=\frac{72}{24}=3$（三角形・星形・道）。
+:::
+
+## 対称群の巡回指数 {#comb:sec-po-symmetric}
+
+::: proposition 巡回型の個数 {#comb:cycle-type-count keywords="number of permutations with given cycle type, Cauchy's formula" index="巡回型の個数|じゅんかいがたのこすう, コーシーの公式|こーしーのこうしき"}
+$\sum_{k}k\,c_{k}=n$ を満たす $(c_{1},\dots,c_{n})\in\N^{n}$ について、巡回型が $(c_{k})$ である $[n]$ の置換の個数は
+$$
+\frac{n!}{\prod_{k}k^{c_{k}}\,c_{k}!}.
+$$
+:::
+
+::: proof
+**Step 1（並べてから区切る）.** 【主張：$[n]$ の並べ方 $a=(a_{1},\dots,a_{n})$ に置換 $\Phi(a)$ を対応させる】長さ $1$ の区間を $c_{1}$ 個、長さ $2$ の区間を $c_{2}$ 個、…と、あらかじめ決めた順に $a$ を区間に区切り、各区間 $(a_{i},a_{i+1},\dots,a_{i+k-1})$ を巡回 $a_{i}\mapsto a_{i+1}\mapsto\dots\mapsto a_{i+k-1}\mapsto a_{i}$ とする置換を $\Phi(a)$ とする。$\Phi(a)$ の巡回型は $(c_{k})$ で、この型の置換はすべてこうして得られる。
+
+**Step 2（ファイバー）.** 【主張：各ファイバーの大きさは $\prod_{k}k^{c_{k}}c_{k}!$】$\Phi(a)=\Phi(a')$ となるのは、$a'$ が、各区間の中身を巡回的にずらすこと（長さ $k$ の区間ごとに $k$ 通り）と、同じ長さの区間どうしの並べ替え（長さ $k$ の区間全体で $c_{k}!$ 通り）を組み合わせて $a$ から得られるときに限る。巡回の集合と各巡回の中の巡回順序が一致することがちょうどこの条件である。これらの操作は互いに独立で、異なる操作は異なる並べ方を与えるので、ファイバーの大きさは積になる。\ref{comb:fiber-count} と \ref{comb:bijections-count} から主張を得る。
+:::
+
+::: theorem 対称群の巡回指数の母関数 {#comb:symmetric-cycle-index keywords="generating function of cycle indices of symmetric groups, exponential formula" index="対称群の巡回指数|たいしょうぐんのじゅんかいしすう"}
+$\Sym([n])$ の $[n]$ への自然な作用の巡回指数を $Z_{n}$（$Z_{0}=1$）とする。不定元 $p_{1},p_{2},\dots$ の多項式環 $A=\Q[p_{1},p_{2},\dots]$ 上の形式的冪級数環 $A[[t]]$ で
+$$
+\sum_{n\ge0}Z_{n}\,t^{n}=\exp\Bigl(\sum_{k\ge1}\frac{p_{k}t^{k}}{k}\Bigr).
+$$
+:::
+
+::: intuition
+置換は巡回の集まりで、長さ $k$ の巡回は $k$ 通りの回り方が同じものになる。この「集まり」を指数関数が、「回り方の重複」を $1/k$ が表している。
+:::
+
+::: proof
+**Step 1（右辺を因子に分ける）.** 【主張：右辺 $=\prod_{k\ge1}\exp(p_{k}t^{k}/k)$】$G_{M}\defeq\sum_{k\le M}p_{k}t^{k}/k$ について \ref{comb:exp-log-properties.2} から $\exp G_{M}=\prod_{k\le M}\exp(p_{k}t^{k}/k)$。$t^{n}$ の係数は、$M\ge n$ なら $\exp G_{M}$ と $\exp(\sum_{k\ge1}p_{k}t^{k}/k)$ で等しい（代入は $t^{n}$ の係数を $t^{\le n}$ の係数だけで決める：\ref{comb:substitution-homomorphism} の証明 Step 3）。積の側も $k>n$ の因子は $1+O(t^{n+1})$ なので、$t^{n}$ の係数は $M\ge n$ で一定である。
+
+**Step 2（係数の計算）.** 【主張：$t^{n}$ の係数は $\sum_{(c_{k})}\prod_{k}\frac{p_{k}^{c_{k}}}{k^{c_{k}}c_{k}!}$（和は $\sum kc_{k}=n$ にわたる）】$\exp(p_{k}t^{k}/k)=\sum_{c\ge0}\frac{p_{k}^{c}t^{kc}}{k^{c}c!}$ で、$k\le n$ の因子から項を一つずつ選んで掛けたものを $t^{n}$ ごとにまとめればよい。
+
+**Step 3（左辺と比べる）.** \ref{comb:cycle-type-count} より $Z_{n}=\frac{1}{n!}\sum_{(c_{k})}\frac{n!}{\prod k^{c_{k}}c_{k}!}\prod_{k}p_{k}^{c_{k}}$ で、Step 2 と一致する。
+:::
+
+::: corollary {#comb:symmetric-cycle-index-check}
+$Z_{n}(x,x,\dots,x)=\binom{x+n-1}{n}$（$x\in\N$）。すなわち $n$ 個の区別しない玉を $x$ 色で塗る方法（$x$ 元集合上の大きさ $n$ の多重集合）の個数である。
+:::
+
+::: proof
+\ref{comb:symmetric-cycle-index} ですべての $p_{k}$ に $x$ を代入すると（代入 $A\to\Q$ は環準同型で、係数ごとに働く）、右辺は $\exp\bigl(x\sum_{k}t^{k}/k\bigr)=\exp(-x\log(1-t))=(1-t)^{-x}$（$\sum_{k}t^{k}/k=-L\circ(-t)=-\log(1-t)$, \ref{comb:general-power}）。\ref{comb:binomial-series-examples.1} より $t^{n}$ の係数は $\binom{x+n-1}{n}$。これは \ref{comb:polya-theorem} の後半と \ref{comb:multiset-count} とも整合する。
+:::
+
+::: supplement
+**一般化.** 色の側にも群 $H$ が作用し、$G\times H$ の作用の軌道を数える問題（ド・ブラウンの定理）や、根付き木・化合物の異性体の数え上げ（ポリアの元来の動機）がある。指数型母関数の言葉では、\ref{comb:symmetric-cycle-index} は「ラベル付き構造の集まりの母関数は $\exp$」という指数公式（\ref{comb:egf-applications} の補足）の、巡回型を記録する精密版である。
+
+**高い視点.** $Z_{n}$ を $p_{k}$ が冪和対称関数を表すものとみると、$Z_{n}$ は完全斉次対称関数 $h_{n}$ に等しく、\ref{comb:symmetric-cycle-index} はニュートンの恒等式の母関数版である。対称関数の理論は対称群の表現論と深く結びつく（ここでは扱わない）。
+:::
+
+## 問題 {#comb:sec-po-problems}
+
+::: problem {#comb:prob-po-bracelets}
+二面体群 $D_{6}$（位数 12）が正六角形の頂点に作用するときの巡回指数が $\frac{1}{12}(p_{1}^{6}+2p_{6}+2p_{3}^{2}+4p_{2}^{3}+3p_{1}^{2}p_{2}^{2})$ であることを確かめ、黒玉 3 個・白玉 3 個のブレスレットの個数を求めよ。
+:::
+
+::: solution
+回転 6 個の寄与は \ref{comb:polya-necklaces} の $p_{1}^{6}+p_{2}^{3}+2p_{3}^{2}+2p_{6}$。裏返し 6 個のうち、向かい合う頂点を通る軸 3 本は 2 頂点を固定し残りを 2 個ずつ入れ替えて $p_{1}^{2}p_{2}^{2}$、向かい合う辺の中点を通る軸 3 本は 3 組を入れ替えて $p_{2}^{3}$。合わせて上の式になる。$p_{k}=b^{k}+w^{k}$ を代入した $b^{3}w^{3}$ の係数は、$p_{1}^{6}$ から $\binom63=20$、$p_{2}^{3}$ と $p_{6}$ からは偶数次・6 次の項しか出ないので $0$、$p_{3}^{2}=(b^{3}+w^{3})^{2}$ から $2$、$p_{1}^{2}p_{2}^{2}=(b+w)^{2}(b^{2}+w^{2})^{2}$ からは $2bw\cdot2b^{2}w^{2}$ の $4$。よって $\frac{1}{12}(20+2\cdot2+3\cdot4)=3$（$\mathtt{BBBWWW}$, $\mathtt{BBWBWW}$, $\mathtt{BWBWBW}$。回転だけなら $\mathtt{BBWBWW}$ とその鏡像 $\mathtt{BBWWBW}$ が別になり、ネックレスは $4$ 個）。
+:::
+
+::: problem {#comb:prob-po-cycle-index-s3}
+$Z_{3}=\frac16(p_{1}^{3}+3p_{1}p_{2}+2p_{3})$ を、\ref{comb:cycle-type-count} と \ref{comb:symmetric-cycle-index} の両方から確かめよ。
+:::
+
+::: solution
+巡回型 $(3,0,0)$, $(1,1,0)$, $(0,0,1)$ の置換の個数は $\frac{3!}{3!}=1$, $\frac{3!}{1\cdot2}=3$, $\frac{3!}{3}=2$。母関数の側では $t^{3}$ の係数は $\frac{p_{1}^{3}}{3!}+\frac{p_{1}}{1}\cdot\frac{p_{2}}{2}+\frac{p_{3}}{3}$ で一致する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
