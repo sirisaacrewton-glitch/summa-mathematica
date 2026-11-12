@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>半順序集合のメビウス反転 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/03-posets-mobius/01-mobius-inversion.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 半順序集合のメビウス反転 {#comb:page-mobius-inversion keywords="Mobius inversion, Mobius function, incidence algebra, locally finite poset, partition lattice, necklaces, irreducible polynomials over finite fields"}
+
+\ref{comb:inclusion-exclusion} は、部分集合の包含関係について「上の和から元の値を取り出す」公式だった。同じことは任意の（局所有限な）半順序集合で行え、その係数が**メビウス関数**である。このページでは、半順序集合の**接続代数**を導入してメビウス関数をゼータ関数の逆元として定義し、メビウス反転公式、直積の上のメビウス関数を示す。応用として、包除原理・数論のメビウス関数とオイラー関数・有限体上の既約多項式の個数・分割束のメビウス関数を求める。
+
+## 記法と定義の確認 {#comb:sec-mi-notation}
+
+::: notation
+- **半順序集合** $(P,\le)$ とは、反射的・反対称的・推移的な関係 $\le$ をもつ集合である。$x<y$ は $x\le y$ かつ $x\neq y$。$x\le y$ のとき**区間** $[x,y]\defeq\{z : x\le z\le y\}$ とおく。
+- $K$ は可換環（$\Z$ でよい）。有限集合の上の和は \ref{comb:page-binomial-coefficients} の記法の約束どおり並べ替えてよい。$\delta_{x,y}\defeq[x=y]$。
+- 整数の約数関係 $d\mid n$、素因数分解の一意性（\ref{grp:unique-factorization-jh}）、オイラー関数 $\varphi$（\ref{grp:units-mod-n}）と $\sum_{d\mid n}\varphi(d)=n$（\ref{grp:sum-phi-divisors}）を使う。
+- 集合の分割とブロックは \ref{comb:set-partition}、下降階乗冪は \ref{comb:falling-factorial}、第 1 種スターリング数 $s(n,k)$ は \ref{comb:stirling1} のとおり。
+:::
+
+## 接続代数とメビウス関数 {#comb:sec-mi-incidence}
+
+::: definition 局所有限な半順序集合と接続代数 {#comb:incidence-algebra keywords="locally finite poset, incidence algebra, zeta function, delta function" index="局所有限|きょくしょゆうげん, 接続代数|せつぞくだいすう, ゼータ関数（半順序集合の）|ぜーたかんすう"}
+すべての区間 $[x,y]$ が有限であるとき、$P$ は**局所有限**であるという。このとき、$x\le y$ となる組 $(x,y)$ 全体の上の $K$ 値関数全体 $I(P)$ に、成分ごとの和と**畳み込み**
+$$
+(f*g)(x,y)\defeq\sum_{z\in[x,y]}f(x,z)\,g(z,y)
+$$
+を入れたものを**接続代数**という。$\delta(x,y)\defeq\delta_{x,y}$、$\zeta(x,y)\defeq1$（$x\le y$）とおき、$\zeta$ を**ゼータ関数**という。
+:::
+
+::: intuition
+$P$ が有限で $P=\{x_{1},\dots,x_{N}\}$ と $\le$ と両立する順に番号を付ければ、$f\in I(P)$ は「$x_{i}\le x_{j}$ の成分だけが $0$ でありうる上三角行列」で、畳み込みは行列の積である。
+:::
+
+::: proposition 接続代数は単位的結合代数 {#comb:incidence-algebra-basic keywords="incidence algebra is associative, invertible elements of the incidence algebra" index="接続代数の可逆元|せつぞくだいすうのかぎゃくげん"}
+$P$ を局所有限とする。
+1. $*$ は結合的で和に対して分配的、$\delta$ は単位元である。
+2. $f\in I(P)$ が（両側）逆元をもつことと、すべての $x$ で $f(x,x)$ が $K$ の単元であることは同値である。
+:::
+
+::: proof
+**Step 1（結合法則）.** 【主張：$((f*g)*h)(x,y)$ と $(f*(g*h))(x,y)$ はどちらも $\sum f(x,z)g(z,w)h(w,y)$（和は $x\le z\le w\le y$ の組全体）】左辺を展開すると $\sum_{w\in[x,y]}\sum_{z\in[x,w]}$、右辺は $\sum_{z\in[x,y]}\sum_{w\in[z,y]}$ で、どちらも同じ有限集合 $\{(z,w) : x\le z\le w\le y\}$ の上の和である。分配法則と $\delta$ が単位元であることは定義から直ちに従う。
+
+**Step 2（(2)、必要性）.** $f*g=\delta$ なら $(x,x)$ 成分は $f(x,x)g(x,x)=1$。
+
+**Step 3（(2)、右逆元の構成）.** 【主張：$f(x,x)$ がすべて単元なら $f*g=\delta$ となる $g$ がある】$g(y,y)\defeq f(y,y)^{-1}$、$x<y$ について
+$$
+g(x,y)\defeq-f(x,x)^{-1}\sum_{x<z\le y}f(x,z)\,g(z,y)
+$$
+と、$\abs{[x,y]}$ に関する帰納法で定める（右辺の $g(z,y)$ は $\abs{[z,y]}<\abs{[x,y]}$）。これは $(f*g)(x,y)=\delta_{x,y}$ を書き直したものである。
+
+**Step 4（両側逆元）.** 同様に $(x,y)$ の左端から順に決めて $h*f=\delta$ となる $h$ が作れ、結合法則から $h=h*(f*g)=(h*f)*g=g$。
+:::
+
+::: definition メビウス関数 {#comb:mobius-function keywords="Mobius function of a poset" index="メビウス関数|めびうすかんすう"}
+局所有限な $P$ について、$\zeta$ の逆元を $\mu=\mu_{P}$ と書き、$P$ の**メビウス関数**という（\ref{comb:incidence-algebra-basic.2} より存在する）。$\mu*\zeta=\zeta*\mu=\delta$ を書き下すと
+$$
+\mu(x,x)=1,\qquad\mu(x,y)=-\sum_{x\le z<y}\mu(x,z)=-\sum_{x<z\le y}\mu(z,y)\quad(x<y).
+$$
+:::
+
+::: intuition
+$\mu(x,y)$ は、$[x,y]$ のすべての点での値を足すと $x=y$ のとき以外は $0$ になるように、下から順に決めた整数である。
+:::
+
+::: theorem メビウス反転公式 {#comb:mobius-inversion keywords="Mobius inversion formula" index="メビウス反転公式|めびうすはんてんこうしき" refname="メビウス反転公式"}
+$P$ を半順序集合で、すべての $x$ について $\{y : y\le x\}$ が有限であるとする（このとき $P$ は局所有限）。関数 $f,g\colon P\to K$ について
+$$
+g(x)=\sum_{y\le x}f(y)\ (\forall x)\iff f(x)=\sum_{y\le x}\mu(y,x)\,g(y)\ (\forall x).
+$$
+双対的に、すべての $\{y : y\ge x\}$ が有限なら、$g(x)=\sum_{y\ge x}f(y)\ (\forall x)\iff f(x)=\sum_{y\ge x}\mu(x,y)\,g(y)\ (\forall x)$。
+:::
+
+::: intuition
+「自分以下のものの総和」をとる操作は、メビウス関数を重みにした和で元に戻せる。包除原理は、部分集合の包含について「自分を含むものの総和」を戻す場合である。
+:::
+
+::: proof
+**Step 1（$\Rightarrow$）.** 【主張：右辺に $g$ を代入すると $f(x)$】
+$$
+\sum_{y\le x}\mu(y,x)g(y)=\sum_{y\le x}\mu(y,x)\sum_{w\le y}f(w)=\sum_{w\le x}f(w)\sum_{y\in[w,x]}\mu(y,x)=\sum_{w\le x}f(w)\,\delta_{w,x}=f(x).
+$$
+和の入れ替えは有限集合 $\{(w,y) : w\le y\le x\}$ の上で行い、$\sum_{y\in[w,x]}\mu(y,x)=(\zeta*\mu)(w,x)=\delta_{w,x}$ を使った。
+
+**Step 2（$\Leftarrow$）.** 【主張：$\sum_{y\le x}f(y)=g(x)$】Step 1 と同様に $\sum_{y\le x}\sum_{w\le y}\mu(w,y)g(w)=\sum_{w\le x}g(w)(\mu*\zeta)(w,x)=g(x)$。双対版は順序を逆にした半順序集合に当てはめればよい（$\mu_{P^{\mathrm{op}}}(x,y)=\mu_{P}(y,x)$ は、$\zeta*\mu=\delta$ の転置から従う）。
+
+::: hypcheck
+- **$\{y\le x\}$ の有限性**：Step 1・2 で和が有限であることと、和の入れ替えに使った。$P=\Z$（通常の順序）では $\sum_{y\le x}f(y)$ 自体が定義されない。
+:::
+:::
+
+## 直積と具体的な計算 {#comb:sec-mi-products}
+
+::: proposition 直積のメビウス関数 {#comb:mobius-product keywords="Mobius function of a product of posets" index="直積のメビウス関数|ちょくせきのめびうすかんすう"}
+局所有限な $P,Q$ の直積 $P\times Q$ に $(x,x')\le(y,y')\iff x\le y\text{ かつ }x'\le y'$ で順序を入れると局所有限で、
+$$
+\mu_{P\times Q}\bigl((x,x'),(y,y')\bigr)=\mu_{P}(x,y)\,\mu_{Q}(x',y').
+$$
+:::
+
+::: proof
+区間は $[(x,x'),(y,y')]=[x,y]\times[x',y']$ で有限。右辺を $h$ とおくと
+$$
+(h*\zeta)\bigl((x,x'),(y,y')\bigr)=\sum_{z\in[x,y]}\sum_{z'\in[x',y']}\mu_{P}(x,z)\mu_{Q}(x',z')=\delta_{x,y}\,\delta_{x',y'}.
+$$
+（有限和の分配法則で二重和を積に分け、$\mu_{P}*\zeta_{P}=\delta$, $\mu_{Q}*\zeta_{Q}=\delta$ を使った。）よって $h*\zeta=\delta$ で、逆元の一意性（\ref{comb:incidence-algebra-basic}）から $h=\mu_{P\times Q}$。
+:::
+
+::: example 鎖・ブール束・約数の束 {#comb:mobius-examples keywords="Mobius function of a chain, Boolean lattice, divisor lattice, number-theoretic Mobius function" index="数論のメビウス関数|すうろんのめびうすかんすう"}
+1. **鎖** $\N$（通常の順序）：$\mu(m,m)=1$, $\mu(m,m+1)=-1$、それ以外は $0$。実際、$\sum_{m\le z\le n}\mu(m,z)=1-1=0$（$n>m$）。
+2. **ブール束** $\mathcal{P}(X)$（包含）：$S\subseteq T$ なら $\mu(S,T)=(-1)^{\abs{T\setminus S}}$。$\mathcal{P}(X)$ は特性関数によって 2 元の鎖 $\{0<1\}$ の $\abs{X}$ 個の直積と順序同型で、(1) と \ref{comb:mobius-product} から従う。これを \ref{comb:mobius-inversion} の双対版に代入したものが、\ref{comb:inclusion-exclusion-exact} の背後にある反転公式である。
+3. **約数の束**（正の整数を約数関係で順序付けたもの）：$m\mid n$ なら $\mu(m,n)=\mu(n/m)$ で、**数論のメビウス関数** $\mu(k)$ は、$k$ が相異なる $j$ 個の素数の積なら $(-1)^{j}$（$\mu(1)=1$）、ある素数の平方で割り切れるなら $0$ である。区間 $[m,n]$ は $d\mapsto d/m$ で $[1,n/m]$ と同型であり、$n/m=p_{1}^{e_{1}}\cdots p_{t}^{e_{t}}$ と素因数分解すると（\ref{grp:unique-factorization-jh}）、$[1,n/m]$ は指数の組によって鎖 $\{0,\dots,e_{i}\}$ の直積と同型になる。(1) と \ref{comb:mobius-product} から主張を得る。
+:::
+
+::: corollary 数論のメビウス反転 {#comb:number-theoretic-inversion keywords="classical Mobius inversion, Euler phi via Mobius" index="メビウスの反転公式（数論）|めびうすのはんてんこうしき"}
+正の整数上の関数 $f,g$ について、$g(n)=\sum_{d\mid n}f(d)\ (\forall n)\iff f(n)=\sum_{d\mid n}\mu(n/d)g(d)\ (\forall n)$。特に $\varphi(n)=\sum_{d\mid n}\mu(d)\frac{n}{d}$。
+:::
+
+::: proof
+約数の束では $\{d : d\mid n\}$ は有限なので \ref{comb:mobius-inversion} と \ref{comb:mobius-examples.3} を使う。後半は $\sum_{d\mid n}\varphi(d)=n$（\ref{grp:sum-phi-divisors}）に適用し、$d\mapsto n/d$ で和を書き直す。
+:::
+
+## 応用 {#comb:sec-mi-applications}
+
+::: theorem 有限体上の既約多項式の個数 {#comb:irreducible-polynomials-count keywords="number of monic irreducible polynomials over a finite field, necklace polynomial" index="既約多項式の個数|きやくたこうしきのこすう"}
+$p$ を素数とし、$\mathbb{F}_{p}[x]$ の $n$ 次モニック既約多項式の個数を $N_{n}$ とすると
+$$
+N_{n}=\frac{1}{n}\sum_{d\mid n}\mu(d)\,p^{n/d}.
+$$
+特に $N_{n}\ge1$：すべての $n\ge1$ について $n$ 次の既約多項式が存在する。
+:::
+
+::: intuition
+$p$ 元体上の $n$ 次の既約多項式はおよそ $p^{n}/n$ 個あり、正確な個数はメビウス関数を使った約数和で表せる。特にどの次数にも既約多項式がある。
+:::
+
+::: proof
+**Step 1.** 【主張：$p^{n}=\sum_{d\mid n}d\,N_{d}$】$x^{p^{n}}-x$ は、次数が $n$ の約数であるモニック既約多項式すべての積である（\ref{fld:prob-ff-irreducible-divides}）。次数を比べればよい。
+
+**Step 2.** \ref{comb:number-theoretic-inversion} を $g(n)=p^{n}$, $f(d)=dN_{d}$ に使うと $nN_{n}=\sum_{d\mid n}\mu(n/d)p^{d}=\sum_{d\mid n}\mu(d)p^{n/d}$。
+
+**Step 3（$N_{n}\ge1$）.** $n\ge2$ のとき、$d=1$ の項は $p^{n}$ で、他の項の絶対値の和は $\sum_{k\le n/2}p^{k}<p^{n/2+1}\le p^{n}$（$p\ge2$, $n\ge2$）なので、$nN_{n}>0$。$n=1$ では $N_{1}=p$。
+:::
+
+::: theorem 分割束のメビウス関数 {#comb:partition-lattice-mobius keywords="Mobius function of the partition lattice" index="分割束|ぶんかつそく"}
+$[n]$ の分割全体 $\Pi_{n}$ に、$\sigma\le\tau\iff\sigma$ の各ブロックが $\tau$ のあるブロックに含まれる（$\sigma$ は $\tau$ の**細分**）で順序を入れる。最小元 $\hat0$（すべてのブロックが 1 元）と最大元 $\hat1$（ブロックが $[n]$ だけ）について
+$$
+\mu(\hat0,\hat1)=(-1)^{n-1}(n-1)!.
+$$
+:::
+
+::: intuition
+$[n]$ を $q$ 色で塗る方法を、「同じ色になる点の組み分け」ごとに分けて数えると、メビウス反転から $q$ の多項式の恒等式が得られ、その一次の係数が $\mu(\hat0,\hat1)$ になる。
+:::
+
+::: proof
+**Step 1（細分の上の和）.** 【主張：$q\in\N$ と $\sigma\in\Pi_{n}$ について $q^{\abs{\sigma}}=\sum_{\tau\ge\sigma}q^{\underline{\abs{\tau}}}$】写像 $f\colon[n]\to[q]$ で $\sigma$ の各ブロックの上で定数なものは、ブロックごとに値を選んで $q^{\abs{\sigma}}$ 個ある。そのような $f$ のファイバー分割（\ref{comb:set-partition}）$\tau$ は $\sigma$ より粗く（$\tau\ge\sigma$）、ファイバー分割がちょうど $\tau$ になる $f$ は、$\tau$ のブロックから $[q]$ への単射と一対一に対応して $q^{\underline{\abs{\tau}}}$ 個ある（\ref{comb:injections-count}）。
+
+**Step 2（反転）.** 【主張：$q^{\underline{n}}=\sum_{\tau}\mu(\hat0,\tau)\,q^{\abs{\tau}}$】$\Pi_{n}$ は有限なので \ref{comb:mobius-inversion} の双対版を $g(\sigma)=q^{\abs{\sigma}}$, $f(\tau)=q^{\underline{\abs{\tau}}}$ に使い、$\sigma=\hat0$（$\abs{\hat0}=n$）とおく。
+
+**Step 3（多項式として比べる）.** 【主張：$\Q[y]$ で $y^{\underline{n}}=\sum_{\tau}\mu(\hat0,\tau)y^{\abs{\tau}}$】両辺の差は、Step 2 からすべての $q\in\N$ を根にもつ $\Q[y]$ の多項式で、$\Q$ は整域なので \ref{ring:factor-theorem.3} より $0$ である。$y^{1}$ の係数を比べると、右辺では $\abs{\tau}=1$ となる $\tau=\hat1$ の項だけが残り $\mu(\hat0,\hat1)$、左辺では $s(n,1)=(-1)^{n-1}c(n,1)=(-1)^{n-1}(n-1)!$（\ref{comb:rising-factorial-expansion}・\ref{comb:prob-tw-cycles}）。
+:::
+
+::: supplement
+**一般化.** 区間 $[\sigma,\tau]$ は、$\tau$ の各ブロック $B$ について「$B$ に含まれる $\sigma$ のブロックの集合の分割束」の直積と同型なので、$\mu(\sigma,\tau)=\prod_{B\in\tau}(-1)^{k_{B}-1}(k_{B}-1)!$（$k_{B}$ は $B$ に含まれる $\sigma$ のブロックの数）となる。
+
+**高い視点.** 接続代数は、有限の場合には上三角行列の代数の部分代数であり、$\mu$ はゼータ行列の逆行列である。ロタはこの観点から組合せ論の多くの反転公式を統一した（G.-C. Rota, "On the foundations of combinatorial theory I. Theory of Möbius functions", 1964）。数論のメビウス反転は、ディリクレ級数で言えば $\zeta(s)^{-1}=\sum_{n}\mu(n)n^{-s}$ にあたる。
+:::
+
+## 問題 {#comb:sec-mi-problems}
+
+::: problem {#comb:prob-mi-necklaces}
+$q$ 色のビーズ $n$ 個を円形に並べた首飾りで、回転で重ならない**原始的**なもの（どの真の回転でも元に戻らない並び）の個数を $M_{n}$ とする。$nM_{n}$ は、回転で自分自身に戻る最小の回転角が $2\pi$ である長さ $n$ の語の個数であることを示し、$M_{n}=\frac1n\sum_{d\mid n}\mu(d)q^{n/d}$ を導け。
+:::
+
+::: solution
+長さ $n$ の語 $w$ について、$w$ を自分自身に戻す回転の最小の量 $d$ は $n$ の約数で、$w$ は長さ $d$ の語 $u$ を $n/d$ 回繰り返したものであり、$u$ を戻す最小の回転は $d$ である。したがって $q^{n}=\sum_{d\mid n}a_{d}$（$a_{d}$ は最小周期がちょうど $d$ の長さ $d$ の語の個数）。最小周期 $d$ の語の回転による軌道はちょうど $d$ 個の語からなるので、$a_{n}=nM_{n}$。\ref{comb:number-theoretic-inversion} より $nM_{n}=\sum_{d\mid n}\mu(n/d)q^{d}$。これは \ref{comb:irreducible-polynomials-count} と同じ式で、$q=p$ のとき原始的な首飾りの個数と既約多項式の個数は一致する。
+:::
+
+::: problem {#comb:prob-mi-chain-product}
+$\{0,1,\dots,n\}$ の鎖を $k$ 個掛けた直積 $C^{k}$ のメビウス関数を求めよ。
+:::
+
+::: solution
+\ref{comb:mobius-product} と \ref{comb:mobius-examples.1} から、$\mu(a,b)=(-1)^{\sum(b_{i}-a_{i})}$（すべての $i$ で $b_{i}-a_{i}\in\{0,1\}$ のとき）、それ以外は $0$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
