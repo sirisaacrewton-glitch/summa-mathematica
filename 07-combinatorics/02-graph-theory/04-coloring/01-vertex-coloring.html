@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>頂点彩色 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/04-coloring/01-vertex-coloring.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 頂点彩色 {#graph:page-vertex-coloring keywords="vertex colouring, chromatic number, greedy colouring, colouring number, critical graphs, five colour theorem, four colour theorem, Brooks's theorem, Kempe chains"}
+
+隣り合う頂点が異なる色になるように頂点を塗り分けるのに必要な色の最小数を**彩色数**という。このページでは、彩色数の基本的な上界（最大次数 $+1$、部分グラフの最小次数 $+1$）を示し、平面グラフが 5 色で塗り分けられること（5 色定理）を、色を入れ替える**ケンペ鎖**の議論で証明する。最後に、完全グラフと奇閉路を除けば最大次数の色で足りるというブルックスの定理を示す。
+
+## 記法と定義の確認 {#graph:sec-vc-notation}
+
+::: notation
+- グラフ・次数・最小次数 $\delta$・最大次数 $\Delta$・連結成分・完全グラフ $K^{n}$・閉路は \ref{graph:page-graphs} の定義に従う。
+- 平面グラフの辺の数の上界と次数 5 以下の頂点の存在（\ref{graph:planar-edge-bound}）、折れ線グラフへの帰着（\ref{mfd:tame-graph}）、\ref{at:jordan-curve} を使う。
+:::
+
+## 彩色数 {#graph:sec-vc-chromatic}
+
+::: definition 頂点彩色と彩色数 {#graph:chromatic-number keywords="vertex colouring, k-colourable, chromatic number, colour class" index="彩色（頂点の）|さいしょく, 彩色数|さいしょくすう, 色クラス|いろくらす"}
+写像 $c\colon V\to S$ で、隣接する頂点に異なる値をとるものを**頂点彩色**という。$\abs{S}\le k$ の頂点彩色をもつとき $G$ は **$k$ 彩色可能**であるといい、そのような最小の $k$ を**彩色数** $\chi(G)$ という。$\chi(G)=k$ のとき **$k$ 彩色的**という。同じ色の頂点の集合を**色クラス**という（独立集合である）。
+:::
+
+::: intuition
+地図の国を塗るように、隣どうしが同じ色にならないように点を塗る。必要な色の最小数が彩色数である。
+:::
+
+::: proposition 彩色数の基本的な評価 {#graph:chromatic-basic-bounds keywords="greedy colouring, chi <= Delta + 1, colouring number, chi >= omega, chi alpha >= n" index="貪欲彩色|どんよくさいしょく, 彩色の番号|さいしょくのばんごう"}
+グラフ $G$（$n$ 頂点）について
+1. $\chi(G)\le\Delta(G)+1$。
+2. $\chi(G)\le\max\{\delta(H) : H\subseteq G\}+1$。
+3. $\chi(G)\ge\omega(G)$（$\omega$ は完全部分グラフの頂点数の最大値）、$\chi(G)\,\alpha(G)\ge n$（$\alpha$ は独立集合の大きさの最大値）。
+:::
+
+::: proof
+**Step 1（貪欲法）.** 【主張：頂点を $v_{1},\dots,v_{n}$ と並べ、各 $v_{i}$ を「それより前の近傍が使っていない最小の色」で塗ると、$v_{i}$ より前の近傍の最大個数 $+1$ 色で塗れる】$v_{i}$ を塗るとき、前の近傍は高々 $b$ 個なので $b+1$ 色のどれかが空いている。(1) はどの並べ方でも $b\le\Delta$ による。
+
+**Step 2（(2)、並べ方の工夫）.** $k\defeq\max_{H}\delta(H)$ とする。$v_{n}$ を $G$ の最小次数の頂点、$v_{n-1}$ を $G-v_{n}$ の最小次数の頂点、…と後ろから選ぶと、$v_{i}$ の前の近傍の個数は $G[v_{1},\dots,v_{i}]$ での次数で、それは $\delta(G[v_{1},\dots,v_{i}])\le k$。Step 1 から $k+1$ 色で塗れる。
+
+**Step 3（(3)）.** 完全部分グラフの頂点はすべて異なる色。色クラスは独立集合なので大きさ $\le\alpha$ で、$\chi$ 個のクラスで $n$ 頂点を覆う。
+:::
+
+::: lemma 臨界部分グラフ {#graph:critical-subgraph keywords="every k-chromatic graph has a k-chromatic subgraph of minimum degree at least k-1" index="臨界グラフ|りんかいぐらふ"}
+$k$ 彩色的なグラフは、最小次数 $k-1$ 以上の $k$ 彩色的な部分グラフをもつ。
+:::
+
+::: proof
+$\chi(H)=k$ となる極小の部分グラフ $H$ をとる。$d_{H}(v)\le k-2$ の頂点 $v$ があれば、$H-v$ の $(k-1)$ 彩色（極小性から存在）を、近傍が使う高々 $k-2$ 色以外の色で $v$ に延ばせて矛盾。
+:::
+
+## 5 色定理 {#graph:sec-vc-five}
+
+::: theorem 5 色定理 {#graph:five-colour keywords="five colour theorem, Kempe chains" index="5 色定理|ごしょくていり, ケンペ鎖|けんぺさ" refname="5 色定理"}
+平面的なグラフは 5 彩色可能である。
+:::
+
+::: intuition
+平面に描けるグラフは 5 色で塗り分けられる。近傍が 5 色すべてを使っている頂点があっても、二色だけを入れ替える「ケンペ鎖」の操作で色を一つ空けられることを、平面の性質（輪が平面を内と外に分ける）を使って示す。
+:::
+
+::: proof
+$n$ の帰納法。$n\le5$ なら明らか。平面グラフ $G$ を折れ線グラフとして描く（\ref{mfd:tame-graph}）。
+
+**Step 1（次数 5 以下の頂点を除く）.** \ref{graph:planar-edge-bound.3} より次数 5 以下の頂点 $v$ がある。帰納法の仮定から $H\defeq G-v$ の 5 彩色 $c$ がある。$v$ の近傍が 4 色以下しか使わなければ、空いた色で $v$ を塗ればよい。以下、$v$ の近傍がちょうど 5 個 $v_{1},\dots,v_{5}$ で、色が相異なるとする。
+
+**Step 2（近傍の巡回的な順）.** $v$ の小さい開円板 $D$ を、$v$ から出る 5 本の辺の始めの線分 $s_{1},\dots,s_{5}$ だけと交わるようにとり、$D$ の中での巡回的な順に番号を付け直して、$s_{i}$ が辺 $vv_{i}$ に含まれ、$c(v_{i})=i$ とする。
+
+**Step 3（$v_{1}$–$v_{3}$ 道は $v_{2}$ と $v_{4}$ を分ける）.** 【主張：$H-\{v_{2},v_{4}\}$ の $v_{1}$–$v_{3}$ 道 $P$ について、$v_{2}$ と $v_{4}$ を結ぶ $H$ の道はすべて $P$ と交わる】閉路 $C\defeq vv_{1}Pv_{3}v$ を考える。$D\setminus C=D\setminus(s_{1}\cup s_{3})$ は二つの開扇形からなり、一方は $s_{2}$ の点 $x_{2}$ を、他方は $s_{4}$ の点 $x_{4}$ を含む（巡回順）。\ref{at:jordan-curve} より $C$ の二つの面はどちらも $v$ を境界に含むので、どちらも $D\setminus C$ と交わり、各扇形は連結で一つの面に含まれるので、二つの扇形は異なる面にある。辺 $vv_{2}$ から $v$ を除いた弧は $C$ と交わらない（$v_{2}\notin C$）ので $v_{2}$ は $x_{2}$ と同じ面に、同様に $v_{4}$ は $x_{4}$ と同じ面にある。$H$ の $v_{2}$–$v_{4}$ 道は $C$ と交わるが、平面グラフの異なる辺は端点でしか交わらず、その道は $v$ も $v$ の辺も使わないので、交点は $P$ の頂点である。
+
+**Step 4（ケンペ鎖による入れ替え）.** 色 $i,j$ の頂点が誘導する $H$ の部分グラフを $H_{i,j}$ とする。$v_{1}$ を含む $H_{1,3}$ の連結成分 $K$ で色 1 と 3 を入れ替えても $H$ の 5 彩色のまま（$K$ の外の隣接頂点は色 1, 3 以外か、$K$ に含まれる）。$v_{3}\notin K$ なら、入れ替え後 $v_{1},v_{3}$ はともに色 3 で、色 1 が空き $v$ を塗れる。よって $v_{3}\in K$、すなわち $H_{1,3}$ に $v_{1}$–$v_{3}$ 道 $P$ がある。$P$ は色 1, 3 の頂点だけを通るので $v_{2},v_{4}$ を通らず、Step 3 より、$v_{2}$ と $v_{4}$ は $H_{2,4}$ の異なる成分にある（$H_{2,4}$ の道は $P$ と交わらない）。$v_{2}$ を含む $H_{2,4}$ の成分で色 2 と 4 を入れ替えると、$v_{2},v_{4}$ がともに色 4 になり、色 2 が空いて $v$ を塗れる。
+:::
+
+::: fact 4 色定理 {#graph:four-colour keywords="four colour theorem" index="4 色定理|よんしょくていり" refname="4 色定理"}
+平面的なグラフは 4 彩色可能である（Appel–Haken, 1976。計算機による検証を含む。Robertson–Sanders–Seymour–Thomas, 1997 による簡略化された証明がある）。三角形を含まない平面的なグラフは 3 彩色可能である（グレッチュの定理、1959 年）。
+:::
+
+::: intuition
+平面の地図は 4 色で塗り分けられる。証明は膨大な場合分けを計算機で確かめるもので、ここでは扱わない。
+:::
+
+## ブルックスの定理 {#graph:sec-vc-brooks}
+
+::: theorem ブルックスの定理 {#graph:brooks keywords="Brooks's theorem, chi <= Delta unless complete or odd cycle" index="ブルックスの定理|ぶるっくすのていり" refname="ブルックスの定理"}
+連結グラフ $G$ が完全グラフでも奇数の長さの閉路でもなければ、$\chi(G)\le\Delta(G)$。
+:::
+
+::: intuition
+最大次数 $\Delta$ のグラフは $\Delta+1$ 色あれば必ず塗れるが、1 色節約できないのは、全員が知り合いのグラフと、奇数人が輪になったグラフだけである。
+:::
+
+::: proof
+$\abs{G}$ の帰納法。$\Delta\le2$ なら $G$ は道か偶数の長さの閉路で 2 彩色可能。$\Delta\defeq\Delta(G)\ge3$ とし、$\chi(G)>\Delta$ と仮定して矛盾を導く。
+
+**Step 1（一点を除けば塗れる）.** 【主張：任意の $v$ について $H\defeq G-v$ は $\Delta$ 彩色可能で、$H$ のどの $\Delta$ 彩色でも $v$ の近傍はすべての色を使い、$d(v)=\Delta$】$H$ の各成分 $H'$ は、帰納法の仮定から $\chi(H')\le\Delta(H')\le\Delta$ か、完全グラフか奇閉路である。後者なら $H'$ のある頂点は $v$ に隣接し（$G$ は連結）、$H'$ の中での次数は $\Delta(H')$ なので $\Delta(H')+1\le\Delta$、したがって $\chi(H')=\Delta(H')+1\le\Delta$。$H$ の $\Delta$ 彩色で $v$ の近傍が使わない色があれば $G$ が $\Delta$ 彩色可能になり矛盾。
+
+$H$ の $\Delta$ 彩色 $c$ を固定し、色 $i$ の $v$ の近傍を $v_{i}$ とする。色 $i,j$ の頂点が誘導する部分グラフを $H_{i,j}$ とする。
+
+**Step 2（同じ成分）.** 【主張：$i\neq j$ なら $v_{i},v_{j}$ は $H_{i,j}$ の同じ成分 $C_{i,j}$ にある】違えば、$v_{i}$ の成分で色 $i,j$ を入れ替えると、$v$ の近傍が色 $i$ を使わなくなり Step 1 に反する。
+
+**Step 3（各 $v_{i}$ の近傍は色が相異なる）.** 【主張：$v_{i}$ の $H$ での近傍の色は相異なる】$d_{H}(v_{i})\le\Delta-1$ なので、近傍の色に重複があれば $v_{i}$ が使える色が自分の色以外にも空き（近傍は高々 $\Delta-2$ 色）、塗り替えると Step 1 に反する。
+
+**Step 4（$C_{i,j}$ は道）.** 【主張：$C_{i,j}$ は $v_{i}$–$v_{j}$ 道】Step 3 より $v_{i}$ は $C_{i,j}$ の中に近傍を一つしかもたない（色 $j$ の近傍は一つ）。$v_{j}$ も同様。$C_{i,j}$ の中の $v_{i}$–$v_{j}$ 道 $P$ をとり、$C_{i,j}\neq P$ なら、$P$ の内部の頂点で $C_{i,j}$ の中の次数が 3 以上のもの（色が同じ近傍を 3 つ以上もつ）があり、$v_{i}$ から最初のものを $u$ とする。$u$ の近傍は高々 $\Delta-2$ 色しか使わないので、$u$ を $i,j$ 以外の色に塗り替えられる。すると $P$ の $v_{i}$ から $u$ の手前までの部分が $H_{i,j}$ の成分になり（その部分の頂点は $C_{i,j}$ の中で次数 2 以下で、外への辺は $u$ だけ）、Step 2 に反する。
+
+**Step 5（道は $v_{i}$ でしか交わらない）.** 【主張：$j,k,i$ が相異なれば $C_{i,j}\cap C_{i,k}=\{v_{i}\}$】$u\neq v_{i}$ が共通なら、$u$（色 $i$）は色 $j$ の近傍を 2 つ、色 $k$ の近傍を 2 つもつので（道の内部の頂点）、近傍は高々 $\Delta-2$ 色で、$u$ を塗り替えられる。すると $v_{i}$ と $v_{j}$ は $H_{i,j}$ の別の成分になり、Step 2 に反する。
+
+**Step 6（結論）.** $v$ の近傍がすべて互いに隣接すれば、各近傍は $N(v)\cup\{v\}$ の中で次数 $\Delta$ を使い切るので $G=K^{\Delta+1}$ となり仮定に反する。よって $v_{1}v_{2}\notin E$ としてよい。$C_{1,2}$ の上の $v_{1}$ の隣を $u$ とすると $u\neq v_{2}$、$c(u)=2$。$C_{1,3}$ で色 1 と 3 を入れ替えた彩色を $c'$ とし、$c'$ についての記号に $'$ を付ける（$v'_{1}=v_{3}$, $v'_{3}=v_{1}$, $v'_{2}=v_{2}$）。$u$ は色 3 の $v'_{3}=v_{1}$ の隣で $c'(u)=2$ なので $u\in C'_{2,3}$。一方 Step 5 より $C_{1,2}$ は $C_{1,3}$ と $v_{1}$ でしか交わらないので、$C_{1,2}$ から $v_{1}$ を除いた道は色が変わらず、$v_{2}$ を含む $H'_{1,2}$ の連結な部分なので $C'_{1,2}$ に含まれ、$u\in C'_{1,2}$。$u\neq v'_{2}$ なので、$c'$ について Step 5 に反する。
+:::
+
+::: supplement
+**前提を変えると.** 完全グラフ $K^{n}$ は $\chi=n=\Delta+1$、奇閉路は $\chi=3=\Delta+1$ で、ブルックスの定理の例外は必要である。
+
+**類似の定理.** 内周が大きい（短い閉路がない）のに彩色数が大きいグラフが存在する（エルデシュ、確率的方法による。\ref[確率的方法]{comb:page-probabilistic-method}）。したがって彩色数の大きさは局所的な構造だけでは決まらない。
+
+**計算量.** $k\ge3$ について $k$ 彩色可能性の判定は NP 完全である（\ref{comp:page-np-complete-problems}）。
+:::
+
+## 問題 {#graph:sec-vc-problems}
+
+::: problem {#graph:prob-vc-six-colour}
+\ref{graph:planar-edge-bound.3} と貪欲法だけを使って、平面的なグラフが 6 彩色可能であることを示せ。
+:::
+
+::: solution
+平面的なグラフの部分グラフも平面的なので、すべての部分グラフ $H$ で $\delta(H)\le5$。\ref{graph:chromatic-basic-bounds.2} より $\chi\le6$。
+:::
+
+::: problem {#graph:prob-vc-edges}
+$m$ 本の辺をもつグラフについて $\chi(G)\le\frac12+\sqrt{2m+\frac14}$ を示せ。
+:::
+
+::: solution
+$k=\chi(G)$ 色の彩色で、どの 2 つの色クラスの間にも辺がある（なければ 2 クラスを同じ色にできる）ので $m\ge\binom{k}{2}=\frac{k(k-1)}{2}$。$k^{2}-k-2m\le0$ を解いて $k\le\frac12+\sqrt{2m+\frac14}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
