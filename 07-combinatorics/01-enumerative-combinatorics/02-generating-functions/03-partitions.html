@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>整数の分割 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/02-generating-functions/03-partitions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 整数の分割 {#comb:page-partitions keywords="integer partitions, Ferrers diagram, conjugate partition, partition generating function, Euler's partition theorem, pentagonal number theorem, Franklin's involution"}
+
+自然数 $n$ を正の整数の和に分ける方法（順序を考えない）の数 $p(n)$ は、閉じた式をもたないが、母関数は単純な無限積 $\prod_{i\ge1}(1-x^{i})^{-1}$ になる。このページでは、形式的冪級数の無限積を正確に定義し（\ref{comb:page-formal-power-series} の総和可能性の考え方を使う）、分割の母関数、共役による分割の対称性、「奇数の部分への分割と相異なる部分への分割は同数」というオイラーの定理、そしてフランクリンの全単射によるオイラーの五角数定理と $p(n)$ の漸化式を示す。
+
+## 記法と定義の確認 {#comb:sec-pt-notation}
+
+::: notation
+- $n$ の分割 $\lambda=(\lambda_{1}\ge\dots\ge\lambda_{r}\ge1)$、部分、$p(n)$, $p_{k}(n)$ は \ref{comb:integer-partition} のとおり。$r$ を $\lambda$ の**長さ**、$\lambda_{1}$ を**最大部分**という。$\lambda$ に $i$ が現れる回数を $m_{i}(\lambda)$（$i$ の**重複度**）と書く。$\lambda$ は重複度の列 $(m_{i})_{i\ge1}$ で決まり、$\sum_{i}i\,m_{i}=n$ である。
+- $K$ は可換環（係数は整数でよい）、$K[[x]]$ は形式的冪級数環で、位数 $\operatorname{ord}$ は \ref{comb:fps-order} のとおり。$1-x^{i}$ は単元で、$\frac{1}{1-x^{i}}=\sum_{k\ge0}x^{ik}$（両辺に $1-x^{i}$ を掛ければ確かめられる）。
+- $[P]$ はアイバーソンの記法。
+:::
+
+## 共役とヤング図形 {#comb:sec-pt-conjugate}
+
+::: definition ヤング図形と共役 {#comb:conjugate-partition keywords="Ferrers diagram, Young diagram, conjugate partition" index="ヤング図形|やんぐずけい, フェラーズ図形|ふぇらーずずけい, 共役分割|きょうやくぶんかつ"}
+分割 $\lambda$ の**ヤング図形**を $Y(\lambda)\defeq\{(i,j)\in\N^{2} : 1\le i\le r,\ 1\le j\le\lambda_{i}\}$ と定める（第 $i$ 行に $\lambda_{i}$ 個の箱を並べる）。$\lambda'_{j}\defeq\abs{\{i : \lambda_{i}\ge j\}}$（$1\le j\le\lambda_{1}$）で定まる分割 $\lambda'$ を $\lambda$ の**共役**という。
+:::
+
+::: intuition
+ヤング図形を対角線で折り返す（行と列を入れ替える）と、別の分割の図形になる。それが共役である。
+:::
+
+::: proposition 共役の性質 {#comb:conjugate-properties keywords="conjugation is an involution, largest part and length are exchanged" index="共役の性質|きょうやくのせいしつ"}
+$\lambda$ を $n$ の分割とする。
+1. $\lambda'$ は $n$ の分割で、$Y(\lambda')=\{(j,i) : (i,j)\in Y(\lambda)\}$。
+2. $\lambda''=\lambda$。
+3. $\lambda'$ の長さは $\lambda$ の最大部分、$\lambda'$ の最大部分は $\lambda$ の長さである。
+4. 長さが $k$ 以下の $n$ の分割と、最大部分が $k$ 以下の $n$ の分割は同数である。$p_{k}(n)$ は最大部分がちょうど $k$ の分割の個数に等しい。
+:::
+
+::: proof
+**Step 1（(1)）.** 【主張：$\lambda'$ は広義単調減少で、図形は転置】$j<j'$ なら $\{i:\lambda_{i}\ge j'\}\subseteq\{i:\lambda_{i}\ge j\}$ なので $\lambda'_{j}\ge\lambda'_{j'}$、また $j\le\lambda_{1}$ なら $\lambda'_{j}\ge1$。$\lambda$ が単調なので $\{i : \lambda_{i}\ge j\}=\{1,\dots,\lambda'_{j}\}$ であり、$(j,i)\in Y(\lambda')\iff i\le\lambda'_{j}\iff\lambda_{i}\ge j\iff(i,j)\in Y(\lambda)$。箱の個数は等しいので $\lambda'$ は $n$ の分割。
+
+**Step 2（(2)(3)(4)）.** 図形の転置を二回行えば元に戻るので (2)。$\lambda'$ の長さは $\lambda_{1}$（定義域）で、最大部分 $\lambda'_{1}=\abs{\{i:\lambda_{i}\ge1\}}=r$ なので (3)。(4) は (2)(3) から、共役が二つの集合の間の全単射を与えることによる。
+:::
+
+## 無限積と分割の母関数 {#comb:sec-pt-products}
+
+::: definition 形式的冪級数の無限積 {#comb:infinite-product keywords="infinite product of formal power series" index="無限積（冪級数の）|むげんせき"}
+$K[[x]]$ の列 $(u_{i})_{i\ge1}$ が、各 $n$ について $\operatorname{ord}(u_{i}-1)\le n$ となる $i$ が有限個しかないとき、**乗積可能**という。このとき部分積 $P_{M}\defeq\prod_{i=1}^{M}u_{i}$ の $x^{n}$ の係数は $M$ が十分大きいと一定になり（\ref{comb:infinite-product-basic}）、その値を係数とする級数を $\prod_{i\ge1}u_{i}$ と書く。
+:::
+
+::: intuition
+どの次数の係数も、有限個の因子を掛け終えたところで確定する。無限個の因子を掛けても、各係数は有限の計算で決まる。
+:::
+
+::: lemma 無限積の計算規則 {#comb:infinite-product-basic keywords="rules for infinite products"}
+$(u_{i})$, $(v_{i})$ を乗積可能な列とする。
+1. $N_{n}$ を、$i>N_{n}$ なら $\operatorname{ord}(u_{i}-1)>n$ となる数とすると、$M\ge N_{n}$ で $[x^{n}]P_{M}=[x^{n}]P_{N_{n}}$。
+2. $(u_{i}v_{i})$ も乗積可能で、$\prod u_{i}v_{i}=\prod u_{i}\cdot\prod v_{i}$。各 $u_{i}$ が単元なら $(u_{i}^{-1})$ も乗積可能で $\prod u_{i}^{-1}=(\prod u_{i})^{-1}$。
+3. $\N_{\ge1}=I\sqcup J$ と分け、$I,J$ の元を小さい順に並べた部分列を考えると、$\prod_{i\ge1}u_{i}=\prod_{i\in I}u_{i}\cdot\prod_{j\in J}u_{j}$（有限集合の上の積は普通の有限積とする）。
+:::
+
+::: proof
+**Step 1（(1)）.** $M\ge N_{n}$ なら $P_{M+1}=P_{M}+P_{M}(u_{M+1}-1)$ で、第 2 項の位数は $>n$（\ref{comb:fps-order-basic.1}）なので $[x^{n}]P_{M+1}=[x^{n}]P_{M}$。
+
+**Step 2（(2)）.** $u_{i}v_{i}-1=(u_{i}-1)v_{i}+(v_{i}-1)$ の位数は $\min(\operatorname{ord}(u_{i}-1),\operatorname{ord}(v_{i}-1))$ 以上なので乗積可能。部分積は $\prod_{i\le M}u_{i}v_{i}=P_{M}Q_{M}$（$Q_{M}$ は $v$ の部分積）で、$x^{n}$ の係数は $P_{M}$, $Q_{M}$ の $x^{0},\dots,x^{n}$ の係数だけで決まり、$M$ が大きければそれらは極限の係数に一致する。逆元については $u_{i}^{-1}-1=-(u_{i}-1)u_{i}^{-1}$ から乗積可能で、$\prod u_{i}\cdot\prod u_{i}^{-1}=\prod1=1$。
+
+**Step 3（(3)）.** 部分積 $P_{M}=\prod_{i\in I,i\le M}u_{i}\cdot\prod_{j\in J,j\le M}u_{j}$ について Step 2 と同じく係数を比べればよい。
+:::
+
+::: theorem 分割の母関数 {#comb:partition-generating-function keywords="generating function for partitions, Euler's product" index="分割の母関数|ぶんかつのぼかんすう" refname="分割の母関数"}
+$S\subseteq\N_{\ge1}$ とし、部分がすべて $S$ に属する $n$ の分割の個数を $p_{S}(n)$、部分が $S$ に属しかつ相異なる $n$ の分割の個数を $q_{S}(n)$ とする。$\Z[[x]]$ において
+$$
+\sum_{n\ge0}p_{S}(n)x^{n}=\prod_{i\in S}\frac{1}{1-x^{i}},\qquad\sum_{n\ge0}q_{S}(n)x^{n}=\prod_{i\in S}(1+x^{i}).
+$$
+特に $\sum_{n}p(n)x^{n}=\prod_{i\ge1}\frac{1}{1-x^{i}}$、また長さが $k$ 以下の分割については $\sum_{n}\bigl(\sum_{j\le k}p_{j}(n)\bigr)x^{n}=\prod_{i=1}^{k}\frac{1}{1-x^{i}}$。
+:::
+
+::: intuition
+$\frac{1}{1-x^{i}}=1+x^{i}+x^{2i}+\cdots$ の中から $x^{i\cdot m_{i}}$ を選ぶことが、「部分 $i$ を $m_{i}$ 個使う」ことに当たる。すべての $i$ について選んで掛け合わせた項 $x^{\sum i m_{i}}$ が、一つの分割に対応する。
+:::
+
+::: proof
+**Step 1（有限部分積の係数）.** 【主張：$[x^{n}]\prod_{i\in S,\,i\le M}\frac{1}{1-x^{i}}$ は、部分が $S\cap[M]$ に属する $n$ の分割の個数】有限個の級数 $\sum_{k}x^{ik}$（$i\in S\cap[M]$）の積の $x^{n}$ の係数は、$\sum_{i}i\,k_{i}=n$ となる $(k_{i})_{i\in S\cap[M]}\in\N^{S\cap[M]}$ の個数である（\ref{comb:summable-rules.3} を繰り返す）。$(k_{i})$ を重複度とする分割（$i$ を $k_{i}$ 個並べて大きい順にしたもの）との対応は全単射である。
+
+**Step 2（極限）.** 【主張：$M\ge n$ なら Step 1 の個数は $p_{S}(n)$】$n$ の分割の部分は $n$ 以下なので、$M\ge n$ なら「部分が $S\cap[M]$ に属する」と「部分が $S$ に属する」は同じ条件である。$(\frac{1}{1-x^{i}})_{i\in S}$ は $\operatorname{ord}(\frac{1}{1-x^{i}}-1)=i$ なので乗積可能で、\ref{comb:infinite-product-basic.1} より無限積の係数は $p_{S}(n)$。
+
+**Step 3（相異なる部分）.** $1+x^{i}$ の積では、各 $i$ について $k_{i}\in\{0,1\}$ を選ぶことになり、同じ議論で $q_{S}(n)$ を得る。最後の主張は $S=[k]$ と \ref{comb:conjugate-properties.4} による。
+:::
+
+::: theorem オイラーの分割定理 {#comb:euler-partition-theorem keywords="Euler's partition theorem, odd parts and distinct parts" index="オイラーの分割定理|おいらーのぶんかつていり, 奇数分割|きすうぶんかつ" refname="オイラーの分割定理"}
+$n$ の分割のうち、部分がすべて奇数であるものの個数と、部分がすべて相異なるものの個数は等しい。
+:::
+
+::: intuition
+たとえば $n=6$ では、奇数の部分への分割は $5+1,\ 3+3,\ 3+1+1+1,\ 1+1+1+1+1+1$ の 4 個、相異なる部分への分割は $6,\ 5+1,\ 4+2,\ 3+2+1$ の 4 個である。
+:::
+
+::: proof
+**Step 1.** 【主張：$\prod_{i\ge1}(1+x^{i})=\prod_{i\ge1}\frac{1-x^{2i}}{1-x^{i}}$】各因子で $(1+x^{i})(1-x^{i})=1-x^{2i}$ なので、両辺の因子は等しい。
+
+**Step 2.** 【主張：右辺は $\prod_{i\text{ 奇数}}\frac{1}{1-x^{i}}$】\ref{comb:infinite-product-basic.2} より右辺は $\prod_{i}(1-x^{2i})\cdot\prod_{i}(1-x^{i})^{-1}$。\ref{comb:infinite-product-basic.3} で $\prod_{i}(1-x^{i})^{-1}=\prod_{i\text{ 偶数}}(1-x^{i})^{-1}\prod_{i\text{ 奇数}}(1-x^{i})^{-1}$ と分ける。偶数番目の積は $\prod_{i}(1-x^{2i})^{-1}$ と同じ列の積なので、$\prod_{i}(1-x^{2i})$ と打ち消し合う（\ref{comb:infinite-product-basic.2}）。
+
+**Step 3.** \ref{comb:partition-generating-function} より、左辺の $x^{n}$ の係数は相異なる部分への分割の個数、右辺のそれは奇数の部分への分割の個数で、両者が等しい。
+:::
+
+::: supplement
+**全単射による証明（グレーシャー）.** 奇数の部分への分割で奇数 $o$ が $m$ 回現れるとき、$m$ を 2 進展開 $m=2^{a_{1}}+\dots+2^{a_{t}}$（$a$ は相異なる）し、$m$ 個の $o$ を相異なる部分 $2^{a_{1}}o,\dots,2^{a_{t}}o$ に置き換える。すべての偶数は $2^{a}o$（$o$ は奇数）とただ一通りに書けるので、これは相異なる部分への分割への全単射である。
+
+**一般化.** 同じ議論で、「どの部分も $d$ 回以上現れない分割」と「どの部分も $d$ で割り切れない分割」は同数である（$\prod\frac{1-x^{di}}{1-x^{i}}$）。
+:::
+
+## オイラーの五角数定理 {#comb:sec-pt-pentagonal}
+
+::: theorem オイラーの五角数定理 {#comb:pentagonal-number-theorem keywords="Euler's pentagonal number theorem, generalized pentagonal numbers" index="五角数定理|ごかくすうていり, 一般五角数|いっぱんごかくすう" refname="オイラーの五角数定理"}
+$\Z[[x]]$ において
+$$
+\prod_{i\ge1}(1-x^{i})=\sum_{k\in\Z}(-1)^{k}x^{k(3k-1)/2}=1-x-x^{2}+x^{5}+x^{7}-x^{12}-x^{15}+\cdots.
+$$
+右辺の指数 $g(k)\defeq k(3k-1)/2$（$k\in\Z$）を**一般五角数**という。
+:::
+
+::: intuition
+相異なる部分への分割を、部分の個数が偶数のものと奇数のものに分けると、ほとんどの $n$ で同数になる。同数にならないのは $n$ が一般五角数のときだけで、そのとき差は $\pm1$ である。
+:::
+
+::: proof
+**Step 1（係数の解釈）.** 【主張：左辺の $x^{n}$ の係数は $e_{n}-o_{n}$】ここで $e_{n}$（$o_{n}$）は、相異なる部分への $n$ の分割のうち長さが偶数（奇数）のものの個数である。\ref{comb:partition-generating-function} の証明の Step 1 と同様に、$\prod_{i\le M}(1-x^{i})$ を展開すると、$[M]$ の部分集合 $T$ ごとに項 $(-1)^{\abs{T}}x^{\sum T}$ が一つずつ出る。$T$ を大きい順に並べたものが相異なる部分への分割である。
+
+**Step 2（記号）.** 長さ $r\ge1$ の相異なる部分への分割 $\lambda_{1}>\dots>\lambda_{r}$ に対し、$s\defeq\lambda_{r}$（最小部分）、$\sigma\defeq\max\{t : \lambda_{i}=\lambda_{1}-i+1\ (i\le t)\}$（先頭から 1 ずつ減っていく部分の個数）とおく。$1\le\sigma\le r$。$\lambda$ が**例外**であるとは、$\sigma=r$ かつ $s\in\{r,r+1\}$ のことをいう。
+
+**Step 3（操作 $\alpha$）.** 【主張：$s\le\sigma$ で例外でないとき、最小部分を取り除き、上位 $s$ 個の部分に $1$ ずつ足した $\mu$ は、相異なる部分への $n$ の分割で、$\mu$ では $s_{\mu}>\sigma_{\mu}=s$、長さは $r-1$、例外でない】$\sigma<r$ なら $s\le\sigma\le r-1$、$\sigma=r$ なら例外でないので $s\le r-1$。よって上位 $s$ 個は最小部分と別にある。上位 $s$ 個は連続していた（$s\le\sigma$）ので、$1$ を足しても相異なり、$\lambda_{s}+1>\lambda_{s+1}$ も保たれる。箱の個数は $-s+s=0$ だけ変わる。$\mu$ の最小部分 $s_{\mu}$ は $\lambda_{r-1}$ か $\lambda_{r-1}+1$ で、$\lambda_{r-1}>\lambda_{r}=s$ より $s_{\mu}\ge s+1$。$\mu$ の先頭の連続部分は $\lambda_{1}+1,\dots,\lambda_{s}+1$ で、次の部分 $\lambda_{s+1}$（あれば）は $\lambda_{s}$ 以下で $\lambda_{s}+1-1=\lambda_{s}$ にはならない（$\lambda_{s+1}<\lambda_{s}$）ので、$\sigma_{\mu}=s$。$\mu$ が例外なら $\sigma_{\mu}=r-1$ かつ $s_{\mu}=r$（$s_{\mu}>\sigma_{\mu}$ なので $s_{\mu}=r-1$ は不可）だが、このとき $s=r-1$ で上位 $s$ 個は最小部分以外のすべてなので $s_{\mu}=\lambda_{r-1}+1=r$、すなわち $\lambda_{r-1}=r-1=s=\lambda_{r}$ となり、相異なることに反する。
+
+**Step 4（操作 $\beta$）.** 【主張：$s>\sigma$ で例外でないとき、上位 $\sigma$ 個の部分から $1$ ずつ引き、新しい部分 $\sigma$ を加えた $\mu$ は、相異なる部分への $n$ の分割で、$\mu$ では $s_{\mu}=\sigma\le\sigma_{\mu}$、長さは $r+1$、例外でない】各部分は $\lambda_{i}\ge s>\sigma\ge1$ なので $1$ を引いても正。$\sigma<r$ なら、連続部分が $\sigma$ で切れるので $\lambda_{\sigma+1}<\lambda_{\sigma}-1$、よって $\lambda_{\sigma}-1>\lambda_{\sigma+1}$ で順序は保たれ、新しい部分 $\sigma<s\le\lambda_{r}$ は最小で相異なる。$\sigma=r$ なら例外でないので $s\ge r+2$、$\lambda_{r}-1\ge r+1>\sigma$ で新しい部分は最小。箱の個数は $-\sigma+\sigma=0$。$\mu$ の先頭の $\sigma$ 個は連続のままなので $\sigma_{\mu}\ge\sigma=s_{\mu}$。$\mu$ が例外なら $\sigma_{\mu}=r+1$ で $s_{\mu}\ge r+1>r\ge\sigma$ となり $s_{\mu}=\sigma$ に反する。
+
+**Step 5（互いに逆の対合）.** 【主張：$\alpha$ と $\beta$ は互いに逆】Step 3 の $\mu$ は $s_{\mu}>\sigma_{\mu}=s$ なので $\beta$ が適用され、上位 $s$ 個から $1$ を引いて部分 $s$ を加えると $\lambda$ に戻る。Step 4 の $\mu$ は $s_{\mu}=\sigma\le\sigma_{\mu}$ なので $\alpha$ が適用され、最小部分 $\sigma$ を除いて上位 $\sigma$ 個に $1$ を足すと $\lambda$ に戻る。したがって、例外でない（長さ $\ge1$ の）相異なる部分への分割全体の上に、長さの偶奇を入れ替える全単射ができ、それらの寄与は $e_{n}-o_{n}$ の中で打ち消し合う。
+
+**Step 6（例外の寄与）.** 【主張：例外は $\lambda=(2r-1,\dots,r)$ と $(2r,\dots,r+1)$ で、寄与はそれぞれ $(-1)^{r}x^{g(r)}$ と $(-1)^{r}x^{g(-r)}$】$\sigma=r$ なら部分は連続な $r$ 個で、最小部分が $r$ なら $\lambda=(2r-1,\dots,r)$、和は $\sum_{i=r}^{2r-1}i=\frac{r(3r-1)}{2}=g(r)$。最小部分が $r+1$ なら和は $\frac{r(3r+1)}{2}=g(-r)$。符号は長さ $r$ の偶奇で $(-1)^{r}=(-1)^{-r}$。長さ $0$ の分割（$n=0$）は $g(0)=0$ の項 $1$ を与える。$r\ge1$ で $g(r)<g(-r)<g(r+1)$ なので、$g$ は $\Z$ の上で単射であり、各 $n$ に例外は高々一つしかない。Step 1・5 と合わせて主張を得る。
+:::
+
+::: corollary 分割数の漸化式 {#comb:partition-number-recurrence keywords="Euler's recurrence for the partition function" index="分割数の漸化式（五角数）|ぶんかつすうのぜんかしき"}
+$n\ge1$ について
+$$
+p(n)=\sum_{k\neq0}(-1)^{k+1}p\bigl(n-g(k)\bigr)=p(n-1)+p(n-2)-p(n-5)-p(n-7)+\cdots.
+$$
+ただし負の数 $m$ について $p(m)\defeq0$ とする。
+:::
+
+::: proof
+\ref{comb:partition-generating-function} と \ref{comb:infinite-product-basic.2} より $\bigl(\sum_{n}p(n)x^{n}\bigr)\prod_{i}(1-x^{i})=1$。\ref{comb:pentagonal-number-theorem} を代入して $x^{n}$（$n\ge1$）の係数を比べると $\sum_{k}(-1)^{k}p(n-g(k))=0$ で、$k=0$ の項 $p(n)$ を移項すればよい。
+:::
+
+::: example
+$p(0),\dots,p(7)=1,1,2,3,5,7,11,15$ から、$p(8)=p(7)+p(6)-p(3)-p(1)=15+11-3-1=22$、$p(9)=p(8)+p(7)-p(4)-p(2)=22+15-5-2=30$。
+:::
+
+::: supplement
+**高い視点.** 五角数定理は、ヤコビの三重積公式 $\prod_{m\ge1}(1-q^{2m})(1+q^{2m-1}z)(1+q^{2m-1}z^{-1})=\sum_{k\in\Z}q^{k^{2}}z^{k}$ の特殊化として得られることが知られている。$p(n)$ の漸近挙動 $p(n)\sim\frac{1}{4n\sqrt3}e^{\pi\sqrt{2n/3}}$（ハーディ–ラマヌジャン）は、母関数をモジュラー形式として扱う解析的な方法で示される（Andrews, *The Theory of Partitions* などに証明がある）。これらはこのページでは証明しない。
+:::
+
+## 問題 {#comb:sec-pt-problems}
+
+::: problem {#comb:prob-pt-self-conjugate}
+自己共役な分割（$\lambda'=\lambda$）の個数と、相異なる奇数の部分への分割の個数が等しいことを示せ。
+:::
+
+::: solution
+自己共役な $\lambda$ のヤング図形を、対角線上の箱 $(i,i)$ ごとに「第 $i$ 行の $(i,i)$ から右の部分と、第 $i$ 列の $(i,i)$ から下の部分」からなる鉤形に分ける。対称性からこの鉤形の大きさは $2(\lambda_{i}-i)+1$ で奇数、$i$ が増えると $\lambda_{i}-i$ は真に減るので相異なる。逆に相異なる奇数 $2a_{1}+1>\dots>2a_{t}+1$ から、腕と脚の長さ $a_{i}$ の鉤形を入れ子に並べれば自己共役な図形が得られる。二つの対応は互いに逆である。
+:::
+
+::: problem {#comb:prob-pt-at-most-two-parts}
+$\sum_{j\le2}p_{j}(n)=\lfloor n/2\rfloor+1$ を、\ref{comb:partition-generating-function} の最後の式と直接の数え上げの両方で確かめよ。
+:::
+
+::: solution
+直接：長さ 2 以下の分割は $(n)$ と $(n-j,j)$（$1\le j\le n/2$）で、$n=0$ のときは空の分割だけ。どちらでも $\lfloor n/2\rfloor+1$ 個。母関数：$\frac{1}{(1-x)(1-x^{2})}$ の $x^{n}$ の係数は $i+2j=n$ となる $(i,j)\in\N^{2}$ の個数で、$j=0,\dots,\lfloor n/2\rfloor$ の $\lfloor n/2\rfloor+1$ 個。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
