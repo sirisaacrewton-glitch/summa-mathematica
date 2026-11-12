@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数え上げの基本と二項係数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/01-basic-counting/01-binomial-coefficients.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 数え上げの基本と二項係数 {#comb:page-binomial-coefficients keywords="binomial coefficients, double counting, sum rule, product rule, multinomial coefficients, multisets, stars and bars"}
+
+有限集合の元を数えることは組合せ論の出発点である。このページでは、集合論で示した有限集合の基本性質（\ref{set:finite-basic}・\ref{set:finite-union-product}）だけから出発して、数え上げの道具を一つずつ組み立てる。まず「和の法則」と「同じものを二通りに数える」**二重数え上げ**を整え、単射の個数から**二項係数**を定義し、その公式と恒等式を全単射によって示す。最後に多項係数と重複組合せを数える。重なりのある集合の和の大きさを求める方法は、次のページ \ref{comb:page-inclusion-exclusion} で扱う。
+
+## 記法と定義の確認 {#comb:sec-bie-notation}
+
+::: notation
+- 体系は $\ZF$ である。有限集合だけを扱うので、選択公理は使わない（有限個の元を一つずつ選ぶことは、有限集合の全単射 $n\to A$ を一つ固定すれば済む）。
+- 有限集合・濃度 $\abs{A}$ は \ref{set:finite-set} の意味である。有限集合の部分集合は有限で、真部分集合の濃度は真に小さい（\ref{set:finite-basic.3}）。有限集合 $A$ から $A$ への単射は全単射である（\ref{set:finite-basic.2}）。
+- 交わらない有限集合 $A,B$ について $\abs{A\cup B}=\abs{A}+\abs{B}$、また $\abs{A\times B}=\abs{A}\cdot\abs{B}$（\ref{set:finite-union-product}）。
+- $\N=\{0,1,2,\dots\}$。$n\in\N$ に対し $[n]\defeq\{1,2,\dots,n\}$（$[0]=\varnothing$）とする。$\abs{[n]}=n$ である。
+- 集合 $X$ から $Y$ への写像全体を $Y^{X}$ と書く（集合論のページ \ref{set:function-set} の ${}^{X}Y$ と同じもの）。$X$ の部分集合全体を $\mathcal{P}(X)$、そのうち濃度が $k$ のもの全体を $\mathcal{P}_{k}(X)$ と書く。
+- 写像 $f\colon A\to B$ と $b\in B$ に対し、$f^{-1}(b)\defeq\{a\in A : f(a)=b\}$ を $b$ の上の**ファイバー**という。
+- 有限集合の上の整数値の和 $\sum_{a\in A}w(a)$ は、和の順序や括弧の付け方によらない（加法の一般結合法則・一般交換法則）。$A$ が交わらない部分集合 $A_{1},\dots,A_{r}$ の和なら $\sum_{a\in A}w(a)=\sum_{i=1}^{r}\sum_{a\in A_{i}}w(a)$ と分けてよい。この事実は以下で断らずに使う。
+- 命題 $P$ に対し、$[P]$ は $P$ が真なら $1$、偽なら $0$ を表す（アイバーソンの記法）。
+:::
+
+## 和の法則と二重数え上げ {#comb:sec-bie-double-counting}
+
+::: proposition 和の法則 {#comb:sum-rule keywords="sum rule, addition principle" index="和の法則|わのほうそく"}
+有限集合 $U$ が、互いに交わらない部分集合 $A_{1},\dots,A_{r}$ の和であるとき
+$$
+\abs{U}=\sum_{i=1}^{r}\abs{A_{i}}.
+$$
+:::
+
+::: proof
+$r$ に関する帰納法で示す。$r=0$ なら $U=\varnothing$ で両辺は $0$。$r\ge1$ のとき、$U'\defeq A_{1}\cup\dots\cup A_{r-1}$ は帰納法の仮定より $\abs{U'}=\sum_{i<r}\abs{A_{i}}$ を満たし、$U'\cap A_{r}=\varnothing$ なので \ref{set:finite-union-product} より $\abs{U}=\abs{U'}+\abs{A_{r}}$。
+:::
+
+::: proposition 二重数え上げ {#comb:double-counting keywords="double counting, counting in two ways, handshake" index="二重数え上げ|にじゅうかぞえあげ, 二通りに数える|ふたとおりにかぞえる"}
+$A,B$ を有限集合、$R\subseteq A\times B$ とし、$R(a)\defeq\{b : (a,b)\in R\}$、$R^{-1}(b)\defeq\{a : (a,b)\in R\}$ とおく。このとき
+$$
+\sum_{a\in A}\abs{R(a)}=\abs{R}=\sum_{b\in B}\abs{R^{-1}(b)}.
+$$
+より一般に、関数 $w\colon R\to\Z$ について $\sum_{a\in A}\sum_{b\in R(a)}w(a,b)=\sum_{b\in B}\sum_{a\in R^{-1}(b)}w(a,b)$。
+:::
+
+::: intuition
+表の $\times$ 印の個数を、行ごとに数えて足しても、列ごとに数えて足しても同じになる。重みを付けた和でも同じである。
+:::
+
+::: proof
+$R$ は互いに交わらない集合 $\{a\}\times R(a)$（$a\in A$）の和であり、$b\mapsto(a,b)$ は $R(a)$ から $\{a\}\times R(a)$ への全単射なので、\ref{comb:sum-rule} から左の等式を得る。同様に $R$ は $R^{-1}(b)\times\{b\}$（$b\in B$）の交わらない和なので右の等式を得る。重み付きの場合も、$\sum_{(a,b)\in R}w(a,b)$ を同じ二通りの分割に沿って分ければよい。
+:::
+
+::: corollary ファイバーによる数え上げ {#comb:fiber-count keywords="counting by fibers, product rule" index="積の法則|せきのほうそく"}
+有限集合の間の写像 $f\colon A\to B$ について $\abs{A}=\sum_{b\in B}\abs{f^{-1}(b)}$。特に、すべての $b\in B$ で $\abs{f^{-1}(b)}=m$ なら $\abs{A}=m\abs{B}$。
+:::
+
+::: proof
+\ref{comb:double-counting} を $f$ のグラフ $R=\{(a,f(a)) : a\in A\}$ に当てはめる。$\abs{R(a)}=1$ なので左辺は $\abs{A}$、右辺は $\sum_{b}\abs{f^{-1}(b)}$。
+:::
+
+::: intuition
+「各段階の選び方が前の選び方によらず同じ個数だけある」とき、全体の個数は個数の積になる。これが**積の法則**の正確な形である。
+:::
+
+::: corollary 一般化された鳩の巣原理 {#comb:pigeonhole-general keywords="generalized pigeonhole principle" index="鳩の巣原理（一般化）|はとのすげんり"}
+有限集合の間の写像 $f\colon A\to B$ と $m\in\N$ について $\abs{A}>m\abs{B}$ なら、$\abs{f^{-1}(b)}\ge m+1$ となる $b\in B$ がある。
+:::
+
+::: proof
+すべての $b$ で $\abs{f^{-1}(b)}\le m$ なら、\ref{comb:fiber-count} より $\abs{A}=\sum_{b}\abs{f^{-1}(b)}\le m\abs{B}$ となり仮定に反する。
+:::
+
+::: supplement
+$m=1$, $\abs{A}=n+1$, $\abs{B}=n$ の場合が集合論の \ref{set:pigeonhole} である。ただしここでの証明は \ref{set:finite-union-product}（その背後の有限基数の算術）を使っており、\ref{set:pigeonhole} はその算術の土台にあるので、\ref{set:pigeonhole} の別証明にはならない。
+:::
+
+::: proposition 写像と部分集合の個数 {#comb:functions-subsets keywords="number of functions, number of subsets" index="写像の個数|しゃぞうのこすう, 部分集合の個数|ぶぶんしゅうごうのこすう"}
+有限集合 $X,Y$ について
+1. $\abs{Y^{X}}=\abs{Y}^{\abs{X}}$（ただし $0^{0}=1$）。
+2. $\abs{\mathcal{P}(X)}=2^{\abs{X}}$。
+:::
+
+::: proof
+$X\approx m$, $Y\approx n$ とすると \ref{set:function-set-bijections.1} より $Y^{X}\approx{}^{m}n$ で、\ref{set:finite-exponentiation} よりその濃度は $n^{m}$（$m=0$ のとき空写像だけで $1$）。(2) は \ref{set:function-set-bijections.6} の $\mathcal{P}(X)\approx{}^{X}2$（部分集合とその特性関数の対応）と (1) から従う。
+:::
+
+## 単射の個数と二項係数 {#comb:sec-bie-binomial}
+
+::: definition 下降階乗冪と階乗 {#comb:falling-factorial keywords="falling factorial, factorial" index="下降階乗冪|かこうかいじょうべき, 階乗|かいじょう"}
+$n\in\Z$, $k\in\N$ に対し $n^{\underline{k}}\defeq\prod_{i=0}^{k-1}(n-i)=n(n-1)\cdots(n-k+1)$（$n^{\underline{0}}=1$）を**下降階乗冪**といい、$n!\defeq n^{\underline{n}}$（$n\in\N$）を**階乗**という。$n\in\N$ かつ $k>n$ なら因子 $n-n=0$ を含むので $n^{\underline{k}}=0$ であり、$0\le k\le n$ なら $n!=n^{\underline{k}}\cdot(n-k)!$ である。
+:::
+
+::: intuition
+$n^{\underline{k}}$ は $n$ から 1 ずつ減らしながら $k$ 個掛けた積で、$n$ 個のものから順番をつけて $k$ 個並べる方法の数になる（次の定理）。
+:::
+
+::: theorem 単射の個数 {#comb:injections-count keywords="number of injections, permutations, k-permutations" index="順列|じゅんれつ, 単射の個数|たんしゃのこすう"}
+$\abs{X}=k$, $\abs{Y}=n$ の有限集合について、単射 $X\to Y$ の個数は $n^{\underline{k}}$ である。特に $k>n$ なら単射はない。
+:::
+
+::: intuition
+$X$ の元を一つずつ順に行き先を決めると、1 番目は $n$ 通り、2 番目は残りの $n-1$ 通り、… と選べる。この「残りの個数が前の選び方によらない」ことをファイバーの言葉で確かめる。
+:::
+
+::: proof
+$\mathrm{Inj}(X,Y)$ を単射全体とし、$k$ に関する帰納法で示す。
+
+**Step 1（$k=0$）.** 【主張：$X=\varnothing$ なら単射は 1 個】空写像だけがあり、それは単射である。$n^{\underline{0}}=1$。
+
+**Step 2（制限写像）.** 【主張：$k\ge1$, $x\in X$, $X'\defeq X\setminus\{x\}$ とすると、制限 $\Phi\colon\mathrm{Inj}(X,Y)\to\mathrm{Inj}(X',Y)$, $f\mapsto f\restr{X'}$ の各ファイバーの大きさは $n-k+1$】$\abs{X'}=k-1$（\ref{set:finite-basic.5}）。$g\in\mathrm{Inj}(X',Y)$ を固定する。$f\in\Phi^{-1}(g)$ は $f(x)$ の値だけで決まり、$f$ が単射であることは $f(x)\notin g[X']$ と同値である。よって $f\mapsto f(x)$ は $\Phi^{-1}(g)$ から $Y\setminus g[X']$ への全単射である。$g$ は単射なので $\abs{g[X']}=k-1$ で、$g[X']\subseteq Y$ なので $k-1\le n$、$\abs{Y\setminus g[X']}=n-(k-1)$（\ref{comb:sum-rule}）。
+
+**Step 3（帰納段階）.** 【主張：$\abs{\mathrm{Inj}(X,Y)}=n^{\underline{k}}$】\ref{comb:fiber-count} と Step 2 より $\abs{\mathrm{Inj}(X,Y)}=(n-k+1)\abs{\mathrm{Inj}(X',Y)}$。$\mathrm{Inj}(X',Y)=\varnothing$ のときもこの式は両辺 $0$ で正しい。帰納法の仮定 $\abs{\mathrm{Inj}(X',Y)}=n^{\underline{k-1}}$ を代入すると $n^{\underline{k-1}}(n-k+1)=n^{\underline{k}}$。
+
+::: hypcheck
+- **有限性**：Step 2 で $\abs{Y\setminus g[X']}$ を引き算で求めるのに使った。
+- 選択公理は使わない。Step 2 で $x\in X$ を一つ固定するのは、空でない集合の元を一つとるだけである。
+:::
+:::
+
+::: corollary 全単射と置換の個数 {#comb:bijections-count keywords="number of permutations, n factorial" index="置換の個数|ちかんのこすう"}
+$\abs{X}=\abs{Y}=n$ なら全単射 $X\to Y$ は $n!$ 個ある。特に $X$ の置換（全単射 $X\to X$）は $n!$ 個ある。
+:::
+
+::: proof
+\ref{set:finite-basic.2} より、単射 $X\to Y$ は全射でもある（$Y\approx X$ を通して単射 $X\to X$ に移せばよい）。よって全単射の個数は単射の個数 $n^{\underline{n}}=n!$ に等しい（\ref{comb:injections-count}）。
+:::
+
+::: definition 二項係数 {#comb:binomial-coefficient keywords="binomial coefficient, n choose k" index="二項係数|にこうけいすう"}
+$n,k\in\N$ に対し $\binom{n}{k}\defeq\abs{\mathcal{P}_{k}([n])}$ と定め、**二項係数**という。$\abs{X}=n$ なら全単射 $[n]\to X$ が $\mathcal{P}_{k}([n])$ と $\mathcal{P}_{k}(X)$ の全単射を引き起こすので、$\abs{\mathcal{P}_{k}(X)}=\binom{n}{k}$ でもある。$k\in\Z$, $k<0$ のときは $\binom{n}{k}\defeq0$ とする。
+:::
+
+::: intuition
+$\binom{n}{k}$ は「$n$ 個のものから順序を考えずに $k$ 個を選ぶ選び方の数」である。
+:::
+
+::: theorem 二項係数の公式 {#comb:binomial-formula keywords="binomial coefficient formula n!/(k!(n-k)!)" index="二項係数の公式|にこうけいすうのこうしき"}
+$n,k\in\N$ について $k!\binom{n}{k}=n^{\underline{k}}$。したがって
+$$
+\binom{n}{k}=\frac{n!}{k!\,(n-k)!}\quad(0\le k\le n),\qquad\binom{n}{k}=0\quad(k>n).
+$$
+:::
+
+::: intuition
+順序をつけて $k$ 個選ぶ方法（$n^{\underline{k}}$ 通り）は、順序をつけずに選んだ $k$ 個の集合ごとに、並べ方の $k!$ 通りずつに分かれる。
+:::
+
+::: proof
+**Step 1（像をとる写像）.** 【主張：$\Psi\colon\mathrm{Inj}([k],[n])\to\mathcal{P}_{k}([n])$, $f\mapsto f[[k]]$ は well-defined で全射】$f$ は単射なので $[k]\to f[[k]]$ は全単射で、$\abs{f[[k]]}=k$。逆に $S\in\mathcal{P}_{k}([n])$ なら全単射 $[k]\to S$ があり、それを $[n]$ への写像と見れば $\Psi$ による像は $S$ である。
+
+**Step 2（ファイバー）.** 【主張：各 $S\in\mathcal{P}_{k}([n])$ について $\abs{\Psi^{-1}(S)}=k!$】$\Psi^{-1}(S)$ は値域を $S$ に制限すると、全単射 $[k]\to S$ 全体と一対一に対応する。\ref{comb:bijections-count} よりその個数は $k!$。
+
+**Step 3（結論）.** \ref{comb:fiber-count} と \ref{comb:injections-count} より $n^{\underline{k}}=\abs{\mathrm{Inj}([k],[n])}=k!\binom{n}{k}$。$0\le k\le n$ なら \ref{comb:falling-factorial} の $n!=n^{\underline{k}}(n-k)!$ から公式を得る。$k>n$ なら $n^{\underline{k}}=0$ で $k!\neq0$ なので $\binom{n}{k}=0$。
+
+::: hypcheck
+- **$k!\neq0$**：Step 3 で割り算に使った（$\Z$ は整域）。
+:::
+:::
+
+::: proposition 二項係数の恒等式 {#comb:binomial-identities keywords="Pascal's rule, Vandermonde's identity, symmetry of binomial coefficients, absorption identity" index="パスカルの規則|ぱすかるのきそく, ヴァンデルモンドの恒等式|ゔぁんでるもんどのこうとうしき"}
+$n,m,k,j\in\N$ について次が成り立つ。
+1. （対称性）$0\le k\le n$ なら $\binom{n}{k}=\binom{n}{n-k}$。
+2. （パスカルの規則）$n\ge1$, $k\ge1$ なら $\binom{n}{k}=\binom{n-1}{k}+\binom{n-1}{k-1}$。
+3. $\sum_{k=0}^{n}\binom{n}{k}=2^{n}$。
+4. （ヴァンデルモンドの恒等式）$\binom{m+n}{k}=\sum_{i=0}^{k}\binom{m}{i}\binom{n}{k-i}$。
+5. （吸収）$k\ge1$ なら $k\binom{n}{k}=n\binom{n-1}{k-1}$。
+6. $\binom{n}{k}\binom{k}{j}=\binom{n}{j}\binom{n-j}{k-j}$（$j\le k$）。
+:::
+
+::: proof
+いずれも二つの集合の間の全単射か、二重数え上げで示す。
+
+**Step 1（(1)）.** $S\mapsto[n]\setminus S$ は $\mathcal{P}_{k}([n])$ から $\mathcal{P}_{n-k}([n])$ への全単射である（逆写像も補集合をとる写像で、$\abs{[n]\setminus S}=n-k$ は \ref{comb:sum-rule} から）。
+
+**Step 2（(2)）.** 【主張：$\mathcal{P}_{k}([n])$ は $n\notin S$ のものと $n\in S$ のものに分かれ、それぞれ $\binom{n-1}{k}$ 個と $\binom{n-1}{k-1}$ 個】前者はちょうど $\mathcal{P}_{k}([n-1])$ である。後者は $S\mapsto S\setminus\{n\}$ で $\mathcal{P}_{k-1}([n-1])$ と全単射に対応する（逆は $T\mapsto T\cup\{n\}$）。\ref{comb:sum-rule} から結論を得る。
+
+**Step 3（(3)・(4)）.** $\mathcal{P}([n])$ は $\mathcal{P}_{k}([n])$（$0\le k\le n$）の交わらない和なので、\ref{comb:sum-rule} と \ref{comb:functions-subsets} から (3)。(4) では $[m+n]=A\sqcup B$, $A=[m]$, $B=[m+n]\setminus[m]$ とし、$S\mapsto(S\cap A,S\cap B)$ を考える。【主張：これは $\mathcal{P}_{k}([m+n])$ から $\bigsqcup_{i=0}^{k}\mathcal{P}_{i}(A)\times\mathcal{P}_{k-i}(B)$ への全単射】逆写像は $(T,T')\mapsto T\cup T'$ で、$\abs{T\cup T'}=\abs{T}+\abs{T'}$（交わらないから）。右辺の濃度は \ref{set:finite-union-product} より $\sum_{i}\binom{m}{i}\binom{n}{k-i}$。
+
+**Step 4（(5)・(6)）.** 【主張：組 $(T,S)$ で $T\subseteq S\subseteq[n]$, $\abs{T}=j$, $\abs{S}=k$ を満たすものの個数は、両辺のどちらにも等しい】$S$ を先に選ぶと、各 $S$ について $T\in\mathcal{P}_{j}(S)$ は $\binom{k}{j}$ 個なので、総数は $\binom{n}{k}\binom{k}{j}$（\ref{comb:double-counting}）。$T$ を先に選ぶと、$S$ は $S\setminus T\in\mathcal{P}_{k-j}([n]\setminus T)$ で決まるので各 $T$ について $\binom{n-j}{k-j}$ 個、総数は $\binom{n}{j}\binom{n-j}{k-j}$。これが (6) で、$j=1$ とすると $\binom{n}{1}=n$, $\binom{k}{1}=k$ より (5) を得る。
+:::
+
+::: supplement
+**環論のページとの整合.** 環論の \ref{ring:binomial} は、整数 $\binom{n}{k}$ を「$\binom{n}{0}=\binom{n}{n}=1$ とパスカルの規則を満たすもの」として使っている。ここで定義した $\binom{n}{k}$ も $\binom{n}{0}=\binom{n}{n}=1$（$\mathcal{P}_{0}$ と $\mathcal{P}_{n}$ はそれぞれ $\varnothing$ と $[n]$ だけ）とパスカルの規則（\ref{comb:binomial-identities.2}）を満たすので、$n$ に関する帰納法で両者は一致する。したがって二項定理
+$$
+(x+y)^{n}=\sum_{k=0}^{n}\binom{n}{k}x^{k}y^{n-k}
+$$
+（可換な $x,y$）の係数は「$k$ 個を選ぶ選び方の数」である。直接にも、$(x+y)^{n}$ を $n$ 個の因子から $x$ か $y$ を一つずつ選ぶ $2^{n}$ 通りの積の和に展開し、$x$ を選ぶ因子の集合ごとにまとめれば、この解釈が見える。
+:::
+
+::: definition 多項係数 {#comb:multinomial-coefficient keywords="multinomial coefficient" index="多項係数|たこうけいすう"}
+$k_{1},\dots,k_{r}\in\N$, $k_{1}+\dots+k_{r}=n$ に対し、写像 $f\colon[n]\to[r]$ で $\abs{f^{-1}(i)}=k_{i}$（$i\in[r]$）を満たすものの個数を $\binom{n}{k_{1},\dots,k_{r}}$ と書き、**多項係数**という。$r=2$ のときは $f\mapsto f^{-1}(1)$ が $\mathcal{P}_{k_{1}}([n])$ への全単射なので $\binom{n}{k_{1},k_{2}}=\binom{n}{k_{1}}$ である。
+:::
+
+::: intuition
+$n$ 個の区別できる玉を、番号 $1,\dots,r$ の箱に、箱 $i$ にちょうど $k_{i}$ 個入るように配る方法の数である。
+:::
+
+::: theorem 多項係数の公式 {#comb:multinomial-formula keywords="multinomial coefficient formula" index="多項係数の公式|たこうけいすうのこうしき"}
+$k_{1}+\dots+k_{r}=n$ なら
+$$
+\binom{n}{k_{1},\dots,k_{r}}=\frac{n!}{k_{1}!\,k_{2}!\cdots k_{r}!}.
+$$
+:::
+
+::: intuition
+$n$ 個の玉を、大きさ $k_{1},\dots,k_{r}$ の番号付きの箱に分ける方法の数である。$n!$ 通りの並べ方のうち、各箱の中の並べ替え $k_{1}!\cdots k_{r}!$ 通りは同じ分け方を与える。
+:::
+
+::: proof
+$r$ に関する帰納法で示す。$r=1$ なら定数写像 $[n]\to[1]$ だけで、両辺は $1$。$r\ge2$ とし、条件を満たす写像全体を $F$ とする。
+
+**Step 1（最初の箱を決める写像）.** 【主張：$f\mapsto f^{-1}(1)$ は $F\to\mathcal{P}_{k_{1}}([n])$ の写像で、各ファイバーの大きさは $\binom{n-k_{1}}{k_{2},\dots,k_{r}}$】$S\in\mathcal{P}_{k_{1}}([n])$ を固定する。$f^{-1}(1)=S$ となる $f\in F$ は、$[n]\setminus S$ から $\{2,\dots,r\}$ への写像で各 $i\ge2$ のファイバーが $k_{i}$ 個のものと一対一に対応する。$\abs{[n]\setminus S}=n-k_{1}$ で、$[n]\setminus S\approx[n-k_{1}]$、$\{2,\dots,r\}\approx[r-1]$ と番号を付け替えれば、その個数は $\binom{n-k_{1}}{k_{2},\dots,k_{r}}$ である。
+
+**Step 2（積と約分）.** 【主張：公式が成り立つ】\ref{comb:fiber-count}・\ref{comb:binomial-formula}・帰納法の仮定より
+$$
+\abs{F}=\binom{n}{k_{1}}\binom{n-k_{1}}{k_{2},\dots,k_{r}}=\frac{n!}{k_{1}!\,(n-k_{1})!}\cdot\frac{(n-k_{1})!}{k_{2}!\cdots k_{r}!}.
+$$
+$(n-k_{1})!$ を約分すればよい。
+:::
+
+::: corollary 多項定理 {#comb:multinomial-theorem keywords="multinomial theorem" index="多項定理|たこうていり"}
+可換環 $A$ の元 $x_{1},\dots,x_{r}$ と $n\in\N$ について
+$$
+(x_{1}+\dots+x_{r})^{n}=\sum_{k_{1}+\dots+k_{r}=n}\binom{n}{k_{1},\dots,k_{r}}x_{1}^{k_{1}}\cdots x_{r}^{k_{r}}.
+$$
+和は $k_{1}+\dots+k_{r}=n$ を満たす $(k_{1},\dots,k_{r})\in\N^{r}$ 全体にわたる。
+:::
+
+::: proof
+$r$ に関する帰納法。$r=1$ は明らか。$r\ge2$ なら $y\defeq x_{2}+\dots+x_{r}$ とおき、\ref{ring:binomial} と帰納法の仮定から
+$$
+(x_{1}+y)^{n}=\sum_{k_{1}=0}^{n}\binom{n}{k_{1}}x_{1}^{k_{1}}\sum_{k_{2}+\dots+k_{r}=n-k_{1}}\binom{n-k_{1}}{k_{2},\dots,k_{r}}x_{2}^{k_{2}}\cdots x_{r}^{k_{r}}.
+$$
+\ref{comb:multinomial-formula} の証明の Step 2 の等式 $\binom{n}{k_{1}}\binom{n-k_{1}}{k_{2},\dots,k_{r}}=\binom{n}{k_{1},\dots,k_{r}}$ を使えばよい。
+:::
+
+## 重複組合せ {#comb:sec-bie-multisets}
+
+::: definition 多重集合 {#comb:multiset keywords="multiset, combination with repetition" index="多重集合|たじゅうしゅうごう, 重複組合せ|ちょうふくくみあわせ"}
+有限集合 $X$ 上の**多重集合**とは写像 $m\colon X\to\N$ のことで、$m(x)$ を $x$ の**重複度**、$\abs{m}\defeq\sum_{x\in X}m(x)$ を大きさという。大きさ $k$ の多重集合を **$k$ 重複組合せ**ともいう。
+:::
+
+::: intuition
+$X$ の元を、同じものを何度でもよいとして $k$ 個選ぶ（順序は考えない）選び方が、大きさ $k$ の多重集合である。
+:::
+
+::: theorem 重複組合せの個数 {#comb:multiset-count keywords="number of multisets, stars and bars" index="重複組合せの個数|ちょうふくくみあわせのこすう"}
+$n\ge1$, $k\ge0$ のとき、$n$ 元集合上の大きさ $k$ の多重集合の個数は $\binom{n+k-1}{k}$ である。
+:::
+
+::: intuition
+$n$ 種類のものから重複を許して $k$ 個選ぶ方法は、$k$ 個の玉と $n-1$ 本の仕切りを一列に並べる方法と同じ数だけある。
+:::
+
+::: proof
+$X=[n]$ としてよい。大きさ $k$ の多重集合全体を $M$、$[n]$ の値をとる広義単調増加列 $a_{1}\le a_{2}\le\dots\le a_{k}$ 全体を $W$ とする。
+
+**Step 1（多重集合と単調増加列）.** 【主張：$\alpha\colon W\to M$, $\alpha(a)(i)\defeq\abs{\{t\in[k] : a_{t}=i\}}$ は全単射】$\abs{\alpha(a)}=\sum_{i}\abs{\{t : a_{t}=i\}}=k$（\ref{comb:fiber-count}）。$N_{i}\defeq\sum_{j\le i}\alpha(a)(j)$ とおくと、$a$ が単調なので $\{t : a_{t}\le i\}=[N_{i}]$ であり、したがって $a_{t}=\min\{i : N_{i}\ge t\}$ と $\alpha(a)$ から $a$ が復元できる（単射）。逆に $m\in M$ が与えられたら、$N_{i}\defeq\sum_{j\le i}m(j)$ と $a_{t}\defeq\min\{i : N_{i}\ge t\}$ で定まる列は（$N$ が単調なので）広義単調増加で、$a_{t}=i\iff N_{i-1}<t\le N_{i}$ より $\abs{\{t : a_{t}=i\}}=N_{i}-N_{i-1}=m(i)$ を満たす（全射）。
+
+**Step 2（ずらして狭義単調にする）.** 【主張：$a\mapsto\{a_{t}+t-1 : t\in[k]\}$ は $W$ から $\mathcal{P}_{k}([n+k-1])$ への全単射】$b_{t}\defeq a_{t}+t-1$ とおくと $b_{t+1}-b_{t}=a_{t+1}-a_{t}+1\ge1$ なので $b$ は狭義単調増加で、$1\le b_{1}$, $b_{k}\le n+k-1$。したがって $\{b_{t}\}$ は $[n+k-1]$ の $k$ 元部分集合である。逆に $k$ 元部分集合の元を小さい順に $b_{1}<\dots<b_{k}$ と並べ、$a_{t}\defeq b_{t}-t+1$ とおけば、$b_{t+1}\ge b_{t}+1$ より $a$ は広義単調増加、$b_{1}\ge1$ と $b_{k}\le n+k-1$ より $a_{t}\in[n]$（$b_{t}\ge t$, $b_{t}\le n+t-1$ を帰納的に得る）。二つの対応は互いに逆である。
+
+**Step 3.** Step 1・2 より $\abs{M}=\abs{\mathcal{P}_{k}([n+k-1])}=\binom{n+k-1}{k}$。
+
+::: hypcheck
+- **$n\ge1$**：Step 2 で $[n+k-1]$ を使った。$n=0$ のときは、大きさ $0$ の多重集合（空写像）が 1 個、大きさ $k\ge1$ のものは 0 個で、$k\ge1$ では公式の値 $\binom{k-1}{k}=0$ と一致するが、$k=0$ では $\binom{-1}{0}$ が \ref{comb:binomial-coefficient} の範囲外になる。
+:::
+:::
+
+::: corollary 不定方程式の解の個数 {#comb:compositions keywords="number of nonnegative integer solutions, compositions" index="合成（整数の）|ごうせい"}
+$n\ge1$ とする。
+1. $x_{1}+\dots+x_{n}=k$ の非負整数解 $(x_{1},\dots,x_{n})\in\N^{n}$ は $\binom{n+k-1}{k}$ 個ある。
+2. $x_{1}+\dots+x_{n}=k$ の正の整数解は $\binom{k-1}{n-1}$ 個ある（$k\ge1$）。
+:::
+
+::: proof
+(1) は解 $(x_{i})$ と多重集合 $i\mapsto x_{i}$ の同一視と \ref{comb:multiset-count} による。(2) は $y_{i}\defeq x_{i}-1$ が $y_{1}+\dots+y_{n}=k-n$ の非負整数解との全単射を与えるので、$k\ge n$ なら $\binom{k-1}{k-n}=\binom{k-1}{n-1}$（\ref{comb:binomial-identities.1}）、$k<n$ なら解はなく $\binom{k-1}{n-1}=0$ と一致する。
+:::
+
+## 問題 {#comb:sec-bie-problems}
+
+::: problem {#comb:prob-bie-weighted-sum}
+$n\ge1$ について $\sum_{k=0}^{n}k\binom{n}{k}=n2^{n-1}$ を、組 $(S,x)$（$S\subseteq[n]$, $x\in S$）の二重数え上げで示せ。
+:::
+
+::: solution
+$S$ ごとに数えると、各 $S$ について $x$ の選び方は $\abs{S}$ 通りなので、総数は $\sum_{S}\abs{S}=\sum_{k}k\binom{n}{k}$。$x$ ごとに数えると、$x\in[n]$ を固定したとき $S$ は $S\setminus\{x\}\subseteq[n]\setminus\{x\}$ で決まるので $2^{n-1}$ 通り（\ref{comb:functions-subsets}）で、総数は $n2^{n-1}$。\ref{comb:double-counting} より両者は等しい。（\ref{comb:binomial-identities.5} を使って $\sum_{k}n\binom{n-1}{k-1}=n2^{n-1}$ と計算してもよい。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
