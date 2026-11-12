@@ -481,7 +481,7 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | OD-02b | 02-stability-boundary/04-limit-cycles | リミットサイクルとベンディクソン–デュラックの判定法 | リミットサイクル、ファン・デル・ポール方程式の周期解（すべての μ>0）、ベンディクソン–デュラック（リウヴィルの公式による）、3 次元以上（2026-11-11 に OD-02 を分割） | 完了 |
 | OD-03 | 02-stability-boundary/05-sturm-liouville | 境界値問題とスツルム–リウヴィル理論 | 作用素と境界条件、グリーン関数、フレドホルムの二者択一、固有値問題（コンパクト自己共役作用素） | 完了 |
 | OD-03b | 02-stability-boundary/06-eigenfunction-expansion | 固有関数展開とスツルムの振動定理 | 固有関数展開とフーリエ級数の例、スツルムの比較・分離定理、プリューファー変換と振動定理（2026-11-05 に OD-03 を分割） | 完了 |
-| OD-E | 02-stability-boundary/07-exercises | 演習 | 系列の演習 | 未着手 |
+| OD-E | 02-stability-boundary/07-exercises | 演習 | 系列の演習 | 完了 |
 | PD-01 | 05-partial-differential-equations/01-classical/01-characteristics | 1 階偏微分方程式と特性曲線 | 偏微分方程式の分類、輸送方程式（前提を外した反例 5 つ）、準線形方程式のコーシー問題と非特性条件 | 完了 |
 | PD-01b | 01-classical/02-burgers | バーガース方程式と衝撃波 | 衝撃波の形成時刻、弱解とランキン–ユゴニオ条件、リーマン問題、エントロピー条件（fact）、特性帯（2026-11-05 に PD-01 を分割） | 完了 |
 | PD-02 | 01-classical/03-harmonic-functions | 調和関数 | 平均値の性質とその逆、強・弱最大値原理、ディリクレ問題の一意性と連続依存 | 完了 |
