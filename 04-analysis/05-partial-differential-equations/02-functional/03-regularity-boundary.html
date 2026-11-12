@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>弱解の境界正則性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/03-regularity-boundary.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 弱解の境界正則性 {#pde:page-regularity-boundary keywords="boundary regularity of weak solutions, flattening the boundary, tangential difference quotients, normal derivatives from the equation, global H^2 estimate, C^2 boundary, higher boundary regularity, smoothness up to the boundary, classical solutions of the Dirichlet problem, higher order reflection, reentrant corner, L-shaped domain, r^{2/3} sin(2 theta/3), 境界正則性, 境界の平坦化, 大域評価, 入隅, L 字型領域"}
+
+前のページ（\ref{pde:page-regularity}）では、弱解が領域の内側で、係数と右辺の滑らかさに見合うだけ滑らかになることを示した。このページでは境界まで込めた正則性を扱う。境界 $\partial\Omega$ が $C^{2}$ 級で、$u\in H_{0}^{1}(\Omega)$ がディリクレ問題の弱解なら、$u$ は $\Omega$ 全体で $H^{2}$ に入る。方法は三段階である：(1) 境界の近くを座標変換で平らにする（**境界の平坦化**）、(2) 平らな境界に沿う方向（接方向）には差分商がそのまま使える、(3) 境界に垂直な方向（法方向）の 2 階導関数は、方程式そのものから他の導関数で書き表す。高階版と合わせると、係数・境界・データが滑らかならディリクレ問題は $C^{\infty}(\overline{\Omega})$ の解をもつ。前のページの存在定理と合わせ、これで関数解析的手法は古典解に戻ってくる。境界に角があると $H^{2}$ 正則性が本当に崩れることは、次のページ（\see{pde:page-regularity-counterexamples}）で L 字型の領域を使って確かめる。
+
+## 記法と定義の確認 {#pde:sec-rgb-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$（$n\ge2$）は有界な開集合、$L$, $B$, $\theta$, $\Lambda$, $b_{\infty}$, $c_{\infty}$, 弱解は \ref{pde:bilinear-elliptic-form}, \ref{pde:weak-elliptic-solution} のとおりで、$L$ はつねに一様楕円型。$f\in L^{2}$ の場合だけを扱う。
+- 前のページの記号：$V\Subset\Omega$、$H_{\mathrm{loc}}^{k}$、$C_{b}^{m}(U)$、$C^{m}(\overline{\Omega})$、差分商 $D_{k}^{h}$（\ref{pde:reg-difference-quotient}）と離散的な部分積分 \eqref{pde:eq-rg-discrete-parts}、差分商の評価 \ref{pde:reg-difference-lemma}、局所化 \ref{pde:reg-localization}、積 \ref{pde:reg-c1-product}、領域の中の弱解 \ref{pde:reg-interior-weak-solution}、差分商によるエネルギー評価 \ref{pde:reg-difference-energy}、内部正則性 \ref{pde:reg-interior-h2}, \ref{pde:reg-interior-higher}, \ref{pde:reg-interior-smooth}。
+- **$C^{k}$ 境界**：\ref{fa:c1-boundary.2} の組 $(A_{i},W_{i},\gamma_{i},a_{i})$ で、$\gamma_{i}$ が $\overline{W_{i}}$ の近傍で $C^{k}$ 級のとき、$\partial\Omega$ は $C^{k}$ 級であるという（\ref{pde:perron-c2-boundary} と同じ約束）。$C^{\infty}$ 級も同様。$W_{i}$ は $\mathbb{R}^{n-1}$ の開直方体にとれる（はじめの組の $W_{i}$ を小さな直方体で覆い直せばよい）ので、以下そうする。
+- **箱**：$W\subset\mathbb{R}^{n-1}$ を開直方体、$a>0$ として $P=W\times(-a,a)$ の形の開集合を箱といい、$P^{+}\defeq W\times(0,a)$ とおく。箱 $P'=W'\times(-a',a')$ について、$\overline{W'}\subset W$ かつ $a'<a$ のとき $P'\Subset P$ と書く（$\overline{P'}\subset P$ と同じ）。$y=(y',y_{n})$ と書き、$k<n$ の $e_{k}$ を**接方向**、$e_{n}$ を**法方向**という。$\mathbb{R}_{+}^{n}\defeq\{y_{n}>0\}$。
+- 変数変換公式は \ref{meas:change-of-variables}（$J_{\Phi}=|\det D\Phi|$）、ソボレフ関数の変数変換は \ref{fa:sobolev-chain-rule}、ソボレフの埋め込みは \ref{fa:higher-embeddings}、ガルディングの不等式と存在定理は \ref{pde:bilinear-energy-estimates}, \ref{pde:weak-elliptic-existence}、フレドホルムの二者択一は \ref{pde:weak-fredholm-alternative}、古典解と弱解は \ref{pde:weak-elliptic-classical}。
+- **選択公理**：このページの議論では使わない。ただし \ref{pde:reg-classical-dirichlet.2} は \ref{pde:weak-fredholm-alternative} を使うので、そちらの従属選択公理に依存する。
+:::
+
+## 境界の平坦化 {#pde:sec-rgb-flattening}
+
+::: lemma 高階の変数変換 {#pde:reg-chain-higher keywords="if Phi is a C^r diffeomorphism with bounded derivatives up to order r and bounded D(Phi^{-1}), then g in H^r(V) implies g o Phi in H^r(U) with a norm bound" index="ソボレフ関数の高階の変数変換|そぼれふかんすうのこうかいのへんすうへんかん"}
+$r\ge1$、$\Phi\colon U\to V$ を開集合の間の $C^{r}$ 微分同相写像で、$\Phi$ の $r$ 階までの導関数と $D(\Phi^{-1})$ が有界なものとする。$g\in H^{r}(V)$ なら $g\circ\Phi\in H^{r}(U)$ で、$\Phi$ だけで決まる $C$ について $\|g\circ\Phi\|_{H^{r}(U)}\le C\|g\|_{H^{r}(V)}$。
+:::
+
+::: proof
+$r$ についての帰納法。$r=1$ は \ref{fa:sobolev-chain-rule}。$r\ge2$ とする。\ref{fa:sobolev-chain-rule} から $\partial_{j}(g\circ\Phi)=\sum_{l}(\partial_{l}g\circ\Phi)\,\partial_{j}\Phi_{l}$。$\partial_{l}g\in H^{r-1}(V)$ と、$C^{r-1}$ 級の $\Phi$ に帰納法の仮定を使うと $\partial_{l}g\circ\Phi\in H^{r-1}(U)$、$\partial_{j}\Phi_{l}\in C_{b}^{r-1}(U)$ なので \ref{pde:reg-c1-product.3} から積は $H^{r-1}(U)$ に入る。\ref{pde:reg-c1-product.2} から $g\circ\Phi\in H^{r}(U)$ と評価が従う。
+:::
+
+::: lemma 境界の平坦化 {#pde:reg-flattening keywords="flattening the boundary: in a C^r boundary chart, Phi(x) = (z', z_n - gamma(z')) with z = A x maps U onto a box P and Omega cap U onto P^+, has Jacobian determinant of absolute value 1, and transforms a weak solution in H^1_0 into a weak solution of an operator with coefficients a~ = (D Phi) a (D Phi)^T, still uniformly elliptic, whose cut-offs lie in H^1_0(P^+)" index="境界の平坦化|きょうかいのへいたんか"}
+$\partial\Omega$ を $C^{r}$ 級（$r\ge2$）、$(A,W,\gamma,a)$ をその組の一つ、$U$ を \ref{fa:c1-boundary.2} の対応する開集合とし、$z=Ax$ として $\Phi(x)\defeq(z',z_{n}-\gamma(z'))$、$P\defeq W\times(-a,a)$ とおく。
+1. $\Phi\colon U\to P$ は $C^{r}$ 微分同相写像で、$\Phi(\Omega\cap U)=P^{+}$、$|\det D\Phi|=1$、$\Phi$ と $\Phi^{-1}$ の $r$ 階までの導関数は有界。
+2. $a^{ij}\in C^{r-1}(\overline{\Omega})$、$b^{i},c\in L^{\infty}$（あるいは $C^{r-1}(\overline{\Omega})$）、$f\in L^{2}(\Omega)$ とし、$u\in H_{0}^{1}(\Omega)$ を $Lu=f$ の弱解とする。$x=\Phi^{-1}(y)$ として
+$$
+\tilde a^{kl}(y)\defeq\sum_{i,j}a^{ij}(x)\,\partial_{i}\Phi_{k}(x)\,\partial_{j}\Phi_{l}(x),\qquad\tilde b^{k}(y)\defeq\sum_{i}b^{i}(x)\,\partial_{i}\Phi_{k}(x),
+$$
+$\tilde c\defeq c\circ\Phi^{-1}$, $\tilde f\defeq f\circ\Phi^{-1}$, $\tilde u\defeq u\circ\Phi^{-1}$ とおき、$P^{+}$ の上の双線形形式を $\tilde B$ とする。このとき
+   - (a) $\tilde a^{kl}\in C_{b}^{r-1}(P^{+})$（$b,c$ が $C^{r-1}(\overline{\Omega})$ なら $\tilde b^{k},\tilde c$ も）で、$\tilde a$ は $\tilde\theta\defeq\theta/M^{2}$（$M\defeq\sup\|D(\Phi^{-1})\|$）で一様楕円型。
+   - (b) $\tilde u\in H^{1}(P^{+})$, $\|\tilde u\|_{H^{1}(P^{+})}\le C\|u\|_{H^{1}(\Omega)}$、$\|\tilde f\|_{L^{2}(P^{+})}\le\|f\|_{2}$。
+   - (c) すべての $\tilde v\in H_{0}^{1}(P^{+})$ について $\tilde B[\tilde u,\tilde v]=(\tilde f,\tilde v)_{P^{+}}$。
+   - (d) すべての $\zeta\in C_{c}^{\infty}(P)$ について $\zeta\tilde u\in H_{0}^{1}(P^{+})$。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：1 が成り立つ】逆写像は $y\mapsto A^{-1}(y',y_{n}+\gamma(y'))$ で、どちらも $C^{r}$。$\Phi$ の微分は「$z\mapsto(z',z_{n}-\gamma(z'))$ の微分（対角成分が $1$ の三角行列）」と $A$ の積なので $|\det D\Phi|=|\det A|=1$。$\gamma$ は $\overline{W}$ のコンパクトな近傍で $C^{r}$ なので導関数は有界。$U$ と $\Omega\cap U$ の像は \ref{fa:c1-boundary.2} の定義から $P$ と $P^{+}$。
+
+**Step 2（(a)）.** 【主張：$\tilde a$ は $C_{b}^{r-1}$ で一様楕円型】$a^{ij}$ と $\partial_{i}\Phi_{k}$ は $C^{r-1}$ で導関数が有界、$\Phi^{-1}$ は導関数が有界なので、合成と積は $C_{b}^{r-1}(P^{+})$。$\eta\in\mathbb{R}^{n}$ について $\xi\defeq D\Phi(x)^{\mathsf{T}}\eta$ とおくと $\sum\tilde a^{kl}\eta_{k}\eta_{l}=\sum a^{ij}\xi_{i}\xi_{j}\ge\theta|\xi|^{2}$ で、$\eta=D(\Phi^{-1})(y)^{\mathsf{T}}\xi$ から $|\eta|\le M|\xi|$。
+
+**Step 3（(b)(c)）.** 【主張：変換した方程式が成り立つ】(b) は \ref{fa:sobolev-chain-rule}（$\Phi^{-1}$ に使う）と、$J_{\Phi}=1$ の変数変換公式 \ref{meas:change-of-variables.3}。$\tilde v\in C_{c}^{\infty}(P^{+})$ について $v\defeq\tilde v\circ\Phi$（$\Omega\cap U$ の外で $0$）は $C_{c}^{1}(\Omega)$ に入り、\ref{pde:reg-localization.3} から $H_{0}^{1}(\Omega)$ の元である。$B[u,v]=(f,v)$ の被積分関数は $\Omega\cap U$ の外で $0$ で、\ref{fa:sobolev-chain-rule} の $\partial_{i}u=\sum_{k}(\partial_{k}\tilde u\circ\Phi)\partial_{i}\Phi_{k}$, $\partial_{j}v=\sum_{l}(\partial_{l}\tilde v\circ\Phi)\partial_{j}\Phi_{l}$ を代入して \ref{meas:change-of-variables.3} で $y=\Phi(x)$ に変数を変えると、$\tilde B[\tilde u,\tilde v]=(\tilde f,\tilde v)$。両辺は $\tilde v$ について $H^{1}(P^{+})$ ノルムで連続なので $H_{0}^{1}(P^{+})$ に延びる。
+
+**Step 4（(d)）.** 【主張：$\zeta\tilde u\in H_{0}^{1}(P^{+})$】$\varphi_{m}\in C_{c}^{\infty}(\Omega)$ を $H^{1}$ で $u$ に収束する列とする。$\hat\zeta\defeq\zeta\circ\Phi\in C_{c}^{1}(U)$ について $\hat\zeta\varphi_{m}\in C_{c}^{1}(\Omega\cap U)$ で、\ref{pde:reg-c1-product.3} から $H^{1}(\Omega\cap U)$ で $\hat\zeta u$ に収束する。$\Phi^{-1}$ で引き戻した $(\hat\zeta\varphi_{m})\circ\Phi^{-1}=\zeta\cdot(\varphi_{m}\circ\Phi^{-1})$ は $C_{c}^{1}(P^{+})\subset H_{0}^{1}(P^{+})$（\ref{pde:reg-localization.3}）に入り、\ref{fa:sobolev-chain-rule} の評価から $H^{1}(P^{+})$ で $\zeta\tilde u$ に収束する。$H_{0}^{1}(P^{+})$ は閉なので $\zeta\tilde u$ もそこに入る。
+
+::: hypcheck
+- **境界が $C^{2}$（$r\ge2$）**：Step 2 で $\partial_{i}\Phi_{k}\in C^{1}$、つまり $\tilde a\in C^{1}$ を得るのに使った。境界が $C^{1}$ なだけでは、変換後の主要部の係数は連続にすぎず、前のページの差分商の評価が使えない。
+- **$u\in H_{0}^{1}$**：Step 4 だけで使った。これが「平らな境界の上で $\tilde u=0$」の弱い形である。
+- **$|\det D\Phi|=1$**：変換後の形を見やすくするためだけで、一般の $C^{r}$ 微分同相でも $J_{\Phi}$ を係数に吸収すれば同じ。
+:::
+:::
+
+平らになった境界の近くでは、接方向の平行移動が $P^{+}$ を保つ。$H_{0}^{1}$ との相性を確かめておく。
+
+::: lemma 接方向の平行移動と H¹₀ {#pde:reg-tangential-h10 keywords="for g in H^1_0(P^+) vanishing outside a compact subset of the box P: multiplication by C^1 functions and small tangential translations preserve H^1_0(P^+); if g in H^2 then tangential derivatives of g lie in H^1_0(P^+); the extension by zero lies in H^1(R^n)" index="接方向の平行移動|せっほうこうのへいこういどう"}
+$P$ を箱、$g\in H_{0}^{1}(P^{+})$ とする。
+1. $g$ を $P^{+}$ の外で $0$ と延ばしたもの $\bar g$ は $H^{1}(\mathbb{R}^{n})$ に入り、$\partial_{j}\bar g$ は $\partial_{j}g$ を $0$ で延ばしたもの。
+2. $\eta\in C_{b}^{1}(\mathbb{R}^{n})$ なら $\eta g\in H_{0}^{1}(P^{+})$。
+
+以下、$g$ はコンパクト集合 $K\subset P$（$\{y_{n}=0\}$ と交わってよい）の外で a.e. に $0$ とし、$\delta_{K}\defeq\frac12\operatorname{dist}(K,\mathbb{R}^{n}\setminus P)$、$k<n$ とする。
+3. $|t|<\delta_{K}$ なら、$\tau_{t}g(y)\defeq\bar g(y+te_{k})$ は $H_{0}^{1}(P^{+})$ に入る。
+4. さらに $g\in H^{2}(P^{+})$ なら、$\partial_{k}g\in H_{0}^{1}(P^{+})$。
+5. $K\subset P''$ となる箱 $P''\subset P$ があれば、$g\in H_{0}^{1}(P''^{+})$（$P''^{+}$ に制限したもの）。
+:::
+
+::: proof
+$g_{m}\in C_{c}^{\infty}(P^{+})$ を $H^{1}(P^{+})$ で $g$ に収束する列とする。
+
+**1・2.** $\bar g_{m}\in C_{c}^{\infty}(\mathbb{R}^{n})$ は $H^{1}(\mathbb{R}^{n})$ のコーシー列で、極限は $\bar g$、その弱微分は $\partial_{j}g_{m}$ の $0$ 延長の極限である（\ref{fa:sobolev-complete.1}）。2 は、$\eta g_{m}\in C_{c}^{1}(P^{+})\subset H_{0}^{1}(P^{+})$（\ref{pde:reg-localization.3}）が \ref{pde:reg-c1-product.3} から $\eta g$ に収束することから。
+
+**3.** 【主張：$\tau_{t}g\in H_{0}^{1}(P^{+})$】$\eta\in C_{c}^{\infty}(P)$ を、$K$ の近傍で $1$、台が $K+B(0,\delta_{K})$ に含まれるものとする（\ref{fa:test-function-density.2}）。$\eta g_{m}\to\eta g=g$。$\tau_{t}(\eta g_{m})$ の台は $(\operatorname{supp}\eta\cap\operatorname{supp}g_{m})-te_{k}$ で、これは $K+B(0,2\delta_{K})\subset P$ に含まれ、$y_{n}$ 座標は変わらないので $P^{+}$ のコンパクト集合である。よって $\tau_{t}(\eta g_{m})\in C_{c}^{\infty}(P^{+})$。平行移動は $H^{1}(\mathbb{R}^{n})$ の等長写像なので（1 の延長で考える）、$\tau_{t}(\eta g_{m})\to\tau_{t}g$。
+
+**4.** 【主張：$\partial_{k}g\in H_{0}^{1}(P^{+})$】$0<|h|<\delta_{K}$ なら 3 から $D_{k}^{h}g\in H_{0}^{1}(P^{+})$ で、$K\cup(K-he_{k})$ の外で $0$。$V_{K}\defeq(K+B(0,\delta_{K}))\cap P^{+}$ とおくと $V_{K}+se_{k}\subset P^{+}$（$|s|\le\frac{\delta_{K}}{2}$）。\ref{pde:reg-difference-lemma.3} を $g$ と $\partial_{j}g$ に使うと、$D_{k}^{h}g\to\partial_{k}g$, $\partial_{j}D_{k}^{h}g=D_{k}^{h}\partial_{j}g\to\partial_{k}\partial_{j}g$（$L^{2}(V_{K})$ で）。$V_{K}$ の外ではどちらも $0$（$P^{+}\setminus K$ は開集合で、そこで $g=0$ なので弱微分も $0$）。よって $H^{1}(P^{+})$ で収束し、$H_{0}^{1}$ は閉なので $\partial_{k}g\in H_{0}^{1}(P^{+})$。
+
+**5.** $\eta\in C_{c}^{\infty}(P'')$ を $K$ の近傍で $1$ とすると、$\eta g_{m}\in C_{c}^{\infty}(P''^{+})$ は $H^{1}(P''^{+})$ で $\eta g=g$ に収束する。
+:::
+
+## 境界での H² 正則性 {#pde:sec-rgb-h2}
+
+平らな境界の近くの評価を先に示す。以下の補題の状況をまとめて **(H)** と呼ぶ。
+
+**(H)**：$P$ は箱、$\tilde a^{kl}\in C_{b}^{1}(P^{+})$ は $P^{+}$ で一様楕円型（定数 $\tilde\theta$）、$\tilde b^{k},\tilde c\in L^{\infty}(P^{+})$、$\tilde f\in L^{2}(P^{+})$、$\tilde u\in H^{1}(P^{+})$ で、(c) すべての $\tilde v\in H_{0}^{1}(P^{+})$ について $\tilde B[\tilde u,\tilde v]=(\tilde f,\tilde v)_{P^{+}}$、(d) すべての $\zeta\in C_{c}^{\infty}(P)$ について $\zeta\tilde u\in H_{0}^{1}(P^{+})$。
+
+::: lemma 半空間の箱での H² 評価 {#pde:reg-halfbox-h2 keywords="H^2 regularity near a flat boundary: under (H), for every box P' compactly inside P, u~ is in H^2(P'^+) with ||u~||_{H^2(P'^+)} <= C(||f~|| + ||u~||_{H^1(P^+)}); tangential second derivatives by difference quotients, the normal one from the equation" index="平らな境界の近くの正則性|たいらなきょうかいのちかくのせいそくせい"}
+(H) を仮定する。各箱 $P'\Subset P$ について、$\tilde u\in H^{2}(P'^{+})$ で、$\tilde u,\tilde f$ によらない $C$ について
+$$
+\|\tilde u\|_{H^{2}(P'^{+})}\le C\bigl(\|\tilde f\|_{L^{2}(P^{+})}+\|\tilde u\|_{H^{1}(P^{+})}\bigr),
+$$
+さらに $P'^{+}$ の a.e. の点で $-\sum_{k,l}\tilde a^{kl}\partial_{k}\partial_{l}\tilde u-\sum_{k,l}(\partial_{l}\tilde a^{kl})\partial_{k}\tilde u+\sum_{k}\tilde b^{k}\partial_{k}\tilde u+\tilde c\tilde u=\tilde f$。
+:::
+
+::: intuition
+平らな境界の上で $0$ になる弱解は、境界の手前まで 2 回微分できる。境界に沿った方向の 2 階導関数は差分で、境界に垂直な方向の 2 階導関数は方程式を解いて求める。
+:::
+
+::: proof
+$P=W\times(-a,a)$, $P'=W'\times(-a',a')$ とし、開直方体 $W_{2},W_{1}$ と $a''$ を $\overline{W'}\subset W_{2}$, $\overline{W_{2}}\subset W_{1}$, $\overline{W_{1}}\subset W$, $a'<a''<a$ となるようにとる。$\zeta\in C_{c}^{\infty}(W_{2}\times(-a'',a''))$ を $\overline{P'}$ の近傍で $1$、$0\le\zeta\le1$ とし（\ref{fa:test-function-density.2}）、$h_{0}>0$ を、$W_{2}$ の各点から $\mathbb{R}^{n-1}\setminus W_{1}$ まで、$W_{1}$ の各点から $\mathbb{R}^{n-1}\setminus W$ までの距離より小さく、さらに $h_{0}\le\frac14\operatorname{dist}(\operatorname{supp}\zeta,\mathbb{R}^{n}\setminus P)$ となるようにとる。$U\defeq P^{+}$, $V\defeq W_{1}\times(0,a)$、$\tilde F\defeq\tilde f-\sum\tilde b^{k}\partial_{k}\tilde u-\tilde c\tilde u$ とおく。
+
+**Step 1.** 【主張：$k<n$ について、$U,V,\zeta,k,h_{0}$ は \ref{pde:reg-difference-energy} の状況にあり、$0<|h|\le h_{0}$ で $v_{h}\in H_{0}^{1}(P^{+})$】$k<n$ の平行移動は $y_{n}$ を変えないので、$h_{0}$ のとり方から $V+te_{k}\subset U$、$(S+[-h_{0},h_{0}]e_{k})\cap U\subset V$（$S=\operatorname{supp}\zeta$）。$V$ の上で $z_{h}=\frac1h\bigl(\tau_{h}(\zeta_{h}^{2}\tilde u)-\zeta^{2}\tilde u\bigr)$（$\zeta_{h}(y)\defeq\zeta(y-he_{k})\in C_{c}^{\infty}(P)$）と書け、$U\setminus V$ では両辺 $0$。(d) から $\zeta^{2}\tilde u,\zeta_{h}^{2}\tilde u\in H_{0}^{1}(P^{+})$ で、どちらも $P$ のコンパクト集合の外で $0$ なので、\ref{pde:reg-tangential-h10.3} から $z_{h}\in H_{0}^{1}(P^{+})$。同じ理由で $v_{h}=-\frac{1}{-h}(\tau_{-h}z_{h}-z_{h})\in H_{0}^{1}(P^{+})$。ここで \ref{pde:reg-tangential-h10.3} の条件 $|h|<\delta_{K}$ は、$K=S$ では $\delta_{K}\ge2h_{0}$、$K=S\cup(S+he_{k})$ では $\delta_{K}\ge\frac38\operatorname{dist}(S,\mathbb{R}^{n}\setminus P)\ge\frac32h_{0}$ から満たされる。
+
+**Step 2（接方向）.** 【主張：$k<n$ とすべての $l$ について $\partial_{k}\partial_{l}\tilde u\in L^{2}(P'^{+})$ で、ノルムは $C(\|\tilde f\|+\|\tilde u\|_{H^{1}(P^{+})})$ 以下】(c) を $v_{h}$ に使い 1 階・0 階の項を右辺に移すと、\ref{pde:reg-difference-energy.2} の仮定の等式が $\tilde F$ で成り立つ。$\|\tilde F\|\le\|\tilde f\|+(\tilde b_{\infty}+\tilde c_{\infty})\|\tilde u\|_{H^{1}(P^{+})}$ なので、$\int_{P'^{+}}|D_{k}^{h}\nabla\tilde u|^{2}\le C(\|\tilde f\|^{2}+\|\tilde u\|_{H^{1}(P^{+})}^{2})$（$P'^{+}$ では $\zeta=1$）。$P'^{+}+te_{k}\subset P^{+}$（$|t|\le h_{0}$）なので、\ref{pde:reg-difference-lemma.2} を $\partial_{l}\tilde u$ に使う。
+
+**Step 3（法方向）.** 【主張：$\partial_{n}(\tilde a^{nn}\partial_{n}\tilde u)=-\tilde G$（$P'^{+}$ での弱微分）、ここで $\tilde G\defeq\tilde F+\sum_{(k,l)\ne(n,n)}\partial_{l}(\tilde a^{kl}\partial_{k}\tilde u)\in L^{2}(P'^{+})$】$(k,l)\ne(n,n)$ なら $k<n$ か $l<n$ で、Step 2 から $\partial_{l}\partial_{k}\tilde u\in L^{2}(P'^{+})$。\ref{pde:reg-c1-product.1}（方向 $l$、$g=\partial_{k}\tilde u$）から $\partial_{l}(\tilde a^{kl}\partial_{k}\tilde u)\in L^{2}(P'^{+})$。$\varphi\in C_{c}^{\infty}(P'^{+})$ を (c) に入れ、$(k,l)\ne(n,n)$ の項を弱微分の定義で $-\int\partial_{l}(\tilde a^{kl}\partial_{k}\tilde u)\varphi$ に書き換えると、$\int\tilde a^{nn}\partial_{n}\tilde u\,\partial_{n}\varphi=\int\tilde G\varphi$。
+
+**Step 4.** 【主張：$\partial_{n}\partial_{n}\tilde u=-\bigl(\tilde G+(\partial_{n}\tilde a^{nn})\partial_{n}\tilde u\bigr)/\tilde a^{nn}\in L^{2}(P'^{+})$】楕円性を $\eta=e_{n}$ で使うと $\tilde a^{nn}\ge\tilde\theta$ なので $\frac{1}{\tilde a^{nn}}\in C_{b}^{1}(P^{+})$。$g\defeq\tilde a^{nn}\partial_{n}\tilde u$ は Step 3 から $\partial_{n}g=-\tilde G\in L^{2}$ をもつので、\ref{pde:reg-c1-product.1} から $\partial_{n}\tilde u=\frac{1}{\tilde a^{nn}}g$ の $\partial_{n}$ は $\frac{-\tilde G}{\tilde a^{nn}}+\partial_{n}\bigl(\frac{1}{\tilde a^{nn}}\bigr)g$ で、整理すると主張の形。ノルムは Step 2 の評価で押さえられる。
+
+Step 2・4 で 2 階導関数がすべて $L^{2}(P'^{+})$ に入り、評価が従う。最後の等式は Step 4 の式を書き直したもので、\ref{pde:reg-interior-h2} の証明の Step 5 と同じく、$\tilde a^{kl}\partial_{k}\tilde u$ の弱微分を積の公式で展開すればよい。
+
+::: hypcheck
+- **$\tilde a\in C^{1}$**：Step 2（\ref{pde:reg-difference-energy} の $M_{1}$）と Step 3・4 の積の微分に使った。もとの領域では「$a^{ij}\in C^{1}$ かつ境界が $C^{2}$」にあたる。
+- **(d)（境界で $0$）**：Step 1 で $v_{h}$ が試験関数として使えることだけに使った。法方向の差分商 $D_{n}^{h}$ では $P^{+}$ からはみ出すので使えず、そのために Step 3・4 が要る。
+- **一様楕円性**：Step 2 と、Step 4 の $\tilde a^{nn}\ge\tilde\theta$ に使った。法方向の 2 階導関数を方程式から取り出せるのは、主要部の係数 $\tilde a^{nn}$ が $0$ にならないから、つまり平らな境界が**非特性的**だからである。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem 境界までの H² 正則性 {#pde:reg-boundary-h2 keywords="global H^2 regularity: if the boundary is C^2, a^{ij} in C^1(closure), b, c bounded, f in L^2, then every weak solution u in H^1_0 of L u = f is in H^2(Omega) with ||u||_{H^2(Omega)} <= C(||f||_2 + ||u||_2)" index="境界正則性|きょうかいせいそくせい, 大域的な H2 評価|たいいきてきなえいちつーひょうか"}
+$\partial\Omega$ を $C^{2}$ 級、$L$ を一様楕円型で $a^{ij}\in C^{1}(\overline{\Omega})$, $b^{i},c\in L^{\infty}(\Omega)$、$f\in L^{2}(\Omega)$ とし、$u\in H_{0}^{1}(\Omega)$ を $Lu=f$ の弱解とする。このとき $u\in H^{2}(\Omega)$ で、$u,f$ によらない $C$ について
+$$
+\|u\|_{H^{2}(\Omega)}\le C\bigl(\|f\|_{2}+\|u\|_{2}\bigr),
+$$
+$\Omega$ の a.e. の点で $Lu=f$（\ref{pde:reg-interior-h2.2} の形）が成り立つ。
+:::
+
+::: intuition
+境界が 2 回連続微分可能で、主要部の係数が 1 回連続微分可能なら、境界で $0$ になる弱解は領域全体で 2 回（弱い意味で）微分でき、その大きさは右辺と解の大きさで押さえられる。
+:::
+
+::: proof
+**Step 1.** 【主張：$\partial\Omega$ は有限個の開集合 $\Phi_{p}^{-1}(P'_{p})$（$p=1,\dots,N$）で覆われる。ここで $\Phi_{p}$ は \ref{pde:reg-flattening} の写像、$P'_{p}\Subset P_{p}$ は箱】$\partial\Omega$ の点 $q$ は境界の組のある $U_{i}$ に入り、$\Phi_{i}(q)=(q',0)$ を中心とする小さな箱 $P'_{q}$ で $\overline{P'_{q}}\subset P_{i}$ となるものがある。$\partial\Omega$ はコンパクトなので、有限個の $\Phi_{i}^{-1}(P'_{q})$ で覆われる。
+
+**Step 2.** 【主張：$u\in H^{2}(\Omega\cap\Phi_{p}^{-1}(P'_{p}))$ で、ノルムは $C(\|f\|_{2}+\|u\|_{H^{1}(\Omega)})$ 以下】\ref{pde:reg-flattening.2}（$r=2$）から、$\tilde u$ は $P_{p}$ で (H) を満たし（$\tilde a\in C_{b}^{1}$）、\ref{pde:reg-halfbox-h2} から $\tilde u\in H^{2}(P_{p}'^{+})$ で、ノルムは $C(\|\tilde f\|+\|\tilde u\|_{H^{1}})\le C(\|f\|_{2}+\|u\|_{H^{1}(\Omega)})$。$u=\tilde u\circ\Phi_{p}$ に \ref{pde:reg-chain-higher}（$r=2$）を使う。
+
+**Step 3.** 【主張：$u\in H^{2}(\Omega)$ と評価】$O\defeq\bigcup_{p}\Phi_{p}^{-1}(P'_{p})$ は $\partial\Omega$ を含む開集合なので、$K\defeq\overline{\Omega}\setminus O$ は $\Omega$ のコンパクト集合で、$V\defeq\{x:\operatorname{dist}(x,K)<\frac12\operatorname{dist}(K,\mathbb{R}^{n}\setminus\Omega)\}\Subset\Omega$。\ref{pde:reg-interior-h2.1} から $\|u\|_{H^{2}(V)}\le C(\|f\|_{2}+\|u\|_{2})$。$\Omega=V\cup\bigcup_{p}(\Omega\cap\Phi_{p}^{-1}(P'_{p}))$ なので、\ref{pde:reg-localization.1} から $u\in H^{2}(\Omega)$ で $\|u\|_{H^{2}(\Omega)}\le C(\|f\|_{2}+\|u\|_{H^{1}(\Omega)})$。最後に、ガルディングの不等式（\ref{pde:bilinear-energy-estimates.2}）と $B[u,u]=(f,u)$ から $\beta\|u\|_{H^{1}}^{2}\le\|f\|_{2}\|u\|_{2}+\gamma\|u\|_{2}^{2}$ なので $\|u\|_{H^{1}}\le C(\|f\|_{2}+\|u\|_{2})$。a.e. の等式は \ref{pde:reg-interior-h2.2}。
+
+::: hypcheck
+- **境界が $C^{2}$**：Step 2 で、平坦化した係数が $C^{1}$ であること（\ref{pde:reg-flattening} の hypcheck）と、$\Phi_{p}$ の 2 階導関数による引き戻し（\ref{pde:reg-chain-higher}）に使った。外すと偽：角のある領域では $f\in C^{\infty}(\overline{\Omega})$ でも $u\notin H^{2}$（\see{pde:reg-corner-counterexample}）。
+- **$a^{ij}\in C^{1}(\overline{\Omega})$**：Step 2・3 で内部と境界の差分商の評価に使った。境界まで $C^{1}$ でなければならないのは、境界の近くでも $M_{1}$ が有限である必要があるから。
+- **$u\in H_{0}^{1}$**：Step 2 で (d) を得るのに使った。境界条件を課さない弱解については、\ref{pde:reg-interior-h2} のように $\partial\Omega$ から離れた所の評価しか得られない。
+- **$f\in L^{2}$、$b,c\in L^{\infty}$**：$\tilde F\in L^{2}$ のため。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 境界の条件は $C^{1,1}$（$\gamma$ の勾配がリプシッツ連続）まで弱められ、凸領域なら角があっても $H^{2}$ 正則性が成り立つことが知られている（Grisvard『Elliptic Problems in Nonsmooth Domains』。このサイトでは証明しない）。凸でない角は本当にいけない（\see{pde:reg-corner-counterexample}）。また、弱解が一意なら（たとえば $b=0$, $c\ge0$）評価の $\|u\|_{2}$ は落とせる（\ref{pde:prob-rgb-coercive}）。
+
+**似た定理.** 閉多様体の \ref{gl:elliptic-regularity} には境界がないので、1 の分割で局所化した各片はどれも「内部」で、このページの Step 3・4 にあたる法方向の議論は要らない。そのかわり任意の階数の作用素と、負の階数のソボレフ空間を扱っている。境界があると、境界の近くでは接方向にしか平行移動できず、残る 1 方向を方程式で補う。この補いができることが、境界が非特性的であることの意味である。
+
+**高い視点：境界は鏡ではなく壁.** 内部では全方向に差分をとれたが、境界ではそのうち 1 方向が壁でふさがれている。壁に沿って動くこと（接方向の差分）は自由で、壁に向かう方向の情報は、方程式という「保存則」から逆算する。比喩で言えば、壁際の部屋の温度分布を測るのに、壁に沿っては温度計を動かせるが壁の中には入れない。それでも熱の流れの収支（方程式）がわかっていれば、壁に垂直な方向の温度の曲がり具合は計算できる。
+:::
+
+## 高階の正則性と古典解 {#pde:sec-rgb-higher}
+
+::: lemma 半空間の箱での高階評価 {#pde:reg-halfbox-higher keywords="higher regularity near a flat boundary: under (H) with coefficients in C^{m+1}_b and f in H^m, u~ is in H^{m+2}(P'^+) for every box P' compactly inside P; tangential derivatives satisfy the same kind of problem, the pure normal derivative comes from the equation" index="平らな境界の近くの高階正則性|たいらなきょうかいのちかくのこうかいせいそくせい"}
+$m\ge0$ とし、(H) に加えて $\tilde a^{kl},\tilde b^{k},\tilde c\in C_{b}^{m+1}(P^{+})$, $\tilde f\in H^{m}(P^{+})$ とする。各箱 $P'\Subset P$ について $\tilde u\in H^{m+2}(P'^{+})$ で、$\|\tilde u\|_{H^{m+2}(P'^{+})}\le C(\|\tilde f\|_{H^{m}(P^{+})}+\|\tilde u\|_{H^{1}(P^{+})})$。
+:::
+
+::: proof
+$m$ についての帰納法（主張をすべての箱と係数について述べたものとして）。$m=0$ は \ref{pde:reg-halfbox-h2}。$m\ge1$ とし、$m-1$ で正しいとする。箱 $P'\Subset P''\Subset P$ をとる。
+
+**Step 1.** 【主張：$\tilde u\in H^{m+1}(P''^{+})$、評価つき】帰納法の仮定を $P''\Subset P$ に使う。とくに $\tilde u\in H^{2}(P''^{+})$。
+
+**Step 2.** 【主張：$k<n$ について $w\defeq\partial_{k}\tilde u$ は、箱 $P''$ で、右辺 $\hat f\defeq\partial_{k}\tilde f+\sum_{i,j}\partial_{j}\bigl((\partial_{k}\tilde a^{ij})\partial_{i}\tilde u\bigr)-\sum_{i}(\partial_{k}\tilde b^{i})\partial_{i}\tilde u-(\partial_{k}\tilde c)\tilde u\in H^{m-1}(P''^{+})$ の (H) を満たす】(c)：$\tilde v\in C_{c}^{\infty}(P''^{+})$ について $\partial_{k}\tilde v\in C_{c}^{\infty}(P^{+})$ を (c) に入れ、\ref{pde:reg-interior-higher} の証明の Step 2 と同じ計算をすると $\tilde B[w,\tilde v]=(\hat f,\tilde v)$。$H_{0}^{1}(P''^{+})$ へは連続性で延びる。$\hat f\in H^{m-1}$ は同じ証明の Step 3 と同じ。(d)：$\zeta\in C_{c}^{\infty}(P'')$ について $\zeta w=\partial_{k}(\zeta\tilde u)-(\partial_{k}\zeta)\tilde u$。$\zeta\tilde u$ は $H_{0}^{1}(P^{+})$ に入り（(d)）、$P''$ のコンパクト集合の外で $0$ で、Step 1 と \ref{pde:reg-localization.1} から $H^{2}(P^{+})$ に入る。\ref{pde:reg-tangential-h10.4} から $\partial_{k}(\zeta\tilde u)\in H_{0}^{1}(P^{+})$、(d) から $(\partial_{k}\zeta)\tilde u\in H_{0}^{1}(P^{+})$。どちらも $P''$ のコンパクト集合の外で $0$ なので、\ref{pde:reg-tangential-h10.5} から $\zeta w\in H_{0}^{1}(P''^{+})$。係数は $C_{b}^{m}$ で、$w\in H^{1}(P''^{+})$。
+
+**Step 3.** 【主張：$k<n$ について $\partial_{k}\tilde u\in H^{m+1}(P'^{+})$、評価つき】Step 2 と帰納法の仮定（$m-1$、箱 $P'\Subset P''$）。
+
+**Step 4.** 【主張：$\partial_{n}\partial_{n}\tilde u\in H^{m}(P'^{+})$】\ref{pde:reg-halfbox-h2} の a.e. の等式から
+$$
+\partial_{n}\partial_{n}\tilde u=\frac{1}{\tilde a^{nn}}\Bigl(-\sum_{(k,l)\ne(n,n)}\tilde a^{kl}\partial_{k}\partial_{l}\tilde u-\sum_{k,l}(\partial_{l}\tilde a^{kl})\partial_{k}\tilde u+\sum_{k}\tilde b^{k}\partial_{k}\tilde u+\tilde c\tilde u-\tilde f\Bigr).
+$$
+$(k,l)\ne(n,n)$ なら一方が接方向なので Step 3 から $\partial_{k}\partial_{l}\tilde u\in H^{m}(P'^{+})$、$\tilde u\in H^{m+1}$、$\tilde f\in H^{m}$。係数 $\frac{1}{\tilde a^{nn}}$, $\tilde a^{kl}$, $\partial_{l}\tilde a^{kl}$, $\tilde b^{k}$, $\tilde c$ は $C_{b}^{m}$ なので、\ref{pde:reg-c1-product.3} から右辺は $H^{m}(P'^{+})$。
+
+$|\alpha|=m+2$ の $\partial^{\alpha}\tilde u$ は、$\alpha\ne(m+2)e_{n}$ なら $\alpha_{k}\ge1$ となる $k<n$ があって Step 3 から、$\alpha=(m+2)e_{n}$ なら Step 4 から $L^{2}(P'^{+})$ に入る。Step 1 と合わせて $\tilde u\in H^{m+2}(P'^{+})$ と評価が従う。
+:::
+
+::: theorem 境界までの高階正則性 {#pde:reg-boundary-higher keywords="higher global regularity: if the boundary is C^{m+2}, the coefficients are C^{m+1}(closure) and f in H^m, every weak solution u in H^1_0 of L u = f lies in H^{m+2}(Omega) with ||u||_{H^{m+2}} <= C(||f||_{H^m} + ||u||_2)" index="高階の境界正則性|こうかいのきょうかいせいそくせい"}
+$m\ge0$ とし、$\partial\Omega$ を $C^{m+2}$ 級、$L$ を一様楕円型で $a^{ij},b^{i},c\in C^{m+1}(\overline{\Omega})$、$f\in H^{m}(\Omega)$ とする。$u\in H_{0}^{1}(\Omega)$ が $Lu=f$ の弱解なら $u\in H^{m+2}(\Omega)$ で、$\|u\|_{H^{m+2}(\Omega)}\le C(\|f\|_{H^{m}}+\|u\|_{2})$。
+:::
+
+::: intuition
+境界が $m+2$ 回、係数が $m+1$ 回微分でき、右辺が $m$ 回微分できるなら、境界で $0$ の弱解は領域全体で $m+2$ 回微分できる。
+:::
+
+::: proof
+\ref{pde:reg-boundary-h2} の証明と同じ手順で、Step 2 の \ref{pde:reg-halfbox-h2} を \ref{pde:reg-halfbox-higher} に、\ref{pde:reg-chain-higher} の $r=2$ を $r=m+2$ に、Step 3 の内部評価を \ref{pde:reg-interior-higher} に替える。\ref{pde:reg-flattening.2}（$r=m+2$）から変換後の係数は $C_{b}^{m+1}(P^{+})$ に入り、\ref{pde:reg-chain-higher}（$m\ge1$ なら $\Phi^{-1}$ に $r=m$）から $\tilde f\in H^{m}(P^{+})$。
+
+::: hypcheck
+- **境界が $C^{m+2}$**：平坦化した係数を $C^{m+1}$ にし（$\partial\Phi\in C^{m+1}$）、$H^{m+2}$ を引き戻すのに使った。
+- **係数が $C^{m+1}(\overline{\Omega})$**：\ref{pde:reg-halfbox-higher} の帰納法で、1 階微分した方程式の係数と右辺を作るのに使った。
+- **$u\in H_{0}^{1}$**：(d) を通して、各段の接方向の導関数が再び境界で $0$ になること（Step 2 の (d)）に使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+$C^{\infty}(\overline{\Omega})$ に移るには、境界の近くで埋め込み定理を使うために、$H^{m}(\mathbb{R}_{+}^{n})$ の関数を全空間に延ばす必要がある。$W^{1,p}$ の延長（\ref{fa:extension-theorem}）は偶な折り返しでできたが、高階では折り返しを何本か重ねる。
+
+::: lemma 高階の折り返しによる延長 {#pde:reg-halfspace-extension keywords="higher order reflection: with c_1,...,c_m solving sum_j c_j (-j)^k = 1 for k < m, E g(y', y_n) = sum_j c_j g(y', -j y_n) for y_n < 0 extends H^m(R^n_+) boundedly into H^m(R^n)" index="高階の折り返し|こうかいのおりかえし, 延長作用素（高階）|えんちょうさようそこうかい"}
+$m\ge1$ とし、$c_{1},\dots,c_{m}\in\mathbb{R}$ を $\sum_{j=1}^{m}c_{j}(-j)^{k}=1$（$k=0,1,\dots,m-1$）の解とする（係数行列は相異なる $-1,\dots,-m$ のファンデルモンド行列なので、解はただ一つある）。$g\in H^{m}(\mathbb{R}_{+}^{n})$ について
+$$
+Eg(y)\defeq\begin{cases}g(y)&(y_{n}>0),\\ \sum_{j=1}^{m}c_{j}\,g(y',-jy_{n})&(y_{n}<0)\end{cases}
+$$
+とおくと、$Eg\in H^{m}(\mathbb{R}^{n})$ で、$\|Eg\|_{H^{m}(\mathbb{R}^{n})}\le C\|g\|_{H^{m}(\mathbb{R}_{+}^{n})}$（$C$ は $m,n$ だけで決まる）。
+:::
+
+::: proof
+係数の組 $d=(d_{1},\dots,d_{m})$ について $E_{d}$ を同じ式で定める（$E=E_{c}$）。$y_{n}=-t/j$ への変数変換（\ref{meas:change-of-variables}）から、$\int_{y_{n}<0}h(y',-jy_{n})\psi(y)\,dy=\frac1j\int_{t>0}h(y',t)\psi(y',-\frac tj)\,dy'dt$。
+
+**Step 1.** 【主張：$g\in H^{1}(\mathbb{R}_{+}^{n})$, $\chi\in C_{c}^{1}(\mathbb{R}^{n})$ について、$i<n$ なら $\int_{\mathbb{R}_{+}^{n}}g\,\partial_{i}\chi=-\int_{\mathbb{R}_{+}^{n}}\partial_{i}g\,\chi$、$i=n$ なら $\chi(y',0)=0$ のときに同じ等式】$\vartheta\in C^{\infty}(\mathbb{R})$ を $t\le1$ で $0$、$t\ge2$ で $1$ とし、$\vartheta_{\delta}(y)\defeq\vartheta(y_{n}/\delta)$ とおく。$\chi\vartheta_{\delta}\in C_{c}^{1}(\mathbb{R}_{+}^{n})$ なので \ref{pde:reg-localization.3} から $\int g\,\partial_{i}(\chi\vartheta_{\delta})=-\int\partial_{i}g\,\chi\vartheta_{\delta}$。$i<n$ なら $\partial_{i}(\chi\vartheta_{\delta})=\vartheta_{\delta}\partial_{i}\chi$ で、$\delta\to0$ で優収束定理（\ref{meas:dominated-convergence}）。$i=n$ なら余分な項 $\int g\chi\,\vartheta'(y_{n}/\delta)/\delta$ が出るが、$|\chi(y',y_{n})|\le y_{n}\sup|\partial_{n}\chi|$（平均値の定理）からその被積分関数は $2\sup|\vartheta'|\sup|\partial_{n}\chi|\,|g|\,1_{\{\delta<y_{n}<2\delta\}\cap\operatorname{supp}\chi}$ 以下で、優収束定理から $0$ に収束する。
+
+**Step 2.** 【主張：$\sum_{j}d_{j}=1$, $g\in H^{1}(\mathbb{R}_{+}^{n})$ なら $E_{d}g\in H^{1}(\mathbb{R}^{n})$ で、$\partial_{i}E_{d}g=E_{d}\partial_{i}g$（$i<n$）、$\partial_{n}E_{d}g=E_{d'}\partial_{n}g$（$d'_{j}\defeq-jd_{j}$）】$\varphi\in C_{c}^{\infty}(\mathbb{R}^{n})$ とする。冒頭の変数変換で $y_{n}<0$ の部分を $y_{n}>0$ に移すと、$\int E_{d}g\,\partial_{i}\varphi=\int_{\mathbb{R}_{+}^{n}}g\,\partial_{i}\psi$、ここで $i<n$ なら $\psi(y)\defeq\varphi(y)+\sum_{j}\frac{d_{j}}{j}\varphi(y',-\frac{y_{n}}{j})$、$i=n$ なら $\psi(y)\defeq\varphi(y)-\sum_{j}d_{j}\varphi(y',-\frac{y_{n}}{j})$（$\partial_{n}[\varphi(y',-\frac{y_{n}}{j})]=-\frac1j(\partial_{n}\varphi)(y',-\frac{y_{n}}{j})$ を使う）。後者は $\psi(y',0)=(1-\sum d_{j})\varphi(y',0)=0$。$\psi$ を $\mathbb{R}^{n}$ の $C_{c}^{1}$ 関数に延ばして Step 1 を使い、変数変換で戻すと $\int E_{d}g\,\partial_{i}\varphi=-\int E_{d}(\partial_{i}g)\varphi$（$i<n$）、$-\int E_{d'}(\partial_{n}g)\varphi$（$i=n$）。$L^{2}$ ノルムは $\|E_{d}h\|_{2}\le(1+\sum_{j}|d_{j}|j^{-1/2})\|h\|_{L^{2}(\mathbb{R}_{+}^{n})}$。
+
+**Step 3.** 【主張：$|\alpha|\le m$ について $\partial^{\alpha}Eg=E_{d^{(\alpha_{n})}}\partial^{\alpha}g$、$d_{j}^{(k)}\defeq c_{j}(-j)^{k}$】$|\alpha|$ についての帰納法。$|\alpha|\le m-1$ で成り立てば、$\alpha_{n}\le m-1$ なので $\sum_{j}d_{j}^{(\alpha_{n})}=1$ で、Step 2 を $\partial^{\alpha}g\in H^{1}$ に使うと、$\alpha+e_{i}$（$i<n$）では同じ $d^{(\alpha_{n})}$、$\alpha+e_{n}$ では $-jd_{j}^{(\alpha_{n})}=d_{j}^{(\alpha_{n}+1)}$ となる。評価は Step 2 の $L^{2}$ ノルムの評価から。
+
+::: hypcheck
+- **$\sum_{j}c_{j}(-j)^{k}=1$（$k<m$）**：Step 3 で、各段の $\psi$ が境界で $0$ になる（Step 2 の $\sum d_{j}=1$）ために使った。$m=1$ なら $c_{1}=1$ で、$y_{n}<0$ に $g(y',-y_{n})$ を置く偶な折り返し（\ref{fa:even-reflection}）である。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 境界まで滑らかな解 {#pde:reg-smooth-up-to-boundary keywords="if the boundary, the coefficients and f are C^infinity up to the boundary, every weak solution u in H^1_0 of L u = f is in C^infinity(closure of Omega), vanishes on the boundary and solves L u = f classically" index="境界まで滑らかな解|きょうかいまでなめらかなかい"}
+$\partial\Omega$ を $C^{\infty}$ 級、$L$ を一様楕円型で $a^{ij},b^{i},c\in C^{\infty}(\overline{\Omega})$、$f\in C^{\infty}(\overline{\Omega})$ とし、$u\in H_{0}^{1}(\Omega)$ を $Lu=f$ の弱解とする。このとき $u$ は零集合の上で修正すると $C^{\infty}(\overline{\Omega})$ に入り、$\partial\Omega$ の上で $u=0$、$\Omega$ の各点で $Lu=f$。
+:::
+
+::: intuition
+境界・係数・右辺がすべて境界まで滑らかなら、境界で $0$ の弱解は境界まで滑らかな本物の解である。
+:::
+
+::: proof
+**Step 1.** 【主張：すべての $m$ で $u\in H^{m}(\Omega)$、$u\in C^{\infty}(\Omega)$ で $Lu=f$（各点）】$f$ の導関数は $\overline{\Omega}$ で有界なので $f\in H^{m}(\Omega)$。\ref{pde:reg-boundary-higher} と \ref{pde:reg-interior-smooth}。
+
+**Step 2.** 【主張：$\partial\Omega$ の各点の近くで、$u$ の各導関数は $\partial\Omega$ まで連続に延びる】\ref{pde:reg-boundary-h2} の証明の Step 1 の覆い $\Phi_{p}^{-1}(P'_{p})$ をとる。$\zeta\in C_{c}^{\infty}(P_{p})$ を $\overline{P'_{p}}$ の近傍で $1$ とし、$g\defeq\zeta\tilde u$ を $P_{p}^{+}$ の外（$\mathbb{R}_{+}^{n}$ の中）で $0$ と延ばす。\ref{pde:reg-chain-higher}（$\Phi_{p}^{-1}$ に使う）から $\tilde u\in H^{m}(P_{p}^{+})$、\ref{pde:reg-c1-product.3} から $\zeta\tilde u\in H^{m}(P_{p}^{+})$ で、$\mathbb{R}_{+}^{n}=P_{p}^{+}\cup(\mathbb{R}_{+}^{n}\setminus\operatorname{supp}\zeta)$ に \ref{pde:reg-localization.1} を使うと $g\in H^{m}(\mathbb{R}_{+}^{n})$（すべての $m$）。\ref{pde:reg-halfspace-extension} の $Eg$ は $H^{m}(\mathbb{R}^{n})$ に入り台は有界なので、\ref{pde:reg-interior-smooth} の証明の Step 2 と同じく \ref{fa:higher-embeddings.2} から $C^{m-\lfloor n/p\rfloor-1}$ 級の代表元をもつ。$\mathbb{R}_{+}^{n}$ の上の代表元は $m$ によらず（連続で a.e. に一致するので）一致し、その各導関数は $\{y_{n}\ge0\}$ まで連続に延びる。$C^{\infty}$ 級の $\Phi_{p}$ で引き戻せば主張を得る。$\Omega$ の内部の点については Step 1。
+
+**Step 3.** 【主張：$\partial\Omega$ の上で $u=0$】Step 2 の $g$ は $\{y_{n}\ge0\}$ で $C^{1}$、台は有界で、(d) から $H_{0}^{1}(P_{p}^{+})$ に入る。\ref{pde:reg-tangential-h10.1} から、$0$ 延長 $\bar g\in H^{1}(\mathbb{R}^{n})$ の弱微分 $\partial_{n}\bar g$ は $\partial_{n}g$ の $0$ 延長である。一方 $\varphi\in C_{c}^{\infty}(\mathbb{R}^{n})$ について、フビニの定理と微積分学の基本定理を $y_{n}\in[0,\infty)$ で使うと
+$$
+\int_{\mathbb{R}^{n}}\bar g\,\partial_{n}\varphi=-\int_{\mathbb{R}^{n-1}}g(y',0)\varphi(y',0)\,dy'-\int_{\mathbb{R}_{+}^{n}}\partial_{n}g\,\varphi.
+$$
+左辺は $-\int_{\mathbb{R}_{+}^{n}}\partial_{n}g\,\varphi$ に等しいので、すべての $\varphi$ で $\int g(y',0)\varphi(y',0)dy'=0$。$\varphi(y)=\psi(y')\chi(y_{n})$（$\chi(0)=1$）とすれば、$\mathbb{R}^{n-1}$ での \ref{fa:fundamental-lemma} と連続性から $g(\cdot,0)=0$。$P_{p}'$ の上では $g=\tilde u$ なので、$\partial\Omega\cap\Phi_{p}^{-1}(P_{p}')$ の上で $u=0$。
+
+::: hypcheck
+- **すべてが $C^{\infty}$**：Step 1 で、すべての $m$ について \ref{pde:reg-boundary-higher} の仮定を満たすために使った。有限の滑らかさでも、\ref{pde:reg-boundary-higher} と埋め込みから「$u\in C^{k}(\overline{\Omega})$」の形の結論が得られる。
+- **$u\in H_{0}^{1}$**：Step 3 で境界値 $0$ を得るのに使った。境界条件は、弱い形から最後に古典的な形に戻る。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 楕円型のディリクレ問題の古典解 {#pde:reg-classical-dirichlet keywords="classical solvability of the Dirichlet problem L u = f, u = g on the boundary with smooth boundary, coefficients and data: a unique solution in C^infinity(closure) when b = 0, c >= 0 (or gamma C_P^2 < theta/2), and more generally when L u = 0 has only the trivial weak solution" index="ディリクレ問題の古典解（楕円型）|でぃりくれもんだいのこてんかいだえんがた"}
+$\partial\Omega$ を $C^{\infty}$ 級、$L$ を一様楕円型で $a^{ij},b^{i},c\in C^{\infty}(\overline{\Omega})$、$f,g\in C^{\infty}(\overline{\Omega})$ とし、ディリクレ問題「$Lu=f$（$\Omega$ で）、$u=g$（$\partial\Omega$ で）」を考える。
+1. $\gamma C_{P}^{2}<\frac{\theta}{2}$（\ref{pde:bilinear-energy-estimates.3}。とくに $b=0$ かつ $c\ge0$）なら、$u-g\in H_{0}^{1}$ となる弱解がただ一つあり、それは $C^{\infty}(\overline{\Omega})$ に入る古典解である。
+2. より一般に、$Lu=0$ の $H_{0}^{1}$ の弱解が $0$ だけなら、同じ結論が成り立つ。
+:::
+
+::: intuition
+境界・係数・データが滑らかで、斉次の問題が自明な解しかもたなければ、ディリクレ問題は境界まで滑らかな古典解をちょうど一つもつ。
+:::
+
+::: proof
+**Step 1.** 【主張：$w\defeq u-g$ とおくと、問題は「$w\in H_{0}^{1}$ が $Lw=f-Lg$ の弱解」と同値で、$f-Lg\in C^{\infty}(\overline{\Omega})$】$Lg$（\ref{pde:reg-interior-h2.2} の形で古典的に計算したもの）は $C^{\infty}(\overline{\Omega})$ に入り、$v\in C_{c}^{\infty}(\Omega)$ について部分積分（\ref{pde:weak-elliptic-classical} の証明の Step 1）から $B[g,v]=(Lg,v)$、連続性から $v\in H_{0}^{1}$ でも成り立つ。よって $B[u,v]=(f,v)$ と $B[w,v]=(f-Lg,v)$ は同値。
+
+**Step 2.** 【主張：1・2】1 では \ref{pde:weak-elliptic-existence.2}、2 では \ref{pde:weak-fredholm-alternative.3} の (a) から、$w$ がただ一つ存在する。\ref{pde:reg-smooth-up-to-boundary} から $w\in C^{\infty}(\overline{\Omega})$, $\partial\Omega$ の上で $w=0$、$Lw=f-Lg$（各点）。$u=w+g$ がその解。
+
+::: hypcheck
+- **境界・係数・データの滑らかさ**：Step 2 で \ref{pde:reg-smooth-up-to-boundary} を使うためだけに使った。存在と一意性（弱解）だけなら、係数は有界可測、境界は任意、$f\in H^{-1}$ でよかった（\ref{pde:weak-elliptic-existence}）。
+- **斉次問題の一意性**：Step 2 の存在に使った。外すと可解条件が付く（\ref{pde:weak-fredholm-alternative.2}）。
+- **公理**：1 は選択公理を使わない。2 はフレドホルムの二者択一を通して従属選択公理を使う。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 一意性は「$u-g\in H_{0}^{1}$ の弱解の中で」のものである。$C^{2}(\overline{\Omega})$ の古典解 $u$ は $u-g$ が境界で $0$ の $C^{1}(\overline{\Omega})$ 関数なので $H_{0}^{1}$ に入り（\see{fa:ex-et-3}）、\ref{pde:weak-elliptic-classical.1} から弱解なので、古典解の中でも一意になる。
+
+**高い視点：遠回りして戻る.** 古典的手法は「滑らかな解」を最初に仮定して公式を作り、関数解析的手法は滑らかさを捨てて広い空間で解を見つけ、あとから滑らかさを取り戻す。比喩で言えば、山の頂上（古典解）へ直登する道（公式）は特別な地形（球や半空間）にしかないが、まず平らな高原（ヒルベルト空間）を車で横切って頂上の真下に着き（ラックス–ミルグラム）、そこから一段ずつ階段（差分商と正則性）を登れば、どんな地形でも頂上に着く。階段の段数（滑らかさ）は、地形（境界）と足場（係数）の滑らかさが許すだけしかない。
+:::
+
+古典的手法と前提を比べると次のようになる。
+
+::: table ディリクレ問題の三つの解き方 {#pde:reg-table-methods}
+| | ペロンの方法 | シャウダー理論 | 弱解と正則性（このページ） |
+|---|---|---|---|
+| 作用素 | $-\Delta$ だけ | 非発散形、係数 $C^{\alpha}(\overline{\Omega})$、$c$ の符号条件 | 発散形、存在は係数有界可測、正則性は $a^{ij}\in C^{1}$ 以上 |
+| 境界 | 各点に障壁（外部球・外部錐条件など） | $C^{2,\alpha}$ | 存在は任意、$H^{2}$ は $C^{2}$、$C^{\infty}(\overline{\Omega})$ は $C^{\infty}$ |
+| 境界値 | $C(\partial\Omega)$ | $C^{2,\alpha}(\overline{\Omega})$ | $H^{1}$ の元（トレースの意味）、古典解には滑らかさ |
+| 右辺 | $0$ | $C^{\alpha}(\overline{\Omega})$ | 存在は $H^{-1}$、$H^{2}$ は $L^{2}$ |
+| 得られる解 | $C^{2}(\Omega)\cap C(\overline{\Omega})$ | $C^{2,\alpha}(\overline{\Omega})$ | $H_{0}^{1}$、正則性で $H^{m+2}$・$C^{\infty}(\overline{\Omega})$ |
+| 主な道具 | 最大値原理・ハルナック | ヘルダー評価・連続性の方法 | ラックス–ミルグラム・差分商 |
+:::
+
+ペロンの方法（\ref{pde:perron-harmonic}, \ref{pde:barrier-regular}）は、境界値が連続なだけでも境界の各点の幾何（障壁）さえあれば解け、そのかわり作用素はラプラシアンに限られた。シャウダー理論（Gilbarg–Trudinger 第 6 章。このサイトでは証明しない）はヘルダー空間で同じ「2 階分の得」を示し、弱解の理論はソボレフ空間でそれを示す。前提のどれがどの段階で効くかは、各定理の hypcheck にまとめた。
+
+## 問題 {#pde:sec-rgb-problems}
+
+::: problem {#pde:prob-rgb-coercive}
+\ref{pde:reg-boundary-h2} の仮定に加えて $b=0$, $c\ge0$ とする。
+1. 弱解 $u$ について $\|u\|_{H^{2}(\Omega)}\le C\|f\|_{2}$（$C$ は $u,f$ によらない）を示せ。
+2. $n=1$, $\Omega=(0,\pi)$, $Lu=-u''-u$ のとき、1 の形の評価が成り立たないことを示せ。1 の仮定のどれが外れているか。
+:::
+
+::: solution
+**1.** \ref{pde:weak-elliptic-existence.2}（$\gamma=0$）から $\|u\|_{H^{1}}\le\frac{1}{\beta'}\|f\|_{H^{-1}}\le\frac{1}{\beta'}\|f\|_{2}$（\ref{pde:weak-dual-representation.3}）。\ref{pde:reg-boundary-h2} の評価の $\|u\|_{2}$ をこれで押さえればよい。
+
+**2.** $u=\sin x\in H_{0}^{1}$ は $C^{\infty}([0,\pi])$ で $-u''-u=0$ を満たすので、\ref{pde:weak-elliptic-classical.1} から $f=0$ の弱解で、$\|u\|_{H^{2}}>0=C\|f\|_{2}$。外れているのは $c\ge0$（ここでは $c=-1$）で、弱解の一意性が崩れている。\ref{pde:reg-boundary-h2} の評価が $\|u\|_{2}$ を含むのは、このように $Lu=0$ が $0$ でない解をもちうるからである。
+:::
+
+::: problem {#pde:prob-rgb-reflection}
+\ref{pde:reg-halfspace-extension} で $m=2$ とする。
+1. $c_{1}=3$, $c_{2}=-2$ であることを確かめよ。
+2. $g\in C^{2}(\{y_{n}\ge0\})$（導関数が $y_{n}=0$ まで連続に延びるもの）について、$Eg$ は $\mathbb{R}^{n}$ で $C^{1}$ 級であることを直接確かめよ。偶な折り返し $g(y',|y_{n}|)$ では一般に $C^{1}$ にならないことも確かめよ。
+:::
+
+::: solution
+**1.** 条件は $c_{1}+c_{2}=1$（$k=0$）と $-c_{1}-2c_{2}=1$（$k=1$）。足すと $-c_{2}=2$、$c_{2}=-2$, $c_{1}=3$。
+
+**2.** $y_{n}<0$ で $Eg(y)=3g(y',-y_{n})-2g(y',-2y_{n})$。$y_{n}\to0-$ で $Eg\to3g(y',0)-2g(y',0)=g(y',0)$、$\partial_{i}Eg\to\partial_{i}g(y',0)$（$i<n$、同じ計算）、$\partial_{n}Eg=-3\partial_{n}g(y',-y_{n})+4\partial_{n}g(y',-2y_{n})\to\partial_{n}g(y',0)$。両側の値と 1 階導関数が $y_{n}=0$ で一致し連続なので、$Eg\in C^{1}(\mathbb{R}^{n})$（$y_{n}=0$ の上での偏微分は、片側の微分係数が一致することと平均値の定理から存在して連続）。偶な折り返しでは $y_{n}<0$ の $\partial_{n}$ は $-\partial_{n}g(y',-y_{n})\to-\partial_{n}g(y',0)$ で、$\partial_{n}g(y',0)\ne0$ なら（たとえば $g=y_{n}$）一致しない。1 階の折り返しは $H^{1}$ までしか保たず、高階には係数を工夫した折り返しが要る。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>放物型方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/07-parabolic.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 放物型方程式 {#pde:page-parabolic keywords="parabolic equations in divergence form, initial-boundary value problem u_t + L u = f, u = 0 on the boundary, u(0) = g, Bochner spaces L^2(0,T;X), strongly measurable, Bochner integral, weak time derivative in L^2(0,T;H^{-1}), continuity into L^2 and d/dt ||u||^2 = 2<u',u>, weak solution, energy estimate, Galerkin method, uniqueness, 放物型方程式, 初期境界値問題, ボホナー空間, ボッホナー空間, ボホナー積分, ガレルキン法, 弱解, エネルギー評価"}
+
+古典的手法の系列では、熱方程式 $u_{t}=\Delta u$ を熱核の公式（\ref{pde:heat-cauchy-solution}）とフーリエ級数（\ref{pde:sep-heat-dirichlet}）で解き、一意性を最大値原理（\ref{pde:heat-weak-maximum}）で示した。どれも作用素がラプラシアンで、解が $C^{2,1}$ 級であることを前提にしていた。このページでは前のページの発散形の楕円型作用素 $L$（係数は有界可測）について、初期境界値問題
+$$
+u_{t}+Lu=f\ \ (\Omega\times(0,T)),\qquad u=0\ \ (\partial\Omega\times(0,T)),\qquad u(\cdot,0)=g
+\label{pde:eq-pa-problem}
+$$
+を弱い形で解く。楕円型の場合（\ref{pde:page-weak-elliptic}）との違いは、未知関数が時刻 $t$ ごとに $H_{0}^{1}(\Omega)$ の元を与える**関数空間に値をとる関数**になることである。そのための最小限の道具として、第 1 節でボホナー空間 $L^{2}(0,T;X)$ と時間の弱微分を定義し、「$u\in L^{2}(0,T;H_{0}^{1})$ かつ $u'\in L^{2}(0,T;H^{-1})$ なら $u$ は $L^{2}$ に値をとる連続関数で、$\frac{d}{dt}\|u\|_{2}^{2}=2\langle u',u\rangle$」を示す。第 2 節で弱解を定義し、エネルギー評価から一意性を得る。第 3 節で、ラプラシアンの固有関数の有限個で張られる空間に方程式を射影し（**ガレルキン法**）、常微分方程式の解の弱極限として弱解を作る。
+
+正則性・半群による別証明・古典的手法との前提の対比は、次のページ（\see{pde:page-parabolic-semigroup}）で扱う。
+
+## 記法と定義の確認 {#pde:sec-pa-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$ は**有界な開集合**（境界の正則性は仮定しない）、$T>0$。関数はすべて実数値。
+- $L$ は \ref{pde:bilinear-elliptic-form} の一様楕円型作用素で、**係数 $a^{ij},b^{i},c$ は $x$ だけの有界可測関数**（時間によらない）とする。双線形形式は $B[u,v]$、定数 $\alpha,\beta,\gamma$ は \ref{pde:bilinear-energy-estimates} のとおり：$|B[u,v]|\le\alpha\|u\|_{H^{1}}\|v\|_{H^{1}}$、$\beta\|u\|_{H^{1}}^{2}\le B[u,u]+\gamma\|u\|_{2}^{2}$。
+- $V\defeq H_{0}^{1}(\Omega)$（内積 $\langle u,v\rangle_{H^{1}}=(u,v)+(\nabla u,\nabla v)$）、$H\defeq L^{2}(\Omega)$、$V^{*}\defeq H^{-1}(\Omega)$（\ref{pde:weak-dual-space}）。$h\in H$ を汎関数 $v\mapsto(h,v)$ とみなす埋め込み（\ref{pde:weak-dual-representation.3}）で $V\subset H\subset V^{*}$ とし、$\|v\|_{2}\le\|v\|_{H^{1}}$、$\|h\|_{H^{-1}}\le\|h\|_{2}$。
+- $\mathcal{A}\colon V\to V^{*}$ を $\langle\mathcal{A}u,v\rangle\defeq B[u,v]$ で定める。\ref{pde:bilinear-energy-estimates.1} から有界線形で $\|\mathcal{A}u\|_{H^{-1}}\le\alpha\|u\|_{H^{1}}$。
+- $(e_{k},\lambda_{k})_{k\ge1}$ は \ref{fa:dirichlet-eigenfunctions.2} のディリクレ・ラプラシアンの固有関数と固有値で、ページを通して固定する：$(e_{k})$ は $H$ の正規直交基底、$e_{k}\in V$、$0<\lambda_{1}\le\lambda_{2}\le\cdots$、すべての $v\in V$ で $(\nabla e_{k},\nabla v)=\lambda_{k}(e_{k},v)$。
+- $(0,T)$ の上の測度はルベーグ測度 $|\cdot|$、可測はルベーグ可測。単調収束定理 \ref{meas:monotone-convergence}、優収束定理 \ref{meas:dominated-convergence}、トネリの定理 \ref{meas:tonelli}、ボレル–カンテリの補題 \ref{meas:borel-cantelli}、リース–フィッシャーの定理 \ref{meas:riesz-fischer}、絶対連続関数と微積分学の基本定理 \ref{meas:ftc-lebesgue} を使う。$[0,T]$ 上の絶対連続関数 $p,q$ の積は絶対連続（$|pq(t)-pq(s)|\le\|p\|_{\infty}|q(t)-q(s)|+\|q\|_{\infty}|p(t)-p(s)|$）で、両方が微分可能な点では $(pq)'=p'q+pq'$。
+- 初等的な不等式：$s,t\ge0$, $\varepsilon>0$ について $st\le\varepsilon s^{2}+\frac{t^{2}}{4\varepsilon}$。
+- **選択公理**：固有関数の基底（\ref{fa:dirichlet-eigenfunctions}）はコンパクト作用素の理論によるので、従属選択公理と可算選択公理に依存する。このページで新たに選択公理を使う箇所はない（単関数の近似は標準的な構成で、部分列は「条件を満たす最小の番号」で選ぶ）。弱収束部分列の存在（\ref{fa:hilbert-weak-compactness}）はそのページの証明に従う。
+:::
+
+## ボホナー空間 {#pde:sec-pa-bochner}
+
+$X$ を実バナッハ空間とする。時刻ごとに $X$ の元を与える関数 $u\colon(0,T)\to X$ を、実数値関数と同じく「単関数で近似できるもの」として扱う。
+
+::: definition ボホナー可積分性と空間 L²(0,T;X) {#pde:bochner-space keywords="simple functions with values in a Banach space, strongly measurable function (a.e. limit of simple functions), Bochner integrable (strongly measurable with integrable norm), L^p(0,T;X) for p = 1, 2, C([0,T];X)" index="強可測|きょうかそく, ボホナー可積分|ぼほなーかせきぶん, ボッホナー可積分|ぼっほなーかせきぶん, ボホナー空間|ぼほなーくうかん"}
+1. 可測集合 $E_{1},\dots,E_{N}\subset(0,T)$ と $x_{1},\dots,x_{N}\in X$ について $s=\sum_{i}\mathbf{1}_{E_{i}}x_{i}$ の形の関数を**単関数**といい、$\int_{0}^{T}s\,dt\defeq\sum_{i}|E_{i}|x_{i}$ とおく（$E_{i}$ を互いに素にとり直しても値は変わらない。実数値の場合 \ref{meas:simple-integral-properties} と同じ）。
+2. 単関数の列 $s_{n}$ で、a.e. の $t$ について $\|s_{n}(t)-u(t)\|_{X}\to0$ となるものがあるとき、$u$ は**強可測**であるという。このとき $t\mapsto\|u(t)\|_{X}$ は実数値単関数 $\|s_{n}(t)\|_{X}$ の a.e. の極限なので可測。
+3. 強可測で $\int_{0}^{T}\|u(t)\|_{X}dt<\infty$ のとき、$u$ は**ボホナー可積分**であるという。
+4. $p=1,2$ について、強可測で $\|u\|_{L^{p}(0,T;X)}\defeq(\int_{0}^{T}\|u(t)\|_{X}^{p}dt)^{1/p}<\infty$ となる $u$ の全体（a.e. で等しいものを同一視）を $L^{p}(0,T;X)$ と書く。$C([0,T];X)$ は連続関数 $[0,T]\to X$ の全体に $\max_{t}\|u(t)\|_{X}$ を入れたもの。
+:::
+
+::: intuition
+ベクトルに値をとる関数も、有限個の値しかとらない階段状の関数で近似できるなら「測れる」とし、そのノルムが積分できれば積分も近似の極限で定める。$L^{2}(0,T;X)$ は、時刻ごとの $X$ のノルムの 2 乗が時間について積分できる関数の空間である。
+:::
+
+::: proposition ボホナー積分 {#pde:bochner-integral keywords="Bochner integral as the limit of integrals of simple functions; ||int u|| <= int ||u||; bounded operators commute with the integral; continuous functions are strongly measurable; L^2(0,T;X) is contained in L^1(0,T;X); psi u is Bochner integrable for psi in L^2(0,T)" index="ボホナー積分|ぼほなーせきぶん, ボッホナー積分|ぼっほなーせきぶん"}
+1. $u$ がボホナー可積分なら、単関数 $s_{n}$ で $\int\|s_{n}-u\|_{X}\to0$ となるものがあり、$\int s_{n}$ は $X$ で収束して極限は $(s_{n})$ のとり方によらない。これを $\int_{0}^{T}u\,dt$ と書く。積分は線形で $\|\int u\|_{X}\le\int\|u\|_{X}$。
+2. $Y$ をバナッハ空間、$\Lambda\colon X\to Y$ を有界線形作用素とする。$u$ が強可測なら $\Lambda u$ も強可測で、$u$ がボホナー可積分なら $\Lambda u$ もそうで $\Lambda\int u=\int\Lambda u$。
+3. 連続関数 $[0,T]\to X$ は強可測。$u\in L^{2}(0,T;X)$, $\psi\in L^{2}(0,T)$ なら $\psi u$ はボホナー可積分で $\int\|\psi u\|\le\|\psi\|_{2}\|u\|_{L^{2}(0,T;X)}$（$\psi=1$ として $L^{2}(0,T;X)\subset L^{1}(0,T;X)$）。
+:::
+
+::: proof
+**Step 1.** 【主張：1 の近似列が存在する】強可測性の単関数 $\sigma_{n}\to u$（a.e.）をとり、$s_{n}\defeq\sigma_{n}\mathbf{1}_{\{\|\sigma_{n}\|\le2\|u\|\}}$ とおく（可測関数の比較で定まる集合なので $s_{n}$ も単関数）。$u(t)\ne0$ なら、十分大きい $n$ で $\|\sigma_{n}(t)\|\le2\|u(t)\|$ なので $s_{n}(t)=\sigma_{n}(t)\to u(t)$。$u(t)=0$ なら $s_{n}(t)=0$。よって $s_{n}\to u$（a.e.）で $\|s_{n}-u\|\le3\|u\|$ は可積分だから、優収束定理で $\int\|s_{n}-u\|\to0$。
+
+**Step 2.** 【主張：$\int s_{n}$ は収束し、極限は近似列によらない】単関数については、互いに素な表示で三角不等式を使うと $\|\int s\|\le\int\|s\|$。よって $\|\int s_{n}-\int s_{m}\|\le\int\|s_{n}-u\|+\int\|u-s_{m}\|\to0$ で、$X$ の完備性から収束する。別の近似列 $(s_{n}')$ があれば、交互に並べた列も近似列なので極限は一致する。線形性と $\|\int u\|\le\int\|u\|$ は単関数の場合から極限をとって従う。
+
+**Step 3（2 と 3）.** 【主張：$\Lambda\int u=\int\Lambda u$ で、3 の主張が成り立つ】$\Lambda s_{n}$ は $Y$ に値をとる単関数で、$\|\Lambda s_{n}-\Lambda u\|\le\|\Lambda\|\|s_{n}-u\|$ なので $\Lambda u$ は強可測、可積分性も同じ評価から。単関数については $\Lambda\int s_{n}=\int\Lambda s_{n}$ で、両辺の極限をとる。3：$u$ が連続なら、$s_{n}\defeq u(0)\mathbf{1}_{\{0\}}+\sum_{i=1}^{n}u(iT/n)\mathbf{1}_{((i-1)T/n,\,iT/n]}$ は一様連続性から一様に $u$ に収束する。$\psi$ を実数値単関数 $\psi_{n}\to\psi$（各点。\ref{meas:simple-approximation-real}）で近似すると $\psi_{n}s_{n}$ は単関数で a.e. に $\psi u$ へ収束するので $\psi u$ は強可測で、評価は $L^{2}(0,T)$ のコーシー–シュワルツの不等式。
+:::
+
+時間の微分を扱うには、$X$ がヒルベルト空間 $H_{0}^{1}$, $L^{2}$, $H^{-1}$ の場合だけで足りる。そこでは正規直交基底の座標を使うと、強可測性も $L^{2}(0,T;X)$ のノルムも、実数値関数の言葉に直せる。
+
+::: proposition 可分なヒルベルト空間に値をとる関数の座標 {#pde:bochner-hilbert-coordinates keywords="for a separable Hilbert space X with orthonormal basis phi_k, u is strongly measurable iff all coordinates <u(t), phi_k> are measurable; ||u||_{L^2(0,T;X)}^2 = sum ||c_k||_{L^2(0,T)}^2; L^2(0,T;X) is a Hilbert space; coordinates of the Bochner integral" index="ボホナー空間の座標|ぼほなーくうかんのざひょう"}
+$X$ を実ヒルベルト空間、$(\varphi_{k})_{k\ge1}$ をその可算な正規直交基底とし、$u\colon(0,T)\to X$ の座標を $c_{k}(t)\defeq\langle u(t),\varphi_{k}\rangle$ とする。
+1. $u$ が強可測であることと、すべての $c_{k}$ が可測であることは同値。
+2. このとき $\|u(t)\|^{2}=\sum_{k}c_{k}(t)^{2}$、$\|u\|_{L^{2}(0,T;X)}^{2}=\sum_{k}\|c_{k}\|_{L^{2}(0,T)}^{2}$（両辺 $\infty$ も許す）。逆に、可測な $c_{k}$ が $\sum_{k}\|c_{k}\|_{L^{2}(0,T)}^{2}<\infty$ を満たせば、$u(t)\defeq\sum_{k}c_{k}(t)\varphi_{k}$（$\sum_{k}c_{k}(t)^{2}<\infty$ となる a.e. の $t$ で。他では $0$）は座標 $c_{k}$ をもつ $L^{2}(0,T;X)$ の元である。
+3. $L^{2}(0,T;X)$ は内積 $\int_{0}^{T}\langle u(t),w(t)\rangle dt$ についてヒルベルト空間である。
+4. $u\in L^{2}(0,T;X)$, $\psi\in L^{2}(0,T)$ について $\langle\int\psi u\,dt,\varphi_{k}\rangle=\int\psi c_{k}\,dt$。$X$ の元は座標で決まる。
+:::
+
+::: proof
+**Step 1（1 の ⇒）.** 【主張：強可測なら $c_{k}$ は可測】単関数 $\sigma_{n}\to u$（a.e.）について $\langle\sigma_{n}(t),\varphi_{k}\rangle$ は実数値単関数で、a.e. に $c_{k}(t)$ へ収束する。
+
+**Step 2（1 の ⇐）.** 【主張：$c_{k}$ がすべて可測なら $u$ は単関数の a.e. の極限】$P_{N}u\defeq\sum_{k\le N}c_{k}\varphi_{k}$ とおく。標準的な構成（\ref{meas:simple-approximation-real}）で実数値単関数 $r_{k,j}\to c_{k}$（各点、$j\to\infty$）をとり、$S_{N,j}\defeq\sum_{k\le N}r_{k,j}\varphi_{k}$ とすると、各 $t$ で $S_{N,j}(t)\to P_{N}u(t)$。$D_{N,j}\defeq\{t:\text{ある }i\ge j\text{ で }\|S_{N,i}(t)-P_{N}u(t)\|>1/N\}$ は可測で $j$ について減少し、共通部分は空なので $|D_{N,j}|\to0$。$|D_{N,j}|<2^{-N}$ となる最小の $j$ を $j(N)$ とし、$s_{N}\defeq S_{N,j(N)}$ とおく。ボレル–カンテリの補題から、a.e. の $t$ は有限個の $D_{N,j(N)}$ にしか属さないので、十分大きい $N$ で $\|s_{N}(t)-P_{N}u(t)\|\le1/N$。\ref{fa:orthonormal-basis.3} から $P_{N}u(t)\to u(t)$ なので $s_{N}(t)\to u(t)$。
+
+**Step 3（2）.** 【主張：ノルムの等式と逆の主張】各点の等式はパーセヴァルの等式（\ref{fa:orthonormal-basis.4}）。部分和は $N$ について増加するので、単調収束定理で $\int\sum_{k}c_{k}^{2}=\sum_{k}\int c_{k}^{2}$。逆：単調収束定理から $\int\sum_{k}c_{k}^{2}<\infty$ なので a.e. の $t$ で $\sum_{k}c_{k}(t)^{2}<\infty$、そこで級数 $\sum_{k}c_{k}(t)\varphi_{k}$ は（部分和がコーシー列なので）収束し、その座標は $c_{k}(t)$。1 から強可測で、ノルムは前半から。
+
+**Step 4（3）.** 【主張：$L^{2}(0,T;X)$ は完備】内積の被積分関数 $\langle u(t),w(t)\rangle=\sum_{k}c_{k}(t)d_{k}(t)$ は可測で、$|\langle u,w\rangle|\le\|u(t)\|\|w(t)\|$ から可積分。測度空間 $(0,T)\times\mathbb{N}$（ルベーグ測度と数え上げ測度の積。どちらも σ 有限）の上の関数 $C_{u}(t,k)\defeq c_{k}(t)$ を考えると、トネリの定理と 2 から $\|u-w\|_{L^{2}(0,T;X)}=\|C_{u}-C_{w}\|_{L^{2}((0,T)\times\mathbb{N})}$。$(u_{n})$ がコーシー列なら $(C_{u_{n}})$ は $L^{2}((0,T)\times\mathbb{N})$ のコーシー列で、リース–フィッシャーの定理から極限 $C$ をもつ。トネリの定理から $\sum_{k}\int|C(t,k)|^{2}dt<\infty$ なので、2 の逆の主張で $c_{k}=C(\cdot,k)$ から $u$ を作れば $\|u_{n}-u\|=\|C_{u_{n}}-C\|\to0$。
+
+**Step 5（4）.** 【主張：積分の座標】$x\mapsto\langle x,\varphi_{k}\rangle$ は有界線形汎関数なので、\ref{pde:bochner-integral.2} と \ref{pde:bochner-integral.3} から。後半は \ref{fa:orthonormal-basis.3}。
+
+::: hypcheck
+- **可分性（可算な正規直交基底）**：Step 2 の対角線的な選び方と、Step 4 の数え上げ測度の σ 有限性で使った。可分でない $X$ では 1 の ⇐ は成り立たない：$X=\ell^{2}([0,1])$（非可算な正規直交基底 $\{\varphi_{s}\}$）で $u(t)\defeq\varphi_{t}$ とすると、各座標 $\langle u(t),\varphi_{s}\rangle=\mathbf{1}_{\{t=s\}}$ は可測だが、単関数の値は可算個のベクトルの張る閉部分空間 $X_{0}$ に入り、$u(t)\in X_{0}$ となる $t$ は可算個しかないので、$u$ は単関数の a.e. の極限にならない。
+- **公理**：Step 2 の $r_{k,j}$ は標準的な構成、$j(N)$ は最小の番号で選ぶので、選択公理は使わない。
+:::
+:::
+
+この命題を、固定した固有関数 $e_{k}$ を使って $V$, $H$, $V^{*}$ の三つに当てはめる。
+
+::: lemma スペクトル座標 {#pde:bochner-spectral-coordinates keywords="Dirichlet eigenfunctions e_k give orthonormal bases of L^2, H^1_0 (e_k / sqrt(1+lambda_k)) and H^{-1}; ||v||_{H^1}^2 = sum (1+lambda_k)(v,e_k)^2, ||f||_{H^{-1}}^2 = sum <f,e_k>^2/(1+lambda_k), <f,v> = sum <f,e_k>(v,e_k); the projection P_m is a contraction in all three norms" index="スペクトル座標|すぺくとるざひょう"}
+1. $v\in V$ について $\langle e_{k},v\rangle_{H^{1}}=(1+\lambda_{k})(e_{k},v)$。$(e_{k}/\sqrt{1+\lambda_{k}})_{k}$ は $V$ の正規直交基底である。
+2. $h\in H$ が $V$ に入るのは $\sum_{k}(1+\lambda_{k})(h,e_{k})^{2}<\infty$ のときに限り、そのとき $\|h\|_{H^{1}}^{2}=\sum_{k}(1+\lambda_{k})(h,e_{k})^{2}$、$\|\nabla h\|_{2}^{2}=\sum_{k}\lambda_{k}(h,e_{k})^{2}$ で、$\sum_{k}(h,e_{k})e_{k}$ は $V$ で $h$ に収束する。とくに $\lambda_{1}\|v\|_{2}^{2}\le\|\nabla v\|_{2}^{2}$（$v\in V$）。
+3. $f\in V^{*}$ について $\|f\|_{H^{-1}}^{2}=\sum_{k}\frac{\langle f,e_{k}\rangle^{2}}{1+\lambda_{k}}$、$\langle f,v\rangle=\sum_{k}\langle f,e_{k}\rangle(v,e_{k})$（$v\in V$、絶対収束）。逆に、$\sum_{k}\frac{a_{k}^{2}}{1+\lambda_{k}}<\infty$ を満たす実数列 $(a_{k})$ について、$\langle f,e_{k}\rangle=a_{k}$ となる $f\in V^{*}$ がただ一つある。$V^{*}$ にリースの表現による内積を入れると、$(\sqrt{1+\lambda_{k}}\,e_{k})_{k}$（$H\subset V^{*}$ の元として）は $V^{*}$ の正規直交基底で、$f$ の座標は $\langle f,e_{k}\rangle/\sqrt{1+\lambda_{k}}$。
+4. $P_{m}f\defeq\sum_{k\le m}\langle f,e_{k}\rangle e_{k}$（$f\in V^{*}$。$f\in H$ なら $\langle f,e_{k}\rangle=(f,e_{k})$）は、$\|P_{m}f\|_{H^{-1}}\le\|f\|_{H^{-1}}$、$f\in H$ なら $\|P_{m}f\|_{2}\le\|f\|_{2}$、$f\in V$ なら $\|P_{m}f\|_{H^{1}}\le\|f\|_{H^{1}}$ を満たす。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$(e_{k}/\sqrt{1+\lambda_{k}})$ は $V$ の正規直交基底】記法の固有方程式から $\langle e_{k},v\rangle_{H^{1}}=(e_{k},v)+(\nabla e_{k},\nabla v)=(1+\lambda_{k})(e_{k},v)$。$v=e_{j}$ とすると $\langle e_{k},e_{j}\rangle_{H^{1}}=(1+\lambda_{k})\delta_{kj}$ で正規直交。$v\in V$ がすべての $e_{k}$ と $H^{1}$ で直交すれば $(e_{k},v)=0$（すべての $k$）で、$(e_{k})$ が $H$ の正規直交基底なので $v=0$。\ref{fa:orthonormal-basis.1} から基底である。
+
+**Step 2（2）.** 【主張：$V$ の元の特徴づけ】$v\in V$ の基底 $e_{k}/\sqrt{1+\lambda_{k}}$ に関する座標は 1 から $\sqrt{1+\lambda_{k}}(v,e_{k})$ なので、パーセヴァルの等式でノルムの式、\ref{fa:orthonormal-basis.3} で $V$ での収束を得る。$\|\nabla h\|^{2}=\|h\|_{H^{1}}^{2}-\|h\|_{2}^{2}$ と $\|h\|_{2}^{2}=\sum(h,e_{k})^{2}$ から勾配の式、$\lambda_{k}\ge\lambda_{1}$ から最後の不等式。逆に $\sum(1+\lambda_{k})(h,e_{k})^{2}<\infty$ なら、$\sum(h,e_{k})e_{k}$ の部分和は $V$ でコーシー列で、ある $v\in V$ に収束する。$\|\cdot\|_{2}\le\|\cdot\|_{H^{1}}$ から同じ部分和は $H$ で $v$ にも収束するが、$H$ では $h$ に収束するので $h=v\in V$。
+
+**Step 3（3）.** 【主張：$V^{*}$ のノルムと双対の式】リースの表現定理（\ref{fa:riesz-representation}）で $w_{f}\in V$ を $\langle f,v\rangle=\langle w_{f},v\rangle_{H^{1}}$, $\|w_{f}\|_{H^{1}}=\|f\|_{H^{-1}}$ ととる。1 から $\langle f,e_{k}\rangle=(1+\lambda_{k})(w_{f},e_{k})$ なので、2 から $\|f\|^{2}=\sum(1+\lambda_{k})(w_{f},e_{k})^{2}=\sum\langle f,e_{k}\rangle^{2}/(1+\lambda_{k})$。双対の式は、$V$ のパーセヴァルの等式の内積版 $\langle w_{f},v\rangle_{H^{1}}=\sum_{k}(1+\lambda_{k})(w_{f},e_{k})(v,e_{k})$ から。逆：2 から $w\defeq\sum_{k}\frac{a_{k}}{1+\lambda_{k}}e_{k}\in V$ で、$f\defeq\langle w,\cdot\rangle_{H^{1}}$ とすれば $\langle f,e_{k}\rangle=a_{k}$。一意性は双対の式から。最後に、リースの表現 $f\mapsto w_{f}$ は $V^{*}$ から $V$ への等長な線形同型で、$\sqrt{1+\lambda_{k}}\,e_{k}$ を $\sqrt{1+\lambda_{k}}\cdot\frac{e_{k}}{1+\lambda_{k}}=\frac{e_{k}}{\sqrt{1+\lambda_{k}}}$ に移す（1 から $(e_{k},\cdot)=\langle\frac{e_{k}}{1+\lambda_{k}},\cdot\rangle_{H^{1}}$）。これは 1 の正規直交基底なので、逆像も正規直交基底で、座標は $\langle w_{f},e_{k}/\sqrt{1+\lambda_{k}}\rangle_{H^{1}}=\langle f,e_{k}\rangle/\sqrt{1+\lambda_{k}}$。
+
+4 は、2・3 とパーセヴァルの等式のノルムの式で、和を $k\le m$ に制限すればよい。
+:::
+
+::: definition 時間の弱微分 {#pde:bochner-weak-derivative keywords="weak time derivative: for u in L^2(0,T;H^1_0) and w in L^2(0,T;H^{-1}), w = u' if int phi'(t) u(t) dt = - int phi(t) w(t) dt in H^{-1} for all test functions phi in C_c^infinity(0,T)" index="時間の弱微分|じかんのじゃくびぶん, 弱導関数（ベクトル値）|じゃくどうかんすうべくとるち"}
+$u\in L^{2}(0,T;V)$, $w\in L^{2}(0,T;V^{*})$ とする。すべての $\varphi\in C_{c}^{\infty}((0,T))$ について
+$$
+\int_{0}^{T}\varphi'(t)u(t)\,dt=-\int_{0}^{T}\varphi(t)w(t)\,dt\qquad(V^{*}\text{ の等式})
+$$
+が成り立つとき、$w$ を $u$ の**弱微分**といい $u'\defeq w$ と書く。左辺は、$u$ を埋め込み $V\subset V^{*}$（有界線形）で $V^{*}$ に値をとる関数とみたもの（\ref{pde:bochner-integral.2} で強可測、\ref{pde:bochner-integral.3} で積分できる）。
+:::
+
+::: intuition
+時間の導関数が $H^{-1}$ に入ることだけを要求する。これは、方程式 $u_{t}=-Lu+f$ の右辺が、$u\in H_{0}^{1}$ では $H^{-1}$ にしか入らないことに合わせた弱さである。
+:::
+
+::: lemma 弱微分の座標 {#pde:bochner-derivative-coordinates keywords="w = u' in L^2(0,T;H^{-1}) iff for each k the scalar function <w(t), e_k> is the weak derivative of (u(t), e_k) on (0,T); then the coordinates are in H^1(0,T); the weak derivative is unique" index="弱微分の座標|じゃくびぶんのざひょう"}
+$u\in L^{2}(0,T;V)$, $w\in L^{2}(0,T;V^{*})$ とし、$d^{k}(t)\defeq(u(t),e_{k})$, $a_{k}(t)\defeq\langle w(t),e_{k}\rangle$ とおく。$d^{k},a_{k}\in L^{2}(0,T)$ であり、$w=u'$ であることと、すべての $k$ で $a_{k}$ が $d^{k}$ の $(0,T)$ での弱微分（\ref{fa:sobolev-space.1}）であることは同値。このとき $d^{k}\in H^{1}(0,T)$ で、$u'$ は一意。
+:::
+
+::: proof
+$d^{k}(t)=\langle u(t),\frac{e_{k}}{1+\lambda_{k}}\rangle_{H^{1}}$（\ref{pde:bochner-spectral-coordinates.1}）と $a_{k}(t)=\sqrt{1+\lambda_{k}}\cdot\frac{\langle w(t),e_{k}\rangle}{\sqrt{1+\lambda_{k}}}$ は、\ref{pde:bochner-spectral-coordinates} の基底に関する座標の定数倍なので、\ref{pde:bochner-hilbert-coordinates.1} から可測。$|d^{k}|\le\|u(t)\|_{H^{1}}$, $|a_{k}|\le\|w(t)\|_{H^{-1}}\|e_{k}\|_{H^{1}}$ から $L^{2}(0,T)$ に入る。有界線形汎関数 $f\mapsto\langle f,e_{k}\rangle$ を定義の等式の両辺に施すと、\ref{pde:bochner-integral.2} から $\int\varphi'd^{k}=-\int\varphi a_{k}$。逆に、これがすべての $k$ で成り立てば、定義の等式の両辺は $e_{k}$ での値がすべて等しい $V^{*}$ の元なので、\ref{pde:bochner-spectral-coordinates.3} の一意性から等しい。$u'$ の一意性は、スカラーの弱微分の一意性（\ref{fa:sobolev-space.1}）と同じ理由による。
+:::
+
+::: theorem ボホナー空間での連続性と積の微分 {#pde:bochner-continuity keywords="if u in L^2(0,T;H^1_0) and u' in L^2(0,T;H^{-1}) then u has a representative in C([0,T];L^2), t -> ||u(t)||_2^2 is absolutely continuous with derivative 2<u'(t), u(t)>, and max ||u(t)||^2 <= ||u||^2/T + 2 ||u|| ||u'||" index="ボホナー空間の連続性|ぼほなーくうかんのれんぞくせい, ノルムの微分（ボホナー空間）|のるむのびぶんぼほなーくうかん"}
+$u\in L^{2}(0,T;V)$ が弱微分 $u'\in L^{2}(0,T;V^{*})$ をもつとする。
+1. $\widetilde{u}\in C([0,T];H)$ で、a.e. の $t$ について $\widetilde{u}(t)=u(t)$ となるものがある。
+2. $t\mapsto\|\widetilde{u}(t)\|_{2}^{2}$ は $[0,T]$ で絶対連続で、a.e. の $t$ で $\frac{d}{dt}\|\widetilde{u}(t)\|_{2}^{2}=2\langle u'(t),u(t)\rangle$。とくに $\|\widetilde{u}(t)\|_{2}^{2}-\|\widetilde{u}(s)\|_{2}^{2}=2\int_{s}^{t}\langle u',u\rangle\,dr$。
+3. $\displaystyle\max_{0\le t\le T}\|\widetilde{u}(t)\|_{2}^{2}\le\frac{1}{T}\|u\|_{L^{2}(0,T;H)}^{2}+2\|u\|_{L^{2}(0,T;V)}\|u'\|_{L^{2}(0,T;V^{*})}$。
+:::
+
+::: intuition
+空間の向きに 1 回微分できる（$H_{0}^{1}$）ことと、時間の向きに「空間の向きの 1 回の積分」の分だけ微分できる（$H^{-1}$）ことを合わせると、ちょうど中間の $L^{2}$ のノルムが時間について連続になり、そのノルムの 2 乗は普通の積の微分の公式どおりに微分できる。
+:::
+
+::: proof
+以下 $d^{k}(t)\defeq(u(t),e_{k})$, $a_{k}(t)\defeq\langle u'(t),e_{k}\rangle$ とする。\ref{pde:bochner-derivative-coordinates} から $d^{k}\in H^{1}(0,T)$ で、その弱微分は $a_{k}$。
+
+**Step 1.** 【主張：各 $k$ について、$d^{k}$ に a.e. で等しい $[0,T]$ 上の絶対連続関数 $\widetilde{d}^{k}$ があり、すべての $s,t$ で $\widetilde{d}^{k}(t)^{2}-\widetilde{d}^{k}(s)^{2}=2\int_{s}^{t}d^{k}a_{k}\,dr$】\ref{fa:sobolev-one-dimension}（$p=2$）から、$\widetilde{d}^{k}$ は絶対連続で a.e. で $(\widetilde{d}^{k})'=a_{k}$。記法の注意から $(\widetilde{d}^{k})^{2}$ も絶対連続で、a.e. で導関数は $2\widetilde{d}^{k}a_{k}=2d^{k}a_{k}$。\ref{meas:ftc-lebesgue.3} から等式が従う。
+
+**Step 2.** 【主張：$\sum_{k}\int_{0}^{T}|d^{k}a_{k}|\,dr\le\|u\|_{L^{2}(0,T;V)}\|u'\|_{L^{2}(0,T;V^{*})}$】a.e. の $r$ で、$\mathbb{R}^{\mathbb{N}}$ のコーシー–シュワルツの不等式と \ref{pde:bochner-spectral-coordinates.2}・\ref{pde:bochner-spectral-coordinates.3} から
+$$
+\sum_{k}|d^{k}a_{k}|=\sum_{k}\sqrt{1+\lambda_{k}}\,|d^{k}|\cdot\frac{|a_{k}|}{\sqrt{1+\lambda_{k}}}\le\|u(r)\|_{H^{1}}\|u'(r)\|_{H^{-1}}.
+$$
+非負の項の級数なので単調収束定理で積分と和を交換し、$L^{2}(0,T)$ のコーシー–シュワルツの不等式を使う。
+
+**Step 3.** 【主張：$M\defeq\sum_{k}\max_{t}\widetilde{d}^{k}(t)^{2}\le\frac{1}{T}\|u\|_{L^{2}(0,T;H)}^{2}+2\|u\|_{L^{2}(0,T;V)}\|u'\|_{L^{2}(0,T;V^{*})}$】Step 1 から、すべての $s,t$ で $\widetilde{d}^{k}(t)^{2}\le\widetilde{d}^{k}(s)^{2}+2\int_{0}^{T}|d^{k}a_{k}|$。$s$ について $(0,T)$ で平均すると $\widetilde{d}^{k}(t)^{2}\le\frac{1}{T}\int_{0}^{T}(d^{k})^{2}+2\int_{0}^{T}|d^{k}a_{k}|$。$k$ について和をとり、第 1 項には \ref{pde:bochner-hilbert-coordinates.2}（$X=H$, 基底 $e_{k}$）、第 2 項には Step 2 を使う。
+
+**Step 4.** 【主張：$\widetilde{u}(t)\defeq\sum_{k}\widetilde{d}^{k}(t)e_{k}$ は $t$ について一様に $H$ で収束し、$\widetilde{u}\in C([0,T];H)$、a.e. で $\widetilde{u}=u$】$N<N'$ について $\max_{t}\|\sum_{k=N}^{N'}\widetilde{d}^{k}(t)e_{k}\|_{2}^{2}=\max_{t}\sum_{k=N}^{N'}\widetilde{d}^{k}(t)^{2}\le\sum_{k\ge N}\max_{t}\widetilde{d}^{k}(t)^{2}$ で、右辺は Step 3 から $N\to\infty$ で $0$ に近づく。部分和は $H$ に値をとる連続関数なので、一様極限 $\widetilde{u}$ も連続。$\widetilde{d}^{k}=d^{k}$ が成り立たない $t$ の集合は各 $k$ で零集合なので、その可算和の外では $\widetilde{u}(t)$ と $u(t)$ の座標がすべて一致し、$\widetilde{u}(t)=u(t)$。
+
+**Step 5.** 【主張：2・3 が成り立つ】パーセヴァルの等式と Step 1 から
+$$
+\|\widetilde{u}(t)\|_{2}^{2}=\sum_{k}\widetilde{d}^{k}(t)^{2}=\sum_{k}\Bigl(\widetilde{d}^{k}(0)^{2}+2\int_{0}^{t}d^{k}a_{k}\Bigr)=\|\widetilde{u}(0)\|_{2}^{2}+2\int_{0}^{t}\sum_{k}d^{k}a_{k}.
+$$
+最後の等号の項別積分は、Step 2 と \ref{meas:series-dominated} による。\ref{pde:bochner-spectral-coordinates.3} から a.e. の $r$ で $\sum_{k}d^{k}(r)a_{k}(r)=\langle u'(r),u(r)\rangle$ で、Step 2 からこれは可積分。よって \ref{meas:ftc-lebesgue} の 2⇒3 から 2 が従う。3 は $\|\widetilde{u}(t)\|_{2}^{2}=\sum_{k}\widetilde{d}^{k}(t)^{2}\le M$ と Step 3 から。
+
+::: hypcheck
+- **$u\in L^{2}(0,T;V)$ と $u'\in L^{2}(0,T;V^{*})$ の組**：Step 2 で、重み $\sqrt{1+\lambda_{k}}$ が両者のあいだでちょうど打ち消し合うことに使った。$u\in L^{2}(0,T;V)$ だけでは連続にならない（\ref{pde:prob-pa-jump}：$u(t)=\mathbf{1}_{(T/2,T)}(t)e_{1}$）。
+- **固有関数の基底**：座標で計算するための道具で、主張は基底によらない（$\widetilde{u}$ の連続性も $\langle u',u\rangle$ も基底を含まない）。ここで $\Omega$ の有界性を使っている（\ref{fa:dirichlet-eigenfunctions} はレリッヒ–コンドラショフの定理による）。
+- **境界・係数の正則性**：使っていない（$L$ はまだ現れない）。
+- **公理**：Step 4 で可算個の零集合の和をとるだけで、選択公理は使わない。
+:::
+:::
+
+::: supplement
+**一般化.** 同じ主張は、ヒルベルト空間 $V\subset H$ が稠密かつ連続に埋め込まれ、$H$ を自分の双対と同一視して $V\subset H\subset V^{*}$ とする一般の状況（**ゲルファントの三つ組**）で成り立つ。標準的な証明は、$u$ を $[0,T]$ の外へ折り返して延ばし、時間について軟化子で畳み込んだ $u^{\varepsilon}=\rho_{\varepsilon}*u$（\ref{fa:mollifier} のベクトル値版）を使う。$u^{\varepsilon}$ は $V$ に値をとる滑らかな関数で、$\frac{d}{dt}\|u^{\varepsilon}-u^{\delta}\|_{H}^{2}=2\langle(u^{\varepsilon})'-(u^{\delta})',u^{\varepsilon}-u^{\delta}\rangle$ を積分すると、$(u^{\varepsilon})$ が $C([0,T];H)$ のコーシー列になることがわかる（Evans『Partial Differential Equations』第 5 章）。ここでは固有関数の座標でスカラーの場合 \ref{fa:sobolev-one-dimension}（その証明が軟化子による近似を使う）に帰着させたので、ベクトル値の畳み込みの収束を別に示す必要がない。
+
+**似た定理.** スカラーの $H^{1}(0,T)\subset C([0,T])$（\ref{fa:sobolev-one-dimension}）の、値がヒルベルト空間になった版である。ただし $u\in H^{1}(0,T;V^{*})$ だけからは $C([0,T];V^{*})$ しか出ず、$H$ への連続性は空間の滑らかさ（$L^{2}(0,T;V)$）との釣り合いから来る。
+
+**高い視点：二つの向きの滑らかさの交換.** $\|u\|_{2}^{2}$ の時間微分 $2\langle u',u\rangle$ は、$u'$ が空間について 1 回分粗く、$u$ が 1 回分滑らかなので、ちょうど意味をもつ。比喩で言えば、時間の向きの粗さを空間の向きの滑らかさで支払っている。放物型方程式のエネルギー法はすべてこの等式の上に立つ。
+:::
+
+## 弱解とエネルギー評価 {#pde:sec-pa-weak}
+
+$u$ が滑らかな解なら、\eqref{pde:eq-pa-problem} に $v\in C_{c}^{\infty}(\Omega)$ を掛けて空間について部分積分すると $(u_{t}(t),v)+B[u(t),v]=(f(t),v)$ となる（\ref{pde:weak-elliptic-classical} の証明の Step 1 と同じ）。これを弱い形の定義にする。
+
+::: definition 放物型方程式の弱解 {#pde:parabolic-weak-solution keywords="weak solution of the parabolic initial-boundary value problem: u in L^2(0,T;H^1_0) with u' in L^2(0,T;H^{-1}), <u'(t),v> + B[u(t),v] = <f(t),v> for a.e. t and all v in H^1_0, and u(0) = g in L^2" index="弱解（放物型方程式）|じゃくかいほうぶつがたほうていしき"}
+$g\in L^{2}(\Omega)$, $f\in L^{2}(0,T;H^{-1}(\Omega))$ とする。$u\in L^{2}(0,T;V)$ が次を満たすとき、$u$ を \eqref{pde:eq-pa-problem} の**弱解**という。
+1. 弱微分 $u'\in L^{2}(0,T;V^{*})$ をもつ。
+2. a.e. の $t$ で、すべての $v\in V$ について $\langle u'(t),v\rangle+B[u(t),v]=\langle f(t),v\rangle$。すなわち $V^{*}$ の等式 $u'(t)+\mathcal{A}u(t)=f(t)$。
+3. \ref{pde:bochner-continuity.1} の連続な代表 $\widetilde{u}$ について $\widetilde{u}(0)=g$。
+
+以後、弱解はつねに連続な代表 $\widetilde{u}$ で考え、$u(t)$ と書く。
+:::
+
+::: intuition
+空間の向きには弱解（\ref{pde:weak-elliptic-solution}）と同じく試験関数との積分で、時間の向きには弱微分で方程式を課す。境界条件は $u(t)\in H_{0}^{1}$ で、初期条件は $L^{2}$ に値をとる連続関数としての $t=0$ での値で課す。
+:::
+
+::: example
+- **意味の確認.** $\mathcal{A}$ は有界線形なので、$t\mapsto\mathcal{A}u(t)$ は $L^{2}(0,T;V^{*})$ に入る（\ref{pde:bochner-integral.2}）。2 は $L^{2}(0,T;V^{*})$ の等式 $u'+\mathcal{A}u=f$ と同値である。初期条件が意味をもつのは \ref{pde:bochner-continuity} のおかげで、$u\in L^{2}(0,T;V)$ だけでは $u(0)$ は定まらない。
+- **1 つのモード.** $L=-\Delta$, $f=0$, $g=e_{k}$ なら $u(t)=e^{-\lambda_{k}t}e_{k}$ は弱解である：$u'(t)=-\lambda_{k}e^{-\lambda_{k}t}e_{k}$ で、$\langle u'(t),v\rangle+(\nabla u(t),\nabla v)=e^{-\lambda_{k}t}(-\lambda_{k}(e_{k},v)+(\nabla e_{k},\nabla v))=0$。区間 $(0,\pi)$ では $e_{k}=\sqrt{2/\pi}\sin kx$, $\lambda_{k}=k^{2}$ で、\ref{pde:sep-heat-dirichlet} の級数の各項にあたる。
+:::
+
+::: theorem エネルギー評価 {#pde:parabolic-energy-estimate keywords="energy estimate for parabolic equations: if t -> ||w(t)||^2 is absolutely continuous and (1/2) d/dt ||w||^2 + B[w,w] = <F,w> a.e., then ||w(t)||^2 + beta int_0^t ||w||_{H^1}^2 <= e^{2 gamma t}(||w(0)||^2 + (1/beta) int_0^t ||F||_{H^{-1}}^2)" index="エネルギー評価（放物型方程式）|えねるぎーひょうかほうぶつがたほうていしき"}
+$w\in L^{2}(0,T;V)$, $F\in L^{2}(0,T;V^{*})$ とし、$\eta(t)\defeq\|w(t)\|_{2}^{2}$ が $[0,T]$ で絶対連続で、a.e. の $t$ で
+$$
+\tfrac{1}{2}\eta'(t)+B[w(t),w(t)]=\langle F(t),w(t)\rangle
+\label{pde:eq-pa-energy-identity}
+$$
+が成り立つとする。このとき $0\le t\le T$ について
+$$
+\|w(t)\|_{2}^{2}+\beta\int_{0}^{t}\|w\|_{H^{1}}^{2}\,ds\le e^{2\gamma t}\Bigl(\|w(0)\|_{2}^{2}+\frac{1}{\beta}\int_{0}^{t}\|F\|_{H^{-1}}^{2}\,ds\Bigr).
+\label{pde:eq-pa-energy-bound}
+$$
+とくに、弱解 $u$ は $w=u$, $F=f$ としてこの仮定を満たす。
+:::
+
+::: intuition
+熱は外から加えた分（$F$）しか増えず、楕円性のおかげで $H^{1}$ ノルムの分だけ散逸する。1 階・0 階の項による増え方は、指数関数 $e^{2\gamma t}$ で押さえられる。
+:::
+
+::: proof
+**Step 1.** 【主張：a.e. の $t$ で $\eta'+\beta\|w\|_{H^{1}}^{2}\le2\gamma\eta+\frac{1}{\beta}\|F\|_{H^{-1}}^{2}$】\eqref{pde:eq-pa-energy-identity} にガルディングの不等式 $B[w,w]\ge\beta\|w\|_{H^{1}}^{2}-\gamma\eta$ と、初等的な不等式 $\langle F,w\rangle\le\|F\|_{H^{-1}}\|w\|_{H^{1}}\le\frac{\beta}{2}\|w\|_{H^{1}}^{2}+\frac{1}{2\beta}\|F\|_{H^{-1}}^{2}$ を入れて 2 倍する。
+
+**Step 2.** 【主張：\eqref{pde:eq-pa-energy-bound}】$e^{-2\gamma t}\eta(t)$ は絶対連続（$C^{1}$ 関数と絶対連続関数の積）で、a.e. で $(e^{-2\gamma t}\eta)'=e^{-2\gamma t}(\eta'-2\gamma\eta)\le e^{-2\gamma t}(\frac{1}{\beta}\|F\|^{2}-\beta\|w\|_{H^{1}}^{2})$。$0$ から $t$ まで積分し（\ref{meas:ftc-lebesgue}）、$e^{2\gamma t}$ を掛けると
+$$
+\eta(t)+\beta\int_{0}^{t}e^{2\gamma(t-s)}\|w\|_{H^{1}}^{2}\le e^{2\gamma t}\eta(0)+\frac{1}{\beta}\int_{0}^{t}e^{2\gamma(t-s)}\|F\|^{2}.
+$$
+$1\le e^{2\gamma(t-s)}\le e^{2\gamma t}$ を使う。
+
+**Step 3.** 【主張：弱解は仮定を満たす】\ref{pde:bochner-continuity.2} から $\eta$ は絶対連続で a.e. で $\eta'=2\langle u',u\rangle$。弱解の定義の 2 で $v=u(t)$ とすれば \eqref{pde:eq-pa-energy-identity}。
+
+::: hypcheck
+- **一様楕円性・係数の有界性**：Step 1 のガルディングの不等式（定数 $\beta,\gamma$）だけで使った。
+- **$\eta$ の絶対連続性**：Step 2 で積分するのに使った。弱解ではこれが \ref{pde:bochner-continuity} の内容で、エネルギー法がボホナー空間の連続性に依存するのはここである。
+- **係数の時間によらないこと**：使っていない。$B$ が $t$ に依存しても、$a^{ij},b^{i},c$ が $\Omega\times(0,T)$ 上で有界可測で楕円性の定数が $t$ によらなければ、同じ証明が通る。
+- **境界・データの正則性**：使っていない。
+:::
+:::
+
+::: corollary 弱解の一意性と安定性 {#pde:parabolic-uniqueness keywords="uniqueness of weak solutions of the parabolic problem; stability estimate max ||u(t)||^2 + beta int ||u||_{H^1}^2 <= e^{2 gamma T}(||g||^2 + ||f||^2/beta) and ||u'|| <= alpha ||u|| + ||f|| in L^2(0,T;H^{-1})" index="一意性（放物型方程式の弱解）|いちいせいほうぶつがたほうていしきのじゃくかい"}
+\eqref{pde:eq-pa-problem} の弱解は高々一つで、弱解 $u$ は次を満たす。
+$$
+\begin{aligned}
+&\max_{0\le t\le T}\|u(t)\|_{2}^{2}+\beta\|u\|_{L^{2}(0,T;V)}^{2}\le2e^{2\gamma T}\Bigl(\|g\|_{2}^{2}+\frac{1}{\beta}\|f\|_{L^{2}(0,T;V^{*})}^{2}\Bigr),\\
+&\|u'\|_{L^{2}(0,T;V^{*})}\le\alpha\|u\|_{L^{2}(0,T;V)}+\|f\|_{L^{2}(0,T;V^{*})}.
+\end{aligned}
+$$
+:::
+
+::: proof
+評価の 1 行目は、\eqref{pde:eq-pa-energy-bound} の 2 つの項をそれぞれ右辺で押さえ（$t$ についての最大と $t=T$）、足したもの。2 行目は $u'=f-\mathcal{A}u$ と $\|\mathcal{A}u(t)\|_{H^{-1}}\le\alpha\|u(t)\|_{H^{1}}$、$L^{2}(0,T)$ の三角不等式から。一意性：弱解 $u_{1},u_{2}$ の差 $w$ は $g=0$, $f=0$ の弱解（定義の条件はどれも線形）なので、評価から $w=0$。
+
+::: hypcheck
+- **一意性の範囲**：$u'\in L^{2}(0,T;V^{*})$ をもつ $L^{2}(0,T;V)$ の関数の中での一意性である。古典的な一意性（\ref{pde:heat-cylinder-uniqueness.1}）は $C(\overline{\Omega}\times[0,T])$ の中のもので、どちらも他方を含まない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## ガレルキン法 {#pde:sec-pa-galerkin}
+
+近似解を $e_{1},\dots,e_{m}$ の張る空間に探す。係数は時間の関数で、それらは定数係数の線形常微分方程式系を満たす。ただし右辺 $\langle f(t),e_{j}\rangle$ は $L^{2}(0,T)$ に入るだけで連続とは限らないので、\ref{ode:constant-coefficients} を少しだけ広げておく。
+
+::: lemma 可積分な右辺の線形系 {#pde:parabolic-linear-ode keywords="for a constant matrix A and F in L^2(0,T;R^m), d(t) = e^{-tA} xi + int_0^t e^{-(t-s)A} F(s) ds is the unique absolutely continuous solution of d' = -A d + F a.e., d(0) = xi" index="定数変化法（可積分な右辺）|ていすうへんかほうかせきぶんなうへん"}
+$A\in M_{m}(\mathbb{R})$, $\xi\in\mathbb{R}^{m}$, $F\in L^{2}(0,T;\mathbb{R}^{m})$（成分ごとに $L^{2}(0,T)$）とする。
+$$
+d(t)\defeq e^{-tA}\xi+\int_{0}^{t}e^{-(t-s)A}F(s)\,ds
+$$
+は $[0,T]$ で絶対連続で、a.e. の $t$ で $d'(t)=-Ad(t)+F(t)$、$d(0)=\xi$。この性質をもつ絶対連続関数はこれだけである。$F$ が連続なら、\ref{ode:constant-coefficients} の解と一致する。
+:::
+
+::: proof
+**Step 1.** 【主張：$d$ は絶対連続で方程式を満たす】$d(t)=e^{-tA}(\xi+G(t))$, $G(t)\defeq\int_{0}^{t}e^{sA}F(s)\,ds$ と書ける。$e^{sA}F(s)$ の成分は有界連続関数と $L^{2}\subset L^{1}$ の関数の積の和なので可積分で、\ref{meas:ftc-lebesgue} から $G$ は成分ごとに絶対連続、a.e. で $G'=e^{tA}F$。$t\mapsto e^{-tA}$ は $C^{1}$ で $(e^{-tA})'=-Ae^{-tA}$（\ref{ode:constant-coefficients}）なので、積 $d$ は絶対連続で、a.e. で $d'=-Ae^{-tA}(\xi+G)+e^{-tA}e^{tA}F=-Ad+F$。
+
+**Step 2.** 【主張：一意性】二つの解の差 $z$ は絶対連続で a.e. で $z'=-Az$、$z(0)=0$。$y(t)\defeq e^{tA}z(t)$ は絶対連続で a.e. で $y'=e^{tA}(Az+z')=0$ なので、\ref{meas:ftc-lebesgue.3} から $y(t)=y(0)=0$。$F$ が連続なら $d$ は $C^{1}$ で古典解であり、古典解の一意性（\ref{ode:linear-existence}）からも一致がわかる。
+:::
+
+::: lemma ガレルキン近似 {#pde:parabolic-galerkin-approx keywords="Galerkin approximations u_m = sum_{k<=m} d_m^k(t) e_k: d_m^k absolutely continuous, d_m^k(0) = (g,e_k), (u_m', e_j) + B[u_m, e_j] = <f, e_j> for j <= m; uniform bounds in L^infinity(0,T;L^2), L^2(0,T;H^1_0) and for u_m' in L^2(0,T;H^{-1})" index="ガレルキン近似（放物型方程式）|がれるきんきんじほうぶつがたほうていしき, ガレルキン法|がれるきんほう"}
+$g\in L^{2}(\Omega)$, $f\in L^{2}(0,T;V^{*})$, $m\ge1$ とする。
+1. $[0,T]$ 上の絶対連続関数 $d_{m}^{1},\dots,d_{m}^{m}$ で、$u_{m}(t)\defeq\sum_{k\le m}d_{m}^{k}(t)e_{k}$ が
+$$
+\begin{aligned}&d_{m}^{k}(0)=(g,e_{k})\quad(k\le m),\\&(d_{m}^{j})'(t)+B[u_{m}(t),e_{j}]=\langle f(t),e_{j}\rangle\quad(\text{a.e. の }t,\ j\le m)\end{aligned}
+\label{pde:eq-pa-galerkin}
+$$
+を満たすものが、ただ一組ある。
+2. $u_{m}\in L^{2}(0,T;V)$ で、弱微分は $u_{m}'(t)=\sum_{k\le m}(d_{m}^{k})'(t)e_{k}=P_{m}(f(t)-\mathcal{A}u_{m}(t))$（$P_{m}$ は \ref{pde:bochner-spectral-coordinates.4}）。
+3. $C_{0}\defeq e^{2\gamma T}(\|g\|_{2}^{2}+\frac{1}{\beta}\|f\|_{L^{2}(0,T;V^{*})}^{2})$ とおくと、$m$ によらず
+$$
+\max_{t}\|u_{m}(t)\|_{2}^{2}\le C_{0},\qquad\beta\|u_{m}\|_{L^{2}(0,T;V)}^{2}\le C_{0},\qquad\|u_{m}'\|_{L^{2}(0,T;V^{*})}\le\alpha\sqrt{C_{0}/\beta}+\|f\|_{L^{2}(0,T;V^{*})}.
+$$
+:::
+
+::: proof
+**Step 1（1）.** 【主張：\eqref{pde:eq-pa-galerkin} は可積分な右辺の線形系】$A_{jk}\defeq B[e_{k},e_{j}]$, $F_{j}(t)\defeq\langle f(t),e_{j}\rangle$, $\xi_{j}\defeq(g,e_{j})$ とおくと、$B[u_{m},e_{j}]=\sum_{k}A_{jk}d_{m}^{k}$ なので \eqref{pde:eq-pa-galerkin} は $d'=-Ad+F$, $d(0)=\xi$。$F_{j}$ は $V^{*}$ の座標の定数倍なので可測（\ref{pde:bochner-hilbert-coordinates.1}、\ref{pde:bochner-spectral-coordinates.3}）で、$|F_{j}|\le\|f(t)\|_{H^{-1}}\|e_{j}\|_{H^{1}}$ から $L^{2}(0,T)$ に入る。\ref{pde:parabolic-linear-ode} から解がただ一つある。
+
+**Step 2（2）.** 【主張：$u_{m}$ の弱微分の表示】$u_{m}$ の座標 $(u_{m},e_{k})$ は $k\le m$ で $d_{m}^{k}$、$k>m$ で $0$。絶対連続関数の弱微分は a.e. の微分に等しい（\ref{fa:sobolev-one-dimension}）ので、\ref{pde:bochner-derivative-coordinates} から $u_{m}'$ の座標は $(d_{m}^{k})'$（$k\le m$）と $0$。\eqref{pde:eq-pa-galerkin} から $(d_{m}^{j})'=\langle f-\mathcal{A}u_{m},e_{j}\rangle$ なので、$u_{m}'=P_{m}(f-\mathcal{A}u_{m})$。$u_{m}\in L^{2}(0,T;V)$ は、座標が連続で \ref{pde:bochner-hilbert-coordinates.2} の和が有限個だから。
+
+**Step 3（3）.** 【主張：一様な評価】\eqref{pde:eq-pa-galerkin} に $d_{m}^{j}$ を掛けて $j\le m$ で足すと、a.e. で $\sum_{j}(d_{m}^{j})'d_{m}^{j}+B[u_{m},u_{m}]=\langle f,u_{m}\rangle$。$\eta(t)\defeq\|u_{m}(t)\|_{2}^{2}=\sum_{j}(d_{m}^{j})^{2}$ は絶対連続で $\eta'=2\sum_{j}(d_{m}^{j})'d_{m}^{j}$ なので、\eqref{pde:eq-pa-energy-identity} が $w=u_{m}$, $F=f$ で成り立つ。\ref{pde:parabolic-energy-estimate} と $\|u_{m}(0)\|_{2}=\|P_{m}g\|_{2}\le\|g\|_{2}$ から、はじめの二つの評価を得る。最後の評価は、2 と \ref{pde:bochner-spectral-coordinates.4} から $\|u_{m}'(t)\|_{H^{-1}}\le\|f(t)\|_{H^{-1}}+\alpha\|u_{m}(t)\|_{H^{1}}$ で、$L^{2}(0,T)$ の三角不等式を使う。
+
+::: hypcheck
+- **固有関数の基底**：Step 3 の最後で、$P_{m}$ が $H^{-1}$ のノルムを増やさないこと（\ref{pde:bochner-spectral-coordinates.4}）に使った。$e_{k}$ が $L^{2}$ と $H^{1}$ の両方で直交することが効いている。$L^{2}$ で正規直交なだけの基底では、$P_{m}$ が $H^{-1}$ で一様に有界とは限らず、$u_{m}'$ の評価が崩れうる。
+- **係数の時間によらないこと**：Step 1 で行列 $A$ が定数であることに使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem ガレルキン法による弱解の存在 {#pde:parabolic-existence keywords="existence of a weak solution of u_t + L u = f, u = 0 on the boundary, u(0) = g for g in L^2 and f in L^2(0,T;H^{-1}) by the Galerkin method; the Galerkin approximations converge weakly to the solution in L^2(0,T;H^1_0), their derivatives weakly in L^2(0,T;H^{-1})" index="弱解の存在（放物型方程式）|じゃくかいのそんざいほうぶつがたほうていしき"}
+$L$ を記法のとおり（係数は時間によらない有界可測、一様楕円型）とし、$g\in L^{2}(\Omega)$, $f\in L^{2}(0,T;H^{-1}(\Omega))$ とする。
+1. \eqref{pde:eq-pa-problem} の弱解 $u$ がただ一つあり、\ref{pde:parabolic-uniqueness} の評価を満たす。
+2. \ref{pde:parabolic-galerkin-approx} の $u_{m}$ は $L^{2}(0,T;V)$ で $u$ に弱収束し、$u_{m}'$ は $L^{2}(0,T;V^{*})$ で $u'$ に弱収束する。
+:::
+
+::: intuition
+方程式を有限個のモードに制限すると常微分方程式になり、その解はエネルギー評価で $m$ によらず押さえられる。有界な列は弱収束する部分列をもつので、その極限が求める解になる。
+:::
+
+::: proof
+**Step 1.** 【主張：部分列 $u_{m_{l}}$ と $u\in L^{2}(0,T;V)$, $w\in L^{2}(0,T;V^{*})$ で、$u_{m_{l}}\rightharpoonup u$, $u_{m_{l}}'\rightharpoonup w$】$L^{2}(0,T;V)$ と $L^{2}(0,T;V^{*})$ はヒルベルト空間（\ref{pde:bochner-hilbert-coordinates.3}。基底は \ref{pde:bochner-spectral-coordinates.1}・\ref{pde:bochner-spectral-coordinates.3}）で、\ref{pde:parabolic-galerkin-approx.3} から二つの列は有界。\ref{fa:hilbert-weak-compactness} を $(u_{m})$ に、次にその部分列の $(u_{m}')$ に使う。
+
+**Step 2.** 【主張：$w=u'$】$k$ と $\varphi\in C_{c}^{\infty}((0,T))$ を固定する。$\Phi(z)\defeq\int\varphi'(t)(z(t),e_{k})\,dt$ と $\Psi(y)\defeq\int\varphi(t)\langle y(t),e_{k}\rangle\,dt$ は、$|(z(t),e_{k})|\le\|z(t)\|_{H^{1}}$, $|\langle y(t),e_{k}\rangle|\le\|y(t)\|_{H^{-1}}\|e_{k}\|_{H^{1}}$ から $L^{2}(0,T;V)$, $L^{2}(0,T;V^{*})$ 上の有界線形汎関数。$m\ge k$ なら $\varphi d_{m}^{k}$ は絶対連続で両端で $0$ なので、\ref{meas:ftc-lebesgue} から $\int(\varphi'd_{m}^{k}+\varphi(d_{m}^{k})')=0$、すなわち $\Phi(u_{m})=-\Psi(u_{m}')$。弱収束で極限をとると $\Phi(u)=-\Psi(w)$。\ref{pde:bochner-derivative-coordinates} から $w=u'$。
+
+**Step 3.** 【主張：a.e. の $t$ で $u'(t)+\mathcal{A}u(t)=f(t)$】$j$ と $\psi\in L^{2}(0,T)$ を固定する。$m\ge j$ なら \eqref{pde:eq-pa-galerkin} に $\psi$ を掛けて積分すると $\int\psi(\langle u_{m}',e_{j}\rangle+B[u_{m},e_{j}])=\int\psi\langle f,e_{j}\rangle$。左辺の二つの項は Step 2 と同じ理由で弱連続な線形汎関数（$|B[z(t),e_{j}]|\le\alpha\|z(t)\|_{H^{1}}\|e_{j}\|_{H^{1}}$）なので、$m=m_{l}\to\infty$ として $\int\psi h_{j}=0$、$h_{j}(t)\defeq\langle u'(t)+\mathcal{A}u(t)-f(t),e_{j}\rangle\in L^{2}(0,T)$。$\psi=h_{j}$ とすれば $h_{j}=0$ a.e.。可算個の $j$ の零集合の和の外では $u'(t)+\mathcal{A}u(t)-f(t)\in V^{*}$ がすべての $e_{j}$ で $0$ なので、\ref{pde:bochner-spectral-coordinates.3} から $0$。
+
+**Step 4.** 【主張：$\widetilde{u}(0)=g$】$[0,T]$ 上の絶対連続関数 $p$ について、$p(s)=p(0)+\int_{0}^{s}p'$ を $s$ について平均し、フビニの定理で積分の順序を替えると
+$$
+p(0)=\frac{1}{T}\int_{0}^{T}p(s)\,ds-\frac{1}{T}\int_{0}^{T}(T-r)p'(r)\,dr.
+$$
+$p=d_{m}^{k}$（$m\ge k$）に使うと、左辺は $(g,e_{k})$。右辺は Step 2 と同じく $u_{m}$ と $u_{m}'$ の弱連続な線形汎関数なので、極限で $p=\widetilde{d}^{k}=(\widetilde{u},e_{k})$（\ref{pde:bochner-continuity} の証明の Step 4）について同じ式の右辺になる。よって $(\widetilde{u}(0),e_{k})=(g,e_{k})$ がすべての $k$ で成り立ち、$\widetilde{u}(0)=g$。
+
+**Step 5.** 【主張：2 が成り立つ】Step 1〜4 から、$u$ は弱解で、\ref{pde:parabolic-uniqueness} から一意。もし $(u_{m})$ 全体が $u$ に弱収束しなければ、有界線形汎関数 $\Lambda$ と $\varepsilon>0$ と部分列で $|\Lambda(u_{m})-\Lambda(u)|\ge\varepsilon$ となるものがある。この部分列に Step 1〜4 を使うと、さらに部分列が弱解に、したがって $u$ に弱収束し、矛盾。$u_{m}'$ も同じ。
+
+::: hypcheck
+- **一様楕円性・係数の有界性**：Step 1 の一様な評価（\ref{pde:parabolic-galerkin-approx.3} を通してガルディングの不等式）と、Step 3 の $\mathcal{A}$ の有界性で使った。**係数の微分可能性は使っていない。**
+- **係数の時間によらないこと**：\ref{pde:parabolic-galerkin-approx} の常微分方程式が定数係数であることだけに使った（下の補足）。
+- **$\Omega$ の有界性**：固有関数の基底（\ref{fa:dirichlet-eigenfunctions}）の存在に使った。基底は $H_{0}^{1}$ の可分性と、射影が $H^{-1}$ でも縮小であることのために要る。
+- **境界の正則性**：使っていない。境界条件は $u(t)\in H_{0}^{1}$ に入っている。
+- **データの正則性**：$g\in L^{2}$, $f\in L^{2}(0,T;H^{-1})$ で十分。$g$ が連続でなくても、$g$ が境界条件と両立しなくても（$g=1$ など）解がある。古典的な初期境界値問題では、境界で $g=0$ でないと $\overline{\Omega}\times[0,T]$ で連続な解はない。
+- **公理**：固有関数の基底（従属選択・可算選択）と、\ref{fa:hilbert-weak-compactness} に依存する。Step 5 では選択を使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 係数が $(x,t)$ の有界可測関数で、楕円性の定数が $t$ によらない場合も、弱解の定義・\ref{pde:parabolic-energy-estimate}・一意性はそのまま成り立つ（エネルギー評価の hypcheck）。ガレルキン法では \eqref{pde:eq-pa-galerkin} が $d'=-A(t)d+F$ で $A(t)$ が有界可測になり、\ref{ode:linear-existence} は連続な係数を要求するので使えない。絶対連続な解を積分方程式 $d(t)=\xi+\int_{0}^{t}(-A(s)d(s)+F(s))ds$ の逐次近似で作る（カラテオドリの意味の解）と、残りの証明は同じである。$A(t)$ が $t$ について連続なら \ref{ode:linear-existence} と \ref{ode:variation-of-constants} がそのまま使える。
+
+**似た定理.** \ref{fa:galerkin-cea} は楕円型方程式のガレルキン近似で、そこでは近似解が強収束し、誤差が最良近似で押さえられた。ここでは弱収束しか示していないが、一意性から列全体が収束する。\ref{gl:heat-equation} は閉多様体の上の熱方程式を固有関数展開で解いたもので、$L$ が対称なら次のページの半群と同じものである。
+
+**高い視点：有限次元の影から解を組み立てる.** ガレルキン法は、無限次元の方程式の、有限個のモードへの影（射影）を解き、影の列の極限として解を取り出す。比喩で言えば、立体をいくつもの方向から撮った写真から立体を復元するようなもので、エネルギー評価は「どの写真も一定の大きさの枠に収まる」ことを、弱コンパクト性は「そのような写真の列から一つの像が浮かび上がる」ことを保証する。像が本当に方程式を満たすことを確かめる部分（Step 3, 4）は、各写真が方程式の影を満たすことと、影をとる操作が弱収束で保たれることからわかる。
+:::
+
+## 問題 {#pde:sec-pa-problems}
+
+::: problem {#pde:prob-pa-decay}
+$L=-\Delta$, $f=0$ とし、$u$ を \eqref{pde:eq-pa-problem} の弱解とする。
+1. \ref{pde:bochner-continuity} と \ref{pde:bochner-spectral-coordinates.2} を使って、$\|u(t)\|_{2}\le e^{-\lambda_{1}t}\|g\|_{2}$（$0\le t\le T$）を示せ。
+2. $g=e_{1}$ なら等号が成り立つことを示し、1 の減衰率が最良であることを確かめよ。
+3. $\Omega=(0,\pi)$ のとき $\lambda_{1}=1$ で、$\Omega=(0,\ell)$ では $\lambda_{1}=\pi^{2}/\ell^{2}$ となることから、区間が長いほど熱が逃げにくいことを説明せよ。
+:::
+
+::: solution
+**1.** \ref{pde:bochner-continuity.2} と弱解の定義（$v=u(t)$）から、a.e. の $t$ で $\frac{d}{dt}\|u\|_{2}^{2}=2\langle u',u\rangle=-2\|\nabla u\|_{2}^{2}\le-2\lambda_{1}\|u\|_{2}^{2}$。$\eta\defeq e^{2\lambda_{1}t}\|u(t)\|_{2}^{2}$ は絶対連続で a.e. で $\eta'\le0$ なので、\ref{meas:ftc-lebesgue} から $\eta(t)\le\eta(0)=\|g\|_{2}^{2}$。
+
+**2.** 「1 つのモード」の例から $u(t)=e^{-\lambda_{1}t}e_{1}$ が弱解で、一意性（\ref{pde:parabolic-uniqueness}）から唯一の解。$\|u(t)\|_{2}=e^{-\lambda_{1}t}$。
+
+**3.** $(0,\ell)$ のディリクレ固有関数は $\sin(k\pi x/\ell)$ で固有値は $k^{2}\pi^{2}/\ell^{2}$（\ref{fa:prob-lm-eigen-interval} を縮尺した）。最小固有値は $\pi^{2}/\ell^{2}$ で、$\ell$ が大きいほど小さいので、1 の減衰率 $e^{-\pi^{2}t/\ell^{2}}$ は遅い。熱は境界（温度 $0$）からしか逃げられず、境界までの距離が長いほど逃げるのに時間がかかる、ということである。
+:::
+
+::: problem {#pde:prob-pa-jump}
+1. $u(t)\defeq\mathbf{1}_{(T/2,T)}(t)\,e_{1}$ は $L^{2}(0,T;V)$ に入るが、どのように a.e. で修正しても $C([0,T];H)$ に入らないことを示せ。\ref{pde:bochner-continuity} から、$u$ は $L^{2}(0,T;V^{*})$ に弱微分をもたない。これを、座標 $(u(t),e_{1})$ が $(0,T)$ で弱微分をもたないことから直接確かめよ。
+2. $\Omega=(0,\pi)$, $Lu=-u''+bu'$（$b$ は定数）、$e_{k}=\sqrt{2/\pi}\sin kx$ とする。$m=2$ のガレルキン近似の行列 $A_{jk}=B[e_{k},e_{j}]$ を求め、$f=0$ のとき $\|u_{2}(t)\|_{2}\le e^{-t}\|u_{2}(0)\|_{2}$ を示せ。
+:::
+
+::: solution
+**1.** $\|u(t)\|_{H^{1}}^{2}=1+\lambda_{1}$ が $t>T/2$ で、$0$ が $t<T/2$ なので強可測（単関数そのもの）で $L^{2}(0,T;V)$ に入る。a.e. で $u$ に等しい $\widetilde{u}$ が $H$ で連続なら、$s<T/2<t$ を $T/2$ に近づけると $\widetilde{u}(T/2)$ は $0$ と $e_{1}$ の両方に等しくなり矛盾（a.e. で等しいので、$T/2$ のどちら側にも $\widetilde{u}=u$ となる点がいくらでも近くにある）。直接には：$u'\in L^{2}(0,T;V^{*})$ があれば、\ref{pde:bochner-derivative-coordinates} から $d(t)=(u(t),e_{1})=\mathbf{1}_{(T/2,T)}(t)$ は $L^{2}(0,T)$ に弱微分をもち、\ref{fa:sobolev-one-dimension}（$p=2$）から a.e. で $[0,T]$ 上の連続関数に等しい。これは上と同じ理由で起こりえない。
+
+**2.** $B[u,v]=\int_{0}^{\pi}(u'v'+bu'v)$。$\int e_{k}'e_{j}'=k^{2}\delta_{jk}$ で、$\int_{0}^{\pi}\cos kx\sin jx\,dx$ は $j=k$ で $0$、$j\ne k$ で $\frac{j(1-(-1)^{j+k})}{j^{2}-k^{2}}$ なので
+$$
+\begin{aligned}&A_{jk}=k^{2}\delta_{jk}+\frac{2bkj}{\pi}\cdot\frac{1-(-1)^{j+k}}{j^{2}-k^{2}}\quad(j\ne k\text{ の項}),\\&A=\begin{pmatrix}1&-\frac{8b}{3\pi}\\ \frac{8b}{3\pi}&4\end{pmatrix}.\end{aligned}
+$$
+$A$ の対称部分は $\operatorname{diag}(1,4)$ なので、$d\in\mathbb{R}^{2}$ について $d^{\mathsf{T}}Ad=d_{1}^{2}+4d_{2}^{2}\ge|d|^{2}$。$f=0$ なら $\frac{d}{dt}|d|^{2}=-2d^{\mathsf{T}}Ad\le-2|d|^{2}$ で、問題 1 と同じく $|d(t)|\le e^{-t}|d(0)|$、$\|u_{2}(t)\|_{2}=|d(t)|$。流れ $b$ の項は反対称な部分にだけ入り、エネルギーを変えない（\ref{pde:prob-we-drift.1} の有限次元版）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

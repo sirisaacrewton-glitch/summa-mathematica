@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>双曲型方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/09-hyperbolic.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 双曲型方程式 {#pde:page-hyperbolic keywords="second order hyperbolic equations, wave equation with variable coefficients, initial-boundary value problem, weak solutions, Galerkin method, energy estimates, uniqueness of weak solutions, energy equality, Bochner spaces L^2(0,T;X), H^{-1}, 双曲型方程式, 波動方程式, ガレルキン法, 弱解, エネルギー等式, ボホナー空間"}
+
+古典的手法の系列では、波動方程式 $\partial_{t}^{2}u=\Delta u$ の解を公式（ダランベール、キルヒホッフ）で書き、エネルギー法で一意性と有限伝播速度を示した（\tref{pde:page-wave-energy}）。そこで扱ったのは定数係数の方程式の $C^{2}$ 級の解で、公式を使うにはデータにも解に必要な以上の滑らかさが要った（\ref{pde:wave-kirchhoff-loss}）。このページでは、\ref{pde:page-weak-elliptic}の考え方を時間を含む方程式に広げ、係数が有界可測なだけの作用素 $L$ について、初期値・境界値問題
+$$
+\partial_{t}^{2}u+Lu=f\ \ (\Omega\times(0,T)),\qquad u=0\ \ (\partial\Omega\times(0,T)),\qquad u(0)=g,\ \ \partial_{t}u(0)=h
+$$
+の**弱解**を作る。方法は**ガレルキン法**で、固有関数の有限個の一次結合の中で方程式を解き（常微分方程式の系になる）、**エネルギー**の評価で近似解をそろえて押さえ、弱極限をとる。データは $g\in H_{0}^{1}$, $h\in L^{2}$、つまりエネルギーが有限であることだけを仮定する。一意性もエネルギー法で示すが、弱解の 2 階の時間微分は $H^{-1}$ にしか入らないので、古典的手法のように $\partial_{t}u$ をかけて積分することはできず、時間について積分した試験関数を使う。最後に、弱解についてもエネルギーが保存されることを示す。正則性・固有関数展開と関数計算・有限伝播速度は次のページ（\see{pde:page-hyperbolic-propagation}）で扱う。
+
+## 記法と定義の確認 {#pde:sec-hy-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$ は有界な開集合（境界の正則性は仮定しない）、$T>0$、関数はすべて実数値。$L^{2}=L^{2}(\Omega)$ の内積を $(\cdot,\cdot)$、ノルムを $\|\cdot\|$ と書く。
+- $L$ は \ref{pde:bilinear-elliptic-form} の一様楕円型作用素で、**対称**（$a^{ij}=a^{ji}$）、$b=0$、$c$ は有界可測（符号は任意）とする。係数は時間によらない。双線形形式 $B[u,v]=\int(\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}v+cuv)$ は対称である。定数 $\theta,\Lambda,c_{\infty}$ は \ref{pde:bilinear-elliptic-form}、$\alpha,\beta,\gamma$ は \ref{pde:bilinear-energy-estimates} のとおり（$b=0$ なので $\gamma=c_{-}$）。
+- $H^{-1}$ と対 $\langle f,v\rangle$ は \ref{pde:weak-dual-space}、$L^{2}\subset H^{-1}$ は \ref{pde:weak-dual-representation.3}。
+- 固有関数：\ref{pde:weak-symmetric-eigen} の $L^{2}$ の正規直交基底 $(e_{k})_{k\ge1}$（$e_{k}\in H_{0}^{1}$, $B[e_{k},v]=\lambda_{k}(e_{k},v)$）と $-\gamma<\lambda_{1}\le\lambda_{2}\le\cdots\to\infty$ を固定する。$\mu\defeq\gamma+1$、$\kappa_{k}\defeq\lambda_{k}+\mu$（$>1$）、$B_{\mu}[u,v]\defeq B[u,v]+\mu(u,v)$ とおく。
+- 座標：$v\in L^{2}$ について $v_{k}\defeq(v,e_{k})$、$f\in H^{-1}$ について $f_{k}\defeq\langle f,e_{k}\rangle$（$f\in L^{2}$ なら両者は一致）。整数 $s$ について、実数列 $(c_{k})$ で $\|c\|_{(s)}^{2}\defeq\sum_{k}\kappa_{k}^{s}c_{k}^{2}<\infty$ となるものの全体を $X_{s}$ と書く（重みつきの $\ell^{2}$ でヒルベルト空間）。$\kappa_{k}>1$ なので $s\ge r$ なら $X_{s}\subset X_{r}$, $\|c\|_{(r)}\le\|c\|_{(s)}$。$p\in X_{-s}$, $q\in X_{s}$ の対を $\langle p,q\rangle\defeq\sum_{k}p_{k}q_{k}$ とする（コーシー–シュワルツから絶対収束し $|\langle p,q\rangle|\le\|p\|_{(-s)}\|q\|_{(s)}$）。
+- ヒルベルト空間の正規直交基底とパーセヴァルの等式は \ref{fa:orthonormal-basis}、リースの表現定理は \ref{fa:riesz-representation}、有界列の弱収束部分列は \ref{fa:hilbert-weak-compactness}、ノルムの弱下半連続性は \ref{fa:weak-convergence-basic.3}。$L^{2}$ の完備性は \ref{meas:riesz-fischer}。
+- 1 次元：区間上の関数が $H^{1}(0,T)$ に入ることと、絶対連続な代表をもち導関数が $L^{2}$ に入ることは同値（\ref{fa:sobolev-one-dimension}、\ref{meas:ftc-lebesgue}）。以後 $y\in H^{1}(0,T)$ はいつもこの連続な代表で考え、$y\in H^{2}(0,T)$ は「$y\in C^{1}([0,T])$ で $y'$ が絶対連続、$y''\in L^{2}$」の意味とする。絶対連続な $F,G$ の積も絶対連続で $(FG)'=F'G+FG'$（a.e.）：$F(x)-F(a)=\int_{a}^{x}F'$ などを代入し、正方形 $[a,x]^{2}$ の上の積分を対角線で二つに分けてフビニの定理（\tref{meas:fubini}）を使えばよい。
+- 級数の項別積分 \ref{meas:series-dominated}、単調収束定理 \ref{meas:monotone-convergence}、グロンウォールの不等式 \ref{ode:gronwall}。
+- ボホナー空間とボホナー積分は放物型方程式のページの \ref{pde:bochner-space}, \ref{pde:bochner-integral}、可分なヒルベルト空間に値をとる関数の座標は \ref{pde:bochner-hilbert-coordinates}、時間の弱微分は \ref{pde:bochner-weak-derivative}、$u\in L^{2}(0,T;H_{0}^{1})$, $u'\in L^{2}(0,T;H^{-1})$ の連続性は \ref{pde:bochner-continuity}。そこではラプラシアンの固有関数を座標に使ったが、ここでは $L$ の固有関数を使い、重み $\kappa_{k}$ で $L^{2}$, $H_{0}^{1}$, $H^{-1}$ を一度に扱う。対称な作用素の座標は \ref{pde:parabolic-symmetric-coordinates}（そこでの $\sigma$, $\mu_{k}$, $\varphi_{k}$ はここでの $\mu$, $\lambda_{k}$, $e_{k}$）。
+- **選択公理**：固有関数基底の存在（\ref{pde:weak-symmetric-eigen}）が、コンパクト作用素の理論を通して従属選択公理と可算選択公理に依存する。弱収束部分列の取り出し（\ref{pde:hyperbolic-existence} の Step 3）は \ref{fa:hilbert-weak-compactness} に従う。それ以外にこのページで選択公理を使う箇所はない。
+:::
+
+## 座標による空間の表示 {#pde:sec-hy-coordinates}
+
+固有関数の座標を使うと、$L^{2}$, $H_{0}^{1}$, $H^{-1}$ はどれも重みの違う $\ell^{2}$ になる。時間に依存する関数は、座標ごとに 1 変数の関数として扱える。
+
+::: lemma 固有関数の座標 {#pde:hyperbolic-coordinates keywords="the eigenfunction coordinates identify L^2, H^1_0 and H^{-1} with weighted sequence spaces X_0, X_1, X_{-1}; B_mu[u,v] = sum kappa_k u_k v_k, B[u,v] = sum lambda_k u_k v_k, <f,v> = sum f_k v_k" index="固有関数の座標|こゆうかんすうのざひょう"}
+1. $v\mapsto(v_{k})$ は $L^{2}$ から $X_{0}$ への等長同型で、$(v,w)=\sum_{k}v_{k}w_{k}$。
+2. $v\in L^{2}$ が $H_{0}^{1}$ に入るのは $(v_{k})\in X_{1}$ のときに限り、このとき $v,w\in H_{0}^{1}$ について $B_{\mu}[v,w]=\sum_{k}\kappa_{k}v_{k}w_{k}$、$B[v,w]=\sum_{k}\lambda_{k}v_{k}w_{k}$ で、$\beta\|v\|_{H^{1}}^{2}\le\|v\|_{(1)}^{2}\le(\alpha+\mu)\|v\|_{H^{1}}^{2}$。
+3. $f\mapsto(f_{k})$ は $H^{-1}$ から $X_{-1}$ への全単射で、$v\in H_{0}^{1}$ について $\langle f,v\rangle=\sum_{k}f_{k}v_{k}$。$\|f\|_{(-1)}$ は $(H_{0}^{1},B_{\mu})$ の双対ノルムに等しく、$\|\cdot\|_{H^{-1}}$ と同値である。
+:::
+
+::: proof
+**1** は \ref{fa:orthonormal-basis}（$(e_{k})$ は正規直交基底）のパーセヴァルの等式と、その極化。
+
+**2** は \ref{pde:parabolic-symmetric-coordinates}（そこでの $\sigma$, $\mu_{k}$, $\varphi_{k}$ がここでの $\mu$, $\lambda_{k}$, $e_{k}$）と、その証明のパーセヴァルの等式の内積版 $B_{\mu}[v,w]=\sum_{k}\kappa_{k}v_{k}w_{k}$ から（$\|v\|_{(1)}^{2}=B_{\mu}[v,v]$。$B$ の式はこれから $\mu(v,w)=\sum\mu v_{k}w_{k}$ を引く）。ノルムの比較は同じ補題の 1。とくに $(H_{0}^{1},B_{\mu})$ はヒルベルト空間で、$\kappa_{k}^{-1/2}e_{k}$ はその正規直交基底である。
+
+**3.** $f\in H^{-1}$ は、ノルムの同値性から $(H_{0}^{1},B_{\mu})$ 上の有界線形汎関数で、リースの表現定理から $r\in H_{0}^{1}$ で $\langle f,v\rangle=B_{\mu}[r,v]$、双対ノルムが $B_{\mu}[r,r]^{1/2}$ となるものがある。$f_{k}=B_{\mu}[r,e_{k}]=\kappa_{k}r_{k}$ なので、2 から $\langle f,v\rangle=\sum\kappa_{k}r_{k}v_{k}=\sum f_{k}v_{k}$、双対ノルムの 2 乗は $\sum\kappa_{k}r_{k}^{2}=\sum f_{k}^{2}/\kappa_{k}=\|f\|_{(-1)}^{2}$。この式から $f$ は $(f_{k})$ で決まる（単射）。逆に $(f_{k})\in X_{-1}$ なら $r\defeq\sum(f_{k}/\kappa_{k})e_{k}$ は 2 から $H_{0}^{1}$ に入り、$f\defeq B_{\mu}[r,\cdot]$ の座標は $(f_{k})$（全射）。$H^{-1}$ ノルムとの同値性は、$H_{0}^{1}$ 上の二つのノルムの同値性から。
+:::
+
+以後、$v\in L^{2}$ と $(v_{k})\in X_{0}$、$v\in H_{0}^{1}$ と $X_{1}$ の元、$f\in H^{-1}$ と $X_{-1}$ の元を同一視し、$\|v\|_{(0)}=\|v\|$ と書く。$H_{0}^{1}$ のノルムとしては同値な $\|\cdot\|_{(1)}=B_{\mu}[\cdot,\cdot]^{1/2}$ を使う。
+
+::: definition 時間に依存する関数の空間 {#pde:hyperbolic-time-spaces keywords="Bochner spaces L^2(0,T;X_s), L^infinity(0,T;X_s), C([0,T];X_s) for the weighted sequence spaces X_s, and weak time derivatives; equivalent description through eigenfunction coordinates" index="ボホナー空間（双曲型方程式）|ぼほなーくうかんそうきょくがたほうていしき, 時間微分（弱い）|じかんびぶんよわい"}
+$s$ を整数とする。$X_{s}$ はヒルベルト空間で、第 $k$ 座標だけが $\kappa_{k}^{-s/2}$ の列（$k\ge1$）がその正規直交基底である。関数 $u\colon(0,T)\to X_{s}$ を座標 $u_{k}\colon(0,T)\to\mathbb{R}$ で表す。
+1. $\mathbb{L}_{s}\defeq L^{2}(0,T;X_{s})$ は \ref{pde:bochner-space} のボホナー空間で、ノルムを $\|u\|_{\mathbb{L}_{s}}^{2}=\int_{0}^{T}\|u(t)\|_{(s)}^{2}dt$ と書く。$\|u(t)\|_{(s)}$ の ess sup が有限な強可測関数の全体を $L^{\infty}(0,T;X_{s})$、連続関数 $[0,T]\to X_{s}$ の全体を $C([0,T];X_{s})$ と書く。
+2. $u\in\mathbb{L}_{s}$, $w\in\mathbb{L}_{r}$ とし $m\defeq\min(r,s)$ とする。すべての $\varphi\in C_{c}^{\infty}((0,T))$ について $\int_{0}^{T}\varphi'u\,dt=-\int_{0}^{T}\varphi w\,dt$（$X_{m}$ のボホナー積分の等式）が成り立つとき、$w$ を $u$ の**時間微分**といい $u'$ と書く。$u''\defeq(u')'$。$s=1$, $r=-1$ の場合が \ref{pde:bochner-weak-derivative} である（$X_{1}=H_{0}^{1}$, $X_{-1}=H^{-1}$ のノルムはもとのノルムと同値なので、ボホナー空間も弱微分も同じ）。
+:::
+
+::: intuition
+$L^{2}(0,T;H_{0}^{1})$ は、各時刻に $H_{0}^{1}$ の関数を与える写像で、その $H^{1}$ ノルムの 2 乗が時間について可積分なものの全体である。固有関数の座標で見れば、可算個の実数値関数 $u_{k}(t)$ の組で、重みつきの 2 乗和が時間について可積分なものにすぎない。
+:::
+
+座標で言い換えておく。\ref{pde:bochner-hilbert-coordinates} の 1〜3 を上の正規直交基底に使うと、$u\in\mathbb{L}_{s}$ であるのは、各 $u_{k}$ が可測で $\int_{0}^{T}\sum_{k}\kappa_{k}^{s}u_{k}^{2}\,dt<\infty$ のときに限り、$\mathbb{L}_{s}$ はヒルベルト空間である。また $w=u'$ であるのは、すべての $k$ で $w_{k}$ が $u_{k}$ の $(0,T)$ での弱微分であるときに限る：座標をとる写像 $p\mapsto p_{k}$ は $X_{m}$ 上の有界線形汎関数なので \ref{pde:bochner-integral.2} で積分と交換でき、逆に $X_{m}$ の元は座標で決まる（\ref{pde:bochner-hilbert-coordinates.4}）。以後はほとんどこの座標の形で使う。$\varphi\in L^{2}(0,T)$ と $k$ について $u\mapsto\int_{0}^{T}u_{k}\varphi\,dt$ は $\mathbb{L}_{s}$ 上の有界線形汎関数である（コーシー–シュワルツから絶対値は $\kappa_{k}^{-s/2}\|\varphi\|_{L^{2}}\|u\|_{\mathbb{L}_{s}}$ 以下）。
+
+::: lemma 時間についての連続性 {#pde:hyperbolic-time-continuity keywords="if u and u' are in L^2(0,T;X_s), then u has a representative in C([0,T];X_s) with u(t) - u(r) = int_r^t u' coordinatewise, Holder-1/2 continuity and a sup bound" index="時間についての連続性（ボホナー空間）|じかんについてのれんぞくせいぼほなーくうかん"}
+$u,u'\in\mathbb{L}_{s}$ とする。
+1. 各座標を絶対連続な代表に取り替えると、すべての $t$ で $u(t)\in X_{s}$ となり、$u\in C([0,T];X_{s})$、$u_{k}(t)-u_{k}(r)=\int_{r}^{t}u_{k}'$、$\|u(t)-u(r)\|_{(s)}\le|t-r|^{1/2}\|u'\|_{\mathbb{L}_{s}}$。
+2. $\sup_{t}\|u(t)\|_{(s)}\le T^{-1/2}\|u\|_{\mathbb{L}_{s}}+T^{1/2}\|u'\|_{\mathbb{L}_{s}}$。
+3. とくに $u\in\mathbb{L}_{s}$, $u'\in\mathbb{L}_{r}$（$r\le s$）なら、$\mathbb{L}_{s}\subset\mathbb{L}_{r}$ なので $u\in C([0,T];X_{r})$。
+:::
+
+::: proof
+**Step 1.** 【主張：$w\in\mathbb{L}_{s}$ と $r<t$ について、数列 $(\int_{r}^{t}w_{k})_{k}$ は $X_{s}$ に入り、ノルムは $\int_{r}^{t}\|w(\tau)\|_{(s)}d\tau$ 以下】$N$ を固定し、$\sum_{k\le N}c_{k}^{2}\le1$ となる $(c_{k})$ をとると、
+$$
+\sum_{k\le N}c_{k}\kappa_{k}^{s/2}\int_{r}^{t}w_{k}=\int_{r}^{t}\sum_{k\le N}c_{k}\kappa_{k}^{s/2}w_{k}\le\int_{r}^{t}\Bigl(\sum_{k\le N}\kappa_{k}^{s}w_{k}^{2}\Bigr)^{1/2}.
+$$
+左辺の $(c_{k})$ についての上限は $(\sum_{k\le N}\kappa_{k}^{s}(\int_{r}^{t}w_{k})^{2})^{1/2}$ なので、$N\to\infty$ とすれば主張（単調収束）。
+
+**Step 2（1）.** 【主張：1 が成り立つ】\ref{fa:sobolev-one-dimension} から各 $u_{k}$ は絶対連続な代表をもち $u_{k}(t)-u_{k}(r)=\int_{r}^{t}u_{k}'$。$u(r_{0})\in X_{s}$ となる $r_{0}$ を一つとると（a.e. の $r_{0}$ でそうなる）、Step 1 から $\|u(t)\|_{(s)}\le\|u(r_{0})\|_{(s)}+\int_{0}^{T}\|u'\|_{(s)}<\infty$。また $\|u(t)-u(r)\|_{(s)}\le|\int_{r}^{t}\|u'\|_{(s)}|\le|t-r|^{1/2}\|u'\|_{\mathbb{L}_{s}}$（コーシー–シュワルツ）。
+
+**2** は、$\|u(t)\|_{(s)}\le\|u(r)\|_{(s)}+T^{1/2}\|u'\|_{\mathbb{L}_{s}}$ を $r$ について $[0,T]$ で平均し、$\frac1T\int_{0}^{T}\|u(r)\|_{(s)}dr\le T^{-1/2}\|u\|_{\mathbb{L}_{s}}$ を使う。**3** は 1 を $r$ で使う。
+:::
+
+::: lemma 対の微分 {#pde:hyperbolic-pairing keywords="product rule in time: if p, p' in L^2(0,T;X_{-s}) and q, q' in L^2(0,T;X_s), then <p(t), q(t)> is absolutely continuous with derivative <p', q> + <p, q'>; d/dt ||u||^2 = 2(u', u), d/dt B[u,u] = 2B[u', u]" index="対の微分（時間）|ついのびぶんじかん"}
+$p,p'\in\mathbb{L}_{-s}$, $q,q'\in\mathbb{L}_{s}$ とし、\ref{pde:hyperbolic-time-continuity.1} の連続な代表をとる。
+1. $t\mapsto\langle p(t),q(t)\rangle$ は $[0,T]$ で絶対連続で、$0\le r\le t\le T$ について
+$$
+\langle p(t),q(t)\rangle-\langle p(r),q(r)\rangle=\int_{r}^{t}\bigl(\langle p',q\rangle+\langle p,q'\rangle\bigr)d\tau.
+$$
+2. $u,u'\in\mathbb{L}_{0}$ なら $\|u(t)\|^{2}-\|u(r)\|^{2}=2\int_{r}^{t}(u',u)$。$u,u'\in\mathbb{L}_{1}$ なら $B[u(t),u(t)]-B[u(r),u(r)]=2\int_{r}^{t}B[u',u]$。
+:::
+
+::: proof
+**1.** 各 $k$ で $p_{k}q_{k}$ は絶対連続な関数の積なので、記法の積の規則から $p_{k}(t)q_{k}(t)-p_{k}(r)q_{k}(r)=\int_{r}^{t}(p_{k}'q_{k}+p_{k}q_{k}')$。$k$ について和をとる。左辺の和は、すべての $t$ で $p(t)\in X_{-s}$, $q(t)\in X_{s}$ なので収束して $\langle p(t),q(t)\rangle-\langle p(r),q(r)\rangle$。右辺は $\sum_{k}\int_{0}^{T}(|p_{k}'q_{k}|+|p_{k}q_{k}'|)\le\int_{0}^{T}(\|p'\|_{(-s)}\|q\|_{(s)}+\|p\|_{(-s)}\|q'\|_{(s)})<\infty$ なので、\ref{meas:series-dominated} から和と積分を交換できる。右辺は可積分関数の不定積分なので絶対連続（\ref{meas:ftc-lebesgue}）。
+
+**2.** 前半は 1 を $s=0$, $p=q=u$ で使う。後半は $p_{k}\defeq\lambda_{k}u_{k}$, $q=u$ とする：$\lambda_{k}^{2}\le2\kappa_{k}^{2}+2\mu^{2}\le(2+2\mu^{2})\kappa_{k}^{2}$ から $\|p\|_{(-1)}^{2}=\sum\lambda_{k}^{2}u_{k}^{2}/\kappa_{k}\le(2+2\mu^{2})\|u\|_{(1)}^{2}$ なので $p,p'\in\mathbb{L}_{-1}$、$\langle p,u\rangle=B[u,u]$, $\langle p',u\rangle=\langle p,u'\rangle=B[u',u]$（\ref{pde:hyperbolic-coordinates.2}）。
+:::
+
+## 弱解 {#pde:sec-hy-weak}
+
+::: definition 双曲型方程式の弱解 {#pde:hyperbolic-weak-solution keywords="weak solution of the initial-boundary value problem u'' + L u = f, u = 0 on the boundary, u(0) = g, u'(0) = h: u in L^2(0,T;H^1_0), u' in L^2(0,T;L^2), u'' in L^2(0,T;H^{-1}), <u'', v> + B[u,v] = (f,v) for every v in H^1_0 and a.e. t" index="弱解（双曲型方程式）|じゃくかいそうきょくがたほうていしき, 双曲型方程式|そうきょくがたほうていしき"}
+$g\in H_{0}^{1}$, $h\in L^{2}$, $f\in\mathbb{L}_{0}=L^{2}(0,T;L^{2})$ とする。$u$ が次を満たすとき、$u$ を初期値・境界値問題「$u''+Lu=f$, $u=0$（$\partial\Omega$ で）, $u(0)=g$, $u'(0)=h$」の**弱解**という。
+1. $u\in\mathbb{L}_{1}=L^{2}(0,T;H_{0}^{1})$, $u'\in\mathbb{L}_{0}=L^{2}(0,T;L^{2})$, $u''\in\mathbb{L}_{-1}=L^{2}(0,T;H^{-1})$。
+2. 各 $v\in H_{0}^{1}$ について、a.e. の $t\in(0,T)$ で
+$$
+\langle u''(t),v\rangle+B[u(t),v]=(f(t),v).
+\label{pde:eq-hy-weak}
+$$
+3. $u(0)=g$, $u'(0)=h$。
+:::
+
+3 は意味をもつ：1 と \ref{pde:hyperbolic-time-continuity.3} から $u\in C([0,T];L^{2})$（$u\in\mathbb{L}_{1}$, $u'\in\mathbb{L}_{0}$）、$u'\in C([0,T];H^{-1})$（$u'\in\mathbb{L}_{0}\subset\mathbb{L}_{-1}$, $u''\in\mathbb{L}_{-1}$）なので、$u(0)\in L^{2}$, $u'(0)\in H^{-1}$ が定まる。
+
+::: intuition
+弱解とは、各時刻に境界で消える $H^{1}$ の関数で、その時間微分（速度）は $L^{2}$ に、加速度は $H^{-1}$ に入り、方程式をどの試験関数とかけて積分しても満たすものである。速度が $L^{2}$、変位の勾配が $L^{2}$ というのは、運動エネルギーと位置エネルギーが有限ということにあたる。
+:::
+
+::: proposition 弱い方程式の座標による表示 {#pde:hyperbolic-weak-coordinates keywords="the weak formulation of the hyperbolic problem is equivalent to the decoupled scalar equations u_k'' + lambda_k u_k = f_k a.e. for every k; then the equation holds for all v outside one null set, and can be tested with time-dependent v in L^2(0,T;H^1_0)" index="弱解の座標表示（双曲型）|じゃくかいのざひょうひょうじそうきょくがた"}
+$u$ が \ref{pde:hyperbolic-weak-solution.1} を満たすとする。
+1. \ref{pde:hyperbolic-weak-solution.2} は、すべての $k$ で $u_{k}''+\lambda_{k}u_{k}=f_{k}$（a.e.）が成り立つことと同値。ここで $u_{k}''$ は $u''$ の第 $k$ 座標。
+2. このとき零集合 $N\subset(0,T)$ があって、$t\notin N$ なら \eqref{pde:eq-hy-weak} がすべての $v\in H_{0}^{1}$ で同時に成り立つ。
+3. このとき $v\in\mathbb{L}_{1}$ について $\int_{0}^{T}\bigl(\langle u'',v\rangle+B[u,v]\bigr)dt=\int_{0}^{T}(f,v)\,dt$（被積分関数は可積分）。
+:::
+
+::: proof
+\ref{pde:hyperbolic-coordinates} から、$u(t)\in X_{1}$, $u''(t)\in X_{-1}$, $f(t)\in X_{0}$ となる $t$ では、$v\in H_{0}^{1}$ について
+$$
+\langle u''(t),v\rangle+B[u(t),v]-(f(t),v)=\sum_{k}\bigl(u_{k}''(t)+\lambda_{k}u_{k}(t)-f_{k}(t)\bigr)v_{k}
+$$
+（三つの級数はそれぞれ絶対収束）。**1 の ⇒** は $v=e_{k}$（$v_{k'}=\delta_{kk'}$）とおけばよい。**1 の ⇐ と 2**：$k$ ごとの例外の零集合と、$u(t)\notin X_{1}$ などとなる零集合の、可算個の和集合を $N$ とすれば、$t\notin N$ で右辺の各項が $0$。**3**：2 から a.e. の $t$ で $v=v(t)$ とおけて両辺が等しい。被積分関数 $\sum_{k}(u_{k}''+\lambda_{k}u_{k})v_{k}$ は可測関数の級数の極限なので可測で、絶対値は $\|u''\|_{(-1)}\|v\|_{(1)}+(2+2\mu^{2})^{1/2}\|u\|_{(1)}\|v\|_{(1)}$ 以下（\ref{pde:hyperbolic-pairing} の証明の評価）なので可積分。
+:::
+
+固有関数の座標では、方程式は互いに独立な可算個の常微分方程式 $u_{k}''+\lambda_{k}u_{k}=f_{k}$ に分かれる。その一つ一つは次の公式で解ける。
+
+::: lemma 1 自由度の振動子 {#pde:hyperbolic-scalar-ode keywords="scalar equation y'' + lambda y = F with F in L^2: the functions C_lambda(t) = cos(sqrt(lambda) t), S_lambda(t) = sin(sqrt(lambda) t)/sqrt(lambda) (cosh, sinh for lambda < 0) as power series; Duhamel formula y = a C + b S + int S(t-s) F(s) ds" index="デュアメルの公式（1 自由度）|でゅあめるのこうしき1じゆうど"}
+$\lambda\in\mathbb{R}$ について
+$$
+C_{\lambda}(t)\defeq\sum_{m\ge0}\frac{(-\lambda)^{m}t^{2m}}{(2m)!},\qquad S_{\lambda}(t)\defeq\sum_{m\ge0}\frac{(-\lambda)^{m}t^{2m+1}}{(2m+1)!}
+$$
+とおく（$\lambda>0$ なら $\cos(\sqrt{\lambda}t)$, $\frac{\sin(\sqrt{\lambda}t)}{\sqrt{\lambda}}$、$\lambda=0$ なら $1$, $t$、$\lambda<0$ なら $\cosh(\sqrt{-\lambda}t)$, $\frac{\sinh(\sqrt{-\lambda}t)}{\sqrt{-\lambda}}$）。
+1. $C_{\lambda}'=-\lambda S_{\lambda}$, $S_{\lambda}'=C_{\lambda}$, $C_{\lambda}(0)=1$, $S_{\lambda}(0)=0$。
+2. $a,b\in\mathbb{R}$, $F\in L^{2}(0,T)$ について、$y(t)\defeq aC_{\lambda}(t)+bS_{\lambda}(t)+\int_{0}^{t}S_{\lambda}(t-s)F(s)\,ds$ は $H^{2}(0,T)$ に入り、$y''+\lambda y=F$（a.e.）、$y(0)=a$, $y'(0)=b$。
+:::
+
+::: proof
+**1** は項別微分（整級数の収束半径は $\infty$）。**2**：$K\in C^{1}(\mathbb{R})$ について $J_{K}(t)\defeq\int_{0}^{t}K(t-s)F(s)\,ds$ とおく。$K(t-s)=K(0)+\int_{s}^{t}K'(\tau-s)\,d\tau$ を代入し、三角形 $\{0\le s\le\tau\le t\}$ の上でフビニの定理を使うと
+$$
+J_{K}(t)=K(0)\int_{0}^{t}F(s)\,ds+\int_{0}^{t}J_{K'}(\tau)\,d\tau,
+$$
+ここで $J_{K'}$ は優収束定理から連続。$K=S_{\lambda}$ なら $K(0)=0$ なので $J_{S}\in C^{1}$, $J_{S}'=J_{C}$。$K=C_{\lambda}$ なら $J_{C}(t)=\int_{0}^{t}F-\lambda\int_{0}^{t}J_{S}$ なので $J_{C}$ は絶対連続で $J_{C}'=F-\lambda J_{S}$（a.e.）。よって $J_{S}\in H^{2}(0,T)$, $J_{S}''+\lambda J_{S}=F$, $J_{S}(0)=J_{S}'(0)=0$。1 から $C_{\lambda}''=-\lambda C_{\lambda}$, $S_{\lambda}''=-\lambda S_{\lambda}$ なので、和 $y$ が主張を満たす。
+:::
+
+次の補題が、このページと次のページのエネルギー評価のすべての源である。各座標の振動子のエネルギー $y_{k}'^{2}+\lambda_{k}y_{k}^{2}$ は外力 $F_{k}$ がなければ保存されるが、$\lambda_{k}$ は負のこともあるので、正の重み $\kappa_{k}=\lambda_{k}+\mu$ に替えた量で評価する。
+
+::: lemma モードごとのエネルギー {#pde:hyperbolic-mode-energy keywords="energy for the modes: if y_k'' + lambda_k y_k = F_k with finite initial energy N(0)^2 = sum (y_k'(0)^2 + kappa_k y_k(0)^2) and F in L^2(0,T;L^2), then N(t) is finite, satisfies an energy identity, (y, y') is continuous into X_1 x X_0, N(t)^2 <= e^{(1+mu)t} (N(0)^2 + int ||F||^2), and backward bound when F = 0" index="モードごとのエネルギー|もーどごとのえねるぎー"}
+各 $k$ で $y_{k}\in H^{2}(0,T)$ が $y_{k}''+\lambda_{k}y_{k}=F_{k}$（a.e.）を満たし、$N(0)^{2}<\infty$, $F=(F_{k})\in\mathbb{L}_{0}$ とする。ここで $N(t)^{2}\defeq\sum_{k}\bigl(y_{k}'(t)^{2}+\kappa_{k}y_{k}(t)^{2}\bigr)$。
+1. すべての $t\in[0,T]$ で $N(t)<\infty$ で、
+$$
+\sum_{k}\bigl(y_{k}'^{2}+\lambda_{k}y_{k}^{2}\bigr)(t)=\sum_{k}\bigl(y_{k}'^{2}+\lambda_{k}y_{k}^{2}\bigr)(0)+2\int_{0}^{t}\sum_{k}y_{k}'F_{k}\,ds
+$$
+（右辺の被積分関数の級数は絶対収束し、和は可積分）。
+2. $t\mapsto(y(t),y'(t))$ は $[0,T]$ から $X_{1}\times X_{0}$ への連続写像。
+3. $N(t)^{2}\le e^{(1+\mu)t}\bigl(N(0)^{2}+\int_{0}^{t}\|F(s)\|^{2}ds\bigr)$。
+4. $F=0$ なら $N(0)^{2}\le e^{(1+\mu)t}N(t)^{2}$。
+:::
+
+::: proof
+**Step 1.** 【主張：$\tilde{e}_{k}\defeq y_{k}'^{2}+\kappa_{k}y_{k}^{2}$ は絶対連続で $\tilde{e}_{k}'=2y_{k}'(F_{k}+\mu y_{k})$（a.e.）】積の規則と $y_{k}''+\kappa_{k}y_{k}=F_{k}+\mu y_{k}$ から。
+
+**Step 2（3）.** 【主張：3 が成り立つ（とくに $N(t)<\infty$）】$2y_{k}'F_{k}\le y_{k}'^{2}+F_{k}^{2}$ と、$\kappa_{k}\ge1$ から $2\mu y_{k}y_{k}'\le\mu(y_{k}^{2}+y_{k}'^{2})\le\mu\tilde{e}_{k}$ なので $\tilde{e}_{k}'\le(1+\mu)\tilde{e}_{k}+F_{k}^{2}$。$K$ 個の和 $N_{K}^{2}\defeq\sum_{k\le K}\tilde{e}_{k}$ を積分すると
+$$
+N_{K}(t)^{2}\le A(t)+(1+\mu)\int_{0}^{t}N_{K}^{2},\qquad A(t)\defeq N(0)^{2}+\int_{0}^{t}\|F\|^{2}.
+$$
+\ref{ode:gronwall} と $A$ が単調非減少であることから $N_{K}(t)^{2}\le A(t)+\int_{0}^{t}A(s)(1+\mu)e^{(1+\mu)(t-s)}ds\le A(t)e^{(1+\mu)t}$。$K\to\infty$ とする。
+
+**Step 3（1）.** 【主張：1 が成り立つ】Step 2 から $\sup_{t}N(t)<\infty$ なので $\sum_{k}\int_{0}^{T}|y_{k}'F_{k}|\le\int_{0}^{T}N\|F\|<\infty$。各 $k$ で $(y_{k}'^{2}+\lambda_{k}y_{k}^{2})'=2y_{k}'F_{k}$（Step 1 と同じ計算）を積分して $k$ について和をとり、\ref{meas:series-dominated} で和と積分を交換する。左辺の和は $|\lambda_{k}|\le\kappa_{k}+\mu$ から絶対収束する。
+
+**Step 4（2）.** 【主張：2 が成り立つ】$Y(t)\defeq(y(t),y'(t))$ とし、$X_{1}\times X_{0}$ の内積を $\langle\!\langle Y,Z\rangle\!\rangle\defeq\sum_{k}(\kappa_{k}Y_{k}Z_{k}+Y_{k}'Z_{k}')$ とする（$\langle\!\langle Y(t),Y(t)\rangle\!\rangle=N(t)^{2}$）。Step 1 を積分して和をとると（Step 3 と同様に交換できる）$N(t)^{2}=N(0)^{2}+2\int_{0}^{t}\sum_{k}y_{k}'(F_{k}+\mu y_{k})$ なので、$N^{2}$ は連続。$r$ を固定する。各座標は連続なので、$K$ を固定すれば $k\le K$ の部分の内積は $t\to r$ で $\sum_{k\le K}(\cdots)(r)$ に収束し、$k>K$ の部分は絶対値が $\sup_{t}N(t)\cdot N_{>K}(r)$ 以下（$N_{>K}(r)^{2}\defeq\sum_{k>K}\tilde{e}_{k}(r)$）。よって $\langle\!\langle Y(t),Y(r)\rangle\!\rangle\to N(r)^{2}$ で、
+$$
+\langle\!\langle Y(t)-Y(r),Y(t)-Y(r)\rangle\!\rangle=N(t)^{2}+N(r)^{2}-2\langle\!\langle Y(t),Y(r)\rangle\!\rangle\to0.
+$$
+
+**4.** $t$ を固定し、$\tilde{y}_{k}(\tau)\defeq y_{k}(t-\tau)$（$0\le\tau\le t$）とおくと $\tilde{y}_{k}''+\lambda_{k}\tilde{y}_{k}=0$ で、そのエネルギーは $\tilde{N}(\tau)=N(t-\tau)$。3 を区間 $[0,t]$ で $\tilde{y}$ に使うと $N(0)^{2}=\tilde{N}(t)^{2}\le e^{(1+\mu)t}\tilde{N}(0)^{2}=e^{(1+\mu)t}N(t)^{2}$。
+:::
+
+::: intuition
+固有関数ごとに見ると、弱解は可算個のばねの振動の重ね合わせである。それぞれのばねのエネルギーは外力の仕事の分だけ変わり、合計のエネルギーが最初に有限なら、ずっと有限で連続に変わる。
+:::
+
+## ガレルキン法による存在 {#pde:sec-hy-existence}
+
+::: theorem 弱解の存在 {#pde:hyperbolic-existence keywords="existence of weak solutions of the hyperbolic initial-boundary value problem by the Galerkin method: projection onto finitely many eigenfunctions, a system of second order ODEs, uniform energy estimates (approximate energy conservation), weak limits in L^2(0,T;H^1_0), L^2(0,T;L^2), L^2(0,T;H^{-1})" index="ガレルキン法|がれるきんほう, 弱解の存在（双曲型方程式）|じゃくかいのそんざいそうきょくがたほうていしき"}
+$g\in H_{0}^{1}$, $h\in L^{2}$, $f\in L^{2}(0,T;L^{2})$ なら、\ref{pde:hyperbolic-weak-solution} の弱解が存在する。
+:::
+
+::: intuition
+最初の有限個の固有振動だけを許した近似問題は、有限個のばねの運動なので普通の常微分方程式として解ける。近似解のエネルギーは近似の段数によらずに押さえられるので、弱い意味で収束する部分列がとれ、その極限が弱解になる。
+:::
+
+::: proof
+**Step 1（ガレルキン近似）.** 【主張：各 $m$ について、$u_{m}(t)=\sum_{k\le m}d_{mk}(t)e_{k}$ で、$d_{mk}\in H^{2}(0,T)$、$v\in\operatorname{span}\{e_{1},\dots,e_{m}\}$ について $(u_{m}'',v)+B[u_{m},v]=(f,v)$（a.e.）、$d_{mk}(0)=g_{k}$, $d_{mk}'(0)=h_{k}$ となるものがある】$v=e_{j}$（$j\le m$）とおくと、$(u_{m}'',e_{j})=d_{mj}''$, $B[u_{m},e_{j}]=\sum_{k\le m}d_{mk}B[e_{k},e_{j}]=\lambda_{j}d_{mj}$ なので、条件は $m$ 個の 2 階の常微分方程式の系 $d_{mj}''+\lambda_{j}d_{mj}=f_{j}$（$j\le m$）に初期条件をつけたものになる。固有関数を基底に選んだので系は分離していて、各式は \ref{pde:hyperbolic-scalar-ode.2} で解ける（$f_{j}=(f,e_{j})\in L^{2}(0,T)$ はコーシー–シュワルツから）。一般の $v$ へは線形性で延びる。
+
+**Step 2（エネルギー評価）.** 【主張：$\|u_{m}\|_{\mathbb{L}_{1}}$, $\|u_{m}'\|_{\mathbb{L}_{0}}$, $\|u_{m}''\|_{\mathbb{L}_{-1}}$ は $m$ によらない定数で押さえられる】$y_{k}\defeq d_{mk}$, $F_{k}\defeq f_{k}$（$k\le m$）、$y_{k}=F_{k}=0$（$k>m$）に \ref{pde:hyperbolic-mode-energy} を使う。1 は近似解のエネルギーの等式
+$$
+\|u_{m}'(t)\|^{2}+B[u_{m}(t),u_{m}(t)]=\sum_{k\le m}(h_{k}^{2}+\lambda_{k}g_{k}^{2})+2\int_{0}^{t}(f,u_{m}')\,ds
+$$
+（エネルギー保存の近似版：外力がなければ近似解のエネルギーは保存される）で、3 から
+$$
+\|u_{m}'(t)\|^{2}+\|u_{m}(t)\|_{(1)}^{2}\le M\defeq e^{(1+\mu)T}\bigl(\|h\|^{2}+\|g\|_{(1)}^{2}+\|f\|_{\mathbb{L}_{0}}^{2}\bigr).
+$$
+積分して $\|u_{m}\|_{\mathbb{L}_{1}}^{2}+\|u_{m}'\|_{\mathbb{L}_{0}}^{2}\le TM$。また $u_{m}''$ の座標は $d_{mk}''=f_{k}-\lambda_{k}d_{mk}$（$k\le m$）なので、$\lambda_{k}^{2}/\kappa_{k}\le(2+2\mu^{2})\kappa_{k}$（\ref{pde:hyperbolic-pairing} の証明）と $\kappa_{k}\ge1$ から
+$$
+\|u_{m}''(t)\|_{(-1)}^{2}\le2\sum_{k}\frac{f_{k}^{2}}{\kappa_{k}}+2\sum_{k\le m}\frac{\lambda_{k}^{2}d_{mk}^{2}}{\kappa_{k}}\le2\|f(t)\|^{2}+(4+4\mu^{2})\|u_{m}(t)\|_{(1)}^{2},
+$$
+積分して $\|u_{m}''\|_{\mathbb{L}_{-1}}^{2}\le2\|f\|_{\mathbb{L}_{0}}^{2}+(4+4\mu^{2})TM$。
+
+**Step 3（弱極限）.** 【主張：部分列について $u_{m}\rightharpoonup u$（$\mathbb{L}_{1}$）、$u_{m}'\rightharpoonup w$（$\mathbb{L}_{0}$）、$u_{m}''\rightharpoonup z$（$\mathbb{L}_{-1}$）で、$w=u'$, $z=u''$】$\mathbb{L}_{s}$ はヒルベルト空間なので、Step 2 と \ref{fa:hilbert-weak-compactness} を三回続けて使って部分列をとる（以下その部分列を $u_{m}$ と書く）。$\varphi\in C_{c}^{\infty}((0,T))$ と $k$ について、$\int d_{mk}\varphi'=-\int d_{mk}'\varphi$（$m\ge k$）で、左右の $u\mapsto\int u_{k}\varphi'$, $w\mapsto\int w_{k}\varphi$ は有界線形汎関数なので、極限で $\int u_{k}\varphi'=-\int w_{k}\varphi$、つまり $w=u'$。同様に $z=w'$。
+
+**Step 4（方程式）.** 【主張：$u$ は \ref{pde:hyperbolic-weak-solution.2} を満たす】$k$ を固定し、$\varphi\in L^{2}(0,T)$ をとる。$m\ge k$ なら $\int_{0}^{T}(d_{mk}''+\lambda_{k}d_{mk})\varphi=\int_{0}^{T}f_{k}\varphi$。左辺は Step 3 の弱収束で $\int(u_{k}''+\lambda_{k}u_{k})\varphi$ に収束する。$\varphi$ は任意なので $u_{k}''+\lambda_{k}u_{k}=f_{k}$（a.e.）で、\ref{pde:hyperbolic-weak-coordinates.1} から主張。
+
+**Step 5（初期条件）.** 【主張：$u(0)=g$, $u'(0)=h$】$y\in H^{1}(0,T)$ について、$y(0)=y(t)-\int_{0}^{t}y'$ を $t$ について平均してフビニの定理を使うと
+$$
+y(0)=\frac1T\int_{0}^{T}y(t)\,dt-\frac1T\int_{0}^{T}(T-s)\,y'(s)\,ds.
+$$
+右辺は $y$ と $y'$ の $L^{2}(0,T)$ の弱収束について連続である（Step 3 の汎関数の形）。$m\ge k$ で $d_{mk}(0)=g_{k}$、$d_{mk}\rightharpoonup u_{k}$, $d_{mk}'\rightharpoonup u_{k}'$ なので $u_{k}(0)=g_{k}$。同じ式を $y=d_{mk}'$ に使って $u_{k}'(0)=h_{k}$。\ref{pde:hyperbolic-time-continuity.1} の連続な代表の座標はこれらの値なので、\ref{pde:hyperbolic-coordinates} から $u(0)=g$（$X_{0}$ の元として）、$u'(0)=h$（$X_{-1}$ の元として）。
+
+::: hypcheck
+- **$L$ の対称性と時間によらない係数**：固有関数の正規直交基底（\ref{pde:weak-symmetric-eigen}）の存在に使い、Step 1 で系が分離するのもそのためである。Step 2〜5 の議論は分離を使っていない（Step 2 の評価はエネルギーの等式から出せる）ので、係数が時間に依存しても、別の基底をとれば同じ道筋で存在が示せる。ただし時間微分の評価には係数の時間微分の有界性が要る。
+- **一様楕円性**：\ref{pde:hyperbolic-coordinates.2}（\ref{pde:parabolic-symmetric-coordinates.1} のガルディングの不等式）を通して使った。$H_{0}^{1}$ のノルムが $B_{\mu}$ で測れることが、Step 2 の評価が $H^{1}$ の評価になる理由である。
+- **データの正則性 $g\in H_{0}^{1}$, $h\in L^{2}$, $f\in L^{2}(0,T;L^{2})$**：Step 2 の $M<\infty$ に使った（初期エネルギーが有限で、外力の仕事 $\int(f,u_{m}')$ が $\|f\|_{\mathbb{L}_{0}}$ で押さえられる）。
+- **$\Omega$ の有界性**：固有関数基底の存在（埋め込みのコンパクト性）に使った。境界の正則性は使っていない。
+- **公理**：Step 3 の部分列は \ref{fa:hilbert-weak-compactness} による。固有関数基底は記法のとおり。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 固有関数を基底に選んだので、Step 1 の $d_{mk}$ は $m\ge k$ なら $m$ によらず、Step 4 の極限の $u_{k}$ に等しい。つまり $u_{m}$ は弱解 $u$ の座標を $m$ 個で切ったもので、部分列をとらなくても列全体が（強く）収束する。弱極限をとる議論は、この特別な事情を使わずに書いてあり、時間に依存する係数や一般の基底にそのまま移せる。ガレルキン法の要点は、近似解の評価が近似の段数によらないこと（Step 2）にある。放物型方程式でも同じ道筋をたどった（\see{pde:parabolic-existence}）。
+
+**似た定理.** 楕円型方程式では、存在はラックス–ミルグラムの定理で一度に得た（\ref{pde:weak-elliptic-existence}）。時間を含む方程式ではそのような一つの汎関数がないので、有限次元で常微分方程式を解き、評価だけを持ち越す。
+
+**高い視点：有限個のばねで弦を近似する.** 比喩で言えば、ガレルキン法は連続な膜を、$m$ 個の固有の振動だけが許された機械で近似する。どの段数の機械でも、ばねにたくわえられるエネルギーの合計は最初に与えたエネルギーと外力の仕事を超えないので、機械の列は暴れ出さずに一つの運動に寄っていく。その極限の運動が、無限個の自由度をもつ膜の運動である。
+:::
+
+## 一意性 {#pde:sec-hy-uniqueness}
+
+古典解の一意性（\ref{pde:wave-uniqueness-bounded}）は、二つの解の差 $w$ について $\partial_{t}w$ を方程式にかけて積分し、エネルギー保存を導いて示した。弱解では $w''$ は $H^{-1}$ にしか入らず、$w'$ は $H_{0}^{1}$ に入るとは限らないので、$\langle w''(t),w'(t)\rangle$ は意味をもたない。代わりに、$w$ を時間について積分した関数（これは $H_{0}^{1}$ に入る）を試験関数にする。
+
+::: theorem 弱解の一意性 {#pde:hyperbolic-uniqueness keywords="uniqueness of weak solutions of the hyperbolic problem by the energy method with the time-integrated test function v(t) = int_t^s w; since w'' is only in H^{-1}, w' cannot be used as a test function" index="弱解の一意性（双曲型方程式）|じゃくかいのいちいせいそうきょくがたほうていしき"}
+同じ $g,h,f$ に対する弱解は高々一つである。
+:::
+
+::: intuition
+二つの弱解の差は、初期値も外力も $0$ の弱解である。その「時間についての積分」を試験関数に使うと、差の $L^{2}$ ノルムが、それ自身の過去の積分で押さえられ、$0$ でなければならないことがわかる。
+:::
+
+::: proof
+二つの弱解の差 $w$ は、$g=h=0$, $f=0$ の弱解である（\ref{pde:hyperbolic-weak-solution} の条件はどれも線形）。$s\in(0,T]$ を固定し、区間 $[0,s]$ で考える。
+
+**Step 1（試験関数）.** 【主張：$v(t)\defeq\int_{t}^{s}w(\tau)\,d\tau$（座標ごとの積分、$0\le t\le s$）について、$v\in C([0,s];X_{1})$, $v'=-w\in L^{2}(0,s;X_{1})$, $v(s)=0$】各座標 $v_{k}(t)=\int_{t}^{s}w_{k}$ は絶対連続で $v_{k}'=-w_{k}$。\ref{pde:hyperbolic-time-continuity} の Step 1 から $\|v(t)\|_{(1)}\le\int_{0}^{s}\|w\|_{(1)}$ で、同じく $\|v(t)-v(r)\|_{(1)}\le|\int_{r}^{t}\|w\|_{(1)}|$。
+
+**Step 2（積分した等式）.** 【主張：$\|w(s)\|^{2}+B[v(0),v(0)]=0$】\ref{pde:hyperbolic-weak-coordinates.3}（区間 $[0,s]$ で）から
+$$
+\int_{0}^{s}\langle w'',v\rangle\,dt+\int_{0}^{s}B[w,v]\,dt=0.
+$$
+第 1 項に \ref{pde:hyperbolic-pairing.1} を $p=w'$（$p,p'\in L^{2}(0,s;X_{-1})$）、$q=v$（$q,q'\in L^{2}(0,s;X_{1})$）で使うと、$\langle w'(s),v(s)\rangle-\langle w'(0),v(0)\rangle=\int_{0}^{s}\bigl(\langle w'',v\rangle-\langle w',w\rangle\bigr)$。$v(s)=0$, $w'(0)=0$ なので左辺は $0$ で、$\langle w',w\rangle=(w',w)$ に \ref{pde:hyperbolic-pairing.2} を使うと
+$$
+\int_{0}^{s}\langle w'',v\rangle=\int_{0}^{s}(w',w)=\frac12\|w(s)\|^{2}-\frac12\|w(0)\|^{2}=\frac12\|w(s)\|^{2}.
+$$
+第 2 項は $w=-v'$ と $B$ の対称性、\ref{pde:hyperbolic-pairing.2} から $\int_{0}^{s}B[w,v]=-\int_{0}^{s}B[v',v]=-\frac12B[v(s),v(s)]+\frac12B[v(0),v(0)]=\frac12B[v(0),v(0)]$。
+
+**Step 3（グロンウォール）.** 【主張：$w(s)=0$】\ref{pde:bilinear-energy-estimates.2} から $B[v(0),v(0)]\ge-\gamma\|v(0)\|^{2}$。$v(0)=\int_{0}^{s}w$ なので、\ref{pde:hyperbolic-time-continuity} の Step 1（$s=0$ の場合）とコーシー–シュワルツから $\|v(0)\|^{2}\le(\int_{0}^{s}\|w\|)^{2}\le s\int_{0}^{s}\|w\|^{2}$。Step 2 と合わせて、$\phi(s)\defeq\|w(s)\|^{2}$ について
+$$
+\phi(s)\le\gamma T\int_{0}^{s}\phi(\tau)\,d\tau\qquad(0\le s\le T).
+$$
+$\phi$ は連続（$w\in C([0,T];L^{2})$）で非負なので、\ref{ode:gronwall}（$a=0$）から $\phi=0$。
+
+::: hypcheck
+- **$B$ の対称性**：Step 2 の第 2 項で $B[v',v]=\frac12\frac{d}{dt}B[v,v]$ とするのに使った。1 階の項 $b\ne0$ があると対称でなくなり、この計算に非対称な部分 $\int\sum_{i}b^{i}\partial_{i}w\,v$ が残るので、それを $b$ の有界性で押さえる別の評価が要る。
+- **ガルディングの不等式**（一様楕円性・係数の有界性）：Step 3 で $B[v(0),v(0)]$ を下から押さえるのに使った。$c$ が負で $B$ が正定値でなくても（$\gamma>0$）、グロンウォールの不等式が埋め合わせる。
+- **$w''\in L^{2}(0,T;H^{-1})$ だけで足りること**：$w'$ を試験関数にせず、$v\in H_{0}^{1}$ を使ったのはこのためである。$v$ が $H_{0}^{1}$ 値で $v'$ も $H_{0}^{1}$ 値なので、Step 2 の対 $\langle w'',v\rangle$ も $B[v',v]$ も意味をもつ。
+- **初期条件**：Step 2 の $w'(0)=0$（$H^{-1}$ の元として）と $w(0)=0$ で使った。
+- **公理**：選択公理は使わない（固有関数基底は座標を定めるのに使うが、主張には現れない）。
+:::
+:::
+
+::: proof 別証明（固有関数の座標）
+差 $w$ の各座標 $w_{k}$ は $H^{2}(0,T)$ に入り（$w_{k}''=-\lambda_{k}w_{k}\in L^{2}$）、$w_{k}''+\lambda_{k}w_{k}=0$, $w_{k}(0)=w_{k}'(0)=0$ を満たす（\ref{pde:hyperbolic-weak-coordinates.1}）。\ref{pde:hyperbolic-mode-energy.3} を一つの座標だけからなる列に使うと $w_{k}'(t)^{2}+\kappa_{k}w_{k}(t)^{2}\le0$ で $w_{k}=0$。すべての座標が $0$ なので $w=0$。
+:::
+
+別証明は、係数が時間によらず固有関数で方程式が分離することに頼っている。本証明のほうは分離を使わず、$B$ の対称性とガルディングの不等式だけを使うので、係数が時間に依存する場合にも（$\frac{d}{dt}B$ の項を評価に加えて）広がる。
+
+## エネルギー等式 {#pde:sec-hy-energy}
+
+::: theorem エネルギー等式 {#pde:hyperbolic-energy-equality keywords="energy equality for weak solutions of the hyperbolic problem: u in C([0,T];H^1_0), u' in C([0,T];L^2), E(t) = (1/2)(||u'||^2 + B[u,u]) satisfies E(t) = E(0) + int_0^t (f,u'); conservation of energy when f = 0; energy estimate" index="エネルギー等式（双曲型方程式）|えねるぎーとうしきそうきょくがたほうていしき, エネルギー保存（弱解）|えねるぎーほぞんじゃくかい"}
+$u$ を $g\in H_{0}^{1}$, $h\in L^{2}$, $f\in L^{2}(0,T;L^{2})$ に対する弱解とする。
+1. $u\in C([0,T];H_{0}^{1})$, $u'\in C([0,T];L^{2})$（代表を適当にとって）。
+2. $E(t)\defeq\frac12\bigl(\|u'(t)\|^{2}+B[u(t),u(t)]\bigr)$ について、すべての $t\in[0,T]$ で
+$$
+E(t)=E(0)+\int_{0}^{t}(f(s),u'(s))\,ds,\qquad E(0)=\frac12\bigl(\|h\|^{2}+B[g,g]\bigr).
+\label{pde:eq-hy-energy}
+$$
+とくに $f=0$ なら $E$ は一定（**エネルギー保存**）。
+3. $\|u'(t)\|^{2}+\|u(t)\|_{(1)}^{2}\le e^{(1+\mu)t}\bigl(\|h\|^{2}+\|g\|_{(1)}^{2}+\int_{0}^{t}\|f\|^{2}\bigr)$。したがって $\sup_{t}\bigl(\|u'(t)\|^{2}+\beta\|u(t)\|_{H^{1}}^{2}\bigr)\le e^{(1+\mu)T}\bigl(\|h\|^{2}+(\alpha+\mu)\|g\|_{H^{1}}^{2}+\|f\|_{\mathbb{L}_{0}}^{2}\bigr)$。
+:::
+
+::: intuition
+弱解でも、運動エネルギーと位置エネルギーの和は外力の仕事の分だけしか変わらず、外力がなければ保存される。しかも解は、エネルギーの意味で時間について連続に動く。
+:::
+
+::: proof
+**Step 1（座標）.** 【主張：各 $k$ で $u_{k}\in H^{2}(0,T)$, $u_{k}''+\lambda_{k}u_{k}=f_{k}$, $u_{k}(0)=g_{k}$, $u_{k}'(0)=h_{k}$】$u\in\mathbb{L}_{1}$, $u'\in\mathbb{L}_{0}$ から $u_{k}\in H^{1}(0,T)$ で導関数は $u'$ の第 $k$ 座標、$u'\in\mathbb{L}_{0}$, $u''\in\mathbb{L}_{-1}$ からその座標も $H^{1}(0,T)$ に入る。\ref{pde:hyperbolic-weak-coordinates.1} から $u_{k}''=f_{k}-\lambda_{k}u_{k}\in L^{2}(0,T)$。初期値は、\ref{pde:hyperbolic-time-continuity.1} の連続な代表の座標が $u_{k}$, $u_{k}'$ の連続な代表であることと、\ref{pde:hyperbolic-weak-solution.3}。
+
+**Step 2（1・3）.** 【主張：1 と 3 が成り立つ】Step 1 の $y_{k}\defeq u_{k}$, $F\defeq f$ は \ref{pde:hyperbolic-mode-energy} の仮定を満たす（$N(0)^{2}=\|h\|^{2}+\|g\|_{(1)}^{2}$）。同じ補題の 2 が 1、3 が 3 の前半で、後半は \ref{pde:hyperbolic-coordinates.2} のノルムの比較。
+
+**Step 3（2）.** 【主張：\eqref{pde:eq-hy-energy} が成り立つ】\ref{pde:hyperbolic-mode-energy.1} の左辺は \ref{pde:hyperbolic-coordinates} から $\|u'(t)\|^{2}+B[u(t),u(t)]$、右辺の被積分関数は $(f,u')$ である。
+
+::: hypcheck
+- **データ $g\in H_{0}^{1}$, $h\in L^{2}$**：Step 2 で初期エネルギー $N(0)$ が有限であることに使った。エネルギー空間 $H_{0}^{1}\times L^{2}$ はこの等式が意味をもつ最小の枠組みである。
+- **弱解の正則性 $u''\in L^{2}(0,T;H^{-1})$**：Step 1 で $u_{k}\in H^{2}(0,T)$ を得るのに使った。$\langle u'',u'\rangle$ は意味をもたないが、座標ごとには意味をもち、和をとる段階（\ref{pde:hyperbolic-mode-energy} の Step 3）で外力の項 $(f,u')$ だけが残る。
+- **$L$ の対称性**：$E$ の位置エネルギー $\frac12B[u,u]$ がそもそも $\frac12\langle Lu,u\rangle$ の形で書けることに使っている。$c$ が負のところがあると $E$ は負にもなりうるが、等式は成り立つ（\ref{pde:prob-hy-negative-energy}）。
+- **境界・係数の正則性**：使っていない。
+- **公理**：選択公理は（固有関数基底のほかは）使わない。
+:::
+:::
+
+::: supplement
+**似た定理.** 古典解のエネルギー保存（\ref{pde:wave-energy-conservation}）は、$u\in C^{2}$ と $C^{1}$ 境界を仮定して、ガウス–グリーンの公式で示した。ここでは解の滑らかさも境界の正則性も仮定しておらず、境界条件は $u(t)\in H_{0}^{1}$ という形でだけ入っている。$\Omega$ が $C^{1}$ 境界をもち、$u\in C^{2}([0,T]\times\overline{\Omega})$ が $\partial_{t}^{2}u=\Delta u$ と $\partial\Omega$ の上で $u=0$ を満たす古典解なら、トレースが $0$ の関数は $H_{0}^{1}$ に入り（\see{fa:ex-et-3}）、\ref{pde:weak-elliptic-classical} の Step 1 と同じ部分積分で弱い方程式も確かめられるので、二つの保存則は一致する。
+
+**前提を変えると.** 熱方程式なら、同じ計算で $\frac12\|u(t)\|^{2}+\int_{0}^{t}B[u,u]=\frac12\|g\|^{2}+\int_{0}^{t}(f,u)$ となり、エネルギーは散逸する。波動方程式のエネルギー保存は、時間について 2 階で、時間の向きを区別しないことの表れである。また、時間微分の項 $a\,u'$（摩擦）を加えると、エネルギーは $a\|u'\|^{2}$ の割合で減る（\ref{pde:prob-wv-damped} の弱解版）。
+
+**高い視点：エネルギー空間.** 等式が示しているのは、組 $(u(t),u'(t))$ がエネルギー空間 $H_{0}^{1}\times L^{2}$ の中を、エネルギーの長さを保って（外力がなければ）動くことである。次のページでは、これを「エネルギー空間のユニタリ群」として捉え直し、ストーンの定理と結びつける。
+:::
+
+## 問題 {#pde:sec-hy-problems}
+
+::: problem {#pde:prob-hy-plucked}
+$\Omega=(0,\pi)$, $L=-\partial_{x}^{2}$, $f=0$, $g=0$, $h=1$（定数）とする。$e_{k}=\sqrt{2/\pi}\sin(kx)$, $\lambda_{k}=k^{2}$ である（\ref{fa:prob-lm-eigen-interval} を区間 $(0,\pi)$ に縮尺）。
+1. 弱解が $u(t,x)=\sum_{k\text{ 奇数}}\frac{4}{\pi k^{2}}\sin(kt)\sin(kx)$ であることを示せ（級数は $C([0,T];H_{0}^{1})$ で収束する）。
+2. $E(t)=\frac{\pi}{2}$（すべての $t$）を、級数から直接確かめよ。$\sum_{k\text{ 奇数}}\frac{1}{k^{2}}=\frac{\pi^{2}}{8}$ を使ってよい。
+3. $0\le t\le\frac{\pi}{2}$ で $u(t,x)=\min(x,t,\pi-x)$ であることを確かめ、$0<t<\frac{\pi}{2}$ では $u'(t)$ が $H^{1}$ に入らないことを示せ。
+:::
+
+::: solution
+**1.** $h_{k}=(1,e_{k})=\sqrt{2/\pi}\cdot\frac{1-\cos(k\pi)}{k}$ は奇数の $k$ で $\sqrt{2/\pi}\cdot\frac{2}{k}$、偶数で $0$。$g=0$, $f=0$ なので、\ref{pde:hyperbolic-existence} の弱解の座標は \ref{pde:hyperbolic-scalar-ode.2} の $y=h_{k}S_{k^{2}}(t)=h_{k}\frac{\sin(kt)}{k}$（\ref{pde:hyperbolic-uniqueness} から弱解はこれだけ）。$h_{k}\frac{\sin kt}{k}e_{k}=\frac{2}{\pi}\cdot\frac{2}{k^{2}}\sin(kt)\sin(kx)$。収束は \ref{pde:hyperbolic-energy-equality.1}。
+
+**2.** $\|u'(t)\|^{2}=\sum h_{k}^{2}\cos^{2}(kt)$, $B[u,u]=\sum k^{2}h_{k}^{2}\frac{\sin^{2}(kt)}{k^{2}}$ なので、$\|u'\|^{2}+B[u,u]=\sum h_{k}^{2}=\frac{2}{\pi}\sum_{k\text{ 奇数}}\frac{4}{k^{2}}=\frac{8}{\pi}\cdot\frac{\pi^{2}}{8}=\pi$、$E=\frac{\pi}{2}=\frac12\|h\|^{2}$。
+
+**3.** $\psi(t,x)\defeq\min(x,t,\pi-x)$ の正弦係数を計算すると、$\frac{2}{\pi}\int_{0}^{\pi}\psi(t,x)\sin(kx)\,dx=\frac{2}{\pi}\cdot\frac{(1-\cos k\pi)\sin(kt)}{k^{2}}$（$[0,t]$, $[t,\pi-t]$, $[\pi-t,\pi]$ に分けて部分積分）で、奇数の $k$ で $\frac{4\sin(kt)}{\pi k^{2}}$、偶数で $0$。よって $u(t)=\psi(t,\cdot)$。$u'(t)$ は $L^{2}$ の中の時間微分で、$\frac{\psi(t+\delta,\cdot)-\psi(t,\cdot)}{\delta}$ は $\delta\to0$ で区間 $(t,\pi-t)$ の指示関数に $L^{2}$ 収束するので、$u'(t)=\mathbf{1}_{(t,\pi-t)}$。これは跳びをもち、\ref{fa:sobolev-one-dimension} から $H^{1}(0,\pi)$ に入らない。速度は「初めの一様な速度」が両端から $0$ に変わっていく様子を表し、その境目（$x=t$, $x=\pi-t$）が速さ $1$ で内側へ進む。データの滑らかさ（$h\in L^{2}$ だが $H_{0}^{1}$ でない）は、時間がたっても良くならない。
+:::
+
+::: problem {#pde:prob-hy-negative-energy}
+$\Omega=(0,\pi)$, $Lu=-u''-2u$（$c=-2$）とし、$g=\sin x$, $h=0$, $f=0$ とする。
+1. $\lambda_{k}=k^{2}-2$ で、$\lambda_{1}=-1<0$ であることを確かめ、\ref{pde:bilinear-energy-estimates} の $\gamma$ と比べよ。
+2. 弱解が $u(t,x)=\cosh(t)\sin x$ であることを示し、$\|u(t)\|$ が指数関数的に増えることを確かめよ。
+3. それでも $E(t)=-\frac{\pi}{4}$ が一定であることを確かめ、エネルギー保存から一意性や有界性が直接は出ない理由を説明せよ。
+:::
+
+::: solution
+**1.** $e_{k}=\sqrt{2/\pi}\sin(kx)$ について $B[e_{k},v]=\int e_{k}'v'-2\int e_{k}v=(k^{2}-2)(e_{k},v)$（$\lambda_{k}=k^{2}$ の $-\partial_{x}^{2}$ の固有関数を同じ基底として使える）。$c_{-}=2$ なので $\gamma=2$ で、$\lambda_{1}=-1>-\gamma$ は \ref{pde:weak-symmetric-eigen} の範囲に入る。
+
+**2.** $g=\sqrt{\pi/2}\,e_{1}$ なので座標は $u_{1}(t)=\sqrt{\pi/2}\,C_{-1}(t)=\sqrt{\pi/2}\cosh t$、他は $0$（\ref{pde:hyperbolic-scalar-ode}、一意性は \ref{pde:hyperbolic-uniqueness}）。$\|u(t)\|=\sqrt{\pi/2}\cosh t\to\infty$。
+
+**3.** $\|u'\|^{2}=\frac{\pi}{2}\sinh^{2}t$, $B[u,u]=\lambda_{1}u_{1}^{2}=-\frac{\pi}{2}\cosh^{2}t$ なので $E=\frac{\pi}{4}(\sinh^{2}t-\cosh^{2}t)=-\frac{\pi}{4}$。$E$ は正定値でないので、$E$ が一定でも $\|u'\|$ と $\|u\|_{H^{1}}$ はいくらでも大きくなれる。一意性の証明（\ref{pde:hyperbolic-uniqueness} の Step 3）と \ref{pde:hyperbolic-energy-equality.3} で $\gamma$ や $\mu$ のずらしとグロンウォールの不等式が必要だったのはこのためで、評価が $e^{(1+\mu)t}$ の増大を許すのは、この例のとおり本当に増大がありうるからである。
+:::
+
+正則性・固有関数展開と関数計算・有限伝播速度は \see{pde:page-hyperbolic-propagation} で扱う。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

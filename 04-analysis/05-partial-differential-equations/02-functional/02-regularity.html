@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>弱解の正則性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/02-regularity.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 弱解の正則性 {#pde:page-regularity keywords="regularity of weak solutions, interior regularity, difference quotients, Nirenberg's method, H^2_loc, interior H^2 estimate, Caccioppoli inequality, higher interior regularity, H^{m+2}_loc, smoothness of weak solutions, Weyl's lemma, discontinuous coefficients, 差分商, 内部正則性, 内部評価, カッチョッポリの不等式, 弱解の滑らかさ, 正則性理論"}
+
+前のページ（\ref{pde:page-weak-elliptic}）では、発散形の一様楕円型作用素 $L$ について、ディリクレ問題の弱解を $H_{0}^{1}(\Omega)$ の中に作った。弱解は 1 回しか（それも弱い意味でしか）微分できず、方程式 $Lu=f$ も積分の形でしか成り立たない。このページと次のページでは、係数とデータが滑らかなら弱解も滑らかになることを示し、古典的手法の系列が最初から仮定していた「解の滑らかさ」を、係数・境界・データの滑らかさから取り戻す。
+
+このページは**内部**、つまり $\Omega$ の内側にコンパクトに含まれる部分での正則性を扱う。道具は**差分商**である。微分の代わりに差分 $\frac{u(x+he_{k})-u(x)}{h}$ を考えると、これは弱解の試験関数として使え、しかも $h$ によらない $L^{2}$ の評価が得られれば、$h\to0$ で本物の導関数が $L^{2}$ に入ることがわかる（第 1 節）。これを方程式に当てはめると、$a^{ij}\in C^{1}$, $f\in L^{2}$ なら弱解は $H_{\mathrm{loc}}^{2}$ に入り（第 2 節）、係数と右辺が $C^{\infty}$ なら弱解は $C^{\infty}$ になる（第 3 節）。境界まで込めた正則性は次のページ（\see{pde:page-regularity-boundary}）で、係数や境界の滑らかさを外すと正則性が崩れる例はその次のページ（\tref{pde:page-regularity-counterexamples}）で扱う。
+
+## 記法と定義の確認 {#pde:sec-rg-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$ は有界な開集合。関数は実数値。作用素 $L$、係数 $a^{ij},b^{i},c$、定数 $\theta,\Lambda,b_{\infty},c_{\infty}$、双線形形式 $B[u,v]$ は \ref{pde:bilinear-elliptic-form} のとおりで、$L$ はつねに一様楕円型とする。$a^{ij}=a^{ji}$ は仮定しない。弱解は \ref{pde:weak-elliptic-solution}、エネルギー評価は \ref{pde:bilinear-energy-estimates}。\ref{pde:bilinear-energy-estimates.1} の証明の Step 1 の評価は $u,v\in H^{1}(\Omega)$ でもそのまま成り立つ。
+- ソボレフ空間 $H^{k}(\Omega)$ とそのノルムは \ref{fa:sobolev-space}、$H_{0}^{k}$ は \ref{fa:c1-boundary.1}。$L^{2}$ の内積とノルムは $(u,v)$, $\|u\|_{2}$、部分集合 $U$ の上のものは $\|u\|_{L^{2}(U)}$ のように書く。
+- $V\Subset\Omega$ は、$\overline{V}$ がコンパクトで $\overline{V}\subset\Omega$ となる開集合 $V$ を表す。このとき $\operatorname{dist}(V,\mathbb{R}^{n}\setminus\Omega)>0$。$u\in H^{k}(V)$ がすべての $V\Subset\Omega$ で成り立つとき $u\in H_{\mathrm{loc}}^{k}(\Omega)$ と書く。
+- 開集合 $U$ について、$C^{m}(U)$ の関数で $m$ 階までの導関数がすべて $U$ で有界なものの全体を $C_{b}^{m}(U)$ と書く。$C^{m}(\overline{\Omega})$ は、$m$ 階までの導関数が $\overline{\Omega}$ まで連続に延びる $C^{m}(\Omega)$ の関数の全体で、$\Omega$ は有界なので $C^{m}(\overline{\Omega})\subset C_{b}^{m}(\Omega)$。
+- 軟化子 $\rho_{\varepsilon}$ と軟化は \ref{fa:mollifier}, \ref{fa:mollification}、軟化と弱微分は \ref{fa:mollification-sobolev}、切り落とし関数と 1 の分割は \ref{fa:test-function-density}、変分法の基本補題は \ref{fa:fundamental-lemma}、リースの表現定理は \ref{fa:riesz-representation}、平行移動の不変性と連続性は \ref{meas:translation-continuity}、フビニ–トネリの定理は \tref{meas:fubini}、高階のソボレフの埋め込みは \ref{fa:higher-embeddings}。
+- $e_{k}$ は第 $k$ 座標の単位ベクトル。初等的な不等式 $st\le\varepsilon s^{2}+\frac{t^{2}}{4\varepsilon}$（$s,t\ge0$, $\varepsilon>0$）を何度も使う。
+- **選択公理**：このページの議論では使わない（差分商の評価から導関数を取り出すのに、弱コンパクト性ではなくリースの表現定理を使う）。引用する関数解析の系列の結果については、そちらの記述に従う。
+:::
+
+## 差分商 {#pde:sec-rg-difference}
+
+::: definition 差分商 {#pde:reg-difference-quotient keywords="difference quotient D_k^h u(x) = (u(x + h e_k) - u(x))/h in the direction e_k" index="差分商|さぶんしょう"}
+$u$ を開集合 $U$ 上の関数、$k\in\{1,\dots,n\}$、$h\ne0$ とする。$x$ と $x+he_{k}$ がともに $U$ に入る点 $x$ で
+$$
+D_{k}^{h}u(x)\defeq\frac{u(x+he_{k})-u(x)}{h}
+$$
+と定め、$u$ の第 $k$ 方向の**差分商**という。開集合 $V$ について $V+he_{k}\subset U$ なら、$D_{k}^{h}u$ は $V$ 全体で定義される。
+:::
+
+::: intuition
+微分の定義の極限をとる前の商である。差分商は平行移動と引き算だけでできているので、弱微分をもたない関数にも意味をもち、積分の中で「部分積分」に似た移し替えができる。
+:::
+
+差分商の基本的な計算を三つまとめておく。$u,w$ が $V$ と $V+he_{k}$ を含む開集合の上の関数のとき、$V$ の上で
+
+- （積の公式）$D_{k}^{h}(aw)=a_{h}\,D_{k}^{h}w+(D_{k}^{h}a)\,w$、ここで $a_{h}(x)\defeq a(x+he_{k})$。両辺に $h$ を掛ければ $a(x+he_{k})w(x+he_{k})-a(x)w(x)$ の加減で確かめられる。
+- （弱微分との交換）$w$ の弱微分 $\partial_{j}w$ があれば、平行移動 $x\mapsto w(x+he_{k})$ の弱微分は $x\mapsto\partial_{j}w(x+he_{k})$（試験関数を逆向きに平行移動して \ref{meas:translation-continuity.1} を使う）。よって $\partial_{j}D_{k}^{h}w=D_{k}^{h}\partial_{j}w$。
+- （離散的な部分積分）$g$ が可積分で、コンパクト集合 $S$ の外で $0$ であり、$S\cup(S+he_{k})$ の上で $w$ が定義されて $wg$ などが可積分なら、
+$$
+\int w\,D_{k}^{-h}g\,dx=-\int(D_{k}^{h}w)\,g\,dx.
+\label{pde:eq-rg-discrete-parts}
+$$
+実際、$\int w(x)g(x-he_{k})\,dx=\int w(y+he_{k})g(y)\,dy$（\ref{meas:translation-continuity.1}）なので、左辺は $-\frac1h\int\bigl(w(y+he_{k})-w(y)\bigr)g(y)\,dy$ に等しい。
+
+::: lemma 差分商の評価 {#pde:reg-difference-lemma keywords="difference quotient lemma: if d_k u in L^2(U) then ||D_k^h u||_{L^2(V)} <= ||d_k u||_{L^2(U)} whenever V + t e_k in U for |t| <= |h|; conversely uniformly bounded difference quotients give a weak derivative in L^2 with the same bound; D_k^h u -> d_k u in L^2(V)" index="差分商の補題|さぶんしょうのほだい"}
+$U,V\subset\mathbb{R}^{n}$ を開集合、$k\in\{1,\dots,n\}$、$h_{0}>0$ とし、$|t|\le h_{0}$ のとき $V+te_{k}\subset U$ とする。$0<|h|\le h_{0}$ とする。
+1. $u\in L^{2}(U)$ が弱微分 $\partial_{k}u\in L^{2}(U)$ をもつなら、a.e. の $x\in V$ で $D_{k}^{h}u(x)=\int_{0}^{1}\partial_{k}u(x+the_{k})\,dt$ で、$\|D_{k}^{h}u\|_{L^{2}(V)}\le\|\partial_{k}u\|_{L^{2}(U)}$。
+2. $u\in L^{2}(U)$ について、定数 $C$ で $\|D_{k}^{h}u\|_{L^{2}(V)}\le C$（$0<|h|\le h_{0}$）となるものがあれば、$u$ は $V$ で弱微分 $\partial_{k}u\in L^{2}(V)$ をもち、$\|\partial_{k}u\|_{L^{2}(V)}\le C$。
+3. 1 の仮定の下で、$h\to0$ のとき $\|D_{k}^{h}u-\partial_{k}u\|_{L^{2}(V)}\to0$。
+:::
+
+::: proof
+$G\defeq\partial_{k}u$ とおく。$x\in V$ と $t\in[0,1]$ について $x+the_{k}\in U$ である。
+
+**Step 1.** 【主張：$L^{2}(U)$ の関数 $g$ に $(Ag)(x)\defeq\int_{0}^{1}g(x+the_{k})\,dt$ を対応させる写像は、$L^{2}(V)$ への有界線形写像でノルムは $1$ 以下】コーシー–シュワルツの不等式から各 $x$ で $|Ag(x)|^{2}\le\int_{0}^{1}|g(x+the_{k})|^{2}dt$。これを $V$ で積分し、トネリの定理（\tref{meas:fubini}）で順序を入れ替え、各 $t$ で平行移動の不変性（\ref{meas:translation-continuity.1}）と $V+the_{k}\subset U$ を使うと $\|Ag\|_{L^{2}(V)}^{2}\le\int_{0}^{1}\|g\|_{L^{2}(U)}^{2}dt$。
+
+**Step 2（1 の等式）.** 【主張：a.e. の $x\in V$ で $D_{k}^{h}u=AG$】$K\subset V$ をコンパクトとし、$K_{h}\defeq\{x+the_{k}:x\in K,\ t\in[0,1]\}$（$U$ のコンパクト集合）とおく。$\varepsilon<\operatorname{dist}(K_{h},\mathbb{R}^{n}\setminus U)$ なら $u_{\varepsilon}\defeq\rho_{\varepsilon}*u$ は $K_{h}$ の近傍で滑らかで、$\partial_{k}u_{\varepsilon}=\rho_{\varepsilon}*G$ となる（$\partial_{k}u_{\varepsilon}(x)=\int\partial_{x_{k}}\rho_{\varepsilon}(x-y)u(y)\,dy=-\int\partial_{y_{k}}[\rho_{\varepsilon}(x-y)]u(y)\,dy$ で、$y\mapsto\rho_{\varepsilon}(x-y)$ は $C_{c}^{\infty}(U)$ に入るので弱微分の定義が使える）。微積分学の基本定理から $K$ の上で $D_{k}^{h}u_{\varepsilon}=A(\rho_{\varepsilon}*G)$。$\varepsilon\to0$ のとき \ref{fa:mollification.3} から $u_{\varepsilon}\to u$, $\rho_{\varepsilon}*G\to G$（$L^{2}(K_{h})$ で）なので、左辺は $L^{2}(K)$ で $D_{k}^{h}u$ に、右辺は Step 1 の評価（$U$ の代わりに $K_{h}$ で行う。$x\in K$ なら $x+the_{k}\in K_{h}$）から $AG$ に収束する。よって $K$ の上で a.e. に等しい。$V$ はコンパクト集合の可算和なので、$V$ の上で a.e. に等しい。不等式は Step 1 から。
+
+**Step 3（2）.** 【主張：$\varphi\in C_{c}^{\infty}(V)$ について $\bigl|\int_{V}u\,\partial_{k}\varphi\bigr|\le C\|\varphi\|_{L^{2}(V)}$】$S\defeq\operatorname{supp}\varphi$ とすると $S'\defeq S+[-h_{0},h_{0}]e_{k}$ は $U$ のコンパクト集合で、$0<|h|\le h_{0}$ について \eqref{pde:eq-rg-discrete-parts} から $\int_{V}(D_{k}^{h}u)\varphi=-\int_{U}u\,D_{k}^{-h}\varphi$。$h\to0$ で $D_{k}^{-h}\varphi\to\partial_{k}\varphi$ は $S'$ の上の一様収束（平均値の定理と $\partial_{k}\varphi$ の一様連続性）で、$u$ は $S'$ で可積分なので、右辺は $-\int u\,\partial_{k}\varphi$ に収束する。左辺の絶対値はコーシー–シュワルツの不等式から $C\|\varphi\|_{L^{2}(V)}$ 以下。
+
+**Step 4（2 の結論）.** 【主張：$V$ での弱微分 $\partial_{k}u\in L^{2}(V)$ があり、ノルムは $C$ 以下】Step 3 から、$\ell(\varphi)\defeq-\int u\,\partial_{k}\varphi$ は $C_{c}^{\infty}(V)$ 上の線形汎関数で $|\ell(\varphi)|\le C\|\varphi\|_{L^{2}(V)}$。$C_{c}^{\infty}(V)$ は $L^{2}(V)$ で稠密（\ref{fa:test-function-density.1}）なので $\ell$ は $L^{2}(V)$ 上の有界線形汎関数（ノルム $C$ 以下）に一意に延び、\ref{fa:riesz-representation} から $g\in L^{2}(V)$, $\|g\|_{L^{2}(V)}\le C$ で $\ell(\varphi)=\int g\varphi$ となる。これは $\int u\,\partial_{k}\varphi=-\int g\varphi$ なので、$g$ が $V$ での弱微分である。
+
+**Step 5（3）.** 【主張：$\|D_{k}^{h}u-G\|_{L^{2}(V)}\le\sup_{|s|\le|h|}\|\bar G(\cdot+se_{k})-\bar G\|_{L^{2}(\mathbb{R}^{n})}$。ここで $\bar G$ は $G$ を $U$ の外で $0$ と延ばしたもの】Step 2 から $D_{k}^{h}u-G=\int_{0}^{1}\bigl(G(\cdot+the_{k})-G\bigr)dt$（$V$ の上で a.e.）。Step 1 と同じくコーシー–シュワルツとトネリの定理で、$L^{2}(V)$ ノルムの 2 乗は $\int_{0}^{1}\|G(\cdot+the_{k})-G\|_{L^{2}(V)}^{2}dt$ 以下で、$V$ の上では $G(\cdot+the_{k})=\bar G(\cdot+the_{k})$。右辺は \ref{meas:translation-continuity.2} から $h\to0$ で $0$ に収束する。
+
+::: hypcheck
+- **$V+te_{k}\subset U$（$|t|\le h_{0}$）**：Step 1 の平行移動と、Step 3 の $S'\subset U$ に使った。これがないと差分商は $V$ 全体で定義されない。
+- **指数 $2$**：Step 4 のリースの表現定理で使った。$1<p<\infty$ なら $L^{p}$ の双対を使って同じ結論が成り立つが、ここでは要らない。$p=1$ では 2 は偽である：$u=1_{(0,\infty)}$ は $\|D_{1}^{h}u\|_{L^{1}(-1,1)}=1$ と一様に有界だが、弱微分はディラック測度で関数ではない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem 差分商による H¹ の特徴づけ {#pde:reg-h1-characterization keywords="characterization of H^1 by difference quotients: u in L^2(Omega) has d_k u in L^2(Omega) iff ||D_k^h u||_{L^2(V)} is bounded uniformly in V compactly contained in Omega and 0 < |h| < dist(V, boundary); the best constant is ||d_k u||_2" index="差分商による特徴づけ|さぶんしょうによるとくちょうづけ"}
+$u\in L^{2}(\Omega)$, $k\in\{1,\dots,n\}$, $C\ge0$ とする。次は同値である。
+1. $u$ は弱微分 $\partial_{k}u\in L^{2}(\Omega)$ をもち、$\|\partial_{k}u\|_{2}\le C$。
+2. すべての $V\Subset\Omega$ と $0<|h|<\operatorname{dist}(V,\mathbb{R}^{n}\setminus\Omega)$ について $\|D_{k}^{h}u\|_{L^{2}(V)}\le C$。
+
+とくに、$u\in H^{1}(\Omega)$ であるための必要十分条件は、各 $k$ について 2 を満たす $C$ があることである。
+:::
+
+::: intuition
+関数が $L^{2}$ の意味で 1 回微分できることは、差分商が刻み幅によらず $L^{2}$ で一様に有界であることと同じである。しかも差分商の大きさの上限は、ちょうど導関数の大きさになる。
+:::
+
+::: proof
+**1 ⇒ 2.** $V\Subset\Omega$, $0<|h|<\operatorname{dist}(V,\mathbb{R}^{n}\setminus\Omega)$ なら、$|t|\le|h|$ で $V+te_{k}\subset\Omega$。\ref{pde:reg-difference-lemma.1}（$U=\Omega$, $h_{0}=|h|$）から。
+
+**2 ⇒ 1.** $V_{m}\defeq\{x\in\Omega:\operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)>\frac1m\}$ とおくと $V_{m}\Subset\Omega$（$\Omega$ は有界）、$V_{m}$ は増大して和は $\Omega$。\ref{pde:reg-difference-lemma.2}（$U=\Omega$, $V=V_{m}$, $h_{0}=\frac{1}{2m}$）から、$V_{m}$ での弱微分 $g_{m}\in L^{2}(V_{m})$, $\|g_{m}\|_{L^{2}(V_{m})}\le C$ がある。弱微分の一意性（\ref{fa:sobolev-space.1}）から $g_{m+1}=g_{m}$（$V_{m}$ の上で a.e.）なので、$g\defeq g_{m}$（$V_{m}$ の上）は $\Omega$ 上の関数として定まる。$\varphi\in C_{c}^{\infty}(\Omega)$ の台はある $V_{m}$ に含まれるので $\int u\,\partial_{k}\varphi=-\int g\varphi$、つまり $g=\partial_{k}u$。単調収束定理から $\|g\|_{2}=\lim_{m}\|g\|_{L^{2}(V_{m})}\le C$。
+
+::: hypcheck
+- **$\Omega$ の有界性**：$V_{m}\Subset\Omega$ のためだけに使った。非有界なら $V_{m}$ に $|x|<m$ を加えればよい。
+- **境界の正則性**：使っていない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example
+$\Omega=(-1,1)$ で $u=1_{(0,1)}$ とすると、$V=(-\frac12,\frac12)$, $0<h<\frac12$ について $\|D_{1}^{h}u\|_{L^{2}(V)}^{2}=h\cdot h^{-2}=\frac1h$ は有界でなく、$u\notin H^{1}$ である（\ref{pde:prob-rg-heaviside}）。一方 $u(x)=|x|$ では $|D_{1}^{h}u|\le1$ なので $\|D_{1}^{h}u\|_{L^{2}(V)}\le\sqrt2$ で、実際 $\|u'\|_{2}=\sqrt2$。
+:::
+
+方程式に差分商を当てはめる前に、係数との積と局所化について必要なことを確かめておく。\ref{fa:sobolev-product-rule} は係数が $C^{\infty}$ の場合なので、$C^{m}$ の係数に広げる。
+
+::: lemma 局所化 {#pde:reg-localization keywords="patching Sobolev functions along a finite open cover; compactly supported H^k functions lie in H^k_0 and extend by zero; C^1_c test functions in weak derivatives" index="ソボレフ関数の貼り合わせ|そぼれふかんすうのはりあわせ"}
+$U$ を開集合とする。
+1. $U=U_{1}\cup\dots\cup U_{N}$（$U_{j}$ は開集合）で、$u\in L^{2}(U)$ の各 $U_{j}$ への制限が $H^{k}(U_{j})$ に入るなら、$u\in H^{k}(U)$ で $\|u\|_{H^{k}(U)}^{2}\le\sum_{j}\|u\|_{H^{k}(U_{j})}^{2}$。
+2. $u\in H^{k}(U)$ がコンパクト集合 $K\subset U$ の外で a.e. に $0$ なら、$u\in H_{0}^{k}(U)$ で、$U$ の外で $0$ と延ばしたものは $H^{k}(\mathbb{R}^{n})$ に入る。
+3. $g\in L^{2}(U)$ が弱微分 $\partial_{l}g\in L^{2}(U)$ をもつなら、すべての $\psi\in C_{c}^{1}(U)$ について $\int g\,\partial_{l}\psi=-\int\partial_{l}g\,\psi$。また $C_{c}^{1}(U)\subset H_{0}^{1}(U)$。
+:::
+
+::: proof
+**1.** $|\alpha|\le k$ について、$U_{j}$ の上で $g_{\alpha}\defeq\partial^{\alpha}(u|_{U_{j}})$ と定めると、弱微分の一意性から $U_{i}\cap U_{j}$ の上で両者は a.e. に一致し、$g_{\alpha}\in L^{2}(U)$ が定まる。$\varphi\in C_{c}^{\infty}(U)$ について、\ref{fa:test-function-density.3} で $\psi_{j}\in C_{c}^{\infty}(U_{j})$、$\operatorname{supp}\varphi$ の近傍で $\sum_{j}\psi_{j}=1$ となるものをとると、$\int u\,\partial^{\alpha}\varphi=\sum_{j}\int u\,\partial^{\alpha}(\psi_{j}\varphi)=(-1)^{|\alpha|}\sum_{j}\int g_{\alpha}\psi_{j}\varphi=(-1)^{|\alpha|}\int g_{\alpha}\varphi$。ノルムの評価は $\|g_{\alpha}\|_{L^{2}(U)}^{2}\le\sum_{j}\|g_{\alpha}\|_{L^{2}(U_{j})}^{2}$ から。
+
+**2.** 前半は \ref{fa:mollification-sobolev.3}。後半は 1 を $\mathbb{R}^{n}=U\cup(\mathbb{R}^{n}\setminus K)$ に使う（後者の上では $0$）。
+
+**3.** $\psi_{\varepsilon}\defeq\rho_{\varepsilon}*\psi$ は小さな $\varepsilon$ で $C_{c}^{\infty}(U)$ に入り、台は固定したコンパクト集合 $K'\subset U$ に含まれる（\ref{fa:mollification.4}）。$\partial_{l}\psi_{\varepsilon}=\rho_{\varepsilon}*\partial_{l}\psi$（$\psi_{\varepsilon}(x)=\int\rho_{\varepsilon}(z)\psi(x-z)\,dz$ を積分記号下で微分）なので、\ref{fa:mollification.2} から $\psi_{\varepsilon}\to\psi$, $\partial_{l}\psi_{\varepsilon}\to\partial_{l}\psi$ は $K'$ の上で一様収束。$\int g\,\partial_{l}\psi_{\varepsilon}=-\int\partial_{l}g\,\psi_{\varepsilon}$ で、$g,\partial_{l}g$ は $K'$ で可積分なので極限がとれる。後半：$\psi\in C_{c}^{1}(U)$ の古典的な導関数は、通常の部分積分（フビニの定理と微積分学の基本定理）から弱微分なので $\psi\in H^{1}(U)$ で、2 から $H_{0}^{1}(U)$ に入る。
+:::
+
+::: lemma C^m 級の関数との積 {#pde:reg-c1-product keywords="product of a Sobolev function with a C^m function with bounded derivatives: Leibniz rule for one derivative d_l(a g) = a d_l g + (d_l a) g, and a g in H^m with ||a g||_{H^m} <= C ||g||_{H^m}" index="C^m 級の関数との積|しーえむきゅうのかんすうとのせき"}
+$U$ を開集合とする。
+1. $a\in C_{b}^{1}(U)$、$g\in L^{2}(U)$ が弱微分 $\partial_{l}g\in L^{2}(U)$ をもつなら、$ag$ は弱微分 $\partial_{l}(ag)=a\,\partial_{l}g+(\partial_{l}a)\,g\in L^{2}(U)$ をもつ。
+2. $v\in L^{2}(U)$ で、各 $l$ について $\partial_{l}v\in H^{m-1}(U)$（$m\ge1$）なら、$v\in H^{m}(U)$ で $\|v\|_{H^{m}}^{2}\le\|v\|_{2}^{2}+\sum_{l}\|\partial_{l}v\|_{H^{m-1}}^{2}$。
+3. $a\in C_{b}^{m}(U)$, $g\in H^{m}(U)$ なら $ag\in H^{m}(U)$ で、$n,m$ と $a$ の $m$ 階までの導関数の上限だけで決まる $C$ について $\|ag\|_{H^{m}}\le C\|g\|_{H^{m}}$。
+:::
+
+::: proof
+**1.** $\varphi\in C_{c}^{\infty}(U)$ について $a\varphi\in C_{c}^{1}(U)$ で、\ref{pde:reg-localization.3} から $\int g\,\partial_{l}(a\varphi)=-\int\partial_{l}g\,a\varphi$。左辺は $\int ag\,\partial_{l}\varphi+\int g\varphi\,\partial_{l}a$ なので $\int ag\,\partial_{l}\varphi=-\int(a\,\partial_{l}g+\partial_{l}a\,g)\varphi$。
+
+**2.** $\alpha\ne0$, $|\alpha|\le m$ なら $\alpha_{l}\ge1$ となる $l$ があり、$\beta\defeq\alpha-e_{l}$ とおくと、$\varphi\in C_{c}^{\infty}(U)$ について $\int v\,\partial^{\alpha}\varphi=\int v\,\partial_{l}(\partial^{\beta}\varphi)=-\int\partial_{l}v\,\partial^{\beta}\varphi=(-1)^{|\alpha|}\int\partial^{\beta}(\partial_{l}v)\,\varphi$。よって $\partial^{\alpha}v=\partial^{\beta}\partial_{l}v\in L^{2}$。ノルムは、各 $\alpha\ne0$ が右辺の和に少なくとも 1 回現れることから。
+
+**3.** $m$ についての帰納法。$m=0$ は $\|ag\|_{2}\le\sup|a|\,\|g\|_{2}$。$m\ge1$ とし、$m-1$ で正しいとする。1 から $\partial_{l}(ag)=a\,\partial_{l}g+(\partial_{l}a)g$ で、$a\in C_{b}^{m-1}$, $\partial_{l}g\in H^{m-1}$ と $\partial_{l}a\in C_{b}^{m-1}$, $g\in H^{m-1}$ に帰納法の仮定を使うと右辺は $H^{m-1}$ に入り、ノルムは $C\|g\|_{H^{m}}$ 以下。2 から $ag\in H^{m}$ と評価が従う。
+:::
+
+## 内部正則性 {#pde:sec-rg-interior}
+
+境界条件を課さない、内部だけの弱解を定める。
+
+::: definition 領域の中の弱解 {#pde:reg-interior-weak-solution keywords="weak solution of L u = f in Omega without boundary condition: u in H^1(Omega) with B[u,v] = (f,v) for all test functions v; equivalently for all v in H^1_0(Omega); restrictions to subdomains" index="領域の中の弱解|りょういきのなかのじゃくかい, 内部の弱解|ないぶのじゃくかい"}
+$f\in L^{2}(\Omega)$ とする。$u\in H^{1}(\Omega)$ が、すべての $v\in C_{c}^{\infty}(\Omega)$ について $B[u,v]=(f,v)$ を満たすとき、$u$ を $\Omega$ における $Lu=f$ の**弱解**（境界条件なし）という。
+:::
+
+::: intuition
+境界での値には何も要求せず、領域の内側で方程式を弱い意味で満たすものである。
+:::
+
+両辺は $v$ について $H^{1}$ ノルムで連続（記法の注意）なので、この等式は $C_{c}^{\infty}(\Omega)$ の閉包 $H_{0}^{1}(\Omega)$ のすべての $v$ に延びる。したがって \ref{pde:weak-elliptic-solution} の弱解はこの意味の弱解であり、また開集合 $U\subset\Omega$ への制限 $u|_{U}$ は（$C_{c}^{\infty}(U)\subset C_{c}^{\infty}(\Omega)$ なので）$U$ における弱解である。
+
+最初の評価は、$u$ の勾配を $u$ と $f$ で内側から押さえるものである。
+
+::: lemma カッチョッポリの不等式 {#pde:reg-caccioppoli keywords="Caccioppoli inequality (interior energy estimate): for a weak solution and a cut-off zeta, int zeta^2 |grad u|^2 <= C (||f||^2 + ||u||^2) with C depending on theta, Lambda, b, c and sup |grad zeta|" index="カッチョッポリの不等式|かっちょっぽりのふとうしき, 内部エネルギー評価|ないぶえねるぎーひょうか"}
+$u\in H^{1}(\Omega)$ を $\Omega$ における $Lu=f$ の弱解、$\zeta\in C_{c}^{\infty}(\Omega)$, $0\le\zeta\le1$, $G\defeq\sup|\nabla\zeta|$ とする。このとき
+$$
+\frac{\theta}{2}\int_{\Omega}\zeta^{2}|\nabla u|^{2}dx\le\frac12\|f\|_{2}^{2}+\Bigl(\frac12+\frac{4\Lambda^{2}G^{2}+b_{\infty}^{2}}{\theta}+c_{\infty}\Bigr)\|u\|_{2}^{2}.
+$$
+:::
+
+::: proof
+$v\defeq\zeta^{2}u$ は \ref{pde:reg-c1-product.3} から $H^{1}$ に入り、$\operatorname{supp}\zeta$ の外で $0$ なので \ref{pde:reg-localization.2} から $H_{0}^{1}(\Omega)$ に入る。$\partial_{j}v=\zeta^{2}\partial_{j}u+2\zeta\partial_{j}\zeta\,u$ を $B[u,v]=(f,v)$ に入れ、一様楕円性を使うと
+$$
+\theta\int\zeta^{2}|\nabla u|^{2}\le\int f\zeta^{2}u-\int2\zeta u\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}\zeta-\int\zeta^{2}u\sum_{i}b^{i}\partial_{i}u-\int c\zeta^{2}u^{2}.
+$$
+各点で $2\zeta|u|\,\Lambda|\nabla u|G\le\frac{\theta}{4}\zeta^{2}|\nabla u|^{2}+\frac{4\Lambda^{2}G^{2}}{\theta}u^{2}$、$\zeta^{2}|u|b_{\infty}|\nabla u|\le\frac{\theta}{4}\zeta^{2}|\nabla u|^{2}+\frac{b_{\infty}^{2}}{\theta}u^{2}$、$|f\zeta^{2}u|\le\frac12(f^{2}+u^{2})$、$|c\zeta^{2}u^{2}|\le c_{\infty}u^{2}$（$\zeta\le1$）。$|\sum a^{ij}\partial_{i}u\,\partial_{j}\zeta|\le\Lambda|\nabla u||\nabla\zeta|$ は \ref{pde:bilinear-energy-estimates} の証明の Step 1 と同じ。$\frac{\theta}{2}\int\zeta^{2}|\nabla u|^{2}$ を左辺に移せばよい。
+:::
+
+次の補題が内部正則性と境界正則性（次のページ）の共通の核心である。試験関数として「差分商の差分商」をとり、2 階の部分の楕円性で $\nabla D_{k}^{h}u$ を押さえる。
+
+::: lemma 差分商によるエネルギー評価 {#pde:reg-difference-energy keywords="key estimate of Nirenberg's method: testing the equation with v = - D_k^{-h}(zeta^2 D_k^h u) gives int zeta^2 |D_k^h grad u|^2 <= C(||F||^2 + ||grad u||^2) when a^{ij} is C^1 with bounded derivatives" index="差分商によるエネルギー評価|さぶんしょうによるえねるぎーひょうか, ニーレンバーグの方法|にーれんばーぐのほうほう"}
+次の状況を考える。
+- $U$ は開集合、$a^{ij}\in C_{b}^{1}(U)$ で、$U$ の各点ですべての $\xi$ について $\sum a^{ij}\xi_{i}\xi_{j}\ge\theta|\xi|^{2}$、$\sup_{U}(\sum_{i,j}(a^{ij})^{2})^{1/2}\le\Lambda$。$M_{1}\defeq\max_{l}\bigl(\sum_{i,j}\sup_{U}|\partial_{l}a^{ij}|^{2}\bigr)^{1/2}$。
+- $k\in\{1,\dots,n\}$, $h_{0}>0$、$V\subset U$ は開集合で $V+te_{k}\subset U$（$|t|\le h_{0}$）。$\zeta\in C_{c}^{\infty}(\mathbb{R}^{n})$, $0\le\zeta\le1$, $G\defeq\sup|\nabla\zeta|$, $S\defeq\operatorname{supp}\zeta$ で、$(S+[-h_{0},h_{0}]e_{k})\cap U\subset V$。
+- $u\in H^{1}(U)$, $F\in L^{2}(U)$。$0<|h|\le h_{0}$ について、$V$ の上で $z_{h}\defeq\zeta^{2}D_{k}^{h}u$、$U\setminus V$ の上で $z_{h}\defeq0$ とし、$V$ の上で $v_{h}\defeq-D_{k}^{-h}z_{h}$、$U\setminus V$ の上で $v_{h}\defeq0$ とする。
+
+このとき次が成り立つ。
+1. $z_{h},v_{h}\in H^{1}(U)$ で、$U$ の外の点を使わずに定義されている。
+2. すべての $0<|h|\le h_{0}$ について $\int_{U}\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}v_{h}\,dx=\int_{U}Fv_{h}\,dx$ なら、
+$$
+\frac{\theta}{2}\int_{U}\zeta^{2}|D_{k}^{h}\nabla u|^{2}dx\le\Bigl(\frac1\theta+1\Bigr)\|F\|_{L^{2}(U)}^{2}+\Bigl(\frac{(2\Lambda G+M_{1})^{2}}{\theta}+2M_{1}G+G^{2}\Bigr)\|\nabla u\|_{L^{2}(U)}^{2}.
+$$
+:::
+
+::: proof
+$S_{1}\defeq S+[-h_{0},h_{0}]e_{k}$ は閉集合で、$V_{0}\defeq U\setminus S_{1}$ は開集合、$U=V\cup V_{0}$（仮定から $U\cap S_{1}\subset V$）。
+
+**Step 1（1）.** 【主張：$z_{h},v_{h}\in H^{1}(U)$】$V$ の上では、$x\mapsto u(x+he_{k})$ が $H^{1}(V)$ に入る（$V+he_{k}\subset U$ と弱微分の平行移動）ので、\ref{pde:reg-c1-product.3} から $z_{h}\in H^{1}(V)$。$z_{h}(x)\ne0$ なら $x\in S$ なので、$z_{h}$ は $V_{0}$ で $0$。\ref{pde:reg-localization.1} から $z_{h}\in H^{1}(U)$。$v_{h}$ は $V$ の上で $z_{h}$ と $z_{h}(\cdot-he_{k})$（$V-he_{k}\subset U$）の一次結合なので $H^{1}(V)$ に入り、$v_{h}(x)\ne0$ なら $x\in S\cup(S+he_{k})\subset S_{1}$ なので $V_{0}$ で $0$。同じく $v_{h}\in H^{1}(U)$。
+
+以下、$X\defeq\bigl(\int_{U}\zeta^{2}|D_{k}^{h}\nabla u|^{2}\bigr)^{1/2}$, $Y\defeq\|\nabla u\|_{L^{2}(U)}$ とおく。\ref{pde:reg-difference-lemma.1} から $\|D_{k}^{h}u\|_{L^{2}(V)}\le\|\partial_{k}u\|_{L^{2}(U)}\le Y$。
+
+**Step 2.** 【主張：$\int_{U}\sum a^{ij}\partial_{i}u\,\partial_{j}v_{h}=\int_{U}\sum D_{k}^{h}(a^{ij}\partial_{i}u)\,\partial_{j}z_{h}$】$V$ の上で $\partial_{j}v_{h}=-D_{k}^{-h}\partial_{j}z_{h}$、$V_{0}$ の上で $\partial_{j}v_{h}=0$。$\partial_{j}z_{h}$ は $S\cap U$ の外で $0$ で、$(S\cap U)\cup((S\cap U)+he_{k})\subset V$ なので、\eqref{pde:eq-rg-discrete-parts} を $w=a^{ij}\partial_{i}u$, $g=\partial_{j}z_{h}$ に使えばよい。
+
+**Step 3.** 【主張：左辺 $\ge\theta X^{2}-(2\Lambda G+M_{1})XY-2M_{1}GY^{2}$】差分商の積の公式から $V$ の上で $D_{k}^{h}(a^{ij}\partial_{i}u)=a_{h}^{ij}\,\partial_{i}D_{k}^{h}u+(D_{k}^{h}a^{ij})\partial_{i}u$。線分 $[x,x+he_{k}]\subset U$（$x\in V$）での平均値の定理から $|D_{k}^{h}a^{ij}|\le\sup_{U}|\partial_{k}a^{ij}|$ なので、コーシー–シュワルツの不等式から $|\sum_{i,j}(D_{k}^{h}a^{ij})p_{i}q_{j}|\le M_{1}|p||q|$。また $\partial_{j}z_{h}=\zeta^{2}\partial_{j}D_{k}^{h}u+2\zeta\partial_{j}\zeta\,D_{k}^{h}u$。展開すると主要項は $\int\zeta^{2}\sum a_{h}^{ij}\partial_{i}D_{k}^{h}u\,\partial_{j}D_{k}^{h}u\ge\theta X^{2}$（点 $x+he_{k}\in U$ での楕円性）で、残りの 3 項は $\zeta^{2}\le\zeta\le1$ を使って
+$$
+2\Lambda G\,XY,\qquad M_{1}\,YX,\qquad2M_{1}G\,Y^{2}
+$$
+で押さえられる（たとえば第 1 項は $\int2\zeta|\nabla D_{k}^{h}u|\,\Lambda\,G\,|D_{k}^{h}u|\le2\Lambda G\,X\,\|D_{k}^{h}u\|_{L^{2}(V)}$）。
+
+**Step 4.** 【主張：$\bigl|\int_{U}Fv_{h}\bigr|\le\|F\|_{L^{2}(U)}(X+2GY)$】$\|v_{h}\|_{L^{2}(U)}=\|D_{k}^{-h}z_{h}\|_{L^{2}(V)}\le\|\partial_{k}z_{h}\|_{L^{2}(U)}$（\ref{pde:reg-difference-lemma.1} を $z_{h}$ と $-h$ に使う）で、$|\partial_{k}z_{h}|\le\zeta|\partial_{k}D_{k}^{h}u|+2G\zeta|D_{k}^{h}u|$ から $\|\partial_{k}z_{h}\|\le X+2GY$。
+
+**Step 5（2）.** 【主張：結論の不等式】Step 2〜4 と仮定の等式から $\theta X^{2}\le\|F\|X+2G\|F\|Y+(2\Lambda G+M_{1})XY+2M_{1}GY^{2}$。$\|F\|X\le\frac\theta4X^{2}+\frac1\theta\|F\|^{2}$、$(2\Lambda G+M_{1})XY\le\frac\theta4X^{2}+\frac{(2\Lambda G+M_{1})^{2}}{\theta}Y^{2}$、$2G\|F\|Y\le\|F\|^{2}+G^{2}Y^{2}$ を使い、$\frac\theta2X^{2}$ を左辺に移す。
+
+::: hypcheck
+- **$a^{ij}\in C^{1}$（導関数が有界）**：Step 3 の $|D_{k}^{h}a^{ij}|\le\sup|\partial_{k}a^{ij}|$ だけに使った。$a^{ij}$ がリプシッツ連続（定数 $M$）なら $|D_{k}^{h}a^{ij}|\le M$ で、同じ結論が成り立つ。
+- **一様楕円性**：Step 3 の主要項だけに使った。点 $x+he_{k}$ での楕円性なので、$U$ 全体で必要。
+- **平行移動が $U$ に収まること**：Step 1 と Step 2 で使った。次のページでは $U$ を半空間の箱にし、$k$ を接方向に限ってこの条件を満たす。
+- **$u$ の境界での条件**：使っていない。試験関数として使えるかどうか（2 の仮定の等式）は、使う場面ごとに確かめる。
+:::
+:::
+
+::: theorem 内部 H² 正則性 {#pde:reg-interior-h2 keywords="interior H^2 regularity: if a^{ij} in C^1, b, c bounded, f in L^2 and u in H^1 is a weak solution of L u = f in Omega, then u in H^2_loc(Omega), ||u||_{H^2(V)} <= C(||f||_2 + ||u||_2), and L u = f a.e. in nondivergence form" index="内部正則性（楕円型方程式）|ないぶせいそくせいだえんがたほうていしき, 内部評価|ないぶひょうか, H2 正則性|えいちつーせいそくせい"}
+$L$ を一様楕円型で、$a^{ij}\in C^{1}(\overline{\Omega})$, $b^{i},c\in L^{\infty}(\Omega)$ とし、$f\in L^{2}(\Omega)$、$u\in H^{1}(\Omega)$ を $\Omega$ における $Lu=f$ の弱解とする。
+1. $u\in H_{\mathrm{loc}}^{2}(\Omega)$ で、各 $V\Subset\Omega$ について、$u,f$ によらない定数 $C$（$n,\theta,\Lambda,M_{1},b_{\infty},c_{\infty}$ と $V,\Omega$ で決まる）があって
+$$
+\|u\|_{H^{2}(V)}\le C\bigl(\|f\|_{2}+\|u\|_{2}\bigr).
+$$
+2. $\Omega$ の a.e. の点で
+$$
+-\sum_{i,j}a^{ij}\partial_{i}\partial_{j}u-\sum_{i,j}(\partial_{j}a^{ij})\partial_{i}u+\sum_{i}b^{i}\partial_{i}u+cu=f.
+$$
+:::
+
+::: intuition
+主要部の係数が 1 回連続微分可能で右辺が 2 乗可積分なら、弱解は内側で 2 回（弱い意味で）微分でき、2 階導関数も 2 乗可積分になる。その大きさは右辺と解そのものの大きさで押さえられ、方程式はほとんどすべての点で文字どおりに成り立つ。
+:::
+
+::: proof
+$d\defeq\operatorname{dist}(V,\mathbb{R}^{n}\setminus\Omega)$ とし、$0<s<1$ について $W_{s}\defeq\{x:\operatorname{dist}(x,V)<sd\}$ とおく。$V\subset W_{s}\subset W_{s'}$（$s<s'$）で、$\overline{W_{s}}\subset\Omega$。$\zeta\in C_{c}^{\infty}(W_{1/4})$ を、$0\le\zeta\le1$ で $\overline{V}$ の近傍で $1$ となるものとする（\ref{fa:test-function-density.2}）。$h_{0}\defeq\frac{d}{8}$、$U\defeq W_{3/4}$ とおく。
+
+**Step 1.** 【主張：$U$, $V_{\mathrm{L}}\defeq W_{1/2}$, $\zeta$, 各 $k$, $h_{0}$ について \ref{pde:reg-difference-energy} の状況が成り立ち、2 の仮定の等式が $F\defeq f-\sum b^{i}\partial_{i}u-cu$ で成り立つ】$W_{1/2}+te_{k}\subset W_{5/8}\subset U$、$S+[-h_{0},h_{0}]e_{k}\subset W_{3/8}\subset W_{1/2}$（$|t|\le h_{0}$）。$a^{ij}$ の条件は $\overline{\Omega}$ での仮定から。$v_{h}\in H^{1}(U)$（\ref{pde:reg-difference-energy.1}）は $U$ のコンパクト集合 $S_{1}$ の外で $0$ なので、\ref{pde:reg-localization.2} から $H_{0}^{1}(U)$ に入る。$u|_{U}$ は $U$ における弱解なので、定義の後の注意から $B_{U}[u,v_{h}]=(f,v_{h})_{U}$（$B_{U}$ は $U$ の上の積分）。1 階・0 階の項を右辺に移せばよい。$\|F\|_{L^{2}(U)}\le\|f\|_{2}+b_{\infty}\|\nabla u\|_{L^{2}(U)}+c_{\infty}\|u\|_{2}$。
+
+**Step 2.** 【主張：$\|\nabla u\|_{L^{2}(U)}\le C(\|f\|_{2}+\|u\|_{2})$】$\zeta'\in C_{c}^{\infty}(W_{7/8})$ を $\overline{U}$ の近傍で $1$、$0\le\zeta'\le1$ となるものとし、\ref{pde:reg-caccioppoli} を使う。
+
+**Step 3.** 【主張：$V$ の上で $\|D_{k}^{h}\partial_{l}u\|_{L^{2}(V)}\le C(\|f\|_{2}+\|u\|_{2})$（$0<|h|\le h_{0}$、すべての $k,l$）】\ref{pde:reg-difference-energy.2} と Step 1・2 から $\int_{U}\zeta^{2}|D_{k}^{h}\nabla u|^{2}\le C(\|f\|_{2}^{2}+\|u\|_{2}^{2})$。$V$ の上では $\zeta=1$。
+
+**Step 4（1）.** 【主張：$\partial_{k}\partial_{l}u\in L^{2}(V)$ で、そのノルムは $C(\|f\|_{2}+\|u\|_{2})$ 以下】$|t|\le h_{0}$ で $V+te_{k}\subset\Omega$ なので、\ref{pde:reg-difference-lemma.2} を $\partial_{l}u\in L^{2}(\Omega)$ に使う。$\|u\|_{H^{1}(V)}$ は Step 2 で押さえてある。
+
+**Step 5（2）.** 【主張：$\Omega$ で a.e. に方程式が成り立つ】$\varphi\in C_{c}^{\infty}(\Omega)$ をとり、$\operatorname{supp}\varphi\subset V'\Subset\Omega$ とする。1 から $\partial_{i}u\in H^{1}(V')$ で、\ref{pde:reg-c1-product.1} から $\partial_{j}(a^{ij}\partial_{i}u)=(\partial_{j}a^{ij})\partial_{i}u+a^{ij}\partial_{j}\partial_{i}u$。弱微分の定義から $\int a^{ij}\partial_{i}u\,\partial_{j}\varphi=-\int\partial_{j}(a^{ij}\partial_{i}u)\varphi$ なので、$B[u,\varphi]=(f,\varphi)$ は $\int(\tilde Lu-f)\varphi=0$ と書ける（$\tilde Lu$ は 2 の左辺で、$L_{\mathrm{loc}}^{2}$ に入る）。\ref{fa:fundamental-lemma} から $\tilde Lu=f$（a.e.）。
+
+::: hypcheck
+- **$a^{ij}\in C^{1}(\overline{\Omega})$**：Step 3 で \ref{pde:reg-difference-energy} の $M_{1}$ を通して、また Step 5 の積の微分に使った。実際に要るのは $\Omega$ の上で $a^{ij}$ がリプシッツ連続なことだけで、1 の結論はそれで成り立つ（\ref{pde:reg-difference-energy} の hypcheck）。不連続な係数では偽（\see{pde:reg-discontinuous-coefficient}）、連続なだけでも偽（\see{pde:prob-rgc-continuous-coefficient}）。
+- **一様楕円性**：Step 3（\ref{pde:reg-difference-energy} の主要項）と Step 2（\ref{pde:reg-caccioppoli}）で使った。
+- **$b^{i},c\in L^{\infty}$**：Step 1 の $F\in L^{2}$ と Step 2 だけに使った。微分可能性は要らない。
+- **$f\in L^{2}$**：Step 1 で $F\in L^{2}$ を得るのに使った。$f\in H^{-1}$ だけでは $u\in H^{2}$ にならない（$u$ が $H^{2}$ なら $Lu\in L^{2}$ なので）。
+- **境界条件・境界の正則性**：使っていない。$u\in H^{1}(\Omega)$ でありさえすればよく、そのため評価は $\Omega$ の内側の $V$ でしか得られない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 定数 $C$ は $\operatorname{dist}(V,\partial\Omega)$ が小さくなると大きくなり、一般には $V$ を $\Omega$ 全体にできない：境界の近くの評価には境界条件と境界の滑らかさが要る（次のページ）。また右辺に $\|u\|_{2}$ が必要なのは、$Lu=0$ が $0$ でない解をもちうるからで、たとえば $-\Delta u=0$ の解 $u=x_{1}$ では $\|u\|_{H^{2}(V)}>0$ だが $f=0$ である。
+
+**似た定理.** 閉多様体の上の楕円型作用素についても、局所正則性は差分商で示された（\ref{gl:local-regularity-torus}）。そこでは係数を凍結した評価（\ref{gl:local-elliptic-estimate}）を使って任意の階数の作用素を扱い、ここでは発散形の 2 階作用素に限るかわりに、楕円性をそのまま試験関数に効かせた。古典的手法では、熱方程式の古典解が内部で $C^{\infty}$ になること（\ref{pde:heat-interior-regularity}）を、熱核による表示で示した。そこでは「解はもともと $C^{2,1}$」と仮定しており、弱解から出発するここでの結果とは出発点が違う。
+
+**高い視点：差分商は「微分をこっそり試す」.** 微分そのものを試験関数に入れると、まだ存在するかわからない $\partial_{k}u$ を使うことになる。差分商は平行移動と引き算でできているので、いつでも試験関数として使え、得られた評価が刻み幅 $h$ によらなければ、極限で微分が存在することまでわかる（\ref{pde:reg-difference-lemma.2}）。比喩で言えば、橋の強度を知りたいときに、橋をいきなり限界まで揺らす（微分を入れる）のではなく、少しずつずらした荷重（差分）をかけて応答を測り、その応答がずらし幅によらず一定以下なら、橋はなめらかにたわむとわかる、という手順である。
+:::
+
+## 高階の正則性 {#pde:sec-rg-higher}
+
+方程式を 1 回微分すると、導関数がまた同じ形の方程式を満たす。これを繰り返して、内部正則性を高階に上げる。
+
+::: theorem 内部の高階正則性 {#pde:reg-interior-higher keywords="higher interior regularity: if a^{ij}, b^i, c in C^{m+1}(closure of Omega) and f in H^m(Omega), every weak solution u in H^1(Omega) of L u = f lies in H^{m+2}_loc(Omega) with ||u||_{H^{m+2}(V)} <= C(||f||_{H^m} + ||u||_2)" index="高階の内部正則性|こうかいのないぶせいそくせい"}
+$m\ge0$ を整数とし、$L$ を一様楕円型、$a^{ij},b^{i},c\in C^{m+1}(\overline{\Omega})$、$f\in H^{m}(\Omega)$、$u\in H^{1}(\Omega)$ を $\Omega$ における $Lu=f$ の弱解とする。このとき $u\in H_{\mathrm{loc}}^{m+2}(\Omega)$ で、各 $V\Subset\Omega$ について $u,f$ によらない $C$ があって
+$$
+\|u\|_{H^{m+2}(V)}\le C\bigl(\|f\|_{H^{m}(\Omega)}+\|u\|_{2}\bigr).
+$$
+:::
+
+::: intuition
+係数と右辺が $m$ 回余分に微分できるなら、弱解も内側で $m$ 回余分に微分できる。楕円型方程式の解は、右辺よりちょうど 2 階だけ滑らかになる。
+:::
+
+::: proof
+$m$ についての帰納法で、主張を「すべての有界開集合 $\Omega$ とすべての $L$, $f$, $u$ について成り立つ」という形で示す。$m=0$ は \ref{pde:reg-interior-h2.1}（$b^{i},c\in C^{1}(\overline{\Omega})$ は有界）。$m\ge1$ とし、$m-1$ では正しいとする。$V\Subset\Omega$ をとり、$V\Subset W\Subset\Omega$ となる開集合 $W$ を選ぶ（たとえば $W=\{x:\operatorname{dist}(x,V)<\frac12\operatorname{dist}(V,\mathbb{R}^{n}\setminus\Omega)\}$）。
+
+**Step 1.** 【主張：$u\in H^{m+1}(W)$ で $\|u\|_{H^{m+1}(W)}\le C(\|f\|_{H^{m}}+\|u\|_{2})$】係数は $C^{m}(\overline{\Omega})$、$f\in H^{m-1}(\Omega)$ でもあるので、帰納法の仮定（$m-1$）を $W\Subset\Omega$ に使う。とくに $m\ge1$ から $u\in H^{2}(W)$。
+
+**Step 2.** 【主張：$k$ を固定し $w\defeq\partial_{k}u\in H^{1}(W)$ とおくと、$w$ は $W$ における $Lw=\tilde f$ の弱解で、$\tilde f\defeq\partial_{k}f+\sum_{i,j}\partial_{j}\bigl((\partial_{k}a^{ij})\partial_{i}u\bigr)-\sum_{i}(\partial_{k}b^{i})\partial_{i}u-(\partial_{k}c)u$】$v\in C_{c}^{\infty}(W)$ とする。$\partial_{k}v\in C_{c}^{\infty}(\Omega)$ を弱解の定義に入れると、$f\in H^{1}$ から $B[u,\partial_{k}v]=(f,\partial_{k}v)=-(\partial_{k}f,v)$。一方 $a^{ij}\partial_{i}u$, $b^{i}\partial_{i}u$, $cu$ は \ref{pde:reg-c1-product.1} から $W$ で弱微分 $\partial_{k}$ をもち、弱微分の定義と $\partial_{k}\partial_{i}u=\partial_{i}w$ から
+$$
+\begin{aligned}
+B[u,\partial_{k}v]&=-\int\sum_{i,j}\partial_{k}(a^{ij}\partial_{i}u)\,\partial_{j}v-\int\Bigl(\sum_{i}\partial_{k}(b^{i}\partial_{i}u)+\partial_{k}(cu)\Bigr)v\\
+&=-B[w,v]-\int\sum_{i,j}(\partial_{k}a^{ij})\partial_{i}u\,\partial_{j}v-\int\Bigl(\sum_{i}(\partial_{k}b^{i})\partial_{i}u+(\partial_{k}c)u\Bigr)v.
+\end{aligned}
+$$
+$(\partial_{k}a^{ij})\partial_{i}u\in H^{1}(W)$（$\partial_{k}a^{ij}\in C_{b}^{1}$）なので第 2 項は $\int\sum\partial_{j}((\partial_{k}a^{ij})\partial_{i}u)v$ に等しい。二つの式から $B[w,v]=(\tilde f,v)$。
+
+**Step 3.** 【主張：$\tilde f\in H^{m-1}(W)$ で $\|\tilde f\|_{H^{m-1}(W)}\le C(\|f\|_{H^{m}}+\|u\|_{H^{m+1}(W)})$】$\partial_{k}f\in H^{m-1}$。$\partial_{k}a^{ij},\partial_{k}b^{i},\partial_{k}c\in C_{b}^{m}(W)$ と $\partial_{i}u\in H^{m}(W)$, $u\in H^{m+1}(W)$ に \ref{pde:reg-c1-product.3} を使うと、$(\partial_{k}a^{ij})\partial_{i}u\in H^{m}(W)$ なのでその $\partial_{j}$ は $H^{m-1}$、残りの項も $H^{m}\subset H^{m-1}$ に入る。
+
+**Step 4.** 【主張：$\partial_{k}u\in H^{m+1}(V)$ で $\|\partial_{k}u\|_{H^{m+1}(V)}\le C(\|f\|_{H^{m}}+\|u\|_{2})$】$W$ の上で係数は $C^{m}(\overline{W})$、$\tilde f\in H^{m-1}(W)$、$w\in H^{1}(W)$ は $W$ における弱解なので、帰納法の仮定を $V\Subset W$ に使うと $\|w\|_{H^{m+1}(V)}\le C(\|\tilde f\|_{H^{m-1}(W)}+\|w\|_{L^{2}(W)})$。Step 1・3 で右辺を押さえる。
+
+すべての $k$ について Step 4 が成り立つので、\ref{pde:reg-c1-product.2} から $u\in H^{m+2}(V)$ で評価が従う。
+
+::: hypcheck
+- **係数が $C^{m+1}$**：Step 2 で $\partial_{k}a^{ij}\in C^{1}$ を、Step 3 で $\partial_{k}a^{ij},\partial_{k}b^{i},\partial_{k}c\in C^{m}$ を使い、Step 4 で帰納法の仮定（係数 $C^{m}$）を使った。$b^{i},c$ については $C^{m}$ で足りるように証明を組み替えられるが（$m=0$ では有界でよい）、ここでは記述を簡単にした。
+- **$f\in H^{m}$**：Step 2 の $(f,\partial_{k}v)=-(\partial_{k}f,v)$ と Step 3 に使った。
+- **一様楕円性**：帰納法の底（\ref{pde:reg-interior-h2}）を通して使う。
+- **境界の正則性**：使っていない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: corollary 内部での滑らかさ {#pde:reg-interior-smooth keywords="if the coefficients are smooth and bounded and f is smooth, every weak solution u in H^1(Omega) of L u = f is C^infinity in Omega after modification on a null set and solves L u = f classically; Weyl's lemma for -Delta" index="弱解の滑らかさ（楕円型方程式）|じゃくかいのなめらかさだえんがたほうていしき, ワイルの補題|わいるのほだい"}
+$L$ を一様楕円型とし、$a^{ij},b^{i},c$ は $\Omega$ で有界かつ $C^{\infty}(\Omega)$ に入るとする。$f\in L^{2}(\Omega)\cap C^{\infty}(\Omega)$ で、$u\in H^{1}(\Omega)$ が $\Omega$ における $Lu=f$ の弱解なら、$u$ は零集合の上で値を修正すると $C^{\infty}(\Omega)$ に入り、$\Omega$ の各点で $Lu=f$（\ref{pde:reg-interior-h2.2} の形）を満たす。
+:::
+
+::: intuition
+係数と右辺が滑らかなら、弱解は実は内側で何回でも微分できる普通の解である。
+:::
+
+::: proof
+**Step 1.** 【主張：$V\Subset\Omega$ とすべての $m$ について $u\in H^{m}(V)$】$V\Subset W\Subset\Omega$ をとる。$\overline{W}$ は $\Omega$ のコンパクト集合なので、係数は $C^{m+1}(\overline{W})$ に、$f$ は $H^{m}(W)$ に入る（導関数が $\overline{W}$ で有界）。$u|_{W}$ は $W$ における弱解なので、\ref{pde:reg-interior-higher} から $u\in H^{m+2}(V)$。
+
+**Step 2.** 【主張：$V'\Subset V\Subset\Omega$ について、$u$ は $V'$ の上で a.e. に $C^{\infty}$ 関数と一致する】$\zeta\in C_{c}^{\infty}(V)$ を $\overline{V'}$ の近傍で $1$ とする。\ref{pde:reg-c1-product.3} と \ref{pde:reg-localization.2} から、$\zeta u$ を $V$ の外で $0$ と延ばしたもの $g$ はすべての $k$ で $H^{k}(\mathbb{R}^{n})$ に入り、台は有界。$n$ が奇数なら $p\defeq2$、偶数なら $p\defeq\frac{2n}{n+1}\in[1,2)$ とおくと、$\frac{n}{p}$ は整数でない。台が有界なのでヘルダーの不等式から $g\in W^{k,p}(\mathbb{R}^{n})$（各 $\partial^{\alpha}g$ について $\|\partial^{\alpha}g\|_{p}\le|\operatorname{supp}g|^{\frac1p-\frac12}\|\partial^{\alpha}g\|_{2}$）。\ref{fa:higher-embeddings.2} から $g$ は $C^{k-\lfloor n/p\rfloor-1}$ 級の代表元をもつ。異なる $k$ の代表元は連続で a.e. に一致するので一致し、$C^{\infty}$ 級の代表元 $\tilde g$ がある。$V'$ の上で $u=g=\tilde g$（a.e.）。
+
+**Step 3.** 【主張：結論】$\Omega$ は $V'\Subset\Omega$ の形の開集合の和で、それぞれの上の $C^{\infty}$ の代表元は重なりで（連続で a.e. に一致するので）一致するから、$\Omega$ 上の $C^{\infty}$ 関数 $\tilde u$ で $u=\tilde u$（a.e.）となるものがある。$C^{1}$ 関数の古典的な導関数は弱微分なので、\ref{pde:reg-interior-h2.2} の等式は $\tilde u$ の古典的な導関数について a.e. で成り立ち、両辺が連続なので各点で成り立つ。
+
+::: hypcheck
+- **係数と $f$ の滑らかさ**：Step 1 で、すべての $m$ について \ref{pde:reg-interior-higher} の仮定を満たすために使った。$\Omega$ の内側だけで滑らかならよく、境界まで滑らかである必要はない。
+- **係数の有界性**：弱解の定義（$B$ が意味をもつこと）のためだけに使った。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: example
+**ワイルの補題.** $L=-\Delta$, $f=0$ とする。$u\in H^{1}(\Omega)$ が $\int\nabla u\cdot\nabla v=0$（$v\in C_{c}^{\infty}(\Omega)$）を満たせば、$u$ は（修正して）$C^{\infty}$ で $\Delta u=0$、つまり調和関数（\ref{pde:harmonic-function}）である。調和関数の平均値の性質の逆（\ref{pde:mean-value-converse}）が「連続で平均値の性質をもつ関数は調和」と言ったのと同じく、ここでは「弱い意味で調和なら本当に調和」と言っている。どちらも、調和性という条件が関数に滑らかさを強いることを示している。
+:::
+
+::: supplement
+**前提を変えると.** 解析的な係数なら解は実解析的になる（\see{pde:harmonic-analytic} はラプラシアンの場合）が、これは差分商の方法では出ない。また、正則性は局所的な性質なので、係数と $f$ がある開集合 $U\subset\Omega$ で滑らかなら、$u$ は $U$ で滑らかになる（証明は Step 1 をそのまま $U$ の中で行えばよい）。
+
+**似た定理.** 閉多様体では \ref{gl:elliptic-smooth} が同じ結論で、そこでは多様体全体でソボレフ空間の階数を上げ、最後にソボレフの埋め込みで滑らかさに移った。ヘルダー空間での内部評価（シャウダーの内部評価：$a^{ij},b^{i},c,f\in C^{\alpha}$ なら $C^{2}$ 解は $C^{2,\alpha}$ で、ヘルダーノルムの評価がつく）も同じ「右辺より 2 階滑らか」という形をしている（Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 6 章。このサイトでは証明しない）。ポアソン方程式の場合は \ref{pde:newton-holder} がその出発点にあたる。
+
+**高い視点：2 階分の得.** $L$ は 2 階の作用素なので、$u\in H^{m+2}$ なら $Lu\in H^{m}$ であるのは当たり前で、内部正則性はその逆、つまり「$Lu$ が $H^{m}$ なら $u$ は（内側で）$H^{m+2}$」を言う。楕円型作用素は微分の階数をちょうど 2 だけ下げ、それ以上の滑らかさを奪わない。比喩で言えば、楕円型作用素はどの方向にも均等に効くレンズで、像（$Lu$）がぼやけていなければ、元の物体（$u$）もそのぶんだけはっきりしている。波動方程式のような双曲型の作用素では、特定の方向（特性方向）にだけレンズが効かず、そこを伝わる特異性は消えない（\see{pde:wave-no-smoothing}）。
+:::
+
+## 問題 {#pde:sec-rg-problems}
+
+::: problem {#pde:prob-rg-heaviside}
+$\Omega=(-1,1)$, $V=(-\frac12,\frac12)$ とする。
+1. $u=1_{(0,1)}$ について、$0<h<\frac12$ なら $\|D_{1}^{h}u\|_{L^{2}(V)}^{2}=\frac1h$ であることを示し、\ref{pde:reg-h1-characterization} を使って $u\notin H^{1}(\Omega)$ を確かめよ。
+2. $u(x)=|x|$ について、すべての $V'\Subset\Omega$ と $0<|h|<\operatorname{dist}(V',\mathbb{R}\setminus\Omega)$ で $\|D_{1}^{h}u\|_{L^{2}(V')}\le\sqrt2$ を示し、$\|u'\|_{2}=\sqrt2$ と比べよ。
+:::
+
+::: solution
+**1.** $x\in V$ について $D_{1}^{h}u(x)=\frac{u(x+h)-u(x)}{h}$ は、$-h<x\le0$ なら $\frac1h$、それ以外（$x>0$ では両方 $1$、$x\le-h$ では両方 $0$）なら $0$。よって $\|D_{1}^{h}u\|_{L^{2}(V)}^{2}=h\cdot\frac{1}{h^{2}}=\frac1h$。$h\to0$ で有界でないので、\ref{pde:reg-h1-characterization} の 2 を満たす $C$ はなく、$u$ は $L^{2}$ の弱微分をもたない。
+
+**2.** $\bigl||x+h|-|x|\bigr|\le|h|$ から $|D_{1}^{h}u|\le1$、よって $\|D_{1}^{h}u\|_{L^{2}(V')}^{2}\le|V'|\le2$。一方 $u'=\operatorname{sgn}x$（a.e.）で $\|u'\|_{2}^{2}=2$。\ref{pde:reg-h1-characterization} の最良の定数が $\|u'\|_{2}$ であることと整合する（$V'$ を $\Omega$ に近づけ $h\to0$ とすると $\|D_{1}^{h}u\|_{L^{2}(V')}^{2}\to2$）。
+:::
+
+::: problem {#pde:prob-rg-scaling}
+$u\in H^{1}(B(0,2r))$（$r>0$）が $B(0,2r)$ における $-\Delta u=0$ の弱解であるとする。
+1. $v(x)\defeq u(rx)$ は $B(0,2)$ における $-\Delta v=0$ の弱解であることを示せ。
+2. $r$ によらない定数 $C$（$n$ だけで決まる）があって $\int_{B(0,r)}\sum_{i,j}(\partial_{i}\partial_{j}u)^{2}dx\le\frac{C}{r^{4}}\int_{B(0,2r)}u^{2}dx$ となることを示せ。
+:::
+
+::: solution
+**1.** \ref{fa:sobolev-chain-rule}（$\Phi(x)=rx$）から $v\in H^{1}(B(0,2))$ で $\nabla v(x)=r(\nabla u)(rx)$。$\varphi\in C_{c}^{\infty}(B(0,2))$ について $\psi(y)\defeq\varphi(y/r)\in C_{c}^{\infty}(B(0,2r))$ で $\nabla\varphi(x)=r(\nabla\psi)(rx)$。変数変換 $y=rx$（\ref{meas:change-of-variables}）から $\int\nabla v\cdot\nabla\varphi\,dx=r^{2-n}\int\nabla u\cdot\nabla\psi\,dy=0$。
+
+**2.** \ref{pde:reg-interior-h2.1} を $\Omega=B(0,2)$, $V=B(0,1)$, $L=-\Delta$, $f=0$ に使うと、$C$ は $n$ だけで決まり $\|v\|_{H^{2}(B(0,1))}\le C\|v\|_{L^{2}(B(0,2))}$。\ref{pde:reg-interior-smooth} から $u$, $v$ は $C^{\infty}$ で $\partial_{i}\partial_{j}v(x)=r^{2}(\partial_{i}\partial_{j}u)(rx)$ なので、変数変換から $\int_{B(0,1)}\sum(\partial_{i}\partial_{j}v)^{2}=r^{4-n}\int_{B(0,r)}\sum(\partial_{i}\partial_{j}u)^{2}$、$\int_{B(0,2)}v^{2}=r^{-n}\int_{B(0,2r)}u^{2}$。代入すると $r^{4-n}\int_{B(0,r)}\sum(\partial_{i}\partial_{j}u)^{2}\le C^{2}r^{-n}\int_{B(0,2r)}u^{2}$。\ref{pde:derivative-estimates}と同じく、半径 $r$ の球で 2 階導関数は $r^{-2}$ 倍の大きさで押さえられる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

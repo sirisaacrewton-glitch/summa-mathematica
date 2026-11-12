@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>弱最大値原理と固有値問題 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/05-maximum-eigen.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 弱最大値原理と固有値問題 {#pde:page-maximum-eigen keywords="weak maximum principle for weak solutions, positive part u^+ in H^1, truncation, Stampacchia, boundary inequality in the weak sense, comparison principle, uniqueness for c >= 0, Rayleigh quotient, variational characterization of eigenvalues, maximum principle below the first eigenvalue, 弱最大値原理, 切り落とし, 打ち切り, 比較原理, レイリー商, 劣解"}
+
+古典的手法の系列では、最大値原理を $C^{2}$ 級の調和関数について、平均値の性質を使って示した（\tref{pde:weak-maximum-principle}）。前のページ（\ref{pde:page-weak-elliptic}）で作った弱解は $H^{1}$ に入るだけで、各点の値も 2 階の導関数ももたないので、その証明はそのままでは使えない。このページでは、関数を「ある水位より上の部分」で切り落とす操作 $u\mapsto(u-k)^{+}$ が $H^{1}$ の中で閉じていることを示し、それを試験関数に入れることで、有界可測な係数をもつ発散形の作用素についての弱最大値原理を証明する。その帰結として、前のページで残した主張 —— 1 階の項 $b$ があっても $c\ge0$ なら $Lu=f$ の弱解はただ一つ存在する —— を示す。
+
+後半では固有値問題に移り、対称な作用素の固有値を**レイリー商**の最小値として特徴づける。弱最大値原理とは逆に、ここでは $c$ が負でもよい。その応用として、$c$ が負でも最小固有値より上なら最大値原理が生き残ることを問題で確かめる。ミニマックス原理、領域を広げると固有値が下がること、最小固有値の単純性と固有関数の正値性、具体的な領域の固有値は、次のページ（\see{pde:page-principal-eigen}）で扱う。
+
+## 記法と定義の確認 {#pde:sec-me-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$（$n\ge1$）は**有界な開集合**で、境界の正則性は仮定しない。関数はすべて実数値。$|A|$ は可測集合 $A$ のルベーグ測度。
+- $H^{1}(\Omega)$, $H_{0}^{1}(\Omega)$ は \ref{fa:sobolev-space}, \ref{fa:c1-boundary.1}。$\Omega$ は有界なので定数関数は $H^{1}(\Omega)$ に入り、弱勾配は $0$。$(u,v)=\int_{\Omega}uv$, $\|u\|_{2}$ は $L^{2}$ の内積とノルム。
+- ポアンカレの不等式 $\|u\|_{2}\le C_{P}\|\nabla u\|_{2}$（$u\in H_{0}^{1}$）は \ref{fa:poincare-inequality}。とくに $u\in H_{0}^{1}$ で $\nabla u=0$ なら $u=0$。
+- 軟化子 $\rho_{\varepsilon}$ と軟化 $\rho_{\varepsilon}*u$ は \ref{fa:mollifier}、その性質は \ref{fa:mollification}, \ref{fa:mollification-sobolev}。$\Omega_{\varepsilon}\defeq\{x\in\Omega:\operatorname{dist}(x,\mathbb{R}^{n}\setminus\Omega)>\varepsilon\}$。
+- 作用素 $L$、一様楕円性の定数 $\theta$、係数の上界 $\Lambda,b_{\infty},c_{\infty},c_{-}$、双線形形式 $B[u,v]$（$u,v\in H^{1}(\Omega)$ で定義される）は \ref{pde:bilinear-elliptic-form}。弱解は \ref{pde:weak-elliptic-solution}、エネルギー評価の定数 $\beta,\gamma$ は \ref{pde:bilinear-energy-estimates}、フレドホルムの二者択一は \ref{pde:weak-fredholm-alternative}、実固有値の集合 $\Sigma$ と固有空間 $N_{\lambda}$ は \ref{pde:weak-elliptic-spectrum}。$\lambda\in\mathbb{R}$ について、$u\in H_{0}^{1}\setminus\{0\}$ が $B[u,v]=\lambda(u,v)$（すべての $v\in H_{0}^{1}$）を満たすとき、$u$ を固有値 $\lambda$ の**弱い固有関数**という。
+- 対称な作用素の固有関数の正規直交基底 $(e_{k})$ と固有値 $\lambda_{1}\le\lambda_{2}\le\cdots\to\infty$ は \ref{pde:weak-symmetric-eigen}、ディリクレ・ラプラシアンの場合は \ref{fa:dirichlet-eigenfunctions}。
+- $t^{+}\defeq\max(t,0)$, $t^{-}\defeq\max(-t,0)$（$t=t^{+}-t^{-}$, $|t|=t^{+}+t^{-}$）。関数 $u$ についても各点でとる。$\mathbf{1}_{A}$ は集合 $A$ の定義関数で、$\{u>k\}\defeq\{x\in\Omega:u(x)>k\}$。$u$ とその弱勾配 $\nabla u$ の代表を一つずつ固定して集合を定める（代表を替えても集合は零集合の差しか変わらない）。
+- $\operatorname*{ess\,sup}_{\Omega}u\defeq\inf\{k\in\mathbb{R}:\text{a.e. で }u\le k\}$（空集合の下限は $+\infty$）。
+- 測度論：リース–フィッシャーの定理（$L^{2}$ で収束する列は a.e. で収束する部分列をもつ）\ref{meas:riesz-fischer}、優収束定理 \ref{meas:dominated-convergence}、測度の上からの連続性 \ref{meas:measure-properties.5}。
+- **選択公理**：第 1・2 節（切り落とし、境界での不等式）は使わない（部分列は「誤差が $2^{-j}$ 未満になる最小の番号」と明示的に選べる）。第 3 節の弱最大値原理は、$b\ne0$ の場合にレリッヒ–コンドラショフの定理（\ref{fa:rellich-kondrachov.3}）でコンパクト性から部分列を取り出すので、その証明が使う選択公理（従属選択公理）に依存する。第 4 節の存在の部分はフレドホルムの二者択一を通して、第 5 節は固有関数の基底（\ref{pde:weak-symmetric-eigen}）を通して、前のページと同じく従属選択公理と可算選択公理に依存する。
+:::
+
+## H¹ の切り落とし {#pde:sec-me-truncation}
+
+最大値原理の証明の鍵は、$u$ が $k$ を超える部分 $(u-k)^{+}$ を試験関数にすることである。そのためには、この「切り落とし」が $H^{1}$ を保ち、勾配が $\mathbf{1}_{\{u>k\}}\nabla u$ になることが要る。関数解析の系列の \ref{fa:sobolev-chain-rule} は $C^{1}$ 微分同相による変数変換で、値の側の合成（$G\circ u$）は扱っていないので、ここで示す。
+
+::: lemma 滑らかな関数との合成 {#pde:wmp-chain-rule keywords="chain rule in H^1: if G in C^1(R) has bounded derivative and u in H^1(Omega) on a bounded open set, then G(u) in H^1 and grad G(u) = G'(u) grad u" index="連鎖律（ソボレフ関数）|れんさりつそぼれふかんすう"}
+$G\in C^{1}(\mathbb{R})$ で $M\defeq\sup_{t}|G'(t)|<\infty$ とする。$u\in H^{1}(\Omega)$ なら $G(u)\in H^{1}(\Omega)$ で、$\nabla G(u)=G'(u)\nabla u$。
+:::
+
+::: proof
+$|G(t)|\le|G(0)|+M|t|$ で $\Omega$ は有界なので $G(u)\in L^{2}$、また $|G'(u)\partial_{i}u|\le M|\partial_{i}u|$ なので $G'(u)\partial_{i}u\in L^{2}$。示すべきは、$\varphi\in C_{c}^{\infty}(\Omega)$ について
+$$
+\int_{\Omega}G(u)\,\partial_{i}\varphi\,dx=-\int_{\Omega}G'(u)\,\partial_{i}u\,\varphi\,dx
+$$
+である。$K\defeq\operatorname{supp}\varphi$ とし、$\varepsilon<\operatorname{dist}(K,\mathbb{R}^{n}\setminus\Omega)$ について $u_{\varepsilon}\defeq\rho_{\varepsilon}*u$ とおく。
+
+**Step 1.** 【主張：$\int G(u_{\varepsilon})\partial_{i}\varphi=-\int G'(u_{\varepsilon})\,\partial_{i}u_{\varepsilon}\,\varphi$】\ref{fa:mollification.1} から $u_{\varepsilon}\in C^{\infty}(\Omega_{\varepsilon})$ で、$K\subset\Omega_{\varepsilon}$。$G(u_{\varepsilon})$ は $\Omega_{\varepsilon}$ で $C^{1}$ 級で、古典的な連鎖律から $\partial_{i}G(u_{\varepsilon})=G'(u_{\varepsilon})\partial_{i}u_{\varepsilon}$。$\varphi$ の台は $K$ なので、$C^{1}$ 関数と $C_{c}^{1}$ 関数の積に部分積分（$x_{i}$ についての微積分学の基本定理とフビニ）を使えばよい。
+
+**Step 2.** 【主張：$\varepsilon_{m}\to0$ のある列で、$G(u_{\varepsilon_{m}})\to G(u)$ が $L^{2}(K)$ で、$G'(u_{\varepsilon_{m}})\partial_{i}u_{\varepsilon_{m}}\to G'(u)\partial_{i}u$ が $L^{1}(K)$ で成り立つ】\ref{fa:mollification-sobolev.2} から $u_{\varepsilon}\to u$, $\partial_{i}u_{\varepsilon}\to\partial_{i}u$（$L^{2}(K)$）。\ref{meas:riesz-fischer} から、$K$ の上で a.e. に $u_{\varepsilon_{m}}\to u$ となる列をとる。前半は $|G(u_{\varepsilon_{m}})-G(u)|\le M|u_{\varepsilon_{m}}-u|$ から。後半は
+$$
+G'(u_{\varepsilon_{m}})\partial_{i}u_{\varepsilon_{m}}-G'(u)\partial_{i}u=G'(u_{\varepsilon_{m}})(\partial_{i}u_{\varepsilon_{m}}-\partial_{i}u)+\bigl(G'(u_{\varepsilon_{m}})-G'(u)\bigr)\partial_{i}u
+$$
+と分ける。第 1 項の $L^{2}(K)$ ノルムは $M\|\partial_{i}u_{\varepsilon_{m}}-\partial_{i}u\|_{L^{2}(K)}\to0$（$K$ は有界なので $L^{1}(K)$ でも $0$ へ）。第 2 項は $G'$ の連続性から a.e. で $0$ に収束し、$2M|\partial_{i}u|\in L^{1}(K)$ で押さえられるので、\ref{meas:dominated-convergence} から $L^{1}(K)$ で $0$ に収束する。
+
+Step 1 の等式で $\varepsilon=\varepsilon_{m}\to0$ とすると（$\varphi,\partial_{i}\varphi$ は有界）、示すべき等式を得る。
+
+::: hypcheck
+- **$G'$ の有界性**：$G(u),G'(u)\nabla u\in L^{2}$ と Step 2 の評価に使った。外すと偽：$n=3$, $\Omega=B(0,1)$, $u(x)=|x|^{-1/4}$ とすると、$|\nabla u|=\frac14|x|^{-5/4}$ で $\int_{B}|\nabla u|^{2}=\frac{4\pi}{16}\int_{0}^{1}r^{-5/2}r^{2}dr<\infty$ なので $u\in H^{1}$（$u\in C^{\infty}(\Omega\setminus\{0\})$ で、原点の除去は \ref{pde:weak-elliptic-existence} の補足と同じ切り取りの議論でできる）。$G(t)=t^{2}$ なら $G(u)=|x|^{-1/2}$ で $|\nabla G(u)|^{2}=\frac14|x|^{-3}$、$\int_{0}^{1}r^{-3}r^{2}dr=\infty$ なので $G(u)\notin H^{1}$。
+- **$\Omega$ の有界性**：$G(0)\ne0$ のとき $G(u)\in L^{2}$ を言うのに使った。$G(0)=0$ なら不要。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: proposition 正の部分と切り落とし {#pde:wmp-positive-part keywords="u^+ = max(u,0) belongs to H^1 with grad u^+ = 1_{u>0} grad u; grad u = 0 a.e. on level sets; (u-k)^+ in H^1; continuity of truncation along subsequences" index="正の部分（ソボレフ関数）|せいのぶぶんそぼれふかんすう, 切り落とし|きりおとし, 打ち切り|うちきり"}
+$u\in H^{1}(\Omega)$, $k\in\mathbb{R}$ とする。
+1. $u^{+}\in H^{1}(\Omega)$ で $\nabla u^{+}=\mathbf{1}_{\{u>0\}}\nabla u$。同様に $u^{-}\in H^{1}$ で $\nabla u^{-}=-\mathbf{1}_{\{u<0\}}\nabla u$、$|u|\in H^{1}$ で $|\nabla|u||=|\nabla u|$（a.e.）。
+2. a.e. の $x\in\{u=k\}$ で $\nabla u(x)=0$。
+3. $(u-k)^{+}\in H^{1}$ で $\nabla(u-k)^{+}=\mathbf{1}_{\{u>k\}}\nabla u$。とくに $\|(u-k)^{+}\|_{H^{1}}\le\|u-k\|_{H^{1}}$。
+4. $u_{m}\to u$（$H^{1}$）なら、ある部分列で $(u_{m}-k)^{+}\to(u-k)^{+}$（$H^{1}$）。
+5. $k_{m}\downarrow k$ なら $(u-k_{m})^{+}\to(u-k)^{+}$（$H^{1}$）。
+:::
+
+::: intuition
+$u$ の $0$ より上の部分だけを残すと、勾配は「残った場所ではもとのまま、消した場所では $0$」になる。折れ目ができても $H^{1}$ からははみ出さない。
+:::
+
+::: proof
+**Step 1.** 【主張：1 の $u^{+}$ についての部分】$\varepsilon>0$ について $F_{\varepsilon}(t)\defeq\sqrt{t^{2}+\varepsilon^{2}}-\varepsilon$（$t>0$）、$F_{\varepsilon}(t)\defeq0$（$t\le0$）とおく。$t>0$ で $F_{\varepsilon}'(t)=t/\sqrt{t^{2}+\varepsilon^{2}}$ は $t\downarrow0$ で $0$ に近づくので $F_{\varepsilon}\in C^{1}(\mathbb{R})$、$|F_{\varepsilon}'|\le1$。\ref{pde:wmp-chain-rule} から、$\varphi\in C_{c}^{\infty}(\Omega)$ について $\int F_{\varepsilon}(u)\partial_{i}\varphi=-\int F_{\varepsilon}'(u)\partial_{i}u\,\varphi$。$t>0$ で $t-\varepsilon\le F_{\varepsilon}(t)\le t$ なので $|F_{\varepsilon}(t)-t^{+}|\le\varepsilon$ で、$F_{\varepsilon}'(t)\to\mathbf{1}_{\{t>0\}}$（各点）、$|F_{\varepsilon}'(u)\partial_{i}u\,\varphi|\le|\partial_{i}u||\varphi|$。$\varepsilon\to0$ として優収束定理を使えば $\int u^{+}\partial_{i}\varphi=-\int\mathbf{1}_{\{u>0\}}\partial_{i}u\,\varphi$。$|u^{+}|\le|u|$ なので $u^{+}\in H^{1}$。
+
+**Step 2.** 【主張：1 の残りと 2】$u^{-}=(-u)^{+}$ に Step 1 を使うと $\nabla u^{-}=\mathbf{1}_{\{-u>0\}}\nabla(-u)=-\mathbf{1}_{\{u<0\}}\nabla u$。$|u|=u^{+}+u^{-}$ から $\nabla|u|=(\mathbf{1}_{\{u>0\}}-\mathbf{1}_{\{u<0\}})\nabla u$ で、$|\nabla|u||\le|\nabla u|$。一方 $u=u^{+}-u^{-}$ から
+$$
+\nabla u=\nabla u^{+}-\nabla u^{-}=\mathbf{1}_{\{u\ne0\}}\nabla u\quad\text{（a.e.）},
+$$
+つまり a.e. の $x\in\{u=0\}$ で $\nabla u(x)=0$。これで $|\nabla|u||=|\nabla u|$ も a.e. で成り立つ。2 は $u-k\in H^{1}$（$\nabla(u-k)=\nabla u$）にこれを使えばよい。
+
+**Step 3.** 【主張：3】$u-k\in H^{1}$ に Step 1 を使う。ノルムの不等式は $|(u-k)^{+}|\le|u-k|$ と $|\nabla(u-k)^{+}|\le|\nabla u|$ から。
+
+**Step 4.** 【主張：4】$|a^{+}-b^{+}|\le|a-b|$ から $\|(u_{m}-k)^{+}-(u-k)^{+}\|_{2}\le\|u_{m}-u\|_{2}\to0$。勾配については、\ref{meas:riesz-fischer} で a.e. に $u_{m}\to u$ となる部分列をとり、
+$$
+\mathbf{1}_{\{u_{m}>k\}}\nabla u_{m}-\mathbf{1}_{\{u>k\}}\nabla u=\mathbf{1}_{\{u_{m}>k\}}(\nabla u_{m}-\nabla u)+(\mathbf{1}_{\{u_{m}>k\}}-\mathbf{1}_{\{u>k\}})\nabla u
+$$
+と分ける。第 1 項の $L^{2}$ ノルムは $\|\nabla u_{m}-\nabla u\|_{2}$ 以下。第 2 項は、$u(x)>k$ の点では十分大きい $m$ で $u_{m}(x)>k$、$u(x)<k$ の点では十分大きい $m$ で $u_{m}(x)<k$ なので $0$ に収束し、$\{u=k\}$ では 2 から a.e. で $\nabla u=0$。よって第 2 項の 2 乗は a.e. で $0$ に収束し、$|\nabla u|^{2}$ で押さえられるので、優収束定理から $L^{2}$ で $0$ に収束する。
+
+**Step 5.** 【主張：5】$|(u-k_{m})^{+}-(u-k)^{+}|\le k_{m}-k$ で $\Omega$ は有界なので $L^{2}$ で収束する。$\{u>k_{m}\}$ は増加して和集合が $\{u>k\}$ なので $\mathbf{1}_{\{u>k_{m}\}}\to\mathbf{1}_{\{u>k\}}$（各点）で、$|(\mathbf{1}_{\{u>k_{m}\}}-\mathbf{1}_{\{u>k\}})\nabla u|^{2}\le|\nabla u|^{2}$ に優収束定理を使う。
+
+::: hypcheck
+- **$u\in H^{1}$**：Step 1 で \ref{pde:wmp-chain-rule} を使うのに要る。$u$ の滑らかさ（$C^{1}$ など）は仮定していない。滑らかな $u$ でも $u^{+}$ は一般に $C^{1}$ ではない（$u(x)=x$ で $u^{+}$ は $0$ で折れる）ので、切り落としは $H^{1}$ という枠の中でしか閉じた操作にならない。
+- **$\Omega$ の有界性**：3 で定数 $k$ を $H^{1}$ の元とみること、5 で $L^{2}$ の収束に使った。$k=0$ の 1・2 は有界性なしで成り立つ。
+- **部分列**：4 で部分列が要る（$u\mapsto u^{+}$ は $H^{1}$ で連続であることが知られているが、ここでは部分列で足りる）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: lemma H₀¹ での切り落とし {#pde:wmp-h10-truncation keywords="if w in H^1_0 and t >= 0 then (w - t)^+ in H^1_0; u in H^1_0 implies u^+, u^-, |u| in H^1_0" index="切り落とし（H01）|きりおとしえいちぜろわん"}
+1. $w\in H_{0}^{1}(\Omega)$, $t\ge0$ なら $(w-t)^{+}\in H_{0}^{1}(\Omega)$。
+2. $u\in H_{0}^{1}(\Omega)$ なら $u^{+},u^{-},|u|\in H_{0}^{1}(\Omega)$。
+:::
+
+::: proof
+1：$\varphi_{m}\in C_{c}^{\infty}(\Omega)$ で $\varphi_{m}\to w$（$H^{1}$）となるものをとる。\ref{pde:wmp-positive-part.3} から $(\varphi_{m}-t)^{+}\in H^{1}$ で、$t\ge0$ なので $\varphi_{m}(x)=0$ の点では $(\varphi_{m}-t)^{+}(x)=0$、つまり台は $\operatorname{supp}\varphi_{m}$（$\Omega$ のコンパクト集合）に含まれる。\ref{fa:mollification-sobolev.3} から $(\varphi_{m}-t)^{+}$ は $C_{c}^{\infty}(\Omega)$ の元の $H^{1}$ 極限なので $H_{0}^{1}$ に入る。\ref{pde:wmp-positive-part.4} から部分列で $(\varphi_{m}-t)^{+}\to(w-t)^{+}$（$H^{1}$）で、$H_{0}^{1}$ は閉じているので $(w-t)^{+}\in H_{0}^{1}$。2：$t=0$ として $u^{+}$、$-u\in H_{0}^{1}$ に使って $u^{-}$、和をとって $|u|$。
+
+::: hypcheck
+- **$t\ge0$**：台が $\varphi_{m}$ の台に収まることに使った。$t<0$ なら $(w-t)^{+}$ は $w=0$ の所で $-t>0$ になり、たとえば $w=0$ で $(0-t)^{+}=-t$ は $0$ でない定数なので $H_{0}^{1}$ に入らない（ポアンカレの不等式から、$H_{0}^{1}$ の定数は $0$ だけ）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## 境界での不等式 {#pde:sec-me-boundary}
+
+$H^{1}$ の関数は境界で値をもたない（境界が滑らかならトレース \see{fa:trace-theorem} があるが、ここでは境界の正則性を仮定しない）。そこで「境界で $u\le k$」を、$H_{0}^{1}$ を使って定める。
+
+::: definition 弱い意味の境界での不等式と劣解 {#pde:wmp-boundary-inequality keywords="u <= k on the boundary in the weak sense: (u - k)^+ in H^1_0; weak boundary supremum sup_{partial Omega} u = inf{k : (u-k)^+ in H^1_0}; weak subsolution L u <= 0: B[u,v] <= 0 for all nonnegative v in H^1_0" index="境界での不等式（弱い意味）|きょうかいでのふとうしきよわいいみ, 弱劣解|じゃくれつかい, 劣解|れつかい"}
+$u\in H^{1}(\Omega)$ とする。
+1. $k\in\mathbb{R}$ について、$(u-k)^{+}\in H_{0}^{1}(\Omega)$ のとき、**弱い意味で $\partial\Omega$ の上で $u\le k$** という。とくに $k=0$ では $u^{+}\in H_{0}^{1}$。
+2. $\sup_{\partial\Omega}u\defeq\inf\{k\in\mathbb{R}:(u-k)^{+}\in H_{0}^{1}(\Omega)\}\in[-\infty,\infty]$ とおき、$\sup_{\partial\Omega}u^{+}\defeq\max(\sup_{\partial\Omega}u,0)$ と書く。
+3. $L$ を \ref{pde:bilinear-elliptic-form} の作用素とする。すべての $v\in H_{0}^{1}(\Omega)$, $v\ge0$（a.e.）について $B[u,v]\le0$ となるとき、**弱い意味で $Lu\le0$**（$u$ は**弱劣解**）という。$B[u,v]\ge0$ なら弱い意味で $Lu\ge0$ という。
+:::
+
+::: intuition
+境界の上で $u$ が $k$ 以下であることを、「$u$ の $k$ より上の部分が、境界で消える関数の空間に入る」ことで言い表す。境界の値を直接見ずに、境界に近づくと消える関数との近さで判定する。
+:::
+
+2 の記号 $\sup_{\partial\Omega}u^{+}$ が、$u^{+}$ に 2 の最初の定義を当てはめた値と一致することは、次の命題の 5 で確かめる。
+
+::: proposition 境界での不等式の性質 {#pde:wmp-boundary-consistency keywords="the set of k with (u-k)^+ in H^1_0 is a closed half line; continuous functions on the closure that are <= k on the boundary satisfy it in the weak sense; H^1_0 functions are <= 0 on the boundary; the converse fails for punctured balls" index="境界での不等式の整合性|きょうかいでのふとうしきのせいごうせい"}
+$u\in H^{1}(\Omega)$ とする。
+1. $K_{u}\defeq\{k:(u-k)^{+}\in H_{0}^{1}\}$ は、空でなければ $[\sup_{\partial\Omega}u,\infty)$（$\sup_{\partial\Omega}u>-\infty$ のとき）か $\mathbb{R}$ である。
+2. $u\in C(\overline{\Omega})\cap H^{1}(\Omega)$ で、$\partial\Omega$ の各点で $u\le k$ なら、弱い意味で $\partial\Omega$ の上で $u\le k$。とくに $\sup_{\partial\Omega}u\le\max_{\partial\Omega}u$。
+3. $u\in H_{0}^{1}$ なら $\sup_{\partial\Omega}u\le0$ かつ $\sup_{\partial\Omega}(-u)\le0$。
+4. $u\in C(\overline{\Omega})\cap H^{1}(\Omega)$ で $\partial\Omega$ の各点で $u=0$ なら $u\in H_{0}^{1}$。
+5. $\sup_{\partial\Omega}u^{+}$（\ref{pde:wmp-boundary-inequality.2} の記号）は、$u^{+}$ に \ref{pde:wmp-boundary-inequality.2} の最初の定義を当てはめた値に等しい。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$k\in K_{u}$, $k'\ge k$ なら $(u-k')^{+}=((u-k)^{+}-(k'-k))^{+}$（$u\le k$ の点では両辺 $0$、$u>k$ の点では両辺 $(u-k')^{+}$）で、\ref{pde:wmp-h10-truncation.1} から $k'\in K_{u}$。よって $K_{u}$ は上に閉じた区間。$k_{m}\in K_{u}$, $k_{m}\downarrow k\defeq\inf K_{u}>-\infty$ なら、\ref{pde:wmp-positive-part.5} と $H_{0}^{1}$ の閉性から $k\in K_{u}$。
+
+**Step 2.** 【主張：2】$\varepsilon>0$ をとる。$F_{\varepsilon}\defeq\{x\in\overline{\Omega}:u(x)\ge k+\varepsilon\}$ はコンパクト（有界閉集合）で、$\partial\Omega$ と交わらないので $\Omega$ に含まれる。$(u-k-\varepsilon)^{+}$ は $\Omega\setminus F_{\varepsilon}$ で $0$ なので、台は $F_{\varepsilon}$ に含まれ、\ref{pde:wmp-positive-part.3} と \ref{fa:mollification-sobolev.3} から $H_{0}^{1}$ に入る。$\varepsilon\downarrow0$ として Step 1 の後半の議論（\ref{pde:wmp-positive-part.5}）を使えば $(u-k)^{+}\in H_{0}^{1}$。
+
+**Step 3.** 【主張：3・4・5】3 は \ref{pde:wmp-h10-truncation.2}。4 は 2 を $u$ と $-u$ に $k=0$ で使い、$u=u^{+}-u^{-}$ とする。5：$\sup_{\partial\Omega}u^{+}$ を $u^{+}$ に対する $\inf K_{u^{+}}$ と比べる。$k\ge0$ なら $(u^{+}-k)^{+}=(u-k)^{+}$ なので $K_{u^{+}}\cap[0,\infty)=K_{u}\cap[0,\infty)$。$k<0$ なら $(u^{+}-k)^{+}=u^{+}+|k|$ である。これが $H_{0}^{1}$ に入るとすると、\ref{pde:wmp-h10-truncation.1} を $w=u^{+}+|k|$, $t=|k|/2$ に使って $(w-t)^{+}=u^{+}+|k|/2\in H_{0}^{1}$、差 $w-(w-t)^{+}=|k|/2$ も $H_{0}^{1}$ に入り、$0$ でない定数が $H_{0}^{1}$ に入ってポアンカレの不等式に反する。よって $K_{u^{+}}\subset[0,\infty)$ で、$\inf K_{u^{+}}=\max(\inf K_{u},0)$。
+
+::: hypcheck
+- **2 の $u\in C(\overline{\Omega})$**：Step 2 で $F_{\varepsilon}$ がコンパクトで $\Omega$ に収まることに使った。境界の正則性は使っていない。
+- **逆は成り立たない**：$n\ge3$, $\Omega=B(0,1)\setminus\{0\}$ とし、$\varphi\in C_{c}^{\infty}(B(0,1))$ で $\varphi(0)=1$ のものをとる。前のページの \ref{pde:weak-elliptic-existence} の補足で見たとおり $H_{0}^{1}(\Omega)=H_{0}^{1}(B(0,1))$ なので $\varphi\in H_{0}^{1}(\Omega)$、つまり弱い意味で $\partial\Omega$ の上で $\varphi\le0$ だが、境界点 $0$ で $\varphi(0)=1>0$。弱い意味の不等式は、測度もソボレフ空間から見ても小さすぎる境界の部分（容量 $0$ の集合）を見ない。$C^{1}$ 境界ならトレース（\see{fa:trace-theorem}）を使って、連続関数について両者が一致することが示せる。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## 弱解の弱最大値原理 {#pde:sec-me-wmp}
+
+::: theorem 弱解の弱最大値原理 {#pde:wmp-weak-maximum-principle refname="弱最大値原理（弱解）" keywords="weak maximum principle for weak subsolutions of divergence form elliptic operators with bounded measurable coefficients: if c >= 0 and L u <= 0 weakly then ess sup u <= sup_{partial Omega} u^+; if c = 0 then ess sup u <= sup_{partial Omega} u; proof by Stampacchia truncation (u-k)^+ and the Rellich compactness" index="弱最大値原理（弱解）|じゃくさいだいちげんりじゃくかい, スタンパキアの切り落とし|すたんぱきあのきりおとし"}
+$L$ を一様楕円型とし、a.e. で $c\ge0$ とする（$b$ は有界可測なら何でもよい）。$u\in H^{1}(\Omega)$ が弱い意味で $Lu\le0$ を満たすとする。
+1. $\operatorname*{ess\,sup}_{\Omega}u\le\sup_{\partial\Omega}u^{+}$。
+2. $c=0$ なら $\operatorname*{ess\,sup}_{\Omega}u\le\sup_{\partial\Omega}u$。
+:::
+
+::: intuition
+吸収（$c\ge0$）はあっても湧き出しのない方程式の劣解は、内部で境界より高くなれない。ただし吸収があると負の値の側では効き方が逆になるので、境界の値が負のときは $0$ までしか押さえられない。
+:::
+
+::: proof
+1 を示す。$\ell\defeq\sup_{\partial\Omega}u^{+}$, $M\defeq\operatorname*{ess\,sup}_{\Omega}u$ とおき、$\ell<\infty$ かつ $M>\ell$ と仮定して矛盾を導く。$\ell\ge\sup_{\partial\Omega}u$ なので、\ref{pde:wmp-boundary-consistency.1} から、$k\ge\ell$ ならすべて $(u-k)^{+}\in H_{0}^{1}$。$k\in[\ell,M)$ について
+$$
+v_{k}\defeq(u-k)^{+},\qquad\Gamma_{k}\defeq\{x:u(x)>k,\ \nabla u(x)\ne0\}
+$$
+とおく。$v_{k}\ge0$ で、$k<M$ なので $|\{u>k\}|>0$、つまり $v_{k}\ne0$。
+
+**Step 1（試験関数 $v_{k}$）.** 【主張：$\theta\|\nabla v_{k}\|_{2}^{2}\le b_{\infty}\|\nabla v_{k}\|_{2}\,\|\mathbf{1}_{\Gamma_{k}}v_{k}\|_{2}$】\ref{pde:wmp-positive-part.3} から a.e. で $\partial_{j}v_{k}=\mathbf{1}_{\{u>k\}}\partial_{j}u$。$\mathbf{1}_{\{u>k\}}^{2}=\mathbf{1}_{\{u>k\}}$ と、$v_{k}$ が $\{u>k\}$ の外で $0$ であること（$v_{k}=\mathbf{1}_{\{u>k\}}v_{k}$）から、
+$$
+\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}v_{k}=\sum_{i,j}a^{ij}\partial_{i}v_{k}\,\partial_{j}v_{k},\qquad\sum_{i}b^{i}\partial_{i}u\,v_{k}=\sum_{i}b^{i}\partial_{i}v_{k}\,v_{k}
+$$
+が a.e. で成り立つ。$v_{k}>0$ の点では $u>k\ge\ell\ge0$ なので $cuv_{k}\ge0$。$B[u,v_{k}]\le0$ と一様楕円性から
+$$
+\theta\|\nabla v_{k}\|_{2}^{2}\le\int\sum_{i,j}a^{ij}\partial_{i}v_{k}\partial_{j}v_{k}\le-\int\sum_{i}b^{i}\partial_{i}v_{k}\,v_{k}\le b_{\infty}\int_{\Gamma_{k}}|\nabla v_{k}|\,v_{k}.
+$$
+最後は $\nabla v_{k}$ が $\Gamma_{k}$ の外で a.e. に $0$ だから。コーシー–シュワルツの不等式で主張を得る。
+
+**Step 2.** 【主張：$b_{\infty}>0$ で、$w_{k}\defeq v_{k}/\|\nabla v_{k}\|_{2}$ は $\|w_{k}\|_{H^{1}}^{2}\le1+C_{P}^{2}$ と $\|\mathbf{1}_{\Gamma_{k}}w_{k}\|_{2}\ge\theta/b_{\infty}$ を満たす】$v_{k}\in H_{0}^{1}$, $v_{k}\ne0$ なので、ポアンカレの不等式から $\|\nabla v_{k}\|_{2}>0$。Step 1 を $\|\nabla v_{k}\|_{2}^{2}$ で割ると $\theta\le b_{\infty}\|\mathbf{1}_{\Gamma_{k}}w_{k}\|_{2}$。とくに $b_{\infty}=0$ なら $\theta\le0$ となって矛盾するので、ここで証明が終わる。$\|\nabla w_{k}\|_{2}=1$ とポアンカレの不等式から $\|w_{k}\|_{H^{1}}^{2}\le C_{P}^{2}+1$。
+
+**Step 3（水位を上げる）.** 【主張：$k_{m}\uparrow M$（$k_{m}\in[\ell,M)$）なら $|\Gamma_{k_{m}}|\to0$】$\Gamma_{k_{m}}$ は減少列で、$|\Gamma_{k_{1}}|\le|\Omega|<\infty$。共通部分は $\{u\ge M,\ \nabla u\ne0\}$（$M=\infty$ なら空集合）。$M<\infty$ なら a.e. で $u\le M$ なので、共通部分は零集合の差を除いて $\{u=M,\ \nabla u\ne0\}$ で、\ref{pde:wmp-positive-part.2} からこれは零集合。測度の上からの連続性（\ref{meas:measure-properties.5}）から $|\Gamma_{k_{m}}|\to0$。
+
+**Step 4（コンパクト性）.** 【主張：矛盾が起こる】Step 3 の列をとる。Step 2 から $(w_{k_{m}})$ は $H_{0}^{1}$ の有界列なので、\ref{fa:rellich-kondrachov.3} から $L^{2}$ で収束する部分列があり、その極限を $w$ とする（部分列も同じ記号で書く）。
+$$
+\|\mathbf{1}_{\Gamma_{k_{m}}}w_{k_{m}}\|_{2}\le\|w_{k_{m}}-w\|_{2}+\|\mathbf{1}_{\Gamma_{k_{m}}}w\|_{2}.
+$$
+第 1 項は $0$ に収束する。第 2 項は、Step 3 から $\mathbf{1}_{\Gamma_{k_{m}}}\to0$ が a.e. で成り立つ（減少列の共通部分が零集合）ので、$|\mathbf{1}_{\Gamma_{k_{m}}}w|^{2}\le|w|^{2}$ に優収束定理を使って $0$ に収束する。これは Step 2 の $\|\mathbf{1}_{\Gamma_{k}}w_{k}\|_{2}\ge\theta/b_{\infty}>0$ に反する。
+
+以上で 1 が示された。2 は、$c=0$ なら Step 1 の $cuv_{k}$ の項がはじめから $0$ なので、$\ell\defeq\sup_{\partial\Omega}u$（負でもよい）として同じ議論をすればよい（$k\ge0$ は Step 1 の $cuv_{k}\ge0$ にしか使っていない）。
+
+::: hypcheck
+- **$c\ge0$**：Step 1 で $cuv_{k}\ge0$ に使った（$k\ge0$ と組で）。外すと偽：$\Omega=(0,\pi)$, $Lu=-u''-u$（$c=-1$）なら $u=\sin x\in H_{0}^{1}$ は $Lu=0$ の弱解で、$\sup_{\partial\Omega}u^{+}=0$ なのに $\operatorname*{ess\,sup}u=1$。
+- **1 の $u^{+}$（$k\ge0$）**：$c\ge0$ でも $\sup_{\partial\Omega}u$ そのものでは押さえられない：$\Omega=(0,\pi)$, $Lu=-u''+u$ で $u(x)=-\cosh(x-\frac{\pi}{2})$ は $Lu=0$ を満たし、境界の値は $-\cosh\frac{\pi}{2}\approx-2.51$ だが $\max u=-1$。吸収 $cu$ は $u<0$ の所では湧き出しとして働くからである。
+- **一様楕円性**：Step 1 で $\theta\|\nabla v_{k}\|_{2}^{2}$ を下から押さえるのに使った。
+- **$b$ の有界性**：Step 1 の $b_{\infty}$ に使った。$b=0$ なら Step 2 で証明が終わり、Step 3・4（コンパクト性）は要らない。
+- **解の滑らかさ**：$u\in H^{1}$ だけ。各点の値・2 階の導関数は一度も使っていない。**係数の正則性**：有界可測だけ。
+- **境界の正則性**：使っていない。境界条件は $(u-k)^{+}\in H_{0}^{1}$ の形で入る。ただし Step 4 の \ref{fa:rellich-kondrachov.3} は $H_{0}^{1}$ についての主張なので境界の仮定は要らない。
+- **$\Omega$ の有界性**：ポアンカレの不等式（Step 2）、定数が $H^{1}$ に入ること、$|\Omega|<\infty$（Step 3）、レリッヒの定理（Step 4）に使った。
+- **公理**：$b\ne0$ のとき、Step 4 でレリッヒ–コンドラショフの定理から部分列を取り出すのに、その証明が使う従属選択公理に依存する。$b=0$ なら選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** ここでは $b$ の大きさを定量的に扱わず、コンパクト性による背理法で済ませた。ソボレフの不等式 $\|v\|_{2^{*}}\le C\|\nabla v\|_{2}$（$n\ge3$）を使えば、Step 1 から $\|v_{k}\|_{2^{*}}\le C\frac{b_{\infty}}{\theta}|\Gamma_{k}|^{1/n}\|v_{k}\|_{2^{*}}$、すなわち $|\Gamma_{k}|\ge(\theta/(Cb_{\infty}))^{n}$ という $k$ によらない下界が出て、選択公理なしに同じ結論が得られる。さらに右辺 $f$ がある場合に $\operatorname*{ess\,sup}u\le\sup_{\partial\Omega}u^{+}+C\|f\|$ の形の評価が成り立ち、$b$ は $L^{q}$（$q>n$）で足りることが知られている（Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 8 章）。$c$ が負の部分をもっていても、$c>-\lambda_{1}$ の形の条件（最小固有値との比較）なら最大値原理は生き残る（\ref{pde:prob-me-below-lambda1}）。
+
+**似た定理.** 古典的手法の \tref{pde:weak-maximum-principle} は、$u\in C(\overline{\Omega})$ が平均値の性質をもつ（調和）ことを仮定し、各点の値の最大を境界の最大で押さえた。ここでは $u\in H^{1}$ と有界可測な係数だけを仮定する代わりに、本質的上限と弱い意味の境界の上限で述べる。両者は包含関係にない：$u\in C^{2}(\Omega)\cap C(\overline{\Omega})\cap H^{1}(\Omega)$ が調和なら、部分積分と稠密性から弱い意味で $-\Delta u=0$ で、\ref{pde:wmp-boundary-consistency.2} から上の 2 は古典的な結論を含む。しかし、閉円板で連続な調和関数でも $H^{1}$ に入らないものがある：$u(r,\vartheta)=\sum_{k\ge1}k^{-2}r^{k^{4}}\cos(k^{4}\vartheta)$ は係数が絶対収束するので閉円板で連続、各項は調和で開円板の上で調和だが、$r^{N}\cos N\vartheta$ たちの勾配は $L^{2}$ で直交し $\int_{B}|\nabla(r^{N}\cos N\vartheta)|^{2}=\pi N$ なので、$\int_{B}|\nabla u|^{2}=\pi\sum_{k}k^{4}\cdot k^{-4}=\infty$（アダマールの例）。この $u$ には古典的な最大値原理しか使えない。熱方程式の円柱での最大値原理（\see{pde:page-heat-uniqueness}）も、同じ「境界で押さえる」型である。
+
+**高い視点：水位を上げる.** 証明は、$u$ を水面の高さに見立て、水位 $k$ を境界の高さから少しずつ上げていく操作である。$k$ を超えて頭を出した部分 $(u-k)^{+}$ にはエネルギーの不等式が働き、「頭を出す島は、勾配をもつ部分の面積がある大きさ以上でなければならない」（Step 2）。ところが水位が最高点に近づくと島は沈んで面積が $0$ に近づく（Step 3）。この「切り落とした関数を試験関数にする」発想はスタンパキアやデ・ジョルジに由来し、有界可測な係数の解の有界性・ヘルダー連続性（デ・ジョルジ–ナッシュ–モーザーの理論）へと発展する。関数解析の言葉では、弱最大値原理は「解作用素 $f\mapsto u$ が順序を保つ（正の右辺に正の解を返す）」ことであり（\ref{pde:wmp-comparison.2}）、正の作用素のスペクトル理論（クライン–ルトマンの定理）につながる。
+:::
+
+::: corollary 比較原理 {#pde:wmp-comparison keywords="comparison principle for weak sub- and supersolutions when c >= 0: if L u <= L w weakly and u <= w on the boundary in the weak sense then u <= w a.e.; positivity of weak solutions with nonnegative data" index="比較原理（弱解）|ひかくげんりじゃくかい"}
+$L$ を一様楕円型、a.e. で $c\ge0$ とする。
+1. $u,w\in H^{1}(\Omega)$ が、すべての $v\in H_{0}^{1}$, $v\ge0$ について $B[u,v]\le B[w,v]$ を満たし、$(u-w)^{+}\in H_{0}^{1}$ なら、a.e. で $u\le w$。
+2. $f\in H^{-1}$ がすべての $v\in H_{0}^{1}$, $v\ge0$ について $\langle f,v\rangle\ge0$ を満たし、$u\in H^{1}$ が $B[u,v]=\langle f,v\rangle$（$v\in H_{0}^{1}$）と $u^{-}\in H_{0}^{1}$ を満たすなら、a.e. で $u\ge0$。
+:::
+
+::: proof
+1：$B$ は 1 つ目の変数について線形なので、$u-w$ は弱い意味で $L(u-w)\le0$ で、仮定から $\sup_{\partial\Omega}(u-w)\le0$、よって $\sup_{\partial\Omega}(u-w)^{+}=0$。\ref{pde:wmp-weak-maximum-principle.1} から a.e. で $u-w\le0$。2：$-u$ は弱い意味で $L(-u)\le0$ を満たし、$(-u)^{+}=u^{-}\in H_{0}^{1}$ なので、同じく a.e. で $-u\le0$。
+:::
+
+## c ≥ 0 のときの一意可解性 {#pde:sec-me-unique}
+
+前のページの \ref{pde:weak-elliptic-existence.2} は、1 階の項 $b$ の大きさを $\gamma C_{P}^{2}<\frac{\theta}{2}$ という形で制限していた。弱最大値原理を使うと、この制限なしに $c\ge0$ だけで一意可解性が得られる。
+
+::: theorem c ≥ 0 のときの一意可解性 {#pde:wmp-unique-solvability keywords="if c >= 0 a.e., then for every bounded b the Dirichlet problem L u = f has a unique weak solution for each f in H^{-1} with ||u||_{H^1} <= C ||f||_{H^{-1}}; uniqueness by the weak maximum principle and existence by the Fredholm alternative; the adjoint homogeneous problem has only the trivial solution" index="一意可解性（c≥0）|いちいかかいせいしーだいなりいこーるぜろ"}
+$L$ を一様楕円型とし、a.e. で $c\ge0$ とする（$b$ は有界可測で大きさの制限はない）。
+1. $Lu=0$ の弱解（$u\in H_{0}^{1}$ で $B[u,v]=0$ がすべての $v\in H_{0}^{1}$ で成り立つもの）は $u=0$ だけである。
+2. すべての $f\in H^{-1}(\Omega)$ について $Lu=f$ の弱解がただ一つあり、$f$ によらない $C$ で $\|u\|_{H^{1}}\le C\|f\|_{H^{-1}}$。
+3. 随伴方程式の斉次問題（\ref{pde:weak-fredholm-alternative} の $N^{*}$）も $0$ だけである。したがって $0\notin\Sigma$。
+:::
+
+::: intuition
+吸収の係数が負でなければ、流れの項がどれほど強くても、境界で $0$ の解は $0$ しかなく、どんな右辺にも解がちょうど一つある。一意性は最大値原理から、存在は「一意なら解ける」というフレドホルムの二者択一から出る。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$u$ を弱解とする。すべての $v\in H_{0}^{1}$ で $B[u,v]=0$ なので、$u$ と $-u$ はどちらも弱い意味で $L(\pm u)\le0$ を満たす。\ref{pde:wmp-boundary-consistency.3} から $\sup_{\partial\Omega}u\le0$, $\sup_{\partial\Omega}(-u)\le0$、よって $\sup_{\partial\Omega}u^{+}=\sup_{\partial\Omega}(-u)^{+}=0$。\ref{pde:wmp-weak-maximum-principle.1} から a.e. で $u\le0$ かつ $-u\le0$、すなわち $u=0$。
+
+**Step 2.** 【主張：2・3】Step 1 は \ref{pde:weak-fredholm-alternative} の $N$ が $0$ であることを言っている。同じ定理の 3 で (b) が成り立たないので (a) が成り立ち、2 を得る。3 は同じ定理の 1 の $\dim N^{*}=\dim N=0$。$0\notin\Sigma$ は 1 の言い換えである。
+
+::: hypcheck
+- **$c\ge0$**：Step 1 で弱最大値原理を使うのに要る。外すと偽：$\Omega=(0,\pi)$, $Lu=-u''-u$ では $\sin x$ が $0$ でない弱解（\ref{pde:weak-elliptic-existence} の hypcheck）。
+- **$b$ の大きさ**：制限していない。\ref{pde:weak-elliptic-existence.2} の条件 $\gamma C_{P}^{2}<\frac{\theta}{2}$ は $b_{\infty}$ が大きいと破れるが、この定理は成り立つ。代わりに定数 $C$ は具体的には得られない（フレドホルムの二者択一の (a) は背理法による）。
+- **係数の正則性・境界の正則性・解の滑らかさ**：どれも使っていない（有界可測な係数、任意の有界開集合、$H_{0}^{1}$ の弱解）。
+- **公理**：Step 1 は弱最大値原理を通して従属選択公理に依存し（$b\ne0$ のとき）、Step 2 はフレドホルムの二者択一を通して従属選択公理に依存する。
+:::
+:::
+
+::: supplement
+**前提を変えると.** $b$ が定数ベクトルなら、$\int\sum b^{i}\partial_{i}u\,u=0$ から強圧性が直接出た（\ref{pde:prob-we-drift}）。一般の $b$ では強圧性は本当に失われうるが、それでも解は一意で存在する、というのがこの定理の内容で、エネルギー評価（ラックス–ミルグラム）だけでは届かず、順序の構造（最大値原理）を使う必要がある。$c$ が負の場合は、固有値 $0$ がちょうど $\Sigma$ に入るかどうかで一意可解性が決まる（\ref{pde:weak-elliptic-spectrum}）。
+
+**似た定理.** 常微分方程式の境界値問題 $-(pu')'+qu=f$, $u(a)=u(b)=0$ が $q\ge0$ で一意に解けることは、$1$ 次元の同じ現象である（\see{ode:page-sturm-liouville}）。古典的手法では、ディリクレ問題の一意性は \tref{pde:weak-maximum-principle} から、存在はペロンの方法から得た。ここでも一意性は最大値原理から来るが、存在は境界での障壁ではなく、コンパクト性（フレドホルムの二者択一）から来る。
+
+**高い視点：一意性が存在を生む.** 有限次元では、正方行列は単射なら全射である。フレドホルムの二者択一はこれを「恒等写像 $-$ コンパクト作用素」に広げたもので、無限次元でも「解が多すぎない」ことが「解がある」ことを保証する。最大値原理は解の個数を数える道具ではないが、「境界で $0$ の劣解は正になれない」という順序の情報で核を消し、二者択一の扉を開ける。
+:::
+
+## レイリー商 {#pde:sec-me-rayleigh}
+
+この節では $L$ を一様楕円型で $a^{ij}=a^{ji}$, $b=0$（$c$ は有界で符号は任意）とする。このとき $B$ は対称で、\ref{pde:weak-symmetric-eigen} の正規直交基底 $(e_{k})_{k\ge1}$ と固有値 $-\gamma<\lambda_{1}\le\lambda_{2}\le\cdots\to\infty$ を固定する（以下の主張と証明は、弱い固有関数からなる $L^{2}$ の正規直交基底で、固有値が単調に増加して $\infty$ に発散するように並べたものなら、どれについてもそのまま成り立つ。固有値が $-\gamma$ より大きいことは、\ref{pde:bilinear-energy-estimates.2} から $\lambda_{k}=B[e_{k},e_{k}]>-\gamma$ と確かめられる）。$u\in H_{0}^{1}(\Omega)\setminus\{0\}$ について
+$$
+R(u)\defeq\frac{B[u,u]}{\|u\|_{2}^{2}}=\frac{\int_{\Omega}\bigl(\sum_{i,j}a^{ij}\partial_{i}u\,\partial_{j}u+cu^{2}\bigr)dx}{\int_{\Omega}u^{2}\,dx}
+$$
+を $L$ の**レイリー商**という。$L=-\Delta$ なら $R(u)=\|\nabla u\|_{2}^{2}/\|u\|_{2}^{2}$。\index{レイリー商|れいりーしょう}
+
+::: theorem 固有値の変分的な特徴づけ {#pde:dirichlet-eigen-variational keywords="variational characterization of Dirichlet eigenvalues of a symmetric elliptic operator: B[u,u] = sum lambda_k (u,e_k)^2 and the eigenfunction expansion converges in H^1; every eigenvalue is some lambda_k with eigenspace spanned by the corresponding e_k; lambda_1 = min of the Rayleigh quotient, minimizers are exactly the eigenfunctions of lambda_1; lambda_k = min over the orthogonal complement of e_1..e_{k-1}" index="レイリー商|れいりーしょう, 固有値の変分的特徴づけ|こゆうちのへんぶんてきとくちょうづけ, 最小固有値|さいしょうこゆうち, 主固有値|しゅこゆうち"}
+上の設定で、$\mu\ge\gamma$ とする。
+1. $u\in H_{0}^{1}$ について、$u=\sum_{k}(u,e_{k})e_{k}$ は $H^{1}$ で収束し、
+$$
+B[u,u]+\mu\|u\|_{2}^{2}=\sum_{k\ge1}(\lambda_{k}+\mu)(u,e_{k})^{2},\qquad B[u,u]=\sum_{k\ge1}\lambda_{k}(u,e_{k})^{2}.
+$$
+2. $\lambda\in\mathbb{R}$ が $L$ の弱い固有値であるのは、ある $k$ で $\lambda=\lambda_{k}$ となるときに限り、そのとき固有空間は $N_{\lambda}=\operatorname{span}\{e_{k}:\lambda_{k}=\lambda\}$（有限次元）。
+3. $\lambda_{1}=\min_{u\in H_{0}^{1}\setminus\{0\}}R(u)$ で、$R(u)=\lambda_{1}$ となる $u$ はちょうど $N_{\lambda_{1}}\setminus\{0\}$ の元である。
+4. $k\ge2$ なら $\lambda_{k}=\min\{R(u):u\in H_{0}^{1}\setminus\{0\},\ (u,e_{j})=0\ (j<k)\}$ で、最小は $u=e_{k}$ でとられる。
+:::
+
+::: intuition
+最小固有値は、「エネルギーと $L^{2}$ ノルムの 2 乗の比」をすべての関数の中で最小にした値で、最小を与えるのはちょうどその固有関数である。$k$ 番目の固有値は、それより低い固有関数と直交する関数の中での最小値である。
+:::
+
+::: proof
+**Step 1.** 【主張：$B_{\mu}[u,v]\defeq B[u,v]+\mu(u,v)$ は $H_{0}^{1}$ の内積で、そのノルムは $H^{1}$ ノルムと同値であり、$\tilde{e}_{k}\defeq(\lambda_{k}+\mu)^{-1/2}e_{k}$ はこの内積についての正規直交基底】$B_{\mu}$ は対称で、\ref{pde:bilinear-energy-estimates.1}・\ref{pde:bilinear-energy-estimates.2} から $\beta\|u\|_{H^{1}}^{2}\le B_{\mu}[u,u]\le(\alpha+\mu)\|u\|_{H^{1}}^{2}$。よって $(H_{0}^{1},B_{\mu})$ はヒルベルト空間である。$\lambda_{k}>-\gamma\ge-\mu$ なので $\lambda_{k}+\mu>0$。固有関数の定義から $B_{\mu}[e_{j},e_{k}]=(\lambda_{j}+\mu)(e_{j},e_{k})=(\lambda_{j}+\mu)\delta_{jk}$ なので $(\tilde{e}_{k})$ は正規直交。$u\in H_{0}^{1}$ がすべての $k$ で $B_{\mu}[u,\tilde{e}_{k}]=0$ なら、対称性から $0=B_{\mu}[e_{k},u]=(\lambda_{k}+\mu)(e_{k},u)$ なので $(u,e_{k})=0$ がすべての $k$ で成り立ち、$(e_{k})$ が $L^{2}$ の正規直交基底であること（\ref{fa:orthonormal-basis.1}）から $u=0$。よって \ref{fa:orthonormal-basis.1} の意味で極大で、正規直交基底である。
+
+**Step 2.** 【主張：1】Step 1 の計算から $B_{\mu}[u,\tilde{e}_{k}]=(\lambda_{k}+\mu)^{1/2}(u,e_{k})$。\ref{fa:orthonormal-basis.3} から $u=\sum_{k}B_{\mu}[u,\tilde{e}_{k}]\tilde{e}_{k}=\sum_{k}(u,e_{k})e_{k}$ が $B_{\mu}$ のノルム、したがって $H^{1}$ ノルムで収束し、\ref{fa:orthonormal-basis.4} から $B_{\mu}[u,u]=\sum_{k}(\lambda_{k}+\mu)(u,e_{k})^{2}$。$L^{2}$ のパーセヴァルの等式 $\|u\|_{2}^{2}=\sum_{k}(u,e_{k})^{2}$ の $\mu$ 倍を引けば 2 つ目の式（両方の級数が収束するので項ごとに引ける）。
+
+**Step 3.** 【主張：2】$u$ を固有値 $\lambda$ の弱い固有関数とする。対称性から $\lambda(u,e_{k})=B[u,e_{k}]=B[e_{k},u]=\lambda_{k}(e_{k},u)$ なので、$\lambda_{k}\ne\lambda$ なら $(u,e_{k})=0$。$u\ne0$ なので $(u,e_{k})\ne0$ となる $k$ があり、その $k$ で $\lambda=\lambda_{k}$。$\lambda_{k}\to\infty$ なので $\{k:\lambda_{k}=\lambda\}$ は有限集合で、$L^{2}$ の展開 $u=\sum_{k}(u,e_{k})e_{k}$ はその $k$ の有限和になる。逆に $\lambda_{k}=\lambda$ となる $e_{k}$ の 1 次結合は、$B$ の線形性から固有値 $\lambda$ の固有関数（または $0$）。
+
+**Step 4.** 【主張：3・4】$c_{k}\defeq(u,e_{k})$ とおくと、1 とパーセヴァルの等式から
+$$
+B[u,u]-\lambda_{1}\|u\|_{2}^{2}=\sum_{k}(\lambda_{k}-\lambda_{1})c_{k}^{2}\ge0
+$$
+で、等号は $\lambda_{k}>\lambda_{1}$ となるすべての $k$ で $c_{k}=0$ のとき、すなわち（Step 3 の議論から）$u\in N_{\lambda_{1}}$ のときに限る。$R(e_{1})=\lambda_{1}$ なので最小値は $\lambda_{1}$ で、3 が従う。4 は、$c_{j}=0$（$j<k$）なら同じ計算で $B[u,u]-\lambda_{k}\|u\|_{2}^{2}=\sum_{j\ge k}(\lambda_{j}-\lambda_{k})c_{j}^{2}\ge0$ で、$R(e_{k})=\lambda_{k}$。
+
+::: hypcheck
+- **対称性（$a^{ij}=a^{ji}$, $b=0$）**：Step 1 で $B_{\mu}$ が内積であること、Step 3 で $B[u,e_{k}]=B[e_{k},u]$ に使った。$b\ne0$ だとレイリー商の最小値は固有値と一致しない：$\Omega=(0,1)$, $Lu=-u''+bu'$（$b\ne0$ は定数）なら $\int bu'u=0$（\ref{pde:prob-we-drift}）から $B[u,u]=\|u'\|_{2}^{2}$ で $\min R=\pi^{2}$。一方 $u=e^{bx/2}w$ と置くと $-u''+bu'=e^{bx/2}(-w''+\frac{b^{2}}{4}w)$ なので、固有値は $k^{2}\pi^{2}+\frac{b^{2}}{4}$ で、最小固有値 $\pi^{2}+\frac{b^{2}}{4}$ は $\min R$ より大きい。
+- **$\mu\ge\gamma$**：Step 1 で $B_{\mu}$ の正値性と $\lambda_{k}+\mu>0$ に使った。
+- **固有関数の基底**：\ref{pde:weak-symmetric-eigen} から借りた。その存在がレリッヒの定理（コンパクト性）に依存するので、この定理も間接的にそれに依存する。
+- **係数・境界・解の正則性**：使っていない。
+- **公理**：基底 $(e_{k})$ を通して、前のページと同じく従属選択公理と可算選択公理に依存する。それ以外の Step では選択公理を使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 3 の「最小値が存在する」ことは、基底を使わずに直接示すこともできる：$R$ の下限に近づく列 $u_{m}$（$\|u_{m}\|_{2}=1$）は $H_{0}^{1}$ で有界なので、レリッヒの定理と弱収束で極限がとれ、$B_{\mu}[u,u]$ の弱下半連続性から極限が最小元になる（直接法）。ここでは基底がすでにあるので、展開による短い証明をとった。
+
+**似た定理.** 行列の場合のレイリー商とミニマックス原理は \ref{lin:hadamard-minmax}、閉多様体上の楕円型作用素については \see{gl:prob-sp-rayleigh}、コンパクト自己共役作用素一般については \see{fa:prob-st-rayleigh}。常微分方程式のスツルム–リウヴィル問題でも同じ特徴づけが成り立つ（\see{ode:page-sturm-liouville}）。
+
+**高い視点：もっとも安い振動.** $R(u)$ は「形 $u$ の膜を張るのに要るエネルギー」を「膜の量」で割った単価である。最小固有値は最も安い形の単価で、その形が最小固有関数である。高い固有値は、安い形とすべて「独立に」振動する形の中で最も安い単価にあたる。
+:::
+
+## 問題 {#pde:sec-me-problems}
+
+::: problem {#pde:prob-me-below-lambda1}
+$\lambda_{1}>0$ をディリクレ・ラプラシアンの最小固有値とし、$\mu\in\mathbb{R}$ とする。$Lu\defeq-\Delta u-\mu u$（$c=-\mu$）を考える。
+1. $\mu<\lambda_{1}$ とする。$u\in H^{1}(\Omega)$ が弱い意味で $Lu\le0$ を満たし、$u^{+}\in H_{0}^{1}$ なら、a.e. で $u\le0$ であることを示せ（$\mu>0$ なら $c<0$ なので \ref{pde:wmp-weak-maximum-principle} は使えない）。
+2. $\mu<\lambda_{1}$ なら、すべての $f\in H^{-1}$ について $-\Delta u-\mu u=f$ の弱解がただ一つあることを示せ。
+3. $\mu=\lambda_{1}$ では 1 の結論が成り立たないことを示せ。
+:::
+
+::: solution
+**1.** $v=u^{+}\in H_{0}^{1}$, $v\ge0$ を試験関数にとる。\ref{pde:wmp-positive-part.1} から $\nabla u\cdot\nabla u^{+}=|\nabla u^{+}|^{2}$, $uu^{+}=(u^{+})^{2}$（a.e.）なので、$0\ge B[u,u^{+}]=\|\nabla u^{+}\|_{2}^{2}-\mu\|u^{+}\|_{2}^{2}$。$u^{+}\ne0$ と仮定すると、\ref{pde:dirichlet-eigen-variational.3}（$L=-\Delta$, $c=0$）から $\|\nabla u^{+}\|_{2}^{2}\ge\lambda_{1}\|u^{+}\|_{2}^{2}$ なので $(\lambda_{1}-\mu)\|u^{+}\|_{2}^{2}\le0$、$\mu<\lambda_{1}$ から $u^{+}=0$ となり矛盾。よって $u^{+}=0$、すなわち a.e. で $u\le0$。
+
+**2.** 弱解 $u\in H_{0}^{1}$ が $f=0$ に対するものなら、$u$ と $-u$ に 1 を使って（\ref{pde:wmp-h10-truncation.2} から $u^{\pm}\in H_{0}^{1}$）$u=0$。よって $0$ でない斉次解はなく、\ref{pde:weak-fredholm-alternative.3} の (a) から一意に解ける。別解：$-\Delta-\mu$ は対称で $b=0$ なので、固有値 $\lambda_{k}-\mu>0$ がすべて正であることから \ref{pde:dirichlet-eigen-variational.1} より $B[u,u]=\sum_{k}(\lambda_{k}-\mu)(u,e_{k})^{2}\ge(1-\frac{\mu^{+}}{\lambda_{1}})\|\nabla u\|_{2}^{2}$ が出て（$\|\nabla u\|_{2}^{2}=\sum_{k}\lambda_{k}(u,e_{k})^{2}$ と比べる）、強圧的なので \ref{fa:lax-milgram} が使える。
+
+**3.** $e_{1}$ を固有値 $\lambda_{1}$ の弱い固有関数とすると、$-\Delta e_{1}-\lambda_{1}e_{1}=0$ が弱い意味で成り立つので、$u=e_{1}$ と $u=-e_{1}$ はどちらも弱い意味で $Lu\le0$ を満たし、$u^{+}\in H_{0}^{1}$（\ref{pde:wmp-h10-truncation.2}）。1 の結論が両方で成り立てば $e_{1}\le0$ かつ $-e_{1}\le0$ で $e_{1}=0$ となり矛盾。（次のページで示すとおり $e_{1}$ は符号を変えないので、正の向きにとった $e_{1}$ がそのまま反例になる。）
+:::
+
+::: problem {#pde:prob-me-drift-comparison}
+$\Omega=(0,1)$, $b>0$ を定数とし、$-u''+bu'=1$, $u(0)=u(1)=0$ の弱解 $u$ を考える（\ref{pde:prob-we-drift} で $u(x)=\frac{x}{b}-\frac{e^{bx}-1}{b(e^{b}-1)}$ と求めた）。
+1. 解の式を使わずに、\ref{pde:wmp-comparison} だけから $0\le u(x)\le\frac{x}{b}$ を示せ。
+2. 1 を解の式で確かめよ。
+:::
+
+::: solution
+**1.** $L u=-u''+bu'$ は $a^{11}=1$, $b^{1}=b$, $c=0$。下からの評価：$f=1$ は $v\ge0$ について $\langle f,v\rangle=\int v\ge0$、$u\in H_{0}^{1}$ なので $u^{-}\in H_{0}^{1}$（\ref{pde:wmp-h10-truncation.2}）。\ref{pde:wmp-comparison.2} から a.e. で $u\ge0$。上からの評価：$w(x)\defeq\frac{x}{b}\in C^{\infty}([0,1])\subset H^{1}(0,1)$ は、$v\in H_{0}^{1}$ について
+$$
+B[w,v]=\int_{0}^{1}\Bigl(\frac{1}{b}v'+b\cdot\frac{1}{b}v\Bigr)dx=\frac{1}{b}\int_{0}^{1}v'\,dx+\int_{0}^{1}v\,dx=\int_{0}^{1}v\,dx=B[u,v].
+$$
+ここで $\int_{0}^{1}v'=0$ は、$v\in C_{c}^{\infty}(0,1)$ で成り立ち、$v\mapsto\int v'$ が $H^{1}$ で連続なので $H_{0}^{1}$ でも成り立つ。$u-w$ は $[0,1]$ で連続な代表をもち（\ref{fa:sobolev-one-dimension}）、端点の値は $H^{1}$ ノルムについて連続（\ref{fa:prob-et-interval-trace}）で $C_{c}^{\infty}(0,1)$ の元では $0$ なので、$H_{0}^{1}$ の元 $u$ の連続な代表は両端で $0$、よって $(u-w)(0)=0$, $(u-w)(1)=-\frac{1}{b}<0$。\ref{pde:wmp-boundary-consistency.2} から $(u-w)^{+}\in H_{0}^{1}$ で、\ref{pde:wmp-comparison.1} から a.e. で $u\le w$。両辺連続なので各点で成り立つ。
+
+**2.** $\frac{x}{b}-u(x)=\frac{e^{bx}-1}{b(e^{b}-1)}\ge0$。また $u\ge0$ は $\frac{e^{bx}-1}{e^{b}-1}\le x$（$[0,1]$ で凸関数 $e^{bx}$ が両端を結ぶ弦の下にあること：$e^{bx}\le(1-x)+xe^{b}$）と同じである。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

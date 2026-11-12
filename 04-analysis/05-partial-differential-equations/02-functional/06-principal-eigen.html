@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ミニマックス原理と主固有値 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/06-principal-eigen.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ミニマックス原理と主固有値 {#pde:page-principal-eigen keywords="Courant-Fischer min-max principle for Dirichlet eigenvalues, domain monotonicity, extension by zero, Weyl lemma, smoothness of Dirichlet eigenfunctions of the Laplacian, principal eigenvalue, simplicity of the first eigenvalue, positive first eigenfunction, eigenvalues of intervals rectangles squares and disks, Bessel functions, scaling, Faber-Krahn inequality, ミニマックス原理, クーラン–フィッシャーの定理, 領域の単調性, ワイルの補題, 主固有値, 第 1 固有値, ファーバー–クラーンの不等式"}
+
+前のページ（\ref{pde:page-maximum-eigen}）では、対称な楕円型作用素の固有値を、レイリー商を低い固有関数と直交する関数の中で最小化した値として特徴づけた（\ref{pde:dirichlet-eigen-variational}）。この特徴づけは固有関数の基底を使っている。このページではまず、基底を使わずに部分空間だけで固有値を表す**ミニマックス原理**を示し、そこから「領域を広げると固有値は下がる」という単調性を導く。
+
+次に、ディリクレ・ラプラシアンの最小固有値 $\lambda_{1}$ について、連結な領域では固有空間が 1 次元で、固有関数が領域の中で $0$ にならない（正にとれる）ことを示す。鍵は、固有関数 $u$ の絶対値 $|u|$ もレイリー商の最小元になることと、強最大値原理である。ただし強最大値原理は各点の値を使うので、弱い固有関数が滑らかであることを先に示さなければならない。ラプラシアンの場合はこれを、固有関数を 1 次元高い空間の調和関数に持ち上げ、**ワイルの補題**（弱い意味の調和関数は本当の調和関数である）に帰着させて示す。一般の変数係数の作用素の正則性は、系列の別のページ（\see[弱解の正則性]{pde:page-regularity}）の主題で、このページはそれに依存しない。最後に区間・長方形・円板の固有値を計算し、ファーバー–クラーンの不等式を紹介する。
+
+## 記法と定義の確認 {#pde:sec-me-pe-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$ は有界な開集合、関数は実数値。$H^{1}$, $H_{0}^{1}$, $(u,v)$, $\|u\|_{2}$, ポアンカレの不等式は前のページと同じ（\ref{fa:sobolev-space}, \ref{fa:c1-boundary.1}, \ref{fa:poincare-inequality}）。
+- 作用素 $L$ と双線形形式 $B$ は \ref{pde:bilinear-elliptic-form}。この節以降、固有値を扱うときは**対称な設定** $a^{ij}=a^{ji}$, $b=0$（$c$ は有界で符号は任意）をとる。弱い固有関数・固有空間 $N_{\lambda}$ は \ref{pde:weak-elliptic-spectrum}、固有関数の正規直交基底 $(e_{k})$ と固有値 $\lambda_{1}\le\lambda_{2}\le\cdots\to\infty$（重複度をこめて小さい順）は \ref{pde:weak-symmetric-eigen}、ディリクレ・ラプラシアン（$L=-\Delta$）の場合は \ref{fa:dirichlet-eigenfunctions}（このとき $\lambda_{1}>0$）。
+- レイリー商 $R(u)=B[u,u]/\|u\|_{2}^{2}$（$u\in H_{0}^{1}\setminus\{0\}$）と固有値の変分的な特徴づけは \ref{pde:dirichlet-eigen-variational}。領域 $\Omega$ を明示するときは $R_{\Omega}$, $\lambda_{k}(\Omega)$ と書く。
+- $H^{1}$ の切り落とし $u^{+},u^{-},|u|$ とその勾配は \ref{pde:wmp-positive-part}, \ref{pde:wmp-h10-truncation}。境界で $0$ の連続関数が $H_{0}^{1}$ に入ることは \ref{pde:wmp-boundary-consistency.4}。
+- 調和関数：球面平均 $S_{r}u(x)$ と平均値の性質 \ref{pde:mean-value-property}、局所的な劣平均値の性質と強最大値原理 \ref{pde:subharmonic-local-maximum}。極座標の積分 \ref{meas:polar-decomposition}, \ref{meas:polar-radial}。
+- 軟化子 $\rho_{\varepsilon}$ と軟化は \ref{fa:mollifier}, \ref{fa:mollification}（次元 $N$ の空間で使う）。\ref{fa:mollifier} の $\rho$ は $|z|$ だけの関数である（\ref{pde:mean-value-converse} の証明で確かめたとおり、隆起関数が $|z|^{2}$ を通して定義されているため）：$\rho_{\varepsilon}(z)=q_{\varepsilon}(|z|)$、$q_{\varepsilon}(s)=0$（$s>\varepsilon$）。開集合 $D$ について $D_{\varepsilon}\defeq\{z\in D:\operatorname{dist}(z,\mathbb{R}^{N}\setminus D)>\varepsilon\}$。
+- **選択公理**：固有関数の基底（\ref{pde:weak-symmetric-eigen}, \ref{fa:dirichlet-eigenfunctions}）を使う主張は、それを通して従属選択公理と可算選択公理に依存する。ワイルの補題と固有関数の滑らかさは選択公理を使わない。
+:::
+
+## ミニマックス原理と領域の単調性 {#pde:sec-me-minimax}
+
+::: theorem ミニマックス原理 {#pde:dirichlet-eigen-minimax refname="ミニマックス原理（ディリクレ固有値）" keywords="Courant-Fischer min-max principle for Dirichlet eigenvalues: lambda_k = min over k-dimensional subspaces V of H^1_0 of max of the Rayleigh quotient on V; max-min form lambda_k = max over w_1..w_{k-1} in L^2 of inf of R on the orthogonal complement" index="ミニマックス原理|みにまっくすげんり, クーラン–フィッシャーの定理|くーらんふぃっしゃーのていり, マックスミニ原理|まっくすみにげんり"}
+対称な設定（$a^{ij}=a^{ji}$, $b=0$）で $k\ge1$ とする。
+1. $\displaystyle\lambda_{k}=\min_{V}\max_{u\in V\setminus\{0\}}R(u)$。ここで $V$ は $H_{0}^{1}(\Omega)$ の $k$ 次元部分空間を動く。
+2. $\displaystyle\lambda_{k}=\max_{w_{1},\dots,w_{k-1}\in L^{2}}\ \inf\{R(u):u\in H_{0}^{1}\setminus\{0\},\ (u,w_{j})=0\ (j<k)\}$（$k=1$ なら条件なしの下限）。
+:::
+
+::: intuition
+$k$ 番目の固有値は、基底を知らなくても決まる：$k$ 次元の関数の空間をどう選んでも、その中には単価が $\lambda_{k}$ 以上の関数が必ずあり、うまく選べば最大の単価をちょうど $\lambda_{k}$ にできる。
+:::
+
+::: proof
+**Step 1.** 【主張：各 $k$ 次元部分空間 $V$ の上で $R$ は最大値をもち、それは $\lambda_{k}$ 以上】$R(tu)=R(u)$（$t\ne0$）なので、$V$ の単位球面 $\{u\in V:\|u\|_{2}=1\}$ の上で考えればよい。$V$ は有限次元なので $L^{2}$ ノルムと $H^{1}$ ノルムは $V$ 上で同値で、単位球面はコンパクト、$u\mapsto B[u,u]$ は連続なので最大値がある。線形写像 $V\to\mathbb{R}^{k-1}$, $u\mapsto((u,e_{j}))_{j<k}$ は次元の理由で $0$ でない核の元 $u$ をもち、\ref{pde:dirichlet-eigen-variational.4}（$k=1$ なら \ref{pde:dirichlet-eigen-variational.3}）から $R(u)\ge\lambda_{k}$。
+
+**Step 2.** 【主張：$V_{k}\defeq\operatorname{span}\{e_{1},\dots,e_{k}\}$ の上で $\max R=\lambda_{k}$】$u=\sum_{j\le k}c_{j}e_{j}\ne0$ なら \ref{pde:dirichlet-eigen-variational.1} から $R(u)=\sum_{j\le k}\lambda_{j}c_{j}^{2}/\sum_{j\le k}c_{j}^{2}\le\lambda_{k}$ で、$u=e_{k}$ で等号。Step 1 と合わせて 1 を得る。
+
+**Step 3.** 【主張：2】$w_{j}=e_{j}$ と選ぶと、\ref{pde:dirichlet-eigen-variational.4} から下限は $\lambda_{k}$。任意の $w_{1},\dots,w_{k-1}$ について、Step 1 と同じ次元の議論で $u\in V_{k}\setminus\{0\}$ を $(u,w_{j})=0$（$j<k$）となるようにとれ、Step 2 から $R(u)\le\lambda_{k}$。よって下限は $\lambda_{k}$ 以下。
+
+::: hypcheck
+- **対称性**：\ref{pde:dirichlet-eigen-variational} を通して使った。
+- **$V$ の有限次元性**：Step 1 の最大値の存在（コンパクト性）と次元の議論に使った。
+- **公理**：Step 1・2・3 自体は選択公理を使わない（基底 $(e_{k})$ の存在を除く）。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 1 の右辺は基底 $(e_{k})$ に触れずに $B$ と $L^{2}$ の内積だけで書かれている。だから $B$ や領域を取り替えたときの固有値の比較が、固有関数を知らなくてもできる（次の系）。非対称な作用素（$b\ne0$）ではこの特徴づけは失われ、固有値は複素数にもなりうる。
+
+**似た定理.** 行列版は \ref{lin:hadamard-minmax}。ミニマックス原理から、固有値の個数の漸近（**ワイルの法則**）$\#\{k:\lambda_{k}\le\lambda\}\sim(2\pi)^{-n}\omega_{n}|\Omega|\lambda^{n/2}$（$L=-\Delta$、$\omega_{n}$ は単位球の体積、$\Omega$ は適当な正則性をもつ）が、領域を小さな立方体で内外から近似することで導かれる。また、$k$ 番目の固有関数の節領域（固有関数が $0$ でない連結成分）は $k$ 個以下であることも知られている（クーランの節領域定理）。どちらもここでは証明しない（Courant–Hilbert『Methods of Mathematical Physics』第 I 巻 第 VI 章）。
+
+**高い視点：選べる自由と選ばれる不自由.** 1 は「$k$ 次元の自由度を与えられた設計者は、最悪の場合の単価を $\lambda_{k}$ まで下げられる」と言い、2 は「$k-1$ 個の制約を課せる相手は、最良の場合の単価を $\lambda_{k}$ まで上げられる」と言う。両者が同じ値で釣り合うのは、ゲームの鞍点に似ている。
+:::
+
+::: lemma 0 による延長 {#pde:dirichlet-eigen-zero-extension keywords="extension by zero maps H^1_0(Omega) isometrically into H^1_0(Omega') for open Omega in Omega', with the gradient extended by zero" index="0 による延長|ぜろによるえんちょう"}
+$\Omega\subset\Omega'$ を開集合とする。$u\in H_{0}^{1}(\Omega)$ を $\Omega'\setminus\Omega$ で $0$ と延ばした関数 $\tilde{u}$ は $H_{0}^{1}(\Omega')$ に入り、$\nabla\tilde{u}$ は $\nabla u$ を $0$ で延ばしたもので、$\|\tilde{u}\|_{H^{1}(\Omega')}=\|u\|_{H^{1}(\Omega)}$。
+:::
+
+::: proof
+$\varphi_{m}\in C_{c}^{\infty}(\Omega)$ で $\varphi_{m}\to u$（$H^{1}(\Omega)$）とする。$\varphi_{m}$ を $0$ で延ばしたもの $\tilde{\varphi}_{m}$ は $C_{c}^{\infty}(\Omega')$ に入り、$\|\tilde{\varphi}_{m}-\tilde{\varphi}_{l}\|_{H^{1}(\Omega')}=\|\varphi_{m}-\varphi_{l}\|_{H^{1}(\Omega)}$ なので $H^{1}(\Omega')$ のコーシー列で、\ref{fa:sobolev-complete} からある $w\in H_{0}^{1}(\Omega')$ に収束する。$L^{2}(\Omega')$ では $\tilde{\varphi}_{m}\to\tilde{u}$, $\nabla\tilde{\varphi}_{m}\to\widetilde{\nabla u}$（$0$ で延ばしたもの）なので、$w=\tilde{u}$ で $\nabla w=\widetilde{\nabla u}$。ノルムの等式は被積分関数が $\Omega'\setminus\Omega$ で $0$ だから。
+:::
+
+::: corollary 領域と係数についての単調性 {#pde:dirichlet-eigen-monotone keywords="domain monotonicity of Dirichlet eigenvalues: if Omega is contained in Omega' then lambda_k(Omega) >= lambda_k(Omega'); monotonicity in the zeroth order coefficient; scaling" index="領域の単調性（固有値）|りょういきのたんちょうせいこゆうち, 固有値の比較|こゆうちのひかく"}
+$\Omega\subset\Omega'$ を有界な開集合とし、$\Omega'$ 上の係数 $a^{ij}=a^{ji}$, $c$（$b=0$）をもつ一様楕円型作用素 $L$ を考える。$\Omega$ では係数を制限して使う。$\lambda_{k}(\Omega)$, $\lambda_{k}(\Omega')$ をそれぞれのディリクレ固有値（重複度をこめて小さい順）とする。
+1. すべての $k$ で $\lambda_{k}(\Omega)\ge\lambda_{k}(\Omega')$。とくにディリクレ・ラプラシアンについて成り立つ。
+2. 同じ $\Omega$ で $c\le c'$（a.e.）なら、$c$ と $c'$ をもつ作用素の固有値について $\lambda_{k}(c)\le\lambda_{k}(c')$。
+:::
+
+::: proof
+1：$V$ が $H_{0}^{1}(\Omega)$ の $k$ 次元部分空間なら、\ref{pde:dirichlet-eigen-zero-extension} から $\tilde{V}\defeq\{\tilde{u}:u\in V\}$ は $H_{0}^{1}(\Omega')$ の $k$ 次元部分空間で（延長は線形で単射）、$\Omega'$ でのレイリー商は $R_{\Omega'}(\tilde{u})=R_{\Omega}(u)$（被積分関数は $\Omega'\setminus\Omega$ で $0$）。よって \ref{pde:dirichlet-eigen-minimax.1} の $\Omega'$ での最小は、$\Omega$ での最小よりも広い範囲でとるので小さいか等しい。2：すべての $u$ で $R_{c}(u)\le R_{c'}(u)$ なので、\ref{pde:dirichlet-eigen-minimax.1} の両辺をとればよい。
+:::
+
+1 の不等式は、$\Omega'$ が連結で $|\Omega'\setminus\Omega|>0$ なら $k=1$ で狭義になる。その証明には最小固有関数が $\Omega'$ の中で $0$ にならないことが要るので、次の 2 節のあと（\ref{pde:dirichlet-eigen-strict-monotone}）で示す。ディリクレ条件の固有値は「境界で膜を固定した太鼓の音の高さの 2 乗」にあたり、1 は「太鼓を大きくすると音は低くなる」と言っている。ノイマン条件では $H_{0}^{1}$ の代わりに $H^{1}$ を使うので 0 による延長の議論が使えず、領域の単調性は一般には成り立たない。
+
+## ラプラシアンの固有関数の滑らかさ {#pde:sec-me-weyl}
+
+::: lemma ワイルの補題 {#pde:dirichlet-eigen-weyl refname="ワイルの補題" keywords="Weyl's lemma: a locally integrable function u with int u Delta phi = 0 for all test functions coincides a.e. with a smooth harmonic function; proof by radial mollifiers and the mean value property" index="ワイルの補題|わいるのほだい, 弱調和関数|じゃくちょうわかんすう"}
+$D\subset\mathbb{R}^{N}$ を開集合とし、$W\in L_{\mathrm{loc}}^{1}(D)$ がすべての $\varphi\in C_{c}^{\infty}(D)$ について $\int_{D}W\,\Delta\varphi=0$ を満たすとする。このとき $D$ の調和関数 $H\in C^{\infty}(D)$ で、a.e. で $W=H$ となるものがある。
+:::
+
+::: intuition
+方程式 $\Delta W=0$ を試験関数との積分の形でしか満たさない関数も、測度 $0$ の集合で値を直せば、本当の滑らかな調和関数である。
+:::
+
+::: proof
+$\varepsilon>0$ について $W_{\varepsilon}\defeq\rho_{\varepsilon}*W$（$D_{\varepsilon}$ の上で定義）とおく。
+
+**Step 1.** 【主張：$W_{\varepsilon}\in C^{\infty}(D_{\varepsilon})$ は $D_{\varepsilon}$ で調和】\ref{fa:mollification.1} から $W_{\varepsilon}\in C^{\infty}(D_{\varepsilon})$ で $\Delta W_{\varepsilon}(z)=\int_{D}(\Delta\rho_{\varepsilon})(z-y)W(y)\,dy$。$z\in D_{\varepsilon}$ を固定すると、$\varphi(y)\defeq\rho_{\varepsilon}(z-y)$ は台が $\overline{B}(z,\varepsilon)\subset D$ の $C_{c}^{\infty}(D)$ の元で、$\Delta\varphi(y)=(\Delta\rho_{\varepsilon})(z-y)$。仮定から $\Delta W_{\varepsilon}(z)=\int W\Delta\varphi=0$。
+
+**Step 2.** 【主張：$z\in D_{\varepsilon+\delta}$ なら $(\rho_{\delta}*W_{\varepsilon})(z)=W_{\varepsilon}(z)$】$\overline{B}(z,\delta)\subset D_{\varepsilon}$ で、$W_{\varepsilon}$ はそこで $C^{2}$ 級の調和関数なので、\ref{pde:mean-value-property.2} から $0<s\le\delta$ で $\int_{S^{N-1}}W_{\varepsilon}(z+s\theta)\,d\sigma(\theta)=N\omega_{N}W_{\varepsilon}(z)$。$\rho_{\delta}(-\zeta)=q_{\delta}(|\zeta|)$ と極座標（\ref{meas:polar-decomposition.2}。被積分関数は有界で台がコンパクトなので正の部分と負の部分に分けて使う）から
+$$
+(\rho_{\delta}*W_{\varepsilon})(z)=\int_{0}^{\delta}q_{\delta}(s)\Bigl(\int_{S^{N-1}}W_{\varepsilon}(z+s\theta)\,d\sigma\Bigr)s^{N-1}ds=W_{\varepsilon}(z)\,N\omega_{N}\int_{0}^{\infty}q_{\delta}(s)s^{N-1}ds,
+$$
+最後の積分は \ref{meas:polar-radial.2} から $\int\rho_{\delta}=1$ に等しい。
+
+**Step 3.** 【主張：$D_{\varepsilon+\delta}$ の上で $W_{\varepsilon}=W_{\delta}$】$z\in D_{\varepsilon+\delta}$ について、$(y,x)\mapsto\rho_{\delta}(z-y)\rho_{\varepsilon}(y-x)W(x)$ は $\overline{B}(z,\delta)\times\overline{B}(z,\varepsilon+\delta)$ の外で $0$ で、$W$ はこのコンパクト集合（$\subset D$）の上で可積分なので、フビニの定理から積分の順序を替えられて
+$$
+\rho_{\delta}*(\rho_{\varepsilon}*W)(z)=\int\Bigl(\int\rho_{\delta}(z-y)\rho_{\varepsilon}(y-x)\,dy\Bigr)W(x)\,dx=\bigl((\rho_{\delta}*\rho_{\varepsilon})*W\bigr)(z).
+$$
+$\rho_{\delta}*\rho_{\varepsilon}=\rho_{\varepsilon}*\rho_{\delta}$（変数 $y\mapsto z-x-y$ の置き換え）なので、同じ式で $\varepsilon,\delta$ を入れ替えたものに等しい。Step 2 を両方の順で使うと $W_{\varepsilon}(z)=\rho_{\delta}*W_{\varepsilon}(z)=\rho_{\varepsilon}*W_{\delta}(z)=W_{\delta}(z)$。
+
+**Step 4.** 【主張：結論】$\delta>0$ を固定する。コンパクト集合 $K\subset D_{2\delta}$ について、$\varepsilon<\delta$ なら Step 3 から $K$ の上で $W_{\varepsilon}=W_{\delta}$、一方 \ref{fa:mollification.3} から $\varepsilon\to0$ で $W_{\varepsilon}\to W$（$L^{1}(K)$）。よって $K$ の上で a.e. に $W=W_{\delta}$。$D_{2\delta}$ は可算個のコンパクト集合の和なので、$D_{2\delta}$ の上で a.e. に $W=W_{\delta}$。$\delta'<\delta$ なら $D_{2\delta}$ の上で $W_{\delta}=W_{\delta'}$（Step 3）なので、$z\in D_{2\delta}$ のとき $H(z)\defeq W_{\delta}(z)$ は $\delta$ の選び方によらない。$H$ は $D=\bigcup_{m}D_{2/m}$ の上で $C^{\infty}$ 級・調和（Step 1）で、a.e. で $W$ に等しい。
+
+::: hypcheck
+- **放射的な軟化子**：Step 2 で平均値の性質から $\rho_{\delta}*W_{\varepsilon}=W_{\varepsilon}$ を出すのに使った。
+- **$W\in L_{\mathrm{loc}}^{1}$**：軟化が定義されること、Step 3 のフビニ、Step 4 の $L^{1}$ 収束に使った。$W$ の微分可能性は一切仮定していない。
+- **公理**：選択公理は使わない（Step 4 の可算個のコンパクト集合は、たとえば $\{z\in D_{2\delta}:|z|\le m,\ \operatorname{dist}(z,\mathbb{R}^{N}\setminus D_{2\delta})\ge1/m\}$ と明示できる）。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 同じ証明は、定数係数で「平均値の性質」に当たる不変性をもつ作用素にしか通らない。変数係数の作用素では、差分商による評価で正則性を 1 階ずつ上げていく（\see[弱解の正則性]{pde:page-regularity}）。古典的手法の系列では、この補題は「ここでは証明しない」とした（\ref{pde:mean-value-converse} の補足）。そこでの平均値の性質の逆は連続関数についてのもので、この補題はそれを $L_{\mathrm{loc}}^{1}$ の関数に広げたものである。
+
+**似た定理.** 超関数の言葉では、「$\Delta T=0$ を満たす超関数 $T$ は滑らかな関数である」（ラプラシアンの**楕円正則性**）。閉多様体上の楕円型作用素の正則性 \see{gl:elliptic-regularity} はその一般化である。
+
+**高い視点：ならしても動かない.** 弱い意味の調和関数をならした $W_{\varepsilon}$ は本物の調和関数になり、本物の調和関数は放射的なならしで動かない。だから、どの細かさでならしても同じ関数 $W_{\delta}$ が得られ、それがもとの $W$ に一致する。「ならしの不動点は滑らか」（\ref{pde:mean-value-converse} の補足）の、弱い関数への延長である。
+:::
+
+::: corollary ラプラシアンの弱い固有関数は滑らか {#pde:dirichlet-eigen-smooth keywords="weak eigenfunctions of the Dirichlet Laplacian are C^infinity in the interior and satisfy -Delta u = lambda u classically; proof by lifting u(x) cosh(sqrt(lambda) t) to a weakly harmonic function in one more variable and Weyl's lemma" index="固有関数の滑らかさ（ラプラシアン）|こゆうかんすうのなめらかさらぷらしあん"}
+$\lambda\in\mathbb{R}$、$u\in H^{1}(\Omega)$ がすべての $\varphi\in C_{c}^{\infty}(\Omega)$ について $\int_{\Omega}\nabla u\cdot\nabla\varphi=\lambda\int_{\Omega}u\varphi$ を満たすとする（とくに $-\Delta$ の弱い固有関数）。このとき $u$ は a.e. で $C^{\infty}(\Omega)$ の関数 $g$ に等しく、$\Omega$ の各点で $-\Delta g=\lambda g$。
+:::
+
+::: proof
+$\kappa(t)\defeq\cosh(\sqrt{\lambda}\,t)$（$\lambda>0$）、$\kappa\defeq1$（$\lambda=0$）、$\kappa(t)\defeq\cos(\sqrt{-\lambda}\,t)$（$\lambda<0$）とおくと $\kappa''=\lambda\kappa$, $\kappa(0)=1$。$D\defeq\Omega\times\mathbb{R}\subset\mathbb{R}^{n+1}$、$W(x,t)\defeq u(x)\kappa(t)$ とする。$u\in L^{2}(\Omega)\subset L^{1}(\Omega)$ なので $W\in L_{\mathrm{loc}}^{1}(D)$。
+
+**Step 1.** 【主張：すべての $\varphi\in C_{c}^{\infty}(D)$ で $\int_{D}W\,(\Delta_{x}\varphi+\partial_{t}^{2}\varphi)=0$】各 $t$ で $\psi_{t}\defeq\varphi(\cdot,t)\in C_{c}^{\infty}(\Omega)$。弱微分の定義（\ref{fa:sobolev-space.1}）を $\partial_{i}\psi_{t}$ に使うと $\int u\,\partial_{i}^{2}\psi_{t}=-\int\partial_{i}u\,\partial_{i}\psi_{t}$ なので、仮定から $\int_{\Omega}u\,\Delta_{x}\psi_{t}=-\int\nabla u\cdot\nabla\psi_{t}=-\lambda\int_{\Omega}u\psi_{t}$。各 $x$ では、台がコンパクトなので 2 回の部分積分で $\int_{\mathbb{R}}\kappa\,\partial_{t}^{2}\varphi(x,\cdot)\,dt=\lambda\int_{\mathbb{R}}\kappa\,\varphi(x,\cdot)\,dt$。フビニの定理で順に積分すると
+$$
+\int_{D}W\Delta_{x}\varphi=-\lambda\int_{D}u\kappa\varphi,\qquad\int_{D}W\partial_{t}^{2}\varphi=\lambda\int_{D}u\kappa\varphi,
+$$
+和は $0$。
+
+**Step 2.** 【主張：$u$ は a.e. で $C^{\infty}$ 関数 $g$ に等しく、$D$ の各点で $H(x,t)=g(x)\kappa(t)$】\ref{pde:dirichlet-eigen-weyl}（$N=n+1$）から、調和関数 $H\in C^{\infty}(D)$ で a.e. に $W=H$ となるものがある。フビニの定理から、a.e. の $t$ で「a.e. の $x$ で $H(x,t)=u(x)\kappa(t)$」が成り立つ。$\kappa$ の零点は可算個なので、そのような $t_{0}$ で $\kappa(t_{0})\ne0$ のものがとれ、$g(x)\defeq H(x,t_{0})/\kappa(t_{0})$ は $C^{\infty}(\Omega)$ の元で a.e. に $u$ に等しい。すると $H$ と $g(x)\kappa(t)$ は $D$ の上の連続関数で a.e. に等しいので、すべての点で等しい（違う点の集合は開集合で測度 $0$ なので空）。
+
+**Step 3.** 【主張：$-\Delta g=\lambda g$】$0=\Delta H(x,t)=\kappa(t)\Delta g(x)+g(x)\kappa''(t)=\kappa(t)\bigl(\Delta g(x)+\lambda g(x)\bigr)$ に $t=0$ を入れる。
+
+::: hypcheck
+- **作用素がラプラシアン（定数係数）であること**：Step 1 で $u(x)\kappa(t)$ が $n+1$ 変数のラプラス方程式を満たすことに使った。変数係数の作用素ではこの持ち上げは使えない。係数が滑らかな一般の作用素では、差分商による内部正則性（\see{pde:reg-interior-smooth}）から同じ結論が得られる。ここではそれに依存しない証明をとった。
+- **境界条件**：使っていない（$u\in H_{0}^{1}$ は不要で、$\Omega$ の内部の滑らかさだけを示した）。境界まで滑らかかどうかは境界の正則性による（\see[弱解の正則性]{pde:page-regularity}）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+## 最小固有値の単純性と正値性 {#pde:sec-me-principal}
+
+::: theorem 主固有値の単純性と正の固有関数 {#pde:dirichlet-eigen-principal keywords="principal Dirichlet eigenvalue of the Laplacian on a connected bounded open set: every eigenfunction of lambda_1 has a smooth representative of constant strict sign, lambda_1 is simple, the first eigenfunction can be chosen positive, eigenfunctions of higher eigenvalues change sign, lambda_2 > lambda_1" index="主固有値|しゅこゆうち, 第 1 固有値の単純性|だいいちこゆうちのたんじゅんせい, 正の固有関数|せいのこゆうかんすう, 最小固有値の単純性|さいしょうこゆうちのたんじゅんせい"}
+$\Omega$ を**連結**な有界開集合、$\lambda_{1}$ をディリクレ・ラプラシアンの最小固有値とする。
+1. 固有値 $\lambda_{1}$ の弱い固有関数は、$\Omega$ のすべての点で正であるか、すべての点で負である $C^{\infty}$ の代表をもつ。
+2. $\dim N_{\lambda_{1}}=1$（$\lambda_{1}$ は単純）。とくに $\|e_{1}\|_{2}=1$ で $\Omega$ の各点で $e_{1}>0$ となる固有関数がただ一つある。
+3. 固有値 $\lambda\ne\lambda_{1}$ の弱い固有関数は、a.e. で $\ge0$ にも、a.e. で $\le0$ にもならない（符号を変える）。また $\lambda_{2}>\lambda_{1}$。
+:::
+
+::: intuition
+つながった領域で膜を固定して振動させると、いちばん低い音の振動の形は一つしかなく、膜全体が同じ向きにふくらむ。それより高い音の形は、必ず膜のどこかが逆向きに動く。
+:::
+
+::: proof
+**Step 1.** 【主張：$u\in N_{\lambda_{1}}\setminus\{0\}$ なら $|u|\in N_{\lambda_{1}}$】\ref{pde:wmp-h10-truncation.2} から $|u|\in H_{0}^{1}$、\ref{pde:wmp-positive-part.1} から a.e. で $|\nabla|u||=|\nabla u|$。よって $R(|u|)=R(u)$ で、\ref{pde:dirichlet-eigen-variational.3} から $R(u)=\lambda_{1}$、同じ定理から $R(|u|)=\lambda_{1}$ となる $|u|$ は $N_{\lambda_{1}}$ に入る。
+
+**Step 2.** 【主張：$u$, $|u|$ の $C^{\infty}$ の代表 $g$, $h$ について、各点で $h=|g|>0$】代表の存在は \ref{pde:dirichlet-eigen-smooth}。$|g|$ と $h$ は連続で a.e. に等しい（どちらも $|u|$）ので、各点で等しい。$h\ge0$ で $\Delta h=-\lambda_{1}h\le0$（$\lambda_{1}>0$）。ある $x_{0}$ で $h(x_{0})=0$ と仮定し、$w\defeq-h$ とおく。$\overline{B}(x,R)\subset\Omega$ なら、\ref{pde:mean-value-property.1} から $0<r\le R$ で $\frac{d}{dr}S_{r}w(x)=\frac{r}{n}A_{r}(\Delta w)(x)\ge0$ なので $S_{r}w(x)$ は $r$ について増加し、$w$ の連続性から $|S_{r}w(x)-w(x)|\le\max_{|y-x|=r}|w(y)-w(x)|\to0$（$r\to0$）。よって $w(x)\le S_{r}w(x)$ で、$w$ は局所的な劣平均値の性質をもつ。$w\le0=w(x_{0})$ なので $w$ は $x_{0}$ で上限をとり、$\Omega$ が連結なので \ref{pde:subharmonic-local-maximum.1} から $w$ は定数 $0$、すなわち a.e. で $u=0$ となって $u\ne0$ に反する。
+
+**Step 3.** 【主張：1】Step 2 から $g$ は $\Omega$ のどの点でも $0$ でない。$\{g>0\}$ と $\{g<0\}$ は互いに素な開集合で和が $\Omega$ なので、$\Omega$ の連結性からどちらかが空。
+
+**Step 4.** 【主張：2】$u,v\in N_{\lambda_{1}}\setminus\{0\}$ とする。1 から $v$ は（代表をとって）$\Omega$ の各点で同じ符号なので $\int_{\Omega}v\ne0$（$\Omega$ は有界なので $L^{2}\subset L^{1}$）。$t\defeq\int u/\int v$ とおくと $w\defeq u-tv\in N_{\lambda_{1}}$ で $\int w=0$。$w\ne0$ なら 1 から $w$ は各点で同じ符号で $\int w\ne0$ となり矛盾するので、$u=tv$。よって $\dim N_{\lambda_{1}}=1$。$N_{\lambda_{1}}$ の元を正の向きに正規化すれば $e_{1}$ を得る。
+
+**Step 5.** 【主張：3】$u$ を固有値 $\lambda\ne\lambda_{1}$ の弱い固有関数とする。$B$ の対称性から $\lambda(u,e_{1})=B[u,e_{1}]=B[e_{1},u]=\lambda_{1}(e_{1},u)$ なので $\int ue_{1}=0$。a.e. で $u\ge0$ なら、$e_{1}>0$ から $ue_{1}\ge0$ の積分が $0$ なので a.e. で $u=0$ となり矛盾。$u\le0$ も同様。$\lambda_{2}>\lambda_{1}$ は、\ref{pde:dirichlet-eigen-variational.2} から $N_{\lambda_{1}}=\operatorname{span}\{e_{k}:\lambda_{k}=\lambda_{1}\}$ で、2 からこの $k$ は $1$ だけだから。
+
+::: hypcheck
+- **$\Omega$ の連結性**：Step 2 の強最大値原理（\ref{pde:subharmonic-local-maximum.1}）と Step 3 で使った。外すと偽：$\Omega=B(a,1)\cup B(b,1)$（$|a-b|>2$）なら、2 つの球の最小固有関数をそれぞれ他方で $0$ と延ばしたものは独立な固有関数で、$\lambda_{1}$ は重複度 $2$、差 $\varphi_{a}-\varphi_{b}$ は符号を変える最小固有関数になる。
+- **$L=-\Delta$**：Step 2 で、弱い固有関数の滑らかさ（\ref{pde:dirichlet-eigen-smooth}。定数係数でしか示していない）と、$C^{2}$ 関数の強最大値原理に使った。Step 1・4・5 は、対称な一般の作用素でもそのまま通る。
+- **$\lambda_{1}>0$**：Step 2 で $\Delta h\le0$ に使った（ディリクレ・ラプラシアンでは \ref{fa:dirichlet-eigenfunctions.2}）。
+- **境界の正則性**：使っていない。正値性は内部の性質で、境界での振る舞い（境界まで滑らかか、境界で法線微分が負か）は別の問題である。
+- **解の滑らかさ**：仮定していない。弱い固有関数から出発し、\ref{pde:dirichlet-eigen-smooth} で内部の滑らかさを取り戻した。
+- **公理**：固有関数の基底（$e_{k}$ と $\lambda_{1}$ の存在）を通して従属選択公理と可算選択公理に依存する。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 有界可測な係数をもつ一般の対称な作用素 $L$（$c$ は有界）でも、連結な領域なら 1〜3 は成り立つ。Step 1・4・5 は同じで、Step 2 の代わりに、非負の弱優解についての強最大値原理（ハルナックの不等式から出る）を使う。その証明にはデ・ジョルジ–ナッシュ–モーザーの理論が要るので、ここでは証明しない（Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 8 章）。係数が滑らかなら、正則性の理論（\see[弱解の正則性]{pde:page-regularity}）で固有関数が滑らかになり、古典的な強最大値原理（$c\ge0$ のとき。$c$ が負なら $L+\mu$ に移す）で同じ議論ができる。非対称な作用素（$b\ne0$）でも、実数の主固有値が存在して単純で、正の固有関数をもつことが、クライン–ルトマンの定理（正の作用素のペロン–フロベニウス型の定理）を使って示される（Evans『Partial Differential Equations』第 6.5 節）。
+
+**似た定理.** 正の成分をもつ行列の最大固有値が単純で正の固有ベクトルをもつ（ペロン–フロベニウスの定理）ことと同じ構造である：$L$ の解作用素（逆作用素）は正の関数を正の関数に移し（\ref{pde:wmp-comparison.2}）、その最大固有値 $1/\lambda_{1}$ の固有ベクトルが正になる。常微分方程式では、スツルム–リウヴィル問題の $k$ 番目の固有関数がちょうど $k-1$ 個の零点をもつ（\see{ode:page-eigenfunction-expansion}）ことの $k=1$ の場合にあたる。
+
+**高い視点：絶対値をとっても損をしない.** 証明の要は Step 1 の「$|u|$ をとってもエネルギーが増えない」ことにある。符号を変える関数を折り返して正にしても、勾配の大きさは変わらない。だから最小のエネルギーを与える形は、折り返した形と同じエネルギーをもつ。最小元は滑らかで（ワイルの補題）、滑らかな非負の優調和関数は内部で $0$ に触れられない（強最大値原理）ので、折り返した形はどこにも折り目をもてず、もとの形は最初から符号を変えていなかったことになる。
+:::
+
+::: corollary 領域の狭義の単調性 {#pde:dirichlet-eigen-strict-monotone keywords="strict domain monotonicity of the first Dirichlet eigenvalue: if Omega is contained in a connected Omega' and Omega' minus Omega has positive measure then lambda_1(Omega) > lambda_1(Omega')" index="領域の単調性（狭義）|りょういきのたんちょうせいきょうぎ"}
+$\Omega\subset\Omega'$ を有界な開集合とし、$\Omega'$ は連結で $|\Omega'\setminus\Omega|>0$ とする。ディリクレ・ラプラシアンについて $\lambda_{1}(\Omega)>\lambda_{1}(\Omega')$。
+:::
+
+::: proof
+\ref{pde:dirichlet-eigen-monotone.1} から $\lambda_{1}(\Omega)\ge\lambda_{1}(\Omega')$。等号と仮定する。$u$ を $\Omega$ の固有値 $\lambda_{1}(\Omega)$ の弱い固有関数とし、\ref{pde:dirichlet-eigen-zero-extension} の延長 $\tilde{u}\in H_{0}^{1}(\Omega')$ をとると、$R_{\Omega'}(\tilde{u})=R_{\Omega}(u)=\lambda_{1}(\Omega)=\lambda_{1}(\Omega')$。\ref{pde:dirichlet-eigen-variational.3} から $\tilde{u}$ は $\Omega'$ の固有値 $\lambda_{1}(\Omega')$ の弱い固有関数で、\ref{pde:dirichlet-eigen-principal.1} から $\Omega'$ のどの点でも $0$ でない連続な代表 $g$ をもつ。ところが $\tilde{u}=0$ が $\Omega'\setminus\Omega$ の上で成り立ち、そこは正の測度をもつので、$g=0$ となる点がある。矛盾。
+:::
+
+$|\Omega'\setminus\Omega|>0$ は外せない：$n\ge3$, $\Omega'=B(0,1)$, $\Omega=B(0,1)\setminus\{0\}$ なら $H_{0}^{1}(\Omega)=H_{0}^{1}(\Omega')$（\ref{pde:weak-elliptic-existence} の補足）なので、固有値はすべて一致する。
+
+## 固有値の例 {#pde:sec-me-examples}
+
+::: proposition 相似変換と固有値 {#pde:dirichlet-eigen-scaling keywords="Dirichlet eigenvalues of the Laplacian are invariant under rigid motions and scale like t^{-2} under dilation by t" index="固有値の相似則|こゆうちのそうじそく"}
+$t>0$, $a\in\mathbb{R}^{n}$, $A$ を直交行列とし、$\Phi(x)\defeq a+tAx$, $\Omega'\defeq\Phi(\Omega)$ とする。ディリクレ・ラプラシアンについて、すべての $k$ で $\lambda_{k}(\Omega')=t^{-2}\lambda_{k}(\Omega)$。
+:::
+
+::: proof
+$u\mapsto u\circ\Phi^{-1}$ は $C_{c}^{\infty}(\Omega)$ を $C_{c}^{\infty}(\Omega')$ の上へ移し、\ref{fa:sobolev-chain-rule} から $H^{1}(\Omega)$ を $H^{1}(\Omega')$ へ有界に移す（逆も同様）。よって閉包どうしの全単射 $H_{0}^{1}(\Omega)\to H_{0}^{1}(\Omega')$ を与える線形写像である。$\nabla(u\circ\Phi^{-1})=t^{-1}A\,(\nabla u)\circ\Phi^{-1}$ で $|A\xi|=|\xi|$、変数変換のヤコビアンは $t^{n}$ なので、
+$$
+\|\nabla(u\circ\Phi^{-1})\|_{L^{2}(\Omega')}^{2}=t^{n-2}\|\nabla u\|_{L^{2}(\Omega)}^{2},\qquad\|u\circ\Phi^{-1}\|_{L^{2}(\Omega')}^{2}=t^{n}\|u\|_{L^{2}(\Omega)}^{2},
+$$
+つまり $R_{\Omega'}(u\circ\Phi^{-1})=t^{-2}R_{\Omega}(u)$。$k$ 次元部分空間は $k$ 次元部分空間に移るので、\ref{pde:dirichlet-eigen-minimax.1} から主張が従う。
+:::
+
+::: example
+**区間.** $\Omega=(0,\ell)$ では $\lambda_{k}=\bigl(\frac{k\pi}{\ell}\bigr)^{2}$、固有関数は $\sqrt{2/\ell}\,\sin\frac{k\pi x}{\ell}$ で、すべて単純である（$\ell=1$ は \ref{fa:prob-lm-eigen-interval}、一般の $\ell$ は \ref{pde:dirichlet-eigen-scaling}。固有関数は $u(x)\mapsto u(x/\ell)$ で移る）。$\sin\frac{\pi x}{\ell}>0$ は \ref{pde:dirichlet-eigen-principal.1} のとおりで、$k\ge2$ の固有関数は区間の内部に $k-1$ 個の零点をもち符号を変える。\ref{pde:dirichlet-eigen-variational.3} は、$u\in H_{0}^{1}(0,\ell)$ について
+$$
+\int_{0}^{\ell}u'(x)^{2}\,dx\ge\frac{\pi^{2}}{\ell^{2}}\int_{0}^{\ell}u(x)^{2}\,dx
+$$
+（ヴィルティンガーの不等式）で、定数 $\frac{\pi^{2}}{\ell^{2}}$ は最良であることを言っている。ポアンカレの不等式（\ref{fa:poincare-inequality}。帯の幅 $2a=\ell$）が与える定数 $\frac{1}{\ell^{2}}$ はこれより約 $10$ 倍弱い。
+:::
+
+::: proposition 長方形の固有値 {#pde:dirichlet-eigen-rectangle keywords="Dirichlet eigenvalues of the Laplacian on a rectangle (0,a) x (0,b): pi^2 (j^2/a^2 + k^2/b^2) with eigenfunctions sin(j pi x/a) sin(k pi y/b), which form an orthonormal basis of L^2" index="長方形の固有値|ちょうほうけいのこゆうち"}
+$Q\defeq(0,a)\times(0,b)\subset\mathbb{R}^{2}$ とし、$j,k\ge1$ について
+$$
+e_{jk}(x,y)\defeq\frac{2}{\sqrt{ab}}\sin\frac{j\pi x}{a}\sin\frac{k\pi y}{b},\qquad\mu_{jk}\defeq\pi^{2}\Bigl(\frac{j^{2}}{a^{2}}+\frac{k^{2}}{b^{2}}\Bigr)
+$$
+とおく。
+1. $(e_{jk})_{j,k\ge1}$ は $L^{2}(Q)$ の正規直交基底で、各 $e_{jk}\in H_{0}^{1}(Q)$ は $-\Delta$ の固有値 $\mu_{jk}$ の弱い固有関数である。
+2. $Q$ のディリクレ・ラプラシアンの固有値は $\{\mu_{jk}\}$ だけで、固有値 $\mu$ の重複度は $\mu_{jk}=\mu$ となる組 $(j,k)$ の個数に等しい。
+:::
+
+::: proof
+**Step 1.** 【主張：$(e_{jk})$ は正規直交で、各 $e_{jk}$ は $H_{0}^{1}(Q)$ に入る固有値 $\mu_{jk}$ の弱い固有関数】$\int_{0}^{a}\sin\frac{j\pi x}{a}\sin\frac{j'\pi x}{a}dx=\frac{a}{2}\delta_{jj'}$ とフビニの定理から正規直交。$e_{jk}\in C^{\infty}(\overline{Q})$ は $\partial Q$ で $0$ で、偏導関数は $\overline{Q}$ で有界連続なので（部分積分から）弱微分でもあり $e_{jk}\in H^{1}(Q)$。\ref{pde:wmp-boundary-consistency.4} から $e_{jk}\in H_{0}^{1}(Q)$。各点で $-\Delta e_{jk}=\mu_{jk}e_{jk}$ なので、\ref{pde:weak-elliptic-classical.1}（$a^{ij}=\delta_{ij}$, $b=c=0$, 右辺 $\mu_{jk}e_{jk}\in L^{2}$）から弱い固有関数。
+
+**Step 2.** 【主張：$f\in L^{2}(Q)$ がすべての $e_{jk}$ と直交すれば $f=0$】フビニの定理から a.e. の $y$ で $f(\cdot,y)\in L^{2}(0,a)$ で、$F_{j}(y)\defeq\int_{0}^{a}f(x,y)\sin\frac{j\pi x}{a}dx$ は $L^{2}(0,b)$ に入り（コーシー–シュワルツ）、仮定はすべての $k$ で $\int_{0}^{b}F_{j}(y)\sin\frac{k\pi y}{b}dy=0$ と書ける。$[0,b]$ を $[0,\pi]$ に $y\mapsto\pi y/b$ で移して \ref{pde:sep-sine-cosine.1}（正弦係数がすべて $0$ なら $L^{2}$ ノルムが $0$）を使うと、a.e. で $F_{j}=0$。可算個の零集合の和は零集合なので、a.e. の $y$ ですべての $j$ について $F_{j}(y)=0$ で、同じく \ref{pde:sep-sine-cosine.1} から $f(\cdot,y)=0$（a.e.）。フビニの定理から $\|f\|_{L^{2}(Q)}=0$。
+
+**Step 3.** 【主張：1・2】1 は Step 1・2 と \ref{fa:orthonormal-basis.1}。$\mu_{jk}\le M$ となる組は有限個なので、$(e_{jk})$ を $\mu_{jk}$ の小さい順に並べると、固有値が単調に増加して $\infty$ に発散する固有関数の正規直交基底になる。\ref{pde:dirichlet-eigen-variational.2}（その前提の注意のとおり、どの基底についても成り立つ）から 2 を得る。
+:::
+
+::: example
+**正方形.** 一辺 $s$ の正方形では $\mu_{jk}=\frac{\pi^{2}}{s^{2}}(j^{2}+k^{2})$ で、$j^{2}+k^{2}$ の値は小さい順に $2,5,5,8,10,10,13,13,\dots$。よって $\lambda_{1}=\frac{2\pi^{2}}{s^{2}}$（単純で、固有関数 $\sin\frac{\pi x}{s}\sin\frac{\pi y}{s}>0$）、$\lambda_{2}=\lambda_{3}=\frac{5\pi^{2}}{s^{2}}$（重複度 $2$）。正方形の対称性が固有値を重ねている。長方形 $a\ne b$ で $a/b$ が「一般の」比なら、$\mu_{jk}$ はすべて異なる。
+
+**円板（補足）.** 半径 $\rho_{0}$ の円板では、極座標で $u=f(r)\cos m\vartheta$ または $f(r)\sin m\vartheta$ と変数分離すると、$f$ はベッセルの微分方程式 $f''+\frac1rf'+(\lambda-\frac{m^{2}}{r^{2}})f=0$ を満たし、原点で有界な解はベッセル関数 $J_{m}(\sqrt{\lambda}\,r)$ である。境界条件 $f(\rho_{0})=0$ から $\lambda=j_{m,k}^{2}/\rho_{0}^{2}$（$j_{m,k}$ は $J_{m}$ の $k$ 番目の正の零点）。数値は $j_{0,1}^{2}\approx5.783$, $j_{1,1}^{2}\approx14.682$, $j_{2,1}^{2}\approx26.375$, $j_{0,2}^{2}\approx30.471$ で、$\lambda_{1}=j_{0,1}^{2}/\rho_{0}^{2}$ は単純で固有関数 $J_{0}(j_{0,1}r/\rho_{0})$ は回転対称で正、$m\ge1$ の固有値は $\cos$ と $\sin$ の 2 つで重複度 $2$ をもつ。これらの関数が $L^{2}$ の正規直交基底をなすこと（すべての固有値がこの形であること）は、特異なスツルム–リウヴィル問題としてのベッセル方程式の理論によるので、ここでは証明しない（Courant–Hilbert『Methods of Mathematical Physics』第 I 巻 第 V 章）。
+:::
+
+::: supplement
+**ファーバー–クラーンの不等式.** 同じ面積（体積）の領域の中で、最小固有値がいちばん小さいのは球である：$|\Omega|=|B|$ なら $\lambda_{1}(\Omega)\ge\lambda_{1}(B)$ で、等号は $\Omega$ が球のとき（容量 $0$ の集合の差を除いて）に限る。レイリーが予想し、1920 年代にファーバーとクラーンが独立に、関数を同じ分布をもつ回転対称な関数に並べ替える方法（シュワルツの対称化）で証明した。ここでは証明しない（Chavel『Eigenvalues in Riemannian Geometry』）。たとえば面積 $\pi$ の正方形（一辺 $\sqrt{\pi}$）では $\lambda_{1}=\frac{2\pi^{2}}{\pi}=2\pi\approx6.283$ で、単位円板の $j_{0,1}^{2}\approx5.783$ より大きい。「同じ面積の太鼓の中で、円い太鼓がいちばん低い音を出す」。
+
+**似た定理.** 等周不等式（同じ面積なら円の周長が最小）と同じ形の極値問題で、証明にも等周不等式が使われる。前のページの \ref{pde:prob-me-below-lambda1} と合わせると、ファーバー–クラーンの不等式は「領域の面積だけで、$-\Delta-\mu$ に最大値原理が成り立つ $\mu$ の範囲を保証する」と読める。
+
+**高い視点：太鼓の形は聞こえるか.** 固有値の列 $(\lambda_{k})$ は太鼓の音の高さの全体である。ワイルの法則（\ref{pde:dirichlet-eigen-minimax} の補足）から面積が、ファーバー–クラーンの不等式から「面積のわりに音が低ければ円に近い」ことがわかる。ではすべての $\lambda_{k}$ から形が決まるか、というカッツの問い（1966 年）には、平面でも同じ固有値の列をもつ合同でない多角形の組がある（ゴードン–ウェッブ–ウォルパート、1992 年）という否定的な答えが出ている。
+:::
+
+## 問題 {#pde:sec-me-pe-problems}
+
+::: problem {#pde:prob-me-disk-bounds}
+$B_{\rho_{0}}$ を半径 $\rho_{0}$ の円板とする。
+1. \ref{pde:dirichlet-eigen-monotone}、\ref{pde:dirichlet-eigen-scaling}、\ref{pde:dirichlet-eigen-rectangle} を使って、$\dfrac{\pi^{2}}{2\rho_{0}^{2}}<\lambda_{1}(B_{\rho_{0}})<\dfrac{\pi^{2}}{\rho_{0}^{2}}$ を示せ。
+2. 例の値 $j_{0,1}^{2}\approx5.783$ がこの範囲（$\rho_{0}=1$ で約 $4.935$ と $9.870$ の間）にあることを確かめよ。
+:::
+
+::: solution
+**1.** \ref{pde:dirichlet-eigen-scaling} から $\lambda_{1}(B_{\rho_{0}})=\rho_{0}^{-2}\lambda_{1}(B_{1})$ なので $\rho_{0}=1$ でよい。単位円板 $B_{1}$ は一辺 $\sqrt2$ の正方形 $Q_{1}=(-\frac{1}{\sqrt2},\frac{1}{\sqrt2})^{2}$ を含み、一辺 $2$ の正方形 $Q_{2}=(-1,1)^{2}$ に含まれる。\ref{pde:dirichlet-eigen-rectangle}（と平行移動、\ref{pde:dirichlet-eigen-scaling}）から $\lambda_{1}(Q_{1})=\frac{2\pi^{2}}{2}=\pi^{2}$, $\lambda_{1}(Q_{2})=\frac{2\pi^{2}}{4}=\frac{\pi^{2}}{2}$。\ref{pde:dirichlet-eigen-monotone.1} から $\frac{\pi^{2}}{2}\le\lambda_{1}(B_{1})\le\pi^{2}$。狭義の不等号は \ref{pde:dirichlet-eigen-strict-monotone}：$B_{1}$ と $Q_{2}$ は連結で、$Q_{2}\setminus B_{1}$（4 つの角）と $B_{1}\setminus Q_{1}$（4 つの弓形）はどちらも正の面積をもつ。
+
+**2.** $\frac{\pi^{2}}{2}\approx4.935<5.783<9.870\approx\pi^{2}$。下からの評価のほうがずっと近いのは、外接正方形の角が円板から少ししかはみ出さず、振動の小さい端の部分しか加えていないからである。
+:::
+
+::: problem {#pde:prob-me-square-nodal}
+正方形 $Q=(0,\pi)^{2}$ のディリクレ・ラプラシアンを考える。
+1. $\lambda_{1}=2$, $\lambda_{2}=\lambda_{3}=5$ で、固有値 $5$ の固有空間は $\sin x\sin2y$ と $\sin2x\sin y$ で張られることを示せ。
+2. $u_{\pm}\defeq\sin x\sin2y\pm\sin2x\sin y$ が $Q$ の中で $0$ になる点の集合を求め、どちらも符号を変えることを確かめよ。これが \ref{pde:dirichlet-eigen-principal.3} と合っていることを説明せよ。
+:::
+
+::: solution
+**1.** \ref{pde:dirichlet-eigen-rectangle} で $a=b=\pi$ とすると $\mu_{jk}=j^{2}+k^{2}$。$j,k\ge1$ で $j^{2}+k^{2}=2$ となるのは $(1,1)$ だけ、$3,4$ となる組はなく、$5$ となるのは $(1,2),(2,1)$ だけ。よって $\lambda_{1}=2$, $\lambda_{2}=\lambda_{3}=5$ で、2 から固有空間は $e_{12},e_{21}$ で張られる。
+
+**2.** $\sin2x=2\sin x\cos x$ から $u_{\pm}=2\sin x\sin y\,(\cos y\pm\cos x)$。$Q$ の中では $\sin x\sin y>0$ なので、$u_{\pm}=0$ は $\cos y=\mp\cos x$ と同値。$u_{+}$：$\cos y=-\cos x=\cos(\pi-x)$ で、$x,y\in(0,\pi)$ では $\cos$ は単射なので $y=\pi-x$（反対角線）。$u_{-}$：$y=x$（対角線）。どちらも、線の片側で $\cos y\pm\cos x$ が正、反対側で負なので符号を変える（たとえば $u_{-}$ は $y<x$ で $\cos y>\cos x$ から正、$y>x$ で負）。\ref{pde:dirichlet-eigen-principal.3} は、固有値 $5\ne\lambda_{1}$ の固有関数がすべて符号を変えることを言っており、固有空間のどの元 $\alpha\sin x\sin2y+\beta\sin2x\sin y=2\sin x\sin y(\alpha\cos y+\beta\cos x)$ も、$(\alpha,\beta)\ne0$ なら $\alpha\cos y+\beta\cos x$ が $Q$ の中で正負両方の値をとる（$x,y$ をそれぞれ $0$ と $\pi$ の近くに動かすと $\pm(|\alpha|+|\beta|)$ に近い値が出る）ことと一致する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
