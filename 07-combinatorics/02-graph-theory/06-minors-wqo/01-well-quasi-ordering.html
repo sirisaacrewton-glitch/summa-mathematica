@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>整擬順序とクラスカルの木定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/06-minors-wqo/01-well-quasi-ordering.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 整擬順序とクラスカルの木定理 {#graph:page-wqo-kruskal keywords="quasi-ordering, well-quasi-ordering, good sequence, bad sequence, minimal bad sequence, Dickson's lemma, Higman's lemma, Kruskal's tree theorem, rooted tree, tree-order, topological minor"}
+
+グラフマイナー定理（\ref[グラフマイナー定理の概観]{graph:page-graph-minor-theorem}）は「有限グラフ全体はマイナー関係で**整擬順序**になる」と述べる。このページでは、その基礎となる整擬順序の一般論と、木の場合の答えであるクラスカルの木定理を証明する。中心となる道具は、ナッシュ＝ウィリアムズの**極小な悪い列**の議論である。
+
+## 記法と定義の確認 {#graph:sec-wq-notation}
+
+::: notation
+- 体系は $\ZF$ に従属選択公理を加えたもの（$\ZFC$ で十分）。極小な悪い列の構成（\ref{graph:higman-lemma} の Step 1）で、可算回の選択を続けて行う。
+- グラフ・木・細分・位相的マイナーは \ref{graph:page-graphs}, \ref{graph:tree}, \ref{graph:subdivision} のとおりで、グラフは有限とする。$\abs{T}$ は頂点の数。
+- 鎖と反鎖は \ref{graph:chain-antichain} の定義を擬順序にもそのまま使う：どの 2 元も比較できない部分集合が**反鎖**である。
+- $\N=\{0,1,2,\dots\}$。列 $(x_{n})_{n\in\N}$ を単に「列」という。
+:::
+
+## 擬順序と整擬順序 {#graph:sec-wq-wqo}
+
+::: definition 擬順序と整擬順序 {#graph:wqo keywords="quasi-ordering, preorder, well-quasi-ordering, good pair, good sequence, bad sequence" index="擬順序|ぎじゅんじょ, 整擬順序|せいぎじゅんじょ, 良い列|よいれつ, 悪い列|わるいれつ"}
+集合 $X$ 上の反射的かつ推移的な関係 $\le$ を**擬順序**という。$x\le y$ かつ $y\not\le x$ のとき $x<y$ と書く。列 $(x_{n})$ が $i<j$ かつ $x_{i}\le x_{j}$ となる添字の組 $(i,j)$（**良い組**）をもつとき**良い列**、もたないとき**悪い列**という。$X$ のすべての列が良いとき、$\le$ を**整擬順序**という。
+:::
+
+::: intuition
+整擬順序とは「どんなに無限に並べても、どこかで前のものが後ろのものの中に埋め込まれてしまう」順序である。無限に「互いに埋め込めないもの」を並べることも、無限に「真に小さくなり続ける」ことも許されない、というのが次の命題の内容である。
+:::
+
+::: example
+1. $(\N,\le)$ は整擬順序：列 $(x_{n})$ で $x_{0}>x_{1}>\cdots$ が無限に続くことはないので、ある $i$ で $x_{i}\le x_{i+1}$。
+2. 有限集合上の等号 $=$ は整擬順序（鳩の巣原理で、ある $i<j$ で $x_{i}=x_{j}$）。無限集合上の等号は整擬順序でない（相異なる元の列は悪い）。
+3. $(\mathbb{Z},\le)$ は整擬順序でない（$0,-1,-2,\dots$ は悪い列）。
+4. 正の整数の整除関係は整擬順序でない（素数の列 $2,3,5,7,\dots$ は無限反鎖で、悪い列）。
+:::
+
+::: proposition 整擬順序の言い換え {#graph:wqo-equivalents keywords="wqo iff no infinite antichain and no infinite strictly decreasing sequence iff every sequence has an increasing subsequence" index="整擬順序の言い換え|せいぎじゅんじょのいいかえ" refname="整擬順序の言い換え"}
+擬順序集合 $(X,\le)$ について次は同値である。
+1. $\le$ は整擬順序である。
+2. $X$ は無限反鎖も、無限の真に減少する列 $x_{0}>x_{1}>\cdots$ も含まない。
+3. $X$ の任意の列は、**単調増加な部分列** $x_{n_{0}}\le x_{n_{1}}\le x_{n_{2}}\le\cdots$（$n_{0}<n_{1}<\cdots$）をもつ。
+:::
+
+::: intuition
+整擬順序であることを壊す原因は二つしかない：互いに比べられないものが無限にあること（無限反鎖）と、どこまでも小さくなり続けること（無限降下）である。両方がなければ、どんな列からも「だんだん大きくなる」部分列を抜き出せる。
+:::
+
+::: proof
+**Step 1（3 ⇒ 1）.** 単調増加な部分列の最初の 2 項 $(n_{0},n_{1})$ が良い組である。
+
+**Step 2（1 ⇒ 2）.** 無限反鎖から相異なる元を並べた列は、どの $i<j$ でも $x_{i}\not\le x_{j}$ なので悪い。真に減少する列 $x_{0}>x_{1}>\cdots$ も、$i<j$ なら推移律から $x_{i}>x_{j}$、特に $x_{i}\not\le x_{j}$ なので悪い。どちらも 1 に反する。
+
+**Step 3（2 ⇒ 3 の準備：終端添字）.** 列 $(x_{n})$ について、$j>i$ かつ $x_{i}\le x_{j}$ となる $j$ が存在しない添字 $i$ を**終端**とよぶ。【主張：2 のもとで終端は有限個】終端が無限個あるとし、それを $i_{0}<i_{1}<\cdots$、$y_{k}\defeq x_{i_{k}}$ とおく。$k<l$ なら $i_{k}$ が終端なので $y_{k}\not\le y_{l}$ である。$K\defeq\{k : y_{l}\le y_{k}\text{ となる }l>k\text{ がある}\}$ とおく。
+- $\N\setminus K$ が無限の場合：$k<k'$ がともに $K$ に属さなければ、$y_{k}\not\le y_{k'}$ かつ（$k\notin K$ より）$y_{k'}\not\le y_{k}$ なので比較不能。特に相異なり、$\{y_{k}: k\notin K\}$ は無限反鎖で、2 に反する。
+- $\N\setminus K$ が有限の場合：$k^{*}$ 以上のすべての $k$ が $K$ に属するような $k^{*}$ をとる。$l_{0}\defeq k^{*}$ とし、$l_{t+1}$ を $y_{l}\le y_{l_{t}}$ となる $l>l_{t}$ のうち最小のものとする（$l_{t}\in K$ なので存在する）。$y_{l_{t}}\not\le y_{l_{t+1}}$ でもあるので $y_{l_{t}}>y_{l_{t+1}}$ であり、真に減少する無限列 $y_{l_{0}}>y_{l_{1}}>\cdots$ が得られ、2 に反する。
+
+いずれも矛盾なので、終端は有限個である。
+
+**Step 4（2 ⇒ 3）.** 最後の終端より大きい $n_{0}$ をとる（終端がなければ $n_{0}=0$）。$n_{k}$ が終端でないので、$j>n_{k}$ かつ $x_{n_{k}}\le x_{j}$ となる $j$ がある。その最小のものを $n_{k+1}$ とする（$n_{k+1}>n_{0}$ なので $n_{k+1}$ も終端でない）。こうして単調増加な部分列 $x_{n_{0}}\le x_{n_{1}}\le\cdots$ が得られる。
+:::
+
+::: corollary ディクソンの補題 {#graph:dickson-lemma keywords="Dickson's lemma, product of wqos is wqo, N^k componentwise order" index="ディクソンの補題|でぃくそんのほだい" refname="ディクソンの補題"}
+$(X,\le_{X})$, $(Y,\le_{Y})$ が整擬順序なら、$X\times Y$ 上の成分ごとの順序（$(x,y)\le(x',y')\iff x\le_{X}x'$ かつ $y\le_{Y}y'$）も整擬順序である。特に $\N^{k}$ は成分ごとの順序で整擬順序である。
+:::
+
+::: intuition
+まず 1 つ目の座標で増える部分列を抜き出し、その中からさらに 2 つ目の座標で増える部分列を抜き出せばよい。「単調増加な部分列がとれる」という言い換えのおかげで、条件を一つずつ追加できる。
+:::
+
+::: proof
+**Step 1.** $X\times Y$ の列 $((x_{n},y_{n}))$ をとる。\ref{graph:wqo-equivalents}（1 ⇒ 3）により $(x_{n})$ は単調増加な部分列 $(x_{n_{k}})_{k}$ をもつ。
+
+**Step 2.** 再び \ref{graph:wqo-equivalents} により、$(y_{n_{k}})_{k}$ は単調増加な部分列をもつ。その添字 $n_{k_{0}}<n_{k_{1}}$ について $x_{n_{k_{0}}}\le x_{n_{k_{1}}}$ かつ $y_{n_{k_{0}}}\le y_{n_{k_{1}}}$ なので、良い組が得られる。$\N^{k}$ は $k$ についての帰納法と例 1 から従う。
+:::
+
+## ヒグマンの補題 {#graph:sec-wq-higman}
+
+::: definition 語の埋め込み {#graph:word-embedding keywords="finite words over a quasi-ordered set, subsequence embedding" index="語の埋め込み|ごのうめこみ"}
+擬順序集合 $(X,\le)$ の元の有限列（**語**）全体を $X^{*}$ と書く。語 $u=a_{1}\cdots a_{p}$, $v=b_{1}\cdots b_{q}$ について、狭義単調増加な $\iota\colon\{1,\dots,p\}\to\{1,\dots,q\}$ で、すべての $i$ について $a_{i}\le b_{\iota(i)}$ となるものがあるとき $u\le^{*}v$ と書く。$\le^{*}$ は $X^{*}$ 上の擬順序である。
+:::
+
+::: intuition
+$u\le^{*}v$ は、$v$ からいくつかの文字を消し、残った各文字を（$X$ の順序で）小さい文字に取り替えると $u$ が得られる、ということである。
+:::
+
+::: theorem ヒグマンの補題 {#graph:higman-lemma keywords="Higman's lemma, finite words over a wqo are wqo under subsequence embedding, minimal bad sequence, Nash-Williams" index="ヒグマンの補題|ひぐまんのほだい, 極小な悪い列|きょくしょうなわるいれつ" refname="ヒグマンの補題"}
+$(X,\le)$ が整擬順序なら、$(X^{*},\le^{*})$ も整擬順序である。
+:::
+
+::: intuition
+アルファベットの各文字が「比べられる」なら、文字列も「部分列として埋め込めるか」で比べられ、やはり整擬順序になる。たとえば 2 文字 $\{a,b\}$（等号）の上では、どんな無限の文字列の並びにも、前の文字列が後ろの文字列の（連続とは限らない）部分列になっている組がある。
+:::
+
+::: proof
+**Step 1（極小な悪い列の構成）.** 結論が成り立たないとし、$X^{*}$ に悪い列があるとする。次の規則で語 $w_{0},w_{1},\dots$ を再帰的に選ぶ：$w_{0},\dots,w_{n-1}$ が選ばれ、それで始まる悪い列が存在するとき、$w_{0},\dots,w_{n-1},w$ で始まる悪い列が存在するような語 $w$ のうち、長さが最小のものを一つ選んで $w_{n}$ とする（長さは自然数なので最小値がある。この選択の繰り返しに従属選択公理を使う）。$n=0$ では仮定から条件が満たされる。
+
+**Step 2（$(w_{n})$ は悪い）.** 【主張：$(w_{n})$ は悪い列】良い組 $(i,j)$ があったとすると、$w_{0},\dots,w_{j}$ で始まる列はすべて良いが、構成から $w_{0},\dots,w_{j}$ で始まる悪い列が存在する。矛盾。
+
+**Step 3（先頭の文字を取り除く）.** 空語 $\varepsilon$ はすべての語以下なので、ある $w_{n}=\varepsilon$ なら $(n,n+1)$ が良い組になる。よってどの $w_{n}$ も空でなく、$w_{n}=a_{n}v_{n}$（$a_{n}\in X$ は先頭の文字、$v_{n}$ は残り）と書ける。$X$ は**整擬順序**なので、\ref{graph:wqo-equivalents} により $(a_{n})$ は単調増加な部分列 $a_{n_{0}}\le a_{n_{1}}\le\cdots$ をもつ。
+
+**Step 4（短い列は良い）.** 列
+$$w_{0},\ \dots,\ w_{n_{0}-1},\ v_{n_{0}},\ v_{n_{1}},\ v_{n_{2}},\ \dots$$
+を考える。$v_{n_{0}}$ は $w_{n_{0}}$ より短く、$w_{0},\dots,w_{n_{0}-1},v_{n_{0}}$ で始まるので、Step 1 の**長さの最小性**からこの列は良い。その良い組を場合分けする。
+- 両方が $w_{i},w_{j}$（$i<j<n_{0}$）：$(w_{n})$ が悪いことに反する。
+- $w_{i}$ と $v_{n_{k}}$（$i<n_{0}\le n_{k}$）：$v_{n_{k}}\le^{*}w_{n_{k}}$（後ろの部分）なので推移律から $w_{i}\le^{*}w_{n_{k}}$ となり、$(w_{n})$ が悪いことに反する。
+- $v_{n_{k}}$ と $v_{n_{l}}$（$k<l$）：$v_{n_{k}}\le^{*}v_{n_{l}}$ の埋め込みの前に、先頭の $a_{n_{k}}\le a_{n_{l}}$ を対応させれば $w_{n_{k}}\le^{*}w_{n_{l}}$ となり、$n_{k}<n_{l}$ なので $(w_{n})$ が悪いことに反する。
+
+いずれも矛盾であり、$X^{*}$ は整擬順序である。
+:::
+
+::: corollary 有限部分集合の整擬順序 {#graph:finite-subsets-wqo keywords="finite subsets of a wqo under injective domination are wqo" index="有限部分集合の整擬順序|ゆうげんぶぶんしゅうごうのせいぎじゅんじょ"}
+$(X,\le)$ が整擬順序とする。$X$ の有限部分集合 $A,B$ について、単射 $f\colon A\to B$ で各 $a\in A$ について $a\le f(a)$ となるものがあるとき $A\le B$ と書くと、これは $X$ の有限部分集合全体の上の整擬順序である。
+:::
+
+::: proof
+有限部分集合の列 $(A_{n})$ について、各 $A_{n}$ の元を一列に並べた語 $u_{n}$ をとる（並べ方は任意）。\ref{graph:higman-lemma} により $u_{i}\le^{*}u_{j}$ となる $i<j$ がある。埋め込み $\iota$ は狭義単調なので単射であり、$u_{i}$ の $k$ 番目の文字を $u_{j}$ の $\iota(k)$ 番目の文字に送る写像は単射 $f\colon A_{i}\to A_{j}$ で $a\le f(a)$ を満たす（$A_{i}$ の元は $u_{i}$ にちょうど一度ずつ現れる）。
+:::
+
+## クラスカルの木定理 {#graph:sec-wq-kruskal}
+
+::: definition 根付き木と木の順序 {#graph:rooted-tree keywords="rooted tree, root, tree-order, rooted embedding" index="根付き木|ねつききぎ, 根（木の）|ね, 木の順序|きのじゅんじょ"}
+木 $T$ と頂点 $r\in V(T)$ の組を**根付き木**、$r$ を**根**という。$x,y\in V(T)$ について、$x$ が $r$ から $y$ への（一意な）道の上にあるとき $x\le_{T}y$ と書き、$\le_{T}$ を**木の順序**という（$r$ が最小元の半順序である）。根付き木 $T,T'$ について、$T$ のある細分から $T'$ の部分木への同型 $\varphi$ で、$V(T)$ 上で木の順序を保つ（$x\le_{T}y\Rightarrow\varphi(x)\le_{T'}\varphi(y)$）ものがあるとき、$T\le T'$ と書く。
+:::
+
+::: intuition
+木の順序は「根から見た祖先・子孫の関係」である。$T\le T'$ は、$T$ を辺を引き伸ばしながら $T'$ の中に描くとき、祖先は祖先のまま、子孫は子孫のままに描けることを意味する。
+:::
+
+::: theorem クラスカルの木定理 {#graph:kruskal-tree-theorem keywords="Kruskal's tree theorem, finite trees are well-quasi-ordered by the topological minor relation" index="クラスカルの木定理|くらすかるのきていり" refname="クラスカルの木定理"}
+有限な根付き木全体は関係 $\le$ で整擬順序になる。特に、有限な木全体は位相的マイナーの関係で整擬順序になる。
+:::
+
+::: intuition
+無限に木を並べると、必ずどこかで前の木が後ろの木の中に（辺を引き伸ばして）描けてしまう。木は「根と、根の下にぶら下がる小さい木の集まり」という再帰構造をもつので、小さい木について整擬性を仮定し、ヒグマンの補題で集まりに持ち上げる、という帰納法の形をとる。
+:::
+
+::: proof
+**Step 0（「特に」の部分）.** $T\le T'$ なら $T$ の細分が $T'$ の部分グラフと同型なので、$T$ は $T'$ の位相的マイナー（\ref{graph:subdivision}）。木の列 $(T_{n})$ が与えられたら各々に根を一つ選び、根付き木の列としての良い組が位相的マイナーの良い組になる。また $\le$ が擬順序であること（反射律は恒等写像、推移律は細分の細分と同型の合成）は定義から確かめられる。以下、根付き木について示す。
+
+**Step 1（極小な悪い列）.** 結論が成り立たないとする。\ref{graph:higman-lemma} の Step 1 と同様に、$T_{0},\dots,T_{n-1}$ で始まる悪い列が存在するという条件のもとで、$T_{0},\dots,T_{n-1},T$ で始まる悪い列が存在する根付き木 $T$ のうち**頂点数**が最小のものを $T_{n}$ とする。同じ議論で $(T_{n})$ は悪い列である。$T_{n}$ の根を $r_{n}$ とする。
+
+**Step 2（根を取り除いた森）.** $T_{n}-r_{n}$ の各連結成分を、$r_{n}$ に隣接する頂点を根とする根付き木と見なし、その全体を $A_{n}$、$A\defeq\bigcup_{n}A_{n}$ とおく（同型な成分も別の元として区別する。$\abs{A_{n}}=d(r_{n})$）。成分 $S\in A_{n}$ の木の順序は $T_{n}$ の木の順序の制限である：$x,y\in S$ について、$r_{n}$ から $y$ への道は $S$ の根 $c$ を通り、その $c$ 以降の部分が $c$ から $y$ への道だから。したがって包含写像が $S\le T_{n}$ を示す。また $\abs{S}<\abs{T_{n}}$。
+
+**Step 3（$A$ は整擬順序）.** 【主張：$A$ は $\le$ で整擬順序】$A$ の列 $(S^{k})$ をとり、$S^{k}\in A_{n(k)}$ となる $n(k)$ を選ぶ。$n(k)$ が最小になる $k$ を一つ固定する。列
+$$T_{0},\ \dots,\ T_{n(k)-1},\ S^{k},\ S^{k+1},\ \dots$$
+は、$\abs{S^{k}}<\abs{T_{n(k)}}$ と Step 1 の**最小性**から良い列である。その良い組 $(P,Q)$ を考える。
+- $P,Q$ がともに $T_{0},\dots,T_{n(k)-1}$ の中にあることは、$(T_{n})$ が悪いので起こらない。
+- $P=T_{i}$（$i<n(k)$）、$Q=S^{l}$（$l\ge k$）とすると、Step 2 から $T_{i}\le S^{l}\le T_{n(l)}$ で、$k$ の選び方から $i<n(k)\le n(l)$。$(T_{n})$ の良い組 $(i,n(l))$ ができて矛盾。
+- よって $P=S^{l}$, $Q=S^{m}$（$k\le l<m$）であり、これは $(S^{k})$ の良い組である。
+
+**Step 4（森の比較）.** Step 3 と \ref{graph:finite-subsets-wqo} により、$A$ の有限部分集合の列 $(A_{n})$ は良い組 $(i,j)$（$i<j$）をもつ。すなわち単射 $f\colon A_{i}\to A_{j}$ で、各 $S\in A_{i}$ について $S\le f(S)$ となるものがある。その埋め込みを $\varphi_{S}$ とする。
+
+**Step 5（根まで延ばす）.** 【主張：$T_{i}\le T_{j}$】$\varphi(r_{i})\defeq r_{j}$、$S\in A_{i}$ の頂点 $x$ について $\varphi(x)\defeq\varphi_{S}(x)$ と定める。
+- *細分の像.* $T_{i}$ の辺は、各 $S$ の辺と、$r_{i}$ と $S$ の根 $c_{S}$ を結ぶ辺である。前者は $\varphi_{S}$ の細分の道に写す。後者は、$r_{j}$ から $f(S)$ の根 $c'$ へ辺で進み、$f(S)$ の中で $c'$ から $\varphi_{S}(c_{S})$ への道をたどる道に写す（$c_{S}$ は $S$ の最小元で $\varphi_{S}$ は木の順序を保つので、分岐点の像はすべて $\varphi_{S}(c_{S})$ 以上であり、木の中で $z$ 以上の 2 点を結ぶ道は $z$ 以上の点しか通らないから、細分の像全体が $\varphi_{S}(c_{S})$ 以上の点に含まれる。よって $c'$ から $\varphi_{S}(c_{S})$ への道は、終点以外で像と交わらない）。
+- *交わらないこと.* $f$ が**単射**なので異なる $S$ は異なる成分 $f(S)$ に写り、それらは $T_{j}-r_{j}$ の異なる連結成分なので、像は $r_{j}$ 以外で交わらない。よって $T_{i}$ の細分から $T_{j}$ の部分木への同型が得られる。
+- *木の順序.* $r_{i}$ は $T_{i}$ の最小元で $r_{j}$ は $T_{j}$ の最小元。同じ $S$ の中の比較は $\varphi_{S}$ が保ち、Step 2 により $S$ と $f(S)$ の木の順序は $T_{i}$, $T_{j}$ の木の順序の制限である。異なる $S$ の頂点どうしは $T_{i}$ で比較不能なので条件はない。
+
+したがって $(i,j)$ は $(T_{n})$ の良い組となり、Step 1 に反する。
+:::
+
+::: hypcheck
+- **整擬順序の言い換え**：仮定 2 の「無限反鎖がない」「真に減少する無限列がない」はどちらも Step 3 で使い、片方だけでは足りない（例 3 の $\mathbb{Z}$ は反鎖を含まず、例 4 の整除は減少列を含まない）。
+- **ヒグマンの補題**：$X$ が整擬順序であることは Step 3（先頭の文字の単調増加な部分列）でだけ使う。長さの最小性は Step 4 で使う。
+- **クラスカルの木定理**：木の有限性は Step 1（頂点数の最小値）と、\ref{graph:finite-subsets-wqo} を適用するための $A_{n}$ の有限性で使った。根付きにしたのは、Step 5 で根を根に送って帰納法を回すためで、主張自体（位相的マイナー）には根は現れない。
+- **選択公理**：極小な悪い列の構成で従属選択公理を使う。
+:::
+
+::: fact クラスカルの定理の強さとラベル付き版 {#graph:kruskal-facts keywords="labelled Kruskal theorem, Friedman, unprovability in ATR0, Robertson-Seymour" index="フリードマンの有限版クラスカル定理|ふりーどまんのゆうげんばんくらすかるていり"}
+次のことが知られている（R. Diestel, *Graph Theory*, 第 12 章；S. G. Simpson, *Subsystems of Second Order Arithmetic* などの文献による）。
+1. （ラベル付き版）頂点に整擬順序集合の元がラベルとして付いた根付き木も、ラベルの大小を保つ埋め込みで整擬順序になる。上の証明はほぼそのまま通る。
+2. （フリードマン）クラスカルの木定理は、二階算術の体系 $\mathsf{ATR}_{0}$（\ref{logic:page-rm-wkl0} からの逆数学の系列を参照）では証明できない。その有限版も同様の強さをもつ。
+3. （ロバートソン–シーモア）有限グラフ全体はマイナー関係で整擬順序になる（グラフマイナー定理）。位相的マイナーの関係では整擬順序にならない（D 第 12 章の演習）。
+:::
+
+## 問題 {#graph:sec-wq-problems}
+
+::: problem {#graph:prob-wq-minimal-elements}
+$(X,\le)$ が整擬順序なら、任意の部分集合 $Y\subseteq X$ について、$Y$ の極小元（$y'<y$ となる $y'\in Y$ がない $y$）の集合から、互いに $\le$ で同値でない（$y\le y'$ かつ $y'\le y$ でない）代表を選ぶと有限個であることを示せ。また、$Y\subseteq\N^{k}$ を単項式 $x_{1}^{a_{1}}\cdots x_{k}^{a_{k}}$ の指数の集合と見ると、単項式の集合が生成する単項式イデアルは有限生成であることを導け。
+:::
+
+::: solution
+極小元の代表 $y_{0},y_{1},\dots$ が無限にあれば、$i\neq j$ で $y_{i}\le y_{j}$ なら（極小性から $y_{j}<y_{i}$ ではないので）$y_{j}\le y_{i}$ となり同値になって代表の選び方に反する。よって代表どうしは比較不能で無限反鎖となり、\ref{graph:wqo-equivalents} に反する。また \ref{graph:wqo-equivalents} の 2 から、$Y$ の各元 $y$ の下には極小元がある（なければ真に減少する無限列が作れる）。単項式イデアル $I$ の単項式の指数の集合を $Y$ とすると、$\N^{k}$ は \ref{graph:dickson-lemma} により整擬順序で、$\N^{k}$ の成分ごとの順序では同値な元は等しい。極小元は有限個 $m_{1},\dots,m_{s}$ で、$I$ のどの単項式もそのどれかで割り切れる（指数がどれかの極小元以上）。よって $I=(m_{1},\dots,m_{s})$。
+:::
+
+::: problem {#graph:prob-wq-minor-descending}
+有限グラフ（同型なものは同一視する）のマイナー関係 $\preccurlyeq$（\ref{graph:minor}）には、真に減少する無限列 $G_{0}\succ G_{1}\succ\cdots$ がないことを示せ。したがって、グラフマイナー定理「有限グラフはマイナー関係で整擬順序になる」は「マイナー関係の無限反鎖は存在しない」と同値である。
+:::
+
+::: solution
+$H\preccurlyeq G$ とし、分岐集合を $V_{x}$（$x\in V(H)$）とする。分岐集合は互いに交わらず空でないので $\abs{H}\le\abs{G}$。$H$ の辺 $xx'$ ごとに $V_{x}$ と $V_{x'}$ の間の $G$ の辺を一本選ぶと、異なる辺には異なる分岐集合の組が対応するので選んだ辺は相異なり、$\norm{H}\le\norm{G}$。等号 $\abs{H}+\norm{H}=\abs{G}+\norm{G}$ が成り立つなら $\abs{H}=\abs{G}$ かつ $\norm{H}=\norm{G}$ で、分岐集合はすべて 1 点で $V(G)$ を覆い、$G$ の辺はすべて選ばれた辺なので、$x\mapsto V_{x}$ の唯一の点は同型 $H\cong G$ を与える。よって $H\prec G$（$H\preccurlyeq G$ かつ同型でない）なら $\abs{H}+\norm{H}<\abs{G}+\norm{G}$ で、真に減少する無限列は自然数の真に減少する無限列を与えてしまう。後半は \ref{graph:wqo-equivalents} の 1 ⇔ 2 から従う。
+:::
+
+::: problem {#graph:prob-wq-higman-two-letters}
+2 文字 $\{a,b\}$（順序は等号）の上の語の列 $w_{n}\defeq a^{n}b$（$a$ を $n$ 個並べたあと $b$）について、良い組を具体的に一つ求めよ。また、語の埋め込みを「**連続した**部分語として含む」に変えると、列 $u_{n}\defeq ba^{n}b$ が悪い列になることを示せ（つまりヒグマンの補題は部分語では成り立たない）。
+:::
+
+::: solution
+$w_{0}=b$ は $w_{1}=ab$ の 2 文字目に埋め込めるので $(0,1)$ が良い組。後半：$i<j$ について、$u_{i}=ba^{i}b$ が $u_{j}=ba^{j}b$ の連続した部分語なら、$u_{j}$ の中の $b$ は両端の 2 つだけなので、$u_{i}$ の 2 つの $b$ はそれらに対応し、その間の $a$ の個数が一致して $i=j$ となり矛盾。よって良い組はない。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.**
+- \ref{graph:wqo-equivalents} の証明はラムゼーの定理を使わずに、終端添字の議論だけで済ませた（R. Diestel, *Graph Theory* ではラムゼーの定理を使う）。
+- クラスカルの木定理の証明で、木であることは「根を取り除くと根付き木の有限集合に分かれる」という再帰構造としてだけ使った。
+
+**前提を変えると.**
+- 有限部分集合の代わりに**無限**部分集合の族を、単射による支配で比べると、$X$ が整擬順序でも整擬順序にならない例がある（ラドの例）と一般には言われている。これを修正した概念が**ベター擬順序**（ナッシュ＝ウィリアムズ）で、無限部分集合や超限列にまで閉じている。
+- 位相的マイナーの関係では、有限グラフ全体は整擬順序にならないことが知られている（R. Diestel, *Graph Theory*, 第 12 章の演習）。木に限ればクラスカルの定理により整擬順序になる。
+
+**類似の定理.** ヒグマンの補題は、整擬順序の上の有限列について、ディクソンの補題は直積について、クラスカルの定理は木について、それぞれ「整擬性が構成で保たれる」ことを述べる。これらはすべて極小な悪い列という同じ議論で証明できる。
+
+**高い視点から：整擬順序は「有限生成性」の順序論版.** 整擬順序 $X$ の上方閉集合（$x\in U$, $x\le y$ なら $y\in U$）はすべて有限個の元の上方閉包であり、上方閉集合の増大列は止まる。これはネーター環のイデアルが有限生成でイデアルの増大列が止まることと平行で、実際 \ref{graph:prob-wq-minimal-elements} の単項式イデアルの例はヒルベルトの基底定理の組合せ論的な核心である。比喩で言えば、整擬順序の上では「禁止すべきもの」のリストが必ず有限で済む：グラフマイナー定理から、マイナーで閉じたグラフの性質（たとえば平面的であること）は必ず有限個の禁止マイナーで特徴づけられる（平面グラフでは $K^{5}$ と $K_{3,3}$、\ref{graph:page-kuratowski}）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
