@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>木分解と木幅 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/06-minors-wqo/02-tree-width.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 木分解と木幅 {#graph:page-tree-width keywords="tree-decomposition, parts, width, tree-width, separation by adhesion sets, chordal graphs, brambles, grid, minor-monotone, Seymour-Thomas duality, grid theorem"}
+
+木は「1 点を取り除くとばらばらになる」という強い分離性をもつ。一般のグラフを「木のように」組み立てられた小さな部分の集まりとして表すのが**木分解**であり、部分の大きさの最小値が**木幅**である。木幅はグラフマイナー理論の中心的な量で、木幅が小さいグラフは木に近く、木幅が大きいグラフは大きな格子をマイナーとして含む。このページでは木分解の基本性質（分離・部分グラフ・マイナーへの遺伝）、弦グラフによる木幅の特徴づけ、そして木幅の下界を与える**ブランブル**を扱う。
+
+## 記法と定義の確認 {#graph:sec-tw-notation}
+
+::: notation
+- グラフは有限。道・連結・木・マイナー（分岐集合）は \ref{graph:page-graphs}, \ref{graph:tree}, \ref{graph:minor} のとおり。木 $T$ の 2 頂点 $t,t'$ を結ぶ一意な道を $tTt'$ と書く（\ref{graph:tree-characterization}）。
+- $X\subseteq V(G)$ が $A$ と $B$ を**分離する**とは、すべての $A$–$B$ 道が $X$ の頂点を含むことである（\ref{graph:separator}）。$X$ が頂点 $a,b\notin X$ を分離するとは、$\{a\}$ と $\{b\}$ を分離することをいう。
+- 弦グラフ・貼り合わせ・クリーク数 $\omega$ は \ref{graph:chordal}, \ref{graph:page-perfect-graphs} のとおり。
+- 混同を避けるため、木分解の木 $T$ の頂点を**節点**とよぶ。
+:::
+
+## 木分解 {#graph:sec-tw-decomposition}
+
+::: definition 木分解と木幅 {#graph:tree-decomposition keywords="tree-decomposition, parts, bags, width, tree-width" index="木分解|きぶんかい, 木幅|きはば" refname="木分解"}
+グラフ $G$ の**木分解**とは、木 $T$ と、節点 $t\in V(T)$ で添字づけられた $V(G)$ の部分集合の族 $\mathcal{V}=(V_{t})_{t\in V(T)}$ の組 $(T,\mathcal{V})$ で、次を満たすものである。
+- (T1) $V(G)=\bigcup_{t}V_{t}$。
+- (T2) $G$ の各辺 $uv$ について、$u,v\in V_{t}$ となる節点 $t$ がある。
+- (T3) 節点 $t_{2}$ が道 $t_{1}Tt_{3}$ の上にあれば $V_{t_{1}}\cap V_{t_{3}}\subseteq V_{t_{2}}$。
+
+$V_{t}$ を**部分**という。$\max_{t}\abs{V_{t}}-1$ を木分解の**幅**、$G$ の木分解の幅の最小値を $G$ の**木幅** $\mathrm{tw}(G)$ という。
+:::
+
+::: intuition
+グラフを、重なりを許した小さな「袋」$V_{t}$ に分けて木の形に並べる。(T2) はどの辺もどれかの袋に収まること、(T3) は同じ頂点が入っている袋が木の上でひと続きに並ぶことを要求する。袋が小さいほどグラフは木に近い。木幅の定義の $-1$ は、木の木幅をちょうど 1 にするための調整である。
+:::
+
+::: lemma (T3) の言い換え {#graph:t3-subtree keywords="T3 iff the nodes whose parts contain a given vertex form a subtree"}
+族 $(V_{t})$ が (T3) を満たすことと、各頂点 $v\in V(G)$ について $T_{v}\defeq\{t: v\in V_{t}\}$ が $T$ の連結な部分（$T_{v}$ で誘導される部分グラフが連結、または空）であることは同値である。
+:::
+
+::: proof
+**Step 1（⇒）.** $t_{1},t_{3}\in T_{v}$ なら、(T3) により道 $t_{1}Tt_{3}$ の上の節点はすべて $T_{v}$ に属する。よってこの道は $T[T_{v}]$ の中にあり、$T[T_{v}]$ は連結。
+
+**Step 2（⇐）.** $t_{2}\in t_{1}Tt_{3}$ と $v\in V_{t_{1}}\cap V_{t_{3}}$ をとる。$T[T_{v}]$ は連結なので $t_{1}$ と $t_{3}$ を結ぶ道を含み、木では 2 点を結ぶ道は一意なので、それは $t_{1}Tt_{3}$ である。よって $t_{2}\in T_{v}$、すなわち $v\in V_{t_{2}}$。
+:::
+
+::: example
+1. 1 個の節点に $V_{t}=V(G)$ をのせたものは木分解で、幅は $\abs{G}-1$。よって $\mathrm{tw}(G)\le\abs{G}-1$。
+2. 閉路 $C=x_{1}x_{2}\cdots x_{n}x_{1}$（$n\ge3$）は、道 $t_{1}t_{2}\cdots t_{n-2}$ を木とし、$V_{t_{i}}\defeq\{x_{1},x_{i+1},x_{i+2}\}$ とする木分解をもつ（扇形の三角形分割）。(T2)：辺 $x_{i}x_{i+1}$ は $V_{t_{i-1}}$ または $V_{t_{i}}$ に、辺 $x_{n}x_{1}$ は $V_{t_{n-2}}$ に入る。(T3)：$x_{1}$ はすべての部分に、$x_{j}$（$j\ge2$）は連続する高々 2 つの部分に入る。幅は 2 なので $\mathrm{tw}(C)\le2$。
+:::
+
+::: lemma 木分解による分離 {#graph:td-separation keywords="adhesion set separates the two sides of a tree-decomposition" index="付着集合|ふちゃくしゅうごう"}
+$(T,\mathcal{V})$ を $G$ の木分解、$t_{1}t_{2}$ を $T$ の辺とし、$T-t_{1}t_{2}$ の $t_{i}$ を含む成分を $T_{i}$、$U_{i}\defeq\bigcup_{t\in T_{i}}V_{t}$（$i=1,2$）とする。このとき $U_{1}\cap U_{2}=V_{t_{1}}\cap V_{t_{2}}$ であり、$X\defeq V_{t_{1}}\cap V_{t_{2}}$ は $G$ で $U_{1}$ と $U_{2}$ を分離する。
+:::
+
+::: proof
+**Step 1（共通部分）.** 【主張：$U_{1}\cap U_{2}=X$】$\supseteq$ は明らか。$v\in U_{1}\cap U_{2}$ なら、$v\in V_{t}\cap V_{t'}$ となる $t\in T_{1}$, $t'\in T_{2}$ がある。道 $tTt'$ は $T_{1}$ から $T_{2}$ へ移るので辺 $t_{1}t_{2}$ を通り、$t_{1},t_{2}$ はその上にある。(T3) により $v\in V_{t_{1}}\cap V_{t_{2}}$。
+
+**Step 2（$U_{1}\setminus X$ と $U_{2}\setminus X$ の間に辺はない）.** そのような辺 $uv$（$u\in U_{1}\setminus U_{2}$, $v\in U_{2}\setminus U_{1}$）があれば、(T2) により $u,v\in V_{t}$ となる $t$ がある。$t\in T_{1}$ なら $v\in U_{1}$、$t\in T_{2}$ なら $u\in U_{2}$ となり、どちらも矛盾。
+
+**Step 3（分離）.** $U_{1}$–$U_{2}$ 道 $P=u_{0}u_{1}\cdots u_{m}$（$u_{0}\in U_{1}$, $u_{m}\in U_{2}$）をとる。(T1) により各頂点は $U_{1}\cup U_{2}$ に属する。$u_{i}\in U_{2}$ となる最小の $i$ をとる。$i=0$ なら $u_{0}\in U_{1}\cap U_{2}=X$。$i\ge1$ なら $u_{i-1}\in U_{1}\setminus U_{2}$ で、Step 2 から $u_{i}\notin U_{2}\setminus U_{1}$、つまり $u_{i}\in U_{1}\cap U_{2}=X$。いずれも $P$ は $X$ の頂点を含む。
+:::
+
+::: lemma 部分グラフとマイナーへの遺伝 {#graph:td-minor keywords="tree-decompositions restrict to subgraphs and descend to minors, tree-width is minor-monotone" index="木幅の単調性|きはばのたんちょうせい"}
+$(T,(V_{t}))$ を $G$ の木分解とする。
+1. $H\subseteq G$ なら $(T,(V_{t}\cap V(H)))$ は $H$ の木分解である。
+2. $H\preccurlyeq G$ で、分岐集合が $U_{h}$（$h\in V(H)$）のとき、$W_{t}\defeq\{h: U_{h}\cap V_{t}\neq\varnothing\}$ とおくと $(T,(W_{t}))$ は $H$ の木分解である。
+3. 特に、$H\preccurlyeq G$ なら $\mathrm{tw}(H)\le\mathrm{tw}(G)$。
+:::
+
+::: proof
+**Step 1（部分グラフ）.** (T1)–(T3) は、$V(H)\subseteq V(G)$, $E(H)\subseteq E(G)$ と、各集合に $V(H)$ を交わらせても包含関係が保たれることから、そのまま従う。
+
+**Step 2（マイナー：(T1), (T2)）.** 分岐集合 $U_{h}$ は空でないので、その頂点を含む $V_{t}$ があり $h\in W_{t}$。$H$ の辺 $hh'$ について $U_{h}$ と $U_{h'}$ の間の $G$ の辺 $uu'$ があり、(T2) から $u,u'\in V_{t}$ となる $t$ があるので $h,h'\in W_{t}$。
+
+**Step 3（マイナー：(T3)）.** $t_{2}\in t_{1}Tt_{3}$、$h\in W_{t_{1}}\cap W_{t_{3}}$ とする。$t_{2}\in\{t_{1},t_{3}\}$ なら明らか。そうでなければ、$t_{2}$ の隣接節点で $t_{2}Tt_{1}$ 上にあるものを $s$ とし、辺 $st_{2}$ に \ref{graph:td-separation} を適用する（$s$ 側を $U_{1}$、$t_{2}$ 側を $U_{2}$）。$t_{1}$ は $s$ 側、$t_{3}$ は $t_{2}$ 側の成分にあるので、$U_{h}$ は $U_{1}$ と $U_{2}$ の両方と交わる。$U_{h}$ は**連結**なので、$U_{h}$ の中に $U_{1}$–$U_{2}$ 道があり、それは $V_{s}\cap V_{t_{2}}$ の頂点を含む。よって $U_{h}\cap V_{t_{2}}\neq\varnothing$、すなわち $h\in W_{t_{2}}$。
+
+**Step 4（木幅）.** $H\preccurlyeq G$ なら、$G$ の幅 $\mathrm{tw}(G)$ の木分解から Step 2, 3 で $H$ の木分解が得られ、$\abs{W_{t}}\le\abs{V_{t}}$（$W_{t}$ の各元 $h$ に $U_{h}\cap V_{t}$ の点を対応させる写像は、分岐集合が互いに交わらないので単射）なので幅は増えない。
+:::
+
+::: lemma 部分に入らない集合は分離される {#graph:td-not-in-part keywords="a vertex set not contained in a part contains two vertices separated by an adhesion set; cliques lie in parts" index="クリークは部分に入る|くりーくはぶぶんにはいる"}
+$(T,\mathcal{V})$ を $G$ の木分解とし、$W\subseteq V(G)$ がどの部分 $V_{t}$ にも含まれないとする。このとき $T$ のある辺 $t_{1}t_{2}$ と、$V_{t_{1}}\cap V_{t_{2}}$ で分離される $w_{1},w_{2}\in W$ がある。特に、$G$ の完全部分グラフの頂点集合はある部分に含まれる。
+:::
+
+::: proof
+**Step 1（辺の向き付け）.** $T$ の各辺 $t_{1}t_{2}$ について \ref{graph:td-separation} の $U_{1},U_{2},X$ を考える。$W\subseteq U_{1}$ または $W\subseteq U_{2}$ なら、そのような $i$ を一つ選んで辺を $t_{i}$ に向ける。どちらでもなければ、$w_{1}\in W\setminus U_{2}$, $w_{2}\in W\setminus U_{1}$ がとれ、$w_{1}\in U_{1}\setminus X$, $w_{2}\in U_{2}\setminus X$ は \ref{graph:td-separation} により $X$ で分離されるので、結論が成り立つ。以下、すべての辺が向き付けられたとする。
+
+**Step 2（吸い込み節点）.** 【主張：入ってくる辺しかもたない節点 $t$ がある】任意の節点から出発し、出ていく辺をたどる。来た辺は逆向きなので戻ることはなく、木では後戻りしない歩道は道なので同じ節点を二度通らない。$T$ は**有限**なので、どこかで出ていく辺のない節点 $t$ に着く。
+
+**Step 3（$W\subseteq V_{t}$）.** $w\in W$ をとり、(T1) から $w\in V_{t'}$ となる $t'$ をとる。$t'=t$ ならよい。$t'\neq t$ なら、$tTt'$ の最初の辺 $e=ts$ は $t$ に向いているので、$W$ は $T-e$ の $t$ 側の成分の部分の和に含まれ、$w\in V_{t''}$ となる $t''$（$t$ 側）がある。道 $t'Tt''$ は $e$ を通って $t$ を経由するので、(T3) により $w\in V_{t}$。これは $W$ がどの部分にも含まれないという仮定に反するので、Step 1 で結論が得られている。
+
+**Step 4（完全部分グラフ）.** 完全部分グラフの 2 頂点 $w_{1},w_{2}$ は辺で結ばれ、$w_{1},w_{2}\notin X$ ならこの辺は $X$ を通らない $w_{1}$–$w_{2}$ 道なので、どの $X$ にも分離されない。よって頂点集合はある部分に含まれる。
+:::
+
+::: example
+**完全グラフの木幅.** \ref{graph:td-not-in-part} により $K^{n}$ のどの木分解にも $\abs{V_{t}}\ge n$ の部分があるので、$\mathrm{tw}(K^{n})\ge n-1$。例 1 と合わせて $\mathrm{tw}(K^{n})=n-1$。
+:::
+
+## 弦グラフと木幅 {#graph:sec-tw-chordal}
+
+::: proposition 完全な部分への木分解 {#graph:chordal-tree-decomposition keywords="a graph is chordal iff it has a tree-decomposition into complete parts" index="弦グラフの木分解|げんぐらふのきぶんかい"}
+$G$ が弦グラフであることと、$G$ がすべての部分 $G[V_{t}]$ が完全グラフであるような木分解をもつことは同値である。
+:::
+
+::: proof
+**Step 1（⇐）.** 【主張：弦のない長さ 4 以上の閉路 $C$ は存在しない】あったとする。$C$ には隣接しない 2 頂点があり、部分はすべて完全なので $V(C)$ はどの部分にも含まれない。\ref{graph:td-not-in-part} により、ある辺 $t_{1}t_{2}$ について $X\defeq V_{t_{1}}\cap V_{t_{2}}$ が $w_{1},w_{2}\in V(C)$ を分離する。$C$ は $w_{1}$ と $w_{2}$ を結ぶ、内部で交わらない 2 本の道 $P,P'$ からなり、それぞれ $X$ の頂点 $x\in P$, $x'\in P'$ を含む（$w_{1},w_{2}\notin X$ なので $x,x'$ はそれぞれの内部の点で、$x\neq x'$）。$X\subseteq V_{t_{1}}$ で $G[V_{t_{1}}]$ は完全なので $xx'\in E(G)$。$C$ の辺は $P$ か $P'$ の辺であり、$P$ の内部の点と $P'$ の内部の点を結ぶ $C$ の辺はないので、$xx'$ は $C$ の弦である。矛盾。
+
+**Step 2（⇒）.** \ref{graph:chordal-structure} により、弦グラフは完全グラフから完全部分グラフに沿った貼り合わせを繰り返して得られる。貼り合わせの回数についての帰納法で示す。完全グラフは節点 1 個の木分解をもつ。$G$ が $G_{1}$ と $G_{2}$ を完全部分グラフ $S=G_{1}\cap G_{2}$ に沿って貼り合わせたもので、$G_{i}$ が完全な部分への木分解 $(T_{i},\mathcal{V}_{i})$ をもつとする（$T_{1},T_{2}$ は交わらないとする）。\ref{graph:td-not-in-part} により $V(S)\subseteq V_{t_{1}}$ となる $t_{1}\in T_{1}$ と $V(S)\subseteq V_{t_{2}}$ となる $t_{2}\in T_{2}$ がある。木 $T\defeq T_{1}\cup T_{2}+t_{1}t_{2}$ と部分 $\mathcal{V}_{1}\cup\mathcal{V}_{2}$ を考える。
+- (T1)(T2)：$V(G)=V(G_{1})\cup V(G_{2})$、$E(G)=E(G_{1})\cup E(G_{2})$（貼り合わせの定義）から従う。
+- (T3)：\ref{graph:t3-subtree} で確かめる。$v\in V(G_{1})\setminus V(S)$ なら $T_{v}$ は $T_{1}$ の中で連結。$v\in V(S)$ なら $T_{v}$ は $T_{1}$ 側の連結な部分（$t_{1}$ を含む）と $T_{2}$ 側の連結な部分（$t_{2}$ を含む）を辺 $t_{1}t_{2}$ で結んだもので連結。
+
+部分は完全のままである。
+:::
+
+::: proposition 弦グラフによる木幅の特徴づけ {#graph:tw-chordal-supergraph keywords="tree-width equals min omega(H) - 1 over chordal supergraphs H" index="木幅と弦グラフ|きはばとげんぐらふ" refname="弦グラフによる木幅の特徴づけ"}
+$$\mathrm{tw}(G)=\min\{\omega(H)-1 : H\text{ は }V(H)=V(G),\ G\subseteq H\text{ を満たす弦グラフ}\}.$$
+:::
+
+::: intuition
+木幅を求めることは、辺を足して弦グラフ（三角形以外の穴のないグラフ）に仕上げるとき、できるクリークをどこまで小さく抑えられるかという問題と同じである。
+:::
+
+::: proof
+**Step 1（$\le$）.** そのような $H$ について、\ref{graph:chordal-tree-decomposition} により $H$ は完全な部分への木分解をもつ。完全な部分の大きさは $\omega(H)$ 以下なので幅は $\omega(H)-1$ 以下で、\ref{graph:td-minor} の 1 によりそれは $G$ の木分解でもある。よって $\mathrm{tw}(G)\le\omega(H)-1$。
+
+**Step 2（$\ge$）.** $G$ の幅 $\mathrm{tw}(G)$ の木分解 $(T,(V_{t}))$ をとり、$H$ を $G$ に「同じ部分に属する 2 頂点をすべて結ぶ」辺を加えたグラフとする。$(T,(V_{t}))$ は $H$ の木分解でもあり（新しい辺はどれかの部分に収まる）、部分は完全なので、\ref{graph:chordal-tree-decomposition} により $H$ は弦グラフ。\ref{graph:td-not-in-part} により $H$ の最大クリークはある部分に含まれるので、$\omega(H)\le\max\abs{V_{t}}=\mathrm{tw}(G)+1$。
+:::
+
+::: proposition 木幅 1 以下のグラフ {#graph:tw-forest keywords="tree-width at most 1 iff forest, forbidden minor K3" index="木幅 1 のグラフ|きはばいちのぐらふ"}
+$\mathrm{tw}(G)\le1$ であることと、$G$ が森であることは同値である。
+:::
+
+::: proof
+**Step 1（森 ⇒ 木幅 1 以下）.** 森に辺を加えて同じ頂点集合上の木にでき、\ref{graph:td-minor} の 1 により木について示せばよい。$\abs{G}=1$ なら幅 0。$\abs{G}\ge2$ の木 $G$ について、$G$ の各辺を 1 回細分した木を $T$ とする（節点は $G$ の頂点 $v$ と辺 $e$）。$V_{v}\defeq\{v\}$、$V_{e}\defeq\{x,y\}$（$e=xy$）とおく。(T1)(T2) は明らかで、頂点 $v$ を含む部分の節点は $v$ と $v$ に接続する辺 $e$ たちで、$T$ の中で $v$ を中心とする星をなし連結だから、\ref{graph:t3-subtree} により (T3) も成り立つ。幅は 1。
+
+**Step 2（閉路があれば木幅 2 以上）.** $G$ が閉路 $C$ を含むとする。$C$ の頂点を 3 つの空でない弧に分けると、それらを分岐集合として $K^{3}\preccurlyeq C\subseteq G$。\ref{graph:td-minor} の 3 と例から $\mathrm{tw}(G)\ge\mathrm{tw}(K^{3})=2$。
+:::
+
+## ブランブルと木幅の下界 {#graph:sec-tw-bramble}
+
+::: definition ブランブル {#graph:bramble keywords="bramble, touching sets, cover, order of a bramble" index="ブランブル|ぶらんぶる, 接する（頂点集合が）|せっする"}
+$V(G)$ の 2 つの部分集合が**接する**とは、共通の頂点をもつか、両者の間に $G$ の辺があることをいう。$G$ で連結な頂点集合（$G[B]$ が連結、特に空でない）の族で、どの 2 つも接するものを**ブランブル**という。ブランブル $\mathcal{B}$ のすべての元と交わる頂点集合を $\mathcal{B}$ の**被覆**、被覆の大きさの最小値を $\mathcal{B}$ の**位数**という。
+:::
+
+::: intuition
+ブランブルは「互いに絡み合ったつる草」の集まりで、どの二つも触れ合っている。木幅の小さい木分解では、小さな袋でグラフを切り分けられるが、絡み合ったつる草を全部切るにはどこかの袋がすべてのつるに触れていなければならない。
+:::
+
+::: theorem ブランブルによる木幅の下界 {#graph:bramble-lower-bound keywords="every tree-decomposition has a part covering a given bramble, tw >= order - 1" index="ブランブルによる下界|ぶらんぶるによるかかい" refname="ブランブルによる木幅の下界"}
+$\mathcal{B}$ を $G$ のブランブルとする。$G$ のどの木分解にも $\mathcal{B}$ を被覆する部分がある。特に $\mathrm{tw}(G)\ge(\mathcal{B}\text{ の位数})-1$。
+:::
+
+::: intuition
+どの二つも触れ合うつる草の集まりは、木分解のどの「切れ目」でも片側にまとまってしまう。切れ目ごとにつる草のある側へ矢印を向けると、すべての矢印が集まる袋ができ、その袋はすべてのつる草に触れている。
+:::
+
+::: proof
+**Step 1（辺の向き付け）.** 木分解 $(T,\mathcal{V})$ の辺 $t_{1}t_{2}$ について \ref{graph:td-separation} の $U_{1},U_{2},X$ を考える。$X$ が $\mathcal{B}$ を被覆するなら、$X\subseteq V_{t_{1}}$ なので $V_{t_{1}}$ が被覆で、結論が成り立つ。そうでないとき、$X$ と交わらない $B\in\mathcal{B}$ は**連結**なので、$U_{1}\setminus X$ と $U_{2}\setminus X$ の一方に含まれる（両方と交われば $B$ の中の $U_{1}$–$U_{2}$ 道が $X$ と交わる）。【主張：その側は $B$ によらない】$X$ と交わらない $B,B'$ が別々の側にあるとすると、側どうしは交わらず、\ref{graph:td-separation} の Step 2 よりその間に辺もないので $B,B'$ は**接しない**。ブランブルであることに反する。そこで辺をその側の $t_{i}$ に向ける。
+
+**Step 2（吸い込み節点）.** すべての辺が向き付けられたとすると、\ref{graph:td-not-in-part} の Step 2 と同様に、入ってくる辺しかもたない節点 $t$ がある。
+
+**Step 3（$V_{t}$ は被覆）.** $B\in\mathcal{B}$ が $V_{t}$ と交わらないとする。$b\in B$ と $b\in V_{t'}$ となる $t'$ をとると $t'\neq t$。$tTt'$ の最初の辺 $e=ts$ について、$X_{e}=V_{t}\cap V_{s}$ も $B$ と交わらないので、Step 1 から $B$ は $t$ 側の $U_{t}\setminus X_{e}$ に含まれる。一方 $b\in V_{t'}$ で $t'$ は $s$ 側なので $b\in U_{s}$。すると $b\in U_{t}\cap U_{s}=X_{e}$ となり矛盾。よって $V_{t}$ は被覆である。
+
+**Step 4（下界）.** 被覆する部分は位数以上の大きさをもつので、どの木分解の幅も（位数）$-1$ 以上。
+:::
+
+::: example 格子の十字 {#graph:grid-crosses keywords="k x k grid, crosses form a bramble of order k, tree-width of grids" index="格子グラフ|こうしぐらふ, 十字（格子の）|じゅうじ"}
+$k\times k$ **格子**とは、頂点集合 $\{1,\dots,k\}^{2}$ で、$\abs{i-i'}+\abs{j-j'}=1$ のとき $(i,j)$ と $(i',j')$ を結んだグラフである。第 $i$ 行と第 $j$ 列の和集合を**十字** $C_{ij}$ とする。
+- 各 $C_{ij}$ は連結で、$C_{ij}$ と $C_{i'j'}$ は頂点 $(i,j')$ を共有するので、十字全体はブランブルである。
+- 1 つの行は、すべての十字と交わる（第 $i$ 行は $C_{i'j}$ と $(i,j)$ で交わる）ので位数は $k$ 以下。
+- $k$ 個未満の頂点の集合 $S$ は、どこかの行 $i$ 全体とどこかの列 $j$ 全体を避けるので $C_{ij}$ と交わらない。よって位数はちょうど $k$。
+
+\ref{graph:bramble-lower-bound} により $k\times k$ 格子の木幅は $k-1$ 以上である（実際は $k$。\ref{graph:prob-tw-grid}）。
+:::
+
+::: hypcheck
+- **木分解による分離**：(T3) は Step 1、(T2) は Step 2、(T1) は Step 3 で使った。
+- **マイナーへの遺伝**：分岐集合の**連結性**は (T3) の確認（Step 3）で本質的に使った。連結でない集合を 1 点に潰すと (T3) は一般に壊れる。
+- **部分に入らない集合**：$T$ の有限性は吸い込み節点の存在（Step 2）で使った。
+- **ブランブルによる下界**：ブランブルの元の**連結性**と、元どうしが**接する**ことは Step 1 で使った。
+:::
+
+::: fact 木幅の双対定理と格子定理 {#graph:tree-width-facts keywords="Seymour-Thomas tree-width duality, grid theorem, excluded planar minor, K4-minor-free graphs, Robertson-Seymour wqo for bounded tree-width" index="木幅双対定理|きはばそうついていり, 格子定理|こうしていり"}
+次のことが知られている（R. Diestel, *Graph Theory*, 第 12 章による）。
+1. （シーモア–トーマス）$\mathrm{tw}(G)<k$ であることと、$G$ が位数 $k$ を超えるブランブルを含まないことは同値。つまり木幅は「ブランブルの位数の最大値」$-1$ に等しく、\ref{graph:bramble-lower-bound} の評価は最良である。
+2. （ロバートソン–シーモアの格子定理）任意の $r$ について、木幅が十分大きいグラフは $r\times r$ 格子をマイナーとして含む。その帰結として、グラフ $H$ をマイナーにもたないグラフの木幅が有界であるのは、$H$ が平面的なときに限る。
+3. $\mathrm{tw}(G)\le2$ であることと、$G$ が $K^{4}$ をマイナーにもたないことは同値（$\Rightarrow$ は \ref{graph:td-minor} と $\mathrm{tw}(K^{4})=3$ から従う）。
+4. （ロバートソン–シーモア）各 $k$ について、木幅 $k$ 未満のグラフ全体はマイナー関係で整擬順序になる。これは \ref{graph:kruskal-tree-theorem} の一般化で、グラフマイナー定理（\ref[グラフマイナー定理の概観]{graph:page-graph-minor-theorem}）の証明の柱の一つである。
+:::
+
+## 問題 {#graph:sec-tw-problems}
+
+::: problem {#graph:prob-tw-grid}
+$k\times k$ 格子（$k\ge2$）の木幅が $k$ 以下であることを、頂点を行ごとに並べた順序 $v_{1},\dots,v_{k^{2}}$ と、道を木とする木分解 $V_{t_{i}}\defeq\{v_{i},v_{i+1},\dots,v_{i+k}\}$（$i=1,\dots,k^{2}-k$）で示せ。
+:::
+
+::: solution
+$v_{(i-1)k+j}\defeq(i,j)$ と並べる。横の辺 $(i,j)(i,j+1)$ は $v_{m}v_{m+1}$、縦の辺 $(i,j)(i+1,j)$ は $v_{m}v_{m+k}$ の形で、どちらも $V_{t_{m}}$ に含まれる（$m\le k^{2}-k$ である。横の辺で $m>k^{2}-k$ のものは最終行にあり $V_{t_{k^{2}-k}}=\{v_{k^{2}-k},\dots,v_{k^{2}}\}$ に含まれる）。(T1) も同様。頂点 $v_{m}$ を含む部分は $t_{i}$（$m-k\le i\le m$）で、道の上の連続した区間なので (T3) が成り立つ（\ref{graph:t3-subtree}）。各部分の大きさは $k+1$ なので幅は $k$。（下界 $k$ には、十字よりも少し工夫したブランブルが要る。）
+:::
+
+::: problem {#graph:prob-tw-k4}
+$\mathrm{tw}(K^{4})=3$ を用いて、$K^{4}$ をマイナーにもつグラフの木幅は 3 以上であることを確かめよ。また、木幅 2 以下のグラフの例として、$K_{2,3}$ の木分解を幅 2 で与えよ。
+:::
+
+::: solution
+前半は \ref{graph:td-minor} の 3 と完全グラフの木幅の例から従う。後半：$K_{2,3}$ の 2 点側を $\{a,b\}$、3 点側を $\{x,y,z\}$ とし、道 $t_{1}t_{2}t_{3}$ に部分 $\{a,b,x\}$, $\{a,b,y\}$, $\{a,b,z\}$ をのせる。各辺 $ax$ などはそれぞれの部分に入り、$a,b$ はすべての部分に、$x,y,z$ は 1 つずつの部分に入るので (T3) も成り立つ。幅は 2。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.**
+- \ref{graph:td-separation} と \ref{graph:td-minor} の証明に有限性は使わない（無限グラフの木分解でも同じ議論が通る）。有限性が効くのは、吸い込み節点の存在（\ref{graph:td-not-in-part} の Step 2）である。
+- \ref{graph:chordal-tree-decomposition} の ⇐ では弦グラフの構造定理を使わず、分離の補題だけで示した。
+
+**前提を変えると.**
+- 部分 $G[V_{t}]$ が連結であることを要求する「連結な木分解」の幅は、一般に木幅より大きい（たとえば閉路の連結な木分解の幅は長さとともに増える）と D 第 12 章に述べられている。
+- 木 $T$ を道に限ったものを**道分解**、その幅の最小値を**道幅**という。問題の格子の木分解は道分解である。
+
+**類似の定理.** 木幅の小さいグラフは、木の上の動的計画法を一般化して多くの NP 困難問題（彩色数、ハミルトン閉路など）を多項式時間で解けることが知られている（クールセルの定理）。これは「木のように分けられる」ことの計算論的な意味である。
+
+**高い視点から：木分解は「グラフを木の形の図式に沿って貼り合わせたもの」.** 木分解は、部分 $G[V_{t}]$ を対象とし、隣接する節点の共通部分 $V_{t}\cap V_{t'}$ に沿って貼り合わせる図式であり、その余極限（貼り合わせ）として $G$ が再現される。\ref{graph:td-separation} は「図式の木の辺を切ると、グラフも小さな共通部分で切れる」という分離の遺伝であり、木幅は「この貼り合わせに必要な糊しろの大きさ」を測る。位相幾何での単体複体の構成や、層の張り合わせ条件と同じ形で、局所的な小さい部品から大域的な構造を組み立てる典型例である。比喩で言えば、木幅の小さいグラフは「細い枝でつながった木の形の家具」で、どの枝を切っても小さな切り口で二つに分かれる。格子のように木幅の大きいグラフは「網」で、どこを切っても長い切り口が必要になる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
