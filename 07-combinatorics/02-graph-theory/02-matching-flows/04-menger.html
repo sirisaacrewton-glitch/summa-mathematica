@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>連結度とメンガーの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/02-matching-flows/04-menger.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 連結度とメンガーの定理 {#graph:page-menger keywords="Menger's theorem, disjoint paths, separator, ear decomposition, 2-connected graphs, Whitney's theorem, Fan lemma"}
+
+$k$ 連結性は「$k-1$ 個の頂点を除いても連結」という否定的な条件で定義した（\ref{graph:connectivity}）。メンガーの定理はこれを、「任意の 2 頂点を $k$ 本の互いに交わらない道で結べる」という肯定的な条件に言い換える。このページでは、まず 2 連結グラフが閉路に耳（道）を付け足していくことで得られることを示し、次にメンガーの定理を前のページの \ref{graph:max-flow-min-cut} から導き、ホイットニーによる $k$ 連結性の特徴づけと辺版を得る。
+
+## 記法と定義の確認 {#graph:sec-me-notation}
+
+::: notation
+- グラフ・道・連結度 $\kappa$・辺連結度 $\lambda$ は \ref{graph:page-graphs} の定義に従う。ネットワーク・流れ・カットは \ref{graph:network-flow} のとおり。
+- $A,B\subseteq V$ について、道 $P=x_{0}\dots x_{k}$ が **$A$–$B$ 道**であるとは、$V(P)\cap A=\{x_{0}\}$, $V(P)\cap B=\{x_{k}\}$ であることをいう（$k=0$ で $x_{0}\in A\cap B$ も許す）。部分グラフ $H$ について、長さ $1$ 以上で両端だけが $H$ にある道を **$H$ 道**という。
+- 頂点を共有しない道の族を**互いに素**な道という。端点以外の頂点を共有しない道を**独立**な道という。
+:::
+
+## 2 連結グラフの耳分解 {#graph:sec-me-ears}
+
+::: theorem 耳分解 {#graph:ear-decomposition keywords="ear decomposition, Whitney's characterization of 2-connected graphs" index="耳分解|みみぶんかい, 2 連結|にれんけつ" refname="耳分解定理"}
+グラフが 2 連結であることと、閉路から始めて、そのときまでのグラフ $H$ の $H$ 道を一本ずつ加えていくことで得られることは同値である。
+:::
+
+::: intuition
+2 連結なグラフは、一つの輪から出発して、すでにある部分の 2 点を結ぶ新しい道（耳）を次々に足していけば作れる。
+:::
+
+::: proof
+**Step 1（⇐）.** 【主張：2 連結な $H$ に $H$ 道 $P$ を加えた $H'$ も 2 連結】閉路は 2 連結である。$x\in V(H')$ を除くとき、$x\in H$ なら $H-x$ は連結で、$P$ の残りの各部分は $H-x$ の点（$P$ の端点のうち $x$ でない方）につながる。$x$ が $P$ の内部なら $H$ はそのまま連結で、$P-x$ の二つの部分はそれぞれ $P$ の端点で $H$ につながる。
+
+**Step 2（⇒）.** 【主張：$G$ が 2 連結なら、閉路と $H$ 道の追加で作れる極大な部分グラフ $H$ は $G$ 全体】$G$ は 2 連結なので閉路を含み（最小次数 $\ge2$：\ref{graph:kappa-lambda-delta} と \ref{graph:long-path-cycle}）、$H$ は存在する。$H$ は誘導部分グラフである（$H$ の 2 頂点を結ぶ $H$ にない辺はそれ自体が $H$ 道）。$H\neq G$ なら、$G$ の連結性から $H$ にない頂点 $v$ と $H$ の頂点 $w$ が隣接する。$G-w$ は連結なので、$v$ から $H-w$ への道 $Q$ があり、$wv$ に $Q$ を（$Q$ が最初に $H$ に着くところまで）つなげると $H$ 道になり、極大性に反する。
+:::
+
+## メンガーの定理 {#graph:sec-me-menger}
+
+::: definition 分離集合 {#graph:separator keywords="A-B separator, separating set" index="分離集合|ぶんりしゅうごう"}
+$X\subseteq V$ が $A$ と $B$ を**分離する**とは、すべての $A$–$B$ 道が $X$ の頂点を含むことをいう。
+:::
+
+::: intuition
+$X$ の頂点をすべて通行止めにすると、$A$ から $B$ へ行けなくなる。$A\cap B$ の頂点は長さ 0 の道なので、必ず $X$ に入る。
+:::
+
+::: theorem メンガーの定理 {#graph:menger keywords="Menger's theorem, vertex version" index="メンガーの定理|めんがーのていり" refname="メンガーの定理"}
+グラフ $G=(V,E)$ と $A,B\subseteq V$ について、互いに素な $A$–$B$ 道の最大本数は、$A$ と $B$ を分離する頂点集合の最小の大きさに等しい。
+:::
+
+::: intuition
+$A$ から $B$ へ、互いにぶつからない道を何本通せるかは、$A$ と $B$ の間の「関所」の最少の数で決まる。
+:::
+
+::: proof
+$k$ を分離集合の最小の大きさとする。互いに素な $A$–$B$ 道が $p$ 本あれば、分離集合はそれぞれの道から相異なる頂点を含むので $p\le k$。以下、$k$ 本の互いに素な $A$–$B$ 道を作る。
+
+**Step 1（頂点を分けたネットワーク）.** 各頂点 $v$ を二つの頂点 $v^{-}$（入口）, $v^{+}$（出口）に分け、弧 $(v^{-},v^{+})$ を容量 1 とする。各辺 $uv$ について弧 $(u^{+},v^{-})$ と $(v^{+},u^{-})$ を、新しい始点 $s$ から弧 $(s,a^{-})$（$a\in A$）を、弧 $(b^{+},t)$（$b\in B$）を加え、これらの容量を $M\defeq\abs{V}+1$ とする。
+
+**Step 2（整数の流れから道）.** 【主張：値 $p$ の整数の流れから、互いに素な $A$–$B$ 道が $p$ 本得られる】整数の流れで値 1 以上の弧をたどると、$s$ から出て $t$ に着く有向道に分解できる（\ref{graph:prob-nf-edge-disjoint} の解答と同じ。値は各弧で $M$ 以下だが、$v^{-}$ から出る弧は $(v^{-},v^{+})$ だけで容量 1 なので、各 $v^{-}$ を通る流れは 1 以下）。各頂点 $v$ は $(v^{-},v^{+})$ を通してしか通れないので、$p$ 本の有向道は $G$ の頂点を共有しない。$G$ に戻すと $A$ の頂点から $B$ の頂点への互いに素な歩道で、\ref{graph:walk-contains-path} によって道にし、さらに最後に $A$ を出たところから最初に $B$ に入るところまでに切り詰めれば $A$–$B$ 道になる。
+
+**Step 3（有限容量のカットは分離集合）.** 【主張：容量 $<M$ のカット $S$ について、$X\defeq\{v : v^{-}\in S,\ v^{+}\notin S\}$ は $A$ と $B$ を分離し、$\abs{X}=c(\partial^{+}S)$】容量が $M$ 未満なので、$S$ から出る弧はすべて容量 1 の弧 $(v^{-},v^{+})$ で、その個数が $\abs{X}$。$X$ を通らない $A$–$B$ 道 $a=x_{0}\dots x_{\ell}=b$ があれば、$s\in S$ から $a^{-},a^{+},x_{1}^{-},x_{1}^{+},\dots,b^{+},t$ と弧をたどるとき、容量 $M$ の弧は $S$ から出られず、$(x_{i}^{-},x_{i}^{+})$ も $x_{i}\notin X$ なので $S$ から出ない。よって $t\in S$ となり矛盾。
+
+**Step 4（分離集合から有限容量のカット）.** 【主張：$\abs{X}=k$ の分離集合から容量 $k$ のカットが作れる】$R$ を「$G-X$ の中で $A\setminus X$ のどれかから道で到達できる頂点」全体とし、$S\defeq\{s\}\cup\{v^{\pm} : v\in R\}\cup\{x^{-} : x\in X\}$ とする。容量 $M$ の弧が $S$ から出ないこと：$(s,a^{-})$ は $a\in R\cup X$ なので $a^{-}\in S$。$u\in R$ と隣接する $v$ は $v\in R$ か $v\in X$ で、どちらでも $v^{-}\in S$。$b^{+}\in S$ なら $b\in R$ で、$b\notin X$ なので $X$ を通らない $A$–$b$ 道があり、それを切り詰めた $A$–$B$ 道は $X$ を通らず矛盾。よって $S$ から出る弧は $(x^{-},x^{+})$（$x\in X$）だけで、容量は $k$。
+
+**Step 5.** Step 3・4 から最小カットの容量は $k$ で、\ref{graph:max-flow-min-cut} より値 $k$ の整数の流れがあり、Step 2 から $k$ 本の互いに素な $A$–$B$ 道が得られる。
+:::
+
+::: corollary ホイットニーの定理 {#graph:whitney-k-connected keywords="global version of Menger's theorem, k-connected iff k independent paths" index="ホイットニーの定理（連結度）|ほいっとにーのていり" refname="ホイットニーの定理（連結度）"}
+$\abs{G}>k$ のグラフ $G$ が $k$ 連結であることと、任意の 2 頂点が $k$ 本の独立な道で結ばれることは同値である。
+:::
+
+::: intuition
+どの $k-1$ 個の頂点を壊してもつながっているグラフとは、どの 2 点の間にも、途中で交わらない $k$ 本の道があるグラフのことである。
+:::
+
+::: proof
+**Step 1（⇐）.** $\abs{X}<k$ の $X$ を除いても、$X$ の外の 2 頂点を結ぶ $k$ 本の独立な道のどれかは $X$ を避けるので、$G-X$ は連結。
+
+**Step 2（隣接しない 2 頂点）.** 【主張：$k$ 連結なら、隣接しない $a,b$ は $k$ 本の独立な道で結ばれる】$G'\defeq G-\{a,b\}$ の中で $N(a)$ と $N(b)$ を分離する集合 $X$ は、$G$ で $a$ と $b$ を分離する（$a$–$b$ 道から $a,b$ を除いた部分は $G'$ の中の $N(a)$ から $N(b)$ への歩道で、$N(a)$–$N(b)$ 道を含む）ので、$k$ 連結性から $\abs{X}\ge k$。\ref{graph:menger} を $G'$ に使うと互いに素な $N(a)$–$N(b)$ 道が $k$ 本あり、両端に $a,b$ を付ければ独立な $a$–$b$ 道になる。
+
+**Step 3（隣接する 2 頂点）.** 【主張：$ab\in E$ なら $G-ab$ で $a,b$ を結ぶ独立な道が $k-1$ 本ある】$G-ab$ で $a$ と $b$ を分離する頂点集合 $X$ が $\abs{X}\le k-2$ なら、$\abs{G}>k$ より $X\cup\{a,b\}$ の外に頂点 $v$ があり、$v$ は $G-ab-X$ で $a$ か $b$ の一方（たとえば $b$）と別の成分にある。すると $X\cup\{a\}$（大きさ $\le k-1$）は $G$ で $v$ と $b$ を分離し、$k$ 連結性に反する。よって $G-\{a,b\}$ の中で $N_{G-ab}(a)$ と $N_{G-ab}(b)$ を分離する集合（それは $G-ab$ で $a$ と $b$ を分離する）は $k-1$ 個以上で、Step 2 と同じく \ref{graph:menger} から $k-1$ 本の独立な $a$–$b$ 道が $G-ab$ にあり、辺 $ab$ と合わせて $k$ 本。
+:::
+
+::: corollary 辺版のメンガーの定理 {#graph:menger-edge keywords="edge version of Menger's theorem, k-edge-connected iff k edge-disjoint paths" index="メンガーの定理（辺版）|めんがーのていり"}
+2 頂点 $a\neq b$ を結ぶ辺素な道の最大本数は、$a$ と $b$ を分ける辺集合（除くと $a$ と $b$ が別の成分になるもの）の最小の大きさに等しい。したがって $G$ が $\ell$ 辺連結であることと、任意の 2 頂点が $\ell$ 本の辺素な道で結ばれることは同値である。
+:::
+
+::: proof
+各辺 $uv$ を二つの弧 $(u,v)$, $(v,u)$ に置き換え、容量をすべて 1 とする。値 $p$ の整数の流れで、ある辺の両向きの弧がともに値 1 なら両方を 0 にしても流れのままで値は変わらないので、そうなっていないとしてよい。\ref{graph:prob-nf-edge-disjoint} より、値は辺素な有向道の最大本数（辺ごとに一方向しか使わないので $G$ の辺素な道になる）に等しく、最小カットは $a$ と $b$ を分ける辺集合に対応する。\ref{graph:max-flow-min-cut} から主張を得る。
+:::
+
+::: supplement
+**類似の定理.** \ref{graph:menger} から、2 部グラフのケーニッヒの定理（$A$ と $B$ を二部分割とする）や、扇補題（$\abs{B}\ge k$ の集合 $B$ と頂点 $a\notin B$ について、$k$ 連結なら $a$ から $B$ への、$a$ だけを共有する $k$ 本の道がある）が直ちに従う。
+
+**無限グラフ.** 無限グラフでのメンガーの定理（エルデシュの予想）はアハロニとベルガーによって証明された（2009 年）。（\ref[無限グラフの基本]{graph:page-infinite-graphs} を参照。）
+
+**高い視点.** メンガーの定理・最大流最小カット定理・ケーニッヒの定理・ホールの定理は互いに容易に導き合える「最小最大定理」の一族で、いずれも線形計画の双対性の組合せ論的な現れである。
+:::
+
+## 問題 {#graph:sec-me-problems}
+
+::: problem {#graph:prob-me-cycle-through}
+2 連結グラフでは、任意の 2 頂点がある閉路の上にあることを示せ。
+:::
+
+::: solution
+$\abs{G}\ge3$ なので \ref{graph:whitney-k-connected}（$k=2$）より、2 頂点 $a,b$ は 2 本の独立な道で結ばれ、その和が $a,b$ を通る閉路である。
+:::
+
+::: problem {#graph:prob-me-fan}
+扇補題を \ref{graph:menger} から示せ：$G$ が $k$ 連結、$a\in V$、$B\subseteq V\setminus\{a\}$, $\abs{B}\ge k$ なら、$a$ から $B$ への道 $k$ 本で、$a$ 以外では交わらず、各道の $B$ の頂点は終点だけのものがある。
+:::
+
+::: solution
+$A\defeq N(a)$ とし、$G-a$ の中で考える。$G-a$ で $A$ と $B$ を分離する $X$ が $\abs{X}<k$ なら、$G-X$ は連結（$k$ 連結性）、$\abs{B}\ge k$ より $b\in B\setminus X$、$\abs{N(a)}\ge\delta(G)\ge k$（\ref{graph:kappa-lambda-delta}）より $x\in N(a)\setminus X$ がとれる。$G-X$ の $x$–$b$ 道が $a$ を通るなら、$a$ の後の部分は $a$ の近傍から始まる。いずれにしても $a$ と $X$ を通らない $A$–$B$ 道が得られて矛盾。よって \ref{graph:menger} を $G-a$ に使うと、$a$ を通らない互いに素な $A$–$B$ 道が $k$ 本あり、各道の始点に $a$ を付ければよい（$A\cap B$ の頂点は長さ 0 の道で、$a$ との辺が道になる）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
