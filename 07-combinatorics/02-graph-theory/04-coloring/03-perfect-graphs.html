@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>パーフェクトグラフ | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/04-coloring/03-perfect-graphs.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# パーフェクトグラフ {#graph:page-perfect-graphs keywords="perfect graphs, clique number, independence number, complement, chordal graphs, perfect graph theorem, Lovasz, strong perfect graph theorem"}
+
+彩色数は完全部分グラフの大きさ $\omega$ 以上である（\ref{graph:chromatic-basic-bounds.3}）。すべての誘導部分グラフでこの自明な下界が彩色数に一致するグラフを**パーフェクトグラフ**（perfect graph）という。パーフェクトグラフでは「$\omega+1$ 個の点が互いに隣接していること」が、少ない色で塗れないことの唯一の理由になる。このページでは、二部グラフとその補グラフ、弦グラフがパーフェクトグラフであることを示し、パーフェクトグラフの補グラフもパーフェクトグラフであるというロヴァースのパーフェクトグラフ定理を証明する。
+
+## 記法と定義の確認 {#graph:sec-pf-notation}
+
+::: notation
+- 彩色数 $\chi$、完全部分グラフの大きさの最大値 $\omega$（**クリーク数**）、独立集合の大きさの最大値 $\alpha$（**独立数**）は \ref{graph:chromatic-basic-bounds} の記号に従い、$\chi(G)\ge\omega(G)$、$\chi(G)\,\alpha(G)\ge\abs{G}$。
+- $G$ の**補グラフ** $\overline{G}$ は、同じ頂点集合で、$G$ で隣接しない 2 頂点を辺とするグラフ。$\alpha(G)=\omega(\overline{G})$、$\omega(G)=\alpha(\overline{G})$。
+- 分離集合は \ref{graph:separator}、ケーニッヒの定理は \ref{graph:konig-theorem}。このページでは perfect graph を「パーフェクトグラフ」と書き、すべての 2 頂点が隣接するグラフ（\ref{graph:graph} の完全グラフ）は $K^{n}$ と書いて区別する。
+:::
+
+## パーフェクトグラフの定義と例 {#graph:sec-pf-definition}
+
+::: definition パーフェクトグラフ {#graph:perfect-graph keywords="perfect graph" index="パーフェクトグラフ|ぱーふぇくとぐらふ, 完全グラフ（perfect）|かんぜんぐらふ"}
+グラフ $G$ のすべての誘導部分グラフ $H$ で $\chi(H)=\omega(H)$ が成り立つとき、$G$ を**パーフェクトグラフ**（**パーフェクトグラフ**とも訳される）という。
+:::
+
+::: intuition
+どの部分を取り出しても、「互いに隣接する点の最大個数」と同じ数の色で塗れるグラフである。
+:::
+
+::: example 二部グラフとその補グラフ {#graph:perfect-examples keywords="bipartite graphs and their complements are perfect" index="二部グラフの補グラフ|にぶぐらふのほぐらふ"}
+1. 二部グラフは完全：誘導部分グラフも二部グラフで、辺があれば $\chi=\omega=2$、なければ $\chi=\omega=1$（空でないとき）。
+2. 二部グラフの補グラフは完全：誘導部分グラフは二部グラフ $H$ の補グラフ $\overline{H}$ の形である。$\overline{H}$ の色クラスは $\overline{H}$ の独立集合、すなわち $H$ のクリークで、二部グラフのクリークは 1 点か 1 辺なので、$\chi(\overline{H})$ は $V(H)$ を 1 点と $H$ の辺に分ける最小の個数で、それは $\abs{H}-\nu(H)$（$\nu$ は最大マッチングの大きさ：マッチングの辺と残りの 1 点で分ける）に等しい。一方 $\omega(\overline{H})=\alpha(H)=\abs{H}-\tau(H)$（$\tau$ は最小頂点被覆の大きさ：独立集合の補集合が頂点被覆）。\ref{graph:konig-theorem} の $\nu=\tau$ から一致する。
+:::
+
+::: proposition 奇穴は完全でない {#graph:odd-hole-imperfect keywords="odd cycles of length at least 5 and their complements are not perfect" index="穴（グラフの）|あな"}
+長さ $2k+1\ge5$ の閉路 $C$ とその補グラフ $\overline{C}$ はパーフェクトグラフでない。
+:::
+
+::: proof
+$\omega(C)=2<3=\chi(C)$。$\overline{C}$ では $\omega(\overline{C})=\alpha(C)=k$ で、$\alpha(\overline{C})=\omega(C)=2$ から $\chi(\overline{C})\ge\frac{2k+1}{2}>k$。
+:::
+
+## 弦グラフ {#graph:sec-pf-chordal}
+
+::: definition 弦グラフ {#graph:chordal keywords="chordal graph, triangulated graph, pasting along a complete subgraph" index="弦グラフ|げんぐらふ, 三角化グラフ|さんかくかぐらふ"}
+長さ 4 以上のすべての閉路が**弦**（閉路の隣り合わない 2 頂点を結ぶ辺）をもつグラフを**弦グラフ**という。$G$ の誘導部分グラフ $G_{1},G_{2}$ で $G=G_{1}\cup G_{2}$ のとき、$G$ は $G_{1}$ と $G_{2}$ を $S\defeq G_{1}\cap G_{2}$ に沿って**貼り合わせた**ものという。
+:::
+
+::: intuition
+弦グラフとは、長い輪には必ず近道の辺がある、すなわち三角形以外の「穴」がないグラフである。
+:::
+
+::: proposition 弦グラフの構造 {#graph:chordal-structure keywords="chordal graphs are obtained by pasting complete graphs along complete subgraphs" index="弦グラフの構造|げんぐらふのこうぞう"}
+グラフが弦グラフであることと、完全グラフ $K^{n}$ から始めて、完全部分グラフに沿って貼り合わせることを繰り返して得られることは同値である。
+:::
+
+::: proof
+**Step 1（⇐）.** 【主張：弦グラフ $G_{1},G_{2}$ を完全部分グラフ $S$ に沿って貼り合わせた $G$ は弦グラフ】$G$ の長さ 4 以上の閉路 $D$ をとる。$D$ が $G_{1}$ か $G_{2}$ に含まれれば、誘導部分グラフなので弦をもつ。そうでなければ $D$ は $u\in G_{1}\setminus S$ と $w\in G_{2}\setminus S$ を通り、$G_{1}\setminus S$ と $G_{2}\setminus S$ の間に辺はないので、$D$ を $u,w$ で分けた二つの弧はそれぞれ $S$ の頂点 $s,s'$ を通る。$s\neq s'$ で、$D$ の上で $u$ と $w$ に隔てられるので隣り合わず、$S$ は完全なので $ss'$ は弦である。
+
+**Step 2（⇒）.** $\abs{G}$ の帰納法。完全なら終わり。そうでなければ隣接しない $a,b$ と、$a,b$ を分離する極小な頂点集合 $X$（$a,b\notin X$）をとり、$G-X$ の $a$ を含む成分を $C$、$G_{1}\defeq G[V(C)\cup X]$, $G_{2}\defeq G-C$ とする。$G$ は $G_{1},G_{2}$ を $S\defeq G[X]$ に沿って貼り合わせたもので（$C$ と $G_{2}-X$ の間に辺はない）、$G_{1},G_{2}$ は弦グラフ（誘導部分グラフ）で頂点が少ないので帰納法が使える。
+
+**Step 3（$S$ は完全）.** 【主張：$s,t\in X$ は隣接する】隣接しないとする。$X$ の極小性から $s,t$ はどちらも $C$ に近傍をもつ（なければ $X\setminus\{s\}$ がなお分離する）。よって $G_{1}$ の中に内部が $C$ にある $s$–$t$ 道があり、最短のもの $P_{1}$ をとる。同様に $b$ を含む成分 $C'$ について、内部が $C'$ にある最短の $s$–$t$ 道 $P_{2}$ をとる。$P_{1}\cup P_{2}$ は長さ 4 以上の閉路で、$C$ と $C'$ の間に辺はなく、$st\notin E$、各 $P_{i}$ は最短なので弦をもたない。矛盾。
+:::
+
+::: theorem 弦グラフは完全 {#graph:chordal-perfect keywords="chordal graphs are perfect" index="弦グラフの完全性|げんぐらふのかんぜんせい"}
+弦グラフはパーフェクトグラフである。
+:::
+
+::: intuition
+長い輪に必ず近道があるグラフは、互いに隣接する点の最大個数と同じ数の色で塗れ、これはどの部分を取り出しても成り立つ。
+:::
+
+::: proof
+\ref{graph:chordal-structure} より、パーフェクトグラフ $G_{1},G_{2}$ を完全部分グラフ $S$ に沿って貼り合わせた $G$ が完全であることを示せばよい（$K^{n}$ は完全）。$G$ の誘導部分グラフ $H$ について $H_{i}\defeq H\cap G_{i}$, $T\defeq H\cap S$ とすると、$T$ は完全部分グラフで、$H$ は $H_{1},H_{2}$ を $T$ に沿って貼り合わせたもの。$H_{i}$ は $\omega(H_{i})$ 色で塗れ、$T$ の頂点は互いに異なる色をもつので、一方の色の名前を付け替えて $T$ の上で一致させれば、$\max(\omega(H_{1}),\omega(H_{2}))\le\omega(H)$ 色の $H$ の彩色になる（$H_{1}\setminus T$ と $H_{2}\setminus T$ の間に辺はない）。
+:::
+
+## パーフェクトグラフ定理 {#graph:sec-pf-pgt}
+
+::: lemma 頂点の膨張 {#graph:vertex-expansion keywords="expanding a vertex preserves perfection" index="頂点の膨張|ちょうてんのぼうちょう"}
+パーフェクトグラフ $G$ の頂点 $x$ に、$x$ と $x$ のすべての近傍に隣接する新しい頂点 $x'$ を加えたグラフ $G'$ もパーフェクトグラフである。
+:::
+
+::: proof
+$\abs{G}$ の帰納法。$G'$ の真の誘導部分グラフは、$G$ の誘導部分グラフか、$G$ の真の誘導部分グラフの頂点を膨張させたものなので、仮定と帰納法から完全。よって $\chi(G')\le\omega(G')$ を示せばよい。$\omega\defeq\omega(G)$ とすると $\omega(G')\in\{\omega,\omega+1\}$。$\omega(G')=\omega+1$ なら $\chi(G')\le\chi(G)+1=\omega+1$。
+
+$\omega(G')=\omega$ のとき：$x$ はどの $K^{\omega}$ にも含まれない（含まれれば $x'$ を加えて $K^{\omega+1}$）。$G$ を $\omega$ 色で塗り、$x$ の色クラスを $X$ とすると、$G$ の各 $K^{\omega}$ はどの色も一度ずつ使うので $X$ と交わり、その交点は $x$ ではない。よって $H\defeq G-(X\setminus\{x\})$ は $\omega(H)<\omega$ で、$G$ が完全なので $H$ は $\omega-1$ 色で塗れる。$(X\setminus\{x\})\cup\{x'\}$ は独立（$X$ は独立で、$x'$ は $X\setminus\{x\}$ の点と隣接しない：それらは $x$ と隣接しないので）なので、これに $\omega$ 番目の色を与えれば $G'$ の $\omega$ 色の彩色になる。
+:::
+
+::: theorem ロヴァースのパーフェクトグラフ定理 {#graph:perfect-graph-theorem keywords="perfect graph theorem, Lovasz 1972, complement of a perfect graph is perfect" index="パーフェクトグラフ定理|ぱーふぇくとぐらふていり, 完全グラフ定理|かんぜんぐらふていり" refname="パーフェクトグラフ定理"}
+グラフがパーフェクトグラフであることと、その補グラフがパーフェクトグラフであることは同値である。
+:::
+
+::: intuition
+「互いに隣接する点の最大数で塗れる」という性質は、隣接と非隣接を入れ替えても保たれる。言い換えると、独立集合で頂点を覆う問題とクリークで頂点を覆う問題の両方で、自明な下界が達成される。
+:::
+
+::: proof
+パーフェクトグラフ $G=(V,E)$ の補グラフが完全であることを $\abs{G}$ の帰納法で示す（逆は $\overline{\overline{G}}=G$ による）。$\overline{G}$ の真の誘導部分グラフは $G$ の真の誘導部分グラフの補グラフなので、帰納法から完全。よって $\chi(\overline{G})\le\omega(\overline{G})=\alpha\defeq\alpha(G)$ を示せばよい。$\mathcal{K}$ を $G$ の空でない完全部分グラフの頂点集合全体、$\mathcal{A}$ を大きさ $\alpha$ の独立集合全体とする。
+
+**Step 1（帰着）.** 【主張：すべての $A\in\mathcal{A}$ と交わる $K\in\mathcal{K}$ があれば十分】そのとき $\omega(\overline{G}-K)=\alpha(G-K)<\alpha$ で、$K$ は $\overline{G}$ の独立集合なので、帰納法から $\chi(\overline{G})\le\chi(\overline{G}-K)+1=\omega(\overline{G}-K)+1\le\alpha$。
+
+**Step 2（反例のグラフ）.** そのような $K$ がないとして、各 $K\in\mathcal{K}$ に $K\cap A_{K}=\varnothing$ となる $A_{K}\in\mathcal{A}$ を選ぶ。各頂点 $x$ を、$k(x)\defeq\abs{\{K : x\in A_{K}\}}$ 個の頂点からなるパーフェクトグラフ $G_{x}$ に置き換え、$xy\in E$ なら $G_{x}$ と $G_{y}$ の頂点をすべて結んだグラフを $G'$ とする。$G'$ は $G[\{x : k(x)>0\}]$ から頂点の膨張を繰り返して得られるので、\ref{graph:vertex-expansion} より完全で、$\chi(G')\le\omega(G')$。
+
+**Step 3（クリーク数）.** 【主張：$\omega(G')\le\abs{\mathcal{K}}-1$】$G'$ の極大なクリークは、ある $X\in\mathcal{K}$ について $\bigcup_{x\in X}G_{x}$ の形で、その大きさは
+$$
+\sum_{x\in X}k(x)=\abs{\{(x,K) : x\in X,\ x\in A_{K}\}}=\sum_{K\in\mathcal{K}}\abs{X\cap A_{K}}\le\abs{\mathcal{K}}-1.
+$$
+$X$ はクリーク、$A_{K}$ は独立なので $\abs{X\cap A_{K}}\le1$、さらに $K=X$ の項は $0$。
+
+**Step 4（彩色数）.** 【主張：$\chi(G')\ge\abs{\mathcal{K}}$】$\abs{G'}=\sum_{x}k(x)=\sum_{K}\abs{A_{K}}=\abs{\mathcal{K}}\,\alpha$。$G'$ の独立集合は各 $G_{x}$ から高々 1 点で、その $x$ たちは $G$ で独立なので $\alpha(G')\le\alpha$。よって $\chi(G')\ge\abs{G'}/\alpha(G')\ge\abs{\mathcal{K}}$。Step 2・3 と矛盾する。
+:::
+
+::: fact 強パーフェクトグラフ定理 {#graph:strong-perfect-graph-theorem keywords="strong perfect graph theorem, Berge conjecture" index="強パーフェクトグラフ定理|きょうぱーふぇくとぐらふていり, 強完全グラフ定理|きょうかんぜんぐらふていり" refname="強パーフェクトグラフ定理"}
+グラフがパーフェクトグラフであることと、$G$ も $\overline{G}$ も長さ 5 以上の奇閉路を誘導部分グラフとして含まないことは同値である（Chudnovsky–Robertson–Seymour–Thomas, 2006。ベルジュの予想）。
+:::
+
+::: intuition
+パーフェクトグラフでないのは、5 以上の奇数の長さの「穴」か、その補グラフが隠れているときに限る。
+:::
+
+::: supplement
+**比較可能性グラフ.** 半順序集合で比較可能な 2 元を結んだグラフ（比較可能性グラフ）はパーフェクトグラフで、そのことは \ref{graph:mirsky} と同値である（クリーク＝鎖、色クラス＝反鎖）。補グラフの完全性は \ref{graph:dilworth} にあたり、パーフェクトグラフ定理は、比較可能性グラフについては「ミルスキー型の主張から双対の主張を導く」ことの一般化とみなせる。
+:::
+
+## 問題 {#graph:sec-pf-problems}
+
+::: problem {#graph:prob-pf-interval}
+実数直線の閉区間の族について、区間が交わるとき結んだグラフ（区間グラフ）は弦グラフであることを示せ。
+:::
+
+::: solution
+長さ 4 以上の弦のない閉路 $I_{1}\dots I_{k}I_{1}$ があるとし、右端が最小の区間を $I_{1}=[l,r]$ とする。$I_{2}$ は $I_{1}$ と交わるので左端は $r$ 以下、右端は（最小性から）$r$ 以上で、$r\in I_{2}$。同様に $r\in I_{k}$。よって $I_{2}$ と $I_{k}$ は交わり、$k\ge4$ なのでこれは弦で、矛盾。
+:::
+
+::: problem {#graph:prob-pf-c5}
+$C_{5}$ は自己補（補グラフと同型）であることを確かめ、\ref{graph:odd-hole-imperfect} と \ref{graph:perfect-graph-theorem} が整合することを確かめよ。
+:::
+
+::: solution
+$C_{5}=12345$ の補グラフの辺は $13,35,52,24,41$ で、閉路 $13524$ をなす。$C_{5}$ は完全でなく、補グラフも完全でないので、定理と整合する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
