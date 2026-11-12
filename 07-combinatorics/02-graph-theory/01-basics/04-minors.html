@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>縮約とマイナー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/01-basics/04-minors.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 縮約とマイナー {#graph:page-minors keywords="contraction, minor, topological minor, subdivision, branch sets, model"}
+
+部分グラフ・誘導部分グラフに加えて、グラフの間にはもう二つの重要な「含まれる」関係がある。辺を道に置き換えた**細分**を含む**位相的マイナー**と、頂点を連結な塊に膨らませたものを含む**マイナー**である。これらはクラトフスキーの定理・ワグナーの定理（\ref[クラトフスキーの定理]{graph:page-kuratowski}）やグラフマイナー定理（\ref[グラフマイナー定理の概観]{graph:page-graph-minor-theorem}）の言葉になる。このページでは定義を正確に与え、どちらも半順序であること、マイナーは辺の削除・縮約と頂点の削除の繰り返しで得られること、最大次数 3 以下のグラフでは二つの概念が一致することを示す。
+
+## 記法と定義の確認 {#graph:sec-mn-notation}
+
+::: notation
+- グラフ・部分グラフ・同型・道・連結・全域木は \ref{graph:page-graphs}・\ref{graph:page-trees-bipartite} の定義に従う。$\abs{G}$ は頂点数、$\norm{G}$ は辺の数。
+- 頂点集合 $U$ が $G$ で**連結**とは $G[U]$ が連結であることをいう。
+- グラフは同型なものを同一視して扱う（「$X$ は $Y$ のマイナー」は同型類についての関係）。
+:::
+
+## 細分とマイナー {#graph:sec-mn-definitions}
+
+::: definition 細分と位相的マイナー {#graph:subdivision keywords="subdivision, TX, branch vertices, topological minor" index="細分（グラフの）|さいぶん, 位相的マイナー|いそうてきまいなー, 分岐点|ぶんきてん"}
+グラフ $X$ の各辺 $xy$ を、$x$ と $y$ を結ぶ道 $P_{xy}$（長さ $\ge1$）に置き換え、どの $P_{xy}$ の内部の頂点も $X$ の頂点や他の道の頂点と重ならないようにしたグラフを $X$ の**細分**といい、$TX$ と書く。$X$ の頂点を $TX$ の**分岐点**という。$Y$ が $X$ の細分を部分グラフとして含むとき、$X$ を $Y$ の**位相的マイナー**という。
+:::
+
+::: intuition
+辺の途中に点を打って辺を何本かに分けても、図としての形（位相）は変わらない。そうして得られるものをどこかに含んでいれば、$X$ は位相的に含まれている。
+:::
+
+::: definition マイナー {#graph:minor keywords="minor, IX, model, branch sets" index="マイナー（グラフの）|まいなー, 分岐集合|ぶんきしゅうごう, モデル（マイナーの）|もでる"}
+グラフ $X$ が $Y$ の**マイナー**であるとは、$Y$ の頂点の互いに交わらない空でない部分集合 $V_{x}$（$x\in V(X)$）で、各 $V_{x}$ が $Y$ で連結であり、$X$ の各辺 $xx'$ について $V_{x}$ と $V_{x'}$ の間に $Y$ の辺があるものが存在することをいい、$X\preccurlyeq Y$ と書く。$V_{x}$ を**分岐集合**という。同じことだが、$Y$ の頂点の部分集合から $V(X)$ への全射 $\varphi$ で、各 $\varphi^{-1}(x)$ が連結で、$X$ の辺 $xx'$ ごとに $\varphi^{-1}(x)$ と $\varphi^{-1}(x')$ の間に辺があるものがあることである。
+:::
+
+::: intuition
+$Y$ のいくつかの連結な塊をそれぞれ一点につぶし、塊どうしの間に辺があればそれを辺とみなすと、$X$ が（部分グラフとして）見えるということである。
+:::
+
+::: example
+1. 部分グラフはマイナーである（分岐集合を 1 点にとる）。
+2. 長さ $k\ge3$ の閉路は $K^{3}$ をマイナーにもつ（閉路を三つの連続した弧に分ける）。
+3. 細分 $TX$ は $X$ をマイナーにもつ（\ref{graph:topological-minor-is-minor}）。
+:::
+
+## 半順序であること {#graph:sec-mn-order}
+
+::: proposition マイナー関係は半順序 {#graph:minor-partial-order keywords="minor relation and topological minor relation are partial orders" index="マイナー関係|まいなーかんけい"}
+同型を同一視した有限グラフの全体の上で、マイナー関係 $\preccurlyeq$ と位相的マイナーの関係は、どちらも反射的・推移的・反対称的である。
+:::
+
+::: proof
+**Step 1（反射律）.** 分岐集合を 1 点にとれば $X\preccurlyeq X$。細分としては各辺を長さ 1 の道にとる。
+
+**Step 2（マイナーの推移律）.** 【主張：$X\preccurlyeq Y$（$\varphi$）、$Y\preccurlyeq Z$（$\psi$）なら $\varphi\circ\psi$ が $X\preccurlyeq Z$ を与える】$\varphi\circ\psi$ は $\psi^{-1}(\operatorname{dom}\varphi)$ から $V(X)$ への全射である。$x$ の逆像 $W_{x}\defeq\bigcup_{y\in\varphi^{-1}(x)}\psi^{-1}(y)$ は連結：各 $\psi^{-1}(y)$ は連結で、$\varphi^{-1}(x)$ が $Y$ で連結なので、その中の辺 $yy'$ ごとに $\psi^{-1}(y)$ と $\psi^{-1}(y')$ の間に $Z$ の辺がある。$X$ の辺 $xx'$ については、$\varphi^{-1}(x)$ と $\varphi^{-1}(x')$ の間の $Y$ の辺 $yy'$ をとり、$\psi^{-1}(y)$ と $\psi^{-1}(y')$ の間の $Z$ の辺が $W_{x}$ と $W_{x'}$ を結ぶ。
+
+**Step 3（位相的マイナーの推移律）.** $TX\subseteq Y$、$TY\subseteq Z$ なら、$TY$ の中で $TX$ の各辺を置き換えた道をつなげたものは、$X$ の各辺を道に置き換えた $X$ の細分で、$Z$ に含まれる。
+
+**Step 4（反対称律）.** 【主張：$X\preccurlyeq Y$ かつ $Y\preccurlyeq X$ なら $X\cong Y$】$X\preccurlyeq Y$ なら $\abs{X}\le\abs{Y}$（分岐集合は交わらず空でない）で、$X$ の辺ごとに $Y$ の相異なる辺がとれる（異なる辺 $xx'$ は異なる分岐集合の組を結ぶ）ので $\norm{X}\le\norm{Y}$。両方向なら等号が成り立ち、$\abs{X}=\abs{Y}$ からすべての分岐集合は 1 点で $\varphi\colon V(Y)\to V(X)$ は全単射。$xx'\in E(X)\Rightarrow\varphi^{-1}(x)\varphi^{-1}(x')\in E(Y)$ は辺の単射を与え、辺の数が等しいので全射でもあり、$\varphi^{-1}$ は同型写像である。位相的マイナーも同じ不等式（細分は頂点と辺を減らさない）から同様である。
+:::
+
+## 縮約 {#graph:sec-mn-contraction}
+
+::: definition 縮約 {#graph:contraction keywords="contraction of an edge, G/e, contraction minor" index="縮約（辺の）|しゅくやく"}
+辺 $e=xy$ について、$x,y$ を新しい一点 $v_{e}$ に置き換え、$x$ または $y$ に隣接していた頂点（$x,y$ 以外）を $v_{e}$ に隣接させたグラフを $G/e$ と書き、$e$ の**縮約**という（重複する辺は一本にまとめ、ループは作らない）。
+:::
+
+::: intuition
+辺を縮めて両端を一点に合わせる。辺の長さを 0 にすることにあたる。
+:::
+
+::: theorem マイナーと削除・縮約 {#graph:minor-deletion-contraction keywords="minors are obtained by deletions and contractions" index="削除と縮約|さくじょとしゅくやく" refname="マイナーと削除・縮約"}
+有限グラフ $X,Y$ について、$X\preccurlyeq Y$ であることと、$Y$ から始めて、辺の削除・辺の縮約・頂点の削除を有限回繰り返して $X$（と同型なグラフ）が得られることは同値である。
+:::
+
+::: intuition
+マイナーとは、辺を消す・辺を縮める・頂点を消すという三つの操作を繰り返して得られるグラフのことである。
+:::
+
+::: proof
+**Step 1（⇐）.** 【主張：一回の操作で得られるグラフはマイナー】部分グラフはマイナーである。$G/e$ は、分岐集合 $\{x,y\}$（$v_{e}$ に対応）と他の頂点の 1 点集合によって $G$ のマイナーである。推移律（\ref{graph:minor-partial-order}）で繰り返しに対しても成り立つ。
+
+**Step 2（⇒）.** 【主張：分岐集合 $V_{x}$ をもつモデルから、操作の列で $X$ が得られる】(a) どの $V_{x}$ にも入らない頂点を削除する。(b) $X$ の各辺 $xx'$ について $V_{x}$–$V_{x'}$ 間の辺を一本ずつ選び、選ばなかった分岐集合間の辺を削除し、さらに各 $G[V_{x}]$ の全域木（\ref{graph:spanning-tree}）の辺以外の $V_{x}$ 内の辺を削除する。(c) 各全域木の辺を一本ずつ縮約する。木の辺を縮約すると頂点が一つ減った木になり（閉路は生じない）、$\abs{V_{x}}-1$ 回で一点になる。(c) の各段階で、異なる分岐集合の間の辺は「つぶした点どうしの辺」として残り（重なりは (b) で除いてある）、最後のグラフは $X$ と同型である。
+
+::: hypcheck
+- **有限性**：Step 2 で操作が有限回で終わることに使った。無限グラフではマイナーは定義できるが、この特徴づけは成り立たない。
+:::
+:::
+
+## 位相的マイナーとマイナー {#graph:sec-mn-comparison}
+
+::: proposition 位相的マイナーはマイナー {#graph:topological-minor-is-minor keywords="every topological minor is a minor, minors of maximum degree 3 are topological minors" index="最大次数 3 のマイナー|さいだいじすう3のまいなー"}
+1. $TX$ は $X$ をマイナーにもつ。したがって位相的マイナーはマイナーである。
+2. $\Delta(X)\le3$ なら、$X$ をマイナーにもつグラフは $X$ の細分を部分グラフとして含む。したがって最大次数 3 以下のグラフについて、マイナーと位相的マイナーは一致する。
+:::
+
+::: proof
+**Step 1（(1)）.** 【主張：分岐点 $x$ ごとに、$x$ と、$x$ から出る道 $P_{xy}$ の内部の頂点の「半分」を合わせて分岐集合にすればよい】各道 $P_{xy}$ の内部の頂点を、$x$ に近い側と $y$ に近い側に（どちらかに）分け、$x$ 側を $V_{x}$、$y$ 側を $V_{y}$ に入れる。$V_{x}$ は $x$ から出る道の始めの部分の和で連結、$P_{xy}$ の分かれ目の辺が $V_{x}$ と $V_{y}$ を結ぶ。後半は推移律（\ref{graph:minor-partial-order}）による。
+
+**Step 2（(2)、分岐集合の中の星形）.** 【主張：各 $x$ について、$V_{x}$ の中に点 $c_{x}$ と、$c_{x}$ から「$x$ の各辺のために選んだ辺の $V_{x}$ 側の端点」への道で、互いに $c_{x}$ 以外で交わらないものがとれる】$X$ の各辺 $xx'$ について $V_{x}$–$V_{x'}$ 間の辺 $e_{xx'}$ を一本選ぶ。$x$ の辺は高々 3 本なので、$V_{x}$ 側の端点は（重複を込めて）高々 3 個である。$G[V_{x}]$ の全域木 $T_{x}$ をとり、端点をすべて含む最小の部分木を $S_{x}$ とする。$S_{x}$ の葉はどれも端点である（そうでなければ葉を除いてより小さくできる）。
+- (a) 二つの辺が同じ端点 $u$ を共有するとき：異なる端点は高々 2 個なので $S_{x}$ は $u$ ともう一つの端点を結ぶ道（または 1 点）で、$c_{x}\defeq u$ とし、もう一つの端点への道と、$u$ 自身への長さ 0 の道をとる。
+- (b) 端点が相異なる 3 点で $S_{x}$ の葉が 3 個のとき：葉の数は $2+\sum_{v}(d(v)-2)$（和は次数 3 以上の頂点にわたる。\ref{graph:handshake} と辺の数 $\abs{S_{x}}-1$ から）なので、次数 3 の頂点がちょうど一つあり、それ以外の頂点の次数は 2 以下である。それを $c_{x}$ とすれば $S_{x}$ は $c_{x}$ から 3 つの葉への、$c_{x}$ 以外で交わらない 3 本の道からなる。
+- (c) それ以外では $S_{x}$ は道（または 1 点）で、端点は道の両端と、高々一つの内部の点である。内部の端点があればそれを、なければ道の一端を $c_{x}$ とすれば、$c_{x}$ から各端点への道は $c_{x}$ 以外で交わらない。
+
+**Step 3（(2)、組み立て）.** 各 $x$ の $c_{x}$ を分岐点とし、$X$ の辺 $xx'$ を「$c_{x}$ から $e_{xx'}$ の $V_{x}$ 側端点への道 $+e_{xx'}+$ $V_{x'}$ 側の道」に置き換える。異なる分岐集合は交わらず、一つの分岐集合の中の道は $c_{x}$ でしか交わらないので、これは $X$ の細分である。
+
+::: hypcheck
+- **$\Delta(X)\le3$**：Step 2 で、端点が高々 3 個の部分木が「中心から 3 本以下の道」の形になることに使った。次数 4 の頂点では、分岐集合の中の木が二つの次数 3 の頂点をもつ形（$H$ 字形）になりうるので、マイナーであっても位相的マイナーとは限らない。たとえばペテルセングラフは 3 正則で、5 本の「スポーク」を縮約すると $K^{5}$ になるが、次数 4 の頂点がないので $TK^{5}$ を含まない。
+:::
+:::
+
+::: supplement
+**類似の定理.** 平面グラフの特徴づけでは、「$K^{5}$ も $K_{3,3}$ も位相的マイナーに含まない」（クラトフスキー）と「マイナーに含まない」（ワグナー）が同値になる（\ref[クラトフスキーの定理]{graph:page-kuratowski}）。
+
+**高い視点.** マイナー関係で閉じたグラフのクラス（平面グラフ全体など）は、有限個の「禁止マイナー」で特徴づけられることが、ロバートソンとシーモアのグラフマイナー定理から従う（\ref[グラフマイナー定理の概観]{graph:page-graph-minor-theorem}）。これは有限グラフ全体がマイナー関係について整擬順序であることの言い換えである。
+:::
+
+## 問題 {#graph:sec-mn-problems}
+
+::: problem {#graph:prob-mn-k4-minor}
+$K^{4}$ をマイナーにもつグラフは、$K^{4}$ の細分を部分グラフとして含むことを示せ。
+:::
+
+::: solution
+$\Delta(K^{4})=3$ なので \ref{graph:topological-minor-is-minor.2} から従う。
+:::
+
+::: problem {#graph:prob-mn-contract-tree}
+連結グラフの全域木の辺をすべて縮約すると 1 点になることを示し、連結グラフはすべて $K^{1}$ をマイナーにもつことを確かめよ。また、$G$ が $K^{2}$ をマイナーにもつことと辺をもつことは同値であることを示せ。
+:::
+
+::: solution
+\ref{graph:minor-deletion-contraction} の証明の Step 2 (c) と同じく、木の辺の縮約は頂点を一つずつ減らし、$\abs{G}-1$ 回で 1 点になる。後半：辺 $xy$ があれば分岐集合 $\{x\}$, $\{y\}$。逆に $K^{2}$ のモデルの二つの分岐集合の間には辺がある。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
