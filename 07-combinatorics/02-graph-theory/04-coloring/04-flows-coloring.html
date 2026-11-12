@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>群に値をとるフローと彩色 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/04-coloring/04-flows-coloring.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 群に値をとるフローと彩色 {#graph:page-flows-coloring keywords="group-valued flows, nowhere-zero flows, flow polynomial, k-flows, Tutte's theorem, flow number, 4-flows and 3-edge-colourings, flow-colouring duality, Tutte's flow conjectures"}
+
+\ref{graph:page-network-flows} では流れの量は実数だったが、ここでは各辺に**アーベル群** $H$ の元を流し、どの頂点でも流入と流出が釣り合い、しかもどの辺でも $0$ でない、という「至るところ 0 でないフロー」を考える。驚くべきことに、そのような $H$ フローの個数は群 $H$ の構造によらず位数 $\abs{H}$ だけで決まり（タットのフロー多項式）、整数で $\abs{f}<k$ となる **$k$ フロー**の存在は $\Z_{k}$ フローの存在と同値である。平面グラフでは $k$ フローは面の $k$ 彩色と対応し、4 色定理は「橋のない平面グラフは 4 フローをもつ」と言い換えられる。
+
+## 記法と定義の確認 {#graph:sec-fl-notation}
+
+::: notation
+- このページでは**多重グラフ** $G=(V,E)$ を使う：$V,E$ は有限集合で、各辺 $e$ に**尾** $t(e)\in V$ と**頭** $h(e)\in V$ が定まっているもの（$t(e)=h(e)$ の辺を**ループ**という。同じ 2 頂点を結ぶ辺が複数あってよい）。尾と頭は辺の基準の向きを決めるだけで、無向の多重グラフとみなすときは向きを忘れる。単純グラフ（\ref{graph:graph}）は、各辺に向きを一つ選べば多重グラフとみなせる。
+- 非ループの辺 $e$ の**縮約** $G/e$ は、$e$ を除き、$t(e),h(e)$ を新しい一点 $v_{e}$ に置き換えたもの（他の辺の端点の $t(e),h(e)$ を $v_{e}$ に置き換える。平行な辺やループは残す）。$G-e$ は $e$ だけを除いたもの。
+- $H$ はアーベル群（加法で書く）、$\Z_{k}\defeq\Z/k\Z$。$X\subseteq V$ について、$X$ から出る辺（$t(e)\in X$, $h(e)\notin X$）の集合を $E^{+}(X)$、$X$ に入る辺の集合を $E^{-}(X)$ と書く。
+- 二部グラフ（\ref{graph:bipartite}）、辺彩色（\ref{graph:chromatic-index}）、全域木と基本閉路（\ref{graph:fundamental-cycles-cuts}）を使う。
+:::
+
+## 循環とフロー {#graph:sec-fl-definitions}
+
+::: definition 循環と H フロー {#graph:group-flow keywords="circulation, H-flow, nowhere-zero flow, k-flow, flow number" index="循環（グラフの）|じゅんかん, H フロー|えいちふろー, 至るところ 0 でないフロー|いたるところぜろでないふろー, k フロー|けいふろー, フロー数|ふろーすう"}
+写像 $f\colon E\to H$ が**循環**であるとは、すべての頂点 $v$ で
+$$
+\partial f(v)\defeq\sum_{t(e)=v}f(e)-\sum_{h(e)=v}f(e)=0
+$$
+（**キルヒホッフの法則**。ループは両方の和に現れて打ち消す）が成り立つことをいう。すべての辺で $f(e)\neq0$ の循環を **$H$ フロー**という。$H=\Z$ で $0<\abs{f(e)}<k$ の $H$ フローを **$k$ フロー**といい、$k$ フローをもつ最小の $k$ を**フロー数** $\varphi(G)$（なければ $\infty$）という。
+:::
+
+::: intuition
+各辺に向きと「流量」（群の元）を与え、どの点でも出る量と入る量が等しく、どの辺にも何かしら流れているようにする。辺の向きを逆にすることは、その辺の値の符号を変えることにあたる。
+:::
+
+::: lemma カットを横切る流れ {#graph:circulation-cut keywords="net flow across any cut of a circulation is zero, graphs with a bridge have no H-flow" index="カットを横切る流れ|かっとをよこぎるながれ"}
+循環 $f$ と $X\subseteq V$ について $\sum_{e\in E^{+}(X)}f(e)-\sum_{e\in E^{-}(X)}f(e)=0$。特に、橋をもつ多重グラフは $H$ フローをもたない。
+:::
+
+::: proof
+$\sum_{v\in X}\partial f(v)=0$ で、両端が $X$ にある辺は $+f$ と $-f$ で打ち消すので、残るのは $X$ を横切る辺の項だけである。橋 $e$ があれば、$e$ を除いた一方の成分を $X$ とすると $X$ を横切る辺は $e$ だけで、$f(e)=0$ となる。
+:::
+
+## フロー多項式 {#graph:sec-fl-polynomial}
+
+::: theorem タットのフロー多項式 {#graph:flow-polynomial keywords="flow polynomial, number of H-flows depends only on |H|, deletion-contraction" index="フロー多項式|ふろーたこうしき, 削除縮約|さくじょしゅくやく" refname="タットのフロー多項式"}
+多重グラフ $G$ に対し、整数係数の多項式 $P_{G}$ があって、任意の有限アーベル群 $H$ について、$G$ の $H$ フローの個数は $P_{G}(\abs{H}-1)$ に等しい。
+:::
+
+::: intuition
+至るところ 0 でないフローがいくつあるかは、流す群の中身ではなく、群の元の個数だけで決まる。
+:::
+
+::: proof
+辺の数 $m$ の帰納法。$k\defeq\abs{H}-1$ とする。
+
+**Step 1（ループだけの場合）.** 辺がすべてループなら、キルヒホッフの法則は自動的に成り立つので、$H$ フローは $E\to H\setminus\{0\}$ の写像全体で、$k^{m}$ 個。$P_{G}\defeq x^{m}$ とおく。
+
+**Step 2（削除と縮約）.** 【主張：非ループの辺 $e_{0}$（$x\defeq t(e_{0})$, $y\defeq h(e_{0})$）について、$G$ の $H$ フローの個数は $P_{G/e_{0}}(k)-P_{G-e_{0}}(k)$】$E'\defeq E\setminus\{e_{0}\}$ とし、$G$ の循環で $E'$ の上で 0 にならないものの集合を $\mathcal{F}_{2}$ とする。$\mathcal{F}_{2}$ は、$f(e_{0})=0$ のもの（その $E'$ への制限は $G-e_{0}$ の $H$ フローと一対一に対応）と、$f(e_{0})\neq0$ のもの（$G$ の $H$ フロー）に分かれる。よって $\abs{\mathcal{F}_{2}}=P_{G/e_{0}}(k)$ を示せば、帰納法の仮定と合わせて主張が従う。
+
+**Step 3（$\mathcal{F}_{2}$ と $G/e_{0}$ の $H$ フローの対応）.** 【主張：$f\in\mathcal{F}_{2}$ の $E'$ への制限は $G/e_{0}$ の $H$ フローで、この対応は全単射】$G/e_{0}$ の $x,y,v_{e_{0}}$ 以外の頂点では、接する辺と向きは $G$ と同じなので法則が成り立つ。$v_{e_{0}}$ での $\partial$ は、$G$ での $\partial f(x)+\partial f(y)$ から $e_{0}$ の寄与（$x$ で $+f(e_{0})$、$y$ で $-f(e_{0})$、合わせて 0）を除いたもので 0（$x,y$ を結んでいた辺は $v_{e_{0}}$ のループになるが、$x$ と $y$ の項がやはり打ち消す）。逆に $G/e_{0}$ の $H$ フロー $g$ が与えられたとき、$f\defeq g$（$E'$ の上）と延ばすには、$x$ での法則から $f(e_{0})\defeq-\bigl(\sum_{e\in E',t(e)=x}g(e)-\sum_{e\in E',h(e)=x}g(e)\bigr)$ と一通りに決まり、そのとき $y$ での法則は「$v_{e_{0}}$ での法則 $-$ $x$ での法則」から自動的に成り立つ。よって全単射である。
+
+**Step 4.** $P_{G}\defeq P_{G/e_{0}}-P_{G-e_{0}}$ とおけばよい（どちらも辺の数が $m-1$）。
+:::
+
+::: corollary {#graph:flow-existence-order}
+位数の等しい有限アーベル群 $H,H'$ について、$G$ が $H$ フローをもつことと $H'$ フローをもつことは同値である。
+:::
+
+## k フローと Z_k フロー {#graph:sec-fl-tutte}
+
+::: theorem タットの定理（k フロー） {#graph:k-flow-zk-flow keywords="a multigraph has a k-flow iff it has a Z_k-flow" index="k フローと Z_k フロー|けいふろーとぜっとけいふろー" refname="タットの k フロー定理"}
+多重グラフが $k$ フローをもつことと、$\Z_{k}$ フローをもつことは同値である。
+:::
+
+::: intuition
+整数で絶対値 $k$ 未満の至るところ 0 でないフローは、$k$ を法とした計算で見つかれば、必ず整数の世界に持ち上げられる。
+:::
+
+::: proof
+$k$ フローを $k$ で割った余りをとれば $\Z_{k}$ フローなので、逆を示す。ループは法則に寄与しないので、ループはないとしてよい（ループの値は $1$ にすればよい）。$\Z_{k}$ フロー $g$ について、$f\colon E\to\Z$ で $0<\abs{f(e)}<k$、$f(e)\bmod k=g(e)$ を満たすもの全体を $\mathcal{F}$ とする（$g(e)$ の代表元を $\{1,\dots,k-1\}$ からとれば $\mathcal{F}\neq\varnothing$）。$f\in\mathcal{F}$ について $\partial f(v)\equiv\partial g(v)=0\pmod k$ である。$K(f)\defeq\sum_{v}\abs{\partial f(v)}$ が最小の $f\in\mathcal{F}$ をとり、$K(f)=0$（すなわち $f$ が $k$ フロー）を示す。
+
+**Step 1（正の点からたどれる集合）.** 【主張：$K(f)>0$ なら、$\partial f(x)>0$ の $x$ と、$x$ から「正の向きの一歩」でたどれる点 $x'$ で $\partial f(x')<0$ のものがある】$\sum_{v}\partial f(v)=0$（各辺が $+f$ と $-f$ で一度ずつ現れる）なので $\partial f(x)>0$ の $x$ がある。辺 $e$ を、$f(e)>0$ なら $t(e)\to h(e)$ に、$f(e)<0$ なら $h(e)\to t(e)$ に一歩進めるとし、$x$ からたどれる点の集合を $X$ とする。$X$ を横切る辺はどれも $X$ の外から内へ流れ込む向き（さもなくば $X$ を広げられる）なので、$\sum_{e\in E^{+}(X)}f(e)-\sum_{e\in E^{-}(X)}f(e)<0$ か（横切る辺があれば）$=0$。この量は $\sum_{v\in X}\partial f(v)$ に等しい（\ref{graph:circulation-cut} の証明と同じ計算）ので $\le0$、$\partial f(x)>0$ から $\partial f(x')<0$ の $x'\in X$ がある。
+
+**Step 2（$k$ を逆に流す）.** 【主張：$x$ から $x'$ への最短の歩道 $W$（道になる）に沿って、たどる向きの流量を $k$ 減らした $f'$ も $\mathcal{F}$ に属し、$K(f')<K(f)$】$W$ の辺 $e$ で、$t(e)\to h(e)$ と進むものは $f(e)\in[1,k-1]$ なので $f'(e)\defeq f(e)-k\in[1-k,-1]$、$h(e)\to t(e)$ と進むものは $f(e)\in[1-k,-1]$ なので $f'(e)\defeq f(e)+k\in[1,k-1]$。どちらも $0<\abs{f'}<k$ で $k$ を法として $g$ と一致する。$W$ の内部の点では、入ってくる辺と出ていく辺の「進む向きの流量」がともに $k$ 減るので $\partial$ は変わらず、$\partial f'(x)=\partial f(x)-k$, $\partial f'(x')=\partial f(x')+k$。$\partial f(x)$, $\partial f(x')$ は $k$ の 0 でない倍数なので $\partial f(x)\ge k$, $\partial f(x')\le-k$ で、どちらも絶対値が $k$ 減る。$K(f')=K(f)-2k$ となり、最小性に反する。
+:::
+
+## 小さい k のフロー {#graph:sec-fl-small}
+
+::: proposition 小さい k のフロー {#graph:small-flows keywords="2-flows and even graphs, 3-flows of cubic graphs, 4-flows and 3-edge-colourings" index="偶グラフ|ぐうぐらふ"}
+1. グラフが 2 フローをもつことと、すべての頂点の次数が偶数であることは同値である。
+2. 3 正則グラフが 3 フローをもつことと、二部グラフであることは同値である。
+3. グラフが 4 フローをもつことと、次数がすべて偶数の部分グラフ二つの和（辺集合の和集合が $E$）で表せることは同値である。
+4. 3 正則グラフが 4 フローをもつことと、3 色で辺彩色できることは同値である。
+:::
+
+::: proof
+\ref{graph:k-flow-zk-flow} と \ref{graph:flow-existence-order} により、$k$ フローの存在は $\Z_{k}$ フロー、$k=4$ では $\Z_{2}\times\Z_{2}$ フローの存在と同値である。
+
+**Step 1（(1)）.** $\Z_{2}$ の 0 でない元は $1$ だけなので、$\Z_{2}$ フローは定数 $1$ で、法則は各頂点の次数が偶数であること。
+
+**Step 2（(2)）.** $\Z_{3}$ フロー $f$ があるとき、各頂点で三本の辺の（その頂点から出る向きの）値の和が 0 で、値は $\pm1$ なので、三本とも同じ値、すなわち「出る向き」に 1（または 2）がそろう。頂点 $v$ で出る向きの値を $\epsilon(v)\in\{1,2\}$ とすると、辺 $uv$ では $v$ から見た値は $u$ から見た値の符号違いなので $\epsilon(u)\neq\epsilon(v)$。よって $\epsilon$ は二部分割を与える。逆に二部分割 $\{X,Y\}$ があれば、各辺を $X\to Y$ に向けて値 $1$ とすると、$X$ の頂点では出る量 $3=0$、$Y$ では入る量 $3=0$（$\Z_{3}$ で）。
+
+**Step 3（(3)）.** $\Z_{2}\times\Z_{2}$ フロー $f=(f_{1},f_{2})$ について、$E_{i}\defeq\{e : f_{i}(e)\neq0\}$ とすると、$f_{i}$ は $E_{i}$ の上で定数 1 の $\Z_{2}$ 循環なので、$(V,E_{i})$ の次数は偶数で、$f$ が至るところ 0 でないので $E_{1}\cup E_{2}=E$。逆に偶部分グラフ $E_{1},E_{2}$ の和なら、$f\defeq(1_{E_{1}},1_{E_{2}})$ がフローである（$\Z_{2}$ では向きは関係しない）。
+
+**Step 4（(4)）.** $\Z_{2}\times\Z_{2}$ では $a=-a$ なので向きは関係しない。フロー $f$ があるとき、$f(e)$ を辺 $e$ の色とすると、各頂点の三本の値の和は 0 で、二本が同じ色なら三本目が 0 になるので、三色の辺彩色である。逆に、0 でない三元 $a,b,a+b$ の和は $0$ なので、三色の辺彩色をこの三元で表せばフローになる。
+:::
+
+## 平面グラフでの双対性と未解決問題 {#graph:sec-fl-duality}
+
+::: fact フローと彩色の双対性 {#graph:flow-colouring-duality keywords="flow-colouring duality for plane graphs" index="フローと彩色の双対性|ふろーとさいしょくのそうついせい" refname="フローと彩色の双対性"}
+橋のない連結な平面グラフ $G$ について、$G$ が $k$ フローをもつことと、$G$ の面を $k$ 色で、各辺の両側（\ref{graph:edge-sides}）が異なる色になるように塗れることは同値である（タット。Diestel, *Graph Theory* 第 6.5 節）。面の彩色 $c\colon\{\text{面}\}\to\Z_{k}$ から、辺の「左側の色 $-$ 右側の色」で $\Z_{k}$ フローが作られ、逆に $\Z_{k}$ フローから、外側の面から辺を横切るたびに値を足していくことで面の彩色が作られる。
+:::
+
+::: intuition
+平面の地図を塗り分けることと、国境に沿って何かを流すことは、表裏一体である。
+:::
+
+::: fact タットのフロー予想と既知の結果 {#graph:tutte-flow-conjectures keywords="Tutte's 5-flow conjecture, 4-flow conjecture, 3-flow conjecture, Seymour's 6-flow theorem, Jaeger's 8-flow theorem" index="5 フロー予想|ごふろーよそう, 6 フロー定理|ろくふろーていり"}
+- （ジェガー、1979 年）橋のないグラフは 8 フローをもつ。（シーモア、1981 年）橋のないグラフは 6 フローをもつ。
+- （タットの 5 フロー予想）橋のないグラフは 5 フローをもつ。（4 フロー予想）ペテルセングラフをマイナーに含まない橋のないグラフは 4 フローをもつ。（3 フロー予想）4 辺連結なグラフは 3 フローをもつ。いずれも一般には未解決とされている（このページを書いた時点で確認できた範囲。最新の状況は未確認）。
+- \ref{graph:four-colour} は、\ref{graph:flow-colouring-duality} を通して「橋のない平面グラフは 4 フローをもつ」と同値である。
+:::
+
+::: supplement
+**高い視点.** フロー多項式と彩色多項式（$k$ 色での頂点彩色の個数）は、どちらもタット多項式という二変数多項式の特殊化であり、平面グラフでは双対によって入れ替わる。循環は $H$ 係数の閉路空間（1 次のホモロジー）の元であり、フローは「至るところ 0 でない」1 サイクルである。
+:::
+
+## 問題 {#graph:sec-fl-problems}
+
+::: problem {#graph:prob-fl-k4}
+$K^{4}$ のフロー数が 4 であることを示せ。
+:::
+
+::: solution
+次数がすべて 3（奇数）なので 2 フローはない（\ref{graph:small-flows.1}）。3 正則で二部グラフでない（三角形を含む）ので 3 フローもない（\ref{graph:small-flows.2}）。$K^{4}$ は 3 色で辺彩色できる（向かい合う辺の 3 組に別の色）ので 4 フローをもつ（\ref{graph:small-flows.4}）。
+:::
+
+::: problem {#graph:prob-fl-cycle-polynomial}
+長さ $n$ の閉路 $C_{n}$ のフロー多項式が $x$ であることを、削除と縮約で確かめよ。
+:::
+
+::: solution
+$C_{n}$ の辺 $e$ について、$C_{n}-e$ は道で橋をもつので $H$ フローは 0 個、$C_{n}/e=C_{n-1}$（$n\ge2$。$C_{1}$ はループ 1 本、$C_{2}$ は平行な 2 辺）。よって $P_{C_{n}}=P_{C_{n-1}}=\dots=P_{C_{1}}=x$。直接には、閉路の向きに一定の値 $a\neq0$ を流すフローが $\abs{H}-1$ 個あり、それ以外はない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
