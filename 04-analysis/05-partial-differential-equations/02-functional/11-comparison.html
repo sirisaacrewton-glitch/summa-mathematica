@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>古典的手法と関数解析的手法 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/11-comparison.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 古典的手法と関数解析的手法 {#pde:page-comparison keywords="classical versus functional-analytic methods for partial differential equations, comparison of hypotheses, smoothness of solutions, regularity of data, coefficients and boundary, Dirichlet problem via Lax-Milgram and regularity versus Perron's method, Sobolev embedding loss, Lebesgue spine weak solution, Poisson equation with continuous right-hand side, Hoelder spaces, Schauder estimates, 古典的手法, 関数解析的手法, 前提の対比, シャウダー評価, ヘルダー空間, 正則性理論"}
+
+この分野では、偏微分方程式を二つの方法で解いてきた。古典的手法の系列（\ref{pde:page-characteristics} から \ref{pde:page-separation-laplace} まで）では、特性曲線・基本解・グリーン関数・最大値原理・ペロンの方法・熱核・球面平均・フーリエ級数を使って、方程式を各点で満たす**古典解**を具体的に作った。関数解析的手法の系列（\ref{pde:page-weak-elliptic} から \ref{pde:page-hyperbolic-propagation} まで）では、方程式を弱い形に書き直してソボレフ空間の中で解を探し（ラックス–ミルグラムの定理、ガレルキン法、半群）、滑らかさは**正則性理論**で後から取り戻した。このページでは、二つの系列の各定理の hypcheck・補足・対比表を集め、方程式ごとに、存在・一意性・正則性を得るためにどちらの手法が何を前提にしたかを並べる（第 1 節）。次に、ディリクレ問題を例にとって、「関数解析的手法は前提が弱いが結論も弱く、古典解に戻るには前提を強め直す必要がある」という往復を一本の定理として示し、境界の幾何だけで連続な境界値の古典解を作るペロンの方法と比べる（第 2 節）。第 3 節では、どちらか一方の手法でしか得られないものを例で確かめ、第 4 節では、このサイトでまだ証明していないシャウダー評価の主張を正確に述べる。結論を先に言えば、関数解析的手法の方がはるかに一般的で見通しがよいが、古典解や各点の性質を得ようとすると細かな前提が少しずつ強くなり、その隙間を埋めるのが古典的手法である。
+
+## 記法と定義の確認 {#pde:sec-cmp-notation}
+
+::: notation
+- $\Omega\subset\mathbb{R}^{n}$ は開集合。$V\Subset\Omega$、$C^{m}(\overline{\Omega})$、$C_{b}^{m}(U)$、$H_{\mathrm{loc}}^{k}$ は \ref{pde:page-regularity} の記法のとおり（$\Omega$ が有界なら $C^{m}(\overline{\Omega})\subset C_{b}^{m}(\Omega)$ で、古典的な導関数は弱微分でもあるので $C^{m}(\overline{\Omega})\subset H^{m}(\Omega)$）。$C^{k}$ 境界は \ref{pde:page-regularity-boundary} の記法のとおり（\ref{fa:c1-boundary.2} の組の $\gamma_{i}$ が $C^{k}$ 級）。
+- 古典的手法：調和関数 \ref{pde:harmonic-function}、ディリクレ問題の一意性と連続依存 \ref{pde:dirichlet-uniqueness}、ペロン族とペロン関数 $u_{g}$ \ref{pde:perron-family}、障壁と正則な境界点 \ref{pde:barrier}、外部錐条件 \ref{pde:exterior-cone-condition}、基本解 $\Phi$ とニュートン・ポテンシャル $\Phi*f$（\ref{pde:gf-fundamental-solution}, \ref{pde:newton-potential}）、ディニ連続 \ref{pde:gf-dini-continuous}。
+- 関数解析的手法：発散形の一様楕円型作用素 $L$ と双線形形式 $B$（\ref{pde:bilinear-elliptic-form}。$Lu=-\sum_{i,j}\partial_{j}(a^{ij}\partial_{i}u)+\sum_{i}b^{i}\partial_{i}u+cu$）、弱解 \ref{pde:weak-elliptic-solution}、領域の中の弱解 \ref{pde:reg-interior-weak-solution}、存在定理 \ref{pde:weak-elliptic-existence}、フレドホルムの二者択一 \ref{pde:weak-fredholm-alternative}、内部・境界の正則性 \ref{pde:reg-interior-h2}, \ref{pde:reg-boundary-higher}、ソボレフの埋め込み \ref{fa:higher-embeddings}、ワイルの補題 \tref{pde:dirichlet-eigen-weyl}。
+- 放物型・双曲型方程式の弱解は \ref{pde:parabolic-weak-solution}, \ref{pde:hyperbolic-weak-solution} のとおりで、どちらも $\Omega$ は有界、係数は時間によらない。
+- 表の中で「（$L$ の hypcheck）」と書いたものは、その定理の証明の最後の検査欄を指す。
+- **選択公理**：第 2 節の \ref{pde:cmp-dirichlet-sobolev-route} は、斉次問題の一意性を $b=0$, $c\ge0$ から得るなら選択公理を使わず、一般の場合はフレドホルムの二者択一を通して従属選択公理に依存する。ペロンの方法を使う結果（\ref{pde:cmp-dirichlet-perron-route}, \ref{pde:cmp-dirichlet-agree}, \ref{pde:cmp-spine-weak}）は \ref{pde:perron-harmonic} を通して可算選択公理に依存する。それ以外にこのページで選択公理を使う箇所はない。
+:::
+
+## 方程式ごとの前提の対比 {#pde:sec-cmp-tables}
+
+各方程式について、解を得るのに使った前提を五つの観点（解の滑らかさ・データの正則性・係数の正則性・境界の正則性・領域の有界性）に分けて並べる。セルの根拠は、その定理の主張か hypcheck にある。
+
+::: table ラプラス方程式・ポアソン方程式（ディリクレ問題）の前提 {#pde:cmp-table-laplace}
+| 観点 | 古典的手法 | 関数解析的手法 |
+|---|---|---|
+| 解の滑らかさ | 解は $C^{2}(\Omega)\cap C(\overline{\Omega})$ で探す。一意性（\ref{pde:dirichlet-uniqueness.1}）も最大値原理もこの範囲の主張。グリーン関数による表示は境界の近傍まで $C^{2}$ を仮定（\ref{pde:green-dirichlet}） | 解は $H^{1}$ で探す（\ref{pde:weak-elliptic-solution}）。滑らかさは結論として得る（\ref{pde:reg-interior-h2}, \ref{pde:reg-boundary-higher}） |
+| データ（右辺） | $C^{2}$ 解にはディニ連続（とくにヘルダー連続）で十分（\ref{pde:newton-holder}）、連続では足りない（\ref{pde:newton-continuous-counterexample}） | 存在は $f\in H^{-1}$（\ref{pde:weak-elliptic-existence}）、$H^{2}$ には $f\in L^{2}$（\ref{pde:reg-interior-h2}）、$H^{m+2}$ には $f\in H^{m}$ |
+| データ（境界値） | 連続で十分（\ref{pde:poisson-ball-dirichlet}, \ref{pde:perron-dirichlet-solvable}） | $H^{1}$ の関数 $G$ で $u-G\in H_{0}^{1}$ と課す。古典解には滑らかさ（\ref{pde:reg-classical-dirichlet}） |
+| 係数 | 定数係数（$-\Delta$）。基本解（\ref{pde:gf-fundamental-solution}）・平均値の性質（\ref{pde:mean-value-property}）・ポアソン核（\ref{pde:poisson-kernel-ball}）がすべてこれによる | 存在は有界可測（\ref{pde:bilinear-energy-estimates} の hypcheck）、$H^{2}$ には $a^{ij}\in C^{1}$、跳ぶと崩れる（\ref{pde:reg-discontinuous-coefficient}） |
+| 境界 | 各点の障壁：外部球（\ref{pde:barrier-exterior-sphere}）・外部錐（\ref{pde:barrier-exterior-cone}）。棘では解けない（\ref{pde:lebesgue-spine}） | 存在には不要。$H^{2}$ には $C^{2}$（\ref{pde:reg-boundary-h2}）、入隅で崩れる（\ref{pde:reg-corner-counterexample}） |
+| 領域の有界性 | 最大値原理に要る（\ref{pde:weak-maximum-principle} の hypcheck の外部領域の例） | ポアンカレの不等式による強圧性（\ref{pde:weak-elliptic-existence.2}）と、コンパクト性（\ref{pde:weak-fredholm-alternative}） |
+:::
+
+ラプラス方程式では、二つの手法の得意分野がほぼ正反対になる。古典的手法は境界値と右辺について最小限の滑らかさ（連続・ヘルダー連続）で古典解を与えるが、作用素は $-\Delta$ に限られ、境界は各点で障壁をもたなければならない。関数解析的手法は係数・境界・右辺のどれにもほとんど何も要求せずに弱解を与えるが、古典解に戻るには係数・境界・データのすべてに滑らかさを要求し直す。
+
+::: table 熱方程式（放物型方程式）の前提 {#pde:cmp-table-heat}
+| 観点 | 古典的手法 | 関数解析的手法 |
+|---|---|---|
+| 解の滑らかさ | $C^{2,1}$ の古典解。一意性と比較原理は $C^{2,1}\cap C(\overline{\Omega}\times[0,T])$ の中（\ref{pde:heat-cylinder-uniqueness}） | $u\in L^{2}(0,T;H_{0}^{1})$, $u'\in L^{2}(0,T;H^{-1})$（\ref{pde:parabolic-weak-solution}）。一意性もこの中（\ref{pde:parabolic-uniqueness}） |
+| データ（初期値） | 有界連続（\ref{pde:heat-cauchy-solution}）。区間では $L^{2}$ でも $t>0$ で古典解（\ref{pde:sep-heat-dirichlet}） | $g\in L^{2}$（\ref{pde:parabolic-existence}）。$u'\in L^{2}(0,T;L^{2})$ には $g\in H_{0}^{1}$（\ref{pde:parabolic-regularity.1}） |
+| データ（熱源） | 空間についてヘルダー連続（\ref{pde:heat-duhamel-holder}）、連続では足りない（\ref{pde:heat-continuous-source-fails}） | $f\in L^{2}(0,T;H^{-1})$（\ref{pde:parabolic-existence}） |
+| 係数 | 定数係数（熱核）。区間では 1 次元の滑らかな係数（\ref{pde:sep-sl-heat}） | 有界可測（\ref{pde:parabolic-existence}）。半群は対称な場合（\ref{pde:parabolic-semigroup}） |
+| 境界 | 公式があるのは全空間と区間。最大値原理による一意性は境界の正則性を使わない（\ref{pde:heat-cylinder-uniqueness}） | 存在・一意性には不要。$L^{2}(0,T;H^{2})$ には楕円型の正則性 (R)（\ref{pde:parabolic-regularity.2}） |
+| 領域の有界性・増大条件 | 全空間の一意性には増大条件が要る（\ref{pde:heat-uniqueness-rn.1}, \ref{pde:heat-tychonoff}） | 有界な $\Omega$。固有関数の基底（コンパクト性）に使う（\ref{pde:parabolic-existence} の hypcheck） |
+:::
+
+::: table 波動方程式（双曲型方程式）の前提 {#pde:cmp-table-wave}
+| 観点 | 古典的手法 | 関数解析的手法 |
+|---|---|---|
+| 解の滑らかさ | $C^{2}$ の古典解（\ref{pde:wave-dalembert}, \ref{pde:wave-energy-conservation}） | $u\in C([0,T];H_{0}^{1})$, $u'\in C([0,T];L^{2})$（\ref{pde:hyperbolic-energy-equality.1}） |
+| データ | 1 次元は $g\in C^{2}$, $h\in C^{1}$ で必要十分（\ref{pde:wave-dalembert}）。3 次元は $g\in C^{3}$, $h\in C^{2}$（\ref{pde:wave-kirchhoff}）で、$C^{2}\times C^{1}$ では足りない（\ref{pde:wave-kirchhoff-loss}）。区間の級数解には両立条件（\ref{pde:sep-string}） | $g\in H_{0}^{1}$, $h\in L^{2}$, $f\in L^{2}(0,T;L^{2})$（\ref{pde:hyperbolic-existence}）。滑らかさは保たれる（\ref{pde:hyperbolic-no-smoothing}） |
+| 係数 | 定数係数（\ref{pde:wave-kirchhoff}, \ref{pde:wave-energy-conservation}） | 有界可測・対称（\ref{pde:hyperbolic-existence} の hypcheck）。有限伝播速度の近似に $a^{ij}\in C^{1}$（\ref{pde:hyperbolic-finite-speed}） |
+| 境界 | エネルギー法に $C^{1}$ 境界（\ref{pde:wave-energy-conservation}） | 存在・一意性・エネルギー等式には不要。$H^{2}$ と同一視するのに $C^{2}$（\ref{pde:hyperbolic-regularity.3}） |
+| 領域の有界性・増大条件 | 全空間でも増大条件なしで一意（\ref{pde:wave-uniqueness-rn.1}） | 有界な $\Omega$（固有関数の基底。\ref{pde:hyperbolic-existence} の hypcheck） |
+:::
+
+熱方程式と波動方程式では、関数解析的手法の弱点がはっきりする。熱方程式の正値性・無限の伝播速度（\ref{pde:heat-infinite-speed}）や、奇数次元の強いホイヘンスの原理（\tref{pde:wave-huygens}）は解の公式から読み取る性質で、エネルギー評価からは出てこない。逆に、3 次元の波動方程式で古典的なデータの空間 $C^{2}\times C^{1}$ では解けないことは、関数解析的手法ではエネルギー空間 $H_{0}^{1}\times L^{2}$ を使うことで消える：そこでは解は保存的に動き、滑らかさは増えも減りもしない（\ref{pde:hyperbolic-no-smoothing}）。
+
+::: table 1 階の方程式の前提 {#pde:cmp-table-first-order}
+| 観点 | 古典的手法（特性曲線） | 弱い解（積分解） |
+|---|---|---|
+| 解の滑らかさ | $C^{1}$ の古典解（\ref{pde:transport-variable}, \ref{pde:quasilinear-local-existence}） | 局所有界な可測関数（\ref{pde:burgers-weak-solution}）。不連続な解を許す |
+| データ | $g\in C^{1}$ が必要十分（\ref{pde:transport-counterexamples.5}）。非線形では $C^{1}$ でも有限時間で壊れる（\ref{pde:burgers-shock-formation.2}） | 不連続な初期値も扱える。弱解だけでは一意性が崩れ（\ref{pde:riemann-problem.2}）、有界な初期値の存在と一意性にはエントロピー条件が要る（\ref{pde:entropy-uniqueness.2}。証明していない） |
+| 係数 | $D_{x}b$ が連続で線形増大（\ref{pde:transport-variable}）。リプシッツでないと特性曲線が合流（\ref{pde:transport-counterexamples.1}） | この分野では扱っていない |
+| 初期曲面 | 非特性条件（\ref{pde:quasilinear-local-existence}, \ref{pde:characteristic-data-necessary}） | 扱っていない |
+| 領域 | 結論は初期曲面の近くだけ（\ref{pde:quasilinear-local-existence}） | 全空間 $[0,\infty)\times\mathbb{R}$ |
+:::
+
+1 階の方程式では、「試験関数に微分を移す」という関数解析的手法の発想（弱解）は使えるが、ヒルベルト空間の方法（強圧性とラックス–ミルグラム）は非線形の保存則には使えない。そのため、関数解析的手法の系列では 1 階の方程式を扱わず、弱解はバーガース方程式のページで導入した。楕円型方程式の弱解は一意で正則性定理によって自動的に滑らかになるのに対し、保存則の弱解は一意でなく不連続のまま残る。弱めた後に何を足せば一意性が戻るかは、方程式の型による。
+
+四つの表から、二つの手法の前提の違いは次の三点にまとめられる。
+
+1. **解の空間**：古典的手法は解が $C^{2}$（$C^{1}$, $C^{2,1}$）であることを最初に仮定し、その範囲で一意性と表示を示す。関数解析的手法は $H^{1}$ やエネルギー空間で解を探し、滑らかさを結論に回す。
+2. **係数と領域**：古典的手法の公式は定数係数と特別な領域（全空間・半空間・球・区間・長方形）にしかなく、一般の領域ではペロンの方法のような別の議論が要る。関数解析的手法は有界可測な係数と任意の有界な開集合で存在と一意性を与える。
+3. **データの正則性**：存在だけなら関数解析的手法の方が弱いデータ（$H^{-1}$, $L^{2}$）で済むが、古典解を得るには、古典的手法が要求する滑らかさ（連続・ヘルダー連続）より**強い**滑らかさを要求する。これが次の節の主題である。
+
+## ディリクレ問題の往復 {#pde:sec-cmp-dirichlet}
+
+ディリクレ問題「$\Omega$ で $Lu=f$、$\partial\Omega$ で $u=g$」の古典解を、関数解析的手法だけで得る道筋を一本の定理にまとめる。各段で使う前提を明示すると、最後に古典解へ戻るための代償（ソボレフの埋め込みで失う滑らかさ）が見える。
+
+::: theorem 関数解析的手法によるディリクレ問題の古典解 {#pde:cmp-dirichlet-sobolev-route keywords="classical solution of the Dirichlet problem by weak solutions, global regularity and Sobolev embedding: boundary C^{m+2}, coefficients C^{m+1}, f in C^m, g in C^{m+2}, m >= floor(n/2) + 1, unique weak solution with u - g in H^1_0 lies in C^2(closure)" index="関数解析的手法による古典解|かんすうかいせきてきしゅほうによるこてんかい, 埋め込みの代償|うめこみのだいしょう"}
+$\Omega\subset\mathbb{R}^{n}$（$n\ge2$）を有界な開集合、$m$ を $m\ge\lfloor n/2\rfloor+1$ となる整数とし、次を仮定する。
+- (i) $\partial\Omega$ は $C^{m+2}$ 級。
+- (ii) $L$ は一様楕円型で、$a^{ij},b^{i},c\in C^{m+1}(\overline{\Omega})$。
+- (iii) $f\in C^{m}(\overline{\Omega})$, $g\in C^{m+2}(\overline{\Omega})$。
+- (iv) $Lu=0$ の $H_{0}^{1}$ の弱解は $0$ だけ（たとえば $b=0$ かつ $c\ge0$ のとき）。
+
+このとき $u-g\in H_{0}^{1}(\Omega)$ となる $Lu=f$ の弱解 $u$ がただ一つあり、零集合の上で修正すると $u\in C^{2}(\overline{\Omega})$ で、$\Omega$ の各点で
+$$
+-\sum_{i,j}a^{ij}\partial_{i}\partial_{j}u-\sum_{i,j}(\partial_{j}a^{ij})\partial_{i}u+\sum_{i}b^{i}\partial_{i}u+cu=f
+$$
+（$Lu=f$ の古典的な形）が成り立ち、$\partial\Omega$ の上で $u=g$。
+:::
+
+::: intuition
+境界・係数・データが次元の半分ほど余分に滑らかなら、ラックス–ミルグラムで作った弱解は、境界まで 2 回連続微分できる本物の解である。
+:::
+
+::: proof
+以下、$Lg$ は $g$ に \ref{pde:reg-interior-h2.2} の左辺の式を古典的に施したものとする。
+
+**Step 1.** 【主張：$w\defeq u-g$ とおくと、問題は「$w\in H_{0}^{1}$ が $Lw=F\defeq f-Lg$ の弱解」と同値で、$F\in C^{m}(\overline{\Omega})\subset H^{m}(\Omega)$】$a^{ij}\partial_{i}g\in C^{m+1}(\overline{\Omega})$ なので $\partial_{j}(a^{ij}\partial_{i}g)\in C^{m}(\overline{\Omega})$、$b^{i}\partial_{i}g$, $cg$ も $C^{m}(\overline{\Omega})$ に入るから、$Lg\in C^{m}(\overline{\Omega})$。$g\in C^{2}(\overline{\Omega})\subset H^{1}(\Omega)$ で、\ref{pde:reg-classical-dirichlet} の証明の Step 1 と同じ部分積分から、すべての $v\in H_{0}^{1}$ で $B[g,v]=(Lg,v)$。よって $B[u,v]=(f,v)$ と $B[w,v]=(F,v)$ は同値。
+
+**Step 2.** 【主張：そのような $w$ がただ一つある】(iv) から \ref{pde:weak-fredholm-alternative} の \ref[3 の (a)]{pde:weak-fredholm-alternative.3} が成り立つので（その証明は、ラックス–ミルグラムの定理で $L+\mu$ を解き、残りをコンパクト作用素の理論で扱うものだった）、$F\in L^{2}\subset H^{-1}$ について弱解 $w$ がただ一つある。$b=0$, $c\ge0$ の場合は \ref{pde:weak-elliptic-existence.2} からも直接わかる。ここで使ったのは一様楕円性・係数の有界性・$\Omega$ の有界性だけである。
+
+**Step 3.** 【主張：$w\in H^{m+2}(\Omega)$】\ref{pde:reg-boundary-higher} を $m$ について使う。仮定は (i)・(ii) と Step 1 の $F\in H^{m}$ で、ちょうど満たされている。
+
+**Step 4.** 【主張：$h\in H^{k}(\mathbb{R}^{n})$ が有界な集合 $S$ の外で a.e. に $0$ で、$k\ge\lfloor n/2\rfloor+3$ なら、$h$ は 2 階までの導関数が連続で有界な代表元をもつ】$n$ が奇数なら $p=2$ とし、$n$ が偶数なら $\frac{2n}{n+2}<p<2$ となる $p$ をとる。どちらでも $p\ge1$、$\frac np$ は整数でなく $\lfloor\frac np\rfloor=\lfloor\frac n2\rfloor$（偶数のときは $\frac n2<\frac np<\frac n2+1$）。$|\alpha|\le k$ について、ヘルダーの不等式（\ref{meas:holder}）から $\|\partial^{\alpha}h\|_{L^{p}}\le|S|^{1/p-1/2}\|\partial^{\alpha}h\|_{L^{2}}$ なので $h\in W^{k,p}(\mathbb{R}^{n})$。\ref{fa:higher-embeddings.2} から $h$ は $C^{k-\lfloor n/2\rfloor-1}$ 級で導関数が有界な代表元をもち、$k-\lfloor n/2\rfloor-1\ge2$。
+
+**Step 5.** 【主張：$w$ は零集合の上で修正すると $C^{2}(\overline{\Omega})$ に入る】内部：$x_{0}\in\Omega$ と $\overline{B}(x_{0},2r)\subset\Omega$ をとり、$\zeta\in C_{c}^{\infty}(B(x_{0},2r))$ を $B(x_{0},r)$ で $1$ とする。\ref{pde:reg-c1-product.3} から $\zeta w\in H^{m+2}(\Omega)$、\ref{pde:reg-localization.2} からその $0$ 延長は $H^{m+2}(\mathbb{R}^{n})$ に入り、Step 4（$k=m+2\ge\lfloor n/2\rfloor+3$）から $w$ は $B(x_{0},r)$ で $C^{2}$ 級の代表元をもつ。境界の近く：\ref{pde:reg-boundary-h2} の証明の Step 1 の覆い $\Phi_{p}^{-1}(P'_{p})$ をとり、\ref{pde:reg-smooth-up-to-boundary} の証明の Step 2 と同じく、$\zeta\in C_{c}^{\infty}(P_{p})$ を $\overline{P'_{p}}$ の近傍で $1$ として $h_{p}\defeq\zeta\,(w\circ\Phi_{p}^{-1})$（$\mathbb{R}_{+}^{n}$ の中で $P_{p}^{+}$ の外は $0$）とおく。$\Phi_{p}$ は $C^{m+2}$ 級（\ref{pde:reg-flattening.1}、$r=m+2$）なので、\ref{pde:reg-chain-higher} と \ref{pde:reg-c1-product.3}・\ref{pde:reg-localization.1} から $h_{p}\in H^{m+2}(\mathbb{R}_{+}^{n})$、\ref{pde:reg-halfspace-extension}（$m+2$ 階）から $Eh_{p}\in H^{m+2}(\mathbb{R}^{n})$ で、台は有界。Step 4 から $Eh_{p}$ は $\mathbb{R}^{n}$ 全体で $C^{2}$ 級の代表元をもつので、$w=(Eh_{p})\circ\Phi_{p}$（a.e.、$\Omega\cap\Phi_{p}^{-1}(P'_{p})$ の上）は $C^{2}$ 級で、2 階までの導関数は $\partial\Omega$ まで連続に延びる。各部分の代表元は重なりの上で一致する（連続で a.e. に等しい）。$\overline{\Omega}$ は有限個の内部の球と $\Phi_{p}^{-1}(P'_{p})$ で覆われるので、主張が従う。
+
+**Step 6.** 【主張：$\partial\Omega$ の上で $w=0$、$\Omega$ の各点で $Lw=F$】$h_{p}$ は $\{y_{n}\ge0\}$ で $C^{1}$ 級、台は有界で、\ref{pde:reg-flattening} の \ref[2 の (d)]{pde:reg-flattening.2}（$w\in H_{0}^{1}$）から $H_{0}^{1}(P_{p}^{+})$ に入る。\ref{pde:reg-smooth-up-to-boundary} の証明の Step 3 と同じ計算で $h_{p}(y',0)=0$、つまり $\partial\Omega$ の上で $w=0$。また \ref{pde:reg-interior-h2.2} から $\Omega$ の a.e. の点で $Lw=F$ で、$w\in C^{2}(\Omega)$、$a^{ij}\in C^{1}$, $b^{i},c,F$ は連続なので両辺は連続、したがって各点で等しい。$u=w+g$ とおけば $Lu=F+Lg=f$、$\partial\Omega$ で $u=g$。一意性は Step 2。
+
+::: hypcheck
+- **(i) 境界が $C^{m+2}$**：Step 3 で \ref{pde:reg-boundary-higher} の仮定として、Step 5 で $\Phi_{p}$ による $H^{m+2}$ の引き戻しと $C^{2}$ の引き戻しに使った。外すと偽：L 字型領域（\ref{pde:reg-corner-counterexample}）では右辺が $C^{\infty}(\overline{\Omega})$ でも解は $r^{2/3}\sin\frac{2\theta}{3}$ のように振る舞い、勾配が入隅で有界でないので $C^{1}(\overline{\Omega})$ にすら入らない。
+- **(ii) 係数が $C^{m+1}(\overline{\Omega})$**：Step 3 で使い、Step 6 で各点の方程式を書くのに $a^{ij}\in C^{1}$ を使った。外すと偽：係数が跳ぶと解の導関数が跳ぶ（\ref{pde:reg-discontinuous-coefficient}）。
+- **(iii) データ**：$f\in C^{m}$ と $g\in C^{m+2}$ は Step 1 で $F\in H^{m}$ を得るのに、$g\in C^{2}(\overline{\Omega})$ は Step 6 で $u\in C^{2}(\overline{\Omega})$ を得るのに使った。
+- **(iv)**：Step 2 の存在と一意性だけに使った。外すと、$F$ が $Lu=0$ の随伴の解と直交するときにしか解けない（\ref{pde:weak-fredholm-alternative.2}）。
+- **$m\ge\lfloor n/2\rfloor+1$**：Step 5 の埋め込み（Step 4）だけに使った。これは方法の代償で、結論に本質的な前提ではない：シャウダー理論（\ref{pde:cmp-schauder.4}）によれば、境界が $C^{2,\alpha}$、係数とデータが $C^{0,\alpha}$ 程度で同じ結論が成り立つ。たとえば $m=0$（境界 $C^{2}$、係数 $C^{1}$、$f\in L^{2}$）でも $u\in H^{2}$ までは得られる（\ref{pde:reg-boundary-h2}）が、$n=2,3$ では $H^{2}$ から埋め込みで得られるのは連続性だけで、$C^{2}$ には届かない。
+- **$\Omega$ の有界性**：Step 2（ポアンカレの不等式とコンパクト性）と、Step 5 の有限個の覆いに使った。
+- **公理**：$b=0$, $c\ge0$ なら選択公理を使わない。一般の (iv) では \ref{pde:weak-fredholm-alternative} を通して従属選択公理に依存する。
+:::
+:::
+
+::: supplement
+**各段の前提.** 証明の流れと、そこで初めて要る前提を並べると次のようになる。前提は段を進むごとに増えていき、最初の段（存在と一意性）にはほとんど何も要らない。
+
+| 段 | 使う結果 | 新たに要る前提 |
+|---|---|---|
+| 弱解の存在と一意性 | \ref{pde:weak-elliptic-existence}, \ref{pde:weak-fredholm-alternative} | 一様楕円性、係数の有界性、$\Omega$ の有界性、(iv) |
+| 内部の正則性 | \ref{pde:reg-interior-h2}, \ref{pde:reg-interior-higher} | $a^{ij}\in C^{1}$（$H^{2}$）、係数 $C^{m+1}$ と $f\in H^{m}$（$H^{m+2}$） |
+| 境界の正則性 | \ref{pde:reg-boundary-h2}, \ref{pde:reg-boundary-higher} | 境界 $C^{2}$（$H^{2}$）、境界 $C^{m+2}$（$H^{m+2}$）、$u-g\in H_{0}^{1}$ |
+| ソボレフの埋め込み | \ref{fa:higher-embeddings.2} | $m\ge\lfloor n/2\rfloor+1$ |
+| 古典的な境界値 | \ref{pde:reg-smooth-up-to-boundary} の証明の Step 3 | （新たな前提なし） |
+
+$n=2,3$ なら $m=2$ で、境界 $C^{4}$、係数 $C^{3}$、$f\in C^{2}$、$g\in C^{4}$ が要る。次元が上がるとこの要求は $\frac n2$ 程度ずつ増える。$L^{2}$ を基準にした空間で滑らかさを測る限り、各点の値を語るには次元の半分の微分を払わなければならない。
+
+**似た定理.** ヘルダー空間で同じ往復をするのがシャウダー理論（\ref{pde:cmp-schauder}）で、そこでは埋め込みの損失がないので、境界 $C^{2,\alpha}$・係数とデータ $C^{0,\alpha}$ という最小に近い前提で $C^{2,\alpha}(\overline{\Omega})$ の解を得る。ただしこのサイトでは証明していない。前提をすべて $C^{\infty}$ にしたのが \ref{pde:reg-classical-dirichlet} である。
+
+**高い視点：両替の手数料.** 関数解析的手法は、方程式を「エネルギー（$L^{2}$ の通貨）」で解く。存在はこの通貨で安く買えるが、最後に「各点の値（$C^{k}$ の通貨）」に両替するとき、次元の半分の手数料（埋め込みの損失）を取られる。古典的手法とシャウダー理論は最初から各点の値の通貨で取引するので手数料はないが、その通貨で解の存在を買うのは高い（公式か、ヘルダー評価という精密な道具が要る）。
+:::
+
+これに対して、古典的手法は境界の幾何だけで、連続な境界値の古典解を与える。
+
+::: proposition ペロンの方法によるディリクレ問題の古典解 {#pde:cmp-dirichlet-perron-route keywords="classical solvability of the Dirichlet problem for the Laplace and Poisson equations on bounded open sets satisfying the exterior cone condition, continuous boundary values, Dini continuous right-hand side, Perron's method plus Newton potential" index="ペロンの方法による古典解|ぺろんのほうほうによるこてんかい"}
+$\Omega$ を空でない有界な開集合で、$\partial\Omega$ の各点で外部錐条件（\ref{pde:exterior-cone-condition}）が成り立つものとし、$g\in C(\partial\Omega)$ とする。
+1. $\Omega$ で調和、$\partial\Omega$ で $u=g$ となる $u\in C^{2}(\Omega)\cap C(\overline{\Omega})$ がただ一つあり、それはペロン関数 $u_{g}$ に等しい。
+2. $f\in C_{c}(\mathbb{R}^{n})$ がディニ連続（とくにヘルダー連続）なら、$\Omega$ で $-\Delta u=f$、$\partial\Omega$ で $u=g$ となる $u\in C^{2}(\Omega)\cap C(\overline{\Omega})$ がただ一つある。
+:::
+
+::: proof
+**Step 1.** 【主張：$\partial\Omega$ の各点は正則】\ref{pde:barrier-exterior-cone}。
+
+**Step 2.** 【主張：1】Step 1 から \ref{pde:perron-dirichlet-solvable} の 2 が成り立つので、同じ系の 1 と、解がただ一つで $u_{g}$ に一致すること（系の主張の最後）から従う。
+
+**Step 3.** 【主張：2】$N\defeq\Phi*f$ とおくと \ref{pde:newton-holder.1}・\ref{pde:newton-holder.2} から $N\in C^{2}(\mathbb{R}^{n})$ で $-\Delta N=f$。$g-N\in C(\partial\Omega)$ なので、1 から $\Omega$ で調和で $\partial\Omega$ で $h=g-N$ となる $h\in C^{2}(\Omega)\cap C(\overline{\Omega})$ がある。$u\defeq N+h$ が求める解で、一意性は \ref{pde:dirichlet-uniqueness.1}（$\Delta u=-f$ は連続）。
+
+::: hypcheck
+- **外部錐条件**：Step 1 だけで使った。外すと偽になりうる：ルベーグの棘（\ref{pde:lebesgue-spine}）や穴あき球（\ref{pde:perron-punctured-ball}）では、ある連続な $g$ について古典解がない。必要条件ではない：外部錐条件の成り立たない点でも正則なことがある（\ref{pde:prob-pr-slit}）。本当に要るのは各点の障壁（\ref{pde:perron-dirichlet-solvable}）。
+- **$g$ の連続性**：Step 2 で \ref{pde:barrier-regular} を通して使った。$g$ が有界なだけでも $u_{g}$ は調和（\ref{pde:perron-harmonic}）だが、境界で値をとるとは限らない。**$g$ の微分可能性は一度も使っていない**。
+- **作用素がラプラシアン（定数係数）であること**：すべての段で本質的に使った。\ref{pde:perron-harmonic} の持ち上げは球のポアソン積分（\ref{pde:poisson-ball-dirichlet}）とハルナックの原理（\tref{pde:harnack-principle}）に、\ref{pde:barrier-exterior-cone} の障壁は同次関数のラプラシアンの具体的な計算（\ref{pde:barrier-homogeneous-laplacian}）に、Step 3 は基本解 $\Phi$ に頼っている。変数係数の $L$ でペロンの方法を使うには、球の上の $L$ のディリクレ問題をまず解き（ここでシャウダー理論が要る）、障壁を作り直さなければならない（Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 6 章）。
+- **$f$ のディニ連続性**：Step 3 だけで使った。連続なだけでは古典解がないことがある（\ref{pde:newton-continuous-counterexample}）。台がコンパクトなことはニュートン・ポテンシャルを定義するためで、$\Omega$ の外の $f$ の値は解に影響しない。
+- **$\Omega$ の有界性**：ペロン関数の調和性と比較原理（\ref{pde:perron-harmonic}, \ref{pde:dirichlet-uniqueness}）に使った。
+- **公理**：\ref{pde:perron-harmonic} を通して可算選択公理に依存する。
+:::
+:::
+
+二つの道は、両方が使える所では同じ解に着く。さらに、関数解析的手法で滑らかなデータの解を作り、古典的手法の最大値原理で連続なデータに延ばすこともできる。
+
+::: corollary 二つの道の一致と連続な境界値への延長 {#pde:cmp-dirichlet-agree keywords="the weak solution with smooth data coincides with the Perron solution; on smooth domains the classical solution for continuous boundary data is the uniform limit of weak solutions with polynomial data, by the maximum principle" index="弱解とペロン解の一致|じゃくかいとぺろんかいのいっち"}
+$\Omega$, $m$ は \ref{pde:cmp-dirichlet-sobolev-route} の (i) を満たすとし、$L=-\Delta$, $f=0$ とする。
+1. $g\in C^{m+2}(\overline{\Omega})$ なら、\ref{pde:cmp-dirichlet-sobolev-route} の解 $u$ は $\Omega$ の上でペロン関数 $u_{g|_{\partial\Omega}}$ に等しい。
+2. $g\in C(\partial\Omega)$ とし、多項式の列 $P_{k}$ を $\partial\Omega$ の上で $g$ に一様収束するようにとる。$P_{k}$ に対する \ref{pde:cmp-dirichlet-sobolev-route} の解を $u_{k}$ とすると、$u_{k}$ は $\overline{\Omega}$ の上で一様収束し、極限 $u$ は $\Omega$ で調和、$\overline{\Omega}$ で連続、$\partial\Omega$ で $u=g$ で、$\Omega$ の上で $u=u_{g}$。
+:::
+
+::: proof
+**Step 1.** 【主張：1】$u\in C^{2}(\overline{\Omega})$ は $\Omega$ で調和で $\partial\Omega$ で $g$ に等しいので、\ref{pde:perron-family-properties.4} から $u_{g}=u$。
+
+**Step 2.** 【主張：2 の多項式の列は存在し、$u_{k}$ は $\overline{\Omega}$ の上で一様にコーシー列】$\partial\Omega$ はコンパクトで、多項式の制限は定数を含み座標関数で二点を分離する部分代数なので、\ref{top:stone-weierstrass} から $P_{k}$ がとれる。$P_{k}\in C^{\infty}(\overline{\Omega})$ なので $u_{k}$ が定まり、$u_{k}\in C^{2}(\overline{\Omega})$ は調和で $\partial\Omega$ で $u_{k}=P_{k}$。\ref{pde:dirichlet-uniqueness.3} から $\max_{\overline{\Omega}}|u_{k}-u_{l}|=\max_{\partial\Omega}|P_{k}-P_{l}|\to0$。
+
+**Step 3.** 【主張：極限 $u$ は求める性質をもつ】一様極限なので $u\in C(\overline{\Omega})$、$\partial\Omega$ で $u=\lim P_{k}=g$。\ref{pde:harmonic-uniform-limit} から $u$ は $\Omega$ で調和。\ref{pde:perron-family-properties.4} から $u=u_{g}$。
+
+::: hypcheck
+- **境界の滑らかさ（(i)）**：$u_{k}$ を作るのに使った。2 の結論そのもの（連続な $g$ の古典解の存在）は、境界の $C^{2}$ 性からも外部球条件を通して出る（\ref{pde:perron-c2-boundary}）。この系の要点は結論よりも道筋で、古典解の存在を障壁ではなく「滑らかなデータの解＋最大値原理による一様な近似」で得たことにある。
+- **最大値原理**：Step 2 の一様評価に使った。$H^{1}$ のノルムの評価（\ref{pde:weak-elliptic-existence}）では一様ノルムは押さえられない。弱解の弱最大値原理（\ref{pde:wmp-weak-maximum-principle}）からも、$\sup|u_{k}-u_{l}|$ を境界の値で押さえる評価が得られる。
+- **公理**：ペロン関数（\ref{pde:perron-family-properties}）を通して可算選択公理に依存する（1・2 の $u=u_{g}$ の部分だけ）。
+:::
+:::
+
+## どちらか一方でしか得られないもの {#pde:sec-cmp-one-side}
+
+第 1 節の表には、片方の手法でしか届かない結論が含まれている。まず、関数解析的手法でしか得られない解の例を二つ、命題として確かめる。
+
+::: proposition 連続な右辺のポアソン方程式の弱解 {#pde:cmp-poisson-continuous keywords="for the continuous right-hand side F of the counterexample, -Delta u = F has no C^2 solution near the origin, but the weak solution in H^1_0 of the unit ball lies in H^2 and C^1 and satisfies the equation almost everywhere" index="連続な右辺の弱解|れんぞくなうへんのじゃくかい, 強解|きょうかい"}
+$n\ge2$ とし、$F\in C_{c}(\mathbb{R}^{n})$ を \ref{pde:newton-continuous-counterexample} の関数、$B\defeq B(0,1)$ とする。
+1. $0$ を含むどの開集合 $V\subset B$ の上にも、$-\Delta v=F$ を満たす $v\in C^{2}(V)$ はない。
+2. $-\Delta u=F$ の弱解 $u\in H_{0}^{1}(B)$ がただ一つあり、$u\in H^{2}(B)$ で、$B$ の a.e. の点で $-\Delta u=F$。
+3. $u$ は零集合の上で修正すると $C^{1}(B)$ に入るが、$0$ のどの近傍でも $C^{2}$ 級ではない。
+:::
+
+::: proof
+**Step 1.** 【主張：1 と、2 の弱解の存在と一意性】1 は \ref{pde:newton-continuous-counterexample.2}。$F\in L^{2}(B)$ なので、\ref{pde:weak-elliptic-existence.2}（$a^{ij}=\delta_{ij}$, $b=0$, $c=0$）から弱解がただ一つある。
+
+**Step 2.** 【主張：$u\in H^{2}(B)$ で、a.e. で $-\Delta u=F$】$\partial B$ は $C^{\infty}$ 級（局所的に $x_{k}=\pm\sqrt{1-\sum_{i\ne k}x_{i}^{2}}$ のグラフ）で、係数は定数なので、\ref{pde:reg-boundary-h2} の仮定を満たす。
+
+**Step 3.** 【主張：$N\defeq\Phi*F$ とおくと、$u-N$ は $B$ の調和関数 $H$ に a.e. で等しい】\ref{pde:newton-weak.2} から $\zeta\in C_{c}^{\infty}(B)$ について $\int N\Delta\zeta=-\int F\zeta$。一方、弱解の定義と弱微分の定義から $\int u\Delta\zeta=-\int\nabla u\cdot\nabla\zeta=-\int F\zeta$。差 $W\defeq u-N\in L_{\mathrm{loc}}^{1}(B)$ は $\int W\Delta\zeta=0$ を満たすので、\ref{pde:dirichlet-eigen-weyl} から主張を得る。
+
+**Step 4.** 【主張：3】\ref{pde:newton-c1} から $N\in C^{1}(\mathbb{R}^{n})$ なので、$u$ を $H+N\in C^{1}(B)$ に修正できる。$0$ を含む開集合 $V$ の上で $u\in C^{2}(V)$ なら、2 の a.e. の等式の両辺が $V$ で連続になり、各点で $-\Delta u=F$ となって 1 に反する。
+
+::: hypcheck
+- **$F$ の連続性**：Step 3 の \ref{pde:newton-weak} と Step 4 で使った。2 は $F\in L^{2}$ だけで成り立つ。
+- **$B$ の境界の滑らかさ**：Step 2 で $H^{2}(B)$ 全体を得るのに使った。$H_{\mathrm{loc}}^{2}(B)$ だけなら境界によらず \ref{pde:reg-interior-h2} から出る。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: proposition ルベーグの棘の弱解 {#pde:cmp-spine-weak keywords="Lebesgue spine: a polynomial boundary function with no classical solution of the Dirichlet problem, while the weak (variational) solution u with u - G in H^1_0 exists, is unique and harmonic" index="ルベーグの棘の弱解|るべーぐのとげのじゃくかい"}
+$n=3$ とし、$\Omega$ を \ref{pde:lebesgue-spine} の有界な開集合とする。
+1. ある多項式 $G$ について、$g\defeq G|_{\partial\Omega}$ のディリクレ問題は古典解をもたない。
+2. すべての $G\in C^{2}(\mathbb{R}^{3})$ について、$u-G\in H_{0}^{1}(\Omega)$ かつすべての $v\in H_{0}^{1}(\Omega)$ で $\int_{\Omega}\nabla u\cdot\nabla v=0$ となる $u\in H^{1}(\Omega)$ がただ一つあり、$u$ は $\Omega$ の調和関数に a.e. で等しい。
+:::
+
+::: proof
+**Step 1.** 【主張：ある多項式 $G$ について、$x\to0$ のとき $u_{g}(x)\to G(0)$ とならない（$g=G|_{\partial\Omega}$）】そうでないとし、$g\in C(\partial\Omega)$ を任意にとる。\ref{pde:cmp-dirichlet-agree} の証明の Step 2 と同じく、多項式 $P$ で $\delta\defeq\max_{\partial\Omega}|g-P|$ がいくらでも小さいものがある。$v\in\mathcal{S}_{g}$ なら $v-\delta\in\mathcal{S}_{P}$、$v\in\mathcal{S}_{P}$ なら $v-\delta\in\mathcal{S}_{g}$（\ref{pde:perron-family} の定義の不等式を確かめるだけ）なので $|u_{g}-u_{P}|\le\delta$。仮定から $u_{P}(x)\to P(0)$ なので $\limsup_{x\to0}|u_{g}(x)-g(0)|\le2\delta$。$\delta$ は任意なので $u_{g}(x)\to g(0)$。$g$ は任意だったので \ref{pde:barrier-regular} から $0$ は正則となり、\ref{pde:lebesgue-spine} に反する。
+
+**Step 2.** 【主張：1】Step 1 の $G$ について古典解 $u$ があれば、\ref{pde:perron-family-properties.4} から $\Omega$ の上で $u_{g}=u$ で、$u$ は $0$ で連続なので $u_{g}(x)\to g(0)=G(0)$。Step 1 に反する。
+
+**Step 3.** 【主張：2 の $u$ が存在して一意】$\Omega$ は有界なので $G|_{\Omega}\in H^{1}(\Omega)$、$\Delta G\in L^{2}(\Omega)$。\ref{pde:weak-elliptic-existence.2}（$L=-\Delta$）から、すべての $v\in H_{0}^{1}$ で $\int\nabla w\cdot\nabla v=\int(\Delta G)v$ となる $w\in H_{0}^{1}$ がある。$u\defeq G+w$ とおくと、$v\in C_{c}^{\infty}(\Omega)$ について部分積分 $\int\nabla G\cdot\nabla v=-\int(\Delta G)v$ から $\int\nabla u\cdot\nabla v=0$、$H_{0}^{1}$ の定義（$C_{c}^{\infty}$ の閉包）と連続性からすべての $v\in H_{0}^{1}$ で成り立つ。二つの解の差 $d\in H_{0}^{1}$ は $\int\nabla d\cdot\nabla v=0$ を満たすので、$v=d$ として $\nabla d=0$、ポアンカレの不等式（\ref{fa:poincare-inequality}）から $d=0$。
+
+**Step 4.** 【主張：$u$ は調和関数に a.e. で等しい】$\zeta\in C_{c}^{\infty}(\Omega)$ について $\int u\Delta\zeta=-\int\nabla u\cdot\nabla\zeta=0$ なので、\ref{pde:dirichlet-eigen-weyl}。
+
+::: hypcheck
+- **棘の形**：Step 1 で、原点が正則でないこと（\ref{pde:lebesgue-spine}）だけを使った。
+- **境界値が多項式（滑らか）であること**：1 で、滑らかな境界値でも古典解がないことを言うために、ストーン–ワイエルシュトラスの近似で多項式に取り替えた。2 では $G\in C^{2}$ を $\Delta G\in L^{2}$ のために使った。$G\in H^{1}(\Omega)$ でも、右辺を $H^{-1}$ の元 $v\mapsto-\int\nabla G\cdot\nabla v$ に替えれば同じ結論が成り立つ。
+- **境界の正則性**：2 ではまったく使っていない。弱解は存在するが、1 から、$\overline{\Omega}$ で連続で $\partial\Omega$ の上で $G$ に等しい関数にはならない。
+- **公理**：1 は \ref{pde:barrier-regular} と \ref{pde:perron-family-properties} を通して可算選択公理に依存する。2 は選択公理を使わない。
+:::
+:::
+
+逆に、古典的手法でしか得られないもの、両方の手法でそれぞれ違う形で得られるものを表にする。
+
+::: table 片方の手法でしか届かない結論 {#pde:cmp-table-one-side}
+| 結論 | 古典的手法 | 関数解析的手法 |
+|---|---|---|
+| 連続な境界値のディリクレ問題の古典解 | :yes:（障壁があれば。\ref{pde:cmp-dirichlet-perron-route}） | :partial:（滑らかな境界で、最大値原理と組み合わせて。\ref{pde:cmp-dirichlet-agree}） |
+| 境界の正則性を問わない解の存在 | :partial:（内部で調和なペロン関数だけ。\ref{pde:perron-harmonic}） | :yes:（弱い意味の境界値。\ref{pde:cmp-spine-weak}） |
+| 連続な右辺から 2 階の導関数 | :no:（\ref{pde:newton-continuous-counterexample}） | :yes:（$H^{2}$ の強解。\ref{pde:cmp-poisson-continuous}） |
+| ヘルダー連続な右辺から $C^{2}$ 解 | :yes:（\ref{pde:newton-holder}、一般にはシャウダー評価） | :no:（$H^{m}$ で測るので、$C^{2}$ には $m>\frac n2$ の滑らかさが要る） |
+| 有界可測な係数での存在・一意性 | :no: | :yes:（\ref{pde:weak-elliptic-existence}, \ref{pde:parabolic-existence}, \ref{pde:hyperbolic-existence}） |
+| 固有値と固有関数展開 | :partial:（区間・長方形・円板。\ref{pde:sep-sl-heat}） | :yes:（\ref{pde:weak-elliptic-spectrum}, \ref{pde:dirichlet-eigen-minimax}） |
+| 強最大値原理・解の正値性 | :yes:（\tref{pde:strong-maximum-principle}, \ref{pde:heat-infinite-speed}） | :partial:（弱い形の最大値原理。\ref{pde:wmp-weak-maximum-principle}） |
+| 解の公式・ホイヘンスの原理・実解析性 | :yes:（\tref{pde:wave-huygens}, \tref{pde:harmonic-analytic}） | :no: |
+| 3 次元の波動方程式の適切な解の空間 | :no:（$C^{2}\times C^{1}$ のデータで解がない。\ref{pde:wave-kirchhoff-loss}） | :yes:（エネルギー空間。\ref{pde:hyperbolic-energy-equality}） |
+| 非線形保存則の一意な解 | :no:（衝撃波の後は古典解がない） | :no:（弱解は一意でない。\ref{pde:riemann-problem.2}） |
+:::
+
+表のいくつかの行に注を付ける。
+
+- **増大条件.** 全空間の熱方程式では、\ref{pde:heat-tychonoff} のように初期値 $0$ の解が $0$ 以外にもあり、一意性には $|u|\le Ae^{a|x|^{2}}$ のような増大条件が要った（\ref{pde:heat-uniqueness-rn.1}）。関数解析的手法の系列は有界な $\Omega$ だけを扱い、解を $L^{2}(0,T;H_{0}^{1})$ の中で探すので、この問題は表に出てこない。全空間でも、関数解析的手法では解の空間（たとえば各時刻で $L^{2}(\mathbb{R}^{n})$）を選んだ時点で、無限遠での振る舞いの制限が組み込まれる。増大条件は、どちらの手法でも「どの範囲の解について一意か」を決める前提として現れ、関数解析的手法ではそれが空間の選び方に隠れている。
+- **非線形保存則.** バーガース方程式では、古典解は衝撃波の形成時刻 $T^{*}$ を越えて延びず（\ref{pde:burgers-shock-formation.2}）、弱解は存在しても一意でない（\ref{pde:riemann-problem.2}）。一意性を取り戻すのはエントロピー条件（\ref{pde:entropy-uniqueness}）で、これは線形の楕円型・放物型・双曲型方程式のエネルギー法とは別の、物理（時間の向き）に由来する前提である。ここでは証明していない。
+- **ヘルダー連続な右辺.** 古典解の理論にヘルダー空間を使うのは、ポアソン方程式で「右辺より 2 階滑らか」が成り立つのが、$C^{0}$ や $L^{\infty}$ の端点ではなく $C^{0,\alpha}$（$0<\alpha<1$）だからである（\ref{pde:newton-continuous-counterexample}）。この評価の一般形が次の節のシャウダー評価である。
+
+## シャウダー評価 {#pde:sec-cmp-schauder}
+
+古典的手法を一般の係数と一般の領域に広げる理論の中心は、ヘルダー空間での評価である。このサイトではポアソン方程式の特別な場合（\ref{pde:newton-holder}：右辺がディニ連続ならニュートン・ポテンシャルは $C^{2}$）しか示していないので、主張を正確に述べ、証明はしない。
+
+::: definition ヘルダー空間 {#pde:cmp-holder-space keywords="Hoelder spaces C^{k,alpha}(closure of Omega) and C^{k,alpha}(Omega), Hoelder seminorm, C^{k,alpha} boundary" index="ヘルダー空間|へるだーくうかん, ヘルダー半ノルム|へるだーはんのるむ"}
+$\Omega\subset\mathbb{R}^{n}$ を開集合、$0<\alpha<1$、$k\ge0$ を整数とする。
+1. 関数 $v\colon\Omega\to\mathbb{R}$ の**ヘルダー半ノルム**を $[v]_{\alpha;\Omega}\defeq\sup\{|v(x)-v(y)|/|x-y|^{\alpha}:x,y\in\Omega,\ x\ne y\}$ と定める。
+2. $\Omega$ が有界のとき、$v\in C^{k}(\overline{\Omega})$ で $|\beta|=k$ のすべての $\partial^{\beta}v$ について $[\partial^{\beta}v]_{\alpha;\Omega}<\infty$ となるものの全体を $C^{k,\alpha}(\overline{\Omega})$ と書き、ノルムを $\|v\|_{C^{k,\alpha}(\overline{\Omega})}\defeq\sum_{|\beta|\le k}\sup_{\Omega}|\partial^{\beta}v|+\sum_{|\beta|=k}[\partial^{\beta}v]_{\alpha;\Omega}$ とする。
+3. すべての $V\Subset\Omega$ で $v|_{V}\in C^{k,\alpha}(\overline{V})$ となる $v$ の全体を $C^{k,\alpha}(\Omega)$ と書く。
+4. \ref{fa:c1-boundary.2} の組の $\gamma_{i}$ が $C^{k,\alpha}$ 級（$\overline{W_{i}}$ の近傍の上で）のとき、$\partial\Omega$ は **$C^{k,\alpha}$ 級**であるという。
+:::
+
+::: fact シャウダー評価 {#pde:cmp-schauder keywords="Schauder estimates: interior C^{2,alpha} estimate for the Poisson equation, interior and global Schauder estimates for non-divergence uniformly elliptic operators with Hoelder coefficients, existence of C^{2,alpha} solutions of the Dirichlet problem (Schauder theory, method of continuity)" index="シャウダー評価|しゃうだーひょうか, シャウダー理論|しゃうだーりろん"}
+$0<\alpha<1$ とする。非発散形の作用素 $Mu\defeq-\sum_{i,j}a^{ij}\partial_{i}\partial_{j}u+\sum_{i}b^{i}\partial_{i}u+cu$ で、$a^{ij}=a^{ji}$、ある $\theta>0$ について $\sum_{i,j}a^{ij}(x)\xi_{i}\xi_{j}\ge\theta|\xi|^{2}$ となるものを考える。
+1. （ポアソン方程式の内部評価）$u\in C^{2}(\Omega)$、$-\Delta u=f$ で $f\in C^{0,\alpha}(\Omega)$ なら $u\in C^{2,\alpha}(\Omega)$。$\overline{B}(x_{0},2R)\subset\Omega$ なら、$n,\alpha,R$ だけで決まる $C$ について $\|u\|_{C^{2,\alpha}(\overline{B}(x_{0},R))}\le C\bigl(\sup_{B(x_{0},2R)}|u|+\|f\|_{C^{0,\alpha}(\overline{B}(x_{0},2R))}\bigr)$。
+2. （内部評価）$\Omega$ を有界とし、$a^{ij},b^{i},c,f\in C^{0,\alpha}(\overline{\Omega})$、$u\in C^{2}(\Omega)$ が $Mu=f$ を満たせば $u\in C^{2,\alpha}(\Omega)$。$V\Subset\Omega$ について、$n,\alpha,\theta$、係数の $C^{0,\alpha}$ ノルムと $V,\Omega$ だけで決まる $C$ があって、$u$ が有界なら $\|u\|_{C^{2,\alpha}(\overline{V})}\le C\bigl(\sup_{\Omega}|u|+\|f\|_{C^{0,\alpha}(\overline{\Omega})}\bigr)$。
+3. （大域評価）さらに $\partial\Omega$ が $C^{2,\alpha}$ 級で、$u\in C^{2,\alpha}(\overline{\Omega})$ が $Mu=f$ と $\partial\Omega$ の上で $u=g$（$g\in C^{2,\alpha}(\overline{\Omega})$）を満たせば、同様の $C$ について $\|u\|_{C^{2,\alpha}(\overline{\Omega})}\le C\bigl(\sup_{\Omega}|u|+\|g\|_{C^{2,\alpha}(\overline{\Omega})}+\|f\|_{C^{0,\alpha}(\overline{\Omega})}\bigr)$。
+4. （存在）3 の設定で $c\ge0$ なら、すべての $f\in C^{0,\alpha}(\overline{\Omega})$, $g\in C^{2,\alpha}(\overline{\Omega})$ について、$Mu=f$（$\Omega$ で）、$u=g$（$\partial\Omega$ で）となる $u\in C^{2,\alpha}(\overline{\Omega})$ がただ一つある。
+
+出典：Gilbarg–Trudinger『Elliptic Partial Differential Equations of Second Order』第 4 章（1）、第 6 章（2〜4。4 は 3 の評価と連続性の方法による）。このサイトでは証明しない。
+:::
+
+::: intuition
+右辺と係数がヘルダー連続なら、解の 2 階導関数も同じ指数でヘルダー連続になり、そのノルムは右辺と境界値のノルムで押さえられる。境界と係数がほどほどに滑らかなら、ディリクレ問題はこの空間でいつも解ける。
+:::
+
+::: supplement
+**このサイトで何がこれに依存するか.** 主張・証明・例の論理で \ref{pde:cmp-schauder} に依存するものはない。言及しているのは次の補足・注・表だけである：滑らかな境界をもつ領域のグリーン関数の存在（\ref{pde:green-function} の後の例の 2）、ヘルダー連続な右辺の $\partial_{i}\partial_{j}u$ 自体のヘルダー連続性（\ref{pde:newton-holder} の補足）、放物型の版（\ref{pde:heat-duhamel-holder} の補足）、ヘルダー空間での内部評価（\ref{pde:reg-interior-smooth} の補足）、ディリクレ問題の三つの解き方の表のシャウダー理論の列（\ref{pde:reg-table-methods}）、このページの \ref{pde:cmp-dirichlet-sobolev-route} の hypcheck（前提 $m\ge\lfloor n/2\rfloor+1$ が本質的でないこと）と \ref{pde:cmp-dirichlet-perron-route} の hypcheck（変数係数へのペロンの方法）、\ref{pde:cmp-table-one-side}。実変数の調和解析（\see{four:si-cz-estimate}）と多様体上の楕円型作用素（\see{gl:elliptic-estimate}）の補足も同じ評価に触れている。
+
+**前提を変えると.** 端点では成り立たない：$\alpha=0$（右辺が連続なだけ）では $u\in C^{2}$ とは限らず（\ref{pde:newton-continuous-counterexample}）、$\alpha=1$（右辺がリプシッツ連続）でも $\partial_{i}\partial_{j}u$ はリプシッツ連続とは限らない（\ref{pde:newton-holder} の補足。ここでは証明しない）。$L^{p}$ の尺度では $1<p<\infty$ で同じ形の評価が成り立ち（カルデロン–ジグムントの評価。\see{four:si-cz-estimate}）、$p=1,\infty$ が端点になる。
+
+**似た定理.** \ref{pde:reg-boundary-higher} は「$f\in H^{m}$ なら $u\in H^{m+2}$」というソボレフ空間での同じ形の評価で、差分商で証明できた。ヘルダー空間には差分商とヒルベルト空間の構造がそのままは使えないので、凍結係数（係数を 1 点の値で止めた定数係数の作用素との比較）とニュートン・ポテンシャルの精密な評価が要り、証明はずっと長くなる。
+
+**高い視点：二つの物差し.** 関数解析的手法は滑らかさを $L^{2}$ の物差し（$H^{m}$）で測り、存在を内積から安く得る。古典的手法は滑らかさを各点の物差し（$C^{k,\alpha}$）で測り、結論が直接古典解になる。シャウダー理論は後者の物差しで前者と同じ「2 階分の得」を示すもので、二つの手法の中間に立っている。
+:::
+
+## 二つの手法の役割 {#pde:sec-cmp-conclusion}
+
+ここまでの比較をまとめる。
+
+- **関数解析的手法の強み.** 方程式の型（楕円型・放物型・双曲型）によらず、エネルギー評価とヒルベルト空間（ラックス–ミルグラム、ガレルキン法、半群）という一つの枠組みで、有界可測な係数・任意の有界な開集合・弱いデータ（$H^{-1}$, $L^{2}$）について存在と一意性を与える。フレドホルムの二者択一や固有値問題のような構造も、この枠組みで初めて一般的に見える。
+- **関数解析的手法の弱み.** 得られる解は $H^{1}$ やエネルギー空間の元で、古典解・各点の性質に戻るには、係数・境界・データのすべてに滑らかさを課し直す必要がある。その要求は、ソボレフの埋め込みの損失の分だけ、古典的手法やシャウダー理論の要求より強い（\ref{pde:cmp-dirichlet-sobolev-route} の hypcheck）。連続な境界値・ヘルダー連続な右辺・強最大値原理・解の公式・ホイヘンスの原理・実解析性は、この枠組みからは直接出てこない。
+- **古典的手法の役割.** 特別な作用素と領域に限られるが、その範囲で最小限の滑らかさで最も強い結論（古典解、各点の評価、正値性、伝播の様子）を与える。さらに、関数解析的手法の前提が飾りでないことを示す反例（連続な右辺、ルベーグの棘、ティホノフの例、3 次元の波の滑らかさの損失）は、どれも古典的手法の具体的な計算で作られた。
+
+関数解析的手法は圧倒的に一般的で見通しがよいが、細かな前提が少しずつ強くなる所があり、そこでは古典的手法が欠かせない。二つの手法は対立するものではなく、\ref{pde:cmp-dirichlet-agree} のように、弱解で存在を、最大値原理で一様な評価を、と役割を分けて組み合わせるのが実際の使い方である。ディリクレの原理の歴史とハダマールの適切性は、次のページ（\see{pde:page-well-posedness}）で扱う。
+
+## 問題 {#pde:sec-cmp-problems}
+
+::: problem {#pde:prob-cmp-dimension}
+\ref{pde:cmp-dirichlet-sobolev-route} について答えよ。
+1. $n=2,3,4,5$ のそれぞれについて、最小の $m$ と、そのとき要求される境界・係数・$f$・$g$ の滑らかさを求めよ。
+2. $n=4$ で $m=2$ とすると、証明のどの段が通らないか。そのとき証明から得られる $u$ の滑らかさを答えよ。
+:::
+
+::: solution
+**1.** $m=\lfloor n/2\rfloor+1$ で、境界 $C^{m+2}$、係数 $C^{m+1}(\overline{\Omega})$、$f\in C^{m}(\overline{\Omega})$、$g\in C^{m+2}(\overline{\Omega})$ が要る。
+
+| $n$ | $m$ | 境界 | 係数 | $f$ | $g$ |
+|---|---|---|---|---|---|
+| 2 | 2 | $C^{4}$ | $C^{3}$ | $C^{2}$ | $C^{4}$ |
+| 3 | 2 | $C^{4}$ | $C^{3}$ | $C^{2}$ | $C^{4}$ |
+| 4 | 3 | $C^{5}$ | $C^{4}$ | $C^{3}$ | $C^{5}$ |
+| 5 | 3 | $C^{5}$ | $C^{4}$ | $C^{3}$ | $C^{5}$ |
+
+**2.** Step 1〜3 は $m=2$ でそのまま通り、$w\in H^{4}(\Omega)$ を得る。通らないのは Step 4・5 の埋め込みで、$k=4$, $\lfloor n/2\rfloor=2$ から $k-\lfloor n/2\rfloor-1=1$、つまり $w$（したがって $u$）は $C^{1}(\overline{\Omega})$ の代表元をもつところまでしか言えない。Step 6 の境界値 $w=0$ は $C^{1}$ で足りるので $\partial\Omega$ の上で $u=g$ は成り立つが、方程式は a.e. の意味（\ref{pde:reg-interior-h2.2}）でしか言えない。なお内部では、係数とデータが $\Omega$ の中で滑らかなら \ref{pde:reg-interior-higher} から $\Omega$ の中では $C^{2}$ になりうる。足りないのは境界までの $C^{2}$ 性である。
+:::
+
+::: problem {#pde:prob-cmp-punctured}
+$n=3$, $B\defeq B(0,1)$, $\Omega\defeq B\setminus\{0\}$ とし、$G\in C_{c}^{\infty}(B)$ を $G(0)=1$ となるものとする。
+1. $\varphi\in C_{c}^{\infty}(B)$ について、$\eta\in C_{c}^{\infty}(B(0,1))$ を原点の近くで $1$ とし、$\varphi_{\varepsilon}\defeq(1-\eta(\cdot/\varepsilon))\varphi$ とおく。$\varphi_{\varepsilon}\in C_{c}^{\infty}(\Omega)$（$\varepsilon$ が小さいとき）と $\|\varphi_{\varepsilon}-\varphi\|_{H^{1}}\to0$（$\varepsilon\to0$）を示し、$H_{0}^{1}(\Omega)=H_{0}^{1}(B)$ を導け。
+2. \ref{pde:cmp-spine-weak.2} と同じ意味の $\Omega$ の弱解（$u-G\in H_{0}^{1}(\Omega)$、$H_{0}^{1}(\Omega)$ のすべての $v$ で $\int\nabla u\cdot\nabla v=0$）は $u=0$ であることを示せ。
+3. 境界値 $g\defeq G|_{\partial\Omega}$（$|x|=1$ で $0$、原点で $1$）のディリクレ問題は古典解をもたないこと、ペロン関数が $u_{g}\equiv0$ であることと比べて、弱解が何を「無視」したかを説明せよ。
+:::
+
+::: solution
+**1.** $\eta(x/\varepsilon)$ の台は $B(0,\varepsilon)$ に入り、$\eta=1$ となる原点の近傍 $B(0,\rho)$ について $\varphi_{\varepsilon}$ は $B(0,\rho\varepsilon)$ で $0$。台は $\operatorname{supp}\varphi$ から原点の近傍を除いたコンパクト集合で、$\Omega$ に入る。$\varphi-\varphi_{\varepsilon}=\eta(\cdot/\varepsilon)\varphi$ について、$\|\eta(\cdot/\varepsilon)\varphi\|_{2}^{2}\le\sup|\varphi|^{2}\sup|\eta|^{2}|B(0,\varepsilon)|\to0$、$\nabla(\eta(\cdot/\varepsilon)\varphi)=\varepsilon^{-1}(\nabla\eta)(\cdot/\varepsilon)\varphi+\eta(\cdot/\varepsilon)\nabla\varphi$ で、第 2 項は同様に $0$ に、第 1 項は変数変換 $x=\varepsilon y$ で
+$$
+\int\bigl|\varepsilon^{-1}(\nabla\eta)(x/\varepsilon)\bigr|^{2}dx=\varepsilon^{n-2}\int|\nabla\eta|^{2}dy=\varepsilon\|\nabla\eta\|_{2}^{2}\to0
+$$
+（$n=3$）なので、$L^{2}$ ノルムは $\sup|\varphi|$ 倍以下で $0$ に近づく。よって $C_{c}^{\infty}(B)$ の元は $H_{0}^{1}(\Omega)$ に入り、$H_{0}^{1}(B)$ は $C_{c}^{\infty}(B)$ の閉包なので $H_{0}^{1}(B)\subset H_{0}^{1}(\Omega)$。逆の包含は $C_{c}^{\infty}(\Omega)\subset C_{c}^{\infty}(B)$ から。
+
+**2.** $G\in C_{c}^{\infty}(B)\subset H_{0}^{1}(B)=H_{0}^{1}(\Omega)$ なので $u=G+(u-G)\in H_{0}^{1}(\Omega)$。$v=u$ とおくと $\int|\nabla u|^{2}=0$ で、ポアンカレの不等式（\ref{fa:poincare-inequality}）から $u=0$。（存在は \ref{pde:cmp-spine-weak} の証明の Step 3 と同じで、$u=0$ が実際に条件を満たす。）
+
+**3.** 古典解がないことと $u_{g}\equiv0$ は \ref{pde:perron-punctured-ball}。弱解 $u=0$ はペロン関数と一致し、球面での値 $0$ は正しくとるが、原点での値 $G(0)=1$ はとらない。1 のとおり、$n\ge3$ では 1 点は $H^{1}$ の関数にとって「見えない」（$H_{0}^{1}(\Omega)=H_{0}^{1}(B)$）ので、条件 $u-G\in H_{0}^{1}(\Omega)$ は原点での値について何も課していない。古典的手法はこの状況を「解がない」と判定し、関数解析的手法は「その境界条件は最初から意味がない」と判定する。どちらも、原点が正則でないという同じ事実の表れである。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

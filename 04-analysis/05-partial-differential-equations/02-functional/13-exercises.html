@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：関数解析的手法（1） | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/13-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：関数解析的手法（1） {#pde:page-exercises-functional keywords="exercises, functional-analytic methods for PDE"}
+
+この系列の前半（楕円型方程式の弱解から主固有値まで）の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは、非対称な係数とドリフトをもつ作用素のガルディングの定数と直接の強圧性、点源の $H^{-1}$ ノルムと区間の弱解、非対称な作用素の可解条件、正弦波の差分商、円板の境界の平坦化、不連続な右辺をもつ円板の弱解の $H^{2}$ 正則性、係数が円で跳ぶ透過問題、放物面の障壁による弱解の評価、リッツ法による区間の固有値の上からの評価、直角二等辺三角形の主固有値である。後半（放物型方程式・双曲型方程式）は \see{pde:page-exercises-functional-b} にある。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#pde:sec-exfn-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。$\Omega\subset\mathbb{R}^{n}$ は有界な開集合、関数は実数値、$(u,v)=\int uv$、$\|u\|_{2}$ は $L^{2}$ のノルム、$\|u\|_{H^{1}}^{2}=\|u\|_{2}^{2}+\|\nabla u\|_{2}^{2}$ で、$H^{2}$ のノルムは多重指数についての和（\ref{fa:sobolev-space}）。作用素 $L$、双線形形式 $B$、定数 $\theta,\Lambda,b_{\infty},c_{\infty},c_{-}$ は \ref{pde:bilinear-elliptic-form}、$\alpha,\beta,\gamma,\beta'$ は \ref{pde:bilinear-energy-estimates}、$C_{P}=2a$（$\Omega\subset\{|x_{1}|<a\}$）はポアンカレの不等式（\ref{fa:poincare-inequality}）の定数である。
+- **区間の $H_{0}^{1}$.** $I=(a,b)$ を有界な開区間とする。$u\in H^{1}(I)$ はいつも $[a,b]$ 上の絶対連続な代表（\ref{fa:sobolev-one-dimension}）で考える。$u\in H_{0}^{1}(I)$ なら、この代表は両端で $0$ である。実際、$\varphi\in C_{c}^{\infty}(I)$ について $|\varphi(x)|=|\int_{a}^{x}\varphi'|\le\sqrt{b-a}\,\|\varphi'\|_{2}$ なので、$H^{1}$ で $u$ に収束する $\varphi_{m}\in C_{c}^{\infty}(I)$ は $[a,b]$ の上で一様コーシー列をなし、その一様極限は連続で両端で $0$、しかも $L^{2}$ の極限でもあるので a.e. で $u$ に等しい。a.e. で等しい二つの連続関数は等しい。また、$u\in H^{1}(I)$ の弱微分 $u'$ がさらに弱微分 $u''\in L^{2}(I)$ をもてば、$u'$ も絶対連続な代表をもつので $u\in C^{1}([a,b])$ である。
+- **同心球面で区分的に $C^{1}$ の関数**（第 2 節で使う）。$n\ge2$, $B\defeq B(0,1)\subset\mathbb{R}^{n}$、$0=\rho_{0}<\rho_{1}<\dots<\rho_{m}=1$ とし、$D_{1}\defeq B(0,\rho_{1})$、$D_{i}\defeq\{\rho_{i-1}<|x|<\rho_{i}\}$（$2\le i\le m$）とおく。各 $i$ について $u_{i}$ を $\overline{D_{i}}$ の近傍で $C^{1}$ 級の関数とし、球面 $|x|=\rho_{i}$（$1\le i<m$）の上で $u_{i}=u_{i+1}$ とする。$u$ を $\overline{D_{i}}\cap B$ の上で $u_{i}$ と定めると、次が成り立つ。
+  - (P1) $u\in H^{1}(B)$ で、弱勾配は各 $D_{i}$ の上で $\nabla u_{i}$。
+  - (P2) さらに $|x|=1$ の上で $u_{m}=0$ なら、$u\in H_{0}^{1}(B)$。
+
+  (P1) の理由：$\varphi\in C_{c}^{\infty}(B)$ とする。$D_{i}$ は $C^{1}$ 境界をもつので、ガウス–グリーンの公式（\ref{fa:gauss-green-c1}）を $u_{i}\varphi$ に使うと $\int_{D_{i}}\partial_{j}(u_{i}\varphi)\,dx=\int_{\partial D_{i}}u_{i}\varphi\,\nu_{j}\,d\sigma$。$|x|=1$ の上では $\varphi=0$ で、球面 $|x|=\rho_{i}$ の上では $D_{i}$ と $D_{i+1}$ の外向き法線が逆向きで $u_{i}=u_{i+1}$ なので、$i$ について足すと境界の項は打ち消し合い、$\int_{B}u\,\partial_{j}\varphi\,dx=-\int_{B}g_{j}\varphi\,dx$（$g_{j}$ は $D_{i}$ の上で $\partial_{j}u_{i}$）。$g_{j}$ は有界なので $L^{2}(B)$ に入る。(P2) の理由：$0<\varepsilon<1$ について、$|x|<\frac{1}{1+\varepsilon}$ では $u_{\varepsilon}(x)\defeq u((1+\varepsilon)x)$、$\frac{1}{1+\varepsilon}\le|x|<1$ では $u_{\varepsilon}(x)\defeq0$ とおく。$u_{\varepsilon}$ は半径 $\frac{\rho_{1}}{1+\varepsilon},\dots,\frac{1}{1+\varepsilon},1$ の同心球面で区切った同じ形の関数（いちばん外の部分は $0$ で、$|x|=\frac{1}{1+\varepsilon}$ でつながるのは $u_{m}=0$（$|y|=1$）による）なので、(P1) から $H^{1}(B)$ に入る。台は $\overline{B}(0,\frac{1}{1+\varepsilon})$ に含まれるので、軟化で $C_{c}^{\infty}(B)$ の関数により近似でき（\ref{fa:mollification-sobolev.3}）、$u_{\varepsilon}\in H_{0}^{1}(B)$。$\varepsilon\to0$ のとき、$|x|\notin\{\rho_{1},\dots,\rho_{m-1}\}$ なら $(1+\varepsilon)x$ はやがて $x$ と同じ $D_{i}$ に入るので、$u_{\varepsilon}(x)\to u(x)$、$\nabla u_{\varepsilon}(x)=(1+\varepsilon)(\nabla u_{i})((1+\varepsilon)x)\to\nabla u(x)$ で、どちらも $\varepsilon$ によらない定数で押さえられる。優収束定理（\ref{meas:dominated-convergence}）から $u_{\varepsilon}\to u$（$H^{1}$）で、$H_{0}^{1}$ は閉なので $u\in H_{0}^{1}(B)$。
+- 一つの問題の解答は、ほかの問題の結果を使わない（使うのは各ページの本文の結果と、この節の約束だけである）。
+- **選択公理**：引用する結果に含まれるもの（フレドホルムの二者択一、固有関数の基底、弱最大値原理とそれを使う一意可解性が、コンパクト作用素の理論やレリッヒ–コンドラショフの定理を通して使う従属選択公理と可算選択公理）のほかには使わない。
+:::
+
+## 弱解 {#pde:sec-we-exercises}
+
+対応するページ：\ref{pde:page-weak-elliptic}
+
+::: problem ★ 基本：ガルディングの定数と、1 階の項による強圧性 {#pde:ex-we-1}
+$\Omega\defeq(-1,1)\times(0,1)\subset\mathbb{R}^{2}$ とし（$C_{P}=2$）、係数を $a^{11}=2$, $a^{12}=1$, $a^{21}=0$, $a^{22}=1$, $b=(-x_{1},0)$, $c=-\frac14$ とする。すなわち
+$$
+\begin{aligned}
+Lu&=-2\partial_{1}^{2}u-\partial_{1}\partial_{2}u-\partial_{2}^{2}u-x_{1}\partial_{1}u-\tfrac14u.
+\end{aligned}
+$$
+1. 最良の $\theta$ と、$\Lambda$, $b_{\infty}$, $c_{\infty}$, $c_{-}$、\ref{pde:bilinear-energy-estimates} の $\alpha,\beta,\gamma$ を求めよ。\ref{pde:bilinear-energy-estimates.3} の条件 $\gamma C_{P}^{2}<\frac{\theta}{2}$ は成り立つか。
+2. $u\in H_{0}^{1}(\Omega)$ について $\int_{\Omega}(-x_{1})\,\partial_{1}u\,u\,dx=\frac12\|u\|_{2}^{2}$ を示し、$B[u,u]\ge\frac14\|u\|_{H^{1}}^{2}$ を導け。
+3. すべての $f\in H^{-1}(\Omega)$ について $Lu=f$ の弱解がただ一つあり、$\|u\|_{H^{1}}\le4\|f\|_{H^{-1}}$ となることを示せ。\ref{pde:weak-elliptic-existence} から直接わかることと比べよ。
+:::
+
+::: solution
+**1.** $\sum_{i,j}a^{ij}\xi_{i}\xi_{j}=2\xi_{1}^{2}+\xi_{1}\xi_{2}+\xi_{2}^{2}$ は対称行列 $\begin{pmatrix}2&1/2\\1/2&1\end{pmatrix}$ の 2 次形式で、その固有値は $s^{2}-3s+\frac74=0$ の根 $\frac{3\pm\sqrt2}{2}$。よって最良の $\theta$ は小さいほうの固有値 $\theta=\frac{3-\sqrt2}{2}\approx0.793$。$\Lambda=(2^{2}+1^{2}+0^{2}+1^{2})^{1/2}=\sqrt6$、$b_{\infty}=\sup_{\Omega}|x_{1}|=1$、$c_{\infty}=c_{-}=\frac14$。したがって
+$$
+\begin{aligned}
+\alpha&=\Lambda+b_{\infty}+c_{\infty}=\sqrt6+\tfrac54\approx3.70,\\
+\beta&=\frac{\theta}{2(1+C_{P}^{2})}=\frac{3-\sqrt2}{20}\approx0.079,\\
+\gamma&=\frac{b_{\infty}^{2}}{2\theta}+c_{-}=\frac{1}{3-\sqrt2}+\frac14=\frac{3+\sqrt2}{7}+\frac14\approx0.881.
+\end{aligned}
+$$
+$\gamma C_{P}^{2}\approx3.52$ は $\frac{\theta}{2}\approx0.396$ より大きいので、条件は成り立たない。（同じ作用素を対称な係数 $a^{12}=a^{21}=\frac12$ で書くと $\Lambda=\sqrt{5.5}$ に下がるが、$\theta$ と $\gamma$ は変わらない。）
+
+**2.** $u\in C_{c}^{\infty}(\Omega)$ なら $\partial_{1}u\,u=\frac12\partial_{1}(u^{2})$ で、フビニの定理（\tref{meas:fubini}）で $x_{2}$ を固定し、$x_{1}$ について部分積分すると（$u$ は $x_{1}=\pm1$ の近くで $0$）
+$$
+\begin{aligned}
+&\int_{\Omega}(-x_{1})\,\partial_{1}u\,u\,dx\\
+&=-\frac12\int_{0}^{1}\!\!\int_{-1}^{1}x_{1}\,\partial_{1}(u^{2})\,dx_{1}\,dx_{2}\\
+&=\frac12\int_{\Omega}u^{2}\,dx.
+\end{aligned}
+$$
+左辺を $Q(u)$ とすると、$|x_{1}|\le1$ から $|Q(u)-Q(w)|\le\|\nabla u-\nabla w\|_{2}\|u\|_{2}+\|\nabla w\|_{2}\|u-w\|_{2}$ なので、両辺は $H^{1}$ ノルムについて連続で、等式は $C_{c}^{\infty}(\Omega)$ の閉包 $H_{0}^{1}(\Omega)$ でも成り立つ。したがって $u\in H_{0}^{1}$ について
+$$
+\begin{aligned}
+&B[u,u]\\
+&=\int_{\Omega}\bigl(2(\partial_{1}u)^{2}+\partial_{1}u\,\partial_{2}u+(\partial_{2}u)^{2}\bigr)dx\\
+&\quad+\frac12\|u\|_{2}^{2}-\frac14\|u\|_{2}^{2}\\
+&\ge\theta\|\nabla u\|_{2}^{2}+\frac14\|u\|_{2}^{2},
+\end{aligned}
+$$
+$\theta>\frac14$ なので右辺は $\frac14\|u\|_{H^{1}}^{2}$ 以上である。
+
+**3.** $B$ は有界（\ref{pde:bilinear-energy-estimates.1}）で、2 から定数 $\frac14$ で強圧的なので、ラックス–ミルグラムの定理（\ref{fa:lax-milgram}。実ヒルベルト空間 $H_{0}^{1}(\Omega)$ で使う）から、$B[u,v]=\langle f,v\rangle$（すべての $v\in H_{0}^{1}$）となる $u\in H_{0}^{1}$ がただ一つあり、$\|u\|_{H^{1}}\le4\|f\|_{H^{-1}}$。一方 \ref{pde:weak-elliptic-existence.1} からわかるのは、$\mu\ge\gamma\approx0.881$ について $Lu+\mu u=f$ が一意に解けることだけで、\ref{pde:weak-elliptic-existence.2} は 1 の条件が成り立たないので使えない。ガルディングの不等式は 1 階の係数の大きさ $b_{\infty}$ しか見ないが、$\operatorname{div}b=-1$ のドリフト（$x_{1}=0$ の方へ寄せる流れ）は 2 のとおり吸収の項 $\frac12u$ として働き、負の $c$ を打ち消している。逆向きの $b=(x_{1},0)$ なら、同じ計算で 1 階の項は $-\frac12\|u\|_{2}^{2}$ になり、湧き出しとして働く。
+:::
+
+::: problem ★★ 標準：点源の H⁻¹ ノルムと区間の弱解 {#pde:ex-we-2}
+$I\defeq(0,1)$ とし、$v\in H_{0}^{1}(I)$ にその連続な代表の値 $v(\frac12)$ を対応させる汎関数を $\delta$ と書く。
+1. $f^{0}\defeq0$, $f^{1}\defeq\frac12-\mathbf{1}_{(1/2,1)}$ が \ref{pde:weak-dual-representation.1} の意味で $\delta$ を表すことを確かめ、$\delta\in H^{-1}(I)$、$\|\delta\|_{H^{-1}}\le\frac12$ を示せ。
+2. $\|\delta\|_{H^{-1}}=\sqrt{\frac12\tanh\frac12}\approx0.481$ を示せ。
+3. $-u''=\delta$, $u(0)=u(1)=0$ の弱解は $u(x)=\frac12\min(x,1-x)$ であることを示し、$u\notin H^{2}(I)$ を確かめよ。\ref{pde:weak-elliptic-existence.2} の評価 $\|u\|_{H^{1}}\le\frac{1}{\beta'}\|\delta\|_{H^{-1}}$ と実際の値を比べよ。
+:::
+
+::: solution
+**1.** 記法の節の約束から、$v\in H_{0}^{1}(I)$ の代表は絶対連続で $v(0)=v(1)=0$。微積分学の基本定理（\ref{meas:ftc-lebesgue}）から
+$$
+\int_{0}^{1}f^{1}v'\,dx=\frac12\bigl(v(1)-v(0)\bigr)-\bigl(v(1)-v(\tfrac12)\bigr)=v(\tfrac12).
+$$
+よって $\delta$ は \ref{pde:weak-dual-representation.1} の形の汎関数で、$H^{-1}(I)$ に入り、$\|\delta\|_{H^{-1}}\le\|f^{1}\|_{2}=\frac12$（$|f^{1}|=\frac12$）。$\frac12$ は $|v(\frac12)|/\|v'\|_{2}$ の上限で、$v=\min(x,1-x)$ で達せられる。
+
+**2.** リースの表現定理（\ref{fa:riesz-representation}）から、$w\in H_{0}^{1}(I)$ で $\int_{0}^{1}(w'v'+wv)\,dx=v(\frac12)$（$v\in H_{0}^{1}$）となるものがただ一つあり、$\|\delta\|_{H^{-1}}=\|w\|_{H^{1}}$。$w$ を求める。$v\in C_{c}^{\infty}((0,\frac12))$ では右辺が $0$ なので、$(0,\frac12)$ の上で $w'$ の弱微分は $w\in L^{2}$ で、記法の節の約束から $w\in C^{1}([0,\frac12])$, $w''=w$（a.e.）。$w''$ も連続なので $w\in C^{2}([0,\frac12])$ で、$w(0)=0$ から $w=A\sinh x$。同様に $[\frac12,1]$ で $w=A'\sinh(1-x)$ で、$w$ の連続性から $A'=A$。$v\in H_{0}^{1}$ について両側で部分積分すると（$w'v$ は各閉区間で絶対連続、$w''=w$）
+$$
+\int_{0}^{1}(w'v'+wv)\,dx=\bigl(w'(\tfrac12-)-w'(\tfrac12+)\bigr)v(\tfrac12)=2A\cosh\tfrac12\cdot v(\tfrac12)
+$$
+なので $A=\frac{1}{2\cosh(1/2)}$。$v=w$ とおくと
+$$
+\begin{aligned}
+\|\delta\|_{H^{-1}}^{2}&=\|w\|_{H^{1}}^{2}=w(\tfrac12)=\frac{\sinh(1/2)}{2\cosh(1/2)}\\
+&=\frac12\tanh\frac12\approx0.2311.
+\end{aligned}
+$$
+1 の上界 $\frac12$ より少し小さいのは、$H^{1}$ ノルムが $\|v'\|_{2}$ のほかに $\|v\|_{2}$ も含むからである。
+
+**3.** $L=-\frac{d^{2}}{dx^{2}}$ は $b=0$, $c=0$ なので、\ref{pde:weak-elliptic-existence.2} から弱解 $u\in H_{0}^{1}$ がただ一つある。2 と同じく、$(0,\frac12)$ と $(\frac12,1)$ の上で $u''=0$ なので $u$ は各閉区間で 1 次式、$u(0)=u(1)=0$ と連続性から $u=s\min(x,1-x)$ の形で、部分積分から $\int_{0}^{1}u'v'\,dx=\bigl(u'(\frac12-)-u'(\frac12+)\bigr)v(\frac12)=2s\,v(\frac12)$。これが $v(\frac12)$ に等しいので $s=\frac12$。$u'$ は a.e. で $(0,\frac12)$ では $\frac12$、$(\frac12,1)$ では $-\frac12$ なので、連続な代表をもたず $u'\notin H^{1}(I)$（\ref{fa:sobolev-one-dimension}）、すなわち $u\notin H^{2}(I)$。右辺が $H^{-1}$ にしか入らないと、解は $H^{1}$ より滑らかにならない。
+
+評価：$\theta=1$, $\gamma=0$, $C_{P}=2$（$I\subset\{|x|<1\}$）なので $\beta'=\frac{1/2}{1+4}=\frac{1}{10}$ で、評価は $\|u\|_{H^{1}}\le10\|\delta\|_{H^{-1}}\approx4.81$。実際は $\|u'\|_{2}^{2}=\frac14$, $\|u\|_{2}^{2}=2\int_{0}^{1/2}\frac{x^{2}}{4}dx=\frac{1}{48}$ で $\|u\|_{H^{1}}=\sqrt{13/48}\approx0.520$。評価が 10 倍近く粗いのは、ポアンカレの定数 $C_{P}=2$ が最良の値 $\frac1\pi$ よりずっと大きいことと、$\frac{\theta}{2}$ の分割による。弱形式で $v=u$ とおいた $B[u,u]=\|u'\|_{2}^{2}=\frac14=u(\frac12)$ も確かめられる。
+:::
+
+::: problem ★★ 標準：非対称な作用素の可解条件 {#pde:ex-we-3}
+$I\defeq(0,\pi)$, $Lu\defeq-u''+2u'$（$a^{11}=1$, $b=2$, $c=0$）とし、$Lu=2u+f$ の弱解、すなわち $u\in H_{0}^{1}(I)$ で $\int_{0}^{\pi}(u'v'+2u'v-2uv)\,dx=(f,v)$（すべての $v\in H_{0}^{1}$）となるものを考える。
+1. $\lambda=2$ は $L$ の実固有値で、$N_{2}=\mathbb{R}\,e^{x}\sin x$, $N_{2}^{*}=\mathbb{R}\,e^{-x}\sin x$ であることを、\ref{pde:weak-elliptic-spectrum} の後の例から確かめよ。
+2. $f=1$ のとき弱解はないことを示せ。
+3. $f=e^{x}\cos x$ のとき弱解があることを示し、弱解をすべて求めよ。
+4. 3 の $f$ は $N_{2}$ と直交しないこと、逆に $f=e^{-x}\cos x$ は $N_{2}$ と直交するが弱解をもたないことを確かめよ。可解条件で直交すべき相手は $N_{2}$ と $N_{2}^{*}$ のどちらか。
+:::
+
+::: solution
+**1.** 例は、$(0,\pi)$ の上の $Lu=-u''+bu'$ について $\Sigma=\{k^{2}+\frac{b^{2}}{4}:k\ge1\}$ で、固有値 $k^{2}+\frac{b^{2}}{4}$ の $N_{\lambda}$ と $N_{\lambda}^{*}$ がそれぞれ $e^{bx/2}\sin kx$ と $e^{-bx/2}\sin kx$ で張られる 1 次元の空間であることを示している。$b=2$, $k=1$ とすれば $\lambda=2$。直接にも、$e^{x}\sin x$ は $-u''+2u'-2u=0$ を、$e^{-x}\sin x$ は $L^{*}v-2v=-v''-2v'-2v=0$ を満たす。
+
+**2.** \ref{pde:weak-elliptic-spectrum.3}（$\lambda=2\in\Sigma$）から、弱解があるのは $(f,e^{-x}\sin x)=0$ のときに限る。$f=1$ では $\int_{0}^{\pi}e^{-x}\sin x\,dx=\frac{1+e^{-\pi}}{2}\ne0$ なので、弱解はない。
+
+**3.** $\int_{0}^{\pi}e^{x}\cos x\cdot e^{-x}\sin x\,dx=\int_{0}^{\pi}\frac{\sin2x}{2}\,dx=0$ なので、\ref{pde:weak-elliptic-spectrum.3} から弱解 $u_{0}$ がある。弱解 $u$ は、$v\in C_{c}^{\infty}(I)$ について $\int u'v'=\int(-2u'+2u+f)v$ を満たすので、$u'$ の弱微分は $2u'-2u-f\in L^{2}$ で、記法の節の約束から $u\in C^{1}([0,\pi])$。さらに $u''=2u'-2u-f$ は連続なので $u\in C^{2}([0,\pi])$ で、各点で $-u''+2u'-2u=e^{x}\cos x$、$u(0)=u(\pi)=0$。$u=e^{x}w$ とおくと $-u''+2u'-2u=e^{x}(-w''-w)$ なので $-w''-w=\cos x$。$(-\frac x2\sin x)''=-\cos x+\frac x2\sin x$ から $-\frac x2\sin x$ は特解で、$w=-\frac x2\sin x+A\sin x+B'\cos x$、$w(0)=0$ から $B'=0$。よって弱解は
+$$
+u_{A}(x)\defeq e^{x}\Bigl(A-\frac x2\Bigr)\sin x\qquad(A\in\mathbb{R})
+$$
+の形のものに限る。$u_{0}$ はこの形の一つで、二つの弱解の差は $N_{2}$ の元、逆に $u_{0}$ に $N_{2}$ の元を足したものも弱解なので、弱解の全体は $u_{0}+\mathbb{R}e^{x}\sin x=\{u_{A}:A\in\mathbb{R}\}$ である。
+
+**4.** $\int_{0}^{\pi}e^{ax}\sin2x\,dx=\frac{2(1-e^{a\pi})}{a^{2}+4}$ を使う。3 の $f$ について $(f,e^{x}\sin x)=\frac12\int_{0}^{\pi}e^{2x}\sin2x\,dx=\frac{1-e^{2\pi}}{8}\ne0$ なので、$f$ は $N_{2}$ と直交しないが、3 のとおり解ける。$f=e^{-x}\cos x$ では $(f,e^{x}\sin x)=\int_{0}^{\pi}\frac{\sin2x}{2}dx=0$ だが、$(f,e^{-x}\sin x)=\frac12\int_{0}^{\pi}e^{-2x}\sin2x\,dx=\frac{1-e^{-2\pi}}{8}\ne0$ なので、2 と同じ理由で弱解はない。直交すべき相手は随伴方程式の解の空間 $N_{2}^{*}$ であり（\ref{pde:weak-fredholm-alternative.2} を $L-2$ に使ったもの）、$L$ が対称でなければ $N_{2}$ とは一般に異なる。
+:::
+
+## 正則性 {#pde:sec-rg-exercises}
+
+対応するページ：\ref{pde:page-regularity}、\ref{pde:page-regularity-boundary}、\ref{pde:page-regularity-counterexamples}
+
+::: problem ★ 基本：正弦波の差分商と離散的な部分積分 {#pde:ex-rg-1}
+$k\ge1$ を整数、$u(x)\defeq\sin kx$、$U\defeq(-1,2\pi+1)$, $V\defeq(0,2\pi)$, $0<|h|\le1$ とする（$n=1$ で $D^{h}=D_{1}^{h}$）。
+1. $\|D^{h}u\|_{L^{2}(V)}^{2}=\pi\Bigl(\dfrac{2\sin(kh/2)}{h}\Bigr)^{2}$ を示し、\ref{pde:reg-difference-lemma.1} の評価と比べよ。
+2. $\|D^{h}u-u'\|_{L^{2}(V)}=\sqrt\pi\,\Bigl|\dfrac{e^{ikh}-1}{h}-ik\Bigr|\le\dfrac{\sqrt\pi}{2}k^{2}|h|$ を示せ。$h$ を固定すると比 $\|D^{h}u-u'\|_{L^{2}(V)}/\|u'\|_{L^{2}(V)}$ が $k$ について一様には小さくならないことを、$kh=2\pi$ の場合で確かめよ。
+3. $\varphi\in C_{c}^{\infty}(\mathbb{R})$ について $\displaystyle\int_{\mathbb{R}}\varphi'\,\bigl(-D^{-h}D^{h}\varphi\bigr)'\,dx=\int_{\mathbb{R}}|D^{h}\varphi'|^{2}\,dx$ を示し、\ref{pde:reg-difference-energy} の試験関数 $v_{h}$ との関係を述べよ。
+:::
+
+::: solution
+**1.** $\sin(k(x+h))-\sin kx=2\cos\bigl(k(x+\frac h2)\bigr)\sin\frac{kh}{2}$ なので、$D^{h}u(x)=\frac{2}{h}\sin\frac{kh}{2}\cos\bigl(k(x+\frac h2)\bigr)$。$\cos^{2}$ は周期 $\frac{\pi}{k}$ で、長さ $2\pi$ の区間での積分は $\pi$ なので、主張の式を得る。一方 $u'=k\cos kx$ で $\|u'\|_{L^{2}(V)}^{2}=\pi k^{2}$。比は
+$$
+\frac{\|D^{h}u\|_{L^{2}(V)}^{2}}{\|u'\|_{L^{2}(V)}^{2}}=\Bigl(\frac{\sin(kh/2)}{kh/2}\Bigr)^{2}\le1
+$$
+（$|\sin s|\le|s|$）。$|t|\le1$ で $V+t\subset U$ なので \ref{pde:reg-difference-lemma.1} は $\|D^{h}u\|_{L^{2}(V)}\le\|u'\|_{L^{2}(U)}$ を与えるが、この例では $U$ を $V$ に替えても成り立ち、$h\to0$ で比は $1$ に近づく。
+
+**2.** $u=\operatorname{Im}e^{ikx}$ で、$D^{h}$ も微分も実部・虚部と交換するので、$c\defeq\frac{e^{ikh}-1}{h}-ik$ について $D^{h}u-u'=\operatorname{Im}(c\,e^{ikx})$。$c=|c|e^{i\psi}$ と書くと $\operatorname{Im}(ce^{ikx})=|c|\sin(kx+\psi)$ で、$V$ の上の 2 乗積分は $\pi|c|^{2}$。また $s\in\mathbb{R}$ について $|e^{i\tau}-1|\le|\tau|$ から
+$$
+|e^{is}-1-is|=\Bigl|\int_{0}^{s}i\bigl(e^{i\tau}-1\bigr)d\tau\Bigr|\le\frac{s^{2}}{2}
+$$
+なので、$s=kh$ として $|c|\le\frac{k^{2}|h|}{2}$。$kh=2\pi$（$k\ge7$, $h=\frac{2\pi}{k}\le1$）なら $e^{ikh}=1$ で $D^{h}u=0$ なので、$\|D^{h}u-u'\|_{L^{2}(V)}=\|u'\|_{L^{2}(V)}$、比は $1$ である。\ref{pde:reg-difference-lemma.3} の収束は関数ごとには起こるが、振動の速い関数ほど遅く、$H^{1}$ の有界集合の上で一様ではない。
+
+**3.** $\psi\defeq D^{h}\varphi\in C_{c}^{\infty}(\mathbb{R})$ について $\psi'=D^{h}\varphi'$（差分商と微分は交換する）で、$(D^{-h}\psi)'=D^{-h}\psi'$。離散的な部分積分 \eqref{pde:eq-rg-discrete-parts} を $w=\varphi'$, $g=\psi'$ に使うと
+$$
+\begin{aligned}
+\int\varphi'\bigl(-D^{-h}\psi\bigr)'\,dx&=-\int\varphi'\,D^{-h}\psi'\,dx\\
+&=\int(D^{h}\varphi')\,\psi'\,dx=\int|D^{h}\varphi'|^{2}\,dx.
+\end{aligned}
+$$
+\ref{pde:reg-difference-energy} の $v_{h}=-D^{-h}(\zeta^{2}D^{h}u)$ は、$\zeta=1$（台の上）、$a=1$ とするとちょうど $-D^{-h}D^{h}u$ で、上の等式は「$-u''=F$ にこの試験関数を入れると、左辺が $\|D^{h}u'\|^{2}$ になる」ことを言っている。右辺 $\int Fv_{h}$ を $\|F\|$ と $\|D^{h}u'\|$ で押さえれば差分商が一様に有界になり、\ref{pde:reg-h1-characterization} から $u'\in H^{1}$ が出る。これが差分商による正則性の証明の骨組みで、一般の場合の $\zeta$ と変数係数は、そこから出る誤差項を処理するためにある。
+:::
+
+::: problem ★ 基本：円板の境界の平坦化 {#pde:ex-rg-2}
+$\Omega\defeq B(0,1)\subset\mathbb{R}^{2}$ とし、点 $(0,-1)$ の近くの組 $(A,W,\gamma,a)$ を $A=I$（恒等変換）、$W=(-\frac12,\frac12)$, $\gamma(x_{1})=-\sqrt{1-x_{1}^{2}}$, $a=\frac12$ とする。$U$ は \ref{fa:c1-boundary.2} の対応する開集合とする。
+1. $\Omega\cap U=\{x_{2}>\gamma(x_{1})\}\cap U$ を確かめ、\ref{pde:reg-flattening} の $\Phi$ と $D\Phi$ を求めて $|\det D\Phi|=1$ を確かめよ。
+2. $L=-\Delta$（$a^{ij}=\delta_{ij}$）のとき、変換後の係数 $\tilde a^{kl}$ を求めよ。$\tilde a(y)$ の最小固有値は $p=\gamma'(y_{1})$ について $\frac{2+p^{2}-|p|\sqrt{p^{2}+4}}{2}$ であることを示し、$\tilde\theta=\frac{7-\sqrt{13}}{6}$ が \ref{pde:reg-flattening.2} の $\theta/M^{2}$ に等しいことを確かめよ。
+3. $u\in C^{2}(\Omega\cap U)$, $\tilde u\defeq u\circ\Phi^{-1}$ とする。$P^{+}$ の各点で
+$$
+\begin{aligned}
+&-(\Delta u)\circ\Phi^{-1}\\
+&=-\partial_{1}^{2}\tilde u+2\gamma'\,\partial_{1}\partial_{2}\tilde u\\
+&\quad-(1+\gamma'^{2})\,\partial_{2}^{2}\tilde u+\gamma''\,\partial_{2}\tilde u
+\end{aligned}
+$$
+（$\gamma',\gamma''$ は $y_{1}$ で評価）を示し、右辺が $-\sum_{k,l}\partial_{l}(\tilde a^{kl}\partial_{k}\tilde u)$ に等しいことを確かめよ。$u=1-|x|^{2}$ で右辺が $4$ になることを確かめよ。
+:::
+
+::: solution
+**1.** $U=\{x:x_{1}\in W,\ |x_{2}-\gamma(x_{1})|<\frac12\}$。$x\in U$ で $x_{2}>\gamma(x_{1})$ なら、$|x_{1}|<\frac12$ から $\sqrt{1-x_{1}^{2}}>\frac{\sqrt3}{2}$ なので $-\sqrt{1-x_{1}^{2}}<x_{2}<\frac12-\sqrt{1-x_{1}^{2}}<\sqrt{1-x_{1}^{2}}$、すなわち $x_{1}^{2}+x_{2}^{2}<1$。$x_{2}\le\gamma(x_{1})$ なら $x_{2}\le-\sqrt{1-x_{1}^{2}}$ で $|x|\ge1$。よって $\Omega\cap U=\{x_{2}>\gamma\}\cap U$。$\Phi(x)=(x_{1},x_{2}-\gamma(x_{1}))=(x_{1},x_{2}+\sqrt{1-x_{1}^{2}})$ で、
+$$
+D\Phi=\begin{pmatrix}1&0\\-\gamma'(x_{1})&1\end{pmatrix},\qquad\gamma'(x_{1})=\frac{x_{1}}{\sqrt{1-x_{1}^{2}}},
+$$
+で、$\det D\Phi=1$。
+**2.** $\tilde a^{kl}=\sum_{i}\partial_{i}\Phi_{k}\,\partial_{i}\Phi_{l}$、すなわち $\tilde a=D\Phi\,(D\Phi)^{T}$ で、
+$$
+\tilde a=\begin{pmatrix}1&-p\\-p&1+p^{2}\end{pmatrix}\qquad(p=\gamma'(y_{1})).
+$$
+跡は $2+p^{2}$、行列式は $1$ なので、固有値は $s^{2}-(2+p^{2})s+1=0$ の根 $s_{\pm}=\frac{2+p^{2}\pm|p|\sqrt{p^{2}+4}}{2}$（判別式 $(2+p^{2})^{2}-4=p^{2}(p^{2}+4)$）。$s_{+}$ は $|p|$ について増加し $s_{-}=1/s_{+}$ は減少する。$|y_{1}|<\frac12$ では $|p|<\frac{1}{\sqrt3}$ なので、$p^{2}=\frac13$ での値 $s_{-}=\frac{7/3-\sqrt{13}/3}{2}=\frac{7-\sqrt{13}}{6}\approx0.566$ が下限で、$\tilde\theta=\frac{7-\sqrt{13}}{6}$ ととれる。一方 $D(\Phi^{-1})=(D\Phi)^{-1}=\begin{pmatrix}1&0\\p&1\end{pmatrix}$ の作用素ノルムの 2 乗は $(D\Phi^{-1})^{T}D\Phi^{-1}=\begin{pmatrix}1+p^{2}&p\\p&1\end{pmatrix}$ の最大固有値で、跡と行列式が同じなので $s_{+}$。よって $M^{2}=\sup s_{+}=1/\inf s_{-}$ で、$\theta=1$ について $\theta/M^{2}=\frac{7-\sqrt{13}}{6}$。一般に $D\Phi\,(D\Phi)^{T}$ の最小固有値は $1/\|(D\Phi)^{-1}\|^{2}$ に等しいので、$a=I$ のときは \ref{pde:reg-flattening.2} の楕円性の定数は各点で最良になる。
+
+**3.** $u(x)=\tilde u(x_{1},x_{2}-\gamma(x_{1}))$ を連鎖律で微分すると、$\partial_{x_{1}}u=\partial_{1}\tilde u-\gamma'\partial_{2}\tilde u$、$\partial_{x_{2}}u=\partial_{2}\tilde u$、
+$$
+\begin{aligned}
+\partial_{x_{1}}^{2}u&=\partial_{1}^{2}\tilde u-2\gamma'\partial_{1}\partial_{2}\tilde u\\
+&\quad+\gamma'^{2}\partial_{2}^{2}\tilde u-\gamma''\partial_{2}\tilde u,\\
+\partial_{x_{2}}^{2}u&=\partial_{2}^{2}\tilde u,
+\end{aligned}
+$$
+足して符号を変えれば主張の式になる。$\tilde a$ は $y_{1}$ だけの関数で $\partial_{1}\tilde a^{11}=0$, $\partial_{1}\tilde a^{21}=-\gamma''$ なので
+$$
+\begin{aligned}
+&-\sum_{k,l}\partial_{l}(\tilde a^{kl}\partial_{k}\tilde u)\\
+&=-\sum_{k,l}\tilde a^{kl}\partial_{k}\partial_{l}\tilde u\\
+&\quad-\sum_{k}(\partial_{1}\tilde a^{k1})\partial_{k}\tilde u\\
+&=-\partial_{1}^{2}\tilde u+2\gamma'\partial_{1}\partial_{2}\tilde u\\
+&\quad-(1+\gamma'^{2})\partial_{2}^{2}\tilde u+\gamma''\partial_{2}\tilde u.
+\end{aligned}
+$$
+1 階の項 $\gamma''\partial_{2}\tilde u$（$\gamma''=(1-y_{1}^{2})^{-3/2}$）は境界の曲がりから生まれたもので、$\tilde a$ の微分可能性（$\gamma\in C^{2}$）が要るのはここである。$u=1-|x|^{2}$ では $\tilde u=1-y_{1}^{2}-(y_{2}+\gamma)^{2}$ で、$\partial_{2}\tilde u=-2(y_{2}+\gamma)$, $\partial_{1}^{2}\tilde u=-2-2\gamma'^{2}-2(y_{2}+\gamma)\gamma''$, $\partial_{1}\partial_{2}\tilde u=-2\gamma'$, $\partial_{2}^{2}\tilde u=-2$ なので、右辺は
+$$
+\begin{aligned}
+&2+2\gamma'^{2}+2(y_{2}+\gamma)\gamma''-4\gamma'^{2}\\
+&\quad+2(1+\gamma'^{2})-2(y_{2}+\gamma)\gamma''\\
+&=4=-\Delta u.
+\end{aligned}
+$$
+:::
+
+::: problem ★★ 標準：不連続な右辺をもつ円板の弱解 {#pde:ex-rg-3}
+$B\defeq B(0,1)\subset\mathbb{R}^{2}$, $f\defeq\mathbf{1}_{B(0,1/2)}$ とし、$r=|x|$ として
+$$
+u(x)\defeq\begin{cases}\dfrac{1}{16}+\dfrac{\log2}{8}-\dfrac{r^{2}}{4}&(r\le\frac12),\\[2mm]-\dfrac{\log r}{8}&(\frac12<r<1)\end{cases}
+$$
+とおく。
+1. $u\in H_{0}^{1}(B)$ は $-\Delta u=f$, $u=0$（$\partial B$）のただ一つの弱解であることを示せ。
+2. $u\in H^{2}(B)$ を直接確かめ、\ref{pde:reg-boundary-h2} と照らし合わせよ。一方 $u\notin C^{2}(B)$ であること、とくに $\partial_{1}^{2}u$ が点 $(\frac12,0)$ で $-\frac12$ から $\frac12$ に跳ぶことを示せ。
+3. $\|\nabla u\|_{2}^{2}$ と $(f,u)$ をそれぞれ計算し、どちらも $\frac{\pi(1+4\log2)}{128}$ になることを確かめよ。
+:::
+
+::: solution
+**1.** $u_{1}\defeq\frac{1}{16}+\frac{\log2}{8}-\frac{|x|^{2}}{4}$（$\mathbb{R}^{2}$ で $C^{\infty}$）、$u_{2}\defeq-\frac{\log|x|}{8}$（$x\ne0$ で $C^{\infty}$）とおく。$r=\frac12$ で $u_{1}=\frac{\log2}{8}=u_{2}$、$r=1$ で $u_{2}=0$ なので、記法の節の (P1)(P2)（$m=2$, $\rho_{1}=\frac12$）から $u\in H_{0}^{1}(B)$ で、弱勾配は $\nabla u_{1}=-\frac x2$, $\nabla u_{2}=-\frac{x}{8r^{2}}$。$r=\frac12$ でどちらも $-\frac x2$ なので、$\nabla u$ は $B$ で連続、とくに $\partial_{r}u_{1}=\partial_{r}u_{2}=-\frac14$（$r=\frac12$）。$\Delta u_{1}=-1$、$\Delta u_{2}=0$（$\log r$ は平面で調和）。$v\in C_{c}^{\infty}(B)$ について、ガウス–グリーンの公式（\ref{fa:gauss-green-c1}）を $v\,\nabla u_{i}$ の各成分に使うと
+$$
+\begin{aligned}
+&\int_{D_{i}}\nabla u_{i}\cdot\nabla v\,dx\\
+&=\int_{\partial D_{i}}v\,\partial_{\nu}u_{i}\,d\sigma-\int_{D_{i}}\Delta u_{i}\,v\,dx.
+\end{aligned}
+$$
+円 $r=\frac12$ での項は、外向き法線が $D_{1}$ と $D_{2}$ で逆向きで $\partial_{r}u_{1}=\partial_{r}u_{2}$ なので打ち消し合い、$r=1$ では $v=0$。よって $\int_{B}\nabla u\cdot\nabla v=\int_{D_{1}}v=(f,v)$。両辺は $v$ について $H^{1}$ で連続なので、すべての $v\in H_{0}^{1}(B)$ で成り立つ。一意性は \ref{pde:weak-elliptic-existence.2}（$b=0$, $c=0$）。
+
+**2.** $\partial_{j}u$ は $D_{1}$ で $\partial_{j}u_{1}=-\frac{x_{j}}{2}$、$D_{2}$ で $\partial_{j}u_{2}=-\frac{x_{j}}{8r^{2}}$ で、どちらも閉包の近傍で $C^{1}$ 級、$r=\frac12$ で一致する。(P1) を $\partial_{j}u$ に使うと $\partial_{j}u\in H^{1}(B)$ で、2 階の弱微分は
+$$
+\begin{aligned}
+\partial_{l}\partial_{j}u&=-\frac{\delta_{jl}}{2}\quad(D_{1}),\\
+\partial_{l}\partial_{j}u&=-\frac{\delta_{jl}r^{2}-2x_{j}x_{l}}{8r^{4}}\quad(D_{2}),
+\end{aligned}
+$$
+どちらも有界なので $u\in H^{2}(B)$。境界は $C^{\infty}$、係数は定数、$f\in L^{2}$ なので、これは \ref{pde:reg-boundary-h2} の結論どおりである。$x=(s,0)$ では $D_{2}$ の式は $\frac{1}{8s^{2}}$ で、$s\downarrow\frac12$ のとき $\frac12$ に近づく。$u\in C^{2}(B)$ なら古典的な 2 階導関数は弱微分と a.e. で一致するので、連続関数 $\partial_{1}^{2}u$ が $D_{1}$ では $-\frac12$、$D_{2}$ では $\frac{1}{8s^{2}}$（$x=(s,0)$）となり、点 $(\frac12,0)$ で両側の極限 $-\frac12$ と $\frac12$ が一致しないので矛盾する。右辺の跳び（$-\Delta u$ が $1$ から $0$ へ）が、そのまま 2 階導関数の跳びに現れている。$f\notin H^{1}$ なので、\ref{pde:reg-interior-higher}（$m=1$）も使えず、$H^{2}$ が限界である。
+
+**3.** $|\nabla u|^{2}$ は $D_{1}$ で $\frac{r^{2}}{4}$、$D_{2}$ で $\frac{1}{64r^{2}}$ なので、極座標で
+$$
+\begin{aligned}
+\|\nabla u\|_{2}^{2}&=2\pi\Bigl(\int_{0}^{1/2}\frac{r^{3}}{4}\,dr+\int_{1/2}^{1}\frac{dr}{64r}\Bigr)\\
+&=2\pi\Bigl(\frac{1}{256}+\frac{\log2}{64}\Bigr)=\frac{\pi(1+4\log2)}{128}.
+\end{aligned}
+$$
+また
+$$
+\begin{aligned}
+(f,u)&=2\pi\int_{0}^{1/2}\Bigl(\frac{1}{16}+\frac{\log2}{8}-\frac{r^{2}}{4}\Bigr)r\,dr\\
+&=2\pi\Bigl(\frac{1}{128}+\frac{\log2}{64}-\frac{1}{256}\Bigr)=\frac{\pi(1+4\log2)}{128}.
+\end{aligned}
+$$
+これは弱形式で $v=u$ とおいた $B[u,u]=(f,u)$ である。
+:::
+
+::: problem ★★★ 発展：係数が円で跳ぶ透過問題 {#pde:ex-rg-4}
+$B\defeq B(0,1)\subset\mathbb{R}^{2}$、$a(x)\defeq1$（$|x|<\frac12$）、$a(x)\defeq2$（$\frac12\le|x|<1$）とし、$Lu\defeq-\operatorname{div}(a\nabla u)$（$a^{ij}=a\,\delta_{ij}$, $b=0$, $c=0$）、$f\defeq1$ とする。$r=|x|$ として
+$$
+u(x)\defeq\begin{cases}\dfrac{5}{32}-\dfrac{r^{2}}{4}&(r\le\frac12),\\[2mm]\dfrac{1-r^{2}}{8}&(\frac12<r<1)\end{cases}
+$$
+とおく。
+1. $u$ は $Lu=1$, $u=0$（$\partial B$）のただ一つの弱解であることを示せ。流束 $a\nabla u$ は $B$ 全体で $-\frac x2$ に等しいが、$\nabla u$ は円 $r=\frac12$ で跳ぶことを確かめよ。
+2. 点 $p\defeq(\frac12,0)$ のどんな近傍 $V\subset B$ についても $u\notin H^{2}(V)$ であることを、差分商を使って示せ。\ref{pde:reg-interior-h2} のどの前提が満たされていないか。
+3. $u$ は $B(0,\frac12)$ と $\{\frac12<r<1\}$ のそれぞれで $C^{\infty}$ 級で、各点で $Lu=1$ を満たすことを確かめよ。また $B[u,u]$ と $(1,u)$ をそれぞれ計算し、どちらも $\frac{17\pi}{256}$ になることを確かめよ。\ref{pde:reg-discontinuous-coefficient} の 1 次元の例と比べよ。
+:::
+
+::: solution
+**1.** $u_{1}\defeq\frac{5}{32}-\frac{|x|^{2}}{4}$, $u_{2}\defeq\frac{1-|x|^{2}}{8}$ は多項式で、$r=\frac12$ でどちらも $\frac{3}{32}$、$r=1$ で $u_{2}=0$。記法の節の (P1)(P2) から $u\in H_{0}^{1}(B)$ で、弱勾配は $B(0,\frac12)$ で $-\frac x2$、$\{\frac12<r<1\}$ で $-\frac x4$。よって $a\nabla u=-\frac x2$（a.e.）で、これは $B$ 全体で滑らか。$\nabla u$ は円の内側からは $-\frac x2$、外側からは $-\frac x4$ に近づくので跳ぶ。$L$ は $\theta=1$ の一様楕円型で、$v\in C_{c}^{\infty}(B)$ について
+$$
+\begin{aligned}
+B[u,v]&=\int_{B}a\nabla u\cdot\nabla v\,dx\\
+&=-\int_{B}\frac{x}{2}\cdot\nabla v\,dx\\
+&=\int_{B}\Bigl(\operatorname{div}\frac x2\Bigr)v\,dx=\int_{B}v\,dx
+\end{aligned}
+$$
+（$\frac x2$ は滑らかで $v$ の台はコンパクトなので、各座標方向の部分積分）。両辺は $v$ について $H^{1}$ で連続なので、すべての $v\in H_{0}^{1}(B)$ で成り立つ。一意性は \ref{pde:weak-elliptic-existence.2}（係数は有界可測で十分）。
+
+**2.** $g\defeq\partial_{1}u$ は a.e. で、$|x|<\frac12$ では $-\frac{x_{1}}{2}$、$|x|>\frac12$ では $-\frac{x_{1}}{4}$。$u\in H^{2}(V)$ となる近傍 $V\ni p$ があったとする。$\delta\in(0,\frac{1}{10}]$ を $Q\defeq(\frac12-2\delta,\frac12+2\delta)\times(-\delta,\delta)\subset V$ となるようにとり、$V'\defeq(\frac12-\delta,\frac12+\delta)\times(-\delta,\delta)$ とおく。$|t|\le\delta$ なら $V'+te_{1}\subset Q$ で、$\partial_{1}g\in L^{2}(Q)$ なので、\ref{pde:reg-difference-lemma.1} から $0<h\le\delta$ について $\|D_{1}^{h}g\|_{L^{2}(V')}\le\|\partial_{1}g\|_{L^{2}(Q)}$。
+
+一方 $0<h\le\frac\delta2$ とし、$\rho(s)\defeq\sqrt{\frac14-s^{2}}$、$S_{h}\defeq\{x:|x_{2}|<\delta,\ \rho(x_{2})-h<x_{1}<\rho(x_{2})\}$ とおく。$\delta\le\frac25$ なら $(\frac12-\frac\delta2)^{2}=\frac14-\frac\delta2+\frac{\delta^{2}}{4}\le\frac14-\delta^{2}$ なので、$|x_{2}|<\delta$ で $\rho(x_{2})\ge\frac12-\frac\delta2$、したがって $S_{h}\subset V'$ で $|S_{h}|=2\delta h$。$x\in S_{h}$ なら $|x|<\frac12$ かつ $x_{1}+h>\rho(x_{2})$ から $|x+he_{1}|>\frac12$ なので
+$$
+\begin{aligned}
+D_{1}^{h}g(x)&=\frac{1}{h}\Bigl(-\frac{x_{1}+h}{4}+\frac{x_{1}}{2}\Bigr)=\frac{x_{1}}{4h}-\frac14\\
+&\ge\frac{1/2-\delta}{4h}-\frac14\\
+&\ge\frac{1}{10h}-\frac14\ge\frac{1}{20h}
+\end{aligned}
+$$
+（$\delta\le\frac{1}{10}$, $h\le\frac15$ を使った）。よって $\|D_{1}^{h}g\|_{L^{2}(V')}^{2}\ge2\delta h\cdot\frac{1}{400h^{2}}=\frac{\delta}{200h}$ で、$h\downarrow0$ で発散し、上の有界性に反する。したがって $u\notin H^{2}(V)$。差分商が大きくなるのは、線分 $[x,x+he_{1}]$ が円をまたぐ幅 $h$ の帯の上だけで、そこで $g$ の跳び（約 $\frac18$）を $h$ で割った値をとるからである。満たされていないのは主要部の係数の滑らかさ $a^{ij}\in C^{1}(\overline{\Omega})$ で、境界 $\partial B$ は滑らかなので、崩れは係数の跳びだけによる内部の現象である。
+
+**3.** $B(0,\frac12)$ では $-\operatorname{div}(\nabla u_{1})=-\Delta u_{1}=1$、外側では $-\operatorname{div}(2\nabla u_{2})=-2\Delta u_{2}=-2\cdot(-\frac12)=1$。エネルギーは
+$$
+\begin{aligned}
+B[u,u]&=\int_{B}a|\nabla u|^{2}\\
+&=2\pi\Bigl(\int_{0}^{1/2}\frac{r^{2}}{4}r\,dr+\int_{1/2}^{1}2\cdot\frac{r^{2}}{16}r\,dr\Bigr)\\
+&=2\pi\Bigl(\frac{1}{256}+\frac{15}{512}\Bigr)=\frac{17\pi}{256},
+\end{aligned}
+$$
+$$
+\begin{aligned}
+(1,u)&=2\pi\int_{0}^{1/2}\Bigl(\frac{5}{32}-\frac{r^{2}}{4}\Bigr)r\,dr+2\pi\int_{1/2}^{1}\frac{1-r^{2}}{8}r\,dr\\
+&=2\pi\Bigl(\frac{4}{256}+\frac{9}{512}\Bigr)=\frac{17\pi}{256}.
+\end{aligned}
+$$
+1 次元の例と同じく、連続なのは流束 $a\nabla u$ で、勾配は係数の比で跳ぶ（$\partial_{r}u$ は $r=\frac12$ で $-\frac14$ から $-\frac18$ へ。比は $\frac{a_{\text{内}}}{a_{\text{外}}}=\frac12$）。片側ずつ見れば解は滑らかで、方程式も各点で成り立つが、境目をまたぐと $H^{2}$ に入らない。弱解の存在と一意性は係数が有界可測なだけで成り立つので、この種の透過問題を扱えるのが弱解の理論の利点である。
+:::
+
+## 最大値原理と固有値 {#pde:sec-me-exercises}
+
+対応するページ：\ref{pde:page-maximum-eigen}、\ref{pde:page-principal-eigen}
+
+::: problem ★ 基本：放物面の障壁による弱解の評価 {#pde:ex-me-1}
+$n\ge1$, $B\defeq B(0,1)\subset\mathbb{R}^{n}$ とし、$Lu\defeq-\Delta u+\sum_{i}b^{i}\partial_{i}u+cu$ を考える。$b$ は有界可測で、ある $0\le b_{0}<n$ について a.e. で $|b|\le b_{0}$、$c\ge0$ は有界可測とする。
+1. $Lu=1$, $u=0$（$\partial B$）の弱解 $u$ がただ一つあることを示せ。
+2. $w(x)\defeq\dfrac{1-|x|^{2}}{2(n-b_{0})}$ とおく。a.e. で $0\le u\le w$ を示せ。
+3. $b=0$, $c=0$ なら $u=\frac{1-|x|^{2}}{2n}$ で、2 の上からの評価は等号になることを確かめよ。
+:::
+
+::: solution
+**1.** $c\ge0$ なので \ref{pde:wmp-unique-solvability.2}（$f=1\in L^{2}\subset H^{-1}$）。
+
+**2.** 下から：$v\ge0$ なら $\langle1,v\rangle=\int v\ge0$ で、$u\in H_{0}^{1}$ から $u^{-}\in H_{0}^{1}$（\ref{pde:wmp-h10-truncation.2}）なので、\ref{pde:wmp-comparison.2} から a.e. で $u\ge0$。
+
+上から：$A\defeq\frac{1}{2(n-b_{0})}$ とし、$w=A(1-|x|^{2})$ を比べる。
+- $B[w,v]\ge B[u,v]$（$v\in H_{0}^{1}$, $v\ge0$）：$\varphi\in C_{c}^{\infty}(B)$ について、各座標方向の部分積分から $\int\nabla w\cdot\nabla\varphi=-\int\Delta w\,\varphi=2nA\int\varphi$。両辺は $H^{1}$ で連続なので $v\in H_{0}^{1}$ でも成り立つ。$\partial_{i}w=-2Ax_{i}$ なので a.e. で $\sum_{i}b^{i}\partial_{i}w=-2A\,b\cdot x\ge-2A|b||x|\ge-2Ab_{0}$、また $cw\ge0$。よって $v\ge0$ なら
+$$
+\begin{aligned}
+B[w,v]&=\int_{B}\bigl(2nA-2A\,b\cdot x+cw\bigr)v\,dx\\
+&\ge\int_{B}(2nA-2Ab_{0})v\,dx=\int_{B}v\,dx=B[u,v].
+\end{aligned}
+$$
+- $(u-w)^{+}\in H_{0}^{1}$：$\varphi_{m}\in C_{c}^{\infty}(B)$ を $H^{1}$ で $u$ に収束する列とする。$g_{m}\defeq\varphi_{m}-w\in H^{1}$ について $g_{m}^{+}\in H^{1}$（\ref{pde:wmp-positive-part.1}）で、$B$ の上で $w>0$ なので $g_{m}^{+}$ は $\operatorname{supp}\varphi_{m}$ の外で $0$。コンパクトな台をもつので軟化で近似でき（\ref{fa:mollification-sobolev.3}）、$g_{m}^{+}\in H_{0}^{1}$。$g_{m}\to u-w$（$H^{1}$）なので、\ref{pde:wmp-positive-part.4}（$k=0$）からある部分列で $g_{m}^{+}\to(u-w)^{+}$（$H^{1}$）。$H_{0}^{1}$ は閉なので $(u-w)^{+}\in H_{0}^{1}$。
+
+この二つと $c\ge0$ から、\ref{pde:wmp-comparison.1} により a.e. で $u\le w$。
+
+**3.** $b=0$, $c=0$ では $b_{0}=0$ ととれて $w=\frac{1-|x|^{2}}{2n}$。$w$ は $\overline{B}$ で連続、$H^{1}(B)$ に入り $\partial B$ で $0$ なので $w\in H_{0}^{1}$（\ref{pde:wmp-boundary-consistency.4}）、$-\Delta w=1$ を各点で満たすので \ref{pde:weak-elliptic-classical.1} から弱解で、一意性から $u=w$。ドリフトがあると上界は $\frac{n}{n-b_{0}}$ 倍になる（$n=2$, $b_{0}=1$ なら 2 倍の $\frac{1-|x|^{2}}{2}$）。$b_{0}\ge n$ では $2nA-2Ab_{0}\le0$ となって、放物面はもう優解にならない。
+:::
+
+::: problem ★ 基本：リッツ法で区間の固有値を上から評価する {#pde:ex-me-2}
+$I\defeq(0,1)$ のディリクレ・ラプラシアン（$L=-\frac{d^{2}}{dx^{2}}$）の固有値を $\lambda_{1}\le\lambda_{2}\le\cdots$ とする（実際は $\lambda_{k}=k^{2}\pi^{2}$。\ref{pde:dirichlet-eigen-scaling} の後の区間の例）。$\phi_{1}\defeq x(1-x)$, $\phi_{2}\defeq x(1-x)(1-2x)$, $\phi_{3}\defeq x^{2}(1-x)^{2}$ とし、$R(u)=\|u'\|_{2}^{2}/\|u\|_{2}^{2}$ とする。
+1. $R(\phi_{1})=10$, $R(\phi_{2})=42$ を示し、$\lambda_{1}\le10$, $\lambda_{2}\le42$ を導け。
+2. $u=s\phi_{1}+t\phi_{3}$（$(s,t)\ne(0,0)$）の上での $R$ の最小値は $\mu_{-}\defeq56-4\sqrt{133}\approx9.86975$、最大値は $\mu_{+}\defeq56+4\sqrt{133}\approx102.13$ であることを示せ。
+3. $\lambda_{1}\le\mu_{-}$, $\lambda_{2}\le42$, $\lambda_{3}\le\mu_{+}$ を導き、実際の値と比べよ。
+:::
+
+::: solution
+$\phi_{i}$ は $[0,1]$ で連続な多項式で両端で $0$ なので $H_{0}^{1}(I)$ に入る（\ref{pde:wmp-boundary-consistency.4}）。$x\mapsto1-x$ で $\phi_{1},\phi_{3}$ は不変、$\phi_{2}$ は符号を変え、導関数では偶奇が入れ替わるので、$\int\phi_{1}\phi_{2}=\int\phi_{3}\phi_{2}=0$, $\int\phi_{1}'\phi_{2}'=\int\phi_{3}'\phi_{2}'=0$。残りの積分は
+$$
+\begin{aligned}
+&\int\phi_{1}'^{2}=\tfrac13,\quad\int\phi_{2}'^{2}=\tfrac15,\quad\int\phi_{3}'^{2}=\tfrac{2}{105},\quad\int\phi_{1}'\phi_{3}'=\tfrac{1}{15},\\
+&\int\phi_{1}^{2}=\tfrac{1}{30},\quad\int\phi_{2}^{2}=\tfrac{1}{210},\quad\int\phi_{3}^{2}=\tfrac{1}{630},\quad\int\phi_{1}\phi_{3}=\tfrac{1}{140}.
+\end{aligned}
+$$
+
+**1.** $R(\phi_{1})=\frac{1/3}{1/30}=10$, $R(\phi_{2})=\frac{1/5}{1/210}=42$。\ref{pde:dirichlet-eigen-variational.3} から $\lambda_{1}\le10$。$V\defeq\operatorname{span}\{\phi_{1},\phi_{2}\}$ の元 $u=s\phi_{1}+t\phi_{2}$ について、交差項が消えるので
+$$
+R(u)=\frac{s^{2}/3+t^{2}/5}{s^{2}/30+t^{2}/210}\le\max(10,42)=42
+$$
+（正の数について $\frac{p+q}{p'+q'}\le\max(\frac{p}{p'},\frac{q}{q'})$）。\ref{pde:dirichlet-eigen-minimax.1}（$k=2$）から $\lambda_{2}\le42$。
+
+**2.** $q_{\lambda}(s,t)\defeq\int(u'^{2}-\lambda u^{2})$ は行列 $K-\lambda M$、$K\defeq\begin{pmatrix}1/3&1/15\\1/15&2/105\end{pmatrix}$, $M\defeq\begin{pmatrix}1/30&1/140\\1/140&1/630\end{pmatrix}$ の 2 次形式で、$R(u)\le\lambda\iff q_{\lambda}(s,t)\le0$。計算すると
+$$
+\begin{aligned}
+\det(K-\lambda M)&=\frac{\lambda^{2}-112\lambda+1008}{529200},\\
+\operatorname{tr}(K-\lambda M)&=\frac{37}{105}-\frac{11\lambda}{315},
+\end{aligned}
+$$
+行列式の根が $\mu_{\pm}=56\pm\sqrt{56^{2}-1008}=56\pm4\sqrt{133}$、跡の根は $\frac{111}{11}\approx10.09$。$\lambda=\mu_{+}$ では行列式が $0$ で跡が負なので、$K-\mu_{+}M$ の固有値は $0$ と負の数で、$q_{\mu_{+}}\le0$ かつ $0$ でない零ベクトルがある。よって $R\le\mu_{+}$ で、等号が達せられる。$\lambda=\mu_{-}$ では跡が正なので同様に $q_{\mu_{-}}\ge0$ で零ベクトルがあり、$R$ の最小値は $\mu_{-}$。最小を与えるのは $u_{*}\defeq\frac{7+\sqrt{133}}{21}\phi_{1}+\phi_{3}$ である（$K-\mu_{-}M$ の零ベクトル）。
+
+**3.** $\lambda_{1}=\min R\le R(u_{*})=\mu_{-}$。$\operatorname{span}\{u_{*},\phi_{2}\}$ の上では 1 と同じく交差項が消え $R\le\max(\mu_{-},42)=42$ なので $\lambda_{2}\le42$。$W\defeq\operatorname{span}\{\phi_{1},\phi_{2},\phi_{3}\}$ の元を $u=u_{e}+u_{o}$（$u_{e}\in\operatorname{span}\{\phi_{1},\phi_{3}\}$, $u_{o}\in\mathbb{R}\phi_{2}$）と分けると、交差項が消えて $R(u)\le\max(R(u_{e}),R(u_{o}))\le\max(\mu_{+},42)=\mu_{+}$ なので、\ref{pde:dirichlet-eigen-minimax.1}（$k=3$）から $\lambda_{3}\le\mu_{+}$。実際の値は $\pi^{2}\approx9.86960$, $4\pi^{2}\approx39.48$, $9\pi^{2}\approx88.83$ で、相対誤差は約 $1.5\times10^{-5}$, $6.4\%$, $15\%$。上の固有値ほど近似は悪い。部分空間の上でレイリー商を最小・最大にすることは、固有値問題のガレルキン近似（\see{fa:galerkin-cea}）にあたり、ミニマックス原理がそれを上界として保証する。
+:::
+
+::: problem ★★ 標準：直角二等辺三角形の主固有値 {#pde:ex-me-3}
+$T\defeq\{(x,y):x>0,\ y>0,\ x+y<\pi\}$ のディリクレ・ラプラシアンの最小固有値を $\lambda_{1}(T)$ とする。
+1. $2<\lambda_{1}(T)<8$ を示せ。
+2. $u\defeq xy(\pi-x-y)$ のレイリー商を計算して、$\lambda_{1}(T)\le\frac{56}{\pi^{2}}\approx5.67$ を示せ。
+3. $\phi\defeq\sin x\sin2y+\sin2x\sin y$ は $T$ で正、$\partial T$ で $0$ で、$-\Delta\phi=5\phi$ を満たすことを示せ。$\lambda_{1}(T)=5$ で、その固有空間は $\phi$ で張られることを示せ。
+:::
+
+::: solution
+**1.** $T\subset Q\defeq(0,\pi)^{2}$ で、$Q$ は連結、$|Q\setminus T|=\frac{\pi^{2}}{2}>0$ なので、\ref{pde:dirichlet-eigen-strict-monotone} と \ref{pde:dirichlet-eigen-rectangle.2} から $\lambda_{1}(T)>\lambda_{1}(Q)=\pi^{2}\bigl(\frac{1}{\pi^{2}}+\frac{1}{\pi^{2}}\bigr)=2$。また $Q'\defeq(0,\frac\pi2)^{2}\subset T$（$x,y<\frac\pi2$ なら $x+y<\pi$）で、$T$ は凸なので連結、$|T\setminus Q'|=\frac{\pi^{2}}{4}>0$ なので、同じく $\lambda_{1}(T)<\lambda_{1}(Q')=\pi^{2}\bigl(\frac{4}{\pi^{2}}+\frac{4}{\pi^{2}}\bigr)=8$。
+
+**2.** $u$ は多項式で $\partial T$（$x=0$, $y=0$, $x+y=\pi$）の上で $0$ なので $u\in H_{0}^{1}(T)$（\ref{pde:wmp-boundary-consistency.4}）。$z\defeq\pi-x-y$ とおくと、$y=(\pi-x)\sigma$ と置換してベータ積分に直す計算から、非負整数 $a,b,c$ について
+$$
+\int_{T}x^{a}y^{b}z^{c}\,dx\,dy=\frac{a!\,b!\,c!}{(a+b+c+2)!}\pi^{a+b+c+2}.
+$$
+$\partial_{x}u=y(z-x)$ なので $(\partial_{x}u)^{2}=y^{2}z^{2}-2xy^{2}z+x^{2}y^{2}$ で、その積分は $\frac{4\pi^{6}}{720}-2\cdot\frac{2\pi^{6}}{720}+\frac{4\pi^{6}}{720}=\frac{\pi^{6}}{180}$。対称性から $(\partial_{y}u)^{2}$ も同じで、$\int_{T}|\nabla u|^{2}=\frac{\pi^{6}}{90}$。$\int_{T}u^{2}=\int x^{2}y^{2}z^{2}=\frac{8\pi^{8}}{8!}=\frac{\pi^{8}}{5040}$。よって $R(u)=\frac{5040}{90\pi^{2}}=\frac{56}{\pi^{2}}$ で、\ref{pde:dirichlet-eigen-variational.3} から $\lambda_{1}(T)\le\frac{56}{\pi^{2}}$。
+
+**3.** 加法定理から $\phi=2\sin x\sin y\cos y+2\sin x\cos x\sin y=2\sin x\sin y(\cos x+\cos y)$。$T$ の点では $\sin x,\sin y>0$ で、$\cos x+\cos y=2\cos\frac{x+y}{2}\cos\frac{x-y}{2}>0$（$0<\frac{x+y}{2}<\frac\pi2$, $\frac{|x-y|}{2}<\frac\pi2$）なので $\phi>0$。$x=0$ や $y=0$ では $\sin$ が、$x+y=\pi$ では $\cos x=-\cos y$ から括弧が $0$。$\sin x\sin2y$ と $\sin2x\sin y$ はどちらも $-\Delta$ をかけると $1+4=5$ 倍になるので $-\Delta\phi=5\phi$。$\phi$ は $\overline{T}$ で滑らかで $\partial T$ で $0$ なので $\phi\in H_{0}^{1}(T)$（\ref{pde:wmp-boundary-consistency.4}）、\ref{pde:weak-elliptic-classical.1} を $L=-\Delta-5$（$c=-5$, $f=0$）に使うと $\int\nabla\phi\cdot\nabla v=5\int\phi v$（$v\in H_{0}^{1}(T)$）で、$\phi$ は固有値 $5$ の弱い固有関数である。$T$ は連結で、$\phi>0$ なので、\ref{pde:dirichlet-eigen-principal.3}（$\lambda\ne\lambda_{1}$ の固有関数は符号を変える）から $5=\lambda_{1}(T)$。\ref{pde:dirichlet-eigen-principal.2} から $\lambda_{1}(T)$ は単純なので、固有空間は $\mathbb{R}\phi$。1 の $2<5<8$ と、2 の上界 $5.67$（約 13% の過大評価）とも合う。正方形の固有値 $5$ の固有関数のうち、対角線 $x+y=\pi$ について反対称な組み合わせが、ちょうど三角形の第 1 固有関数になっている。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
