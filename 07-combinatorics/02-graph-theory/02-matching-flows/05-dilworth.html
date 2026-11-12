@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>道被覆とディルワースの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/02-matching-flows/05-dilworth.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 道被覆とディルワースの定理 {#graph:page-dilworth keywords="path cover, Gallai-Milgram theorem, Dilworth's theorem, Mirsky's theorem, chains, antichains, Erdos-Szekeres theorem"}
+
+有向グラフの頂点を互いに素な有向道で覆うには何本の道が必要か。ガライ–ミルグラムの定理は、それが互いに隣接しない頂点の最大個数で抑えられることを示す。これを半順序集合に適用すると、半順序集合を覆う鎖の最小個数は反鎖の最大の大きさに等しいという**ディルワースの定理**が得られる。このページでは二つの定理を証明し、ディルワースの定理をケーニッヒの定理（\ref{graph:konig-theorem}）から導く別証明も与える。さらに双対なミルスキーの定理と、その応用としてのエルデシュ–セケレシュの単調部分列定理を示す。
+
+## 記法と定義の確認 {#graph:sec-dw-notation}
+
+::: notation
+- 有向グラフ $D=(V,A)$ は \ref{graph:page-network-flows} の記法に従う。**有向道**とは相異なる頂点 $x_{0},\dots,x_{k}$ で $(x_{i},x_{i+1})\in A$ のもの（$k=0$ を許す）で、$x_{k}$ をその**終点**という。
+- 頂点集合 $I$ が**独立**とは、$I$ のどの 2 頂点の間にも（どちら向きの）弧もないことをいう。
+- 半順序集合は \ref{comb:page-mobius-inversion} の意味で、すべて有限とする。二部グラフ・ケーニッヒの定理は \ref{graph:page-bipartite-matching} のとおり。
+:::
+
+## ガライ–ミルグラムの定理 {#graph:sec-dw-gallai-milgram}
+
+::: definition 道被覆 {#graph:path-cover keywords="path cover of a directed graph" index="道被覆|みちひふく"}
+有向グラフ $D$ の互いに素な有向道の族 $\mathcal{P}$ で、すべての頂点を含むものを**道被覆**という。$\mathcal{P}$ の道の終点全体を $\operatorname{ter}(\mathcal{P})$ と書く。
+:::
+
+::: intuition
+すべての点を、一方通行の道を何本か使って、重複なく巡ることである。
+:::
+
+::: theorem ガライ–ミルグラムの定理 {#graph:gallai-milgram keywords="Gallai-Milgram theorem" index="ガライ–ミルグラムの定理|がらいみるぐらむのていり" refname="ガライ–ミルグラムの定理"}
+すべての有向グラフ $D$ は、道被覆 $\mathcal{P}$ と、各道 $P\in\mathcal{P}$ から一頂点ずつ選んだ独立集合 $\{v_{P} : P\in\mathcal{P}\}$ をもつ。特に、頂点を覆うのに必要な互いに素な有向道の最小本数は、独立集合の最大の大きさ以下である。
+:::
+
+::: intuition
+一方通行の道で全員を覆うとき、うまく覆えば、各道から一人ずつ選んだ代表どうしが互いに直接つながっていないようにできる。
+:::
+
+::: proof
+$\abs{D}$ の帰納法で、「$\operatorname{ter}(\mathcal{P})$ が包含について極小な道被覆 $\mathcal{P}=\{P_{1},\dots,P_{m}\}$ には、求める独立な代表がある」ことを示す（長さ 0 の道だけの道被覆があるので、極小なものは存在する）。$v_{i}$ を $P_{i}$ の終点とする。
+
+**Step 1（終点が独立なら終わり）.** $\{v_{1},\dots,v_{m}\}$ が独立ならそれを代表にとればよい。そうでなければ、番号を付け替えて弧 $(v_{2},v_{1})$ があるとする。
+
+**Step 2（$P_{1}$ は 2 頂点以上）.** 【主張：$v_{1}$ の直前の頂点 $v$ が $P_{1}$ にある】$P_{1}=\{v_{1}\}$ なら、$P_{2}$ に $v_{1}$ を付け足した $P_{2}v_{2}v_{1}$ と残りの道で、終点の集合が $\operatorname{ter}(\mathcal{P})\setminus\{v_{2}\}$ の道被覆ができ、極小性に反する。
+
+**Step 3（一頂点小さいグラフ）.** $D'\defeq D-v_{1}$ と、その道被覆 $\mathcal{P}'\defeq\{P_{1}v,P_{2},\dots,P_{m}\}$（$P_{1}v$ は $P_{1}$ から $v_{1}$ を除いたもの）を考える。$\operatorname{ter}(\mathcal{P}')=\{v,v_{2},\dots,v_{m}\}$。
+
+**Step 4（$\mathcal{P}'$ の極小性）.** 【主張：$\operatorname{ter}(\mathcal{P}'')\subsetneq\operatorname{ter}(\mathcal{P}')$ となる $D'$ の道被覆 $\mathcal{P}''$ はない】そのような $\mathcal{P}''$ があるとする。(i) $v$ で終わる道 $P\in\mathcal{P}''$ があれば、$P$ を $Pvv_{1}$ に置き換えると $D$ の道被覆で、終点の集合は $\operatorname{ter}(\mathcal{P}'')\setminus\{v\}\cup\{v_{1}\}\subsetneq\operatorname{ter}(\mathcal{P})$。(ii) $v$ で終わる道はないが $v_{2}$ で終わる道 $P$ があれば、$P$ を $Pv_{2}v_{1}$ に置き換えて同様に矛盾。(iii) どちらもなければ $\operatorname{ter}(\mathcal{P}'')\subseteq\{v_{3},\dots,v_{m}\}$ で、$\mathcal{P}''$ に長さ 0 の道 $\{v_{1}\}$ を加えた $D$ の道被覆の終点集合は $\operatorname{ter}(\mathcal{P})\setminus\{v_{2}\}$ に含まれ、矛盾。
+
+**Step 5（帰納法）.** Step 4 より帰納法の仮定が $\mathcal{P}'$ に使え、$\mathcal{P}'$ の各道から選んだ独立な代表 $\{v_{P'}\}$ が $D'$ にある。$\mathcal{P}$ と $\mathcal{P}'$ の道は一対一に対応し（$P_{1}\leftrightarrow P_{1}v$）、対応する道は代表を含み、$D'$ で独立な集合は $D$ でも独立なので、これが $\mathcal{P}$ の代表になる。後半：この $\mathcal{P}$ の道の本数は独立集合 $\{v_{P}\}$ の大きさに等しく、したがって独立集合の大きさの最大値以下である。
+:::
+
+## ディルワースの定理 {#graph:sec-dw-dilworth}
+
+::: definition 鎖と反鎖 {#graph:chain-antichain keywords="chain, antichain, width, height of a poset" index="鎖（半順序集合の）|くさり, 反鎖|はんさ, 幅（半順序集合の）|はば"}
+半順序集合 $P$ の部分集合で、どの 2 元も比較可能なものを**鎖**、どの 2 元も比較不能なものを**反鎖**という。反鎖の大きさの最大値を $P$ の**幅**という。
+:::
+
+::: intuition
+鎖は一列に並べられる部分、反鎖はどの二つも大小がつかない部分である。
+:::
+
+::: theorem ディルワースの定理 {#graph:dilworth keywords="Dilworth's theorem, minimum chain cover equals width" index="ディルワースの定理|でぃるわーすのていり" refname="ディルワースの定理"}
+有限な半順序集合 $P$ を覆う（和集合が $P$ になる）鎖の最小個数は、$P$ の幅に等しい。
+:::
+
+::: intuition
+大小のつかない組を最大何個集められるかは、全体を何本の「大小の列」に分けられるかの最小値と等しい。
+:::
+
+::: proof
+**Step 1（$\ge$）.** 反鎖 $X$ のどの 2 元も同じ鎖には入らないので、$P$ を覆う鎖は $\abs{X}$ 個以上ある。
+
+**Step 2（$\le$）.** 【主張：幅を $w$ とすると、$w$ 個の鎖で覆える】有向グラフ $D\defeq(P,\{(x,y) : x<y\})$ に \ref{graph:gallai-milgram} を使う。$D$ の有向道は鎖で、$D$ の独立集合は反鎖である。道被覆 $\mathcal{P}$ と独立な代表 $\{v_{P}\}$ について、代表は反鎖なので $\abs{\mathcal{P}}\le w$。
+:::
+
+::: proposition ケーニッヒの定理による別証明 {#graph:dilworth-via-konig keywords="Dilworth from Konig, chain partitions and matchings" index="ディルワースの定理（ケーニッヒによる証明）|でぃるわーすのていり"}
+$P=\{p_{1},\dots,p_{n}\}$ について、頂点 $x'_{i}$（$i\le n$）と $x''_{j}$（$j\le n$）の二部グラフ $G$ を、$p_{i}<p_{j}$ のとき $x'_{i}x''_{j}$ を辺として定める。
+1. $G$ の $m$ 本の辺のマッチングから、$P$ を $n-m$ 個の互いに素な鎖に分割できる。
+2. $G$ の頂点被覆 $U$ から、大きさ $\ge n-\abs{U}$ の反鎖が得られる。
+
+したがって \ref{graph:konig-theorem} から \ref{graph:dilworth} がふたたび得られる。
+:::
+
+::: proof
+**Step 1（(1)）.** 【主張：マッチングの辺 $x'_{i}x''_{j}$ を「$p_{i}$ の次は $p_{j}$」と読むと、$P$ は $n-m$ 本の鎖に分かれる】マッチングなので、各 $p_{i}$ には「次」が高々一つ、「前」も高々一つある。$p_{i}<p_{j}$ なので「次」をたどると狭義に増え、同じ元に戻らない。よって $P$ は「次」でつながった列（鎖）に分かれ、各列の最後の元はちょうど「次」をもたない元で、その個数は $n-m$。
+
+**Step 2（(2)）.** 【主張：$X\defeq\{p_{i} : x'_{i}\notin U\text{ かつ }x''_{i}\notin U\}$ は反鎖で、$\abs{X}\ge n-\abs{U}$】$p_{i}<p_{j}$（$p_{i},p_{j}\in X$）なら辺 $x'_{i}x''_{j}$ は $U$ に覆われないので矛盾。$U$ の各頂点は高々一つの $i$ を $X$ から除くので $\abs{X}\ge n-\abs{U}$。
+
+**Step 3.** 最大マッチングの大きさを $m$ とすると、ケーニッヒの定理から大きさ $m$ の頂点被覆があり、Step 1・2 から $n-m$ 個の鎖による分割と、大きさ $\ge n-m$ の反鎖が得られる。\ref{graph:dilworth} の Step 1 と合わせて等号が成り立つ。
+:::
+
+::: theorem ミルスキーの定理 {#graph:mirsky keywords="Mirsky's theorem, dual Dilworth" index="ミルスキーの定理|みるすきーのていり" refname="ミルスキーの定理"}
+有限な半順序集合を覆う反鎖の最小個数は、鎖の大きさの最大値に等しい。
+:::
+
+::: intuition
+大小のつかない組に全体を分けるのに必要な最少の組数は、一番長い「大小の列」の長さに等しい。
+:::
+
+::: proof
+**Step 1（$\ge$）.** 鎖のどの 2 元も同じ反鎖に入らない。
+
+**Step 2（高さ関数）.** 【主張：$h(x)\defeq$「$x$ を最大元とする鎖の大きさの最大値」とおくと、$h^{-1}(k)$ は反鎖】$x<y$ なら、$x$ で終わる最長の鎖に $y$ を加えて $h(y)\ge h(x)+1$。よって同じ $h$ の値の 2 元は比較不能。$h$ の値は $1$ から鎖の最大の大きさ $\ell$ までなので、$\ell$ 個の反鎖で覆える。
+:::
+
+::: corollary エルデシュ–セケレシュの定理 {#graph:erdos-szekeres keywords="Erdos-Szekeres theorem, monotone subsequences" index="エルデシュ–セケレシュの定理|えるでしゅせけれしゅのていり, 単調部分列|たんちょうぶぶんれつ" refname="エルデシュ–セケレシュの定理"}
+相異なる実数の列 $a_{1},\dots,a_{n}$ で $n>rs$ なら、長さ $r+1$ の増加部分列か長さ $s+1$ の減少部分列がある。
+:::
+
+::: intuition
+$rs+1$ 個以上の相異なる数を並べると、どう並べても、$r+1$ 個の増える部分列か $s+1$ 個の減る部分列が見つかる。
+:::
+
+::: proof
+$[n]$ に $i\preceq j\iff(i\le j\text{ かつ }a_{i}\le a_{j})$ で半順序を入れる。鎖は増加部分列、反鎖は（$i<j$ で $a_{i}>a_{j}$ なので）減少部分列である。鎖の大きさがすべて $r$ 以下なら、\ref{graph:mirsky} より $[n]$ は $r$ 個の反鎖で覆われ、$n>rs$ なのである反鎖は $s+1$ 個以上の元をもつ（鳩の巣原理 \ref{comb:pigeonhole-general}）。
+:::
+
+::: supplement
+**一般化.** ディルワースの定理は無限の半順序集合でも、幅が有限なら成り立つ（コンパクト性の議論による）。ミルスキーの定理はディルワースの定理の「双対」だが、証明ははるかに易しい。これは「完全グラフ」の理論で、比較可能性グラフの補グラフが完全グラフになることの現れとみることができる（\ref[完全グラフ]{graph:page-perfect-graphs}）。
+:::
+
+## 問題 {#graph:sec-dw-problems}
+
+::: problem {#graph:prob-dw-boolean}
+$\mathcal{P}([n])$（包含の順序）の幅を、\ref{graph:dilworth} を使って求めよ（**スペルナーの定理**：答えは $\binom{n}{\lfloor n/2\rfloor}$）。ここでは、$\mathcal{P}([n])$ が $\binom{n}{\lfloor n/2\rfloor}$ 個の鎖に分割できることを認めてよい（対称鎖分解）。
+:::
+
+::: solution
+$\mathcal{P}_{\lfloor n/2\rfloor}([n])$ は反鎖なので幅は $\binom{n}{\lfloor n/2\rfloor}$ 以上。$\binom{n}{\lfloor n/2\rfloor}$ 個の鎖で覆えるなら、\ref{graph:dilworth} の Step 1（反鎖は各鎖と高々 1 元を共有する）から幅はそれ以下。
+:::
+
+::: problem {#graph:prob-dw-erdos-szekeres-sharp}
+\ref{graph:erdos-szekeres} の $rs$ が最良であること、すなわち長さ $rs$ の列で、長さ $r+1$ の増加部分列も長さ $s+1$ の減少部分列ももたないものがあることを示せ。
+:::
+
+::: solution
+$s$ 個の増加する塊を、後の塊ほど小さい値になるように並べる：$k$ 番目の塊（$k=1,\dots,s$）を $(s-k)r+1,(s-k)r+2,\dots,(s-k)r+r$ とする。増加部分列は一つの塊の中にしかとれないので長さ $\le r$、減少部分列は各塊から高々一つなので長さ $\le s$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
