@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>一般グラフのマッチング | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/02-matching-flows/02-general-matching.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 一般グラフのマッチング {#graph:page-general-matching keywords="Tutte's theorem, Tutte's condition, odd components, Petersen's theorem, bridgeless cubic graph, factor-critical, Tutte-Berge formula, Gallai-Edmonds"}
+
+二部グラフでない一般のグラフで完全マッチング（1 因子）が存在する条件は、ホールの定理の代わりに、奇数個の頂点をもつ連結成分の個数で与えられる。このページでは、完全マッチングの存在をこの条件で特徴づけるタットの定理を二通りに証明する。一つ目は辺について極大なグラフの構造を調べる証明、二つ目は任意のグラフに「最大マッチングの構造」を与える分解定理を経由する証明である。後者から、最大マッチングの大きさを与えるタット–ベルジュの公式が得られる。応用として、橋のない 3 正則グラフが完全マッチングをもつというピーターセンの定理を示す。
+
+## 記法と定義の確認 {#graph:sec-gm-notation}
+
+::: notation
+- マッチング・完全マッチング（1 因子）・増加道は \ref{graph:page-bipartite-matching} の定義に従い、\ref{graph:hall-theorem} を使う。連結成分・橋は \ref{graph:connectivity} のとおり。
+- グラフ $H$ の連結成分のうち頂点数が奇数のもの（**奇成分**）の個数を $q(H)$ と書く。$S\subseteq V$ について $G-S$ の連結成分全体を $\mathcal{C}_{G-S}$ と書く。
+:::
+
+## タットの定理 {#graph:sec-gm-tutte}
+
+::: definition タットの条件 {#graph:tutte-condition keywords="Tutte's condition, odd component, barrier" index="タットの条件|たっとのじょうけん, 奇成分|きせいぶん"}
+グラフ $G$ が、すべての $S\subseteq V$ について $q(G-S)\le\abs{S}$ を満たすとき、**タットの条件**を満たすという。これを満たさない $S$ を**悪い集合**という。
+:::
+
+::: intuition
+頂点を $S$ だけ取り除くと奇数個の頂点の塊ができる。完全マッチングでは各奇数の塊から少なくとも一人は外の $S$ の人と組まなければならないので、塊の数は $S$ の人数を超えられない。
+:::
+
+::: theorem タットの定理 {#graph:tutte-theorem keywords="Tutte's 1-factor theorem" index="タットの定理|たっとのていり" refname="タットの定理"}
+グラフ $G$ が完全マッチングをもつことと、タットの条件を満たすことは同値である。
+:::
+
+::: intuition
+全員が二人組になれるのは、どの何人を取り除いても、残りにできる奇数人の塊の数が取り除いた人数を超えないときに限る。
+:::
+
+::: proof
+**Step 1（必要性）.** 完全マッチング $M$ があるとき、$G-S$ の奇成分 $C$ の頂点を $C$ の中だけで組にすることはできないので、$C$ のある頂点は $M$ で $C$ の外、すなわち $S$ の頂点と組になる。異なる奇成分は異なる $S$ の頂点を使うので $q(G-S)\le\abs{S}$。
+
+**Step 2（十分性：辺について極大な反例に帰着）.** 完全マッチングをもたない $G$ について悪い集合を見つければよい。$G$ に辺を加えても完全マッチングをもたない限り加え続け、辺について極大なものを $G'$ とする（同じ頂点集合）。$G'$ の悪い集合 $S$ は $G$ でも悪い：$G'-S$ の奇成分は $G-S$ のいくつかの成分の和で、その中に奇成分が少なくとも一つある。よって $G$ は辺について極大と仮定してよい。
+
+**Step 3（構造 (∗) をもつ集合があれば悪い集合がある）.** 【主張：$S\subseteq V$ が「(∗) $G-S$ の各成分は完全グラフで、$S$ の各頂点は他のすべての頂点に隣接する」を満たせば、$S$ か $\varnothing$ が悪い】$S$ が悪くなければ $q(G-S)\le\abs{S}$。各奇成分から一頂点ずつ選んで $S$ の相異なる頂点と組にし（$S$ の頂点は全員と隣接）、各成分の残り（偶数個、完全グラフ）を組にし、$S$ の残りも組にすると、$\abs{V}$ が偶数なら完全マッチングができて矛盾。$\abs{V}$ が奇数なら $q(G-\varnothing)\ge1>0$ で $\varnothing$ が悪い。
+
+**Step 4（(∗) の確認：設定）.** 【主張：$S\defeq\{$他のすべての頂点に隣接する頂点$\}$ は (∗) を満たす】そうでないとすると、$G-S$ のある成分に隣接しない 2 頂点 $a,a'$ がある。その成分の中の $a$–$a'$ 最短道の最初の 3 頂点を $a,b,c$ とすると $ab,bc\in E$, $ac\notin E$。$b\notin S$ なので $bd\notin E$ となる $d$ がある。極大性から $G+ac$ と $G+bd$ はそれぞれ完全マッチング $M_{1}$, $M_{2}$ をもつ（$ac\in M_{1}$, $bd\in M_{2}$：そうでなければ $G$ が完全マッチングをもつ）。
+
+**Step 5（交互道から矛盾）.** 【主張：$M_{2}$ を修正して $G$ の完全マッチングが作れる】$d$ から $M_{1}$ の辺で出発し、$M_{1}$ と $M_{2}$ の辺を交互に通る極大な道 $P=d\dots v$（$G$ の辺だけを使う、すなわち $ac$ と $bd$ を使わない）をとる。(i) $P$ の最後の辺が $M_{1}$ のとき、$v$ の $M_{2}$ の辺で延ばせないのは、それが $bd$ のとき、すなわち $v=b$（$v=d$ は $P$ の始点なので起きない）。$C\defeq P+bd$ とおく。(ii) 最後の辺が $M_{2}$ のとき、$v$ の $M_{1}$ の辺で延ばせないのは、それが $ac$ のとき、すなわち $v\in\{a,c\}$。$C\defeq dPvbd$（$vb\in E$）とおく。どちらでも $C$ は偶数の長さの閉路で、辺は $M_{2}$ とそれ以外が交互に並び、$G$ にない辺は $bd$ だけである（$bd\in M_{2}$）。$M_{2}$ の $C$ 上の辺を $C$ の他の辺に入れ替えると、$G$ の完全マッチングになり矛盾。
+:::
+
+::: corollary ピーターセンの定理 {#graph:petersen-1-factor keywords="Petersen's theorem, bridgeless cubic graphs have perfect matchings" index="ピーターセンの定理（1 因子）|ぴーたーせんのていり" refname="ピーターセンの 1 因子定理"}
+橋のない 3 正則グラフは完全マッチングをもつ。
+:::
+
+::: intuition
+どの頂点からも 3 本の辺が出ていて、一本切っただけでは分かれないグラフは、必ず全頂点を二人組に分けられる。
+:::
+
+::: proof
+タットの条件を確かめる。$S\subseteq V$ と $G-S$ の奇成分 $C$ をとる。$C$ の頂点の次数の和 $3\abs{C}$ は奇数で、そのうち $C$ の中の辺は 2 回ずつ数えられるので、$C$ と $S$ の間の辺は奇数本。橋がないので 1 本ではなく（1 本ならそれは橋）、3 本以上。よって $S$ と $G-S$ の間の辺は $3q(G-S)$ 本以上で、$S$ の頂点の次数の和 $3\abs{S}$ 以下。$q(G-S)\le\abs{S}$。
+:::
+
+## 分解定理とタット–ベルジュの公式 {#graph:sec-gm-structure}
+
+::: definition 因子臨界 {#graph:factor-critical keywords="factor-critical graph, matchable" index="因子臨界|いんしりんかい"}
+空でないグラフ $G$ が、どの頂点 $v$ についても $G-v$ が完全マッチングをもつとき、**因子臨界**という（頂点数は奇数）。$S\subseteq V$ について、$S$ と $\mathcal{C}_{G-S}$ を頂点とし、$s\in S$ と成分 $C$ を、$s$ と $C$ の頂点を結ぶ辺があるとき結んだ二部グラフを $G_{S}$ と書く。$G_{S}$ が $S$ のマッチングをもつとき、$S$ は $\mathcal{C}_{G-S}$ に**マッチ可能**という。
+:::
+
+::: intuition
+因子臨界とは、どの一人が抜けても残りの全員が二人組を作れるグラフである。
+:::
+
+::: theorem マッチングの分解定理 {#graph:gallai-edmonds-lite keywords="structure theorem for matchings, Gallai-Edmonds type decomposition" index="ガライ–エドモンズの分解|がらいえどもんずのぶんかい"}
+任意のグラフ $G$ は、次の 2 条件を満たす $S\subseteq V$ をもつ。
+1. $S$ は $\mathcal{C}_{G-S}$ にマッチ可能である。
+2. $G-S$ のすべての成分は因子臨界である。
+
+さらに、このような $S$ について、$G$ の最大マッチングの辺の数は $\frac12\bigl(\abs{V}-\abs{\mathcal{C}_{G-S}}+\abs{S}\bigr)$ である。
+:::
+
+::: intuition
+どんなグラフにも、取り除くと残りが「一人抜ければ全員が組める」塊に分かれ、しかも取り除いた人たちがそれぞれ別々の塊の一人と組めるような頂点の集まりがある。最大マッチングはこの構造で完全に記述される。
+:::
+
+::: proof
+**Step 1（$S$ の選び方）.** $\abs{G}$ の帰納法で示す（$\abs{G}=0$ なら $S=\varnothing$）。$d(T)\defeq q(G-T)-\abs{T}$ を最大にする $T$ のうち、最大のものを $S$ とする。$d(S)\ge d(\varnothing)\ge0$。
+
+**Step 2（各成分は奇数）.** 【主張：$\mathcal{C}_{G-S}$ の成分はすべて奇成分】偶数個の頂点の成分 $C$ があれば、$c\in C$ について $C-c$ は奇数個の頂点をもち奇成分を含むので、$T\defeq S\cup\{c\}$ は $q(G-T)\ge q(G-S)+1$、$\abs{T}=\abs{S}+1$ で $d(T)\ge d(S)$、$\abs{T}>\abs{S}$ となり $S$ の選び方に反する。
+
+**Step 3（各成分は因子臨界）.** 【主張：$C\in\mathcal{C}_{G-S}$, $c\in C$ について $C'\defeq C-c$ は完全マッチングをもつ】もたなければ、\ref{graph:tutte-theorem}（この節より前に独立に証明した）を $C'$ に使って $q(C'-S')>\abs{S'}$ となる $S'\subseteq V(C')$ がある。$\abs{C'}$ は偶数なので $q(C'-S')$ と $\abs{S'}$ の偶奇は等しく、$q(C'-S')\ge\abs{S'}+2$。$T\defeq S\cup\{c\}\cup S'$ とすると、$C$ が奇成分でなくなり（$-1$）、$c$ が加わり（$-1$）、$C'-S'$ の奇成分が加わる（$+q(C'-S')$）ので、$d(T)\ge d(S)-2+(\abs{S'}+2)-\abs{S'}=d(S)$、$\abs{T}>\abs{S}$ で矛盾。
+
+**Step 4（マッチ可能性）.** 【主張：$G_{S}$ は $S$ のマッチングをもつ】もたなければ \ref{graph:hall-theorem} より、$\abs{N_{G_{S}}(S')}<\abs{S'}$ となる $S'\subseteq S$ がある。$S'$ と辺で結ばれない成分は $G-(S\setminus S')$ の成分でもあるので、$T\defeq S\setminus S'$ について $q(G-T)\ge q(G-S)-\abs{N_{G_{S}}(S')}>q(G-S)-\abs{S'}$、すなわち $d(T)>d(S)$ となり矛盾。
+
+**Step 5（最大マッチングの大きさ）.** 【主張：最大マッチングは $\abs{S}+\frac12(\abs{V}-\abs{S}-\abs{\mathcal{C}})$ 本（$\mathcal{C}\defeq\mathcal{C}_{G-S}$）】任意のマッチング $M$ で、$S$ に端点をもつ辺は $\abs{S}$ 本以下、$G-S$ の中の辺は、各奇成分で少なくとも一頂点が使われないので $\frac12(\abs{V}-\abs{S}-\abs{\mathcal{C}})$ 本以下。逆に (1) による $S$ の各頂点と別々の成分の頂点の組 $\abs{S}$ 本と、(2) により各成分で使われた頂点（なければ任意の頂点）を除いた残りの完全マッチングを合わせると、ちょうどその本数になる。
+:::
+
+::: corollary タット–ベルジュの公式 {#graph:tutte-berge keywords="Tutte-Berge formula, maximum matching size" index="タット–ベルジュの公式|たっとべるじゅのこうしき" refname="タット–ベルジュの公式"}
+グラフ $G$ の最大マッチングの辺の数は
+$$
+\frac12\Bigl(\abs{V}-\max_{T\subseteq V}\bigl(q(G-T)-\abs{T}\bigr)\Bigr).
+$$
+特に \ref{graph:tutte-theorem} がふたたび得られる。
+:::
+
+::: intuition
+最大のマッチングの大きさは、「頂点を取り除いたときにできる奇数個の塊の数と、取り除いた数の差」の最大値で決まる。
+:::
+
+::: proof
+任意の $T$ について、$G-T$ の各奇成分の少なくとも一頂点は $T$ の頂点と組むか使われないので、マッチングで覆われない頂点は $q(G-T)-\abs{T}$ 個以上で、マッチングは $\frac12(\abs{V}-q(G-T)+\abs{T})$ 本以下。\ref{graph:gallai-edmonds-lite} の $S$ では $\abs{\mathcal{C}_{G-S}}=q(G-S)$（Step 2）で、最大マッチングがちょうどこの上限に達する。タットの条件のもとでは最大値は $0$ 以下（$T=\varnothing$ で $q(G)\ge0$ なので $0$）で、最大マッチングは $\abs{V}/2$ 本、すなわち完全マッチングである。
+:::
+
+::: supplement
+**ガライ–エドモンズの構造定理.** \ref{graph:gallai-edmonds-lite} の $S$ を「ある最大マッチングで覆われない頂点の隣接点で、そのような頂点自身ではないもの」全体として標準的に選ぶことができ、その場合の分解はグラフから一意に決まる（ガライ–エドモンズの構造定理）。ここではその完全な形は扱わない（文献：Lovász–Plummer, *Matching Theory*）。
+
+**計算量.** 最大マッチングは、増加道を「花」（奇閉路）を縮約しながら探すエドモンズの算法で多項式時間で求められる（\ref{comp:class-p}）。
+:::
+
+## 問題 {#graph:sec-gm-problems}
+
+::: problem {#graph:prob-gm-bridge-needed}
+3 正則グラフで完全マッチングをもたないものを作り、\ref{graph:petersen-1-factor} の「橋がない」という前提が外せないことを確かめよ。
+:::
+
+::: solution
+中心の頂点 $z$ に、三つの「部品」をそれぞれ一本の辺（橋）で結ぶ。部品は、$K^{4}$ の一辺 $uv$ を細分して新しい頂点 $w$ を入れたもの（5 頂点、$w$ 以外は次数 3、$w$ は次数 2）で、$w$ を $z$ と結ぶ。全体は 3 正則で 16 頂点。$S=\{z\}$ とすると $G-S$ は 5 頂点の部品三つで、$q(G-S)=3>1=\abs{S}$。タットの定理より完全マッチングはない。
+:::
+
+::: problem {#graph:prob-gm-odd-complete}
+$K^{2n+1}$ は因子臨界であることと、$K^{2n}$ の完全マッチングの個数が $(2n-1)(2n-3)\cdots3\cdot1$ であることを示せ。
+:::
+
+::: solution
+$K^{2n+1}-v=K^{2n}$ は完全マッチングをもつ（頂点を任意に二つずつ組にする）。個数は、頂点 $1$ の相手の選び方 $2n-1$ 通りと、残りの $K^{2n-2}$ の完全マッチングの組で、帰納法から積になる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
