@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>母関数と漸化式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/02-generating-functions/02-generating-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 母関数と漸化式 {#comb:page-generating-functions keywords="generating functions, ordinary generating function, exponential generating function, linear recurrence, Fibonacci numbers, Catalan numbers, Dyck words"}
+
+数列 $(a_{n})$ を一つの形式的冪級数にまとめたものを**母関数**という。数列の和や畳み込みは母関数の和や積になり、漸化式は母関数の方程式になる。このページでは、前のページの形式的冪級数の計算（\ref{comb:page-formal-power-series}）を使って、定数係数の線形漸化式の一般解、カタラン数の公式、そして番号付きの対象を数える**指数型母関数**の積の意味と、その応用（完全順列・スターリング数・ベル数の母関数）を示す。
+
+## 記法と定義の確認 {#comb:sec-gf-notation}
+
+::: notation
+- $K$ は $\Q$ を含む体（$\Q$, $\R$, $\C$ など）で、$K[[x]]$ は形式的冪級数環である。代入・微分・$\exp$・$\log$・一般の冪は \ref{comb:page-formal-power-series} の意味で、$E=\exp x=\sum x^{n}/n!$ と書く。
+- $(1-x)^{-j}=\sum_{n}\binom{n+j-1}{n}x^{n}$（\ref{comb:binomial-series-examples.1}）と、$(1-4x)^{1/2}$ の展開（\ref{comb:binomial-series-examples.2}）を使う。
+- $K[x]$ はユークリッド環で、したがって単項イデアル整域である（\ref{ring:euclidean-examples}）。互いに素な（$(u,v)=(1)$ となる）$u,v$ について $au+bv=1$ となる $a,b$ がある（\ref{ring:pid-basic.1}）。
+- 第 2 種スターリング数 $S(m,k)$、ベル数 $B_{m}$、完全順列の個数 $D_{n}$ は \ref{comb:stirling2}・\ref{comb:derangement} のとおり。
+:::
+
+## 通常型母関数と指数型母関数 {#comb:sec-gf-ogf-egf}
+
+::: definition 母関数 {#comb:generating-function keywords="ordinary generating function, exponential generating function" index="母関数|ぼかんすう, 通常型母関数|つうじょうがたぼかんすう, 指数型母関数|しすうがたぼかんすう"}
+$K$ の元の列 $(a_{n})_{n\in\N}$ に対し、$\sum_{n}a_{n}x^{n}$ を**通常型母関数**、$\sum_{n}a_{n}\frac{x^{n}}{n!}$ を**指数型母関数**という。
+:::
+
+::: intuition
+数列を一つの「式」にまとめる。通常型は区別のないものの個数を、指数型は番号の付いたもの（ラベル付きの対象）を数えるのに向いている。
+:::
+
+::: proposition 積の意味 {#comb:gf-products keywords="Cauchy product, binomial convolution, labelled product" index="畳み込み|たたみこみ, 二項畳み込み|にこうたたみこみ"}
+1. （通常型）$\bigl(\sum a_{n}x^{n}\bigr)\bigl(\sum b_{n}x^{n}\bigr)=\sum_{n}c_{n}x^{n}$、$c_{n}=\sum_{k=0}^{n}a_{k}b_{n-k}$。
+2. （指数型）$\bigl(\sum a_{n}\frac{x^{n}}{n!}\bigr)\bigl(\sum b_{n}\frac{x^{n}}{n!}\bigr)=\sum_{n}c_{n}\frac{x^{n}}{n!}$、$c_{n}=\sum_{k=0}^{n}\binom{n}{k}a_{k}b_{n-k}$。
+3. （ラベル付きの積）$r$ 個の列 $(a^{(1)}_{n}),\dots,(a^{(r)}_{n})$ の指数型母関数の積の $x^{m}/m!$ の係数は
+$$
+\sum_{(T_{1},\dots,T_{r})}a^{(1)}_{\abs{T_{1}}}\cdots a^{(r)}_{\abs{T_{r}}}
+$$
+である。和は、$[m]$ を互いに交わらない（空でもよい）集合 $T_{1},\dots,T_{r}$ に分ける順序付きの分け方全体にわたる。
+:::
+
+::: intuition
+(3) は、$[m]$ のラベルを $r$ 個の部分に配り、それぞれの部分に構造を載せる方法の数が、指数型母関数の積で数えられることを言っている。
+:::
+
+::: proof
+**Step 1（(1)・(2)）.** (1) は積の定義（\ref{ring:power-series-ring.1}）そのもの。(2) は $\frac{a_{k}}{k!}\frac{b_{n-k}}{(n-k)!}=\frac{1}{n!}\binom{n}{k}a_{k}b_{n-k}$（\ref{comb:binomial-formula}）による。
+
+**Step 2（(3)、$r$ の帰納法）.** 【主張：分け方を「$T_{r}$ を先に選ぶ」順に数えると (2) の形になる】$r=1$ なら分け方は $T_{1}=[m]$ だけで、係数は $a^{(1)}_{m}$。$r\ge2$ では、$T_{r}$ を大きさ $k$ の部分集合として固定すると、残りの $(T_{1},\dots,T_{r-1})$ は $[m]\setminus T_{r}\approx[m-k]$ の分け方で、帰納法の仮定よりその寄与の和は最初の $r-1$ 個の積の $x^{m-k}/(m-k)!$ の係数 $c_{m-k}$ である。$T_{r}$ の選び方は $\binom{m}{k}$ 通りなので、全体は $\sum_{k}\binom{m}{k}c_{m-k}a^{(r)}_{k}$ で、(2) よりこれは $r$ 個の積の係数である。
+:::
+
+## 定数係数の線形漸化式 {#comb:sec-gf-recurrences}
+
+::: lemma 漸化式と有理式 {#comb:recurrence-rational keywords="linear recurrence with constant coefficients and rational generating functions" index="線形漸化式|せんけいぜんかしき"}
+$c_{1},\dots,c_{d}\in K$ とし $Q\defeq1-c_{1}x-\dots-c_{d}x^{d}$ とおく。列 $(a_{n})$ の通常型母関数を $A$ とすると、次は同値である。
+1. すべての $n\ge d$ で $a_{n}=c_{1}a_{n-1}+\dots+c_{d}a_{n-d}$。
+2. $QA$ は次数 $d$ 未満の多項式である。
+:::
+
+::: proof
+$c_{0}\defeq-1$ とおくと $QA=-\sum_{n}\bigl(\sum_{i=0}^{\min(n,d)}c_{i}a_{n-i}\bigr)x^{n}$。$n\ge d$ では $x^{n}$ の係数は $a_{n}-\sum_{i=1}^{d}c_{i}a_{n-i}$ で、それがすべて $0$ であることが (1) である。
+:::
+
+::: lemma 一次式の冪の互いに素 {#comb:coprime-linear-powers keywords="coprimality of powers of distinct linear factors"}
+$r\neq s$ を $K$ の $0$ でない元、$m,k\ge1$ とすると、$(1-rx)^{m}$ と $(1-sx)^{k}$ は $K[x]$ で互いに素である。
+:::
+
+::: proof
+**Step 1.** 【主張：$(1-rx)^{m}$ を割り切る多項式は $a(1-rx)^{j}$（$a\in K^{\times}$, $0\le j\le m$）の形】$y\defeq1-rx$ とおくと、$r\neq0$ なので $x=(1-y)/r$ で $K[x]=K[y]$。$de=y^{m}$ とし、$d=y^{j}d_{1}$, $e=y^{l}e_{1}$（$d_{1}(0),e_{1}(0)\neq0$）と書くと $d_{1}e_{1}=y^{m-j-l}$ で、左辺の定数項が $0$ でないので $m=j+l$、$d_{1}e_{1}=1$、よって $d_{1}$ は定数。
+
+**Step 2.** 【主張：生成元は単元】$((1-rx)^{m},(1-sx)^{k})=(d)$ とすると（\ref{ring:pid-basic.1}）、$d\mid(1-rx)^{m}$ なので Step 1 より $d=a(1-rx)^{j}$。$j\ge1$ なら $d(1/r)=0$ だが、$d\mid(1-sx)^{k}$ と $(1-s/r)^{k}\neq0$ に反する。よって $j=0$ で $d$ は単元。
+:::
+
+::: theorem 線形漸化式の一般解 {#comb:linear-recurrence-solution keywords="general solution of linear recurrences, characteristic roots" index="線形漸化式の一般解|せんけいぜんかしきのいっぱんかい, 特性根|とくせいこん"}
+$c_{d}\neq0$ とし、$Q=1-c_{1}x-\dots-c_{d}x^{d}$ が $K[x]$ で
+$$
+Q=\prod_{i=1}^{t}(1-r_{i}x)^{m_{i}}\qquad(r_{i}\text{ は相異なり }0\text{ でない})
+$$
+と分解するとする。このとき漸化式 $a_{n}=c_{1}a_{n-1}+\dots+c_{d}a_{n-d}$（$n\ge d$）を満たす列は、次数 $<m_{i}$ の多項式 $p_{i}\in K[y]$ を用いて
+$$
+a_{n}=\sum_{i=1}^{t}p_{i}(n)\,r_{i}^{n}\qquad(n\ge0)
+$$
+と書ける。逆にこの形の列は漸化式を満たす。$K=\C$ なら、このような分解はつねに存在する。
+:::
+
+::: intuition
+漸化式の解は、特性多項式の根 $r$ ごとに「$r^{n}$ に $n$ の多項式を掛けたもの」の和になる。根が重なると、重複度より低い次数の多項式が掛かる。
+:::
+
+::: proof
+\ref{comb:recurrence-rational} より $A=P/Q$、$\deg P<d$ である。
+
+**Step 1（部分分数分解）.** 【主張：$P/Q=\sum_{i}P_{i}/(1-r_{i}x)^{m_{i}}$ となる多項式 $P_{i}$ がある】$t$ の帰納法。$U\defeq(1-r_{t}x)^{m_{t}}$, $V\defeq Q/U$ とおくと、\ref{comb:coprime-linear-powers} を繰り返し使って $(U,V)=(1)$（$U$ と互いに素な元の積は $U$ と互いに素：$aU+bV_{1}=1$, $a'U+b'V_{2}=1$ を掛け合わせる）。$aU+bV=1$ なら $P/Q=Pa/V+Pb/U$ で、$V$ について帰納法の仮定を使う。
+
+**Step 2（各項の展開）.** 【主張：$P_{i}/(1-r_{i}x)^{m_{i}}$ は、$\sum_{j=1}^{m_{i}}e_{ij}(1-r_{i}x)^{-j}$ と多項式の和】$y=1-r_{i}x$ とおけば $P_{i}=\sum_{k}e'_{k}y^{k}$ と $y$ の多項式に書けるので、$k<m_{i}$ の項は $e'_{k}y^{-(m_{i}-k)}$、$k\ge m_{i}$ の項は多項式である。
+
+**Step 3（多項式部分は消える）.** 【主張：Step 1・2 で残る多項式 $R$ は $0$】$P/Q=\sum_{i,j}e_{ij}(1-r_{i}x)^{-j}+R$ の両辺に $Q$ を掛けると、$Q(1-r_{i}x)^{-j}$（$j\le m_{i}$）は次数 $d-j\le d-1$ の多項式なので、$RQ=P-\sum e_{ij}Q(1-r_{i}x)^{-j}$ の次数は $d$ 未満。$\deg Q=d$（$c_{d}\neq0$）なので $R=0$。
+
+**Step 4（係数を読む）.** 【主張：$x^{n}$ の係数は $\sum_{i}p_{i}(n)r_{i}^{n}$】\ref{comb:binomial-series-examples.1} に $r_{i}x$ を代入すると $(1-r_{i}x)^{-j}=\sum_{n}\binom{n+j-1}{j-1}r_{i}^{n}x^{n}$ で、$\binom{n+j-1}{j-1}=\frac{(n+1)(n+2)\cdots(n+j-1)}{(j-1)!}$ は $n$ の次数 $j-1$ の多項式（係数は $K$ の元。$K\supseteq\Q$）である。$p_{i}(y)\defeq\sum_{j\le m_{i}}e_{ij}\frac{(y+1)\cdots(y+j-1)}{(j-1)!}$ とおけばよい。
+
+**Step 5（逆と存在）.** 逆の主張は、Step 4 の計算を逆にたどると $\sum_{i}p_{i}(n)r_{i}^{n}$ の母関数が $\sum e_{ij}(1-r_{i}x)^{-j}$（$p_{i}$ を多項式 $\frac{(y+1)\cdots(y+j-1)}{(j-1)!}$, $j\le m_{i}$ の一次結合に書き直す。これらは次数が $0,1,\dots,m_{i}-1$ なので基底をなす）となり、それに $Q$ を掛けると次数 $<d$ の多項式になることから、\ref{comb:recurrence-rational} で従う。$K=\C$ のとき、$x^{d}-c_{1}x^{d-1}-\dots-c_{d}$ は \ref{fld:fundamental-theorem-algebra} より一次式の積 $\prod(x-r_{i})^{m_{i}}$ に分解し、$c_{d}\neq0$ より $r_{i}\neq0$。$x$ を $1/x$ に置き換えて $x^{d}$ を掛ければ $Q=\prod(1-r_{i}x)^{m_{i}}$ を得る（両辺は多項式で、$K(x)$ の中の等式から $K[x]$ の等式が従う）。
+
+::: hypcheck
+- **$c_{d}\neq0$**：Step 3 で $\deg Q=d$ に、Step 5 で $r_{i}\neq0$ に使った。$c_{d}=0$ なら実際の階数を下げて考えればよい（$n$ の小さいところで例外が出る）。
+- **$K\supseteq\Q$**：Step 4 で $1/(j-1)!$ を使った。重根がなければ（$m_{i}=1$）不要である。
+- **分解の存在**：$K=\R$ では一般に一次式に分解しないので、$\C$ に移って解を求め、実数であることを後で確かめる。
+:::
+:::
+
+::: example フィボナッチ数 {#comb:fibonacci keywords="Fibonacci numbers, Binet's formula" index="フィボナッチ数|ふぃぼなっちすう, ビネの公式|びねのこうしき"}
+$F_{0}=0$, $F_{1}=1$, $F_{n}=F_{n-1}+F_{n-2}$ とし、$K=\R$ で考える。$Q=1-x-x^{2}=(1-\phi x)(1-\bar\phi x)$、$\phi=\frac{1+\sqrt5}{2}$, $\bar\phi=\frac{1-\sqrt5}{2}$ で、$QA=x$ から $A=\frac{x}{(1-\phi x)(1-\bar\phi x)}=\frac{1}{\sqrt5}\bigl(\frac{1}{1-\phi x}-\frac{1}{1-\bar\phi x}\bigr)$。よって $F_{n}=\frac{\phi^{n}-\bar\phi^{n}}{\sqrt5}$（ビネの公式）。
+:::
+
+## カタラン数 {#comb:sec-gf-catalan}
+
+::: definition ディック語とカタラン数 {#comb:catalan keywords="Dyck words, balanced parentheses, Catalan numbers" index="ディック語|でぃっくご, カタラン数|かたらんすう"}
+文字 $\mathtt{U}$, $\mathtt{D}$ からなる長さ $2n$ の語で、$\mathtt{U}$ と $\mathtt{D}$ を $n$ 個ずつ含み、どの先頭部分でも $\mathtt{D}$ の個数が $\mathtt{U}$ の個数を超えないものを**ディック語**という。その個数を $C_{n}$ と書き、**カタラン数**という（$C_{0}=1$：空の語）。
+:::
+
+::: intuition
+$\mathtt{U}$ を開き括弧、$\mathtt{D}$ を閉じ括弧と読めば、正しく対応のとれた $n$ 組の括弧の並べ方である。
+:::
+
+::: theorem カタラン数の公式 {#comb:catalan-formula keywords="Catalan number formula binom(2n,n)/(n+1), Catalan recurrence" index="カタラン数の公式|かたらんすうのこうしき" refname="カタラン数の公式"}
+1. $C_{n+1}=\sum_{k=0}^{n}C_{k}C_{n-k}$。
+2. 通常型母関数 $C=\sum C_{n}x^{n}$ は $C=1+xC^{2}$ を満たす。
+3. $C_{n}=\frac{1}{n+1}\binom{2n}{n}$。
+:::
+
+::: intuition
+正しく対応のとれた $n$ 組の括弧の並べ方は、$\binom{2n}{n}$ を $n+1$ で割った数だけある。最初の括弧が閉じる位置で二つに分けると、母関数が二次方程式を満たすことからこれが出る。
+:::
+
+::: proof
+**Step 1（最初に戻る位置で分ける）.** 【主張：長さ $2n+2$ のディック語 $w$ は $w=\mathtt{U}u\mathtt{D}v$（$u,v$ はディック語）とただ一通りに書ける】$w$ の先頭部分で $\mathtt{U}$ と $\mathtt{D}$ が初めて同数になる長さを $2k+2$ とする。$w$ は $\mathtt{U}$ で始まり（長さ 1 の先頭部分の条件）、その位置の文字は $\mathtt{D}$ である。間の語 $u$（長さ $2k$）は、途中で同数にならないことから $u$ の各先頭部分で $\mathtt{D}$ が $\mathtt{U}$ を超えない、すなわちディック語であり、残り $v$ も（$w$ の条件から）ディック語である。逆に $\mathtt{U}u\mathtt{D}v$ はディック語で、最初に同数になるのは $\mathtt{U}u\mathtt{D}$ の直後なので分解は一意。よって $C_{n+1}=\sum_{k}C_{k}C_{n-k}$（\ref{comb:sum-rule}）。
+
+**Step 2（(2)）.** (1) と \ref{comb:gf-products.1} から、$C^{2}$ の $x^{n}$ の係数は $C_{n+1}$。よって $xC^{2}=C-1$。
+
+**Step 3（二次方程式を解く）.** 【主張：$1-2xC=(1-4x)^{1/2}$】(2) より $(1-2xC)^{2}=1-4xC+4x^{2}C^{2}=1-4x(C-xC^{2})=1-4x$。$1-2xC$ の定数項は $1$ なので、\ref{comb:binomial-series-examples.2} の一意性から主張を得る。
+
+**Step 4（係数）.** Step 3 と \ref{comb:binomial-series-examples.2} から $2xC=1-(1-4x)^{1/2}=\sum_{k\ge1}\frac{2}{k}\binom{2k-2}{k-1}x^{k}$。$x^{n+1}$ の係数を比べて $2C_{n}=\frac{2}{n+1}\binom{2n}{n}$。
+:::
+
+::: supplement
+**全単射による証明.** $\frac{1}{n+1}\binom{2n}{n}=\binom{2n}{n}-\binom{2n}{n+1}$ であり、$\mathtt{U}$, $\mathtt{D}$ を $n$ 個ずつ含む語のうちディック語でないものが、「最初に条件を破った位置より後の文字を入れ替える」**鏡像原理**によって、$\mathtt{U}$ が $n-1$ 個・$\mathtt{D}$ が $n+1$ 個の語と一対一に対応することからも示せる。
+
+**同じ数が現れる問題.** カタラン数は、二分木の個数、凸 $(n+2)$ 角形の三角形分割の個数、交差しない括弧付けの個数など、非常に多くの問題に現れる。どれも Step 1 と同じ「最初の分かれ目で二つに分ける」分解をもつ。
+:::
+
+## 指数型母関数の応用 {#comb:sec-gf-egf-applications}
+
+::: theorem ラベル付きの数え上げの母関数 {#comb:egf-applications keywords="exponential generating functions of derangements, Stirling numbers, Bell numbers" index="ベル数の母関数|べるすうのぼかんすう"}
+1. $\sum_{n}D_{n}\frac{x^{n}}{n!}=\frac{\exp(-x)}{1-x}$。
+2. $k\in\N$ について $\sum_{m}S(m,k)\frac{x^{m}}{m!}=\frac{(E-1)^{k}}{k!}$。
+3. $\sum_{m}B_{m}\frac{x^{m}}{m!}=\exp(E-1)$。
+:::
+
+::: intuition
+置換は「固定する点の集合」と「残りの完全順列」に、分割は「番号の付いていない空でないブロックの集まり」に分けられる。番号付きの対象をこのように部分に分けることが、指数型母関数の積や $\exp$ に対応する。
+:::
+
+::: proof
+**Step 1（(1)）.** 【主張：$\sum_{k}\binom{n}{k}D_{k}=n!$】$[n]$ の置換 $\sigma$ に不動点の集合 $F$ を対応させると、$F$ を固定したとき $\sigma$ は $[n]\setminus F$ の完全順列と一対一に対応する。$\abs{[n]\setminus F}=k$ となる $F$ は $\binom{n}{k}$ 個なので、\ref{comb:fiber-count} と \ref{comb:bijections-count} から主張を得る。$\mathcal{D}\defeq\sum_{n}D_{n}\frac{x^{n}}{n!}$ とおくと、\ref{comb:gf-products.2} より $\mathcal{D}\cdot E=\sum n!\frac{x^{n}}{n!}=\frac{1}{1-x}$ で、$E^{-1}=\exp(-x)$（\ref{comb:exp-log-properties.2}）を掛ければよい。
+
+**Step 2（(2)）.** 【主張：$k!\,S(m,k)$ は、$[m]$ を空でない $T_{1},\dots,T_{k}$ に分ける順序付きの分け方の個数】順序付きの分け方 $(T_{1},\dots,T_{k})$ は全射 $f\colon[m]\to[k]$（$T_{i}=f^{-1}(i)$）と一対一に対応し、その個数は $k!\,S(m,k)$（\ref{comb:surjections-partitions}）。一方 \ref{comb:gf-products.3} を $a_{n}=[n\ge1]$（指数型母関数 $E-1$）の $k$ 個に使うと、$(E-1)^{k}$ の $x^{m}/m!$ の係数はその個数に等しい。
+
+**Step 3（(3)）.** 【主張：$\mathcal{B}\defeq\sum B_{m}\frac{x^{m}}{m!}$ と $\exp(E-1)$ はどちらも $Dy=E\,y$, $y_{0}=1$ を満たす】$D\mathcal{B}=\sum_{m}B_{m+1}\frac{x^{m}}{m!}$ で、ベル数の漸化式（\ref{comb:bell-recurrence}）と \ref{comb:gf-products.2} より $D\mathcal{B}=E\,\mathcal{B}$。$D\exp(E-1)=\exp(E-1)\,DE=E\exp(E-1)$（\ref{comb:exp-log-properties.1}）。$w\defeq\mathcal{B}\exp(1-E)$ は $Dw=w(E-E)=0$、$w_{0}=1$ なので \ref{comb:fps-derivative-rules.4} より $w=1$。
+:::
+
+::: supplement
+**指数公式.** (2) を $k$ について足すと $\sum_{k}\frac{(E-1)^{k}}{k!}=\exp(E-1)$ となり (3) が別の形でも得られる。一般に、「連結な部分」の指数型母関数を $F$（$F_{0}=0$）とすると、それらの集まりからなる構造の指数型母関数は $\exp F$ になる（**指数公式**）。置換を巡回の集まりと見ると、巡回の指数型母関数は $\sum_{n\ge1}(n-1)!\frac{x^{n}}{n!}=-\log(1-x)$ で、$\exp(-\log(1-x))=\frac{1}{1-x}$ は置換の個数 $n!$ を再現する。
+:::
+
+## 問題 {#comb:sec-gf-problems}
+
+::: problem {#comb:prob-gf-tiling}
+$1\times n$ の帯を $1\times1$ と $1\times2$ の板で敷き詰める方法の数 $t_{n}$ を求めよ。
+:::
+
+::: solution
+最後の板が $1\times1$ か $1\times2$ かで分けて $t_{n}=t_{n-1}+t_{n-2}$（$n\ge2$）、$t_{0}=t_{1}=1$。よって $t_{n}=F_{n+1}$（\ref{comb:fibonacci}）。
+:::
+
+::: problem {#comb:prob-gf-repeated-root}
+$a_{0}=0$, $a_{1}=1$, $a_{n}=4a_{n-1}-4a_{n-2}$ を解け。
+:::
+
+::: solution
+$Q=1-4x+4x^{2}=(1-2x)^{2}$ で、$QA=x$ より $A=\frac{x}{(1-2x)^{2}}=\sum_{n}n2^{n-1}x^{n}$（$(1-2x)^{-2}=\sum(n+1)2^{n}x^{n}$）。よって $a_{n}=n2^{n-1}$。\ref{comb:linear-recurrence-solution} の形では $p(n)=n/2$, $r=2$ である。
+:::
+
+::: problem {#comb:prob-gf-sum-squares}
+$s_{n}=\sum_{j=0}^{n}j^{2}$ の通常型母関数が $\frac{x(1+x)}{(1-x)^{4}}$ であることを示し、$s_{n}=\frac{n(n+1)(2n+1)}{6}$ を導け。
+:::
+
+::: solution
+$\sum j^{2}x^{j}=(xD)^{2}\frac{1}{1-x}=\frac{x(1+x)}{(1-x)^{3}}$ で、部分和をとることは $\frac{1}{1-x}$ を掛けることである（\ref{comb:gf-products.1}）。$x(1+x)=(1-x)^{2}-3(1-x)+2$ と書き直すと $\frac{x(1+x)}{(1-x)^{4}}=\frac{1}{(1-x)^{2}}-\frac{3}{(1-x)^{3}}+\frac{2}{(1-x)^{4}}$ で、\ref{comb:binomial-series-examples.1} から $s_{n}=(n+1)-3\binom{n+2}{2}+2\binom{n+3}{3}=\frac{n(n+1)(2n+1)}{6}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
