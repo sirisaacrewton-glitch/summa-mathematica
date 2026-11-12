@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ハミルトン閉路 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/05-hamilton-infinite/01-hamilton-cycles.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ハミルトン閉路 {#graph:page-hamilton-cycles keywords="Hamilton cycle, hamiltonian graph, Dirac's theorem, Ore's theorem, Bondy-Chvatal closure, Chvatal's degree sequence condition, Chvatal-Erdos theorem, toughness"}
+
+すべての頂点をちょうど一度ずつ通る閉路を**ハミルトン閉路**という。すべての辺を一度ずつ通るオイラー回路（\ref{graph:euler-theorem}）とは対照的に、ハミルトン閉路の存在を特徴づける簡単な条件は知られていない（判定は NP 完全である）。このページでは、存在を保証する代表的な十分条件を示す：次数が大きいこと（ディラック・オーレ）、それを一般化した次数列の条件（フヴァータル）、そして連結度が独立数以上であること（フヴァータル–エルデシュ）である。
+
+## 記法と定義の確認 {#graph:sec-ha-notation}
+
+::: notation
+- グラフ・次数・道・閉路・連結度 $\kappa$ は \ref{graph:page-graphs}、独立数 $\alpha$ は \ref{graph:page-perfect-graphs} のとおり。$n\defeq\abs{G}$。
+- 扇補題（\ref{graph:prob-me-fan}）を使う：$k$ 連結グラフの頂点 $a$ と $\abs{B}\ge k$ の $B\not\ni a$ について、$a$ から $B$ への、$a$ 以外で交わらず $B$ の点を終点にだけもつ道が $k$ 本ある。
+:::
+
+## 定義と閉包 {#graph:sec-ha-closure}
+
+::: definition ハミルトン閉路 {#graph:hamilton-cycle keywords="Hamilton cycle, Hamilton path, hamiltonian" index="ハミルトン閉路|はみるとんへいろ, ハミルトン道|はみるとんみち, ハミルトングラフ|はみるとんぐらふ"}
+すべての頂点を含む閉路を**ハミルトン閉路**、すべての頂点を含む道を**ハミルトン道**という。ハミルトン閉路をもつグラフを**ハミルトン的**という。
+:::
+
+::: intuition
+すべての町をちょうど一度ずつ訪ねて出発点に戻る巡回路である。
+:::
+
+::: lemma ボンディ–フヴァータルの補題 {#graph:bondy-chvatal-lemma keywords="Bondy-Chvatal lemma, closure" index="ボンディ–フヴァータルの補題|ぼんでぃふゔぁーたるのほだい, 閉包（ハミルトン）|へいほう"}
+$n\ge3$ とし、隣接しない $u,v$ が $d(u)+d(v)\ge n$ を満たすとする。$G$ がハミルトン的であることと $G+uv$ がハミルトン的であることは同値である。
+:::
+
+::: proof
+**Step 1（ハミルトン道）.** $G$ がハミルトン的なら $G+uv$ も明らか。逆に $G+uv$ のハミルトン閉路があり、$G$ にないとすると、その閉路は $uv$ を通るので、それを除くと $G$ のハミルトン道 $u=x_{1}x_{2}\dots x_{n}=v$ が得られる。
+
+**Step 2（交差する添字）.** 【主張：$x_{1}x_{i+1}\in E$ かつ $x_{i}x_{n}\in E$ となる $i\in\{1,\dots,n-1\}$ がある】$S\defeq\{i : x_{1}x_{i+1}\in E\}$、$T\defeq\{i : x_{i}x_{n}\in E\}$ はどちらも $\{1,\dots,n-1\}$ の部分集合で、$\abs{S}=d(u)$, $\abs{T}=d(v)$。$\abs{S}+\abs{T}\ge n>n-1$ なので $S\cap T\neq\varnothing$。
+
+**Step 3.** Step 2 の $i$ について、$x_{1}x_{i+1}x_{i+2}\dots x_{n}x_{i}x_{i-1}\dots x_{1}$ は $G$ のハミルトン閉路である（$i=1$ なら $x_{1}x_{n}\in E$ となり $uv\in E$ に反するので $i\ge2$）。矛盾。
+:::
+
+::: definition ハミルトン閉包 {#graph:hamilton-closure keywords="Hamilton closure" index="ハミルトン閉包|はみるとんへいほう"}
+$G$ から始めて、次数の和が $n$ 以上の隣接しない 2 頂点を辺で結ぶ操作を、できなくなるまで繰り返して得られるグラフを $G$ の**閉包**という（$H$ と書く）。$H$ では、隣接しない 2 頂点の次数の和は $n-1$ 以下である。
+:::
+
+::: intuition
+次数の大きい 2 点を結んでもハミルトン性は変わらないので、そのような辺を足せるだけ足してから調べればよい。
+:::
+
+::: corollary オーレとディラックの定理 {#graph:ore-dirac keywords="Ore's theorem, Dirac's theorem" index="オーレの定理|おーれのていり, ディラックの定理|でぃらっくのていり" refname="ディラックの定理"}
+$n\ge3$ とする。
+1. （オーレ）隣接しないすべての 2 頂点で $d(u)+d(v)\ge n$ なら、$G$ はハミルトン的である。
+2. （ディラック）$\delta(G)\ge n/2$ なら、$G$ はハミルトン的である。
+:::
+
+::: intuition
+どの点も全体の半分以上の点とつながっていれば、全員を一度ずつ巡る閉路がある。
+:::
+
+::: proof
+(1) の仮定のもとで閉包は完全グラフ $K^{n}$ で、$n\ge3$ なのでハミルトン的。\ref{graph:bondy-chvatal-lemma} を逆にたどれば $G$ もハミルトン的。(2) は (1) の特別な場合。
+:::
+
+::: example
+$n/2$ を $\lfloor n/2\rfloor$ に下げることはできない：$n$ が奇数のとき、二つの $K^{(n+1)/2}$ を一点で貼り合わせたグラフは $\delta=\lfloor n/2\rfloor$ だが、その点を除くと非連結になるのでハミルトン閉路をもたない。
+:::
+
+## フヴァータルの次数列条件 {#graph:sec-ha-chvatal}
+
+::: theorem フヴァータルの定理 {#graph:chvatal-degree-sequence keywords="Chvatal's degree sequence condition" index="フヴァータルの定理|ふゔぁーたるのていり, 次数列|じすうれつ" refname="フヴァータルの次数列定理"}
+$n\ge3$ とし、次数を小さい順に $d_{1}\le d_{2}\le\dots\le d_{n}$ と並べる。$i<n/2$ となるすべての $i$ について「$d_{i}\le i$ ならば $d_{n-i}\ge n-i$」が成り立てば、$G$ はハミルトン的である。
+:::
+
+::: intuition
+次数が小さい点が多すぎず、そのぶん次数が大きい点が十分あれば、ハミルトン閉路がある。ディラックやオーレの条件はその特別な場合である。
+:::
+
+::: proof
+**Step 1（条件は閉包に引き継がれる）.** 閉包 $H$ の次数は $G$ の次数以上なので、小さい順に並べた次数列も項ごとに大きい。条件「$d_{i}\le i\Rightarrow d_{n-i}\ge n-i$」は次数を大きくしても保たれる（$H$ で $d'_{i}\le i$ なら $d_{i}\le d'_{i}\le i$ から $d'_{n-i}\ge d_{n-i}\ge n-i$）。\ref{graph:bondy-chvatal-lemma} より、$H=K^{n}$ を示せばよい。
+
+**Step 2（極端な非隣接対）.** $H\neq K^{n}$ とし、$H$ で隣接しない $u,v$ のうち $d(u)+d(v)$ が最大のものを $d(u)\le d(v)$ となるようにとる（次数は $H$ で考える）。閉包の性質から $d(u)+d(v)\le n-1$、$i\defeq d(u)$ とすると $2i\le n-1$、$i<n/2$。
+
+**Step 3（$d_{i}\le i$）.** 【主張：次数 $i$ 以下の頂点が $i$ 個以上ある】$v$ と隣接しない $v$ 以外の頂点は $n-1-d(v)\ge i$ 個あり、その各 $w$ は $d(w)+d(v)\le d(u)+d(v)$（最大性）より $d(w)\le i$。よって $d_{i}\le i$。
+
+**Step 4（矛盾）.** 仮定から $d_{n-i}\ge n-i$、すなわち次数 $n-i$ 以上の頂点が $i+1$ 個以上ある。$u$ は次数 $i<n-i$ なのでそれらに含まれず、$u$ の近傍は $i$ 個なので、そのうち $u$ と隣接しない $w$ がある。$d(u)+d(w)\ge i+(n-i)=n$ で、閉包の性質に反する。
+:::
+
+## フヴァータル–エルデシュの定理 {#graph:sec-ha-chvatal-erdos}
+
+::: theorem フヴァータル–エルデシュの定理 {#graph:chvatal-erdos keywords="Chvatal-Erdos theorem, alpha <= kappa implies hamiltonian" index="フヴァータル–エルデシュの定理|ふゔぁーたるえるでしゅのていり" refname="フヴァータル–エルデシュの定理"}
+$n\ge3$ で $\alpha(G)\le\kappa(G)$ なら、$G$ はハミルトン的である。
+:::
+
+::: intuition
+どの $k-1$ 点を壊してもつながっていて、互いに隣接しない点を $k$ 個より多く選べないなら、全員を巡る閉路がある。
+:::
+
+::: proof
+$k\defeq\kappa(G)$ とする。$\alpha\ge1$ なので $k\ge1$。$k=1$ なら $\alpha=1$ で $G$ は完全グラフ、ハミルトン的。$k\ge2$ なら $G$ は閉路をもち、最長の閉路 $C$ をとって頂点を巡回的に $v_{i}$（$i\in\Z_{\abs{C}}$）とする。$C$ がハミルトン閉路でないとして矛盾を導く。
+
+**Step 1（扇）.** 【主張：$u$ から $C$ への、$u$ 以外で交わらない道 $P_{i}$（$i\in I$、$P_{i}$ は $v_{i}$ で終わり、$C$ とは終点だけで交わる）が $k$ 本ある】$\delta(G)\ge\kappa(G)=k$（\ref{graph:kappa-lambda-delta}）なので $\abs{C}\ge\delta+1>k$（\ref{graph:long-path-cycle}）。$C$ にない頂点 $u$ をとり、\ref{graph:prob-me-fan} を $B=V(C)$ に使えばよい。
+
+**Step 2（隣り合う終点はない）.** 【主張：$i\in I$ なら $i+1\notin I$】そうでなければ $C$ の辺 $v_{i}v_{i+1}$ を $P_{i}$ と $P_{i+1}$（$u$ を経由）で置き換えた、$C$ より長い閉路ができる。特に $\abs{I}<\abs{C}$。
+
+**Step 3（独立集合）.** 【主張：$\{v_{i+1} : i\in I\}\cup\{u\}$ は独立】$u v_{i+1}$ が辺なら、Step 2 と同じ理由で（$u$ から $v_{i+1}$ への長さ 1 の道を扇に加えると）$C$ より長い閉路ができる。$v_{i+1}v_{j+1}$（$i\neq j\in I$）が辺なら、$C$ から辺 $v_{i}v_{i+1}$, $v_{j}v_{j+1}$ を除き、$P_{i}uP_{j}$ と辺 $v_{i+1}v_{j+1}$ を加えると $C$ より長い閉路になる。よって大きさ $k+1$ の独立集合があり、$\alpha\le k$ に反する。
+
+:::
+
+::: fact 平面グラフとタフネス {#graph:hamilton-facts keywords="Tutte's theorem on 4-connected planar graphs, toughness conjecture, NP-completeness" index="タフネス|たふねす"}
+- （タット、1956 年）4 連結な平面グラフはハミルトン的である。3 連結な 3 正則平面グラフでハミルトン的でないものがある（タット、1946 年）。
+- グラフ $G$ が **$t$ タフ**であるとは、任意の分離集合 $S$ について $G-S$ の連結成分が $\abs{S}/t$ 個以下であることをいう。ハミルトン的なグラフは 1 タフであり、「ある $t$ について $t$ タフならハミルトン的」というフヴァータルの予想は未解決とされる（Diestel, *Graph Theory* 第 10.1 節）。
+- ハミルトン閉路の存在判定は NP 完全である（\ref{comp:page-np-complete-problems}）。
+:::
+
+## 問題 {#graph:sec-ha-problems}
+
+::: problem {#graph:prob-ha-knn}
+$K_{n,n}$（$n\ge2$）はハミルトン的、$K_{n,n+1}$ はハミルトン的でないことを示せ。
+:::
+
+::: solution
+$K_{n,n}$ は $a_{1}b_{1}a_{2}b_{2}\dots a_{n}b_{n}a_{1}$ が閉路。ハミルトン閉路は二部グラフの両側を交互に通るので、両側の頂点数が等しくなければならず、$K_{n,n+1}$ にはない。（ディラックの条件 $\delta\ge n/2$ と比べると、$K_{n,n+1}$ は $\delta=n<(2n+1)/2$ で条件をぎりぎり満たさない。）
+:::
+
+::: problem {#graph:prob-ha-petersen}
+ペテルセングラフは $\alpha=4$, $\kappa=3$ であり、フヴァータル–エルデシュの定理の仮定を満たさないことを確かめよ（ペテルセングラフはハミルトン的でないことが知られている）。
+:::
+
+::: solution
+外側の 5 角形から 2 点、内側の星形から 2 点を、互いに隣接しないように選べる（外側の 5 角形 $a_{0}\dots a_{4}$、スポーク $a_{i}b_{i}$、内側は $b_{i}$ と $b_{i\pm2}$ が隣接する星形として、たとえば $a_{0},a_{2},b_{3},b_{4}$）ので $\alpha\ge4$。3 正則なので $\kappa\le3$。$\alpha>\kappa$ で仮定を満たさない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
