@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>包除原理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/01-basic-counting/02-inclusion-exclusion.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 包除原理 {#comb:page-inclusion-exclusion keywords="inclusion-exclusion principle, sieve formula, Bonferroni inequalities, derangements, number of surjections, Euler totient"}
+
+重なりのある有限集合の和の大きさは、共通部分の大きさの交代和で表せる。これが**包除原理**である。このページでは、前のページの二重数え上げ（\ref{comb:double-counting}）と二項係数の交代和だけから包除原理とその一般化（ちょうど $q$ 個の集合に属する元の個数、ボンフェローニの不等式）を示し、全射の個数・**完全順列**の個数・オイラー関数の積公式を導く。
+
+## 記法と定義の確認 {#comb:sec-ie-notation}
+
+::: notation
+- 体系は $\ZF$ で、有限集合だけを扱う。記法は前のページ（\ref{comb:page-binomial-coefficients}）と同じ：$[n]=\{1,\dots,n\}$、$Y^{X}$ は写像全体、$\mathcal{P}_{k}(X)$ は $k$ 元部分集合全体、$\binom{n}{k}=\abs{\mathcal{P}_{k}([n])}$（\ref{comb:binomial-coefficient}）、$[P]$ はアイバーソンの記法。
+- 使う道具：和の法則（\ref{comb:sum-rule}）、重み付きの二重数え上げ（\ref{comb:double-counting}）、写像と部分集合の個数（\ref{comb:functions-subsets}）、全単射の個数（\ref{comb:bijections-count}）、二項係数の公式と恒等式（\ref{comb:binomial-formula}・\ref{comb:binomial-identities}）。
+:::
+
+## 包除原理 {#comb:sec-ie-main}
+
+::: lemma 二項係数の交代和 {#comb:alternating-sum keywords="alternating sum of binomial coefficients, partial alternating sum" index="二項係数の交代和|にこうけいすうのこうたいわ"}
+1. 有限集合 $I$ について $\sum_{S\subseteq I}(-1)^{\abs{S}}=[I=\varnothing]$。同じことだが $\sum_{k=0}^{t}(-1)^{k}\binom{t}{k}=[t=0]$。
+2. $t\ge1$, $q\ge0$ なら $\sum_{k=0}^{q}(-1)^{k}\binom{t}{k}=(-1)^{q}\binom{t-1}{q}$。
+:::
+
+::: proof
+**Step 1（(1)、偶奇を入れ替える全単射）.** 【主張：$I\neq\varnothing$ なら、濃度が偶数の部分集合と奇数の部分集合は同数】$i_{0}\in I$ を一つとり、$\tau(S)\defeq S\mathbin{\triangle}\{i_{0}\}$（$i_{0}$ があれば除き、なければ加える）とおく。$\tau\circ\tau$ は恒等写像なので $\tau$ は $\mathcal{P}(I)$ の全単射で、$\abs{\tau(S)}=\abs{S}\pm1$ は偶奇を入れ替える。よって偶数部分と奇数部分は $\tau$ で全単射に対応し、交代和は $0$。$I=\varnothing$ なら部分集合は $\varnothing$ だけで、和は $1$。後半は $\mathcal{P}([t])$ を濃度ごとに分ければよい（\ref{comb:sum-rule}）。
+
+**Step 2（(2)、$q$ の帰納法）.** 【主張：部分和はパスカルの規則で一段ずつ畳める】$q=0$ では両辺 $1$。$q$ で成り立てば、\ref{comb:binomial-identities.2}（$t\ge1$, $q+1\ge1$）より
+$$
+(-1)^{q}\binom{t-1}{q}+(-1)^{q+1}\binom{t}{q+1}=(-1)^{q+1}\Bigl(\binom{t}{q+1}-\binom{t-1}{q}\Bigr)=(-1)^{q+1}\binom{t-1}{q+1}.
+$$
+:::
+
+::: theorem 包除原理 {#comb:inclusion-exclusion keywords="principle of inclusion-exclusion, sieve formula" index="包除原理|ほうじょげんり, ふるいの公式|ふるいのこうしき" refname="包除原理"}
+$U$ を有限集合、$I$ を有限集合、$(A_{i})_{i\in I}$ を $U$ の部分集合の族とする。$S\subseteq I$ に対し $A_{S}\defeq\bigcap_{i\in S}A_{i}$（ただし $A_{\varnothing}\defeq U$）とおく。このとき
+$$
+\Bigl\lvert U\setminus\bigcup_{i\in I}A_{i}\Bigr\rvert=\sum_{S\subseteq I}(-1)^{\abs{S}}\abs{A_{S}}.
+\label{comb:eq-inclusion-exclusion}
+$$
+同じことだが、$\bigl\lvert\bigcup_{i\in I}A_{i}\bigr\rvert=\sum_{\varnothing\neq S\subseteq I}(-1)^{\abs{S}+1}\abs{A_{S}}$。
+:::
+
+::: intuition
+どの $A_{i}$ にも入らない元の個数は、全体から各 $A_{i}$ を引き、引きすぎた 2 つずつの共通部分を足し戻し、足しすぎた 3 つずつの共通部分を引き…と交互に補正すれば求まる。各元はちょうど 1 回だけ（どれにも入らないなら 1 回、どれかに入るなら 0 回）数えられる。
+:::
+
+::: example
+$I=\{1,2\}$ なら $\abs{A_{1}\cup A_{2}}=\abs{A_{1}}+\abs{A_{2}}-\abs{A_{1}\cap A_{2}}$。$I=\{1,2,3\}$ なら
+$$
+\abs{A_{1}\cup A_{2}\cup A_{3}}=\sum_{i}\abs{A_{i}}-\sum_{i<j}\abs{A_{i}\cap A_{j}}+\abs{A_{1}\cap A_{2}\cap A_{3}}.
+$$
+:::
+
+::: proof
+$x\in U$ に対し $I(x)\defeq\{i\in I : x\in A_{i}\}$ とおく。
+
+**Step 1（共通部分の言い換え）.** 【主張：$x\in A_{S}\iff S\subseteq I(x)$】$x\in A_{S}$ はすべての $i\in S$ で $x\in A_{i}$ であること、すなわち $S\subseteq I(x)$ である（$S=\varnothing$ のときは両辺とも真）。
+
+**Step 2（二重数え上げ）.** 【主張：右辺 $=\sum_{x\in U}\sum_{S\subseteq I(x)}(-1)^{\abs{S}}$】$R\defeq\{(x,S)\in U\times\mathcal{P}(I) : x\in A_{S}\}$ に \ref{comb:double-counting} を重み $w(x,S)=(-1)^{\abs{S}}$ で当てはめる。$S$ ごとに数えると $\sum_{S}(-1)^{\abs{S}}\abs{A_{S}}$、$x$ ごとに数えると Step 1 より $\sum_{x}\sum_{S\subseteq I(x)}(-1)^{\abs{S}}$。
+
+**Step 3（内側の和）.** 【主張：$\sum_{S\subseteq I(x)}(-1)^{\abs{S}}=[I(x)=\varnothing]$】\ref{comb:alternating-sum.1} による。
+
+**Step 4（結論）.** Step 2・3 より右辺は $\abs{\{x\in U : I(x)=\varnothing\}}$ で、$I(x)=\varnothing$ は $x\notin\bigcup_{i}A_{i}$ と同値である。後半は $\abs{U}=\abs{U\setminus\bigcup A_{i}}+\abs{\bigcup A_{i}}$ に代入して $S=\varnothing$ の項 $\abs{U}$ を移項すればよい。
+
+::: hypcheck
+- **$U$ と $I$ の有限性**：Step 2 の二重数え上げ（有限和の入れ替え）で使った。$I$ が無限だと右辺は無限和で意味をなさない。
+- **$A_{\varnothing}=U$ の約束**：Step 1 で $S=\varnothing$ の場合を正しくするために使った。
+:::
+:::
+
+::: theorem ちょうど $q$ 個に属する元の個数 {#comb:inclusion-exclusion-exact keywords="generalized inclusion-exclusion, number of elements in exactly q sets" index="包除原理（一般化）|ほうじょげんり"}
+\ref{comb:inclusion-exclusion} の状況で、$\sigma_{j}\defeq\sum_{S\in\mathcal{P}_{j}(I)}\abs{A_{S}}$ とおく。$q\in\N$ について、ちょうど $q$ 個の $A_{i}$ に属する元の個数 $E_{q}\defeq\abs{\{x\in U : \abs{I(x)}=q\}}$ は
+$$
+E_{q}=\sum_{j\ge q}(-1)^{j-q}\binom{j}{q}\sigma_{j}.
+$$
+:::
+
+::: intuition
+ちょうど $q$ 個の集合に入る元の個数も、共通部分の大きさの交代和で求まる。$q=0$ の場合が包除原理である。
+:::
+
+::: proof
+**Step 1（$\sigma_{j}$ の言い換え）.** 【主張：$\sigma_{j}=\sum_{x\in U}\binom{\abs{I(x)}}{j}$】\ref{comb:inclusion-exclusion} の証明の Step 1・2 と同じく、組 $(x,S)$, $\abs{S}=j$, $S\subseteq I(x)$ を二通りに数える。$x$ ごとには $\abs{\mathcal{P}_{j}(I(x))}=\binom{\abs{I(x)}}{j}$ 個である。
+
+**Step 2（係数の計算）.** 【主張：$t\in\N$ について $\sum_{j\ge q}(-1)^{j-q}\binom{j}{q}\binom{t}{j}=[t=q]$】$t<q$ なら、$j\ge q>t$ の各項で $\binom{t}{j}=0$ なので左辺は $0=[t=q]$。$t\ge q$ なら、\ref{comb:binomial-identities.6} より $\binom{t}{j}\binom{j}{q}=\binom{t}{q}\binom{t-q}{j-q}$（$q\le j$）なので、$i=j-q$ とおくと左辺は $\binom{t}{q}\sum_{i=0}^{t-q}(-1)^{i}\binom{t-q}{i}$ で（$j>t$ の項は $0$）、\ref{comb:alternating-sum.1} よりこれは $\binom{t}{q}[t=q]=[t=q]$。
+
+**Step 3.** Step 1 を代入して和を入れ替えると、右辺 $=\sum_{x\in U}\sum_{j}(-1)^{j-q}\binom{j}{q}\binom{\abs{I(x)}}{j}=\sum_{x}[\abs{I(x)}=q]=E_{q}$。
+:::
+
+::: proposition ボンフェローニの不等式 {#comb:bonferroni keywords="Bonferroni inequalities, truncated inclusion-exclusion" index="ボンフェローニの不等式|ぼんふぇろーにのふとうしき"}
+\ref{comb:inclusion-exclusion} の状況で、$\ell\in\N$ について
+$$
+(-1)^{\ell+1}\Bigl(\Bigl\lvert U\setminus\bigcup_{i}A_{i}\Bigr\rvert-\sum_{j=0}^{\ell}(-1)^{j}\sigma_{j}\Bigr)\ge0.
+$$
+すなわち包除原理の右辺を $\ell$ 項目で打ち切ると、$\ell$ が偶数なら真の値以上、奇数なら真の値以下になる。
+:::
+
+::: proof
+**Step 1.** 【主張：打ち切った和 $=\sum_{x\in U}\sum_{j=0}^{\ell}(-1)^{j}\binom{t_{x}}{j}$（$t_{x}\defeq\abs{I(x)}$）】\ref{comb:inclusion-exclusion-exact} の Step 1 による。
+
+**Step 2.** 【主張：$x$ ごとの寄与の差は $(-1)^{\ell+1}$ を掛けると非負】$t_{x}=0$ なら内側の和は $1=[x\notin\bigcup A_{i}]$ で差は $0$。$t_{x}\ge1$ なら \ref{comb:alternating-sum.2} より内側の和は $(-1)^{\ell}\binom{t_{x}-1}{\ell}$ で、真の寄与 $0$ との差に $(-1)^{\ell+1}$ を掛けると $(-1)^{\ell+1}\cdot(-(-1)^{\ell})\binom{t_{x}-1}{\ell}=\binom{t_{x}-1}{\ell}\ge0$。
+
+$x$ について足せば主張を得る。
+:::
+
+::: supplement
+**一般化.** 包除原理は、部分集合の束 $\mathcal{P}(I)$ の上のメビウス反転の特別な場合である：$g(S)\defeq\abs{\{x : I(x)=S\}}$, $f(S)\defeq\sum_{T\supseteq S}g(T)=\abs{A_{S}}$ とおくと、\ref{comb:inclusion-exclusion-exact} は $f$ から $g$ を取り出す反転公式 $g(S)=\sum_{T\supseteq S}(-1)^{\abs{T\setminus S}}f(T)$ を濃度ごとにまとめたものである。一般の局所有限半順序集合でのメビウス反転は \ref[半順序集合のメビウス反転]{comb:page-mobius-inversion} で扱う。
+
+**確率版.** $U$ 上の一様分布で割れば、事象の和の確率 $P(\bigcup A_{i})=\sum_{S\neq\varnothing}(-1)^{\abs{S}+1}P(A_{S})$ になる。同じ証明（Step 2 の二重数え上げを期待値の線形性に置き換える）で、任意の確率空間の有限個の事象について成り立つ。
+:::
+
+## 包除原理の応用 {#comb:sec-ie-applications}
+
+::: theorem 全射の個数 {#comb:surjections-count keywords="number of surjections, onto functions" index="全射の個数|ぜんしゃのこすう"}
+$\abs{X}=m$, $\abs{Y}=n$ の有限集合について、全射 $X\to Y$ の個数は
+$$
+\sum_{j=0}^{n}(-1)^{j}\binom{n}{j}(n-j)^{m}.
+$$
+:::
+
+::: intuition
+全射の個数は、すべての写像から「ある元を取りこぼす写像」を包除原理で取り除いて求まる。
+:::
+
+::: proof
+**Step 1（集合の設定）.** 【主張：$U\defeq Y^{X}$, $A_{y}\defeq\{f : y\notin f[X]\}$（$y\in Y$）とすると、全射全体は $U\setminus\bigcup_{y}A_{y}$】$f$ が全射でないことは、ある $y$ が像に入らないことである。
+
+**Step 2（共通部分の大きさ）.** 【主張：$S\subseteq Y$ なら $\abs{A_{S}}=(n-\abs{S})^{m}$】$A_{S}$ は像が $Y\setminus S$ に含まれる写像全体で、$(Y\setminus S)^{X}$ と同一視できる。\ref{comb:functions-subsets} よりその個数は $(n-\abs{S})^{m}$。
+
+**Step 3.** \ref{comb:inclusion-exclusion} の右辺を $\abs{S}=j$ ごとにまとめると、$\abs{\mathcal{P}_{j}(Y)}=\binom{n}{j}$ 個の項がどれも $(n-j)^{m}$ に等しい。
+:::
+
+::: corollary {#comb:surjection-identities}
+$m,n\in\N$ について $\sum_{j=0}^{n}(-1)^{j}\binom{n}{j}(n-j)^{m}$ は、$m<n$ なら $0$、$m=n$ なら $n!$ である。
+:::
+
+::: proof
+全射 $f\colon[m]\to[n]$ の各ファイバーは空でないので、\ref{comb:fiber-count} より $m=\sum_{y}\abs{f^{-1}(y)}\ge n$。よって $m<n$ なら全射はない。$m=n$ なら同じ式で等号が成り立つので各ファイバーはちょうど 1 元、すなわち全射は全単射であり（逆に全単射は全射）ので、\ref{comb:bijections-count} より $n!$ 個。
+:::
+
+::: definition 完全順列 {#comb:derangement keywords="derangement, fixed-point-free permutation, subfactorial" index="完全順列|かんぜんじゅんれつ, 攪乱順列|かくらんじゅんれつ, モンモール数|もんもーるすう"}
+集合 $X$ の置換 $\pi$ が不動点をもたない（すべての $x$ で $\pi(x)\neq x$）とき、$\pi$ を**完全順列**（**攪乱順列**）という。$n$ 元集合の完全順列の個数を $D_{n}$ と書く（$D_{0}=1$：空写像は不動点をもたない）。
+:::
+
+::: intuition
+どの元も元の位置に残らないような並べ替えのことである。
+:::
+
+::: theorem 完全順列の個数 {#comb:derangements-count keywords="number of derangements, n!/e" index="完全順列の個数|かんぜんじゅんれつのこすう"}
+1. $D_{n}=\sum_{j=0}^{n}(-1)^{j}\binom{n}{j}(n-j)!=n!\sum_{j=0}^{n}\frac{(-1)^{j}}{j!}$。
+2. $\lim_{n\to\infty}D_{n}/n!=1/e$。さらに $n\ge1$ なら $D_{n}$ は $n!/e$ に最も近い整数である。
+:::
+
+::: intuition
+$n$ 人がプレゼントを持ち寄って無作為に配り直すとき、誰も自分のものを受け取らない確率は、$n$ が大きいとほぼ $1/e\approx0.368$ で、$n$ にほとんどよらない。
+:::
+
+::: proof
+**Step 1（(1)）.** 【主張：$U$ を $[n]$ の置換全体、$A_{i}\defeq\{\pi : \pi(i)=i\}$ とすれば $\abs{A_{S}}=(n-\abs{S})!$】$A_{S}$ は $S$ の各点を固定する置換全体で、$[n]\setminus S$ への制限によって $[n]\setminus S$ の置換全体と一対一に対応する（\ref{comb:bijections-count}）。\ref{comb:inclusion-exclusion} を $\abs{S}=j$ ごとにまとめ、$\binom{n}{j}(n-j)!=n!/j!$（\ref{comb:binomial-formula}）を使う。
+
+**Step 2（極限）.** 【主張：$D_{n}/n!\to e^{-1}$】(1) より $D_{n}/n!$ は級数 $\sum_{j\ge0}(-1)^{j}/j!$ の第 $n$ 部分和で、\ref{calc:exp} によりこの級数は $\exp(-1)=1/\exp(1)=1/e$ に収束する（\ref{calc:exp.3}・\ref[4]{calc:exp.4}）。
+
+**Step 3（誤差の評価）.** 【主張：$n\ge1$ なら $\abs{D_{n}-n!/e}<1/2$】$n!/e-D_{n}=n!\sum_{j>n}(-1)^{j}/j!$ であり、
+$$
+n!\sum_{j>n}\frac{1}{j!}\le\frac{1}{n+1}\sum_{i\ge0}\frac{1}{(n+2)^{i}}=\frac{1}{n+1}\cdot\frac{n+2}{n+1}.
+$$
+ここで $j=n+1+i$ について $n!/j!\le\frac{1}{n+1}(n+2)^{-i}$ を使った。右辺は $n\ge2$ なら $\frac{n+2}{(n+1)^{2}}\le\frac{4}{9}<\frac12$。$n=1$ なら $D_{1}=0$ で、$e>2$ より $\abs{0-1/e}<1/2$。$D_{n}$ は整数なので、$n!/e$ から距離 $1/2$ 未満の整数はそれだけである。
+
+::: hypcheck
+- **$n\ge1$**（後半）：Step 3 で使った。$n=0$ では $D_{0}=1$, $0!/e\approx0.37$ で、最も近い整数は $0$ になり主張は偽である。
+:::
+:::
+
+::: theorem オイラー関数の公式 {#comb:euler-phi-formula keywords="Euler's totient function product formula" index="オイラー関数の公式|おいらーかんすうのこうしき"}
+$n\ge1$ とし、$n$ を割り切る素数全体を $P$ とする。\ref{grp:units-mod-n} のオイラー関数 $\varphi(n)$ について
+$$
+\varphi(n)=n\prod_{p\in P}\Bigl(1-\frac1p\Bigr).
+$$
+:::
+
+::: intuition
+$n$ と互いに素な数の割合は、$n$ の各素因数 $p$ について「$p$ で割り切れない割合 $1-1/p$」を掛け合わせたものに等しい。
+:::
+
+::: proof
+$U\defeq\{0,1,\dots,n-1\}$, $A_{p}\defeq\{a\in U : p\mid a\}$（$p\in P$）とおく。$\varphi(n)=\abs{\{a\in U:\gcd(a,n)=1\}}$ である。
+
+**Step 1（互いに素の言い換え）.** 【主張：$\gcd(a,n)=1\iff a\notin\bigcup_{p\in P}A_{p}$】$p\in P$ が $a$ を割り切れば $p$ は $a,n$ の公約数なので $p\mid\gcd(a,n)$（\ref{grp:bezout-euclid.2}）で、$\gcd(a,n)\neq1$。逆に $g\defeq\gcd(a,n)>1$ なら（$n\ge1$ より $g\ge1$）、$g$ の $1$ より大きい約数のうち最小のもの $p$ は素数である（$p$ の $1$ より大きい真の約数は $g$ の約数でもあり、最小性に反する）。$p\mid g$ なので $p\mid n$, $p\mid a$、すなわち $a\in A_{p}$。
+
+**Step 2（共通部分の大きさ）.** 【主張：$S\subseteq P$, $d_{S}\defeq\prod_{p\in S}p$ なら $\abs{A_{S}}=n/d_{S}$】まず、相異なる素数 $p_{1},\dots,p_{s}$ がすべて整数 $c$ を割り切れば $p_{1}\cdots p_{s}\mid c$ であることを $s$ の帰納法で示す：$d'\defeq p_{1}\cdots p_{s-1}\mid c$ とし $c=d'e$ と書く。$i<s$ について $\gcd(p_{s},p_{i})=1$（素数どうしの正の公約数は 1 か両者自身で、$p_{s}\neq p_{i}$）なので、\ref{grp:gcd-residue.2} を繰り返して $\gcd(p_{s},d')=1$。$p_{s}\mid d'e$ と \ref{grp:bezout-euclid.4} より $p_{s}\mid e$、よって $d'p_{s}\mid c$。これを $c=a$ と $c=n$ に使うと、$a\in A_{S}\iff d_{S}\mid a$ であり、$d_{S}\mid n$。$U$ の中の $d_{S}$ の倍数は $d_{S}t$（$0\le t<n/d_{S}$）のちょうど $n/d_{S}$ 個である。
+
+**Step 3（積への展開）.** 【主張：$\sum_{S\subseteq P}(-1)^{\abs{S}}\frac{n}{d_{S}}=n\prod_{p\in P}(1-\frac1p)$】有限集合 $P$ と有理数 $y_{p}$ について $\prod_{p\in P}(1+y_{p})=\sum_{S\subseteq P}\prod_{p\in S}y_{p}$ を $\abs{P}$ の帰納法で示せばよい（$y_{p}=-1/p$ とおく）：$P=P'\sqcup\{p_{0}\}$ なら、帰納法の仮定と分配法則により $(1+y_{p_{0}})\sum_{S\subseteq P'}\prod_{S}y_{p}=\sum_{S\subseteq P'}\prod_{S}y_{p}+\sum_{S\subseteq P'}\prod_{S\cup\{p_{0}\}}y_{p}$ で、右辺の二つの和は $p_{0}\notin S$ と $p_{0}\in S$ の部分集合にわたる和である。
+
+Step 1–3 と \ref{comb:inclusion-exclusion} から公式を得る。
+
+::: hypcheck
+- **$n\ge1$**：$U$ を $\{0,\dots,n-1\}$ とおくのと、Step 1 で $g\ge1$ を得るのに使った。
+- **$P$ が $n$ の素因数全体であること**：Step 1 の「$\Leftarrow$」で、$\gcd(a,n)$ の素因数が $P$ に入ることを使った。
+:::
+:::
+
+::: supplement
+**乗法性との関係.** この公式から $\gcd(m,n)=1$ のとき $\varphi(mn)=\varphi(m)\varphi(n)$ がすぐ読み取れる（$mn$ の素因数の集合は $m$ と $n$ の素因数の集合の交わらない和）。群論のページでは逆に中国剰余定理から乗法性を示している（\ref{grp:euler-phi-multiplicative}）。
+
+**高い視点.** 包除原理の証明の本質は、$\mathcal{P}(I)$ の上で「$\sum_{T\subseteq S}(-1)^{\abs{T}}=[S=\varnothing]$」が成り立つことだけである。これは「部分集合の束が、2 元の鎖 $\{0<1\}$ の $\abs{I}$ 個の直積であり、鎖の上のメビウス関数が $\mu(0,0)=1$, $\mu(0,1)=-1$ である」ことの言い換えで、直積の上ではメビウス関数も積になる。接続代数の言葉では、包除原理は「ゼータ関数の逆元を求めること」である（\ref[半順序集合のメビウス反転]{comb:page-mobius-inversion}）。
+:::
+
+## 問題 {#comb:sec-ie-problems}
+
+::: problem {#comb:prob-ie-derangement-recursion}
+$n\ge2$ について $D_{n}=(n-1)(D_{n-1}+D_{n-2})$ を、$\pi(n)$ の値と $\pi(\pi(n))=n$ かどうかで場合分けして示せ。
+:::
+
+::: solution
+完全順列 $\pi$ では $\pi(n)=k\neq n$ で、$k$ は $n-1$ 通りある。各 $k$ について、$\pi(n)=k$ となる完全順列が $D_{n-1}+D_{n-2}$ 個あることを示せばよい（\ref{comb:sum-rule}）。(a) $\pi(k)=n$ のとき：$\pi$ は $\{k,n\}$ を入れ替え、残りの $n-2$ 点の上の完全順列を与える。逆も成り立ち、$D_{n-2}$ 個。(b) $\pi(k)\neq n$ のとき：$\pi(j)=n$ となる $j\neq k$ があり、$\pi'(j)\defeq k$, $\pi'(i)\defeq\pi(i)$（$i\neq j$, $i\in[n-1]$）と定めると $\pi'$ は $[n-1]$ の置換で、$\pi'(j)=k\neq j$ より完全順列。逆に $[n-1]$ の完全順列 $\pi'$ から $j\defeq\pi'^{-1}(k)$ をとり $\pi(j)\defeq n$, $\pi(n)\defeq k$ と戻せる。対応は互いに逆で $D_{n-1}$ 個。
+:::
+
+::: problem {#comb:prob-ie-sieve-1000}
+$1$ 以上 $1000$ 以下の整数で、$2,3,5$ のどれでも割り切れないものはいくつあるか。
+:::
+
+::: solution
+$U=[1000]$, $A_{p}$ を $p$ の倍数全体とする。$d$ の倍数は $\lfloor1000/d\rfloor$ 個あり、相異なる素数がすべて割り切ることと積が割り切ることは同値（\ref{comb:euler-phi-formula} の Step 2）なので、\ref{comb:inclusion-exclusion} より
+$$
+1000-(500+333+200)+(166+100+66)-33=266.
+$$
+:::
+
+::: problem {#comb:prob-ie-surjection-small}
+$\abs{X}=n+1$, $\abs{Y}=n$（$n\ge1$）のとき、全射 $X\to Y$ の個数は $\binom{n+1}{2}n!$ であることを、直接の数え上げと \ref{comb:surjections-count} の両方で確かめよ（$n=2$ で $6$）。
+:::
+
+::: solution
+**直接.** 全射 $f$ の各ファイバーは空でなく、大きさの和は $n+1$ なので、ちょうど一つのファイバーが 2 元で他は 1 元である（\ref{comb:fiber-count}）。$f\mapsto(\text{2 元のファイバー }T,\ \bar f)$ とし、$\bar f$ を $X/T$（$T$ を一点につぶした $n$ 元集合）から $Y$ への全単射とみれば、$T$ は $\binom{n+1}{2}$ 通り、$\bar f$ は $n!$ 通りで、対応は全単射である。
+
+**公式.** $n=2$ では $\sum_{j=0}^{2}(-1)^{j}\binom{2}{j}(2-j)^{3}=8-2+0=6$、一方 $\binom{3}{2}2!=6$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
