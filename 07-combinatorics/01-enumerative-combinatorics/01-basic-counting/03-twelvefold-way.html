@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>写像の数え上げとスターリング数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/01-basic-counting/03-twelvefold-way.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 写像の数え上げとスターリング数 {#comb:page-twelvefold-way keywords="twelvefold way, Stirling numbers of the second kind, Stirling numbers of the first kind, Bell numbers, integer partitions, set partitions"}
+
+$m$ 個の玉を $n$ 個の箱に入れる方法は、玉どうし・箱どうしを区別するかどうか、各箱に高々 1 個（単射）か少なくとも 1 個（全射）かによって 12 通りの問題に分かれる。これを**十二通りの数え方**という。このページでは、区別しないことを群の作用の軌道として正確に定め、12 通りの答えを、前の二つのページの数（\ref{comb:page-binomial-coefficients}・\ref{comb:page-inclusion-exclusion}）と、新しく導入する**第 2 種スターリング数**・**整数の分割数**で表す。あわせて、置換を巡回置換の個数で数える**第 1 種スターリング数**と、二種類のスターリング数が多項式の基底の取り替えの係数として互いに逆の関係にあることを示す。
+
+## 記法と定義の確認 {#comb:sec-tw-notation}
+
+::: notation
+- 体系は $\ZF$ で、有限集合だけを扱う。$[n]=\{1,\dots,n\}$、$Y^{X}$ は写像全体、$\binom{n}{k}$ は二項係数（\ref{comb:binomial-coefficient}）、$n^{\underline{k}}$ は下降階乗冪（\ref{comb:falling-factorial}）、$[P]$ はアイバーソンの記法である。
+- 使う数え上げ：全射の個数（\ref{comb:surjections-count}）、重複組合せと方程式の解の個数（\ref{comb:multiset-count}・\ref{comb:compositions}）、ファイバーによる数え上げ（\ref{comb:fiber-count}）。
+- 群 $G$ の集合 $Z$ への作用と軌道は \ref{grp:orbit-stabilizer-def} の意味で、軌道は $Z$ を分割する（\ref{grp:orbits-partition.3}）。有限集合 $X$ の置換全体を $\Sym(X)$ と書く。
+- 置換 $\sigma\in\Sym(X)$ の**巡回**とは、$\ang{\sigma}$ の $X$ への自然な作用の軌道のことで、その個数を $\mathrm{cyc}(\sigma)$ と書く。不動点も長さ 1 の巡回として数える。大きさ 2 以上の巡回が巡回置換分解（\ref{grp:cycle-decomposition}）の各因子の台である。
+- 多項式環 $\Z[x]$ の元は係数の列で決まり、二つの多項式が等しいことは各次数の係数が等しいことである。上昇階乗冪を $x^{\overline{n}}\defeq x(x+1)\cdots(x+n-1)$（$x^{\overline{0}}=1$）と書く。$x^{\underline{n}}=x(x-1)\cdots(x-n+1)$ も $\Z[x]$ の元とみる。
+:::
+
+## 集合の分割と第 2 種スターリング数 {#comb:sec-tw-stirling2}
+
+::: definition 集合の分割 {#comb:set-partition keywords="set partition, block" index="集合の分割|しゅうごうのぶんかつ, ブロック（分割の）|ぶろっく"}
+集合 $X$ の**分割**とは、$X$ の空でない部分集合からなる集合 $\pi$ で、元どうしが交わらず、和集合が $X$ になるものである。$\pi$ の元を**ブロック**という。写像 $f\colon X\to Y$ の空でないファイバー全体 $\{f^{-1}(y) : y\in f[X]\}$ は $X$ の分割で、これを $f$ の**ファイバー分割**と書く。
+:::
+
+::: intuition
+分割とは $X$ の元を、空のグループを作らずにいくつかのグループに分けることである。グループには名前（番号）がない。
+:::
+
+::: definition 第 2 種スターリング数とベル数 {#comb:stirling2 keywords="Stirling numbers of the second kind, Bell numbers" index="第 2 種スターリング数|だいにしゅすたーりんぐすう, ベル数|べるすう"}
+$m,n\in\N$ に対し、$[m]$ の分割でブロックがちょうど $n$ 個のものの個数を $S(m,n)$ と書き、**第 2 種スターリング数**という。$[m]$ の分割全体の個数 $B_{m}\defeq\sum_{n=0}^{m}S(m,n)$ を**ベル数**という。$S(0,0)=1$（空集合の分割は空集合だけ）、$m\ge1$ なら $S(m,0)=0$、$n>m$ なら $S(m,n)=0$ である。
+:::
+
+::: intuition
+$S(m,n)$ は「$m$ 人を、区別のない $n$ 個の空でないグループに分ける方法の数」である。
+:::
+
+::: proposition 全射と分割 {#comb:surjections-partitions keywords="surjections and set partitions, explicit formula for Stirling numbers" index="スターリング数の公式|すたーりんぐすうのこうしき"}
+$\abs{X}=m$, $\abs{Y}=n$ なら、全射 $X\to Y$ の個数は $n!\,S(m,n)$ である。したがって
+$$
+S(m,n)=\frac{1}{n!}\sum_{j=0}^{n}(-1)^{j}\binom{n}{j}(n-j)^{m}.
+$$
+:::
+
+::: proof
+**Step 1.** 【主張：全射 $f$ にファイバー分割を対応させる写像 $\Phi$ は、全射全体から「ブロックが $n$ 個の $X$ の分割」全体への全射】$f$ が全射なので空でないファイバーはちょうど $n$ 個ある。逆に、ブロックが $n$ 個の分割 $\pi$ と全単射 $\beta\colon\pi\to Y$ に対し、$x$ を含むブロックを $B_{x}$ として $f(x)\defeq\beta(B_{x})$ と定めると、$f$ は全射でファイバー分割は $\pi$ である。
+
+**Step 2.** 【主張：$\Phi$ の各ファイバーの大きさは $n!$】$\Phi(f)=\pi$ となる $f$ と、全単射 $\beta\colon\pi\to Y$ は、$f\mapsto(B\mapsto f[B])$ と Step 1 の構成によって一対一に対応する（$f$ は各ブロックの上で定数なので $f[B]$ は 1 点）。全単射 $\pi\to Y$ は $n!$ 個ある（\ref{comb:bijections-count}）。
+
+**Step 3.** $X\approx[m]$ として分割の個数を $S(m,n)$ と同一視し、\ref{comb:fiber-count} で個数 $n!\,S(m,n)$ を得る。公式は \ref{comb:surjections-count} と比べればよい。
+:::
+
+::: theorem 第 2 種スターリング数の漸化式 {#comb:stirling2-recurrence keywords="recurrence for Stirling numbers of the second kind" index="スターリング数の漸化式|すたーりんぐすうのぜんかしき"}
+$m,n\ge1$ なら $S(m,n)=S(m-1,n-1)+n\,S(m-1,n)$。
+:::
+
+::: intuition
+最後の人 $m$ が一人だけのグループを作るか（残りを $n-1$ グループに分ける）、既存の $n$ グループのどれかに加わるか（$n$ 通り）で場合を分ける。
+:::
+
+::: proof
+ブロックが $n$ 個の $[m]$ の分割 $\pi$ を、$\{m\}\in\pi$ かどうかで分ける（\ref{comb:sum-rule}）。
+
+**Step 1.** 【主張：$\{m\}\in\pi$ のものは $S(m-1,n-1)$ 個】$\pi\mapsto\pi\setminus\{\{m\}\}$ は、ブロックが $n-1$ 個の $[m-1]$ の分割への全単射である（逆は $\{m\}$ を加える）。
+
+**Step 2.** 【主張：$\{m\}\notin\pi$ のものは $n\,S(m-1,n)$ 個】$m$ を含むブロックを $B$ とすると $B\setminus\{m\}\neq\varnothing$。$\pi$ から $m$ を取り除いた $\pi'\defeq\{C\setminus\{m\} : C\in\pi\}$ は、ブロックが $n$ 個の $[m-1]$ の分割である。写像 $\pi\mapsto\pi'$ の各ファイバーは、$m$ を $\pi'$ のどのブロックに加えるかの $n$ 通りと一対一に対応する。\ref{comb:fiber-count} から結論を得る。
+:::
+
+::: example
+漸化式から表を作ると、$S(4,2)=S(3,1)+2S(3,2)=1+2\cdot3=7$、$S(4,3)=S(3,2)+3S(3,3)=3+3=6$。ベル数は $B_{0},\dots,B_{5}=1,1,2,5,15,52$。
+:::
+
+::: proposition ベル数の漸化式 {#comb:bell-recurrence keywords="recurrence for Bell numbers" index="ベル数の漸化式|べるすうのぜんかしき"}
+$m\in\N$ について $B_{m+1}=\sum_{k=0}^{m}\binom{m}{k}B_{k}$。
+:::
+
+::: proof
+$[m+1]$ の分割 $\pi$ に、$m+1$ を含むブロックから $m+1$ を除いた集合 $T\subseteq[m]$ を対応させる。$T$ を固定すると、$\pi$ は残りの集合 $[m]\setminus T$ の分割と一対一に対応し、その個数は $B_{m-\abs{T}}$ である（$[m]\setminus T\approx[m-\abs{T}]$）。\ref{comb:fiber-count} と、大きさ $j$ の $T$ が $\binom{m}{j}$ 個あることから $B_{m+1}=\sum_{j}\binom{m}{j}B_{m-j}=\sum_{k}\binom{m}{k}B_{k}$（\ref{comb:binomial-identities.1} で $k=m-j$ とおく）。
+:::
+
+::: theorem 冪の下降階乗冪による展開 {#comb:power-falling-expansion keywords="x^m = sum S(m,n) falling factorial" index="下降階乗冪による展開|かこうかいじょうべきによるてんかい"}
+$\Z[x]$ において、$m\in\N$ について
+$$
+x^{m}=\sum_{n=0}^{m}S(m,n)\,x^{\underline{n}}.
+$$
+:::
+
+::: intuition
+$m$ 個の玉を $N$ 個の箱に入れる $N^{m}$ 通りを、「実際に使う箱の集合」ごとに分けると、使う箱が $n$ 個なら $\binom{N}{n}\cdot n!\,S(m,n)=S(m,n)N^{\underline{n}}$ 通りになる。この等式がすべての $N$ で成り立つので、多項式としても成り立つ。証明は多項式の計算で直接行う。
+:::
+
+::: proof
+**Step 1（下降階乗冪に $x$ を掛ける）.** 【主張：$x\cdot x^{\underline{n}}=x^{\underline{n+1}}+n\,x^{\underline{n}}$】$x^{\underline{n+1}}=x^{\underline{n}}(x-n)$ なので、右辺は $x^{\underline{n}}(x-n+n)=x\cdot x^{\underline{n}}$。
+
+**Step 2（$m$ の帰納法）.** 【主張：$m-1$ で成り立てば $m$ でも成り立つ】$m=0$ では両辺 $1$。帰納法の仮定と Step 1 から
+$$
+x^{m}=\sum_{n}S(m-1,n)\bigl(x^{\underline{n+1}}+n\,x^{\underline{n}}\bigr)=\sum_{n}\bigl(S(m-1,n-1)+n\,S(m-1,n)\bigr)x^{\underline{n}}.
+$$
+$m\ge1$ なので、$n\ge1$ では括弧の中は \ref{comb:stirling2-recurrence} より $S(m,n)$、$n=0$ では $S(m-1,-1)\defeq0$ と $0\cdot S(m-1,0)$ の和で $0=S(m,0)$ である。
+:::
+
+## 置換の巡回と第 1 種スターリング数 {#comb:sec-tw-stirling1}
+
+::: definition 第 1 種スターリング数 {#comb:stirling1 keywords="unsigned Stirling numbers of the first kind, signed Stirling numbers of the first kind" index="第 1 種スターリング数|だいいっしゅすたーりんぐすう"}
+$n,k\in\N$ に対し、$[n]$ の置換で巡回がちょうど $k$ 個のもの（$\mathrm{cyc}(\sigma)=k$）の個数を $c(n,k)$ と書き、**（符号なし）第 1 種スターリング数**という。$s(n,k)\defeq(-1)^{n-k}c(n,k)$ を**符号付き第 1 種スターリング数**という。$c(0,0)=1$、$n\ge1$ なら $c(n,0)=0$、$k>n$ なら $c(n,k)=0$ である。
+:::
+
+::: intuition
+$c(n,k)$ は「$n$ 人を、区別のない $k$ 個の円卓に座らせる方法の数」である（各円卓の座り方は回転で同じとみなす）。$\sum_{k}c(n,k)=n!$ である。
+:::
+
+::: theorem 第 1 種スターリング数の漸化式 {#comb:stirling1-recurrence keywords="recurrence for Stirling numbers of the first kind" index="第 1 種スターリング数の漸化式|だいいっしゅすたーりんぐすうのぜんかしき"}
+$n,k\ge1$ なら $c(n,k)=c(n-1,k-1)+(n-1)\,c(n-1,k)$。
+:::
+
+::: intuition
+$n$ 番目の人が一人で新しい円卓に座るか、すでに座っている $n-1$ 人のだれかの右隣に割り込むかで場合を分ける。
+:::
+
+::: proof
+$\sigma\in\Sym([n])$ を $\sigma(n)=n$ かどうかで分ける。
+
+**Step 1.** 【主張：$\sigma(n)=n$ のものは $c(n-1,k-1)$ 個】$\{n\}$ は一つの巡回で、$\sigma$ の $[n-1]$ への制限は $[n-1]$ の置換であり、その巡回は $\sigma$ の残りの巡回と一致する。逆に $[n-1]$ の置換は $n$ を固定して延長できる。
+
+**Step 2（$n$ を巡回から抜く）.** 【主張：$\sigma(n)\neq n$ のとき、$i\defeq\sigma^{-1}(n)$ とし、$\sigma'(i)\defeq\sigma(n)$、$\sigma'(y)\defeq\sigma(y)$（$y\in[n-1]$, $y\neq i$）と定めると、$\sigma'$ は $[n-1]$ の置換で $\mathrm{cyc}(\sigma')=\mathrm{cyc}(\sigma)$】$\sigma(n)\neq n$ より $i\neq n$、$\sigma(n)\in[n-1]$。$\sigma'$ の値は $\sigma[[n-1]\setminus\{i\}]\cup\{\sigma(n)\}=[n]\setminus\{n\}$ を一度ずつとるので $\sigma'$ は全単射である。$y\in[n-1]$ について $\sigma'(y)$ は $\sigma(y)$ か $\sigma^{2}(y)$ なので、$y$ の $\sigma'$ 軌道は $y$ の $\sigma$ 軌道に含まれる。逆に $\sigma$ 軌道 $O$ の $n$ 以外の元は、$\sigma$ で順にたどるとき $n$ を飛ばす以外は $\sigma'$ と同じ順に並ぶので、$O\setminus\{n\}$ は一つの $\sigma'$ 軌道である（$n$ を含む軌道は $i,\sigma(n)\in[n-1]$ を含むので $O\setminus\{n\}\neq\varnothing$）。よって $\sigma$ と $\sigma'$ の巡回は「$n$ を除く」ことで一対一に対応する。
+
+**Step 3（元に戻す）.** 【主張：$\sigma\mapsto(\sigma',i)$ は、$\sigma(n)\neq n$ の置換全体から $\Sym([n-1])\times[n-1]$ への全単射】逆写像は $(\sigma',i)\mapsto\sigma$、$\sigma(i)\defeq n$, $\sigma(n)\defeq\sigma'(i)$, 他は $\sigma'$ と同じ、で与えられ、合成がどちらも恒等写像であることは定義から確かめられる。Step 2 より巡回の個数は保たれるので、$\mathrm{cyc}(\sigma)=k$ のものは $(n-1)c(n-1,k)$ 個ある。
+:::
+
+::: theorem 上昇階乗冪の展開 {#comb:rising-factorial-expansion keywords="rising factorial expansion, falling factorial in powers" index="上昇階乗冪|じょうしょうかいじょうべき"}
+$\Z[x]$ において、$n\in\N$ について
+$$
+x^{\overline{n}}=\sum_{k=0}^{n}c(n,k)\,x^{k},\qquad x^{\underline{n}}=\sum_{k=0}^{n}s(n,k)\,x^{k}.
+$$
+:::
+
+::: intuition
+上昇階乗冪 $x(x+1)\cdots(x+n-1)$ を展開したときの $x^{k}$ の係数は、巡回がちょうど $k$ 個の置換の個数に等しい。下降階乗冪では、それに符号 $(-1)^{n-k}$ が付く。
+:::
+
+::: proof
+**Step 1（前半、$n$ の帰納法）.** 【主張：$x^{\overline{n}}=x^{\overline{n-1}}(x+n-1)$ の係数は漸化式を満たす】$n=0$ は両辺 $1$。$n\ge1$ で $x^{\overline{n-1}}=\sum_{k}c(n-1,k)x^{k}$ なら、$x^{k}$ の係数は $c(n-1,k-1)+(n-1)c(n-1,k)$ で、$k\ge1$ では \ref{comb:stirling1-recurrence} より $c(n,k)$、$k=0$ では $(n-1)c(n-1,0)=0=c(n,0)$（$n=1$ なら係数 $0$、$n\ge2$ なら $c(n-1,0)=0$）。
+
+**Step 2（後半）.** 【主張：$x$ を $-x$ に置き換える】$(-x)^{\overline{n}}=(-x)(-x+1)\cdots(-x+n-1)=(-1)^{n}x^{\underline{n}}$。前半に $-x$ を代入すると $(-1)^{n}x^{\underline{n}}=\sum_{k}c(n,k)(-1)^{k}x^{k}$ で、両辺に $(-1)^{n}$ を掛ければよい。
+:::
+
+::: corollary スターリング数の直交関係 {#comb:stirling-orthogonality keywords="orthogonality of Stirling numbers, inverse matrices" index="スターリング数の直交関係|すたーりんぐすうのちょっこうかんけい"}
+$m,n\in\N$ について
+$$
+\sum_{k}S(m,k)\,s(k,n)=[m=n],\qquad\sum_{k}s(m,k)\,S(k,n)=[m=n].
+$$
+:::
+
+::: proof
+\ref{comb:power-falling-expansion} の右辺に \ref{comb:rising-factorial-expansion} の後半を代入すると $x^{m}=\sum_{n}\bigl(\sum_{k}S(m,k)s(k,n)\bigr)x^{n}$ で、係数を比べて前半を得る。後半も同様に、$x^{\underline{m}}=\sum_{k}s(m,k)x^{k}=\sum_{n}\bigl(\sum_{k}s(m,k)S(k,n)\bigr)x^{\underline{n}}$ を得る。$x^{\underline{n}}$（$n\in\N$）は次数がちょうど $n$ でモニックなので、$\Z[x]$ の元を $x^{\underline{n}}$ の整数係数の有限和に表す方法は一意（最高次の係数から順に決まる）であり、係数を比べればよい。
+:::
+
+::: supplement
+**高い視点.** $\{x^{n}\}$ と $\{x^{\underline{n}}\}$ はどちらも $\Z[x]$ の（$\Z$ 加群としての）基底で、行列 $(S(m,n))$ と $(s(m,n))$ はその取り替え行列である。直交関係は「二つの取り替え行列が互いに逆」という当たり前の事実の言い換えにすぎない。
+
+**別証明（数え上げ）.** \ref{comb:power-falling-expansion} は、各 $N\in\N$ で $N^{m}=\sum_{n}S(m,n)N^{\underline{n}}$（写像 $[m]\to[N]$ を像の大きさで分け、\ref{comb:surjections-partitions} と \ref{comb:binomial-formula} を使う）を示し、「無限個の点で一致する $\Q[x]$ の二つの多項式は等しい」ことを使っても示せる。
+:::
+
+## 整数の分割 {#comb:sec-tw-integer-partitions}
+
+::: definition 整数の分割 {#comb:integer-partition keywords="integer partition, parts, partition function" index="整数の分割|せいすうのぶんかつ, 分割数|ぶんかつすう"}
+$m\in\N$ の**分割**とは、正の整数の広義単調減少列 $\lambda_{1}\ge\lambda_{2}\ge\dots\ge\lambda_{n}\ge1$ で $\lambda_{1}+\dots+\lambda_{n}=m$ となるもので、$\lambda_{i}$ を**部分**という。部分がちょうど $n$ 個の $m$ の分割の個数を $p_{n}(m)$、すべての分割の個数を $p(m)\defeq\sum_{n}p_{n}(m)$（**分割数**）と書く。$p_{0}(0)=1$（空の列）である。
+:::
+
+::: intuition
+$m$ 個の同じ玉を、区別のない箱にいくつかずつ分ける方法は、各箱の玉の数を大きい順に並べた列で決まる。
+:::
+
+::: proposition 分割数の漸化式 {#comb:partition-recurrence keywords="recurrence p_n(m) = p_{n-1}(m-1) + p_n(m-n)" index="分割数の漸化式|ぶんかつすうのぜんかしき"}
+$m,n\ge1$ なら $p_{n}(m)=p_{n-1}(m-1)+p_{n}(m-n)$（$m<n$ のとき $p_{n}(m-n)\defeq0$）。
+:::
+
+::: proof
+部分が $n$ 個の分割を、最小の部分 $\lambda_{n}$ が $1$ かどうかで分ける。$\lambda_{n}=1$ のものは、最後の部分を除くと部分が $n-1$ 個の $m-1$ の分割と一対一に対応する。$\lambda_{n}\ge2$ のものは、各部分から $1$ を引くと部分が $n$ 個の $m-n$ の分割と一対一に対応する（逆は各部分に $1$ を足す。単調性と正値性は保たれる）。
+:::
+
+::: example
+$p(1),\dots,p(7)=1,2,3,5,7,11,15$。たとえば $5=4+1=3+2=3+1+1=2+2+1=2+1+1+1=1+1+1+1+1$ で $p(5)=7$。分割数の母関数とオイラーの恒等式は \ref[整数の分割]{comb:page-partitions} で扱う。
+:::
+
+## 十二通りの数え方 {#comb:sec-tw-twelvefold}
+
+$X$ を $m$ 元集合（玉）、$Y$ を $n$ 元集合（箱）とする。群 $\Sym(X)\times\Sym(Y)$ は $Y^{X}$ に $(\pi,\tau)\cdot f\defeq\tau\circ f\circ\pi^{-1}$ で作用する。「玉を区別しない」とは $\Sym(X)$ の作用の軌道を数えること、「箱を区別しない」とは $\Sym(Y)$ の作用の軌道を数えること、両方とも区別しないとは $\Sym(X)\times\Sym(Y)$ の軌道を数えることと定める。$\tau\circ f\circ\pi^{-1}$ は $f$ が単射（全射）なら単射（全射）なので、単射全体・全射全体はこれらの作用で保たれ、その上の軌道も考えられる。
+
+::: theorem 十二通りの数え方 {#comb:twelvefold-way keywords="twelvefold way, balls into boxes" index="十二通りの数え方|じゅうにとおりのかぞえかた, 玉と箱|たまとはこ" refname="十二通りの数え方"}
+$\abs{X}=m$, $\abs{Y}=n$ のとき、写像・単射・全射の個数（または軌道の個数）は次の表のとおりである。
+
+| 玉 | 箱 | 任意の写像 | 単射 | 全射 |
+|---|---|---|---|---|
+| 区別する | 区別する | $n^{m}$ | $n^{\underline{m}}$ | $n!\,S(m,n)$ |
+| 区別しない | 区別する | $\binom{n+m-1}{m}$ | $\binom{n}{m}$ | $\binom{m-1}{n-1}$ |
+| 区別する | 区別しない | $\sum_{k=0}^{n}S(m,k)$ | $[m\le n]$ | $S(m,n)$ |
+| 区別しない | 区別しない | $\sum_{k=0}^{n}p_{k}(m)$ | $[m\le n]$ | $p_{n}(m)$ |
+
+ただし 2 行目は $n\ge1$ とし、全射の欄は $m\ge1$ とする（$m=n=0$ ではどの欄も $1$）。
+:::
+
+::: intuition
+玉を区別しないときは「各箱に何個入ったか」だけが残り、箱を区別しないときは「どの玉どうしが同じ箱に入ったか」だけが残る。両方区別しないときは「入った個数の多い順の列」だけが残る。
+:::
+
+::: proof
+**Step 1（1 行目）.** \ref{comb:functions-subsets}・\ref{comb:injections-count}・\ref{comb:surjections-partitions} による。
+
+**Step 2（2 行目：玉を区別しない）.** 【主張：$\Sym(X)$ 軌道は $f\mapsto(y\mapsto\abs{f^{-1}(y)})$ によって $Y$ 上の大きさ $m$ の多重集合と一対一に対応する】$g=f\circ\pi^{-1}$ なら $g^{-1}(y)=\pi[f^{-1}(y)]$ で大きさは等しいので、写像は軌道の上で定まる。逆に $f,g$ のファイバーの大きさがすべて等しければ、各 $y$ で全単射 $\pi_{y}\colon f^{-1}(y)\to g^{-1}(y)$ をとり（有限個なので選択公理は要らない）、それらを合わせた $\pi\in\Sym(X)$ で $g\circ\pi=f$。どの多重集合 $\mu$ も実現される：$X\approx[m]$, $Y=\{y_{1},\dots,y_{n}\}$ と番号を付け、$[m]$ を先頭から長さ $\mu(y_{1}),\dots,\mu(y_{n})$ の区間に切って、$j$ 番目の区間の元を $y_{j}$ に送ればよい（長さの和は $m$）。単射は重複度がすべて $\le1$ の多重集合、すなわち $Y$ の $m$ 元部分集合に対応し、全射は重複度がすべて $\ge1$ のものに対応する。個数は \ref{comb:multiset-count}・\ref{comb:binomial-coefficient}・\ref{comb:compositions.2}。
+
+**Step 3（3 行目：箱を区別しない）.** 【主張：$\Sym(Y)$ 軌道はファイバー分割によって、ブロックが $n$ 個以下の $X$ の分割と一対一に対応する】$\tau\circ f$ のファイバー分割は $f$ のものと同じである。逆に $f,g$ のファイバー分割が等しければ、各ブロック $B$ について $f[B]$ を $g[B]$ に写す全単射 $f[X]\to g[X]$ ができ、$\abs{Y\setminus f[X]}=\abs{Y\setminus g[X]}$ なので補集合どうしの全単射と合わせて $\tau\in\Sym(Y)$ が得られ、$g=\tau\circ f$。ブロックが $k\le n$ 個の分割はどれも、ブロックから $Y$ への単射を一つ選べば実現される。単射のファイバー分割はすべてのブロックが 1 元のもので、それは $m\le n$ のときだけ実現される。全射はブロックがちょうど $n$ 個のものに対応する。
+
+**Step 4（4 行目：両方区別しない）.** 【主張：$\Sym(X)\times\Sym(Y)$ 軌道は、空でないファイバーの大きさを大きい順に並べた列によって、部分が $n$ 個以下の $m$ の分割と一対一に対応する】$\tau\circ f\circ\pi^{-1}$ の空でないファイバーは $\pi[f^{-1}(y)]$ の形なので、大きさの列は変わらない。逆に列が等しければ、Step 3 の $\Sym(Y)$ の作用で $f,g$ の空でないファイバーの大きさを箱ごとに一致させられ（大きさの等しいファイバーどうしを対応させる全単射 $f[X]\to g[X]$ を補集合で延長する）、そのあと Step 2 の $\Sym(X)$ の作用で一致させられる。部分が $k\le n$ 個の分割はどれも実現される。単射・全射の欄は Step 3 と同様に、部分がすべて $1$（$m\le n$ のときだけ）と、部分がちょうど $n$ 個の場合である。
+
+::: hypcheck
+- **2 行目の $n\ge1$**：\ref{comb:multiset-count} の前提。$n=0$ なら写像は $m=0$ のときだけ 1 個である。
+- **全射の欄の $m\ge1$**：\ref{comb:compositions.2} の前提（$\binom{m-1}{n-1}$ が定義される範囲）。
+- 選択公理は使わない：Step 2・4 で全単射を選ぶのは有限個である。
+:::
+:::
+
+::: supplement
+**バーンサイドの補題との関係.** 軌道の個数は、一般には \ref{grp:page-burnside-counting} のバーンサイドの補題（固定点の個数の平均）でも数えられる。玉と箱の両方に別々の群（たとえば回転だけ）を作用させる問題がポリアの数え上げであり、\ref[ポリアの数え上げ定理]{comb:page-polya} で扱う。
+
+**高い視点.** 十二通りの数え方は、写像の集合 $Y^{X}$ に $\Sym(X)\times\Sym(Y)$ が作用するときの軌道の分類である。表の 2 行目・3 行目・4 行目は、軌道の完全な不変量（多重集合・分割・分割の型）をそれぞれ求めたことにあたる。
+:::
+
+## 問題 {#comb:sec-tw-problems}
+
+::: problem {#comb:prob-tw-stirling-small}
+$S(m,2)=2^{m-1}-1$（$m\ge1$）と $S(m,m-1)=\binom{m}{2}$（$m\ge1$）を示せ。
+:::
+
+::: solution
+2 ブロックの分割は、$m$ を含まない方のブロック $T$ で決まり、$T$ は $[m-1]$ の空でない部分集合（$[m-1]$ 全体も可：もう一方は $\{m\}$）なので $2^{m-1}-1$ 個。$m-1$ ブロックの分割はちょうど一つのブロックが 2 元で他は 1 元（ブロックの大きさの和が $m$）なので、2 元のブロックの選び方 $\binom{m}{2}$ 個。
+:::
+
+::: problem {#comb:prob-tw-cycles}
+$c(n,n-1)=\binom{n}{2}$ と $c(n,1)=(n-1)!$（$n\ge1$）を示せ。
+:::
+
+::: solution
+巡回が $n-1$ 個の置換は、一つの巡回が 2 元（互換）で他は不動点なので $\binom{n}{2}$ 個。巡回が 1 個の置換は \ref{comb:stirling1-recurrence} で $k=1$ とすると $c(n,1)=c(n-1,0)+(n-1)c(n-1,1)$ で、$n\ge2$ では $c(n-1,0)=0$ なので帰納的に $c(n,1)=(n-1)!$（$c(1,1)=1$）。
+:::
+
+::: problem {#comb:prob-tw-dice}
+同じ形のさいころ 3 個を振ったときの目の出方（さいころを区別しない）は何通りか。区別する場合とあわせて答えよ。
+:::
+
+::: solution
+玉が 3 個のさいころ、箱が 6 つの目である。区別するとき $6^{3}=216$ 通り。区別しないときは表の 2 行目で $\binom{6+3-1}{3}=56$ 通り。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
