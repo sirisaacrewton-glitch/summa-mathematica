@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ネットワークフロー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/02-matching-flows/03-network-flows.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ネットワークフロー {#graph:page-network-flows keywords="network, flow, capacity, cut, max-flow min-cut theorem, Ford-Fulkerson, augmenting path, integrality theorem"}
+
+辺に流せる量の上限（容量）が決まった有向グラフで、出発点から到着点へ最大どれだけ流せるかという問題を考える。答えは、出発点と到着点を分ける「切れ目」の容量の最小値に等しい。これが**最大流最小カット定理**（フォード–ファルカーソン）であり、容量が整数なら最大の流れも整数でとれる（整数性定理）。このページでは増加道の方法でこれらを証明し、二部グラフのケーニッヒの定理（\ref{graph:konig-theorem}）が特別な場合として得られることを示す。
+
+## 記法と定義の確認 {#graph:sec-nf-notation}
+
+::: notation
+- **有向グラフ** $D=(V,A)$ とは、有限集合 $V$ と、$x\neq y$ となる順序対 $(x,y)$ の集合 $A\subseteq V\times V$ の組である。$(x,y)\in A$ を $x$ から $y$ への**弧**という（逆向きの弧 $(y,x)$ もあってよい）。
+- $S\subseteq V$ について $\partial^{+}S\defeq\{(x,y)\in A : x\in S,\ y\notin S\}$（$S$ から出る弧）、$\partial^{-}S\defeq\{(x,y)\in A : x\notin S,\ y\in S\}$（$S$ に入る弧）。$v\in V$ について $\partial^{\pm}v\defeq\partial^{\pm}\{v\}$。
+- 実数値の関数 $g$ と有限集合 $F\subseteq A$ について $g(F)\defeq\sum_{a\in F}g(a)$。
+:::
+
+## ネットワークと流れ {#graph:sec-nf-flows}
+
+::: definition ネットワークと流れ {#graph:network-flow keywords="network, source, sink, capacity, flow, value of a flow, cut, capacity of a cut" index="ネットワーク|ねっとわーく, フロー|ふろー, 流れ（ネットワークの）|ながれ, 容量|ようりょう, 始点|してん, 終点|しゅうてん, 最小カット|さいしょうかっと"}
+**ネットワーク** $N=(D,s,t,c)$ とは、有向グラフ $D=(V,A)$、相異なる 2 頂点 $s$（**始点**）と $t$（**終点**）、および**容量** $c\colon A\to\R_{\ge0}$ の組である。関数 $f\colon A\to\R$ が**流れ**であるとは、
+1. （容量制約）すべての $a$ で $0\le f(a)\le c(a)$、
+2. （保存則）$s,t$ 以外のすべての $v$ で $f(\partial^{-}v)=f(\partial^{+}v)$
+
+を満たすことをいう。$\operatorname{val}f\defeq f(\partial^{+}s)-f(\partial^{-}s)$ を流れの**値**という。$s\in S$, $t\notin S$ となる $S\subseteq V$ を**カット**と呼び、$c(\partial^{+}S)$ をその**容量**という。
+:::
+
+::: intuition
+弧は一方向にだけ水を流せる管で、容量はその太さである。途中の点では入る量と出る量が等しく、始点から湧き出した量が流れの値である。カットは始点側と終点側を分ける切れ目である。
+:::
+
+::: lemma 流れの値とカット {#graph:flow-cut-lemma keywords="value of a flow equals net flow across any cut, weak duality" index="弱双対性（フロー）|じゃくそうついせい"}
+流れ $f$ とカット $S$ について
+$$
+\operatorname{val}f=f(\partial^{+}S)-f(\partial^{-}S)\le c(\partial^{+}S).
+$$
+:::
+
+::: proof
+**Step 1（保存則の和）.** 【主張：$\sum_{v\in S}\bigl(f(\partial^{+}v)-f(\partial^{-}v)\bigr)=f(\partial^{+}S)-f(\partial^{-}S)$】両端が $S$ にある弧 $(x,y)$ は、$v=x$ の項で $+f$、$v=y$ の項で $-f$ と数えられて打ち消す。$S$ から出る弧は $+f$ として一度、$S$ に入る弧は $-f$ として一度数えられる。
+
+**Step 2.** 左辺は保存則により $v=s$ の項だけが残り（$t\notin S$）、$\operatorname{val}f$ に等しい。不等式は $0\le f\le c$ から $f(\partial^{+}S)\le c(\partial^{+}S)$, $f(\partial^{-}S)\ge0$ による。
+:::
+
+## 最大流最小カット定理 {#graph:sec-nf-mfmc}
+
+::: definition 増加道 {#graph:flow-augmenting-path keywords="augmenting path for a flow, residual capacity" index="増加道（フローの）|ぞうかみち, 残余容量|ざんよようりょう"}
+流れ $f$ について、頂点の列 $s=x_{0},x_{1},\dots,x_{k}$（相異なる）で、各 $i$ について (i) $(x_{i},x_{i+1})\in A$ かつ $f<c$（**前向き**）、または (ii) $(x_{i+1},x_{i})\in A$ かつ $f>0$（**後向き**）となるものを $s$ からの**未飽和道**という。$x_{k}=t$ のとき**増加道**という。各段の余裕（前向きなら $c-f$、後向きなら $f$）の最小値を $\epsilon>0$ とする。
+:::
+
+::: intuition
+増加道は、空いている管を順方向に、すでに流れている管を逆方向にたどって始点から終点に至る道である。前向きの管には $\epsilon$ だけ多く流し、後向きの管の流れを $\epsilon$ だけ減らすと、全体の値が $\epsilon$ 増える。
+:::
+
+::: theorem 最大流最小カット定理 {#graph:max-flow-min-cut keywords="max-flow min-cut theorem, Ford-Fulkerson theorem, integrality" index="最大流最小カット定理|さいだいりゅうさいしょうかっとていり, フォード–ファルカーソンの定理|ふぉーどふぁるかーそんのていり" refname="最大流最小カット定理"}
+容量がすべて整数のネットワークでは、流れの値の最大値はカットの容量の最小値に等しく、値が最大の流れで、すべての弧の値が整数であるものが存在する（**整数性**）。
+:::
+
+::: intuition
+始点から終点へ流せる最大の量は、始点側と終点側を分ける切れ目の太さの合計の最小値に等しい。管の太さが整数なら、最大の流し方も整数の量でとれる。
+:::
+
+::: proof
+**Step 1（増加道による改善）.** 【主張：$f$ に増加道 $P$ があれば、$P$ の前向きの弧で $+\epsilon$、後向きの弧で $-\epsilon$ した $f'$ は値 $\operatorname{val}f+\epsilon$ の流れ】$\epsilon$ の定め方から $0\le f'\le c$。$P$ の内部の頂点 $x_{i}$ では、入ってくる段と出ていく段の組み合わせ（前・前、前・後、後・前、後・後）のどれでも、$x_{i}$ への流入と流出の変化が等しいので保存則が保たれる。$s$ では最初の段だけが変化し、前向きなら流出が $+\epsilon$、後向きなら流入が $-\epsilon$ で、値は $+\epsilon$。
+
+**Step 2（整数の流れの繰り返し）.** 【主張：零の流れから始めて Step 1 を繰り返すと、有限回で増加道のない整数の流れ $f$ に達する】容量と $f$ が整数なら $\epsilon$ は正の整数で、$f'$ も整数。値は 1 以上ずつ増え、\ref{graph:flow-cut-lemma} より $c(\partial^{+}\{s\})$ 以下なので、有限回で止まる。
+
+**Step 3（最小カットの構成）.** 【主張：増加道のない流れ $f$ について、$s$ からの未飽和道で到達できる頂点の集合 $S$ はカットで、$\operatorname{val}f=c(\partial^{+}S)$】増加道がないので $t\notin S$、$s\in S$。$(x,y)\in\partial^{+}S$ なら $f(x,y)=c(x,y)$（さもなくば $x$ までの未飽和道を $y$ まで延ばせる）、$(x,y)\in\partial^{-}S$ なら $f(x,y)=0$（さもなくば後向きに $x$ まで延ばせる）。\ref{graph:flow-cut-lemma} の等式から $\operatorname{val}f=c(\partial^{+}S)-0$。
+
+**Step 4.** \ref{graph:flow-cut-lemma} より任意の流れの値は任意のカットの容量以下なので、Step 3 の $f$ は値が最大、$S$ は容量が最小で、両者は等しい。
+
+::: hypcheck
+- **容量が整数**：Step 2 で $\epsilon\ge1$ となり、有限回で止まることに使った。容量が有理数なら公分母を掛けて同じ結論（値の最大は最小カット、最大流は有理数でとれる）が得られる。実数の容量でも最大値の等式は成り立つ（補足）が、増加道の選び方によっては Step 2 の手順が止まらない例が知られている。
+:::
+:::
+
+::: supplement
+**実数の容量.** 流れ全体は $\R^{A}$ の有界閉集合（有限個の不等式と等式で定まる）で、値は連続関数なので最大値をとる（\ref{top:extreme-value}）。最大の流れには増加道がない（あれば Step 1 で値が増える）ので、Step 3・4 の議論がそのまま使え、最大流最小カット定理は実数の容量でも成り立つ。
+
+**計算量.** 増加道として辺の数が最小のものを選ぶ（幅優先探索）と、容量によらず $O(\abs{V}\,\abs{A}^{2})$ 回の基本操作で最大流が求まることが知られている（エドモンズ–カープの算法）。
+
+**高い視点.** 最大流最小カット定理は、線形計画の双対定理の特別な場合であり、制約行列の完全単模性が整数性を保証している。
+:::
+
+## 応用：ケーニッヒの定理の別証明 {#graph:sec-nf-konig}
+
+::: corollary 流れによるケーニッヒの定理 {#graph:konig-via-flows keywords="Konig's theorem from max-flow min-cut" index="ケーニッヒの定理（フローによる）|けーにっひのていり"}
+二部グラフ $G$（二部分割 $\{A,B\}$）で、最大マッチングの辺の数は最小頂点被覆の頂点数に等しい。
+:::
+
+::: proof
+**Step 1（ネットワーク）.** 新しい頂点 $s,t$ を加え、弧 $(s,a)$（$a\in A$）、$(b,t)$（$b\in B$）を容量 1、$G$ の各辺 $ab$ を弧 $(a,b)$ として容量 $\abs{V}+1$（「無限大」の代わり）とする。
+
+**Step 2（整数の流れとマッチング）.** 【主張：整数の流れの値 $k$ と、$k$ 本の辺のマッチングは一対一に対応する】整数の流れでは、$(s,a)$ の値は 0 か 1 で、保存則から $a$ を出る弧のうち値 1 のものは高々一本（$a$ に入るのは $(s,a)$ だけ）、同様に $b$ に入る値 1 の弧は高々一本。値 1 の弧 $(a,b)$ の集合はマッチングで、その本数は値に等しい。逆も同様。
+
+**Step 3（有限容量のカットと被覆）.** 【主張：容量 $\le\abs{V}$ のカット $S$ について、$U\defeq(A\setminus S)\cup(B\cap S)$ は頂点被覆で $\abs{U}=c(\partial^{+}S)$】容量が $\abs{V}$ 以下なので、$a\in S$, $b\notin S$ となる $G$ の辺 $ab$ はない。よって各辺 $ab$ は $a\notin S$（$a\in U$）か $b\in S$（$b\in U$）を満たす。$\partial^{+}S$ は $(s,a)$（$a\notin S$）と $(b,t)$（$b\in S$）からなるので容量は $\abs{U}$。逆に頂点被覆 $U$ から $S\defeq\{s\}\cup(A\setminus U)\cup(B\cap U)$ を作ると、容量 $\abs{U}$ のカットになる。
+
+**Step 4.** 最小カットの容量は $S=\{s\}$ の $\abs{A}\le\abs{V}$ 以下なので、Step 3 から最小カットの容量は最小頂点被覆の大きさに等しい。\ref{graph:max-flow-min-cut} と Step 2 から結論を得る。
+:::
+
+## 問題 {#graph:sec-nf-problems}
+
+::: problem {#graph:prob-nf-small}
+頂点 $s,a,b,t$、弧と容量 $(s,a):3$, $(s,b):2$, $(a,b):1$, $(a,t):2$, $(b,t):3$ のネットワークで、最大流の値と最小カットを求めよ。
+:::
+
+::: solution
+$S=\{s\}$ の容量は $3+2=5$。流れ $f(s,a)=3$, $f(a,t)=2$, $f(a,b)=1$, $f(s,b)=2$, $f(b,t)=3$ は保存則（$a$：入 3、出 $2+1$；$b$：入 $1+2$、出 3）を満たし値 5。\ref{graph:flow-cut-lemma} より最大で、$\{s\}$ が最小カット。
+:::
+
+::: problem {#graph:prob-nf-edge-disjoint}
+有向グラフで $s$ から $t$ への弧を共有しない有向道の最大本数は、$s$ と $t$ を分けるのに除く必要のある弧の最小本数に等しいことを示せ。
+:::
+
+::: solution
+すべての容量を 1 とする。値 $k$ の整数の流れは、値 1 の弧の集合として与えられ、保存則から $s$ から $t$ への弧素な有向道 $k$ 本（と閉路）に分解できる（値 1 の弧をたどって $t$ に着くまで進み、使った弧を除いて繰り返す。途中の頂点では流入と流出が等しいので行き止まらない）。逆に $k$ 本の弧素な道は値 $k$ の流れを与える。カット $S$ の容量は $\partial^{+}S$ の本数で、それを除くと $s$ から $t$ への有向道はなくなる。逆に弧集合 $F$ を除いて $t$ に到達できなくなるなら、到達できる頂点の集合 $S$ について $\partial^{+}S\subseteq F$。\ref{graph:max-flow-min-cut} から結論を得る。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
