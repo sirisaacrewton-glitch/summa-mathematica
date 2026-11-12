@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>クラトフスキーの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/03-planarity/03-kuratowski.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# クラトフスキーの定理 {#graph:page-kuratowski keywords="Kuratowski's theorem, Wagner's theorem, planarity, K5, K3,3, topological minor, minor, 3-connected planar graphs"}
+
+$K^{5}$ と $K_{3,3}$ は平面的でなく（\ref{graph:k5-k33-nonplanar}）、平面的なグラフの部分グラフやマイナーは平面的なので、平面的なグラフは $K^{5}$ も $K_{3,3}$ もマイナーに含まない。驚くべきことに、その逆が成り立つ：**$K^{5}$ と $K_{3,3}$ をマイナーに（同じことだが位相的マイナーに）含まないグラフは平面的である**。これがクラトフスキーの定理（位相的マイナー版、1930 年）とワグナーの定理（マイナー版、1937 年）である。このページでは、Diestel の方針に従い、まず 3 連結な場合を辺の縮約による帰納法で示し、次に一般の場合を「位相的マイナーを含まない辺について極大なグラフは 3 連結」という補題で 3 連結な場合に帰着させる。
+
+## 記法と定義の確認 {#graph:sec-ku-notation}
+
+::: notation
+- 平面埋め込み・面・辺の両側は \ref{graph:page-plane-graphs}、2 連結な平面グラフの面が閉路で囲まれること（\ref{graph:faces-bounded-by-cycles}）、部分グラフの面（\ref{graph:faces-of-subgraph}）、θ 形グラフの面（\ref{graph:theta-faces}）、縮約できる辺（\ref{graph:contractible-edge}）は \ref{graph:page-face-boundaries} のとおり。
+- 細分・位相的マイナー・マイナー・分岐集合と、それらが半順序であることは \ref{graph:page-minors} のとおり。$G\succcurlyeq X$ は $X$ が $G$ のマイナーであること、$TX\subseteq G$ は $X$ の細分が $G$ に含まれることを表す。
+- $G$ の分離 $\{V_{1},V_{2}\}$ とは、$V_{1}\cup V_{2}=V$ で、$V_{1}\setminus V_{2}$ と $V_{2}\setminus V_{1}$ の間に辺がないことをいい、両方が空でないとき**真の分離**、$\abs{V_{1}\cap V_{2}}$ を**位数**という。
+- \ref{mfd:schoenflies} を使う。
+:::
+
+## 面に頂点や辺を描き足す {#graph:sec-ku-insertion}
+
+::: lemma 面への描き足し {#graph:face-insertion keywords="adding a vertex or an edge inside a face bounded by a cycle" index="面への描き足し|めんへのえがきたし"}
+平面グラフ $\Gamma$ の面 $f$ の境界が閉路 $C$ であるとする。$C$ の頂点 $u_{1},\dots,u_{r}$ に対し、$f$ の中に新しい点 $w$ と、$w$ と $u_{j}$ を結ぶ弧 $\alpha_{j}$ で、内部が $f$ に含まれ互いに $w$ でしか交わらないものがとれる。また $C$ の 2 頂点を、内部が $f$ に含まれる弧で結べる。
+:::
+
+::: proof
+**Step 1（内部の場合）.** $f$ は $\mathbb{R}^{2}\setminus|C|$ の成分である（\ref{graph:faces-of-subgraph.2}）。$f$ が $C$ の内部なら、\ref{mfd:schoenflies} より同相写像 $\Phi\colon C\cup f\to\overline{B}$（閉単位円板）で $C$ を単位円に移すものがある。$w\defeq\Phi^{-1}(0)$、$\alpha_{j}\defeq\Phi^{-1}([0,\Phi(u_{j})])$（半径）とすればよい。2 頂点は弦 $\Phi^{-1}([\Phi(u),\Phi(u')])$ で結べる（弦の内部は開円板にある）。
+
+**Step 2（外部の場合）.** $C$ の内部の点 $a$ をとり、$\phi(z)=1/(z-a)$（$\widehat{\C}$ の同相写像）で移すと、$f$ は $\phi(C)$ の内部（から $0=\phi(\infty)$ を除いたもの）に移る（\ref{graph:theta-faces} の証明の Step 2）。Step 1 の構成で、$0$ を通らないように点と弧をとり（円板の中で 0 を避ける半径・弦は回転で選べる）、$\phi^{-1}$ で戻せばよい。
+:::
+
+## マイナーと位相的マイナー {#graph:sec-ku-minors}
+
+::: lemma K5 と K3,3 のマイナー {#graph:k5-k33-minor-topological keywords="a graph has a K5 or K3,3 minor iff it has a K5 or K3,3 topological minor" index="K5 マイナー|けーごまいなー"}
+グラフが $K^{5}$ か $K_{3,3}$ をマイナーにもつことと、$K^{5}$ か $K_{3,3}$ を位相的マイナーにもつことは同値である。
+:::
+
+::: proof
+**Step 1.** 位相的マイナーはマイナーで、$\Delta(K_{3,3})=3$ なので $K_{3,3}$ のマイナーは位相的マイナー（\ref{graph:topological-minor-is-minor}）。よって $K^{5}$ をマイナーにもつ $G$ が $TK^{5}$ か $K_{3,3}$ のマイナーを含むことを示せばよい。
+
+**Step 2（極小なモデル）.** 【主張：$K^{5}$ のモデル（分岐集合 $V_{1},\dots,V_{5}$ と、それらの中と間の辺からなる部分グラフ $K$）で頂点と辺の数の和が最小のものでは、各 $K[V_{i}]$ は木、異なる分岐集合の間の辺はちょうど 1 本】$K[V_{i}]$ に閉路があればその辺を除けるし、間に 2 本あれば 1 本除ける。$K[V_{i}]$ の木に、$V_{i}$ から出る 4 本の辺を加えた木を $T_{i}$ とすると、$T_{i}$ の葉はちょうどその 4 本の外側の端点である（$V_{i}$ の中の葉は除ける）。
+
+**Step 3（葉 4 個の木の形）.** 葉が 4 個の木では、次数 3 以上の頂点 $v$ について $\sum(d(v)-2)=2$（葉の数 $=2+\sum(d(v)-2)$）なので、次数 4 の頂点が一つか、次数 3 の頂点が二つある。すべての $T_{i}$ が前者なら、$K$ は $TK^{5}$ である（次数 4 の頂点が分岐点、4 本の道が出る）。
+
+**Step 4（$K_{3,3}$ の構成）.** 【主張：ある $T_{1}$ が次数 3 の頂点 $a,b$ を二つもてば $G\succcurlyeq K_{3,3}$】$T_{1}$ の $a$–$b$ 道の辺を一本除くと、$T_{1}$ は $a$ を含む部分と $b$ を含む部分に分かれ、それぞれ葉を 2 個ずつ含む（$a$ と $b$ からそれぞれ道以外に 2 本の枝が出るので）。$a$ 側の葉が属する分岐集合を $V_{2},V_{3}$、$b$ 側を $V_{4},V_{5}$ とする。$V_{1}$ を $a$ 側と $b$ 側の二つの分岐集合 $A,B$ に分け、他の $V_{j}$ はそのままにすると、6 つの分岐集合の間に、$A$–$B$、$A$–$V_{2}$, $A$–$V_{3}$, $B$–$V_{4}$, $B$–$V_{5}$、$V_{j}$ どうし（$2\le j\le5$）の辺がある。二部分割 $\{A,V_{4},V_{5}\}$, $\{B,V_{2},V_{3}\}$ のすべての組が結ばれているので $K_{3,3}$ のモデルである。
+:::
+
+## 3 連結な場合 {#graph:sec-ku-3-connected}
+
+::: lemma 3 連結な場合 {#graph:kuratowski-3-connected keywords="3-connected graphs without K5 or K3,3 minor are planar" index="クラトフスキーの定理（3 連結）|くらとふすきーのていり"}
+$K^{5}$ も $K_{3,3}$ もマイナーに含まない 3 連結グラフは平面的である。
+:::
+
+::: proof
+$\abs{G}$ の帰納法。$\abs{G}=4$ なら $G=K^{4}$ で、三角形とその内部の一点で描ける。$\abs{G}>4$ とする。
+
+**Step 1（縮約して描く）.** \ref{graph:contractible-edge} より、$G/xy$ が 3 連結となる辺 $xy$ がある。マイナー関係の推移性（\ref{graph:minor-partial-order}）から $G/xy$ も $K^{5}$, $K_{3,3}$ をマイナーに含まないので、帰納法の仮定から平面グラフ $\tilde G$ として描ける。$v\defeq v_{xy}$ とし、$\tilde G-v$ の面のうち点 $v$ を含むものを $f$ とする。$\tilde G-v$ は 2 連結なので、$\partial f$ は閉路 $C$ である（\ref{graph:faces-bounded-by-cycles}）。$v$ から出る辺は、内部が $|\tilde G-v|$ と交わらず $v\in f$ から出るので内部は $f$ にあり、他端は $\partial f=C$ の上にある。
+
+**Step 2（$x$ の位置に $v$ を置く）.** $X\defeq N_{G}(x)\setminus\{y\}$, $Y\defeq N_{G}(y)\setminus\{x\}$ とすると、$v$ の近傍は $X\cup Y\subseteq V(C)$。$\tilde G$ から辺 $vu$（$u\in Y\setminus X$）を除いたものを $\tilde G'$ とすると、$\tilde G'$ は $G-y$ の描画で、$x$ が点 $v$ で表される。$X$ の頂点を $C$ に沿った順に $x_{1},\dots,x_{k}$ とし、$x_{i}$ から $x_{i+1}$ までの $C$ の道を $P_{i}$（$x_{k+1}\defeq x_{1}$）とする。$d_{G}(x)\ge3$ なので $k\ge2$。
+
+**Step 3（$Y$ はある $P_{i}$ に含まれる）.** 【主張：$Y\subseteq V(P_{i})$ となる $i$ がある】ないとする。
+- (a) $y$ の近傍 $y'\in Y\setminus X$ があるとき：$y'$ はある $P_{i}$ の内部にある。$Y\not\subseteq V(P_{i})$ なので $y''\in Y\setminus V(P_{i})$ があり、$C$ の上で $y',y''$ は $x_{i},x_{i+1}$ によって隔てられる（$C$ を巡ると $x_{i},y',x_{i+1},y''$ の順に現れる）。
+- (b) $Y\subseteq X$ で $\abs{Y}\ge3$ のとき：$y$ と $x$ は 3 頂点 $z_{1},z_{2},z_{3}\in Y$ を共通の近傍にもち、$C$ の $z$ どうしを結ぶ 3 本の弧と辺 $xz_{j}$, $yz_{j}$, $xy$ が $TK^{5}$（分岐点 $x,y,z_{1},z_{2},z_{3}$）をなす。
+- (c) $Y\subseteq X$ で $\abs{Y}\le2$ のとき：$d_{G}(y)\ge3$ より $Y=\{y',y''\}$。両者は同じ $P_{i}$ に入らないので $C$ の上で隣り合う $X$ の点ではなく、$C$ を $y',y''$ で分けた二つの弧のどちらにも $X$ の点 $x',x''$ がある。
+
+(a)(c) では、$C$ を巡ると $x',y',x'',y''$ の順に現れる 4 点（(a) では $x'=x_{i}$, $x''=x_{i+1}$）について、$C$ のこれらの間の 4 本の弧と辺 $xx',xx'',yy',yy'',xy$ が $TK_{3,3}$（二部分割 $\{x,y',y''\}$, $\{y,x',x''\}$）をなす。どの場合も $G$ が $K^{5}$ か $K_{3,3}$ をマイナーに含み、仮定に反する。
+
+**Step 4（$y$ を置く面）.** 【主張：$Y\subseteq V(P_{i})$ とすると、閉路 $C_{i}\defeq vx_{i}P_{i}x_{i+1}v$ で囲まれた $\tilde G'$ の面 $f_{i}$ がある】$Q\defeq x_{i}vx_{i+1}$（$\tilde G'$ の二本の辺）は内部が $f$ にある $C$ 道で、\ref{graph:theta-faces} より $C\cup Q$ の面は 3 つ：$f$ の外側の面と、$f$ を $Q$ で分けた二つの面 $f_{i}$（境界 $Q\cup P_{i}=C_{i}$）と $f_{i}'$（境界 $Q\cup(C$ の残りの道$)$）である。$\tilde G'$ の残りの部分は、$f$ の外か $C$ の上にあるか、$v$ から $x_{j}$（$j\neq i,i+1$）への辺である。後者の辺の内部は連結で $C\cup Q$ と交わらないので $C\cup Q$ の一つの面にあり、その終点 $x_{j}$ は $\overline{f_{i}}=f_{i}\cup C_{i}$ に入らない（$x_{j}\notin V(C_{i})$）ので、その面は $f_{i}$ ではない。よって $f_{i}\cap|\tilde G'|=\varnothing$、$\partial f_{i}=C_{i}\subseteq|\tilde G'|$ で、\ref{graph:faces-of-subgraph.2} より $f_{i}$ は $\tilde G'$ の面である。
+
+**Step 5（$y$ を描き足す）.** \ref{graph:face-insertion} により、$f_{i}$ の中に点 $y$ を置き、$Y\cup\{x\}$（すべて $C_{i}$ の上：$x$ は点 $v$）の各点への弧を描くと、$G$ の平面埋め込みが得られる。
+:::
+
+## 一般の場合 {#graph:sec-ku-general}
+
+::: lemma 小さい分離をもつ極大なグラフ {#graph:maximal-separation keywords="edge-maximal graphs without TK5, TK3,3 and separations of order at most 2" index="辺について極大|へんについてきょくだい"}
+$\mathcal{X}=\{K^{5},K_{3,3}\}$ とする。$G$ が「$\mathcal{X}$ のどれも位相的マイナーに含まない」性質について辺に関して極大で、位数 $\kappa(G)\le2$ の真の分離 $\{V_{1},V_{2}\}$ をもつとすると、$G_{i}\defeq G[V_{i}]$ も同じ性質について辺に関して極大で、$S\defeq V_{1}\cap V_{2}$ は 2 頂点からなり、その 2 頂点は隣接する。
+:::
+
+::: proof
+**Step 1（準備）.** $S$ の各頂点は $G_{i}-S$ のすべての成分に隣接する（そうでなければ $S$ より小さい集合が $G$ を分離し、$\abs{S}=\kappa(G)$ に反する）。極大性から、$G$ に加えた辺 $e$ はどれも $G+e$ の中のある $TX$（$X\in\mathcal{X}$）に含まれる。$X$ は 3 連結なので、$TX$ の分岐点はすべて同じ側、たとえば $V_{1}$ にある（両側に分岐点があれば、それらを結ぶ 3 本の独立な道が $\abs{S}\le2$ の $S$ と、加えた一本の辺だけを通ることになり矛盾）。このとき $TX$ と $V_{2}\setminus V_{1}$ の交わりは、$X$ の一本の辺に対応する道 $P$ の一部に限られる。
+
+**Step 2（$\abs{S}\le1$ は不可能）.** $S=\varnothing$ なら、$V_{1}$ と $V_{2}$ の頂点を結ぶ辺 $e$ を加える。Step 1 の $TX$ の分岐点は $V_{1}$ にあり、道 $P$ が $e$ を通って $V_{2}$ に入ると、$V_{1}$ に戻る通り道がもうない（$S=\varnothing$ で、$e$ は使用済み）ので、$P$ は $V_{2}$ に入らず、$TX$ は $e$ を使わない。よって $TX\subseteq G$ となり矛盾。$S=\{v\}$ なら、$v$ の近傍 $v_{1}\in V_{1}\setminus S$, $v_{2}\in V_{2}\setminus S$ を結ぶ辺 $e=v_{1}v_{2}$ を加える。$P$ が $e$ を通るなら $P$ は $v$ と $e$ の両方を通り、$P$ の $v\dots v_{2}v_{1}$ の部分を辺 $vv_{1}$ に置き換えると $G_{1}$ の中の $TX$ になり矛盾。
+
+**Step 3（$S$ の 2 頂点は隣接）.** $S=\{x,y\}$ で $xy\notin E$ なら、$e=xy$ を加えた $TX$ の $e$ を、$G_{2}$ の中の $x$–$y$ 道（$G_{2}-S$ の成分を通る。Step 1 より存在）に置き換えると $TX\subseteq G$ となり矛盾。
+
+**Step 4（$G_{i}$ の極大性）.** $G_{1}$ に辺 $e'$ を加えると、$G+e'$ の中の $TX$ が得られ、その分岐点は $V_{1}$ にあるか $V_{2}$ にある。$V_{1}$ にあれば、$V_{2}\setminus V_{1}$ を通る道の部分 $xPy$ を辺 $xy$ に置き換えて $G_{1}+e'$ の中の $TX$ を得る。$V_{2}$ にあれば同様に $G_{2}$ の中の $TX$ が得られ、$G_{2}\subseteq G$ に反する。
+:::
+
+::: lemma 極大なグラフは 3 連結 {#graph:maximal-3-connected keywords="edge-maximal graphs without TK5 and TK3,3 are 3-connected" index="極大なグラフの 3 連結性|きょくだいなぐらふの3れんけつせい"}
+$\abs{G}\ge4$ で、$TK^{5}$ も $TK_{3,3}$ も含まない性質について $G$ が辺に関して極大なら、$G$ は 3 連結である。
+:::
+
+::: proof
+$\abs{G}$ の帰納法。$\abs{G}=4$ なら $G=K^{4}$。$\abs{G}>4$ で $\kappa(G)\le2$ とし、\ref{graph:maximal-separation} の $G_{1},G_{2}$, $S=\{x,y\}$ をとる。
+
+**Step 1（$G_{i}$ は平面的）.** 帰納法の仮定から $G_{i}$ は 3 連結か三角形（$\abs{G_{i}}=3$ で極大）である。$TK^{5}$, $TK_{3,3}$ を含まないので \ref{graph:k5-k33-minor-topological} よりマイナーにも含まず、\ref{graph:kuratowski-3-connected}（三角形は明らか）より平面的。
+
+**Step 2（面と頂点 $z_{i}$）.** $G_{i}$ を描き、辺 $xy$ を境界にもつ面 $f_{i}$ をとる（\ref{graph:edge-sides}）。$G_{i}$ は 2 連結なので $\partial f_{i}$ は閉路（\ref{graph:faces-bounded-by-cycles}）で、$x,y$ 以外の頂点 $z_{i}$ をもつ。\ref{graph:face-insertion} より、$G_{i}+xz_{i}$, $G_{i}+yz_{i}$、および $G_{1}$ に新しい頂点 $w$ を $x,y,z_{1}$ に結んだもの $G_{1}+w$ は平面的である。
+
+**Step 3（矛盾）.** 極大性から $G+z_{1}z_{2}$ は $TK^{5}$ か $TK_{3,3}$ を含み、それを $K$ とする。分岐点がすべて同じ $G_{i}$ にあれば、$K$ のうち $G_{3-i}-G_{i}$ を通る部分は、通り道 $x$, $y$, 辺 $z_{3-i}z_{i}$ を端にもつ道の断片で、互いに内部で交わらないので、「$x$ と $y$ を結ぶもの」と「$x$ か $y$ から辺 $z_{3-i}z_{i}$ を通って $z_{i}$ に至るもの」が高々一つずつである（辺 $z_{3-i}z_{i}$ は一度しか使えない）。前者を辺 $xy$（\ref{graph:maximal-separation} より $G_{i}$ の辺）、後者を辺 $xz_{i}$ か $yz_{i}$ に置き換えて、$G_{i}+xz_{i}$ か $G_{i}+yz_{i}$ の中に $TK^{5}$ か $TK_{3,3}$ が得られ、Step 2 と \ref{graph:k5-k33-nonplanar} に反する（位相的マイナーを含むグラフは平面的でない）。$G_{1}-G_{2}$ と $G_{2}-G_{1}$ の間には、$x,y$ と辺 $z_{1}z_{2}$ の 3 か所しか通り道がないので、互いに素な道は 3 本以下。したがって $K$ が $TK^{5}$ なら両側に分岐点をもてない（分岐点の間に 4 本の独立な道が要る）。$K$ が $TK_{3,3}$ なら、両側に 2 個以上ずつ分岐点をもてない（同様に 4 本の道が要る）。よって $K$ は $TK_{3,3}$ で、一方、たとえば $G_{2}-G_{1}$ に分岐点 $v$ がちょうど一つある。$v$ から出る 3 本の道は $x$, $y$, $z_{1}z_{2}$ を通って $G_{1}$ に入るので、$G_{2}$ 側を一点 $w$ につぶすと $G_{1}+w$ の中の $TK_{3,3}$ になり、Step 2 に反する。
+:::
+
+::: theorem クラトフスキーの定理とワグナーの定理 {#graph:kuratowski keywords="Kuratowski's theorem, Wagner's theorem, characterization of planar graphs" index="クラトフスキーの定理|くらとふすきーのていり, ワグナーの定理|わぐなーのていり, 平面性の判定|へいめんせいのはんてい" refname="クラトフスキーの定理"}
+グラフ $G$ について次は同値である。
+1. $G$ は平面的である。
+2. $G$ は $K^{5}$ も $K_{3,3}$ もマイナーに含まない（ワグナー）。
+3. $G$ は $K^{5}$ も $K_{3,3}$ も位相的マイナーに含まない（クラトフスキー）。
+:::
+
+::: intuition
+グラフが平面に交差なしで描けないのは、その中に「5 点を全部結んだ図形」か「3 軒の家と 3 つの施設を全部結んだ図形」が、線を曲げたり伸ばしたりした形で隠れているときに限る。
+:::
+
+::: proof
+**Step 1（(1)⇒(3)）.** 【主張：平面的なグラフは $TK^{5}$ も $TK_{3,3}$ も含まない】平面的な $G$ が $TK^{5}$ を含めば、$G$ の平面埋め込みを $TK^{5}$ に制限し、細分の道を一本の弧とみなせば（道の辺の弧をつないだものは弧）、$K^{5}$ の平面埋め込みになり、\ref{graph:k5-k33-nonplanar} に反する。$TK_{3,3}$ も同様。
+
+**Step 2（(2)⇔(3)）.** 【主張：マイナー版と位相的マイナー版は同値】\ref{graph:k5-k33-minor-topological}。
+
+**Step 3（(3)⇒(1)）.** 【主張：$TK^{5}$, $TK_{3,3}$ を含まなければ平面的】$\abs{G}\le3$ なら平面的。$\abs{G}\ge4$ なら、$TK^{5}$, $TK_{3,3}$ を含まない性質を保って辺を加えられるだけ加えた $G'$（頂点は同じ）は、\ref{graph:maximal-3-connected} より 3 連結で、Step 2 から $K^{5}$, $K_{3,3}$ をマイナーに含まないので、\ref{graph:kuratowski-3-connected} より平面的。その部分グラフ $G$ も平面的である。
+
+以上で (1)⇒(3)⇔(2) と (3)⇒(1) が示された。
+:::
+
+::: supplement
+**一般化.** クラトフスキーの定理は、他の曲面への埋め込みについても「禁止マイナーが有限個」という形で一般化される（射影平面では 35 個の禁止マイナーが知られている）。これはロバートソン–シーモアのグラフマイナー定理（\ref[グラフマイナー定理の概観]{graph:page-graph-minor-theorem}）の特別な場合である。
+
+**計算量.** グラフが平面的かどうかは線形時間で判定できる（ホップクロフト–タージャン、1974 年）。
+:::
+
+## 問題 {#graph:sec-ku-problems}
+
+::: problem {#graph:prob-ku-petersen}
+ペテルセングラフが $K_{3,3}$ の細分を含むことを示し、平面的でないことをクラトフスキーの定理からも確かめよ。
+:::
+
+::: solution
+ペテルセングラフは 5 本のスポークを縮約すると $K^{5}$ になる（\ref{graph:topological-minor-is-minor} の hypcheck）ので、\ref{graph:k5-k33-minor-topological} より $TK^{5}$ か $TK_{3,3}$ を含む。3 正則なので次数 4 の分岐点をもつ $TK^{5}$ は含まず、$TK_{3,3}$ を含む。よって \ref{graph:kuratowski} より平面的でない。
+:::
+
+::: problem {#graph:prob-ku-k5-minus-edge}
+$K^{5}$ から一辺を除いたグラフは平面的であることを示せ。
+:::
+
+::: solution
+除いた辺を $ab$、残りを $c,d,e$ とする。三角形 $cde$ を描き、$a$ を内部、$b$ を外部に置いて、それぞれ $c,d,e$ と結べばよい（\ref{graph:face-insertion}）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
