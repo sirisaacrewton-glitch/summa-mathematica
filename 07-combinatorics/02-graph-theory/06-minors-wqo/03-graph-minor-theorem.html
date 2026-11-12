@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>グラフマイナー定理の概観 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/06-minors-wqo/03-graph-minor-theorem.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# グラフマイナー定理の概観 {#graph:page-graph-minor-theorem keywords="graph minor theorem, Robertson-Seymour theorem, minor-closed property, forbidden minors, Kuratowski set, excluded minors, minor testing, cubic time algorithm, structure theorem, self-minor conjecture, Erdos-Posa property"}
+
+ロバートソンとシーモアは、約 20 編の論文（1983–2004 年に出版）で次の定理を証明した：**有限グラフ全体はマイナー関係で整擬順序になる**。その帰結として、マイナーをとる操作で閉じたグラフの性質は、必ず**有限個の禁止マイナー**で特徴づけられる。平面性を $K^{5}$ と $K_{3,3}$ で特徴づけるワグナーの定理（\ref{graph:kuratowski}）は、その最初の例である。このページでは、禁止マイナーによる特徴づけの一般論を証明し、定理そのものとその証明の構成、アルゴリズム的な帰結を概観する。定理の証明は数百ページに及ぶので、ここでは扱わない。
+
+## 記法と定義の確認 {#graph:sec-gmt-notation}
+
+::: notation
+- グラフは有限で、同型なグラフは同一視する。マイナー関係 $\preccurlyeq$ は \ref{graph:minor} のとおりで、反射的・推移的である（\ref{graph:minor-partial-order}）。$H\prec G$ は $H\preccurlyeq G$ かつ $H\not\cong G$ を表す。
+- 整擬順序・反鎖・極小な悪い列は \ref{graph:page-wqo-kruskal}、木幅と格子は \ref{graph:page-tree-width} のとおり。
+- マイナーの真に減少する無限列は存在しない（\ref{graph:prob-wq-minor-descending}）。特に、性質をもたないグラフの集合が空でなければ、その中にマイナーについて極小な元がある。
+:::
+
+## マイナーで閉じた性質と禁止マイナー {#graph:sec-gmt-forbidden}
+
+::: definition マイナーで閉じた性質 {#graph:minor-closed keywords="graph property, minor-closed, Forb(H), excluded minors" index="マイナーで閉じた性質|まいなーでとじたせいしつ, 禁止マイナー|きんしまいなー"}
+同型なグラフについて同時に成り立つか成り立たないかが決まるグラフの集合 $\mathcal{P}$ を**グラフの性質**という。$G\in\mathcal{P}$ かつ $H\preccurlyeq G$ なら $H\in\mathcal{P}$ となるとき、$\mathcal{P}$ は**マイナーで閉じている**という。グラフの集合 $\mathcal{H}$ について
+$$\mathrm{Forb}(\mathcal{H})\defeq\{G : \text{どの }H\in\mathcal{H}\text{ も }G\text{ のマイナーでない}\}$$
+とおき、$\mathcal{P}=\mathrm{Forb}(\mathcal{H})$ のとき $\mathcal{P}$ は**禁止マイナー** $\mathcal{H}$ で特徴づけられるという。
+:::
+
+::: intuition
+マイナーで閉じた性質とは、辺や頂点を消しても、辺を縮めても失われない性質である。そのような性質は「これを含んでいたら駄目」という禁止リストで記述できる。問題はそのリストが有限で済むかどうかである。
+:::
+
+::: proposition 禁止マイナーによる特徴づけ {#graph:forbidden-minor-characterization keywords="minor-closed iff expressible by forbidden minors, Kuratowski set is the unique minimal set of forbidden minors" index="クラトフスキー集合|くらとふすきーしゅうごう" refname="禁止マイナーによる特徴づけ"}
+グラフの性質 $\mathcal{P}$ について次が成り立つ。
+1. $\mathcal{P}$ がマイナーで閉じていることと、ある $\mathcal{H}$ について $\mathcal{P}=\mathrm{Forb}(\mathcal{H})$ であることは同値である。
+2. $\mathcal{P}$ がマイナーで閉じているとき、$\mathcal{P}$ に属さないグラフのうちマイナーについて極小なもの全体を $\mathcal{K}_{\mathcal{P}}$（**クラトフスキー集合**）とすると、$\mathcal{P}=\mathrm{Forb}(\mathcal{K}_{\mathcal{P}})$ であり、$\mathcal{P}=\mathrm{Forb}(\mathcal{H})$ となる任意の $\mathcal{H}$ について $\mathcal{K}_{\mathcal{P}}\subseteq\mathcal{H}$。
+3. $\mathcal{K}_{\mathcal{P}}$ は $\preccurlyeq$ についての反鎖である。
+:::
+
+::: intuition
+性質を満たさないグラフの中で「ぎりぎり満たさない」もの（どのマイナーも性質を満たすもの）を集めると、それが最小の禁止リストになる。性質を満たさないグラフは、必ずそのどれかを含んでいる。
+:::
+
+::: proof
+**Step 1（1 の ⇐）.** $G\in\mathrm{Forb}(\mathcal{H})$, $H'\preccurlyeq G$ とする。ある $H\in\mathcal{H}$ が $H\preccurlyeq H'$ なら、**推移律**により $H\preccurlyeq G$ となり矛盾。よって $H'\in\mathrm{Forb}(\mathcal{H})$。
+
+**Step 2（2 の $\mathcal{P}\subseteq\mathrm{Forb}(\mathcal{K}_{\mathcal{P}})$）.** $G\in\mathcal{P}$ で、ある $K\in\mathcal{K}_{\mathcal{P}}$ が $K\preccurlyeq G$ なら、$\mathcal{P}$ がマイナーで閉じていることから $K\in\mathcal{P}$ となり、$K\notin\mathcal{P}$ に反する。
+
+**Step 3（2 の $\mathrm{Forb}(\mathcal{K}_{\mathcal{P}})\subseteq\mathcal{P}$）.** 【主張：$\mathcal{P}$ に属さない $G$ は $\mathcal{K}_{\mathcal{P}}$ のある元をマイナーにもつ】$G\notin\mathcal{P}$ とする。$G$ のマイナーで $\mathcal{P}$ に属さないもの全体は $G$ を含んで空でなく、真に減少する無限列がない（記法の項）ので、極小な元 $K$ がある。$K$ のマイナーで $\mathcal{P}$ に属さないものは $G$ のマイナーでもあるので（推移律）、$K$ は $\mathcal{P}$ の外で極小であり、$K\in\mathcal{K}_{\mathcal{P}}$ かつ $K\preccurlyeq G$。よって $G\notin\mathrm{Forb}(\mathcal{K}_{\mathcal{P}})$。これで 1 の ⇒ も示された（$\mathcal{H}\defeq\mathcal{K}_{\mathcal{P}}$）。
+
+**Step 4（2 の最小性）.** $\mathcal{P}=\mathrm{Forb}(\mathcal{H})$ とし、$K\in\mathcal{K}_{\mathcal{P}}$ をとる。$K\notin\mathcal{P}=\mathrm{Forb}(\mathcal{H})$ なので、ある $H\in\mathcal{H}$ が $H\preccurlyeq K$。$H\preccurlyeq H$ なので $H\notin\mathrm{Forb}(\mathcal{H})=\mathcal{P}$。$H\preccurlyeq K$ と $K$ の極小性から $H\cong K$、つまり $K\in\mathcal{H}$。
+
+**Step 5（3）.** $K,K'\in\mathcal{K}_{\mathcal{P}}$ が $K\preccurlyeq K'$ なら、$K\notin\mathcal{P}$ と $K'$ の極小性から $K\cong K'$。
+:::
+
+::: example
+1. **森.** 森全体はマイナーで閉じ（森の木幅は 1 以下で、\ref{graph:td-minor} によりマイナーの木幅も 1 以下、\ref{graph:tw-forest} により森）、クラトフスキー集合は $\{K^{3}\}$ である：$K^{3}$ は森でなく、その真のマイナーは頂点 3 個以下で辺 2 本以下なので森。逆に森でないグラフは閉路を含み、閉路は $K^{3}$ をマイナーにもつ（\ref{graph:tw-forest} の Step 2）ので、極小な非森は $K^{3}$ だけである。
+2. **平面グラフ.** 平面グラフ全体はマイナーで閉じ、クラトフスキー集合は $\{K^{5},K_{3,3}\}$ である（ワグナーの定理、\ref{graph:kuratowski}）。
+3. **木幅 $k$ 未満.** \ref{graph:td-minor} によりマイナーで閉じる。クラトフスキー集合は $k=2$ で $\{K^{3}\}$、$k=3$ で $\{K^{4}\}$（\ref{graph:tree-width-facts}）。
+:::
+
+## グラフマイナー定理 {#graph:sec-gmt-theorem}
+
+::: fact ロバートソン–シーモアのグラフマイナー定理 {#graph:graph-minor-theorem keywords="Robertson-Seymour graph minor theorem, finite graphs are well-quasi-ordered by the minor relation" index="グラフマイナー定理|ぐらふまいなーていり, ロバートソン–シーモアの定理|ろばーとそんしーもあのていり" refname="グラフマイナー定理"}
+（N. Robertson と P. D. Seymour, *Graph Minors* I–XX, J. Combin. Theory Ser. B, 1983–2004）有限グラフ全体はマイナー関係 $\preccurlyeq$ で整擬順序になる。同値なこととして（\ref{graph:prob-wq-minor-descending}）、マイナーについての無限反鎖は存在しない。
+:::
+
+::: intuition
+グラフを無限に並べると、必ずどこかで前のグラフが後ろのグラフのマイナーになっている。互いにマイナーの関係にないグラフを無限に集めることはできない。
+:::
+
+::: corollary 有限個の禁止マイナー {#graph:finite-kuratowski-set keywords="every minor-closed property has a finite Kuratowski set, surfaces have finitely many forbidden minors" index="有限個の禁止マイナー|ゆうげんこのきんしまいなー" refname="有限個の禁止マイナー"}
+（\ref{graph:graph-minor-theorem} を仮定する）マイナーで閉じた任意のグラフの性質 $\mathcal{P}$ のクラトフスキー集合 $\mathcal{K}_{\mathcal{P}}$ は有限であり、$\mathcal{P}=\mathrm{Forb}(\mathcal{K}_{\mathcal{P}})$。特に、任意の閉曲面 $S$ について、$S$ に埋め込めるグラフ全体は有限個の禁止マイナーで特徴づけられる。
+:::
+
+::: intuition
+禁止リストの中のグラフは互いにマイナーの関係になく（反鎖）、整擬順序には無限反鎖がないので、リストは有限で終わる。曲面に描けるかどうかのように、一見無限に多くの障害がありそうな性質でも、確かめるべき障害は有限個しかない。
+:::
+
+::: proof
+**Step 1.** \ref{graph:forbidden-minor-characterization} の 2, 3 により $\mathcal{P}=\mathrm{Forb}(\mathcal{K}_{\mathcal{P}})$ で、$\mathcal{K}_{\mathcal{P}}$ は反鎖である。
+
+**Step 2.** 【主張：$\mathcal{K}_{\mathcal{P}}$ は有限】\ref{graph:graph-minor-theorem} により無限反鎖はないので $\mathcal{K}_{\mathcal{P}}$ は有限。
+
+**Step 3（曲面）.** 閉曲面 $S$ に埋め込めるグラフの性質がマイナーで閉じていることを確かめればよい。埋め込みから頂点や辺を除いても埋め込みのままであり、辺 $xy$ を縮約するには、$S$ 上の辺 $xy$ の像の小さな近傍の中で、$x$ と $y$ を辺に沿って 1 点に寄せればよい（平面の場合の \ref{graph:page-plane-graphs} と同じ局所的な操作である。この部分は曲面の位相についての直観的な議論で、厳密な証明はここでは与えない）。マイナーは削除と縮約の繰り返しで得られる（\ref{graph:minor-deletion-contraction}）。
+:::
+
+::: example
+**クラトフスキー集合の大きさ.** 射影平面については 35 個の禁止マイナーが知られている（D. Archdeacon による）。トーラスについては数千個以上あることが計算機で示されているが、完全な一覧は知られていない、と一般には言われている。\ref{graph:finite-kuratowski-set} は有限性を保証するだけで、一覧の求め方は与えない。
+:::
+
+## 証明の構成（概略） {#graph:sec-gmt-sketch}
+
+以下は R. Diestel, *Graph Theory*, 第 12.7 節の概略に沿った説明であり、各段階の証明は与えない。
+
+::: supplement
+**Step A（$K^{n}$ を含まない列への帰着）.** 無限列 $G_{0},G_{1},\dots$ が良い組をもつことを示せばよい。$G_{0}\preccurlyeq G_{i}$ となる $i\ge1$ があれば終わりなので、すべての $i\ge1$ について $G_{i}\in\mathrm{Forb}(\{G_{0}\})$ と仮定してよい。$n\defeq\abs{G_{0}}$ とすれば $G_{0}\preccurlyeq K^{n}$ なので、$G_{i}\in\mathrm{Forb}(\{K^{n}\})$ である。
+
+**Step B（$G_{0}$ が平面的な場合）.** 平面グラフ $H$ を禁止したグラフの木幅は有界であり（\ref{graph:tree-width-facts} の 2、格子定理による）、木幅が有界なグラフ全体はマイナーで整擬順序になる（同 4、\ref{graph:kruskal-tree-theorem} の議論を木幅の回数だけ繰り返す）。よって列は良い。
+
+**Step C（構造定理）.** 一般の場合は、$K^{n}$ を禁止したグラフの構造定理を使う：各 $n$ について有限個の曲面があり、$K^{n}$ をマイナーにもたないグラフは、それらの曲面のどれかに「ほぼ」埋め込める部分（有界個の頂点を除き、有界個の「渦」を許したもの）を、有界な大きさの共通部分に沿って木の形に貼り合わせた木分解をもつ。
+
+**Step D（曲面上のグラフの整擬性）.** 曲面 $S$ に埋め込めるグラフの列については、オイラー標数についての帰納法で示す。$H_{0}$ を禁止すると、各 $H_{i}$ は $S$ の非自明な閉曲線と少ない点でしか交わらないように埋め込め、その曲線で切り開いて、より単純な曲面に埋め込めるグラフ（と有限個の印のついた頂点）に帰着する。
+
+**Step E（木の形での組み立て）.** 部分ごとの整擬性を、クラスカルの木定理（ラベル付き版）の議論で木分解全体の整擬性に持ち上げる。
+:::
+
+## アルゴリズム的な帰結 {#graph:sec-gmt-algorithms}
+
+::: fact マイナー判定の多項式時間アルゴリズム {#graph:minor-testing keywords="minor testing in cubic time, minor-closed properties decidable in polynomial time, non-constructive" index="マイナー判定|まいなーはんてい"}
+次のことが知られている（R. Diestel, *Graph Theory*, 第 12.7 節）。
+1. （ロバートソン–シーモア）各グラフ $H$ について、入力グラフ $G$ が $H$ をマイナーにもつかを $\abs{G}$ の 3 乗に比例する時間で判定するアルゴリズムがある（比例定数は $H$ に依存し、非常に大きい）。
+2. したがって \ref{graph:finite-kuratowski-set} と合わせて、マイナーで閉じた任意の性質は多項式時間で判定できる（クラス P に属する、\ref{comp:class-p}）：有限個の禁止マイナーのそれぞれについて判定すればよい。
+3. ただしこの論法は**非構成的**である：禁止マイナーが有限個であることは分かっても、それらを具体的に求める方法は一般には与えられない。たとえば「結び目のない埋め込みをもつ」というマイナーで閉じた性質については、多項式時間アルゴリズムの存在が分かる一方で、具体的なアルゴリズムは長く知られていなかったと D に述べられている。
+:::
+
+::: hypcheck
+- **禁止マイナーによる特徴づけ**：推移律は Step 1, 3 で、マイナーの真に減少する無限列がないこと（**グラフの有限性**）は Step 3 の極小元の存在で使った。無限グラフでは、極小な非該当グラフが存在するとは限らない。
+- **有限個の禁止マイナー**：グラフマイナー定理（ここでは証明していない）を Step 2 で使った。それ以外の部分は証明済みの命題だけによる。曲面に埋め込めるグラフがマイナーで閉じていることは、位相的な直観に頼っている。
+:::
+
+## 問題 {#graph:sec-gmt-problems}
+
+::: problem {#graph:prob-gm-wqo-forb}
+擬順序集合 $(X,\le)$ が整擬順序であることと、下に閉じた任意の部分集合 $B$（$x\le y\in B$ なら $x\in B$）が、ある有限集合 $F$ によって $B=\{x\in X : \text{どの }f\in F\text{ についても }f\not\le x\}$ と書けることは同値であることを示せ。
+:::
+
+::: solution
+**(⇒)** $X\setminus B$ の元 $x$ で、$y<x$ となる $y\in X\setminus B$ がないものを極小元とよぶ。\ref{graph:wqo-equivalents} により真に減少する無限列はないので、$X\setminus B$ の各元 $y$ の下に極小元 $x\le y$ がある（$y$ から真に小さい元を順にとる操作は有限回で止まる）。極小元を同値（$x\le x'$ かつ $x'\le x$）で類別し、各類から代表を一つずつ選んで $F$ とする。代表 $f\neq f'$ について $f\le f'$ なら、$f'$ の極小性から $f<f'$ ではないので $f'\le f$ となり同値で、代表の選び方に反する。よって $F$ は反鎖で、\ref{graph:wqo-equivalents} により有限。$y\notin B$ なら、その下の極小元 $x$ と同値な代表 $f$ について $f\le x\le y$。逆に $f\le y$ なら、$B$ は下に閉じていて $f\notin B$ なので $y\notin B$。よって $B=\{y : \text{どの }f\in F\text{ も }f\not\le y\}$。
+**(⇐)** 整擬順序でないとし、悪い列 $(x_{n})$ をとる。$B\defeq\{x : \text{どの }n\text{ についても }x_{n}\not\le x\}$ は下に閉じている（$x\le y\in B$ で $x_{n}\le x$ なら $x_{n}\le y$ となり矛盾）。仮定から $B=\{x : \text{どの }f\in F\text{ も }f\not\le x\}$ となる有限集合 $F$ がある。各 $f\in F$ は $f\le f$ なので $f\notin B$ であり、$x_{n(f)}\le f$ となる $n(f)$ がある。$N\defeq\max_{f\in F}n(f)$ とし、$m>N$ をとる。$x_{m}\le x_{m}$ なので $x_{m}\notin B$ で、ある $f\in F$ について $f\le x_{m}$。すると $x_{n(f)}\le f\le x_{m}$ かつ $n(f)\le N<m$ となり、$(x_{n})$ の良い組ができて矛盾。
+:::
+
+::: problem {#graph:prob-gm-forest-kuratowski}
+「辺を含まない（独立集合である）」というグラフの性質のクラトフスキー集合を求めよ。また「各連結成分が道である（線形森）」という性質のクラトフスキー集合が $\{K^{3},K_{1,3}\}$ であることを示せ。
+:::
+
+::: solution
+前半：辺のないグラフ全体はマイナーで閉じ、辺のないグラフでない極小なグラフは辺 1 本の $K^{2}$ だけ（辺をもつグラフは $K^{2}$ をマイナーにもつ）。よって $\{K^{2}\}$。
+後半：道の部分グラフは線形森であり、道の辺を縮約すると短い道になるので、線形森の性質は削除と縮約で保たれ、マイナーで閉じている（\ref{graph:minor-deletion-contraction}）。$K^{3}$ と $K_{1,3}$ は線形森でなく、その真のマイナーは（辺を除くか縮めると）頂点 3 個以下の道の和か、辺 2 本以下の星で、線形森である。逆に線形森でないグラフ $G$ は、閉路を含む（すると $K^{3}$ をマイナーにもつ）か、森であって次数 3 以上の頂点 $v$ をもつ（$v$ と 3 つの隣接頂点が $K_{1,3}$ をなす部分グラフ）。よって極小な非線形森は $K^{3}$ と $K_{1,3}$ だけである（両者は互いにマイナーでない：$K_{1,3}$ は閉路をもたず、$K^{3}$ は頂点が 3 個しかない）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{graph:forbidden-minor-characterization} は整擬性を使わず、マイナーの真の減少列が有限であることだけを使う。整擬性が効くのは、クラトフスキー集合の**有限性**（\ref{graph:finite-kuratowski-set}）だけである。
+
+**前提を変えると.**
+- 無限グラフに対しては、マイナー関係で整擬順序にならない（非可算グラフの反例がある）と D に述べられている。可算グラフについては未解決とされる。
+- 位相的マイナーの関係では、有限グラフでも整擬順序にならない（\ref{graph:page-wqo-kruskal} の補足）。部分グラフの関係ではもちろんならない（閉路の列 $C^{3},C^{4},\dots$ は部分グラフについて反鎖）。
+- （シーモアの自己マイナー予想）可算無限グラフは自分自身の真のマイナーである、という予想がある。これは有限グラフのグラフマイナー定理を導くことが D の演習に挙げられている。
+
+**類似の定理.** エルデシュ–ポーシャの性質：$H$ が平面的なら、$H$ をマイナーにもつ互いに交わらない部分グラフの最大個数と、それらすべてと交わる頂点集合の最小の大きさは、一方が他方の関数で抑えられる（ロバートソン–シーモア）。$H=K^{3}$ の場合が、閉路についてのエルデシュ–ポーシャの定理である。
+
+**高い視点から：整擬順序は「下に閉じた集合 ＝ 有限個の禁止」の世界.** \ref{graph:prob-gm-wqo-forb} が示すように、整擬順序とは「下に閉じた集合（性質）がすべて有限個の禁止で記述できる」順序のことである。これは可換環論で、ネーター環ではイデアルがすべて有限生成である（\ref{graph:prob-wq-minimal-elements} の単項式イデアルの場合）ことと同じ形をしている。グラフマイナー定理は、「グラフの圏」のマイナー関係がネーター的であるという主張であり、比喩で言えば、マイナーで閉じた性質はどれも「有限個の基本的な障害」という生成元で表せる。平面性（障害 2 個）はその最も美しい例であり、その背後にある一般原理がグラフマイナー定理である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
