@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>二部グラフのマッチング | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/02-matching-flows/01-bipartite-matching.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 二部グラフのマッチング {#graph:page-bipartite-matching keywords="matching, augmenting path, Berge's lemma, Konig's theorem, Hall's marriage theorem, deficiency, perfect matching, 2-factor, stable matching, Gale-Shapley"}
+
+グラフの辺の中から、端点を共有しないものをできるだけ多く選ぶ問題が**マッチング**の問題である。このページでは、マッチングが最大であることを増加道で判定するベルジュの補題を示し、二部グラフについて、最大マッチングの大きさは辺を覆う頂点の最小個数に等しいというケーニッヒの定理と、片側全体を覆うマッチングが存在する条件を与えるホールの結婚定理を証明する。応用として正則グラフの因子の存在（ピーターセンの定理）を導き、最後に、各頂点が相手に好みの順序をもつときの安定マッチングの存在（ゲール–シャプレーの定理）を示す。
+
+## 記法と定義の確認 {#graph:sec-bm-notation}
+
+::: notation
+- グラフ・次数・道・二部グラフ・オイラー回路は \ref{graph:page-graphs}・\ref{graph:page-trees-bipartite} の定義に従う。二部グラフ $G$ の二部分割を $\{A,B\}$ とし、$a,a'$ は $A$ の頂点、$b,b'$ は $B$ の頂点を表す。
+- $S\subseteq V$ の近傍 $N(S)\defeq\bigcup_{v\in S}N(v)$。辺集合の対称差 $M\triangle P$ は \ref{graph:edge-space} と同じく辺の集合の和である。
+:::
+
+## マッチングと増加道 {#graph:sec-bm-augmenting}
+
+::: definition マッチング {#graph:matching keywords="matching, matched vertex, perfect matching, 1-factor, k-factor, vertex cover" index="マッチング|まっちんぐ, 完全マッチング|かんぜんまっちんぐ, 因子（グラフの）|いんし, 頂点被覆|ちょうてんひふく"}
+端点を共有しない辺の集合を**マッチング**という。$v$ が $M$ の辺の端点のとき $v$ は $M$ で**覆われる**という。$U\subseteq V$ のすべての頂点を覆うマッチングを $U$ の**マッチング**、$V$ 全体のマッチングを**完全マッチング**（**1 因子**）という。$k$ 正則な全域部分グラフを **$k$ 因子**という。すべての辺が $U$ の頂点に接するとき、$U$ を**頂点被覆**という。
+:::
+
+::: intuition
+マッチングは、だれも二人以上と組まないような「二人組」の作り方である。
+:::
+
+::: definition 交互道と増加道 {#graph:augmenting-path keywords="alternating path, augmenting path" index="交互道|こうごみち, 増加道|ぞうかみち"}
+マッチング $M$ について、$M$ の辺と $M$ にない辺を交互に通る道を**交互道**という。両端が $M$ で覆われない長さ $1$ 以上の交互道を**増加道**という。
+:::
+
+::: intuition
+増加道に沿って、マッチングに入っている辺と入っていない辺を入れ替えると、マッチングの辺が一本増える。
+:::
+
+::: lemma ベルジュの補題 {#graph:berge-lemma keywords="Berge's lemma, maximum matching iff no augmenting path" index="ベルジュの補題|べるじゅのほだい" refname="ベルジュの補題"}
+（一般のグラフで）マッチング $M$ が最大（辺の数が最大）であることと、$M$ についての増加道が存在しないことは同値である。
+:::
+
+::: intuition
+マッチングをこれ以上大きくできないのは、マッチングの辺とそうでない辺を交互にたどって、組になっていない二人を結ぶ道がないときに限る。
+:::
+
+::: proof
+**Step 1（⇒）.** 【主張：増加道 $P$ があれば $M\triangle E(P)$ はより大きいマッチング】$P$ は $M$ にない辺で始まり $M$ にない辺で終わる（両端が覆われないので）ので、$P$ の辺のうち $M$ にないものが $M$ のものより一本多い。入れ替えた後、$P$ の内部の頂点はちょうど一本の辺で覆われ、両端は新しい辺一本で覆われ、$P$ の外は変わらないので、マッチングである。
+
+**Step 2（⇐）.** 【主張：$\abs{M'}>\abs{M}$ のマッチング $M'$ があれば増加道がある】$H\defeq(V,M\triangle M')$ の各頂点の次数は 2 以下なので、$H$ の連結成分は道か閉路で、その辺は $M$ と $M'$ に交互に属する。閉路の成分は偶数の長さで $M$ と $M'$ の辺を同数含む。$\abs{M'\setminus M}>\abs{M\setminus M'}$ なので、$M'$ の辺を $M$ の辺より多く含む道の成分 $P$ がある。$P$ は $M'$ の辺で始まり $M'$ の辺で終わり、その両端は $M$ で覆われない（覆われていれば、その $M$ の辺も $H$ に入り $P$ が延びる）。$P$ は $M$ の増加道である。
+:::
+
+## ケーニッヒの定理とホールの定理 {#graph:sec-bm-konig-hall}
+
+以下、$G$ は二部分割 $\{A,B\}$ をもつ二部グラフとする。
+
+::: theorem ケーニッヒの定理 {#graph:konig-theorem keywords="Konig's theorem, maximum matching equals minimum vertex cover in bipartite graphs" index="ケーニッヒの定理（マッチング）|けーにっひのていり" refname="ケーニッヒの定理（マッチング）"}
+二部グラフで、マッチングの辺の数の最大値は、頂点被覆の頂点数の最小値に等しい。
+:::
+
+::: intuition
+二人組をできるだけ多く作った数は、すべての「組める関係」を見張るのに必要な最少の人数と等しい。
+:::
+
+::: proof
+**Step 1（不等式 $\le$）.** 頂点被覆はマッチングの各辺の端点を少なくとも一つ含み、マッチングの辺は端点を共有しないので、被覆の頂点数はマッチングの辺の数以上である。
+
+**Step 2（被覆の構成）.** 【主張：最大マッチング $M$ から $\abs{M}$ 個の頂点被覆 $U$ が作れる】$A$ の覆われない頂点から始まる交互道（長さ 0 を含む）を考える。$M$ の各辺 $ab$ について、$b$ で終わる交互道があれば $b$ を、なければ $a$ を $U$ に入れる。$\abs{U}=\abs{M}$。
+
+**Step 3（交互道の終点）.** 【主張：交互道が $b\in B$ で終われば $b$ は $M$ で覆われ、$b\in U$】交互道 $P$ が覆われない $b$ で終われば、$P$ は覆われない頂点から始まり覆われない頂点で終わる増加道で、\ref{graph:berge-lemma} に反する。よって $b$ は $M$ の辺 $ab$ で覆われ、Step 2 の規則で $b\in U$。
+
+**Step 4（$U$ は被覆）.** 【主張：辺 $ab$ について $a\in U$ か $b\in U$】$a\notin U$ とする。$a$ が覆われなければ $ab$ 自体が $b$ で終わる交互道なので Step 3 より $b\in U$。$a$ が $M$ の辺 $ab'$ で覆われていれば、$a\notin U$ より $b'$ で終わる交互道 $P$ がある。$b\in P$ なら $P$ の $b$ までの部分、$b\notin P$ なら $Pab$（$P$ の後に $b'a\in M$, $ab\notin M$ を続けたもの；$a\notin P$ は $P$ の $A$ の頂点が始点か $P$ の $M$ の辺で覆われるものなので）が $b$ で終わる交互道で、Step 3 より $b\in U$（$ab\in M$ なら $b=b'$ で同じく）。
+:::
+
+::: theorem ホールの結婚定理 {#graph:hall-theorem keywords="Hall's marriage theorem, marriage condition" index="ホールの定理|ほーるのていり, 結婚定理|けっこんていり, 結婚条件|けっこんじょうけん" refname="ホールの結婚定理"}
+二部グラフ $G$ が $A$ のマッチングをもつことと、すべての $S\subseteq A$ について $\abs{N(S)}\ge\abs{S}$（**結婚条件**）が成り立つことは同値である。
+:::
+
+::: intuition
+女性の集合 $A$ の全員が、知り合いの男性と結婚できるのは、どの何人の女性を集めても、その知り合いの男性が少なくとも同じ人数いるときである。
+:::
+
+::: proof
+**Step 1（必要性）.** $A$ のマッチング $M$ があれば、$S$ の各頂点の相手は相異なり $N(S)$ に入るので $\abs{N(S)}\ge\abs{S}$。
+
+**Step 2（十分性：増加道を見つける）.** 【主張：結婚条件のもと、$a\in A$ を覆わないマッチング $M$ には増加道がある】$a$ から始まる長さ 1 以上の交互道で $A$ の頂点に到達できる頂点の集合を $A'$、それらの交互道の最後から二番目の頂点（$B$ の頂点）の集合を $B'$ とする。これらの道の最後の辺は $M$ の辺なので、$b\in B'$ と $M$ での相手 $a'\in A'$ が一対一に対応し $\abs{A'}=\abs{B'}$。結婚条件を $S\defeq A'\cup\{a\}$ に使うと $\abs{N(S)}\ge\abs{A'}+1>\abs{B'}$ なので、$S$ の頂点 $v$ と $b\notin B'$ を結ぶ辺がある。$v$ までの交互道 $P$（$v=a$ なら長さ 0）に $vb$ を加えると交互道になる（$P$ の $B$ の頂点は $B'$ に入るので $b\notin P$、$vb\notin M$：$v=a$ は覆われず、$v\in A'$ の $M$ の辺は $B'$ の頂点に向かう）。$b$ が $M$ の辺 $a''b$ で覆われていれば $Pvba''$ も交互道で $b\in B'$ となり矛盾。よって $b$ は覆われず、$Pvb$ は増加道。
+
+**Step 3.** 最大マッチング $M$ をとると、Step 2 と \ref{graph:berge-lemma} から $A$ のすべての頂点が覆われる。
+:::
+
+::: corollary 欠損版のホールの定理 {#graph:hall-deficiency keywords="defect version of Hall's theorem" index="欠損（ホールの定理の）|けっそん"}
+二部グラフの最大マッチングの辺の数は $\abs{A}-\max_{S\subseteq A}\bigl(\abs{S}-\abs{N(S)}\bigr)$ に等しい（$S=\varnothing$ を含むので最大値は $\ge0$）。
+:::
+
+::: proof
+$d\defeq\max_{S}(\abs{S}-\abs{N(S)})$ とする。マッチング $M$ について、各 $S$ の頂点のうち覆われるものは $\abs{N(S)}$ 個以下なので、覆われない $A$ の頂点は $\abs{S}-\abs{N(S)}$ 個以上で、$\abs{M}\le\abs{A}-d$。逆に、$B$ に $d$ 個の新しい頂点を加え $A$ のすべての頂点と結んだ $G^{+}$ は結婚条件を満たす（$\abs{N^{+}(S)}=\abs{N(S)}+d\ge\abs{S}$、$S\neq\varnothing$）ので、\ref{graph:hall-theorem} より $A$ のマッチングをもつ。新しい頂点を使う辺は高々 $d$ 本なので、$G$ の中に $\abs{A}-d$ 本の辺のマッチングが残る。
+:::
+
+::: corollary 正則な二部グラフ {#graph:regular-bipartite-factor keywords="regular bipartite graphs have perfect matchings, decomposition into perfect matchings" index="正則二部グラフ|せいそくにぶぐらふ"}
+$k\ge1$ とする。$k$ 正則な二部グラフは完全マッチングをもち、さらにその辺集合は $k$ 個の完全マッチングに分割される。
+:::
+
+::: proof
+$S\subseteq A$ と $N(S)$ の間の辺は $k\abs{S}$ 本で、これらは $N(S)$ に接する $k\abs{N(S)}$ 本の辺に含まれるので $\abs{N(S)}\ge\abs{S}$。$S=A$ と $S=B$（対称な議論）から $\abs{A}=\abs{B}$ で、\ref{graph:hall-theorem} の $A$ のマッチングは完全マッチングである。それを除くと $(k-1)$ 正則な二部グラフになるので、$k$ の帰納法で後半を得る。
+:::
+
+::: theorem ピーターセンの定理（2 因子） {#graph:petersen-2-factor keywords="Petersen's theorem, every 2k-regular graph has a 2-factor" index="ピーターセンの定理|ぴーたーせんのていり" refname="ピーターセンの 2 因子定理"}
+正の偶数次数の正則グラフは 2 因子をもつ。
+:::
+
+::: intuition
+各頂点の次数が同じ偶数のグラフでは、いくつかの閉路で全頂点をちょうど一度ずつ覆える。
+:::
+
+::: proof
+**Step 1（オイラー回路で向きを付ける）.** $G$ を $2k$ 正則（$k\ge1$）とし、連結成分ごとに考えて連結としてよい。\ref{graph:euler-theorem} よりオイラー回路 $v_{0}e_{0}v_{1}\dots e_{\ell-1}v_{\ell}$（$v_{\ell}=v_{0}$）がある。各頂点 $v$ を二つの頂点 $v^{-},v^{+}$ に分け、辺 $e_{i}=v_{i}v_{i+1}$ を $v_{i}^{+}v_{i+1}^{-}$ に置き換えた二部グラフ $G'$（二部分割 $\{V^{+},V^{-}\}$）を作る。
+
+**Step 2（正則性と結論）.** 【主張：$G'$ は $k$ 正則】オイラー回路は各頂点を通るたびに入る辺と出る辺を一本ずつ使い、$v$ の $2k$ 本の辺をちょうど一度ずつ使うので、$v$ に入る辺と出る辺はそれぞれ $k$ 本。よって $v^{-}$, $v^{+}$ の次数はともに $k$。\ref{graph:regular-bipartite-factor} より $G'$ は完全マッチングをもち、$v^{-},v^{+}$ を $v$ に戻すと、各頂点に「入る辺一本と出る辺一本」が選ばれた全域部分グラフ、すなわち 2 因子が得られる（$G$ は単純グラフなので、一つの頂点で選ばれた 2 本は異なる辺で、各成分は閉路である）。
+:::
+
+## 安定マッチング {#graph:sec-bm-stable}
+
+::: definition 安定マッチング {#graph:stable-matching keywords="preferences, stable matching, blocking pair" index="安定マッチング|あんていまっちんぐ, 選好|せんこう"}
+各頂点 $v$ が、$v$ に接する辺の上の全順序 $\le_{v}$（**選好**、大きい方を好む）をもつとする。マッチング $M$ が**安定**であるとは、$M$ にない任意の辺 $e=ab$ について、$a$ か $b$ の少なくとも一方が、$e$ より好む $M$ の辺で覆われていることをいう（そうでない $e$ を**ブロッキング対**という）。
+:::
+
+::: intuition
+今の相手よりお互いを好む二人組がどこにもいなければ、だれも抜け駆けしないので安定である。
+:::
+
+::: theorem ゲール–シャプレーの定理 {#graph:gale-shapley keywords="Gale-Shapley theorem, stable marriage, deferred acceptance" index="ゲール–シャプレーの定理|げーるしゃぷれーのていり, 受入保留方式|うけいれほりゅうほうしき" refname="ゲール–シャプレーの定理"}
+二部グラフ $G$ では、どのような選好に対しても安定マッチングが存在する。
+:::
+
+::: intuition
+片側が好きな順に申し込み、もう片側が一番良い申し込みだけを保留する手順を繰り返すと、必ず安定な組み合わせに落ち着く。
+:::
+
+::: proof
+**Step 1（受入保留の手順）.** 【主張：次の手順は有限回で止まる】各 $a\in A$ は、まだ**断られていない**辺のうち $\le_{a}$ で最大のものの相手に**申し込む**。各 $b\in B$ は、受けている申し込みのうち $\le_{b}$ で最大のものを**保留**し、他を断る。これを、新しく断られる辺がなくなるまで繰り返す。各回で少なくとも一本の辺が新しく断られ、一度断られた辺は二度と申し込まれないので、高々 $\norm{G}$ 回で止まる。止まったとき保留されている辺の集合を $M$ とする。
+
+**Step 2（$M$ はマッチング）.** 各 $a$ は同時に一人にしか申し込まず、各 $b$ は一つしか保留しないので、$M$ の辺は端点を共有しない。
+
+**Step 3（$b$ の保留は良くなる一方）.** 【主張：$b$ が一度申し込みを受けると、以後 $b$ はずっと何かを保留し、保留する辺は $\le_{b}$ について減らない】$b$ が断るのは自分の保留するものより悪い申し込みだけで、保留中の相手は（断られていないので）申し込みを続ける。
+
+**Step 4（安定性）.** 【主張：$e=ab\notin M$ はブロッキング対でない】(i) $a$ が $e$ に一度も申し込まなかったなら、$a$ は止まった時点で $e$ より好む辺に申し込んでおり、その辺は断られていないので $M$ に入っている。よって $a$ は $e$ より好む $M$ の辺で覆われる。(ii) $a$ が $e$ に申し込んだことがあれば、$e\notin M$ なので $e$ は断られた。断られたとき $b$ は $e$ より好む辺を保留していて、Step 3 より $b$ の最終的な $M$ の辺は $e$ より好むものである。
+:::
+
+::: supplement
+**一般化と注意.** 一般の（二部でない）グラフでは、安定マッチングが存在しない選好がある（3 頂点の閉路で、各頂点が「次の頂点」を好む場合など）。受入保留の手順で得られる安定マッチングは、$A$ の側にとって安定マッチングの中で最良であることが知られている（Gale–Shapley, 1962）。
+
+**類似の定理.** ケーニッヒの定理とホールの定理は、ネットワークの最大流最小カット定理（\ref[ネットワークフロー]{graph:page-network-flows}）や、線形計画の双対定理の特別な場合とみなすこともできる。一般のグラフでの完全マッチングの存在条件はタットの定理である（\ref[一般グラフのマッチング]{graph:page-general-matching}）。
+:::
+
+## 問題 {#graph:sec-bm-problems}
+
+::: problem {#graph:prob-bm-konig-implies-hall}
+ケーニッヒの定理からホールの定理の十分性を導け。
+:::
+
+::: solution
+結婚条件のもとで、頂点被覆 $U$ について $\abs{U}\ge\abs{A}$ を示せばよい（ケーニッヒの定理から最大マッチングが $\abs{A}$ 本になり、それは $A$ のマッチング）。$S\defeq A\setminus U$ とすると、$S$ の頂点に接する辺の $B$ 側の端点は $U$ に入るので $N(S)\subseteq U\cap B$。よって $\abs{U}=\abs{U\cap A}+\abs{U\cap B}\ge(\abs{A}-\abs{S})+\abs{N(S)}\ge\abs{A}$。
+:::
+
+::: problem {#graph:prob-bm-latin}
+$n\times n$ のラテン方陣（各行・各列に $1,\dots,n$ が一度ずつ現れる表）の最初の $r$ 行（$r<n$、各行は $[n]$ の置換で、各列の値は相異なる）は、つねに 1 行延長できることを示せ。
+:::
+
+::: solution
+列の集合 $A$ と値の集合 $B=[n]$ の二部グラフで、列 $j$ と値 $x$ を、$x$ がまだ列 $j$ に現れていないとき結ぶ。各列は $n-r$ 個の値と結ばれ、各値は（$r$ 行のそれぞれに一度ずつ現れ、そのたびに別の列に入るので）$r$ 個の列で使われ、$n-r$ 個の列と結ばれる。この二部グラフは $(n-r)$ 正則なので完全マッチングをもち（\ref{graph:regular-bipartite-factor}）、それが新しい行を与える。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
