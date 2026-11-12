@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>形式的冪級数の代入・微分・指数と対数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/01-enumerative-combinatorics/02-generating-functions/01-formal-power-series.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 形式的冪級数の代入・微分・指数と対数 {#comb:page-formal-power-series keywords="formal power series, substitution, composition, formal derivative, formal exponential, formal logarithm, binomial series, summable family"}
+
+母関数の方法では、数列 $(a_{n})$ を形式的冪級数 $\sum a_{n}x^{n}$ にまとめ、級数の計算で数列の性質を調べる。そこでは「$x$ に別の級数を代入する」「微分する」「$\exp$ や $\log$ をとる」「$(1-4x)^{1/2}$ を展開する」といった、解析学のような操作を使う。このページでは、収束を一切使わずに、これらの操作を形式的冪級数環 $A[[x]]$（\ref{ring:power-series-ring}）の上で定義し、解析学と同じ公式が成り立つことを示す。
+
+## 記法と定義の確認 {#comb:sec-fps-notation}
+
+::: notation
+- $A$ は可換環、$A[[x]]$ は形式的冪級数環で、$f=\sum_{n\ge0}f_{n}x^{n}$ は係数の列 $(f_{n})$ のことである（\ref{ring:power-series-ring}）。$x^{n}$ の係数を $[x^{n}]f\defeq f_{n}$ とも書く。
+- $f$ が単元であることと $f_{0}$ が $A$ の単元であることは同値である（\ref{ring:power-series-units.1}）。単元 $f$ の逆元を $1/f$ や $f^{-1}$ と書く。
+- 「$A$ は $\Q$ を含む」とは、$\Q$ が $A$ の部分環であることをいう（このとき正の整数 $n$ は $A$ の単元）。$\Q$, $\R$, $\C$ や、$\Q$ 上の多項式環などがそうである。
+- 無限和 $\sum_{i\in I}$ は、このページで定義する「総和可能な族」の和としてだけ使う。収束の概念は使わない。
+:::
+
+## 位数と総和可能な族 {#comb:sec-fps-summable}
+
+::: definition 位数 {#comb:fps-order keywords="order of a formal power series, valuation" index="位数（冪級数の）|いすう"}
+$f\neq0$ のとき $f_{n}\neq0$ となる最小の $n$ を $f$ の**位数**といい $\operatorname{ord}f$ と書く。$\operatorname{ord}0\defeq\infty$ とする。
+:::
+
+::: intuition
+位数は「$x$ で何回割り切れるか」であり、位数が大きい級数ほど $0$ に近いと考える。
+:::
+
+::: lemma 位数の性質 {#comb:fps-order-basic keywords="ord(fg) >= ord f + ord g, power series over a domain is a domain"}
+$f,g\in A[[x]]$ について
+1. $\operatorname{ord}(f+g)\ge\min(\operatorname{ord}f,\operatorname{ord}g)$、$\operatorname{ord}(fg)\ge\operatorname{ord}f+\operatorname{ord}g$。
+2. $A$ が整域なら $\operatorname{ord}(fg)=\operatorname{ord}f+\operatorname{ord}g$ であり、$A[[x]]$ は整域である。
+:::
+
+::: proof
+$p=\operatorname{ord}f$, $q=\operatorname{ord}g$ とする（どちらかが $\infty$ なら明らか）。和は係数ごとなので前半の不等式は明らか。$(fg)_{n}=\sum_{i+j=n}f_{i}g_{j}$ で、$n<p+q$ なら各項で $i<p$ か $j<q$ なので $0$。$n=p+q$ なら残る項は $f_{p}g_{q}$ だけで、$A$ が整域なら $\neq0$。
+:::
+
+::: definition 総和可能な族 {#comb:summable-family keywords="summable family of formal power series, formal convergence" index="総和可能な族|そうわかのうなぞく"}
+集合 $I$ を添字とする $A[[x]]$ の族 $(f_{i})_{i\in I}$ が**総和可能**であるとは、各 $n\in\N$ について $[x^{n}]f_{i}\neq0$ となる $i$ が有限個しかないことをいう。このとき和 $\sum_{i\in I}f_{i}$ を、$x^{n}$ の係数が有限和 $\sum_{i\in I}[x^{n}]f_{i}$ である級数と定める。
+:::
+
+::: intuition
+どの次数の係数を見ても有限個の級数しか寄与しないなら、無限個の級数を足し合わせても係数は有限の計算で決まる。たとえば $\operatorname{ord}f_{k}\ge k$ なら $(f_{k})_{k\in\N}$ は総和可能である。
+:::
+
+::: lemma 総和可能な族の計算規則 {#comb:summable-rules keywords="rules for summable families"}
+$(f_{i})_{i\in I}$, $(g_{j})_{j\in J}$ を総和可能な族とする。
+1. $f=\sum_{n}f_{n}x^{n}$ は、族 $(f_{n}x^{n})_{n\in\N}$ の和に等しい。
+2. $I=\bigsqcup_{\lambda\in\Lambda}I_{\lambda}$ と分けると、各 $(f_{i})_{i\in I_{\lambda}}$ と $(\sum_{i\in I_{\lambda}}f_{i})_{\lambda\in\Lambda}$ は総和可能で、$\sum_{\lambda}\sum_{i\in I_{\lambda}}f_{i}=\sum_{i\in I}f_{i}$。
+3. $(f_{i}g_{j})_{(i,j)\in I\times J}$ は総和可能で、$\sum_{(i,j)}f_{i}g_{j}=\bigl(\sum_{i}f_{i}\bigr)\bigl(\sum_{j}g_{j}\bigr)$。
+:::
+
+::: proof
+(1)(2) は係数ごとの有限和の並べ替えである（$x^{n}$ の係数に寄与する $i$ は有限個なので、$\lambda$ も有限個しか寄与しない）。(3)：$[x^{n}](f_{i}g_{j})=\sum_{p+q=n}[x^{p}]f_{i}\,[x^{q}]g_{j}$ が $0$ でなければ、ある $p\le n$ で $[x^{p}]f_{i}\neq0$、ある $q\le n$ で $[x^{q}]g_{j}\neq0$ なので、そうなる $(i,j)$ は有限個である。係数を計算すると
+$$
+\sum_{(i,j)}\sum_{p+q=n}[x^{p}]f_{i}[x^{q}]g_{j}=\sum_{p+q=n}\Bigl(\sum_{i}[x^{p}]f_{i}\Bigr)\Bigl(\sum_{j}[x^{q}]g_{j}\Bigr),
+$$
+これは右辺の $x^{n}$ の係数である（有限和の分配法則）。
+:::
+
+## 代入 {#comb:sec-fps-substitution}
+
+::: definition 代入 {#comb:substitution keywords="substitution, composition of formal power series" index="代入（冪級数の）|だいにゅう, 合成（冪級数の）|ごうせい"}
+$g\in A[[x]]$, $g_{0}=0$（すなわち $\operatorname{ord}g\ge1$）とする。$f\in A[[x]]$ に対し、$\operatorname{ord}(f_{k}g^{k})\ge k$（\ref{comb:fps-order-basic.1}）より族 $(f_{k}g^{k})_{k\in\N}$ は総和可能なので、
+$$
+f\circ g=f(g)\defeq\sum_{k\ge0}f_{k}g^{k}
+$$
+と定め、$f$ に $g$ を**代入**した級数という。
+:::
+
+::: intuition
+$f$ の $x$ のところに $g$ を入れる。$g$ の定数項が $0$ なので、$g^{k}$ は $x^{k}$ 以上の項しかもたず、各係数は有限個の項の和で決まる。
+:::
+
+::: theorem 代入は準同型 {#comb:substitution-homomorphism keywords="substitution is a ring homomorphism, associativity of composition" index="代入準同型|だいにゅうじゅんどうけい"}
+$g,h\in A[[x]]$, $g_{0}=h_{0}=0$ とする。
+1. $f\mapsto f\circ g$ は $A$ 代数の準同型 $A[[x]]\to A[[x]]$ で、$x\circ g=g$。
+2. 総和可能な族 $(f_{i})$ について $(f_{i}\circ g)$ も総和可能で、$\bigl(\sum_{i}f_{i}\bigr)\circ g=\sum_{i}(f_{i}\circ g)$。
+3. $(f\circ g)\circ h=f\circ(g\circ h)$。特に $u$ が単元なら $u\circ g$ も単元で $(1/u)\circ g=1/(u\circ g)$。
+:::
+
+::: intuition
+定数項が $0$ の級数を代入する操作は、足し算・掛け算・無限和と両立し、続けて代入することもできる。つまり普通の関数の合成と同じように計算してよい。
+:::
+
+::: proof
+**Step 1（(1) 加法と定数）.** 【主張：$f\mapsto f\circ g$ は加法と $A$ の元倍を保ち、$1\circ g=1$, $x\circ g=g$】係数ごとの計算と \ref{comb:summable-rules.2} による。
+
+**Step 2（(1) 乗法）.** 【主張：$(fh)\circ g=(f\circ g)(h\circ g)$】\ref{comb:summable-rules.3} と \ref{comb:summable-rules.2} で、$(i,j)$ を $i+j=n$ ごとにまとめると
+$$
+(f\circ g)(h\circ g)=\sum_{(i,j)}f_{i}h_{j}g^{i+j}=\sum_{n}\Bigl(\sum_{i+j=n}f_{i}h_{j}\Bigr)g^{n}=(fh)\circ g.
+$$
+
+**Step 3（(2)）.** 【主張：代入は総和可能な和と交換する】$x^{n}$ の係数を見る。$k>n$ なら $[x^{n}]g^{k}=0$ なので、$[x^{n}](f\circ g)$ は $f_{0},\dots,f_{n}$ だけで決まる。$(f_{i})$ が総和可能なら、$[x^{k}]f_{i}\neq0$（$k\le n$）となる $i$ は有限個で、それ以外の $i$ で $[x^{n}](f_{i}\circ g)=0$。よって $(f_{i}\circ g)$ は総和可能で、$x^{n}$ の係数は両辺とも $\sum_{k\le n}\bigl(\sum_{i}[x^{k}]f_{i}\bigr)[x^{n}]g^{k}$ に等しい。
+
+**Step 4（(3)）.** 【主張：結合法則】$\operatorname{ord}(g\circ h)\ge1$ なので右辺は定義される。(2)・(1) を $h$ への代入に使うと
+$$
+(f\circ g)\circ h=\Bigl(\sum_{k}f_{k}g^{k}\Bigr)\circ h=\sum_{k}f_{k}(g\circ h)^{k}=f\circ(g\circ h).
+$$
+後半は $(u\circ g)((1/u)\circ g)=(u\cdot u^{-1})\circ g=1$ による。
+
+::: hypcheck
+- **$g_{0}=0$**：定義（総和可能性）と Step 3 の「$k>n$ なら $[x^{n}]g^{k}=0$」に使った。$g_{0}\neq0$ だと、たとえば $f=\sum x^{k}$ に $g=1$ を代入すると定数項が $\sum_{k}1$ となり意味をもたない。ただし $f$ が多項式なら $g_{0}\neq0$ でも代入は定義できる（有限和）。
+:::
+:::
+
+::: proposition 合成についての逆元 {#comb:compositional-inverse keywords="compositional inverse, reversion of power series" index="合成の逆元|ごうせいのぎゃくげん"}
+$g\in A[[x]]$ が $g_{0}=0$ で $g_{1}$ が $A$ の単元なら、$g\circ h=x=h\circ g$ となる $h\in A[[x]]$（$h_{0}=0$）がただ一つある。
+:::
+
+::: proof
+**Step 1（右逆元の係数を順に決める）.** 【主張：$g\circ h=x$ となる $h$（$h_{0}=0$）がただ一つある】$n\ge1$ について、$[x^{n}](g\circ h)=\sum_{k=1}^{n}g_{k}[x^{n}]h^{k}$ の $k=1$ の項は $g_{1}h_{n}$ である。$k\ge2$ の項 $[x^{n}]h^{k}$ は、$i_{1}+\dots+i_{k}=n$, $i_{t}\ge1$ についての $h_{i_{1}}\cdots h_{i_{k}}$ の和で、各 $i_{t}\le n-1$ なので $h_{1},\dots,h_{n-1}$ だけで決まる。したがって条件 $[x^{n}](g\circ h)=[n=1]$ は $h_{n}=g_{1}^{-1}\bigl([n=1]-c_{n}\bigr)$ （$c_{n}$ は $k\ge2$ の項の和で、$h_{1},\dots,h_{n-1}$ の多項式）と同値で、$h_{1},h_{2},\dots$ が順に一意に決まる。
+
+**Step 2（左逆元でもある）.** 【主張：$h\circ g=x$】Step 1 から $h_{1}=g_{1}^{-1}$ は単元なので、同じく $h\circ h'=x$ となる $h'$ がある。\ref{comb:substitution-homomorphism.3} より $g=g\circ x=g\circ(h\circ h')=(g\circ h)\circ h'=x\circ h'=h'$。よって $h\circ g=x$。
+:::
+
+## 形式的微分 {#comb:sec-fps-derivative}
+
+::: definition 冪級数の形式的微分 {#comb:fps-derivative keywords="formal derivative of a power series" index="形式的微分（冪級数の）|けいしきてきびぶん"}
+$f\in A[[x]]$ について $f'=Df\defeq\sum_{n\ge0}(n+1)f_{n+1}x^{n}$ と定める。多項式については \ref{ring:formal-derivative} と一致する。
+:::
+
+::: intuition
+$x^{n}$ を $nx^{n-1}$ に置き換える操作を、すべての項に同時に行う。
+:::
+
+::: proposition 微分の計算規則 {#comb:fps-derivative-rules keywords="Leibniz rule, chain rule for formal power series" index="連鎖律（冪級数の）|れんさりつ"}
+$f,h\in A[[x]]$ とする。
+1. $D$ は加法的で、総和可能な族 $(f_{i})$ について $(Df_{i})$ も総和可能で $D\sum f_{i}=\sum Df_{i}$。
+2. （ライプニッツ則）$D(fh)=(Df)h+f(Dh)$。特に $f$ が単元なら $D(1/f)=-Df/f^{2}$。
+3. （連鎖律）$g_{0}=0$ なら $D(f\circ g)=\bigl((Df)\circ g\bigr)\,Dg$。
+4. $A$ が $\Q$ を含むなら、$Df=0$ は $f$ が定数（$f=f_{0}$）であることと同値である。したがって $Df=Dh$ かつ $f_{0}=h_{0}$ なら $f=h$。
+:::
+
+::: proof
+**Step 1（(1)）.** $[x^{n}]Df=(n+1)[x^{n+1}]f$ なので、係数ごとの計算である。
+
+**Step 2（(2)）.** 両辺は $f$ についても $h$ についても加法的で、総和可能な和と交換する（(1) と \ref{comb:summable-rules.3}）。$f=\sum f_{i}x^{i}$, $h=\sum h_{j}x^{j}$（\ref{comb:summable-rules.1}）なので、$f=x^{i}$, $h=x^{j}$ の場合に示せばよく、そのとき両辺は $(i+j)x^{i+j-1}$。後半は $D(f\cdot f^{-1})=D1=0$ から。
+
+**Step 3（(3)）.** 【主張：$f=x^{k}$ の場合に帰着できる】両辺は $f$ について加法的で、\ref{comb:substitution-homomorphism.2} と (1) から総和可能な和と交換する。$f=x^{k}$ のとき、(2) と $k$ の帰納法で $D(g^{k})=kg^{k-1}Dg=((Dx^{k})\circ g)Dg$。
+
+**Step 4（(4)）.** $Df=0$ なら $(n+1)f_{n+1}=0$ で、$n+1$ は $A$ の単元なので $f_{n+1}=0$（$n\ge0$）。後半は $f-h$ に当てはめる。
+
+::: hypcheck
+- **$A\supseteq\Q$**：Step 4 だけで使った。$A=\Z/p\Z$ では $D(x^{p})=px^{p-1}=0$ なのに $x^{p}$ は定数でない。
+:::
+:::
+
+## 指数と対数 {#comb:sec-fps-exp-log}
+
+以下この節では $A$ は $\Q$ を含むとする。
+
+::: definition 形式的な指数と対数 {#comb:fps-exp-log keywords="formal exponential, formal logarithm, exp, log(1+x)" index="指数（形式的冪級数の）|しすう, 対数（形式的冪級数の）|たいすう"}
+$$
+E\defeq\sum_{n\ge0}\frac{x^{n}}{n!},\qquad L\defeq\sum_{n\ge1}\frac{(-1)^{n-1}}{n}x^{n}.
+$$
+$g_{0}=0$ の $g$ に対し $\exp g\defeq E\circ g$、$f_{0}=1$ の $f$ に対し $\log f\defeq L\circ(f-1)$ と書く。$\log(1+x)=L$ である。
+:::
+
+::: intuition
+解析学の $e^{x}$ と $\log(1+x)$ のテイラー展開を、収束を考えずに係数の列として取り出したものである。
+:::
+
+::: theorem 指数と対数の基本性質 {#comb:exp-log-properties keywords="exp and log are inverse, exp(g+h) = exp g exp h, log(fh) = log f + log h" index="指数と対数の関係|しすうとたいすうのかんけい"}
+$g,h$ は $g_{0}=h_{0}=0$、$f,u$ は $f_{0}=u_{0}=1$ とする。
+1. $DE=E$、$DL=1/(1+x)$。したがって $D\exp g=(\exp g)\,Dg$、$D\log f=Df/f$。
+2. $\exp(g+h)=\exp g\cdot\exp h$。
+3. $\log(fu)=\log f+\log u$。
+4. $\exp(\log f)=f$、$\log(\exp g)=g$。
+:::
+
+::: intuition
+指数は足し算を掛け算に、対数は掛け算を足し算に変え、互いに逆の操作である。証明は「微分が同じで定数項も同じなら等しい」という一つの原理だけで行う。
+:::
+
+::: proof
+**Step 1（(1)）.** 【主張：微分の公式】$DE=\sum_{n}(n+1)\frac{x^{n}}{(n+1)!}=E$。$DL=\sum_{n\ge0}(-1)^{n}x^{n}$ で、$(1+x)\sum_{n}(-1)^{n}x^{n}=1$（隣どうしの項が打ち消す）なので $DL=1/(1+x)$。後半は \ref{comb:fps-derivative-rules.3} から：$D\log f=\bigl((1+x)^{-1}\circ(f-1)\bigr)Df$ で、\ref{comb:substitution-homomorphism.3} より $(1+x)^{-1}\circ(f-1)=1/f$。
+
+**Step 2（(2)）.** 【主張：$\exp(g+h)=\exp g\cdot\exp h$】$\exp(\cdot)$ の定数項は $1$ なので単元である。まず $w_{1}\defeq\exp h\cdot\exp(-h)$ について、(1) とライプニッツ則から $Dw_{1}=w_{1}(Dh-Dh)=0$、定数項は $1$ なので \ref{comb:fps-derivative-rules.4} より $w_{1}=1$、すなわち $\exp(-h)=1/\exp h$。次に $w\defeq\exp(g+h)\exp(-g)\exp(-h)$ について同様に $Dw=w\cdot(Dg+Dh-Dg-Dh)=0$ で定数項は $1$ なので $w=1$。前半を使って両辺に $\exp g\cdot\exp h$ を掛ければよい。
+
+**Step 3（(3)）.** 【主張：両辺の微分と定数項が一致】(1) より $D\log(fu)=D(fu)/(fu)=Df/f+Du/u=D(\log f+\log u)$。定数項はどちらも $0$。
+
+**Step 4（(4)）.** 【主張：$\exp(\log f)=f$】$v\defeq\exp(\log f)/f$ とおくと、(1) より $D\exp(\log f)=\exp(\log f)\cdot Df/f$ なので $Dv=0$、定数項は $1$。よって $v=1$。後半は、$\log(\exp g)$ の微分が (1) より $D\exp g/\exp g=Dg$ で、定数項がともに $0$ であることから。
+
+::: hypcheck
+- **$A\supseteq\Q$**：$E$, $L$ の係数 $1/n!$, $1/n$ と、Step 2–4 で使う \ref{comb:fps-derivative-rules.4} に必要。
+- **$g_{0}=0$, $f_{0}=1$**：代入が定義されるための条件（\ref{comb:substitution}）。
+:::
+:::
+
+::: definition 一般の冪 {#comb:general-power keywords="(1+x)^alpha, general binomial series, generalized binomial coefficient" index="一般の二項係数|いっぱんのにこうけいすう, 二項級数|にこうきゅうすう"}
+$\alpha\in A$ と $f_{0}=1$ の $f$ に対し $f^{\alpha}\defeq\exp(\alpha\log f)$ と定める。$k\in\N$ に対し $\binom{\alpha}{k}\defeq\alpha^{\underline{k}}/k!=\alpha(\alpha-1)\cdots(\alpha-k+1)/k!$（**一般の二項係数**）とおく。
+:::
+
+::: intuition
+定数項が $1$ の級数の $\alpha$ 乗を、「対数をとって $\alpha$ 倍し、指数に戻す」ことで定める。
+:::
+
+::: theorem 二項級数 {#comb:binomial-series keywords="Newton's binomial theorem for formal power series" index="ニュートンの二項定理|にゅーとんのにこうていり, 二項級数|にこうきゅうすう" refname="二項級数"}
+$\alpha,\beta\in A$、$f_{0}=1$ とする。
+1. $(1+x)^{\alpha}=\sum_{k\ge0}\binom{\alpha}{k}x^{k}$。
+2. $f^{\alpha}f^{\beta}=f^{\alpha+\beta}$、$(f^{\alpha})^{\beta}=f^{\alpha\beta}$。$n\in\N$ なら $f^{n}$ は通常の $n$ 乗と一致し、$f^{-1}$ は逆元と一致する。
+:::
+
+::: intuition
+$(1+x)^{\alpha}$ は、$\alpha$ が自然数でなくても、二項係数を「$\alpha$ から 1 ずつ減らして $k$ 個掛けて $k!$ で割ったもの」に置き換えれば同じ形に展開できる。
+:::
+
+::: proof
+**Step 1（(2)）.** 【主張：指数法則】$\log f^{\alpha}=\log\exp(\alpha\log f)=\alpha\log f$（\ref{comb:exp-log-properties.4}）なので、$(f^{\alpha})^{\beta}=\exp(\beta\alpha\log f)=f^{\alpha\beta}$。$f^{\alpha}f^{\beta}=\exp(\alpha\log f)\exp(\beta\log f)=f^{\alpha+\beta}$（\ref{comb:exp-log-properties.2}）。$f^{1}=\exp\log f=f$ なので帰納法で $f^{n}$ は $n$ 乗、$f^{-1}f^{1}=f^{0}=\exp0=1$。
+
+**Step 2（(1)、微分方程式）.** 【主張：$y\defeq(1+x)^{\alpha}$ は $(1+x)Dy=\alpha y$, $y_{0}=1$ を満たす】\ref{comb:exp-log-properties.1} より $Dy=y\cdot\alpha D\log(1+x)=\alpha y/(1+x)$。
+
+**Step 3（係数の漸化式）.** 【主張：$y_{k}=\binom{\alpha}{k}$】$(1+x)Dy=\alpha y$ の $x^{k}$ の係数を比べると $(k+1)y_{k+1}+ky_{k}=\alpha y_{k}$、すなわち $y_{k+1}=\frac{\alpha-k}{k+1}y_{k}$。$y_{0}=1$ から帰納的に $y_{k}=\alpha^{\underline{k}}/k!$。
+:::
+
+::: corollary 負の冪と平方根 {#comb:binomial-series-examples keywords="1/(1-x)^n, sqrt(1-4x)" index="負の二項係数|ふのにこうけいすう"}
+1. $n\ge1$ について $(1-x)^{-n}=\sum_{k\ge0}\binom{n+k-1}{k}x^{k}$。
+2. $(1-4x)^{1/2}=1-\sum_{k\ge1}\frac{2}{k}\binom{2k-2}{k-1}x^{k}$ で、これは $(1-4x)^{1/2}\cdot(1-4x)^{1/2}=1-4x$ を満たす定数項 $1$ の唯一の級数である。
+:::
+
+::: proof
+**Step 1（(1)）.** $(1+x)^{-n}$ に $-x$ を代入する（\ref{comb:substitution-homomorphism}）と $(1-x)^{-n}=\sum_{k}\binom{-n}{k}(-1)^{k}x^{k}$ で、$\binom{-n}{k}(-1)^{k}=\frac{n(n+1)\cdots(n+k-1)}{k!}=\binom{n+k-1}{k}$（\ref{comb:binomial-formula}）。
+
+**Step 2（(2) の係数）.** 【主張：$\binom{1/2}{k}(-4)^{k}=-\frac{2}{k}\binom{2k-2}{k-1}$（$k\ge1$）】
+$$
+\binom{1/2}{k}(-4)^{k}=\frac{(-4)^{k}}{k!}\cdot\frac12\cdot\Bigl(-\frac12\Bigr)\cdots\Bigl(\frac{3-2k}{2}\Bigr)=-\frac{2^{k}}{k!}\cdot1\cdot3\cdots(2k-3).
+$$
+ここで $1\cdot3\cdots(2k-3)=\frac{(2k-2)!}{2^{k-1}(k-1)!}$ を代入すると $-\frac{2(2k-2)!}{k!\,(k-1)!}=-\frac{2}{k}\binom{2k-2}{k-1}$。
+
+**Step 3（一意性）.** 【主張：$u^{2}=1-4x$, $u_{0}=1$ となる $u$ は一つ】$v$ も同じ条件を満たせば $(u-v)(u+v)=0$ で、$u+v$ は定数項 $2$ の単元なので $u=v$。$(1-4x)^{1/2}$ は \ref{comb:binomial-series.2} を $f=1-4x$ に使えば $f^{1/2}f^{1/2}=f^{1}=f$ を満たす。その係数は、(1) の $(1+x)^{1/2}$ に $-4x$ を代入したもの（$\log$ と $\exp$ が代入と交換すること：\ref{comb:substitution-homomorphism.3}）で、Step 2 の値になる。
+:::
+
+::: supplement
+**一般化.** 多変数の形式的冪級数環 $A[[x_{1},\dots,x_{r}]]$ でも、総和可能性・代入・偏微分を同じように定義でき、同じ公式が成り立つ。
+
+**前提を変えると.** $A$ が $\Q$ を含まないと $E$ や $L$ が定義できない。正標数でも、$p$ 進数の議論で使われる**アルティン–ハッセの指数関数**のような代用品があるが、ここでは扱わない。
+
+**高い視点.** $A[[x]]$ は、イデアル $(x)$ による位相（$x$ 進位相）について多項式環 $A[x]$ を完備化したものであり、「総和可能」はこの位相での収束にほかならない。\ref{comb:substitution-homomorphism} は、$A[[x]]$ が「$(x)$ 進完備な $A$ 代数で、元 $x$ をもつ」もののうちの普遍的なものである（完備な $A$ 代数の位相的に冪零な元 $g$ ごとに、$x\mapsto g$ となる連続な準同型がただ一つある）ことの具体的な形である。完備化については \ref{ring:page-completion} を参照。
+:::
+
+## 問題 {#comb:sec-fps-problems}
+
+::: problem {#comb:prob-fps-geometric}
+$\Z[[x]]$ で $(1-x)\sum_{n\ge0}x^{n}=1$ を確かめ、$\frac{1}{(1-x)^{2}}=\sum_{n\ge0}(n+1)x^{n}$ を (a) 積の計算、(b) 微分、(c) \ref{comb:binomial-series-examples.1} の三通りで示せ。
+:::
+
+::: solution
+$(1-x)\sum x^{n}$ の $x^{n}$ の係数は $n=0$ で $1$、$n\ge1$ で $1-1=0$。(a) $\bigl(\sum x^{n}\bigr)^{2}$ の $x^{n}$ の係数は $\sum_{i+j=n}1=n+1$。(b) $D\frac{1}{1-x}=\frac{1}{(1-x)^{2}}$（\ref{comb:fps-derivative-rules.2}）で、左辺は $D\sum x^{n}=\sum(n+1)x^{n}$。(c) $n=2$ として $\binom{k+1}{k}=k+1$。
+:::
+
+::: problem {#comb:prob-fps-exp-inverse}
+$\Q[[x]]$ で $g=x+x^{2}$ の合成についての逆元 $h$ の係数を $x^{4}$ まで求めよ。
+:::
+
+::: solution
+$h=h_{1}x+h_{2}x^{2}+h_{3}x^{3}+h_{4}x^{4}+\cdots$ とし $h+h^{2}=x$ を比べる。$x$：$h_{1}=1$。$x^{2}$：$h_{2}+h_{1}^{2}=0$ で $h_{2}=-1$。$x^{3}$：$h_{3}+2h_{1}h_{2}=0$ で $h_{3}=2$。$x^{4}$：$h_{4}+2h_{1}h_{3}+h_{2}^{2}=0$ で $h_{4}=-5$。（一般に $h_{n}=(-1)^{n-1}C_{n-1}$ で $C_{n}$ はカタラン数。次のページ \ref[母関数と漸化式]{comb:page-generating-functions} を参照。）
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
