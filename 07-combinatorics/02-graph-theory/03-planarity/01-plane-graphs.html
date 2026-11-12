@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平面グラフとオイラーの公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/03-planarity/01-plane-graphs.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 平面グラフとオイラーの公式 {#graph:page-plane-graphs keywords="planar graph, plane graph, faces, sides of an edge, Euler's formula, 3n-6 bound, K5, K3,3, nonplanar"}
+
+グラフを平面上に、辺どうしが端点以外で交わらないように描けるとき、そのグラフは**平面的**であるという。描いた図は平面をいくつかの**面**に切り分け、頂点の数 $n$・辺の数 $m$・面の数 $f$ の間には $n-m+f=1+c$（$c$ は連結成分の数）という**オイラーの公式**が成り立つ。このページでは、多様体論の分野で用意した有限平面グラフの理論（\ref{mfd:page-plane-graphs}）と \ref{at:jordan-curve} を使って、各辺の「両側」の面を正確に定め、オイラーの公式を証明する。系として、平面的な単純グラフの辺の数の上界と、$K^{5}$ と $K_{3,3}$ が平面的でないことを示す。
+
+## 記法と定義の確認 {#graph:sec-pg-notation}
+
+::: notation
+- 平面の**有限平面グラフ** $\Gamma=(V,E)$（頂点は平面の有限個の点、辺は端点だけを共有する弧）、$|\Gamma|$、**面**（$\mathbb{R}^{2}\setminus|\Gamma|$ の連結成分）、折れ線グラフは \ref{mfd:plane-graph} の定義に従う。任意の有限平面グラフは平面の同相写像で折れ線グラフに移せる（\ref{mfd:tame-graph}）。
+- 弧 $e$ の端点を除いた部分を $e^{\circ}$ と書く。集合 $F$ の閉包を $\overline{F}$、**境界** $\overline{F}\setminus F$（$F$ が開集合のとき）を $\partial F$ と書く。
+- \ref{at:jordan-curve}、弧は平面を分けないこと（\ref{mfd:arc-nonseparating}）、ヤニシェフスキの補題（\ref{mfd:complement-connected}）を使う。$\widehat{\C}=\mathbb{R}^{2}\cup\{\infty\}$ はリーマン球面。
+- グラフの言葉（次数・閉路・連結成分・橋）は \ref{graph:page-graphs} のとおり。
+:::
+
+## 平面グラフと辺の両側 {#graph:sec-pg-sides}
+
+::: definition 平面的なグラフ {#graph:planar keywords="planar graph, plane embedding, plane graph" index="平面的グラフ|へいめんてきぐらふ, 平面埋め込み|へいめんうめこみ"}
+グラフ $G=(V,E)$ の**平面埋め込み**とは、有限平面グラフ $\Gamma$ と、$V$ から $\Gamma$ の頂点への全単射 $\iota$ で、$xy\in E$ と「$\iota(x)$, $\iota(y)$ を端点とする $\Gamma$ の辺がある」ことが同値になるもの（辺も一対一に対応する）をいう。平面埋め込みをもつグラフを**平面的**という。$G$ の面とは $\Gamma$ の面のことで、その個数は埋め込みによらない（\ref{graph:euler-formula} の系）。
+:::
+
+::: intuition
+平面的なグラフとは、点と線を紙の上に、線どうしが途中で交わらないように描けるグラフである。
+:::
+
+::: lemma 辺の両側 {#graph:edge-sides keywords="each edge of a plane graph has two sides; an edge on a cycle separates two faces, a bridge borders one face" index="辺の両側|へんのりょうがわ"}
+$\Gamma$ を有限平面グラフ、$e$ をその辺とする。
+1. $e^{\circ}$ の点を境界に含む面は高々 2 つで、そのような面 $F$ について $e\subseteq\partial F$。
+2. 各 $p\in e^{\circ}$ は、$\overline{D}\cap|\Gamma|$ が $e$ の部分弧で、$D\setminus e$ がちょうど 2 つの連結成分 $D^{1},D^{2}$ をもち、$D^{1}$ と $D^{2}$ がそれぞれ (1) の面のどれかに含まれる、ような開近傍 $D$ をもつ（$D^{1},D^{2}$ を含む面を $e$ の**両側の面**という。$D$ と $p$ によらない）。
+3. $e$ が $\Gamma$ の閉路に含まれるなら、両側の面は異なる。
+4. $e$ がどの閉路にも含まれない（橋である）なら、両側の面は一致する。
+:::
+
+::: intuition
+辺の一点のすぐそばでは、辺の左側と右側の二つの面しか見えない。辺が輪の一部なら輪の内側と外側で左右は別の面になり、輪の一部でなければ辺の先端をぐるりと回って左右がつながるので同じ面になる。
+:::
+
+::: proof
+**Step 0（折れ線に帰着）.** 平面の同相写像は面・境界・閉路を保つので、\ref{mfd:tame-graph} により $\Gamma$ は折れ線グラフとしてよい。
+
+**Step 1（小さい円板）.** 【主張：$p\in e^{\circ}$ に対し、小さい開円板 $D$ で、$\overline{D}\cap|\Gamma|$ が「$p$ を通る線分」か「$p$ を頂点とする 2 本の線分（$p$ が折れ線の角）」で、$D\setminus e$ がちょうど 2 つの開扇形からなるものがとれる】$p$ を含む $e$ の線分（1 本か 2 本）以外の $|\Gamma|$ の部分はコンパクトで $p$ を含まないので、$p$ からの距離は正である。半径をそれより小さく、かつ線分の他端までの距離より小さくとればよい。極座標で、円板から 1 本の直径または $p$ から出る 2 本の半径を除いた集合は、二つの開扇形（どちらも凸または角の領域で連結）に分かれる。
+
+**Step 2（側は辺に沿って一定）.** 【主張：$p\mapsto\{D^{1}(p),D^{2}(p)\text{ を含む面}\}$ は $e^{\circ}$ の上で一定】Step 1 の円板 $D(p)$ の中の $e^{\circ}$ の点 $q$ について、$D(q)\subseteq D(p)$ ととると、$D(q)\setminus e$ の二つの扇形はそれぞれ $D(p)\setminus e$ のどちらかの扇形に含まれ、$q$ の両側の近くの点は $D(p)$ の異なる扇形にあるので、二つの扇形は $D(p)$ の二つの扇形に一つずつ含まれる。よって面の組は $D(p)\cap e^{\circ}$ の上で一定。$e^{\circ}$ は連結なので全体で一定である。
+
+**Step 3（(1)(2)）.** 面 $F$ が $p\in e^{\circ}$ を境界に含めば、$F$ は $D(p)$ と交わり、$D(p)\setminus|\Gamma|=D(p)\setminus e$ の扇形のどちらかを（連結なので丸ごと）含む。よって $F$ は Step 2 の高々 2 つの面のどれかで、その面は $e^{\circ}$ のすべての点の近くに現れるので $e^{\circ}\subseteq\partial F$、閉包をとって $e\subseteq\partial F$。
+
+**Step 4（(3)）.** 【主張：$e\subseteq C$（閉路）なら $D^{1}$ と $D^{2}$ は $\mathbb{R}^{2}\setminus C$ の異なる成分にある】$D=D(p)$ は $C$ と $D\cap e$ でしか交わらない。\ref{at:jordan-curve} より $\mathbb{R}^{2}\setminus C$ の二つの成分はどちらも $C$ を境界にもつので、どちらも $D\setminus C=D^{1}\cup D^{2}$ と交わる。各 $D^{i}$ は連結で一つの成分に含まれるので、$D^{1}$ と $D^{2}$ は異なる成分にある。$\Gamma$ の面は $\mathbb{R}^{2}\setminus C$ の一つの成分に含まれるので、両側の面は異なる。
+
+**Step 5（(4)、辺を二つに分ける）.** $e$ の端点を $u,v$、$e$ の内部の点 $m$ で $e$ を弧 $\lambda_{1}=e[u,m]$, $\lambda_{2}=e[m,v]$ に分ける。$\Gamma-e$（辺 $e$ だけを除いたもの）の、$u$ を含む連結成分を $K_{u}$ とする。$e$ はどの閉路にも含まれないので $v\notin K_{u}$（$K_{u}$ の中の $u$–$v$ 道と $e$ で閉路ができる）。$A_{1}\defeq|K_{u}|\cup\lambda_{1}$、$A_{2}\defeq\bigl(|\Gamma-e|\setminus|K_{u}|\bigr)\cup\lambda_{2}$ とおくと、これらは閉集合で（$\Gamma-e$ の成分は互いに交わらない閉集合）、$A_{1}\cap A_{2}=\{m\}$、$A_{1}\cup A_{2}=|\Gamma|$。
+
+**Step 6（(4)、ヤニシェフスキの補題）.** 【主張：$p\in\lambda_{1}^{\circ}$ の両側の点 $x\in D^{1}$, $y\in D^{2}$ は $\widehat{\C}\setminus|\Gamma|$ の同じ成分にある】$\widehat{\C}\setminus A_{2}$ について：$D(p)$ は $A_{2}$ と交わらない（小さくとる）ので、$x,y$ は $D(p)$ の中の弧で結べて同じ成分にある。$\widehat{\C}\setminus A_{1}$ について：$\lambda_{1}\setminus\{u\}$ は連結で $|K_{u}|$ と交わらないので、$\widehat{\C}\setminus|K_{u}|$ の一つの成分 $W$ に含まれる。$\lambda_{1}\setminus W\subseteq\{u\}$ なので \ref{mfd:complement-connected.2} より $W\setminus\lambda_{1}$ は連結で、$x,y\in W\setminus\lambda_{1}\subseteq\widehat{\C}\setminus A_{1}$。\ref{mfd:complement-connected.1} から主張を得る。
+
+**Step 7（(4)、平面に戻す）.** 【主張：$x,y$ は同じ面にある】$\widehat{\C}\setminus|\Gamma|$ の成分のうち $\infty$ を含まないものは $\Gamma$ の面である。$\infty$ を含む成分 $W_{\infty}$ について、$|\Gamma|$ を含む大きな円板の外側 $O$ は連結で一つの面 $F_{\infty}$ に含まれ、$F_{\infty}\cup\{\infty\}$ は $\widehat{\C}$ の開集合である。$W_{\infty}\setminus(F_{\infty}\cup\{\infty\})$ は他の面の和で開集合なので、$W_{\infty}$ の連結性から空、すなわち $W_{\infty}=F_{\infty}\cup\{\infty\}$。どちらの場合も $x,y$ は同じ面にある。
+:::
+
+::: definition 面の次数 {#graph:face-degree keywords="degree of a face, number of edge-sides on a face" index="面の次数|めんのじすう"}
+平面グラフ $\Gamma$ の面 $F$ について、各辺 $e$ の両側のうち $F$ であるものの個数（0, 1, 2）の和を $F$ の**面の次数** $d(F)$ という。各辺は両側を一つずつもつので $\sum_{F}d(F)=2m$。
+:::
+
+::: intuition
+面の周りを一周するときに通る辺の数である。橋は両側から 2 回数える。
+:::
+
+## オイラーの公式 {#graph:sec-pg-euler}
+
+::: theorem オイラーの公式 {#graph:euler-formula keywords="Euler's formula n - m + f = 1 + c for plane graphs" index="オイラーの公式（平面グラフ）|おいらーのこうしき" refname="オイラーの公式（平面グラフ）"}
+頂点 $n$ 個・辺 $m$ 本・面 $f$ 個・連結成分 $c$ 個の平面グラフについて
+$$
+n-m+f=1+c.
+$$
+特に連結なら $n-m+f=2$。
+:::
+
+::: intuition
+連結な平面グラフでは、「頂点の数 − 辺の数 + 面の数」はいつも 2 である。辺を一本消すと、それが輪の一部なら二つの面が一つになり、橋なら連結成分が一つ増えるので、この量は変わらない。
+:::
+
+::: proof
+$m$ の帰納法。
+
+**Step 1（$m=0$）.** $\mathbb{R}^{2}$ から有限個の点を除いた集合は連結（2 点は除いた点を避ける折れ線で結べる）なので $f=1$、$c=n$。
+
+**Step 2（辺を一本除く：面の対応）.** 【主張：辺 $e$ の両側の面を $L,R$ とすると、$\Gamma-e$ の面は、$\Gamma$ の $L,R$ 以外の面と、$L\cup R\cup e^{\circ}$ である】$U\defeq L\cup R\cup e^{\circ}$ は、$e^{\circ}$ の各点の円板 $D(p)$（\ref{graph:edge-sides.2}）が $U$ に含まれるので開集合、各円板が $L$ と $R$ の両方と交わるので連結で、$|\Gamma-e|$ と交わらない。その境界は $\partial L\cup\partial R$ から $e^{\circ}$ を除いたものに含まれ、$|\Gamma-e|$ に入る。よって $U$ は $\mathbb{R}^{2}\setminus|\Gamma-e|$ の開かつ閉な連結部分集合で、成分である。$L,R$ 以外の面 $F$ は \ref{graph:edge-sides.1} より $\partial F\cap e^{\circ}=\varnothing$ なので $\partial F\subseteq|\Gamma-e|$ で、同様に $\Gamma-e$ の面である。これらで $\mathbb{R}^{2}\setminus|\Gamma-e|$ は覆われる。
+
+**Step 3（帰納段階）.** $e$ が閉路に含まれれば $L\neq R$（\ref{graph:edge-sides.3}）で、$\Gamma-e$ の面は $f-1$ 個、連結成分は $c$ 個（$e$ を除いても閉路の残りで端点は結ばれる）。$e$ が橋なら $L=R$（\ref{graph:edge-sides.4}）で面は $f$ 個、連結成分は $c+1$ 個。どちらでも帰納法の仮定 $n-(m-1)+f(\Gamma-e)=1+c(\Gamma-e)$ から $n-m+f=1+c$。
+:::
+
+::: corollary 平面グラフの辺の数 {#graph:planar-edge-bound keywords="planar graphs have at most 3n-6 edges, triangle-free planar graphs have at most 2n-4 edges, minimum degree at most 5" index="平面グラフの辺の数|へいめんぐらふのへんのかず"}
+$n\ge3$ 頂点の平面的なグラフ $G$ について
+1. $m\le3n-6$。
+2. $G$ が長さ 3 の閉路（三角形）を含まなければ $m\le2n-4$。
+3. $G$ は次数 5 以下の頂点をもつ。
+:::
+
+::: proof
+**Step 1（面の次数の下界）.** 【主張：連結で $m\ge2$ なら、すべての面の次数は 3 以上（三角形がなければ 4 以上）】面 $F$ の境界は \ref{graph:edge-sides.1} から辺と頂点の和で、$\partial F$ に含まれる辺の集合を $E_{F}$ とする。$d(F)\ge\abs{E_{F}}$ で、橋は 2 と数える。$E_{F}$ が閉路を含めば、閉路の長さは 3 以上（三角形がなければ 4 以上）なので主張が成り立つ。$E_{F}$ が閉路を含まないとき、$E_{F}$ の辺はすべて橋か、閉路の辺でも両側が $F$ でないものだが、後者は両側が異なる面なので $d(F)$ に 1 だけ寄与する。$E_{F}$ の辺がつくる森 $H$ について、$\mathbb{R}^{2}\setminus|H|$ は連結（森の各成分は木で \ref{mfd:prob-gr-tree}、互いに交わらない成分は \ref{mfd:complement-connected.1} を繰り返して合わせる。$\widehat{\C}$ と $\mathbb{R}^{2}$ の行き来は \ref{graph:edge-sides} の Step 7 と同じ）。$\partial F\subseteq|H|$ である：$\partial F$ の頂点 $w$ について、折れ線グラフに直して $w$ の小さい円板を考えると、$w$ から出る辺（半径）で円板が扇形に分かれ（$G$ は連結で $m\ge2$ なので $w$ の次数は 1 以上）、$F$ はある扇形を含むので、その扇形の縁の辺の両側のどちらかは $F$ で、$w$ はその辺の端点として $|H|$ に入る。よって $F$ は $\mathbb{R}^{2}\setminus|H|$ の開集合で、境界が $|H|$ に含まれるので閉集合でもあり、$F=\mathbb{R}^{2}\setminus|H|$。したがって $|\Gamma|\subseteq|H|$、$G$ は森 $H$ そのもので、連結なので木。木では全辺が橋で両側が唯一の面なので、$d(F)=2m\ge4$。
+
+**Step 2（(1)(2)）.** 連結成分ごとに辺を足して連結にしても平面的なまま（成分を外側の面の中で辺で結べる）なので、$G$ は連結としてよい。$m\le1$ なら $m\le3n-6$（$n\ge3$）。$m\ge2$ なら Step 1 から $2m=\sum_{F}d(F)\ge3f$ で、\ref{graph:euler-formula} の $f=2-n+m$ を代入して $2m\ge3(2-n+m)$、$m\le3n-6$。三角形がなければ $2m\ge4f$ から $m\le2n-4$。
+
+**Step 3（(3)）.** すべての次数が 6 以上なら \ref{graph:handshake} より $m\ge3n$ となり (1) に反する（$n\le2$ なら次数は 1 以下）。
+:::
+
+::: corollary K5 と K3,3 {#graph:k5-k33-nonplanar keywords="K5 and K3,3 are not planar" index="K5 の非平面性|けーごのひへいめんせい, 完全二部グラフ K3,3|かんぜんにぶぐらふけーさんさん"}
+$K^{5}$ と $K_{3,3}$ は平面的でない。
+:::
+
+::: proof
+$K^{5}$ は $n=5$, $m=10>3\cdot5-6=9$。$K_{3,3}$ は二部グラフなので奇閉路、特に三角形をもたず（\ref{graph:bipartite-odd-cycle}）、$n=6$, $m=9>2\cdot6-4=8$。\ref{graph:planar-edge-bound} に反する。
+:::
+
+::: supplement
+**一般化.** オイラーの公式は、球面上の胞体分割のオイラー標数 $\chi(S^{2})=2$ の特別な場合であり、種数 $g$ の向き付け可能な閉曲面に描いたグラフ（各面が円板）では $n-m+f=2-2g$ になる（\ref{mfd:page-classification-surfaces}）。
+
+**類似の定理.** \ref{graph:planar-edge-bound} の (3) から、平面グラフは 6 色で頂点を塗り分けられ（次数 5 以下の頂点を除いて帰納法）、もう少し工夫すると 5 色で塗り分けられる（\ref[頂点彩色]{graph:page-vertex-coloring}）。$K^{5}$ と $K_{3,3}$ が平面的でない「本質的な理由」はクラトフスキーの定理（\ref[クラトフスキーの定理]{graph:page-kuratowski}）が与える。
+:::
+
+## 問題 {#graph:sec-pg-problems}
+
+::: problem {#graph:prob-pg-petersen}
+ペテルセングラフ（10 頂点・15 辺、内周 5）が平面的でないことを、\ref{graph:planar-edge-bound} の証明と同じ方法で示せ。
+:::
+
+::: solution
+連結で、平面的なら各面の次数は、面の境界が閉路を含む場合は 5 以上（内周 5）、含まない場合は木になって $m=n-1$ に反する。よって $2m\ge5f$、$f\le6$。一方オイラーの公式から $f=2-n+m=7$ で矛盾。
+:::
+
+::: problem {#graph:prob-pg-platonic}
+すべての頂点の次数が $k\ge3$、すべての面の次数が $\ell\ge3$ の連結な平面グラフは、$(k,\ell)$ が $(3,3),(3,4),(4,3),(3,5),(5,3)$ のいずれかに限ることを示せ（正多面体の分類の組合せ論的な部分）。
+:::
+
+::: solution
+$kn=2m=\ell f$ をオイラーの公式に代入すると $\frac{2m}{k}-m+\frac{2m}{\ell}=2$、すなわち $\frac1k+\frac1\ell=\frac12+\frac1m>\frac12$。$k,\ell\ge3$ でこれを満たすのは上の 5 組だけである（$k=3$ なら $\ell<6$、$k=4$ なら $\ell<4$、$k=5$ なら $\ell<10/3$、$k\ge6$ なら解なし）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
