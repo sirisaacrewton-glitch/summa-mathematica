@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ディリクレの原理と適切性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/12-well-posedness.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ディリクレの原理と適切性 {#pde:page-well-posedness keywords="history of the Dirichlet principle, Riemann, Weierstrass counterexample int x^2 y'^2, Hilbert's rehabilitation, Sobolev spaces, boundary data with infinite Dirichlet energy, Hadamard well-posedness, existence uniqueness continuous dependence, ill-posed problems, Cauchy problem for the Laplace equation, Hadamard's example, odd reflection, backward heat equation, ディリクレの原理, ワイエルシュトラスの反例, 適切性, 適切な問題, 不適切問題, 非適切問題, ハダマールの例, コーシー問題"}
+
+前のページ（\ref{pde:page-comparison}）では、二つの系列の前提を方程式ごとに比べた。このページでは、その比較の背景にある二つの考え方を扱う。一つは**ディリクレの原理**（ディリクレ問題の解はエネルギーを最小にする関数である）で、関数解析的手法の出発点になったこの原理は、19 世紀にワイエルシュトラスの反例で一度信用を失い、ヒルベルトによって回復された。その経緯を、反例の証明と、現代の形（\ref{fa:dirichlet-principle}）との対応とともに述べる。もう一つは**ハダマールの適切性**（解の存在・一意性・データへの連続依存）で、偏微分方程式の問題を「正しく立てる」とはどういうことかを定める。ラプラス方程式のコーシー問題が一意だが適切でないこと（ハダマールの例）を証明し、適切性が解の空間の選び方によることを、前のページの比較と結びつける。
+
+## 記法と定義の確認 {#pde:sec-cmp-wp-notation}
+
+::: notation
+- 調和関数 \ref{pde:harmonic-function}、調和関数の実解析性 \tref{pde:harmonic-analytic}、一致の定理 \ref{pde:harmonic-unique-continuation}、ワイルの補題 \tref{pde:dirichlet-eigen-weyl}、実解析関数 \ref{pde:real-analytic-rn}、解析的でない $C^{\infty}$ 級関数 \ref{calc:non-analytic-smooth}。
+- 円板のディリクレ問題の級数解 \ref{pde:sep-disk}（$B$ は $\mathbb{R}^{2}$ の単位円板、境界値 $\gamma(\varphi)$ の係数 $\alpha_{k},\beta_{k}$）。
+- ディリクレの原理の現代の形 \ref{fa:dirichlet-principle}、ラックス–ミルグラムの定理 \ref{fa:lax-milgram}、弱解の存在 \ref{pde:weak-elliptic-existence}、一様楕円性 \ref{pde:bilinear-elliptic-form}。
+- 区間 $I\subset\mathbb{R}$ と $\delta>0$ について $Q\defeq I\times(0,\delta)\subset\mathbb{R}^{2}$ とおき、点を $(x,y)$ と書く。$C^{1}(I\times[0,\delta))$ は、$Q$ で $C^{1}$ 級で、関数と 1 階の偏導関数が $I\times[0,\delta)$ まで連続に延びるものの全体とする（$y=0$ での $\partial_{y}u$ は上側からの微分係数で、延長の値に等しい）。
+- 長方形の上の発散定理：$F\in C^{1}$ が閉長方形 $[a_{1},a_{2}]\times[b_{1},b_{2}]$ の近傍で定義されていれば、$\int\operatorname{div}F$ は 4 辺の上の外向きの流束の和に等しい（各成分にフビニの定理と微積分学の基本定理を使えばよい）。
+- **選択公理**：このページでは選択公理を使わない（引用する結果のうち、\ref{pde:weak-elliptic-existence.2} と \ref{fa:dirichlet-principle} も選択公理を使わない）。
+:::
+
+## ディリクレの原理とその批判 {#pde:sec-cmp-wp-dirichlet}
+
+有界な開集合 $\Omega\subset\mathbb{R}^{n}$ と境界値 $g$ について、境界で $g$ に等しい関数 $v$ の**ディリクレ積分** $D[v]\defeq\int_{\Omega}|\nabla v|^{2}dx$ を考える。$u$ が $D$ の最小点なら、境界で $0$ の $\varphi$ について $t\mapsto D[u+t\varphi]$ が $t=0$ で最小なので、$\int\nabla u\cdot\nabla\varphi=0$、部分積分して $\Delta u=0$ を得る。逆に調和関数はディリクレ積分を最小にする。「最小点はいつも存在するのだから、ディリクレ問題はいつも解ける」というのが**ディリクレの原理**である。リーマンは 1850 年代にこの原理をこの名で呼び、複素関数論（リーマン面の上の関数の存在）の基礎に用いた。
+
+問題は「最小点はいつも存在する」の部分にある。$D[v]\ge0$ なので下限は存在するが、下限が実際にある関数で達成されるとは限らない。ワイエルシュトラスは 1870 年に、変分問題の下限が達成されない例を示してこの推論を批判した。次はその例として知られるもので、1 次元の変分問題である。
+
+::: proposition ワイエルシュトラスの例 {#pde:cmp-weierstrass-example keywords="Weierstrass's counterexample to the Dirichlet principle: the functional int_{-1}^{1} x^2 y'(x)^2 dx over C^1 functions with y(-1) = -1, y(1) = 1 has infimum 0, which is not attained; the weight x^2 degenerates at 0, so the problem is not uniformly elliptic" index="ワイエルシュトラスの例|わいえるしゅとらすのれい, ワイエルシュトラスの反例|わいえるしゅとらすのはんれい"}
+$\mathcal{K}\defeq\{y\in C^{1}[-1,1]:y(-1)=-1,\ y(1)=1\}$ の上で $J[y]\defeq\int_{-1}^{1}x^{2}y'(x)^{2}\,dx$ とおく。
+1. $\inf_{y\in\mathcal{K}}J[y]=0$。
+2. $J[y]=0$ となる $y\in\mathcal{K}$ はない。
+:::
+
+::: intuition
+端点の値を固定して「傾きの 2 乗に $x^{2}$ の重みを付けた量」を小さくしたいとき、原点の近くで急に立ち上がる関数を使えばいくらでも小さくできるが、0 にする関数は存在しない。
+:::
+
+::: proof
+**Step 1.** 【主張：$\varepsilon>0$ について $y_{\varepsilon}(x)\defeq\arctan(x/\varepsilon)/\arctan(1/\varepsilon)$ は $\mathcal{K}$ に入り、$J[y_{\varepsilon}]\le\pi\varepsilon/\arctan(1/\varepsilon)^{2}$】$y_{\varepsilon}$ は $C^{\infty}$ 級で $y_{\varepsilon}(\pm1)=\pm1$。$A\defeq\arctan(1/\varepsilon)$ とおくと $y_{\varepsilon}'(x)=\frac{\varepsilon}{A(\varepsilon^{2}+x^{2})}$ で、$\frac{x^{2}}{\varepsilon^{2}+x^{2}}\le1$ から
+$$
+x^{2}y_{\varepsilon}'(x)^{2}=\frac{\varepsilon^{2}}{A^{2}}\cdot\frac{x^{2}}{(\varepsilon^{2}+x^{2})^{2}}\le\frac{1}{A^{2}}\cdot\frac{\varepsilon^{2}}{\varepsilon^{2}+x^{2}}.
+$$
+$\int_{-1}^{1}\frac{\varepsilon^{2}}{\varepsilon^{2}+x^{2}}dx=2\varepsilon A$ なので $J[y_{\varepsilon}]\le\frac{2\varepsilon}{A}\le\frac{\pi\varepsilon}{A^{2}}$（$A<\frac{\pi}{2}$）。
+
+**Step 2.** 【主張：1】$\varepsilon\to0$ で $A\to\frac{\pi}{2}$ なので、Step 1 の右辺は $0$ に近づく。$J\ge0$ なので下限は $0$。
+
+**Step 3.** 【主張：2】$J[y]=0$ なら、$x^{2}y'(x)^{2}$ は連続で非負なので恒等的に $0$、とくに $x\ne0$ で $y'(x)=0$。平均値の定理から $y$ は $[-1,0)$ と $(0,1]$ のそれぞれで定数で、連続性から $y(-1)=y(0)=y(1)$。これは $y(-1)=-1\ne1=y(1)$ に反する。
+
+::: hypcheck
+- **重み $x^{2}$ が原点で $0$ になること**：Step 1 で、原点の近くの大きな傾きが $J$ にほとんど寄与しないことに使った。重みを連続で $a(x)\ge\theta>0$ を満たす $a$ に替える（一様楕円性）と、コーシー–シュワルツの不等式から $2=\int_{-1}^{1}\sqrt{a}\,y'\cdot a^{-1/2}\le\bigl(\int ay'^{2}\bigr)^{1/2}\bigl(\int a^{-1}\bigr)^{1/2}$ なので $\int ay'^{2}\ge4/\int_{-1}^{1}a^{-1}>0$ となり、等号は $y'=C/a$（$C=2/\int a^{-1}$）となる $C^{1}$ 級の $y$ で達成される（\ref{pde:prob-cmp-wp-weight} と同じ計算）。
+- **関数の範囲 $C^{1}$**：Step 3 で使った。どんな関数の範囲に広げても、$J=0$ なら $y$ は $x\ne0$ で局所定数なので、端点の値をつなぐには原点で跳ぶしかない。この例の失敗は関数の範囲の選び方ではなく、重みの退化に由来する。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 重みを $|x|^{\beta}$ に替えると、$0\le\beta<1$ では下限は正で、絶対連続な関数の中では達成されるが $C^{1}$ 級の関数では達成されない（\ref{pde:prob-cmp-wp-weight}）。$\beta<1$ で下限が正になるのは、$\int_{-1}^{1}|x|^{-\beta}dx<\infty$ で、コーシー–シュワルツの不等式が使えるからである。
+
+**似た定理.** ディリクレ積分そのものについても、下限が「達成されない」のではなく「有限でない」という失敗がありうる：境界値が連続でも、それをとる関数のディリクレ積分がすべて無限大になることがある（\ref{pde:cmp-infinite-energy}）。
+
+**高い視点：一様楕円性は谷底の保証.** ワイエルシュトラスの例は、楕円型の作用素 $-(x^{2}y')'$ の係数 $a(x)=x^{2}$ が一様楕円性（\ref{pde:bilinear-elliptic-form}）を満たさない問題として読める。関数解析的手法の存在定理（\ref{pde:weak-elliptic-existence}）では、一様楕円性がガルディングの不等式を通してエネルギーの強圧性を保証し、それが「エネルギーの谷底が実際に存在する」ことの根拠だった。比喩で言えば、谷の底が平らに抜けている（重みが $0$ になる）所があると、ボールはそこから転がり出てしまい、底に止まらない。
+:::
+
+ディリクレの原理に対するもう一つの障害は、エネルギーが有限でない境界値である。ペロンの方法（\tref{pde:page-perron}）は連続な境界値のディリクレ問題を解くが、その解のディリクレ積分は有限とは限らない。
+
+::: proposition ディリクレ積分が無限大の古典解 {#pde:cmp-infinite-energy keywords="a continuous boundary function on the unit circle, gamma = sum 2^{-j} cos(4^j phi), whose harmonic extension has infinite Dirichlet integral; Dirichlet energy pi sum k (alpha_k^2 + beta_k^2) of a harmonic function on the disk" index="ディリクレ積分が無限大の解|でぃりくれせきぶんがむげんだいのかい"}
+$B\subset\mathbb{R}^{2}$ を単位円板とする。
+1. $\gamma\in C(\partial B)$ の円板のディリクレ問題の解 $u$（\ref{pde:sep-disk}）について、$0<\rho<1$ なら
+$$
+\int_{B(0,\rho)}|\nabla u|^{2}\,dx=\pi\sum_{k=1}^{\infty}k\bigl(\alpha_{k}^{2}+\beta_{k}^{2}\bigr)\rho^{2k}.
+$$
+2. $\gamma(\varphi)\defeq\sum_{j=1}^{\infty}2^{-j}\cos(4^{j}\varphi)$ は連続で、その解 $u\in C^{\infty}(B)\cap C(\overline{B})$ は $\int_{B}|\nabla u|^{2}dx=\infty$ を満たす。とくに $u\notin H^{1}(B)$。
+:::
+
+::: proof
+**Step 1.** 【主張：1】極座標 $x=(r\cos\varphi,r\sin\varphi)$ で $|\nabla u|^{2}=(\partial_{r}u)^{2}+r^{-2}(\partial_{\varphi}u)^{2}$。$r\le\rho$ では、\eqref{pde:eq-sep-disk-series} を項別に微分した級数は、係数が $|\alpha_{k}|+|\beta_{k}|\le C$ で $\sum k\rho^{k-1}<\infty$ なので一様絶対収束し、$\partial_{r}u=\sum_{k}kr^{k-1}(\alpha_{k}\cos k\varphi+\beta_{k}\sin k\varphi)$、$\partial_{\varphi}u=\sum_{k}kr^{k}(-\alpha_{k}\sin k\varphi+\beta_{k}\cos k\varphi)$。三角関数の直交性から
+$$
+\int_{0}^{2\pi}\Bigl((\partial_{r}u)^{2}+\frac{(\partial_{\varphi}u)^{2}}{r^{2}}\Bigr)d\varphi=2\pi\sum_{k}k^{2}r^{2k-2}\bigl(\alpha_{k}^{2}+\beta_{k}^{2}\bigr).
+$$
+$r\,dr$ を掛けて $0$ から $\rho$ まで積分すると（非負の項の級数なので項別に積分してよい）、$\int_{0}^{\rho}k^{2}r^{2k-1}dr=\frac{k\rho^{2k}}{2}$ から主張を得る。
+
+**Step 2.** 【主張：$\gamma$ は連続で、$\alpha_{4^{j}}=2^{-j}$、それ以外の $\alpha_{k}$（$k\ge1$）と $\beta_{k}$ は $0$】$|2^{-j}\cos(4^{j}\varphi)|\le2^{-j}$ なので級数は一様収束し、$\gamma$ は連続。一様収束する級数は項別に積分できるので、$\alpha_{k}=\frac1\pi\int_{0}^{2\pi}\gamma(\varphi)\cos k\varphi\,d\varphi$ は、$k=4^{j}$ のとき $2^{-j}$、それ以外は $0$。$\beta_{k}$ も同様に $0$。
+
+**Step 3.** 【主張：2】1 から $\int_{B(0,\rho)}|\nabla u|^{2}=\pi\sum_{j}4^{j}\cdot4^{-j}\rho^{2\cdot4^{j}}=\pi\sum_{j}\rho^{2\cdot4^{j}}$。$\rho\uparrow1$ で各項は $1$ に増加するので、単調収束定理（\ref{meas:monotone-convergence}）から右辺は $\infty$ に、左辺は $\int_{B}|\nabla u|^{2}$ に近づく。$u\in C(\overline{B})$ と調和性は \ref{pde:sep-disk.2}。
+
+::: hypcheck
+- **$\gamma$ の連続性**：Step 2 で係数を項別積分で求めるのに、\ref{pde:sep-disk} で古典解を得るのに使った。係数は $\sum|\alpha_{k}|<\infty$ を満たすので、\ref{pde:sep-disk.3} から級数は閉じた円板で一様に収束している。
+- **係数が疎であること**：Step 3 で $k\alpha_{k}^{2}=1$（$k=4^{j}$）とするのに使った。$\gamma$ のディリクレ積分が有限になるのは $\sum k(\alpha_{k}^{2}+\beta_{k}^{2})<\infty$ のとき、つまり係数が $\sum|\alpha_{k}|$ の収束よりわずかに速く減衰するときに限る。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 1 の式から、円板の調和関数のディリクレ積分が有限であることは $\sum k(\alpha_{k}^{2}+\beta_{k}^{2})<\infty$ と同値である。これは境界値が円周上の分数階のソボレフ空間 $H^{1/2}$ に入る条件で、$H^{1}(B)$ の関数のトレースがちょうどこの空間になることが知られている（\see{fa:trace-theorem}, \see{fa:fractional-sobolev}。円周の場合の対応はここでは証明しない）。連続性と $H^{1/2}$ はどちらも他方を含まない。
+
+**高い視点：二つのディリクレ問題.** 連続な境界値の問題（古典的手法の問題）と、有限エネルギーの境界値の問題（関数解析的手法の問題）は、重なりは大きいが同じではない。ディリクレの原理が解くのは後者だけで、前者を解くにはペロンの方法や、滑らかなデータの解の一様な近似（\ref{pde:cmp-dirichlet-agree.2}）が要る。前のページの比較で、二つの手法の境界値の扱いが違った（\ref{pde:cmp-table-laplace}）のは、この違いの表れである。
+:::
+
+**ヒルベルトによる回復とその後.** ヒルベルトは 1900 年前後に、ディリクレの原理を、十分な仮定（境界と境界値の滑らかさ）の下で厳密に正当化した。考え方は、ディリクレ積分を小さくしていく関数の列（最小化列）から収束する部分列を取り出し、その極限が最小点であることを示すことで、今日**変分法の直接法**と呼ばれる。同じ年の国際数学者会議で彼が挙げた問題には、正則な変分問題の解の解析性（第 19 問題）と、境界値問題の可解性（第 20 問題）が含まれ、この分野の 20 世紀の研究の指針になった。
+
+現代の形では、この回復は二段に分かれる。第一段は**存在**で、関数の空間をディリクレ積分のノルムについて完備にしておけば（$H_{0}^{1}(\Omega)$）、最小点の存在はヒルベルト空間の射影定理、すなわちラックス–ミルグラムの定理の対称な場合（\ref{fa:dirichlet-principle}）からすぐに従う。ワイエルシュトラスの批判への答えは「最小点を探す空間を正しく選べば、最小点は存在する」である。第二段は**正則性**で、こうして得た最小点が実際に滑らかな調和関数であること（ワイルの補題 \tref{pde:dirichlet-eigen-weyl}、一般の作用素では差分商による正則性理論 \ref{pde:page-regularity}）を別に示す。存在と正則性を分けて扱うこの方針が、関数解析的手法の系列全体の構成になっている。
+
+完備な関数空間の役割を明確にしたのが、ソボレフが 1930 年代に導入した、弱い導関数をもつ関数の空間とその埋め込み定理である（\see{fa:page-sobolev-spaces}, \see{fa:page-embeddings}）。前のページで見た「埋め込みの代償」（\ref{pde:cmp-dirichlet-sobolev-route} の $m\ge\lfloor n/2\rfloor+1$）は、エネルギーの空間から各点の値の空間へ戻るときの、この埋め込み定理の限界である。歴史の詳しい経緯は Courant『Dirichlet's Principle, Conformal Mapping, and Minimal Surfaces』に述べられている。
+
+## ハダマールの適切性 {#pde:sec-cmp-wp-hadamard}
+
+::: definition 適切な問題 {#pde:cmp-well-posed keywords="well-posed problem in the sense of Hadamard: existence for all data in a given space, uniqueness in a given solution space, and continuous dependence of the solution on the data; ill-posed problem" index="適切な問題|てきせつなもんだい, 適切性|てきせつせい, 不適切な問題|ふてきせつなもんだい, 非適切問題|ひてきせつもんだい"}
+データの集合 $X$ と解の集合 $Y$ をそれぞれ距離空間（多くはノルム空間）とし、各データ $d\in X$ について「$d$ に対する解」が $Y$ の元として定められているとする。次の三つが成り立つ問題を、（ハダマールの意味で）**適切な問題**という。単に「問題が適切である」ともいう。
+1. （存在）すべての $d\in X$ について解 $S(d)\in Y$ がある。
+2. （一意性）解は $Y$ の中にただ一つである。
+3. （連続依存）写像 $S\colon X\to Y$ は連続である。
+
+適切でない問題を**不適切な問題**という。
+:::
+
+::: intuition
+問題が適切とは、どんなデータにも解がちょうど一つあり、データを少し変えると解も少ししか変わらないことである。測定誤差のあるデータから意味のある答えを出せるのは、適切な問題だけである。
+:::
+
+::: example
+1. 球のディリクレ問題は、$X=C(\partial B)$、$Y=C(\overline{B})$（一様ノルム）で適切である：存在と一意性は \ref{pde:poisson-ball-dirichlet}、連続依存は \ref{pde:dirichlet-uniqueness.3}。
+2. 全空間の熱方程式の初期値問題は、$X$ を有界連続関数（一様ノルム）、$Y$ を $\mathbb{R}^{n}\times[0,\infty)$ の有界な古典解（一様ノルム）とすると適切である（\ref{pde:heat-cauchy-solution}, \ref{pde:heat-uniqueness-rn.2}）。$Y$ から有界性を外すと一意性が崩れる（\ref{pde:heat-tychonoff}）。
+3. 楕円型方程式の弱解は、$b=0$, $c\ge0$ なら $X=H^{-1}$, $Y=H_{0}^{1}$ で適切である（\ref{pde:weak-elliptic-existence.2}）。
+4. 3 次元の波動方程式は、$X=C^{2}\times C^{1}$, $Y=C^{2}$ では存在が崩れて適切でない（\ref{pde:wave-kirchhoff-loss}）が、有界な領域のディリクレ条件の問題は、エネルギー空間 $X=H_{0}^{1}\times L^{2}$（$f=0$）、$Y=C([0,T];H_{0}^{1})$ では適切である（\ref{pde:hyperbolic-existence}, \ref{pde:hyperbolic-uniqueness}, \ref{pde:hyperbolic-energy-equality.3}）。
+5. 後退熱方程式は、一様ノルムで連続依存が崩れ、角のある終端値には解がない（\ref{pde:heat-backward}）。
+:::
+
+例の 2 と 4 が示すように、適切性は方程式だけでなく、データと解の空間の選び方で決まる。古典的手法が $C^{k}$ の空間で不適切になる問題を、関数解析的手法はエネルギー空間で適切な問題に立て直すことがある。ただし、どう空間を選んでも直らない不適切性もある。その典型がラプラス方程式のコーシー問題である。
+
+**ラプラス方程式のコーシー問題.** 境界の一部 $y=0$ で、値 $u$ と法線微分 $\partial_{y}u$ の両方を与える問題
+$$
+\Delta u=0\ (Q\text{ で}),\qquad u(x,0)=\phi(x),\quad\partial_{y}u(x,0)=\psi(x)\quad(x\in I)
+\label{pde:eq-cmp-laplace-cauchy}
+$$
+を考える。解は $u\in C^{2}(Q)\cap C^{1}(I\times[0,\delta))$ の範囲で探す。波動方程式なら初期値と初速度を与えるのは自然な問題で適切だったが、ラプラス方程式では次のように振る舞いがまったく違う。
+
+まず、一意性と非存在の証明に使う、境界を越えて調和関数を延ばす補題を示す。
+
+::: lemma 境界を越える延長 {#pde:cmp-reflection keywords="extension of harmonic functions across a flat boundary: zero extension when u and its normal derivative vanish, odd reflection when u vanishes on the segment; proof by Green's identity on y > epsilon and Weyl's lemma" index="鏡像の原理（調和関数）|きょうぞうのげんりちょうわかんすう, 奇な折り返し|きなおりかえし"}
+$u\in C^{2}(Q)\cap C^{1}(I\times[0,\delta))$ が $Q$ で調和で、$I$ の上で $u(x,0)=0$ とする。$D\defeq I\times(-\delta,\delta)$ とおく。
+1. $U(x,y)\defeq u(x,y)$（$y>0$）、$U(x,0)\defeq0$、$U(x,y)\defeq-u(x,-y)$（$y<0$）は $D$ で調和である。
+2. さらに $I$ の上で $\partial_{y}u(x,0)=0$ なら、$Q$ の上で $u=0$。
+:::
+
+::: proof
+**Step 1.** 【主張：$\varphi\in C_{c}^{\infty}(D)$ と $0<\varepsilon<\delta$ について、$Q_{\varepsilon}\defeq I\times(\varepsilon,\delta)$ とおくと $\int_{Q_{\varepsilon}}u\,\Delta\varphi=\int_{I}\bigl(\varphi\,\partial_{y}u-u\,\partial_{y}\varphi\bigr)(x,\varepsilon)\,dx$】$\varphi$ の台は、ある閉長方形 $[a_{1},a_{2}]\times[-\delta',\delta']$（$[a_{1},a_{2}]\subset I$, $\delta'<\delta$）の内部に入る。$F\defeq u\nabla\varphi-\varphi\nabla u$ は $[a_{1},a_{2}]\times[\varepsilon,\delta']$ の近傍で $C^{1}$ 級で、$\operatorname{div}F=u\Delta\varphi-\varphi\Delta u=u\Delta\varphi$。長方形の上の発散定理で、$\varphi$ が $0$ になる 3 辺の流束は $0$、下の辺（外向きの法線 $-e_{2}$）の流束は $-\int(u\,\partial_{y}\varphi-\varphi\,\partial_{y}u)(x,\varepsilon)dx$。
+
+**Step 2.** 【主張：1】$\int_{D}U\Delta\varphi=0$ を示せばよい：$U$ は $D$ で連続（$y=0$ での値は $u(x,0)=0$ と一致）、とくに局所有界なので、\ref{pde:dirichlet-eigen-weyl} から $U$ はある調和関数 $H$ に a.e. で等しく、連続性から至る所で $U=H$。$y<-\varepsilon$ の部分は $y\mapsto-y$ と変数を替え、$\tilde\varphi(x,y)\defeq\varphi(x,-y)$ に Step 1 を使う（$\Delta\tilde\varphi(x,y)=(\Delta\varphi)(x,-y)$、$\partial_{y}\tilde\varphi(x,\varepsilon)=-(\partial_{y}\varphi)(x,-\varepsilon)$）。上下を合わせると
+$$
+\begin{aligned}
+\int_{|y|>\varepsilon}U\Delta\varphi=\int_{I}\Bigl[&\partial_{y}u(x,\varepsilon)\bigl(\varphi(x,\varepsilon)-\varphi(x,-\varepsilon)\bigr)\\
+&-u(x,\varepsilon)\bigl(\partial_{y}\varphi(x,\varepsilon)+\partial_{y}\varphi(x,-\varepsilon)\bigr)\Bigr]dx.
+\end{aligned}
+$$
+$x\in[a_{1},a_{2}]$ で $\partial_{y}u(x,\varepsilon)$ は有界、$|\varphi(x,\varepsilon)-\varphi(x,-\varepsilon)|\le2\varepsilon\sup|\partial_{y}\varphi|$、$u(x,\varepsilon)\to u(x,0)=0$（一様。$[a_{1},a_{2}]\times[0,\delta']$ での一様連続性）なので、右辺は $\varepsilon\to0$ で $0$ に近づく。左辺は優収束定理で $\int_{D}U\Delta\varphi$ に近づく。
+
+**Step 3.** 【主張：2】$U_{0}\defeq u$（$y>0$）、$0$（$y\le0$）とおく。$\varphi\in C_{c}^{\infty}(D)$ について、Step 1 から $\int_{D}U_{0}\Delta\varphi=\lim_{\varepsilon\to0}\int_{I}(\varphi\,\partial_{y}u-u\,\partial_{y}\varphi)(x,\varepsilon)dx=\int_{I}(\varphi\,\partial_{y}u-u\,\partial_{y}\varphi)(x,0)dx=0$（仮定から $u=\partial_{y}u=0$ on $y=0$）。$U_{0}$ は局所有界なので、\ref{pde:dirichlet-eigen-weyl} から $D$ の調和関数 $H_{0}$ に a.e. で等しい。$H_{0}$ は $y<0$ の開集合で a.e. に $0$、連続なので $0$ で、$D$ は連結なので \ref{pde:harmonic-unique-continuation} から $H_{0}\equiv0$。$u$ は $Q$ で連続で $H_{0}$ と a.e. に等しいので $u=0$。
+
+::: hypcheck
+- **$u\in C^{1}(I\times[0,\delta))$**：Step 2 で $\partial_{y}u(x,\varepsilon)$ の有界性に、Step 3 で $\varepsilon\to0$ の極限をとるのに使った。境界での連続性だけでは、Step 3 の境界の項が意味をもたない。
+- **境界が平らであること**：Step 2 の折り返し $y\mapsto-y$ で $\Delta$ が保たれることに使った。曲がった境界では、ケルヴィン変換のような別の変換が要る（球面の場合）。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: theorem ハダマールの例 {#pde:cmp-hadamard keywords="Hadamard's example: the Cauchy problem for the Laplace equation in the plane with data on a line is uniquely solvable at most, but u_k = k^{-1} e^{-sqrt k} sin(kx) sinh(ky) shows that the solution does not depend continuously on the data in any C^j norm, and data that is not real analytic has no solution" index="ハダマールの例|はだまーるのれい, ラプラス方程式のコーシー問題|らぷらすほうていしきのこーしーもんだい"}
+\eqref{pde:eq-cmp-laplace-cauchy} について次が成り立つ。
+1. （一意性）同じ $\phi,\psi$ に対する解は高々一つである。
+2. （連続依存の破れ）$I=\mathbb{R}$ とし、$\delta=\infty$（$Q=\mathbb{R}\times(0,\infty)$）として、$k\ge1$ について $u_{k}(x,y)\defeq k^{-1}e^{-\sqrt{k}}\sin(kx)\sinh(ky)$ とおく。$u_{k}$ は $\phi=0$, $\psi_{k}(x)\defeq e^{-\sqrt k}\sin(kx)$ に対する解で、すべての $j\ge0$ について $\sup_{x}|\psi_{k}^{(j)}(x)|\to0$（$k\to\infty$）だが、どの $y>0$ についても $\sup_{x}|u_{k}(x,y)|\to\infty$。
+3. （非存在）$\phi=0$ で、$\psi\in C(I)$ が $I$ のある点の近くで実解析的でないなら、解は存在しない。たとえば $0\in I$ で $\psi$ が \ref{calc:non-analytic-smooth} の関数 $e^{-1/x}$（$x>0$）、$0$（$x\le0$）なら、$\psi$ は $C^{\infty}$ 級だが解はない。
+:::
+
+::: intuition
+ラプラス方程式で、直線の上の値と法線微分を両方指定すると、解はあっても一つだが、データの細かく小さな振動が少し離れた所で爆発的に増幅され、さらにデータが少しでも解析的でなければ解がない。
+:::
+
+::: proof
+**Step 1.** 【主張：1】二つの解の差 $w$ は \eqref{pde:eq-cmp-laplace-cauchy} の $\phi=\psi=0$ の解なので、\ref{pde:cmp-reflection.2} から $w=0$。
+
+**Step 2.** 【主張：$u_{k}$ は $\phi=0$, $\psi=\psi_{k}$ の解】$\partial_{x}^{2}u_{k}=-k^{2}u_{k}$, $\partial_{y}^{2}u_{k}=k^{2}u_{k}$ なので $\Delta u_{k}=0$。$u_{k}(x,0)=0$、$\partial_{y}u_{k}(x,y)=e^{-\sqrt k}\sin(kx)\cosh(ky)$ から $\partial_{y}u_{k}(x,0)=\psi_{k}(x)$。
+
+**Step 3.** 【主張：2 の評価】$|\psi_{k}^{(j)}(x)|\le k^{j}e^{-\sqrt k}$ で、$k^{j}e^{-\sqrt k}=\exp(j\log k-\sqrt k)\to0$。一方 $y>0$ を固定すると、$x=\frac{\pi}{2k}$ で $\sin(kx)=1$ なので、$\sinh s\ge\frac{e^{s}-1}{2}$ から
+$$
+\sup_{x}|u_{k}(x,y)|\ge\frac{e^{ky}-1}{2k}e^{-\sqrt k}=\frac{1}{2}\exp\bigl(ky-\sqrt k-\log k\bigr)-\frac{e^{-\sqrt k}}{2k},
+$$
+$ky-\sqrt k-\log k\to\infty$ なので右辺は $\infty$ に発散する。
+
+**Step 4.** 【主張：3】解 $u$ があるとすると、\ref{pde:cmp-reflection.1} の $U$ は $D$ で調和なので、\ref{pde:harmonic-derivatives} から $\partial_{y}U$ は $D$ で調和、したがって \ref{pde:harmonic-analytic} から $D$ で実解析的である。\ref{pde:real-analytic-rn} の冪級数で $h=(h_{1},0)$ とすると、$x\mapsto\partial_{y}U(x,0)$ は $I$ の各点の近くで $h_{1}$ の冪級数で表される。$U$ は $D$ で微分可能で $y\ge0$ では $U=u$ なので、$\partial_{y}U(x,0)$ は上側からの微分係数 $\partial_{y}u(x,0)=\psi(x)$ に等しい。よって $\psi$ は $I$ の各点の近くで実解析的で、仮定に反する。例の $\psi$ が $0$ の近くで実解析的でないことは \ref{calc:non-analytic-smooth.1}。
+
+::: hypcheck
+- **解の範囲 $C^{1}(I\times[0,\delta))$**：Step 1・4 で \ref{pde:cmp-reflection} を使うのに使った。データを課す以上、境界まで $C^{1}$ であることは自然な要請である。
+- **2 のノルムの選び方**：データをどの $C^{j}$ ノルムで測っても、解を $y>0$ での一様ノルムで測る限り連続依存は崩れる。データの側を $e^{-\sqrt k}$ より速く減衰させる（たとえば $e^{-k}$ のような解析的なデータの空間のノルム）と、$y<1$ の範囲では解は小さいままだが、それはデータを実解析的な関数に限ることにあたり、3 から見て、そうしなければ存在すら保証されない。
+- **3 の $\phi=0$**：Step 4 で \ref{pde:cmp-reflection.1} を使うのに使った。一般の $\phi$ では、この折り返しはそのままは使えない。
+- **公理**：選択公理は使わない。
+:::
+:::
+
+::: supplement
+**前提を変えると.** データが実解析的なら、コーシー–コワレフスカヤの定理から、初期の直線の近くで実解析的な解が存在する（Evans『Partial Differential Equations』第 4 章。このサイトでは証明しない）。しかし 2 が示すとおり、実解析的なデータの中でも、通常の $C^{j}$ ノルムについての連続依存はない。ラプラス方程式のコーシー問題は、一意性だけは成り立つが、存在と連続依存の両方が崩れる典型的な不適切問題である。一方、解に「$Q$ の上で $|u|\le M$」のような事前の有界性を課すと、データの小ささから解の小ささが（ヘルダー型の弱い形で）従う、という条件つきの安定性が成り立つことが知られている（ここでは証明しない）。2 の $u_{k}$ は、この事前の有界性を破ることで爆発している。
+
+**似た定理.** 後退熱方程式（\ref{pde:heat-backward}）も同じ形をしている：周波数 $k$ の成分が逆向きの時間 $1$ で $e^{k^{2}}$ 倍され、ラプラス方程式では高さ $y$ で $e^{ky}$ 倍される。どちらも、正しい向きに解けば高周波を強く減衰させる問題（熱方程式の前進、ラプラス方程式のディリクレ問題）を、逆向きに解こうとしている。波動方程式では周波数 $k$ の成分は $\cos kt$, $\sin kt$ で振動するだけで増幅されないので、初期値問題は適切である（\ref{pde:wave-uniqueness-rn}）。
+
+**高い視点：楕円型は境界値、双曲型は初期値.** 2 階の方程式の型（\ref{pde:classification}）は、どんな問題が適切かを決める。楕円型方程式では境界全体に一つの条件（値か法線微分）を課すのが適切で、境界の一部に二つの条件を課すと不適切になる。双曲型方程式では初期面に二つの条件（値と時間微分）を課すのが適切である。放物型は時間の向きが決まっていて、前向きの初期値問題だけが適切である。比喩で言えば、楕円型方程式は周囲の意見をすべて聞いて結論を出す「合議」なので、片側の意見を二重に聞いても反対側の情報は補えない。
+:::
+
+## 問題 {#pde:sec-cmp-wp-problems}
+
+::: problem {#pde:prob-cmp-wp-weight}
+$0<\beta<1$ とし、$\mathcal{K}$ を \ref{pde:cmp-weierstrass-example} のとおり、$J_{\beta}[y]\defeq\int_{-1}^{1}|x|^{\beta}y'(x)^{2}\,dx$ とおく。
+1. すべての $y\in\mathcal{K}$ について $J_{\beta}[y]\ge2(1-\beta)$ を示せ。
+2. $J_{\beta}[y]=2(1-\beta)$ となる $y\in\mathcal{K}$ はないことを示せ。
+3. $y_{*}(x)\defeq\operatorname{sgn}(x)|x|^{1-\beta}$ は $[-1,1]$ で絶対連続で、$y_{*}(\pm1)=\pm1$、$J_{\beta}[y_{*}]=2(1-\beta)$ であることを示せ。
+:::
+
+::: solution
+**1.** $y\in\mathcal{K}$ について、コーシー–シュワルツの不等式から
+$$
+2=\int_{-1}^{1}y'\,dx=\int_{-1}^{1}|x|^{\beta/2}y'\cdot|x|^{-\beta/2}\,dx\le J_{\beta}[y]^{1/2}\Bigl(\int_{-1}^{1}|x|^{-\beta}dx\Bigr)^{1/2},
+$$
+$\int_{-1}^{1}|x|^{-\beta}dx=\frac{2}{1-\beta}$ なので $J_{\beta}[y]\ge\frac{4(1-\beta)}{2}=2(1-\beta)$。
+
+**2.** 等号が成り立てば、コーシー–シュワルツの不等式の等号条件から、ある定数 $C$ について a.e. で $|x|^{\beta/2}y'(x)=C|x|^{-\beta/2}$、つまり $x\ne0$ で（連続性から至る所で）$y'(x)=C|x|^{-\beta}$。1 の式から $C\ne0$ で、$x\to0$ で $|y'(x)|\to\infty$ となり、$y'$ が $[-1,1]$ で連続であることに反する。
+
+**3.** $y_{*}$ は $x\ne0$ で微分可能で $y_{*}'(x)=(1-\beta)|x|^{-\beta}$。これは $[-1,1]$ で可積分で、$x>0$ について $\int_{0}^{x}y_{*}'=x^{1-\beta}=y_{*}(x)-y_{*}(0)$（$x<0$ も同様）なので、$y_{*}$ は $y_{*}'$ の不定積分、とくに絶対連続。$y_{*}(\pm1)=\pm1$、$J_{\beta}[y_{*}]=(1-\beta)^{2}\int_{-1}^{1}|x|^{-\beta}dx=2(1-\beta)$。
+
+（$\beta\ge1$ では $\int|x|^{-\beta}=\infty$ で 1 の議論は使えず、$\beta=2$ が \ref{pde:cmp-weierstrass-example} である。$0<\beta<1$ では下限は $C^{1}$ 級の関数では達成されないが、絶対連続な関数、すなわち重みつきのエネルギーが有限な関数の範囲に広げると達成される。関数の範囲を完備な空間に広げると最小点が現れる、というヒルベルトの回復の考え方の 1 次元の例である。）
+:::
+
+::: problem {#pde:prob-cmp-wp-backward}
+区間 $(0,\pi)$ のディリクレ条件の熱方程式で、\ref{pde:sep-heat-dirichlet} の解 $u_{f}(x,t)=\sum_{k}b_{k}(f)e^{-k^{2}t}\sin kx$（$f\in L^{2}(0,\pi)$）を考える。$T>0$ とし、「終端値 $h\in L^{2}(0,\pi)$ が与えられたとき、$u_{f}(\cdot,T)=h$ となる初期値 $f\in L^{2}(0,\pi)$ を求める」という後退問題を考える。
+1. そのような $f$ が存在するための必要十分条件は $\sum_{k}e^{2k^{2}T}b_{k}(h)^{2}<\infty$ であり、このとき $f$ はただ一つであることを示せ。
+2. $h_{N}(x)\defeq N^{-1}\sin(Nx)$ について、$\sup_{x}|h_{N}(x)|\to0$ だが、対応する初期値 $f_{N}$ は $\|f_{N}\|_{2}\to\infty$ を満たすことを示せ。この後退問題は、$X=Y=L^{2}(0,\pi)$ として、適切性のどの条件を満たし、どれを満たさないか。
+:::
+
+::: solution
+**1.** $u_{f}(\cdot,T)=\sum_{k}b_{k}(f)e^{-k^{2}T}\sin kx$ は $L^{2}$ で収束する正弦級数で、正弦係数は $b_{k}(u_{f}(\cdot,T))=e^{-k^{2}T}b_{k}(f)$（$\{\sin kx\}$ の直交性と、$L^{2}$ 収束での内積の連続性）。正弦係数は $L^{2}$ の関数を決める（\ref{pde:sep-sine-cosine.1} のパーセヴァルの等式を差に使う）ので、$u_{f}(\cdot,T)=h$ は「すべての $k$ で $b_{k}(f)=e^{k^{2}T}b_{k}(h)$」と同値。そのような $f\in L^{2}$ があるのは、パーセヴァルの等式から $\sum_{k}(e^{k^{2}T}b_{k}(h))^{2}<\infty$ のときに限り、このとき $f=\sum_{k}e^{k^{2}T}b_{k}(h)\sin kx$ がただ一つの解。
+
+**2.** $b_{k}(h_{N})=N^{-1}$（$k=N$）、$0$（それ以外）なので 1 の条件を満たし、$f_{N}=N^{-1}e^{N^{2}T}\sin(Nx)$、$\|f_{N}\|_{2}=N^{-1}e^{N^{2}T}\sqrt{\pi/2}\to\infty$。一方 $\sup|h_{N}|=N^{-1}\to0$、とくに $\|h_{N}\|_{2}\to0$。したがって一意性は満たすが、存在（1 の条件を満たさない $h$、たとえば $b_{k}(h)=k^{-1}$ のものには解がない）と連続依存（$h_{N}\to0$ だが $f_{N}$ は $0$ に収束しない）を満たさない。全空間の \ref{pde:heat-backward} と同じ現象が、固有関数展開では係数ごとの増幅率 $e^{k^{2}T}$ として見える。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
