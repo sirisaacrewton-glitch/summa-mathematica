@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>辺彩色とリスト彩色 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/04-coloring/02-edge-list-coloring.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 辺彩色とリスト彩色 {#graph:page-edge-list-coloring keywords="edge colouring, chromatic index, Konig's edge colouring theorem, Vizing's theorem, list colouring, choosability, kernel, Galvin's theorem, Thomassen's theorem"}
+
+辺を、端点を共有する辺どうしが異なる色になるように塗るのに必要な色の数を**彩色指数**という。各頂点の辺はすべて異なる色なので、彩色指数は最大次数 $\Delta$ 以上である。このページでは、二部グラフでは $\Delta$ 色で足りること（ケーニッヒ）、一般のグラフでも $\Delta+1$ 色で足りること（ヴィジング）を示す。次に、各頂点（辺）ごとに使える色の**リスト**が与えられる**リスト彩色**を導入し、二部グラフの辺のリスト彩色が通常の辺彩色と同じ数の色で可能であること（ガルヴィン）を、安定マッチング（\ref{graph:gale-shapley}）を使って証明する。
+
+## 記法と定義の確認 {#graph:sec-el-notation}
+
+::: notation
+- 彩色・彩色数は \ref{graph:chromatic-number}、二部グラフと奇閉路の特徴づけは \ref{graph:bipartite-odd-cycle}、安定マッチングとゲール–シャプレーの定理は \ref{graph:page-bipartite-matching} のとおり。
+- 有向グラフ $D$ の頂点 $v$ について、$v$ から出る弧の終点の集合を $N^{+}(v)$、その個数を $d^{+}(v)$ と書く。無向グラフの各辺に向きを付けた有向グラフをその**向き付け**という。
+:::
+
+## 辺彩色 {#graph:sec-el-edge}
+
+::: definition 辺彩色と彩色指数 {#graph:chromatic-index keywords="edge colouring, chromatic index, line graph" index="辺彩色|へんさいしょく, 彩色指数|さいしょくしすう, 線グラフ|せんぐらふ"}
+写像 $c\colon E\to S$ で、端点を共有する辺に異なる値をとるものを**辺彩色**という。$\abs{S}\le k$ の辺彩色が存在する最小の $k$ を**彩色指数** $\chi'(G)$ という。辺を頂点とし、端点を共有する辺どうしを結んだグラフを $G$ の**線グラフ** $L(G)$ といい、$\chi'(G)=\chi(L(G))$ である。
+:::
+
+::: intuition
+各色の辺はマッチングになるので、辺彩色は辺の集合をいくつかのマッチングに分けることである。
+:::
+
+::: theorem ケーニッヒの辺彩色定理 {#graph:konig-edge-colouring keywords="Konig's edge colouring theorem, bipartite graphs are class 1" index="ケーニッヒの辺彩色定理|けーにっひのへんさいしょくていり" refname="ケーニッヒの辺彩色定理"}
+二部グラフ $G$ について $\chi'(G)=\Delta(G)$。
+:::
+
+::: intuition
+二部グラフの辺は、最大次数と同じ数のマッチングに分けられる。
+:::
+
+::: proof
+$\chi'\ge\Delta$ は明らか。辺の数の帰納法で $\Delta\defeq\Delta(G)$ 色の辺彩色を作る。
+
+**Step 1（一本除いて塗る）.** 辺 $xy$ を除いた $G-xy$ を帰納法の仮定で $\Delta$ 色に塗る。$G-xy$ で $x,y$ の次数は $\Delta-1$ 以下なので、$x$ に使われていない色 $\alpha$ と、$y$ に使われていない色 $\beta$ がある。$\alpha=\beta$ なら $xy$ をその色で塗ればよい。$\alpha\neq\beta$ で、$x$ に $\beta$ の辺があるとする（なければ $xy$ を $\beta$ で塗ればよい）。
+
+**Step 2（交互道）.** 【主張：$x$ から出る $\beta$ の辺から始め、$\beta,\alpha$ を交互にたどる極大な歩道 $W$ は道で、$y$ を通らない】各頂点には各色の辺が高々一本なので、$W$ の次の辺は一意に決まり、同じ頂点に戻ると、その頂点で同じ色の辺が二本必要になるか（内部の頂点）、$x$ に戻るとき $x$ に $\alpha$ の辺がないことに反するので、$W$ は道である。$W$ が $y$ を通るなら、$y$ には $\beta$ の辺がないので $W$ は $y$ で $\alpha$ の辺で終わり、長さは偶数で、$W+xy$ は奇閉路になり \ref{graph:bipartite-odd-cycle} に反する。
+
+**Step 3（入れ替え）.** $W$ の辺の色 $\alpha,\beta$ を入れ替えても辺彩色のまま（$W$ の極大性と、$x$ に $\alpha$ の辺がないことから）で、$x$ にも $y$ にも $\beta$ の辺がなくなる。$xy$ を $\beta$ で塗ればよい。
+:::
+
+::: theorem ヴィジングの定理 {#graph:vizing keywords="Vizing's theorem, chi' <= Delta + 1" index="ヴィジングの定理|ゔぃじんぐのていり" refname="ヴィジングの定理"}
+すべてのグラフ $G$ について $\Delta(G)\le\chi'(G)\le\Delta(G)+1$。
+:::
+
+::: intuition
+どんなグラフの辺も、最大次数より一つ多い色があれば塗り分けられる。最大次数で足りるか、一つ足りないかの二通りしかない。
+:::
+
+::: proof
+辺の数の帰納法で $\Delta+1$ 色の辺彩色（以下単に「彩色」）を作る。$\Delta\ge1$ とし、$G$ に彩色がないと仮定する。各頂点 $v$ の辺は高々 $\Delta$ 色を使うので、$v$ で**欠けている**色がある。色 $\alpha$ が欠けている $v$ と色 $\beta$ について、$v$ から $\alpha,\beta$ を交互にたどる極大な歩道は道で（\ref{graph:konig-edge-colouring} の Step 2 と同じ理由）、$v$ からの $\alpha/\beta$ 道という。
+
+**Step 1（基本的な観察）.** 【主張（∗）：辺 $xy$ と $G-xy$ の彩色で、$x$ で $\alpha$ が、$y$ で $\beta$ が欠けているとき、$y$ からの $\alpha/\beta$ 道は $x$ で終わる】そうでなければ、その道の色 $\alpha,\beta$ を入れ替えると、$y$ でも $\alpha$ が欠け（$x$ では入れ替えの影響を受けず $\alpha$ が欠けたまま）、$xy$ を $\alpha$ で塗って $G$ の彩色が得られ矛盾。
+
+**Step 2（扇）.** 【主張：扇を回した $c_{i}$ は $G_{i}$ の彩色で、$x$ で欠ける色は変わらない】辺 $xy_{0}$ をとり、$G_{0}\defeq G-xy_{0}$ の彩色 $c_{0}$ と、$x$ で欠けている色 $\alpha$ をとる。$x$ の相異なる近傍の列 $y_{0},\dots,y_{k}$ で、各 $i<k$ について $c_{0}(xy_{i+1})$ が $y_{i}$ で欠けているもののうち極大なものをとる。$G_{i}\defeq G-xy_{i}$ の彩色 $c_{i}$ を、$j<i$ について $c_{i}(xy_{j})\defeq c_{0}(xy_{j+1})$、他は $c_{0}$ と同じと定める（「扇を回す」）。$c_{i}$ は彩色で、$x$ で欠けている色は $c_{0}$ と同じである。
+
+**Step 3（矛盾）.** 【主張：$y_{k}$ で欠ける色についての (∗) から矛盾が出る】$y_{k}$ で $c_{0}$ について欠けている色 $\beta$ をとる。(∗) を $G_{k}$, $c_{k}$, 辺 $xy_{k}$ に使うと、$y_{k}$ からの $\alpha/\beta$ 道 $P$ は $x$ で終わり、$x$ では $\alpha$ が欠けているので最後の辺 $yx$ は $\beta$ である。$y$ は極大性から $y_{k+1}$ になれない（$\beta$ は $y_{k}$ で欠けているので、$y\notin\{y_{0},\dots,y_{k}\}$ なら列を延ばせる）ので $y=y_{i}$（$i<k$）で、$\beta=c_{k}(xy_{i})=c_{0}(xy_{i+1})$。$y_{i+1}$ の選び方から $\beta$ は $c_{0}$ で、したがって $c_{i}$ で $y_{i}$ に欠けている。$G_{i}$, $c_{i}$ について、$y_{i}$ からの $\alpha/\beta$ 道を考えると、$P$ の $y_{i}$ から $y_{k}$ までの部分（逆向き）は $x$ を通らず、$c_{i}$ でも同じ色なので、この道は $y_{i}Py_{k}$ から始まり、$y_{k}$ には $c_{0}$（したがって $c_{i}$）で $\beta$ の辺がないので $y_{k}$ で終わる。これは $x$ で終わらないので、(∗) に反する。
+:::
+
+## リスト彩色 {#graph:sec-el-list}
+
+::: definition リスト彩色 {#graph:list-colouring keywords="list colouring, k-choosable, choice number, list chromatic index" index="リスト彩色|りすとさいしょく, 選択数|せんたくすう, k 選択可能|けいせんたくかのう"}
+各頂点 $v$ に色の集合（**リスト**）$S_{v}$ が与えられたとき、$c(v)\in S_{v}$ を満たす頂点彩色を**リストからの彩色**という。$\abs{S_{v}}=k$ のどんなリストの族についてもリストからの彩色があるとき **$k$ 選択可能**といい、最小の $k$ を**選択数** $\operatorname{ch}(G)$ という。$\operatorname{ch}'(G)\defeq\operatorname{ch}(L(G))$ を**リスト彩色指数**という。すべてのリストが同じ場合を考えれば $\operatorname{ch}\ge\chi$、$\operatorname{ch}'\ge\chi'$。
+:::
+
+::: intuition
+各点が「自分はこの色の中からしか選べない」という制約をもつときの塗り分けである。全員の候補が同じなら通常の彩色になる。
+:::
+
+::: lemma 核による彩色 {#graph:kernel-lemma keywords="kernel, orientation, list colouring from kernels" index="核（有向グラフの）|かく"}
+有向グラフ $D$ の独立集合 $U$ で、$U$ の外のすべての頂点から $U$ への弧があるものを $D$ の**核**という。グラフ $H$ が、$d^{+}(v)<\abs{S_{v}}$（すべての $v$）を満たし、すべての誘導部分グラフが核をもつ向き付け $D$ をもつなら、$H$ はリスト $S_{v}$ から彩色できる。
+:::
+
+::: proof
+$\abs{H}$ の帰納法。$\abs{H}=0$ なら空の彩色。$\abs{H}>0$ なら、ある $S_{v}$ に現れる色 $\alpha$ をとり、$\alpha\in S_{v}$ となる頂点の誘導する $D'$（空でない）の核 $U$（空でない：空なら $D'$ の頂点から $U$ への弧が要る）をとる。$U$ の頂点を $\alpha$ で塗り、$D'$ の他の頂点のリストから $\alpha$ を除く。それらの頂点は $U$ へ弧をもつので、$D-U$ では出次数も 1 以上減り、$d^{+}_{D-U}(v)<\abs{S'_{v}}$ が保たれる（$\alpha\notin S_{v}$ の頂点はリストも出次数も減らないか出次数だけ減る）。$D-U$ の誘導部分グラフは $D$ の誘導部分グラフなので核をもち、帰納法の仮定から $H-U$ はリスト $S'_{v}$ から塗れる。$S'_{v}$ は $\alpha$ を含まず、$U$ は独立なので、合わせて $H$ の彩色になる。
+:::
+
+::: theorem ガルヴィンの定理 {#graph:galvin keywords="Galvin's theorem, list colouring conjecture for bipartite graphs" index="ガルヴィンの定理|がるゔぃんのていり, リスト彩色予想|りすとさいしょくよそう" refname="ガルヴィンの定理"}
+二部グラフ $G$ について $\operatorname{ch}'(G)=\chi'(G)=\Delta(G)$。
+:::
+
+::: intuition
+二部グラフの辺は、各辺が勝手に $\Delta$ 色の候補リストをもっていても、候補の中から選んで塗り分けられる。
+:::
+
+::: proof
+二部分割を $\{X,Y\}$、$k\defeq\chi'(G)=\Delta(G)$（\ref{graph:konig-edge-colouring}）、$c$ を $k$ 色の辺彩色とする。$\operatorname{ch}'\ge k$ は明らかなので、$H\defeq L(G)$ に \ref{graph:kernel-lemma} を使う。
+
+**Step 1（向き付け）.** 端点を共有する辺 $e,e'$ で $c(e)<c(e')$ のものについて、共有する端点が $X$ にあれば $e'\to e$、$Y$ にあれば $e\to e'$ と向きを付けた $H$ の向き付けを $D$ とする。
+
+**Step 2（出次数）.** 【主張：$d^{+}(e)<k$】$c(e)=i$ とする。$e$ から出る弧の終点 $e'$ のうち、$e$ と $X$ で端点を共有するものは色が $1,\dots,i-1$ のどれか、$Y$ で共有するものは $i+1,\dots,k$ のどれかで、同じ側で共有する $e'$ どうしは端点を共有するので色が異なる。よって $d^{+}(e)\le(i-1)+(k-i)=k-1$。
+
+**Step 3（核の存在）.** 【主張：$D$ の任意の誘導部分グラフ $D'$ は核をもつ】$D'$ の頂点集合（$G$ の辺の集合）$E'$ からなる二部グラフ $(X\cup Y,E')$ に、各頂点 $v$ での選好を「$e<_{v}e'\iff D$ に弧 $e\to e'$ がある」で定める。$X$ の頂点では色が小さいほど好まれ、$Y$ の頂点では色が大きいほど好まれ、$v$ の辺は色が相異なるので、これは全順序である。\ref{graph:gale-shapley} の安定マッチング $M$ をとると、$M$ は $L(G)$ の独立集合で、$M$ にない $e\in E'$ について、端点 $v$ で $e$ より好まれる $f\in M$、すなわち弧 $e\to f$ がある。よって $M$ は $D'$ の核である。
+
+\ref{graph:kernel-lemma} より $L(G)$ は $k$ 選択可能、すなわち $\operatorname{ch}'(G)\le k$。
+:::
+
+::: fact トマセンの定理 {#graph:thomassen-5-choosable keywords="Thomassen's theorem, planar graphs are 5-choosable" index="トマセンの定理|とませんのていり" refname="トマセンの定理"}
+平面的なグラフは 5 選択可能である（Thomassen, 1994。証明は「外側の面が閉路で内側の面が三角形の平面グラフ」についての強い主張の帰納法で、Diestel, *Graph Theory* 第 5.4 節にある。平面グラフに辺を加えて内側の面をすべて三角形にできることを使うため、ここでは扱わない）。4 選択可能でない平面グラフがあることも知られている（Voigt, 1993）。
+:::
+
+::: intuition
+平面に描けるグラフは、各点が勝手に 5 色の候補をもっていても、候補の中から選んで塗り分けられる。
+:::
+
+::: supplement
+**リスト彩色予想.** すべてのグラフで $\operatorname{ch}'(G)=\chi'(G)$ であろうという予想があり、\ref{graph:galvin} は二部グラフの場合である（一般には未解決）。一方、頂点のリスト彩色では、$\operatorname{ch}$ と $\chi$ は大きく異なりうる（問題）。
+:::
+
+## 問題 {#graph:sec-el-problems}
+
+::: problem {#graph:prob-el-k33-choosable}
+$K_{3,3}$ は 2 彩色可能だが 2 選択可能でないことを示せ。
+:::
+
+::: solution
+二部分割 $\{a_{1},a_{2},a_{3}\}$, $\{b_{1},b_{2},b_{3}\}$ に、$a_{i}$ と $b_{i}$ のリストを $\{1,2\},\{1,3\},\{2,3\}$ の $i$ 番目とする。$a$ 側で使う色の集合 $A$ は、三つのリストすべてと交わるので 2 色以上（1 色では三つのリストに共通の色がない）。$b$ 側も同様に 2 色以上を使い、色は 3 色しかないので $A$ と $b$ 側の色は共通の色 $\gamma$ をもつ。$\gamma$ を使う $a_{i}$ と $b_{j}$ は隣接するので矛盾。
+:::
+
+::: problem {#graph:prob-el-petersen-class2}
+ペテルセングラフは $\chi'=4$ であることを示せ（$\Delta=3$ なので「クラス 2」）。
+:::
+
+::: solution
+3 色で塗れれば、各色クラスは完全マッチング（3 正則なので各頂点に各色の辺が一本ずつ）で、二つの色クラスの和は 2 正則な全域部分グラフ、すなわち偶数の長さの閉路の和である。ペテルセングラフは内周 5 で 10 頂点なので、2 因子は 5 閉路二つか 10 閉路一つだが、前者は奇閉路、後者（ハミルトン閉路）はペテルセングラフにない（よく知られた事実で、場合分けで確かめられる）ので矛盾。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
