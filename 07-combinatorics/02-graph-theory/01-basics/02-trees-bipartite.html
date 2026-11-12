@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>木・二部グラフ・オイラー回路 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/01-basics/02-trees-bipartite.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 木・二部グラフ・オイラー回路 {#graph:page-trees-bipartite keywords="tree, forest, spanning tree, leaf, Cayley's formula, Prufer code, bipartite graph, odd cycle, Euler tour, Eulerian graph"}
+
+閉路をもたない連結グラフである**木**は、グラフ理論で最も基本的な構造である。このページでは、木のいくつかの同値な特徴づけと全域木の存在を示し、$n$ 頂点のラベル付きの木が $n^{n-2}$ 個あるというケイリーの公式をプリューファー符号で証明する。続いて、奇数の長さの閉路をもたないことによる**二部グラフ**の特徴づけと、すべての辺をちょうど一度ずつ通る閉じた歩道（**オイラー回路**）の存在条件を示す。
+
+## 記法と定義の確認 {#graph:sec-tb-notation}
+
+::: notation
+- グラフ・次数・道・閉路・歩道・連結成分は \ref{graph:page-graphs} の定義に従う。とくに \ref{graph:handshake}、歩道から道を取り出すこと（\ref{graph:walk-contains-path}）、連結成分による分割（\ref{graph:components-partition}）を使う。
+- 次数 1 の頂点を**葉**という。
+:::
+
+## 木 {#graph:sec-tb-trees}
+
+::: definition 木と森 {#graph:tree keywords="tree, forest, acyclic graph, leaf" index="木（グラフの）|き, 森（グラフの）|もり, 葉|は"}
+閉路を含まないグラフを**森**、連結な森を**木**という。
+:::
+
+::: intuition
+木は、つながっていて、ぐるりと回って戻ってくる道がないグラフである。
+:::
+
+::: lemma 葉の存在 {#graph:tree-leaves keywords="every tree with at least two vertices has two leaves"}
+2 頂点以上の木は葉を 2 個以上もち、葉 $v$ を除いた $T-v$ も木である。
+:::
+
+::: proof
+最長の道 $x_{0}\dots x_{k}$（$k\ge1$：木は連結で 2 頂点以上なので辺をもつ）をとる。$x_{k}$ の近傍は道の上にあり（\ref{graph:long-path-cycle} の証明 Step 1）、$x_{i}$（$i<k-1$）に隣接すれば閉路 $x_{i}\dots x_{k}x_{i}$ ができるので、近傍は $x_{k-1}$ だけ、すなわち $x_{k}$ は葉。同様に $x_{0}$ も葉。葉 $v$ を除いても閉路はできず、$T-v$ の 2 頂点を結ぶ $T$ の道は（内部の頂点の次数が 2 以上なので）$v$ を通らないので $T-v$ は連結である。
+:::
+
+::: theorem 木の特徴づけ {#graph:tree-characterization keywords="equivalent characterizations of trees" index="木の特徴づけ|きのとくちょうづけ"}
+グラフ $T$（$n\ge1$ 頂点）について次は同値である。
+1. $T$ は木である。
+2. $T$ の任意の 2 頂点は、ただ一つの道で結ばれる。
+3. $T$ は**極小連結**である：連結で、どの辺を除いても非連結になる。
+4. $T$ は**極大非巡回**である：閉路をもたず、どの 2 つの隣接しない頂点の間に辺を加えても閉路ができる。
+5. $T$ は連結で、辺の数は $n-1$ である。
+:::
+
+::: intuition
+木は「つながるのにぎりぎり足りるだけの辺」をもち、同時に「閉路を作らずに入れられるだけの辺」をもつ。辺の数はちょうど頂点の数より 1 少ない。
+:::
+
+::: proof
+**Step 1（(1)⇒(2)）.** 【主張：二つの異なる $x$–$y$ 道があれば閉路がある】異なる道 $P,Q$ があれば、$P$ の辺で $Q$ にないもの $uv$ があり、$T-uv$ の中で $u$ と $v$ を（$P$ の残りと $Q$ を使った歩道から \ref{graph:walk-contains-path} で）結ぶ道 $R$ がとれる。$R+uv$ は閉路である。
+
+**Step 2（(2)⇒(3)(4)）.** (2) より連結。辺 $xy$ を除いて連結のままなら、$x$–$y$ 道が $xy$ 以外にもあり (2) に反する。閉路 $x_{0}\dots x_{k}x_{0}$ があれば $x_{0}$ と $x_{1}$ は 2 本の道で結ばれる。隣接しない $x,y$ に辺 $xy$ を加えると、$x$–$y$ 道と合わせて閉路ができる。
+
+**Step 3（(3)⇒(1)、(4)⇒(1)）.** (3) で閉路があれば、その辺を一本除いても連結（閉路の残りが代わりになる）なので矛盾。(4) で非連結なら、異なる連結成分の 2 頂点の間に辺を加えても閉路はできない（その辺を通る閉路は二つの成分を他の道で結ぶ必要がある）ので矛盾。
+
+**Step 4（(1)⇔(5)）.** 【主張：木の辺は $n-1$ 本で、辺が $n-1$ 本の連結グラフは木】前半は \ref{graph:tree-leaves} を使って $n$ の帰納法（葉を除くと頂点も辺も 1 ずつ減る）。後半：連結グラフは (3) が成り立つまで辺を除くと木（全域木）が得られ、それは前半から $n-1$ 本の辺をもつので、除いた辺は 0 本、すなわち元のグラフが木である。
+:::
+
+::: corollary 全域木 {#graph:spanning-tree keywords="every connected graph has a spanning tree" index="全域木|ぜんいきぎ"}
+連結グラフは、すべての頂点を含む木（**全域木**）を部分グラフとしてもつ。
+:::
+
+::: proof
+連結な全域部分グラフ（頂点集合が $V$ のもの）のうち辺の数が最小のものは極小連結なので、\ref{graph:tree-characterization} より木である。
+:::
+
+::: theorem ケイリーの公式 {#graph:cayley-formula keywords="Cayley's formula n^{n-2}, Prufer code, number of labelled trees" index="ケイリーの公式|けいりーのこうしき, プリューファー符号|ぷりゅーふぁーふごう" refname="ケイリーの公式"}
+$n\ge2$ について、頂点集合が $[n]$ の木（ラベル付きの木）は $n^{n-2}$ 個ある。
+:::
+
+::: intuition
+木を「番号の最も小さい葉を取り除き、その隣の番号を書き留める」ことを繰り返して長さ $n-2$ の数列に変えると、数列から木を一意に復元できる。数列は $n^{n-2}$ 通りある。
+:::
+
+::: proof
+**Step 1（符号化）.** 頂点集合 $[n]$ の木 $T$ に、次の手順で列 $\Phi(T)=(a_{1},\dots,a_{n-2})\in[n]^{n-2}$ を対応させる：$T_{1}\defeq T$ とし、$i=1,\dots,n-2$ について、$T_{i}$ の葉のうち番号最小のもの $\ell_{i}$ をとり、その唯一の隣接頂点を $a_{i}$ とし、$T_{i+1}\defeq T_{i}-\ell_{i}$。\ref{graph:tree-leaves} より各 $T_{i}$ は $n-i+1\ge3$ 頂点の木で、葉がある。
+
+**Step 2（次数と出現回数）.** 【主張：$T$ での頂点 $v$ の次数は、$v$ が $\Phi(T)$ に現れる回数 $+1$】$v$ が $a_{i}$ となるたびに $v$ の辺が一本除かれる。最後に残る $T_{n-1}$ は 2 頂点 1 辺である。$v$ が途中で葉として除かれる（$v=\ell_{i}$）なら、そのとき $v$ の残りの辺は 1 本、最後まで残るならやはり 1 本なので、$d_{T}(v)=m_{v}+1$（$m_{v}$ は $v$ が列 $a$ に現れる回数）。特に、$T_{i}$ の葉は「$a_{i},\dots,a_{n-2}$ に現れない、まだ除かれていない頂点」である。
+
+**Step 3（復号）.** 【主張：列 $a\in[n]^{n-2}$ から木 $\Psi(a)$ が作れ、$\Phi(\Psi(a))=a$、$\Psi(\Phi(T))=T$】$i=1,\dots,n-2$ について、$\ell_{i}$ を「$\ell_{1},\dots,\ell_{i-1}$ と異なり、$a_{i},\dots,a_{n-2}$ に現れない最小の頂点」と定め（$i-1$ 個を除いた $n-i+1$ 個の候補のうち、$a_{i},\dots,a_{n-2}$ は高々 $n-1-i$ 種類なので候補は空でない）、辺 $\ell_{i}a_{i}$ を加える。最後に、残った 2 頂点を辺で結ぶ。こうしてできるグラフ $\Psi(a)$ は $n-1$ 本の辺をもち、各辺を加える時点で $\ell_{i}$ は以後の辺に現れないので、逆順にたどれば葉を一つずつ加えていく構成になり、連結である。\ref{graph:tree-characterization.5} より木である。Step 2 の「$T_{i}$ の葉の言い換え」から、$\Phi$ の手順で選ばれる葉は $\Psi$ の手順の $\ell_{i}$ と一致し、隣接頂点は $a_{i}$ なので $\Phi(\Psi(a))=a$。逆に $T$ から $\Phi(T)$ を作ると、各段階の $\ell_{i}$ と辺 $\ell_{i}a_{i}$ は $\Psi$ の手順で復元され、最後の辺も一致するので $\Psi(\Phi(T))=T$。
+
+**Step 4.** $\Phi$ は全単射なので、木の個数は $\abs{[n]^{n-2}}=n^{n-2}$（\ref{comb:functions-subsets}）。
+
+::: hypcheck
+- **$n\ge2$**：Step 1 で列の長さ $n-2\ge0$ と、最後に 2 頂点が残ることに使った。$n=1$ では木は 1 個で、$1^{-1}=1$ と形式的には一致する。
+:::
+:::
+
+::: supplement
+**一般化.** Step 2 から、次数が $d_{1},\dots,d_{n}$（$\sum d_{i}=2n-2$）の $[n]$ 上の木の個数は、$i$ がちょうど $d_{i}-1$ 回現れる列の個数、すなわち多項係数 $\binom{n-2}{d_{1}-1,\dots,d_{n}-1}$ に等しい（\ref{comb:multinomial-coefficient}）。全域木の個数を一般のグラフで数えるのが行列木定理である（\ref[グラフのスペクトル]{comb:page-graph-spectra}）。
+:::
+
+## 二部グラフ {#graph:sec-tb-bipartite}
+
+::: definition 二部グラフ {#graph:bipartite keywords="bipartite graph, bipartition, complete bipartite graph" index="二部グラフ|にぶぐらふ, 完全二部グラフ|かんぜんにぶぐらふ"}
+$V=A\sqcup B$ と分けて、どの辺も $A$ の頂点と $B$ の頂点を結ぶようにできるとき、$G$ を**二部グラフ**といい、$\{A,B\}$ をその**二部分割**という。$\abs{A}=s$, $\abs{B}=t$ で $A$ と $B$ の間のすべての対が辺であるものを**完全二部グラフ** $K_{s,t}$ という。
+:::
+
+::: intuition
+頂点を 2 色で塗り分け、同じ色どうしは結ばれないようにできるグラフである。
+:::
+
+::: theorem 二部グラフの特徴づけ {#graph:bipartite-odd-cycle keywords="a graph is bipartite iff it contains no odd cycle" index="奇閉路|きへいろ" refname="二部グラフの特徴づけ"}
+グラフが二部グラフであることと、長さが奇数の閉路を含まないことは同値である。
+:::
+
+::: intuition
+2 色で塗り分けられるグラフとは、ぐるりと回って戻る道がどれも偶数歩であるグラフのことである。
+:::
+
+::: proof
+**Step 1（⇒）.** 閉路 $x_{0}\dots x_{k-1}x_{0}$ の頂点は $A$ と $B$ に交互に入るので、$x_{0}$ に戻るには $k$ が偶数でなければならない。
+
+**Step 2（⇐、連結な場合）.** 【主張：根 $r$ からの距離の偶奇で分ければ二部分割になる】連結として（一般には成分ごとに分けて合わせればよい：\ref{graph:components-partition}）、全域木 $T$（\ref{graph:spanning-tree}）と根 $r$ をとり、$T$ の中の $r$ からの距離が偶数の頂点を $A$、奇数の頂点を $B$ とする。$T$ の辺は $A$ と $B$ を結ぶ。$G$ の辺 $xy$ で $x,y\in A$（または $B$）のものがあれば、$T$ の中の $x$–$y$ の道 $xTy$ の長さは $d_{T}(r,x)+d_{T}(r,y)-2d_{T}(r,z)$（$z$ は $rTx$ と $rTy$ が分かれる点）で偶数となり、$xTy+xy$ は奇数の長さの閉路になり矛盾。
+:::
+
+## オイラー回路 {#graph:sec-tb-euler}
+
+::: definition オイラー回路 {#graph:euler-tour keywords="Euler tour, Eulerian circuit, Eulerian graph" index="オイラー回路|おいらーかいろ, オイラーグラフ|おいらーぐらふ"}
+閉じた歩道で、グラフのすべての辺をちょうど一度ずつ通るものを**オイラー回路**という。
+:::
+
+::: intuition
+一筆書きで全部の線をなぞり、出発点に戻れることである。
+:::
+
+::: theorem オイラーの定理 {#graph:euler-theorem keywords="Euler's theorem on Eulerian graphs, Konigsberg bridges" index="オイラーの定理（グラフの）|おいらーのていり, ケーニヒスベルクの橋|けーにひすべるくのはし" refname="オイラーの定理（一筆書き）"}
+連結グラフがオイラー回路をもつことと、すべての頂点の次数が偶数であることは同値である。
+:::
+
+::: intuition
+つながったグラフが一筆書きで出発点に戻れるのは、どの頂点にも偶数本の線が集まっているときに限る。
+:::
+
+::: proof
+**Step 1（⇒）.** オイラー回路が頂点 $v$ を通るたびに（出発点では出発と到着を一組と数えて）$v$ の辺を 2 本ずつ使い、すべての辺をちょうど一度使うので $d(v)$ は偶数。
+
+**Step 2（⇐、最長の辺素な回路）.** 【主張：同じ辺を二度通らない閉じた歩道のうち最長のもの $W$ は、すべての辺を使う】$G$ に辺があるとしてよい（なければ一点の歩道）。$W$ が使わない辺があれば、連結性から、$W$ の上の頂点 $u$ に接する未使用の辺 $e=uv$ がある（使われていない辺の端点から $W$ の頂点への道をたどり、最初に $W$ に着く直前の辺を考える）。$G-E(W)$ でも各頂点の次数は偶数（$W$ は各頂点で辺を偶数本使う）。$G-E(W)$ で $u$ から $e$ を通って出発し、未使用の辺をたどって進み続ける最長の歩道 $W'$ をとると、$u$ 以外の頂点では入るたびに出る辺が残っている（次数が偶数なので）ため、$W'$ は $u$ で終わる閉じた歩道である。$W$ を $u$ で切って $W'$ をつなぐと、$W$ より長い辺素な閉じた歩道ができて矛盾。
+
+::: hypcheck
+- **連結性**：Step 2 で未使用の辺が $W$ に接することを示すのに使った。連結でないと、すべての次数が偶数でもオイラー回路はない（辺をもつ成分が二つあるとき）。ただし辺のない成分（孤立点）は無視してよい。
+:::
+:::
+
+::: supplement
+**一般化.** 次数が奇数の頂点がちょうど 2 個の連結グラフは、その 2 頂点を端点とするオイラー路（閉じていない一筆書き）をもつ（2 頂点の間に新しい頂点を経由する道を加えて定理を当てはめる）。すべての頂点をちょうど一度ずつ通る閉路（ハミルトン閉路）の存在は、これと対照的に計算量の意味で難しい問題である（\ref[ハミルトン閉路]{graph:page-hamilton-cycles}）。
+:::
+
+## 問題 {#graph:sec-tb-problems}
+
+::: problem {#graph:prob-tb-forest-edges}
+$n$ 頂点・$c$ 個の連結成分からなる森の辺は $n-c$ 本であることを示せ。
+:::
+
+::: solution
+各連結成分は木で（閉路をもたない連結グラフ）、$n_{i}$ 頂点の成分は $n_{i}-1$ 本の辺をもつ（\ref{graph:tree-characterization.5}）。和をとって $\sum(n_{i}-1)=n-c$。
+:::
+
+::: problem {#graph:prob-tb-cayley-small}
+$n=4$ のときのラベル付きの木 $16$ 個を、形（道 $P^{4}$ と星 $K_{1,3}$）ごとに数えて確かめよ。
+:::
+
+::: solution
+星は中心の選び方で 4 個。道 $abcd$ は頂点の並べ方 $4!$ 通りを、逆順を同一視して $12$ 個。合計 $16=4^{2}$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
