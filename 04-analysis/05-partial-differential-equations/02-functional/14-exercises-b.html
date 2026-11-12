@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：関数解析的手法（2） | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/05-partial-differential-equations/02-functional/14-exercises-b.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：関数解析的手法（2） {#pde:page-exercises-functional-b keywords="exercises, functional-analytic methods for PDE, parabolic equations, hyperbolic equations"}
+
+この系列の後半（放物型方程式・双曲型方程式）の各ページの内容を使う演習を、ページの順に並べた。前半の演習は \ref{pde:page-exercises-functional} にある。ここに集めたのは、変数係数の熱方程式のガレルキン近似の具体的な計算、長方形での熱の減衰と主固有関数、時間によらない不連続な熱源と解の空間の滑らかさの限界、放物線の形にはじいた弦のエネルギーと等分配、共鳴とエネルギーの増え方、エネルギー空間のノルムの比較とユニタリ群、ポテンシャルの強さと波の安定性の境目である。各節の中は、計算・基本（★）、標準（★★）、発展（★★★）の順に並べた。
+
+## 記法と定義の確認 {#pde:sec-exfnb-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。$\Omega\subset\mathbb{R}^{n}$ は有界な開集合、関数は実数値、$(u,v)=\int uv$。放物型の節では $L^{2}$ のノルムを $\|\cdot\|_{2}$、双曲型の節では \ref{pde:page-hyperbolic} に合わせて $\|\cdot\|$ と書く。$V=H_{0}^{1}(\Omega)$, $H=L^{2}(\Omega)$, $V^{*}=H^{-1}(\Omega)$、作用素 $L$ と双線形形式 $B$ は \ref{pde:bilinear-elliptic-form}、定数 $\alpha,\beta,\gamma$ は \ref{pde:bilinear-energy-estimates}。双曲型の節の $\mu=\gamma+1$, $\kappa_{k}$, $X_{s}$, $\|\cdot\|_{(s)}$ は \ref{pde:hyperbolic-coordinates} の前の約束のとおり。
+- **区間 $(0,\pi)$.** $e_{k}(x)\defeq\sqrt{2/\pi}\sin kx$ はディリクレ・ラプラシアンの固有関数で、固有値は $k^{2}$、$(e_{k})$ は $L^{2}(0,\pi)$ の正規直交基底である（\ref{pde:dirichlet-eigen-scaling} の後の区間の例）。$L=-\partial_{x}^{2}$ のとき、\ref{pde:weak-symmetric-eigen} の基底としてこの $e_{k}$ をとる。$[0,\pi]$ で連続、$H^{1}$ に入り両端で $0$ の関数は $H_{0}^{1}(0,\pi)$ に入る（\ref{pde:wmp-boundary-consistency.4}）。
+- 一つの問題の解答は、ほかの問題の結果を使わない（使うのは各ページの本文の結果だけである）。
+- **選択公理**：引用する結果に含まれるもの（固有関数の基底の存在が通る従属選択公理と可算選択公理、弱解の存在の証明での弱収束部分列の取り出し）のほかには使わない。
+:::
+
+## 放物型方程式 {#pde:sec-pa-exercises}
+
+対応するページ：\ref{pde:page-parabolic}、\ref{pde:page-parabolic-semigroup}
+
+::: problem ★ 基本：変数係数の熱方程式のガレルキン近似 {#pde:ex-pa-1}
+$\Omega=(0,\pi)$, $Lu\defeq-\bigl((1+\tfrac{x}{\pi})u'\bigr)'$（$a^{11}=1+\frac x\pi$, $b=c=0$）, $f=0$ とし、\ref{pde:parabolic-galerkin-approx} の近似 $u_{m}=\sum_{k\le m}d_{m}^{k}(t)e_{k}$ を考える（$e_{k}$ はディリクレ・ラプラシアンの固有関数で、$L$ の固有関数ではない）。
+1. $A_{jk}\defeq B[e_{k},e_{j}]$ について $A_{kk}=\frac{3k^{2}}{2}$, $A_{12}=A_{21}=-\frac{40}{9\pi^{2}}$ を示し、$m=2$ の近似の方程式 \eqref{pde:eq-pa-galerkin} を行列で書け。
+2. $A\defeq(A_{jk})_{j,k\le2}$ の固有値は $\mu_{\pm}=\frac{15}{4}\pm\sqrt{\frac{81}{16}+\frac{1600}{81\pi^{4}}}$（$\mu_{-}\approx1.455$, $\mu_{+}\approx6.045$）で、$\|u_{2}(t)\|_{2}\le e^{-\mu_{-}t}\|u_{2}(0)\|_{2}$ であることを示せ。$g=e_{1}$ のとき $u_{2}(1)$ の係数を数値で求めよ。
+3. すべての $m$ と $g\in L^{2}$ について $\|u_{m}(t)\|_{2}\le e^{-t}\|g\|_{2}$ を示し、弱解 $u$ についても $\|u(t)\|_{2}\le e^{-t}\|g\|_{2}$ を示せ。\ref{pde:parabolic-energy-estimate} から直接得られる評価と比べよ。
+:::
+
+::: solution
+**1.** $e_{k}'=\sqrt{2/\pi}\,k\cos kx$ なので $A_{jk}=\frac{2jk}{\pi}\int_{0}^{\pi}\bigl(1+\frac x\pi\bigr)\cos jx\cos kx\,dx$。$m\ne0$ について $\int_{0}^{\pi}x\cos mx\,dx=\frac{(-1)^{m}-1}{m^{2}}$ を使う。$j=k$ では $\int_{0}^{\pi}\cos^{2}kx\,dx=\frac\pi2$、$\int_{0}^{\pi}x\cos^{2}kx\,dx=\frac12\int_{0}^{\pi}x(1+\cos2kx)\,dx=\frac{\pi^{2}}{4}$ なので $A_{kk}=\frac{2k^{2}}{\pi}\bigl(\frac\pi2+\frac\pi4\bigr)=\frac{3k^{2}}{2}$。$j=1$, $k=2$ では $\int_{0}^{\pi}\cos x\cos2x\,dx=0$、
+$$
+\begin{aligned}
+\int_{0}^{\pi}x\cos x\cos2x\,dx&=\frac12\int_{0}^{\pi}x(\cos x+\cos3x)\,dx\\
+&=\frac12\Bigl(-2-\frac29\Bigr)=-\frac{10}{9}
+\end{aligned}
+$$
+なので $A_{12}=\frac{4}{\pi}\cdot\frac1\pi\cdot\bigl(-\frac{10}{9}\bigr)=-\frac{40}{9\pi^{2}}$、$B$ は対称なので $A_{21}=A_{12}$。$B[u_{2},e_{j}]=\sum_{k}d^{k}A_{jk}$ なので、\eqref{pde:eq-pa-galerkin} は
+$$
+\begin{aligned}
+&\frac{d}{dt}\begin{pmatrix}d^{1}\\d^{2}\end{pmatrix}=-\begin{pmatrix}3/2&-40/(9\pi^{2})\\-40/(9\pi^{2})&6\end{pmatrix}\begin{pmatrix}d^{1}\\d^{2}\end{pmatrix},\\
+&d^{k}(0)=(g,e_{k}).
+\end{aligned}
+$$
+係数 $1+\frac x\pi$ が定数でないので、$e_{1}$ と $e_{2}$ が結合する。
+
+**2.** 対称行列 $\begin{pmatrix}p&q\\q&s\end{pmatrix}$ の固有値は $\frac{p+s}{2}\pm\sqrt{(\frac{s-p}{2})^{2}+q^{2}}$ で、$p=\frac32$, $s=6$, $q=-\frac{40}{9\pi^{2}}$ から主張の式を得る。$d$ は絶対連続（\ref{pde:parabolic-galerkin-approx.1}）で、a.e. で $\frac12\frac{d}{dt}|d|^{2}=d\cdot d'=-d\cdot Ad\le-\mu_{-}|d|^{2}$。したがって $e^{2\mu_{-}t}|d(t)|^{2}$ は絶対連続で導関数が a.e. で $\le0$ なので非増加（\ref{meas:ftc-lebesgue}）、$|d(t)|\le e^{-\mu_{-}t}|d(0)|$。$(e_{k})$ は正規直交なので $\|u_{2}(t)\|_{2}=|d(t)|$。$g=e_{1}$ では $d(0)=(1,0)$ で、$d(1)=e^{-A}(1,0)^{T}\approx(0.2311,\ 0.0227)$、$|d(1)|\approx0.2322\le e^{-\mu_{-}}\approx0.2333$。最初に $e_{1}$ だけだった温度分布に、$e_{2}$ の成分が生まれている。
+
+**3.** 一般の $m$ で $d\cdot Ad=B[u_{m},u_{m}]=\int(1+\frac x\pi)u_{m}'^{2}\ge\|u_{m}'\|_{2}^{2}=\sum_{k\le m}k^{2}(d^{k})^{2}\ge|d|^{2}$ なので、2 と同じ議論で $|d(t)|\le e^{-t}|d(0)|$、$|d(0)|^{2}=\sum_{k\le m}(g,e_{k})^{2}\le\|g\|_{2}^{2}$。弱解 $u$ については、\ref{pde:bochner-continuity.2} と弱解の方程式（$v=u(t)$）から a.e. で
+$$
+\begin{aligned}
+\frac{d}{dt}\|u(t)\|_{2}^{2}&=2\langle u'(t),u(t)\rangle\\
+&=-2B[u(t),u(t)]\le-2\|\nabla u(t)\|_{2}^{2}\le-2\|u(t)\|_{2}^{2}
+\end{aligned}
+$$
+（最後は \ref{pde:bochner-spectral-coordinates.2} で $\lambda_{1}=1$）。同じく $\|u(t)\|_{2}\le e^{-t}\|g\|_{2}$。\ref{pde:parabolic-energy-estimate} は $\gamma=0$（$b=0$, $c=0$）で $\|u(t)\|_{2}^{2}+\beta\int_{0}^{t}\|u\|_{H^{1}}^{2}\le\|g\|_{2}^{2}$ を与えるが、これからは減衰の速さは出ない。ガルディングの不等式は楕円性を $\frac{\theta}{2}$ に割って $H^{1}$ ノルム全体を押さえる形なので、$\lambda_{1}>0$ による $L^{2}$ ノルムの減衰を取り出すには、ここのように $\|\nabla u\|_{2}^{2}\ge\lambda_{1}\|u\|_{2}^{2}$ を直接使う。2 の $\mu_{-}\approx1.455$ はレイリー商の最小値（$L$ の最小固有値）の上からの近似で、差分法による数値計算では最小固有値は約 $1.453$ である。
+:::
+
+::: problem ★★ 標準：長方形での熱の減衰と主固有関数 {#pde:ex-pa-2}
+$Q\defeq(0,2)\times(0,1)$, $L=-\Delta$, $f=0$, $g\in L^{2}(Q)$ とし、$u(t)\defeq T(t)g$（\ref{pde:parabolic-semigroup}）を弱解とする（$t\ge0$）。$e_{11}(x,y)\defeq\sqrt2\sin\frac{\pi x}{2}\sin\pi y$ とする。
+1. $Q$ のディリクレ・ラプラシアンの固有値の小さいほうから二つ（重複度をこめて）は $\lambda_{1}=\frac{5\pi^{2}}{4}$ と $\lambda_{2}=2\pi^{2}$ で、$\lambda_{1}$ は単純で固有関数 $e_{11}$ をもつことを示せ。
+2. $t\ge0$ について $\bigl\|e^{\lambda_{1}t}u(t)-(g,e_{11})e_{11}\bigr\|_{2}\le e^{-\frac{3\pi^{2}}{4}t}\|g\|_{2}$ を示せ。
+3. $g\ge0$（a.e.）で $g\ne0$ なら $(g,e_{11})>0$ で、$\lim_{t\to\infty}e^{\lambda_{1}t}\|u(t)\|_{2}=(g,e_{11})$、$\frac{u(t)}{\|u(t)\|_{2}}\to e_{11}$（$L^{2}$）を示せ。$g=1$ のとき $(g,e_{11})$ と比 $\frac{(g,e_{11})}{\|g\|_{2}}$ を求めよ。
+:::
+
+::: solution
+**1.** \ref{pde:dirichlet-eigen-rectangle}（$a=2$, $b=1$）から固有値は $\mu_{jk}=\pi^{2}(\frac{j^{2}}{4}+k^{2})$ で、重複度は $\mu_{jk}$ が等しい組の個数。$(1,1)$ で $\frac{5\pi^{2}}{4}$、$(2,1)$ で $2\pi^{2}$ で、ほかの組は $j\ge3$ か $k\ge2$ なので $\mu_{jk}\ge\min(\frac{13}{4},\frac{17}{4})\pi^{2}>2\pi^{2}$。よって $\lambda_{1}=\frac{5\pi^{2}}{4}$（組は $(1,1)$ だけなので単純）、$\lambda_{2}=2\pi^{2}$。固有関数は $\frac{2}{\sqrt{ab}}\sin\frac{\pi x}{2}\sin\pi y=e_{11}$。
+
+**2.** \ref{pde:parabolic-semigroup} の固有関数と固有値を $(\varphi_{k},\mu_{k})$ とする。\ref{pde:dirichlet-eigen-variational.2} から、各固有値が列 $(\mu_{k})$ に現れる回数は固有空間の次元に等しく、基底によらない。1 と合わせて $\mu_{1}=\frac{5\pi^{2}}{4}$, $\mu_{2}=2\pi^{2}$ で、固有空間 $N_{\lambda_{1}}=\mathbb{R}e_{11}$ から $\varphi_{1}=\pm e_{11}$、$(g,\varphi_{1})\varphi_{1}=(g,e_{11})e_{11}$。よって
+$$
+\begin{aligned}
+&e^{\lambda_{1}t}T(t)g-(g,e_{11})e_{11}\\
+&=\sum_{k\ge2}e^{-(\mu_{k}-\lambda_{1})t}(g,\varphi_{k})\varphi_{k},
+\end{aligned}
+$$
+パーセヴァルの等式から、そのノルムの 2 乗は $\sum_{k\ge2}e^{-2(\mu_{k}-\lambda_{1})t}(g,\varphi_{k})^{2}\le e^{-2(\mu_{2}-\lambda_{1})t}\|g\|_{2}^{2}$。$\mu_{2}-\lambda_{1}=\frac{3\pi^{2}}{4}$。
+
+**3.** $e_{11}>0$ が $Q$ の各点で成り立ち、$g\ge0$ は a.e. で $0$ ではないので $ge_{11}\ge0$ は正の測度の集合で正、$c\defeq(g,e_{11})>0$。$v(t)\defeq e^{\lambda_{1}t}u(t)$ とおくと 2 から $\|v(t)-ce_{11}\|_{2}\le e^{-\frac{3\pi^{2}}{4}t}\|g\|_{2}\to0$ なので $\|v(t)\|_{2}\to c$、
+$$
+\begin{aligned}
+&\Bigl\|\frac{v(t)}{\|v(t)\|_{2}}-e_{11}\Bigr\|_{2}\\
+&\le\frac{\|v(t)-ce_{11}\|_{2}}{\|v(t)\|_{2}}+\Bigl|\frac{c}{\|v(t)\|_{2}}-1\Bigr|\to0,
+\end{aligned}
+$$
+$\frac{v}{\|v\|_{2}}=\frac{u}{\|u\|_{2}}$。正の初期値の熱は、最終的に主固有関数の形で、速さ $\lambda_{1}$ で減衰する。$g=1$ では
+$$
+\begin{aligned}
+(1,e_{11})&=\sqrt2\int_{0}^{2}\sin\frac{\pi x}{2}\,dx\int_{0}^{1}\sin\pi y\,dy\\
+&=\sqrt2\cdot\frac4\pi\cdot\frac2\pi=\frac{8\sqrt2}{\pi^{2}}\approx1.146,
+\end{aligned}
+$$
+$\|1\|_{2}=\sqrt2$ なので比は $\frac{8}{\pi^{2}}\approx0.811$。2 から相対誤差 $\frac{\|v(t)-ce_{11}\|_{2}}{c}$ は $\frac{\pi^{2}}{8}e^{-\frac{3\pi^{2}}{4}t}$ 以下で、たとえば $t=\frac12$ で約 $0.030$ である。
+:::
+
+::: problem ★★★ 発展：時間によらない不連続な熱源 {#pde:ex-pa-3}
+$\Omega=(0,\pi)$, $L=-\partial_{x}^{2}$, $g=0$、$F\defeq\mathbf{1}_{(0,\pi/2)}$ とし、すべての $t$ で $f(t)\defeq F$ とする。$T(t)$, $A$ は \ref{pde:parabolic-semigroup} のもの（$\varphi_{k}=e_{k}$, $\mu_{k}=k^{2}$）とし、$F_{k}\defeq(F,e_{k})$ とおく。
+1. $w(x)\defeq\frac{3\pi x}{8}-\frac{x^{2}}{2}$（$0\le x\le\frac\pi2$）、$w(x)\defeq\frac{\pi(\pi-x)}{8}$（$\frac\pi2\le x\le\pi$）は $-w''=F$ の弱解（定常解）で、$w\in D(A)$, $Aw=F$、$(w,e_{k})=\frac{F_{k}}{k^{2}}$ であることを示せ。$F_{k}$ を求めよ。
+2. $u(t)\defeq w-T(t)w$ が \eqref{pde:eq-pa-problem} の弱解であることを示し、$\|u(t)-w\|_{2}\le e^{-t}\|w\|_{2}$, $\|w\|_{2}^{2}=\frac{17\pi^{5}}{7680}$ を示せ。
+3. $u$ の弱微分は a.e. の $t$ で $u'(t)=T(t)F$ で、$t>0$ なら $T(t)F\in C^{\infty}([0,\pi])$ であることを示せ。また $t>0$ について $u(t)\in C^{1}([0,\pi])$ で、その 2 階の弱微分は $T(t)F-F$ に等しく、とくに $u(t)$ は $\frac\pi2$ の近くで $C^{2}$ 級でないことを示せ。\ref{pde:parabolic-regularity} の結論と比べよ。
+:::
+
+::: solution
+**1.** $x=\frac\pi2$ で両方の式の値は $\frac{\pi^{2}}{16}$、導関数は $\frac{3\pi}{8}-\frac\pi2=-\frac\pi8$ と $-\frac\pi8$ で一致するので $w\in C^{1}([0,\pi])$、$w(0)=w(\pi)=0$。区分的に多項式なので $H^{1}$ に入り（\ref{fa:sobolev-one-dimension}）、記法の節の約束から $w\in H_{0}^{1}$。$v\in C_{c}^{\infty}((0,\pi))$ について、$[0,\frac\pi2]$ と $[\frac\pi2,\pi]$ で部分積分すると、$w'$ の連続性から $\frac\pi2$ での項は打ち消し合い、$\int_{0}^{\pi}w'v'=-\int_{0}^{\pi}w''v=\int_{0}^{\pi/2}v=(F,v)$（$w''=-1$, $0$）。両辺は $H^{1}$ で連続なので $v\in H_{0}^{1}$ でも成り立つ。これは $w\in D(A)$, $Aw=F$ という意味で、\ref{pde:parabolic-semigroup.1} から $F=Aw=\sum_{k}k^{2}(w,e_{k})e_{k}$、すなわち $(w,e_{k})=\frac{F_{k}}{k^{2}}$。$F_{k}=\sqrt{2/\pi}\int_{0}^{\pi/2}\sin kx\,dx=\sqrt{\frac2\pi}\,\frac{1-\cos(k\pi/2)}{k}$。
+
+**2.** $z(t)\defeq T(t)w$ は $f=0$、初期値 $w$ の弱解である（\ref{pde:parabolic-semigroup.3}）：$z\in L^{2}(0,T;V)$, $z'\in L^{2}(0,T;V^{*})$、a.e. の $t$ で $\langle z'(t),v\rangle+B[z(t),v]=0$。定数関数 $t\mapsto w$ は $L^{2}(0,T;V)$ に入り、$\int_{0}^{T}\varphi'\,dt=0$ から弱微分は $0$。よって $u=w-z$ は $L^{2}(0,T;V)$ に入り、$u'=-z'$、a.e. の $t$ で
+$$
+\begin{aligned}
+&\langle u'(t),v\rangle+B[u(t),v]\\
+&=-\langle z'(t),v\rangle+B[w,v]-B[z(t),v]=B[w,v]\\
+&=(F,v).
+\end{aligned}
+$$
+$T$ は強連続なので $u\in C([0,T];H)$ で $u(0)=w-w=0=g$。したがって $u$ は弱解で、\ref{pde:parabolic-uniqueness} からただ一つの弱解である。\ref{pde:parabolic-semigroup.2} から $\|T(t)\|=e^{-\mu_{1}t}=e^{-t}$ なので $\|u(t)-w\|_{2}=\|T(t)w\|_{2}\le e^{-t}\|w\|_{2}$。$\|w\|_{2}^{2}=\int_{0}^{\pi/2}\bigl(\frac{3\pi x}{8}-\frac{x^{2}}{2}\bigr)^{2}dx+\int_{\pi/2}^{\pi}\frac{\pi^{2}(\pi-x)^{2}}{64}dx=\frac{\pi^{5}}{640}+\frac{\pi^{5}}{1536}=\frac{17\pi^{5}}{7680}\approx0.677$。
+
+**3.** $u$ の座標は $(u(t),e_{k})=\frac{F_{k}}{k^{2}}(1-e^{-k^{2}t})$ で、その導関数は $e^{-k^{2}t}F_{k}=(T(t)F,e_{k})$。$t\mapsto T(t)F$ は $[0,T]$ で $H$ に値をとる連続関数なので $L^{2}(0,T;V^{*})$ に入り、\ref{pde:bochner-derivative-coordinates} から $u'=T(\cdot)F$。$t>0$ では、$|F_{k}|\le\frac{2\sqrt{2/\pi}}{k}$ と、$e^{-k^{2}t}k^{j}$ が $k$ について有界であることから、$T(t)F=\sum_{k}e^{-k^{2}t}F_{k}e_{k}$ を $j$ 回項別微分した級数はすべて $[0,\pi]$ で一様収束する。項別微分（\ref{calc:uniform-derivative}）を繰り返して、和は $C^{\infty}([0,\pi])$ の関数で、$L^{2}$ の和と一致する。同じく $T(t)w=\sum_{k}e^{-k^{2}t}\frac{F_{k}}{k^{2}}e_{k}$ は $C^{\infty}([0,\pi])$ で、$(T(t)w)''=-\sum_{k}e^{-k^{2}t}F_{k}e_{k}=-T(t)F$。$w\in C^{1}([0,\pi])$ で $w''=-F$（a.e.）なので、$u(t)=w-T(t)w\in C^{1}([0,\pi])$ で、2 階の弱微分は $-F+T(t)F$。これは $\frac\pi2$ の左で $T(t)F-1$、右で $T(t)F$（$T(t)F$ は連続）なので、$\frac\pi2$ の近くで連続な代表をもたず、$u(t)$ はそこで $C^{2}$ 級でない。
+
+\ref{pde:parabolic-regularity.1} と、その後の例の (R)（$n=1$）による \ref{pde:parabolic-regularity.2} は、$g=0\in H_{0}^{1}$, $f\in L^{2}(0,T;L^{2})$ から $u'\in L^{2}(0,T;L^{2})$, $u\in L^{2}(0,T;H^{2})$ を与える。ここでは実際に各 $t$ で $u(t)\in H^{2}$ だが、$H^{2}$ を超えては空間について滑らかにならない。一方、時間の向きには、$u'(t)=T(t)F$ が $t>0$ で $x$ について $C^{\infty}$ で、$\|u'(t)\|_{2}\le e^{-t}\|F\|_{2}$ と減衰する。熱方程式の平滑化は初期値の粗さを消すが、いつまでも働き続ける熱源の粗さ（$\frac\pi2$ での跳び）は、$-u''=F-u'$ を通して 2 階導関数の跳びとして残る。
+:::
+
+## 双曲型方程式 {#pde:sec-hy-exercises}
+
+対応するページ：\ref{pde:page-hyperbolic}、\ref{pde:page-hyperbolic-propagation}
+
+::: problem ★ 基本：放物線の形にはじいた弦のエネルギー {#pde:ex-hy-1}
+$\Omega=(0,\pi)$, $L=-\partial_{x}^{2}$（$\lambda_{k}=k^{2}$）, $f=0$, $g(x)\defeq x(\pi-x)$, $h=0$ とし、$T>2\pi$ とする。
+1. $g_{k}=(g,e_{k})$ を求め、弱解が $u(t,x)=\frac{8}{\pi}\sum_{k\text{ 奇数}}\frac{\cos kt\,\sin kx}{k^{3}}$ であることを示せ。
+2. $E(t)=\frac{\pi^{3}}{6}$ を示し、$B[g,g]$ を座標で表した式と比べて $\sum_{k\text{ 奇数}}\frac{1}{k^{4}}=\frac{\pi^{4}}{96}$ を導け。
+3. $0\le t\le T-\pi$ で $u(t+\pi)=-u(t)$、とくに $u(\pi)=-g$ を示せ。
+4. $\frac{1}{2\pi}\int_{0}^{2\pi}\frac12\|u'(t)\|^{2}\,dt=\frac{E(0)}{2}$ を示せ（運動エネルギーの時間平均は全エネルギーの半分）。
+:::
+
+::: solution
+**1.** $g$ は $[0,\pi]$ で多項式、両端で $0$ なので $g\in H_{0}^{1}$。部分積分を 2 回行うと $\int_{0}^{\pi}x(\pi-x)\sin kx\,dx=\frac{2(1-(-1)^{k})}{k^{3}}$ なので、$g_{k}=\sqrt{\frac2\pi}\cdot\frac{2(1-(-1)^{k})}{k^{3}}$（$k$ が奇数なら $\sqrt{\frac2\pi}\frac{4}{k^{3}}$、偶数なら $0$）で、$g_{k}e_{k}=\frac{8}{\pi k^{3}}\sin kx$（$k$ 奇数）。\ref{pde:hyperbolic-functional-calculus.3}（$f=0$, $h=0$、$\lambda_{k}=k^{2}>0$）から弱解の座標は $u_{k}(t)=g_{k}\cos kt$ で、主張の式を得る（級数は各 $t$ で $L^{2}$ で収束する）。
+
+**2.** \ref{pde:hyperbolic-energy-equality.2} から $E(t)=E(0)=\frac12(\|h\|^{2}+B[g,g])=\frac12\int_{0}^{\pi}(\pi-2x)^{2}dx=\frac12\cdot\frac{\pi^{3}}{3}=\frac{\pi^{3}}{6}$。一方 \ref{pde:hyperbolic-coordinates.2} から
+$$
+\begin{aligned}
+B[g,g]&=\sum_{k}\lambda_{k}g_{k}^{2}=\sum_{k\text{ 奇数}}k^{2}\cdot\frac{32}{\pi k^{6}}\\
+&=\frac{32}{\pi}\sum_{k\text{ 奇数}}\frac{1}{k^{4}}.
+\end{aligned}
+$$
+これが $\frac{\pi^{3}}{3}$ に等しいので $\sum_{k\text{ 奇数}}k^{-4}=\frac{\pi^{4}}{96}$。
+
+**3.** $k$ が奇数なら $\cos(k(t+\pi))=-\cos kt$ なので、$u(t+\pi)$ と $-u(t)$ はすべての座標が一致し、$L^{2}$ の元として等しい。$t=0$ として $u(\pi)=-g$。偶数番目のモードがないので、半周期 $\pi$（基本振動の周期 $2\pi$ の半分）で弦はちょうど上下が逆の形になる。
+
+**4.** $u'$ の座標は $u_{k}$ の導関数 $-kg_{k}\sin kt$（\ref{pde:hyperbolic-time-spaces} の後の座標による言い換え）なので、パーセヴァルの等式から $\|u'(t)\|^{2}=\sum_{k}k^{2}g_{k}^{2}\sin^{2}kt$。各項は非負なので、単調収束定理（\ref{meas:monotone-convergence}）で項別に積分でき、$\int_{0}^{2\pi}\sin^{2}kt\,dt=\pi$ から
+$$
+\int_{0}^{2\pi}\|u'(t)\|^{2}dt=\pi\sum_{k}k^{2}g_{k}^{2}=\pi B[g,g]=2\pi E(0).
+$$
+よって $\frac{1}{2\pi}\int_{0}^{2\pi}\frac12\|u'\|^{2}dt=\frac{E(0)}{2}$。$E$ は一定なので、位置エネルギー $\frac12B[u,u]$ の時間平均も $\frac{E(0)}{2}$ で、エネルギーは時間平均で運動と位置に等分される。
+:::
+
+::: problem ★★ 標準：共鳴とエネルギーの増え方 {#pde:ex-hy-2}
+$\Omega=(0,\pi)$, $L=-\partial_{x}^{2}$, $g=h=0$, $\omega>0$, $f(t,x)\defeq\sin(\omega t)\sin x$ とする。
+1. 弱解は $u(t,x)=y_{\omega}(t)\sin x$ で、$\omega\ne1$ なら $y_{\omega}(t)=\frac{\sin\omega t-\omega\sin t}{1-\omega^{2}}$、$\omega=1$ なら $y_{1}(t)=\frac{\sin t-t\cos t}{2}$ であることを示せ。
+2. $E(t)=\frac{\pi}{4}\bigl(y_{\omega}'(t)^{2}+y_{\omega}(t)^{2}\bigr)$ を示せ。$\omega=1$ では $E(t)=\frac{\pi}{16}\bigl(t^{2}-t\sin2t+\sin^{2}t\bigr)$ で、エネルギー等式 \eqref{pde:eq-hy-energy} の右辺の積分も同じ値になることを確かめよ。
+3. $\omega\ne1$ なら $E(t)\le\frac{\pi}{4}\cdot\frac{4\omega^{2}+(1+\omega)^{2}}{(1-\omega^{2})^{2}}$（$t$ によらない）を示せ。
+4. どの $\omega$ でも $E(t)\le\frac12\bigl(\int_{0}^{t}\|f(s)\|\,ds\bigr)^{2}\le\frac{\pi}{4}t^{2}$ を示し、\ref{pde:hyperbolic-energy-equality.3} の評価と比べよ。
+:::
+
+::: solution
+**1.** $f\in L^{2}(0,T;L^{2})$ で、$(\sin x,e_{k})=\sqrt{\pi/2}\,\delta_{k1}$ なので $f_{k}(t)=\sqrt{\pi/2}\,\sin(\omega t)\,\delta_{k1}$。\ref{pde:hyperbolic-functional-calculus.3}（$g=h=0$）から弱解の座標は $u_{k}(t)=\int_{0}^{t}S_{k^{2}}(t-s)f_{k}(s)\,ds$ で、$k\ge2$ では $0$、$u_{1}(t)=\sqrt{\pi/2}\int_{0}^{t}\sin(t-s)\sin(\omega s)\,ds$。積和の公式と $\int_{0}^{t}\cos(t-\beta s)\,ds=\frac{\sin t-\sin((1-\beta)t)}{\beta}$（$\beta\ne0$）から、$\omega\ne1$ なら
+$$
+\begin{aligned}
+&\int_{0}^{t}\sin(t-s)\sin(\omega s)\,ds\\
+&=\frac12\Bigl(\frac{\sin t+\sin\omega t}{1+\omega}-\frac{\sin t-\sin\omega t}{1-\omega}\Bigr)\\
+&=\frac{\sin\omega t-\omega\sin t}{1-\omega^{2}},
+\end{aligned}
+$$
+$\omega=1$ なら $\frac12\int_{0}^{t}(\cos(t-2s)-\cos t)\,ds=\frac{\sin t-t\cos t}{2}$。$u=u_{1}e_{1}=y_{\omega}(t)\sin x$。
+
+**2.** $u'$ の座標は $u_{1}'$ だけなので $u'(t)=y_{\omega}'(t)\sin x$、$\|u'\|^{2}=\frac\pi2y_{\omega}'^{2}$、$B[u,u]=\|\partial_{x}u\|^{2}=\frac\pi2y_{\omega}^{2}$。よって $E=\frac\pi4(y_{\omega}'^{2}+y_{\omega}^{2})$。$\omega=1$ では $y_{1}'=\frac{t\sin t}{2}$ で
+$$
+E(t)=\frac{\pi}{16}\bigl(t^{2}\sin^{2}t+(\sin t-t\cos t)^{2}\bigr)=\frac{\pi}{16}\bigl(t^{2}-t\sin2t+\sin^{2}t\bigr).
+$$
+エネルギー等式の右辺は $(f(s),u'(s))=\frac\pi2\sin s\cdot\frac{s\sin s}{2}$ の積分で、$\int_{0}^{t}s\sin^{2}s\,ds=\frac{t^{2}}{4}-\frac{t\sin2t}{4}+\frac{\sin^{2}t}{4}$ から $\frac\pi4\int_{0}^{t}s\sin^{2}s\,ds=E(t)$。外力が固有振動数 $1$ で揺すり続けるので、エネルギーは $t^{2}$ の速さで増える（共鳴）。
+
+**3.** $|y_{\omega}|\le\frac{1+\omega}{|1-\omega^{2}|}$、$y_{\omega}'=\frac{\omega(\cos\omega t-\cos t)}{1-\omega^{2}}$ から $|y_{\omega}'|\le\frac{2\omega}{|1-\omega^{2}|}$ なので、2 から主張の評価を得る。右辺は $\omega\to1$ で発散する。
+
+**4.** $B[u,u]\ge0$ なので $\|u'\|\le\sqrt{2E}$。\ref{pde:hyperbolic-energy-equality.2} から $E$ は絶対連続で、a.e. で $E'=(f,u')$。$\varepsilon>0$ について $\phi_{\varepsilon}\defeq\sqrt{2E+\varepsilon}$ は絶対連続（$\sqrt{\cdot}$ は $[\varepsilon,\infty)$ でリプシッツ）で、a.e. で
+$$
+\begin{aligned}
+\phi_{\varepsilon}'&=\frac{E'}{\phi_{\varepsilon}}\\
+&\le\frac{\|f\|\,\|u'\|}{\sqrt{2E+\varepsilon}}\le\|f\|.
+\end{aligned}
+$$
+$E(0)=0$ なので $\phi_{\varepsilon}(t)\le\sqrt\varepsilon+\int_{0}^{t}\|f\|$、$\varepsilon\to0$ として $\sqrt{2E(t)}\le\int_{0}^{t}\|f\|$。$\|f(s)\|=\sqrt{\pi/2}\,|\sin\omega s|\le\sqrt{\pi/2}$ なので $E(t)\le\frac\pi4t^{2}$。共鳴の場合 $E(t)\sim\frac{\pi}{16}t^{2}$ なので、$t^{2}$ という増え方は最良の次数である。\ref{pde:hyperbolic-energy-equality.3}（$\gamma=0$, $\mu=1$）は $\|u'\|^{2}+\|u\|_{(1)}^{2}\le e^{2t}\int_{0}^{t}\|f\|^{2}$ という指数関数の評価で、$c$ が負の場合も含めるための粗い評価である。
+:::
+
+::: problem ★★ 標準：エネルギー空間のノルムの比較とユニタリ群 {#pde:ex-hy-3}
+$\Omega=(0,\pi)$, $Lu\defeq-u''+u$（$c=1$）, $f=0$ とする。
+1. $\gamma,\mu,\lambda_{k},\kappa_{k}$ を求めよ。\ref{pde:hyperbolic-unitary-group} のエネルギー空間のノルム $\|\cdot\|_{\mathcal{E}}$ と、$X_{1}\times X_{0}$ のノルム $\|(u,v)\|^{2}\defeq\|u\|_{(1)}^{2}+\|v\|^{2}$ について、最良の定数で $\frac23\|(u,v)\|^{2}\le\|(u,v)\|_{\mathcal{E}}^{2}\le\|(u,v)\|^{2}$ となることを示せ。
+2. 弱解について $N(t)^{2}\defeq\|u(t)\|_{(1)}^{2}+\|u'(t)\|^{2}$ とおく。すべての $t\in[0,T]$ で $\frac23N(0)^{2}\le N(t)^{2}\le\frac32N(0)^{2}$ を示し、\ref{pde:hyperbolic-no-smoothing}（$m=0$）の評価と比べよ。
+3. $(g,h)=(0,e_{1})$ と $(g,h)=(e_{1},0)$ の弱解を求め、$T\ge\frac{\pi}{2\sqrt2}$ なら 2 の定数 $\frac32$ と $\frac23$ が達せられることを確かめよ。
+4. $(e_{1},0)$ を \ref{pde:hyperbolic-unitary-group.2} の $\psi_{1}^{\pm}$ で表し、$W(t)(e_{1},0)$ を計算して 3 の解と一致することを確かめよ。
+:::
+
+::: solution
+**1.** $b=0$, $c=1\ge0$ なので $c_{-}=0$, $\gamma=0$, $\mu=1$。$B[u,v]=\int(u'v'+uv)$ で、$B[e_{k},v]=(k^{2}+1)(e_{k},v)$ なので $\lambda_{k}=k^{2}+1$（$\lambda_{1}=2>0$ なので \ref{pde:hyperbolic-unitary-group} が使える）、$\kappa_{k}=k^{2}+2$。$\|(u,v)\|_{\mathcal{E}}^{2}=\sum_{k}(\lambda_{k}u_{k}^{2}+v_{k}^{2})$、$\|(u,v)\|^{2}=\sum_{k}(\kappa_{k}u_{k}^{2}+v_{k}^{2})$ で、$\frac{\lambda_{k}}{\kappa_{k}}=\frac{k^{2}+1}{k^{2}+2}$ は $k$ について増加し、$\frac23$ から $1$ に近づく。よって不等式が成り立ち、$(e_{1},0)$ で左の等号、$(0,v)$ で右の等号が成り立つので、定数は最良。
+
+**2.** $f=0$ なので \ref{pde:hyperbolic-energy-equality.2} から $2E(t)=\|(u(t),u'(t))\|_{\mathcal{E}}^{2}$ は一定。1 から
+$$
+\begin{aligned}
+N(t)^{2}&\le\frac32\cdot2E(t)=\frac32\cdot2E(0)\le\frac32N(0)^{2},\\
+N(t)^{2}&\ge2E(t)=2E(0)\ge\frac23N(0)^{2}.
+\end{aligned}
+$$
+\ref{pde:hyperbolic-no-smoothing}（$m=0$ では $N_{0}=N$）は $e^{-2t}N(0)^{2}\le N(t)^{2}\le e^{2t}N(0)^{2}$（$1+\mu=2$）を与えるが、これは $\lambda_{k}$ が負になりうる一般の場合の評価で、$c\ge0$ ならエネルギー自身がノルムなので、$t$ によらない定数で押さえられる。
+
+**3.** \ref{pde:hyperbolic-functional-calculus.3} から、$(0,e_{1})$ の解は $u=\frac{\sin\sqrt2t}{\sqrt2}e_{1}$、$(e_{1},0)$ の解は $u=\cos(\sqrt2t)\,e_{1}$（$\sqrt{\lambda_{1}}=\sqrt2$）。前者では $N(t)^{2}=\kappa_{1}u_{1}^{2}+u_{1}'^{2}=\frac32\sin^{2}\sqrt2t+\cos^{2}\sqrt2t$, $N(0)^{2}=1$ で、$t=\frac{\pi}{2\sqrt2}$ で $N(t)^{2}=\frac32N(0)^{2}$。後者では $N(t)^{2}=3\cos^{2}\sqrt2t+2\sin^{2}\sqrt2t$, $N(0)^{2}=3$ で、同じ時刻に $N(t)^{2}=2=\frac23N(0)^{2}$。
+
+**4.** $\omega_{1}=\sqrt2$, $\psi_{1}^{\pm}=(2\lambda_{1})^{-1/2}(e_{1},\pm i\omega_{1}e_{1})=\frac12(e_{1},\pm i\sqrt2e_{1})$ なので $(e_{1},0)=\psi_{1}^{+}+\psi_{1}^{-}$。\ref{pde:hyperbolic-unitary-group.2} から
+$$
+\begin{aligned}
+W(t)(e_{1},0)&=e^{i\sqrt2t}\psi_{1}^{+}+e^{-i\sqrt2t}\psi_{1}^{-}\\
+&=\Bigl(\cos(\sqrt2t)\,e_{1},\ \tfrac{i\sqrt2}{2}\bigl(e^{i\sqrt2t}-e^{-i\sqrt2t}\bigr)e_{1}\Bigr)\\
+&=\bigl(\cos(\sqrt2t)\,e_{1},\ -\sqrt2\sin(\sqrt2t)\,e_{1}\bigr),
+\end{aligned}
+$$
+これは 3 の解 $(u(t),u'(t))$ である。$\|\psi_{1}^{\pm}\|_{\mathcal{E}}^{2}=\lambda_{1}\cdot\frac14+\frac{2}{4}=1$ も確かめられる。エネルギー空間では、この 2 次元の成分の上で時間発展は回転（$e^{\pm i\sqrt2t}$ 倍）で、生成作用素 $H$ はこの成分で固有値 $\pm\sqrt2$ をもつ。
+:::
+
+::: problem ★★★ 発展：ポテンシャルの強さと波の安定性の境目 {#pde:ex-hy-4}
+$\Omega$ を有界な開集合、$\nu_{1}\le\nu_{2}\le\cdots$ をディリクレ・ラプラシアンの固有値、$(e_{k})$ をその正規直交な固有関数の基底（\ref{fa:dirichlet-eigenfunctions.2}）とする。定数 $q\ge0$ について $Lu\defeq-\Delta u-qu$（$c=-q$）、$f=0$ を考える。
+1. $(e_{k})$ は $L$ の固有関数の基底で、固有値は $\lambda_{k}=\nu_{k}-q$ であることを確かめよ。
+2. $q<\nu_{1}$ なら、弱解はすべての $t\in[0,T]$ で $\|u'(t)\|^{2}+\bigl(1-\frac{q}{\nu_{1}}\bigr)\|\nabla u(t)\|^{2}\le\|h\|^{2}+\|\nabla g\|^{2}$ を満たすことを示せ（右辺は $T$ によらない）。
+3. $q>\nu_{1}$ とし、$\sigma\defeq\sqrt{q-\nu_{1}}$ とおく。弱解は $\|u(t)\|\le\cosh(\sigma t)\bigl(\|g\|+t\|h\|\bigr)$ を満たし、$g=e_{1}$, $h=0$ なら $\|u(t)\|=\cosh\sigma t$ となることを示せ。\ref{pde:hyperbolic-energy-equality.3} から得られる増大の速さと比べよ。
+4. $\Omega=(0,\pi)^{2}$, $q=4$ とし、$e_{11}\defeq\frac2\pi\sin x\sin y$ とする。すべての $T>0$ で弱解を考える（弱解の定義は時間について局所的なので、$[0,T']$ の弱解を $[0,T]$（$T<T'$）に制限したものは $[0,T]$ の弱解で、一意性から両者は一致する）。$\sup_{t\ge0}\|u(t)\|<\infty$ であるための必要十分条件は $(h,e_{11})=-\sqrt2\,(g,e_{11})$ であることを示せ。
+:::
+
+::: solution
+**1.** $L$ は対称で $b=0$。$v\in H_{0}^{1}$ について $B[e_{k},v]=(\nabla e_{k},\nabla v)-q(e_{k},v)=(\nu_{k}-q)(e_{k},v)$ で、$(e_{k})$ は $L^{2}$ の正規直交基底、$\nu_{k}-q$ は増加して $\infty$ に発散するので、\ref{pde:weak-symmetric-eigen} の基底としてこれをとれる。$\gamma=c_{-}=q$, $\mu=q+1$。
+
+**2.** \ref{pde:hyperbolic-energy-equality.2} から $E(t)=\frac12\bigl(\|u'\|^{2}+\|\nabla u\|^{2}-q\|u\|^{2}\bigr)$ は一定。\ref{pde:dirichlet-eigen-variational.3}（$L=-\Delta$）から $v\in H_{0}^{1}$ について $\nu_{1}\|v\|^{2}\le\|\nabla v\|^{2}$ なので、$q\ge0$ から $\|\nabla u\|^{2}-q\|u\|^{2}\ge\bigl(1-\frac{q}{\nu_{1}}\bigr)\|\nabla u\|^{2}$。よって
+$$
+\begin{aligned}
+\|u'(t)\|^{2}+\Bigl(1-\frac{q}{\nu_{1}}\Bigr)\|\nabla u(t)\|^{2}&\le2E(t)=2E(0)\\
+&=\|h\|^{2}+\|\nabla g\|^{2}-q\|g\|^{2}\le\|h\|^{2}+\|\nabla g\|^{2}.
+\end{aligned}
+$$
+$1-\frac{q}{\nu_{1}}>0$ なので、$u'(t)$ と $\nabla u(t)$（したがって $u(t)$ も）は時間によらない定数で押さえられる。
+
+**3.** \ref{pde:hyperbolic-functional-calculus.3} から $u_{k}(t)=C_{\lambda_{k}}(t)g_{k}+S_{\lambda_{k}}(t)h_{k}$ で、$\lambda_{k}\ge\lambda_{1}=-\sigma^{2}$。$t\ge0$, $\lambda\ge-\sigma^{2}$ について $|C_{\lambda}(t)|\le\cosh\sigma t$, $|S_{\lambda}(t)|\le t\cosh\sigma t$ を示す：$\lambda>0$ なら $|\cos|\le1$, $|\frac{\sin(\sqrt\lambda t)}{\sqrt\lambda}|\le t$、$\lambda=0$ なら $1$, $t$、$\lambda=-s^{2}$（$0<s\le\sigma$）なら $\cosh st\le\cosh\sigma t$, $\frac{\sinh st}{s}=\int_{0}^{t}\cosh s\tau\,d\tau\le t\cosh\sigma t$。$\ell^{2}$ の三角不等式から
+$$
+\begin{aligned}
+\|u(t)\|&=\Bigl(\sum_{k}u_{k}^{2}\Bigr)^{1/2}\\
+&\le\Bigl(\sum_{k}C_{\lambda_{k}}^{2}g_{k}^{2}\Bigr)^{1/2}+\Bigl(\sum_{k}S_{\lambda_{k}}^{2}h_{k}^{2}\Bigr)^{1/2}\\
+&\le\cosh(\sigma t)\bigl(\|g\|+t\|h\|\bigr).
+\end{aligned}
+$$
+$g=e_{1}$, $h=0$ なら $u=C_{-\sigma^{2}}(t)e_{1}=\cosh(\sigma t)\,e_{1}$ で、増大の速さ $\sigma$ は改善できない。\ref{pde:hyperbolic-energy-equality.3}（$\mu=q+1$）は $\|u'\|^{2}+\|u\|_{(1)}^{2}\le e^{(q+2)t}(\cdots)$、すなわち振幅について速さ $\frac{q+2}{2}$ の評価を与えるが、$\sigma<\sqrt q\le\frac{q+2}{2}$ なので粗い。本当の速さは最小固有値 $\lambda_{1}=\nu_{1}-q$ だけで決まり、それはレイリー商で特徴づけられる量である。
+
+**4.** \ref{pde:dirichlet-eigen-rectangle}（$a=b=\pi$）から $\nu_{jk}=j^{2}+k^{2}$ で、$\nu_{1}=2$（組 $(1,1)$ だけなので単純、固有関数 $e_{11}$）、次は $5$。よって $\lambda_{1}=-2$, $\lambda_{k}\ge1$（$k\ge2$）で、$\sigma=\sqrt2$。1 の基底として、$e_{1}=e_{11}$ と長方形の残りの固有関数をとる。$g_{1}\defeq(g,e_{11})$, $h_{1}\defeq(h,e_{11})$ とおくと
+$$
+\begin{aligned}
+u_{1}(t)&=g_{1}\cosh\sqrt2t+h_{1}\frac{\sinh\sqrt2t}{\sqrt2}\\
+&=\frac12\Bigl(g_{1}+\frac{h_{1}}{\sqrt2}\Bigr)e^{\sqrt2t}+\frac12\Bigl(g_{1}-\frac{h_{1}}{\sqrt2}\Bigr)e^{-\sqrt2t}.
+\end{aligned}
+$$
+$h_{1}\ne-\sqrt2g_{1}$ なら $|u_{1}(t)|\to\infty$ で、$\|u(t)\|\ge|u_{1}(t)|$ なので有界でない。$h_{1}=-\sqrt2g_{1}$ なら $u_{1}=g_{1}e^{-\sqrt2t}$。$k\ge2$ では $\lambda_{k}\ge1$ なので $|u_{k}(t)|\le|g_{k}|+\frac{|h_{k}|}{\sqrt{\lambda_{k}}}\le|g_{k}|+|h_{k}|$、したがって
+$$
+\|u(t)\|^{2}\le g_{1}^{2}+2\sum_{k\ge2}(g_{k}^{2}+h_{k}^{2})\le g_{1}^{2}+2\bigl(\|g\|^{2}+\|h\|^{2}\bigr)
+$$
+で有界。不安定なモードは一つだけなので、有界にとどまる初期値は余次元 1 の部分空間（「安定多様体」）をなす。2 の場合と違い、$E(t)$ は一定でもエネルギーは符号をもたず、有界性を保証しない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
