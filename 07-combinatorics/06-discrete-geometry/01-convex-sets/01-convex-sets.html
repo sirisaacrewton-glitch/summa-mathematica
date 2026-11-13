@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>凸集合と相対的内部 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/06-discrete-geometry/01-convex-sets/01-convex-sets.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 凸集合と相対的内部 {#poly:page-convex-sets keywords="affine subspace, affine hull, affine independence, convex set, convex combination, convex hull, Caratheodory's theorem, Radon's theorem, Helly's theorem, compactness of convex hull, simplex, relative interior"}
+
+$\mathbb{R}^{d}$ の部分集合が**凸**であるとは、その 2 点を結ぶ線分が常にその集合に含まれることをいう。凸多面体の理論の出発点として、このページでは、アフィン部分空間とアフィン独立性を準備したうえで、凸包が凸結合の全体であること、凸結合は $d+1$ 個以下の点で足りること（**カラテオドリの定理**）、$d+2$ 個の点は凸包の交わる 2 組に分けられること（**ラドンの定理**）、凸集合の族の交わりについての**ヘリーの定理**を示す。後半では、内点をもたない凸集合でもアフィン包の中では内点をもつこと（**相対的内部**の存在）と、その基本性質を示す。
+
+## 記法と定義の確認 {#poly:sec-cx-notation}
+
+::: notation
+- $\mathbb{R}^{d}$ は標準内積とユークリッド距離をもつ。線形部分空間・次元・一次独立は \ref{lin:dimension-properties}、次元定理は \ref{lin:rank-nullity} のとおり。
+- 位相は通常のもの。$\operatorname{cl}M$ は閉包、$\operatorname{int}M$ は内部。有界閉集合はコンパクト（\ref{top:heine-borel}）、コンパクト集合の連続像はコンパクト（\ref{top:compact-basic} の 2）。
+- 点 $x,y$ について閉線分 $[x,y]\defeq\{(1-t)x+ty: 0\le t\le1\}$、半開線分 $[x,y[\defeq\{(1-t)x+ty: 0\le t<1\}$、開線分 $]x,y[$ も同様。
+- 体系は $\ZF$。
+:::
+
+## アフィン構造 {#poly:sec-cx-affine}
+
+::: definition アフィン部分空間とアフィン独立 {#poly:affine-subspace keywords="affine combination, affine subspace, affine hull aff M, dimension, affinely independent" index="アフィン部分空間|あふぃんぶぶんくうかん, アフィン包|あふぃんほう, アフィン結合|あふぃんけつごう, アフィン独立|あふぃんどくりつ" refname="アフィン部分空間"}
+$\lambda_{1}+\cdots+\lambda_{n}=1$ を満たす実数による $\sum\lambda_{i}x_{i}$ を $x_{1},\dots,x_{n}$ の**アフィン結合**という。アフィン結合で閉じた空でない集合を**アフィン部分空間**という。アフィン部分空間 $A$ は、ある点 $a$ と線形部分空間 $L$ によって $A=a+L$ と一意に（$L$ は一意に）書け、$\dim A\defeq\dim L$。$M$ を含む最小のアフィン部分空間を $M$ の**アフィン包** $\operatorname{aff}M$ という（$\dim M\defeq\dim\operatorname{aff}M$）。点 $x_{1},\dots,x_{n}$ が**アフィン独立**とは、$\sum\lambda_{i}x_{i}=0$, $\sum\lambda_{i}=0$ なら $\lambda_{i}=0$ となることをいい、これは $x_{2}-x_{1},\dots,x_{n}-x_{1}$ が一次独立であることと同値である。
+:::
+
+::: intuition
+アフィン部分空間は原点を通るとは限らない「平らな」空間（点・直線・平面…）である。アフィン独立とは「どの点も他の点のアフィン包に入らない」ことで、$\mathbb{R}^{d}$ ではアフィン独立な点は $d+1$ 個までしかとれない。
+:::
+
+::: lemma アフィン構造の基本 {#poly:affine-basic keywords="aff M = set of affine combinations; A = a + L with L = A - a; at most d+1 affinely independent points" index="アフィン包の記述|あふぃんほうのきじゅつ"}
+1. $A$ がアフィン部分空間で $a\in A$ なら、$L\defeq A-a$ は線形部分空間で、$a$ によらない。
+2. $\operatorname{aff}M$ は $M$ の点のアフィン結合の全体である。
+3. $x_{1},\dots,x_{n}$ がアフィン独立であることと、$x_{2}-x_{1},\dots,x_{n}-x_{1}$ が一次独立であることは同値。特に $\mathbb{R}^{d}$ のアフィン独立な点は $d+1$ 個以下。
+:::
+
+::: proof
+**Step 1（1）.** $u,v\in L$, $s,t\in\mathbb{R}$ なら $a+su+tv=(1-s-t)a+s(a+u)+t(a+v)$ はアフィン結合で $A$ に属するので、$su+tv\in L$。$b\in A$ なら $A-b=(A-a)-(b-a)$ で、$b-a\in L$ なので $A-b=L$。
+
+**Step 2（2）.** アフィン結合の全体 $A'$ は $M$ を含み、アフィン結合のアフィン結合はアフィン結合（係数の和が 1）なので、アフィン部分空間。$M$ を含むアフィン部分空間はアフィン結合で閉じているので $A'$ を含む。
+
+**Step 3（3）.** $\sum\lambda_{i}x_{i}=0$, $\sum\lambda_{i}=0$ なら $\lambda_{1}=-\sum_{i\ge2}\lambda_{i}$ を代入して $\sum_{i\ge2}\lambda_{i}(x_{i}-x_{1})=0$。逆に $\sum_{i\ge2}\mu_{i}(x_{i}-x_{1})=0$ は $\lambda_{1}=-\sum\mu_{i}$, $\lambda_{i}=\mu_{i}$ の関係にあたる。$\mathbb{R}^{d}$ の一次独立なベクトルは $d$ 個以下。
+:::
+
+## 凸集合と凸包 {#poly:sec-cx-convex}
+
+::: definition 凸集合と凸包 {#poly:convex-set keywords="convex set, convex combination, convex hull conv M, polytope, simplex" index="凸集合|とつしゅうごう, 凸結合|とつけつごう, 凸包|とつほう, 凸多面体（有限集合の凸包）|とつためんたい, 単体|たんたい" refname="凸集合"}
+$C\subseteq\mathbb{R}^{d}$ が**凸**であるとは、任意の $x,y\in C$ について $[x,y]\subseteq C$ となることをいう。$\lambda_{i}\ge0$, $\sum\lambda_{i}=1$ のアフィン結合を**凸結合**という。$M$ を含む最小の凸集合（$M$ を含む凸集合すべての共通部分）を**凸包** $\operatorname{conv}M$ という。有限集合の凸包を**凸多面体**（polytope）、アフィン独立な点の凸包を**単体**という。
+:::
+
+::: intuition
+凸集合は「へこみのない」集合で、中のどの 2 点を結んでも外に出ない。凸包は、点の集まりにゴムの膜をかぶせたときの形である。
+:::
+
+::: theorem 凸包と凸結合 {#poly:convex-hull-combinations keywords="a set is convex iff closed under convex combinations; conv M = set of convex combinations" index="凸包の記述|とつほうのきじゅつ" refname="凸包と凸結合"}
+1. $C$ が凸であることと、$C$ の点の任意の凸結合が $C$ に属することは同値である。
+2. $\operatorname{conv}M$ は $M$ の点の凸結合の全体である。
+:::
+
+::: intuition
+へこみがないことは、2 点の間だけでなく、何点の「重み付き平均」をとっても外に出ないことと同じである。凸包は、点の重み付き平均として作れる点の全体である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：凸集合は凸結合で閉じている】項数 $n$ の帰納法。$n=1$ は明らか。$x=\sum_{i=1}^{n}\lambda_{i}x_{i}$（$n\ge2$）で $\lambda_{n}=1$ なら $x=x_{n}$。そうでなければ $x=(1-\lambda_{n})y+\lambda_{n}x_{n}$, $y\defeq\sum_{i<n}\frac{\lambda_{i}}{1-\lambda_{n}}x_{i}$ で、$y$ は $n-1$ 項の凸結合なので帰納法の仮定から $C$ に属し、$x\in[y,x_{n}]\subseteq C$。逆は 2 項の凸結合の場合。
+
+**Step 2（2）.** 凸結合の全体 $C'$ は、2 つの凸結合の凸結合がまた凸結合なので凸で、$M$ を含む。1 から $M$ を含む凸集合は $C'$ を含む。よって $C'=\operatorname{conv}M$。
+:::
+
+::: theorem カラテオドリの定理 {#poly:caratheodory keywords="Caratheodory's theorem: every point of conv M is a convex combination of at most dim M + 1 affinely independent points of M" index="カラテオドリの定理（凸包）|からておどりのていり" refname="カラテオドリの定理"}
+$M\subseteq\mathbb{R}^{d}$、$n\defeq\dim\operatorname{aff}M$ とする。$\operatorname{conv}M$ の各点は、$M$ のアフィン独立な点（したがって $n+1$ 個以下）の凸結合である。
+:::
+
+::: intuition
+平面の点の集まりの凸包の点は、どれかの 3 点が作る三角形の中にある。何百個の点を使った凸結合も、「余分な」点の重みを一つずつ 0 に追い出していけば、アフィン独立な少数の点の凸結合に書き直せる。
+:::
+
+::: proof
+**Step 1（項を減らす）.** 【主張：$x=\sum_{i=1}^{m}\lambda_{i}x_{i}$（凸結合、$\lambda_{i}>0$）で $x_{1},\dots,x_{m}$ がアフィン従属なら、$x$ は $m-1$ 個の $x_{i}$ の凸結合】アフィン従属なので、すべては 0 でない $\mu_{i}$ で $\sum\mu_{i}x_{i}=0$, $\sum\mu_{i}=0$ となるものがあり、ある $\mu_{i}>0$。$\tau\defeq\min\{\lambda_{i}/\mu_{i}:\mu_{i}>0\}$ とし、最小を与える $i_{0}$ をとる。$\lambda'_{i}\defeq\lambda_{i}-\tau\mu_{i}$ とおくと、$\sum\lambda'_{i}x_{i}=x$, $\sum\lambda'_{i}=1$、$\mu_{i}\le0$ なら $\lambda'_{i}\ge\lambda_{i}>0$、$\mu_{i}>0$ なら $\tau$ の最小性から $\lambda'_{i}\ge0$、そして $\lambda'_{i_{0}}=0$。
+
+**Step 2（結論）.** \ref{poly:convex-hull-combinations} から $x\in\operatorname{conv}M$ は $M$ の点の凸結合で、正の係数の項だけ残す。項がアフィン従属である限り Step 1 で項を減らせ、項数は有限なので、アフィン独立な点の凸結合に到達する。$\operatorname{aff}M$（$n$ 次元）の中のアフィン独立な点は $n+1$ 個以下（\ref{poly:affine-basic} の 3 を $\operatorname{aff}M$ に適用）。
+:::
+
+::: theorem ラドンの定理 {#poly:radon keywords="Radon's theorem: d+2 points can be partitioned into two sets with intersecting convex hulls" index="ラドンの定理|らどんのていり" refname="ラドンの定理"}
+$\mathbb{R}^{d}$ の $d+2$ 個以上の点の集合 $M$ は、$\operatorname{conv}M_{1}\cap\operatorname{conv}M_{2}\neq\varnothing$ となる互いに交わらない 2 つの部分集合 $M_{1},M_{2}$ に分けられる。
+:::
+
+::: intuition
+平面に 4 点あれば、2 組に分けて一方の凸包（線分か三角形）と他方の凸包が交わるようにできる。点が多すぎると、どこかで「重なり」が避けられない。
+:::
+
+::: proof
+**Step 1（アフィン従属）.** $M=\{x_{1},\dots,x_{m}\}$（$m\ge d+2$）は \ref{poly:affine-basic} の 3 からアフィン従属で、すべては 0 でない $\mu_{i}$ で $\sum\mu_{i}x_{i}=0$, $\sum\mu_{i}=0$ となるものがある。
+
+**Step 2（分割）.** $I\defeq\{i:\mu_{i}>0\}$, $J\defeq\{i:\mu_{i}\le0\}$ とし、$s\defeq\sum_{i\in I}\mu_{i}>0$（和が 0 で全部は 0 でないので $I\neq\varnothing$）とおく。$\sum_{i\in I}\mu_{i}x_{i}=\sum_{j\in J}(-\mu_{j})x_{j}$ と $\sum_{j\in J}(-\mu_{j})=s$ から、
+$$y\defeq\sum_{i\in I}\frac{\mu_{i}}{s}x_{i}=\sum_{j\in J}\frac{-\mu_{j}}{s}x_{j}$$
+は両辺とも凸結合で、$M_{1}\defeq\{x_{i}:i\in I\}$, $M_{2}\defeq\{x_{j}:j\in J\}$ の凸包の共通の点である。
+:::
+
+::: theorem ヘリーの定理 {#poly:helly keywords="Helly's theorem: if every d+1 of finitely many convex sets intersect, all intersect" index="ヘリーの定理|へりーのていり" refname="ヘリーの定理"}
+$C_{1},\dots,C_{m}$（$m\ge d+1$）を $\mathbb{R}^{d}$ の凸集合とし、どの $d+1$ 個も共通の点をもつとする。このとき $C_{1}\cap\cdots\cap C_{m}\neq\varnothing$。
+:::
+
+::: intuition
+平面で、有限個の凸集合のどの 3 つも交わるなら全部が交わる。「局所的に（少数ずつ）交わる」ことから「大域的に交わる」ことが従う、という凸性の強い性質である。
+:::
+
+::: proof
+**Step 1（帰納法の設定）.** $m$ の帰納法。$m=d+1$ は仮定そのもの。$m\ge d+2$ とし、$m-1$ 個の場合を仮定する。各 $k$ について、$C_{k}$ を除いた $m-1$ 個は（そのどの $d+1$ 個も交わるので）帰納法の仮定から共通の点 $x_{k}$ をもつ。
+
+**Step 2（ラドンの定理）.** $x_{1},\dots,x_{m}$ に重複があり $x_{k}=x_{l}$（$k\neq l$）なら、その点はすべての $C_{i}$ に属する（$i\neq k$ なら $x_{k}\in C_{i}$、$i=k$ なら $x_{l}\in C_{k}$）。相異なるなら、$m\ge d+2$ なので \ref{poly:radon} から添字の分割 $I\sqcup J=\{1,\dots,m\}$ と $y\in\operatorname{conv}\{x_{i}:i\in I\}\cap\operatorname{conv}\{x_{j}:j\in J\}$ がある。
+
+**Step 3（結論）.** 【主張：$y$ はすべての $C_{k}$ に属する】$k\in J$ なら、$i\in I$ について $i\neq k$ なので $x_{i}\in C_{k}$、$C_{k}$ は凸なので $y\in\operatorname{conv}\{x_{i}:i\in I\}\subseteq C_{k}$（\ref{poly:convex-hull-combinations}）。$k\in I$ なら同様に $J$ の側から。
+:::
+
+::: theorem コンパクト集合の凸包 {#poly:convex-hull-compact keywords="the convex hull of a compact set is compact; polytopes are compact" index="凸包のコンパクト性|とつほうのこんぱくとせい"}
+$M\subseteq\mathbb{R}^{d}$ がコンパクトなら $\operatorname{conv}M$ もコンパクト。特に凸多面体はコンパクトである。
+:::
+
+::: intuition
+有限個の点の凸包は、点の数を $d+1$ 個に抑えられる（カラテオドリ）ので、有界閉な集合の連続像として表され、閉じた有界な集合になる。
+:::
+
+::: proof
+\ref{poly:caratheodory} から $\operatorname{conv}M$ は、写像
+$$\Phi\colon M^{d+1}\times\Delta\to\mathbb{R}^{d},\qquad\Phi(x_{0},\dots,x_{d},\lambda)\defeq\sum_{i}\lambda_{i}x_{i}$$
+の像に等しい。ここで $\Delta\defeq\{\lambda\in\mathbb{R}^{d+1}:\lambda_{i}\ge0,\ \sum\lambda_{i}=1\}$ は有界閉集合（$d+1$ 個未満の点の凸結合は、同じ点を繰り返すか係数 0 の項を足して $d+1$ 項にできる）。$M^{d+1}\times\Delta$ はコンパクト（有限個のコンパクト集合の直積、\ref{top:heine-borel}）で、$\Phi$ は連続なので、像はコンパクト（\ref{top:compact-basic} の 2）。
+:::
+
+## 相対的内部 {#poly:sec-cx-relative-interior}
+
+::: definition 相対的内部 {#poly:relative-interior keywords="relative interior ri C, interior relative to the affine hull" index="相対的内部|そうたいてきないぶ" refname="相対的内部"}
+$C\subseteq\mathbb{R}^{d}$ の**相対的内部** $\operatorname{ri}C$ とは、$\operatorname{aff}C$ の相対位相での $C$ の内部、すなわち、ある $\varepsilon>0$ について $B(x,\varepsilon)\cap\operatorname{aff}C\subseteq C$ となる $x\in C$ の全体である。
+:::
+
+::: intuition
+空間の中に置いた三角形は内点をもたないが、自分を含む平面の中で見れば内点をもつ。相対的内部は、凸集合を自分の「住む」アフィン空間の中で見たときの内部である。
+:::
+
+::: theorem 相対的内部は空でない {#poly:relative-interior-nonempty keywords="a nonempty convex set has nonempty relative interior" index="相対的内部の存在|そうたいてきないぶのそんざい" refname="相対的内部の存在"}
+空でない凸集合 $C$ について $\operatorname{ri}C\neq\varnothing$。
+:::
+
+::: intuition
+凸集合は、自分の次元と同じ次元の小さな単体を含むので、その単体の真ん中の点のまわりはアフィン包の中で詰まっている。
+:::
+
+::: proof
+**Step 1（単体を含む）.** $n\defeq\dim\operatorname{aff}C$ とし、$C$ の中のアフィン独立な点を極大にとる：$x_{0},\dots,x_{k}$。極大性から $C\subseteq\operatorname{aff}\{x_{0},\dots,x_{k}\}$（そうでなければ外の点を加えてもアフィン独立）なので $k=n$ で、$\operatorname{aff}C=\operatorname{aff}\{x_{0},\dots,x_{n}\}$。$S\defeq\operatorname{conv}\{x_{0},\dots,x_{n}\}\subseteq C$。
+
+**Step 2（重心は相対的内部）.** 【主張：$b\defeq\frac{1}{n+1}\sum x_{i}\in\operatorname{ri}C$】$\operatorname{aff}C$ の点 $y$ は一意に $y=\sum\lambda_{i}(y)x_{i}$（$\sum\lambda_{i}=1$）と書け、係数 $\lambda_{i}(y)$ はアフィン座標で $y$ について連続（$y-x_{0}$ を基底 $x_{i}-x_{0}$ で表す線形写像の成分）。$\lambda_{i}(b)=\frac{1}{n+1}>0$ なので、$b$ に十分近い $y\in\operatorname{aff}C$ ではすべての $\lambda_{i}(y)>0$、すなわち $y\in S\subseteq C$。
+:::
+
+::: theorem 線分の補題 {#poly:segment-lemma keywords="if x0 in ri C and x1 in cl C then [x0, x1[ is in ri C" index="線分の補題（相対的内部）|せんぶんのほだい" refname="線分の補題"}
+$C$ を凸集合、$x_{0}\in\operatorname{ri}C$, $x_{1}\in\operatorname{cl}C$ とすると、$[x_{0},x_{1}[\subseteq\operatorname{ri}C$。
+:::
+
+::: intuition
+相対的内部の点から閉包の点に向かう線分は、終点の直前まで相対的内部にとどまる。$x_{0}$ のまわりの小さな球を、$x_{1}$ を中心に縮めながら運ぶと、線分の各点のまわりにも小さな球（を $\operatorname{aff}C$ で切ったもの）が $C$ に含まれる。
+:::
+
+::: proof
+**Step 1（設定）.** $A\defeq\operatorname{aff}C$（閉集合なので $\operatorname{cl}C\subseteq A$）、$\varepsilon>0$ を $B(x_{0},\varepsilon)\cap A\subseteq C$ ととる。$x\defeq(1-t)x_{0}+tx_{1}$（$0\le t<1$）とする。
+
+**Step 2（近似）.** 【主張：$y\in B(x,r)\cap A$ は $z\in A$ と $x_{1}'\in C$ を結ぶ線分上にあり、$z$ は $x_{0}$ に近い】$x_{1}\in\operatorname{cl}C$ なので、$\abs{x_{1}-x_{1}'}<\delta$ となる $x_{1}'\in C$ がある（$\delta>0$ は後で決める）。$y\in B(x,r)\cap A$ について $y=(1-t)z+tx_{1}'$ となる $z$ は $z=\frac{y-tx_{1}'}{1-t}\in A$（アフィン結合）で、
+$$\abs{z-x_{0}}=\frac{\abs{y-x-t(x_{1}'-x_{1})}}{1-t}\le\frac{r+t\delta}{1-t}.$$
+
+**Step 3（結論）.** $r$ と $\delta$ を $\frac{r+\delta}{1-t}<\varepsilon$ となるようにとれば、$z\in B(x_{0},\varepsilon)\cap A\subseteq C$ で、$y\in[z,x_{1}']\subseteq C$。よって $B(x,r)\cap A\subseteq C$、$x\in\operatorname{ri}C$。
+:::
+
+::: corollary 相対的内部と閉包の性質 {#poly:ri-closure-properties keywords="ri C is convex; cl ri C = cl C; ri cl C = ri C; aff ri C = aff C" index="相対的内部と閉包|そうたいてきないぶとへいほう"}
+空でない凸集合 $C$ について次が成り立つ。
+1. $\operatorname{ri}C$ と $\operatorname{cl}C$ は凸。
+2. $\operatorname{cl}(\operatorname{ri}C)=\operatorname{cl}C$。
+3. $\operatorname{ri}(\operatorname{cl}C)=\operatorname{ri}C$。
+:::
+
+::: proof
+**Step 1（1）.** $x_{0},x_{1}\in\operatorname{ri}C$ なら \ref{poly:segment-lemma} から $[x_{0},x_{1}[\subseteq\operatorname{ri}C$ で、$x_{1}$ 自身も属するので凸。$\operatorname{cl}C$ は、$x_{n}\to x$, $y_{n}\to y$（$x_{n},y_{n}\in C$）なら $(1-t)x_{n}+ty_{n}\to(1-t)x+ty$ なので凸。
+
+**Step 2（2）.** $\subseteq$ は $\operatorname{ri}C\subseteq C$ から。逆に $x_{1}\in\operatorname{cl}C$ と $x_{0}\in\operatorname{ri}C$（\ref{poly:relative-interior-nonempty}）をとると、$[x_{0},x_{1}[\subseteq\operatorname{ri}C$ の点は $x_{1}$ にいくらでも近いので $x_{1}\in\operatorname{cl}(\operatorname{ri}C)$。
+
+**Step 3（3）.** $\operatorname{aff}\operatorname{cl}C=\operatorname{aff}C$（$\operatorname{aff}C$ は閉集合）なので $\operatorname{ri}C\subseteq\operatorname{ri}\operatorname{cl}C$。逆に $x\in\operatorname{ri}\operatorname{cl}C$ と $x_{0}\in\operatorname{ri}C$ をとる。$x=x_{0}$ ならよい。そうでなければ、$x$ を少し越えた点 $x_{1}\defeq x+\eta(x-x_{0})$（$\eta>0$ 小）は $\operatorname{aff}C$ の中で $x$ に近いので $\operatorname{cl}C$ に属し、$x\in[x_{0},x_{1}[$ なので \ref{poly:segment-lemma} から $x\in\operatorname{ri}C$。
+:::
+
+::: hypcheck
+- **カラテオドリの定理**：$\lambda_{i}>0$ と $\mu_{i}>0$ の比の最小値をとること（Step 1）で係数の非負性を保った。アフィン独立な点が $n+1$ 個以下であることは次元から来る。
+- **ヘリーの定理**：集合の個数が**有限**であることは帰納法に使った。無限個の凸集合では一般に成り立たない（$C_{k}=[k,\infty)\subseteq\mathbb{R}$ はどの有限個も交わるが全体は空）。コンパクト性を仮定すれば無限個でも成り立つ。
+- **線分の補題**：$x_{0}$ が相対的内部にあることが本質的で、$x_{0},x_{1}$ がともに境界にあれば線分は境界に含まれうる（正方形の辺）。
+:::
+
+## 問題 {#poly:sec-cx-problems}
+
+::: problem {#poly:prob-cx-hull-not-closed}
+閉集合の凸包は閉集合とは限らないことを、$\mathbb{R}^{2}$ の例で示せ（\ref{poly:convex-hull-compact} ではコンパクト性が必要）。
+:::
+
+::: solution
+$M\defeq\{(0,0)\}\cup\{(x,y): x\ge1,\ y=1/x\}$ は閉集合。$\operatorname{conv}M$ は $(0,0)$ と曲線の点を結ぶ線分を含み、線分上の点 $(s,s/x^{2})$（$x\ge s$ を固定して $x\to\infty$）は $(s,0)$（$s>0$）に近づくので $(s,0)\in\operatorname{cl}\operatorname{conv}M$ だが、$(s,0)$（$s>0$）自身は含まない（凸包の点は $(0,0)$ 以外 $y>0$ を満たす：$M$ の点のうち $y=0$ なのは原点だけで、凸結合で $y=0$ になるのは原点の重みが 1 のときだけ）。よって閉集合でない。
+:::
+
+::: problem {#poly:prob-cx-helly-plane}
+平面上に有限個の線分（いずれも $x$ 軸に平行とは限らない）がある。どの 3 本にも共通の点があれば、すべての線分に共通の点があることを確かめよ。また、「どの 2 本も交わる」だけでは不十分な例を挙げよ。
+:::
+
+::: solution
+線分は凸集合なので、$d=2$ の \ref{poly:helly} からすべてが交わる。2 本ずつ交わるだけでは不十分な例：三角形の 3 辺はどの 2 本も頂点で交わるが、3 本に共通の点はない。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** カラテオドリ・ラドン・ヘリーの定理の証明では、$\mathbb{R}$ の順序と体の構造（線形代数）だけを使い、位相は使わない。順序体上でも同様に成り立つ。
+
+**前提を変えると.**
+- ヘリーの定理の「$d+1$」は最良である（単体の重心座標 $\lambda_{0},\dots,\lambda_{d}$ について、$d+1$ 個の半空間 $\{x:\lambda_{i}(x)\le0\}$ は、どの $d$ 個も交わるが、全体は $\sum\lambda_{i}=1$ に反して交わらない）。
+- 色付きカラテオドリ定理（バラーニ）、分数ヘリー定理、テヴェルベルグの定理（$(r-1)(d+1)+1$ 点を凸包の交わる $r$ 組に分けられる、$r=2$ がラドン）などの一般化がある、と知られている。
+
+**類似の定理.** 凸集合の分離定理（交わらない凸集合は超平面で分けられる）は、次のページで支持超平面として扱う。関数解析ではハーン–バナッハの定理がその無限次元版である。
+
+**高い視点から：凸性は「線形代数と順序の出会い」.** アフィン独立性は線形代数、凸結合の係数の非負性は順序の構造で、カラテオドリ・ラドン・ヘリーの 3 定理はどれも「アフィン従属な関係 $\sum\mu_{i}x_{i}=0$, $\sum\mu_{i}=0$ の正の部分と負の部分」を操作して得られる。ヘリーの定理は、凸集合の族の交わりの「神経」（交わる部分族の単体複体）が、$d$ 次元より上で単純になることを述べ、位相的組合せ論（位相的ヘリー定理）へとつながる。比喩で言えば、$\mathbb{R}^{d}$ の凸集合は「$d+1$ 人ずつの相談で全員の合意が決まる」社会であり、その人数 $d+1$ が空間の次元を反映している。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
