@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マトロイドの双対と貪欲法 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/04-designs-matroids/02-matroids/02-duality-greedy.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# マトロイドの双対と貪欲法 {#comb:page-matroid-duality-greedy keywords="dual matroid, cobasis, corank, dual rank formula, deletion, contraction, matroid minor, greedy algorithm, Rado-Edmonds theorem, Kruskal's algorithm, minimum spanning tree, transversal matroid, partial transversal"}
+
+マトロイドには、基の補集合を基とする**双対マトロイド**が必ず存在する。平面グラフのグラフ的マトロイドの双対は、双対グラフのグラフ的マトロイドになる。また、要素を除く（**削除**）・つぶす（**縮約**）操作でマトロイドの**マイナー**が得られる。このページの中心は、**貪欲法**（重い元から順に、独立性を保てる限り取る）がどんな重みについても最適解を与えることが、ちょうどマトロイドであることと同値である、というラドー–エドモンズの定理である。最後に、二部グラフのマッチングから**横断マトロイド**を作る。
+
+## 記法と定義の確認 {#comb:sec-md-notation}
+
+::: notation
+- マトロイド・独立集合・基・階数 $r$・閉路・基本閉路は \ref{comb:page-matroid-axioms} のとおり。基の公理は \ref{comb:basis-axioms}、基本閉路は \ref{comb:circuit-axioms}。
+- $X+e$, $X-e$ は元の追加・除去。$E$ は有限。マッチングは \ref{graph:matching} のとおり。
+- 体系は $\ZF$。
+:::
+
+## 双対マトロイド {#comb:sec-md-dual}
+
+::: theorem 双対マトロイド {#comb:dual-matroid keywords="the complements of bases of a matroid are the bases of a matroid, dual matroid M^*" index="双対マトロイド|そうついまとろいど, 余基|よき" refname="双対マトロイド"}
+マトロイド $M$ の基の族を $\mathcal{B}$ とすると、$\mathcal{B}^{*}\defeq\{E\setminus B: B\in\mathcal{B}\}$ もマトロイドの基の族である。このマトロイドを $M$ の**双対** $M^{*}$ といい、$(M^{*})^{*}=M$。
+:::
+
+::: intuition
+基は「必要十分な集まり」、その補集合は「捨ててよい最大の集まり」である。捨ててよい集まりの族もまた交換の性質をもつ。グラフでは、全域木の補集合（余木）を基とするマトロイドで、その閉路はカットの極小なもの（結合）になる。
+:::
+
+::: proof
+**Step 1（(B1)）.** $\mathcal{B}\neq\varnothing$ なので $\mathcal{B}^{*}\neq\varnothing$。
+
+**Step 2（補集合の言葉での交換）.** 【主張：$B_{1},B_{2}\in\mathcal{B}$, $x\in B_{2}\setminus B_{1}$ なら、$B_{1}+x-y\in\mathcal{B}$ となる $y\in B_{1}\setminus B_{2}$ がある】$B_{1}+x$ は基より大きいので従属で、基本閉路 $C\subseteq B_{1}+x$（$x\in C$）がただ一つある（\ref{comb:circuit-axioms}）。$C\not\subseteq B_{2}$（$B_{2}$ は独立）なので $y\in C\setminus B_{2}$ があり、$y\neq x$ なので $y\in B_{1}\setminus B_{2}$。$B_{1}+x-y$ に閉路があれば $B_{1}+x$ の閉路で、唯一の閉路 $C$ は $y$ を含むので含まれない。よって $B_{1}+x-y$ は独立で、大きさが基と等しいので基。
+
+**Step 3（(B2) for $\mathcal{B}^{*}$）.** $B_{1}^{*}=E\setminus B_{1}$, $B_{2}^{*}=E\setminus B_{2}$, $x\in B_{1}^{*}\setminus B_{2}^{*}=B_{2}\setminus B_{1}$ とする。Step 2 の $y\in B_{1}\setminus B_{2}=B_{2}^{*}\setminus B_{1}^{*}$ について、$B_{1}^{*}-x+y=E\setminus(B_{1}+x-y)\in\mathcal{B}^{*}$。よって \ref{comb:basis-axioms} から $\mathcal{B}^{*}$ はマトロイドの基の族。$(M^{*})^{*}=M$ は補集合の補集合から明らか。
+:::
+
+::: proposition 双対の階数 {#comb:dual-rank keywords="r^*(X) = |X| - r(E) + r(E \ X)" index="双対の階数|そうついのかいすう"}
+$M^{*}$ の階数関数 $r^{*}$ は $r^{*}(X)=\abs{X}-r(E)+r(E\setminus X)$ を満たす。
+:::
+
+::: proof
+**Step 1（基で書く）.** $X$ に含まれる $M^{*}$ の独立集合は $M^{*}$ の基 $E\setminus B$ に含まれる集合なので、$r^{*}(X)=\max_{B\in\mathcal{B}}\abs{X\setminus B}=\abs{X}-\min_{B}\abs{X\cap B}$。
+
+**Step 2（最小値）.** 【主張：$\min_{B}\abs{X\cap B}=r(E)-r(E\setminus X)$】どの基 $B$ も $\abs{B\cap(E\setminus X)}\le r(E\setminus X)$（独立集合）なので $\abs{B\cap X}\ge r(E)-r(E\setminus X)$。$E\setminus X$ の極大な独立集合 $I$（$\abs{I}=r(E\setminus X)$）を含む基 $B$ をとると、$B\cap(E\setminus X)\supseteq I$ は独立で $I$ の極大性から等しく、$\abs{B\cap X}=r(E)-r(E\setminus X)$ で等号が成り立つ。
+:::
+
+::: example
+1. $U_{k,n}^{*}=U_{n-k,n}$（$k$ 元部分集合の補集合は $n-k$ 元部分集合）。
+2. 連結グラフ $G$ のグラフ的マトロイド $M(G)$ の双対の基は余木（全域木の補集合）。$M(G)^{*}$ の閉路はちょうど $G$ の結合（極小なカット）であることが知られている（ここでは証明しない）。$G$ が平面グラフなら $M(G)^{*}=M(G^{*})$（$G^{*}$ は双対グラフ）で、ホイットニーは逆に「$M(G)^{*}$ がグラフ的であることと $G$ が平面的であることは同値」を示した、と知られている（\ref{graph:page-plane-duality}）。
+:::
+
+## 削除・縮約・マイナー {#comb:sec-md-minors}
+
+::: definition 削除と縮約 {#comb:deletion-contraction-matroid keywords="deletion M \\ e, contraction M / e, loop, coloop, matroid minor" index="削除（マトロイドの）|さくじょ, 縮約（マトロイドの）|しゅくやく, コループ|こるーぷ, マトロイドのマイナー|まとろいどのまいなー"}
+マトロイド $M=(E,\mathcal{I})$ と $e\in E$ について、
+- **削除** $M\setminus e$：台集合 $E-e$、独立集合 $\{I\in\mathcal{I}: e\notin I\}$。
+- **縮約** $M/e$：$e$ がループでなければ、台集合 $E-e$、独立集合 $\{I\subseteq E-e: I+e\in\mathcal{I}\}$。$e$ がループなら $M/e\defeq M\setminus e$。
+
+削除と縮約を繰り返して得られるマトロイドを $M$ の**マイナー**という。$e$ がすべての基に含まれるとき $e$ を**コループ**という（$M^{*}$ のループ）。
+:::
+
+::: intuition
+削除は「その元を使わないことにする」、縮約は「その元はすでに使ったものとして、残りの独立性を測り直す」操作である。グラフ的マトロイドでは、辺の削除と辺の縮約（\ref{graph:contraction}）にちょうど対応する。
+:::
+
+::: proposition 削除と縮約はマトロイドで、双対で入れ替わる {#comb:deletion-contraction-duality keywords="M \\ e and M / e are matroids; (M \\ e)^* = M^* / e" index="削除と縮約の双対性|さくじょとしゅくやくのそうついせい"}
+$M\setminus e$ と $M/e$ はマトロイドで、$(M\setminus e)^{*}=M^{*}/e$。
+:::
+
+::: proof
+**Step 1（削除）.** (I1)–(I3) は $M$ の独立集合で $e$ を含まないものに制限しても成り立つ（(I3) で借りる元は $J\setminus I\subseteq E-e$）。
+
+**Step 2（縮約）.** $e$ がループでないとする（ループなら Step 1）。(I1)：$\{e\}$ は独立。(I2)：明らか。(I3)：$I+e$, $J+e$ が独立で $\abs{I}<\abs{J}$ なら、$M$ の (I3) を $I+e$, $J+e$ に使って $I+e+f$ が独立となる $f\in(J+e)\setminus(I+e)=J\setminus I$ があり、$I+f$ は $M/e$ で独立。
+
+**Step 3（基の記述）.** $e$ がコループでなければ、$M\setminus e$ の基は $e$ を含まない $M$ の基（$M\setminus e$ の階数は $r(E)$）。$e$ がループでなければ、$M/e$ の基は $\{B-e: B\in\mathcal{B},\ e\in B\}$（$\{e\}$ を含む極大な独立集合から $e$ を除いたもの）。
+
+**Step 4（双対）.** 【主張：$(M\setminus e)^{*}=M^{*}/e$】$e$ が $M$ のコループでない（$M^{*}$ のループでない）とする。$(M\setminus e)^{*}$ の基は、$e\notin B$ となる $M$ の基 $B$ について $(E-e)\setminus B$。$M^{*}/e$ の基は、$e\in B^{*}$ となる $M^{*}$ の基 $B^{*}=E\setminus B$ について $B^{*}-e=(E-e)\setminus B$ で、条件 $e\in E\setminus B$ は $e\notin B$ と同じ。よって一致する。$e$ がコループなら、$M\setminus e$ の基は $B-e$（$B\in\mathcal{B}$）、$M^{*}/e=M^{*}\setminus e$ の基は $E\setminus B$（$e\notin E\setminus B$）で、$(E-e)\setminus(B-e)=E\setminus B$ から一致する。
+:::
+
+## 貪欲法 {#comb:sec-md-greedy}
+
+::: definition 貪欲法 {#comb:greedy-algorithm keywords="greedy algorithm for maximum weight independent set" index="貪欲法（マトロイド）|どんよくほう"}
+$E$ と、(I1)(I2) を満たす $\mathcal{I}\subseteq\mathcal{P}(E)$、重み $w\colon E\to\mathbb{R}_{\ge0}$ について、$E$ の元を重みの大きい順に $e_{1},\dots,e_{n}$ と並べ（同じ重みは任意の順）、$G_{0}\defeq\varnothing$、$G_{i}\defeq G_{i-1}+e_{i}$（$G_{i-1}+e_{i}\in\mathcal{I}$ のとき）、$G_{i}\defeq G_{i-1}$（そうでないとき）と定めて $G\defeq G_{n}$ を出力する手続きを**貪欲法**という。$w(X)\defeq\sum_{x\in X}w(x)$。
+:::
+
+::: intuition
+重いものから順に、今持っている集まりと「両立する」限り取っていく。一度取ったものは手放さず、取れなかったものは二度と考えない、最も単純な戦略である。
+:::
+
+::: theorem ラドー–エドモンズの定理 {#comb:rado-edmonds keywords="greedy algorithm finds a maximum weight independent set for every weight iff the system is a matroid" index="ラドー–エドモンズの定理|らどーえどもんずのていり" refname="ラドー–エドモンズの定理"}
+(I1)(I2) を満たす $(E,\mathcal{I})$ について、次は同値である。
+1. $(E,\mathcal{I})$ はマトロイドである（(I3) を満たす）。
+2. どの重み $w\colon E\to\mathbb{R}_{\ge0}$ についても、貪欲法の出力 $G$ は $\mathcal{I}$ の元の中で重みが最大である。
+:::
+
+::: intuition
+目先の最善を取り続ける貪欲法は、一般には最適解を逃す。ところが「独立性」がマトロイドの性質をもつなら、途中で取った元が後で邪魔をすることがなく、貪欲法が常に最適になる。逆に、貪欲法が常に最適なら、増加公理が成り立たなければならない。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2：貪欲法は基を出す）.** $G$ は独立で、$G+e$（$e\notin G$）は独立でない：$e=e_{i}$ が捨てられたのは $G_{i-1}+e_{i}$ が従属だからで、$G\supseteq G_{i-1}$ と (I2) から $G+e_{i}$ も従属。よって $G$ は極大な独立集合、すなわち基。重みが非負なので、最大の重みは基で達成される（独立集合は基に含まれる）。
+
+**Step 2（1 ⇒ 2：比較）.** 【主張：任意の基 $B$ について $w(G)\ge w(B)$】$G=\{g_{1},\dots,g_{k}\}$ を選ばれた順（重みの大きい順）、$B=\{b_{1},\dots,b_{k}\}$ を重みの大きい順に並べる（基は同じ大きさ $k$）。ある $j$ で $w(b_{j})>w(g_{j})$ だとし、最小の $j$ をとる。$I\defeq\{g_{1},\dots,g_{j-1}\}$、$J\defeq\{b_{1},\dots,b_{j}\}$ に (I3) を使うと、$I+b\in\mathcal{I}$ となる $b\in J\setminus I$ がある。$w(b)\ge w(b_{j})>w(g_{j})$ なので、貪欲法は $g_{j}$ より前に $b$ を調べており、そのときの $G_{\cdot}$ は $I$ に含まれる（$g_{j}$ より前に選ばれた元は $g_{1},\dots,g_{j-1}$ だけ）ので、(I2) から $b$ を加えても独立で、$b$ は選ばれたはずである。$b\notin I$ なので矛盾。よってすべての $j$ で $w(g_{j})\ge w(b_{j})$、和をとって $w(G)\ge w(B)$。
+
+**Step 3（2 ⇒ 1）.** (I3) が成り立たないとし、$I,J\in\mathcal{I}$, $\abs{I}<\abs{J}$ で、どの $e\in J\setminus I$ についても $I+e\notin\mathcal{I}$ とする。$p\defeq\abs{I}$ とし、$0<\varepsilon$ を $\varepsilon<\frac{1}{p+1}$ ととる（$p=0$ なら $\varepsilon\defeq\frac12$）。重みを
+$$w(x)\defeq\begin{cases}1+\varepsilon&(x\in I)\\1&(x\in J\setminus I)\\0&(\text{それ以外})\end{cases}$$
+とする。貪欲法は最初に $I$ の元をすべて選び（$I$ の部分集合は独立）、次に $J\setminus I$ の元を調べるが、$I$ を含む集合に加えると従属なのでどれも選ばない（(I2)）。その後は重み 0 の元しかない。よって $w(G)=p(1+\varepsilon)$。一方 $w(J)\ge\abs{J}\ge p+1>p(1+\varepsilon)$（$p\varepsilon<1$）で、2 に反する。
+:::
+
+::: example クラスカルの方法 {#comb:kruskal-algorithm keywords="Kruskal's algorithm for minimum spanning tree via greedy on the graphic matroid" index="クラスカルの方法|くらすかるのほうほう, 最小全域木|さいしょうぜんいきぎ"}
+連結グラフ $G$ の辺に費用 $c(e)\ge0$ があるとき、費用の和が最小の全域木を求めるには、$w(e)\defeq C-c(e)$（$C\ge\max c$）として \ref{comb:graphic-matroid} に貪欲法を使えばよい：基（全域木）は同じ辺数 $\abs{V}-1$ をもつので、$w$ の和の最大化は $c$ の和の最小化と同じである。手続きとしては「費用の小さい辺から順に、閉路を作らない限り加える」ことになる。
+:::
+
+## 横断マトロイド {#comb:sec-md-transversal}
+
+::: theorem 横断マトロイド {#comb:transversal-matroid keywords="partial transversals of a bipartite graph form a matroid, transversal matroid" index="横断マトロイド|おうだんまとろいど, 部分横断|ぶぶんおうだん" refname="横断マトロイド"}
+二部分割 $\{E,Y\}$ の二部グラフ $H$ について、$E$ の部分集合 $I$ で、$I$ のすべての点を覆うマッチングがあるもの（**部分横断**）の族は、$E$ 上のマトロイドの独立集合の族である。
+:::
+
+::: intuition
+各元を「担当者」に割り当てる問題で、同時に割り当てられる元の集まりは、マッチングの増加道によって一つずつ増やせる。これが増加公理になる。
+:::
+
+::: proof
+**Step 1（(I1)(I2)）.** 空集合は空のマッチングで覆われ、$I$ を覆うマッチングから $J\subseteq I$ の点に接続する辺だけを残せば $J$ を覆う。
+
+**Step 2（対称差）.** 【主張：$\abs{I}<\abs{J}$ で、$I$ をちょうど覆うマッチング $M_{I}$（$E$ 側の端点の集合が $I$）と $J$ をちょうど覆う $M_{J}$ があれば、$M_{I}$ についての増加道で $E$ 側の端点が $J\setminus I$ にあるものがある】$M_{I}\triangle M_{J}$ の各頂点の次数は 2 以下なので、その連結成分は $M_{I}$ と $M_{J}$ の辺が交互に並ぶ道か偶閉路である。$\abs{M_{J}}=\abs{J}>\abs{I}=\abs{M_{I}}$ なので、$M_{J}$ の辺のほうが多い成分 $P$ があり、それは両端が $M_{J}$ の辺の道（偶閉路や他の道では両方の辺の数が等しいか $M_{I}$ が多い）。$P$ の辺の数は奇数なので両端は $E$ と $Y$ に一つずつあり、$E$ 側の端点 $e$ は $M_{J}$ で覆われ（$e\in J$）、$M_{I}$ では覆われない（$P$ の端点なので、$M_{I}$ の辺があれば $P$ が延びる）ので $e\notin I$。
+
+**Step 3（(I3)）.** $M\defeq M_{I}\triangle E(P)$ はマッチングで（$P$ の内部の点は両方のマッチングに接続し、入れ替えても次数 1、端点は $M_{I}$ で覆われていなかった）、$E$ 側で覆う点は $I+e$ である（$P$ の内部の $E$ 側の点は $M_{I}$ でも $M$ でも覆われる）。よって $I+e$ は部分横断。
+:::
+
+::: hypcheck
+- **双対マトロイド**：基本閉路の一意性（\ref{comb:circuit-axioms}）を Step 2 で本質的に使った。
+- **ラドー–エドモンズ**：重みの非負性は Step 1 の「最大値は基で達成される」に、(I3) は Step 2 の比較に使った。逆向き（Step 3）は (I2) だけを仮定して、(I3) の破れから貪欲法が失敗する重みを作った。
+- **横断マトロイド**：二部グラフであることは、$P$ の両端が異なる側にあること（Step 2）に使った。一般のグラフでは、マッチングで覆える頂点集合も（マッチングマトロイドとして）マトロイドになると知られているが、証明はより複雑である。
+:::
+
+## 問題 {#comb:sec-md-problems}
+
+::: problem {#comb:prob-md-greedy-fail}
+$E=\{a,b,c\}$、$\mathcal{I}=\{\varnothing,\{a\},\{b\},\{c\},\{b,c\}\}$ はマトロイドでないことを示し、貪欲法が最大の重みを与えない重みの例を挙げよ。
+:::
+
+::: solution
+$I=\{a\}$, $J=\{b,c\}$ で (I3) が破れる（$\{a,b\}$, $\{a,c\}\notin\mathcal{I}$）。$w(a)=3$, $w(b)=w(c)=2$ とすると、貪欲法は $a$ を選び、$b,c$ は加えられないので重み 3。一方 $\{b,c\}$ の重みは 4。
+:::
+
+::: problem {#comb:prob-md-dual-uniform}
+$U_{2,4}$ が自己双対（$U_{2,4}^{*}\cong U_{2,4}$）であることと、$M(K^{4})$ の双対の階数が 3 であることを確かめよ。
+:::
+
+::: solution
+$U_{2,4}$ の基は 2 元部分集合で、その補集合も 2 元部分集合なので $U_{2,4}^{*}=U_{2,4}$。$M(K^{4})$ は 6 辺・階数 3 なので、\ref{comb:dual-rank} から $r^{*}(E)=6-3+0=3$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 貪欲法の定理で、重みを正（$>0$）に限っても証明は同じである。重みが負の元を許すと、「重み最大の独立集合」は基とは限らず、貪欲法は負の元に来たら止めればよい。
+
+**前提を変えると.**
+- 2 つのマトロイドの共通の独立集合の最大の大きさは、エドモンズの**マトロイド交差定理** $\max\abs{I}=\min_{X}\bigl(r_{1}(X)+r_{2}(E\setminus X)\bigr)$ で与えられ、二部グラフのケーニッヒの定理（\ref{graph:konig-theorem}）はその特別な場合である、と知られている。3 つのマトロイドの交差は NP 困難になる。
+- 線形マトロイドのマイナーで閉じたクラスは、有限個の禁止マイナーで特徴づけられることがある：2 元体上で表せる（2 元マトロイド）ことは $U_{2,4}$ をマイナーにもたないことと同値（タット）、と知られている。
+
+**類似の定理.** 貪欲法がうまく働く構造のより一般の枠組みとして、ポリマトロイドや劣モジュラ関数の最適化がある。劣モジュラ関数の最小化は多項式時間でできることが知られている。
+
+**高い視点から：マトロイドは「貪欲法が正しい世界」.** ラドー–エドモンズの定理は、マトロイドを「最適化の観点から」特徴づける：独立性の構造がマトロイドであることと、局所的な最善の選択が大域的な最善を与えることが同値である。双対性は線形計画法の双対性、マイナーはグラフマイナーの類似で、マトロイド理論はグラフ・線形代数・組合せ最適化をつなぐ共通の言語になっている。比喩で言えば、マトロイドの世界では「今いちばん価値のあるものを、邪魔にならない限り取る」という素朴な戦略が決して後悔を生まない。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{comb:sec-md-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
