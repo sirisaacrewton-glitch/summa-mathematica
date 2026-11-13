@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>支持超平面・面・極集合 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/06-discrete-geometry/01-convex-sets/02-faces-polarity.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 支持超平面・面・極集合 {#poly:page-faces-polarity keywords="hyperplane, halfspace, nearest point projection, separation, supporting hyperplane, proper supporting hyperplane, closed convex set as intersection of halfspaces, face, exposed face, extreme point, facet, Minkowski's theorem, Krein-Milman in finite dimensions, polar set, bipolar theorem"}
+
+閉凸集合は、外側からは「それを含む半空間の共通部分」として、内側からは（コンパクトなら）「端点の凸包」として表される。このページでは、点と閉凸集合を超平面で分ける**分離**から始めて、相対的境界の各点を通る**支持超平面**の存在を示し、閉凸集合が支持半空間の共通部分であることを導く。次に、凸集合の**面**と**露出面**・**端点**を定義して、コンパクト凸集合は端点の凸包であるという**ミンコフスキーの定理**を証明する。最後に、凸集合の双対にあたる**極集合**を定義し、双極定理 $C^{\circ\circ}=C$ を示す。
+
+## 記法と定義の確認 {#poly:sec-fp-notation}
+
+::: notation
+- アフィン包・凸包・相対的内部 $\operatorname{ri}$ と線分の補題は \ref{poly:page-convex-sets} のとおり。**相対的境界**を $\operatorname{rb}C\defeq\operatorname{cl}C\setminus\operatorname{ri}C$ とする。
+- $\langle\cdot,\cdot\rangle$ は標準内積、$\abs{\cdot}$ はノルム。$u\neq0$, $\alpha\in\mathbb{R}$ について、**超平面** $H(u,\alpha)\defeq\{z:\langle u,z\rangle=\alpha\}$、**閉半空間** $K(u,\alpha)\defeq\{z:\langle u,z\rangle\le\alpha\}$。
+- 有界閉集合はコンパクトで、コンパクト集合上の連続関数は最小値をとる。単位球面の点列は収束する部分列をもつ（\ref{top:heine-borel}）。
+- 体系は $\ZF$。
+:::
+
+## 分離と支持超平面 {#poly:sec-fp-support}
+
+::: lemma 最近点と分離 {#poly:nearest-point-separation keywords="nearest point in a closed convex set, <x - p, c - p> <= 0, strict separation of a point from a closed convex set" index="最近点|さいきんてん, 分離（点と凸集合）|ぶんり" refname="最近点と分離"}
+$C$ を空でない閉凸集合、$x\notin C$ とする。
+1. $\abs{x-p}$ を最小にする $p\in C$ がただ一つあり、すべての $c\in C$ について $\langle x-p,\,c-p\rangle\le0$。
+2. $u\defeq x-p$ について $C\subseteq K(u,\langle u,p\rangle)$ かつ $\langle u,x\rangle>\langle u,p\rangle$。すなわち超平面 $H(u,\langle u,p\rangle)$ は $C$ と $x$ を分け、$p$ で $C$ に接する。
+:::
+
+::: intuition
+閉凸集合の外の点から最も近い点を探すと、その点を通り、2 点を結ぶ線分に垂直な平面が、集合と点を分ける壁になる。
+:::
+
+::: proof
+**Step 1（存在）.** $c_{0}\in C$ をとり、$R\defeq\abs{x-c_{0}}$ とする。$C\cap\{c:\abs{x-c}\le R\}$ は空でない有界閉集合なのでコンパクトで、連続関数 $c\mapsto\abs{x-c}$ はそこで最小値をとる。その外の点はより遠いので、これが $C$ 全体での最小値。
+
+**Step 2（不等式）.** 【主張：$\langle x-p,c-p\rangle\le0$】$c\in C$, $0<t\le1$ について $p+t(c-p)\in C$ なので $\abs{x-p}^{2}\le\abs{x-p-t(c-p)}^{2}=\abs{x-p}^{2}-2t\langle x-p,c-p\rangle+t^{2}\abs{c-p}^{2}$。整理して $2\langle x-p,c-p\rangle\le t\abs{c-p}^{2}$、$t\to0$ として結論を得る。
+
+**Step 3（一意性）.** $p,p'$ がともに最小なら、Step 2 を $(p,c=p')$ と $(p',c=p)$ に使って足すと $\langle(x-p)-(x-p'),p'-p\rangle\le0$、すなわち $\abs{p'-p}^{2}\le0$。
+
+**Step 4（2）.** Step 2 から $\langle u,c\rangle\le\langle u,p\rangle$。また $\langle u,x\rangle-\langle u,p\rangle=\abs{u}^{2}>0$（$x\notin C$ より $u\neq0$）。
+:::
+
+::: definition 支持超平面 {#poly:supporting-hyperplane keywords="supporting hyperplane, supporting halfspace, proper supporting hyperplane" index="支持超平面|しじちょうへいめん, 支持半空間|しじはんくうかん" refname="支持超平面"}
+閉凸集合 $C$ と超平面 $H=H(u,\alpha)$ について、$C\cap H\neq\varnothing$ かつ $C\subseteq K(u,\alpha)$ のとき、$H$ を $C$ の**支持超平面**、$K(u,\alpha)$ を**支持半空間**という。$C\not\subseteq H$ のとき**真の**支持超平面という。
+:::
+
+::: intuition
+支持超平面は、凸集合に外から「接する」平らな板である。集合はすべて板の片側にあり、板は集合に触れている。
+:::
+
+::: theorem 支持超平面の存在 {#poly:supporting-hyperplane-exists keywords="through every relative boundary point of a closed convex set there is a proper supporting hyperplane" index="支持超平面の存在|しじちょうへいめんのそんざい" refname="支持超平面の存在"}
+$C$ を閉凸集合、$x\in\operatorname{rb}C$ とする。$x$ を含む $C$ の真の支持超平面がある。
+:::
+
+::: intuition
+境界の点に外から近づく点ごとに分ける壁を立て、その壁の向きの極限をとると、境界の点で集合に接する壁が得られる。
+:::
+
+::: proof
+**Step 1（外から近づく点）.** $A\defeq\operatorname{aff}C=x+L$（$L$ は線形部分空間）とする。$x\notin\operatorname{ri}C$ なので、$x$ の任意の近傍は $A$ の中で $C$ の外の点を含む（\ref{poly:relative-interior} の定義、$C$ は閉）。よって $A\setminus C$ の点列 $x_{k}\to x$ がある。
+
+**Step 2（分離する法線）.** \ref{poly:nearest-point-separation} を $x_{k}$ に使い、最近点を $p_{k}$、$u_{k}\defeq(x_{k}-p_{k})/\abs{x_{k}-p_{k}}$ とすると $\langle u_{k},c\rangle\le\langle u_{k},p_{k}\rangle<\langle u_{k},x_{k}\rangle$（$c\in C$）。$x_{k},p_{k}\in A$ なので $u_{k}\in L$。単位ベクトルの列なので、収束する部分列 $u_{k}\to u$（$\abs{u}=1$, $u\in L$、$L$ は閉）をとる。
+
+**Step 3（極限）.** $\langle u_{k},c\rangle<\langle u_{k},x_{k}\rangle$ で $k\to\infty$ として $\langle u,c\rangle\le\langle u,x\rangle$（$c\in C$）。$x\in C$ なので $H\defeq H(u,\langle u,x\rangle)$ は $x$ を含む支持超平面。
+
+**Step 4（真であること）.** 【主張：$C\not\subseteq H$】$C\subseteq H$ なら $A=\operatorname{aff}C\subseteq H$ で、$L$ のすべての元 $l$ について $\langle u,l\rangle=0$。$u\in L$ なので $\langle u,u\rangle=0$ となり、$\abs{u}=1$ に反する。
+:::
+
+::: corollary 外からの表現 {#poly:intersection-of-halfspaces keywords="a closed convex set is the intersection of its supporting halfspaces" index="半空間の共通部分|はんくうかんのきょうつうぶぶん"}
+空でない閉凸集合 $C\neq\mathbb{R}^{d}$ は、その支持半空間すべての共通部分に等しい。
+:::
+
+::: proof
+支持半空間は $C$ を含むので、共通部分は $C$ を含む。$x\notin C$ なら、\ref{poly:nearest-point-separation} の半空間 $K(u,\langle u,p\rangle)$ は $p\in C$ で $C$ に接する支持半空間で、$x$ を含まない。
+:::
+
+## 面と端点 {#poly:sec-fp-faces}
+
+::: definition 面・露出面・端点 {#poly:face keywords="face of a convex set, exposed face, extreme point, facet, improper faces" index="面（凸集合の）|めん, 露出面|ろしゅつめん, 端点（凸集合の）|たんてん, ファセット|ふぁせっと" refname="面（凸集合の）"}
+閉凸集合 $C$ の凸部分集合 $F$ が**面**であるとは、$x,y\in C$ で $]x,y[\cap F\neq\varnothing$ なら $x,y\in F$ となることをいう。$\varnothing$ と $C$ も面である（**自明な面**）。$1$ 点の面 $\{e\}$ の $e$ を**端点**といい、その全体を $\operatorname{ext}C$ と書く。$C\cap H$（$H$ は支持超平面）と $\varnothing$, $C$ を**露出面**という。$\dim F=\dim C-1$ の面を**ファセット**という。
+:::
+
+::: intuition
+面は「内側から近づけない部分」である：面の点を含む線分は、両端ごと面に入っていなければならない。多角形なら頂点と辺、立方体なら頂点・辺・正方形の面がそれにあたる。端点は、どの線分の内側にもない「角」の点である。
+:::
+
+::: proposition 面の基本性質 {#poly:face-basic keywords="exposed faces are faces; a face of a face is a face; proper faces lie in the relative boundary and have smaller dimension; extreme points of a face are extreme points" index="面の基本性質|めんのきほんせいしつ"}
+$C$ を閉凸集合とする。
+1. 露出面は面である。
+2. $F$ が $C$ の面で、$G$ が $F$ の面なら、$G$ は $C$ の面。特に $\operatorname{ext}F\subseteq\operatorname{ext}C$。
+3. $F\neq C$ が面なら $F\subseteq\operatorname{rb}C$。
+:::
+
+::: proof
+**Step 1（1）.** $F=C\cap H$, $C\subseteq K(u,\alpha)$, $H=H(u,\alpha)$ とする。$x,y\in C$, $z=(1-t)x+ty\in F$（$0<t<1$）なら $\alpha=\langle u,z\rangle=(1-t)\langle u,x\rangle+t\langle u,y\rangle$ で、両項は $\le\alpha$ なので等号、$x,y\in H$。$F$ は凸集合の交わりなので凸。
+
+**Step 2（2）.** $x,y\in C$ で $]x,y[$ が $G$ の点を含めば、$G\subseteq F$ なので $F$ が面であることから $x,y\in F$、$G$ が $F$ の面であることから $x,y\in G$。
+
+**Step 3（3）.** 【主張：$F$ が $\operatorname{ri}C$ の点 $x$ を含めば $F=C$】$y\in C$, $y\neq x$ をとる。$x\in\operatorname{ri}C$ なので、$x$ を $y$ と反対側に少し越えた点 $z\defeq x+\eta(x-y)$（$\eta>0$ 小）は $C$ に属し、$x\in]y,z[$。面の定義から $y\in F$。よって $F=C$。
+:::
+
+::: example
+1. 正方形 $[0,1]^{2}$ の面は、空集合、4 頂点、4 辺、全体で、すべて露出面。端点は 4 頂点。
+2. 長方形の両端に半円を付けた「競技場」の形では、直線部分と半円の接続点は端点（面）だが、その点だけで接する支持直線はない（支持直線は直線部分全体に接する）ので露出面ではない。面と露出面は一般には異なる。
+3. 閉円板の端点は円周のすべての点で、面は空集合・円周の各点・全体。
+:::
+
+::: theorem ミンコフスキーの定理 {#poly:minkowski-extreme-points keywords="Minkowski's theorem: a compact convex set is the convex hull of its extreme points (finite-dimensional Krein-Milman)" index="ミンコフスキーの定理（端点）|みんこふすきーのていり, クライン–ミルマンの定理（有限次元）|くらいんみるまんのていり" refname="ミンコフスキーの定理"}
+コンパクト凸集合 $C$ は端点の凸包に等しい：$C=\operatorname{conv}(\operatorname{ext}C)$。さらに、$C$ の各点は $\dim C+1$ 個以下の端点の凸結合である。
+:::
+
+::: intuition
+コンパクト凸集合の点は、相対的内部にあれば両端が境界にある線分の上にあり、境界にあれば次元の低い面の中にある。面の次元を下げていけば最後は端点にたどり着くので、すべての点は端点の重み付き平均になる。
+:::
+
+::: proof
+**Step 1（帰納法の設定）.** $\operatorname{conv}(\operatorname{ext}C)\subseteq C$ は明らか。逆を $\dim C$ の帰納法で示す。$\dim C\le0$ なら $C$ は 1 点か空で、その点は端点。$\dim C=n\ge1$ とし、次元の小さいコンパクト凸集合で成り立つとする。
+
+**Step 2（境界の点）.** 【主張：$x\in\operatorname{rb}C$ なら $x\in\operatorname{conv}(\operatorname{ext}C)$】\ref{poly:supporting-hyperplane-exists} から $x$ を含む真の支持超平面 $H$ があり、$F\defeq C\cap H$ はコンパクト凸で、$C\not\subseteq H$ なので $\operatorname{aff}F\subseteq H\cap\operatorname{aff}C\subsetneq\operatorname{aff}C$、$\dim F<n$。帰納法の仮定から $x\in\operatorname{conv}(\operatorname{ext}F)$。$F$ は面（\ref{poly:face-basic} の 1）なので $\operatorname{ext}F\subseteq\operatorname{ext}C$（同 2）。
+
+**Step 3（相対的内部の点）.** $x\in\operatorname{ri}C$ なら、$\operatorname{aff}C$ の中の $x$ を通る直線 $\ell$ をとる（$n\ge1$）。$\ell\cap C$ はコンパクト凸、すなわち線分 $[a,b]$ で、$x\in]a,b[$。$a,b$ は相対的内部にない（$a$ を越えた $\ell$ の点は $C$ の外で、$a$ のどの近傍も $\operatorname{aff}C$ の中で $C$ の外の点を含む）ので $a,b\in\operatorname{rb}C$、Step 2 から $a,b\in\operatorname{conv}(\operatorname{ext}C)$ で、$x$ もそうである。
+
+**Step 4（点の個数）.** $\operatorname{ext}C\subseteq C$ で $\dim\operatorname{aff}(\operatorname{ext}C)\le n$ なので、\ref{poly:caratheodory} から $n+1$ 個以下で足りる。
+:::
+
+## 極集合 {#poly:sec-fp-polar}
+
+::: definition 極集合 {#poly:polar-set keywords="polar set M^o = {y : <x,y> <= 1 for all x in M}" index="極集合|きょくしゅうごう, 極（凸集合の）|きょく" refname="極集合"}
+$M\subseteq\mathbb{R}^{d}$ の**極集合**を $M^{\circ}\defeq\{y\in\mathbb{R}^{d}:\langle x,y\rangle\le1\ (\forall x\in M)\}$ とする。
+:::
+
+::: intuition
+$M$ の各点 $x$ は、半空間 $\{y:\langle x,y\rangle\le1\}$ という「制約」を与え、極集合はすべての制約を満たす $y$ の集合である。点と半空間（超平面）の役割を入れ替える、射影幾何の双対性の凸集合版である。
+:::
+
+::: theorem 双極定理 {#poly:bipolar keywords="M^o is closed convex and contains 0; M^oo = cl conv(M cup {0}); for compact convex C with 0 in the interior, C^o is too and C^oo = C" index="双極定理|そうきょくていり" refname="双極定理"}
+1. $M^{\circ}$ は $0$ を含む閉凸集合で、$M\subseteq N$ なら $N^{\circ}\subseteq M^{\circ}$。
+2. $M^{\circ\circ}=\operatorname{cl}\operatorname{conv}(M\cup\{0\})$。
+3. $C$ が $0$ を内点にもつコンパクト凸集合なら、$C^{\circ}$ も $0$ を内点にもつコンパクト凸集合で、$C^{\circ\circ}=C$。
+:::
+
+::: intuition
+極を 2 回とると、元の集合を「原点を含む閉凸集合」に整えたものに戻る。凸で閉で原点を含む集合では、極をとる操作は完全な双対性になる。
+:::
+
+::: proof
+**Step 1（1）.** $M^{\circ}$ は閉半空間 $\{y:\langle x,y\rangle\le1\}$（$x\in M$）の共通部分なので閉凸で、$0$ を含む。包含の逆転は定義から。
+
+**Step 2（2 の $\supseteq$）.** $x\in M$, $y\in M^{\circ}$ なら $\langle x,y\rangle\le1$ なので $M\subseteq M^{\circ\circ}$、また $0\in M^{\circ\circ}$。$M^{\circ\circ}$ は閉凸（1）なので $\operatorname{cl}\operatorname{conv}(M\cup\{0\})$ を含む。
+
+**Step 3（2 の $\subseteq$）.** 【主張：$z\notin D\defeq\operatorname{cl}\operatorname{conv}(M\cup\{0\})$ なら $z\notin M^{\circ\circ}$】\ref{poly:nearest-point-separation} から $\langle u,c\rangle\le\beta<\langle u,z\rangle$（$c\in D$）となる $u$ と $\beta\defeq\langle u,p\rangle$ がある。$0\in D$ なので $\beta\ge0$。$\beta>0$ なら $y\defeq u/\beta$、$\beta=0$ なら $\langle u,z\rangle>0$ なので $y\defeq u\cdot\frac{2}{\langle u,z\rangle}$ とする。どちらも $\langle c,y\rangle\le1$（$c\in D\supseteq M$）で $y\in M^{\circ}$、かつ $\langle z,y\rangle>1$（前者は $\langle u,z\rangle/\beta>1$、後者は $2$）。よって $z\notin M^{\circ\circ}$。
+
+**Step 4（3）.** $B(0,r)\subseteq C\subseteq B(0,R)$ とする。$y\in C^{\circ}$, $y\neq0$ なら $x\defeq ry/\abs{y}\in C$ について $r\abs{y}=\langle x,y\rangle\le1$ なので $C^{\circ}\subseteq B(0,1/r)$（有界）。$\abs{y}\le1/R$ なら $\langle x,y\rangle\le R\cdot\frac{1}{R}=1$（$x\in C$）なので $B(0,1/R)\subseteq C^{\circ}$。1 から閉凸なので、コンパクトで $0$ を内点にもつ。2 から $C^{\circ\circ}=\operatorname{cl}\operatorname{conv}(C\cup\{0\})=C$（$C$ は $0$ を含む閉凸集合）。
+:::
+
+::: example
+1. $\mathbb{R}^{2}$ の正方形 $[-1,1]^{2}$ の極集合は、菱形 $\{y:\abs{y_{1}}+\abs{y_{2}}\le1\}$。一般に立方体と正軸体（クロスポリトープ）は互いに極。
+2. 単位球の極集合は単位球自身。
+3. 原点を中心とする半径 $r$ の球の極集合は半径 $1/r$ の球。
+:::
+
+::: hypcheck
+- **最近点と分離**：$C$ が閉であることは最小値の存在（Step 1）に、凸であることは Step 2（$p+t(c-p)\in C$）と一意性に使った。
+- **支持超平面の存在**：$x$ が相対的境界にあることは、$\operatorname{aff}C$ の中で外から近づく点列の存在（Step 1）に使った。$u_{k}\in L$ に限ったことが、真であること（Step 4）の鍵である。
+- **ミンコフスキーの定理**：コンパクト性は、直線と $C$ の交わりが閉線分になること（Step 3）と、面が帰納法を適用できるコンパクト集合であることに使った。閉だが有界でない凸集合（半空間など）では成り立たない（端点がないこともある）。
+- **双極定理**：$0$ を含むこと、閉であることの両方が $C^{\circ\circ}=C$ に必要である。
+:::
+
+## 問題 {#poly:sec-fp-problems}
+
+::: problem {#poly:prob-fp-square-polar}
+正方形 $Q\defeq[-1,1]^{2}$ の極集合が菱形 $D\defeq\{y:\abs{y_{1}}+\abs{y_{2}}\le1\}$ であることを示せ。
+:::
+
+::: solution
+$y\in Q^{\circ}$ とする。$x=(\operatorname{sgn}y_{1},\operatorname{sgn}y_{2})\in Q$（符号 0 は 1 とする）について $\langle x,y\rangle=\abs{y_{1}}+\abs{y_{2}}\le1$ なので $y\in D$。逆に $y\in D$, $x\in Q$ なら $\langle x,y\rangle\le\abs{x_{1}}\abs{y_{1}}+\abs{x_{2}}\abs{y_{2}}\le\abs{y_{1}}+\abs{y_{2}}\le1$。
+:::
+
+::: problem {#poly:prob-fp-ext-disk}
+閉円板 $\bar{B}=\{x:\abs{x}\le1\}$ の端点が単位円周の点全体であることを示し、ミンコフスキーの定理で必要な端点が無限個になることを確かめよ。
+:::
+
+::: solution
+$\abs{x}<1$ の点は、$x$ を中心に十分小さい線分を作れば $\bar{B}$ の線分の内点なので端点でない。$\abs{x}=1$ で $x=(1-t)y+tz$（$y,z\in\bar{B}$, $0<t<1$）なら、$1=\abs{x}\le(1-t)\abs{y}+t\abs{z}\le1$ で等号が成り立ち、$\abs{y}=\abs{z}=1$ かつ（三角不等式の等号条件から）$y,z$ は同じ向きで $y=z=x$。よって端点。凸包を作るには円周全体が必要で、有限個では足りない。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 分離の補題では内積（直交射影）を使ったが、有限次元では任意の 2 つの交わらない凸集合（一方が相対的内部をもつなど適当な条件のもと）を超平面で分離できる、という一般の分離定理もこの方法から導かれる。
+
+**前提を変えると.**
+- 無限次元では、ミンコフスキーの定理は**クライン–ミルマンの定理**（局所凸空間のコンパクト凸集合は端点の閉凸包）になり、ハーン–バナッハの定理と選択公理を使う、と知られている。
+- 露出点の集合は端点の集合の中で稠密である（ストラシェヴィッチの定理）と知られている。
+
+**類似の定理.** 有限集合の凸包（凸多面体）については、面がすべて露出面で、面の個数は有限であり、極集合もまた凸多面体になる。これを次の系列（\ref[凸多面体と多面的集合]{poly:page-polytopes-polyhedra}）で扱う。
+
+**高い視点から：内からの表現と外からの表現.** 閉凸集合には、点の凸結合として作る「内側からの表現」（ミンコフスキー）と、半空間の共通部分として切り出す「外側からの表現」（支持半空間）の 2 つがあり、極をとる操作がこの 2 つを入れ替える：$C$ の端点は $C^{\circ}$ のファセットを定める超平面に対応する。これは線形計画法の双対性、射影幾何の点と超平面の双対性と同じ構造で、凸多面体ではミンコフスキー–ワイルの定理（V 表示と H 表示の同値性）として完成する。比喩で言えば、凸集合は「どこに角があるか」（内側）と「どこに壁があるか」（外側）のどちらで記述してもよく、極集合はその 2 つの記述を取り替える鏡である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{poly:sec-fp-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
