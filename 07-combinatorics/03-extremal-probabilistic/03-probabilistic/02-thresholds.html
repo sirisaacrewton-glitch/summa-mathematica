@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ほとんどすべてのグラフと閾値関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/03-extremal-probabilistic/03-probabilistic/02-thresholds.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ほとんどすべてのグラフと閾値関数 {#comb:page-thresholds keywords="almost all graphs, almost surely, extension property, k-connectivity of random graphs, chromatic number of random graphs, second moment method, Chebyshev inequality, threshold function, density, balanced graph, Erdos-Renyi threshold for subgraphs, evolution of random graphs"}
+
+\ref{comb:random-graph} $\mathcal{G}(n,p)$ で、ある性質をもつ確率が $n\to\infty$ で 1 に近づくとき、「**ほとんどすべてのグラフ**がその性質をもつ」という。$p$ が定数なら、ほとんどすべてのグラフは任意の固定したグラフを誘導部分グラフとして含み、$k$ 連結で、彩色数は $n/\log n$ のオーダーである。$p=p(n)$ を 0 に近づけていくと、性質は**閾値関数**を境に「ほとんど起こらない」から「ほとんど必ず起こる」に急に切り替わる。このページでは、固定したグラフ $H$ を部分グラフとして含むという性質の閾値関数が $n^{-1/\varepsilon'(H)}$（$\varepsilon'$ は部分グラフの密度の最大値）であることを、**2 次モーメント法**で証明する。
+
+## 記法と定義の確認 {#comb:sec-th-notation}
+
+::: notation
+- $\mathcal{G}(n,p)$・辺の独立性・第 1 モーメント法（マルコフの不等式・和の上界）は \ref{comb:page-probabilistic-method} のとおり。$q\defeq1-p$。$p=p(n)$ は $n$ の関数でもよい。
+- グラフの**性質**は同型で閉じたグラフの集合。$\alpha$・$\chi$・連結度 $\kappa$ は \ref{graph:page-graphs}, \ref{graph:chromatic-number} のとおり。
+- 確率変数 $X$ について $\mu\defeq\mathbb{E}(X)$、**分散** $\sigma^{2}\defeq\mathbb{E}((X-\mu)^{2})=\mathbb{E}(X^{2})-\mu^{2}$。
+- $\log$ は自然対数。体系は $\ZF$。
+:::
+
+## ほとんどすべてのグラフ {#comb:sec-th-almost-all}
+
+::: definition ほとんどすべてのグラフ {#comb:almost-all keywords="almost all graphs, almost surely, asymptotically almost surely" index="ほとんどすべてのグラフ|ほとんどすべてのぐらふ"}
+$p=p(n)$ を固定し、性質 $\mathcal{P}$ について $\lim_{n\to\infty}\mathbb{P}[G\in\mathcal{P}]=1$（$G\in\mathcal{G}(n,p)$）のとき、**ほとんどすべての** $G\in\mathcal{G}(n,p)$ が $\mathcal{P}$ をもつという。極限が 0 のとき、**ほとんどどの** $G$ も $\mathcal{P}$ をもたないという。
+:::
+
+::: intuition
+「ほとんどすべて」は、頂点数を大きくしていくと、その性質をもたないグラフの割合（$p=1/2$ なら個数の割合）が 0 に近づくという意味である。個々の $n$ では例外がありうる。
+:::
+
+::: lemma 性質の共通部分 {#comb:almost-all-intersection keywords="intersection of finitely many almost-sure properties is almost sure"}
+ほとんどすべての $G$ が $\mathcal{P}_{1}$ をもち、ほとんどすべての $G$ が $\mathcal{P}_{2}$ をもつなら、ほとんどすべての $G$ が $\mathcal{P}_{1}\cap\mathcal{P}_{2}$ をもつ。
+:::
+
+::: proof
+和の上界（\ref{comb:first-moment} の 2）から $\mathbb{P}[G\notin\mathcal{P}_{1}\cap\mathcal{P}_{2}]\le\mathbb{P}[G\notin\mathcal{P}_{1}]+\mathbb{P}[G\notin\mathcal{P}_{2}]\to0$。
+:::
+
+::: lemma 拡張性 {#comb:extension-property keywords="property P_{i,j}: for disjoint U, W with |U| <= i, |W| <= j there is v adjacent to all of U and none of W; almost sure for constant p" index="拡張性（ランダムグラフ）|かくちょうせい"}
+$i,j\in\N$ とし、性質 $\mathcal{P}_{i,j}$ を「互いに交わらない頂点集合 $U,W$（$\abs{U}\le i$, $\abs{W}\le j$）のどれについても、$U$ のすべての頂点と隣接し $W$ のどの頂点とも隣接しない頂点 $v\notin U\cup W$ がある」と定める。定数 $p\in(0,1)$ について、ほとんどすべての $G\in\mathcal{G}(n,p)$ は $\mathcal{P}_{i,j}$ をもつ。
+:::
+
+::: proof
+**Step 1（1 組の $U,W$）.** $U,W$ を固定する。$v\notin U\cup W$ が条件を満たす確率は、$v$ と $U\cup W$ の間の $\abs{U}+\abs{W}$ 個の対についての事象なので（\ref{comb:random-graph-basic} の 2）$p^{\abs{U}}q^{\abs{W}}\ge p^{i}q^{j}\eqdef c>0$。異なる $v$ の事象は互いに交わらない対の集合で決まるので独立で、どの $v$ も条件を満たさない確率は $(1-p^{\abs{U}}q^{\abs{W}})^{n-\abs{U}-\abs{W}}\le(1-c)^{n-i-j}$（$n\ge i+j$）。
+
+**Step 2（すべての $U,W$）.** 組 $(U,W)$ は、$U$ を $\{0,\dots,i-1\}\to V$ の写像の像、$W$ を $\{0,\dots,j-1\}\to V$ の写像の像として表せるので（空集合は $i=0$ などで扱う）、$n^{i+j}$ 個以下。和の上界から、$\mathcal{P}_{i,j}$ が成り立たない確率は $n^{i+j}(1-c)^{n-i-j}$ 以下で、$0<1-c<1$ なので $n\to\infty$ で 0 に収束する。
+:::
+
+::: corollary 定数の辺確率での典型的な性質 {#comb:constant-p-properties keywords="for constant p, almost every graph contains every fixed induced subgraph, is k-connected and has diameter 2" index="ランダムグラフの連結度|らんだむぐらふのれんけつど"}
+定数 $p\in(0,1)$ と $k\in\N$、グラフ $H$ について、ほとんどすべての $G\in\mathcal{G}(n,p)$ は次をすべて満たす。
+1. $H$ を誘導部分グラフとして含む。
+2. $k$ 連結である。
+3. 直径が 2 以下である。
+:::
+
+::: proof
+**Step 1（1）.** $h\defeq\abs{H}$ とし、$H$ の頂点を $u_{1},\dots,u_{h}$ とする。ほとんどすべての $G$ は $\mathcal{P}_{h,h}$ をもつ（\ref{comb:extension-property}）。そのような $G$ で $v_{1}$ を任意にとり、$v_{1},\dots,v_{m-1}$ が $u_{1},\dots,u_{m-1}$ の誘導部分グラフの像になっているとき、$U\defeq\{v_{a}: a<m,\ u_{a}u_{m}\in E(H)\}$, $W\defeq\{v_{a}: a<m,\ u_{a}u_{m}\notin E(H)\}$ に $\mathcal{P}_{h,h}$ を使って $v_{m}$ を選ぶ。こうして誘導された $H$ が得られる。
+
+**Step 2（2）.** $\mathcal{P}_{2,k-1}$ をもつグラフは $k$ 連結である：$U$ を 2 点、$W$ を $k-1$ 点とする条件から頂点は $k+2$ 個以上で、$\abs{X}<k$ の $X$ を除いても、残りの任意の 2 点 $x,y$ に $\mathcal{P}_{2,k-1}$（$U=\{x,y\}$, $W=X$）を使えば、$X$ の外の共通の隣接頂点があり、$x,y$ は $G-X$ で結ばれる。
+
+**Step 3（3）.** $\mathcal{P}_{2,0}$ をもつグラフでは、任意の 2 頂点に共通の隣接頂点があるので直径は 2 以下。\ref{comb:almost-all-intersection} で 1–3 を合わせる。
+:::
+
+::: proposition ランダムグラフの彩色数 {#comb:random-chromatic keywords="chromatic number of G(n,p) for constant p is at least (log(1/q)/(2+epsilon)) n / log n almost surely" index="ランダムグラフの彩色数|らんだむぐらふのさいしょくすう"}
+定数 $p\in(0,1)$ と $\varepsilon>0$ について、ほとんどすべての $G\in\mathcal{G}(n,p)$ は
+$$\chi(G)>\frac{\log(1/q)}{2+\varepsilon}\cdot\frac{n}{\log n}.$$
+:::
+
+::: proof
+**Step 1（独立集合の評価）.** $L\defeq\log(1/q)>0$、$k\defeq\left\lceil\left(2+\frac{\varepsilon}{2}\right)\frac{\log n}{L}\right\rceil$ とする。和の上界から
+$$\mathbb{P}[\alpha\ge k]\le\binom{n}{k}q^{\binom{k}{2}}\le n^{k}q^{k(k-1)/2}=\exp\left(k\left(\log n-\frac{k-1}{2}L\right)\right).$$
+$\frac{k-1}{2}L\ge\left(1+\frac{\varepsilon}{4}\right)\log n-\frac{L}{2}$ なので、括弧の中は $-\frac{\varepsilon}{4}\log n+\frac{L}{2}\to-\infty$ で、$k\ge1$ を掛けても $-\infty$。よって $\mathbb{P}[\alpha\ge k]\to0$。
+
+**Step 2（彩色数）.** $\alpha(G)<k$ なら、\ref{graph:chromatic-basic-bounds} の 3 から $\chi(G)\ge n/\alpha(G)>n/k$。$k\le\left(2+\frac{\varepsilon}{2}\right)\frac{\log n}{L}+1<(2+\varepsilon)\frac{\log n}{L}$（十分大きい $n$）なので、$n/k>\frac{L}{2+\varepsilon}\cdot\frac{n}{\log n}$。
+:::
+
+::: example
+$p=1/2$ では、ほとんどすべてのグラフの彩色数は $\frac{n}{(2+\varepsilon)\log_{2}n}$ より大きい。ボロバシュ（1988）により、$\varepsilon$ を $-\varepsilon$ に変えた式は上界になる（したがって彩色数は $\frac{n}{2\log_{2}n}$ に漸近する）と知られている。
+:::
+
+## 2 次モーメント法 {#comb:sec-th-second-moment}
+
+::: lemma チェビシェフの不等式と 2 次モーメント法 {#comb:second-moment keywords="Chebyshev inequality, second moment method, if Var X / (E X)^2 -> 0 then X > 0 almost surely" index="2 次モーメント法|にじもーめんとほう"}
+有限確率空間の確率変数 $X$ と $\lambda>0$ について次が成り立つ。
+1. （チェビシェフ）$\mathbb{P}[\abs{X-\mu}\ge\lambda]\le\sigma^{2}/\lambda^{2}$。
+2. $X\ge0$ を $\mathcal{G}(n,p)$ 上の確率変数の列とし、十分大きい $n$ で $\mu>0$、かつ $\sigma^{2}/\mu^{2}\to0$ なら、ほとんどすべての $G$ で $X(G)>0$。
+:::
+
+::: proof
+**Step 1（1）.** $(X-\mu)^{2}\ge0$ にマルコフの不等式（\ref{comb:first-moment} の 1）を使うと $\mathbb{P}[(X-\mu)^{2}\ge\lambda^{2}]\le\sigma^{2}/\lambda^{2}$（\ref{prb:basic-inequalities} の 2 の有限の場合）。
+
+**Step 2（2）.** $X(G)=0$ なら $\abs{X(G)-\mu}=\mu$ なので、1 を $\lambda=\mu$ で使い $\mathbb{P}[X=0]\le\sigma^{2}/\mu^{2}\to0$。
+:::
+
+::: intuition
+期待値が大きいだけでは「ほとんどすべてで正」とは言えない（少数のグラフで非常に大きな値をとっているかもしれない）。分散が期待値の 2 乗に比べて小さければ、値は期待値の近くに集中しているので、0 になることはまれである。
+:::
+
+## 閾値関数 {#comb:sec-th-threshold}
+
+::: definition 閾値関数と密度 {#comb:threshold-function keywords="threshold function, density epsilon(H) = ||H||/|H|, maximum subgraph density epsilon'(H), balanced graph" index="閾値関数|しきいちかんすう, 平衡グラフ|へいこうぐらふ, 最大部分密度|さいだいぶぶんみつど" refname="閾値関数"}
+正の関数 $t=t(n)$ が性質 $\mathcal{P}$ の**閾値関数**であるとは、任意の $p=p(n)\in[0,1]$ について、$p/t\to0$ ならほとんどどの $G\in\mathcal{G}(n,p)$ も $\mathcal{P}$ をもたず、$p/t\to\infty$ ならほとんどすべての $G$ が $\mathcal{P}$ をもつことをいう。空でないグラフ $H$ の**密度**を $\varepsilon(H)\defeq\norm{H}/\abs{H}$、$\varepsilon'(H)\defeq\max\{\varepsilon(H'): H'\subseteq H,\ H'\neq\varnothing\}$ とし、$\varepsilon'(H)=\varepsilon(H)$ のとき $H$ を**平衡**という。
+:::
+
+::: intuition
+辺の確率 $p$ を少しずつ上げていくと、$H$ の写しの個数の期待値 $n^{\abs{H}}p^{\norm{H}}$ が 1 を超えるあたりで $H$ が現れ始める。ただし $H$ の中に密な部分 $H'$ があると、$H'$ のほうが遅れて現れるので、閾値は「最も密な部分」で決まる。
+:::
+
+::: theorem エルデシュ–レーニィの閾値定理 {#comb:subgraph-threshold keywords="threshold for containing a fixed subgraph H is n^{-1/epsilon'(H)}, Erdos-Renyi, Bollobas" index="部分グラフの閾値|ぶぶんぐらふのしきいち" refname="部分グラフの閾値定理"}
+（エルデシュ–レーニィ 1960、ボロバシュ 1981）$H$ を辺を 1 本以上もつグラフとする。$t(n)\defeq n^{-1/\varepsilon'(H)}$ は、性質 $\mathcal{P}_{H}\defeq\{G: H\subseteq G\}$ の閾値関数である。
+:::
+
+::: intuition
+$p$ が $n^{-1/\varepsilon'(H)}$ より十分小さいと、$H$ の最も密な部分の写しの期待個数すら 0 に近づき、$H$ は現れない。十分大きいと写しの個数の期待値が大きくなるだけでなく、写しどうしの重なりが少ないので個数が期待値の近くに集中し、ほとんど必ず現れる。
+:::
+
+::: proof
+**Step 0（記号）.** $k\defeq\abs{H}$, $\ell\defeq\norm{H}\ge1$、$\varepsilon'\defeq\varepsilon'(H)>0$、$\gamma\defeq p/t$ とする。$\mathcal{H}$ を $V=\{0,\dots,n-1\}$ 上の $H$ の写し（$H$ と同型な $V$ 上のグラフ）全体とし、$G$ に含まれる写しの個数を $X$ とする。$k$ 点集合の上の写しの個数を $h$（$1\le h\le k!$）とすると $\abs{\mathcal{H}}=\binom{n}{k}h$。期待値の線形性と \ref{comb:random-graph-basic} の 3 から $\mu=\abs{\mathcal{H}}p^{\ell}$。
+
+**Step 1（$\gamma\to0$：第 1 モーメント）.** 【主張：$\gamma\to0$ ならほとんどどの $G$ も $H$ を含まない】最大値を与える $H'\subseteq H$（$\varepsilon(H')=\varepsilon'$）をとり、$k'\defeq\abs{H'}$, $\ell'\defeq\norm{H'}$ とする（$\ell'=\varepsilon'k'>0$）。$H'$ の写しの個数を $X'$ とすると、写しは $n^{k'}$ 個以下なので
+$$\mathbb{E}(X')\le n^{k'}p^{\ell'}=n^{k'}\left(\gamma n^{-k'/\ell'}\right)^{\ell'}=\gamma^{\ell'}\to0.$$
+マルコフの不等式から $\mathbb{P}[X'\ge1]\to0$。$H$ を含むグラフは $H'$ を含むので、$\mathbb{P}[G\in\mathcal{P}_{H}]\to0$。
+
+**Step 2（$\gamma\to\infty$：2 次モーメントの分解）.** $\gamma\ge1$ かつ $n\ge2k$ としてよい。$X^{2}$ は $H',H''\subseteq G$ となる写しの組 $(H',H'')$ の個数なので
+$$\mathbb{E}(X^{2})=\sum_{(H',H'')\in\mathcal{H}^{2}}\mathbb{P}[H'\cup H''\subseteq G]=\sum_{i=0}^{k}A_{i},$$
+ここで $A_{i}$ は $\abs{V(H')\cap V(H'')}=i$ の組についての和である。
+
+**Step 3（$i=0$）.** 頂点を共有しない $H',H''$ は辺も共有しないので、$H'\subseteq G$ と $H''\subseteq G$ は独立で、$\mathbb{P}[H'\cup H''\subseteq G]=p^{2\ell}$。よって $A_{0}\le\abs{\mathcal{H}}^{2}p^{2\ell}=\mu^{2}$。
+
+**Step 4（$i\ge1$）.** 【主張：$A_{i}\le\binom{k}{i}k^{k}\gamma^{-\varepsilon'}\mu^{2}$】$H'\cap H''$ は $H'$（$\cong H$）の $i$ 頂点の部分グラフなので、$\varepsilon'$ の定義から辺は $i\varepsilon'$ 本以下。$H'\cup H''$ の辺は $2\ell-\norm{H'\cap H''}\ge2\ell-i\varepsilon'$ 本で、$p\le1$ なので $\mathbb{P}[H'\cup H''\subseteq G]\le p^{2\ell-i\varepsilon'}$。$H'$ を固定すると、$\abs{V(H')\cap V(H'')}=i$ の $H''$ は $\binom{k}{i}\binom{n-k}{k-i}h\le\binom{k}{i}n^{k-i}h$ 個以下。$p^{-i\varepsilon'}=\left(\gamma n^{-1/\varepsilon'}\right)^{-i\varepsilon'}=\gamma^{-i\varepsilon'}n^{i}$ なので
+$$A_{i}\le\abs{\mathcal{H}}\binom{k}{i}n^{k-i}h\,p^{2\ell}\gamma^{-i\varepsilon'}n^{i}=\mu\cdot\binom{k}{i}\,n^{k}h\,p^{\ell}\gamma^{-i\varepsilon'}.$$
+$\binom{n}{k}=\prod_{j<k}\frac{n-j}{k-j}\ge\left(\frac{n}{k}\right)^{k}$（$\frac{n-j}{k-j}\ge\frac{n}{k}$）なので $n^{k}hp^{\ell}\le k^{k}\binom{n}{k}hp^{\ell}=k^{k}\mu$。$\gamma\ge1$ から $\gamma^{-i\varepsilon'}\le\gamma^{-\varepsilon'}$。
+
+**Step 5（結論）.** Step 3, 4 から $\mathbb{E}(X^{2})\le\mu^{2}\left(1+2^{k}k^{k}\gamma^{-\varepsilon'}\right)$、よって $\frac{\sigma^{2}}{\mu^{2}}=\frac{\mathbb{E}(X^{2})}{\mu^{2}}-1\le2^{k}k^{k}\gamma^{-\varepsilon'}\to0$（$\varepsilon'>0$）。$p>0$ なので $\mu>0$。\ref{comb:second-moment} の 2 によりほとんどすべての $G$ で $X>0$、すなわち $H\subseteq G$。
+:::
+
+::: corollary 閉路・木・完全グラフの閾値 {#comb:threshold-examples keywords="threshold n^{-1} for k-cycles, n^{-k/(k-1)} for trees of order k, n^{-2/(r-1)} for K^r" index="閉路の閾値|へいろのしきいち"}
+1. $k\ge3$ について、長さ $k$ の閉路を含む性質の閾値関数は $n^{-1}$。
+2. $k\ge2$ 頂点の木 $T$ を含む性質の閾値関数は $n^{-k/(k-1)}$（形によらない）。
+3. $r\ge2$ について、$K^{r}$ を含む性質の閾値関数は $n^{-2/(r-1)}$。
+:::
+
+::: proof
+\ref{comb:subgraph-threshold} により、それぞれ $\varepsilon'$ を求めればよい。
+- **閉路.** $C_{k}$ の $i$ 頂点の部分グラフは、$i<k$ なら森（閉路 $C_{k}$ の真部分グラフは閉路を含まない）で辺は $i-1$ 本以下、$i=k$ なら $k$ 本以下。密度の最大値は $C_{k}$ 自身の $1$ で、$t=n^{-1}$。
+- **木.** $T$ の $i$ 頂点の部分グラフは森で辺は $i-1$ 本以下、密度 $\frac{i-1}{i}$ は $i$ について増加するので最大値は $\frac{k-1}{k}$（$T$ 自身）、$t=n^{-k/(k-1)}$。
+- **完全グラフ.** $K^{r}$ の $i$ 頂点の部分グラフの辺は $\binom{i}{2}$ 本以下で、密度 $\frac{i-1}{2}$ の最大値は $\frac{r-1}{2}$、$t=n^{-2/(r-1)}$。
+:::
+
+::: example
+$p=n^{-1}/\log n$ では、ほとんどどの $G$ も閉路を含まない（各長さについて。ただし長さを固定しない場合の主張には別の議論が必要）。$p=c/n$（定数 $c$）は閾値の「臨界の窓」にあり、閉路を含む確率は 0 にも 1 にも近づかないことが知られている。
+:::
+
+::: hypcheck
+- **拡張性**：$p$ が定数で $0<p<1$ であることは、$c=p^{i}q^{j}>0$ が $n$ によらないことに使った（Step 2 で $n^{i+j}(1-c)^{n}\to0$）。$p\to0$ では成り立たないことがある。
+- **閾値定理**：$\ell\ge1$ は $\varepsilon'>0$ に使い、$H$ の頂点数 $k$ が $n$ によらないことは、$2^{k}k^{k}$ が定数であることに使った。下側（Step 1）は第 1 モーメントだけ、上側（Step 2–5）は 2 次モーメントを使う。
+- **密度の最大値**：Step 4 で $\norm{H'\cap H''}\le i\varepsilon'$ を使うために、$\varepsilon(H)$ ではなく部分グラフ全体での最大値 $\varepsilon'(H)$ が必要になる。平衡でない $H$ では、$n^{-1/\varepsilon(H)}$ は閾値ではない（\ref{comb:prob-th-unbalanced}）。
+:::
+
+## 問題 {#comb:sec-th-problems}
+
+::: problem {#comb:prob-th-unbalanced}
+$H$ を $K^{4}$ に 1 本の辺で新しい頂点 $w$ を付けたグラフ（5 頂点・7 辺）とする。$\varepsilon(H)$ と $\varepsilon'(H)$ を求め、$H$ を含む性質の閾値関数を答えよ。
+:::
+
+::: solution
+$\varepsilon(H)=7/5$、部分グラフ $K^{4}$ の密度は $6/4=3/2>7/5$ で、5 頂点以下の部分グラフで密度 $3/2$ を超えるものはない（4 頂点以下の部分グラフの辺は $\binom{i}{2}$ 以下で密度 $\frac{i-1}{2}\le\frac32$、5 頂点では辺 7 本以下で $\frac75$）。よって $\varepsilon'(H)=3/2$ で、閾値関数は $n^{-2/3}$（$K^{4}$ と同じ）。$n^{-5/7}$ ではない：$p=n^{-0.7}$ では $p/n^{-5/7}\to\infty$ だが $p/n^{-2/3}\to0$ で、ほとんどどの $G$ も $K^{4}$、したがって $H$ を含まない。
+:::
+
+::: problem {#comb:prob-th-edges}
+$G\in\mathcal{G}(n,p)$ の辺の数の期待値と分散を求め、$pn^{2}\to\infty$ ならほとんどすべての $G$ が辺をもつことを、2 次モーメント法で示せ。
+:::
+
+::: solution
+$N\defeq\binom{n}{2}$ とし、各対の指示変数の和を $X$ とすると $\mu=Np$。異なる対の指示変数は独立なので、$\mathbb{E}(X^{2})=Np+N(N-1)p^{2}$、$\sigma^{2}=Np(1-p)$。$\sigma^{2}/\mu^{2}=\frac{1-p}{Np}\le\frac{1}{Np}\to0$（$Np\sim pn^{2}/2\to\infty$）。\ref{comb:second-moment} の 2 から $X>0$ がほとんど確実。（これは $K^{2}$ についての \ref{comb:subgraph-threshold} で $t=n^{-2}$ の場合である。）
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 閾値定理の証明では、$H$ の写しの「誘導」性は使わず、部分グラフとしての包含だけを扱った。
+
+**前提を変えると.**
+- 定数の $p$ については、一階の論理式で表せる性質はすべて、ほとんどすべてのグラフがもつか、ほとんどどのグラフももたない（**0–1 法則**、\ref{model:zero-one-law}）。その証明の核心が \ref{comb:extension-property}（拡張公理、\ref{model:extension-axioms-almost-sure}）である。
+- ボロバシュ–トマソン（1987）により、辺を加えることで閉じた（単調増加な）自明でない性質は、すべて閾値関数をもつと知られている。連結性などでは、定数倍まで決まる**鋭い閾値**がある：$p=\frac{\log n+c}{n}$ で連結である確率は $e^{-e^{-c}}$ に収束する（エルデシュ–レーニィ）、と知られている。
+- 無限ランダムグラフ $\mathcal{G}(\aleph_{0},p)$ は確率 1 でラドのグラフ（\ref{model:rado-graph}）と同型になる（エルデシュ–レーニィ 1963）。
+
+**類似の定理.** **ランダムグラフの進化**：$p\ll n^{-2}$ で辺がなく、$p$ が $n^{-k/(k-1)}$ を越えると $k$ 頂点の木が現れ、$p=n^{-1}$ 付近で閉路と、$c>1$ の $p=c/n$ で頂点の正の割合を含む「巨大成分」が現れ、$p\approx\log n/n$ で連結になる（エルデシュ–レーニィ）と知られている。
+
+**高い視点から：相転移としての閾値.** 閾値関数は統計物理の**相転移**の離散版である。$p$ という連続的な「温度」を動かすと、性質の確率が 0 から 1 へ急に跳ぶ。第 1 モーメント（期待値）は「起こりえないこと」を、2 次モーメント（分散）は「確実に起こること」を示す道具で、両者の間の隔たりを埋めるのが平衡性（最も密な部分）の概念である。比喩で言えば、ランダムグラフに辺を一本ずつ足していくと、あるときまで影も形もなかった構造が、ほとんど一瞬のうちにあらゆる場所に現れる。その「一瞬」の位置を、構造の最も密な部分の密度が決める。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{comb:sec-th-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
