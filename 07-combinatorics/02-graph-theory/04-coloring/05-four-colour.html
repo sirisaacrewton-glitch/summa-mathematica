@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4 色定理の証明の構造 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/02-graph-theory/04-coloring/05-four-colour.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 4 色定理の証明の構造 {#graph:page-four-colour keywords="four colour theorem, minimal counterexample, Kempe chains, Kempe's error, Heawood, reducible configuration, unavoidable set, discharging, Wernicke's theorem, Birkhoff diamond, Appel-Haken, Robertson-Sanders-Seymour-Thomas, Tait's theorem, computer-assisted proof"}
+
+\ref{graph:four-colour}は「平面的なグラフは 4 色で頂点彩色できる」と述べる。1852 年に提起され、1976 年にアッペルとハーケンが計算機を使って証明した。証明は数百から千数百個の「配置」を計算機で一つずつ調べる部分を含み、すべてを紙の上で確かめることは現実的でない。このページでは、証明の**骨組み**と、その中で紙の上で完全に証明できる部分を扱う：(1) 最小反例が最小次数 5 の極大平面グラフになること（ケンペ鎖）、(2) 放電法による**避けられない配置**の存在（ヴェルニケの定理）、(3) **可約な配置**の考え方と、ケンペの 1879 年の「証明」がどこで失敗したか。
+
+## 記法と定義の確認 {#graph:sec-fc-notation}
+
+::: notation
+- グラフは有限・単純。平面的なグラフ・平面グラフ・面は \ref{graph:page-plane-graphs}、面の境界が閉路になることは \ref{graph:faces-bounded-by-cycles}、面への辺の描き足しは \ref{graph:face-insertion}、$m\le3n-6$ は \ref{graph:planar-edge-bound} のとおり。
+- 頂点彩色・$k$ 彩色可能は \ref{graph:chromatic-number}、ケンペ鎖の議論は \ref{graph:five-colour} の証明のとおり。次数 $k$ の頂点を **$k$ 頂点**とよぶ。
+- 体系は $\ZF$。
+:::
+
+## 最小反例 {#graph:sec-fc-minimal}
+
+::: definition 最小反例 {#graph:fc-minimal-counterexample keywords="minimal counterexample to the four colour theorem" index="最小反例（4 色定理）|さいしょうはんれい"}
+4 彩色可能でない平面的なグラフが存在すると仮定し、そのうち頂点数が最小のもの全体の中で辺の数が最大のものを**最小反例**とよぶ（頂点数 $n$ を固定すると平面的なグラフの辺は $3n-6$ 本以下なので、辺の数の最大値は存在する）。
+:::
+
+::: intuition
+もし 4 色で塗れない地図があるなら、その中で一番小さく、しかも（同じ頂点数で）辺を詰め込めるだけ詰め込んだものを考える。4 色定理の証明は「そのような最小反例は存在しえない」ことを示す形をとる。最小性のおかげで、少しでも小さいグラフは 4 色で塗れると仮定できる。
+:::
+
+::: lemma 最小反例の基本性質 {#graph:fc-minimal-properties keywords="a minimal counterexample is 2-connected, edge-maximal planar, has minimum degree 5, and consecutive neighbours are adjacent" index="最小反例の性質|さいしょうはんれいのせいしつ"}
+$G$ を最小反例とし、平面グラフとして描いておく。
+1. $G$ は 2 連結で、$\abs{G}\ge5$。
+2. $G$ に新しい辺を加えて平面的なグラフにすることはできない（辺について極大）。
+3. $\delta(G)\ge5$。
+4. 頂点 $v$ の隣接頂点を、$v$ のまわりの巡回的な順（\ref{graph:five-colour} の Step 2 と同じく、$v$ の小さい円板と辺の始めの線分で定める）に $v_{1},\dots,v_{d}$ と並べると、$v_{i}v_{i+1}\in E(G)$（添字は $\bmod d$）。
+:::
+
+::: proof
+**Step 1（1）.** $\abs{G}\le4$ なら各頂点に別の色を与えればよいので $\abs{G}\ge5$。$G$ が連結でなければ、各成分は頂点が少なく 4 彩色可能なので $G$ も 4 彩色可能で矛盾。切断点 $z$ があれば、$G-z$ の成分 $C$ ごとに $G[V(C)\cup\{z\}]$ は頂点が少なく 4 彩色可能で、色の名前を入れ替えて $z$ の色をそろえれば、それらを合わせて $G$ の 4 彩色になる（異なる成分の頂点は隣接しない）。矛盾。
+
+**Step 2（2）.** 辺を加えた平面的なグラフ $G'$ は頂点数が同じで、$G'$ の 4 彩色は $G$ の 4 彩色を与えるので、$G'$ も 4 彩色可能でない。辺の数の最大性に反する。
+
+**Step 3（3：次数 3 以下）.** $d(v)\le3$ なら、$G-v$ は頂点が少なく 4 彩色可能で、$v$ の隣接頂点の色は 3 色以下なので、空いた色で $v$ を塗れる。
+
+**Step 4（3：次数 4）.** $d(v)=4$ とし、$G-v$ の 4 彩色 $c$ をとる。隣接頂点の色が 4 色すべてでなければ Step 3 と同様。そうでなければ巡回的な順で $c(v_{i})=i$ とする。\ref{graph:five-colour} の Step 3, 4 の議論は、$v$ の隣接頂点の巡回的な順と色 $1,3$ および $2,4$ のケンペ鎖だけを使うので、隣接頂点が 4 個の場合にもそのまま通る：$v_{1}$ を含む色 $1,3$ のケンペ鎖が $v_{3}$ を含まなければ入れ替えて色 1 を空け、含むなら、その $v_{1}$–$v_{3}$ 道と $v$ がなす閉路が $v_{2}$ と $v_{4}$ を分けるので、$v_{2}$ を含む色 $2,4$ のケンペ鎖は $v_{4}$ を含まず、入れ替えて色 2 を空ける。いずれも $v$ を塗れて矛盾。
+
+**Step 5（4）.** $d\defeq d(v)\ge5$ とし、$v$ の小さい円板 $D$ の中で、辺 $vv_{i}$ と $vv_{i+1}$ の始めの線分にはさまれた開扇形 $S$ をとる。$S$ は連結で $G$ と交わらないので、ある面 $f$ に含まれる。1 により $G$ は 2 連結なので、$f$ の境界は閉路 $C$ である（\ref{graph:faces-bounded-by-cycles}）。$S$ の閉包は辺 $vv_{i}$, $vv_{i+1}$ の内部の点を含み、それらは $f$ の境界の点なので、辺 $vv_{i}$, $vv_{i+1}$ は $C$ の辺であり、$v_{i},v_{i+1}$ は $C$ の頂点である。$v_{i}v_{i+1}\notin E(G)$ なら、\ref{graph:face-insertion} により $v_{i}$ と $v_{i+1}$ を内部が $f$ に含まれる弧で結べ、$G+v_{i}v_{i+1}$ は平面的になる。これは 2 に反する。
+:::
+
+## 避けられない配置と放電法 {#graph:sec-fc-discharging}
+
+::: definition 配置・可約・避けられない集合 {#graph:fc-configuration keywords="configuration, reducible configuration, unavoidable set" index="配置（4 色定理）|はいち, 可約な配置|かやくなはいち, 避けられない集合|さけられないしゅうごう"}
+ここでは、平面グラフの中の「頂点の次数の指定された小さな部分グラフ」を**配置**という（たとえば「5 頂点と 6 頂点を結ぶ辺」）。配置が**可約**であるとは、最小反例がその配置を含みえないことをいう。配置の有限集合 $\mathcal{U}$ が**避けられない**とは、最小次数 5 で \ref{graph:fc-minimal-properties} の 1, 2, 4 を満たすどの平面グラフも $\mathcal{U}$ のどれかの配置を含むことをいう。
+:::
+
+::: intuition
+証明の戦略は二つの部品からなる。「どの最小反例にも、この一覧のどれかが必ず現れる」（避けられない集合）と、「一覧のどれも最小反例には現れえない」（可約性）。両方を同じ一覧について示せば、最小反例は存在しない。
+:::
+
+::: proposition 証明の枠組み {#graph:fc-framework keywords="an unavoidable set of reducible configurations proves the four colour theorem" index="4 色定理の証明の枠組み|よんしょくていりのしょうめいのわくぐみ"}
+避けられない集合 $\mathcal{U}$ で、その配置がすべて可約なものが存在すれば、4 色定理が成り立つ。
+:::
+
+::: proof
+4 色定理が成り立たなければ最小反例 $G$ が存在し、\ref{graph:fc-minimal-properties} により $G$ は避けられない集合の定義の条件を満たすので、$\mathcal{U}$ のある配置を含む。その配置は可約なので最小反例に含まれえず、矛盾。
+:::
+
+::: theorem ヴェルニケの定理 {#graph:wernicke keywords="Wernicke's theorem, every planar triangulation with minimum degree 5 has a 5-vertex adjacent to a 5- or 6-vertex, discharging" index="ヴェルニケの定理|ゔぇるにけのていり, 放電法|ほうでんほう" refname="ヴェルニケの定理"}
+$\abs{G}\ge3$ の平面的なグラフ $G$ が $\delta(G)\ge5$ を満たし、各頂点の隣接頂点が \ref{graph:fc-minimal-properties} の 4 のように巡回的に並べられて隣り合うものが隣接するとする。このとき、5 頂点で、5 頂点か 6 頂点と隣接するものがある。すなわち $\{$5–5 の辺, 5–6 の辺$\}$ は避けられない集合である。
+:::
+
+::: intuition
+各頂点に「電荷」$6-d(v)$ を置くと、総和は平面性から正（12 以上）である。電荷が正なのは 5 頂点だけ（$+1$）で、6 頂点は 0、7 以上の頂点は負である。5 頂点が次数の大きい隣人に電荷を少しずつ「放電」して配っても総和は変わらない。もし 5 頂点の隣人がすべて 7 以上の頂点なら、放電のあと全員の電荷が 0 以下になってしまい、総和が正であることに反する。
+:::
+
+::: proof
+**Step 1（電荷の総和）.** 各頂点 $v$ に電荷 $\mathrm{ch}(v)\defeq6-d(v)$ を置く。握手補題と \ref{graph:planar-edge-bound} の 1 から
+$$\sum_{v}\mathrm{ch}(v)=6n-2m\ge6n-2(3n-6)=12>0.$$
+
+**Step 2（放電の規則）.** 結論が成り立たないと仮定する：どの 5 頂点の隣接頂点も次数 7 以上である。各 5 頂点は、隣接する 5 個の頂点（すべて次数 7 以上）にそれぞれ電荷 $1/5$ を送る。送った後の電荷を $\mathrm{ch}'$ とする。電荷は移動するだけなので総和は変わらず、$\sum\mathrm{ch}'(v)\ge12$。
+
+**Step 3（5 頂点と 6 頂点）.** 5 頂点は $1-5\cdot\frac{1}{5}=0$。5 頂点からは次数 7 以上の頂点にしか送られないので、5 頂点も 6 頂点も受け取らず、6 頂点は $0$。
+
+**Step 4（次数 7 以上の頂点）.** 【主張：$d(v)=d\ge7$ なら $\mathrm{ch}'(v)<0$】隣接頂点 $v_{1},\dots,v_{d}$ は巡回的に並び、$v_{i}v_{i+1}$ は辺である。$v_{i}$ と $v_{i+1}$ がともに 5 頂点なら 5–5 の辺ができ仮定に反するので、5 頂点は巡回的に隣り合わず、$\lfloor d/2\rfloor$ 個以下。よって $v$ が受け取る電荷は $\frac{1}{5}\lfloor d/2\rfloor\le\frac{d}{10}$ で、
+$$\mathrm{ch}'(v)\le6-d+\frac{d}{10}=6-\frac{9d}{10}\le6-\frac{63}{10}<0.$$
+
+**Step 5（矛盾）.** $\delta(G)\ge5$ なので頂点の次数は 5, 6, 7 以上のどれかで、Step 3, 4 からすべての $\mathrm{ch}'(v)\le0$。これは $\sum\mathrm{ch}'(v)\ge12$ に反する。
+:::
+
+::: corollary 最小反例の中の配置 {#graph:fc-minimal-contains-55-56 keywords="a minimal counterexample contains a 5-5 or 5-6 edge"}
+最小反例（もし存在すれば）は、5 頂点どうしを結ぶ辺か、5 頂点と 6 頂点を結ぶ辺を含む。
+:::
+
+::: proof
+\ref{graph:fc-minimal-properties} の 3, 4 により、最小反例は \ref{graph:wernicke} の仮定を満たす。
+:::
+
+## ケンペの誤りと可約性 {#graph:sec-fc-kempe}
+
+::: supplement
+**ケンペの「証明」（1879）.** \ref{graph:fc-minimal-properties} の 3 により、最小反例は 5 頂点 $v$ をもつ。ケンペは次数 4 の場合（Step 4）と同様に、$v$ の 5 個の隣接頂点 $v_{1},\dots,v_{5}$（4 色のうちある色が 2 回現れ、たとえば $c(v_{1})=1, c(v_{2})=2, c(v_{3})=3, c(v_{4})=4, c(v_{5})=2$）について、2 本のケンペ鎖を入れ替えて色 2 を空けようとした：$v_{1}$ を含む色 $1,3$ の鎖と、$v_{1}$ を含む色 $1,4$ の鎖が、それぞれ $v_{3}$, $v_{4}$ に届く場合に、$v_{2}$ を含む色 $2,4$ の鎖と $v_{5}$ を含む色 $2,3$ の鎖を**同時に**入れ替えれば、色 2 が空く、という議論である。
+**誤り.** 1 本目の入れ替えによって 2 本目の鎖の形が変わりうる（2 つの鎖が入れ替えの後で交わり、隣接頂点の色が衝突する）。ヒーウッド（1890）はこの議論が破綻する具体的な平面グラフを示した、と知られている。ヒーウッドは同じ論文で、ケンペ鎖の議論が正しく通る形として \ref{graph:five-colour} を証明した。
+**教訓.** 5 頂点 1 個という配置は避けられないが（\ref{graph:fc-minimal-properties} の 3）、可約ではない（ケンペ鎖の議論だけでは可約性を示せない）。そこで、より大きな配置を考え、避けられない集合を可約な配置だけで作る必要がある。
+:::
+
+::: fact 可約な配置と計算機による証明 {#graph:fc-reducibility-facts keywords="Birkhoff diamond, D-reducibility, C-reducibility, Appel-Haken unavoidable set, 633 configurations, 32 discharging rules, Gonthier Coq formalization" index="バーコフのダイヤモンド|ばーこふのだいやもんど"}
+次のことが知られている（R. Diestel, *Graph Theory*, 第 5 章の注、および N. Robertson, D. P. Sanders, P. D. Seymour, R. Thomas, *The four-colour theorem*, J. Combin. Theory Ser. B 70 (1997) による）。
+1. （バーコフのダイヤモンド）4 個の 5 頂点が菱形（2 つの三角形を貼り合わせた形）をなす配置は可約である。証明は、配置を取り除いた後の外周（6 頂点の閉路）のすべての 4 彩色を調べ、ケンペ鎖の入れ替えで配置の内部まで延長できることを確かめる、有限の場合分けによる。
+2. アッペルとハーケン（1976）は、約 1500 個の配置からなる避けられない集合を放電法で構成し、そのすべてが可約であることを計算機で確かめた。
+3. ロバートソン–サンダース–シーモア–トーマス（1997）は、633 個の配置と 32 個の放電規則による証明を与えた。避けられない集合の確認（放電）と可約性の確認の両方に計算機を使う。
+4. ゴンティエ（2005）は、この証明を証明支援系 Coq で形式化した。
+:::
+
+::: fact テイトの定理と面の彩色 {#graph:tait-theorem keywords="Tait's theorem, four colour theorem equivalent to 3-edge-colourability of bridgeless cubic planar graphs, face colouring, Klein four-group" index="テイトの定理|ていとのていり"}
+次の 3 つは同値であることが知られている（P. G. Tait, 1880）。
+1. 4 色定理（平面的なグラフは 4 彩色可能）。
+2. 橋をもたない平面グラフの面は 4 色で塗り分けられる（境界の辺を共有する面は異なる色）。
+3. 橋をもたない 3 正則な平面グラフは 3 辺彩色可能である。
+
+2 ⇒ 3 の核心は、色をクラインの 4 元群 $\mathbb{Z}_{2}^{2}$ の元とし、各辺に両側の面の色の和（$0$ でない）を与えると 3 辺彩色になることである。これは \ref{graph:page-flows-coloring} の流れと彩色の双対性の特別な場合にあたる。
+:::
+
+::: hypcheck
+- **最小反例の基本性質**：頂点数の最小性は Step 1, 3, 4（小さいグラフの 4 彩色）に、辺の数の最大性は Step 5（辺を描き足せないこと）に使った。Step 5 では、2 連結性による「面の境界は閉路」と、面の境界が部分グラフであること（境界の点を含む辺は境界の辺）を使った。
+- **ヴェルニケの定理**：平面性は Step 1 の $m\le3n-6$ だけに、隣接頂点の巡回的な隣接は Step 4 の「5 頂点は隣り合わない」に使った。$\delta\ge5$ は Step 5 で、すべての頂点が 3 種類のどれかになることに使った。
+- **4 色定理そのもの**はこのページでは証明していない。ここで証明したのは、最小反例の性質と避けられない集合の一例（\ref{graph:wernicke}）であり、可約性の確認（計算機の部分）は事実として述べた。
+:::
+
+## 問題 {#graph:sec-fc-problems}
+
+::: problem {#graph:prob-fc-charge-sum}
+三角形分割（\ref{graph:fc-minimal-properties} の 1, 2 を満たす平面グラフ）では $\sum_{v}(6-d(v))=12$ がちょうど成り立つことを、$m=3n-6$ から確かめよ。また、$\delta\ge5$ の三角形分割には 5 頂点が少なくとも 12 個あることを示せ。
+:::
+
+::: solution
+握手補題から $\sum_{v}(6-d(v))=6n-2m=6n-2(3n-6)=12$。$\delta\ge5$ なら $6-d(v)\le1$ で、等号は 5 頂点のときだけ、他は $\le0$。よって 5 頂点の個数は $\sum_{d(v)=5}(6-d(v))\ge\sum_{v}(6-d(v))=12$ 以上。（$m=3n-6$ がちょうど成り立つことは、すべての面が三角形であることから従うが、不等式 $m\le3n-6$ だけでも「12 個以上」は得られる。）
+:::
+
+::: problem {#graph:prob-fc-icosahedron}
+正 20 面体のグラフ（12 頂点、すべて次数 5 の平面グラフ）は 5 頂点だけからなり、\ref{graph:wernicke} の結論（5–5 の辺）を自明に満たす。このグラフの 4 彩色を一つ与えよ。
+:::
+
+::: solution
+頂点を、上の頂点 $N$、下の頂点 $S$、上の 5 角形 $a_{0},\dots,a_{4}$、下の 5 角形 $b_{0},\dots,b_{4}$ とし、辺を $Na_{i}$, $Sb_{i}$, $a_{i}a_{i+1}$, $b_{i}b_{i+1}$, $a_{i}b_{i}$, $a_{i}b_{i+1}$（添字は $\bmod5$）とする（30 本、各頂点の次数 5）。
+$$N\mapsto4,\ S\mapsto1,\quad(a_{0},\dots,a_{4})\mapsto(1,2,1,2,3),\quad(b_{0},\dots,b_{4})\mapsto(2,3,4,3,4)$$
+とする。確認：$N$ の隣接頂点 $a_{i}$ は色 $1,2,3$。$S$ の隣接頂点 $b_{i}$ は色 $2,3,4$。5 角形 $a$ の隣り合う色は $(1,2),(2,1),(1,2),(2,3),(3,1)$、5 角形 $b$ は $(2,3),(3,4),(4,3),(3,4),(4,2)$ でどれも異なる。$a_{i}$ と $b_{i},b_{i+1}$ の組は $a_{0}{:}(2,3)$, $a_{1}{:}(3,4)$, $a_{2}{:}(4,3)$, $a_{3}{:}(3,4)$, $a_{4}{:}(4,2)$ で、$a_{i}$ の色 $1,2,1,2,3$ とどれも異なる。よって 4 彩色である。（各頂点の近傍は 5 角形、すなわち奇閉路をなすので、近傍だけで 3 色が必要（\ref{graph:bipartite-odd-cycle}）で、頂点自身と合わせて 4 色が必要である。よって彩色数はちょうど 4。）
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ヴェルニケの定理の証明では、平面性を辺の数の上界 $m\le3n-6$ と隣接頂点の巡回的な隣接だけを通じて使った。同じ放電法で、より大きな避けられない集合（たとえば 5 頂点の周りの次数の組合せ）が次々に得られる。
+
+**前提を変えると.**
+- 平面を一般の曲面に変えると、種数 $g\ge1$ の向き付け可能な閉曲面に埋め込めるグラフの彩色数の最大値は $\left\lfloor\frac{7+\sqrt{1+48g}}{2}\right\rfloor$ である（ヒーウッドの公式。上界はヒーウッド、等号はリンゲル–ヤングス、1968）と知られている。平面（$g=0$）では公式は 4 を与えるが、その場合の証明が 4 色定理である。
+- 三角形を含まない平面グラフは 3 彩色可能（グレッチュの定理、\ref{graph:four-colour}）。
+- リスト彩色では平面グラフは 5 選択可能だが 4 選択可能とは限らない（トマセン、フォイクト）。
+
+**類似の定理.** \ref{graph:five-colour} は、可約な配置「5 頂点」をケンペ鎖で処理できる 5 色の場合の、この枠組みの最も簡単な例である。
+
+**高い視点から：放電法は「局所的なオイラー標数の再配分」.** 電荷 $6-d(v)$ の総和 12 は、球面のオイラー標数 $2$ の 6 倍であり、平面グラフの「曲率」の総量と見なせる（各頂点の周りに正三角形を貼ると、$6-d(v)$ はそこでの角度の不足分に比例する：ガウス–ボンネの定理の離散版）。放電は曲率を局所的に移動させる操作で、総和が正であることから「正の曲率が集中した場所」、すなわち特定の配置が必ず存在することが分かる。比喩で言えば、球面に正三角形のタイルを貼ると、どこかで「頂点の周りのタイルが 6 枚未満」の場所が必ず生じ、その場所の形を細かく調べ尽くすのが 4 色定理の証明である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
