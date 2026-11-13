@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>誘導ラムゼー定理と連結性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/03-extremal-probabilistic/02-ramsey/03-induced-ramsey.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 誘導ラムゼー定理と連結性 {#comb:page-induced-ramsey keywords="induced Ramsey theorem, Ramsey graph, Deuber, Erdos-Hajnal-Posa, Rodl, vertex expansion G[U -> H], unavoidable induced subgraphs of connected graphs, stars and paths, cycles and K_{2,r}, Kuratowski sets for connectivity"}
+
+ラムゼーの定理（\ref{comb:page-ramsey-numbers}）によれば、十分大きな完全グラフの辺をどう 2 色に塗っても、与えたグラフ $H$ の単色の写しが現れる。では、その写しを**誘導部分グラフ**として（余分な辺のない形で）見つけるにはどうすればよいか。完全グラフの中の写しは誘導部分グラフにならない（$H$ が完全でなければ）ので、大きさだけでなく**構造**を工夫したグラフが必要になる。このページでは、すべてのグラフ $H$ について、どの 2 色の辺彩色にも単色の誘導された $H$ を含むグラフ（**ラムゼーグラフ**）が存在すること（デューバー、エルデシュ–ハイナル–ポーシャ、レードル）を証明する。また、連結なグラフ・2 連結なグラフの中に必ず現れる部分構造を決定する。
+
+## 記法と定義の確認 {#comb:sec-ir-notation}
+
+::: notation
+- グラフは有限・単純。$G[U]$ は誘導部分グラフ。「$G$ が誘導された $H$ を含む」とは、$H$ と同型な誘導部分グラフをもつことをいう。
+- 辺の **2 色の彩色**とは $E(G)\to\{1,2\}$ の写像のこと。$H\subseteq G$ が**色 $i$ で塗られている**とは、$H$ の辺がすべて色 $i$ であることをいう（辺のない $H$ はどちらの色でも塗られている）。
+- ラムゼー数 $R(r)$ の有限性は \ref{comb:erdos-szekeres-ramsey}、メンガーの定理の大域版は \ref{graph:whitney-k-connected}、細分と位相的マイナーは \ref{graph:subdivision} のとおり。
+- $r$ 頂点の道を $P_{r}$ と書く（長さ $r-1$）。
+- 体系は $\ZF$。
+:::
+
+## 誘導ラムゼー定理 {#comb:sec-ir-theorem}
+
+::: definition 頂点の膨張 {#comb:vertex-blowup keywords="replacing vertices by copies of a graph, G[U -> H]" index="頂点の置き換え|ちょうてんのおきかえ"}
+グラフ $G=(V,E)$、$U\subseteq V$、グラフ $H$ について、$G[U\to H]$ を次のグラフとする：頂点集合は $(U\times V(H))\cup((V\setminus U)\times\{\varnothing\})$ で、$(v,w)$ と $(v',w')$ が隣接するのは、$vv'\in E$ であるか、$v=v'\in U$ かつ $ww'\in E(H)$ のときである。$u\in U$ について $H(u)\defeq\{u\}\times V(H)$ が誘導する部分グラフは $H$ と同型で、$H(u)$ と $H(u')$ は $uu'\in E$ なら完全に結ばれ、そうでなければ結ばれない。
+:::
+
+::: intuition
+$U$ の各頂点を $H$ の写しに膨らませ、元の頂点が隣接していた相手とは写し全体を結ぶ。各写しの中から 1 点ずつ選べば、元の $G$ と同型な誘導部分グラフが得られる。
+:::
+
+::: theorem 誘導ラムゼー定理 {#comb:induced-ramsey keywords="induced Ramsey theorem, every graph has a Ramsey graph" index="誘導ラムゼー定理|ゆうどうらむぜーていり, ラムゼーグラフ|らむぜーぐらふ" refname="誘導ラムゼー定理"}
+任意のグラフ $H_{1},H_{2}$ について、グラフ $G=G(H_{1},H_{2})$ があり、$G$ の辺のどの 2 色の彩色についても、色 1 で塗られた誘導された $H_{1}$ か、色 2 で塗られた誘導された $H_{2}$ が $G$ に含まれる。特に（$H_{1}=H_{2}=H$）、任意のグラフ $H$ は**ラムゼーグラフ**（どの 2 色の辺彩色にも単色の誘導された $H$ を含むグラフ）をもつ。
+:::
+
+::: intuition
+$\abs{H_{1}}+\abs{H_{2}}$ の帰納法で、$H_{1}$, $H_{2}$ から 1 頂点ずつ除いた組についてのラムゼーグラフを「部品」として組み立てる。部品 $G_{1}=G(H_{1},H_{2}')$ の中に色 2 の $H_{2}'$ が現れたとき、それに 1 頂点を色 2 の辺で付け足せば $H_{2}$ になるように、あらかじめ「付け足し用の頂点」$x(F)$ を用意しておく。その頂点の辺が色 1 ばかりなら、今度は $H_{1}$ ができてしまう。
+:::
+
+::: proof
+**Step 0（帰納法の設定と出発点）.** $\abs{H_{1}}+\abs{H_{2}}$ の帰納法で示す。$H_{1}$ か $H_{2}$ が辺をもたなければ、$G$ を $\max(\abs{H_{1}},\abs{H_{2}})$ 頂点の辺のないグラフとすればよい（辺のない $H_{i}$ の誘導された写しはどちらの色でも塗られている）。以下、$H_{1},H_{2}$ はともに辺をもち、頂点数の和が小さい組では主張が成り立つとする。$i=1,2$ について、辺に接続する頂点 $x_{i}\in H_{i}$ を選び、$H_{i}'\defeq H_{i}-x_{i}$、$H_{i}''\defeq H_{i}'[N(x_{i})]$ とする（$H_{i}''$ は空でない）。帰納法の仮定から $G_{1}\defeq G(H_{1},H_{2}')$, $G_{2}\defeq G(H_{1}',H_{2})$ がある。
+
+**Step 1（出発のグラフと $H_{2}'$ の写し）.** $G^{0}$ を $G_{1}$ の写しとし、$V^{0}\defeq V(G^{0})$ とする。$G^{0}[W]\cong H_{2}'$ となる $W\subseteq V^{0}$ をすべて並べて $W'_{0},\dots,W'_{n-1}$ とする（$n=0$ なら $G\defeq G^{0}$ が求めるもの：どの彩色でも色 2 の $H_{2}'$ がないので色 1 の $H_{1}$ がある）。各 $k$ について同型 $H_{2}'\to G^{0}[W'_{k}]$ を一つ固定し、$V(H_{2}'')$ の像を $W''_{k}$ とする。
+
+**Step 2（$G^{i}$ の構成）.** $i=1,\dots,n$ について、$G^{i-1}$、$V^{i-1}\subseteq V(G^{i-1})$、写像 $f$（$V^{j}\to V^{j-1}$, $j\le i-1$）が定まっているとする。$f^{j}$ を $f$ の $j$ 回の合成（$f^{0}$ は恒等写像）とし、$v\in V^{j}$ の**起源**を $f^{j}(v)\in V^{0}$ とよぶ。
+- $U^{i-1}\defeq\{v\in V^{i-1}: f^{i-1}(v)\in W''_{i-1}\}$ とし、$\tilde{G}\defeq G^{i-1}[U^{i-1}\to G_{2}]$ を作る。$u\in U^{i-1}$ の写し $G_{2}(u)$ の点 $u'$ について $f(u')\defeq u$、$v\in V^{i-1}\setminus U^{i-1}$ について $f((v,\varnothing))\defeq v$ とし、$f$ が定義された点全体を $V^{i}$ とする。
+- 各 $u\in U^{i-1}$ について $G_{2}(u)$ の誘導された $H_{1}'$ の写し $H_{1}'(u)$ を一つずつ選ぶ選び方 $F=(H_{1}'(u))_{u\in U^{i-1}}$ ごとに、新しい頂点 $x(F)$ を加え、各 $u$ について $H_{1}'(u)$ の中の $H_{1}''$ の像 $H_{1}''(u)$（同型 $H_{1}'\to H_{1}'(u)$ を一つ固定して定める）のすべての点と結ぶ。こうして得たグラフを $G^{i}$ とする。
+
+$G\defeq G^{n}$ が求めるグラフであることを示す。
+
+**Step 3（帰納的な主張）.** 【主張：（$(\ast\ast)_{i}$）$G^{i}$ の辺のどの 2 色の彩色についても、(a) 色 1 の誘導された $H_{1}$、(b) 色 2 の誘導された $H_{2}$、(c) 色 2 の誘導部分グラフ $H$ で $V(H)\subseteq V^{i}$ かつ $f^{i}\restr{V(H)}$ が $H$ から $G^{0}[W'_{k}]$（ある $k\in\{i,\dots,n-1\}$）への同型であるもの、のどれかが存在する】$i=n$ では (c) の $k$ の範囲が空なので、$(\ast\ast)_{n}$ が定理の主張である。$(\ast\ast)_{0}$ は $G^{0}\cong G_{1}=G(H_{1},H_{2}')$ と $W'_{k}$ の定義から従う。以下 $i\ge1$ で $(\ast\ast)_{i-1}$ を仮定し、$G^{i}$ の彩色をとる。
+
+**Step 4（部品 $G_{2}(u)$ の中）.** 各 $G_{2}(u)$ は $G^{i}$ の誘導部分グラフで $G_{2}$ と同型（$x(F)$ を加えても誘導部分グラフは変わらない）。ある $G_{2}(u)$ が色 2 の誘導された $H_{2}$ を含めば (b)。そうでなければ、各 $G_{2}(u)$ は色 1 の誘導された $H_{1}'(u)$ を含む。それらの族を $F$ とし $x\defeq x(F)$ とする。
+
+**Step 5（付け足し用の頂点の辺）.** ある $u$ について $x$ と $H_{1}''(u)$ を結ぶ辺がすべて色 1 なら、$x$ の $V(H_{1}'(u))$ の中の隣接頂点はちょうど $H_{1}''(u)$ なので、$V(H_{1}'(u))\cup\{x\}$ は色 1 の誘導された $H_{1}$（$x\leftrightarrow x_{1}$）で (a)。そうでなければ、各 $u$ について $xy_{u}$ が色 2 となる $y_{u}\in H_{1}''(u)$ を選ぶ。
+
+**Step 6（$G^{i-1}$ の写しを取り出す）.** $\hat{G}\defeq G^{i}\left[\{y_{u}: u\in U^{i-1}\}\cup\{(v,\varnothing): v\in V(G^{i-1})\setminus U^{i-1}\}\right]$ とし、$g(y_{u})\defeq u$, $g((v,\varnothing))\defeq v$ とおく。$y_{u}$ たちは異なる写しにあるので、$G[U\to H]$ の隣接の定義から $g$ は $\hat{G}$ から $G^{i-1}$ への同型である。$g$ で彩色を $G^{i-1}$ に移し、$(\ast\ast)_{i-1}$ を使う。(a), (b) が $G^{i-1}$ に現れれば、$g^{-1}$ で $\hat{G}$ の中に（$G^{i}$ の誘導部分グラフとして）現れる。
+
+**Step 7（(c) の場合）.** $(\ast\ast)_{i-1}$ の (c) の $H'\subseteq G^{i-1}$（$k\ge i-1$）をとり、$\hat{H}'\defeq g^{-1}(H')$ とする。$v\in V^{i-1}$ について $g^{-1}(v)$ は $y_{v}\in G_{2}(v)$ か $(v,\varnothing)$ で、どちらも $V^{i}$ に属し、$f(g^{-1}(v))=v$。よって $V(\hat{H}')\subseteq V^{i}$ で、$f^{i}\restr{V(\hat{H}')}=f^{i-1}\circ g$ は同型 $\hat{H}'\to G^{0}[W'_{k}]$。$k\ge i$ なら $(\ast\ast)_{i}$ の (c) が成り立つ。$k=i-1$ なら：$\hat{H}'$ の点のうち $f^{i}$ の像が $W''_{i-1}$ にあるものは、$g$ の像が $U^{i-1}$ に属するので $y_{u}$ の形で、$x$ と色 2 の辺で結ばれている。それ以外の点は $(v,\varnothing)$ の形で $x$ と隣接しない（$x$ の隣接頂点はすべて写し $G_{2}(u)$ の中にあり、$\hat{H}'$ の中で写しに属する点は $y_{u}$ だけ）。$f^{i}$ による同型 $\hat{H}'\cong G^{0}[W'_{i-1}]\cong H_{2}'$ のもとで、$x$ の隣接頂点はちょうど $H_{2}''$ に対応するので、$V(\hat{H}')\cup\{x\}$ は色 2 の誘導された $H_{2}$（$x\leftrightarrow x_{2}$）で (b)。
+:::
+
+::: example
+$H=P_{3}$（長さ 2 の道）のとき、完全グラフ $K^{n}$ は誘導された $P_{3}$ を含まない（どの 3 点も三角形）ので、どんなに大きくてもラムゼーグラフにならない。誘導ラムゼー定理のグラフは、完全グラフとは本質的に異なる「疎な」構造をもつ必要がある。
+:::
+
+## 連結性と避けられない部分構造 {#comb:sec-ir-connectivity}
+
+::: lemma 次数の小さいグラフの球 {#comb:ball-bound keywords="in a graph of maximum degree d, at most sum d^i vertices lie within distance r" index="距離 r の球|きょりあーるのたま"}
+$\Delta(G)\le d$ なら、各頂点 $v$ から距離 $r$ 以下の頂点は $\sum_{i=0}^{r}d^{i}$ 個以下である。
+:::
+
+::: proof
+距離がちょうど $i$ の頂点の集合を $D_{i}$ とすると $D_{0}=\{v\}$ で、$D_{i}$ の各点は $D_{i-1}$ のある点に隣接するので $\abs{D_{i}}\le d\abs{D_{i-1}}$。よって $\abs{D_{i}}\le d^{i}$ で、和をとればよい。
+:::
+
+::: proposition 連結グラフの避けられない誘導部分グラフ {#comb:connected-unavoidable keywords="every large connected graph contains K^r, K_{1,r} or P_r as an induced subgraph" index="避けられない部分グラフ|さけられないぶぶんぐらふ" refname="連結グラフの避けられない誘導部分グラフ"}
+任意の $r\ge2$ について、ある $n$ があり、$n$ 頂点以上の連結グラフは $K^{r}$, $K_{1,r}$, $P_{r}$ のどれかを誘導部分グラフとして含む。
+:::
+
+::: intuition
+次数の大きい頂点があれば、その近傍の中でラムゼーの定理を使って、近傍が完全グラフ（$K^{r}$）か独立集合（中心と合わせて星 $K_{1,r}$）を含む。次数がどれも小さければ、グラフは「細長く」なり、長い最短路（誘導された道）ができる。
+:::
+
+::: proof
+**Step 1（定数）.** $d\defeq R(r)$ とし、$n\defeq1+\sum_{i=0}^{r}d^{i}$ とする。$n$ 頂点以上の連結グラフ $G$ をとる。
+
+**Step 2（次数の大きい頂点がある場合）.** $d(v)\ge d=R(r)$ の頂点 $v$ があれば、$G[N(v)]$ は $K^{r}$ を含むか大きさ $r$ の独立集合 $S$ をもつ。後者なら $G[\{v\}\cup S]$ は $K_{1,r}$ である。
+
+**Step 3（次数がすべて小さい場合）.** 【主張：誘導された $P_{r}$ がある】$\Delta(G)\le d-1\le d$ なら、\ref{comb:ball-bound} により頂点 $v$ から距離 $r$ 以下の頂点は $n-1$ 個以下なので、距離が $r+1$ 以上の頂点 $w$ がある（$G$ は連結なので距離は有限）。最短の $v$–$w$ 道は $r+2$ 個以上の頂点をもち、最短の道は弦をもたない（弦があればより短い道ができる）ので誘導された道であり、その最初の $r$ 頂点が誘導された $P_{r}$ をなす。
+:::
+
+::: proposition 2 連結グラフの避けられない位相的マイナー {#comb:2-connected-unavoidable keywords="every large 2-connected graph contains a long cycle or a subdivision of K_{2,r}" index="2 連結グラフの避けられない部分構造|にれんけつぐらふのさけられないぶぶんこうぞう"}
+任意の $r\ge3$ について、ある $N$ があり、$N$ 頂点以上の 2 連結グラフは、長さ $r$ 以上の閉路（したがって $C^{r}$ を位相的マイナー）か、$K_{2,r}$ を位相的マイナーとして含む。
+:::
+
+::: proof
+**Step 1（定数）.** $n_{1}$ を \ref{comb:connected-unavoidable} の $n$（同じ $r$ について）とし、$N\defeq1+\sum_{i=0}^{r}n_{1}^{i}$ とする。$N$ 頂点以上の 2 連結グラフ $G$ をとる。
+
+**Step 2（次数がすべて小さい場合）.** $\Delta(G)<n_{1}$ なら、\ref{comb:ball-bound} により距離が $r+1$ 以上の 2 頂点 $a,b$ がある。2 連結なので \ref{graph:whitney-k-connected} により独立な $a$–$b$ 道が 2 本あり、その和は閉路で、各道の長さは $r+1$ 以上なので閉路の長さは $2(r+1)>r$。
+
+**Step 3（次数の大きい頂点がある場合）.** $d(v)\ge n_{1}$ とする。$G-v$ は連結（2 連結性）なので、$N(v)$ を含む $G-v$ の部分木のうち極小なもの $T$ がある。極小性から $T$ の葉はすべて $N(v)$ に属する（$N(v)$ に属さない葉は取り除ける）。$\abs{T}\ge\abs{N(v)}\ge n_{1}$ なので、\ref{comb:connected-unavoidable} により木 $T$ は誘導された $K^{r}$（$r\ge3$ では木は三角形を含まないので不可能）、$K_{1,r}$、$P_{r}$ のどれかを含む。
+- $T$ が $P_{r}$ を含むなら、その道を両方向に $T$ の中で延ばして葉 $\ell_{1},\ell_{2}$ を結ぶ道（長さ $r-1$ 以上）にでき、$\ell_{1},\ell_{2}\in N(v)$ なので $v$ を加えて長さ $r+1$ 以上の閉路ができる。
+- $T$ が $K_{1,r}$ を含むなら、$T$ に次数 $r$ 以上の頂点 $u$ がある（$u\neq v$、$u\in T$）。$u$ から出る $r$ 本の辺それぞれの先の $T-u$ の成分は $T$ の葉を含む（下の括弧）ので、$u$ からそれぞれの成分の葉 $\ell_{j}\in N(v)$ への道に辺 $\ell_{j}v$ を加えると、$u$ と $v$ を結ぶ $r$ 本の内部で交わらない道が得られる。これは $u,v$ を分岐点とする $K_{2,r}$ の細分である。（各成分 $C$ は $u$ とちょうど 1 本の辺で結ばれるので、$C$ が 1 点ならそれは $T$ の葉、2 点以上なら木 $C$ の 2 つ以上の葉のうち $u$ に隣接しないものが $T$ の葉になる。）
+:::
+
+::: fact 3 連結・4 連結の場合 {#comb:unavoidable-minors-facts keywords="Oporowski-Oxley-Thomas, wheels and K_{3,r}, double wheels, crowns, Mobius crowns, K_{4,r}" index="オポロウスキー–オクスリー–トーマスの定理|おぽろうすきーおくすりーとーますのていり"}
+次のことが知られている（B. Oporowski, J. Oxley, R. Thomas, 1993。R. Diestel, *Graph Theory*, 第 9.4 節による）。
+1. 十分大きな 3 連結グラフは、位数 $r$ の車輪か $K_{3,r}$ をマイナーとして含む。
+2. 十分大きな 4 連結グラフは、位数 $r$ 以上の二重車輪・冠・メビウス冠・$K_{4,r}$ のどれかをマイナーとして含む。
+3. これらの族は、各連結度について「避けられない構造」の最小の集合（同値を除いて一意）である。連結の場合の「星と道」、2 連結の場合の「閉路と $K_{2,r}$」も同様に最小である。
+:::
+
+::: hypcheck
+- **誘導ラムゼー定理**：$x_{i}$ を辺に接続するように選んだのは、$H_{i}''$ を空でなくするための便宜である。帰納法で本質的なのは、$H_{1}',H_{2}'$ がそれぞれ 1 頂点少ないことである。$G[U\to H]$ の隣接の定義（写しの間は完全に結ぶ）は Step 6 の同型 $g$ に、$x(F)$ の隣接頂点の選び方は Step 5, 7 の誘導性に使った。
+- **連結グラフ**：連結性は Step 3 で距離が有限であることに使った。連結でないと、多数の孤立点からなるグラフが反例になる（どれも含まない）。
+- **2 連結グラフ**：2 連結性は Step 2（2 本の独立な道）と Step 3（$G-v$ の連結性）で使った。
+:::
+
+## 問題 {#comb:sec-ir-problems}
+
+::: problem {#comb:prob-ir-complete-not-ramsey}
+$H$ が完全グラフでなければ、完全グラフ $K^{n}$ は $H$ のラムゼーグラフでないことを示せ。また $H=K^{r}$ なら $K^{R(r)}$ は $H$ のラムゼーグラフであることを確かめよ。
+:::
+
+::: solution
+$K^{n}$ の誘導部分グラフはすべて完全グラフなので、完全でない $H$ と同型な誘導部分グラフはない。$H=K^{r}$ では、$K^{R(r)}$ の辺のどの 2 色の彩色にも単色の $K^{r}$ があり、完全グラフの部分グラフ $K^{r}$ は誘導部分グラフである。
+:::
+
+::: problem {#comb:prob-ir-edgeless}
+$H_{1}=\overline{K^{2}}$（辺のない 2 頂点）、$H_{2}=K^{2}$ のとき、$G(H_{1},H_{2})$ として何がとれるか。
+:::
+
+::: solution
+$H_{1}$ は辺をもたないので、2 頂点の辺のないグラフ $\overline{K^{2}}$ 自身が $G(H_{1},H_{2})$ になる（どの彩色でも、全体が色 1 で塗られた誘導された $H_{1}$）。証明の Step 0 の場合である。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 誘導ラムゼー定理の証明は、ラムゼーの定理（\ref{comb:erdos-szekeres-ramsey}）さえ使わず、帰納法と頂点の置き換えだけでラムゼーグラフを構成する。その代わり、得られるグラフは極めて大きい。
+
+**前提を変えると.**
+- ラムゼーグラフにさらに $\omega(G)=\omega(H)$（クリーク数が増えない）を要求することもでき、ネシェトリル–レードルらにより、二部グラフの場合の補題を経由する別証明で示される（R. Diestel, *Graph Theory*, 第 9.3 節の第 2 証明）。
+- 色の数を 2 から任意の有限個に変えても、同じ方法で成り立つ。
+- 「単色の誘導された $H$」を「単色の（誘導とは限らない）$H$」に弱めると、十分大きな完全グラフで足りる（\ref{comb:page-ramsey-numbers}）。
+
+**類似の定理.** 頂点彩色についての類似（どの頂点の $k$ 色彩色にも単色の誘導された $H$ を含むグラフの存在）はより易しく、$H$ の写しを十分多く置くだけで得られる。
+
+**高い視点から：ラムゼー性は「構造のクラスの性質」.** 誘導ラムゼー定理は、有限グラフのクラス（誘導部分グラフによる埋め込みを射とする圏）が「ラムゼー性」をもつことの最も基本的な場合である。ネシェトリル–レードルの理論では、順序付きグラフのクラスは任意の部分構造の彩色についてラムゼー性をもち、これはケクリス–ペストフ–トドルチェヴィッチの対応により、ある位相群が「極度に従順」（コンパクト空間への連続作用が必ず固定点をもつ）であることと同値になる、と一般には言われている。比喩で言えば、ラムゼーグラフは「どう 2 つに分けても、どちらかの側に完全な見本が残るように、見本を何重にも織り込んだ布」であり、証明の $x(F)$ は、どちらの色の糸を引いても見本が完成するように仕込まれた結び目である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
