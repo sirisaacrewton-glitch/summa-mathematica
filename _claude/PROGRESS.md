@@ -708,16 +708,19 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | DM-02 | 04/01-designs/02-projective-planes | 有限射影平面 | 有限射影平面と BIBD、位数 q の体からの構成、ブルック–ライザーの定理 | GW §IXD（行 7220〜7297）、PP | fld:page-finite-fields | 未着手 |
 | DM-03 | 04/02-matroids/01-matroid-axioms | マトロイドの公理 | 独立集合・基・階数・閉包の公理の同値性、グラフ的マトロイド、線形マトロイド | GW §XA–XC（行 7630〜8222） | GR-03 | 未着手 |
 | DM-04 | 04/02-matroids/02-duality-greedy | マトロイドの双対と貪欲法 | 双対マトロイド、マイナー、貪欲法がマトロイドを特徴づけること、横断マトロイド | GW §XD–XE（行 8223〜8628） | DM-03 | 未着手 |
-| DM-E | 04/の最後 | 演習 | 分野 04 の演習 | GW 第 9・10 章の演習 | — | 未着手 |
-| AC-01 | 05-algebraic-combinatorics/01-spectral/01-graph-spectra | グラフのスペクトル | 隣接行列とラプラシアン、固有値と正則性、行列木定理、強正則グラフ | BM（固有値の節）。足りなければ書く前に資料を探す | lin:page-eigenvalues, GR-03 | 未着手 |
-| AC-02 | 05/02-tableaux/01-young-tableaux | ヤング図形と RSK 対応 | ヤング図形、標準タブロー、ロビンソン–シェンステッド–クヌース対応、フック長公式 | なし（書く前に探す。Stanley *Enumerative Combinatorics* が欲しい） | CE-02 | 未着手 |
+| DM-E | 04 の各系列の最後（01-designs/03-exercises, 02-matroids/03-exercises） | 演習（系列ごと） | 各ページ 2〜3 題 | GW 第 9・10 章の演習 | — | 未着手 |
+| AC-01 | 05-algebraic-combinatorics/01-spectral/01-graph-spectra | グラフのスペクトル | 隣接行列の固有値と正則性・二部性・彩色数（ウィルフ・ホフマン）、強正則グラフ、ムーアグラフ（ホフマン–シングルトン） | BM（固有値の節）。足りなければ書く前に資料を探す | lin:page-eigenvalues, GR-03 | 未着手 |
+| AC-01b | 05/01-spectral/02-laplacian-matrix-tree | ラプラシアンと行列木定理 | ラプラシアン、行列木定理（コーシー–ビネ）、ケイリーの公式の再証明、代数的連結度と連結性 | 同上 | AC-01 | 未着手 |
+| AC-02 | 05/02-tableaux/01-young-tableaux | ヤング図形と RSK 対応 | ヤング図形、標準タブロー、ロビンソン–シェンステッド–クヌース対応、シェンステッドの定理（最長増加部分列） | なし（書く前に探す。Stanley *Enumerative Combinatorics* が欲しい） | CE-02 | 未着手 |
+| AC-02b | 05/02-tableaux/02-hook-length | フック長公式 | フック長公式（グリーン–ナイエンハウス–ウィルフの確率的証明）、$\sum f_{\lambda}^{2}=n!$ | 同上 | AC-02 | 未着手 |
+| AC-E | 05 の各系列の最後（01-spectral/03-exercises, 02-tableaux/03-exercises） | 演習（系列ごと） | 各ページ 2〜3 題 | — | — | 未着手 |
 | PL-01 | 06-discrete-geometry/01-convex-sets/01-convex-sets | 凸集合と相対的内部 | アフィン構造、凸包、カラテオドリの定理、相対的内部 | Br §1–3（行 142〜904） | — | 未着手 |
 | PL-02 | 06/01-convex-sets/02-faces-polarity | 支持超平面・面・極 | 支持超平面、面と露出面、極集合 | Br §4–6（行 905〜1493） | PL-01 | 未着手 |
 | PL-03 | 06/02-polytopes/01-polytopes-polyhedra | 凸多面体と多面的集合 | ミンコフスキー–ワイルの定理（V 表示と H 表示）、面の束、極双対 | Br §7–10（行 1498〜2328） | PL-02 | 未着手 |
 | PL-04 | 06/02-polytopes/02-simple-cyclic | 単純多面体・巡回多面体・近隣多面体 | 頂点図形、単純・単体的多面体、巡回多面体とゲールの偶数性条件、多面体のグラフ | Br §11–15（行 2329〜3300） | PL-03 | 未着手 |
 | PL-05 | 06/03-face-numbers/01-euler-dehn-sommerville | オイラーの関係式とデーン–ソマーヴィルの関係式 | f ベクトル、オイラーの関係式（シェリングによる証明）、デーン–ソマーヴィルの関係式、h ベクトル | Br §16–17（行 3303〜3831） | PL-04, GR-10 | 未着手 |
 | PL-06 | 06/03-face-numbers/02-upper-lower-bound | 上限定理と下限定理 | マクマレンの上限定理、下限定理、マクマレンの条件（g 定理。主張と必要性の側の概略） | Br §18–20（行 3832〜） | PL-05 | 未着手 |
-| PL-E | 06/の最後 | 演習 | 分野 06 の演習 | Br の演習 | — | 未着手 |
+| PL-E | 06 の各系列の最後（01-convex-sets/03, 02-polytopes/03, 03-face-numbers/03-exercises） | 演習（系列ごと） | 各ページ 2〜3 題 | Br の演習 | — | 未着手 |
 
 * 分野 05（代数的組合せ論）は資料が足りないので、AC-01 以外は資料が見つかってから行を足す。対称群の表現（`02-algebra/02-group-theory/08-symmetric-group-representations`）と AC-02 は内容が重なるので、片方に本体を置き、もう片方からは参照する（どちらに置くかは書く前に決める）。
 * グラフの計算量（最短路・最大流のアルゴリズムなど）は、ここでは主張だけ書き、計算量の詳しい話は `01-foundations/03-computation/04-complexity` と応用数学の計算機科学へ案内する（2026-10-15 ユーザー要望：アルゴリズムが出てきたら計算量のクラスも書く）。
