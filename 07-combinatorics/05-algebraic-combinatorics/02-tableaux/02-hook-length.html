@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>フック長公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/05-algebraic-combinatorics/02-tableaux/02-hook-length.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# フック長公式 {#comb:page-hook-length keywords="hook length formula, hook, arm, leg, number of standard Young tableaux, Frame-Robinson-Thrall, Greene-Nijenhuis-Wilf hook walk, probabilistic proof, branching rule"}
+
+\ref{comb:young-tableau} の個数 $f^{\lambda}$ には、驚くほど簡潔な公式がある：各箱の**フック**（その箱と、右にある箱と、下にある箱）の大きさを $h(u)$ とすると、$f^{\lambda}=n!/\prod_{u}h(u)$（フレーム–ロビンソン–スロール、1954）。このページでは、グリーン–ナイエンハウス–ウィルフ（1979）による「フックの上のランダムな歩み」を使った確率的な証明を与える。
+
+## 記法と定義の確認 {#comb:sec-hl-notation}
+
+::: notation
+- 分割 $\lambda\vdash n$、ヤング図形・箱 $(i,j)$・角・標準ヤング盤と $f^{\lambda}$ は \ref{comb:page-young-tableaux} のとおり。共役分割 $\lambda'$（$\lambda'_{j}$ は第 $j$ 列の長さ）は \ref{comb:conjugate-partition} のとおり。
+- 角 $c$ を取り除いた分割を $\lambda-c$ と書く。$f^{\varnothing}\defeq1$。
+- 体系は $\ZF$。資料については \ref{comb:page-young-tableaux} の記法の項と同じ。
+:::
+
+## フックと公式 {#comb:sec-hl-formula}
+
+::: definition フック {#comb:hook keywords="hook of a cell, arm, leg, hook length h(i,j) = lambda_i - j + lambda'_j - i + 1" index="フック|ふっく, フック長|ふっくちょう, 腕と脚（ヤング図形）|うでとあし"}
+箱 $u=(i,j)$ の**フック**とは、$u$ と、同じ行で右にある箱（**腕**、$\lambda_{i}-j$ 個）と、同じ列で下にある箱（**脚**、$\lambda'_{j}-i$ 個）の集合で、その大きさ
+$$h(i,j)\defeq(\lambda_{i}-j)+(\lambda'_{j}-i)+1$$
+を**フック長**という。$h(u)=1$ となるのは、$u$ が角のときに限る。
+:::
+
+::: intuition
+フックは箱 $u$ から右と下に伸びる「L 字」である。標準ヤング盤では、$u$ の数はそのフックの中で最小なので、ランダムに数を並べたとき条件が成り立つ「確率」は大まかに $1/h(u)$ で、それを掛け合わせると $n!/\prod h(u)$ になる、というのが公式の直観的な理由である（ただしこの論法そのものは厳密ではない）。
+:::
+
+::: theorem フック長公式 {#comb:hook-length-formula keywords="hook length formula f^lambda = n! / prod h(u)" index="フック長公式|ふっくちょうこうしき" refname="フック長公式"}
+$\lambda\vdash n$ について
+$$f^{\lambda}=\frac{n!}{\prod_{u\in\lambda}h(u)}.$$
+:::
+
+::: intuition
+標準ヤング盤の数え上げは、各箱のフックの大きさだけで決まる。$n!$ 通りの並べ方のうち、各フックで「角の数が最小」という条件を満たす割合が $1/\prod h(u)$ になっている。
+:::
+
+::: example
+$\lambda=(3,2)$：フック長は第 1 行が $4,3,1$、第 2 行が $2,1$。$f^{(3,2)}=\frac{5!}{4\cdot3\cdot1\cdot2\cdot1}=5$。$\lambda=(n-1,1)$ では第 1 行が $n,n-2,n-3,\dots,1$、第 2 行が $1$ で、$f=\frac{n!}{n\cdot(n-2)!}=n-1$（第 2 行の数は $2,\dots,n$ のどれか）。
+:::
+
+## 証明の準備 {#comb:sec-hl-recursion}
+
+::: lemma 分岐則 {#comb:branching-rule keywords="f^lambda = sum over corners c of f^{lambda - c}" index="分岐則（標準ヤング盤）|ぶんきそく"}
+$\lambda\vdash n$（$n\ge1$）について $f^{\lambda}=\sum_{c}f^{\lambda-c}$（和は $\lambda$ の角 $c$ にわたる）。
+:::
+
+::: proof
+標準ヤング盤の最大の数 $n$ は、右にも下にも数がない箱、すなわち角にある。$n$ を除くと形 $\lambda-c$ の標準ヤング盤になり、逆に形 $\lambda-c$ の標準ヤング盤の角 $c$ に $n$ を書き足すと形 $\lambda$ の標準ヤング盤になる。この対応は全単射なので、$n$ の位置 $c$ ごとに数えればよい。
+:::
+
+::: lemma フック長の比 {#comb:hook-ratio keywords="F(lambda - c)/F(lambda) = (1/n) prod over hooks through the corner of h/(h-1)" index="フック長の比|ふっくちょうのひ"}
+$F(\lambda)\defeq n!/\prod_{u\in\lambda}h(u)$ とおく。角 $c=(\alpha,\beta)$ について
+$$\frac{F(\lambda-c)}{F(\lambda)}=\frac{1}{n}\prod_{i=1}^{\alpha-1}\frac{h(i,\beta)}{h(i,\beta)-1}\prod_{j=1}^{\beta-1}\frac{h(\alpha,j)}{h(\alpha,j)-1}.$$
+ここで $h$ は $\lambda$ でのフック長で、右辺の分母は正である。
+:::
+
+::: proof
+$c$ を取り除くと、フック長が変わるのは、$c$ を腕に含む箱（第 $\alpha$ 行で $c$ より左）と $c$ を脚に含む箱（第 $\beta$ 列で $c$ より上）だけで、それぞれ 1 減る。$h(c)=1$ なので
+$$\frac{F(\lambda-c)}{F(\lambda)}=\frac{(n-1)!}{n!}\cdot\prod_{i<\alpha}\frac{h(i,\beta)}{h(i,\beta)-1}\prod_{j<\beta}\frac{h(\alpha,j)}{h(\alpha,j)-1}.$$
+$i<\alpha$ なら箱 $(i,\beta)$ の脚に $c$ が含まれるので $h(i,\beta)\ge2$、$j<\beta$ も同様。
+:::
+
+::: lemma フックの恒等式 {#comb:hook-identity keywords="h(i,j) - 1 = (h(i,beta) - 1) + (h(alpha,j) - 1) for a corner (alpha,beta)" index="フックの恒等式|ふっくのこうとうしき"}
+角 $c=(\alpha,\beta)$ と、$i\le\alpha$, $j\le\beta$ の箱 $(i,j)$ について
+$$h(i,j)-1=\bigl(h(i,\beta)-1\bigr)+\bigl(h(\alpha,j)-1\bigr).$$
+:::
+
+::: proof
+$c$ は角なので $\lambda_{\alpha}=\beta$, $\lambda'_{\beta}=\alpha$。定義から $h(i,\beta)-1=(\lambda_{i}-\beta)+(\alpha-i)$, $h(\alpha,j)-1=(\beta-j)+(\lambda'_{j}-\alpha)$ で、和は $\lambda_{i}-j+\lambda'_{j}-i=h(i,j)-1$。
+:::
+
+## フックの上のランダムな歩み {#comb:sec-hl-hook-walk}
+
+::: definition フックの歩み {#comb:hook-walk keywords="hook walk of Greene-Nijenhuis-Wilf" index="フックの歩み|ふっくのあゆみ"}
+$\lambda$ の箱を一様に 1 つ選んで出発し、現在の箱 $u$ が角でなければ、$u$ のフックの $u$ 以外の $h(u)-1$ 個の箱から一様に 1 つ選んでそこへ移る。これを角に着くまで繰り返す。移る先は常に右か下なので、有限回で角に着いて止まる。
+:::
+
+::: intuition
+フックの歩みは「標準ヤング盤の最大の数がどこに置かれるか」をまねた乱歩で、角 $c$ で止まる確率がちょうど $f^{\lambda-c}/f^{\lambda}$ になるように設計されている。
+:::
+
+::: lemma 止まる確率 {#comb:hook-walk-probability keywords="probability that the hook walk ends at corner c equals F(lambda - c)/F(lambda)" index="フックの歩みの確率|ふっくのあゆみのかくりつ"}
+フックの歩みが角 $c=(\alpha,\beta)$ で止まる確率は $\dfrac{F(\lambda-c)}{F(\lambda)}$ に等しい。
+:::
+
+::: proof
+**Step 1（訪れる行と列の集合）.** 歩みが $c$ で止まるとき、訪れる箱の行番号は増加して $\alpha$ で終わり、列番号も増加して $\beta$ で終わる（右へ動くと行は不変で列が増え、下へ動くと逆）。$c$ 以外に訪れた行の集合を $A\subseteq\{1,\dots,\alpha-1\}$、列の集合を $B\subseteq\{1,\dots,\beta-1\}$ とすると、出発点は $(\min(A\cup\{\alpha\}),\min(B\cup\{\beta\}))$ で、各段は「行を $A\cup\{\alpha\}$ の次の元へ」か「列を $B\cup\{\beta\}$ の次の元へ」進める。
+
+**Step 2（主張）.** 【主張：出発点 $(a,b)$ から、訪れる行・列がちょうど $A\cup\{\alpha\}$, $B\cup\{\beta\}$ で $c$ に止まる確率 $p(A,B)$ は $\prod_{i\in A}\frac{1}{h(i,\beta)-1}\prod_{j\in B}\frac{1}{h(\alpha,j)-1}$】$\abs{A}+\abs{B}$ の帰納法。$A=B=\varnothing$ なら出発点が $c$ で確率 1。そうでなければ $(a,b)\neq c$ で、最初の一歩は各箱へ確率 $\frac{1}{h(a,b)-1}$ で移る。$a\in A$ なら下の次の行へ（残りは $(A-a,B)$）、$b\in B$ なら右の次の列へ（残りは $(A,B-b)$）進むので、
+$$p(A,B)=\frac{1}{h(a,b)-1}\Bigl([a\in A]\,p(A-a,B)+[b\in B]\,p(A,B-b)\Bigr).$$
+帰納法の仮定を代入すると、括弧の中は $\prod_{A}\prod_{B}$ に $[a\in A](h(a,\beta)-1)+[b\in B](h(\alpha,b)-1)$ を掛けたもの。$a\notin A$ なら $a=\alpha$ で $h(\alpha,\beta)-1=0$、$b\notin B$ なら $b=\beta$ で同様に 0 なので、どの場合もこれは $(h(a,\beta)-1)+(h(\alpha,b)-1)=h(a,b)-1$（\ref{comb:hook-identity}）に等しく、主張が成り立つ。
+
+**Step 3（合計）.** 出発点は $n$ 個の箱から一様に選ぶので、$c$ で止まる確率は
+$$\frac{1}{n}\sum_{A,B}p(A,B)=\frac{1}{n}\prod_{i<\alpha}\left(1+\frac{1}{h(i,\beta)-1}\right)\prod_{j<\beta}\left(1+\frac{1}{h(\alpha,j)-1}\right)$$
+（$A,B$ はすべての部分集合を動き、和は積に展開できる。$c$ より右か下の行・列に出発点がある場合は $c$ に着けない）。$1+\frac{1}{h-1}=\frac{h}{h-1}$ なので、\ref{comb:hook-ratio} の右辺に等しい。
+:::
+
+::: proof フック長公式の証明
+**Step 1（$F$ も分岐則を満たす）.** 【主張：$F(\lambda)=\sum_{c}F(\lambda-c)$】フックの歩みは必ずどれか 1 つの角で止まるので、止まる確率の和は 1。\ref{comb:hook-walk-probability} から $\sum_{c}\frac{F(\lambda-c)}{F(\lambda)}=1$。
+
+**Step 2（帰納法）.** $n$ についての帰納法。$n=0$ では $F(\varnothing)=0!/1=1=f^{\varnothing}$。$n\ge1$ では \ref{comb:branching-rule} と Step 1 と帰納法の仮定から $f^{\lambda}=\sum_{c}f^{\lambda-c}=\sum_{c}F(\lambda-c)=F(\lambda)$。
+:::
+
+::: hypcheck
+- **フックの恒等式**：$c$ が角であること（$\lambda_{\alpha}=\beta$, $\lambda'_{\beta}=\alpha$）を使った。角でない箱では成り立たない。
+- **止まる確率**：$a\notin A$ の場合を「$h(\alpha,\beta)-1=0$」で吸収したので、場合分けなしで帰納法が回る。出発点が一様であることは Step 3 の $\frac1n$ に使った。
+- **フック長公式**：分岐則（$f$ 側）と、確率の和が 1（$F$ 側）という 2 つの漸化式が同じであることだけを使う。
+:::
+
+## 問題 {#comb:sec-hl-problems}
+
+::: problem {#comb:prob-hl-staircase}
+階段型 $\lambda=(3,2,1)$ の $f^{\lambda}$ をフック長公式で求めよ。
+:::
+
+::: solution
+フック長は第 1 行 $5,3,1$、第 2 行 $3,1$、第 3 行 $1$。$f=\frac{6!}{5\cdot3\cdot1\cdot3\cdot1\cdot1}=\frac{720}{45}=16$。
+:::
+
+::: problem {#comb:prob-hl-catalan}
+形 $(n,n)$（2 行で各 $n$ 個）の標準ヤング盤の個数がカタラン数 $C_{n}=\frac{1}{n+1}\binom{2n}{n}$ であることを、フック長公式で示せ。
+:::
+
+::: solution
+第 1 行の第 $j$ 列のフック長は $(n-j)+1+1=n-j+2$、第 2 行の第 $j$ 列は $n-j+1$。積は $\prod_{j=1}^{n}(n-j+2)\prod_{j=1}^{n}(n-j+1)=(n+1)!\,n!$。よって $f=\frac{(2n)!}{(n+1)!\,n!}=\frac{1}{n+1}\binom{2n}{n}=C_{n}$（\ref{comb:catalan}）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 証明では、標準ヤング盤の具体的な構造は分岐則（最大の数は角にある）だけを使い、残りはフック長の算術とランダムな歩みの確率の計算である。
+
+**前提を変えると.**
+- ずらしたヤング図形（シフト形）の標準盤についても、ずらしたフックによるフック長公式がある（タール）と知られている。
+- 半標準ヤング盤の個数（成分を $\{1,\dots,m\}$ にとるもの）には、**フック内容公式** $\prod_{u}\frac{m+c(u)}{h(u)}$（$c(u)=j-i$ は内容）がある、と知られている。
+
+**類似の定理.** $f^{\lambda}$ は対称群 $\mathfrak{S}_{n}$ の既約表現の次元であり、フック長公式は表現論ではワイルの次元公式の対称群版にあたる。木の線形拡張の個数 $n!/\prod_{v}\abs{T_{v}}$（$T_{v}$ は $v$ を根とする部分木）も同じ形の公式である。
+
+**高い視点から：確率的証明という発想.** 等式 $\sum_{c}F(\lambda-c)/F(\lambda)=1$ を代数的に示す代わりに、「ある乱歩の終点の分布が確率分布である」ことに読み替えるのが GNW の証明の核心である。確率の総和が 1 であることは自明なので、難しいのは各角に止まる確率の計算だけになり、それはフックの恒等式による局所的な帰納法で済む。比喩で言えば、複雑な恒等式を「迷路の出口が必ずどこかにある」という事実に変え、各出口に辿り着く確率を数えることで、恒等式を手に入れる方法である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{comb:sec-hl-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
