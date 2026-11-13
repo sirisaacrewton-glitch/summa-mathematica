@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>グラフのスペクトル | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/05-algebraic-combinatorics/01-spectral/01-graph-spectra.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# グラフのスペクトル {#comb:page-graph-spectra keywords="adjacency matrix, spectrum of a graph, eigenvalues, walks, largest eigenvalue, average degree, maximum degree, bipartite graph symmetric spectrum, Wilf's theorem, Hoffman ratio bound, strongly regular graph, Moore graph, Hoffman-Singleton theorem, Petersen graph"}
+
+グラフの**隣接行列**は実対称行列なので、実数の固有値をもつ。その固有値の全体（**スペクトル**）は、頂点の番号の付け方によらないグラフの不変量で、辺の数・三角形の数・正則性・二部性などを反映する。このページでは、最大固有値と平均次数・最大次数の関係、二部グラフのスペクトルの対称性、固有値による彩色数と独立数の評価（ウィルフ、ホフマン）を示し、**強正則グラフ**の固有値を求めて、直径 2・内周 5 の**ムーアグラフ**が次数 $2,3,7,57$ の場合にしか存在しえないこと（ホフマン–シングルトンの定理）を証明する。
+
+## 記法と定義の確認 {#comb:sec-sp-notation}
+
+::: notation
+- グラフは有限・単純で、頂点を $1,\dots,n$ と番号付ける。次数・最大次数 $\Delta$・平均次数 $\bar{d}$・彩色数 $\chi$・独立数 $\alpha$ は \ref{graph:page-graphs}, \ref{graph:chromatic-number} のとおり。
+- $\mathbf{1}$ はすべての成分が 1 のベクトル、$J=\mathbf{1}\mathbf{1}^{\mathsf{T}}$、$\langle x,y\rangle=x^{\mathsf{T}}y$ は $\mathbb{R}^{n}$ の標準内積。
+- 実対称行列は直交行列で対角化でき、固有値は実数で、異なる固有値の固有ベクトルは直交する（\ref{lin:spectral-theorem} の 3, 4）。トレースは固有値の和（\ref{lin:char-poly} の 1）。
+- 体系は $\ZF$。
+:::
+
+## 隣接行列とスペクトル {#comb:sec-sp-adjacency}
+
+::: definition 隣接行列とスペクトル {#comb:adjacency-matrix keywords="adjacency matrix A(G), spectrum, eigenvalues lambda_1 >= ... >= lambda_n" index="隣接行列|りんせつぎょうれつ, スペクトル（グラフの）|すぺくとる, グラフの固有値|ぐらふのこゆうち" refname="隣接行列"}
+グラフ $G$ の**隣接行列** $A=A(G)$ は、$ij\in E(G)$ なら $A_{ij}=1$、そうでなければ $0$ とする $n\times n$ 行列である（対角成分は 0）。$A$ は実対称なので固有値はすべて実数で、重複を込めて $\lambda_{1}\ge\lambda_{2}\ge\cdots\ge\lambda_{n}$ と並べたものを $G$ の**スペクトル**という。頂点の番号を付け替えると $A$ は置換行列 $P$ で $P^{\mathsf{T}}AP$ に変わり、固有値は変わらない。
+:::
+
+::: intuition
+$A$ をベクトル $x$（各頂点に数を置いたもの）に掛けると、各頂点の値は「隣の頂点の値の和」に置き換わる。固有ベクトルは、この「隣の和をとる」操作で形を変えず定数倍されるだけの配置である。
+:::
+
+::: proposition 歩道の数え上げとトレース {#comb:walks-trace keywords="(A^k)_{ij} counts walks of length k; tr A = 0, tr A^2 = 2m, tr A^3 = 6 (number of triangles)" index="歩道の数え上げ（隣接行列）|ほどうのかぞえあげ"}
+1. $(A^{k})_{ij}$ は、$i$ から $j$ への長さ $k$ の歩道の個数である。
+2. $\sum_{i}\lambda_{i}=0$, $\sum_{i}\lambda_{i}^{2}=2m$（$m$ は辺の数）、$\sum_{i}\lambda_{i}^{3}=6t$（$t$ は三角形の個数）。
+:::
+
+::: proof
+**Step 1（1）.** $k$ の帰納法。$(A^{k+1})_{ij}=\sum_{l}(A^{k})_{il}A_{lj}$ で、右辺は「$i$ から $l$ への長さ $k$ の歩道」の後に辺 $lj$ を続けた歩道を、最後から 2 番目の頂点 $l$ ごとに数えたものである。
+
+**Step 2（2）.** $A^{k}$ の固有値は $\lambda_{i}^{k}$（対角化から）で、トレースは固有値の和なので $\sum_{i}\lambda_{i}^{k}=\operatorname{tr}A^{k}=\sum_{i}(A^{k})_{ii}$。$k=1$ では対角成分が 0。$k=2$ では $(A^{2})_{ii}=d(i)$ で、\ref{graph:handshake} から和は $2m$。$k=3$ では、長さ 3 の閉じた歩道 $i\to j\to l\to i$ は三角形で、各三角形は始点 3 通り×向き 2 通りの 6 回数えられる。
+:::
+
+::: lemma レイリー商 {#comb:rayleigh-quotient keywords="lambda_1 = max x^T A x / x^T x, lambda_n = min, attained at eigenvectors" index="レイリー商（グラフ）|れいりーしょう"}
+実対称行列 $A$ の最大固有値 $\lambda_{1}$ と最小固有値 $\lambda_{n}$ について、すべての $x\neq0$ で
+$$\lambda_{n}\le\frac{x^{\mathsf{T}}Ax}{x^{\mathsf{T}}x}\le\lambda_{1}$$
+で、等号はそれぞれの固有ベクトルで成り立つ。
+:::
+
+::: proof
+\ref{lin:spectral-theorem} の 3 から、$A$ の固有ベクトルからなる正規直交基底 $u_{1},\dots,u_{n}$（$Au_{i}=\lambda_{i}u_{i}$）がある。$x=\sum c_{i}u_{i}$ と書くと $x^{\mathsf{T}}Ax=\sum\lambda_{i}c_{i}^{2}$, $x^{\mathsf{T}}x=\sum c_{i}^{2}$ で、$\lambda_{n}\sum c_{i}^{2}\le\sum\lambda_{i}c_{i}^{2}\le\lambda_{1}\sum c_{i}^{2}$。$x=u_{1}$ または $u_{n}$ で等号。（\ref{lin:hadamard-minmax} の 2 の特別な場合。）
+:::
+
+::: theorem 最大固有値と次数 {#comb:largest-eigenvalue-degree keywords="average degree <= lambda_1 <= Delta, equality iff regular; |lambda_i| <= Delta; lambda_1 of an induced subgraph is at most lambda_1" index="最大固有値|さいだいこゆうち" refname="最大固有値と次数"}
+グラフ $G$（$n\ge1$）について次が成り立つ。
+1. $\bar{d}\le\lambda_{1}\le\Delta$。
+2. すべての固有値は $\abs{\lambda_{i}}\le\Delta$ を満たす。
+3. $G$ が $d$ 正則なら $\lambda_{1}=d$ で、$\mathbf{1}$ はその固有ベクトル。
+4. $H$ が $G$ の誘導部分グラフなら $\lambda_{1}(H)\le\lambda_{1}(G)$。
+:::
+
+::: intuition
+最大固有値は「平均的な次数」と「最大の次数」の間にある、グラフの一種の「実効的な次数」である。正則グラフでは三つが一致する。
+:::
+
+::: proof
+**Step 1（下界）.** \ref{comb:rayleigh-quotient} を $x=\mathbf{1}$ に使うと、$\mathbf{1}^{\mathsf{T}}A\mathbf{1}=\sum_{i,j}A_{ij}=2m$ なので $\lambda_{1}\ge\frac{2m}{n}=\bar{d}$。
+
+**Step 2（$\abs{\lambda}\le\Delta$）.** 【主張：固有値 $\lambda$、固有ベクトル $x$ について $\abs{\lambda}\le\Delta$】$\abs{x_{i}}$ が最大の $i$ をとると、$\abs{\lambda}\abs{x_{i}}=\abs{\sum_{j}A_{ij}x_{j}}\le d(i)\abs{x_{i}}\le\Delta\abs{x_{i}}$、$x_{i}\neq0$ で割る。1 の上界もこれに含まれる。
+
+**Step 3（正則）.** $d$ 正則なら $A\mathbf{1}=d\mathbf{1}$ で、2 から $\lambda_{1}\le d$ なので $\lambda_{1}=d$。
+
+**Step 4（誘導部分グラフ）.** $H$ の頂点集合を $U$ とし、$\lambda_{1}(H)$ の固有ベクトル $y\in\mathbb{R}^{U}$ をとる。$\abs{y}$（成分ごとの絶対値）について、$A(H)$ の成分は非負なので $y^{\mathsf{T}}A(H)y\le\abs{y}^{\mathsf{T}}A(H)\abs{y}$。$\abs{y}$ を $U$ の外で 0 として $\mathbb{R}^{n}$ に延ばした $z$ について $z^{\mathsf{T}}A(G)z=\abs{y}^{\mathsf{T}}A(H)\abs{y}$（$H$ は誘導部分グラフ）、$z^{\mathsf{T}}z=y^{\mathsf{T}}y$。よって $\lambda_{1}(H)=\frac{y^{\mathsf{T}}A(H)y}{y^{\mathsf{T}}y}\le\frac{z^{\mathsf{T}}A(G)z}{z^{\mathsf{T}}z}\le\lambda_{1}(G)$。
+:::
+
+::: proposition 二部グラフのスペクトル {#comb:bipartite-spectrum keywords="the spectrum of a bipartite graph is symmetric about 0" index="二部グラフのスペクトル|にぶぐらふのすぺくとる"}
+$G$ が二部グラフなら、$\lambda$ が固有値であることと $-\lambda$ が固有値であることは同値で、重複度も等しい。
+:::
+
+::: proof
+二部分割 $V=X\sqcup Y$ について、$D$ を $X$ の頂点で $1$、$Y$ の頂点で $-1$ の対角行列とすると、$X$ と $Y$ の間にしか辺がないので $DAD=-A$（$A_{ij}\neq0$ なら $D_{ii}D_{jj}=-1$）。$D^{-1}=D$ なので $-A$ は $A$ と相似で、固有多項式（\ref{lin:char-poly} の 2）が等しい。$\chi_{-A}(t)=(-1)^{n}\chi_{A}(-t)$ なので、固有値の集合（重複込み）は $\lambda\mapsto-\lambda$ で不変。
+:::
+
+## 固有値と彩色・独立集合 {#comb:sec-sp-colouring}
+
+::: theorem ウィルフの定理 {#comb:wilf-theorem keywords="Wilf's theorem chi(G) <= lambda_1 + 1" index="ウィルフの定理|うぃるふのていり" refname="ウィルフの定理"}
+グラフ $G$ について $\chi(G)\le\lambda_{1}(G)+1$。
+:::
+
+::: intuition
+貪欲な彩色では「部分グラフの最小次数 $+1$」色で足りる。最小次数は平均次数以下、平均次数は最大固有値以下で、最大固有値は部分グラフに移っても増えない。
+:::
+
+::: proof
+誘導部分グラフ $H$ について、\ref{comb:largest-eigenvalue-degree} の 1, 4 から $\delta(H)\le\bar{d}(H)\le\lambda_{1}(H)\le\lambda_{1}(G)$。部分グラフ $H'$ の最小次数は、同じ頂点集合の誘導部分グラフの最小次数以下なので、$\max_{H'\subseteq G}\delta(H')\le\lambda_{1}(G)$。\ref{graph:chromatic-basic-bounds} の 2 から $\chi(G)\le\lambda_{1}(G)+1$。
+:::
+
+::: theorem ホフマンの比の上界 {#comb:hoffman-ratio-bound keywords="Hoffman's ratio bound alpha <= n (-lambda_n) / (d - lambda_n) for d-regular graphs; chi >= 1 - d / lambda_n" index="ホフマンの比の上界|ほふまんのひのじょうかい" refname="ホフマンの比の上界"}
+$G$ を $n$ 頂点の $d$ 正則グラフ（$d\ge1$）とし、最小固有値を $\lambda_{n}$ とする。このとき
+$$\alpha(G)\le\frac{n(-\lambda_{n})}{d-\lambda_{n}},\qquad\chi(G)\ge1-\frac{d}{\lambda_{n}}.$$
+:::
+
+::: intuition
+独立集合 $S$ の指示ベクトルから平均を引いたベクトルは、「$S$ の中で隣どうしがない」ことのために、隣の和をとる操作 $A$ で強く負の方向に引かれる。その引かれ方が最小固有値で抑えられるので、$S$ は大きくなれない。
+:::
+
+::: proof
+**Step 1（設定）.** $d\ge1$ なので辺があり、$\operatorname{tr}A=0$ から $\lambda_{n}<0$。独立集合 $S$（$s\defeq\abs{S}$）の指示ベクトルを $\mathbf{1}_{S}$ とし、$x\defeq\mathbf{1}_{S}-\frac{s}{n}\mathbf{1}$ とおく。
+
+**Step 2（計算）.** $S$ は独立なので $\mathbf{1}_{S}^{\mathsf{T}}A\mathbf{1}_{S}=0$。$A\mathbf{1}=d\mathbf{1}$ から $\mathbf{1}^{\mathsf{T}}A\mathbf{1}_{S}=ds$, $\mathbf{1}^{\mathsf{T}}A\mathbf{1}=dn$。よって
+$$x^{\mathsf{T}}Ax=0-2\frac{s}{n}ds+\frac{s^{2}}{n^{2}}dn=-\frac{ds^{2}}{n},\qquad x^{\mathsf{T}}x=s-2\frac{s^{2}}{n}+\frac{s^{2}}{n}=\frac{s(n-s)}{n}.$$
+
+**Step 3（レイリー商）.** 【主張：$s\le\frac{n(-\lambda_{n})}{d-\lambda_{n}}$】\ref{comb:rayleigh-quotient} から $x^{\mathsf{T}}Ax\ge\lambda_{n}x^{\mathsf{T}}x$、すなわち $-\frac{ds^{2}}{n}\ge\lambda_{n}\frac{s(n-s)}{n}$。$s>0$ で割り $n$ を掛けて $-ds\ge\lambda_{n}(n-s)$、整理して $s(d-\lambda_{n})\le-\lambda_{n}n$。$d-\lambda_{n}>0$ で割る。
+
+**Step 4（彩色数）.** \ref{graph:chromatic-basic-bounds} の 3 から $\chi\ge n/\alpha\ge\frac{d-\lambda_{n}}{-\lambda_{n}}=1-\frac{d}{\lambda_{n}}$。
+:::
+
+::: example ペテルセングラフ {#comb:petersen-spectrum keywords="spectrum of the Petersen graph: 3, 1^5, (-2)^4" index="ペテルセングラフのスペクトル|ぺてるせんぐらふのすぺくとる"}
+ペテルセングラフのスペクトルは $3$（重複度 1）、$1$（重複度 5）、$-2$（重複度 4）である（\ref{comb:srg-eigenvalues} の例）。ホフマンの比の上界は $\alpha\le\frac{10\cdot2}{3+2}=4$ で、実際 $\alpha=4$（等号）。
+:::
+
+## 強正則グラフとムーアグラフ {#comb:sec-sp-srg}
+
+::: definition 強正則グラフ {#comb:strongly-regular-graph keywords="strongly regular graph srg(n,k,lambda,mu)" index="強正則グラフ|きょうせいそくぐらふ" refname="強正則グラフ"}
+$n$ 頂点の $k$ 正則グラフで、隣接する 2 頂点の共通の隣接頂点がちょうど $\lambda$ 個、隣接しない異なる 2 頂点の共通の隣接頂点がちょうど $\mu$ 個であるものを**強正則グラフ** $\mathrm{srg}(n,k,\lambda,\mu)$ という（完全グラフと辺のないグラフを除く）。このとき
+$$A^{2}=kI+\lambda A+\mu(J-I-A).$$
+:::
+
+::: intuition
+強正則グラフは「2 点の関係が、隣接するかしないかの 2 通りしかなく、それぞれで共通の隣人の数が一定」という、極めて対称性の高いグラフである。$A^{2}$ が $I,A,J$ の 1 次結合になるので、固有値が 3 つしかない。
+:::
+
+::: theorem 強正則グラフの固有値 {#comb:srg-eigenvalues keywords="eigenvalues of a strongly regular graph are k and the roots of x^2 - (lambda - mu) x - (k - mu)" index="強正則グラフの固有値|きょうせいそくぐらふのこゆうち"}
+$\mathrm{srg}(n,k,\lambda,\mu)$ の固有値は、$k$（固有ベクトル $\mathbf{1}$）と、$\mathbf{1}$ に直交する固有ベクトルに対する $x^{2}-(\lambda-\mu)x-(k-\mu)=0$ の根 $r,s$ だけである。その重複度 $m_{r},m_{s}$ は $m_{r}+m_{s}=n-1$, $k+m_{r}r+m_{s}s=0$ を満たす。
+:::
+
+::: intuition
+$A^{2}$ が $I$, $A$, $J$ で書けるので、$\mathbf{1}$ に直交する固有ベクトルでは $J$ が消え、固有値は 2 次方程式の根に限られる。
+:::
+
+::: proof
+**Step 1（$\mathbf{1}$ の直交補空間）.** $A$ は対称で $A\mathbf{1}=k\mathbf{1}$ なので、$\mathbf{1}^{\perp}$ は $A$ で不変で、\ref{lin:spectral-theorem} の 3 から $\mathbf{1}^{\perp}$ に $A$ の固有ベクトルからなる直交基底がとれる。
+
+**Step 2（二次方程式）.** 【主張：$\mathbf{1}^{\perp}$ の固有値は $x^{2}-(\lambda-\mu)x-(k-\mu)=0$ の根】$u\in\mathbf{1}^{\perp}$ が $Au=\theta u$ を満たすと $Ju=0$ なので、定義の式を $u$ に掛けて $\theta^{2}u=ku+\lambda\theta u-\mu u-\mu\theta u$、すなわち $\theta^{2}-(\lambda-\mu)\theta-(k-\mu)=0$。
+
+**Step 3（重複度）.** 固有値は $k$ が 1 個（$\mathbf{1}$）と、$\mathbf{1}^{\perp}$（$n-1$ 次元）の $r,s$ なので $m_{r}+m_{s}=n-1$。トレースが 0 なので $k+m_{r}r+m_{s}s=0$。
+:::
+
+::: example
+ペテルセングラフは $\mathrm{srg}(10,3,0,1)$（三角形がなく、隣接しない 2 頂点はちょうど 1 つの共通の隣人をもつ）。$x^{2}+x-2=0$ から $r=1$, $s=-2$。$m_{r}+m_{s}=9$, $3+m_{r}-2m_{s}=0$ から $m_{s}=4$, $m_{r}=5$。
+:::
+
+::: theorem ホフマン–シングルトンの定理 {#comb:hoffman-singleton keywords="Moore graphs of diameter 2 exist only for degree 2, 3, 7, 57" index="ムーアグラフ|むーあぐらふ, ホフマン–シングルトンの定理|ほふまんしんぐるとんのていり" refname="ホフマン–シングルトンの定理"}
+$k$ 正則で直径 2・内周 5 のグラフ（**ムーアグラフ**）が存在すれば、$k\in\{2,3,7,57\}$ で、頂点数は $k^{2}+1$ である。
+:::
+
+::: intuition
+直径 2 で内周 5 という条件は、頂点の数を $k^{2}+1$ にぎりぎりまで押し込め、グラフを強正則にする。すると固有値が決まり、その重複度が整数でなければならないという条件が、次数 $k$ に強い数論的な制約を課す。
+:::
+
+::: proof
+**Step 1（頂点数）.** 頂点 $v$ の隣接頂点 $k$ 個は互いに隣接しない（内周 $>3$）。各隣接頂点 $u$ は $v$ 以外に $k-1$ 個の隣接頂点をもち、それらは $v$ と隣接せず（内周 $>3$）、異なる $u$ の間で重ならない（内周 $>4$）。直径 2 なので、これで全頂点が尽くされ $n=1+k+k(k-1)=k^{2}+1$。
+
+**Step 2（強正則）.** 隣接する 2 頂点は共通の隣人をもたない（三角形がない）ので $\lambda=0$。隣接しない 2 頂点は距離 2 なので共通の隣人をもち、2 つあれば長さ 4 の閉路ができるので、ちょうど 1 つ：$\mu=1$。よって $\mathrm{srg}(k^{2}+1,k,0,1)$（$k\ge2$：$k=1$ なら $n=2$ で直径 1）。
+
+**Step 3（固有値）.** \ref{comb:srg-eigenvalues} から $r,s$ は $x^{2}+x-(k-1)=0$ の根 $\frac{-1\pm\sqrt{4k-3}}{2}$ で、$m_{r}+m_{s}=k^{2}$, $k+m_{r}r+m_{s}s=0$。代入して
+$$2k-k^{2}+\sqrt{4k-3}\,(m_{r}-m_{s})=0.$$
+
+**Step 4（無理数の場合）.** 【主張：$\sqrt{4k-3}$ が無理数なら $k=2$】このとき $m_{r}-m_{s}=0$（そうでなければ $\sqrt{4k-3}=\frac{k^{2}-2k}{m_{r}-m_{s}}$ が有理数）で、$2k-k^{2}=0$ から $k=2$（5 角形）。
+
+**Step 5（有理数の場合）.** $\sqrt{4k-3}=t$ が有理数なら整数（整数の平方根）で、$k=\frac{t^{2}+3}{4}$。Step 3 の式に代入して 16 倍すると
+$$16t(m_{r}-m_{s})=(t^{2}+3)^{2}-8(t^{2}+3)=t^{4}-2t^{2}-15.$$
+右辺を $t$ で割った余りは $-15$ の余りと同じなので $t\mid15$、$t\in\{1,3,5,15\}$ で $k\in\{1,3,7,57\}$。$k=1$ は除かれる。
+:::
+
+::: fact ムーアグラフの存在 {#comb:moore-graph-existence keywords="pentagon, Petersen graph, Hoffman-Singleton graph, the 57 case is open" index="ホフマン–シングルトングラフ|ほふまんしんぐるとんぐらふ"}
+$k=2$ は 5 角形、$k=3$ はペテルセングラフ、$k=7$ はホフマン–シングルトングラフ（50 頂点）がそれぞれ唯一のムーアグラフである。$k=57$（3250 頂点）の存在は知られていない（Bondy–Murty, *Graph Theory*, 演習 3.1.12、および A. J. Hoffman, R. R. Singleton, 1960 による）。
+:::
+
+::: hypcheck
+- **最大固有値と次数**：$A$ の成分が非負であることは Step 4（$\abs{y}$ への取り替え）に本質的に使った。Step 2 は固有ベクトルの最大成分を見るだけで、対称性は使わない。
+- **ホフマンの比の上界**：正則性は $A\mathbf{1}=d\mathbf{1}$（Step 2）に使った。正則でないグラフでは別の形の評価になる。
+- **ホフマン–シングルトン**：直径 2 は Step 1 の頂点数と Step 2 の $\mu\ge1$ に、内周 5 は $\lambda=0$, $\mu\le1$ と Step 1 の重なりのなさに使った。重複度が整数であることが Step 4, 5 の核心である。
+:::
+
+## 問題 {#comb:sec-sp-problems}
+
+::: problem {#comb:prob-sp-complete}
+完全グラフ $K^{n}$ のスペクトルが $n-1$（重複度 1）と $-1$（重複度 $n-1$）であることを示し、ホフマンの比の上界が $\alpha(K^{n})=1$ で等号となることを確かめよ。
+:::
+
+::: solution
+$A(K^{n})=J-I$。$J$ の固有値は $n$（固有ベクトル $\mathbf{1}$）と $0$（$\mathbf{1}^{\perp}$、重複度 $n-1$）なので、$J-I$ の固有値は $n-1$ と $-1$。ホフマンの上界は $\frac{n\cdot1}{(n-1)+1}=1$。
+:::
+
+::: problem {#comb:prob-sp-cycle}
+閉路 $C_{n}$ の固有値が $2\cos\frac{2\pi j}{n}$（$j=0,\dots,n-1$）であることを、$x_{l}\defeq\omega^{jl}$（$\omega=e^{2\pi i/n}$）を使って示せ。
+:::
+
+::: solution
+$C_{n}$ の頂点を $\mathbb{Z}/n$ とし、$l$ は $l\pm1$ と隣接する。$(Ax)_{l}=x_{l-1}+x_{l+1}=(\omega^{-j}+\omega^{j})\omega^{jl}=2\cos\frac{2\pi j}{n}\,x_{l}$。$j=0,\dots,n-1$ のベクトル $x$ は（ヴァンデルモンド行列の列なので）一次独立で、複素数の範囲で $A$ の固有ベクトルの基底になる。固有値は実数 $2\cos\frac{2\pi j}{n}$（$j$ と $n-j$ で同じ値）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{comb:largest-eigenvalue-degree} の 4 では、ペロン–フロベニウスの定理（非負行列の最大固有値の固有ベクトルは非負にとれる）を使わず、絶対値をとる操作だけで済ませた。
+
+**前提を変えると.**
+- ペロン–フロベニウスの定理を使うと、連結グラフについて「$\lambda_{1}$ は単純な固有値」「$\lambda_{n}=-\lambda_{1}$ なら二部グラフ」が示される、と知られている。
+- 隣接行列の代わりに**ラプラシアン** $L=D-A$（$D$ は次数の対角行列）を使うと、固有値 0 の重複度が連結成分の数になり、全域木の個数が固有値で表される（行列木定理、\ref[ラプラシアンと行列木定理]{comb:page-laplacian-matrix-tree}）。
+- 異なるグラフが同じスペクトルをもつこと（**同スペクトル**）はある。たとえば $K_{1,4}$ と $C_{4}\sqcup K_{1}$ はどちらもスペクトル $\{2,0,0,0,-2\}$ をもつ。
+
+**類似の定理.** \ref{comb:hoffman-ratio-bound} は、半正定値計画法によるロヴァースのシータ関数 $\vartheta(G)$ の評価 $\alpha(G)\le\vartheta(G)$ の特別な場合とみなせる、と一般には言われている。
+
+**高い視点から：スペクトルはグラフの「音」.** 「太鼓の形は音から聞き分けられるか」（カッツ）という問いと同じく、グラフのスペクトルはグラフの構造のどれだけを決めるかが問題になる。スペクトルは、歩道の数（全体の構造の数え上げ）を通じて辺・三角形の数を、レイリー商を通じて次数・独立集合の大きさを捉える。強正則グラフでは、隣接行列が 3 つの行列 $I,A,J$ の張る**代数**（ボース–メスナー代数、連合スキーム）の中で閉じており、固有値の重複度が整数であるという条件が、存在の可否を決める強力な道具になる。比喩で言えば、グラフを打楽器とすると、固有値はその固有振動数であり、ムーアグラフの問題は「この振動数の組をもつ楽器が実際に作れるか」という問いである。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
