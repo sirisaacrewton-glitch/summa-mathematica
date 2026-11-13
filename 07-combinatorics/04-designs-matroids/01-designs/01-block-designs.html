@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ブロックデザイン | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/04-designs-matroids/01-designs/01-block-designs.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ブロックデザイン {#comb:page-block-designs keywords="block design, t-design, t-(v,k,lambda) design, BIBD, balanced incomplete block design, replication number, incidence matrix, Fisher's inequality, symmetric design, Steiner triple system, Fano plane, complementary design, derived design"}
+
+有限集合 $V$ の部分集合（**ブロック**）の族で、どの $t$ 点もちょうど同じ回数だけブロックに含まれるものを **$t$ デザイン**という。実験計画で「どの 2 つの処理も同じ回数だけ同じ組で比較される」ように組を作る問題に由来し、有限幾何・符号理論・群論と深く結びつく。このページでは、デザインのパラメータの間の関係式、**フィッシャーの不等式**（ブロックは点より少なくない）、**対称デザイン**の基本性質、シュタイナーの三重系の存在の必要条件を示す。
+
+## 記法と定義の確認 {#comb:sec-bd-notation}
+
+::: notation
+- $V$ の $k$ 元部分集合の全体を $\mathcal{P}_{k}(V)$ と書く。二項係数と二重数え上げは \ref{comb:binomial-coefficient}, \ref{comb:double-counting} のとおり。
+- 行列は実数成分とし、$I$ は単位行列、$J$ はすべての成分が 1 の行列。次元定理は \ref{lin:rank-nullity} のとおり。
+- 体系は $\ZF$。
+:::
+
+## t デザイン {#comb:sec-bd-designs}
+
+::: definition t デザイン {#comb:t-design keywords="t-(v,k,lambda) design, blocks, points, BIBD" index="t デザイン|てぃーでざいん, ブロックデザイン|ぶろっくでざいん, ブロック（デザインの）|ぶろっく, BIBD|びーあいびーでぃー"}
+$1\le t\le k<v$ とし、$\lambda\ge1$ とする。$v$ 元集合 $V$（**点**）と、$\mathcal{P}_{k}(V)$ の元の重複を許す有限列 $\mathcal{B}=(B_{1},\dots,B_{b})$（**ブロック**）の組 $(V,\mathcal{B})$ が **$t$-$(v,k,\lambda)$ デザイン**であるとは、どの $t$ 点集合 $T\subseteq V$ も、ちょうど $\lambda$ 個のブロックに含まれることをいう（$T\subseteq B_{j}$ となる $j$ の個数が $\lambda$）。$t=2$ のものを**釣り合い型不完備ブロックデザイン**（BIBD）という。同じブロックが重複しないとき**単純**という。
+:::
+
+::: intuition
+点を「選手」、ブロックを「試合の組」と思うと、2 デザインは「どの 2 人の選手もちょうど $\lambda$ 回同じ組になる」ように組を作る総当たりの計画である。$k<v$ は「全員が一つの組になる」自明な場合を除く条件である。
+:::
+
+::: example ファノ平面 {#comb:fano-plane keywords="Fano plane, 2-(7,3,1) design" index="ファノ平面|ふぁのへいめん"}
+$V=\{1,\dots,7\}$、ブロックを
+$$\{1,2,4\},\{2,3,5\},\{3,4,6\},\{4,5,7\},\{5,6,1\},\{6,7,2\},\{7,1,3\}$$
+（$\{1,2,4\}$ を法 7 で平行移動したもの）とすると、2-$(7,3,1)$ デザインになる。実際、$\{1,2,4\}$ の 2 元の差 $\pm1,\pm2,\pm3$ は法 7 の 0 でない剰余をちょうど一度ずつ尽くすので、差が $d$ の 2 点 $\{x,x+d\}$ を含む平行移動はちょうど一つである。
+:::
+
+::: proposition パラメータの関係 {#comb:design-parameters keywords="lambda_i = lambda binom(v-i,t-i)/binom(k-i,t-i), b k = v r, r(k-1) = lambda(v-1)" index="反復数|はんぷくすう, デザインのパラメータ|でざいんのぱらめーた" refname="デザインのパラメータの関係"}
+$(V,\mathcal{B})$ を $t$-$(v,k,\lambda)$ デザインとする。$0\le i\le t$ と $i$ 点集合 $S$ について、$S$ を含むブロックの個数は $S$ によらず
+$$\lambda_{i}\defeq\lambda\,\frac{\binom{v-i}{t-i}}{\binom{k-i}{t-i}}$$
+に等しい。特に $(V,\mathcal{B})$ は $i$-$(v,k,\lambda_{i})$ デザインでもある（$1\le i\le t$）。ブロックの個数 $b=\lambda_{0}$、各点を含むブロックの個数（**反復数**）$r=\lambda_{1}$ について、$bk=vr$ であり、$t\ge2$ なら $r(k-1)=\lambda_{2}(v-1)$。
+:::
+
+::: intuition
+$t$ 点ごとの回数がそろっていれば、それより少ない点の集合ごとの回数も自動的にそろう。数え方を変える（二重数え上げ）だけで、すべてのパラメータが $v,k,\lambda,t$ から決まる。
+:::
+
+::: proof
+**Step 1（二重数え上げ）.** 【主張：$S$ を含むブロックの個数は $\lambda_{i}$】$S$（$\abs{S}=i$）を固定し、組 $(T,j)$ で $S\subseteq T\subseteq B_{j}$, $\abs{T}=t$ となるものを数える。$T$ を先に選ぶと、$S\subseteq T$ の $t$ 点集合は $\binom{v-i}{t-i}$ 個で、それぞれ $\lambda$ 個のブロックに含まれるので、$\lambda\binom{v-i}{t-i}$ 組。$j$ を先に選ぶと、$S\subseteq B_{j}$ のブロックごとに、$S\subseteq T\subseteq B_{j}$ の $T$ は $\binom{k-i}{t-i}$ 個なので、$S$ を含むブロックの個数を $\lambda_{S}$ として $\lambda_{S}\binom{k-i}{t-i}$ 組。よって $\lambda_{S}=\lambda\binom{v-i}{t-i}/\binom{k-i}{t-i}$ で、$S$ によらない。
+
+**Step 2（$bk=vr$）.** 組 $(x,j)$（$x\in B_{j}$）を、$j$ ごとに数えると $bk$、$x$ ごとに数えると $vr$。
+
+**Step 3（$r(k-1)=\lambda_{2}(v-1)$）.** 点 $x$ を固定し、組 $(y,j)$（$y\neq x$, $\{x,y\}\subseteq B_{j}$）を数える。$j$ ごとに数えると、$x$ を含む $r$ 個のブロックそれぞれで $k-1$ 通り。$y$ ごとに数えると、$v-1$ 個の $y$ それぞれで $\lambda_{2}$ 通り。
+:::
+
+::: example
+ファノ平面では $b=7$, $r=3$, $\lambda_{2}=1$ で、$bk=21=vr$, $r(k-1)=6=\lambda(v-1)$。パラメータの整数性は存在のための必要条件である：たとえば 2-$(8,3,1)$ デザインは $r=\frac{v-1}{k-1}=\frac72$ が整数でないので存在しない。
+:::
+
+## フィッシャーの不等式と対称デザイン {#comb:sec-bd-fisher}
+
+::: definition 接続行列 {#comb:incidence-matrix keywords="incidence matrix of a design, M M^T = (r - lambda) I + lambda J" index="接続行列（デザインの）|せつぞくぎょうれつ"}
+点を $x_{1},\dots,x_{v}$、ブロックを $B_{1},\dots,B_{b}$ とするとき、$x_{i}\in B_{j}$ なら 1、そうでなければ 0 を $(i,j)$ 成分とする $v\times b$ 行列 $M$ を**接続行列**という。2-$(v,k,\lambda)$ デザインでは、$MM^{\mathsf{T}}$ の $(i,i')$ 成分は $x_{i},x_{i'}$ をともに含むブロックの個数なので
+$$MM^{\mathsf{T}}=(r-\lambda)I+\lambda J,\qquad JM=kJ,\qquad MJ=rJ$$
+（$J$ の大きさは適宜）。
+:::
+
+::: intuition
+接続行列は「どの点がどのブロックに入っているか」の表で、$MM^{\mathsf{T}}$ は「2 点が何回一緒になるか」の表になる。2 デザインではこの表が対角とそれ以外の 2 種類の値しかもたない。
+:::
+
+::: lemma aI+bJ の逆行列 {#comb:inverse-aI-bJ keywords="(aI + bJ) is invertible if a != 0 and a + b n != 0" index="aI+bJ の逆|えーあいぷらすびーじぇいのぎゃく"}
+$n\times n$ 行列 $A=aI+cJ$ について、$a\neq0$ かつ $a+cn\neq0$ なら $A$ は可逆で、$A^{-1}=\frac{1}{a}\left(I-\frac{c}{a+cn}J\right)$。
+:::
+
+::: proof
+$J^{2}=nJ$ なので、$(aI+cJ)\left(I-\frac{c}{a+cn}J\right)=aI+cJ-\frac{ac}{a+cn}J-\frac{c^{2}n}{a+cn}J=aI+\left(c-\frac{c(a+cn)}{a+cn}\right)J=aI$。両辺を $a$ で割ればよい（左右の積の順を入れ替えても同じ計算）。
+:::
+
+::: theorem フィッシャーの不等式 {#comb:fisher-inequality keywords="Fisher's inequality b >= v for 2-designs" index="フィッシャーの不等式|ふぃっしゃーのふとうしき" refname="フィッシャーの不等式"}
+2-$(v,k,\lambda)$ デザインでは $b\ge v$（ブロックの個数は点の個数以上）。
+:::
+
+::: intuition
+接続行列 $M$ から作った $MM^{\mathsf{T}}$ は可逆な $v\times v$ 行列で、$\mathbb{R}^{v}\to\mathbb{R}^{b}\to\mathbb{R}^{v}$ と $b$ 次元を通って戻ってくる。$b<v$ なら途中で情報が失われ、可逆になれない。
+:::
+
+::: proof
+**Step 1（$r>\lambda$）.** $k<v$ なので、\ref{comb:design-parameters} の $r(k-1)=\lambda(v-1)$ から $r=\lambda\frac{v-1}{k-1}>\lambda$（$k\ge2$）。
+
+**Step 2（$MM^{\mathsf{T}}$ は可逆）.** $MM^{\mathsf{T}}=(r-\lambda)I+\lambda J$ に \ref{comb:inverse-aI-bJ} を $a=r-\lambda>0$, $c=\lambda$ で使うと、$a+cv>0$ なので可逆。
+
+**Step 3（次元の比較）.** 【主張：$b\ge v$】$M^{\mathsf{T}}\colon\mathbb{R}^{v}\to\mathbb{R}^{b}$ が単射でなければ、$M^{\mathsf{T}}u=0$ となる $u\neq0$ について $MM^{\mathsf{T}}u=0$ で、Step 2 に反する。よって $M^{\mathsf{T}}$ は単射で、\ref{lin:rank-nullity} から $v=\dim\operatorname{im}M^{\mathsf{T}}\le b$。
+:::
+
+::: definition 対称デザイン {#comb:symmetric-design keywords="symmetric design, b = v, square design" index="対称デザイン|たいしょうでざいん"}
+$b=v$ を満たす 2-$(v,k,\lambda)$ デザインを**対称デザイン**という。このとき $bk=vr$ から $r=k$。
+:::
+
+::: intuition
+ブロックの数がフィッシャーの不等式の下限ちょうどになる、もっとも無駄のないデザインである。
+:::
+
+::: theorem 対称デザインのブロックの交わり {#comb:symmetric-design-intersection keywords="in a symmetric design any two blocks meet in exactly lambda points; the dual is a design" index="対称デザインの双対|たいしょうでざいんのそうつい" refname="対称デザインのブロックの交わり"}
+対称 2-$(v,k,\lambda)$ デザインでは、異なる 2 つのブロックはちょうど $\lambda$ 個の点を共有する。したがって、点とブロックの役割を入れ替えたもの（**双対**）も対称 2-$(v,k,\lambda)$ デザインである。
+:::
+
+::: intuition
+対称デザインでは点とブロックが完全に対等になる：どの 2 点も $\lambda$ 個のブロックを共有し、どの 2 ブロックも $\lambda$ 個の点を共有する。
+:::
+
+::: proof
+**Step 1（$M$ は可逆）.** $M$ は正方行列で、$MM^{\mathsf{T}}$ が可逆（フィッシャーの不等式の証明の Step 2）なので $M$ も可逆。
+
+**Step 2（$M^{\mathsf{T}}M$ の計算）.** 【主張：$M^{\mathsf{T}}M=(k-\lambda)I+\lambda J$】$r=k$ なので $MJ=kJ=JM$。$MM^{\mathsf{T}}=(k-\lambda)I+\lambda J$ の左から $M^{-1}$、右から $M$ を掛けると
+$$M^{\mathsf{T}}M=M^{-1}\left((k-\lambda)I+\lambda J\right)M=(k-\lambda)I+\lambda M^{-1}JM.$$
+$JM=kJ=MJ$ から $M^{-1}JM=M^{-1}MJ=J$。よって $M^{\mathsf{T}}M=(k-\lambda)I+\lambda J$。
+
+**Step 3（結論）.** $M^{\mathsf{T}}M$ の $(j,j')$ 成分（$j\neq j'$）は $\abs{B_{j}\cap B_{j'}}$ なので、それは $\lambda$ に等しい。双対では、どの 2 つの「点」（元のブロック）もちょうど $\lambda$ 個の「ブロック」（元の点）に共通に含まれる。
+:::
+
+::: example
+1. ファノ平面は対称 2-$(7,3,1)$ デザインで、どの 2 本の直線（ブロック）もちょうど 1 点で交わる。
+2. $q$ 元体上の $n$ 次元射影空間の点と超平面は対称デザインになる（\ref[有限射影平面]{comb:page-projective-planes} で $n=2$ を扱う）。
+:::
+
+## 三重系と新しいデザインの作り方 {#comb:sec-bd-constructions}
+
+::: proposition シュタイナーの三重系の必要条件 {#comb:steiner-triple-necessary keywords="Steiner triple system STS(v) exists only if v = 1 or 3 mod 6" index="シュタイナーの三重系|しゅたいなーのさんじゅうけい, カークマンの定理|かーくまんのていり"}
+2-$(v,3,1)$ デザイン（**シュタイナーの三重系**）が存在すれば、$v\equiv1$ または $3\pmod6$。
+:::
+
+::: proof
+\ref{comb:design-parameters} から $r=\frac{v-1}{2}$, $b=\frac{vr}{3}=\frac{v(v-1)}{6}$ は整数。$r$ が整数なので $v$ は奇数、すなわち $v\equiv1,3,5\pmod6$。$v\equiv5\pmod6$ なら $v(v-1)\equiv5\cdot4=20\equiv2\pmod6$ で $b$ が整数にならない。
+:::
+
+::: fact カークマンの定理 {#comb:kirkman keywords="Kirkman's theorem: Steiner triple systems exist for all v = 1, 3 mod 6" index="カークマンの定理|かーくまんのていり"}
+$v\equiv1,3\pmod6$ なら 2-$(v,3,1)$ デザインが存在する（T. P. Kirkman, 1847）。より一般に、パラメータの整数条件を満たす $t$-$(v,k,\lambda)$ デザインは $v$ が十分大きければ存在する（キーヴァシュ、2014）と知られている。
+:::
+
+::: proposition 補デザインと導来デザイン {#comb:complementary-derived-design keywords="complementary design, derived design" index="補デザイン|ほでざいん, 導来デザイン|どうらいでざいん"}
+$(V,\mathcal{B})$ を $t$-$(v,k,\lambda)$ デザイン（$t\ge2$）とする。
+1. （導来デザイン）点 $x$ を固定し、$x$ を含むブロックから $x$ を除いたもの全体は、$V\setminus\{x\}$ 上の $(t-1)$-$(v-1,k-1,\lambda)$ デザインである。
+2. （補デザイン）$t=2$ で $k\le v-2$ のとき、各ブロックの補集合 $V\setminus B_{j}$ 全体は 2-$(v,v-k,b-2r+\lambda)$ デザインである。
+:::
+
+::: proof
+**Step 1（1）.** $V\setminus\{x\}$ の $t-1$ 点集合 $S$ について、$S$ を含む新しいブロックは、$S\cup\{x\}$ を含む元のブロックと一対一に対応し、その個数は $\lambda$。ブロックの大きさは $k-1$ で、$t-1\le k-1<v-1$。
+
+**Step 2（2）.** 2 点 $x\neq y$ について、$\{x,y\}\cap B=\varnothing$ となるブロックの個数を\ref{comb:inclusion-exclusion} で数えると、$b-r-r+\lambda$（$x$ を含むもの $r$、$y$ を含むもの $r$、両方を含むもの $\lambda$）。これが補集合 $V\setminus B$ に $\{x,y\}$ が含まれるブロックの個数である。$k\le v-2$ から補ブロックの大きさ $v-k\ge2$。この値が 1 以上であることは、$b-2r+\lambda\ge1$ をパラメータから確かめる（\ref{comb:prob-bd-complement-positive}）。
+:::
+
+::: hypcheck
+- **パラメータの関係**：$t$ デザインであること（どの $t$ 点集合も $\lambda$ 個）は Step 1 の二重数え上げだけに使う。
+- **フィッシャーの不等式**：$k<v$（不完備）は Step 1 の $r>\lambda$ に本質的に使った。$k=v$ なら $b$ 個の同じブロック $V$ で $b<v$ もありうる。また $t\ge2$ が必要で、1 デザインでは成り立たない（$V$ の分割はブロックが $v/k$ 個）。
+- **対称デザイン**：$M$ が正方行列であること（$b=v$）を、$M$ の可逆性（Step 1）に使った。
+:::
+
+## 問題 {#comb:sec-bd-problems}
+
+::: problem {#comb:prob-bd-complement-positive}
+2-$(v,k,\lambda)$ デザインで $2\le k\le v-2$ なら、$b-2r+\lambda\ge1$ であることを示せ（補デザインの $\lambda$ が正であること）。
+:::
+
+::: solution
+$b=\frac{\lambda v(v-1)}{k(k-1)}$, $r=\frac{\lambda(v-1)}{k-1}$（\ref{comb:design-parameters}）を代入すると
+$$b-2r+\lambda=\frac{\lambda}{k(k-1)}\Bigl(v(v-1)-2k(v-1)+k(k-1)\Bigr)=\frac{\lambda}{k(k-1)}\Bigl((v-k)^{2}-(v-k)\Bigr)=\frac{\lambda(v-k)(v-k-1)}{k(k-1)}.$$
+$2\le k\le v-2$ なら $v-k\ge2$ で右辺は正。
+:::
+
+::: problem {#comb:prob-bd-fano-derived}
+ファノ平面の点 $1$ についての導来デザインを書き下し、それが 1-$(6,2,1)$ デザイン（6 点の完全マッチング）であることを確かめよ。
+:::
+
+::: solution
+1 を含むブロックは $\{1,2,4\},\{5,6,1\},\{7,1,3\}$ で、1 を除くと $\{2,4\},\{5,6\},\{3,7\}$。これは $\{2,\dots,7\}$ の各点をちょうど 1 回含む（完全マッチング）ので、1-$(6,2,1)$ デザイン。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** フィッシャーの不等式の証明では、接続行列の成分が 0, 1 であることと $MM^{\mathsf{T}}$ の形だけを使い、ブロックが単純（重複なし）であることは使わない。
+
+**前提を変えると.**
+- $t$ デザイン（$t=2s$）についてはレイ=チャウドゥリ–ウィルソンの不等式 $b\ge\binom{v}{s}$ が成り立つ（$s=1$ がフィッシャーの不等式）と知られている。
+- 対称デザインの存在には、さらにブルック–ライザー–チョウラの定理による整数論的な必要条件がある（$v$ が偶数なら $k-\lambda$ は平方数、など）。その射影平面の場合を \ref[有限射影平面]{comb:page-projective-planes} で扱う。
+
+**類似の定理.** 有限集合の部分集合族の大きさについての線形代数的な評価（フランクル–ウィルソンの定理など）は、フィッシャーの不等式と同じく「ベクトルの一次独立性から個数を抑える」方法による。
+
+**高い視点から：デザインは「部分集合の上の一様分布の有限近似」.** $t$ デザインのブロックの族は、$\mathcal{P}_{k}(V)$ 全体（完全デザイン）と「$t$ 点以下の統計」が一致する小さな部分族である。これは数値積分の「立方公式」（低次の多項式を正確に積分する少数の点）や、球面デザインと同じ考え方で、表現論の言葉では、ブロックの特性関数の和が $\mathcal{P}_{k}(V)$ 上の関数空間の低い次数の既約成分に射影すると完全デザインと比例する、という条件になる。比喩で言えば、全員の総当たり戦をする代わりに、どの 2 人も同じ回数だけ対戦する「縮約版の総当たり」を組むのがデザインであり、フィッシャーの不等式は「縮約しても試合数（ブロック）は人数より減らせない」という限界を述べる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
