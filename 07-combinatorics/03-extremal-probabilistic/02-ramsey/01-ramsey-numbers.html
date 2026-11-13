@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>有限ラムゼー理論とラムゼー数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/03-extremal-probabilistic/02-ramsey/01-ramsey-numbers.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 有限ラムゼー理論とラムゼー数 {#comb:page-ramsey-numbers keywords="Ramsey number, R(s,t), Erdos-Szekeres bound, R(3,3)=6, R(3,4)=9, multicolour Ramsey number, R(3,3,3), tree-complete graph Ramsey number, Chvatal, Ramsey numbers of bounded degree graphs, Chvatal-Rodl-Szemeredi-Trotter"}
+
+ラムゼーの定理は「十分大きな完全グラフの辺をどう 2 色に塗っても、同じ色の大きな完全部分グラフが現れる」と述べる。その存在は集合論の分割関係のページで、無限版からコンパクト性によって示した（\ref{set:finite-ramsey}）。しかしその証明は「どれだけ大きければよいか」を何も教えない。このページでは、**ラムゼー数**の具体的な上界（エルデシュ–セケレシュ）、小さいラムゼー数の決定、木と完全グラフのラムゼー数、そして最大次数の有界なグラフのラムゼー数が頂点数の 1 次で抑えられること（正則性補題の応用）を示す。下界の確率的な評価は \ref[確率的方法]{comb:page-probabilistic-method} で扱う。
+
+## 記法と定義の確認 {#comb:sec-rn-notation}
+
+::: notation
+- グラフは有限・単純。$\overline{G}$ は補グラフ。$K^{r}$ は完全グラフ、$\overline{K^{r}}$ は辺のない $r$ 頂点のグラフ。
+- 完全グラフ $K^{n}$ の辺の **$c$ 色の彩色**とは、辺集合から $c$ 元集合への写像のこと（頂点彩色の条件は課さない）。同じ色の辺だけからなる部分グラフを**単色**という。グラフ $G$ を $K^{n}$ の辺の 2 色彩色（$G$ の辺を赤、それ以外を青）と同一視する。
+- 使う道具：\ref{comb:regularity-lemma}、\ref{comb:regularity-graph}、\ref{comb:embedding-lemma}、\ref{comb:turan-theorem}。
+- 体系は $\ZF$。
+:::
+
+## ラムゼー数とその上界 {#comb:sec-rn-upper}
+
+::: definition ラムゼー数 {#comb:ramsey-number keywords="Ramsey number R(s,t), R(r), multicolour Ramsey number R(H_1,...,H_c)" index="ラムゼー数|らむぜーすう" refname="ラムゼー数"}
+グラフ $H_{1},\dots,H_{c}$ について、$K^{n}$ の辺のどの $c$ 色の彩色にも、ある $i$ について色 $i$ の単色な $H_{i}$ が含まれるような最小の $n$ を $R(H_{1},\dots,H_{c})$ と書き、**ラムゼー数**という。$R(s,t)\defeq R(K^{s},K^{t})$、$R(r)\defeq R(r,r)$ と書く。2 色の場合、$R(s,t)$ は「$n$ 頂点のどのグラフ $G$ も $K^{s}$ を含むか、$\overline{G}$ が $K^{t}$ を含む（$G$ が大きさ $t$ の独立集合をもつ）」最小の $n$ である。
+:::
+
+::: intuition
+パーティーに何人集めれば「互いに知り合いの $s$ 人」か「互いに知らない $t$ 人」が必ずいるか、という問いの答えが $R(s,t)$ である。有限性はラムゼーの定理が保証するが、正確な値はほとんど分かっていない。
+:::
+
+::: theorem エルデシュ–セケレシュの上界 {#comb:erdos-szekeres-ramsey keywords="R(s,t) <= R(s-1,t) + R(s,t-1), R(s,t) <= binom(s+t-2, s-1), R(r) < 4^r" index="ラムゼー数の上界|らむぜーすうのじょうかい" refname="エルデシュ–セケレシュの上界"}
+$s,t\ge2$ について次が成り立つ。
+1. $R(s,2)=s$, $R(2,t)=t$。
+2. $R(s,t)\le R(s-1,t)+R(s,t-1)$。さらに右辺の 2 つの数がともに偶数なら、不等号は真の不等号になる。
+3. $R(s,t)\le\binom{s+t-2}{s-1}$。特に $R(r)\le\binom{2r-2}{r-1}<4^{r-1}$（$r\ge2$）。
+:::
+
+::: intuition
+頂点を一つ選ぶと、残りの頂点は「その頂点と結ばれている側」と「結ばれていない側」に分かれ、どちらかは十分大きい。大きい側で一回り小さい問題を解けば、選んだ頂点を加えて元の問題が解ける。
+:::
+
+::: proof
+**Step 1（1）.** $n$ 頂点のグラフ $G$ が大きさ 2 の独立集合（隣接しない 2 頂点）をもたなければ $G=K^{n}$ で、$n\ge s$ なら $K^{s}$ を含む。よって $R(s,2)\le s$。$K^{s-1}$ は $K^{s}$ も隣接しない 2 頂点も含まないので $R(s,2)>s-1$。対称に $R(2,t)=t$。
+
+**Step 2（2 の不等式）.** 【主張：$a+b$ 頂点のグラフは $K^{s}$ か大きさ $t$ の独立集合を含む】$a\defeq R(s-1,t)$, $b\defeq R(s,t-1)$, $n\defeq a+b$ とし、$n$ 頂点のグラフ $G$ と頂点 $v$ をとる。$v$ 以外の $n-1=a+b-1$ 頂点は、$v$ に隣接する $N$ と隣接しない $\overline{N}$ に分かれるので、鳩の巣原理により $\abs{N}\ge a$ か $\abs{\overline{N}}\ge b$。
+- $\abs{N}\ge a$ なら、$G[N]$ は $K^{s-1}$ を含む（それに $v$ を加えて $K^{s}$）か、大きさ $t$ の独立集合をもつ。
+- $\abs{\overline{N}}\ge b$ なら、$G[\overline{N}]$ は $K^{s}$ を含むか、大きさ $t-1$ の独立集合をもつ（それに $v$ を加えて大きさ $t$）。
+
+**Step 3（2 の真の不等号）.** $a,b$ がともに偶数とし、$n\defeq a+b-1$ 頂点のグラフ $G$ をとる。$n$ は奇数なので、\ref{graph:handshake} により次数が偶数の頂点 $v$ がある。$v$ 以外の $a+b-2$ 頂点が $N$, $\overline{N}$ に分かれ、$\abs{N}=d(v)$ は偶数。$\abs{N}\le a-2$ かつ $\abs{\overline{N}}\le b-1$ だと合計 $\le a+b-3$ で矛盾し、$\abs{N}=a-1$ は $\abs{N}$ が偶数で $a-1$ が奇数なので起こらない。よって $\abs{N}\ge a$ か $\abs{\overline{N}}\ge b$ で、Step 2 と同じ議論が通る。
+
+**Step 4（3）.** $s+t$ についての帰納法。$s=2$ または $t=2$ では 1 から $\binom{t}{1}=t$, $\binom{s}{s-1}=s$ で等号。$s,t\ge3$ なら 2 と帰納法の仮定、パスカルの規則から
+$$R(s,t)\le\binom{s+t-3}{s-2}+\binom{s+t-3}{s-1}=\binom{s+t-2}{s-1}.$$
+$\binom{2r-2}{r-1}$ は $\sum_{i}\binom{2r-2}{i}=4^{r-1}$ の一つの項で、$r\ge2$ なら他に正の項があるので $4^{r-1}$ より小さい。
+:::
+
+::: example 小さいラムゼー数 {#comb:small-ramsey-numbers keywords="R(3,3)=6, R(3,4)=9, Wagner graph" index="R(3,3)=6|あーるさんさんろく"}
+1. **$R(3,3)=6$.** 上界は 2 から $R(3,3)\le R(2,3)+R(3,2)=6$。5 角形 $C^{5}$ は三角形を含まず、補グラフも $C^{5}$（5 角星）で三角形を含まないので $R(3,3)>5$。
+2. **$R(3,4)=9$.** 上界は $R(2,4)+R(3,3)=4+6=10$ で、両方が偶数なので真の不等号から $R(3,4)\le9$。下界：$\mathbb{Z}/8$ を頂点とし、差が $\pm1$ または $4$ の 2 点を結んだ 3 正則グラフ（ワグナーグラフ）は三角形を含まず（3 つの差 $\pm1,4$ の和が $0\bmod8$ になる組合せはない）、独立集合の大きさは 3 以下である（8 頂点の 4 元部分集合 70 個をすべて調べれば確かめられる）。よって $R(3,4)>8$。
+:::
+
+::: proposition 多色のラムゼー数 {#comb:multicolour-ramsey keywords="R(3,3,3) <= 17, multicolour recursion" index="多色ラムゼー数|たしょくらむぜーすう"}
+1. $c\ge2$ 色、$r_{1},\dots,r_{c}\ge2$ について
+$$R(K^{r_{1}},\dots,K^{r_{c}})\le2+\sum_{i=1}^{c}\left(R(K^{r_{1}},\dots,K^{r_{i}-1},\dots,K^{r_{c}})-1\right)$$
+（$K^{1}$ を含む引数は、$K^{1}$ は 1 頂点なので常に単色に含まれ、その項のラムゼー数は 1 とする）。
+2. $R(3,3,3)\le17$。
+:::
+
+::: proof
+**Step 1（1）.** $n$ を右辺とし、$K^{n}$ の辺の $c$ 色彩色と頂点 $v$ をとる。$v$ から出る $n-1$ 本の辺を色で分け、色 $i$ の辺の先の頂点集合を $N_{i}$ とする。$\sum_{i}\abs{N_{i}}=n-1=1+\sum_{i}(R_{i}-1)$（$R_{i}$ は和の第 $i$ 項のラムゼー数）なので、鳩の巣原理によりある $i$ で $\abs{N_{i}}\ge R_{i}$。$N_{i}$ の上の彩色には、ある $j\neq i$ について色 $j$ の単色な $K^{r_{j}}$ があるか、色 $i$ の単色な $K^{r_{i}-1}$ があり、後者に $v$ を加えれば色 $i$ の $K^{r_{i}}$ になる。
+
+**Step 2（2）.** 1 で $c=3$, $r_{i}=3$ とすると、各項は $R(2,3,3)$ で、色 1 の $K^{2}$ は「色 1 の辺が 1 本」なので、$R(2,3,3)=R(3,3)=6$（色 1 の辺があれば終わり、なければ 2 色で $R(3,3)$）。よって $R(3,3,3)\le2+3\cdot5=17$。
+:::
+
+::: example
+$R(3,3,3)=17$ であることが知られている（グリーンウッドとグリーソン、1955）。下界は位数 16 の有限体の 3 乗剰余類を使った彩色による、と一般には言われている。ここでは証明しない。
+:::
+
+## 木と完全グラフ {#comb:sec-rn-trees}
+
+::: lemma 最小次数と木 {#comb:min-degree-contains-trees keywords="a graph with minimum degree at least t-1 contains every tree with t vertices" index="木の埋め込み（最小次数）|きのうめこみ"}
+$\delta(G)\ge t-1$ なら、$G$ は $t$ 頂点のすべての木を部分グラフとして含む。
+:::
+
+::: proof
+$t$ についての帰納法。$t=1$ は自明（$G$ は空でない：$\delta$ の定義から）。$t\ge2$ の木 $T$ は葉 $u$ をもち（\ref{graph:tree-leaves}）、$T-u$ は $t-1$ 頂点の木。$\delta(G)\ge t-1\ge t-2$ なので帰納法の仮定から $T-u$ の埋め込み $\varphi$ がある。$u$ の $T$ での隣接頂点を $w$ とすると、$\varphi(w)$ は $G$ で $t-1$ 個以上の隣接頂点をもち、そのうち $\varphi(T-u)$ の他の $t-2$ 頂点でないものが少なくとも 1 つある。それを $u$ の像とすればよい。
+:::
+
+::: theorem フヴァータルの木のラムゼー数 {#comb:tree-complete-ramsey keywords="R(T,K^s) = (s-1)(t-1)+1 for every tree T with t vertices" index="木と完全グラフのラムゼー数|きとかんぜんぐらふのらむぜーすう" refname="木と完全グラフのラムゼー数"}
+$s,t\ge1$ とし、$T$ を $t$ 頂点の木とする。$R(T,K^{s})=(s-1)(t-1)+1$。
+:::
+
+::: intuition
+$s-1$ 個の $K^{t-1}$ を並べたグラフは、木 $T$ を含まず（成分が小さすぎる）、補グラフ（完全 $(s-1)$ 部グラフ）は $K^{s}$ を含まない。逆に頂点が 1 つでも多ければ、独立集合が小さいので彩色数が大きくなり、最小次数の大きい部分グラフができて木が入る。
+:::
+
+::: proof
+**Step 1（下界）.** $G$ を $K^{t-1}$ の $s-1$ 個の互いに交わらない和とする（$(s-1)(t-1)$ 頂点）。$T$ は連結で $t$ 頂点なので、$t-1$ 頂点の成分には入らない。$\overline{G}$ は大きさ $t-1$ の組 $s-1$ 個の完全多部グラフで、$K^{s}$ の $s$ 頂点のうち 2 つは同じ組にあり隣接しないので、$\overline{G}$ は $K^{s}$ を含まない。
+
+**Step 2（上界）.** $n\defeq(s-1)(t-1)+1$ 頂点のグラフ $G$ で、$\overline{G}$ が $K^{s}$ を含まない、すなわち $G$ の独立集合の大きさが $s-1$ 以下のものをとる。$s=1$ なら $\overline{G}$ が $K^{1}$ を含まないことはないので $s\ge2$。$G$ の頂点彩色の各色クラスは独立集合で $s-1$ 頂点以下なので、$\chi(G)\ge\lceil n/(s-1)\rceil=t$。\ref{graph:critical-subgraph} により、$G$ は最小次数 $t-1$ 以上の部分グラフ $G'$ をもつ（$k\defeq\chi(G)\ge t$ として、最小次数 $k-1\ge t-1$ の部分グラフ）。\ref{comb:min-degree-contains-trees} により $T\subseteq G'\subseteq G$。
+:::
+
+## 最大次数の有界なグラフのラムゼー数 {#comb:sec-rn-bounded-degree}
+
+::: theorem フヴァータル–レードル–セメレディ–トロッターの定理 {#comb:bounded-degree-ramsey keywords="Ramsey numbers of bounded degree graphs are linear, Chvatal-Rodl-Szemeredi-Trotter" index="有界次数グラフのラムゼー数|ゆうかいじすうぐらふのらむぜーすう" refname="有界次数グラフのラムゼー数"}
+各整数 $\Delta\ge1$ について定数 $c$ があり、$\Delta(H)\le\Delta$ のすべてのグラフ $H$ について $R(H,H)\le c\abs{H}$。
+:::
+
+::: intuition
+一般のグラフ（完全グラフ）ではラムゼー数は頂点数の指数関数的になりうるが、次数の小さいグラフは、正則性グラフの上の小さな単色完全グラフを「膨らませた」ものの中に収まる。正則性グラフの大きさは $\Delta$ だけで決まるので、必要な頂点数は $\abs{H}$ に比例する。
+:::
+
+::: proof
+**Step 1（定数）.** $d\defeq1/2$ と $\Delta$ について \ref{comb:embedding-lemma} の $\varepsilon_{0}$ をとる。$m\defeq R(\Delta+1)$（ラムゼー数、\ref{comb:erdos-szekeres-ramsey} により有限）とし、$\varepsilon\defeq\min\left(\varepsilon_{0},\frac{1}{4m(m-1)}\right)$（$m\ge2$）、正則性補題の $M=M(\varepsilon,m)$ をとり、$c\defeq\dfrac{2^{\Delta+1}M}{1-\varepsilon}$ とおく。
+
+**Step 2（分割）.** $H$ と $n\ge c\abs{H}$ 頂点のグラフ $G$ をとり、$s\defeq\abs{H}$ とする。$n\ge M\ge m$ なので $\varepsilon$ 正則な分割 $\{V_{0},\dots,V_{k}\}$（$m\le k\le M$、$\abs{V_{i}}=\ell$）があり、$\ell\ge\frac{(1-\varepsilon)n}{M}\ge2^{\Delta+1}s=2s/d^{\Delta}$。
+
+**Step 3（正則な対の作るグラフ）.** 【主張：$\varepsilon$ 正則な対 $(V_{i},V_{j})$ を辺とする $k$ 頂点のグラフ $R_{0}$ は $K^{m}$ を含む】$\norm{R_{0}}\ge\binom{k}{2}-\varepsilon k^{2}=\frac{k^{2}}{2}\left(1-\frac{1}{k}-2\varepsilon\right)$。$k\ge m$ なので $\frac{1}{k}+2\varepsilon\le\frac{1}{m}+\frac{1}{2m(m-1)}<\frac{1}{m-1}$（$\frac{1}{m-1}-\frac{1}{m}=\frac{1}{m(m-1)}$）。よって $\norm{R_{0}}>\left(1-\frac{1}{m-1}\right)\frac{k^{2}}{2}\ge t_{m-1}(k)$（\ref{comb:turan-number-bound} の 1）で、トゥランの定理から $K^{m}\subseteq R_{0}$。
+
+**Step 4（2 色に塗る）.** $R_{0}$ の辺 $V_{i}V_{j}$ を、$G$ での密度が $1/2$ 以上なら赤、$1/2$ 未満なら青に塗る。$m=R(\Delta+1)$ なので、$K^{m}\subseteq R_{0}$ の中に単色の $K^{\Delta+1}$ がある。
+- 赤の辺のグラフ $R'$ は $G$ のパラメータ $\varepsilon,\ell,1/2$ の正則性グラフである。
+- $\overline{G}$ では $d_{\overline{G}}(X,Y)=1-d_{G}(X,Y)$ なので、$G$ で $\varepsilon$ 正則な対は $\overline{G}$ でも $\varepsilon$ 正則で、$\{V_{0},\dots,V_{k}\}$ は $\overline{G}$ の $\varepsilon$ 正則な分割でもある。青の辺の対は $\overline{G}$ で密度 $>1/2$ なので、青の辺のグラフ $R''$ は $\overline{G}$ のパラメータ $\varepsilon,\ell,1/2$ の正則性グラフ（の部分グラフ）である。
+
+**Step 5（埋め込み）.** $r\defeq\chi(H)\le\Delta+1$（\ref{graph:chromatic-basic-bounds}）。$H$ の $r$ 色の頂点彩色の色クラスは $s$ 頂点以下なので、$H\subseteq(K^{r})_{s}$。単色の $K^{\Delta+1}$ は $K^{r}$ を含むので、$H\subseteq R'_{s}$ または $H\subseteq R''_{s}$。$\varepsilon\le\varepsilon_{0}$, $\ell\ge2s/d^{\Delta}$ なので、\ref{comb:embedding-lemma} を $G$ または $\overline{G}$ に使って $H\subseteq G$ または $H\subseteq\overline{G}$。よって $R(H,H)\le c\abs{H}$。
+:::
+
+::: hypcheck
+- **エルデシュ–セケレシュの上界**：真の不等号の場合は、頂点数が奇数であることと握手補題（次数が偶数の頂点の存在）を Step 3 で使った。
+- **木のラムゼー数**：$T$ が**木**（連結で $t$ 頂点）であることは、下界（小さい成分に入らない）と上界（\ref{comb:min-degree-contains-trees}）の両方で使った。
+- **有界次数のラムゼー数**：$\Delta(H)\le\Delta$ は、彩色数の評価 $\chi(H)\le\Delta+1$ と埋め込み補題の両方で使った。定数 $c$ は正則性補題の $M$ を通じて塔型に巨大になる。
+:::
+
+## 問題 {#comb:sec-rn-problems}
+
+::: problem {#comb:prob-rn-lower-turan}
+$K^{r-1}$ の $r-1$ 個の互いに交わらない和を考えて、$R(r)>(r-1)^{2}$ を示せ。
+:::
+
+::: solution
+$G$ を $K^{r-1}$ の $r-1$ 個の和とする（$(r-1)^{2}$ 頂点）。$G$ のクリークは 1 つの成分の中にあるので大きさ $r-1$ 以下。独立集合は各成分から高々 1 頂点なので大きさ $r-1$ 以下。よって $G$ は $K^{r}$ も大きさ $r$ の独立集合ももたない。（これは \ref{comb:tree-complete-ramsey} の下界の構成で $T$ を $K^{r}$ にしたものにあたる。確率的方法による下界 $2^{r/2}$ はこれよりずっと大きい。）
+:::
+
+::: problem {#comb:prob-rn-paths}
+$R(P,K^{3})$ を求めよ。ここで $P$ は 4 頂点の道である。
+:::
+
+::: solution
+\ref{comb:tree-complete-ramsey} で $t=4$, $s=3$ とすると $R(P,K^{3})=2\cdot3+1=7$。下界の例は $K^{3}$ の 2 個の和（6 頂点）で、道 $P$（4 頂点、連結）を含まず、補グラフ $K_{3,3}$ は三角形を含まない。
+:::
+
+::: problem {#comb:prob-rn-schur}
+（シューアの定理の有限版の準備）$\{1,\dots,16\}$ を 3 色に塗ると、$x+y=z$ となる同色の $x,y,z$（$x=y$ も許す）があることを、$R(3,3,3)\le17$ を使って示せ。
+:::
+
+::: solution
+$\{0,1,\dots,16\}$ を頂点とする $K^{17}$ の辺 $\{i,j\}$（$i<j$）を、$j-i\in\{1,\dots,16\}$ の色で塗る。\ref{comb:multicolour-ramsey} により単色の三角形 $i<j<k$ がある。$x\defeq j-i$, $y\defeq k-j$, $z\defeq k-i$ は同じ色で、$x+y=z$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{comb:erdos-szekeres-ramsey} の証明は、\ref{set:infinite-ramsey} もコンパクト性も使わず、有限の鳩の巣原理だけで、ラムゼー数の有限性と具体的な上界を同時に与える。
+
+**前提を変えると.**
+- 下界については、確率的方法により $R(r)>2^{r/2}$（$r\ge3$）が示される（\ref[確率的方法]{comb:page-probabilistic-method}）。上界 $4^{r}$ と下界 $2^{r/2}$ の指数の底の差は長く縮まらなかったが、近年、上界の底を 4 より真に小さくできることが示された（Campos–Griffiths–Morris–Sahasrabudhe, 2023）と一般には言われている。
+- 小さいラムゼー数の正確な値は、$R(4,4)=18$, $R(3,5)=14$ などが知られているが、$R(5,5)$ は $43\le R(5,5)\le46$ 程度までしか分かっていない、と一般には言われている（正確な最新値は確認していない）。
+- 有界次数の条件を外すと、ラムゼー数は $\abs{H}$ の 1 次で抑えられない（完全グラフでは指数関数的に大きい）。
+
+**類似の定理.** 超グラフ版（$k$ 元部分集合の彩色）の存在は \ref{set:finite-ramsey} で示した。整数の加法構造についての類似はシューアの定理、ファン・デル・ヴェルデンの定理である（\ref[ファン・デル・ヴェルデンの定理]{comb:page-van-der-waerden}）。
+
+**高い視点から：ラムゼー理論は「完全な無秩序は不可能」.** どの彩色にも単色の構造が現れるということは、十分大きな対象の中では「秩序だった部分」が避けられないということである。エルデシュ–セケレシュの再帰は、頂点を一つ選ぶごとに「色の分かれ目」で候補を半分以下に絞る二分探索であり、そのため上界は指数関数 $4^{r}$ になる。一方、確率的方法の下界は「ランダムな彩色は単色の大きな構造をもたない」ことを示し、秩序が現れ始める大きさが指数関数のオーダーであることを示す。比喩で言えば、ラムゼー数は「無秩序が保てる限界の大きさ」であり、その限界が指数関数的に大きいことは、無秩序（ランダム）と秩序（構造）の境界が対数的なスケールにあることを意味する。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
