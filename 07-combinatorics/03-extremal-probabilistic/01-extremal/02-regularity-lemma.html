@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>セメレディの正則性補題 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/03-extremal-probabilistic/01-extremal/02-regularity-lemma.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# セメレディの正則性補題 {#comb:page-regularity-lemma keywords="Szemeredi regularity lemma, epsilon-regular pair, epsilon-regular partition, density, index (energy) of a partition, energy increment, counting lemma, triangle counting lemma, tower-type bound"}
+
+セメレディの**正則性補題**は「どんなに大きなグラフも、有界個の同じ大きさの部分に分ければ、ほとんどすべての部分の対の間で辺が**ランダムのように一様に**分布している」と述べる。分ける個数は $\varepsilon$ だけで決まり、グラフの大きさに依存しない。この補題により、密なグラフについての問題を、有界な大きさの「縮約グラフ」の問題に帰着できる（応用は \ref[正則性補題の応用]{comb:page-regularity-applications}）。証明の鍵は、分割の**指数**（エネルギー）$q(\mathcal{P})$ という $[0,1]$ に値をとる量が、正則でない分割を細分するたびに一定量ずつ増える、という議論である。
+
+## 記法と定義の確認 {#comb:sec-rg-notation}
+
+::: notation
+- グラフ $G=(V,E)$ は有限・単純で、$n\defeq\abs{V}$。互いに交わらない $X,Y\subseteq V$ について、$X$ の点と $Y$ の点を結ぶ辺の数を $\norm{X,Y}$ と書く。
+- $V$ の**分割**とは、空でない互いに交わらない部分集合で $V$ を覆う族のこと。分割 $\mathcal{P}'$ が $\mathcal{P}$ の**細分**とは、$\mathcal{P}'$ の各元が $\mathcal{P}$ のある元に含まれることをいう。
+- \ref{lin:cauchy-schwarz}を $\mathbb{R}^{k}$ の標準内積で使う。
+- 体系は $\ZF$。
+:::
+
+## 正則な対と正則な分割 {#comb:sec-rg-definitions}
+
+::: definition 密度と ε 正則な対 {#comb:regular-pair keywords="density of a pair, epsilon-regular pair" index="密度（頂点集合の対の）|みつど, ε 正則な対|いぷしろんせいそくなつい"}
+互いに交わらない空でない $X,Y\subseteq V$ について、$d(X,Y)\defeq\dfrac{\norm{X,Y}}{\abs{X}\abs{Y}}\in[0,1]$ を対 $(X,Y)$ の**密度**という。$\varepsilon>0$ とする。互いに交わらない空でない $A,B\subseteq V$ の対 $(A,B)$ が **$\varepsilon$ 正則**であるとは、$\abs{X}\ge\varepsilon\abs{A}$, $\abs{Y}\ge\varepsilon\abs{B}$ を満たすすべての $X\subseteq A$, $Y\subseteq B$ について
+$$\abs{d(X,Y)-d(A,B)}\le\varepsilon$$
+が成り立つことをいう。
+:::
+
+::: intuition
+密度 $p$ のランダムな二部グラフでは、大きな部分集合 $X,Y$ の間の密度もほぼ $p$ になる。$\varepsilon$ 正則な対とは、この性質を「大きな部分集合について密度がほとんど変わらない」という形で要求したもので、辺が偏りなく散らばっていることを表す。
+:::
+
+::: definition ε 正則な分割 {#comb:regular-partition keywords="epsilon-regular partition, exceptional set" index="ε 正則な分割|いぷしろんせいそくなぶんかつ, 例外集合|れいがいしゅうごう"}
+$V$ の互いに交わらない部分集合の族 $\{V_{0},V_{1},\dots,V_{k}\}$（$V_{0}$ は空でもよく、**例外集合**とよぶ。$V_{1},\dots,V_{k}$ は空でない）で $V$ を覆うものが **$\varepsilon$ 正則な分割**であるとは、次を満たすことをいう。
+1. $\abs{V_{0}}\le\varepsilon n$。
+2. $\abs{V_{1}}=\cdots=\abs{V_{k}}$。
+3. 対 $(V_{i},V_{j})$（$1\le i<j\le k$）のうち、$\varepsilon$ 正則でないものは $\varepsilon k^{2}$ 個以下。
+:::
+
+::: intuition
+例外集合 $V_{0}$ は「ごみ箱」で、残りの部分の大きさをそろえるために少数の頂点を捨てておく場所である。残りの部分は同じ大きさで、ほとんどの対が一様である。各部分の内部の辺については何も主張しない。
+:::
+
+::: theorem セメレディの正則性補題 {#comb:regularity-lemma keywords="Szemeredi regularity lemma" index="正則性補題|せいそくせいほだい, セメレディの正則性補題|せめれでぃのせいそくせいほだい" refname="正則性補題"}
+任意の $\varepsilon>0$ と整数 $m\ge1$ について、ある整数 $M$ があり、$m$ 個以上の頂点をもつ任意のグラフは、$m\le k\le M$ を満たす $\varepsilon$ 正則な分割 $\{V_{0},V_{1},\dots,V_{k}\}$ をもつ。
+:::
+
+::: intuition
+グラフがどれほど大きくても、「同じ大きさの $M$ 個以下のブロックと、そのブロック間の密度の表」でほぼ記述できる。$M$ は $\varepsilon$ と $m$ だけで決まる。下限 $m$ は、ブロックの内部の辺（何も分からない部分）を全体の中で無視できるほど少なくするために使う。
+:::
+
+## 分割の指数 {#comb:sec-rg-index}
+
+証明の残りでは $G$ と $n=\abs{G}$ を固定する。
+
+::: definition 分割の指数 {#comb:partition-index keywords="index of a partition, energy, q(P)" index="分割の指数|ぶんかつのしすう, エネルギー（分割の）|えねるぎー"}
+互いに交わらない空でない $A,B\subseteq V$ について
+$$q(A,B)\defeq\frac{\abs{A}\abs{B}}{n^{2}}d(A,B)^{2}=\frac{\norm{A,B}^{2}}{\abs{A}\abs{B}n^{2}}$$
+とおく。$A$ の分割 $\mathcal{A}$ と $B$ の分割 $\mathcal{B}$ について $q(\mathcal{A},\mathcal{B})\defeq\sum_{A'\in\mathcal{A},\,B'\in\mathcal{B}}q(A',B')$、$V$ の分割 $\mathcal{P}$ について $q(\mathcal{P})\defeq\sum q(C,C')$（和は $\mathcal{P}$ の相異なる 2 元の組 $\{C,C'\}$ すべてにわたる）とおく。例外集合 $C_{0}$ をもつ族 $\mathcal{P}=\{C_{0},C_{1},\dots,C_{k}\}$ については、$C_{0}$ を 1 点集合に砕いた分割 $\tilde{\mathcal{P}}\defeq\{C_{1},\dots,C_{k}\}\cup\{\{v\}: v\in C_{0}\}$ を使って $q(\mathcal{P})\defeq q(\tilde{\mathcal{P}})$ とする。
+:::
+
+::: intuition
+$q$ は「各ブロック対の密度の 2 乗を、対の大きさで重みづけた平均」であり、分割が密度の違いをどれだけ捉えているかを測る。ブロックの中に偏りがあれば、そこを分けると密度の 2 乗の平均が増える（2 乗は凸だから）。
+:::
+
+::: lemma 指数の基本性質 {#comb:index-basic keywords="0 <= q <= 1, refinement does not decrease the index, Cauchy-Schwarz" index="指数の単調性|しすうのたんちょうせい"}
+1. 実数 $\mu_{1},\dots,\mu_{k}>0$, $e_{1},\dots,e_{k}\ge0$ について $\displaystyle\sum_{i}\frac{e_{i}^{2}}{\mu_{i}}\ge\frac{(\sum_{i}e_{i})^{2}}{\sum_{i}\mu_{i}}$。
+2. 互いに交わらない $C,D$ とその分割 $\mathcal{C},\mathcal{D}$ について $q(\mathcal{C},\mathcal{D})\ge q(C,D)$。さらに $\mathcal{C}'$, $\mathcal{D}'$ がそれぞれ $\mathcal{C}$, $\mathcal{D}$ の細分なら $q(\mathcal{C}',\mathcal{D}')\ge q(\mathcal{C},\mathcal{D})$。
+3. $V$ の分割 $\mathcal{P}'$ が $\mathcal{P}$ の細分なら $q(\mathcal{P}')\ge q(\mathcal{P})$。
+4. $V$ の任意の分割 $\mathcal{P}$ について $0\le q(\mathcal{P})\le1$。
+:::
+
+::: proof
+**Step 1（1）.** $a_{i}\defeq\sqrt{\mu_{i}}$, $b_{i}\defeq e_{i}/\sqrt{\mu_{i}}$ にコーシー–シュワルツの不等式を使うと $(\sum e_{i})^{2}=(\sum a_{i}b_{i})^{2}\le\sum a_{i}^{2}\sum b_{i}^{2}=\sum\mu_{i}\sum e_{i}^{2}/\mu_{i}$。
+
+**Step 2（2）.** $\mathcal{C}=\{C_{i}\}$, $\mathcal{D}=\{D_{j}\}$ とすると、$\sum_{i,j}\norm{C_{i},D_{j}}=\norm{C,D}$, $\sum_{i,j}\abs{C_{i}}\abs{D_{j}}=\abs{C}\abs{D}$ なので、1 を $\mu_{ij}=\abs{C_{i}}\abs{D_{j}}$, $e_{ij}=\norm{C_{i},D_{j}}$ に使って
+$$q(\mathcal{C},\mathcal{D})=\frac{1}{n^{2}}\sum_{i,j}\frac{\norm{C_{i},D_{j}}^{2}}{\abs{C_{i}}\abs{D_{j}}}\ge\frac{1}{n^{2}}\frac{\norm{C,D}^{2}}{\abs{C}\abs{D}}=q(C,D).$$
+後半は、$\mathcal{C}\times\mathcal{D}$ の各対 $(C_{i},D_{j})$ にこれを（$C_{i}$ と $D_{j}$ の、$\mathcal{C}'$, $\mathcal{D}'$ による分割について）適用して和をとればよい。
+
+**Step 3（3）.** $\mathcal{P}=\{C_{1},\dots,C_{k}\}$ とし、$\mathcal{P}'$ が $C_{i}$ に引き起こす分割を $\mathcal{C}_{i}$ とする。$q(\mathcal{P}')$ は、異なる $i<j$ の $\mathcal{C}_{i},\mathcal{C}_{j}$ の元の組の項と、同じ $\mathcal{C}_{i}$ の中の組の項（$\ge0$）の和なので、2 から
+$$q(\mathcal{P}')\ge\sum_{i<j}q(\mathcal{C}_{i},\mathcal{C}_{j})\ge\sum_{i<j}q(C_{i},C_{j})=q(\mathcal{P}).$$
+
+**Step 4（4）.** $d\le1$ なので $q(\mathcal{P})\le\frac{1}{n^{2}}\sum_{\{C,C'\}}\abs{C}\abs{C'}\le\frac{1}{n^{2}}\cdot\frac{1}{2}\Bigl(\sum_{C}\abs{C}\Bigr)^{2}=\frac{1}{2}\le1$。$q\ge0$ は定義から明らか。
+:::
+
+::: lemma 正則でない対の細分 {#comb:irregular-pair-increment keywords="splitting an irregular pair increases the index by epsilon^4 |C||D|/n^2" index="指数の増加|しすうのぞうか"}
+$\varepsilon>0$ とし、互いに交わらない $C,D$ について $(C,D)$ が $\varepsilon$ 正則でないとする。このとき、$C$ の分割 $\mathcal{C}$ と $D$ の分割 $\mathcal{D}$ で、どちらも 2 個以下の元からなり、
+$$q(\mathcal{C},\mathcal{D})\ge q(C,D)+\varepsilon^{4}\frac{\abs{C}\abs{D}}{n^{2}}$$
+を満たすものがある。
+:::
+
+::: proof
+**Step 1（偏りのある部分集合）.** 正則でないので、$C_{1}\subseteq C$, $D_{1}\subseteq D$ で $\abs{C_{1}}\ge\varepsilon\abs{C}$, $\abs{D_{1}}\ge\varepsilon\abs{D}$、かつ $\eta\defeq d(C_{1},D_{1})-d(C,D)$ が $\abs{\eta}>\varepsilon$ を満たすものがある。$C_{2}\defeq C\setminus C_{1}$, $D_{2}\defeq D\setminus D_{1}$ とし、$\mathcal{C},\mathcal{D}$ をそれらの空でないものからなる分割とする。$c\defeq\abs{C}$, $d\defeq\abs{D}$, $c_{i}\defeq\abs{C_{i}}$, $d_{j}\defeq\abs{D_{j}}$, $e\defeq\norm{C,D}$, $e_{ij}\defeq\norm{C_{i},D_{j}}$ と書く。$C_{1}=C$ かつ $D_{1}=D$ なら $\eta=0$ なので、$cd-c_{1}d_{1}>0$。
+
+**Step 2（3 項をまとめる）.** $(i,j)\neq(1,1)$ の項のうち $c_{i}d_{j}>0$ のものに \ref{comb:index-basic} の 1 を使う（$c_{i}d_{j}=0$ の対は $\mathcal{C}\times\mathcal{D}$ に現れず、$e_{ij}=0$）と、$\sum_{(i,j)\neq(1,1)}e_{ij}=e-e_{11}$, $\sum c_{i}d_{j}=cd-c_{1}d_{1}$ から
+$$n^{2}q(\mathcal{C},\mathcal{D})\ge\frac{e_{11}^{2}}{c_{1}d_{1}}+\frac{(e-e_{11})^{2}}{cd-c_{1}d_{1}}.$$
+
+**Step 3（展開）.** $\eta$ の定義から $e_{11}=\dfrac{c_{1}d_{1}e}{cd}+\eta c_{1}d_{1}$、したがって $e-e_{11}=\dfrac{(cd-c_{1}d_{1})e}{cd}-\eta c_{1}d_{1}$。代入して展開すると
+$$\frac{e_{11}^{2}}{c_{1}d_{1}}=\frac{c_{1}d_{1}e^{2}}{c^{2}d^{2}}+\frac{2e\eta c_{1}d_{1}}{cd}+\eta^{2}c_{1}d_{1},$$
+$$\frac{(e-e_{11})^{2}}{cd-c_{1}d_{1}}=\frac{(cd-c_{1}d_{1})e^{2}}{c^{2}d^{2}}-\frac{2e\eta c_{1}d_{1}}{cd}+\frac{\eta^{2}c_{1}^{2}d_{1}^{2}}{cd-c_{1}d_{1}}.$$
+和をとると交差項が消え、最後の項は $\ge0$ なので
+$$n^{2}q(\mathcal{C},\mathcal{D})\ge\frac{e^{2}}{cd}+\eta^{2}c_{1}d_{1}.$$
+
+**Step 4（増加量）.** $\eta^{2}>\varepsilon^{2}$, $c_{1}d_{1}\ge\varepsilon^{2}cd$ なので $\eta^{2}c_{1}d_{1}\ge\varepsilon^{4}cd$。$e^{2}/(cd)=n^{2}q(C,D)$ なので結論を得る。
+:::
+
+::: lemma 一段の細分 {#comb:regularity-step keywords="one refinement step: either epsilon-regular or index increases by epsilon^5/2" index="正則化の一段|せいそくかのいちだん"}
+$0<\varepsilon\le1/4$ とし、$\mathcal{P}=\{C_{0},C_{1},\dots,C_{k}\}$ を例外集合 $C_{0}$ をもつ族で、$\abs{C_{0}}\le\varepsilon n$, $\abs{C_{1}}=\cdots=\abs{C_{k}}\eqdef c$ を満たし、$\varepsilon$ 正則な分割でないものとする。このとき、例外集合 $C'_{0}$ をもつ族 $\mathcal{P}'=\{C'_{0},C'_{1},\dots,C'_{\ell}\}$ で次を満たすものがある：$k\le\ell\le k4^{k+1}$、$\abs{C'_{0}}\le\abs{C_{0}}+n/2^{k}$、$C'_{1},\dots,C'_{\ell}$ は同じ大きさで、$\mathcal{P}'$ が $\varepsilon$ 正則な分割であるか、$q(\mathcal{P}')\ge q(\mathcal{P})+\varepsilon^{5}/2$。
+:::
+
+::: proof
+**Step 1（対ごとの細分）.** $1\le i\neq j\le k$ について、$(C_{i},C_{j})$ が $\varepsilon$ 正則なら $\mathcal{C}_{ij}\defeq\{C_{i}\}$、そうでなければ \ref{comb:irregular-pair-increment} の 2 元以下の分割を $C_{i}$ 側 $\mathcal{C}_{ij}$、$C_{j}$ 側 $\mathcal{C}_{ji}$ とする（$i<j$ について選び、両方を定める）。後者では
+$$q(\mathcal{C}_{ij},\mathcal{C}_{ji})\ge q(C_{i},C_{j})+\frac{\varepsilon^{4}c^{2}}{n^{2}}.$$
+
+**Step 2（共通の細分）.** $C_{i}$ の 2 点を、すべての $j\neq i$ について $\mathcal{C}_{ij}$ の同じ元に属するとき同値とし、その同値類の族を $\mathcal{C}_{i}$ とする。$\mathcal{C}_{i}$ はすべての $\mathcal{C}_{ij}$ の細分で、$\abs{\mathcal{C}_{i}}\le2^{k-1}$。$\mathcal{C}_{0}\defeq\{\{v\}: v\in C_{0}\}$ とし、例外集合 $C_{0}$ をもつ族 $\mathcal{C}\defeq\{C_{0}\}\cup\bigcup_{i\ge1}\mathcal{C}_{i}$ を考える（$\tilde{\mathcal{C}}=\mathcal{C}_{0}\cup\bigcup_{i\ge1}\mathcal{C}_{i}$）。
+
+**Step 3（指数の増加）.** 【主張：$q(\mathcal{C})\ge q(\mathcal{P})+\varepsilon^{5}/2$】$\tilde{\mathcal{C}}$ の 2 元の組を、どの $\mathcal{C}_{i}$（$i\ge0$）に属するかで分けると
+$$q(\mathcal{C})=\sum_{1\le i<j}q(\mathcal{C}_{i},\mathcal{C}_{j})+\sum_{1\le i}q(\mathcal{C}_{0},\mathcal{C}_{i})+\sum_{0\le i}q(\mathcal{C}_{i}).$$
+\ref{comb:index-basic} の 2 により $q(\mathcal{C}_{i},\mathcal{C}_{j})\ge q(\mathcal{C}_{ij},\mathcal{C}_{ji})$、$q(\mathcal{C}_{0},\mathcal{C}_{i})\ge q(\mathcal{C}_{0},\{C_{i}\})$。また $q(\mathcal{C}_{i})\ge0$（$i\ge1$）。$\mathcal{P}$ は正則な分割でなく、条件 1, 2 は満たすので、条件 3 が破れ、$\varepsilon$ 正則でない対が $\varepsilon k^{2}$ 個より多い。Step 1 の不等式をそれらについて足すと
+$$q(\mathcal{C})\ge\sum_{1\le i<j}q(C_{i},C_{j})+\varepsilon k^{2}\frac{\varepsilon^{4}c^{2}}{n^{2}}+\sum_{1\le i}q(\mathcal{C}_{0},\{C_{i}\})+q(\mathcal{C}_{0})=q(\mathcal{P})+\varepsilon^{5}\left(\frac{kc}{n}\right)^{2}.$$
+$kc=n-\abs{C_{0}}\ge(1-\varepsilon)n\ge\frac{3}{4}n$ なので $\left(\frac{kc}{n}\right)^{2}\ge\frac{9}{16}\ge\frac{1}{2}$。
+
+**Step 4（$c<4^{k}$ の場合）.** $C'_{0}\defeq C_{0}$ とし、$V\setminus C_{0}$ の各点を 1 点集合にした族を $\mathcal{P}'$ とする。1 点集合どうしの対 $(\{u\},\{v\})$ は、条件の $X,Y$ が $\{u\},\{v\}$ 自身に限られるので $\varepsilon$ 正則で、$\mathcal{P}'$ は $\varepsilon$ 正則な分割。$\ell=kc$ で $k\le\ell<k4^{k}$。
+
+**Step 5（$c\ge4^{k}$ の場合：同じ大きさに切りそろえる）.** $s\defeq\lfloor c/4^{k}\rfloor\ge1$ とする。$\mathcal{C}\setminus\{C_{0}\}$ の各元を、大きさ $s$ の互いに交わらない部分集合に、余りが $s$ 未満になるまで切り分け、得られた大きさ $s$ の集合を $C'_{1},\dots,C'_{\ell}$、残りすべてを $C'_{0}$ とする。
+- *指数.* $\tilde{\mathcal{P}'}$ の各元は $\tilde{\mathcal{C}}$ のある元に含まれる（$C'_{0}$ の点は 1 点集合として扱われ、$C_{0}$ の点か $\mathcal{C}_{i}$ のある元の点）ので、$\tilde{\mathcal{P}'}$ は $\tilde{\mathcal{C}}$ の細分で、\ref{comb:index-basic} の 3 と Step 3 から $q(\mathcal{P}')\ge q(\mathcal{C})\ge q(\mathcal{P})+\varepsilon^{5}/2$。
+- *個数.* $c/4^{k}\ge1$ なので $s\ge c/(2\cdot4^{k})$、各 $C_{j}$ に含まれる $C'_{i}$ は $c/s\le2\cdot4^{k}\le4^{k+1}$ 個以下で、$\ell\le k4^{k+1}$。各 $C_{j}$ の $\mathcal{C}_{j}$ のうち最大の元は $c/2^{k-1}\ge s$ 個以上の点をもつので、各 $C_{j}$ に少なくとも 1 つの $C'_{i}$ があり $\ell\ge k$。
+- *例外集合.* $\mathcal{C}\setminus\{C_{0}\}$ の元は $k2^{k-1}$ 個以下で、各元から $s$ 未満の点が残るので $\abs{C'_{0}}\le\abs{C_{0}}+s\,k2^{k-1}\le\abs{C_{0}}+\frac{c}{4^{k}}k2^{k}=\abs{C_{0}}+\frac{kc}{2^{k}}\le\abs{C_{0}}+\frac{n}{2^{k}}$。
+:::
+
+## 正則性補題の証明 {#comb:sec-rg-proof}
+
+::: proof 正則性補題の証明
+**Step 1（$\varepsilon\le1/4$ としてよい）.** $\varepsilon'\le\varepsilon$ のとき、$\varepsilon'$ 正則な対は $\varepsilon$ 正則で（$\abs{X}\ge\varepsilon\abs{A}$ なら $\abs{X}\ge\varepsilon'\abs{A}$）、$\varepsilon'$ 正則な分割は $\varepsilon$ 正則な分割である。よって $\varepsilon$ を $\min(\varepsilon,1/4)$ に取り替えてよい。
+
+**Step 2（定数の選択）.** $s\defeq\lfloor2/\varepsilon^{5}\rfloor+1$ とおく。$k\ge m$ を $s/2^{k}\le\varepsilon/2$ となるようにとり、$f(x)\defeq x4^{x+1}$（単調増加）として
+$$M\defeq\max\left\{f^{s}(k),\ \left\lceil 2k/\varepsilon\right\rceil\right\}$$
+とおく。$M$ は $\varepsilon$ と $m$ だけで決まる。
+
+**Step 3（小さいグラフ）.** $m\le n\le M$ なら、$V_{0}\defeq\varnothing$ と $n$ 個の 1 点集合の族は（\ref{comb:regularity-step} の Step 4 と同様に）$\varepsilon$ 正則な分割で、$k'=n$ は $m\le k'\le M$ を満たす。
+
+**Step 4（初期分割）.** $n>M$ とする。$n\ge2k/\varepsilon$ なので $k\le\varepsilon n/2$。$\abs{V\setminus C_{0}}$ が $k$ で割り切れる最小の $C_{0}$（$\abs{C_{0}}<k$）をとり、$V\setminus C_{0}$ を同じ大きさの $k$ 個の集合 $C_{1},\dots,C_{k}$ に分ける（$n>k$ なので大きさは 1 以上）。$\abs{C_{0}}<k\le\varepsilon n/2$。
+
+**Step 5（繰り返し）.** 【主張：\ref{comb:regularity-step} を高々 $s$ 回適用すると $\varepsilon$ 正則な分割に到達する】現在の族が $\varepsilon$ 正則な分割でなければ、\ref{comb:regularity-step} を適用する。各段の非例外集合の個数は $k$ 以上なので、例外集合は 1 回ごとに $n/2^{k}$ 以下しか増えず、$j$ 回適用後も $\abs{C_{0}}\le\varepsilon n/2+jn/2^{k}$。$j\le s$ なら $jn/2^{k}\le\varepsilon n/2$ なので $\abs{C_{0}}\le\varepsilon n$ で、補題の仮定が保たれる。正則な分割に到達しない限り各適用で $q$ は $\varepsilon^{5}/2$ 以上増え、\ref{comb:index-basic} の 4 により $0\le q\le1$ なので、正則でない結果は高々 $\lfloor2/\varepsilon^{5}\rfloor$ 回しか続かない。よって $s$ 回以内の適用で $\varepsilon$ 正則な分割が得られる。
+
+**Step 6（個数の上界）.** 非例外集合の個数は、1 回の適用で $r$ から $f(r)$ 以下に増え、$f$ は単調増加なので、$s$ 回以内の適用後は $f^{s}(k)\le M$ 以下。また $k\ge m$ 以上。
+:::
+
+::: hypcheck
+- **指数の基本性質**：$\mu_{i}>0$ は Step 1 の $\sqrt{\mu_{i}}$ で使う。そのため \ref{comb:irregular-pair-increment} の Step 2 では大きさ 0 の対を除いた。
+- **一段の細分**：$\varepsilon\le1/4$ は Step 3 の $kc\ge\frac{3}{4}n$ で、$\abs{C_{0}}\le\varepsilon n$ も同じ箇所で使った。
+- **正則性補題**：$q\le1$（有界性）が繰り返しの回数を抑える唯一の理由である。$M$ は $f$ を $s\approx2\varepsilon^{-5}$ 回合成した値で、塔のように巨大になる。
+:::
+
+## 正則な対の基本性質と数え上げ補題 {#comb:sec-rg-counting}
+
+::: lemma 正則な対の典型的な頂点 {#comb:regular-pair-typical-degree keywords="in an epsilon-regular pair most vertices have degree about d|B|" index="典型的な頂点|てんけいてきなちょうてん"}
+$(A,B)$ が密度 $d$ の $\varepsilon$ 正則な対なら、$B$ に $(d-\varepsilon)\abs{B}$ 個未満の隣接頂点しかもたない $A$ の頂点は $\varepsilon\abs{A}$ 個未満である。
+:::
+
+::: proof
+そのような頂点の集合 $X$ が $\abs{X}\ge\varepsilon\abs{A}$ を満たすとすると、$Y\defeq B$ について $\norm{X,B}<(d-\varepsilon)\abs{X}\abs{B}$、すなわち $d(X,B)<d-\varepsilon$。$\abs{B}\ge\varepsilon\abs{B}$ なので正則性から $\abs{d(X,B)-d}\le\varepsilon$ となり矛盾。
+:::
+
+::: theorem 三角形の数え上げ補題 {#comb:triangle-counting-lemma keywords="triangle counting lemma, three pairwise regular pairs contain many triangles" index="数え上げ補題|かぞえあげほだい, 三角形の数え上げ補題|さんかくけいのかぞえあげほだい" refname="三角形の数え上げ補題"}
+$V_{1},V_{2},V_{3}$ を互いに交わらない空でない頂点集合とし、3 つの対 $(V_{i},V_{j})$ がすべて $\varepsilon$ 正則で、密度がすべて $\delta$ 以上、かつ $2\varepsilon\le\delta$ とする。このとき $x\in V_{1}$, $y\in V_{2}$, $z\in V_{3}$ からなる三角形 $xyz$ は少なくとも
+$$(1-2\varepsilon)(\delta-\varepsilon)^{3}\abs{V_{1}}\abs{V_{2}}\abs{V_{3}}$$
+個ある。
+:::
+
+::: intuition
+各対の密度が $\delta$ のランダムなグラフなら、三角形はおよそ $\delta^{3}\abs{V_{1}}\abs{V_{2}}\abs{V_{3}}$ 個ある。正則な対は大きな部分集合の上でランダムのように振る舞うので、ほぼ同じだけの三角形を保証する。
+:::
+
+::: proof
+**Step 1（典型的な $x$）.** \ref{comb:regular-pair-typical-degree} を $(V_{1},V_{2})$ と $(V_{1},V_{3})$ に使うと、$V_{2}$ と $V_{3}$ のどちらにも $(\delta-\varepsilon)\abs{V_{j}}$ 個以上の隣接頂点をもつ $x\in V_{1}$ は、$(1-2\varepsilon)\abs{V_{1}}$ 個より多い（密度 $d_{1j}\ge\delta$ なので $(d_{1j}-\varepsilon)\abs{V_{j}}\ge(\delta-\varepsilon)\abs{V_{j}}$）。
+
+**Step 2（$x$ を含む三角形）.** 【主張：Step 1 の各 $x$ は $(\delta-\varepsilon)^{3}\abs{V_{2}}\abs{V_{3}}$ 個以上の三角形に含まれる】そのような $x$ について $N_{j}\defeq N(x)\cap V_{j}$（$j=2,3$）とおくと $\abs{N_{j}}\ge(\delta-\varepsilon)\abs{V_{j}}\ge\varepsilon\abs{V_{j}}$（$\delta\ge2\varepsilon$）。$(V_{2},V_{3})$ の正則性から $d(N_{2},N_{3})\ge d(V_{2},V_{3})-\varepsilon\ge\delta-\varepsilon$ で、
+$$\norm{N_{2},N_{3}}\ge(\delta-\varepsilon)\abs{N_{2}}\abs{N_{3}}\ge(\delta-\varepsilon)^{3}\abs{V_{2}}\abs{V_{3}}.$$
+各辺 $yz$（$y\in N_{2}$, $z\in N_{3}$）が三角形 $xyz$ を与える。
+
+**Step 3（合計）.** 異なる $x$ の三角形は異なるので、Step 1, 2 を掛けて結論を得る。
+:::
+
+## 問題 {#comb:sec-rg-problems}
+
+::: problem {#comb:prob-rg-complete-bipartite}
+完全二部グラフ $K_{a,b}$ の 2 つの側 $(A,B)$、および辺のない 2 つの集合の対は、どの $\varepsilon>0$ についても $\varepsilon$ 正則であることを示せ。
+:::
+
+::: solution
+前者では任意の空でない $X\subseteq A$, $Y\subseteq B$ について $d(X,Y)=1=d(A,B)$、後者では $d(X,Y)=0=d(A,B)$。（$\abs{X}\ge\varepsilon\abs{A}>0$ なので $X$ は空でない。）
+:::
+
+::: problem {#comb:prob-rg-sparse}
+$\varepsilon>0$ とし、互いに交わらない空でない $A,B$ が $\norm{A,B}\le\varepsilon^{3}\abs{A}\abs{B}$ を満たすなら、$(A,B)$ は $\varepsilon$ 正則であることを示せ。（辺の少ない対は自動的に正則であり、疎なグラフでは正則性補題は自明になる。）
+:::
+
+::: solution
+$\abs{X}\ge\varepsilon\abs{A}$, $\abs{Y}\ge\varepsilon\abs{B}$ なら
+$$0\le d(X,Y)=\frac{\norm{X,Y}}{\abs{X}\abs{Y}}\le\frac{\norm{A,B}}{\varepsilon^{2}\abs{A}\abs{B}}\le\varepsilon,$$
+また $0\le d(A,B)\le\varepsilon^{3}\le\varepsilon$（$\varepsilon\le1$ のとき。$\varepsilon>1$ なら $\abs{X}\ge\varepsilon\abs{A}>\abs{A}$ となる $X$ はなく、条件は空虚に成り立つ）。両者は $[0,\varepsilon]$ に属するので差は $\varepsilon$ 以下。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 証明は辺の密度だけを使い、グラフの具体的な構造（彩色や連結性）は一切使わない。$m$ は初期分割の個数として使うだけで、$m$ を大きくとると内部の辺の割合 $\le1/m$ を小さくできる。
+
+**前提を変えると.**
+- $M$ は $\varepsilon^{-5}$ 回程度の指数関数の合成（塔関数）の大きさになる。ガワーズにより、塔型の増大は避けられない（$M$ は少なくとも $\varepsilon^{-c}$ の高さの塔の大きさを必要とするグラフがある）ことが示されている、と一般には言われている。
+- 疎なグラフ（辺が $o(n^{2})$）では補題は自明になる（\ref{comb:prob-rg-sparse}）。疎なグラフ用の版も研究されている。
+- 弱い版（フリーズ–カナンの弱正則性補題）は、例外を許す代わりに $M$ を $2^{O(\varepsilon^{-2})}$ にできる。
+
+**類似の定理.** 正則性補題は、加法的組合せ論のフーリエ解析的な分解（構造部分とランダム部分への分解）、エルゴード理論の分解と同じ「構造とランダムネスの二分法」の一例である。セメレディの定理（等差数列）の証明のために導入された。
+
+**高い視点から：指数の増加法は「有界なエネルギーの単調増加」.** $q(\mathcal{P})$ は、頂点の対の隣接行列を、分割で決まる区分的定数関数で近似したときの $L^{2}$ ノルムの 2 乗にあたる。細分は条件付き期待値をとる部分 $\sigma$ 代数を細かくすることにあたり、マルチンゲールのように $L^{2}$ ノルムは増えるしかなく、しかも 1 で抑えられているので、一定量ずつ増える段階は有限回しか続かない。正則でない対があるとは「現在の近似と実際の行列の差が大きな長方形の上で相関をもつ」ことで、そこで分けると $L^{2}$ ノルムが一定量増える。比喩で言えば、限られた容量の器に一定量ずつ水を注ぐ操作は有限回で終わる、というのが証明の骨格であり、終わった時点の分割が正則である。グラフ極限（グラフォン）の理論では、この議論がグラフォンの空間のコンパクト性として表現される。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
