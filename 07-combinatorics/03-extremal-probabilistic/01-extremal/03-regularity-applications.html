@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正則性補題の応用 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/03-extremal-probabilistic/01-extremal/03-regularity-applications.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 正則性補題の応用 {#comb:page-regularity-applications keywords="applications of the regularity lemma, regularity graph, reduced graph, embedding lemma, key lemma, proof of the Erdos-Stone theorem, triangle removal lemma, Roth's theorem, 3-term arithmetic progressions, Szemeredi's theorem"}
+
+\ref{comb:regularity-lemma}の典型的な使い方は、(1) 分割から有界な大きさの**正則性グラフ**（縮約グラフ）を作り、(2) そこで有限の組合せ論（トゥランの定理など）を使い、(3) **埋め込み補題**で結果を元のグラフに戻す、という三段階である。このページではこの方法で、\ref{comb:erdos-stone}を証明する。さらに**三角形除去補題**を示し、その帰結として、3 項等差数列を含まない整数の集合は密度 0 であるという**ロスの定理**を導く。
+
+## 記法と定義の確認 {#comb:sec-ra-notation}
+
+::: notation
+- 密度 $d(X,Y)$・$\varepsilon$ 正則な対・$\varepsilon$ 正則な分割は \ref{comb:page-regularity-lemma} のとおり。$\norm{X,Y}$ は $X$–$Y$ 辺の数。
+- トゥラングラフ $T^{r-1}(n)$ と $t_{r-1}(n)$、$K^{r}_{s}$（大きさ $s$ の組 $r$ 個の完全 $r$ 部グラフ）は \ref{comb:page-turan} のとおり。
+- 体系は $\ZF$。
+:::
+
+## 正則性グラフと埋め込み補題 {#comb:sec-ra-embedding}
+
+::: lemma 正則な対の典型的な頂点（一般形） {#comb:regular-pair-typical-into-subset keywords="in an epsilon-regular pair, most vertices have about d|Y| neighbours in a large subset Y" index="典型的な頂点（部分集合への）|てんけいてきなちょうてん"}
+$(A,B)$ を密度 $d$ の $\varepsilon$ 正則な対、$Y\subseteq B$ を $\abs{Y}\ge\varepsilon\abs{B}$ とする。このとき、$Y$ に $(d-\varepsilon)\abs{Y}$ 個未満の隣接頂点しかもたない $A$ の頂点は、$\varepsilon\abs{A}$ 個未満である。
+:::
+
+::: proof
+そのような頂点の集合を $X$ とし、$\abs{X}\ge\varepsilon\abs{A}$ と仮定する。$\norm{X,Y}<\abs{X}(d-\varepsilon)\abs{Y}$ なので $d(X,Y)<d-\varepsilon$。$\abs{Y}\ge\varepsilon\abs{B}$ なので、正則性から $\abs{d(X,Y)-d}\le\varepsilon$ となり矛盾。（$Y=B$ の場合が \ref{comb:regular-pair-typical-degree}。）
+:::
+
+::: definition 正則性グラフ {#comb:regularity-graph keywords="regularity graph, reduced graph, blow-up R_s" index="正則性グラフ|せいそくせいぐらふ, 縮約グラフ（正則性）|しゅくやくぐらふ, ブローアップ|ぶろーあっぷ"}
+$G$ の $\varepsilon$ 正則な分割 $\{V_{0},V_{1},\dots,V_{k}\}$ で $\abs{V_{1}}=\cdots=\abs{V_{k}}=\ell$ のものと $d\in[0,1]$ について、$\{V_{1},\dots,V_{k}\}$ を頂点集合とし、$(V_{i},V_{j})$ が $\varepsilon$ 正則で密度 $d$ 以上のとき $V_{i}V_{j}$ を辺とするグラフ $R$ を、パラメータ $\varepsilon,\ell,d$ の**正則性グラフ**という。$s\in\N$ について、$R$ の各頂点を $s$ 個の頂点に、各辺を対応する $s$ 点集合の間の完全二部グラフに置き換えたグラフを $R_{s}$ と書く（$R=K^{r}$ なら $R_{s}=K^{r}_{s}$）。
+:::
+
+::: intuition
+正則性グラフは、$G$ を「ブロックを点、密で一様なブロック対を辺」とした地図である。$R_{s}$ は地図の各点を $s$ 人に膨らませたもので、埋め込み補題は「膨らませた地図に描ける最大次数の小さいグラフは、元のグラフにも描ける」と述べる。
+:::
+
+::: lemma 埋め込み補題 {#comb:embedding-lemma keywords="embedding lemma, key lemma, subgraphs of R_s with bounded degree are subgraphs of G" index="埋め込み補題|うめこみほだい" refname="埋め込み補題"}
+任意の $d\in(0,1]$ と $\Delta\ge1$ について、ある $\varepsilon_{0}>0$ があり、次が成り立つ：$G$ を任意のグラフ、$H$ を $\Delta(H)\le\Delta$ のグラフ、$s\in\N$ とし、$R$ を $G$ のパラメータ $\varepsilon\le\varepsilon_{0}$, $\ell\ge2s/d^{\Delta}$, $d$ の正則性グラフとする。このとき $H\subseteq R_{s}$ なら $H\subseteq G$。
+:::
+
+::: intuition
+頂点を一つずつ埋め込み、まだ埋め込んでいない各頂点について「行き先の候補」の集合を持っておく。正則な対では、ほとんどの頂点が候補集合の一定割合と隣接するので、そのような頂点を選べば候補集合は一定の割合でしか縮まない。縮む回数は最大次数で抑えられるので、最後まで候補が残る。
+:::
+
+::: proof
+**Step 1（$\varepsilon_{0}$ の選択）.** $\varepsilon\mapsto(d-\varepsilon)^{\Delta}-\Delta\varepsilon$ は連続で $\varepsilon=0$ で $d^{\Delta}$ なので、$0<\varepsilon_{0}<d$ を
+$$(d-\varepsilon_{0})^{\Delta}-\Delta\varepsilon_{0}\ge\tfrac{1}{2}d^{\Delta}\tag{1}$$
+となるようにとれる。$\varepsilon\le\varepsilon_{0}$ なら左辺の $\varepsilon_{0}$ を $\varepsilon$ に変えた値はこれ以上である（左辺は $\varepsilon$ について減少）。
+
+**Step 2（設定）.** $H$ は $R_{s}$ の部分グラフで頂点 $u_{1},\dots,u_{h}$ をもつとし、$u_{i}$ が $V_{j}$ に対応する $s$ 点集合にあるとき $\sigma(i)\defeq j$ とする。$u_{i}\mapsto v_{i}\in V_{\sigma(i)}$ と順に選んで、$v_{i}$ が相異なり、$u_{i}u_{j}\in E(H)$ なら $v_{i}v_{j}\in E(G)$ となるようにする。$u_{i}u_{j}\in E(H)$ なら $R_{s}$ の辺なので $\sigma(i)\neq\sigma(j)$ かつ $(V_{\sigma(i)},V_{\sigma(j)})$ は密度 $d$ 以上の $\varepsilon$ 正則な対である。
+
+**Step 3（候補集合）.** 各 $i$ に候補集合 $Y_{i}\subseteq V_{\sigma(i)}$ を持たせ、最初は $Y_{i}^{0}\defeq V_{\sigma(i)}$ とする。$v_{j}$ を選んだら、$i>j$ で $u_{j}u_{i}\in E(H)$ のものについて $Y_{i}^{j}\defeq N(v_{j})\cap Y_{i}^{j-1}$、それ以外は $Y_{i}^{j}\defeq Y_{i}^{j-1}$ とする。$v_{j}$ は $Y_{j}^{j-1}$ から選ぶので、すでに選んだ隣接する $v$ たちすべてと隣接する。
+
+**Step 4（帰納法の主張）.** 【主張：各 $j\le i$ について $\abs{Y_{i}^{j-1}}\ge(d-\varepsilon)^{\Delta}\ell$ となるように $v_{1},v_{2},\dots$ を選べる】$Y_{i}$ は $u_{i}$ の隣接頂点の数（$\le\Delta$）回だけ縮み、各回で $(d-\varepsilon)$ 倍以上を保てばよい。$v_{j}$ を選ぶ段階で、$i>j$, $u_{j}u_{i}\in E(H)$ の各 $i$（$\Delta$ 個以下）について、$\abs{Y_{i}^{j-1}}\ge(d-\varepsilon)^{\Delta}\ell\ge\varepsilon\ell$（(1) から $(d-\varepsilon)^{\Delta}\ge\frac{1}{2}d^{\Delta}+\Delta\varepsilon\ge\varepsilon$）なので、\ref{comb:regular-pair-typical-into-subset}（$A=V_{\sigma(j)}$, $B=V_{\sigma(i)}$, $Y=Y_{i}^{j-1}$、密度は $d$ 以上）により、$\abs{N(v)\cap Y_{i}^{j-1}}<(d-\varepsilon)\abs{Y_{i}^{j-1}}$ となる $v\in V_{\sigma(j)}$ は $\varepsilon\ell$ 個未満。よって悪い $v$ は全部で $\Delta\varepsilon\ell$ 個未満である。
+
+**Step 5（選べること）.** $\abs{Y_{j}^{j-1}}-\Delta\varepsilon\ell\ge(d-\varepsilon)^{\Delta}\ell-\Delta\varepsilon\ell\ge\frac{1}{2}d^{\Delta}\ell\ge s$（(1) と $\ell\ge2s/d^{\Delta}$）。$V_{\sigma(j)}$ にすでに像をもつ $u$ は（$R_{s}$ の同じ $s$ 点集合に属する頂点なので）$s-1$ 個以下。よって $Y_{j}^{j-1}$ の中に、悪くなく、すでに使われていない $v_{j}$ が選べる。こうして $H\subseteq G$ が得られる。
+:::
+
+## エルデシュ–ストーンの定理の証明 {#comb:sec-ra-erdos-stone}
+
+::: proof エルデシュ–ストーンの定理の証明
+**Step 1（定数の選択）.** $r\ge2$, $s\ge1$, $\gamma>0$ を与える。辺の数は $n^{2}/2$ 以下なので $\gamma>1/2$ なら主張は空虚に成り立ち、$\gamma\le1/2$ としてよい。$d\defeq\gamma$, $\Delta\defeq\Delta(K^{r}_{s})=(r-1)s$ として \ref{comb:embedding-lemma} の $\varepsilon_{0}$ をとる。$m\defeq\lceil4/\gamma\rceil$, $\varepsilon\defeq\min(\varepsilon_{0},\gamma/16)$ とし、\ref{comb:regularity-lemma}の $M=M(\varepsilon,m)$ をとる。
+$$n_{0}\defeq\max\left\{\left\lceil\frac{2Ms}{d^{\Delta}(1-\varepsilon)}\right\rceil,\ m,\ \lceil4/\gamma\rceil\right\}$$
+とおく。$n\ge n_{0}$ 頂点で $\norm{G}\ge t_{r-1}(n)+\gamma n^{2}$ のグラフ $G$ をとる。
+
+**Step 2（正則性グラフ）.** $n\ge m$ なので $\varepsilon$ 正則な分割 $\{V_{0},\dots,V_{k}\}$（$m\le k\le M$, $\abs{V_{i}}=\ell$）がある。$k\ell\le n$ で、$\ell=\frac{n-\abs{V_{0}}}{k}\ge\frac{(1-\varepsilon)n}{M}\ge\frac{2s}{d^{\Delta}}$。$R$ をパラメータ $\varepsilon,\ell,d$ の正則性グラフとする。
+
+**Step 3（$G$ の辺の分類）.** 【主張：$\norm{G}\le n^{2}\left(\frac{\varepsilon^{2}}{2}+2\varepsilon+\frac{d}{2}+\frac{1}{2m}\right)+\norm{R}\ell^{2}$】$G$ の辺は次のどれかに入る。
+- $V_{0}$ の内部：$\abs{V_{0}}^{2}/2\le\varepsilon^{2}n^{2}/2$ 本以下。
+- $V_{0}$ と他の点の間：$\abs{V_{0}}n\le\varepsilon n^{2}$ 本以下。
+- $\varepsilon$ 正則でない対 $(V_{i},V_{j})$：$\varepsilon k^{2}$ 対以下で各 $\ell^{2}$ 本以下、計 $\varepsilon k^{2}\ell^{2}\le\varepsilon n^{2}$ 本以下。
+- 密度 $d$ 未満の正則な対：$\binom{k}{2}d\ell^{2}\le dn^{2}/2$ 本以下。
+- $V_{i}$（$i\ge1$）の内部：$k\binom{\ell}{2}\le k\ell^{2}/2\le n^{2}/(2k)\le n^{2}/(2m)$ 本以下。
+- 残りは $R$ の辺に対応する対の中にあり、$\norm{R}\ell^{2}$ 本以下。
+
+**Step 4（$R$ の辺の数）.** \ref{comb:turan-number-bound} の 2 から $\norm{G}\ge\frac{r-2}{r-1}\cdot\frac{n^{2}}{2}-\frac{n}{2}+\gamma n^{2}$。Step 3 と合わせ、$\ell^{2}\le n^{2}/k^{2}$ で割ると
+$$\frac{\norm{R}}{k^{2}}\ge\frac{r-2}{2(r-1)}+\gamma-\left(\frac{\varepsilon^{2}}{2}+2\varepsilon\right)-\frac{\gamma}{2}-\frac{1}{2m}-\frac{1}{2n}.$$
+$\varepsilon\le\gamma/16$ と $\varepsilon\le1$ から $\frac{\varepsilon^{2}}{2}+2\varepsilon\le3\varepsilon\le\frac{3\gamma}{16}$、$\frac{1}{2m}\le\frac{\gamma}{8}$、$n\ge4/\gamma$ から $\frac{1}{2n}\le\frac{\gamma}{8}$。引かれる量の和は $\frac{\gamma}{2}+\frac{7\gamma}{16}<\gamma$ なので、$\norm{R}>\frac{r-2}{r-1}\cdot\frac{k^{2}}{2}\ge t_{r-1}(k)$（\ref{comb:turan-number-bound} の 1）。
+
+**Step 5（結論）.** \ref{comb:turan-theorem}により $K^{r}\subseteq R$、よって $K^{r}_{s}\subseteq R_{s}$。$\varepsilon\le\varepsilon_{0}$, $\ell\ge2s/d^{\Delta}$ なので、\ref{comb:embedding-lemma} により $K^{r}_{s}\subseteq G$。
+:::
+
+## 三角形除去補題とロスの定理 {#comb:sec-ra-removal}
+
+::: theorem 三角形除去補題 {#comb:triangle-removal-lemma keywords="triangle removal lemma, few triangles implies close to triangle-free" index="三角形除去補題|さんかくけいじょきょほだい, 除去補題|じょきょほだい" refname="三角形除去補題"}
+任意の $\eta>0$ について、ある $\delta>0$ があり、次が成り立つ：$n$ 頂点のグラフ $G$ の三角形が $\delta n^{3}$ 個以下なら、$\eta n^{2}$ 本以下の辺を除いて三角形を含まないグラフにできる。
+:::
+
+::: intuition
+三角形が「ほとんどない」グラフは、「三角形を含まないグラフ」に近い。もし三角形を壊すのに多くの辺の削除が必要なら、どこかに三角形の詰まった密で一様な 3 つのブロックがあり、数え上げ補題によって三角形は $n^{3}$ のオーダーで存在してしまう。
+:::
+
+::: proof
+**Step 1（定数）.** $\eta\le1$ としてよい。$d_{0}\defeq\eta/2$, $\varepsilon\defeq\eta/8$, $m\defeq\lceil4/\eta\rceil$ とし、正則性補題の $M=M(\varepsilon,m)$ をとる。
+$$\delta\defeq\frac{1}{2}\min\left\{\frac{1}{2}\left(\frac{\eta}{8}\right)^{3}\frac{1}{8M^{3}},\ \frac{1}{m^{3}}\right\}.$$
+
+**Step 2（小さい $n$）.** $n<m$ なら $\delta n^{3}<1$ なので $G$ は三角形を含まず、何も除かなくてよい。
+
+**Step 3（削除）.** $n\ge m$ とし、$\varepsilon$ 正則な分割 $\{V_{0},\dots,V_{k}\}$（$\abs{V_{i}}=\ell$）をとる。次の辺をすべて除く：$V_{0}$ に接続する辺、各 $V_{i}$ の内部の辺、$\varepsilon$ 正則でない対の辺、密度 $d_{0}$ 未満の対の辺。\ref{comb:sec-ra-erdos-stone} の Step 3 と同じ評価で、除いた辺は
+$$n^{2}\left(\frac{\varepsilon^{2}}{2}+2\varepsilon+\frac{d_{0}}{2}+\frac{1}{2m}\right)\le n^{2}\left(\frac{3\eta}{8}+\frac{\eta}{4}+\frac{\eta}{8}\right)<\eta n^{2}$$
+本以下である（$\varepsilon^{2}/2+2\varepsilon\le3\varepsilon$）。
+
+**Step 4（残った三角形は多くの三角形を生む）.** 【主張：削除後に三角形が残れば、$G$ の三角形は $\delta n^{3}$ 個より多い】残った三角形の 3 頂点は $V_{0}$ になく、同じ $V_{i}$ にもないので、相異なる $V_{a},V_{b},V_{c}$ にあり、3 つの対はどれも $\varepsilon$ 正則で（$G$ での）密度が $d_{0}$ 以上である。$2\varepsilon\le d_{0}$ なので\ref{comb:triangle-counting-lemma}により、$G$ はこの 3 集合にまたがる三角形を
+$$(1-2\varepsilon)(d_{0}-\varepsilon)^{3}\ell^{3}\ge\frac{1}{2}\left(\frac{3\eta}{8}\right)^{3}\left(\frac{n}{2M}\right)^{3}>\delta n^{3}$$
+個以上含む（$\ell\ge(1-\varepsilon)n/M\ge n/(2M)$, $1-2\varepsilon\ge1/2$）。これは仮定に反するので、削除後のグラフは三角形を含まない。
+:::
+
+::: theorem ロスの定理 {#comb:roth-theorem keywords="Roth's theorem, sets without 3-term arithmetic progressions have density zero" index="ロスの定理|ろすのていり, 等差数列（3 項）|とうさすうれつ" refname="ロスの定理"}
+任意の $\eta>0$ について、ある $N_{0}$ があり、$N\ge N_{0}$ なら、3 項等差数列 $a,a+b,a+2b$（$b\neq0$）を含まない $A\subseteq\{1,\dots,N\}$ は $\abs{A}\le\eta N$ を満たす。
+:::
+
+::: intuition
+等差数列 $a_{1},a_{3},a_{2}$（$a_{1}+a_{2}=2a_{3}$）を三角形として符号化したグラフを作る。$A$ が等差数列を含まなければ、このグラフの三角形は「自明な」ものだけで、それらは互いに辺を共有しない。三角形が少ないので除去補題により少しの辺で壊せるが、辺を共有しない三角形を壊すには三角形の個数だけ辺が要るので、$A$ は小さい。
+:::
+
+::: proof
+**Step 1（グラフの構成）.** $L\defeq3N$ とし、$\mathbb{Z}/L$ の 3 つのコピー $X,Y,Z$ を頂点集合とする 3 部グラフ $\Gamma$ を作る：$x\in X$ と $y\in Y$ は $y-x\in A$ のとき、$y\in Y$ と $z\in Z$ は $z-y\in A$ のとき、$x\in X$ と $z\in Z$ は $z-x\in2A\defeq\{2a: a\in A\}$ のとき結ぶ（差は $\mathbb{Z}/L$ でとり、$A\subseteq\{1,\dots,N\}$ をその剰余類と見る）。頂点数は $n=3L=9N$。
+
+**Step 2（三角形の決定）.** 【主張：$\Gamma$ の三角形はちょうど $\{x,x+a,x+2a\}$（$x\in X$, $a\in A$）の $L\abs{A}$ 個で、どの 2 つも辺を共有しない】三角形は 3 部グラフなので $x\in X,y\in Y,z\in Z$ からなり、$a_{1}\defeq y-x$, $a_{2}\defeq z-y$, $z-x=2a_{3}$（$a_{i}\in A$）と書ける。$a_{1}+a_{2}\equiv2a_{3}\pmod L$ で、両辺の整数としての値は $[2,2N]$ にあり $L=3N>2N$ なので、整数として $a_{1}+a_{2}=2a_{3}$。すると $a_{1},a_{3},a_{2}$ は等差数列で、$A$ は自明でない 3 項等差数列を含まないから $a_{1}=a_{2}=a_{3}$。逆に $\{x,x+a,x+2a\}$ は三角形である。辺 $xy$ は $a=y-x$ を、辺 $yz$ は $a=z-y$ を、辺 $xz$ は $2a=z-x$ を通じて $a$ を決め（$a\mapsto2a$ は $\{1,\dots,N\}$ 上で単射で、値は $L$ 未満）、$a$ と辺の 1 端点から三角形が決まるので、各辺はちょうど 1 つの三角形に含まれる。
+
+**Step 3（除去補題の適用）.** $\eta'\defeq\eta/81$ として \ref{comb:triangle-removal-lemma} の $\delta$ をとり、$N_{0}\defeq\lceil1/(243\delta)\rceil$ とする。$N\ge N_{0}$ なら三角形の数は $L\abs{A}\le3N^{2}\le\delta(9N)^{3}=\delta n^{3}$（$3N^{2}\le729\delta N^{3}\iff N\ge1/(243\delta)$）。よって $\eta'n^{2}=81\eta'N^{2}=\eta N^{2}$ 本以下の辺を除いて三角形をなくせる。
+
+**Step 4（結論）.** Step 2 の $L\abs{A}$ 個の三角形は辺を共有しないので、それらをすべて壊すには $L\abs{A}=3N\abs{A}$ 本以上の辺を除く必要がある。よって $3N\abs{A}\le\eta N^{2}$、すなわち $\abs{A}\le\eta N/3\le\eta N$。
+:::
+
+::: hypcheck
+- **埋め込み補題**：$d>0$ は $\varepsilon_{0}<d$ と (1) に、$\Delta(H)\le\Delta$ は候補集合が縮む回数の上界に、$\ell\ge2s/d^{\Delta}$ は Step 5 で候補が残ることに使った。
+- **エルデシュ–ストーンの定理**：正則性補題の下限 $m$ は、各 $V_{i}$ の内部の辺（何も分からない部分）の割合 $1/(2m)$ を小さくするために使った。トゥランの定理は縮約グラフ $R$ の上でだけ使う。
+- **三角形除去補題**：$\delta$ は $M$ を通じて $\eta$ だけに依存し、正則性補題の塔型の $M$ を引き継ぐので非常に小さい。
+- **ロスの定理**：$L=3N>2N$ が、法 $L$ での等式から整数の等式を導く Step 2 で本質的に使われる。
+:::
+
+## 問題 {#comb:sec-ra-problems}
+
+::: problem {#comb:prob-ra-k3-removal-sharp}
+三角形除去補題で「$\delta n^{3}$ 個以下」を「$o(n^{3})$ 個」に変えた形：$n$ 頂点のグラフ $G_{n}$ の三角形の数が $o(n^{3})$ なら、$o(n^{2})$ 本の辺を除いて三角形を含まないグラフにできることを、\ref{comb:triangle-removal-lemma} から導け。
+:::
+
+::: solution
+$\eta>0$ を任意にとり、対応する $\delta$ をとる。十分大きい $n$ で $G_{n}$ の三角形は $\delta n^{3}$ 個以下なので、$\eta n^{2}$ 本以下の辺の削除で三角形がなくなる。必要な削除数の最小値を $f(n)$ とすれば、任意の $\eta$ について十分大きい $n$ で $f(n)\le\eta n^{2}$、すなわち $f(n)=o(n^{2})$。
+:::
+
+::: problem {#comb:prob-ra-corners}
+\ref{comb:roth-theorem} の証明で、$A=\{1,\dots,N\}$ 全体（等差数列を多く含む）をとると、グラフ $\Gamma$ の三角形はおよそ何個あるか。また、このとき除去補題の仮定が満たされないことを確かめよ。
+:::
+
+::: solution
+三角形は $x\in\mathbb{Z}/L$ と $a_{1}+a_{2}=2a_{3}$（$a_{i}\in\{1,\dots,N\}$）の組で決まる。$a_{1}+a_{2}$ が偶数になる $(a_{1},a_{2})$ は約 $N^{2}/2$ 組で、それぞれ $a_{3}$ は一意なので、三角形は約 $L\cdot N^{2}/2=\frac{3}{2}N^{3}$ 個。$n=9N$ に対しこれは $\frac{3}{2\cdot729}n^{3}$ で、$n^{3}$ の正の定数倍なので、小さい $\delta$ についての仮定「$\delta n^{3}$ 個以下」は満たされない。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ロスの定理の証明は、整数の加法構造を「三角形」というグラフの構造に移しただけで、フーリエ解析を使わない。ロスの元の証明（1953）はフーリエ解析による。
+
+**前提を変えると.**
+- （セメレディの定理）任意の $k$ について、$k$ 項等差数列を含まない $A\subseteq\{1,\dots,N\}$ は $o(N)$ 個の元しかもたない。正則性補題はもともとこの定理の証明のために導入された。$k\ge4$ には超グラフ版の除去補題が必要になる、と一般には言われている。
+- 三角形を任意の固定したグラフ $H$ に変えた**グラフ除去補題**も、同じ方法（$H$ についての数え上げ補題）で成り立つ。
+- 埋め込み補題は $H$ の最大次数を有界に保つ必要があるが、$H$ の頂点数は $\ell$ に比べて小さければよく、$n$ に比例する大きさの $H$ を埋め込む「ブローアップ補題」（コムローシュ–シャールケジ–セメレディ）がある。
+
+**類似の定理.** 正則性補題・埋め込み補題・トゥランの定理の組合せは、ラムゼー型の問題（たとえば最大次数の有界なグラフのラムゼー数が頂点数の 1 次で抑えられるという定理）にも使われる。
+
+**高い視点から：「縮約・有限の議論・持ち上げ」の三段階.** 正則性補題の応用は、巨大な対象を有界な複雑さの「近似」に縮約し、そこで有限の議論を行い、結果を元の対象に持ち上げる、という構造をもつ。これは代数幾何で多様体を有限体に還元して数え、リフトする議論や、モデル理論での超積を通じた議論と同じ型である。数え上げ補題が「持ち上げ」の正当性（近似が部分構造の個数を保つこと）を保証し、除去補題はその逆向き（個数が少ないなら構造的にも遠くない）を述べる。比喩で言えば、正則性グラフは巨大な都市の路線図を「地区と地区の間の交通量の表」に縮めたもので、表の上で見つかった経路は、実際の街でも多数の具体的な道として実現される。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
