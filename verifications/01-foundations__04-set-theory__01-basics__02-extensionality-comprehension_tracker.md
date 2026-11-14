@@ -19,6 +19,7 @@ The page is largely correct: the proofs of the empty set, Russell's argument, th
 - **Detail:** The supplement gives Wiener's definition as $\{\{\{x\},\varnothing\},\{\{y\}\}\}$. Wiener's actual definition is $\{\{\{x\}\},\{\varnothing,\{y\}\}\}$ (equivalently $\{\{\{x\}\},\{\varnothing,\{y\}\}\}$). The stated formula does not have the characteristic property: e.g. with $x=y=\varnothing$ it gives $\{\{\{\varnothing\},\varnothing\},\{\{\varnothing\}\}\}$, and one can check it fails to encode the components correctly (the second component is not recoverable in the intended way). The claim that this formula 'has the same property' is false as written.
 - **Proposed fix:** Replace with Wiener's actual definition: $\langle x,y\rangle=\{\{\{x\}\},\{\varnothing,\{y\}\}\}$, which does satisfy the characteristic property.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Wiener's 1914 definition is exactly {{{x},∅},{{y}}}; it has the characteristic property (a short proof is now given in the supplement). The proposed "correction" is not Wiener's definition.
 
 ### ISSUE-0002 [Open] Claim that {x,{x,y}} works as ordered pair under Foundation needs the correct argument
 - **Category:** Supplement/remark error
@@ -26,3 +27,4 @@ The page is largely correct: the proofs of the empty set, Russell's argument, th
 - **Detail:** The supplement says $\{x,\{x,y\}\}$ works as an ordered pair assuming Foundation, and justifies it by excluding '$x\in\{x,y\}\in x$'. This is essentially correct but the stated obstruction is imprecise: the failure case for $\{x,\{x,y\}\}=\{x',\{x',y'\}\}$ is when $x=\{x',y'\}$ and $\{x,y\}=x'$, which yields $x\in x'\in x$ (a 2-cycle), excluded by Foundation. The remark as phrased ('$x\in\{x,y\}\in x$') is not exactly the cycle that arises. This is a minor imprecision rather than a falsehood, so it is borderline; flagging at medium confidence.
 - **Proposed fix:** State the argument precisely: if $\{x,\{x,y\}\}=\{x',\{x',y'\}\}$ and $x\neq x'$, then necessarily $x=\{x',y'\}$ and $\{x,y\}=x'$, whence $x\in x'\in x$, contradicting Foundation; hence $x=x'$ and then $\{x,y\}=\{x',y'\}$, giving $y=y'$.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** In the failure case x={x',y'}, x'={x,y}, so "x∈{x,y}∈x" is exactly the 2-cycle x∈x'∈x. A full proof (including the case x={x,y'}) has been added.

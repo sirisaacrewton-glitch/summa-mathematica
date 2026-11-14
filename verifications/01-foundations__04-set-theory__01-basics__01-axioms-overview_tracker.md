@@ -19,6 +19,7 @@ The page is largely correct: the axiom table, the definitional-extension facts, 
 - **Detail:** 「NF の無矛盾性は長く未解決の問題であった」は誤り。Jensen (1969) が NFU（urelements 付き）の無矛盾性を ZF の無矛盾性から示し、NF 自身については Jensen の結果と Specker の定理（NF は選択公理の否定を証明する）を組み合わせて、NF が無矛盾であることと NFU + 「集合の全体は無限」が無矛盾であることが同値であることが知られている。したがって NF の無矛盾性は ZF の無矛盾性に相対化されて解決済みであり、「長く未解決」と現在形で述べるのは不正確。
 - **Proposed fix:** NF の無矛盾性は ZF の無矛盾性に相対化されて示されている（Jensen 1969 による NFU の結果と Specker の定理を組み合わせる）。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The page says NF's consistency "was long an open problem" (past tense), which is correct. Jensen (1969) proved the consistency of NFU (with urelements), not of NF; the claimed equivalence "Con(NF) iff Con(NFU + the universe is infinite)" is not a known result. Text now mentions Jensen's NFU result and Holmes's later proof.
 
 ### ISSUE-0002 [Open] 「通常の数学に基礎の公理はまったく使われない」は過剰
 - **Category:** Supplement/remark error
@@ -26,6 +27,7 @@ The page is largely correct: the axiom table, the definitional-extension facts, 
 - **Detail:** 「通常の数学の展開（順序数・基数・実数の構成など）には基礎の公理はまったく使われない」は強すぎる。順序数や累積階層 V_{α} の理論、∈ に関する整礎性を用いる議論（例：整礎帰納法による定義、ランク付け）では基礎の公理が実際に使われる。基礎の公理なしでも多くの数学は展開できるが「まったく使われない」は言えない。
 - **Proposed fix:** 通常の数学の展開の多くは基礎の公理なしでも行えるが、順序数や累積階層の理論など、∈ に関する整礎性を本質的に用いる議論では基礎の公理が使われる。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Ordinals, cardinals and the construction of the reals are developed without Foundation (ordinals are defined as transitive sets well-ordered by ∈); Foundation is only needed for statements such as V = WF. Wording clarified accordingly.
 
 ### ISSUE-0003 [Open] 「ZFC から反証される」の根拠が不正確
 - **Category:** Supplement/remark error
@@ -33,3 +35,4 @@ The page is largely correct: the axiom table, the definitional-extension facts, 
 - **Detail:** 例は「∀x∃y(y∈x) は ZFC から反証される（空集合）」と述べるが、空集合の存在だけでは反証にならない。∀x∃y(y∈x) の否定 ∃x∀y(y∉x) は、空集合の存在（set:empty-set）と外延性から従う。引用先 set:empty-set は空集合の存在と一意性のみで、反証の論理（外延性による ∀y(y∉x) の同定）が省略されており、根拠として不十分。
 - **Proposed fix:** この解釈では ∀x∃y(y∈x) が真になるが、ZFC では空集合 ∅（set:empty-set）が ∀y(y∉∅) を満たし、外延性により ∃x∀y(y∉x) が成り立つので、∀x∃y(y∈x) は反証される。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The existence of the empty set, ∃x∀y(y∉x), is literally the negation of ∀x∃y(y∈x); extensionality is not needed. The example now says this explicitly.
