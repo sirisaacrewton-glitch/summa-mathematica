@@ -685,7 +685,8 @@
       if (!d) return false;
       // フォルダの範囲で指定したとき（"/" を含む項目。'!' で始まればその範囲以外）は、同じ分野の中でも拒否する（2026-10-28）
       if (d.indexOf('/') >= 0) {
-        var hit = d.replace(/^!/, '').split(/\s+/).some(function (x) { return x && String(P.dir || '').indexOf(x) >= 0; });
+        // 項目が ".html" で終わればページ単位（P.path）で照合する（2026-11-14。同じ系列の中でページごとに意味が変わる語のため）
+        var hit = d.replace(/^!/, '').split(/\s+/).some(function (x) { return x && String((/\.html$/.test(x) ? P.path : P.dir) || '').indexOf(x) >= 0; });
         return d.charAt(0) === '!' ? !hit : hit;
       }
       return f !== field(Q.dir) && (d === '*' || (' ' + d + ' ').indexOf(' ' + f + ' ') >= 0);
