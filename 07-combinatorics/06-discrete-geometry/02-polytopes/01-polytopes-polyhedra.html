@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>凸多面体と多面的集合 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/06-discrete-geometry/02-polytopes/01-polytopes-polyhedra.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 凸多面体と多面的集合 {#poly:page-polytopes-polyhedra keywords="polytope, vertex, polyhedral set, halfspace representation, irreducible representation, facet, active constraints, Minkowski-Weyl theorem, V-representation, H-representation, every face of a polytope is exposed, face lattice, conjugate face, polar polytope, dual polytope, cube and cross-polytope"}
+
+凸多面体には 2 つの見方がある。有限個の点の凸包として「角（頂点）」から作る見方（**V 表示**）と、有限個の閉半空間の共通部分として「壁（ファセット）」で切り出す見方（**H 表示**）である。このページでは、凸多面体の頂点と面を調べ、凸多面体の面はすべて露出面で有限個しかないことを示す。次に有限個の閉半空間の共通部分（**多面的集合**）の面を「等号で成り立つ不等式」から記述し、有界な多面的集合が凸多面体であることを示す。極集合を使ってその逆を導き、2 つの見方が一致するという**ミンコフスキー–ワイルの定理**を得る。最後に、原点を内点にもつ凸多面体とその極集合の面の束が、包含を逆にして一致する（**極双対**）ことと、次元の和の公式を証明する。
+
+## 記法と定義の確認 {#poly:sec-pp-notation}
+
+::: notation
+- 凸包 $\operatorname{conv}$、アフィン包 $\operatorname{aff}$、次元 $\dim C\defeq\dim\operatorname{aff}C$、相対的内部 $\operatorname{ri}$ と相対的境界 $\operatorname{rb}$ は \ref{poly:page-convex-sets} と \ref{poly:page-faces-polarity} のとおり。**凸多面体**は有限集合の凸包（\ref{poly:convex-set}）で、$\dim P=k$ の凸多面体を **$k$ 多面体**という。
+- $u\neq0$ について $H(u,\alpha)\defeq\{z:\langle u,z\rangle=\alpha\}$、$K(u,\alpha)\defeq\{z:\langle u,z\rangle\le\alpha\}$。開線分 $]x,y[\defeq\{(1-t)x+ty:0<t<1\}$。
+- 閉凸集合 $C$ の**面**・**露出面**・**端点** $\operatorname{ext}C$・**ファセット**は \ref{poly:face} のとおり。面 $F$ は「$C$ の 2 点を結ぶ開線分が $F$ と交われば両端が $F$ に入る」凸部分集合である。$C$ の面全体を $\mathcal{F}(C)$ と書く。
+- $M^{\circ}\defeq\{y:\langle x,y\rangle\le1\ (\forall x\in M)\}$ は \ref{poly:polar-set}、その性質は \ref{poly:bipolar} のとおり。
+- 体系は $\ZF$。
+:::
+
+## 凸多面体の頂点と面 {#poly:sec-pp-polytopes}
+
+::: lemma 凸包の端点 {#poly:ext-of-hull keywords="every extreme point of conv M lies in M" index="凸包の端点|とつほうのたんてん"}
+$M\subseteq\mathbb{R}^{d}$ が有限集合で $e\in\operatorname{ext}(\operatorname{conv}M)$ なら $e\in M$。
+:::
+
+::: proof
+$C\defeq\operatorname{conv}M$ とする。$e\in C$ を $M$ の点の凸結合 $e=\sum_{i=1}^{m}\lambda_{i}x_{i}$（$x_{i}\in M$ は相異なり、$\lambda_{i}>0$, $\sum\lambda_{i}=1$）と書き（\ref{poly:convex-hull-combinations}）、このような表示のうち $m$ が最小のものをとる。$m=1$ なら $e=x_{1}\in M$。$m\ge2$ と仮定して矛盾を導く。$y\defeq\sum_{i\ge2}\frac{\lambda_{i}}{1-\lambda_{1}}x_{i}\in C$ とおくと $e=\lambda_{1}x_{1}+(1-\lambda_{1})y$ で $0<\lambda_{1}<1$。$x_{1}=y$ なら $e=x_{1}$ となり $m=1$ の表示があって最小性に反する。$x_{1}\neq y$ なら $e\in]x_{1},y[$ で、$\{e\}$ は面なので $x_{1}=e$。これも $m=1$ の表示を与え、最小性に反する。
+:::
+
+::: theorem 凸多面体の特徴づけ {#poly:polytope-characterization keywords="a nonempty set is a polytope iff it is compact convex with finitely many extreme points; P = conv ext P; vertices" index="凸多面体の特徴づけ|とつためんたいのとくちょうづけ, 頂点（凸多面体の）|ちょうてん" refname="凸多面体の特徴づけ"}
+$P\subseteq\mathbb{R}^{d}$ を空でない集合とする。
+1. $P$ が凸多面体であることと、$P$ がコンパクト凸集合で $\operatorname{ext}P$ が有限集合であることは同値。このとき $P=\operatorname{conv}(\operatorname{ext}P)$ で、$P=\operatorname{conv}X$（$X$ は有限）なら $\operatorname{ext}P\subseteq X$。
+2. $P=\operatorname{conv}\{x_{1},\dots,x_{n}\}$ のとき、$x_{j}\in\operatorname{ext}P$ であることと $x_{j}\notin\operatorname{conv}\{x_{i}:i\neq j\}$ であることは同値。
+
+凸多面体の端点を**頂点**ともいう。
+:::
+
+::: intuition
+凸多面体は、有限個の「角」をもつコンパクト凸集合のことである。凸包をとるのに使った点のうち、本当に角になるのは、ほかの点の凸包に埋もれていない点だけで、角だけから多面体全体が復元できる。
+:::
+
+::: proof
+**Step 1（1 の $\Rightarrow$）.** 【主張：$P=\operatorname{conv}X$（$X$ 有限）ならコンパクト凸で $\operatorname{ext}P\subseteq X$】凸包は凸で、有限集合はコンパクトなので \ref{poly:convex-hull-compact} から $P$ はコンパクト。\ref{poly:ext-of-hull} から $\operatorname{ext}P\subseteq X$ で、特に有限。
+
+**Step 2（1 の $\Leftarrow$）.** $P$ がコンパクト凸なら \ref{poly:minkowski-extreme-points} から $P=\operatorname{conv}(\operatorname{ext}P)$。$\operatorname{ext}P$ が有限なので $P$ は凸多面体。この等式は Step 1 の状況でも成り立つ。
+
+**Step 3（2）.** $X\defeq\{x_{1},\dots,x_{n}\}$, $X_{j}\defeq X\setminus\{x_{j}\}$ とする。$x_{j}\in\operatorname{ext}P$ かつ $x_{j}\in\operatorname{conv}X_{j}$ と仮定する。$\operatorname{conv}X_{j}\subseteq P$ なので、$x_{j}$ は $\operatorname{conv}X_{j}$ でも端点である（$\operatorname{conv}X_{j}$ の 2 点を結ぶ開線分は $P$ の開線分でもある）。\ref{poly:ext-of-hull} から $x_{j}\in X_{j}$ となり矛盾。逆に $x_{j}\notin\operatorname{ext}P$ なら、Step 1 から $\operatorname{ext}P\subseteq X_{j}$ で、Step 2 から $P=\operatorname{conv}(\operatorname{ext}P)\subseteq\operatorname{conv}X_{j}$。よって $x_{j}\in\operatorname{conv}X_{j}$。
+:::
+
+::: theorem 凸多面体の面 {#poly:polytope-faces keywords="faces of a polytope: F = conv(F cap ext P), ext F = F cap ext P, faces are polytopes, finitely many faces" index="凸多面体の面|とつためんたいのめん" refname="凸多面体の面"}
+$P$ を凸多面体、$V\defeq\operatorname{ext}P$ とし、$F$ を $P$ の空でない面とする。
+1. $x=\sum_{i}\lambda_{i}v_{i}\in F$（$v_{i}\in V$, $\lambda_{i}>0$, $\sum\lambda_{i}=1$）なら、すべての $v_{i}$ が $F$ に属する。
+2. $F=\operatorname{conv}(F\cap V)$。特に $F$ は凸多面体で、$\operatorname{ext}F=F\cap V$。
+3. $P$ の面の個数は $2^{\abs{V}}$ 以下（有限）。
+:::
+
+::: intuition
+面に入る点を頂点の凸結合で書けば、使った頂点はすべてその面に入る。だから面は「その面に入る頂点の凸包」に等しく、頂点の部分集合で決まる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：使った頂点はすべて $F$ に入る】項の数 $m$ についての帰納法。$m=1$ なら $x=v_{1}\in F$。$m\ge2$ のとき $y\defeq\sum_{i\ge2}\frac{\lambda_{i}}{1-\lambda_{1}}v_{i}\in P$ とおくと $x=\lambda_{1}v_{1}+(1-\lambda_{1})y$。$v_{1}=y$ なら $x=v_{1}$ なので $v_{1}\in F$、$y=x\in F$。$v_{1}\neq y$ なら $x\in]v_{1},y[\cap F$ で、$F$ が面なので $v_{1},y\in F$。どちらの場合も $y\in F$ は $m-1$ 項の正係数の凸結合なので、帰納法の仮定から $v_{2},\dots,v_{m}\in F$。
+
+**Step 2（2）.** $\supseteq$ は $F$ が凸だから。$\subseteq$：$x\in F$ を $V$ の点の正係数の凸結合で書く（\ref{poly:polytope-characterization} から $P=\operatorname{conv}V$）。Step 1 からその点はすべて $F\cap V$ に入るので $x\in\operatorname{conv}(F\cap V)$。よって $F$ は有限集合の凸包である。$\operatorname{ext}F\subseteq\operatorname{ext}P\cap F$ は \ref{poly:face-basic} の 2。逆に $v\in F\cap V$ は $P$ の端点なので、$F$ の 2 点を結ぶ開線分（$P$ の開線分でもある）の内部に来ることはなく、$F$ の端点である。
+
+**Step 3（3）.** 2 から空でない面 $F$ は $F\cap V\subseteq V$ で決まる。空集合を加えても、面の個数は $V$ の部分集合の個数 $2^{\abs{V}}$ 以下（空集合の面は $V$ の空な部分集合に対応させる）。
+:::
+
+::: lemma 面とアフィン包 {#poly:face-aff keywords="a nonempty face F of a closed convex set C satisfies F = C cap aff F" index="面とアフィン包|めんとあふぃんほう"}
+$C$ を閉凸集合、$F$ をその空でない面とすると $F=C\cap\operatorname{aff}F$。
+:::
+
+::: proof
+$\subseteq$ は明らか。$x\in C\cap\operatorname{aff}F$ をとる。\ref{poly:relative-interior-nonempty} から $y\in\operatorname{ri}F$ がある。$x=y$ なら終わり。$x\neq y$ なら、$z\defeq y+\varepsilon(y-x)$ は $\operatorname{aff}F$ の点（$x,y\in\operatorname{aff}F$ のアフィン結合）で、$\varepsilon>0$ が小さければ $y$ の近くにあるので $z\in F$（$y$ は $\operatorname{aff}F$ の中での $F$ の内点）。$y=\frac{1}{1+\varepsilon}z+\frac{\varepsilon}{1+\varepsilon}x\in]x,z[$ で $y\in F$ なので、面の定義から $x\in F$。
+:::
+
+::: theorem 凸多面体の面は露出面 {#poly:polytope-faces-exposed keywords="every face of a polytope is exposed; strict separation of conv of the remaining vertices from aff F" index="露出面（凸多面体の面）|ろしゅつめん" refname="凸多面体の面は露出面"}
+凸多面体 $P$ の面はすべて露出面である。さらに、空でない真の面 $F$ について、$P\subseteq K(u,\alpha)$, $F=P\cap H(u,\alpha)$ で、$F$ に入らない頂点 $v$ では $\langle u,v\rangle<\alpha$ となる $u\neq0$, $\alpha$ がとれる。
+:::
+
+::: intuition
+凸多面体では「面」と「平面で切った切り口」の区別がない。面に入らない頂点を全部集めた凸包は、面の張る平らな空間から離れているので、その間に壁を立てて少し傾けずに平行移動すれば、ちょうど面だけに触れる支持超平面になる。
+:::
+
+::: proof
+$\varnothing$ と $P$ は定義から露出面なので、空でない真の面 $F$ を考える。$V\defeq\operatorname{ext}P$, $V'\defeq V\setminus F$ とする。
+
+**Step 1（$V'\neq\varnothing$）.** $V'=\varnothing$ なら $V\subseteq F$ で $P=\operatorname{conv}V\subseteq F$ となり、$F$ が真であることに反する。
+
+**Step 2（$\operatorname{conv}V'\cap\operatorname{aff}F=\varnothing$）.** 【主張：残りの頂点の凸包は面のアフィン包と交わらない】$z\in\operatorname{conv}V'\cap\operatorname{aff}F$ とすると $z\in P\cap\operatorname{aff}F=F$（\ref{poly:face-aff}）。$z$ は $V'$ の点の正係数の凸結合なので、\ref{poly:polytope-faces} の 1 からそれらの点は $F$ に入り、$V'$ の定義に反する。
+
+**Step 3（分離）.** 【主張：$\langle u,x\rangle=\alpha$（$x\in\operatorname{aff}F$）、$\langle u,w\rangle<\alpha$（$w\in V'$）となる $u\neq0$ がある】$\operatorname{aff}F=a+L$（$L$ は線形部分空間）と書き、$D\defeq\operatorname{conv}V'-a+L$ とおく。$D$ は凸。$D$ は閉：$k_{n}+l_{n}\to z$（$k_{n}\in\operatorname{conv}V'-a$, $l_{n}\in L$）なら、$\operatorname{conv}V'$ のコンパクト性（\ref{poly:convex-hull-compact}）から部分列で $k_{n}\to k$、すると $l_{n}\to z-k\in L$（$L$ は閉）なので $z\in D$。Step 2 から $0\notin D$（$0=w-a+l$ なら $w=a-l\in\operatorname{aff}F$）。\ref{poly:nearest-point-separation} を $D$ と点 $0$ に使うと、最近点 $p\in D$ について $\langle 0-p,d-p\rangle\le0$、つまり $\langle p,d\rangle\ge\abs{p}^{2}>0$（$d\in D$）。$d=w-a+tl$（$t\in\mathbb{R}$, $l\in L$）を代入すると、$t$ について有界でない限り $\langle p,l\rangle=0$ でなければならない。よって $\langle p,l\rangle=0$（$l\in L$）で、$\langle p,w\rangle\ge\langle p,a\rangle+\abs{p}^{2}$（$w\in\operatorname{conv}V'$）。$u\defeq-p$, $\alpha\defeq-\langle p,a\rangle$ とすれば、$x=a+l\in\operatorname{aff}F$ で $\langle u,x\rangle=\alpha$、$w\in V'$ で $\langle u,w\rangle\le\alpha-\abs{p}^{2}<\alpha$。
+
+**Step 4（$F=P\cap H(u,\alpha)$）.** $v\in V$ は $V'$ に入るか $F\subseteq\operatorname{aff}F$ に入るかなので $\langle u,v\rangle\le\alpha$。$P=\operatorname{conv}V$ なので $P\subseteq K(u,\alpha)$、$F\subseteq H(u,\alpha)$ で $H(u,\alpha)$ は支持超平面。逆に $x=\sum\lambda_{v}v\in P\cap H(u,\alpha)$（正係数）なら $\alpha=\sum\lambda_{v}\langle u,v\rangle$ で各項は $\le\alpha$ なので、使った $v$ はすべて $\langle u,v\rangle=\alpha$、つまり $v\notin V'$、$v\in F$。$F$ は凸なので $x\in F$。
+:::
+
+## 多面的集合 {#poly:sec-pp-polyhedral}
+
+::: definition 多面的集合 {#poly:polyhedral-set keywords="polyhedral set: intersection of finitely many closed halfspaces; representation; irreducible representation; active index set I(x)" index="多面的集合|ためんてきしゅうごう, 既約な表示（多面的集合）|きやくなひょうじ, 有効な不等式|ゆうこうなふとうしき" refname="多面的集合"}
+有限個の閉半空間の共通部分
+$$Q=\bigcap_{i=1}^{n}K(u_{i},\alpha_{i})\quad(u_{i}\neq0)$$
+を**多面的集合**といい、この式を $Q$ の**表示**という（$n=0$ のときは $Q=\mathbb{R}^{d}$）。どの $K(u_{i},\alpha_{i})$ を除いても共通部分が変わる表示を**既約**という。$H_{i}\defeq H(u_{i},\alpha_{i})$ とし、$x\in Q$ について $I(x)\defeq\{i:\langle u_{i},x\rangle=\alpha_{i}\}$（$x$ で**等号の成り立つ**添字）、$I\subseteq\{1,\dots,n\}$ について
+$$F_{I}\defeq\{x\in Q:\langle u_{i},x\rangle=\alpha_{i}\ (i\in I)\}$$
+とおく（$F_{\varnothing}=Q$）。
+:::
+
+::: intuition
+多面的集合は「有限個の 1 次不等式の連立の解集合」である。点 $x$ で等号になっている不等式の集合 $I(x)$ は、$x$ がどの壁に乗っているかを表す。表示は除いても変わらない不等式を落とせば既約にできる。
+:::
+
+::: theorem 多面的集合の面 {#poly:polyhedral-faces keywords="faces of a polyhedral set are exactly the nonempty sets F_I and the empty set; finitely many faces; faces are polyhedral and exposed" index="多面的集合の面|ためんてきしゅうごうのめん" refname="多面的集合の面"}
+$Q=\bigcap_{i=1}^{n}K(u_{i},\alpha_{i})$ を多面的集合とする。
+1. 各 $I$ について $F_{I}$ は $Q$ の露出面である。
+2. $Q$ の空でない面 $F$ と $x_{0}\in\operatorname{ri}F$ について $F=F_{I(x_{0})}$。
+3. したがって $Q$ の面は $\varnothing$ と $F_{I}$ たちで尽き、その個数は $2^{n}+1$ 以下。面はすべて多面的集合で、露出面である。
+:::
+
+::: intuition
+多面的集合の面は「いくつかの不等式を等式に変えたもの」に限られる。面の相対的内部の点では、その面を定める不等式だけが等号になり、ほかの不等式には余裕がある。
+:::
+
+::: proof
+**Step 1（1）.** $F_{I}=\varnothing$ または $I=\varnothing$ なら自明な面で露出面。$F_{I}\neq\varnothing$, $I\neq\varnothing$ とし、$u\defeq\sum_{i\in I}u_{i}$, $\alpha\defeq\sum_{i\in I}\alpha_{i}$ とおく。$x\in Q$ では $\alpha-\langle u,x\rangle=\sum_{i\in I}(\alpha_{i}-\langle u_{i},x\rangle)$ の各項が $\ge0$ なので、$\langle u,x\rangle\le\alpha$ で、等号は $x\in F_{I}$ と同値。$u\neq0$ なら $F_{I}=Q\cap H(u,\alpha)$ で $H(u,\alpha)$ は支持超平面。$u=0$ なら、$F_{I}\neq\varnothing$ の点で $0=\langle u,x\rangle=\alpha$ なので、すべての $x\in Q$ で等号が成り立ち $F_{I}=Q$（自明な面）。
+
+**Step 2（$F\subseteq F_{I(x_{0})}$）.** 【主張：$F$ の点は $x_{0}$ で等号になる不等式をすべて等号で満たす】$I\defeq I(x_{0})$, $y\in F$, $y\neq x_{0}$, $i\in I$ とする。$x_{0}\in\operatorname{ri}F$ なので、小さい $\varepsilon>0$ で $z\defeq x_{0}+\varepsilon(x_{0}-y)\in F\subseteq Q$。$\langle u_{i},z\rangle\le\alpha_{i}$ に $\langle u_{i},x_{0}\rangle=\alpha_{i}$ を代入すると $\varepsilon(\alpha_{i}-\langle u_{i},y\rangle)\le0$、つまり $\langle u_{i},y\rangle\ge\alpha_{i}$。$y\in Q$ と合わせて等号。
+
+**Step 3（$F_{I(x_{0})}\subseteq F$）.** 【主張：等号の集合が同じだけの点は $F$ に入る】$y\in F_{I}$, $y\neq x_{0}$ とし、$z\defeq x_{0}+\varepsilon(x_{0}-y)$ とおく。$i\in I$ では $\langle u_{i},z\rangle=\alpha_{i}+\varepsilon(\alpha_{i}-\alpha_{i})=\alpha_{i}$。$i\notin I$ では $\langle u_{i},x_{0}\rangle<\alpha_{i}$ なので、有限個の $i$ について $\varepsilon$ を小さくとれば $\langle u_{i},z\rangle<\alpha_{i}$。よって $z\in Q$。$x_{0}=\frac{1}{1+\varepsilon}z+\frac{\varepsilon}{1+\varepsilon}y\in]z,y[$ で $x_{0}\in F$ なので、面の定義から $y\in F$。
+
+**Step 4（3）.** 2 と \ref{poly:relative-interior-nonempty} から空でない面は $F_{I}$ の形で、1 から露出面。$I$ は $2^{n}$ 通り。$F_{I}=Q\cap\bigcap_{i\in I}\bigl(K(u_{i},\alpha_{i})\cap K(-u_{i},-\alpha_{i})\bigr)$ なので多面的集合。
+:::
+
+::: theorem ファセットと既約な表示 {#poly:facets-irreducible keywords="for a full-dimensional polyhedral set with an irreducible representation, the facets are exactly Q cap H_i, pairwise distinct; int Q = strict inequalities" index="ファセットと既約な表示|ふぁせっとときやくなひょうじ" refname="ファセットと既約な表示"}
+$Q=\bigcap_{i=1}^{n}K(u_{i},\alpha_{i})$ を $\dim Q=d$ の多面的集合とし、表示は既約とする。
+1. $\operatorname{int}Q=\{x:\langle u_{i},x\rangle<\alpha_{i}\ (\forall i)\}$。
+2. 各 $i$ について $Q\cap H_{i}$ は $Q$ のファセットで、$i\neq j$ なら $Q\cap H_{i}\neq Q\cap H_{j}$。
+3. $Q$ のファセットはこれで尽きる。特に、ファセットの個数は既約な表示の不等式の個数 $n$ に等しく、既約な表示は（各 $(u_{i},\alpha_{i})$ の正の定数倍を除いて）ただ一つである。
+:::
+
+::: intuition
+全次元の多面的集合では、余分な不等式を除いた後の不等式と壁（ファセット）が一対一に対応する。だから「必要な壁の枚数」は表示によらない量になる。
+:::
+
+::: proof
+**Step 1（1）.** 右辺は開集合で $Q$ に含まれるので $\operatorname{int}Q$ に含まれる。逆に $x\in\operatorname{int}Q$ で $\langle u_{i},x\rangle=\alpha_{i}$ なら、小さい $t>0$ で $x+tu_{i}\in Q$ だが $\langle u_{i},x+tu_{i}\rangle=\alpha_{i}+t\abs{u_{i}}^{2}>\alpha_{i}$ となり矛盾。
+
+**Step 2（$I(z)=\{i\}$ となる点 $z$）.** 【主張：各 $i$ について、$i$ の不等式だけが等号になる $Q$ の点がある】$\dim Q=d$ なので $\operatorname{ri}Q=\operatorname{int}Q$ は空でなく（\ref{poly:relative-interior-nonempty}）、$x_{0}\in\operatorname{int}Q$ をとる。既約性から $\bigcap_{j\neq i}K(u_{j},\alpha_{j})\neq Q$ なので、$\langle u_{i},y\rangle>\alpha_{i}$ で他の不等式を満たす $y$ がある。$t\mapsto\langle u_{i},x_{0}+t(y-x_{0})\rangle$ は 1 次関数で $t=0$ で $<\alpha_{i}$、$t=1$ で $>\alpha_{i}$ なので、ちょうど $\alpha_{i}$ となる $t^{\ast}\in]0,1[$ がある。$z\defeq x_{0}+t^{\ast}(y-x_{0})$ とおく。$j\neq i$ では $\langle u_{j},z\rangle=(1-t^{\ast})\langle u_{j},x_{0}\rangle+t^{\ast}\langle u_{j},y\rangle<\alpha_{j}$（第 1 項は 1 から狭義、$1-t^{\ast}>0$）。よって $z\in Q$, $I(z)=\{i\}$。
+
+**Step 3（2）.** $G_{i}\defeq Q\cap H_{i}$ は \ref{poly:polyhedral-faces} から面で、$x_{0}\notin G_{i}$ なので真。Step 2 の $z$ の近くでは $j\neq i$ の不等式が狭義に成り立つので、ある $\delta>0$ で $H_{i}\cap B(z,\delta)\subseteq G_{i}$。$H_{i}\cap B(z,\delta)$ は $d-1$ 次元の球を含むので $\dim G_{i}\ge d-1$、真の面なので $\operatorname{aff}G_{i}\subseteq H_{i}$ から $\dim G_{i}=d-1$。$j\neq i$ なら $z\in G_{i}\setminus G_{j}$。
+
+**Step 4（3）.** $F$ をファセットとすると、\ref{poly:polyhedral-faces} から $F=F_{I}$ で、$F\neq Q$ なので $I\neq\varnothing$。$i\in I$ をとると $F\subseteq G_{i}$。$F$ は $Q$ の面で $G_{i}$ に含まれるので $G_{i}$ の面でもある（定義から直ちに）。$F\neq G_{i}$ なら \ref{poly:face-basic} の 3 から $F\subseteq\operatorname{rb}G_{i}$。ところが $\dim F=\dim G_{i}=d-1$ なので $\operatorname{aff}F=\operatorname{aff}G_{i}$ で、$\operatorname{ri}F$（空でない）は $\operatorname{aff}G_{i}$ の開集合で $G_{i}$ に含まれ、$\operatorname{ri}F\subseteq\operatorname{ri}G_{i}$ となって矛盾。よって $F=G_{i}$。ファセットと添字 $i$ が一対一に対応するので個数は $n$。$\operatorname{aff}G_{i}=H_{i}$ なので、超平面 $H_{i}$ はファセットから決まり、$Q$ のある側を指す $u_{i}$ の向きも決まる。これが一意性の意味である。
+:::
+
+::: corollary 有界な多面的集合は凸多面体 {#poly:bounded-polyhedral-is-polytope keywords="a nonempty bounded polyhedral set is a polytope" index="有界な多面的集合|ゆうかいなためんてきしゅうごう"}
+空でない有界な多面的集合は凸多面体である。
+:::
+
+::: proof
+$Q$ は閉集合の共通部分なので閉、有界なのでコンパクトで、凸。端点 $e$ について $\{e\}$ は面なので、\ref{poly:polyhedral-faces} の 3 から端点は $2^{n}$ 個以下。\ref{poly:polytope-characterization} の 1 から $Q$ は凸多面体。
+:::
+
+## ミンコフスキー–ワイルの定理 {#poly:sec-pp-minkowski-weyl}
+
+::: lemma 有限集合の極 {#poly:polar-of-finite keywords="(conv{x_1,...,x_n})^o = intersection of K(x_i,1)" index="有限集合の極集合|ゆうげんしゅうごうのきょくしゅうごう"}
+$x_{1},\dots,x_{n}\in\mathbb{R}^{d}$, $P\defeq\operatorname{conv}\{x_{1},\dots,x_{n}\}$ なら
+$$P^{\circ}=\{y:\langle x_{i},y\rangle\le1\ (i=1,\dots,n)\}.$$
+右辺は $x_{i}\neq0$ の $i$ についての $K(x_{i},1)$ の共通部分で、多面的集合である（$x_{i}=0$ の条件は常に成り立つ）。
+:::
+
+::: proof
+$\subseteq$ は $x_{i}\in P$ から。$\supseteq$：右辺の $y$ と $x=\sum\lambda_{i}x_{i}\in P$ について $\langle x,y\rangle=\sum\lambda_{i}\langle x_{i},y\rangle\le\sum\lambda_{i}=1$。
+:::
+
+::: theorem ミンコフスキー–ワイルの定理 {#poly:minkowski-weyl keywords="Minkowski-Weyl theorem: a nonempty set is a polytope iff it is a bounded polyhedral set; V-representation and H-representation" index="ミンコフスキー–ワイルの定理|みんこふすきーわいるのていり, V 表示|ぶいひょうじ, H 表示|えいちひょうじ" refname="ミンコフスキー–ワイルの定理"}
+$P\subseteq\mathbb{R}^{d}$ を空でない集合とする。$P$ が凸多面体であることと、$P$ が有界な多面的集合であることは同値。
+:::
+
+::: intuition
+有限個の角で作った立体は、必ず有限枚の壁で切り出せ、逆も成り立つ。2 つの表示の取り替えは、極集合を 2 回とることで実現できる：角の極は壁、壁の極は角である。
+:::
+
+::: proof
+$\Leftarrow$ は \ref{poly:bounded-polyhedral-is-polytope}。$\Rightarrow$ を示す。$P=\operatorname{conv}X$（$X$ 有限）は有界（\ref{poly:convex-hull-compact}）。
+
+**Step 1（$0\in\operatorname{int}P$ の場合）.** 【主張：$P$ は多面的】\ref{poly:polar-of-finite} から $P^{\circ}$ は多面的集合。\ref{poly:bipolar} の 3 から $P^{\circ}$ は $0$ を内点にもつコンパクト凸集合で $P^{\circ\circ}=P$。\ref{poly:bounded-polyhedral-is-polytope} から $P^{\circ}=\operatorname{conv}\{y_{1},\dots,y_{m}\}$ と書ける。再び \ref{poly:polar-of-finite} から $P=P^{\circ\circ}=(\operatorname{conv}\{y_{j}\})^{\circ}$ は多面的集合。
+
+**Step 2（平行移動）.** 【主張：$\operatorname{ri}P$ の点を原点に移してよい】$a\in\operatorname{ri}P$ をとり（\ref{poly:relative-interior-nonempty}）、$P-a$ を考える。$K(u,\alpha)+a=K(u,\alpha+\langle u,a\rangle)$ なので、平行移動は多面的集合を多面的集合に移す。以下 $0\in\operatorname{ri}P$ とし、$L\defeq\operatorname{aff}P$（線形部分空間、$\dim L=k$）とおく。
+
+**Step 3（$L$ の中での適用）.** $L$ の正規直交基底で $L\cong\mathbb{R}^{k}$ と同一視すると、$P$ は $L$ の中で $0$ を内点にもつ凸多面体なので、Step 1 から $P=L\cap\bigcap_{j}\{x\in L:\langle w_{j},x\rangle\le\beta_{j}\}$（$w_{j}\in L\setminus\{0\}$）。$\mathbb{R}^{d}$ の中では $\{x\in L:\langle w_{j},x\rangle\le\beta_{j}\}=L\cap K(w_{j},\beta_{j})$ で、$L=\bigcap_{l}\bigl(K(n_{l},0)\cap K(-n_{l},0)\bigr)$（$n_{l}$ は $L^{\perp}$ の基底）も多面的。よって $P$ は $\mathbb{R}^{d}$ の多面的集合。
+:::
+
+::: corollary 凸多面体の共通部分 {#poly:polytope-intersection keywords="intersection of two polytopes is a polytope; intersection of a polytope with an affine subspace is a polytope" index="凸多面体の共通部分|とつためんたいのきょうつうぶぶん"}
+凸多面体 $P_{1},P_{2}$ について $P_{1}\cap P_{2}\neq\varnothing$ なら、$P_{1}\cap P_{2}$ は凸多面体である。凸多面体とアフィン部分空間の空でない共通部分も凸多面体である。
+:::
+
+::: proof
+\ref{poly:minkowski-weyl} から $P_{1},P_{2}$ は有界な多面的集合。表示を並べれば $P_{1}\cap P_{2}$ も有界な多面的集合で、再び \ref{poly:minkowski-weyl} から凸多面体。アフィン部分空間は Step 3 と同様に多面的集合なので同じ議論が使える。
+:::
+
+## 面の束と極双対 {#poly:sec-pp-duality}
+
+::: definition 面の束と共役な面 {#poly:face-lattice keywords="face lattice of a polytope, meet = intersection, join = smallest face containing; conjugate face F^Delta; dual polytopes; combinatorially equivalent" index="面の束|めんのそく, 共役な面|きょうやくなめん, 双対多面体|そうついためんたい, 組合せ同値|くみあわせどうち" refname="面の束"}
+凸多面体 $P$ の面全体 $\mathcal{F}(P)$ を包含で順序づけたものを $P$ の**面の束**という（面の族の共通部分は面なので、$F\wedge G\defeq F\cap G$、$F\vee G\defeq$「$F\cup G$ を含む面すべての共通部分」により束になる）。$0\in\operatorname{int}P$ のとき、$F\in\mathcal{F}(P)$ の**共役な面**を
+$$F^{\Delta}\defeq\{y\in P^{\circ}:\langle x,y\rangle=1\ (\forall x\in F)\}$$
+とする。面の束が順序同型な 2 つの凸多面体を**組合せ同値**、順序を逆にして同型なものを互いに**双対**という。
+:::
+
+::: intuition
+面の束は、多面体のどの頂点・辺・面がどれに含まれるかという「組合せの骨格」だけを記録したものである。共役な面 $F^{\Delta}$ は、$F$ 全体にちょうど接する壁の集まりを、極集合の側の点として見たものである。
+:::
+
+::: theorem 極双対 {#poly:polar-duality keywords="for a d-polytope P with 0 in the interior, F -> F^Delta is an inclusion-reversing bijection F(P) -> F(P^o) with F^DeltaDelta = F and dim F + dim F^Delta = d - 1; every polytope has a dual" index="極双対|きょくそうつい, 面の次元の公式（極双対）|めんのじげんのこうしき" refname="極双対"}
+$P\subseteq\mathbb{R}^{d}$ を $0\in\operatorname{int}P$ の凸多面体とし、$Q\defeq P^{\circ}$ とする。
+1. $Q$ は $0$ を内点にもつ凸多面体で $Q^{\circ}=P$。
+2. 各 $F\in\mathcal{F}(P)$ について $F^{\Delta}\in\mathcal{F}(Q)$ で、$\varnothing^{\Delta}=Q$, $P^{\Delta}=\varnothing$。$F\subseteq G$ なら $G^{\Delta}\subseteq F^{\Delta}$。
+3. $F^{\Delta\Delta}=F$（$Q$ の面にも $Q^{\circ}=P$ を使って $\Delta$ を定める）。したがって $F\mapsto F^{\Delta}$ は $\mathcal{F}(P)$ から $\mathcal{F}(Q)$ への包含を逆にする全単射で、$P$ と $Q$ は互いに双対である。
+4. 空でない真の面 $F$ について $\dim F+\dim F^{\Delta}=d-1$。特に、$P$ の頂点は $Q$ のファセットに、$P$ のファセットは $Q$ の頂点に対応する。
+:::
+
+::: intuition
+原点を中に含む多面体の極をとると、頂点と壁が入れ替わり、辺と「壁の交わる稜」が入れ替わる。立体全体を裏返して、大きい面ほど小さい面に対応させる鏡である。次元の公式は、$k$ 次元の面が $d-1-k$ 次元の面に移ることを言っている。
+:::
+
+::: proof
+**Step 1（1）.** \ref{poly:minkowski-weyl} の証明の Step 1 と \ref{poly:bipolar} の 3 から。
+
+**Step 2（2）.** 【主張：$F^{\Delta}$ は $Q$ の面】$F^{\Delta}=\bigcap_{x\in F}G_{x}$, $G_{x}\defeq Q\cap H(x,1)$ と書ける（$x=0$ では $G_{0}\defeq\varnothing$ と読む。$\langle0,y\rangle=1$ は成り立たないから）。$x\neq0$, $x\in P=Q^{\circ}$ なら $Q\subseteq K(x,1)$ なので、$G_{x}$ は空か支持超平面による露出面で、\ref{poly:face-basic} の 1 から面。面の族の共通部分は面の定義から再び面（$F=\varnothing$ では空の共通部分を $Q$ と読む）。よって $\varnothing^{\Delta}=Q$。$0\in P$ なので $P^{\Delta}\subseteq G_{0}=\varnothing$。包含の逆転は定義から。
+
+**Step 3（3）.** 【主張：$F^{\Delta\Delta}=F$】$F^{\Delta\Delta}=\{x\in P:\langle x,y\rangle=1\ (\forall y\in F^{\Delta})\}$ で、$F\subseteq F^{\Delta\Delta}$ は定義から。$F=\varnothing$ なら $F^{\Delta\Delta}=Q^{\Delta}=\varnothing$（$0\in Q$）、$F=P$ なら $F^{\Delta\Delta}=\varnothing^{\Delta}=P$。空でない真の面 $F$ では、\ref{poly:polytope-faces-exposed} から $P\subseteq K(u,\alpha)$, $F=P\cap H(u,\alpha)$ とする。$0\in\operatorname{int}P$ なので $\alpha>0$（$\alpha\le0$ なら、$0$ の近くの点 $tu$（$t>0$ 小）が $P$ に入り $\langle u,tu\rangle>0\ge\alpha$ となって矛盾）。$y_{0}\defeq u/\alpha$ は $P$ 上で $\langle x,y_{0}\rangle\le1$ なので $y_{0}\in Q$、$F$ 上で $=1$ なので $y_{0}\in F^{\Delta}$。よって $F^{\Delta\Delta}\subseteq\{x\in P:\langle x,y_{0}\rangle=1\}=F$。$Q$ の面にも同じ議論（$P,Q$ の役割の交換。$Q^{\circ}=P$）が使えるので、$\Delta$ は互いに逆の写像で全単射。
+
+**Step 4（4、上からの評価）.** 【主張：$F^{\Delta}$ は $d-1-k$ 次元のアフィン部分空間 $A$ に含まれる】$k\defeq\dim F$ とし、$\operatorname{aff}F$ を張るアフィン独立な $x_{0},\dots,x_{k}\in F$ をとる。$\operatorname{aff}F\subseteq H(u,\alpha)$, $\alpha>0$ なので $0\notin\operatorname{aff}F$。このとき $x_{0},\dots,x_{k}$ は一次独立：$\sum c_{j}x_{j}=0$, $s\defeq\sum c_{j}$ とすると、$s\neq0$ なら $0=\sum(c_{j}/s)x_{j}\in\operatorname{aff}F$ で矛盾、$s=0$ ならアフィン独立性（\ref{poly:affine-basic} の 3）から $c=0$。$A\defeq\{y:\langle x_{j},y\rangle=1\ (j=0,\dots,k)\}$ は一次独立な $k+1$ 本の 1 次方程式の解集合で、$y_{0}\in A$ なので $\dim A=d-k-1$。$F^{\Delta}\subseteq A$ は $x_{j}\in F$ から。
+
+**Step 5（4、下からの評価）.** 【主張：$y_{0}$ の近くの $A$ の点は $F^{\Delta}$ に入る】$y\in A$ と $x\in\operatorname{aff}F$（$x_{j}$ のアフィン結合）について $\langle x,y\rangle=1$。$y\in Q$ は「すべての頂点 $v$ で $\langle v,y\rangle\le1$」と同値（\ref{poly:polar-of-finite}）。$F$ の頂点では等号。$F$ に入らない頂点 $v$ では、\ref{poly:polytope-faces-exposed} の $u,\alpha$ のとり方から $\langle v,y_{0}\rangle<1$ で、頂点は有限個なので、ある $\delta>0$ で $\abs{y-y_{0}}<\delta$ なら $\langle v,y\rangle<1$。よって $A\cap B(y_{0},\delta)\subseteq Q\cap\{y:\langle x,y\rangle=1\ (x\in F)\}=F^{\Delta}$（$F$ の点は $x_{j}$ のアフィン結合）。したがって $\dim F^{\Delta}\ge\dim A=d-k-1$。Step 4 と合わせて等号。
+
+**Step 6（頂点とファセット）.** $k=0$ なら $\dim F^{\Delta}=d-1$、$k=d-1$ なら $\dim F^{\Delta}=0$。
+:::
+
+::: corollary 双対多面体の存在 {#poly:dual-exists keywords="every polytope has a dual polytope" index="双対多面体の存在|そうついためんたいのそんざい"}
+任意の凸多面体 $P$ に双対な凸多面体がある。
+:::
+
+::: proof
+$a\in\operatorname{ri}P$ をとり、$P-a$ を $\operatorname{aff}P-a\cong\mathbb{R}^{k}$ の中の、原点を内点にもつ凸多面体とみなす。平行移動と線形同型は面を面に移すので面の束は変わらない。\ref{poly:polar-duality} の 3 から、$\mathbb{R}^{k}$ の中での極集合が双対である。
+:::
+
+::: example
+1. **立方体と正八面体.** 正八面体 $O\defeq\operatorname{conv}\{\pm e_{1},\pm e_{2},\pm e_{3}\}$ について、\ref{poly:polar-of-finite} から $O^{\circ}=\{y:\abs{y_{i}}\le1\ (i=1,2,3)\}=[-1,1]^{3}$。立方体の頂点 8・辺 12・面 6 は、正八面体の面 8・辺 12・頂点 6 に対応する（$\dim F+\dim F^{\Delta}=2$）。
+2. **単体.** $d$ 単体の極（原点を内点にとる）は再び $d$ 単体で、単体は自分自身と双対である。
+3. **多角形.** $n$ 角形は頂点 $n$・辺 $n$ で、自分自身と双対である。
+:::
+
+::: hypcheck
+- **凸多面体の特徴づけ**：コンパクト性は \ref{poly:minkowski-extreme-points} を使うのに必要。閉半空間はコンパクトでなく、端点をもたない。
+- **凸多面体の面**：$P=\operatorname{conv}V$ と、面の定義（開線分の条件）だけを使った。面が閉であることは使っていない。
+- **凸多面体の面は露出面**：$\operatorname{conv}V'$ のコンパクト性を $D$ が閉であることに、\ref{poly:face-aff} を Step 2 に使った。一般のコンパクト凸集合では、面が露出面とは限らない（スタジアム形の角）。
+- **多面的集合の面**：$\operatorname{ri}F\neq\varnothing$ と、不等式が有限個であること（Step 3 の $\varepsilon$ を一様にとる）を使った。無限個の半空間では、円板のように面が無限個ありうる。
+- **ファセットと既約な表示**：$\dim Q=d$ は内点 $x_{0}$ の存在に、既約性は点 $y$ の存在に使った。$\dim Q<d$ では、$Q$ を含む超平面を 2 つの半空間で表すので、表示は一意にならない。
+- **ミンコフスキー–ワイルの定理**：有界性は「有界な多面的集合 ⇒ 凸多面体」に不可欠（半空間は凸多面体でない）。
+- **極双対**：$0\in\operatorname{int}P$ は $\alpha>0$（Step 3）と $Q$ の有界性に使った。$0\in\operatorname{rb}P$ なら $P^{\circ}$ は有界でない。
+:::
+
+## 問題 {#poly:sec-pp-problems}
+
+::: problem {#poly:prob-pp-irredundant}
+$Q\defeq\{x\in\mathbb{R}^{2}:x_{1}\le1,\ x_{2}\le1,\ x_{1}+x_{2}\le3,\ -x_{1}\le0,\ -x_{2}\le0\}$ の既約な表示とファセットを求めよ。
+:::
+
+::: solution
+$x_{1}\le1$, $x_{2}\le1$ から $x_{1}+x_{2}\le2<3$ なので 3 番目の不等式は除ける。残りの 4 本はどれを除いても非有界になる（例えば $x_{1}\le1$ を除くと $(t,0)$, $t\to\infty$ が入る）ので既約。$Q=[0,1]^{2}$ で、ファセットは 4 本の辺で、既約な表示の 4 本の不等式に対応する（\ref{poly:facets-irreducible}）。
+:::
+
+::: problem {#poly:prob-pp-not-exposed}
+$C\defeq\operatorname{conv}\bigl([-1,1]\times\{0\}\cup\{x:\abs{x-(1,1)}\le1\}\bigr)$ の点 $(1,0)$ は、$C$ の端点だが露出点でないことを確かめ、\ref{poly:polytope-faces-exposed} が凸多面体に限る主張であることを確認せよ。
+:::
+
+::: solution
+$C$ の境界は、線分 $[(-1,0),(1,0)]$ と、$(1,0)$ から円 $\abs{x-(1,1)}=1$ の下側の弧に滑らかにつながる。$(1,0)$ を通る支持直線は円の接線 $x_{2}=0$ しかない（円は $(1,0)$ で直線 $x_{2}=0$ に接する）が、$C\cap\{x_{2}=0\}=[-1,1]\times\{0\}$ は 1 点でない。よって $\{(1,0)\}$ は露出面でない。一方、$(1,0)$ を開線分の内点にもつ $C$ の 2 点は、$x_{2}\ge0$ なのでともに $x_{2}=0$ 上にあり、$C\cap\{x_{2}=0\}$ の端の点なので両端が $(1,0)$ に一致する。よって端点。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{poly:polytope-faces} は面の閉性を使わずに、凸結合の帰納法だけで示した。\ref{poly:polyhedral-faces} は $Q$ の有界性を仮定しないので、非有界な多面的集合でも面は有限個で、すべて露出面である。
+
+**前提を変えると.**
+- 有界でない多面的集合については、**一般のミンコフスキー–ワイルの定理**：$Q$ が多面的集合であることと、$Q=\operatorname{conv}X+\operatorname{cone}Y$（$X,Y$ は有限集合、$\operatorname{cone}$ は非負結合の全体）と書けることは同値、が知られている（G. M. Ziegler, *Lectures on Polytopes*, Theorem 1.2）。ここでは証明しない。
+- 2 つの表示の変換はアルゴリズム的には別の問題で、フーリエ–モツキン消去法（射影による不等式の消去）や二重記述法で行う。頂点の個数と不等式の本数は大きく異なりうる（$d$ 次元立方体は頂点 $2^{d}$、不等式 $2d$）。
+
+**類似の定理.** 線形計画法の双対定理、ファルカスの補題は、同じ「V 表示と H 表示の双対」の別の表れである。極双対の公式 $\dim F+\dim F^{\Delta}=d-1$ は、面の個数の間の関係（$f_{k}(P)=f_{d-1-k}(P^{\circ})$）を与え、\ref[オイラーの関係式とデーン–ソマーヴィルの関係式]{poly:page-euler-dehn-sommerville} で使う。
+
+**高い視点から：ガロア対応としての極双対.** 点 $x$ と点 $y$ の関係「$\langle x,y\rangle=1$」は、$P$ の部分集合と $Q$ の部分集合の間に、包含を逆にする 2 つの写像（どちらも $\Delta$）を定める。これは体の拡大と部分群の間のガロア対応、イデアルと多様体の対応と同じ「関係から生じる反変的な対応」（圏論では、順序集合の間の反変的な随伴、すなわちガロア接続）である。一般のガロア接続では $F\subseteq F^{\Delta\Delta}$ しか言えず、「閉じた」対象の間でだけ全単射になる。極双対の要点は、凸多面体のすべての面が露出面であるため、すべての面が閉じた対象になる点にある（\ref{poly:polytope-faces-exposed} を Step 3 で使った）。比喩で言えば、多面体の頂点で「どの壁に接しているか」を記録し、壁で「どの頂点を含むか」を記録すると、2 冊の台帳はちょうど互いの索引になっている。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{poly:sec-pp-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
