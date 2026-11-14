@@ -19,6 +19,7 @@ The main body (definitions, lemma on function sets, exponent laws, the $\kappa^{
 - **Detail:** The supplement says "${}^{\omega}2\approx\mathcal{P}(\omega)$ が整列可能であることは ZF では証明できない". This is false: ZF proves that $\mathcal{P}(\omega)$ is well-orderable (via the canonical well-ordering of the reals / of ${}^{\omega}2$), and hence ${}^{\omega}2$ is well-orderable in ZF. What is not provable in ZF is that *every* set is well-orderable, or that ${}^{\lambda}\kappa$ is well-orderable for arbitrary infinite $\kappa,\lambda$. The example chosen is exactly a case where well-orderability holds in ZF.
 - **Proposed fix:** Replace with: "${}^{\lambda}\kappa$ は ZF でも集合として存在するが、一般には整列可能とは限らない（たとえば $\kappa=\mathcal{P}(\omega)$ のとき ${}^{\omega}\mathcal{P}(\omega)$ が整列可能かは ZF では言えない）。そのため $\lvert{}^{\lambda}\kappa\rvert$ を基数として定義するのに選択公理を使う。" (Note that ${}^{\omega}2$ itself is well-orderable in ZF.)
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** ZF does not prove that P(ω) (equivalently ℝ or ^ω2) is well-orderable: in Cohen's basic model of ZF (and in Feferman's and Solovay's models) the reals cannot be well-ordered, so this is a weak form of AC, not a theorem of ZF. The page's claim is correct; the text now adds that such a model exists if ZF is consistent.
 
 ### ISSUE-0002 [Open] Easton's theorem misstated as 'no constraints beyond monotonicity and König'
 - **Category:** Supplement/remark error
@@ -33,6 +34,7 @@ The main body (definitions, lemma on function sets, exponent laws, the $\kappa^{
 - **Detail:** The text says "逆に無限の強極限基数は $\omega$ か、極限順序数 $\gamma$ についての $\beth_{\gamma}$ の形をしている". This is false as stated: e.g. $\aleph_{\omega}$ is a strong limit cardinal (assuming GCH, or more generally any strong limit of the form $\sup$ of a strictly increasing sequence of strong limits), but $\aleph_{\omega}$ is not of the form $\beth_{\gamma}$ in general (it equals $\beth_{\omega}$ only under GCH). The correct statement is that the strong limit cardinals are exactly $\omega$ and the cardinals of the form $\beth_{\gamma}$ for $\gamma$ a limit ordinal *only under GCH*; in ZFC alone, every $\beth_{\gamma}$ ($\gamma$ limit) is a strong limit, but not conversely.
 - **Proposed fix:** Replace with: "逆は一般には成り立たない（例：$\aleph_{\omega}$ は強極限基数だが $\beth_{\gamma}$ の形とは限らない）。GCH のもとでは、無限の強極限基数は $\omega$ か極限順序数 $\gamma$ についての $\beth_{\gamma}$ の形のものに限る。"
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** In ZFC every uncountable strong limit κ equals β_γ for the least γ with β_γ ≥ κ: γ ≠ 0, and γ = δ+1 would give β_γ = 2^{β_δ} < κ, so γ is a limit and β_γ = sup_{α<γ} β_α ≤ κ. The proposed counterexample ℵ_ω is a strong limit only when it equals β_ω. A proof is now included in the supplement.
 
 ### ISSUE-0004 [Open] Sierpiński's result: GCH in set form implies AC — needs the right formulation
 - **Category:** Supplement/remark error
