@@ -26,6 +26,7 @@
 - **Detail:** The supplement claims 'プリズム作用素 \ref{at:singular-homotopy-invariance} は $q=1$ のシャッフル写像にあたる'. The prism operator used in homotopy invariance is a chain homotopy $S(X)\to S(X\times I)$ (or $S(X)\to S(X)$ after composing with a projection), not a chain map $S(X)\otimes S(I)\to S(X\times I)$ of the shuffle type. The shuffle map for $q=1$ is a chain map $S(X)\otimes S(\Delta^{1})\to S(X\times\Delta^{1})$; the prism operator is a homotopy, not a chain map, and the two are different objects (the prism operator is not a shuffle).
 - **Proposed fix:** Replace with: 'the prism operator is a chain homotopy, not a chain map; the $q=1$ shuffle map is the chain map $S(X)\otimes S(\Delta^{1})\to S(X\times\Delta^{1})$ given by the standard triangulation of $\Delta^{p}\times\Delta^{1}$, which is related to but distinct from the prism operator.'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The prism operator is (up to sign convention) the image under the homotopy of σ ↦ EZ(σ⊗ι), where ι is the identity 1-simplex of I; since ∂ι is the difference of the endpoints, this is a chain homotopy, not a chain map, exactly as the (p,1)-shuffle triangulation of Δ^n×Δ^1 is the prism decomposition. The text has been reworded to say this explicitly.
 
 ### ISSUE-0003 [Open] Eilenberg–Zilber does not make S a monoidal functor even up to homotopy in the naive sense
 - **Category:** Supplement/remark error
@@ -33,6 +34,7 @@
 - **Detail:** The supplement says Eilenberg–Zilber states that $S\colon\mathbf{Top}\to\mathrm{Ch}$ is 'up to homotopy' a monoidal functor. This is imprecise: the EZ maps $\psi$ and $\theta$ are only inverse chain homotopy equivalences, and the monoidal coherence (associativity, unit) holds only up to coherent homotopy, not on the nose. Stating it as 'up to homotopy a monoidal functor' without mentioning coherence is an overstatement; the correct statement is that $S$ is a homotopy-coherent (weak) monoidal functor, and the $E_{\infty}$-coalgebra structure requires the full coherence data.
 - **Proposed fix:** Replace with: 'Eilenberg–Zilber gives natural chain maps $\psi,\theta$ inverse up to natural chain homotopy, making $S$ a homotopy-coherent (weak) monoidal functor; the coherence data (associativity, unit up to coherent homotopy) is needed to obtain the $E_{\infty}$-coalgebra structure.'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The remark is an informal higher viewpoint and already says that the precise refinement is the E∞-coalgebra structure; monoidal up to homotopy is the standard informal phrasing (the shuffle map makes S lax monoidal and is a natural chain homotopy equivalence). No mathematical claim in the proofs depends on it.
 
 ### ISSUE-0004 [Open] Field-coefficient Künneth requires no Tor but the statement about naturality of the splitting is imprecise
 - **Category:** Supplement/remark error

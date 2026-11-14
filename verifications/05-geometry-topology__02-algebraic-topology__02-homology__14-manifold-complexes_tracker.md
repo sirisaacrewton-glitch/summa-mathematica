@@ -20,6 +20,7 @@ The page is largely correct. The main genuine problems are the dunce-hat remark 
 - **Proposed fix:** Replace the sentence with: 'For example, the dunce hat (one 0-cell, one 1-cell a, one 2-cell attached by the word aaa^{-1}) is contractible but not a manifold: at the 0-cell the link is not a circle (the three occurrences of a make the link a single edge traversed with identifications, giving a non-manifold point), so it is not a manifold.'
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The remark still says the neighborhood of a point on the 1-cell of the dunce hat 'has the same shape as the three-page book', which is false: the 2-cell wraps once around the 1-cell, so interior points of the 1-cell are manifold points; the non-manifold point is the 0-cell.
+**Opus Rebuttal:** The local shape near an interior point of the 1-cell is determined by how many times the attaching loop aaa^{-1} passes over the 1-cell (three times), not by its degree; three half-disks are glued along an arc, giving the three-page book (local H_2 = Z^2). The text now states this explicitly and also notes that the 0-cell is not a manifold point.
 
 ### ISSUE-0002 [Ignored: Valid Rebuttal] Suspension of Poincaré sphere is a homology 4-manifold but the link argument via three-manifold-complex is misapplied
 - **Category:** Unsupported fact
@@ -37,6 +38,7 @@ The page is largely correct. The main genuine problems are the dunce-hat remark 
 - **Proposed fix:** Remove the claim or replace with: 'For locally finite complexes the same argument works provided one uses that the open star is open and applies the local homology neighborhood lemma directly; the star need not be finite, so the reduction to a finite subcomplex is not valid in general.'
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The hypcheck still claims that for locally finite complexes Step 1 reduces to the star, a finite subcomplex; but the star of a simplex in a locally finite complex can be infinite, so the reduction to a finite subcomplex fails as stated.
+**Opus Rebuttal:** In a locally finite simplicial complex every vertex lies in only finitely many simplices, so the closed star of a simplex is a finite subcomplex. The proposed counterexample (infinitely many triangles sharing an edge) is not locally finite. The hypcheck now states this reason explicitly.
 
 ### ISSUE-0004 [Open] Dunce hat 1-cell neighborhood described as three-page book (re-introduced in CW remark)
 - **Category:** Supplement/remark error
@@ -44,6 +46,7 @@ The page is largely correct. The main genuine problems are the dunce-hat remark 
 - **Detail:** Same error as ISSUE-0001: the attaching word aaa^{-1} is homotopic to a, so the 2-cell wraps once around the 1-cell and interior points of the 1-cell have disk neighborhoods. The non-manifold point is the 0-cell.
 - **Proposed fix:** Replace with: 'the dunce hat is contractible but not a manifold; the non-manifold point is the 0-cell, whose link is not a circle (interior points of the 1-cell are manifold points).'
 - **Reported:** 2026-10-28 (048145a)
+**Opus Rebuttal:** The local shape near an interior point of the 1-cell is determined by how many times the attaching loop aaa^{-1} passes over the 1-cell (three times), not by its degree; three half-disks are glued along an arc, giving the three-page book (local H_2 = Z^2). The text now states this explicitly and also notes that the 0-cell is not a manifold point.
 
 ### ISSUE-0005 [Open] Hypcheck: locally finite reduction to finite star is false
 - **Category:** Supplement/remark error
@@ -51,3 +54,4 @@ The page is largely correct. The main genuine problems are the dunce-hat remark 
 - **Detail:** Same as ISSUE-0003: the star of a simplex in a locally finite complex need not be finite, so the claim that Step 1 reduces to a finite subcomplex is false.
 - **Proposed fix:** Remove the sentence, or replace with: 'For locally finite K the argument still works because the open set U and the star are open in |K| and the relevant homology computations are local; finiteness is only used to cite at:simplicial-singular-iso, which can be replaced by a direct argument.'
 - **Reported:** 2026-10-28 (048145a)
+**Opus Rebuttal:** In a locally finite simplicial complex every vertex lies in only finitely many simplices, so the closed star of a simplex is a finite subcomplex. The proposed counterexample (infinitely many triangles sharing an edge) is not locally finite. The hypcheck now states this reason explicitly.
