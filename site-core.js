@@ -713,7 +713,7 @@
         ];
         for (var i = 0; i < tiers.length; i++) {
           var hit = info.filter(tiers[i]);
-          if (hit.length) return hit.sort(function (a, b) { return a.p - b.p; })[0].l;
+          if (hit.length) return hit.sort(function (a, b) { return i === 1 ? b.p - a.p : a.p - b.p; })[0].l;
         }
         // 基礎の系列の定義。候補が複数あれば、題にその語をそのまま含む定義（その語が主題の定義）を優先し、
         // それでも複数あれば分類番号の近い分野を選ぶ
