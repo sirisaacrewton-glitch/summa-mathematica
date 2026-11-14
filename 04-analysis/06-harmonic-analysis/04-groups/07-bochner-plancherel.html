@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正定値関数とボホナーの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/06-harmonic-analysis/04-groups/07-bochner-plancherel.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 正定値関数とボホナーの定理 {#four:page-bochner-plancherel keywords="positive definite functions, functions of positive type, Bochner theorem, Bochner-Khinchin theorem, Herglotz theorem, characteristic functions, group C*-algebra, GNS construction, 正定値関数, ボホナーの定理, 特性関数, 群 C* 環"}
+
+局所コンパクト可換群 $G$ 上の\term[連続関数]{top:continuous} $\varphi$ は、どの有限個の点の上でも行列 $(\varphi(x_{i}x_{j}^{-1}))$ が半正定値のとき**正定値**という。このページでは、連続な正定値関数がちょうど双対群 $\hat G$（\ref{four:lc-character}）上の有限な正値測度の逆フーリエ変換であること（ボホナーの定理）を示す。$\mathbb{R}$ では、これは確率論の特性関数の特徴づけになる。$\mathbb{R}$ の場合（\ref{four:plancherel}）と違って具体的な総和核がないので、正値汎関数とリース–マルコフ–角谷の表現定理が主役になる。次のページ（\see{four:page-inversion-plancherel-lca}）では、この定理から $\hat G$ のハール測度の正しい正規化を選び出し、反転公式と $L^{2}$ での\term[ユニタリ]{four:ga-unitary-representation}性（プランシュレルの定理）を導く。ポンチャーギンの双対定理は使わない。
+
+## 記法と定義の確認 {#four:sec-bp-notation}
+
+::: notation
+- $G$ は局所コンパクト・ハウスドルフな可換位相群、$\mu$ は固定したハール測度（\ref{four:hm-haar-measure}）、$\Delta=1$。$\int F\,dx\defeq\int F\,d\mu$。$\mu$ は反転でも不変：$\int F(x^{-1})\,dx=\int F\,dx$（\ref{four:ga-involution.1}）。
+- $L_{s}f(x)=f(s^{-1}x)$、畳み込み $f*g$、$f^{*}(x)=\overline{f(x^{-1})}$ は \ref{four:ga-convolution}, \ref{four:ga-involution}, \ref{four:ga-group-algebra}。$f^{n}$ は $n$ 個の畳み込み。$\langle f,g\rangle=\int f\overline{g}\,dx$ は $L^{2}(G)$ の内積。
+- 双対群 $\hat G$、$h_{\xi}$、フーリエ変換 $\hat f(\xi)=\int f\overline{\xi}\,dx$ は \ref{four:lc-character}, \ref{four:lc-characters-homomorphisms}, \ref{four:lc-fourier-transform}。$\hat G$ は局所コンパクト・ハウスドルフ（\ref{four:lc-dual-topology}）、$\hat f\in C_{0}(\hat G)$（\ref{four:lc-riemann-lebesgue}、上限ノルム $\|\cdot\|_{\infty}$）。
+- ラドン測度、$f\prec U$、$K\prec f$ は \ref{four:rm-radon-measure}, \ref{four:rm-riesz-markov-kakutani}。
+- **選択公理**：\ref{four:rm-urysohn}・\ref{four:rm-cc-dense}・\ref{four:ga-approximate-identity} を通じて従属選択公理（DC）を、\ref{four:rm-riesz-markov-kakutani}・\ref{four:ga-measurability} を通じて可算選択公理を、\ref{four:lc-dual-topology.3} を通じて超フィルター補題を使う。\ref{four:bp-spectral-radius} では極大イデアルの存在（\ref{ring:nonunit-in-maximal}）のために選択公理を使い、ボホナーの定理以降はそれに依存する。
+:::
+
+## 正定値関数 {#four:sec-bp-positive-definite}
+
+::: definition 正定値関数 {#four:bp-positive-definite keywords="positive definite function, function of positive type, Fourier-Stieltjes algebra B(G)" index="正定値関数|せいていちかんすう, 正型関数|せいけいかんすう"}
+1. \term[連続関数]{top:continuous} $\varphi\colon G\to\mathbb{C}$ が、すべての $n$, $x_{1},\dots,x_{n}\in G$, $c_{1},\dots,c_{n}\in\mathbb{C}$ について
+$$
+\sum_{i,j=1}^{n}c_{i}\overline{c_{j}}\,\varphi(x_{i}x_{j}^{-1})\ge0
+$$
+を満たすとき、**正定値**という。
+2. 連続な正定値関数の一次結合の全体を $B(G)$、そのうち $\mu$ について可積分なものの全体を $B^{1}(G)$ と書く。
+:::
+
+::: intuition
+どの有限個の点でも、値を並べた行列が分散共分散行列のように半正定値になる関数である。
+:::
+
+::: proposition 正定値関数の基本性質 {#four:bp-pd-basic keywords="|phi(x)| <= phi(e), coefficients of unitary representations" index="正定値関数の性質|せいていちかんすうのせいしつ"}
+$\varphi$ を連続な正定値関数とする。
+1. $\varphi(e)\ge0$, $\varphi(x^{-1})=\overline{\varphi(x)}$, $|\varphi(x)|\le\varphi(e)$。
+2. $\overline{\varphi}$、$a\varphi$（$a\ge0$）、$\eta\varphi$（$\eta\in\hat G$）と、正定値関数の和は正定値。
+3. 強連続なユニタリ表現 $\pi$（\ref{four:ga-unitary-representation}）と $v\in H$ について $x\mapsto\langle\pi(x)v,v\rangle$ は正定値。とくに\term[指標]{four:lc-character}と、$f\in L^{2}(G)$ についての $x\mapsto\langle f,L_{x}f\rangle$ は正定値で、後者は $f\in L^{1}\cap L^{2}$ なら $f*f^{*}$ の連続な代表。
+:::
+
+::: proof
+**1.** $n=1$ の場合から $\varphi(e)\ge0$ である。$n=2$, $(x_{1},x_{2})=(x,e)$ とし、$c=(1,1)$, $(1,i)$ とすると、和はそれぞれ $2\varphi(e)+\varphi(x)+\varphi(x^{-1})$, $2\varphi(e)+i(\varphi(x^{-1})-\varphi(x))$ で、これらは実数である。前者から $\varphi(x)+\varphi(x^{-1})$ の虚部が $0$、後者から $\varphi(x^{-1})-\varphi(x)$ の実部が $0$ なので、$\varphi(x^{-1})=\overline{\varphi(x)}$ である。よって行列 $(\varphi(x_{i}x_{j}^{-1}))$ はエルミートで半正定値なので、その行列式について $\varphi(e)^{2}-|\varphi(x)|^{2}\ge0$ が成り立つ。
+
+**2.** $a\varphi$ と和については、定義の不等式を $a$ 倍し、また足し合わせればよい。$\overline{\varphi}$ については和の共役をとり $c_{i}$ を $\overline{c_{i}}$ に替えればよく、$\eta\varphi$ については $\eta(x_{i}x_{j}^{-1})=\eta(x_{i})\overline{\eta(x_{j})}$ なので $c_{i}$ を $c_{i}\eta(x_{i})$ に替えればよい。
+
+**3.** $u_{i}\defeq\pi(x_{i})^{-1}v$ とおくと $\langle\pi(x_{i}x_{j}^{-1})v,v\rangle=\langle\pi(x_{j})^{-1}v,\pi(x_{i})^{-1}v\rangle=\langle u_{j},u_{i}\rangle$ となるので、和は $\|\sum_{j}\overline{c_{j}}u_{j}\|^{2}\ge0$ に等しい。\term[指標]{four:lc-character}は $H=\mathbb{C}$, $\pi=\xi$ の場合である。$\langle f,L_{x}f\rangle$ は左正則表現（\ref{four:ga-regular-representation}）の係数の共役なので 2 から正定値である。また $f*f^{*}(x)=\int f(y)\overline{f(x^{-1}y)}\,dy=\langle f,L_{x}f\rangle$ が成り立つ（\ref{four:ga-convolution.1}）。
+:::
+
+::: proposition 積分による言い換え {#four:bp-pd-equivalent keywords="positive definite iff int (f*f^*) phi >= 0 for f in C_c(G) or L^1(G)" index="正定値性の積分による言い換え|せいていちせいのせきぶんによるいいかえ"}
+\term[連続関数]{top:continuous} $\varphi$ について次は同値。
+- (a) $\varphi$ は正定値。
+- (b) $\varphi$ は有界で、すべての $f\in L^{1}(G)$ について $\int(f*f^{*})\varphi\,dx\ge0$。
+- (c) すべての $f\in C_{c}(G)$ について $\int(f*f^{*})\varphi\,dx\ge0$。
+
+$f\in C_{c}(G)$ なら $\int(f*f^{*})\varphi\,dx=\iint f(x)\overline{f(y)}\varphi(xy^{-1})\,dx\,dy$ である。
+:::
+
+::: proof
+最後の等式：左辺 $=\iint f(y)\overline{f(z^{-1}y)}\varphi(z)\,dy\,dz$ の順序を交換し（\ref{four:ga-measurability.5}）、$z\mapsto w=z^{-1}y$（$\mu$ を保つ、\ref{four:hm-transport}）で変数変換する。
+
+**Step 1.** 【主張：(a)⇒(c)】 $K\defeq\supp f$, $F(x,y)\defeq f(x)\overline{f(y)}\varphi(xy^{-1})\in C_{c}(G\times G)$, $\varepsilon>0$ とする。\ref{four:hm-uniform-continuity.1}（群 $G\times G$）から、閉包がコンパクトな $e$ の開近傍 $U$ で、$x'^{-1}x\in U$, $y'^{-1}y\in U$ なら $|F(x,y)-F(x',y')|<\varepsilon$ となるものをとる。$K\subset\bigcup_{i\le m}x_{i}U$（$x_{i}\in K$）に \ref{four:rm-partition-of-unity} の $\theta_{i}\prec x_{i}U$ をとり、$a_{i}\defeq\int\theta_{i}$ とおく。$K$ 上 $\sum\theta_{i}=1$ なので $\iint F=\sum_{i,j}\iint\theta_{i}(x)\theta_{j}(y)F(x,y)$ となる。$\theta_{i}(x)\theta_{j}(y)\ne0$ なら $x_{i}^{-1}x\in U$, $x_{j}^{-1}y\in U$ なので、次が成り立つ：
+$$
+\Bigl|\iint F-\sum_{i,j}a_{i}a_{j}F(x_{i},x_{j})\Bigr|\le\varepsilon\Bigl(\sum_{i}a_{i}\Bigr)^{2}\le\varepsilon\,\mu(K\overline{U})^{2}.
+$$
+$\sum a_{i}a_{j}F(x_{i},x_{j})=\sum c_{i}\overline{c_{j}}\varphi(x_{i}x_{j}^{-1})\ge0$（$c_{i}\defeq a_{i}f(x_{i})$）なので $\iint F\ge-\varepsilon\mu(K\overline{U})^{2}$ である。$\varepsilon>0$ は任意なので $\iint F\ge0$ を得る。
+
+**Step 2.** 【主張：(c)⇒(a)】 $x_{i},c_{i}$ と $\varepsilon>0$ をとる。$\varphi$ の連続性から、$e$ の近傍 $V$ で $u,v\in V$ なら $|\varphi(x_{i}uv^{-1}x_{j}^{-1})-\varphi(x_{i}x_{j}^{-1})|<\varepsilon$（すべての $i,j$）となるものがある。$\psi\in C_{c}(G)^{+}$, $\int\psi=1$, $\supp\psi\subset V$（\ref{four:ga-approximate-identity}）と $f\defeq\sum_{i}c_{i}L_{x_{i}}\psi$ について、$x=x_{i}u$, $y=x_{j}v$ と変数変換すると次が成り立つ：
+$$
+\iint f(x)\overline{f(y)}\varphi(xy^{-1})=\sum_{i,j}c_{i}\overline{c_{j}}\iint\psi(u)\psi(v)\varphi(x_{i}uv^{-1}x_{j}^{-1})\,du\,dv.
+$$
+(c) と主張の最後の等式から左辺は $0$ 以上であり、右辺と $\sum c_{i}\overline{c_{j}}\varphi(x_{i}x_{j}^{-1})$ の差は $\varepsilon(\sum|c_{i}|)^{2}$ 以下である。$\varepsilon\to0$ として $\sum c_{i}\overline{c_{j}}\varphi(x_{i}x_{j}^{-1})\ge0$ を得る。
+
+**Step 3.** 【主張：(a)⇒(b)】 有界性は \ref{four:bp-pd-basic.1} から従う。$C_{c}(G)\ni f_{n}\to f$（$L^{1}$、\ref{four:rm-cc-dense}）なら $\|f_{n}*f_{n}^{*}-f*f^{*}\|_{1}\le\|f_{n}-f\|_{1}(\|f_{n}\|_{1}+\|f\|_{1})$（\ref{four:ga-convolution.1}, \ref{four:ga-involution.1}）なので、$\varphi$ の有界性から $\int(f*f^{*})\varphi$ は Step 1 の値 $\int(f_{n}*f_{n}^{*})\varphi\ge0$ の極限であり、$0$ 以上である。(b)⇒(c) は $C_{c}(G)\subset L^{1}(G)$ なので特別な場合である。
+:::
+
+## ボホナーの定理 {#four:sec-bp-bochner}
+
+::: lemma スペクトル半径とフーリエ変換 {#four:bp-spectral-radius keywords="spectral radius of h in L^1(G) is at most sup |hat h|" index="スペクトル半径（群環）|すぺくとるはんけいぐんかん"}
+$h\in L^{1}(G)$ なら $\lim_{n\to\infty}\|h^{n}\|_{1}^{1/n}$ は存在して $\sup_{\xi\in\hat G}|\hat h(\xi)|$ 以下である。
+:::
+
+::: proof
+**Step 1.** \ref{four:lc-homomorphism-bound} の別証明の単位的可換バナッハ環（\ref{fa:banach-algebra}）$A=L^{1}(G)\times\mathbb{C}$ を使う。$\|(h,0)^{n}\|=\|h^{n}\|_{1}$ なので、\ref{fa:spectral-radius} から極限は存在して $r((h,0))$ に等しい。【主張：$\lambda\in\sigma((h,0))$, $\lambda\ne0$ なら $\lambda=\hat h(\xi)$ となる $\xi$ がある】 $b_{0}\defeq(-h,\lambda)$ は可逆でないので、ある極大イデアル $M$ に属する（\ref{ring:nonunit-in-maximal}）。
+
+**Step 2.** 【主張：準同型 $\chi\colon A\to\mathbb{C}$ で $\ker\chi=M$ のものがある】 $\|1-m\|<1$ なら $m$ は可逆（\ref{fa:neumann-series}）ので、$\|1+M\|=\operatorname{dist}(1,M)=1$ である。閉包 $\overline{M}$ は $1$ を含まないイデアルなので、極大性から $M=\overline{M}$ である。ゆえに $A/M$ は商ノルムでバナッハ空間であり（\ref{fa:quotient-norm}）、$\|(a+m)(b+m')\|\le\|a+m\|\|b+m'\|$ から単位的バナッハ環である。$A/M$ は体（\ref{ring:prime-maximal-quotient.2}）なので、$b\in A$ について $\beta\in\sigma(b+M)$（\ref{fa:spectrum-nonempty-compact.4}）をとると、可逆でない $(\beta-b)+M$ は $0$ であり、$\beta-b\in M$ となる。このような $\beta$ はただ一つである（二つあれば、その差の $0$ でない定数が $M$ に入る）。$\chi(b)\defeq\beta$ とおくと、$\chi$ は射影 $A\to A/M$ と同型 $A/M\cong\mathbb{C}$ の合成なので準同型で、$\ker\chi=M$ である。
+
+**Step 3.** 【主張：$r((h,0))\le\sup|\hat h|$】 $\chi|_{L^{1}(G)}=0$ と仮定すると $\chi(b_{0})=\lambda\ne0$ となり、$b_{0}\in M=\ker\chi$ に反する。よって $\chi|_{L^{1}(G)}$ は $0$ でない複素準同型なので $h_{\xi}$ の形であり（\ref{four:lc-characters-homomorphisms.2}）、$0=\chi(b_{0})=\lambda-\hat h(\xi)$ を得る。したがって $\sigma((h,0))$ の $0$ でない点はすべて $|\lambda|\le\sup|\hat h|$ を満たし、$r((h,0))\le\sup|\hat h|$ である。
+:::
+
+::: lemma フーリエ変換の像の稠密性 {#four:bp-fourier-dense keywords="Fourier transforms are dense in C_0(hat G)" index="フーリエ変換の像の稠密性|ふーりえへんかんのぞうのちゅうみつせい"}
+1. $f\in L^{1}(G)$ なら $\widehat{f^{*}}=\overline{\hat f}$。
+2. $\{\hat f:f\in C_{c}(G)\}$ は $C_{0}(\hat G)$ で稠密である。
+:::
+
+::: proof
+**1.** 反転不変性と $\xi(x^{-1})=\overline{\xi(x)}$ から、$\widehat{f^{*}}(\xi)=\int\overline{f(x^{-1})\xi(x)}\,dx=\overline{\int f(x)\xi(x^{-1})\,dx}=\overline{\hat f(\xi)}$ である。
+
+**2.** $\mathcal{A}\defeq\{\hat f:f\in L^{1}(G)\}$ は \ref{four:lc-fourier-basic.2} と 1 から共役で閉じた部分代数で、実数値の元の全体 $\mathcal{A}_{r}$ は $\operatorname{Re}u$, $\operatorname{Im}u$（$u\in\mathcal{A}$）を含む。一点コンパクト化 $X\defeq\hat G\cup\{\infty\}$ はコンパクト・ハウスドルフ（\ref{top:one-point-properties.2}・\ref{top:one-point-properties.3}）で、$u\in C_{0}(\hat G)$ は $u(\infty)\defeq0$ で $X$ 上連続になる。$\mathbb{R}+\mathcal{A}_{r}$ は定数を含む $C(X)$ の部分代数で、二点を分離する（$\xi\ne\eta$ なら $h_{\xi}\ne h_{\eta}$（\ref{four:lc-characters-homomorphisms.2}）、$\xi$ と $\infty$ は $h_{\xi}\ne0$ から）。\ref{top:stone-weierstrass} から、実数値の $v\in C_{0}(\hat G)$ に $\|c_{n}+u_{n}-v\|_{\infty}\to0$（$c_{n}\in\mathbb{R}$, $u_{n}\in\mathcal{A}_{r}$）となる列があり、$\infty$ で評価すると $c_{n}\to0$ となるので、$u_{n}\to v$ である。複素数値の $v$ は実部と虚部に分ける。$\|\hat f-\hat g\|_{\infty}\le\|f-g\|_{1}$ と \ref{four:rm-cc-dense} から $f\in C_{c}(G)$ に限ってよい。
+:::
+
+::: lemma 測度の逆フーリエ変換 {#four:bp-measure-transform keywords="inverse Fourier transform of a measure on the dual group, uniqueness" index="測度の逆フーリエ変換|そくどのぎゃくふーりえへんかん"}
+$\lambda$ を $\hat G$ 上のラドン測度、$k\in L^{1}(\lambda)$ とし、$\check k(x)\defeq\int k(\xi)\xi(x)\,d\lambda(\xi)$ とおく。
+1. $\check k$ は $G$ 上の\term[連続関数]{top:continuous}で $|\check k|\le\|k\|_{1}$。
+2. $f\in L^{1}(G)$ なら $\int f(x)\check k(x^{-1})\,dx=\int\hat f\,k\,d\lambda$。
+3. $\check k\equiv0$ なら $\lambda$ について a.e. で $k=0$。
+:::
+
+::: proof
+**Step 1.** 【主張：$(x,\xi)\mapsto\xi(x)$ は $G\times\hat G$ 上連続】 $x_{0}$ のコンパクト近傍 $K$ をとる。$x\in K$, $\xi\in B_{K}(\xi_{0},\varepsilon)$ なら $|\xi(x)-\xi_{0}(x_{0})|\le|\xi(x)-\xi_{0}(x)|+|\xi_{0}(x)-\xi_{0}(x_{0})|\le\varepsilon+|\xi_{0}(x)-\xi_{0}(x_{0})|$ であり、$\xi_{0}$ の連続性から右辺は $x$ が $x_{0}$ に近ければ $2\varepsilon$ 未満になる。
+
+**Step 2.** 【主張：1】 $|\check k|\le\|k\|_{1}$ は $|\xi(x)|=1$ から従う。連続性を示すため、$\|k-g\|_{1}<\varepsilon$ の $g\in C_{c}(\hat G)$ をとる（\ref{four:rm-cc-dense}）。開集合 $\{(x,\xi):|\xi(x)-\xi(x_{0})|<\varepsilon\}$（Step 1）は $\{x_{0}\}\times\supp g$ を含むので、\ref{top:tube-lemma-compact-subset} から $x_{0}$ の近傍 $V$ があり、$x\in V$ なら $|\check g(x)-\check g(x_{0})|\le\varepsilon\|g\|_{1}$ である。$|\check k-\check g|\le\varepsilon$ なので、$x\in V$ なら $|\check k(x)-\check k(x_{0})|\le\varepsilon(2+\|k\|_{1}+\varepsilon)$ となる。
+
+**Step 3.** 【主張：コンパクトな $K\subset G$, $C\subset\hat G$ と $F\in C(K\times C)$ について、$x\mapsto\int_{C}F(x,\xi)\,d\lambda$ は連続で $\int_{K}\int_{C}F\,d\lambda\,d\mu=\int_{C}\int_{K}F\,d\mu\,d\lambda$】 $F$ は実数値としてよい。実数値の $\sum_{i}a_{i}(x)b_{i}(\xi)$（$a_{i}\in C(K)$, $b_{i}\in C(C)$）の全体は定数を含み二点を分離する（\ref{four:rm-urysohn}）部分代数なので、\ref{top:stone-weierstrass} から一様ノルムで稠密である。この形の $F$ では、$x\mapsto\int_{C}F(x,\xi)\,d\lambda=\sum_{i}a_{i}(x)\int_{C}b_{i}\,d\lambda$ は連続で、両辺はともに $\sum_{i}\int_{K}a_{i}\,d\mu\int_{C}b_{i}\,d\lambda$ に等しい。$\mu(K),\lambda(C)<\infty$ なので、$F_{n}\to F$（一様）なら $\int_{C}F_{n}(x,\xi)\,d\lambda$ は $x$ について一様に収束し、両辺も収束する。よって一般の $F$ でも主張が成り立つ。
+
+**Step 4.** 【主張：2】 $f\in C_{c}(G)$, $K\defeq\supp f$ とし、Step 2 の $g$ について Step 3 を $F(x,\xi)\defeq f(x)\overline{\xi(x)}g(\xi)$ に使うと、$\check g(x^{-1})=\int g(\xi)\overline{\xi(x)}\,d\lambda$ なので $\int f(x)\check g(x^{-1})\,dx=\int\hat f g\,d\lambda$ を得る。$|\check g-\check k|\le\|g-k\|_{1}$ と $|\hat f|\le\|f\|_{1}$ から、$g\to k$（$L^{1}(\lambda)$）の極限をとって $k$ でも等式が成り立つ。さらに両辺は $f$ について $L^{1}$ ノルムで連続なので、\ref{four:rm-cc-dense} から一般の $f\in L^{1}(G)$ でも成り立つ。
+
+**Step 5.** 【主張：3】 2 から、すべての $f\in L^{1}(G)$ で $\int\hat fk\,d\lambda=0$ である。$u\mapsto\int uk\,d\lambda$ は一様ノルムについて連続なので、\ref{four:bp-fourier-dense.2} から、すべての $u\in C_{c}(\hat G)$ で $\int uk\,d\lambda=0$ となる。$\|k-g\|_{1}<\varepsilon$ の $g\in C_{c}(\hat G)$ と $\delta\lambda(\supp g)<\varepsilon$ の $\delta>0$ をとり、$u\defeq\overline{g}/\max(|g|,\delta)$ とおくと、$u\in C_{c}(\hat G)$, $|u|\le1$ であり、$ug=|g|^{2}/\max(|g|,\delta)\ge0$ と $\int_{\{|g|<\delta\}}|g|\,d\lambda\le\delta\lambda(\supp g)<\varepsilon$ から次が成り立つ：
+$$
+\|g\|_{1}-\varepsilon<\int_{\{|g|\ge\delta\}}|g|\,d\lambda\le\int ug\,d\lambda=\int u(g-k)\,d\lambda\le\varepsilon.
+$$
+よって $\|g\|_{1}<2\varepsilon$ となり、$\|k\|_{1}<3\varepsilon$ である。$\varepsilon>0$ は任意なので、$\lambda$ について a.e. で $k=0$ である。
+:::
+
+::: theorem ボホナーの定理 {#four:bp-bochner keywords="Bochner theorem, positive definite functions and positive measures on the dual group" index="ボホナーの定理|ぼほなーのていり" refname="ボホナーの定理"}
+1. $\varphi$ が連続な正定値関数なら、$\hat G$ 上の有限なラドン測度 $\nu$ で、すべての $x\in G$ について
+$$
+\varphi(x)=\int_{\hat G}\xi(x)\,d\nu(\xi)
+$$
+となるものがただ一つある。$\nu(\hat G)=\varphi(e)$。
+2. 逆に、有限なラドン測度 $\nu$ について上の式の $\varphi$ は連続な正定値関数である。
+:::
+
+::: intuition
+正定値な\term[連続関数]{top:continuous}は、\term[指標]{four:lc-character}を正の重みで混ぜ合わせたものに限られ、混ぜ方は一通りに決まる。
+:::
+
+::: proof
+**Step 1.** 【主張：2】 連続性は \ref{four:bp-measure-transform.1}（$k=1$）から従う。$\xi(x_{i}x_{j}^{-1})=\xi(x_{i})\overline{\xi(x_{j})}$ から $\sum c_{i}\overline{c_{j}}\varphi(x_{i}x_{j}^{-1})=\int|\sum_{i}c_{i}\xi(x_{i})|^{2}\,d\nu\ge0$ となる。
+
+**Step 2.** 【主張：$\nu$ は一意】 $\nu_{1},\nu_{2}$ がともに 1 を満たせば、\ref{four:bp-measure-transform.2} から $\int\hat f\,d\nu_{1}=\int f(x)\varphi(x^{-1})\,dx=\int\hat f\,d\nu_{2}$。\ref{four:bp-fourier-dense.2} と $\nu_{i}$ の有限性から、すべての $u\in C_{c}(\hat G)$ で $\int u\,d\nu_{1}=\int u\,d\nu_{2}$ となり、\ref{four:rm-riesz-markov-kakutani.2} から $\nu_{1}=\nu_{2}$ である。また 1 の式で $x=e$ とおくと $\nu(\hat G)=\varphi(e)$ を得る。
+
+以下、存在を示す。\ref{four:bp-pd-basic.1} から $T(f)\defeq\int f(x)\varphi(x^{-1})\,dx$ は $|T(f)|\le\varphi(e)\|f\|_{1}$ を満たす。$\varphi(e)>0$ としてよい（$\varphi(e)=0$ なら $|\varphi|\le\varphi(e)$ から $\varphi\equiv0$ であり、$\nu=0$ とすればよい）。
+
+**Step 3.** 【主張：$|T(f*g^{*})|^{2}\le T(f*f^{*})\,T(g*g^{*})$】 $\varphi(x^{-1})=\overline{\varphi(x)}$ は正定値（\ref{four:bp-pd-basic.2}）なので、\ref{four:bp-pd-equivalent.b} から半双線形形式 $[f,g]\defeq T(f*g^{*})$ は $[f,f]\ge0$。$[f+g,f+g]$, $[f+ig,f+ig]$ が実数なので $[g,f]=\overline{[f,g]}$。$|\alpha|=1$, $\overline{\alpha}[f,g]=-|[f,g]|$ とすると、すべての実数 $s$ で $0\le[f,f]-2s|[f,g]|+s^{2}[g,g]$ なので、判別式から主張が従う。
+
+**Step 4.** 【主張：$|T(f)|^{2}\le\varphi(e)\,T(f*f^{*})$】 $\varepsilon>0$ とし、\ref{four:ga-approximate-identity}（$f$, $p=1$）の $V$ について $\psi\in C_{c}(G)^{+}$, $\int\psi=1$, $\supp\psi\subset V^{-1}$ とすると、$\psi^{*}$ も補題の条件を満たし、可換性から $\|f*\psi^{*}-f\|_{1}=\|\psi^{*}*f-f\|_{1}\le\varepsilon$。Step 3 から
+$$
+|T(f*\psi^{*})|^{2}\le T(f*f^{*})\,T(\psi*\psi^{*})\le T(f*f^{*})\,\varphi(e)\|\psi\|_{1}\|\psi^{*}\|_{1}=\varphi(e)\,T(f*f^{*}).
+$$
+$|T(f*\psi^{*})-T(f)|\le\varphi(e)\varepsilon$ なので、$\varepsilon\to0$ とすれば主張を得る。
+
+**Step 5.** 【主張：$|T(f)|\le\varphi(e)\|\hat f\|_{\infty}$】 $h\defeq f*f^{*}$ とおくと、\ref{four:ga-involution.2} と可換性から $h^{*}=h$ である。$a_{m}\defeq T(h^{2^{m}})$ とおくと、$h^{2^{m+1}}=h^{2^{m}}*(h^{2^{m}})^{*}$ なので Step 3 から $a_{m}\ge0$ である。Step 4 を $h^{2^{m}}$ に使うと $a_{m}^{2}\le\varphi(e)a_{m+1}$ となり、これを帰納的に使うと（右の不等号は $a_{n}\le\varphi(e)\|h^{2^{n}}\|_{1}$ から）次が成り立つ：
+$$
+a_{0}\le\varphi(e)^{1-2^{-n}}a_{n}^{2^{-n}}\le\varphi(e)\,\|h^{2^{n}}\|_{1}^{2^{-n}}.
+$$
+$n\to\infty$ とすると、\ref{four:bp-spectral-radius} から $a_{0}\le\varphi(e)\sup|\hat h|=\varphi(e)\|\hat f\|_{\infty}^{2}$ を得る（$\hat h=|\hat f|^{2}$：\ref{four:lc-fourier-basic.2}, \ref{four:bp-fourier-dense.1}）。Step 4 と合わせて主張を得る。
+
+**Step 6.** 【主張：$C_{0}(\hat G)$ 上の正値な線形汎関数 $\Lambda$ で $\Lambda(\hat f)=T(f)$, $|\Lambda(u)|\le\varphi(e)\|u\|_{\infty}$ となるものがある】 Step 5 から $\Lambda(\hat f)\defeq T(f)$ は $\{\hat f\}$ 上で矛盾なく定まり、評価を満たす。$\{\hat f\}$ は稠密（\ref{four:bp-fourier-dense.2}）なので、コーシー列の極限として $C_{0}(\hat G)$ に延びる。$u\ge0$ なら $\sqrt{u}\in C_{0}(\hat G)$ に一様収束する $\hat f_{n}$ をとると $|\hat f_{n}|^{2}=\widehat{f_{n}*f_{n}^{*}}\to u$ も一様収束するので、$\Lambda(u)=\lim T(f_{n}*f_{n}^{*})\ge0$ である。
+
+**Step 7.** 【主張：有限なラドン測度 $\nu$ で、すべての $f\in L^{1}(G)$ について $T(f)=\int\hat f\,d\nu$ となるものがある】 $\Lambda|_{C_{c}(\hat G)}$ に \ref{four:rm-riesz-markov-kakutani.1} を使い、ラドン測度 $\nu$ を得る。\ref{four:rm-riesz-markov-kakutani.3} から $\nu(\hat G)=\sup\{\Lambda(u):u\prec\hat G\}\le\varphi(e)$。$\{|u|\ge\varepsilon\}\prec\theta$（\ref{four:rm-urysohn}）なら $\|u-\theta u\|_{\infty}\le\varepsilon$ なので $C_{c}(\hat G)$ は $C_{0}(\hat G)$ で稠密で、ともに連続な $\Lambda$ と $\int\cdot\,d\nu$ は $C_{0}(\hat G)$ 上で一致する。とくに $T(f)=\Lambda(\hat f)=\int\hat f\,d\nu$ である。
+
+**Step 8.** 【主張：1 の式】 $\psi(x)\defeq\int\xi(x)\,d\nu(\xi)$ は連続で、\ref{four:bp-measure-transform.2}（$k=1$）と Step 7 から、すべての $f\in C_{c}(G)$ で $\int f(x)(\psi-\varphi)(x^{-1})\,dx=0$ なので、\ref{four:lc-characters-homomorphisms} の Step 5 と同じ議論で $\psi=\varphi$ である。
+
+::: hypcheck
+- **正定値性**：Step 3 と Step 6 の $\Lambda$ の正値性に使った。連続性は Step 8 に使った。外すと偽：$\mathbb{R}$ 上の $\mathbf{1}_{\{0\}}$ は定義の不等式を満たすが、連続でないので測度の逆フーリエ変換でない。
+- **可換性**：Step 4・5 と \ref{four:bp-spectral-radius} に使った。
+- **選択公理**：\ref{four:bp-spectral-radius} の極大イデアル、Step 4・7 の DC、$\hat G$ の局所コンパクト性（Step 7）の超フィルター補題。
+:::
+:::
+
+::: supplement
+**確率論の特性関数との関係.** $G=\mathbb{R}$ で、\ref{four:lc-basic-duals.3} により $\hat G=\mathbb{R}$（$\xi_{y}(x)=e^{2\pi ixy}$）と見ると、1 は $\varphi(x)=\int_{\mathbb{R}}e^{2\pi ixy}\,d\nu(y)$ となる。確率変数 $X$ の特性関数 $\varphi_{X}(t)=E[e^{itX}]=\int e^{ity}\,dP_{X}(y)$（\see{prb:characteristic-function}）は、$\nu=P_{X}$ のときのこの関数を $x=t/2\pi$ で読み替えたものである。したがって 2 から、特性関数は連続な正定値関数で $\varphi_{X}(0)=1$。逆に $\psi$ が連続な正定値関数で $\psi(0)=1$ なら、$\varphi(x)\defeq\psi(2\pi x)$ も連続な正定値関数（点 $x_{i}$ を $2\pi x_{i}$ に替えるだけ）なので、1 から $\varphi$ は全測度 $\varphi(0)=1$ のラドン測度、すなわち確率測度 $\nu$ で表され、$\psi$ は分布 $\nu$ をもつ確率変数（たとえば確率空間 $(\mathbb{R},\mathcal{B}(\mathbb{R}),\nu)$ の上の恒等写像）の特性関数である。まとめると、
+
+- 関数 $\psi\colon\mathbb{R}\to\mathbb{C}$ がある確率変数の特性関数であるための必要十分条件は、$\psi$ が連続、正定値で $\psi(0)=1$ であること。
+
+確率論では、この形の主張を指して「ボホナーの定理」と呼ぶことが多い。1 の一意性は「特性関数は分布を決める」（\see{prb:characteristic-uniqueness}）にあたる。確率論の系列ではこれを $\mathbb{R}$ の反転公式から示すが、ここでは \ref{four:bp-measure-transform.3} と \ref{four:bp-fourier-dense.2} から示した。
+
+**前提を変えると（連続性は\term[単位元]{grp:group}だけでよい）.** 連続性を仮定しない関数 $\varphi$ が定義の不等式を満たすとき、3 点 $e,x,y$ と係数 $(t,1,-1)$（$t\in\mathbb{C}$）について不等式を書くと
+$$
+|t|^{2}\varphi(e)+2\varphi(e)-2\operatorname{Re}\varphi(xy^{-1})+2\operatorname{Re}\bigl(\overline{t}(\varphi(x)-\varphi(y))\bigr)\ge0
+$$
+（$\varphi(z^{-1})=\overline{\varphi(z)}$ は \ref{four:bp-pd-basic.1} の証明と同じく連続性なしに出る）。$t=-s\,(\varphi(x)-\varphi(y))/|\varphi(x)-\varphi(y)|$（$s\in\mathbb{R}$）とおいて $s$ の 2 次式の判別式を見ると
+$$
+|\varphi(x)-\varphi(y)|^{2}\le2\varphi(e)\operatorname{Re}\bigl(\varphi(e)-\varphi(xy^{-1})\bigr).
+$$
+よって $\varphi$ が $e$ で連続なら一様連続で、1 がそのまま使える。不等式の条件は各点収束で保たれるので、連続な正定値関数の各点極限は、$e$ で連続でさえあれば有限な正値測度の逆フーリエ変換になる。$\mathbb{R}$ でこれは、レヴィの連続性定理（\see{prb:levy-continuity}）のうち「特性関数の各点極限が $0$ で連続なら、それはまた特性関数である」という部分に当たる（法則収束の主張は含まない）。$e$ での連続性も外せない：$\mathbf{1}_{\{0\}}$（hypcheck）は $e$ で不連続である。
+
+**前提を変えると（非可換群）.** 可換性を外すと、主張のうち次の部分は残る。
+- 強連続なユニタリ表現 $\pi$ と $v\in H$ から作った $x\mapsto\langle\pi(x)v,v\rangle$ は正定値である（\ref{four:bp-pd-basic.3} の証明は可換性を使わない）。逆に、連続な正定値関数 $\varphi$ は、ある強連続なユニタリ表現 $\pi$ と、$\pi(G)v$ の張る部分空間が稠密になる $v$（巡回ベクトル）によって $\varphi(x)=\langle\pi(x)v,v\rangle$ と書け、そのような組は\term[ユニタリ]{four:ga-unitary-representation}同値を除いて一通りであることが知られている（有限個の点の上の関数に $\varphi$ を使って内積を入れ、内積が $0$ の部分で割って完備化し、左平行移動を作用させる。ゲルファント–ナイマルク–シーガル（GNS）の構成と呼ばれる。ここでは証明しない）。可換群でもこの対応は成り立ち、1 は「その表現を\term[指標]{four:lc-character}に分解すると、$v$ の各成分の重みが $\nu$ になる」と読める。
+- 崩れるのは、$\nu$ が乗る空間である。非可換群では既約なユニタリ表現は 1 次元とは限らず（\ref{four:cg-su2} のように高い次元のものがある）、その同値類の全体 $\widehat G$ はテンソル積で閉じないので群にならない。そのため「指標の上の測度」は「既約表現ごとの半正定値な作用素の重み」に替わる。たとえばコンパクト群では、\term[連続関数]{top:continuous} $\varphi$ が正定値であることと、\ref{four:cg-peter-weyl} の補足の記法で $\hat\varphi(\pi)$ がすべて半正定値で $\sum_{\pi}d_{\pi}\tr\hat\varphi(\pi)<\infty$ であり、$\varphi(x)=\sum_{\pi}d_{\pi}\tr\bigl(\hat\varphi(\pi)\pi(x)\bigr)$（一様収束）となることが同値であると知られている（ここでは証明しない）。可換なら $d_{\pi}=1$ で、$\hat\varphi(\xi)\ge0$ が 1 の $\nu(\{\xi\})$ にあたる。また $\widehat G$ が群でないので、ポンチャーギン型の双対定理（\see{four:pd-duality}）もそのままの形では成り立たない。
+
+**似た定理.**
+- **ヘルグロッツの定理.** $G=\mathbb{Z}$ では連続性は自動的で、\ref{four:lc-basic-duals.1} から、数列 $(a_{n})_{n\in\mathbb{Z}}$ が正定値（すべての有限なテプリッツ行列 $(a_{i-j})$ が半正定値）であることと、円周 $S^{1}$ 上の有限な正値測度 $\nu$ で $a_{n}=\int z^{n}\,d\nu(z)$ となることが同値である。これはヘルグロッツの定理として知られる形である。
+- **円周.** $G=\mathbb{T}$ では $\hat G=\mathbb{Z}$ は離散（\ref{four:lc-compact-discrete.1}）なので $\nu=\sum_{n}\nu_{n}\delta_{n}$ と書け、1 は「連続な正定値関数とは、フーリエ係数 $\hat\varphi(n)=\nu_{n}$ がすべて $0$ 以上で $\sum_{n}\hat\varphi(n)=\varphi(0)<\infty$ の関数 $\sum_{n}\hat\varphi(n)e_{n}$ のことである」となる（$\hat\varphi(n)=\nu_{n}$ は一様収束する級数を項別積分して得る）。
+- **定常過程のスペクトル.** 弱定常な確率過程の自己共分散関数は正定値で、そのボホナーの測度は過程のスペクトル測度（パワースペクトル）と呼ばれる。自己共分散とスペクトルが互いにフーリエ変換の関係にあることは、信号処理でウィーナー–ヒンチンの定理として知られている（ここでは扱わない）。
+
+**高い視点：凸集合の端点への分解.** $\varphi(e)=1$ の連続な正定値関数の全体 $P_{1}$ は凸集合で、$\varphi\mapsto\nu$ は 1・2 から $P_{1}$ と $\hat G$ 上のラドン確率測度の全体との間のアフィンな（凸結合を保つ）全単射である。確率測度の端点（二つの異なる確率測度の真の凸結合に書けないもの）は一点の測度 $\delta_{\xi}$ だけなので、$P_{1}$ の端点はちょうど\term[指標]{four:lc-character}であり、ボホナーの定理は「$P_{1}$ のどの点も、端点の上の確率測度の重心としてただ一通りに書ける」と言い換えられる。比喩でいえば、正定値関数は絵の具の混色で、指標は純色である。どの色も純色を正の割合で混ぜたもので、混ぜた結果から割合が一通りに読み取れる。非可換群でも $P_{1}$ の端点は既約なユニタリ表現から来ることが知られている（ここでは証明しない）。
+
+**高い視点：群 C* 環.** $G$ を可換とし、$\pi$ を強連続なユニタリ表現、$f\in L^{1}(G)$ とする。このとき
+$$
+\|\pi(f)\|\le\|\hat f\|_{\infty}
+$$
+である。実際 $h\defeq f^{*}*f$ について $\pi(h)=\pi(f)^{*}\pi(f)$（\ref{four:ga-integrated-representation.2}）は自己共役で $\|\pi(h)\|=\|\pi(f)\|^{2}$。自己共役な $A$ では $\|Ax\|^{2}=\langle A^{2}x,x\rangle$ から $\|A^{2}\|=\|A\|^{2}$ なので、$\|\pi(h)\|=\|\pi(h)^{2^{n}}\|^{2^{-n}}\le\|h^{2^{n}}\|_{1}^{2^{-n}}$（\ref{four:ga-integrated-representation.1}）。$n\to\infty$ として \ref{four:bp-spectral-radius} から $\|\pi(h)\|\le\sup|\hat h|=\|\hat f\|_{\infty}^{2}$（$\hat h=|\hat f|^{2}$）。一方 1 次元の表現 $\pi=\overline{\xi}$ では $\pi(f)=\hat f(\xi)$ なので、すべての表現でとった $\|\pi(f)\|$ の上限はちょうど $\|\hat f\|_{\infty}$ になる（ついでに \ref{four:bp-spectral-radius} の不等式は、$|\hat h(\xi)|^{n}=|\widehat{h^{n}}(\xi)|\le\|h^{n}\|_{1}$ から等号である）。このノルムで $L^{1}(G)$ を完備化したものを $G$ の**群 C* 環** $C^{*}(G)$ という。上の計算と \ref{four:bp-fourier-dense} から、$f\mapsto\hat f$ は $C^{*}(G)$ から $C_{0}(\hat G)$ への、積・対合・ノルムを保つ全単射に延びる（像は閉で、稠密な部分を含む）。
+
+この見方では、証明の Step 3〜6 は「$T$ が $C^{*}(G)$ 上の正値な汎関数である」ことを示しており、Step 7 は $C_{0}(\hat G)$ 上の正値汎関数に \ref{four:rm-riesz-markov-kakutani} を使っているにすぎない。つまりボホナーの定理は、
+
+正定値関数 ＝ $C^{*}(G)$ 上の正値汎関数 ＝ $C_{0}(\hat G)$ 上の正値汎関数 ＝ $\hat G$ 上の有限な正値測度
+
+という同一視の連鎖である。比喩でいえば、可換群の C* 環は双対群という「空間」の上の関数の環そのもので、正定値関数はその空間の上の「正の重みの付け方」を群の側から見たものにすぎない。一般に可換な C* 環は局所コンパクト空間の上の $C_{0}$ と同型であること（ゲルファント–ナイマルクの定理）が知られているが、ここでは $C^{*}(G)$ の場合を直接示した。非可換群では $C^{*}(G)$ は非可換な環になり、もはやどの空間の上の関数の環でもない。双対が群にならないことの代数的な姿である。
+:::
+
+
+## 問題 {#four:sec-bp-problems}
+
+::: problem {#four:prob-bp-product}
+連続な正定値関数 $\varphi,\psi$ の積 $\varphi\psi$ も正定値であることを \ref{four:bp-bochner} を使って示せ。したがって $B(G)$ は積で閉じる。
+:::
+
+::: solution
+$\psi(x)=\int\xi(x)\,d\nu(\xi)$ とし、$x_{i}$, $c_{i}$ をとる。$\xi(x_{i}x_{j}^{-1})=\xi(x_{i})\overline{\xi(x_{j})}$ から
+$$
+\sum_{i,j}c_{i}\overline{c_{j}}\varphi(x_{i}x_{j}^{-1})\psi(x_{i}x_{j}^{-1})=\int\sum_{i,j}\bigl(c_{i}\xi(x_{i})\bigr)\overline{\bigl(c_{j}\xi(x_{j})\bigr)}\varphi(x_{i}x_{j}^{-1})\,d\nu(\xi).
+$$
+被積分関数は、$\varphi$ の正定値性を係数 $c_{i}\xi(x_{i})$ に使うと $0$ 以上である。ゆえに左辺は $0$ 以上であり、\term[連続関数]{top:continuous}の積 $\varphi\psi$ は正定値である。後半は、$B(G)$ の二つの元の積を展開すると、連続な正定値関数どうしの積の一次結合になることから従う。
+:::
+
+::: problem {#four:prob-bp-laplace}
+$\mathbb{R}$ 上の $\varphi(x)\defeq e^{-|x|}$ が正定値であることを示し、\ref{four:bp-bochner.1} の測度 $\nu$ を求めよ（$\hat G=\mathbb{R}$ は \ref{four:lc-basic-duals.3} で同一視する）。
+:::
+
+::: solution
+$\varphi\in L^{1}(\mathbb{R})$ であり、$\varphi$ は偶関数なので次が成り立つ：
+$$
+\hat\varphi(y)=2\int_{0}^{\infty}e^{-x}\cos(2\pi xy)\,dx=\operatorname{Re}\frac{2}{1-2\pi iy}=\frac{2}{1+4\pi^{2}y^{2}}.
+$$
+（ここで $\int_{0}^{\infty}e^{-(1-2\pi iy)x}\,dx=1/(1-2\pi iy)$ を使った。）$\hat\varphi\in L^{1}(\mathbb{R})$ で $\varphi$ は連続なので、$\mathbb{R}$ の反転公式（\ref{four:inversion-theorem}）から、すべての $x$ で $\varphi(x)=\int e^{2\pi ixy}\hat\varphi(y)\,dy$ が成り立つ。$\nu\defeq\hat\varphi(y)\,dy$ は有限な正値測度なので、\ref{four:bp-bochner.2} から $\varphi$ は正定値で、一意性から \ref{four:bp-bochner.1} の測度はこの $\nu$。全測度は $\int\frac{2\,dy}{1+4\pi^{2}y^{2}}=\frac{2}{2\pi}\cdot\pi=1=\varphi(0)$ となり、確かに合う。確率論の言葉では、$e^{-|t|}$ はコーシー分布の特性関数である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{four:sec-bp-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=423b1e51"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
