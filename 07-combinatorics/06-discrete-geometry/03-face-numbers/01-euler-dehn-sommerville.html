@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>オイラーの関係式とデーン–ソマーヴィルの関係式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/06-discrete-geometry/03-face-numbers/01-euler-dehn-sommerville.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# オイラーの関係式とデーン–ソマーヴィルの関係式 {#poly:page-euler-dehn-sommerville keywords="f-vector, faces of a hyperplane section, generic linear functional, Euler's relation for polytopes, sweeping hyperplane proof, h-vector of a simple polytope, top vertex of a face, Dehn-Sommerville relations, h-vector of a simplicial polytope"}
+
+$d$ 多面体 $P$ の $j$ 次元の面の個数を $f_{j}(P)$ と書くと、3 次元の多面体では $f_{0}-f_{1}+f_{2}=2$（オイラーの多面体定理）が成り立つ。このページでは、これを任意の次元の**オイラーの関係式** $\sum_{j=0}^{d}(-1)^{j}f_{j}(P)=1$ に一般化し、平行な超平面で多面体を掃く方法で証明する。そのために、超平面による切り口の面が元の多面体の面からどう生じるかを先に調べる。次に、単純多面体について、一般の向きの 1 次関数で各頂点の「下向きの辺の本数」を数えた **$h$ ベクトル**を導入し、それが 1 次関数によらないことから**デーン–ソマーヴィルの関係式** $h_{i}=h_{d-i}$ を導く。双対をとれば、単体的多面体についても同じ関係式が得られる。
+
+## 記法と定義の確認 {#poly:sec-eds-notation}
+
+::: notation
+- 凸多面体、面、頂点、辺、ファセット、相対的内部 $\operatorname{ri}$ と \ref{poly:segment-lemma}、頂点図形、単純・単体的多面体は \ref{poly:page-convex-sets}, \ref{poly:page-faces-polarity}, \ref{poly:page-polytopes-polyhedra}, \ref{poly:page-simple-cyclic} のとおり。
+- $w\in\mathbb{R}^{d}$ について、点 $x$ の**高さ**を $\langle w,x\rangle$ とよぶことがある。
+- 二項係数 $\binom{i}{k}$ は $0\le k\le i$ 以外では $0$ とする。
+- 体系は $\ZF$。
+:::
+
+::: definition $f$ ベクトル {#poly:f-vector keywords="f-vector (f_0, ..., f_{d-1}) of a d-polytope; f_j = number of j-faces; f_{-1} = 1, f_d = 1" index="f ベクトル|えふべくとる, 面の数|めんのかず" refname="f ベクトル"}
+凸多面体 $P$ の $j$ 次元の面の個数を $f_{j}(P)$ と書き、$d$ 多面体 $P$ について $(f_{0}(P),\dots,f_{d-1}(P))$ を $P$ の **$f$ ベクトル**という。空の面と $P$ 自身を数えて $f_{-1}(P)=1$, $f_{d}(P)=1$ とする。
+:::
+
+::: intuition
+$f$ ベクトルは「頂点がいくつ、辺がいくつ、…」という面の数の一覧表である。どんな一覧表が実際の多面体から生じるかを調べるのが、このページと次のページの主題である。
+:::
+
+## 超平面による切り口の面 {#poly:sec-eds-section}
+
+::: lemma 相対的内部を共有する面 {#poly:faces-common-ri keywords="if two faces of a convex set share a relative interior point they coincide; every point of a polytope lies in the relative interior of exactly one face" index="面の相対的内部の一意性|めんのそうたいてきないぶのいちいせい"}
+$C$ を閉凸集合、$G_{1},G_{2}$ をその面とする。$\operatorname{ri}G_{1}\cap G_{2}\neq\varnothing$ なら $G_{1}\subseteq G_{2}$。特に $\operatorname{ri}G_{1}\cap\operatorname{ri}G_{2}\neq\varnothing$ なら $G_{1}=G_{2}$。凸多面体の各点は、ちょうど 1 つの面の相対的内部に属する。
+:::
+
+::: proof
+$z\in\operatorname{ri}G_{1}\cap G_{2}$, $y\in G_{1}$, $y\neq z$ とする。小さい $\varepsilon>0$ で $z'\defeq z+\varepsilon(z-y)\in G_{1}\subseteq C$ で、$z=\frac{1}{1+\varepsilon}z'+\frac{\varepsilon}{1+\varepsilon}y\in]y,z'[$。$z\in G_{2}$ で $G_{2}$ は面なので $y\in G_{2}$。最後の主張の存在は \ref{poly:ri-of-active-face}、一意性は前半から。
+:::
+
+::: lemma 超平面による切り口の面 {#poly:section-faces keywords="faces of a hyperplane section P cap H correspond bijectively to faces F of P whose relative interior meets H; dimension drops by one unless F lies in H" index="切り口の面|きりくちのめん" refname="超平面による切り口の面"}
+$P$ を凸多面体、$H$ を超平面とし、$P'\defeq P\cap H\neq\varnothing$ とする。$\mathcal{A}\defeq\{F\in\mathcal{F}(P):\operatorname{ri}F\cap H\neq\varnothing\}$ とおく。
+1. $P$ の面 $F$ について、$F\cap H$ は $P'$ の面である。
+2. $F\in\mathcal{A}$ なら $\operatorname{ri}(F\cap H)=\operatorname{ri}F\cap H$ で、$F\not\subseteq H$ なら $\dim(F\cap H)=\dim F-1$。
+3. $F\mapsto F\cap H$ は、$\mathcal{A}$ から $P'$ の空でない面全体への全単射である。
+:::
+
+::: intuition
+多面体を平面で切ると、切り口の各面は、平面が「内側を横切った」元の面からちょうど 1 つずつ生じ、次元が 1 つ下がる。辺を横切れば切り口の頂点が、2 次元の面を横切れば切り口の辺ができる。
+:::
+
+::: proof
+**Step 1（1）.** $a,b\in P'$, $]a,b[\cap(F\cap H)\neq\varnothing$ なら、$F$ が $P$ の面なので $a,b\in F$、よって $a,b\in F\cap H$。
+
+**Step 2（2、$\supseteq$ と次元）.** 【主張：$z_{1}\in\operatorname{ri}F\cap H$ は $F\cap H$ の相対的内部の点】$F\subseteq H$ なら自明なので $F\not\subseteq H$ とする。$E\defeq\operatorname{aff}F\cap H$ は $\operatorname{aff}F$ の中の超平面で、次元 $\dim F-1$。$z_{1}\in\operatorname{ri}F$ から、ある $\delta>0$ で $\operatorname{aff}F\cap B(z_{1},\delta)\subseteq F$、したがって $E\cap B(z_{1},\delta)\subseteq F\cap H\subseteq E$。よって $\operatorname{aff}(F\cap H)=E$, $\dim(F\cap H)=\dim F-1$ で、$z_{1}\in\operatorname{ri}(F\cap H)$。
+
+**Step 3（2、$\subseteq$）.** $z\in\operatorname{ri}(F\cap H)$ とし、$z_{1}\in\operatorname{ri}F\cap H$ を一つとる（$z\neq z_{1}$ とする）。小さい $\varepsilon>0$ で $z''\defeq z+\varepsilon(z-z_{1})\in F\cap H$ で、$z\in]z_{1},z''[$。$z_{1}\in\operatorname{ri}F$, $z''\in F$ なので、\ref{poly:segment-lemma} から $z\in\operatorname{ri}F$。
+
+**Step 4（3）.** 【主張：全射かつ単射】全射：$G$ を $P'$ の空でない面とし、$z\in\operatorname{ri}G$ をとる（\ref{poly:relative-interior-nonempty}）。\ref{poly:faces-common-ri} から $z\in\operatorname{ri}F$ となる $P$ の面 $F$ があり、$z\in H$ なので $F\in\mathcal{A}$。2 から $z\in\operatorname{ri}(F\cap H)$ で、$G$ と $F\cap H$ は $P'$ の面で相対的内部の点 $z$ を共有するので、\ref{poly:faces-common-ri} から $G=F\cap H$。単射：$F_{1}\cap H=F_{2}\cap H=G$（$F_{1},F_{2}\in\mathcal{A}$）なら、2 から $\operatorname{ri}G=\operatorname{ri}F_{1}\cap H=\operatorname{ri}F_{2}\cap H$ は空でなく、$\operatorname{ri}F_{1}\cap\operatorname{ri}F_{2}\neq\varnothing$。\ref{poly:faces-common-ri} から $F_{1}=F_{2}$。
+:::
+
+::: lemma 一般の向き {#poly:generic-direction keywords="there is w taking distinct values on the vertices of a polytope; top and bottom vertex of a face; the relative interior of a face meets H(w, gamma) iff gamma is strictly between its bottom and top heights" index="一般の向き|いっぱんのむき"}
+$P$ を凸多面体とする。
+1. 頂点の高さ $\langle w,x\rangle$ がすべて異なる $w\in\mathbb{R}^{d}$ がある（このような $w$ を**一般の向き**という）。
+2. $w$ を一般の向きとすると、空でない面 $F$ には高さが最大の頂点（**上端**）と最小の頂点（**下端**）がただ一つずつある。$\dim F\ge1$ なら両者は異なり、その高さを $a<b$ とすると、$H(w,\gamma)\cap\operatorname{ri}F\neq\varnothing$ と $a<\gamma<b$ は同値。
+:::
+
+::: proof
+**Step 1（1）.** 頂点を $x_{1},\dots,x_{n}$ とし、$w(s)\defeq(1,s,\dots,s^{d-1})$ とおく。$i\neq j$ について $\langle w(s),x_{i}-x_{j}\rangle$ は、係数が $x_{i}-x_{j}\neq0$ の座標である $s$ の多項式で、$0$ でないので根は有限個。根を避けて $s$ をとればよい。
+
+**Step 2（2）.** $F=\operatorname{conv}(\operatorname{ext}F)$ なので、$F$ 上の高さの最大・最小は頂点でとられ、頂点の高さは相異なるので、上端・下端はただ一つ。$\dim F\ge1$ なら $F$ は 2 頂点以上をもつので $a<b$。$a<\gamma<b$ とし、$y\in\operatorname{ri}F$ をとる。高さが $\gamma$ ならよい。$\gamma$ より大きければ、下端 $x$ に向かう $[y,x[$ は \ref{poly:segment-lemma} から $\operatorname{ri}F$ に含まれ、高さは $y$ の値から $a<\gamma$ まで連続に動くので、$x$ に着く前に $\gamma$ をとる。小さければ上端に向かって同様。逆に $z\in\operatorname{ri}F$ の高さが $b$ なら、$y\in F$ について $z+\varepsilon(z-y)\in F$ の高さ $\le b$ から $\langle w,y\rangle\ge b$、つまり $F$ 上で高さが一定で $a<b$ に反する。高さ $a$ も同様に除かれ、$\gamma\in]a,b[$。
+:::
+
+## オイラーの関係式 {#poly:sec-eds-euler}
+
+::: theorem オイラーの関係式 {#poly:euler-relation keywords="Euler's relation: sum_{j=0}^{d} (-1)^j f_j(P) = 1 for every d-polytope, equivalently f_0 - f_1 + ... + (-1)^{d-1} f_{d-1} = 1 - (-1)^d; proof by sweeping with parallel hyperplanes" index="オイラーの関係式|おいらーのかんけいしき, オイラーの多面体定理|おいらーのためんたいていり" refname="オイラーの関係式"}
+任意の $d$ 多面体 $P$（$d\ge0$）について
+$$\sum_{j=0}^{d}(-1)^{j}f_{j}(P)=1,\qquad\text{すなわち}\qquad\sum_{j=0}^{d-1}(-1)^{j}f_{j}(P)=1-(-1)^{d}.$$
+:::
+
+::: intuition
+多面体を一般の向きの平行な超平面で上から下へ掃き、頂点を通る高さと頂点の間の高さで交互に切る。切り口は次元が 1 つ低い多面体なので、帰納法で各切り口の交代和は 1。切り口の面は元の面から生じ、元の各面は「頂点の間の高さ」で 1 回だけ多く切られるので、切り口の交代和を符号つきで足し合わせると、元の多面体の交代和が現れる。
+:::
+
+::: proof
+$\chi(Q)\defeq\sum_{j\ge0}(-1)^{j}f_{j}(Q)$ とおき、「空でない凸多面体 $Q$ では $\chi(Q)=1$」を次元についての帰納法で示す。$0$ 次元（1 点）なら $\chi=1$。$d\ge1$ とし、$d-1$ 次元以下で正しいとする。
+
+**Step 1（掃く超平面）.** \ref{poly:generic-direction} の一般の向き $w$ をとり、頂点を高さの順に $x_{1},\dots,x_{n}$（高さ $a_{1}<\cdots<a_{n}$, $n\ge2$）とする。$\gamma_{2i-1}\defeq a_{i}$ とし、$a_{i}<\gamma_{2i}<a_{i+1}$ となる $\gamma_{2i}$ を選び、$H_{k}\defeq H(w,\gamma_{k})$, $P_{k}\defeq P\cap H_{k}$（$k=1,\dots,2n-1$）とおく。$P_{k}$ は空でない凸多面体（\ref{poly:polytope-intersection}）で次元 $d-1$ 以下なので、帰納法の仮定から $\chi(P_{k})=1$。$k=1,\dots,2n-1$ のうち奇数は $n$ 個、偶数は $n-1$ 個なので
+$$\sum_{k=1}^{2n-1}(-1)^{k}\chi(P_{k})=-1.\tag{1}$$
+
+**Step 2（切り口の面の数え方）.** 【主張：$\psi(F,k)\defeq[\operatorname{ri}F\cap H_{k}\neq\varnothing]$ とおくと、$j\ge1$ で $f_{j}(P_{k})=\sum_{F\in\mathcal{F}_{j+1}(P)}\psi(F,k)$、$j=0$ で $f_{0}(P_{k})=\sum_{F\in\mathcal{F}_{1}(P)}\psi(F,k)+[k\text{ は奇数}]$】ここで $\mathcal{F}_{m}(P)$ は $m$ 次元の面の集合、$[\cdot]$ は真なら $1$、偽なら $0$。\ref{poly:section-faces} から $P_{k}$ の空でない面は $F\cap H_{k}$（$\psi(F,k)=1$）と一対一に対応し、$F\not\subseteq H_{k}$ なら次元は $\dim F-1$。$F\subseteq H_{k}$ なら $F$ の頂点はすべて $H_{k}$ 上で、$H_{k}$ には頂点が高々 1 つ（$k$ 奇数のとき $x_{(k+1)/2}$ だけ）なので $F=\{x_{(k+1)/2}\}$。これが $k$ 奇数のときだけ $P_{k}$ に加わる頂点である。
+
+**Step 3（各面の寄与）.** 【主張：$\dim F\ge1$ の面 $F$ について $\sum_{k}(-1)^{k}\psi(F,k)=1$】$F$ の下端を $x_{s}$、上端を $x_{t}$（$s<t$）とすると、\ref{poly:generic-direction} の 2 から $\psi(F,k)=1$ は $\gamma_{2s-1}<\gamma_{k}<\gamma_{2t-1}$、すなわち $2s\le k\le2t-2$ と同値。この範囲の偶数は $t-s$ 個、奇数は $t-s-1$ 個なので、和は $1$。
+
+**Step 4（足し合わせる）.** Step 2, 3 から、$j\ge1$ では $\sum_{k}(-1)^{k}f_{j}(P_{k})=\sum_{F\in\mathcal{F}_{j+1}(P)}1=f_{j+1}(P)$、$j=0$ では $\sum_{k}(-1)^{k}f_{0}(P_{k})=f_{1}(P)+\sum_{k\text{ 奇数}}(-1)^{k}=f_{1}(P)-f_{0}(P)$（$n=f_{0}(P)$）。したがって
+$$\sum_{k}(-1)^{k}\chi(P_{k})=\sum_{j\ge0}(-1)^{j}\sum_{k}(-1)^{k}f_{j}(P_{k})=f_{1}-f_{0}+\sum_{j\ge1}(-1)^{j}f_{j+1}=-\sum_{i=0}^{d}(-1)^{i}f_{i}(P).$$
+(1) と比べて $\chi(P)=\sum_{i=0}^{d}(-1)^{i}f_{i}(P)=1$。$f_{d}(P)=1$ を移項すれば後者の形になる。
+:::
+
+::: example
+1. 3 次元：$f_{0}-f_{1}+f_{2}=2$。立方体は $8-12+6=2$、正八面体は $6-12+8=2$。
+2. $d$ 単体：$f_{j}=\binom{d+1}{j+1}$（\ref{poly:simplex-faces}）で、$\sum_{j=0}^{d}(-1)^{j}\binom{d+1}{j+1}=1-(1-1)^{d+1}=1$。
+3. $d$ 次元立方体：$f_{j}=2^{d-j}\binom{d}{j}$ で、$\sum_{j=0}^{d}(-1)^{j}2^{d-j}\binom{d}{j}=(2-1)^{d}=1$。
+:::
+
+## 単純多面体の $h$ ベクトル {#poly:sec-eds-h-vector}
+
+::: lemma 単純多面体の頂点のまわりの面 {#poly:simple-vertex-faces keywords="in a simple d-polytope, for every set S of edges at a vertex v there is a unique face containing v whose edges at v are exactly S; its dimension is |S|" index="単純多面体の頂点のまわりの面|たんじゅんためんたいのちょうてんのまわりのめん"}
+$P$ を単純な $d$ 多面体（$d\ge2$）、$v$ を頂点とし、$v$ を含む辺を $[v,u_{1}],\dots,[v,u_{d}]$ とする。各 $S\subseteq\{1,\dots,d\}$ について、$v$ を含み、$v$ を含む辺がちょうど $[v,u_{i}]$（$i\in S$）であるような面 $F_{S}$ がただ一つあり、$\dim F_{S}=\abs{S}$。$v$ を含む面はすべてある $F_{S}$ である。
+:::
+
+::: intuition
+単純多面体の頂点のまわりは、$d$ 本の座標軸のまわりの「象限の角」と同じ形をしている。どの $k$ 本の辺を選んでも、それらがちょうど張る $k$ 次元の面が 1 つある。
+:::
+
+::: proof
+**Step 1（頂点図形は単体）.** 平行移動で $0\in\operatorname{int}P$ としてよい。\ref{poly:simple-simplicial-duality} から $v$ の辺はちょうど $d$ 本で、\ref{poly:vertex-figure} から頂点図形 $P'=P\cap H'$ は $(d-1)$ 多面体で頂点は $d$ 個の $z_{i}\in]v,u_{i}[$。\ref{poly:few-vertices-facets} の 1 から $P'$ は単体で、その空でない面は $\operatorname{conv}\{z_{i}:i\in S\}$（$S\neq\varnothing$）で尽きる（\ref{poly:simplex-faces}）。
+
+**Step 2（$H'$ と相対的内部で交わる面）.** 【主張：$\operatorname{ri}F\cap H'\neq\varnothing$ と、「$v\in F$ かつ $\dim F\ge1$」は同値】$v\notin F$ なら $F$ の頂点はすべて $H'$ より下にあり、$F\cap H'=\varnothing$。$\{v\}$ は $H'$ と交わらない。$v\in F$, $\dim F\ge1$ なら $F$ は $H'$ より下の頂点ももち、\ref{poly:generic-direction} の 2 の証明と同じ議論（$w$ を頂点図形を定める $c$ に替え、上端 $v$ と、$H'$ より下の頂点を使う）で $\operatorname{ri}F\cap H'\neq\varnothing$。
+
+**Step 3（$F_{S}$ の構成）.** \ref{poly:section-faces} から、$S\neq\varnothing$ について $F_{S}\cap H'=\operatorname{conv}\{z_{i}:i\in S\}$ となる面 $F_{S}\ni v$ がただ一つあり、$\dim F_{S}=(\abs{S}-1)+1=\abs{S}$。$F_{\varnothing}\defeq\{v\}$ とする。Step 2 から $v$ を含む面はすべてこの形。
+
+**Step 4（$F_{S}$ の $v$ における辺）.** $F_{S}$ の辺は $P$ の辺なので、$v$ を含むものはある $[v,u_{i}]$。$[v,u_{i}]\subseteq F_{S}$ なら $z_{i}\in F_{S}\cap H'=\operatorname{conv}\{z_{j}:j\in S\}$ で、単体の頂点 $z_{i}$ は他の頂点の凸包に入らないので $i\in S$。逆に $i\in S$ なら $z_{i}\in F_{S}$ で、$z_{i}\in]v,u_{i}[$ と $F_{S}$ が面であることから $u_{i}\in F_{S}$、$[v,u_{i}]$ は $F_{S}$ に含まれる $P$ の辺なので $F_{S}$ の辺。辺の集合から $S$ が決まるので $F_{S}$ はただ一つ。
+:::
+
+::: definition $h$ ベクトル {#poly:h-vector keywords="h-vector of a simple polytope: h_i = number of vertices with exactly i edges going down for a generic direction w" index="h ベクトル|えいちべくとる" refname="h ベクトル"}
+$P$ を単純な $d$ 多面体、$w$ を一般の向きとする。頂点 $v$ について、$v$ を含む辺 $[v,u]$ のうち $\langle w,u\rangle<\langle w,v\rangle$（下向き）であるものの本数を $\operatorname{in}_{w}(v)$ とし、$h_{i}(P,w)\defeq\#\{v\in\operatorname{ext}P:\operatorname{in}_{w}(v)=i\}$（$0\le i\le d$）とおく。$(h_{0},\dots,h_{d})$ を **$h$ ベクトル**という（次の定理から $w$ によらない）。
+:::
+
+::: intuition
+上から光を当てたとき、各頂点から下に向かう辺の本数で頂点を分類した表が $h$ ベクトルである。$h_{0}$ はいちばん下の頂点（1 個）、$h_{d}$ はいちばん上の頂点（1 個）を数える。
+:::
+
+::: theorem $f$ ベクトルと $h$ ベクトル {#poly:f-h-relation keywords="f_k = sum_i binom(i,k) h_i for a simple polytope; h_i = sum_k (-1)^{k-i} binom(k,i) f_k; the h-vector does not depend on the direction" index="f ベクトルと h ベクトルの関係|えふべくとるとえいちべくとるのかんけい" refname="f ベクトルと h ベクトル"}
+$P$ を単純な $d$ 多面体（$d\ge2$）、$w$ を一般の向きとすると、$0\le k\le d$ について
+$$f_{k}(P)=\sum_{i=k}^{d}\binom{i}{k}h_{i}(P,w),\qquad h_{i}(P,w)=\sum_{k=i}^{d}(-1)^{k-i}\binom{k}{i}f_{k}(P).$$
+特に $h_{i}(P,w)$ は $w$ によらず、$h_{i}(P)$ と書ける。多項式で書けば $\sum_{i}h_{i}s^{i}=\sum_{k}f_{k}(s-1)^{k}$。
+:::
+
+::: intuition
+各面には上端がただ一つあるので、面を上端の頂点ごとに数える。頂点 $v$ を上端とする $k$ 次元の面は、$v$ から下に向かう辺のうち $k$ 本を選ぶごとにちょうど 1 つある。だから $k$ 次元の面の数は、下向きの辺の本数から $k$ 本を選ぶ方法の総数になる。
+:::
+
+::: proof
+**Step 1（上端の判定）.** 【主張：面 $F\ni v$ について、$v$ が $F$ の上端であることと、$F$ の辺で $v$ を含むものがすべて下向きであることは同値】$\Rightarrow$ は上端の定義から。$\Leftarrow$：$\dim F=0$ なら自明。$\dim F\ge1$ なら、$F$ を $\operatorname{aff}F$ の中の多面体とみて \ref{poly:local-max-global} を高さ $\langle w,\cdot\rangle$ に使えば（$F$ の辺は $P$ の辺で、$F$ の頂点の隣接関係は $F$ の辺で決まる）、$v$ は $F$ 上の最大点。
+
+**Step 2（$v$ を上端とする $k$ 次元の面の数）.** \ref{poly:simple-vertex-faces} から $v$ を含む面は $F_{S}$ の形で、$v$ における辺は $S$ に対応する辺。Step 1 から $v$ が $F_{S}$ の上端であることと、$S$ が下向きの辺だけからなることは同値。よって $v$ を上端とする $k$ 次元の面の数は $\binom{\operatorname{in}_{w}(v)}{k}$。
+
+**Step 3（$f_{k}$ の式）.** 空でない面には上端がただ一つある（\ref{poly:generic-direction}）ので、$f_{k}(P)=\sum_{v}\binom{\operatorname{in}_{w}(v)}{k}=\sum_{i}\binom{i}{k}h_{i}(P,w)$。
+
+**Step 4（逆の式）.** $\sum_{k}f_{k}t^{k}=\sum_{i}h_{i}\sum_{k}\binom{i}{k}t^{k}=\sum_{i}h_{i}(1+t)^{i}$。$t=s-1$ を代入すると $\sum_{i}h_{i}s^{i}=\sum_{k}f_{k}(s-1)^{k}=\sum_{k}f_{k}\sum_{i}\binom{k}{i}s^{i}(-1)^{k-i}$ で、$s^{i}$ の係数を比べればよい。右辺は $w$ を含まない。
+:::
+
+## デーン–ソマーヴィルの関係式 {#poly:sec-eds-dehn-sommerville}
+
+::: theorem デーン–ソマーヴィルの関係式 {#poly:dehn-sommerville keywords="Dehn-Sommerville relations h_i = h_{d-i} for simple polytopes; h_0 = h_d = 1 is Euler's relation; h_i >= 0" index="デーン–ソマーヴィルの関係式|でーんそまーう゛ぃるのかんけいしき" refname="デーン–ソマーヴィルの関係式"}
+単純な $d$ 多面体 $P$（$d\ge2$）について、$h_{i}(P)$ は非負整数で、$0\le i\le d$ について
+$$h_{i}(P)=h_{d-i}(P),\qquad\text{すなわち}\qquad\sum_{k=i}^{d}(-1)^{k-i}\binom{k}{i}f_{k}(P)=\sum_{k=d-i}^{d}(-1)^{k-d+i}\binom{k}{d-i}f_{k}(P).$$
+また $h_{0}(P)=h_{d}(P)=1$ で、$h_{0}=1$ はオイラーの関係式と同値。
+:::
+
+::: intuition
+光を上からではなく下から当てると、下向きの辺と上向きの辺が入れ替わる。単純多面体では各頂点の辺はちょうど $d$ 本なので、「下向きが $i$ 本」は「上向きが $d-i$ 本」と同じ。$h$ ベクトルは光の向きによらないので、表が左右対称になる。
+:::
+
+::: proof
+**Step 1（向きの反転）.** 【主張：$\operatorname{in}_{-w}(v)=d-\operatorname{in}_{w}(v)$】$-w$ も一般の向き。\ref{poly:simple-simplicial-duality} から $v$ の辺はちょうど $d$ 本で、各辺の他端の高さは $v$ と異なるので、$w$ について下向きでないものは $-w$ について下向き。
+
+**Step 2（対称性）.** Step 1 から $h_{i}(P,-w)=h_{d-i}(P,w)$。\ref{poly:f-h-relation} から両辺は向きによらないので $h_{i}(P)=h_{d-i}(P)$。$h_{i}$ は頂点の個数なので非負整数。
+
+**Step 3（$h_{0}$）.** $\operatorname{in}_{w}(v)=0$ の頂点は、\ref{poly:local-max-global} を $-w$ に使えば高さの最小点で、一般の向きなのでただ一つ。よって $h_{0}=1$、Step 2 から $h_{d}=1$。一方 \ref{poly:f-h-relation} から $h_{0}=\sum_{k}(-1)^{k}f_{k}$ なので、$h_{0}=1$ は \ref{poly:euler-relation} と同じ式である（$h$ を経由した単純多面体に対する別証明になっている）。
+:::
+
+::: corollary 単体的多面体のデーン–ソマーヴィルの関係式 {#poly:dehn-sommerville-simplicial keywords="h-vector of a simplicial polytope: sum h_i s^i = sum_j f_{j-1} (s-1)^{d-j}; Dehn-Sommerville h_i = h_{d-i}" index="単体的多面体の h ベクトル|たんたいてきためんたいのえいちべくとる" refname="単体的多面体のデーン–ソマーヴィルの関係式"}
+単体的 $d$ 多面体 $P$（$d\ge2$）について、$h_{i}(P)$ を
+$$\sum_{i=0}^{d}h_{i}(P)\,s^{i}=\sum_{j=0}^{d}f_{j-1}(P)\,(s-1)^{d-j}$$
+で定めると、$h_{i}(P)$ は非負整数で $h_{i}(P)=h_{d-i}(P)$。
+:::
+
+::: intuition
+単体的多面体の $h$ ベクトルは、極をとった単純多面体の $h$ ベクトルそのものである。単体的多面体の側では、空の面から始めて $j-1$ 次元の面の数 $f_{j-1}$ を $(s-1)$ の冪で重みづけて足すことで計算でき、やはり左右対称になる。
+:::
+
+::: proof
+平行移動で $0\in\operatorname{int}P$ とし、$Q\defeq P^{\circ}$ とする。\ref{poly:simple-simplicial-duality} を $Q$ に使えば（$Q^{\circ}=P$ は単体的）$Q$ は単純。\ref{poly:polar-duality} の 3, 4 から $0\le k\le d-1$ で $f_{k}(Q)=f_{d-1-k}(P)$、また $f_{d}(Q)=1=f_{-1}(P)$。\ref{poly:f-h-relation} から
+$$\sum_{i}h_{i}(Q)s^{i}=\sum_{k=0}^{d}f_{k}(Q)(s-1)^{k}=\sum_{j=0}^{d}f_{j-1}(P)(s-1)^{d-j}\quad(j\defeq d-k).$$
+よって $h_{i}(P)=h_{i}(Q)$ で、\ref{poly:dehn-sommerville} から従う。
+:::
+
+::: example
+1. 立方体 $f=(8,12,6)$：$8+12(s-1)+6(s-1)^{2}+(s-1)^{3}=1+3s+3s^{2}+s^{3}$ で $h=(1,3,3,1)$。正八面体も双対なので $h=(1,3,3,1)$。
+2. 単純な 3 多面体では $h=(1,h_{1},h_{1},1)$ で、$f_{0}=\sum h_{i}=2h_{1}+2$, $f_{1}=\sum ih_{i}=3h_{1}+3$, $f_{2}=\sum\binom{i}{2}h_{i}=h_{1}+3$。したがって $f_{0}=2f_{2}-4$, $f_{1}=3f_{2}-6$ で、1 つの数から他が決まる。
+3. 巡回多面体 $C(6,4)$ は $f=(6,15,18,9)$（\ref{poly:cyclic-neighbourly} から $f_{1}=\binom{6}{2}$、ゲールの条件から $f_{3}=9$、オイラーの関係式から $f_{2}=18$）で、$h=(1,2,3,2,1)$。
+:::
+
+::: hypcheck
+- **切り口の面**：$P\cap H\neq\varnothing$ と、$H$ が超平面であること（Step 2 の次元の計算）を使った。$H$ が頂点を含んでもよい。
+- **オイラーの関係式**：一般の向き $w$ は、各 $H_{k}$ に頂点が高々 1 つしか乗らないこと（Step 2）と、各面の上端・下端が異なること（Step 3）に使った。帰納法は「次元が低い凸多面体」に対するもので、$P_{k}$ が凸多面体であることは \ref{poly:polytope-intersection} による。
+- **$h$ ベクトル**：単純性は、頂点図形が単体であること（\ref{poly:simple-vertex-faces} の Step 1）と、各頂点の辺がちょうど $d$ 本であること（デーン–ソマーヴィルの Step 1）の 2 か所で使った。単純でない多面体では、頂点の上端の面の数が二項係数にならず、$h_{i}$ は向きによって変わりうる。
+- **単体的の場合**：$0\in\operatorname{int}P$ は極双対を使うためだけに必要で、平行移動で常に満たせる。
+:::
+
+## 問題 {#poly:sec-eds-problems}
+
+::: problem {#poly:prob-eds-pentagon-prism}
+五角柱（単純な 3 多面体）の $f$ ベクトルと $h$ ベクトルを求め、$h_{1}=h_{2}$ を確かめよ。
+:::
+
+::: solution
+五角柱は頂点 10、辺 15（上下の五角形の辺 10 と側面の辺 5）、面 7（上下 2 と側面 5）。$\sum_{k}f_{k}(s-1)^{k}=10+15(s-1)+7(s-1)^{2}+(s-1)^{3}=10+15s-15+7s^{2}-14s+7+s^{3}-3s^{2}+3s-1=1+4s+4s^{2}+s^{3}$。$h=(1,4,4,1)$ で $h_{1}=h_{2}=4$、オイラーの関係式 $10-15+7=2$ も成り立つ。
+:::
+
+::: problem {#poly:prob-eds-euler-4d}
+4 次元立方体の $f$ ベクトルを求め、$f_{0}-f_{1}+f_{2}-f_{3}=0$ を確かめよ。
+:::
+
+::: solution
+$f_{j}=2^{4-j}\binom{4}{j}$ から $f=(16,32,24,8)$。$16-32+24-8=0=1-(-1)^{4}$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** オイラーの関係式の証明では、多面体を位相空間として扱わず、面の組合せと超平面の切り口だけを使った。一般の向きの選び方には自由度があるが、結論には影響しない。
+
+**前提を変えると.**
+- オイラーの関係式は、全ての $d$ 多面体の $f$ ベクトルを含む最小のアフィン部分空間が、この関係式が定める超平面そのものである（ほかの線形関係はない）という意味で最良であることが知られている（Brøndsted, Theorem 16.2）。
+- 単純（または単体的）$d$ 多面体の $f$ ベクトルのアフィン包の次元は $\lfloor d/2\rfloor$ で、デーン–ソマーヴィルの関係式がすべての線形関係を与えることが知られている（Brøndsted, Theorem 17.3。巡回多面体の $f$ ベクトルを使って示す）。
+- 位相幾何の言葉では、$\sum(-1)^{j}f_{j}$ は多面体の境界（$d-1$ 次元球面）のオイラー標数で、$1-(-1)^{d}=\chi(S^{d-1})$ である。デーン–ソマーヴィルの関係式は、境界の単体的複体についてのポアンカレ双対性の組合せ的な影と見ることができる、と一般に言われている。
+
+**類似の定理.** $h$ ベクトルの非負性と対称性は、次のページの上限定理（$h_{i}\le\binom{n-d+i-1}{i}$）と、$g$ 定理（$h$ ベクトルの特徴づけ）の出発点である（\ref[上限定理と下限定理]{poly:page-upper-lower-bound}）。
+
+**高い視点から：モース理論としての掃き出し.** 一般の向き $w$ を「高さ関数」とみると、各頂点は臨界点で、$\operatorname{in}_{w}(v)$ はその**指数**（下に降りる方向の数）にあたる。$h_{i}$ は指数 $i$ の臨界点の個数で、$\sum(-1)^{i}h_{i}$ がオイラー標数を与えること、$w$ を $-w$ に替えると指数 $i$ が $d-i$ になることは、モース理論の離散版である。比喩で言えば、多面体を水に沈めていくとき、水面が頂点を越えるたびに切り口の形が変わり、その変わり方の記録（どの頂点で何本の辺が水面下にあったか）が $h$ ベクトルであり、上下を逆にしても記録が同じになることがデーン–ソマーヴィルの関係式である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{poly:sec-eds-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
