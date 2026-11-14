@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>上限定理と下限定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="07-combinatorics/06-discrete-geometry/03-face-numbers/02-upper-lower-bound.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 上限定理と下限定理 {#poly:page-upper-lower-bound keywords="facets of a simple polytope are simple, sum of h-vectors of facets, h_i(F) <= h_i(P), McMullen's upper bound theorem, h_i <= binom(p-d+i-1, i), h-vector of neighbourly polytopes, cyclic polytopes maximize face numbers, lower bound theorem, Barnette, g-theorem, McMullen's conditions, M-sequence"}
+
+頂点の数 $n$ を決めたとき、$d$ 次元の凸多面体は面をいくつまでもちうるか。**上限定理**（マクマレン、1970 年）は、答えが巡回多面体 $C(n,d)$ で達成されることを述べる。このページでは、単純多面体の $h$ ベクトルについて、ファセットの $h$ ベクトルの和の恒等式と、ファセットの $h$ ベクトルが元の多面体の $h$ ベクトルで押さえられることから $h_{i}\le\binom{p-d+i-1}{i}$ を導き、デーン–ソマーヴィルの関係式と組み合わせて、単体的多面体についての上限定理を証明する。次に、面の数の下限を与える**下限定理**（バーネット）と、単体的多面体の $h$ ベクトルを完全に特徴づける **$g$ 定理**（マクマレンの条件）を述べ、辺の数についての下限定理が $h_{2}\ge h_{1}$ と同値であることを確かめる。
+
+## 記法と定義の確認 {#poly:sec-ub-notation}
+
+::: notation
+- $f$ ベクトル、一般の向き、単純多面体の $h$ ベクトル $h_{i}(P)$（下向きの辺が $i$ 本の頂点の数）、$f_{k}=\sum_{i}\binom{i}{k}h_{i}$、デーン–ソマーヴィルの関係式 $h_{i}=h_{d-i}$、単体的多面体の $h$ ベクトルは \ref{poly:page-euler-dehn-sommerville} のとおり。巡回多面体と近隣性は \ref{poly:page-simple-cyclic} のとおり。
+- 単体的 $d$ 多面体 $P$ の $h$ ベクトルは $\sum_{i}h_{i}s^{i}=\sum_{j=0}^{d}f_{j-1}(s-1)^{d-j}$ で定めた（\ref{poly:dehn-sommerville-simplicial}）。
+- $\mathbb{Z}[[x]]$ は整数係数の形式的冪級数環。$m\ge1$ について $(1-x)^{-m}=\sum_{i\ge0}\binom{m+i-1}{i}x^{i}$（$m$ についての帰納法と $\sum_{l=0}^{i}\binom{m+l-1}{l}=\binom{m+i}{i}$ から）。
+- 体系は $\ZF$。
+:::
+
+## ファセットの $h$ ベクトル {#poly:sec-ub-facets}
+
+::: lemma 単純多面体のファセット {#poly:simple-facets keywords="facets of a simple d-polytope (d >= 3) are simple; a vertex v lies in exactly d facets, one for each omitted edge; the edges of the facet at v are the remaining d-1 edges" index="単純多面体のファセット|たんじゅんためんたいのふぁせっと"}
+$P$ を単純な $d$ 多面体（$d\ge3$）、$v$ を頂点とし、$v$ の辺を $e_{1},\dots,e_{d}$ とする。$v$ を含むファセットはちょうど $d$ 枚で、$e_{l}$ 以外の $d-1$ 本の辺を $v$ における辺とするファセット $G_{l}$（$l=1,\dots,d$）である。$P$ のファセットはすべて単純な $(d-1)$ 多面体である。
+:::
+
+::: proof
+\ref{poly:simple-vertex-faces} から、$v$ を含む面は $F_{S}$（$\dim F_{S}=\abs{S}$、$v$ における辺は $S$）で尽きるので、ファセットは $\abs{S}=d-1$ のもの、すなわち $G_{l}\defeq F_{\{1,\dots,d\}\setminus\{l\}}$。$P$ のファセット $G$ と頂点 $v\in G$ について、$G$ の $v$ における辺（$G$ に含まれる $P$ の辺）はちょうど $d-1$ 本。$G$ を $\operatorname{aff}G$ の中の $(d-1)$ 多面体（$d-1\ge2$）とみて \ref{poly:simple-simplicial-duality} を使えば、各頂点の辺がちょうど $d-1$ 本なので $G$ は単純。
+:::
+
+::: lemma ファセットの $h$ ベクトルの和 {#poly:facet-h-sum keywords="for a simple d-polytope: sum over facets F of h_i(F) = (i+1) h_{i+1}(P) + (d-i) h_i(P)" index="ファセットの h ベクトルの和|ふぁせっとのえいちべくとるのわ"}
+$P$ を単純な $d$ 多面体（$d\ge3$）とすると、$0\le i\le d-1$ について
+$$\sum_{G}h_{i}(G)=(i+1)\,h_{i+1}(P)+(d-i)\,h_{i}(P)$$
+（$G$ は $P$ のファセット全体を動く）。
+:::
+
+::: intuition
+左辺は「ファセット $G$ と、$G$ の中で下向きの辺がちょうど $i$ 本の頂点」の組を数える。頂点 $v$ の下向きの辺が $j$ 本なら、$v$ を含む $d$ 枚のファセットのうち、下向きの辺を 1 本落とした $j$ 枚では下向きが $j-1$ 本、上向きの辺を落とした $d-j$ 枚では $j$ 本のままである。
+:::
+
+::: proof
+**Step 1（向きの共有）.** 【主張：一つの一般の向き $w$ で $P$ と全ファセットの $h$ ベクトルを同時に数えられる】$w$ を $P$ の一般の向きとすると、ファセットの頂点は $P$ の頂点なので、$w$ は各ファセットの一般の向きでもある。\ref{poly:simple-facets} から各ファセットは単純で、\ref{poly:f-h-relation} から $h_{i}(G)$ は $w$ で数えてよい。
+
+**Step 2（頂点ごとに数える）.** 【主張：$\operatorname{in}_{w}(v)=j$ の頂点 $v$ は、$h_{j-1}(G)$ に $j$ 回、$h_{j}(G)$ に $d-j$ 回寄与する】$v$ を含むファセットは $G_{1},\dots,G_{d}$（\ref{poly:simple-facets}）で、$G_{l}$ の $v$ における辺は $e_{l}$ 以外の辺。したがって $G_{l}$ の中での $v$ の下向きの辺の本数は、$e_{l}$ が下向きなら $j-1$、上向きなら $j$。下向きの辺は $j$ 本、上向きは $d-j$ 本なので主張が従う。
+
+**Step 3（合計）.** 左辺は組 $(G,v)$（$v\in G$、$G$ の中での下向きの辺が $i$ 本）の個数で、Step 2 から、$\operatorname{in}_{w}(v)=i+1$ の頂点がそれぞれ $i+1$ 個、$\operatorname{in}_{w}(v)=i$ の頂点がそれぞれ $d-i$ 個の組を与える。
+:::
+
+::: lemma ファセットの $h$ ベクトルの評価 {#poly:facet-h-bound keywords="for a facet F of a simple polytope P, h_i(F) <= h_i(P); proof by choosing a direction in which F is at the bottom" index="ファセットの h ベクトルの評価|ふぁせっとのえいちべくとるのひょうか"}
+$P$ を単純な $d$ 多面体（$d\ge3$）、$G$ をそのファセットとすると、$0\le i\le d-1$ について $h_{i}(G)\le h_{i}(P)$。
+:::
+
+::: intuition
+ファセット $G$ がいちばん下に来るように光を当てると、$G$ の頂点から $G$ の外へ出る 1 本の辺は上向きになる。だから $G$ の頂点の下向きの辺の本数は、$G$ の中で数えても $P$ の中で数えても同じで、$G$ の頂点は $P$ の頂点の一部として数えられる。
+:::
+
+::: proof
+**Step 1（$G$ が下になる一般の向き）.** 【主張：$G$ の頂点が他のすべての頂点より低い一般の向き $w$ がある】\ref{poly:polytope-faces-exposed} から、$P\subseteq K(c,\alpha)$, $G=P\cap H(c,\alpha)$ で、$G$ に入らない頂点 $u$ では $\langle c,u\rangle<\alpha$ となる $c,\alpha$ がある。$\delta\defeq\alpha-\max_{u\notin G}\langle c,u\rangle>0$ とし、\ref{poly:generic-direction} の一般の向き $w_{0}$ をとって $w\defeq-c+\varepsilon w_{0}$ とおく。$\varepsilon>0$ を、すべての頂点 $x$ で $\varepsilon\abs{\langle w_{0},x\rangle}<\delta/2$ となるほど小さくとれば、$G$ の頂点の高さは $G$ の外の頂点の高さより小さい。また、相異なる頂点 $x,y$ について $\langle w,x-y\rangle=-\langle c,x-y\rangle+\varepsilon\langle w_{0},x-y\rangle$ は $\varepsilon$ の 1 次式で、$\langle w_{0},x-y\rangle\neq0$ なので $0$ になる $\varepsilon$ は高々 1 つ。それらを避ければ $w$ は一般の向き。
+
+**Step 2（外への辺は上向き）.** $v\in G$ の辺のうち $G$ の辺は $d-1$ 本（\ref{poly:simple-facets}）で、残りの 1 本 $[v,u]$ について $u\notin G$（$u\in G$ なら $[v,u]\subseteq G$ は $G$ に含まれる $P$ の辺で $G$ の辺になる）。Step 1 から $u$ は $v$ より高く、$[v,u]$ は上向き。よって $v$ の下向きの辺は、$P$ の中で数えても $G$ の中で数えても同じ本数。
+
+**Step 3（比較）.** $h_{i}(G)=\#\{v\in\operatorname{ext}G:\operatorname{in}_{w}(v)=i\}\le h_{i}(P)$。
+:::
+
+## 上限定理 {#poly:sec-ub-upper}
+
+::: theorem 単純多面体の $h$ ベクトルの上界 {#poly:h-upper-bound keywords="for a simple d-polytope with p facets, h_i <= binom(p-d+i-1, i)" index="h ベクトルの上界|えいちべくとるのじょうかい" refname="単純多面体の h ベクトルの上界"}
+$P$ を $p$ 枚のファセットをもつ単純な $d$ 多面体（$d\ge2$）とすると、$0\le i\le d$ について
+$$h_{i}(P)\le\binom{p-d+i-1}{i}.$$
+:::
+
+::: intuition
+ファセットの数 $p$ が決まると、下向きの辺が $i$ 本の頂点の数は、$i$ が 1 増えるごとに高々 $\frac{p-d+i}{i+1}$ 倍にしか増えない。これを $h_{0}=1$ から積み上げると二項係数になる。
+:::
+
+::: proof
+**Step 1（$d=2$）.** $P$ は $p$ 角形で、頂点も $p$ 個、$h_{0}=h_{2}=1$, $h_{0}+h_{1}+h_{2}=f_{0}=p$ から $h=(1,p-2,1)$。$\binom{p-3}{0}=1$, $\binom{p-2}{1}=p-2$, $\binom{p-1}{2}\ge1$（$p\ge3$）なので成り立つ。以下 $d\ge3$。
+
+**Step 2（漸化不等式）.** 【主張：$(i+1)h_{i+1}(P)\le(p-d+i)h_{i}(P)$（$0\le i\le d-1$）】\ref{poly:facet-h-sum} と \ref{poly:facet-h-bound} から
+$$(i+1)h_{i+1}(P)+(d-i)h_{i}(P)=\sum_{G}h_{i}(G)\le p\,h_{i}(P).$$
+
+**Step 3（帰納法）.** $h_{0}(P)=1=\binom{p-d-1}{0}$（\ref{poly:dehn-sommerville}）。$h_{i}\le\binom{p-d+i-1}{i}$ なら、Step 2 と $p-d+i\ge0$（\ref{poly:few-vertices-facets} から $p\ge d+1$）より
+$$h_{i+1}\le\frac{p-d+i}{i+1}\binom{p-d+i-1}{i}=\binom{p-d+i}{i+1}.$$
+:::
+
+::: lemma 近隣多面体の $h$ ベクトル {#poly:neighbourly-h keywords="h-vector of a simplicial polytope in terms of f: sum h_i x^i = sum f_{j-1} x^j (1-x)^{d-j}; for a k-neighbourly simplicial polytope with n vertices h_i = binom(n-d+i-1, i) for i <= k" index="近隣多面体の h ベクトル|きんりんためんたいのえいちべくとる"}
+$P$ を $n$ 頂点の単体的 $d$ 多面体（$d\ge2$）とする。
+1. $\sum_{i=0}^{d}h_{i}x^{i}=\sum_{j=0}^{d}f_{j-1}x^{j}(1-x)^{d-j}$。特に $f_{j-1}=\sum_{i=0}^{j}\binom{d-i}{j-i}h_{i}$。
+2. $P$ が $k$ 近隣（$k\le\lfloor d/2\rfloor$）なら、$0\le i\le k$ について $h_{i}=\binom{n-d+i-1}{i}$。
+:::
+
+::: proof
+**Step 1（1）.** 定義式 $\sum_{i}h_{i}s^{i}=\sum_{j}f_{j-1}(s-1)^{d-j}$ に $s=1/x$ を代入して $x^{d}$ を掛けると $\sum_{i}h_{i}x^{d-i}=\sum_{j}f_{j-1}x^{j}(1-x)^{d-j}$。左辺は \ref{poly:dehn-sommerville-simplicial} の $h_{i}=h_{d-i}$ から $\sum_{i}h_{i}x^{i}$。$x^{j}$ の係数を比べるため $x=t/(1+t)$ とおけば $(1-x)=1/(1+t)$ で、両辺に $(1+t)^{d}$ を掛けて $\sum_{i}h_{i}t^{i}(1+t)^{d-i}=\sum_{j}f_{j-1}t^{j}$。$t^{j}$ の係数から後半の式。
+
+**Step 2（近隣性と $f$）.** $j\le k$ なら、$j$ 頂点の集合 $Y$ ごとに $\operatorname{conv}Y$ は $(j-1)$ 次元の面（単体）で、$\operatorname{ext}(\operatorname{conv}Y)=Y$ なので相異なる。逆に $(j-1)$ 次元の面は単体で（\ref{poly:simplicial-faces}）頂点は $j$ 個。よって $f_{j-1}=\binom{n}{j}$（$0\le j\le k$）。
+
+**Step 3（2）.** 【主張：$\mathbb{Z}[[x]]$ で $\sum_{i}h_{i}x^{i}\equiv(1-x)^{-(n-d)}\pmod{x^{k+1}}$】$\mathbb{Z}[[x]]$ では $1-x$ は可逆で、二項定理から $\sum_{j=0}^{n}\binom{n}{j}x^{j}(1-x)^{d-j}=(1-x)^{d-n}\bigl(x+(1-x)\bigr)^{n}=(1-x)^{d-n}$。1 の右辺と比べると、$j\le k$ の項は Step 2 から一致し、$j>k$ の項はどちらも $x^{k+1}$ の倍数。$n-d\ge1$ なので、$x^{i}$（$i\le k$）の係数は $\binom{n-d+i-1}{i}$（記法の負の冪の展開）。
+:::
+
+::: theorem 上限定理 {#poly:upper-bound-theorem keywords="McMullen's upper bound theorem for simplicial polytopes: f_k(P) <= f_k(C(n,d)) for every simplicial d-polytope with n vertices; equality for neighbourly polytopes; dual form for simple polytopes with p facets" index="上限定理|じょうげんていり, マクマレンの上限定理|まくまれんのじょうげんていり" refname="上限定理"}
+$P$ を $n$ 頂点の単体的 $d$ 多面体（$d\ge2$）とすると、$-1\le k\le d-1$ について
+$$f_{k}(P)\le f_{k}(C(n,d)).$$
+$P$ が $\lfloor d/2\rfloor$ 近隣なら、すべての $k$ で等号が成り立つ。双対的に、$p$ 枚のファセットをもつ単純な $d$ 多面体 $Q$ について $f_{k}(Q)\le f_{d-1-k}(C(p,d))$。
+:::
+
+::: intuition
+単体的多面体の面の数は $h$ ベクトルの非負係数の 1 次式なので、$h$ ベクトルを大きくすれば面も増える。$h_{i}$ の上界は前半（$i\le d/2$）で巡回多面体がちょうど達成し、後半は対称性で決まる。だから巡回多面体がすべての面の数で同時に最大になる。
+:::
+
+::: proof
+**Step 1（$h$ ベクトルの比較）.** 【主張：すべての $i$ で $h_{i}(P)\le h_{i}(C)$、$C\defeq C(n,d)$】平行移動で $0\in\operatorname{int}P$ とし $Q\defeq P^{\circ}$ とすると、$Q$ は単純で、ファセットは $P$ の頂点と対応して $n$ 枚、$h_{i}(P)=h_{i}(Q)$（\ref{poly:dehn-sommerville-simplicial} の証明）。\ref{poly:h-upper-bound} から $h_{i}(P)\le\binom{n-d+i-1}{i}$。$C$ は単体的で $\lfloor d/2\rfloor$ 近隣（\ref{poly:cyclic-basic}, \ref{poly:cyclic-neighbourly}）なので、\ref{poly:neighbourly-h} から $i\le\lfloor d/2\rfloor$ で $h_{i}(C)=\binom{n-d+i-1}{i}\ge h_{i}(P)$。$i>\lfloor d/2\rfloor$ なら $d-i\le\lfloor d/2\rfloor$ で、デーン–ソマーヴィルの関係式から $h_{i}(P)=h_{d-i}(P)\le h_{d-i}(C)=h_{i}(C)$。
+
+**Step 2（$f$ の比較）.** \ref{poly:neighbourly-h} の 1 から $f_{j-1}=\sum_{i}\binom{d-i}{j-i}h_{i}$ は $h$ の非負係数の 1 次式なので、Step 1 から $f_{j-1}(P)\le f_{j-1}(C)$。$P$ が $\lfloor d/2\rfloor$ 近隣なら、$i\le\lfloor d/2\rfloor$ で $h_{i}(P)=h_{i}(C)$（\ref{poly:neighbourly-h}）、対称性からすべての $i$ で等しく、$f$ も等しい。
+
+**Step 3（単純な場合）.** $Q$ を $0\in\operatorname{int}Q$ の単純な $d$ 多面体とすると、$P\defeq Q^{\circ}$ は $p$ 頂点の単体的多面体（\ref{poly:simple-simplicial-duality}）で、$f_{k}(Q)=f_{d-1-k}(P)\le f_{d-1-k}(C(p,d))$（\ref{poly:polar-duality} の 4）。
+:::
+
+::: example
+1. $d=4$：$C(n,4)$ の $h$ ベクトルは $(1,n-4,\binom{n-3}{2},n-4,1)$ で、$f=\bigl(n,\binom{n}{2},n(n-3),\frac{n(n-3)}{2}\bigr)$。$n$ 頂点の単体的 4 多面体のファセットは $\frac{n(n-3)}{2}$ 枚以下。
+2. $d=5$, $n=7$：$h(C(7,5))=(1,2,3,3,2,1)$ で $f=(7,21,34,30,12)$。オイラーの関係式 $7-21+34-30+12=2$ が成り立つ。
+3. $d=3$：$h_{1}=h_{2}=n-3$ なので、$n$ 頂点の単体的 3 多面体の $f$ ベクトルはすべて $(n,3n-6,2n-4)$ で、上限と下限が一致する。
+:::
+
+## 下限定理と $g$ 定理 {#poly:sec-ub-lower}
+
+::: proposition 辺の数と $g_{2}$ {#poly:g2-edges keywords="for a simplicial d-polytope: h_1 = f_0 - d, h_2 - h_1 = f_1 - d f_0 + binom(d+1, 2); the edge lower bound is equivalent to g_2 >= 0" index="辺の数の下限と g_2|へんのかずのかげんとじー2"}
+単体的 $d$ 多面体（$d\ge2$）について $h_{1}=f_{0}-d$, $h_{2}-h_{1}=f_{1}-d\,f_{0}+\binom{d+1}{2}$。したがって
+$$f_{1}\ge d\,f_{0}-\binom{d+1}{2}\iff h_{2}\ge h_{1}.$$
+:::
+
+::: proof
+\ref{poly:neighbourly-h} の 1 で $x$ の係数を比べる。$\sum_{j}f_{j-1}x^{j}(1-x)^{d-j}$ の $x^{1}$ の係数は $f_{-1}\cdot(-d)+f_{0}=f_{0}-d$、$x^{2}$ の係数は $f_{-1}\binom{d}{2}+f_{0}\cdot(-(d-1))+f_{1}$。差をとれば $h_{2}-h_{1}=\binom{d}{2}-(d-1)f_{0}+f_{1}-f_{0}+d=f_{1}-d\,f_{0}+\binom{d+1}{2}$。（$d=2$ では $f_{1}=f_{0}$ で両辺とも $f_{0}-3$ に関する式になり、同じ計算が成り立つ。）
+:::
+
+::: fact 下限定理 {#poly:lower-bound-theorem keywords="Barnette's lower bound theorem: for a simplicial d-polytope with n vertices, f_1 >= d n - binom(d+1,2) and f_{d-1} >= (d-1) n - (d+1)(d-2); equality for stacked polytopes" index="下限定理|かげんていり, バーネットの下限定理|ばーねっとのかげんていり, 積み上げ多面体|つみあげためんたい" refname="下限定理"}
+$n$ 頂点の単体的 $d$ 多面体（$d\ge3$）について
+$$f_{1}\ge d\,n-\binom{d+1}{2},\qquad f_{d-1}\ge(d-1)n-(d+1)(d-2)$$
+が成り立ち、等号は**積み上げ多面体**（単体から始めて、ファセットの上に低い角錐を貼り付けることを繰り返して得られる多面体）で達成される（D. Barnette, 1971, 1973。Brøndsted, Theorem 19.1 と Corollary 19.6 に単純多面体の側からの証明がある）。ここでは証明しない。
+:::
+
+::: intuition
+面の数が最も少ない単体的多面体は、単体に「とげ」を一つずつ生やしていったものである。とげを 1 本生やすと頂点が 1、辺がちょうど $d$ 本増えるので、辺の数は $d\,n-\binom{d+1}{2}$ になる。
+:::
+
+::: fact $g$ 定理 {#poly:g-theorem keywords="g-theorem (McMullen's conditions): a vector is the h-vector of a simplicial d-polytope iff h_i = h_{d-i}, and g_i = h_i - h_{i-1} (i <= d/2) is an M-sequence; Billera-Lee sufficiency, Stanley necessity via hard Lefschetz" index="g 定理|じーていり, マクマレンの条件|まくまれんのじょうけん, M 列|えむれつ" refname="g 定理"}
+整数 $g\ge1$, $i\ge1$ について、$g=\binom{a_{i}}{i}+\binom{a_{i-1}}{i-1}+\cdots+\binom{a_{j}}{j}$（$a_{i}>a_{i-1}>\cdots>a_{j}\ge j\ge1$）と一意に書け（$i$ 二項展開）、$g^{\langle i\rangle}\defeq\binom{a_{i}+1}{i+1}+\cdots+\binom{a_{j}+1}{j+1}$, $0^{\langle i\rangle}\defeq0$ とおく。$(h_{0},\dots,h_{d})$ が単体的 $d$ 多面体の $h$ ベクトルであることと、次の 3 条件は同値である（L. J. Billera, C. W. Lee（十分性）、R. P. Stanley（必要性）、1980。G. M. Ziegler, *Lectures on Polytopes*, 第 8 章）。
+1. $h_{i}=h_{d-i}$（$0\le i\le d$）。
+2. $g_{0}\defeq h_{0}=1$, $g_{i}\defeq h_{i}-h_{i-1}\ge0$（$1\le i\le\lfloor d/2\rfloor$）。
+3. $g_{i+1}\le g_{i}^{\langle i\rangle}$（$1\le i\le\lfloor d/2\rfloor-1$）。
+
+ここでは証明しない。
+:::
+
+::: intuition
+1 はデーン–ソマーヴィルの関係式、2 は「$h$ ベクトルが真ん中まで増える」こと（$g_{2}\ge0$ は辺の下限定理）、3 は「次の段の増え方は前の段の増え方で決まる上限を超えない」ことで、上限定理を精密にしたものである。
+:::
+
+::: hypcheck
+- **ファセットの $h$ ベクトルの和・評価**：単純性は、頂点を含むファセットが「辺を 1 本落とすごと」にちょうど 1 枚あること（\ref{poly:simple-facets}）と、外への辺がちょうど 1 本であること（評価の Step 2）に使った。$d\ge3$ はファセットが単純な多面体として $h$ ベクトルをもつために必要で、$d=2$ は直接扱った。
+- **$h$ ベクトルの上界**：$p\ge d+1$（ファセットの数の下界）を、漸化不等式の係数が非負であることに使った。
+- **上限定理**：単体的であることは、$f$ を $h$ の非負係数の 1 次式で書けること（\ref{poly:neighbourly-h} の 1）に使った。単体的でない多面体にも上限定理は成り立つが、頂点を少し動かして単体的にしても面の数が減らないことを示す別の議論が要る（補足）。
+- **近隣多面体の $h$ ベクトル**：$k\le\lfloor d/2\rfloor$ と単体的であることを $f_{j-1}=\binom{n}{j}$（$j\le k$）に使った。
+:::
+
+## 問題 {#poly:sec-ub-problems}
+
+::: problem {#poly:prob-ub-c84}
+$C(8,4)$ の $h$ ベクトルと $f$ ベクトルを求め、ゲールの偶数性条件から数えたファセットの数 $\frac{8\cdot5}{2}=20$ と一致することを確かめよ。
+:::
+
+::: solution
+\ref{poly:neighbourly-h} の 2（$k=2$）から $h_{0}=1$, $h_{1}=\binom{4}{1}=4$, $h_{2}=\binom{5}{2}=10$、対称性から $h=(1,4,10,4,1)$。$f_{j-1}=\sum_{i}\binom{4-i}{j-i}h_{i}$ から $f_{0}=4+4=8$, $f_{1}=6+12+10=28$, $f_{2}=4+12+20+4=40$, $f_{3}=1+4+10+4+1=20$。ファセットの数 20 は \ref{poly:ex-sc-c-n-4} の $\frac{n(n-3)}{2}$（$n=8$）と一致し、$8-28+40-20=0$ でオイラーの関係式も成り立つ。
+:::
+
+::: problem {#poly:prob-ub-octahedron-lower}
+正八面体（単体的 3 多面体、$n=6$）と、4 次元正軸体（単体的 4 多面体、$n=8$）で、辺の下限 $d\,n-\binom{d+1}{2}$ と実際の辺の数を比べよ。
+:::
+
+::: solution
+正八面体：$3\cdot6-6=12$ で、辺は 12 本（3 次元では常に等号）。4 次元正軸体：辺は $\pm e_{i}$ と $\pm e_{j}$（$i\neq j$）を結ぶ $\binom{4}{2}\cdot4=24$ 本で、下限は $4\cdot8-10=22$。$h_{2}-h_{1}=24-22=2>0$ で、積み上げ多面体ではない。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 上限定理の証明では、オイラーの関係式を直接は使っていない（$h_{0}=1$ だけを使った）。マクマレンの元の証明も、シェリング（境界を一枚ずつ貼り合わせる順序）で $h$ ベクトルを解釈し、同じ漸化不等式を導くものである、と一般に説明されている。
+
+**前提を変えると.**
+- 単体的でない $d$ 多面体についても、$n$ 頂点なら $f_{k}(P)\le f_{k}(C(n,d))$ が成り立つ。頂点を一般の位置に少し押し出して（pulling）単体的多面体にすると面の数は減らない、というクレーの議論で単体的な場合に帰着される、と知られている（Ziegler, *Lectures on Polytopes*, 第 8 章）。
+- 上限定理は、単体的な球面（多面体の境界とは限らない三角形分割された球面）にも成り立つ（スタンリー、1975。可換環論のコーエン–マコーレー性を使う）。
+- $g$ 定理の必要性（3 条件が必要であること）は、スタンリーが、有理数の頂点をもつ単体的多面体に対応するトーリック多様体のコホモロジー環に**ハード・レフシェッツの定理**を適用して示した。概略は次のとおりである：コホモロジー環 $H^{\ast}$ の偶数次の部分の次元が $h_{i}$ で、ポアンカレ双対性が $h_{i}=h_{d-i}$ を、ハード・レフシェッツの定理（ある元 $\omega$ を掛ける写像 $H^{2i-2}\to H^{2i}$ が $i\le d/2$ で単射）が $g_{i}\ge0$ を与え、さらに商環 $H^{\ast}/(\omega)$ の次元の列が $g_{i}$ で、次数 1 の元で生成される環のヒルベルト関数についてのマコーレーの定理が条件 3 を与える。十分性は、ビレラとリーが条件を満たす $h$ ベクトルをもつ多面体を具体的に構成して示した。単体的球面に対する $g$ 予想は、K. Adiprasito（2018 年）による証明が発表されている、と一般に言われている。
+
+**類似の定理.** 下限定理の等号の場合（積み上げ多面体）と上限定理の等号の場合（近隣多面体）は、$g$ ベクトルの言葉ではそれぞれ $g_{2}=0$ と、$g_{i}$ ができるだけ大きいことに対応する。
+
+**高い視点から：数え上げの不等式と代数.** オイラーの関係式やデーン–ソマーヴィルの関係式は「等式」で、トポロジー（オイラー標数とポアンカレ双対性）から来る。これに対して上限定理・下限定理・$g$ 定理は「不等式」で、その深い形は代数（次数つき環の構造とハード・レフシェッツの定理）から来る。組合せ的な対象（面の数）に代数的な対象（環）を対応させ、環の次元の列についての一般的な制約を組合せの不等式として読み出す、というのが代数的組合せ論の典型的な道筋である。比喩で言えば、多面体の面の数の表は環の「段ごとの部屋数」を写した影であり、建物の構造上の制約（どの階も下の階より極端に広くはなれない）が、影の形の制約として現れる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{poly:sec-ub-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
