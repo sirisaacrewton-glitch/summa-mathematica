@@ -19,6 +19,7 @@ The main body (definitions, König's lemma, the Aronszajn construction, well-pru
 - **Detail:** The supplement claims that under MA + ¬CH every Aronszajn tree is special (Baumgartner). This is false: MA(ω₁) implies every Aronszajn tree is special, but MA + ¬CH alone (i.e. MA for all κ < 2^ω) does not suffice; the correct hypothesis is MA(ω₁) (equivalently 2^ω > ω₁ with MA(ω₁)). The statement as written is stronger than the literature supports.
 - **Proposed fix:** Under MA(ω₁) (in particular under MA + ¬CH) every Aronszajn tree is special (Baumgartner's theorem; Kunen, *Set Theory*, Ch. II Exercise 41).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Kunen II Ex. 41 states exactly "MA+¬CH implies every Aronszajn tree is special"; the text is correct. A note that MA(ω₁) suffices was added, with a pointer to the supplement of the next page.
 
 ### ISSUE-0002 [Open] Specker's construction hypotheses
 - **Category:** Supplement/remark error
@@ -26,6 +27,7 @@ The main body (definitions, König's lemma, the Aronszajn construction, well-pru
 - **Detail:** The claim that for κ = λ⁺ with λ regular and 2^{<λ} = λ one gets a κ-Aronszajn tree by replacing ω with λ and requiring the range to be non-stationary is stated too strongly: the standard Specker construction requires λ^{<λ} = λ (or at least λ^{ω} = λ type hypotheses), and the non-stationary-range condition is the correct device only when λ is uncountable regular; the stated hypothesis 2^{<λ} = λ is insufficient in general.
 - **Proposed fix:** If κ = λ⁺ with λ regular and λ^{<λ} = λ, then replacing ω by λ in the construction and requiring each s_{α} to have non-stationary range in λ yields a κ-Aronszajn tree (Specker; Kunen Ch. II Exercise 37).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Kunen II Ex. 37 assumes exactly λ regular, 2^{<λ}=λ, with ran(s_α) nonstationary. For regular λ, 2^{<λ}=λ already implies λ^{<λ}=λ. Only "uncountable" was added (λ=ω is the theorem itself).
 
 ### ISSUE-0003 [Open] Weak compactness and κ-Aronszajn trees
 - **Category:** Supplement/remark error
@@ -33,6 +35,7 @@ The main body (definitions, König's lemma, the Aronszajn construction, well-pru
 - **Detail:** The sentence 'the nonexistence of a κ-Aronszajn tree for strongly inaccessible κ is equivalent to κ being weakly compact' is imprecise: the correct equivalence is that κ is weakly compact iff there is no κ-Aronszajn tree, and this requires κ to be uncountable and inaccessible (the equivalence is standard, but the phrasing 'strongly inaccessible' plus the surrounding attribution to Kunen Exercise 49 is loose). More importantly, the preceding sentence about ω₂-Aronszajn trees and Mitchell 1972 is stated without the needed large-cardinal hypothesis being precise.
 - **Proposed fix:** For an uncountable inaccessible κ, κ is weakly compact iff there is no κ-Aronszajn tree (Kunen Ch. II Exercise 49). The nonexistence of an ω₂-Aronszajn tree is equiconsistent with a weakly compact cardinal (Mitchell 1972).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** For strongly inaccessible κ, Kunen (II Ex. 49) defines weak compactness as the nonexistence of κ-Aronszajn trees, and the Mitchell (1972) sentence matches Kunen. No change was needed.
 
 ### ISSUE-0004 [Open] König's lemma does not need AC here
 - **Category:** Supplement/remark error
@@ -40,6 +43,7 @@ The main body (definitions, König's lemma, the Aronszajn construction, well-pru
 - **Detail:** The hypcheck says AC is used in Step 3 to choose x_{n+1}, and that it is unnecessary if T has a fixed well-order. But the proof already fixes a well-order of T ('T の整列順序を 1 つ固定し'), so the appeal to AC is redundant; more importantly the statement '（AC）' in the lemma is misleading since König's lemma for ω-trees is provable in ZF. This is an overstatement of the role of AC.
 - **Proposed fix:** König's lemma for ω-trees is provable in ZF: fixing a well-order of T (available since T is a set) lets one choose the least suitable z at each stage, so no choice is needed.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Fixing a well-order of T is itself an application of AC (well-ordering theorem); König's lemma for ω-trees is not a ZF theorem in general. The text now says so explicitly.
 
 ### ISSUE-0005 [Open] Well-pruned subtree preserves Suslin/Aronszajn
 - **Category:** Supplement/remark error

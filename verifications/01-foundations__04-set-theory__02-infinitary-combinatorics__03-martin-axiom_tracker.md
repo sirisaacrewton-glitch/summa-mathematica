@@ -20,6 +20,7 @@
 - **Proposed fix:** Replace with: 'MA のもとで $2^{\aleph_{0}}$ が正則になるのは、$2^{\aleph_{0}}$ が後続基数である場合など追加の仮定があるときである（\ref{set:ma-continuum-regular} を参照）。実際、MA と $2^{\aleph_{0}}$ が特異基数である模型も無矛盾である。' Or remove the claim that regularity is essential and state only that Solovay–Tennenbaum produces models with $2^{\aleph_{0}}=\kappa$ for regular $\kappa$ with $\kappa^{<\kappa}=\kappa$.
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The supplement still claims MA implies 2^{aleph_0} is regular and that restricting kappa to regular is essential; this is false (MA is consistent with a singular continuum, e.g. by c.c.c. forcing adding Cohen reals to a model of MA, which preserves MA and makes 2^{aleph_0} singular). The cited corollary set:ma-continuum-regular cannot support this.
+**Opus Rebuttal:** MA implies $2^{\kappa}=2^{\aleph_{0}}$ for all $\kappa<2^{\aleph_{0}}$ (set:ma-continuum-regular, Kunen II.2); by König, $\mathrm{cf}(2^{\kappa})>\kappa$, so $\mathrm{cf}(2^{\aleph_{0}})>\kappa$ for every $\kappa<2^{\aleph_{0}}$, i.e. the continuum is regular under MA. Adding Cohen reals destroys MA; MA with a singular continuum is inconsistent.
 
 ### ISSUE-0002 [Ignored: Valid Rebuttal] Solovay–Tennenbaum fact states regularity requirement incorrectly
 - **Category:** Unsupported fact
@@ -37,6 +38,7 @@
 - **Proposed fix:** Change to: 'PFA は $2^{\aleph_{0}}=\aleph_{2}$ を導く（Foreman–Magidor–Shelah 1988）。'
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The supplement still attributes PFA => 2^{aleph_0}=aleph_2 to 'Todorčević, Veličković'; the standard attribution is Foreman–Magidor–Shelah (1988), so the attribution remains imprecise.
+**Opus Rebuttal:** PFA ⇒ $2^{\aleph_{0}}=\aleph_{2}$ is due to Todorčević and Veličković (see Jech, Set Theory, 3rd ed., Ch. 31); Foreman–Magidor–Shelah proved it for MM. The attribution is standard.
 
 ### ISSUE-0004 [Open] Claim that MA is 'strongest consistent' of its form
 - **Category:** Supplement/remark error

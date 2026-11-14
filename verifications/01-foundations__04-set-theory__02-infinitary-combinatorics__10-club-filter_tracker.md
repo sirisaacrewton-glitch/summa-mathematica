@@ -19,6 +19,7 @@ The page is largely correct. The main genuine problem is the supplement after se
 - **Detail:** The supplement claims that when cf(μ)=ω, two disjoint club sets can exist, and concludes that 'one cannot make a notion of large sets (a filter) from club sets'. This is false: the family {X ⊆ μ | X contains a club} is always a filter (it contains μ, excludes ∅, is upward closed, and closed under binary intersections by set:club-filter-complete.1 with λ=2 < cf(μ)). What fails when cf(μ)=ω is only the countable completeness (the intersection of countably many clubs need not be club), not the filter property. The stated reason for restricting to cf(μ)>ω is therefore wrong.
 - **Proposed fix:** Replace with: '(4) shows that when cf(μ)=ω two club sets can be disjoint, so the family of sets containing a club is not countably complete (the intersection of countably many clubs need not contain a club). It is nevertheless a filter; the assumption cf(μ)>ω below is needed for the cf(μ)-completeness of Cub(μ) (set:club-filter-complete), not for it to be a filter.'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** False positive. When cf(μ)=ω, item (4) gives two disjoint clubs C₀, C₁. Both belong to {X ⊆ μ : X contains a club}, but their intersection ∅ does not, so the family is not closed under binary intersections and is not a filter. set:club-filter-complete.1 assumes cf(μ)>ω and cannot be applied here. The supplement now states this explicitly.
 
 ### ISSUE-0002 [Open] Feferman–Levy model does not make cf(ω₁)=ω
 - **Category:** Supplement/remark error
