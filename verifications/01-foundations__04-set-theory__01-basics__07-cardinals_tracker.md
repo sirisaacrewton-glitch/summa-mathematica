@@ -26,6 +26,7 @@ The page's main proofs (Schröder–Bernstein, cardinality properties, pigeonhol
 - **Detail:** 「$\mathcal{P}(\omega)\approx\mathcal{P}(\omega)\times 2$ と、$\ZF$ で作れる全射 $\mathcal{P}(\omega)\to\omega_{1}$ を使う」とあるが、$\omega_{1}$ から $\mathcal{P}(\omega)$ への単射が存在しないモデルでは、そもそも全射 $\mathcal{P}(\omega)\to\omega_{1}$ が存在しない（全射があれば選択公理なしで $\omega_{1}\preccurlyeq\mathcal{P}(\omega)$ の単射が得られる）。したがってこの構成は成立せず、反例の説明として誤り。$B$ への全射は $\mathcal{P}(\omega)\times\{0\}\cup\omega_{1}\times\{1\}\to\omega_{1}$ を第2成分への射影で作るべきで、$\mathcal{P}(\omega)\to\omega_{1}$ への全射は不要かつ不可能。
 - **Proposed fix:** Replace the parenthetical with: "（$B\to\omega_{1}$ は第2成分への射影 $\mathcal{P}(\omega)\times\{0\}\cup\omega_{1}\times\{1\}\to\omega_{1}$ が全射、$A\to B$ は $x\mapsto(x,0)$ が全射、$B\to A$ は第1成分への射影が全射）".
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** A surjection $\mathcal{P}(\omega)\to\omega_{1}$ exists in ZF (send a code of a well-order of a subset of $\omega$ to its order type, otherwise to 0; see the supplement of set:surjection-cardinality). The claim that a surjection yields an injection without AC is false. The construction is correct; the page now spells out both surjections explicitly.
 
 ### ISSUE-0003 [Open] 「$\omega_{1}$ から $\mathcal{P}(\omega)$ への単射が存在しない」モデルの仮定が過剰/不正確
 - **Category:** Supplement/remark error
@@ -33,6 +34,7 @@ The page's main proofs (Schröder–Bernstein, cardinality properties, pigeonhol
 - **Detail:** 反例に必要なのは「$\omega_{1}\preccurlyeq\mathcal{P}(\omega)$ の単射が存在しない」こと（すなわち $\omega_{1}\not\preccurlyeq\mathcal{P}(\omega)$）であり、これは到達不能基数の存在を仮定しなくても（例えば $\omega_{1}$ が特異基数となるモデルなど）成り立ちうる。また「到達不能基数の存在が無矛盾ならば存在する」という帰属は、引用先の補足に依存するが、ここでの主張としては過大な仮定を課しており、反例の必要十分な条件を述べていない。
 - **Proposed fix:** Replace with: "$\omega_{1}\not\preccurlyeq\mathcal{P}(\omega)$ が成り立つ $\ZF$ のモデル（例えば $\omega_{1}$ が可算和で表されるモデル）では…"
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The page states only a sufficient condition (Solovay's model from an inaccessible), which is correct; it does not claim necessity. Moreover, if $\omega_{1}$ is regular, $\aleph_{1}\not\le2^{\aleph_{0}}$ implies $\omega_{1}$ is inaccessible in L (otherwise $\omega_1=\omega_1^{L[a]}$ for some real a, and L[a] well-orders an $\omega_1$-sequence of reals), so the hypothesis is not superfluous in that case.
 
 ### ISSUE-0004 [Open] 「$\omega$ の像の上でずらせば」の記述が不正確
 - **Category:** Supplement/remark error
@@ -54,6 +56,7 @@ The page's main proofs (Schröder–Bernstein, cardinality properties, pigeonhol
 - **Detail:** 「遺伝的に可算な集合全体 $H(\omega_{1})$ は冪集合の公理以外の $\ZFC$ の公理を満たし、その中ではすべての集合が可算である」とあるが、$H(\omega_{1})$ は置換公理を満たさない（置換公理の図式は $H(\kappa)$ で一般には成立しない）。正しくは $H(\omega_{1})$ は $\ZFC$ から冪集合の公理と置換公理を除いた理論（$\ZFC^{-}$ や $\ZFC$ の「冪集合なし」版）のモデルであり、「冪集合の公理以外の $\ZFC$ の公理を満たす」は誤り。
 - **Proposed fix:** Replace with: "$\ZFC$ の中で、遺伝的に可算な集合全体 $H(\omega_{1})$ は冪集合の公理と置換公理を除く $\ZFC$ の公理を満たし、その中ではすべての集合が可算である（Kunen, *Set Theory*, 第 IV 章）。"
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** For regular uncountable $\kappa$, $H(\kappa)$ satisfies ZFC minus Power Set, including Replacement (Kunen, Set Theory, Ch. IV). In particular $H(\omega_{1})$ satisfies Replacement, and every set in it is countable there.
 
 ### ISSUE-0007 [Open] 「$\omega_{1}$ から $\mathcal{P}(\omega)$ への単射が存在しないモデル」の存在主張
 - **Category:** Supplement/remark error
@@ -61,3 +64,4 @@ The page's main proofs (Schröder–Bernstein, cardinality properties, pigeonhol
 - **Detail:** 「$\omega_{1}$ から $\mathcal{P}(\omega)$ への単射が存在しない $\ZF$ のモデル（到達不能基数の存在が無矛盾ならば存在する）」とあるが、$\omega_{1}\not\preccurlyeq\mathcal{P}(\omega)$ が成り立つモデルの存在は到達不能基数の存在を必要としない（例えば $\omega_{1}$ が可算和で表されるモデルや、$\mathrm{cf}(\omega_{1})=\omega$ となるモデル）。到達不能基数の存在を仮定するのは過剰で、誤った帰属。
 - **Proposed fix:** Replace with: "$\omega_{1}\not\preccurlyeq\mathcal{P}(\omega)$ が成り立つ $\ZF$ のモデル（例えば $\omega_{1}$ が可算和で表されるモデル）では…"
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The page states only a sufficient condition (Solovay's model from an inaccessible), which is correct; it does not claim necessity. Moreover, if $\omega_{1}$ is regular, $\aleph_{1}\not\le2^{\aleph_{0}}$ implies $\omega_{1}$ is inaccessible in L (otherwise $\omega_1=\omega_1^{L[a]}$ for some real a, and L[a] well-orders an $\omega_1$-sequence of reals), so the hypothesis is not superfluous in that case.
