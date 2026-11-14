@@ -19,6 +19,7 @@ The page is largely correct. Ulam's theorem, its corollaries, the closure-club l
 - **Detail:** The supplement claims Kunen (1980) raised as open whether there can be a regular κ>ω with no 'almost disjoint family of κ⁺ stationary sets'. This is a vague and likely misattributed claim; the actual open problem Kunen discussed concerns whether every stationary set splits, and the phrasing '概素族' (almost disjoint family) of stationary sets is imprecise. Since the text itself hedges ('未確認'), it is not a hard error, but the attribution is dubious.
 - **Proposed fix:** Replace with: 'Whether every stationary subset of every regular uncountable cardinal splits into κ many disjoint stationary sets is Solovay's theorem (ZFC); the harder case is weak inaccessible cardinals, where the argument via Ulam's theorem is unavailable.'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The attribution is accurate: Kunen (1980), Ch. II §6 states that it is unknown whether there can be a regular κ>ω such that there is no almost disjoint family of κ⁺ stationary sets (see also Exercise 52). The text reports this as open at the time of the book and explicitly says later developments are unverified. A link to set:almost-disjoint (intersections of size <κ) was added for precision.
 
 ### ISSUE-0002 [Open] Hypcheck comment on ω-ary operations in set:closure-club
 - **Category:** Supplement/remark error
