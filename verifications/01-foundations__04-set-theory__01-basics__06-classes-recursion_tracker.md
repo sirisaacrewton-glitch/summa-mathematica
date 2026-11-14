@@ -19,6 +19,7 @@
 - **Detail:** The supplement claims that Kunen defines the limit case of ordinal exponentiation by sup regardless of base, so that 0^ω = 1. This is false. In Kunen's Set Theory (and in standard treatments), ordinal exponentiation is defined so that 0^λ = 0 for limit λ (equivalently 0^β = 0 for β > 0). The sup-based definition sup{0^n | n<ω} = sup{1,0} = 1 is not Kunen's convention. The attribution is wrong.
 - **Proposed fix:** Remove the attribution to Kunen, or correct it: 'Some authors define the limit case by sup for all bases, which would give 0^ω = 1; this is not the convention used here (nor Kunen's).'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Kunen (1980), Ch. I, Definition 9.5 defines α^β = sup{α^ξ : ξ<β} for limit β with no exception for α=0, so 0^ω = 1 in Kunen's convention. The attribution is correct.
 
 ### ISSUE-0002 [Open] Cantor normal form requires ordinal division, not multiplication laws item 9
 - **Category:** Supplement/remark error
@@ -26,6 +27,7 @@
 - **Detail:** The supplement says the Cantor normal form can be shown using the exponentiation laws and 'division (\ref{set:ordinal-multiplication-laws.9})'. The cited item is a property of ordinal multiplication, not a division algorithm; the existence/uniqueness of the CNF requires the division algorithm for ordinals (division with remainder by ω^β), which is a separate result. Citing multiplication-laws.9 as 'division' is an improper/misleading reference for the argument.
 - **Proposed fix:** Replace with a correct pointer: '...using the exponentiation laws together with the division algorithm for ordinals (division with remainder by ω^β), applied repeatedly.'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** set:ordinal-multiplication-laws.9 is exactly division with remainder (γ = α·ξ+η, η<α, unique), applied with α=ω^β. The supplement now sketches the argument and cites Kunen Ch. I Exercise 6.
 
 ### ISSUE-0003 [Open] ε_0 as least fixed point of β↦ω^β
 - **Category:** Supplement/remark error
