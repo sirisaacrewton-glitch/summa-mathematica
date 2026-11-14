@@ -26,3 +26,4 @@
 - **Detail:** The supplement claims that Smith normal form can be computed in polynomial time and hence homology of a finite complex is computable in polynomial time in the number of simplices. This is misleading: computing the Smith normal form of an integer matrix is not known to be polynomial time in the usual bit-complexity sense (the entries can grow exponentially; the problem is not known to be in P, and integer matrix rank/Smith form is a delicate complexity question). The statement '多項式時間で計算できる' overstates the literature.
 - **Proposed fix:** Replace with: 'スミス標準形を計算するアルゴリズムは知られているが、整数行列のスミス標準形の計算は係数の膨張のため多項式時間アルゴリズムは知られていない（本サイト未収録）。したがって「有限複体のホモロジーが多項式時間で計算できる」とは一般には言えない。'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Polynomial-time algorithms for the Smith and Hermite normal forms of integer matrices are known (Kannan–Bachem, SIAM J. Comput. 1979), controlling coefficient growth. The page states exactly this; the citation has been added.
