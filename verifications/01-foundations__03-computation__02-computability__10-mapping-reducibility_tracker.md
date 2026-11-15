@@ -26,6 +26,7 @@ The main text (definitions, propositions, the EQ_TM theorem, the MPCP/PCP reduct
 - **Detail:** The supplement says "決定可能な言語（自明なものを除く）は最小の類をなし", i.e. all nontrivial decidable languages form one minimal equivalence class under $\le_{\mathrm{m}}$. This is false: decidable languages fall into infinitely many distinct many-one degrees (e.g. $\varnothing$, $\Sigma^{\ast}$, and finite nonempty sets are pairwise incomparable under $\le_{\mathrm{m}}$). Only the trivial languages $\varnothing$ and $\Sigma^{\ast}$ are $\le_{\mathrm{m}}$-equivalent to each other, and they are the minimum degree.
 - **Proposed fix:** 決定可能な言語は $\le_{\mathrm{m}}$ に関して最小の類（$\varnothing$ と $\Sigma^{\ast}$ の類）より上に無数の類をなす。$A_{\mathsf{TM}}$ は認識可能な言語の中の最大の類をなす。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Every decidable A other than ∅ and Σ* reduces to any B ≠ ∅, Σ* via w ↦ b (w∈A) / b' (w∉A) with b∈B, b'∉B, so all nontrivial decidable languages form a single m-degree; finite nonempty sets are not pairwise incomparable. The text excluded the trivial languages and was correct; the wording was clarified and this one-line proof added.
 
 ### ISSUE-0003 [Open] Post's problem conflated with Turing degrees
 - **Category:** Supplement/remark error
