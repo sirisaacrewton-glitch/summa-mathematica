@@ -28,6 +28,7 @@ The page is largely correct: the bisimulation invariance proof, the Hennessy–M
 - **Proposed fix:** Soften to: 'In this view a bounded morphism is closely related to a coalgebra homomorphism (a p-morphism); precisely, bounded morphisms are the coalgebra morphisms for a suitable (e.g. neighbourhood/predicate-lifting) presentation of the powerset functor, and bisimilarity is the span/topos-theoretic notion of behavioural equivalence.' Avoid the flat assertion that bounded morphisms are *exactly* coalgebra homomorphisms for F(W)=P(W)×P(PV).
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The supplement still asserts '有界射はちょうど余代数の準同型' for the functor W→P(W)×P(PV); a coalgebra homomorphism requires image-of-successors = successors, which is strictly stronger than a bounded morphism, so 'exactly' remains incorrect.
+**Opus Rebuttal:** For F(W)=P(W)×P(PV), F(f)∘γ=γ'∘f means f[R(w)]=R'(f(w)) and equal valuations. The inclusion ⊆ is the forth condition and ⊇ ("every successor of f(w) is f(v) for some successor v of w") is exactly the back condition of a bounded morphism, so bounded morphisms are exactly the P-coalgebra homomorphisms; the claim that the homomorphism condition is strictly stronger is mistaken. The page now spells out this check and the span characterization of bisimulations.
 
 ### ISSUE-0003 [Resolved] Hypcheck of irreflexivity-undefinable: claim about finite irreflexive frames is imprecise
 - **Category:** Supplement/remark error

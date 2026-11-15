@@ -19,6 +19,7 @@ The completeness proof and the Kozen–Parikh lemma are carefully structured and
 - **Detail:** The remark says EXPTIME-membership was shown by Pratt (1978) via an elimination method, and EXPTIME-hardness by Fischer–Ladner (1979). This reverses the standard attributions: the EXPTIME upper bound for PDL satisfiability is due to Pratt (1979, 'Models of program logics'), while the EXPTIME lower bound (hardness) is due to Fischer and Ladner (1979, 'Propositional dynamic logic of regular programs'). The elimination/ filtration-style argument gives the upper bound, not hardness.
 - **Proposed fix:** EXPTIME に属することはプラット（1979）が、EXPTIME 困難であることはフィッシャー–ラドナー（1979）が示した。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Not reversed: the text already attributed the EXPTIME upper bound to Pratt and hardness to Fischer–Ladner, as the proposed fix says. Reworded to say upper bound / lower bound explicitly and to attribute the elimination-method proof to Harel–Kozen–Tiuryn Ch. 8.
 
 ### ISSUE-0002 [Open] Axiom 6 alone does not say [α*]A is a fixed point
 - **Category:** Supplement/remark error

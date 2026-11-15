@@ -44,6 +44,7 @@ The main theorem and its proof are sound: the compilation lemma, expressiveness 
 - **Detail:** The intuition says '帰納的に枚挙できるのは Σ₁ の性質だけなので' (only Σ₁ properties are recursively enumerable). This is false: every Δ₁ (decidable) property is also r.e., and Δ₁ properties are not Σ₁-complete; more importantly, r.e. sets are exactly the Σ₁ sets, but a set can be both Σ₁ and Π₁ (Δ₁) without being 'only Σ₁'. The intended claim is that the complement of a non-decidable Σ₁ set (like the non-halting set) is not r.e., i.e. Π₁-but-not-Σ₁ properties cannot be captured by an r.e. system. As written the sentence overstates and is incorrect.
 - **Proposed fix:** Replace with: '帰納的に枚挙できる集合は Σ₁ の集合に限られる。停止しないこと（Π₁ の性質）は、対応する停止問題が決定不能であるため Σ₁ ですらない（そうでなければ Δ₁ となり決定可能になってしまう）。したがって Π₁ の性質をすべて捉える機械的な証明体系は存在しない。'
 - **Reported:** 2026-10-28 (048145a)
+**Opus Rebuttal:** r.e. sets are exactly the Σ₁ sets, so "only Σ₁ properties are r.e." was correct; the sentence now also states that non-halting is Π₁ but not Σ₁.
 
 ### ISSUE-0005 [Open] Remark 1: Th(N) non-r.e. justification
 - **Category:** Supplement/remark error

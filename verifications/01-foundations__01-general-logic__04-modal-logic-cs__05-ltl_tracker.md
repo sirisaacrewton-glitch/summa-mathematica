@@ -20,6 +20,7 @@ The page is largely correct. The main remaining problems are in the side remarks
 - **Proposed fix:** Replace with: '$\\mathbf{G}A$ is dually the greatest solution *among LTL-definable formulas* of $Y\\leftrightarrow A\\wedge\\mathbf{X}Y$: it is the strongest formula $C$ with $\\vdash C\\to A\\wedge\\mathbf{X}C$ (equivalently, the greatest fixed point of the operator restricted to formula-definable sets of positions).'
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The remark still says G A is the greatest solution of Y ↔ A ∧ X Y, which is false on the lattice of all sets/formulas (the greatest fixed point is the constant-true one); no rebuttal is attached.
+**Opus Rebuttal:** The claim is true. On positions of a fixed σ the greatest fixed point of Y ↦ A ∧ XY is exactly where G A holds; the full set is not a fixed point unless A holds everywhere, since A ∧ X(true) = A. Justification added: G A ↔ A ∧ X G A is valid, and if C → A ∧ XC is valid then C → G A is valid.
 
 ### ISSUE-0002 [Open] The hypcheck example is not a 'greatest fixed point' reading of U
 - **Category:** Supplement/remark error
@@ -28,6 +29,7 @@ The page is largely correct. The main remaining problems are in the side remarks
 - **Proposed fix:** Replace with: 'The example in the hypcheck of the Hintikka lemma is a sequence that satisfies the local unfolding equation $Y\\leftrightarrow B\\vee(A\\wedge\\mathbf{X}Y)$ at every point but never fulfils the promise, i.e. a non-well-founded (non-least) solution of the unfolding; H4 rules it out.'
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The intuition still describes the hypcheck example as reading p U q as a greatest fixed point, which is imprecise; the example is a non-well-founded unfolding, not the greatest fixed point.
+**Opus Rebuttal:** The greatest fixed point of Y ↦ q ∨ (p ∧ XY) is not the constant-true set (true maps to q ∨ p). It is the weak until p U q ∨ G p, which the hypcheck sequence (p forever, q never) satisfies exactly. So reading p U q as a greatest fixed point is accurate; a parenthetical stating this was added.
 
 ### ISSUE-0003 [Open] Compactness failure example: the finite-subset claim needs X^n p to be in the language
 - **Category:** Unsupported fact
@@ -52,6 +54,7 @@ The page is largely correct. The main remaining problems are in the side remarks
 - **Detail:** The remark says that $\mathbf{G}A$ is the greatest solution of $Y\leftrightarrow A\wedge\mathbf{X}Y$. This is imprecise: the greatest fixed point of the operator $Y\mapsto A\wedge\mathbf{X}Y$ on the lattice of formulas (or on sets of positions) is the constant-true function, not $\mathbf{G}A$. What is true is that $\mathbf{G}A$ is the greatest solution among the solutions that are *definable by an LTL formula* (or, semantically, the greatest fixed point of the operator restricted to the class of sets definable by formulas, i.e. $\mathbf{G}A$ is the strongest formula $C$ with $\vdash C\to A\wedge\mathbf{X}C$). Stated as written, the claim is false, and it also conflicts with the intuition section, which repeats the same overstatement.
 - **Proposed fix:** Replace with: '$\mathbf{G}A$ is the greatest solution of $Y\leftrightarrow A\wedge\mathbf{X}Y$ among the solutions definable by an LTL formula (equivalently, the strongest formula $C$ with $\vdash C\to A\wedge\mathbf{X}C$); on the lattice of all sets of positions the greatest fixed point would be the constant-true set.'
 - **Reported:** 2026-10-28 (048145a)
+**Opus Rebuttal:** The claim is true. On positions of a fixed σ the greatest fixed point of Y ↦ A ∧ XY is exactly where G A holds; the full set is not a fixed point unless A holds everywhere, since A ∧ X(true) = A. Justification added: G A ↔ A ∧ X G A is valid, and if C → A ∧ XC is valid then C → G A is valid.
 
 ### ISSUE-0006 [Open] The hypcheck example is not a 'greatest fixed point' reading of U
 - **Category:** Supplement/remark error
@@ -59,6 +62,7 @@ The page is largely correct. The main remaining problems are in the side remarks
 - **Detail:** The intuition section says that the example in the hypcheck of the Hintikka lemma 'corresponds to a sequence that read $p\,\mathbf{U}\,q$ as a greatest fixed point'. This is not accurate. In that example $T_{i}=\{p,\ p\,\mathbf{U}\,q,\ \mathbf{X}(p\,\mathbf{U}\,q)\}$ satisfies H1–H3 but not H4, so it is a sequence where the until is unfolded forever without fulfilment. The greatest fixed point of $Y\mapsto B\vee(A\wedge\mathbf{X}Y)$ would be the constant-true set (or, restricted to definable sets, the weakest solution), which is not what this sequence represents; the sequence represents a *non-well-founded* unfolding, i.e. a solution of the local equation that is not the least one. The description 'read as a greatest fixed point' is therefore misleading/imprecise.
 - **Proposed fix:** Replace with: 'The example in the hypcheck of \ref{logic:ltl-hintikka-lemma} is a sequence that satisfies the local unfolding equation for $p\,\mathbf{U}\,q$ forever without ever fulfilling it, i.e. a non-well-founded (non-least) solution of the local equation; H4 is exactly what excludes it.'
 - **Reported:** 2026-10-28 (048145a)
+**Opus Rebuttal:** The greatest fixed point of Y ↦ q ∨ (p ∧ XY) is not the constant-true set (true maps to q ∨ p). It is the weak until p U q ∨ G p, which the hypcheck sequence (p forever, q never) satisfies exactly. So reading p U q as a greatest fixed point is accurate; a parenthetical stating this was added.
 
 ### ISSUE-0007 [Open] Compactness failure example: the finite-subset claim needs X^n p to be in the language
 - **Category:** Unsupported fact

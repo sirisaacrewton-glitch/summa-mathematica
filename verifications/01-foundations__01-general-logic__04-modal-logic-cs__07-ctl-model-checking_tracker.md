@@ -19,6 +19,7 @@ The main genuine problem is the remark claiming CTL* model checking is PSPACE-co
 - **Detail:** The remark states that CTL* model checking is PSPACE-complete. This is wrong: CTL* model checking is 2EXPTIME-complete (Emerson–Jutla, Kupferman–Vardi). Only LTL model checking is PSPACE-complete (Sistla–Clarke 1985).
 - **Proposed fix:** LTL のモデル検査は PSPACE 完全（Sistla–Clarke 1985）だが、CTL* のモデル検査は 2EXPTIME 完全である（Emerson–Jutla 1988, Kupferman–Vardi）。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** CTL* model checking is PSPACE-complete (Emerson–Lei 1987, by reduction to LTL model checking; see Baier–Katoen, Principles of Model Checking). 2EXPTIME-completeness is the complexity of CTL* satisfiability (Emerson–Jutla; Vardi–Stockmeyer), a different problem. The remark now states this distinction explicitly.
 
 ### ISSUE-0002 [Open] Fairness claim: CTL with fairness is not simply polynomial
 - **Category:** Supplement/remark error
@@ -26,3 +27,4 @@ The main genuine problem is the remark claiming CTL* model checking is PSPACE-co
 - **Detail:** The remark says CTL model checking under fairness constraints is polynomial. For CTL with fairness constraints this is not generally true; the polynomial-time result (Clarke–Emerson–Sistla 1986, Emerson–Lei 1986) concerns CTL with fairness / CTL_F, but the standard statement is that CTL model checking with fairness constraints is polynomial only for the restricted logic; for full CTL with fairness the problem is more subtle. The claim as stated is overstated.
 - **Proposed fix:** 公平性制約のもとでの CTL のモデル検査は、制約の個数を k とすると O(|F|·(|S|+|R|)·k) 程度の多項式時間でできる（Clarke–Emerson–Sistla 1986, Emerson–Lei 1986）。ただしこれは公平性を満たす経路のみを考える CTL の拡張に対する結果である。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The remark already restricts to fair CTL (path quantifiers range over paths visiting the fairness sets infinitely often), for which model checking is polynomial, roughly O(|F|·(|S|+|R|)·k) via strongly connected components (Clarke–Emerson–Sistla 1986; Emerson–Lei 1986). This is exactly what the text says, so nothing is overstated.

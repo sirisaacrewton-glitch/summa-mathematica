@@ -33,13 +33,13 @@
 ## while プログラムの L への翻訳 {#logic:sec-ha-compile}
 
 ::: lemma 項と条件の計算 {#logic:ha-term-test keywords="computing terms and quantifier-free conditions by for-programs of L"}
-$\mathcal{L}_{\mathrm{ar}}$ の項 $t$、量化子のない論理式 $B$ と、$t,B$ に現れない変数 $z$ について、L の for プログラム $T_{t,z}$, $C_{B,z}$ で次を満たすものがある：どの状態 $\sigma$ から実行しても止まり、止まった状態では $z$ の値が $t^{\mathcal{N},\sigma}$（$C_{B,z}$ では、$\mathcal{N},\sigma\models B$ なら $1$、そうでなければ $0$）で、$z$ と（プログラムごとに新しくとった）補助の変数以外の値は変わらない。
+$\mathcal{L}_{\mathrm{ar}}$ の項 $t$、量化子のない論理式 $B$ と、$t,B$ に現れない変数 $z$ について、L の for プログラム $T_{t,z}$, $C_{B,z}$ で次を満たすものがある：どの状態 $\sigma$ から実行しても止まり、止まった状態では $z$ の値が $t^{\mathcal{N},\sigma}$（$C_{B,z}$ では、$\mathcal{N},\sigma\models B$ なら $1$、そうでなければ $0$）で、$z$ と（$T_{t,z}$, $C_{B,z}$ ごとに新しくとった）補助の変数以外の値は変わらない。
 :::
 
 ::: proof
-**Step 1.** 【主張：項】 $t$ の構成についての帰納法。$0$：$z:=0$。変数 $x$：$z:=x$。$S(t_{1})$：$T_{t_{1},z}$ の後 $z:=z+1$。$t_{1}+t_{2}$, $t_{1}\times t_{2}$：新しい $z_{1},z_{2}$ について $T_{t_{1},z_{1}};T_{t_{2},z_{2}}$ の後 $z:=z_{1}+z_{2}$（$z:=z_{1}\cdot z_{2}$）。\ref{comp:L-macros} の各略記は新しい変数以外を変えず、$T_{t_{2},z_{2}}$ は $z_{1}$ を変えないので、値は帰納法の仮定から正しい。
+**Step 1.** 【主張：項を計算する $T_{t,z}$ がある】 $t$ の構成についての帰納法で定める。$t=0$ なら $T_{t,z}\defeq(z:=0)$ とする。$t$ が変数 $x$ なら $T_{t,z}\defeq(z:=x)$ とする。$t=S(t_{1})$ なら、$T_{t_{1},z}$ の後に $z:=z+1$ を置く。$t=t_{1}+t_{2}$（$t_{1}\times t_{2}$）なら、新しい $z_{1},z_{2}$ について $T_{t_{1},z_{1}};T_{t_{2},z_{2}}$ の後に $z:=z_{1}+z_{2}$（$z:=z_{1}\cdot z_{2}$）を置く。\ref{comp:L-macros} の各略記は新しい変数以外を変えず、$T_{t_{1},z_{1}}$ は $t_{2}$ の変数を、$T_{t_{2},z_{2}}$ は $z_{1}$ を変えないので、帰納法の仮定から $z$ の値は $t^{\mathcal{N},\sigma}$ になる。
 
-**Step 2.** 【主張：条件】 $B$ の構成についての帰納法で、値を $0,1$ で計算する。$s=t$：$a,b$ に $s,t$ を計算し、$z:=(a\mathbin{\dot{-}}b)+(b\mathbin{\dot{-}}a)$ の後 $z:=1\mathbin{\dot{-}}z$。$s<t$：$z:=b\mathbin{\dot{-}}a$ の後 $z:=1\mathbin{\dot{-}}(1\mathbin{\dot{-}}z)$。$\bot$：$z:=0$。$B_{1}\to B_{2}$：$z_{1},z_{2}$ に計算して $z:=1\mathbin{\dot{-}}(z_{1}\cdot(1\mathbin{\dot{-}}z_{2}))$。（ほかの結合子は略記。途中の $1\mathbin{\dot{-}}\cdot$ などは \ref{comp:L-macros} の 2・4 の組み合わせ。）どれも for プログラムなので止まる（\ref{comp:for-total}）。
+**Step 2.** 【主張：条件を $0,1$ で計算する $C_{B,z}$ がある】 $B$ の構成についての帰納法で定める。$B$ が $s=t$ なら、新しい $a,b$ に $s,t$ を計算し、$z:=(a\mathbin{\dot{-}}b)+(b\mathbin{\dot{-}}a)$ の後 $z:=1\mathbin{\dot{-}}z$ とする（$a=b$ のときだけ $1$）。$B$ が $s<t$ なら、$a,b$ を同様に計算し、$z:=b\mathbin{\dot{-}}a$ の後 $z:=1\mathbin{\dot{-}}(1\mathbin{\dot{-}}z)$ とする（$a<b$ のときだけ $1$）。$B$ が $\bot$ なら $z:=0$ とする。$B$ が $B_{1}\to B_{2}$ なら、$z_{1},z_{2}$ に計算して $z:=1\mathbin{\dot{-}}(z_{1}\cdot(1\mathbin{\dot{-}}z_{2}))$ とする（$z_{1}=1$, $z_{2}=0$ のときだけ $0$）。（ほかの結合子は略記。途中の $1\mathbin{\dot{-}}\cdot$ などは \ref{comp:L-macros} の 2・4 の組み合わせ。）どれも for プログラムなので止まる（\ref{comp:for-total}）。
 :::
 
 ::: proposition while プログラムの L への翻訳 {#logic:ha-compile keywords="translation of while programs over the arithmetic language into L preserving the big-step semantics" index="L への翻訳（while プログラム）|えるへのほんやくほわいるぷろぐらむ"}
@@ -51,7 +51,14 @@ $$
 :::
 
 ::: proof
-$P$ の構成についての再帰で、各段で新しい補助の変数をとって定める。$\mathtt{skip}^{\circ}\defeq(u:=u)$（$u$ は補助）。$(x:=t)^{\circ}\defeq T_{t,z};\ x:=z$。$(P;Q)^{\circ}\defeq P^{\circ};Q^{\circ}$。$(\mathtt{if}\ B\ \mathtt{then}\ P\ \mathtt{else}\ Q\ \mathtt{fi})^{\circ}\defeq C_{B,z};\ \mathtt{if}\ z\ne0\ \mathtt{then}\ P^{\circ}\ \mathtt{fi};\ \mathtt{if}\ z=0\ \mathtt{then}\ Q^{\circ}\ \mathtt{fi}$。$(\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od})^{\circ}\defeq C_{B,z};\ \mathtt{while}\ z\ne0\ \mathtt{do}\ P^{\circ};\ C_{B,z}\ \mathtt{od}$。ここで $z$ はその段で新しくとる補助の変数で、$P^{\circ},Q^{\circ}$ に現れない。
+$P$ の構成についての再帰で、各段で（プログラム全体に対して）新しい補助の変数をとって次のように定める。
+- $\mathtt{skip}^{\circ}\defeq(u:=u)$ とする（$u$ は補助）。
+- $(x:=t)^{\circ}\defeq T_{t,z};\ x:=z$ とする。
+- $(P;Q)^{\circ}\defeq P^{\circ};Q^{\circ}$ とする。
+- $(\mathtt{if}\ B\ \mathtt{then}\ P\ \mathtt{else}\ Q\ \mathtt{fi})^{\circ}\defeq C_{B,z};\ \mathtt{if}\ z\ne0\ \mathtt{then}\ P^{\circ}\ \mathtt{fi};\ \mathtt{if}\ z=0\ \mathtt{then}\ Q^{\circ}\ \mathtt{fi}$ とする。
+- $(\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od})^{\circ}\defeq C_{B,z};\ \mathtt{while}\ z\ne0\ \mathtt{do}\ P^{\circ};\ C_{B,z}\ \mathtt{od}$ とする。
+
+ここで $z$ はその段で新しくとる補助の変数で、$P^{\circ},Q^{\circ}$ に現れない。
 
 **Step 1.** 【主張：⇒】 $\langle P,\sigma\rangle\Downarrow\tau$ の導出についての帰納法で、「$\langle P^{\circ},\sigma\rangle\Downarrow\tau'$ となる $\tau'$ があって $\mathrm{Aux}(P)$ の外で $\tau$ と一致する」を、すべての $\sigma$（補助の変数の値は任意）について示す。代入と skip は \ref{logic:ha-term-test}。合成と条件分岐は帰納法の仮定と、$z$ が $P^{\circ},Q^{\circ}$ で変わらないこと（局所性、\ref{comp:L-locality}）。while：$\langle W,\sigma\rangle\Downarrow\tau$ の導出の最後が $\sigma\models\neg B$ なら、$C_{B,z}$ の後 $z=0$ でループは回らない。$\sigma\models B$、$\langle P,\sigma\rangle\Downarrow\rho$、$\langle W,\rho\rangle\Downarrow\tau$ なら、$z=1$ で一周目に入り、$P^{\circ}$ の後（帰納法の仮定）$\rho$ と補助の外で一致する状態で $C_{B,z}$ を計算する。その後の L のループの残りの実行は、$\rho$ から $W^{\circ}$ を実行したときの $C_{B,z}$ の後と同じ状態から始まるので、$\langle W,\rho\rangle\Downarrow\tau$ についての帰納法の仮定が使える。
 
@@ -110,12 +117,12 @@ $\mathcal{N}$ で妥当なホーアの三つ組の全体は帰納的に枚挙で
 :::
 
 ::: remark
-1. \ref{logic:n-expressive} と合わせると、ホーア論理は $\mathrm{Th}(\mathcal{N})$ を神託として完全だが、$\mathrm{Th}(\mathcal{N})$ そのものが帰納的に枚挙できないので（Step 2 と同じ議論でも、ゲーデルの不完全性定理からも分かる）、矛盾はない。
-2. 逆に、帰結規則の前提を「$\PA\vdash\varphi\to\varphi'$」に制限した体系は機械的に検査できるが、上の定理から $\mathcal{N}$ について完全ではない。
+1. \ref{logic:n-expressive} と合わせると、ホーア論理は $\mathrm{Th}(\mathcal{N})$ を神託として完全である。これが上の定理と矛盾しないのは、$\mathrm{Th}(\mathcal{N})$ 自身が帰納的に枚挙できないからである。実際、$\mathrm{Th}(\mathcal{N})$ が帰納的に枚挙できるとすると、帰結規則の前提を枚挙しながら導出を並べることで、$\vdash_{\mathcal{N}}$ で導ける三つ組が枚挙できる。\ref{logic:n-expressive} からそれは $\mathcal{N}$ で妥当な三つ組の全体なので、上の定理に反する。（$\mathrm{Th}(\mathcal{N})$ は完全な理論なので、帰納的に枚挙できれば決定可能になり、ゲーデルの第一不完全性定理の議論に反する、という道もある。）
+2. 逆に、帰結規則の前提を「$\PA\vdash\varphi\to\varphi'$」に制限した体系は、$\PA$ での証明も導出に含めれば機械的に検査でき、$\mathcal{N}\models\PA$ なので健全である。よって上の定理から、この体系は $\mathcal{N}$ について完全ではない（健全かつ完全で機械的に検査できる体系は、どう作ってもない）。
 :::
 
 ::: intuition
-**部分正当性は「止まらないこと」を含む。** $\{\top\}P\{\bot\}$ は「$P$ はどこからも止まらない」という主張で、これは停止問題の否定、すなわち Π₁ の性質である。帰納的に枚挙できるのは Σ₁ の性質だけなので、どんな機械的な証明体系も部分正当性をすべて捉えることはできない。相対完全性は、この困難を「算術の真理」という神託にすべて押しつけた上で、プログラムの構造についての推論はホーアの規則で尽くせる、と言っている。
+**部分正当性は「止まらないこと」を含む。** $\{\top\}P\{\bot\}$ は「$P$ はどこからも止まらない」という主張で、これは停止問題の否定で、Π₁ の性質であり、しかも Σ₁ ではない（Σ₁ でもあれば停止問題が Δ₁、すなわち決定可能になってしまう）。帰納的に枚挙できる性質はちょうど Σ₁ の性質なので、どんな機械的な証明体系も部分正当性をすべて捉えることはできない。相対完全性は、この困難を「算術の真理」という神託にすべて押しつけた上で、プログラムの構造についての推論はホーアの規則で尽くせる、と言っている。
 
 **高い視点：表現性と算術化。** $\mathcal{N}$ が表現的である理由は、プログラムの実行（有限の計算の列）を数で符号化し、その正しさを算術の論理式で書けること、すなわち不完全性定理と同じ**算術化**である。ホーア論理の相対完全性は、「計算についての推論」を「数についての推論」に移すゲーデルの方法の、プログラム検証での現れと見ることができる。
 :::
@@ -135,7 +142,7 @@ $x=0$ ならループは回らずに止まり、$x\ne0$ なら $x$ は倍々に�
 :::
 
 ::: solution
-できない。$e\mapsto P'_{e}$ を、「$x_{1}$ の値 $n$ を読み、$M_{e}$ を入力 $n$ で模倣する」（\ref{logic:ha-simulate-rm} の初めの代入から $x_{1}:=\underline{n}$ を除いたもの）とすると、$P'_{e}$ がどこからも止まる $\iff$ $\varphi_{e}$ がすべての入力で定義される。すべての入力で定義される関数の指数の集合は帰納的に枚挙できない（\ref{comp:prob-total-not-decidable} を参照。そこでは決定不能性が示されているが、同じ対角線論法で枚挙不能性も示せる：枚挙 $e_{0},e_{1},\dots$ があれば $k\mapsto\varphi_{e_{k}}(k)+1$ はすべての入力で定義される計算可能な関数で、どの $e_{k}$ とも異なる）。
+できない。$e\mapsto P'_{e}$ を、「$x_{1}$ の値 $n$ を読み、$M_{e}$ を入力 $n$ で模倣する」プログラム（\ref{logic:ha-simulate-rm} の初めの代入から $x_{1}:=\underline{n}$ を除いたもの）とすると、$P'_{e}$ がどこからも止まることと、$\varphi_{e}$ がすべての入力で定義されることは同値である。どこからも止まる while プログラムの全体が帰納的に枚挙できるとすると、計算可能な写像 $e\mapsto P'_{e}$ による逆像として、すべての入力で定義される関数の指数の集合 $\mathrm{Tot}$ も帰納的に枚挙できる。ところが $\mathrm{Tot}$ は帰納的に枚挙できない。実際、$\mathrm{Tot}$（空でない）の計算可能な枚挙 $e_{0},e_{1},\dots$ があるとする。各 $e_{k}$ はすべての入力で定義される関数の指数なので $\varphi_{e_{k}}(k)$ はすべての $k$ で定義され、$g(k)\defeq\varphi_{e_{k}}(k)+1$ はすべての入力で定義される計算可能な関数になる。よって $g=\varphi_{e}$ となる $e\in\mathrm{Tot}$ があり、$e=e_{k}$ となる $k$ をとると $g(k)=\varphi_{e_{k}}(k)+1\ne\varphi_{e_{k}}(k)=g(k)$ となって矛盾する（\ref{comp:prob-total-not-decidable} は決定不能性を同じ対角線論法で示した問題である）。
 :::
 </script>
 <noscript>このサイトの表示には JavaScript が必要です。</noscript>

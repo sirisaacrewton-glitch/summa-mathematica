@@ -71,7 +71,7 @@
 
 ::: remark
 1. 帰結規則の前提 $\mathfrak{A}\models\varphi\to\varphi'$ は三つ組ではなく、$\mathfrak{A}$ で真な論理式であることを求める。つまりこの体系は $\mathfrak{A}$ の理論 $\mathrm{Th}(\mathfrak{A})$ を「神託」として使う。完全性が「相対」完全性と呼ばれるのはこのためである。
-2. 代入の公理を通常の $\{\psi[t/x]\}\ x:=t\ \{\psi\}$ にすると、$t$ が $\psi$ の中で $x$ に代入可能という条件が要り、完全性の証明で束縛変数の付け替えを扱う必要がある。ここでの形は、新しい変数 $y$ は必ず代入可能（\ref{logic:fresh-renaming}）なので、その手間を省く。
+2. 代入の公理を通常の $\{\psi[t/x]\}\ x:=t\ \{\psi\}$ にすると、$t$ が $\psi$ の中で $x$ に代入可能という条件が要り、完全性の証明で\term[束縛変数]{logic:free-variables}の付け替えを扱う必要がある。ここでの形では、$y$ は $\psi$ に現れない変数なので $\psi$ の中で $x$ に必ず代入可能であり（\ref{logic:fresh-renaming}）、その手間が省ける。
 :::
 
 ::: lemma 代入の公理の事前条件 {#logic:hoare-assignment-pre keywords="meaning of the precondition of the assignment axiom"}
@@ -79,7 +79,7 @@ $y$ が $\psi$, $t$ に現れず $x$ と異なるとき、$v\models\exists y\,(y
 :::
 
 ::: proof
-$b\defeq t^{\mathfrak{A},v}$。左辺 $\iff$ ある $c$ で $v[y\mapsto c]\models y=t$ かつ $v[y\mapsto c]\models\psi[y/x]$。$y\notin\mathrm{var}(t)$ なので一致補題で $t^{\mathfrak{A},v[y\mapsto c]}=b$、よって $c=b$。$y$ は $\psi$ の中で $x$ に代入可能（\ref{logic:fresh-renaming}）なので、\ref{logic:semantic-substitution.2} で $v[y\mapsto b]\models\psi[y/x]\iff v[y\mapsto b][x\mapsto b]\models\psi$、$y\notin\mathrm{FV}(\psi)$ と一致補題で $\iff v[x\mapsto b]\models\psi$。
+$b\defeq t^{\mathfrak{A},v}$ とおく。左辺は、ある $c$ について $v[y\mapsto c]\models y=t$ かつ $v[y\mapsto c]\models\psi[y/x]$ となることと同値である。$y\notin\mathrm{var}(t)$ なので \ref{logic:coincidence.1} から $t^{\mathfrak{A},v[y\mapsto c]}=b$ であり、よって $c=b$ に限る。$y$ は $\psi$ に現れないので $\psi$ の中で $x$ に代入可能であり（\ref{logic:fresh-renaming}）、\ref{logic:semantic-substitution.2} から $v[y\mapsto b]\models\psi[y/x]\iff v[y\mapsto b][x\mapsto b]\models\psi$ が成り立つ。$y\ne x$ かつ $y\notin\mathrm{FV}(\psi)$ なので、\ref{logic:coincidence.2} から右辺は $v[x\mapsto b]\models\psi$ と同値である。
 :::
 
 ::: theorem ホーア論理の健全性 {#logic:hoare-soundness keywords="soundness of Hoare logic" index="健全性（ホーア論理）|けんぜんせいほーあろんり" refname="ホーア論理の健全性"}
@@ -89,9 +89,9 @@ $\vdash_{\mathfrak{A}}\{\varphi\}P\{\psi\}$ ならば $\mathfrak{A}\models\{\var
 ::: proof
 三つ組の導出についての帰納法。
 
-**Step 1.** 【主張：skip・代入・合成・条件分岐・帰結は妥当性を保つ】 skip は $\langle\mathtt{skip},v\rangle\Downarrow w$ なら $w=v$（決定性）。代入は \ref{logic:hoare-assignment-pre} と、$\langle x:=t,v\rangle\Downarrow w$ なら $w=v[x\mapsto t^{\mathfrak{A},v}]$ から。合成は、$\langle P;Q,v\rangle\Downarrow w$ の導出の最後の規則から $\langle P,v\rangle\Downarrow u$, $\langle Q,u\rangle\Downarrow w$ となる $u$ があり、帰納法の仮定を二回。条件分岐は $v\models B$ かどうかで場合分け。帰結は定義から。
+**Step 1.** 【主張：skip・代入・合成・条件分岐・帰結は妥当性を保つ】 skip については、$\langle\mathtt{skip},v\rangle\Downarrow w$ の導出の最後の規則は skip の規則しかないので $w=v$ である。代入については、同様に $\langle x:=t,v\rangle\Downarrow w$ なら $w=v[x\mapsto t^{\mathfrak{A},v}]$ であり、\ref{logic:hoare-assignment-pre} から事前条件が成り立てば $w\models\psi$ となる。合成については、$\langle P;Q,v\rangle\Downarrow w$ の導出の最後の規則から $\langle P,v\rangle\Downarrow u$, $\langle Q,u\rangle\Downarrow w$ となる $u$ があり、帰納法の仮定を二回使えばよい。条件分岐については、$v\models B$ の場合は導出の最後の規則が規則 3 の前半で $\langle P,v\rangle\Downarrow w$ となり、$v\models\varphi\wedge B$ と帰納法の仮定から $w\models\psi$ である。$v\models\neg B$ の場合も同様である。帰結規則については、$v\models\varphi$ なら $v\models\varphi'$ であり、帰納法の仮定から止まった状態で $\psi'$、したがって $\psi$ が成り立つ。
 
-**Step 2.** 【主張：while 規則は妥当性を保つ】 $W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$、$\mathfrak{A}\models\{\varphi\wedge B\}P\{\varphi\}$ とする。$\langle W,v\rangle\Downarrow w$ の導出についての帰納法で、「$v\models\varphi$ なら $w\models\varphi\wedge\neg B$」を示す。最後の規則が 4 の前半なら $w=v$ で $v\models\neg B$。後半なら $v\models B$、$\langle P,v\rangle\Downarrow u$、$\langle W,u\rangle\Downarrow w$ で、仮定から $u\models\varphi$、帰納法の仮定（より短い導出）で $w\models\varphi\wedge\neg B$。
+**Step 2.** 【主張：while 規則は妥当性を保つ】 $W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$、$\mathfrak{A}\models\{\varphi\wedge B\}P\{\varphi\}$ とする。$\langle W,v\rangle\Downarrow w$ の導出についての帰納法で、「$v\models\varphi$ なら $w\models\varphi\wedge\neg B$」を示す。最後の規則が 4 の前半なら、$w=v$ かつ $v\models\neg B$ なので $w\models\varphi\wedge\neg B$ である。後半なら、$v\models B$、$\langle P,v\rangle\Downarrow u$、$\langle W,u\rangle\Downarrow w$ であり、$v\models\varphi\wedge B$ と前提の三つ組の妥当性から $u\models\varphi$ となる。より短い導出 $\langle W,u\rangle\Downarrow w$ についての帰納法の仮定から $w\models\varphi\wedge\neg B$ である。
 :::
 
 ## 最弱事前条件と相対完全性 {#logic:sec-hoare-completeness}
@@ -107,7 +107,7 @@ $\mathrm{wlp}(P,\psi)\defeq\{v:\langle P,v\rangle\Downarrow w$ となるすべ�
 :::
 
 ::: proof
-1 は定義の言い換え。2：$\langle P;Q,v\rangle\Downarrow w\iff$ ある $u$ で $\langle P,v\rangle\Downarrow u$ かつ $\langle Q,u\rangle\Downarrow w$（規則 2 と、導出の最後の規則）。3：$v\in I$, $v\models\neg B$ なら $\langle W,v\rangle\Downarrow v$ なので $v\models\psi$。$v\in I$, $v\models B$, $\langle P,v\rangle\Downarrow u$ とし、$\langle W,u\rangle\Downarrow w$ なら規則 4 の後半で $\langle W,v\rangle\Downarrow w$、よって $w\models\psi$。したがって $u\in I$。
+1 は定義の言い換えである。2 は、$\langle P;Q,v\rangle\Downarrow w$ とある $u$ で $\langle P,v\rangle\Downarrow u$ かつ $\langle Q,u\rangle\Downarrow w$ となることが同値であることから分かる（⇐ は規則 2、⇒ は導出の最後の規則による）。3 の前半：$v\in I$ かつ $v\models\neg B$ なら $\langle W,v\rangle\Downarrow v$ なので $v\models\psi$ である。3 の後半：$v\in I$, $v\models B$, $\langle P,v\rangle\Downarrow u$ とする。$\langle W,u\rangle\Downarrow w$ なら規則 4 の後半で $\langle W,v\rangle\Downarrow w$ となり、$v\in I$ から $w\models\psi$ である。したがって $u\in I$ である。
 :::
 
 ::: theorem クックの相対完全性定理 {#logic:cook-completeness keywords="Cook's relative completeness theorem for Hoare logic: expressive structures" index="相対完全性|そうたいかんぜんせい, クックの相対完全性定理|くっくのそうたいかんぜんせいていり" refname="クックの相対完全性定理"}
@@ -115,17 +115,22 @@ $\mathfrak{A}$ が表現的ならば、すべての三つ組について $\mathf
 :::
 
 ::: proof
-⇐ は \ref{logic:hoare-soundness}。⇒ のため、各 $P,\psi$ について $\mathrm{wlp}(P,\psi)$ を表す論理式を一つ選んで $\omega_{P,\psi}$ とし（表現性。選び方は、論理式を一列に並べて最初のものとすればよい）、まず「すべての $\psi$ で $\vdash_{\mathfrak{A}}\{\omega_{P,\psi}\}P\{\psi\}$」を $P$ の構成についての帰納法で示す。最後に、妥当な $\{\varphi\}P\{\psi\}$ について 1 から $\mathfrak{A}\models\varphi\to\omega_{P,\psi}$ なので、帰結規則で $\vdash_{\mathfrak{A}}\{\varphi\}P\{\psi\}$。
+⇐ は \ref{logic:hoare-soundness} である。⇒ のため、次の (∗) を $P$ の構成についての帰納法で示す。
 
-**Step 1（skip・代入）.** 【主張：公理と帰結規則で導ける】 $\mathrm{wlp}(\mathtt{skip},\psi)=\llbracket\psi\rrbracket$ なので $\mathfrak{A}\models\omega\to\psi$、skip の公理と帰結規則。代入：$\mathrm{wlp}(x:=t,\psi)=\{v:v[x\mapsto t^{\mathfrak{A},v}]\models\psi\}$ で、\ref{logic:hoare-assignment-pre} からこれは代入の公理の事前条件の真理集合に等しい。よって $\mathfrak{A}\models\omega\to\exists y\,(y=t\wedge\psi[y/x])$、代入の公理と帰結規則。
+(∗) すべての論理式 $\psi$ と、$\llbracket\omega\rrbracket=\mathrm{wlp}(P,\psi)$ となるすべての論理式 $\omega$ について、$\vdash_{\mathfrak{A}}\{\omega\}P\{\psi\}$ である。
 
-**Step 2（合成・条件分岐）.** 【主張：帰納法の仮定と帰結規則で導ける】 合成：$\chi\defeq\omega_{Q,\psi}$ とすると帰納法の仮定で $\vdash\{\chi\}Q\{\psi\}$ と $\vdash\{\omega_{P,\chi}\}P\{\chi\}$。\ref{logic:wlp-props.2} で $\llbracket\omega_{P,\chi}\rrbracket=\mathrm{wlp}(P,\chi)=\mathrm{wlp}(P;Q,\psi)$ なので、合成規則と帰結規則。条件分岐：$\mathfrak{A}\models\omega\wedge B\to\omega_{P,\psi}$ と $\mathfrak{A}\models\omega\wedge\neg B\to\omega_{Q,\psi}$（$v\models B$ なら $\langle\mathtt{if}\cdots,v\rangle\Downarrow w\iff\langle P,v\rangle\Downarrow w$）なので、帰納法の仮定に帰結規則を使ってから条件分岐の規則。
+(∗) が示せれば、妥当な $\{\varphi\}P\{\psi\}$ について、表現性から $\llbracket\omega\rrbracket=\mathrm{wlp}(P,\psi)$ となる $\omega$ をとると、\ref{logic:wlp-props.1} から $\mathfrak{A}\models\varphi\to\omega$ なので、帰結規則で $\vdash_{\mathfrak{A}}\{\varphi\}P\{\psi\}$ を得る。以下の Step では、$\omega$ は (∗) の $\omega$ を表す。
 
-**Step 3（while）.** 【主張：最弱事前条件そのものがループ不変条件になる】 $I\defeq\omega_{W,\psi}$ とする。帰納法の仮定で $\vdash\{\omega_{P,I}\}P\{I\}$。\ref{logic:wlp-props.3} の後半から $\mathfrak{A}\models I\wedge B\to\omega_{P,I}$ なので、帰結規則で $\vdash\{I\wedge B\}P\{I\}$。while 規則で $\vdash\{I\}W\{I\wedge\neg B\}$。\ref{logic:wlp-props.3} の前半から $\mathfrak{A}\models I\wedge\neg B\to\psi$ で、帰結規則で $\vdash\{I\}W\{\psi\}$。
+**Step 1（skip・代入）.** 【主張：公理と帰結規則で導ける】 skip の場合、$\mathrm{wlp}(\mathtt{skip},\psi)=\llbracket\psi\rrbracket$ なので $\mathfrak{A}\models\omega\to\psi$ であり、skip の公理と帰結規則で導ける。代入の場合、$\mathrm{wlp}(x:=t,\psi)=\{v:v[x\mapsto t^{\mathfrak{A},v}]\models\psi\}$ であり、\ref{logic:hoare-assignment-pre} からこれは $\llbracket\exists y\,(y=t\wedge\psi[y/x])\rrbracket$（代入の公理の事前条件）に等しい。よって $\mathfrak{A}\models\omega\to\exists y\,(y=t\wedge\psi[y/x])$ であり、代入の公理と帰結規則で導ける。
+
+**Step 2（合成・条件分岐）.** 【主張：帰納法の仮定と帰結規則で導ける】 合成 $P;Q$ の場合、表現性から $\llbracket\chi\rrbracket=\mathrm{wlp}(Q,\psi)$ となる $\chi$ と、$\llbracket\omega'\rrbracket=\mathrm{wlp}(P,\chi)$ となる $\omega'$ をとる。帰納法の仮定から $\vdash\{\chi\}Q\{\psi\}$ と $\vdash\{\omega'\}P\{\chi\}$ を得る。\ref{logic:wlp-props.2} から $\llbracket\omega'\rrbracket=\mathrm{wlp}(P,\chi)=\mathrm{wlp}(P;Q,\psi)=\llbracket\omega\rrbracket$ なので、合成規則と帰結規則で $\vdash\{\omega\}P;Q\{\psi\}$ となる。条件分岐の場合、$\llbracket\omega_{1}\rrbracket=\mathrm{wlp}(P,\psi)$, $\llbracket\omega_{2}\rrbracket=\mathrm{wlp}(Q,\psi)$ となる $\omega_{1},\omega_{2}$ をとる。$v\models B$ なら $\langle\mathtt{if}\cdots,v\rangle\Downarrow w\iff\langle P,v\rangle\Downarrow w$ であり（導出の最後の規則は規則 3 の前半に限る）、$v\models\neg B$ なら $Q$ について同様なので、$\mathfrak{A}\models\omega\wedge B\to\omega_{1}$ と $\mathfrak{A}\models\omega\wedge\neg B\to\omega_{2}$ が成り立つ。帰納法の仮定に帰結規則を使って $\vdash\{\omega\wedge B\}P\{\psi\}$ と $\vdash\{\omega\wedge\neg B\}Q\{\psi\}$ を得て、条件分岐の規則で結論を得る。
+
+**Step 3（while）.** 【主張：最弱事前条件そのものがループ不変条件になる】 $W=\mathtt{while}\ B\ \mathtt{do}\ P\ \mathtt{od}$ の場合、$I\defeq\omega$（$\llbracket I\rrbracket=\mathrm{wlp}(W,\psi)$）とおき、表現性から $\llbracket\omega'\rrbracket=\mathrm{wlp}(P,I)$ となる $\omega'$ をとる。帰納法の仮定から $\vdash\{\omega'\}P\{I\}$ である。\ref{logic:wlp-props.3} の後半から $\mathfrak{A}\models I\wedge B\to\omega'$ なので、帰結規則で $\vdash\{I\wedge B\}P\{I\}$ となる。while 規則から $\vdash\{I\}W\{I\wedge\neg B\}$ を得る。\ref{logic:wlp-props.3} の前半から $\mathfrak{A}\models I\wedge\neg B\to\psi$ なので、帰結規則で $\vdash\{I\}W\{\psi\}$ である。
 
 ::: hypcheck
-- **表現性を使った場所**：Step 1〜3 で $\omega_{P,\psi}$ が論理式として存在することだけを使った。とくに Step 3 では、ループ不変条件 $I$ を「論理式で書ける」形で手に入れることが本質である。最弱事前条件が論理式で書けない構造もあり（\ref{logic:prob-hoare-not-expressive}）、そのような構造で妥当だが導けない三つ組がある例が知られている（Wand, *A new incompleteness result for Hoare's system*, J. ACM 25 (1978)）。このサイトではその例は扱わない。
-- **帰結規則**：$\mathfrak{A}\models\cdots$ の形の前提を何度も使った。この体系で三つ組を「機械的に」導くには $\mathrm{Th}(\mathfrak{A})$ を判定できる必要がある。
+- **表現性を使った場所**：Step 2・3 で中間の最弱事前条件を表す論理式（$\chi,\omega',\omega_{1},\omega_{2}$）をとるのと、最後に妥当な三つ組の $\mathrm{wlp}$ を表す $\omega$ をとるのに使った。論理式が存在することだけを使い、どの論理式かは問わない。とくに Step 3 では、ループ不変条件 $I$ を「論理式で書ける」形で手に入れることが本質である。最弱事前条件が論理式で書けない構造もあり（\ref{logic:prob-hoare-not-expressive}）、そのような構造で妥当だが導けない三つ組がある例が知られている（Wand, *A new incompleteness result for Hoare's system*, J. ACM 25 (1978)）。このサイトではその例は扱わない。
+- **帰結規則**：$\mathfrak{A}\models\cdots$ の形の前提を何度も使った。導出が正しいかを機械的に検査するには、この前提 $\mathfrak{A}\models\varphi\to\varphi'$ を判定できる必要がある。どの文 $\sigma$ も $\top\to\sigma$ の形に書けるので、これは（言語が有限で、論理式を数で符号化したとき）$\mathrm{Th}(\mathfrak{A})$ が決定可能であることと同じである。導ける三つ組を枚挙するだけなら、$\mathrm{Th}(\mathfrak{A})$ が帰納的に枚挙できれば足りる（前提を枚挙しながら導出を並べればよい）。$\mathcal{N}$ ではどちらも成り立たない（\see{logic:hoare-n-not-re}）。
+- **選択公理**：論理式を一度に選ぶ写像 $(P,\psi)\mapsto\omega_{P,\psi}$ を作らず、(∗) を「すべての $\omega$ について」の形にしたので、各段では有限個の論理式の存在を使うだけである。よって言語の大きさによらず選択公理は要らない。
 :::
 :::
 
@@ -142,7 +147,7 @@ $\mathfrak{A}$ が表現的ならば、すべての三つ組について $\mathf
 :::
 
 ::: solution
-$I\defeq2s=i(i+1)\wedge i\le n$。本体 $i:=i+1;\ s:=s+i$ について、代入の公理を後ろから二回使うと、事前条件は（\ref{logic:hoare-assignment-pre} で読み替えて）「$2(s+i+1)=(i+1)(i+2)\wedge i+1\le n$」と $\mathcal{N}$ で同値。$\mathcal{N}\models I\wedge i<n\to$ この論理式（$2s=i(i+1)$ なら $2(s+i+1)=i(i+1)+2(i+1)=(i+1)(i+2)$、$i<n$ なら $i+1\le n$）なので、帰結規則で $\vdash\{I\wedge i<n\}$ 本体 $\{I\}$。while 規則で $\vdash\{I\}$ ループ $\{I\wedge\neg(i<n)\}$。$\mathcal{N}\models I\wedge\neg(i<n)\to2s=n(n+1)$（$i\le n$ かつ $i\ge n$ で $i=n$）。初期化は代入の公理二回で事前条件が $2\cdot0=0\cdot1\wedge0\le n$ と同値になり、$\mathcal{N}\models\top\to$ これ（$0\le n$ は $0<n\vee0=n$ の略記で真）。合成規則と帰結規則でまとめる。
+$I\defeq2s=i(i+1)\wedge i\le n$ とおく。本体 $i:=i+1;\ s:=s+i$ について、事後条件 $I$ から代入の公理を後ろから二回使い、合成規則でつなぐ。\ref{logic:hoare-assignment-pre} で読み替えると、$s:=s+i$ の事前条件は $2(s+i)=i(i+1)\wedge i\le n$ と、さらに $i:=i+1$ の事前条件は $2(s+i+1)=(i+1)(i+2)\wedge i+1\le n$ と $\mathcal{N}$ で同値である。$2s=i(i+1)$ なら $2(s+i+1)=i(i+1)+2(i+1)=(i+1)(i+2)$ であり、$i<n$ なら $i+1\le n$ なので、$I\wedge i<n$ からこの事前条件が $\mathcal{N}$ で導かれる。よって帰結規則で $\vdash\{I\wedge i<n\}$ 本体 $\{I\}$ を得る。while 規則から $\vdash\{I\}$ ループ $\{I\wedge\neg(i<n)\}$ である。$i\le n$ かつ $\neg(i<n)$ なら $i=n$ なので、$\mathcal{N}\models I\wedge\neg(i<n)\to2s=n(n+1)$ が成り立つ。初期化 $s:=0;\ i:=0$ については、代入の公理を二回使うと事前条件が $2\cdot0=0\cdot1\wedge0\le n$ と同値になり、これは $\mathcal{N}$ で真である（$0\le n$ は $0<n\vee0=n$ の略記）。以上を合成規則と帰結規則でまとめると結論を得る。
 :::
 
 ::: problem {#logic:prob-hoare-not-total}
@@ -150,7 +155,7 @@ $\vdash_{\mathfrak{A}}\{\top\}\ \mathtt{while}\ \top\ \mathtt{do}\ \mathtt{skip}
 :::
 
 ::: solution
-ループ不変条件 $\top$：skip の公理 $\{\top\}\mathtt{skip}\{\top\}$ と帰結規則（$\mathfrak{A}\models\top\wedge\top\to\top$）で $\{\top\wedge\top\}\mathtt{skip}\{\top\}$。while 規則で $\{\top\}W\{\top\wedge\neg\top\}$、帰結規則で $\{\bot\}$。意味論：$\langle W,v\rangle\Downarrow w$ となる $w$ はない（最短の導出をとると、規則 4 の後半で同じ形のより短い導出が要り矛盾）ので、部分正当性は自明に成り立つ。部分正当性は停止を保証しない。
+ループ不変条件を $\top$ とする。skip の公理 $\{\top\}\mathtt{skip}\{\top\}$ と帰結規則（$\mathfrak{A}\models\top\wedge\top\to\top$）から $\{\top\wedge\top\}\mathtt{skip}\{\top\}$ を得る。while 規則から $\{\top\}W\{\top\wedge\neg\top\}$ となり、$\mathfrak{A}\models\top\wedge\neg\top\to\bot$ と帰結規則で事後条件を $\bot$ にできる。意味論：$\langle W,v\rangle\Downarrow w$ となる $w$ はない（最短の導出をとると、規則 4 の後半で同じ形のより短い導出が要り矛盾）ので、部分正当性は自明に成り立つ。部分正当性は停止を保証しない。
 :::
 
 ::: problem {#logic:prob-hoare-not-expressive}
@@ -158,7 +163,7 @@ $\vdash_{\mathfrak{A}}\{\top\}\ \mathtt{while}\ \top\ \mathtt{do}\ \mathtt{skip}
 :::
 
 ::: solution
-$P\defeq y:=0;\ \mathtt{while}\ \neg(y=x)\ \mathtt{do}\ y:=S(S(y))\ \mathtt{od}$、$\psi\defeq\bot$ とする。$x$ の値が偶数 $2k$ なら $k$ 周で止まり、奇数なら $y$ は $x$ を飛び越して止まらない。よって $\mathrm{wlp}(P,\bot)=\{v:v(x)$ は奇数$\}$（止まらない状態だけ）。これを表す論理式 $\chi$ があれば、$x$ 以外の自由変数に $0$ を代入した論理式は $x$ だけで奇数全体を定義し、有限でも補有限でもなく、前提の事実に反する。（前提の事実は量化子消去で示せることが知られている。このサイトでは示していない。）
+$P\defeq y:=0;\ \mathtt{while}\ \neg(y=x)\ \mathtt{do}\ y:=S(S(y))\ \mathtt{od}$、$\psi\defeq\bot$ とする。$x$ の値が偶数 $2k$ なら $k$ 周で止まり、奇数なら $y$ は $x$ を飛び越して止まらない。よって $\mathrm{wlp}(P,\bot)=\{v:v(x)$ は奇数$\}$（止まらない状態だけ）である。これを表す論理式 $\chi$ があるとし、$\chi$ の $x$ 以外の\term[自由変数]{logic:free-variables}に閉じた項 $0$ を\term[代入]{logic:substitution}した論理式を $\chi'$ とおく。閉じた項は代入可能なので、意味論的代入補題（\ref{logic:semantic-substitution.2}）から $v\models\chi'$ は $x$ 以外の変数の値を $0$ にした状態で $\chi$ が真であることと同値であり、$\mathrm{wlp}(P,\bot)$ は $x$ の値だけで決まるので、それは $v(x)$ が奇数であることと同値である。よって $\chi'$ は $x$ だけを自由変数にもち奇数全体を定義するが、奇数全体は有限でも補有限でもないので、前提の事実に反する。（前提の事実は量化子消去で示せることが知られている。このサイトでは示していない。）
 :::
 </script>
 <noscript>このサイトの表示には JavaScript が必要です。</noscript>
