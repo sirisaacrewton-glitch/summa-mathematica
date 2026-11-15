@@ -19,6 +19,7 @@ The main theorems and proofs are correct. The problems lie in the supplement and
 - **Detail:** 「可算コンパクト空間の二つの直積は可算コンパクトとは限らない」は誤り。可算コンパクト性は有限直積（したがって二つの直積）で保たれる。実際 $X\times Y$ の可算開被覆に対し、各 $x$ で $\{y:(x,y)\in U_{n}\text{ なる }n\}$ の有限部分被覆を選び、$x$ の近傍で一様にとれることから $X$ の可算被覆を作り、$X$ の可算コンパクト性で有限個の $x_{i}$ に絞り、各ファイバーを $Y$ の可算コンパクト性で有限被覆すればよい。反例として知られているのは「可算コンパクト空間の可算個の直積」であり、二つの直積ではない。
 - **Proposed fix:** Replace with: 「また、可算コンパクト空間の可算個の直積は可算コンパクトとは限らないことが知られている（コンパクト空間の任意個の直積、点列コンパクト空間の可算個の直積はそれぞれコンパクト・点列コンパクトである）。なお可算コンパクト性は有限個の直積では保たれる。」
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Countable compactness is NOT preserved by products of two spaces: Novák and Terasaka constructed two countably compact subspaces of βN whose product is not countably compact (Engelking, Example 3.10.19). It is preserved when one factor is compact or sequentially compact. The proposed fix would introduce a false statement. The text was only expanded.
 
 ### ISSUE-0002 [Open] 距離空間が「可算コンパクトなら第二可算」という主張
 - **Category:** Supplement/remark error
