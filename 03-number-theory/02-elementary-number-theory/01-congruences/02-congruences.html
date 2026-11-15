@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>合同式と中国剰余定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/02-elementary-number-theory/01-congruences/02-congruences.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 合同式と中国剰余定理 {#nt:page-congruences keywords="congruence modulo m, residue classes, linear congruence ax = b mod m, number of solutions, Chinese remainder theorem for non-coprime moduli, explicit solution of simultaneous congruences, Euler's totient function, formula phi(n) = n prod (1 - 1/p), sum of phi(d) over divisors, Wilson's theorem and its converse, Lagrange's theorem on polynomial congruences, roots of x^d - 1 modulo p, number of solutions of polynomial congruences is multiplicative, Carmichael numbers"}
+
+整数を $m$ で割った余りだけに注目して計算するのが**合同式**である。このページでは、1 次合同式 $ax\equiv b\pmod m$ の解の個数を決め、連立合同式を解く**中国剰余定理**を、法が互いに素でない場合も含めて構成的に証明する。次に**オイラー関数** $\varphi$ の公式と $\sum_{d\mid n}\varphi(d)=n$ を示し、素数を法とする世界に特有の 2 つの結果、**ウィルソンの定理**と、多項式合同式の根の個数についての**ラグランジュの定理**を証明する。
+
+## 記法と定義の確認 {#nt:sec-cgr-notation}
+
+::: notation
+- $m\ge1$ と $a,b\in\Z$ について、$m\mid a-b$ のとき $a\equiv b\pmod m$ と書き、$a$ と $b$ は $m$ を**法として合同**であるという。$a$ を含む類 $a+m\Z$ を $\bar a$ と書き、剰余環 $\Z/m\Z$ の元とみる（\ref{ring:z-mod-n-ring}）。
+- $\gcd$, ベズーの等式、\ref{nt:linear-diophantine}、算術の基本定理と $p$ 進付値 $v_{p}$ は \ref{nt:page-divisibility} のとおり。
+- $(\Z/m\Z)^{\times}$ は単元群で、$\bar a$ が単元であることと $\gcd(a,m)=1$ は同値（\ref{ring:z-mod-n-ring} の 2）。その位数を**オイラー関数** $\varphi(m)$ という。オイラーの定理 $a^{\varphi(m)}\equiv1$（$\gcd(a,m)=1$）とフェルマーの小定理は \ref{grp:euler-fermat}。
+- 体系は $\ZF$。
+:::
+
+::: proposition 合同の基本性質 {#nt:congruence-basic keywords="congruence is an equivalence relation compatible with + and *; cancellation ca = cb mod m iff a = b mod m/gcd(c,m)" index="合同式|ごうどうしき, 法（合同式の）|ほう" refname="合同の基本性質"}
+1. $\equiv\pmod m$ は同値関係で、$a\equiv a'$, $b\equiv b'$ なら $a+b\equiv a'+b'$, $ab\equiv a'b'$。特に整数係数の多項式 $f$ について $f(a)\equiv f(a')$。
+2. （約分）$ca\equiv cb\pmod m$ と $a\equiv b\pmod{m/\gcd(c,m)}$ は同値（$c\neq0$）。
+:::
+
+::: intuition
+合同式は「余りだけを見る」計算で、足し算・掛け算は余りどうしで行ってよい。ただし割り算（約分）は、法と共通の因子を割るときに法も小さくなる。
+:::
+
+::: proof
+1 は $\Z\to\Z/m\Z$ が環準同型であること（\ref{ring:z-mod-n-ring}）の言い換え。2：$g\defeq\gcd(c,m)$, $c=gc'$, $m=gm'$ とすると $m\mid c(a-b)\iff m'\mid c'(a-b)\iff m'\mid a-b$（$\gcd(c',m')=1$ とユークリッドの補題、\ref{grp:bezout-euclid}）。
+:::
+
+## 1 次合同式と中国剰余定理 {#nt:sec-cgr-linear-crt}
+
+::: theorem 1 次合同式 {#nt:linear-congruence keywords="ax = b mod m is solvable iff g = gcd(a,m) divides b; then it has exactly g solutions modulo m" index="1 次合同式|いちじごうどうしき" refname="1 次合同式"}
+$m\ge1$, $a,b\in\Z$, $g\defeq\gcd(a,m)$ とする。$ax\equiv b\pmod m$ が解をもつことと $g\mid b$ は同値。このとき解は $m$ を法としてちょうど $g$ 個あり、一つの解 $x_{0}$ について $x_{0}+t\frac{m}{g}$（$t=0,\dots,g-1$）である。
+:::
+
+::: intuition
+$a$ と法 $m$ の最大公約数 $g$ が「掛け算 $x\mapsto ax$ でつぶれる量」を表す。$b$ がその像に入っていれば、解は $m/g$ ずつずれた $g$ 個になる。
+:::
+
+::: proof
+$ax\equiv b\pmod m$ は「$ax+my=b$ となる $y$ がある」と同じなので、\ref{nt:linear-diophantine} から可解性と、解 $x$ の全体が $x_{0}+\frac{m}{g}\Z$ であることが従う。この集合の $m$ を法とする類は、$t\in\Z$ を $g$ で割った余りで決まる（$x_{0}+t\frac{m}{g}\equiv x_{0}+t'\frac{m}{g}\pmod m\iff g\mid t-t'$）ので、ちょうど $g$ 個。
+:::
+
+::: theorem 中国剰余定理 {#nt:crt-general keywords="simultaneous congruences x = a_i mod m_i are solvable iff a_i = a_j mod gcd(m_i, m_j); the solution is unique modulo lcm; explicit formula for pairwise coprime moduli" index="中国剰余定理（連立合同式）|ちゅうごくじょうよていり, 連立合同式|れんりつごうどうしき" refname="連立合同式の中国剰余定理"}
+$m_{1},\dots,m_{r}\ge1$, $a_{1},\dots,a_{r}\in\Z$ とする。
+1. 連立合同式 $x\equiv a_{i}\pmod{m_{i}}$（$i=1,\dots,r$）が解をもつことと、すべての $i,j$ で $a_{i}\equiv a_{j}\pmod{\gcd(m_{i},m_{j})}$ であることは同値。解は $L\defeq\operatorname{lcm}(m_{1},\dots,m_{r})$ を法としてただ一つ。
+2. $m_{i}$ がどの 2 つも互いに素なら、$M\defeq m_{1}\cdots m_{r}$, $M_{i}\defeq M/m_{i}$, $M_{i}y_{i}\equiv1\pmod{m_{i}}$ となる $y_{i}$ について、$x\defeq\sum_{i}a_{i}M_{i}y_{i}$ が解である。
+:::
+
+::: intuition
+法が互いに素なら、それぞれの法での余りは自由に指定でき、それを満たす数は積を法としてただ一つある。法に公約数があれば、その公約数での余りが食い違わないことが必要十分になる。
+:::
+
+::: proof
+**Step 1（一意性）.** 2 つの解 $x,x'$ は、すべての $i$ で $m_{i}\mid x-x'$ なので、$L\mid x-x'$（\ref{nt:gcd-lcm-valuations} の 3 を繰り返し使う：公倍数は最小公倍数で割り切れる）。逆に $x$ が解で $L\mid x'-x$ なら $x'$ も解。
+
+**Step 2（必要性）.** 解 $x$ があれば $a_{i}\equiv x\equiv a_{j}\pmod{\gcd(m_{i},m_{j})}$（$\gcd(m_{i},m_{j})$ は $m_{i},m_{j}$ の両方を割る）。
+
+**Step 3（2 つの式の場合の十分性）.** 【主張：$a_{1}\equiv a_{2}\pmod g$（$g=\gcd(m_{1},m_{2})$）なら $x\equiv a_{1}\ (m_{1})$, $x\equiv a_{2}\ (m_{2})$ は解をもつ】$x=a_{1}+m_{1}t$ とおくと条件は $m_{1}t\equiv a_{2}-a_{1}\pmod{m_{2}}$ で、$g\mid a_{2}-a_{1}$ なので \ref{nt:linear-congruence} から $t$ がある。解は $\operatorname{lcm}(m_{1},m_{2})$ を法として一つ（Step 1）なので、2 つの式は 1 つの式 $x\equiv c\pmod{\operatorname{lcm}(m_{1},m_{2})}$ と同値。
+
+**Step 4（帰納法）.** 【主張：$r$ 個の式で、条件が成り立てば解がある】最初の 2 つを Step 3 で $x\equiv c\pmod{\ell}$（$\ell=\operatorname{lcm}(m_{1},m_{2})$）に置き換える。残りの $j\ge3$ との両立条件 $c\equiv a_{j}\pmod{\gcd(\ell,m_{j})}$ を確かめればよい。素数 $p$ ごとに見ると、$v_{p}(\gcd(\ell,m_{j}))=\min(\max(e_{1},e_{2}),e_{j})$（$e_{i}\defeq v_{p}(m_{i})$）で、これは $\min(e_{1},e_{j})$ か $\min(e_{2},e_{j})$ に等しい。前者なら $p^{\min(e_{1},e_{j})}$ が $\gcd(m_{1},m_{j})$ を割るので $c\equiv a_{1}\equiv a_{j}$ がその冪を法として成り立ち、後者も同様。よって $c-a_{j}$ は各素数 $p$ について $p^{v_{p}(\gcd(\ell,m_{j}))}$ で割り切れ、\ref{nt:gcd-lcm-valuations} の 1 から $\gcd(\ell,m_{j})$ で割り切れる。これで式が 1 つ減り、帰納法が進む。
+
+**Step 5（2）.** $\gcd(M_{i},m_{i})=1$ なので $y_{i}$ がある（\ref{nt:linear-congruence}）。$j\neq i$ なら $m_{j}\mid M_{i}$ なので $x\equiv a_{j}M_{j}y_{j}\equiv a_{j}\pmod{m_{j}}$。
+:::
+
+## オイラー関数 {#nt:sec-cgr-phi}
+
+::: theorem オイラー関数の公式 {#nt:euler-phi-formula keywords="phi is multiplicative; phi(p^k) = p^k - p^{k-1}; phi(n) = n prod_{p | n} (1 - 1/p); sum_{d | n} phi(d) = n" index="オイラー関数|おいらーかんすう, オイラーの φ 関数|おいらーのふぁいかんすう" refname="オイラー関数の公式"}
+1. $\gcd(m,n)=1$ なら $\varphi(mn)=\varphi(m)\varphi(n)$。
+2. 素数 $p$ と $k\ge1$ について $\varphi(p^{k})=p^{k}-p^{k-1}$。したがって $\varphi(n)=n\prod_{p\mid n}\bigl(1-\frac1p\bigr)$。
+3. $\sum_{d\mid n}\varphi(d)=n$（$d$ は $n$ の正の約数を動く）。
+:::
+
+::: intuition
+$1,\dots,n$ を、$n$ との最大公約数で分類すると、最大公約数が $n/d$ のものは「$d$ と互いに素な $1,\dots,d$」と一対一に対応する。だから $\varphi(d)$ を約数全体で足すと $n$ になる。
+:::
+
+::: proof
+**Step 1（1）.** \ref{ring:crt-integers} の環同型は単元群の同型 $(\Z/mn\Z)^{\times}\cong(\Z/m\Z)^{\times}\times(\Z/n\Z)^{\times}$ を与える。
+
+**Step 2（2）.** $0\le a<p^{k}$ で $\gcd(a,p^{k})\neq1$ なのは $p\mid a$ のときで、それは $p^{k-1}$ 個。乗法性と算術の基本定理から $\varphi(n)=\prod_{p\mid n}(p^{v_{p}(n)}-p^{v_{p}(n)-1})=n\prod_{p\mid n}(1-\frac1p)$。
+
+**Step 3（3）.** 【主張：$\{1,\dots,n\}=\bigsqcup_{d\mid n}S_{d}$, $S_{d}\defeq\{a:\gcd(a,n)=n/d\}$、$\abs{S_{d}}=\varphi(d)$】分割であることは明らか。$a\in S_{d}$ なら $a=(n/d)b$ で $1\le b\le d$、$\gcd(b,d)=\gcd(a,n)/(n/d)=1$（\ref{grp:bezout-euclid} の 3）。逆に $1\le b\le d$, $\gcd(b,d)=1$ なら $a\defeq(n/d)b$ は $\gcd(a,n)=(n/d)\gcd(b,d)=n/d$。この対応 $a\leftrightarrow b$ は全単射。$b$ の個数は $\varphi(d)$（$b=d$ は $d=1$ のときだけ互いに素で、$\varphi(1)=1$ と合う）。
+:::
+
+## 素数を法とする合同式 {#nt:sec-cgr-prime}
+
+::: theorem ラグランジュの定理（多項式合同式） {#nt:lagrange-polynomial-congruence keywords="a polynomial of degree n not divisible by p has at most n roots modulo p; x^{p-1} - 1 = prod (x - a) mod p; if d | p-1 then x^d - 1 has exactly d roots modulo p" index="ラグランジュの定理（多項式合同式）|らぐらんじゅのていり, 多項式合同式|たこうしきごうどうしき" refname="多項式合同式のラグランジュの定理"}
+$p$ を素数とする。
+1. 整数係数の多項式 $f(x)=c_{n}x^{n}+\cdots+c_{0}$ で $p\nmid c_{n}$ のものは、$p$ を法として高々 $n$ 個の根をもつ。
+2. $\Z/p\Z[x]$ で $x^{p-1}-1=\prod_{a=1}^{p-1}(x-\bar a)$。
+3. $d\mid p-1$ なら、$x^{d}\equiv1\pmod p$ は $p$ を法としてちょうど $d$ 個の解をもつ。
+:::
+
+::: intuition
+素数を法とする世界は体なので、多項式の根は次数の個数までしかない。$x^{p-1}-1$ は $0$ 以外のすべての元を根にもち、その約数 $x^{d}-1$ はちょうど $d$ 個の根を受け持つ。
+:::
+
+::: proof
+**Step 1（1）.** $\Z/p\Z$ は体（\ref{ring:z-mod-n-ring} の 3）で、$f$ の像は $\Z/p\Z[x]$ の次数 $n$ の多項式なので、\ref{ring:factor-theorem} の 3 から根は $n$ 個以下。
+
+**Step 2（2）.** フェルマーの小定理（\ref{grp:euler-fermat}）から $\bar1,\dots,\overline{p-1}$ はすべて $x^{p-1}-1$ の根。因数定理を繰り返せば $\prod(x-\bar a)$ が $x^{p-1}-1$ を割り、両辺はともに次数 $p-1$ でモニックなので等しい。
+
+**Step 3（3）.** 【主張：根はちょうど $d$ 個】$p-1=de$ とすると $x^{p-1}-1=(x^{d}-1)g(x)$, $g\defeq x^{d(e-1)}+\cdots+x^{d}+1$（次数 $p-1-d$）。左辺の根は $p-1$ 個（2）で、各根は $x^{d}-1$ か $g$ の根（体なので積が $0$ ならどちらかが $0$）。$g$ の根は $p-1-d$ 個以下（1）なので、$x^{d}-1$ の根は $d$ 個以上、1 から $d$ 個以下。
+:::
+
+::: theorem ウィルソンの定理 {#nt:wilson-theorem keywords="Wilson's theorem: (p-1)! = -1 mod p for primes p; conversely if (n-1)! = -1 mod n then n is prime" index="ウィルソンの定理|うぃるそんのていり" refname="ウィルソンの定理"}
+$n\ge2$ について、$(n-1)!\equiv-1\pmod n$ と $n$ が素数であることは同値。
+:::
+
+::: intuition
+素数を法とすると $1,\dots,p-1$ はすべて逆元をもち、自分自身が逆元になるのは $\pm1$ だけなので、積をとると他の元は逆元と組になって消え、$1\cdot(-1)=-1$ が残る。合成数では、真の約数が積に現れて $-1$ にはなりえない。
+:::
+
+::: proof
+**Step 1（素数のとき）.** \ref{nt:lagrange-polynomial-congruence} の 2 で $x=0$ を代入すると $-1=\prod_{a=1}^{p-1}(-\bar a)=(-1)^{p-1}(p-1)!$。$p$ が奇素数なら $(-1)^{p-1}=1$、$p=2$ なら $-1\equiv1$ なので、どちらも $(p-1)!\equiv-1$。
+
+**Step 2（逆）.** $n$ が合成数なら $n=ab$, $1<a<n$ と書け、$a\mid(n-1)!$。$(n-1)!\equiv-1\pmod n$ なら $a\mid(n-1)!+1$ とあわせて $a\mid1$ で矛盾。
+:::
+
+::: proposition 多項式合同式の解の個数の乗法性 {#nt:polynomial-congruence-crt keywords="the number of solutions of f(x) = 0 mod m is multiplicative in m by the Chinese remainder theorem; x^2 = 1 mod m" index="多項式合同式の解の個数|たこうしきごうどうしきのかいのこすう"}
+整数係数の多項式 $f$ と $m\ge1$ について $N_{f}(m)\defeq\#\{\bar x\in\Z/m\Z:f(x)\equiv0\pmod m\}$ とおく。$\gcd(m,n)=1$ なら $N_{f}(mn)=N_{f}(m)N_{f}(n)$。
+:::
+
+::: proof
+\ref{ring:crt-integers} の環同型 $\Z/mn\Z\to\Z/m\Z\times\Z/n\Z$ は $f$ と可換（環準同型は多項式の値を保つ）なので、$f$ の根の集合を $(f\text{ の } m\text{ での根})\times(f\text{ の }n\text{ での根})$ に全単射で移す。
+:::
+
+::: example
+1. **連立合同式.** $x\equiv2\ (3)$, $x\equiv3\ (5)$, $x\equiv2\ (7)$：$M=105$, $M_{i}=35,21,15$, $y_{i}\equiv35^{-1}\equiv2\ (3)$, $21^{-1}\equiv1\ (5)$, $15^{-1}\equiv1\ (7)$。$x=2\cdot35\cdot2+3\cdot21\cdot1+2\cdot15\cdot1=233\equiv23\pmod{105}$（孫子算経の問題）。
+2. **互いに素でない法.** $x\equiv1\ (6)$, $x\equiv3\ (4)$ は $1\equiv3\pmod2$ なので可解で、$x\equiv7\pmod{12}$。$x\equiv1\ (6)$, $x\equiv2\ (4)$ は $1\not\equiv2\pmod 2$ なので解がない。
+3. **カーマイケル数.** $561=3\cdot11\cdot17$ は合成数だが、$\gcd(a,561)=1$ なら $a^{560}\equiv1\pmod{561}$：$2,10,16$ がすべて $560$ を割るので、フェルマーの小定理から $a^{560}\equiv1$ が $3,11,17$ のそれぞれを法として成り立ち、中国剰余定理から $561$ を法として成り立つ。フェルマーの小定理の逆は成り立たない。
+4. $x^{2}\equiv1\pmod{2^{k}}$（$k\ge3$）の解は $\pm1,\ 2^{k-1}\pm1$ の 4 個、奇素数冪 $p^{e}$ では $\pm1$ の 2 個なので、乗法性から奇数 $m$ では $2^{\omega(m)}$ 個（$\omega(m)$ は $m$ の相異なる素因数の個数）。
+:::
+
+::: hypcheck
+- **1 次合同式**：$g\mid b$ は可解性の必要十分条件。$g=1$ のとき（$a$ が単元）だけ解がただ一つ。
+- **中国剰余定理**：互いに素でない法では、両立条件が必要で、解は積ではなく最小公倍数を法として一意。Step 4 では、両立条件が置き換え後も保たれることを素数冪ごとに確かめた。
+- **ラグランジュの定理**：$p$ が素数であること（$\Z/p\Z$ が整域）が本質。合成数の法では根の個数は次数を超えうる（例 4：$x^{2}-1$ は $\bmod 8$ で 4 個の根）。$p\nmid c_{n}$ は次数が下がらないために必要。
+- **ウィルソンの定理**：逆向きは、合成数 $n$ の真の約数が $(n-1)!$ を割ることだけを使った。
+:::
+
+## 問題 {#nt:sec-cgr-problems}
+
+::: problem {#nt:prob-cg-linear}
+$12x\equiv18\pmod{30}$ の解を $30$ を法としてすべて求めよ。
+:::
+
+::: solution
+$g=\gcd(12,30)=6\mid18$ なので解は 6 個。約分して $2x\equiv3\pmod5$、$x\equiv4\pmod5$。$30$ を法として $x\equiv4,9,14,19,24,29$。
+:::
+
+::: problem {#nt:prob-cg-wilson-16}
+$16!$ を $17$ で割った余りと、$15!$ を $17$ で割った余りを求めよ。
+:::
+
+::: solution
+ウィルソンの定理から $16!\equiv-1\equiv16\pmod{17}$。$16\equiv-1$ なので $15!\cdot(-1)\equiv-1$、$15!\equiv1\pmod{17}$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 中国剰余定理の構成（2）は、ベズーの等式で $M_{i}$ の逆元を求めるだけで、素因数分解を使わない。素因数分解は、互いに素でない場合の両立条件の確認（Step 4）にだけ使った。
+
+**前提を変えると.**
+- 中国剰余定理は、可換環の互いに素なイデアル $I_{1},\dots,I_{r}$（$I_{i}+I_{j}=A$）について $A/\bigcap I_{i}\cong\prod A/I_{i}$ という形に一般化される（\ref{ring:chinese-remainder}）。
+- ラグランジュの定理は、素数冪の法では\ref{nt:hensel-lemma}と組み合わせて、根を $p$ から $p^{k}$ へ持ち上げる方法に発展する。
+- ウィルソンの定理を合成数の法に一般化すると、$(\Z/m\Z)^{\times}$ の全元の積は、この群が巡回群のとき（$m=1,2,4,p^{k},2p^{k}$）$-1$、それ以外は $1$ になる（ガウス）。巡回群になる法の決定は次の系列（\ref[原始根と既約剰余類群の構造]{nt:page-primitive-roots}）で行う。
+- カーマイケル数（例 3 の性質をもつ合成数）は無限に多くある（Alford–Granville–Pomerance、1994）と知られている。
+
+**高い視点から：局所と大域.** 中国剰余定理は、$\Z/m\Z$ という「大域的な」対象が、素数冪 $\Z/p^{e}\Z$ という「局所的な」部分の積に分解されることを述べる。多項式合同式の解の個数が乗法的であることは、その帰結である。この考え方は、$p$ 進数（\ref{nt:page-p-adic}）を使って「各素数での情報を集めて整数の性質を調べる」局所–大域原理へとつながる。比喩で言えば、整数の余りは各素数の「窓」から見た景色の寄せ集めで、窓どうしは互いに独立に見え方を選べる（法が互いに素な限り）。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-cgr-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
