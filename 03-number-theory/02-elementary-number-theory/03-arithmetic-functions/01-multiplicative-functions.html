@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>数論的関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/02-elementary-number-theory/03-arithmetic-functions/01-multiplicative-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 数論的関数 {#nt:page-multiplicative-functions keywords="arithmetic function, multiplicative function, completely multiplicative, Dirichlet convolution, ring of arithmetic functions, Dirichlet inverse, Mobius function, sum of mu(d) over divisors, Mobius inversion, phi = mu * id, divisor functions tau and sigma, perfect numbers, Euclid-Euler theorem, Mersenne primes, Liouville function, average order of the divisor function"}
+
+正の整数の上の関数 $f:\Z_{>0}\to\mathbb{C}$ を**数論的関数**という。約数の個数 $\tau(n)$、約数の和 $\sigma(n)$、オイラー関数 $\varphi(n)$ のように、素因数分解に沿って値が決まる**乗法的関数**が典型である。このページでは、約数についての和の形の積 $(f\ast g)(n)=\sum_{d\mid n}f(d)g(n/d)$（**ディリクレ積**）で数論的関数が可換環をなすことを示し、メビウス関数 $\mu$ が定数関数 $1$ の逆元であることから**メビウスの反転公式**を導く。応用として、偶数の完全数がメルセンヌ素数から作られるもので尽きること（**ユークリッド–オイラーの定理**）と、約数の個数の平均 $\frac1x\sum_{n\le x}\tau(n)\approx\log x$ を示す。
+
+## 記法と定義の確認 {#nt:sec-mf-notation}
+
+::: notation
+- $d\mid n$ の和 $\sum_{d\mid n}$ は $n$ の正の約数全体にわたる。算術の基本定理、$p$ 進付値 $v_{p}$、\ref{nt:gcd-lcm-valuations} は \ref{nt:page-divisibility} のとおり。オイラー関数 $\varphi$ とその公式は \ref{nt:euler-phi-formula}。
+- 半順序集合の一般のメビウス反転は \ref{comb:page-mobius-inversion} にあり、約数の束の場合が \ref{comb:number-theoretic-inversion} である。このページでは、それを数論的関数の環の言葉で整理し直す。
+- 体系は $\ZF$。
+:::
+
+## ディリクレ積 {#nt:sec-mf-dirichlet}
+
+::: definition 数論的関数とディリクレ積 {#nt:dirichlet-convolution keywords="arithmetic function f: Z_{>0} -> C; multiplicative: f(mn) = f(m) f(n) for coprime m, n and f(1) = 1; completely multiplicative; Dirichlet convolution (f * g)(n) = sum_{d | n} f(d) g(n/d); delta, 1, id, mu, tau, sigma_k" index="数論的関数|すうろんてきかんすう, 乗法的関数|じょうほうてきかんすう, 完全乗法的関数|かんぜんじょうほうてきかんすう, ディリクレ積|でぃりくれせき" refname="ディリクレ積"}
+数論的関数 $f$ が**乗法的**であるとは、$f(1)=1$ で、$\gcd(m,n)=1$ なら $f(mn)=f(m)f(n)$ となることをいう。すべての $m,n$ で成り立つものを**完全乗法的**という。数論的関数 $f,g$ の**ディリクレ積**を
+$$(f\ast g)(n)\defeq\sum_{d\mid n}f(d)\,g\Bigl(\frac nd\Bigr)=\sum_{ab=n}f(a)g(b)$$
+とする。次の関数を使う：$\delta(n)\defeq[n=1]$、$\mathbf 1(n)\defeq1$、$\mathrm{id}(n)\defeq n$、**約数関数** $\sigma_{k}(n)\defeq\sum_{d\mid n}d^{k}$（$\tau\defeq\sigma_{0}$, $\sigma\defeq\sigma_{1}$）、**メビウス関数** $\mu(n)\defeq(-1)^{r}$（$n$ が相異なる $r$ 個の素数の積）、$0$（$n$ が平方因子をもつ）。
+:::
+
+::: intuition
+ディリクレ積は「$n$ を 2 つの因子の積に分けるすべての方法」についての和で、多項式の積が「次数を足して $n$ になる組」についての和であるのと同じ形をしている。足し算の代わりに掛け算で添字が組み合わさる。
+:::
+
+::: theorem 数論的関数の環 {#nt:arithmetic-function-ring keywords="arithmetic functions form a commutative ring under + and Dirichlet convolution with identity delta; f is invertible iff f(1) != 0; the convolution of multiplicative functions is multiplicative; the inverse of a multiplicative function is multiplicative" index="数論的関数の環|すうろんてきかんすうのかん, ディリクレ逆元|でぃりくれぎゃくげん" refname="数論的関数の環"}
+1. 数論的関数の全体は、各点の和とディリクレ積について、$\delta$ を単位元とする可換環である。
+2. $f$ がディリクレ積について可逆であることと $f(1)\neq0$ は同値。
+3. $f,g$ が乗法的なら $f\ast g$ も乗法的で、乗法的な $f$ の逆元も乗法的である。
+:::
+
+::: intuition
+数論的関数は、ディリクレ積で掛け合わせると多項式のように振る舞う。$f(1)\neq0$ なら、逆元の値を小さい $n$ から順に決めていける。乗法的関数どうしの積が乗法的なのは、互いに素な 2 数の約数が「それぞれの約数の組」に一意に分かれるからである。
+:::
+
+::: proof
+**Step 1（1）.** 可換性は $\sum_{ab=n}$ が $a,b$ について対称だから。結合性は $((f\ast g)\ast h)(n)=\sum_{abc=n}f(a)g(b)h(c)=(f\ast(g\ast h))(n)$。分配法則は定義から。$(f\ast\delta)(n)=\sum_{ab=n}f(a)\delta(b)=f(n)$。
+
+**Step 2（2）.** 【主張：$f(1)\neq0$ なら逆元 $g$ が帰納的に決まる】$f\ast g=\delta$ は $f(1)g(1)=1$ と、$n>1$ で $\sum_{d\mid n}f(d)g(n/d)=0$、すなわち $g(n)=-f(1)^{-1}\sum_{d\mid n,d>1}f(d)g(n/d)$ と同値で、右辺は $n$ より小さい引数の $g$ だけを含む。$n$ についての帰納法で $g$ がただ一つ定まる。逆に逆元があれば $f(1)g(1)=1$ から $f(1)\neq0$。
+
+**Step 3（3：積）.** 【主張：$\gcd(m,n)=1$ なら $(f\ast g)(mn)=(f\ast g)(m)(f\ast g)(n)$】$mn$ の約数 $d$ は $d=d_{1}d_{2}$（$d_{1}\mid m$, $d_{2}\mid n$）とただ一通りに書ける（$d_{1}=\gcd(d,m)$, $d_{2}=\gcd(d,n)$。\ref{nt:gcd-lcm-valuations} で素数ごとに見る）。$\gcd(d_{1},d_{2})=\gcd(m/d_{1},n/d_{2})=1$ なので
+$$(f\ast g)(mn)=\sum_{d_{1}\mid m}\sum_{d_{2}\mid n}f(d_{1})f(d_{2})g\Bigl(\frac{m}{d_{1}}\Bigr)g\Bigl(\frac{n}{d_{2}}\Bigr)=(f\ast g)(m)(f\ast g)(n).$$
+
+**Step 4（3：逆元）.** 乗法的な $f$ について、$g'(n)\defeq\prod_{p}g(p^{v_{p}(n)})$（$g$ は $f$ の逆元）とおくと $g'$ は乗法的。Step 3 から $f\ast g'$ は乗法的で、素数冪 $p^{k}$ では $(f\ast g')(p^{k})=\sum_{j}f(p^{j})g(p^{k-j})=(f\ast g)(p^{k})=\delta(p^{k})$（約数が $p$ の冪だけなので $g'=g$ が素数冪の上で一致）。乗法的関数は素数冪の値で決まるので $f\ast g'=\delta$、逆元の一意性から $g=g'$。
+:::
+
+::: theorem メビウスの反転公式 {#nt:mobius-inversion-nt keywords="sum_{d | n} mu(d) = delta(n), i.e. mu * 1 = delta; Mobius inversion: g = f * 1 iff f = g * mu; phi = mu * id; sigma_k = id_k * 1" index="メビウスの反転公式（数論）|めびうすのはんてんこうしき, メビウス関数（数論）|めびうすかんすう" refname="メビウスの反転公式（数論）"}
+1. $\sum_{d\mid n}\mu(d)=\delta(n)$、すなわち $\mu\ast\mathbf 1=\delta$。
+2. 数論的関数 $f,g$ について、$g(n)=\sum_{d\mid n}f(d)$（すべての $n$）と $f(n)=\sum_{d\mid n}\mu(d)g(n/d)$（すべての $n$）は同値。
+3. $\varphi=\mu\ast\mathrm{id}$、すなわち $\varphi(n)=\sum_{d\mid n}\mu(d)\frac nd$。
+:::
+
+::: intuition
+$\mu$ は「約数についての和をとる操作」を元に戻す操作で、包除原理を約数の束で行ったものである。約数の和で積み上げた量から、元の量を $\mu$ の符号つきの和で取り出せる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\mu\ast\mathbf 1=\delta$】$\mu$ と $\mathbf 1$ は乗法的（$\mu$ の定義と算術の基本定理から）なので、\ref{nt:arithmetic-function-ring} の 3 から $\mu\ast\mathbf 1$ も乗法的で、素数冪で調べればよい。$(\mu\ast\mathbf 1)(p^{k})=\mu(1)+\mu(p)=1-1=0$（$k\ge1$。$\mu(p^{j})=0$, $j\ge2$）、$(\mu\ast\mathbf 1)(1)=1$。
+
+**Step 2（2）.** 【主張：$g=f\ast\mathbf 1\iff f=g\ast\mu$】$g=f\ast\mathbf 1$ なら $g\ast\mu=f\ast(\mathbf 1\ast\mu)=f$、逆も同様（環の結合性と 1）。
+
+**Step 3（3）.** 【主張：$\varphi=\mu\ast\mathrm{id}$】$\sum_{d\mid n}\varphi(d)=n$（\ref{nt:euler-phi-formula} の 3）は $\varphi\ast\mathbf 1=\mathrm{id}$ なので、2 から $\varphi=\mathrm{id}\ast\mu$。
+:::
+
+## 約数関数と完全数 {#nt:sec-mf-perfect}
+
+::: proposition 約数関数の公式 {#nt:divisor-function-formula keywords="tau and sigma are multiplicative; tau(n) = prod (e_p + 1); sigma(n) = prod (p^{e+1} - 1)/(p - 1)" index="約数の個数|やくすうのこすう, 約数の和|やくすうのわ, 約数関数|やくすうかんすう"}
+$\sigma_{k}=\mathrm{id}_{k}\ast\mathbf 1$（$\mathrm{id}_{k}(n)\defeq n^{k}$）は乗法的で、$n=\prod p^{e_{p}}$ について
+$$\tau(n)=\prod_{p}(e_{p}+1),\qquad\sigma(n)=\prod_{p}\frac{p^{e_{p}+1}-1}{p-1}.$$
+:::
+
+::: proof
+$\mathrm{id}_{k}$, $\mathbf 1$ は乗法的なので \ref{nt:arithmetic-function-ring} の 3 から乗法的。$p^{e}$ の約数は $1,p,\dots,p^{e}$ なので $\tau(p^{e})=e+1$, $\sigma(p^{e})=1+p+\cdots+p^{e}=\frac{p^{e+1}-1}{p-1}$。
+:::
+
+::: theorem ユークリッド–オイラーの定理 {#nt:euclid-euler keywords="an even number n is perfect (sigma(n) = 2n) iff n = 2^{k-1}(2^k - 1) with 2^k - 1 prime (a Mersenne prime); if 2^k - 1 is prime then k is prime" index="完全数|かんぜんすう, ユークリッド–オイラーの定理|ゆーくりっどおいらーのていり, メルセンヌ素数|めるせんぬそすう" refname="ユークリッド–オイラーの定理"}
+$\sigma(n)=2n$ となる $n$ を**完全数**という。偶数 $n$ が完全数であることと、$2^{k}-1$ が素数となる $k\ge2$ によって $n=2^{k-1}(2^{k}-1)$ と書けることは同値。また $2^{k}-1$ が素数なら $k$ は素数である（このような素数を**メルセンヌ素数**という）。
+:::
+
+::: intuition
+偶数の完全数を $2$ の冪と奇数の部分に分けると、$\sigma$ の乗法性から奇数の部分 $m$ について $\sigma(m)=m+\frac{m}{2^{k}-1}$ という強い条件が出る。約数の和が「自分自身ともう一つ」しかないのは素数のときだけなので、奇数の部分は素数 $2^{k}-1$ に限られる。
+:::
+
+::: proof
+**Step 1（十分性：ユークリッド）.** $q\defeq2^{k}-1$ が素数なら、$\gcd(2^{k-1},q)=1$ と乗法性から $\sigma(n)=\sigma(2^{k-1})\sigma(q)=(2^{k}-1)(q+1)=(2^{k}-1)2^{k}=2n$。
+
+**Step 2（必要性：オイラー）.** 【主張：偶数の完全数はこの形】$n=2^{k-1}m$（$k\ge2$, $m$ 奇数）とすると $2^{k}m=\sigma(n)=(2^{k}-1)\sigma(m)$。$\gcd(2^{k},2^{k}-1)=1$ なので $2^{k}-1\mid m$、$m=(2^{k}-1)c$ とおくと $\sigma(m)=2^{k}c=m+c$。$c$ と $m$ はともに $m$ の約数で、$k\ge2$ から $c<m$。$\sigma(m)$ は約数の総和なので、$m$ の約数は $c$ と $m$ だけ。$1$ も約数なので $c=1$ で、$m=2^{k}-1$ の約数は $1,m$ だけ、すなわち素数（$m=2^{k}-1\ge3$）。
+
+**Step 3（$k$ は素数）.** $k=ab$（$1<a<k$）なら $2^{a}-1\mid2^{k}-1$（$x^{b}-1=(x-1)(\cdots)$ に $x=2^{a}$）で、$1<2^{a}-1<2^{k}-1$ なので $2^{k}-1$ は素数でない。
+:::
+
+::: proposition 約数の個数の平均 {#nt:divisor-average keywords="sum_{n <= x} tau(n) = x log x + O(x); average order of tau is log n" index="約数の個数の平均|やくすうのこすうのへいきん"}
+$x\ge1$ について $\Bigl\lvert\sum_{n\le x}\tau(n)-x\log x\Bigr\rvert\le2x$。
+:::
+
+::: proof
+**Step 1（和の入れ替え）.** $\sum_{n\le x}\tau(n)=\#\{(d,e):de\le x\}=\sum_{d\le x}\lfloor x/d\rfloor$。$x/d-1<\lfloor x/d\rfloor\le x/d$ なので、和は $x\sum_{d\le x}\frac1d$ との差が $x$ 以下。
+
+**Step 2（調和和）.** 【主張：$\log x\le\sum_{d\le x}\frac1d\le\log x+1$】$N\defeq\lfloor x\rfloor$ とする。$t\in[d,d+1]$ で $\frac1{d+1}\le\frac1t\le\frac1d$ なので $\sum_{d=1}^{N}\frac1d\ge\int_{1}^{N+1}\frac{dt}{t}=\log(N+1)\ge\log x$、$\sum_{d=1}^{N}\frac1d\le1+\int_{1}^{N}\frac{dt}{t}=1+\log N\le1+\log x$。
+
+**Step 3.** Step 1, 2 から $\bigl\lvert\sum\tau(n)-x\log x\bigr\rvert\le x+x=2x$。
+:::
+
+::: example
+1. $\tau(360)=\tau(2^{3}3^{2}5)=4\cdot3\cdot2=24$, $\sigma(360)=15\cdot13\cdot6=1170$。
+2. 完全数：$k=2,3,5,7$ で $6,28,496,8128$。$k=11$ では $2^{11}-1=2047=23\cdot89$ は素数でない（$k$ が素数でも十分ではない）。
+3. $\mu(30)=-1$, $\mu(12)=0$。$\varphi(12)=\sum_{d\mid12}\mu(d)\frac{12}{d}=12-6-4+2=4$（$d=1,2,3,6$。他の約数は $\mu=0$）。
+:::
+
+::: hypcheck
+- **数論的関数の環**：逆元の構成（Step 2）は $f(1)\neq0$ で割ることだけを使う。乗法性の保存（Step 3）は、$\gcd(m,n)=1$ のとき約数が一意に分解されることに本質的に依存する。
+- **ユークリッド–オイラーの定理**：$n$ が偶数であることは $k\ge2$ に使った。奇数の完全数が存在するかは未解決である、と知られている。
+- **約数の個数の平均**：定数 $2$ は粗い。より精密には $\sum_{n\le x}\tau(n)=x\log x+(2\gamma-1)x+O(\sqrt x)$（ディリクレ、$\gamma$ はオイラーの定数）が知られている。
+:::
+
+## 問題 {#nt:sec-mf-problems}
+
+::: problem {#nt:prob-mf-sigma-odd}
+$\sigma(n)$ が奇数となる $n$ は、平方数か平方数の 2 倍に限ることを示せ。
+:::
+
+::: solution
+$\sigma$ は乗法的なので、$\sigma(n)=\prod\sigma(p^{e})$ が奇数 $\iff$ 各 $\sigma(p^{e})$ が奇数。$\sigma(2^{e})=2^{e+1}-1$ は常に奇数。奇素数 $p$ では $\sigma(p^{e})=1+p+\cdots+p^{e}$ は $e+1$ 個の奇数の和なので、奇数 $\iff e$ が偶数。よって $n=2^{e}m^{2}$（$m$ 奇数）で、$e$ が偶数なら平方数、奇数なら平方数の 2 倍。
+:::
+
+::: problem {#nt:prob-mf-liouville}
+リウヴィル関数 $\lambda(n)\defeq(-1)^{\sum_{p}v_{p}(n)}$ について、$\sum_{d\mid n}\lambda(d)$ は $n$ が平方数なら $1$、そうでなければ $0$ であることを示せ。
+:::
+
+::: solution
+$\lambda$ は完全乗法的なので $\lambda\ast\mathbf 1$ は乗法的。$(\lambda\ast\mathbf 1)(p^{e})=\sum_{j=0}^{e}(-1)^{j}$ は $e$ が偶数なら $1$、奇数なら $0$。積は、すべての $e_{p}$ が偶数（$n$ が平方数）なら $1$、そうでなければ $0$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 環の構造（1, 2）は乗法性を使わず、任意の数論的関数について成り立つ。値は $\mathbb{C}$ でなく、任意の可換環でよい（逆元については $f(1)$ がその環の単元であればよい）。
+
+**前提を変えると.**
+- ディリクレ積は、形式的ディリクレ級数 $\sum f(n)n^{-s}$ の積に対応する：$\bigl(\sum f(n)n^{-s}\bigr)\bigl(\sum g(n)n^{-s}\bigr)=\sum(f\ast g)(n)n^{-s}$。$\mathbf 1$ に対応するのがリーマンのゼータ関数 $\zeta(s)$ で、$\mu$ に対応するのは $1/\zeta(s)$、乗法性はオイラー積 $\prod_{p}(1-p^{-s})^{-1}$ に対応する。これは解析的整数論の系列で扱う予定である。
+- 数論のメビウス反転は、半順序集合（約数の束）のメビウス反転の特別な場合である（\ref{comb:number-theoretic-inversion}）。
+- メルセンヌ素数が無限にあるか、奇数の完全数があるかは、どちらも未解決である、と知られている。
+
+**高い視点から：約数の束と接続代数.** 数論的関数の環は、約数の束の接続代数のうち「$f(d,n)$ が $n/d$ だけで決まる」部分環であり、ディリクレ積は接続代数の積の特別な場合である（\ref{comb:incidence-algebra}）。約数の束は素数ごとの鎖 $\N$ の直積なので、乗法的関数は各素数の鎖の上の関数の「テンソル積」にあたり、それが乗法性の保存の理由である。比喩で言えば、乗法的関数は各素数の「部品」の値を掛け合わせて組み立てる模型で、ディリクレ積は部品ごとに組み立てて最後に合わせても、合わせてから組み立てても同じ結果になる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-mf-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

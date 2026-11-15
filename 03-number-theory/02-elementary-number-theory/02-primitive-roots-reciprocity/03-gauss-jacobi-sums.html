@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ガウス和とヤコビ和 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/02-elementary-number-theory/02-primitive-roots-reciprocity/03-gauss-jacobi-sums.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ガウス和とヤコビ和 {#nt:page-gauss-jacobi-sums keywords="multiplicative character of F_p, character group is cyclic, orthogonality, additive character sum, Gauss sum g(chi), |g(chi)|^2 = p, quadratic Gauss sum g^2 = (-1/p) p, Jacobi sum J(chi, lambda) = g(chi) g(lambda) / g(chi lambda), |J| = sqrt p, J(chi, chi^{-1}) = -chi(-1), number of solutions of x^2 + y^2 = 1 mod p, Fermat's two squares theorem via Jacobi sums"}
+
+有限体 $\mathbb{F}_{p}=\Z/p\Z$ の上の方程式の解の個数は、**指標**（乗法群から複素数の単位円への準同型）を使った和で表すことができる。このページでは、乗法的指標と加法的な $1$ の冪根を組み合わせた**ガウス和** $g(\chi)$ が絶対値 $\sqrt p$ をもつことを示し、2 つの乗法的指標から作る**ヤコビ和** $J(\chi,\lambda)$ をガウス和で表す。応用として、$x^{2}+y^{2}=1$ の $\mathbb{F}_{p}$ での解の個数を求め、$p\equiv1\pmod4$ の素数が 2 つの平方数の和であること（フェルマー）を、位数 4 の指標のヤコビ和から導く。
+
+## 記法と定義の確認 {#nt:sec-gj-notation}
+
+::: notation
+- $p$ は奇素数、$\mathbb{F}_{p}\defeq\Z/p\Z$、$\mathbb{F}_{p}^{\times}=(\Z/p\Z)^{\times}$ は位数 $p-1$ の巡回群（\ref{nt:primitive-root-prime}）。原始根を $g$ とする。
+- $\zeta\defeq e^{2\pi i/p}$。$t\in\mathbb{F}_{p}$ について $\zeta^{t}$ は代表元によらない。複素数の絶対値 $\abs{\cdot}$ と共役 $\bar z$。
+- ルジャンドル記号 $\rho(a)\defeq(\tfrac{a}{p})$ とその性質は \ref{nt:page-quadratic-residues} のとおり。
+- 体系は $\ZF$（複素数の構成を含む）。
+:::
+
+## 乗法的指標 {#nt:sec-gj-characters}
+
+::: definition 乗法的指標 {#nt:multiplicative-character keywords="multiplicative character chi: F_p^x -> C^x; trivial character epsilon; extension chi(0) = 0 for chi nontrivial, epsilon(0) = 1" index="乗法的指標|じょうほうてきしひょう, 指標（有限体の）|しひょう" refname="乗法的指標"}
+群準同型 $\chi:\mathbb{F}_{p}^{\times}\to\mathbb{C}^{\times}$ を $\mathbb{F}_{p}$ の**乗法的指標**という。常に $1$ をとるものを**自明な指標** $\varepsilon$ とする。$\chi(0)$ は、$\chi\neq\varepsilon$ なら $0$、$\varepsilon(0)\defeq1$ と定める。ルジャンドル記号 $\rho$ は位数 2 の指標である。
+:::
+
+::: intuition
+乗法的指標は、乗法群 $\mathbb{F}_{p}^{\times}$ を単位円の上に「回転として」写したものである。原始根 $g$ の行き先を決めれば全体が決まるので、指標は $(p-1)$ 乗根の数だけある。
+:::
+
+::: proposition 指標の基本性質 {#nt:character-basic keywords="characters take values in (p-1)-th roots of unity; character group is cyclic of order p-1; orthogonality sum chi(a) = 0 for chi != epsilon; sum_t zeta^{at} = p or 0" index="指標の直交性|しひょうのちょっこうせい" refname="指標の基本性質"}
+1. $\chi(a)^{p-1}=1$ で、$\abs{\chi(a)}=1$, $\chi(a^{-1})=\chi(a)^{-1}=\overline{\chi(a)}$（$a\neq0$）。
+2. 指標全体は、積 $(\chi\lambda)(a)\defeq\chi(a)\lambda(a)$ について位数 $p-1$ の巡回群をなす。$n\mid p-1$ なら位数 $n$ の指標がある。
+3. $\chi\neq\varepsilon$ なら $\sum_{a\in\mathbb{F}_{p}}\chi(a)=0$。
+4. $\sum_{t\in\mathbb{F}_{p}}\zeta^{at}$ は $a=0$ なら $p$、$a\neq0$ なら $0$。
+:::
+
+::: intuition
+自明でない指標は単位円上をまんべんなく回るので、全体で足すと打ち消し合って $0$ になる。加法的な $\zeta^{at}$ についても同じことが成り立つ。
+:::
+
+::: proof
+**Step 1（1）.** $a^{p-1}=1$（フェルマーの小定理）から $\chi(a)^{p-1}=1$。$1$ の冪根なので絶対値 $1$、逆数は共役。
+
+**Step 2（2）.** 【主張：$\chi\mapsto\chi(g)$ は指標の群から $\mu_{p-1}\defeq\{z:z^{p-1}=1\}$ への同型】$\mathbb{F}_{p}^{\times}=\langle g\rangle$ なので $\chi$ は $\chi(g)$ で決まり（単射）、1 から $\chi(g)\in\mu_{p-1}$。逆に $w\in\mu_{p-1}$ について $\chi(g^{k})\defeq w^{k}$ は $g^{k}=g^{l}\iff p-1\mid k-l$ から矛盾なく定まり、準同型。$\mu_{p-1}$ は $e^{2\pi i/(p-1)}$ で生成される巡回群で、$n\mid p-1$ なら $e^{2\pi i/n}$ が位数 $n$ の元。
+
+**Step 3（3）.** $\chi(b)\neq1$ となる $b\neq0$ をとる。$a\mapsto ba$ は $\mathbb{F}_{p}$ の全単射なので $S\defeq\sum_{a}\chi(a)=\sum_{a}\chi(ba)=\chi(b)S$（$\chi(0)=0$）。よって $S=0$。
+
+**Step 4（4）.** $a=0$ なら各項 $1$。$a\neq0$ なら $\zeta^{a}\neq1$ で、$\sum_{t=0}^{p-1}(\zeta^{a})^{t}=\frac{\zeta^{ap}-1}{\zeta^{a}-1}=0$。
+:::
+
+## ガウス和 {#nt:sec-gj-gauss}
+
+::: definition ガウス和 {#nt:gauss-sum-def keywords="Gauss sum g(chi) = sum_t chi(t) zeta^t" index="ガウス和|がうすわ" refname="ガウス和"}
+乗法的指標 $\chi$ の**ガウス和**を $g(\chi)\defeq\sum_{t\in\mathbb{F}_{p}}\chi(t)\zeta^{t}$ とする。
+:::
+
+::: intuition
+ガウス和は、乗法の構造（$\chi$）と加法の構造（$\zeta^{t}$）を一つの和で掛け合わせたものである。$p$ 個の長さ 1 のベクトルの和なのに、長さがちょうど $\sqrt p$ になる、という「打ち消し合いの精密さ」がその本質である。
+:::
+
+::: theorem ガウス和の絶対値 {#nt:gauss-sum-abs keywords="|g(chi)|^2 = p for chi != epsilon; g(chi) g(chi^{-1}) = chi(-1) p; quadratic Gauss sum g(rho)^2 = (-1/p) p; g(epsilon) = 0" index="ガウス和の絶対値|がうすわのぜったいち" refname="ガウス和の絶対値"}
+$\chi\neq\varepsilon$ とする。
+1. $\abs{g(\chi)}^{2}=p$。
+2. $g(\chi)\,g(\chi^{-1})=\chi(-1)\,p$。特に $g(\rho)^{2}=(\tfrac{-1}{p})\,p$。
+3. $g(\varepsilon)=0$。
+:::
+
+::: intuition
+ガウス和の絶対値の 2 乗を展開すると、ほとんどの項が直交性で打ち消し合い、対角線上の $p$ 個分だけが残る。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$g(\chi)\overline{g(\chi)}=p$】$\overline{g(\chi)}=\sum_{t}\overline{\chi(t)}\zeta^{-t}$ なので
+$$g(\chi)\overline{g(\chi)}=\sum_{s,t}\chi(s)\overline{\chi(t)}\zeta^{s-t}.$$
+$t=0$ の項は $\overline{\chi(0)}=0$ で消える。$t\neq0$ では $s=tu$ と置き換えると $\chi(tu)\overline{\chi(t)}=\chi(u)\abs{\chi(t)}^{2}=\chi(u)$ なので、和は $\sum_{u}\chi(u)\sum_{t\neq0}\zeta^{t(u-1)}$。内側の和は \ref{nt:character-basic} の 4 から、$u=1$ なら $p-1$、$u\neq1$ なら $0-1=-1$。よって $(p-1)\chi(1)-\sum_{u\neq1}\chi(u)=(p-1)-(0-1)=p$（\ref{nt:character-basic} の 3）。
+
+**Step 2（2）.** $\overline{g(\chi)}=\sum_{t}\chi^{-1}(t)\zeta^{-t}$ で $t\mapsto-t$ と置き換えると $=\chi^{-1}(-1)\sum_{t}\chi^{-1}(t)\zeta^{t}=\chi(-1)g(\chi^{-1})$（$\chi(-1)=\pm1$）。1 と合わせて $g(\chi)g(\chi^{-1})=\chi(-1)p$。$\rho^{-1}=\rho$ と $\rho(-1)=(\tfrac{-1}{p})$ から後半。
+
+**Step 3（3）.** $g(\varepsilon)=\sum_{t}\zeta^{t}=0$（\ref{nt:character-basic} の 4）。
+:::
+
+## ヤコビ和 {#nt:sec-gj-jacobi}
+
+::: definition ヤコビ和 {#nt:jacobi-sum-def keywords="Jacobi sum J(chi, lambda) = sum_{a+b=1} chi(a) lambda(b)" index="ヤコビ和|やこびわ" refname="ヤコビ和"}
+乗法的指標 $\chi,\lambda$ の**ヤコビ和**を $J(\chi,\lambda)\defeq\sum_{a+b=1}\chi(a)\lambda(b)$（$a,b\in\mathbb{F}_{p}$）とする。
+:::
+
+::: intuition
+ヤコビ和は、直線 $a+b=1$ の上で 2 つの指標の値を掛けて足したもので、方程式の解の個数を数えるときに自然に現れる。ガウス和の積を「足し算の結果ごと」にまとめ直すと、ヤコビ和が出てくる。
+:::
+
+::: theorem ヤコビ和とガウス和 {#nt:jacobi-gauss keywords="J(epsilon, epsilon) = p; J(epsilon, chi) = 0; J(chi, chi^{-1}) = -chi(-1); if chi, lambda, chi lambda are nontrivial then J = g(chi) g(lambda) / g(chi lambda) and |J| = sqrt p" index="ヤコビ和とガウス和の関係|やこびわとがうすわのかんけい" refname="ヤコビ和とガウス和"}
+$\chi,\lambda$ を乗法的指標とする。
+1. $J(\varepsilon,\varepsilon)=p$、$\chi\neq\varepsilon$ なら $J(\varepsilon,\chi)=0$、$J(\chi,\chi^{-1})=-\chi(-1)$。
+2. $\chi,\lambda,\chi\lambda$ がいずれも自明でなければ、$J(\chi,\lambda)=\dfrac{g(\chi)g(\lambda)}{g(\chi\lambda)}$ で、$\abs{J(\chi,\lambda)}=\sqrt p$。
+:::
+
+::: intuition
+2 つのガウス和の積を、加えた結果 $c$ ごとにまとめると、各 $c$ の部分はヤコビ和のスカラー倍になり、全体はもう一つのガウス和の形になる。だからヤコビ和はガウス和の比で、その絶対値は $\sqrt p$ になる。
+:::
+
+::: proof
+**Step 1（1）.** $J(\varepsilon,\varepsilon)$ は $p$ 個の組の数。$J(\varepsilon,\chi)=\sum_{b}\chi(b)=0$。$J(\chi,\chi^{-1})$：$a=0$ や $a=1$（$b=0$）の項は $0$ なので、$a\neq0,1$ について $\chi(a)\chi^{-1}(1-a)=\chi\bigl(\frac{a}{1-a}\bigr)$。$a\mapsto c=\frac{a}{1-a}$ は $\mathbb{F}_{p}\setminus\{1\}$ から $\mathbb{F}_{p}\setminus\{-1\}$ への全単射（逆写像 $a=\frac{c}{1+c}$）で、$a=0\mapsto0$。よって $J=\sum_{c\neq-1}\chi(c)=0-\chi(-1)$。
+
+**Step 2（2）.** 【主張：$g(\chi)g(\lambda)=J(\chi,\lambda)g(\chi\lambda)$】
+$$g(\chi)g(\lambda)=\sum_{s,t}\chi(s)\lambda(t)\zeta^{s+t}=\sum_{c}\zeta^{c}\sum_{s+t=c}\chi(s)\lambda(t).$$
+$c\neq0$ では $s=cs'$, $t=ct'$ と置き換えて内側の和は $\chi\lambda(c)J(\chi,\lambda)$。$c=0$ では $\sum_{s}\chi(s)\lambda(-s)=\lambda(-1)\sum_{s}\chi\lambda(s)=0$（$\chi\lambda\neq\varepsilon$）。よって $g(\chi)g(\lambda)=J(\chi,\lambda)\sum_{c\neq0}\chi\lambda(c)\zeta^{c}=J(\chi,\lambda)g(\chi\lambda)$（$\chi\lambda(0)=0$）。\ref{nt:gauss-sum-abs} から $g(\chi\lambda)\neq0$ なので割れて、絶対値は $\sqrt p\sqrt p/\sqrt p$。
+:::
+
+## 応用 {#nt:sec-gj-applications}
+
+::: theorem $x^{2}+y^{2}=1$ の解の個数 {#nt:circle-points-mod-p keywords="number of solutions of x^2 + y^2 = 1 in F_p is p - (-1/p); N(x^2 = a) = 1 + (a/p)" index="2 次曲線の点の個数|にじきょくせんのてんのこすう" refname="x^2+y^2=1 の解の個数"}
+$\mathbb{F}_{p}$ で $x^{2}+y^{2}=1$ を満たす $(x,y)$ の個数は $p-(\tfrac{-1}{p})$。
+:::
+
+::: intuition
+$x^{2}=a$ の解の個数は $1+(\tfrac{a}{p})$ と指標で書けるので、円 $x^{2}+y^{2}=1$ の点の個数は、主要項 $p$ とヤコビ和による小さな補正 $-(\tfrac{-1}{p})$ に分かれる。
+:::
+
+::: proof
+$N(x^{2}=a)=1+\rho(a)$（$a=0$ で 1 個、平方剰余で 2 個、非剰余で 0 個）。$x^{2}=a$, $y^{2}=b$ と分けて
+$$N=\sum_{a+b=1}(1+\rho(a))(1+\rho(b))=p+\sum_{a}\rho(a)+\sum_{b}\rho(b)+J(\rho,\rho).$$
+中の 2 つの和は $0$（\ref{nt:character-basic} の 3）、$\rho^{-1}=\rho$ なので $J(\rho,\rho)=-\rho(-1)$（\ref{nt:jacobi-gauss} の 1）。
+:::
+
+::: theorem フェルマーの 2 平方和定理（ヤコビ和による証明） {#nt:two-squares-jacobi keywords="a prime p = 1 mod 4 is a sum of two squares: J(chi, chi) for a character of order 4 is a Gaussian integer of norm p" index="フェルマーの 2 平方和定理|ふぇるまーのにへいほうわていり, 2 平方和定理|にへいほうわていり" refname="フェルマーの 2 平方和定理"}
+$p\equiv1\pmod4$ なら $p=a^{2}+b^{2}$ となる整数 $a,b$ がある。
+:::
+
+::: intuition
+位数 4 の指標の値は $\pm1,\pm i$ なので、そのヤコビ和はガウスの整数 $a+bi$ になる。一方ヤコビ和の絶対値は $\sqrt p$ なので、$a^{2}+b^{2}=p$ が出る。
+:::
+
+::: proof
+$4\mid p-1$ なので位数 4 の指標 $\chi$ がある（\ref{nt:character-basic} の 2）。$\chi^{2}$ は位数 2 で自明でないので、$\chi,\chi,\chi^{2}$ はすべて自明でなく、\ref{nt:jacobi-gauss} の 2 から $\abs{J(\chi,\chi)}^{2}=p$。$\chi$ の値は $\{0,\pm1,\pm i\}$ に入るので $J(\chi,\chi)=a+bi$（$a,b\in\Z$）。よって $p=a^{2}+b^{2}$。
+:::
+
+::: example
+1. $p=5$：$x^{2}+y^{2}=1$ の解は $p-1=4$ 個：$(\pm1,0),(0,\pm1)$（$\pm2$ の平方は $4$ で、$4+4=8\equiv3$, $1+4=5\equiv0$ なので他にない）。
+2. $p=7$：解は $7+1=8$ 個：$(\pm1,0),(0,\pm1),(\pm2,\pm2)$（$4+4=8\equiv1$）。
+3. $p=13$、原始根 $g=2$、$\chi(2^{k})=i^{k}$ とすると $J(\chi,\chi)$ を計算すると $3-2i$ となり、$13=3^{2}+2^{2}$。
+4. $p=3$ では $\abs{g(\rho)}^{2}=3$：$g(\rho)=\zeta-\zeta^{2}=i\sqrt3$（$\zeta=e^{2\pi i/3}$）で、$g(\rho)^{2}=-3=(\tfrac{-1}{3})\cdot3$。
+:::
+
+::: hypcheck
+- **ガウス和の絶対値**：$\chi\neq\varepsilon$ は $\sum_{u}\chi(u)=0$（Step 1）に必要。$\chi=\varepsilon$ ではガウス和は $0$。
+- **ヤコビ和とガウス和**：$\chi\lambda\neq\varepsilon$ は $c=0$ の項が消えることと、$g(\chi\lambda)\neq0$ で割ることに使った。$\chi\lambda=\varepsilon$ の場合は 1 で別に計算した。
+- **2 平方和定理**：$p\equiv1\pmod4$ は位数 4 の指標の存在に必要。$p\equiv3\pmod4$ の素数は 2 平方の和でない（平方数は $\bmod4$ で $0,1$）。
+:::
+
+## 問題 {#nt:sec-gj-problems}
+
+::: problem {#nt:prob-gj-g5}
+$p=5$ の 2 次ガウス和 $g(\rho)=\zeta-\zeta^{2}-\zeta^{3}+\zeta^{4}$ について $g(\rho)^{2}=5$ を確かめ、$g(\rho)=\pm\sqrt5$ を示せ。
+:::
+
+::: solution
+$\rho(1)=\rho(4)=1$, $\rho(2)=\rho(3)=-1$ から式の形になる。\ref{nt:gauss-sum-abs} の 2 で $(\tfrac{-1}{5})=1$ なので $g(\rho)^{2}=5$。$g(\rho)$ は実数（$\zeta^{4}=\bar\zeta$, $\zeta^{3}=\overline{\zeta^{2}}$ から $g(\rho)=2\cos\frac{2\pi}{5}-2\cos\frac{4\pi}{5}$）なので $\pm\sqrt5$。実際 $\cos\frac{2\pi}{5}>0>\cos\frac{4\pi}{5}$ から $+\sqrt5$。
+:::
+
+::: problem {#nt:prob-gj-j-epsilon}
+\ref{nt:jacobi-gauss} の 1 の $J(\chi,\chi^{-1})=-\chi(-1)$ を、$p=5$, $\chi=\rho$ で直接確かめよ。
+:::
+
+::: solution
+$a+b=1$ で $a,b\neq0$ の組は $(2,4),(3,3),(4,2)$（$a=1$ は $b=0$）。$\rho(2)\rho(4)+\rho(3)^{2}+\rho(4)\rho(2)=-1+1-1=-1$。$-\rho(-1)=-\rho(4)=-1$ と一致する。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ガウス和の絶対値は、指標の値が $1$ の冪根であることと、加法的な和の直交性だけで示せた。$\zeta$ を $e^{2\pi i/p}$ にとったが、$\mathbb{C}$ の任意の原始 $p$ 乗根でよい。
+
+**前提を変えると.**
+- 2 次ガウス和の符号は $g(\rho)=\sqrt p$（$p\equiv1\pmod4$）、$i\sqrt p$（$p\equiv3\pmod4$）である（ガウスが数年かけて証明した、と伝えられている。Ireland–Rosen, 第 6 章 §4）。
+- $g(\rho)^{2}=(\tfrac{-1}{p})p$ を、代数的整数の環で $q$ を法として計算すると、平方剰余の相互法則の別証明が得られる（Ireland–Rosen, 第 6 章 §3）。
+- 一般の有限体 $\mathbb{F}_{q}$ と方程式 $a_{1}x_{1}^{l_{1}}+\cdots+a_{r}x_{r}^{l_{r}}=b$ の解の個数も、ヤコビ和で表され、その絶対値の評価がヴェイユ予想（合同ゼータ関数）の最初の例になった、と知られている（Ireland–Rosen, 第 8・11 章）。
+- $p\equiv1\pmod3$ なら、位数 3 の指標のヤコビ和から $4p=A^{2}+27B^{2}$ が得られる（Ireland–Rosen, 第 8 章）と知られている。
+
+**高い視点から：有限体上のフーリエ解析.** 加法的指標 $t\mapsto\zeta^{at}$ と乗法的指標 $\chi$ は、それぞれ加法群・乗法群の上のフーリエ解析の基底で、ガウス和は両者の「内積」、すなわち乗法的指標の加法的フーリエ係数である。$\abs{g(\chi)}=\sqrt p$ は、有限群上のプランシュレルの等式から来る「フーリエ変換は長さを保つ」ことの現れで、指標の値が均等に散らばっていること（平方根相殺）を表す。比喩で言えば、ガウス和は乗法の時計と加法の時計を同時に回したときの「ずれ」の総和で、その大きさがちょうど $\sqrt p$ になることは、2 つの時計が互いに無関係に回っていることの証拠である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-gj-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

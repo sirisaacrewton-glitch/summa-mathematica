@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平方和 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/02-elementary-number-theory/03-arithmetic-functions/02-sums-of-squares.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 平方和 {#nt:page-sums-of-squares keywords="sums of two squares, Brahmagupta-Fibonacci identity, characterization of integers that are sums of two squares, Gaussian integers, Gaussian primes, Jacobi's two square theorem r_2(n) = 4 sum chi(d), Lagrange's four square theorem, Euler's four square identity, descent"}
+
+どんな整数が平方数の和で書けるかは、数論の最も古い問題の一つである。このページでは、2 つの平方数の和で書ける整数を素因数分解で完全に特徴づけ、さらにその表し方の個数 $r_{2}(n)$ を、ガウスの整数環 $\Z[i]$ の素元分解を使って $4\sum_{d\mid n}\chi(d)$（$\chi$ は $4$ を法とする自明でない指標）と求める（**ヤコビの 2 平方定理**）。後半では、すべての自然数が 4 つの平方数の和であること（**ラグランジュの 4 平方定理**）を、オイラーの恒等式と無限降下法で証明する。
+
+## 記法と定義の確認 {#nt:sec-sq-notation}
+
+::: notation
+- $p$ は $p\equiv1\pmod4$ の素数、$q$ は $q\equiv3\pmod4$ の素数を表すことが多い。$p\equiv1\pmod4$ の素数が 2 平方の和であること（フェルマー）は \ref{nt:two-squares-jacobi}、$(\tfrac{-1}{q})=-1$ は \ref{nt:euler-criterion-elementary}。
+- ガウスの整数環 $\Z[i]$ とノルム $N(a+bi)\defeq a^{2}+b^{2}$ は乗法的で、$\Z[i]$ はユークリッド環（\ref{ring:euclidean-examples}）、したがって単項イデアル整域で一意分解環（\ref{ring:euclidean-pid}）。単元は $N(u)=1$ の $\pm1,\pm i$（\ref{ring:quadratic-units}）。
+- $r_{k}(n)\defeq\#\{(x_{1},\dots,x_{k})\in\Z^{k}:x_{1}^{2}+\cdots+x_{k}^{2}=n\}$（符号と順序を区別する）。
+- 体系は $\ZF$。
+:::
+
+## 2 平方和 {#nt:sec-sq-two}
+
+::: theorem 2 平方和で表せる整数 {#nt:two-squares-characterization keywords="n >= 1 is a sum of two squares iff every prime q = 3 mod 4 divides n to an even power; (a^2+b^2)(c^2+d^2) = (ac-bd)^2 + (ad+bc)^2" index="2 平方和で表せる整数|にへいほうわであらわせるせいすう" refname="2 平方和で表せる整数"}
+1. $(a^{2}+b^{2})(c^{2}+d^{2})=(ac-bd)^{2}+(ad+bc)^{2}$。
+2. $q\equiv3\pmod4$ の素数 $q$ が $a^{2}+b^{2}$ を割るなら、$q\mid a$ かつ $q\mid b$。
+3. $n\ge1$ が 2 つの平方数の和であることと、$q\equiv3\pmod4$ のすべての素数 $q$ について $v_{q}(n)$ が偶数であることは同値。
+:::
+
+::: intuition
+2 平方和は複素数の絶対値の 2 乗で、積の絶対値は絶対値の積なので、2 平方和の積も 2 平方和である。$4k+1$ 型の素数と $2=1+1$ は 2 平方和なので、それらと平方数の積はすべて 2 平方和になる。一方 $4k+3$ 型の素数は「$-1$ が平方でない」ので、$a^{2}+b^{2}$ を割るなら $a,b$ を両方割るしかなく、奇数回は現れえない。
+:::
+
+::: proof
+**Step 1（1）.** 展開して確かめる（$\abs{z}^{2}\abs{w}^{2}=\abs{zw}^{2}$, $z=a+bi$, $w=c+di$）。
+
+**Step 2（2）.** $q\nmid a$ なら $a$ は $q$ を法として可逆で、$(ba^{-1})^{2}\equiv-1\pmod q$ となり $(\tfrac{-1}{q})=1$。これは $(\tfrac{-1}{q})=(-1)^{(q-1)/2}=-1$ に反する。よって $q\mid a$、すると $q\mid b^{2}$ から $q\mid b$。
+
+**Step 3（3 の $\Leftarrow$）.** $n=2^{a}\prod p_{j}^{e_{j}}\prod q_{k}^{2g_{k}}$ と書くと、$2=1^{2}+1^{2}$、$p_{j}$ は 2 平方和（\ref{nt:two-squares-jacobi}）、$q_{k}^{2g_{k}}=(q_{k}^{g_{k}})^{2}+0^{2}$ なので、1 を繰り返して $n$ も 2 平方和。
+
+**Step 4（3 の $\Rightarrow$）.** 【主張：$n=a^{2}+b^{2}$ なら $v_{q}(n)$ は偶数】$v_{q}(n)$ についての帰納法。$v_{q}(n)\ge1$ なら 2 から $a=qa'$, $b=qb'$ で $n/q^{2}=a'^{2}+b'^{2}$、$v_{q}(n/q^{2})=v_{q}(n)-2$ に帰納法の仮定を使う（$v_{q}=0$ は偶数）。
+:::
+
+::: lemma ガウス素元の分類 {#nt:gaussian-primes keywords="Gaussian primes up to units: 1+i, rational primes q = 3 mod 4, and a+bi, a-bi with a^2+b^2 = p = 1 mod 4 (non-associate)" index="ガウス素元|がうすそげん" refname="ガウス素元の分類"}
+$\Z[i]$ の素元は、単元倍を除いて次のもので尽き、互いに同伴でない：
+1. $1+i$（$N=2$。$2=-i(1+i)^{2}$）。
+2. $q\equiv3\pmod4$ の有理素数 $q$（$N=q^{2}$）。
+3. $p\equiv1\pmod4$ の素数を $p=a^{2}+b^{2}$ と書いたときの $\pi_{p}\defeq a+bi$ と $\bar\pi_{p}=a-bi$（$N=p$）。
+:::
+
+::: intuition
+ガウスの整数の世界では、有理素数は 3 通りに振る舞う：$2$ は $(1+i)^{2}$ の単元倍に「重なり」、$4k+1$ 型は共役な 2 つの素元に「割れ」、$4k+3$ 型は素元のまま「残る」。
+:::
+
+::: proof
+**Step 1（素元はある有理素数を割る）.** 素元 $\pi$ について $\pi\mid\pi\bar\pi=N(\pi)$ で、$N(\pi)\ge2$ を有理素数の積に分けると、$\pi$ は素元なのでそのどれか $\ell$ を割る。$\ell=\pi\gamma$ のノルムをとって $N(\pi)\mid\ell^{2}$、$N(\pi)\in\{\ell,\ell^{2}\}$。
+
+**Step 2（場合分け）.** 【主張：$\ell$ の剰余類ごとに $\pi$ が決まる】ノルムが素数の元は既約（積に分けるとノルムの一方が $1$、すなわち単元）なので、一意分解環では素元。(a) $\ell=2$：$1+i$ はノルム 2 で素元、$\pi\mid2=-i(1+i)^{2}$ から $\pi\sim1+i$。(b) $\ell=q\equiv3\pmod4$：$q$ は 2 平方和でない（平方数は $\bmod4$ で $0,1$）ので $N(\pi)\neq q$、$N(\pi)=q^{2}=N(q)$ で $\gamma$ は単元、$\pi\sim q$。$q$ 自身はノルム $q^{2}$ で、ノルム $q$ の元がないので既約、素元。(c) $\ell=p\equiv1\pmod4$：$p=\pi_{p}\bar\pi_{p}$ はノルム $p$ の素元 2 つの積なので、$\pi\mid p$ から $\pi\sim\pi_{p}$ か $\pi\sim\bar\pi_{p}$。
+
+**Step 3（非同伴）.** 【主張：$\pi_{p}$ と $\bar\pi_{p}$ は同伴でない】$a+bi$ の同伴は $\pm(a+bi)$, $\pm(-b+ai)$ で、$a-bi$ がそのどれかに等しいなら $b=0$ か $a=0$ か $a=\pm b$。いずれも $p=a^{2}+b^{2}$ が素数で $p\equiv1\pmod4$ であることに反する（$p=a^{2}$ や $p=2a^{2}$）。ノルムが異なる種類どうしは同伴でない。
+:::
+
+::: theorem ヤコビの 2 平方定理 {#nt:jacobi-two-squares keywords="r_2(n) = 4 sum_{d | n} chi(d) where chi is the nontrivial character mod 4; r_2(n) = 4 prod (e_p + 1) if all v_q(n) are even" index="ヤコビの 2 平方定理|やこびのにへいほうていり" refname="ヤコビの 2 平方定理"}
+$\chi(d)\defeq0,1,-1$（$d$ が偶数、$d\equiv1$、$d\equiv3\pmod4$）とすると、$n\ge1$ について
+$$r_{2}(n)=4\sum_{d\mid n}\chi(d).$$
+:::
+
+::: intuition
+$n=x^{2}+y^{2}$ の解は、ノルムが $n$ のガウス整数と同じである。ガウス整数の素元分解で、$4k+1$ 型の素数 $p^{e}$ の部分は $\pi^{s}\bar\pi^{e-s}$ の $e+1$ 通りを選べ、$4k+3$ 型は偶数乗でないと実現できない。この数え方を約数の言葉に直すと、指標 $\chi$ の約数和になる。
+:::
+
+::: proof
+**Step 1（右辺）.** $\chi$ は完全乗法的なので $\rho\defeq\chi\ast\mathbf 1$ は乗法的（\ref{nt:arithmetic-function-ring}）。$\rho(2^{a})=1$、$\rho(p^{e})=e+1$、$\rho(q^{f})=\sum_{j=0}^{f}(-1)^{j}=[f\text{ が偶数}]$。
+
+**Step 2（左辺）.** 【主張：$r_{2}(n)=\#\{\alpha\in\Z[i]:N(\alpha)=n\}=4\prod_{j}(e_{j}+1)\cdot[\text{すべての }f_{k}\text{ が偶数}]$】$x^{2}+y^{2}=n$ の解と $N(x+yi)=n$ の $\alpha=x+yi$ は一対一。$n=2^{a}\prod p_{j}^{e_{j}}\prod q_{k}^{f_{k}}$ とし、\ref{nt:gaussian-primes} と一意分解から $\alpha=u(1+i)^{a'}\prod\pi_{p_{j}}^{s_{j}}\bar\pi_{p_{j}}^{t_{j}}\prod q_{k}^{g_{k}}$（$u$ は単元）と一意に書く。$N(\alpha)=2^{a'}\prod p_{j}^{s_{j}+t_{j}}\prod q_{k}^{2g_{k}}$ が $n$ に等しいことは、算術の基本定理から $a'=a$, $s_{j}+t_{j}=e_{j}$, $2g_{k}=f_{k}$ と同値。よって $f_{k}$ がすべて偶数のときに限り解があり、$(s_{j})$ の選び方 $\prod(e_{j}+1)$ と単元 4 つで、個数は $4\prod(e_{j}+1)$。
+
+**Step 3.** Step 1, 2 を比べればよい。
+:::
+
+## 4 平方和 {#nt:sec-sq-four}
+
+::: theorem ラグランジュの 4 平方定理 {#nt:lagrange-four-squares keywords="every natural number is a sum of four squares; Euler's four square identity; descent: for a prime p, the least m with mp a sum of four squares is 1" index="ラグランジュの 4 平方定理|らぐらんじゅのよんへいほうていり, オイラーの 4 平方恒等式|おいらーのよんへいほうこうとうしき" refname="ラグランジュの 4 平方定理"}
+1. （オイラーの恒等式）$\bigl(\sum_{i=1}^{4}a_{i}^{2}\bigr)\bigl(\sum_{i=1}^{4}b_{i}^{2}\bigr)=z_{1}^{2}+z_{2}^{2}+z_{3}^{2}+z_{4}^{2}$。ここで
+$$\begin{aligned}z_{1}&=a_{1}b_{1}+a_{2}b_{2}+a_{3}b_{3}+a_{4}b_{4},& z_{2}&=a_{1}b_{2}-a_{2}b_{1}+a_{3}b_{4}-a_{4}b_{3},\\ z_{3}&=a_{1}b_{3}-a_{3}b_{1}+a_{4}b_{2}-a_{2}b_{4},& z_{4}&=a_{1}b_{4}-a_{4}b_{1}+a_{2}b_{3}-a_{3}b_{2}.\end{aligned}$$
+2. すべての自然数は 4 つの平方数の和である。
+:::
+
+::: intuition
+4 平方和は四元数のノルムで、ノルムの乗法性がオイラーの恒等式である。だから素数について示せば十分で、素数 $p$ については、まず「$p$ のある倍数 $mp$」が 4 平方和であることを鳩の巣原理で示し、$m$ を少しずつ小さくして（無限降下法）$m=1$ にたどり着く。
+:::
+
+::: proof
+**Step 1（1）.** 両辺を展開して比べる（交差項 $2a_{i}a_{j}b_{k}b_{l}$ は $z$ の 2 乗の和の中で打ち消し合う）。
+
+**Step 2（素数の倍数）.** 【主張：奇素数 $p$ について、$1\le m<p$ と $x_{i}$ で $mp=x_{1}^{2}+x_{2}^{2}+x_{3}^{2}+x_{4}^{2}$ となるものがある】$x\in\{0,\dots,\frac{p-1}{2}\}$ の $x^{2}$ は $p$ を法として相異なり（$x^{2}\equiv y^{2}$ なら $x\equiv\pm y$）、$\frac{p+1}{2}$ 個。$-1-y^{2}$ も同様に $\frac{p+1}{2}$ 個の相異なる値をとる。合計 $p+1>p$ 個なので、ある $x,y$ で $x^{2}\equiv-1-y^{2}$。$x^{2}+y^{2}+1^{2}+0^{2}=mp$ で、$x^{2}+y^{2}+1\le2\cdot\frac{(p-1)^{2}}{4}+1<p^{2}$ から $1\le m<p$。
+
+**Step 3（偶数の $m$ は半分にできる）.** $m$ を Step 2 の形の最小の数とする。$m$ が偶数なら、$x_{i}$ の偶奇は偶数個ずつそろうので、並べ替えて $x_{1}\equiv x_{2}$, $x_{3}\equiv x_{4}\pmod2$ とでき、$\frac m2p=\bigl(\frac{x_{1}+x_{2}}{2}\bigr)^{2}+\bigl(\frac{x_{1}-x_{2}}{2}\bigr)^{2}+\bigl(\frac{x_{3}+x_{4}}{2}\bigr)^{2}+\bigl(\frac{x_{3}-x_{4}}{2}\bigr)^{2}$ が最小性に反する。
+
+**Step 4（奇数の $m>1$ も小さくできる）.** 【主張：$m$ が奇数で $1<m<p$ なら、$rp$ が 4 平方和となる $1\le r<m$ がある】$y_{i}\equiv x_{i}\pmod m$, $\abs{y_{i}}<m/2$ となる $y_{i}$ をとる（$m$ 奇数）。$\sum y_{i}^{2}\equiv\sum x_{i}^{2}\equiv0\pmod m$ で $\sum y_{i}^{2}<m^{2}$ なので $\sum y_{i}^{2}=mr$, $0\le r<m$。$r=0$ なら $x_{i}$ はすべて $m$ の倍数で $m^{2}\mid mp$、$m\mid p$ となり $1<m<p$ に反する。1 から $(mp)(mr)=\sum z_{i}^{2}$ で、$y_{i}\equiv x_{i}$ を代入すると $z_{1}\equiv\sum x_{i}^{2}\equiv0$, $z_{2}\equiv x_{1}x_{2}-x_{2}x_{1}+x_{3}x_{4}-x_{4}x_{3}=0$、$z_{3},z_{4}$ も同様に $\equiv0\pmod m$。よって $rp=\sum(z_{i}/m)^{2}$。これは $m$ の最小性に反するので $m=1$、すなわち $p$ は 4 平方和。
+
+**Step 5（2）.** $0=0^{2}\cdot4$、$1=1^{2}$、$2=1^{2}+1^{2}$。$n\ge2$ は素数の積なので、1 を繰り返して 4 平方和。
+:::
+
+::: example
+1. $r_{2}(25)=4(\chi(1)+\chi(5)+\chi(25))=12$：$(\pm5,0),(0,\pm5),(\pm3,\pm4),(\pm4,\pm3)$。
+2. $r_{2}(65)=4\cdot2\cdot2=16$（$65=5\cdot13$）：$65=1^{2}+8^{2}=4^{2}+7^{2}$。
+3. $21=3\cdot7$ は $v_{3}=v_{7}=1$ なので 2 平方和でない。4 平方和では $21=4^{2}+2^{2}+1^{2}+0^{2}$。
+4. $7$ は 3 平方和でもない（$\bmod8$ で平方数は $0,1,4$ で、3 つの和は $7$ にならない）ので、4 は最小である。
+:::
+
+::: hypcheck
+- **2 平方和**：$q\equiv3\pmod4$ の性質 $(\tfrac{-1}{q})=-1$ を Step 2 に使った。
+- **ヤコビの 2 平方定理**：$\Z[i]$ の一意分解（ユークリッド環であること）が本質。ノルムが乗法的であることで、因数の指数の条件が有理整数の素因数分解の条件に変わる。
+- **4 平方定理**：$p$ が奇素数であることは、Step 2 の鳩の巣原理（$x^{2}$ の値の個数）と、Step 4 で $\abs{y_{i}}<m/2$ をとるときの $m$ の奇数性に使った。無限降下法は $\N$ の整列性（最小の $m$）による。
+:::
+
+## 問題 {#nt:sec-sq-problems}
+
+::: problem {#nt:prob-sq-sum-of-two-squares-list}
+$21,33,42,57$ が 2 つの平方数の和で表せないこと、$45$ は表せることを \ref{nt:two-squares-characterization} で確かめ、$45$ の表し方を一つ求めよ。
+:::
+
+::: solution
+$21=3\cdot7$, $33=3\cdot11$, $42=2\cdot3\cdot7$, $57=3\cdot19$ はいずれも $4k+3$ 型の素数を奇数乗で含むので表せない。$45=3^{2}\cdot5$ は $v_{3}=2$ で、$5=1^{2}+2^{2}$ に $3^{2}$ を掛けて $45=3^{2}+6^{2}$。
+:::
+
+::: problem {#nt:prob-sq-four-31}
+$31$ を 4 平方和で表せ。また $31$ が 3 平方和でないことを示せ。
+:::
+
+::: solution
+$31=25+4+1+1=5^{2}+2^{2}+1^{2}+1^{2}$。$31\equiv7\pmod8$ で、平方数は $\bmod8$ で $0,1,4$ なので、3 つの和は $0,1,2,3,4,5,6$ の値しかとらず$7$ にならない（3 つの値の和を $\bmod8$ ですべて調べると $0+0+0=0$, $0+0+1=1$, $0+1+1=2$, $1+1+1=3$, $0+0+4=4$, $0+1+4=5$, $1+1+4=6$, $0+4+4\equiv0$, $1+4+4\equiv1$, $4+4+4\equiv4$）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 4 平方定理の証明は、四元数を表に出さず、オイラーの恒等式と合同式だけで行った。$\Z[i]$ の一意分解は、ノルムについての帰納法で選択公理なしに示せる（ユークリッド環ではノルムが真に減る）。
+
+**前提を変えると.**
+- 3 平方和で表せる自然数は、$4^{a}(8b+7)$ の形でないものに限る（ルジャンドル–ガウスの 3 平方定理）と知られている。証明には 3 元 2 次形式の理論かディリクレの算術級数定理が要る、と一般に説明されている。
+- $r_{4}(n)=8\sum_{d\mid n,\,4\nmid d}d$（ヤコビの 4 平方定理）が成り立つ、と知られている。モジュラー形式の理論で自然に証明される。
+- 一般に、すべての自然数が $g(k)$ 個の $k$ 乗数の和になるという**ウェアリングの問題**は、ヒルベルトが肯定的に解決した（$g(2)=4$, $g(3)=9$）、と知られている。
+- 4 平方定理の帰結として、ブルック–ライザー–チャウラの定理（\ref{comb:page-projective-planes}）の証明に必要な「4 平方和」の道具がそろう。
+
+**高い視点から：ノルム形式と数の体系.** 2 平方和はガウス整数（複素数）のノルム、4 平方和は四元数のノルムで、それぞれの乗法性が恒等式 1 とオイラーの恒等式である。8 平方和についても八元数から同様の恒等式があり、乗法的な $n$ 平方和の恒等式は $n=1,2,4,8$ に限る（フルヴィッツの定理）と知られている。2 平方和の特徴づけは、$\Z[i]$ での素数の分解（分解・惰性・分岐、\ref{nt:gaussian-decomposition}）の言い換えで、どの素数が 2 平方和になるかは、$\mathbb{Q}(i)$ で分解するかで決まる。比喩で言えば、平方和の問題は、整数を「より大きな数の世界」の中で長さとして測り直す問題で、その世界の素因数分解が、どの長さが実現できるかを決めている。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-sq-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

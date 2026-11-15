@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>平方剰余 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/02-elementary-number-theory/02-primitive-roots-reciprocity/02-quadratic-residues.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 平方剰余 {#nt:page-quadratic-residues keywords="quadratic residue, Legendre symbol, Euler's criterion from primitive roots, Gauss's lemma, second supplementary law via Gauss's lemma, Eisenstein's lemma, lattice point proof of quadratic reciprocity, Jacobi symbol, reciprocity for the Jacobi symbol, computing Legendre symbols, (3/p)"}
+
+素数 $p$ を法として $a$ が平方数になるか（$x^{2}\equiv a$ が解けるか）は、ルジャンドル記号 $(\tfrac{a}{p})$ で表される。**平方剰余の相互法則**は、相異なる奇素数 $p,q$ について「$p$ が $q$ を法として平方か」と「$q$ が $p$ を法として平方か」を結びつける。代数的整数論の系列ではこれを円分体のフロベニウス元で証明した（\ref{nt:quadratic-reciprocity}）。このページでは、合同式だけを使う初等的な証明を与える：**ガウスの補題**で記号を「半分を超える余りの個数」に直し、**アイゼンシュタインの補題**で床関数の和に直し、長方形の格子点を数えて相互法則を得る。最後に、記号を素因数分解なしで計算できる**ヤコビ記号**を導入する。
+
+## 記法と定義の確認 {#nt:sec-qr-notation}
+
+::: notation
+- $p$ は奇素数。ルジャンドル記号 $(\tfrac{a}{p})$（$p\mid a$ なら $0$、$a$ が $p$ を法とする $0$ でない平方（**平方剰余**）なら $1$、そうでない（**平方非剰余**）なら $-1$）は \ref{nt:legendre-symbol} のとおり。
+- 原始根と冪剰余の判定は \ref{nt:page-primitive-roots} のとおり。$\lfloor x\rfloor$ は $x$ 以下の最大の整数。
+- 体系は $\ZF$。代数的整数論の系列の証明と違い、このページの議論は代数閉包を使わない。
+:::
+
+## オイラーの規準とガウスの補題 {#nt:sec-qr-gauss}
+
+::: proposition オイラーの規準（原始根による証明） {#nt:euler-criterion-elementary keywords="Euler's criterion via primitive roots: a^{(p-1)/2} = (a/p) mod p; there are (p-1)/2 quadratic residues; the Legendre symbol is completely multiplicative" index="オイラーの規準（初等的証明）|おいらーのきじゅん" refname="オイラーの規準（初等的証明）"}
+$p\nmid a$ について $a^{(p-1)/2}\equiv(\tfrac{a}{p})\pmod p$。平方剰余はちょうど $(p-1)/2$ 個で、$(\tfrac{ab}{p})=(\tfrac{a}{p})(\tfrac{b}{p})$、$(\tfrac{-1}{p})=(-1)^{(p-1)/2}$。
+:::
+
+::: intuition
+原始根の偶数乗がちょうど平方剰余で、それは $(p-1)/2$ 乗すると $1$ になるもの、奇数乗は $(p-1)/2$ 乗すると $-1$ になるものである。
+:::
+
+::: proof
+**Step 1.** \ref{nt:power-residue-criterion} を $m=p$, $n=2$ に使うと $d=2$ で、$a$ が平方剰余 $\iff a^{(p-1)/2}\equiv1$、平方剰余は $(p-1)/2$ 個。
+
+**Step 2.** $c\defeq a^{(p-1)/2}$ は $c^{2}\equiv1$（\ref{grp:euler-fermat}）を満たし、\ref{nt:lagrange-polynomial-congruence} から $x^{2}\equiv1$ の解は $\pm1$ だけなので、平方非剰余なら $c\equiv-1$。$1\not\equiv-1$（$p$ は奇数）なので $a^{(p-1)/2}\equiv(\tfrac{a}{p})$ は等式として決まる。乗法性は左辺の乗法性から、$(\tfrac{-1}{p})$ は $a=-1$ を代入して得る。
+:::
+
+::: theorem ガウスの補題 {#nt:gauss-lemma keywords="Gauss's lemma: (a/p) = (-1)^mu where mu is the number of k in 1..(p-1)/2 with ak mod p > p/2" index="ガウスの補題|がうすのほだい" refname="ガウスの補題"}
+$p\nmid a$ とし、$k=1,\dots,\frac{p-1}{2}$ について $ak$ を $p$ で割った余り $r_{k}$ のうち $p/2$ を超えるものの個数を $\mu$ とする。このとき $(\tfrac{a}{p})=(-1)^{\mu}$。
+:::
+
+::: intuition
+$a,2a,\dots,\frac{p-1}{2}a$ の余りを「$\pm$ 小さい数」の形に直すと、絶対値の部分はちょうど $1,\dots,\frac{p-1}{2}$ の並べ替えになる。だから積をとると $a^{(p-1)/2}$ が $\pm1$ の積、すなわち負になった回数の符号だけになる。
+:::
+
+::: proof
+**Step 1（絶対値は並べ替え）.** 【主張：$\abs{r_{k}}'\defeq\min(r_{k},p-r_{k})$ は $1,\dots,\frac{p-1}{2}$ の並べ替え】$r_{k}\neq0$ なので $\abs{r_{k}}'\in\{1,\dots,\frac{p-1}{2}\}$。$\abs{r_{k}}'=\abs{r_{l}}'$（$k\neq l$）なら $ak\equiv\pm al$、$p\nmid a$ で約分して $k\equiv\pm l\pmod p$。$1\le k,l\le\frac{p-1}{2}$ では $k-l$ も $k+l$ も $p$ で割れない（$0<\abs{k-l}<p$, $0<k+l<p$）ので矛盾。$\frac{p-1}{2}$ 個の相異なる値なので並べ替え。
+
+**Step 2（積をとる）.** $r_{k}\equiv\varepsilon_{k}\abs{r_{k}}'$（$\varepsilon_{k}=-1$ となるのは $r_{k}>p/2$ のとき）なので
+$$a^{\frac{p-1}{2}}\Bigl(\frac{p-1}{2}\Bigr)!\equiv\prod_{k}r_{k}\equiv(-1)^{\mu}\prod_{k}\abs{r_{k}}'=(-1)^{\mu}\Bigl(\frac{p-1}{2}\Bigr)!.$$
+$(\frac{p-1}{2})!$ は $p$ と互いに素なので約分でき、$a^{(p-1)/2}\equiv(-1)^{\mu}$。\ref{nt:euler-criterion-elementary} から $(\tfrac{a}{p})=(-1)^{\mu}$。
+:::
+
+::: corollary 第 2 補充法則（ガウスの補題による証明） {#nt:second-supplementary-elementary keywords="(2/p) = (-1)^{(p^2-1)/8} via Gauss's lemma" index="第 2 補充法則（初等的証明）|だいにほじゅうほうそく"}
+$(\tfrac{2}{p})=(-1)^{(p^{2}-1)/8}$。すなわち $2$ が平方剰余であることと $p\equiv\pm1\pmod8$ は同値。
+:::
+
+::: proof
+$a=2$ では $r_{k}=2k$ で、$2k>p/2\iff k>p/4$ なので $\mu=\frac{p-1}{2}-\lfloor\frac{p}{4}\rfloor$。$p=8m+1,8m+3,8m+5,8m+7$ に対して $\mu=2m,\ 2m+1,\ 2m+1,\ 2m+2$。一方 $\frac{p^{2}-1}{8}$ はそれぞれ $8m^{2}+2m$, $8m^{2}+6m+1$, $8m^{2}+10m+3$, $8m^{2}+14m+6$ で、偶奇は $\mu$ と一致する。
+:::
+
+## 相互法則の格子点による証明 {#nt:sec-qr-reciprocity}
+
+::: lemma アイゼンシュタインの補題 {#nt:eisenstein-lemma keywords="for odd a coprime to p: (a/p) = (-1)^{sum_{k=1}^{(p-1)/2} floor(ka/p)}" index="アイゼンシュタインの補題|あいぜんしゅたいんのほだい"}
+$a$ を $p$ と互いに素な奇数とすると
+$$\Bigl(\frac{a}{p}\Bigr)=(-1)^{T(a,p)},\qquad T(a,p)\defeq\sum_{k=1}^{(p-1)/2}\Bigl\lfloor\frac{ka}{p}\Bigr\rfloor.$$
+:::
+
+::: proof
+**Step 1（余りの分類）.** $ka=p\lfloor ka/p\rfloor+r_{k}$。$r_{k}<p/2$ のものを $s_{1},\dots,s_{\lambda}$、$r_{k}>p/2$ のものを $t_{1},\dots,t_{\mu}$ とする。\ref{nt:gauss-lemma} の Step 1 から $\{s_{i}\}\cup\{p-t_{j}\}=\{1,\dots,\frac{p-1}{2}\}$。$S\defeq\sum_{k=1}^{(p-1)/2}k=\frac{p^{2}-1}{8}$ とおく。
+
+**Step 2（2 つの和）.** $k$ について足すと $aS=pT(a,p)+\sum s_{i}+\sum t_{j}$。Step 1 から $S=\sum s_{i}+\mu p-\sum t_{j}$。引いて $(a-1)S=pT(a,p)-\mu p+2\sum t_{j}$。
+
+**Step 3（偶奇）.** $a$ は奇数なので左辺は偶数、$2\sum t_{j}$ も偶数なので $p(T(a,p)-\mu)$ は偶数。$p$ は奇数なので $T(a,p)\equiv\mu\pmod2$。\ref{nt:gauss-lemma} から結論。
+:::
+
+::: theorem 平方剰余の相互法則（初等的証明） {#nt:quadratic-reciprocity-elementary keywords="quadratic reciprocity (p/q)(q/p) = (-1)^{(p-1)/2 (q-1)/2}: Eisenstein's lattice point proof; counting lattice points in a rectangle on both sides of the diagonal" index="平方剰余の相互法則（格子点による証明）|へいほうじょうよのそうごほうそく" refname="平方剰余の相互法則（初等的証明）"}
+相異なる奇素数 $p,q$ について
+$$\Bigl(\frac{p}{q}\Bigr)\Bigl(\frac{q}{p}\Bigr)=(-1)^{\frac{p-1}{2}\cdot\frac{q-1}{2}}.$$
+:::
+
+::: intuition
+縦 $\frac{q-1}{2}$・横 $\frac{p-1}{2}$ の長方形の格子点を、対角線 $y=\frac{q}{p}x$ の下と上に分けて数える。下側の点の数は $T(q,p)$、上側の点の数は $T(p,q)$ で、対角線上には格子点がないので、合計は長方形の点の数 $\frac{p-1}{2}\cdot\frac{q-1}{2}$ になる。アイゼンシュタインの補題で、それぞれの偶奇が 2 つの記号を決める。
+:::
+
+::: proof
+**Step 1（格子点の分割）.** 【主張：$T(q,p)+T(p,q)=\frac{p-1}{2}\cdot\frac{q-1}{2}$】$R\defeq\{(x,y)\in\Z^{2}:1\le x\le\frac{p-1}{2},\ 1\le y\le\frac{q-1}{2}\}$ とする。$(x,y)\in R$ で $qx=py$ なら $p\mid qx$、$p\nmid q$ から $p\mid x$ となり $1\le x<p$ に反するので、$R$ の点は $qx>py$ か $qx<py$ のどちらか一方を満たす。
+
+**Step 2（下側を数える）.** $x$ を固定すると $qx>py$, $y\ge1$ を満たす $y$ は $1\le y\le\lfloor qx/p\rfloor$ で、$qx/p<q/2$ から $\lfloor qx/p\rfloor\le\frac{q-1}{2}$ なので、$R$ の条件は自動的に満たされる。よって下側の点の数は $\sum_{x}\lfloor qx/p\rfloor=T(q,p)$。同様に上側は $\sum_{y}\lfloor py/q\rfloor=T(p,q)$。
+
+**Step 3（結論）.** \ref{nt:eisenstein-lemma}（$a=q$ と $a=p$ はともに奇数）から $(\tfrac{q}{p})(\tfrac{p}{q})=(-1)^{T(q,p)+T(p,q)}=(-1)^{\frac{p-1}{2}\cdot\frac{q-1}{2}}$。
+:::
+
+## ヤコビ記号 {#nt:sec-qr-jacobi}
+
+::: definition ヤコビ記号 {#nt:jacobi-symbol keywords="Jacobi symbol (a/n) = prod (a/p_i)^{e_i} for odd n = prod p_i^{e_i}" index="ヤコビ記号|やこびきごう" refname="ヤコビ記号"}
+正の奇数 $n=p_{1}^{e_{1}}\cdots p_{r}^{e_{r}}$ と $a\in\Z$ について、**ヤコビ記号**を $(\tfrac{a}{n})\defeq\prod_{i}(\tfrac{a}{p_{i}})^{e_{i}}$ とする（$(\tfrac{a}{1})\defeq1$）。
+:::
+
+::: intuition
+ヤコビ記号は、ルジャンドル記号を合成数の「分母」に形式的に広げたもので、相互法則がそのまま成り立つ。そのおかげで、分子を素因数分解せずに、互除法のように分子と分母を入れ替えて計算できる。
+:::
+
+::: theorem ヤコビ記号の相互法則 {#nt:jacobi-reciprocity keywords="properties of the Jacobi symbol: multiplicativity, (-1/n), (2/n), reciprocity (m/n)(n/m) = (-1)^{(m-1)/2 (n-1)/2} for coprime odd m, n > 0" index="ヤコビ記号の相互法則|やこびきごうのそうごほうそく" refname="ヤコビ記号の相互法則"}
+$m,n$ を正の奇数とする。
+1. $(\tfrac{a}{n})$ は $a\bmod n$ だけで決まり、$(\tfrac{ab}{n})=(\tfrac{a}{n})(\tfrac{b}{n})$, $(\tfrac{a}{mn})=(\tfrac{a}{m})(\tfrac{a}{n})$。
+2. $(\tfrac{-1}{n})=(-1)^{(n-1)/2}$, $(\tfrac{2}{n})=(-1)^{(n^{2}-1)/8}$。
+3. $\gcd(m,n)=1$ なら $(\tfrac{m}{n})(\tfrac{n}{m})=(-1)^{\frac{m-1}{2}\cdot\frac{n-1}{2}}$。
+:::
+
+::: intuition
+ヤコビ記号は分母について乗法的に定義されているので、素数の相互法則を分母・分子の素因数ごとに掛け合わせれば、合成数でも同じ形の法則が残る。符号の指数が奇数の積について加法的にふるまうことが、それを支えている。
+:::
+
+::: proof
+**Step 1（1）.** ルジャンドル記号の性質（\ref{nt:euler-criterion-elementary}）と定義から。
+
+**Step 2（指数の加法性）.** 【主張：奇数 $m,n$ について $\frac{mn-1}{2}\equiv\frac{m-1}{2}+\frac{n-1}{2}$, $\frac{m^{2}n^{2}-1}{8}\equiv\frac{m^{2}-1}{8}+\frac{n^{2}-1}{8}\pmod 2$】差はそれぞれ $\frac{(m-1)(n-1)}{2}$ と $\frac{(m^{2}-1)(n^{2}-1)}{8}$ で、$m-1,n-1$ は偶数、$8\mid m^{2}-1$ なので、どちらも偶数。
+
+**Step 3（2）.** Step 2 から $n\mapsto(-1)^{(n-1)/2}$, $(-1)^{(n^{2}-1)/8}$ は奇数の積について乗法的。素数では \ref{nt:euler-criterion-elementary} と \ref{nt:second-supplementary-elementary}。$n$ の素因数分解に沿って掛ければよい。
+
+**Step 4（3）.** $m=\prod p_{i}$, $n=\prod q_{j}$（重複を許す素因数の列）とすると、1 から $(\tfrac{m}{n})(\tfrac{n}{m})=\prod_{i,j}(\tfrac{p_{i}}{q_{j}})(\tfrac{q_{j}}{p_{i}})=\prod_{i,j}(-1)^{\frac{p_{i}-1}{2}\cdot\frac{q_{j}-1}{2}}$（\ref{nt:quadratic-reciprocity-elementary}。$\gcd(m,n)=1$ なので $p_{i}\neq q_{j}$）。指数の和は $\bigl(\sum_{i}\frac{p_{i}-1}{2}\bigr)\bigl(\sum_{j}\frac{q_{j}-1}{2}\bigr)\equiv\frac{m-1}{2}\cdot\frac{n-1}{2}\pmod2$（Step 2）。
+:::
+
+::: example
+1. **計算.** $383$ は素数。$(\tfrac{219}{383})$：相互法則（$219\equiv383\equiv3\pmod4$ なので符号 $-1$）で $=-(\tfrac{383}{219})=-(\tfrac{164}{219})=-(\tfrac{4}{219})(\tfrac{41}{219})=-(\tfrac{41}{219})$。$41\equiv1\pmod4$ なので $=-(\tfrac{219}{41})=-(\tfrac{14}{41})=-(\tfrac{2}{41})(\tfrac{7}{41})=-(\tfrac{7}{41})$（$41\equiv1\pmod8$）$=-(\tfrac{41}{7})=-(\tfrac{6}{7})=-(\tfrac{-1}{7})=1$。$219$ は $383$ を法とする平方剰余。
+2. **$(\tfrac{3}{p})$.** 相互法則から $(\tfrac{3}{p})=(-1)^{(p-1)/2}(\tfrac{p}{3})$。$p\equiv1\pmod{12}$ なら $1\cdot1$、$p\equiv-1$ なら $(-1)(-1)$、$p\equiv\pm5$ なら $-1$。よって $(\tfrac{3}{p})=1\iff p\equiv\pm1\pmod{12}$（$p\ge5$）。
+3. **注意.** $(\tfrac{2}{15})=(\tfrac{2}{3})(\tfrac{2}{5})=(-1)(-1)=1$ だが、$2$ は $3$ を法として平方でないので $15$ を法としても平方でない。ヤコビ記号が $1$ でも平方剰余とは限らない。
+:::
+
+::: hypcheck
+- **ガウスの補題**：$p$ が奇素数であることは、$\pm$ の分け方（$p/2$ が整数でない）と $(\frac{p-1}{2})!$ の約分に使った。
+- **アイゼンシュタインの補題**：$a$ が奇数であることは Step 3 の偶奇の議論に本質的。$a=2$ では使えないので、第 2 補充法則はガウスの補題から直接示した。
+- **相互法則**：$p\neq q$ は対角線上に格子点がないこと（Step 1）に使った。
+- **ヤコビ記号の相互法則**：$\gcd(m,n)=1$ がないと、ある $p_{i}=q_{j}$ で記号が $0$ になり、式は成り立たない。
+:::
+
+## 問題 {#nt:sec-qr-problems}
+
+::: problem {#nt:prob-qr-gauss-lemma-5-13}
+ガウスの補題を使って $(\tfrac{5}{13})$ を求め、オイラーの規準で確かめよ。
+:::
+
+::: solution
+$5k\bmod13$（$k=1,\dots,6$）は $5,10,2,7,12,4$。$13/2$ を超えるのは $10,7,12$ の 3 個なので $(\tfrac{5}{13})=(-1)^{3}=-1$。オイラーの規準：$5^{2}=25\equiv-1$, $5^{6}=(5^{2})^{3}\equiv-1$。一致する。
+:::
+
+::: problem {#nt:prob-qr-lattice-count}
+$p=5$, $q=7$ について $T(7,5)$ と $T(5,7)$ を計算し、和が $\frac{4}{2}\cdot\frac{6}{2}=6$ になることを確かめよ。
+:::
+
+::: solution
+$T(7,5)=\lfloor7/5\rfloor+\lfloor14/5\rfloor=1+2=3$。$T(5,7)=\lfloor5/7\rfloor+\lfloor10/7\rfloor+\lfloor15/7\rfloor=0+1+2=3$。和は $6$。$(\tfrac{7}{5})=(-1)^{3}=-1$（$7\equiv2$ は $\bmod5$ で非剰余）、$(\tfrac{5}{7})=(-1)^{3}=-1$（$5$ は $\bmod7$ で非剰余：平方は $1,2,4$）で、積 $1=(-1)^{6}$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** このページの証明は円分体も代数閉包も使わず、$\ZF$ の中の有限の数え上げだけで完結する。代数的整数論の系列の証明は、相互法則を「素数の分解」の言葉で理解させるもので、類体論への入り口になる。
+
+**前提を変えると.**
+- 相互法則の証明は 200 以上知られている、と一般に言われている。ガウス和を使う証明（\ref{nt:page-gauss-jacobi-sums} で扱うガウス和の性質から導ける）、ゾロタレフの置換の符号による証明などがある。
+- 3 次・4 次の剰余については、それぞれ $\Z[\omega]$, $\Z[i]$ の上で相互法則が成り立つ（Ireland–Rosen, 第 9 章）と知られている。
+- ヤコビ記号は、法を素因数分解せずに計算でき、ソロヴェイ–シュトラッセンの確率的素数判定に使われる（\ref{comp:page-primality-branching} の周辺を参照）。
+
+**高い視点から：相互法則と類体論.** $(\tfrac{q}{p})$ は「素数 $p$ が 2 次体 $\mathbb{Q}(\sqrt{q^{\ast}})$（$q^{\ast}=(-1)^{(q-1)/2}q$）で分解するか」を表し、相互法則はそれが $p$ を $q$ で割った余りだけで決まることを述べる。素数の分解の仕方が「合同条件」で決まるという現象は、アーベル拡大について一般に成り立ち、これが類体論（アルティンの相互法則）である。格子点の証明は、その最も素朴な影で、対称性 $(x,y)\leftrightarrow(y,x)$ が $p$ と $q$ の役割の入れ替えを実現している。比喩で言えば、相互法則は 2 つの素数の間の「礼儀作法」で、$p$ が $q$ に対してどう振る舞うかを知れば、$q$ が $p$ に対してどう振る舞うかも、両者の 4 で割った余りだけで決まってしまう。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-qr-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
