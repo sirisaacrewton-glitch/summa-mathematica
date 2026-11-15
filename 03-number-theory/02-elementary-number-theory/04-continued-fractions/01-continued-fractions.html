@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>連分数とディオファントス近似 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/02-elementary-number-theory/04-continued-fractions/01-continued-fractions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 連分数とディオファントス近似 {#nt:page-continued-fractions keywords="simple continued fraction, partial quotients, convergents p_k/q_k, recurrence p_k = a_k p_{k-1} + p_{k-2}, p_k q_{k-1} - p_{k-1} q_k = (-1)^{k-1}, continued fraction expansion of a real number, rational numbers have finite expansions, convergence and error bounds, uniqueness of the expansion of irrationals, Dirichlet's approximation theorem, best approximation, Legendre's theorem, Hurwitz's theorem sqrt 5, golden ratio"}
+
+実数を分数で近似するとき、分母の大きさに比べてどれだけ良い近似ができるかが**ディオファントス近似**の問題である。このページでは、実数 $\alpha$ を $\alpha=a_{0}+\cfrac{1}{a_{1}+\cfrac{1}{a_{2}+\cdots}}$ の形に展開する**単純連分数**を導入し、途中で打ち切った**近似分数** $p_{k}/q_{k}$ が漸化式で計算でき、$\abs{\alpha-p_{k}/q_{k}}<1/q_{k}^{2}$ を満たすことを示す。さらに、近似分数は分母がそれ以下の分数の中で最良の近似であること、$\abs{\alpha-p/q}<1/(2q^{2})$ なら $p/q$ は近似分数であること（**ルジャンドルの定理**）、そして定数 $\sqrt5$ が最良であるという**フルヴィッツの定理**を証明する。
+
+## 記法と定義の確認 {#nt:sec-cf-notation}
+
+::: notation
+- $\lfloor x\rfloor$ は $x$ 以下の最大の整数。互除法と \ref{nt:euclidean-algorithm} は \ref{nt:page-divisibility} のとおり。フィボナッチ数 $F_{k}$ と黄金比 $\varphi=\frac{1+\sqrt5}{2}$, $\psi=\frac{1-\sqrt5}{2}$（$\varphi\psi=-1$, $F_{k}=\frac{\varphi^{k}-\psi^{k}}{\sqrt5}$）を使う。
+- 体系は $\ZF$。
+:::
+
+## 連分数と近似分数 {#nt:sec-cf-convergents}
+
+::: definition 単純連分数と近似分数 {#nt:simple-continued-fraction keywords="finite simple continued fraction [a_0; a_1, ..., a_n], partial quotients a_i >= 1 for i >= 1, convergents p_k / q_k defined by recurrences" index="連分数|れんぶんすう, 単純連分数|たんじゅんれんぶんすう, 部分商|ぶぶんしょう, 近似分数|きんじぶんすう" refname="単純連分数"}
+$a_{0}\in\Z$ と正の実数 $a_{1},\dots,a_{n}$ について $[a_{0};a_{1},\dots,a_{n}]$ を
+$$[a_{0}]\defeq a_{0},\qquad[a_{0};a_{1},\dots,a_{n}]\defeq a_{0}+\frac{1}{[a_{1};a_{2},\dots,a_{n}]}$$
+で定める。$a_{1},\dots,a_{n}$ が正の整数のとき**単純連分数**といい、$a_{i}$ を**部分商**という。$p_{-2}=0$, $p_{-1}=1$, $q_{-2}=1$, $q_{-1}=0$ と
+$$p_{k}=a_{k}p_{k-1}+p_{k-2},\qquad q_{k}=a_{k}q_{k-1}+q_{k-2}\quad(k\ge0)$$
+で定まる $p_{k}/q_{k}$ を**近似分数**という。
+:::
+
+::: intuition
+連分数は「整数部分を取り出し、残りの逆数をとる」ことを繰り返して数を表す方法で、互除法の商の列を記録したものである。近似分数の分子・分母は、行列の積 $\begin{pmatrix}a_{0}&1\\1&0\end{pmatrix}\cdots\begin{pmatrix}a_{k}&1\\1&0\end{pmatrix}=\begin{pmatrix}p_{k}&p_{k-1}\\q_{k}&q_{k-1}\end{pmatrix}$ として現れる。
+:::
+
+::: theorem 近似分数の基本性質 {#nt:convergent-properties keywords="[a_0; ..., a_{k-1}, x] = (x p_{k-1} + p_{k-2}) / (x q_{k-1} + q_{k-2}); p_k / q_k = [a_0; ..., a_k]; p_k q_{k-1} - p_{k-1} q_k = (-1)^{k-1}; gcd(p_k, q_k) = 1; q_k >= F_{k+1}" index="近似分数の性質|きんじぶんすうのせいしつ" refname="近似分数の基本性質"}
+$a_{0}\in\Z$, $a_{1},a_{2},\dots$ を正の整数とする。
+1. 正の実数 $x$ と $k\ge1$ について $[a_{0};a_{1},\dots,a_{k-1},x]=\dfrac{xp_{k-1}+p_{k-2}}{xq_{k-1}+q_{k-2}}$。特に $\dfrac{p_{k}}{q_{k}}=[a_{0};a_{1},\dots,a_{k}]$。
+2. $p_{k}q_{k-1}-p_{k-1}q_{k}=(-1)^{k-1}$（$k\ge-1$）。したがって $\gcd(p_{k},q_{k})=1$ で、$\dfrac{p_{k}}{q_{k}}-\dfrac{p_{k-1}}{q_{k-1}}=\dfrac{(-1)^{k-1}}{q_{k}q_{k-1}}$（$k\ge1$）。
+3. $q_{0}=1\le q_{1}<q_{2}<\cdots$ で、$q_{k}\ge F_{k+1}$。
+:::
+
+::: intuition
+近似分数の分子・分母は、部分商を 1 つずつ掛け込む漸化式で計算でき、隣り合う 2 つの近似分数は「行列式 $\pm1$」の関係で結ばれている。その差はちょうど $1/(q_{k}q_{k-1})$ で、分母は少なくともフィボナッチ数の速さで大きくなる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$[a_{0};\dots,a_{k-1},x]=\frac{xp_{k-1}+p_{k-2}}{xq_{k-1}+q_{k-2}}$】$k$ についての帰納法。$k=1$：$[a_{0};x]=a_{0}+\frac1x=\frac{xa_{0}+1}{x}=\frac{xp_{0}+p_{-1}}{xq_{0}+q_{-1}}$。$k$ で正しいとすると、$[a_{0};\dots,a_{k},x]=[a_{0};\dots,a_{k-1},a_{k}+\frac1x]$ に帰納法の仮定を使い、
+$$\frac{(a_{k}+\frac1x)p_{k-1}+p_{k-2}}{(a_{k}+\frac1x)q_{k-1}+q_{k-2}}=\frac{x p_{k}+p_{k-1}}{xq_{k}+q_{k-1}}$$
+（分子分母に $x$ を掛けて漸化式を使う）。$x=a_{k}$ とおけば後半。
+
+**Step 2（2）.** 【主張：$p_{k}q_{k-1}-p_{k-1}q_{k}=(-1)^{k-1}$】$k=-1$：$p_{-1}q_{-2}-p_{-2}q_{-1}=1$。漸化式から $p_{k}q_{k-1}-p_{k-1}q_{k}=(a_{k}p_{k-1}+p_{k-2})q_{k-1}-p_{k-1}(a_{k}q_{k-1}+q_{k-2})=-(p_{k-1}q_{k-2}-p_{k-2}q_{k-1})$。公約数は左辺を割るので $\pm1$ を割る。両辺を $q_{k}q_{k-1}$ で割れば最後の式。
+
+**Step 3（3）.** 【主張：$q_{k}$ は増加し $q_{k}\ge F_{k+1}$】$q_{0}=1$, $q_{1}=a_{1}\ge1$、$k\ge2$ では $q_{k}=a_{k}q_{k-1}+q_{k-2}\ge q_{k-1}+q_{k-2}>q_{k-1}$。同じ不等式と $q_{0}=1=F_{1}$, $q_{1}\ge1=F_{2}$ から帰納法で $q_{k}\ge F_{k+1}$。
+:::
+
+## 実数の連分数展開 {#nt:sec-cf-expansion}
+
+::: definition 連分数展開 {#nt:continued-fraction-expansion keywords="continued fraction algorithm: alpha_0 = alpha, a_k = floor(alpha_k), alpha_{k+1} = 1/(alpha_k - a_k); complete quotients" index="連分数展開|れんぶんすうてんかい, 完全商|かんぜんしょう" refname="連分数展開"}
+実数 $\alpha$ について、$\alpha_{0}\defeq\alpha$、$a_{k}\defeq\lfloor\alpha_{k}\rfloor$、$\alpha_{k}\neq a_{k}$ なら $\alpha_{k+1}\defeq\frac{1}{\alpha_{k}-a_{k}}$ と定める（$\alpha_{k}=a_{k}$ なら止める）。$\alpha_{k}$ を**完全商**、$[a_{0};a_{1},\dots]$ を $\alpha$ の**連分数展開**という。
+:::
+
+::: intuition
+整数部分を取り出し、小数部分の逆数をとることを繰り返す。有理数なら互除法と同じ手順で有限回で止まり、無理数なら永遠に続く。
+:::
+
+::: theorem 連分数展開の収束と一意性 {#nt:continued-fraction-convergence keywords="alpha = [a_0; ..., a_k, alpha_{k+1}]; a finite expansion iff alpha is rational; alpha - p_k/q_k = (-1)^k / (q_k (alpha_{k+1} q_k + q_{k-1})); 1/(q_k(q_k + q_{k+1})) < |alpha - p_k/q_k| < 1/(q_k q_{k+1}); convergents alternate; every infinite simple continued fraction converges to an irrational number whose expansion it is" index="連分数の収束|れんぶんすうのしゅうそく" refname="連分数展開の収束と一意性"}
+1. $\alpha_{k+1}>1$（定義されるとき）で、$\alpha=[a_{0};a_{1},\dots,a_{k},\alpha_{k+1}]$。展開が有限で止まることと $\alpha\in\mathbb{Q}$ は同値。
+2. $\alpha$ が無理数なら、すべての $k\ge0$ で
+$$\alpha-\frac{p_{k}}{q_{k}}=\frac{(-1)^{k}}{q_{k}(\alpha_{k+1}q_{k}+q_{k-1})},\qquad\frac{1}{q_{k}(q_{k}+q_{k+1})}<\Bigl\lvert\alpha-\frac{p_{k}}{q_{k}}\Bigr\rvert<\frac{1}{q_{k}q_{k+1}}\le\frac{1}{q_{k}^{2}}.$$
+偶数番目の近似分数は $\alpha$ より小さく、奇数番目は大きく、$p_{k}/q_{k}\to\alpha$。
+3. 整数 $a_{0}$ と正の整数 $a_{1},a_{2},\dots$ の任意の無限列について、$[a_{0};a_{1},\dots,a_{k}]$ はある無理数 $\beta$ に収束し、$\beta$ の連分数展開はこの列である。
+:::
+
+::: intuition
+近似分数は $\alpha$ の左右から交互に近づき、その誤差は次の分母との積の逆数程度である。どんな正の整数列から連分数を作っても、ちょうどその列を展開にもつ無理数が一つ決まる。
+:::
+
+::: proof
+**Step 1（1）.** $0<\alpha_{k}-a_{k}<1$ なので $\alpha_{k+1}>1$。$\alpha_{k}=a_{k}+\frac{1}{\alpha_{k+1}}$ を繰り返し代入すれば $\alpha=[a_{0};\dots,a_{k},\alpha_{k+1}]$。有限で止まれば $\alpha$ は有理数。逆に $\alpha_{k}=u/v$（$v\ge1$, $\gcd$ は問わない）なら $\alpha_{k}-a_{k}=r/v$（$r=u\bmod v$）で、$r\neq0$ なら $\alpha_{k+1}=v/r$。分母が $v>r>\cdots$ と真に減るので有限回で止まる（互除法）。
+
+**Step 2（2 の等式）.** 1 と \ref{nt:convergent-properties} の 1 から $\alpha=\frac{\alpha_{k+1}p_{k}+p_{k-1}}{\alpha_{k+1}q_{k}+q_{k-1}}$。$p_{k}/q_{k}$ を引いて通分し、\ref{nt:convergent-properties} の 2 を使うと
+$$\alpha-\frac{p_{k}}{q_{k}}=\frac{q_{k}p_{k-1}-p_{k}q_{k-1}}{q_{k}(\alpha_{k+1}q_{k}+q_{k-1})}=\frac{(-1)^{k}}{q_{k}(\alpha_{k+1}q_{k}+q_{k-1})}.$$
+
+**Step 3（2 の不等式）.** $a_{k+1}<\alpha_{k+1}<a_{k+1}+1$（無理数なので $\alpha_{k+1}$ は整数でない）から $q_{k+1}=a_{k+1}q_{k}+q_{k-1}<\alpha_{k+1}q_{k}+q_{k-1}<q_{k+1}+q_{k}$。符号 $(-1)^{k}$ から交互性、$q_{k}\to\infty$ から収束。
+
+**Step 4（3：収束）.** 【主張：$r_{k}\defeq[a_{0};\dots,a_{k}]$ は収束する】\ref{nt:convergent-properties} の 2, 3 から $r_{k}-r_{k-1}=\frac{(-1)^{k-1}}{q_{k}q_{k-1}}$ で、絶対値は真に減少して $0$ に収束する。よって $r_{0}<r_{2}<r_{4}<\cdots<r_{5}<r_{3}<r_{1}$ で、偶数番目と奇数番目は同じ極限 $\beta$ をもち、$r_{0}<\beta<r_{1}$。
+
+**Step 5（3：展開の一致）.** 【主張：$\beta$ の展開は $(a_{k})$】同じことを列 $a_{1},a_{2},\dots$ に使って極限 $\beta_{1}$ を得る。$r_{k}=a_{0}+1/[a_{1};\dots,a_{k}]$ で極限をとると $\beta=a_{0}+1/\beta_{1}$。Step 4 を $\beta_{1}$ に使うと $a_{1}<\beta_{1}<a_{1}+\frac1{a_{2}}\le a_{1}+1$ なので $\beta_{1}>1$、$0<\beta-a_{0}<1$、$\lfloor\beta\rfloor=a_{0}$ で、$\beta$ の完全商は $\beta_{1}=\frac{1}{\beta-a_{0}}$。これを繰り返せば、$\beta$ の部分商は $a_{0},a_{1},\dots$ で、展開は止まらないので 1 から $\beta$ は無理数。
+:::
+
+## 最良近似 {#nt:sec-cf-best}
+
+::: theorem ディリクレの近似定理 {#nt:dirichlet-approximation keywords="for real alpha and N >= 1 there is 1 <= q <= N with |q alpha - p| < 1/N; an irrational alpha has infinitely many p/q with |alpha - p/q| < 1/q^2" index="ディリクレの近似定理|でぃりくれのきんじていり" refname="ディリクレの近似定理"}
+1. 実数 $\alpha$ と整数 $N\ge1$ について、$1\le q\le N$ と整数 $p$ で $\abs{q\alpha-p}<\frac1N$ となるものがある。
+2. $\alpha$ が無理数なら、$\abs{\alpha-\frac pq}<\frac{1}{q^{2}}$ を満たす既約分数 $p/q$ が無限に多くある。
+:::
+
+::: intuition
+$\alpha,2\alpha,\dots,N\alpha$ の小数部分を $N$ 個の小部屋に入れると、どれか 2 つが同じ部屋に入る。その差が整数に非常に近い $\alpha$ の倍数を与える。
+:::
+
+::: proof
+**Step 1（1：鳩の巣原理）.** $N+1$ 個の数 $k\alpha-\lfloor k\alpha\rfloor\in[0,1)$（$k=0,\dots,N$）を、$N$ 個の区間 $[\frac jN,\frac{j+1}{N})$ に分けると、ある 2 つ $k<l$ が同じ区間に入る。$q\defeq l-k$, $p\defeq\lfloor l\alpha\rfloor-\lfloor k\alpha\rfloor$ とすれば $\abs{q\alpha-p}<\frac1N$。
+
+**Step 2（2）.** 近似分数 $p_{k}/q_{k}$ は既約（\ref{nt:convergent-properties} の 2）で、\ref{nt:continued-fraction-convergence} の 2 から条件を満たし、相異なる（$q_{k}$ が真に増える）。
+:::
+
+::: theorem 近似分数の最良性 {#nt:best-approximation keywords="for irrational alpha, if 0 < q < q_{k+1} then |q alpha - p| >= |q_k alpha - p_k|; Legendre's theorem: if |alpha - p/q| < 1/(2 q^2) then p/q is a convergent" index="最良近似|さいりょうきんじ, ルジャンドルの定理（連分数）|るじゃんどるのていり" refname="近似分数の最良性"}
+$\alpha$ を無理数とする。
+1. $k\ge0$, $0<q<q_{k+1}$, $p\in\Z$ なら $\abs{q\alpha-p}\ge\abs{q_{k}\alpha-p_{k}}$。
+2. （ルジャンドル）$q\ge1$ で $\abs{\alpha-\frac pq}<\frac{1}{2q^{2}}$ なら、$p/q$ はある近似分数 $p_{k}/q_{k}$ に等しい。
+:::
+
+::: intuition
+近似分数より分母の小さい分数は、近似分数より $\alpha$ に近づけない。逆に、分母の 2 乗の半分の逆数より近い分数は、必ず近似分数として連分数展開の中に現れる。連分数は良い近似を「もれなく」列挙する。
+:::
+
+::: proof
+**Step 1（1：座標の変換）.** 【主張：$(p,q)=x(p_{k},q_{k})+y(p_{k+1},q_{k+1})$ となる整数 $x,y$ がある】行列 $\begin{pmatrix}p_{k}&p_{k+1}\\q_{k}&q_{k+1}\end{pmatrix}$ の行列式は $\pm1$（\ref{nt:convergent-properties} の 2）なので、逆行列は整数成分で、$x,y\in\Z$ が定まる。
+
+**Step 2（1：場合分け）.** $y=0$ なら $q=xq_{k}$ で $x\ge1$、$\abs{q\alpha-p}=x\abs{q_{k}\alpha-p_{k}}$。$x=0$ なら $q=yq_{k+1}$ で $q>0$ から $y\ge1$、$q\ge q_{k+1}$ となり仮定に反する。$x,y\neq0$ なら、$x,y$ が同符号だと $q=xq_{k}+yq_{k+1}$ が $\ge q_{k+1}$ か $<0$ になるので異符号。一方 $q_{k}\alpha-p_{k}$ と $q_{k+1}\alpha-p_{k+1}$ も異符号（\ref{nt:continued-fraction-convergence} の 2 の交互性）。よって $x(q_{k}\alpha-p_{k})$ と $y(q_{k+1}\alpha-p_{k+1})$ は同符号で、
+$$\abs{q\alpha-p}=\abs{x(q_{k}\alpha-p_{k})+y(q_{k+1}\alpha-p_{k+1})}\ge\abs{x}\abs{q_{k}\alpha-p_{k}}\ge\abs{q_{k}\alpha-p_{k}}.$$
+
+**Step 3（2）.** 【主張：近似分数でないと仮定すると矛盾】$q_{k}\le q<q_{k+1}$ となる $k$ をとる（$q_{0}=1$ と $q_{k}\to\infty$ から存在する）。1 から $\abs{q_{k}\alpha-p_{k}}\le\abs{q\alpha-p}<\frac{1}{2q}$。$p/q\neq p_{k}/q_{k}$ なら $\abs{pq_{k}-p_{k}q}\ge1$ なので
+$$\frac{1}{qq_{k}}\le\Bigl\lvert\frac pq-\frac{p_{k}}{q_{k}}\Bigr\rvert\le\Bigl\lvert\alpha-\frac pq\Bigr\rvert+\Bigl\lvert\alpha-\frac{p_{k}}{q_{k}}\Bigr\rvert<\frac{1}{2q^{2}}+\frac{1}{2qq_{k}}.$$
+整理すると $\frac{1}{2qq_{k}}<\frac{1}{2q^{2}}$、すなわち $q<q_{k}$ で矛盾。
+:::
+
+::: theorem フルヴィッツの定理 {#nt:hurwitz-theorem keywords="Hurwitz: an irrational alpha has infinitely many p/q with |alpha - p/q| < 1/(sqrt5 q^2); among any two consecutive convergents ... ; sqrt 5 is optimal for the golden ratio" index="フルヴィッツの定理|ふるう゛ぃっつのていり" refname="フルヴィッツの定理"}
+1. 無理数 $\alpha$ について、$\abs{\alpha-\frac pq}<\frac{1}{\sqrt5\,q^{2}}$ を満たす既約分数 $p/q$ が無限に多くある。より詳しく、連続する 3 つの近似分数のうち少なくとも 1 つがこれを満たす。
+2. $c>\sqrt5$ なら、黄金比 $\varphi$ について $\abs{\varphi-\frac pq}<\frac{1}{cq^{2}}$ を満たす $p/q$ は有限個しかない。
+:::
+
+::: intuition
+連続する近似分数の分母の比が黄金比を挟むように動くので、3 つ続けて近似が悪いことはありえない。黄金比は部分商がすべて 1 で最も近似しにくく、その限界がちょうど $\sqrt5$ である。
+:::
+
+::: proof
+**Step 1（連続する 2 つが満たさないとき）.** 【主張：$k$ と $k+1$ の近似分数がともに満たさなければ、$\lambda\defeq q_{k+1}/q_{k}$ は $\frac1\varphi<\lambda<\varphi$】$\alpha$ は $p_{k}/q_{k}$ と $p_{k+1}/q_{k+1}$ の間にある（交互性）ので
+$$\frac{1}{q_{k}q_{k+1}}=\Bigl\lvert\frac{p_{k+1}}{q_{k+1}}-\frac{p_{k}}{q_{k}}\Bigr\rvert=\Bigl\lvert\alpha-\frac{p_{k}}{q_{k}}\Bigr\rvert+\Bigl\lvert\alpha-\frac{p_{k+1}}{q_{k+1}}\Bigr\rvert\ge\frac{1}{\sqrt5}\Bigl(\frac{1}{q_{k}^{2}}+\frac{1}{q_{k+1}^{2}}\Bigr).$$
+$\sqrt5q_{k}q_{k+1}$ を掛けて $\lambda+\frac1\lambda\le\sqrt5$。$\lambda$ は有理数で $\sqrt5$ は無理数なので等号はなく、$\lambda^{2}-\sqrt5\lambda+1<0$、すなわち $\frac1\varphi<\lambda<\varphi$（根は $\varphi$ と $\frac1\varphi=\varphi-1$）。
+
+**Step 2（3 つ連続は満たさない）.** $k,k+1,k+2$ がすべて満たさないなら、Step 1 から $q_{k+2}/q_{k+1}<\varphi$ と $q_{k}/q_{k+1}>\frac1\varphi$。一方 $q_{k+2}\ge q_{k+1}+q_{k}$ から $\frac{q_{k+2}}{q_{k+1}}\ge1+\frac{q_{k}}{q_{k+1}}>1+\frac1\varphi=\varphi$。矛盾。近似分数は無限にあるので 1 が従う。
+
+**Step 3（2）.** $\varphi=[1;1,1,\dots]$（$\varphi=1+1/\varphi$）で、近似分数は $F_{j+1}/F_{j}$。$c>\sqrt5>2$ で $\abs{\varphi-p/q}<\frac{1}{cq^{2}}<\frac{1}{2q^{2}}$ なら、\ref{nt:best-approximation} の 2 から $p/q=F_{j+1}/F_{j}$。ビネの公式から $F_{j+1}-F_{j}\varphi=\psi^{j}$ で、
+$$F_{j}^{2}\Bigl\lvert\varphi-\frac{F_{j+1}}{F_{j}}\Bigr\rvert=F_{j}\abs{\psi}^{j}=\frac{(\varphi^{j}-\psi^{j})\abs{\psi}^{j}}{\sqrt5}=\frac{1-\psi^{j}\abs{\psi}^{j}}{\sqrt5}\to\frac1{\sqrt5}\quad(\varphi\abs\psi=1).$$
+極限 $\frac{1}{\sqrt5}>\frac1c$ なので、$<\frac1c$ となる $j$ は有限個。
+:::
+
+::: example
+1. $\frac{415}{93}=[4;2,6,7]$（互除法：$415=4\cdot93+43$, $93=2\cdot43+7$, $43=6\cdot7+1$, $7=7\cdot1$）。
+2. $\pi=[3;7,15,1,292,\dots]$ の近似分数は $3,\frac{22}{7},\frac{333}{106},\frac{355}{113}$。次の部分商 $292$ が大きいので、$\abs{\pi-\frac{355}{113}}<\frac{1}{113\cdot q_{4}}$, $q_{4}=292\cdot113+106$ ときわめて良い近似になる。
+3. $\sqrt2=[1;2,2,2,\dots]$、$\varphi=[1;1,1,\dots]$。部分商がすべて $1$ の $\varphi$ は、最も近似しにくい無理数で、フルヴィッツの定数がちょうど達成される。
+:::
+
+::: hypcheck
+- **近似分数の基本性質**：部分商が正であることは $q_{k}$ の単調増加（3）に使った。1 は正の実数 $x$ でも成り立つので、完全商 $\alpha_{k+1}$ を代入できる。
+- **収束と一意性**：無理数であることは、完全商が整数にならないこと（Step 3 の狭義不等式）と、展開が終わらないことに使った。有理数では展開は 2 通り（$[\dots,a_{n}]=[\dots,a_{n}-1,1]$, $a_{n}\ge2$）ありうる。
+- **最良性**：行列式が $\pm1$ であること（2）が、任意の $(p,q)$ を近似分数の整数結合で書けることの核心である。
+- **フルヴィッツの定理**：$\sqrt5$ が無理数であることを Step 1 の狭義不等式に使った。
+:::
+
+## 問題 {#nt:sec-cf-problems}
+
+::: problem {#nt:prob-cf-expand}
+$\frac{355}{113}$ と $\frac{17}{12}$ の連分数展開を求め、後者の近似分数を列挙せよ。
+:::
+
+::: solution
+$355=3\cdot113+16$, $113=7\cdot16+1$, $16=16\cdot1$ から $\frac{355}{113}=[3;7,16]$。$17=1\cdot12+5$, $12=2\cdot5+2$, $5=2\cdot2+1$, $2=2\cdot1$ から $\frac{17}{12}=[1;2,2,2]$ で、近似分数は $1,\frac32,\frac75,\frac{17}{12}$（$\sqrt2$ の近似分数と同じ）。
+:::
+
+::: problem {#nt:prob-cf-legendre-check}
+$\sqrt2$ について $\abs{\sqrt2-\frac75}<\frac{1}{2\cdot25}$ を確かめ、ルジャンドルの定理と合うことを確認せよ。
+:::
+
+::: solution
+$\frac75=1.4$, $\sqrt2\approx1.41421$ で差は約 $0.0142<0.02=\frac{1}{50}$。$\frac75$ は $\sqrt2=[1;2,2,\dots]$ の近似分数 $p_{2}/q_{2}$ で、定理と合う。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 最良性の証明は、近似分数の行列式が $\pm1$ であることと交互性だけを使い、$\alpha$ の具体的な形を使わない。
+
+**前提を変えると.**
+- 近似の指数を上げることはできない：代数的数 $\alpha$ について、任意の $\varepsilon>0$ で $\abs{\alpha-p/q}<q^{-2-\varepsilon}$ を満たす $p/q$ は有限個しかない（ロスの定理、1955）と知られている。リウヴィルの定理（$d$ 次の代数的数では指数 $d$）はその最初の形で、超越数の最初の例を与えた。
+- フルヴィッツの定数 $\sqrt5$ は、$\varphi$ と同値な（連分数の末尾がすべて $1$ の）数を除けば $\sqrt8$ に、さらに $\frac{\sqrt{221}}{5}$, … と改善でき、これらの定数の列（ラグランジュ・スペクトル）はマルコフ数で記述される、と知られている。
+- 同じ考え方は、連分数のガウス写像 $x\mapsto\{1/x\}$ の力学系としての研究（部分商の分布、ガウス–クズミンの定理）にもつながる。
+
+**高い視点から：$\mathrm{SL}_{2}(\Z)$ とユークリッドの互除法.** 近似分数の行列 $\begin{pmatrix}p_{k}&p_{k-1}\\q_{k}&q_{k-1}\end{pmatrix}$ は行列式 $\pm1$ の整数行列で、連分数展開は「$\alpha$ を一次分数変換 $x\mapsto\frac{ax+b}{cx+d}$（$\mathrm{GL}_{2}(\Z)$）で $[0,1)$ の外の大きな数に移していく」手続きである。互除法はこの群の生成元 $\begin{pmatrix}1&1\\0&1\end{pmatrix}$ と $\begin{pmatrix}0&1\\1&0\end{pmatrix}$ への分解で、連分数は上半平面の測地線をモジュラー群の基本領域で切っていくことに対応する、と一般に説明されている。比喩で言えば、連分数は実数直線上の点を、有理数の「ファレイ木」を根から順にたどる道順として記録したもので、部分商は同じ方向に何歩続けて進んだかを表す。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-cf-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
