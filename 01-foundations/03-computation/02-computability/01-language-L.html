@@ -16,11 +16,11 @@
 <script type="text/markdown" id="source">
 # プログラミング言語 L と計算可能関数 {#comp:page-language-L keywords="while programs, loop programs, programming language L, computable partial function, big-step semantics, structured programming"}
 
-本ページから、計算可能性を**プログラミング言語 L** によって定義する。L は、変数への代入（$0$ の代入、$1$ を足す、$1$ を引く、変数の写し）、逐次実行、回数を決めた繰り返し $\mathtt{for}$、条件つきの繰り返し $\mathtt{while}$ だけをもつ小さな言語である。チューリング機械（\ref{comp:turing-machine}）よりも、普段書くプログラムに近いので直感的にとらえやすい。L で計算できる部分関数を**計算可能**と呼び（\ref{comp:L-computable}）、後のページで、原始再帰関数（$\mathtt{while}$ を除いた L）、一般再帰関数、レジスタ機械、チューリング機械と比べる。
+本ページから、計算可能性を**プログラミング言語 L** によって定義する。L は、変数への代入（$0$ の代入、$1$ を足す、$1$ を引く、変数の写し）、逐次実行、回数を決めた繰り返し $\mathtt{for}$、条件つきの繰り返し $\mathtt{while}$ だけをもつ小さな言語である。チューリング機械（\see{comp:turing-machine}）よりも、普段書くプログラムに近いので直感的にとらえやすい。L で計算できる部分関数を**計算可能**と呼び（\ref{comp:L-computable}）、後のページで、原始再帰関数（$\mathtt{while}$ を除いた L）、一般再帰関数、レジスタ機械、チューリング機械と比べる。
 
 本ページでは、L の構文（\ref{comp:L-syntax}）と意味（\ref{comp:L-semantics}）を定め、意味が一意に決まること（\ref{comp:L-determinism}）、現れない変数は書き換えられないこと（\ref{comp:L-locality}）、$\mathtt{for}$ だけのプログラムは必ず停止すること（\ref{comp:for-total}）を示し、よく使う命令の略記（\tref{comp:L-macros}）と合成についての閉包性（\ref{comp:L-composition}）を準備する。
 
-> L のような言語（while プログラム、LOOP プログラム）による計算可能性の扱いは、Meyer–Ritchie (1967) の LOOP 言語などに由来する標準的な方法である。資料フォルダにこの形の教科書はないので、定義と証明は本サイトで組み立てた。基本命令の選び方は本によって異なるが、計算できる関数の範囲は変わらない（\ref{comp:L-macros} の後の注意）。
+> L のような言語（英語では while programs・LOOP programs と呼ばれる）による計算可能性の扱いは、Meyer–Ritchie (1967) の LOOP 言語などに由来する標準的な方法である。資料フォルダにこの形の教科書はないので、定義と証明は本サイトで組み立てた。基本命令の選び方は本によって異なるが、計算できる関数の範囲は変わらない（\ref{comp:L-macros} の後の注意）。
 
 ## 記法と定義の確認 {#comp:sec-L-notation}
 
@@ -67,7 +67,7 @@ Python の `for _ in range(x):` も、繰り返しの回数をループに入っ
 ## 意味 {#comp:sec-L-semantics}
 
 ::: definition L の意味（大きいステップの意味論） {#comp:L-semantics keywords="big-step operational semantics, evaluation relation" index="意味（プログラムの）|いみぷろぐらむの"}
-プログラム $P$ と状態 $\sigma,\tau$ の間の関係 $\langle P,\sigma\rangle\Downarrow\tau$（「$P$ を状態 $\sigma$ から実行すると停止して状態 $\tau$ になる」）を、次の規則で閉じた**最小の**関係として定める。
+プログラム $P$ と状態 $\sigma,\tau$ の間の関係 $\langle P,\sigma\rangle\Downarrow\tau$（「$P$ を状態 $\sigma$ から実行すると停止し、状態 $\tau$ になる」）を、次の規則で閉じた**最小の**関係として定める。
 1. $\langle x:=0,\sigma\rangle\Downarrow\sigma[x\mapsto0]$。
 2. $\langle x:=x+1,\sigma\rangle\Downarrow\sigma[x\mapsto\sigma(x)+1]$、$\langle x:=x\mathbin{\dot{-}}1,\sigma\rangle\Downarrow\sigma[x\mapsto\sigma(x)\mathbin{\dot{-}}1]$。
 3. $\langle x:=y,\sigma\rangle\Downarrow\sigma[x\mapsto\sigma(y)]$。
@@ -88,7 +88,7 @@ Python の `for _ in range(x):` も、繰り返しの回数をループに入っ
 while x1 != 0:
     x1 += 1
 ```
-$\sigma(x_{1})=0$ なら $\langle P,\sigma\rangle\Downarrow\sigma$。$\sigma(x_{1})\neq0$ なら、どの $\tau$ でも $\langle P,\sigma\rangle\Downarrow\tau$ とならない：そうなる導出のうち最も短いものをとると、最後の規則は 6 の後半で、前提 $\langle P,\sigma[x_{1}\mapsto\sigma(x_{1})+1]\rangle\Downarrow\tau$ がより短い導出をもつ。新しい状態でも $x_{1}\neq0$ なので、同じ議論で無限に短くなり、矛盾する。
+$\sigma(x_{1})=0$ なら、規則 6 の前半により $\langle P,\sigma\rangle\Downarrow\sigma$ である。$\sigma(x_{1})\neq0$ なら、どの $\tau$ でも $\langle P,\sigma\rangle\Downarrow\tau$ とならない。実際、$\sigma(x_{1})\neq0$ となる状態 $\sigma$ と状態 $\tau$ で $\langle P,\sigma\rangle\Downarrow\tau$ となるものがあったとし、そのような導出すべてのうち最も短いものをとる。$\sigma(x_{1})\neq0$ なので最後の規則は 6 の後半であり、その前提 $\langle P,\sigma'\rangle\Downarrow\tau$（$\sigma'\defeq\sigma[x_{1}\mapsto\sigma(x_{1})+1]$）はより短い導出をもつ。ところが $\sigma'(x_{1})\neq0$ なので、これは最短性に反する。
 :::
 
 ::: proposition 意味の一意性 {#comp:L-determinism keywords="determinism of L" index="決定性（L の）|けっていせいえるの"}
@@ -112,7 +112,7 @@ $V\defeq\mathrm{var}(P)$ とする。
 ::: proof
 どちらも $\langle P,\sigma\rangle\Downarrow\tau$ の導出に関する帰納法。
 1. 規則 1〜3 で書き換わるのは $x\in V$ だけである。規則 4〜6 では、前提に現れるプログラム $P_{1},P_{2}$（または本体）の変数は $V$ に含まれるので、帰納法の仮定を各段に使えば $z$ の値は変わらない。
-2. 規則 1〜3：右辺の値（$0$, $\sigma(x)\pm1$, $\sigma(y)$）は $V$ 上の値だけで決まる。規則 4：帰納法の仮定を $P_{1}$ に使って $\sigma'_{1}$ を得ると、$\sigma'_{1}$ は $V$ 上で $\sigma_{1}$ と一致するので、$P_{2}$ にも使える。規則 5：$x\in V$ なので $\sigma'(x)=\sigma(x)=n$ で、繰り返し回数が同じになる。各段に帰納法の仮定を使う。規則 6：$x\in V$ なので $\sigma(x)=0$ かどうかが $\sigma'$ でも同じで、後半は規則 4 と同じ。$V$ の外での一致は 1 による。
+2. 規則 1〜3：右辺の値（$0$, $\sigma(x)\pm1$, $\sigma(y)$）は $V$ 上の値だけで決まる。規則 4：帰納法の仮定を $P_{1}$ に使って $\sigma'_{1}$ を得る。$\sigma'_{1}$ は $\mathrm{var}(P_{1})$ 上で $\sigma_{1}$ と一致する。$V\setminus\mathrm{var}(P_{1})$ 上では $\sigma_{1}$ は $\sigma$ と、$\sigma'_{1}$ は $\sigma'$ と一致し（1 と帰納法の仮定）、$\sigma$ と $\sigma'$ は $V$ 上で一致する。ゆえに $\sigma'_{1}$ は $V$ 上で $\sigma_{1}$ と一致し、$P_{2}$ にも帰納法の仮定を使える。規則 5：$x\in V$ なので $\sigma'(x)=\sigma(x)=n$ で、繰り返し回数が同じになる。各段に帰納法の仮定を使う。規則 6：$x\in V$ なので $\sigma(x)=0$ かどうかが $\sigma'$ でも同じで、後半は規則 4 と同じ。$V$ の外での一致は 1 による。
 :::
 
 ::: proposition for プログラムは停止する {#comp:for-total keywords="loop programs always terminate" index="for プログラム|ふぉーぷろぐらむ"}
@@ -138,7 +138,7 @@ $$
 :::
 
 ::: remark
-「計算可能」は、どの計算模型を選ぶかに依存する定義に見える。後のページで、\ref{comp:page-recursive-functions}、\ref{comp:page-register-machines}、チューリング機械（\ref{comp:page-turing-completeness}）が、どれも L と同じ部分関数を計算することを示す。チャーチ–チューリングの提唱（\ref{comp:church-turing}）は、この共通の範囲が「アルゴリズムで計算できる」ことの正しい定式化であるという主張で、数学的な定理ではない。
+「計算可能」は、どの計算模型を選ぶかに依存する定義に見える。後のページで、\see{comp:page-recursive-functions}、\see{comp:page-register-machines}、チューリング機械（\see{comp:page-turing-completeness}）が、どれも L と同じ部分関数を計算することを示す。チャーチ–チューリングの提唱（\see{comp:church-turing}）は、この共通の範囲が「アルゴリズムで計算できる」ことの正しい定式化であるという主張で、数学的な定理ではない。
 :::
 
 ## 略記 {#comp:sec-L-macros}
@@ -186,9 +186,9 @@ while u != 0:
 :::
 
 ::: proof
-1. $u:=z$ の後 $u=\sigma(z)$、$x:=y$ の後 $x=\sigma(y)$（$x=z$ でも、$z$ の値は先に $u$ に写してある）。for ループは $\sigma(z)$ 回 $x$ に $1$ を足すので、$i$ に関する帰納法で $i$ 回目の後 $x=\sigma(y)+i$。2 も同じ。
-3. 2 行目までで $u=\sigma(y)$, $v=\sigma(z)$, $x=0$。本体 $x:=x+u$ は 1 の略記で、$u$ を書き換えない（1 の新しい変数は $u,v$ と別にとる）。$i$ 回目の後 $x=i\cdot\sigma(y)$。
-5. $v=1\mathbin{\dot{-}}\sigma(x)$ は $\sigma(x)=0$ なら $1$、そうでなければ $0$。$u=1\mathbin{\dot{-}}v$ はその逆で、for ループの回数になる。
+1. $u:=z$ の後 $u=\sigma(z)$ となり、$x:=y$ の後 $x=\sigma(y)$ となる（$x=z$ でも、$z$ の値は先に $u$ に写してある）。for ループは $\sigma(z)$ 回 $x$ に $1$ を足すので、$i$ に関する帰納法で $i$ 回目の後 $x=\sigma(y)+i$ となる。2 も、足す代わりに $1$ を引く（$0$ なら $0$ のまま）だけで同じである。
+3. 3 行目までで $u=\sigma(y)$, $v=\sigma(z)$, $x=0$ となる。本体 $x:=x+u$ は 1 の略記で、$u$ を書き換えない（1 の新しい変数は $u,v$ と別にとる）。ゆえに $i$ に関する帰納法で、$i$ 回目の後 $x=i\cdot\sigma(y)$ となる。
+5. $v=1\mathbin{\dot{-}}\sigma(x)$ は、$\sigma(x)=0$ なら $1$、そうでなければ $0$ である。$u=1\mathbin{\dot{-}}v$ はその逆で、これが for ループの回数になる。
 6. 右辺：$u$ の値は本体 $P$ で変わらない（\ref{comp:L-locality.1}、$u\notin\mathrm{var}(P)$）ので、各周回の終わりに $1$ ずつ減り、ちょうど $\sigma(x)$ 周で $u=0$ になって止まる。各周回で $P$ が一度実行されるので、左辺の規則 5 の列 $\sigma_{0},\dots,\sigma_{n}$ と、$u$ 以外で一致する状態を順にたどる（$i$ に関する帰納法と \ref{comp:L-locality.2}）。$P$ が停止しない段があれば、両辺とも停止しない。
 :::
 
@@ -223,7 +223,7 @@ v1 = h1(x1, ..., xk)
 vl = hl(x1, ..., xk)
 x0 = g(v1, ..., vl)
 ```
-とする（各呼び出しで別々の新しい変数を使う）。入力状態 $\sigma_{\vec{m}}$ から、$j$ 番目の呼び出しは $h_{j}(\vec{m})\downarrow$ のときに限り停止して $v_{j}=h_{j}(\vec{m})$ とし、入力変数 $x_{1},\dots,x_{k}$ は書き換えない。最後の呼び出しは $g(h_{1}(\vec{m}),\dots)\downarrow$ のときに限り停止する。よってこのプログラムは $f$ を計算する。$g,h_{j}$ を計算するプログラムが $\mathrm{L}_{\mathrm{for}}$ に属すれば、組み立てたものも $\mathrm{L}_{\mathrm{for}}$ に属する。
+とする（各呼び出しで別々の新しい変数を使う）。入力状態 $\sigma_{\vec{m}}$ から、$j$ 番目の呼び出しは $h_{j}(\vec{m})\downarrow$ のときに限り停止し、$v_{j}=h_{j}(\vec{m})$ とし、入力変数 $x_{1},\dots,x_{k}$ は書き換えない。最後の呼び出しは $g(h_{1}(\vec{m}),\dots)\downarrow$ のときに限り停止する。よってこのプログラムは $f$ を計算する。$g,h_{j}$ を計算するプログラムが $\mathrm{L}_{\mathrm{for}}$ に属すれば、組み立てたものも $\mathrm{L}_{\mathrm{for}}$ に属する。
 :::
 
 ::: hypcheck
@@ -257,11 +257,14 @@ for _ in range(x):
     v += 1
 x = u
 ```
-$i$ 周後に $(u,v)=(i\mathbin{\dot{-}}1,i)$ であることが $i$ に関する帰納法で分かる（$i=0$ で $(0,0)$、$i\to i+1$ で $u=i$, $v=i+1$）。$\sigma(x)$ 周後に $u=\sigma(x)\mathbin{\dot{-}}1$ で、最後にそれを $x$ に写す。
+$i$ 周後に $(u,v)=(i\mathbin{\dot{-}}1,i)$ であることが $i$ に関する帰納法で分かる（$i=0$ では $(0,0)$ であり、$i$ 周後に成り立てば $i+1$ 周目で $u=i$, $v=i+1$ となる）。ゆえに $\sigma(x)$ 周後に $u=\sigma(x)\mathbin{\dot{-}}1$ となり、最後の行でそれを $x$ に写す。
 :::
 
 ::: problem {#comp:prob-L-examples}
-次の関数が for 計算可能であることを示せ：(a) $\max(m,n)$、(b) $\chi_{=}(m,n)$（$m=n$ で $1$、そうでなければ $0$）、(c) $m^{n}$。
+次の関数が for 計算可能であることを示せ。
+- (a) $\max(m,n)$
+- (b) $\chi_{=}(m,n)$（$m=n$ で $1$、そうでなければ $0$）
+- (c) $m^{n}$
 :::
 
 ::: solution
@@ -279,7 +282,7 @@ x0 = 1
 if u != 0:
     x0 = 0
 ```
-(c) $i$ 周後に $x_{0}=m^{i}$。
+(c) $i$ 周後に $x_{0}=m^{i}$ となる（$i$ に関する帰納法）。
 ```python x1 の x2 乗
 x0 = 1
 for _ in range(x2):
@@ -303,19 +306,28 @@ while x2 != 0:
 
 ::: supplement
 **前提の検討.**
-- 変数の値を自然数に限ったので、L のプログラムは「無限に大きいメモリをもつ機械」の模型である。変数の値に上限 $N$ を設けると（$N$ を超える足し算は $N$ に止める、など）、状態は有限個しかなく、計算できるものは本質的に有限オートマトン（\ref{comp:dfa}）と同じ程度になる。
-- for ループを除くと、while と基本命令だけでも同じ部分関数が計算できる（\ref{comp:L-macros.6}）。しかし、while を除くと計算できる範囲は真に狭くなる（\ref{comp:page-ackermann}）。
-- 変数の個数を固定すると範囲が狭くなるかは自明でない。レジスタ機械では、レジスタ $2$ 個でも（入力と出力をうまくコード化すれば）すべての計算可能関数を計算できることが知られている（ミンスキー。\tref{comp:page-register-machines} で触れる）。
+- 変数の値に上限を設けなかったので、L のプログラムは「いくらでも大きい数を記憶できる機械」の模型である。変数の値に上限 $N$ を設けると（$N$ を超える足し算は $N$ に止める、など）、プログラム $P$ に現れる変数への値の割り当ては $(N+1)^{\lvert\mathrm{var}(P)\rvert}$ 通りしかなく、$P$ は有限オートマトン（\ref{comp:dfa}）と同じく有限の記憶しかもたない機械になる。入力も $N$ 以下に限られるので、扱えるのは有限個の入力の上の関数だけである。
+- for ループを除くと、while と基本命令だけでも同じ部分関数が計算できる（\ref{comp:L-macros.6}）。しかし、while を除くと計算できる範囲は真に狭くなる（\see{comp:page-ackermann}）。
+- 変数の個数を固定すると範囲が狭くなるかは自明でない。レジスタ機械では、レジスタが $2$ 個でも、入力 $m$ を $2^{m}$ として与え、出力 $n$ を $2^{n}$ として受け取る約束にすれば、すべての $1$ 変数の計算可能な部分関数を計算できることが知られている（ミンスキー。多変数なら入力の組を $2^{m_{1}}3^{m_{2}}\cdots$ の形で与える。\see{comp:page-register-machines} の補足で触れる）。この結果は入力と出力をこの形で受け渡す約束のもとでのものである。
 
 **関連する結果.**
-- *構造化定理.* goto 文をもつプログラム（レジスタ機械のプログラム）は、while ループ一つと条件文で書き直せる（ベーム–ヤコピーニの定理として知られる主張の一形態。\ref{comp:page-recursive-functions} の標準形で、L について示す）。
+- *構造化定理.* goto 文をもつプログラム（レジスタ機械のプログラム）は、while ループ一つと条件文で書き直せる（ベーム–ヤコピーニの定理として知られる主張の一形態。\see{comp:page-recursive-functions} の標準形で、L について示す）。
 - *意味の別の与え方.* 本ページの $\Downarrow$ は**大きいステップの操作的意味論**である。1 命令ずつ状態を変える**小さいステップの意味論**や、次の**表示的意味論**でも同じ部分写像 $[\![P]\!]$ が得られる。
 
-**高い視点から：while は最小不動点.** 状態から状態への部分写像全体を $\mathcal{D}$ とし、$g\sqsubseteq g'$ を「$g'$ は $g$ の拡張」と定めると、$\mathcal{D}$ は「定義域を増やしていく」順序で、上向きの鎖の和をもつ。while ループ $W=\mathtt{while}\ x\neq0\ \mathtt{do}\ P\ \mathtt{od}$ の意味は、写像
+**高い視点から：while は最小不動点.** 状態から状態への部分写像全体を $\mathcal{D}$ とし、$g\sqsubseteq g'$ を「$g(\sigma)\downarrow$ なら $g'(\sigma)\downarrow$ かつ $g'(\sigma)=g(\sigma)$」（$g'$ は $g$ の拡張）と定める。上向きの鎖 $g_{0}\sqsubseteq g_{1}\sqsubseteq\cdots$ には、グラフの和集合で定まる部分写像 $\bigsqcup_{n}g_{n}$ が最小の上界としてある（鎖なので、和集合も部分写像のグラフである）。while ループ $W=\mathtt{while}\ x\neq0\ \mathtt{do}\ P\ \mathtt{od}$ について、写像 $\Phi\colon\mathcal{D}\to\mathcal{D}$ を
 $$
 \Phi(g)(\sigma)\simeq\begin{cases}\sigma&(\sigma(x)=0)\\ g([\![P]\!](\sigma))&(\sigma(x)\neq0)\end{cases}
 $$
-の**最小の不動点**であり、$\varnothing\sqsubseteq\Phi(\varnothing)\sqsubseteq\Phi^{2}(\varnothing)\sqsubseteq\cdots$ の和として得られる（$\Phi^{n}(\varnothing)$ は「$n$ 周以内で終わる実行」だけを知っている近似）。これはクリーネの不動点定理の一例で、言語方程式の最小解（\ref{comp:page-fixed-points}）と同じ形をしている。プログラムを「一つのループの式 $W=\Phi(W)$ を解いたもの」と見る比喩は、正規表現のスター $A^{\ast}=\{\varepsilon\}\cup AA^{\ast}$ と同じ発想である。圏論的には、$[\![P;Q]\!]=[\![Q]\!]\circ[\![P]\!]$ なので、意味はプログラムの逐次実行を「部分写像の圏」での合成に写す関手のようにふるまう。
+で定める。$\Phi(g)(\sigma)$ は $g$ の一点 $[\![P]\!](\sigma)$ での値だけで決まる。ゆえに $\Phi$ は単調であり（$g\sqsubseteq g'$ なら $\Phi(g)\sqsubseteq\Phi(g')$）、上向きの鎖の和を保つ（$\bigsqcup_{n}g_{n}$ の一点での値は、ある $g_{n}$ のその点での値に等しいので、$\Phi(\bigsqcup_{n}g_{n})=\bigsqcup_{n}\Phi(g_{n})$ である）。$\varnothing$（どこでも定義されない部分写像）について $\varnothing\sqsubseteq\Phi(\varnothing)$ なので、単調性から $\Phi^{n}(\varnothing)$ は上向きの鎖をなす。このとき
+$$
+[\![W]\!]=\bigsqcup_{n}\Phi^{n}(\varnothing)
+$$
+であり、これは $\Phi$ の**最小の不動点**である。
+- **$\Phi^{n}(\varnothing)$ の意味.** $\Phi^{n}(\varnothing)(\sigma)$ が定義されて $\tau$ に等しいのは、ある $j<n$ と状態の列 $\sigma_{0}=\sigma,\dots,\sigma_{j}=\tau$ で、$i<j$ について $\sigma_{i}(x)\neq0$ かつ $\langle P,\sigma_{i}\rangle\Downarrow\sigma_{i+1}$、さらに $\sigma_{j}(x)=0$ となるものがあるときに限る（本体の実行が $n$ 回未満で終わる実行）。これは $n$ に関する帰納法で分かる：$n=0$ ではどちらも起こらない。$n+1$ では、$\sigma(x)=0$ の場合は $j=0$ の列に当たり、$\sigma(x)\neq0$ の場合は、$\Phi^{n}(\varnothing)([\![P]\!](\sigma))$ についての帰納法の仮定の列の前に $\sigma$ を付ければよい。
+- **$[\![W]\!]$ との一致.** $\langle W,\sigma\rangle\Downarrow\tau$ となるのは、上のような列がある $j$ についてあるときに限る。列があれば、$j$ に関する帰納法と規則 6 で $\langle W,\sigma\rangle\Downarrow\tau$ が導ける。逆は $\langle W,\sigma\rangle\Downarrow\tau$ の導出に関する帰納法で示せる：最後の規則が 6 の前半なら $j=0$ の列があり、後半なら前提 $\langle W,\sigma'\rangle\Downarrow\tau$ についての列の前に $\sigma$ を付ければよい。ゆえに $[\![W]\!]=\bigsqcup_{n}\Phi^{n}(\varnothing)$ である。
+- **最小の不動点.** 和を保つことから $\Phi(\bigsqcup_{n}\Phi^{n}(\varnothing))=\bigsqcup_{n}\Phi^{n+1}(\varnothing)=\bigsqcup_{n}\Phi^{n}(\varnothing)$ である（$\Phi^{0}(\varnothing)=\varnothing$ は和を変えない）。$\Phi(g)=g$ なら、$\varnothing\sqsubseteq g$ と単調性から、$n$ に関する帰納法で $\Phi^{n}(\varnothing)\sqsubseteq\Phi^{n}(g)=g$ となり、和も $g$ の下にある。
+
+これは、上向きの鎖の和を保つ単調な写像の最小不動点が $\bigsqcup_{n}\Phi^{n}(\varnothing)$ で得られるというクリーネの不動点定理の一例で、言語方程式の最小解（\ref{comp:page-fixed-points}）と同じ形をしている。プログラムを「一つのループの式 $W=\Phi(W)$ を解いたもの」と見る比喩は、正規表現のスター $A^{\ast}=\{\varepsilon\}\cup AA^{\ast}$ と同じ発想である。圏論的には、$[\![P;Q]\!]=[\![Q]\!]\circ[\![P]\!]$ なので、意味はプログラムの逐次実行を「部分写像の圏」での合成に写す関手のようにふるまう。
 :::
 </script>
 <noscript>このサイトの表示には JavaScript が必要です。</noscript>

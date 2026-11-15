@@ -45,7 +45,7 @@
 ::: proof
 部分再帰関数の構成に関する帰納法。初期関数と合成は \ref{comp:pr-to-for} の証明と \ref{comp:L-composition} のとおり。
 
-**原始再帰.** \ref{comp:pr-to-for} の証明と同じプログラムを使う。$g,h$ が部分関数でも、サブルーチン呼び出しは呼んだ関数が定義されるときに限り停止する（\ref{comp:L-composition} の証明）。$i$ 周目の呼び出しが停止するのは、$f(\vec{x},i)\downarrow$ かつ $h(\vec{x},i,f(\vec{x},i))\downarrow$、すなわち $f(\vec{x},i+1)\downarrow$ のときに限る。よって $i$ に関する帰納法で、「$f(\vec{x},i)\downarrow$ のときに限り $i$ 周目の終わりまで停止して $x_{0}=f(\vec{x},i)$」が成り立ち、プログラムは $f$ を計算する。
+**原始再帰.** \ref{comp:pr-to-for} の証明と同じプログラムを使う。$g,h$ が部分関数でも、サブルーチン呼び出しは呼んだ関数が定義されるときに限り停止し、そのとき値を返す（\ref{comp:L-composition} の証明）。入力 $(\vec{x},y)$ から実行し、$i\le y$ に関する帰納法で「実行が $i$ 周後（$i=0$ ではループの前）に達するのは $f(\vec{x},i)\downarrow$ のときに限り、そのとき $u=i$ かつ $x_{0}=f(\vec{x},i)$ である」ことを示す。$i=0$ の場合、1 行目の呼び出しが停止するのは $g(\vec{x})\downarrow$、すなわち $f(\vec{x},0)\downarrow$ のときに限る。$i<y$ で成り立つとする。$f(\vec{x},i)\uparrow$ なら、実行は $i$ 周後に達せず、$f(\vec{x},i+1)\uparrow$ でもあるので、$i+1$ でも成り立つ。$f(\vec{x},i)\downarrow$ なら、$i+1$ 周目の呼び出し $h(\vec{x},i,f(\vec{x},i))$ が停止するのは $f(\vec{x},i+1)\downarrow$ のときに限り、そのとき $x_{0}=f(\vec{x},i+1)$, $u=i+1$ となる。$i=y$ とすれば、プログラムは $f$ を計算する。
 
 **最小化.** $g$ を計算するプログラムがあるとき、新しい変数 $y,w$ をとって
 ```python 最小化 μy[g(x⃗, y) = 0]
@@ -56,7 +56,7 @@ while w != 0:
     w = g(x1, ..., xk, y)
 x0 = y
 ```
-とする（表示は \ref{comp:L-python-display} の約束による）。$j$ 周目の終わり（$j=0$ は 2 行目の後）で $y=j$, $w=g(\vec{x},j)$ であり、そこまで停止していることは「$z\le j$ のすべてで $g(\vec{x},z)\downarrow$」と同値である（$j$ に関する帰納法）。ループは $w=0$ となった最初の周回の後で止まる。したがって、プログラムが停止して $x_{0}=y$ となるのは、$g(\vec{x},y)=0$ かつ $z<y$ で $g(\vec{x},z)\downarrow\neq0$ のときに限る。これは $\mu y\,[g(\vec{x},y)=0]$ の定義そのものである。
+とする（表示は \ref{comp:L-python-display} の約束による）。$j$ に関する帰納法で、「実行が $j$ 周後（$j=0$ では 2 行目の後）に達するのは、すべての $z<j$ で $g(\vec{x},z)\downarrow\neq0$ かつ $g(\vec{x},j)\downarrow$ のときに限り、そのとき $y=j$, $w=g(\vec{x},j)$ である」ことが分かる（$j$ 周後に $w\neq0$ のときに限り $j+1$ 周目に入り、その周回の呼び出しは $g(\vec{x},j+1)\downarrow$ のときに限り停止する）。ループは $w=0$ となる最初の $j$ で止まる。したがって、プログラムが停止し、出力 $x_{0}=n$ を返すのは、$g(\vec{x},n)=0$ かつすべての $z<n$ で $g(\vec{x},z)\downarrow\neq0$ のときに限る。これは $\mu y\,[g(\vec{x},y)=0]$ の定義そのものである。
 :::
 
 ## 燃料つきの実行 {#comp:sec-fuel}
@@ -81,13 +81,13 @@ $\sigma$ が $\vec{v}$ を表すとする。
 :::
 
 ::: proof
-1・2 は $P$ の構成に関する帰納法、3 は導出に関する帰納法。どれも基本命令・逐次実行・for ループの場合は、定義をたどり、帰納法の仮定を各段に使えばよい（for の段数は $v_{i}$ で燃料によらない）。while ループ $P=\mathtt{while}\ x_{i}\neq0\ \mathtt{do}\ Q\ \mathtt{od}$ の場合を示す。
+1・2 は $P$ の構成に関する帰納法、3 は導出に関する帰納法。どれも基本命令・逐次実行・for ループの場合は、定義をたどり、帰納法の仮定を各段に使えばよい（for の段数は $v_{i}$ であり、燃料によらない）。ただし 3 の逐次実行・for では、前の段で得た組が次の段の入力を表すことに 1 と意味の一意性（\ref{comp:L-determinism}）を使い、各段で得た燃料を最大のものにそろえるのに 2 を使う。while ループ $P=\mathtt{while}\ x_{i}\neq0\ \mathtt{do}\ Q\ \mathtt{od}$ の場合を示す。
 
-1. $\vec{w}_{t}\neq\bot$ で第 $i$ 成分が $0$。$\vec{w}_{s}$ の第 $i$ 成分が初めて $0$ になる $s_{0}\le t$ をとる（以後は変わらない）。$s<s_{0}$ では $\vec{w}_{s+1}=E^{Q}_{t}(\vec{w}_{s})\neq\bot$ なので、$Q$ についての帰納法の仮定から、$\vec{w}_{s}$ を表す状態から $Q$ を実行すると停止して $\vec{w}_{s+1}$ を表す状態になる（$\mathrm{var}(Q)$ の外の値は保たれる。\ref{comp:L-locality}）。規則 6 を $s=s_{0},s_{0}-1,\dots,0$ の順に使えば、$\langle P,\sigma\rangle\Downarrow\tau$（$\tau$ は $\vec{w}_{s_{0}}$ を表す）。
+1. 仮定から $\vec{w}_{t}\neq\bot$ であり、その第 $i$ 成分は $0$ である。一度 $\bot$ になると以後 $\bot$ のままなので、$s\le t$ のすべてで $\vec{w}_{s}\neq\bot$ である。$\vec{w}_{s}$ の第 $i$ 成分が初めて $0$ になる $s_{0}\le t$ をとる（以後 $\vec{w}_{s}$ は変わらない）。$s<s_{0}$ では $\vec{w}_{s+1}=E^{Q}_{t}(\vec{w}_{s})\neq\bot$ なので、$Q$ についての帰納法の仮定から、$\vec{w}_{s}$ を表す状態から $Q$ を実行すると停止して $\vec{w}_{s+1}$ を表す状態になる（$\mathrm{var}(Q)$ の外の値は保たれる。\ref{comp:L-locality}）。規則 6 を $s=s_{0},s_{0}-1,\dots,0$ の順に使えば、$\langle P,\sigma\rangle\Downarrow\tau$（$\tau$ は $\vec{w}_{s_{0}}$ を表す）。
 
-2. 1 と同じ $s_{0}\le t\le t'$ をとる。$Q$ についての帰納法の仮定（単調性）から、燃料 $t'$ でも $s<s_{0}$ の各周回は同じ $\vec{w}_{s+1}$ を与え、$s_{0}$ 周で第 $i$ 成分が $0$ になる。$s_{0}\le t'$ なので $E^{P}_{t'}(\vec{v})=\vec{w}_{s_{0}}$。
+2. 1 と同じ $s_{0}\le t\le t'$ をとる。$Q$ についての帰納法の仮定（単調性）から、燃料 $t'$ でも $s<s_{0}$ の各周回は同じ $\vec{w}_{s+1}$ を与え、$s_{0}$ 周で第 $i$ 成分が $0$ になる。$s_{0}\le t'$ なので、$E^{P}_{t'}(\vec{v})=\vec{w}_{s_{0}}=\vec{u}$ である。
 
-3. 導出の最後が規則 6 の前半なら、$v_{i}=0$ で任意の $t$ で $E^{P}_{t}(\vec{v})=\vec{v}$。後半なら、$\langle Q,\sigma\rangle\Downarrow\sigma'$ と $\langle P,\sigma'\rangle\Downarrow\tau$ があり、帰納法の仮定から $E^{Q}_{t_{1}}(\vec{v})=\vec{v}'\neq\bot$（$\sigma'$ が表す組）、$E^{P}_{t_{2}}(\vec{v}')\neq\bot$ となる $t_{1},t_{2}$ がある。後者では、$\vec{v}'$ から $s_{0}'\le t_{2}$ 周で終わる。$t\defeq\max(t_{1},t_{2})+1$ とすると、単調性（2 は $P$ の構成に関する帰納法ですでに示した。それを $Q$ と $P$ に使う）から、燃料 $t$ で $\vec{v}$ からの最初の周回は $\vec{v}'$ を与え、その後 $s_{0}'$ 周で終わる。$1+s_{0}'\le t$ なので $E^{P}_{t}(\vec{v})\neq\bot$。
+3. 導出の最後が規則 6 の前半なら、$v_{i}=0$ であり、任意の $t$ で $E^{P}_{t}(\vec{v})=\vec{v}$ となる。後半なら、$\langle Q,\sigma\rangle\Downarrow\sigma'$ と $\langle P,\sigma'\rangle\Downarrow\tau$ がある。$\sigma'$ が表す組を $\vec{v}'$ とする。帰納法の仮定から $E^{Q}_{t_{1}}(\vec{v})\neq\bot$ となる $t_{1}$ があり、1 と意味の一意性（\ref{comp:L-determinism}）からその値は $\vec{v}'$ である。また帰納法の仮定から $E^{P}_{t_{2}}(\vec{v}')\neq\bot$ となる $t_{2}$ があり、その計算は $\vec{v}'$ から $s_{0}'\le t_{2}$ 周で第 $i$ 成分が $0$ になる（1 の $s_{0}$ と同じとり方）。$t\defeq\max(t_{1},t_{2})+1$ とすると、単調性（2 は $P$ の構成に関する帰納法ですでに示した。それを $Q$ と $P$ に使う）から、燃料 $t$ で $\vec{v}$ からの最初の周回は $\vec{v}'$ を与え、その後 $s_{0}'$ 周で終わる。$1+s_{0}'\le t$ なので、$E^{P}_{t}(\vec{v})\neq\bot$ である。
 :::
 
 ::: lemma 燃料つきの実行は原始再帰的 {#comp:fuel-pr keywords="fuel semantics is primitive recursive"}
@@ -99,7 +99,7 @@ $\mathrm{var}(P)\subseteq\{x_{0},\dots,x_{n}\}$ とする。原始再帰関数 $
 :::
 
 ::: proof
-$P$ の構成に関する帰納法。$t$ はすべての関数で共通のパラメータとして運ぶ。基本命令は $D=1$, $G_{j}=F^{P}_{j}$。逐次実行は、$D^{P}=D^{P_{1}}\cdot D^{P_{2}}(\vec{G}^{P_{1}},t)$、$G^{P}_{j}=G^{P_{2}}_{j}(\vec{G}^{P_{1}},t)$（$\vec{G}^{P_{1}}=(G^{P_{1}}_{0}(\vec{v},t),\dots)$）。
+$P$ の構成に関する帰納法。$t$ はすべての関数で共通のパラメータとして運ぶ。基本命令では $D\defeq1$, $G_{j}\defeq F^{P}_{j}$ とおく。逐次実行では、$D^{P}\defeq D^{P_{1}}\cdot D^{P_{2}}(\vec{G}^{P_{1}},t)$, $G^{P}_{j}\defeq G^{P_{2}}_{j}(\vec{G}^{P_{1}},t)$ とおく（$\vec{G}^{P_{1}}=(G^{P_{1}}_{0}(\vec{v},t),\dots)$。$D^{P_{1}}=0$ なら積が $0$ になる）。
 
 for と while では、$s$ 周後の「燃料切れでないか（$d$）と組 $\vec{w}$」を同時原始再帰（\ref{comp:simultaneous-recursion}、パラメータ $\vec{v},t$、再帰の変数 $s$）で定める：$d_{0}=1$, $\vec{w}_{0}=\vec{v}$、
 $$
@@ -108,7 +108,7 @@ d_{s+1}&=d_{s}\cdot\bigl(1\mathbin{\dot{-}}c_{s}+c_{s}\cdot D^{Q}(\vec{w}_{s},t)
 w_{s+1,j}&=(1\mathbin{\dot{-}}c_{s})\cdot w_{s,j}+c_{s}\cdot G^{Q}_{j}(\vec{w}_{s},t),
 \end{aligned}
 $$
-ただし for では $c_{s}\defeq1$、while では $c_{s}\defeq d_{s}\cdot\mathrm{sg}(w_{s,i})$（「まだ回る」）。for では $D^{P}=d_{v_{i}}$, $G^{P}_{j}=w_{v_{i},j}$（$s=v_{i}$ を代入）。while では $D^{P}=d_{t}\cdot\overline{\mathrm{sg}}(w_{t,i})$, $G^{P}_{j}=w_{t,j}$（$s=t$ を代入）。これらが \ref{comp:fuel-semantics.3}・\ref[4]{comp:fuel-semantics.4} と一致することは $s$ に関する帰納法で分かる（$d_{s}=0$ になった後は $d$ は $0$ のままで、$\vec{w}$ の値は使われない）。
+ただし for では $c_{s}\defeq1$、while では $c_{s}\defeq d_{s}\cdot\mathrm{sg}(w_{s,i})$（「まだ回る」）。for では $D^{P}\defeq d_{v_{i}}$, $G^{P}_{j}\defeq w_{v_{i},j}$ とおき（$s=v_{i}$ を代入する）、while では $D^{P}\defeq d_{t}\cdot\overline{\mathrm{sg}}(w_{t,i})$, $G^{P}_{j}\defeq w_{t,j}$ とおく（$s=t$ を代入する）。これらが \ref{comp:fuel-semantics.3}・\ref[4]{comp:fuel-semantics.4} と一致することは $s$ に関する帰納法で分かる（$d_{s}=0$ になった後は $d$ は $0$ のままで、$\vec{w}$ の値は使われない）。
 :::
 
 ## L 計算可能＝部分再帰 {#comp:sec-L-equals-recursive}
@@ -126,8 +126,8 @@ $$
 T_{P}(\vec{m},t)\defeq1\mathbin{\dot{-}}D^{P}(\vec{v}(\vec{m}),t),\qquad U_{P}(\vec{m},t)\defeq G^{P}_{0}(\vec{v}(\vec{m}),t)
 $$
 とする。どちらも原始再帰的で全域的なので、最小化の「途中で定義される」条件は自動的に満たされる。
-- $f(\vec{m})\downarrow$ なら $\langle P,\sigma_{\vec{m}}\rangle\Downarrow\tau$ で $\tau(x_{0})=f(\vec{m})$。十分性（\ref{comp:fuel-adequacy.3}）から $T_{P}(\vec{m},t)=0$ となる $t$ があり、最小のもの $t_{0}$ をとると、正しさ（1）と意味の一意性（\ref{comp:L-determinism}）から $E^{P}_{t_{0}}(\vec{v}(\vec{m}))$ は $\tau$ が表す組で、$U_{P}(\vec{m},t_{0})=\tau(x_{0})=f(\vec{m})$。
-- $f(\vec{m})\uparrow$ なら、正しさ（1）から、どの $t$ でも $E^{P}_{t}(\vec{v}(\vec{m}))=\bot$、すなわち $T_{P}(\vec{m},t)=1$ で、右辺の $\mu$ は定義されない。
+- $f(\vec{m})\downarrow$ の場合、$\langle P,\sigma_{\vec{m}}\rangle\Downarrow\tau$ かつ $\tau(x_{0})=f(\vec{m})$ となる $\tau$ がある。十分性（\ref{comp:fuel-adequacy.3}）から $T_{P}(\vec{m},t)=0$ となる $t$ があり、最小のもの $t_{0}$ をとる。正しさ（\ref{comp:fuel-adequacy.1}）と意味の一意性（\ref{comp:L-determinism}）から $E^{P}_{t_{0}}(\vec{v}(\vec{m}))$ は $\tau$ が表す組であり、ゆえに $U_{P}(\vec{m},t_{0})=\tau(x_{0})=f(\vec{m})$ である。
+- $f(\vec{m})\uparrow$ の場合、$P$ は $\sigma_{\vec{m}}$ から停止しないので、正しさ（\ref{comp:fuel-adequacy.1}）から、どの $t$ でも $E^{P}_{t}(\vec{v}(\vec{m}))=\bot$、すなわち $T_{P}(\vec{m},t)=1$ である。よって右辺の $\mu$ は定義されない。
 :::
 
 ::: corollary L 計算可能関数と部分再帰関数の一致 {#comp:L-equals-recursive keywords="L-computable equals partial recursive" index="部分再帰関数と L|ぶぶんさいきかんすうとえる"}
@@ -135,7 +135,7 @@ $$
 :::
 
 ::: proof
-\ref{comp:recursive-to-L} と、\ref{comp:normal-form-program}（右辺は原始再帰関数の最小化と合成なので部分再帰関数）。
+部分再帰関数が L で計算可能であることは \ref{comp:recursive-to-L} による。逆に、L で計算可能な $f$ は \ref{comp:normal-form-program} の右辺の形に書け、右辺は原始再帰関数の最小化と合成なので部分再帰関数である。後半は、これを全域的な関数と特性関数に当てはめればよい。
 :::
 
 ::: corollary while ループは一つでよい {#comp:one-while keywords="one while loop suffices, Kleene normal form, structured program theorem" index="while ループは一つでよい|ほわいるるーぷはひとつでよい"}
@@ -143,7 +143,7 @@ L で計算可能な部分関数は、while ループをちょうど一つ含み
 :::
 
 ::: proof
-\ref{comp:normal-form-program} の右辺を \ref{comp:recursive-to-L} の最小化のプログラムで書く。$T_{P}$, $U_{P}$ は原始再帰的なので for プログラムで呼び出せる（\ref{comp:pr-equals-for}）。使う while ループは最小化の一つだけである。
+\ref{comp:normal-form-program} の右辺を、\ref{comp:recursive-to-L} の最小化のプログラム（$g=T_{P}$）の後に $x_{0}:=U_{P}(\vec{m},y)$ の呼び出しを置いたプログラムで書く。$T_{P}$, $U_{P}$ は原始再帰的なので for プログラムで計算でき（\ref{comp:pr-equals-for}）、その呼び出しの展開（\ref{comp:L-composition} の証明）は基本命令と呼んだプログラムだけからなるので、for プログラムである。よって使う while ループは最小化の一つだけで、その本体（$y$ を増やして $T_{P}$ を呼ぶ）と外側（初期化、最初の呼び出し、$U_{P}$ の呼び出し）はどちらも for プログラムである。
 :::
 
 ::: hypcheck
@@ -160,7 +160,7 @@ $R\subseteq\N^{k+1}$ が再帰的で、すべての $\vec{x}$ に $R(\vec{x},y)$
 :::
 
 ::: solution
-$f(\vec{x})\simeq\mu y\,[\overline{\mathrm{sg}}(\chi_{R}(\vec{x},y))=0]$。$\chi_{R}$ が全域的なので途中の値はすべて定義され、仮定から $y$ が存在するので $f$ は全域的。
+$\overline{\mathrm{sg}}(\chi_{R}(\vec{x},y))=0$ は $R(\vec{x},y)$ と同値なので、$f(\vec{x})\simeq\mu y\,[\overline{\mathrm{sg}}(\chi_{R}(\vec{x},y))=0]$ が成り立つ。$\chi_{R}$ が全域的なので途中の値はすべて定義され、仮定から $y$ が存在するので、$f$ は全域的な部分再帰関数、すなわち一般再帰関数である。
 :::
 
 ::: problem {#comp:prob-graph-recursive}
@@ -168,7 +168,7 @@ $f\colon\N^{k}\to\N$ が一般再帰関数なら、グラフ $\{(\vec{x},y):f(\v
 :::
 
 ::: solution
-前半：$\chi(\vec{x},y)=\chi_{=}(f(\vec{x}),y)$ は全域的な部分再帰関数。後半：グラフを $\Gamma$ とすると、$f(\vec{x})=\min\{y:(\vec{x},y)\in\Gamma\}$ で、$f$ が全域的なので問題 \ref{comp:prob-mu-total} が使える。
+前半：グラフの特性関数は $\chi(\vec{x},y)=\chi_{=}(f(\vec{x}),y)$ であり、原始再帰関数 $\chi_{=}$ と $f$ の合成なので全域的な部分再帰関数、すなわち一般再帰関数である。後半：グラフを $\Gamma$ とすると、$(\vec{x},y)\in\Gamma$ となる $y$ は $f(\vec{x})$ ただ一つなので $f(\vec{x})=\min\{y:(\vec{x},y)\in\Gamma\}$ であり、$f$ が全域的なので問題 \ref{comp:prob-mu-total} が使える。
 :::
 
 ::: problem {#comp:prob-mu-strict}
@@ -176,17 +176,17 @@ $f\colon\N^{k}\to\N$ が一般再帰関数なら、グラフ $\{(\vec{x},y):f(\v
 :::
 
 ::: solution
-停止集合 $K$（決定不能で、計算可能な部分関数 $h$ の定義域になっているもの）をとる。$g(x,0)\simeq0$（$h(x)\downarrow$ のとき）、$g(x,0)\uparrow$（$h(x)\uparrow$ のとき）、$g(x,1)\defeq0$ とする（$g(x,0)\simeq Z^{1}(h(x))$、$y\ge1$ では $0$。場合分けは $y$ で行うので $g$ は計算可能）。すると $\mu^{\ast}y\,[g(x,y)=0]$ は $x\in K$ で $0$、$x\notin K$ で $1$ となり、$K$ の特性関数の否定である。これが計算可能なら $K$ が決定可能になり矛盾する。
+停止集合 $K$（決定不能で、計算可能な部分関数 $h$ の定義域になっているもの）をとる。$g(x,0)\simeq Z^{1}(h(x))$（$h(x)\downarrow$ なら $0$、$h(x)\uparrow$ なら未定義）、$y\ge1$ では $g(x,y)\defeq0$ と定める。$y=0$ かどうかで場合分けし、$y=0$ のときだけ $h$ を呼ぶプログラムで計算できるので、$g$ は計算可能である。すると $\mu^{\ast}y\,[g(x,y)=0]$ は、$x\in K$ なら $0$、$x\notin K$ なら $1$ となり（$g(x,0)\uparrow$ でも $\mu^{\ast}$ は $y=1$ を返す）、$1\mathbin{\dot{-}}\chi_{K}$ に等しい。これが計算可能なら $K$ が決定可能になり矛盾する。
 :::
 
 ::: supplement
 **前提の検討.**
-- 標準形 \ref{comp:normal-form-program} の $T_{P}$, $U_{P}$ はプログラム $P$ ごとに作った。プログラムをコード化してこれらを一様にしたものが、クリーネの標準形定理と $T$ 述語（\ref{comp:page-universal-smn}）である。
-- 最小化を $\mu y\,[g(\vec{x},y)=0]$ の形で定めたが、関係 $R(\vec{x},y)$ についての $\mu y\,R(\vec{x},y)$ で定めても、特性関数を通して同じクラスになる。
+- 標準形 \ref{comp:normal-form-program} の $T_{P}$, $U_{P}$ はプログラム $P$ ごとに作った。プログラムを数で表してこれらを一様にしたものが、クリーネの標準形定理と $T$ 述語（\ref{comp:page-universal-smn}）である。
+- 最小化を $\mu y\,[g(\vec{x},y)=0]$ の形で定めたが、最小化を「特性関数がそのクラスの全域関数である関係 $R(\vec{x},y)$ についての $\mu y\,R(\vec{x},y)$」だけに制限しても、同じクラスになる。実際、$\mu y\,R(\vec{x},y)\simeq\mu y\,[\overline{\mathrm{sg}}(\chi_{R}(\vec{x},y))=0]$ なので制限したクラスは部分再帰関数に含まれる。逆に、部分再帰関数は \ref{comp:L-equals-recursive} により L で計算可能なので \ref{comp:normal-form-program} の形 $U_{P}(\vec{m},\mu t\,[T_{P}(\vec{m},t)=0])$ に書け、これは原始再帰的な関係 $T_{P}(\vec{m},t)=0$ についての最小化を一回使うだけである。
 
 **関連する結果.**
-- *構造化定理.* \ref{comp:one-while} は、ベーム–ヤコピーニの定理（goto を使う流れ図は、逐次・分岐・繰り返しの組み合わせで書ける）として知られる主張の、L についての形である。L の場合は、補助の変数（燃料、状態の組）を使ってよいことが本質的である。
-- *クリーネの不動点定理（第一再帰定理）.* 計算可能な汎関数の最小不動点は計算可能であることが知られている。while ループの意味が最小不動点であること（\ref{comp:page-language-L} の補足）を、一般の再帰的定義に広げたものに当たる。
+- *構造化定理.* ベーム–ヤコピーニの定理は、goto を使う流れ図が逐次・分岐・繰り返しの組み合わせで書けることを述べる。\ref{comp:one-while} はさらに、補助の変数（燃料、状態の組）を使えば繰り返しを while ループ一つに集約できることを述べるもので、その本質はクリーネの標準形（最小化は一回で足りる）にある。
+- *クリーネの第一再帰定理.* 部分関数から部分関数への再帰的作用素（出力の有限の部分が入力の有限の部分から計算できる汎関数。とくに単調で連続である）の最小不動点は、部分計算可能関数である。最小不動点が空の関数から反復した極限であること（\ref{comp:kleene-fixed-point}）と、while ループの意味が最小不動点であること（\ref{comp:page-language-L} の補足）を、一般の再帰的定義に広げたものに当たる。本サイトでは示していない。
 
 **高い視点から：探索と燃料.** 部分再帰関数の構成のうち、原始再帰までは「事前に回数が分かる」計算で、最小化だけが「見つかるまで探す」計算である。標準形は、どんな計算も「原始再帰的な検査 $T_{P}$ を満たす燃料 $t$ を一つ探す」ことに帰着すると言っている。比喩で言えば、どの計算も「何秒あれば終わるかを順に試し、試すたびに最初からやり直す」ことで行える。やり直しは無駄だが、計算できる範囲には影響しない。計算量を問題にするとき（\ref{comp:page-time-complexity}）には、この無駄が問題になる。論理の言葉では、$f(\vec{m})=y$ は「$\exists t$（原始再帰的な条件）」の形、すなわち Σ₁ の形で書けることになり、これが\ref{comp:page-representability}や算術的階層（\ref{comp:arithmetical-hierarchy}）につながる。
 :::

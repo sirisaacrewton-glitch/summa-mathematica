@@ -16,7 +16,7 @@
 <script type="text/markdown" id="source">
 # 決定可能性と停止問題 {#comp:page-decidability keywords="decidable languages, A_DFA, E_DFA, EQ_DFA, A_CFG, universal Turing machine, diagonalization, A_TM undecidable, halting problem, Turing-unrecognizable language"}
 
-有限オートマトンや文脈自由文法についての基本的な問い（与えられた文字列を受理するか、受理する文字列があるか、二つが同じ言語を認識するか）は、アルゴリズムで答えられる（\ref{comp:dfa-decidable}, \ref{comp:cfg-decidable}）。一方、チューリング機械についての「与えられた入力を受理するか」という問い $A_{\mathsf{TM}}$ は、チューリング機械では決定できない（\ref{comp:atm-undecidable}）。証明は、カントールの対角線論法を機械に適用するものである。帰結として、**停止問題**（\ref{comp:halting-problem}）も決定不能で、チューリング認識可能でない言語が具体的に得られる（\ref{comp:co-atm-unrecognizable}）。同じことは、後のページで L のプログラムの指数を使って数の言葉でも示す（\ref{comp:halting-L}）。
+有限オートマトンや文脈自由文法についての基本的な問い（与えられた文字列を受理するか、受理する文字列があるか、二つが同じ言語を認識するか）は、アルゴリズムで答えられる（\ref{comp:dfa-decidable}, \ref{comp:cfg-decidable}）。一方、チューリング機械についての「与えられた入力を受理するか」という問い $A_{\mathsf{TM}}$ は、チューリング機械では決定できない（\ref{comp:atm-undecidable}）。証明は、カントールの対角線論法を機械に適用するものである。帰結として、**停止問題**（\ref{comp:halting-problem}）も決定不能で、チューリング認識可能でない言語が具体的に得られる（\ref{comp:co-atm-unrecognizable}）。同じことは、後のページで L のプログラムの指数を使って数の言葉でも示す（\see{comp:halting-L}）。
 
 ## 記法と定義の確認 {#comp:sec-dec-notation}
 
@@ -35,6 +35,10 @@
 3. $EQ_{\mathsf{DFA}}\defeq\{\langle B,C\rangle:B,C\text{ は DFA で }L(B)=L(C)\}$。
 :::
 
+::: intuition
+有限オートマトンは状態が有限個しかないので、受理するか・受理する文字列があるか・二つが同じ言語を認識するかは、状態をたどり尽くすことで機械的に答えられる。
+:::
+
 ::: proof
 1. $B$ を $w$ の上で $\lvert w\rvert$ 段模倣し、最後の状態が受理状態かどうかで受理・拒否する。
 2. 開始状態から遷移でたどれる状態を、新しい状態が増えなくなるまで印をつけていく（高々 $\lvert Q\rvert$ 回）。受理状態に印がつかなければ受理する。$L(B)\neq\varnothing\iff$ 開始状態から受理状態に到達できる、による。
@@ -45,6 +49,10 @@
 1. $A_{\mathsf{CFG}}\defeq\{\langle G,w\rangle:G\text{ は CFG で }w\in L(G)\}$ は決定可能である。
 2. $E_{\mathsf{CFG}}\defeq\{\langle G\rangle:L(G)=\varnothing\}$ は決定可能である。
 3. 任意の文脈自由言語は決定可能である。
+:::
+
+::: intuition
+文脈自由文法が文字列を生成するかは、導出の長さが文字列の長さで抑えられる形（チョムスキー標準形）に直せば、有限個の導出を調べ尽くして判定できる。
 :::
 
 ::: proof
@@ -67,6 +75,10 @@ $U$ は入力 $\langle M,w\rangle$ に対し、$M$ の時点表示をテープ�
 $A_{\mathsf{TM}}$ は決定可能でない。
 :::
 
+::: intuition
+「機械が入力を受理するか」を必ず正しく答える機械はない。あれば、それに自分自身についての答えを聞いて逆のことをする機械が作れて、矛盾する。
+:::
+
 ::: proof
 判定機 $H$ が $A_{\mathsf{TM}}$ を決定するとする：
 $$
@@ -80,11 +92,11 @@ D\text{ が }\langle D\rangle\text{ を受理する}&\iff H\text{ が }\langle D
 \end{aligned}
 $$
 となり、矛盾する。
-:::
 
 ::: hypcheck
 - **$H$ が判定機であること**：$D$ が必ず停止し、「受理しない $\iff$ 拒否する」と言い換えられることに使った。$A_{\mathsf{TM}}$ を認識するだけの $U$ では、$D$ がループする場合があり矛盾は生じない。
 - **符号化**：機械が自分の符号を入力として受け取れること（$\langle D\rangle$）。これが対角線論法の「対角線」である。
+:::
 :::
 
 ::: remark 対角線論法との関係 {#comp:diagonalization-remark}
@@ -97,12 +109,20 @@ TM は有限の文字列で符号化されるので可算個しかないが、�
 $\mathit{HALT}_{\mathsf{TM}}\defeq\{\langle M,w\rangle:M\text{ は TM で }M\text{ は }w\text{ の上で停止する}\}$ は決定可能でない。
 :::
 
+::: intuition
+プログラムが止まるかどうかを、どんな入力についても正しく判定する一般的な方法はない。
+:::
+
 ::: proof
-判定機 $R$ が $\mathit{HALT}_{\mathsf{TM}}$ を決定するとする。$A_{\mathsf{TM}}$ の判定機 $S$ を次のように作る：入力 $\langle M,w\rangle$ に対し、$R$ を動かす。$R$ が拒否すれば（$M$ は $w$ の上でループする）拒否する。$R$ が受理すれば、$M$ を $w$ の上で停止するまで模倣し（必ず停止する）、$M$ が受理すれば受理、拒否すれば拒否する。$S$ は判定機で $A_{\mathsf{TM}}$ を決定し、\ref{comp:atm-undecidable} に反する。
+判定機 $R$ が $\mathit{HALT}_{\mathsf{TM}}$ を決定するとする。$A_{\mathsf{TM}}$ の判定機 $S$ を次のように作る：入力 $\langle M,w\rangle$ に対し、$R$ を動かす。$R$ が拒否すれば（$M$ は $w$ の上でループする）拒否する。$R$ が受理すれば、$M$ を $w$ の上で停止するまで模倣し（必ず停止する）、$M$ が受理すれば受理、拒否すれば拒否する。$S$ は判定機であり、$A_{\mathsf{TM}}$ を決定するので、\ref{comp:atm-undecidable} に反する。
 :::
 
 ::: theorem 補集合の認識不能性 {#comp:co-atm-unrecognizable keywords="complement of A_TM is not Turing-recognizable" index="認識不能な言語|にんしきふのうなげんご"}
 $\overline{A_{\mathsf{TM}}}$ はチューリング認識可能でない。
+:::
+
+::: intuition
+「機械が入力を受理しない」ことは、待っていればいつか確かめられる、という形でさえ確かめられない。
 :::
 
 ::: proof
@@ -116,7 +136,13 @@ $\mathit{INF}_{\mathsf{DFA}}\defeq\{\langle B\rangle:L(B)\text{ は無限集合}
 :::
 
 ::: solution
-$B$ の状態数を $k$ とする。$L(B)$ が無限であることと、長さが $k$ 以上 $2k$ 未満の文字列を $B$ が受理することは同値である。$\Leftarrow$：長さ $\ge k$ の受理される文字列は反復補題（\tref{comp:pumping-regular}、反復長 $k$）で繰り返せるので無限個ある。$\Rightarrow$：長さ $\ge k$ の受理される文字列のうち最短のものを $s$ とする。$\lvert s\rvert\ge2k$ なら、$s$ の最初の $k$ 文字を読む間に状態が繰り返すので、その間の長さ $\le k$ の部分を除いた文字列も受理され（反復補題の $i=0$）、長さは $\ge k$ でより短く、最短性に反する。長さ $k$ 以上 $2k$ 未満の文字列は有限個なので、すべて調べればよい。
+$B$ の状態数を $k$ とする。$L(B)$ が無限であることと、長さが $k$ 以上 $2k$ 未満の文字列を $B$ が受理することは同値である。まず次を確かめる：$B$ が長さ $\ge k$ の文字列 $s$ を受理するなら、$s$ の最初の $k$ 文字を読む間に $B$ は $k+1$ 個の状態を（重複を許して）通るので、鳩の巣原理により同じ状態を二度通る。その間に読んだ部分を $y$ とし、$s=xyz$ と書くと、$1\le\lvert y\rvert\le k$ であり、$y$ を読む前後で状態が同じなので、すべての $i\ge0$ について $xy^{i}z$ も受理される（\tref{comp:pumping-regular} の証明と同じ議論）。
+
+$\Leftarrow$ の場合：上の $xy^{i}z$（$i=0,1,2,\dots$）は長さがすべて異なるので、$L(B)$ は無限である。
+
+$\Rightarrow$ の場合：長さ $<k$ の文字列は有限個なので、$L(B)$ は長さ $\ge k$ の文字列を含む。そのうち最短のものを $s$ とし、$\lvert s\rvert\ge2k$ と仮定する。上の分解で $i=0$ とすると、$xz$ も受理され、$\lvert xz\rvert=\lvert s\rvert-\lvert y\rvert\ge2k-k=k$ かつ $\lvert xz\rvert<\lvert s\rvert$ である。これは $s$ の最短性に反する。ゆえに $k\le\lvert s\rvert<2k$ である。
+
+長さ $k$ 以上 $2k$ 未満の文字列は有限個なので、そのすべてについて $A_{\mathsf{DFA}}$ の判定機（\ref{comp:dfa-decidable.1}）を動かせばよい。
 :::
 
 ::: problem {#comp:prob-etm-co-recognizable}
@@ -133,7 +159,7 @@ $E_{\mathsf{TM}}\defeq\{\langle M\rangle:L(M)=\varnothing\}$ の補集合はチ�
 - $A_{\mathsf{TM}}$ は認識可能だが決定可能でなく、$\overline{A_{\mathsf{TM}}}$ は認識可能でもない。決定可能 $\subsetneq$ 認識可能 であり、認識可能な言語のクラスは補集合で閉じていない。
 
 **関連する結果.**
-- *不完全性定理との関係.* 「算術の真な文全体」が決定不能であることや、ゲーデルの第一不完全性定理も、停止問題から導けることが知られている（$M$ が $w$ の上で停止することは算術の $\Sigma_{1}$ 文で表せるので、算術の健全で完全な認識可能な公理系があれば $\mathit{HALT}_{\mathsf{TM}}$ が決定可能になる）。本サイトの不完全性定理の系列（\ref{pt:page-diagonal-first-incompleteness}）は対角化定理による証明で、こちらとは独立である。
+- *不完全性定理との関係.* 「算術の真な文全体」が決定不能であることや、ゲーデルの第一不完全性定理も、停止問題から導けることが知られている（$M$ が $w$ の上で停止することは算術の $\Sigma_{1}$ 文で表せるので、算術の健全で完全な認識可能な公理系があれば $\mathit{HALT}_{\mathsf{TM}}$ が決定可能になる）。本サイトの不完全性定理の系列（\see{pt:page-diagonal-first-incompleteness}）は対角化定理による証明で、停止問題の決定不能性には（論理の依存として）頼っていない。ただし、どちらも同じ対角線論法の骨格をもつ（下の「高い視点から」）。
 - *ローヴェアの不動点定理.* 対角線論法の共通の形は、圏論の\tref{cat:lawvere-fixed-point}として抽象化される。
 
 **高い視点から：自己言及の禁止.** $D$ は「自分についての予言を必ず裏切る」機械である。もし完全な予言者 $H$ がいれば、予言を聞いてから逆のことをする天邪鬼 $D$ を作れるので、予言者は存在しえない。この論法は、カントールの定理（集合はその冪集合と対応しない）、ラッセルの逆理、ゲーデルの不完全性定理、タルスキの真理の定義不能性と同じ骨格をもつ。決定不能性は、機械の能力不足ではなく、「自分自身を入力として扱える」ほど強い体系が必然的に抱える限界である。
