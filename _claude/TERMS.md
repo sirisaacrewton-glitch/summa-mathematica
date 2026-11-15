@@ -656,3 +656,5 @@
 | primitive root / order modulo m / index (discrete logarithm) / n-th power residue | 原始根 / 位数（法 m での） / 指数（離散対数） / n 乗剰余 | — / 法 m での位数 / インデックス / 冪剰余 | 2026-11-15（nt:page-primitive-roots） |
 | Gauss's lemma / Eisenstein's lemma / Jacobi symbol | ガウスの補題 / アイゼンシュタインの補題 / ヤコビ記号 | — / — / — | 2026-11-15（nt:page-quadratic-residues） |
 | multiplicative character / Gauss sum / Jacobi sum | 乗法的指標 / ガウス和 / ヤコビ和 | 乗法指標・ディリクレ指標（有限体の）/ — / — | 2026-11-15（nt:page-gauss-jacobi-sums） |
+| arithmetic function / multiplicative function / Dirichlet convolution / Möbius function / divisor function / perfect number / Mersenne prime | 数論的関数 / 乗法的関数 / ディリクレ積 / メビウス関数 / 約数関数 / 完全数 / メルセンヌ素数 | 算術関数 / 乗法関数 / ディリクレ畳み込み / — / — / — / — | 2026-11-15（nt:page-multiplicative-functions） |
+| Gaussian prime / Jacobi's two square theorem / Lagrange's four square theorem / Euler's four square identity | ガウス素元 / ヤコビの 2 平方定理 / ラグランジュの 4 平方定理 / オイラーの 4 平方恒等式 | ガウス素数 / — / 4 平方和定理 / — | 2026-11-15（nt:page-sums-of-squares） |
