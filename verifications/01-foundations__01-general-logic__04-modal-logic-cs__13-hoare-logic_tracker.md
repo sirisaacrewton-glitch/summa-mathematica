@@ -19,6 +19,7 @@
 - **Detail:** The remark says the new variable $y$ is 'always substitutable (\ref{logic:fresh-renaming})'. But \ref{logic:fresh-renaming} (corollary 2.7, 'renaming by a new variable') is about renaming bound variables; it does not state that a fresh variable is substitutable for $x$ in $\psi$. The actual reason $y$ is substitutable for $x$ in $\psi$ is simply that $y$ does not occur in $\psi$ (a variable not occurring in a formula is substitutable for any variable). The citation is used for a claim it does not make, and the stated justification is imprecise.
 - **Proposed fix:** Replace with: 'In the form used here, the fresh variable $y$ does not occur in $\psi$, hence is substitutable for $x$ in $\psi$ (a variable not occurring in a formula is substitutable for any variable), so no renaming of bound variables is needed.'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** logic:fresh-renaming explicitly states that a variable y not occurring in φ is substitutable for x in φ, so the citation is exact; the wording was made more explicit (y does not occur in ψ, hence is substitutable).
 
 ### ISSUE-0002 [Open] Hypcheck: 'mechanical' derivation requires decidable Th(A)
 - **Category:** Supplement/remark error
