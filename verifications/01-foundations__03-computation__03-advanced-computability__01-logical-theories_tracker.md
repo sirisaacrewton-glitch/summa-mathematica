@@ -19,6 +19,7 @@ The page is largely correct. The main genuine concern is the supplement's comple
 - **Detail:** The supplement says deciding Th(N,+) requires double exponential time, attributed to Fischer–Rabin. The known Fischer–Rabin (1974) result is a double-exponential *lower bound on the length of formulas* in quantifier elimination, giving a triple-exponential decision procedure; the standard complexity statement is that Presburger arithmetic is decidable in at most double exponential time (and requires at least exponential time / is not elementary-lower in the general sense). Stating 'double exponential time is necessary' as a lower bound is not the established attribution.
 - **Proposed fix:** Replace with: '決定には二重指数時間の上界が知られており（量化子消去の式の長さが二重指数的に増大するというフィッシャー–ラビンの結果に基づく）、実際に非常に遅い。'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Fischer and Rabin (1974) did prove a double-exponential lower bound: for some c>0, every decision procedure for Presburger arithmetic (even nondeterministic) needs at least 2^{2^{cn}} steps on some sentence of length n, for infinitely many n. The proposed upper-bound reading is wrong (the known upper bound is triple exponential, Oppen 1978). The text now states the bound precisely and mentions the upper bound.
 
 ### ISSUE-0002 [Open] Quantifier elimination for Presburger needs congruences, not just 'k で割った余り'
 - **Category:** Supplement/remark error
