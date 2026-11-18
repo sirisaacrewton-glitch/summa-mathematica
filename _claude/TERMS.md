@@ -668,3 +668,5 @@
 | Dirichlet series / Euler product / Riemann zeta function / Dirichlet character / principal character / Dirichlet L-function | ディリクレ級数 / オイラー積 / リーマンのゼータ関数 / ディリクレ指標 / 主指標 / ディリクレの L 関数 | — / オイラー乗積 / ゼータ関数 / 指標 / 単位指標 / L 関数 | 2026-11-18（nt:page-dirichlet-series） |
 | Landau's lemma / Dirichlet's theorem on arithmetic progressions / Dirichlet density | ランダウの補題 / ディリクレの算術級数定理 / ディリクレ密度 | — / 算術級数定理 / 解析的密度 | 2026-11-18（nt:page-dirichlet-theorem） |
 | theta function / completed zeta function / functional equation / trivial zeros / Bernoulli numbers / primitive character | テータ関数 / 完備化されたゼータ関数 / 関数等式 / 自明な零点 / ベルヌーイ数 / 原始指標 | ヤコビのテータ関数 / 完備ゼータ関数 / — / 自明零点 / — / 原始的指標 | 2026-11-18（nt:page-functional-equation） |
+| Chebyshev functions / von Mangoldt function / Legendre's formula / Chebyshev's bounds / Mertens' theorems | チェビシェフ関数 / フォン・マンゴルト関数 / ルジャンドルの公式 / チェビシェフの評価 / メルテンスの定理 | — / マンゴルト関数 / — / チェビシェフの不等式 / — | 2026-11-18（nt:page-chebyshev） |
+| prime number theorem / Newman's Tauberian theorem / Riemann hypothesis / logarithmic integral | 素数定理 / ニューマンのタウバー型定理 / リーマン予想 / 対数積分 | — / ニューマンの解析的定理 / — / li 関数 | 2026-11-18（nt:page-prime-number-theorem） |

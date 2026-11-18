@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>チェビシェフの評価とメルテンスの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/03-analytic-number-theory/02-prime-number-theorem/01-chebyshev.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# チェビシェフの評価とメルテンスの定理 {#nt:page-chebyshev keywords="Chebyshev functions theta(x) and psi(x), von Mangoldt function, Legendre's formula for v_p(n!), central binomial coefficient, Erdos's proof of theta(x) <= 2 x log 2, Chebyshev's bounds psi(x) >= c x, pi(x) is of order x / log x, Mertens' first and second theorems, sum of log p / p and sum of 1/p, equivalence of pi(x) ~ x/log x, theta(x) ~ x, psi(x) ~ x"}
+
+$x$ 以下の素数の個数 $\pi(x)$ が $x/\log x$ 程度であることを最初に示したのはチェビシェフ（1850 年頃）である。このページでは、素数を対数で重みづけて数える**チェビシェフ関数** $\theta(x)=\sum_{p\le x}\log p$ と $\psi(x)=\sum_{p^{k}\le x}\log p$ を導入し、中心二項係数 $\binom{2n}{n}$ の素因数分解を使って、$\theta(x)\le(2\log2)x$ と $\psi(x)\ge cx$ を初等的に証明する。帰結として $\pi(x)$ が $x/\log x$ の定数倍で上下から押さえられることを示す。後半では $n!$ の素因数分解から**メルテンスの定理** $\sum_{p\le x}\frac{\log p}{p}=\log x+O(1)$ と $\sum_{p\le x}\frac1p=\log\log x+M+O(1/\log x)$ を導き、最後に素数定理 $\pi(x)\sim x/\log x$ が $\psi(x)\sim x$ と同値であることを確かめる。
+
+## 記法と定義の確認 {#nt:sec-ch-notation}
+
+::: notation
+- $p$ は素数、$\log$ は自然対数。$f(x)=O(g(x))$ は「ある定数 $C$ で $\abs{f(x)}\le Cg(x)$（$x$ が十分大きいとき）」、$f\sim g$ は $f/g\to1$。
+- 算術の基本定理と $p$ 進付値 $v_{p}$ は \ref{nt:page-divisibility}、ディリクレ積は \ref{nt:page-multiplicative-functions}。\ref{calc:summation-by-parts} を使う。
+- 体系は $\ZF$。
+:::
+
+## チェビシェフ関数 {#nt:sec-ch-functions}
+
+::: definition チェビシェフ関数とフォン・マンゴルト関数 {#nt:chebyshev-functions keywords="von Mangoldt function Lambda(n) = log p if n = p^k, 0 otherwise; Lambda * 1 = log; theta(x) = sum_{p <= x} log p; psi(x) = sum_{n <= x} Lambda(n); -zeta'/zeta = sum Lambda(n) n^{-s}" index="チェビシェフ関数|ちぇびしぇふかんすう, フォン・マンゴルト関数|ふぉんまんごるとかんすう" refname="チェビシェフ関数"}
+**フォン・マンゴルト関数**を $\Lambda(n)\defeq\log p$（$n=p^{k}$, $k\ge1$）、$0$（それ以外）とし、**チェビシェフ関数**を
+$$\theta(x)\defeq\sum_{p\le x}\log p,\qquad\psi(x)\defeq\sum_{n\le x}\Lambda(n)=\sum_{p^{k}\le x}\log p$$
+とする。$\sum_{d\mid n}\Lambda(d)=\log n$（$\log n=\sum_{p}v_{p}(n)\log p$ から）で、$\mathrm{Re}\,s>1$ で $-\frac{\zeta'(s)}{\zeta(s)}=\sum_{n}\Lambda(n)n^{-s}$。
+:::
+
+::: intuition
+素数 $p$ を $1$ ではなく $\log p$ の重みで数えると、ちょうど「平均して密度 $1$」になる（素数定理の予想）。$\psi$ は素数の冪も同じ重みで数えるもので、$\log n=\sum_{d\mid n}\Lambda(d)$ という関係がゼータ関数の対数微分と結びつく。
+:::
+
+::: proof
+最後の式：$\mathrm{Re}\,s>1$ で $\zeta(s)\sum\Lambda(n)n^{-s}=\sum(\mathbf 1\ast\Lambda)(n)n^{-s}=\sum(\log n)n^{-s}=-\zeta'(s)$（絶対収束するディリクレ級数の積と項別微分、\ref{nt:dirichlet-series-convergence}）。$\zeta(s)\neq0$（\ref{nt:euler-product}）で割る。
+:::
+
+::: lemma ルジャンドルの公式と中心二項係数 {#nt:legendre-formula keywords="v_p(n!) = sum_{i >= 1} floor(n / p^i); v_p(binom(2n, n)) <= max{i : p^i <= 2n}; binom(2n, n) divides lcm(1, ..., 2n) = e^{psi(2n)}; primes n < p <= 2n divide binom(2n, n); binom(2m+1, m) <= 4^m" index="ルジャンドルの公式|るじゃんどるのこうしき, 中心二項係数|ちゅうしんにこうけいすう"}
+1. $v_{p}(n!)=\sum_{i\ge1}\lfloor n/p^{i}\rfloor$。
+2. $v_{p}\binom{2n}{n}\le\max\{i:p^{i}\le2n\}$。したがって $\binom{2n}{n}$ は $\operatorname{lcm}(1,\dots,2n)=e^{\psi(2n)}$ を割る。
+3. $n<p\le2n$ の素数はすべて $\binom{2n}{n}$ を割る。$m<p\le2m+1$ の素数はすべて $\binom{2m+1}{m}$ を割り、$\binom{2m+1}{m}\le4^{m}$。
+:::
+
+::: proof
+**Step 1（1）.** $v_{p}(n!)=\sum_{k\le n}v_{p}(k)=\sum_{k\le n}\sum_{i\ge1}[p^{i}\mid k]=\sum_{i}\#\{k\le n:p^{i}\mid k\}=\sum_{i}\lfloor n/p^{i}\rfloor$。
+
+**Step 2（2）.** $v_{p}\binom{2n}{n}=\sum_{i}\bigl(\lfloor2n/p^{i}\rfloor-2\lfloor n/p^{i}\rfloor\bigr)$ で、各項は $0$ か $1$（$\lfloor2y\rfloor-2\lfloor y\rfloor\in\{0,1\}$）、$p^{i}>2n$ なら $0$。$\operatorname{lcm}(1,\dots,2n)$ の $p$ 進付値はちょうど $\max\{i:p^{i}\le2n\}$ で、$\log\operatorname{lcm}=\sum_{p}\max\{i\}\log p=\sum_{p^{i}\le2n}\log p=\psi(2n)$。
+
+**Step 3（3）.** $n<p\le2n$ なら $p$ は $(2n)!$ を割り $n!^{2}$ を割らない。$\binom{2m+1}{m}=\frac{(2m+1)!}{m!(m+1)!}$ も同様。$\binom{2m+1}{m}=\binom{2m+1}{m+1}$ は $(1+1)^{2m+1}$ の展開に 2 回現れるので $2\binom{2m+1}{m}\le2^{2m+1}$。
+:::
+
+::: theorem チェビシェフの評価 {#nt:chebyshev-bounds keywords="theta(x) <= (2 log 2) x for x >= 1 (Erdos); psi(2n) >= n log 4 - log(2n+1); psi(x) >= (log 2 / 2) x for large x; psi(x) - theta(x) = O(sqrt(x) log x); c x / log x <= pi(x) <= C x / log x" index="チェビシェフの評価|ちぇびしぇふのひょうか" refname="チェビシェフの評価"}
+1. $x\ge1$ で $\theta(x)\le(2\log2)\,x$。
+2. $n\ge1$ で $\psi(2n)\ge n\log4-\log(2n+1)$。特に十分大きい $x$ で $\psi(x)\ge\frac{\log2}{2}x$。
+3. $0\le\psi(x)-\theta(x)\le\sqrt x\log x+x^{1/3}(\log x)^{2}$（$x\ge2$）。
+4. 正の定数 $c,C$ で、十分大きい $x$ について $c\frac{x}{\log x}\le\pi(x)\le C\frac{x}{\log x}$。
+:::
+
+::: intuition
+$\binom{2n}{n}$ は $4^{n}$ 程度の大きさで、$n$ と $2n$ の間の素数をすべて含み、しかも $2n$ 以下の素数の冪しか含まない。前者から「素数が多すぎない」、後者から「素数が少なすぎない」がわかる。
+:::
+
+::: proof
+**Step 1（1：エルデシュの帰納法）.** 【主張：$\theta(n)\le2n\log2$】$x$ を整数 $n$ に替えてよい。$n$ についての強い帰納法。$n=1,2$ は $\theta(1)=0$, $\theta(2)=\log2\le4\log2$。$n\ge3$ が偶数なら $\theta(n)=\theta(n-1)$。$n=2m+1$ なら \ref{nt:legendre-formula} の 3 から $\theta(2m+1)-\theta(m+1)\le\log\binom{2m+1}{m}\le2m\log2$ で、帰納法の仮定 $\theta(m+1)\le2(m+1)\log2$ と合わせて $\theta(2m+1)\le(4m+2)\log2=2(2m+1)\log2$。
+
+**Step 2（2）.** 【主張：$\psi(2n)\ge n\log4-\log(2n+1)$】$\binom{2n}{n}$ は $(1+1)^{2n}$ の $2n+1$ 個の項の最大なので $\binom{2n}{n}\ge\frac{4^{n}}{2n+1}$。\ref{nt:legendre-formula} の 2 から $\psi(2n)\ge\log\binom{2n}{n}$。$x\ge2$ で $n\defeq\lfloor x/2\rfloor$ とすると $\psi(x)\ge\psi(2n)\ge n\log4-\log(2n+1)\ge(x/2-1)\log4-\log(x+1)$ で、十分大きい $x$ では $\ge\frac{\log2}{2}x$。
+
+**Step 3（3）.** 【主張：$\psi-\theta$ の評価】$\psi(x)-\theta(x)=\sum_{k\ge2}\theta(x^{1/k})$ で、$k>\log_{2}x$ では $x^{1/k}<2$ なので $0$。$\theta(y)\le y\log y$ から、$k=2$ の項は $\le\sqrt x\log x$、$3\le k\le\log_{2}x$ の項はそれぞれ $\le x^{1/3}\log x$ で個数は $\le\log_{2}x\le2\log x$。
+
+**Step 4（4）.** 【主張：$\pi(x)$ は $x/\log x$ の定数倍で挟まれる】上界：$\theta(x)\ge\sum_{\sqrt x<p\le x}\log p\ge\frac12\log x\,(\pi(x)-\sqrt x)$ なので $\pi(x)\le\sqrt x+\frac{2\theta(x)}{\log x}\le\sqrt x+\frac{4\log2\,x}{\log x}$。下界：$\psi(x)\le\pi(x)\log x+(\psi(x)-\theta(x))$（$\theta(x)\le\pi(x)\log x$）と 2, 3 から $\pi(x)\log x\ge\frac{\log2}{2}x-O(\sqrt x\log x)$。
+:::
+
+## メルテンスの定理 {#nt:sec-ch-mertens}
+
+::: theorem メルテンスの定理 {#nt:mertens-theorems keywords="Mertens: sum_{p <= x} log p / p = log x + O(1); sum_{p <= x} 1/p = log log x + M + O(1/log x)" index="メルテンスの定理|めるてんすのていり" refname="メルテンスの定理"}
+1. $\sum_{p\le x}\frac{\log p}{p}=\log x+O(1)$。
+2. ある定数 $M$ で $\sum_{p\le x}\frac1p=\log\log x+M+O\bigl(\frac{1}{\log x}\bigr)$。
+:::
+
+::: intuition
+$n!$ を素因数分解すると、各素数 $p$ はおよそ $n/p$ 回現れるので、$\log n!\approx n\sum_{p\le n}\frac{\log p}{p}$。一方 $\log n!\approx n\log n$ なので、$\frac{\log p}{p}$ の和は $\log n$ になる。重み $\frac{\log p}{p}$ を $\frac1p$ に替えると、対数が二重になる。
+:::
+
+::: proof
+**Step 1（$\log n!$ の 2 通りの評価）.** 【主張：$\log n!=n\sum_{p\le n}\frac{\log p}{p}+O(n)=n\log n+O(n)$】$\sum_{k=2}^{n}\log k$ を $\int_{1}^{n}\log t\,dt=n\log n-n+1$ と比べると（$\log$ は単調で、差は $\log n$ 以下）、$\log n!=n\log n-n+O(\log n)$。一方 \ref{nt:legendre-formula} の 1 から
+$$\log n!=\sum_{p\le n}\log p\sum_{i\ge1}\Bigl\lfloor\frac{n}{p^{i}}\Bigr\rfloor=n\sum_{p\le n}\frac{\log p}{p}+R,$$
+$\abs R\le\sum_{p\le n}\log p+n\sum_{p}\log p\sum_{i\ge2}p^{-i}\le\theta(n)+n\sum_{p}\frac{\log p}{p(p-1)}=O(n)$（\ref{nt:chebyshev-bounds} の 1、$\sum\frac{\log p}{p(p-1)}$ は収束）。
+
+**Step 2（1）.** 【主張：第 1 定理】Step 1 の 2 つを比べ $n$ で割ると $\sum_{p\le n}\frac{\log p}{p}=\log n+O(1)$。実数 $x$ には $n=\lfloor x\rfloor$ を使う（差は $O(1)$）。
+
+**Step 3（2：部分和）.** 【主張：第 2 定理】$A(t)\defeq\sum_{p\le t}\frac{\log p}{p}=\log t+r(t)$, $\abs{r(t)}\le K$ とおく。$\frac1p=\frac{\log p}{p}\cdot\frac{1}{\log p}$ に部分和（スティルチェス積分の部分積分、あるいは \ref{calc:summation-by-parts} の連続版）を使うと
+$$\sum_{p\le x}\frac1p=\frac{A(x)}{\log x}+\int_{2}^{x}\frac{A(t)}{t(\log t)^{2}}dt=1+\frac{r(x)}{\log x}+\int_{2}^{x}\frac{dt}{t\log t}+\int_{2}^{x}\frac{r(t)}{t(\log t)^{2}}dt.$$
+$\int_{2}^{x}\frac{dt}{t\log t}=\log\log x-\log\log2$。最後の積分は $\int_{2}^{\infty}$ が絶対収束し（$\abs r\le K$）、尾は $\int_{x}^{\infty}\frac{K}{t(\log t)^{2}}dt=\frac{K}{\log x}$。よって $M\defeq1-\log\log2+\int_{2}^{\infty}\frac{r(t)}{t(\log t)^{2}}dt$ とおけば 2 が成り立つ。
+:::
+
+::: proposition 素数定理の同値な形 {#nt:pnt-equivalent-forms keywords="pi(x) ~ x / log x iff theta(x) ~ x iff psi(x) ~ x" index="素数定理の同値な形|そすうていりのどうちなかたち"}
+次は同値である：(a) $\pi(x)\sim\frac{x}{\log x}$、(b) $\theta(x)\sim x$、(c) $\psi(x)\sim x$。
+:::
+
+::: proof
+**Step 1（(b)⇔(c)）.** \ref{nt:chebyshev-bounds} の 3 から $\psi(x)-\theta(x)=O(\sqrt x\log x)=o(x)$。
+
+**Step 2（(b)⇒(a)）.** $\theta(x)\le\pi(x)\log x$ から $\liminf\frac{\pi(x)\log x}{x}\ge1$。$0<\varepsilon<1$ について $\theta(x)\ge\sum_{x^{1-\varepsilon}<p\le x}\log p\ge(1-\varepsilon)\log x\,(\pi(x)-x^{1-\varepsilon})$ から $\frac{\pi(x)\log x}{x}\le\frac{\theta(x)}{(1-\varepsilon)x}+\frac{\log x}{x^{\varepsilon}}$、$\limsup\le\frac{1}{1-\varepsilon}$。
+
+**Step 3（(a)⇒(b)）.** $\theta(x)\le\pi(x)\log x$ と Step 2 の下からの評価を逆に使う：$\theta(x)\ge(1-\varepsilon)\log x\,(\pi(x)-x^{1-\varepsilon})$ から $\liminf\frac{\theta(x)}{x}\ge1-\varepsilon$、$\limsup\le\lim\frac{\pi(x)\log x}{x}=1$。
+:::
+
+::: example
+1. $x=100$：$\pi(100)=25$, $\frac{100}{\log100}\approx21.7$, $\theta(100)\approx83.7$, $\psi(100)\approx94.0$。
+2. $\binom{20}{10}=184756=2^{2}\cdot11\cdot13\cdot17\cdot19$ は $10$ と $20$ の間の素数 $11,13,17,19$ をすべて含み、$184756\le\operatorname{lcm}(1,\dots,20)=232792560$。
+3. メルテンスの定数は $M\approx0.2615$ と知られている。
+:::
+
+::: hypcheck
+- **チェビシェフの評価**：中心二項係数の 2 つの性質（大きさが $4^{n}$ 程度、$2n$ 以下の素数冪しか含まない）だけを使った。素数の分布の解析的な情報は使っていない。
+- **メルテンスの定理**：$\theta(x)=O(x)$（チェビシェフの評価の 1）が、ルジャンドルの公式の誤差を $O(n)$ に抑えるのに必要。
+- **同値な形**：$\psi-\theta$ が $o(x)$ であること、$x^{1-\varepsilon}$ 以下の素数が $\pi(x)$ に比べて少ないことを使った。
+:::
+
+## 問題 {#nt:sec-ch-problems}
+
+::: problem {#nt:prob-ch-v5-100}
+$v_{5}(100!)$ と、$100!$ の末尾の $0$ の個数を求めよ。
+:::
+
+::: solution
+$v_{5}(100!)=\lfloor100/5\rfloor+\lfloor100/25\rfloor=20+4=24$。$v_{2}(100!)\ge24$ なので、$10^{24}$ が割り、末尾の $0$ は $24$ 個。
+:::
+
+::: problem {#nt:prob-ch-bertrand-weak}
+\ref{nt:chebyshev-bounds} から、十分大きい $x$ について $x$ と $Kx$（$K$ はある定数）の間に素数があることを示せ。
+:::
+
+::: solution
+$\theta(Kx)-\theta(x)\ge\psi(Kx)-O(\sqrt{Kx}\log(Kx))-(2\log2)x\ge\bigl(\frac{\log2}{2}K-2\log2\bigr)x-o(x)$。$K=5$ なら係数 $\frac{\log2}{2}>0$ で、十分大きい $x$ で正。よって $(x,5x]$ に素数がある。（実際にはベルトランの仮説：$(n,2n]$ に素数がある、が成り立つ。）
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** このページはゼータ関数を使わず、すべて初等的である（$-\zeta'/\zeta$ の式は定義の補足）。
+
+**前提を変えると.**
+- $\binom{2n}{n}$ の評価を精密にすると、**ベルトランの仮説**（$n\ge1$ について $n<p\le2n$ の素数がある）が初等的に示せる（エルデシュ、1932）と知られている。
+- メルテンスの第 3 定理 $\prod_{p\le x}\bigl(1-\frac1p\bigr)\sim\frac{e^{-\gamma}}{\log x}$（$\gamma$ はオイラーの定数）が成り立つ、と知られている。
+- チェビシェフは $0.92\frac{x}{\log x}<\pi(x)<1.11\frac{x}{\log x}$ を示し、もし $\pi(x)\log x/x$ が収束するなら極限は $1$ であることも示した。収束そのもの（素数定理）は、ゼータ関数の $\mathrm{Re}\,s=1$ 上の性質を使って 1896 年に証明された（\ref[素数定理]{nt:page-prime-number-theorem}）。
+
+**高い視点から：初等的方法と解析的方法.** 二項係数の素因数分解による評価は、素数の分布についての「粗い」情報を算術から直接取り出す方法で、ふるい法の原型である。一方、精密な漸近式 $\psi(x)\sim x$ はゼータ関数の零点の位置という解析的な情報を必要とし、両者の差は「定数倍の精度」と「$1+o(1)$ の精度」の差として現れる。比喩で言えば、チェビシェフの評価は素数の森の木の数を「数百本から数千本」と見積もるのに対し、素数定理は「ちょうど何本」という精密な測量で、そのためには森全体を上空から見る解析の道具が要る。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-ch-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
