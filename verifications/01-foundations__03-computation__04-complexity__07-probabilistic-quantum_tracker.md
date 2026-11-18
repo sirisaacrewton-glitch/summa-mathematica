@@ -19,6 +19,7 @@ The page is largely correct: the amplification lemma, Schwartz–Zippel, BPP ⊆
 - **Detail:** The supplement says the Θ(√N) optimality of the number of queries is known by Bennett–Bernstein–Brassard–Vazirani. BBHT (1996) gave a bounded-error algorithm with O(√N) queries but did not prove optimality. The matching lower bound Ω(√N) is due to Bennett–Bernstein–Brassard–Vazirani (1997) for the exact case and to Boyer–Brassard–Høyer–Tapp (1998) / Zalka (1999) for the bounded-error case. Attributing the optimality result to BBHT alone is a misattribution.
 - **Proposed fix:** The Θ(√N) optimality of the query complexity is known (lower bound by Bennett–Bernstein–Brassard–Vazirani 1997 for exact search, and by Boyer–Brassard–Høyer–Tapp 1998 / Zalka 1999 for bounded-error search).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The page attributes the Θ(√N) optimality to Bennett–Bernstein–Brassard–Vazirani (BBBV 1997), not to Boyer–Brassard–Høyer–Tapp; BBBV's hybrid argument gives the Ω(√N) lower bound for bounded-error search. The wording now says explicitly that BBBV is credited for the lower bound.
 
 ### ISSUE-0002 [Open] BQP vs NP: 'neither known' is imprecise
 - **Category:** Supplement/remark error
