@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>絶対値と完備離散付値体 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/01-algebraic-number-theory/02-local-fields/01-absolute-values.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 絶対値と完備離散付値体 {#nt:page-absolute-values keywords="absolute value on a field, archimedean and non-archimedean, ultrametric inequality, equivalent absolute values, Ostrowski's theorem, completion of a valued field, value group of the completion, complete discretely valued field, power series expansion with representatives, unit group filtration U^(n), Hensel's lemma for factorizations, coefficients of irreducible polynomials over a complete field, roots of unity in local fields"}
+
+数の大きさを測る方法は通常の絶対値だけではない。有理数 $\mathbb{Q}$ では、素数 $p$ ごとに「$p$ で何回割れるか」で測る $p$ 進絶対値があり、**オストロフスキーの定理**によれば、本質的にこれらと通常の絶対値しかない。このページでは、体の絶対値の一般論を整え、完備化を構成し、離散付値について完備な体（**完備離散付値体**）の基本構造を調べる：元は「代表元を係数とする一意化元の冪級数」として一意に表され、単数群は自然なフィルトレーションをもつ。最後に、局所体の理論の最も重要な道具である**ヘンゼルの補題**を、剰余体での因数分解を持ち上げる形で証明し、その帰結として、既約多項式の係数の大きさについての補題を得る。
+
+## 記法と定義の確認 {#nt:sec-av-notation}
+
+::: notation
+- 付値環、離散付値環、一意化元は \ref{ring:dvr} のとおり。$\mathbb{Z}_{p}$、$\mathbb{Q}_{p}$、$\mathbb{Z}_{p}$ のヘンゼルの補題は \ref{nt:page-p-adic} のとおり。
+- 距離空間の完備化は \ref{top:completion-exists} のとおり。
+- 体系は $\ZF$。
+:::
+
+## 絶対値 {#nt:sec-av-absolute-values}
+
+::: definition 絶対値 {#nt:absolute-value keywords="absolute value |.|: K -> R_{>=0}; trivial absolute value; non-archimedean (ultrametric) |x + y| <= max(|x|, |y|); archimedean; p-adic absolute value |x|_p = p^{-v_p(x)}" index="絶対値（体の）|ぜったいち, 非アルキメデス的絶対値|ひあるきめですてきぜったいち, 超距離不等式|ちょうきょりふとうしき" refname="絶対値（体の）"}
+体 $K$ の**絶対値**とは、写像 $\abs{\cdot}:K\to\mathbb{R}_{\ge0}$ で、$\abs{x}=0\iff x=0$、$\abs{xy}=\abs{x}\abs{y}$、$\abs{x+y}\le\abs{x}+\abs{y}$ を満たすものをいう。$x\neq0$ でつねに $\abs{x}=1$ のものを**自明**という。さらに $\abs{x+y}\le\max(\abs{x},\abs{y})$（**超距離不等式**）を満たすものを**非アルキメデス的**、そうでないものを**アルキメデス的**という。$\mathbb{Q}$ の **$p$ 進絶対値**を $\abs{x}_{p}\defeq p^{-v_{p}(x)}$、通常の絶対値を $\abs{x}_{\infty}$ と書く。
+:::
+
+::: intuition
+絶対値は「大きさ」の公理化で、$d(x,y)=\abs{x-y}$ が距離になる。非アルキメデス的な絶対値では、小さいものをいくら足しても大きくならない：$p$ 進絶対値では、$p$ で何回も割れる数ほど「小さい」。
+:::
+
+::: proposition 非アルキメデス性の判定 {#nt:non-archimedean-criterion keywords="an absolute value is non-archimedean iff |n.1| <= 1 for all integers n; if |x| != |y| then |x + y| = max(|x|, |y|)" index="非アルキメデス性の判定|ひあるきめですせいのはんてい"}
+1. $\abs{\cdot}$ が非アルキメデス的であることと、すべての整数 $n$ で $\abs{n\cdot1}\le1$ であることは同値。
+2. 非アルキメデス的なら、$\abs{x}\neq\abs{y}$ のとき $\abs{x+y}=\max(\abs{x},\abs{y})$。
+:::
+
+::: proof
+**Step 1（1 の $\Rightarrow$）.** $\abs{1}=1$、$\abs{\pm n}\le\max(\abs{n-1},\abs{1})$ から帰納法。
+
+**Step 2（1 の $\Leftarrow$）.** 【主張：$\abs{x+y}\le\max(\abs x,\abs y)$】$M\defeq\max(\abs x,\abs y)$ とすると、二項定理から $\abs{x+y}^{m}\le\sum_{k=0}^{m}\abs{\binom mk}\abs x^{k}\abs y^{m-k}\le(m+1)M^{m}$。$m$ 乗根をとり $m\to\infty$ とすると $(m+1)^{1/m}\to1$ なので $\abs{x+y}\le M$。
+
+**Step 3（2）.** $\abs x<\abs y$ とすると $\abs{x+y}\le\abs y$ で、$\abs y=\abs{(x+y)-x}\le\max(\abs{x+y},\abs x)$。右辺が $\abs x$ なら $\abs y\le\abs x$ に反するので $\abs y\le\abs{x+y}$。
+:::
+
+::: proposition 同値な絶対値 {#nt:equivalent-absolute-values keywords="two nontrivial absolute values with |x|_1 < 1 => |x|_2 < 1 satisfy |.|_2 = |.|_1^s for some s > 0; equivalent absolute values define the same topology" index="同値な絶対値|どうちなぜったいち"}
+$\abs\cdot_{1},\abs\cdot_{2}$ を $K$ の自明でない絶対値とする。「$\abs x_{1}<1\Rightarrow\abs x_{2}<1$」が成り立つなら、ある $s>0$ で $\abs\cdot_{2}=\abs\cdot_{1}^{s}$。このとき 2 つの絶対値は**同値**であるという。
+:::
+
+::: proof
+**Step 1.** $\abs y_{1}>1$ となる $y$ をとる（自明でないので $\abs z_{1}\neq1$ の $z$ があり、$z$ か $1/z$）。仮定を $1/y$ に使うと $\abs y_{2}>1$。
+
+**Step 2.** 【主張：$\abs x_{1}=\abs y_{1}^{\alpha}$ なら $\abs x_{2}=\abs y_{2}^{\alpha}$】有理数 $m/n>\alpha$（$n\ge1$）なら $\abs{x^{n}/y^{m}}_{1}<1$ なので $\abs{x^{n}/y^{m}}_{2}<1$、すなわち $\abs x_{2}<\abs y_{2}^{m/n}$。$m/n<\alpha$ なら逆向きの議論（$y^{m}/x^{n}$）で $\abs x_{2}>\abs y_{2}^{m/n}$。有理数は稠密なので主張が従う。
+
+**Step 3.** $s\defeq\log\abs y_{2}/\log\abs y_{1}>0$ とすると、Step 2 から $\abs x_{2}=\abs y_{2}^{\alpha}=\abs y_{1}^{s\alpha}=\abs x_{1}^{s}$（$x\neq0$）。
+:::
+
+::: theorem オストロフスキーの定理 {#nt:ostrowski keywords="Ostrowski: every nontrivial absolute value on Q is equivalent to the usual absolute value or to a p-adic absolute value for exactly one prime p" index="オストロフスキーの定理|おすとろふすきーのていり" refname="オストロフスキーの定理"}
+$\mathbb{Q}$ の自明でない絶対値は、通常の絶対値 $\abs\cdot_{\infty}$ か、ある素数 $p$ についての $\abs\cdot_{p}$ のどちらかと同値である。
+:::
+
+::: intuition
+アルキメデス的なら、整数の大きさは底の取り方によらず $n^{s}$ の形に決まり、通常の絶対値になる。非アルキメデス的なら、「小さい」整数全体が素イデアル $p\Z$ をなし、絶対値は $p$ で割れる回数だけで決まる。
+:::
+
+::: proof
+**Step 1（底 $n$ の展開による評価）.** 【主張：整数 $m,n\ge2$ について $\abs m\le\max(1,\abs n)^{\log m/\log n}$】$m$ を $n$ 進展開 $m=\sum_{i=0}^{L}c_{i}n^{i}$（$0\le c_{i}<n$, $L\le\log m/\log n$）すると、$\abs{c_{i}}\le c_{i}\abs1\le n$（三角不等式）から $\abs m\le(L+1)\,n\,\max(1,\abs n)^{L}$。$m$ を $m^{k}$ に替えて $k$ 乗根をとり $k\to\infty$ とすると、$\bigl((k\log m/\log n+1)n\bigr)^{1/k}\to1$ なので主張が従う。
+
+**Step 2（アルキメデス的な場合）.** ある整数 $n_{0}\ge2$ で $\abs{n_{0}}>1$ とする（\ref{nt:non-archimedean-criterion} の 1 から、アルキメデス的ならこうなる）。Step 1 で $m=n_{0}$ とすると $1<\abs{n_{0}}\le\max(1,\abs n)^{\cdots}$ なので、すべての $n\ge2$ で $\abs n>1$。すると Step 1 は $\abs m^{1/\log m}\le\abs n^{1/\log n}$ で、$m,n$ を入れ替えて等号。$s\defeq\log\abs n/\log n>0$ は $n$ によらず、$\abs n=n^{s}$。乗法性から $\abs x=\abs x_{\infty}^{s}$。
+
+**Step 3（非アルキメデス的な場合）.** すべての整数で $\abs n\le1$ とする。$I\defeq\{n\in\Z:\abs n<1\}$ は（超距離不等式と乗法性から）イデアルで、$\abs{ab}<1$ なら $\abs a<1$ か $\abs b<1$ なので素イデアル。自明でないので $\abs x\neq1$ の有理数があり、分子か分母の整数で $\abs n<1$、$I\neq0$。よって $I=p\Z$。$p\nmid a$ なら $\abs a=1$ なので、$\abs x=\abs p^{v_{p}(x)}$。$\abs p=p^{-s}$（$s>0$）とおけば $\abs x=\abs x_{p}^{s}$。
+:::
+
+## 完備化と完備離散付値体 {#nt:sec-av-completion}
+
+::: theorem 完備化 {#nt:valued-field-completion keywords="completion of a valued field: a complete valued field containing K densely, unique up to isometric isomorphism; for non-archimedean absolute values the value group and residue field do not change" index="完備化（付値体の）|かんびか" refname="付値体の完備化"}
+$(K,\abs\cdot)$ を絶対値つきの体とする。
+1. 完備な絶対値つきの体 $\hat K$ と、絶対値を保つ体の埋め込み $K\to\hat K$ で、像が稠密なものがあり、絶対値を保つ同型を除いて一意。
+2. $\abs\cdot$ が非アルキメデス的なら $\hat K$ でもそうで、$\abs{\hat K^{\times}}=\abs{K^{\times}}$、剰余体（$\{\abs x\le1\}/\{\abs x<1\}$）も変わらない。
+:::
+
+::: intuition
+有理数から実数を作るのと同じく、コーシー列の極限を付け加えて「穴」を埋める。非アルキメデス的な場合、コーシー列の絶対値はいずれ一定になるので、新しい大きさの値は生まれず、剰余体も変わらない。
+:::
+
+::: proof
+**Step 1（体の構造）.** 距離空間としての完備化 $\hat K$（\ref{top:completion-exists}）はコーシー列の同値類の集合である。コーシー列の和と積はコーシー列（積は有界性から）で、同値関係と両立するので、$\hat K$ は可換環。$0$ に収束しない列 $(x_{n})$ は、ある $\delta>0$ と $N$ で $\abs{x_{n}}\ge\delta$（$n\ge N$）を満たし、$(x_{n}^{-1})_{n\ge N}$ は $\abs{x_{n}^{-1}-x_{m}^{-1}}\le\delta^{-2}\abs{x_{m}-x_{n}}$ からコーシー列で逆元を与える。$\abs{\lim x_{n}}\defeq\lim\abs{x_{n}}$（$\bigl\lvert\abs{x_{n}}-\abs{x_{m}}\bigr\rvert\le\abs{x_{n}-x_{m}}$ から収束）は絶対値で、距離と一致する。一意性は距離空間の完備化の一意性と、演算の連続性から。
+
+**Step 2（2）.** 超距離不等式は極限で保たれる。$0$ に収束しないコーシー列では、十分大きい $m,n$ で $\abs{x_{n}-x_{m}}<\abs{x_{m}}$ となり、\ref{nt:non-archimedean-criterion} の 2 から $\abs{x_{n}}=\abs{x_{m}}$。よって $\abs{\lim x_{n}}\in\abs{K^{\times}}$。剰余体：$\abs{\hat x}\le1$ なら $\abs{\hat x-x}<1$ となる $x\in K$ があり（稠密性）、$\abs x\le1$ で、$\hat x$ と $x$ は同じ剰余類。
+:::
+
+::: theorem 完備離散付値体の構造 {#nt:complete-dvf-structure keywords="K complete for a discrete valuation, A valuation ring, pi uniformizer, S set of representatives of the residue field containing 0: every x is uniquely sum_{n >= v(x)} s_n pi^n; A = lim A / m^n; a series converges iff its terms tend to 0; K^x = pi^Z x A^x; U^(n) filtration with U/U^(1) = k^x and U^(n)/U^(n+1) = k" index="完備離散付値体|かんびりさんふちたい, 単数群のフィルトレーション|たんすうぐんのふぃるとれーしょん" refname="完備離散付値体の構造"}
+$K$ を離散付値 $v$ について完備な体、$A$ を付値環、$\mathfrak m=\pi A$ を極大イデアル、$k=A/\mathfrak m$ を剰余体とし、$0\in S\subseteq A$ を $k$ の代表系とする。絶対値は $\abs x\defeq c^{v(x)}$（$0<c<1$）とする。
+1. 級数 $\sum x_{n}$ が収束することと $x_{n}\to0$ は同値。
+2. $x\in K^{\times}$ は $x=\sum_{n\ge v(x)}s_{n}\pi^{n}$（$s_{n}\in S$, $s_{v(x)}\neq0$）とただ一通りに書ける。
+3. $A\to\varprojlim_{n}A/\mathfrak m^{n}$ は環の同型。
+4. $K^{\times}=\pi^{\Z}\times A^{\times}$。$U^{(0)}\defeq A^{\times}$, $U^{(n)}\defeq1+\mathfrak m^{n}$（$n\ge1$）とすると $U^{(0)}/U^{(1)}\cong k^{\times}$, $U^{(n)}/U^{(n+1)}\cong k$（加法群）。
+:::
+
+::: intuition
+完備離散付値体の元は、剰余体の代表元を「桁」とする $\pi$ 進展開で書ける：$p$ 進数の $p$ 進展開の一般化である。単数群は「先頭の桁」で $k^{\times}$ に、「$1$ からのずれの最初の桁」で $k$ に写り、層状の構造をもつ。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：級数の収束 $\iff$ 項が $0$ に収束】部分和の差 $\abs{\sum_{n=M}^{N}x_{n}}\le\max_{M\le n\le N}\abs{x_{n}}$（超距離不等式）なので、$x_{n}\to0$ なら部分和はコーシー列で、完備性から収束。逆は一般の級数と同じ。
+
+**Step 2（2：存在）.** 【主張：単元は代表元の級数に展開できる】$x=\pi^{v(x)}u$（$u\in A^{\times}$）とし、$u$ について示せばよい。$s_{0}\in S$ を $u\equiv s_{0}\pmod{\mathfrak m}$ ととり、$u_{1}\defeq(u-s_{0})/\pi\in A$。これを繰り返すと $u=s_{0}+s_{1}\pi+\cdots+s_{N}\pi^{N}+\pi^{N+1}u_{N+1}$ で、余りは $\to0$ なので 1 から $u=\sum s_{n}\pi^{n}$。$s_{0}\neq0$（$u$ は単元）。
+
+**Step 3（2：一意性）.** 【主張：展開は一意】2 つの展開が異なり、最初に異なる番号を $n_{0}$ とすると、差は $(s_{n_{0}}-s'_{n_{0}})\pi^{n_{0}}+(\text{付値 }>n_{0}\text{ の項})$ で、$s_{n_{0}}-s'_{n_{0}}$ は単元（代表元が異なる）なので付値はちょうど $n_{0}$、差は $0$ でない。
+
+**Step 4（3）.** 【主張：$A\cong\varprojlim A/\mathfrak m^{n}$】単射：$\bigcap\mathfrak m^{n}=0$。全射：両立する列 $(a_{n}\bmod\mathfrak m^{n})$ について $a_{n+1}-a_{n}\in\mathfrak m^{n}$ なので $a_{n}$ はコーシー列で、極限 $a\in A$（$A=\{\abs x\le1\}$ は閉）は $a\equiv a_{n}\pmod{\mathfrak m^{n}}$。
+
+**Step 5（4）.** 【主張：フィルトレーションの商】$x=\pi^{v(x)}u$ の分解は一意。$A^{\times}\to k^{\times}$ は全射で核 $U^{(1)}$。$n\ge1$ で $1+\pi^{n}a\mapsto a\bmod\mathfrak m$ は $U^{(n)}\to k$ の全射で、$(1+\pi^{n}a)(1+\pi^{n}b)=1+\pi^{n}(a+b+\pi^{n}ab)$ から準同型、核は $U^{(n+1)}$。
+:::
+
+## ヘンゼルの補題 {#nt:sec-av-hensel}
+
+::: theorem ヘンゼルの補題（因数分解の持ち上げ） {#nt:hensel-factorization keywords="Hensel's lemma: if f in A[x] is primitive and f mod m = g0 h0 with g0, h0 coprime in k[x], then f = g h with g, h in A[x] lifting g0, h0 and deg g = deg g0" index="ヘンゼルの補題（因数分解）|へんぜるのほだい" refname="ヘンゼルの補題（因数分解の持ち上げ）"}
+$K,A,\mathfrak m,\pi,k$ を \ref{nt:complete-dvf-structure} のとおりとする。$f\in A[x]$ を $\bar f\neq0$（$\bar{\ }$ は $\bmod\mathfrak m$）とし、$\bar f=\bar g_{0}\bar h_{0}$ と、$k[x]$ で互いに素な $\bar g_{0},\bar h_{0}$ に分解されているとする。このとき $f=gh$, $\bar g=\bar g_{0}$, $\bar h=\bar h_{0}$, $\deg g=\deg\bar g_{0}$ となる $g,h\in A[x]$ がある。
+:::
+
+::: intuition
+剰余体での因数分解は、互いに素でさえあれば、$\pi$ の冪を法として 1 桁ずつ修正していくことで、完備な環の中の本当の因数分解に持ち上がる。各段階で必要な修正は、剰余体での 1 次方程式 $\bar g_{0}\bar q+\bar h_{0}\bar p=(\text{誤差})$ を解くことで、互いに素なのでいつでも解ける。
+:::
+
+::: proof
+$d\defeq\deg f$, $m\defeq\deg\bar g_{0}$ とし、$\deg\bar h_{0}\le d-m$ に注意する（$\deg\bar f\le d$）。
+
+**Step 1（出発点）.** $g_{0},h_{0}\in A[x]$ を $\bar g_{0},\bar h_{0}$ の持ち上げで、$\deg g_{0}=m$（最高次係数は単元）、$\deg h_{0}\le d-m$ となるものとする。互いに素なので $\bar a\bar g_{0}+\bar b\bar h_{0}=1$ となる $a,b\in A[x]$ がある。
+
+**Step 2（帰納的な修正）.** 【主張：$g_{n}=g_{n-1}+\pi^{n}p_{n}$, $h_{n}=h_{n-1}+\pi^{n}q_{n}$（$\deg p_{n}<m$, $\deg q_{n}\le d-m$）で $f\equiv g_{n}h_{n}\pmod{\pi^{n+1}}$ となるものがとれる】$f\equiv g_{n-1}h_{n-1}\pmod{\pi^{n}}$ として、$f-g_{n-1}h_{n-1}=\pi^{n}f_{n}$（$\deg f_{n}\le d$）とおく。$f\equiv g_{n}h_{n}\pmod{\pi^{n+1}}$ は $g_{0}q_{n}+h_{0}p_{n}\equiv f_{n}\pmod\pi$ と同値（$g_{n-1}\equiv g_{0}$, $h_{n-1}\equiv h_{0}$）。$bf_{n}$ を $g_{0}$ で割って（最高次係数が単元なので可能）$bf_{n}=Qg_{0}+p_{n}$, $\deg p_{n}<m$。すると $g_{0}(af_{n}+h_{0}Q)+h_{0}p_{n}\equiv(ag_{0}+bh_{0})f_{n}\equiv f_{n}$。$\bar q\defeq\overline{af_{n}+h_{0}Q}$ は $\bar g_{0}\bar q=\bar f_{n}-\bar h_{0}\bar p_{n}$（次数 $\le d$）と $\deg\bar g_{0}=m$ から $\deg\bar q\le d-m$。$\bar q$ の同じ次数の持ち上げを $q_{n}$ とする。
+
+**Step 3（極限）.** $g_{n},h_{n}$ の各係数はコーシー列で（次数は $m$, $d-m$ 以下に有界）、極限 $g,h\in A[x]$ は $f\equiv gh\pmod{\pi^{n+1}}$（すべての $n$）、すなわち $f=gh$。$\deg g=m$（最高次係数は $g_{0}$ のものと $\bmod\pi$ で一致し単元）。
+:::
+
+::: corollary ヘンゼルの補題の系 {#nt:hensel-corollaries keywords="simple roots mod m lift to roots; if the residue field is finite with q elements then K contains the (q-1)-th roots of unity and A^x = mu_{q-1} x U^(1); for an irreducible polynomial over K the largest coefficient is at the leading or constant term" index="ヘンゼルの補題の系|へんぜるのほだいのけい"}
+1. $f\in A[x]$ と $a\in A$ について $\bar f(\bar a)=0$, $\bar f'(\bar a)\neq0$ なら、$f(\alpha)=0$, $\bar\alpha=\bar a$ となる $\alpha\in A$ がある。
+2. $k$ が $q$ 元の有限体なら、$K$ は $1$ の $(q-1)$ 乗根全体 $\mu_{q-1}$ を含み、$A^{\times}=\mu_{q-1}\times U^{(1)}$。
+3. $f=a_{n}x^{n}+\cdots+a_{0}\in K[x]$ が既約で $a_{0}a_{n}\neq0$ なら $\max_{i}\abs{a_{i}}=\max(\abs{a_{0}},\abs{a_{n}})$。特に、モニックな既約多項式で $a_{0}\in A$ なら $f\in A[x]$。
+:::
+
+::: proof
+**Step 1（1）.** $\bar f=(x-\bar a)\bar h$ で、$\bar f'(\bar a)=\bar h(\bar a)\neq0$ から $x-\bar a$ と $\bar h$ は互いに素。定理から 1 次の因子 $g$（$\bar g=x-\bar a$）が持ち上がり、その根が $\alpha$。
+
+**Step 2（2）.** $x^{q-1}-1$ は $k$ で $q-1$ 個の相異なる根（$k^{\times}$ の全元）をもつので、1 を各根に使って $\mu_{q-1}\subseteq A^{\times}$ が $k^{\times}$ と全単射に対応する。$A^{\times}\to k^{\times}$ の核は $U^{(1)}$ なので、$A^{\times}=\mu_{q-1}\times U^{(1)}$（$\mu_{q-1}\cap U^{(1)}=1$）。
+
+**Step 3（3）.** 定数倍して $\max\abs{a_{i}}=1$（$f\in A[x]$, $\bar f\neq0$）とし、$r$ を $\abs{a_{r}}=1$ となる最小の番号とする。$\bar f=x^{r}(\bar a_{r}+\cdots+\bar a_{n}x^{n-r})$ で、$0<r<n$ なら $\bar g_{0}=x^{r}$ と $\bar h_{0}=\bar a_{r}+\cdots$ は互いに素（$\bar h_{0}(0)\neq0$）なので、定理から $f=gh$, $\deg g=r\ge1$ と分解され、$\deg h=n-r\ge1$。これは既約性に反する。よって $r=0$（$\abs{a_{0}}=1$）か $r=n$（$\abs{a_{n}}=1$ で $a_{0},\dots,a_{n-1}\in\mathfrak m$）。
+:::
+
+::: example
+1. $\mathbb{Q}_{p}$（$p$ 奇素数）では $\mu_{p-1}\subseteq\mathbb{Z}_{p}^{\times}$（**タイヒミュラー代表元**）で、$\mathbb{Q}_{p}^{\times}=p^{\Z}\times\mu_{p-1}\times(1+p\mathbb{Z}_{p})$。
+2. $u\in\mathbb{Z}_{p}^{\times}$（$p$ 奇素数）が平方数であることと、$\bar u$ が $\mathbb{F}_{p}$ の平方であることは同値（1 を $x^{2}-u$ に使う。$2\bar a\neq0$）。$\mathbb{Q}_{p}^{\times}/(\mathbb{Q}_{p}^{\times})^{2}$ は位数 4。
+3. 3 の帰結：$\mathbb{Q}_{p}$ で $x^{2}+p^{-1}x+1$ は、係数の絶対値の最大 $\abs{p^{-1}}=p$ が両端（$\abs1=1$）でなく中間でとられるので可約である。
+:::
+
+::: hypcheck
+- **非アルキメデス性の判定**：$\abs{\binom mk}\le1$（Step 2）は仮定「整数の絶対値は 1 以下」そのもの。
+- **オストロフスキーの定理**：$\mathbb{Q}$ の整数が $n$ 進展開できること（Step 1）と、$\Z$ が単項イデアル整域であること（Step 3）を使った。一般の体では、絶対値の種類はもっと多い。
+- **完備離散付値体の構造**：完備性は級数の収束（Step 1）に、付値が離散であることは $\pi$ による展開に使った。
+- **ヘンゼルの補題**：$\bar g_{0},\bar h_{0}$ が互いに素であることが本質（Step 1 の $a,b$）。互いに素でないと持ち上がらない例：$x^{2}-p$ は $\bmod p$ で $x\cdot x$ だが $\mathbb{Q}_{p}$ で既約。
+:::
+
+## 問題 {#nt:sec-av-problems}
+
+::: problem {#nt:prob-av-ostrowski-product}
+$x=\frac{12}{35}$ について $\abs x_{\infty}\prod_{p}\abs x_{p}=1$ を確かめよ。
+:::
+
+::: solution
+$\abs x_{2}=2^{-2}$, $\abs x_{3}=3^{-1}$, $\abs x_{5}=5$, $\abs x_{7}=7$、他の $p$ では $1$。積は $\frac{12}{35}\cdot\frac{1}{12}\cdot35=1$（\ref{nt:product-formula}）。
+:::
+
+::: problem {#nt:prob-av-sqrt-minus-one}
+$\sqrt{-1}\in\mathbb{Q}_{5}$ であることを示し、$\mathbb{Q}_{3}$ には含まれないことを示せ。
+:::
+
+::: solution
+$x^{2}+1$ は $\bmod5$ で $2$ を単根にもつ（$4+1=5$, 微分 $2\cdot2\neq0$）ので、\ref{nt:hensel-corollaries} の 1 から $\mathbb{Z}_{5}$ に根がある。$\mathbb{Q}_{3}$ に $x^{2}=-1$ の解があれば、$v_{3}(x^{2})=0$ から $x\in\mathbb{Z}_{3}^{\times}$ で、$\bmod3$ で $x^{2}\equiv-1$ となるが、$-1$ は $\bmod3$ の平方でない。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ヘンゼルの補題は、離散付値でなくても、完備な非アルキメデス的絶対値の付値環で同じ証明が通る（Ne II.4.6）。$\pi$ の冪の代わりに、係数の絶対値が小さくなっていくことを使う。
+
+**前提を変えると.**
+- 完備でない体ではヘンゼルの補題は成り立たない：$\mathbb{Z}_{(5)}$（$5$ で局所化した $\Z$）では、$x^{2}+1$ は $\bmod5$ で単根をもつが根をもたない。ヘンゼルの補題が成り立つ局所環を**ヘンゼル環**といい、完備化より小さいヘンゼル化が存在する、と知られている。
+- 剰余体の代表系 $S$ は一般に乗法的にとれない。剰余体が完全体で標数 $p$ のとき、乗法的な代表系（タイヒミュラー代表元）があり、さらに完備離散付値環の構造はウィット環で記述される（Se II §4–6）と知られている。
+- オストロフスキーの定理の一般化として、数体 $K$ の絶対値の同値類（**素点**）は、有限素点（素イデアル）と無限素点（実埋め込みと複素埋め込みの対）で尽きる、と知られている。
+
+**高い視点から：素点と局所化.** オストロフスキーの定理は、$\mathbb{Q}$ の「点」が素数 $p$ と、もう一つの点 $\infty$ からなることを述べている。代数幾何学で $\operatorname{Spec}\Z$ の閉点が素数であるのに対し、絶対値の言葉では $\infty$ も対等な点として現れる。各点での完備化 $\mathbb{Q}_{p}$, $\mathbb{R}$ を調べ（局所）、それを貼り合わせて $\mathbb{Q}$ を調べる（大域）、というのが局所–大域原理の考え方で、積公式 $\prod_{v}\abs x_{v}=1$ はすべての点を合わせると釣り合うことを示す。比喩で言えば、有理数を素数ごとの「顕微鏡」と通常の「望遠鏡」で同時に見るのが素点の考え方で、各レンズの像（完備化）は単純だが、像を貼り合わせる規則に数論の深さがある。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-av-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
