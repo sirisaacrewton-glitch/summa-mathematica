@@ -19,6 +19,7 @@ The main theorems (quantifier characterization, oracle characterization, Karp–
 - **Detail:** The supplement claims that if PSPACE ⊆ P/poly then PSPACE = Σ₂^P, and if EXP ⊆ P/poly then EXP = Σ₂^P (attributed to Meyer). These are not correct as stated. The standard results are: if PSPACE ⊆ P/poly then PSPACE = Σ₂^P ∩ Π₂^P (equivalently PH = PSPACE, i.e. the hierarchy collapses to PSPACE), and if EXP ⊆ P/poly then EXP = Σ₂^P ∩ Π₂^P (PH collapses to EXP). The equality with Σ₂^P alone is not what the literature supports; the collapse is to the second level of PH, i.e. Σ₂^P = Π₂^P, and PSPACE/EXP equal that class, not Σ₂^P alone. Stating 'PSPACE = Σ₂^P' is stronger than justified.
 - **Proposed fix:** If $\mathrm{PSPACE}\subseteq\mathrm{P}/\mathrm{poly}$ then $\mathrm{PSPACE}=\Sigma_{2}^{\mathrm{P}}\cap\Pi_{2}^{\mathrm{P}}$ (so $\mathrm{PH}=\mathrm{PSPACE}$); if $\mathrm{EXP}\subseteq\mathrm{P}/\mathrm{poly}$ then $\mathrm{EXP}=\Sigma_{2}^{\mathrm{P}}\cap\Pi_{2}^{\mathrm{P}}$ (so $\mathrm{PH}=\mathrm{EXP}$).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** PSPACE and EXP are closed under complement, so PSPACE = Σ₂^P already implies Σ₂^P = Π₂^P = PSPACE; the stated form is equivalent to the proposed ∩ form and is the standard statement of Meyer's theorem (EXP ⊆ P/poly ⇒ EXP = Σ₂^P). A sentence making this explicit was added.
 
 ### ISSUE-0002 [Open] Karp–Lipton improvement to ZPP^NP is misattributed/misstated
 - **Category:** Supplement/remark error
