@@ -670,3 +670,5 @@
 | theta function / completed zeta function / functional equation / trivial zeros / Bernoulli numbers / primitive character | テータ関数 / 完備化されたゼータ関数 / 関数等式 / 自明な零点 / ベルヌーイ数 / 原始指標 | ヤコビのテータ関数 / 完備ゼータ関数 / — / 自明零点 / — / 原始的指標 | 2026-11-18（nt:page-functional-equation） |
 | Chebyshev functions / von Mangoldt function / Legendre's formula / Chebyshev's bounds / Mertens' theorems | チェビシェフ関数 / フォン・マンゴルト関数 / ルジャンドルの公式 / チェビシェフの評価 / メルテンスの定理 | — / マンゴルト関数 / — / チェビシェフの不等式 / — | 2026-11-18（nt:page-chebyshev） |
 | prime number theorem / Newman's Tauberian theorem / Riemann hypothesis / logarithmic integral | 素数定理 / ニューマンのタウバー型定理 / リーマン予想 / 対数積分 | — / ニューマンの解析的定理 / — / li 関数 | 2026-11-18（nt:page-prime-number-theorem） |
+| Dedekind zeta function / Kronecker symbol / analytic class number formula | デデキントゼータ関数 / クロネッカー記号 / 解析的類数公式 | — / — / 類数公式 | 2026-11-18（nt:page-dedekind-zeta） |
+| Dirichlet's class number formula / Gauss circle problem | ディリクレの類数公式 / 円の格子点 | 類数公式 / ガウスの円問題 | 2026-11-18（nt:page-class-number-formula） |

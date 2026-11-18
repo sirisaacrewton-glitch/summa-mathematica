@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2 次体の類数公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/03-analytic-number-theory/03-dedekind-zeta/02-class-number-formula.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 2 次体の類数公式 {#nt:page-class-number-formula keywords="lattice points in a disc, Gauss circle problem estimate, counting ideals in an ideal class, number of ideals of norm at most x in an imaginary quadratic field, residue of zeta_K, Dirichlet's class number formula h = w sqrt|d| L(1, chi) / 2 pi, Gauss sums and L(1, chi) as a finite sum, h(-p) = -(1/p) sum a (a/p), positivity of L(1, chi)"}
+
+虚 2 次体 $K$ の類数 $h$（イデアル類群の位数）は、$L$ 関数の値 $L(1,\chi_{K})$ と
+$$h=\frac{w\sqrt{\abs d}}{2\pi}L(1,\chi_{K})$$
+で結ばれている（**ディリクレの類数公式**）。このページではこれを、各イデアル類に属するイデアルを複素平面の格子の点として数え、円板の中の格子点の個数を面積で近似することで証明する。次に、ガウス和を使って $L(1,\chi)$ を有限和に直し、$p\equiv3\pmod4$ の素数 $p>3$ について $h(\mathbb{Q}(\sqrt{-p}))=\frac1p\bigl\lvert\sum_{a=1}^{p-1}a(\tfrac ap)\bigr\rvert$ という初等的な公式を導く。副産物として、$L(1,\chi)>0$ が類数の正値性からわかる。
+
+## 記法と定義の確認 {#nt:sec-cn-notation}
+
+::: notation
+- $K$ は虚 2 次体、$d<0$ はその判別式、$w$ は $K$ の 1 の冪根の個数（$d=-3$ で $6$、$d=-4$ で $4$、それ以外は $2$）、$h$ は類数（\ref{nt:class-group-finite}）。
+- ミンコフスキー埋め込みは $K\subseteq\mathbb{C}$ そのもので（$r_{2}=1$）、$0$ でないイデアル $\mathfrak b$ は $\mathbb{C}\cong\mathbb{R}^{2}$ の格子で $\operatorname{covol}(\mathfrak b)=\frac{\sqrt{\abs d}}{2}N\mathfrak b$（\ref{nt:minkowski-embedding}）。$\alpha\in K$ のノルムは $N(\alpha)=\abs\alpha^{2}$ で、$N((\alpha))=\abs\alpha^{2}$（$\alpha\in\mathcal{O}_{K}$）。
+- $\zeta_{K}=\zeta\cdot L(s,\chi_{K})$ は \ref{nt:quadratic-zeta-factorization}、ガウス和の性質は \ref{nt:page-gauss-jacobi-sums}。
+- 体系は $\ZF$（ただし \ref{nt:quadratic-splitting} を使う部分は（AC））。
+:::
+
+## 格子点とイデアルの数え上げ {#nt:sec-cn-counting}
+
+::: lemma 円板の中の格子点 {#nt:lattice-points-disc keywords="for a lattice in R^2 with fundamental parallelogram of diameter delta, the number of lattice points in the disc of radius r is pi r^2 / covol + O(r)" index="円板の中の格子点|えんばんのなかのこうしてん"}
+$\Lambda\subseteq\mathbb{R}^{2}$ を格子、$P$ を基本領域、$\delta$ を $P$ の直径とし、$N(r)\defeq\#\{v\in\Lambda:\abs v\le r\}$ とする。$r\ge\delta$ で
+$$\Bigl\lvert N(r)-\frac{\pi r^{2}}{\operatorname{covol}(\Lambda)}\Bigr\rvert\le\frac{\pi(2r\delta+\delta^{2})}{\operatorname{covol}(\Lambda)}.$$
+:::
+
+::: proof
+平行移動 $v+P$（$v\in\Lambda$）は $\mathbb{R}^{2}$ を重なりなく覆う。$\abs v\le r$ の $v+P$ の和集合は半径 $r+\delta$ の円板に含まれ、半径 $r-\delta$ の円板を含む（その円板の点 $y$ を含む $v+P$ では $\abs v\le\abs y+\delta\le r$）。面積を比べて $\pi(r-\delta)^{2}\le N(r)\operatorname{covol}(\Lambda)\le\pi(r+\delta)^{2}$。
+:::
+
+::: theorem イデアルの個数の漸近式 {#nt:ideal-count-imaginary-quadratic keywords="each ideal class of an imaginary quadratic field contains 2 pi x / (w sqrt|d|) + O(sqrt x) integral ideals of norm at most x; the total number is 2 pi h x / (w sqrt|d|) + O(sqrt x)" index="イデアルの個数の漸近式|いであるのこすうのぜんきんしき"}
+1. 各イデアル類 $C$ について $\#\{\mathfrak a\in C:\mathfrak a\subseteq\mathcal{O}_{K},\ N\mathfrak a\le x\}=\frac{2\pi}{w\sqrt{\abs d}}x+O(\sqrt x)$。
+2. $A(x)\defeq\#\{\mathfrak a\neq0:N\mathfrak a\le x\}=\rho x+O(\sqrt x)$, $\rho\defeq\frac{2\pi h}{w\sqrt{\abs d}}$。
+:::
+
+::: intuition
+一つのイデアル類のイデアルは、逆類の固定したイデアル $\mathfrak b$ の元 $\alpha$ と（単元倍を除いて）一対一に対応し、ノルムの条件は $\alpha$ が円板の中にあることになる。円板の中の格子点の個数は面積を格子の面積で割ったもので、それは類によらない。類の数 $h$ だけ足せば全体になる。
+:::
+
+::: proof
+**Step 1（イデアルと格子点の対応）.** 【主張：$C$ のイデアルは、$\mathfrak b\in C^{-1}$ を固定すると $\{\alpha\in\mathfrak b\setminus0\}/\mathcal{O}_{K}^{\times}$ と一対一に対応する】$C^{-1}$ は整イデアル $\mathfrak b$ を含む（分数イデアルに整数を掛ける）。$\mathfrak a\in C$ が整なら $\mathfrak a\mathfrak b$ は単項で $\subseteq\mathfrak b$、$\mathfrak a\mathfrak b=(\alpha)$, $\alpha\in\mathfrak b$、$\alpha$ は単元倍を除いて決まる。逆に $\alpha\in\mathfrak b\setminus0$ なら $(\alpha)\subseteq\mathfrak b$ なので $\mathfrak a\defeq(\alpha)\mathfrak b^{-1}$ は整イデアルで $C$ に属する。
+
+**Step 2（ノルムの条件）.** $N\mathfrak a=N((\alpha))/N\mathfrak b=\abs\alpha^{2}/N\mathfrak b$ なので、$N\mathfrak a\le x\iff\abs\alpha\le\sqrt{xN\mathfrak b}$。単元群は位数 $w$ で自由に作用するので
+$$\#\{\mathfrak a\in C:N\mathfrak a\le x\}=\frac1w\Bigl(N_{\mathfrak b}\bigl(\sqrt{xN\mathfrak b}\bigr)-1\Bigr),$$
+$N_{\mathfrak b}(r)$ は格子 $\mathfrak b$ の半径 $r$ の円板の点の数。
+
+**Step 3（1）.** \ref{nt:lattice-points-disc} と $\operatorname{covol}(\mathfrak b)=\frac{\sqrt{\abs d}}{2}N\mathfrak b$ から $N_{\mathfrak b}(\sqrt{xN\mathfrak b})=\frac{\pi xN\mathfrak b}{\frac{\sqrt{\abs d}}2N\mathfrak b}+O(\sqrt x)=\frac{2\pi x}{\sqrt{\abs d}}+O(\sqrt x)$。
+
+**Step 4（2）.** $h$ 個の類について足す。
+:::
+
+## 類数公式 {#nt:sec-cn-formula}
+
+::: theorem ディリクレの類数公式（虚 2 次体） {#nt:dirichlet-class-number-formula keywords="residue of zeta_K at 1 equals 2 pi h / (w sqrt|d|); h = w sqrt|d| L(1, chi_K) / (2 pi); L(1, chi_K) > 0" index="ディリクレの類数公式|でぃりくれのるいすうこうしき, 類数公式|るいすうこうしき" refname="ディリクレの類数公式"}
+虚 2 次体 $K$ について
+1. $\lim_{s\to1+0}(s-1)\zeta_{K}(s)=\frac{2\pi h}{w\sqrt{\abs d}}$。
+2. $\lim_{s\to1+0}\sum_{m}\chi_{K}(m)m^{-s}=\frac{2\pi h}{w\sqrt{\abs d}}$。$\chi_{K}$ がディリクレ指標のとき（例えば $K=\mathbb{Q}(\sqrt{-p})$, $p\equiv3\pmod4$）、左辺は $L(1,\chi_{K})$ で、
+$$h=\frac{w\sqrt{\abs d}}{2\pi}L(1,\chi_{K}).$$
+特に $L(1,\chi_{K})>0$。
+:::
+
+::: intuition
+イデアルのノルムが $x$ 以下のものが $\rho x$ 個ほどあるなら、ゼータ関数 $\sum N\mathfrak a^{-s}$ は $s=1$ の近くで $\frac{\rho}{s-1}$ のように振る舞う。一方 $\zeta_{K}=\zeta\cdot L$ で、$\zeta$ の極の留数は $1$ なので、留数 $\rho$ はそのまま $L(1,\chi)$ になる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$A(x)=\rho x+O(\sqrt x)$ なら $(s-1)\zeta_{K}(s)\to\rho$】実数 $s>1$ で、部分和（\ref{calc:summation-by-parts} の連続版）から $\zeta_{K}(s)=s\int_{1}^{\infty}A(x)x^{-s-1}dx=\frac{s\rho}{s-1}+s\int_{1}^{\infty}E(x)x^{-s-1}dx$, $E(x)\defeq A(x)-\rho x=O(\sqrt x)$（$A(x)x^{-s}\to0$）。最後の積分は $s>\frac12$ で収束し、$s\to1$ で有界。$(s-1)$ を掛けて $s\to1$ とする。\ref{nt:ideal-count-imaginary-quadratic} の 2 を使う。
+
+**Step 2（2）.** $\zeta_{K}(s)=\zeta(s)\sum\chi_{K}(m)m^{-s}$（\ref{nt:quadratic-zeta-factorization} の 1）と $(s-1)\zeta(s)\to1$（\ref{nt:zeta-continuation}）から。$\chi_{K}$ が指標なら $L(s,\chi_{K})$ は $s=1$ で連続（\ref{nt:dirichlet-l-function} の 3）なので、極限は $L(1,\chi_{K})$。$K=\mathbb{Q}(\sqrt{-p})$, $p\equiv3\pmod4$ では $-p=p^{\ast}$ なので \ref{nt:quadratic-zeta-factorization} の 2 から $\chi_{K}=(\tfrac\cdot p)$。$h\ge1$ なので正。
+:::
+
+::: theorem $L(1,\chi)$ の有限和表示と $h(-p)$ {#nt:class-number-minus-p keywords="for an odd primitive character chi mod p, L(1, chi) = -(pi i / (p tau(conj chi))) ... ; for p = 3 mod 4, p > 3: h(Q(sqrt -p)) = (1/p) |sum_{a=1}^{p-1} a (a/p)|; with Gauss's sign tau = i sqrt p, h = -(1/p) sum a (a/p)" index="類数の公式（h(-p)）|るいすうのこうしき" refname="h(-p) の公式"}
+$p$ を奇素数、$\chi=(\tfrac\cdot p)$ で $\chi(-1)=-1$（$p\equiv3\pmod4$）とし、$\tau\defeq\sum_{a=1}^{p-1}\chi(a)e^{2\pi ia/p}$ とする。
+1. $L(1,\chi)=-\frac{\pi i}{p\,\tau}\sum_{a=1}^{p-1}a\,\chi(a)$。
+2. $\tau^{2}=-p$ なので $\tau=\pm i\sqrt p$ で、$L(1,\chi)=\mp\frac{\pi}{p\sqrt p}\sum_{a}a\chi(a)$。
+3. $p>3$ なら $h(\mathbb{Q}(\sqrt{-p}))=\frac1p\Bigl\lvert\sum_{a=1}^{p-1}a\Bigl(\frac ap\Bigr)\Bigr\rvert$。
+:::
+
+::: intuition
+指標をガウス和で 1 の冪根の重ね合わせに書き直すと、$L(1,\chi)$ は $\log(1-\zeta_{p}^{a})$ の重ね合わせになる。奇の指標では対数の実部が打ち消し合い、偏角の部分 $\frac{\pi a}{p}$ だけが残るので、$L(1,\chi)$ は剰余と非剰余の和の差という有限和になる。
+:::
+
+::: proof
+**Step 1（指標のフーリエ展開）.** 【主張：すべての整数 $n$ で $\sum_{a}\chi(a)\zeta_{p}^{an}=\chi(n)\tau$】（$\zeta_{p}\defeq e^{2\pi i/p}$、$\chi$ は実数値）$p\nmid n$ なら $a\mapsto an$ の置き換えで $\sum_{a}\chi(an^{-1})\zeta_{p}^{a}=\chi(n)^{-1}\tau=\chi(n)\tau$。$p\mid n$ なら左辺は $\sum\chi(a)=0=\chi(n)\tau$。
+
+**Step 2（1）.** $\tau\neq0$（\ref{nt:gauss-sum-abs} の 1 から $\abs\tau^{2}=p$）。Step 1 から $\chi(n)=\frac1\tau\sum_{a}\chi(a)\zeta_{p}^{an}$ なので
+$$L(1,\chi)=\sum_{n}\frac{\chi(n)}{n}=\frac1\tau\sum_{a=1}^{p-1}\chi(a)\sum_{n\ge1}\frac{\zeta_{p}^{an}}{n}=-\frac1\tau\sum_{a}\chi(a)\log(1-\zeta_{p}^{a})$$
+（$\abs z=1$, $z\neq1$ で $\sum z^{n}/n=-\log(1-z)$（主枝）は \ref{calc:abel-theorem} から。有限和と収束級数の交換は自由）。$\theta=2\pi a/p\in(0,2\pi)$ で $1-e^{i\theta}=2\sin\frac\theta2\,e^{i(\theta-\pi)/2}$、$\sin\frac\theta2>0$, $\frac{\theta-\pi}{2}\in(-\frac\pi2,\frac\pi2)$ なので $\log(1-e^{i\theta})=\log(2\sin\frac\theta2)+i\frac{\theta-\pi}{2}$。$\chi$ は奇（$\chi(p-a)=-\chi(a)$）で $\sin\frac{\pi(p-a)}{p}=\sin\frac{\pi a}{p}$ なので実部の和は $0$。虚部は $\sum_{a}\chi(a)\bigl(\frac{\pi a}{p}-\frac\pi2\bigr)=\frac\pi p\sum a\chi(a)$（$\sum\chi(a)=0$）。
+
+**Step 3（2）.** \ref{nt:gauss-sum-abs} の 2 から $\tau^{2}=\chi(-1)p=-p$。
+
+**Step 4（3）.** $p>3$, $p\equiv3\pmod4$ なら $d=-p$, $w=2$ で、\ref{nt:dirichlet-class-number-formula} から $h=\frac{2\sqrt p}{2\pi}L(1,\chi)=\frac{\sqrt p}{\pi}\cdot\frac{\pi}{p\sqrt p}\bigl\lvert\sum a\chi(a)\bigr\rvert$（$h>0$ と 2 から絶対値がとれる）。
+:::
+
+::: remark
+実際には $\tau=+i\sqrt p$（ガウスの符号の決定、Ireland–Rosen 第 6 章 §4）であり、したがって $\sum_{a=1}^{p-1}a(\tfrac ap)<0$、すなわち「$1,\dots,p-1$ の中で平方非剰余の和は平方剰余の和より大きい」。この不等式の初等的な証明は知られていない、と一般に言われている。
+:::
+
+::: example
+$p=7,11,19,43$ で $h=1$、$p=23,31,59$ で $h=3$、$p=47$ で $h=5$、$p=71$ で $h=7$。例えば $p=23$：平方剰余は $1,2,3,4,6,8,9,12,13,16,18$（和 $92$）、非剰余の和は $253-92=161$ で、$\frac{\abs{92-161}}{23}=3$。$L(1,(\tfrac\cdot{23}))=\frac{3\pi}{\sqrt{23}}\approx1.9652$ は級数の数値計算とも一致する。
+:::
+
+::: hypcheck
+- **イデアルの個数**：虚 2 次体であること（単元群が有限で $w$ 個、ノルムが $\abs\alpha^{2}$）が、格子点の数え上げを円板の問題にするのに本質的。実 2 次体では単元群が無限なので、双曲線と単元の作用の基本領域で数える必要があり、単数基準が現れる。
+- **類数公式**：誤差 $O(\sqrt x)$ が $o(x)$ であることだけを使った。
+- **$h(-p)$ の公式**：$\chi$ が奇であることを、$\log$ の実部の打ち消しに使った。偶の指標（実 2 次体）では虚部が消え、$\log\sin$ の和（基本単数の対数）が残る。
+:::
+
+## 問題 {#nt:sec-cn-problems}
+
+::: problem {#nt:prob-cn-h7}
+$p=7$ で $\sum_{a=1}^{6}a(\tfrac a7)$ を計算し、$h(\mathbb{Q}(\sqrt{-7}))=1$ を確かめよ。
+:::
+
+::: solution
+平方剰余は $1,2,4$、非剰余は $3,5,6$。和は $(1+2+4)-(3+5+6)=-7$ で、$h=\frac{7}{7}=1$。
+:::
+
+::: problem {#nt:prob-cn-lattice-check}
+$K=\mathbb{Q}(i)$ で、ノルム $\le x$ のイデアルの個数が $\frac\pi4x+O(\sqrt x)$ であることを、\ref{nt:ideal-count-imaginary-quadratic} と、$\#\{(a,b)\neq0:a^{2}+b^{2}\le x\}$ の直接の数え上げの両方で確かめよ。
+:::
+
+::: solution
+$h=1$, $w=4$, $d=-4$ から $\rho=\frac{2\pi}{4\cdot2}=\frac\pi4$。直接には、イデアルは $(\alpha)$（$\alpha\neq0$）で単元 4 つを除いて一意、$N((\alpha))=a^{2}+b^{2}$ なので個数は $\frac14(\pi x+O(\sqrt x))$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 類数公式の証明は、類数が有限であること（\ref{nt:class-group-finite}）を使うが、その値は使わない。逆に公式から類数が計算できる。
+
+**前提を変えると.**
+- 実 2 次体では $h=\frac{\sqrt d}{2\log\varepsilon}L(1,\chi_{K})$（$\varepsilon>1$ は基本単数）が成り立つ、と知られている。
+- 虚 2 次体の類数が $1$ になるのは $d=-3,-4,-7,-8,-11,-19,-43,-67,-163$ の 9 個だけである（ヘーグナー、ベイカー、スターク）と知られている。$h(d)\to\infty$（$\abs d\to\infty$）はジーゲルの定理 $L(1,\chi_{d})\gg_{\varepsilon}\abs d^{-\varepsilon}$ から従う。
+
+**高い視点から：幾何と解析の出会い.** 類数公式の左辺 $h$ は代数的な量（イデアル類群の位数）、右辺 $L(1,\chi)$ は解析的な量（級数の値）で、両者を結ぶのは格子点の数え上げという幾何である。$\mathbb{C}$ の中の格子の面積（判別式）と単元の個数が、解析的な値と代数的な値の比を決める。この型の公式は、BSD 予想（楕円曲線の $L$ 関数の $s=1$ での振る舞いと有理点の群）や、玉河数の理論へと一般化される。比喩で言えば、類数公式は「部屋の数」を「床の総面積」と「部屋の広さ」から割り出す公式で、床の面積を測る道具が $L$ 関数、部屋の広さを決めるのが判別式と単元である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-cn-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
