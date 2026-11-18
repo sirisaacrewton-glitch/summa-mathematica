@@ -38,13 +38,13 @@
 :::
 
 ::: proof
-1. 推移性：$A$ を $B$ で決定する機械の各問い合わせ「$y\in B$？」を、$B$ を $C$ で決定する機械の模倣で置き換える（模倣は必ず停止する）。
-2. 前半：$f(w)$ を計算して一度問い合わせ、その答えを返す。後半：一度問い合わせて答えを反転する。
-3. 1 の置き換えを、$B$ の判定機で行う。
+1. 反射性：入力 $w$ をそのまま一度問い合わせ、その答えを返す神託機械が $A$ を $A$ で決定する。推移性：$A\le_{\mathrm{T}}B$, $B\le_{\mathrm{T}}C$ とする。$A$ を $B$ で決定する機械の各問い合わせ「$y\in B$？」を、$B$ を $C$ で決定する機械の $y$ の上での模倣で置き換える。模倣は必ず停止して正しい答えを返すので、得られる $C$ についての神託機械は $A$ を決定する。
+2. 前半：$f$ を写像還元とすると、$f(w)$ を計算して一度問い合わせ、その答えを返す神託機械が $A$ を決定する（$w\in A\iff f(w)\in B$）。後半：$w$ を一度問い合わせて答えを反転する。
+3. 1 の推移性の証明の置き換えを、問い合わせをしない $B$ の判定機で行うと、問い合わせをしない機械、すなわち $A$ の判定機が得られる。
 :::
 
 ::: definition ジャンプ {#comp:jump keywords="Turing jump, relativized halting problem" index="ジャンプ（チューリング）|じゃんぷちゅーりんぐ"}
-集合 $B$ の**ジャンプ**を $B'\defeq\{\langle M,w\rangle:M\text{ は神託機械で }M^{B}\text{ は }w\text{ を受理する}\}$ と定める。$\varnothing'$ は（神託を使わない機械の）$A_{\mathsf{TM}}$ と相互に $\le_{\mathrm{m}}$ で還元できる。$B^{(0)}\defeq B$, $B^{(n+1)}\defeq(B^{(n)})'$。
+集合 $B$ の**ジャンプ**を $B'\defeq\{\langle M,w\rangle:M\text{ は神託機械で }M^{B}\text{ は }w\text{ を受理する}\}$ と定める。$\varnothing'$ は（神託を使わない機械の）$A_{\mathsf{TM}}$ と相互に $\le_{\mathrm{m}}$ で還元できる（神託 $\varnothing$ への問い合わせはつねに $q_{\mathrm{no}}$ に移るので、$q_{?}$ に入る遷移を $q_{\mathrm{no}}$ に入る遷移に置き換えた通常の TM が同じ動きをする。逆に通常の TM は、問い合わせをしない神託機械とみなせる。どちらの置き換えも機械の符号から計算できる）。$B^{(0)}\defeq B$, $B^{(n+1)}\defeq(B^{(n)})'$。
 :::
 
 ::: theorem ジャンプの性質 {#comp:jump-properties refname="チューリングジャンプの性質" refscope="field"}
@@ -55,8 +55,8 @@
 
 ::: proof
 1. 万能機械（\ref{comp:universal-tm}）が神託機械を模倣するとき、模倣される機械の問い合わせを自分の神託 $B$ に回せばよい。
-2. $A_{\mathsf{TM}}$ の決定不能性（\ref{comp:atm-undecidable}）の証明を神託機械で行う：$B'$ を $B$ で決定する神託機械 $H^{B}$ があれば、「入力 $\langle M\rangle$ に対し $H^{B}$ を $\langle M,\langle M\rangle\rangle$ で動かし逆の答えを出す」神託機械 $D^{B}$ が作れ、$D$ 自身の符号で矛盾する。（神託はどの機械にも同じ $B$ が与えられるので、対角線論法はそのまま通る。）
-3. $A=L(M^{B})$ なら $w\mapsto\langle M,w\rangle$。
+2. $A_{\mathsf{TM}}$ の決定不能性（\ref{comp:atm-undecidable}）の証明を神託機械で行う：$B'$ を $B$ で決定する神託機械 $H^{B}$ があると仮定する。「入力 $\langle M\rangle$ に対し $H^{B}$ を $\langle M,\langle M\rangle\rangle$ で動かし、$H^{B}$ が拒否すれば受理し、受理すれば拒否する」神託機械 $D^{B}$ が作れる。$D$ 自身の符号を入力すると、$D^{B}$ が $\langle D\rangle$ を受理する $\iff$ $\langle D,\langle D\rangle\rangle\notin B'$ $\iff$ $D^{B}$ が $\langle D\rangle$ を受理しない、となり矛盾する。（神託はどの機械にも同じ $B$ が与えられるので、対角線論法はそのまま通る。）
+3. $A=L(M^{B})$ なら、$w\mapsto\langle M,w\rangle$ は\term[計算可能]{comp:mapping-reducible}で、$w\in A\iff\langle M,w\rangle\in B'$ となるので、これが写像還元である。
 :::
 
 ## 算術的階層 {#comp:sec-arithmetical-hierarchy}
@@ -77,7 +77,7 @@ $$
 
 ::: proof
 1. 否定を量化子の内側に移すと $\exists$ と $\forall$ が入れ替わり、$\overline{R}$ は決定可能（\ref{comp:prob-decidable-complement}）。
-2. $\Sigma_{n}$ の関係に、使わない変数についての量化子を外側（$\forall y_{0}$）や内側に加える。
+2. $\Sigma_{n}$ の関係の定義の量化子の列の最も内側に、使わない変数についての量化子を一つ加えると、量化子が $n+1$ 個交互に並ぶ $\Sigma_{n+1}$ の形になる（決定可能な関係に使わない変数を加えても決定可能）。外側に使わない変数についての $\forall y_{0}$ を加えると $\Pi_{n+1}$ の形になる。ゆえに $\Sigma_{n}\subseteq\Sigma_{n+1}\cap\Pi_{n+1}=\Delta_{n+1}$ であり、$\Pi_{n}$ も同様（内側に加えると $\Pi_{n+1}$、外側に $\exists y_{0}$ を加えると $\Sigma_{n+1}$）。
 3. 対の符号化とその成分の取り出しは計算可能で、$R'(\vec{x},u)\defeq R(\vec{x},(u)_{0},(u)_{1})$ は決定可能。$\wedge,\vee$ は、二つの量化子の列の変数を別々にとり、量化子を外に並べてから 3 の前半でまとめる。
 :::
 
@@ -88,7 +88,7 @@ $$
 
 ::: proof
 1. *$\Rightarrow$*：$\vec{x}\in A\iff\exists y\,R(\vec{x},y)$ なら、$y=0,1,2,\dots$ について順に $R(\vec{x},y)$ を判定し、真になれば受理する機械が $A$ を認識する。*$\Leftarrow$*：$A=L(M)$ なら、$T(\vec{x},t)\defeq$「$M$ は入力 $\vec{x}$ を $t$ 段以内に受理する」は決定可能（$t$ 段だけ模倣する）で、$\vec{x}\in A\iff\exists t\,T(\vec{x},t)$。
-2. 1 と、$A$, $\overline{A}$ がともに認識可能なら決定可能（問題 \ref{comp:prob-decidable-complement}）と、\ref{comp:hierarchy-basic.1}。
+2. 決定可能な関係は $\Sigma_{0}\subseteq\Delta_{1}$ に属する（\ref{comp:hierarchy-basic.2}）。逆に $A$ が $\Delta_{1}$ なら、$A$ と $\overline{A}$ はともに $\Sigma_{1}$（\ref{comp:hierarchy-basic.1}）なので、1 によりともに認識可能であり、問題 \ref{comp:prob-decidable-complement} より $A$ は決定可能である。
 :::
 
 ::: example 階層の例 {#comp:hierarchy-examples}
@@ -107,7 +107,7 @@ TM の符号 $e$ について、$W_{e}\defeq L(M_{e})$ とする。
 ::: proof
 $n$ に関する帰納法。$n=1$：$U_{1}\defeq\{(e,\vec{x}):M_{e}\text{ は }\langle\vec{x}\rangle\text{ を受理する}\}$ は認識可能なので $\Sigma_{1}$（\ref{comp:sigma1-recognizable}）、任意の $\Sigma_{1}$ 関係は認識可能なのである $M_{e}$ で $A=L(M_{e})$。$\Pi_{1}$ の普遍関係は $\overline{U_{1}}$（\ref{comp:hierarchy-basic.1}）。
 
-$n\to n+1$：$\Sigma_{n+1}$ の関係は $\vec{x}\in A\iff\exists y\,B(\vec{x},y)$（$B$ は $\Pi_{n}$、\ref{comp:hierarchy-basic.3} で先頭の $\exists$ を一つにまとめる）の形である。帰納法の仮定の $(k+1)$ 変数の普遍 $\Pi_{n}$ 関係 $V_{n}$ について $U_{n+1}\defeq\{(e,\vec{x}):\exists y\,(e,\vec{x},y)\in V_{n}\}$ とすれば、$U_{n+1}$ は $\Sigma_{n+1}$ で、$B=\{(\vec{x},y):(e,\vec{x},y)\in V_{n}\}$ となる $e$ について $A=\{\vec{x}:(e,\vec{x})\in U_{n+1}\}$。$\Pi_{n+1}$ は補集合。
+$n\to n+1$：$\Sigma_{n+1}$ の関係は、定義から $\vec{x}\in A\iff\exists y\,B(\vec{x},y)$（$B$ は先頭の $\exists y_{1}$ を除いた残りが定める $\Pi_{n}$ の関係）の形である。帰納法の仮定の $(k+1)$ 変数の普遍 $\Pi_{n}$ 関係 $V_{n}$ について $U_{n+1}\defeq\{(e,\vec{x}):\exists y\,(e,\vec{x},y)\in V_{n}\}$ とおく。$V_{n}$ を定める $\Pi_{n}$ の形の前に $\exists y$ を付けると $\Sigma_{n+1}$ の形になるので、$U_{n+1}$ は $\Sigma_{n+1}$ である。$B=\{(\vec{x},y):(e,\vec{x},y)\in V_{n}\}$ となる $e$ をとれば $A=\{\vec{x}:(e,\vec{x})\in U_{n+1}\}$ となる。$\Pi_{n+1}$ の普遍関係は $U_{n+1}$ の補集合である（\ref{comp:hierarchy-basic.1}）。
 :::
 
 ::: theorem 階層定理 {#comp:hierarchy-theorem keywords="arithmetical hierarchy is proper" index="階層定理（算術的階層）|かいそうていりさんじゅつてきかいそう"}
@@ -115,12 +115,12 @@ $n\to n+1$：$\Sigma_{n+1}$ の関係は $\vec{x}\in A\iff\exists y\,B(\vec{x},y
 :::
 
 ::: proof
-$U_{n}\subseteq\N^{2}$ を $k=1$ の普遍 $\Sigma_{n}$ 関係とし、$D\defeq\{x:(x,x)\notin U_{n}\}$ とする。$\{x:(x,x)\in U_{n}\}$ は $\Sigma_{n}$（決定可能な関係の変数を同じにしても決定可能）なので $D$ は $\Pi_{n}$。$D$ が $\Sigma_{n}$ なら、ある $e$ で $D=\{x:(e,x)\in U_{n}\}$ となり、$x=e$ を代入すると $e\in D\iff(e,e)\in U_{n}\iff e\notin D$ で矛盾する。後半：$D\in\Pi_{n}\subseteq\Delta_{n+1}$ で $D\notin\Sigma_{n}$ なので $\Sigma_{n}\neq\Delta_{n+1}$。$\overline{D}\in\Sigma_{n}\setminus\Pi_{n}$ なので $\overline{D}\notin\Delta_{n}$。
-:::
+$U_{n}\subseteq\N^{2}$ を $k=1$ の普遍 $\Sigma_{n}$ 関係とし、$D\defeq\{x:(x,x)\notin U_{n}\}$ とする。$\{x:(x,x)\in U_{n}\}$ は $\Sigma_{n}$（決定可能な関係の変数を同じにしても決定可能）なので $D$ は $\Pi_{n}$。$D$ が $\Sigma_{n}$ なら、ある $e$ で $D=\{x:(e,x)\in U_{n}\}$ となり、$x=e$ を代入すると $e\in D\iff(e,e)\in U_{n}\iff e\notin D$ となり矛盾する。後半：$D\in\Pi_{n}\subseteq\Delta_{n+1}$（\ref{comp:hierarchy-basic.2}）かつ $D\notin\Sigma_{n}$ なので、$\Sigma_{n}\subseteq\Delta_{n+1}$ は真の包含である。また $\overline{D}$ は $\Sigma_{n}$ であり、$\Pi_{n}$ なら \ref{comp:hierarchy-basic.1} で $D$ が $\Sigma_{n}$ になってしまうので $\Pi_{n}$ でない。ゆえに $\overline{D}\in\Sigma_{n}\setminus\Delta_{n}$ であり、$\Delta_{n}\subseteq\Sigma_{n}$ も真の包含である。
 
 ::: hypcheck
 - **普遍関係**：対角線論法を各段で行うために使った。$n=1$ の普遍関係は万能機械から得られ、$n+1$ は量化子を一つ付け加えて得られる。
 - **決定可能な関係が補集合で閉じること**：\ref{comp:hierarchy-basic.1} で使った。
+:::
 :::
 
 ## 問題 {#comp:sec-tr-problems}
@@ -130,11 +130,11 @@ $E_{\mathsf{TM}}\le_{\mathrm{T}}A_{\mathsf{TM}}$ を示せ。$E_{\mathsf{TM}}\le
 :::
 
 ::: solution
-入力 $\langle M\rangle$ から、「入力を無視し、すべての文字列の上で $M$ をダブテイルで模倣し、どれかが受理されれば受理する」機械 $M'$ と任意の $w_{0}$ を作り、神託に $\langle M',w_{0}\rangle\in A_{\mathsf{TM}}$ を問い合わせ、答えを反転する。$M'$ が $w_{0}$ を受理する $\iff L(M)\neq\varnothing$。後半：$E_{\mathsf{TM}}\le_{\mathrm{m}}A_{\mathsf{TM}}$ なら、$A_{\mathsf{TM}}$ は認識可能なので $E_{\mathsf{TM}}$ も認識可能（\ref{comp:mapping-basic.3}）。$\overline{E_{\mathsf{TM}}}$ も認識可能（問題 \ref{comp:prob-etm-co-recognizable}）なので $E_{\mathsf{TM}}$ が決定可能になり、\ref{comp:etm-undecidable} に反する。
+入力 $\langle M\rangle$ から、「入力を無視し、すべての文字列の上で $M$ をダブテイルで模倣し、どれかが受理されれば受理する」機械 $M'$ と任意の $w_{0}$ を作り、神託に $\langle M',w_{0}\rangle\in A_{\mathsf{TM}}$ を問い合わせ、答えを反転する。$M'$ は入力によらず同じ動きをするので、$M'$ が $w_{0}$ を受理することは $L(M)\neq\varnothing$ と同値であり、この神託機械は $E_{\mathsf{TM}}$ を決定する。後半：$E_{\mathsf{TM}}\le_{\mathrm{m}}A_{\mathsf{TM}}$ なら、$A_{\mathsf{TM}}$ は認識可能なので $E_{\mathsf{TM}}$ も認識可能（\ref{comp:mapping-basic.3}）。$\overline{E_{\mathsf{TM}}}$ も認識可能（問題 \ref{comp:prob-etm-co-recognizable}）なので $E_{\mathsf{TM}}$ が決定可能になり、\ref{comp:etm-undecidable} に反する。
 :::
 
 ::: problem {#comp:prob-tot-not-sigma2}
-$\mathit{TOT}$ は $\Sigma_{2}$ でない（$\Pi_{2}$ 完全。\ref{comp:tot-complete} で示す）。ここでは、$\mathit{TOT}$ が $\Sigma_{1}$ でないことを示せ。
+$\mathit{TOT}$ は $\Sigma_{2}$ でない（$\Pi_{2}$ 完全。\see{comp:tot-complete} で示す）。ここでは、$\mathit{TOT}$ が $\Sigma_{1}$ でないことを示せ。
 :::
 
 ::: solution
@@ -143,7 +143,7 @@ $\mathit{TOT}$ は $\Sigma_{2}$ でない（$\Pi_{2}$ 完全。\ref{comp:tot-com
 
 ::: supplement
 **前提の検討.**
-- 算術的階層は、量化子が自然数の上を動くことを前提とする。量化子を集合（関数）の上に動かすと、解析的階層 $\Sigma^{1}_{n}$ が得られる（二階算術の系列で扱う予定）。
+- 算術的階層は、量化子が自然数の上を動くことを前提とする。量化子を集合（関数）の上に動かすと、解析的階層 $\Sigma^{1}_{n}$ が得られる（\see{comp:page-analytical-hierarchy}）。
 - \ref{comp:hierarchy-basic.3} の「量化子をまとめる」操作は、対の符号化が計算可能であることだけを使う。
 
 **関連する結果.**
