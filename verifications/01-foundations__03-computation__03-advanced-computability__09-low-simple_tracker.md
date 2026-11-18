@@ -26,6 +26,7 @@ The main construction (Post's simple set, limit lemma, low simple set via finite
 - **Detail:** The supplement states the limit lemma characterizes $\Delta_{2}$ sets as those with a computable approximation that changes only finitely many times. That is wrong: the limit lemma gives approximations that may change infinitely often (only requiring convergence to a limit). Approximations with a bounded number of changes characterize the computable sets, not $\Delta_{2}$. The sentence conflates the limit lemma with the difference hierarchy (which bounds the number of changes and yields $n$-c.e. sets).
 - **Proposed fix:** Replace with: 極限補題は、$\Delta_{2}$ の集合（\ref{comp:post-theorem}）を「計算可能な近似をもち、各点で極限が存在する」集合として特徴づける。近似の変化の回数に上限 $n$ を付けると、差の階層（$n$-c.e. 集合）が得られる（\tref{comp:page-difference-hierarchy}）。
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** "Changes only finitely many times" was meant pointwise, which is exactly convergence; bounded changes give n-c.e. sets, not computable sets. Wording clarified to "finitely often at each point".
 
 ### ISSUE-0003 [Open] Low basis theorem misattributed to reverse mathematics context
 - **Category:** Supplement/remark error
