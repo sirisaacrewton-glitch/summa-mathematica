@@ -19,6 +19,7 @@
 - **Detail:** The supplement says a Σ¹₂ set is represented by the non-well-foundedness of a tree on ℕ×ω₁. The Schoenfield tree representation for Σ¹₂ sets is via the *well-foundedness* of a tree on ℕ×ω₁ (equivalently, a Σ¹₂ set is the projection of a tree on ℕ×ω₁, i.e. x ∈ A iff the tree T_x on ℕ×ω₁ has an infinite branch). The Π¹₁ case is well-foundedness of a tree on ℕ; the Σ¹₂ case is existence of a branch through a tree on ℕ×ω₁, not non-well-foundedness of a tree on ℕ×ω₁ in the same sense. As stated ('非整礎性で表せる') it is imprecise/incorrect about which property of the tree encodes membership.
 - **Proposed fix:** A Σ¹₂ set A is represented by a tree T on ℕ×ω₁: x ∈ A iff T_x has an infinite branch (equivalently, x ∉ A iff T_x is well-founded). This is the basis of Schoenfield's absoluteness theorem for Σ¹₂ statements.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** "非整礎" means not well-founded, i.e. having an infinite branch, which is exactly the proposed formulation (x∈A iff T_x has an infinite branch). The text now states this explicitly.
 
 ### ISSUE-0002 [Open] Spector boundedness phrasing about Σ¹₁ trees
 - **Category:** Supplement/remark error
@@ -33,3 +34,4 @@
 - **Detail:** The supplement states that Π¹₁-CA₀ 'admits the existence of Π¹₁-complete sets like WT'. This is misleading: Π¹₁-CA₀ is the subsystem asserting that every Π¹₁-definable set exists (Π¹₁ comprehension). The existence of a Π¹₁-complete set such as WT is provable already in much weaker systems (indeed WT is arithmetically definable via a Π¹₁ formula, and its existence as a set follows from arithmetical comprehension ACA₀). What Π¹₁-CA₀ adds is comprehension for arbitrary Π¹₁ formulas, not the existence of a particular complete set. The claim overstates the role of Π¹₁-CA₀.
 - **Proposed fix:** Π¹₁-CA₀ is the system with comprehension for all Π¹₁ formulas; it proves the existence of sets defined by Π¹₁ conditions (the existence of a specific Π¹₁-complete set like WT already follows from far weaker systems such as ACA₀).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The proposed fix is false: ACA0 does not prove the existence of WT, since the arithmetical sets form an ω-model of ACA0 and WT is not arithmetical (it is not even Σ¹₁). Π¹₁-CA0 is the system of Π¹₁ comprehension and does guarantee WT (and its relativizations). The text now says this.

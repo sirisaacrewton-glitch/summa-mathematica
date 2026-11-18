@@ -26,6 +26,7 @@
 - **Detail:** The supplement claims one can also take a path that does not compute a given noncomputable set C. This is false in general: if C is itself a path of the tree (or computable from every path), no path can avoid computing C. The correct statement requires C to be noncomputable and the tree to have a path not computing C, which is not guaranteed for arbitrary C.
 - **Proposed fix:** Either delete the clause, or state it correctly: '与えられた集合 C について、C を計算しない道が存在するための十分条件（例えば C が計算可能でないことだけでは不十分）を仮定した上で' — or restrict to the standard result that for any noncomputable C there is a tree all of whose paths avoid C only under additional hypotheses.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The cone-avoidance basis theorem (Jockusch–Soare) holds for every noncomputable C: every nonempty Pi^0_1 class has a member not computing C. The objection fails because a computable tree whose only path through some node is C would make C an isolated path, hence computable.
 
 ### ISSUE-0003 [Open] Low basis does not give an omega-model of WKL_0 all of whose elements are low
 - **Category:** Supplement/remark error
@@ -33,3 +34,4 @@
 - **Detail:** The supplement states that from the low basis theorem one builds an ω-model of WKL_0 all of whose elements are low. The low basis theorem gives, for each single tree, a low path; but the set of all low sets is not closed under the operations needed to form an ω-model of WKL_0 (in particular it is not closed under relative computation: a set computable from a low set need not be low). The standard consequence is that WKL_0 has an ω-model consisting of low sets only in the weaker sense that the model is built from a single low path together with its computable-in-it closure, which is not 'all elements low'. The claim as stated is stronger than what the theorem yields.
 - **Proposed fix:** Replace with: 'WKL_0 の ω モデルで、その第二次要素がすべて低い集合からなるものが作れる、という主張は正しくない。低基底定理から直接得られるのは、各計算可能な木に対し低い道が存在することであり、これを用いて WKL_0 が ACA_0 を証明しないことを示すには別の議論（例えば低い道の存在から WKL_0 の ω モデルを作り、それが ACA_0 を満たさないことを示す）が必要である。'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Lowness is closed downward under ≤_T (X ≤_T A implies X' ≤_T A' ≤_T 0'), so iterating the relativized low basis theorem (now comp:low-basis-relative) yields an ω-model of WKL0 all of whose members are low; it omits 0', so it is not a model of ACA0. The construction is now spelled out in the supplement.

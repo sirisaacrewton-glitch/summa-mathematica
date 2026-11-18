@@ -19,6 +19,7 @@ The core theorems (prewellordering, reduction, separation, number uniformization
 - **Detail:** The supplement claims that every nonempty Σ¹₁ set has a member f with WT ≰_T f, attributing this to Gandy's basis theorem (citing Sacks). Gandy's basis theorem states that every nonempty Σ¹₁ set of reals has a member hyperarithmetic in Kleene's O (i.e., hyperarithmetic), not one that fails to compute WT. The claim that a member with WT ≰_T f exists is not Gandy's theorem and is not generally true as stated (e.g., a Σ¹₁ set all of whose members compute WT would be a counterexample; the assertion needs a genuine argument and is not what the cited theorem says). The attribution and the statement are both wrong.
 - **Proposed fix:** Replace with the correct statement: "空でない $\Sigma^{1}_{1}$ 集合はクリーネの $\mathcal{O}$（すなわち $\mathrm{WT}$）で計算可能な元をもつ（ガンディの基底定理、G. E. Sacks, *Higher Recursion Theory*）。したがってその元は超算術的である。" Remove the claim about $\mathrm{WT}\not\le_{\mathrm{T}}f$.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Gandy's basis theorem: every nonempty Σ¹₁ class has a member f with ω₁^f = ω₁^CK, and by Kleene's basis theorem one can take f ≤_T O; hence f ≤_T WT and WT ≰_T f, as the page says. The proposed "member hyperarithmetic in O, hence hyperarithmetic" is false (cf. ISSUE-0002). The page now states f ≤_T WT explicitly.
 
 ### ISSUE-0002 [Open] Kleene claim: computable tree with no hyperarithmetic branch
 - **Category:** Supplement/remark error
@@ -26,6 +27,7 @@ The core theorems (prewellordering, reduction, separation, number uniformization
 - **Detail:** The supplement states that there is a computable tree with a branch such that no branch is hyperarithmetic, attributed to Kleene. This is false: by the Kleene basis theorem (part 1 of this very page), a computable tree with a branch has a branch computable in WT, hence hyperarithmetic. So every computable ill-founded tree has a hyperarithmetic branch. The intended true statement is that there is a computable (or Σ¹₁) tree all of whose branches are non-hyperarithmetic is impossible; what is true is that there are computable trees with branches but no computable branch (Kleene), or Σ¹₁ sets with no hyperarithmetic member is also false. The claim as written contradicts the page's own theorem.
 - **Proposed fix:** Replace with the correct statement: "一方、計算可能な木で枝をもつが計算可能な枝をもたないものがある（クリーネ）。ただし基底定理により、そのような木も $\mathrm{WT}$ で計算可能な（したがって超算術的な）枝をもつ。"
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Being computable in WT does not imply hyperarithmetic: WT is Π¹₁-complete and not Δ¹₁. Kleene's computable tree with paths but no hyperarithmetic path is a standard result and is consistent with the basis theorem; a sentence explaining this was added.
 
 ### ISSUE-0003 [Open] Σ¹₂ prewellordering and Π¹₂ failure claim
 - **Category:** Supplement/remark error
@@ -33,6 +35,7 @@ The core theorems (prewellordering, reduction, separation, number uniformization
 - **Detail:** The supplement asserts that Σ¹₂ has the prewellordering property (from the Schoenfield tree representation) and Π¹₂ does not, and that Π¹₁ and Σ¹₂ are the 'good side'. This is imprecise/incorrect: the prewellordering property holds for Σ¹₂ (and Π¹₁), but the standard statement is that Σ¹₂ has the prewellordering property while Π¹₂ does not; however the claim that 'Σ¹₂ has it from Schoenfield tree representation' conflates the scale property with prewellordering, and the assertion that 'Π¹₂ does not have it' is not a theorem of ZFC alone in the way stated—the prewellordering property for Π¹₂ is independent. The blanket statement 'Π¹₂ はもたない' is overstated.
 - **Proposed fix:** Restate: "$\Sigma^{1}_{2}$ は前整列性（実際スケール性）をもつ（ショーンフィールド）。$\Pi^{1}_{2}$ が前整列性をもつかは $\ZFC$ では決まらない。"
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** In ZFC Σ¹₂ has the prewellordering property (minimize a Π¹₁-norm over witnesses), and Π¹₂ provably lacks it: a pointclass with universal sets and its dual cannot both have the reduction property. Only higher levels are independent. The justification in the text was corrected.
 
 ### ISSUE-0004 [Open] Boldface correspondence: 'Kuratowski' reduction and 'Lusin' separation attributions
 - **Category:** Supplement/remark error
@@ -47,3 +50,4 @@ The core theorems (prewellordering, reduction, separation, number uniformization
 - **Detail:** The notation says countable choice is used 'only for closure under number quantifiers', and the hypcheck of the uniformization theorem says closure under ∀m uses countable choice (citing quantifier-absorption.3 dual). But the closure of Π¹₁ under number quantifiers does not require countable choice—it is provable in ZF (the analytical hierarchy closure under number quantifiers is elementary). The claim that countable choice is needed here is an overstatement.
 - **Proposed fix:** Remove the claim that countable choice is needed for number-quantifier closure, or state that the metatheory is ZF (countable choice is not actually needed for these closure properties).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Fixed in part: the hypcheck wrongly attributed countable choice to the ∀m closure, which needs no choice. Countable choice is used only through comp:quantifier-absorption.3 (the ∃m closure in Δ¹₁ selection), whose proof on the earlier page uses it; the stated metatheory is therefore accurate.
