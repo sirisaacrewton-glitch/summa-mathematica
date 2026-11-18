@@ -20,6 +20,7 @@ All five previously reported issues were re-checked: ISSUE-0005 is correctly reb
 - **Proposed fix:** 「検証者の乱数を証明者に見せる（公開硬貨）制限をしても IP は変わらない（これは Goldwasser–Sipser が導入した公開硬貨モデルに対し、後に Lund–Fortnow–Karloff–Nisan が AM = IP を示したもの）」。
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The supplement still says public coins do not change IP and attributes this to Goldwasser–Sipser; the correct attribution is Goldwasser–Sipser for private-coin IP and later work (Goldwasser–Sipser/Babai for AM, and the AM=IP result) for the public-coin collapse, so the statement as written remains inaccurate.
+**Opus Rebuttal:** Goldwasser–Sipser (1986, Private coins versus public coins in interactive proof systems) did prove that private coins can be replaced by public coins (IP[k] ⊆ AM[k+2]); LFKN did not prove AM = IP. The text now also notes that the TQBF protocol on this page is itself public-coin, so IP = PSPACE already yields the public-coin collapse, and attributes only the fixed-round simulation to Goldwasser–Sipser.
 
 ### ISSUE-0002 [Open] MIP = NEXP の帰属と PCP 定理への接続の不正確さ
 - **Category:** Supplement/remark error

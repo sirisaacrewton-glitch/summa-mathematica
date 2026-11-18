@@ -39,8 +39,12 @@ $$
 （量化子は交互に $k$ 個）となるものがあることは同値である。$\Pi_{k}^{\mathrm{P}}$ は $\forall$ から始まる形で同様。
 :::
 
+::: intuition
+多項式階層の第 $k$ 層の問題とは、「ある短い $y_{1}$ があって、どんな短い $y_{2}$ についても、ある短い $y_{3}$ があって……」と量化子を $k$ 回交互に並べ、最後に多項式時間で確かめられる条件で表せる問題のことである。
+:::
+
 ::: proof
-**⇐.** 交代機械 $M$ を次のように作る：存在状態で $y_{1}$ の各ビット（と長さ）を一つずつ非決定的に選び、全称状態に移って $y_{2}$ を選び、……と $k$ ブロックを選んだ後、決定的に $R(x,y_{1},\dots,y_{k})$ を多項式時間で計算して受理・拒否する。切り替わりは $k-1$ 回で、時間は多項式。各ブロックの選択は、その時点までに選んだ文字列だけに依存する木の分岐なので、計算の木の受理のラベル付けは、量化子を外側から順に評価したものとちょうど一致する（$\exists$ ブロックの頂点は子のどれかが受理なら受理、$\forall$ ブロックはすべてが受理なら受理）。
+**⇐.** 交代機械 $M$ を次のように作る：存在状態で $y_{1}$ の各ビット（と長さ）を一つずつ非決定的に選び、全称状態に移って $y_{2}$ を選び、……と $k$ ブロックを選んだ後、決定的に $R(x,y_{1},\dots,y_{k})$ を多項式時間で計算して受理・拒否する。切り替わりは $k-1$ 回で、時間は多項式である。各ブロックの選択は、その時点までに選んだ文字列だけに依存する木の分岐なので、計算の木の受理のラベル付けは、量化子を外側から順に評価したものとちょうど一致する（$\exists$ ブロックの頂点は子のどれかが受理なら受理、$\forall$ ブロックはすべてが受理なら受理）。
 
 **⇒.** $A$ を時間 $T(n)$（多項式）の $\Sigma_{k}$ 交代判定機 $M$ が決定するとし、各時点表示の次の時点表示は高々 $b$ 個とする。長さ $T(n)$ の $\{0,\dots,b-1\}$ の列（**選択列**）を、長さ $T(n)\lceil\log_{2}b\rceil$ の二進文字列で表す。選択列 $c_{1},\dots,c_{k}$ が与えられたとき、$M$ を入力 $x$ の上で次のように走らせる：いま第 $i$ ブロックにいる（存在・全称の切り替わりが $i-1$ 回あった）なら、$c_{i}$ のまだ使っていない次の値を、現在の時点表示の次の時点表示の個数で割った余りで選択を決める。$R(x,c_{1},\dots,c_{k})$ を「この走らせ方で受理状態に達する」とすると、$R$ は多項式時間で決定できる。
 
@@ -53,7 +57,7 @@ $$
 - $v$ が第 $i$ ブロックの存在状態（$\mathsf{Q}_{i}=\exists$）なら、$v$ が受理 $\iff$ ある子 $u$ が受理。$u$ が同じブロックなら、帰納法の仮定から「$\exists$（$c_{i}$ の次の値で $u$ を選ぶ）$\exists$（$c_{i}$ のさらに残り）$\cdots$」で、二つの $\exists$ はまとめて「$\exists$（$c_{i}$ の残り）」になる（割った余りで選ぶので、どの子もある値で選べる）。$u$ が次のブロックなら、帰納法の仮定は $\mathsf{Q}_{i+1}c_{i+1}\cdots$ で始まり、$c_{i}$ の残りは使われないので、その量化を前に付けても同値。
 - 全称状態も同様（$\exists$ を $\forall$ に替える）。
 
-$v$ を開始時点表示（第 1 ブロック、$j=0$）とすれば、$x\in A\iff\exists c_{1}\forall c_{2}\cdots\mathsf{Q}_{k}c_{k}\,R(x,c_{1},\dots,c_{k})$。ブロックの切り替わりが $k-1$ 回以下なので $k$ 個の量化子で足りる。$\Pi_{k}^{\mathrm{P}}$ は補集合（\ref{comp:ph-basic.2}）と否定を内側に移すことによる。
+$v$ を開始時点表示（第 1 ブロック、$j=0$）とすれば、$x\in A\iff\exists c_{1}\forall c_{2}\cdots\mathsf{Q}_{k}c_{k}\,R(x,c_{1},\dots,c_{k})$ が成り立つ。ブロックの切り替わりが $k-1$ 回以下なので $k$ 個の量化子で足りる。$\Pi_{k}^{\mathrm{P}}$ は補集合（\ref{comp:ph-basic.2}）と否定を内側に移すことによる。
 :::
 
 ::: hypcheck
@@ -68,16 +72,20 @@ $v$ を開始時点表示（第 1 ブロック、$j=0$）とすれば、$x\in A\
 すべての $k\ge0$ について $\Sigma_{k+1}^{\mathrm{P}}=\mathrm{NP}^{\Sigma_{k}^{\mathrm{P}}}$。
 :::
 
-::: proof
-$k=0$ は $\mathrm{NP}^{\mathrm{P}}=\mathrm{NP}=\Sigma_{1}^{\mathrm{P}}$（P の神託への質問は機械自身が多項式時間で答えられる）。$k\ge1$ とする。
+::: intuition
+多項式階層の一段上の問題は、一段下の問題を一回の手間で答えてくれる神託を使える非決定性の多項式時間の機械で解ける問題と同じである。
+:::
 
-**⊆.** $A\in\Sigma_{k+1}^{\mathrm{P}}$ を \ref{comp:ph-quantifiers} で $x\in A\iff\exists^{p}y_{1}\,B(x,y_{1})$ と書く。$B(x,y_{1})\defeq\forall^{p}y_{2}\cdots R$ は（$\langle x,y_{1}\rangle$ の言語として）\ref{comp:ph-quantifiers} から $\Pi_{k}^{\mathrm{P}}$ で、補集合 $\overline{B}$ は $\Sigma_{k}^{\mathrm{P}}$。非決定性の神託機械は、$y_{1}$ を推測し、神託 $\overline{B}$ に $\langle x,y_{1}\rangle$ を質問して、答えが「いいえ」なら受理する。
+::: proof
+$k=0$ の場合、$\mathrm{NP}^{\mathrm{P}}=\mathrm{NP}=\Sigma_{1}^{\mathrm{P}}$ である（P の神託への質問は機械自身が多項式時間で答えられる）。以下 $k\ge1$ とする。
+
+**⊆.** $A\in\Sigma_{k+1}^{\mathrm{P}}$ を \ref{comp:ph-quantifiers} で $x\in A\iff\exists^{p}y_{1}\,B(x,y_{1})$ と書く。$B(x,y_{1})\defeq\forall^{p}y_{2}\cdots R$ とおく。量化の長さの上限 $p(\lvert x\rvert)$ は $\langle x,y_{1}\rangle$ から多項式時間で計算できるので、$R$ に「各 $y_{i}$ の長さが $p(\lvert x\rvert)$ 以下」を加えれば、$\langle x,y_{1}\rangle$ の長さの多項式で抑えた量化に書き直せる。よって $B$ は（$\langle x,y_{1}\rangle$ の言語として）\ref{comp:ph-quantifiers} から $\Pi_{k}^{\mathrm{P}}$ に属し、補集合 $\overline{B}$ は $\Sigma_{k}^{\mathrm{P}}$ に属する。非決定性の神託機械は、$y_{1}$ を推測し、神託 $\overline{B}$ に $\langle x,y_{1}\rangle$ を質問して、答えが「いいえ」なら受理する。
 
 **⊇.** $A=L(N^{O})$（$N$ は時間 $q(n)$ の非決定性神託機械、$O\in\Sigma_{k}^{\mathrm{P}}$）とする。$N$ の計算の枝は、非決定的な選択の列と、神託の答えの列で決まる。$x\in A$ であることは次と同値である：
 $$
 \exists^{q}(\text{選択の列}\ g,\ \text{答えの列}\ a)\ \Bigl[\,V(x,g,a)\wedge\bigwedge_{a_{j}=\text{はい}}z_{j}\in O\wedge\bigwedge_{a_{j}=\text{いいえ}}z_{j}\notin O\,\Bigr]
 $$
-ここで $V$ は「$g$ と $a$ に従って $N$ を走らせると受理する」（多項式時間）、$z_{j}$ はその走らせ方での第 $j$ の質問。$z\in O$ は $\Sigma_{k}$ の形、$z\notin O$ は $\Pi_{k}$ の形で、どちらも先頭に意味のない量化子を補えば $\Sigma_{k+1}$ の形 $\exists u_{1}\forall u_{2}\cdots$ になる。高々 $q(n)$ 個の連言は、各ブロックの変数を組にまとめて一つの $\Sigma_{k+1}$ の形にでき（変数は互いに別なので量化子を外に並べられる）、先頭の $\exists$ は外側の $\exists(g,a)$ とまとめられる。長さはすべて多項式で抑えられ、内側の関係は多項式時間。\ref{comp:ph-quantifiers} から $A\in\Sigma_{k+1}^{\mathrm{P}}$。
+ここで $V$ は「$g$ と $a$ に従って $N$ を走らせると受理する」（多項式時間）、$z_{j}$ はその走らせ方での第 $j$ の質問。$z\in O$ は $\Sigma_{k}$ の形で、末尾に意味のない量化子を補えば $\Sigma_{k+1}$ の形 $\exists u_{1}\forall u_{2}\cdots$ になる。$z\notin O$ は $\Pi_{k}$ の形で、先頭に意味のない $\exists$ を補えば同じく $\Sigma_{k+1}$ の形になる。高々 $q(n)$ 個の連言は、各ブロックの変数を組にまとめて一つの $\Sigma_{k+1}$ の形にでき（変数は互いに別なので量化子を外に並べられる）、先頭の $\exists$ は外側の $\exists(g,a)$ とまとめられる。長さはすべて多項式で抑えられ（質問 $z_{j}$ の長さは $q(n)$ 以下）、内側の関係は多項式時間で判定できる（$g,a$ から走らせ方と質問を計算し、各連言肢の関係を調べる）。ゆえに \ref{comp:ph-quantifiers} から $A\in\Sigma_{k+1}^{\mathrm{P}}$ である。
 :::
 
 ## カープ–リプトンの定理 {#comp:sec-kl-karp-lipton}
@@ -91,15 +99,19 @@ $\mathrm{EXT}\defeq\{\langle\varphi,\pi\rangle:\varphi\text{ は } v\text{ 変�
 :::
 
 ::: proof
-NP：証明書は延長した割り当てそのもの。手続き：$\pi\defeq\ast^{v}$ から始め、$i=1,\dots,v$ について、$\pi$ の第 $i$ 成分を $0$ にしたものを $D$ が受理すればそれを、そうでなければ第 $i$ 成分を $1$ にしたものを新しい $\pi$ とする。$\langle\varphi,\pi\rangle\in\mathrm{EXT}$ が各段階で保たれる（$0$ で延長できなければ $1$ で延長できる）ので、最後の $\pi$ は充足する割り当て。
+NP に属すること：延長した割り当てそのものを証明書とすればよい。手続き：$\pi\defeq\ast^{v}$ から始め、$i=1,\dots,v$ について、$\pi$ の第 $i$ 成分を $0$ にしたものを $D$ が受理すればそれを、そうでなければ第 $i$ 成分を $1$ にしたものを新しい $\pi$ とする。$\langle\varphi,\pi\rangle\in\mathrm{EXT}$ が各段階で保たれる（$0$ で延長できなければ $1$ で延長できる）ので、最後の $\pi$ は充足する割り当てである。
 :::
 
 ::: theorem カープ–リプトンの定理 {#comp:karp-lipton keywords="if NP is contained in P/poly then Sigma_2^P = Pi_2^P and PH collapses to its second level" index="カープ–リプトンの定理|かーぷりぷとんのていり" refname="カープ–リプトンの定理"}
 $\mathrm{NP}\subseteq\mathrm{P}/\mathrm{poly}$ なら $\Pi_{2}^{\mathrm{P}}=\Sigma_{2}^{\mathrm{P}}$ で、したがって $\mathrm{PH}=\Sigma_{2}^{\mathrm{P}}$。
 :::
 
+::: intuition
+NP の問題がすべて多項式の大きさの回路で解けるなら、多項式階層は第 2 層より上に伸びない。正しい回路を「存在する」で推測し、その回路が出す答えを検算すればよいからである。
+:::
+
 ::: proof
-$\Pi_{2}^{\mathrm{P}}\subseteq\Sigma_{2}^{\mathrm{P}}$ を示せば、補集合をとって等号が成り立ち（\ref{comp:ph-basic.2}）、\ref{comp:prob-alt-collapse} から $\mathrm{PH}=\Sigma_{2}^{\mathrm{P}}$。
+$\Pi_{2}^{\mathrm{P}}\subseteq\Sigma_{2}^{\mathrm{P}}$ を示せば、補集合をとって等号が成り立ち（\ref{comp:ph-basic.2}）、\ref{comp:prob-alt-collapse} から $\mathrm{PH}=\Sigma_{2}^{\mathrm{P}}$ が従う。
 
 $A\in\Pi_{2}^{\mathrm{P}}$ を $x\in A\iff\forall^{p}y\,\exists^{p}z\,R(x,y,z)$ と書く（\ref{comp:ph-quantifiers}）。$\{\langle x,y\rangle:\exists^{p}z\,R\}\in\mathrm{NP}$ なので、\ref{comp:cook-levin}から多項式時間の $f$ で $\exists^{p}z\,R(x,y,z)\iff f(x,y)$ が充足可能、となるものがある。$\lvert x\rvert=n$ について、$\lvert y\rvert\le p(n)$ の範囲で $\langle f(x,y),\pi\rangle$ の長さは多項式 $M(n)$ 以下。仮定から $\mathrm{EXT}\in\mathrm{P}/\mathrm{poly}$ で、長さ $m$ の入力を正しく決定する大きさ $s(m)$ 以下の回路がある。
 $$
@@ -123,7 +135,7 @@ $\mathrm{P}\subseteq\mathrm{P}/\mathrm{poly}$ を示せ。また、$\mathrm{NP}\
 :::
 
 ::: solution
-前半は \ref{comp:time-to-size}（多項式時間の機械から多項式の大きさの回路族が得られる）。後半：$A\in\mathrm{coNP}$ なら $\overline{A}\in\mathrm{NP}\subseteq\mathrm{P}/\mathrm{poly}$ で、$\overline{A}$ を決定する回路の出力に NOT ゲートを一つ加えれば $A$ を決定する。
+前半は \ref{comp:time-to-size} から従う（多項式時間の機械から多項式の大きさの回路族が得られる）。後半：$A\in\mathrm{coNP}$ なら $\overline{A}\in\mathrm{NP}\subseteq\mathrm{P}/\mathrm{poly}$ であり、$\overline{A}$ を決定する回路の出力に NOT ゲートを一つ加えれば $A$ を決定する。
 :::
 
 ::: problem {#comp:prob-kl-np-conp}
@@ -131,11 +143,11 @@ $\mathrm{NP}^{\mathrm{NP}}=\Sigma_{2}^{\mathrm{P}}$ と、$\mathrm{NP}=\mathrm{c
 :::
 
 ::: solution
-前半は \ref{comp:ph-oracle} の $k=1$。後半：$\mathrm{NP}=\mathrm{coNP}$ は $\Sigma_{1}^{\mathrm{P}}=\Pi_{1}^{\mathrm{P}}$ で、\ref{comp:prob-alt-collapse} から $\Sigma_{2}^{\mathrm{P}}=\Sigma_{1}^{\mathrm{P}}=\mathrm{NP}$。
+前半は \ref{comp:ph-oracle} の $k=1$ の場合である。後半：$\mathrm{NP}=\mathrm{coNP}$ は \ref{comp:ph-basic.1} により $\Sigma_{1}^{\mathrm{P}}=\Pi_{1}^{\mathrm{P}}$ のことであり、\ref{comp:prob-alt-collapse} から $\mathrm{NP}^{\mathrm{NP}}=\Sigma_{2}^{\mathrm{P}}=\Sigma_{1}^{\mathrm{P}}=\mathrm{NP}$ が従う。
 :::
 
 ::: supplement
-**前提を変えると.** カープ–リプトンの定理の結論は、$\Sigma_{2}^{\mathrm{P}}$ より小さいクラスへの崩壊（$\mathrm{PH}=\mathrm{ZPP}^{\mathrm{NP}}$ など）に改良できることが知られている（ここでは扱わない）。同じ方法で、$\mathrm{PSPACE}\subseteq\mathrm{P}/\mathrm{poly}$ なら $\mathrm{PSPACE}=\Sigma_{2}^{\mathrm{P}}$、$\mathrm{EXP}\subseteq\mathrm{P}/\mathrm{poly}$ なら $\mathrm{EXP}=\Sigma_{2}^{\mathrm{P}}$ となることが知られている（メイヤー）。
+**前提を変えると.** カープ–リプトンの定理の結論は、$\Sigma_{2}^{\mathrm{P}}\cap\Pi_{2}^{\mathrm{P}}$ に含まれるクラスへの崩壊 $\mathrm{PH}=\mathrm{ZPP}^{\mathrm{NP}}$ に強められることが知られている（ケブラー–ワタナベ。ここでは扱わない）。また、回路を推測して検査する同様の考え方で、$\mathrm{PSPACE}\subseteq\mathrm{P}/\mathrm{poly}$ なら $\mathrm{PSPACE}=\Sigma_{2}^{\mathrm{P}}$、$\mathrm{EXP}\subseteq\mathrm{P}/\mathrm{poly}$ なら $\mathrm{EXP}=\Sigma_{2}^{\mathrm{P}}$ となることが知られている（後者はメイヤー。ここでは証明しない）。PSPACE と EXP は補集合で閉じているので、これらの等式は $\Sigma_{2}^{\mathrm{P}}=\Pi_{2}^{\mathrm{P}}$ も意味する。
 
 **似た定理.** 量化子による特徴づけと神託による特徴づけは、計算可能性理論の算術的階層と\ref{comp:post-theorem}の「多項式時間版」である：$\Sigma_{n+1}^{0}$ が $\varnothing^{(n)}$ で認識可能な集合であるのに対し、$\Sigma_{k+1}^{\mathrm{P}}$ は $\Sigma_{k}^{\mathrm{P}}$ の神託をもつ非決定性多項式時間で認識される言語である。ただし計算可能性理論と違い、多項式階層が真の階層かどうか（$\mathrm{P}\ne\mathrm{NP}$ を含む）は未解決である。
 
