@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ディリクレ級数とゼータ関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/03-analytic-number-theory/01-zeta-l-functions/01-dirichlet-series.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ディリクレ級数とゼータ関数 {#nt:page-dirichlet-series keywords="Dirichlet series, abscissa of convergence, holomorphy in a half plane, Euler product, Riemann zeta function, continuation of zeta to Re s > 0, simple pole at s = 1 with residue 1, zeta has no zeros for Re s > 1, log zeta(s) = sum p^{-s} + O(1), Dirichlet characters modulo q, orthogonality relations, Dirichlet L-functions, holomorphy of L(s, chi) for Re s > 0"}
+
+素数の分布を解析で調べる出発点は、**ディリクレ級数** $\sum a_{n}n^{-s}$ である。その代表が**リーマンのゼータ関数** $\zeta(s)=\sum n^{-s}$ で、算術の基本定理は**オイラー積** $\zeta(s)=\prod_{p}(1-p^{-s})^{-1}$ という形で解析の言葉に翻訳される。このページでは、ディリクレ級数が右半平面で正則な関数を定めることを示し、$\zeta(s)$ を $\mathrm{Re}\,s>0$ まで延長して $s=1$ に留数 $1$ の 1 位の極をもつことを確かめる。次に、$q$ を法とする**ディリクレ指標** $\chi$ とその直交関係を整え、$L(s,\chi)=\sum\chi(n)n^{-s}$ が $\chi\neq\chi_{0}$ なら $\mathrm{Re}\,s>0$ で正則であることを示す。
+
+## 記法と定義の確認 {#nt:sec-ds-notation}
+
+::: notation
+- $s=\sigma+it$（$\sigma,t\in\mathbb{R}$）、$n^{-s}\defeq e^{-s\log n}$ で $\abs{n^{-s}}=n^{-\sigma}$。$p$ は素数を動く。
+- 正則関数のコンパクト一様極限は正則（\ref{cx:weierstrass-convergence}）。\ref{cx:power-series-holomorphic}、\ref{cx:identity-theorem}。
+- \ref{calc:summation-by-parts} を使う。乗法的関数とディリクレ積は \ref{nt:page-multiplicative-functions}。
+- $(\Z/q\Z)^{\times}$ の構造（素数冪ごとの巡回群または $\{\pm1\}\times\langle5\rangle$ の積）は \ref{nt:page-primitive-roots} と中国剰余定理による。
+- 体系は $\ZF$。
+:::
+
+## ディリクレ級数 {#nt:sec-ds-series}
+
+::: definition ディリクレ級数 {#nt:dirichlet-series-def keywords="Dirichlet series sum a_n n^{-s}; abscissa of convergence and of absolute convergence" index="ディリクレ級数|でぃりくれきゅうすう, 収束座標|しゅうそくざひょう" refname="ディリクレ級数"}
+複素数列 $(a_{n})_{n\ge1}$ について $F(s)\defeq\sum_{n=1}^{\infty}a_{n}n^{-s}$ を**ディリクレ級数**という。
+:::
+
+::: intuition
+冪級数 $\sum a_{n}z^{n}$ が「円板」で収束するのに対し、ディリクレ級数は「右半平面」で収束する。$n^{-s}$ の大きさは $\sigma=\mathrm{Re}\,s$ だけで決まり、虚部 $t$ は回転を与えるだけだからである。
+:::
+
+::: theorem ディリクレ級数の収束と正則性 {#nt:dirichlet-series-convergence keywords="if a Dirichlet series converges at s_0 it converges for Re s > Re s_0, uniformly on compact subsets, and defines a holomorphic function there; termwise differentiation; if the partial sums of a_n are bounded the series converges for Re s > 0" index="ディリクレ級数の収束|でぃりくれきゅうすうのしゅうそく" refname="ディリクレ級数の収束と正則性"}
+1. $\sum a_{n}n^{-s_{0}}$ が収束するなら、$F(s)$ は $\mathrm{Re}\,s>\mathrm{Re}\,s_{0}$ で収束し、その領域のコンパクト集合上で一様に収束する。したがって $F$ はそこで正則で、項別微分 $F'(s)=-\sum a_{n}(\log n)n^{-s}$ が成り立つ。
+2. 特に、部分和 $A(x)\defeq\sum_{n\le x}a_{n}$ が有界なら $F(s)$ は $\mathrm{Re}\,s>0$ で正則。
+:::
+
+::: intuition
+ある点で収束すれば、そこより右では項 $n^{-s}$ がさらに速く小さくなるので、部分和を使った総和公式で収束が保証される。一様に収束するので、極限は正則関数になる。
+:::
+
+::: proof
+**Step 1（部分和による表示）.** $s_{0}=0$ の場合に帰着できる（$a_{n}$ を $a_{n}n^{-s_{0}}$ に替える）。$A(x)\defeq\sum_{n\le x}a_{n}$ は $x\to\infty$ で収束するので有界、$\abs{A(x)}\le M$。\ref{calc:summation-by-parts}から、$N<N'$ について
+$$\sum_{n=N+1}^{N'}a_{n}n^{-s}=A(N')N'^{-s}-A(N)(N+1)^{-s}-\sum_{n=N+1}^{N'-1}A(n)\bigl((n+1)^{-s}-n^{-s}\bigr).$$
+
+**Step 2（評価）.** 【主張：$\sigma>0$ のコンパクト集合上で、この和は $N\to\infty$ で一様に $0$ に近づく】$\abs{(n+1)^{-s}-n^{-s}}=\Bigl\lvert s\int_{n}^{n+1}x^{-s-1}dx\Bigr\rvert\le\abs s\int_{n}^{n+1}x^{-\sigma-1}dx$。よって和の絶対値は $\le2MN^{-\sigma}+M\abs s\int_{N}^{\infty}x^{-\sigma-1}dx=MN^{-\sigma}(2+\abs s/\sigma)$。コンパクト集合 $D\subseteq\{\sigma>0\}$ では $\sigma\ge\sigma_{1}>0$, $\abs s\le R$ なので一様に $0$ に収束する（コーシーの判定法）。
+
+**Step 3（正則性）.** 部分和は正則（有限個の $e^{-s\log n}$ の和）で、コンパクト一様収束なので極限も正則で、項別微分できる（\ref{cx:weierstrass-convergence}）。2 は Step 1–2 を $s_{0}=0$ の代わりに「部分和が有界」という仮定で行えばよい。
+:::
+
+::: theorem オイラー積 {#nt:euler-product keywords="for a multiplicative f with sum |f(n)| n^{-sigma} < infinity: sum f(n) n^{-s} = prod_p sum_k f(p^k) p^{-ks}; zeta(s) = prod (1 - p^{-s})^{-1} for Re s > 1; zeta(s) != 0 for Re s > 1" index="オイラー積|おいらーせき" refname="オイラー積"}
+$f$ を乗法的関数とし、$\sum_{n}\abs{f(n)}n^{-\sigma}<\infty$ とする。$\mathrm{Re}\,s=\sigma$ で
+$$\sum_{n=1}^{\infty}f(n)n^{-s}=\prod_{p}\Bigl(\sum_{k=0}^{\infty}f(p^{k})p^{-ks}\Bigr)$$
+（右辺は $p$ の小さい順の部分積の極限）。$f$ が完全乗法的なら右辺の各因子は $(1-f(p)p^{-s})^{-1}$。特に $\mathrm{Re}\,s>1$ で $\zeta(s)=\prod_{p}(1-p^{-s})^{-1}\neq0$。
+:::
+
+::: intuition
+$\prod_{p}(1+p^{-s}+p^{-2s}+\cdots)$ を展開すると、算術の基本定理により、各 $n^{-s}$ がちょうど一度ずつ現れる。素因数分解の一意性を、関数の等式に書き直したものである。
+:::
+
+::: proof
+**Step 1（有限積の展開）.** $P_{x}\defeq\prod_{p\le x}\sum_{k}f(p^{k})p^{-ks}$ は、各因子が絶対収束するので展開でき、算術の基本定理と乗法性から $P_{x}=\sum_{n\in S_{x}}f(n)n^{-s}$（$S_{x}$ は素因数がすべて $x$ 以下の $n$ 全体）。
+
+**Step 2（極限）.** $\Bigl\lvert\sum_{n}f(n)n^{-s}-P_{x}\Bigr\rvert\le\sum_{n>x}\abs{f(n)}n^{-\sigma}\to0$（$S_{x}$ は $x$ 以下の数をすべて含む）。
+
+**Step 3（零点がないこと）.** 【主張：$\mathrm{Re}\,s>1$ で $\zeta(s)\neq0$】$T_{x}$ を $x$ 以下の素因数をもたない正の整数全体（$1$ を含む）とすると、Step 1 と同様に展開して $\zeta(s)\prod_{p\le x}(1-p^{-s})=\sum_{n\in T_{x}}n^{-s}$。$T_{x}\setminus\{1\}$ の元は $x$ より大きいので、右辺の絶対値は $1-\sum_{n>x}n^{-\sigma}$ 以上で、$x$ を大きくとれば正。よって $\zeta(s)\neq0$。
+:::
+
+## ゼータ関数 {#nt:sec-ds-zeta}
+
+::: theorem ゼータ関数の延長 {#nt:zeta-continuation keywords="zeta(s) - 1/(s-1) extends holomorphically to Re s > 0: zeta(s) = s/(s-1) - s int_1^infty {x} x^{-s-1} dx; simple pole at s = 1 with residue 1; log zeta(s) = sum_p p^{-s} + O(1) as s -> 1+" index="リーマンのゼータ関数|りーまんのぜーたかんすう, ゼータ関数の延長|ぜーたかんすうのえんちょう" refname="ゼータ関数の延長"}
+1. $\mathrm{Re}\,s>1$ で $\zeta(s)=\dfrac{s}{s-1}-s\displaystyle\int_{1}^{\infty}\{x\}x^{-s-1}\,dx$（$\{x\}=x-\lfloor x\rfloor$）。右辺の積分は $\mathrm{Re}\,s>0$ で正則なので、$\zeta$ は $\mathrm{Re}\,s>0$ の有理型関数に一意に延長され、極は $s=1$ だけで、1 位、留数 $1$。
+2. 実数 $s>1$ について $\frac{1}{s-1}\le\zeta(s)\le\frac{s}{s-1}$。
+3. 実数 $s\to1+0$ のとき $\sum_{p}p^{-s}=\log\frac{1}{s-1}+O(1)$。
+:::
+
+::: intuition
+$\sum n^{-s}$ を積分 $\int_{1}^{\infty}x^{-s}dx=\frac{1}{s-1}$ と比べると、その差は「階段と坂の差」$\{x\}$ の積分で表され、こちらはずっとよく収束する。$s=1$ での発散はちょうど $\frac{1}{s-1}$ だけで、素数の逆数の和の発散はその対数として現れる。
+:::
+
+::: proof
+**Step 1（1：積分表示）.** 【主張：$\zeta(s)=\frac{s}{s-1}-s\int_{1}^{\infty}\{x\}x^{-s-1}dx$】$\sigma>1$, $N\ge1$ について、アーベルの総和公式の連続版（$\sum_{n\le N}n^{-s}=\lfloor N\rfloor N^{-s}+s\int_{1}^{N}\lfloor x\rfloor x^{-s-1}dx$、各区間 $[n,n+1)$ で $\lfloor x\rfloor$ が定数であることから直接計算）で $\lfloor x\rfloor=x-\{x\}$ とおくと
+$$\sum_{n\le N}n^{-s}=N^{1-s}+s\int_{1}^{N}x^{-s}dx-s\int_{1}^{N}\{x\}x^{-s-1}dx.$$
+$N\to\infty$ とすると $N^{1-s}\to0$, $s\int_{1}^{\infty}x^{-s}dx=\frac{s}{s-1}$ から式が従う。
+
+**Step 2（1：正則性）.** 【主張：右辺は $\mathrm{Re}\,s>0$ で有理型で、極は $s=1$ だけ】$0\le\{x\}<1$ なので積分は $\sigma>0$ で絶対収束し、$\sigma\ge\sigma_{1}>0$ で一様。$\int_{1}^{N}$ は $s$ の正則関数（被積分関数が $s$ について正則で連続）で、一様極限なので正則（\ref{cx:weierstrass-convergence}）。$\frac{s}{s-1}=1+\frac{1}{s-1}$ なので、$s=1$ に留数 $1$ の 1 位の極をもつ。延長の一意性は\ref{cx:identity-theorem}。
+
+**Step 3（2）.** 【主張：$\frac{1}{s-1}\le\zeta(s)\le\frac{s}{s-1}$】実数 $s>1$ で $\int_{n}^{n+1}x^{-s}dx\le n^{-s}\le\int_{n-1}^{n}x^{-s}dx$（$n\ge2$）を足して、$\frac{1}{s-1}\le\zeta(s)\le1+\frac{1}{s-1}=\frac{s}{s-1}$。
+
+**Step 4（3）.** 【主張：$\sum_{p}p^{-s}=\log\frac{1}{s-1}+O(1)$】オイラー積から $\log\zeta(s)=\sum_{p}\sum_{k\ge1}\frac{p^{-ks}}{k}$（実数 $s>1$、$-\log(1-x)=\sum x^{k}/k$）。$k\ge2$ の部分は $\sum_{p}\sum_{k\ge2}p^{-k}\le\sum_{p}\frac{p^{-2}}{1-p^{-1}}\le2\sum_{n}n^{-2}$ で有界。2 から $\log\zeta(s)=\log\frac{1}{s-1}+O(1)$（$s\le2$ で $\log s\le\log2$）。
+:::
+
+## ディリクレ指標と L 関数 {#nt:sec-ds-characters}
+
+::: definition ディリクレ指標 {#nt:dirichlet-character keywords="Dirichlet character modulo q: a homomorphism (Z/qZ)^x -> C^x extended by chi(n) = 0 for gcd(n, q) > 1; principal character chi_0; completely multiplicative and periodic" index="ディリクレ指標|でぃりくれしひょう, 主指標|しゅしひょう" refname="ディリクレ指標"}
+$q\ge1$ とする。群準同型 $\chi:(\Z/q\Z)^{\times}\to\mathbb{C}^{\times}$ から、$\chi(n)\defeq\chi(n\bmod q)$（$\gcd(n,q)=1$）、$\chi(n)\defeq0$（$\gcd(n,q)>1$）で定まる関数 $\chi:\Z\to\mathbb{C}$ を $q$ を法とする**ディリクレ指標**という。常に $1$（$\gcd(n,q)=1$）のものを**主指標** $\chi_{0}$ という。
+:::
+
+::: intuition
+ディリクレ指標は、合同類 $n\bmod q$ にだけよる完全乗法的な関数で、値は 1 の冪根である。指標を重ね合わせると、特定の合同類の指示関数を取り出せる（直交関係）。
+:::
+
+::: theorem 指標の直交関係 {#nt:character-orthogonality keywords="there are phi(q) Dirichlet characters modulo q; sum_{a mod q} chi(a) = phi(q) [chi = chi_0]; sum_chi chi(a) = phi(q) [a = 1 mod q]; (1/phi(q)) sum_chi conj(chi(a)) chi(n) is the indicator of n = a mod q for gcd(a,q) = 1" index="指標の直交関係|しひょうのちょっこうかんけい" refname="指標の直交関係"}
+$G\defeq(\Z/q\Z)^{\times}$ とする。
+1. $q$ を法とするディリクレ指標はちょうど $\varphi(q)$ 個あり、各点の積で群 $\hat G$ をなす。$a\neq1$（$a\in G$）なら $\chi(a)\neq1$ となる $\chi$ がある。
+2. $\sum_{a\in G}\chi(a)=\varphi(q)[\chi=\chi_{0}]$、$\sum_{\chi\in\hat G}\chi(a)=\varphi(q)[a=1]$。
+3. $\gcd(a,q)=1$ なら $\frac{1}{\varphi(q)}\sum_{\chi}\overline{\chi(a)}\chi(n)=[n\equiv a\pmod q]$。
+:::
+
+::: intuition
+自明でない指標を群全体で足すと打ち消し合い、指標全体で足すと単位元以外では打ち消し合う。この 2 つの打ち消し合いを組み合わせると、特定の合同類だけを拾い出すふるいができる。
+:::
+
+::: proof
+**Step 1（巡回群の場合）.** 【主張：位数 $m$ の巡回群 $C=\langle g\rangle$ の指標は $m$ 個で、$c\neq1$ を $1$ に送らない指標がある】指標は $\chi(g)\in\mu_{m}$ で決まり、逆に $w\in\mu_{m}$ ごとに $\chi(g^{k})\defeq w^{k}$ が矛盾なく定まる。$c=g^{k}\neq1$（$m\nmid k$）なら $w=e^{2\pi i/m}$ で $w^{k}\neq1$。
+
+**Step 2（1）.** $G$ は巡回群の直積 $C_{1}\times\cdots\times C_{r}$ と同型（\ref{nt:structure-units-mod-pk} と中国剰余定理）。直積の指標は各成分の指標の積 $\chi(c_{1},\dots,c_{r})=\prod\chi_{j}(c_{j})$ と一対一に対応する（成分への制限で分解）ので、個数は $\prod\abs{C_{j}}=\abs G=\varphi(q)$。$a\neq1$ ならある成分 $c_{j}\neq1$ で、Step 1 の指標をその成分に、他の成分に自明な指標を使えばよい。
+
+**Step 3（2）.** $\chi\neq\chi_{0}$ なら $\chi(b)\neq1$ の $b$ をとり、$S=\sum_{a}\chi(a)=\sum_{a}\chi(ba)=\chi(b)S$ から $S=0$。第 2 式は、$a\neq1$ について 1 の $\chi'$（$\chi'(a)\neq1$）をとり、$T=\sum_{\chi}\chi(a)=\sum_{\chi}(\chi'\chi)(a)=\chi'(a)T$ から $T=0$（$\chi\mapsto\chi'\chi$ は $\hat G$ の全単射）。
+
+**Step 4（3）.** $\gcd(n,q)>1$ なら両辺 $0$。そうでなければ $\overline{\chi(a)}\chi(n)=\chi(a^{-1}n)$（$\abs{\chi(a)}=1$）で、2 の第 2 式を $a^{-1}n$ に使う。
+:::
+
+::: theorem ディリクレの L 関数 {#nt:dirichlet-l-function keywords="L(s, chi) = sum chi(n) n^{-s} = prod (1 - chi(p) p^{-s})^{-1} for Re s > 1; L(s, chi_0) = zeta(s) prod_{p | q} (1 - p^{-s}); for chi != chi_0, L(s, chi) is holomorphic for Re s > 0" index="ディリクレの L 関数|でぃりくれのえるかんすう, L 関数|えるかんすう" refname="ディリクレの L 関数"}
+$\chi$ を $q$ を法とするディリクレ指標とし、$L(s,\chi)\defeq\sum_{n}\chi(n)n^{-s}$ とする。
+1. $\mathrm{Re}\,s>1$ で絶対収束し、$L(s,\chi)=\prod_{p}(1-\chi(p)p^{-s})^{-1}\neq0$。
+2. $L(s,\chi_{0})=\zeta(s)\prod_{p\mid q}(1-p^{-s})$。したがって $L(s,\chi_{0})$ は $\mathrm{Re}\,s>0$ に有理型に延長され、$s=1$ に留数 $\varphi(q)/q$ の 1 位の極をもつ。
+3. $\chi\neq\chi_{0}$ なら $L(s,\chi)$ は $\mathrm{Re}\,s>0$ で正則。
+:::
+
+::: intuition
+$L(s,\chi)$ は、ゼータ関数の各項に指標の値という「符号」を付けたもので、主指標以外では符号が打ち消し合うので、$s=1$ の極が消え、もっと左まで正則に延びる。
+:::
+
+::: proof
+**Step 1（1, 2）.** $\chi$ は完全乗法的で $\abs{\chi(n)}\le1$ なので、\ref{nt:euler-product} と同じ議論。$\chi_{0}$ の因子は $p\nmid q$ で $(1-p^{-s})^{-1}$、$p\mid q$ で $1$ なので、$\zeta(s)$ のオイラー積から $p\mid q$ の因子を除いたもの。留数は $\prod_{p\mid q}(1-p^{-1})=\varphi(q)/q$（\ref{nt:euler-phi-formula}）。
+
+**Step 2（3）.** \ref{nt:character-orthogonality} の 2 から、$q$ 個続く $n$ にわたる $\chi(n)$ の和は $0$ なので、部分和 $\sum_{n\le x}\chi(n)$ は $\varphi(q)$ 以下で有界。\ref{nt:dirichlet-series-convergence} の 2 から正則。
+:::
+
+::: example
+1. $q=4$：指標は $\chi_{0}$ と $\chi_{4}(n)=0,1,0,-1$（$n\equiv0,1,2,3$）。$L(1,\chi_{4})=1-\frac13+\frac15-\cdots=\frac\pi4$（ライプニッツの級数）。
+2. $q=3$：$\chi_{3}(n)=(\tfrac n3)$ で、$L(1,\chi_{3})=1-\frac12+\frac14-\frac15+\cdots=\frac{\pi}{3\sqrt3}$ と知られている。
+3. $\zeta(2)=\prod_{p}(1-p^{-2})^{-1}=\frac{\pi^{2}}{6}$ から、2 つのランダムな整数が互いに素である「確率」は $\frac{6}{\pi^{2}}$ と解釈される（$\sum\mu(n)n^{-2}=1/\zeta(2)$）。
+:::
+
+::: hypcheck
+- **ディリクレ級数の収束**：アーベルの総和公式で、部分和の有界性と $n^{-s}$ の差の小ささに分けた。$\sigma>0$（$s_{0}$ に対しては $\mathrm{Re}\,s>\mathrm{Re}\,s_{0}$）は差の積分 $\int x^{-\sigma-1}$ の収束に必要。
+- **オイラー積**：絶対収束の仮定が、無限和の並べ替え（素因数ごとの展開）を正当化する。$\mathrm{Re}\,s=1$ では $\zeta$ のオイラー積は収束しない。
+- **ゼータ関数の延長**：$0\le\{x\}<1$ の有界性だけを使った。$\mathrm{Re}\,s\le0$ への延長には関数等式が要る（\ref[関数等式]{nt:page-functional-equation}）。
+- **L 関数の正則性**：$\chi\neq\chi_{0}$ は、1 周期の和が $0$ になること（直交関係）に必要。
+:::
+
+## 問題 {#nt:sec-ds-problems}
+
+::: problem {#nt:prob-ds-mobius-zeta}
+$\mathrm{Re}\,s>1$ で $\sum_{n}\mu(n)n^{-s}=\frac{1}{\zeta(s)}$、$\sum_{n}\tau(n)n^{-s}=\zeta(s)^{2}$ を示せ。
+:::
+
+::: solution
+ともに絶対収束するディリクレ級数の積は \ref{nt:dirichlet-convolution} の級数：$\bigl(\sum a_{n}n^{-s}\bigr)\bigl(\sum b_{n}n^{-s}\bigr)=\sum(a\ast b)(n)n^{-s}$（絶対収束する二重級数の並べ替え）。$\mu\ast\mathbf 1=\delta$（\ref{nt:mobius-inversion-nt}）から $\bigl(\sum\mu(n)n^{-s}\bigr)\zeta(s)=1$。$\tau=\mathbf 1\ast\mathbf 1$ から 2 つ目。
+:::
+
+::: problem {#nt:prob-ds-characters-5}
+$5$ を法とするディリクレ指標を、原始根 $2$ の行き先ですべて書き出せ。
+:::
+
+::: solution
+$(\Z/5\Z)^{\times}=\langle2\rangle$（位数 4）。指標は $\chi(2)\in\{1,i,-1,-i\}$ で決まり、$\chi(1)=1$, $\chi(2)=w$, $\chi(4)=w^{2}$, $\chi(3)=\chi(2^{3})=w^{3}$。$w=1$ が主指標、$w=-1$ がルジャンドル記号 $(\tfrac n5)$、$w=\pm i$ が複素指標（互いに共役）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{nt:dirichlet-series-convergence} は係数の大きさの仮定を一切使わず、ある 1 点での収束だけから半平面での正則性を導く。
+
+**前提を変えると.**
+- 一般のディリクレ級数は、収束座標 $\sigma_{c}$ と絶対収束座標 $\sigma_{a}$ をもち、$\sigma_{a}-\sigma_{c}\le1$。冪級数と違って、収束域の境界上に特異点があるとは限らないが、係数が非負なら $\sigma_{c}$ は特異点である（ランダウの補題、\ref[ディリクレの算術級数定理]{nt:page-dirichlet-theorem}）。
+- $\zeta(s)$ は全平面に有理型に延長され、$s=1$ 以外では正則である。その非自明な零点がすべて $\mathrm{Re}\,s=\frac12$ 上にあるという**リーマン予想**は未解決である。
+
+**高い視点から：オイラー積と局所因子.** オイラー積 $\zeta(s)=\prod_{p}(1-p^{-s})^{-1}$ の各因子は、素数 $p$ という「局所的な点」からの寄与で、$(1-p^{-s})^{-1}=\sum_{k}p^{-ks}$ は $\mathbb{Z}_{p}$ の中で $p$ の冪を数えたものである。$L$ 関数は、この局所因子を指標（ガロア群の 1 次元表現）でひねったもので、類体論を経て、ガロア表現の $L$ 関数（アルティンの $L$ 関数）や保型形式の $L$ 関数へと一般化される。比喩で言えば、ゼータ関数は素数という音符からなる和音の周波数スペクトルで、オイラー積は和音を個々の音に分解した楽譜である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{nt:sec-ds-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
