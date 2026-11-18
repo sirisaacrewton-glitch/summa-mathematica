@@ -52,9 +52,9 @@ $$
 :::
 
 ::: proof
-**$\subseteq$.** $A$ に時間 $n^{k}$ の検証機 $V$ があるとする（定数倍は省く）。非決定性機械 $N$：入力 $w$ に対し、長さ $n^{k}$ 以下の文字列 $c$ を非決定的に選んで書き、$V$ を $\langle w,c\rangle$ の上で動かして、その答えを出す。$w\in A$ なら証明書 $c$ を選ぶ枝が受理する。$w\notin A$ ならどの枝も拒否する。時間は $O(n^{k})$（多テープで書いた場合は \ref{comp:multitape-time} で単一テープに直しても多項式）。
+**$\subseteq$.** $A$ に時間 $n^{k}$ の検証機 $V$ があるとする（定数倍は省く）。非決定性機械 $N$：入力 $w$ に対し、長さ $n^{k}$ 以下の文字列 $c$ を非決定的に選んで書き、$V$ を $\langle w,c\rangle$ の上で動かして、その答えを出す。$w\in A$ なら証明書 $c$ を選ぶ枝が受理する。$w\notin A$ ならどの枝も拒否する。時間は $O(n^{k})$ である（多テープで書いた場合も、\ref{comp:multitape-time} で単一テープに直して多項式時間になる）。
 
-**$\supseteq$.** $A$ を時間 $n^{k}$ の非決定性判定機 $N$ が決定するとする。証明書を「各段でどの選択肢をとったかの列」（長さ $n^{k}$ 以下）とし、検証機 $V$ は $\langle w,c\rangle$ について、$c$ の選択に従って $N$ を $w$ の上で決定的に動かし、受理状態に達したら受理する。$w\in A$ なら受理する枝の選択の列が証明書になる。$w\notin A$ ならどの選択の列でも受理しない。$V$ の時間は $O(n^{k})$ の多項式。
+**$\supseteq$.** $A$ を時間 $n^{k}$ の非決定性判定機 $N$ が決定するとする。証明書を「各段でどの選択肢をとったかの列」（長さ $n^{k}$ 以下）とし、検証機 $V$ は $\langle w,c\rangle$ について、$c$ の選択に従って $N$ を $w$ の上で決定的に動かし、\term[受理状態]{comp:turing-machine}に達したら受理する（$c$ がその時点で選べない番号を指すときは拒否する）。$w\in A$ なら受理する枝の選択の列が証明書になる。$w\notin A$ ならどの選択の列でも受理しない。$V$ の時間は $O(n^{k})$ で、多項式である。
 :::
 
 ::: remark
@@ -73,8 +73,8 @@ $\mathrm{P}\subseteq\mathrm{NP}$（証明書を無視する検証機）。\ref{c
 :::
 
 ::: proof
-1. 推移性：$f$（時間 $n^{a}$）、$g$（時間 $n^{b}$）について、$f(w)$ の長さは $\lvert w\rvert^{a}$ 以下（一段で一升しか書けない）なので、$g(f(w))$ の計算は $(n^{a})^{b}$ 段程度。合計は多項式。
-2. $f(w)$ を計算し（多項式時間、長さも多項式）、$B$ の判定機（または検証機）を $f(w)$ の上で動かす。多項式の合成は多項式。
+1. 反射性：恒等写像は、入力をそのまま残して止まる機械で $O(1)$ 段で計算できるので、$A\le_{\mathrm{P}}A$ である。推移性：$A\le_{\mathrm{P}}B$ を $f$（時間 $n^{a}$）、$B\le_{\mathrm{P}}C$ を $g$（時間 $n^{b}$）が与えるとする。ヘッドは一段に一升しか動かないので、$f(w)$ の長さは $\lvert w\rvert+n^{a}+1$ 以下である。ゆえに $g(f(w))$ の計算は $(n+n^{a}+1)^{b}$ 段以下で、合計は $n$ の多項式である。また $w\in A\iff f(w)\in B\iff g(f(w))\in C$ なので、$g\circ f$ が $A\le_{\mathrm{P}}C$ を与える。
+2. $f(w)$ を計算し（多項式時間で、長さも 1 と同じく多項式）、$B$ の判定機を $f(w)$ の上で動かせば $A$ を決定できる。$B\in\mathrm{NP}$ の場合は、$w$ の証明書として $f(w)$ の証明書をとり、$B$ の検証機を $\langle f(w),c\rangle$ の上で動かせばよい。どちらも多項式の合成なので多項式時間である。
 :::
 
 ::: definition NP 完全 {#comp:np-complete keywords="NP-hard, NP-complete" index="NP 完全|えぬぴーかんぜん, NP 困難|えぬぴーこんなん"}
@@ -86,14 +86,14 @@ NP 完全な言語 $B$ について、$B\in\mathrm{P}$ であることと $\math
 :::
 
 ::: proof
-\ref{comp:poly-reduction-basic.2} と 1。
+$B\in\mathrm{P}$ とする。任意の $A\in\mathrm{NP}$ について $A\le_{\mathrm{P}}B$ なので、\ref{comp:poly-reduction-basic.2} から $A\in\mathrm{P}$ である。ゆえに $\mathrm{NP}\subseteq\mathrm{P}$ となり、$\mathrm{P}\subseteq\mathrm{NP}$ と合わせて $\mathrm{P}=\mathrm{NP}$ である。逆に $\mathrm{P}=\mathrm{NP}$ なら、$B\in\mathrm{NP}=\mathrm{P}$ である。後半は、任意の $A\in\mathrm{NP}$ について $A\le_{\mathrm{P}}B\le_{\mathrm{P}}C$ なので、推移性（\ref{comp:poly-reduction-basic.1}）から $A\le_{\mathrm{P}}C$ となることによる。
 :::
 
 ## クック–レヴィンの定理 {#comp:sec-cook-levin}
 
-$N=(Q,\Sigma,\Gamma,\delta,q_{0},q_{\mathrm{acc}},q_{\mathrm{rej}})$ を、時間 $n^{k}$（$n\ge2$ で）の非決定性の単一テープ判定機とする。ここで $\delta(q,a)$ は $Q\times\Gamma\times\{\mathrm{L},\mathrm{R}\}$ の部分集合で、その元を（$q,a$ とあわせて）**遷移**と呼ぶ。遷移全体の集合 $\Delta$ は有限である。入力 $w$（$\lvert w\rvert=n$）を固定し、$T\defeq n^{k}$, $m\defeq T+2$ とする。
+$N=(Q,\Sigma,\Gamma,\delta,q_{0},q_{\mathrm{acc}},q_{\mathrm{rej}})$ を、時間 $n^{k}$（$n\ge2$ で）の非決定性の単一テープ判定機とする。ここで $\delta(q,a)$ は $Q\times\Gamma\times\{\mathrm{L},\mathrm{R}\}$ の部分集合で、その元を（$q,a$ とあわせて）**遷移**と呼ぶ。遷移全体の集合 $\Delta$ は有限である。入力 $w$（$\lvert w\rvert=n\ge2$）を固定し、$T\defeq n^{k}$, $m\defeq T+2$ とする（長さ $1$ 以下の入力は有限個なので、還元ではそれぞれに答えに応じた定数の論理式を出せばよい）。
 
-**表.** 時点表示 $uqv$（$\lvert uv\rvert\le T+1$）を、長さ $m$ の記号列 $c_{1}\cdots c_{m}$（$c_{j}\in C\defeq Q\cup\Gamma$）で、$uqv$ の後に空白を補ったものとして表す。さらに位置 $0$ に左端を表す新しい記号 $\triangleright$ を、位置 $m+1,m+2$ に空白を置く。$T$ 段以内の計算では、ヘッドは位置 $T+1$ より右へ行かないので、状態の記号は位置 $1,\dots,m-1$ にあり、この長さで時点表示を表せる。
+**表.** 時点表示 $uqv$（$\lvert uv\rvert\le T+1$）を、長さ $m$ の文字列 $c_{1}\cdots c_{m}$（$c_{j}\in C\defeq Q\cup\Gamma$）で、$uqv$ の後に空白を補ったものとして表す。さらに位置 $0$ に左端を表す新しい記号 $\triangleright$ を、位置 $m+1,m+2$ に空白を置く。$T$ 段以内の計算では、ヘッドは位置 $T+1$ より右へ行かないので、状態の記号は位置 $1,\dots,m-1$ にあり、この長さで時点表示を表せる。
 
 ::: lemma 一段の動きは局所的 {#comp:local-step keywords="locality of TM steps, windows" index="局所性（TM の一段の）|きょくしょせいてぃーえむのいちだんの"}
 各 $\tau\in\Delta$ について、写像 $g_{\tau}\colon(C\cup\{\triangleright\})^{4}\to C$ があり、次が成り立つ：時点表示 $c$ の状態が $q$、ヘッドの下の記号が $a$ で、$\tau$ が $(q,a)$ の遷移なら、$\tau$ による次の時点表示 $c'$ は、すべての $1\le j\le m$ について
@@ -116,11 +116,11 @@ SAT は NP 完全である。
 :::
 
 ::: proof
-SAT $\in$ NP は例の 3。$A\in\mathrm{NP}$ を時間 $n^{k}$ の非決定性判定機 $N$ が決定するとし（\ref{comp:np-ntm}）、上の記号を使う。$w$ から論理式 $\varphi_{w}$ を作る。
+SAT $\in$ NP であることは例の 3 で見た。$A\in\mathrm{NP}$ を時間 $n^{k}$ の非決定性判定機 $N$ が決定するとし（\ref{comp:np-ntm}）、上の記号を使う。$w$ から論理式 $\varphi_{w}$ を作る。
 
 **変数.** $x_{i,j,s}$（$0\le i\le T$, $1\le j\le m$, $s\in C$）：「表の第 $i$ 行の位置 $j$ が $s$」。$y_{i,\tau}$（$0\le i<T$, $\tau\in\Delta\cup\{\mathrm{stay}\}$）：「第 $i$ 行から第 $i+1$ 行へ $\tau$ で進む」（$\mathrm{stay}$ は停止した後に行をそのまま写すこと）。
 
-**論理式.** $\varphi_{w}\defeq\varphi_{\mathrm{cell}}\wedge\varphi_{\mathrm{choice}}\wedge\varphi_{\mathrm{start}}\wedge\varphi_{\mathrm{step}}\wedge\varphi_{\mathrm{acc}}$。
+**論理式.** $\varphi_{w}\defeq\varphi_{\mathrm{cell}}\wedge\varphi_{\mathrm{choice}}\wedge\varphi_{\mathrm{start}}\wedge\varphi_{\mathrm{step}}\wedge\varphi_{\mathrm{acc}}$ とおく。各部分は次のとおりである。
 - $\varphi_{\mathrm{cell}}$：各 $(i,j)$ で $x_{i,j,s}$ のちょうど一つが真（「どれかが真」の選言と、$s\neq s'$ ごとの $\neg x_{i,j,s}\vee\neg x_{i,j,s'}$）。
 - $\varphi_{\mathrm{choice}}$：各 $i$ で $y_{i,\tau}$ のちょうど一つが真。
 - $\varphi_{\mathrm{start}}$：第 $0$ 行が $q_{0}w_{1}\cdots w_{n}\sqcup\cdots\sqcup$ であることを、$x_{0,j,s}$ の連言で書く。
@@ -131,14 +131,22 @@ SAT $\in$ NP は例の 3。$A\in\mathrm{NP}$ を時間 $n^{k}$ の非決定性�
   \bigl(y_{i,\tau}\wedge\textstyle\bigwedge_{l=-1}^{2}x_{i,j+l,s_{l}}\bigr)\to x_{i+1,j,g_{\tau}(s_{-1},s_{0},s_{1},s_{2})}.
   $$
   ここで $x_{i,0,\triangleright}$ と $x_{i,m+1,\sqcup}$, $x_{i,m+2,\sqcup}$ は常に真の定数、他の記号の場合は常に偽の定数として扱う。$\mathrm{stay}$ については $(y_{i,\mathrm{stay}}\wedge x_{i,j,s})\to x_{i+1,j,s}$。
-- $\varphi_{\mathrm{acc}}$：$\bigvee_{i,j}x_{i,j,q_{\mathrm{acc}}}$。
+- $\varphi_{\mathrm{acc}}$：どこかの行に\term[受理状態]{comp:turing-machine}が現れること、すなわち $\bigvee_{i,j}x_{i,j,q_{\mathrm{acc}}}$ とする。
 
-**大きさと計算時間.** 変数は $O(Tm)=O(n^{2k})$ 個。各 $(i,j)$ につき、定数個（$\lvert C\rvert$, $\lvert\Delta\rvert$ だけで決まる個数）の定数の大きさの論理式があるので、$\varphi_{w}$ の長さは $O(n^{2k})$ に（変数の添字を書く）$O(\log n)$ を掛けた程度で、$w$ から多項式時間で書き出せる。
+**Step 1.** 【主張：$\varphi_{w}$ は $w$ から多項式時間で書き出せる】 変数は $O(Tm)=O(n^{2k})$ 個である。各 $(i,j)$ につき、定数個（$\lvert C\rvert$, $\lvert\Delta\rvert$ だけで決まる個数）の定数の大きさの論理式があり、$\varphi_{\mathrm{step}}$ の最初の項と $\varphi_{\mathrm{acc}}$ も全体で $O(Tm)$ 個の変数の選言からなる。ゆえに $\varphi_{w}$ の長さは $O(n^{2k})$ に（変数の添字を書く）$O(\log n)$ を掛けた程度で、$w$ から多項式時間で書き出せる。
 
-**正しさ.** ($\Rightarrow$) $N$ の受理する計算の枝 $C_{0}\vdash C_{1}\vdash\cdots\vdash C_{r}$（$r\le T$, $C_{r}$ は受理）があれば、$i\le r$ で第 $i$ 行を $C_{i}$、$i>r$ で $C_{r}$ とし、$y_{i,\tau}$ を使った遷移（$i\ge r$ では $\mathrm{stay}$）とする付値が $\varphi_{w}$ を充足する（\ref{comp:local-step}）。
-($\Leftarrow$) 充足する付値から、$\varphi_{\mathrm{cell}}$ で各行の記号列 $R_{i}$ が、$\varphi_{\mathrm{choice}}$ で各段の選択 $\tau_{i}$ が決まる。$i$ に関する帰納法で $R_{i}$ は $N$ の時点表示で、$R_{i+1}$ は $R_{i}$ から $\tau_{i}$ で一段進めたもの（$\tau_{i}=\mathrm{stay}$ なら $R_{i}$ は停止時点表示で $R_{i+1}=R_{i}$）であることが分かる：$R_{0}$ は開始時点表示、$\tau_{i}$ は $R_{i}$ で使える遷移で、\ref{comp:local-step} により $R_{i+1}$ の各位置は $\tau_{i}$ による次の時点表示と一致する。$\varphi_{\mathrm{acc}}$ から、ある $R_{i}$ は受理状態を含む。停止した後は $\mathrm{stay}$ しか使えない（停止状態の遷移はない）ので、最初に停止した行が受理時点表示であり、$N$ は $w$ を受理する。
+**Step 2.** 【主張：$w\in A$ なら $\varphi_{w}$ は充足可能である】 $N$ の受理する計算の枝 $C_{0}\vdash C_{1}\vdash\cdots\vdash C_{r}$（$r\le T$, $C_{r}$ は受理）をとる。$i\le r$ で第 $i$ 行を $C_{i}$、$i>r$ で $C_{r}$ とし、$y_{i,\tau}$ を第 $i$ 段で使った遷移（$i\ge r$ では $\mathrm{stay}$）とする付値を考える。\ref{comp:local-step} から $\varphi_{\mathrm{step}}$ の局所的な項が満たされ、ほかの部分は作り方から満たされるので、この付値は $\varphi_{w}$ を充足する。
 
-よって $w\in A\iff\varphi_{w}\in\mathrm{SAT}$ で、$A\le_{\mathrm{P}}\mathrm{SAT}$。
+**Step 3.** 【主張：$\varphi_{w}$ が充足可能なら $w\in A$ である】 充足する付値から、$\varphi_{\mathrm{cell}}$ で各行の文字列 $R_{i}$ が、$\varphi_{\mathrm{choice}}$ で各段の選択 $\tau_{i}$ が決まる。$i$ に関する帰納法で $R_{i}$ は $N$ の時点表示で、$R_{i+1}$ は $R_{i}$ から $\tau_{i}$ で一段進めたもの（$\tau_{i}=\mathrm{stay}$ なら $R_{i}$ は停止時点表示で $R_{i+1}=R_{i}$）であることが分かる：$R_{0}$ は開始時点表示、$\tau_{i}$ は $R_{i}$ で使える遷移で、\ref{comp:local-step} により $R_{i+1}$ の各位置は $\tau_{i}$ による次の時点表示と一致する。$\varphi_{\mathrm{acc}}$ から、ある $R_{i}$ は受理状態を含む。停止した後は $\mathrm{stay}$ しか使えない（停止状態の遷移はない）ので、最初に停止した行が受理時点表示であり、$N$ は $w$ を受理する。
+
+Step 2・3 より $w\in A\iff\varphi_{w}\in\mathrm{SAT}$ であり、Step 1 と合わせて $A\le_{\mathrm{P}}\mathrm{SAT}$ である。
+
+::: hypcheck
+- **時間の多項式の上限 $n^{k}$**：表の大きさ（$T\times m$）を多項式にするのに Step 1 で使った。これがヘッドの到達範囲と行数を同時に抑える。
+- **一段の局所性**（\ref{comp:local-step}）：$\varphi_{\mathrm{step}}$ が定数の大きさの論理式の連言で書けること（Step 1）と、Step 2・3 の行の対応に本質的に使った。TM の一段が「ヘッドの近くだけを変える」ことが鍵である。
+- **選択の変数 $y_{i,\tau}$**：非決定性を、付値の自由度として表すのに使った。$\varphi_{\mathrm{choice}}$ の「どれかが真」の部分がなければ、すべての $y_{i,\tau}$ を偽にして第 $i+1$ 行を $N$ の動きと無関係に選ぶ付値が残り、Step 3 が崩れる。「高々一つ」の部分は、Step 3 で各段の選択 $\tau_{i}$ を一つに決めるために置いた。
+- **$N$ が固定されていること**：$\lvert C\rvert$, $\lvert\Delta\rvert$ を Step 1 で定数として扱った。
+:::
 :::
 
 ## 3SAT {#comp:sec-3sat}
@@ -149,12 +157,17 @@ SAT $\in$ NP は例の 3。$A\in\mathrm{NP}$ を時間 $n^{k}$ の非決定性�
 
 ::: proof
 $\varphi$ の各部分論理式 $\theta$ に新しい変数 $z_{\theta}$ を割り当てる（変数 $p$ そのものには $z_{p}\defeq p$）。各部分論理式について、$z_{\theta}$ が $\theta$ の値と等しいことを表す節を作る：
-- $\theta=\neg\alpha$：$(z_{\theta}\vee z_{\alpha})\wedge(\neg z_{\theta}\vee\neg z_{\alpha})$。
-- $\theta=\alpha\wedge\beta$：$(\neg z_{\theta}\vee z_{\alpha})\wedge(\neg z_{\theta}\vee z_{\beta})\wedge(z_{\theta}\vee\neg z_{\alpha}\vee\neg z_{\beta})$。
-- $\theta=\alpha\vee\beta$：$(z_{\theta}\vee\neg z_{\alpha})\wedge(z_{\theta}\vee\neg z_{\beta})\wedge(\neg z_{\theta}\vee z_{\alpha}\vee z_{\beta})$。
+- $\theta=\neg\alpha$ の場合、節 $(z_{\theta}\vee z_{\alpha})\wedge(\neg z_{\theta}\vee\neg z_{\alpha})$ を作る。
+- $\theta=\alpha\wedge\beta$ の場合、節 $(\neg z_{\theta}\vee z_{\alpha})\wedge(\neg z_{\theta}\vee z_{\beta})\wedge(z_{\theta}\vee\neg z_{\alpha}\vee\neg z_{\beta})$ を作る。
+- $\theta=\alpha\vee\beta$ の場合、節 $(z_{\theta}\vee\neg z_{\alpha})\wedge(z_{\theta}\vee\neg z_{\beta})\wedge(\neg z_{\theta}\vee z_{\alpha}\vee z_{\beta})$ を作る。
 
-各組の節は、$z_{\theta}\leftrightarrow\neg z_{\alpha}$ などと同値である（真理表で確かめられる）。$\psi$ を、これらすべての節と一つの節 $z_{\varphi}$ の連言とする。部分論理式の個数は $\varphi$ の長さ以下なので、$\psi$ の長さは多項式。
-($\Rightarrow$) $\varphi$ を充足する付値 $v$ を、$z_{\theta}\defeq$「$v$ での $\theta$ の値」で延長すれば $\psi$ を充足する。($\Leftarrow$) $\psi$ を充足する付値 $v'$ について、部分論理式の構成に関する帰納法で $v'(z_{\theta})=$「$v'$ の元の変数への制限での $\theta$ の値」。$z_{\varphi}$ が真なので、制限は $\varphi$ を充足する。
+各組の節は、$z_{\theta}\leftrightarrow\neg z_{\alpha}$ などと同値である（真理表で確かめられる）。$\psi$ を、これらすべての節と一つの節 $z_{\varphi}$ の連言とする。部分論理式の個数は $\varphi$ の長さ以下なので、$\psi$ の長さは多項式である。
+($\Rightarrow$) $\varphi$ を充足する付値 $v$ を、$z_{\theta}\defeq$「$v$ での $\theta$ の値」で延長すれば $\psi$ を充足する。($\Leftarrow$) $\psi$ を充足する付値 $v'$ について、部分論理式の構成に関する帰納法で、$v'(z_{\theta})$ は「$v'$ の元の変数への制限での $\theta$ の値」に等しい。$z_{\varphi}$ が真なので、制限は $\varphi$ を充足する。
+
+::: hypcheck
+- **新しい変数**：単純に分配法則で CNF に直すと長さが指数的に増えうる（例：$(p_{1}\wedge q_{1})\vee\cdots\vee(p_{n}\wedge q_{n})$ を分配すると、各 $i$ で $p_{i}$ か $q_{i}$ を選ぶ $2^{n}$ 個の節になる）ので、充足可能性だけを保つ（論理的に同値ではない）変換を使った。
+- **結合子が $\neg,\wedge,\vee$**：節の組を三種類に限るのに使った。$\to$ や $\leftrightarrow$ も、同じように定数個の節で書ける。
+:::
 :::
 
 ::: corollary 3SAT は NP 完全 {#comp:3sat-complete keywords="3SAT is NP-complete" index="3SAT|すりーさっと"}
@@ -162,14 +175,7 @@ $\mathrm{3SAT}\defeq\{\langle\psi\rangle:\psi\text{ は充足可能な 3CNF}\}$ 
 :::
 
 ::: proof
-3SAT $\in$ NP は SAT と同じ。\ref{comp:tseitin} は $\mathrm{SAT}\le_{\mathrm{P}}\mathrm{3SAT}$ を与え、\ref{comp:cook-levin} と推移性による。
-:::
-
-::: hypcheck
-- **時間の多項式の上限 $n^{k}$**：\ref{comp:cook-levin} で、表の大きさ（$T\times m$）を多項式にするのに使った。これがヘッドの到達範囲と行数を同時に抑える。
-- **一段の局所性**（\ref{comp:local-step}）：$\varphi_{\mathrm{step}}$ が定数の大きさの論理式の連言で書けることに本質的に使った。TM の一段が「ヘッドの近くだけを変える」ことが鍵である。
-- **選択の変数 $y_{i,\tau}$**：非決定性を、付値の自由度として表すのに使った。$\varphi_{\mathrm{choice}}$ がなければ、二つの遷移を同時に「選んで」矛盾する行を作ることはできないが、どちらも使えないのに行を写す付値が残るおそれがある。
-- **ツァイティン変換の新しい変数**：単純に分配法則で CNF に直すと長さが指数的に増えうるので、充足可能性だけを保つ（論理的に同値ではない）変換を使った。
+3SAT $\in$ NP であることは SAT と同じ（充足する付値が証明書）である。\ref{comp:tseitin} は $\mathrm{SAT}\le_{\mathrm{P}}\mathrm{3SAT}$ を与えるので、\ref{comp:cook-levin} と推移性（\ref{comp:poly-reduction-basic.1}）から、すべての $A\in\mathrm{NP}$ について $A\le_{\mathrm{P}}\mathrm{3SAT}$ である。
 :::
 
 ## 問題 {#comp:sec-np-problems}
@@ -179,7 +185,7 @@ NP は和集合と連接で閉じていることを示せ。
 :::
 
 ::: solution
-$A,B\in\mathrm{NP}$ の多項式時間の検証機を $V_{A},V_{B}$ とする。和集合：証明書 $\langle i,c\rangle$（$i\in\{1,2\}$）について、$i=1$ なら $V_{A}$ を、$i=2$ なら $V_{B}$ を $\langle w,c\rangle$ の上で動かす。連接：証明書 $\langle k,c_{1},c_{2}\rangle$ について、$w=w_{1}\cdots w_{k}\cdot w_{k+1}\cdots w_{n}$ と分け、$V_{A}$ を $\langle w_{1}\cdots w_{k},c_{1}\rangle$、$V_{B}$ を残りと $c_{2}$ の上で動かし、両方受理なら受理。いずれも多項式時間。
+$A,B\in\mathrm{NP}$ の多項式時間の検証機を $V_{A},V_{B}$ とする。和集合：証明書 $\langle i,c\rangle$（$i\in\{1,2\}$）について、$i=1$ なら $V_{A}$ を、$i=2$ なら $V_{B}$ を $\langle w,c\rangle$ の上で動かす。連接：証明書 $\langle k,c_{1},c_{2}\rangle$ について、$w=w_{1}\cdots w_{k}\cdot w_{k+1}\cdots w_{n}$ と分け、$V_{A}$ を $\langle w_{1}\cdots w_{k},c_{1}\rangle$、$V_{B}$ を残りと $c_{2}$ の上で動かし、両方受理なら受理する。どちらの検証機も多項式時間で動き、証明書の長さも多項式で抑えられる。
 :::
 
 ::: problem {#comp:prob-2sat-p}
@@ -189,7 +195,12 @@ $\mathrm{2SAT}$（各節のリテラルが $2$ 個以下の CNF の充足可能�
 ::: solution
 節 $\ell_{1}\vee\ell_{2}$ を二つの含意 $\neg\ell_{1}\to\ell_{2}$, $\neg\ell_{2}\to\ell_{1}$ と見て、リテラルを頂点、含意を辺とする有向グラフ $G$ を作る（一つのリテラルの節 $\ell$ は $\ell\vee\ell$ とする）。**主張**：論理式が充足不能であることと、ある変数 $p$ について $p$ から $\neg p$ へ、かつ $\neg p$ から $p$ への有向路があることは同値。
 (⇐) 付値で $p$ が真なら $p\to\cdots\to\neg p$ の路に沿って真が伝わり（辺は含意で、充足する付値では真から真へ）、$\neg p$ も真となり矛盾。$p$ が偽でも逆の路で同様。
-(⇒) どの変数もそうでないとする。まだ値の決まっていない変数 $p$ を選び、$p$ から $\neg p$ への路がないなら $p$ を、あるなら $\neg p$ を真とし（このとき $\neg p$ から $p$ への路はない）、真としたリテラルから到達できるリテラルをすべて真に（その否定を偽に）する。これで矛盾（あるリテラルとその否定が両方真）が起きないことは、$G$ の対称性（$\ell\to\ell'$ があれば $\neg\ell'\to\neg\ell$ もある）から示せ、繰り返すとすべての節が充足される。到達可能性は P に属する（\ref{comp:path-in-p}）ので、判定は多項式時間。（(⇒) の矛盾が起きないことの詳細は、本サイトでは省略した。）
+(⇒) 対偶を示すため、どの変数もそうでないとする。$G$ の**対称性**、すなわち辺 $\ell\to\ell'$ があれば辺 $\neg\ell'\to\neg\ell$ もあること（どちらも同じ節から作られる）から、路 $\ell\leadsto\ell'$ があれば路 $\neg\ell'\leadsto\neg\ell$ もある。次の手続きをくり返す：まだ値の決まっていない変数 $p$ を選び、$p$ から $\neg p$ への路がないなら $\ell\defeq p$、あるなら $\ell\defeq\neg p$ とおく（後者のとき $\neg p$ から $p$ への路はないので、どちらの場合も $\ell$ から $\neg\ell$ への路はない）。そして $\ell$ から到達できるリテラルをすべて真に（その否定を偽に）する。この手続きの各回で矛盾が起きないことを示す。
+- $\ell$ から $x$ と $\neg x$ の両方に到達できたとすると、対称性から $\ell\leadsto\neg x$ は $x\leadsto\neg\ell$ を与え、$\ell\leadsto x\leadsto\neg\ell$ となって $\ell$ の選び方に反する。ゆえに今回真にするリテラルどうしは矛盾しない。
+- 前の回までに真にしたリテラルの集合は、到達可能性で閉じている（真にしたリテラルから到達できるものはすべて真にした）。$\ell\leadsto x$ で、$\neg x$ が前の回で真になっていたとすると、対称性から $\neg x\leadsto\neg\ell$ なので $\neg\ell$ も前の回で真になっており、$p$ の値はすでに決まっていたことになって $p$ の選び方に反する。ゆえに前の回の値とも矛盾しない。
+
+すべての変数の値が決まったとき、真のリテラルの集合は辺で閉じている。節 $\ell_{1}\vee\ell_{2}$ について $\ell_{1}$ が偽なら $\neg\ell_{1}$ が真で、辺 $\neg\ell_{1}\to\ell_{2}$ から $\ell_{2}$ も真である。ゆえにすべての節が充足される。
+最後に、主張の条件は $2\cdot$（変数の数）回の到達可能性の判定で調べられ、到達可能性は P に属する（\ref{comp:path-in-p}）ので、判定は多項式時間でできる。
 :::
 
 ::: supplement
