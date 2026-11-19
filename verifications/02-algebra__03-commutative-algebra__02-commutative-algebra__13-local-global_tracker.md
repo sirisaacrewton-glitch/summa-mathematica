@@ -19,6 +19,7 @@ The main theorems and proofs (local properties list, finite-cover locality, unit
 - **Detail:** The supplement claims that for $A=\Z[\sqrt{-5}]$ every localization at a maximal ideal is a DVR. This is false: $A$ is a Dedekind domain but not a PID, so at a maximal ideal $\mathfrak{m}$ the localization $A_{\mathfrak{m}}$ is a DVR only when $\mathfrak{m}$ is principal (e.g. $(\sqrt{-5})$ or $(3,1+\sqrt{-5})$). At the non-principal maximal ideal $(2,1+\sqrt{-5})$ the localization is a Dedekind local domain whose maximal ideal is not principal, hence not a DVR (not a PID, not a UFD). The cited \ref{ring:z-sqrt-minus-5-dedekind} only gives that $A$ is Dedekind, which does not imply all localizations are DVRs.
 - **Proposed fix:** Replace with: 「$\Z[\sqrt{-5}]$ はデデキント環だが PID でも UFD でもない。主イデアルでない極大イデアル（例えば $(2,1+\sqrt{-5})$）での局所化は DVR でなく、極大イデアルが単項でないデデキント局所環である。一方、主イデアルである極大イデアルでの局所化は DVR である。」 (i.e. state only that $A$ is Dedekind but neither PID nor UFD, and that at the non-principal maximal ideal $(2,1+\sqrt{-5})$ the localization is not a DVR.)
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Z[√-5] is a Dedekind domain, so every localization at a maximal ideal is a DVR (Noetherian normal local domain of dimension 1, ring:dedekind-local). Principality of m in A is irrelevant: at m=(2,1+√-5), 3 is a unit in A_m and 2=(1+√-5)(1-√-5)/3, so mA_m=(1+√-5)A_m. The computation is now in the text.
 
 ### ISSUE-0002 [Open] The ideal (2,1+√-5) is not locally free / not principal locally at (2,1+√-5)
 - **Category:** Supplement/remark error
@@ -26,6 +27,7 @@ The main theorems and proofs (local properties list, finite-cover locality, unit
 - **Detail:** The supplement says the ideal $(2,1+\sqrt{-5})$ is 'locally principal (a free module of rank 1)' but not free. Local freeness must be checked at every prime. At $\mathfrak{m}=(2,1+\sqrt{-5})$ the localization $\mathfrak{m}_{\mathfrak{m}}$ is the maximal ideal of the local ring $A_{\mathfrak{m}}$, which is not principal (since $\mathfrak{m}$ is not invertible/principal), so $\mathfrak{m}_{\mathfrak{m}}$ is not free of rank 1. Hence the ideal is not locally free, and the sentence misstates the example.
 - **Proposed fix:** Replace with: 「イデアル $(2,1+\sqrt{-5})$ は自由加群でない（$A$ は UFD でないので階数 1 の非自由イデアルが存在する）。ただし $(2,1+\sqrt{-5})$ は局所自由でもない：$\mathfrak{m}=(2,1+\sqrt{-5})$ での局所化 $\mathfrak{m}_{\mathfrak{m}}$ は局所環 $A_{\mathfrak{m}}$ の極大イデアルで、単項でないため自由でない。」
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Same computation: (2,1+√-5) is invertible, hence locally principal (locally free of rank 1) at every maximal ideal, but not principal in A, hence not free. The claim was correct; the computation is now in the text.
 
 ### ISSUE-0003 [Open] Reduced + unique minimal prime implies domain needs the ring to be nonzero / the argument via nilradical
 - **Category:** Supplement/remark error
