@@ -672,3 +672,8 @@
 | prime number theorem / Newman's Tauberian theorem / Riemann hypothesis / logarithmic integral | 素数定理 / ニューマンのタウバー型定理 / リーマン予想 / 対数積分 | — / ニューマンの解析的定理 / — / li 関数 | 2026-11-18（nt:page-prime-number-theorem） |
 | Dedekind zeta function / Kronecker symbol / analytic class number formula | デデキントゼータ関数 / クロネッカー記号 / 解析的類数公式 | — / — / 類数公式 | 2026-11-18（nt:page-dedekind-zeta） |
 | Dirichlet's class number formula / Gauss circle problem | ディリクレの類数公式 / 円の格子点 | 類数公式 / ガウスの円問題 | 2026-11-18（nt:page-class-number-formula） |
+| G-module / invariants / coinvariants / augmentation ideal / group cohomology / group homology / periodic resolution | G 加群 / 不変元 / 余不変元 / 添加イデアル / 群のコホモロジー / 群のホモロジー / 周期的な分解 | — / 固定元 / — / 増大イデアル / — / — / 周期分解 | 2026-11-19（ha:page-group-cohomology） |
+| induced module / coinduced module / Shapiro's lemma / restriction / corestriction / inflation | 誘導加群 / 余誘導加群 / シャピロの補題 / 制限 / 余制限 / インフレーション | — / — / — / 制限写像 / 移送（transfer）/ 膨張 | 2026-11-19（ha:page-change-of-groups） |
+| group extension / factor set / complement / Schur–Zassenhaus theorem | 群の拡大 / 因子団 / 補群 / シューア–ツァッセンハウスの定理 | — / 因子系 / 補部分群 / — | 2026-11-19（ha:page-group-extensions） |
+| complete resolution / Tate cohomology / Herbrand quotient | 完全分解 / テイトのコホモロジー / エルブラン商 | 完備分解 / テイト・コホモロジー / エルブランの商 | 2026-11-19（ha:page-tate-cohomology） |
+| cup product / Galois cohomology / Kummer isomorphism / Tate–Nakayama theorem / relative Brauer group | カップ積 / ガロアコホモロジー / クンマーの同型 / テイト–中山の定理 / 相対ブラウアー群 | — / — / クンマー写像 / — / — | 2026-11-19（ha:page-cup-products-galois） |
