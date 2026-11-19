@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>群のコホモロジー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="02-algebra/06-homological-algebra/03-group-cohomology/01-group-cohomology.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 群のコホモロジー {#ha:page-group-cohomology keywords="G-module, group ring, invariants M^G, coinvariants M_G, augmentation ideal, group cohomology H^n(G,M) = Ext^n_{ZG}(Z,M), group homology as left derived functors of coinvariants, long exact sequences, H^1 with trivial action = Hom(G,M), H_1(G,Z) = G^ab, periodic resolution of a cyclic group, cohomology of finite cyclic groups, cohomology of the infinite cyclic group"}
+
+群 $G$ が作用するアーベル群（$G$ 加群）$M$ について、不変元 $M^{G}$ を取り出す操作は左完全だが完全ではない。その「ずれ」を測るのが**群のコホモロジー** $H^{n}(G,M)$ で、自明な加群 $\Z$ の射影分解を使った $\mathrm{Ext}^{n}_{\Z G}(\Z,M)$ として定義される。棒分解による具体的な計算と $H^{0}$, $H^{1}$ の意味はすでに見た（\ref{cat:page-comonads-homology}）。このページでは、定義を整理したうえで、余不変元 $M_{G}$ の左導来関手としての**群のホモロジー**を導入し、短完全列から長完全列が得られることを確認する。具体例として、$H_{1}(G,\Z)\cong G^{\mathrm{ab}}$ を示し、巡回群の**周期的な分解**を作って有限巡回群と無限巡回群のコホモロジーをすべて計算する。
+
+## 記法と定義の確認 {#ha:sec-gc-notation}
+
+::: notation
+- $G$ は群、$\Z G$ は群環（$\sum a_{g}g$ の形の有限和）。左 $\Z G$ 加群を **$G$ 加群**という。$\Z$ に $G$ が自明に作用するものを**自明な加群** $\Z$ と書く。**添加** $\varepsilon:\Z G\to\Z$, $\sum a_{g}g\mapsto\sum a_{g}$ の核 $I_{G}$ を**添加イデアル**という。
+- \ref{ha:page-projective-resolutions}, \ref{ha:page-derived-functors}, \ref{ha:page-tor-ext} の結果（環は可換でなくてよい）を使う。
+- 棒分解（\ref{cat:bar-resolution-exact}）と、非斉次コチェインによる $H^{n}$ の記述・$H^{0}$・$H^{1}$（\ref{cat:group-cohomology}, \ref{cat:group-cohomology-low}）を使う。
+- 体系は $\ZF$。
+:::
+
+## 定義 {#ha:sec-gc-definition}
+
+::: definition 不変元と余不変元 {#ha:invariants-coinvariants keywords="invariants M^G = {m : gm = m}; coinvariants M_G = M / I_G M; M^G = Hom_G(Z, M), M_G = Z tensor_G M; I_G is free abelian on g - 1" index="不変元|ふへんげん, 余不変元|よふへんげん, 添加イデアル|てんかいである" refname="不変元と余不変元"}
+$G$ 加群 $M$ について、**不変元**の部分群 $M^{G}\defeq\{m:gm=m\ (\forall g)\}$ と、**余不変元**の商 $M_{G}\defeq M/I_{G}M$（$I_{G}M$ は $gm-m$ で生成される部分群）を定める。$M^{G}=\mathrm{Hom}_{\Z G}(\Z,M)$（$f\mapsto f(1)$）。$I_{G}$ はアーベル群として $\{g-1:g\neq1\}$ を基底とする自由アーベル群である。
+:::
+
+::: intuition
+$M^{G}$ は $G$ で動かない元、$M_{G}$ は $G$ で移り合う元を同一視した商で、互いに双対的な「$G$ の作用を消す」2 つの方法である。前者は左完全、後者は右完全で、それぞれの欠陥を測るのがコホモロジーとホモロジーである。
+:::
+
+::: proof
+$f\in\mathrm{Hom}_{\Z G}(\Z,M)$ は $f(1)=f(g\cdot1)=gf(1)$ なので $f(1)\in M^{G}$、逆に $m\in M^{G}$ について $n\mapsto nm$ は $\Z G$ 準同型。$I_{G}$ の元 $\sum a_{g}g$（$\sum a_{g}=0$）は $\sum a_{g}(g-1)$ と書け、$\{g-1\}_{g\neq1}$ の一次独立性は $\{g\}$ が $\Z G$ の基底であることから。$I_{G}M$ は $\{(g-1)m\}$ で生成される。
+:::
+
+::: definition 群のコホモロジーとホモロジー {#ha:group-cohomology-homology keywords="H^n(G, M) = Ext^n_{ZG}(Z, M) = right derived functors of M -> M^G; H_n(G, M) = left derived functors of M -> M_G" index="群のコホモロジー|ぐんのこほもろじー, 群のホモロジー|ぐんのほもろじー" refname="群のコホモロジーとホモロジー"}
+$G$ 加群 $M$ について
+$$H^{n}(G,M)\defeq\mathrm{Ext}^{n}_{\Z G}(\Z,M),\qquad H_{n}(G,M)\defeq L_{n}(-)_{G}(M)$$
+とする。後者は右完全な加法関手 $M\mapsto M_{G}$ の左導来関手（$M$ の射影分解 $Q\to M$ について $H_{n}(Q_{G})$）である。
+:::
+
+::: intuition
+$H^{n}$ は不変元をとる操作の右導来関手、$H_{n}$ は余不変元をとる操作の左導来関手で、どちらも「作用の自明化」が完全でない分を、射影分解を使って次数ごとに記録したものである。
+:::
+
+::: proposition 基本性質 {#ha:group-cohomology-basic keywords="H^0 = M^G, H_0 = M_G; long exact sequences of cohomology and homology; H^n(G, M) is computed by any projective resolution of Z, e.g. the bar resolution; trivial action: H^1(G, M) = Hom(G, M)" index="群のコホモロジーの基本性質|ぐんのこほもろじーのきほんせいしつ"}
+1. $H^{0}(G,M)=M^{G}$, $H_{0}(G,M)=M_{G}$。
+2. 短完全列 $0\to M'\to M\to M''\to0$ から長完全列
+$$0\to M'^{G}\to M^{G}\to M''^{G}\to H^{1}(G,M')\to H^{1}(G,M)\to\cdots,$$
+$$\cdots\to H_{1}(G,M'')\to M'_{G}\to M_{G}\to M''_{G}\to0$$
+が得られ、短完全列の射について自然である。
+3. $H^{n}(G,M)$ は $\Z$ のどの射影分解で計算しても同じで、棒分解を使うと \ref{cat:group-cohomology} の非斉次コチェインによる定義に一致する。
+4. $G$ が $M$ に自明に作用するなら $H^{1}(G,M)=\mathrm{Hom}(G,M)$（群準同型全体）。
+5. 射影的な $G$ 加群 $P$ について $H_{n}(G,P)=0$（$n\ge1$）。
+:::
+
+::: proof
+**Step 1（1）.** \ref{ha:ext-basic} の 2 と \ref{ha:invariants-coinvariants}。$H_{0}$ は右完全関手の 0 次の左導来関手なので関手そのもの（\ref{ha:l0-right-exact}）。
+
+**Step 2（2）.** コホモロジーは \ref{ha:ext-long-exact} の 1（第 2 変数の短完全列）、ホモロジーは \ref{ha:derived-long-exact}。
+
+**Step 3（3）.** \ref{ha:ext-basic} の 1（分解の取り方によらない）と、棒分解が自由分解であること（\ref{cat:bar-resolution-exact}）。
+
+**Step 4（4）.** \ref{cat:group-cohomology-low} の 2 で、自明な作用では交叉準同型は準同型 $\varphi(xy)=\varphi(x)+\varphi(y)$、主交叉準同型は $xa-a=0$ なので $B^{1}=0$。
+
+**Step 5（5）.** 射影対象は自身の射影分解なので、左導来関手は $n\ge1$ で $0$。
+:::
+
+## 低次の計算 {#ha:sec-gc-low}
+
+::: theorem $H_{1}(G,\Z)=G^{\mathrm{ab}}$ {#ha:h1-abelianization keywords="H_1(G, Z) = I_G / I_G^2 = G^ab via g -> (g - 1) mod I_G^2" index="群のホモロジーとアーベル化|ぐんのほもろじーとあーべるか" refname="H₁(G,Z)=G^ab"}
+$H_{1}(G,\Z)\cong I_{G}/I_{G}^{2}\cong G^{\mathrm{ab}}\defeq G/[G,G]$。後者の同型は $g[G,G]\mapsto(g-1)+I_{G}^{2}$ で与えられる。
+:::
+
+::: intuition
+自明な加群 $\Z$ を $\Z G$ と添加イデアルの差として表すと、$H_{1}(G,\Z)$ は添加イデアルの余不変元 $I_{G}/I_{G}^{2}$ になる。$g\mapsto g-1$ は「掛け算を足し算に変える」写像で、$gh-1=(g-1)+(h-1)+(g-1)(h-1)$ の最後の項を $I_{G}^{2}$ で消すとちょうど準同型になり、交換子が消える。
+:::
+
+::: proof
+**Step 1（長完全列）.** $0\to I_{G}\to\Z G\xrightarrow{\varepsilon}\Z\to0$ に \ref{ha:group-cohomology-basic} の 2 を使うと $H_{1}(G,\Z G)\to H_{1}(G,\Z)\to(I_{G})_{G}\to(\Z G)_{G}\to\Z_{G}\to0$。$\Z G$ は自由なので $H_{1}(G,\Z G)=0$（同 5）。$(\Z G)_{G}=\Z G/I_{G}\cong\Z$ で、$\Z_{G}=\Z$、その間の写像は $\varepsilon$ から誘導される同型。よって $H_{1}(G,\Z)\cong(I_{G})_{G}=I_{G}/I_{G}^{2}$。
+
+**Step 2（$G^{\mathrm{ab}}\to I_{G}/I_{G}^{2}$）.** 【主張：$\phi(g)\defeq(g-1)+I_{G}^{2}$ は準同型】$gh-1=(g-1)+(h-1)+(g-1)(h-1)$ で最後の項は $I_{G}^{2}$ に入る。可換群への準同型なので $[G,G]$ を経由する。
+
+**Step 3（逆写像）.** $I_{G}$ は $\{g-1\}$ を基底とする自由アーベル群なので、$\psi(g-1)\defeq g[G,G]$ で $\psi:I_{G}\to G^{\mathrm{ab}}$ が定まる。$I_{G}^{2}$ は $(g-1)(h-1)=(gh-1)-(g-1)-(h-1)$ で生成され、$\psi$ はこれを $gh\,g^{-1}h^{-1}[G,G]=[G,G]$ に送るので、$\psi$ は $I_{G}/I_{G}^{2}$ を経由する。$\psi\phi$ と $\phi\psi$ は生成元上で恒等。
+:::
+
+## 巡回群のコホモロジー {#ha:sec-gc-cyclic}
+
+::: theorem 巡回群の周期的な分解 {#ha:cyclic-periodic-resolution keywords="for G = <sigma> cyclic of order m, with N = 1 + sigma + ... + sigma^{m-1}: ... -> ZG -N-> ZG -(sigma-1)-> ZG -N-> ZG -(sigma-1)-> ZG -> Z -> 0 is a free resolution; for G infinite cyclic: 0 -> ZG -(t-1)-> ZG -> Z -> 0" index="周期的な分解|しゅうきてきなぶんかい" refname="巡回群の周期的な分解"}
+1. $G=\langle\sigma\rangle$ を位数 $m$ の巡回群、$N\defeq1+\sigma+\cdots+\sigma^{m-1}\in\Z G$ とすると、
+$$\cdots\xrightarrow{N}\Z G\xrightarrow{\sigma-1}\Z G\xrightarrow{N}\Z G\xrightarrow{\sigma-1}\Z G\xrightarrow{\varepsilon}\Z\to0$$
+（各写像は右からの掛け算。$\Z G$ は可換）は自由分解である。
+2. $G=\langle t\rangle$ を無限巡回群とすると、$0\to\Z G\xrightarrow{t-1}\Z G\xrightarrow{\varepsilon}\Z\to0$ は自由分解である。
+:::
+
+::: intuition
+有限巡回群では、「$\sigma-1$ を掛けて消えるもの」はちょうど $N$ の倍数、「$N$ を掛けて消えるもの」はちょうど $\sigma-1$ の倍数で、この 2 つが交互に繰り返す。だから分解は周期 2 で無限に続き、コホモロジーも周期 2 になる。
+:::
+
+::: proof
+**Step 1（$\ker(\sigma-1)=N\Z G$）.** 【主張：$\sigma-1$ の核は $N$ の倍数】$x=\sum_{i=0}^{m-1}a_{i}\sigma^{i}$ について $(\sigma-1)x=\sum_{i}(a_{i-1}-a_{i})\sigma^{i}$（添字は $\bmod m$）なので、$(\sigma-1)x=0\iff$ すべての $a_{i}$ が等しい $\iff x\in\Z N=N\Z G$（$N\sigma=N$）。
+
+**Step 2（$\ker N=(\sigma-1)\Z G=I_{G}$）.** 【主張：$N$ の核は $\sigma-1$ の倍数】$Nx=(\sum a_{i})N$ なので $\ker N=\{\sum a_{i}=0\}=I_{G}$。$I_{G}$ は $\sigma^{i}-1=(\sigma-1)(1+\sigma+\cdots+\sigma^{i-1})$ で生成されるので $I_{G}=(\sigma-1)\Z G$。
+
+**Step 3（1）.** 【主張：完全】$\ker\varepsilon=I_{G}=\operatorname{im}(\sigma-1)$（Step 2）、$\ker(\sigma-1)=\operatorname{im}N$（Step 1）、$\ker N=\operatorname{im}(\sigma-1)$（Step 2）が交互に成り立つので完全。
+
+**Step 4（2）.** $\Z G=\Z[t,t^{-1}]$ は整域なので $t-1$ を掛ける写像は単射。$\ker\varepsilon=I_{G}$ は $t^{i}-1$（$i\in\Z$）で生成され、$t^{i}-1$ は $t-1$ の倍数（$i<0$ でも $t^{i}-1=-t^{i}(t^{-i}-1)$）。
+:::
+
+::: corollary 巡回群のコホモロジー {#ha:cyclic-cohomology keywords="for G cyclic of order m: H^0 = M^G, H^{2k-1} = ker N / (sigma - 1) M, H^{2k} = M^G / N M (k >= 1); H_{2k-1} = M^G / N M, H_{2k} = ker N / (sigma - 1) M; H^n(C_m, Z) = Z, 0, Z/m, 0, Z/m, ...; for G infinite cyclic: H^1 = M_G, H^n = 0 for n >= 2" index="巡回群のコホモロジー|じゅんかいぐんのこほもろじー" refname="巡回群のコホモロジー"}
+$G=\langle\sigma\rangle$ を位数 $m$ の巡回群とし、$N_{M}:M\to M$, $x\mapsto Nx$ とする。
+1. $H^{0}(G,M)=M^{G}$、$k\ge1$ で $H^{2k-1}(G,M)=\ker N_{M}/(\sigma-1)M$、$H^{2k}(G,M)=M^{G}/N_{M}M$。
+2. 特に $H^{n}(G,\Z)$ は $n=0$ で $\Z$、奇数 $n$ で $0$、正の偶数 $n$ で $\Z/m\Z$。
+3. $G$ が無限巡回群（生成元 $t$）なら $H^{0}=M^{G}$, $H^{1}(G,M)=M/(t-1)M=M_{G}$, $n\ge2$ で $H^{n}(G,M)=0$。
+:::
+
+::: intuition
+周期的な分解に $\mathrm{Hom}(-,M)$ を施すと、$\sigma-1$ と $N$ が交互に並ぶ複体になる。だから奇数次は「ノルムが $0$ の元を $\sigma-1$ の像で割ったもの」、偶数次は「不変元をノルムの像で割ったもの」で、2 つの値を交互にとる。
+:::
+
+::: proof
+**Step 1（Hom の計算）.** 【主張：$\mathrm{Hom}$ をとると $M$ の周期的な複体になる】$\mathrm{Hom}_{\Z G}(\Z G,M)\cong M$（$f\mapsto f(1)$）で、右からの $x$ の掛け算は $M$ 上の $x$ の作用に対応する（$f(1\cdot x)=xf(1)$）。よって周期的な分解に $\mathrm{Hom}(-,M)$ を施すと
+$$0\to M\xrightarrow{\sigma-1}M\xrightarrow{N}M\xrightarrow{\sigma-1}M\xrightarrow{N}\cdots$$
+
+**Step 2（1）.** 【主張：各次数の値】0 次は $\ker(\sigma-1)=M^{G}$。奇数次は $\ker N/\operatorname{im}(\sigma-1)$、正の偶数次は $\ker(\sigma-1)/\operatorname{im}N=M^{G}/NM$。
+
+**Step 3（2）.** 【主張：$M=\Z$ の場合】$M=\Z$（自明）では $\sigma-1=0$, $N=m$ なので、$\ker N=0$（奇数次 $0$）、$M^{G}/NM=\Z/m\Z$。
+
+**Step 4（3）.** 分解 $0\to\Z G\xrightarrow{t-1}\Z G$ から $0\to M\xrightarrow{t-1}M\to0$ で、$H^{0}=\ker(t-1)$, $H^{1}=M/(t-1)M$、それ以上は $0$。$(t-1)M=I_{G}M$（$I_{G}=(t-1)\Z G$）なので $M/(t-1)M=M_{G}$。
+:::
+
+::: example
+1. $G=C_{2}=\{1,\sigma\}$ が $M=\Z$ に $\sigma\cdot x=-x$ で作用する（符号加群 $\Z^{-}$）なら、$N=1+\sigma$ は $0$ を掛ける写像、$\sigma-1$ は $-2$ を掛ける写像なので、$H^{0}=0$、奇数次 $H^{2k-1}=\Z/2$、偶数次 $H^{2k}=0$（$M^{G}=0$）。
+2. $L/K$ を巡回拡大、$G=\operatorname{Gal}(L/K)$, $M=L^{\times}$ とすると $N$ はノルム写像で、$H^{2}(G,L^{\times})=K^{\times}/N(L^{\times})$。局所類体論では、これがガロア群と同じ位数をもつ（\ref{nt:unramified-norm-group}）。
+:::
+
+::: hypcheck
+- **$H_{1}=G^{\mathrm{ab}}$**：$\Z G$ が自由で $H_{1}(G,\Z G)=0$ であることが Step 1 の鍵。
+- **周期的な分解**：$G$ が巡回群であることは、添加イデアルが 1 つの元 $\sigma-1$ で生成されること（Step 2）に本質的。巡回群でない有限群でも、自由作用をもつ球面がある群（例えば一般四元数群）は周期的なコホモロジーをもつと知られている（Br VI §9）。
+:::
+
+## 問題 {#ha:sec-gc-problems}
+
+::: problem {#ha:prob-gc-h1-cyclic}
+$G=C_{m}$ が $M$ に自明に作用するとき、\ref{ha:cyclic-cohomology} の 1 から $H^{1}(G,M)$ を求め、\ref{ha:group-cohomology-basic} の 4 の $\mathrm{Hom}(C_{m},M)$ と一致することを確かめよ。
+:::
+
+::: solution
+自明な作用では $\sigma-1=0$, $N=m$ なので $H^{1}=\ker(m:M\to M)=M[m]$（$m$ 倍で $0$ になる元）。$\mathrm{Hom}(C_{m},M)$ は生成元の行き先 $x$（$mx=0$）で決まるので $M[m]$ と同型。
+:::
+
+::: problem {#ha:prob-gc-coinvariants}
+$G=C_{2}$ が $\Z^{2}$ に座標の入れ替えで作用するとき、$M^{G}$, $M_{G}$, $H^{1}(G,M)$ を求めよ。
+:::
+
+::: solution
+$M^{G}=\{(a,a)\}\cong\Z$。$(\sigma-1)M=\{(b-a,a-b)\}=\{(c,-c)\}$ で $M_{G}=\Z^{2}/\{(c,-c)\}\cong\Z$（$(a,b)\mapsto a+b$）。$N(a,b)=(a+b,a+b)$ で $\ker N=\{(c,-c)\}=(\sigma-1)M$ なので $H^{1}=0$（実際 $M=\Z G$ は自由なので当然）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** コホモロジーの定義には群の有限性を使わない。巡回群の計算は、$\Z G$ が可換であることと、添加イデアルが単項であることだけを使う。
+
+**前提を変えると.**
+- $H^{2}(G,M)$ は可換群 $M$ による $G$ の拡大を分類し（\ref[群の拡大と H²]{ha:page-group-extensions}）、$H^{3}$ は交差加群による拡大を分類する、と知られている。
+- 自由群 $F$ では $\Z$ の長さ 1 の自由分解があり、$n\ge2$ で $H^{n}(F,M)=0$。逆に、$\Z$ 上のコホモロジー次元が 1 の群は自由群である（スターリングス–スワンの定理）と知られている。
+- 位相空間の言葉では、$H^{n}(G,\Z)$ は分類空間 $BG=K(G,1)$ の特異コホモロジーに一致する（Br II §4）。$C_{m}$ の周期性は、$C_{m}$ が奇数次元の球面に自由に作用すること（レンズ空間）の反映である。
+
+**高い視点から：導来関手としての不変元.** 群のコホモロジーは、「$G$ 加群の圏から可換群の圏への関手 $(-)^{G}$」の右導来関手で、層のコホモロジー（大域切断の導来関手）と同じ形をしている。実際、$G$ 加群は分類空間上の局所系であり、$(-)^{G}$ はその大域切断である。比喩で言えば、$H^{0}$ は「対称な元がどれだけあるか」、$H^{1}$ は「局所的には対称に見えるが大域的にはずれる元」、高次の $H^{n}$ はそのずれのずれ、という階層を記録している。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref{ha:sec-gc-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
