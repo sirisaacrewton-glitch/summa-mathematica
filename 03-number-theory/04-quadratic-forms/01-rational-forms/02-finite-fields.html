@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>有限体上の 2 次形式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/04-quadratic-forms/01-rational-forms/02-finite-fields.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 有限体上の 2 次形式 {#nt:page-finite-field-forms keywords="power sums over a finite field, Chevalley-Warning theorem, number of common zeros divisible by p, homogeneous polynomials in more variables than the degree have a nontrivial zero, every conic over a finite field has a rational point, squares in F_q, quadratic forms over F_q of rank >= 2 represent every nonzero element, rank >= 3 represent 0, classification of quadratic forms over finite fields by rank and discriminant"}
+
+有限体 $\mathbb{F}_{q}$ では、変数の個数が次数の和より多い多項式系は、自明でない共通零点をもつ（**シュヴァレー–ワーニングの定理**）。2 次形式に当てはめると、3 変数以上の 2 次形式は必ず $0$ を表し、その結果、有限体上の非退化な 2 次形式は階数と判別式だけで分類される。この単純な分類は、次のページ以降で $p$ 進体上の形式を「剰余体に落として持ち上げる」ときの出発点になる。
+
+## 記法と定義の確認 {#nt:sec-ff-notation}
+
+::: notation
+- $q=p^{f}$（$p$ は素数）、$\mathbb{F}_{q}$ は $q$ 元体。$\mathbb{F}_{q}^{\times}$ は位数 $q-1$ の巡回群（\ref{fld:finite-multiplicative-cyclic}）。
+- 判別式・同値・表現などの用語と、零を表すことと値を表すことの関係は \ref{nt:quadratic-space}, \ref{nt:representation-criteria}。
+- 多項式 $f\in\mathbb{F}_{q}[X_{1},\dots,X_{n}]$ について $S(f)\defeq\sum_{x\in\mathbb{F}_{q}^{n}}f(x)$。単項式の約束として $x^{0}=1$（$x=0$ でも）。
+- 体系は $\ZF$。
+:::
+
+## シュヴァレー–ワーニングの定理 {#nt:sec-ff-chevalley}
+
+::: lemma 冪和 {#nt:power-sums-finite-field keywords="sum over x in F_q of x^u is -1 if u >= 1 and q - 1 divides u, and 0 otherwise" index="冪和（有限体）|べきわ" refname="有限体の冪和"}
+整数 $u\ge0$ について、$\sum_{x\in\mathbb{F}_{q}}x^{u}$ は、$u\ge1$ かつ $(q-1)\mid u$ なら $-1$、それ以外は $0$。
+:::
+
+::: intuition
+有限体のすべての元の $u$ 乗を足すと、ほとんどの場合打ち消し合って $0$ になる。$u$ が $q-1$ の倍数のときだけ、$0$ でない元がすべて $1$ になって $-1$ が残る。
+:::
+
+::: proof
+**Step 1（$u=0$）.** 各項が $1$ なので和は $q\cdot1=0$（標数 $p$）。
+
+**Step 2（$u\ge1$, $(q-1)\mid u$）.** $0^{u}=0$、$x\neq0$ では $x^{u}=1$（ラグランジュの定理）なので和は $(q-1)\cdot1=-1$。
+
+**Step 3（$u\ge1$, $(q-1)\nmid u$）.** 【主張：和は $0$】$\mathbb{F}_{q}^{\times}$ の生成元 $y$ について $y^{u}\neq1$（位数 $q-1$ が $u$ を割らない）。$x\mapsto yx$ は $\mathbb{F}_{q}^{\times}$ の全単射なので $T\defeq\sum_{x\neq0}x^{u}=\sum_{x\neq0}(yx)^{u}=y^{u}T$、$(1-y^{u})T=0$ から $T=0$。$0^{u}=0$ なので和も $0$。
+:::
+
+::: theorem シュヴァレー–ワーニングの定理 {#nt:chevalley-warning keywords="Chevalley-Warning: if f_1, ..., f_r in F_q[X_1..X_n] satisfy sum deg f_i < n, the number of common zeros in F_q^n is divisible by p; if the f_i have no constant term there is a nontrivial common zero" index="シュヴァレー–ワーニングの定理|しゅゔぁれーわーにんぐのていり, シュヴァレーの定理|しゅゔぁれーのていり" refname="シュヴァレー–ワーニングの定理"}
+$f_{1},\dots,f_{r}\in\mathbb{F}_{q}[X_{1},\dots,X_{n}]$ が $\sum_{i}\deg f_{i}<n$ をみたすとし、$V\subseteq\mathbb{F}_{q}^{n}$ をそれらの共通零点の集合とする。
+1. $\abs V\equiv0\pmod p$。
+2. $f_{i}$ がすべて定数項をもたなければ（たとえば斉次なら）、$0$ 以外の共通零点がある。
+:::
+
+::: intuition
+「方程式の個数・次数に比べて変数が多ければ解がある」という直感の、有限体での厳密版である。証明の鍵は、$V$ の特性関数を多項式 $\prod(1-f_{i}^{q-1})$ で書き、その全点での和が、次数が低いため冪和の補題で $0$ になることにある。
+:::
+
+::: proof
+**Step 1（特性関数）.** 【主張：$P\defeq\prod_{i}(1-f_{i}^{q-1})$ は $V$ の特性関数】$x\in V$ ならすべての因子が $1$。$x\notin V$ なら $f_{i}(x)\neq0$ となる $i$ があり、$f_{i}(x)^{q-1}=1$ で因子が $0$。よって $\abs V\cdot1=S(P)$（$\mathbb{F}_{q}$ の中で）。
+
+**Step 2（$S(P)=0$）.** 【主張：$\deg P<n(q-1)$ の多項式 $P$ について $S(P)=0$】$\deg P\le(q-1)\sum\deg f_{i}<n(q-1)$。$P$ は単項式 $X^{u}=X_{1}^{u_{1}}\cdots X_{n}^{u_{n}}$（$\sum u_{j}<n(q-1)$）の一次結合で、各単項式で $u_{j}<q-1$ となる $j$ がある。$S(X^{u})=\prod_{j}\sum_{x\in\mathbb{F}_{q}}x^{u_{j}}$ で、その $j$ の因子は \ref{nt:power-sums-finite-field} から $0$（$u_{j}=0$ のときも Step 1 から $0$）。
+
+**Step 3（1・2）.** Step 1・2 から $\abs V\cdot1=0$ in $\mathbb{F}_{q}$、すなわち $p\mid\abs V$。定数項がなければ $0\in V$ なので $\abs V\ge p\ge2$、したがって $0$ 以外の元がある。
+:::
+
+::: corollary 有限体上の 3 変数の 2 次形式 {#nt:finite-field-conic keywords="every quadratic form in at least 3 variables over a finite field has a nontrivial zero; every conic has a rational point" index="有限体上の円錐曲線|ゆうげんたいじょうのえんすいきょくせん"}
+$\mathbb{F}_{q}$ 上の 3 変数以上の 2 次形式は $0$ を表す（自明でない零点をもつ）。
+:::
+
+::: proof
+2 次形式は定数項のない斉次多項式で、$\deg=2<3\le n$ なので \ref{nt:chevalley-warning} の 2 を使う。
+:::
+
+::: example
+$\mathbb{F}_{3}$ 上の $X^{2}+Y^{2}+Z^{2}$。$\mathbb{F}_{3}$ の平方は $0,1$ なので、和が $0$ になるのは全部 $0$（1 通り）か全部 $0$ でない（$2^{3}=8$ 通り）場合で、零点は $9$ 個。$3\mid9$ で定理と一致し、$(1,1,1)$ が自明でない零点。
+:::
+
+## 有限体上の 2 次形式の分類 {#nt:sec-ff-classification}
+
+この節では $q$ は奇数とする。
+
+::: proposition 有限体の平方類 {#nt:finite-field-squares keywords="for q odd, F_q^x2 has index 2 in F_q^x; F_q^x / F_q^x2 has two elements" index="有限体の平方|ゆうげんたいのへいほう" refname="有限体の平方類"}
+$q$ が奇数なら $\mathbb{F}_{q}^{\times2}$ は $\mathbb{F}_{q}^{\times}$ の指数 $2$ の部分群で、$\mathbb{F}_{q}^{\times}/\mathbb{F}_{q}^{\times2}$ は位数 $2$。
+:::
+
+::: intuition
+$0$ でない $q-1$ 個の元のうち、ちょうど半分が平方である。$x$ と $-x$ が同じ平方を与えるからである。
+:::
+
+::: proof
+$x\mapsto x^{2}$ は $\mathbb{F}_{q}^{\times}$ の準同型で、核は $\{\pm1\}$（$x^{2}=1$ の根は高々 2 個で、$-1\neq1$）。像は位数 $(q-1)/2$。
+:::
+
+::: proposition 有限体上の形式による表現 {#nt:finite-field-represent keywords="a quadratic form over F_q (q odd) of rank >= 2 represents every element of F_q^x; of rank >= 3 it represents 0" index="有限体上の 2 次形式の表現|ゆうげんたいじょうのにじけいしきのひょうげん" refname="有限体上の形式による表現"}
+$q$ を奇数とする。$\mathbb{F}_{q}$ 上の 2 次形式で、階数 $\ge2$ のものは $\mathbb{F}_{q}^{\times}$ のすべての元を表し、階数 $\ge3$ のものは $0$ を表す。
+:::
+
+::: intuition
+有限体では 2 変数の形式が「ほぼすべて」の値をとる：$ax^{2}$ の値と $c-by^{2}$ の値はそれぞれ半分以上あるので必ず重なる。
+:::
+
+::: proof
+**Step 1（階数 $\ge3$）.** 直交基底（\ref{lin:symmetric-diagonalization}）で $f\sim a_{1}X_{1}^{2}+\dots$ とし、$a_{i}\neq0$ の 3 変数に制限すれば \ref{nt:finite-field-conic}。
+
+**Step 2（階数 $\ge2$）.** 【主張：非退化な 2 変数の $g$ と $a\neq0$ について $g$ は $a$ を表す】\ref{nt:finite-field-conic} から $g\ominus aZ^{2}$ は $0$ を表すので、\ref{nt:representation-criteria} の 1 から $g$ は $a$ を表す。階数 $\ge2$ の形式はそのような $g$ を部分に含む。
+:::
+
+::: theorem 有限体上の 2 次形式の分類 {#nt:finite-field-classification keywords="every nondegenerate quadratic form of rank n over F_q (q odd) is equivalent to X_1^2 + ... + X_{n-1}^2 + d X_n^2; two nondegenerate forms are equivalent iff they have the same rank and discriminant" index="有限体上の 2 次形式の分類|ゆうげんたいじょうのにじけいしきのぶんるい" refname="有限体上の 2 次形式の分類"}
+$q$ を奇数、$a\in\mathbb{F}_{q}^{\times}$ を平方でない元とする。階数 $n\ge1$ の非退化な形式は、判別式が平方なら $X_{1}^{2}+\dots+X_{n-1}^{2}+X_{n}^{2}$ と、そうでなければ $X_{1}^{2}+\dots+X_{n-1}^{2}+aX_{n}^{2}$ と同値である。特に、2 つの非退化な形式が同値 $\iff$ 階数と判別式（$\mathbb{F}_{q}^{\times}/\mathbb{F}_{q}^{\times2}$ の元）が等しい。
+:::
+
+::: intuition
+有限体の上では「平方かどうか」の 1 ビットしか区別がない。2 変数以上の形式はどんな $0$ でない値も表すので、$1$ を表すベクトルを次々に分離でき、最後に残る 1 変数の係数だけが判別式として情報を持つ。
+:::
+
+::: proof
+**Step 1（$n=1$）.** $f=cX^{2}$ で、$c$ は平方類 $1$ か $a$ の代表を掛けて $X^{2}$ か $aX^{2}$ に同値。判別式は $c$ の類。
+
+**Step 2（$n\ge2$）.** 【主張：$f\sim X_{1}^{2}\oplus g$】\ref{nt:finite-field-represent} から $f$ は $1$ を表すので、\ref{nt:representation-criteria} の 1 から $f\sim X_{1}^{2}\oplus g$（$g$ は $n-1$ 変数、非退化）。$d(g)=d(f)$ で、帰納法の仮定を $g$ に使う。
+
+**Step 3（同値の判定）.** 同値な形式の判別式は等しい（\ref{nt:quadratic-space} の 2）。逆に階数と判別式が等しければ、Step 1・2 で同じ標準形と同値。
+:::
+
+::: hypcheck
+- **シュヴァレー–ワーニング**：$\sum\deg f_{i}<n$ は Step 2 で各単項式に $u_{j}<q-1$ の変数が残ることに本質的。$X^{2}+Y^{2}$ over $\mathbb{F}_{3}$（$2=n$）は自明な零点しかもたない（$-1$ は平方でない）。
+- **有限体であること**：$x^{q-1}=1$（特性関数の構成）と冪和の補題に本質的。$\mathbb{Q}$ 上では $X^{2}+Y^{2}+Z^{2}$ は $0$ を表さない。
+- **$q$ が奇数**：平方類が 2 個であることと、2 次形式と対称形式の対応（標数 $\neq2$）に使った。$q$ が偶数ならすべての元が平方で、2 次形式の理論は別の形になる。
+:::
+
+## 問題 {#nt:sec-ff-problems}
+
+::: problem {#nt:prob-ff-minus-one}
+奇素数 $p$ について、$x^{2}+y^{2}\equiv-1\pmod p$ が整数解をもつことを示せ。
+:::
+
+::: solution
+$X^{2}+Y^{2}$ は $\mathbb{F}_{p}$ 上の階数 $2$ の形式なので、\ref{nt:finite-field-represent} から $-1\in\mathbb{F}_{p}^{\times}$ を表す。代表の整数をとればよい。
+:::
+
+::: problem {#nt:prob-ff-cubic}
+$\mathbb{F}_{q}$ 上の 4 変数の 3 次斉次多項式は、自明でない零点をもつことを示せ。また、$\mathbb{F}_{q}$ 上の 2 次形式の 2 つ $f_{1},f_{2}$（各 5 変数）は自明でない共通零点をもつことを示せ。
+:::
+
+::: solution
+どちらも \ref{nt:chevalley-warning} の 2：$3<4$、$2+2<5$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 分類定理の証明は、シュヴァレー–ワーニングの代わりに数え上げでも示せる：$a,b,c\neq0$ について $\{ax^{2}\}$ と $\{c-by^{2}\}$ はそれぞれ $(q+1)/2$ 個の元をもつので交わり、$ax^{2}+by^{2}=c$ が解をもつ。
+
+**前提を変えると.**
+- **アックス–カッツの定理**：シュヴァレー–ワーニングの結論は、共通零点の個数が $q^{\lceil(n-\sum d_{i})/\max d_{i}\rceil}$ で割り切れる、と精密化される（ここでは証明しない）。
+- **$C_{1}$ 体**：「$n>d$ 変数の $d$ 次斉次式は零点をもつ」性質をもつ体を擬代数閉体（$C_{1}$ 体）という。有限体はその例（シュヴァレー）で、$p$ 進体は $C_{1}$ でない（$p$ 進体の 4 変数の非等方 2 次形式がある：\ref[$p$ 進体上の 2 次形式]{nt:page-local-forms}）。
+- **個数**：非退化な 3 変数の形式の零点は、自明なものを含めてちょうど $q^{2}$ 個（射影平面の円錐曲線の $\mathbb{F}_{q}$ 点が $q+1$ 個）。
+
+**高い視点から：有限体の上の 2 次形式は「ほぼ自明」.** ヴィット環で言えば $W(\mathbb{F}_{q})$ は位数 $4$ で、判別式（と階数の偶奇）だけがすべての情報である。これは、有限体の絶対ガロア群が $\hat{\mathbb{Z}}$（射有限完備化された整数）で、ガロアコホモロジーが $H^{1}(\mathbb{F}_{q},\mu_{2})\cong\mathbb{F}_{q}^{\times}/\mathbb{F}_{q}^{\times2}$（判別式の住処）だけ残り、ブラウアー群（ハッセ不変量の住処）が消えることの反映である。$p$ 進体ではブラウアー群 $\mathbb{Q}/\mathbb{Z}$ の $2$ 等分点がハッセ不変量 $\varepsilon$ として新たに現れる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-ff-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
