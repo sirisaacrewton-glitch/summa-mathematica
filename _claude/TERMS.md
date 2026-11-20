@@ -682,3 +682,7 @@
 | decomposition group (of a place) / completely split / semilocal component / cohomologically trivial | 分解群 / 完全分解 / 半局所成分 / コホモロジー的に自明 | — / — / — / — | 2026-11-20（nt:page-galois-ideles） |
 | first inequality / permutation lattice | 第一不等式 / 置換格子 | 第 1 不等式 / — | 2026-11-20（nt:page-first-inequality） |
 | global class field theory / Artin reciprocity / existence theorem / ray class field / Hilbert class field / Kronecker–Weber theorem | 大域類体論 / アルティンの相互法則 / 存在定理 / 射類体 / ヒルベルト類体 / クロネッカー–ウェーバーの定理 | — / アルティン相互律 / — / 射類体（合同類体）/ 絶対類体 / — | 2026-11-20（nt:page-global-class-field-theory） |
+| quadratic space / isometry / isotropic vector / hyperbolic plane / anisotropic / Witt's theorem / Witt cancellation / Witt index | 2 次空間 / 等長写像 / 等方ベクトル / 双曲平面 / 非等方的 / ヴィットの定理 / ヴィットの消去定理 / ヴィット指数 | 2 次加群 / 計量射 / 零ベクトル（不採用） / — / — / — / — / — | 2026-11-20（nt:page-quadratic-spaces） |
+| Chevalley–Warning theorem / power sum | シュヴァレー–ワーニングの定理 / 冪和 | シュバレー・ワーニングの定理 / — | 2026-11-20（nt:page-finite-field-forms） |
+| square class / Hasse invariant | 平方類 / ハッセ不変量 | — / ハッセ・ヴィット不変量 | 2026-11-20（nt:page-hilbert-symbol-squares, nt:page-local-forms） |
+| Hasse–Minkowski theorem / local-global principle / Meyer's theorem / Davenport–Cassels lemma / three squares theorem / triangular number | ハッセ–ミンコフスキーの定理 / 局所大域原理 / マイヤーの定理 / ダヴェンポート–カッセルスの補題 / 3 平方和定理 / 三角数 | — / ハッセ原理 / — / — / — / — | 2026-11-20（nt:page-hasse-minkowski, nt:page-three-squares） |
