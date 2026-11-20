@@ -1,6 +1,6 @@
-# Verification tracker: `02-algebra/03-commutative-algebra/07-regular-cm/02-depth.html`
+# Verification tracker: `02-algebra/03-commutative-algebra/06-regular-homological/02-depth.html`
 
-<!-- source: 02-algebra/03-commutative-algebra/07-regular-cm/02-depth.html -->
+<!-- source: 02-algebra/03-commutative-algebra/06-regular-homological/02-depth.html -->
 <!-- Managed by scripts/verify.py (GitHub Actions). To dispute an [Open] issue, add a line starting with
      **Opus Rebuttal:** at the end of that issue and push; the next run judges it. Do not edit other lines. -->
 
