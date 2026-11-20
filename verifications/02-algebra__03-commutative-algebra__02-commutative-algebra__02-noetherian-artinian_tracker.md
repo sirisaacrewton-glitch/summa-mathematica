@@ -19,6 +19,7 @@ The main theorems and proofs are essentially correct. The genuine problems are i
 - **Detail:** The claim that the subgroups of $\Z[1/p]/\Z$ are 'only the chain $p^{-n}\Z/\Z$' is false: for each $n$ the subgroup $p^{-n}\Z/\Z$ is finite cyclic of order $p^{n}$, and it has many proper subgroups (e.g. the unique subgroup of order $p^{m}$ for each $m\le n$). The correct statement is that the subgroups form the chain $0\subset p^{-1}\Z/\Z\subset p^{-2}\Z/\Z\subset\cdots$ (each $p^{-n}\Z/\Z$ being cyclic, so its subgroups are among the $p^{-m}\Z/\Z$ with $m\le n$). The conclusion (Artinian but not Noetherian) is correct, but the parenthetical justification is false.
 - **Proposed fix:** Replace the parenthetical with: '（部分群は $0\subset p^{-1}\Z/\Z\subset p^{-2}\Z/\Z\subset\cdots$ という鎖をなし、各 $p^{-n}\Z/\Z$ は位数 $p^{n}$ の巡回群なので、その部分群もこの鎖に現れる。よって降鎖は止まるが、この鎖は無限に真に上昇するのでネーター加群でない。）'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The detection's own reason is wrong: the subgroups of Z[1/p]/Z are exactly the p^{-n}Z/Z (n ≥ 0) and the whole group, which form a chain, so there are not "many more subgroups". The original text only omitted the whole group; the example now lists all subgroups with a proof.
 
 ### ISSUE-0002 [Open] Wrong reason for $K[x]/(f)$ being Artinian
 - **Category:** Supplement/remark error
@@ -33,3 +34,4 @@ The main theorems and proofs are essentially correct. The genuine problems are i
 - **Detail:** The hypcheck states that '2⇒1 (from maximal/minimal element to chain condition) and 3⇒1 do not use the axiom of choice'. The direction 2⇒1 is proved in Step 1 by contradiction using DC to build the ascending chain, so it does use DC; the statement in the hypcheck that 2⇒1 needs no choice contradicts Step 1, which explicitly invokes DC. (3⇒1 indeed needs no choice.) This is an internal inconsistency in a side comment.
 - **Proposed fix:** Change the hypcheck to: '**従属選択公理**：Step 1（1⇒2 の対偶、すなわち 2⇒1）で使った。3⇒1 は選択公理を使わない。'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** Step 1 proves 1⇒2 (ascending chain condition ⇒ maximal condition), and that is where DC is used; it does not prove 2⇒1. The direction 2⇒1 holds without choice: the set of terms of an ascending chain has a maximal element M_n, and the chain is constant from n on. The hypcheck has been reworded to say this explicitly.

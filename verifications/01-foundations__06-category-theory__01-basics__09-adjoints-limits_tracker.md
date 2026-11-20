@@ -19,6 +19,7 @@ The page is largely correct. The main concerns are in the supplement: the filter
 - **Detail:** The claim that finite limits commute with filtered colimits 'in Set' is stated too narrowly and the attribution to Mac Lane Ch. IX §2 is imprecise. The correct general statement is that filtered colimits commute with finite limits in Set (and more generally in any locally finitely presentable category / category of algebras), not merely 'in Set'. Also the reason given for forgetful functors of algebraic categories preserving filtered colimits ('this is why') is a non-sequitur: preservation of filtered colimits by forgetful functors is a separate fact (they create them), not a consequence of commutation in Set.
 - **Proposed fix:** Finite limits commute with filtered colimits in $\mathbf{Set}$ (and more generally in any category of algebras over a finitary monodromy / locally finitely presentable category). The forgetful functor from a category of algebras preserves filtered colimits because it creates them, not because of this commutation.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The "in Set" scope and the Mac Lane IX.2 citation are correct as stated. The link to forgetful functors is not a non-sequitur: they create filtered colimits precisely because finitary operations are maps out of finite products, which commute with filtered colimits in Set. The text now spells this out.
 
 ### ISSUE-0002 [Open] Alternative proof via adjunction composition misuses uniqueness
 - **Category:** Supplement/remark error

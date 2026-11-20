@@ -879,6 +879,8 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 ## 環論・加群論の割り当て（2026-10-15 ユーザー承認）
 
 到達目標（SCOPE.md §9）：整域の分類と包含関係（反例つき）、保存表（剰余環・多項式環・冪級数環・直積・テンソル積・局所化）、保たれない場合の反例、性質ごとの深掘りページ。**2026-10-15 追加（ユーザー承認）**：フィルトレーションと完備化、次元論、正則局所環・コーエン＝マコーレー環（13H）、ホモロジー的方法（13D、セールの正則性判定法とアウスランダー＝ブクスバウムの公式まで）。
+
+> **2026-11-20 再編（ユーザー了承）**：系列の依存を一方向にするため、ID-01〜03（ユークリッド環・PID・UFD、ガウスの補題、GCD・ベズー整域）を環の基礎（01-basics の 07〜09）へ移した。CR の「整閉包の有限性」「クルル＝秋月と正規性」を整域の系列（付値環・デデキント環と正規性、04-integral-domains）の 03・04 へ移し、整域の系列は 01 付値環・02 デデキント・03・04・05 プリューファー・06 分類・07 保存表・08 反例集、可換環論は 10 操作の可換性・11 局所と大域に番号を振り直した。ラベルは不変。下の表の ID・CR のパスは再編前のもの。
 接頭辞：可換環 `ring`（13A・13F・13H・13D）、加群 `mod`（16D）。主な資料：雪江『代数学 2』第 1・2 章（`<和書>/_text/yukie-algebra-ja.txt`。行番号は下の表）、松村『可換環論』（`matsumura-kakankan-ja`）、Zariski–Samuel（`zariski-samuel-ca1`・`-ca2`）、新妻『可換環論の様相』（反例）、Anderson–Fuller（加群）。環は単位元をもつ可換環を基本とし（16D/01 の加群論は一般の環上で、必要なところだけ可換を仮定）、非可換環は 16D/02 の系列で扱う（当面。内容が増えたら 16K・16N・16P に分ける）。
 **配置の決定（2026-10-15）**：加群の一般論と PID 上の構造定理は 16D/01-module-theory（20K からは \ref で参照。START.md §8.1 により `also` は使わない）。零点定理の証明は 13A/02 に置き、14A からは参照する。予約ラベル：ring:euclidean-pid（ID-01）、ring:fraction-field（RB-05）、ring:hilbert-basis（CR-02）、ring:localization（RB-05）、ring:polynomial-ufd（ID-02）、ring:page-noetherian-artinian（CR-02）、ring:nullstellensatz（CR-05）、ring:page-dimension-theory（CR-08）、ring:page-polynomial-rings（RB-04）、mod:page-noncommutative-rings（16D/02 の最初のページ）、ag:zariski-topology（14A）。
 

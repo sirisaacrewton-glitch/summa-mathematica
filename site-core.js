@@ -686,8 +686,13 @@
       // フォルダの範囲で指定したとき（"/" を含む項目。'!' で始まればその範囲以外）は、同じ分野の中でも拒否する（2026-10-28）
       if (d.indexOf('/') >= 0) {
         // 項目が ".html" で終わればページ単位（P.path）で照合する（2026-11-14。同じ系列の中でページごとに意味が変わる語のため）
-        var hit = d.replace(/^!/, '').split(/\s+/).some(function (x) { return x && String((/\.html$/.test(x) ? P.path : P.dir) || '').indexOf(x) >= 0; });
-        return d.charAt(0) === '!' ? !hit : hit;
+        // "/" を含まない項目（分野番号・'*'）が混ざっていれば、それは分野での拒否として扱う（2026-11-20。以前は無視されていた）
+        var items = d.replace(/^!/, '').split(/\s+/).filter(Boolean);
+        var hit = items.some(function (x) { return x.indexOf('/') >= 0 && String((/\.html$/.test(x) ? P.path : P.dir) || '').indexOf(x) >= 0; });
+        if (d.charAt(0) === '!') return !hit;
+        if (hit) return true;
+        var codes = items.filter(function (x) { return x.indexOf('/') < 0; });
+        return codes.length > 0 && f !== field(Q.dir) && codes.some(function (x) { return x === '*' || x === f; });
       }
       return f !== field(Q.dir) && (d === '*' || (' ' + d + ' ').indexOf(' ' + f + ' ') >= 0);
     }
