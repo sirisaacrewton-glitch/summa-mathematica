@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>高さと降下 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/05-elliptic-curves-modular-forms/02-elliptic-curves/04-heights-descent.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 高さと降下 {#nt:page-heights-descent keywords="naive height of a rational point H(P) = max(|m|, e^2) for x = m/e^2, logarithmic height h = log H, finiteness of points of bounded height, h(P + P_0) <= 2 h(P) + kappa_0, h(2P) >= 4 h(P) - kappa, duplication formula x(2P) = (x^4 - 2bx^2 - 8cx + b^2 - 4ac)/(4y^2), the identity f_1 F + g_1 G = 4 D_0 N^7, gcd of F and G divides 4 D_0, descent theorem: an abelian group with a height function and finite Gamma/2Gamma is finitely generated"}
+
+モーデルの定理（$E(\mathbb{Q})$ は有限生成）の証明は 2 つの部分からなる：**弱モーデル–ヴェイユの定理**（$E(\mathbb{Q})/2E(\mathbb{Q})$ が有限）と、**高さ**による**降下**である。このページは後者を扱う。有理点の「複雑さ」を $x$ 座標の分子と分母の大きさで測る高さ $h$ は、足し算で高々 2 倍、2 倍写像でほぼ 4 倍になる。この 2 つの不等式があれば、「$2$ で割る」ことを繰り返すたびに高さが減っていき、すべての点が有限個の点から生成されることがわかる。
+
+## 記法と定義の確認 {#nt:sec-hd-notation}
+
+::: notation
+- この節の曲線は $E:y^{2}=f(x)=x^{3}+ax^{2}+bx+c$（$a,b,c\in\mathbb{Z}$、$f$ は相異なる 3 根をもつ）。$x\mapsto x-a/3$ で標準形になるので、\ref{nt:addition-formulas} の演算と群構造（\ref{nt:elliptic-group-law}）はこの形でも成り立ち、第 3 の交点の $x$ 座標は $\lambda^{2}-a-x_{1}-x_{2}$。
+- $D_{0}\defeq4a^{3}c-a^{2}b^{2}-18abc+4b^{3}+27c^{2}$ は $f$ の判別式の $-1$ 倍で、$f$ が重根をもたないので $D_{0}\neq0$。
+- 有理点の分母の形（$\operatorname{ord}_{p}x<0$ なら $\operatorname{ord}_{p}x=-2\nu$, $\operatorname{ord}_{p}y=-3\nu$）は \ref{nt:rational-point-denominators} と同じ議論で $ax^{2}$ の項があっても成り立つ（$x^{3}$ の項が他より小さい付値をもつ）。よって $P=(x,y)\in E(\mathbb{Q})$ は $x=\frac{m}{e^{2}}$, $y=\frac{n}{e^{3}}$（$e\ge1$, $\gcd(m,e)=\gcd(n,e)=1$）と書ける。
+- 体系は $\ZF$。
+:::
+
+## 高さ {#nt:sec-hd-heights}
+
+::: definition 高さ {#nt:naive-height keywords="H(P) = max(|m|, e^2) for x(P) = m/e^2 in lowest terms, H(O) = 1, h(P) = log H(P)" index="高さ（有理点の）|たかさ, 素朴な高さ|そぼくなたかさ" refname="高さ"}
+有理数 $t=m/k$（既約、$k>0$）について $H(t)\defeq\max(\abs m,k)$。$P\in E(\mathbb{Q})$ について $H(P)\defeq H(x(P))=\max(\abs m,e^{2})$、$H(O)\defeq1$、$h(P)\defeq\log H(P)\ge0$ とする。
+:::
+
+::: intuition
+高さは「その点を書き下すのに必要な桁数」の目安である。$y^{2}=x^{3}-2$ で $P=(3,5)$, $2P=(\frac{129}{100},-\frac{383}{1000})$ と、2 倍するたびに桁数がおよそ 4 倍になっていくのが高さの不等式の内容である。
+:::
+
+::: lemma 高さの基本評価 {#nt:height-basic-bounds keywords="finitely many points of bounded height; |n| <= K H(P)^{3/2}; for a fraction p/q (not necessarily reduced) H(p/q) <= max(|p|, |q|)" index="高さの有限性|たかさのゆうげんせい" refname="高さの基本評価"}
+1. 各 $M$ について $\{P\in E(\mathbb{Q}):h(P)\le M\}$ は有限集合。
+2. $K\defeq\sqrt{1+\abs a+\abs b+\abs c}$ について $\abs n\le KH(P)^{3/2}$。
+3. 整数 $p,q$（$q\neq0$）について $H(p/q)\le\max(\abs p,\abs q)$。
+:::
+
+::: intuition
+高さの有界な点は有限個しかない。また $y$ 座標の分子は、曲線の式から $x$ 座標の高さの $3/2$ 乗で抑えられる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：高さが有界な点は有限個】$H(x)\le e^{M}$ となる有理数 $x$ は有限個で、各 $x$ に $y$ は高々 2 個。
+
+**Step 2（2）.** 【主張：$y$ の分子は $H^{3/2}$ で抑えられる】$n^{2}=m^{3}+am^{2}e^{2}+bme^{4}+ce^{6}$ で、$\abs m\le H$, $e^{2}\le H$ から $n^{2}\le(1+\abs a+\abs b+\abs c)H^{3}$。
+
+**Step 3（3）.** 【主張：約分で高さは増えない】既約分数に約すと分子・分母の絶対値は減るだけ。
+:::
+
+::: proposition 足し算での高さ {#nt:height-sum-bound keywords="for a fixed P_0 there is kappa_0 with h(P + P_0) <= 2 h(P) + kappa_0 for all P" index="高さの上からの評価|たかさのうえからのひょうか" refname="足し算での高さ"}
+$P_{0}\in E(\mathbb{Q})$ を固定すると、ある定数 $\kappa_{0}$ ですべての $P\in E(\mathbb{Q})$ について $h(P+P_{0})\le2h(P)+\kappa_{0}$。
+:::
+
+::: intuition
+決まった点 $P_{0}$ を足すと、$x$ 座標は $x,y$ の 2 次式の比で表されるので、桁数（高さ）は高々 2 倍と定数しか増えない。
+:::
+
+::: proof
+**Step 1（例外の除外）.** $P_{0}=O$ なら $\kappa_{0}=0$。$P\in\{O,\pm P_{0}\}$ は有限個なので、$\kappa_{0}$ を大きくとれば除外してよい。$P_{0}=(x_{0},y_{0})$, $P=(x,y)$, $x\neq x_{0}$ とする。
+
+**Step 2（$x(P+P_{0})$ の形）.** 【主張：有理数の定数 $\alpha_{1},\dots,\alpha_{7}$（$P_{0}$ だけで決まる）で $x(P+P_{0})=\frac{\alpha_{1}y+\alpha_{2}x^{2}+\alpha_{3}x+\alpha_{4}}{\alpha_{5}x^{2}+\alpha_{6}x+\alpha_{7}}$】$\lambda=\frac{y-y_{0}}{x-x_{0}}$, $x(P+P_{0})=\lambda^{2}-a-x-x_{0}=\frac{(y-y_{0})^{2}-(x-x_{0})^{2}(x+x_{0}+a)}{(x-x_{0})^{2}}$。分子に $y^{2}=f(x)$, $y_{0}^{2}=f(x_{0})$ を代入すると $x^{3}$ が消え、
+$$
+-2y_{0}y+x_{0}x^{2}+(b+2ax_{0}+x_{0}^{2})x+(bx_{0}+2c),
+$$
+分母は $x^{2}-2x_{0}x+x_{0}^{2}$。
+
+**Step 3（評価）.** 分母を払って $\alpha_{i}\in\mathbb{Z}$ としてよい。$x=m/e^{2}$, $y=n/e^{3}$ を代入して $e^{4}$ を掛けると
+$$
+x(P+P_{0})=\frac{\alpha_{1}ne+\alpha_{2}m^{2}+\alpha_{3}me^{2}+\alpha_{4}e^{4}}{\alpha_{5}m^{2}+\alpha_{6}me^{2}+\alpha_{7}e^{4}}.
+$$
+$\abs{ne}\le KH^{3/2}H^{1/2}=KH^{2}$（\ref{nt:height-basic-bounds} の 2）、$m^{2},\abs m e^{2},e^{4}\le H^{2}$ なので、分子・分母の絶対値は $CH(P)^{2}$ 以下（$C$ は定数）。\ref{nt:height-basic-bounds} の 3 から $H(P+P_{0})\le CH(P)^{2}$。
+:::
+
+::: proposition 2 倍での高さ {#nt:height-doubling-bound keywords="there is kappa with h(2P) >= 4 h(P) - kappa for all P; x(2P) = F(m, e^2)/G(m, e^2) with F = M^4 - 2bM^2N^2 - 8cMN^3 + (b^2 - 4ac)N^4 and G = 4N(M^3 + aM^2N + bMN^2 + cN^3); f_1 F + g_1 G = 4 D_0 N^7" index="高さの下からの評価|たかさのしたからのひょうか" refname="2 倍での高さ"}
+ある定数 $\kappa$ ですべての $P\in E(\mathbb{Q})$ について $h(2P)\ge4h(P)-\kappa$。
+:::
+
+::: intuition
+$x(2P)$ は $x$ の 4 次式と 4 次式の比なので、分子・分母は高さの 4 乗の大きさになる。問題は約分でどれだけ小さくなるかで、分子と分母の 4 次式が共通根をもたない（曲線が滑らか）ことから、約分される量は定数 $4D_{0}$ を超えない。
+:::
+
+::: proof
+**Step 1（倍加公式）.** 【主張：$y\neq0$ なら $x(2P)=\frac{x^{4}-2bx^{2}-8cx+b^{2}-4ac}{4f(x)}$】$x(2P)=\lambda^{2}-a-2x$, $\lambda=\frac{f'(x)}{2y}$ で、$\frac{f'(x)^{2}-4(a+2x)f(x)}{4f(x)}$ の分子を展開すると上の 4 次式になる。$y=0$ の点（$2P=O$）は有限個で、$\kappa$ を大きくとって除外する。
+
+**Step 2（同次化）.** $M\defeq m$, $N\defeq e^{2}$（$\gcd(M,N)=1$）とし、$F(M,N)\defeq M^{4}-2bM^{2}N^{2}-8cMN^{3}+(b^{2}-4ac)N^{4}$, $G(M,N)\defeq4N(M^{3}+aM^{2}N+bMN^{2}+cN^{3})$ とすると $x(2P)=F/G$。
+
+**Step 3（恒等式）.** 【主張：$f_{1}\defeq12M^{2}N+8aMN^{2}+4(4b-a^{2})N^{3}$, $g_{1}\defeq-3M^{3}+aM^{2}N+5bMN^{2}+(27c-2ab)N^{3}$ について $f_{1}F+g_{1}G=4D_{0}N^{7}$】両辺を $M,N$ の 7 次形式として展開し係数を比べる（$M^{7},M^{6}N,\dots$ の係数は左辺で $0$ になり、$N^{7}$ の係数が $4D_{0}$）。
+
+**Step 4（約分の大きさ）.** 【主張：$\gcd(F,G)\mid4D_{0}$】$d\defeq\gcd(F,G)$ は Step 3 から $4D_{0}N^{7}$ を割る。素数 $p$ が $d$ と $N$ を割れば、$F\equiv M^{4}\pmod p$ から $p\mid M$ となり $\gcd(M,N)=1$ に反する。よって $\gcd(d,N)=1$ で $d\mid4D_{0}$。
+
+**Step 5（$\max(\abs F,\abs G)$ の下からの評価）.** 【主張：定数 $c_{1}>0$ で $\max(\abs F,\abs G)\ge c_{1}\max(\abs M,\abs N)^{4}$】$T\defeq2(1+2\abs b+8\abs c+\abs{b^{2}-4ac})$ とする。$\abs M\ge T\abs N$ なら $\abs{F-M^{4}}\le(2\abs b+8\abs c+\abs{b^{2}-4ac})M^{4}/T\le\frac12M^{4}$ で $\abs F\ge\frac12M^{4}$。$\abs M<T\abs N$ なら $\max(\abs M,\abs N)\le T\abs N$ で、$\abs{f_{1}}+\abs{g_{1}}\le C_{1}\max(\abs M,\abs N)^{3}$（$C_{1}$ は係数の絶対値の和）から、Step 3 より
+$$
+4\abs{D_{0}}\abs N^{7}\le C_{1}\max(\abs M,\abs N)^{3}\max(\abs F,\abs G)\le C_{1}T^{3}\abs N^{3}\max(\abs F,\abs G),
+$$
+$\max(\abs F,\abs G)\ge\frac{4\abs{D_{0}}}{C_{1}T^{3}}N^{4}\ge\frac{4\abs{D_{0}}}{C_{1}T^{7}}\max(\abs M,\abs N)^{4}$。
+
+**Step 6（結論）.** $H(2P)=\max(\abs F,\abs G)/d\ge\frac{c_{1}}{4\abs{D_{0}}}\max(\abs M,\abs N)^{4}=\frac{c_{1}}{4\abs{D_{0}}}H(P)^{4}$。対数をとって $\kappa\defeq\log\frac{4\abs{D_{0}}}{c_{1}}$（と除外した有限個の点の分）。
+:::
+
+## 降下定理 {#nt:sec-hd-descent}
+
+::: theorem 降下定理 {#nt:descent-theorem keywords="if an abelian group Gamma has a function h >= 0 with finitely many elements of bounded height, h(P + Q) <= 2 h(P) + kappa_Q, h(2P) >= 4 h(P) - kappa, and Gamma/2Gamma is finite, then Gamma is finitely generated, generated by coset representatives and the finitely many elements of height at most kappa + kappa'" index="降下定理|こうかていり, 無限降下法|むげんこうかほう" refname="降下定理"}
+アーベル群 $\Gamma$ と関数 $h:\Gamma\to\mathbb{R}_{\ge0}$ が次をみたすとする。
+1. 各 $M$ で $\{P:h(P)\le M\}$ は有限集合。
+2. 各 $Q\in\Gamma$ に定数 $\kappa_{Q}$ があって、すべての $P$ で $h(P+Q)\le2h(P)+\kappa_{Q}$。
+3. 定数 $\kappa$ があって、すべての $P$ で $h(2P)\ge4h(P)-\kappa$。
+4. $[\Gamma:2\Gamma]$ は有限。
+
+このとき $\Gamma$ は有限生成で、$\Gamma/2\Gamma$ の代表 $Q_{1},\dots,Q_{r}$ と、$h(P)\le\kappa+\kappa'$（$\kappa'\defeq\max_{i}\kappa_{-Q_{i}}$）の有限個の $P$ で生成される。
+:::
+
+::: intuition
+どの点も「代表 $Q_{i}$ を引いて 2 で割る」ことができ、2 で割ると高さはおよそ 4 分の 1、代表を引いても高々 2 倍なので、全体として高さはおよそ半分になる。これを繰り返せば高さの小さい有限個の点に行き着く：無限降下法である。
+:::
+
+::: proof
+**Step 1（降下の列）.** $P\in\Gamma$ について、$P=Q_{i_{1}}+2P_{1}$, $P_{1}=Q_{i_{2}}+2P_{2}$, … と順に書く（4 から可能）。
+
+**Step 2（高さの減少）.** 【主張：$h(P_{j})\le\frac12h(P_{j-1})+\frac{\kappa'+\kappa}4$】3 と 2 から $4h(P_{j})\le h(2P_{j})+\kappa=h(P_{j-1}-Q_{i_{j}})+\kappa\le2h(P_{j-1})+\kappa'+\kappa$。
+
+**Step 3（有限個への帰着）.** $h(P_{j-1})>\kappa'+\kappa$ なら Step 2 から $h(P_{j})<\frac34h(P_{j-1})$ なので、ある $n$ で $h(P_{n})\le\kappa'+\kappa$。$P=Q_{i_{1}}+2Q_{i_{2}}+\dots+2^{n-1}Q_{i_{n}}+2^{n}P_{n}$ で、$P_{n}$ は 1 の有限集合 $S\defeq\{h\le\kappa+\kappa'\}$ に入る。よって $\Gamma$ は $\{Q_{i}\}\cup S$ で生成される。
+:::
+
+::: corollary 高さの性質の楕円曲線への適用 {#nt:height-axioms-elliptic keywords="the height h on E(Q) satisfies conditions 1-3 of the descent theorem; Mordell's theorem reduces to the finiteness of E(Q)/2E(Q)" index="モーデルの定理への帰着|もーでるのていりへのきちゃく"}
+$E(\mathbb{Q})$ と高さ $h$ は \ref{nt:descent-theorem} の 1〜3 をみたす。したがって $[E(\mathbb{Q}):2E(\mathbb{Q})]$ が有限なら $E(\mathbb{Q})$ は有限生成である。
+:::
+
+::: proof
+\ref{nt:height-basic-bounds} の 1、\ref{nt:height-sum-bound}、\ref{nt:height-doubling-bound}。
+:::
+
+::: hypcheck
+- **整数係数・相異なる根**：分母の形（\ref{nt:rational-point-denominators}）と、$D_{0}\neq0$（Step 4・5 の約分の評価）に本質的。$f$ が重根をもつと $F$ と $G$ が共通因子をもち、2 倍で高さが 4 倍にならない。
+- **降下定理**：1 と 3 の組合せが本質的で、$\mathbb{Q}$ の加法群（$h=\log H$ で 2 倍の高さは高々定数しか増えない）では 3 が成り立たず、実際 $\mathbb{Q}$ は $\mathbb{Q}/2\mathbb{Q}=0$ なのに有限生成でない。
+:::
+
+## 問題 {#nt:sec-hd-problems}
+
+::: problem {#nt:prob-hd-height-growth}
+$y^{2}=x^{3}-2$ の $P=(3,5)$ について $H(P)$, $H(2P)$ を求め、$H(2P)/H(P)^{4}$ を計算せよ。
+:::
+
+::: solution
+$H(P)=3$, $x(2P)=\frac{129}{100}$ で $H(2P)=129$。$129/81\approx1.59$。（\ref{nt:height-doubling-bound} はこの比が定数以上であることを主張している。）
+:::
+
+::: problem {#nt:prob-hd-q-not-fg}
+$\Gamma=\mathbb{Q}$（加法群）、$h(t)=\log H(t)$ は \ref{nt:descent-theorem} の 1, 2, 4 をみたすが 3 をみたさないことを示せ。
+:::
+
+::: solution
+1：分子・分母の有界な有理数は有限個。2：$t=p/q$, $s=r/u$ について $t+s=\frac{pu+rq}{qu}$ で、$H(t+s)\le2H(t)H(s)$、したがって $h(t+s)\le h(t)+h(s)+\log2\le2h(t)+\kappa_{s}$。4：$\mathbb{Q}=2\mathbb{Q}$ で指数 1。3：$h(2t)\le h(t)+\log2$ なので、$h(t)$ が大きいと $4h(t)-\kappa$ より小さい。$\mathbb{Q}$ は有限生成でないので、3 は省けない。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 高さの議論は曲線の 2 等分点の有無を使わない。弱モーデル–ヴェイユの定理（$\Gamma/2\Gamma$ の有限性）だけが曲線の算術的な性質を使う（\ref[モーデルの定理]{nt:page-mordell}）。証明の流れは Silverman–Tate *Rational Points on Elliptic Curves* 第 III 章に沿っているが、手元に原典がないため、恒等式は自分で計算して確かめた。
+
+**前提を変えると.**
+- **標準的な高さ**：$\hat h(P)\defeq\lim_{n\to\infty}4^{-n}h(2^{n}P)$ は存在し、$\hat h(2P)=4\hat h(P)$, $\hat h(P+Q)+\hat h(P-Q)=2\hat h(P)+2\hat h(Q)$ をみたす 2 次形式になる（ネロン–テイト）。その行列式が楕円曲線の単数基準で、バーチ–スウィンナートン＝ダイアー予想に現れる。ここでは証明しない。
+- **ノースコットの有限性**：代数体上でも、次数と高さが有界な点は有限個（ノースコット）で、降下定理と合わせて一般のモーデル–ヴェイユの定理になる。
+
+**高い視点から：高さは「数論的な距離」.** 高さは、各素点での「大きさ」（分母の $p$ 進的な大きさと実数としての大きさ）を足し合わせた量で、積公式のおかげで座標の取り方にほとんどよらない。2 倍写像が高さを 4 倍にすることは、高さが「2 次形式」であることの現れで、格子のノルムのように振る舞う。比喩で言えば、$E(\mathbb{Q})$ の点は高さという距離で測った空間に散らばっていて、2 倍写像はその空間を一様に 2 倍に拡大する写像であり、拡大して有限個の「鋳型」で覆えるなら、空間は有限個の点で生成されるしかない。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-hd-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

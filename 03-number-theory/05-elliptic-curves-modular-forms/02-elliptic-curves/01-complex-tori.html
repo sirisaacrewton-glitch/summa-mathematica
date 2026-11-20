@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>複素トーラスと楕円曲線 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/05-elliptic-curves-modular-forms/02-elliptic-curves/01-complex-tori.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 複素トーラスと楕円曲線 {#nt:page-complex-tori keywords="complex torus C/Lambda, Weierstrass cubic y^2 = 4x^3 - g_2 x - g_3, point at infinity, the map u -> (p(u), p'(u)) is a bijection C/Lambda -> E(C), three points sum to zero iff collinear, addition formula for p, duplication formula, chord-tangent law corresponds to addition on C/Lambda, uniformization: every cubic y^2 = 4x^3 - a x - b with a^3 - 27 b^2 != 0 comes from a lattice, via surjectivity of j, homothetic lattices give isomorphic curves"}
+
+格子 $\Lambda\subseteq\mathbb{C}$ による商 $\mathbb{C}/\Lambda$（複素トーラス）は、ワイエルシュトラスの $\wp$ 関数によって、3 次曲線 $y^{2}=4x^{3}-g_{2}x-g_{3}$ の点の全体（無限遠点を含む）と一対一に対応する。この対応で $\mathbb{C}/\Lambda$ の足し算は、曲線の上の「3 点が一直線上にあれば和が $0$」という幾何的な規則（弦と接線の法則）になる。さらに、モジュラー不変量 $j$ が全射であることから、判別式が $0$ でないすべての 3 次曲線 $y^{2}=4x^{3}-ax-b$ がこうして格子から得られる（**一意化**）。このページは、次のページで任意の体の上の楕円曲線の群演算を定義し、その結合法則を確かめるための土台である。
+
+## 記法と定義の確認 {#nt:sec-ct-notation}
+
+::: notation
+- 格子 $\Lambda$、楕円関数、その位数、リウヴィルの定理（零点の個数＝極の個数、零点の和－極の和 $\in\Lambda$）、$\wp$ の性質（偶、位数 2、$\wp'$ は奇で位数 3）、微分方程式 $\wp'^{2}=4\wp^{3}-g_{2}\wp-g_{3}$、半周期 $\eta_{j}$ と $e_{j}=\wp(\eta_{j})$ が相異なることは \ref{cx:elliptic-function}, \ref{cx:elliptic-liouville}, \ref{cx:wp-properties}, \ref{cx:wp-differential-equation}, \ref{cx:half-periods}。
+- $g_{2}(\Lambda)=60G_{4}(\Lambda)$, $g_{3}(\Lambda)=140G_{6}(\Lambda)$, $\Delta(\Lambda)=g_{2}^{3}-27g_{3}^{2}$, $j=1728g_{2}^{3}/\Delta$、格子と上半平面の点の対応、$j$ が全単射であることは \ref{nt:lattices-homothety}, \ref{nt:eisenstein-series-modular}, \ref{nt:j-invariant}。
+- 体系は $\ZF$。
+:::
+
+## 3 次曲線と $\wp$ による写像 {#nt:sec-ct-map}
+
+::: definition ワイエルシュトラスの 3 次曲線 {#nt:weierstrass-cubic-complex keywords="for a, b in C with a^3 - 27 b^2 != 0, E(C) = {(x, y) in C^2 : y^2 = 4x^3 - a x - b} together with a point at infinity O; lines in the affine plane and the line at infinity" index="ワイエルシュトラスの 3 次曲線|わいえるしゅとらすのさんじきょくせん, 無限遠点|むげんえんてん" refname="ワイエルシュトラスの 3 次曲線"}
+$a,b\in\mathbb{C}$, $a^{3}-27b^{2}\neq0$ について
+$$
+E(\mathbb{C})\defeq\{(x,y)\in\mathbb{C}^{2}:y^{2}=4x^{3}-ax-b\}\cup\{O\}
+$$
+とする（$O$ は**無限遠点**。射影平面では $[0:1:0]$）。**直線**は、平面の直線 $\alpha x+\beta y+\gamma=0$ と、$O$ を通る「無限遠直線」とする。縦線 $x=c$ は $O$ を通るとみなす。
+:::
+
+::: intuition
+条件 $a^{3}-27b^{2}\neq0$ は、$4x^{3}-ax-b$ が重根をもたないこと、すなわち曲線に尖りや交差がないことを意味する。$O$ はすべての縦線が無限の彼方で交わる点で、曲線を射影平面で閉じたときに付け加わる 1 点である。
+:::
+
+::: theorem $\mathbb{C}/\Lambda$ と 3 次曲線 {#nt:torus-cubic-bijection keywords="phi(u) = (p(u), p'(u)) for u not in Lambda and phi(0) = O defines a bijection C/Lambda -> E(C) for the cubic with a = g_2(Lambda), b = g_3(Lambda)" index="複素トーラスと 3 次曲線|ふくそとーらすとさんじきょくせん" refname="C/Λ と 3 次曲線"}
+$\Lambda$ を格子、$a=g_{2}(\Lambda)$, $b=g_{3}(\Lambda)$ とする。$u\notin\Lambda$ で $\phi(u)\defeq(\wp(u),\wp'(u))$、$u\in\Lambda$ で $\phi(u)\defeq O$ とすると、$\phi$ は全単射 $\mathbb{C}/\Lambda\to E(\mathbb{C})$ を誘導する。
+:::
+
+::: intuition
+$\wp$ は複素トーラスの各点に $x$ 座標を与え、$\wp'$ が $y$ 座標を与える。$\wp$ は各値をちょうど 2 回（$u$ と $-u$）とり、その 2 点を $\wp'$ の符号が区別するので、トーラスの点と曲線の点が一対一に対応する。
+:::
+
+::: proof
+**Step 1（well-defined）.** $\wp,\wp'$ は $\Lambda$ 周期的で、微分方程式から $\phi(u)\in E(\mathbb{C})$。判別式 $a^{3}-27b^{2}=\Delta(\Lambda)\neq0$（\ref{cx:half-periods}）。
+
+**Step 2（全射）.** 【主張：$(x,y)\in E(\mathbb{C})$ に $\phi(u)=(x,y)$ となる $u$ がある】$\wp-x$ は位数 2 の楕円関数なので、\ref{cx:elliptic-liouville} の 3 から零点 $u$ をもつ。$\wp'(u)^{2}=4x^{3}-ax-b=y^{2}$ なので $\wp'(u)=\pm y$。$\wp'(-u)=-\wp'(u)$, $\wp(-u)=\wp(u)$ なので、$u$ か $-u$ が求めるもの。
+
+**Step 3（単射）.** 【主張：$\phi(u)=\phi(v)\neq O$ なら $v\equiv u$】$\wp-\wp(u)$ の零点は周期平行四辺形の中にちょうど 2 個（重複度込み）で、$u$ と $-u$。$u\not\equiv-u$ なら $v\equiv\pm u$、$u\equiv-u$（$2u\in\Lambda$）なら $v\equiv u$。$v\equiv-u\not\equiv u$ のときは $\wp'(u)=\wp'(v)=\wp'(-u)=-\wp'(u)$ から $\wp'(u)=0$ で、$\wp'$ の零点は半周期（$2u\in\Lambda$）なので矛盾。$\phi(u)=O$ は $u\in\Lambda$ と同値。
+:::
+
+## 足し算と共線性 {#nt:sec-ct-addition}
+
+::: theorem 3 点の和と共線性 {#nt:collinear-sum-zero keywords="for u_1, u_2, u_3 in C/Lambda, u_1 + u_2 + u_3 = 0 iff phi(u_1), phi(u_2), phi(u_3) lie on a line (counted with multiplicity: tangent lines, inflection points, vertical lines through O)" index="共線性と足し算|きょうせんせいとたしざん" refname="3 点の和と共線性"}
+直線 $\ell$ と $E(\mathbb{C})$ の交わりを重複度込みで数えると、ちょうど 3 点 $\phi(u_{1}),\phi(u_{2}),\phi(u_{3})$ で、$u_{1}+u_{2}+u_{3}\equiv0\pmod\Lambda$。逆に $u_{1}+u_{2}+u_{3}\equiv0$ なら、3 点 $\phi(u_{i})$ を（重複度込みで）交わりとする直線がある。ここで直線 $\ell$ と曲線の交わりの重複度は、次のように楕円関数の零点の位数で定める：$\ell:y=mx+c$ なら $\wp'-m\wp-c$ の零点、$\ell:x=c$ なら $\wp-c$ の零点と $O$（重複度 1）、無限遠直線なら $O$（重複度 3）。
+:::
+
+::: intuition
+直線 $y=mx+c$ と曲線の交点は、楕円関数 $\wp'-m\wp-c$ の零点である。この関数は $u=0$ に 3 位の極をもつだけなので、零点も 3 個で、リウヴィルの定理から零点の和は極の和 $0$ と $\Lambda$ を法として等しい。こうして「一直線上の 3 点の和は $0$」が、楕円関数の零点の和の法則そのものになる。
+:::
+
+::: proof
+**Step 1（$y=mx+c$）.** 【主張：直線 $y=mx+c$ の交点は 3 個で和は $0$】$f\defeq\wp'-m\wp-c$ は $\Lambda$ の点にだけ 3 位の極をもつ（$\wp'$ の主要部 $-2u^{-3}$）。\ref{cx:elliptic-liouville} の 3・4 から、周期平行四辺形の中に零点がちょうど 3 個 $u_{1},u_{2},u_{3}$（重複度込み）あり、$u_{1}+u_{2}+u_{3}\equiv3\cdot0=0$。$f(u)=0$ は $\phi(u)$ が直線上にあることと同値なので、交わりは $\phi(u_{i})$。
+
+**Step 2（縦線と無限遠直線）.** 【主張：縦線と無限遠直線でも和は $0$】$x=c$：$\wp-c$ の零点は $u,-u$ で、$O=\phi(0)$ を加えて和は $0$。無限遠直線：$O$ が 3 重で $0+0+0=0$。
+
+**Step 3（逆）.** 【主張：和が $0$ の 3 点を通る直線がある】$u_{1}+u_{2}+u_{3}\equiv0$ とする。$u_{1}\equiv0$ なら $u_{3}\equiv-u_{2}$ で、縦線 $x=\wp(u_{2})$（$u_{2}\equiv0$ なら無限遠直線）。$u_{i}\not\equiv0$（$i=1,2,3$）とする。$\phi(u_{1})\neq\phi(u_{2})$ で $\wp(u_{1})\neq\wp(u_{2})$ なら 2 点を通る直線 $y=mx+c$ をとると、Step 1 から第 3 の交点 $u'$ は $u'\equiv-u_{1}-u_{2}\equiv u_{3}$。$\wp(u_{1})=\wp(u_{2})$ なら $u_{2}\equiv-u_{1}$（$u_{2}\not\equiv u_{1}$ のとき）で $u_{3}\equiv0$ となり除外した場合。$u_{1}\equiv u_{2}$ なら $\phi(u_{1})$ での接線（$\wp'(u_{1})\neq0$ のとき $m=\wp''(u_{1})/\wp'(u_{1})$、$f$ は $u_{1}$ で 2 位以上の零点）をとって同様。$\wp'(u_{1})=0$ なら $2u_{1}\equiv0$ で $u_{3}\equiv0$、除外した場合。
+:::
+
+::: corollary 加法公式 {#nt:wp-addition-formula keywords="p(u + v) = -p(u) - p(v) + (1/4) ((p'(u) - p'(v)) / (p(u) - p(v)))^2 for p(u) != p(v); duplication p(2u) = -2 p(u) + (1/4) (p''(u)/p'(u))^2" index="ワイエルシュトラスの加法公式|わいえるしゅとらすのかほうこうしき" refname="℘ の加法公式"}
+$\wp(u)\neq\wp(v)$ なら
+$$
+\wp(u+v)=-\wp(u)-\wp(v)+\frac14\Bigl(\frac{\wp'(u)-\wp'(v)}{\wp(u)-\wp(v)}\Bigr)^{2},
+$$
+$\wp'(u)\neq0$ なら $\wp(2u)=-2\wp(u)+\frac14\bigl(\frac{\wp''(u)}{\wp'(u)}\bigr)^{2}$。
+:::
+
+::: intuition
+2 点を通る直線と曲線の第 3 の交点の $x$ 座標は、3 次方程式の根と係数の関係から傾きの 2 乗で決まる。これが $\wp(u+v)$ を $\wp(u),\wp(v)$ とその導関数で表す式になる。
+:::
+
+::: proof
+直線 $y=mx+c$（$m$ は 2 点の傾き、または接線の傾き）上の点の $x$ 座標は $4x^{3}-ax-b-(mx+c)^{2}=0$ の根で、\ref{nt:collinear-sum-zero} からそれは $\wp(u)$, $\wp(v)$, $\wp(-u-v)=\wp(u+v)$（重複度込み）。根と係数の関係で 3 根の和は $m^{2}/4$。
+:::
+
+::: definition 弦と接線の法則 {#nt:chord-tangent-complex keywords="group law on E(C): P + Q is the reflection in the x-axis of the third intersection point of the line PQ (tangent if P = Q); O is the identity; -P is the reflection" index="弦と接線の法則|げんとせっせんのほうそく" refname="弦と接線の法則"}
+$P,Q\in E(\mathbb{C})$ について、$P,Q$ を通る直線（$P=Q$ なら接線）と $E$ の第 3 の交点を $R$ とし、$R$ と $O$ を通る直線（縦線）の第 3 の交点を $P+Q$ と定める（$R=(x,y)$ なら $P+Q=(x,-y)$、$R=O$ なら $P+Q=O$）。
+:::
+
+::: intuition
+2 点を結ぶ直線（同じ点なら接線）が曲線と交わる 3 つ目の点を、$x$ 軸について折り返したものを和とする。$O$ は無限の彼方の点で、足し算の単位元になる。
+:::
+
+::: theorem 弦と接線の法則は足し算 {#nt:chord-tangent-is-addition keywords="phi(u + v) = phi(u) + phi(v) for the chord-tangent law; E(C) with the chord-tangent law is an abelian group isomorphic to C/Lambda" index="楕円曲線の群構造（複素）|だえんきょくせんのぐんこうぞう" refname="弦と接線の法則は足し算"}
+$\phi(u+v)=\phi(u)+\phi(v)$。特に $E(\mathbb{C})$ は弦と接線の法則でアーベル群になり、$\phi$ は群同型 $\mathbb{C}/\Lambda\cong E(\mathbb{C})$、単位元は $O$、$-(x,y)=(x,-y)$。
+:::
+
+::: intuition
+一直線上の 3 点のトーラスの座標の和は $0$ なので、弦と接線の作図はトーラスの上の足し算そのものである。作図だけからは見えにくい結合法則も、トーラスの足し算から自動的に従う。
+:::
+
+::: proof
+\ref{nt:collinear-sum-zero} から、$\phi(u),\phi(v)$ を通る直線の第 3 の交点は $\phi(-u-v)$。$\phi(-u-v)$ と $O=\phi(0)$ を通る直線の第 3 の交点は $\phi(u+v)$（和が $0$）。よって $\phi(u)+\phi(v)=\phi(u+v)$。群の公理は $\mathbb{C}/\Lambda$ から移る。$\phi(-u)=(\wp(u),-\wp'(u))$。
+:::
+
+## 一意化 {#nt:sec-ct-uniformization}
+
+::: theorem 一意化定理 {#nt:uniformization-theorem keywords="for every a, b in C with a^3 - 27 b^2 != 0 there is a lattice Lambda with g_2(Lambda) = a and g_3(Lambda) = b; proof via the surjectivity of j and homothety g_2(lambda Lambda) = lambda^{-4} g_2(Lambda)" index="一意化定理（楕円曲線）|いちいかていり" refname="一意化定理"}
+$a,b\in\mathbb{C}$, $a^{3}-27b^{2}\neq0$ なら、$g_{2}(\Lambda)=a$, $g_{3}(\Lambda)=b$ となる格子 $\Lambda$ がある。したがって $y^{2}=4x^{3}-ax-b$ の $E(\mathbb{C})$ は、ある複素トーラス $\mathbb{C}/\Lambda$ と群として同型。
+:::
+
+::: intuition
+$j$ は格子の「形」を一つの複素数で表し、しかもすべての値をとる。$a,b$ から作った $j$ の値をもつ格子を一つとれば、形は合っているので、あとは格子を何倍かに拡大・回転して $g_{2},g_{3}$ の値そのものを合わせればよい。
+:::
+
+::: proof
+**Step 1（$j$ を合わせる）.** $J\defeq1728a^{3}/(a^{3}-27b^{2})$ とする。\ref{nt:j-invariant} の 2 から $j(z_{0})=J$ となる $z_{0}\in H$ があり、$\Lambda_{0}\defeq\mathbb{Z}z_{0}+\mathbb{Z}$、$a_{0}=g_{2}(\Lambda_{0})$, $b_{0}=g_{3}(\Lambda_{0})$ とすると $\frac{a_{0}^{3}}{a_{0}^{3}-27b_{0}^{2}}=\frac{a^{3}}{a^{3}-27b^{2}}$、すなわち $a_{0}^{3}b^{2}=a^{3}b_{0}^{2}$。
+
+**Step 2（拡大率）.** 【主張：$\lambda^{-4}a_{0}=a$, $\lambda^{-6}b_{0}=b$ となる $\lambda\in\mathbb{C}^{\times}$ がある】$g_{2}(\lambda\Lambda)=\lambda^{-4}g_{2}(\Lambda)$, $g_{3}(\lambda\Lambda)=\lambda^{-6}g_{3}(\Lambda)$ に注意。$a=0$ なら $J=0$ で $a_{0}=0$、$b,b_{0}\neq0$（判別式）なので $\lambda^{6}=b_{0}/b$ をとる。$b=0$ なら $J=1728$ で $b_{0}=0$、$\lambda^{4}=a_{0}/a$。$ab\neq0$ なら $a_{0}b_{0}\neq0$（$J\neq0,1728$）で、$\mu\defeq\frac{a_{0}b}{ab_{0}}$ とおくと $\mu^{2}=\frac{a_{0}^{2}b^{2}}{a^{2}b_{0}^{2}}=\frac{a_{0}^{2}\cdot a^{3}b_{0}^{2}/a_{0}^{3}}{a^{2}b_{0}^{2}}=\frac{a}{a_{0}}$ と $\mu^{3}=\frac{a_{0}^{3}b^{3}}{a^{3}b_{0}^{3}}=\frac{b}{b_{0}}$（Step 1 の関係式）。$\lambda^{2}\defeq\mu^{-1}$ となる $\lambda$ をとれば $\lambda^{-4}=\mu^{2}=a/a_{0}$, $\lambda^{-6}=\mu^{3}=b/b_{0}$。
+
+**Step 3（結論）.** $\Lambda\defeq\lambda\Lambda_{0}$ が求めるもの。後半は \ref{nt:chord-tangent-is-addition}。
+:::
+
+::: example
+$y^{2}=4x^{3}-4x$（$a=4$, $b=0$）は $j=1728$ で、正方格子 $\mathbb{Z}i+\mathbb{Z}$ の相似の格子から来る。2 等分点（$\wp'=0$）は $(0,0)$, $(\pm1,0)$ で、$\mathbb{C}/\Lambda$ の 3 つの半周期に対応する。$x\mapsto-x$, $y\mapsto iy$ は曲線の自己同型で、$u\mapsto iu$（正方格子の回転）に対応する。
+:::
+
+::: hypcheck
+- **判別式 $\neq0$**：$\wp$ から来る曲線では自動的に成り立ち（半周期の値が相異なる）、一意化では $j$ の定義（分母 $\neq0$）と Step 2 の場合分けに使った。判別式が $0$ の曲線（$y^{2}=4x^{3}$ など）は、格子からは得られない（尖点や結節点をもつ）。
+- **共線性**：$\wp'$ の極が 3 位であること（$\wp'-m\wp-c$ の位数が 3）が本質的で、これが「直線と 3 次曲線の交点は 3 個」の解析的な理由である。
+:::
+
+## 問題 {#nt:sec-ct-problems}
+
+::: problem {#nt:prob-ct-two-torsion}
+$\mathbb{C}/\Lambda$ の 2 等分点（$2u\equiv0$）が $E(\mathbb{C})$ では $O$ と $y=0$ の 3 点に対応することを示せ。
+:::
+
+::: solution
+$2u\equiv0$, $u\not\equiv0$ の $u$ は 3 つの半周期で、\ref{cx:half-periods} から $\wp'(u)=0$、$\phi(u)=(e_{j},0)$。逆に $\phi(u)=(x,0)$ なら $\phi(-u)=(x,-0)=\phi(u)$ で、単射性から $-u\equiv u$。
+:::
+
+::: problem {#nt:prob-ct-three-torsion}
+$P=\phi(u)$ が $3P=O$ をみたす（$u\not\equiv0$）$\iff$ $P$ が曲線の変曲点（接線との交わりの重複度が 3）であることを示せ。
+:::
+
+::: solution
+$3u\equiv0$ $\iff$ $u+u+u\equiv0$ $\iff$（\ref{nt:collinear-sum-zero}）$P,P,P$ を交わりとする直線がある、すなわち $P$ での接線が $P$ で重複度 3 で交わる。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 弦と接線の法則が群になることは、ここでは $\mathbb{C}/\Lambda$ の足し算を移すことで示し、結合法則の直接の計算を避けた。
+
+**前提を変えると.**
+- **同型**：2 つの格子が定める曲線は、格子が相似 $\iff$ $j$ が等しい $\iff$ 曲線が $(x,y)\mapsto(\lambda^{-2}x,\lambda^{-3}y)$ の形の変換で移り合う。したがって $\mathbb{C}$ 上の楕円曲線の同型類は $j\in\mathbb{C}$ で分類される（\ref[演習]{nt:sec-ct-exercises}）。
+- **正則写像**：$\mathbb{C}/\Lambda\to\mathbb{C}/\Lambda'$ の正則写像で $0$ を $0$ に送るものは $u\mapsto\alpha u$（$\alpha\Lambda\subseteq\Lambda'$）だけで、$\alpha\Lambda\subseteq\Lambda$ となる $\alpha\notin\mathbb{Z}$ があるのは、$\Lambda$ が虚 2 次体の整数環の分数イデアルに相似なとき（虚数乗法）に限る。ここでは証明しない。
+
+**高い視点から：解析と代数の橋.** 複素トーラスは「平面を格子で割った」解析的な対象、3 次曲線は「多項式の零点」の代数的な対象で、$\wp$ はその 2 つを同一視する。群演算は解析側では自明な足し算で、代数側では非自明な弦と接線の作図である。この対応のおかげで、代数側の群演算を任意の体（有理数体や有限体）に持ち込むことができ、そこから数論の問題（有理点、合同ゼータ関数）が生まれる。比喩で言えば、$\wp$ はドーナツの表面に描いた座標を、平面の 3 次曲線に写す「設計図」で、ドーナツの上を真っ直ぐ歩くことが曲線の上では弦と接線の作図になる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-ct-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

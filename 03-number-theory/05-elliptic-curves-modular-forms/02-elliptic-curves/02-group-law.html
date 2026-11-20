@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ワイエルシュトラス方程式と群演算 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/05-elliptic-curves-modular-forms/02-elliptic-curves/02-group-law.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ワイエルシュトラス方程式と群演算 {#nt:page-group-law keywords="elliptic curve over a subfield k of C in short Weierstrass form y^2 = x^3 + A x + B, discriminant -16(4A^3 + 27B^2), E(k) with the point O, explicit addition and duplication formulas, the chord-tangent law agrees with addition on C/Lambda, associativity via uniformization, E(k) is an abelian group, j-invariant 1728 * 4A^3/(4A^3 + 27B^2), change of variables (x, y) -> (u^2 x, u^3 y), curves over C with the same j are isomorphic, examples y^2 = x^3 - 2 and y^2 = x^3 - x"}
+
+有理数体などの体 $k$ 上の**楕円曲線**は、方程式 $y^{2}=x^{3}+Ax+B$（判別式 $\neq0$）で与えられ、その $k$ 有理点の全体 $E(k)$ に、弦と接線の法則で群の構造が入る。演算は $k$ の四則演算で書けるので $E(k)$ は閉じているが、結合法則を代数的に直接確かめるのは長い計算になる。このページでは、$k$ が複素数体の部分体の場合に、前のページの一意化を使って $E(\mathbb{C})\cong\mathbb{C}/\Lambda$ に埋め込み、結合法則を $\mathbb{C}/\Lambda$ の足し算から受け取る。
+
+## 記法と定義の確認 {#nt:sec-gl-notation}
+
+::: notation
+- $y^{2}=4x^{3}-ax-b$ の $E(\mathbb{C})$ と $\phi:\mathbb{C}/\Lambda\to E(\mathbb{C})$、一直線上の 3 点と足し算、℘ の加法、弦と接線の作図、格子からの実現は \ref{nt:torus-cubic-bijection}, \ref{nt:collinear-sum-zero}, \ref{nt:wp-addition-formula}, \ref{nt:chord-tangent-is-addition}, \ref{nt:uniformization-theorem}。$\wp''=6\wp^{2}-g_{2}/2$ は \ref{cx:wp-differential-equation} を微分して得られる。
+- $k$ は $\mathbb{C}$ の部分体（$\mathbb{Q}$, $\mathbb{R}$, 代数体など）。
+- 体系は $\ZF$。
+:::
+
+## 楕円曲線と群演算 {#nt:sec-gl-definition}
+
+::: definition 楕円曲線 {#nt:elliptic-curve keywords="elliptic curve E over k in short Weierstrass form y^2 = x^3 + A x + B with A, B in k and Delta = -16(4A^3 + 27B^2) != 0; E(k) = affine solutions in k^2 together with O" index="楕円曲線|だえんきょくせん, ワイエルシュトラス方程式|わいえるしゅとらすほうていしき, 判別式（楕円曲線）|はんべつしき, 有理点|ゆうりてん" refname="楕円曲線"}
+$A,B\in k$ で $\Delta\defeq-16(4A^{3}+27B^{2})\neq0$ のとき、方程式 $E:y^{2}=x^{3}+Ax+B$ を $k$ 上の**楕円曲線**（ワイエルシュトラスの標準形）といい、$\Delta$ をその**判別式**という。$k\subseteq K\subseteq\mathbb{C}$ について $E(K)\defeq\{(x,y)\in K^{2}:y^{2}=x^{3}+Ax+B\}\cup\{O\}$ を $E$ の **$K$ 有理点**の集合という。
+:::
+
+::: intuition
+判別式 $\Delta\neq0$ は $x^{3}+Ax+B$ が重根をもたないことと同値で、曲線が滑らかであることを意味する。一般の 3 次式 $y^{2}=x^{3}+ax^{2}+bx+c$ も $x\mapsto x-a/3$ でこの形になるので、標準形で議論して一般性は失われない（標数 $0$）。
+:::
+
+::: definition 加法の公式 {#nt:addition-formulas keywords="P + O = P; if x_1 = x_2 and y_1 = -y_2 then P_1 + P_2 = O; otherwise lambda = (y_2 - y_1)/(x_2 - x_1) or (3x_1^2 + A)/(2y_1), nu = y_1 - lambda x_1, x_3 = lambda^2 - x_1 - x_2, y_3 = -(lambda x_3 + nu); -(x, y) = (x, -y)" index="加法公式（楕円曲線）|かほうこうしき, 倍加公式|ばいかこうしき" refname="加法の公式"}
+$E(K)$ に演算 $+$ を次で定める。$P+O=O+P=P$。$P_{i}=(x_{i},y_{i})$（$i=1,2$）について、$x_{1}=x_{2}$ かつ $y_{1}=-y_{2}$ なら $P_{1}+P_{2}=O$。そうでなければ
+$$
+\lambda=\begin{cases}\dfrac{y_{2}-y_{1}}{x_{2}-x_{1}}&(x_{1}\neq x_{2})\\[2mm]\dfrac{3x_{1}^{2}+A}{2y_{1}}&(P_{1}=P_{2},\ y_{1}\neq0)\end{cases},\qquad\nu=y_{1}-\lambda x_{1},
+$$
+$$
+P_{1}+P_{2}\defeq(x_{3},y_{3}),\quad x_{3}=\lambda^{2}-x_{1}-x_{2},\quad y_{3}=-(\lambda x_{3}+\nu).
+$$
+$-(x,y)\defeq(x,-y)$, $-O\defeq O$。
+:::
+
+::: intuition
+$\lambda$ は $P_{1},P_{2}$ を通る直線（$P_{1}=P_{2}$ なら接線）の傾きで、直線 $y=\lambda x+\nu$ を曲線の式に代入した 3 次式 $x^{3}-\lambda^{2}x^{2}+\cdots$ の 3 根の和が $\lambda^{2}$ なので、第 3 の交点の $x$ 座標は $\lambda^{2}-x_{1}-x_{2}$。その点を $x$ 軸で折り返したものが和である。
+:::
+
+::: theorem 楕円曲線の群構造 {#nt:elliptic-group-law keywords="for k contained in C, E(k) with the chord-tangent law is an abelian group with identity O and inverse (x, -y); the formulas agree with addition on C/Lambda under (p(u), p'(u)/2); E(k) is a subgroup of E(C)" index="楕円曲線の群構造|だえんきょくせんのぐんこうぞう, モーデル–ヴェイユ群|もーでるゔぇいゆぐん" refname="楕円曲線の群構造"}
+$E:y^{2}=x^{3}+Ax+B$ を $k\subseteq\mathbb{C}$ 上の楕円曲線とする。
+1. $g_{2}(\Lambda)=-4A$, $g_{3}(\Lambda)=-4B$ となる格子 $\Lambda$ があり、$\psi(u)\defeq(\wp(u),\frac12\wp'(u))$（$u\notin\Lambda$）, $\psi(0)\defeq O$ は全単射 $\mathbb{C}/\Lambda\to E(\mathbb{C})$ で、$\psi(u+v)=\psi(u)+\psi(v)$（右辺は加法の公式）。
+2. $E(\mathbb{C})$ は加法の公式でアーベル群で、$E(k)$ はその部分群である。
+:::
+
+::: intuition
+有理数係数の曲線でも、複素数の点まで広げれば複素トーラスと同じ群になる。有理点どうしの和は有理数の四則演算で計算できるので、有理点は部分群をなす。
+:::
+
+::: proof
+**Step 1（格子と曲線の対応）.** $a\defeq-4A$, $b\defeq-4B$ とすると $a^{3}-27b^{2}=-64A^{3}-432B^{2}=\Delta\neq0$。\ref{nt:uniformization-theorem} から $g_{2}(\Lambda)=a$, $g_{3}(\Lambda)=b$ の $\Lambda$ がある。$E_{c}:Y^{2}=4X^{3}-aX-b$ と $E$ は $(X,Y)\mapsto(X,Y/2)$ で対応し（$Y^{2}/4=X^{3}+AX+B$）、直線を直線に写す。\ref{nt:torus-cubic-bijection} から $\psi$ は全単射。
+
+**Step 2（$x_{1}\neq x_{2}$ の場合）.** 【主張：$\psi(u_{1})+\psi(u_{2})=\psi(u_{1}+u_{2})$】$P_{i}=\psi(u_{i})$ とすると $\wp(u_{1})\neq\wp(u_{2})$。$E$ の傾き $\lambda$ は $E_{c}$ の傾き $m$ の $\frac12$ 倍なので、\ref{nt:wp-addition-formula} から $\wp(u_{1}+u_{2})=-x_{1}-x_{2}+\frac{m^{2}}4=\lambda^{2}-x_{1}-x_{2}=x_{3}$。\ref{nt:collinear-sum-zero} から $P_{1},P_{2}$ を通る直線の第 3 の交点は $\psi(-u_{1}-u_{2})=(x_{3},\lambda x_{3}+\nu)$、したがって $\psi(u_{1}+u_{2})=(x_{3},-(\lambda x_{3}+\nu))$。
+
+**Step 3（$P_{1}=P_{2}$, $y_{1}\neq0$ の場合）.** $\wp'(u_{1})=2y_{1}\neq0$。$E_{c}$ の接線の傾きは $\wp''/\wp'=\frac{6x_{1}^{2}-a/2}{2y_{1}}=\frac{6x_{1}^{2}+2A}{2y_{1}}$ で、$E$ では $\frac12$ 倍の $\frac{3x_{1}^{2}+A}{2y_{1}}=\lambda$。倍加公式（\ref{nt:wp-addition-formula}）と \ref{nt:collinear-sum-zero}（接線と第 3 の交点 $\psi(-2u_{1})$）から Step 2 と同様。
+
+**Step 4（逆元と $O$）.** $x_{1}=x_{2}$, $y_{1}=-y_{2}$ なら $\psi(u_{2})=\psi(-u_{1})$ で $u_{1}+u_{2}\equiv0$、$\psi(0)=O$。$P+O=P$ は $u+0=u$。
+
+**Step 5（2）.** Step 2〜4 から $\psi$ は加法の公式を $\mathbb{C}/\Lambda$ の足し算に写すので、$E(\mathbb{C})$ はアーベル群。$O\in E(k)$ で、$E(k)$ の点の和と逆元は公式から $k$ の元を座標にもつので、$E(k)$ は部分群。
+:::
+
+::: example
+$E:y^{2}=x^{3}-2$, $P=(3,5)\in E(\mathbb{Q})$。$\lambda=\frac{3\cdot9}{2\cdot5}=\frac{27}{10}$, $\nu=5-\frac{81}{10}=-\frac{31}{10}$、$x(2P)=\frac{729}{100}-6=\frac{129}{100}$, $y(2P)=-(\frac{27}{10}\cdot\frac{129}{100}-\frac{31}{10})=-(\frac{3483}{1000}-\frac{3100}{1000})=-\frac{383}{1000}$。確かめ：$(\frac{129}{100})^{3}-2=\frac{2146689-2000000}{10^{6}}=\frac{146689}{10^{6}}=(\frac{383}{1000})^{2}$。分母が $10^{2}$, $10^{3}$ と大きくなっていくことに注意（次のページの捩れ点の議論の鍵）。
+:::
+
+::: example
+$E:y^{2}=x^{3}-x$ では $O$, $(0,0)$, $(1,0)$, $(-1,0)$ はいずれも位数 1 または 2（$y=0$ の点は $-P=P$）で、$\{O,(0,0),(\pm1,0)\}\cong(\mathbb{Z}/2)^{2}$ は $E(\mathbb{Q})$ の部分群。
+:::
+
+## $j$ 不変量と同型 {#nt:sec-gl-isomorphism}
+
+::: proposition $j$ 不変量と座標変換 {#nt:j-invariant-curve keywords="j(E) = 1728 * 4A^3/(4A^3 + 27B^2); for u in k^x, (x, y) -> (u^2 x, u^3 y) is a group isomorphism E_{A,B}(K) -> E_{u^4 A, u^6 B}(K) preserving j; over C, curves with equal j are related by such a change of variables" index="j 不変量（楕円曲線）|じぇいふへんりょう" refname="j 不変量と座標変換"}
+$E=E_{A,B}$ について $j(E)\defeq1728\frac{4A^{3}}{4A^{3}+27B^{2}}$ とする。
+1. $u\in k^{\times}$ について $(x,y)\mapsto(u^{2}x,u^{3}y)$, $O\mapsto O$ は群同型 $E_{A,B}(K)\to E_{u^{4}A,u^{6}B}(K)$ で、$j$ は変わらない。
+2. $j(E_{A,B})=j(E_{A',B'})$ なら、$A'=u^{4}A$, $B'=u^{6}B$ となる $u\in\mathbb{C}^{\times}$ がある。
+3. $j(E)$ は、対応する格子のモジュラー不変量 $j(\Lambda)=1728g_{2}^{3}/(g_{2}^{3}-27g_{3}^{2})$ に等しい。
+:::
+
+::: intuition
+座標を $(u^{2}x,u^{3}y)$ と伸縮すると係数は $(u^{4}A,u^{6}B)$ に変わるが、$A^{3}$ と $B^{2}$ の比は変わらない。この比を表す $j$ が、複素数の上で楕円曲線の同型類を完全に区別する。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：座標の伸縮は群同型で $j$ を保つ】$(u^{3}y)^{2}=u^{6}(x^{3}+Ax+B)=(u^{2}x)^{3}+u^{4}A(u^{2}x)+u^{6}B$。加法の公式で $\lambda\mapsto u\lambda$, $x_{3}\mapsto u^{2}x_{3}$, $y_{3}\mapsto u^{3}y_{3}$ と斉次に変わるので準同型。逆は $u^{-1}$。$j$ は $A^{3}$ と $B^{2}$ の次数 12 の比なので不変。
+
+**Step 2（2）.** 【主張：$j$ が等しければ伸縮で移り合う】\ref{nt:uniformization-theorem} の Step 2 と同じ場合分け（$A=0$, $B=0$, $AB\neq0$）で、$\mu$ を作り $u^{2}\defeq\mu$ の $u$ をとる。
+
+**Step 3（3）.** 【主張：曲線の $j$ と格子の $j$ は一致】$g_{2}=-4A$, $g_{3}=-4B$ を代入すると $\frac{1728(-4A)^{3}}{(-4A)^{3}-27(4B)^{2}}=\frac{1728\cdot64A^{3}}{64A^{3}+432B^{2}}=1728\frac{4A^{3}}{4A^{3}+27B^{2}}$。
+:::
+
+::: hypcheck
+- **$k\subseteq\mathbb{C}$**：結合法則を一意化から受け取るために使った。有限体や $p$ 進体の上でも加法の公式で群になる（結合法則は代数的な計算か、因子類群の議論で示される。標準的な教科書、たとえば Silverman *The Arithmetic of Elliptic Curves* 第 III 章にある）が、ここでは証明しない。$p$ 進体 $\mathbb{Q}_{p}$ は $\mathbb{C}$ に埋め込めるが、その埋め込みの存在には選択公理が要る。
+- **判別式 $\neq0$**：一意化定理の仮定。$\Delta=0$ の曲線（$y^{2}=x^{3}$ など）では特異点を除いた点が群になるが、それは $k$ の加法群や乗法群と同型で、楕円曲線ではない。
+- **標準形**：標数 $2,3$ では $y^{2}=x^{3}+Ax+B$ の形にできず、一般のワイエルシュトラス方程式 $y^{2}+a_{1}xy+a_{3}y=x^{3}+\cdots$ が要る。
+:::
+
+## 問題 {#nt:sec-gl-problems}
+
+::: problem {#nt:prob-gl-sum}
+$E:y^{2}=x^{3}+17$ 上の $P=(-2,3)$, $Q=(-1,4)$ について $P+Q$ を求めよ。
+:::
+
+::: solution
+$\lambda=\frac{4-3}{-1+2}=1$, $\nu=3-1\cdot(-2)=5$。$x_{3}=1+2+1=4$, $y_{3}=-(4+5)=-9$。$P+Q=(4,-9)$。確かめ：$4^{3}+17=81=(-9)^{2}$。
+:::
+
+::: problem {#nt:prob-gl-isomorphic}
+$y^{2}=x^{3}+x$ と $y^{2}=x^{3}+4x$ は $\mathbb{Q}$ 上の座標変換 $(x,y)\mapsto(u^{2}x,u^{3}y)$ で移り合うか。$\mathbb{C}$ 上ではどうか。
+:::
+
+::: solution
+$4=u^{4}\cdot1$, $0=u^{6}\cdot0$ をみたす $u$ は $u^{4}=4$、$u=\pm\sqrt2,\pm\sqrt2i$ で、$\mathbb{Q}$ にはない（$u^{2}=\pm2$）。$\mathbb{C}$ 上では $u=\sqrt2$ で移り合う（どちらも $j=1728$）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 結合法則の証明は、群 $\mathbb{C}/\Lambda$ の結合法則と、加法の公式が $\mathbb{C}/\Lambda$ の足し算と一致することだけを使い、多項式の恒等式の計算は使わない。
+
+**前提を変えると.**
+- **モーデル–ヴェイユの定理**：代数体 $K$ について $E(K)$ は有限生成アーベル群である。$K=\mathbb{Q}$ で 2 等分点をもつ曲線の場合を \ref[モーデルの定理]{nt:page-mordell} で証明する。
+- **ハッセの定理**：素数 $p\nmid\Delta$ について、$E$ を $\bmod p$ で還元した曲線の点の数は $\abs{\#E(\mathbb{F}_{p})-(p+1)}\le2\sqrt p$ をみたす。ここでは証明しない。
+- **同種写像**：$E\to E'$ の群準同型で有理式で書けるもの（同種写像）は、$\mathbb{C}$ 上では $\mathbb{C}/\Lambda\to\mathbb{C}/\Lambda'$, $u\mapsto\alpha u$（$\alpha\Lambda\subseteq\Lambda'$）に対応する。
+
+**高い視点から：群構造は「直線束」から.** 弦と接線の法則は、曲線上の点 $P$ に因子 $P-O$ を対応させる写像 $E\to\operatorname{Pic}^{0}(E)$ が全単射であること（リーマン–ロッホの定理の帰結）によって、因子類群の群構造を点に移したものとして代数的に理解できる。「3 点が一直線上にある」ことは「$P+Q+R-3O$ が直線という関数の因子」であることに他ならない。比喩で言えば、$\mathbb{C}$ の上ではドーナツの上の足し算が先にあって曲線はその影だったが、一般の体の上では影（曲線と直線）しかなく、影の幾何から足し算を組み立て直すのが代数幾何の仕事である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-gl-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
