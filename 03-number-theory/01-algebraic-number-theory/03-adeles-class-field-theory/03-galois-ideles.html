@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ガロア拡大のイデールと局所コホモロジー | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/01-algebraic-number-theory/03-adeles-class-field-theory/03-galois-ideles.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ガロア拡大のイデールと局所コホモロジー {#nt:page-galois-ideles keywords="Galois action on places, transitivity on places above v, decomposition group G_w = Gal(L_w/K_v), local and global ramification index and residue degree, completely split places, idele group of L as a G-module, semilocal components are coinduced modules, I_L^G = I_K, C_L^G = C_K, norm of ideles is the product of local norms, cohomologically trivial open subgroup of the units, Herbrand quotient of local units h(U_L) = 1, |K^x / N L^x| = n for cyclic local extensions, norm groups contain open subgroups"}
+
+大域類体論の第一歩は、ガロア拡大 $L/K$ について、イデール群 $I_{L}$ を $G=\operatorname{Gal}(L/K)$ 加群として理解することである。$v$ の上の素点 $w$ たちは $G$ で入れ替えられ、$v$ の上の成分の積 $\prod_{w\mid v}L_{w}^{\times}$ は、分解群 $G_{w}$ の加群 $L_{w}^{\times}$ からの余誘導加群になる。シャピロの補題により、$I_{L}$ のコホモロジーは局所体 $L_{w}/K_{v}$ のコホモロジーに帰着する。このページでは、この帰着の仕組みと、局所的な入力として「巡回拡大 $L_{w}/K_{v}$ で $[K_{v}^{\times}:N(L_{w}^{\times})]=[L_{w}:K_{v}]$」を、局所類体論を使わずに証明する。
+
+## 記法と定義の確認 {#nt:sec-gi-notation}
+
+::: notation
+- 素点・正規化された絶対値・完備化・イデール群は \ref{nt:places-number-field}, \ref{nt:normalized-absolute-value}, \ref{nt:idele-group}。$L/K$ を代数体の有限次ガロア拡大、$G\defeq\operatorname{Gal}(L/K)$、$n\defeq[L:K]$ とする。$L$ の素点 $w$ が $K$ の素点 $v$ の**上にある**（$w\mid v$）とは、$\abs\cdot_{w}$ の $K$ への制限が $v$ の絶対値と同値なことをいう。$K_{v}$ は $L_{w}$ の中の $K$ の閉包と同一視する。
+- デデキント環の拡大 $\mathcal{O}_{K}\subseteq\mathcal{O}_{L}$ で $\mathfrak{p}\mathcal{O}_{L}=\prod\mathfrak{P}_{i}^{e(\mathfrak{P}_{i}\mid\mathfrak{p})}$、$f(\mathfrak{P}\mid\mathfrak{p})\defeq[\mathcal{O}_{L}/\mathfrak{P}:\mathcal{O}_{K}/\mathfrak{p}]$。分岐する素数の有限性は \ref{nt:finitely-many-ramified}。
+- 局所体の拡大の分岐指数・剰余次数と $ef=n$ は \ref{nt:ramification-index-local}, \ref{nt:ef-equals-n}、完備体の有限次拡大への延長の一意性は \ref{nt:extension-of-absolute-value}、不分岐拡大でのノルムの計算は \ref{nt:unramified-norm-group}。
+- $G$ 加群、余誘導加群 $\operatorname{CoInd}_{H}^{G}A=\mathrm{Hom}_{\Z H}(\Z G,A)$ とそのコホモロジーの計算は \ref{ha:induced-coinduced}, \ref{ha:shapiro-lemma}。テイトのコホモロジー $\hat H^{q}$、巡回群での周期性 $\hat H^{0}\cong\hat H^{2}=H^{2}$, $\hat H^{-1}\cong\hat H^{1}=H^{1}$、エルブラン商 $h(M)=\abs{\hat H^{0}(G,M)}/\abs{\hat H^{1}(G,M)}$ とその性質は \ref{ha:tate-low-degrees}, \ref{ha:tate-cyclic}, \ref{ha:herbrand-quotient-def}, \ref{ha:herbrand-quotient-properties}。ヒルベルトの定理 90 $H^{1}(G,L^{\times})=1$ は \ref{ha:galois-cohomology-vanishing}。乗法的な加群では群演算を積で書く。
+- 正規底の存在は \ref{fld:normal-basis}、ノルムが共役の積であることは \ref{fld:norm-trace-embeddings}。
+- 体系は $\ZFC$。
+:::
+
+## 素点のガロア作用と分解群 {#nt:sec-gi-places}
+
+::: theorem 素点へのガロア作用 {#nt:places-galois-action keywords="sigma w defined by |x|_{sigma w} = |sigma^{-1} x|_w; sigma extends to an isometric K_v-isomorphism L_w -> L_{sigma w}; G acts transitively on the places above v; decomposition group G_w is isomorphic to Gal(L_w / K_v); local e and f equal global e and f; almost all places are unramified" index="分解群（素点の）|ぶんかいぐん, 素点のガロア作用|そてんのがろあさよう" refname="素点へのガロア作用"}
+（AC）$v$ を $K$ の素点、$w\mid v$ とする。
+1. $\sigma\in G$ について $\abs x_{\sigma w}\defeq\abs{\sigma^{-1}x}_{w}$ は $v$ の上の素点の正規化された絶対値で、$\sigma$ は $K_{v}$ 上の等長な体の同型 $\sigma:L_{w}\to L_{\sigma w}$ に一意に延びる。これで $G$ は $v$ の上の素点の集合に作用し、有限素点 $w=\mathfrak{P}$ では $\sigma w=\sigma\mathfrak{P}$。
+2. この作用は推移的である。
+3. $G_{w}\defeq\{\sigma:\sigma w=w\}$（**分解群**）について、$L_{w}/K_{v}$ はガロア拡大で、制限 $G_{w}\to\operatorname{Gal}(L_{w}/K_{v})$ は同型。$n_{v}\defeq[L_{w}:K_{v}]=\abs{G_{w}}$ は $w$ によらず、$v$ の上の素点はちょうど $n/n_{v}$ 個。
+4. $v=\mathfrak{p}$, $w=\mathfrak{P}$ が有限素点なら、$L_{w}/K_{v}$ の分岐指数と剰余次数は $e(\mathfrak{P}\mid\mathfrak{p})$, $f(\mathfrak{P}\mid\mathfrak{p})$ に等しく、$n_{v}=e(\mathfrak{P}\mid\mathfrak{p})f(\mathfrak{P}\mid\mathfrak{p})$。有限個を除くすべての有限素点 $v$ で $L_{w}/K_{v}$ は不分岐である。
+:::
+
+::: intuition
+ガロア群は $v$ の上の素点を「区別できないもの」として入れ替える。一つの素点 $w$ を止める部分群 $G_{w}$ は、完備化 $L_{w}/K_{v}$ のガロア群そのものになる：大域的なガロア群の中に、各素点ごとの局所的なガロア群が分解群として埋まっている。素点が $n/n_{v}$ 個に分かれ、各素点で次数 $n_{v}$ の局所拡大になる、という「$n=(\text{個数})\times(\text{局所次数})$」は、$efg=n$ の素点版である。
+:::
+
+::: proof
+**Step 1（1：$\sigma w$ と等長性）.** 【主張：$\sigma w$ は正規化された絶対値で、$\sigma$ は等長】$x\mapsto\abs{\sigma^{-1}x}_{w}$ は $L$ の絶対値（またはその 2 乗）で、$K$ 上では $\abs\cdot_{w}$ と一致する（$\sigma$ は $K$ を固定）。有限素点 $w=\mathfrak{P}$ では、$\sigma$ は $\mathcal{O}_{L}$ の自己同型なので $\sigma^{-1}x\mathcal{O}_{L}$ の分解から $v_{\mathfrak{P}}(\sigma^{-1}x)=v_{\sigma\mathfrak{P}}(x)$、また $\mathcal{O}_{L}/\mathfrak{P}\cong\mathcal{O}_{L}/\sigma\mathfrak{P}$ から $N(\mathfrak{P})=N(\sigma\mathfrak{P})$ で、$\abs{\sigma^{-1}x}_{\mathfrak{P}}=\abs x_{\sigma\mathfrak{P}}$。無限素点 $w$ が埋め込み $\tau$ に対応するなら $\abs{\sigma^{-1}x}_{w}$ は $\tau\circ\sigma^{-1}$ に対応する正規化された絶対値（実・複素の別は $\tau$ と同じ）。定義から $\abs{\sigma x}_{\sigma w}=\abs x_{w}$ なので、$\sigma:(L,\abs\cdot_{w})\to(L,\abs\cdot_{\sigma w})$ は等長で一様連続、完備化の同型に一意に延びる。$K$ 上で恒等なので、閉包 $K_{v}$ 上でも恒等。$(\sigma\tau)w=\sigma(\tau w)$ は定義から明らか。
+
+**Step 2（2：有限素点の推移性）.** 【主張：$\mathfrak{p}$ の上の $\mathfrak{P},\mathfrak{P}'$ について $\mathfrak{P}'=\sigma\mathfrak{P}$ となる $\sigma$ がある】そうでないとすると、$\mathfrak{P}'$ と $\sigma\mathfrak{P}$（$\sigma\in G$）は互いに異なる極大イデアルなので、中国剰余定理（\ref{ring:chinese-remainder}）で $x\in\mathfrak{P}'$, すべての $\sigma$ で $x\equiv1\pmod{\sigma\mathfrak{P}}$ となる $x\in\mathcal{O}_{L}$ がとれる。$N_{L/K}(x)=\prod_{\sigma}\sigma(x)$（\ref{fld:norm-trace-embeddings}）は $\mathcal{O}_{K}$ の元で、因子 $x\in\mathfrak{P}'$ を含むので $\mathfrak{P}'\cap\mathcal{O}_{K}=\mathfrak{p}\subseteq\mathfrak{P}$ に入る。一方 $\sigma(x)\notin\mathfrak{P}$（$x\notin\sigma^{-1}\mathfrak{P}$）なので、素イデアル $\mathfrak{P}$ に積が入ることに矛盾。
+
+**Step 3（2：無限素点の推移性）.** 【主張：同じ $v$ の上の $w\leftrightarrow\tau$, $w'\leftrightarrow\tau'$ について $\sigma w=w'$ となる $\sigma$ がある】$\tau,\tau'$ の $K$ への制限は同じ素点を定めるので、\ref{nt:places-number-field} の 2 から $\tau'|_{K}\in\{\tau|_{K},\overline{\tau|_{K}}\}$ で、$\tau'$ をその共役に替えても素点は変わらないので $\tau'|_{K}=\tau|_{K}$ としてよい。$L=K(\theta)$ で $\theta$ の最小多項式は $L$ で分解するから、$\tau(L)$ と $\tau'(L)$ はどちらも $\tau(K)$ 上のその多項式の根で生成され等しい。$\sigma\defeq\tau'^{-1}\circ\tau\in G$ とおくと $\tau\circ\sigma^{-1}=\tau'$ なので、Step 1 から $\sigma w=w'$。
+
+**Step 4（3：$L_{w}/K_{v}$ はガロア）.** 【主張：$L_{w}=K_{v}(\theta)$ は $K_{v}$ 上の最小多項式 $g$ の分解体】$L$ の $K$ 基底の張る $K_{v}$ 部分空間は有限次元なので閉（\ref{nt:norms-equivalent-complete}）、$L$ を含み $L$ は稠密なので $L_{w}$ に等しい。よって $L_{w}=K_{v}(\theta_{1},\dots,\theta_{n})$（$\theta_{i}$ は $\theta$ の $K$ 上の共役、すべて $L$ の元）は、$\theta$ の $K$ 上の最小多項式の $K_{v}$ 上の分解体で、標数 $0$ なので分離的。
+
+**Step 5（3：$G_{w}\cong\operatorname{Gal}(L_{w}/K_{v})$）.** 【主張：制限写像は全単射】$\sigma\in G_{w}$ は Step 1 から $L_{w}$ の $K_{v}$ 上の自己同型を与え、稠密な $L$ 上の値で決まるので単射。$\rho\in\operatorname{Gal}(L_{w}/K_{v})$ をとる。$\rho(\theta_{i})$ は共役なので $\rho(L)=L$ で、$\sigma\defeq\rho|_{L}\in G$。$x\mapsto\abs{\rho x}_{w}$ は $K_{v}$ の絶対値を延ばす $L_{w}$ の絶対値なので、有限素点では一意性（\ref{nt:extension-of-absolute-value} の 2）から $\abs{\rho x}_{w}=\abs x_{w}$。無限素点では $L_{w}/K_{v}$ は $\mathbb{C}/\mathbb{R}$ か自明で、$\rho$ は恒等か複素共役なので同じく等長。$\rho^{-1}$ についても同様なので $\abs x_{\sigma w}=\abs{\sigma^{-1}x}_{w}=\abs x_{w}$、すなわち $\sigma\in G_{w}$ で、その延長は（$L$ 上で一致し連続なので）$\rho$。
+
+**Step 6（3：個数）.** $G_{\sigma w}=\sigma G_{w}\sigma^{-1}$ なので $\abs{G_{w}}$ は $w$ によらない。軌道・安定化群の関係と推移性から、素点の個数は $\abs G/\abs{G_{w}}=n/n_{v}$。
+
+**Step 7（4）.** 【主張：局所と大域の $e,f$ は等しい】$x\in K^{\times}$ について $v_{\mathfrak{P}}(x)=e(\mathfrak{P}\mid\mathfrak{p})v_{\mathfrak{p}}(x)$（$x\mathcal{O}_{L}=\prod_{\mathfrak{p}}(\mathfrak{p}\mathcal{O}_{L})^{v_{\mathfrak{p}}(x)}$ の $\mathfrak{P}$ の指数）。完備化で値群は変わらない（\ref{nt:valued-field-completion} の 2）ので $v_{\mathfrak{P}}(L_{w}^{\times})=\mathbb{Z}$, $v_{\mathfrak{P}}(K_{v}^{\times})=e(\mathfrak{P}\mid\mathfrak{p})\mathbb{Z}$、指数は $e(\mathfrak{P}\mid\mathfrak{p})$。剰余体も完備化で変わらないので剰余次数は $f(\mathfrak{P}\mid\mathfrak{p})$。\ref{nt:ef-equals-n} から $n_{v}=ef$。最後に、素数 $p$ の上で $p\mathcal{O}_{L}=\prod_{\mathfrak{p}\mid p}(\mathfrak{p}\mathcal{O}_{L})^{e(\mathfrak{p}\mid p)}$ なので $e(\mathfrak{P}\mid p)=e(\mathfrak{P}\mid\mathfrak{p})e(\mathfrak{p}\mid p)$。$e(\mathfrak{P}\mid\mathfrak{p})>1$ なら $\mathfrak{P}$ は $L/\mathbb{Q}$ で分岐し、そのような $\mathfrak{P}$ は \ref{nt:finitely-many-ramified}（$L$ の整な原始元に適用）から有限個。剰余体は有限体で、剰余拡大は分離的なので、それ以外の $v$ で $L_{w}/K_{v}$ は不分岐（\ref{nt:unramified-def}）。
+:::
+
+::: definition 完全分解 {#nt:completely-split-place keywords="a place v of K splits completely in a Galois extension L if n_v = [L_w : K_v] = 1, equivalently there are n places above v; for finite places e = f = 1" index="完全分解（素点の）|かんぜんぶんかい" refname="素点の完全分解"}
+$K$ の素点 $v$ が $L$ で**完全分解する**とは $n_{v}=1$（$L_{w}=K_{v}$）となることをいう。\ref{nt:places-galois-action} から、これは $v$ の上に $n$ 個の素点があることと同値で、有限素点では $e=f=1$ と同値。$n_{v}=n$（$v$ の上の素点が一つ）のとき $v$ は**分解しない**という。
+:::
+
+::: intuition
+完全分解は「$v$ では $L$ が $K$ と区別できない」状態である：$v$ の上に $n$ 個の素点があり、どの完備化も $K_{v}$ そのものになる。
+:::
+
+## $G$ 加群としてのイデール群 {#nt:sec-gi-module}
+
+::: lemma 余誘導加群の判定 {#nt:coinduced-criterion keywords="if a G-module M is the internal direct sum of the translates g M_0 of an H-submodule M_0 over coset representatives of G/H, then M is isomorphic to CoInd_H^G M_0" index="余誘導加群の判定|よゆうどうかぐんのはんてい" refname="余誘導加群の判定"}
+$G$ を有限群、$H\le G$、$M$ を $G$ 加群、$M_{0}\subseteq M$ を $H$ 部分加群とし、$G/H$ の代表 $g_{1}=1,g_{2},\dots,g_{r}$ について $M=\bigoplus_{i}g_{i}M_{0}$（内部直和）とする。$\pi_{0}:M\to M_{0}$ を射影とすると、$m\mapsto\varphi_{m}$, $\varphi_{m}(x)\defeq\pi_{0}(xm)$（$x\in G$ を $\Z G$ に線形に延ばす）は $G$ 加群の同型 $M\cong\operatorname{CoInd}_{H}^{G}M_{0}$ である。
+:::
+
+::: intuition
+$G$ 加群が、部分群 $H$ の加群 $M_{0}$ の「平行移動したコピー」の直和に分かれていれば、それは $M_{0}$ を $G$ 全体に広げた余誘導加群である。素点の上の成分の積は、まさにこの形をしている。
+:::
+
+::: proof
+**Step 1（$\pi_{0}$ は $H$ 線形）.** 【主張：$h\in H$ について $\pi_{0}(hm)=h\pi_{0}(m)$】$hM_{0}=M_{0}$ で、$hg_{i}M_{0}=g_{j}M_{0}$（$hg_{i}H=g_{j}H$）なので、$h$ は直和成分を置換し $M_{0}$ を $M_{0}$ に送る。$i\neq1$ なら $hg_{i}H\neq H$（$g_{i}\notin H$）なので、$h$ は $M_{0}$ 以外の成分を $M_{0}$ 以外に送る。
+
+**Step 2（準同型）.** $\varphi_{m}(hx)=\pi_{0}(hxm)=h\varphi_{m}(x)$ なので $\varphi_{m}\in\mathrm{Hom}_{\Z H}(\Z G,M_{0})$。$(g\varphi_{m})(x)=\varphi_{m}(xg)=\pi_{0}(xgm)=\varphi_{gm}(x)$ なので $G$ 準同型。
+
+**Step 3（全単射）.** $m$ の $g_{i}M_{0}$ 成分は $g_{i}\pi_{0}(g_{i}^{-1}m)=g_{i}\varphi_{m}(g_{i}^{-1})$（$g_{i}^{-1}$ は $g_{i}M_{0}$ を $M_{0}$ に、他の成分を $M_{0}$ 以外に送る）なので、$\varphi_{m}=0$ なら $m=0$。逆に $\varphi\in\mathrm{Hom}_{\Z H}(\Z G,M_{0})$ について $m\defeq\sum_{i}g_{i}\varphi(g_{i}^{-1})$ とおくと $\varphi_{m}(g_{j}^{-1})=\varphi(g_{j}^{-1})$ で、$G=\bigsqcup_{j}Hg_{j}^{-1}$ と $H$ 線形性から $\varphi_{m}=\varphi$。
+:::
+
+::: proposition $G$ 加群としてのイデール群 {#nt:idele-g-module keywords="G acts on I_L by (sigma a)_{sigma w} = sigma(a_w); the v-part prod_{w | v} L_w^x is CoInd_{G_w}^G L_w^x and similarly for units; I_L^G = I_K; C_L^G = C_K; the norm N_G(a) = prod sigma(a) has v-component prod_{w | v} N_{L_w/K_v}(a_w)" index="イデール群のガロア作用|いでーるぐんのがろあさよう, 半局所成分|はんきょくしょせいぶん" refname="G 加群としてのイデール群"}
+（AC）
+1. $(\sigma a)_{\sigma w}\defeq\sigma(a_{w})$ で $G$ は $I_{L}$ に作用し、$L^{\times}$ への作用は通常のもの、各 $I_{L,\bar S}$（$\bar S$ は $K$ の素点の集合 $S$ の上の素点全体）は $G$ 部分加群。
+2. $v$ ごとに $L_{v}^{\times}\defeq\prod_{w\mid v}L_{w}^{\times}$, $U_{L,v}\defeq\prod_{w\mid v}U_{w}$（$v$ 有限）は $G$ 部分加群で、$w\mid v$ を一つ固定すると $L_{v}^{\times}\cong\operatorname{CoInd}_{G_{w}}^{G}L_{w}^{\times}$, $U_{L,v}\cong\operatorname{CoInd}_{G_{w}}^{G}U_{w}$。
+3. $a\in I_{K}$ を、各 $w\mid v$ の成分が $a_{v}\in K_{v}\subseteq L_{w}$ のイデールに送る $I_{K}\to I_{L}$ は単射で、像は $I_{L}^{G}$。$K^{\times}=L^{\times}\cap I_{K}$ で、$C_{K}\to C_{L}$ は単射、像は $C_{L}^{G}$。
+4. $N_{G}(a)\defeq\prod_{\sigma\in G}\sigma(a)\in I_{L}^{G}=I_{K}$ の $v$ 成分は $\prod_{w\mid v}N_{L_{w}/K_{v}}(a_{w})$。
+:::
+
+::: intuition
+$G$ は $v$ の上の素点を入れ替えながら成分を写し、$v$ の上の成分の積は一つの素点の成分から誘導された加群になる。$G$ 不変なイデールは「$K$ のイデールを $L$ に持ち上げたもの」で、イデールのノルムは素点ごとの局所ノルムの積である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\sigma a$ はイデールで、作用になる】$\sigma:L_{w}\to L_{\sigma w}$ は等長なので $U_{w}$ を $U_{\sigma w}$ に送り、$\sigma a$ はほとんどすべての成分が単元。$\sigma\tau$ の延長は $\sigma$ と $\tau$ の延長の合成（稠密な $L$ 上で一致）なので $(\sigma(\tau a))_{\sigma\tau w}=\sigma\tau(a_{w})=((\sigma\tau)a)_{\sigma\tau w}$。$x\in L^{\times}$ では $(\sigma x)_{\sigma w}=\sigma(x)$ で通常の作用。$\bar S$ は $G$ で閉じている（$\sigma w$ と $w$ は同じ $v$ の上）。
+
+**Step 2（2）.** $\sigma$ は $v$ の上の素点を置換するので $L_{v}^{\times}$, $U_{L,v}$ は $G$ 部分加群。$G/G_{w}$ の代表 $g_{i}$ について $g_{i}w$ は $v$ の上の素点を重複なく尽くし（\ref{nt:places-galois-action} の 2・3）、$g_{i}$ は成分 $L_{w}^{\times}$ を成分 $L_{g_{i}w}^{\times}$ に同型に写すので $L_{v}^{\times}=\bigoplus_{i}g_{i}L_{w}^{\times}$（有限直積）。$L_{w}^{\times}$ は $G_{w}$ 部分加群なので \ref{nt:coinduced-criterion} を適用すればよい。$U$ についても同じ。
+
+**Step 3（3）.** 【主張：$I_{L}^{G}$ は $I_{K}$ の像】写像の像がイデールであることは、$U_{v}=U_{w}\cap K_{v}$ からわかる。単射は明らか。$G$ 不変性：$K_{v}$ の元は $\sigma$ の延長で動かない（\ref{nt:places-galois-action} の 1）ので $(\sigma a)_{\sigma w}=a_{v}$。逆に $a\in I_{L}^{G}$ なら、$\sigma\in G_{w}$ で $\sigma(a_{w})=a_{w}$ なので $a_{w}\in L_{w}^{G_{w}}=K_{v}$（\ref{nt:places-galois-action} の 3 とガロアの基本定理）で、$a_{\sigma w}=\sigma(a_{w})=a_{w}$ から成分は $w\mid v$ によらない。$L^{\times}\cap I_{K}=(L^{\times})^{G}=K^{\times}$ から $C_{K}\to C_{L}$ は単射。$1\to L^{\times}\to I_{L}\to C_{L}\to1$ の $G$ 不変部分の長完全列 $1\to K^{\times}\to I_{K}\to C_{L}^{G}\to H^{1}(G,L^{\times})$ と、ヒルベルトの定理 90（$H^{1}(G,L^{\times})=1$）から $C_{L}^{G}=I_{K}/K^{\times}=C_{K}$。
+
+**Step 4（4）.** 【主張：$N_{G}(a)_{w}=\prod_{w'\mid v}N_{L_{w'}/K_{v}}(a_{w'})$】$G=\bigsqcup_{i}g_{i}G_{w}$, $w_{i}\defeq g_{i}w$ とする。$\sigma\in G$ について $(\sigma a)_{w}=\sigma(a_{\sigma^{-1}w})$ で、$\sigma^{-1}w=w_{i}\iff\sigma\in G_{w}g_{i}^{-1}$。$\sigma=\rho g_{i}^{-1}$（$\rho\in G_{w}$）と書くと $(\sigma a)_{w}=\rho(g_{i}^{-1}(a_{w_{i}}))$ なので
+$$
+N_{G}(a)_{w}=\prod_{i}\prod_{\rho\in G_{w}}\rho\bigl(g_{i}^{-1}(a_{w_{i}})\bigr)=\prod_{i}N_{L_{w}/K_{v}}\bigl(g_{i}^{-1}(a_{w_{i}})\bigr)=\prod_{i}N_{L_{w_{i}}/K_{v}}(a_{w_{i}}).
+$$
+2 つ目の等号は $G_{w}=\operatorname{Gal}(L_{w}/K_{v})$ と \ref{fld:norm-trace-embeddings}、3 つ目は $g_{i}^{-1}:L_{w_{i}}\to L_{w}$ が $K_{v}$ 上の同型でノルムを保つことによる。
+:::
+
+## 局所体の乗法群のエルブラン商 {#nt:sec-gi-local}
+
+::: lemma コホモロジー的に自明な開部分群 {#nt:cohomologically-trivial-open keywords="for a finite Galois extension L/K of local fields there is an open G-stable subgroup V of U_L with H^q(G, V) = 0 for all q >= 1; construction V = 1 + pi^i M with M = O_K[G] alpha from a normal basis; filtration with graded pieces k[G]; successive approximation of cocycles" index="コホモロジー的に自明な開部分群|こほもろじーてきにじめいなかいぶぶんぐん" refname="コホモロジー的に自明な開部分群"}
+$L/K$ を局所体（剰余体が有限な完備離散付値体で標数 $0$）の有限次ガロア拡大、$G=\operatorname{Gal}(L/K)$ とする。$U_{L}$ の開部分群 $V$ で、$G$ で閉じていて、すべての $q\ge1$ で $H^{q}(G,V)=0$ となるものがある。
+:::
+
+::: intuition
+単数群の十分小さい部分は、加法群の格子 $\pi^{i}M$ と同じように振る舞い、正規底のおかげで $G$ の各元に独立な座標をもつ。そのような加群はコホモロジーをもたないので、単数群のコホモロジーは有限な商だけに残る。
+:::
+
+::: proof
+**Step 1（格子 $M$）.** 【主張：$M\defeq\bigoplus_{\sigma}\mathcal{O}_{K}\sigma(\alpha)\subseteq\mathcal{O}_{L}$ となる正規底 $\alpha$ がある】正規底 $\alpha$（\ref{fld:normal-basis}）に $K$ の一意化元 $\pi$ の冪を掛けても正規底で（$\sigma(\pi^{k}\alpha)=\pi^{k}\sigma(\alpha)$）、十分高い冪で $\alpha\in\mathcal{O}_{L}$。$M$ は $G$ で閉じた自由 $\mathcal{O}_{K}$ 加群。
+
+**Step 2（$M$ は $\mathcal{O}_{L}$ の中で指数有限）.** 【主張：ある $c\ge0$ で $\pi^{c}\mathcal{O}_{L}\subseteq M\subseteq\mathcal{O}_{L}$】$\mathcal{O}_{L}$ は有限生成自由 $\mathcal{O}_{K}$ 加群（\ref{nt:ef-equals-n}）で、その基底を $\sigma(\alpha)$ の $K$ 係数の結合で書き、係数の分母を払う $c$ をとればよい。
+
+**Step 3（部分群 $V_{i}$）.** 【主張：$i\ge c+1$ について $V_{i}\defeq1+\pi^{i}M$ は $U_{L}$ の $G$ で閉じた開部分群】$a,b\in M$ について $(1+\pi^{i}a)(1+\pi^{i}b)=1+\pi^{i}(a+b+\pi^{i}ab)$ で、$ab\in\mathcal{O}_{L}\subseteq\pi^{-c}M$ なので $\pi^{i}ab\in\pi^{i-c}M\subseteq M$。逆元：$(1+\pi^{i}a)^{-1}=1+\pi^{i}b$, $b\defeq-a\sum_{k\ge0}(-\pi^{i}a)^{k}$ で、$k\ge1$ の項 $\pi^{ki}a^{k+1}\in\pi^{ki-c}M\subseteq M$ は $0$ に収束し、$M$ は閉（有限生成で、$\mathcal{O}_{K}$ のコンパクト性からコンパクト）なので $b\in M$。$V_{i}\supseteq1+\pi^{i+c}\mathcal{O}_{L}$ なので開。$\sigma(\pi)=\pi$, $\sigma M=M$ なので $G$ で閉じている。
+
+**Step 4（商 $V_{i}/V_{i+1}$）.** 【主張：$i\ge c+1$ で $V_{i}/V_{i+1}\cong M/\pi M$（$G$ 加群）で、$H^{q}(G,M/\pi M)=0$（$q\ge1$）】$1+\pi^{i}a\mapsto a\bmod\pi M$ は well-defined な全射で、Step 3 の計算と $\pi^{i}ab\in\pi^{i-c}M\subseteq\pi M$ から準同型、核は $a\in\pi M$ すなわち $V_{i+1}$。$G$ 同変。$M/\pi M=\bigoplus_{\sigma}\sigma(k\bar\alpha)$（$k=\mathcal{O}_{K}/\pi$）は \ref{nt:coinduced-criterion}（$H=1$）から $\operatorname{CoInd}_{1}^{G}k$ と同型で、\ref{ha:shapiro-lemma} の 3 から $q\ge1$ のコホモロジーは消える。
+
+**Step 5（逐次近似）.** 【主張：$V\defeq V_{c+1}$ で $H^{q}(G,V)=0$（$q\ge1$）】非斉次 $q$ コサイクル $f:G^{q}\to V$ をとる。$j\ge c+1$ について、$V_{j}$ に値をもつコサイクル $f_{j}$（$f_{c+1}=f$）と $g_{j}:G^{q-1}\to V_{j}$ を次のように作る：$f_{j}$ の $V_{j}/V_{j+1}$ への像はコサイクルで、Step 4 から $\bar g$ のコバウンダリなので、$\bar g$ の持ち上げ $g_{j}$ をとり $f_{j+1}\defeq f_{j}\cdot(dg_{j})^{-1}$ とすると $V_{j+1}$ に値をもつ。$V_{j}\subseteq1+\pi^{j}\mathcal{O}_{L}$ なので無限積 $g\defeq\prod_{j\ge c+1}g_{j}$ は各点で収束し、$V$ は閉なので $g$ は $V$ に値をもつ。$f=d(g_{c+1}\cdots g_{J})\cdot f_{J+1}$ で、$J\to\infty$ のとき $f_{J+1}\to1$、$d$ は（有限個の値と $G$ の作用の積なので）各点収束について連続だから $f=dg$。
+:::
+
+::: theorem 局所体の巡回拡大のエルブラン商 {#nt:local-herbrand keywords="for a cyclic extension L/K of local fields of degree n: h(U_L) = 1, H^1(G, L^x) = 1 and |K^x / N L^x| = n; for unramified L/K the Tate cohomology of U_L vanishes; N(L^x) contains an open subgroup of K^x; for C/R the norm index is 2" index="局所体のエルブラン商|きょくしょたいのえるぶらんしょう" refname="局所体の巡回拡大のエルブラン商"}
+$L/K$ を局所体の $n$ 次巡回拡大、$G=\operatorname{Gal}(L/K)$ とする。
+1. $h(U_{L})=1$。
+2. $\hat H^{1}(G,L^{\times})=1$ で、$\abs{\hat H^{0}(G,L^{\times})}=[K^{\times}:N_{L/K}(L^{\times})]=n$。
+3. $L/K$ が不分岐なら $\hat H^{0}(G,U_{L})=\hat H^{1}(G,U_{L})=1$。
+4. $N_{L/K}(L^{\times})$ は $K^{\times}$ の開部分群を含む。
+5. $\mathbb{C}/\mathbb{R}$ では $\hat H^{1}(G,\mathbb{C}^{\times})=1$, $\abs{\hat H^{0}(G,\mathbb{C}^{\times})}=2$。
+:::
+
+::: intuition
+$L^{\times}$ は「単数 $U_{L}$」と「付値 $\mathbb{Z}$」に分かれる。単数は、十分小さい開部分群が正規底のおかげで「$G$ の各元に一つずつ自由な座標をもつ」加群になってコホモロジーが消え、残りは有限なので、エルブラン商は $1$。付値の側の $\mathbb{Z}$ は $G$ が自明に作用し $h(\mathbb{Z})=n$。ヒルベルトの定理 90 で $\hat H^{1}$ が消えるので、ノルムで割った剰余 $K^{\times}/N(L^{\times})$ のちょうど大きさ $n$ が残る。局所類体論は、この剰余がさらにガロア群と標準的に同型であると主張する。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$h(U_{L})=1$】\ref{nt:cohomologically-trivial-open} の $V$ について、周期性から $\hat H^{0}(G,V)\cong H^{2}(G,V)=0$, $\hat H^{1}(G,V)=H^{1}(G,V)=0$ なので $h(V)=1$。$U_{L}$ はコンパクトで $V$ は開なので $U_{L}/V$ は有限、$h(U_{L}/V)=1$。乗法性（\ref{ha:herbrand-quotient-properties}）から $h(U_{L})=h(V)h(U_{L}/V)=1$。
+
+**Step 2（2）.** 【主張：$\abs{\hat H^{0}(G,L^{\times})}=n$】$\hat H^{1}(G,L^{\times})=H^{1}(G,L^{\times})=1$（ヒルベルトの定理 90）。$v_{L}:L^{\times}\to\mathbb{Z}$ は全射で核は $U_{L}$、$v_{L}\circ\sigma=v_{L}$（\ref{nt:extension-of-absolute-value} の一意性から $\abs{\sigma x}=\abs x$）なので、自明な作用の $\mathbb{Z}$ との短完全列 $1\to U_{L}\to L^{\times}\to\mathbb{Z}\to0$ を得る。$h(\mathbb{Z})=n$ と Step 1 から $h(L^{\times})=n$、よって $\abs{\hat H^{0}}=n\abs{\hat H^{1}}=n$。最後に $(L^{\times})^{G}=K^{\times}$ で、$N_{G}=\prod_{\sigma}\sigma=N_{L/K}$（\ref{fld:norm-trace-embeddings}）なので $\hat H^{0}=K^{\times}/N_{L/K}(L^{\times})$。
+
+**Step 3（3）.** \ref{nt:unramified-norm-group} の 1（$i=0$）から $N(U_{L})=U_{K}=U_{L}^{G}$ なので $\hat H^{0}(G,U_{L})=1$。Step 1 から $\abs{\hat H^{1}}=\abs{\hat H^{0}}/h=1$。
+
+**Step 4（4）.** $\hat H^{0}(G,V)=V^{G}/N(V)=1$ なので $N(L^{\times})\supseteq N(V)=V^{G}=V\cap K^{\times}$ で、$V$ は $L^{\times}$ の開集合なので $V\cap K^{\times}$ は $K^{\times}$ の開部分群。
+
+**Step 5（5）.** $G=\{1,c\}$（$c$ は複素共役）で $N(z)=z\bar z=\abs z^{2}$ なので $N(\mathbb{C}^{\times})=\mathbb{R}_{>0}$、$\hat H^{0}=\mathbb{R}^{\times}/\mathbb{R}_{>0}$ は位数 $2$。$\hat H^{1}=H^{1}(G,\mathbb{C}^{\times})=1$（ヒルベルトの定理 90）。
+:::
+
+::: hypcheck
+- **素点へのガロア作用**：$L/K$ がガロアであることは、$\tau(L)=\tau'(L)$（Step 3）と $\rho(L)=L$（Step 5）、つまり共役が $L$ に入ることに本質的。ガロアでない拡大では $v$ の上の素点で局所次数が異なりうる（$\mathbb{Q}(\sqrt[3]2)$ の $\infty$ の上には実素点と複素素点がある）。局所の絶対値の拡張の一意性（完備性）は、$\operatorname{Gal}(L_{w}/K_{v})$ の元が等長であること（Step 5）に使った。
+- **余誘導加群の判定**：$G$ が有限であることは、直和と直積の区別をなくすために使った。
+- **開部分群**：剰余体の有限性（$\mathcal{O}_{K}$ のコンパクト性）を $M$ が閉であることに、完備性を逐次近似の収束に使った。標数 $0$ は使っていない（正規底定理は任意の有限次ガロア拡大で成り立つ）。
+- **局所のエルブラン商**：$G$ が巡回群であることは、エルブラン商が定義され周期性 $\hat H^{0}\cong H^{2}$ が成り立つことに本質的。
+:::
+
+## 問題 {#nt:sec-gi-problems}
+
+::: problem {#nt:prob-gi-gaussian-places}
+$L=\mathbb{Q}(i)$, $K=\mathbb{Q}$ とする。$v=\infty,2,3,5$ のそれぞれについて、$v$ の上の素点の個数と $n_{v}$ を求めよ。
+:::
+
+::: solution
+$n=2$。$\infty$：$L$ は総虚なので複素素点一つ、$L_{w}=\mathbb{C}$ で $n_{\infty}=2$。$2=-i(1+i)^{2}$ は分岐し $e=2$、素点一つで $n_{2}=2$。$3$ は $x^{2}+1$ が $\mathbb{F}_{3}$ で既約なので惰性（$f=2$）、素点一つで $n_{3}=2$。$5=(2+i)(2-i)$ は完全分解し、素点 2 つで $n_{5}=1$。いずれも（素点の個数）$\times n_{v}=2$。
+:::
+
+::: problem {#nt:prob-gi-minus-one-q2}
+$L=\mathbb{Q}_{2}(i)$, $K=\mathbb{Q}_{2}$ について、$-1\notin N_{L/K}(L^{\times})$ を直接示し、\ref{nt:local-herbrand} の 2 と合わせて $K^{\times}/N(L^{\times})$ が $-1$ の類で生成されることを示せ。
+:::
+
+::: solution
+$N(x+yi)=x^{2}+y^{2}$。$x^{2}+y^{2}=-1$（$x,y\in\mathbb{Q}_{2}$）とする。$x,y\in\mathbb{Z}_{2}$ なら、平方は $4$ を法として $0,1$ なので左辺 $\equiv0,1,2$、右辺 $\equiv3\pmod4$ で矛盾。そうでなければ $m\defeq\min(v_{2}(x),v_{2}(y))<0$ で、$X=2^{-m}x$, $Y=2^{-m}y$ は $\mathbb{Z}_{2}$ の元で一方は単元、$X^{2}+Y^{2}\equiv1,2\pmod4$ だが右辺 $-4^{-m}\equiv0\pmod4$ で矛盾。\ref{nt:local-herbrand} の 2 から指数は $2$ なので、$N$ に入らない $-1$ の類が商を生成する。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 局所のエルブラン商の計算は \ref{nt:local-class-field-theory} を使わない。使ったのは正規底定理、ヒルベルトの定理 90、エルブラン商の乗法性と不分岐拡大のノルムの計算だけである。
+
+**前提を変えると.**
+- 局所類体論は、$\hat H^{0}(G,L^{\times})=K^{\times}/N(L^{\times})$ が巡回群に限らずアーベル拡大で $G$ と標準的に同型であることを主張する（\ref{nt:local-class-field-theory}）。ここで示した「位数が $n$」はその数え上げの部分にあたる。
+- 一般の有限次ガロア拡大では、\ref{nt:cohomologically-trivial-open} の $V$ はすべての部分群について**コホモロジー的に自明**で、$\hat H^{q}(G,U_{L})$ は有限群になる（Se VII–IX）。ここでは巡回群の場合だけを使う。
+- 4 の逆として、指数有限な開部分群はすべてノルム群である（局所存在定理）。証明にはルビン–テイトの理論などが要る。
+
+**高い視点から：半局所化と誘導.** $v$ の上の素点の集合は推移的な $G$ 集合 $G/G_{w}$ で、$\prod_{w\mid v}L_{w}^{\times}$ はその上の「束」の切断の加群である。余誘導加群 $\operatorname{CoInd}_{G_{w}}^{G}$ は、部分群の表現を群全体に広げる右随伴（$\mathrm{Hom}_{G}(N,\operatorname{CoInd}A)\cong\mathrm{Hom}_{G_{w}}(N,A)$）で、シャピロの補題はこの随伴が導来関手のレベルでも保たれることを言っている。比喩で言えば、大域的なガロア群は各素点に「局所の望遠鏡」$G_{w}$ を向けていて、イデール群のコホモロジーは各望遠鏡で見た局所のコホモロジーの直積に分解する。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-gi-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

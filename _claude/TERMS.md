@@ -677,3 +677,8 @@
 | group extension / factor set / complement / Schur–Zassenhaus theorem | 群の拡大 / 因子団 / 補群 / シューア–ツァッセンハウスの定理 | — / 因子系 / 補部分群 / — | 2026-11-19（ha:page-group-extensions） |
 | complete resolution / Tate cohomology / Herbrand quotient | 完全分解 / テイトのコホモロジー / エルブラン商 | 完備分解 / テイト・コホモロジー / エルブランの商 | 2026-11-19（ha:page-tate-cohomology） |
 | cup product / Galois cohomology / Kummer isomorphism / Tate–Nakayama theorem / relative Brauer group | カップ積 / ガロアコホモロジー / クンマーの同型 / テイト–中山の定理 / 相対ブラウアー群 | — / — / クンマー写像 / — / — | 2026-11-19（ha:page-cup-products-galois） |
+| place / finite place / infinite place / normalized absolute value / product formula / restricted product / adele ring | 素点 / 有限素点 / 無限素点 / 正規化された絶対値 / 積公式 / 制限直積 / アデール環 | 付値 / 有限付値 / 無限付値 / — / — / 制限積 / アデール | 2026-11-20（nt:page-places-adeles） |
+| idele group / idele class group / content (volume) / S-unit / approximation theorem / modulus / ray class group | イデール群 / イデール類群 / 体積 / S 単数 / 近似補題 / 法 / 射類群 | — / — / 内容・ノルム / — / 近似定理 / モジュラス / 射類群（合同イデアル類群） | 2026-11-20（nt:page-ideles） |
+| decomposition group (of a place) / completely split / semilocal component / cohomologically trivial | 分解群 / 完全分解 / 半局所成分 / コホモロジー的に自明 | — / — / — / — | 2026-11-20（nt:page-galois-ideles） |
+| first inequality / permutation lattice | 第一不等式 / 置換格子 | 第 1 不等式 / — | 2026-11-20（nt:page-first-inequality） |
+| global class field theory / Artin reciprocity / existence theorem / ray class field / Hilbert class field / Kronecker–Weber theorem | 大域類体論 / アルティンの相互法則 / 存在定理 / 射類体 / ヒルベルト類体 / クロネッカー–ウェーバーの定理 | — / アルティン相互律 / — / 射類体（合同類体）/ 絶対類体 / — | 2026-11-20（nt:page-global-class-field-theory） |

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>素点とアデール | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/01-algebraic-number-theory/03-adeles-class-field-theory/01-places-adeles.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 素点とアデール {#nt:page-places-adeles keywords="places of a number field, classification of absolute values on a number field, finite places correspond to nonzero prime ideals, infinite places correspond to real embeddings and pairs of complex embeddings, normalized absolute values, product formula for number fields, restricted product, adele ring A_K, topology of the adele ring, locally compact ring, K is discrete in A_K, A_K = K + (K_infinity x prod O_v), A_K / K is compact, adeles of Q"}
+
+代数体 $K$ の「素点」とは、$K$ の絶対値の同値類である。$\mathbb{Q}$ ではオストロフスキーの定理により素数と $\infty$ が素点のすべてだったが、一般の代数体でも、素点は $0$ でない素イデアル（**有限素点**）と、複素数体への埋め込み（**無限素点**）で尽くされる。すべての素点での完備化 $K_{v}$ を「ほとんどすべての成分が整数」という条件付きで並べたものが**アデール環** $\mathbb{A}_{K}$ で、$K$ は $\mathbb{A}_{K}$ の中で、$\mathbb{Z}$ が $\mathbb{R}$ の中にあるのと同じように、離散的でしかも商がコンパクトな部分群として入る。このページでは、素点の分類、積公式、アデール環の位相、そして $\mathbb{A}_{K}/K$ のコンパクト性を証明する。
+
+## 記法と定義の確認 {#nt:sec-pl-notation}
+
+::: notation
+- $K$ は代数体（$\mathbb{Q}$ の有限次拡大）、$n\defeq[K:\mathbb{Q}]$、$\mathcal{O}_{K}$ はその整数環。実埋め込み $\rho_{1},\dots,\rho_{r_{1}}$、複素埋め込みの組の代表 $\tau_{1},\dots,\tau_{r_{2}}$、ミンコフスキー埋め込み $j:K\to\mathbb{R}^{r_{1}}\times\mathbb{C}^{r_{2}}$ と、$j(\mathcal{O}_{K})$ が格子であることは \ref{nt:minkowski-embedding}, \ref{nt:lattice} のとおり。
+- 絶対値・自明な絶対値・非アルキメデス的・同値は \ref{nt:absolute-value}, \ref{nt:equivalent-absolute-values}。非アルキメデス的 $\iff$ すべての整数 $m$ で $\abs{m}\le1$（\ref{nt:non-archimedean-criterion}）。$\mathbb{Q}$ の絶対値の分類は \ref{nt:ostrowski}、完備化は \ref{nt:valued-field-completion}、完備体上の有限次元空間のノルムの同値性は \ref{nt:norms-equivalent-complete}。
+- $\mathcal{O}_{K}$ はデデキント環（\ref{nt:integers-dedekind}）。分数イデアルは素イデアルの冪の積に一意に分解する（\ref{ring:dedekind-factorization}）。$x\in K^{\times}$ について $x\mathcal{O}_{K}=\prod_{\mathfrak{P}}\mathfrak{P}^{v_{\mathfrak{P}}(x)}$ で $v_{\mathfrak{P}}$ を定め、$v_{\mathfrak{P}}(0)\defeq\infty$ とする。$0$ でない素イデアル $\mathfrak{P}$ での局所化 $\mathcal{O}_{K,(\mathfrak{P})}$ は離散付値環（\ref{ring:dedekind-local}）。
+- イデアルのノルム $N(\mathfrak{a})=\abs{\mathcal{O}_{K}/\mathfrak{a}}$、$N(\mathfrak{P})=p^{f(\mathfrak{P})}$（$\mathfrak{P}\mid p$）、$N(x\mathcal{O}_{K})=\abs{N_{K/\mathbb{Q}}(x)}$ は \ref{nt:ideal-norm}, \ref{nt:ideal-norm-multiplicative}。
+- $\hat{\mathcal{O}}_{\mathfrak{P}}=\varprojlim\mathcal{O}_{K}/\mathfrak{P}^{m}$ とその商体 $K_{\mathfrak{P}}$ は \ref{nt:local-decomposition} のとおりで、$K_{\mathfrak{P}}$ は剰余体 $\mathcal{O}_{K}/\mathfrak{P}$ が有限な完備離散付値体で、その付値環はコンパクト（\ref{nt:local-field-compact}）。
+- 位相群・位相環は \ref{top:topological-group}、任意個のコンパクト空間の直積がコンパクトであることは \ref{top:tychonoff}。
+- 体系は $\ZFC$。選択公理はデデキント環の理論（素イデアル分解）とチコノフの定理を通して使う。
+:::
+
+## 代数体の素点 {#nt:sec-pl-places}
+
+::: theorem 代数体の絶対値の分類 {#nt:places-number-field keywords="every nontrivial non-archimedean absolute value on a number field K is equivalent to a P-adic one for a unique nonzero prime P; every archimedean absolute value is equivalent to |sigma(x)| for an embedding sigma: K -> C, unique up to complex conjugation; the completion at an infinite place is R or C" index="素点|そてん, 有限素点|ゆうげんそてん, 無限素点|むげんそてん" refname="代数体の絶対値の分類"}
+$K$ を代数体とする。
+1. $0$ でない素イデアル $\mathfrak{P}$ ごとに、$\abs{x}_{\mathfrak{P}}\defeq N(\mathfrak{P})^{-v_{\mathfrak{P}}(x)}$ は $K$ の自明でない非アルキメデス的絶対値である。$K$ の自明でない非アルキメデス的絶対値は、ちょうど一つの $\mathfrak{P}$ について $\abs\cdot_{\mathfrak{P}}$ と同値である。
+2. 埋め込み $\sigma:K\to\mathbb{C}$ ごとに $\abs{\sigma(x)}_{\infty}$ はアルキメデス的絶対値である。$K$ のアルキメデス的絶対値は、ある $\sigma$ について $\abs{\sigma(\cdot)}_{\infty}$ と同値で、$\abs{\sigma(\cdot)}_{\infty}$ と $\abs{\tau(\cdot)}_{\infty}$ が同値 $\iff$ $\tau\in\{\sigma,\bar\sigma\}$。
+3. したがって $K$ の絶対値の同値類（**素点**）は、$0$ でない素イデアル（**有限素点**）と、$r_{1}$ 個の実埋め込みおよび $r_{2}$ 組の複素埋め込みの組（**無限素点**、$r_{1}+r_{2}$ 個）に一対一に対応する。無限素点 $v$ での完備化 $K_{v}$ は、$v$ が実なら $\mathbb{R}$、複素なら $\mathbb{C}$ である。
+:::
+
+::: intuition
+$\mathbb{Q}$ で「小さい」とは「$p$ でたくさん割れる」か「通常の意味で小さい」かのどちらかだった。代数体でも同じで、非アルキメデス的な「小ささ」は必ずどれか一つの素イデアル $\mathfrak{P}$ での割れやすさであり、アルキメデス的な「小ささ」は $K$ を複素平面に置いたときの大きさである。$\mathbb{Q}(\sqrt2)$ なら、$1+\sqrt2$ と $1-\sqrt2$ を入れ替える 2 つの実埋め込みが、2 つの異なる無限素点を与える。
+:::
+
+::: proof
+**Step 1（1 の前半）.** 【主張：$\abs\cdot_{\mathfrak{P}}$ は非アルキメデス的絶対値】$v_{\mathfrak{P}}(xy)=v_{\mathfrak{P}}(x)+v_{\mathfrak{P}}(y)$ は、$xy\mathcal{O}_{K}=(x\mathcal{O}_{K})(y\mathcal{O}_{K})$ と分解の一意性（\ref{ring:dedekind-factorization}）から従う。$x,y\neq0$, $x+y\neq0$ で $m\defeq\min(v_{\mathfrak{P}}(x),v_{\mathfrak{P}}(y))$ とすると、$x,y\in\mathfrak{P}^{m}\mathcal{O}_{K,(\mathfrak{P})}$ だから $x+y$ もそうで、$v_{\mathfrak{P}}(x+y)\ge m$。よって $\abs{x+y}_{\mathfrak{P}}\le\max(\abs x_{\mathfrak{P}},\abs y_{\mathfrak{P}})$。$\mathfrak{P}\neq\mathfrak{P}^{2}$（分解の一意性）なので $v_{\mathfrak{P}}(\pi)=1$ となる $\pi$ があり、自明でない。
+
+**Step 2（1：付値環が $\mathcal{O}_{K}$ を含む）.** 【主張：非アルキメデス的な $\abs\cdot$ について $R\defeq\{x:\abs x\le1\}\supseteq\mathcal{O}_{K}$】$R$ は環（乗法性と非アルキメデス的三角不等式）で、\ref{nt:non-archimedean-criterion} から $\mathbb{Z}\subseteq R$。$x\in\mathcal{O}_{K}$ が $x^{d}+a_{d-1}x^{d-1}+\dots+a_{0}=0$（$a_{i}\in\mathbb{Z}$）をみたし $\abs x>1$ だとすると、$i<d$ で $\abs{a_{i}x^{i}}\le\abs x^{i}<\abs x^{d}$ なので、\ref{nt:non-archimedean-criterion} の後半から $\abs{x^{d}+\dots+a_{0}}=\abs x^{d}\neq0$ となり矛盾。
+
+**Step 3（1：素イデアル $\mathfrak{P}$ の取り出し）.** 【主張：$\mathfrak{P}\defeq\{x\in\mathcal{O}_{K}:\abs x<1\}$ は $0$ でない素イデアル】$\mathfrak{P}$ は $\mathcal{O}_{K}$ のイデアル（Step 2 から $\mathcal{O}_{K}\cdot\mathfrak{P}\subseteq\mathfrak{P}$）で、$1\notin\mathfrak{P}$、$\abs{xy}<1$ なら $\abs x<1$ か $\abs y<1$（$\abs x,\abs y\le1$ だから）なので素。$\mathfrak{P}=0$ とすると $\mathcal{O}_{K}\setminus\{0\}$ の元はすべて $\abs x=1$ で、$K=\operatorname{Frac}\mathcal{O}_{K}$ の元 $a/b$ も $\abs{a/b}=1$ となり、$\abs\cdot$ が自明になって仮定に反する。
+
+**Step 4（1：$\abs\cdot_{\mathfrak{P}}$ との同値）.** 【主張：$c\defeq\abs\pi$ とすると $\abs x=c^{v_{\mathfrak{P}}(x)}$】$\mathcal{O}_{K,(\mathfrak{P})}$ は離散付値環で、$v_{\mathfrak{P}}(\pi)=1$ の $\pi\in\mathfrak{P}$ が一意化元である。$s\in\mathcal{O}_{K}\setminus\mathfrak{P}$ は $\abs s=1$（Step 2 と $\mathfrak{P}$ の定義）なので、$\mathcal{O}_{K,(\mathfrak{P})}$ の単元 $a/s$（$a,s\notin\mathfrak{P}$）は絶対値 $1$。$x\in K^{\times}$ は $x=u\pi^{v_{\mathfrak{P}}(x)}$（$u$ は単元）と書けるので $\abs x=c^{v_{\mathfrak{P}}(x)}$、ここで $0<c<1$（$\pi\in\mathfrak{P}$）。$s\defeq-\log c/\log N(\mathfrak{P})>0$ とおけば $\abs\cdot=\abs\cdot_{\mathfrak{P}}^{s}$。
+
+**Step 5（1：一意性）.** 【主張：$\mathfrak{P}\neq\mathfrak{Q}$ なら $\abs\cdot_{\mathfrak{P}}$ と $\abs\cdot_{\mathfrak{Q}}$ は同値でない】中国剰余定理（\ref{ring:chinese-remainder}）で $x\equiv0\pmod{\mathfrak{P}}$, $x\equiv1\pmod{\mathfrak{Q}}$ となる $x\in\mathcal{O}_{K}$ をとると $\abs x_{\mathfrak{P}}<1=\abs x_{\mathfrak{Q}}$。同値なら $\abs x_{\mathfrak{Q}}=\abs x_{\mathfrak{P}}^{s}<1$ となるはずなので矛盾。
+
+**Step 6（2：$\mathbb{R}$ を含む完備化）.** 【主張：アルキメデス的な $\abs\cdot$ の完備化 $\hat K$ は、$\mathbb{Q}$ の閉包として $(\mathbb{R},\abs\cdot_{\infty}^{s})$（$0<s\le1$）を含む】\ref{nt:non-archimedean-criterion} から $\abs m>1$ となる整数 $m$ があるので、$\mathbb{Q}$ への制限は自明でもなく非アルキメデス的でもない。\ref{nt:ostrowski} から $\abs\cdot|_{\mathbb{Q}}=\abs\cdot_{\infty}^{s}$（$s>0$）で、$\abs2=2^{s}\le\abs1+\abs1=2$ から $s\le1$。$\mathbb{Q}$ の $\hat K$ での閉包は $(\mathbb{Q},\abs\cdot_{\infty}^{s})$ の完備化であり、\ref{nt:valued-field-completion} の一意性から $(\mathbb{R},\abs\cdot_{\infty}^{s})$ と同一視できる。
+
+**Step 7（2：$\hat K$ は $\mathbb{R}$ か $\mathbb{C}$）.** 【主張：$\hat K=\mathbb{R}\omega_{1}+\dots+\mathbb{R}\omega_{n}$ は $\mathbb{R}$ 上有限次】$K$ の $\mathbb{Q}$ 基底 $\omega_{1},\dots,\omega_{n}$ の張る $\mathbb{R}$ 部分空間 $V$ は有限次元なので、\ref{nt:norms-equivalent-complete}（完備体 $(\mathbb{R},\abs\cdot_{\infty}^{s})$ 上、ノルムは $\hat K$ の絶対値の制限）から $\hat K$ の中で閉。$V\supseteq K$ で $K$ は $\hat K$ で稠密なので $V=\hat K$。よって $\hat K$ は $\mathbb{R}$ の有限次拡大体で、$\mathbb{C}$ が代数閉体であることから $\mathbb{R}$ か $\mathbb{C}$ に $\mathbb{R}$ 同型（\ref{fld:fundamental-theorem-algebra}）。同型 $\iota:\hat K\to\mathbb{C}$（$\mathbb{R}$ 上）を一つとる。
+
+**Step 8（2：絶対値の形）.** 【主張：$\abs x=\abs{\iota(x)}_{\infty}^{s}$】$\abs\cdot$ と $x\mapsto\abs{\iota(x)}_{\infty}^{s}$ はどちらも有限次元 $\mathbb{R}$ 空間 $\hat K$ 上の $(\mathbb{R},\abs\cdot_{\infty}^{s})$ についてのノルムなので、\ref{nt:norms-equivalent-complete} から同値なノルムで、同じ位相を定める。すると $\abs x<1\iff x^{m}\to0\iff\abs{\iota(x)}_{\infty}^{s}<1$ だから、\ref{nt:equivalent-absolute-values} から $\abs\cdot=\abs{\iota(\cdot)}_{\infty}^{st}$（$t>0$）。$x=2$ で比べて $t=1$。$\sigma\defeq\iota|_{K}:K\to\mathbb{C}$ は埋め込みで、$\abs\cdot=\abs{\sigma(\cdot)}_{\infty}^{s}$ は $\abs{\sigma(\cdot)}_{\infty}$ と同値。$\hat K\cong\mathbb{R}$ のとき $\sigma$ は実埋め込み、$\hat K\cong\mathbb{C}$ のとき $\sigma(K)\not\subseteq\mathbb{R}$。
+
+**Step 9（2：埋め込みの一意性）.** 【主張：$\abs{\sigma(\cdot)}_{\infty}$ と $\abs{\tau(\cdot)}_{\infty}$ が同値なら $\tau\in\{\sigma,\bar\sigma\}$】$\abs{\tau(x)}_{\infty}=\abs{\sigma(x)}_{\infty}^{t}$ で $x=2$ とすると $t=1$。すると $\phi:\sigma(K)\to\tau(K)$, $\sigma(x)\mapsto\tau(x)$ は $\abs\cdot_{\infty}$ を保つ体の同型で、一様連続なので閉包の間の連続な体の同型 $\bar\phi:\overline{\sigma(K)}\to\overline{\tau(K)}$ に延びる。$\bar\phi$ は $\mathbb{Q}$ を固定し連続なので $\mathbb{R}$ を固定する。閉包が $\mathbb{R}$ なら $\bar\phi=\mathrm{id}$ で $\tau=\sigma$。閉包が $\mathbb{C}$ なら $\bar\phi$ は $\mathbb{R}$ 線形で $\bar\phi(i)^{2}=-1$ だから $\bar\phi(i)=\pm i$、すなわち $\bar\phi$ は恒等写像か複素共役で、$\tau=\sigma$ か $\tau=\bar\sigma$。逆に $\abs{\bar\sigma(x)}_{\infty}=\abs{\sigma(x)}_{\infty}$ は明らか。
+
+**Step 10（3）.** 【主張：素点の一覧】1 と 2 から、同値類は $\mathfrak{P}$ と、埋め込みの共役による同値類 $\{\sigma,\bar\sigma\}$ に一対一に対応する。実埋め込みは $\sigma=\bar\sigma$ で $r_{1}$ 個、複素埋め込みは $r_{2}$ 組。完備化は Step 7 のとおり。
+:::
+
+::: definition 正規化された絶対値 {#nt:normalized-absolute-value keywords="normalized absolute values: |x|_P = N(P)^{-v_P(x)} for finite places, |sigma(x)| for real places, |sigma(x)|^2 for complex places; v | p, v | infinity" index="正規化された絶対値|せいきかされたぜったいち" refname="正規化された絶対値"}
+素点 $v$ の**正規化された絶対値** $\abs\cdot_{v}$ を、有限素点 $v=\mathfrak{P}$ では $\abs x_{v}\defeq N(\mathfrak{P})^{-v_{\mathfrak{P}}(x)}$、実素点（実埋め込み $\rho$）では $\abs x_{v}\defeq\abs{\rho(x)}_{\infty}$、複素素点（埋め込み $\tau$）では $\abs x_{v}\defeq\abs{\tau(x)}_{\infty}^{2}$ と定める。素数 $p$ の上にある有限素点を $v\mid p$、無限素点を $v\mid\infty$ と書く。$v$ での完備化を $K_{v}$、有限素点 $v$ ではその付値環を $\mathcal{O}_{v}$ とする（$K_{v}=K_{\mathfrak{P}}$, $\mathcal{O}_{v}=\hat{\mathcal{O}}_{\mathfrak{P}}$）。
+:::
+
+::: intuition
+複素素点の絶対値を 2 乗するのは、$\mathbb{C}$ が $\mathbb{R}$ の 2 次元分だからである。どの素点でも「$\abs x_{v}$ は $x$ 倍写像が $K_{v}$ の体積を何倍にするか」になるように正規化している：$\mathbb{C}$ 上の $x$ 倍は面積を $\abs x^{2}$ 倍し、$K_{\mathfrak{P}}$ 上の $\pi$ 倍は付値環を指数 $N(\mathfrak{P})$ の部分群に縮める。（複素素点の $\abs\cdot_{v}$ は三角不等式をみたさないので、厳密には絶対値ではない。）
+:::
+
+::: theorem 代数体の積公式 {#nt:product-formula-number-field keywords="for x in K^x, |x|_v = 1 for almost all places v; product over v | p of |x|_v equals |N_{K/Q}(x)|_p and product over v | infinity equals |N_{K/Q}(x)|; product formula prod_v |x|_v = 1" index="積公式（代数体）|せきこうしき" refname="代数体の積公式"}
+$x\in K^{\times}$ とする。
+1. 有限個を除くすべての素点 $v$ で $\abs x_{v}=1$。
+2. 素数 $p$ について $\prod_{v\mid p}\abs x_{v}=\abs{N_{K/\mathbb{Q}}(x)}_{p}$、また $\prod_{v\mid\infty}\abs x_{v}=\abs{N_{K/\mathbb{Q}}(x)}_{\infty}$。
+3. $\prod_{v}\abs x_{v}=1$。
+:::
+
+::: intuition
+積公式は「$K^{\times}$ の元は、すべての素点を合わせると大きくも小さくもない」という釣り合いである。整数で言えば、$12$ は通常の意味で $12$ 倍大きく、$2$ 進で $1/4$、$3$ 進で $1/3$ 小さく、全部掛けると $1$。代数体では、ノルムをとって $\mathbb{Q}$ の積公式に帰着する。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\abs x_{v}\neq1$ の有限素点は有限個】$x\mathcal{O}_{K}$ の素イデアル分解に現れる $\mathfrak{P}$ は有限個で、それ以外では $v_{\mathfrak{P}}(x)=0$。
+
+**Step 2（2 の無限素点）.** 【主張：$\prod_{v\mid\infty}\abs x_{v}=\abs{N_{K/\mathbb{Q}}(x)}_{\infty}$】標数 $0$ なので分離的で、\ref{fld:norm-trace-embeddings} から $N_{K/\mathbb{Q}}(x)=\prod_{\sigma}\sigma(x)$（$n$ 個の埋め込み全体）。実埋め込みは一度ずつ、複素埋め込みは $\tau,\bar\tau$ の組で現れ $\abs{\tau(x)\bar\tau(x)}_{\infty}=\abs{\tau(x)}_{\infty}^{2}$ なので、絶対値をとれば主張を得る。
+
+**Step 3（2 の有限素点、$x\in\mathcal{O}_{K}$ のとき）.** 【主張：$\prod_{\mathfrak{P}\mid p}N(\mathfrak{P})^{-v_{\mathfrak{P}}(x)}=\abs{N_{K/\mathbb{Q}}(x)}_{p}$】\ref{nt:ideal-norm-multiplicative} から
+$$
+\abs{N_{K/\mathbb{Q}}(x)}_{\infty}=N(x\mathcal{O}_{K})=\prod_{\mathfrak{P}}N(\mathfrak{P})^{v_{\mathfrak{P}}(x)}.
+$$
+右辺の各因子 $N(\mathfrak{P})=q^{f(\mathfrak{P})}$ は、$\mathfrak{P}$ の下にある素数 $q$ の冪である。$p$ 進絶対値をとると、$q\neq p$ の因子は $\abs\cdot_{p}=1$、$q=p$ の因子は $\abs{N(\mathfrak{P})^{v}}_{p}=N(\mathfrak{P})^{-v}$ となる。$N_{K/\mathbb{Q}}(x)\in\mathbb{Z}$ の符号は $\abs\cdot_{p}$ に影響しない。
+
+**Step 4（2 の有限素点、一般の $x$）.** 【主張：$K^{\times}$ 全体で成り立つ】$x$ は $\mathbb{Q}$ 上整なので、$d x\in\mathcal{O}_{K}$ となる $0\neq d\in\mathbb{Z}$ がある（最小多項式の分母を払う）。両辺とも乗法的（$v_{\mathfrak{P}}$ は加法的、$N_{K/\mathbb{Q}}$ は乗法的）なので、$dx$ と $d$ についての Step 3 を割り算すればよい。
+
+**Step 5（3）.** 【主張：$\prod_{v}\abs x_{v}=1$】Step 1 から積は有限積。素点を $\mathbb{Q}$ の素点ごとにまとめ（\ref{nt:integers-dedekind} の 3 から各 $\mathfrak{P}$ はちょうど一つの $p$ の上にある）、2 を使うと
+$$
+\prod_{v}\abs x_{v}=\abs{N_{K/\mathbb{Q}}(x)}_{\infty}\prod_{p}\abs{N_{K/\mathbb{Q}}(x)}_{p}=1
+$$
+（最後は \ref{nt:product-formula}）。
+:::
+
+::: example
+$K=\mathbb{Q}(i)$, $x=3+4i$。$N(x)=25$ で、$x=(2+i)^{2}$（$(2+i)^{2}=4+4i-1$）。$5$ の上の素点は $\mathfrak{P}=(2+i)$, $\bar{\mathfrak{P}}=(2-i)$ で、$N(\mathfrak{P})=5$ なので $\abs x_{\mathfrak{P}}=5^{-2}$, $\abs x_{\bar{\mathfrak{P}}}=1$（$2-i\nmid 2+i$：$\frac{2+i}{2-i}=\frac{3+4i}{5}\notin\mathbb{Z}[i]$）。唯一の無限素点は複素で $\abs x_{\infty}=\abs{3+4i}^{2}=25$。他の素点では $1$ なので積は $25\cdot5^{-2}=1$。正規化で 2 乗しなければ積は $5\cdot5^{-2}\neq1$ になる。
+:::
+
+## 制限直積とアデール環 {#nt:sec-pl-adeles}
+
+::: definition アデール環 {#nt:adele-ring keywords="adele ring A_K: restricted product of the completions K_v with respect to the valuation rings O_v; A_{K,S} = prod_{v in S} K_v x prod_{v not in S} O_v; basis of the topology; finite adeles; diagonal embedding K -> A_K" index="アデール|あでーる, アデール環|あでーるかん, 制限直積|せいげんちょくせき" refname="アデール環"}
+$K$ の素点全体を $V_{K}$、無限素点全体を $V_{\infty}$ とする。
+$$
+\mathbb{A}_{K}\defeq\Bigl\{(a_{v})_{v}\in\prod_{v\in V_{K}}K_{v}:\text{有限個を除くすべての有限素点 }v\text{ で }a_{v}\in\mathcal{O}_{v}\Bigr\}
+$$
+を $K$ の**アデール環**、その元を**アデール**という（$\mathcal{O}_{v}$ に関する $K_{v}$ の**制限直積**）。成分ごとの和と積で環になる。$V_{\infty}\subseteq S\subseteq V_{K}$ となる有限集合 $S$ について
+$$
+\mathbb{A}_{K,S}\defeq\prod_{v\in S}K_{v}\times\prod_{v\notin S}\mathcal{O}_{v}
+$$
+とおく。$S$ と開集合 $U_{v}\subseteq K_{v}$（$v\in S$）について $\prod_{v\in S}U_{v}\times\prod_{v\notin S}\mathcal{O}_{v}$ の形の集合を**基本開集合**とし、その和集合全体を $\mathbb{A}_{K}$ の位相とする。$x\in K$ を $(x)_{v}$ に送る写像を**対角埋め込み**という。
+:::
+
+::: intuition
+アデールは「すべての素点での $x$ の姿を同時に記録した無限次元の座標」である。直積 $\prod K_{v}$ をそのまま使うと局所コンパクトでなくなる（無限個の非コンパクト空間の積）ので、「有限個の素点以外では整数」という制限をつける。$K$ の元は有限個の素点でしか分母をもたないので、この制限をみたし、対角的にアデール環に入る。
+:::
+
+::: proposition アデール環の位相 {#nt:adele-ring-topology keywords="the basic open sets form a basis; A_{K,S} is open and carries the product topology; A_K is a locally compact Hausdorff topological ring; the diagonal embedding K -> A_K is an injective ring homomorphism" index="アデール環の位相|あでーるかんのいそう" refname="アデール環の位相"}
+1. 基本開集合の全体は位相の基底をなす。各 $\mathbb{A}_{K,S}$ は $\mathbb{A}_{K}$ の開集合で、その相対位相は直積位相に一致する。$\mathbb{A}_{K}=\bigcup_{S}\mathbb{A}_{K,S}$。
+2. $\mathbb{A}_{K}$ はハウスドルフで局所コンパクトな位相環である。
+3. 対角埋め込み $K\to\mathbb{A}_{K}$ は well-defined な単射環準同型である。
+:::
+
+::: intuition
+アデール環は、有限個の素点では自由に動き、残りでは整数環という「コンパクトな箱」に閉じ込められた空間の和集合である。各箱はコンパクトな部品と有限個の局所コンパクトな部品の直積なので局所コンパクトで、箱どうしは開集合として貼り合わさる。
+:::
+
+::: proof
+**Step 1（基底）.** 【主張：2 つの基本開集合の共通部分は基本開集合】$B=\prod_{S}U_{v}\times\prod_{\notin S}\mathcal{O}_{v}$, $B'=\prod_{S'}U'_{v}\times\prod_{\notin S'}\mathcal{O}_{v}$ について、$T\defeq S\cup S'$ とし、$v\in S\cap S'$ では $U_{v}\cap U'_{v}$、$v\in S\setminus S'$ では $U_{v}\cap\mathcal{O}_{v}$、$v\in S'\setminus S$ では $\mathcal{O}_{v}\cap U'_{v}$ とおけば（$\mathcal{O}_{v}$ は $K_{v}$ の開集合：$\{\abs x_{v}<\abs{\pi}_{v}^{-1}\}$ に等しい）、$B\cap B'$ は $T$ についての基本開集合。基本開集合は $\mathbb{A}_{K}$ を覆う（$\mathbb{A}_{K,S}$ 自身が基本開集合で、各アデールはどれかの $\mathbb{A}_{K,S}$ に入る）。
+
+**Step 2（$\mathbb{A}_{K,S}$ の相対位相）.** 【主張：相対位相＝直積位相】基本開集合と $\mathbb{A}_{K,S}$ の共通部分は、Step 1 と同じ計算で、有限個の成分だけが開集合 $W_{v}\subsetneq$（$K_{v}$ または $\mathcal{O}_{v}$）で他は全体という直積位相の開集合になる。逆に、直積位相の基本開集合 $\prod_{v\in T}W_{v}\times\prod_{v\in S\setminus T}K_{v}\times\prod_{v\notin S\cup T}\mathcal{O}_{v}$（$T$ 有限、$v\notin S$ なら $W_{v}\subseteq\mathcal{O}_{v}$ 開）は、$S\cup T$ についての基本開集合そのものである。
+
+**Step 3（ハウスドルフ）.** 【主張：異なる 2 点は開集合で分離される】2 点はともにある $\mathbb{A}_{K,S}$ に入る（2 点の「整でない」有限個の成分を $S$ に加える）。$\mathbb{A}_{K,S}$ はハウスドルフ空間の直積なのでハウスドルフで、$\mathbb{A}_{K}$ の開集合なので、そこでの分離開集合は $\mathbb{A}_{K}$ でも開。
+
+**Step 4（局所コンパクト）.** 【主張：各点がコンパクトな近傍をもつ】$a\in\mathbb{A}_{K,S}$ とする。$v\in S$ では $a_{v}$ のコンパクトな近傍 $C_{v}$ をとる（$\mathbb{R}$, $\mathbb{C}$ では閉円板、有限素点では $a_{v}+\mathcal{O}_{v}$ で、\ref{nt:local-field-compact} からコンパクト）。$\prod_{S}C_{v}\times\prod_{\notin S}\mathcal{O}_{v}$ は \ref{top:tychonoff} から直積位相でコンパクトで、Step 2 から $\mathbb{A}_{K}$ でもコンパクト。内部に基本開集合 $\prod_{S}C_{v}^{\circ}\times\prod\mathcal{O}_{v}\ni a$ を含む。
+
+**Step 5（位相環）.** 【主張：和・積・符号反転は連続】$(a,b)\in\mathbb{A}_{K}^{2}$ をとり、$a,b\in\mathbb{A}_{K,S}$ となる $S$ をとる。$\mathbb{A}_{K,S}^{2}$ は $\mathbb{A}_{K}^{2}$ の開集合で、その上で和と積は成分ごとの演算なので直積位相について連続、値は $\mathbb{A}_{K,S}$（$\mathcal{O}_{v}$ は環）に入る。Step 2 からこれは $\mathbb{A}_{K}$ の位相で連続である。連続性は局所的な性質なので、$(a,b)$ で連続。
+
+**Step 6（3）.** 【主張：$x\in K$ の対角像はアデール】$x=0$ は明らか。$x\neq0$ なら \ref{nt:product-formula-number-field} の 1 から有限個を除く $v$ で $\abs x_{v}=1$、特に $x\in\mathcal{O}_{v}$。成分ごとの演算なので環準同型で、成分 $x\in K_{v}$ から $x$ が決まるので単射。
+:::
+
+::: example
+$K=\mathbb{Q}$ では $V_{\mathbb{Q}}=\{\infty,2,3,5,\dots\}$, $K_{\infty}=\mathbb{R}$, $K_{p}=\mathbb{Q}_{p}$, $\mathcal{O}_{p}=\mathbb{Z}_{p}$ で、$\mathbb{A}_{\mathbb{Q}}$ は「ほとんどすべての $p$ で $p$ 進整数」の列 $(a_{\infty},a_{2},a_{3},\dots)$ の全体。$\hat{\mathbb{Z}}\defeq\prod_{p}\mathbb{Z}_{p}$ とおくと $\mathbb{A}_{\mathbb{Q},\{\infty\}}=\mathbb{R}\times\hat{\mathbb{Z}}$。$1/6$ は $p=2,3$ でだけ整でない成分をもつアデールである。
+:::
+
+## $K$ の離散性と $\mathbb{A}_{K}/K$ のコンパクト性 {#nt:sec-pl-compact}
+
+::: lemma 剰余環と完備化 {#nt:residue-completion keywords="O_K / P^m is isomorphic to O_v / P^m O_v; density of K in K_v" index="剰余環と完備化|じょうよかんとかんびか"}
+有限素点 $v=\mathfrak{P}$ と $m\ge1$ について、包含から誘導される $\mathcal{O}_{K}/\mathfrak{P}^{m}\to\mathcal{O}_{v}/\{a:v_{\mathfrak{P}}(a)\ge m\}$ は環の同型である（$v_{\mathfrak{P}}$ は $K_{v}$ に延ばした付値）。
+:::
+
+::: proof
+**Step 1（単射）.** 【主張：$x\in\mathcal{O}_{K}$, $v_{\mathfrak{P}}(x)\ge m$ なら $x\in\mathfrak{P}^{m}$】$x\mathcal{O}_{K}$ の分解で $\mathfrak{P}$ の指数が $m$ 以上なので $x\mathcal{O}_{K}\subseteq\mathfrak{P}^{m}$。
+
+**Step 2（全射）.** 【主張：$a\in\mathcal{O}_{v}$ に $v_{\mathfrak{P}}(a-y)\ge m$ となる $y\in\mathcal{O}_{K}$ がある】$K$ は $K_{v}$ で稠密なので $v_{\mathfrak{P}}(a-x)\ge m$ の $x\in K$ がある。$v_{\mathfrak{P}}(x)\ge0$ なので $x\in\mathcal{O}_{K,(\mathfrak{P})}$（離散付値環の元は付値が非負の元）で、$x=b/c$, $b\in\mathcal{O}_{K}$, $c\in\mathcal{O}_{K}\setminus\mathfrak{P}$ と書ける。$\mathcal{O}_{K}/\mathfrak{P}^{m}$ は極大イデアル $\mathfrak{P}/\mathfrak{P}^{m}$ だけをもつ局所環（$\mathfrak{P}^{m}$ を含む素イデアルは $\mathfrak{P}$ だけ）なので、$c$ の像は単元で、$cc'\equiv1\pmod{\mathfrak{P}^{m}}$ の $c'\in\mathcal{O}_{K}$ がある。$y\defeq bc'$ とすると $x-y=b(1-cc')/c$ で $v_{\mathfrak{P}}(x-y)\ge m$。よって $v_{\mathfrak{P}}(a-y)\ge m$。
+:::
+
+::: theorem アデール環の中の $K$ {#nt:adeles-discrete-cocompact keywords="A_K = K + A_{K,infinity} with A_{K,infinity} = prod_{v | infinity} K_v x prod O_v; K intersect A_{K,infinity} = O_K; K is discrete in A_K; A_K / K is compact; fundamental domain F x prod O_v" index="アデール環の中の K|あでーるかんのなかの, A_K/K のコンパクト性|こんぱくとせい" refname="アデール環の中の K"}
+$\mathbb{A}_{K,\infty}\defeq\mathbb{A}_{K,V_{\infty}}=\prod_{v\mid\infty}K_{v}\times\prod_{v\nmid\infty}\mathcal{O}_{v}$ とする。
+1. $K\cap\mathbb{A}_{K,\infty}=\mathcal{O}_{K}$ で、$\mathbb{A}_{K}=K+\mathbb{A}_{K,\infty}$。
+2. $K$ は $\mathbb{A}_{K}$ の離散部分群である。
+3. $\mathbb{A}_{K}/K$（商位相）はコンパクトである。より詳しく、$\omega_{1},\dots,\omega_{n}$ を $\mathcal{O}_{K}$ の $\mathbb{Z}$ 基底、$F\subseteq\prod_{v\mid\infty}K_{v}$ を $j(\omega_{i})$ の張る閉平行体とすると、$\mathbb{A}_{K}=K+\bigl(F\times\prod_{v\nmid\infty}\mathcal{O}_{v}\bigr)$。
+:::
+
+::: intuition
+$\mathbb{Z}\subseteq\mathbb{R}$ では、$\mathbb{Z}$ の点はばらばらで（離散）、$[0,1]$ をずらせば $\mathbb{R}$ を覆う（$\mathbb{R}/\mathbb{Z}$ がコンパクト）。アデール環の中の $K$ も同じで、「すべての有限素点で整」に限ると $\mathcal{O}_{K}$ が残り、無限素点の側は $\mathcal{O}_{K}$ が格子として $\mathbb{R}^{n}$ に入る。有限素点の側の自由度は中国剰余定理で $K$ の元を引いて吸収できる。
+:::
+
+::: proof
+**Step 1（$K\cap\mathbb{A}_{K,\infty}=\mathcal{O}_{K}$）.** 【主張：すべての有限素点で整な $K$ の元は代数的整数】$x\in K^{\times}$ がすべての $\mathfrak{P}$ で $v_{\mathfrak{P}}(x)\ge0$ なら、$x\mathcal{O}_{K}=\prod\mathfrak{P}^{v_{\mathfrak{P}}(x)}\subseteq\mathcal{O}_{K}$ なので $x\in\mathcal{O}_{K}$。逆に $\mathcal{O}_{K}\subseteq\mathcal{O}_{v}$ は明らか。
+
+**Step 2（$\mathbb{A}_{K}=K+\mathbb{A}_{K,\infty}$）.** 【主張：アデール $a$ に、すべての有限素点で $a_{v}-x\in\mathcal{O}_{v}$ となる $x\in K$ がある】$a_{v}\notin\mathcal{O}_{v}$ となる有限素点は有限個 $\mathfrak{P}_{1},\dots,\mathfrak{P}_{k}$。$\mathfrak{P}_{i}$ の下の素数を $p_{i}$ とし、$0\neq d\in\mathbb{Z}$ を $p_{i}$ の十分高い冪の積にとって、すべての有限素点で $da_{v}\in\mathcal{O}_{v}$ とする。$d\mathcal{O}_{K}=\prod_{\mathfrak{P}\mid d}\mathfrak{P}^{m_{\mathfrak{P}}}$ とすると、\ref{nt:residue-completion} と中国剰余定理（\ref{ring:chinese-remainder}）から、$\mathfrak{P}\mid d$ のすべてで $v_{\mathfrak{P}}(da_{\mathfrak{P}}-y)\ge m_{\mathfrak{P}}$ となる $y\in\mathcal{O}_{K}$ がある。$x\defeq y/d$ とおく。$\mathfrak{P}\mid d$ なら $v_{\mathfrak{P}}(a_{\mathfrak{P}}-x)=v_{\mathfrak{P}}(da_{\mathfrak{P}}-y)-m_{\mathfrak{P}}\ge0$。$\mathfrak{P}\nmid d$ なら $\mathfrak{P}\notin\{\mathfrak{P}_{i}\}$ なので $a_{\mathfrak{P}}\in\mathcal{O}_{\mathfrak{P}}$ で、$d$ は $\mathcal{O}_{\mathfrak{P}}$ の単元、$y\in\mathcal{O}_{K}$ なので $a_{\mathfrak{P}}-x\in\mathcal{O}_{\mathfrak{P}}$。よって $a-x\in\mathbb{A}_{K,\infty}$。
+
+**Step 3（離散性）.** 【主張：$U\defeq\{a\in\mathbb{A}_{K,\infty}:\abs{a_{v}}_{v}<1\ (v\mid\infty)\}$ は $0$ の開近傍で $U\cap K=\{0\}$】$U$ は基本開集合。$x\in U\cap K$ なら Step 1 から $x\in\mathcal{O}_{K}$ で、\ref{nt:product-formula-number-field} の 2 から $\abs{N_{K/\mathbb{Q}}(x)}_{\infty}=\prod_{v\mid\infty}\abs x_{v}<1$。$N_{K/\mathbb{Q}}(x)\in\mathbb{Z}$（\ref{nt:integers-basic}）なので $N_{K/\mathbb{Q}}(x)=0$、すなわち $x=0$。平行移動 $a\mapsto x+a$ は同相写像（\ref{nt:adele-ring-topology} の 2）で、$(x+U)\cap K=x+(U\cap K)=\{x\}$。よって $K$ の各点は孤立点。
+
+**Step 4（基本領域）.** 【主張：$\mathbb{A}_{K}=K+(F\times\prod_{v\nmid\infty}\mathcal{O}_{v})$】無限素点の完備化を、実素点 $\rho_{i}$ には $\mathbb{R}$、複素素点には代表 $\tau_{l}$ を使って $\mathbb{C}$ と同一視すると、$K\to\prod_{v\mid\infty}K_{v}$ はミンコフスキー埋め込み $j$ になる。$j(\mathcal{O}_{K})$ は格子なので $j(\omega_{1}),\dots,j(\omega_{n})$ は $\prod_{v\mid\infty}K_{v}\cong\mathbb{R}^{n}$ の $\mathbb{R}$ 基底（\ref{nt:lattice}）。$a\in\mathbb{A}_{K}$ を Step 2 で $a=x+b$（$b\in\mathbb{A}_{K,\infty}$）と書き、$b$ の無限成分を $\sum c_{i}j(\omega_{i})$（$c_{i}\in\mathbb{R}$）とする。$z\defeq\sum\lfloor c_{i}\rfloor\omega_{i}\in\mathcal{O}_{K}$ とおくと、$b-z$ の無限成分は $\sum(c_{i}-\lfloor c_{i}\rfloor)j(\omega_{i})\in F$、有限成分は $\mathcal{O}_{v}$ に入る（$z\in\mathcal{O}_{v}$）。よって $a=(x+z)+(b-z)$。
+
+**Step 5（コンパクト性）.** 【主張：$\mathbb{A}_{K}/K$ はコンパクト】$F$ は $[0,1]^{n}$ の線形同型像なのでコンパクトで、$C\defeq F\times\prod_{v\nmid\infty}\mathcal{O}_{v}$ は \ref{top:tychonoff} と \ref{nt:local-field-compact} から $\mathbb{A}_{K,\infty}$（直積位相）でコンパクト、したがって $\mathbb{A}_{K}$ でもコンパクト（\ref{nt:adele-ring-topology} の 1）。商写像 $\mathbb{A}_{K}\to\mathbb{A}_{K}/K$ は連続で、Step 4 から $C$ の像は全体。コンパクト集合の連続像なのでコンパクト。
+:::
+
+::: example
+$K=\mathbb{Q}$ では $\mathcal{O}_{K}=\mathbb{Z}$, $F=[0,1]$ で、$\mathbb{A}_{\mathbb{Q}}=\mathbb{Q}+([0,1]\times\hat{\mathbb{Z}})$。実際、さらに $[0,1)\times\hat{\mathbb{Z}}$ は**基本領域**（各アデールがただ一通りに $x+b$, $x\in\mathbb{Q}$, $b\in[0,1)\times\hat{\mathbb{Z}}$ と書ける）である：$x+b=x'+b'$ なら $x-x'\in\mathbb{Q}\cap(\mathbb{R}\times\hat{\mathbb{Z}})=\mathbb{Z}$（Step 1）で、その実成分 $b'_{\infty}-b_{\infty}$ は $(-1,1)$ に入るので $x=x'$。
+:::
+
+::: hypcheck
+- **絶対値の分類**：$\mathcal{O}_{K}$ がデデキント環であることは、局所化が離散付値環であること（Step 4）と中国剰余定理（Step 5）に使った。アルキメデス的な場合は、$\mathbb{Q}$ のオストロフスキーの定理（Step 6）、$\mathbb{R}$ の完備性を通したノルムの同値性（Step 7・8）、代数学の基本定理（Step 7）を使った。$K/\mathbb{Q}$ が有限次であることは Step 7（有限次元性）に本質的で、$\overline{\mathbb{Q}}$ では完備化は $\mathbb{R}$ 上無限次元になりうる。
+- **積公式**：複素素点で 2 乗する正規化は本質的（例で 2 乗しないと積が $1/5$）。有限性はイデアル分解の有限性による。
+- **アデール環の位相**：局所コンパクト性には、ほとんどすべての成分が**コンパクト**な $\mathcal{O}_{v}$ に入ること（剰余体の有限性による。\ref{nt:local-field-compact}）が本質的。直積 $\prod_{v}K_{v}$（制限なし）は局所コンパクトでない。
+- **$K$ の離散性**：すべての無限素点を使うことが本質的で、無限素点を除いた**有限アデール**の中では $\mathbb{Q}$ は離散でない（$\mathbb{Z}$ は中国剰余定理により $\hat{\mathbb{Z}}$ で稠密なので、$0$ のどんな近傍も $0$ 以外の整数を含む）。
+- **コンパクト性**：$\mathcal{O}_{v}$ のコンパクト性と、$j(\mathcal{O}_{K})$ が格子であること（全階数）を使った。
+:::
+
+## 問題 {#nt:sec-pl-problems}
+
+::: problem {#nt:prob-pl-sqrt2-places}
+$K=\mathbb{Q}(\sqrt2)$ の無限素点をすべて挙げ、$x=1+\sqrt2$ について、すべての素点での正規化された絶対値を求めて積公式を確かめよ。
+:::
+
+::: solution
+実埋め込みが 2 つ（$\sqrt2\mapsto\pm\sqrt2$）で、複素埋め込みはないので、無限素点は 2 つの実素点 $v_{+}$, $v_{-}$。$\abs x_{v_{+}}=1+\sqrt2$, $\abs x_{v_{-}}=\abs{1-\sqrt2}=\sqrt2-1$。$N(x)=(1+\sqrt2)(1-\sqrt2)=-1$ なので $x$ は単数で、すべての $\mathfrak{P}$ で $v_{\mathfrak{P}}(x)=0$、$\abs x_{\mathfrak{P}}=1$。積は $(1+\sqrt2)(\sqrt2-1)=1$。
+:::
+
+::: problem {#nt:prob-pl-not-locally-compact}
+制限をつけない直積 $\prod_{p}\mathbb{Q}_{p}$（直積位相）は局所コンパクトでないことを示せ。
+:::
+
+::: solution
+$0$ がコンパクトな近傍 $C$ をもつとすると、$C$ は基本開集合 $\prod_{p\in T}W_{p}\times\prod_{p\notin T}\mathbb{Q}_{p}$（$T$ 有限）を含む。$p_{0}\notin T$ をとると、$p_{0}$ 成分への射影は連続なので、$C$ の像は $\mathbb{Q}_{p_{0}}$ のコンパクト集合で $\mathbb{Q}_{p_{0}}$ 全体を含む。しかし $\mathbb{Q}_{p_{0}}$ はコンパクトでない（$p_{0}^{-k}$ はどの部分列も収束しない：$\abs{p_{0}^{-k}}_{p_{0}}=p_{0}^{k}\to\infty$）ので矛盾。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 素点の分類の非アルキメデス的な場合は、$\mathcal{O}_{K}$ がデデキント環であることだけを使い、$K$ が代数体であること（有限次性）は使わない。したがって任意のデデキント環の商体で、その環の上で $\le1$ になる絶対値は素イデアルから来る。$\mathbb{A}_{K}/K$ のコンパクト性の証明はディリクレの単数定理も類数の有限性も使わない（これらはイデールの側で現れる：\ref{nt:page-ideles}）。
+
+**前提を変えると.**
+- **強近似定理**：一つの素点 $v_{0}$ を除いた制限直積 $\mathbb{A}_{K}^{v_{0}}$ の中で、$K$ は稠密であると知られている（CF II §15、Ne VI の演習）。上の Step 2 はその弱い形（有限素点の側の近似）にあたる。
+- **関数体**：有限体上の 1 変数関数体 $F$ でも、素点（すべて非アルキメデス的）の完備化の制限直積としてアデール環が定義され、$F$ は離散で $\mathbb{A}_{F}/F$ はコンパクトになる。この場合の $\mathbb{A}_{F}/(F+\prod\mathcal{O}_{v})$ はリーマン–ロッホの定理の $H^{1}$ にあたる（Weil の立場）。
+- **自己双対性**：$\mathbb{A}_{K}$ は局所コンパクト可換群としてポントリャーギン双対が自分自身と同型で、$K$ の双対は $\mathbb{A}_{K}/K$ になる（テイトの学位論文。CF XV）。ここでは証明しない。
+
+**高い視点から：アデールは「すべての完備化の貼り合わせ」.** 制限直積は、有限集合 $S$ についての $\mathbb{A}_{K,S}$ の和集合、すなわち包含の作る有向系の余極限（位相環の圏で）である。$\mathbb{Z}\subseteq\mathbb{R}$ の商 $\mathbb{R}/\mathbb{Z}$ は円周だったが、$\mathbb{Q}\subseteq\mathbb{A}_{\mathbb{Q}}$ の商 $\mathbb{A}_{\mathbb{Q}}/\mathbb{Q}\cong(\mathbb{R}\times\hat{\mathbb{Z}})/\mathbb{Z}$ は、円周を $n$ 重に巻き付ける写像の逆極限 $\varprojlim_{n}\mathbb{R}/n\mathbb{Z}$（**ソレノイド**）と同型になる（\ref[演習]{nt:sec-pl-exercises} の演習）：円周を 2 重・3 重…に巻いた覆いをすべて同時に見るので、各 $p$ 進方向の「ねじれ」が $\hat{\mathbb{Z}}$ として現れる。比喩で言えば、$K$ は $\mathbb{A}_{K}$ の中の「結晶格子」で、$\mathbb{A}_{K}/K$ はその単位胞（コンパクトなトーラスの無限次元版）である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-pl-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=c20405c1"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=23a7fce9"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
