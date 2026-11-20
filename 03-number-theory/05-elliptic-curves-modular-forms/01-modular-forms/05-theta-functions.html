@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>テータ関数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/05-elliptic-curves-modular-forms/01-modular-forms/05-theta-functions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# テータ関数 {#nt:page-theta-functions keywords="Poisson summation on Z^n for rapidly decreasing functions by induction, Fourier transform of Gaussians, dual lattice, volume v = sqrt(det A), theta inversion Theta_L(t) = t^{-n/2} v^{-1} Theta_{L'}(1/t), theta series of an even unimodular positive definite lattice theta_L(z) = sum q^{x.x/2}, theta_L is a modular form of weight n/2, n divisible by 8, theta_L = E_{n/2} + cusp form, r_L(m) asymptotics, theta of E_8 is E_4 so r(m) = 240 sigma_3(m), E_8 + E_8 and Gamma_16 have the same theta series, rank 24 lattices and the Leech lattice"}
+
+正定値な格子 $L$ の**テータ級数** $\theta_{L}(z)=\sum_{x\in L}e^{\pi iz\,x\cdot x}$ は、長さの 2 乗が $2m$ のベクトルの個数 $r_{L}(m)$ を係数にもつ $q$ 級数である。ポアソンの和公式によって、$\theta_{L}$ は $z\mapsto-1/z$ で双対格子のテータ級数に移る。$L$ が偶ユニモジュラーなら $L$ は自分自身の双対なので、$\theta_{L}$ は重さ $n/2$ のモジュラー形式になる。モジュラー形式の空間は小さいので、$E_{8}$ 格子のテータ級数は $E_{4}$ そのものになり、「長さの 2 乗が $2m$ の $E_{8}$ のベクトルは $240\sigma_{3}(m)$ 本」という公式が得られる。階数 16 の非同型な 2 つの偶格子が同じテータ級数をもつことも、この方法でわかる。
+
+## 記法と定義の確認 {#nt:sec-th-notation}
+
+::: notation
+- 1 変数のフーリエ変換 $\hat f(\xi)=\int f(x)e^{-2\pi ix\xi}dx$ とポアソンの和公式は \ref{four:poisson-summation}、ガウス関数のフーリエ変換は \ref{cx:gaussian-fourier}。
+- 偶ユニモジュラー格子、偶で定値なら階数は 8 の倍数（\ref{nt:ks-determination}）、$E_{8}=\Gamma_{8}$, $\Gamma_{16}$ は \ref{nt:unimodular-lattice}, \ref{nt:gamma-lattices}。
+- 定義・変換則の判定・構造定理・$E_{k}$ の $q$ 展開・係数の評価・$\sum\tau(n)q^{n}$ は \ref{nt:modular-form}, \ref{nt:modular-transformation-criterion}, \ref{nt:modular-forms-structure}, \ref{nt:eisenstein-q-expansion}, \ref{nt:coefficient-growth}, \ref{nt:ramanujan-tau}。正則関数の一意接続は \ref{cx:identity-theorem}。
+- $\mathbb{R}^{n}$ 上の**急減少関数**：滑らかで、すべての多項式 $P$ と偏微分 $\partial^{\beta}$ について $P(x)\partial^{\beta}f(x)$ が有界な関数。$\hat f(\xi)\defeq\int_{\mathbb{R}^{n}}f(x)e^{-2\pi ix\cdot\xi}dx$。
+- 体系は $\ZF$。
+:::
+
+## ポアソンの和公式とテータの反転公式 {#nt:sec-th-poisson}
+
+::: lemma 多次元のポアソンの和公式 {#nt:poisson-summation-zn keywords="for a rapidly decreasing f on R^n, sum_{m in Z^n} f(m) = sum_{k in Z^n} f hat(k); proof by induction on n from the one-variable formula" index="ポアソンの和公式（多次元）|ぽあそんのわこうしき" refname="多次元のポアソンの和公式"}
+$\mathbb{R}^{n}$ 上の急減少関数 $f$ について $\sum_{m\in\mathbb{Z}^{n}}f(m)=\sum_{k\in\mathbb{Z}^{n}}\hat f(k)$（両辺は絶対収束）。
+:::
+
+::: intuition
+格子の点での値の和は、フーリエ変換の双対格子の点での値の和に等しい。1 変数のポアソンの和公式を、座標ごとに繰り返し使えば多変数の場合になる。
+:::
+
+::: proof
+**Step 1（$n=1$）.** \ref{four:poisson-summation}（急減少関数は仮定をみたし、$\hat f$ も急減少）。
+
+**Step 2（部分フーリエ変換）.** 【主張：$g(\xi_{1},x')\defeq\int_{\mathbb{R}}f(x_{1},x')e^{-2\pi ix_{1}\xi_{1}}dx_{1}$ は $\mathbb{R}^{n}$ 上の急減少関数】積分記号下の微分で $x'$ についての偏微分は被積分関数の偏微分の積分、$\xi_{1}^{a}$ を掛けることは $x_{1}$ についての部分積分で $(2\pi i)^{-a}\partial_{x_{1}}^{a}$ に移り、$x'$ の多項式は被積分関数に入る。どれも $f$ の急減少性から有界。
+
+**Step 3（帰納法）.** 各 $x'$ で Step 1 を $x_{1}\mapsto f(x_{1},x')$ に使うと $\sum_{m_{1}}f(m_{1},x')=\sum_{k_{1}}g(k_{1},x')$。$x'=m'\in\mathbb{Z}^{n-1}$ で足し、急減少性から和の順序を交換し（$\sum_{k_{1},m'}\abs{g(k_{1},m')}<\infty$）、各 $k_{1}$ で $x'\mapsto g(k_{1},x')$ に $n-1$ 次元の場合を使う。その部分フーリエ変換はフビニの定理で $\hat f(k_{1},\cdot)$ になる。
+:::
+
+::: theorem テータの反転公式 {#nt:theta-inversion keywords="for a lattice L in a Euclidean space of dimension n with Gram matrix A, volume v = sqrt(det A), dual lattice L', Theta_L(t) = sum_{x in L} e^{-pi t x.x} satisfies Theta_L(t) = t^{-n/2} v^{-1} Theta_{L'}(1/t)" index="テータの反転公式|てーたのはんてんこうしき, 双対格子|そうついこうし" refname="テータの反転公式"}
+$V$ を内積 $x\cdot y$ をもつ $n$ 次元の実ユークリッド空間、$L\subseteq V$ を基底 $e_{1},\dots,e_{n}$ の格子、$A=(e_{i}\cdot e_{j})$, $v\defeq\sqrt{\det A}$、$L'\defeq\{y\in V:y\cdot L\subseteq\mathbb{Z}\}$（双対格子）とする。$t>0$ について $\Theta_{L}(t)\defeq\sum_{x\in L}e^{-\pi t\,x\cdot x}$ とおくと
+$$
+\Theta_{L}(t)=t^{-n/2}v^{-1}\Theta_{L'}(1/t).
+$$
+:::
+
+::: intuition
+ガウス関数はフーリエ変換で（幅の逆数の）ガウス関数に移るので、格子の上のガウス関数の和は、双対格子の上の幅の逆数のガウス関数の和に等しい。細かい格子（体積が小さい）のテータ級数は、粗い双対格子のテータ級数に、体積の逆数の重みで対応する。
+:::
+
+::: proof
+**Step 1（座標）.** 【主張：双対格子は逆転置行列の列で張られる】正規直交基底で $V=\mathbb{R}^{n}$ とし、$E$ を列が $e_{i}$ の行列とすると $A={}^{t}EE$, $v=\abs{\det E}$。$L'$ は双対基底 $e'_{i}$（${}^{t}E^{-1}$ の列）の張る格子（$e'_{i}\cdot e_{j}=\delta_{ij}$）。
+
+**Step 2（フーリエ変換）.** 【主張：ガウス関数のフーリエ変換はガウス関数】$\varphi(u)\defeq e^{-\pi t\abs{Eu}^{2}}$（$u\in\mathbb{R}^{n}$）とすると $\Theta_{L}(t)=\sum_{m\in\mathbb{Z}^{n}}\varphi(m)$。$w=Eu$ と置換し、1 変数の $\int e^{-\pi tx^{2}}e^{-2\pi ix\xi}dx=t^{-1/2}e^{-\pi\xi^{2}/t}$（\ref{cx:gaussian-fourier} で $x\mapsto\sqrt{\pi t}x$）の積から
+$$
+\hat\varphi(k)=\frac1v\int e^{-\pi t\abs w^{2}}e^{-2\pi i\,({}^{t}E^{-1}k)\cdot w}dw=\frac{t^{-n/2}}{v}e^{-\pi\abs{{}^{t}E^{-1}k}^{2}/t}.
+$$
+
+**Step 3（ポアソン）.** 【主張：ポアソンの和公式で双対格子の和になる】\ref{nt:poisson-summation-zn} から $\Theta_{L}(t)=\sum_{k}\hat\varphi(k)$。${}^{t}E^{-1}k$（$k\in\mathbb{Z}^{n}$）は $L'$ を一回ずつ動くので、右辺は $t^{-n/2}v^{-1}\Theta_{L'}(1/t)$。
+:::
+
+## 偶ユニモジュラー格子のテータ級数 {#nt:sec-th-modular}
+
+::: theorem テータ級数のモジュラー性 {#nt:theta-modular-form keywords="for an even unimodular positive definite lattice L of rank n, n is divisible by 8 and theta_L(z) = sum_{x in L} q^{x.x/2} = sum r_L(m) q^m is a modular form of weight n/2 with theta_L(infinity) = 1; theta_L = E_{n/2} + cusp form; r_L(m) = -(n/B_{n/2}) sigma_{n/2-1}(m) + O(m^{n/4})" index="テータ級数|てーたきゅうすう, 格子のテータ関数|こうしのてーたかんすう" refname="テータ級数のモジュラー性"}
+$L$ を階数 $n$ の正定値な偶ユニモジュラー格子とし、$r_{L}(m)\defeq\#\{x\in L:x\cdot x=2m\}$,
+$$
+\theta_{L}(z)\defeq\sum_{x\in L}e^{\pi iz\,x\cdot x}=\sum_{m\ge0}r_{L}(m)q^{m}
+$$
+とする。
+1. $n$ は 8 の倍数で、$\theta_{L}$ は重さ $n/2$ のモジュラー形式、$\theta_{L}(\infty)=1$。
+2. $w\defeq n/2$ とすると $\theta_{L}-E_{w}$ は尖点形式で、$r_{L}(m)=-\frac{2w}{B_{w}}\sigma_{w-1}(m)+O(m^{w/2})$。
+:::
+
+::: intuition
+ユニモジュラー性は「格子が自分自身の双対で体積 $1$」ということなので、テータの反転公式の両辺が同じ関数になり、$z\mapsto-1/z$ での変換則が得られる。偶であることは $q$ の冪が整数になること、すなわち $z\mapsto z+1$ での不変性である。
+:::
+
+::: proof
+**Step 1（収束と正則性）.** 【主張：$r_{L}(m)=O(m^{n/2})$】格子点を中心とする半径 $\delta$（最短ベクトルの長さの半分）の球は互いに交わらないので、半径 $R$ の球の中の格子点の数は $(R+\delta)^{n}/\delta^{n}$ 以下。よって $\sum r_{L}(m)q^{m}$ は $\abs q<1$ で収束し、$H$ のコンパクト集合上で一様、$\theta_{L}$ は $H$ で正則。
+
+**Step 2（$T$ での不変性）.** 偶なので $x\cdot x/2\in\mathbb{Z}$ で、$\theta_{L}(z+1)=\theta_{L}(z)$。
+
+**Step 3（$S$ での変換）.** 【主張：$\theta_{L}(-1/z)=z^{n/2}\theta_{L}(z)$】$z=it$（$t>0$）で $\theta_{L}(it)=\Theta_{L}(t)$, $\theta_{L}(i/t)=\Theta_{L}(1/t)$。ユニモジュラーなので $L'=L$, $v=1$（\ref{nt:unimodular-determinant}）、\ref{nt:theta-inversion} から $\Theta_{L}(1/t)=t^{n/2}\Theta_{L}(t)$、すなわち $\theta_{L}(-1/z)=(z/i)^{n/2}\theta_{L}(z)$（$z=it$）。$n$ は 8 の倍数（\ref{nt:ks-determination} の 3）なので $(z/i)^{n/2}=z^{n/2}(-1)^{n/4}=z^{n/2}$。両辺は $H$ で正則で虚軸上で一致するので、\ref{cx:identity-theorem} から $H$ 全体で一致。
+
+**Step 4（1 の結論）.** \ref{nt:modular-transformation-criterion} から重さ $n/2$ の弱モジュラー関数で、$q$ 展開から無限遠で正則、$\theta_{L}(\infty)=r_{L}(0)=1$。
+
+**Step 5（2）.** $E_{w}(\infty)=1$ なので差は尖点形式。$E_{w}$ の係数は $-\frac{2w}{B_{w}}\sigma_{w-1}(m)$（\ref{nt:eisenstein-q-expansion}）、尖点形式の係数は $O(m^{w/2})$（\ref{nt:coefficient-growth}）。
+:::
+
+::: corollary $E_{8}$ と階数 16 の格子 {#nt:theta-e8-rank16 keywords="theta of E_8 is E_4, so the number of vectors of norm 2m in E_8 is 240 sigma_3(m); for rank 16 theta = E_8 = 1 + 480 sum sigma_7(m) q^m for both E_8 + E_8 and Gamma_16; non-isomorphic lattices with the same theta series" index="E8 のテータ級数|いーはちのてーたきゅうすう" refname="E_8 と階数 16 の格子"}
+1. $\theta_{E_{8}}=E_{4}$。すなわち $E_{8}$ の長さの 2 乗が $2m$ のベクトルは $240\sigma_{3}(m)$ 本（$m\ge1$）。
+2. 階数 16 の正定値な偶ユニモジュラー格子 $L$ は $\theta_{L}=E_{8}=1+480\sum\sigma_{7}(m)q^{m}$。特に $E_{8}\oplus E_{8}$ と $\Gamma_{16}$ は同型でないのに同じテータ級数をもつ。
+:::
+
+::: intuition
+重さ 4 と 8 には尖点形式がないので、$E_{8}$ と階数 16 の偶ユニモジュラー格子のテータ級数はアイゼンシュタイン級数そのものになる。ベクトルの本数が約数和で書け、形の違う 2 つの格子が同じ本数のベクトルをもつ。
+:::
+
+::: proof
+$S_{4}=S_{8}=0$（\ref{nt:modular-forms-structure}）なので \ref{nt:theta-modular-form} の 2 で尖点形式の部分は $0$。$E_{8}\oplus E_{8}\not\cong\Gamma_{16}$ は長さ 2 のベクトルの生成する部分群の比較による（\ref[演習]{nt:sec-ul-exercises}）。
+:::
+
+::: example
+$m=1$：$E_{8}$ の長さ $\sqrt2$ のベクトルは $240\sigma_{3}(1)=240$ 本で、\ref{nt:gamma-lattices} の直接の数え上げと一致する。$m=2$：$240\sigma_{3}(2)=2160$ 本。また $\theta_{E_{8}\oplus E_{8}}=\theta_{E_{8}}^{2}$ なので、2 から $E_{4}^{2}=E_{8}$ が再び得られる。
+:::
+
+::: example
+階数 24 では $M_{12}$ が 2 次元で、$\theta_{L}=E_{12}+c_{L}\sum\tau(m)q^{m}$、$q^{1}$ の係数を比べて $c_{L}=r_{L}(1)-\frac{65520}{691}$。$E_{8}^{\oplus3}$ では $r(1)=720$ で $c=\frac{432000}{691}$、$\Gamma_{24}$ では $r(1)=2\cdot24\cdot23=1104$（$\pm e_{i}\pm e_{j}$）で $c=\frac{697344}{691}$。長さ $\sqrt2$ のベクトルをもたない階数 24 の偶ユニモジュラー格子（リーチ格子）が存在することが知られていて（Se7 VII §6.6、ここでは構成しない）、それは $c=-\frac{65520}{691}$。
+:::
+
+::: hypcheck
+- **ユニモジュラー性**：$L'=L$ と $v=1$ が Step 3 に本質的。一般の正定値格子では $\theta_{L}$ は $\theta_{L'}$ に移り、合同部分群のモジュラー形式（「レベル」をもつ形式）になる。
+- **偶であること**：$T$ での不変性に本質的。奇の格子 $\mathbb{Z}^{n}$ の $\sum q^{x\cdot x/2}$ は半整数冪を含み、$S$ と $T^{2}$ で生成される指数 3 の部分群のモジュラー形式になる（Se7 VII §6.7）。
+- **8 の倍数**：$(z/i)^{n/2}=z^{n/2}$ に使った。この結論自体もテータ級数から直接示せる（\ref[演習]{nt:sec-th-exercises}）。
+:::
+
+## 問題 {#nt:sec-th-problems}
+
+::: problem {#nt:prob-th-e8-m3}
+$E_{8}$ の長さの 2 乗が $6$ のベクトルの本数を求めよ。
+:::
+
+::: solution
+$2m=6$, $m=3$ で $240\sigma_{3}(3)=240\cdot28=6720$。
+:::
+
+::: problem {#nt:prob-th-dual-volume}
+\ref{nt:theta-inversion} を $L'$ に使うと、$vv'=1$（$v'$ は $L'$ の体積）でなければならないことを示せ。
+:::
+
+::: solution
+$L''=L$ なので、反転公式を 2 回使うと $\Theta_{L}(t)=t^{-n/2}v^{-1}\Theta_{L'}(1/t)=t^{-n/2}v^{-1}t^{n/2}v'^{-1}\Theta_{L}(t)$。$\Theta_{L}(t)\ge1>0$ なので $vv'=1$。（直接には $L'$ のグラム行列は $A^{-1}$。）
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** テータ級数のモジュラー性には、偶ユニモジュラー格子の分類（\ref{nt:even-indefinite-structure} など）は使わず、階数が 8 の倍数であることだけを使った。
+
+**前提を変えると.**
+- **ジーゲルの質量公式**：同じ階数の偶ユニモジュラー格子のテータ級数を自己同型群の位数の逆数で重み付けして平均すると、ちょうどアイゼンシュタイン級数 $E_{n/2}$ になる（尖点部分は平均で消える。Se7 VII §6.5、ここでは証明しない）。
+- **平方和**：$x_{1}^{2}+\dots+x_{n}^{2}$ の表現の個数も、合同部分群のアイゼンシュタイン級数と尖点形式の和として求まる（ヤコビの 4 平方和公式など）。
+- **音で聞き分けられない太鼓**：$\mathbb{R}^{16}/(E_{8}\oplus E_{8})$ と $\mathbb{R}^{16}/\Gamma_{16}$ は、ラプラシアンの固有値が重複度まで一致する（テータ級数が等しいことと同値）が等長でない平坦トーラスで、ミルナーが最初に与えた例である。
+
+**高い視点から：テータ級数は「格子のゼータ関数の母関数」.** テータ級数は格子のベクトルの長さの分布を記録する母関数で、そのメリン変換は格子のエプシュタインのゼータ関数になる。ポアソンの和公式による変換則は、格子と双対格子の間の「フーリエ双対性」の現れで、リーマンのゼータ関数の関数等式（$\mathbb{Z}$ という 1 次元の格子の場合）と同じ構造である。比喩で言えば、格子は結晶で、テータ級数はその結晶に X 線を当てたときの回折像の「強度の一覧」であり、偶ユニモジュラー格子は回折像が自分自身と同じ形になる特別な結晶である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-th-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

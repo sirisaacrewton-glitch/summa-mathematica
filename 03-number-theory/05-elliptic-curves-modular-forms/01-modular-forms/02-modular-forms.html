@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>モジュラー形式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/05-elliptic-curves-modular-forms/01-modular-forms/02-modular-forms.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# モジュラー形式 {#nt:page-modular-forms keywords="weakly modular function of weight k, f(gz) = (cz+d)^k f(z), invariance under S and T suffices, q-expansion, modular function, modular form, cusp form, lattices and homothety, H/G = lattices up to homothety, lattice functions of weight k, Eisenstein series G_k(z) = sum' (mz+n)^{-k}, G_k(infinity) = 2 zeta(k), g_2 = 60 G_4, g_3 = 140 G_6, discriminant Delta = g_2^3 - 27 g_3^2, valence formula v_infinity + v_i/2 + v_rho/3 + sum v_p = k/12, M_k = 0 for k < 0 and k = 2, M_k = C G_k + S_k, Delta: M_{k-12} -> S_k isomorphism, dimension formula, M = C[G_4, G_6], modular invariant j = 1728 g_2^3 / Delta, j: H/G -> C bijective, modular functions of weight 0 are rational functions of j"}
+
+**モジュラー形式**は、上半平面の正則関数で、モジュラー群の作用に対して $f(gz)=(cz+d)^{k}f(z)$ と決まった仕方で変換し、無限遠でも有界なものである。格子の言葉で言えば、「格子を $\lambda$ 倍すると $\lambda^{-k}$ 倍になる格子の関数」にあたり、アイゼンシュタイン級数 $G_{k}=\sum'\omega^{-k}$ がその典型である。このページの中心は**次数公式**（零点の個数の重み付きの和が $k/12$）で、そこから重さ $k$ のモジュラー形式の空間 $M_{k}$ が有限次元で、多項式環 $\mathbb{C}[G_{4},G_{6}]$ と一致することが従う。最後に、モジュラー不変量 $j$ が $H/G$ と $\mathbb{C}$ の全単射を与えることを示す。
+
+## 記法と定義の確認 {#nt:sec-mfm-notation}
+
+::: notation
+- $H$, $G=\SL_{2}(\mathbb{Z})/\{\pm1\}$, $S$, $T$, $\rho=e^{2\pi i/3}$、基本領域 $D$ とその性質、$G$ が $S,T$ で生成されることは \ref{nt:modular-group}, \ref{nt:modular-fundamental-domain}, \ref{nt:modular-generators}。
+- 格子 $\Lambda\subseteq\mathbb{C}$、$\sum'_{\omega\in\Lambda}\abs\omega^{-s}$ の収束（$s>2$）、ワイエルシュトラスの $\wp$、$g_{2}=60G_{4}(\Lambda)$, $g_{3}=140G_{6}(\Lambda)$、判別式 $g_{2}^{3}-27g_{3}^{2}\neq0$ は \ref{cx:lattice-series}, \ref{cx:weierstrass-p}, \ref{cx:wp-differential-equation}, \ref{cx:half-periods}。
+- 広義一様収束する正則関数の級数の和は正則（\ref{cx:weierstrass-convergence}）。零点と極の数え上げは \ref{cx:argument-principle}、零点の孤立性は \ref{cx:identity-theorem}。$\zeta(4)=\pi^{4}/90$, $\zeta(6)=\pi^{6}/945$ は \ref{nt:zeta-special-values}。
+- 有理型関数 $f\not\equiv0$ と $p\in H$ について、$f/(z-p)^{n}$ が $p$ で正則かつ $0$ でない整数 $n$ を $v_{p}(f)$ と書く。
+- **記法の注意**：重さを $k$（偶数）で表す。Serre は重さ $2k$ の形式を「指数 $k$」とし $G_{k}$ と書くが、ここでの $G_{k}$ は重さ $k$（Serre の $G_{k/2}$）。
+- 体系は $\ZF$（基本領域の議論と複素関数論だけを使う）。
+:::
+
+## 定義 {#nt:sec-mfm-definitions}
+
+::: definition モジュラー形式 {#nt:modular-form keywords="weakly modular of weight k: f meromorphic on H with f(gz) = (cz+d)^k f(z) for g in SL_2(Z); q-expansion; meromorphic / holomorphic at infinity; modular function; modular form; cusp form; M_k and S_k" index="モジュラー形式|もじゅらーけいしき, 尖点形式|せんてんけいしき, モジュラー関数|もじゅらーかんすう, 重さ（モジュラー形式）|おもさ" refname="モジュラー形式"}
+$k$ を整数とする。$H$ 上の有理型関数 $f$ が、すべての $\begin{pmatrix}a&b\\c&d\end{pmatrix}\in\SL_{2}(\mathbb{Z})$ について
+$$
+f\Bigl(\frac{az+b}{cz+d}\Bigr)=(cz+d)^{k}f(z)
+$$
+をみたすとき、**重さ $k$ の弱モジュラー関数**という。$f(z+1)=f(z)$ なので $f(z)=\tilde f(q)$, $q=e^{2\pi iz}$ と書け、$\tilde f$ は $0<\abs q<1$ で有理型。$\tilde f$ が $q=0$ で有理型（正則）に延びるとき $f$ は**無限遠で有理型（正則）**であるといい、無限遠で有理型な弱モジュラー関数を**モジュラー関数**、$H$ と無限遠で正則なものを**モジュラー形式**、さらに $\tilde f(0)=0$ のものを**尖点形式**という。$\tilde f(0)$ を $f(\infty)$ と書く。重さ $k$ のモジュラー形式・尖点形式の空間を $M_{k}$, $S_{k}$ とする。モジュラー形式は $f(z)=\sum_{n\ge0}a_{n}q^{n}$（**$q$ 展開**）と書ける。
+:::
+
+::: intuition
+$f(z)\,dz^{k/2}$ という「重さ $k/2$ の微分形式」が $G$ 不変である、というのが変換則の意味である（$d(gz)/dz=(cz+d)^{-2}$）。$q=e^{2\pi iz}$ は上半平面の帯 $0\le\operatorname{Re}z<1$ を穴あき円板に巻き付ける座標で、無限遠は $q=0$ という一点に縮む。
+:::
+
+::: proposition 変換則の判定 {#nt:modular-transformation-criterion keywords="f is weakly modular of weight k iff f(z+1) = f(z) and f(-1/z) = z^k f(z); odd weights vanish" index="変換則の判定|へんかんそくのはんてい"}
+$H$ 上の有理型関数 $f$ が重さ $k$ の弱モジュラー関数 $\iff$ $f(z+1)=f(z)$ かつ $f(-1/z)=z^{k}f(z)$。また $k$ が奇数なら $0$ 以外にない。
+:::
+
+::: proof
+**Step 1（コサイクル関係）.** 【主張：$j(g,z)\defeq cz+d$ について $j(gh,z)=j(g,hz)j(h,z)$】行列の積の下の行を直接計算する（$hz=\frac{a'z+b'}{c'z+d'}$ のとき $c\,hz+d=\frac{(ca'+dc')z+(cb'+dd')}{c'z+d'}$）。
+
+**Step 2（生成元で十分）.** 変換則 $f(gz)=j(g,z)^{k}f(z)$ が $g,h$ で成り立てば、Step 1 から $f(ghz)=j(g,hz)^{k}f(hz)=j(g,hz)^{k}j(h,z)^{k}f(z)=j(gh,z)^{k}f(z)$ で $gh$ でも成り立つ。逆元でも同様。$\pm S,\pm T$ が $\SL_{2}(\mathbb{Z})$ を生成し（\ref{nt:modular-generators}）、$T$ と $S$ で変換則は与えられた 2 式になる。$-1$ では $f(z)=(-1)^{k}f(z)$ で、$k$ 奇数なら $f=0$、偶数なら自明。
+:::
+
+## 格子とアイゼンシュタイン級数 {#nt:sec-mfm-eisenstein}
+
+::: proposition 格子の相似類と $H/G$ {#nt:lattices-homothety keywords="pairs (omega_1, omega_2) with Im(omega_1/omega_2) > 0 define the same lattice iff they differ by SL_2(Z); omega_1/omega_2 gives a bijection from lattices up to homothety to H/G; lattice functions F(lambda Lambda) = lambda^{-k} F(Lambda) correspond to weakly modular functions via F(Z omega_1 + Z omega_2) = omega_2^{-k} f(omega_1/omega_2)" index="格子の相似類|こうしのそうじるい" refname="格子の相似類と H/G"}
+1. $\operatorname{Im}(\omega_{1}/\omega_{2})>0$ の組 $(\omega_{1},\omega_{2})$ の 2 つが同じ格子 $\mathbb{Z}\omega_{1}+\mathbb{Z}\omega_{2}$ を定める $\iff$ $\SL_{2}(\mathbb{Z})$ の元で移り合う。$(\omega_{1},\omega_{2})\mapsto\omega_{1}/\omega_{2}$ は、格子の相似類（$\Lambda\sim\lambda\Lambda$, $\lambda\in\mathbb{C}^{\times}$）と $H/G$ の全単射を与える。
+2. 格子の関数 $F$ で $F(\lambda\Lambda)=\lambda^{-k}F(\Lambda)$ をみたすものと、$f(gz)=(cz+d)^{k}f(z)$ をみたす $H$ 上の関数 $f$ は、$F(\mathbb{Z}\omega_{1}+\mathbb{Z}\omega_{2})=\omega_{2}^{-k}f(\omega_{1}/\omega_{2})$ で一対一に対応する。
+:::
+
+::: intuition
+上半平面の点 $z$ は格子 $\mathbb{Z}z+\mathbb{Z}$ の「形」を表し、基底の取り替えで $z$ はモジュラー群の作用で動く。重さ $k$ のモジュラー関数は、格子を $\lambda$ 倍すると $\lambda^{-k}$ 倍になる格子の関数と同じものである。
+:::
+
+::: proof
+**Step 1（1）.** $(\omega'_{1},\omega'_{2})=(a\omega_{1}+b\omega_{2},c\omega_{1}+d\omega_{2})$ なら $\omega'_{1}/\omega'_{2}=g(\omega_{1}/\omega_{2})$ で、$\det=1$ なら虚部の符号が保たれる（\ref{nt:sl2-action-h}）。同じ格子の 2 つの基底は行列式 $\pm1$ の整数行列で移り合い、虚部が正のまま移るのは行列式 $1$ のときだけ（行列式 $-1$ では $\operatorname{Im}$ の符号が変わる）。相似で割ると $(\omega_{1},\omega_{2})\mapsto z=\omega_{1}/\omega_{2}$（$\lambda=\omega_{2}^{-1}$ で $(z,1)$ に揃う）で、$\SL_{2}(\mathbb{Z})$ の作用は $G$ の $H$ への作用になる。
+
+**Step 2（2）.** $F$ から $f(z)\defeq F(\mathbb{Z}z+\mathbb{Z})$ とおくと、$F(\mathbb{Z}\omega_{1}+\mathbb{Z}\omega_{2})=F(\omega_{2}(\mathbb{Z}z+\mathbb{Z}))=\omega_{2}^{-k}f(z)$。基底 $(az+b,cz+d)$ についての同じ式から $f(z)=(cz+d)^{-k}f(gz)$。逆も同様。
+:::
+
+::: theorem アイゼンシュタイン級数 {#nt:eisenstein-series-modular keywords="for even k >= 4, G_k(z) = sum'_{(m,n)} (mz + n)^{-k} is a modular form of weight k with G_k(infinity) = 2 zeta(k); g_2 = 60 G_4 and g_3 = 140 G_6; Delta = g_2^3 - 27 g_3^2 is a cusp form of weight 12 with no zero in H" index="アイゼンシュタイン級数（モジュラー形式）|あいぜんしゅたいんきゅうすう, 判別式 Δ|はんべつしきでるた" refname="アイゼンシュタイン級数"}
+偶数 $k\ge4$ について $G_{k}(z)\defeq\sum'_{(m,n)\in\mathbb{Z}^{2}}(mz+n)^{-k}$ とする。
+1. $G_{k}$ は重さ $k$ のモジュラー形式で、$G_{k}(\infty)=2\zeta(k)$。
+2. $g_{2}\defeq60G_{4}$, $g_{3}\defeq140G_{6}$, $\Delta\defeq g_{2}^{3}-27g_{3}^{2}$ とすると、$\Delta$ は重さ 12 の尖点形式で、$H$ 上で零点をもたない。
+:::
+
+::: intuition
+格子の点の $-k$ 乗の和は、格子を $\lambda$ 倍すると $\lambda^{-k}$ 倍になるので、自動的にモジュラーな変換則をもつ。虚部が大きくなると格子は「横に細長く」なり、$m\neq0$ の項は消え、実軸上の整数点の和 $2\zeta(k)$ だけが残る。
+:::
+
+::: proof
+**Step 1（変換則）.** $G_{k}(\Lambda)\defeq\sum'_{\omega\in\Lambda}\omega^{-k}$ は \ref{cx:lattice-series} から絶対収束し、$G_{k}(\lambda\Lambda)=\lambda^{-k}G_{k}(\Lambda)$。\ref{nt:lattices-homothety} の 2 で対応する関数が $G_{k}(z)=G_{k}(\mathbb{Z}z+\mathbb{Z})$。
+
+**Step 2（正則性）.** 【主張：$H$ のコンパクト集合 $K$ 上で一様収束】$K\times\{(m,n)\in\mathbb{R}^{2}:\max(\abs m,\abs n)=1\}$ はコンパクトで、その上で $\abs{mz+n}$ は連続かつ $0$ にならない（$\operatorname{Im}z>0$）ので、正の最小値 $c$ をもつ。斉次性から整数の組について $\abs{mz+n}\ge c\max(\abs m,\abs n)$。$\max=N$ の整数の組は $8N$ 個なので、$\sum'\abs{mz+n}^{-k}\le c^{-k}\sum_{N}8N\cdot N^{-k}<\infty$（$k\ge4$）。\ref{cx:weierstrass-convergence} から $G_{k}$ は $H$ で正則。
+
+**Step 3（無限遠）.** 【主張：$\operatorname{Im}z\to\infty$（$\abs{\operatorname{Re}z}\le\frac12$）で $G_{k}(z)\to2\zeta(k)$】$\abs{\operatorname{Re}z}\le\frac12$, $\operatorname{Im}z\ge1$ なら $\abs{mz+n}^{2}=m^{2}\abs z^{2}+2mn\operatorname{Re}z+n^{2}\ge m^{2}-\abs{mn}+n^{2}\ge\frac12(m^{2}+n^{2})$ なので、この領域で級数は一様収束し、項ごとに極限をとってよい。$m\neq0$ の項は $\to0$、$m=0$ の項は $n^{-k}$ で、和は $2\zeta(k)$（$k$ 偶数）。$G_{k}$ は周期 $1$ なので $\tilde G_{k}$ は $q=0$ の近くで有界、除去可能特異点で正則に延びる。
+
+**Step 4（$\Delta$）.** $g_{2}(\infty)=120\zeta(4)=\frac43\pi^{4}$, $g_{3}(\infty)=280\zeta(6)=\frac{8}{27}\pi^{6}$ から $\Delta(\infty)=\frac{64}{27}\pi^{12}-27\cdot\frac{64}{729}\pi^{12}=0$。各 $z\in H$ で $\Delta(z)$ は格子 $\mathbb{Z}z+\mathbb{Z}$ の $g_{2}^{3}-27g_{3}^{2}$ で、\ref{cx:half-periods} から $0$ でない。
+:::
+
+## 次数公式 {#nt:sec-mfm-valence}
+
+::: theorem 次数公式 {#nt:valence-formula keywords="valence formula: for a nonzero modular function f of weight k, v_infinity(f) + v_i(f)/2 + v_rho(f)/3 + sum over other points of H/G of v_p(f) = k/12; finiteness of zeros and poles modulo G" index="次数公式|じすうこうしき, 価数公式|かすうこうしき" refname="次数公式"}
+$f\not\equiv0$ を重さ $k$ のモジュラー関数とする。$v_{p}(f)$ は $p$ の $G$ 軌道だけで決まり、$v_{\infty}(f)$ を $\tilde f$ の $q=0$ での位数とすると
+$$
+v_{\infty}(f)+\frac12v_{i}(f)+\frac13v_{\rho}(f)+\sum_{p\in H/G}^{\ast}v_{p}(f)=\frac{k}{12}
+$$
+（$\sum^{\ast}$ は $i,\rho$ の類以外の点にわたる有限和）。
+:::
+
+::: intuition
+零点の個数を、基本領域の境界に沿った $f'/f$ の積分で数える。境界の辺は $T$ と $S$ で対になっていて、$T$ の対は打ち消し合い、$S$ の対は変換則の因子 $z^{k}$ のために $k/12$ だけ残る。角 $i$, $\rho$ では基本領域が点のまわりの $1/2$, $1/6+1/6$ しか含まないので、そこの零点は $1/2$, $1/3$ の重みで数えられる。
+:::
+
+::: proof
+**Step 1（有限性と $v_{p}$ の不変性）.** $f(gz)=(cz+d)^{k}f(z)$ で $(cz+d)^{k}$ は $H$ で零点をもたないので $v_{gp}(f)=v_{p}(f)$。$\tilde f$ は $q=0$ で有理型なので、ある $r>0$ で $0<\abs q<r$ に零点・極がなく、$\operatorname{Im}z>y_{0}\defeq\frac1{2\pi}\log\frac1r$ に零点・極がない。$D\cap\{\operatorname{Im}z\le y_{0}\}$ はコンパクトなので零点・極は有限個（\ref{cx:identity-theorem}）。
+
+**Step 2（境界に零点・極がない場合の積分路）.** 境界上の零点・極が $i,\rho,-\bar\rho$ 以外にないとする。$D$ の境界を、高さ $y_{0}$ より上の水平線分 $EA$（$A=\frac12+iy_{0}$ から $E=-\frac12+iy_{0}$）、右の縦の辺 $AB$、$\rho+1$ のまわりの小円弧 $BB'$、単位円の弧 $B'C$、$i$ のまわりの小円弧 $CC'$、単位円の弧 $C'D$、$\rho$ のまわりの小円弧 $DD'$、左の縦の辺 $D'E$ をつないだ正の向きの閉曲線 $\mathscr{C}$ とする（小円弧は $D$ の内側を回る）。\ref{cx:argument-principle} から $\frac1{2\pi i}\int_{\mathscr{C}}\frac{f'}{f}dz=\sum^{\ast}_{p}v_{p}(f)$。
+
+**Step 3（各部分）.** 【主張：各部分の寄与は次のとおり】
+- $EA$：$q=e^{2\pi iz}$ で $q=0$ のまわりの負の向きの円になり、$-v_{\infty}(f)$。
+- 小円弧 $BB'$ と $DD'$：半径 $\to0$ で、それぞれ点のまわりの角 $\frac{2\pi}{6}$（負の向き）なので、$-\frac16v_{\rho}(f)$ ずつ（$v_{\rho+1}=v_{\rho}$）。$CC'$：角 $\pi$ で $-\frac12v_{i}(f)$。
+- $AB$ と $D'E$：$T$ で $D'E$ の逆向きが $AB$ に移り、$f(z+1)=f(z)$ なので打ち消し合う。
+- $B'C$ と $C'D$：$S$ で $B'C$ が $C'D$ の逆向きに移る。$f(Sz)=z^{k}f(z)$ から $\frac{d}{dz}\log f(Sz)=\frac kz+\frac{f'(z)}{f(z)}$ で、2 つの積分の和は $\frac1{2\pi i}\int_{B'C}\bigl(\frac{f'}{f}(z)-\frac{d}{dz}\log f(Sz)\bigr)dz=-\frac{k}{2\pi i}\int_{B'C}\frac{dz}{z}$。$B'C$ は偏角 $\frac{2\pi}3$ から $\frac\pi2$ への単位円の弧（の極限）なので $\int\frac{dz}{z}\to i(\frac\pi2-\frac{2\pi}3)=-\frac{\pi i}6$、寄与は $\frac{k}{12}$。
+
+**Step 4（まとめ）.** Step 2・3 を等置して極限をとると $\sum^{\ast}v_{p}=-v_{\infty}-\frac13v_{\rho}-\frac12v_{i}+\frac{k}{12}$。
+
+**Step 5（境界に零点・極がある場合）.** 左の縦の辺上の零点・極 $\lambda$ については、$\lambda$ のまわりで内側に、$T\lambda$ のまわりで外側に（$T$ で対応する）小円弧で迂回し、単位円の弧上の $\lambda$ についても $S$ で対応する迂回をとる。迂回の寄与は $T$（$S$）で打ち消し合い、各類の点がちょうど一つだけ内側に入るので、Step 4 と同じ式を得る。
+:::
+
+## モジュラー形式の空間 {#nt:sec-mfm-spaces}
+
+::: theorem モジュラー形式の空間の構造 {#nt:modular-forms-structure keywords="M_k = 0 for k < 0 and k = 2; M_k = C G_k for k = 4, 6, 8, 10 and S_k = 0; G_4 has a unique simple zero at rho, G_6 at i; Delta has no zero in H and a simple zero at infinity; multiplication by Delta is an isomorphism M_{k-12} -> S_k; M_k = S_k + C G_k" index="モジュラー形式の空間|もじゅらーけいしきのくうかん" refname="モジュラー形式の空間の構造"}
+$k$ を偶数とする。
+1. $k<0$ または $k=2$ なら $M_{k}=0$。
+2. $k=0,4,6,8,10$ なら $M_{k}$ は $1,G_{4},G_{6},G_{8},G_{10}$ で張られる 1 次元空間で、$S_{k}=0$。
+3. $G_{4}$ の零点は $\rho$ の類の 1 位の零点だけ、$G_{6}$ は $i$ の類だけ。$\Delta$ は $H$ で零点をもたず、無限遠で 1 位の零点をもつ。
+4. $\Delta$ を掛けることは同型 $M_{k-12}\to S_{k}$ を与える。$k\ge4$ では $M_{k}=S_{k}\oplus\mathbb{C}G_{k}$。
+:::
+
+::: intuition
+次数公式の右辺 $k/12$ は小さいので、低い重さではモジュラー形式の零点の置き場がほとんどない。そこから、重さ 2 の形式がないこと、$G_{4}$, $G_{6}$ の零点の位置、$\Delta$ が上半平面で消えないことが一挙に決まる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$M_{k}=0$ となる重さ】$f\in M_{k}$, $f\neq0$ なら次数公式の左辺の各項は $\ge0$ なので $k\ge0$。$\frac2{12}=\frac16=n+\frac{n'}2+\frac{n''}3$（$n,n',n''\ge0$ 整数）は解をもたないので $k\neq2$。
+
+**Step 2（3）.** 【主張：$G_{4},G_{6},\Delta$ の零点】$k=4$：$\frac13=n+\frac{n'}2+\frac{n''}3$ の解は $(0,0,1)$ だけなので、$G_{4}$ の零点は $\rho$ での 1 位だけ（$G_{4}(\infty)\neq0$ から $v_{\infty}=0$ でもよい）。$k=6$：$\frac12$ の解は $(0,1,0)$ だけで、$G_{6}$ は $i$ でだけ 1 位の零点。$\Delta$ は $H$ で零点をもたず（\ref{nt:eisenstein-series-modular}）、$v_{\infty}\ge1$ で重さ 12（右辺 $1$）なので $v_{\infty}(\Delta)=1$。
+
+**Step 3（4）.** 【主張：$\Delta$ で割ると重さが 12 下がる】$f\in S_{k}$ なら $f/\Delta$ は $H$ で正則（$\Delta$ は零点なし）、$v_{\infty}(f/\Delta)=v_{\infty}(f)-1\ge0$ で、重さ $k-12$ のモジュラー形式。逆も明らか。$f\mapsto f(\infty)$ の核が $S_{k}$ で、$G_{k}(\infty)\neq0$ なので $M_{k}=S_{k}\oplus\mathbb{C}G_{k}$。
+
+**Step 4（2）.** 【主張：$k\le10$ の空間は 1 次元】$k\le10$ なら $k-12<0$ で、1 と 3 から $S_{k}=0$、$\dim M_{k}\le1$。$1,G_{4},\dots,G_{10}$ は $0$ でない元。
+:::
+
+::: corollary 次元公式と $\mathbb{C}[G_{4},G_{6}]$ {#nt:modular-forms-dimension keywords="dim M_k = [k/12] if k = 2 mod 12 and [k/12] + 1 otherwise (k >= 0 even); monomials G_4^a G_6^b with 4a + 6b = k form a basis; the graded ring of modular forms is the polynomial ring C[G_4, G_6]" index="モジュラー形式の次元公式|もじゅらーけいしきのじげんこうしき" refname="次元公式と C[G_4, G_6]"}
+1. 偶数 $k\ge0$ について、$\dim M_{k}=\lfloor k/12\rfloor$（$k\equiv2\pmod{12}$）、$\lfloor k/12\rfloor+1$（それ以外）。
+2. $4a+6b=k$（$a,b\ge0$）となる単項式 $G_{4}^{a}G_{6}^{b}$ は $M_{k}$ の基底。すなわち次数付き環 $\bigoplus_{k}M_{k}$ は多項式環 $\mathbb{C}[G_{4},G_{6}]$ と同型。
+:::
+
+::: intuition
+重さが 12 増えるごとに、$\Delta$ を掛ける分だけ次元が 1 増える。すべてのモジュラー形式は $G_{4}$ と $G_{6}$ の多項式で書け、両者の間には関係がない。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：次元は重さ 12 ごとに 1 増える】$0\le k<12$ では定理の 1・2 から正しい。$k\to k+12$ で $\dim M_{k+12}=\dim S_{k+12}+1=\dim M_{k}+1$（定理の 4）、右辺も $1$ 増える。
+
+**Step 2（2：生成）.** 【主張：単項式が $M_{k}$ を張る】$k$ についての帰納法。$k\le6$ は定理から。$k\ge4$ で $4\gamma+6\delta=k$ となる $\gamma,\delta\ge0$ をとると $g=G_{4}^{\gamma}G_{6}^{\delta}$ は $g(\infty)\neq0$。$f\in M_{k}$ について $f-\lambda g\in S_{k}=\Delta M_{k-12}$ で、$\Delta=g_{2}^{3}-27g_{3}^{2}$ は $G_{4},G_{6}$ の多項式なので帰納法が回る。
+
+**Step 3（2：一次独立）.** 【主張：単項式は一次独立】一次関係があれば、両辺を $G_{6}^{k/6}$（$k$ が 6 の倍数でなければ適当に $G_{4}$ も掛けて）で割ると、$G_{4}^{3}/G_{6}^{2}$ が $\mathbb{C}$ 上の自明でない多項式の根になり、連結な $H$ 上で定数になる。しかし $G_{4}^{3}/G_{6}^{2}$ は $\rho$ で $0$ で $i$ で極をもつので定数でない。（正確には：同じ $k$ の単項式は $(a,b)\mapsto(a-3,b+2)$ で並ぶので、関係は $G_{4}^{a_{0}}G_{6}^{b_{0}}P(G_{4}^{3}/G_{6}^{2})=0$ の形に書ける。）
+:::
+
+## モジュラー不変量 $j$ {#nt:sec-mfm-j}
+
+::: theorem モジュラー不変量 {#nt:j-invariant keywords="j = 1728 g_2^3 / Delta is a modular function of weight 0, holomorphic on H with a simple pole at infinity, inducing a bijection H/G -> C; j(i) = 1728, j(rho) = 0; every modular function of weight 0 is a rational function of j" index="モジュラー不変量|もじゅらーふへんりょう, j 関数|じぇいかんすう" refname="モジュラー不変量 j"}
+$j\defeq1728\,g_{2}^{3}/\Delta$ とする。
+1. $j$ は重さ $0$ のモジュラー関数で、$H$ で正則、無限遠で 1 位の極をもつ。$j(\rho)=0$, $j(i)=1728$。
+2. $j$ は全単射 $H/G\to\mathbb{C}$ を誘導する。
+3. $H$ 上の有理型関数 $f$ について、(i) 重さ $0$ のモジュラー関数、(ii) 同じ重さの 2 つのモジュラー形式の商、(iii) $j$ の有理関数、は同値。
+:::
+
+::: intuition
+$H/G$（格子の相似類、楕円曲線の同型類）は、$j$ によって複素平面そのものと同一視される：楕円曲線は一つの複素数 $j$ で分類される。重さ $0$ のモジュラー関数は $H/G$（に無限遠を足した球面）上の有理型関数なので、球面上の有理型関数が有理関数であることと同じく $j$ の有理関数になる。
+:::
+
+::: proof
+**Step 1（1）.** $g_{2}^{3}$ と $\Delta$ はどちらも重さ 12 で、$\Delta$ は $H$ で零点なし、無限遠で 1 位の零点、$g_{2}(\infty)\neq0$。$g_{2}(\rho)=0$（\ref{nt:modular-forms-structure} の 3）から $j(\rho)=0$。$g_{3}(i)=0$ から $\Delta(i)=g_{2}(i)^{3}$, $j(i)=1728$。
+
+**Step 2（2）.** 【主張：$\lambda\in\mathbb{C}$ について $f_{\lambda}\defeq1728g_{2}^{3}-\lambda\Delta\in M_{12}$ はちょうど一つの類で零点をもつ】$f_{\lambda}(\infty)=1728g_{2}(\infty)^{3}\neq0$ なので $v_{\infty}=0$。次数公式（右辺 $1$）で $1=n+\frac{n'}2+\frac{n''}3$ の解は $(1,0,0),(0,2,0),(0,0,3)$ だけで、いずれも零点の類はただ一つ。$j(z)=\lambda\iff f_{\lambda}(z)=0$（$\Delta(z)\neq0$）。
+
+**Step 3（3）.** (iii)⇒(ii)⇒(i) は明らか（$j=1728g_{2}^{3}/\Delta$）。(i)⇒(iii)：$f$ の $H$ での極は $G$ を法として有限個（次数公式の Step 1）なので、$\prod(j-j(p_{i}))^{m_{i}}$ を掛けて $H$ で正則としてよい（これは $j$ の多項式）。$\Delta^{n}f$ は $n$ が大きければ無限遠で正則で、重さ $12n$ のモジュラー形式なので、$4a+6b=12n$ の $G_{4}^{a}G_{6}^{b}$ の一次結合。$4a+6b=12n$ から $a=3p$, $b=2r$, $p+r=n$ で、$\frac{G_{4}^{3p}G_{6}^{2r}}{\Delta^{n}}=\bigl(\frac{G_{4}^{3}}{\Delta}\bigr)^{p}\bigl(\frac{G_{6}^{2}}{\Delta}\bigr)^{r}$。$\frac{g_{2}^{3}}{\Delta}=\frac{j}{1728}$, $\frac{g_{3}^{2}}{\Delta}=\frac{g_{2}^{3}-\Delta}{27\Delta}=\frac1{27}(\frac{j}{1728}-1)$ なので $f$ は $j$ の有理関数。
+:::
+
+::: hypcheck
+- **アイゼンシュタイン級数**：$k\ge4$ は級数の絶対収束（$\sum'\abs\omega^{-s}$, $s>2$）に必要。$k=2$ の $\sum'(mz+n)^{-2}$ は条件収束で、和の順序に依存し、$G_{2}$ はモジュラー形式にならない（$M_{2}=0$）。
+- **次数公式**：$f$ が無限遠で有理型であること（零点・極の有限性と $EA$ の寄与）が本質的。正則な弱モジュラー関数でも $e^{-2\pi iq^{-1}}$ のような真性特異点をもつ $\tilde f$ には使えない。
+- **構造定理**：$\Delta$ が $H$ で零点をもたないことは、楕円関数の半周期の値が相異なること（\ref{cx:half-periods}）から来ている。
+:::
+
+## 問題 {#nt:sec-mfm-problems}
+
+::: problem {#nt:prob-mf-dimensions}
+$\dim M_{24}$, $\dim S_{24}$, $\dim M_{26}$ を求め、$M_{24}$ の基底を $G_{4},G_{6}$ の単項式で書け。
+:::
+
+::: solution
+$24\equiv0\pmod{12}$ なので $\dim M_{24}=2+1=3$、$\dim S_{24}=\dim M_{12}=2$。$26\equiv2$ なので $\dim M_{26}=2$。$4a+6b=24$ の解は $(6,0),(3,2),(0,4)$ で、基底は $G_{4}^{6},G_{4}^{3}G_{6}^{2},G_{6}^{4}$。
+:::
+
+::: problem {#nt:prob-mf-g8}
+$G_{8}$ は $G_{4}^{2}$ の定数倍であることを示し、定数を $\zeta$ の値で表せ。
+:::
+
+::: solution
+$\dim M_{8}=1$ なので $G_{8}=cG_{4}^{2}$。無限遠の値を比べて $2\zeta(8)=c\cdot4\zeta(4)^{2}$、$c=\frac{\zeta(8)}{2\zeta(4)^{2}}$。$\zeta(4)=\frac{\pi^{4}}{90}$, $\zeta(8)=\frac{\pi^{8}}{9450}$ から $c=\frac{8100}{2\cdot9450}=\frac37$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 次数公式の証明では、$H/G$ にリーマン面の構造を入れることを避け、基本領域の境界での積分で直接示した（Se7 VII §3.1 の注意）。
+
+**前提を変えると.**
+- **$G_{2}$**：$G_{2}(z)\defeq\sum_{n}\sum'_{m}(mz+n)^{-2}$（この順序で和をとる）は正則だが、$G_{2}(-1/z)=z^{2}G_{2}(z)-2\pi iz$ という「準モジュラー」な変換をする（Ap 3.10）。$\Delta$ の対数微分として現れる。
+- **合同部分群**：$\Gamma_{0}(N)$ などに対するモジュラー形式の空間は、次数公式の類似（基本領域の面積と尖点・楕円点の寄与）で次元が計算される。
+- **$j$ の係数**：$j=q^{-1}+744+196884q+\cdots$ の係数は整数で、モンスター群の表現の次元と関係する（ムーンシャイン、ここでは扱わない）。
+
+**高い視点から：モジュラー形式は直線束の切断.** コンパクト化した $\overline{H/G}$（$j$ によってリーマン球面と同一視される）の上で、重さ $k$ のモジュラー形式は直線束 $\omega^{\otimes k/2}$ の正則切断であり、次数公式はその直線束の次数が $k/12$ であること（$i,\rho$ では軌道体の重み $1/2,1/3$ が付く）の言い換えである。次元公式はこの曲線上のリーマン–ロッホの定理にあたる。比喩で言えば、$M_{k}$ は「格子の形のカタログ」の上の、重さ $k$ だけ歪んだ関数の空間で、その大きさは歪みの量 $k/12$ だけで決まる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-mfm-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

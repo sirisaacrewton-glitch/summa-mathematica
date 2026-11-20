@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>フーリエ展開と $\Delta$ の積公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="03-number-theory/05-elliptic-curves-modular-forms/01-modular-forms/03-q-expansions.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# フーリエ展開と $\Delta$ の積公式 {#nt:page-q-expansions keywords="Lipschitz formula sum_m (z+m)^{-k} = (-2 pi i)^k/(k-1)! sum n^{k-1} q^n from the cotangent partial fractions, q-expansion of Eisenstein series G_k = 2 zeta(k) + 2 (2 pi i)^k/(k-1)! sum sigma_{k-1}(n) q^n, normalized E_k = 1 - (2k/B_k) sum sigma_{k-1}(n) q^n, E_4 = 1 + 240 sum sigma_3, E_6 = 1 - 504 sum sigma_5, divisor sum identities from E_4^2 = E_8, growth of coefficients, Hecke bound a_n = O(n^{k/2}) for cusp forms, quasi-modular G_2 and its transformation law, Jacobi product formula Delta = (2 pi)^12 q prod (1 - q^n)^24, Ramanujan tau function"}
+
+モジュラー形式は $q=e^{2\pi iz}$ のべき級数で書ける。アイゼンシュタイン級数の $q$ 展開の係数は約数の冪和 $\sigma_{k-1}(n)=\sum_{d\mid n}d^{k-1}$ で、$\dim M_{8}=1$ のような次元の情報が、約数和の間の非自明な恒等式に化ける。このページでは、余接の部分分数展開からアイゼンシュタイン級数の $q$ 展開を求め、係数の増大度を評価し、判別式 $\Delta$ の**ヤコビの積公式** $\Delta=(2\pi)^{12}q\prod_{n\ge1}(1-q^{n})^{24}$ を、重さ 2 の「準モジュラー」な級数 $G_{2}$ の変換則を使って証明する。
+
+## 記法と定義の確認 {#nt:sec-qe-notation}
+
+::: notation
+- モジュラー形式、$M_{k}$, $S_{k}$, $G_{k}$（偶数 $k\ge4$）、$g_{2}=60G_{4}$, $g_{3}=140G_{6}$, $\Delta$、構造定理（$\dim S_{12}=1$, $\Delta$ は $H$ で零点なし）は \ref{nt:modular-form}, \ref{nt:eisenstein-series-modular}, \ref{nt:modular-forms-structure}。変換則は $T$, $S$ で確かめれば十分（\ref{nt:modular-transformation-criterion}）。
+- $q\defeq e^{2\pi iz}$, $\sigma_{r}(n)\defeq\sum_{d\mid n}d^{r}$。
+- 余接の部分分数展開は \ref{cx:cot-partial-fractions}、無限積の正則性と零点は \ref{cx:infinite-product}、広義一様収束と項別微分は \ref{cx:weierstrass-convergence}。ベルヌーイ数（$B_{2}=\frac16$, $B_{4}=-\frac1{30}$, $B_{6}=\frac1{42}$ の流儀）と $\zeta(k)=\frac{(-1)^{k/2+1}(2\pi)^{k}B_{k}}{2\cdot k!}$（$k$ 偶数）は \ref{nt:bernoulli-numbers}, \ref{nt:zeta-special-values}。
+- 体系は $\ZF$。
+:::
+
+## アイゼンシュタイン級数の $q$ 展開 {#nt:sec-qe-eisenstein}
+
+::: lemma リプシッツの公式 {#nt:lipschitz-formula keywords="for z in H and k >= 2: sum_{m in Z} (z + m)^{-k} = (-2 pi i)^k / (k-1)! sum_{n >= 1} n^{k-1} q^n; from pi cot pi z = i pi - 2 pi i sum q^n" index="リプシッツの公式|りぷしっつのこうしき" refname="リプシッツの公式"}
+$z\in H$, 整数 $k\ge2$ について
+$$
+\sum_{m\in\mathbb{Z}}\frac1{(z+m)^{k}}=\frac{(-2\pi i)^{k}}{(k-1)!}\sum_{n\ge1}n^{k-1}q^{n}.
+$$
+:::
+
+::: intuition
+整数だけずらした点の $-k$ 乗の和は周期 1 の関数なので $q$ のべき級数で書け、その係数は余接の展開を微分して得られる。
+:::
+
+::: proof
+**Step 1（余接の $q$ 展開）.** 【主張：$\pi\cot\pi z=i\pi-2\pi i\sum_{n\ge0}q^{n}$】$\pi\cot\pi z=\pi i\frac{e^{i\pi z}+e^{-i\pi z}}{e^{i\pi z}-e^{-i\pi z}}=\pi i\frac{q+1}{q-1}=i\pi-\frac{2\pi i}{1-q}$ で、$\abs q<1$。
+
+**Step 2（微分）.** \ref{cx:cot-partial-fractions} から $\frac1z+\sum_{m\ge1}\bigl(\frac1{z+m}+\frac1{z-m}\bigr)=i\pi-2\pi i\sum_{n\ge0}q^{n}$。両辺は $H$ で広義一様収束するので項別に $k-1$ 回微分でき（\ref{cx:weierstrass-convergence}）、左辺は $(-1)^{k-1}(k-1)!\sum_{m}(z+m)^{-k}$（$k\ge2$ で絶対収束）、右辺は $-2\pi i\sum_{n}(2\pi in)^{k-1}q^{n}$（$\frac{d}{dz}q^{n}=2\pi inq^{n}$）。整理すると $(-1)^{k}(2\pi i)^{k}=(-2\pi i)^{k}$ から主張を得る。
+:::
+
+::: theorem アイゼンシュタイン級数の $q$ 展開 {#nt:eisenstein-q-expansion keywords="G_k(z) = 2 zeta(k) + 2 (2 pi i)^k / (k-1)! sum sigma_{k-1}(n) q^n; E_k = G_k / (2 zeta(k)) = 1 - (2k / B_k) sum sigma_{k-1}(n) q^n; E_4, E_6, E_8, E_10, E_12; g_2 = (2 pi)^4 E_4 / 12, g_3 = (2 pi)^6 E_6 / 216" index="アイゼンシュタイン級数の q 展開|あいぜんしゅたいんきゅうすうのきゅーてんかい, 正規化されたアイゼンシュタイン級数|せいきかされたあいぜんしゅたいんきゅうすう" refname="アイゼンシュタイン級数の q 展開"}
+偶数 $k\ge4$ について
+$$
+G_{k}(z)=2\zeta(k)+\frac{2(2\pi i)^{k}}{(k-1)!}\sum_{n\ge1}\sigma_{k-1}(n)q^{n},\qquad E_{k}\defeq\frac{G_{k}}{2\zeta(k)}=1-\frac{2k}{B_{k}}\sum_{n\ge1}\sigma_{k-1}(n)q^{n}.
+$$
+特に $E_{4}=1+240\sum\sigma_{3}(n)q^{n}$, $E_{6}=1-504\sum\sigma_{5}(n)q^{n}$, $E_{8}=1+480\sum\sigma_{7}(n)q^{n}$, $E_{12}=1+\frac{65520}{691}\sum\sigma_{11}(n)q^{n}$、また $g_{2}=\frac{(2\pi)^{4}}{12}E_{4}$, $g_{3}=\frac{(2\pi)^{6}}{216}E_{6}$。
+:::
+
+::: intuition
+格子の点の $-k$ 乗の和を、実軸に平行な「行」ごとに足す。各行は整数の平行移動の和なので、リプシッツの公式で $q$ の冪に変わり、行の番号 $n$ と $q$ の指数の約数の関係から約数の冪和が現れる。
+:::
+
+::: proof
+**Step 1（行ごとの和）.** 【主張：格子を行ごとに足す】絶対収束なので並べ替えてよく、$G_{k}(z)=\sum_{n=0,m\neq0}m^{-k}+\sum_{n\neq0}\sum_{m}(nz+m)^{-k}=2\zeta(k)+2\sum_{n\ge1}\sum_{m}(nz+m)^{-k}$（$k$ 偶数で $(n,m)\mapsto(-n,-m)$ が項を保つ）。
+
+**Step 2（行の和の q 展開）.** \ref{nt:lipschitz-formula} を $nz$ に使うと $\sum_{m}(nz+m)^{-k}=\frac{(-2\pi i)^{k}}{(k-1)!}\sum_{d\ge1}d^{k-1}q^{nd}$。$k$ 偶数で $(-2\pi i)^{k}=(2\pi i)^{k}$。$N=nd$ でまとめると係数は $\sum_{d\mid N}d^{k-1}=\sigma_{k-1}(N)$。
+
+**Step 3（正規化）.** 【主張：定数項で割った係数は $-2k/B_{k}$】$\frac{(2\pi i)^{k}}{(k-1)!\,\zeta(k)}=\frac{(-1)^{k/2}(2\pi)^{k}\cdot2\cdot k!}{(k-1)!\,(-1)^{k/2+1}(2\pi)^{k}B_{k}}=-\frac{2k}{B_{k}}$。$B_{4}=-\frac1{30}$, $B_{6}=\frac1{42}$, $B_{8}=-\frac1{30}$, $B_{12}=-\frac{691}{2730}$ から係数が出る。$g_{2}=120\zeta(4)E_{4}=\frac43\pi^{4}E_{4}$、$g_{3}=280\zeta(6)E_{6}=\frac8{27}\pi^{6}E_{6}$。
+:::
+
+::: corollary 約数和の恒等式 {#nt:divisor-sum-identities keywords="E_4^2 = E_8 and E_4 E_6 = E_10 give sigma_7(n) = sigma_3(n) + 120 sum_{m=1}^{n-1} sigma_3(m) sigma_3(n-m)" index="約数和の恒等式|やくすうわのこうとうしき" refname="約数和の恒等式"}
+$E_{4}^{2}=E_{8}$, $E_{4}E_{6}=E_{10}$。特にすべての $n\ge1$ で
+$$
+\sigma_{7}(n)=\sigma_{3}(n)+120\sum_{m=1}^{n-1}\sigma_{3}(m)\sigma_{3}(n-m).
+$$
+:::
+
+::: intuition
+重さ 8 のモジュラー形式は定数倍を除いて一つしかないので、$E_{4}^{2}$ と $E_{8}$ は一致する。係数を比べると、約数の 7 乗和が約数の 3 乗和の畳み込みで書けるという、初等的には見えにくい恒等式になる。
+:::
+
+::: proof
+$\dim M_{8}=\dim M_{10}=1$（\ref{nt:modular-forms-structure}）で、両辺は定数項 $1$ なので等しい。$q^{n}$ の係数を比べると $480\sigma_{7}(n)=480\sigma_{3}(n)+240^{2}\sum_{m=1}^{n-1}\sigma_{3}(m)\sigma_{3}(n-m)$、$480$ で割る。
+:::
+
+::: example
+$n=2$：$\sigma_{7}(2)=129$、右辺は $\sigma_{3}(2)+120\sigma_{3}(1)^{2}=9+120=129$。
+:::
+
+## 係数の評価 {#nt:sec-qe-growth}
+
+::: theorem 係数の増大度 {#nt:coefficient-growth keywords="coefficients of G_k grow like n^{k-1}; Hecke's bound a_n = O(n^{k/2}) for cusp forms of weight k; non-cusp forms have coefficients of order n^{k-1}" index="ヘッケの評価|へっけのひょうか, 係数の増大度|けいすうのぞうだいど" refname="係数の増大度"}
+$f=\sum a_{n}q^{n}\in M_{k}$（$k\ge4$）とする。
+1. $f=G_{k}$ なら、正の定数 $A,B$ で $An^{k-1}\le\abs{a_{n}}\le Bn^{k-1}$。
+2. （ヘッケ）$f\in S_{k}$ なら $a_{n}=O(n^{k/2})$。
+3. $f\notin S_{k}$ なら $\abs{a_{n}}$ は $n^{k-1}$ の程度（上下から定数倍で評価される）。
+:::
+
+::: intuition
+アイゼンシュタイン級数の係数は $n^{k-1}$ の大きさで増えるが、尖点形式の係数は $n^{k/2}$ 程度にしか増えない。尖点形式は無限遠で消えるので、$\abs f\,y^{k/2}$ が有界になることがその理由である。
+:::
+
+::: proof
+**Step 1（1）.** $a_{n}=c\,\sigma_{k-1}(n)$（$c\neq0$）で、$n^{k-1}\le\sigma_{k-1}(n)=n^{k-1}\sum_{d\mid n}d^{-(k-1)}\le\zeta(k-1)n^{k-1}$。
+
+**Step 2（2：有界な不変関数）.** 【主張：$\phi(z)\defeq\abs{f(z)}y^{k/2}$（$y=\operatorname{Im}z$）は $G$ 不変で有界】\ref{nt:sl2-action-h} の虚部の公式と変換則から $\phi(gz)=\abs{cz+d}^{k}\abs{f(z)}\cdot y^{k/2}\abs{cz+d}^{-k}=\phi(z)$。$f$ は尖点形式なので $f=q\cdot(\text{正則})$、$\abs{f}=O(e^{-2\pi y})$（$y\to\infty$）で、$\phi\to0$。$\phi$ は $D$ 上で連続で、$y$ の大きい部分では小さく、残りはコンパクトなので有界。$G$ 不変なので $H$ 全体で $\abs{f(z)}\le My^{-k/2}$。
+
+**Step 3（2：係数の積分表示）.** $a_{n}=\int_{0}^{1}f(x+iy)e^{-2\pi in(x+iy)}dx$（周期関数のフーリエ係数、$y>0$ は任意）から $\abs{a_{n}}\le My^{-k/2}e^{2\pi ny}$。$y=1/n$ とおくと $\abs{a_{n}}\le e^{2\pi}Mn^{k/2}$。
+
+**Step 4（3）.** $f=\lambda G_{k}+h$（$\lambda\neq0$, $h\in S_{k}$）で、$k/2<k-1$（$k\ge4$）なので 1・2 から。
+:::
+
+## $G_{2}$ と $\Delta$ の積公式 {#nt:sec-qe-delta}
+
+::: proposition $G_{2}$ の変換則 {#nt:g2-transformation keywords="G_2(z) = sum_n sum'_m (m + nz)^{-2} in this order; G_2 = pi^2/3 - 8 pi^2 sum sigma_1(n) q^n; G_2(-1/z) = z^2 G_2(z) - 2 pi i z; proof via the telescoping series H_1 = 2 and H = 2 - 2 pi i / z" index="G_2 の変換則|じーつーのへんかんそく, 準モジュラー形式|じゅんもじゅらーけいしき" refname="G_2 の変換則"}
+$G_{2}(z)\defeq\sum_{n\in\mathbb{Z}}\sum'_{m\in\mathbb{Z}}(m+nz)^{-2}$（この順序で和をとる。$\sum'$ は $(m,n)\neq(0,0)$）とする。
+1. $G_{2}(z)=\frac{\pi^{2}}3-8\pi^{2}\sum_{n\ge1}\sigma_{1}(n)q^{n}$。特に $G_{2}$ は $H$ で正則。
+2. $G_{2}(-1/z)=z^{2}G_{2}(z)-2\pi iz$。
+:::
+
+::: intuition
+重さ 2 では格子の和が絶対収束しないので、和をとる順序が結果に効く。行ごとに足すと $q$ 展開は綺麗に求まるが、$S$ は行と列を入れ替えるので、列ごとの和との差 $2\pi i/z$ が変換則の「ずれ」として残る。
+:::
+
+::: proof
+**Step 1（1）.** $n=0$ の行は $2\zeta(2)=\frac{\pi^{2}}3$。$n\neq0$ の行は $\pm n$ で等しく、\ref{nt:lipschitz-formula}（$k=2$）から $\sum_{m}(m+nz)^{-2}=-4\pi^{2}\sum_{d}dq^{nd}$。$n\ge1$ で足して $-8\pi^{2}\sum\sigma_{1}(N)q^{N}$。級数は $H$ で広義一様収束。
+
+**Step 2（もう一つの順序）.** $\tilde G_{2}(z)\defeq\sum_{m}\sum'_{n}(m+nz)^{-2}$（外側が $m$）とする。また $(m,n)\neq(0,0),(1,0)$ にわたって、$H_{1}\defeq\sum_{n}\sum_{m}\frac1{(m-1+nz)(m+nz)}$, $H\defeq\sum_{m}\sum_{n}\frac1{(m-1+nz)(m+nz)}$ とする。
+
+**Step 3（差の級数）.** 【主張：$G_{2}-H_{1}=\tilde G_{2}-H$】$\frac1{(m+nz)^{2}}-\frac1{(m-1+nz)(m+nz)}=-\frac1{(m+nz)^{2}(m-1+nz)}$ は $(m,n)\neq(0,0),(1,0)$ で絶対総和可能（$\abs\omega^{-3}$ の和、\ref{cx:lattice-series}）なので、和の順序によらない。$G_{2}$, $\tilde G_{2}$ の $(1,0)$ の項 $1$ を別にすると、$G_{2}=1+H_{1}+R$, $\tilde G_{2}=1+H+R$（$R$ は差の級数の和）。
+
+**Step 4（$H_{1}=2$）.** $\frac1{(m-1+nz)(m+nz)}=\frac1{m-1+nz}-\frac1{m+nz}$。$n\neq0$ では $m$ の和は望遠鏡和で、$\frac1{m+nz}\to0$（$m\to\pm\infty$）から $0$。$n=0$ では $m\neq0,1$ で $\sum_{m\ge2}(\frac1{m-1}-\frac1m)=1$, $\sum_{m\le-1}(\frac1{m-1}-\frac1m)=1$、計 $2$。
+
+**Step 5（$H=2-2\pi i/z$）.** $a(w)\defeq\sum_{n}\frac1{w+nz}$（$\abs n\le N$ の極限）$=\frac\pi z\cot\frac{\pi w}{z}$（\ref{cx:cot-partial-fractions} を $w/z$ に適用）とおく。内側の $n$ の和は、$m\neq0,1$ で $a(m-1)-a(m)$、$m=0$ で $\sum_{n\neq0}(\frac1{-1+nz}-\frac1{nz})=a(-1)+1$、$m=1$ で $\sum_{n\neq0}(\frac1{nz}-\frac1{1+nz})=1-a(1)$（$\sum_{n\neq0}\frac1{nz}$ は対称な和で $0$；各内側の和は項が $O(n^{-2})$ で絶対収束）。$-M\le m\le N$ で足すと望遠鏡和で $2+a(-M-1)-a(N)$。$N\to\infty$ で $\operatorname{Im}(\pi N/z)\to-\infty$ なので $\cot\to i$、$a(N)\to\frac{\pi i}z$。$M\to\infty$ で $\operatorname{Im}(-\pi(M+1)/z)\to+\infty$ なので $\cot\to-i$、$a(-M-1)\to-\frac{\pi i}z$。よって $H=2-\frac{2\pi i}z$。
+
+**Step 6（2）.** Step 3〜5 から $G_{2}-\tilde G_{2}=H_{1}-H=\frac{2\pi i}z$。一方 $G_{2}(-1/z)=\sum_{n}\sum'_{m}(m-n/z)^{-2}=z^{2}\sum_{n}\sum'_{m}(mz-n)^{-2}=z^{2}\tilde G_{2}(z)$（外側の変数が $(m,n)$ の第 2 成分から第 1 成分に入れ替わり、$n\mapsto-n$）。よって $G_{2}(-1/z)=z^{2}(G_{2}(z)-\frac{2\pi i}z)$。
+:::
+
+::: theorem ヤコビの積公式 {#nt:jacobi-product-formula keywords="Delta(z) = (2 pi)^12 q prod_{n >= 1} (1 - q^n)^24; proof: the logarithmic derivative of F = q prod (1 - q^n)^24 is (6i/pi) G_2(z) dz, and the transformation law of G_2 gives F(-1/z) = z^12 F(z)" index="ヤコビの積公式|やこびのせきこうしき, Δ の積公式|でるたのせきこうしき" refname="ヤコビの積公式"}
+$$
+\Delta(z)=(2\pi)^{12}q\prod_{n\ge1}(1-q^{n})^{24}.
+$$
+:::
+
+::: intuition
+右辺の対数微分は $1-24\sum\sigma_{1}(n)q^{n}$、すなわち $G_{2}$ そのものである。$G_{2}$ の変換則の「ずれ」$-2\pi iz$ は、対数をとると $z^{12}$ の因子の対数微分 $12\,dz/z$ にちょうど一致し、右辺は重さ 12 の尖点形式になる。重さ 12 の尖点形式は $\Delta$ の定数倍しかない。
+:::
+
+::: proof
+**Step 1（$F$ の正則性と対数微分）.** $F(z)\defeq q\prod_{n\ge1}(1-q^{n})^{24}$ は、$\sum\abs q^{n}$ が $H$ のコンパクト集合上で一様収束するので、$H$ で正則で零点をもたない（\ref{cx:infinite-product}）。対数微分は項別に計算でき、$q\frac{d}{dq}$ で
+$$
+\frac{F'(z)}{F(z)}=2\pi i\Bigl(1-24\sum_{n\ge1}\frac{nq^{n}}{1-q^{n}}\Bigr)=2\pi i\Bigl(1-24\sum_{N\ge1}\sigma_{1}(N)q^{N}\Bigr)=\frac{6i}{\pi}G_{2}(z)
+$$
+（\ref{nt:g2-transformation} の 1：$G_{2}=\frac{\pi^{2}}3(1-24\sum\sigma_{1}q^{N})$）。
+
+**Step 2（$S$ での変換）.** 【主張：$F(-1/z)=z^{12}F(z)$】$\frac{d}{dz}\log F(-1/z)=\frac{6i}{\pi}G_{2}(-1/z)\cdot\frac1{z^{2}}=\frac{6i}{\pi}\bigl(G_{2}(z)-\frac{2\pi i}z\bigr)=\frac{F'(z)}{F(z)}+\frac{12}z$。よって $F(-1/z)/(z^{12}F(z))$ は $H$（連結）で導関数 $0$ で定数 $c$。$z=i$ で $-1/i=i$, $i^{12}=1$, $F(i)\neq0$ から $c=1$。
+
+**Step 3（結論）.** $F(z+1)=F(z)$ なので、\ref{nt:modular-transformation-criterion} から $F$ は重さ 12 の弱モジュラー関数で、$q$ 展開 $q-24q^{2}+\cdots$ から尖点形式。$\dim S_{12}=1$（\ref{nt:modular-forms-structure}）なので $F=c'\Delta$。$\Delta=g_{2}^{3}-27g_{3}^{2}=\frac{(2\pi)^{12}}{1728}(E_{4}^{3}-E_{6}^{2})$ の $q$ の係数は $\frac{(2\pi)^{12}}{1728}(3\cdot240+2\cdot504)=(2\pi)^{12}$ なので $\Delta=(2\pi)^{12}F$。
+:::
+
+::: definition ラマヌジャンの $\tau$ 関数 {#nt:ramanujan-tau keywords="tau(n) defined by sum tau(n) q^n = q prod (1 - q^n)^24 = Delta / (2 pi)^12; tau(1) = 1, tau(2) = -24, tau(3) = 252; tau(n) = O(n^6) by Hecke's bound" index="ラマヌジャンの τ 関数|らまぬじゃんのたうかんすう" refname="ラマヌジャンの τ 関数"}
+$\sum_{n\ge1}\tau(n)q^{n}\defeq q\prod_{n\ge1}(1-q^{n})^{24}=(2\pi)^{-12}\Delta$ で定まる $\tau(n)\in\mathbb{Z}$ を**ラマヌジャンの $\tau$ 関数**という。\ref{nt:coefficient-growth} の 2 から $\tau(n)=O(n^{6})$。
+:::
+
+::: intuition
+$\tau(n)$ は $q\prod(1-q^{n})^{24}$ を展開した係数で、整数の分割の母関数 $\prod(1-q^{n})^{-1}$ の 24 乗の逆数に関係する。モジュラー形式の理論から、乗法性や合同式などの驚くべき性質が従う。
+:::
+
+::: example
+$(1-q)^{24}=1-24q+276q^{2}-\cdots$、$(1-q^{2})^{24}=1-24q^{2}+\cdots$ なので $q\prod(1-q^{n})^{24}=q-24q^{2}+252q^{3}+\cdots$、$\tau(2)=-24$, $\tau(3)=252$。同じ値は $\frac{E_{4}^{3}-E_{6}^{2}}{1728}$ からも得られる：$E_{4}=1+240q+2160q^{2}+\cdots$, $E_{6}=1-504q-16632q^{2}+\cdots$ から $E_{4}^{3}-E_{6}^{2}=1728q-41472q^{2}+\cdots$ で、$1728$ で割って $q-24q^{2}$。
+:::
+
+::: hypcheck
+- **リプシッツの公式**：$k\ge2$ は左辺の絶対収束と項別微分に使った。$k=1$ は対称な和として余接そのもの。
+- **$G_{2}$ の変換則**：和の順序は本質的で、$G_{2}$ と $\tilde G_{2}$ の差 $2\pi i/z$ が変換則のずれを生む。絶対収束する $k\ge4$ ではこのずれは生じない。
+- **ヤコビの積公式**：$\dim S_{12}=1$（構造定理）と、$F(i)\neq0$（無限積の零点の記述）を使った。$H$ の連結性は Step 2 で導関数 $0$ から定数を結論するのに使った。
+- **ヘッケの評価**：$f$ が尖点形式であることは $\phi\to0$（$y\to\infty$）、すなわち $\phi$ の有界性に本質的。$G_{k}$ では $\phi\sim y^{k/2}$ で有界でない。
+:::
+
+## 問題 {#nt:sec-qe-problems}
+
+::: problem {#nt:prob-qe-e4-e6}
+$E_{4}$ と $E_{6}$ の $q^{3}$ までの係数を求めよ。
+:::
+
+::: solution
+$\sigma_{3}(1)=1$, $\sigma_{3}(2)=9$, $\sigma_{3}(3)=28$ から $E_{4}=1+240q+2160q^{2}+6720q^{3}+\cdots$。$\sigma_{5}(1)=1$, $\sigma_{5}(2)=33$, $\sigma_{5}(3)=244$ から $E_{6}=1-504q-16632q^{2}-122976q^{3}+\cdots$。
+:::
+
+::: problem {#nt:prob-qe-delta-at-i}
+$\Delta(i)=(2\pi)^{12}e^{-2\pi}\prod(1-e^{-2\pi n})^{24}$ は正の実数であることを示し、$g_{3}(i)=0$ と合わせて $g_{2}(i)>0$ を結論せよ。
+:::
+
+::: solution
+$q=e^{-2\pi}\in(0,1)$ なので積の各因子は正。$g_{3}(i)=0$（\ref{nt:modular-forms-structure} の 3）から $\Delta(i)=g_{2}(i)^{3}>0$。$g_{2}(i)=\frac{(2\pi)^{4}}{12}E_{4}(i)$ で $E_{4}(i)=1+240\sum\sigma_{3}(n)e^{-2\pi n}$ は実数なので、$g_{2}(i)$ は実数で、3 乗が正なので正。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 積公式の証明は楕円関数を使わない「初等的な」証明（Se7 VII §4.4、フルヴィッツの方法）である。楕円関数（テータ関数）を使えば、デデキントのイータ関数 $\eta=q^{1/24}\prod(1-q^{n})$ の変換則 $\eta(-1/z)=\sqrt{-iz}\,\eta(z)$ から直接示せる（Ap 3）。
+
+**前提を変えると.**
+- **ラマヌジャン予想（ドリーニュの定理）**：$\abs{\tau(p)}\le2p^{11/2}$、より一般に重さ $k$ の固有尖点形式の係数は $O(n^{(k-1)/2+\varepsilon})$。ヘッケの評価 $O(n^{k/2})$ の改良で、ヴェイユ予想の証明に依存する（ここでは証明しない）。
+- **合同式**：$\tau(n)\equiv\sigma_{11}(n)\pmod{691}$ は $E_{12}-\Delta$ の定数倍の関係（$\dim M_{12}=2$）と $B_{12}$ の分子 $691$ から従う（\ref[演習]{nt:sec-qe-exercises}）。
+- **レーマーの問題**：すべての $n$ で $\tau(n)\neq0$ かどうかは未解決（Se7 VII §4.5）。
+
+**高い視点から：約数和は格子の「行」の数え上げ.** アイゼンシュタイン級数の係数 $\sigma_{k-1}(n)$ は、格子の点を行ごとに数えたときの約数の構造を記録している。モジュラー形式の空間が有限次元であることから、無限個の約数和の恒等式が出るのは、「対称性の強い関数の空間は小さい」という一般原理の典型例である。比喩で言えば、$M_{k}$ は数個の音しか鳴らせない楽器で、そこで鳴る和音（$E_{4}^{2}=E_{8}$）はすべて、約数の世界の和声法則として聞こえる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{nt:sec-qe-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
