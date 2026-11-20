@@ -686,3 +686,5 @@
 | Chevalley–Warning theorem / power sum | シュヴァレー–ワーニングの定理 / 冪和 | シュバレー・ワーニングの定理 / — | 2026-11-20（nt:page-finite-field-forms） |
 | square class / Hasse invariant | 平方類 / ハッセ不変量 | — / ハッセ・ヴィット不変量 | 2026-11-20（nt:page-hilbert-symbol-squares, nt:page-local-forms） |
 | Hasse–Minkowski theorem / local-global principle / Meyer's theorem / Davenport–Cassels lemma / three squares theorem / triangular number | ハッセ–ミンコフスキーの定理 / 局所大域原理 / マイヤーの定理 / ダヴェンポート–カッセルスの補題 / 3 平方和定理 / 三角数 | — / ハッセ原理 / — / — / — / — | 2026-11-20（nt:page-hasse-minkowski, nt:page-three-squares） |
+| unimodular lattice / index (signature) / even (type II) / odd (type I) / characteristic vector / indivisible vector / stable isomorphism / E8 lattice | ユニモジュラー格子 / 指数 / 偶（II 型） / 奇（I 型） / 特性ベクトル / 分割できないベクトル / 安定同型 / E8 格子 | — / 符号数（τ の意味で） / 偶格子 / 奇格子 / — / 原始ベクトル / — / — | 2026-11-20（nt:page-unimodular-lattices） |
+| Milnor's classification of indefinite unimodular lattices | ミルナーの分類定理 | — | 2026-11-20（nt:page-indefinite-lattices） |
