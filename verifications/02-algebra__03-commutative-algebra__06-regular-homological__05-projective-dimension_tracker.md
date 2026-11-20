@@ -1,6 +1,6 @@
-# Verification tracker: `02-algebra/03-commutative-algebra/06-homological-methods/02-projective-dimension.html`
+# Verification tracker: `02-algebra/03-commutative-algebra/06-regular-homological/05-projective-dimension.html`
 
-<!-- source: 02-algebra/03-commutative-algebra/06-homological-methods/02-projective-dimension.html -->
+<!-- source: 02-algebra/03-commutative-algebra/06-regular-homological/05-projective-dimension.html -->
 <!-- Managed by scripts/verify.py (GitHub Actions). To dispute an [Open] issue, add a line starting with
      **Opus Rebuttal:** at the end of that issue and push; the next run judges it. Do not edit other lines. -->
 
