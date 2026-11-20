@@ -4,7 +4,7 @@
  * access: 'free' は無料お試し（各分野の最初の 1 つ）、'pro' は Pro プランで全体が開く。 */
 window.SM_LEARN_MANIFEST = {
   // 可換環論の保存表：○× ゲーム
-  '02-algebra/03-commutative-algebra/04-integral-domains/08-preservation-table.html': {
+  '02-algebra/03-commutative-algebra/05-dedekind-domains/05-preservation-table.html': {
     interactive: [
       { id: 'qz-ring-preservation', type: 'quiz', target: 'ring:preservation-table', access: 'free', label: '○× ゲーム：環の性質は保たれる？',
         summary: '保存表から 10 問', yes: 'いつも保たれる', no: '保たれない例がある',
