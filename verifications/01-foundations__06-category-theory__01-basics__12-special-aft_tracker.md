@@ -19,6 +19,7 @@ The main theorems and proofs (special initial object theorem, SAFT, CHaus reflec
 - **Detail:** The supplement says Watts' theorem concerns "an additive contravariant functor from R-Mod to Ab that sends colimits to limits" and that it is of the form Hom_R(-,C). Watts' theorem is about *covariant* additive functors that preserve colimits (direct sums and cokernels), giving the form Hom_R(R,-) tensor - (i.e. - ⊗_R M). The contravariant Hom_R(-,C) form is the dual statement (for contravariant functors sending colimits to limits), which is a different theorem. As stated the attribution is wrong.
 - **Proposed fix:** Replace with: "Mac Lane cites as an application of the dual form of this theorem Watts' theorem: an additive *covariant* functor R-Mod → Ab preserving colimits is of the form - ⊗_R M (equivalently, a contravariant additive functor sending colimits to limits is of the form Hom_R(-,C))."
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The page states the contravariant form exactly as Mac Lane V.8 does (Watts' theorem: a contravariant additive functor R-Mod→Ab taking small colimits to limits is Hom_R(-,C)). Watts (1960) proves both this form and the covariant tensor form.
 
 ### ISSUE-0002 [Open] Q/Z is not a cogenerator of Ab in the stated sense
 - **Category:** Supplement/remark error
@@ -26,6 +27,7 @@ The main theorems and proofs (special initial object theorem, SAFT, CHaus reflec
 - **Detail:** The supplement claims Q/Z is an injective cogenerator of Ab. Q/Z is injective and a cogenerator in the sense that every object embeds into a product of copies of it, but it is NOT a cogenerator in the sense defined on this page (definition cat:generator): for h ≠ h': a → b one needs g: b → Q/Z with gh ≠ gh'. Take a = Z, b = Z, h = id, h' = 0: any g: Z → Q/Z is zero (Q/Z is torsion, Z is torsion-free), so gh = gh'. Hence {Q/Z} fails the separating condition used by SAFT.
 - **Proposed fix:** Either state it correctly: "Q/Z is an injective cogenerator in the sense that every abelian group embeds into a product of copies of Q/Z", or use a genuine cogenerator for the separating condition, e.g. "Q/Z ⊕ Q is a cogenerator of Ab in the sense of this page".
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The counterexample is wrong: Hom(Z, Q/Z) ≅ Q/Z is nonzero (send 1 to 1/2), so id and 0 on Z are separated. Q/Z is a cogenerator in the separating sense, since every nonzero element of an abelian group has a homomorphism to Q/Z that does not kill it.
 
 ### ISSUE-0003 [Open] Dual SAFT statement omits completeness of the target
 - **Category:** Supplement/remark error
