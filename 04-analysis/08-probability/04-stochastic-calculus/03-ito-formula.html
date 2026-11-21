@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>伊藤の公式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/04-stochastic-calculus/03-ito-formula.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 伊藤の公式 {#prb:page-ito-formula keywords="Ito processes X = X_0 + int K ds + int H dB, integral with respect to an Ito process, bounded F_a-measurable factors pass into the integral, Ito's formula for f in C^2(R^d) of Ito processes driven by one Brownian motion, second-order term 1/2 sum f_kl H^k H^l ds, (dB)^2 = dt, time-dependent f(t, X_t), product rule, E[B_t^4] = 3t^2, exponential martingale exp(int theta dB - 1/2 int theta^2 ds), nonnegative local martingales are supermartingales, Dynkin formula"}
+
+通常の微積分では $df(x(t))=f'(x(t))\,dx(t)$ だが、ブラウン運動では増分の 2 乗 $(dB)^{2}$ が $dt$ と同じ大きさをもつ（2 次変分 $\sum(\Delta B)^{2}\to t$）ので、テイラー展開の 2 次の項が消えずに残る。これが**伊藤の公式**
+$$
+df(B_{t})=f'(B_{t})\,dB_{t}+\tfrac12f''(B_{t})\,dt
+$$
+である。このページでは、1 つのブラウン運動で駆動される伊藤過程の組 $(X^{1},\dots,X^{d})$ の $C^{2}$ 関数について公式を証明し、指数マルチンゲールなどに応用する。
+
+## 記法と定義の確認 {#prb:sec-if-notation}
+
+::: notation
+- $(\mathcal{F}_{t})$, $B$, $T$ は \ref{prb:page-ito-integral} の通り。被積分関数の空間 $L_{T}^{2}$ と単純過程は \ref{prb:ito-integrand-space}、積分とその性質は \ref{prb:ito-isometry-simple}, \ref{prb:simple-dense}, \ref{prb:ito-integral}, \ref{prb:ito-stopping}, \ref{prb:ito-localization}。
+- ドゥーブの不等式は \ref{prb:doob-continuous}、停止時刻の性質は \ref{prb:stopping-time-properties}。2 次までのテイラー展開（剰余は線分上の点での値）は \ref{calc:multivariable-taylor}、優収束定理は \ref{meas:dominated-convergence}。
+- 確率収束する列は、部分列をとるとほとんど確実に収束する（$P(\abs{Y_{n_{j}}-Y}>2^{-j})<2^{-j}$ となる部分列をとり、ボレル–カンテリの補題 \ref{prb:borel-cantelli} を使う）。
+- 体系は $\ZFC$。
+:::
+
+## 伊藤過程 {#prb:sec-if-processes}
+
+::: definition 伊藤過程 {#prb:ito-process keywords="X_t = X_0 + int_0^t K_s ds + int_0^t H_s dB_s with F_0-measurable X_0, progressive K with int |K| < infinity a.s., progressive H with int H^2 < infinity a.s.; dX = K dt + H dB; int G dX := int G K ds + int G H dB" index="伊藤過程|いとうかてい" refname="伊藤過程"}
+$\mathcal{F}_{0}$ 可測な $X_{0}$、発展的可測で $\int_{0}^{T}\abs{K_{s}}ds<\infty$（a.s.）の $K$、発展的可測で $\int_{0}^{T}H_{s}^{2}ds<\infty$（a.s.）の $H$ によって
+$$
+X_{t}=X_{0}+\int_{0}^{t}K_{s}ds+\int_{0}^{t}H_{s}dB_{s}
+$$
+と書ける連続過程を**伊藤過程**といい、$dX_{t}=K_{t}dt+H_{t}dB_{t}$ と略記する（第 3 項は \ref{prb:ito-localization} の意味）。発展的可測な $G$ で $GK$, $GH$ が同じ可積分条件をみたすものについて $\int G\,dX\defeq\int GK\,ds+\int GH\,dB$ とおく。
+:::
+
+::: intuition
+伊藤過程は「なめらかなドリフト $K\,dt$」と「ゆらぎ $H\,dB$」の和である。ドリフトの部分は有界変動で 2 次変分をもたず、ゆらぎの部分だけが $(dX)^{2}=H^{2}dt$ という 2 次変分を生む。
+:::
+
+::: lemma 有界な因子の出し入れ {#prb:ito-bounded-factor keywords="for a <= b, bounded F_a-measurable xi and H in L^2_T: xi (int_0^b H dB - int_0^a H dB) = int_0^T xi 1_{(a, b]} H dB" index="伊藤積分の因子|いとうせきぶんのいんし" refname="有界な因子の出し入れ"}
+$a\le b\le T$、$\xi$ を有界な $\mathcal{F}_{a}$ 可測確率変数、$H\in L_{T}^{2}$ とすると、
+$$
+\xi\Bigl(\int_{0}^{b}H\,dB-\int_{0}^{a}H\,dB\Bigr)=\int_{0}^{T}\xi1_{(a,b]}H\,dB\quad\text{(a.s.)}.
+$$
+:::
+
+::: intuition
+時刻 $a$ に分かっている量 $\xi$ は、$a$ 以降の賭けにとっては定数と同じであり、積分の外に出せる。
+:::
+
+::: proof
+**Step 1（単純過程）.** 【主張：$H$ が単純なら成り立つ】$a,b$ を分割点に加えると $H=\sum\xi_{i}1_{(t_{i},t_{i+1}]}$。$\xi1_{(a,b]}H=\sum_{a\le t_{i}<b}\xi\xi_{i}1_{(t_{i},t_{i+1}]}$ は、$\xi\xi_{i}$ が有界で $\mathcal{F}_{t_{i}}$ 可測（$a\le t_{i}$）なので単純過程。その積分は $\sum_{a\le t_{i}<b}\xi\xi_{i}(B_{t_{i+1}}-B_{t_{i}})=\xi(I(H)_{b}-I(H)_{a})$。
+
+**Step 2（極限）.** $\xi1_{(a,b]}H$ は発展的可測で $L_{T}^{2}$ に属する。単純過程 $H^{n}\to H$（\ref{prb:simple-dense}）について、等長性から $\norm{\xi(I(H^{n})_{b}-I(H)_{b})}_{2}\le\sup\abs\xi\norm{H^{n}-H}$（$a$ についても同様）、$\norm{I(\xi1_{(a,b]}H^{n})_{T}-I(\xi1_{(a,b]}H)_{T}}_{2}\le\sup\abs\xi\norm{H^{n}-H}$。Step 1 の等式が極限に移る。
+:::
+
+## 伊藤の公式 {#prb:sec-if-formula}
+
+::: theorem 伊藤の公式 {#prb:ito-formula keywords="for Ito processes X^k = X^k_0 + int K^k ds + int H^k dB (k = 1..d) driven by the same Brownian motion and f in C^2(R^d): f(X_t) = f(X_0) + sum_k int d_k f(X) K^k ds + sum_k int d_k f(X) H^k dB + 1/2 sum_{k,l} int d_k d_l f(X) H^k H^l ds a.s. for all t" index="伊藤の公式|いとうのこうしき" refname="伊藤の公式"}
+$X^{k}=X_{0}^{k}+\int K^{k}ds+\int H^{k}dB$（$k=1,\dots,d$）を同じブラウン運動 $B$ で駆動される伊藤過程、$X=(X^{1},\dots,X^{d})$、$f\in C^{2}(\mathbb{R}^{d})$ とすると、ほとんど確実に、すべての $t\in[0,T]$ で
+$$
+f(X_{t})=f(X_{0})+\sum_{k}\int_{0}^{t}\partial_{k}f(X_{s})K_{s}^{k}ds+\sum_{k}\int_{0}^{t}\partial_{k}f(X_{s})H_{s}^{k}dB_{s}+\frac12\sum_{k,l}\int_{0}^{t}\partial_{k}\partial_{l}f(X_{s})H_{s}^{k}H_{s}^{l}ds.
+$$
+特に $f(X)$ は伊藤過程である。$d=1$, $X=B$ なら $f(B_{t})=f(0)+\int_{0}^{t}f'(B)dB+\frac12\int_{0}^{t}f''(B)ds$。
+:::
+
+::: intuition
+テイラー展開 $f(X_{t_{i+1}})-f(X_{t_{i}})\approx\sum\partial_{k}f\,\Delta X^{k}+\frac12\sum\partial_{k}\partial_{l}f\,\Delta X^{k}\Delta X^{l}$ を足し合わせると、1 次の項は確率積分に、2 次の項は「掛け算表」$dt\cdot dt=0$, $dt\cdot dB=0$, $dB\cdot dB=dt$ によって $H^{k}H^{l}dt$ の積分になる。3 次以上の項は $\abs{\Delta X}^{3}\sim(\Delta t)^{3/2}$ で、足しても $0$ に消える。
+:::
+
+::: proof
+**Step 0（各項が定義されること）.** $X$ は連続なので $\partial_{k}f(X)$, $\partial_{k}\partial_{l}f(X)$ は連続な適合過程で、道ごとに $[0,T]$ 上有界。よって $\int\abs{\partial_{k}f(X)K^{k}}<\infty$, $\int(\partial_{k}f(X)H^{k})^{2}<\infty$, $\int\abs{\partial_{k}\partial_{l}f(X)H^{k}H^{l}}<\infty$（コーシー–シュワルツ）で、右辺の各項は定義される。両辺は $t$ について連続なので、各 $t$ で a.s. に成り立つことを示せば、有理数の $t$ と連続性からすべての $t$ で同時に成り立つ。
+
+**Step 1（強い仮定のもとでの証明の準備）.** まず次の仮定 (A) のもとで示す：
+(A) $f\in C^{2}$ でその台はコンパクト（したがって $f$, $\partial_{k}f$, $\partial_{k}\partial_{l}f$ は有界で一様連続）、$\abs{K^{k}}\le C$、$H^{k}$ はすべて共通の分割 $0=s_{0}<\dots<s_{m}=T$ 上の単純過程で $\abs{H^{k}}\le C$。
+$t$ を固定し、$[0,t]$ の分割 $\pi:0=t_{0}<\dots<t_{N}=t$ を、$s_{j}<t$ を分割点に含むようにとる。$\Delta_{i}X^{k}\defeq X_{t_{i+1}}^{k}-X_{t_{i}}^{k}=a_{i}^{k}+b_{i}^{k}$、$a_{i}^{k}\defeq\int_{t_{i}}^{t_{i+1}}K^{k}ds$, $b_{i}^{k}\defeq\int_{t_{i}}^{t_{i+1}}H^{k}dB=h_{i}^{k}\Delta_{i}B$（$h_{i}^{k}$ は $(t_{i},t_{i+1}]$ 上の $H^{k}$ の値で、有界な $\mathcal{F}_{t_{i}}$ 可測確率変数）。テイラーの定理（\ref{calc:multivariable-taylor}）から、$X_{t_{i}}$ と $X_{t_{i+1}}$ を結ぶ線分上の点 $\zeta_{i}$ があって
+$$
+f(X_{t})-f(X_{0})=\sum_{i}\sum_{k}\partial_{k}f(X_{t_{i}})\Delta_{i}X^{k}+\frac12\sum_{i}\sum_{k,l}\partial_{k}\partial_{l}f(\zeta_{i})\Delta_{i}X^{k}\Delta_{i}X^{l}.
+$$
+以下 $\abs\pi\defeq\max(t_{i+1}-t_{i})\to0$ として、各項の確率収束先を求める。
+
+**Step 2（1 次の項）.** 【主張：$\sum_{i}\partial_{k}f(X_{t_{i}})\Delta_{i}X^{k}\to\int_{0}^{t}\partial_{k}f(X)K^{k}ds+\int_{0}^{t}\partial_{k}f(X)H^{k}dB$（$L^{1}$ で）】$G^{\pi}\defeq\sum_{i}\partial_{k}f(X_{t_{i}})1_{(t_{i},t_{i+1}]}$ とおく。ドリフト部分は $\sum_{i}\partial_{k}f(X_{t_{i}})a_{i}^{k}=\int_{0}^{t}G^{\pi}K^{k}ds$ で、道の連続性から $G^{\pi}_{s}\to\partial_{k}f(X_{s})$（各点）、$\abs{G^{\pi}K^{k}}\le C\sup\abs{\partial_{k}f}$ なので優収束定理で a.s. かつ $L^{1}$ で収束。確率積分部分は、\ref{prb:ito-bounded-factor}（$\xi=\partial_{k}f(X_{t_{i}})$, $a=t_{i}$, $b=t_{i+1}$）を足して $\sum_{i}\partial_{k}f(X_{t_{i}})b_{i}^{k}=\int_{0}^{T}G^{\pi}1_{(0,t]}H^{k}dB$。等長性から
+$$
+E\Bigl[\Bigl(\int_{0}^{T}G^{\pi}1_{(0,t]}H^{k}dB-\int_{0}^{t}\partial_{k}f(X)H^{k}dB\Bigr)^{2}\Bigr]=E\int_{0}^{t}(G^{\pi}_{s}-\partial_{k}f(X_{s}))^{2}(H_{s}^{k})^{2}ds\to0
+$$
+（被積分関数は $4C^{2}\sup\abs{\partial_{k}f}^{2}$ で抑えられ各点で $0$ に収束するので優収束定理）。
+
+**Step 3（2 次の項の代表点の取り替え）.** 【主張：$\sum_{i}\abs{\partial_{k}\partial_{l}f(\zeta_{i})-\partial_{k}\partial_{l}f(X_{t_{i}})}\abs{\Delta_{i}X^{k}\Delta_{i}X^{l}}\to0$（確率収束）】$\abs{\Delta_{i}X^{k}\Delta_{i}X^{l}}\le\frac12((\Delta_{i}X^{k})^{2}+(\Delta_{i}X^{l})^{2})$ で、
+$$
+E\sum_{i}(\Delta_{i}X^{k})^{2}\le2\sum_{i}E[(a_{i}^{k})^{2}]+2\sum_{i}E[(b_{i}^{k})^{2}]\le2C^{2}t^{2}+2C^{2}t
+$$
+（$\abs{a_{i}^{k}}\le C(t_{i+1}-t_{i})$、等長性で $E[(b_{i}^{k})^{2}]\le C^{2}(t_{i+1}-t_{i})$）。一方 $\varepsilon_{\pi}\defeq\max_{i}\abs{\partial_{k}\partial_{l}f(\zeta_{i})-\partial_{k}\partial_{l}f(X_{t_{i}})}$ は、$X$ の道の $[0,t]$ 上の一様連続性と $\partial_{k}\partial_{l}f$ の一様連続性から各点で $0$ に収束し、有界。よって和は $\varepsilon_{\pi}\cdot\sum(\Delta X)^{2}$ で抑えられ、任意の $\delta,M>0$ について $P(\varepsilon_{\pi}\sum(\Delta X)^{2}>\delta)\le P(\varepsilon_{\pi}>\delta/M)+P(\sum(\Delta X)^{2}>M)\le P(\varepsilon_{\pi}>\delta/M)+\frac{2C^{2}(t^{2}+t)}{M}$。$\abs\pi\to0$ の後 $M\to\infty$ として $0$。
+
+**Step 4（ドリフトを含む 2 次の項）.** 【主張：$\sum_{i}g_{i}(a_{i}^{k}a_{i}^{l}+a_{i}^{k}b_{i}^{l}+b_{i}^{k}a_{i}^{l})\to0$（$L^{1}$）、$g_{i}\defeq\partial_{k}\partial_{l}f(X_{t_{i}})$】$\abs{g_{i}}\le c\defeq\sup\abs{\partial_{k}\partial_{l}f}$。$\sum\abs{a_{i}^{k}a_{i}^{l}}\le C^{2}t\abs\pi$。コーシー–シュワルツから $E\sum\abs{a_{i}^{k}b_{i}^{l}}\le(E\sum(a_{i}^{k})^{2})^{1/2}(E\sum(b_{i}^{l})^{2})^{1/2}\le(C^{2}t\abs\pi)^{1/2}(C^{2}t)^{1/2}\to0$。
+
+**Step 5（主要項）.** 【主張：$\sum_{i}g_{i}b_{i}^{k}b_{i}^{l}-\int_{0}^{t}\partial_{k}\partial_{l}f(X)H^{k}H^{l}ds\to0$（確率収束）】$b_{i}^{k}b_{i}^{l}=h_{i}^{k}h_{i}^{l}(\Delta_{i}B)^{2}$ で、$\int_{t_{i}}^{t_{i+1}}H^{k}H^{l}ds=h_{i}^{k}h_{i}^{l}\Delta t_{i}$（$\Delta t_{i}\defeq t_{i+1}-t_{i}$）。$c_{i}\defeq g_{i}h_{i}^{k}h_{i}^{l}$（有界な $\mathcal{F}_{t_{i}}$ 可測、$\abs{c_{i}}\le cC^{2}$）、$\eta_{i}\defeq(\Delta_{i}B)^{2}-\Delta t_{i}$ とおくと、$\eta_{i}$ は $\mathcal{F}_{t_{i}}$ と独立で $E\eta_{i}=0$, $E\eta_{i}^{2}=2(\Delta t_{i})^{2}$。$i<j$ なら $c_{i}\eta_{i}c_{j}$ は $\mathcal{F}_{t_{j}}$ 可測なので $E[c_{i}\eta_{i}c_{j}\eta_{j}]=E[c_{i}\eta_{i}c_{j}]E[\eta_{j}]=0$。よって
+$$
+E\Bigl[\Bigl(\sum_{i}c_{i}\eta_{i}\Bigr)^{2}\Bigr]=\sum_{i}E[c_{i}^{2}]E[\eta_{i}^{2}]\le2c^{2}C^{4}t\abs\pi\to0.
+$$
+すなわち $\sum g_{i}b_{i}^{k}b_{i}^{l}-\int_{0}^{t}G^{\pi,kl}H^{k}H^{l}ds\to0$（$L^{2}$）、ここで $G^{\pi,kl}\defeq\sum g_{i}1_{(t_{i},t_{i+1}]}$。最後に $\int_{0}^{t}(G^{\pi,kl}-\partial_{k}\partial_{l}f(X))H^{k}H^{l}ds\to0$（各点収束と有界性による優収束）。
+
+**Step 6（(A) のもとでの結論）.** Step 2〜5 から、$f(X_{t})-f(X_{0})$（$\pi$ によらない）は公式の右辺に確率収束する。確率収束の極限は a.s. に一意なので、公式が各 $t$ で a.s. に成り立つ。Step 0 からすべての $t$ で同時に成り立つ。
+
+**Step 7（$H$, $K$ の仮定を外す：$f$ はコンパクト台のまま）.** 【主張：$f$ がコンパクト台の $C^{2}$ で、$E\int_{0}^{T}(H^{k})^{2}<\infty$, $\int_{0}^{T}\abs{K^{k}}\le C'$（定数）なら公式が成り立つ】\ref{prb:simple-dense} の証明は有界な単純過程を作るので、各 $k$ について有界な単純過程 $H^{k,n}\to H^{k}$（$L_{T}^{2}$）がとれ、分割の共通細分をとって全 $k$ で共通の分割上の単純過程にできる。$K^{k,n}\defeq K^{k}1_{\{\abs{K^{k}}\le n\}}$ とすると、$\int_{0}^{T}\abs{K^{k,n}-K^{k}}ds\to0$（各点・優収束、$\omega$ ごと）で、$\le C'$ なので $L^{1}(P)$ でも $0$ に収束。$X^{k,n}\defeq X_{0}^{k}+\int K^{k,n}+\int H^{k,n}dB$ には (A) のもとの公式が使える。
+$$
+\sup_{s\le T}\abs{X_{s}^{k,n}-X_{s}^{k}}\le\int_{0}^{T}\abs{K^{k,n}-K^{k}}ds+\sup_{s\le T}\Bigl|\int_{0}^{s}(H^{k,n}-H^{k})dB\Bigr|
+$$
+の右辺はドゥーブの不等式（\ref{prb:doob-continuous}）と等長性から $L^{1}$ で $0$ に収束するので、部分列をとって a.s. に一様収束するとしてよい。各項の収束：$f(X_{t}^{n})\to f(X_{t})$；$\abs{\partial_{k}f(X^{n})K^{k,n}-\partial_{k}f(X)K^{k}}\le\sup\abs{\partial_{k}f}\abs{K^{k,n}-K^{k}}+\abs{\partial_{k}f(X^{n})-\partial_{k}f(X)}\abs{K^{k}}$ の積分は $0$ に（第 2 項は優収束）；確率積分の項は等長性から
+$$
+\norm{\partial_{k}f(X^{n})H^{k,n}-\partial_{k}f(X)H^{k}}_{L_{T}^{2}}\le\sup\abs{\partial_{k}f}\norm{H^{k,n}-H^{k}}+\norm{(\partial_{k}f(X^{n})-\partial_{k}f(X))H^{k}}\to0
+$$
+（第 2 項は $4\sup\abs{\partial_{k}f}^{2}(H^{k})^{2}$ を優関数とする優収束）；2 次の項も同様に $L^{1}$ で収束（$\abs{H^{k,n}H^{l,n}-H^{k}H^{l}}$ の積分はコーシー–シュワルツで $0$ に）。部分列をさらにとって全項が a.s. に収束するとし、公式が極限に移る。
+
+**Step 8（局所化）.** 【主張：一般の場合に成り立つ】$R>0$ について $\Omega_{R}\defeq\{\abs{X_{0}}<R\}\in\mathcal{F}_{0}$、
+$$
+\tau_{R}\defeq\inf\Bigl\{s:\abs{X_{s}}\ge R\text{ または }\sum_{k}\int_{0}^{s}\bigl(\abs{K^{k}}+(H^{k})^{2}\bigr)du\ge R\Bigr\}\wedge T
+$$
+とする（連続な適合過程の閉集合への到達時刻なので停止時刻、\ref{prb:stopping-time-properties}）。$\tilde{K}^{k}\defeq1_{\Omega_{R}}1_{[0,\tau_{R}]}K^{k}$, $\tilde{H}^{k}\defeq1_{\Omega_{R}}1_{[0,\tau_{R}]}H^{k}$, $\tilde{X}^{k}\defeq1_{\Omega_{R}}X_{0}^{k}+\int\tilde{K}^{k}+\int\tilde{H}^{k}dB$ とおくと、$\int_{0}^{T}\abs{\tilde{K}^{k}}\le R$, $\int_{0}^{T}(\tilde{H}^{k})^{2}\le R$ で、\ref{prb:ito-stopping}・\ref{prb:ito-localization} と \ref{prb:ito-bounded-factor}（$a=0$, $\xi=1_{\Omega_{R}}$）から $\tilde{X}_{t}=1_{\Omega_{R}}X_{t\wedge\tau_{R}}$。したがって $\abs{\tilde{X}}\le R$。$\varphi\in C^{\infty}$ を $\abs x\le R+1$ で $1$、$\abs x\ge R+2$ で $0$ にとり $\tilde{f}\defeq\varphi f$（コンパクト台の $C^{2}$、$\abs x<R+1$ で $f$ と 2 階までの導関数が一致）とする。Step 7 を $\tilde{X}$, $\tilde f$ に適用すると、$\tilde f$ とその導関数は $\tilde{X}$ の値の上で $f$ のものと一致するので、$\Omega_{R}$ の上で $t\wedge\tau_{R}$ までの公式が $f$ について得られる。$R\to\infty$ で $P(\Omega_{R}\cap\{\tau_{R}=T\})\to1$（$X$ の道は有界で、積分は有限）。
+:::
+
+::: corollary 時間に依存する関数と積の公式 {#prb:ito-formula-time keywords="f(t, X_t) for f in C^{1,2}: df = f_t dt + f_x dX + 1/2 f_xx H^2 dt; product rule d(XY) = X dY + Y dX + H^X H^Y dt" index="伊藤の積の公式|いとうのせきのこうしき" refname="時間に依存する関数と積の公式"}
+1. $f\in C^{2}(\mathbb{R}^{2})$ なら、伊藤過程 $X$ について
+$$
+f(t,X_{t})=f(0,X_{0})+\int_{0}^{t}\bigl(\partial_{t}f+\partial_{x}f\,K+\tfrac12\partial_{x}^{2}f\,H^{2}\bigr)(s,X_{s})\,ds+\int_{0}^{t}\partial_{x}f(s,X_{s})H_{s}dB_{s}.
+$$
+2. 伊藤過程 $X$, $Y$（同じ $B$ で駆動、拡散係数 $H^{X}$, $H^{Y}$）について $X_{t}Y_{t}=X_{0}Y_{0}+\int_{0}^{t}X\,dY+\int_{0}^{t}Y\,dX+\int_{0}^{t}H^{X}H^{Y}ds$。
+:::
+
+::: intuition
+時間 $t$ はゆらぎをもたない伊藤過程なので、時間についての微分は 1 次の項だけが現れる。積の公式の最後の項は、2 つの過程が同じノイズを共有することによる相関である。
+:::
+
+::: proof
+**Step 1（1）.** $X^{1}_{t}\defeq t$ は $K=1$, $H=0$ の伊藤過程。$X^{1}$ と $X^{2}=X$ に \ref{prb:ito-formula} を使うと、2 次の項のうち $H^{1}=0$ を含むものは消え、$\frac12\partial_{x}^{2}f\,H^{2}$ だけが残る。
+
+**Step 2（2）.** $f(x,y)=xy$ に \ref{prb:ito-formula} を使う。$\partial_{x}f=y$, $\partial_{y}f=x$, $\partial_{x}\partial_{y}f=1$, $\partial_{x}^{2}f=\partial_{y}^{2}f=0$ なので、2 次の項は $\frac12\cdot2\int H^{X}H^{Y}ds$。
+:::
+
+## 応用 {#prb:sec-if-applications}
+
+::: example 伊藤の公式の計算例 {#prb:ito-formula-examples}
+1. $f(x)=x^{2}$：$B_{t}^{2}=2\int_{0}^{t}B\,dB+t$。これは \ref{prb:ito-riemann-sums} の 2 と一致する。
+2. $f(x)=x^{4}$：$B_{t}^{4}=4\int_{0}^{t}B^{3}dB+6\int_{0}^{t}B_{s}^{2}ds$。$B^{3}\in L_{T}^{2}$（$E\int B^{6}<\infty$）なので確率積分の期待値は $0$ で、$E[B_{t}^{4}]=6\int_{0}^{t}s\,ds=3t^{2}$。
+3. $f(t,x)=e^{\lambda x-\lambda^{2}t/2}$：$\partial_{t}f+\frac12\partial_{x}^{2}f=0$ なので $e^{\lambda B_{t}-\lambda^{2}t/2}=1+\int_{0}^{t}\lambda e^{\lambda B_{s}-\lambda^{2}s/2}dB_{s}$。
+:::
+
+::: lemma 非負の局所マルチンゲール {#prb:nonnegative-local-martingale keywords="a nonnegative continuous local martingale is a supermartingale; E[M_t] <= E[M_0]" index="非負の局所マルチンゲール|ひふのきょくしょまるちんげーる" refname="非負の局所マルチンゲール"}
+$M$ を連続で $M\ge0$、$M_{0}$ が可積分、停止時刻 $\sigma_{n}\uparrow$ で $P(\sigma_{n}=T)\to1$ かつ $M_{t\wedge\sigma_{n}}$ がマルチンゲールであるような過程とする。このとき $M$ は優マルチンゲールで、$E[M_{t}]\le E[M_{0}]$。
+:::
+
+::: intuition
+負けても資産が負にならない公平な賭けは、極限で「破産の確率に吸い込まれる質量」を失うことはあっても、増やすことはない。だから期待値は増えない。
+:::
+
+::: proof
+**Step 1（可積分性）.** $M_{t\wedge\sigma_{n}}\to M_{t}$（a.s.：$\sigma_{n}=T$ となる $n$ 以降は一定）。ファトゥの補題とマルチンゲール性から $E[M_{t}]\le\liminf_{n}E[M_{t\wedge\sigma_{n}}]=E[M_{0}]<\infty$。
+
+**Step 2（優マルチンゲール性）.** 【主張：$s<t$, $A\in\mathcal{F}_{s}$ について $E[M_{t}1_{A}]\le E[M_{s}1_{A}]$】$A_{k}\defeq A\cap\{\sigma_{k}>s\}\in\mathcal{F}_{s}$ とする。$n\ge k$ なら $A_{k}$ の上で $\sigma_{n}\ge\sigma_{k}>s$ なので $M_{s\wedge\sigma_{n}}=M_{s}$。止めた過程のマルチンゲール性とファトゥの補題から
+$$
+E[M_{t}1_{A_{k}}]\le\liminf_{n}E[M_{t\wedge\sigma_{n}}1_{A_{k}}]=\liminf_{n}E[M_{s\wedge\sigma_{n}}1_{A_{k}}]=E[M_{s}1_{A_{k}}].
+$$
+$\sigma_{k}$ は増加し a.s. にいずれ $T>s$ になるので $A_{k}\uparrow A$（零集合を除く）。単調収束定理で $k\to\infty$ とすればよい。
+:::
+
+::: theorem 指数マルチンゲール {#prb:exponential-martingale keywords="for progressive theta with int theta^2 < infinity a.s., Z_t = exp(int_0^t theta dB - 1/2 int_0^t theta^2 ds) satisfies Z = 1 + int Z theta dB, is a nonnegative supermartingale; if |theta| <= C then Z is a martingale with E Z_t^2 <= e^{C^2 t}" index="指数マルチンゲール|しすうまるちんげーる, ドレアン–ドレイドの指数|どれあんどれいどのしすう" refname="指数マルチンゲール"}
+$\theta$ を発展的可測で $\int_{0}^{T}\theta^{2}<\infty$（a.s.）とし、$Z_{t}\defeq\exp\bigl(\int_{0}^{t}\theta\,dB-\frac12\int_{0}^{t}\theta^{2}ds\bigr)$ とする。
+1. $Z_{t}=1+\int_{0}^{t}Z_{s}\theta_{s}dB_{s}$。
+2. $Z$ は非負の優マルチンゲールで $E[Z_{t}]\le1$。
+3. $\abs\theta\le C$（定数）なら $E[Z_{t}^{2}]\le e^{C^{2}t}$ で、$Z$ はマルチンゲール、$E[Z_{T}]=1$。
+:::
+
+::: intuition
+$Z$ は「掛け金を資産に比例させる」賭けの資産で、$dZ=Z\theta\,dB$ により公平だが、指数の中の $-\frac12\int\theta^{2}$ は伊藤の補正項である（通常の微積分なら $e^{\int\theta dB}$ が答えになるはずのところ）。$\theta$ が大きすぎると、ごくまれな大勝ちに期待値が集中して $Z$ はマルチンゲールでなくなりうるが、$\theta$ が有界ならそれは起きない。
+:::
+
+::: proof
+**Step 1（1）.** $Y_{t}\defeq\int_{0}^{t}\theta\,dB-\frac12\int_{0}^{t}\theta^{2}ds$ は伊藤過程（$K=-\frac12\theta^{2}$, $H=\theta$）。$f(y)=e^{y}$ に \ref{prb:ito-formula} を使うと $Z_{t}=1+\int Z(-\frac12\theta^{2})ds+\int Z\theta\,dB+\frac12\int Z\theta^{2}ds=1+\int_{0}^{t}Z\theta\,dB$。
+
+**Step 2（2）.** 1 と \ref{prb:ito-localization} から $Z$ は止めるとマルチンゲールになる過程（$Z\theta$ の局所化の停止時刻 $\sigma_{n}$ で）、$Z>0$, $Z_{0}=1$。\ref{prb:nonnegative-local-martingale} を使う。
+
+**Step 3（3）.** 【主張：$E[Z_{t}^{2}]\le e^{C^{2}t}$】$Z_{t}^{2}=\exp\bigl(\int2\theta\,dB-\frac12\int(2\theta)^{2}ds\bigr)\exp\bigl(\int_{0}^{t}\theta^{2}ds\bigr)\le Z_{t}^{(2\theta)}e^{C^{2}t}$。ここで $Z^{(2\theta)}$ は $2\theta$ に対する同じ過程で、2 から $E[Z_{t}^{(2\theta)}]\le1$。よって $E\int_{0}^{T}(Z\theta)^{2}ds\le C^{2}\int_{0}^{T}e^{C^{2}s}ds<\infty$、すなわち $Z\theta\in L_{T}^{2}$ で、1 の右辺は \ref{prb:ito-integral} の意味の積分（\ref{prb:ito-localization} の 3 で一致）。したがって $Z$ はマルチンゲールで $E[Z_{T}]=E[Z_{0}]=1$。
+:::
+
+::: hypcheck
+- **$f\in C^{2}$**：テイラー展開の 2 次の剰余（Step 1）と、2 階導関数の連続性による代表点の取り替え（Step 3）・リーマン和の収束（Step 5）に使った。$f$ が $C^{1}$ だけでは公式は意味をもたない（例えば $f(x)=\abs x$ では局所時間という新しい項が現れる：タナカの公式）。
+- **同じブラウン運動で駆動**：Step 5 の $b_{i}^{k}b_{i}^{l}=h_{i}^{k}h_{i}^{l}(\Delta_{i}B)^{2}$ に使った。独立なブラウン運動 $B^{1},B^{2}$ なら $\Delta B^{1}\Delta B^{2}$ の和は $0$ に収束し、交差項は消える（$dB^{1}dB^{2}=0$）。
+- **適合性**：Step 2 の確率積分への変形（\ref{prb:ito-bounded-factor}）と Step 5 の交差項の消去に使った。
+- **局所化**：Step 8 で、$f$ や $H$, $K$ の大きさに条件を課さずに済ませるために必要だった。そのため一般には確率積分の項は局所マルチンゲールにとどまる。
+:::
+
+## 問題 {#prb:sec-if-problems}
+
+::: problem {#prb:prob-if-b3}
+$\int_{0}^{t}B_{s}^{2}dB_{s}=\frac13B_{t}^{3}-\int_{0}^{t}B_{s}ds$ を示せ。
+:::
+
+::: solution
+$f(x)=x^{3}$：$B_{t}^{3}=3\int B^{2}dB+3\int B\,ds$。
+:::
+
+::: problem {#prb:prob-if-tb}
+$tB_{t}=\int_{0}^{t}s\,dB_{s}+\int_{0}^{t}B_{s}ds$ を示せ。
+:::
+
+::: solution
+\ref{prb:ito-formula-time} の 2 を $X_{t}=t$（$H^{X}=0$）, $Y=B$ に使う。交差項は $0$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 証明では $f$ の 3 階導関数を使わなかった（剰余を 2 次で止め、一様連続性で処理した）。被積分関数の近似（Step 7）で単純過程が有界であることを使い、4 次モーメントの評価を避けた。議論は Karatzas–Shreve『Brownian Motion and Stochastic Calculus』第 3.3 節の流儀に近いが、ブラウン運動のみで駆動される場合に絞って自分で組み立てた。
+
+**前提を変えると.**
+- **多次元ブラウン運動**：$B=(B^{1},\dots,B^{m})$ が独立な成分をもつなら、2 次の項は $\frac12\sum_{k,l}\partial_{k}\partial_{l}f\sum_{j}H^{k,j}H^{l,j}dt$ になる（$dB^{i}dB^{j}=\delta_{ij}dt$）。
+- **連続セミマルチンゲール**：$X=X_{0}+M+A$（$M$ 連続局所マルチンゲール、$A$ 有界変動）なら $f(X)=f(X_{0})+\int f'(X)dX+\frac12\int f''(X)d\langle M\rangle$。
+- **レヴィの特徴づけ**：連続局所マルチンゲール $M$ で $M_{t}^{2}-t$ も局所マルチンゲールなら $M$ はブラウン運動である。これは $f(t,x)=e^{i\lambda x+\lambda^{2}t/2}$ に伊藤の公式を使って示される（ここでは証明しない）。
+- **タナカの公式**：$\abs{B_{t}}=\int_{0}^{t}\operatorname{sgn}(B)dB+L_{t}$、$L$ は $0$ での局所時間。
+
+**高い視点から：2 次の微分としての伊藤の公式.** 通常の微分は 1 次の量だけを見るが、ブラウン運動の道は $\abs{\Delta B}\sim\sqrt{\Delta t}$ と「半分の次数」をもつので、2 次の量まで含めた「2 次のジェット」が座標変換で正しく変換される。この観点では、伊藤の公式は $\frac12\Delta$ を生成作用素とする拡散過程の「2 次の連鎖律」であり、確率解析と 2 階楕円型偏微分方程式（熱方程式、調和関数）とを結ぶ橋である。比喩で言えば、酔っ払いの足取りでは「平均的な傾き」だけでなく「曲がり具合」も到達点の期待値を動かす：凸な関数の値は、ゆらぎによって平均的に増える（イェンセンの不等式の動的な形）。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-if-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

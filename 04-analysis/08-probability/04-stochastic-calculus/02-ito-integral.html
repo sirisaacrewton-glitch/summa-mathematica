@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>伊藤積分 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/04-stochastic-calculus/02-ito-integral.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 伊藤積分 {#prb:page-ito-integral keywords="Ito integral with respect to Brownian motion, the space L^2_T of progressively measurable processes with E int_0^T H^2 ds < infinity, simple processes, integral of simple processes, Ito isometry, density of simple processes (bounded continuous, bounded progressive via moving averages, truncation), Ito integral as an element of M^2_c, martingale property, I(H)^2 - int H^2 ds is a martingale, Riemann sums with left endpoints, int B dB = (B_t^2 - t)/2, stopping and the integral, localization for int H^2 ds < infinity a.s., continuous local martingales"}
+
+ブラウン運動の道は至る所微分不可能で有界変動でないので、$\int H_{s}\,dB_{s}$ をスティルチェス積分としては定義できない。伊藤の発想は、被積分関数 $H$ を「その時点までの情報で決まる」過程に限り、リーマン和の代表点を**区間の左端**にとることで、積分を $L^{2}$ の極限として定義することだった。鍵は**伊藤の等長性** $E[(\int H\,dB)^{2}]=E[\int H^{2}ds]$ で、これにより積分は $L^{2}$ の等長写像として、単純な過程から一般の過程へ一意に延びる。こうして得られる積分は連続マルチンゲールで、前のページのヒルベルト空間 $\mathcal{M}_{T}^{2}$ の元になる。
+
+## 記法と定義の確認 {#prb:sec-it-notation}
+
+::: notation
+- $(\mathcal{F}_{t})$ は零集合を含むフィルトレーション、$B$ は $(\mathcal{F}_{t})$ ブラウン運動、$T>0$ を固定。発展的可測性、停止時刻と性質、連続マルチンゲール、ドゥーブの不等式、任意抽出、$\mathcal{M}_{T}^{2}$ の完備性は \ref{prb:filtration-continuous}, \ref{prb:stopping-time-continuous}, \ref{prb:stopping-time-properties}, \ref{prb:continuous-martingale}, \ref{prb:doob-continuous}, \ref{prb:optional-stopping-continuous}, \ref{prb:m2-complete}。
+- ブラウン運動の 2 次変分は \ref{prb:quadratic-variation}。積分の順序交換、優収束、ルベーグの微分定理は \ref{meas:fubini}, \ref{meas:dominated-convergence}, \ref{meas:lebesgue-differentiation}。条件付き期待値の性質は \ref{prb:conditional-properties}。
+- 体系は $\ZFC$。
+:::
+
+## 単純過程の積分 {#prb:sec-it-simple}
+
+::: definition 被積分関数の空間と単純過程 {#prb:ito-integrand-space keywords="L^2_T: progressively measurable H on [0, T] with ||H||^2 = E int_0^T H_s^2 ds < infinity; simple processes H = sum xi_i 1_{(t_i, t_{i+1}]} with xi_i bounded F_{t_i} measurable" index="単純過程|たんじゅんかてい, 発展的可測な被積分関数|はってんてきかそくなひせきぶんかんすう" refname="被積分関数の空間と単純過程"}
+1. $L_{T}^{2}$ を、$[0,T]$ 上の発展的可測な過程 $H$ で $\norm H_{L_{T}^{2}}^{2}\defeq E\int_{0}^{T}H_{s}^{2}ds<\infty$ をみたすもの全体（$ds\otimes P$ でほとんど至る所等しいものを同一視）とする。これは $L^{2}([0,T]\times\Omega)$ の閉部分空間で、ヒルベルト空間。
+2. 分割 $0=t_{0}<t_{1}<\dots<t_{n}=T$ と、有界な $\mathcal{F}_{t_{i}}$ 可測確率変数 $\xi_{i}$ によって $H_{s}=\sum_{i}\xi_{i}1_{(t_{i},t_{i+1}]}(s)$ と書ける過程を**単純過程**という。
+:::
+
+::: intuition
+単純過程は「時刻 $t_{i}$ に、それまでの情報だけで賭け金 $\xi_{i}$ を決め、次の時刻 $t_{i+1}$ まで賭け続ける」戦略である。賭け金を決める時刻が区間の左端であることが本質で、未来の値を見て賭け金を決めることは許されない。
+:::
+
+::: definition 単純過程の伊藤積分 {#prb:ito-simple keywords="I(H)_t = sum xi_i (B_{t_{i+1} and t} - B_{t_i and t}) for a simple process H" index="伊藤積分（単純過程）|いとうせきぶん" refname="単純過程の伊藤積分"}
+単純過程 $H=\sum\xi_{i}1_{(t_{i},t_{i+1}]}$ について
+$$
+I(H)_{t}\defeq\sum_{i}\xi_{i}\bigl(B_{t_{i+1}\wedge t}-B_{t_{i}\wedge t}\bigr)\qquad(0\le t\le T).
+$$
+（分割を細かくしても値は変わらないので、表示によらない。）
+:::
+
+::: intuition
+賭け金 $\xi_{i}$ を区間の始めに決め、その区間でのブラウン運動の増分だけ損益が出る。積分はこの損益の累計である。
+:::
+
+::: proposition 伊藤の等長性（単純過程） {#prb:ito-isometry-simple keywords="for a simple process H, I(H) is a continuous martingale with I(H)_0 = 0, E[I(H)_t^2] = E int_0^t H^2 ds, I(H)_t^2 - int_0^t H_s^2 ds is a martingale, and I is linear" index="伊藤の等長性|いとうのとうちょうせい" refname="伊藤の等長性（単純過程）"}
+単純過程 $H$ について、$I(H)\in\mathcal{M}_{T}^{2}$ で、
+1. $I$ は線形で、$E[I(H)_{t}^{2}]=E\int_{0}^{t}H_{s}^{2}ds$。
+2. $I(H)_{t}^{2}-\int_{0}^{t}H_{s}^{2}ds$ はマルチンゲール。
+:::
+
+::: intuition
+各区間の損益は、それまでの情報について平均 $0$ で互いに「直交」するので、合計の分散は各区間の分散の和、すなわち賭け金の 2 乗と時間の積の和になる。
+:::
+
+::: proof
+**Step 1（マルチンゲール性）.** 道は連続、$I(H)_{0}=0$。分割に $s<t$ を加えて考えれば、各項 $\xi_{i}(B_{t_{i+1}\wedge t}-B_{t_{i}\wedge t})$ の条件付き期待値を示せばよい。$s\le t_{i}$ なら、$\mathcal{F}_{t_{i}}$ で条件付けると $\xi_{i}E[B_{t_{i+1}\wedge t}-B_{t_{i}\wedge t}\mid\mathcal{F}_{t_{i}}]=0$（増分は $\mathcal{F}_{t_{i}}$ と独立で平均 $0$）、塔性質で $0$。$t_{i}\le s$ なら $\xi_{i}$ は $\mathcal{F}_{s}$ 可測で、$E[B_{t_{i+1}\wedge t}\mid\mathcal{F}_{s}]=B_{t_{i+1}\wedge s}$ から項はマルチンゲール。
+
+**Step 2（等長性）.** 【主張：$E[I(H)_{t}^{2}]=\sum_{i}E[\xi_{i}^{2}](t_{i+1}\wedge t-t_{i}\wedge t)$】$\Delta_{i}\defeq B_{t_{i+1}\wedge t}-B_{t_{i}\wedge t}$ とする。$i<j$ なら $\xi_{i}\xi_{j}\Delta_{i}$ は $\mathcal{F}_{t_{j}}$ 可測で $\Delta_{j}$ はそれと独立で平均 $0$ なので、交差項の期待値は $0$。対角項は $E[\xi_{i}^{2}\Delta_{i}^{2}]=E[\xi_{i}^{2}]E[\Delta_{i}^{2}]$（独立）。右辺は $E\int_{0}^{t}H^{2}$ に等しい。線形性は分割を共通にとれば明らか。
+
+**Step 3（2）.** 【主張：$s<t$ について $E[I(H)_{t}^{2}-I(H)_{s}^{2}\mid\mathcal{F}_{s}]=E[\int_{s}^{t}H^{2}\mid\mathcal{F}_{s}]$】$E[I_{t}^{2}-I_{s}^{2}\mid\mathcal{F}_{s}]=E[(I_{t}-I_{s})^{2}\mid\mathcal{F}_{s}]$（マルチンゲール性で交差項が消える）。$s$ を分割点に加えると、$I_{t}-I_{s}$ は $s$ 以降の項の和で、Step 2 と同じ計算を $\mathcal{F}_{s}$ で条件付けて行えばよい（交差項は条件付きで $0$、対角項は $E[\xi_{i}^{2}\mid\mathcal{F}_{s}](t_{i+1}\wedge t-t_{i}\vee s)$）。
+:::
+
+## 単純過程の稠密性 {#prb:sec-it-density}
+
+::: lemma 単純過程の稠密性 {#prb:simple-dense keywords="simple processes are dense in L^2_T: first bounded continuous adapted processes via left endpoints, then bounded progressive processes via moving averages m int_{t-1/m}^t H_s ds, then general processes by truncation" index="単純過程の稠密性|たんじゅんかていのちゅうみつせい" refname="単純過程の稠密性"}
+単純過程の全体は $L_{T}^{2}$ で稠密である。
+:::
+
+::: intuition
+一般の賭け方も、賭け金を細かい時間ごとに「過去の平均」で決め直す戦略で、いくらでもよく近似できる。過去の平均をとることで、未来を覗かずに済んでいる。
+:::
+
+::: proof
+**Step 1（有界で連続な適合過程）.** 【主張：$\abs{H}\le C$ で道が連続なら、$H^{n}\defeq\sum_{k}H_{kT2^{-n}}1_{(kT2^{-n},(k+1)T2^{-n}]}$ は $H$ に $L_{T}^{2}$ で収束】$H^{n}$ は単純過程（$H_{kT2^{-n}}$ は有界で $\mathcal{F}_{kT2^{-n}}$ 可測）。各 $\omega$ と $s>0$ で、連続性から $H_{s}^{n}\to H_{s}$。$\abs{H^{n}-H}^{2}\le4C^{2}$ なので優収束定理（$ds\otimes P$ について）。
+
+**Step 2（有界な発展的可測過程）.** 【主張：$\abs H\le C$ なら、$H^{m}_{t}\defeq m\int_{(t-1/m)\vee0}^{t}H_{s}ds$ は有界で連続な適合過程で、$H^{m}\to H$（$L_{T}^{2}$）】$\abs{H^{m}}\le C$、$t\mapsto H^{m}_{t}$ は連続（積分の上端・下端の連続性）。発展的可測性とフビニの定理から $\int_{0}^{t}H_{s}ds$ は $\mathcal{F}_{t}$ 可測で、$H^{m}_{t}$ は適合。各 $\omega$ でルベーグの微分定理から、ほとんどすべての $t$ で $H_{t}^{m}\to H_{t}$。優収束定理（まず $ds$ について、次に $P$ について）で $E\int_{0}^{T}\abs{H^{m}-H}^{2}ds\to0$。Step 1 と合わせて有界な発展的可測過程は単純過程で近似される。
+
+**Step 3（一般の $H$）.** $H1_{\{\abs H\le n\}}$ は有界で発展的可測、$\abs{H1_{\{\abs H\le n\}}-H}^{2}\le H^{2}$ は可積分で各点で $0$ に収束するので、優収束定理から $L_{T}^{2}$ で $H$ に収束。
+:::
+
+## 伊藤積分 {#prb:sec-it-integral}
+
+::: theorem 伊藤積分 {#prb:ito-integral keywords="the map I from simple processes to M^2_T extends uniquely to a linear isometry L^2_T -> M^2_T; int_0^t H dB := I(H)_t; continuous martingale with mean 0; E[(int_0^t H dB)^2] = E int_0^t H^2 ds; I(H)^2 - int H^2 ds is a martingale; E[I(H)_t I(K)_t] = E int_0^t H K ds" index="伊藤積分|いとうせきぶん, 確率積分|かくりつせきぶん" refname="伊藤積分"}
+単純過程の積分 $I$ は、線形な等長写像 $I:L_{T}^{2}\to\mathcal{M}_{T}^{2}$ に一意に延びる。$\int_{0}^{t}H_{s}dB_{s}\defeq I(H)_{t}$ と書く。$H,K\in L_{T}^{2}$ について
+1. $\int_{0}^{t}H\,dB$ は $t$ について連続なマルチンゲールで、$E[\int_{0}^{t}H\,dB]=0$。
+2. $E\bigl[\int_{0}^{t}H\,dB\int_{0}^{t}K\,dB\bigr]=E\int_{0}^{t}H_{s}K_{s}ds$。特に $E[(\int_{0}^{t}H\,dB)^{2}]=E\int_{0}^{t}H^{2}ds$。
+3. $\bigl(\int_{0}^{t}H\,dB\bigr)^{2}-\int_{0}^{t}H_{s}^{2}ds$ はマルチンゲール。
+:::
+
+::: intuition
+単純過程の上で積分は長さを保つ（等長）ので、近似列がコーシー列なら積分の列もコーシー列になり、完備な $\mathcal{M}_{T}^{2}$ の中で極限をもつ。この極限が近似の取り方によらないことも等長性から従う。こうして「左端のリーマン和の $L^{2}$ 極限」として積分が定まる。
+:::
+
+::: proof
+**Step 1（延長）.** 【主張：$I$ は $L_{T}^{2}$ から $\mathcal{M}_{T}^{2}$ への線形等長写像に一意に延びる】単純過程の空間は稠密（\ref{prb:simple-dense}）で、$I$ はその上で等長（\ref{prb:ito-isometry-simple}、$\norm{I(H)}=\norm{I(H)_{T}}_{2}=\norm H_{L_{T}^{2}}$）。$\mathcal{M}_{T}^{2}$ は完備（\ref{prb:m2-complete}）なので、等長写像は閉包に一意に延び、延長も線形で等長。
+
+**Step 2（1・2）.** マルチンゲール性と連続性は $\mathcal{M}_{T}^{2}$ の元であることから。$t<T$ での等長性：$H1_{[0,t]}$ について単純過程の近似を考えると、$I(H1_{[0,t]})_{T}=I(H)_{t}$（単純過程で成り立ち、両辺は $H$ について $L^{2}$ 連続：$\norm{I(H)_{t}}_{2}\le\norm{I(H)_{T}}_{2}$）。2 は等長性を偏極（$HK=\frac14((H+K)^{2}-(H-K)^{2})$）して得る。
+
+**Step 3（3）.** 単純過程 $H^{n}\to H$ をとると、$I(H^{n})_{t}^{2}\to I(H)_{t}^{2}$, $\int_{0}^{t}(H^{n})^{2}\to\int_{0}^{t}H^{2}$ はどちらも $L^{1}$ 収束（$\abs{a^{2}-b^{2}}\le\abs{a-b}\abs{a+b}$ とコーシー–シュワルツ）。条件付き期待値は $L^{1}$ で連続なので、\ref{prb:ito-isometry-simple} の 2 のマルチンゲール性が極限に移る。
+:::
+
+::: proposition 左端のリーマン和 {#prb:ito-riemann-sums keywords="for a continuous adapted H in L^2_T with E int |H_s - H_{s'}|^2 ds -> 0 along partitions (e.g. bounded or H = B), sum H_{t_i}(B_{t_{i+1}} - B_{t_i}) -> int_0^T H dB in L^2; int_0^t B dB = (B_t^2 - t)/2" index="伊藤積分とリーマン和|いとうせきぶんとりーまんわ" refname="左端のリーマン和"}
+1. $H$ が連続な適合過程で、分割 $\pi$ の幅 $\abs\pi\to0$ のとき $H^{\pi}\defeq\sum H_{t_{i}}1_{(t_{i},t_{i+1}]}$ が $L_{T}^{2}$ で $H$ に収束するなら（$H$ が有界なら成り立つ）、$\sum H_{t_{i}}(B_{t_{i+1}}-B_{t_{i}})\to\int_{0}^{T}H\,dB$（$L^{2}$）。
+2. $\int_{0}^{t}B_{s}dB_{s}=\frac12(B_{t}^{2}-t)$。
+:::
+
+::: intuition
+伊藤積分は、代表点を左端にとったリーマン和の極限そのものである。代表点を右端にずらすと 2 次変分の分だけ値が変わる。これが通常の積分との違いの源である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$H^{\pi}\to H$ なら左端のリーマン和は $\int H\,dB$ に $L^{2}$ 収束】$\xi_{i}=H_{t_{i}}$ が有界でなくても、$H^{\pi}\in L_{T}^{2}$ なら単純過程の極限として $I(H^{\pi})_{T}=\sum H_{t_{i}}\Delta_{i}B$（有界な切り捨ての極限）。等長性から $\norm{I(H^{\pi})_{T}-I(H)_{T}}_{2}=\norm{H^{\pi}-H}_{L_{T}^{2}}\to0$。
+
+**Step 2（$H=B$ の近似）.** $E\int_{0}^{t}(B_{s}-B_{t_{i}})^{2}ds=\sum\int_{t_{i}}^{t_{i+1}}(s-t_{i})ds=\frac12\sum(t_{i+1}-t_{i})^{2}\le\frac t2\abs\pi\to0$。
+
+**Step 3（計算）.** $\sum B_{t_{i}}(B_{t_{i+1}}-B_{t_{i}})=\frac12\bigl(B_{t}^{2}-\sum(B_{t_{i+1}}-B_{t_{i}})^{2}\bigr)$（$b^{2}-a^{2}=2a(b-a)+(b-a)^{2}$ を足す）。$E[(\sum(\Delta_{i}B)^{2}-t)^{2}]=\sum\operatorname{Var}((\Delta_{i}B)^{2})=2\sum(\Delta t_{i})^{2}\to0$（独立な増分、$\operatorname{Var}(Z^{2})=2\sigma^{4}$ for $Z\sim N(0,\sigma^{2})$）。よって $L^{2}$ で $\frac12(B_{t}^{2}-t)$ に収束。
+:::
+
+## 停止と局所化 {#prb:sec-it-localization}
+
+::: proposition 停止時刻と伊藤積分 {#prb:ito-stopping keywords="for H in L^2_T and a stopping time tau <= T, int_0^{t and tau} H dB = int_0^t H 1_{[0, tau]} dB" index="停止時刻と伊藤積分|ていしじこくといとうせきぶん" refname="停止時刻と伊藤積分"}
+$H\in L_{T}^{2}$、$\tau\le T$ を停止時刻とすると、すべての $t$ で $I(H)_{t\wedge\tau}=I(H1_{[0,\tau]})_{t}$（a.s.）。ここで $1_{[0,\tau]}(s)\defeq1_{\{s\le\tau\}}$。
+:::
+
+::: intuition
+時刻 $\tau$ で積分を止めることと、$\tau$ の後の賭け金を $0$ にすることは同じである。
+:::
+
+::: proof
+**Step 1（$H1_{[0,\tau]}\in L_{T}^{2}$）.** $s\mapsto1_{\{s\le\tau\}}$ は左連続な適合過程で、\ref{prb:continuous-progressive} と同様の近似（左端の値で近似）で発展的可測。$\abs{H1_{[0,\tau]}}\le\abs H$。
+
+**Step 2（単純過程と有限個の値の停止時刻）.** 【主張：$H$ が単純、$\tau$ が有限個の値をとれば成り立つ】$\tau$ の値を分割点に加えると、$(t_{i},t_{i+1}]$ 上で $1_{\{s\le\tau\}}=1_{\{\tau>t_{i}\}}$（$\tau$ の値は分割点）は $\mathcal{F}_{t_{i}}$ 可測。よって $H1_{[0,\tau]}=\sum\xi_{i}1_{\{\tau>t_{i}\}}1_{(t_{i},t_{i+1}]}$ は単純過程で、その積分は $\sum\xi_{i}1_{\{\tau>t_{i}\}}(B_{t_{i+1}\wedge t}-B_{t_{i}\wedge t})=\sum\xi_{i}(B_{t_{i+1}\wedge t\wedge\tau}-B_{t_{i}\wedge t\wedge\tau})=I(H)_{t\wedge\tau}$（$\tau>t_{i}$ なら $\tau\ge t_{i+1}$、$\tau\le t_{i}$ なら両方の増分が $0$）。
+
+**Step 3（$\tau$ の近似）.** \ref{prb:stopping-time-properties} の 4 の $\tau_{n}\downarrow\tau$ （有限個の値、$\le T$）について、$H$ 単純なら Step 2 が使える。$n\to\infty$ で $I(H)_{t\wedge\tau_{n}}\to I(H)_{t\wedge\tau}$（道の連続性、かつ $L^{2}$：$\abs{I(H)_{t\wedge\tau_{n}}}\le\sup_{s\le T}\abs{I(H)_{s}}\in L^{2}$ で優収束）、$H1_{[0,\tau_{n}]}\to H1_{[0,\tau]}$（$L_{T}^{2}$、優収束）なので等長性から右辺も収束。
+
+**Step 4（$H$ の近似）.** 単純過程 $H^{m}\to H$ について、$\norm{I(H^{m})_{t\wedge\tau}-I(H)_{t\wedge\tau}}_{2}\le\norm{\sup_{s}\abs{I(H^{m}-H)_{s}}}_{2}\le2\norm{H^{m}-H}$（ドゥーブ）、右辺も $\norm{(H^{m}-H)1_{[0,\tau]}}\le\norm{H^{m}-H}$ で収束する。両辺は連続なので、すべての $t$ で同時に成り立つ。
+:::
+
+::: theorem 局所化された伊藤積分 {#prb:ito-localization keywords="for progressively measurable H with int_0^T H^2 ds < infinity a.s., tau_n = inf{t : int_0^t H^2 >= n} and int H dB := int H 1_{[0,tau_n]} dB on {tau_n = T}; continuous local martingale; consistency" index="局所マルチンゲール|きょくしょまるちんげーる, 伊藤積分の局所化|いとうせきぶんのきょくしょか" refname="局所化された伊藤積分"}
+$H$ を発展的可測で $\int_{0}^{T}H_{s}^{2}ds<\infty$（a.s.）とする。$\tau_{n}\defeq\inf\{t:\int_{0}^{t}H^{2}\ge n\}\wedge T$ とすると、
+1. $\tau_{n}$ は停止時刻で、$H1_{[0,\tau_{n}]}\in L_{T}^{2}$、$P(\tau_{n}=T)\to1$。
+2. $m>n$ なら $I(H1_{[0,\tau_{m}]})$ と $I(H1_{[0,\tau_{n}]})$ は $[0,\tau_{n}]$ 上で一致する（a.s.）。
+3. したがって $\{\tau_{n}=T\}$ 上で $\int_{0}^{t}H\,dB\defeq I(H1_{[0,\tau_{n}]})_{t}$ とおくと、$n$ によらず well-defined な連続過程が（零集合を除いて）定まる。これは**連続局所マルチンゲール**（停止時刻の列 $\tau_{n}\uparrow T$ で止めるとマルチンゲール）である。$H\in L_{T}^{2}$ なら前の定義と一致する。
+:::
+
+::: intuition
+$E\int H^{2}=\infty$ でも、$\int H^{2}$ が大きくなる前に止めれば通常の伊藤積分が使え、止める時刻を遅らせていけば全体が定まる。代償として、期待値の計算に必要な可積分性は失われうる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\tau_{n}$ は停止時刻、$E\int_{0}^{T}H^{2}1_{[0,\tau_{n}]}\le n$、$P(\tau_{n}<T)\to0$】$A_{t}\defeq\int_{0}^{t}H^{2}ds$ は発展的可測性とフビニの定理で適合し、$t$ について連続（有限値の事象の上で）で増加。$\tau_{n}$ は閉集合 $[n,\infty)$ への到達時刻と $T$ の最小値なので停止時刻（\ref{prb:stopping-time-properties}）。$E\int_{0}^{T}H^{2}1_{[0,\tau_{n}]}=E[A_{\tau_{n}}]\le n$。$A_{T}<\infty$ a.s. なので $P(\tau_{n}<T)\le P(A_{T}\ge n)\to0$。
+
+**Step 2（2）.** \ref{prb:ito-stopping} を $H1_{[0,\tau_{m}]}$ と $\tau_{n}$ に使うと $I(H1_{[0,\tau_{m}]})_{t\wedge\tau_{n}}=I(H1_{[0,\tau_{m}]}1_{[0,\tau_{n}]})_{t}=I(H1_{[0,\tau_{n}]})_{t}$、また同じ命題を $H1_{[0,\tau_{n}]}$ に使うと右辺は $I(H1_{[0,\tau_{n}]})_{t\wedge\tau_{n}}$。
+
+**Step 3（3）.** $\bigcup_{n}\{\tau_{n}=T\}$ は確率 1 で、2 から定義は整合する。止めた過程 $\int_{0}^{t\wedge\tau_{n}}H\,dB=I(H1_{[0,\tau_{n}]})_{t}$ はマルチンゲール。$H\in L_{T}^{2}$ なら \ref{prb:ito-stopping} と $\tau_{n}\to T$ から一致。
+:::
+
+::: hypcheck
+- **適合性（左端の代表点）**：単純過程で $\xi_{i}$ が $\mathcal{F}_{t_{i}}$ 可測であることが、交差項の消去とマルチンゲール性（\ref{prb:ito-isometry-simple}）に本質的。右端の代表点 $\sum B_{t_{i+1}}\Delta_{i}B$ をとると極限は $\frac12(B_{t}^{2}+t)$ になり、マルチンゲールでない。
+- **$E\int H^{2}<\infty$**：等長写像としての定義に必要。$\int H^{2}<\infty$ a.s. だけなら局所化で定義できるが、積分はマルチンゲールとは限らず局所マルチンゲールにとどまる。
+- **発展的可測性**：被積分関数の近似（\ref{prb:simple-dense} の Step 2 で $\int_{0}^{t}H$ が $\mathcal{F}_{t}$ 可測）と局所化の停止時刻に使った。
+:::
+
+## 問題 {#prb:sec-it-problems}
+
+::: problem {#prb:prob-it-variance}
+$X_{t}\defeq\int_{0}^{t}s\,dB_{s}$ の分散を求めよ。
+:::
+
+::: solution
+等長性から $E[X_{t}^{2}]=\int_{0}^{t}s^{2}ds=\frac{t^{3}}3$、平均は $0$。
+:::
+
+::: problem {#prb:prob-it-right-endpoint}
+$\sum B_{t_{i+1}}(B_{t_{i+1}}-B_{t_{i}})$ が分割を細かくするとき $L^{2}$ で $\frac12(B_{t}^{2}+t)$ に収束することを示せ。
+:::
+
+::: solution
+$\sum B_{t_{i+1}}\Delta_{i}B=\sum B_{t_{i}}\Delta_{i}B+\sum(\Delta_{i}B)^{2}$ で、第 1 項は $\frac12(B_{t}^{2}-t)$、第 2 項は $t$ に $L^{2}$ 収束（\ref{prb:ito-riemann-sums} の Step 3）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 積分子をブラウン運動に限ったので、2 次変動過程 $\langle B\rangle_{t}=t$ の一般論は不要だった。議論は標準的な流儀（Øksendal『Stochastic Differential Equations』第 3 章、Karatzas–Shreve『Brownian Motion and Stochastic Calculus』第 3 章）に沿う。
+
+**前提を変えると.**
+- **一般のマルチンゲールによる積分**：連続 $L^{2}$ マルチンゲール $M$ について、$E\int H^{2}d\langle M\rangle<\infty$ の $H$ に対して $\int H\,dM$ が同じ等長性 $E[(\int H\,dM)^{2}]=E\int H^{2}d\langle M\rangle$ で定義される。
+- **ストラトノヴィッチ積分**：区間の中点を代表点にとると、通常の微積分の連鎖律が成り立つ積分 $\int H\circ dB=\int H\,dB+\frac12\langle H,B\rangle$ が得られる。物理や幾何（多様体上のブラウン運動）ではこちらが自然である。
+- **マルチンゲール表現定理**：ブラウン運動のフィルトレーションでは、$L^{2}(\mathcal{F}_{T})$ の任意の元は $E[X]+\int_{0}^{T}H\,dB$ と一意に書ける（ここでは証明しない）。
+
+**高い視点から：等長写像としての積分.** 伊藤積分は、「時刻と偶然の積空間」上の適合した関数の空間 $L_{T}^{2}$ から、マルチンゲールのヒルベルト空間 $\mathcal{M}_{T}^{2}$ への等長埋め込みである。これはブラウン運動を「白色雑音」$\dot B$ という直交する無数の方向の和とみなし、$H$ をその方向ごとの係数とする展開にあたる。比喩で言えば、ブラウン運動は毎瞬間に公平なコインを投げ続ける過程で、伊藤積分は「投げる直前までの結果だけを見て掛け金を決める」賭けの累積利益であり、等長性は「利益の分散は掛け金の 2 乗の総和」という賭けの基本法則である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-it-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
