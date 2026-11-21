@@ -19,6 +19,7 @@
 - **Detail:** The supplement claims that \ref{cat:free-monoid-monoidal} gives, among others, the free topological monoid on a topological space. But the theorem requires that $a\square-$ and $-\square a$ preserve countable coproducts. In $(\mathbf{Top},\times,\ast)$ the product functor $X\times-$ does not preserve countable coproducts (disjoint unions) in general, so the hypotheses of the theorem fail and the theorem does not apply to topological spaces. The free topological monoid exists but is not obtained from this theorem.
 - **Proposed fix:** Remove the topological example, or replace it with: "$\mathbf{Set}$ での語のモノイド、加群のテンソル代数などがこの定理の適用例である（位相空間の自由位相モノイドは存在するが、$\mathbf{Top}$ では $X\times-$ が余積を保存しないため本定理からは得られない）。"
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** In Top, $X\times-$ does preserve coproducts: $X\times\coprod_{i}Y_{i}$ is the disjoint union of the open subsets $X\times Y_{i}$, each carrying the product topology as a subspace, so the canonical continuous bijection $\coprod_{i}(X\times Y_{i})\to X\times\coprod_{i}Y_{i}$ is a homeomorphism. Hence the hypotheses hold in $(\mathbf{Top},\times,\ast)$ and $\coprod_{n}X^{n}$ is the free topological monoid. The supplement now states this reason.
 
 ### ISSUE-0002 [Open] Monad algebras are not literally actions of the monoid T
 - **Category:** Supplement/remark error
