@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：確率解析 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/04-stochastic-calculus/06-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：確率解析 {#prb:page-exercises-stochastic-calculus keywords="exercises, B^3 - 3tB martingale, Laplace transform of hitting times E exp(-lambda tau_a) = exp(-a sqrt(2 lambda)), variance of int B dB, int 1_{B > 0} dB, E e^{B_t} = e^{t/2} via Ito, even moments of Brownian motion, B_t / (1 + t) as a solution of a linear SDE, Picard iterates of dX = X dB and Hermite polynomials, second moment under Girsanov, E Z_T^2 = e^{mu^2 T}"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習や、二つ以上のページの道具を組み合わせるものである。難易度は ★（基本）・★★（標準）・★★★（発展）で示す。
+
+## 記法と定義の確認 {#prb:sec-sce-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。$B$ は $(\mathcal{F}_{t})$ ブラウン運動。
+:::
+
+## 連続時間のマルチンゲール {#prb:sec-cm-exercises}
+
+対応するページ：\ref{prb:page-continuous-martingales}
+
+::: problem ★ 基本：3 次のマルチンゲール {#prb:ex-cm-cubic}
+$B_{t}^{3}-3tB_{t}$ がマルチンゲールであることを、条件付き期待値の計算で示せ。
+:::
+
+::: solution
+$s<t$, $D\defeq B_{t}-B_{s}$（$\mathcal{F}_{s}$ と独立、$N(0,t-s)$）とすると、$E[D]=E[D^{3}]=0$, $E[D^{2}]=t-s$ から
+$$
+E[B_{t}^{3}\mid\mathcal{F}_{s}]=B_{s}^{3}+3B_{s}^{2}E[D]+3B_{s}E[D^{2}]+E[D^{3}]=B_{s}^{3}+3(t-s)B_{s},
+$$
+$E[3tB_{t}\mid\mathcal{F}_{s}]=3tB_{s}$。差は $B_{s}^{3}-3sB_{s}$。可積分性は正規分布のモーメントから。
+:::
+
+::: problem ★★ 標準：到達時刻のラプラス変換 {#prb:ex-cm-hitting-laplace}
+$a>0$, $\tau_{a}\defeq\inf\{t:B_{t}=a\}$ とする。$\lambda>0$ について $E[e^{-\lambda\tau_{a}}1_{\{\tau_{a}<\infty\}}]=e^{-a\sqrt{2\lambda}}$ を示せ。特に $P(\tau_{a}<\infty)=1$ も導け。
+:::
+
+::: solution
+$\theta\defeq\sqrt{2\lambda}$ として $M_{t}\defeq e^{\theta B_{t}-\lambda t}$ はマルチンゲール（\ref{prb:continuous-martingale}）。$\tau_{a}$ は停止時刻（\ref{prb:stopping-time-properties}）で、有界な停止時刻 $\tau_{a}\wedge t$ に任意抽出定理（\ref{prb:optional-stopping-continuous}）を使うと $E[M_{\tau_{a}\wedge t}]=1$。$s\le\tau_{a}$ なら $B_{s}\le a$ なので $0<M_{\tau_{a}\wedge t}\le e^{\theta a}$。$t\to\infty$ で、$\{\tau_{a}<\infty\}$ の上では $M_{\tau_{a}\wedge t}\to e^{\theta a-\lambda\tau_{a}}$、$\{\tau_{a}=\infty\}$ の上では $M_{\tau_{a}\wedge t}\le e^{\theta a-\lambda t}\to0$。優収束定理から $E[e^{\theta a-\lambda\tau_{a}}1_{\{\tau_{a}<\infty\}}]=1$。$\lambda\downarrow0$ として単調収束定理から $P(\tau_{a}<\infty)=1$。
+:::
+
+## 伊藤積分 {#prb:sec-it-exercises}
+
+対応するページ：\ref{prb:page-ito-integral}
+
+::: problem ★ 基本：$\int B\,dB$ の分散 {#prb:ex-it-variance-bdb}
+$\int_{0}^{t}B_{s}dB_{s}$ の分散を、等長性と \ref{prb:ito-riemann-sums} の 2 の表示の両方から計算し、一致を確かめよ。
+:::
+
+::: solution
+等長性：$E\int_{0}^{t}B_{s}^{2}ds=\int_{0}^{t}s\,ds=\frac{t^{2}}2$。表示から：$\frac14E[(B_{t}^{2}-t)^{2}]=\frac14(3t^{2}-2t^{2}+t^{2})=\frac{t^{2}}2$。
+:::
+
+::: problem ★★ 標準：符号の指示関数の積分 {#prb:ex-it-indicator}
+$X\defeq\int_{0}^{T}1_{\{B_{s}>0\}}dB_{s}$ について $E[X]=0$, $E[X^{2}]=\frac T2$ を示せ。また $E[XB_{T}]$ を求めよ。
+:::
+
+::: solution
+$1_{\{B_{s}>0\}}$ は発展的可測（連続な適合過程とボレル関数の合成）で有界なので $L_{T}^{2}$ に属する。\ref{prb:ito-integral} から平均 $0$、$E[X^{2}]=E\int_{0}^{T}1_{\{B_{s}>0\}}ds=\int_{0}^{T}P(B_{s}>0)ds=\frac T2$（フビニ）。$B_{T}=\int_{0}^{T}1\,dB$ なので \ref{prb:ito-integral} の 2 から $E[XB_{T}]=E\int_{0}^{T}1_{\{B_{s}>0\}}ds=\frac T2$。
+:::
+
+## 伊藤の公式 {#prb:sec-if-exercises}
+
+対応するページ：\ref{prb:page-ito-formula}
+
+::: problem ★ 基本：$E[e^{B_{t}}]$ {#prb:ex-if-exp-mean}
+伊藤の公式を使って $m(t)\defeq E[e^{B_{t}}]$ が $m(t)=1+\frac12\int_{0}^{t}m(s)ds$ をみたすことを示し、$m(t)=e^{t/2}$ を導け。
+:::
+
+::: solution
+$e^{B_{t}}=1+\int_{0}^{t}e^{B}dB+\frac12\int_{0}^{t}e^{B_{s}}ds$（\ref{prb:ito-formula}）。$E\int_{0}^{T}e^{2B_{s}}ds=\int_{0}^{T}e^{2s}ds<\infty$ なので $e^{B}\in L_{T}^{2}$ で確率積分の期待値は $0$。フビニで $m(t)=1+\frac12\int_{0}^{t}m$。$m$ は連続なので微分して $m'=\frac12m$, $m(0)=1$。
+:::
+
+::: problem ★★ 標準：偶数次のモーメント {#prb:ex-if-even-moments}
+$E[B_{t}^{2n}]=(2n-1)!!\,t^{n}$ を、伊藤の公式と $n$ についての帰納法で示せ。
+:::
+
+::: solution
+$f(x)=x^{2n}$：$B_{t}^{2n}=2n\int_{0}^{t}B^{2n-1}dB+n(2n-1)\int_{0}^{t}B_{s}^{2n-2}ds$。$B^{2n-1}\in L_{T}^{2}$（正規分布の全モーメントは有限）なので期待値をとると $E[B_{t}^{2n}]=n(2n-1)\int_{0}^{t}(2n-3)!!\,s^{n-1}ds=(2n-1)(2n-3)!!\,t^{n}$。
+:::
+
+## 確率微分方程式 {#prb:sec-sd-exercises}
+
+対応するページ：\ref{prb:page-sde}
+
+::: problem ★ 基本：$B_{t}/(1+t)$ {#prb:ex-sd-brownian-bridge-type}
+$X_{t}\defeq B_{t}/(1+t)$ が $dX=-\frac{X}{1+t}dt+\frac{1}{1+t}dB$, $X_{0}=0$ の（ただ一つの）解であることを示せ。
+:::
+
+::: solution
+$Y_{t}\defeq\frac1{1+t}$ は $K=-\frac1{(1+t)^{2}}$, $H=0$ の伊藤過程。積の公式（\ref{prb:ito-formula-time} の 2）から $d(YB)=Y\,dB+B\,dY+0=\frac{1}{1+t}dB-\frac{B}{(1+t)^{2}}dt$ で、$\frac{B}{(1+t)^{2}}=\frac{X}{1+t}$。係数 $b(t,x)=-\frac{x}{1+t}$, $\sigma(t,x)=\frac1{1+t}$ はリプシッツで線形増大条件をみたすので、\ref{prb:sde-existence-uniqueness} から一意。
+:::
+
+::: problem ★★ 標準：$dX=X\,dB$ の逐次近似 {#prb:ex-sd-picard-hermite}
+$dX=X\,dB$, $X_{0}=1$ の逐次近似 $X^{0}=1$, $X^{n+1}=1+\int_{0}^{t}X^{n}dB$ について $X^{1}$, $X^{2}$ を求め、極限が $e^{B_{t}-t/2}$ であることと整合することを確かめよ。
+:::
+
+::: solution
+$X^{1}_{t}=1+B_{t}$、$X^{2}_{t}=1+B_{t}+\int_{0}^{t}B\,dB=1+B_{t}+\frac12(B_{t}^{2}-t)$（\ref{prb:ito-riemann-sums}）。一方 $e^{\lambda B_{t}-\lambda^{2}t/2}=\sum_{n}\frac{\lambda^{n}}{n!}t^{n/2}h_{n}(B_{t}/\sqrt t)$（$h_{n}$ はエルミート多項式、$h_{0}=1$, $h_{1}(x)=x$, $h_{2}(x)=x^{2}-1$）の $\lambda$ について 2 次までの部分は $1+\lambda B_{t}+\frac{\lambda^{2}}2(B_{t}^{2}-t)$ で、$\lambda=1$ として $X^{2}$ と一致する。逐次近似は $\lambda$ の次数を 1 つずつ増やしていく展開になっている（伊藤–ウィーナーのカオス展開）。
+:::
+
+## ギルサノフの定理 {#prb:sec-gi-exercises}
+
+対応するページ：\ref{prb:page-girsanov}
+
+::: problem ★ 基本：測度を変えた 2 次モーメント {#prb:ex-gi-second-moment}
+$\theta\equiv\mu$ として $Q$ を \ref{prb:girsanov} の測度とする。$E_{Q}[B_{T}^{2}]=T+\mu^{2}T^{2}$ を、(a) ギルサノフの定理、(b) 密度を直接掛ける計算、の 2 通りで示せ。
+:::
+
+::: solution
+(a) $B_{T}=W_{T}+\mu T$、$W_{T}\sim N(0,T)$（$Q$ のもと）なので $T+\mu^{2}T^{2}$。(b) $E[B_{T}^{2}e^{\mu B_{T}-\mu^{2}T/2}]=e^{-\mu^{2}T/2}\frac{d^{2}}{d\mu^{2}}e^{\mu^{2}T/2}=T+\mu^{2}T^{2}$。
+:::
+
+::: problem ★★ 標準：密度の 2 次モーメント {#prb:ex-gi-density-l2}
+$\theta\equiv\mu$ のとき $E[Z_{T}^{2}]=e^{\mu^{2}T}$ を示し、\ref{prb:exponential-martingale} の 3 の評価 $E[Z_{T}^{2}]\le e^{C^{2}T}$ が等号で達成されうることを確かめよ。
+:::
+
+::: solution
+$Z_{T}^{2}=e^{2\mu B_{T}-\mu^{2}T}$ で $E[e^{2\mu B_{T}}]=e^{2\mu^{2}T}$ から $E[Z_{T}^{2}]=e^{\mu^{2}T}$。$C=\abs\mu$ で評価の右辺と一致する（評価の証明で $\int\theta^{2}\le C^{2}t$ と $E[Z^{(2\theta)}]\le1$ がともに等号になる場合）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

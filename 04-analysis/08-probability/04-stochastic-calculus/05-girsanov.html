@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ギルサノフの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/04-stochastic-calculus/05-girsanov.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ギルサノフの定理 {#prb:page-girsanov keywords="change of probability measure Q = Z_T P, density process Z_t = E[Z_T | F_t], Bayes formula for conditional expectations, Girsanov theorem for bounded drift: W = B - int theta ds is a Q-Brownian motion, complex exponential martingale, Cameron-Martin formula E F(B + H) = E[F(B) exp(int h dB - 1/2 int h^2)], weak solutions of dX = b(X) dt + dW for bounded measurable drift, Novikov condition"}
+
+ブラウン運動にドリフトを加えた $B_{t}+\int_{0}^{t}\theta\,ds$ は、もとの確率測度ではブラウン運動でない。しかし確率測度を適当な密度で取り替えると、ドリフトを加えた過程がちょうどブラウン運動に見えるようになる。これが**ギルサノフの定理**で、密度は指数マルチンゲール $\exp(\int\theta\,dB-\frac12\int\theta^{2}ds)$ で与えられる。このページでは、測度の取り替えの一般的な事実を準備し、$\theta$ が有界な場合にギルサノフの定理を証明して、キャメロン–マルティンの公式と、有界な可測ドリフトをもつ確率微分方程式の（弱い意味の）解の構成に応用する。
+
+## 記法と定義の確認 {#prb:sec-gi-notation}
+
+::: notation
+- $(\Omega,\mathcal{F},P)$, $(\mathcal{F}_{t})_{t\le T}$, $B$ は \ref{prb:page-ito-integral} の通りで、$\mathcal{F}=\mathcal{F}_{T}$ とする。$(\mathcal{F}_{t})$ ブラウン運動の定義は \ref{prb:filtration-continuous}、ブラウン運動の定義は \ref{prb:brownian-motion}。
+- 前のページまでの道具として \ref{prb:exponential-martingale}, \ref{prb:nonnegative-local-martingale}, \ref{prb:ito-formula}, \ref{prb:ito-integral} を使う。
+- 条件付き期待値の性質は \ref{prb:conditional-properties}、特性関数による分布の決定は \ref{prb:characteristic-uniqueness}、ラドン–ニコディムの定理は \ref{meas:radon-nikodym}。
+- 体系は $\ZFC$。
+:::
+
+## 確率測度の取り替え {#prb:sec-gi-change}
+
+::: proposition 密度による測度の取り替え {#prb:change-of-measure keywords="for Z_T > 0 with E Z_T = 1, Q(A) = E[Z_T 1_A] is a probability measure equivalent to P; with Z_t = E[Z_T | F_t]: E_Q[Y] = E[Z_t Y] for F_t-measurable Y >= 0; Bayes formula E_Q[Y | F_s] = E[Z_t Y | F_s] / Z_s; M is a Q-martingale iff MZ is a P-martingale" index="測度の取り替え|そくどのとりかえ, 密度過程|みつどかてい, ベイズの公式|べいずのこうしき" refname="密度による測度の取り替え"}
+$Z_{T}>0$ を $E[Z_{T}]=1$ の確率変数、$Q(A)\defeq E[Z_{T}1_{A}]$、$Z_{t}\defeq E[Z_{T}\mid\mathcal{F}_{t}]$（**密度過程**）とする。
+1. $Q$ は確率測度で、$Q(A)=0\iff P(A)=0$。
+2. $Y\ge0$ が $\mathcal{F}_{t}$ 可測なら $E_{Q}[Y]=E[Z_{t}Y]$。
+3. $s\le t$、$Y$ が $\mathcal{F}_{t}$ 可測で $E_{Q}\abs Y<\infty$ なら $E_{Q}[Y\mid\mathcal{F}_{s}]=E[Z_{t}Y\mid\mathcal{F}_{s}]/Z_{s}$（a.s.）。
+:::
+
+::: intuition
+測度の取り替えは「各シナリオ $\omega$ の重みを $Z_{T}(\omega)$ 倍する」ことである。時刻 $t$ までの情報で決まる量の期待値には、重みの「時刻 $t$ での予想」$Z_{t}$ だけが効く。ベイズの公式は、条件付けたときに重みを規格化し直す必要があることを言っている。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$Q$ は確率測度で $P$ と同じ零集合をもつ】可算加法性は単調収束定理から、$Q(\Omega)=E[Z_{T}]=1$。$Z_{T}>0$ なので $E[Z_{T}1_{A}]=0\iff P(A)=0$。
+
+**Step 2（2）.** $Y$ が $\mathcal{F}_{t}$ 可測な有界関数なら、条件付き期待値の性質（$\mathcal{F}_{t}$ 可測な因子を外に出す、塔性質）から $E[Z_{T}Y]=E[E[Z_{T}\mid\mathcal{F}_{t}]Y]=E[Z_{t}Y]$。非負の $Y$ には $Y\wedge n$ に適用して単調収束定理。
+
+**Step 3（3）.** $Z_{s}>0$（a.s.）：$A\defeq\{Z_{s}\le0\}\in\mathcal{F}_{s}$ について $E[Z_{T}1_{A}]=E[Z_{s}1_{A}]\le0$ で、$Z_{T}>0$ から $P(A)=0$。右辺 $V\defeq E[Z_{t}Y\mid\mathcal{F}_{s}]/Z_{s}$ は $\mathcal{F}_{s}$ 可測（$E\abs{Z_{t}Y}=E_{Q}\abs Y<\infty$ なので条件付き期待値は定義される）。$A\in\mathcal{F}_{s}$ について、2 を $\mathcal{F}_{s}$ 可測な $V1_{A}$ と $\mathcal{F}_{t}$ 可測な $Y1_{A}$ に（正負の部分に分けて）使うと
+$$
+E_{Q}[V1_{A}]=E[Z_{s}V1_{A}]=E\bigl[E[Z_{t}Y\mid\mathcal{F}_{s}]1_{A}\bigr]=E[Z_{t}Y1_{A}]=E_{Q}[Y1_{A}].
+$$
+（$V$ の $Q$ 可積分性は $A=\{V\ge0\}$ などとした同じ計算で $E_{Q}\abs V\le E_{Q}\abs Y$ から。）よって $V$ は $Q$ に関する条件付き期待値。
+:::
+
+## ギルサノフの定理 {#prb:sec-gi-theorem}
+
+::: theorem ギルサノフの定理（有界なドリフト） {#prb:girsanov keywords="for progressive theta with |theta| <= C, Z_t = exp(int_0^t theta dB - 1/2 int_0^t theta^2 ds), Q = Z_T P: W_t = B_t - int_0^t theta_s ds is an (F_t)-Brownian motion under Q; proof via the complex exponential martingale Z exp(i lambda W + lambda^2 t / 2)" index="ギルサノフの定理|ぎるさのふのていり" refname="ギルサノフの定理（有界なドリフト）"}
+$\theta$ を発展的可測で $\abs\theta\le C$（定数）とし、$Z_{t}\defeq\exp\bigl(\int_{0}^{t}\theta\,dB-\frac12\int_{0}^{t}\theta^{2}ds\bigr)$、$Q\defeq Z_{T}\cdot P$ とする。このとき
+$$
+W_{t}\defeq B_{t}-\int_{0}^{t}\theta_{s}ds
+$$
+は $Q$ のもとで $(\mathcal{F}_{t})$ ブラウン運動である。
+:::
+
+::: intuition
+$P$ のもとで $B$ は平均 $0$ でゆらぐ。重み $Z_{T}$ は、$B$ が $\theta$ の向きに動いたシナリオを重くするので、$Q$ のもとでは $B$ はドリフト $\theta$ をもつ。そのドリフトを差し引いた $W$ は、重みを変えた世界でちょうど公平なゆらぎになる。重要なのは、ゆらぎの「大きさ」（2 次変分）は測度を取り替えても変わらず、変わるのは「向き」（ドリフト）だけだという点である。
+:::
+
+::: proof
+**Step 1（$Q$ と密度過程）.** \ref{prb:exponential-martingale} の 3 から $Z$ はマルチンゲールで $E[Z_{T}]=1$、$Z_{T}>0$。したがって $Q$ は $P$ と同じ零集合をもつ確率測度で（\ref{prb:change-of-measure} の 1）、$(\mathcal{F}_{t})$ は $Q$ についても零集合を含む。$Z_{t}=E[Z_{T}\mid\mathcal{F}_{t}]$ は $Z$ のマルチンゲール性から。$W$ は連続な適合過程で $W_{0}=0$。
+
+**Step 2（複素指数マルチンゲール）.** 【主張：$\lambda\in\mathbb{R}$ について $N_{t}\defeq Z_{t}\exp(i\lambda W_{t}+\frac12\lambda^{2}t)$ は（実部・虚部がともに）$P$ マルチンゲール】$N_{t}=e^{X_{t}}(\cos Y_{t}+i\sin Y_{t})$、ここで
+$$
+X_{t}\defeq\int_{0}^{t}\theta\,dB+\int_{0}^{t}\bigl(-\tfrac12\theta^{2}+\tfrac12\lambda^{2}\bigr)ds,\qquad Y_{t}\defeq\lambda B_{t}-\int_{0}^{t}\lambda\theta\,ds
+$$
+はともに $B$ で駆動される伊藤過程（拡散係数 $\theta$ と $\lambda$）。$R\defeq e^{X}\cos Y$, $I\defeq e^{X}\sin Y$ とおき、\ref{prb:ito-formula} を $f(x,y)=e^{x}\cos y$ に使うと、$\partial_{x}f=R$, $\partial_{y}f=-I$, $\partial_{x}^{2}f=R$, $\partial_{x}\partial_{y}f=-I$, $\partial_{y}^{2}f=-R$ から、$ds$ の項の係数は
+$$
+R\bigl(-\tfrac12\theta^{2}+\tfrac12\lambda^{2}\bigr)-I(-\lambda\theta)+\tfrac12\bigl(R\theta^{2}-2I\theta\lambda-R\lambda^{2}\bigr)=0,
+$$
+$dB$ の係数は $R\theta-I\lambda$。同様に $f=e^{x}\sin y$ について $ds$ の係数は $0$、$dB$ の係数は $I\theta+R\lambda$。よって
+$$
+R_{t}=1+\int_{0}^{t}(R\theta-I\lambda)dB,\qquad I_{t}=\int_{0}^{t}(I\theta+R\lambda)dB.
+$$
+$R^{2}+I^{2}=e^{2X}=Z^{2}e^{\lambda^{2}t}$ で、\ref{prb:exponential-martingale} の 3 から $E[Z_{t}^{2}]\le e^{C^{2}t}$。よって被積分関数は $E\int_{0}^{T}(\cdots)^{2}ds\le2(C^{2}+\lambda^{2})e^{\lambda^{2}T}\int_{0}^{T}e^{C^{2}s}ds<\infty$ をみたして $L_{T}^{2}$ に属し、$R$, $I$ は \ref{prb:ito-integral} の 1 からマルチンゲール。
+
+**Step 3（条件付き特性関数）.** 【主張：$s<t$、$A\in\mathcal{F}_{s}$ について $E_{Q}[e^{i\lambda(W_{t}-W_{s})}1_{A}]=e^{-\lambda^{2}(t-s)/2}Q(A)$】$e^{i\lambda(W_{t}-W_{s})}1_{A}$ は有界で $\mathcal{F}_{t}$ 可測なので、\ref{prb:change-of-measure} の 2（実部・虚部に分けて）と Step 2 のマルチンゲール性から
+$$
+E_{Q}[e^{i\lambda(W_{t}-W_{s})}1_{A}]=E[Z_{t}e^{i\lambda W_{t}}e^{-i\lambda W_{s}}1_{A}]=e^{-\lambda^{2}t/2}E[N_{t}e^{-i\lambda W_{s}}1_{A}]=e^{-\lambda^{2}t/2}E[N_{s}e^{-i\lambda W_{s}}1_{A}].
+$$
+$N_{s}e^{-i\lambda W_{s}}=Z_{s}e^{\lambda^{2}s/2}$ なので、右辺は $e^{-\lambda^{2}(t-s)/2}E[Z_{s}1_{A}]=e^{-\lambda^{2}(t-s)/2}Q(A)$。
+
+**Step 4（独立性と分布）.** 【主張：$Q$ のもとで $D\defeq W_{t}-W_{s}$ は $\mathcal{F}_{s}$ と独立で $N(0,t-s)$ にしたがう】$Q(A)>0$ なら、確率測度 $Q_{A}\defeq Q(\cdot\cap A)/Q(A)$ のもとでの $D$ の特性関数は Step 3 から $e^{-\lambda^{2}(t-s)/2}$ で、\ref{prb:characteristic-uniqueness} から $Q_{A}(D\in G)=\gamma_{t-s}(G)$（$\gamma_{t-s}$ は $N(0,t-s)$、$G$ はボレル集合）。すなわち $Q(\{D\in G\}\cap A)=\gamma_{t-s}(G)Q(A)$ で、これは $Q(A)=0$ でも成り立つ。$A=\Omega$ とすれば $Q(D\in G)=\gamma_{t-s}(G)$ で、独立性が従う。
+
+**Step 5（結論）.** $W$ は $Q$ のもとで連続、$W_{0}=0$、適合し、増分 $W_{t}-W_{s}$ は $\mathcal{F}_{s}$ と独立で $N(0,t-s)$。$t_{0}<\dots<t_{k}$ の増分の独立性は、$W_{t_{k}}-W_{t_{k-1}}$ が先行する増分を可測にする $\mathcal{F}_{t_{k-1}}$ と独立であることから帰納法で従う。よって $W$ は $Q$ のもとでブラウン運動（\ref{prb:brownian-motion}）で、$(\mathcal{F}_{t})$ ブラウン運動である。
+:::
+
+## 応用 {#prb:sec-gi-applications}
+
+::: corollary キャメロン–マルティンの公式 {#prb:cameron-martin keywords="for bounded measurable deterministic h and H_t = int_0^t h, and any bounded measurable functional F on C[0, T]: E[F(B + H)] = E[F(B) exp(int_0^T h dB - 1/2 int_0^T h^2 ds)]; the law of B + H is equivalent to Wiener measure" index="キャメロン–マルティンの公式|きゃめろんまるてぃんのこうしき" refname="キャメロン–マルティンの公式"}
+$h:[0,T]\to\mathbb{R}$ を有界なボレル関数、$H_{t}\defeq\int_{0}^{t}h(s)ds$ とする。$C[0,T]$ 上の（座標写像の生成する $\sigma$ 加法族について）有界可測な汎関数 $F$ について
+$$
+E[F(B+H)]=E\Bigl[F(B)\exp\Bigl(\int_{0}^{T}h\,dB-\frac12\int_{0}^{T}h^{2}ds\Bigr)\Bigr].
+$$
+特に $B+H$ の分布は $B$ の分布（ウィーナー測度）と互いに絶対連続である。
+:::
+
+::: intuition
+ブラウン運動の道を確定的な関数 $H$ だけずらしても、どの道が現れやすいかの重みが $e^{\int h\,dB-\frac12\int h^{2}}$ 倍変わるだけで、起こりうる道の全体は変わらない。
+:::
+
+::: proof
+**Step 1（ギルサノフの適用）.** 【主張：$Q$ のもとで $W=B-H$ はブラウン運動】$\theta\defeq h$（確定的なので発展的可測、有界）として \ref{prb:girsanov} を使うと、$Q$ のもとで $W=B-H$ はブラウン運動。よって $B=W+H$。
+
+**Step 2（分布の一致）.** 連続過程の分布は有限次元分布で決まる（座標写像の生成する $\sigma$ 加法族は、有限個の座標の値で決まる事象の族という $\pi$ 系で生成されるので、ディンキンの $\pi$-$\lambda$ 定理）。ブラウン運動の有限次元分布は定義から決まっているので、$Q$ のもとの $W$ と $P$ のもとの $B$ は同じ分布をもつ。よって $E_{Q}[F(W+H)]=E[F(B+H)]$。
+
+**Step 3（結論）.** 左辺は $E_{Q}[F(B)]=E[Z_{T}F(B)]$ で、$Z_{T}$ は公式の指数。絶対連続性：ウィーナー測度で零の集合 $G$ について $F=1_{G}$ とすれば右辺は $0$。逆向き：$B+H$ の分布で零の集合 $G$ なら右辺の $E[1_{G}(B)Z_{T}]=0$ で、$Z_{T}>0$ から $P(B\in G)=0$。
+:::
+
+::: example ドリフト付きブラウン運動の期待値 {#prb:girsanov-drift-example}
+$h\equiv\mu$（定数）、$F(x)=x_{T}$（有界でないが、$\abs{x_{T}}\wedge n$ で切り捨てて単調収束定理を使えば公式は成り立つ）とすると、$E[B_{T}+\mu T]=\mu T$ と $E[B_{T}e^{\mu B_{T}-\mu^{2}T/2}]=\frac{d}{d\mu}E[e^{\mu B_{T}}]e^{-\mu^{2}T/2}=\mu Te^{\mu^{2}T/2}e^{-\mu^{2}T/2}=\mu T$ が一致する。
+:::
+
+::: theorem ドリフトの付加による弱解の構成 {#prb:girsanov-weak-solution keywords="for bounded Borel b on R and x in R, there is a probability measure Q and a Q-Brownian motion W such that X_t = x + B_t satisfies X_t = x + int_0^t b(X_s) ds + W_t; weak existence for bounded measurable drift" index="弱解|じゃくかい" refname="ドリフトの付加による弱解の構成"}
+$b:\mathbb{R}\to\mathbb{R}$ を有界なボレル関数、$x\in\mathbb{R}$ とする。$X_{t}\defeq x+B_{t}$、$\theta_{s}\defeq b(X_{s})$ とし、$Q$ を \ref{prb:girsanov} の測度とすると、$W_{t}\defeq B_{t}-\int_{0}^{t}b(X_{s})ds$ は $Q$ のもとで $(\mathcal{F}_{t})$ ブラウン運動で、
+$$
+X_{t}=x+\int_{0}^{t}b(X_{s})ds+W_{t}.
+$$
+すなわち $(\Omega,\mathcal{F},Q,(\mathcal{F}_{t}),W,X)$ は確率微分方程式 $dX=b(X)dt+dW$ の解である（ブラウン運動 $W$ も一緒に構成するので、弱い意味の解）。
+:::
+
+::: intuition
+係数 $b$ が不連続でもかまわないのは、方程式を「解く」のではなく、先に解の候補 $X=x+B$ を用意し、確率測度の方を取り替えて辻褄を合わせているからである。代償として、駆動するブラウン運動 $W$ は $X$ から作られ、あらかじめ与えられたものではない。
+:::
+
+::: proof
+**Step 1（被積分関数の条件）.** $\theta_{s}=b(x+B_{s})$ は連続な適合過程とボレル関数の合成なので発展的可測で、$\abs\theta\le\sup\abs b$。
+
+**Step 2（結論）.** \ref{prb:girsanov} から $W$ は $Q$ のもとで $(\mathcal{F}_{t})$ ブラウン運動。等式は $W$ の定義を書き直したものにすぎない。
+:::
+
+::: hypcheck
+- **$\theta$ の有界性**：$Z$ がマルチンゲールで $E[Z_{T}]=1$ となること（Step 1）と、複素指数マルチンゲールの被積分関数が $L_{T}^{2}$ に属すること（Step 2）に使った。一般の $\theta$ では $Z$ は優マルチンゲールにすぎず（\ref{prb:exponential-martingale} の 2）、$E[Z_{T}]<1$ となりうる。そのとき $Q$ は確率測度にならない。
+- **$Z_{T}>0$**：$Q$ と $P$ が同じ零集合をもつこと（\ref{prb:change-of-measure} の 1）、したがってフィルトレーションが $Q$ についても零集合を含むことに使った。
+- **有限の時間区間**：$[0,T]$ 上で $Q$ を定めた。$[0,\infty)$ 全体では、ドリフト $\mu\ne0$ のブラウン運動の分布はウィーナー測度と互いに特異になる（$B_{t}/t\to0$ と $(B_{t}+\mu t)/t\to\mu$）。
+:::
+
+## 問題 {#prb:sec-gi-problems}
+
+::: problem {#prb:prob-gi-density}
+$\theta\equiv\mu$（定数）のとき、$Q$ のもとで $B_{T}$ の分布が $N(\mu T,T)$ であることを、密度 $e^{\mu B_{T}-\mu^{2}T/2}$ を正規分布の密度に掛けて直接確かめよ。
+:::
+
+::: solution
+$\frac{1}{\sqrt{2\pi T}}e^{-x^{2}/(2T)}e^{\mu x-\mu^{2}T/2}=\frac{1}{\sqrt{2\pi T}}e^{-(x-\mu T)^{2}/(2T)}$。
+:::
+
+::: problem {#prb:prob-gi-bayes}
+\ref{prb:change-of-measure} の記法で、$M$ が適合過程で各 $M_{t}$ が $Q$ 可積分なら、「$M$ が $Q$ マルチンゲール $\iff$ $MZ$ が $P$ マルチンゲール」を示せ。
+:::
+
+::: solution
+ベイズの公式（3）から $E_{Q}[M_{t}\mid\mathcal{F}_{s}]=E[Z_{t}M_{t}\mid\mathcal{F}_{s}]/Z_{s}$。左辺が $M_{s}$ であることと $E[Z_{t}M_{t}\mid\mathcal{F}_{s}]=Z_{s}M_{s}$ は同値（$Z_{s}>0$）。$E\abs{Z_{t}M_{t}}=E_{Q}\abs{M_{t}}<\infty$ も 2 から。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** レヴィの特徴づけ（連続局所マルチンゲールで 2 次変分が $t$ ならブラウン運動）を使わず、複素指数マルチンゲールで直接に条件付き特性関数を計算した。これは $\theta$ が有界であることに依存している。議論の流れは Karatzas–Shreve『Brownian Motion and Stochastic Calculus』第 3.5 節に近いが、有界な $\theta$ に絞って自分で組み立てた。ラドン–ニコディムの定理（\ref{meas:radon-nikodym}）は、逆向き（$P$ と同値な任意の $Q$ が密度をもつ）を考えるときに必要になるが、ここでは使っていない。
+
+**前提を変えると.**
+- **ノビコフの条件**：$E[\exp(\frac12\int_{0}^{T}\theta^{2}ds)]<\infty$ なら $E[Z_{T}]=1$ で、ギルサノフの定理は同じ形で成り立つ（ここでは証明しない）。カザマキの条件はさらに弱い十分条件である。
+- **一般の連続局所マルチンゲール**：$Q\sim P$ なら、$P$ の連続局所マルチンゲール $M$ について $M-\int\frac{1}{Z}d\langle M,Z\rangle$ は $Q$ の連続局所マルチンゲールである（ギルサノフ–メイヤーの定理）。
+- **キャメロン–マルティン空間**：シフト $H$ によってウィーナー測度が同値な測度に移るのは、$H$ が絶対連続で $\dot H\in L^{2}$ のとき、かつそのときに限る。この $H$ の空間（キャメロン–マルティン空間）は、ウィーナー測度の「方向」を表すヒルベルト空間である。
+- **数理ファイナンス**：株価 $dS=\mu S\,dt+\sigma S\,dB$ について、$\theta=-(\mu-r)/\sigma$ とした測度の取り替えで割引株価がマルチンゲールになる（リスク中立測度）。ブラック–ショールズの公式はこの測度での期待値として得られる。
+
+**高い視点から：無限次元の平行移動.** 有限次元のガウス測度 $N(0,I)$ をベクトル $h$ だけ平行移動すると、密度は $e^{\langle h,x\rangle-\abs h^{2}/2}$ 倍になる。キャメロン–マルティンの公式はこれを無限次元のウィーナー測度に拡げたもので、$\int h\,dB$ が内積 $\langle h,x\rangle$ の役を果たす。ただし無限次元では、平行移動しても絶対連続性が保たれる方向（キャメロン–マルティン空間）はウィーナー測度にとって零集合という、有限次元にない現象が起こる。比喩で言えば、ギルサノフの定理は「傾いた机の上を転がる玉」を、机が水平に見えるように観測者の側の確率の物差しを取り替えて記述する方法である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-gi-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

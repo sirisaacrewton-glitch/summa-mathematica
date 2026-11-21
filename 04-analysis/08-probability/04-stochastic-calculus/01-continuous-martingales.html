@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>連続マルチンゲール | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/04-stochastic-calculus/01-continuous-martingales.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 連続マルチンゲール {#prb:page-continuous-martingales keywords="filtration in continuous time, completed Brownian filtration, (F_t)-Brownian motion, adapted and progressively measurable processes, continuous adapted processes are progressive, stopping times in continuous time, hitting times of closed sets, F_tau, X_tau is F_tau measurable, continuous martingales, B_t, B_t^2 - t and exp(theta B_t - theta^2 t / 2), Doob's maximal and L^2 inequalities for continuous martingales, optional stopping for bounded stopping times, stopped martingales, conditional expectations are uniformly integrable, completeness of the space of continuous square integrable martingales"}
+
+伊藤積分は「連続な $L^{2}$ マルチンゲール」として構成される。そのために、離散時間のマルチンゲールの理論（ドゥーブの不等式・任意抽出定理）を連続時間に移す。連続な道をもつ過程では、上限や停止時刻での値を有理数（2 進数）の時刻で近似できるので、離散時間の結果から極限で導ける。このページの到達点は、区間 $[0,T]$ 上の連続な $L^{2}$ マルチンゲールの空間が、ノルム $\norm{M_{T}}_{L^{2}}$ について完備（ヒルベルト空間）であることで、これが伊藤積分の定義の土台になる。
+
+## 記法と定義の確認 {#prb:sec-cm-notation}
+
+::: notation
+- $(\Omega,\mathcal{F},P)$ は完備な確率空間（零集合の部分集合は可測）。$\mathcal{N}$ を確率 $0$ の事象の全体とする。
+- ブラウン運動とその不変性（増分 $B_{s+t}-B_{s}$ が $\sigma(B_{r}:r\le s)$ と独立）は \ref{prb:brownian-motion}, \ref{prb:brownian-invariance}。
+- 離散時間のマルチンゲール・停止時刻・ドゥーブの不等式・任意抽出定理は \ref{prb:martingale}, \ref{prb:stopping-time}, \ref{prb:doob-inequalities}, \ref{prb:optional-stopping}。条件付き期待値の性質は \ref{prb:conditional-properties}、一様可積分性の判定とヴィタリの収束定理は \ref{prb:ui-criteria}, \ref{prb:vitali-convergence}。$L^{2}$ の完備性と概収束する部分列は \ref{meas:riesz-fischer}。
+- 体系は $\ZFC$（測度論の通常の範囲）。
+:::
+
+## フィルトレーションと過程 {#prb:sec-cm-filtrations}
+
+::: definition フィルトレーションと適合過程 {#prb:filtration-continuous keywords="filtration (F_t) in continuous time containing all null sets; adapted process; progressively measurable: (s, omega) -> X_s(omega) on [0, t] x Omega is B([0,t]) x F_t measurable; (F_t)-Brownian motion: adapted with B_t - B_s independent of F_s" index="フィルトレーション（連続時間）|ふぃるとれーしょん, 発展的可測|はってんてきかそく, 適合過程|てきごうかてい" refname="フィルトレーションと適合過程"}
+1. 部分 σ-加法族の族 $(\mathcal{F}_{t})_{t\ge0}$ で $s\le t\Rightarrow\mathcal{F}_{s}\subseteq\mathcal{F}_{t}$、$\mathcal{N}\subseteq\mathcal{F}_{0}$ をみたすものを**フィルトレーション**という。
+2. 過程 $X=(X_{t})_{t\ge0}$ が**適合**しているとは、各 $X_{t}$ が $\mathcal{F}_{t}$ 可測なことをいう。各 $t$ で $[0,t]\times\Omega\ni(s,\omega)\mapsto X_{s}(\omega)$ が $\mathcal{B}([0,t])\otimes\mathcal{F}_{t}$ 可測なとき**発展的可測**という。
+3. ブラウン運動 $B$ が適合していて、すべての $s\le t$ で $B_{t}-B_{s}$ が $\mathcal{F}_{s}$ と独立なとき、$B$ を **$(\mathcal{F}_{t})$ ブラウン運動**という。$\mathcal{F}_{t}^{B}\defeq\sigma(\sigma(B_{r}:r\le t)\cup\mathcal{N})$ について $B$ は $(\mathcal{F}_{t}^{B})$ ブラウン運動である（\ref{prb:brownian-invariance} の 2、零集合を加えても独立性は変わらない）。
+:::
+
+::: intuition
+$\mathcal{F}_{t}$ は「時刻 $t$ までに得られる情報」で、適合過程はその時点で値が分かる過程である。発展的可測性は、時刻 $t$ までの道全体を（時間についての積分などで）扱っても時刻 $t$ の情報に収まることを保証する技術的な条件で、連続な適合過程では自動的に成り立つ。
+:::
+
+::: lemma 連続な適合過程は発展的可測 {#prb:continuous-progressive keywords="a continuous adapted process is progressively measurable; approximation by step processes taking values at grid points up to t" index="発展的可測性（連続過程）|はってんてきかそくせい"}
+すべての道が連続な適合過程は発展的可測である。
+:::
+
+::: proof
+$t>0$ を固定し、$s\in[kt2^{-n},(k+1)t2^{-n})$ で $X_{s}^{n}\defeq X_{(k+1)t2^{-n}}$、$X_{t}^{n}\defeq X_{t}$ とする。$X^{n}$ は有限個の「区間の特性関数 $\times$ $\mathcal{F}_{t}$ 可測な関数」の和なので $\mathcal{B}([0,t])\otimes\mathcal{F}_{t}$ 可測。道の連続性から $X_{s}^{n}(\omega)\to X_{s}(\omega)$（各点）なので、極限も可測。
+:::
+
+::: definition 停止時刻（連続時間） {#prb:stopping-time-continuous keywords="tau: Omega -> [0, infinity] with {tau <= t} in F_t; F_tau = {A : A cap {tau <= t} in F_t for all t}; stopped process X^tau_t = X_{tau and t}" index="停止時刻（連続時間）|ていしじこく" refname="停止時刻（連続時間）"}
+$\tau:\Omega\to[0,\infty]$ がすべての $t$ で $\{\tau\le t\}\in\mathcal{F}_{t}$ をみたすとき**停止時刻**という。$\mathcal{F}_{\tau}\defeq\{A\in\mathcal{F}:\text{すべての }t\text{ で }A\cap\{\tau\le t\}\in\mathcal{F}_{t}\}$、停止過程 $X_{t}^{\tau}\defeq X_{\tau\wedge t}$。
+:::
+
+::: intuition
+停止時刻とは「止まるかどうかを、その時点までの情報だけで判断できる」ルールである。「最高値をつけた時刻」のように未来を見ないと決まらない時刻は停止時刻ではない。
+:::
+
+::: proposition 停止時刻の基本性質 {#prb:stopping-time-properties keywords="hitting time of a closed set by a continuous adapted process is a stopping time; min of stopping times; sigma <= tau implies F_sigma subset F_tau; X_tau is F_tau measurable on {tau < infinity} for continuous adapted X; dyadic approximation from above" index="到達時刻（連続過程）|とうたつじこく" refname="停止時刻の基本性質"}
+1. $X$ が連続な適合過程、$F\subseteq\mathbb{R}$ が閉集合なら、$\tau_{F}\defeq\inf\{t:X_{t}\in F\}$（$\inf\emptyset=\infty$）は停止時刻。
+2. 停止時刻 $\sigma,\tau$ について $\sigma\wedge\tau$ は停止時刻、$\sigma\le\tau$ なら $\mathcal{F}_{\sigma}\subseteq\mathcal{F}_{\tau}$。定数 $t$ は停止時刻で $\mathcal{F}_{t}$ は元の $\mathcal{F}_{t}$。
+3. $X$ が連続な適合過程、$\tau\le T$（定数）なら $X_{\tau}$ は $\mathcal{F}_{\tau}$ 可測。
+4. $\tau\le T$ なら、$\tau_{n}\defeq\min\bigl(T,\ T2^{-n}(\lfloor2^{n}\tau/T\rfloor+1)\bigr)$ は格子 $\{kT2^{-n}\}$ に値をとる停止時刻で、$\tau\le\tau_{n}$, $\tau_{n}\downarrow\tau$。
+:::
+
+::: intuition
+連続な道は閉集合に「飛び込む」ことができず必ず境界を通るので、到達したかどうかは有理数時刻の値から判定でき、停止時刻になる。格子での近似は、連続時間の停止時刻を「少し遅めに」離散時刻へ丸める操作である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\{\tau_{F}\le t\}=\{\inf_{s\in([0,t]\cap\mathbb{Q})\cup\{t\}}d(X_{s},F)=0\}$】$\tau_{F}\le t$ なら、道の連続性と $F$ が閉集合であることから $X_{\tau_{F}}\in F$（下限に近づく時刻の列の極限）で、$\tau_{F}$ に近い有理数の時刻で $d(X_{s},F)$ はいくらでも小さい。逆に右辺の下限が $0$ なら、$[0,t]$ のコンパクト性と連続性から $d(X_{s},F)=0$ の $s\le t$ があり、$F$ は閉なので $X_{s}\in F$。右辺は可算個の $\mathcal{F}_{t}$ 可測関数の下限で決まる。
+
+**Step 2（2）.** $\{\sigma\wedge\tau\le t\}=\{\sigma\le t\}\cup\{\tau\le t\}$。$A\in\mathcal{F}_{\sigma}$ なら $A\cap\{\tau\le t\}=(A\cap\{\sigma\le t\})\cap\{\tau\le t\}\in\mathcal{F}_{t}$。
+
+**Step 3（3）.** 【主張：ボレル集合 $U$ について $\{X_{\tau}\in U\}\cap\{\tau\le t\}\in\mathcal{F}_{t}$】この事象は $\{X_{\tau\wedge t}\in U\}\cap\{\tau\le t\}$ に等しい。$\omega\mapsto(\tau(\omega)\wedge t,\omega)$ は $\mathcal{F}_{t}$ から $\mathcal{B}([0,t])\otimes\mathcal{F}_{t}$ への可測写像（$\{\tau\wedge t\le s\}\in\mathcal{F}_{t}$）で、\ref{prb:continuous-progressive} の可測写像と合成すると $X_{\tau\wedge t}$ は $\mathcal{F}_{t}$ 可測。
+
+**Step 4（4）.** $\{\tau_{n}\le kT2^{-n}\}=\{\tau<kT2^{-n}\}$（$k<2^{n}$）、$=\Omega$（$k=2^{n}$）で、$\{\tau<s\}=\bigcup_{m}\{\tau\le s-1/m\}\in\mathcal{F}_{s}$。単調減少と収束は定義から。
+:::
+
+## 連続マルチンゲール {#prb:sec-cm-martingales}
+
+::: definition 連続マルチンゲール {#prb:continuous-martingale keywords="continuous martingale: adapted, integrable, continuous paths, E[M_t | F_s] = M_s for s <= t; examples B_t, B_t^2 - t, exp(theta B_t - theta^2 t/2) for an (F_t)-Brownian motion" index="連続マルチンゲール|れんぞくまるちんげーる" refname="連続マルチンゲール"}
+適合した可積分な過程 $M$ で、すべての道が連続、$s\le t$ で $E[M_{t}\mid\mathcal{F}_{s}]=M_{s}$ をみたすものを**連続マルチンゲール**という（劣・優マルチンゲールも同様）。
+:::
+
+::: intuition
+マルチンゲールは「公平な賭けの資産の推移」で、どの時点から見ても将来の期待値は現在の値に等しい。連続時間では、この公平性が時間の連続な流れのすべての瞬間で成り立つ。
+:::
+
+::: example
+$B$ を $(\mathcal{F}_{t})$ ブラウン運動とすると、$B_{t}$, $B_{t}^{2}-t$, $\exp(\theta B_{t}-\frac{\theta^{2}}2t)$（$\theta\in\mathbb{R}$）は連続マルチンゲール。$s<t$ で $D\defeq B_{t}-B_{s}$ は $\mathcal{F}_{s}$ と独立で $N(0,t-s)$ なので、$E[B_{t}\mid\mathcal{F}_{s}]=B_{s}+E[D]=B_{s}$、$E[B_{t}^{2}\mid\mathcal{F}_{s}]=B_{s}^{2}+2B_{s}E[D]+E[D^{2}]=B_{s}^{2}+(t-s)$、$E[e^{\theta B_{t}}\mid\mathcal{F}_{s}]=e^{\theta B_{s}}E[e^{\theta D}]=e^{\theta B_{s}+\theta^{2}(t-s)/2}$（\ref{prb:conditional-properties}）。
+:::
+
+::: theorem ドゥーブの不等式（連続時間） {#prb:doob-continuous keywords="for a continuous martingale M on [0, T]: P(sup_{t <= T} |M_t| >= lambda) <= E|M_T| / lambda and E[sup_{t <= T} M_t^2] <= 4 E[M_T^2]; proof by dyadic approximation" index="ドゥーブの不等式（連続時間）|どぅーぶのふとうしき" refname="ドゥーブの不等式（連続時間）"}
+$M$ を連続マルチンゲールとし、$M_{T}^{\ast}\defeq\sup_{t\le T}\abs{M_{t}}$ とする。
+1. $\lambda>0$ について $P(M_{T}^{\ast}>\lambda)\le E[\abs{M_{T}}]/\lambda$。
+2. $E[(M_{T}^{\ast})^{2}]\le4E[M_{T}^{2}]$。
+:::
+
+::: intuition
+連続な道の上限は、有理数の時刻での上限と同じである。有限個の時刻では離散時間のドゥーブの不等式がそのまま使え、時刻を細かくしていく極限で上限は単調に増えるので、不等式は極限でも保たれる。
+:::
+
+::: proof
+**Step 1（格子での不等式）.** $D_{n}\defeq\{kT2^{-n}:0\le k\le2^{n}\}$ とする。$(M_{t})_{t\in D_{n}}$ は離散時間のマルチンゲールで、$\abs M$ は劣マルチンゲール（条件付きイェンセン）。\ref{prb:doob-inequalities} から $\lambda P(\max_{D_{n}}\abs{M}\ge\lambda)\le E[\abs{M_{T}}]$, $E[\max_{D_{n}}M^{2}]\le4E[M_{T}^{2}]$。
+
+**Step 2（極限）.** $D_{n}$ は増大し、$\bigcup D_{n}$ は $[0,T]$ で稠密なので、道の連続性から $\max_{D_{n}}\abs M\uparrow M_{T}^{\ast}$。$\{M_{T}^{\ast}>\lambda\}=\bigcup_{n}\{\max_{D_{n}}\abs M>\lambda\}$（増大和）で確率の連続性から 1、単調収束定理から 2。
+:::
+
+::: lemma 条件付き期待値の族の一様可積分性 {#prb:conditional-ui keywords="for Z in L^1 the family {E[Z | G] : G sub-sigma-algebra} is uniformly integrable" index="条件付き期待値の一様可積分性|じょうけんつききたいちのいちようかせきぶんせい"}
+$Z\in L^{1}$ について、$\mathcal{F}$ の部分 σ-加法族 $\mathcal{G}$ を動かした族 $\{E[Z\mid\mathcal{G}]\}$ は一様可積分。
+:::
+
+::: proof
+$Y\defeq E[Z\mid\mathcal{G}]$ とすると $\abs Y\le E[\abs Z\mid\mathcal{G}]$ で $E\abs Y\le E\abs Z$。$\{\abs Y>K\}\in\mathcal{G}$ なので $E[\abs Y;\abs Y>K]\le E[\abs Z;\abs Y>K]$、また $P(\abs Y>K)\le E\abs Z/K$。$Z$ の積分の絶対連続性から、$K$ を大きくとれば右辺は $\mathcal{G}$ によらず小さい。\ref{prb:ui-criteria} の 4。
+:::
+
+::: theorem 任意抽出定理（連続時間） {#prb:optional-stopping-continuous keywords="for a continuous martingale M and a stopping time tau <= T: E[M_T | F_tau] = M_tau, E[M_tau] = E[M_0]; the stopped process M^tau is a continuous martingale" index="任意抽出定理（連続時間）|にんいちゅうしゅつていり" refname="任意抽出定理（連続時間）"}
+$M$ を連続マルチンゲール、$\tau\le T$ を停止時刻とする。
+1. $M_{\tau}$ は可積分で $E[M_{T}\mid\mathcal{F}_{\tau}]=M_{\tau}$。特に $E[M_{\tau}]=E[M_{0}]$。
+2. 任意の停止時刻 $\tau$ について、停止過程 $M^{\tau}$ は連続マルチンゲール。
+:::
+
+::: intuition
+公平な賭けは、やめる時刻を（未来を見ずに）どう選んでも公平なままである。連続時間でも、時刻を格子に丸めた離散の場合に帰着させ、道の連続性で極限をとればよい。
+:::
+
+::: proof
+**Step 1（格子への近似）.** \ref{prb:stopping-time-properties} の 4 の $\tau_{n}$ は、離散フィルトレーション $(\mathcal{F}_{kT2^{-n}})_{k}$ の停止時刻で $\le T$。\ref{prb:optional-stopping} の 2 から $M_{\tau_{n}}=E[M_{T}\mid\mathcal{F}_{\tau_{n}}]$（離散の $\mathcal{F}_{\tau_{n}}$ は連続時間の定義と一致する：格子の外の時刻 $t$ では $\{\tau_{n}\le t\}=\{\tau_{n}\le t'\}$, $t'$ は $t$ 以下の最大の格子点）。
+
+**Step 2（極限）.** 【主張：$M_{\tau_{n}}\to M_{\tau}$ が $L^{1}$ で成り立つ】道の連続性から各点で収束し、\ref{prb:conditional-ui} から一様可積分なので、\ref{prb:vitali-convergence} から $L^{1}$ 収束。
+
+**Step 3（1）.** $\tau\le\tau_{n}$ から $\mathcal{F}_{\tau}\subseteq\mathcal{F}_{\tau_{n}}$ なので、塔性質で $E[M_{T}\mid\mathcal{F}_{\tau}]=E[M_{\tau_{n}}\mid\mathcal{F}_{\tau}]$。$n\to\infty$ で右辺は $L^{1}$ で $E[M_{\tau}\mid\mathcal{F}_{\tau}]=M_{\tau}$（\ref{prb:stopping-time-properties} の 3）に収束し、左辺は $n$ によらない。
+
+**Step 4（2）.** $s\le t$ と $A\in\mathcal{F}_{s}$ について、1 を有界な停止時刻 $\tau\wedge t$ と $\tau\wedge s$ に使う。$E[M_{t}\mid\mathcal{F}_{\tau\wedge t}]=M_{\tau\wedge t}$, $E[M_{t}\mid\mathcal{F}_{\tau\wedge s}]=M_{\tau\wedge s}$ で、塔性質から $E[M_{\tau\wedge t}\mid\mathcal{F}_{\tau\wedge s}]=M_{\tau\wedge s}$。最後に $E[M_{\tau\wedge t}\mid\mathcal{F}_{s}]=M_{\tau\wedge s}$ を示す：$A\in\mathcal{F}_{s}$ について $A\cap\{\tau>s\}\in\mathcal{F}_{\tau\wedge s}$（$\{\tau>s\}$ 上で $\tau\wedge s=s$）で、そこでは上の等式、$A\cap\{\tau\le s\}$ 上では $M_{\tau\wedge t}=M_{\tau}=M_{\tau\wedge s}$ で、$M_{\tau\wedge s}1_{\{\tau\le s\}}$ は $\mathcal{F}_{s}$ 可測。両方を足して $E[M_{\tau\wedge t};A]=E[M_{\tau\wedge s};A]$。
+:::
+
+## 連続 $L^{2}$ マルチンゲールの空間 {#prb:sec-cm-hilbert}
+
+::: theorem 連続 $L^{2}$ マルチンゲールの空間の完備性 {#prb:m2-complete keywords="the space M^2_c[0,T] of continuous martingales (M_t)_{t <= T} with M_0 = 0 and E[M_T^2] < infinity, with norm ||M_T||_2, is a Hilbert space (identifying indistinguishable processes); Cauchy sequences converge uniformly on [0,T] a.s. along a subsequence" index="連続 L² マルチンゲールの空間|れんぞくえるにまるちんげーるのくうかん" refname="連続 L² マルチンゲールの空間の完備性"}
+$\mathcal{M}_{T}^{2}$ を、$[0,T]$ 上の連続マルチンゲール $M$ で $M_{0}=0$, $E[M_{T}^{2}]<\infty$ をみたすもの全体（区別できない過程を同一視：$P(M_{t}=N_{t}\ \forall t)=1$）とし、$\norm M\defeq\norm{M_{T}}_{L^{2}}$ とする。$\mathcal{M}_{T}^{2}$ はヒルベルト空間である。さらに $\norm{M^{n}-M}\to0$ なら、部分列で $\sup_{t\le T}\abs{M_{t}^{n_{k}}-M_{t}}\to0$（a.s.）。
+:::
+
+::: intuition
+マルチンゲールは終端の値 $M_{T}$ で決まる（$M_{t}=E[M_{T}\mid\mathcal{F}_{t}]$）ので、$\mathcal{M}_{T}^{2}$ は $L^{2}$ の部分空間のように見える。問題は極限の道が連続かどうかだが、ドゥーブの不等式で終端の $L^{2}$ 距離が道全体の一様距離を制御するので、連続性は極限でも保たれる。
+:::
+
+::: proof
+**Step 1（ノルム）.** $\norm M=0$ なら $M_{T}=0$ a.s.、ドゥーブの不等式から $\sup\abs{M_{t}}=0$ a.s.。内積は $E[M_{T}N_{T}]$。
+
+**Step 2（一様収束する部分列）.** 【主張：コーシー列 $M^{n}$ に、$\sup_{t\le T}\abs{M^{n_{k}}_{t}-M^{n_{k+1}}_{t}}$ の和が a.s. 有限になる部分列がある】\ref{prb:doob-continuous} の 2 から $E[\sup_{t}\abs{M_{t}^{n}-M_{t}^{m}}^{2}]\le4\norm{M^{n}-M^{m}}^{2}$。$\norm{M^{n_{k}}-M^{n_{k+1}}}\le2^{-k}$ ととれば $E[\sum_{k}\sup_{t}\abs{\cdot}]\le\sum_{k}2\cdot2^{-k}<\infty$。
+
+**Step 3（極限の構成）.** その事象（確率 1）の上で $M^{n_{k}}$ は $[0,T]$ 上一様収束し、極限 $M$ は連続。外では $M\defeq0$（零集合は $\mathcal{F}_{0}$ に入るので適合性は保たれる）。各 $t$ で $M_{t}^{n}\to M_{t}$ が $L^{2}$ で成り立つ（$M_{t}^{n}$ は $L^{2}$ のコーシー列で、条件付き期待値の縮小性 $\norm{M_{t}^{n}-M_{t}^{m}}_{2}\le\norm{M_{T}^{n}-M_{T}^{m}}_{2}$、極限は概収束の極限と一致）。
+
+**Step 4（マルチンゲール性）.** $L^{2}$ での条件付き期待値は連続（縮小写像）なので、$E[M_{t}\mid\mathcal{F}_{s}]=\lim E[M_{t}^{n}\mid\mathcal{F}_{s}]=\lim M_{s}^{n}=M_{s}$。よって $M\in\mathcal{M}_{T}^{2}$ で $\norm{M^{n}-M}\to0$。
+:::
+
+::: hypcheck
+- **道の連続性**：上限・停止時刻での値を格子で近似する（ドゥーブの不等式、任意抽出、完備性の Step 3）ためにすべての箇所で使った。連続でない過程では、修正（同じ有限次元分布の別の過程）の選び方で上限が変わる。
+- **零集合を含むフィルトレーション**：完備性の Step 3 で、零集合の上で極限を定義し直しても適合性が保たれるために使った。
+- **有界な停止時刻**：任意抽出定理で $\tau\le T$ を使った。有界でないと $E[B_{\tau_{1}}]=1\neq0$（$\tau_{1}$ は 1 への到達時刻）のように成り立たない。
+:::
+
+## 問題 {#prb:sec-cm-problems}
+
+::: problem {#prb:prob-cm-exit-time}
+$a,b>0$, $\tau\defeq\inf\{t:B_{t}\in\{-a,b\}\}$ とする。$E[\tau]<\infty$ を認めて、$P(B_{\tau}=b)=\frac{a}{a+b}$, $E[\tau]=ab$ を示せ（$B_{t}$ と $B_{t}^{2}-t$ に任意抽出定理を $\tau\wedge t$ で使い、$t\to\infty$ とする）。
+:::
+
+::: solution
+$\tau$ は閉集合 $\{-a,b\}$ への到達時刻で停止時刻。$\abs{B_{\tau\wedge t}}\le\max(a,b)$。$E[B_{\tau\wedge t}]=0$ で $t\to\infty$（$\tau<\infty$ a.s.、有界収束）から $E[B_{\tau}]=0$：$bp-a(1-p)=0$, $p=\frac{a}{a+b}$。$E[B_{\tau\wedge t}^{2}]=E[\tau\wedge t]$ で、左辺は有界収束で $E[B_{\tau}^{2}]=b^{2}p+a^{2}(1-p)=ab$、右辺は単調収束で $E[\tau]$。
+:::
+
+::: problem {#prb:prob-cm-doob-sharp}
+$E[\sup_{t\le T}B_{t}^{2}]\le4T$ を示せ。
+:::
+
+::: solution
+$B$ は連続マルチンゲールで $E[B_{T}^{2}]=T$。\ref{prb:doob-continuous} の 2。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** フィルトレーションの右連続性（通常の条件）は使っていない。積分子をブラウン運動に限り、道の連続性で済ませたためである。議論は標準的な流儀（Karatzas–Shreve『Brownian Motion and Stochastic Calculus』第 1 章、Le Gall『Brownian Motion, Martingales, and Stochastic Calculus』第 3 章）に沿う。
+
+**前提を変えると.**
+- **右連続な修正**：通常の条件をみたすフィルトレーションでは、任意のマルチンゲールは右連続で左極限をもつ修正をもつ（ドゥーブの正則化定理）。ジャンプをもつ過程の確率積分はこの枠組みで構成される。
+- **2 次変動**：連続 $L^{2}$ マルチンゲール $M$ には、$M^{2}-\langle M\rangle$ がマルチンゲールになる連続増加過程 $\langle M\rangle$ がただ一つある（ドゥーブ–メイエ分解）。ブラウン運動では $\langle B\rangle_{t}=t$ で、伊藤積分では $\int H^{2}ds$（\ref[伊藤積分]{prb:page-ito-integral}）。
+
+**高い視点から：マルチンゲールは「公平なゲーム」のヒルベルト空間.** $\mathcal{M}_{T}^{2}$ は、終端の値 $M_{T}\in L^{2}(\mathcal{F}_{T})$ の中で平均 $0$ のものの空間と同型である（ブラウン運動のフィルトレーションでは、マルチンゲール表現定理によって全体と一致する）。伊藤積分は、ブラウン運動の増分という「公平な賭け」に、その時点で分かっている情報だけを使って賭け金 $H$ を決めて作られるこの空間の元で、伊藤の等長性はその空間の内積を賭け金の大きさで表す式になる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-cm-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

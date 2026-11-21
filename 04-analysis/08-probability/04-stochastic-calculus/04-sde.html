@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>確率微分方程式 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/04-stochastic-calculus/04-sde.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 確率微分方程式 {#prb:page-sde keywords="stochastic differential equations dX = b(t, X) dt + sigma(t, X) dB, strong solutions, pathwise uniqueness, Lipschitz and linear growth conditions, Picard iteration, iterated integral inequality, moment estimate E sup X^2 <= C(1 + E xi^2), geometric Brownian motion, Ornstein-Uhlenbeck process, Gaussian Wiener integrals, linear SDEs, non-uniqueness for non-Lipschitz coefficients, explosion"}
+
+常微分方程式 $\dot x=b(t,x)$ に「ゆらぎ」$\sigma(t,x)\dot B$ を加えたのが確率微分方程式 $dX=b(t,X)\,dt+\sigma(t,X)\,dB$ である。伊藤積分を使えばこれは積分方程式として意味をもち、係数がリプシッツ連続なら、常微分方程式のピカールの逐次近似と同じ方法で解がただ一つ存在する。違いは、評価にドゥーブの不等式と伊藤の等長性を使うことだけである。このページではこの存在と一意性を証明し、具体的に解ける線形方程式を扱う。
+
+## 記法と定義の確認 {#prb:sec-sd-notation}
+
+::: notation
+- $(\mathcal{F}_{t})$, $B$, $T$ は \ref{prb:page-ito-integral} の通り。確率積分の定義は \ref{prb:ito-integral}・\ref{prb:ito-localization}、停止との関係は \ref{prb:ito-stopping}。また、ドリフトと拡散係数による表示とその変数変換は \ref{prb:ito-process}, \ref{prb:ito-formula}, \ref{prb:ito-formula-time}。
+- ドゥーブの不等式は \ref{prb:doob-continuous}、ボレル–カンテリの補題は \ref{prb:borel-cantelli}、発展的可測性は \ref{prb:continuous-progressive}。常微分方程式の解の存在と一意性は \ref{ode:picard-lindelof}。
+- $\mathcal{S}_{T}$：連続な適合過程 $X$ で $\norm X_{\mathcal{S}}^{2}\defeq E[\sup_{t\le T}X_{t}^{2}]<\infty$ をみたすもの全体。
+- 体系は $\ZFC$。
+:::
+
+## 強解 {#prb:sec-sd-solutions}
+
+::: definition 確率微分方程式の強解 {#prb:sde-strong-solution keywords="Borel b, sigma on [0, T] x R; a strong solution of dX = b(t, X) dt + sigma(t, X) dB, X_0 = xi is a continuous adapted X with int |b(s, X_s)| + sigma(s, X_s)^2 ds < infinity a.s. and X_t = xi + int b ds + int sigma dB a.s. for all t; pathwise uniqueness" index="確率微分方程式|かくりつびぶんほうていしき, 強解|きょうかい, 道ごとの一意性|みちごとのいちいせい" refname="確率微分方程式の強解"}
+$b,\sigma:[0,T]\times\mathbb{R}\to\mathbb{R}$ をボレル可測、$\xi$ を $\mathcal{F}_{0}$ 可測な確率変数とする。連続な適合過程 $X$ で、$\int_{0}^{T}(\abs{b(s,X_{s})}+\sigma(s,X_{s})^{2})ds<\infty$（a.s.）かつ、ほとんど確実にすべての $t\in[0,T]$ で
+$$
+X_{t}=\xi+\int_{0}^{t}b(s,X_{s})\,ds+\int_{0}^{t}\sigma(s,X_{s})\,dB_{s}
+$$
+をみたすものを、確率微分方程式 $dX_{t}=b(t,X_{t})dt+\sigma(t,X_{t})dB_{t}$, $X_{0}=\xi$ の**強解**という（$s\mapsto b(s,X_{s})$, $\sigma(s,X_{s})$ は、$(s,\omega)\mapsto(s,X_{s}(\omega))$ が発展的可測でボレル関数との合成なので発展的可測）。2 つの強解がほとんど確実にすべての $t$ で一致するとき、**道ごとの一意性**が成り立つという。
+:::
+
+::: intuition
+「強」解とは、与えられたブラウン運動 $B$ と初期値 $\xi$ から（その時点までの情報だけで）組み立てられる解のことである。微分方程式を「ノイズ $B$ を入力して道 $X$ を出力する装置」と見て、その装置が well-defined であることを求めている。
+:::
+
+## 存在と一意性 {#prb:sec-sd-existence}
+
+::: lemma 積分作用素の評価 {#prb:sde-picard-estimate keywords="Phi(X)_t = xi + int b(s, X_s) ds + int sigma(s, X_s) dB maps S_T to S_T under linear growth, and E sup_{s <= t} |Phi(X)_s - Phi(Y)_s|^2 <= 2(T + 4) L^2 int_0^t E|X_s - Y_s|^2 ds under Lipschitz" index="ピカールの逐次近似（確率微分方程式）|ぴかーるのちくじきんじ" refname="積分作用素の評価"}
+$E[\xi^{2}]<\infty$ とし、定数 $L$ について、すべての $t,x,y$ で
+$$
+\abs{b(t,x)-b(t,y)}+\abs{\sigma(t,x)-\sigma(t,y)}\le L\abs{x-y},\qquad\abs{b(t,x)}+\abs{\sigma(t,x)}\le L(1+\abs x)
+$$
+とする。$X\in\mathcal{S}_{T}$ について $\Phi(X)_{t}\defeq\xi+\int_{0}^{t}b(s,X_{s})ds+\int_{0}^{t}\sigma(s,X_{s})dB_{s}$ とおくと、
+1. $\Phi(X)\in\mathcal{S}_{T}$。
+2. $X,Y\in\mathcal{S}_{T}$ と $t\le T$ について $E\bigl[\sup_{s\le t}\abs{\Phi(X)_{s}-\Phi(Y)_{s}}^{2}\bigr]\le2(T+4)L^{2}\int_{0}^{t}E[\abs{X_{s}-Y_{s}}^{2}]ds$。
+:::
+
+::: intuition
+解の候補を積分方程式の右辺に入れる操作 $\Phi$ は、2 つの候補の差を「時間について積分した大きさ」に縮める。
+:::
+
+::: proof
+**Step 1（$\sigma(\cdot,X)\in L_{T}^{2}$）.** 【主張：$E\int_{0}^{T}\sigma(s,X_{s})^{2}ds<\infty$】線形増大条件から $\sigma(s,X_{s})^{2}\le2L^{2}(1+X_{s}^{2})$ なので $E\int_{0}^{T}\sigma(s,X_{s})^{2}ds\le2L^{2}T(1+\norm X_{\mathcal{S}}^{2})<\infty$。よって確率積分は \ref{prb:ito-integral} の意味で定義され、$\Phi(X)$ は連続な適合過程。
+
+**Step 2（1）.** $(a+b+c)^{2}\le3(a^{2}+b^{2}+c^{2})$ から
+$$
+\sup_{s\le T}\Phi(X)_{s}^{2}\le3\xi^{2}+3\Bigl(\int_{0}^{T}\abs{b(s,X_{s})}ds\Bigr)^{2}+3\sup_{s\le T}\Bigl(\int_{0}^{s}\sigma\,dB\Bigr)^{2}.
+$$
+第 2 項はコーシー–シュワルツで $\le3T\int_{0}^{T}b(s,X_{s})^{2}ds$、期待値は $\le6L^{2}T^{2}(1+\norm X_{\mathcal{S}}^{2})$。第 3 項の期待値はドゥーブの不等式（\ref{prb:doob-continuous}）と等長性で $\le12E\int_{0}^{T}\sigma^{2}ds<\infty$。
+
+**Step 3（2）.** $\Delta b_{s}\defeq b(s,X_{s})-b(s,Y_{s})$, $\Delta\sigma_{s}$ も同様とすると、$\abs{\Delta b_{s}},\abs{\Delta\sigma_{s}}\le L\abs{X_{s}-Y_{s}}$。$s\le t$ で
+$$
+\abs{\Phi(X)_{s}-\Phi(Y)_{s}}^{2}\le2\Bigl(\int_{0}^{t}\abs{\Delta b_{u}}du\Bigr)^{2}+2\Bigl|\int_{0}^{s}\Delta\sigma\,dB\Bigr|^{2}.
+$$
+第 1 項はコーシー–シュワルツで $\le2t\int_{0}^{t}\Delta b_{u}^{2}du\le2TL^{2}\int_{0}^{t}\abs{X_{u}-Y_{u}}^{2}du$。第 2 項の $\sup_{s\le t}$ の期待値は、$\int_{0}^{s}\Delta\sigma\,dB$（$s\le t$）がマルチンゲールなのでドゥーブの不等式と等長性から $\le2\cdot4E\int_{0}^{t}\Delta\sigma_{u}^{2}du\le8L^{2}\int_{0}^{t}E\abs{X_{u}-Y_{u}}^{2}du$。足して $2(T+4)L^{2}\int_{0}^{t}E\abs{X_{u}-Y_{u}}^{2}du$（フビニの定理で期待値と $du$ を交換）。
+:::
+
+::: lemma 反復積分不等式 {#prb:iterated-integral-inequality keywords="if 0 <= g(t) <= a + c int_0^t g(s) ds on [0, T] with g bounded measurable, then g(t) <= a e^{ct}; in particular a = 0 gives g = 0; iterated version g_n(t) <= c int_0^t g_{n-1} gives g_n(t) <= M (ct)^n / n!" index="反復積分不等式|はんぷくせきぶんふとうしき" refname="反復積分不等式"}
+$c\ge0$、$g_{n}:[0,T]\to[0,\infty)$ を有界な可測関数とする。
+1. $g_{0}\le M$（定数）で $g_{n}(t)\le c\int_{0}^{t}g_{n-1}(s)ds$ なら $g_{n}(t)\le M(ct)^{n}/n!$。
+2. 有界可測な $g\ge0$ が定数 $a\ge0$ について $g(t)\le a+c\int_{0}^{t}g(s)ds$ をみたせば $g(t)\le ae^{ct}$。特に $a=0$ なら $g=0$。
+:::
+
+::: intuition
+自分自身の過去の積分で抑えられる量は、積分を $n$ 回繰り返すと $t^{n}/n!$ の速さで小さくなる。グロンウォールの不等式の、連続性を仮定しない版である。
+:::
+
+::: proof
+**Step 1（1）.** $n$ についての帰納法：$g_{n}(t)\le c\int_{0}^{t}M(cs)^{n-1}/(n-1)!\,ds=M(ct)^{n}/n!$。
+
+**Step 2（2）.** 【主張：$g(t)\le a\sum_{k<n}(ct)^{k}/k!+M(ct)^{n}/n!$（$M\defeq\sup g$）】$n=0$ では $g\le M$。$n$ で成り立てば、仮定に代入して $g(t)\le a+c\int_{0}^{t}\bigl(a\sum_{k<n}(cs)^{k}/k!+M(cs)^{n}/n!\bigr)ds=a\sum_{k\le n}(ct)^{k}/k!+M(ct)^{n+1}/(n+1)!$。$n\to\infty$ で $g(t)\le ae^{ct}$。
+:::
+
+::: theorem 強解の存在と一意性 {#prb:sde-existence-uniqueness keywords="under Lipschitz and linear growth conditions and E xi^2 < infinity, the SDE has a strong solution in S_T, obtained by Picard iteration, with E sup X^2 <= C(1 + E xi^2); pathwise uniqueness among all strong solutions" index="確率微分方程式の解の存在と一意性|かくりつびぶんほうていしきのかいのそんざいといちいせい" refname="強解の存在と一意性"}
+\ref{prb:sde-picard-estimate} の条件（リプシッツ条件と線形増大条件、$E\xi^{2}<\infty$）のもとで
+1. 強解 $X\in\mathcal{S}_{T}$ が存在する。逐次近似 $X^{0}\defeq\xi$, $X^{n+1}\defeq\Phi(X^{n})$ は、ほとんど確実に $[0,T]$ 上一様に、また $\mathcal{S}_{T}$ のノルムで $X$ に収束する。
+2. 道ごとの一意性が成り立つ：$Y$ が（$\mathcal{S}_{T}$ に属するとは限らない）任意の強解なら、ほとんど確実にすべての $t$ で $X_{t}=Y_{t}$。
+:::
+
+::: intuition
+逐次近似の各段の差は、評価式によって「時間の 1 回積分」ずつ小さくなり、$n$ 段後には $(ct)^{n}/n!$ の大きさになる。階乗が勝つので、差の和は収束する。常微分方程式と同じ仕組みで、ノイズの寄与はドゥーブの不等式と等長性によって「時間の積分」に置き換えられている。
+:::
+
+::: proof
+**Step 1（差の評価）.** 【主張：$D_{n}(t)\defeq E[\sup_{s\le t}\abs{X_{s}^{n+1}-X_{s}^{n}}^{2}]\le D_{0}(T)(ct)^{n}/n!$、$c\defeq2(T+4)L^{2}$】\ref{prb:sde-picard-estimate} の 1 から帰納的に $X^{n}\in\mathcal{S}_{T}$ で、$D_{0}(T)<\infty$。2 から $D_{n}(t)\le c\int_{0}^{t}E\abs{X_{s}^{n}-X_{s}^{n-1}}^{2}ds\le c\int_{0}^{t}D_{n-1}(s)ds$。$D_{n}$ は単調増加で有界なので可測。\ref{prb:iterated-integral-inequality} の 1 を使う。
+
+**Step 2（収束）.** チェビシェフの不等式から $P(\sup_{s\le T}\abs{X^{n+1}_{s}-X^{n}_{s}}>2^{-n})\le4^{n}D_{0}(T)(cT)^{n}/n!$ で、これは $n$ について和が有限。ボレル–カンテリの補題（\ref{prb:borel-cantelli}）から、ほとんど確実に十分大きい $n$ で $\sup\abs{X^{n+1}-X^{n}}\le2^{-n}$、したがって $X^{n}$ は一様コーシー列で、連続な適合過程 $X$ に一様収束する（極限が適合するのは零集合を含むフィルトレーションだから）。また $\norm{X^{m}-X^{n}}_{\mathcal{S}}\le\sum_{k\ge n}D_{k}(T)^{1/2}\to0$（ミンコフスキー）で、ファトゥの補題から $\norm{X-X^{n}}_{\mathcal{S}}\le\sum_{k\ge n}D_{k}(T)^{1/2}\to0$。特に $X\in\mathcal{S}_{T}$。
+
+**Step 3（極限が解であること）.** \ref{prb:sde-picard-estimate} の 2 から $\norm{\Phi(X)-\Phi(X^{n})}_{\mathcal{S}}^{2}\le cT\norm{X-X^{n}}_{\mathcal{S}}^{2}\to0$。$\Phi(X^{n})=X^{n+1}\to X$ なので $\norm{\Phi(X)-X}_{\mathcal{S}}=0$、すなわちほとんど確実にすべての $t$ で $X_{t}=\Phi(X)_{t}$。
+
+**Step 4（一意性）.** 【主張：任意の強解 $Y$ について $X=Y$】$R>0$ について $\tau_{R}\defeq\inf\{t:\abs{X_{t}}\ge R\text{ または }\abs{Y_{t}}\ge R\}\wedge T$、$\Omega_{R}\defeq\{\abs\xi<R\}\in\mathcal{F}_{0}$ とする。$\Omega_{R}$ の外では $\tau_{R}=0$。\ref{prb:ito-stopping}・\ref{prb:ito-localization} から
+$$
+X_{t\wedge\tau_{R}}-Y_{t\wedge\tau_{R}}=\int_{0}^{t}1_{[0,\tau_{R}]}\Delta b_{s}\,ds+\int_{0}^{t}1_{[0,\tau_{R}]}\Delta\sigma_{s}\,dB_{s}
+$$
+で、$s\le\tau_{R}$ なら $\abs{X_{s}},\abs{Y_{s}}\le R$ なので $\abs{1_{[0,\tau_{R}]}\Delta\sigma}\le2L(1+R)$ は有界で、右辺の確率積分は $L_{T}^{2}$ の被積分関数の積分。$g(t)\defeq E[\sup_{s\le t}\abs{X_{s\wedge\tau_{R}}-Y_{s\wedge\tau_{R}}}^{2}]\le4R^{2}$ は有界で単調。\ref{prb:sde-picard-estimate} の Step 3 と同じ計算で
+$$
+g(t)\le c\int_{0}^{t}E\bigl[1_{\{s\le\tau_{R}\}}\abs{X_{s}-Y_{s}}^{2}\bigr]ds\le c\int_{0}^{t}g(s)ds.
+$$
+\ref{prb:iterated-integral-inequality} の 2 から $g=0$。すなわち $[0,\tau_{R}]$ 上で $X=Y$（a.s.）。$X,Y$ の道は連続で有界なので $R\to\infty$ で $\tau_{R}=T$ となり、$X=Y$。
+
+**Step 5（モーメント評価）.** 【主張：$E\sup_{t\le T}X_{t}^{2}\le C(1+E\xi^{2})$、$C$ は $L,T$ のみによる】$h(t)\defeq E[\sup_{s\le t}X_{s}^{2}]$ は $X\in\mathcal{S}_{T}$ から有界で、単調なので可測。$X=\Phi(X)$ に \ref{prb:sde-picard-estimate} の Step 2 の計算を $[0,t]$ 上で行うと、$b(s,X_{s})^{2},\sigma(s,X_{s})^{2}\le2L^{2}(1+X_{s}^{2})$ から
+$$
+h(t)\le3E\xi^{2}+6L^{2}(T+4)\int_{0}^{t}(1+h(s))ds\le3E\xi^{2}+6L^{2}(T+4)T+6L^{2}(T+4)\int_{0}^{t}h(s)ds.
+$$
+\ref{prb:iterated-integral-inequality} の 2 から $h(T)\le(3E\xi^{2}+6L^{2}(T+4)T)e^{6L^{2}(T+4)T}$。
+:::
+
+## 線形方程式 {#prb:sec-sd-linear}
+
+::: example 幾何ブラウン運動 {#prb:geometric-brownian-motion keywords="dX = mu X dt + sigma X dB has the unique solution X_t = X_0 exp((mu - sigma^2/2)t + sigma B_t); E X_t = E X_0 e^{mu t}" index="幾何ブラウン運動|きかぶらうんうんどう" refname="幾何ブラウン運動"}
+$\mu,\sigma\in\mathbb{R}$ について $dX=\mu X\,dt+\sigma X\,dB$ の解は
+$$
+X_{t}=X_{0}\exp\Bigl(\bigl(\mu-\tfrac12\sigma^{2}\bigr)t+\sigma B_{t}\Bigr).
+$$
+実際、$f(t,x)\defeq e^{(\mu-\sigma^{2}/2)t+\sigma x}$ は $C^{2}(\mathbb{R}^{2})$ で $\partial_{t}f+\frac12\partial_{x}^{2}f=\mu f$, $\partial_{x}f=\sigma f$ なので、\ref{prb:ito-formula-time} の 1 から $S_{t}\defeq f(t,B_{t})$ は $S_{t}=1+\int_{0}^{t}\mu S\,ds+\int_{0}^{t}\sigma S\,dB$ をみたす。$X_{0}$ が有界なら \ref{prb:ito-bounded-factor}（$a=0$, $\xi=X_{0}$）で $X_{0}$ を積分の中に入れて $X=X_{0}S$ が解。係数 $\mu x$, $\sigma x$ はリプシッツで線形増大条件をみたすので、\ref{prb:sde-existence-uniqueness} から解はこれに限る（一意性の証明は $E X_{0}^{2}<\infty$ を使わない）。なお $0<\mu<\sigma^{2}/2$ なら、期待値 $E[X_{t}]=E[X_{0}]e^{\mu t}$ は増大するのに、$B_{t}/t\to0$（a.s.、ここでは証明しない）から道はほとんど確実に $0$ に近づく。
+:::
+
+::: proposition オルンシュタイン–ウーレンベック過程 {#prb:ornstein-uhlenbeck keywords="dX = -a X dt + sigma dB has the unique solution X_t = e^{-at} X_0 + sigma int_0^t e^{-a(t-s)} dB_s; for X_0 = x deterministic, X_t ~ N(e^{-at} x, sigma^2 (1 - e^{-2at})/(2a)); Wiener integrals of deterministic functions are Gaussian" index="オルンシュタイン–ウーレンベック過程|おるんしゅたいんうーれんべっくかてい, ウィーナー積分|うぃーなーせきぶん" refname="オルンシュタイン–ウーレンベック過程"}
+$a>0$, $\sigma\in\mathbb{R}$, $x\in\mathbb{R}$ について
+1. 確定的な $h\in L^{2}[0,T]$ の積分 $\int_{0}^{t}h\,dB$ は平均 $0$、分散 $\int_{0}^{t}h^{2}$ の正規分布にしたがう。
+2. $dX=-aX\,dt+\sigma\,dB$, $X_{0}=x$ の解は $X_{t}=e^{-at}x+\sigma\int_{0}^{t}e^{-a(t-s)}dB_{s}$ で、$X_{t}\sim N\bigl(e^{-at}x,\ \frac{\sigma^{2}}{2a}(1-e^{-2at})\bigr)$。
+:::
+
+::: intuition
+オルンシュタイン–ウーレンベック過程は、ばねで原点に引き戻されながら熱ゆらぎを受ける粒子の速度のモデルである。引き戻しとゆらぎが釣り合って、分散 $\sigma^{2}/(2a)$ の正規分布に落ち着く。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\int_{0}^{t}h\,dB\sim N(0,\int_{0}^{t}h^{2})$】$h$ が階段関数なら $\int h\,dB$ は独立な正規確率変数の線形結合で、平均 $0$、分散 $\int h^{2}$ の正規分布。階段関数 $h_{n}\to h$（$L^{2}[0,T]$、確定的な関数なので発展的可測）をとると、等長性から $\int h_{n}dB\to\int h\,dB$（$L^{2}$）。特性関数 $e^{-\lambda^{2}\int h_{n}^{2}/2}$ は $e^{-\lambda^{2}\int h^{2}/2}$ に収束し、$L^{2}$ 収束は分布収束を導くので（$\abs{E e^{i\lambda Y_{n}}-Ee^{i\lambda Y}}\le\abs\lambda E\abs{Y_{n}-Y}$）、極限の特性関数はこれに等しい。
+
+**Step 2（2：解であること）.** $Y_{t}\defeq\int_{0}^{t}e^{as}dB_{s}$ は伊藤過程（$K=0$, $H_{s}=e^{as}$）。$f(t,y)\defeq e^{-at}(x+\sigma y)$ は $C^{2}(\mathbb{R}^{2})$ で、\ref{prb:ito-formula-time} の 1 から
+$$
+f(t,Y_{t})=x+\int_{0}^{t}\bigl(-af(s,Y_{s})\bigr)ds+\int_{0}^{t}\sigma e^{-as}e^{as}dB_{s}
+$$
+（$\partial_{y}^{2}f=0$）。$X_{t}=f(t,Y_{t})=e^{-at}x+\sigma e^{-at}\int_{0}^{t}e^{as}dB_{s}$ は方程式をみたす。最後の形を $\sigma\int_{0}^{t}e^{-a(t-s)}dB_{s}$ と書けるのは、$t$ を固定して $e^{-at}$ を定数として積分の中に入れられるから（線形性）。係数はリプシッツなので解は一意。
+
+**Step 3（分布）.** 1 を $h(s)=\sigma e^{-a(t-s)}$ に使い、$\int_{0}^{t}\sigma^{2}e^{-2a(t-s)}ds=\frac{\sigma^{2}}{2a}(1-e^{-2at})$。
+:::
+
+::: hypcheck
+- **リプシッツ条件**：一意性（Step 4）と逐次近似の収束（Step 1）に使った。リプシッツでないと一意性は崩れうる：$\sigma=0$, $b(x)=3\abs{x}^{2/3}$, $\xi=0$ では $X\equiv0$ と $X_{t}=t^{3}$ がともに解。
+- **線形増大条件**：$\Phi$ が $\mathcal{S}_{T}$ を保つこと（\ref{prb:sde-picard-estimate} の 1）に使った。これがないと解は有限時間で爆発しうる：$\sigma=0$, $b(x)=x^{2}$, $\xi=1$ の解 $1/(1-t)$ は $t=1$ で発散する。なお $[0,T]$ 上で $b(t,0)$, $\sigma(t,0)$ が有界ならリプシッツ条件から線形増大条件が従う。
+- **$E\xi^{2}<\infty$**：$\mathcal{S}_{T}$ で議論するためと、モーメント評価（Step 5）に使った。一意性の証明（Step 4）では使っていない。また存在も $\xi$ を $\{\abs\xi<R\}$ に制限して貼り合わせれば、可積分性なしで得られる。
+:::
+
+## 問題 {#prb:sec-sd-problems}
+
+::: problem {#prb:prob-sd-gbm-mean}
+幾何ブラウン運動 $X_{t}=\exp((\mu-\frac12\sigma^{2})t+\sigma B_{t})$ について $E[X_{t}]=e^{\mu t}$, $E[X_{t}^{2}]=e^{(2\mu+\sigma^{2})t}$ を確かめよ。
+:::
+
+::: solution
+$E[e^{\lambda B_{t}}]=e^{\lambda^{2}t/2}$ から $E[X_{t}]=e^{(\mu-\sigma^{2}/2)t+\sigma^{2}t/2}=e^{\mu t}$, $E[X_{t}^{2}]=e^{(2\mu-\sigma^{2})t+2\sigma^{2}t}$。
+:::
+
+::: problem {#prb:prob-sd-ou-stationary}
+オルンシュタイン–ウーレンベック過程で、$X_{0}\sim N(0,\frac{\sigma^{2}}{2a})$ を $B$ と独立にとると、各 $t$ で $X_{t}\sim N(0,\frac{\sigma^{2}}{2a})$ となることを示せ。
+:::
+
+::: solution
+$X_{t}=e^{-at}X_{0}+\sigma\int_{0}^{t}e^{-a(t-s)}dB$ の 2 項は独立な正規確率変数（$X_{0}$ は $\mathcal{F}_{0}$ 可測で $B$ と独立）。分散は $e^{-2at}\frac{\sigma^{2}}{2a}+\frac{\sigma^{2}}{2a}(1-e^{-2at})=\frac{\sigma^{2}}{2a}$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** グロンウォールの不等式（\ref{ode:gronwall}）は連続関数を仮定するので、可測関数で済む \ref{prb:iterated-integral-inequality} を代わりに使った。議論は Øksendal『Stochastic Differential Equations』第 5 章、Karatzas–Shreve 第 5.2 節の流儀に沿う。
+
+**前提を変えると.**
+- **局所リプシッツ条件**：係数が局所リプシッツなら、解は爆発時刻まで一意に存在する。線形増大条件はその爆発が起きないことを保証する。
+- **弱解と山田–渡辺の定理**：係数が連続なだけでも、別の確率空間とブラウン運動を選び直せば解（弱解）が存在する（スコロホッドの定理）。道ごとの一意性と弱解の存在から強解の存在が従う（山田–渡辺）。1 次元では $\sigma$ が $\frac12$ 次のヘルダー連続でも道ごとの一意性が成り立つ（例：$dX=2\sqrt{\abs X}dB$ 型の方程式）。
+- **マルコフ性と生成作用素**：解はマルコフ過程で、その生成作用素は $\mathcal{L}=b\partial_{x}+\frac12\sigma^{2}\partial_{x}^{2}$。伊藤の公式から $E[f(X_{t})]=f(x)+E\int_{0}^{t}\mathcal{L}f(X_{s})ds$（ディンキンの公式）。これがファインマン–カッツの公式や確率論的な偏微分方程式の解法の出発点になる。
+
+**高い視点から：ノイズを入力とする力学系.** 強解は「ブラウン運動の道 $B$」から「解の道 $X$」への写像 $X=F(\xi,B)$ で、時刻 $t$ までの $B$ だけで $X_{t}$ が決まる（因果的）。リプシッツ条件のもとでは、これはウィーナー空間上の可測写像として一意に定まる。ただし $F$ は道について連続ではない（伊藤積分は $B$ の一様位相について連続でない）。この欠陥を、道の「2 次の情報」を加えることで直したのがラフパスの理論（ライオンズ）である。比喩で言えば、確率微分方程式は「風の中を進む小舟」で、強解は風の吹き方の記録から小舟の航跡を復元する手順であり、一意性は同じ風なら同じ航跡になることを言っている。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-sd-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
