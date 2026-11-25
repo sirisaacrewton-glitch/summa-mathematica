@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：大偏差 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/05-large-deviations/05-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：大偏差 {#prb:page-exercises-large-deviations keywords="exercises, Rademacher rate function, sub-Gaussian bound Lambda^*(x) >= x^2/2 and Hoeffding-type tail, contraction to |S_n/n|, Varadhan's lemma for a clipped linear function, maximum entropy of the uniform distribution, binomial coefficients and binary entropy, degenerate random vectors in R^2, joint large deviations of correlated Gaussian averages"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習や、二つ以上のページの道具を組み合わせるものである。難易度は ★（基本）・★★（標準）・★★★（発展）で示す。
+
+## 記法と定義の確認 {#prb:sec-lde-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。$X,X_{1},X_{2},\dots$ は独立同分布、$S_{n}=X_{1}+\dots+X_{n}$。
+:::
+
+## クラメールの定理 {#prb:sec-cr-exercises}
+
+対応するページ：\ref{prb:page-cramer}
+
+::: problem ★ 基本：ラデマッハー分布 {#prb:ex-cr-rademacher}
+$P(X=1)=P(X=-1)=\frac12$ のとき、$\Lambda(\lambda)=\log\cosh\lambda$ と、$\abs x\le1$ で
+$$
+\Lambda^{*}(x)=\frac{1+x}2\log(1+x)+\frac{1-x}2\log(1-x)
+$$
+（$\abs x>1$ で $\infty$）を示せ。
+:::
+
+::: solution
+$E[e^{\lambda X}]=\cosh\lambda$。$\abs x<1$ で $\Lambda'(\eta)=\tanh\eta=x$ から $\eta=\frac12\log\frac{1+x}{1-x}$、$\cosh\eta=(1-x^{2})^{-1/2}$。$\Lambda^{*}(x)=\eta x-\log\cosh\eta=\frac x2\log\frac{1+x}{1-x}+\frac12\log(1-x^{2})$ を整理すると主張の式。$x=\pm1$ は \ref{prb:cramer-theorem} の Step 7 から $-\log\frac12=\log2$ で、式の値と一致する。$\abs x>1$ は同じ証明の Step 6。
+:::
+
+::: problem ★★ 標準：ガウス型の裾の評価 {#prb:ex-cr-subgaussian}
+前問の分布について $\Lambda(\lambda)\le\frac{\lambda^{2}}2$ を示し、すべての $n$ と $x\ge0$ で $P(S_{n}\ge nx)\le e^{-nx^{2}/2}$ を導け。
+:::
+
+::: solution
+$\cosh\lambda=\sum_{k}\frac{\lambda^{2k}}{(2k)!}\le\sum_{k}\frac{\lambda^{2k}}{2^{k}k!}=e^{\lambda^{2}/2}$（$(2k)!\ge2^{k}k!$）。よって $\Lambda^{*}(x)\ge\sup_{\lambda}(\lambda x-\frac{\lambda^{2}}2)=\frac{x^{2}}2$。\ref{prb:chernoff-bound}（$m=0$）から $P(S_{n}\ge nx)\le e^{-n\Lambda^{*}(x)}\le e^{-nx^{2}/2}$。
+:::
+
+## 大偏差原理 {#prb:sec-ld-exercises}
+
+対応するページ：\ref{prb:page-ldp}
+
+::: problem ★ 基本：絶対値への縮約 {#prb:ex-ld-absolute-value}
+$X\sim N(0,1)$ のとき、$\abs{S_{n}/n}$ の分布が大偏差原理をみたすことを示し、そのレート関数を求めよ。
+:::
+
+::: solution
+$S_{n}/n$ は良いレート関数 $\frac{x^{2}}2$ による大偏差原理をみたす（\ref{prb:cramer-theorem}, \ref{prb:cramer-examples}, \ref{prb:log-mgf-properties} の 4）。$f(x)=\abs x$ は連続なので \ref{prb:contraction-principle} から $J(y)=\frac{y^{2}}2$（$y\ge0$）、$J(y)=\infty$（$y<0$）。
+:::
+
+::: problem ★★ 標準：切り詰めた線形関数の指数積分 {#prb:ex-ld-varadhan-clip}
+$X\sim N(0,1)$、$\varphi(x)\defeq\max(-1,\min(x,1))$ とする。$\lim_{n}\frac1n\log E[e^{n\varphi(S_{n}/n)}]$ を求めよ。
+:::
+
+::: solution
+$\varphi$ は有界連続なので \ref{prb:varadhan-lemma} から極限は $\sup_{x}(\varphi(x)-\frac{x^{2}}2)$。$\abs x\le1$ では $x-\frac{x^{2}}2$ が $x=1$ で最大値 $\frac12$、$x>1$ では $1-\frac{x^{2}}2<\frac12$、$x<-1$ では $-1-\frac{x^{2}}2<0$。答えは $\frac12$。（切り詰めない $\lambda x$ の場合の $\frac{\lambda^{2}}2$ と、$\lambda=1$ で一致する。最大点 $x=1$ が切り詰めの境界にあるため。）
+:::
+
+## サノフの定理 {#prb:sec-sa-exercises}
+
+対応するページ：\ref{prb:page-sanov}
+
+::: problem ★ 基本：最大エントロピー {#prb:ex-sa-max-entropy}
+$\Sigma$ 上の一様分布 $u$ について $H(\nu\mid u)=\log\abs\Sigma-H(\nu)$ を示し、$H(\nu)\le\log\abs\Sigma$（等号は $\nu=u$ のときに限る）を導け。
+:::
+
+::: solution
+$H(\nu\mid u)=\sum\nu(a)\log(\abs\Sigma\nu(a))=\log\abs\Sigma+\sum\nu\log\nu$。\ref{prb:relative-entropy-properties} の 1 から $\ge0$、等号は $\nu=u$。
+:::
+
+::: problem ★★ 標準：2 項係数の指数的な大きさ {#prb:ex-sa-binomial}
+$0\le k\le n$, $p\defeq k/n$, $h(p)\defeq-p\log p-(1-p)\log(1-p)$ とすると、$(n+1)^{-2}e^{nh(p)}\le\binom nk\le e^{nh(p)}$ を示せ。$\binom{2n}{n}$ の指数の速さを求めよ。
+:::
+
+::: solution
+$\Sigma=\{0,1\}$ で型 $\nu=(1-p,p)$ の型類の大きさは $\binom nk$、$H(\nu)=h(p)$。\ref{prb:method-of-types} の 3（$\abs\Sigma=2$）。$\frac1{2n}\log\binom{2n}{n}\to h(\frac12)=\log2$、すなわち $\binom{2n}{n}=4^{n}e^{o(n)}$。
+:::
+
+## 多次元のクラメールの定理 {#prb:sec-crd-exercises}
+
+対応するページ：\ref{prb:page-cramer-multidim}
+
+::: problem ★ 基本：対角線上に集中する確率ベクトル {#prb:ex-crd-degenerate}
+$\xi$ をラデマッハー分布、$X\defeq(\xi,\xi)\in\mathbb{R}^{2}$ とする。$\Lambda^{*}(x_{1},x_{2})$ を求めよ。
+:::
+
+::: solution
+$\Lambda(\lambda)=\log\cosh(\lambda_{1}+\lambda_{2})$。$x_{1}\ne x_{2}$ なら $\lambda=t(1,-1)$ で $\langle\lambda,x\rangle-\Lambda(\lambda)=t(x_{1}-x_{2})\to\infty$ なので $\Lambda^{*}=\infty$。$x_{1}=x_{2}=x$ なら $\langle\lambda,x\rangle-\Lambda(\lambda)=sx-\log\cosh s$（$s=\lambda_{1}+\lambda_{2}$）で、上限は \ref{prb:ex-cr-rademacher} の $\Lambda^{*}(x)$。$\Lambda$ は狭義凸でないが、定理は成り立つ（\ref{prb:cramer-multidim} の証明はガウス雑音の付加によって狭義凸性を要しない）。
+:::
+
+::: problem ★★★ 発展：相関のある正規分布の同時の大偏差 {#prb:ex-crd-correlated}
+$X\sim N\Bigl(0,\begin{pmatrix}1&\rho\\\rho&1\end{pmatrix}\Bigr)$（$-1<\rho<1$）、$a>0$ とする。
+$$
+\lim_{n\to\infty}\frac1n\log P\Bigl(\frac{S_{n}^{1}}n\ge a,\ \frac{S_{n}^{2}}n\ge a\Bigr)=-\frac{a^{2}}{1+\rho}
+$$
+を示し、$\rho\to1$ と $\rho\to-1$ での意味を述べよ。
+:::
+
+::: solution
+\ref{prb:cramer-gaussian-multidim} から $\Lambda^{*}(x)=\frac12x^{\mathsf T}\Sigma^{-1}x$、$\Sigma^{-1}=\frac1{1-\rho^{2}}\begin{pmatrix}1&-\rho\\-\rho&1\end{pmatrix}$。$F\defeq[a,\infty)^{2}$ 上の最小値：$c\defeq(a,a)$ で $\nabla\Lambda^{*}(c)=\Sigma^{-1}c=\frac{a}{1+\rho}(1,1)$ は成分が正なので、$x\in F$ について $\langle\nabla\Lambda^{*}(c),x-c\rangle\ge0$。$\Lambda^{*}$ は凸なので（接平面の不等式、\ref{prb:log-mgf-multidim} の Step 3 と同じ議論）$\Lambda^{*}(x)\ge\Lambda^{*}(c)$。$\Lambda^{*}(c)=\frac{a^{2}(2-2\rho)}{2(1-\rho^{2})}=\frac{a^{2}}{1+\rho}$。$\Lambda^{*}$ は連続なので内部 $(a,\infty)^{2}$ 上の下限も同じで、\ref{prb:cramer-multidim} の上界と下界が一致する。$\rho\to1$ では $\frac{a^{2}}2$（2 つの座標がほぼ同じなので、1 つの座標の大偏差と同じ）、$\rho\to-1$ では $\infty$ に発散（逆向きに動く 2 つが同時に大きくなるのは極めて稀）。独立 $\rho=0$ では $a^{2}=2\cdot\frac{a^{2}}2$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

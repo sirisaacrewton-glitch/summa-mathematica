@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多次元のクラメールの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/05-large-deviations/04-cramer-multidim.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 多次元のクラメールの定理 {#prb:page-cramer-multidim keywords="Cramer's theorem in R^d when the logarithmic moment generating function is finite everywhere, convexity and differentiability of Lambda, tangent plane inequality, good rate function Lambda^*, exponential tightness via one-dimensional Chernoff bounds, local upper bound, exponential tilting in R^d, Gaussian perturbation trick, surjectivity of the gradient of Lambda + |lambda|^2/(2M), multivariate normal rate (x-m)^T Sigma^{-1} (x-m)/2, multinomial and relative entropy"}
+
+1 次元の場合の証明（\ref{prb:cramer-theorem}）は、閉集合を平均の左右の半直線で挟む議論と、$\Lambda'$ が $(\operatorname{ess\,inf}X,\operatorname{ess\,sup}X)$ への全単射であることに依存していた。$\mathbb{R}^{d}$ ではどちらも使えない。そこで前のページの一般論を使い、上界は「点ごとの評価＋指数的緊密性」で、下界は「独立な小さなガウス雑音を加えて $\nabla\Lambda$ を全射にし、雑音の寄与を指数的に無視する」という方法で示す。
+
+## 記法と定義の確認 {#prb:sec-crd-notation}
+
+::: notation
+- $X,X_{1},X_{2},\dots$ は独立同分布な $\mathbb{R}^{d}$ 値確率変数、$\mu$ はその分布、$S_{n}\defeq X_{1}+\dots+X_{n}$。$\langle\cdot,\cdot\rangle$, $\abs{\cdot}$ はユークリッドの内積とノルム、$B(x,\delta)$ は開球。
+- $\Lambda(\lambda)\defeq\log E[e^{\langle\lambda,X\rangle}]$、$\Lambda^{*}(x)\defeq\sup_{\lambda\in\mathbb{R}^{d}}(\langle\lambda,x\rangle-\Lambda(\lambda))$。このページでは**すべての $\lambda\in\mathbb{R}^{d}$ で $\Lambda(\lambda)<\infty$** と仮定する。
+- 1 次元の場合の性質と指数型の上からの評価は \ref{prb:log-mgf-properties}, \ref{prb:exponential-tilting}, \ref{prb:chernoff-bound}。大偏差原理の一般論は \ref{prb:large-deviation-principle}, \ref{prb:exponential-tightness}。
+- ヘルダーの不等式は \ref{meas:holder}、積分記号下の微分は \ref{meas:parameter-integrals}、マルコフ・チェビシェフ・イェンセンの不等式は \ref{prb:basic-inequalities}、1 変数の凸関数の性質は \ref{calc:convex-properties}。
+- 体系は $\ZFC$。
+:::
+
+## 対数積率母関数の性質 {#prb:sec-crd-properties}
+
+::: lemma 多次元の対数積率母関数 {#prb:log-mgf-multidim keywords="Lambda is convex and differentiable on R^d with grad Lambda(eta) = mean of the tilted law; tangent plane inequality Lambda(lambda) >= Lambda(eta) + <grad Lambda(eta), lambda - eta>; if grad Lambda(eta) = x then Lambda^*(x) = <eta, x> - Lambda(eta); Lambda^*(x) >= r |x|_1 - C_r; Lambda^* is a good rate function; Lambda(lambda) >= <lambda, m>" index="対数積率母関数（多次元）|たいすうせきりつぼかんすう" refname="多次元の対数積率母関数"}
+1. $\Lambda$ は凸で、$\Lambda(\lambda)\ge\langle\lambda,m\rangle$（$m\defeq E[X]$）。
+2. $\Lambda$ は微分可能で、$\nabla\Lambda(\eta)=\int y\,\mu_{\eta}(dy)$。ここで $\mu_{\eta}(dy)\defeq e^{\langle\eta,y\rangle-\Lambda(\eta)}\mu(dy)$（傾けた分布、すべてのモーメントをもつ）。
+3. $\nabla\Lambda(\eta)=x$ なら $\Lambda^{*}(x)=\langle\eta,x\rangle-\Lambda(\eta)$。
+4. $\Lambda^{*}$ は凸、下半連続、$\ge0$ で、各 $r>0$ について $C_{r}\defeq\max\{\Lambda(\lambda):\lambda\in\{-r,r\}^{d}\}$ とおくと $\Lambda^{*}(x)\ge r\abs x_{1}-C_{r}$（$\abs x_{1}\defeq\sum_{i}\abs{x_{i}}$）。特に $\Lambda^{*}$ は良いレート関数。
+:::
+
+::: intuition
+1 次元と同じく、$\Lambda$ の勾配は傾けた分布の平均を与え、勾配が $x$ になる点がルジャンドル変換の上限を実現する。$\abs{x}$ が大きいと $\Lambda^{*}$ は少なくとも線形に増えるので、水準集合は有界になる。
+:::
+
+::: proof
+**Step 1（1）.** 凸性は 1 次元と同じくヘルダーの不等式（\ref{prb:log-mgf-properties} の Step 1 と同じ計算）。$\abs{X_{i}}\le e^{X_{i}}+e^{-X_{i}}$ から $E\abs X<\infty$ で、イェンセンの不等式から $E[e^{\langle\lambda,X\rangle}]\ge e^{\langle\lambda,m\rangle}$。
+
+**Step 2（2）.** 各座標方向について、$\abs{\eta'-\eta}<1$ で $\abs{y_{i}}e^{\langle\eta',y\rangle}\le\abs{y_{i}}\prod_{j}(e^{(\eta_{j}+1)y_{j}}+e^{(\eta_{j}-1)y_{j}})$ が $\mu$ 可積分なので（右辺を展開すると、$\abs{y_{i}}\le e^{y_{i}}+e^{-y_{i}}$ と合わせて有限個の $e^{\langle\lambda,y\rangle}$ の和で抑えられる）、積分記号下の微分（\ref{meas:parameter-integrals}）から $M(\eta)\defeq E[e^{\langle\eta,X\rangle}]$ の偏導関数は $E[X_{i}e^{\langle\eta,X\rangle}]$ で、同じ優関数によって $\eta$ について連続。偏導関数が連続なので $M$ は微分可能（$C^{1}$）、$\nabla\Lambda=\nabla M/M$ が主張の式。
+
+**Step 3（接平面の不等式と 3）.** 【主張：$\Lambda(\lambda)\ge\Lambda(\eta)+\langle\nabla\Lambda(\eta),\lambda-\eta\rangle$】$g(t)\defeq\Lambda(\eta+t(\lambda-\eta))$ は $\mathbb{R}$ 上の微分可能な凸関数で、$g'(0)=\langle\nabla\Lambda(\eta),\lambda-\eta\rangle$。凸関数の差分商は単調なので（\ref{calc:convex-properties}）$g(1)-g(0)\ge g'(0)$。$\nabla\Lambda(\eta)=x$ なら、これを書き直して $\langle\lambda,x\rangle-\Lambda(\lambda)\le\langle\eta,x\rangle-\Lambda(\eta)$ がすべての $\lambda$ で成り立ち、上限は $\eta$ で達成される。
+
+**Step 4（4）.** 凸性・下半連続性・非負性は 1 次元と同じ（アフィン関数の上限、$\lambda=0$ の項）。$x$ について $\lambda\defeq r(\operatorname{sgn}x_{1},\dots,\operatorname{sgn}x_{d})$（$\operatorname{sgn}0\defeq1$）とすると $\lambda\in\{-r,r\}^{d}$ で、$\Lambda^{*}(x)\ge\langle\lambda,x\rangle-\Lambda(\lambda)\ge r\abs x_{1}-C_{r}$。よって $\{\Lambda^{*}\le\alpha\}$ は有界閉集合で、ハイネ–ボレルの定理からコンパクト。
+:::
+
+## 定理と証明 {#prb:sec-crd-theorem}
+
+::: lemma 勾配が届く点での下界 {#prb:cramer-lower-tilting keywords="if x = grad Lambda(eta), then liminf (1/n) log P(|S_n/n - x| < delta) >= -Lambda^*(x) for every delta > 0; proof by exponential tilting and the weak law of large numbers" index="指数的な傾け（多次元）|しすうてきなかたむけ" refname="勾配が届く点での下界"}
+$x=\nabla\Lambda(\eta)$ となる $\eta$ があれば、すべての $\delta>0$ で $\displaystyle\liminf_{n}\frac1n\log P\Bigl(\Bigl|\frac{S_{n}}{n}-x\Bigr|<\delta\Bigr)\ge-\Lambda^{*}(x)$。
+:::
+
+::: intuition
+目標の点 $x$ を平均にもつように分布を傾ければ、$x$ の近くに来ることは典型的な出来事になり、確率の比の代価 $e^{-n\Lambda^{*}(x)}$ だけが残る。
+:::
+
+::: proof
+**Step 1（傾け）.** 【主張：$Y_{i}$ を分布 $\mu_{\eta}$ の独立同分布とすると、非負ボレル関数 $f$ で $E[f(X_{1},\dots,X_{n})]=E[f(Y_{1},\dots,Y_{n})e^{-\langle\eta,Y_{1}+\dots+Y_{n}\rangle+n\Lambda(\eta)}]$】1 次元の \ref{prb:exponential-tilting} の 3 と同じ計算（$\eta y$ を $\langle\eta,y\rangle$ に替えるだけ）。
+
+**Step 2（評価）.** $0<\delta'\le\delta$ とし、$f$ を事象 $\{\abs{s/n-x}<\delta'\}$（$s=y_{1}+\dots+y_{n}$）の指示関数とする。この事象の上で $-\langle\eta,s\rangle\ge-n\langle\eta,x\rangle-n\abs\eta\delta'$（コーシー–シュワルツ）なので
+$$
+P\Bigl(\Bigl|\frac{S_{n}}{n}-x\Bigr|<\delta\Bigr)\ge e^{-n(\langle\eta,x\rangle-\Lambda(\eta))-n\abs\eta\delta'}P\Bigl(\Bigl|\frac{Y_{1}+\dots+Y_{n}}{n}-x\Bigr|<\delta'\Bigr).
+$$
+$Y_{i}$ の平均は $\nabla\Lambda(\eta)=x$（\ref{prb:log-mgf-multidim} の 2）で各座標の分散は有限なので、各座標にチェビシェフの不等式を使うと最後の確率は $1$ に収束する（大数の弱法則）。\ref{prb:log-mgf-multidim} の 3 から指数は $-n\Lambda^{*}(x)-n\abs\eta\delta'$。$\delta'\to0$。
+:::
+
+::: theorem 多次元のクラメールの定理 {#prb:cramer-multidim keywords="if Lambda < infinity on R^d then the laws of S_n / n satisfy the LDP on R^d with the good rate function Lambda^*" index="クラメールの定理（多次元）|くらめーるのていり" refname="多次元のクラメールの定理"}
+すべての $\lambda\in\mathbb{R}^{d}$ で $\Lambda(\lambda)<\infty$ なら、$S_{n}/n$ の分布は良いレート関数 $\Lambda^{*}$ による大偏差原理をみたす。
+:::
+
+::: intuition
+上界は、各点の近くに来る確率を指数型のチェビシェフの不等式で抑え、遠くへ行く確率を座標ごとの 1 次元の評価で抑えて組み合わせる。下界では、$x$ に平均をもつ傾けた分布が欲しいが、$x$ がもとの分布の「端」にあると傾けても届かない。そこで小さなガウス雑音を加えて分布の台を全空間に広げ、どんな $x$ にも届くようにする。雑音の影響は $e^{-cMn}$ 程度で、$M$ を大きくとれば目標の指数より速く消える。
+:::
+
+::: proof
+**Step 1（指数的緊密性）.** 【主張：$P(\abs{S_{n}/n}_{\infty}\ge r)\le2de^{-n(r-C)}$、$C\defeq\max_{i,\pm}\Lambda(\pm e_{i})$】各座標 $S_{n}^{i}$ について、\ref{prb:chernoff-bound} の Step 1 の計算を $\lambda=\pm1$ で行うと $P(\pm S_{n}^{i}\ge nr)\le e^{-n(r-\Lambda(\pm e_{i}))}$。$2d$ 個を足す。$K_{r}\defeq[-r,r]^{d}$ はコンパクトで、$r\ge\alpha+C$ なら $\limsup\frac1n\log P(S_{n}/n\notin K_{r})\le-\alpha$（$\{S_{n}/n\notin K_{r}\}\subseteq\{\abs{S_{n}/n}_{\infty}\ge r\}$）。
+
+**Step 2（点ごとの上界）.** 【主張：$\lim_{\delta\to0}\limsup\frac1n\log P(S_{n}/n\in B(x,\delta))\le-\Lambda^{*}(x)$】$\lambda\in\mathbb{R}^{d}$ を固定する。事象 $\{S_{n}/n\in B(x,\delta)\}$ の上で $\langle\lambda,S_{n}\rangle\ge n(\langle\lambda,x\rangle-\abs\lambda\delta)$ なので、マルコフの不等式と独立性から
+$$
+P\Bigl(\frac{S_{n}}{n}\in B(x,\delta)\Bigr)\le e^{-n(\langle\lambda,x\rangle-\abs\lambda\delta)}E[e^{\langle\lambda,S_{n}\rangle}]=e^{-n(\langle\lambda,x\rangle-\Lambda(\lambda)-\abs\lambda\delta)}.
+$$
+$\delta\to0$ の後 $\lambda$ について上限をとる。
+
+**Step 3（上界）.** Step 2 と \ref{prb:exponential-tightness} の 1 からコンパクト集合の上界、Step 1 と同じ命題の 2 から閉集合の上界が従う。
+
+**Step 4（ガウス雑音の付加）.** 下界は、各 $x$ と $\delta>0$ について $\liminf\frac1n\log P(\abs{S_{n}/n-x}<2\delta)\ge-\Lambda^{*}(x)$ を示せば十分（開集合 $G$ の点 $x$ の近傍をとる）。$\Lambda^{*}(x)=\infty$ なら自明なので有限とする。$M>0$ とし、$Z_{1},Z_{2},\dots$ を $N(0,I_{d})$ の独立同分布で $(X_{i})$ と独立なものとする（確率は $S_{n}$ の分布だけで決まるので、積空間に実現してよい）。$X_{i}^{M}\defeq X_{i}+M^{-1/2}Z_{i}$ は独立同分布で、独立性から対数積率母関数は
+$$
+\Lambda_{M}(\lambda)=\Lambda(\lambda)+\frac{\abs\lambda^{2}}{2M}\ge\Lambda(\lambda),\qquad\text{したがって}\quad\Lambda_{M}^{*}\le\Lambda^{*}.
+$$
+
+**Step 5（勾配の全射性）.** 【主張：$\nabla\Lambda_{M}$ は $\mathbb{R}^{d}$ から $\mathbb{R}^{d}$ への全射】$y\in\mathbb{R}^{d}$ について $g(\lambda)\defeq\Lambda_{M}(\lambda)-\langle\lambda,y\rangle\ge\langle\lambda,m-y\rangle+\frac{\abs\lambda^{2}}{2M}$（\ref{prb:log-mgf-multidim} の 1）は $\abs\lambda\to\infty$ で $\infty$ に発散する。$g$ は連続なので、有界閉集合 $\{g\le g(0)\}$ 上で最小値をとり、それは $\mathbb{R}^{d}$ 全体の最小値。最小点 $\eta$ で $\nabla g(\eta)=0$、すなわち $\nabla\Lambda_{M}(\eta)=y$。
+
+**Step 6（雑音つきの下界）.** Step 5 と \ref{prb:cramer-lower-tilting}（$X^{M}$ に適用）から、$S_{n}^{M}\defeq\sum_{i\le n}X_{i}^{M}$ について $\liminf\frac1n\log P(\abs{S_{n}^{M}/n-x}<\delta)\ge-\Lambda_{M}^{*}(x)\ge-\Lambda^{*}(x)$。
+
+**Step 7（雑音の除去）.** $N_{n}\defeq\frac{1}{n\sqrt M}\sum_{i\le n}Z_{i}\sim N(0,\frac{1}{nM}I_{d})$ で $S_{n}^{M}/n=S_{n}/n+N_{n}$。各座標で $P(\abs{N_{n}^{i}}\ge t)\le2e^{-nMt^{2}/2}$（$N(0,\sigma^{2})$ のチェルノフの上界：\ref{prb:cramer-examples} の 1 の $\Lambda^{*}(t)=t^{2}/(2\sigma^{2})$）なので、$\abs{N_{n}}\ge\delta$ なら少なくとも 1 つの座標で $\abs{N_{n}^{i}}\ge\delta/\sqrt d$ となることから
+$$
+P(\abs{N_{n}}\ge\delta)\le2de^{-nM\delta^{2}/(2d)}.
+$$
+$M$ を $M\delta^{2}/(2d)>\Lambda^{*}(x)+1$ となるように選ぶ。$0<\varepsilon<1$ について、Step 6 から十分大きい $n$ で $a_{n}\defeq P(\abs{S_{n}^{M}/n-x}<\delta)\ge e^{-n(\Lambda^{*}(x)+\varepsilon)}$、一方 $b_{n}\defeq P(\abs{N_{n}}\ge\delta)\le2de^{-n(\Lambda^{*}(x)+1)}$ なので、十分大きい $n$ で $b_{n}\le a_{n}/2$。三角不等式から
+$$
+P\Bigl(\Bigl|\frac{S_{n}}{n}-x\Bigr|<2\delta\Bigr)\ge a_{n}-b_{n}\ge\frac{a_{n}}2\ge\frac12e^{-n(\Lambda^{*}(x)+\varepsilon)}.
+$$
+よって $\liminf\frac1n\log P\ge-\Lambda^{*}(x)-\varepsilon$。$\varepsilon\to0$。
+:::
+
+::: example 多次元正規分布 {#prb:cramer-gaussian-multidim}
+$X\sim N(m,\Sigma)$（$\Sigma$ は正定値対称行列）なら $\Lambda(\lambda)=\langle\lambda,m\rangle+\frac12\lambda^{\mathsf T}\Sigma\lambda$、$\nabla\Lambda(\eta)=m+\Sigma\eta$。$\eta=\Sigma^{-1}(x-m)$ として \ref{prb:log-mgf-multidim} の 3 から
+$$
+\Lambda^{*}(x)=\frac12(x-m)^{\mathsf T}\Sigma^{-1}(x-m).
+$$
+$S_{n}/n\sim N(m,\Sigma/n)$ の密度 $\propto e^{-\frac n2(x-m)^{\mathsf T}\Sigma^{-1}(x-m)}$ と一致する。
+:::
+
+::: hypcheck
+- **$\Lambda$ がいたる所有限**：指数的緊密性（Step 1、$\Lambda(\pm e_{i})<\infty$ があれば足りる）、勾配の存在と傾けた分布（\ref{prb:log-mgf-multidim} の 2、Step 5）に使った。
+- **独立同分布**：$E[e^{\langle\lambda,S_{n}\rangle}]=e^{n\Lambda(\lambda)}$（Step 2）、傾けの積の公式、雑音を加えた列の独立同分布性（Step 4）に使った。
+- **$\Lambda$ の狭義凸性は不要**：$X$ がある超平面に集中していても（$\Lambda$ がある方向に線形でも）、ガウス雑音の付加によって Step 5 の全射性が得られる。1 次元の証明（\ref{prb:cramer-theorem}）で行った端点の場合分けも、この方法では不要になる。
+:::
+
+## 問題 {#prb:sec-crd-problems}
+
+::: problem {#prb:prob-crd-independent-coordinates}
+$X=(X^{1},X^{2})$ の座標が独立なら $\Lambda^{*}(x_{1},x_{2})=\Lambda_{1}^{*}(x_{1})+\Lambda_{2}^{*}(x_{2})$ を示せ（$\Lambda_{i}$ は各座標の対数積率母関数）。
+:::
+
+::: solution
+独立性から $\Lambda(\lambda_{1},\lambda_{2})=\Lambda_{1}(\lambda_{1})+\Lambda_{2}(\lambda_{2})$。上限は変数ごとに分かれて $\sup_{\lambda_{1}}(\lambda_{1}x_{1}-\Lambda_{1})+\sup_{\lambda_{2}}(\lambda_{2}x_{2}-\Lambda_{2})$。
+:::
+
+::: problem {#prb:prob-crd-multinomial}
+$\Sigma=\{1,\dots,d\}$ 上の分布 $\mu$（すべての成分が正）について、$X\defeq e_{\xi}$（$\xi\sim\mu$、$e_{a}$ は標準基底）とすると $S_{n}/n=L_{n}$（経験分布）である。$\nu$ が確率ベクトルなら $\Lambda^{*}(\nu)=H(\nu\mid\mu)$ となることを、勾配の条件から直接確かめよ。
+:::
+
+::: solution
+$\Lambda(\lambda)=\log\sum_{a}\mu(a)e^{\lambda_{a}}$、$\partial_{a}\Lambda=\frac{\mu(a)e^{\lambda_{a}}}{\sum_{b}\mu(b)e^{\lambda_{b}}}$。$\nu(a)>0$（すべての $a$）なら $\lambda_{a}=\log\frac{\nu(a)}{\mu(a)}$ で $\nabla\Lambda=\nu$、$\Lambda(\lambda)=\log\sum\nu(a)=0$ なので $\Lambda^{*}(\nu)=\sum_{a}\nu(a)\log\frac{\nu(a)}{\mu(a)}$。境界上の $\nu$ でも、レート関数の一意性（\ref{prb:sanov-theorem} を $\mathbb{R}^{d}$ 上の大偏差原理とみなす。単体は閉集合なので、その外では $H=\infty$ とおけばよい）から一致する。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** $\Lambda$ の 2 階微分可能性や狭義凸性は使わなかった（補題の 2 は 1 階で足りる）。ガウス雑音を加える方法は Dembo–Zeitouni『Large Deviations Techniques and Applications』第 2.2.2 節の証明の流儀による。
+
+**前提を変えると.**
+- **$\Lambda$ が原点の近傍でだけ有限**：$\mathbb{R}^{d}$ でも、$0$ が $\{\Lambda<\infty\}$ の内部にあれば同じ結論が成り立つ（Dembo–Zeitouni 第 6 章。ここでは証明しない）。
+- **ガルトナー–エリスの定理**：独立同分布でなくても、$\Lambda(\lambda)\defeq\lim\frac1n\log E[e^{\langle\lambda,Z_{n}\rangle}]$ が存在し、原点の近傍で有限で、本質的になめらか（微分可能で、定義域の境界で勾配が発散する）なら、$Z_{n}/n$ は $\Lambda^{*}$ による大偏差原理をみたす。マルコフ連鎖の加法汎関数などに使われる。
+- **無限次元**：バナッハ空間値の独立同分布確率変数についても、適当な可積分性のもとでクラメールの定理が成り立つ（ドンスカー–ヴァラダン）。ブラウン運動の小さな雑音の大偏差（シルダーの定理）はこの延長線上にある。
+
+**高い視点から：凸双対性としての大偏差.** 上界は「すべての線形汎関数 $\lambda$ について指数型チェビシェフの不等式を使い、最良のものを選ぶ」ことで、これは凸集合をそれを含む半空間の交わりとして表すこと（ハーン–バナッハの定理の有限次元版）と同じ発想である。下界は「確率を傾けて稀な点を典型的な点にする」ことで、凸関数の勾配写像 $\nabla\Lambda$ がルジャンドル変換の双対座標を与える。比喩で言えば、上界は外から光を当てて影の形を測り、下界は内側に入り込んでその点に立ってみることである。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-crd-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
