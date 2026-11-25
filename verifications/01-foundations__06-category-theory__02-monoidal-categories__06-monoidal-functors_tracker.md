@@ -19,6 +19,7 @@ The main body (definition, composition, preservation of monoids, strictification
 - **Detail:** The supplement says the proof of the strictification theorem uses no assumption on $\mathbf{M}$ (such as smallness). But the construction forms $\mathbf{S}$ whose objects are finite lists of objects of $\mathbf{M}$ and whose hom-sets are those of $\mathbf{M}$; for $\mathbf{S}$ to be a genuine category (with a set/class of objects and well-defined hom-collections) and for the equivalence to be stated in the usual foundational setting, one needs $\mathbf{M}$ to be at least locally small (and the list construction to be legitimate). The statement 'no assumption at all' is overstated; the honest claim is that no size assumption beyond local smallness is needed, and the coherence theorem is the only nontrivial input.
 - **Proposed fix:** Replace with: 'The proof uses no assumption on $\mathbf{M}$ beyond local smallness (so that $\mathbf{S}(s,t)=\mathbf{M}(F(s),F(t))$ is a set); in particular no strictness or size hypothesis on $\mathbf{M}$ itself is needed. The only non-trivial input is the coherence theorem.'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** S has hom-sets S(s,t) = M(F(s),F(t)) and objects the finite lists of objects of M, so S satisfies exactly the same size conditions as M (locally small iff M is, small iff M is). No hypothesis on M is needed; the text now says so explicitly.
 
 ### ISSUE-0002 [Open] Mac Lane XI.3 Theorem 2 characterization stated loosely
 - **Category:** Supplement/remark error
@@ -26,6 +27,7 @@ The main body (definition, composition, preservation of monoids, strictification
 - **Detail:** The supplement states Mac Lane XI §3 Theorem 2 as 'if a monoidal category is monoidally equivalent to a strict monoidal category via strong monoidal functors, then associativity coherence holds'. As stated this is imprecise: the theorem concerns the coherence of the associativity (and unit) constraints, i.e. that the pentagon (and triangle) diagrams commute, and the equivalence must be a monoidal equivalence in the appropriate sense. The phrasing 'associativity coherence holds' without specifying the pentagon/triangle conditions is too vague and could be read as a triviality.
 - **Proposed fix:** Replace with: 'Mac Lane XI §3 Theorem 2 shows conversely that if $\mathbf{M}$ is monoidally equivalent to a strict monoidal category, then the pentagon and triangle axioms hold in $\mathbf{M}$ (i.e. the associativity and unit constraints are coherent).'
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The proposed wording is wrong: the pentagon and triangle are axioms of a monoidal category, so they need not be proved. Mac Lane XI.3 Theorem 2 proves coherence, i.e. that any two morphisms between the same words built from α, λ, ρ are equal. The text now states this precisely.
 
 ### ISSUE-0003 [Open] Bicategory strictification attribution and statement
 - **Category:** Supplement/remark error
@@ -33,6 +35,7 @@ The main body (definition, composition, preservation of monoids, strictification
 - **Detail:** The supplement says every bicategory is biequivalent to a 2-category, attributed to 'Mac Lane–Paré, 1985'. The standard reference for strictification of bicategories is Mac Lane's coherence for bicategories and, for the general strictification result, the work of Gordon–Power–Street (1995) and earlier Mac Lane; the attribution 'Mac Lane–Paré 1985' is not the standard citation for bicategory strictification (Mac Lane–Paré is associated with coherence for monoidal categories / symmetric monoidal). Since the text itself flags it as unverified, the attribution is at least suspect and should not be asserted.
 - **Proposed fix:** Replace with: 'every bicategory is biequivalent to a 2-category (strictification of bicategories; see e.g. Gordon–Power–Street 1995, and Mac Lane's coherence theorem for the one-object case)'.
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** S. Mac Lane and R. Paré, "Coherence for bicategories and indexed categories", J. Pure Appl. Algebra 37 (1985), is a standard reference for the theorem that every bicategory is biequivalent to a 2-category, so the attribution is correct. The text now gives the full reference. Gordon–Power–Street concerns tricategories.
 
 ### ISSUE-0004 [Open] Tricategory 'semi-strictification only' claim overstated
 - **Category:** Supplement/remark error
