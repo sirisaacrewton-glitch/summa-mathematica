@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>大偏差原理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/05-large-deviations/02-ldp.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 大偏差原理 {#prb:page-ldp keywords="rate functions, good rate functions with compact level sets, large deviation principle with speed n on a metric space, largest exponent wins for finite sums, uniqueness of the rate function, local upper bounds imply compact upper bounds, exponential tightness, contraction principle, Varadhan's lemma for bounded continuous functions, Laplace principle"}
+
+クラメールの定理の形「閉集合で上から、開集合で下から、同じ関数 $I$ で指数の速さが決まる」を抽象化したのが**大偏差原理**である。この形にしておくと、レート関数が一意に決まること、連続写像で押し出しても大偏差原理が保たれること（**縮約原理**）、そして指数関数的な重みをつけた積分の漸近がレート関数の変分問題で与えられること（**ヴァラダンの補題**、ラプラスの方法の無限次元版）が、分布の具体形によらずに示せる。
+
+## 記法と定義の確認 {#prb:sec-ld-notation}
+
+::: notation
+- $(E,d)$ は距離空間、$\mathcal{B}(E)$ はボレル集合族、$\mu_{n}$（$n\ge1$）は $(E,\mathcal{B}(E))$ 上の確率測度。$B(x,\delta)$ は開球、$\bar B(x,\delta)\defeq\{y:d(x,y)\le\delta\}$ は閉球。$A^{\circ}$, $\bar A$ は内部と閉包。
+- 下半連続性は \ref{calc:semicontinuous}（距離空間でも同じ定義：$\{f>c\}$ がすべて開集合）。コンパクト集合の基本性質は \ref{top:compact-basic}、距離空間のコンパクト性の同値な言い換え（点列コンパクト性）は \ref{top:compact-metric-equivalents}。
+- 標本平均の大偏差とレート関数 $\Lambda^{*}$ は \ref{prb:cramer-theorem}, \ref{prb:log-mgf-properties}。
+- $\log0=-\infty$, $\inf\emptyset=+\infty$。体系は $\ZFC$。
+:::
+
+## レート関数と大偏差原理 {#prb:sec-ld-definition}
+
+::: definition レート関数と大偏差原理 {#prb:large-deviation-principle keywords="rate function: lower semicontinuous I: E -> [0, infinity]; good if all level sets {I <= alpha} are compact; (mu_n) satisfies the LDP with rate I if limsup (1/n) log mu_n(F) <= - inf_F I for closed F and liminf (1/n) log mu_n(G) >= - inf_G I for open G" index="大偏差原理|だいへんさげんり, レート関数|れーとかんすう, 良いレート関数|よいれーとかんすう" refname="レート関数と大偏差原理"}
+1. 下半連続な関数 $I:E\to[0,\infty]$ を**レート関数**という。すべての $\alpha\in[0,\infty)$ について水準集合 $\{I\le\alpha\}$ がコンパクトなとき、**良いレート関数**という。
+2. 確率測度の列 $(\mu_{n})$ が、レート関数 $I$ による（速さ $n$ の）**大偏差原理**をみたすとは、
+$$
+\limsup_{n\to\infty}\frac1n\log\mu_{n}(F)\le-\inf_{F}I\quad(F\text{ は閉}),\qquad\liminf_{n\to\infty}\frac1n\log\mu_{n}(G)\ge-\inf_{G}I\quad(G\text{ は開})
+$$
+が成り立つことをいう。前者を**上界**、後者を**下界**と呼ぶ。同値な言い換えとして、任意のボレル集合 $A$ について
+$$
+-\inf_{A^{\circ}}I\le\liminf\frac1n\log\mu_{n}(A)\le\limsup\frac1n\log\mu_{n}(A)\le-\inf_{\bar A}I.
+$$
+:::
+
+::: intuition
+大偏差原理は「$\mu_{n}(dx)\approx e^{-nI(x)}dx$」という主張を、測度の言葉で正確にしたものである。$I$ が $0$ になる点が「典型的な値」（大数の法則の極限）で、$I(x)>0$ の点の近くに来る確率は指数関数的に小さい。境界上の点での振る舞いは指数の速さに影響しうるので、閉集合と開集合を分けて述べる。
+:::
+
+::: lemma 最大の指数が勝つ {#prb:largest-exponent keywords="for nonnegative a_n^{(1)}, ..., a_n^{(N)}: limsup (1/n) log sum_j a_n^{(j)} = max_j limsup (1/n) log a_n^{(j)}" index="ラプラスの原理（有限和）|らぷらすのげんり" refname="最大の指数が勝つ"}
+$N$ を固定し、$a_{n}^{(1)},\dots,a_{n}^{(N)}\ge0$ とすると
+$$
+\limsup_{n\to\infty}\frac1n\log\sum_{j=1}^{N}a_{n}^{(j)}=\max_{j}\limsup_{n\to\infty}\frac1n\log a_{n}^{(j)}.
+$$
+:::
+
+::: intuition
+$e^{-2n}+e^{-5n}$ は $n$ が大きいと $e^{-2n}$ とほとんど変わらない。指数の速さで見ると、有限個の和は最大の項だけで決まる。
+:::
+
+::: proof
+**Step 1（$\ge$）.** 和は各項以上なので左辺は各 $j$ の $\limsup$ 以上。
+
+**Step 2（$\le$）.** $\sum_{j}a_{n}^{(j)}\le N\max_{j}a_{n}^{(j)}$ から $\frac1n\log\sum\le\frac{\log N}{n}+\max_{j}\frac1n\log a_{n}^{(j)}$。有限個の数列の最大値の $\limsup$ は $\limsup$ の最大値以下（各 $j$ について、十分大きい $n$ で $\frac1n\log a_{n}^{(j)}\le\limsup_{j}+\varepsilon$）。
+:::
+
+::: proposition レート関数の一意性 {#prb:rate-function-unique keywords="if (mu_n) satisfies the LDP with rate functions I and J on a metric space then I = J; I(x) = - lim_{delta -> 0} liminf (1/n) log mu_n(B(x, delta)) = - lim_{delta -> 0} limsup (1/n) log mu_n(B(x, delta))" index="レート関数の一意性|れーとかんすうのいちいせい" refname="レート関数の一意性"}
+$(\mu_{n})$ がレート関数 $I$ による大偏差原理をみたせば、すべての $x\in E$ で
+$$
+I(x)=-\lim_{\delta\to0}\liminf_{n\to\infty}\frac1n\log\mu_{n}(B(x,\delta))=-\lim_{\delta\to0}\limsup_{n\to\infty}\frac1n\log\mu_{n}(B(x,\delta)).
+$$
+特に、大偏差原理のレート関数はただ一つである。
+:::
+
+::: intuition
+レート関数の値 $I(x)$ は「$x$ の小さな近傍に来る確率の指数の速さ」として測定できる量なので、確率測度の列から一意に読み取れる。
+:::
+
+::: proof
+**Step 1（極限の存在）.** $\mu_{n}(B(x,\delta))$ は $\delta$ について単調増加なので、$\liminf$, $\limsup$ もそうで、$\delta\to0$ の極限（$[-\infty,0]$ の値）が存在する。
+
+**Step 2（下からの評価）.** 開球に下界を使うと $\liminf\frac1n\log\mu_{n}(B(x,\delta))\ge-\inf_{B(x,\delta)}I\ge-I(x)$。
+
+**Step 3（上からの評価）.** 【主張：$\inf_{\bar B(x,\delta)}I\to I(x)$（$\delta\to0$）】$c<I(x)$ を任意にとると、$\{I>c\}$ は下半連続性から開集合で $x$ を含むので、小さな $\delta$ で $\bar B(x,\delta)\subseteq\{I>c\}$、すなわち $\inf_{\bar B(x,\delta)}I\ge c$。一方 $\inf_{\bar B(x,\delta)}I\le I(x)$。閉球に上界を使うと $\limsup\frac1n\log\mu_{n}(B(x,\delta))\le\limsup\frac1n\log\mu_{n}(\bar B(x,\delta))\le-\inf_{\bar B(x,\delta)}I\to-I(x)$。
+
+**Step 4（結論）.** Step 2, 3 から $-I(x)\le\lim_{\delta}\liminf\le\lim_{\delta}\limsup\le-I(x)$。中辺は $(\mu_{n})$ だけで決まるので、レート関数は一意。
+:::
+
+## 上界の局所化と指数的緊密性 {#prb:sec-ld-tightness}
+
+::: proposition 上界の局所化と指数的緊密性 {#prb:exponential-tightness keywords="if lim_{delta -> 0} limsup (1/n) log mu_n(B(x, delta)) <= -I(x) for all x then the upper bound holds for compact sets; (mu_n) is exponentially tight if for every alpha there is a compact K with limsup (1/n) log mu_n(K^c) <= -alpha; compact upper bound plus exponential tightness gives the upper bound for closed sets" index="指数的緊密性|しすうてききんみつせい" refname="上界の局所化と指数的緊密性"}
+$I$ をレート関数とする。
+1. すべての $x$ で $\lim_{\delta\to0}\limsup_{n}\frac1n\log\mu_{n}(B(x,\delta))\le-I(x)$ なら、すべてのコンパクト集合 $K$ で $\limsup\frac1n\log\mu_{n}(K)\le-\inf_{K}I$。
+2. $(\mu_{n})$ が**指数的に緊密**、すなわち各 $\alpha<\infty$ についてコンパクト集合 $K_{\alpha}$ があって $\limsup\frac1n\log\mu_{n}(E\setminus K_{\alpha})\le-\alpha$ であり、さらにコンパクト集合について上界が成り立つなら、すべての閉集合について上界が成り立つ。
+:::
+
+::: intuition
+コンパクト集合は有限個の小さな球で覆えるので、点ごとの評価を足し合わせても指数の速さは変わらない（\ref{prb:largest-exponent}）。コンパクトでない閉集合に対しては、確率の質量が「無限遠に逃げない」こと、すなわち指数的緊密性が要る。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$c<\inf_{K}I$ をみたす任意の実数 $c$ について $\limsup\frac1n\log\mu_{n}(K)\le-c$】各 $x\in K$ で $I(x)>c$ なので、仮定から $\delta_{x}>0$ があって $\limsup\frac1n\log\mu_{n}(B(x,\delta_{x}))\le-c$。開球 $B(x,\delta_{x})$ は $K$ を覆うので有限個 $B(x_{1},\delta_{1}),\dots,B(x_{N},\delta_{N})$ で覆える。$\mu_{n}(K)\le\sum_{j}\mu_{n}(B(x_{j},\delta_{j}))$ と \ref{prb:largest-exponent} から主張が従う。$c\uparrow\inf_{K}I$（$\inf_{K}I=\infty$ なら $c\to\infty$）とする。
+
+**Step 2（2）.** $F$ を閉集合とする。$F\cap K_{\alpha}$ はコンパクト（\ref{top:compact-basic}）で、$\mu_{n}(F)\le\mu_{n}(F\cap K_{\alpha})+\mu_{n}(E\setminus K_{\alpha})$。\ref{prb:largest-exponent} から
+$$
+\limsup\frac1n\log\mu_{n}(F)\le\max\Bigl(-\inf_{F\cap K_{\alpha}}I,\ -\alpha\Bigr)\le\max\Bigl(-\inf_{F}I,\ -\alpha\Bigr).
+$$
+$\alpha\to\infty$ とする。
+:::
+
+## 縮約原理 {#prb:sec-ld-contraction}
+
+::: theorem 縮約原理 {#prb:contraction-principle keywords="if (mu_n) satisfies the LDP on E with a good rate function I and f: E -> E' is continuous, then (mu_n o f^{-1}) satisfies the LDP on E' with the good rate function J(y) = inf{I(x) : f(x) = y}; the infimum is attained" index="縮約原理|しゅくやくげんり" refname="縮約原理"}
+$(E,d)$, $(E',d')$ を距離空間、$f:E\to E'$ を連続写像、$(\mu_{n})$ を良いレート関数 $I$ による大偏差原理をみたす確率測度の列とする。
+$$
+J(y)\defeq\inf\{I(x):f(x)=y\}\qquad(y\in E')
+$$
+とおくと、
+1. $J(y)<\infty$ なら下限は達成される。$J$ は良いレート関数で、$\{J\le\alpha\}=f(\{I\le\alpha\})$。
+2. 押し出し $\mu_{n}\circ f^{-1}$ は $J$ による大偏差原理をみたす。
+:::
+
+::: intuition
+$f(x)$ が $y$ になるという稀な出来事は、$f(x)=y$ となるさまざまな $x$ を通って起こりうるが、指数の速さを決めるのはその中で最も起こりやすい $x$（$I$ が最小の $x$）だけである。
+:::
+
+::: proof
+**Step 1（下限の達成と水準集合）.** 【主張：$\{J\le\alpha\}=f(\{I\le\alpha\})$】$\supseteq$ は定義から。$J(y)\le\alpha$ とすると、各 $k$ について $f(x_{k})=y$, $I(x_{k})\le\alpha+\frac1k$ となる $x_{k}$ がある。$x_{k}\in\{I\le\alpha+1\}$ はコンパクトなので（\ref{top:compact-metric-equivalents}）収束する部分列 $x_{k_{j}}\to x$ がある。下半連続性から $I(x)\le\liminf I(x_{k_{j}})\le\alpha$、連続性から $f(x)=y$。よって $y\in f(\{I\le\alpha\})$ で、$J(y)=I(x)$（$I(x)\ge J(y)$ は定義から）。
+
+**Step 2（$J$ は良いレート関数）.** $\{J\le\alpha\}=f(\{I\le\alpha\})$ はコンパクト集合の連続像なのでコンパクト（\ref{top:compact-basic}）、距離空間で閉。$\{J>\alpha\}$ が開なので $J$ は下半連続、$J\ge0$。
+
+**Step 3（大偏差原理）.** $F\subseteq E'$ が閉なら $f^{-1}(F)$ は閉で、$\inf_{f^{-1}(F)}I=\inf_{y\in F}\inf_{f(x)=y}I(x)=\inf_{F}J$。よって $\limsup\frac1n\log\mu_{n}(f^{-1}(F))\le-\inf_{F}J$。開集合も同様。
+:::
+
+::: example 標本平均の 2 乗 {#prb:contraction-square-example}
+$\Lambda$ がいたる所有限なら、\ref{prb:cramer-theorem} と \ref{prb:log-mgf-properties} の 4 から、$S_{n}/n$ の分布は良いレート関数 $\Lambda^{*}$ による大偏差原理をみたす。$f(x)=x^{2}$ に縮約原理を使うと、$(S_{n}/n)^{2}$ の分布は
+$$
+J(y)=\min\bigl(\Lambda^{*}(\sqrt y),\Lambda^{*}(-\sqrt y)\bigr)\quad(y\ge0),\qquad J(y)=\infty\quad(y<0)
+$$
+による大偏差原理をみたす。標準正規分布なら $J(y)=\frac y2$（$y\ge0$）。
+:::
+
+## ヴァラダンの補題 {#prb:sec-ld-varadhan}
+
+::: theorem ヴァラダンの補題 {#prb:varadhan-lemma keywords="if (mu_n) satisfies the LDP with rate I and phi: E -> R is bounded and continuous, then lim (1/n) log int e^{n phi} d mu_n = sup_x (phi(x) - I(x)); proof by a finite partition of the range of phi" index="ヴァラダンの補題|ゔぁらだんのほだい, ラプラスの方法（無限次元）|らぷらすのほうほう" refname="ヴァラダンの補題"}
+$(\mu_{n})$ がレート関数 $I$ による大偏差原理をみたし、$\varphi:E\to\mathbb{R}$ が有界かつ連続なら
+$$
+\lim_{n\to\infty}\frac1n\log\int_{E}e^{n\varphi}\,d\mu_{n}=\sup_{x\in E}\bigl(\varphi(x)-I(x)\bigr).
+$$
+:::
+
+::: intuition
+これはラプラスの方法 $\int e^{n\varphi(x)}e^{-nI(x)}dx\approx e^{n\sup(\varphi-I)}$ の一般化である。指数の重み $e^{n\varphi}$ と確率の小ささ $e^{-nI}$ の綱引きで、積分は $\varphi-I$ が最大の点の寄与に支配される。統計力学では、エネルギーと（符号を変えた）エントロピーの和を最小にする状態が実現する、という変分原理にあたる。
+:::
+
+::: proof
+**Step 1（下からの評価）.** 【主張：各 $x$ と $\varepsilon>0$ について $\liminf\frac1n\log\int e^{n\varphi}d\mu_{n}\ge\varphi(x)-I(x)-\varepsilon$】$I(x)=\infty$ なら自明。$G\defeq\{\varphi>\varphi(x)-\varepsilon\}$ は連続性から開集合で $x$ を含む。$\int e^{n\varphi}d\mu_{n}\ge e^{n(\varphi(x)-\varepsilon)}\mu_{n}(G)$ に下界を使うと、$\liminf\ge\varphi(x)-\varepsilon-\inf_{G}I\ge\varphi(x)-\varepsilon-I(x)$。$x$ と $\varepsilon$ について上限をとる。
+
+**Step 2（値域の分割）.** $\abs\varphi\le M$ とし、$\varepsilon>0$ について $c_{j}\defeq-M+j\varepsilon$（$j=0,1,\dots,N$、$c_{N}\ge M$）、$F_{j}\defeq\varphi^{-1}([c_{j},c_{j+1}])$（$j<N$）とする。$F_{j}$ は閉集合で $E$ を覆い、$F_{j}$ の上で $e^{n\varphi}\le e^{nc_{j+1}}$。よって $\int e^{n\varphi}d\mu_{n}\le\sum_{j<N}e^{nc_{j+1}}\mu_{n}(F_{j})$。
+
+**Step 3（上からの評価）.** 【主張：$\limsup\frac1n\log\int e^{n\varphi}d\mu_{n}\le\sup(\varphi-I)+\varepsilon$】\ref{prb:largest-exponent} と上界から、左辺 $\le\max_{j<N}(c_{j+1}-\inf_{F_{j}}I)$。$x\in F_{j}$ なら $c_{j+1}\le\varphi(x)+\varepsilon$ なので $c_{j+1}-I(x)\le\sup(\varphi-I)+\varepsilon$。$x\in F_{j}$ について上限をとると $c_{j+1}-\inf_{F_{j}}I\le\sup(\varphi-I)+\varepsilon$（$F_{j}=\emptyset$ なら左辺は $-\infty$）。$\varepsilon\to0$ とし、Step 1 と合わせる。
+:::
+
+::: example ヴァラダンの補題と積率母関数 {#prb:varadhan-example}
+標準正規分布の標本平均では $\Lambda^{*}(x)=\frac{x^{2}}2$ で、$\varphi(x)=\lambda x$ について $\sup_{x}(\lambda x-\frac{x^{2}}2)=\frac{\lambda^{2}}2$。一方 $\frac1n\log E[e^{n\lambda S_{n}/n}]=\frac1n\log E[e^{\lambda S_{n}}]=\Lambda(\lambda)=\frac{\lambda^{2}}2$ で一致する。ただし $\varphi(x)=\lambda x$ は有界でないので、これは定理の適用ではなく整合性の確認である（有界でない $\varphi$ には、補足の裾の条件が必要）。一般に $\Lambda=\Lambda^{**}$（凸双対性）が、ヴァラダンの補題を $\varphi(x)=\lambda x$ に形式的に当てはめた式と一致する。
+:::
+
+::: hypcheck
+- **良いレート関数**：縮約原理で下限の達成と水準集合のコンパクト性（Step 1）に使った。良くないレート関数では $J$ が下半連続にならないことがある。一方、ヴァラダンの補題と一意性には使っていない。
+- **$\varphi$ の有界性**：ヴァラダンの補題で値域を有限個の区間に分けるのに使った（Step 2）。上に有界でない $\varphi$ では、裾の条件 $\lim_{M\to\infty}\limsup_{n}\frac1n\log\int_{\{\varphi\ge M\}}e^{n\varphi}d\mu_{n}=-\infty$ のもとで同じ結論が成り立つ（Dembo–Zeitouni 定理 4.3.1）。
+- **$\varphi$ の連続性**：下界で $\{\varphi>\varphi(x)-\varepsilon\}$ が開集合であること、上界で $F_{j}$ が閉集合であることに使った。
+- **距離空間**：一意性の証明で球を使った。位相空間でも、正則ハウスドルフ空間なら一意性は成り立つ。
+:::
+
+## 問題 {#prb:sec-ld-problems}
+
+::: problem {#prb:prob-ld-affine}
+$(\mu_{n})$ が $\mathbb{R}$ 上で良いレート関数 $I$ による大偏差原理をみたすとき、$a\ne0$, $b\in\mathbb{R}$ について $x\mapsto ax+b$ による押し出しのレート関数を求めよ。
+:::
+
+::: solution
+縮約原理から $J(y)=I\bigl(\frac{y-b}{a}\bigr)$（$f$ が全単射なので下限は 1 点）。
+:::
+
+::: problem {#prb:prob-ld-not-good}
+$E=\mathbb{R}$、$\mu_{n}=\delta_{n}$（点 $n$ の単位質量）、$I\equiv\infty$ とする。コンパクト集合についての上界と開集合についての下界は成り立つが、閉集合 $F=\mathbb{N}$ について上界が成り立たないこと、および $(\mu_{n})$ が指数的に緊密でないことを示せ。
+:::
+
+::: solution
+$I\equiv\infty$ は下半連続なのでレート関数。下界の右辺は $-\infty$ なので自明。コンパクト集合 $K$ は有界なので、十分大きい $n$ で $\mu_{n}(K)=0$、$\frac1n\log\mu_{n}(K)=-\infty$。一方 $\mu_{n}(\mathbb{N})=1$ なので $\limsup\frac1n\log\mu_{n}(\mathbb{N})=0>-\infty$。どのコンパクト集合 $K$ についても $\mu_{n}(\mathbb{R}\setminus K)=1$（$n$ が大きいとき）なので、指数的に緊密でない。\ref{prb:exponential-tightness} の 2 で指数的緊密性が外せないことを示す例である。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ヴァラダンの補題とレート関数の一意性には $I$ が良いことを使っていない。可分性も使っていない。議論は Dembo–Zeitouni『Large Deviations Techniques and Applications』第 4.1〜4.3 節の流儀に沿う。
+
+**前提を変えると.**
+- **ブリックの逆補題**：指数的に緊密な $(\mu_{n})$ について、すべての有界連続関数 $\varphi$ で $\Gamma(\varphi)\defeq\lim\frac1n\log\int e^{n\varphi}d\mu_{n}$ が存在すれば、$(\mu_{n})$ は $I(x)=\sup_{\varphi}(\varphi(x)-\Gamma(\varphi))$ による大偏差原理をみたす（ここでは証明しない）。ヴァラダンの補題と合わせると、大偏差原理は「ラプラス原理」と同値になる。
+- **指数的同等性**：$d(Y_{n},Z_{n})$ が指数的に小さい速さで $0$ に近づけば、$Y_{n}$ と $Z_{n}$ の分布は同じレート関数の大偏差原理をみたす。縮約原理と組み合わせると、近似による議論ができる。
+- **速さ $a_{n}$**：$\frac1n$ を一般の $a_{n}\to0$ に置き換えた大偏差原理も同様に扱える（例：$\sqrt\varepsilon B$ のシルダーの定理は速さ $\varepsilon$）。
+
+**高い視点から：トロピカルな極限としての大偏差.** $\frac1n\log$ をとる操作は、和を最大値に、積を和に変える（\ref{prb:largest-exponent}）。この意味で大偏差原理は、確率測度を「$(\max,+)$ 代数に値をとる測度」$-I$ に移す極限で、縮約原理は押し出しの、ヴァラダンの補題は積分の、その極限での振る舞いである。比喩で言えば、確率測度を「指数の眼鏡」で見ると、なめらかな山並みが最高峰の高さだけからなる地図に変わる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-ld-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

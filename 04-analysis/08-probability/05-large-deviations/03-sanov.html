@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>サノフの定理（有限アルファベット） | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/05-large-deviations/03-sanov.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# サノフの定理（有限アルファベット） {#prb:page-sanov keywords="empirical measures of i.i.d. samples on a finite alphabet, types and type classes, number of types at most (n+1)^{|Sigma|}, size of a type class between (n+1)^{-|Sigma|} e^{n H(nu)} and e^{n H(nu)}, Shannon entropy, relative entropy (Kullback-Leibler divergence), Sanov's theorem for finite alphabets, method of types, contraction to Cramer's theorem, variational formula Lambda^*(x) = min{H(nu|mu) : mean of nu = x}"}
+
+標本平均は標本の情報の一部しか見ていない。標本全体の「ヒストグラム」、すなわち経験分布 $L_{n}=\frac1n\sum_{i}\delta_{X_{i}}$ は、大数の法則によって真の分布 $\mu$ に近づくが、別の分布 $\nu$ の近くに来る確率はどれほどか。**サノフの定理**によれば、それは $e^{-nH(\nu\mid\mu)}$ の速さで小さくなる。ここで $H(\nu\mid\mu)$ は**相対エントロピー**（カルバック–ライブラー情報量）である。値が有限個の場合には、同じヒストグラムをもつ標本列の個数を数える**型の方法**で、この定理を組合せ論的に完全に証明できる。さらに縮約原理を使うと、クラメールの定理のレート関数が相対エントロピーの最小化として表される。
+
+## 記法と定義の確認 {#prb:sec-sa-notation}
+
+::: notation
+- $\Sigma$ は有限集合（アルファベット）、$\abs\Sigma$ はその元の個数。$\mathcal{P}(\Sigma)$ は $\Sigma$ 上の確率分布全体で、$\nu\mapsto(\nu(a))_{a\in\Sigma}$ によって $\mathbb{R}^{\Sigma}$ の単体（コンパクト集合）と同一視し、距離 $\norm{\nu-\nu'}_{1}\defeq\sum_{a}\abs{\nu(a)-\nu'(a)}$ を入れる。内部 $\Gamma^{\circ}$ はこの距離空間 $\mathcal{P}(\Sigma)$ の中でとる。
+- $\mu\in\mathcal{P}(\Sigma)$ は**すべての $a$ で $\mu(a)>0$** をみたすとし、$X_{1},X_{2},\dots$ は分布 $\mu$ の独立同分布な $\Sigma$ 値確率変数とする。
+- $0\log0\defeq0$。大偏差原理の定義と一般論は \ref{prb:large-deviation-principle}, \ref{prb:rate-function-unique}, \ref{prb:contraction-principle}、標本平均の大偏差は \ref{prb:cramer-theorem}。
+- 体系は $\ZFC$。
+:::
+
+## 型と相対エントロピー {#prb:sec-sa-types}
+
+::: definition 経験分布・型・エントロピー {#prb:types-entropy keywords="empirical measure L_n = (1/n) sum delta_{X_i}; type of a sequence x in Sigma^n; set of types T_n; type class T(nu); Shannon entropy H(nu) = - sum nu log nu; relative entropy H(nu | mu) = sum nu log(nu / mu)" index="経験分布|けいけんぶんぷ, 型（情報理論）|かた, エントロピー|えんとろぴー, 相対エントロピー|そうたいえんとろぴー, カルバック–ライブラー情報量|かるばっくらいぶらーじょうほうりょう" refname="経験分布・型・エントロピー"}
+1. 列 $x=(x_{1},\dots,x_{n})\in\Sigma^{n}$ の**型**（経験分布）を $L(x)(a)\defeq\frac1n\#\{i:x_{i}=a\}$ で定める。$L_{n}\defeq L(X_{1},\dots,X_{n})$ を**経験分布**という。
+2. $n$ 個の列の型として現れる分布（すべての $a$ で $n\nu(a)\in\mathbb{Z}$）の全体を $\mathcal{T}_{n}$、$\nu\in\mathcal{T}_{n}$ の**型類**を $T(\nu)\defeq\{x\in\Sigma^{n}:L(x)=\nu\}$ とする。
+3. $\nu\in\mathcal{P}(\Sigma)$ の**エントロピー**を $H(\nu)\defeq-\sum_{a}\nu(a)\log\nu(a)$、$\mu$ に関する**相対エントロピー**を
+$$
+H(\nu\mid\mu)\defeq\sum_{a\in\Sigma}\nu(a)\log\frac{\nu(a)}{\mu(a)}
+$$
+とする。
+:::
+
+::: intuition
+型は「並び順を忘れたヒストグラム」である。同じ型をもつ列は、$\mu$ のもとで同じ確率をもつ（確率は各記号の出現回数だけで決まる）。だから型 $\nu$ が現れる確率は「型類の大きさ」×「1 つの列の確率」で、前者はエントロピー $e^{nH(\nu)}$、後者は $e^{-n(H(\nu)+H(\nu\mid\mu))}$ の大きさなので、積は $e^{-nH(\nu\mid\mu)}$ になる。
+:::
+
+::: lemma 相対エントロピーの性質 {#prb:relative-entropy-properties keywords="H(nu | mu) >= 0 with equality iff nu = mu (Gibbs inequality via log t <= t - 1); H(. | mu) is continuous on P(Sigma) when mu has full support" index="ギブスの不等式|ぎぶすのふとうしき" refname="相対エントロピーの性質"}
+1. $H(\nu\mid\mu)\ge0$ で、等号は $\nu=\mu$ のときに限る。
+2. $\nu\mapsto H(\nu\mid\mu)$ は $\mathcal{P}(\Sigma)$ 上連続（有限値）。
+:::
+
+::: intuition
+相対エントロピーは「真の分布が $\mu$ なのに $\nu$ だと思って符号化したときの損失」で、正しい分布を使うときに限って損失が $0$ になる。
+:::
+
+::: proof
+**Step 1（1）.** $S\defeq\{a:\nu(a)>0\}$ とする。$\log t\le t-1$（等号は $t=1$ のみ、$\log$ の凹性）を $t=\mu(a)/\nu(a)$ に使うと
+$$
+-H(\nu\mid\mu)=\sum_{a\in S}\nu(a)\log\frac{\mu(a)}{\nu(a)}\le\sum_{a\in S}(\mu(a)-\nu(a))=\mu(S)-1\le0.
+$$
+等号なら $S$ 上で $\mu=\nu$ かつ $\mu(S)=1$、すなわち $\mu=\nu$。
+
+**Step 2（2）.** $\mu(a)>0$ なので $H(\nu\mid\mu)=\sum_{a}\bigl(\nu(a)\log\nu(a)-\nu(a)\log\mu(a)\bigr)$ で、$t\mapsto t\log t$ は $[0,1]$ 上連続（$t\to0$ で $\to0$）。
+:::
+
+::: lemma 型の数え上げ {#prb:method-of-types keywords="|T_n| <= (n+1)^{|Sigma|}; for x in T(nu), P(X = x) = exp(-n (H(nu) + H(nu|mu))); (n+1)^{-|Sigma|} e^{n H(nu)} <= |T(nu)| <= e^{n H(nu)}; (n+1)^{-|Sigma|} e^{-n H(nu|mu)} <= P(L_n = nu) <= e^{-n H(nu|mu)}" index="型の方法|かたのほうほう" refname="型の数え上げ"}
+$\nu\in\mathcal{T}_{n}$ とする。
+1. $\abs{\mathcal{T}_{n}}\le(n+1)^{\abs\Sigma}$。
+2. $x\in T(\nu)$ なら $P((X_{1},\dots,X_{n})=x)=e^{-n(H(\nu)+H(\nu\mid\mu))}$。
+3. $(n+1)^{-\abs\Sigma}e^{nH(\nu)}\le\abs{T(\nu)}\le e^{nH(\nu)}$。
+4. $(n+1)^{-\abs\Sigma}e^{-nH(\nu\mid\mu)}\le P(L_{n}=\nu)\le e^{-nH(\nu\mid\mu)}$。
+:::
+
+::: intuition
+長さ $n$ の列は $\abs\Sigma^{n}$ 個と指数的に多いが、型の種類は多項式個しかない。だから確率の計算は、少数の型ごとに「型類の大きさ」と「1 本の列の確率」を掛ける作業に帰着する。
+:::
+
+::: proof
+**Step 1（1）.** 各 $\nu(a)$ は $\{0,\frac1n,\dots,1\}$ の $n+1$ 通りの値しかとらない。
+
+**Step 2（2）.** 独立性から $P(X=x)=\prod_{i}\mu(x_{i})=\prod_{a}\mu(a)^{n\nu(a)}=\exp\bigl(n\sum_{a}\nu(a)\log\mu(a)\bigr)$。$\sum_{a}\nu(a)\log\mu(a)=\sum_{a}\nu(a)\log\nu(a)-\sum_{a}\nu(a)\log\frac{\nu(a)}{\mu(a)}=-H(\nu)-H(\nu\mid\mu)$（$\nu(a)=0$ の項はどれも $0$）。
+
+**Step 3（3 の上界）.** 2 は $\mu$ の代わりに $\nu$ 自身を使っても成り立つ（$\nu(a)=0$ の記号は $T(\nu)$ の列に現れないので、$\nu(a)>0$ の $a$ だけで計算が閉じる）。$\nu$ のもとの確率を $P_{\nu}$ と書くと $1\ge P_{\nu}(T(\nu))=\abs{T(\nu)}e^{-nH(\nu)}$（$H(\nu\mid\nu)=0$）。
+
+**Step 4（最頻の型）.** 【主張：すべての $\nu'\in\mathcal{T}_{n}$ で $P_{\nu}(T(\nu))\ge P_{\nu}(T(\nu'))$】ある $a$ で $\nu(a)=0<\nu'(a)$ なら右辺は $0$。そうでなければ、$\abs{T(\nu)}=\frac{n!}{\prod_{a}(n\nu(a))!}$（多項係数）から
+$$
+\frac{P_{\nu}(T(\nu))}{P_{\nu}(T(\nu'))}=\prod_{a}\frac{(n\nu'(a))!}{(n\nu(a))!}\nu(a)^{n\nu(a)-n\nu'(a)}.
+$$
+非負整数 $m,k$ について $\frac{m!}{k!}\ge k^{m-k}$（$m\ge k$ なら $(k+1)\cdots m\ge k^{m-k}$、$m<k$ なら $\frac{1}{(m+1)\cdots k}\ge k^{-(k-m)}$。$0^{0}=1$）を $m=n\nu'(a)$, $k=n\nu(a)$ に使うと、比は $\ge\prod_{a}(n\nu(a))^{n\nu'(a)-n\nu(a)}\nu(a)^{n\nu(a)-n\nu'(a)}=\prod_{a}n^{n(\nu'(a)-\nu(a))}=n^{n(1-1)}=1$（$\nu(a)=0$ の $a$ では $\nu'(a)=0$ で因子は $1$）。
+
+**Step 5（3 の下界）.** 型類は $\Sigma^{n}$ を分割するので、1 と Step 4 から $1=\sum_{\nu'\in\mathcal{T}_{n}}P_{\nu}(T(\nu'))\le\abs{\mathcal{T}_{n}}P_{\nu}(T(\nu))\le(n+1)^{\abs\Sigma}\abs{T(\nu)}e^{-nH(\nu)}$。
+
+**Step 6（4）.** $P(L_{n}=\nu)=\abs{T(\nu)}e^{-n(H(\nu)+H(\nu\mid\mu))}$（2）に 3 を代入する。
+:::
+
+## サノフの定理 {#prb:sec-sa-theorem}
+
+::: theorem サノフの定理（有限アルファベット） {#prb:sanov-theorem keywords="for every Gamma subset P(Sigma): limsup (1/n) log P(L_n in Gamma) <= - inf_Gamma H(.|mu) and liminf (1/n) log P(L_n in Gamma) >= - inf_{interior Gamma} H(.|mu); the empirical measures satisfy the LDP with the good rate function H(.|mu)" index="サノフの定理|さのふのていり" refname="サノフの定理（有限アルファベット）"}
+すべての $a$ で $\mu(a)>0$ とする。任意の $\Gamma\subseteq\mathcal{P}(\Sigma)$ について
+$$
+-\inf_{\nu\in\Gamma^{\circ}}H(\nu\mid\mu)\le\liminf_{n\to\infty}\frac1n\log P(L_{n}\in\Gamma)\le\limsup_{n\to\infty}\frac1n\log P(L_{n}\in\Gamma)\le-\inf_{\nu\in\Gamma}H(\nu\mid\mu).
+$$
+特に $(L_{n})$ の分布は、良いレート関数 $H(\cdot\mid\mu)$ による大偏差原理をみたす。
+:::
+
+::: intuition
+上界が閉集合でなくても成り立つのは、型の個数が多項式 $(n+1)^{\abs\Sigma}$ でしか増えず、指数の速さに影響しないからである。下界で内部が必要なのは、$\nu$ そのものは型として現れないことがあり（$n\nu(a)$ が整数とは限らない）、近くの型で近似する必要があるからである。
+:::
+
+::: proof
+**Step 1（上界）.** 【主張：$P(L_{n}\in\Gamma)\le(n+1)^{\abs\Sigma}e^{-n\inf_{\Gamma}H(\cdot\mid\mu)}$】$L_{n}$ は $\mathcal{T}_{n}$ に値をとるので、\ref{prb:method-of-types} の 4 と 1 から
+$$
+P(L_{n}\in\Gamma)=\sum_{\nu\in\Gamma\cap\mathcal{T}_{n}}P(L_{n}=\nu)\le\abs{\mathcal{T}_{n}}\max_{\nu\in\Gamma\cap\mathcal{T}_{n}}e^{-nH(\nu\mid\mu)}\le(n+1)^{\abs\Sigma}e^{-n\inf_{\Gamma}H(\cdot\mid\mu)}.
+$$
+$\frac1n\log(n+1)^{\abs\Sigma}\to0$。
+
+**Step 2（型による近似）.** 【主張：任意の $\nu\in\mathcal{P}(\Sigma)$ について $\nu_{n}\in\mathcal{T}_{n}$ で $\norm{\nu_{n}-\nu}_{1}\le\frac{2(\abs\Sigma-1)}{n}$ となるものがある】$a_{0}\in\Sigma$ を固定し、$a\ne a_{0}$ で $\nu_{n}(a)\defeq\frac1n\lfloor n\nu(a)\rfloor$、$\nu_{n}(a_{0})\defeq1-\sum_{a\ne a_{0}}\nu_{n}(a)$ とする。$\nu_{n}(a_{0})\ge1-\sum_{a\ne a_{0}}\nu(a)=\nu(a_{0})\ge0$ なので $\nu_{n}\in\mathcal{T}_{n}$。$a\ne a_{0}$ で $0\le\nu(a)-\nu_{n}(a)<\frac1n$、$\nu_{n}(a_{0})-\nu(a_{0})=\sum_{a\ne a_{0}}(\nu(a)-\nu_{n}(a))<\frac{\abs\Sigma-1}{n}$。
+
+**Step 3（下界）.** $\nu\in\Gamma^{\circ}$ を任意にとる。Step 2 の $\nu_{n}$ は $\nu$ に収束するので、十分大きい $n$ で $\nu_{n}\in\Gamma$。\ref{prb:method-of-types} の 4 から $P(L_{n}\in\Gamma)\ge P(L_{n}=\nu_{n})\ge(n+1)^{-\abs\Sigma}e^{-nH(\nu_{n}\mid\mu)}$。\ref{prb:relative-entropy-properties} の 2（連続性）から $H(\nu_{n}\mid\mu)\to H(\nu\mid\mu)$ なので $\liminf\frac1n\log P(L_{n}\in\Gamma)\ge-H(\nu\mid\mu)$。$\nu\in\Gamma^{\circ}$ について上限をとる。
+
+**Step 4（良いレート関数）.** $H(\cdot\mid\mu)$ は連続で $\ge0$ なので下半連続、水準集合はコンパクトな $\mathcal{P}(\Sigma)$ の閉部分集合なのでコンパクト。閉集合 $F$ には Step 1（$F^{\circ}$ の代わりに $F$）、開集合 $G$ には Step 3（$G^{\circ}=G$）を使えば大偏差原理になる。
+:::
+
+## クラメールの定理との関係 {#prb:sec-sa-cramer}
+
+::: corollary レート関数の変分表示 {#prb:cramer-variational keywords="for a finite set Sigma of reals and mu with full support: Lambda^*(x) = min{H(nu|mu) : sum_a a nu(a) = x}, by the contraction principle and uniqueness of rate functions; the minimizer is the tilted law" index="レート関数の変分表示|れーとかんすうのへんぶんひょうじ" refname="レート関数の変分表示"}
+$\Sigma\subseteq\mathbb{R}$ を有限集合、$\mu$ を $\Sigma$ 上の分布で $\mu(a)>0$（すべての $a$）、$\Lambda$, $\Lambda^{*}$ を $\mu$ の対数積率母関数とそのルジャンドル変換とする。すべての $x\in\mathbb{R}$ で
+$$
+\Lambda^{*}(x)=\inf\Bigl\{H(\nu\mid\mu):\nu\in\mathcal{P}(\Sigma),\ \sum_{a}a\,\nu(a)=x\Bigr\}
+$$
+で、右辺の下限は（有限なら）達成される。
+:::
+
+::: intuition
+標本平均が $x$ になる稀な出来事は、平均 $x$ をもつさまざまなヒストグラムを通して起こりうるが、指数の速さを決めるのは $\mu$ に最も近い（相対エントロピーが最小の）ヒストグラムである。その最小点は傾けた分布で、クラメールの定理の証明に現れた傾けの意味がここで分かる。
+:::
+
+::: proof
+**Step 1（押し出し）.** $f(\nu)\defeq\sum_{a}a\,\nu(a)$ は $\mathcal{P}(\Sigma)$ から $\mathbb{R}$ への連続写像で、$f(L_{n})=S_{n}/n$。\ref{prb:sanov-theorem} と \ref{prb:contraction-principle} から、$S_{n}/n$ の分布は右辺の関数 $J$ による大偏差原理をみたし、下限は達成される。
+
+**Step 2（一意性）.** $X$ は有界なので $\Lambda$ はいたる所有限で、\ref{prb:cramer-theorem} から $S_{n}/n$ の分布は $\Lambda^{*}$ による大偏差原理もみたす（$\Lambda^{*}$ は下半連続、\ref{prb:log-mgf-properties} の 2）。\ref{prb:rate-function-unique} から $\Lambda^{*}=J$。
+:::
+
+::: example 硬貨投げでの一致 {#prb:sanov-coin-example}
+$\Sigma=\{0,1\}$, $\mu(1)=p$ のとき、$\sum a\nu(a)=x$ をみたす $\nu$ は $\nu(1)=x$ だけなので、右辺は $H(\nu\mid\mu)=x\log\frac xp+(1-x)\log\frac{1-x}{1-p}$。これは \ref{prb:cramer-examples} の 2 のベルヌーイ分布のレート関数と一致する。
+:::
+
+::: hypcheck
+- **$\mu(a)>0$（すべての $a$）**：\ref{prb:method-of-types} の 2 で $\log\mu(a)$ が有限であることと、相対エントロピーの連続性（下界の Step 3）に使った。$\mu(a)=0$ の記号があれば、その記号を $\Sigma$ から除けば同じ結論が得られる（そのような $\nu$ では $H=\infty$、確率は $0$）。
+- **$\Sigma$ が有限**：型の個数が多項式で抑えられること（\ref{prb:method-of-types} の 1）が上界の核心だった。無限アルファベットでは、$\mathcal{P}(\Sigma)$ に弱位相を入れて別の方法（劣加法性や射影極限）で示す。
+- **独立同分布**：\ref{prb:method-of-types} の 2 の確率の積公式に使った。
+:::
+
+## 問題 {#prb:sec-sa-problems}
+
+::: problem {#prb:prob-sa-constant-sequence}
+$a\in\Sigma$ について、$X_{1}=\dots=X_{n}=a$ となる確率と $e^{-nH(\delta_{a}\mid\mu)}$ が等しいことを確かめよ。
+:::
+
+::: solution
+$P=\mu(a)^{n}$、$H(\delta_{a}\mid\mu)=1\cdot\log\frac1{\mu(a)}$。$T(\delta_{a})$ は 1 点なので、$P(L_{n}=\delta_{a})$ は \ref{prb:method-of-types} の 4 の上界にちょうど等しい。
+:::
+
+::: problem {#prb:prob-sa-die}
+公平なさいころを $n$ 回振るとき、出た目の経験分布が $\nu=(\frac12,\frac12,0,0,0,0)$（1 と 2 だけが半分ずつ）である確率の指数の速さ $\lim\frac1n\log P(L_{n}=\nu)$（$n$ は偶数）を求めよ。
+:::
+
+::: solution
+\ref{prb:method-of-types} の 4 から $-H(\nu\mid\mu)=-\bigl(2\cdot\frac12\log\frac{1/2}{1/6}\bigr)=-\log3$。直接にも $P=\binom{n}{n/2}6^{-n}$ で、$\binom{n}{n/2}\approx2^{n}$ から $\frac1n\log P\to\log2-\log6=-\log3$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** スターリングの公式は使わず、多項係数の比の評価 $m!/k!\ge k^{m-k}$ だけで済ませた。議論は Cover–Thomas『Elements of Information Theory』第 11 章、Dembo–Zeitouni 第 2.1 節の型の方法に沿う。
+
+**前提を変えると.**
+- **一般のポーランド空間**：$\Sigma$ が完備可分距離空間なら、経験分布 $L_{n}$ は（弱位相の）$\mathcal{P}(\Sigma)$ 上で良いレート関数 $H(\nu\mid\mu)=\int\log\frac{d\nu}{d\mu}d\nu$（$\nu\ll\mu$ でなければ $\infty$）による大偏差原理をみたす（ここでは証明しない）。
+- **ギブスの条件付け原理**：$\Gamma$ が凸閉集合で適当な正則性をもてば、$L_{n}\in\Gamma$ という条件のもとで $X_{1}$ の条件付き分布は $H(\cdot\mid\mu)$ を $\Gamma$ 上で最小にする分布 $\nu^{*}$ に収束する。平均の制約なら $\nu^{*}$ は傾けた分布（ギブス分布）で、統計力学の最大エントロピー原理の確率論的な根拠になる。
+- **情報理論**：仮説検定の第 2 種の誤り確率の最適な指数は $H(\mu_{0}\mid\mu_{1})$ である（スタインの補題）。これはサノフの定理の直接の応用である。
+
+**高い視点から：数え上げとしての確率.** 型の方法は、確率の問題を「同じヒストグラムをもつ列の個数を数える」問題に置き換える。その個数の対数がエントロピーで、これはボルツマンの $S=k\log W$ そのものである。相対エントロピーは「真の分布 $\mu$ で生成した列が、たまたま $\nu$ のように見える」ことのまれさで、サノフの定理は情報理論・統計力学・統計学をつなぐ要の位置にある。比喩で言えば、偏ったヒストグラムを見たとき、それは「その偏りを実現する並べ方の数」と「1 つの並べ方の起こりにくさ」の綱引きの結果であり、相対エントロピーはその差し引きの勘定書である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-sa-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

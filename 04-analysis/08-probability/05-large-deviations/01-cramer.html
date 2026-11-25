@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>クラメールの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="04-analysis/08-probability/05-large-deviations/01-cramer.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# クラメールの定理 {#prb:page-cramer keywords="large deviations of sample means, logarithmic moment generating function Lambda, convexity by Hoelder, Legendre-Fenchel transform Lambda^*, rate function properties, Chernoff bound P(S_n/n >= x) <= exp(-n Lambda^*(x)), exponential tilting, Cramer's theorem in R when Lambda is finite everywhere, Bernoulli rate function x log(x/p) + (1-x) log((1-x)/(1-p)), Gaussian rate x^2/2, Poisson rate"}
+
+大数の法則によれば、独立同分布な確率変数の標本平均 $S_{n}/n$ は平均 $m$ に近づく。では、平均から一定の距離だけ離れる確率 $P(S_{n}/n\ge x)$（$x>m$）はどれほど速く $0$ に近づくか。中心極限定理は $\sqrt n$ の尺度のゆらぎしか扱わないので、この問いには答えない。**クラメールの定理**によれば、この確率は指数関数的に減少し、その速さは
+$$
+P\Bigl(\frac{S_{n}}{n}\approx x\Bigr)=e^{-n\Lambda^{*}(x)+o(n)}
+$$
+と、対数積率母関数 $\Lambda$ のルジャンドル変換 $\Lambda^{*}$ でちょうど決まる。上からの評価は指数型のチェビシェフの不等式（チェルノフの上界）で、下からの評価は分布を「傾けて」稀な事象を典型的な事象に変える方法で得られる。
+
+## 記法と定義の確認 {#prb:sec-cr-notation}
+
+::: notation
+- $X,X_{1},X_{2},\dots$ は独立同分布な実数値確率変数、$\mu$ はその分布、$S_{n}\defeq X_{1}+\dots+X_{n}$。
+- マルコフの不等式・イェンセンの不等式は \ref{prb:basic-inequalities}、大数の弱法則は \ref{prb:weak-law}、独立性の性質は \ref{prb:independence-criteria}。
+- ヘルダーの不等式は \ref{meas:holder}、積分記号下の微分は \ref{meas:parameter-integrals}、単調収束・優収束定理は \ref{meas:monotone-convergence}, \ref{meas:dominated-convergence}。
+- 1 変数の凸関数の性質は \ref{calc:convex-properties}、下半連続性は \ref{calc:semicontinuous}。
+- $\log0\defeq-\infty$、$\sup\emptyset\defeq-\infty$、$\inf\emptyset\defeq+\infty$ と約束する。体系は $\ZFC$。
+:::
+
+## 対数積率母関数とルジャンドル変換 {#prb:sec-cr-legendre}
+
+::: definition 対数積率母関数とルジャンドル変換 {#prb:log-mgf keywords="Lambda(lambda) = log E e^{lambda X} in (-infinity, infinity]; Lambda^*(x) = sup_lambda (lambda x - Lambda(lambda)), the Legendre-Fenchel transform" index="対数積率母関数|たいすうせきりつぼかんすう, キュムラント母関数|きゅむらんとぼかんすう, ルジャンドル変換|るじゃんどるへんかん" refname="対数積率母関数とルジャンドル変換"}
+$\lambda\in\mathbb{R}$ について
+$$
+\Lambda(\lambda)\defeq\log E[e^{\lambda X}]\in(-\infty,\infty]
+$$
+を**対数積率母関数**（キュムラント母関数）といい、
+$$
+\Lambda^{*}(x)\defeq\sup_{\lambda\in\mathbb{R}}\bigl(\lambda x-\Lambda(\lambda)\bigr)\in[0,\infty]\qquad(x\in\mathbb{R})
+$$
+をその**ルジャンドル変換**（ルジャンドル–フェンシェル変換）という。
+:::
+
+::: intuition
+$\Lambda^{*}(x)$ は「直線 $\lambda\mapsto\lambda x$ が $\Lambda$ のグラフをどれだけ上回れるか」の最大値である。$\Lambda$ がなめらかで狭義凸なら、傾き $\Lambda'(\eta)=x$ となる点 $\eta$ で最大になり、$\Lambda^{*}(x)=\eta x-\Lambda(\eta)$。グラフの接線の切片（の符号を変えたもの）を傾きの関数として読み直したのが $\Lambda^{*}$ である。
+:::
+
+::: proposition $\Lambda$ と $\Lambda^{*}$ の性質 {#prb:log-mgf-properties keywords="Lambda(0) = 0, Lambda convex; Lambda^* convex, lower semicontinuous, nonnegative; if E|X| < infinity then Lambda^*(m) = 0, Lambda^* is nondecreasing on [m, infinity) and nonincreasing on (-infinity, m], and for x >= m the sup can be taken over lambda >= 0; if Lambda is finite near 0 then Lambda^* has compact level sets" index="レート関数（クラメール）|れーとかんすう" refname="Λ と Λ* の性質"}
+1. $\Lambda(0)=0$ で、$\Lambda$ は凸（値 $+\infty$ を許す意味で）。
+2. $\Lambda^{*}$ は凸、下半連続で、$\Lambda^{*}\ge0$。
+3. $E\abs X<\infty$, $m\defeq E[X]$ なら、$\Lambda^{*}(m)=0$。$x\ge m$ なら $\Lambda^{*}(x)=\sup_{\lambda\ge0}(\lambda x-\Lambda(\lambda))$、$x\le m$ なら $\Lambda^{*}(x)=\sup_{\lambda\le0}(\lambda x-\Lambda(\lambda))$。$\Lambda^{*}$ は $[m,\infty)$ で単調増加、$(-\infty,m]$ で単調減少。
+4. ある $\delta>0$ で $\Lambda(\pm\delta)<\infty$ なら、各 $\alpha<\infty$ について $\{\Lambda^{*}\le\alpha\}$ はコンパクト。
+:::
+
+::: intuition
+$\Lambda^{*}$ は平均 $m$ で $0$ になり、そこから離れるほど増える「谷」の形をしている。$x$ が平均より大きいときに傾き $\lambda\ge0$ だけを見ればよいのは、右に偏らせるには大きな値を重くする傾けしか役に立たないからである。
+:::
+
+::: proof
+**Step 1（1）.** $\Lambda(0)=\log1=0$。$\lambda=(1-t)\lambda_{0}+t\lambda_{1}$（$0<t<1$）について、ヘルダーの不等式（\ref{meas:holder}、指数 $1/(1-t)$ と $1/t$）から
+$$
+E[e^{\lambda X}]=E[(e^{\lambda_{0}X})^{1-t}(e^{\lambda_{1}X})^{t}]\le E[e^{\lambda_{0}X}]^{1-t}E[e^{\lambda_{1}X}]^{t}.
+$$
+対数をとって $\Lambda(\lambda)\le(1-t)\Lambda(\lambda_{0})+t\Lambda(\lambda_{1})$。
+
+**Step 2（2）.** 各 $\lambda$ について $x\mapsto\lambda x-\Lambda(\lambda)$ はアフィン関数（$\Lambda(\lambda)=\infty$ なら定数 $-\infty$）で、アフィン関数の上限は凸かつ下半連続（各 $\{x:\lambda x-\Lambda(\lambda)>c\}$ が開集合なので $\{\Lambda^{*}>c\}$ は開集合の和）。$\lambda=0$ の項が $0$ なので $\Lambda^{*}\ge0$。
+
+**Step 3（3）.** 【主張：$\Lambda(\lambda)\ge\lambda m$】$\Lambda(\lambda)=\infty$ なら明らか。有限なら、イェンセンの不等式（\ref{prb:basic-inequalities}、凸関数 $e^{\lambda\cdot}$）から $E[e^{\lambda X}]\ge e^{\lambda m}$。したがって $\lambda m-\Lambda(\lambda)\le0$ で $\Lambda^{*}(m)=0$。$x\ge m$, $\lambda<0$ なら $\lambda x-\Lambda(\lambda)\le\lambda m-\Lambda(\lambda)\le0$ なので、上限は $\lambda\ge0$ でとってよい（$\lambda=0$ の項が $0$）。$\lambda\ge0$ のとき $\lambda x-\Lambda(\lambda)$ は $x$ について増加するので、その上限も $[m,\infty)$ で増加。$x\le m$ も同様。
+
+**Step 4（4）.** $c\defeq\max(\Lambda(\delta),\Lambda(-\delta))<\infty$ とすると、$\lambda=\pm\delta$ の項から $\Lambda^{*}(x)\ge\delta\abs x-c$。よって $\{\Lambda^{*}\le\alpha\}\subseteq[-(\alpha+c)/\delta,(\alpha+c)/\delta]$ は有界で、2 から閉集合。ハイネ–ボレルの定理からコンパクト。
+:::
+
+::: lemma なめらかさと傾けた分布 {#prb:exponential-tilting keywords="if Lambda is finite everywhere then Lambda is C^2 (indeed smooth), Lambda'(eta) is the mean and Lambda''(eta) the variance of the tilted law mu_eta(dy) = e^{eta y - Lambda(eta)} mu(dy); if X is not a.s. constant, Lambda' is strictly increasing with range (a, b), a = ess inf X, b = ess sup X; product formula for tilted i.i.d. sequences" index="指数的な傾け|しすうてきなかたむけ, エッシャー変換|えっしゃーへんかん" refname="なめらかさと傾けた分布"}
+すべての $\lambda$ で $\Lambda(\lambda)<\infty$ と仮定する。$\eta\in\mathbb{R}$ について、$\mu_{\eta}(dy)\defeq e^{\eta y-\Lambda(\eta)}\mu(dy)$ を**傾けた分布**という。
+1. $\mu_{\eta}$ は確率分布で、すべての次数のモーメントをもつ。$\Lambda$ は $C^{2}$ 級で、$\Lambda'(\eta)=\int y\,\mu_{\eta}(dy)$、$\Lambda''(\eta)=\int y^{2}\mu_{\eta}(dy)-\Lambda'(\eta)^{2}$（$\mu_{\eta}$ の分散）。
+2. $X$ が a.s. 定数でなければ、$a\defeq\operatorname{ess\,inf}X\in[-\infty,\infty)$, $b\defeq\operatorname{ess\,sup}X\in(-\infty,\infty]$ について、$\Lambda'$ は $\mathbb{R}$ から $(a,b)$ への狭義単調増加な全単射。
+3. $\eta$ を固定し、$Y_{1},\dots,Y_{n}$ を分布 $\mu_{\eta}$ の独立同分布な確率変数とすると、非負のボレル関数 $f$ について
+$$
+E[f(X_{1},\dots,X_{n})]=E\bigl[f(Y_{1},\dots,Y_{n})e^{-\eta(Y_{1}+\dots+Y_{n})+n\Lambda(\eta)}\bigr].
+$$
+:::
+
+::: intuition
+傾けの強さ $\eta$ を動かすと、傾けた分布の平均 $\Lambda^{\prime}(\eta)$ はもとの分布の値域の下端から上端までなめらかに動く。だから値域の内側のどの点も、ある傾けの「典型的な平均」になる。
+:::
+
+::: proof
+**Step 1（1）.** $\int\mu_{\eta}=E[e^{\eta X}]e^{-\Lambda(\eta)}=1$。$\abs y^{k}e^{\eta y}\le C_{k}(e^{(\eta+1)y}+e^{(\eta-1)y})$（$\abs y^{k}\le k!(e^{y}+e^{-y})$）なので全モーメントは有限。$\eta$ の近く $\abs{\eta'-\eta}<1$ で $\abs{\partial_{\eta'}^{j}e^{\eta'y}}=\abs y^{j}e^{\eta'y}\le\abs y^{j}(e^{(\eta+1)y}+e^{(\eta-1)y})$ は $\mu$ 可積分なので、積分記号下の微分（\ref{meas:parameter-integrals}）で $M(\eta)\defeq E[e^{\eta X}]$ は $C^{2}$ 級、$M'=E[Xe^{\eta X}]$, $M''=E[X^{2}e^{\eta X}]$（導関数も同じ優関数で連続）。$\Lambda'=M'/M$, $\Lambda''=M''/M-(M'/M)^{2}$ が主張の式。
+
+**Step 2（2：狭義単調性と値の範囲）.** $X$ が定数でなければ $\mu_{\eta}$（$\mu$ と同じ零集合をもつ）も 1 点に集中しないので分散 $\Lambda''(\eta)>0$、$\Lambda'$ は狭義増加。$\mu_{\eta}$ は $[a,b]$ 上にあり 1 点分布でないので、平均 $\Lambda'(\eta)\in(a,b)$。
+
+**Step 3（2：全射性）.** 【主張：$\lambda\to\infty$ で $\Lambda'(\lambda)\to b$】$c<b$ を任意にとると $p\defeq P(X\ge c)>0$ で、$\Lambda(\lambda)\ge\log E[e^{\lambda X}1_{\{X\ge c\}}]\ge\lambda c+\log p$。$\Lambda$ は凸で $\Lambda(0)=0$ なので、平均値の定理と $\Lambda'$ の単調性から $\Lambda'(\lambda)\ge\frac{\Lambda(\lambda)-\Lambda(0)}{\lambda}\ge c+\frac{\log p}{\lambda}$（$\lambda>0$）。$\liminf_{\lambda\to\infty}\Lambda'(\lambda)\ge c$ で、$c<b$ は任意。$\lambda\to-\infty$ で $\to a$ も同様。$\Lambda'$ は連続なので中間値の定理から値域は $(a,b)$ 全体。
+
+**Step 4（3）.** 右辺は $(Y_{1},\dots,Y_{n})$ の分布 $\mu_{\eta}^{\otimes n}$ についての積分で、$\mu_{\eta}^{\otimes n}(dy)=e^{\eta(y_{1}+\dots+y_{n})-n\Lambda(\eta)}\mu^{\otimes n}(dy)$（フビニ）。指数因子が打ち消し合い、$\int f\,d\mu^{\otimes n}=E[f(X_{1},\dots,X_{n})]$（独立性から $(X_{1},\dots,X_{n})$ の分布は $\mu^{\otimes n}$）。
+:::
+
+::: intuition
+傾けた分布 $\mu_{\eta}$ は、もとの分布の大きな値（$\eta>0$ のとき）に指数的な重みを掛けたものである。$\eta$ を $\Lambda'(\eta)=x$ となるように選べば、もとの分布では稀な「平均が $x$ に近い」という事象が、傾けた分布ではありふれた事象（大数の法則で確率 $\to1$）になる。確率の比 $e^{-\eta S_{n}+n\Lambda(\eta)}\approx e^{-n\Lambda^{*}(x)}$ が、その事象の「稀さ」の代価である。
+:::
+
+## チェルノフの上界とクラメールの定理 {#prb:sec-cr-theorem}
+
+::: theorem チェルノフの上界 {#prb:chernoff-bound keywords="for all n and x >= m: P(S_n >= n x) <= exp(-n Lambda^*(x)); for x <= m: P(S_n <= n x) <= exp(-n Lambda^*(x)); valid with no assumption on Lambda other than E|X| < infinity" index="チェルノフの上界|ちぇるのふのじょうかい" refname="チェルノフの上界"}
+$E\abs X<\infty$, $m\defeq E[X]$ とする。すべての $n\ge1$ について
+$$
+x\ge m\implies P\Bigl(\frac{S_{n}}{n}\ge x\Bigr)\le e^{-n\Lambda^{*}(x)},\qquad x\le m\implies P\Bigl(\frac{S_{n}}{n}\le x\Bigr)\le e^{-n\Lambda^{*}(x)}.
+$$
+:::
+
+::: intuition
+$e^{\lambda S_{n}}$ にマルコフの不等式を使うと、独立性によって期待値が $n$ 乗に分かれる。その結果、評価は $n$ について指数関数の形になり、$\lambda$ を最適に選ぶことでルジャンドル変換が現れる。
+:::
+
+::: proof
+**Step 1（指数型マルコフ不等式）.** $\lambda\ge0$ について、マルコフの不等式（\ref{prb:basic-inequalities}）を $e^{\lambda S_{n}}$ に使い、独立性で積に分けると
+$$
+P(S_{n}\ge nx)\le P(e^{\lambda S_{n}}\ge e^{n\lambda x})\le e^{-n\lambda x}E[e^{\lambda S_{n}}]=e^{-n\lambda x}E[e^{\lambda X}]^{n}=e^{-n(\lambda x-\Lambda(\lambda))}
+$$
+（$\Lambda(\lambda)=\infty$ なら自明）。
+
+**Step 2（最適化）.** $\lambda\ge0$ について下限をとると $\exp(-n\sup_{\lambda\ge0}(\lambda x-\Lambda(\lambda)))$ で、$x\ge m$ ならこの上限は $\Lambda^{*}(x)$（\ref{prb:log-mgf-properties} の 3）。$x\le m$ は $X$ を $-X$ に置き換える。
+:::
+
+::: theorem クラメールの定理 {#prb:cramer-theorem keywords="if Lambda(lambda) < infinity for all lambda: for closed F, limsup (1/n) log P(S_n/n in F) <= - inf_F Lambda^*; for open G, liminf (1/n) log P(S_n/n in G) >= - inf_G Lambda^*; Lambda^* is a good rate function" index="クラメールの定理|くらめーるのていり, 大偏差（標本平均）|だいへんさ" refname="クラメールの定理"}
+すべての $\lambda\in\mathbb{R}$ で $\Lambda(\lambda)<\infty$ と仮定する。このとき
+1. 閉集合 $F\subseteq\mathbb{R}$ について $\displaystyle\limsup_{n\to\infty}\frac1n\log P\Bigl(\frac{S_{n}}{n}\in F\Bigr)\le-\inf_{x\in F}\Lambda^{*}(x)$。
+2. 開集合 $G\subseteq\mathbb{R}$ について $\displaystyle\liminf_{n\to\infty}\frac1n\log P\Bigl(\frac{S_{n}}{n}\in G\Bigr)\ge-\inf_{x\in G}\Lambda^{*}(x)$。
+:::
+
+::: intuition
+標本平均が集合 $F$ に入る確率は、$F$ の中で最も「起こりやすい」点（$\Lambda^{*}$ が最小の点）の寄与で指数の速さが決まる。たくさんの稀な事象の和の確率は、その中で最も稀でないものに支配される（「最も起こりやすい起こり方」の原理）。
+:::
+
+::: proof
+**Step 1（上界：$m\in F$ の場合と準備）.** 仮定から $E\abs X<\infty$（$\abs x\le e^{x}+e^{-x}$）。$m\in F$ なら $\inf_{F}\Lambda^{*}=0$（\ref{prb:log-mgf-properties} の 3）で、確率は $\le1$ なので自明。$m\notin F$ とすると、$F$ は閉なので $x_{+}\defeq\inf(F\cap[m,\infty))>m$, $x_{-}\defeq\sup(F\cap(-\infty,m])<m$（空なら $\pm\infty$）で、$x_{\pm}$ は（有限なら）$F$ に属する。
+
+**Step 2（上界の結論）.** 【主張：$P(S_{n}/n\in F)\le2e^{-n\inf_{F}\Lambda^{*}}$】$F\subseteq(-\infty,x_{-}]\cup[x_{+},\infty)$ なので、\ref{prb:chernoff-bound} から $P(S_{n}/n\in F)\le e^{-n\Lambda^{*}(x_{+})}+e^{-n\Lambda^{*}(x_{-})}$（無限の側の項は $0$ と読む）。\ref{prb:log-mgf-properties} の 3 の単調性から、$F$ の上での $\Lambda^{*}$ の下限は $\min(\Lambda^{*}(x_{+}),\Lambda^{*}(x_{-}))$ に等しい。よって $\frac1n\log P\le\frac{\log2}{n}-\inf_{F}\Lambda^{*}$。
+
+**Step 3（下界の局所化）.** 【主張：各 $x$ と $\delta>0$ について $\liminf\frac1n\log P(\abs{S_{n}/n-x}<\delta)\ge-\Lambda^{*}(x)$ を示せば十分】$x\in G$ なら $(x-\delta,x+\delta)\subseteq G$ となる $\delta$ があり、$P(S_{n}/n\in G)\ge P(\abs{S_{n}/n-x}<\delta)$。$x\in G$ について上限をとる。
+
+**Step 4（$X$ が定数の場合）.** $X\equiv m$ なら $\Lambda(\lambda)=\lambda m$, $\Lambda^{*}(m)=0$、$x\ne m$ で $\Lambda^{*}(x)=\infty$。$x=m$ なら確率は $1$。他は自明。以下 $X$ は定数でないとし、$a,b$ を \ref{prb:exponential-tilting} の 2 のとおりとする。
+
+**Step 5（$a<x<b$：傾けた分布と大数の法則）.** \ref{prb:exponential-tilting} の 2 から $\Lambda'(\eta)=x$ となる $\eta$ がある。凹関数 $\lambda\mapsto\lambda x-\Lambda(\lambda)$ は導関数が $0$ になる $\eta$ で最大なので $\Lambda^{*}(x)=\eta x-\Lambda(\eta)$。$0<\delta'\le\delta$ について、\ref{prb:exponential-tilting} の 3 を $f=1_{\{\abs{s/n-x}<\delta'\}}$（$s=y_{1}+\dots+y_{n}$）に使うと、この事象の上で $-\eta s\ge-n\eta x-n\abs\eta\delta'$ なので
+$$
+P\Bigl(\Bigl|\frac{S_{n}}{n}-x\Bigr|<\delta\Bigr)\ge P\Bigl(\Bigl|\frac{S_{n}}{n}-x\Bigr|<\delta'\Bigr)\ge e^{-n(\eta x-\Lambda(\eta))-n\abs\eta\delta'}\,P\Bigl(\Bigl|\frac{Y_{1}+\dots+Y_{n}}{n}-x\Bigr|<\delta'\Bigr).
+$$
+$Y_{i}$ は平均 $x$、有限分散なので、大数の弱法則（\ref{prb:weak-law}）から最後の確率は $1$ に収束する。よって $\liminf\frac1n\log P\ge-\Lambda^{*}(x)-\abs\eta\delta'$。$\delta'\to0$ とすればよい。
+
+**Step 6（$x\notin[a,b]$）.** 例えば $x>b$ なら $\lambda x-\Lambda(\lambda)\ge\lambda(x-b)\to\infty$（$\lambda\to\infty$、$\Lambda(\lambda)\le\lambda b$）なので $\Lambda^{*}(x)=\infty$ で、主張は自明。$x<a$ も同様。
+
+**Step 7（$x=b<\infty$ の場合）.** 【主張：$\Lambda^{*}(b)=-\log P(X=b)$】$\lambda b-\Lambda(\lambda)=-\log E[e^{\lambda(X-b)}]$ で、$X\le b$ から $e^{\lambda(X-b)}$ は $\lambda$ について単調減少し $1_{\{X=b\}}$ に収束する（$\le1$ で優収束）。したがって $\lambda\to\infty$ で $\lambda b-\Lambda(\lambda)\uparrow-\log P(X=b)$、$\lambda\le0$ の項は $\le\lambda m-\Lambda(\lambda)\le0$。$P(X=b)=0$ なら $\Lambda^{*}(b)=\infty$ で自明。そうでなければ $P(\abs{S_{n}/n-b}<\delta)\ge P(X_{1}=\dots=X_{n}=b)=P(X=b)^{n}=e^{-n\Lambda^{*}(b)}$。$x=a>-\infty$ も同様。
+:::
+
+::: example 代表的なレート関数 {#prb:cramer-examples}
+1. **正規分布** $N(m,\sigma^{2})$：$\Lambda(\lambda)=m\lambda+\frac12\sigma^{2}\lambda^{2}$、$\Lambda^{*}(x)=\frac{(x-m)^{2}}{2\sigma^{2}}$（$\eta=(x-m)/\sigma^{2}$）。この場合 $S_{n}/n\sim N(m,\sigma^{2}/n)$ なので、ガウス積分の評価とも一致する。
+2. **ベルヌーイ分布** $P(X=1)=p$, $P(X=0)=1-p$（$0<p<1$）：$\Lambda(\lambda)=\log(1-p+pe^{\lambda})$、$x\in(0,1)$ で $\Lambda'(\eta)=x$ を解くと $e^{\eta}=\frac{x(1-p)}{p(1-x)}$ で
+$$
+\Lambda^{*}(x)=x\log\frac xp+(1-x)\log\frac{1-x}{1-p},
+$$
+$x\in\{0,1\}$ でも（$0\log0=0$ として）同じ式、$x\notin[0,1]$ で $\infty$。
+3. **ポアソン分布**（平均 $c>0$）：$\Lambda(\lambda)=c(e^{\lambda}-1)$、$x>0$ で $\Lambda^{*}(x)=x\log\frac xc-x+c$、$\Lambda^{*}(0)=c$、$x<0$ で $\infty$。
+:::
+
+::: hypcheck
+- **$\Lambda$ がいたる所有限**：$E\abs X<\infty$（Step 1）、傾けた分布のなめらかさと $\Lambda'$ の全射性（\ref{prb:exponential-tilting}、Step 5）に使った。上からの評価（\ref{prb:chernoff-bound}）には不要で、$E\abs X<\infty$ だけで成り立つ。
+- **独立同分布**：$E[e^{\lambda S_{n}}]=E[e^{\lambda X}]^{n}$（チェルノフ）と、傾けた分布の積の公式（\ref{prb:exponential-tilting} の 3）に使った。
+- **$F$ が閉、$G$ が開**：上界の $x_{\pm}\in F$、下界の近傍 $(x-\delta,x+\delta)\subseteq G$ に使った。一般の集合では両方の不等式が同時に等号になるとは限らない（例：ベルヌーイ分布で $F=\mathbb{Q}^{c}$ は確率 $0$ だが $\inf_{F}\Lambda^{*}=0$）。
+:::
+
+## 問題 {#prb:sec-cr-problems}
+
+::: problem {#prb:prob-cr-coin}
+公平な硬貨を $n$ 回投げて表が $0.6n$ 回以上出る確率について、$\lim\frac1n\log P=-(0.6\log1.2+0.4\log0.8)\approx-0.0201$ を示せ。
+:::
+
+::: solution
+ベルヌーイ分布 $p=\frac12$ の $\Lambda^{*}(0.6)=0.6\log1.2+0.4\log0.8$。$F=[0.6,\infty)$ の上界、$G=(0.6,\infty)$ の下界を使い、$\Lambda^{*}$ が $[0.6,1]$ で連続・増加なので $\inf_{F}\Lambda^{*}=\inf_{G}\Lambda^{*}=\Lambda^{*}(0.6)$。
+:::
+
+::: problem {#prb:prob-cr-exponential}
+平均 $1$ の指数分布について $\Lambda(\lambda)=-\log(1-\lambda)$（$\lambda<1$）, $=\infty$（$\lambda\ge1$）、$\Lambda^{*}(x)=x-1-\log x$（$x>0$）を示せ。この分布は定理の仮定をみたさないことも確かめよ。
+:::
+
+::: solution
+$\int_{0}^{\infty}e^{\lambda y}e^{-y}dy=\frac1{1-\lambda}$（$\lambda<1$）。$\frac{d}{d\lambda}(\lambda x+\log(1-\lambda))=x-\frac1{1-\lambda}=0$ から $\lambda=1-\frac1x$、値は $x-1-\log x$。$\lambda\ge1$ で $\Lambda=\infty$ なので仮定をみたさない（それでも結論は成り立つ：補足を参照）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 下界の証明で用いた大数の法則は弱法則（チェビシェフの不等式による）で足りた。中心極限定理は使っていない。$\Lambda^{*}$ の水準集合のコンパクト性（\ref{prb:log-mgf-properties} の 4）は定理の主張には不要だが、次のページで「良いレート関数」として使う。議論は Dembo–Zeitouni『Large Deviations Techniques and Applications』第 2.2 節の流儀に沿う。
+
+**前提を変えると.**
+- **一般の場合**：$\Lambda$ がいたる所有限でなくても、独立同分布ならクラメールの定理は（$\Lambda$ が $0$ の近傍でしか有限でなくても、さらには $0$ 以外で無限でも）そのまま成り立つ（Dembo–Zeitouni 定理 2.2.3。ここでは証明しない）。
+- **精密な漸近**：$x>m$ で $X$ が格子分布でなければ、$P(S_{n}\ge nx)\sim\frac{1}{\eta\sqrt{2\pi n\Lambda''(\eta)}}e^{-n\Lambda^{*}(x)}$（バハドゥール–ランガ・ラオの定理）。
+- **ホフディングの不等式**：$X\in[0,1]$ なら $\Lambda^{*}(x)\ge2(x-m)^{2}$ で、$P(S_{n}/n-m\ge t)\le e^{-2nt^{2}}$。
+- **統計学**：検定の誤り確率の指数的な減少の速さ（チャーノフ情報量、スタインの補題）は、この種のレート関数で表される。
+
+**高い視点から：凸双対性と統計力学.** $\Lambda$ と $\Lambda^{*}$ はルジャンドル変換で互いに移り合う凸関数の対で（$\Lambda$ が凸で下半連続なら $\Lambda^{**}=\Lambda$）、統計力学では $\Lambda$ が自由エネルギー（分配関数の対数）、$\Lambda^{*}$ が（符号を変えた）エントロピー、$\lambda$ が逆温度にあたる。傾けた分布はカノニカル分布（ギブス分布）で、クラメールの定理は「ミクロカノニカル集団とカノニカル集団の同等性」の確率論版である。比喩で言えば、$\Lambda^{*}(x)$ は「平均を $x$ にずらすために支払う最小の費用」で、自然は稀な出来事を起こすとき、最も安上がりな起こし方を選ぶ。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{prb:sec-cr-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
