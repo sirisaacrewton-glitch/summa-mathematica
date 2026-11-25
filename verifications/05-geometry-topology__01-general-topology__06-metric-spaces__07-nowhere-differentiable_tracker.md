@@ -19,6 +19,7 @@
 - **Detail:** The supplement claims that the set of continuous functions for which no one-sided derivative (even infinite) exists at any point is not comeager (attributed to Saks). This is a misstatement. The classical Saks theorem concerns the set of continuous functions that have no finite one-sided derivative at any point (or, in the standard formulation, functions for which at every point at least one of the four Dini derivatives is infinite), and that set IS residual. The claim as written ("片側微分係数が（無限大を含めて）存在しない" is not comeager) is at best imprecise and at worst false, and the attribution to Saks is not supported in this form.
 - **Proposed fix:** Replace with: "一方、どの点でも有限な片側微分係数をもたない連続関数の集合も第一類集合の補集合であることが知られている（サックスの定理）。" (i.e. the residual set consists of functions having no finite one-sided derivative at any point; do not claim the infinite-derivative version is non-comeager).
 - **Reported:** 2026-10-28 (8ccef3d)
+**Opus Rebuttal:** The page's claim is correct. Saks proved that the set of continuous functions having at no point a one-sided derivative, finite or infinite (Besicovitch functions), is of first category in C[0,1]; since C[0,1] is a Baire space, such a set is in particular not residual, which is what the page said. The residuality of functions with no finite one-sided derivative is the first sentence of the same paragraph (now with a short proof). The supplement now states Saks' result in the stronger form.
 
 ### ISSUE-0002 [Open] Weierstrass function condition ab>1+3π/2
 - **Category:** Supplement/remark error
