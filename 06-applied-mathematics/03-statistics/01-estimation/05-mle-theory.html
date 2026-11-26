@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>最尤推定量の一般理論 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/01-estimation/05-mle-theory.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 最尤推定量の一般理論 {#stat:page-mle-theory keywords="convergence in distribution in R^p, tightness, Levy-type continuity lemma via Gaussian smoothing, multivariate Slutsky, multivariate central limit theorem with second moments (Cramer-Wold), multivariate delta method, Wald's consistency theorem for the global maximum likelihood estimator on a compact parameter space, generalized information inequality, upper strong law for variables with integrable positive part, multivariate asymptotic normality of the MLE with covariance I(theta_0)^{-1}, Hodges' superefficient estimator"}
+
+前のページでは、1 次元のパラメータについて「尤度方程式の解で一致するもの」の漸近正規性を証明した。このページでは残っていた 2 つの点を埋める。第一に、尤度方程式の解ではなく尤度の**大域的な最大点**（本来の最尤推定量）が一致性をもつことを、**ワルドの条件**のもとで示す。第二に、パラメータが $p$ 次元のときに $\sqrt n(\hat\theta_{n}-\theta_{0})$ が多次元正規分布 $N(0,I(\theta_{0})^{-1})$ に近づくことを示す。そのために、$\mathbb{R}^{p}$ の法則収束の基本的な道具（特性関数による判定、スルツキーの定理、2 次モーメントだけを仮定する多次元の中心極限定理）をここで証明する。最後に、漸近分散 $1/I(\theta)$ が「すべての $\theta$ で同時には」破れないことを示唆する、ホッジスの超有効推定量の例を扱う。
+
+## 記法と定義の確認 {#stat:sec-mlt-notation}
+
+::: notation
+- 1 次元の大標本理論（一致性、確率有界性、スルツキーの定理、確率収束と連続関数、デルタ法）と 1 次元の最尤推定量の理論は \ref{stat:consistency}, \ref{stat:tightness-from-weak-convergence}, \ref{stat:slutsky}, \ref{stat:continuous-mapping-probability}, \ref{stat:delta-method}, \ref{stat:information-inequality}, \ref{stat:mle-asymptotic-normality}。
+- 1 次元の法則収束とその特徴づけ、大数の強法則、中心極限定理は \ref{prb:convergence-in-distribution}, \ref{prb:portmanteau}, \ref{prb:strong-law}, \ref{prb:clt}。多次元の特性関数による一意性と、ガウス分布との畳み込みの密度の表示（その証明の 2）は \ref{prb:multivariate-uniqueness}、多次元正規分布は \ref{prb:multivariate-normal}, \ref{prb:multivariate-normal-properties}。
+- 単調収束定理・優収束定理は \ref{meas:monotone-convergence}, \ref{meas:dominated-convergence}。多変数のテイラー展開は \ref{calc:multivariable-taylor}。
+- $\abs\cdot$ はユークリッドノルム、行列には作用素ノルムを使う。$B(x,r)$ は開球。体系は $\ZFC$。
+:::
+
+## 多次元の法則収束 {#stat:sec-mlt-weak}
+
+::: definition 多次元の法則収束と確率有界性 {#stat:multivariate-weak-convergence keywords="W_n => W in R^p iff E f(W_n) -> E f(W) for all bounded continuous f; tightness (bounded in probability): for every epsilon there is R with sup_n P(|W_n| > R) < epsilon" index="法則収束（多次元）|ほうそくしゅうそく, 確率有界|かくりつゆうかい" refname="多次元の法則収束と確率有界性"}
+1. $\mathbb{R}^{p}$ 値確率変数 $W_{n}$, $W$ について、すべての有界連続関数 $f:\mathbb{R}^{p}\to\mathbb{R}$ で $E[f(W_{n})]\to E[f(W)]$ となるとき、$W_{n}\Rightarrow W$（法則収束）と書く（$p=1$ では \ref{prb:portmanteau} の 2 から以前の定義と一致する）。
+2. 任意の $\varepsilon>0$ に $R$ があって、すべての $n$ で $P(\abs{W_{n}}>R)<\varepsilon$ となるとき、$(W_{n})$ は**確率有界**（緊密）であるという。
+:::
+
+::: intuition
+法則収束は「分布の形が近づく」ことで、確率変数どうしが近づくことではない。確率有界は「確率の質量が無限遠へ逃げない」ことで、分布の極限を考えるための最低限の条件である。
+:::
+
+::: lemma 法則収束の基本性質 {#stat:multivariate-weak-basic keywords="if W_n => W then (W_n) is tight; continuous mapping g(W_n) => g(W); if W_n tight and V_n -> 0 in probability then |V_n| |W_n| -> 0 in probability; coordinatewise tightness implies tightness" index="連続写像定理（多次元）|れんぞくしゃぞうていり" refname="法則収束の基本性質"}
+1. $W_{n}\Rightarrow W$ なら $(W_{n})$ は確率有界。
+2. $W_{n}\Rightarrow W$、$g:\mathbb{R}^{p}\to\mathbb{R}^{q}$ が連続なら $g(W_{n})\Rightarrow g(W)$。
+3. $(W_{n})$ が確率有界で、実数値の $V_{n}\xrightarrow{P}0$ なら $V_{n}\abs{W_{n}}\xrightarrow{P}0$。
+4. 各座標 $(W_{n}^{j})_{n}$（$j=1,\dots,p$）が確率有界なら $(W_{n})$ も確率有界。
+:::
+
+::: intuition
+分布の極限をもつ列は質量を無限遠に逃がさず、連続写像は分布の近さを保つ。質量が逃げない量に、$0$ に近づく量を掛ければ $0$ に近づく。多次元の質量が逃げないことは、各座標で逃げないことと同じである。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$R$ をとれば十分大きい $n$ で $P(\abs{W_{n}}\ge R+1)<\varepsilon$】$\varepsilon>0$ について $R$ を $P(\abs W>R)<\varepsilon$ ととり、$h(w)\defeq\min(1,\max(0,\abs w-R))$（連続、$\abs w\le R$ で $0$、$\abs w\ge R+1$ で $1$）とする。$P(\abs{W_{n}}\ge R+1)\le E[h(W_{n})]\to E[h(W)]\le P(\abs W>R)<\varepsilon$ なので、ある $N$ 以降 $P(\abs{W_{n}}\ge R+1)<\varepsilon$。有限個の $n<N$ については、$P(\abs{W_{n}}>r)\to0$（$r\to\infty$）から $R$ を大きくとり直せばよい。
+
+**Step 2（2）.** $f$ が有界連続なら $f\circ g$ も有界連続。
+
+**Step 3（3）.** $\delta,\varepsilon>0$ について確率有界性の $R$ をとると $P(V_{n}\abs{W_{n}}>\delta)\le P(\abs{W_{n}}>R)+P(\abs{V_{n}}>\delta/R)<\varepsilon+o(1)$。
+
+**Step 4（4）.** $\abs w\le\sqrt p\max_{j}\abs{w^{j}}$ なので $P(\abs{W_{n}}>\sqrt pR)\le\sum_{j}P(\abs{W_{n}^{j}}>R)$。
+:::
+
+::: lemma 特性関数による判定 {#stat:levy-multivariate keywords="if (W_n) is tight and E exp(i <u, W_n>) -> E exp(i <u, W>) for every u in R^p, then W_n => W; proof by Gaussian smoothing" index="レヴィの連続性定理（多次元）|れゔぃのれんぞくせいていり" refname="特性関数による判定"}
+$(W_{n})$ が確率有界で、すべての $u\in\mathbb{R}^{p}$ で特性関数 $\varphi_{n}(u)\defeq E[e^{i\langle u,W_{n}\rangle}]$ が $\varphi(u)\defeq E[e^{i\langle u,W\rangle}]$ に収束するなら、$W_{n}\Rightarrow W$。
+:::
+
+::: intuition
+特性関数は分布を決めるが、各点収束だけでは質量が無限遠に逃げる可能性を排除できない。確率有界性でそれを防いだうえで、小さなガウス雑音を足して分布をなめらかにすると、なめらかになった分布の密度は特性関数の積分で書けるので、特性関数の収束がそのまま密度の収束になる。最後に雑音を小さくする。
+:::
+
+::: proof
+**Step 1（ガウス平滑化の密度）.** 【主張：$\sigma>0$ と、$W_{n}$ と独立な $G\sim N(0,I_{p})$ について、$W_{n}+\sigma G$ は密度 $q_{n}(x)=\frac{1}{(2\pi)^{p}}\int\varphi_{n}(u)e^{-\sigma^{2}\abs u^{2}/2}e^{-i\langle u,x\rangle}du$ をもち、$q_{n}\to q$（各点）、$\abs{q_{n}}\le c_{\sigma}\defeq\frac{1}{(2\pi)^{p}}\int e^{-\sigma^{2}\abs u^{2}/2}du$】密度の表示は \ref{prb:multivariate-uniqueness} の 2 の証明による。$\abs{\varphi_{n}}\le1$ なので、被積分関数は可積分な $e^{-\sigma^{2}\abs u^{2}/2}$ で抑えられ、優収束定理から $q_{n}(x)\to q(x)$（$q$ は $W+\sigma G$ の密度）。
+
+**Step 2（コンパクトな台の関数）.** $g$ を有界連続でコンパクトな台 $K$ をもつ関数とすると、$E[g(W_{n}+\sigma G)]=\int_{K}gq_{n}dx\to\int_{K}gq\,dx=E[g(W+\sigma G)]$（優関数 $\sup\abs g\cdot c_{\sigma}1_{K}$）。
+
+**Step 3（平滑化の誤差）.** $g$ は一様連続なので、連続度 $\omega(r)\defeq\sup\{\abs{g(x)-g(y)}:\abs{x-y}\le r\}\to0$（$r\to0$）。$\abs{E[g(W_{n}+\sigma G)]-E[g(W_{n})]}\le E[\min(\omega(\sigma\abs G),2\sup\abs g)]$ で、右辺は $n$ によらず、優収束定理から $\sigma\to0$ で $0$。$W$ についても同じ。Step 2 と合わせて $E[g(W_{n})]\to E[g(W)]$。
+
+**Step 4（一般の有界連続関数）.** $f$ を有界連続、$\abs f\le C$、$\varepsilon>0$ とする。確率有界性と \ref{stat:multivariate-weak-basic} の Step 1 の議論から、$R$ を $\sup_{n}P(\abs{W_{n}}>R)<\varepsilon$, $P(\abs W>R)<\varepsilon$ ととる。$h$ を $B(0,R)$ の上で $1$、$B(0,R+1)$ の外で $0$ の連続関数（$0\le h\le1$）とし、$g\defeq fh$ とすると、$\abs{E f(W_{n})-E g(W_{n})}\le C\varepsilon$、$W$ も同様。Step 3 から $\limsup_{n}\abs{E f(W_{n})-E f(W)}\le2C\varepsilon$。
+:::
+
+::: proposition 多次元のスルツキーの定理 {#stat:slutsky-multivariate keywords="if W_n => W and V_n - W_n -> 0 in probability then V_n => W; if A_n -> A and b_n -> b in probability (A, b constant) then A_n W_n + b_n => A W + b" index="スルツキーの定理（多次元）|するつきーのていり" refname="多次元のスルツキーの定理"}
+1. $W_{n}\Rightarrow W$ で $V_{n}-W_{n}\xrightarrow{P}0$ なら $V_{n}\Rightarrow W$。
+2. $W_{n}\Rightarrow W$（$\mathbb{R}^{p}$）、$q\times p$ 行列 $A_{n}\xrightarrow{P}A$、$b_{n}\xrightarrow{P}b$（$A$, $b$ は定数）なら $A_{n}W_{n}+b_{n}\Rightarrow AW+b$。
+:::
+
+::: intuition
+$0$ に確率収束する誤差は分布の極限に影響しない。定数に近づく係数は、極限では定数として扱ってよい。
+:::
+
+::: proof
+**Step 1（1：特性関数）.** 【主張：$\varphi_{V_{n}}(u)-\varphi_{W_{n}}(u)\to0$】$\abs{e^{ia}-e^{ib}}\le\min(2,\abs{a-b})$ から、$\delta>0$ について $\abs{\varphi_{V_{n}}(u)-\varphi_{W_{n}}(u)}\le E[\min(2,\abs u\abs{V_{n}-W_{n}})]\le\abs u\delta+2P(\abs{V_{n}-W_{n}}>\delta)$。また $\cos\langle u,\cdot\rangle$, $\sin\langle u,\cdot\rangle$ は有界連続なので $\varphi_{W_{n}}(u)\to\varphi_{W}(u)$。
+
+**Step 2（1：確率有界性と結論）.** \ref{stat:multivariate-weak-basic} の 1 から $(W_{n})$ は確率有界で、$P(\abs{V_{n}}>R+1)\le P(\abs{W_{n}}>R)+P(\abs{V_{n}-W_{n}}>1)$ から $(V_{n})$ も確率有界。\ref{stat:levy-multivariate} を使う。
+
+**Step 3（2）.** $\abs{(A_{n}-A)W_{n}}\le\norm{A_{n}-A}\abs{W_{n}}\xrightarrow{P}0$（\ref{stat:multivariate-weak-basic} の 3）、$b_{n}-b\xrightarrow{P}0$。$AW_{n}+b\Rightarrow AW+b$（同じ補題の 2）に 1 を使う。
+:::
+
+::: theorem 多次元の中心極限定理 {#stat:multivariate-clt keywords="for i.i.d. random vectors X_i in R^p with mean m and finite covariance Sigma, (S_n - n m)/sqrt(n) => N(0, Sigma); only second moments are needed; proof via the one-dimensional CLT for <u, X> and the characteristic function criterion" index="多次元の中心極限定理|たじげんのちゅうしんきょくげんていり, クラメール–ウォルドの方法|くらめーるうぉるどのほうほう" refname="多次元の中心極限定理"}
+$X_{1},X_{2},\dots$ を独立同分布な $\mathbb{R}^{p}$ 値確率変数で、$E\abs X^{2}<\infty$、平均 $m$、共分散行列 $\Sigma$ とすると、$W_{n}\defeq\frac{1}{\sqrt n}\sum_{i\le n}(X_{i}-m)\Rightarrow N(0,\Sigma)$。
+:::
+
+::: intuition
+どの方向 $u$ に射影しても、射影は 1 次元の独立同分布の和なので 1 次元の中心極限定理で正規分布に近づく。すべての方向の射影の分布が決まれば多次元の分布が決まる（特性関数）。質量が逃げないことは座標ごとの 1 次元の結果から従う。
+:::
+
+::: proof
+**Step 1（射影の特性関数）.** 【主張：すべての $u$ で $E[e^{i\langle u,W_{n}\rangle}]\to e^{-\langle u,\Sigma u\rangle/2}$】$Y_{i}\defeq\langle u,X_{i}-m\rangle$ は独立同分布で平均 $0$、分散 $v\defeq\langle u,\Sigma u\rangle$。$v=0$ なら $Y_{i}=0$（a.s.）で両辺 $1$。$v>0$ なら中心極限定理（\ref{prb:clt}）から $\langle u,W_{n}\rangle=\frac1{\sqrt n}\sum Y_{i}\Rightarrow N(0,v)$ で、$\cos$, $\sin$ に \ref{prb:portmanteau} の 2 を使うと $E[e^{i\langle u,W_{n}\rangle}]\to e^{-v/2}$。これは $N(0,\Sigma)$ の特性関数（\ref{prb:multivariate-normal}）。
+
+**Step 2（確率有界性）.** Step 1 の $u=e_{j}$ の場合、$W_{n}^{j}$ は 1 次元で法則収束（または恒等的に $0$）するので確率有界（\ref{stat:tightness-from-weak-convergence} の 1）。\ref{stat:multivariate-weak-basic} の 4 から $(W_{n})$ も確率有界。
+
+**Step 3（結論）.** \ref{stat:levy-multivariate}。
+:::
+
+::: corollary 多次元のデルタ法 {#stat:delta-method-multivariate keywords="if sqrt(n)(T_n - theta) => N(0, Sigma) in R^p and g: R^p -> R^q is differentiable at theta, then sqrt(n)(g(T_n) - g(theta)) => N(0, Dg Sigma Dg^T)" index="デルタ法（多次元）|でるたほう" refname="多次元のデルタ法"}
+$\sqrt n(T_{n}-\theta)\Rightarrow N(0,\Sigma)$（$\mathbb{R}^{p}$）で、$g:\mathbb{R}^{p}\to\mathbb{R}^{q}$ が $\theta$ で微分可能（ヤコビ行列 $Dg$）なら $\sqrt n(g(T_{n})-g(\theta))\Rightarrow N(0,Dg\,\Sigma\,Dg^{\top})$。
+:::
+
+::: intuition
+$T_{n}$ の近くで $g$ は 1 次近似 $g(\theta)+Dg(T_{n}-\theta)$ で表され、正規ベクトルの線形変換は正規ベクトルなので、共分散が $Dg\,\Sigma\,Dg^{\top}$ に変わるだけである。
+:::
+
+::: proof
+**Step 1（剰余）.** $\rho(t)\defeq\frac{\abs{g(t)-g(\theta)-Dg(t-\theta)}}{\abs{t-\theta}}$（$t\ne\theta$）、$\rho(\theta)\defeq0$ は微分可能性から $\theta$ で連続。$U_{n}\defeq\sqrt n(T_{n}-\theta)$ は確率有界（\ref{stat:multivariate-weak-basic} の 1）なので、$\abs{T_{n}-\theta}=\abs{U_{n}}/\sqrt n\xrightarrow{P}0$（同じ補題の 3）、$\rho(T_{n})\xrightarrow{P}0$（\ref{stat:continuous-mapping-probability}）。
+
+**Step 2（結論）.** $\abs{\sqrt n(g(T_{n})-g(\theta))-DgU_{n}}=\rho(T_{n})\abs{U_{n}}\xrightarrow{P}0$。$DgU_{n}\Rightarrow DgZ$（$Z\sim N(0,\Sigma)$）、$DgZ\sim N(0,Dg\Sigma Dg^{\top})$（\ref{prb:multivariate-normal-properties} の 2）。\ref{stat:slutsky-multivariate} の 1 を使う。
+:::
+
+## ワルドの一致性定理 {#stat:sec-mlt-wald}
+
+::: lemma 上からの大数の法則 {#stat:upper-strong-law keywords="if Y_i are i.i.d. with E Y^+ < infinity then limsup (1/n) sum Y_i <= E Y a.s., where E Y may be -infinity; decreasing limits of such expectations" index="大数の強法則（上からの評価）|たいすうのきょうほうそく" refname="上からの大数の法則"}
+$Y,Y_{1},Y_{2},\dots$ を $[-\infty,\infty)$ に値をとる独立同分布な確率変数で $E[Y^{+}]<\infty$ とする（$E[Y]\in[-\infty,\infty)$ が定まる）。
+1. $\limsup_{n}\frac1n\sum_{i\le n}Y_{i}\le E[Y]$（a.s.）。
+2. $Y^{(1)}\ge Y^{(2)}\ge\dots$ で $E[(Y^{(1)})^{+}]<\infty$、$Y^{(k)}\downarrow Y^{(\infty)}$ なら $E[Y^{(k)}]\downarrow E[Y^{(\infty)}]$。
+:::
+
+::: intuition
+平均が $-\infty$ になりうる確率変数でも、正の側が可積分なら標本平均は上から期待値で抑えられる。下に大きく振れる値を $-c$ で切り捨てて普通の大数の法則を使い、$c\to\infty$ とする。
+:::
+
+::: proof
+**Step 1（2）.** $Z_{k}\defeq(Y^{(1)})^{+}-Y^{(k)}\ge0$ は単調増加で $(Y^{(1)})^{+}-Y^{(\infty)}$ に収束する。単調収束定理（\ref{meas:monotone-convergence}）から $E[Z_{k}]\uparrow E[(Y^{(1)})^{+}-Y^{(\infty)}]$ で、有限な $E[(Y^{(1)})^{+}]$ を引く。
+
+**Step 2（1）.** $c>0$ について $Y\vee(-c)$ は可積分で、$\frac1n\sum Y_{i}\le\frac1n\sum(Y_{i}\vee(-c))\to E[Y\vee(-c)]$（a.s.、\ref{prb:strong-law}）。$c=1,2,\dots$ の可算個の零集合を除けば、すべての $c$ で $\limsup\frac1n\sum Y_{i}\le E[Y\vee(-c)]$。2 を $Y^{(c)}\defeq Y\vee(-c)\downarrow Y$ に使い $c\to\infty$。
+:::
+
+::: lemma 情報不等式（一般形） {#stat:information-inequality-general keywords="for densities f_theta, f_theta0 with respect to a sigma-finite measure and P_theta != P_theta0, E_theta0[log(f_theta(X)/f_theta0(X))] in [-infinity, 0) is well defined and negative; no integrability or common support needed" index="情報不等式（一般形）|じょうほうふとうしき" refname="情報不等式（一般形）"}
+$P_{\theta},P_{\theta_{0}}$ が $\sigma$ 有限測度 $\mu$ に関する密度 $f_{\theta},f_{\theta_{0}}$ をもち、$P_{\theta}\ne P_{\theta_{0}}$ とする。$m\defeq\log\frac{f_{\theta}}{f_{\theta_{0}}}$（$\{f_{\theta_{0}}>0\}$ の上で定義、値は $[-\infty,\infty)$）について、$E_{\theta_{0}}[m(X)^{+}]<\infty$ で、$E_{\theta_{0}}[m(X)]\in[-\infty,0)$。
+:::
+
+::: intuition
+真の分布で測ると、他の分布との尤度比の対数の平均は負になる。尤度比の平均は高々 $1$ で、$\log$ の凹性によって対数の平均はそれより真に小さくなる。可積分性や台についての仮定は不要である。
+:::
+
+::: proof
+**Step 1（正の部分）.** $Y\defeq e^{m(X)}=\frac{f_{\theta}(X)}{f_{\theta_{0}}(X)}\ge0$（$X\in\{f_{\theta_{0}}>0\}$ a.s.）。$E_{\theta_{0}}[Y]=\int_{\{f_{\theta_{0}}>0\}}f_{\theta}d\mu\le1$。$(\log y)^{+}\le y$ から $E[m^{+}]\le E[Y]<\infty$。
+
+**Step 2（負であること）.** $\log y\le y-1$（$y\ge0$、$\log0=-\infty$、等号は $y=1$ のみ）から $E[m]\le E[Y]-1\le0$。$E[m]=0$ なら $E[Y]=1$ かつ非負の $Y-1-\log Y$ の期待値が $0$、よって $Y=1$（$P_{\theta_{0}}$-a.s.）。$\{f_{\theta_{0}}>0\}$ の上の $P_{\theta_{0}}$ の零集合は $\mu$ の零集合なので、そこで $\mu$-a.e. に $f_{\theta}=f_{\theta_{0}}$、さらに $\int_{\{f_{\theta_{0}}>0\}}f_{\theta}d\mu=1$ から $\{f_{\theta_{0}}=0\}$ の上で $\mu$-a.e. に $f_{\theta}=0$。よって $P_{\theta}=P_{\theta_{0}}$ となり矛盾。
+:::
+
+::: theorem ワルドの一致性定理 {#stat:wald-consistency keywords="Wald's conditions: compact metric parameter space, identifiability, continuity of theta -> f(x; theta), local integrable upper bounds E sup_U m^+ < infinity; then any statistic theta-hat_n that maximizes the likelihood up to a deterministic epsilon_n -> 0 is consistent; no differentiability needed" index="ワルドの一致性定理|わるどのいっちせいていり, ワルドの条件|わるどのじょうけん" refname="ワルドの一致性定理"}
+$\Theta$ をコンパクトな距離空間、真の値を $\theta_{0}\in\Theta$ とし、各 $P_{\theta}$ は $\sigma$ 有限測度 $\mu$ に関する密度 $f(x;\theta)$ をもつとする。$m_{\theta}(x)\defeq\log\frac{f(x;\theta)}{f(x;\theta_{0})}$（$f(x;\theta_{0})>0$ の上）、$M_{n}(\theta)\defeq\frac1n\sum_{i\le n}m_{\theta}(X_{i})$ とし、次を仮定する。
+- （W1）$\theta\ne\theta'$ なら $P_{\theta}\ne P_{\theta'}$。
+- （W2）各 $x$ で $\theta\mapsto f(x;\theta)$ は連続。
+- （W3）各 $\theta\in\Theta$ に開近傍 $U$ があって $E_{\theta_{0}}\bigl[\sup_{\theta'\in U}m_{\theta'}(X)^{+}\bigr]<\infty$。
+
+このとき、$\Theta$ 値の統計量 $\hat\theta_{n}$ が、ある決まった数列 $\varepsilon_{n}\to0$ について $M_{n}(\hat\theta_{n})\ge\sup_{\theta\in\Theta}M_{n}(\theta)-\varepsilon_{n}$ をみたせば（特に $\hat\theta_{n}$ が最尤推定量なら）、$\hat\theta_{n}\xrightarrow{P}\theta_{0}$。
+:::
+
+::: intuition
+平均の対数尤度比 $M_{n}(\theta)$ は、大数の法則によって $\theta$ ごとに $M(\theta)=E[m_{\theta}]$ に近づき、$M$ は $\theta_{0}$ だけで最大値 $0$ をとる（情報不等式）。問題は「$\theta$ ごとの収束」から「最大点の収束」を得ることで、そのためには $\theta_{0}$ から離れた領域全体で $M_{n}$ が一様に負になることが要る。コンパクト性で離れた領域を有限個の小さな近傍で覆い、各近傍の上限に大数の法則を使う。
+:::
+
+::: proof
+**Step 1（可測性と準備）.** 確率 $1$ で $X_{i}\in\{f(\cdot;\theta_{0})>0\}$ なので $M_{n}(\theta_{0})=0$、よって $\sup_{\Theta}M_{n}\ge0$。（W2）から各 $x$ で $\theta\mapsto m_{\theta}(x)\in[-\infty,\infty)$ は連続。コンパクトな距離空間は可分なので、任意の部分集合 $A$ の上の上限は、$A$ の可算な稠密部分集合の上の上限に等しく、可測である。
+
+**Step 2（各点での負の近傍）.** 【主張：$\theta\ne\theta_{0}$ には開近傍 $V_{\theta}$ があって $E_{\theta_{0}}[\sup_{\theta'\in V_{\theta}}m_{\theta'}(X)]<0$】（W3）の $U$ の中の開球 $B_{k}\defeq B(\theta,1/k)$（大きい $k$）をとる。$Y^{(k)}\defeq\sup_{B_{k}}m_{\theta'}(X)$ は $k$ について減少し、$m$ の $\theta$ での連続性から $m_{\theta}(X)$ に収束する。$E[(Y^{(k)})^{+}]<\infty$ なので、\ref{stat:upper-strong-law} の 2 から $E[Y^{(k)}]\downarrow E[m_{\theta}(X)]$。右辺は（W1）と \ref{stat:information-inequality-general} から負なので、十分大きい $k$ で $E[Y^{(k)}]<0$。$V_{\theta}\defeq B_{k}$ とする。
+
+**Step 3（離れた領域での一様な負値）.** 【主張：$\varepsilon>0$ について $K\defeq\{\theta:d(\theta,\theta_{0})\ge\varepsilon\}$ とすると、$\eta>0$ があって a.s. に十分大きい $n$ で $\sup_{K}M_{n}\le-\eta$】$K$ はコンパクトで（空なら主張は自明）、Step 2 の $V_{\theta}$（$\theta\in K$）で覆えるので、有限個 $V_{1},\dots,V_{J}$ で覆える。$-2\eta\defeq\max_{j}E[\sup_{V_{j}}m]<0$（$-\infty$ なら $\eta\defeq1$）。$\sup_{K}M_{n}\le\max_{j}\frac1n\sum_{i}\sup_{V_{j}}m_{\theta'}(X_{i})$ で、\ref{stat:upper-strong-law} の 1 から右辺の $\limsup$ は a.s. に $\le-2\eta$。
+
+**Step 4（結論）.** $\hat\theta_{n}\in K$ なら $\sup_{K}M_{n}\ge M_{n}(\hat\theta_{n})\ge\sup_{\Theta}M_{n}-\varepsilon_{n}\ge-\varepsilon_{n}$。よって $P(d(\hat\theta_{n},\theta_{0})\ge\varepsilon)\le P(\sup_{K}M_{n}\ge-\varepsilon_{n})$。$\varepsilon_{n}<\eta$ となる $n$ では、この事象は Step 3 の「$\sup_{K}M_{n}\le-\eta$」と両立しないので、その指示関数は a.s. に $0$ に収束し、優収束定理から確率は $0$ に収束する。
+:::
+
+## 多次元の漸近正規性 {#stat:sec-mlt-normality}
+
+::: theorem 最尤推定量の漸近正規性（多次元） {#stat:mle-asymptotic-normality-multivariate keywords="Theta open in R^p; C^3 log-density with integrable bound on third derivatives near theta_0; int grad f = 0, int Hessian f = 0; positive definite finite Fisher information matrix; any consistent sequence of roots of the likelihood equations satisfies sqrt(n)(theta-hat - theta_0) => N(0, I(theta_0)^{-1})" index="最尤推定量の漸近正規性（多次元）|さいゆうすいていりょうのぜんきんせいきせい, フィッシャー情報行列|ふぃっしゃーじょうほうぎょうれつ" refname="最尤推定量の漸近正規性（多次元）"}
+$\Theta\subseteq\mathbb{R}^{p}$ を開集合、$\theta_{0}\in\Theta$ を真の値とし、各 $P_{\theta}$ は $\sigma$ 有限測度 $\mu$ に関する密度 $f(x;\theta)$ をもち、$D\defeq\{x:f(x;\theta)>0\}$ は $\theta$ によらないとする。次を仮定する。
+- （M1）各 $x\in D$ で $\theta\mapsto\log f(x;\theta)$ は $C^{3}$ 級で、$\delta_{0}>0$（$B(\theta_{0},\delta_{0})\subseteq\Theta$）と $E_{\theta_{0}}[M(X)]<\infty$ をみたす $M$ があって、$\abs{\theta-\theta_{0}}<\delta_{0}$ ですべての 3 階偏導関数の絶対値が $M(x)$ 以下。
+- （M2）$\int_{D}\nabla_{\theta}f(x;\theta_{0})\mu(dx)=0$、$\int_{D}\nabla_{\theta}^{2}f(x;\theta_{0})\mu(dx)=0$（被積分関数は $\mu$ 可積分）。
+- （M3）スコア $s(x)\defeq\nabla_{\theta}\log f(x;\theta_{0})$ は $E_{\theta_{0}}\abs s^{2}<\infty$ で、**フィッシャー情報行列** $I(\theta_{0})\defeq E_{\theta_{0}}[ss^{\top}]$ は正定値。2 階偏導関数 $\partial_{j}\partial_{k}\log f(X;\theta_{0})$ は $P_{\theta_{0}}$ 可積分。
+
+$\ell_{n}(\theta)\defeq\sum_{i\le n}\log f(X_{i};\theta)$ とする。$\Theta$ 値の統計量 $\hat\theta_{n}$ が $\hat\theta_{n}\xrightarrow{P}\theta_{0}$ かつ $P(\nabla\ell_{n}(\hat\theta_{n})=0)\to1$ をみたせば、
+$$
+\sqrt n(\hat\theta_{n}-\theta_{0})\Rightarrow N\bigl(0,I(\theta_{0})^{-1}\bigr).
+$$
+:::
+
+::: intuition
+1 次元の場合とまったく同じで、「スコアのゆらぎ」（多次元の中心極限定理で $N(0,I)$）を「曲率の行列」$I$ で割る、すなわち $I^{-1}$ を掛ける。$I^{-1}N(0,I)$ の共分散は $I^{-1}II^{-1}=I^{-1}$ で、これが多次元のクラメール–ラオの下限にあたる。
+:::
+
+::: proof
+**Step 1（スコアと曲率）.** 【主張：$N_{n}\defeq\frac1{\sqrt n}\nabla\ell_{n}(\theta_{0})\Rightarrow N(0,I)$、$H_{n}\defeq-\frac1n\nabla^{2}\ell_{n}(\theta_{0})\to I$（a.s.）、$I\defeq I(\theta_{0})$】（M2）から $E[s]=\int_{D}\frac{\nabla f}{f}fd\mu=\int_{D}\nabla f\,d\mu=0$ で、\ref{stat:multivariate-clt} から $N_{n}\Rightarrow N(0,I)$。$\nabla^{2}\log f=\frac{\nabla^{2}f}{f}-ss^{\top}$ で、（M2）から $E[\frac{\nabla^{2}f}{f}]=0$、よって $E[\nabla^{2}\log f]=-I$。（M3）と大数の強法則を各成分に使う。
+
+**Step 2（テイラー展開）.** 【主張：$h_{n}\defeq\hat\theta_{n}-\theta_{0}$、$r_{n}\defeq\frac{1}{\sqrt n}\bigl(\nabla\ell_{n}(\hat\theta_{n})-\nabla\ell_{n}(\theta_{0})-\nabla^{2}\ell_{n}(\theta_{0})h_{n}\bigr)$ とすると、$\abs{h_{n}}<\delta_{0}$ のとき $\abs{r_{n}}\le c\,\bar M_{n}\abs{h_{n}}\cdot\sqrt n\abs{h_{n}}$、$\bar M_{n}\defeq\frac1n\sum M(X_{i})$、$c$ は $p$ だけによる定数】$r_{n}$ は明示的な式なので可測。各成分 $\partial_{j}\ell_{n}$ に 2 次の剰余つきのテイラーの定理（\ref{calc:multivariable-taylor}）を線分 $[\theta_{0},\hat\theta_{n}]$ の上で使うと、剰余は $\frac12\sum_{k,l}\partial_{j}\partial_{k}\partial_{l}\ell_{n}(\xi_{j})h_{n}^{k}h_{n}^{l}$ の形で、（M1）から絶対値は $\frac12p^{2}\cdot n\bar M_{n}\abs{h_{n}}^{2}$ 以下。$\sqrt p$ 個の成分をまとめて $c\defeq\frac12p^{5/2}$ とすればよい。
+
+**Step 3（基本の等式）.** 事象 $A_{n}\defeq\{\nabla\ell_{n}(\hat\theta_{n})=0,\ \abs{h_{n}}<\delta_{0}\}$ は $P(A_{n})\to1$ をみたし、その上で Step 2 の定義を書き直すと
+$$
+H_{n}\sqrt nh_{n}=N_{n}+r_{n}.
+$$
+
+**Step 4（$\sqrt nh_{n}$ の確率有界性）.** 【主張：$(\sqrt nh_{n})$ は確率有界】$H_{n}\to I$（正定値）なので、確率 $\to1$ で $H_{n}$ は可逆で $\norm{H_{n}^{-1}}\le2\norm{I^{-1}}$（逆行列は可逆行列の上で連続）。また $\gamma_{n}\defeq c\bar M_{n}\abs{h_{n}}\xrightarrow{P}0$（\ref{stat:multivariate-weak-basic} の 3。$\bar M_{n}$ は a.s. に収束するので確率有界）。$A_{n}$ と、$H_{n}$ が可逆で $\norm{H_{n}^{-1}}\gamma_{n}\le\frac12$、$\norm{H_{n}^{-1}}\le2\norm{I^{-1}}$ である事象（確率 $\to1$）の上で、Step 3 から $\abs{\sqrt nh_{n}}\le\norm{H_{n}^{-1}}(\abs{N_{n}}+\gamma_{n}\abs{\sqrt nh_{n}})$、すなわち $\abs{\sqrt nh_{n}}\le4\norm{I^{-1}}\abs{N_{n}}$。$(N_{n})$ は確率有界（\ref{stat:multivariate-weak-basic} の 1）なので、$(\sqrt nh_{n})$ も確率有界。
+
+**Step 5（結論）.** Step 4 から $\abs{r_{n}}\le\gamma_{n}\abs{\sqrt nh_{n}}\xrightarrow{P}0$（$\abs{h_{n}}<\delta_{0}$ の事象の上で）。確率 $\to1$ の事象の上で $\sqrt nh_{n}=H_{n}^{-1}(N_{n}+r_{n})$ なので、$\sqrt nh_{n}-I^{-1}N_{n}=(H_{n}^{-1}-I^{-1})N_{n}+H_{n}^{-1}r_{n}\xrightarrow{P}0$（同じ補題の 3）。$I^{-1}N_{n}\Rightarrow I^{-1}Z$（$Z\sim N(0,I)$）で、$I^{-1}Z\sim N(0,I^{-1}II^{-1})=N(0,I^{-1})$（\ref{prb:multivariate-normal-properties} の 2）。\ref{stat:slutsky-multivariate} の 1 から主張が従う。
+:::
+
+::: corollary 最尤推定量そのものの漸近正規性 {#stat:global-mle-asymptotic-normality keywords="if Theta is a compact subset of R^p with theta_0 in its interior, Wald's conditions hold and the conditions (M1)-(M3) hold on an open neighbourhood of theta_0, then the maximum likelihood estimator (the global maximizer) satisfies sqrt(n)(theta-hat - theta_0) => N(0, I(theta_0)^{-1})" index="最尤推定量の漸近正規性（大域的な最大点）|さいゆうすいていりょうのぜんきんせいきせい" refname="最尤推定量そのものの漸近正規性"}
+$\Theta\subseteq\mathbb{R}^{p}$ をコンパクト集合、$\theta_{0}$ をその内点とし、$\Theta$ の上で（W1）〜（W3）が、$\theta_{0}$ の開近傍 $\Theta'\subseteq\Theta$ の上で \ref{stat:mle-asymptotic-normality-multivariate} の仮定が成り立つとする。統計量 $\hat\theta_{n}$ が尤度 $\ell_{n}$ の $\Theta$ 上の最大点なら、$\sqrt n(\hat\theta_{n}-\theta_{0})\Rightarrow N(0,I(\theta_{0})^{-1})$。
+:::
+
+::: intuition
+ワルドの定理で最大点が真の値の近くにあることがわかれば、そこは内点なので最大点で勾配が $0$ になり、尤度方程式の解についての漸近正規性がそのまま使える。
+:::
+
+::: proof
+**Step 1（一致性）.** \ref{stat:wald-consistency}（$\varepsilon_{n}=0$）から $\hat\theta_{n}\xrightarrow{P}\theta_{0}$。
+
+**Step 2（尤度方程式）.** $B(\theta_{0},\delta)\subseteq\Theta'$ となる $\delta>0$ をとる。$X\in D^{n}$（a.s.）で $\hat\theta_{n}\in B(\theta_{0},\delta)$ なら、$\hat\theta_{n}$ は $\Theta$ 上の最大点で開集合 $B(\theta_{0},\delta)$ の点、$\ell_{n}$ はそこで微分可能なので $\nabla\ell_{n}(\hat\theta_{n})=0$。よって $P(\nabla\ell_{n}(\hat\theta_{n})=0)\ge P(\abs{\hat\theta_{n}-\theta_{0}}<\delta)\to1$。$\hat\theta_{n}$ を $\Theta'$ 値に修正しても（$\Theta'$ の外では $\theta_{0}$ に置き換える）確率 $\to1$ で変わらないので、\ref{stat:mle-asymptotic-normality-multivariate} を $\Theta'$ の上で使い、\ref{stat:slutsky-multivariate} の 1 で戻す。
+:::
+
+::: example 正規分布の 2 パラメータ {#stat:mle-normal-two-parameter}
+$N(m,v)$（$\theta=(m,v)$, $v>0$）では $s=\bigl(\frac{x-m}v,\ -\frac1{2v}+\frac{(x-m)^{2}}{2v^{2}}\bigr)$、$I(\theta)=\operatorname{diag}\bigl(\frac1v,\frac1{2v^{2}}\bigr)$。$\Theta=\mathbb{R}\times(0,\infty)$ は開集合で、（M1）〜（M3）は直接の計算で確かめられる。最尤推定量 $(\bar X,\hat\sigma^{2})$（\ref{stat:mle-examples} の 3）は大数の法則から一致し、データがすべて等しくない限り尤度方程式の解なので、定理は $\sqrt n(\bar X-m,\hat\sigma^{2}-v)\Rightarrow N\bigl(0,\operatorname{diag}(v,2v^{2})\bigr)$ を与える。これは、正規標本では $\bar X$ と $\hat\sigma^{2}$ が独立で（\ref{stat:normal-sample-theorem}）、それぞれの漸近分散が $v$ と $2v^{2}$（\ref{stat:ex-as-sample-variance}）であることと一致する。
+:::
+
+## 超有効性 {#stat:sec-mlt-hodges}
+
+::: example ホッジスの推定量 {#stat:hodges-estimator keywords="Hodges' estimator T_n = bar X if |bar X| >= n^{-1/4} and 0 otherwise for N(theta, 1): asymptotic variance 1 for theta != 0 and 0 at theta = 0, beating 1/I(theta) = 1 at a single point" index="ホッジスの推定量|ほっじすのすいていりょう, 超有効性|ちょうゆうこうせい" refname="ホッジスの推定量"}
+$N(\theta,1)$ からの標本で、$T_{n}\defeq\bar X$（$\abs{\bar X}\ge n^{-1/4}$ のとき）、$T_{n}\defeq0$（それ以外）とする。$I(\theta)=1$ だが、
+1. $\theta\ne0$ なら $\sqrt n(T_{n}-\theta)\Rightarrow N(0,1)$。
+2. $\theta=0$ なら $\sqrt nT_{n}\xrightarrow{P}0$（漸近分散 $0$）。
+:::
+
+::: proof
+**Step 1（2）.** $\theta=0$ なら $\sqrt n\bar X\sim N(0,1)$ で、$P(T_{n}\ne0)=P(\abs{\sqrt n\bar X}\ge n^{1/4})\to0$。$T_{n}=0$ となる確率が $1$ に近づくので $\sqrt nT_{n}\xrightarrow{P}0$。
+
+**Step 2（1）.** $\theta\ne0$ なら、$n^{-1/4}<\abs\theta/2$ となる $n$ で $P(T_{n}\ne\bar X)\le P(\abs{\bar X}<n^{-1/4})\le P(\abs{\bar X-\theta}>\abs\theta/2)\to0$。$\sqrt n(T_{n}-\theta)-\sqrt n(\bar X-\theta)$ は確率 $\to1$ で $0$ なので、スルツキー（\ref{stat:slutsky}）から $\sqrt n(\bar X-\theta)\sim N(0,1)$ と同じ極限をもつ。
+:::
+
+::: remark
+この例は、漸近分散 $1/I(\theta)$ が「各点ごとには」破れることを示す。ただし、破れるのはルベーグ測度 $0$ の集合の上だけで、$\theta_{n}=h/\sqrt n$ のように真の値が $n$ とともに動くと、ホッジスの推定量の誤差は悪化する（局所漸近ミニマックス定理、ハイェック–ル・カムの畳み込み定理。ここでは証明しない）。
+:::
+
+::: hypcheck
+- **コンパクト性（ワルド）**：Step 3 で離れた領域を有限個の近傍で覆うのに使った。コンパクトでない $\Theta$ では、無限遠で尤度が大きくなりうる（例：正規分布の混合で、分散を $0$ に近づけると尤度が発散する）。そのような場合は、$\Theta$ をコンパクト化して（W2）（W3）を確かめるか、尤度に制約を加える。
+- **（W3）の局所的な上界**：単調収束の議論（Step 2）の出発点として使った。
+- **（M1）の 3 階導関数の上界**：テイラーの剰余を $\bar M_{n}\abs{h_{n}}^{2}$ で抑えるのに使った。
+- **$I(\theta_{0})$ の正定値性**：$H_{n}$ の逆行列の存在と有界性（Step 4）に使った。正定値でないと、パラメータの一部の方向でデータが情報をもたず（識別不能に近く）、$\sqrt n$ の速さが成り立たない。
+- **台が共通であること**：\ref{stat:mle-asymptotic-normality-multivariate} の（M2）の積分を $D$ の上で考えるのに使った。ワルドの定理では使っていない。
+:::
+
+## 問題 {#stat:sec-mlt-problems}
+
+::: problem {#stat:prob-mlt-ratio-delta}
+$\sqrt n(\bar X-m,\bar Y-m')\Rightarrow N(0,\Sigma)$（$m'\ne0$）のとき、多次元のデルタ法で $\sqrt n(\bar X/\bar Y-m/m')$ の漸近分散を求めよ。
+:::
+
+::: solution
+$g(x,y)=x/y$、$\nabla g=(1/m',-m/m'^{2})$。漸近分散は $\nabla g\,\Sigma\,\nabla g^{\top}=\frac{\Sigma_{11}}{m'^{2}}-\frac{2m\Sigma_{12}}{m'^{3}}+\frac{m^{2}\Sigma_{22}}{m'^{4}}$。
+:::
+
+::: problem {#stat:prob-mlt-wald-uniform}
+$U(0,\theta)$（$\theta\in[a,b]$, $0<a<b$）で、ワルドの条件のうち（W2）が成り立たないことを確かめよ。それでも最尤推定量 $\max X_{i}$ が一致性をもつことを直接示せ。
+:::
+
+::: solution
+$f(x;\theta)=\theta^{-1}1_{[0,\theta]}(x)$ は $\theta=x$ で不連続。直接には $P(\abs{M-\theta}>\varepsilon)=(1-\varepsilon/\theta)^{n}\to0$（\ref{stat:consistency-examples} の 3）。ワルドの条件は十分条件であって必要条件ではない（上半連続性に弱めた形の定理もある）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 多次元の中心極限定理は 2 次モーメントだけを仮定し、3 次モーメントもリンデベルグの置き換えも使わなかった（\ref{stat:multivariate-clt-smooth} は 3 次モーメントを仮定する定量的な版）。多次元のプロホロフの定理（確率有界な列から法則収束する部分列がとれること）も使わず、ガウス平滑化で直接示した。ワルドの定理では尤度の微分可能性を使っていない。議論は Wald（1949, Annals of Mathematical Statistics）の方法と、van der Vaart『Asymptotic Statistics』第 2・5 章の流れに沿う。
+
+**前提を変えると.**
+- **上半連続性**：（W2）を「$\theta\mapsto f(x;\theta)$ が上半連続」に弱めてもワルドの定理は成り立つ（ただし上限の可測性に別の注意が要る。ここでは証明しない）。
+- **モデルの誤特定**：真の分布 $Q$ がモデルに含まれないとき、同様の議論で最尤推定量は $E_{Q}[\log f(X;\theta)]$ の最大点 $\theta^{*}$（$Q$ から最も近いモデルの分布）に収束し、$\sqrt n(\hat\theta-\theta^{*})\Rightarrow N(0,A^{-1}BA^{-1})$（$A=-E_{Q}\nabla^{2}\log f$, $B=E_{Q}ss^{\top}$、サンドイッチ型の分散）。証明は本ページの Step 1〜5 で $I$ を $A$ と $B$ に分けるだけでよいが、ここでは詳細を書かない。
+- **局所漸近正規性**：正則なモデルでは対数尤度比 $\ell_{n}(\theta_{0}+h/\sqrt n)-\ell_{n}(\theta_{0})$ が $\langle h,N_{n}\rangle-\frac12\langle h,Ih\rangle+o_{P}(1)$ と展開され、これがハイェック–ル・カムの畳み込み定理などの最適性理論の出発点になる（ここでは証明しない）。
+
+**高い視点から：「各点の収束」から「最大点の収束」へ.** ワルドの定理の本質は、関数の列 $M_{n}$ の各点収束では最大点の収束は得られず、一様な（少なくとも片側の）収束が必要だ、という解析の一般原理である。コンパクト性と局所的な上界が、点ごとの大数の法則を一様な上からの評価に格上げする。漸近正規性の方は、最大点の近くで目的関数を 2 次関数で近似するという、ニュートン法と同じ発想である。比喩で言えば、ワルドの定理は「山脈全体を見渡して最高峰が正しい山にあることを確かめる」作業、漸近正規性は「その山頂付近を拡大して、頂上の位置のゆれを放物面の形から読む」作業である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-mlt-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

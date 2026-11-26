@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>主成分分析 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/03-regression/04-pca.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 主成分分析 {#stat:page-pca keywords="sample covariance matrix, principal components as directions of maximal variance, Rayleigh quotient and eigenvectors, successive maximization, reconstruction error of projection onto a k-dimensional subspace, Ky Fan inequality tr(P S) <= lambda_1 + ... + lambda_k, proportion of variance explained, principal component scores and the singular value decomposition, Courant-Fischer min-max, Weyl's inequality, consistency of sample eigenvalues, scale dependence"}
+
+多数の変数をもつデータを、少数の「合成変数」で要約したい。**主成分分析**（PCA）は、データのばらつきが最も大きい方向から順に軸を選び、データをその上に射影する方法である。数学的には、標本共分散行列の固有ベクトルを求めることに帰着し、「射影したときのばらつきを最大にする」ことと「射影で失われる情報（再構成誤差）を最小にする」ことが同じ答えを与える。このページではこの 2 つの最適性を証明し、標本の固有値が母集団の固有値に近づくこと（一致性）を、固有値の摂動評価（ワイルの不等式）から示す。
+
+## 記法と定義の確認 {#stat:sec-pca-notation}
+
+::: notation
+- 実対称行列の直交行列による対角化は \ref{lin:spectral-theorem} の 3、特異値分解は \ref{lin:svd} の 3、直交射影は \ref{lin:orthogonal-projection}。直交射影のトレースは像の次元（\ref{stat:quadratic-form-expectation} の 2）。
+- 実対称行列 $A$ の固有値を重複を込めて $\lambda_{1}(A)\ge\dots\ge\lambda_{d}(A)$ と並べる。$\norm A$ は作用素ノルム。大数の強法則は \ref{prb:strong-law}。
+- 体系は $\ZFC$。
+:::
+
+## 分散最大の方向 {#stat:sec-pca-variance}
+
+::: definition 標本共分散行列と主成分 {#stat:sample-covariance-pca keywords="data x_1, ..., x_n in R^d, sample mean bar x, sample covariance S = (1/n) sum (x_i - bar x)(x_i - bar x)^T (symmetric positive semidefinite); spectral decomposition S = sum lambda_j u_j u_j^T; principal axes u_j, principal component scores u_j^T (x_i - bar x), proportion of variance explained" index="主成分分析|しゅせいぶんぶんせき, 標本共分散行列|ひょうほんきょうぶんさんぎょうれつ, 主成分得点|しゅせいぶんとくてん, 寄与率|きよりつ" refname="標本共分散行列と主成分"}
+データ $x_{1},\dots,x_{n}\in\mathbb{R}^{d}$ について、$\bar x\defeq\frac1n\sum x_{i}$、$y_{i}\defeq x_{i}-\bar x$、
+$$
+S\defeq\frac1n\sum_{i=1}^{n}y_{i}y_{i}^{\top}
+$$
+を**標本共分散行列**という（対称で、$v^{\top}Sv=\frac1n\sum\langle v,y_{i}\rangle^{2}\ge0$ なので半正定値）。スペクトル定理から正規直交基底 $u_{1},\dots,u_{d}$ と $\lambda_{1}\ge\dots\ge\lambda_{d}\ge0$ で $S=\sum_{j}\lambda_{j}u_{j}u_{j}^{\top}$ と書ける。$u_{j}$ を第 $j$ **主成分の方向**、$\langle u_{j},y_{i}\rangle$ を**主成分得点**、$\frac{\lambda_{1}+\dots+\lambda_{k}}{\lambda_{1}+\dots+\lambda_{d}}$ を第 $k$ 主成分までの**累積寄与率**という。
+:::
+
+::: intuition
+データの点群を、平均の位置に置いた楕円体で近似したとき、主成分の方向はその楕円体の軸、固有値は軸方向の分散である。最も長い軸の方向に射影すると、点群は最も広がって見える。
+:::
+
+::: theorem 分散最大化と固有ベクトル {#stat:pca-variance-maximization keywords="max over unit v of v^T S v is lambda_1, attained at u_1; for k >= 2 the max over unit v orthogonal to u_1, ..., u_{k-1} is lambda_k, attained at u_k; v^T S v is the variance of the projected data" index="レイリー商|れいりーしょう, 分散最大化|ぶんさんさいだいか" refname="分散最大化と固有ベクトル"}
+単位ベクトル $v$ への射影 $\langle v,y_{i}\rangle$ の（$n$ で割った）分散は $v^{\top}Sv$ で、
+1. $\max_{\abs v=1}v^{\top}Sv=\lambda_{1}$ で、$v=u_{1}$ で達成される。
+2. $k\ge2$ について、$u_{1},\dots,u_{k-1}$ に直交する単位ベクトルの上での最大値は $\lambda_{k}$ で、$v=u_{k}$ で達成される。
+:::
+
+::: intuition
+射影した分散は、固有値を重み（射影の各固有方向の成分の 2 乗）で平均したものである。重みの合計は $1$ なので、最大は最大の固有値に全部の重みを置いたときである。
+:::
+
+::: proof
+**Step 1（固有基底での表示）.** 【主張：$\abs v=1$ なら $v^{\top}Sv=\sum_{j}\lambda_{j}w_{j}$、$w_{j}\defeq\langle u_{j},v\rangle^{2}\ge0$、$\sum w_{j}=1$】$S=\sum\lambda_{j}u_{j}u_{j}^{\top}$ から $v^{\top}Sv=\sum\lambda_{j}\langle u_{j},v\rangle^{2}$。正規直交基底なので $\sum_{j}\langle u_{j},v\rangle^{2}=\abs v^{2}=1$。射影の分散については、$\frac1n\sum\langle v,y_{i}\rangle=\langle v,\frac1n\sum y_{i}\rangle=0$ なので $\frac1n\sum\langle v,y_{i}\rangle^{2}=v^{\top}Sv$。
+
+**Step 2（1）.** $\sum\lambda_{j}w_{j}\le\lambda_{1}\sum w_{j}=\lambda_{1}$、$v=u_{1}$ で等号。
+
+**Step 3（2）.** $v\perp u_{1},\dots,u_{k-1}$ なら $w_{1}=\dots=w_{k-1}=0$ で $\sum_{j\ge k}\lambda_{j}w_{j}\le\lambda_{k}$、$v=u_{k}$ で等号。
+:::
+
+## 再構成誤差の最小化 {#stat:sec-pca-reconstruction}
+
+::: theorem 再構成誤差とカイ・ファンの不等式 {#stat:pca-reconstruction keywords="for a k-dimensional subspace W with orthogonal projection P, (1/n) sum |y_i - P y_i|^2 = tr S - tr(P S); Ky Fan: tr(P S) <= lambda_1 + ... + lambda_k with equality for W = span(u_1, ..., u_k); PCA gives the best k-dimensional affine approximation" index="カイ・ファンの不等式|かいふぁんのふとうしき, 再構成誤差|さいこうせいごさ" refname="再構成誤差とカイ・ファンの不等式"}
+$W$ を $\mathbb{R}^{d}$ の $k$ 次元部分空間、$P$ をその直交射影とすると、
+1. $\frac1n\sum_{i}\abs{y_{i}-Py_{i}}^{2}=\operatorname{tr}S-\operatorname{tr}(PS)$。
+2. $\operatorname{tr}(PS)\le\lambda_{1}+\dots+\lambda_{k}$ で、$W=\operatorname{span}(u_{1},\dots,u_{k})$ のとき等号。
+したがって、平均を通る $k$ 次元のアフィン部分空間 $\bar x+W$ でデータを近似するとき、2 乗誤差の和を最小にするのは主成分の方向で張られるもので、最小値は $n(\lambda_{k+1}+\dots+\lambda_{d})$。
+:::
+
+::: intuition
+射影で失われるのは、部分空間に直交する方向の分散である。全体の分散（トレース）は一定なので、失う分を最小にすることと、残す分 $\operatorname{tr}(PS)$ を最大にすることは同じで、残す分は大きい固有値から $k$ 個とるのが最善である。
+:::
+
+::: proof
+**Step 1（1）.** $\abs{y-Py}^{2}=\abs y^{2}-\abs{Py}^{2}$（ピタゴラス）で、$\abs{Py}^{2}=y^{\top}Py=\operatorname{tr}(Pyy^{\top})$。$\frac1n$ を掛けて足すと $\operatorname{tr}S-\operatorname{tr}(PS)$。
+
+**Step 2（重み）.** 【主張：$\operatorname{tr}(PS)=\sum_{j}\lambda_{j}w_{j}$、$w_{j}\defeq\abs{Pu_{j}}^{2}\in[0,1]$、$\sum_{j}w_{j}=k$】$\operatorname{tr}(PS)=\sum_{j}\lambda_{j}\operatorname{tr}(Pu_{j}u_{j}^{\top})=\sum_{j}\lambda_{j}u_{j}^{\top}Pu_{j}$、$u_{j}^{\top}Pu_{j}=\abs{Pu_{j}}^{2}\le\abs{u_{j}}^{2}=1$。$\sum_{j}u_{j}^{\top}Pu_{j}=\operatorname{tr}P=k$（\ref{stat:quadratic-form-expectation} の 2）。
+
+**Step 3（2）.** 
+$$
+\sum_{j}\lambda_{j}w_{j}-\sum_{j\le k}\lambda_{j}=\sum_{j\le k}\lambda_{j}(w_{j}-1)+\sum_{j>k}\lambda_{j}w_{j}\le\lambda_{k}\sum_{j\le k}(w_{j}-1)+\lambda_{k}\sum_{j>k}w_{j}=\lambda_{k}\Bigl(\sum_{j}w_{j}-k\Bigr)=0
+$$
+（$j\le k$ では $w_{j}-1\le0$, $\lambda_{j}\ge\lambda_{k}$、$j>k$ では $w_{j}\ge0$, $\lambda_{j}\le\lambda_{k}$）。$W=\operatorname{span}(u_{1},\dots,u_{k})$ なら $w_{j}=1$（$j\le k$）, $0$（$j>k$）で等号。
+
+**Step 4（アフィン近似）.** $\bar x+W$ への最良の当てはめ $x_{i}\approx\bar x+Py_{i}$ の誤差は 1 で、最小値は $n\operatorname{tr}S-n(\lambda_{1}+\dots+\lambda_{k})=n(\lambda_{k+1}+\dots+\lambda_{d})$。
+:::
+
+::: proposition 特異値分解との関係 {#stat:pca-svd keywords="for the centered data matrix Y (rows y_i^T) with SVD Y = U Sigma V^T, the principal axes are the columns of V, lambda_j = sigma_j^2 / n, and the scores are the columns of U Sigma" index="主成分分析と特異値分解|しゅせいぶんぶんせきととくいちぶんかい" refname="特異値分解との関係"}
+$y_{i}^{\top}$ を行とする $n\times d$ 行列 $Y$ の特異値分解を $Y=U\Sigma V^{\top}$ とすると、$nS=Y^{\top}Y=V\Sigma^{\top}\Sigma V^{\top}$。よって $V$ の列が主成分の方向、$\lambda_{j}=\sigma_{j}^{2}/n$、主成分得点の行列は $YV=U\Sigma$。
+:::
+
+::: intuition
+中心化したデータ行列の特異値分解は、データを「直交する軸の向き」（$V$）と「各軸方向の広がり」（特異値）と「各点の座標」（$U\Sigma$）に分ける。これがそのまま主成分分析である。
+:::
+
+::: proof
+**Step 1（計算）.** $Y^{\top}Y=\sum_{i}y_{i}y_{i}^{\top}=nS$。$Y^{\top}Y=V\Sigma^{\top}U^{\top}U\Sigma V^{\top}=V(\Sigma^{\top}\Sigma)V^{\top}$ は直交行列による対角化で、対角成分は $\sigma_{j}^{2}$。$YV=U\Sigma V^{\top}V=U\Sigma$。
+:::
+
+## 標本の固有値の一致性 {#stat:sec-pca-consistency}
+
+::: lemma クーラント–フィッシャーの定理とワイルの不等式 {#stat:courant-fischer-weyl keywords="lambda_k(A) = max over k-dimensional subspaces W of min over unit v in W of v^T A v; Weyl: |lambda_k(A) - lambda_k(B)| <= ||A - B|| for symmetric A, B" index="クーラント–フィッシャーの定理|くーらんとふぃっしゃーのていり, ワイルの不等式|わいるのふとうしき" refname="クーラント–フィッシャーの定理とワイルの不等式"}
+$A,B$ を $d\times d$ 実対称行列とする。
+1. $\lambda_{k}(A)=\max_{\dim W=k}\min_{v\in W,\abs v=1}v^{\top}Av$。
+2. $\abs{\lambda_{k}(A)-\lambda_{k}(B)}\le\norm{A-B}$。
+:::
+
+::: intuition
+$k$ 番目の固有値は「$k$ 次元のどの部分空間を選んでも避けられない最小の値の、最良の選び方での値」である。行列を少し動かすと 2 次形式も同じだけしか動かないので、固有値もその範囲でしか動かない。
+:::
+
+::: proof
+**Step 1（1：下からの評価）.** 【主張：右辺 $\ge\lambda_{k}(A)$】$A$ の固有ベクトル $u_{1},\dots,u_{d}$ について $W_{0}\defeq\operatorname{span}(u_{1},\dots,u_{k})$ とすると、単位ベクトル $v\in W_{0}$ で $v^{\top}Av=\sum_{j\le k}\lambda_{j}\langle u_{j},v\rangle^{2}\ge\lambda_{k}$。よって右辺 $\ge\lambda_{k}$。
+
+**Step 2（1：上からの評価）.** 任意の $k$ 次元の $W$ と $W_{1}\defeq\operatorname{span}(u_{k},\dots,u_{d})$（次元 $d-k+1$）について、$\dim W+\dim W_{1}>d$ なので $W\cap W_{1}$ は単位ベクトル $v$ を含む。$v^{\top}Av=\sum_{j\ge k}\lambda_{j}\langle u_{j},v\rangle^{2}\le\lambda_{k}$ なので $\min_{W}\le\lambda_{k}$。
+
+**Step 3（2）.** 単位ベクトル $v$ で $v^{\top}Av\le v^{\top}Bv+\norm{A-B}$。1 の右辺の各 $W$ で最小値をとり、最大値をとると $\lambda_{k}(A)\le\lambda_{k}(B)+\norm{A-B}$。$A,B$ を入れ替える。
+:::
+
+::: theorem 標本の固有値の一致性 {#stat:pca-consistency keywords="if X_1, X_2, ... are i.i.d. in R^d with E|X|^2 < infinity and covariance Sigma, then the sample covariance S_n -> Sigma a.s. and lambda_k(S_n) -> lambda_k(Sigma) a.s. for every k" index="主成分分析の一致性|しゅせいぶんぶんせきのいっちせい" refname="標本の固有値の一致性"}
+$X_{1},X_{2},\dots$ を独立同分布な $\mathbb{R}^{d}$ 値確率変数で $E\abs X^{2}<\infty$、共分散行列 $\Sigma$ とし、$S_{n}$ を $X_{1},\dots,X_{n}$ の標本共分散行列とする。このとき $S_{n}\to\Sigma$（a.s.、成分ごと）で、各 $k$ で $\lambda_{k}(S_{n})\to\lambda_{k}(\Sigma)$（a.s.）。
+:::
+
+::: intuition
+標本共分散行列は大数の法則で母集団の共分散行列に近づき、固有値は行列の連続関数（ワイルの不等式）なので、標本の固有値も近づく。
+:::
+
+::: proof
+**Step 1（行列の収束）.** $S_{n}=\frac1n\sum X_{i}X_{i}^{\top}-\bar X\bar X^{\top}$（展開）。大数の強法則（\ref{prb:strong-law}）を各成分に使うと $\frac1n\sum X_{i}X_{i}^{\top}\to E[XX^{\top}]$, $\bar X\to E[X]$（a.s.）で、$S_{n}\to E[XX^{\top}]-E[X]E[X]^{\top}=\Sigma$。
+
+**Step 2（固有値）.** 作用素ノルムは成分の最大値の $d$ 倍以下なので $\norm{S_{n}-\Sigma}\to0$。\ref{stat:courant-fischer-weyl} の 2 を使う。
+:::
+
+::: remark
+固有値が一致しても、固有ベクトル（主成分の方向）が一致するとは限らない。$\lambda_{k}(\Sigma)$ が重複していると方向は一意に決まらないし、隣の固有値との差（スペクトルギャップ）が小さいと方向は不安定になる（デイヴィス–カハンの定理：方向の誤差は $\norm{S_{n}-\Sigma}$ をギャップで割った大きさで抑えられる。ここでは証明しない）。
+:::
+
+::: hypcheck
+- **対称性**：スペクトル定理（実固有値と直交する固有ベクトル）に使った。共分散行列は自動的に対称である。
+- **尺度の依存性**：PCA は変数の単位に依存する（ある変数を 1000 倍すると、その方向が第 1 主成分になる）。単位の異なる変数では、標準化した変数（相関行列）に PCA を使うのが普通である。
+- **$E\abs X^{2}<\infty$**：一致性の Step 1 で大数の強法則に使った。
+- **線形性**：PCA が見つけるのは線形な部分空間である。データが曲がった多様体の上にあるときは、カーネル PCA や多様体学習が使われる。
+:::
+
+## 問題 {#stat:sec-pca-problems}
+
+::: problem {#stat:prob-pca-2d}
+$S=\begin{pmatrix}2&1\\1&2\end{pmatrix}$ の主成分の方向と寄与率を求めよ。
+:::
+
+::: solution
+固有値 $3,1$、固有ベクトル $\frac1{\sqrt2}(1,1)$, $\frac1{\sqrt2}(1,-1)$。第 1 主成分の寄与率は $\frac34$。
+:::
+
+::: problem {#stat:prob-pca-trace}
+すべての主成分の分散の和が、各変数の分散の和に等しいことを示せ。
+:::
+
+::: solution
+$\sum_{j}\lambda_{j}=\operatorname{tr}S=\sum_{l}S_{ll}$、$S_{ll}$ は第 $l$ 変数の分散。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 分散最大化と再構成誤差の最適性には確率モデルを使っていない（データの記述的な性質）。一致性だけが確率の仮定（独立同分布、2 次モーメント）を使う。議論は Jolliffe『Principal Component Analysis』第 1・2 章、行列の不等式は Bhatia『Matrix Analysis』第 3 章の流儀に沿う。
+
+**前提を変えると.**
+- **エッカート–ヤングの定理**：任意の $n\times d$ 行列の、フロベニウスノルムでの最良の階数 $k$ 近似は、特異値分解の上位 $k$ 項の切り詰めで与えられる。\ref{stat:pca-reconstruction} はこの定理の言い換えである（行の張る空間の最良の $k$ 次元部分空間）。
+- **高次元**：$d/n\to\gamma>0$ の高次元では、$\Sigma=I$ でも標本の固有値は $1$ に集まらず、マルチェンコ–パストゥール分布に広がる（ランダム行列理論。ここでは証明しない）。
+- **因子分析**：観測変数を少数の潜在因子と独立な誤差の和とみる確率モデルで、PCA と似た結果を与えるが、誤差の分散を変数ごとに別に推定する点が異なる。
+
+**高い視点から：変分原理としての固有値.** 主成分は、レイリー商 $v^{\top}Sv$ のグラスマン多様体（部分空間の空間）の上での最大化の解であり、カイ・ファンの不等式とクーラント–フィッシャーの定理は、固有値が「最適化の値」として特徴づけられることを述べている。この変分的な特徴づけが、固有値の摂動の安定性（ワイルの不等式）を一行で導く。比喩で言えば、主成分分析は、点群に最もよく合う「影の映し方」を探す作業で、光を当てる向きを変えながら、影が最も大きく広がる向きを順に選んでいく。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-pca-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

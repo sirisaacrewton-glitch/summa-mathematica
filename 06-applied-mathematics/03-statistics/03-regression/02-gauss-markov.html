@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ガウス–マルコフの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/03-regression/02-gauss-markov.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ガウス–マルコフの定理 {#stat:page-gauss-markov keywords="linear unbiased estimators of c^T beta, characterization X^T a = c, Gauss-Markov theorem: least squares is the best linear unbiased estimator (BLUE), matrix form Cov(A Y) - Cov(beta-hat) positive semidefinite, generalized least squares (Aitken) with Cov epsilon = sigma^2 V, whitening by V^{-1/2}, inverse-variance weighted mean"}
+
+最小二乗推定量は不偏で、共分散は $\sigma^{2}(X^{\top}X)^{-1}$ だった。では、他にもっとばらつきの小さい推定量はないのか。**ガウス–マルコフの定理**は、「観測値の線形結合で表される不偏推定量」の中では最小二乗推定量の分散が最小であること（**最良線形不偏推定量**、BLUE）を、誤差の分布を正規分布と仮定せずに示す。証明は、不偏性の条件が「ある部分空間への直交性」になることを使う、純粋に幾何学的なものである。誤差の分散がそろっていない場合には、データを「白色化」してから最小二乗法を使う**一般化最小二乗法**が最良になる。
+
+## 記法と定義の確認 {#stat:sec-gm-notation}
+
+::: notation
+- 線形モデル $Y=X\beta+\varepsilon$（$X$ は $n\times p$、階数 $p$、$E\varepsilon=0$、$\operatorname{Cov}(\varepsilon)=\sigma^{2}I_{n}$）、$\hat\beta=(X^{\top}X)^{-1}X^{\top}Y$ とその性質は \ref{stat:linear-model}, \ref{stat:least-squares-estimator}, \ref{stat:least-squares-moments}。
+- 対称行列 $A,B$ について、$B-A$ が半正定値であることを $A\preceq B$ と書く。半正定値行列の平方根は \ref{lin:svd} の 1。
+- 体系は $\ZFC$。
+:::
+
+## 最良線形不偏推定量 {#stat:sec-gm-blue}
+
+::: definition 線形不偏推定量 {#stat:linear-unbiased-estimator keywords="an estimator a^T Y of c^T beta is linear unbiased if E a^T Y = c^T beta for all beta, equivalently X^T a = c; a linear estimator A Y of beta is unbiased iff A X = I" index="線形不偏推定量|せんけいふへんすいていりょう, 最良線形不偏推定量|さいりょうせんけいふへんすいていりょう" refname="線形不偏推定量"}
+$c\in\mathbb{R}^{p}$ について、定数ベクトル $a\in\mathbb{R}^{n}$ による $a^{\top}Y$ が、すべての $\beta\in\mathbb{R}^{p}$ で $E[a^{\top}Y]=c^{\top}\beta$ をみたすとき、$c^{\top}\beta$ の**線形不偏推定量**という。$E[a^{\top}Y]=a^{\top}X\beta$ なので、これは $X^{\top}a=c$ と同値。同様に $p\times n$ 行列 $A$ による $AY$ が $\beta$ の線形不偏推定量であることは $AX=I_{p}$ と同値。分散が最小の線形不偏推定量を**最良線形不偏推定量**（BLUE）という。
+:::
+
+::: intuition
+不偏性の条件 $X^{\top}a=c$ は、係数ベクトル $a$ が「ある決まった点を通る、$\operatorname{Col}(X)$ に直交する方向の平行移動」の上を動くことを意味する。分散は $\sigma^{2}\abs a^{2}$ なので、その中で長さが最小のもの、すなわち $\operatorname{Col}(X)$ に属するもの（原点からの垂線の足）が最良になる。
+:::
+
+::: theorem ガウス–マルコフの定理 {#stat:gauss-markov keywords="for every c, c^T beta-hat is the unique BLUE of c^T beta: Var(a^T Y) >= Var(c^T beta-hat) with equality iff a^T Y = c^T beta-hat; matrix form Cov(beta-hat) <= Cov(A Y) for every linear unbiased A Y" index="ガウス–マルコフの定理|がうすまるこふのていり" refname="ガウス–マルコフの定理"}
+線形モデルで、
+1. 任意の $c\in\mathbb{R}^{p}$ と $c^{\top}\beta$ の線形不偏推定量 $a^{\top}Y$ について $\operatorname{Var}(a^{\top}Y)\ge\operatorname{Var}(c^{\top}\hat\beta)$。等号は $a=X(X^{\top}X)^{-1}c$、すなわち $a^{\top}Y=c^{\top}\hat\beta$ のときに限る。
+2. $\beta$ の任意の線形不偏推定量 $AY$ について $\operatorname{Cov}(\hat\beta)\preceq\operatorname{Cov}(AY)$。
+:::
+
+::: intuition
+最小二乗推定量の係数ベクトルは $\operatorname{Col}(X)$ の中にあり、他の線形不偏推定量の係数ベクトルとの差は $\operatorname{Col}(X)$ に直交する。ピタゴラスの定理により、余計な直交成分は分散を増やすだけである。
+:::
+
+::: proof
+**Step 1（分解）.** 【主張：$a_{0}\defeq X(X^{\top}X)^{-1}c$ とおくと $a_{0}^{\top}Y=c^{\top}\hat\beta$ で、任意の線形不偏推定量の係数は $a=a_{0}+d$, $X^{\top}d=0$ と書ける】$a_{0}^{\top}Y=c^{\top}(X^{\top}X)^{-1}X^{\top}Y=c^{\top}\hat\beta$。$X^{\top}a_{0}=c$ なので $d\defeq a-a_{0}$ は $X^{\top}d=c-c=0$。
+
+**Step 2（ピタゴラス）.** $\operatorname{Var}(a^{\top}Y)=\operatorname{Var}(a^{\top}\varepsilon)=\sigma^{2}\abs a^{2}=\sigma^{2}(\abs{a_{0}}^{2}+2a_{0}^{\top}d+\abs d^{2})$。$a_{0}^{\top}d=c^{\top}(X^{\top}X)^{-1}X^{\top}d=0$ なので $\operatorname{Var}(a^{\top}Y)=\operatorname{Var}(c^{\top}\hat\beta)+\sigma^{2}\abs d^{2}$。等号は $d=0$ のときに限る。
+
+**Step 3（2）.** $AY$ が不偏なら、任意の $c$ について $(A^{\top}c)^{\top}Y=c^{\top}AY$ は $c^{\top}\beta$ の線形不偏推定量（$X^{\top}A^{\top}c=(AX)^{\top}c=c$）。1 から $c^{\top}\operatorname{Cov}(AY)c=\operatorname{Var}(c^{\top}AY)\ge\operatorname{Var}(c^{\top}\hat\beta)=c^{\top}\operatorname{Cov}(\hat\beta)c$。
+:::
+
+## 一般化最小二乗法 {#stat:sec-gm-gls}
+
+::: theorem 一般化最小二乗法（エイトケンの定理） {#stat:generalized-least-squares keywords="if Cov epsilon = sigma^2 V with V known positive definite, beta-tilde = (X^T V^{-1} X)^{-1} X^T V^{-1} Y is the BLUE, with covariance sigma^2 (X^T V^{-1} X)^{-1}; proof by whitening with V^{-1/2}" index="一般化最小二乗法|いっぱんかさいしょうにじょうほう, エイトケンの定理|えいとけんのていり, 重みつき最小二乗法|おもみつきさいしょうにじょうほう" refname="一般化最小二乗法（エイトケンの定理）"}
+$Y=X\beta+\varepsilon$、$E\varepsilon=0$、$\operatorname{Cov}(\varepsilon)=\sigma^{2}V$（$V$ は既知の正定値行列）、$X$ の階数 $p$ とする。このとき
+$$
+\tilde\beta\defeq(X^{\top}V^{-1}X)^{-1}X^{\top}V^{-1}Y
+$$
+は $\beta$ の BLUE で（\ref{stat:gauss-markov} の 1, 2 の意味で）、$\operatorname{Cov}(\tilde\beta)=\sigma^{2}(X^{\top}V^{-1}X)^{-1}$。
+:::
+
+::: intuition
+相関や分散の違いのある雑音も、適当な線形変換 $V^{-1/2}$ で「そろった、無相関な」雑音に直せる。変換した世界で最小二乗法を使い、元に戻したものが一般化最小二乗推定量である。分散の大きい観測ほど小さい重みで扱われる。
+:::
+
+::: proof
+**Step 1（白色化）.** 【主張：$W=V^{-1/2}$ で変換したモデルは誤差の共分散が $\sigma^{2}I$ の線形モデル】$V$ の正定値な平方根 $V^{1/2}$（\ref{lin:svd} の 1）は可逆で、$W\defeq V^{-1/2}$ は対称で $W^{2}=V^{-1}$。$Y'\defeq WY$, $X'\defeq WX$, $\varepsilon'\defeq W\varepsilon$ とすると $Y'=X'\beta+\varepsilon'$、$\operatorname{Cov}(\varepsilon')=\sigma^{2}WVW=\sigma^{2}I$、$X'$ の階数は $p$（$W$ は可逆）。
+
+**Step 2（推定量の一致）.** 変換したモデルの最小二乗推定量は $(X'^{\top}X')^{-1}X'^{\top}Y'=(X^{\top}V^{-1}X)^{-1}X^{\top}V^{-1}Y=\tilde\beta$。共分散は \ref{stat:least-squares-moments} から $\sigma^{2}(X'^{\top}X')^{-1}=\sigma^{2}(X^{\top}V^{-1}X)^{-1}$。
+
+**Step 3（BLUE）.** $Y=W^{-1}Y'$ なので、$Y$ の線形推定量 $a^{\top}Y$ は $Y'$ の線形推定量 $(W^{-1}a)^{\top}Y'$ に等しく（$W^{-1}$ は対称）、逆に $b^{\top}Y'=(Wb)^{\top}Y$。不偏性と分散はモデルの書き換えで変わらないので、変換したモデルに \ref{stat:gauss-markov} を使えばよい。
+:::
+
+::: example 分散の異なる測定の統合 {#stat:inverse-variance-weighting keywords="independent measurements Y_i = mu + epsilon_i with Var epsilon_i = sigma_i^2: the BLUE of mu is the inverse-variance weighted mean with variance (sum 1/sigma_i^2)^{-1}" index="逆分散重みつき平均|ぎゃくぶんさんおもみつきへいきん" refname="分散の異なる測定の統合"}
+同じ量 $\mu$ を、分散 $\sigma_{i}^{2}$（既知）の独立な誤差で $n$ 回測定したとする（$X=(1,\dots,1)^{\top}$, $\sigma^{2}V=\operatorname{diag}(\sigma_{i}^{2})$）。\ref{stat:generalized-least-squares} から BLUE は
+$$
+\tilde\mu=\frac{\sum_{i}Y_{i}/\sigma_{i}^{2}}{\sum_{i}1/\sigma_{i}^{2}},\qquad\operatorname{Var}(\tilde\mu)=\Bigl(\sum_{i}\frac1{\sigma_{i}^{2}}\Bigr)^{-1}.
+$$
+単純平均 $\bar Y$ の分散 $\frac1{n^{2}}\sum\sigma_{i}^{2}$ はこれ以上である（ガウス–マルコフの定理）。メタ分析で複数の研究の結果を統合する固定効果モデルは、この形である。
+:::
+
+::: hypcheck
+- **線形かつ不偏**：定理が比べるのは線形不偏推定量だけである。偏りのある推定量（次の系列で扱うリッジ回帰）や非線形な推定量（ジェームズ–スタイン推定量、外れ値に強い推定量）は、平均二乗誤差で最小二乗推定量に勝ちうる。
+- **$\operatorname{Cov}(\varepsilon)=\sigma^{2}I$**：Step 2 の $\operatorname{Var}(a^{\top}\varepsilon)=\sigma^{2}\abs a^{2}$ に使った。これが崩れると最小二乗推定量は BLUE でなくなり、一般化最小二乗推定量が BLUE になる（\ref{stat:generalized-least-squares}）。
+- **正規性は不要**：2 次モーメントだけを使った。正規誤差なら、最小二乗推定量は線形に限らずすべての不偏推定量の中で分散最小になる（完備十分統計量によるレーマン–シェフェの定理。ここでは証明しない）。
+:::
+
+## 問題 {#stat:sec-gm-problems}
+
+::: problem {#stat:prob-gm-mean-blue}
+$Y_{i}=\mu+\varepsilon_{i}$（$\varepsilon_{i}$ は無相関、分散 $\sigma^{2}$）で、$\mu$ の BLUE が $\bar Y$ であることを、ガウス–マルコフの定理を使わずに直接示せ。
+:::
+
+::: solution
+$\sum a_{i}Y_{i}$ が不偏 $\iff\sum a_{i}=1$。分散 $\sigma^{2}\sum a_{i}^{2}$ をこの制約のもとで最小化すると、コーシー–シュワルツ $1=(\sum a_{i})^{2}\le n\sum a_{i}^{2}$ から $\sum a_{i}^{2}\ge\frac1n$、等号は $a_{i}=\frac1n$。
+:::
+
+::: problem {#stat:prob-gm-two-measurements}
+分散 $1$ と $4$ の 2 つの独立な測定を統合した BLUE と、その分散を求めよ。
+:::
+
+::: solution
+重みは $1:\frac14$、$\tilde\mu=\frac{Y_{1}+Y_{2}/4}{5/4}=\frac{4Y_{1}+Y_{2}}5$、分散 $\frac1{1+1/4}=\frac45$（単純平均なら $\frac{1+4}4=\frac54$）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ガウス–マルコフの定理は、誤差の独立性すら使わず、無相関性と分散の均一性だけを使う。議論は Seber–Lee『Linear Regression Analysis』第 3 章の流れに沿う。
+
+**前提を変えると.**
+- **推定可能な関数**：$X$ の階数が $p$ より小さくても、$c\in\operatorname{Row}(X)$（$c^{\top}\beta$ が推定可能）なら、$c^{\top}\beta$ の BLUE は正規方程式の任意の解 $b$ による $c^{\top}b$ で、解の選び方によらない。
+- **$V$ が未知の場合**：$V$ を推定して代入した実行可能な一般化最小二乗法は、漸近的には BLUE と同じ精度をもつが、有限標本での最適性は保証されない。
+- **最良線形予測**：同じ論法で、条件付き期待値の代わりに「線形な予測量の中で平均二乗誤差最小のもの」（ウィーナーフィルタ、カルマンフィルタ）が得られる。
+
+**高い視点から：不偏性の制約はアフィン部分空間.** 線形不偏推定量の係数の全体は、$\mathbb{R}^{n}$ の中のアフィン部分空間 $a_{0}+\operatorname{Col}(X)^{\perp}$ で、分散は（定数倍を除いて）原点からの距離の 2 乗である。BLUE はこのアフィン部分空間の中で原点に最も近い点、すなわち原点からの垂線の足で、これは $\operatorname{Col}(X)$ に属する。比喩で言えば、偏りのない測り方の候補は一枚の平面の上に並んでいて、そのうち最も「力を使わない」（係数の長さが短い）ものが最も揺れが小さい。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-gm-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

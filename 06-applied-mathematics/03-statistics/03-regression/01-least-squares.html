@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>最小二乗法 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/03-regression/01-least-squares.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 最小二乗法 {#stat:page-least-squares keywords="linear model Y = X beta + epsilon with E epsilon = 0, Cov epsilon = sigma^2 I, full column rank design, least squares estimator (X^T X)^{-1} X^T Y, normal equations, hat matrix as the orthogonal projection onto the column space, Pythagorean decomposition, unbiasedness and covariance sigma^2 (X^T X)^{-1}, residuals, E[e^T A e] = sigma^2 tr A, unbiased residual variance RSS/(n - p), simple linear regression"}
+
+説明変数 $x$ と応答 $y$ の関係を直線（一般には線形な式）で表し、その係数をデータから推定するのが**線形回帰**である。誤差の 2 乗和を最小にする**最小二乗法**は、幾何学的には、観測値のベクトルを「説明変数で張られる部分空間」へ直交射影することにほかならない。この見方から、推定量の公式・不偏性・共分散、そして誤差の分散の推定で $n$ ではなく $n-p$ で割る理由（射影の次元）が、すべて線形代数の計算として得られる。
+
+## 記法と定義の確認 {#stat:sec-ls-notation}
+
+::: notation
+- ベクトルは列ベクトル、$\abs\cdot$ はユークリッドノルム、$A^{\top}$ は転置、$\operatorname{tr}$ はトレース、$\operatorname{Col}(X)$ は列空間。直交射影と最良近似は \ref{lin:orthogonal-projection}。
+- 確率変数のベクトル $\varepsilon$ について $E[\varepsilon]$ は成分ごとの期待値、$\operatorname{Cov}(\varepsilon)\defeq E[(\varepsilon-E\varepsilon)(\varepsilon-E\varepsilon)^{\top}]$。定数行列 $A$ について $E[A\varepsilon]=AE[\varepsilon]$, $\operatorname{Cov}(A\varepsilon)=A\operatorname{Cov}(\varepsilon)A^{\top}$（期待値の線形性から）。
+- 体系は $\ZFC$。
+:::
+
+## 線形モデルと最小二乗推定量 {#stat:sec-ls-model}
+
+::: definition 線形モデル {#stat:linear-model keywords="Y = X beta + epsilon, X a known n x p design matrix of rank p, beta in R^p unknown, E epsilon = 0, Cov epsilon = sigma^2 I_n" index="線形モデル|せんけいもでる, 線形回帰|せんけいかいき, 計画行列|けいかくぎょうれつ" refname="線形モデル"}
+既知の $n\times p$ 行列 $X$（**計画行列**、階数 $p$、$n>p$）と未知の $\beta\in\mathbb{R}^{p}$, $\sigma^{2}>0$ について、観測値のベクトル $Y\in\mathbb{R}^{n}$ が
+$$
+Y=X\beta+\varepsilon,\qquad E[\varepsilon]=0,\qquad\operatorname{Cov}(\varepsilon)=\sigma^{2}I_{n}
+$$
+をみたすとき、これを**線形モデル**という。$X$ の第 $i$ 行は $i$ 番目の観測の説明変数（定数項を入れるなら成分 $1$ を含む）である。
+:::
+
+::: intuition
+線形モデルは「応答は説明変数の 1 次式に、互いに無相関で大きさのそろった雑音が乗ったもの」と仮定する。「線形」はパラメータ $\beta$ について線形という意味で、説明変数に $x$, $x^{2}$, $\log x$ などを並べれば曲線の当てはめも含む。
+:::
+
+::: theorem 最小二乗推定量 {#stat:least-squares-estimator keywords="the unique minimizer of |Y - X b|^2 is beta-hat = (X^T X)^{-1} X^T Y; X beta-hat = H Y with H = X (X^T X)^{-1} X^T the orthogonal projection onto Col(X); normal equations X^T X b = X^T Y; Pythagorean identity |Y - X b|^2 = |Y - H Y|^2 + |X(beta-hat - b)|^2" index="最小二乗推定量|さいしょうにじょうすいていりょう, 正規方程式|せいきほうていしき, ハット行列|はっとぎょうれつ" refname="最小二乗推定量"}
+$X$ の階数が $p$ なら、
+1. $X^{\top}X$ は可逆で、$H\defeq X(X^{\top}X)^{-1}X^{\top}$ は $\operatorname{Col}(X)$ への直交射影（$H^{\top}=H$, $H^{2}=H$, 像は $\operatorname{Col}(X)$）。
+2. すべての $b\in\mathbb{R}^{p}$ で $\abs{Y-Xb}^{2}=\abs{Y-HY}^{2}+\abs{X(\hat\beta-b)}^{2}$、ここで $\hat\beta\defeq(X^{\top}X)^{-1}X^{\top}Y$。
+3. したがって $\abs{Y-Xb}^{2}$ を最小にする $b$ は $\hat\beta$ ただ一つで、それは**正規方程式** $X^{\top}Xb=X^{\top}Y$ の唯一の解。$X\hat\beta=HY$。
+:::
+
+::: intuition
+観測値 $Y$ に最も近い「モデルが作れるベクトル」$Xb$ は、$Y$ から部分空間 $\operatorname{Col}(X)$ に下ろした垂線の足である。垂線の条件「残差 $Y-X\hat\beta$ が $X$ のすべての列に直交する」が正規方程式 $X^{\top}(Y-X\hat\beta)=0$ である。
+:::
+
+::: proof
+**Step 1（$X^{\top}X$ の可逆性）.** 【主張：$X^{\top}Xv=0$ なら $v=0$】$X^{\top}Xv=0$ なら $\abs{Xv}^{2}=v^{\top}X^{\top}Xv=0$ で $Xv=0$。$X$ の階数は $p$（列が一次独立）なので $v=0$。
+
+**Step 2（$H$ は直交射影）.** $H^{\top}=X((X^{\top}X)^{-1})^{\top}X^{\top}=H$（$X^{\top}X$ は対称）、$H^{2}=X(X^{\top}X)^{-1}X^{\top}X(X^{\top}X)^{-1}X^{\top}=H$。像は $\operatorname{Col}(X)$ に含まれ、$HXc=Xc$ なので $\operatorname{Col}(X)$ に等しい。対称で冪等な行列は像への直交射影である（$v-Hv$ は $\langle v-Hv,Hw\rangle=v^{\top}(H-H^{2})w=0$ から像に直交する）。
+
+**Step 3（ピタゴラスの分解）.** $X\hat\beta=X(X^{\top}X)^{-1}X^{\top}Y=HY$。$Y-Xb=(Y-HY)+(HY-Xb)$ で、第 1 項は $\operatorname{Col}(X)$ に直交、第 2 項 $=X(\hat\beta-b)$ は $\operatorname{Col}(X)$ の元なので、2 乗ノルムは和に分かれる。
+
+**Step 4（最小点）.** Step 3 から最小は $X(\hat\beta-b)=0$、すなわち（Step 1 の単射性から）$b=\hat\beta$ のときだけ。正規方程式は $X^{\top}X$ の可逆性から唯一の解 $\hat\beta$ をもつ。
+:::
+
+## 推定量の性質 {#stat:sec-ls-properties}
+
+::: proposition 最小二乗推定量の平均と共分散 {#stat:least-squares-moments keywords="E beta-hat = beta, Cov beta-hat = sigma^2 (X^T X)^{-1}; residuals e = (I - H) Y = (I - H) epsilon; fitted values and residuals are uncorrelated" index="最小二乗推定量の不偏性|さいしょうにじょうすいていりょうのふへんせい, 残差|ざんさ" refname="最小二乗推定量の平均と共分散"}
+線形モデルで、
+1. $E[\hat\beta]=\beta$、$\operatorname{Cov}(\hat\beta)=\sigma^{2}(X^{\top}X)^{-1}$。
+2. **残差** $e\defeq Y-X\hat\beta=(I-H)\varepsilon$ について $E[e]=0$、$\operatorname{Cov}(e)=\sigma^{2}(I-H)$、$\operatorname{Cov}(\hat\beta,e)\defeq E[(\hat\beta-\beta)e^{\top}]=0$。
+:::
+
+::: intuition
+最小二乗推定量は観測値の線形関数なので、平均と共分散は雑音の平均と共分散から線形代数だけで計算できる。当てはめ値と残差は直交する部分空間にあるので無相関になる。
+:::
+
+::: proof
+**Step 1（1）.** $\hat\beta=(X^{\top}X)^{-1}X^{\top}(X\beta+\varepsilon)=\beta+A\varepsilon$、$A\defeq(X^{\top}X)^{-1}X^{\top}$。$E[A\varepsilon]=0$、$\operatorname{Cov}(A\varepsilon)=\sigma^{2}AA^{\top}=\sigma^{2}(X^{\top}X)^{-1}$。
+
+**Step 2（2）.** $(I-H)X=0$ なので $e=(I-H)Y=(I-H)\varepsilon$。$\operatorname{Cov}(e)=\sigma^{2}(I-H)(I-H)^{\top}=\sigma^{2}(I-H)$。$E[A\varepsilon\varepsilon^{\top}(I-H)]=\sigma^{2}A(I-H)=\sigma^{2}(X^{\top}X)^{-1}((I-H)X)^{\top}=0$。
+:::
+
+::: lemma 2 次形式の期待値 {#stat:quadratic-form-expectation keywords="if E epsilon = 0 and Cov epsilon = sigma^2 I then E[epsilon^T A epsilon] = sigma^2 tr A; the trace of an orthogonal projection is its rank" index="2 次形式の期待値|にじけいしきのきたいち" refname="2 次形式の期待値"}
+1. $E[\varepsilon]=0$, $\operatorname{Cov}(\varepsilon)=\sigma^{2}I_{n}$ なら、$n\times n$ 行列 $A$ について $E[\varepsilon^{\top}A\varepsilon]=\sigma^{2}\operatorname{tr}A$。
+2. 直交射影 $P$ のトレースは像の次元に等しい。特に $\operatorname{tr}H=p$, $\operatorname{tr}(I-H)=n-p$。
+:::
+
+::: intuition
+独立で大きさのそろった雑音の 2 次形式の平均は、行列の対角成分だけが効いてトレースになる。射影のトレースは射影先の次元で、「雑音が何次元分入り込むか」を数えている。
+:::
+
+::: proof
+**Step 1（1）.** $\varepsilon^{\top}A\varepsilon=\sum_{i,j}A_{ij}\varepsilon_{i}\varepsilon_{j}$ で、$E[\varepsilon_{i}\varepsilon_{j}]=\sigma^{2}\delta_{ij}$。
+
+**Step 2（2）.** 像の正規直交基底を延長した $\mathbb{R}^{n}$ の正規直交基底で $P$ は $\operatorname{diag}(1,\dots,1,0,\dots,0)$（$1$ は像の次元の個数）と表され、トレースは基底によらない。$H$ の像は $\operatorname{Col}(X)$ で次元 $p$。
+:::
+
+::: theorem 残差分散の不偏推定量 {#stat:residual-variance keywords="RSS = |e|^2 has expectation (n - p) sigma^2; s^2 = RSS/(n - p) is unbiased for sigma^2" index="残差平方和|ざんさへいほうわ, 残差分散|ざんさぶんさん" refname="残差分散の不偏推定量"}
+**残差平方和** $\mathrm{RSS}\defeq\abs e^{2}$ について $E[\mathrm{RSS}]=(n-p)\sigma^{2}$。したがって $s^{2}\defeq\frac{\mathrm{RSS}}{n-p}$ は $\sigma^{2}$ の不偏推定量。
+:::
+
+::: intuition
+残差は $n$ 次元の雑音を、$p$ 次元の部分空間の直交補空間（$n-p$ 次元）に射影したものである。射影で $p$ 次元分の雑音は「当てはめ」に吸い取られてしまうので、残差の 2 乗和は平均して $(n-p)\sigma^{2}$ しかない。標本分散で $n-1$ で割ったのは $p=1$（定数だけのモデル）の場合である。
+:::
+
+::: proof
+**Step 1（計算）.** $\mathrm{RSS}=\varepsilon^{\top}(I-H)^{\top}(I-H)\varepsilon=\varepsilon^{\top}(I-H)\varepsilon$。\ref{stat:quadratic-form-expectation} から $E[\mathrm{RSS}]=\sigma^{2}\operatorname{tr}(I-H)=\sigma^{2}(n-p)$。
+:::
+
+::: example 単回帰 {#stat:simple-linear-regression keywords="y_i = a + b x_i + epsilon_i: b-hat = S_xy / S_xx, a-hat = bar y - b-hat bar x, Var b-hat = sigma^2 / S_xx" index="単回帰|たんかいき, 回帰直線|かいきちょくせん" refname="単回帰"}
+$Y_{i}=a+bx_{i}+\varepsilon_{i}$（$x_{i}$ がすべて等しくはない）では $X$ の行は $(1,x_{i})$。$S_{xx}\defeq\sum(x_{i}-\bar x)^{2}>0$, $S_{xy}\defeq\sum(x_{i}-\bar x)(Y_{i}-\bar Y)$ とすると、正規方程式 $\sum(Y_{i}-a-bx_{i})=0$, $\sum x_{i}(Y_{i}-a-bx_{i})=0$ を解いて
+$$
+\hat b=\frac{S_{xy}}{S_{xx}},\qquad\hat a=\bar Y-\hat b\bar x,\qquad\operatorname{Var}(\hat b)=\frac{\sigma^{2}}{S_{xx}}.
+$$
+（第 1 式から $\hat a=\bar Y-\hat b\bar x$、第 2 式に代入して $\sum x_{i}(Y_{i}-\bar Y)=\hat b\sum x_{i}(x_{i}-\bar x)$、両辺は $S_{xy}$, $\hat bS_{xx}$ に等しい。分散は $\hat b=\sum\frac{x_{i}-\bar x}{S_{xx}}Y_{i}$ から。）説明変数を広い範囲にとるほど $S_{xx}$ が大きくなり、傾きは精密に推定できる。
+:::
+
+::: remark
+回帰係数は「$x$ が 1 増えたときの $y$ の条件付き平均の変化」を表すが、これは観測データの相関の要約であって、$x$ を介入して変えたときの因果効果とは一般に異なる。両者が一致するのは、例えば $x$ が無作為に割り付けられている場合である（交絡がない場合）。
+:::
+
+::: hypcheck
+- **$X$ の階数が $p$**：$X^{\top}X$ の可逆性（Step 1）と最小点の一意性に使った。階数が落ちると最小点は無数にあり（射影 $HY$ は一意だが係数は一意でない）、ムーア–ペンローズの一般逆行列で最小ノルムの解を選ぶことになる。
+- **誤差の平均 $0$**：不偏性に使った。
+- **$\operatorname{Cov}(\varepsilon)=\sigma^{2}I$**：共分散の公式と $E[\mathrm{RSS}]$ の計算に使った。推定量の定義と射影としての性質（\ref{stat:least-squares-estimator}）には確率の仮定を一切使っていない。
+- **正規性は不要**：このページの結果はすべて 2 次モーメントだけで成り立つ。分布についての推測（検定・区間）には正規性を使う（\ref[正規線形モデル]{stat:page-normal-linear-model}）。
+:::
+
+## 問題 {#stat:sec-ls-problems}
+
+::: problem {#stat:prob-ls-mean-model}
+$p=1$, $X=(1,\dots,1)^{\top}$ のとき、$\hat\beta=\bar Y$、$s^{2}=S^{2}$（標本分散）となることを確かめよ。
+:::
+
+::: solution
+$X^{\top}X=n$, $X^{\top}Y=\sum Y_{i}$ から $\hat\beta=\bar Y$。$\mathrm{RSS}=\sum(Y_{i}-\bar Y)^{2}$、$n-p=n-1$。
+:::
+
+::: problem {#stat:prob-ls-residual-orthogonal}
+定数項を含むモデル（$X$ の列に $(1,\dots,1)^{\top}$ がある）では、残差の和が $0$ になることを示せ。
+:::
+
+::: solution
+正規方程式 $X^{\top}e=0$ の、定数の列に対応する成分が $\sum e_{i}=0$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 最小二乗推定量の存在・一意性・射影としての表示は純粋に線形代数の結果で、誤差の分布の仮定を使わない。議論は Seber–Lee『Linear Regression Analysis』第 3 章の流れに沿う。
+
+**前提を変えると.**
+- **重みつき最小二乗**：$\operatorname{Cov}(\varepsilon)=\sigma^{2}V$（$V$ は既知の正定値行列）なら、$V^{-1/2}$ を掛けて白色化したモデルに最小二乗法を使う（次のページの一般化最小二乗）。
+- **不均一分散**：$\operatorname{Cov}(\varepsilon)$ が対角だが成分がそろっていないと、$\hat\beta$ は不偏のままだが $\sigma^{2}(X^{\top}X)^{-1}$ は正しい共分散でなくなる。$X^{\top}\operatorname{diag}(e_{i}^{2})X$ を使う「頑健な」共分散の推定（ホワイトの推定量）が使われる。
+- **最小絶対偏差**：2 乗和の代わりに $\sum\abs{Y_{i}-x_{i}^{\top}b}$ を最小にすると、外れ値に強い推定（中央値回帰）になる。これは線形計画問題として解ける。
+
+**高い視点から：射影としての統計.** 最小二乗法は、ヒルベルト空間 $\mathbb{R}^{n}$ の閉部分空間への直交射影で、確率変数の空間 $L^{2}$ での条件付き期待値（$L^{2}$ の部分空間への射影）と同じ構造をもつ。「データの空間 = 信号の部分空間 ⊕ 雑音の補空間」という直交分解が、推定（射影）と誤差の推定（補空間の長さ）を同時に与える。比喩で言えば、最小二乗法は、壁（モデルの部分空間）に向かって真上から光を当てたときの影であり、影と実物の距離（残差）が最も短くなるのは光が壁に垂直なときである。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-ls-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

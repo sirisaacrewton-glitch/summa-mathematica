@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：回帰 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/03-regression/06-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：回帰 {#stat:page-exercises-regression keywords="exercises, simple regression computation, leverages H_ii in [0, 1] summing to p, regression through the origin and the ratio estimator, covariance of least squares under correlated errors, slope t test computation, R^2 equals the squared correlation, PCA of collinear data, uncorrelated principal component scores, lasso and ridge on an orthonormal design, monotone shrinkage of ridge"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習や、二つ以上のページの道具を組み合わせるものである。難易度は ★（基本）・★★（標準）・★★★（発展）で示す。
+
+## 記法と定義の確認 {#stat:sec-esr-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。
+:::
+
+## 最小二乗法 {#stat:sec-ls-exercises}
+
+対応するページ：\ref{stat:page-least-squares}
+
+::: problem ★ 基本：単回帰の計算 {#stat:ex-ls-compute}
+データ $(x,y)=(0,1),(1,3),(2,4),(3,6)$ に直線 $y=a+bx$ を当てはめ、$\hat a$, $\hat b$, 残差、$s^{2}$ を求めよ。
+:::
+
+::: solution
+$\bar x=1.5$, $\bar y=3.5$, $S_{xx}=5$, $S_{xy}=3.75+0.25+0.25+3.75=8$。$\hat b=1.6$, $\hat a=3.5-2.4=1.1$（\ref{stat:simple-linear-regression}）。当てはめ値 $1.1,2.7,4.3,5.9$、残差 $-0.1,0.3,-0.3,0.1$（和は $0$）。$\mathrm{RSS}=0.2$、$s^{2}=0.2/(4-2)=0.1$。
+:::
+
+::: problem ★★ 標準：てこ比 {#stat:ex-ls-leverage}
+ハット行列の対角成分（**てこ比**）について $0\le H_{ii}\le1$、$\sum_{i}H_{ii}=p$ を示せ。
+:::
+
+::: solution
+$H$ は対称冪等なので $H_{ii}=e_{i}^{\top}He_{i}=e_{i}^{\top}H^{\top}He_{i}=\abs{He_{i}}^{2}\in[0,\abs{e_{i}}^{2}]=[0,1]$（射影はノルムを増やさない）。和はトレースで $p$（\ref{stat:quadratic-form-expectation} の 2）。$\operatorname{Var}(e_{i})=\sigma^{2}(1-H_{ii})$ なので、てこ比の大きい点は当てはめに強く引き寄せられ、残差が小さく出る。
+:::
+
+## ガウス–マルコフの定理 {#stat:sec-gm-exercises}
+
+対応するページ：\ref{stat:page-gauss-markov}
+
+::: problem ★ 基本：原点を通る回帰 {#stat:ex-gm-origin}
+$Y_{i}=bx_{i}+\varepsilon_{i}$（$x_{i}>0$）で、$b$ の BLUE が $\hat b=\sum x_{i}Y_{i}/\sum x_{i}^{2}$ であることと、比推定量 $\sum Y_{i}/\sum x_{i}$ が線形不偏でその分散が $\hat b$ の分散以上であることを確かめよ。
+:::
+
+::: solution
+$X=(x_{1},\dots,x_{n})^{\top}$ で \ref{stat:least-squares-estimator} から $\hat b$、\ref{stat:gauss-markov} から BLUE。比推定量は $a_{i}=1/\sum x_{j}$ で $\sum a_{i}x_{i}=1$（不偏）、分散 $\frac{n\sigma^{2}}{(\sum x_{i})^{2}}$。コーシー–シュワルツ $(\sum x_{i})^{2}\le n\sum x_{i}^{2}$ から $\ge\frac{\sigma^{2}}{\sum x_{i}^{2}}=\operatorname{Var}(\hat b)$。
+:::
+
+::: problem ★★ 標準：相関のある誤差のもとの最小二乗 {#stat:ex-gm-ols-correlated}
+$\operatorname{Cov}(\varepsilon)=\sigma^{2}V$ のとき、最小二乗推定量 $\hat\beta$ は不偏で $\operatorname{Cov}(\hat\beta)=\sigma^{2}(X^{\top}X)^{-1}X^{\top}VX(X^{\top}X)^{-1}$ であることを示し、これが $\sigma^{2}(X^{\top}V^{-1}X)^{-1}$ 以上（$\succeq$）であることを説明せよ。
+:::
+
+::: solution
+$\hat\beta=\beta+A\varepsilon$（$A=(X^{\top}X)^{-1}X^{\top}$）で $E[A\varepsilon]=0$、$\operatorname{Cov}=\sigma^{2}AVA^{\top}$。$\hat\beta$ は線形不偏推定量（$AX=I$）なので、\ref{stat:generalized-least-squares}（一般化最小二乗推定量が BLUE）から $\operatorname{Cov}(\hat\beta)\succeq\sigma^{2}(X^{\top}V^{-1}X)^{-1}$。誤差に相関があるとき通常の公式 $\sigma^{2}(X^{\top}X)^{-1}$ を使うと、標準誤差を誤って見積もる。
+:::
+
+## 正規線形モデルの推測 {#stat:sec-nl-exercises}
+
+対応するページ：\ref{stat:page-normal-linear-model}
+
+::: problem ★ 基本：傾きの t 検定 {#stat:ex-nl-slope}
+\ref{stat:ex-ls-compute} のデータで、誤差を正規と仮定して $H_{0}:b=0$ を有意水準 5% で検定せよ（$t_{2,0.025}\approx4.303$）。
+:::
+
+::: solution
+$\operatorname{Var}(\hat b)$ の推定は $s^{2}/S_{xx}=0.1/5=0.02$、標準誤差 $\approx0.141$。$T=1.6/0.141\approx11.3>4.303$ なので棄却（\ref{stat:coefficient-t-test}）。
+:::
+
+::: problem ★★ 標準：決定係数と相関係数 {#stat:ex-nl-r2-correlation}
+単回帰で $R^{2}=\frac{S_{xy}^{2}}{S_{xx}S_{yy}}$（標本相関係数の 2 乗、$S_{yy}=\sum(Y_{i}-\bar Y)^{2}$）を示せ。
+:::
+
+::: solution
+\ref{stat:regression-anova-example} から $\mathrm{TSS}-\mathrm{RSS}=\hat b^{2}S_{xx}=S_{xy}^{2}/S_{xx}$、$\mathrm{TSS}=S_{yy}$。$R^{2}=1-\mathrm{RSS}/\mathrm{TSS}=\frac{S_{xy}^{2}}{S_{xx}S_{yy}}$。
+:::
+
+## 主成分分析 {#stat:sec-pca-exercises}
+
+対応するページ：\ref{stat:page-pca}
+
+::: problem ★ 基本：直線上のデータ {#stat:ex-pca-collinear}
+データ $(1,1),(2,2),(3,3)$ の主成分分析を行え。
+:::
+
+::: solution
+$\bar x=(2,2)$, $y_{i}=(-1,-1),(0,0),(1,1)$。$S=\frac13\begin{pmatrix}2&2\\2&2\end{pmatrix}$、固有値 $\frac43,0$、第 1 主成分の方向 $\frac1{\sqrt2}(1,1)$、寄与率 $100\%$。データは 1 次元の直線上にあり、第 2 主成分の方向の分散は $0$。
+:::
+
+::: problem ★★ 標準：主成分得点の無相関性 {#stat:ex-pca-uncorrelated}
+異なる主成分の得点が（標本の意味で）無相関で、第 $j$ 主成分得点の分散が $\lambda_{j}$ であることを示せ。
+:::
+
+::: solution
+$\frac1n\sum_{i}\langle u_{j},y_{i}\rangle\langle u_{k},y_{i}\rangle=u_{j}^{\top}Su_{k}=\lambda_{k}u_{j}^{\top}u_{k}=\lambda_{k}\delta_{jk}$。得点の平均は $0$（$\sum y_{i}=0$）なので、これが標本共分散。主成分分析は、データを無相関な座標に回転する操作である。
+:::
+
+## 過学習と正則化 {#stat:sec-rg-exercises}
+
+対応するページ：\ref{stat:page-regularization}
+
+::: problem ★ 基本：直交計画でのラッソとリッジ {#stat:ex-rg-compute}
+直交計画で $\hat\beta=(3,-0.5,1.2)$ のとき、$\lambda=2$ のラッソと $\lambda=1$ のリッジの推定値を求めよ。
+:::
+
+::: solution
+ラッソ（しきい値 $\lambda/2=1$）：$(2,0,0.2)$。リッジ：$\hat\beta/2=(1.5,-0.25,0.6)$（\ref{stat:lasso-soft-thresholding}）。ラッソは第 2 係数をちょうど $0$ にする。
+:::
+
+::: problem ★★ 標準：リッジの縮小の単調性 {#stat:ex-rg-ridge-monotone}
+$X$ の階数が $p$ のとき、$\abs{\hat\beta_{\lambda}}$ が $\lambda$ について単調減少で、$\lambda\to0$ で $\hat\beta$ に、$\lambda\to\infty$ で $0$ に収束することを示せ。
+:::
+
+::: solution
+\ref{stat:hoerl-kennard} の Step 1 から $\abs{\hat\beta_{\lambda}}^{2}=\sum_{j}\bigl(\frac{d_{j}}{d_{j}+\lambda}\bigr)^{2}\langle v_{j},\hat\beta\rangle^{2}$。各係数 $\frac{d_{j}}{d_{j}+\lambda}$ は $\lambda$ について減少し、$\lambda\to0$ で $1$、$\lambda\to\infty$ で $0$。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

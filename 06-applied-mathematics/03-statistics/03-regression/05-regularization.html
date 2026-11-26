@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>過学習と正則化 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/03-regression/05-regularization.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 過学習と正則化 {#stat:page-regularization keywords="prediction error at the design points, bias-variance decomposition for projection estimators, training error is optimistic by 2 p sigma^2 (Mallows' C_p), overfitting and underfitting, ridge regression (X^T X + lambda I)^{-1} X^T Y, shrinkage in the eigenbasis, Hoerl-Kennard: some lambda > 0 has smaller mean squared error than least squares, lasso, soft thresholding for orthonormal designs, sparsity"}
+
+説明変数を増やせば、手元のデータへの当てはまり（残差平方和）は必ず良くなる。しかし、新しいデータを予測する力は、ある所から悪くなる。これが**過学習**である。このページでは、予測誤差が「偏りの 2 乗」と「分散」に分かれ、変数を増やすと前者が減って後者が増えることを、射影の計算で正確に示す。また、残差平方和が予測誤差をどれだけ楽観的に見積もるか（$2p\sigma^{2}$）を求める。最後に、係数の大きさに罰則をつける**正則化**を扱い、リッジ回帰が適当な罰則の強さで最小二乗推定量より平均二乗誤差を小さくできること、ラッソが係数をちょうど $0$ にする（変数選択をする）ことを示す。
+
+## 記法と定義の確認 {#stat:sec-rg-notation}
+
+::: notation
+- $Y=X\beta+\varepsilon$（$E\varepsilon=0$, $\operatorname{Cov}(\varepsilon)=\sigma^{2}I_{n}$）とその推定、ハット行列、2 次形式の期待値は \ref{stat:linear-model}, \ref{stat:least-squares-estimator}, \ref{stat:least-squares-moments}, \ref{stat:quadratic-form-expectation}。前の系列とページの結果 \ref{stat:mse-decomposition}, \ref{stat:gauss-markov} も使う。
+- 実対称行列の対角化は \ref{lin:spectral-theorem} の 3。$\abs b_{1}\defeq\sum_{j}\abs{b_{j}}$。$(t)_{+}\defeq\max(t,0)$。
+- 体系は $\ZFC$。
+:::
+
+## 予測誤差と過学習 {#stat:sec-rg-prediction}
+
+::: definition 予測誤差と訓練誤差 {#stat:prediction-error keywords="for a fitted vector mu-hat = f(Y), prediction error E|Y* - mu-hat|^2 with an independent copy Y* = X beta + epsilon*; training error E|Y - mu-hat|^2" index="予測誤差|よそくごさ, 訓練誤差|くんれんごさ, 過学習|かがくしゅう" refname="予測誤差と訓練誤差"}
+$\mu\defeq X\beta$ とし、データ $Y$ から作った当てはめのベクトル $\hat\mu$ について、$Y$ と独立で同じ分布の新しい観測 $Y^{*}=\mu+\varepsilon^{*}$ に対する $E\abs{Y^{*}-\hat\mu}^{2}$ を**予測誤差**、$E\abs{Y-\hat\mu}^{2}$ を**訓練誤差**という。
+:::
+
+::: intuition
+訓練誤差は「答えを見ながら解いた試験の点数」で、予測誤差は「初見の試験の点数」である。答えに合わせすぎる（雑音まで覚える）と、前者は良くなるが後者は悪くなる。
+:::
+
+::: theorem 射影による推定量の予測誤差 {#stat:projection-prediction-error keywords="for mu-hat = P Y with P the orthogonal projection onto a q-dimensional subspace: prediction error = n sigma^2 + |(I - P) mu|^2 + q sigma^2 and training error = |(I - P) mu|^2 + (n - q) sigma^2; the difference is 2 q sigma^2 (Mallows' C_p)" index="バイアスと分散のトレードオフ|ばいあすとぶんさんのとれーどおふ, マロウズの Cp|まろうずのしーぴー" refname="射影による推定量の予測誤差"}
+$P$ を $q$ 次元部分空間への直交射影とし、$\hat\mu\defeq PY$ とする（変数を選んだ部分モデルの最小二乗の当てはめ）。このとき
+$$
+E\abs{Y^{*}-\hat\mu}^{2}=n\sigma^{2}+\underbrace{\abs{(I-P)\mu}^{2}}_{\text{偏りの 2 乗}}+\underbrace{q\sigma^{2}}_{\text{分散}},\qquad E\abs{Y-\hat\mu}^{2}=\abs{(I-P)\mu}^{2}+(n-q)\sigma^{2}.
+$$
+特に、予測誤差は訓練誤差より $2q\sigma^{2}$ だけ大きい。
+:::
+
+::: intuition
+変数を増やす（$q$ を大きくする）と、モデルが真の平均に近づけるようになって偏り $\abs{(I-P)\mu}^{2}$ は減るが、推定する方向が増えて雑音を拾う分 $q\sigma^{2}$ が増える。訓練誤差では雑音を拾った分が逆に「当てはまりの良さ」に見えるので、変数を増やすほど訓練誤差は下がり続ける。
+:::
+
+::: proof
+**Step 1（予測誤差）.** $Y^{*}-\hat\mu=\varepsilon^{*}+(\mu-PY)$ で、$\varepsilon^{*}$ は $Y$ と独立で平均 $0$ なので交差項の期待値は $0$。$E\abs{\varepsilon^{*}}^{2}=n\sigma^{2}$。$\mu-PY=(I-P)\mu-P\varepsilon$ で、2 項は直交（像が直交）するので $E\abs{\mu-PY}^{2}=\abs{(I-P)\mu}^{2}+E\abs{P\varepsilon}^{2}$、\ref{stat:quadratic-form-expectation} から $E\abs{P\varepsilon}^{2}=E[\varepsilon^{\top}P\varepsilon]=q\sigma^{2}$。
+
+**Step 2（訓練誤差）.** $Y-\hat\mu=(I-P)Y=(I-P)\mu+(I-P)\varepsilon$。交差項の期待値は $0$、$E\abs{(I-P)\varepsilon}^{2}=(n-q)\sigma^{2}$。
+:::
+
+::: example 多項式回帰の次数 {#stat:polynomial-degree-example}
+真の平均が $x$ の 2 次式で、$1,x,\dots,x^{q-1}$ を説明変数とする部分モデルを考える（$x_{i}$ は相異なる $n$ 点）。$q\ge3$ なら真の平均は部分空間に含まれるので偏りは $0$ で、予測誤差は $n\sigma^{2}+q\sigma^{2}$（$q$ について増加）。$q\le2$ では偏り $\abs{(I-P)\mu}^{2}>0$（$\mu$ の 2 次の成分が $0$ でなければ）が残る。予測誤差を最小にするのは $q=3$ か、偏りが $\sigma^{2}$ 程度より小さければそれ以下の次数で、$q=n$（データ点を全部通る補間）は訓練誤差 $0$ だが予測誤差は $2n\sigma^{2}$ と最悪になりうる。
+:::
+
+## リッジ回帰 {#stat:sec-rg-ridge}
+
+::: theorem リッジ回帰 {#stat:ridge-regression keywords="for lambda > 0 the unique minimizer of |Y - X b|^2 + lambda |b|^2 is beta-hat_lambda = (X^T X + lambda I)^{-1} X^T Y, for any X (rank need not be full)" index="リッジ回帰|りっじかいき, 正則化|せいそくか, 縮小推定|しゅくしょうすいてい" refname="リッジ回帰"}
+$\lambda>0$ なら、$X$ の階数によらず $X^{\top}X+\lambda I$ は正定値で、$\abs{Y-Xb}^{2}+\lambda\abs b^{2}$ を最小にする $b$ は
+$$
+\hat\beta_{\lambda}\defeq(X^{\top}X+\lambda I)^{-1}X^{\top}Y
+$$
+ただ一つである。
+:::
+
+::: intuition
+係数の長さに罰則をつけると、データだけでは決まらない方向（$X^{\top}X$ の固有値が小さい方向）の係数が $0$ の方へ引き戻される。わずかな偏りと引き換えに、不安定な方向の大きなばらつきを抑える。
+:::
+
+::: proof
+**Step 1（正定値性）.** $v^{\top}(X^{\top}X+\lambda I)v=\abs{Xv}^{2}+\lambda\abs v^{2}>0$（$v\ne0$）。
+
+**Step 2（平方完成）.** $A\defeq X^{\top}X+\lambda I$ とすると、$\abs{Y-Xb}^{2}+\lambda\abs b^{2}=b^{\top}Ab-2b^{\top}X^{\top}Y+\abs Y^{2}=(b-\hat\beta_{\lambda})^{\top}A(b-\hat\beta_{\lambda})+\abs Y^{2}-\hat\beta_{\lambda}^{\top}A\hat\beta_{\lambda}$（$A\hat\beta_{\lambda}=X^{\top}Y$ を使って展開して確かめる）。$A$ は正定値なので第 1 項は $b=\hat\beta_{\lambda}$ でだけ $0$ になる。
+:::
+
+::: theorem ホール–ケナードの定理 {#stat:hoerl-kennard keywords="if X has rank p, X^T X = sum d_j v_j v_j^T, theta_j = <v_j, beta>, then E|beta-hat_lambda - beta|^2 = sigma^2 sum d_j/(d_j + lambda)^2 + lambda^2 sum theta_j^2/(d_j + lambda)^2; its derivative at lambda = 0 is -2 sigma^2 sum 1/d_j^2 < 0, so some lambda > 0 beats least squares" index="ホール–ケナードの定理|ほーるけなーどのていり" refname="ホール–ケナードの定理"}
+$X$ の階数を $p$、$X^{\top}X=\sum_{j}d_{j}v_{j}v_{j}^{\top}$（$d_{j}>0$、$v_{j}$ は正規直交）、$\theta_{j}\defeq\langle v_{j},\beta\rangle$ とすると、
+$$
+R(\lambda)\defeq E\abs{\hat\beta_{\lambda}-\beta}^{2}=\sigma^{2}\sum_{j}\frac{d_{j}}{(d_{j}+\lambda)^{2}}+\lambda^{2}\sum_{j}\frac{\theta_{j}^{2}}{(d_{j}+\lambda)^{2}}\qquad(\lambda\ge0).
+$$
+$R(0)$ は最小二乗推定量の平均二乗誤差で、$R'(0)=-2\sigma^{2}\sum_{j}d_{j}^{-2}<0$。したがって、真の $\beta$ と $\sigma^{2}$ がどうであれ、ある $\lambda>0$ で $R(\lambda)<R(0)$。
+:::
+
+::: intuition
+罰則を少しだけかけると、分散は罰則の強さについて 1 次の速さで減るが、偏りの 2 乗は 2 次の速さでしか増えない。だから小さな罰則は必ず得をする。ただし最適な $\lambda$ は未知の $\beta$ に依存するので、実際には交差検証などでデータから選ぶ。
+:::
+
+::: proof
+**Step 1（固有基底での表示）.** 【主張：$\langle v_{j},\hat\beta_{\lambda}\rangle=\frac{d_{j}}{d_{j}+\lambda}\langle v_{j},\hat\beta\rangle$】$\hat\beta_{\lambda}=(X^{\top}X+\lambda I)^{-1}X^{\top}X\hat\beta$（$X^{\top}Y=X^{\top}X\hat\beta$、$\hat\beta$ は最小二乗推定量）で、$(X^{\top}X+\lambda I)^{-1}X^{\top}X=\sum_{j}\frac{d_{j}}{d_{j}+\lambda}v_{j}v_{j}^{\top}$。
+
+**Step 2（各成分の偏りと分散）.** $\hat\beta\sim$ 平均 $\beta$、共分散 $\sigma^{2}(X^{\top}X)^{-1}=\sigma^{2}\sum d_{j}^{-1}v_{j}v_{j}^{\top}$（\ref{stat:least-squares-moments}）なので、$\langle v_{j},\hat\beta\rangle$ は平均 $\theta_{j}$、分散 $\sigma^{2}/d_{j}$。よって $c_{j}\defeq\langle v_{j},\hat\beta_{\lambda}\rangle$ の偏りは $\bigl(\frac{d_{j}}{d_{j}+\lambda}-1\bigr)\theta_{j}=-\frac{\lambda\theta_{j}}{d_{j}+\lambda}$、分散は $\frac{d_{j}^{2}}{(d_{j}+\lambda)^{2}}\cdot\frac{\sigma^{2}}{d_{j}}$。
+
+**Step 3（和）.** $\abs{\hat\beta_{\lambda}-\beta}^{2}=\sum_{j}(c_{j}-\theta_{j})^{2}$（正規直交基底）で、各項の期待値は分散と偏りの 2 乗の和（\ref{stat:mse-decomposition}）。
+
+**Step 4（微分）.** $\frac{d}{d\lambda}\frac{\sigma^{2}d}{(d+\lambda)^{2}}=-\frac{2\sigma^{2}d}{(d+\lambda)^{3}}$、$\frac{d}{d\lambda}\frac{\lambda^{2}\theta^{2}}{(d+\lambda)^{2}}=\frac{2\lambda d\theta^{2}}{(d+\lambda)^{3}}$。$\lambda=0$ で和は $-2\sigma^{2}\sum d_{j}^{-2}$。$R$ は $[0,\infty)$ で微分可能なので、$R'(0)<0$ から十分小さい $\lambda>0$ で $R(\lambda)<R(0)$。
+:::
+
+## ラッソ {#stat:sec-rg-lasso}
+
+::: theorem 直交計画でのラッソと軟しきい値 {#stat:lasso-soft-thresholding keywords="lasso minimizes |Y - X b|^2 + lambda |b|_1; if X^T X = I the unique minimizer is the soft-thresholded least squares estimate b_j = sign(beta-hat_j)(|beta-hat_j| - lambda/2)_+, which is exactly 0 when |beta-hat_j| <= lambda/2; ridge gives beta-hat/(1 + lambda) instead" index="ラッソ|らっそ, 軟しきい値|なんしきいち, スパース推定|すぱーすすいてい" refname="直交計画でのラッソと軟しきい値"}
+$\lambda>0$ について $\abs{Y-Xb}^{2}+\lambda\abs b_{1}$ を最小にする $b$ を**ラッソ推定量**という。$X^{\top}X=I_{p}$（直交計画）なら、最小点はただ一つで
+$$
+b_{j}=\operatorname{sgn}(\hat\beta_{j})\Bigl(\abs{\hat\beta_{j}}-\frac\lambda2\Bigr)_{+}\qquad(j=1,\dots,p),
+$$
+$\hat\beta=X^{\top}Y$ は最小二乗推定量。特に $\abs{\hat\beta_{j}}\le\lambda/2$ の係数はちょうど $0$ になる。同じ状況でリッジ回帰は $\hat\beta_{\lambda}=\hat\beta/(1+\lambda)$ で、$\hat\beta_{j}\ne0$ なら $0$ にならない。
+:::
+
+::: intuition
+$\ell^{1}$ の罰則は原点で尖っているので、小さな係数は「少し縮める」のではなく「ちょうど $0$ に落とす」方が得になる。$\ell^{2}$ の罰則（リッジ）は原点でなめらかなので、係数は小さくなるだけで $0$ にはならない。ラッソは推定と変数選択を同時に行う。
+:::
+
+::: proof
+**Step 1（分離）.** $X^{\top}X=I$ なら $H=XX^{\top}$ で、\ref{stat:least-squares-estimator} の 2 から $\abs{Y-Xb}^{2}=\abs{Y-X\hat\beta}^{2}+\abs{\hat\beta-b}^{2}$。よって目的関数は定数と $\sum_{j}\bigl((b_{j}-\hat\beta_{j})^{2}+\lambda\abs{b_{j}}\bigr)$ の和で、各 $j$ について別々に最小化すればよい。
+
+**Step 2（1 変数の問題）.** 【主張：$g(t)\defeq(t-z)^{2}+\lambda\abs t$ の最小点は $\operatorname{sgn}(z)(\abs z-\lambda/2)_{+}$ ただ一つ】$g$ は狭義凸（狭義凸な 2 次関数と凸関数の和）なので最小点は高々 1 つ。$t>0$ で $g'(t)=2(t-z)+\lambda$、$t<0$ で $g'(t)=2(t-z)-\lambda$。$z>\lambda/2$ なら $t=z-\lambda/2>0$ で $g'=0$、凸性からそこが最小。$z<-\lambda/2$ も同様で $t=z+\lambda/2$。$\abs z\le\lambda/2$ なら、$t>0$ で $g'(t)\ge2t>0$、$t<0$ で $g'(t)\le2t<0$ なので $g$ は $t=0$ で最小。
+
+**Step 3（リッジ）.** \ref{stat:ridge-regression} の式で $X^{\top}X=I$ とすると $\hat\beta_{\lambda}=(1+\lambda)^{-1}X^{\top}Y$。
+:::
+
+::: hypcheck
+- **固定された計画**：予測誤差は同じ説明変数の点での新しい観測について計算した。説明変数も新しく引き直す場合（ランダムな計画）は、分散の項が $q\sigma^{2}$ より大きくなる。
+- **$\operatorname{Cov}(\varepsilon)=\sigma^{2}I$**：予測誤差の分散項 $q\sigma^{2}$ と、ホール–ケナードの定理の分散の計算に使った。
+- **直交計画**：ラッソの閉じた形（Step 1 の分離）に使った。一般の $X$ ではラッソの解は閉じた形をもたず（凸最適化で計算する）、一意でないこともある。
+- **最適な $\lambda$ は未知**：ホール–ケナードの定理は「よい $\lambda$ が存在する」ことを言うだけで、データから選んだ $\lambda$ で平均二乗誤差が改善する保証は別問題である。
+:::
+
+## 問題 {#stat:sec-rg-problems}
+
+::: problem {#stat:prob-rg-cp}
+\ref{stat:projection-prediction-error} の設定で、$C_{q}\defeq\mathrm{RSS}_{q}+2q\sigma^{2}$（$\mathrm{RSS}_{q}\defeq\abs{Y-PY}^{2}$）が予測誤差 $E\abs{Y^{*}-\hat\mu}^{2}$ の不偏推定量であることを示せ。
+:::
+
+::: solution
+$E[\mathrm{RSS}_{q}]=\abs{(I-P)\mu}^{2}+(n-q)\sigma^{2}$ なので $E[C_{q}]=\abs{(I-P)\mu}^{2}+(n+q)\sigma^{2}$ で、これは予測誤差 $n\sigma^{2}+\abs{(I-P)\mu}^{2}+q\sigma^{2}$ に等しい。$\sigma^{2}$ が未知なら大きいモデルの $s^{2}$ で置き換えて、候補のモデルを $C_{q}$ の小さい順に比べる（マロウズの $C_{p}$）。
+:::
+
+::: problem {#stat:prob-rg-ridge-shrink}
+$p=1$、$X^{\top}X=d$ のとき、リッジ推定量の平均二乗誤差を最小にする $\lambda$ が $\lambda^{*}=\sigma^{2}/\beta^{2}$ であることを示せ。
+:::
+
+::: solution
+$R(\lambda)=\frac{\sigma^{2}d+\lambda^{2}\beta^{2}}{(d+\lambda)^{2}}$、$R'(\lambda)=\frac{2\lambda\beta^{2}(d+\lambda)-2(\sigma^{2}d+\lambda^{2}\beta^{2})}{(d+\lambda)^{3}}=\frac{2d(\lambda\beta^{2}-\sigma^{2})}{(d+\lambda)^{3}}$。$\lambda<\lambda^{*}$ で負、$>$ で正。信号が弱い（$\beta^{2}$ が小さい）ほど強く縮めるのがよい。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** このページの結果は、すべて 2 次モーメント（とラッソでは直交計画）だけを使い、正規性を使っていない。議論は Hastie–Tibshirani–Friedman『The Elements of Statistical Learning』第 3・7 章の流れに沿う。
+
+**前提を変えると.**
+- **交差検証**：データを分けて、一部で推定し残りで予測誤差を測ることで、$\sigma^{2}$ もモデルの形も仮定せずに予測誤差を推定する。一つ抜き交差検証は、線形な当てはめ $\hat\mu=HY$ では $\frac1n\sum\bigl(\frac{Y_{i}-\hat\mu_{i}}{1-H_{ii}}\bigr)^{2}$ と閉じた形で計算できる。
+- **ラッソの理論**：$p>n$ の高次元でも、真の $\beta$ がスパースで計画行列が「制限固有値条件」をみたせば、$\lambda\asymp\sigma\sqrt{\log p/n}$ のラッソは $\abs{\hat\beta-\beta}^{2}\lesssim s\sigma^{2}\log p/n$（$s$ は非零係数の数）を達成する（ここでは証明しない）。
+- **ベイズ的解釈**：リッジ回帰は $\beta\sim N(0,\frac{\sigma^{2}}\lambda I)$ の事前分布での事後平均、ラッソはラプラス分布の事前分布での事後最頻値にあたる。
+
+**高い視点から：推定量の幾何と罰則の形.** 正則化は「誤差の等高線（楕円）」と「罰則の等高線」が接する点を求める問題で、$\ell^{2}$ の罰則の等高線は球、$\ell^{1}$ は角のある正軸体である。正軸体の角は座標軸の上にあるので、楕円が角で接しやすく、解の座標の一部がちょうど $0$ になる。過学習は、モデルの自由度（射影の次元）と雑音の大きさの釣り合いの問題で、予測誤差の $q\sigma^{2}$ は「自由度 1 つあたり雑音を $\sigma^{2}$ だけ拾う」という会計である。比喩で言えば、正則化は、たくさんの調整つまみ（係数）を持つ機械に「つまみを大きく回すほど料金がかかる」規則を課し、本当に必要なつまみだけを回させる仕組みである。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-rg-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
