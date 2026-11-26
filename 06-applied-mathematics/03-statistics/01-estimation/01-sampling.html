@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>標本と統計量 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/01-estimation/01-sampling.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 標本と統計量 {#stat:page-sampling keywords="statistical model, parameter, i.i.d. sample, statistic, sample mean, sample variance with n - 1, unbiasedness of the sample variance, empirical distribution function and Glivenko-Cantelli, chi-square distribution and its density, Student t distribution, normal samples: independence of sample mean and sample variance, (n-1) S^2 / sigma^2 ~ chi^2_{n-1}, studentized mean ~ t_{n-1}"}
+
+統計学の出発点は、「データは、ある確率分布から独立に取り出された値である」というモデルである。分布は未知の**パラメータ** $\theta$ で決まっていて、データから $\theta$ について何が言えるかを考える。このページでは、そのための基本的な道具である**統計量**（データの関数）を導入し、最もよく使う標本平均と標本分散の性質を調べる。特にデータが正規分布から取られているときは、標本平均と標本分散が**独立**になり、その分布が $\chi^{2}$ 分布と $t$ 分布で正確に書ける。これが、後のページの区間推定と検定の土台になる。
+
+## 記法と定義の確認 {#stat:sec-sm-notation}
+
+::: notation
+- 確率空間・期待値・分散・独立性は確率論の基礎の系列（\ref{prb:probability-space}, \ref{prb:expectation}, \ref{prb:independence}）に従う。$X\sim\mu$ は「$X$ の分布が $\mu$」、$\overset{d}{=}$ は分布が等しいことを表す。
+- 正規分布 $N(m,\sigma^{2})$、多次元正規分布とその線形変換は \ref{prb:distribution-examples}, \ref{prb:multivariate-normal}, \ref{prb:multivariate-normal-properties}。特性関数による分布の決定は \ref{prb:multivariate-uniqueness}。
+- 大数の強法則・グリヴェンコ–カンテリの定理は \ref{prb:strong-law}, \ref{prb:glivenko-cantelli}。ガンマ関数とベータ関数は \ref{calc:gamma}, \ref{calc:beta-function}。直交行列の存在（正規直交基底への延長）は \ref{lin:gram-schmidt}。
+- 体系は $\ZFC$。
+:::
+
+## 統計モデルと統計量 {#stat:sec-sm-model}
+
+::: definition 統計モデル・標本・統計量 {#stat:statistical-model keywords="statistical model {P_theta : theta in Theta}, parameter space, i.i.d. sample X_1, ..., X_n from P_theta, statistic T = t(X_1, ..., X_n) not depending on theta, sample mean, sample variance S^2 = (1/(n-1)) sum (X_i - bar X)^2" index="統計モデル|とうけいもでる, 標本|ひょうほん, 統計量|とうけいりょう, 標本平均|ひょうほんへいきん, 標本分散|ひょうほんぶんさん, 不偏分散|ふへんぶんさん" refname="統計モデル・標本・統計量"}
+1. 集合 $\Theta$（**パラメータ空間**）で添字づけられた確率分布の族 $\{P_{\theta}:\theta\in\Theta\}$ を**統計モデル**という。
+2. $X_{1},\dots,X_{n}$ が独立で、どれも分布 $P_{\theta}$ をもつとき、これを $P_{\theta}$ からの大きさ $n$ の**標本**（無作為標本）という。$\theta$ のもとでの確率・期待値を $P_{\theta}$, $E_{\theta}$ と書く。
+3. $\theta$ を含まない可測関数 $t$ による $T=t(X_{1},\dots,X_{n})$ を**統計量**という。代表的なものは**標本平均**と**標本分散**（不偏分散）
+$$
+\bar X\defeq\frac1n\sum_{i=1}^{n}X_{i},\qquad S^{2}\defeq\frac1{n-1}\sum_{i=1}^{n}(X_{i}-\bar X)^{2}\quad(n\ge2).
+$$
+:::
+
+::: intuition
+統計モデルは「真実の候補のリスト」で、データは真実の一つから引かれたくじの結果である。統計量はデータだけから計算できる要約で、計算に未知の $\theta$ を使ってはいけない。推定や検定は、すべて統計量を通して $\theta$ について推論する手続きである。
+:::
+
+::: proposition 標本平均と標本分散の期待値 {#stat:sample-mean-variance keywords="for an i.i.d. sample with mean m and variance sigma^2: E bar X = m, Var bar X = sigma^2 / n, E S^2 = sigma^2; why divide by n - 1" index="標本分散の不偏性|ひょうほんぶんさんのふへんせい" refname="標本平均と標本分散の期待値"}
+$X_{1},\dots,X_{n}$ を平均 $m$、分散 $\sigma^{2}<\infty$ の分布からの標本とすると、
+$$
+E[\bar X]=m,\qquad\operatorname{Var}(\bar X)=\frac{\sigma^{2}}n,\qquad E[S^{2}]=\sigma^{2}.
+$$
+:::
+
+::: intuition
+標本平均は平均的には真の平均に当たり、ばらつきは $n$ 個の平均をとることで $\frac1n$ に縮む。標本分散は $n-1$ で割ることで、平均的に真の分散に当たるように調整されている。
+:::
+
+::: proof
+**Step 1（標本平均）.** 期待値の線形性から $E[\bar X]=m$。独立性から共分散が $0$ なので $\operatorname{Var}(\bar X)=\frac1{n^{2}}\sum\operatorname{Var}(X_{i})=\frac{\sigma^{2}}n$。
+
+**Step 2（平方和の分解）.** 【主張：$\sum(X_{i}-\bar X)^{2}=\sum(X_{i}-m)^{2}-n(\bar X-m)^{2}$】$X_{i}-m=(X_{i}-\bar X)+(\bar X-m)$ を 2 乗して和をとると、交差項は $2(\bar X-m)\sum(X_{i}-\bar X)=0$。
+
+**Step 3（標本分散）.** Step 2 の期待値をとると $E\sum(X_{i}-\bar X)^{2}=n\sigma^{2}-n\cdot\frac{\sigma^{2}}n=(n-1)\sigma^{2}$。
+:::
+
+::: intuition
+$n$ ではなく $n-1$ で割るのは、偏差を真の平均 $m$ でなく標本平均 $\bar X$ から測っているためである。$\bar X$ はデータに「寄せて」選ばれているので、偏差の 2 乗和は真の平均からのものより平均して $\sigma^{2}$ 1 つ分だけ小さい。データの自由度が 1 つ $\bar X$ に使われた、とも言う。
+:::
+
+::: proposition 経験分布関数 {#stat:empirical-distribution-function keywords="empirical distribution function F_n(x) = (1/n) #{i : X_i <= x}; n F_n(x) ~ Bin(n, F(x)); E F_n(x) = F(x), Var F_n(x) = F(x)(1 - F(x))/n; sup_x |F_n - F| -> 0 a.s." index="経験分布関数|けいけんぶんぷかんすう" refname="経験分布関数"}
+分布関数 $F$ の分布からの標本について $F_{n}(x)\defeq\frac1n\#\{i\le n:X_{i}\le x\}$ とすると、
+1. 各 $x$ で $nF_{n}(x)$ は 2 項分布 $\mathrm{Bin}(n,F(x))$ にしたがい、$E[F_{n}(x)]=F(x)$, $\operatorname{Var}(F_{n}(x))=\frac{F(x)(1-F(x))}n$。
+2. $\sup_{x}\abs{F_{n}(x)-F(x)}\to0$（a.s.）。
+:::
+
+::: intuition
+経験分布関数は「データのうち $x$ 以下のものの割合」で、各点ではただの比率の推定である。それが $x$ について一様に真の分布関数に近づくので、データの分布全体の形をデータから読み取れる。
+:::
+
+::: proof
+**Step 1（1）.** $1_{\{X_{i}\le x\}}$ は独立で、確率 $F(x)$ で $1$ をとるベルヌーイ確率変数。その和なので 2 項分布で、期待値と分散は \ref{stat:sample-mean-variance} の Step 1 と同じ計算。
+
+**Step 2（2）.** グリヴェンコ–カンテリの定理（\ref{prb:glivenko-cantelli}）そのもの。
+:::
+
+## 正規標本の分布 {#stat:sec-sm-normal}
+
+::: definition $\chi^{2}$ 分布と $t$ 分布 {#stat:chi-square-t keywords="chi-square distribution with k degrees of freedom: law of Z_1^2 + ... + Z_k^2 for i.i.d. standard normal Z_i; Student t distribution with k degrees of freedom: law of Z / sqrt(V/k) with Z ~ N(0,1), V ~ chi^2_k independent" index="カイ二乗分布|かいにじょうぶんぷ, t 分布|てぃーぶんぷ, 自由度|じゆうど" refname="χ² 分布と t 分布"}
+$k\ge1$ とし、$Z,Z_{1},\dots,Z_{k}$ を独立な標準正規確率変数とする。
+1. $Z_{1}^{2}+\dots+Z_{k}^{2}$ の分布を自由度 $k$ の **$\chi^{2}$ 分布** $\chi_{k}^{2}$ という。
+2. $V\sim\chi_{k}^{2}$ を $Z$ と独立にとり、$Z/\sqrt{V/k}$ の分布を自由度 $k$ の **$t$ 分布** $t_{k}$ という。
+（分布は $Z_{i}$ の選び方によらない：独立な確率変数の組の分布は各分布の直積で決まる。）
+:::
+
+::: intuition
+$\chi^{2}$ 分布は「標準正規の雑音の 2 乗和」、すなわち $k$ 次元の雑音ベクトルの長さの 2 乗の分布である。$t$ 分布は、正規の量を「推定された」尺度で割ったときの分布で、尺度の不確かさの分だけ正規分布より裾が重い。
+:::
+
+::: proposition $\chi^{2}$ 分布の密度 {#stat:chi-square-density keywords="chi^2_k has density x^{k/2 - 1} e^{-x/2} / (2^{k/2} Gamma(k/2)) on (0, infinity); mean k, variance 2k; sum of independent chi^2_a and chi^2_b is chi^2_{a+b}" index="カイ二乗分布の密度|かいにじょうぶんぷのみつど" refname="χ² 分布の密度"}
+$\chi_{k}^{2}$ は $(0,\infty)$ 上の密度
+$$
+g_{k}(x)=\frac{x^{k/2-1}e^{-x/2}}{2^{k/2}\Gamma(k/2)}
+$$
+をもち、平均 $k$、分散 $2k$。また独立な $\chi_{a}^{2}$ と $\chi_{b}^{2}$ の和は $\chi_{a+b}^{2}$。
+:::
+
+::: intuition
+独立な $\chi^{2}$ の和が再び $\chi^{2}$ になるのは、2 乗和を足し合わせることが、雑音ベクトルの次元を増やすことにあたるからである。
+:::
+
+::: proof
+**Step 1（$k=1$）.** $x>0$ について $P(Z^{2}\le x)=2\int_{0}^{\sqrt x}\frac{e^{-z^{2}/2}}{\sqrt{2\pi}}dz$。$z=\sqrt u$ と置換すると $\int_{0}^{x}\frac{u^{-1/2}e^{-u/2}}{\sqrt{2\pi}}du$ で、$\Gamma(\frac12)=\sqrt\pi$（\ref{calc:beta-function}）から被積分関数は $g_{1}$。
+
+**Step 2（たたみ込み）.** 【主張：$g_{a}*g_{b}=g_{a+b}$（$a,b>0$ の実数で $g$ を同じ式で定める）】$U,V$ が独立で密度 $g_{a},g_{b}$ をもてば、フビニの定理と置換 $v=z-u$ から $P(U+V\le x)=\int\int_{u+v\le x}g_{a}(u)g_{b}(v)\,du\,dv=\int_{-\infty}^{x}\Bigl(\int g_{a}(y)g_{b}(z-y)dy\Bigr)dz$ なので、$U+V$ の密度はたたみ込み $\int g_{a}(y)g_{b}(x-y)dy$ である。$y=xt$ と置換すると
+$$
+\int_{0}^{x}g_{a}(y)g_{b}(x-y)dy=\frac{x^{(a+b)/2-1}e^{-x/2}}{2^{(a+b)/2}\Gamma(a/2)\Gamma(b/2)}\int_{0}^{1}t^{a/2-1}(1-t)^{b/2-1}dt,
+$$
+最後の積分は $B(\frac a2,\frac b2)=\frac{\Gamma(a/2)\Gamma(b/2)}{\Gamma((a+b)/2)}$ なので $g_{a+b}(x)$。
+
+**Step 3（結論）.** Step 1, 2 と $k$ についての帰納法で密度が得られ、和の性質も Step 2 から。平均は $kE[Z^{2}]=k$、分散は $k\operatorname{Var}(Z^{2})=k(E[Z^{4}]-1)=k(3-1)=2k$。
+:::
+
+::: theorem 正規標本の基本定理 {#stat:normal-sample-theorem keywords="for an i.i.d. N(m, sigma^2) sample: bar X ~ N(m, sigma^2/n), (n-1) S^2 / sigma^2 ~ chi^2_{n-1}, bar X and S^2 are independent, and sqrt(n)(bar X - m)/S ~ t_{n-1}; proof by an orthogonal change of coordinates" index="正規標本の基本定理|せいきひょうほんのきほんていり, スチューデント化|すちゅーでんとか" refname="正規標本の基本定理"}
+$X_{1},\dots,X_{n}$（$n\ge2$）を $N(m,\sigma^{2})$ からの標本とする。
+1. $\bar X\sim N(m,\sigma^{2}/n)$。
+2. $\frac{(n-1)S^{2}}{\sigma^{2}}\sim\chi_{n-1}^{2}$。
+3. $\bar X$ と $S^{2}$ は独立。
+4. $T\defeq\frac{\sqrt n(\bar X-m)}{S}\sim t_{n-1}$。
+:::
+
+::: intuition
+データのベクトル $(X_{1},\dots,X_{n})$ を「全部の平均の方向」と「それに直交する $n-1$ 次元の方向」に分解すると、標本平均は前者だけで、標本分散は後者だけで決まる。正規分布は回転で形を変えないので、2 つの成分は独立な正規確率変数の組になり、直交する部分の長さの 2 乗が $\chi_{n-1}^{2}$ になる。$n-1$ は直交補空間の次元である。
+:::
+
+::: proof
+**Step 1（直交行列）.** 【主張：第 1 行が $u\defeq\frac1{\sqrt n}(1,\dots,1)$ の直交行列 $Q$ がある】単位ベクトル $u$ を含む基底 $u,e_{2},\dots,e_{n}$ をとり、グラム–シュミットの直交化（\ref{lin:gram-schmidt}）で正規直交基底 $u,q_{2},\dots,q_{n}$ にする（最初のベクトルは $u$ のまま）。これらを行とする行列が $Q$。
+
+**Step 2（回転した座標）.** $W_{i}\defeq(X_{i}-m)/\sigma$ とすると $W=(W_{1},\dots,W_{n})\sim N(0,I_{n})$（独立な標準正規の組の特性関数は $e^{-\abs u^{2}/2}$）。$Y\defeq QW$ は \ref{prb:multivariate-normal-properties} の 2 から $N(0,QQ^{\top})=N(0,I_{n})$。$N(0,I_{n})$ の特性関数は各座標の特性関数の積なので、\ref{prb:multivariate-uniqueness} から $Y_{1},\dots,Y_{n}$ は独立な標準正規確率変数（分布が直積測度に一致する）。
+
+**Step 3（統計量の表示）.** $Y_{1}=\langle u,W\rangle=\sqrt n\,\bar W=\frac{\sqrt n(\bar X-m)}{\sigma}$。$Q$ は長さを保つので $\sum_{i}Y_{i}^{2}=\sum_{i}W_{i}^{2}$、したがって \ref{stat:sample-mean-variance} の Step 2 から
+$$
+\sum_{i=2}^{n}Y_{i}^{2}=\sum_{i}W_{i}^{2}-n\bar W^{2}=\sum_{i}(W_{i}-\bar W)^{2}=\frac{(n-1)S^{2}}{\sigma^{2}}.
+$$
+
+**Step 4（結論）.** 1：$\bar X=m+\frac{\sigma}{\sqrt n}Y_{1}$。2：定義から $\chi_{n-1}^{2}$。3：$\bar X$ は $Y_{1}$ の関数、$S^{2}$ は $(Y_{2},\dots,Y_{n})$ の関数で、これらは独立。4：$T=\frac{Y_{1}}{\sqrt{V/(n-1)}}$（$V\defeq\sum_{i\ge2}Y_{i}^{2}$）で、$Y_{1}\sim N(0,1)$ と $V\sim\chi_{n-1}^{2}$ は独立なので、定義から $t_{n-1}$。
+:::
+
+::: fact $t$ 分布の密度 {#stat:t-density keywords="t_k has density Gamma((k+1)/2) / (sqrt(k pi) Gamma(k/2)) (1 + x^2/k)^{-(k+1)/2}; heavier tails than the normal; t_k => N(0,1) as k -> infinity; t_1 is the Cauchy distribution" index="t 分布の密度|てぃーぶんぷのみつど" refname="t 分布の密度"}
+$t_{k}$ は密度 $\dfrac{\Gamma((k+1)/2)}{\sqrt{k\pi}\,\Gamma(k/2)}\Bigl(1+\dfrac{x^{2}}k\Bigr)^{-(k+1)/2}$ をもつ。$t_{1}$ はコーシー分布で、$k\to\infty$ で $t_{k}$ は $N(0,1)$ に法則収束する。
+:::
+
+::: intuition
+自由度が大きいと分母の尺度の推定が正確になり、$t$ 分布は正規分布に近づく。自由度 1 では分母が非常に小さくなりうるので、平均すら存在しないほど裾が重い。
+:::
+
+::: remark
+$t$ 分布の密度は、$(Z,V)$ の同時密度 $\varphi(z)g_{k}(v)$ から変数変換 $(z,v)\mapsto(z/\sqrt{v/k},v)$ で同時密度を求め、$v$ について積分すれば得られる（積分はガンマ関数の定義の形になる）。法則収束は、大数の法則で $V/k\to1$（a.s.）となることと、後のページのスルツキーの定理から従う。
+:::
+
+::: hypcheck
+- **正規性**：\ref{stat:normal-sample-theorem} の Step 2（回転しても分布が変わらないこと、無相関なら独立）に本質的に使った。正規分布でなければ $\bar X$ と $S^{2}$ は一般に独立でない（実は独立になるのは正規分布に限る：ガイリーの定理、ここでは証明しない）。
+- **独立同分布**：\ref{stat:sample-mean-variance} は独立性を共分散 $0$ にだけ使ったので、無相関で平均と分散が共通なら成り立つ。
+- **$n\ge2$**：$S^{2}$ の定義で $n-1$ で割るため。
+:::
+
+## 問題 {#stat:sec-sm-problems}
+
+::: problem {#stat:prob-sm-biased-variance}
+$\hat\sigma^{2}\defeq\frac1n\sum(X_{i}-\bar X)^{2}$ の期待値を求め、その偏り $E[\hat\sigma^{2}]-\sigma^{2}$ を計算せよ。
+:::
+
+::: solution
+$\hat\sigma^{2}=\frac{n-1}nS^{2}$ なので $E[\hat\sigma^{2}]=\frac{n-1}n\sigma^{2}$、偏りは $-\frac{\sigma^{2}}n$。
+:::
+
+::: problem {#stat:prob-sm-var-s2}
+正規標本について $\operatorname{Var}(S^{2})=\frac{2\sigma^{4}}{n-1}$ を示せ。
+:::
+
+::: solution
+\ref{stat:normal-sample-theorem} の 2 と \ref{stat:chi-square-density} から $\operatorname{Var}\bigl(\frac{(n-1)S^{2}}{\sigma^{2}}\bigr)=2(n-1)$。両辺を $\frac{(n-1)^{2}}{\sigma^{4}}$ で割る。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{stat:sample-mean-variance} には正規性も独立性も（無相関性以外は）使っていない。正規標本の定理では、直交行列の具体形（ヘルマート行列）は不要で、存在だけを使った。議論の流れは標準的な数理統計学の教科書（例えば Casella–Berger『Statistical Inference』第 5 章）に沿う。
+
+**前提を変えると.**
+- **ガイリーの定理**：独立同分布な標本で $\bar X$ と $S^{2}$ が独立になるのは、分布が正規分布のときに限る。
+- **コクランの定理**：$N(0,I_{n})$ のベクトルの 2 乗ノルムを、ランク $r_{1}+\dots+r_{k}=n$ の射影の 2 次形式に分けると、それぞれ独立な $\chi_{r_{j}}^{2}$ になる。分散分析（ANOVA）の基礎で、本ページの定理は $k=2$ の場合にあたる。
+- **$F$ 分布**：独立な $\chi_{a}^{2}$, $\chi_{b}^{2}$ の比 $\frac{U/a}{V/b}$ の分布で、2 つの分散の比較に使う。$t_{k}^{2}$ は $F(1,k)$。
+
+**高い視点から：直交分解としての統計.** 標本 $(X_{1},\dots,X_{n})\in\mathbb{R}^{n}$ を、平均の方向（1 次元）とその直交補空間（$n-1$ 次元）に射影すると、前者が「信号」、後者が「雑音」の推定に使われる。正規分布の回転不変性がこの分解を確率的に独立なものにし、「自由度」は射影先の部分空間の次元という線形代数の量になる。回帰分析も分散分析も、すべてこの「直交射影と $\chi^{2}$」の繰り返しである。比喩で言えば、正規標本はどの向きから見ても同じ形の霧の塊で、どの直交する方向に切り分けても、それぞれの切り口は互いに無関係なゆらぎになる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-sm-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

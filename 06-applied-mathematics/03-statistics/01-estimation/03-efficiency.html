@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>推定量の良さ | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/01-estimation/03-efficiency.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 推定量の良さ {#stat:page-efficiency keywords="score function, Fisher information I(theta) = E (d/d theta log f)^2, additivity I_n = n I, Cramer-Rao lower bound Var T >= g'(theta)^2 / (n I(theta)), efficient estimators, equality case, failure for U(0, theta), sufficient statistics, factorization theorem (discrete case), Rao-Blackwell theorem, examples Bernoulli and Poisson, Lehmann-Scheffe"}
+
+前のページで見たように、同じ量を推定する方法はいくつもある。不偏推定量どうしなら、分散が小さい方が良い。では分散はどこまで小さくできるか。**クラメール–ラオの不等式**は、データ 1 個あたりの情報の量（**フィッシャー情報量**）で分散の下限を与える。また、データのうち推定に役立つ部分だけを取り出した統計量（**十分統計量**）で条件付けると、どんな推定量も改良できる（**ラオ–ブラックウェルの定理**）。
+
+## 記法と定義の確認 {#stat:sec-ef-notation}
+
+::: notation
+- 前のページの用語は \ref{stat:estimator-bias-mse}, \ref{stat:maximum-likelihood}。$f(x;\theta)$ は確率関数または密度。積分 $\int\cdots dx$ は離散の場合は和と読む。
+- コーシー–シュワルツの不等式、条件付き期待値とその性質（塔性質、条件付きイェンセン）は \ref{meas:holder}, \ref{prb:conditional-expectation}, \ref{prb:conditional-properties}, \ref{prb:conditional-jensen}。
+- 体系は $\ZFC$。
+:::
+
+## フィッシャー情報量とクラメール–ラオの不等式 {#stat:sec-ef-cramer-rao}
+
+::: definition スコアとフィッシャー情報量 {#stat:fisher-information keywords="regular model: Theta open interval, support {f > 0} independent of theta, theta -> f(x; theta) differentiable, differentiation under the integral; score s(x; theta) = d/d theta log f(x; theta); Fisher information I(theta) = E_theta s(X; theta)^2" index="スコア関数|すこあかんすう, フィッシャー情報量|ふぃっしゃーじょうほうりょう, 正則なモデル|せいそくなもでる" refname="スコアとフィッシャー情報量"}
+次の条件をみたすモデルを（このページの意味で）**正則**という：$\Theta\subseteq\mathbb{R}$ は開区間、集合 $\{x:f(x;\theta)>0\}$ は $\theta$ によらず、その上で $\theta\mapsto f(x;\theta)$ は微分可能で、以下に現れる積分は $\theta$ について積分記号下で微分できる。このとき
+$$
+s(x;\theta)\defeq\frac{\partial}{\partial\theta}\log f(x;\theta),\qquad I(\theta)\defeq E_{\theta}[s(X;\theta)^{2}]
+$$
+を**スコア関数**、**フィッシャー情報量**という。標本 $X=(X_{1},\dots,X_{n})$ のスコアは $s_{n}(X;\theta)\defeq\sum_{i}s(X_{i};\theta)=\partial_{\theta}\ell(\theta;X)$。
+:::
+
+::: intuition
+スコアは「$\theta$ を少し動かしたとき、データの出やすさが何割変わるか」である。フィッシャー情報量はその変化の大きさの平均で、大きいほどデータが $\theta$ の違いに敏感、すなわち $\theta$ を見分けやすい。
+:::
+
+::: proposition スコアの平均と情報量の加法性 {#stat:score-properties keywords="E_theta s(X; theta) = 0; the Fisher information of an i.i.d. sample of size n is n I(theta)" index="スコアの平均|すこあのへいきん" refname="スコアの平均と情報量の加法性"}
+正則なモデルで $I(\theta)<\infty$ なら、$E_{\theta}[s(X;\theta)]=0$ で、$E_{\theta}[s_{n}(X;\theta)^{2}]=nI(\theta)$。
+:::
+
+::: intuition
+真の $\theta$ のもとでは、データが $\theta$ を「上げろ」と言う度合いと「下げろ」と言う度合いが平均して釣り合う。独立なデータの情報は単純に足し合わされる。
+:::
+
+::: proof
+**Step 1（平均 0）.** $\int f(x;\theta)dx=1$ を $\theta$ で微分すると（積分記号下の微分）$0=\int\partial_{\theta}f\,dx=\int s(x;\theta)f(x;\theta)dx=E_{\theta}[s]$。
+
+**Step 2（加法性）.** $s(X_{i};\theta)$ は独立同分布で平均 $0$、分散 $I(\theta)$ なので、和の分散は $nI(\theta)$。
+:::
+
+::: theorem クラメール–ラオの不等式 {#stat:cramer-rao keywords="for a regular model and an estimator T with E_theta T = g(theta) and finite variance: Var_theta T >= g'(theta)^2 / (n I(theta)); equality iff T - g(theta) is a multiple of the score" index="クラメール–ラオの不等式|くらめーるらおのふとうしき, 有効推定量|ゆうこうすいていりょう" refname="クラメール–ラオの不等式"}
+正則なモデルで $0<I(\theta)<\infty$ とし、統計量 $T$ が $E_{\theta}[T^{2}]<\infty$, $E_{\theta}[T]=g(\theta)$ をみたし、$\int t(x)L(\theta;x)dx$ も積分記号下で微分できるとする。このとき
+$$
+\operatorname{Var}_{\theta}(T)\ge\frac{g'(\theta)^{2}}{nI(\theta)}.
+$$
+等号は、$T-g(\theta)=c(\theta)s_{n}(X;\theta)$（a.s.）となる定数 $c(\theta)$ があるときに限る。等号が成り立つ不偏推定量を**有効推定量**という。
+:::
+
+::: intuition
+推定量が $\theta$ の変化に反応するには、データ自体が $\theta$ の変化に反応していなければならない。その反応の大きさがスコアで、推定量の「感度」$g'(\theta)$ はスコアとの共分散として表される。コーシー–シュワルツの不等式によって、感度を上げるには推定量のばらつきを払う必要がある。
+:::
+
+::: proof
+**Step 1（感度は共分散）.** 【主張：$g'(\theta)=\operatorname{Cov}_{\theta}(T,s_{n})$】$g(\theta)=\int t(x)L(\theta;x)dx$ を微分すると $g'(\theta)=\int t(x)\partial_{\theta}L\,dx=E_{\theta}[Ts_{n}]$（$\partial_{\theta}L=s_{n}L$）。$E_{\theta}[s_{n}]=0$（\ref{stat:score-properties}）なので、これは共分散に等しい。
+
+**Step 2（コーシー–シュワルツ）.** $\operatorname{Cov}(T,s_{n})^{2}\le\operatorname{Var}(T)\operatorname{Var}(s_{n})=\operatorname{Var}(T)\cdot nI(\theta)$（\ref{stat:score-properties}）。等号は $T-E T$ と $s_{n}$ が一次従属（a.s.）のときに限る。
+:::
+
+::: example 有効推定量の例と下限が成り立たない例 {#stat:cramer-rao-examples}
+1. **ベルヌーイ分布**：$s(x;p)=\frac xp-\frac{1-x}{1-p}$、$I(p)=\frac1{p(1-p)}$。$\operatorname{Var}(\bar X)=\frac{p(1-p)}n$ は下限に一致するので、$\bar X$ は有効推定量。
+2. **正規分布の平均**（$\sigma^{2}$ は既知）：$s=\frac{x-m}{\sigma^{2}}$、$I=\frac1{\sigma^{2}}$、$\operatorname{Var}(\bar X)=\frac{\sigma^{2}}n$ で有効。
+3. **一様分布** $U(0,\theta)$：$\{f>0\}=(0,\theta)$ が $\theta$ に依存するので正則でない。実際 \ref{stat:uniform-maximum} の $\frac{n+1}nM$ は分散 $\frac{\theta^{2}}{n(n+2)}$ で、$\frac1n$ に比例する形の下限を破る。
+:::
+
+## 十分統計量 {#stat:sec-ef-sufficiency}
+
+::: definition 十分統計量 {#stat:sufficient-statistic keywords="T is sufficient for theta if for every bounded measurable phi there is a version of E_theta[phi(X) | T] not depending on theta; in the discrete case, P_theta(X = x | T = t) does not depend on theta" index="十分統計量|じゅうぶんとうけいりょう" refname="十分統計量"}
+統計量 $T=t(X)$ が $\theta$ について**十分**であるとは、任意の有界可測関数 $\varphi$ について、条件付き期待値 $E_{\theta}[\varphi(X)\mid T]$ のすべての $\theta$ に共通な版（$T$ の可測関数）がとれることをいう。離散モデルでは、$P_{\theta}(T=t)>0$ のとき $P_{\theta}(X=x\mid T=t)$ が $\theta$ によらないことと同値である。
+:::
+
+::: intuition
+$T$ の値を知った後では、データの残りの部分は $\theta$ によらない「純粋な雑音」で、$\theta$ についてもう何も教えない。だから推定は $T$ だけを見て行えばよい。例えば硬貨投げでは、表の総数がわかれば、表がどの順番で出たかは $p$ について何も語らない。
+:::
+
+::: theorem 分解定理（離散の場合） {#stat:factorization-theorem keywords="for a discrete model, T = t(X) is sufficient iff L(theta; x) = g(t(x); theta) h(x) for some functions g, h" index="分解定理|ぶんかいていり, ネイマンの分解定理|ねいまんのぶんかいていり" refname="分解定理（離散の場合）"}
+離散モデルについて、$T=t(X)$ が十分であることと、関数 $g,h$ によって $L(\theta;x)=g(t(x);\theta)h(x)$（すべての $\theta,x$）と書けることは同値である。
+:::
+
+::: intuition
+尤度の中で $\theta$ とデータが「$T$ を通してしか」出会わなければ、$T$ 以外のデータの部分は $\theta$ について何も語らない。
+:::
+
+::: proof
+**Step 1（分解 ⇒ 十分）.** $t(x)=t$ なら $P_{\theta}(X=x\mid T=t)=\dfrac{g(t;\theta)h(x)}{\sum_{y:t(y)=t}g(t;\theta)h(y)}=\dfrac{h(x)}{\sum_{y:t(y)=t}h(y)}$ は $\theta$ によらない（$t(x)\ne t$ なら $0$）。
+
+**Step 2（十分 ⇒ 分解）.** $k(x)\defeq P_{\theta}(X=x\mid T=t(x))$（$\theta$ によらない、$P_{\theta}(T=t(x))=0$ なら $0$）とおくと $L(\theta;x)=P_{\theta}(X=x)=P_{\theta}(T=t(x))k(x)$。$g(t;\theta)\defeq P_{\theta}(T=t)$, $h\defeq k$ とする。
+:::
+
+::: theorem ラオ–ブラックウェルの定理 {#stat:rao-blackwell keywords="if T is sufficient and U is an estimator of g(theta) with finite variance, U* = E[U | T] is a statistic with the same mean and Var U* <= Var U; strict unless U is a function of T" index="ラオ–ブラックウェルの定理|らおぶらっくうぇるのていり" refname="ラオ–ブラックウェルの定理"}
+$T$ を十分な統計量、$U$ を $E_{\theta}[U^{2}]<\infty$ の推定量とし、$U^{*}\defeq E[U\mid T]$（\ref{stat:sufficient-statistic} の共通の版）とする。このとき $U^{*}$ は統計量で、すべての $\theta$ で
+$$
+E_{\theta}[U^{*}]=E_{\theta}[U],\qquad\operatorname{Var}_{\theta}(U^{*})=\operatorname{Var}_{\theta}(U)-E_{\theta}[(U-U^{*})^{2}]\le\operatorname{Var}_{\theta}(U).
+$$
+特に $U$ が不偏なら $U^{*}$ も不偏で、平均二乗誤差は小さくなる。
+:::
+
+::: intuition
+推定量を十分統計量で条件付けることは、推定量に含まれる「$\theta$ と無関係なばらつき」を平均して消すことである。平均は変わらず、ばらつきだけが減る。
+:::
+
+::: proof
+**Step 1（統計量であること）.** 十分性から $U^{*}$ は $\theta$ によらない $T$ の関数として選べる（有界でない $U$ には、$U$ の切り捨て $(U\wedge k)\vee(-k)$ の共通の版の極限をとる。条件付き期待値は $L^{2}$ で連続）。
+
+**Step 2（平均）.** 塔性質（\ref{prb:conditional-properties}）から $E_{\theta}[U^{*}]=E_{\theta}[U]$。
+
+**Step 3（分散の分解）.** 【主張：$E_{\theta}[(U-U^{*})U^{*}]=0$】$U^{*}$ は $T$ の関数なので、$E[(U-U^{*})U^{*}\mid T]=U^{*}E[U-U^{*}\mid T]=0$。よって $E[U^{2}]=E[(U^{*})^{2}]+E[(U-U^{*})^{2}]$ で、両辺から $(E U)^{2}=(E U^{*})^{2}$ を引く（$U^{*}$ の 2 乗可積分性は条件付きイェンセン \ref{prb:conditional-jensen} から）。
+:::
+
+::: example ラオ–ブラックウェル化 {#stat:rao-blackwell-examples}
+1. **ベルヌーイ分布**：$L(p;x)=p^{t}(1-p)^{n-t}$（$t=\sum x_{i}$）なので $T=\sum X_{i}$ は十分。不偏推定量 $U=X_{1}$ を条件付けると、対称性から $E[X_{1}\mid T]=\frac Tn=\bar X$。分散は $p(1-p)$ から $\frac{p(1-p)}n$ に下がる。
+2. **ポアソン分布で $e^{-\lambda}$ の推定**：$T=\sum X_{i}$ は十分（$L=e^{-n\lambda}\lambda^{t}/\prod x_{i}!$）。$U=1_{\{X_{1}=0\}}$ は不偏。$T=t$ のもとで各 $X_{i}$ を $t$ 個の点に多項的に割り振ると $X_{1}\sim\mathrm{Bin}(t,\frac1n)$ なので、$U^{*}=\bigl(1-\frac1n\bigr)^{T}$。これは最尤推定量 $e^{-\bar X}$ と違って不偏である。
+:::
+
+::: hypcheck
+- **正則性**：クラメール–ラオの Step 1 で積分記号下の微分を 2 回（$\int L=1$ と $\int tL=g$）使った。台が $\theta$ に依存すると、例 3 のように下限は崩れる。
+- **$T$ の 2 乗可積分性**：コーシー–シュワルツ（Step 2）に使った。
+- **十分性**：ラオ–ブラックウェルで、$U^{*}$ が $\theta$ を含まず統計量になること（Step 1）にだけ使った。十分でない $T$ で条件付けても分散は下がるが、結果は $\theta$ に依存して推定量として使えない。
+:::
+
+## 問題 {#stat:sec-ef-problems}
+
+::: problem {#stat:prob-ef-poisson-fisher}
+ポアソン分布の $I(\lambda)=\frac1\lambda$ を示し、$\bar X$ が $\lambda$ の有効推定量であることを確かめよ。
+:::
+
+::: solution
+$s=\frac x\lambda-1$、$E[s^{2}]=\frac{\operatorname{Var}X}{\lambda^{2}}=\frac1\lambda$。$\operatorname{Var}(\bar X)=\frac\lambda n=\frac1{nI(\lambda)}$。
+:::
+
+::: problem {#stat:prob-ef-normal-sufficient}
+正規分布 $N(m,\sigma^{2})$（両方未知）で、$(\sum X_{i},\sum X_{i}^{2})$ の関数として尤度が書けることを示せ。
+:::
+
+::: solution
+$L=(2\pi\sigma^{2})^{-n/2}\exp\bigl(-\frac1{2\sigma^{2}}(\sum x_{i}^{2}-2m\sum x_{i}+nm^{2})\bigr)$。連続の場合の分解定理（補足）から $(\bar X,S^{2})$ は十分。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ラオ–ブラックウェルの定理は正則性を使わない。分解定理は離散の場合だけ証明した。連続の場合（一般に、ある $\sigma$ 有限測度に関する密度をもつ族）でも同じ形で成り立つ（ハルモス–サヴェッジ、ここでは証明しない）。議論は Casella–Berger『Statistical Inference』第 6・7 章の流れに沿う。
+
+**前提を変えると.**
+- **レーマン–シェフェの定理**：$T$ が十分かつ**完備**（$E_{\theta}[\phi(T)]=0$ がすべての $\theta$ で成り立てば $\phi(T)=0$ a.s.）なら、$T$ の関数である不偏推定量は一様最小分散不偏推定量（UMVUE）で一意である。
+- **多次元のクラメール–ラオ**：$\theta\in\mathbb{R}^{k}$ ならフィッシャー情報行列 $I(\theta)$ を使い、$\operatorname{Cov}(T)\succeq\frac1n\nabla g\,I(\theta)^{-1}\nabla g^{\top}$（行列の半正定値順序）。
+- **指数型分布族**：$f(x;\theta)=h(x)\exp(\langle\eta(\theta),t(x)\rangle-A(\theta))$ の形の族では、$\sum t(X_{i})$ が十分統計量で、自然パラメータについて完備になる。ベルヌーイ・ポアソン・正規はすべてこの族である。
+
+**高い視点から：情報量の幾何.** フィッシャー情報量は、分布族 $\{P_{\theta}\}$ をパラメータで張られた曲面とみたときのリーマン計量（フィッシャー計量）で、相対エントロピーの 2 次近似 $H(P_{\theta+h}\mid P_{\theta})\approx\frac12I(\theta)h^{2}$ にあたる。クラメール–ラオの不等式は「距離の近い 2 点は見分けにくい」という幾何学的な事実で、十分統計量はこの計量を変えない写像（情報を失わない要約）である。比喩で言えば、フィッシャー情報量は地図の縮尺で、縮尺が細かい（情報量が大きい）場所ほど、少しの移動もはっきり見分けられる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-ef-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

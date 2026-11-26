@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：推定 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/01-estimation/06-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：推定 {#stat:page-exercises-estimation keywords="exercises, computing sample mean and variance, independence of bar X and X_1 - bar X for normal samples, MLE for the geometric distribution, MSE of estimators of the uniform endpoint, Fisher information for a normal variance, Rao-Blackwellization for the uniform distribution, delta method for bar X^2, asymptotic distribution of S^2 and kurtosis, t interval computation, failure of the normal-theory variance interval for exponential data"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習や、二つ以上のページの道具を組み合わせるものである。難易度は ★（基本）・★★（標準）・★★★（発展）で示す。
+
+## 記法と定義の確認 {#stat:sec-ese-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。$\mu_{4}\defeq E[(X-m)^{4}]$ は中心 4 次モーメント。
+:::
+
+## 標本と統計量 {#stat:sec-sm-exercises}
+
+対応するページ：\ref{stat:page-sampling}
+
+::: problem ★ 基本：標本平均と標本分散の計算 {#stat:ex-sm-compute}
+データ $2,4,4,4,5,5,7,9$ の標本平均と標本分散を求めよ。
+:::
+
+::: solution
+$\bar x=40/8=5$。偏差の 2 乗和は $9+1+1+1+0+0+4+16=32$ で、$S^{2}=32/7\approx4.57$（$n$ で割ると $4$）。
+:::
+
+::: problem ★★ 標準：標本平均と偏差の独立性 {#stat:ex-sm-independence}
+正規標本で、$\bar X$ と $X_{1}-\bar X$ が独立であることを、共分散を計算して示せ。
+:::
+
+::: solution
+$(\bar X,X_{1}-\bar X)$ は正規ベクトルの線形変換なので 2 次元正規分布（\ref{prb:multivariate-normal-properties}）。$\operatorname{Cov}(\bar X,X_{1}-\bar X)=\operatorname{Cov}(\bar X,X_{1})-\operatorname{Var}(\bar X)=\frac{\sigma^{2}}n-\frac{\sigma^{2}}n=0$。共分散行列が対角の正規ベクトルの特性関数は積に分かれるので、\ref{prb:multivariate-uniqueness} から成分は独立（\ref{stat:normal-sample-theorem} の Step 2 と同じ議論）。
+:::
+
+## 点推定 {#stat:sec-pe-exercises}
+
+対応するページ：\ref{stat:page-point-estimation}
+
+::: problem ★ 基本：幾何分布の最尤推定量 {#stat:ex-pe-geometric}
+$P_{p}(X=k)=(1-p)^{k-1}p$（$k=1,2,\dots$）からの標本について、$p$ の最尤推定量を求めよ。
+:::
+
+::: solution
+$\ell(p)=n\log p+(\sum x_{i}-n)\log(1-p)$、$\ell'(p)=\frac np-\frac{\sum x_{i}-n}{1-p}=0$ から $\hat p=\frac n{\sum x_{i}}=\frac1{\bar X}$（$\bar x=1$ なら端点 $p=1$）。
+:::
+
+::: problem ★★ 標準：一様分布の端点の推定量の比較 {#stat:ex-pe-uniform-mse}
+$U(0,\theta)$ で、最尤推定量 $M$ と不偏推定量 $\frac{n+1}nM$ の平均二乗誤差を比べよ。
+:::
+
+::: solution
+\ref{stat:uniform-maximum} と \ref{stat:mse-decomposition} から $\mathrm{MSE}(M)=\frac{n\theta^{2}}{(n+1)^{2}(n+2)}+\frac{\theta^{2}}{(n+1)^{2}}=\frac{2\theta^{2}}{(n+1)(n+2)}$、$\mathrm{MSE}(\frac{n+1}nM)=\frac{\theta^{2}}{n(n+2)}$。比は $\frac{2n}{n+1}$ で、$n\ge2$ なら不偏推定量の方が良い（$n=1$ では等しい）。
+:::
+
+## 推定量の良さ {#stat:sec-ef-exercises}
+
+対応するページ：\ref{stat:page-efficiency}
+
+::: problem ★ 基本：正規分散のフィッシャー情報量 {#stat:ex-ef-normal-variance}
+平均 $m$ が既知の正規分布で、$v=\sigma^{2}$ についての $I(v)=\frac1{2v^{2}}$ を示し、$\frac1n\sum(X_{i}-m)^{2}$ が有効推定量であることを確かめよ。
+:::
+
+::: solution
+$\log f=-\frac12\log(2\pi v)-\frac{(x-m)^{2}}{2v}$、$s=-\frac1{2v}+\frac{(x-m)^{2}}{2v^{2}}$。$E[(X-m)^{4}]=3v^{2}$ から $E[s^{2}]=\frac1{4v^{4}}\operatorname{Var}((X-m)^{2})=\frac{2v^{2}}{4v^{4}}=\frac1{2v^{2}}$。推定量は不偏で分散 $\frac{2v^{2}}n=\frac1{nI(v)}$。
+:::
+
+::: problem ★★ 標準：一様分布のラオ–ブラックウェル化 {#stat:ex-ef-uniform-rb}
+$U(0,\theta)$ で $M=\max X_{i}$ は十分統計量で、$M=t$ のもとで $X_{1}$ は確率 $\frac1n$ で $t$ に等しく、確率 $\frac{n-1}n$ で $U(0,t)$ にしたがうことが知られている。不偏推定量 $2X_{1}$ をラオ–ブラックウェル化せよ。
+:::
+
+::: solution
+$E[X_{1}\mid M]=\frac1nM+\frac{n-1}n\cdot\frac M2=\frac{n+1}{2n}M$。よって $E[2X_{1}\mid M]=\frac{n+1}nM$（\ref{stat:rao-blackwell}）。分散は $\frac{\theta^{2}}3$ から $\frac{\theta^{2}}{n(n+2)}$ に下がる。
+:::
+
+## 大標本理論 {#stat:sec-as-exercises}
+
+対応するページ：\ref{stat:page-asymptotics}
+
+::: problem ★ 基本：平均の 2 乗 {#stat:ex-as-square}
+平均 $m\ne0$、分散 $\sigma^{2}$ のとき、$\sqrt n(\bar X^{2}-m^{2})$ の極限分布を求めよ。$m=0$ ではどうなるか。
+:::
+
+::: solution
+\ref{stat:delta-method} で $g(t)=t^{2}$, $g'(m)=2m$ から $N(0,4m^{2}\sigma^{2})$。$m=0$ では極限は $0$ に退化し、$n\bar X^{2}=(\sqrt n\bar X)^{2}\Rightarrow\sigma^{2}\chi_{1}^{2}$（連続写像定理）。
+:::
+
+::: problem ★★★ 発展：標本分散の漸近分布 {#stat:ex-as-sample-variance}
+$\mu_{4}<\infty$ なら $\sqrt n(S^{2}-\sigma^{2})\Rightarrow N(0,\mu_{4}-\sigma^{4})$ を示せ。正規分布ではこれが $2\sigma^{4}$ になることを確かめよ。
+:::
+
+::: solution
+$\hat\sigma^{2}\defeq\frac1n\sum(X_{i}-\bar X)^{2}=\frac1n\sum(X_{i}-m)^{2}-(\bar X-m)^{2}$（\ref{stat:sample-mean-variance} の Step 2）。中心極限定理から $\sqrt n\bigl(\frac1n\sum(X_{i}-m)^{2}-\sigma^{2}\bigr)\Rightarrow N(0,\mu_{4}-\sigma^{4})$。$\sqrt n(\bar X-m)^{2}=\frac1{\sqrt n}(\sqrt n(\bar X-m))^{2}\xrightarrow{P}0$（\ref{stat:tightness-from-weak-convergence}）。スルツキーの定理で $\sqrt n(\hat\sigma^{2}-\sigma^{2})$ の極限は同じ。$S^{2}-\hat\sigma^{2}=\frac{\hat\sigma^{2}}{n-1}$ で $\sqrt n\cdot\frac{\hat\sigma^{2}}{n-1}\xrightarrow{P}0$。正規分布では $\mu_{4}=3\sigma^{4}$。
+:::
+
+## 区間推定 {#stat:sec-ci-exercises}
+
+対応するページ：\ref{stat:page-confidence-intervals}
+
+::: problem ★ 基本：$t$ 区間の計算 {#stat:ex-ci-compute}
+正規標本で $n=9$, $\bar x=10$, $s=3$ のとき、信頼係数 95% の $t$ 区間を求めよ（$t_{8,0.025}\approx2.306$）。
+:::
+
+::: solution
+$10\pm2.306\cdot\frac33=10\pm2.306$、すなわち $[7.694,12.306]$。$\sigma=3$ が既知なら $z_{0.025}\approx1.96$ で $[8.04,11.96]$ と狭くなる。
+:::
+
+::: problem ★★ 標準：正規性を仮定した分散の区間の破綻 {#stat:ex-ci-variance-robustness}
+正規分布を仮定した漸近的な区間 $S^{2}\pm z_{\alpha/2}S^{2}\sqrt{2/n}$ を、実際には指数分布のデータに使うと、被覆確率の極限はいくらか（$\alpha=0.05$）。
+:::
+
+::: solution
+指数分布では $\mu_{4}=9\sigma^{4}$ なので、\ref{stat:ex-as-sample-variance} から $\sqrt n(S^{2}-\sigma^{2})\Rightarrow N(0,8\sigma^{4})$。被覆確率は $P\bigl(\abs{\sqrt n(S^{2}-\sigma^{2})}\le z\sqrt2S^{2}\bigr)\to P(\abs{N(0,8)}\le z\sqrt2)=2\Phi(z/2)-1$。$z=1.96$ で $2\Phi(0.98)-1\approx0.67$。名目の 95% を大きく下回る（\ref{stat:chi-square-interval} の頑健性のなさ）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

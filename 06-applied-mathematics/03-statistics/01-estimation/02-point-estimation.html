@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>点推定 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/01-estimation/02-point-estimation.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 点推定 {#stat:page-point-estimation keywords="estimators, bias, unbiased estimators, mean squared error = variance + bias^2, method of moments, likelihood and log-likelihood, maximum likelihood estimator, invariance of the MLE, examples: Bernoulli, Poisson, normal (mean and variance), uniform on (0, theta) with the sample maximum, comparison of 2 bar X and (n+1)/n max X_i"}
+
+未知のパラメータ $\theta$ を、データから一つの値で言い当てるのが**点推定**である。そのための統計量を**推定量**という。良い推定量とは何かを測る基本の物差しは、平均して真の値に当たっているか（**偏り**）と、どれだけばらつくか（**分散**）で、両方を合わせたものが**平均二乗誤差**である。推定量の作り方として、ここでは標本のモーメントを母集団のモーメントに合わせる**モーメント法**と、データが最も出やすくなる $\theta$ を選ぶ**最尤法**を扱う。
+
+## 記法と定義の確認 {#stat:sec-pe-notation}
+
+::: notation
+- 基本の用語（モデル、標本、標本平均など）は \ref{stat:statistical-model}、その期待値は \ref{stat:sample-mean-variance}。
+- 統計モデル $\{P_{\theta}\}$ の各分布は、離散分布なら確率関数 $f(x;\theta)\defeq P_{\theta}(X=x)$、連続分布なら密度 $f(x;\theta)$ をもつとする。
+- $\Theta\subseteq\mathbb{R}^{k}$ のときの微分・極値の判定は多変数の微分法の通常の道具を使う。体系は $\ZFC$。
+:::
+
+## 推定量と平均二乗誤差 {#stat:sec-pe-mse}
+
+::: definition 推定量・偏り・平均二乗誤差 {#stat:estimator-bias-mse keywords="estimator of g(theta) is a statistic T; bias_theta(T) = E_theta T - g(theta); unbiased if the bias is 0 for all theta; mean squared error MSE_theta(T) = E_theta (T - g(theta))^2" index="推定量|すいていりょう, 不偏推定量|ふへんすいていりょう, 偏り|かたより, 平均二乗誤差|へいきんにじょうごさ" refname="推定量・偏り・平均二乗誤差"}
+$g:\Theta\to\mathbb{R}$ を推定したい量とする。統計量 $T$ を $g(\theta)$ の**推定量**と呼ぶ。
+$$
+\mathrm{bias}_{\theta}(T)\defeq E_{\theta}[T]-g(\theta),\qquad\mathrm{MSE}_{\theta}(T)\defeq E_{\theta}[(T-g(\theta))^{2}]
+$$
+を**偏り**（バイアス）と**平均二乗誤差**という。すべての $\theta$ で偏りが $0$ のとき、$T$ は**不偏**であるという。
+:::
+
+::: intuition
+推定量は「くじを引くたびに違う値を出す測定器」である。偏りはその測定器の目盛りのずれ、分散は針のふらつきで、平均二乗誤差は両方を合わせた「平均的な外れ具合」である。
+:::
+
+::: proposition 平均二乗誤差の分解 {#stat:mse-decomposition keywords="MSE = Var + bias^2; an unbiased estimator need not have smaller MSE than a biased one" index="バイアスと分散の分解|ばいあすとぶんさんのぶんかい" refname="平均二乗誤差の分解"}
+$E_{\theta}[T^{2}]<\infty$ なら $\mathrm{MSE}_{\theta}(T)=\operatorname{Var}_{\theta}(T)+\mathrm{bias}_{\theta}(T)^{2}$。
+:::
+
+::: intuition
+外れ具合の 2 乗の平均は、針のふらつき（分散）と目盛りのずれ（偏りの 2 乗）にきれいに分かれる。片方を減らすともう片方が増えることが多く、その釣り合いが推定量選びの中心になる。
+:::
+
+::: proof
+**Step 1（展開）.** $T-g(\theta)=(T-E_{\theta}T)+\mathrm{bias}_{\theta}(T)$ を 2 乗して期待値をとると、交差項は $2\,\mathrm{bias}_{\theta}(T)E_{\theta}[T-E_{\theta}T]=0$。
+:::
+
+::: example 偏りと分散の釣り合い {#stat:bias-variance-example}
+正規標本で $\sigma^{2}$ を $cS^{2}$（$c>0$）で推定すると、\ref{stat:normal-sample-theorem} から $\operatorname{Var}(S^{2})=\frac{2\sigma^{4}}{n-1}$ なので
+$$
+\mathrm{MSE}(cS^{2})=c^{2}\frac{2\sigma^{4}}{n-1}+(c-1)^{2}\sigma^{4}.
+$$
+$c$ について最小化すると $c=\frac{n-1}{n+1}$、すなわち $\frac1{n+1}\sum(X_{i}-\bar X)^{2}$ が平均二乗誤差最小で、不偏な $S^{2}$（$c=1$）より誤差が小さい。不偏性は、それだけで最良を意味しない。
+:::
+
+## モーメント法 {#stat:sec-pe-moments}
+
+::: definition モーメント法 {#stat:method-of-moments keywords="method of moments: solve (1/n) sum X_i^j = E_theta[X^j], j = 1..k, for theta" index="モーメント法|もーめんとほう, 積率法|せきりつほう" refname="モーメント法"}
+$\Theta\subseteq\mathbb{R}^{k}$ とし、$\mu_{j}(\theta)\defeq E_{\theta}[X^{j}]$ とする。連立方程式
+$$
+\frac1n\sum_{i=1}^{n}X_{i}^{j}=\mu_{j}(\theta)\qquad(j=1,\dots,k)
+$$
+の解 $\hat\theta$ を（存在して一意なら）**モーメント推定量**という。
+:::
+
+::: intuition
+大数の法則によって標本のモーメントは母集団のモーメントに近づくので、「標本で観測したモーメントを生む $\theta$」は真の $\theta$ に近いはずだ、という発想である。計算は簡単だが、どのモーメントを使うかに任意性がある。
+:::
+
+::: example モーメント推定量の例 {#stat:moments-examples}
+1. **正規分布** $N(m,\sigma^{2})$：$\mu_{1}=m$, $\mu_{2}=\sigma^{2}+m^{2}$ から $\hat m=\bar X$, $\hat\sigma^{2}=\frac1n\sum X_{i}^{2}-\bar X^{2}=\frac1n\sum(X_{i}-\bar X)^{2}$。
+2. **一様分布** $U(0,\theta)$：$\mu_{1}=\theta/2$ から $\hat\theta=2\bar X$。不偏で、分散は $4\cdot\frac{\theta^{2}}{12n}=\frac{\theta^{2}}{3n}$。
+:::
+
+## 最尤法 {#stat:sec-pe-likelihood}
+
+::: definition 尤度と最尤推定量 {#stat:maximum-likelihood keywords="likelihood L(theta; x) = prod f(x_i; theta), log-likelihood l(theta) = sum log f(x_i; theta), maximum likelihood estimate theta-hat = argmax L, likelihood equation" index="尤度|ゆうど, 対数尤度|たいすうゆうど, 最尤推定量|さいゆうすいていりょう, 尤度方程式|ゆうどほうていしき" refname="尤度と最尤推定量"}
+観測値 $x=(x_{1},\dots,x_{n})$ を固定し、$\theta$ の関数
+$$
+L(\theta;x)\defeq\prod_{i=1}^{n}f(x_{i};\theta),\qquad\ell(\theta;x)\defeq\log L(\theta;x)
+$$
+を**尤度**、**対数尤度**という。$L(\cdot;x)$ を最大にする $\hat\theta(x)$ が（各 $x$ で存在し、可測に選べるとき）$\hat\theta(X)$ を**最尤推定量**という。$\ell$ が微分可能で最大点が内点なら、それは**尤度方程式** $\nabla_{\theta}\ell(\theta;x)=0$ の解である。
+:::
+
+::: intuition
+尤度は「パラメータが $\theta$ だったとしたら、実際に見たデータがどれだけ出やすかったか」である。最尤法は、手元のデータを最も「ありそうなこと」にする説明を選ぶ。尤度は $\theta$ の確率ではない（$\theta$ について積分して $1$ になるとは限らない）ことに注意する。
+:::
+
+::: example 最尤推定量の例 {#stat:mle-examples keywords="MLE for Bernoulli p is bar X, Poisson lambda is bar X, normal (m, sigma^2) is (bar X, (1/n) sum (X_i - bar X)^2), uniform (0, theta) is max X_i" index="最尤推定量の例|さいゆうすいていりょうのれい" refname="最尤推定量の例"}
+1. **ベルヌーイ分布**（$P(X=1)=p$）：$k\defeq\sum x_{i}$ とすると $\ell(p)=k\log p+(n-k)\log(1-p)$。$0<k<n$ なら $\ell'(p)=\frac kp-\frac{n-k}{1-p}$ は $p=k/n$ で $0$、その前後で正から負に変わるので $\hat p=\bar X$。$k=0,n$ でも $\hat p=k/n$（端点で最大）。
+2. **ポアソン分布**：$\ell(\lambda)=\sum x_{i}\log\lambda-n\lambda-\sum\log x_{i}!$ から同様に $\hat\lambda=\bar X$。
+3. **正規分布**：$\ell(m,\sigma^{2})=-\frac n2\log(2\pi\sigma^{2})-\frac1{2\sigma^{2}}\sum(x_{i}-m)^{2}$。どの $\sigma^{2}$ でも $\sum(x_{i}-m)^{2}$ は $m=\bar x$ で最小（\ref{stat:sample-mean-variance} の Step 2 の分解）。$m=\bar x$ として $v\defeq\sigma^{2}$ の関数 $-\frac n2\log v-\frac{Q}{2v}$（$Q\defeq\sum(x_{i}-\bar x)^{2}>0$）は $v=Q/n$ で最大。よって $\hat m=\bar X$, $\hat\sigma^{2}=\frac1n\sum(X_{i}-\bar X)^{2}$（偏りあり）。
+4. **一様分布** $U(0,\theta)$：$L(\theta)=\theta^{-n}1_{\{\theta\ge\max x_{i}\}}$ は $\theta\ge\max x_{i}$ で減少するので $\hat\theta=M\defeq\max_{i}X_{i}$。尤度は $\hat\theta$ で微分できず、尤度方程式は使えない。
+:::
+
+::: proposition 一様分布の最大値 {#stat:uniform-maximum keywords="for U(0, theta), M = max X_i has P(M <= t) = (t/theta)^n, E M = n theta/(n+1), (n+1)M/n is unbiased with variance theta^2/(n(n+2)), much smaller than theta^2/(3n) for 2 bar X" index="一様分布の最大値|いちようぶんぷのさいだいち" refname="一様分布の最大値"}
+$U(0,\theta)$ からの標本の最大値 $M$ について、
+1. $P_{\theta}(M\le t)=(t/\theta)^{n}$（$0\le t\le\theta$）、$E_{\theta}[M]=\frac{n}{n+1}\theta$。
+2. $\tilde\theta\defeq\frac{n+1}nM$ は不偏で、$\operatorname{Var}_{\theta}(\tilde\theta)=\frac{\theta^{2}}{n(n+2)}$。これはモーメント推定量 $2\bar X$ の分散 $\frac{\theta^{2}}{3n}$ より、$n\ge2$ で小さい。
+:::
+
+::: intuition
+一様分布の右端を知るには、データの最大値が最も直接的な手がかりである。最大値は必ず真の端点より手前にあるので少し割り増すと不偏になり、平均を使う方法よりはるかに速く真の値に近づく。
+:::
+
+::: proof
+**Step 1（分布）.** 【主張：$P_{\theta}(M\le t)=(t/\theta)^{n}$】$\{M\le t\}=\bigcap_{i}\{X_{i}\le t\}$ と独立性から $(t/\theta)^{n}$。密度は $nt^{n-1}/\theta^{n}$。
+
+**Step 2（モーメント）.** $E[M]=\int_{0}^{\theta}t\cdot\frac{nt^{n-1}}{\theta^{n}}dt=\frac{n}{n+1}\theta$、$E[M^{2}]=\frac{n}{n+2}\theta^{2}$。$\operatorname{Var}(M)=\theta^{2}\bigl(\frac n{n+2}-\frac{n^{2}}{(n+1)^{2}}\bigr)=\frac{n\theta^{2}}{(n+1)^{2}(n+2)}$。$\operatorname{Var}(\tilde\theta)=\frac{(n+1)^{2}}{n^{2}}\operatorname{Var}(M)=\frac{\theta^{2}}{n(n+2)}$。
+
+**Step 3（比較）.** $\frac1{n(n+2)}<\frac1{3n}\iff n+2>3\iff n>1$。
+:::
+
+::: proposition 最尤推定量の不変性 {#stat:mle-invariance keywords="if g is a bijection of Theta onto Lambda and theta-hat is an MLE of theta then g(theta-hat) is an MLE of the reparametrized model" index="最尤推定量の不変性|さいゆうすいていりょうのふへんせい" refname="最尤推定量の不変性"}
+$g:\Theta\to\Lambda$ を全単射とし、モデルを $\lambda=g(\theta)$ で書き直す（$\tilde f(x;\lambda)\defeq f(x;g^{-1}(\lambda))$）。$\hat\theta$ が $\theta$ の最尤推定量なら、$g(\hat\theta)$ は $\lambda$ の最尤推定量である。
+:::
+
+::: intuition
+最尤法は「どの分布が最もデータを出しやすいか」を選ぶので、分布にどんな名前（パラメータ）をつけるかには左右されない。
+:::
+
+::: proof
+**Step 1（尤度の対応）.** 書き直したモデルの尤度は $\tilde L(\lambda)=L(g^{-1}(\lambda))$。$\lambda$ が $\Lambda$ を動くと $g^{-1}(\lambda)$ は $\Theta$ 全体を動くので、$\tilde L$ の最大は $g^{-1}(\lambda)=\hat\theta$、すなわち $\lambda=g(\hat\theta)$ で達成される。
+:::
+
+::: hypcheck
+- **最尤推定量の存在と一意性**：一般には保証されない（尤度が有界でない、あるいは最大点が複数ある例がある）。例 3 では $Q>0$（データがすべて等しくはない）を使った。$Q=0$ なら $\sigma^{2}\to0$ で尤度は発散する。
+- **尤度方程式**：最大点が内点で $\ell$ が微分可能なときに限り使える。例 4 はその前提が崩れる例で、実際に $M$ は通常の $\frac1{\sqrt n}$ ではなく $\frac1n$ の速さで $\theta$ に近づく（\ref{stat:uniform-maximum} の分散）。
+- **不偏性と平均二乗誤差**：\ref{stat:bias-variance-example} のように、偏りのある推定量の方が平均二乗誤差の意味で良いこともある。
+:::
+
+## 問題 {#stat:sec-pe-problems}
+
+::: problem {#stat:prob-pe-exponential-mle}
+平均 $1/\lambda$ の指数分布からの標本について、$\lambda$ の最尤推定量が $\hat\lambda=1/\bar X$ であることを示せ。
+:::
+
+::: solution
+$\ell(\lambda)=n\log\lambda-\lambda\sum x_{i}$、$\ell'(\lambda)=\frac n\lambda-\sum x_{i}$ は $\lambda=1/\bar x$ で $0$ で、その前後で正から負に変わる。
+:::
+
+::: problem {#stat:prob-pe-poisson-zero}
+ポアソン分布で $P_{\lambda}(X=0)=e^{-\lambda}$ の最尤推定量を求めよ。
+:::
+
+::: solution
+$g(\lambda)=e^{-\lambda}$ は $(0,\infty)$ から $(0,1)$ への全単射なので、\ref{stat:mle-invariance} から $e^{-\bar X}$（$\bar X>0$ のとき）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 平均二乗誤差の分解には分布の形を使っていない。最尤推定量の不変性は、$g$ が全単射でなくても「誘導された尤度」$\sup\{L(\theta):g(\theta)=\lambda\}$ を使えば同じ形で成り立つ。議論は Casella–Berger『Statistical Inference』第 7 章の流れに沿う。
+
+**前提を変えると.**
+- **M 推定量**：尤度の代わりに一般の目的関数 $\sum\rho(X_{i};\theta)$ を最小にする推定量。外れ値に強い推定（ロバスト統計）の基本形である。
+- **ベイズ推定**：$\theta$ に事前分布を置き、事後分布の平均などを推定値とする。最尤推定量は一様な事前分布での事後分布の最頻値にあたる（ベイズ統計の系列で扱う予定）。
+- **縮小推定**：$k\ge3$ 次元の正規平均の推定では、$\bar X$ を原点の方へ縮めたジェームズ–スタイン推定量が、すべての $\theta$ で平均二乗誤差の意味で $\bar X$ に勝つ（スタインの逆説、ここでは証明しない）。
+
+**高い視点から：推定は射影である.** 正規分布の平均の推定では、最尤法も最小二乗法も、データのベクトルを「モデルが許す部分空間」へ直交射影する操作になる。一般のモデルでは、尤度の最大化は、データの経験分布からモデルの分布族への相対エントロピーの意味での「射影」である（離散分布なら、$-\frac1n\ell(\theta)$ は経験分布から $P_{\theta}$ への相対エントロピーと、$\theta$ によらない定数しか違わない）。比喩で言えば、点推定は、ぼやけた写真（データ）から、候補の顔写真の並び（モデル）のうち最も似ているものを選ぶ作業で、似ていることの測り方が推定法ごとに違う。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-pe-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
