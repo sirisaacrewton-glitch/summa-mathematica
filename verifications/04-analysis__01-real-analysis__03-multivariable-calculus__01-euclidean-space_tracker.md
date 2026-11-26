@@ -37,6 +37,7 @@ The main theorems and proofs (norm equivalence, operator norm, invertibility of 
 - **Proposed fix:** State precisely: "A normed space is finite-dimensional if and only if its closed unit ball is compact (Riesz's lemma; not covered on this site)."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The supplement still states the finite-dimensional iff closed-unit-ball-compact equivalence without noting it is the local-compactness/Riesz characterization for normed spaces; the surrounding discussion of non-equivalent norms and non-compact bounded closed sets makes the scope ambiguous.
+**Opus Rebuttal:** The sentence already restricts the equivalence to normed spaces (a normed space is finite-dimensional iff its closed unit ball is compact), which is exactly the Riesz characterization, so its scope is not ambiguous. The earlier claim that this is not on the site was wrong and has been replaced by a link (\see{fa:compact-unit-ball}), where the equivalence is proved.
 
 ### ISSUE-0004 [Open] Neumann series claim for bounded operators on a Banach space is imprecise
 - **Category:** Supplement/remark error
