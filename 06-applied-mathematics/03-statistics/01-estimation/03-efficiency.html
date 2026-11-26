@@ -80,16 +80,32 @@ $$
 
 ## 十分統計量 {#stat:sec-ef-sufficiency}
 
-::: definition 十分統計量 {#stat:sufficient-statistic keywords="T is sufficient for theta if for every bounded measurable phi there is a version of E_theta[phi(X) | T] not depending on theta; in the discrete case, P_theta(X = x | T = t) does not depend on theta" index="十分統計量|じゅうぶんとうけいりょう" refname="十分統計量"}
-統計量 $T=t(X)$ が $\theta$ について**十分**であるとは、任意の有界可測関数 $\varphi$ について、条件付き期待値 $E_{\theta}[\varphi(X)\mid T]$ のすべての $\theta$ に共通な版（$T$ の可測関数）がとれることをいう。離散モデルでは、$P_{\theta}(T=t)>0$ のとき $P_{\theta}(X=x\mid T=t)$ が $\theta$ によらないことと同値である。
+::: definition 十分統計量 {#stat:sufficient-statistic keywords="T is sufficient for theta if for every measurable phi with E_theta|phi(X)| < infinity for all theta there is a version of E_theta[phi(X) | T] not depending on theta" index="十分統計量|じゅうぶんとうけいりょう" refname="十分統計量"}
+統計量 $T=t(X)$ が $\theta$ について**十分**であるとは、すべての $\theta$ で $E_{\theta}\abs{\varphi(X)}<\infty$ となる任意の可測関数 $\varphi$ について、$T$ の可測関数 $\psi$ で、すべての $\theta$ について $\psi(T)$ が $E_{\theta}[\varphi(X)\mid T]$ の版になるもの（$\theta$ に共通な版）がとれることをいう。
 :::
 
 ::: intuition
 $T$ の値を知った後では、データの残りの部分は $\theta$ によらない「純粋な雑音」で、$\theta$ についてもう何も教えない。だから推定は $T$ だけを見て行えばよい。例えば硬貨投げでは、表の総数がわかれば、表がどの順番で出たかは $p$ について何も語らない。
 :::
 
+::: lemma 離散モデルでの十分性 {#stat:sufficiency-discrete keywords="for a discrete model, T is sufficient iff P_theta(X = x | T = t) does not depend on theta whenever P_theta(T = t) > 0" index="十分統計量（離散）|じゅうぶんとうけいりょう" refname="離散モデルでの十分性"}
+$X$ が可算集合 $\mathcal{X}$ に値をとる離散モデルでは、$T$ が十分であることと、関数 $k:\mathcal{X}\to[0,1]$ があって、$P_{\theta}(T=t(x))>0$ となるすべての $\theta,x$ で $P_{\theta}(X=x\mid T=t(x))=k(x)$ となることは同値である。
+:::
+
+::: intuition
+離散の場合、条件付き期待値は「その値をとった列だけに絞った平均」なので、十分性は「$T$ の値ごとの条件付き確率が $\theta$ を含まない」ことに帰着する。
+:::
+
+::: proof
+**Step 1（離散な条件付けの計算）.** 【主張：$E_{\theta}[Y\mid T]$ は $\{T=t\}$ の上で $E_{\theta}[Y1_{\{T=t\}}]/P_{\theta}(T=t)$】$T$ は可算個の値をとるので、可積分な $Y$ について $E_{\theta}[Y\mid T]=\frac{E_{\theta}[Y1_{\{T=t\}}]}{P_{\theta}(T=t)}$（$\{T=t\}$ の上、$P_{\theta}(T=t)>0$）が版を与え、$P_{\theta}(T=t)=0$ の値は版の選び方に影響しない。
+
+**Step 2（十分 ⇒ $k$）.** $\varphi=1_{\{x\}}$ の共通の版 $\psi$ をとり $k(x)\defeq\psi(t(x))$ とする。$P_{\theta}(T=t(x))>0$ なら Step 1 から $\psi(t(x))=P_{\theta}(X=x\mid T=t(x))$。
+
+**Step 3（$k$ ⇒ 十分）.** $\psi(t)\defeq\sum_{x:t(x)=t}\varphi(x)k(x)$ とおく（$E_{\theta}\abs{\varphi(X)}<\infty$ となる $\theta$ があり $P_{\theta}(T=t)>0$ ならこの和は絶対収束する。そうでない $t$ では $\psi(t)\defeq0$）。$P_{\theta}(T=t)>0$ なら $E_{\theta}[\varphi(X)1_{\{T=t\}}]/P_{\theta}(T=t)=\sum_{x:t(x)=t}\varphi(x)P_{\theta}(X=x\mid T=t)=\psi(t)$ で、Step 1 から $\psi(T)$ は $E_{\theta}[\varphi(X)\mid T]$ の版。
+:::
+
 ::: theorem 分解定理（離散の場合） {#stat:factorization-theorem keywords="for a discrete model, T = t(X) is sufficient iff L(theta; x) = g(t(x); theta) h(x) for some functions g, h" index="分解定理|ぶんかいていり, ネイマンの分解定理|ねいまんのぶんかいていり" refname="分解定理（離散の場合）"}
-離散モデルについて、$T=t(X)$ が十分であることと、関数 $g,h$ によって $L(\theta;x)=g(t(x);\theta)h(x)$（すべての $\theta,x$）と書けることは同値である。
+離散モデルについて、$T=t(X)$ が十分であることと、関数 $g,h\ge0$ によって $L(\theta;x)=g(t(x);\theta)h(x)$（すべての $\theta,x$）と書けることは同値である。
 :::
 
 ::: intuition
@@ -97,13 +113,35 @@ $T$ の値を知った後では、データの残りの部分は $\theta$ によ
 :::
 
 ::: proof
-**Step 1（分解 ⇒ 十分）.** $t(x)=t$ なら $P_{\theta}(X=x\mid T=t)=\dfrac{g(t;\theta)h(x)}{\sum_{y:t(y)=t}g(t;\theta)h(y)}=\dfrac{h(x)}{\sum_{y:t(y)=t}h(y)}$ は $\theta$ によらない（$t(x)\ne t$ なら $0$）。
+**Step 1（分解 ⇒ 十分）.** $P_{\theta}(T=t)>0$ かつ $t(x)=t$ なら
+$$
+P_{\theta}(X=x\mid T=t)=\frac{g(t;\theta)h(x)}{\sum_{y:t(y)=t}g(t;\theta)h(y)}=\frac{h(x)}{\sum_{y:t(y)=t}h(y)}
+$$
+（分母は $P_{\theta}(T=t)>0$ なので $g(t;\theta)>0$ で約分できる）は $\theta$ によらない。\ref{stat:sufficiency-discrete} から十分。
 
-**Step 2（十分 ⇒ 分解）.** $k(x)\defeq P_{\theta}(X=x\mid T=t(x))$（$\theta$ によらない、$P_{\theta}(T=t(x))=0$ なら $0$）とおくと $L(\theta;x)=P_{\theta}(X=x)=P_{\theta}(T=t(x))k(x)$。$g(t;\theta)\defeq P_{\theta}(T=t)$, $h\defeq k$ とする。
+**Step 2（十分 ⇒ 分解）.** \ref{stat:sufficiency-discrete} の $k$ を使い、$g(t;\theta)\defeq P_{\theta}(T=t)$, $h\defeq k$ とおく。$P_{\theta}(T=t(x))>0$ なら $L(\theta;x)=P_{\theta}(X=x)=P_{\theta}(T=t(x))k(x)$。$P_{\theta}(T=t(x))=0$ なら両辺とも $0$。
+:::
+
+::: theorem 分解定理（台が共通な密度の場合） {#stat:factorization-density keywords="if all P_theta have densities f(x; theta) > 0 on a common set and f(x; theta) = g(t(x); theta) h(x), then T is sufficient; proof by expressing dP_theta / dP_theta0 as a function of T" index="分解定理（連続）|ぶんかいていり" refname="分解定理（台が共通な密度の場合）"}
+各 $P_{\theta}$ が $\mathbb{R}^{n}$ 上の密度 $L(\theta;x)$ をもち、集合 $D\defeq\{x:L(\theta;x)>0\}$ が $\theta$ によらず、$L(\theta;x)=g(t(x);\theta)h(x)$（$g,h\ge0$ は可測）と書けるなら、$T=t(X)$ は十分である。
+:::
+
+::: intuition
+密度の比 $dP_{\theta}/dP_{\theta_{0}}$ が $T$ だけで決まれば、$\theta$ を変えることは「$T$ の値ごとに重みを付け直す」だけで、$T$ を固定したときのデータの残りの分布は変わらない。
+:::
+
+::: proof
+**Step 1（密度比は $T$ の関数）.** $\theta_{0}\in\Theta$ を固定する。$x\in D$ で $g(t(x);\theta_{0})h(x)>0$ なので $r_{\theta}(x)\defeq\frac{L(\theta;x)}{L(\theta_{0};x)}=\frac{g(t(x);\theta)}{g(t(x);\theta_{0})}$ は $t(x)$ の可測関数 $\rho_{\theta}(t(x))$ として書ける（$D$ の外では $0$ とおく）。$P_{\theta}$, $P_{\theta_{0}}$ はともに $D$ の上にあるので、非負可測な $F$ について $E_{\theta}[F(X)]=E_{\theta_{0}}[F(X)\rho_{\theta}(T)]$。
+
+**Step 2（共通の版）.** 【主張：$E_{\theta}\abs{\varphi(X)}<\infty$（すべての $\theta$）なら、$\psi(T)\defeq E_{\theta_{0}}[\varphi(X)\mid T]$ はすべての $\theta$ で $E_{\theta}[\varphi(X)\mid T]$ の版】$\varphi\ge0$ としてよい（正負の部分に分ける）。$A=\{T\in B\}$ について、$1_{A}\rho_{\theta}(T)\wedge m$ は有界で $T$ の可測関数なので、条件付き期待値の性質（\ref{prb:conditional-properties}）から
+$$
+E_{\theta_{0}}[\varphi(X)1_{A}(\rho_{\theta}(T)\wedge m)]=E_{\theta_{0}}[\psi(T)1_{A}(\rho_{\theta}(T)\wedge m)].
+$$
+$m\to\infty$ として単調収束定理を使い、Step 1 で書き直すと $E_{\theta}[\varphi(X)1_{A}]=E_{\theta}[\psi(T)1_{A}]$。$\psi(T)$ は $T$ の可測関数なので、これは条件付き期待値の定義そのもの（左辺は有限なので $\psi(T)$ は $P_{\theta}$ 可積分）。
 :::
 
 ::: theorem ラオ–ブラックウェルの定理 {#stat:rao-blackwell keywords="if T is sufficient and U is an estimator of g(theta) with finite variance, U* = E[U | T] is a statistic with the same mean and Var U* <= Var U; strict unless U is a function of T" index="ラオ–ブラックウェルの定理|らおぶらっくうぇるのていり" refname="ラオ–ブラックウェルの定理"}
-$T$ を十分な統計量、$U$ を $E_{\theta}[U^{2}]<\infty$ の推定量とし、$U^{*}\defeq E[U\mid T]$（\ref{stat:sufficient-statistic} の共通の版）とする。このとき $U^{*}$ は統計量で、すべての $\theta$ で
+$U$ をすべての $\theta$ で $E_{\theta}[U^{2}]<\infty$ の推定量とし、$U^{*}=\psi(T)$ を $E_{\theta}[U\mid T]$ の $\theta$ に共通な版とする（$T$ が十分なら存在する。十分でなくても、この $U$ について共通な版があれば以下は成り立つ）。このとき $U^{*}$ は統計量で、すべての $\theta$ で
 $$
 E_{\theta}[U^{*}]=E_{\theta}[U],\qquad\operatorname{Var}_{\theta}(U^{*})=\operatorname{Var}_{\theta}(U)-E_{\theta}[(U-U^{*})^{2}]\le\operatorname{Var}_{\theta}(U).
 $$
@@ -115,16 +153,20 @@ $$
 :::
 
 ::: proof
-**Step 1（統計量であること）.** 十分性から $U^{*}$ は $\theta$ によらない $T$ の関数として選べる（有界でない $U$ には、$U$ の切り捨て $(U\wedge k)\vee(-k)$ の共通の版の極限をとる。条件付き期待値は $L^{2}$ で連続）。
+**Step 1（統計量であること）.** $U^{*}=\psi(T)$ で $\psi$ は $\theta$ によらないので、$U^{*}$ はデータの可測関数、すなわち統計量。$T$ が十分なら、$E_{\theta}\abs U\le E_{\theta}[U^{2}]^{1/2}<\infty$ なので \ref{stat:sufficient-statistic} から $\psi$ がとれる。
 
 **Step 2（平均）.** 塔性質（\ref{prb:conditional-properties}）から $E_{\theta}[U^{*}]=E_{\theta}[U]$。
 
-**Step 3（分散の分解）.** 【主張：$E_{\theta}[(U-U^{*})U^{*}]=0$】$U^{*}$ は $T$ の関数なので、$E[(U-U^{*})U^{*}\mid T]=U^{*}E[U-U^{*}\mid T]=0$。よって $E[U^{2}]=E[(U^{*})^{2}]+E[(U-U^{*})^{2}]$ で、両辺から $(E U)^{2}=(E U^{*})^{2}$ を引く（$U^{*}$ の 2 乗可積分性は条件付きイェンセン \ref{prb:conditional-jensen} から）。
+**Step 3（分散の分解）.** 【主張：$E_{\theta}[(U-U^{*})U^{*}]=0$】条件付きイェンセンの不等式（\ref{prb:conditional-jensen}）から $(U^{*})^{2}\le E_{\theta}[U^{2}\mid T]$ で $U^{*}$ は 2 乗可積分。$U^{*}$ は $T$ の関数なので $E_{\theta}[(U-U^{*})U^{*}\mid T]=U^{*}E_{\theta}[U-U^{*}\mid T]=0$。よって $E_{\theta}[U^{2}]=E_{\theta}[(U^{*})^{2}]+E_{\theta}[(U-U^{*})^{2}]$ で、両辺から $(E_{\theta}U)^{2}=(E_{\theta}U^{*})^{2}$ を引く。
 :::
 
 ::: example ラオ–ブラックウェル化 {#stat:rao-blackwell-examples}
-1. **ベルヌーイ分布**：$L(p;x)=p^{t}(1-p)^{n-t}$（$t=\sum x_{i}$）なので $T=\sum X_{i}$ は十分。不偏推定量 $U=X_{1}$ を条件付けると、対称性から $E[X_{1}\mid T]=\frac Tn=\bar X$。分散は $p(1-p)$ から $\frac{p(1-p)}n$ に下がる。
-2. **ポアソン分布で $e^{-\lambda}$ の推定**：$T=\sum X_{i}$ は十分（$L=e^{-n\lambda}\lambda^{t}/\prod x_{i}!$）。$U=1_{\{X_{1}=0\}}$ は不偏。$T=t$ のもとで各 $X_{i}$ を $t$ 個の点に多項的に割り振ると $X_{1}\sim\mathrm{Bin}(t,\frac1n)$ なので、$U^{*}=\bigl(1-\frac1n\bigr)^{T}$。これは最尤推定量 $e^{-\bar X}$ と違って不偏である。
+1. **ベルヌーイ分布**：$L(p;x)=p^{t}(1-p)^{n-t}$（$t=\sum x_{i}$）なので、\ref{stat:factorization-theorem} から $T=\sum X_{i}$ は十分。$P(X_{i}=1,T=t)=p\binom{n-1}{t-1}p^{t-1}(1-p)^{n-t}$ は $i$ によらないので $E[X_{i}\mid T]$ は $i$ によらず、和は $E[T\mid T]=T$。よって $E[X_{1}\mid T]=\frac Tn=\bar X$。不偏推定量 $X_{1}$ の分散 $p(1-p)$ が $\frac{p(1-p)}n$ に下がる。
+2. **ポアソン分布で $e^{-\lambda}$ の推定**：$L=e^{-n\lambda}\lambda^{t}/\prod x_{i}!$ なので $T=\sum X_{i}$ は十分。独立なポアソン確率変数の和はポアソン（$P(X+Y=t)=\sum_{j}e^{-a}\frac{a^{j}}{j!}e^{-b}\frac{b^{t-j}}{(t-j)!}=e^{-(a+b)}\frac{(a+b)^{t}}{t!}$、2 項定理）なので、$U=1_{\{X_{1}=0\}}$（不偏）について
+$$
+P(X_{1}=0\mid T=t)=\frac{e^{-\lambda}\cdot e^{-(n-1)\lambda}\frac{((n-1)\lambda)^{t}}{t!}}{e^{-n\lambda}\frac{(n\lambda)^{t}}{t!}}=\Bigl(1-\frac1n\Bigr)^{t}.
+$$
+よって $U^{*}=\bigl(1-\frac1n\bigr)^{T}$。これは最尤推定量 $e^{-\bar X}$ と違って不偏である。
 :::
 
 ::: hypcheck
@@ -148,11 +190,11 @@ $s=\frac x\lambda-1$、$E[s^{2}]=\frac{\operatorname{Var}X}{\lambda^{2}}=\frac1\
 :::
 
 ::: solution
-$L=(2\pi\sigma^{2})^{-n/2}\exp\bigl(-\frac1{2\sigma^{2}}(\sum x_{i}^{2}-2m\sum x_{i}+nm^{2})\bigr)$。連続の場合の分解定理（補足）から $(\bar X,S^{2})$ は十分。
+$L=(2\pi\sigma^{2})^{-n/2}\exp\bigl(-\frac1{2\sigma^{2}}(\sum x_{i}^{2}-2m\sum x_{i}+nm^{2})\bigr)$。正規分布の密度は $\mathbb{R}^{n}$ 全体で正なので、\ref{stat:factorization-density} から $(\sum X_{i},\sum X_{i}^{2})$、したがって $(\bar X,S^{2})$ も十分（両者は互いに連続関数で表せるので同じ $\sigma$ 加法族を生成し、条件付き期待値は等しい）。
 :::
 
 ::: supplement
-**使わなかった前提・本質的でない前提.** ラオ–ブラックウェルの定理は正則性を使わない。分解定理は離散の場合だけ証明した。連続の場合（一般に、ある $\sigma$ 有限測度に関する密度をもつ族）でも同じ形で成り立つ（ハルモス–サヴェッジ、ここでは証明しない）。議論は Casella–Berger『Statistical Inference』第 6・7 章の流れに沿う。
+**使わなかった前提・本質的でない前提.** ラオ–ブラックウェルの定理は正則性を使わない。分解定理は、離散の場合は同値性を、密度の場合は台が共通という仮定のもとで「分解 ⇒ 十分」の向きを証明した。台が $\theta$ に依存する場合や逆向きを含む一般の形（ある $\sigma$ 有限測度に関する密度をもつ族での同値性）はハルモス–サヴェッジの定理による（ここでは証明せず、本文の議論にも使わない）。議論は Casella–Berger『Statistical Inference』第 6・7 章の流れに沿う。
 
 **前提を変えると.**
 - **レーマン–シェフェの定理**：$T$ が十分かつ**完備**（$E_{\theta}[\phi(T)]=0$ がすべての $\theta$ で成り立てば $\phi(T)=0$ a.s.）なら、$T$ の関数である不偏推定量は一様最小分散不偏推定量（UMVUE）で一意である。
