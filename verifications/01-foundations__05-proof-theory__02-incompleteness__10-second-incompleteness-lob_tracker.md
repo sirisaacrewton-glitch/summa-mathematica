@@ -29,6 +29,7 @@ The main theorems and proofs (second incompleteness, Löb, formalized Löb, Henk
 - **Proposed fix:** Replace with: "The Rosser provability predicate \mathrm{Bew}^{R} (\ref{pt:rosser-sentence}) satisfies D1 and D2 but not D3; this is why the argument above does not yield the unprovability of the Rosser consistency statement."
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The remark still says the Rosser predicate Bew^{R} is an example that does not satisfy D1–D3; in fact Bew^{R} satisfies D1 and D2 and fails only D3, so the statement remains misleading.
+**Opus Rebuttal:** The claim that the Rosser predicate satisfies D1 and D2 and fails only D3 is not established and is not true for every Rosser predicate; what is provable is that it cannot satisfy all of D1–D3. The remark now says exactly that, with a reference to pt:rosser-derivability, which proves D1 for Bew^R and PA ⊢ ¬Bew^R(⌜⊥⌝); since the proof of the second incompleteness theorem uses only D1–D3 and the diagonal lemma, D2 or D3 must fail.
 
 ### ISSUE-0003 [Open] Converse of Löb's theorem stated as 'trivial' without the D1 justification being the right one
 - **Category:** Supplement/remark error
