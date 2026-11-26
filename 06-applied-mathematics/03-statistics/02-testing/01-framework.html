@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>検定の枠組みと p 値 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/02-testing/01-framework.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 検定の枠組みと p 値 {#stat:page-testing-framework keywords="null and alternative hypotheses, test functions and randomized tests, rejection regions, type I and type II errors, size and level, power function, p-values defined as sup over the null of P(T >= t), validity P(p <= u) <= u, uniformity of p-values for continuous statistics, probability integral transform, one-sided z test for a normal mean, common misinterpretations of p-values"}
+
+**仮説検定**は、データが「ある仮説（帰無仮説）のもとでは起こりにくいか」を測り、起こりにくければその仮説を棄却する手続きである。手続きの誤りには、正しい帰無仮説を棄却する誤り（第 1 種）と、誤った帰無仮説を見逃す誤り（第 2 種）の 2 種類がある。検定の理論は、第 1 種の誤りの確率を一定以下（有意水準 $\alpha$）に抑えたうえで、第 2 種の誤りをできるだけ小さくする（検出力を上げる）ことを目指す。**p 値**は「帰無仮説のもとで、観測値以上に極端なデータが出る確率」で、その分布についての基本的な不等式が、p 値による検定が有意水準を守る根拠になる。
+
+## 記法と定義の確認 {#stat:sec-tf-notation}
+
+::: notation
+- 統計モデル $\{P_{\theta}:\theta\in\Theta\}$、標本、統計量は \ref{stat:statistical-model}。$X$ は標本全体、$E_{\theta}$, $P_{\theta}$ はパラメータ $\theta$ のもとでの期待値と確率。
+- 推定の系列の結果（正規標本、区間推定）は \ref{stat:normal-sample-theorem}, \ref{stat:confidence-interval}。$\Phi$ は標準正規分布の分布関数、$z_{\alpha}$ は上側 $\alpha$ 点。
+- 体系は $\ZFC$。
+:::
+
+## 検定 {#stat:sec-tf-tests}
+
+::: definition 仮説と検定 {#stat:hypothesis-test keywords="null hypothesis H_0: theta in Theta_0 and alternative H_1: theta in Theta_1 with Theta_0, Theta_1 a partition; test function phi(X) in [0, 1] = probability of rejecting; rejection region; power function beta(theta) = E_theta phi; size sup_{Theta_0} beta; level alpha; type I and type II errors" index="仮説検定|かせつけんてい, 帰無仮説|きむかせつ, 対立仮説|たいりつかせつ, 検定関数|けんていかんすう, 棄却域|ききゃくいき, 有意水準|ゆういすいじゅん, 検出力|けんしゅつりょく, 第 1 種の誤り|だいいっしゅのあやまり, 第 2 種の誤り|だいにしゅのあやまり" refname="仮説と検定"}
+1. $\Theta=\Theta_{0}\sqcup\Theta_{1}$（交わらない和）とし、$H_{0}:\theta\in\Theta_{0}$ を**帰無仮説**、$H_{1}:\theta\in\Theta_{1}$ を**対立仮説**という。
+2. データの可測関数 $\varphi(X)\in[0,1]$ を**検定関数**といい、「確率 $\varphi(X)$ で $H_{0}$ を棄却する」と読む。$\varphi$ が $0,1$ の値だけをとるとき、$\{\varphi=1\}$ を**棄却域**という。
+3. $\beta_{\varphi}(\theta)\defeq E_{\theta}[\varphi(X)]$ を**検出力関数**、$\sup_{\theta\in\Theta_{0}}\beta_{\varphi}(\theta)$ を検定の**大きさ**という。大きさが $\alpha$ 以下のとき、検定は**有意水準** $\alpha$ であるという。
+4. $\theta\in\Theta_{0}$ で棄却することを**第 1 種の誤り**（確率 $\beta_{\varphi}(\theta)$）、$\theta\in\Theta_{1}$ で棄却しないことを**第 2 種の誤り**（確率 $1-\beta_{\varphi}(\theta)$）という。$\theta\in\Theta_{1}$ での $\beta_{\varphi}(\theta)$ を**検出力**という。
+:::
+
+::: intuition
+検定は裁判に似ている。帰無仮説は「無罪」で、有罪（対立仮説）の証拠が十分なときだけ棄却する。有意水準は「無実の人を有罪にする確率」の上限で、これを先に固定したうえで、真犯人を逃さない確率（検出力）をできるだけ高くする。2 つの誤りは非対称に扱われ、帰無仮説を棄却できないことは、帰無仮説が正しいことの証明ではない。
+:::
+
+## p 値 {#stat:sec-tf-pvalue}
+
+::: definition p 値 {#stat:p-value keywords="for a test statistic T where large values are evidence against H_0, the p-value is p(X) = sup_{theta in Theta_0} P_theta(T >= t) evaluated at t = T(X); reject when p <= alpha" index="p 値|ぴーち, 検定統計量|けんていとうけいりょう" refname="p 値"}
+統計量 $T$（大きいほど $H_{0}$ に反する証拠とみなす**検定統計量**）について、$G(t)\defeq\sup_{\theta\in\Theta_{0}}P_{\theta}(T\ge t)$ とし、$p\defeq G(T)$ を **p 値**という。
+:::
+
+::: intuition
+p 値は「帰無仮説が正しいとしたら、いま見たもの以上に極端な結果が出る確率」である。小さい p 値は「帰無仮説のもとでは珍しいことが起きた」ことを意味する。それ以上のこと、例えば帰無仮説が正しい確率や効果の大きさは、p 値からは直接わからない。
+:::
+
+::: theorem p 値の妥当性 {#stat:p-value-validity keywords="for every theta in Theta_0 and u in [0, 1], P_theta(p <= u) <= u; hence the test rejecting when p <= alpha has level alpha" index="p 値の妥当性|ぴーちのだとうせい" refname="p 値の妥当性"}
+すべての $\theta\in\Theta_{0}$ と $u\in[0,1]$ で $P_{\theta}(p\le u)\le u$。したがって「$p\le\alpha$ なら棄却する」検定は有意水準 $\alpha$ である。
+:::
+
+::: intuition
+p 値が $u$ 以下になるのは、「帰無仮説のもとで確率 $u$ 以下の極端さ」のデータが出たときだけである。だから、そのような出来事の確率は $u$ を超えない。
+:::
+
+::: proof
+**Step 1（1 点の場合への帰着）.** 【主張：$P_{\theta}(G_{\theta}(T)\le u)\le u$ を示せば十分】$\theta\in\Theta_{0}$ を固定し、$G_{\theta}(t)\defeq P_{\theta}(T\ge t)$ とする。$G\ge G_{\theta}$ なので $\{p\le u\}=\{G(T)\le u\}\subseteq\{G_{\theta}(T)\le u\}$。よって $P_{\theta}(G_{\theta}(T)\le u)\le u$ を示せばよい。
+
+**Step 2（$G_{\theta}$ の性質）.** $G_{\theta}$ は非増加。$t^{*}\defeq\inf\{t:G_{\theta}(t)\le u\}$ とする（集合が空なら $\{G_{\theta}(T)\le u\}=\emptyset$ で自明。$t^{*}=-\infty$ なら $G_{\theta}\le u$ がいたる所で、$u\ge\lim_{t\to-\infty}G_{\theta}(t)=1$ なので自明）。$t_{k}\downarrow t^{*}$（$t_{k}>t^{*}$）では $G_{\theta}(t_{k})\le u$ で、$\{T\ge t_{k}\}\uparrow\{T>t^{*}\}$ から $P_{\theta}(T>t^{*})\le u$。
+
+**Step 3（場合分け）.** $G_{\theta}(t^{*})\le u$ のとき：$T<t^{*}$ なら $T$ は下限より小さいので $G_{\theta}(T)>u$。よって $\{G_{\theta}(T)\le u\}\subseteq\{T\ge t^{*}\}$ で、確率は $G_{\theta}(t^{*})\le u$。$G_{\theta}(t^{*})>u$ のとき：$\{G_{\theta}(T)\le u\}\subseteq\{T>t^{*}\}$ で、確率は Step 2 から $\le u$。
+
+**Step 4（検定）.** $u=\alpha$ として、すべての $\theta\in\Theta_{0}$ で $P_{\theta}(p\le\alpha)\le\alpha$。
+:::
+
+::: proposition 連続な統計量の p 値は一様分布 {#stat:p-value-uniform keywords="if F is a continuous distribution function then F(T) ~ U(0, 1) (probability integral transform); for a simple null with continuous T the p-value is uniform on (0, 1)" index="確率積分変換|かくりつせきぶんへんかん" refname="連続な統計量の p 値は一様分布"}
+1. 確率変数 $T$ の分布関数 $F$ が連続なら、$F(T)$ は $[0,1]$ 上の一様分布にしたがう。
+2. 帰無仮説が 1 点 $\Theta_{0}=\{\theta_{0}\}$ で、$T$ の $P_{\theta_{0}}$ のもとでの分布関数が連続なら、p 値は $H_{0}$ のもとで一様分布にしたがう。
+:::
+
+::: intuition
+連続な分布関数で値を変換すると、どの位置の値も「下から何割の位置にあるか」に置き換わり、その割合は一様に散らばる。帰無仮説が 1 点なら、p 値はこの割合を裏返したものにすぎない。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$v\in(0,1)$ について $P(F(T)\le v)=v$】$F$ は連続で $-\infty$ で $0$、$+\infty$ で $1$ に近づくので、中間値の定理から $\{x:F(x)=v\}$ は空でない閉集合で、上に有界（$F\to1$）。その最大元を $x_{v}$ とする。$F$ は非減少なので、$T\le x_{v}$ なら $F(T)\le v$、$T>x_{v}$ なら $F(T)\ge v$ で、等号は $x_{v}$ の最大性に反するので $F(T)>v$。よって $P(F(T)\le v)=P(T\le x_{v})=F(x_{v})=v$。
+
+**Step 2（2）.** 分布関数が連続なので $P_{\theta_{0}}(T=t)=0$、$G(t)=P_{\theta_{0}}(T\ge t)=1-F(t)$。$p=1-F(T)$ で、1 から $1-F(T)$ も一様分布（$P(1-F(T)\le v)=P(F(T)\ge1-v)=v$）。
+:::
+
+::: example 正規平均の片側 z 検定 {#stat:z-test-one-sided keywords="H_0: m <= m_0 vs H_1: m > m_0 with known sigma; T = sqrt(n)(bar X - m_0)/sigma; p = 1 - Phi(T); the supremum over the null is attained at m_0; power 1 - Phi(z_alpha - sqrt(n)(m - m_0)/sigma)" index="z 検定|ぜっとけんてい" refname="正規平均の片側 z 検定"}
+$N(m,\sigma^{2})$（$\sigma$ は既知）の標本で、$H_{0}:m\le m_{0}$ 対 $H_{1}:m>m_{0}$ を考え、$T\defeq\sqrt n(\bar X-m_{0})/\sigma$ とする。$\delta\defeq\sqrt n(m-m_{0})/\sigma$ とおくと $T\sim N(\delta,1)$ なので $P_{m}(T\ge t)=1-\Phi(t-\delta)$ は $m$ について増加し、$H_{0}$ の上での上限は $m=m_{0}$ で達成される。よって p 値は $p=1-\Phi(T)$、有意水準 $\alpha$ の検定は「$T\ge z_{\alpha}$ なら棄却」で、検出力関数は $\beta(m)=1-\Phi(z_{\alpha}-\delta)$。$m>m_{0}$ を固定して $n\to\infty$ とすると検出力は $1$ に近づく。
+:::
+
+::: remark
+**p 値のよくある誤解**（米国統計学会の声明、Wasserstein–Lazar, The American Statistician, 2016 も参照）。(1) p 値は「帰無仮説が正しい確率」ではない（それには事前分布が要る）。(2) p 値が小さいことは、効果が大きいこと・重要であることを意味しない：上の例で $n$ が大きいと、ごく小さな $m-m_{0}$ でも p 値は小さくなる。(3) $p>\alpha$ は「効果がない」ことの証明ではない：検出力が低いだけかもしれない。(4) 結果を見てから検定や仮説を選ぶと、\ref{stat:p-value-validity} の前提（統計量と仮説がデータより前に決まっている）が崩れる（多重検定の系列で扱う予定）。
+:::
+
+::: hypcheck
+- **$T$ と $\Theta_{0}$ がデータより前に決まっていること**：p 値の定義と \ref{stat:p-value-validity} の確率計算は、$T$ と $G$ が固定された関数であることを前提にしている。
+- **分布関数の連続性**：\ref{stat:p-value-uniform} の Step 1 で中間値の定理に使った。離散な統計量では p 値は一様分布にならず、\ref{stat:p-value-validity} の不等号は一般に真の不等号になる（検定は保守的になる）。
+- **合成帰無仮説**：$\Theta_{0}$ が 2 点以上なら、$G$ は上限なので p 値は一般に一様分布より大きい側にずれる。
+:::
+
+## 問題 {#stat:sec-tf-problems}
+
+::: problem {#stat:prob-tf-discrete-pvalue}
+$X\sim\mathrm{Bin}(1,p)$、$H_{0}:p=\frac12$、$T=X$ のとき、p 値の分布を求め、$P(p\le u)<u$ となる $u$ があることを確かめよ。
+:::
+
+::: solution
+$G(0)=1$, $G(1)=\frac12$。p 値は確率 $\frac12$ で $1$、確率 $\frac12$ で $\frac12$。$u=0.4$ なら $P(p\le0.4)=0<0.4$。
+:::
+
+::: problem {#stat:prob-tf-power-sample-size}
+\ref{stat:z-test-one-sided} で、$m-m_{0}=\Delta>0$ のときの検出力を $1-\beta_{0}$ 以上にする $n$ の条件を求めよ。
+:::
+
+::: solution
+$1-\Phi(z_{\alpha}-\sqrt n\Delta/\sigma)\ge1-\beta_{0}\iff z_{\alpha}-\sqrt n\Delta/\sigma\le-z_{\beta_{0}}\iff n\ge\bigl(\frac{(z_{\alpha}+z_{\beta_{0}})\sigma}{\Delta}\bigr)^{2}$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{stat:p-value-validity} は、$T$ の分布にも独立性にも何の仮定も置いていない（統計量と帰無仮説が固定されていることだけを使った）。議論は Lehmann–Romano『Testing Statistical Hypotheses』第 3 章、Casella–Berger『Statistical Inference』第 8 章の流れに沿う。
+
+**前提を変えると.**
+- **乱択検定と p 値**：離散な統計量では、境界の点で乱数を使って棄却する確率を調整すると、大きさをちょうど $\alpha$ にでき、乱択化した p 値は一様分布になる。
+- **両側検定**：$H_{1}:m\ne m_{0}$ なら、$\abs T$ を検定統計量にとり、p 値は $2(1-\Phi(\abs T))$。
+- **ベイズの立場**：帰無仮説の事後確率は、事前確率と、データの尤度の比（ベイズ因子）で決まり、p 値とは一般に大きく異なりうる（リンドレーの逆説）。
+
+**高い視点から：決定問題としての検定.** 検定は「棄却する・しない」の 2 つの行動をデータから選ぶ決定規則で、損失を 2 種類の誤りに割り当てた統計的決定理論の特別な場合である。p 値は、入れ子になった棄却域の族 $\{T\ge t\}$ のうち、データがちょうど入る最小の水準を返す関数で、すべての水準の検定を 1 つの数にまとめている。比喩で言えば、p 値は「その証拠がどの厳しさの関所まで通過できるか」の目盛りで、関所の厳しさ（有意水準）は証拠を見る前に決めておかなければならない。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-tf-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

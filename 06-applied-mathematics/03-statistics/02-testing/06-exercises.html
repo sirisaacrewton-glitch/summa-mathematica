@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：検定 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/02-testing/06-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：検定 {#stat:page-exercises-testing keywords="exercises, two-sided z test p-value, power function and unbiasedness of the two-sided z test, UMP test for a Poisson mean, UMP test for a normal variance, two-sample t computation, variance of paired differences, Pearson test for a coin and the z test, Wilks statistic for the Poisson mean, Benjamini-Hochberg computation, weak FWER control of BH"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習や、二つ以上のページの道具を組み合わせるものである。難易度は ★（基本）・★★（標準）・★★★（発展）で示す。
+
+## 記法と定義の確認 {#stat:sec-est-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。$\Phi$ と $\varphi$ は標準正規分布の分布関数と密度。
+:::
+
+## 検定の枠組みと p 値 {#stat:sec-tf-exercises}
+
+対応するページ：\ref{stat:page-testing-framework}
+
+::: problem ★ 基本：両側 z 検定の p 値 {#stat:ex-tf-two-sided}
+$\sigma$ 既知の正規平均の両側検定 $H_{0}:m=m_{0}$ で、$T=\sqrt n(\bar X-m_{0})/\sigma=2.1$ が観測された。p 値を求めよ（$\Phi(2.1)\approx0.9821$）。
+:::
+
+::: solution
+統計量 $\abs T$ について $p=P(\abs Z\ge2.1)=2(1-\Phi(2.1))\approx0.036$。有意水準 5% なら棄却、1% なら棄却しない。
+:::
+
+::: problem ★★ 標準：両側 z 検定の検出力 {#stat:ex-tf-two-sided-power}
+両側 z 検定「$\abs T\ge z_{\alpha/2}$ なら棄却」の検出力関数が $\beta(\delta)=\Phi(\delta-z)+\Phi(-\delta-z)$（$z=z_{\alpha/2}$, $\delta=\sqrt n(m-m_{0})/\sigma$）であることを示し、$\beta$ が $\delta=0$ で最小値 $\alpha$ をとることを示せ。
+:::
+
+::: solution
+$T\sim N(\delta,1)$ なので $P(T\ge z)=1-\Phi(z-\delta)=\Phi(\delta-z)$, $P(T\le-z)=\Phi(-z-\delta)$。$\beta'(\delta)=\varphi(\delta-z)-\varphi(\delta+z)$ で、$\delta\ge0$ なら $\abs{\delta-z}\le\delta+z$ なので $\varphi(\delta-z)\ge\varphi(\delta+z)$、$\beta'\ge0$。$\beta$ は偶関数なので $\delta=0$ で最小、値は $2\Phi(-z)=\alpha$。（どの対立値でも検出力が $\alpha$ 以上：不偏検定。）
+:::
+
+## ネイマン–ピアソンの補題 {#stat:sec-np-exercises}
+
+対応するページ：\ref{stat:page-neyman-pearson}
+
+::: problem ★ 基本：ポアソン平均の一様最強力検定 {#stat:ex-np-poisson}
+ポアソン分布の標本で $H_{0}:\lambda\le\lambda_{0}$ 対 $H_{1}:\lambda>\lambda_{0}$ の有意水準 $\alpha$ の一様最強力検定の形を述べよ。
+:::
+
+::: solution
+尤度 $e^{-n\lambda}\lambda^{t}/\prod x_{i}!$（$t=\sum x_{i}$）は $\eta(\lambda)=\log\lambda$（増加）の指数型分布族なので、$T=\sum X_{i}$ について単調尤度比をもつ（\ref{stat:ump-examples}）。\ref{stat:karlin-rubin} から「$T>c$ で棄却、$T=c$ では確率 $\gamma$ で棄却」、$c,\gamma$ は $T\sim\mathrm{Po}(n\lambda_{0})$ のもとで大きさがちょうど $\alpha$ になるように選ぶ（\ref{stat:randomized-threshold}）。
+:::
+
+::: problem ★★ 標準：正規分散の一様最強力検定 {#stat:ex-np-normal-variance}
+平均 $0$ が既知の正規分布 $N(0,\sigma^{2})$ で、$H_{0}:\sigma\le\sigma_{0}$ 対 $H_{1}:\sigma>\sigma_{0}$ の一様最強力検定が「$\sum X_{i}^{2}\ge\sigma_{0}^{2}\chi_{n,\alpha}^{2}$ なら棄却」であることを示せ。
+:::
+
+::: solution
+密度 $(2\pi\sigma^{2})^{-n/2}\exp(-\frac{1}{2\sigma^{2}}\sum x_{i}^{2})$ は $\eta(\sigma)=-\frac1{2\sigma^{2}}$（$\sigma>0$ で増加）、$T=\sum x_{i}^{2}$ の指数型分布族で、単調尤度比をもつ。$\sigma=\sigma_{0}$ のもとで $T/\sigma_{0}^{2}\sim\chi_{n}^{2}$（定義）で連続分布なので、\ref{stat:karlin-rubin} の検定は「$T\ge\sigma_{0}^{2}\chi_{n,\alpha}^{2}$ なら棄却」。
+:::
+
+## 正規母集団の検定 {#stat:sec-nt-exercises}
+
+対応するページ：\ref{stat:page-normal-tests}
+
+::: problem ★ 基本：2 標本 t 検定の計算 {#stat:ex-nt-two-sample}
+等分散を仮定し、$m=n=5$, $\bar x=10$, $s_{X}^{2}=4$, $\bar y=7$, $s_{Y}^{2}=6$ のとき、$H_{0}:\mu_{1}=\mu_{2}$ を有意水準 5% で両側検定せよ（$t_{8,0.025}\approx2.306$）。
+:::
+
+::: solution
+$s_{p}^{2}=\frac{4\cdot4+4\cdot6}{8}=5$、$T=\frac{3}{\sqrt5\sqrt{2/5}}=\frac3{\sqrt2}\approx2.12<2.306$ なので棄却しない。
+:::
+
+::: problem ★★ 標準：対応のあるデータの利点 {#stat:ex-nt-paired-variance}
+$(X_{i},Y_{i})$ が分散 $\sigma^{2}$、相関係数 $\rho$ の組で、組は独立とする。$\operatorname{Var}(\bar D)=\frac{2\sigma^{2}(1-\rho)}n$（$D_{i}=X_{i}-Y_{i}$）を示し、$\rho>0$ のとき対応のある比較が有利な理由を説明せよ。
+:::
+
+::: solution
+$\operatorname{Var}(D_{i})=\sigma^{2}+\sigma^{2}-2\rho\sigma^{2}$、組の独立性から $\bar D$ の分散は $\frac1n$ 倍。2 つの独立な標本の差 $\bar X-\bar Y$ の分散 $\frac{2\sigma^{2}}n$ と比べ、$1-\rho$ 倍に小さい。同じ個体内の共通の変動が差をとることで消えるので、同じ効果に対する $t$ 統計量が大きくなり、検出力が上がる。
+:::
+
+## 尤度比検定とカイ二乗検定 {#stat:sec-lr-exercises}
+
+対応するページ：\ref{stat:page-likelihood-ratio-chi-square}
+
+::: problem ★ 基本：硬貨のカイ二乗検定 {#stat:ex-lr-coin}
+硬貨を 100 回投げて表が 60 回出た。ピアソンの $X^{2}$ を計算し、有意水準 5%（$\chi_{1,0.05}^{2}\approx3.84$）で公平性を検定せよ。z 検定との関係を述べよ。
+:::
+
+::: solution
+$X^{2}=\frac{(60-50)^{2}}{50}+\frac{(40-50)^{2}}{50}=4>3.84$ なので棄却。z 統計量 $\frac{60-50}{\sqrt{100\cdot\frac14}}=2$ の 2 乗が $X^{2}$ に等しく（\ref{stat:prob-lr-two-categories}）、$z_{0.025}^{2}\approx1.96^{2}\approx3.84$ なので両側 z 検定と同じ判定になる。
+:::
+
+::: problem ★★ 標準：ポアソン平均のウィルクス統計量 {#stat:ex-lr-poisson-wilks}
+ポアソン分布で $H_{0}:\lambda=\lambda_{0}$ のとき $\Lambda_{n}=2n\bigl(\bar X\log\frac{\bar X}{\lambda_{0}}-(\bar X-\lambda_{0})\bigr)$ を示し、$\Lambda_{n}-\frac{n(\bar X-\lambda_{0})^{2}}{\lambda_{0}}\xrightarrow{P}0$ を確かめよ（$\bar X>0$ とする）。
+:::
+
+::: solution
+$\ell(\lambda)=n\bar x\log\lambda-n\lambda+$ 定数、$\hat\lambda=\bar x$ から式を得る。$g(x)\defeq x\log\frac x{\lambda_{0}}-(x-\lambda_{0})$ は $g(\lambda_{0})=g'(\lambda_{0})=0$, $g''(x)=\frac1x$ で、テイラーの定理から $g(\bar X)=\frac{(\bar X-\lambda_{0})^{2}}{2\xi}$（$\xi$ は $\bar X$ と $\lambda_{0}$ の間）。差は $n(\bar X-\lambda_{0})^{2}\bigl(\frac1\xi-\frac1{\lambda_{0}}\bigr)$ で、$\sqrt n(\bar X-\lambda_{0})$ は法則収束し $\xi\to\lambda_{0}$（確率収束）なので、\ref{stat:tightness-from-weak-convergence} から差は $0$ に確率収束する。
+:::
+
+## 多重検定 {#stat:sec-mt-exercises}
+
+対応するページ：\ref{stat:page-multiple-testing}
+
+::: problem ★ 基本：ベンジャミニ–ホッホベルク法の計算 {#stat:ex-mt-bh-compute}
+$m=8$, $\alpha=0.1$ で p 値が $0.002,0.009,0.03,0.04,0.06,0.2,0.5,0.9$ のとき、ボンフェローニ法とベンジャミニ–ホッホベルク法の棄却数を求めよ。
+:::
+
+::: solution
+ボンフェローニの基準 $0.0125$：2 個。BH の基準 $j\cdot0.0125$ は $0.0125,0.025,0.0375,0.05,0.0625,0.075,\dots$ で、$p_{(5)}=0.06\le0.0625$、$p_{(6)}=0.2>0.075$, $p_{(7)}=0.5>0.0875$, $p_{(8)}=0.9>0.1$ なので $k=5$、5 個を棄却。
+:::
+
+::: problem ★★ 標準：すべての帰無仮説が正しいときの BH 法 {#stat:ex-mt-bh-weak}
+すべての帰無仮説が正しく（$m_{0}=m$）、p 値が独立で一様分布なら、ベンジャミニ–ホッホベルク法の FWER がちょうど $\alpha$ であることを示せ。
+:::
+
+::: solution
+$m_{0}=m$ なら棄却はすべて誤りで $V=R$、したがって $\frac{V}{\max(R,1)}=1_{\{R\ge1\}}=1_{\{V\ge1\}}$。よって $\mathrm{FWER}=\mathrm{FDR}=\frac{m_{0}}m\alpha=\alpha$（\ref{stat:benjamini-hochberg} の等号の場合）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
