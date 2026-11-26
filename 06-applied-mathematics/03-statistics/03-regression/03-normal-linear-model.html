@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正規線形モデルの推測 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/03-regression/03-normal-linear-model.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 正規線形モデルの推測 {#stat:page-normal-linear-model keywords="normal linear model, projections of a spherical normal vector onto orthogonal subspaces are independent with chi-square squared norms (Cochran for orthogonal projections), distribution of beta-hat and RSS, t tests and confidence intervals for coefficients, F test for nested linear hypotheses, F test as the likelihood ratio test, coefficient of determination R^2 and its monotonicity, slope test in simple regression"}
+
+誤差が正規分布にしたがうと仮定すると、最小二乗推定量と残差平方和の分布が正確に求まり、係数についての検定と信頼区間が作れる。鍵は、球対称な正規ベクトルを互いに直交する部分空間へ射影すると、射影どうしが独立になり、その長さの 2 乗が $\chi^{2}$ 分布にしたがう、という事実（**コクランの定理**の基本形）である。正規標本の基本定理は、その最も簡単な場合（平均の方向とその直交補空間）だった。入れ子になった 2 つのモデルの比較は、2 つの部分空間への射影の差を見る **F 検定**になり、これは尤度比検定と同じものである。
+
+## 記法と定義の確認 {#stat:sec-nl-notation}
+
+::: notation
+- モデル、最小二乗推定量、ハット行列 $H$、残差 $e$、$\mathrm{RSS}$、$s^{2}=\mathrm{RSS}/(n-p)$ は \ref{stat:linear-model}, \ref{stat:least-squares-estimator}, \ref{stat:least-squares-moments}, \ref{stat:residual-variance}。
+- $\chi^{2}$ 分布・$t$ 分布・$F$ 分布は \ref{stat:chi-square-t}, \ref{stat:chi-square-density}, \ref{stat:variance-tests}。多次元正規分布は \ref{prb:multivariate-normal-properties}, \ref{prb:multivariate-uniqueness}。検定と信頼区間の双対性は \ref{stat:test-ci-duality}。
+- **正規線形モデル**：線形モデルで $\varepsilon\sim N(0,\sigma^{2}I_{n})$ とするもの。体系は $\ZFC$。
+:::
+
+## 射影と χ² 分布 {#stat:sec-nl-cochran}
+
+::: lemma 直交する射影の独立性 {#stat:orthogonal-projections-independent keywords="for epsilon ~ N(0, sigma^2 I_n) and orthogonal projections P_1, ..., P_k with P_i P_j = 0 (i != j), the vectors P_i epsilon are independent and |P_i epsilon|^2 / sigma^2 ~ chi^2 with rank P_i degrees of freedom" index="コクランの定理|こくらんのていり, 直交射影と χ² 分布|ちょっこうしゃえいとかいにじょうぶんぷ" refname="直交する射影の独立性"}
+$\varepsilon\sim N(0,\sigma^{2}I_{n})$、$P_{1},\dots,P_{k}$ を $\mathbb{R}^{n}$ の直交射影で $i\ne j$ なら $P_{i}P_{j}=0$ とし、$r_{i}\defeq\operatorname{rank}P_{i}$ とする。このとき $P_{1}\varepsilon,\dots,P_{k}\varepsilon$ は独立で、$\abs{P_{i}\varepsilon}^{2}/\sigma^{2}\sim\chi_{r_{i}}^{2}$。
+:::
+
+::: intuition
+$N(0,\sigma^{2}I)$ は回転で形を変えないので、どんな正規直交基底で見ても座標は独立な $N(0,\sigma^{2})$ である。互いに直交する部分空間に合わせた基底をとれば、各射影は別々の座標のかたまりだけで決まるので独立になり、長さの 2 乗は座標の 2 乗和、すなわち $\chi^{2}$ である。
+:::
+
+::: proof
+**Step 1（像は互いに直交）.** 【主張：$i\ne j$ なら $P_{i}$ と $P_{j}$ の像は直交】$i\ne j$ なら $\langle P_{i}u,P_{j}v\rangle=u^{\top}P_{i}P_{j}v=0$。
+
+**Step 2（適合した基底）.** 各 $P_{i}$ の像の正規直交基底を並べ（Step 1 から全体も正規直交系）、$\mathbb{R}^{n}$ の正規直交基底 $q_{1},\dots,q_{n}$ に延長する。$q_{l}$ を行とする直交行列を $Q$ とすると $\xi\defeq Q\varepsilon\sim N(0,\sigma^{2}I)$（\ref{prb:multivariate-normal-properties} の 2）で、特性関数が積に分かれるので $\xi_{1},\dots,\xi_{n}$ は独立な $N(0,\sigma^{2})$（\ref{prb:multivariate-uniqueness}）。
+
+**Step 3（結論）.** $P_{i}$ の像の基底を $q_{l}$（$l\in J_{i}$）とすると $P_{i}\varepsilon=\sum_{l\in J_{i}}\langle q_{l},\varepsilon\rangle q_{l}=\sum_{l\in J_{i}}\xi_{l}q_{l}$。$J_{1},\dots,J_{k}$ は交わらないので、$P_{i}\varepsilon$ は独立な座標のかたまりの関数で独立（\ref{prb:independence-criteria}）。$\abs{P_{i}\varepsilon}^{2}=\sum_{l\in J_{i}}\xi_{l}^{2}$ で、$\xi_{l}/\sigma$ は独立な標準正規なので $\chi_{r_{i}}^{2}$（$\abs{J_{i}}=r_{i}$）。
+:::
+
+::: theorem 正規線形モデルの標本分布 {#stat:normal-linear-model-distribution keywords="in the normal linear model beta-hat ~ N(beta, sigma^2 (X^T X)^{-1}), RSS / sigma^2 ~ chi^2_{n-p}, and beta-hat, RSS are independent" index="正規線形モデル|せいきせんけいもでる" refname="正規線形モデルの標本分布"}
+正規線形モデルで、
+1. $\hat\beta\sim N(\beta,\sigma^{2}(X^{\top}X)^{-1})$。
+2. $\mathrm{RSS}/\sigma^{2}\sim\chi_{n-p}^{2}$。
+3. $\hat\beta$ と $\mathrm{RSS}$ は独立。
+:::
+
+::: intuition
+係数の推定は当てはめの部分空間の雑音だけで、残差平方和は補空間の雑音だけで決まる。正規分布では直交する方向の雑音は独立なので、両者は独立になる。
+:::
+
+::: proof
+**Step 1（射影による表示）.** $A\defeq(X^{\top}X)^{-1}X^{\top}$ とすると $AH=A$ なので $\hat\beta-\beta=A\varepsilon=A(H\varepsilon)$、また $e=(I-H)\varepsilon$（\ref{stat:least-squares-moments}）。$H$ と $I-H$ は直交射影で $H(I-H)=0$、階数は $p$ と $n-p$（\ref{stat:quadratic-form-expectation} の 2）。
+
+**Step 2（結論）.** 1：正規ベクトルの線形変換（\ref{prb:multivariate-normal-properties} の 2）で、共分散は $\sigma^{2}AA^{\top}=\sigma^{2}(X^{\top}X)^{-1}$。2, 3：\ref{stat:orthogonal-projections-independent} から $H\varepsilon$ と $(I-H)\varepsilon$ は独立で $\abs{(I-H)\varepsilon}^{2}/\sigma^{2}\sim\chi_{n-p}^{2}$。$\hat\beta$ は $H\varepsilon$ の関数、$\mathrm{RSS}$ は $(I-H)\varepsilon$ の関数。
+:::
+
+## 係数の t 検定と入れ子モデルの F 検定 {#stat:sec-nl-tests}
+
+::: corollary 係数の t 検定と信頼区間 {#stat:coefficient-t-test keywords="T_j = (beta-hat_j - beta_j) / (s sqrt(c_jj)) ~ t_{n-p}, c_jj the j-th diagonal entry of (X^T X)^{-1}; confidence interval beta-hat_j +- t_{n-p, alpha/2} s sqrt(c_jj); slope test in simple regression" index="回帰係数の t 検定|かいきけいすうのてぃーけんてい, 標準誤差|ひょうじゅんごさ" refname="係数の t 検定と信頼区間"}
+$c_{jj}$ を $(X^{\top}X)^{-1}$ の第 $j$ 対角成分とすると、
+$$
+T_{j}\defeq\frac{\hat\beta_{j}-\beta_{j}}{s\sqrt{c_{jj}}}\sim t_{n-p}.
+$$
+したがって $\hat\beta_{j}\pm t_{n-p,\alpha/2}s\sqrt{c_{jj}}$ は $\beta_{j}$ の信頼係数 $1-\alpha$ の信頼区間で、「$\abs{T_{j}^{(0)}}\ge t_{n-p,\alpha/2}$ なら $H_{0}:\beta_{j}=0$ を棄却」（$T_{j}^{(0)}$ は $\beta_{j}=0$ とした $T_{j}$）は大きさ $\alpha$ の検定。$s\sqrt{c_{jj}}$ を $\hat\beta_{j}$ の**標準誤差**という。
+:::
+
+::: intuition
+係数のずれを、推定した標準誤差で割ると、未知の $\sigma$ が消えて自由度 $n-p$ の $t$ 分布になる。正規標本の t 検定の、回帰への一般化である。
+:::
+
+::: proof
+**Step 1（分解）.** \ref{stat:normal-linear-model-distribution} から $Z\defeq\frac{\hat\beta_{j}-\beta_{j}}{\sigma\sqrt{c_{jj}}}\sim N(0,1)$、$V\defeq\frac{(n-p)s^{2}}{\sigma^{2}}\sim\chi_{n-p}^{2}$ で、両者は独立。$T_{j}=Z/\sqrt{V/(n-p)}$ なので定義（\ref{stat:chi-square-t}）から $t_{n-p}$。区間と検定は \ref{stat:t-interval}, \ref{stat:one-sample-t-test} と同じ議論。
+:::
+
+::: theorem 入れ子モデルの F 検定 {#stat:nested-f-test keywords="H_0: X beta in L_0, a q-dimensional subspace of L = Col(X); RSS_0 = |(I - H_0) Y|^2; F = ((RSS_0 - RSS)/(p - q)) / (RSS/(n - p)) ~ F(p - q, n - p) under H_0; the F test is the likelihood ratio test" index="F 検定（線形モデル）|えふけんてい, 入れ子モデル|いれこもでる, 線形仮説|せんけいかせつ" refname="入れ子モデルの F 検定"}
+$L\defeq\operatorname{Col}(X)$（次元 $p$）の $q$ 次元部分空間 $L_{0}$（$q<p$）について、帰無仮説 $H_{0}:X\beta\in L_{0}$ を考える。$H_{0}$ を $L_{0}$ への直交射影、$\mathrm{RSS}_{0}\defeq\abs{(I-H_{0})Y}^{2}$ とし、
+$$
+F\defeq\frac{(\mathrm{RSS}_{0}-\mathrm{RSS})/(p-q)}{\mathrm{RSS}/(n-p)}
+$$
+とする。
+1. $H_{0}$ のもとで $F\sim F(p-q,n-p)$。したがって「$F\ge F_{p-q,n-p,\alpha}$（上側 $\alpha$ 点）なら棄却」は大きさ $\alpha$ の検定。
+2. 正規線形モデルの \ref{stat:likelihood-ratio-statistic} は $\lambda=\bigl(1+\frac{p-q}{n-p}F\bigr)^{-n/2}$ で、$F$ の減少関数。したがって F 検定は尤度比検定である。
+:::
+
+::: intuition
+小さいモデル $L_{0}$ に制限すると、当てはまりが悪くなった分だけ残差平方和が増える。その増え方 $\mathrm{RSS}_{0}-\mathrm{RSS}$ を、増えた次元 $p-q$ あたりで測り、雑音の大きさの推定 $s^{2}$ と比べる。帰無仮説が正しければ、増えた分は $p-q$ 次元分の雑音にすぎず、比は $F$ 分布にしたがう。
+:::
+
+::: proof
+**Step 1（射影の分解）.** 【主張：$\mathrm{RSS}_{0}=\mathrm{RSS}+\abs{(H-H_{0})Y}^{2}$】$L_{0}\subseteq L$ なので $HH_{0}=H_{0}=H_{0}H$、よって $H-H_{0}$ は対称冪等で $L\ominus L_{0}$（$L$ の中の $L_{0}$ の直交補空間、次元 $p-q$）への直交射影。$(I-H)(H-H_{0})=0$ で、$I-H_{0}=(I-H)+(H-H_{0})$ はピタゴラスの分解を与える：$\mathrm{RSS}_{0}=\mathrm{RSS}+\abs{(H-H_{0})Y}^{2}$。
+
+**Step 2（帰無仮説のもとの分布）.** $X\beta\in L_{0}$ なら $(I-H)X\beta=0$、$(H-H_{0})X\beta=X\beta-X\beta=0$。よって $\mathrm{RSS}=\abs{(I-H)\varepsilon}^{2}$, $\mathrm{RSS}_{0}-\mathrm{RSS}=\abs{(H-H_{0})\varepsilon}^{2}$。\ref{stat:orthogonal-projections-independent}（$P_{1}=I-H$, $P_{2}=H-H_{0}$）から、両者は独立で $\sigma^{2}\chi_{n-p}^{2}$, $\sigma^{2}\chi_{p-q}^{2}$。$F$ は定義（\ref{stat:variance-tests} の 2）から $F(p-q,n-p)$。$F$ 分布は連続（独立な $\chi^{2}$ の比の分布関数は、同時密度の積分で連続）なので大きさはちょうど $\alpha$。
+
+**Step 3（尤度比）.** $\mu\defeq X\beta$ が部分空間 $M$（$L$ または $L_{0}$）を動くとき、対数尤度 $-\frac n2\log(2\pi\sigma^{2})-\frac{\abs{Y-\mu}^{2}}{2\sigma^{2}}$ は、$\mu$ について $Y$ の $M$ への射影で（\ref{stat:least-squares-estimator}）、$\sigma^{2}$ について $\hat\sigma^{2}=R_{M}/n$（$R_{M}$ はその残差平方和、\ref{stat:mle-examples} の 3 と同じ計算）で最大になり、最大値は $-\frac n2\log(2\pi R_{M}/n)-\frac n2$。よって $\lambda=(\mathrm{RSS}/\mathrm{RSS}_{0})^{n/2}=\bigl(1+\frac{p-q}{n-p}F\bigr)^{-n/2}$（データが $L$ に含まれず $\mathrm{RSS}>0$ のとき）。
+:::
+
+::: example 単回帰の傾きの検定と分散分析 {#stat:regression-anova-example}
+単回帰 $Y_{i}=a+bx_{i}+\varepsilon_{i}$ で $H_{0}:b=0$ は、$L_{0}=\operatorname{span}\{(1,\dots,1)\}$（$q=1$, $p=2$）の場合である。$\mathrm{RSS}_{0}=\sum(Y_{i}-\bar Y)^{2}$、$\mathrm{RSS}_{0}-\mathrm{RSS}=\hat b^{2}S_{xx}$ で、$F=\hat b^{2}S_{xx}/s^{2}=T^{2}$（$T=\hat b\sqrt{S_{xx}}/s$ は \ref{stat:coefficient-t-test} の $t$ 統計量）。1 自由度の F 検定は両側 t 検定と同じである。
+:::
+
+::: definition 決定係数 {#stat:coefficient-of-determination keywords="for a model with intercept, R^2 = 1 - RSS / TSS, TSS = sum (Y_i - bar Y)^2; R^2 in [0, 1] and never decreases when columns are added" index="決定係数|けっていけいすう" refname="決定係数"}
+定数項を含むモデルで、$\mathrm{TSS}\defeq\sum(Y_{i}-\bar Y)^{2}>0$ として $R^{2}\defeq1-\mathrm{RSS}/\mathrm{TSS}$ を**決定係数**という。$\mathrm{TSS}$ は定数だけのモデル $L_{0}=\operatorname{span}\{\mathbf 1\}\subseteq L$ の残差平方和なので、\ref{stat:nested-f-test} の Step 1 から $0\le\mathrm{RSS}\le\mathrm{TSS}$、$R^{2}\in[0,1]$。説明変数（列）を加えると $L$ が大きくなり $\mathrm{RSS}$ は増えないので、$R^{2}$ は決して減らない。
+:::
+
+::: intuition
+$R^{2}$ は「応答のばらつきのうち、モデルで説明できた割合」である。変数を加えれば必ず増えるので、$R^{2}$ が大きいことはモデルが良いことを意味しない（意味のない変数でも増える）。変数の数を考慮した比較には F 検定や情報量規準を使う。
+:::
+
+::: hypcheck
+- **正規性**：\ref{stat:orthogonal-projections-independent} の Step 2（無相関なら独立、回転不変性）に本質的に使った。正規でない誤差でも、$n\to\infty$ で $X$ が適当な条件（$\max_{i}H_{ii}\to0$ など）をみたせば、t・F 検定は漸近的に正しい（ここでは証明しない）。
+- **等分散・無相関**：$\operatorname{Cov}(\varepsilon)=\sigma^{2}I$ が回転不変性の前提。崩れると F 統計量の分布は $F$ 分布でなくなる。
+- **$L_{0}\subseteq L$**：Step 1 の $HH_{0}=H_{0}$ に使った。入れ子でない 2 つのモデルの比較には F 検定は使えない。
+:::
+
+## 問題 {#stat:sec-nl-problems}
+
+::: problem {#stat:prob-nl-overall-f}
+定数項を含む $p$ 個の係数のモデルで、「定数項以外の係数がすべて $0$」の F 統計量が $F=\frac{R^{2}/(p-1)}{(1-R^{2})/(n-p)}$ と書けることを示せ。
+:::
+
+::: solution
+$L_{0}=\operatorname{span}\{\mathbf 1\}$、$\mathrm{RSS}_{0}=\mathrm{TSS}$。$F=\frac{(\mathrm{TSS}-\mathrm{RSS})/(p-1)}{\mathrm{RSS}/(n-p)}$ の分子と分母を $\mathrm{TSS}$ で割る。
+:::
+
+::: problem {#stat:prob-nl-prediction-interval}
+新しい説明変数 $x_{0}$ での応答 $Y_{0}=x_{0}^{\top}\beta+\varepsilon_{0}$（$\varepsilon_{0}\sim N(0,\sigma^{2})$ は $\varepsilon$ と独立）について、$\frac{Y_{0}-x_{0}^{\top}\hat\beta}{s\sqrt{1+x_{0}^{\top}(X^{\top}X)^{-1}x_{0}}}\sim t_{n-p}$ を示せ。
+:::
+
+::: solution
+$Y_{0}-x_{0}^{\top}\hat\beta=\varepsilon_{0}-x_{0}^{\top}(\hat\beta-\beta)$ は独立な正規確率変数の和で、平均 $0$、分散 $\sigma^{2}(1+x_{0}^{\top}(X^{\top}X)^{-1}x_{0})$。これは $(\varepsilon_{0},H\varepsilon)$ の関数で、$s^{2}$（$(I-H)\varepsilon$ の関数）と独立。$t$ 分布の定義から。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** \ref{stat:orthogonal-projections-independent} は、コクランの定理の「射影の和が単位行列」という条件を要しない形で証明した。議論は Seber–Lee『Linear Regression Analysis』第 2・4 章の流れに沿う。
+
+**前提を変えると.**
+- **一般の線形仮説**：$H_{0}:C\beta=0$（$C$ は階数 $r$ の $r\times p$ 行列）は、$L_{0}=\{X\beta:C\beta=0\}$（次元 $p-r$）とした F 検定で、$\mathrm{RSS}_{0}-\mathrm{RSS}=(C\hat\beta)^{\top}(C(X^{\top}X)^{-1}C^{\top})^{-1}C\hat\beta$ と書ける。
+- **分散分析**：説明変数がすべて群のダミー変数なら、F 検定は群間の平均の差の検定（一元配置分散分析）になる。
+- **モデル選択**：$R^{2}$ の代わりに、自由度調整済み $R^{2}$、赤池情報量規準（AIC）、交差検証などが使われる。これらは過学習（次のページ）を避けるための道具である。
+
+**高い視点から：直交分解の会計.** 正規線形モデルの推測はすべて「$\mathbb{R}^{n}=L_{0}\oplus(L\ominus L_{0})\oplus L^{\perp}$」という直交分解の上の会計である。各部分空間への射影の長さの 2 乗が平方和で、その次元が自由度で、それらは独立な $\chi^{2}$ になる。分散分析表は、この直交分解を表に書いたものにすぎない。比喩で言えば、データのベクトルの長さ（全変動）を、互いに直角な方向の成分に分けて「信号らしい部分」と「雑音の部分」に配分し、その配分の比が偶然の範囲かを $F$ 分布で判定している。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-nl-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
