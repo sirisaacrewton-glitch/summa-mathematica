@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>定義的等価の性質 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/05-proof-theory/10-lean-type-theory/03-lean-defeq.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 定義的等価の性質 {#logic:page-lean-defeq keywords="definitional equality in Lean, ideal definitional equality, algorithmic definitional equality, typechecker, undecidability of definitional equality, failure of transitivity, failure of subject reduction, proof irrelevance, K-like reduction, accessibility predicate Acc"}
+
+前ページまで（\ref[Lean の核の型理論]{logic:page-lean-core}, \ref[三つの公理と古典論理]{logic:page-lean-axioms}）で、Lean の核の型理論の規則を述べた。その中心にある**定義的等価**（定義を展開し計算すれば同じになる、という等しさ）には、二つの顔がある。一つは規則の一覧を推移性まで含めて閉じた**理想の定義的等価** $\equiv$（\ref{logic:ideal-defeq}）で、型理論の「意味」はこちらで決まる（次ページの集合論のモデルもこちらを解釈する）。もう一つは、型検査器が実際に行う**算法の定義的等価**で、簡約して頭をそろえ、引数を比べるという手続きである。本ページでは、後者を簡単な模型 $\approx$（\ref{logic:algorithmic-defeq}）として書き下し、両者のずれを具体的な項で調べる。鍵になるのは、証明の無関係性（同じ命題の二つの証明は定義的に等しい）と、$\mathsf{Acc}$ の再帰子のように命題から型へ除去できる帰納型との組み合わせである。この組み合わせのために、理想の定義的等価は「再帰子を何度でも展開できる」ものになり（\ref{logic:acc-unfolding}）、算法はそれを追えない。その結果、算法の定義的等価は推移的でなく（\ref{logic:algorithmic-defeq-not-transitive}）、型付けは簡約で保たれない（\ref{logic:subject-reduction-fails}）。さらに、理想の定義的等価は決定不能であるとされる（\ref{logic:defeq-undecidable}）。
+
+> 資料なし。Lean 4 の規則（再帰子の形、K 様の簡約が適用される帰納型の条件など）は記憶による記述で、Lean 4 の実装・文書とは照合していない。理想と算法の区別、推移性と部分簡約の破れ、決定不能性は、M. Carneiro の修士論文 *The Type Theory of Lean*（2019 年とされる）で論じられた内容とされる（未確認）。本ページの算法の模型 $\approx$ と具体例は本サイトで組み立てたもので、実際の型検査器の手続きとは細部が違う。
+
+## 記法と定義の確認 {#logic:sec-ldq-notation}
+
+::: notation
+- 宇宙 $\mathsf{Sort}\,u$、$\mathsf{Prop}=\mathsf{Sort}\,0$、$\mathsf{Type}\,u=\mathsf{Sort}\,(u+1)$ は \ref[Lean の宇宙]{logic:lean-sorts}、Π 型の宇宙の規則は \ref[Π 型の宇宙の規則]{logic:lean-pi-universe}、帰納型・再帰子・ι 簡約は \ref[帰納型と再帰子]{logic:lean-inductive}、定義的等価の規則は \ref[定義的等価の規則]{logic:lean-defeq-rules}、命題から型への除去の制限は \ref[部分単集合除去]{logic:lean-subsingleton-elimination} のとおり。本ページで使う形は \ref{logic:ideal-defeq} と \ref{logic:ldq-acc-eq} に書き直す。
+- Π 型を $\prod_{x:A}B$ と書き、$B$ が $x$ に依存しないときは $A\to B$ と書く（Lean の $(x:A)\to B$、$\forall x{:}A,\,B$ と同じもの）。判断と文脈の書き方は \ref{logic:dt-judgments} に合わせる。
+- 定数（型の名前・構成子・再帰子）はサンセリフ体で $\mathsf{Acc}$, $\mathsf{Acc.intro}$, $\mathsf{Acc.rec}$ のように書く。自然数 $n$ の数項 $\mathsf{succ}^{n}\,\mathsf{zero}$ を $\bar{n}$ と書く。
+- 型 $P$ が**命題**であるとは $\Gamma\vdash P:\mathsf{Prop}$ のことで、そのとき $\Gamma\vdash p:P$ となる $p$ を $P$ の**証明**という。
+- 判断上の等しさ（\ref{logic:dt-judgments}）を、Lean の文脈では**定義的等価**と呼ぶ。
+- 構文についての主張（導出の存在、簡約の列）は有限の記号操作についての主張で、メタ理論は算術で足りる。
+:::
+
+## 理想の定義的等価 {#logic:sec-ldq-ideal}
+
+::: definition 理想の定義的等価 {#logic:ideal-defeq keywords="ideal definitional equality, typing judgment of Lean, conversion rule" index="理想の定義的等価|りそうのていぎてきとうか"}
+型付けの判断 $\Gamma\vdash t:A$ と**理想の定義的等価** $\Gamma\vdash s\equiv t$ は、\ref[定義的等価の規則]{logic:lean-defeq-rules} の規則で同時に帰納的に定める。本ページで使うのは次の規則である。
+1. （同値）$\equiv$ は反射的・対称的・推移的である。
+2. （合同）$\equiv$ は適用・$\lambda$・Π・let のすべての構成と両立する（束縛の下でも）。
+3. （β）$(\lambda x{:}A.\,b)\,a\equiv b[a/x]$。
+4. （δ・ζ）定義された定数は本体と等しく、$\mathsf{let}\ x\defeq a\ \mathsf{in}\ b\equiv b[a/x]$。
+5. （η）$x$ が $f$ に自由に現れないとき $\lambda x{:}A.\,f\,x\equiv f$。
+6. （ι）再帰子を構成子に適用したものは、小前提を使った計算の結果と等しい（具体形は \ref{logic:ldq-acc-eq}）。
+7. （証明の無関係性）$\Gamma\vdash P:\mathsf{Prop}$, $\Gamma\vdash p:P$, $\Gamma\vdash q:P$ なら $\Gamma\vdash p\equiv q$。
+8. （構造の η）構造体（構成子が一つで添字も再帰もない帰納型）の項 $s$ は、射影を並べ直した $\mathsf{mk}\,(\pi_{1}s)\cdots(\pi_{k}s)$ と等しい。
+9. （変換）$\Gamma\vdash t:A$ と $\Gamma\vdash A\equiv B$ から $\Gamma\vdash t:B$。
+:::
+
+::: intuition
+理想の定義的等価は「規則で一歩ずつ書き換えて行き来できるものは、何段かかっても等しい」とする関係である。推移律 1 があるので、途中で一度「証明を別の証明に取り替える」（規則 7）と、その先で新しい計算が始まってもよい。この自由さが、本ページで見るすべての現象の源になる。
+:::
+
+## このページで使う帰納型 {#logic:sec-ldq-inductives}
+
+::: definition 到達可能性と等号の再帰子 {#logic:ldq-acc-eq keywords="accessibility predicate Acc, Acc.rec, equality type Eq, Eq.rec, iota reduction" index="到達可能性（Acc）|とうたつかのうせいあっく, Acc|あっく"}
+以下、$\alpha:\mathsf{Sort}\,u$ とする。
+1. （到達可能性）$R:\alpha\to\alpha\to\mathsf{Prop}$ に対し、命題の族 $\mathsf{Acc}\,R:\alpha\to\mathsf{Prop}$ を、ただ一つの構成子
+$$
+\mathsf{Acc.intro}:\prod_{x:\alpha}\Bigl(\prod_{y:\alpha}R\,y\,x\to\mathsf{Acc}\,R\,y\Bigr)\to\mathsf{Acc}\,R\,x
+$$
+をもつ帰納型とする。動機 $M:\prod_{x:\alpha}\mathsf{Acc}\,R\,x\to\mathsf{Sort}\,v$ と小前提
+$$
+m:\prod_{x:\alpha}\ \prod_{k:\prod_{y}R\,y\,x\to\mathsf{Acc}\,R\,y}\Bigl(\prod_{y:\alpha}\prod_{p:R\,y\,x}M\,y\,(k\,y\,p)\Bigr)\to M\,x\,(\mathsf{Acc.intro}\,x\,k)
+$$
+から再帰子 $\mathsf{Acc.rec}_{M}\,m:\prod_{x:\alpha}\prod_{h:\mathsf{Acc}\,R\,x}M\,x\,h$ が得られる。$x$ を省いて $\mathsf{Acc.rec}_{M}\,m\,h$ と書く。ι 規則は
+$$
+\mathsf{Acc.rec}_{M}\,m\,(\mathsf{Acc.intro}\,x\,k)\equiv m\,x\,k\,\bigl(\lambda y\,p.\,\mathsf{Acc.rec}_{M}\,m\,(k\,y\,p)\bigr)
+$$
+である。$v$ は任意でよい（命題から任意の宇宙へ除去できる）。これは、構成子の命題でない引数 $x$ が型の添字にそのまま現れることによる（\ref[部分単集合除去]{logic:lean-subsingleton-elimination}）。
+2. （等号）$a:\alpha$ に対し、命題の族 $\mathsf{Eq}\,a:\alpha\to\mathsf{Prop}$ を、構成子 $\mathsf{Eq.refl}\,a:\mathsf{Eq}\,a\,a$ だけをもつ帰納型とする。動機 $M:\prod_{b:\alpha}\mathsf{Eq}\,a\,b\to\mathsf{Sort}\,v$ と $m:M\,a\,(\mathsf{Eq.refl}\,a)$ から $\mathsf{Eq.rec}_{M}\,m:\prod_{b:\alpha}\prod_{h:\mathsf{Eq}\,a\,b}M\,b\,h$ が得られ、ι 規則は $\mathsf{Eq.rec}_{M}\,m\,(\mathsf{Eq.refl}\,a)\equiv m$ である。
+3. （逆向きの取り出し）$h:\mathsf{Acc}\,R\,x$ に対し、命題の動機 $M_{0}\defeq\lambda x\,\_.\,\prod_{y:\alpha}R\,y\,x\to\mathsf{Acc}\,R\,y$ を使って
+$$
+\mathrm{inv}\,h\defeq\mathsf{Acc.rec}_{M_{0}}\,(\lambda x\,k\,\_.\,k)\,h:\prod_{y:\alpha}R\,y\,x\to\mathsf{Acc}\,R\,y
+$$
+とおく。$\mathrm{inv}$ は略記で、δ 簡約される定数ではない。
+:::
+
+::: intuition
+$\mathsf{Acc}\,R\,x$ は「$x$ から $R$ をさかのぼる列は必ず有限で止まる」という命題で、整礎な再帰（「より小さいもの」への再帰呼び出し）の土台になる。$\mathsf{Acc.rec}$ はその再帰そのもので、小前提 $m$ は「より小さい $y$ での値（第 3 引数）から $x$ での値を作る」規則である。$\mathrm{inv}$ は「$x$ が到達可能なら、その一つ手前の $y$ も到達可能」を取り出す。
+:::
+
+## 理想の定義的等価で導ける二つの規則 {#logic:sec-ldq-derived}
+
+::: proposition K 様の簡約は導ける {#logic:k-like-derivable keywords="K-like reduction is derivable from proof irrelevance and iota" index="K 様の簡約|けいようのかんやく"}
+$\Gamma\vdash h:\mathsf{Eq}\,a\,b$ かつ $\Gamma\vdash a\equiv b$ とする。このとき、動機 $M$ と $\Gamma\vdash m:M\,a\,(\mathsf{Eq.refl}\,a)$ について
+$$
+\Gamma\vdash\mathsf{Eq.rec}_{M}\,m\,h\equiv m
+$$
+が成り立つ。とくに $h$ が変数でもよい。
+:::
+
+::: intuition
+等号の証明 $h$ が何であっても、両辺が定義的に等しいなら、$h$ を $\mathsf{Eq.refl}$ に取り替えて計算してよい。これを型検査器では「**K 様の簡約**」と呼んで特別な規則にするが、理想の定義的等価では証明の無関係性から自動的に従う。
+:::
+
+::: proof
+**Step 1.** 【主張：$\Gamma\vdash h\equiv\mathsf{Eq.refl}\,a$】 $\Gamma\vdash\mathsf{Eq.refl}\,a:\mathsf{Eq}\,a\,a$ であり、合同と仮定 $a\equiv b$ から $\mathsf{Eq}\,a\,a\equiv\mathsf{Eq}\,a\,b$ である。変換規則（\ref{logic:ideal-defeq.9}）から $\Gamma\vdash\mathsf{Eq.refl}\,a:\mathsf{Eq}\,a\,b$ となる。$\mathsf{Eq}\,a\,b$ は命題なので、証明の無関係性（\ref{logic:ideal-defeq.7}）から $h\equiv\mathsf{Eq.refl}\,a$ が成り立つ。
+
+**Step 2.** 【主張：$\mathsf{Eq.rec}_{M}\,m\,h\equiv\mathsf{Eq.rec}_{M}\,m\,(\mathsf{Eq.refl}\,a)$】 再帰子の適用は暗黙の添字 $b$ と主前提 $h$ を引数にもつ。添字については $b\equiv a$、主前提については Step 1 を使い、合同（\ref{logic:ideal-defeq.2}）から両辺は等しい。
+
+**Step 3.** 【主張：右辺は $m$ と等しい】 ι 規則（\ref{logic:ldq-acc-eq.2}）から $\mathsf{Eq.rec}_{M}\,m\,(\mathsf{Eq.refl}\,a)\equiv m$ である。Step 2 と推移律から結論を得る。
+
+::: hypcheck
+- **証明の無関係性**：Step 1 で、変数 $h$ を構成子 $\mathsf{Eq.refl}\,a$ に取り替えるのに使った。これを外すと、$h$ が変数のとき ι 規則は使えず、結論は導けない（内包的な型理論で $h$ を変数として $\mathsf{Eq.rec}$ が計算しないのと同じ状況。\ref{logic:uip-not-provable} の補足も参照）。
+- **前提 $a\equiv b$**：Step 1 で $\mathsf{Eq.refl}\,a$ に型 $\mathsf{Eq}\,a\,b$ を付けるのに使った。$a$ と $b$ が定義的に等しくなければ、$\mathsf{Eq.rec}_{M}\,m\,h$ の型 $M\,b\,h$ と $m$ の型 $M\,a\,(\mathsf{Eq.refl}\,a)$ がそもそも違いうる。
+- **推移律**：Step 3 で使った。算法の模型（\ref{logic:algorithmic-defeq}）には推移律がないので、そこでは K 様の簡約を簡約規則として別に入れる（\ref{logic:checker-reduction.3}）。
+:::
+:::
+
+::: proposition Acc の再帰子の展開 {#logic:acc-unfolding keywords="unfolding Acc.rec on an arbitrary proof, proof irrelevance and accessibility" index="Acc の再帰子の展開|あっくのさいきしのてんかい"}
+$\Gamma\vdash h:\mathsf{Acc}\,R\,x$ とする（$h$ は変数でもよい）。動機 $M$ と小前提 $m$ について
+$$
+\Gamma\vdash\mathsf{Acc.rec}_{M}\,m\,h\equiv m\,x\,(\mathrm{inv}\,h)\,\bigl(\lambda y\,p.\,\mathsf{Acc.rec}_{M}\,m\,(\mathrm{inv}\,h\,y\,p)\bigr)
+$$
+が成り立つ。
+:::
+
+::: intuition
+到達可能性の証明 $h$ が何であっても、それは「$\mathsf{Acc.intro}$ を当てたもの」と定義的に等しいので、再帰子は常に一段展開できる。展開した中にまた $\mathsf{Acc.rec}$ が現れるので、この展開は何度でも繰り返せる。
+:::
+
+::: proof
+**Step 1.** 【主張：$\Gamma\vdash\mathsf{Acc.intro}\,x\,(\mathrm{inv}\,h):\mathsf{Acc}\,R\,x$】 \ref{logic:ldq-acc-eq.3} から $\mathrm{inv}\,h:\prod_{y:\alpha}R\,y\,x\to\mathsf{Acc}\,R\,y$ である。これは $\mathsf{Acc.intro}\,x$ の引数の型そのものなので、適用の規則から主張の型が付く。
+
+**Step 2.** 【主張：$h\equiv\mathsf{Acc.intro}\,x\,(\mathrm{inv}\,h)$】 両者は同じ命題 $\mathsf{Acc}\,R\,x$ の証明なので、証明の無関係性（\ref{logic:ideal-defeq.7}）から等しい。
+
+**Step 3.** 【主張：結論が成り立つ】 合同から $\mathsf{Acc.rec}_{M}\,m\,h\equiv\mathsf{Acc.rec}_{M}\,m\,(\mathsf{Acc.intro}\,x\,(\mathrm{inv}\,h))$ である。右辺に ι 規則（\ref{logic:ldq-acc-eq.1}）を $k\defeq\mathrm{inv}\,h$ として使うと、$m\,x\,(\mathrm{inv}\,h)\,\bigl(\lambda y\,p.\,\mathsf{Acc.rec}_{M}\,m\,(\mathrm{inv}\,h\,y\,p)\bigr)$ になる。推移律から結論を得る。
+
+::: hypcheck
+- **証明の無関係性**：Step 2 で使った。これがなければ $h$ が変数のとき展開できない。
+- **大きな除去**：動機 $M$ の値の宇宙 $\mathsf{Sort}\,v$ は任意だった。$v=0$（命題への除去）だけなら、展開しても結果はまた命題の証明で、証明の無関係性からもともと等しいものしか得られず、計算として意味のある現象は起きない。$\mathsf{Acc}$ が型へ除去できること（\ref{logic:ldq-acc-eq.1}）が、以下の現象に本質的である。
+- **型の一致**：Step 3 の両辺の型は $M\,x\,h$ と $M\,x\,(\mathsf{Acc.intro}\,x\,(\mathrm{inv}\,h))$ で、Step 2 と合同から定義的に等しい。
+:::
+:::
+
+::: supplement
+**展開が止まらない例.** $R\defeq\lambda y\,x.\,\mathsf{True}$（すべての対が関係する）とし、文脈に $h:\mathsf{Acc}\,R\,a$ を置く（この命題は集合論的には偽だが、変数として仮定することはできる）。$m\defeq\lambda x\,k\,\mathit{ih}.\,\mathit{ih}\,x\,\mathsf{trivial}$ とすると、\ref{logic:acc-unfolding} と β から $\mathsf{Acc.rec}_{M}\,m\,h\equiv\mathsf{Acc.rec}_{M}\,m\,(\mathrm{inv}\,h\,a\,\mathsf{trivial})$ となり、右辺はまた同じ形をしている。理想の定義的等価で「計算」を最後まで進めようとすると終わらない。型検査器が変数の上で $\mathsf{Acc.rec}$ を展開しないのはこのためである。
+
+**関連する結果.** A. Abel と T. Coquand は、非可述的な命題の宇宙と定義的な証明の無関係性をもつ型理論で、正規化が成り立たない（簡約が止まらない項がある）ことを示したとされる（2020 年頃とされる。未確認）。Coq（Rocq）の定義的に証明が無関係な命題の宇宙 $\mathsf{SProp}$ では、この種の現象を避けるために、$\mathsf{Acc}$ のような型から型への大きな除去を制限しているとされる（未確認）。
+:::
+
+## 型検査器の簡約と算法の定義的等価 {#logic:sec-ldq-algorithmic}
+
+型検査器は推移律を「探索」できない。二つの項が等しいかを調べるとき、中間の項を思いつく手段がないからである。そこで検査器は、両辺を簡約して形をそろえ、そろった部分を比べる。以下はその手続きを、規則の形で書いた模型である。
+
+::: definition 検査器の簡約 {#logic:checker-reduction keywords="weak head reduction of the Lean kernel, iota reduction only on constructors, K-like reduction" index="検査器の簡約|けんさきのかんやく"}
+項の上の一段の**検査器の簡約** $s\rightsquigarrow t$ を、次の書き換えを部分項のどこかで一回行うことと定める。$\rightsquigarrow^{*}$ はその反射推移閉包である。
+1. β・δ・ζ：\ref{logic:ideal-defeq.3}・\ref[4]{logic:ideal-defeq.4} の左辺を右辺に書き換える。
+2. ι：再帰子の主前提が構成子の適用の形をしているときに限り、ι 規則の左辺を右辺に書き換える。
+3. K 様の簡約：構成子が一つで、その構成子が引数をもたない命題の帰納型（$\mathsf{Eq}$ など）に限り、主前提 $h$ の型が $\mathsf{Eq}\,a\,b$ で $\Gamma\vdash a\approx b$（\ref{logic:algorithmic-defeq}）なら、$\mathsf{Eq.rec}_{M}\,m\,h\rightsquigarrow m$ とする。
+:::
+
+::: intuition
+検査器は、再帰子の主前提が変数なら計算を止める。例外は K 様の簡約で、構成子に引数がないので取り替えても新しい再帰呼び出しは生じず、安全に計算を進められる。$\mathsf{Acc}$ の構成子には引数（とくに再帰的な引数）があるので、この例外に入らない。
+:::
+
+::: definition 算法の定義的等価の模型 {#logic:algorithmic-defeq keywords="algorithmic definitional equality, model of the Lean typechecker, type inference, proof irrelevance check" index="算法の定義的等価|さんぽうのていぎてきとうか"}
+型の推論 $\Gamma\vdash_{\mathrm{a}}t\Rightarrow A$ と、**算法の定義的等価** $\Gamma\vdash s\approx t$ を、次の規則で同時に帰納的に定める。
+
+推論の規則は次のとおりである。
+- (V) $x{:}A$ が $\Gamma$ にあれば $\Gamma\vdash_{\mathrm{a}}x\Rightarrow A$。定数は宣言された型（宇宙のレベルを代入したもの）を、$\mathsf{Sort}\,u$ は $\mathsf{Sort}\,(u+1)$ を推論する。
+- (A) $\Gamma\vdash_{\mathrm{a}}f\Rightarrow F$ で $F\rightsquigarrow^{*}\prod_{x:A}B$、$\Gamma\vdash_{\mathrm{a}}a\Rightarrow A'$ かつ $\Gamma\vdash A'\approx A$ なら $\Gamma\vdash_{\mathrm{a}}f\,a\Rightarrow B[a/x]$。
+- (L) $A$ の推論された型が簡約で $\mathsf{Sort}$ になり、$\Gamma,x{:}A\vdash_{\mathrm{a}}b\Rightarrow B$ なら $\Gamma\vdash_{\mathrm{a}}\lambda x{:}A.\,b\Rightarrow\prod_{x:A}B$。Π 型は \ref[Π 型の宇宙の規則]{logic:lean-pi-universe} の宇宙を推論する。
+
+等価の規則：$\Gamma\vdash s\approx t$ とは、$s\rightsquigarrow^{*}s'$ と $t\rightsquigarrow^{*}t'$ となる $s'$, $t'$ があって、次のどれかが成り立つことをいう。
+- (C1) $s'$ と $t'$ は（束縛変数の名前の違いを除いて）同じ項である。
+- (C2) $s'=h\,s_{1}\cdots s_{k}$, $t'=h\,t_{1}\cdots t_{k}$（$k\ge1$）で、頭 $h$ は同じ変数または同じ定数（同じ宇宙のレベル）であり、すべての $i$ で $\Gamma\vdash s_{i}\approx t_{i}$。
+- (C3) $s'$, $t'$ がともに $\lambda$（ともに Π）で、束縛の型どうしと本体どうしが $\approx$ である。
+- (C4) （η）$s'=\lambda x{:}A.\,b$ で $t'$ が $\lambda$ でなく、$\Gamma,x{:}A\vdash b\approx t'\,x$ である（左右を入れ替えたものも同様）。
+- (C5) （証明の無関係性）$\Gamma\vdash_{\mathrm{a}}s'\Rightarrow P$, $\Gamma\vdash_{\mathrm{a}}t'\Rightarrow Q$ で、$P$ と $Q$ の推論された型がどちらも簡約で $\mathsf{Prop}$ になり、$\Gamma\vdash P\approx Q$ である。
+:::
+
+::: intuition
+$s\approx t$ は「両辺を好きなだけ簡約したあと、頭が同じなら引数ごとに、証明どうしなら型どうしを比べて一致する」という意味である。引数の比較では、また簡約からやり直してよい。推移律の規則はない。実際の型検査器は、どこまで簡約するか、どの順で試すかを決めた決定的な手続きだが、等しいと答えるときの理由は (C1)〜(C5) のどれかに当たる。Carneiro はこの種の関係を宣言的な規則で書き、型検査器が判定するのはその部分であるとしたとされる（未確認）。
+:::
+
+::: lemma 模型の基本性質 {#logic:algorithmic-defeq-basic keywords="reflexivity, symmetry and closure under reduction of algorithmic definitional equality"}
+1. $\approx$ は反射的かつ対称的である。
+2. $s\rightsquigarrow^{*}s_{1}$, $t\rightsquigarrow^{*}t_{1}$ で $\Gamma\vdash s_{1}\approx t_{1}$ なら $\Gamma\vdash s\approx t$ である。
+:::
+
+::: proof
+1 について：$s'=t'=s$（簡約しない）とすれば (C1) が成り立つので反射的である。対称性は、$\Gamma\vdash s\approx t$ を導く規則の高さについての帰納法で示す。(C1) は左右を入れ替えても同じ条件であり、(C2)(C3) は引数ごと・本体ごとの $\approx$ に帰納法の仮定を使えばよい。(C4) は定義に両向きを入れてあり、(C5) は $P$ と $Q$ について対称な条件と $P\approx Q$ からなるので、帰納法の仮定で $Q\approx P$ とすればよい。
+
+2 について：$s_{1}\rightsquigarrow^{*}s'$, $t_{1}\rightsquigarrow^{*}t'$ で (C1)〜(C5) のどれかが成り立つとする。$\rightsquigarrow^{*}$ は推移的なので $s\rightsquigarrow^{*}s'$, $t\rightsquigarrow^{*}t'$ でもあり、同じ $s'$, $t'$ が $\Gamma\vdash s\approx t$ の証人になる。
+:::
+
+::: proposition 模型の健全性 {#logic:algorithmic-defeq-sound keywords="soundness of algorithmic definitional equality with respect to ideal definitional equality" index="算法の定義的等価の健全性|さんぽうのていぎてきとうかのけんぜんせい"}
+$\Gamma\vdash s\approx t$ で $s$, $t$ が $\Gamma$ で型をもつなら、$\Gamma\vdash s\equiv t$ である。また $\Gamma\vdash_{\mathrm{a}}t\Rightarrow A$ なら $\Gamma\vdash t:A$ である。
+:::
+
+::: intuition
+検査器が「等しい」と答えたものは、理想の意味でも等しい。逆は成り立たない（次節）。
+:::
+
+::: proof
+規則 (V)(A)(L)(C1)〜(C5) と簡約の定義についての同時帰納法で示す。
+
+**Step 1.** 【主張：$s\rightsquigarrow t$ なら $s\equiv t$】 β・δ・ζ・ι の書き換えは \ref{logic:ideal-defeq} の規則 3・4・6 の場合であり、部分項で行う書き換えは合同（\ref{logic:ideal-defeq.2}）で全体に広がる。K 様の簡約は、帰納法の仮定から $a\approx b$ が $a\equiv b$ を与えるので、\ref{logic:k-like-derivable} の場合である。$\rightsquigarrow^{*}$ については推移律で一段ずつつなぐ。
+
+**Step 2.** 【主張：推論は正しい型を与える】 (V) は変数・定数・宇宙の型付け規則である。(A) では、帰納法の仮定から $f:F$、Step 1 から $F\equiv\prod_{x:A}B$、変換規則で $f:\prod_{x:A}B$ となる。同様に $a:A'$ と $A'\equiv A$ から $a:A$ となり、適用の規則で $f\,a:B[a/x]$ を得る。(L) も同様である。
+
+**Step 3.** 【主張：(C1)〜(C5) は $\equiv$ を与える】 Step 1 から $s\equiv s'$, $t\equiv t'$ である。(C1) は反射律、(C2)(C3) は帰納法の仮定と合同、(C4) は帰納法の仮定 $b\equiv t'\,x$ と合同から $\lambda x.\,b\equiv\lambda x.\,t'\,x$、η から $\lambda x.\,t'\,x\equiv t'$ による。(C5) では Step 2 から $s':P$, $t':Q$、帰納法の仮定から $P\equiv Q$ なので変換規則で $t':P$ となり、$P$ は命題なので証明の無関係性から $s'\equiv t'$ である。最後に推移律で $s\equiv s'\equiv t'\equiv t$ をつなぐ。
+
+::: hypcheck
+- **推移律（理想の側）**：Step 1 と Step 3 で、簡約の列と (C1)〜(C5) をつなぐのに使った。$\approx$ にはこの規則がない。
+- **\ref{logic:k-like-derivable}**：Step 1 で K 様の簡約の正しさに使った。
+- **型をもつという前提**：(C5) と変換規則を使う箇所で、項が型をもつことが要る。型のない項どうしの $\approx$ については何も主張しない。
+:::
+:::
+
+## 推移性の破れ {#logic:sec-ldq-transitivity}
+
+以下この節と次の節では、文脈
+$$
+\begin{aligned}
+\Gamma_{0}\defeq\ &\alpha{:}\mathsf{Type},\ R{:}\alpha\to\alpha\to\mathsf{Prop},\ a{:}\alpha,\ h{:}\mathsf{Acc}\,R\,a,\ C{:}\mathsf{Type},\\
+&m{:}\textstyle\prod_{x:\alpha}\prod_{k:\prod_{y}R\,y\,x\to\mathsf{Acc}\,R\,y}\bigl(\prod_{y:\alpha}R\,y\,x\to C\bigr)\to C
+\end{aligned}
+$$
+と定数の動機 $M\defeq\lambda x\,\_.\,C$ を固定し、次の三つの項を考える。
+$$
+\begin{aligned}
+e_{1}&\defeq\mathsf{Acc.rec}_{M}\,m\,h,\\
+e_{2}&\defeq\mathsf{Acc.rec}_{M}\,m\,\bigl(\mathsf{Acc.intro}\,a\,(\mathrm{inv}\,h)\bigr),\\
+e_{3}&\defeq m\,a\,(\mathrm{inv}\,h)\,\bigl(\lambda y\,p.\,\mathsf{Acc.rec}_{M}\,m\,(\mathrm{inv}\,h\,y\,p)\bigr).
+\end{aligned}
+$$
+$m$ の型は、$M$ を代入して β 簡約した小前提の型と定義的に等しいので、三つとも $\Gamma_{0}$ で型 $C$ をもつ。
+
+::: theorem 算法の定義的等価は推移的でない {#logic:algorithmic-defeq-not-transitive keywords="algorithmic definitional equality is not transitive, Acc counterexample" index="定義的等価の推移性の破れ|ていぎてきとうかのすいいせいのやぶれ"}
+文脈 $\Gamma_{0}$ で次が成り立つ。
+1. $e_{1}\approx e_{2}$ かつ $e_{2}\approx e_{3}$。
+2. $e_{1}\not\approx e_{3}$。
+3. 理想の定義的等価では $e_{1}\equiv e_{3}$。
+:::
+
+::: intuition
+$e_{1}$ と $e_{2}$ は「証明を取り替えただけ」なので頭をそろえて比べれば等しく、$e_{2}$ と $e_{3}$ は「一段計算しただけ」なので等しい。ところが $e_{1}$ から $e_{3}$ へ直接行くには、証明を取り替えてから計算する、という二段の操作が要り、検査器はその中間の形を思いつけない。
+:::
+
+::: proof
+**Step 1.** 【主張：$e_{1}\approx e_{2}$】 簡約せずに (C2) を使う。頭はどちらも $\mathsf{Acc.rec}$ で、暗黙の引数 $\alpha,R,M,m,a$ は同じ項なので (C1) で $\approx$ である。残る主前提 $h$ と $\mathsf{Acc.intro}\,a\,(\mathrm{inv}\,h)$ には (C5) を使う。$h$ の推論された型は (V) から $\mathsf{Acc}\,R\,a$ である。$\mathsf{Acc.intro}\,a\,(\mathrm{inv}\,h)$ の推論された型も、(A) を二回使って $\mathsf{Acc}\,R\,a$ になる（2 回目の引数の検査では、$\mathrm{inv}\,h$ の推論された型 $M_{0}\,a\,h$ が β 簡約で $\prod_{y}R\,y\,a\to\mathsf{Acc}\,R\,y$ になるので (C1) が使える）。両辺の推論された型は同じ $\mathsf{Acc}\,R\,a$ で、その推論された型は $\mathsf{Prop}$ なので、(C5) が成り立つ。
+
+**Step 2.** 【主張：$e_{2}\approx e_{3}$】 $e_{2}$ の主前提は構成子 $\mathsf{Acc.intro}$ の適用なので、ι の書き換え（\ref{logic:checker-reduction.2}）が一回でき、$k\defeq\mathrm{inv}\,h$ としたその結果がちょうど $e_{3}$ である。$e_{2}\rightsquigarrow e_{3}$ と $e_{3}$ 自身に (C1) を使えばよい。
+
+**Step 3.** 【主張：$e_{1}$ は検査器の簡約をもたない】 $e_{1}$ の部分項は変数 $\alpha,R,a,h,m,C$、定数 $\mathsf{Acc.rec}$、および $\lambda$ 式 $M=\lambda x\,\_.\,C$ である。$M$ は何にも適用されていないので β の書き換えはなく、定義された定数も let もないので δ・ζ もない。ただ一つの再帰子の適用は主前提が変数 $h$ なので ι は使えず、$\mathsf{Acc}$ の構成子は引数をもつので K 様の簡約も使えない。
+
+**Step 4.** 【主張：$e_{3}$ を簡約した項の頭は常に変数 $m$ である】 $e_{3}$ は変数 $m$ に三つの引数を適用した形である。頭が変数なので、β・ι のどの書き換えも項全体ではなく引数の中で起こる。ゆえに $e_{3}\rightsquigarrow^{*}t'$ となる $t'$ はどれも $m$ に三つの引数を適用した形をしている。
+
+**Step 5.** 【主張：$e_{1}\not\approx e_{3}$】 $e_{1}\approx e_{3}$ と仮定すると、Step 3 から $s'=e_{1}$ で、Step 4 の形の $t'$ について (C1)〜(C5) のどれかが成り立つ。(C1)(C2) は頭が $\mathsf{Acc.rec}$ と $m$ で違うので成り立たない。(C3)(C4) はどちらも $\lambda$ や Π でないので当てはまらない。(C5) には両辺の推論された型の型が $\mathsf{Prop}$ に簡約されることが要る。$e_{1}$ の推論された型は $M\,a\,h$（あるいはその簡約形 $C$）で、その推論された型は $\mathsf{Type}=\mathsf{Sort}\,1$ であり、$\mathsf{Sort}\,1$ はそれ以上簡約されないので $\mathsf{Prop}$ にならない。よってどの規則も成り立たない。
+
+**Step 6.** 【主張：$e_{1}\equiv e_{3}$】 Step 1・2 と \ref{logic:algorithmic-defeq-sound} から $e_{1}\equiv e_{2}$ と $e_{2}\equiv e_{3}$ であり、推移律から $e_{1}\equiv e_{3}$ である。これは \ref{logic:acc-unfolding} で $x\defeq a$ としたものでもある。
+
+::: hypcheck
+- **$\mathsf{Acc}$ が命題であること**：Step 1 の (C5) で使った。主前提の比較を証明の無関係性で済ませられるのは、主前提が命題の証明だからである。
+- **大きな除去（$C:\mathsf{Type}$）**：Step 5 で、$e_{1}$ が証明でない（その型 $C$ が命題でない）ことを使った。$C$ が命題なら (C5) で $e_{1}\approx e_{3}$ となり、反例にならない。
+- **$h$ が変数であること**：Step 3 で使った。$h$ が構成子の形なら、$e_{1}$ 自身が ι で簡約される。
+- **$m$ が変数であること**：Step 4 で、$e_{3}$ の頭が簡約で変わらないことに使った。$m$ が具体的な $\lambda$ 式なら $e_{3}$ はさらに簡約されうるが、そのときは $m$ の中身に応じて別の反例を作ることになる。
+- **K 様の簡約の適用範囲**：Step 3 で、$\mathsf{Acc}$ に K 様の簡約が適用されないことを使った。もし $\mathsf{Acc}$ にも「主前提を構成子に取り替えて ι」を許すと、\ref{logic:acc-unfolding} の展開が検査器でも起き、展開が止まらない例（\ref{logic:acc-unfolding} の補足）で検査器が停止しなくなる。
+:::
+:::
+
+::: supplement
+**実際の型検査器では.** 本ページの模型では、$e_{1}\approx e_{2}$ を簡約せずに (C2) で示した。実際の型検査器は比較の前に両辺を弱頭部正規形まで簡約することが多く、その場合 $e_{2}$ が先に $e_{3}$ に簡約されて、$e_{1}$ と $e_{2}$ の比較自体に失敗しうる。いずれにしても、検査器が判定できるのは理想の定義的等価の一部で、理想の側にある推移性を検査器の側では保てない、という点は変わらない。Carneiro は Lean の型検査器について、$\mathsf{Acc}$ を使った例で推移性が成り立たないことを示したとされる（未確認）。
+
+**前提を変えると.** 証明の無関係性を定義的等価から外す（証明を区別する）と、$e_{1}\equiv e_{2}$ 自体が理想の側でも成り立たず、この例は消える。マルティン＝レーフ型理論（\ref{logic:page-identity-types}）では証明の無関係性も命題から型への除去もこの形では入っておらず、算法の定義的等価（正規形の比較）は推移的である。
+:::
+
+## 部分簡約の破れ {#logic:sec-ldq-subject-reduction}
+
+型理論の**部分簡約**（subject reduction）とは、「$t$ が型 $A$ をもち $t\rightsquigarrow t'$ なら $t'$ も型 $A$ をもつ」という性質である。算法の型付けでは、推移性の破れがそのまま部分簡約の破れになる。
+
+::: theorem 算法の型付けで部分簡約は成り立たない {#logic:subject-reduction-fails keywords="failure of subject reduction for algorithmic typing in Lean" index="部分簡約|ぶぶんかんやく, 主部簡約|しゅぶかんやく"}
+文脈 $\Gamma_{1}\defeq\Gamma_{0},\ B{:}C\to\mathsf{Type},\ x{:}B\,e_{1}$ で、型 $T_{i}\defeq B\,e_{i}$（$i=1,2,3$）と項
+$$
+E\defeq\bigl(\lambda y{:}T_{2}.\,(\lambda z{:}T_{3}.\,z)\,y\bigr)\,x
+$$
+を考える。このとき次が成り立つ。
+1. $\Gamma_{1}\vdash_{\mathrm{a}}E\Rightarrow T_{3}$。
+2. $E$ は β で $E'\defeq(\lambda z{:}T_{3}.\,z)\,x$ に簡約されるが、$E'$ には $\Gamma_{1}$ で推論される型がない。
+3. 理想の型付けでは、$E$ と $E'$ はどちらも型 $T_{3}$ をもつ。
+:::
+
+::: intuition
+外側の関数は「$T_{1}$ の元を $T_{2}$ の元として受け取り、それを $T_{3}$ の元として内側の関数に渡す」。それぞれの受け渡しは一段の比較で済むので検査に通る。ところが外側の β 簡約で中間の型 $T_{2}$ が消えると、$T_{1}$ から $T_{3}$ へ直接受け渡すことになり、それは検査器には一段の比較では確かめられない。
+:::
+
+::: proof
+**Step 1.** 【主張：$T_{1}\approx T_{2}$, $T_{2}\approx T_{3}$, $T_{1}\not\approx T_{3}$】 $T_{i}$ はどれも頭が変数 $B$ で引数が一つの項である。\ref{logic:algorithmic-defeq-not-transitive.1} の $e_{1}\approx e_{2}$, $e_{2}\approx e_{3}$ と (C2) から、前の二つが成り立つ。$T_{1}\approx T_{3}$ と仮定する。$T_{1}$ は（\ref{logic:algorithmic-defeq-not-transitive} の証明の Step 3 と同じ理由で）簡約をもたず、$T_{3}$ を簡約した項はどれも $B\,e_{3}'$（$e_{3}\rightsquigarrow^{*}e_{3}'$）の形である。頭が同じなので (C2) なら $e_{1}\approx e_{3}'$ が要るが、\ref{logic:algorithmic-defeq-basic.2} からそれは $e_{1}\approx e_{3}$ を導き、\ref{logic:algorithmic-defeq-not-transitive.2} に反する。(C5) は $T_{1}$ の推論された型が $\mathsf{Type}$ で命題でないので当てはまらず、(C1)(C3)(C4) も当てはまらない。
+
+**Step 2.** 【主張：$\Gamma_{1}\vdash_{\mathrm{a}}E\Rightarrow T_{3}$】 文脈 $\Gamma_{1},y{:}T_{2}$ で、$\lambda z{:}T_{3}.\,z$ は (L) から $T_{3}\to T_{3}$ を推論し、$y$ は $T_{2}$ を推論する。Step 1 の $T_{2}\approx T_{3}$ から (A) が使えて、$(\lambda z{:}T_{3}.\,z)\,y\Rightarrow T_{3}$ である。(L) から外側の $\lambda$ は $T_{2}\to T_{3}$ を推論し、$x$ は $T_{1}$ を推論するので、$T_{1}\approx T_{2}$ と (A) から $E\Rightarrow T_{3}$ を得る。
+
+**Step 3.** 【主張：$E'$ には推論される型がない】 $E'$ に (A) を使うには、$\lambda z{:}T_{3}.\,z$ の推論された型 $T_{3}\to T_{3}$ を Π の形に簡約したもの $\prod_{z:T_{3}'}T_{3}''$（$T_{3}\rightsquigarrow^{*}T_{3}'$）の束縛変数の型と、$x$ の推論された型 $T_{1}$ について $T_{1}\approx T_{3}'$ が要る。\ref{logic:algorithmic-defeq-basic.2} からそれは $T_{1}\approx T_{3}$ を導き、Step 1 に反する。$x$ の推論された型は (V) による $T_{1}$ だけなので、ほかに (A) を使う道はない。
+
+**Step 4.** 【主張：理想の型付けでは $E$, $E'$ とも型 $T_{3}$ をもつ】 \ref{logic:algorithmic-defeq-sound} と Step 2 から $\Gamma_{1}\vdash E:T_{3}$ である。また \ref{logic:algorithmic-defeq-not-transitive.3} と合同から $T_{1}\equiv T_{3}$ なので、変換規則で $x:T_{3}$ となり、$E':T_{3}$ である。
+
+::: hypcheck
+- **推移性の破れ**：Step 1 の三つの関係はすべて \ref{logic:algorithmic-defeq-not-transitive} から来ている。算法の定義的等価が推移的なら、Step 3 で $T_{1}\approx T_{3}$ となり、反例にならない。
+- **型の注釈 $\lambda z{:}T_{3}$**：Step 3 で、関数の引数の型が $T_{3}$ に固定されていることを使った。Lean の項は束縛変数に型を書く（チャーチ流）ので、型の情報が項の中に残る。
+- **推論の一意性**：Step 3 で、変数 $x$ の推論された型が $T_{1}$ だけであることを使った。
+:::
+:::
+
+::: supplement
+**理想の型付けでは.** 理想の定義的等価は推移的なので、上の反例は理想の型付けには当てはまらない（Step 4）。理想の型付けで部分簡約が成り立つかどうかは、Π 型の単射性（$\prod_{x:A}B\equiv\prod_{x:A'}B'$ なら $A\equiv A'$, $B\equiv B'$）のような性質に依存し、証明の無関係性があるとその証明はやさしくない。Carneiro の論文でどこまで示されているかは確かめていない（未確認）。
+
+**実用上の意味.** 型検査器は「書かれた項」を検査するので、部分簡約が成り立たなくても、検査に通った証明が正しいこと（\ref{logic:algorithmic-defeq-sound} により理想の意味で型が付くこと）は損なわれない。破れるのは「検査に通った項を簡約したものも検査に通る」という期待で、プログラムの変換や自動化の道具にとっては問題になりうる。
+:::
+
+## 定義的等価の決定不能性 {#logic:sec-ldq-undecidable}
+
+\ref{logic:acc-unfolding} の展開を繰り返すと、理想の定義的等価の中で任意の計算を走らせることができる。これが決定不能性の源である。
+
+::: construction 停止を待つ項 {#logic:halting-loop-term keywords="encoding a computation in Acc.rec" index="停止を待つ項|ていしをまつこう"}
+プログラム $P$（\ref{comp:page-primitive-recursive} の言語 L の while プログラム）と入力 $\vec{v}$ を固定し、$d(t)\defeq D^{P}(\vec{v},t)$ とおく（\ref{comp:fuel-pr}）。$d$ は原始再帰関数で、値は $0$ か $1$ である。
+1. $d$ を表す体系 T の閉項 $\hat{d}$（\ref{logic:t-primitive-recursive}）とその型の導出を一つとる。T の型 $\mathrm{N}$ を $\mathsf{Nat}$ に、$0$, $\mathrm{S}$ を $\mathsf{zero}$, $\mathsf{succ}$ に、型 $A$ で使われた再帰子 $\mathrm{R}$ を $\lambda a\,b\,n.\,\mathsf{Nat.rec}_{\lambda\_.A}\,a\,(\lambda k\,\mathit{ih}.\,b\,\mathit{ih}\,k)\,n$ に置き換え、束縛変数には導出に従って型を書き入れた閉項を $\tilde{d}:\mathsf{Nat}\to\mathsf{Nat}$ とする。$H\defeq\lambda n.\,\mathsf{Nat.rec}_{\lambda\_.\mathsf{Bool}}\,\mathsf{false}\,(\lambda\_\,\_.\,\mathsf{true})\,(\tilde{d}\,n)$ とおく。
+2. $R\defeq\lambda y\,x.\,\mathsf{Eq}\,y\,(\mathsf{succ}\,x)$（$\mathsf{Nat}$ 上の関係）、$M\defeq\lambda x\,\_.\,\mathsf{Bool}$ とし、
+$$
+m\defeq\lambda x\,k\,\mathit{ih}.\ \mathsf{Bool.rec}_{\lambda\_.\mathsf{Bool}}\,\bigl(\mathit{ih}\,(\mathsf{succ}\,x)\,(\mathsf{Eq.refl}\,(\mathsf{succ}\,x))\bigr)\,\mathsf{true}\,(H\,x)
+$$
+とおく。$\mathsf{Bool.rec}_{N}\,f\,t\,b$ は $b$ が $\mathsf{false}$ なら $f$、$\mathsf{true}$ なら $t$ に計算される（ι 規則）ので、$m$ は「$H\,x$ が真なら $\mathsf{true}$、偽なら $x+1$ で再帰呼び出し」を表す。
+3. 文脈 $\Delta\defeq h{:}\mathsf{Acc}\,R\,\bar{0}$ で、$e_{P,\vec{v}}\defeq\mathsf{Acc.rec}_{M}\,m\,h$（添字は $\bar{0}$）とおく。
+:::
+
+::: intuition
+$e_{P,\vec{v}}$ は「燃料 $0,1,2,\dots$ の順に、プログラムがその燃料で止まるかを調べ、止まったら $\mathsf{true}$ を返す」ループである。ループを回す権利（到達可能性の証明 $h$）は仮定にすぎないが、理想の定義的等価は証明の中身を見ないので、ループを何周でも回せる。
+:::
+
+::: proposition 停止すれば定義的に等しい {#logic:halting-loop-defeq keywords="if the program halts then the loop is definitionally equal to true"}
+$P$ が入力 $\vec{v}$ で停止するなら、$\Delta\vdash e_{P,\vec{v}}\equiv\mathsf{true}$ である。
+:::
+
+::: proof
+**Step 1.** 【主張：$d(n)=1$ なら $H\,\bar{n}\equiv\mathsf{true}$、$d(n)=0$ なら $H\,\bar{n}\equiv\mathsf{false}$】 T の項 $s$ の置き換えを $\tilde{s}$ と書く。置き換えは代入と可換なので、T の β の一段 $s\to t$ について $\tilde{s}\rightsquigarrow\tilde{t}$ である。T の再帰子の規則 $\mathrm{R}\,a\,b\,0\to a$ の左辺の置き換えは β 三回と ι 一回で $\tilde{a}$ になる。$\mathrm{R}\,a\,b\,(\mathrm{S}\,n)\to b\,(\mathrm{R}\,a\,b\,n)\,n$ では、両辺の置き換えがどちらも $\tilde{b}\,\bigl(\mathsf{Nat.rec}\,\tilde{a}\,g\,\tilde{n}\bigr)\,\tilde{n}$（$g$ は上の $\lambda k\,\mathit{ih}.\,\tilde{b}\,\mathit{ih}\,k$）に簡約される。ゆえに T の一段 $s\to t$ ごとに $\tilde{s}\equiv\tilde{t}$ であり、\ref{logic:t-representable} の意味で $\hat{d}\,\underline{n}$ が数項 $\underline{d(n)}$ に簡約されることから $\tilde{d}\,\bar{n}\equiv\overline{d(n)}$ を得る。$\overline{d(n)}$ が $\mathsf{zero}$ なら $\mathsf{Nat.rec}$ の ι で $H\,\bar{n}\equiv\mathsf{false}$、$\mathsf{succ}\,\mathsf{zero}$ なら ι と β で $H\,\bar{n}\equiv\mathsf{true}$ である。
+
+**Step 2.** 【主張：$d(k)=1$ となる $k$ がある】 $P$ が $\vec{v}$ で停止するので、燃料の十分性（\ref{comp:fuel-adequacy.3}）からある $k$ で $E^{P}_{k}(\vec{v})\neq\bot$ であり、\ref{comp:fuel-pr} から $d(k)=1$ である。そのような最小の $k$ をとる。
+
+**Step 3.** 【主張：$j\le k$ と $\Delta\vdash h_{j}:\mathsf{Acc}\,R\,\bar{j}$ について、$\mathsf{Acc.rec}_{M}\,m\,h_{j}\equiv\mathsf{true}$】 $k-j$ についての帰納法で示す。\ref{logic:acc-unfolding} と β から
+$$
+\mathsf{Acc.rec}_{M}\,m\,h_{j}\equiv\mathsf{Bool.rec}\,\bigl(\mathit{ih}_{j}\,\overline{j+1}\,(\mathsf{Eq.refl}\,\overline{j+1})\bigr)\,\mathsf{true}\,(H\,\bar{j})
+$$
+である。ここで $\mathit{ih}_{j}\defeq\lambda y\,p.\,\mathsf{Acc.rec}_{M}\,m\,(\mathrm{inv}\,h_{j}\,y\,p)$ で、$\mathsf{succ}\,\bar{j}$ は数項 $\overline{j+1}$ そのものである。$j=k$ なら Step 1 から $H\,\bar{k}\equiv\mathsf{true}$ で、$\mathsf{Bool.rec}$ の ι から右辺は $\mathsf{true}$ に等しい。$j<k$ なら $k$ の最小性から $d(j)=0$ で $H\,\bar{j}\equiv\mathsf{false}$ なので、右辺は ι と β で $\mathsf{Acc.rec}_{M}\,m\,h_{j+1}$ に等しい。ここで $h_{j+1}\defeq\mathrm{inv}\,h_{j}\,\overline{j+1}\,(\mathsf{Eq.refl}\,\overline{j+1})$ は型 $\mathsf{Acc}\,R\,\overline{j+1}$ をもつ（$R\,\overline{j+1}\,\bar{j}$ は β で $\mathsf{Eq}\,\overline{j+1}\,\overline{j+1}$ になるので、$\mathsf{Eq.refl}$ がその証明である）。帰納法の仮定から $\mathsf{Acc.rec}_{M}\,m\,h_{j+1}\equiv\mathsf{true}$ である。
+
+Step 3 で $j=0$, $h_{0}\defeq h$ とすれば結論を得る。
+
+::: hypcheck
+- **停止の仮定**：Step 2 で、ループが終わる周回 $k$ を得るのに使った。
+- **\ref{logic:acc-unfolding}（証明の無関係性）**：Step 3 の各周回で、変数 $h$ から作った証明 $h_{j}$ の上で再帰子を展開するのに使った。
+- **$R$ の選び方**：Step 3 で、再帰呼び出しの引数 $\overline{j+1}$ が $R$ で $\bar{j}$ の手前にあることを $\mathsf{Eq.refl}$ で示した。$R$ は「一つ先の数」を表していれば何でもよい。
+:::
+:::
+
+::: proposition 検査器はこの等しさを判定できない {#logic:loop-not-algorithmic keywords="the typechecker cannot see the loop equal to true"}
+すべての $P$, $\vec{v}$ について $\Delta\vdash e_{P,\vec{v}}\not\approx\mathsf{true}$ である。とくに $P$ が停止するとき、$e_{P,\vec{v}}\equiv\mathsf{true}$ だが $e_{P,\vec{v}}\not\approx\mathsf{true}$ となり、$\approx$ は $\equiv$ より真に小さい。
+:::
+
+::: proof
+$e_{P,\vec{v}}$ の中で簡約できるのは $m$ の中の部分（$H\,x$ の β など）だけで、項全体の頭 $\mathsf{Acc.rec}$ と主前提の変数 $h$ は簡約で変わらない（主前提が構成子の形にならないので ι は使えず、$\mathsf{Acc}$ に K 様の簡約はない）。ゆえに $e_{P,\vec{v}}\rightsquigarrow^{*}s'$ となる $s'$ はどれも $\mathsf{Acc.rec}_{M'}\,m'\,h$ の形である。一方 $\mathsf{true}$ は構成子で、簡約されない。(C1)(C2) は頭が違うので成り立たず（$\mathsf{true}$ は引数をもたない）、(C3)(C4) も当てはまらない。(C5) は、$s'$ の推論された型 $M'\,\bar{0}\,h$ が簡約で $\mathsf{Bool}$ になり、その型 $\mathsf{Type}$ が $\mathsf{Prop}$ でないので成り立たない。後半は \ref{logic:halting-loop-defeq} と合わせたものである。
+:::
+
+::: fact 理想の定義的等価の決定不能性 {#logic:defeq-undecidable keywords="undecidability of definitional equality in Lean, Carneiro" index="定義的等価の決定不能性|ていぎてきとうかのけっていふのうせい" refname="Lean の定義的等価の決定不能性"}
+文脈 $\Gamma$ と項 $s$, $t$ を与えて $\Gamma\vdash s\equiv t$ かどうかを判定するアルゴリズムは存在しない。これは Carneiro の修士論文で、$\mathsf{Acc}$ と証明の無関係性を使って示されたとされる（未確認）。
+:::
+
+::: intuition
+理想の定義的等価を正しく判定する型検査器は作れない。だから実際の検査器は、判定できる部分（$\approx$ のような関係）だけを扱い、理想の等しさの一部を「等しくない」と答える。
+:::
+
+::: supplement
+**証明の道筋.** \ref{logic:halting-loop-defeq} は、停止問題（\ref{comp:halting-L}）から理想の定義的等価への還元の半分である。残りの半分は「$P$ が停止しないなら $e_{P,\vec{v}}\not\equiv\mathsf{true}$」で、これには理想の定義的等価で保たれる不変量（たとえば、文脈の変数 $h$ を含むどんな書き換えでも $\mathsf{true}$ に到達しないことを示す道具）が要る。文脈 $\Delta$ は集合論では満たされない（$R$ に沿って $\bar{0},\bar{1},\bar{2},\dots$ と無限にさかのぼれるので、$\mathsf{Acc}\,R\,\bar{0}$ は $P$ によらず偽である）ので、次ページの集合のモデルはこの向きには使えない。Carneiro の証明がこの形の還元によるのかどうかを含め、細部は確かめていない（未確認）。
+
+**決定可能な部分.** 型検査器が使う関係は、簡約が停止する限り判定できる。Lean の検査器の簡約が常に停止するかどうか（検査器の簡約の正規化）は、筆者の知る限り証明されていない（未確認）。
+
+**型付けへの影響.** 理想の型付け $\Gamma\vdash t:A$ には変換規則があるので、定義的等価が決定不能なら、型付けの判定も一般には難しくなる。理想の型付けも決定不能であるとされる（未確認）。
+:::
+
+## 問題 {#logic:sec-ldq-problems}
+
+::: problem ★ 基本：K 様の簡約の役割 {#logic:prob-ldq-k-like}
+文脈 $\alpha{:}\mathsf{Type},\ a{:}\alpha,\ h{:}\mathsf{Eq}\,a\,a$ で、定数の動機 $M\defeq\lambda b\,\_.\,\alpha$ と小前提 $m\defeq a$ を考える。
+1. 検査器の簡約から K 様の簡約（\ref{logic:checker-reduction.3}）を除いた場合、$\mathsf{Eq.rec}_{M}\,m\,h\not\approx a$ であることを示せ。
+2. K 様の簡約がある場合、$\mathsf{Eq.rec}_{M}\,m\,h\approx a$ であることを示せ。
+:::
+
+::: solution
+1. K 様の簡約がなければ、$\mathsf{Eq.rec}_{M}\,m\,h$ の主前提は変数 $h$ なので ι は使えず、ほかに簡約できる部分項もない（$M$ は適用されていない $\lambda$ 式である）。ゆえに簡約しても形は変わらない。$a$ は変数で簡約されない。頭が $\mathsf{Eq.rec}$ と $a$ で違うので (C1)(C2) は成り立たず、(C3)(C4) も当てはまらない。左辺の推論された型 $M\,a\,h$ は β で $\alpha$ になり、その型は $\mathsf{Type}$ で命題でないので (C5) も成り立たない。よって $\not\approx$ である。
+2. $h$ の型は $\mathsf{Eq}\,a\,a$ で、添字の $a$ と $a$ は (C1) で $\approx$ なので、K 様の簡約で $\mathsf{Eq.rec}_{M}\,m\,h\rightsquigarrow m=a$ となる。右辺の $a$ と (C1) で一致するので $\approx$ である。理想の定義的等価では、どちらの場合も \ref{logic:k-like-derivable} から $\equiv$ である。
+:::
+
+::: problem ★ 基本：同じ形への展開 {#logic:prob-ldq-same-shape}
+文脈に $r:R\,a\,a$ と $k:\mathsf{Acc}\,R\,a$ があり、動機 $M$ は値が $\mathsf{Type}$ の定数 $C$ であるとする。任意の小前提 $m$ について、$\mathsf{Acc.rec}_{M}\,m\,k\approx\mathsf{Acc.rec}_{M}\,m\,(\mathrm{inv}\,k\,a\,r)$ であることを示せ。また、両辺が理想の定義的等価で等しいことを、\ref{logic:algorithmic-defeq-sound} を使わずに示せ。
+:::
+
+::: solution
+$\mathrm{inv}\,k\,a\,r$ の推論された型は、$\mathrm{inv}\,k$ の推論された型 $M_{0}\,a\,k$ を β で $\prod_{y}R\,y\,a\to\mathsf{Acc}\,R\,y$ にし、(A) を二回使って $\mathsf{Acc}\,R\,a$ である（$r$ の型 $R\,a\,a$ が Π 型の束縛変数の型と (C1) で一致する）。$k$ の推論された型も $\mathsf{Acc}\,R\,a$ で、これは命題なので (C5) から $k\approx\mathrm{inv}\,k\,a\,r$ である。両辺は頭 $\mathsf{Acc.rec}$ が同じで、ほかの引数は同じ項なので、(C2) から $\approx$ が成り立つ。理想の側では、$k$ と $\mathrm{inv}\,k\,a\,r$ が同じ命題 $\mathsf{Acc}\,R\,a$ の証明なので証明の無関係性（\ref{logic:ideal-defeq.7}）から等しく、合同（\ref{logic:ideal-defeq.2}）から両辺は等しい。$m$ が $\lambda x\,k'\,\mathit{ih}.\,\mathit{ih}\,x\,r$ のときは、\ref{logic:acc-unfolding} と β から左辺は右辺に一段で展開されるので、この展開は「同じ形に戻る」ループになる（\ref{logic:acc-unfolding} の補足）。
+:::
+
+::: problem ★★ 標準：内側の簡約 {#logic:prob-ldq-inner-redex}
+\ref{logic:subject-reduction-fails} の項 $E$ の内側の β 簡約の結果 $E''\defeq(\lambda y{:}T_{2}.\,y)\,x$ について、$\Gamma_{1}\vdash_{\mathrm{a}}E''\Rightarrow T_{2}$ であることを示せ。また、型を検査する判断を「$t$ の推論された型 $A'$ について $A'\approx A$ なら $t$ は型 $A$ をもつ」と定めると、$E''$ は型 $T_{3}$ をもつが $E'$ は型 $T_{3}$ をもたないことを示せ。
+:::
+
+::: solution
+$\lambda y{:}T_{2}.\,y$ は (L) から $T_{2}\to T_{2}$ を推論し、$x$ は $T_{1}$ を推論する。\ref{logic:subject-reduction-fails} の証明の Step 1 から $T_{1}\approx T_{2}$ なので、(A) から $E''\Rightarrow T_{2}$ である。$T_{2}\approx T_{3}$（同じ Step 1）なので、検査の判断で $E''$ は型 $T_{3}$ をもつ。一方 $E'$ には推論される型がない（同じ定理の Step 3）ので、検査の判断の前提が満たされず、型 $T_{3}$ をもたない。つまり $E$ の二つの簡約のうち、内側を先に簡約すれば検査に通り、外側を先に簡約すれば通らない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

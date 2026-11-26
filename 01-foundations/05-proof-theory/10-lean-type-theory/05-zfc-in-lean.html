@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>型理論の中の ZFC | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/05-proof-theory/10-lean-type-theory/05-zfc-in-lean.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 型理論の中の ZFC {#logic:page-zfc-in-lean keywords="ZFC in type theory, Aczel's interpretation, pre-sets, PSet, ZFSet, sets as trees, set model in Lean, Grothendieck universe, inaccessible cardinal, lower bound of consistency strength, equiconsistency"}
+
+前ページ（\ref[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model}）では、集合論の中に Lean の型理論のモデルを作り、型理論の無矛盾性を「$\ZFC$ ＋到達不能基数」の無矛盾性で上から押さえた。本ページでは逆向きに、**型理論の中に $\ZFC$ のモデルを作る**。考え方はアクゼル（P. Aczel）によるとされるもので、集合を「添字の型 $\alpha$ と、各添字に元を割り当てる関数 $\alpha\to(\text{集合})$ の組」という整礎な木として表し（**前集合**、\ref{logic:pset}）、同じ元をもつ木を同一視する（\ref{logic:zfset}）。$\ZFC$ の各公理は型理論の構成で確かめられ（\ref{logic:zfset-zfc}）、そこでは命題外延性・商型・選択という三つの公理（\ref[三つの公理と古典論理]{logic:page-lean-axioms}）がそれぞれ別の場所で使われる。さらに宇宙を一段上げると、下の段の集合全体がグロタンディーク宇宙になり、到達不能基数が一つ増える（\ref{logic:zfset-universe}, \ref{logic:zfset-n-inaccessibles}）。これが無矛盾性の強さの**下界**であり、前ページの上界と合わせて Lean と「$\ZFC$ ＋有限個の到達不能基数」の等無矛盾性が得られる（\ref{logic:lean-equiconsistency}）。
+
+> 資料なし（標準的な内容を本サイトで組み立てた）。構成はアクゼルの論文（1978 年とされる）と Werner の論文「Sets in Types, Types in Sets」（1997 年とされる）の内容とされるもの、および Mathlib の `PSet`・`ZFSet` にあるとされる構成に沿うが、いずれも未確認である。Lean 4 の規則（宇宙の規則、帰納型、商型、公理の型）は記憶によるもので、Lean 4 の実装・文書とは照合していない。
+
+## 記法と定義の確認 {#logic:sec-zl-notation}
+
+::: notation
+- **宇宙**：$\mathsf{Sort}\,u$、$\mathsf{Prop}=\mathsf{Sort}\,0$、$\mathsf{Type}\,u=\mathsf{Sort}(u+1)$ は \ref[Lean の宇宙]{logic:lean-sorts} のとおり。Π 型の宇宙の規則（\ref[Π 型の宇宙]{logic:lean-pi-universe}）から、$\alpha:\mathsf{Type}\,u$ なら $\alpha\to\mathsf{Prop}:\mathsf{Type}\,u$ である（$\mathsf{Prop}$ は非可述的で、$\mathsf{Prop}:\mathsf{Type}\,0$）。本ページの議論の要はこの一点にある。
+- **帰納型**とその再帰子・帰納法、ι 簡約は \ref[帰納型]{logic:lean-inductive} のとおり。依存関数型は \ref{logic:pi-type} にならって $\prod_{x:A}B(x)$ と書き、値が命題のときは $\forall x{:}A,\ P(x)$ とも書く。$\exists$、$\land$、$\lor$、$\leftrightarrow$、$\lnot$、$\mathsf{False}$ は $\mathsf{Prop}$ の中の論理結合子、$=$ は $\mathsf{Eq}$（等号の型）で、$a=b$ と $P(a)$ から $P(b)$ を得る代入（$\mathsf{Eq}$ の除去）を使う。
+- **三つの公理**：命題外延性 $\mathsf{propext}$（\ref[命題外延性]{logic:lean-propext}。$(P\leftrightarrow Q)\to P=Q$）、商型 $\mathsf{Quot}$（\ref[商型]{logic:lean-quot}）、選択 $\mathsf{choice}:\mathsf{Nonempty}\,\alpha\to\alpha$（\ref[選択の公理]{logic:lean-choice}）。商型について使うのは次の四つである：関係 $r:\alpha\to\alpha\to\mathsf{Prop}$ に対し、型 $\mathsf{Quot}\,r$、$\mathsf{mk}:\alpha\to\mathsf{Quot}\,r$（$[a]$ と書く）、$f:\alpha\to\beta$ が $r\,a\,b\to f\,a=f\,b$ を満たすときの持ち上げ $\mathsf{lift}\,f:\mathsf{Quot}\,r\to\beta$（計算規則 $\mathsf{lift}\,f\,[a]\equiv f\,a$）、帰納法 $\mathsf{ind}$（$P:\mathsf{Quot}\,r\to\mathsf{Prop}$ について $\forall a,\,P[a]$ から $\forall q,\,P\,q$）、健全性 $\mathsf{sound}$（$r\,a\,b\to[a]=[b]$）。
+- これらから導かれる関数外延性 $\mathsf{funext}$（\ref[商型からの関数外延性]{logic:lean-funext-from-quot}）と排中律 $\mathsf{em}$（\ref[ディアコネスクの定理]{logic:diaconescu}）を使う。
+- $\mathsf{0}_{u},\mathsf{1}_{u},\mathsf{2}_{u}:\mathsf{Type}\,u$ は元が 0, 1, 2 個の帰納型、$\mathbb{N}:\mathsf{Type}\,0$ は自然数の型である。$\mathsf{ULift}\,\alpha$ は $\alpha:\mathsf{Type}\,u$ を一段上の $\mathsf{Type}(u+1)$ に持ち上げた型で、構成子 $\mathsf{up}:\alpha\to\mathsf{ULift}\,\alpha$ ただ一つの帰納型として定める。$\mathsf{down}(\mathsf{up}\,a)\equiv a$（ι 簡約）であり、$\mathsf{up}(\mathsf{down}\,c)=c$ は $c$ についての帰納法で示せるので、$\mathsf{up}$ と $\mathsf{down}$ は互いに逆の全単射である。
+- 集合論の側：$\ZFC$ の公理は \ref{set:zfc}、自然演繹による導出は \ref{logic:deduction-system}、宇宙（グロタンディーク宇宙）は \ref{cat:universe}、強到達不能基数は \ref{set:inaccessible} のとおり。累積階層は集合論の系列では $R(\alpha)$ と書くが（\ref{set:cumulative-hierarchy}）、本ページでは現代の標準に合わせて $V_{\alpha}$ と書く。
+- **メタ理論**：「Lean で証明できる」とは、Lean の型理論（三つの公理を含む）で、その命題の型をもつ閉じた項が作れることをいい、$\mathsf{Lean}\vdash P$ と書く。宇宙の段 $u$ は固定した自然数（または宇宙変数）とする。
+:::
+
+## 前集合 {#logic:sec-zl-pset}
+
+::: definition 前集合 {#logic:pset keywords="pre-set, PSet, Aczel's sets as trees, well-founded trees" index="前集合|ぜんしゅうごう, PSet|ぴーせっと, アクゼルの構成|あくぜるのこうせい"}
+宇宙の段 $u$ について、**前集合**の型 $\mathsf{PSet}_{u}:\mathsf{Type}(u+1)$ を、構成子
+$$
+\mathsf{mk}:\prod_{\alpha:\mathsf{Type}\,u}(\alpha\to\mathsf{PSet}_{u})\to\mathsf{PSet}_{u}
+$$
+ただ一つをもつ帰納型として定める。$x=\mathsf{mk}\,\alpha\,A$ の $\alpha$ を $x$ の添字の型、$A$ を元の族と呼び、再帰子で定めた射影を $\mathrm{ty}(\mathsf{mk}\,\alpha\,A)\equiv\alpha$、$\mathrm{fn}(\mathsf{mk}\,\alpha\,A)\equiv A$ と書く。
+:::
+
+::: intuition
+前集合は「どの添字のところにどの前集合がぶら下がっているか」で決まる、枝分かれの仕方が型 $\alpha$ で与えられる整礎な木である。$\mathsf{mk}\,\alpha\,A$ を「元が $A(a)$（$a:\alpha$）である集合」と読む。添字の型が $\mathsf{Type}\,u$ に属するという制限が「集合は小さい」ことに当たり、そのため $\mathsf{PSet}_{u}$ 自身は一段上の $\mathsf{Type}(u+1)$ に住む（構成子の引数 $\alpha:\mathsf{Type}\,u$ が $\mathsf{Type}(u+1)$ の元なので、帰納型の宇宙の規則による）。
+:::
+
+::: example
+1. 空集合：$\varnothing\defeq\mathsf{mk}\,\mathsf{0}_{u}\,(\text{空の関数})$。
+2. 単集合：前集合 $x$ について $\{x\}\defeq\mathsf{mk}\,\mathsf{1}_{u}\,(\lambda\_.\,x)$。対：$\{x,y\}\defeq\mathsf{mk}\,\mathsf{2}_{u}\,A$（$A$ は二つの元を $x,y$ に送る）。
+3. $\mathsf{mk}\,\mathsf{2}_{u}\,(\lambda\_.\,\varnothing)$ は、二つの添字に同じ $\varnothing$ がぶら下がった木で、木としては $\{\varnothing\}$ と異なる。集合としては同じものと見たいので、次の同値関係で割る。
+:::
+
+::: definition 外延的同値と所属 {#logic:pset-equiv keywords="extensional equivalence of pre-sets, membership of pre-sets, bisimulation" index="外延的同値（前集合）|がいえんてきどうちぜんしゅうごう, 所属（前集合）|しょぞくぜんしゅうごう"}
+関係 $\approx\ :\mathsf{PSet}_{u}\to\mathsf{PSet}_{u}\to\mathsf{Prop}$ を、第一引数についての再帰（内側で第二引数を場合分け）で次のように定める。
+$$
+\begin{aligned}
+\mathsf{mk}\,\alpha\,A\approx\mathsf{mk}\,\beta\,B\ \defeq\ {}&\bigl(\forall a{:}\alpha,\ \exists b{:}\beta,\ A(a)\approx B(b)\bigr)\\
+&\land\bigl(\forall b{:}\beta,\ \exists a{:}\alpha,\ A(a)\approx B(b)\bigr).
+\end{aligned}
+$$
+$x\approx y$ を**外延的に同値**であるという。さらに所属 $x\in y$ を $\exists b{:}\mathrm{ty}(y),\ x\approx\mathrm{fn}(y)(b)$ と定める。
+:::
+
+::: intuition
+二つの木が同値であるとは、一方の各枝の先が他方のどこかの枝の先と同値であり、その逆も言えることである（双模倣の考え方）。再帰は第一引数の木の構成に沿って行うので整礎であり、右辺の $A(a)\approx B(b)$ は再帰の仮定から得られる命題である。
+:::
+
+::: lemma 外延的同値は同値関係 {#logic:pset-equiv-equivalence keywords="extensional equivalence is an equivalence relation" index="外延的同値の性質|がいえんてきどうちのせいしつ"}
+任意の前集合 $x,y,z$ について次が成り立つ。
+1. $x\approx x$。
+2. $x\approx y$ ならば $y\approx x$。
+3. $x\approx y$ かつ $y\approx z$ ならば $x\approx z$。
+:::
+
+::: proof
+いずれも $x$ についての $\mathsf{PSet}_{u}$ の帰納法で示す（2, 3 は $y$, $z$ を任意としたまま帰納法の主張に含める）。$x=\mathsf{mk}\,\alpha\,A$ とし、各 $A(a)$ について主張が成り立つと仮定する。
+
+**Step 1.** 【主張：$x\approx x$】 定義の第一の連言には、$a$ に対して $b\defeq a$ をとり、帰納法の仮定 $A(a)\approx A(a)$ を使えばよい。第二の連言も同じである。
+
+**Step 2.** 【主張：$x\approx y$ ならば $y\approx x$】 $y=\mathsf{mk}\,\beta\,B$ とする（$y$ についての帰納法で $y$ がこの形であるとしてよい）。仮定の第二の連言から、各 $b$ に $A(a)\approx B(b)$ となる $a$ があり、帰納法の仮定（$A(a)$ について 2）により $B(b)\approx A(a)$ となる。これは $y\approx x$ の第一の連言である。第二の連言も同様に仮定の第一の連言から得られる。
+
+**Step 3.** 【主張：$x\approx y$, $y\approx z$ ならば $x\approx z$】 $y=\mathsf{mk}\,\beta\,B$, $z=\mathsf{mk}\,\gamma\,C$ とする。$a:\alpha$ をとると、$x\approx y$ から $A(a)\approx B(b)$ となる $b$ があり、$y\approx z$ から $B(b)\approx C(c)$ となる $c$ がある。帰納法の仮定（$A(a)$ について 3）から $A(a)\approx C(c)$ である。逆向きの連言も、$c$ から $b$、$b$ から $a$ をたどって同様に示せる。
+
+::: hypcheck
+- **帰納法**：$\mathsf{PSet}_{u}$ の帰納法（除去先は $\mathsf{Prop}$）だけを使い、三つの公理は使っていない。
+- **存在の除去**：Step 3 で「$A(a)\approx B(b)$ となる $b$ がある」から $b$ を取り出したが、結論も命題（$\exists c,\dots$）なので $\mathsf{Prop}$ の中での $\exists$ の除去で足りる。結論が型（たとえば前集合そのもの）だったら選択公理が要る。この区別が \ref{logic:zfset-zfc} の置換公理の検証で効いてくる。
+:::
+:::
+
+::: lemma 所属と外延性 {#logic:pset-mem-congr keywords="membership respects extensional equivalence, extensionality for pre-sets" index="所属の両立性|しょぞくのりょうりつせい"}
+任意の前集合について次が成り立つ。
+1. $x\approx x'$, $y\approx y'$, $x\in y$ ならば $x'\in y'$。
+2. $x\approx y\iff\forall z,\ (z\in x\leftrightarrow z\in y)$。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】 $y=\mathsf{mk}\,\beta\,B$, $y'=\mathsf{mk}\,\beta'\,B'$ とする。$x\in y$ から $x\approx B(b)$ となる $b$ があり、$y\approx y'$ の第一の連言から $B(b)\approx B'(b')$ となる $b'$ がある。\ref{logic:pset-equiv-equivalence} の 2, 3 より $x'\approx x\approx B(b)\approx B'(b')$ なので $x'\approx B'(b')$、すなわち $x'\in y'$ である。
+
+**Step 2.** 【主張：2 の ⇒】 $x\approx y$ なら、1 を $x'=x$（反射律）に使って $z\in x\to z\in y$ を得る。対称律から逆向きも得られる。
+
+**Step 3.** 【主張：2 の ⇐】 $x=\mathsf{mk}\,\alpha\,A$, $y=\mathsf{mk}\,\beta\,B$ とする。$a:\alpha$ について、反射律より $A(a)\approx A(a)$ なので $A(a)\in x$ であり、仮定から $A(a)\in y$、すなわち $A(a)\approx B(b)$ となる $b$ がある。これが第一の連言である。第二の連言は、$B(b)\in y$ から $B(b)\in x$ を得て対称律を使えばよい。
+:::
+
+## 商と ZFSet {#logic:sec-zl-quotient}
+
+::: definition ZFSet {#logic:zfset keywords="ZFSet, quotient of pre-sets, sets in Lean" index="ZFSet|ぜっとえふせっと"}
+$\mathsf{ZFSet}_{u}\defeq\mathsf{Quot}\,(\approx)$ と定め、前集合 $x$ の類を $[x]$ と書く。$\mathsf{ZFSet}_{u}$ の上の所属 $X\in Y$ を、$\in$ を両方の引数について持ち上げて定める：
+$$
+[x]\in[y]\ \equiv\ x\in y .
+$$
+:::
+
+::: intuition
+集合とは、前集合の木を「同じ元をもつかどうか」だけで区別したものである。持ち上げが定義できるのは、\ref{logic:pset-mem-congr.1} により $x\in y$ の真偽が代表元の取り方によらないからである。ただし $\mathsf{lift}$ が要求するのは命題の**等式** $(x\in y)=(x'\in y')$ であり、\ref{logic:pset-mem-congr.1} が与えるのは同値 $\leftrightarrow$ なので、その間を命題外延性がつなぐ。
+:::
+
+::: lemma ZFSet の基本性質 {#logic:zfset-basic keywords="basic properties of ZFSet, exactness of the quotient" index="ZFSet の基本性質|ぜっとえふせっとのきほんせいしつ"}
+1. 所属は well-defined であり、任意の $X:\mathsf{ZFSet}_{u}$ はある前集合 $x$ について $X=[x]$ である。
+2. $[x]=[y]\iff x\approx y$。
+3. $y=\mathsf{mk}\,\beta\,B$ なら、$Z\in[y]\iff\exists b{:}\beta,\ Z=[B(b)]$。
+:::
+
+::: proof
+**Step 1.** 【主張：$\in$ は $\mathsf{ZFSet}_{u}$ に持ち上がる】 $x\approx x'$ なら、\ref{logic:pset-mem-congr.1} と対称律から各 $y$ について $x\in y\leftrightarrow x'\in y$ であり、$\mathsf{propext}$ で $(x\in y)=(x'\in y)$ となる。よって $\lambda x.\,(x\in y)$ は第一引数について持ち上がる。第二引数については、持ち上げた関数 $\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ どうしの等式を示す必要があり、$\mathsf{ind}$ で各点 $[x]$ での等式（上と同じく $\mathsf{propext}$ による）に直してから $\mathsf{funext}$ を使う。こうして二回の $\mathsf{lift}$ で $\in$ が定まる。$X=[x]$ となる $x$ があることは、命題 $\exists x,\ X=[x]$ に $\mathsf{ind}$ を使えば（$X=[x]$ のとき $x$ 自身が証拠）得られる。
+
+**Step 2.** 【主張：$[x]=[y]$ ならば $x\approx y$】 $x$ を固定し、$\lambda z.\,(x\approx z):\mathsf{PSet}_{u}\to\mathsf{Prop}$ を考える。$z\approx z'$ なら推移律と対称律で $(x\approx z)\leftrightarrow(x\approx z')$ であり、$\mathsf{propext}$ で等式になるので、これは $R:\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ に持ち上がり、$R[z]\equiv(x\approx z)$ となる。$R[x]$ は反射律で成り立つので、$[x]=[y]$ で書き換えると $R[y]$、すなわち $x\approx y$ を得る。逆向き $x\approx y\Rightarrow[x]=[y]$ は $\mathsf{sound}$ そのものである。
+
+**Step 3.** 【主張：3 が成り立つ】 1 より $Z=[z]$ とすると、$[z]\in[y]$ は $\exists b,\ z\approx B(b)$ と定義上等しい。2 より $z\approx B(b)\iff[z]=[B(b)]$ なので主張を得る。
+
+::: hypcheck
+- **命題外延性**：Step 1 と Step 2 で、命題値の関数を商へ持ち上げるのに使った。Step 1 では第二引数の持ち上げに関数外延性も使った（関数外延性は商型から導かれる）。これがないと、所属も「同値かどうか」も $\mathsf{ZFSet}_{u}$ の上の述語として定義できない。
+- **商の健全性** $\mathsf{sound}$：Step 2 の逆向きで使った。これがないと $\approx$ な前集合が等しい集合になる保証がなく、外延性の公理が等号 $=$ について言えない（\ref{logic:zfset-zfc} の Step 1）。
+- 選択公理は使っていない。
+:::
+:::
+
+## 論理式の翻訳 {#logic:sec-zl-translation}
+
+$\ZFC$ の公理を $\mathsf{ZFSet}_{u}$ で確かめるには、集合論の論理式を Lean の命題に翻訳する必要がある。これはメタ理論での（記号列についての）操作である。
+
+::: definition 論理式の翻訳 {#logic:zf-translation keywords="translation of set-theoretic formulas into Lean propositions" index="論理式の翻訳（ZFSet）|ろんりしきのほんやくぜっとえふせっと"}
+集合論の言語（原始記号は $\in$, $=$, $\bot$, $\to$, $\forall$）の論理式 $\varphi$ で、自由変数が $v_{1},\dots,v_{n}$ に含まれるものに対し、Lean の命題 $\varphi^{Z}(X_{1},\dots,X_{n}):\mathsf{Prop}$（$X_{i}:\mathsf{ZFSet}_{u}$）を論理式の構成についての再帰で定める。
+1. $(v_{i}\in v_{j})^{Z}\defeq X_{i}\in X_{j}$、$(v_{i}=v_{j})^{Z}\defeq(X_{i}=X_{j})$（$\mathsf{Eq}$）、$\bot^{Z}\defeq\mathsf{False}$。
+2. $(\varphi\to\psi)^{Z}\defeq\varphi^{Z}\to\psi^{Z}$、$(\forall v\,\varphi)^{Z}\defeq\forall V{:}\mathsf{ZFSet}_{u},\ \varphi^{Z}$。
+
+文 $\varphi$ について $\mathsf{Lean}\vdash\varphi^{Z}$ のとき、$\mathsf{ZFSet}_{u}$ で $\varphi$ が成り立つという。自由変数をもつ論理式については全称閉包をとる。
+:::
+
+::: intuition
+集合論の論理式を、「集合」を $\mathsf{ZFSet}_{u}$ の元、「属する」を前の定義の所属、「等しい」を Lean の等号と読み替えて、そのまま Lean の命題として読む。集合論の相対化（モデルの中で読むこと）を、型理論の中で行うものである。
+:::
+
+::: lemma 翻訳は導出を保つ {#logic:zf-translation-sound keywords="soundness of the translation into Lean" index="翻訳の健全性|ほんやくのけんぜんせい"}
+論理式の集合 $\Sigma$ と論理式 $\varphi$ について、自然演繹で $\Sigma\vdash\varphi$ であり、各 $\sigma\in\Sigma$ について $\mathsf{Lean}\vdash\sigma^{Z}$ ならば、$\mathsf{Lean}\vdash\varphi^{Z}$ である。
+:::
+
+::: proof
+導出 $D$ についての帰納法で、「$\mathrm{A}(D)=\{\psi_{1},\dots,\psi_{k}\}$、結論 $\varphi$ のとき、自由変数 $\vec{X}$ を引数とする Lean の項 $\prod_{\vec{X}}\psi_{1}^{Z}\to\dots\to\psi_{k}^{Z}\to\varphi^{Z}$ が作れる」ことを示す。$\Sigma\vdash\varphi$ の導出の未解消の仮定は $\Sigma$ の有限個なので、最後に $\mathsf{Lean}\vdash\sigma^{Z}$ の項を代入すれば主張を得る。
+
+**Step 1（論理の規則）.** 【主張：仮定・$\to$I・$\to$E・$\forall$I・$\forall$E の各規則は Lean の項の構成に移る】 仮定は変数、$\to$I は λ 抽象、$\to$E は関数適用である。$\forall$I は $\lambda V{:}\mathsf{ZFSet}_{u}$ による抽象で、固有変数条件は「$V$ が仮定の型に現れない」ことに当たり、抽象が許される。集合論の言語の項は変数だけなので、$\forall$E は変数への適用である。
+
+**Step 2（背理法）.** 【主張：RAA は排中律で翻訳できる】 $\lnot\varphi\to\bot$ の翻訳 $h:\lnot\varphi^{Z}\to\mathsf{False}$ から $\varphi^{Z}$ を得ればよい。$\mathsf{em}(\varphi^{Z}):\varphi^{Z}\lor\lnot\varphi^{Z}$ で場合分けし、左なら そのまま、右なら $h$ を適用して $\mathsf{False}$ を得て、$\mathsf{False}$ の除去で $\varphi^{Z}$ を得る。
+
+**Step 3（等号）.** 【主張：$=$I と $=$E は $\mathsf{Eq}$ の反射と代入に移る】 $=$I は $\mathsf{Eq}$ の構成子（反射律）である。$=$E は、$s=t$ と $\varphi[s/x]^{Z}$ から $\varphi[t/x]^{Z}$ を得る規則で、翻訳が代入と可換（$\varphi[s/x]^{Z}$ は $\varphi^{Z}$ の $X$ に $s$ の値を入れたもの）なので、述語 $\lambda X.\,\varphi^{Z}$ に $\mathsf{Eq}$ の除去を使えばよい。
+
+::: hypcheck
+- **排中律**：Step 2 だけで使った。$\mathsf{em}$ は Lean では選択・命題外延性・関数外延性から導かれる（\ref[ディアコネスクの定理]{logic:diaconescu}）。直観主義論理の導出に限れば不要である。
+- **領域が空でないこと**：一階論理は領域が空でないことを前提にする。$\mathsf{ZFSet}_{u}$ は $[\varnothing]$ を元にもつので、閉じた導出の途中で自由変数に値を入れる必要が生じても（たとえば $\forall x\,\varphi\to\exists x\,\varphi$）、$[\varnothing]$ を入れればよい。
+:::
+:::
+
+## 公理の確認 {#logic:sec-zl-axioms}
+
+まず前集合の段階で、公理に必要な構成をすべて用意する。
+
+::: lemma 集合の構成 {#logic:zfset-constructions keywords="empty set, pair, union, power set, separation, omega, image for ZFSet" index="ZFSet の構成|ぜっとえふせっとのこうせい"}
+$x=\mathsf{mk}\,\alpha\,A$, $y$ を前集合、$Z$ を $\mathsf{ZFSet}_{u}$ の元とする。次の前集合について、右の同値が成り立つ。
+1. 空集合 $\varnothing$：$Z\notin[\varnothing]$。
+2. 対 $\{x,y\}$：$Z\in[\{x,y\}]\iff Z=[x]\lor Z=[y]$。
+3. 和集合 $\bigcup x\defeq\mathsf{mk}\,\bigl(\sum_{a:\alpha}\mathrm{ty}(A(a))\bigr)\,\bigl(\lambda(a,c).\,\mathrm{fn}(A(a))(c)\bigr)$：$Z\in[\bigcup x]\iff\exists W,\ Z\in W\land W\in[x]$。
+4. 分出：述語 $P:\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ について $x_{P}\defeq\mathsf{mk}\,\{a:\alpha\mid P[A(a)]\}\,(\lambda s.\,A(s.1))$：$Z\in[x_{P}]\iff Z\in[x]\land P(Z)$。
+5. 冪集合 $\mathcal{P}x\defeq\mathsf{mk}\,(\alpha\to\mathsf{Prop})\,(\lambda p.\,\mathsf{mk}\,\{a\mid p\,a\}\,(\lambda s.\,A(s.1)))$：$Z\in[\mathcal{P}x]\iff\forall W,\ (W\in Z\to W\in[x])$。
+6. 像：$\beta:\mathsf{Type}\,u$ と関数 $F:\beta\to\mathsf{ZFSet}_{u}$ について、ある前集合 $w$ が $\mathrm{ty}(w)=\beta$ かつ $Z\in[w]\iff\exists b{:}\beta,\ Z=F(b)$ を満たす。
+:::
+
+::: proof
+\ref{logic:zfset-basic.3} を各構成に当てはめる。
+
+**Step 1（空集合・対・和集合）.** 【主張：1〜3 が成り立つ】 $\mathsf{0}_{u}$ に元がないので 1 が成り立つ。$\{x,y\}$ の元の族は $\mathsf{2}_{u}$ の二元を $x,y$ に送るので 2 が成り立つ。3 では、$Z\in[\bigcup x]$ は「ある $a$ と $c:\mathrm{ty}(A(a))$ について $Z=[\mathrm{fn}(A(a))(c)]$」と同値である。これは「$W\defeq[A(a)]$ とおくと $W\in[x]$ かつ $Z\in W$」と同値であり（\ref{logic:zfset-basic.3} を $A(a)$ に使う）、逆に $W\in[x]$ なら $W=[A(a)]$ となる $a$ があるので、3 を得る。
+
+**Step 2（分出）.** 【主張：4 が成り立つ】 $x_{P}$ の元は $P[A(a)]$ を満たす $a$ についての $[A(a)]$ である。$Z\in[x]$ かつ $P(Z)$ なら $Z=[A(a)]$ となる $a$ があり、$P[A(a)]$ が成り立つので $(a,\cdot)$ が $x_{P}$ の添字になる。逆も同様である。部分型 $\{a:\alpha\mid P[A(a)]\}$ は $\mathsf{Type}\,u$ に属する（$\alpha:\mathsf{Type}\,u$ で、条件は命題）。
+
+**Step 3（冪集合）.** 【主張：5 が成り立つ】 $\alpha\to\mathsf{Prop}:\mathsf{Type}\,u$ なので $\mathcal{P}x$ は $\mathsf{PSet}_{u}$ の元である。⇒：$Z=[\mathsf{mk}\,\{a\mid p\,a\}\,\dots]$ の元は $[A(a)]$ の形なので $[x]$ に属する。⇐：$Z\subseteq[x]$ とし、$p\,a\defeq([A(a)]\in Z)$ とおく。4 と同じ計算で $Z$ と $[\mathsf{mk}\,\{a\mid p\,a\}\,\dots]$ は同じ元をもつ（$Z$ の元は $[x]$ の元なので $[A(a)]$ の形）。\ref{logic:pset-mem-congr.2} と \ref{logic:zfset-basic.2} から両者は等しく、$Z\in[\mathcal{P}x]$ である。
+
+**Step 4（像）.** 【主張：6 が成り立つ】 各 $b$ について $\mathsf{Nonempty}\{w_{b}:\mathsf{PSet}_{u}\mid[w_{b}]=F(b)\}$ が成り立つ（\ref{logic:zfset-basic.1}）。$\mathsf{choice}$ でその元を取り出して $G(b)$ とし、$w\defeq\mathsf{mk}\,\beta\,G$ とおく。\ref{logic:zfset-basic.3} から $Z\in[w]\iff\exists b,\ Z=[G(b)]=F(b)$ である。
+
+::: hypcheck
+- **$\mathsf{Prop}$ の非可述性**：Step 3 で、$\alpha\to\mathsf{Prop}$ が $\alpha$ と同じ宇宙 $\mathsf{Type}\,u$ に入ることを使った。述語 $p\,a\defeq([A(a)]\in Z)$ は大きな型 $\mathsf{ZFSet}_{u}$ の元 $Z$ に言及するが、命題なので $\mathsf{Prop}$ に属する。宇宙が可述的で「命題」が $\mathsf{Type}\,0$ の型として表される体系（マルティン＝レーフ型理論で命題を型と読む場合）では、$\alpha\to\mathsf{Type}\,0$ は $\mathsf{Type}\,1$ に上がり、同じ段の冪集合が作れない。
+- **選択公理**：Step 4 だけで使った。$F(b)$ は商の元であり、その代表元という**型の元**を $b$ ごとに選ぶには、$\mathsf{Prop}$ の中の存在の除去では足りない（\ref{logic:pset-equiv-equivalence} の hypcheck）。
+- 命題外延性と $\mathsf{sound}$ は Step 3 の最後（同じ元をもつ集合が等しい）で使った。
+:::
+:::
+
+::: theorem ZFSet は ZFC のモデル {#logic:zfset-zfc keywords="ZFSet is a model of ZFC, Aczel's interpretation of ZFC in Lean, Werner" index="ZFSet は ZFC のモデル|ぜっとえふせっとはぜっとえふしーのもでる"}
+各宇宙の段 $u$ について、$\ZFC$ の各公理 $\varphi$（\ref{set:zfc}。分出・置換は図式の各例）は $\mathsf{ZFSet}_{u}$ で成り立つ：$\mathsf{Lean}\vdash\varphi^{Z}$。したがって $\ZFC\vdash\varphi$ ならば $\mathsf{Lean}\vdash\varphi^{Z}$ である。
+:::
+
+::: intuition
+Lean の中で、前集合の木のうち同じ元をもつものどうしを同一視した型 $\mathsf{ZFSet}_{u}$ を「集合の宇宙」と見ると、$\ZFC$ の公理がすべて成り立つ。したがって $\ZFC$ で証明できる定理は、すべて Lean の定理として $\mathsf{ZFSet}_{u}$ の上に移せる。
+:::
+
+::: proof
+最後の主張は前半と \ref{logic:zf-translation-sound} から従う。前半を公理ごとに確かめる。$X,Y,\dots$ は $\mathsf{ZFSet}_{u}$ の元で、\ref{logic:zfset-basic.1} により代表元 $x,y,\dots$ をとって考える（示す主張が命題なので $\mathsf{ind}$ が使える）。
+
+**Step 1（集合の存在・外延性）.** 【主張：$\forall Z\,(Z\in X\leftrightarrow Z\in Y)$ ならば $X=Y$】 存在は $[\varnothing]$ でよい。外延性について、$X=[x]$, $Y=[y]$ とすると、仮定は $\forall z\,(z\in x\leftrightarrow z\in y)$ を意味する（$Z=[z]$ と書けるので）。\ref{logic:pset-mem-congr.2} より $x\approx y$、\ref{logic:zfset-basic.2} より $X=Y$ である。
+
+**Step 2（基礎）.** 【主張：空でない $Y$ は $\in$ について極小な元をもつ】 まず $\in$-帰納法「$P:\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ について、$\forall X\,((\forall W\in X,\ P\,W)\to P\,X)$ ならば $\forall X,\ P\,X$」を示す。これは $\lambda x.\,P[x]$ についての $\mathsf{PSet}_{u}$ の帰納法である：$x=\mathsf{mk}\,\alpha\,A$ で各 $P[A(a)]$ を仮定すると、\ref{logic:zfset-basic.3} より $[x]$ の元はすべて $[A(a)]$ の形なので仮定が使え、$P[x]$ を得る。次に、$Y$ が極小元をもたないと仮定し、$P(X)\defeq X\notin Y$ に $\in$-帰納法を使う。$X$ の元がすべて $Y$ に属さないのに $X\in Y$ なら $X$ は極小元になるので矛盾し、$X\notin Y$ である。よってすべての $X$ について $X\notin Y$ となり、$Y$ が空でないことに反する。最後の背理法で $\mathsf{em}$ を使う。
+
+**Step 3（分出・対・和集合）.** 【主張：分出・対・和集合の公理が成り立つ】 分出の図式の例 $\exists Y\,\forall X\,(X\in Y\leftrightarrow X\in Z\land\varphi)$ は、$P\defeq\lambda X.\,\varphi^{Z}$ として \ref{logic:zfset-constructions.4} の $[z_{P}]$ が $Y$ になる。対は \ref{logic:zfset-constructions.2}、和集合は \ref{logic:zfset-constructions.3} による。
+
+**Step 4（冪集合）.** 【主張：$\forall X\,\exists Y\,\forall Z\,(Z\subseteq X\to Z\in Y)$】 $Y\defeq[\mathcal{P}x]$ とすれば \ref{logic:zfset-constructions.5} の ⇐ による。
+
+**Step 5（無限）.** 【主張：$[\varnothing]$ を含み $W\mapsto W\cup\{W\}$ で閉じた集合がある】 $s(W)\defeq\bigcup\{W,\{W\}\}$ を \ref{logic:zfset-constructions} の 2, 3 で作る（これが $W\cup\{W\}$ の元の条件を満たす）。$\mathbb{N}$ についての再帰で $N(0)\defeq[\varnothing]$, $N(n+1)\defeq s(N(n))$ と定め、\ref{logic:zfset-constructions.6} を $\beta\defeq\mathsf{ULift}\,\mathbb{N}$（$\mathsf{Type}\,u$ に持ち上げたもの）と $F(\mathsf{up}\,n)\defeq N(n)$ に使って $\Omega$ を作る。$\Omega$ の元はちょうど $N(n)$ たちなので、$[\varnothing]=N(0)\in\Omega$ であり、$N(n)\in\Omega$ なら $s(N(n))=N(n+1)\in\Omega$ である。（ここでは $F$ の値の代表元が具体的に書けるので、選択公理を使わずに $\mathsf{mk}\,\beta\,(\lambda(\mathsf{up}\,n).\,\text{代表元})$ と直接作ることもできる。）
+
+**Step 6（置換）.** 【主張：$\forall W\in A\,\exists!V\,\varphi(W,V)$ ならば $\forall W\in A\,\exists V\in Y\,\varphi(W,V)$ となる $Y$ がある】 $A=[\mathsf{mk}\,\alpha\,A_{0}]$ とする。各 $a:\alpha$ について $\exists V,\ \varphi^{Z}([A_{0}(a)],V)$ なので、$\mathsf{choice}$ で（$\mathsf{Nonempty}\{V\mid\varphi^{Z}([A_{0}(a)],V)\}$ から）$F(a)$ を選ぶ。\ref{logic:zfset-constructions.6} の像 $Y\defeq[w]$ をとると、$W\in A$ なら $W=[A_{0}(a)]$ となる $a$ があり、$F(a)\in Y$ かつ $\varphi^{Z}(W,F(a))$ である。一意性の仮定は使っていない（収集公理の形まで成り立つ）。
+
+**Step 7（選択）.** 【主張：任意の集合は整列可能である】 $\ZF$ の公理はここまでで確かめたので、\ref{logic:zf-translation-sound} により $\ZF$ の定理は $\mathsf{ZFSet}_{u}$ で成り立つ。\ref{set:ac-equivalences.2}⇒\ref[1]{set:ac-equivalences.1} は $\ZF$ の定理なので、「$\varnothing$ を元にもたない集合族は選択関数をもつ」を示せばよい。$\mathsf{ZFSet}_{u}$ は空でないので、$c(X)\defeq\mathsf{choice}(\cdot)$ を $\mathsf{Nonempty}\{W\mid X\ne[\varnothing]\to W\in X\}$ に使って（この型が空でないことは $\mathsf{em}$ で $X$ が空かどうかを場合分けして示す）、$X\ne[\varnothing]$ なら $c(X)\in X$ となる関数 $c:\mathsf{ZFSet}_{u}\to\mathsf{ZFSet}_{u}$ を得る。集合族 $\mathcal{F}$ について、順序対 $\langle X,c(X)\rangle$（対の構成を二回使う）の全体 $f$ を \ref{logic:zfset-constructions.6} で作る（添字は $\mathcal{F}$ の代表元の添字の型）。$f$ の元はすべて $\langle X,c(X)\rangle$（$X\in\mathcal{F}$）の形で、$\langle X,V\rangle,\langle X,V'\rangle\in f$ なら、\ref{set:ordered-pair-characterization}（外延性と対だけから従う $\ZF$ の定理）より $V=c(X)=V'$ である。よって $f$ は $\mathcal{F}$ 上の選択関数である。
+
+::: hypcheck
+- **命題外延性**：所属を $\mathsf{ZFSet}_{u}$ に持ち上げる段階（\ref{logic:zfset-basic}）で使い、以後のすべての Step はその上に立つ。
+- **商の健全性**：Step 1（外延性）で、$\approx$ を等号 $=$ に変えるのに使った。等号が $\mathsf{Eq}$ なので、Step 7 の「$X=X'$ なら $c(X)=c(X')$」は関数の性質として自動的に成り立つ。$\mathsf{sound}$ がなく前集合のまま扱うと、関数 $c$ が $\approx$ を保つかどうかを別に示さなければならず、一般には保たない。
+- **選択**：Step 6（置換）と Step 7（選択）、および \ref{logic:zfset-constructions.6} で使った。Step 6 は、値が一意（$\exists!$）であっても代表元の前集合は一意でないので、選択なしでは作れない。
+- **排中律**：Step 2 の背理法、Step 7 の場合分け、および \ref{logic:zf-translation-sound} の Step 2 で使った。
+- **$\mathsf{Prop}$ の非可述性**：Step 4（冪集合）で、\ref{logic:zfset-constructions.5} を通じて使った。
+- **宇宙の段**：$\mathsf{ZFSet}_{u}$ は $\mathsf{Type}(u+1)$ の型で、集合の添字の型は $\mathsf{Type}\,u$ に限られる。置換で作った $Y$ の添字の型は $A$ と同じ $\alpha$ なので段は上がらない。これが「置換は宇宙の型による」ということの中身である：像の大きさは添字の型で押さえられ、それが同じ宇宙に属するから集合になる。
+:::
+:::
+
+::: supplement
+**分出と置換は図式より強い.** Step 3, 6 では、述語 $P$ や関係 $\varphi$ は論理式の翻訳である必要がなく、任意の $\mathsf{ZFSet}_{u}\to\mathsf{Prop}$（関係なら二引数）でよい。すなわち $\mathsf{ZFSet}_{u}$ では、「クラス」を述語 $\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ と読むと、クラスについての分出と置換が一つの定理として成り立つ。これはモース＝ケリーの集合論（\ref{set:nbg-mk}）のクラスに近い。大域的選択と合わせた形は次ページ（\see{logic:page-global-choice}）で扱う。
+
+**直観主義的な場合.** 選択と排中律を使わず、存在を $\mathsf{Prop}$ の $\exists$ でなく Σ 型で表すと、同じ構成から構成的集合論 CZF のモデルが得られるとされる（アクゼルの元の目的はこちらで、マルティン＝レーフ型理論の中の解釈である。未確認）。その場合、冪集合の代わりに部分集合の集まりについての弱い公理しか成り立たない。
+
+**高い視点.** $\mathsf{PSet}_{u}$ は関手 $X\mapsto\sum_{\alpha:\mathsf{Type}\,u}(\alpha\to X)$ の始代数（W 型）であり、$\approx$ はその上の最大の双模倣である。$\mathsf{ZFSet}_{u}$ を始代数を双模倣で割ったものと見ると、外延性は「双模倣な木は等しい」こと、基礎の公理は始代数の帰納法に当たる。
+:::
+
+::: corollary ZFC の無矛盾性は Lean の無矛盾性から従う {#logic:con-lean-zfc keywords="Con(Lean) implies Con(ZFC)" index="ZFC の無矛盾性と Lean|ぜっとえふしーのむむじゅんせいとりーん"}
+宇宙 $\mathsf{Type}\,0,\mathsf{Type}\,1$ をもつ Lean の型理論が無矛盾（$\mathsf{False}$ の閉じた項がない）ならば、$\ZFC$ は無矛盾である。
+:::
+
+::: proof
+対偶を示す。$\ZFC\vdash\bot$ なら、\ref{logic:zfset-zfc} を $u=0$ に使って $\mathsf{Lean}\vdash\bot^{Z}$、すなわち $\mathsf{False}$ の閉じた項が得られる。$\mathsf{ZFSet}_{0}:\mathsf{Type}\,1$ なので、使う宇宙は $\mathsf{Type}\,0$ と $\mathsf{Type}\,1$ だけである（$\mathsf{PSet}_{0}$ の添字の型は $\mathsf{Type}\,0$ に属する）。この議論は導出の変換という有限の操作なので、弱いメタ理論（たとえば原始帰納的算術）で行える。
+:::
+
+::: supplement
+**内部の無矛盾性証明.** Lean は帰納型として論理式と導出の型を定義でき、\ref{logic:zf-translation-sound} の議論を Lean の**中で**行える（論理式から $\mathsf{Prop}$ への翻訳を再帰で定める。$\mathsf{Prop}$ を値とする再帰が書けるのは $\mathsf{Prop}:\mathsf{Type}\,0$ だからである）。これにより Lean 自身が「$\ZFC$ は無矛盾」を証明する。ゲーデルの第二不完全性定理（\see{set:second-incompleteness-zf}）と合わせると、Lean（宇宙 $\mathsf{Type}\,0,\mathsf{Type}\,1$ をもつ断片）は $\ZFC$ より真に強い理論である。
+:::
+
+## 宇宙を一段上げる {#logic:sec-zl-lift}
+
+$\mathsf{PSet}_{u}$ は $\mathsf{Type}(u+1)$ の型なので、一段上の前集合 $\mathsf{PSet}_{u+1}$ の添字の型として使える。これで「下の段の集合全体」が上の段の一つの集合になる。
+
+::: definition 持ち上げと下の段の集合全体 {#logic:pset-lift keywords="lifting pre-sets to a higher universe, set of all small sets" index="前集合の持ち上げ|ぜんしゅうごうのもちあげ"}
+1. 持ち上げ $\ell:\mathsf{PSet}_{u}\to\mathsf{PSet}_{u+1}$ を再帰で $\ell(\mathsf{mk}\,\alpha\,A)\defeq\mathsf{mk}\,(\mathsf{ULift}\,\alpha)\,(\lambda c.\,\ell(A(\mathsf{down}\,c)))$ と定める。
+2. $U_{u}\defeq\mathsf{mk}\,\mathsf{PSet}_{u}\,\ell:\mathsf{PSet}_{u+1}$（添字の型 $\mathsf{PSet}_{u}$ は $\mathsf{Type}(u+1)$ に属する）とし、$\mathbb{U}\defeq[U_{u}]:\mathsf{ZFSet}_{u+1}$ とおく。
+:::
+
+::: intuition
+持ち上げは、木の形を変えずに添字の型だけを一段上の宇宙へ移す。$U_{u}$ は、下の段のすべての前集合を添字とし、各添字にその持ち上げをぶら下げた木で、「下の段の集合全体の集合」を表す。下の段では作れない（全体集合はない。\ref{logic:prob-zl-no-universal-set}）が、上の段では一つの集合になる。
+:::
+
+::: lemma 持ち上げの性質 {#logic:lift-basic keywords="lifting preserves equivalence and membership" index="持ち上げの性質|もちあげのせいしつ"}
+前集合 $x,y:\mathsf{PSet}_{u}$ と $z:\mathsf{PSet}_{u+1}$ について次が成り立つ。
+1. $\ell(x)\approx\ell(y)\iff x\approx y$。
+2. $\ell(x)\in\ell(y)\iff x\in y$。
+3. $z\in\ell(y)$ ならば、ある $x\in y$ について $z\approx\ell(x)$。
+4. $Z\in\mathbb{U}\iff\exists x{:}\mathsf{PSet}_{u},\ Z=[\ell(x)]$。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】 $x$ についての帰納法（$y$ は任意）で示す。$x=\mathsf{mk}\,\alpha\,A$, $y=\mathsf{mk}\,\beta\,B$ とすると、$\ell(x)\approx\ell(y)$ は定義から「各 $c:\mathsf{ULift}\,\alpha$ に $\ell(A(\mathsf{down}\,c))\approx\ell(B(\mathsf{down}\,d))$ となる $d$ があり、逆も成り立つ」ことである。$\mathsf{down}$ は全単射なので、これは「各 $a$ に $\ell(A(a))\approx\ell(B(b))$ となる $b$ があり、逆も成り立つ」と同値で、帰納法の仮定により $x\approx y$ の定義と同値になる。
+
+**Step 2.** 【主張：2, 3 が成り立つ】 $\ell(y)$ の元の族は $\ell\circ B\circ\mathsf{down}$ なので、$z\in\ell(y)$ は $\exists b,\ z\approx\ell(B(b))$ と同値である。$x\defeq B(b)$ とすれば $x\in y$ で 3 を得る。$z=\ell(x)$ のときは 1 により $\exists b,\ x\approx B(b)$、すなわち $x\in y$ と同値になり、2 を得る。4 は \ref{logic:zfset-basic.3} を $U_{u}$ に使えばよい。
+:::
+
+::: theorem 下の段の集合全体は宇宙 {#logic:zfset-universe keywords="the set of all small sets is a Grothendieck universe in the next universe level" index="下の段の集合全体|したのだんのしゅうごうぜんたい"}
+$\mathsf{ZFSet}_{u+1}$ において、$\mathbb{U}$ はグロタンディーク宇宙（\ref{cat:universe}）である。すなわち、宇宙の条件を集合論の論理式として書いたものの翻訳が Lean で証明できる。さらに $\ell$ は $\mathsf{ZFSet}_{u}$ から $\mathbb{U}$ への $\in$ を保つ全単射 $\bar{\ell}$（$\bar{\ell}[x]\defeq[\ell(x)]$）を引き起こす。
+:::
+
+::: intuition
+上の段から見ると、下の段の集合をすべて集めたものが一つの集合になり、それは対・和集合・冪集合・置換で閉じた「小さな集合論の世界」になっている。下の段の世界は、上の段の世界の中の一つの宇宙として、そっくりそのまま見える。
+:::
+
+::: proof
+$x=\mathsf{mk}\,\alpha\,A:\mathsf{PSet}_{u}$ について、\ref{logic:lift-basic} の 2, 3 から
+$$
+Z\in[\ell(x)]\iff\exists w\in x,\ Z=[\ell(w)]
+\label{logic:eq-lift-members}
+$$
+が成り立つ（$Z=[z]$ とし、$z\approx\ell(w)$ を \ref{logic:zfset-basic.2} で等式に直す）。外延性を使って集合の等式を示すときは、この同値で両辺の元を比べる。
+
+**Step 1（$\bar{\ell}$ と推移性）.** 【主張：$\bar{\ell}$ は well-defined な全単射で $\in$ を保ち、$\mathbb{U}$ は \term[推移的]{set:transitive-set}】 \ref{logic:lift-basic.1} と \ref{logic:zfset-basic.2} から、$\bar{\ell}$ は well-defined かつ単射である。\ref{logic:lift-basic.4} から像はちょうど $\mathbb{U}$ の元であり、\ref{logic:lift-basic.2} から $\in$ を保つ。推移性：$Z\in Y\in\mathbb{U}$ なら $Y=[\ell(y)]$ と書け、\eqref{logic:eq-lift-members} から $Z=[\ell(w)]$ となり $Z\in\mathbb{U}$ である。
+
+**Step 2（対・和集合）.** 【主張：$\bar{\ell}$ は対と和集合と可換】 \eqref{logic:eq-lift-members} と \ref{logic:zfset-constructions} の 2, 3 から、$[\ell(\{x,y\})]$ の元は $[\ell(w)]$（$w\approx x$ または $w\approx y$）、すなわち $[\ell(x)]$ か $[\ell(y)]$ であり、外延性から $\{[\ell(x)],[\ell(y)]\}=[\ell(\{x,y\})]\in\mathbb{U}$ である。和集合も同様に $\bigcup[\ell(x)]=[\ell(\bigcup x)]\in\mathbb{U}$ となる。順序対と直積は対・和集合・冪集合・分出から $\ZF$ で作られ、$\mathbb{U}$ の元の部分集合はまた $\mathbb{U}$ に属する（次の Step と推移性）ので、宇宙の条件 2 も成り立つ。
+
+**Step 3（冪集合）.** 【主張：$\mathcal{P}([\ell(x)])=[\ell(\mathcal{P}x)]$】 $S\subseteq[\ell(x)]$ とする。$p\,a\defeq([\ell(A(a))]\in S)$ とおくと、$p:\alpha\to\mathsf{Prop}$ は $\mathsf{Type}\,u$ の型の元であり、$s\defeq\mathsf{mk}\,\{a\mid p\,a\}\,(\lambda t.\,A(t.1))$ は $x$ の部分集合を表す $\mathsf{PSet}_{u}$ の元である。\eqref{logic:eq-lift-members} から $S$ と $[\ell(s)]$ は同じ元をもつので $S=[\ell(s)]$ である。逆に $s\subseteq x$ なら $[\ell(s)]\subseteq[\ell(x)]$ である。$[s]\in[\mathcal{P}x]\iff[s]\subseteq[x]$（\ref{logic:zfset-constructions.5}）と合わせて、両辺の元が一致する。
+
+**Step 4（$\omega$）.** 【主張：$\omega\in\mathbb{U}$】 \ref{logic:zfset-zfc} の Step 5 の $\Omega$ を段 $u$ と段 $u+1$ で作り、$\Omega_{u}$, $\Omega_{u+1}$ とする。Step 2 から $\bar{\ell}$ は $[\varnothing]$ と $s(W)=W\cup\{W\}$ と可換なので、$n$ についての帰納法で $\bar{\ell}(N_{u}(n))=N_{u+1}(n)$ となり、外延性から $\bar{\ell}(\Omega_{u})=\Omega_{u+1}$ である。$\Omega_{u+1}$ は $\mathsf{ZFSet}_{u+1}$ の $\omega$ である：$\Omega_{u+1}$ は帰納的集合であり、任意の帰納的集合 $I$ が各 $N(n)$ を含むことは $n$ についての帰納法でわかるので、$\Omega_{u+1}$ は最小の帰納的集合である。
+
+**Step 5（置換による像）.** 【主張：$a\in\mathbb{U}$, $b\subseteq\mathbb{U}$ で全射 $f:a\to b$ があれば $b\in\mathbb{U}$】 $a=[\ell(x)]$, $x=\mathsf{mk}\,\alpha\,A$ とする。各 $i:\alpha$ について $f([\ell(A(i))])\in b\subseteq\mathbb{U}$ なので、\ref{logic:lift-basic.4} から $f([\ell(A(i))])=[\ell(y)]$ となる $y:\mathsf{PSet}_{u}$ がある。$\mathsf{choice}$ でそれを $y_{i}$ と選び、$w\defeq\mathsf{mk}\,\alpha\,(\lambda i.\,y_{i}):\mathsf{PSet}_{u}$ とおく。\eqref{logic:eq-lift-members} から $[\ell(w)]$ の元は $[\ell(y_{i})]=f([\ell(A(i))])$ であり、$a$ の元は $[\ell(A(i))]$ の形で $f$ は全射なので、これはちょうど $b$ の元である。よって $b=[\ell(w)]\in\mathbb{U}$。
+
+::: hypcheck
+- **$\mathsf{Prop}$ が全段で共通であること**：Step 3 で、上の段の集合 $S$ について述べる命題を、下の段の添字 $a$ の述語 $p$ として使った。$\mathsf{Prop}$ がどの宇宙からも同じ $\mathsf{Prop}$ なので、$p$ は $\alpha\to\mathsf{Prop}:\mathsf{Type}\,u$ に入る。これが「下の段の集合の部分集合は（上の段で見ても）すべて下の段にある」理由で、宇宙の冪集合での閉包、すなわち到達不能基数の強極限性の源である。
+- **選択**：Step 5 で使った（\ref{logic:zfset-zfc} の置換と同じ理由）。
+- 宇宙の条件 5 の「全射」は $\mathsf{ZFSet}_{u+1}$ の中の関数（順序対の集合）である。Step 5 の $f(\cdot)$ は、その関数の値（$\langle X,V\rangle\in f$ となる唯一の $V$）を表す。
+:::
+:::
+
+::: lemma 宇宙と到達不能基数 {#logic:universe-inaccessible keywords="Grothendieck universe containing omega is V_kappa for a strongly inaccessible kappa" index="宇宙と到達不能基数|うちゅうととうたつふのうきすう"}
+（$\ZFC$）$U$ を宇宙（\ref{cat:universe}）とし、$\kappa\defeq U\cap\mathbf{ON}$ とおく。このとき $\kappa$ は強到達不能基数で、$U=V_{\kappa}$ である。
+:::
+
+::: proof
+**Step 1.** 【主張：$\kappa$ は順序数で $\kappa\notin U$】 $U$ は \term[推移的]{set:transitive-set}なので $U\cap\mathbf{ON}$ は \term[推移的]{set:transitive-set}な順序数の集合、すなわち順序数である。$\kappa\in U$ なら $\kappa\in U\cap\mathbf{ON}=\kappa$ となり矛盾する。
+
+**Step 2.** 【主張：順序数 $\beta$ と $a\in U$ について、単射 $\beta\to a$ があれば $\beta\in U$】 $\beta$ についての超限帰納法で示す。$\gamma<\beta$ も $a$ に単射されるので $\gamma\in U$、よって $\beta\subseteq U$ である。$\beta=0$ なら、$\varnothing\in\mathcal{P}(a)\in U$ と推移性から $\beta\in U$。$\beta\ne0$ なら単射 $g$ から全射 $a\to\beta$（$\ran g$ の外は $0$ に送る）が作れるので、宇宙の条件 5 から $\beta\in U$ である。
+
+**Step 3.** 【主張：$\kappa$ は $\omega$ より大きい極限基数】 $\omega\in U$ なので $\omega<\kappa$。$\alpha\in\kappa$ なら $\alpha+1=\alpha\cup\{\alpha\}\in U$（条件 2, 3）なので $\kappa$ は極限である。$\mu<\kappa$ と全単射 $\kappa\to\mu$ があれば、Step 2 を $a=\mu$ に使って $\kappa\in U$ となり Step 1 に反するので、$\kappa$ は基数である。
+
+**Step 4.** 【主張：$\kappa$ は正則】 $\mu<\kappa$ と共終な $f:\mu\to\kappa$ があるとする。$\ran f\subseteq U$ は $\mu\in U$ からの全射の像なので $\ran f\in U$、よって $\bigcup\ran f\in U$。$\kappa$ は極限で $f$ は共終なので $\bigcup\ran f=\kappa$ となり、Step 1 に反する。
+
+**Step 5.** 【主張：基数 $\lambda<\kappa$ について $2^{\lambda}<\kappa$】 $\mathcal{P}(\lambda)\in U$ であり、基数 $2^{\lambda}$ から $\mathcal{P}(\lambda)$ への単射（全単射）がある。Step 2 から $2^{\lambda}\in U$、すなわち $2^{\lambda}<\kappa$。
+
+**Step 6.** 【主張：$U=V_{\kappa}$】 $\alpha<\kappa$ について $V_{\alpha}\in U$ を帰納法で示す：$V_{0}=\varnothing\in U$、$V_{\alpha+1}=\mathcal{P}(V_{\alpha})\in U$、極限 $\alpha<\kappa$ では $\{V_{\xi}:\xi<\alpha\}\subseteq U$ が $\alpha\in U$ の全射像なので $U$ に属し、その和 $V_{\alpha}$ も属する。推移性から $V_{\kappa}=\bigcup_{\alpha<\kappa}V_{\alpha}\subseteq U$。逆に $x\in U$ について $\rank(x)\in U$ を $\in$-帰納法で示す：$y\in x$ なら $y\in U$ で $\rank(y)+1\in U$、集合 $\{\rank(y)+1:y\in x\}\subseteq U$ は $x$ からの全射像なので $U$ に属し（$x=\varnothing$ なら $\varnothing\in U$）、その和は \ref{set:rank-basic.3} より $\rank(x)$ である。よって $\rank(x)<\kappa$、\ref{set:rank-basic.1} より $x\in V_{\kappa}$。
+
+::: hypcheck
+- **選択公理**：Step 5 で $\lvert\mathcal{P}(\lambda)\rvert$ を基数 $2^{\lambda}$ として扱うのに使った。強到達不能基数の定義（\ref{set:inaccessible}）自体が AC のもとでのものである。
+- **基礎の公理**：Step 6 で、すべての集合がランクをもつことを使った。
+- **条件 5（置換）**：Step 2, 4, 6 で使った。これを外すと、たとえば $V_{\omega+\omega}$ は条件 1〜4 を満たすが $\omega+\omega$ は到達不能でない。
+- 逆向き（$\kappa$ が強到達不能なら $V_{\kappa}$ は宇宙）は \ref{cat:universe-from-inaccessible.1} である。
+:::
+:::
+
+::: corollary 宇宙の段と到達不能基数の個数 {#logic:zfset-n-inaccessibles keywords="ZFSet at level n satisfies ZFC plus n inaccessible cardinals, lower bound of consistency strength of Lean" index="無矛盾性の下界|むむじゅんせいのかかい"}
+各自然数 $n$ と段 $u$ について、$\mathsf{ZFSet}_{u+n}$ で「$\ZFC$ ＋強到達不能基数が少なくとも $n$ 個ある」が成り立つ。とくに、宇宙 $\mathsf{Type}\,0,\dots,\mathsf{Type}(n+1)$ をもつ Lean の断片が無矛盾なら、$\ZFC$ ＋「強到達不能基数が $n$ 個ある」は無矛盾である。
+:::
+
+::: proof
+$n$ についての帰納法で示す。$n=0$ は \ref{logic:zfset-zfc} である。
+
+**Step 1.** 【主張：$\mathsf{ZFSet}_{m+1}$ に強到達不能基数 $\kappa$ があり、$\mathbb{U}=V_{\kappa}$】 \ref{logic:zfset-universe} より $\mathsf{ZFSet}_{m+1}$ で「$\mathbb{U}$ は宇宙」が成り立つ。\ref{logic:universe-inaccessible} は $\ZFC$ の定理なので、\ref{logic:zfset-zfc} により $\mathsf{ZFSet}_{m+1}$ で成り立ち、主張を得る。
+
+**Step 2.** 【主張：$\mathsf{ZFSet}_{m}$ で成り立つ文は、$\mathsf{ZFSet}_{m+1}$ で $V_{\kappa}$ に相対化して成り立つ】 \ref{logic:zfset-universe} の全単射 $\bar{\ell}$ は $\in$ を保ち、像はちょうど $\mathbb{U}$ である。論理式 $\varphi$ についての帰納法で、$\varphi^{Z}(\vec{X})$（段 $m$）と $\varphi$ を $\mathbb{U}$ に相対化したものの翻訳 $(\varphi^{\mathbb{U}})^{Z}(\bar{\ell}\vec{X})$（段 $m+1$）が同値であることがわかる：原子論理式は $\bar{\ell}$ が単射で $\in$ を保つことから、量化子は $\bar{\ell}$ の像が $\mathbb{U}$ 全体であることから従う。
+
+**Step 3.** 【主張：$\mathsf{ZFSet}_{m+1}$ に強到達不能基数が $n+1$ 個ある】 帰納法の仮定（$m=u+n$）から $\mathsf{ZFSet}_{m}$ に強到達不能基数 $\kappa_{1}<\dots<\kappa_{n}$ がある。Step 2 より、$\mathsf{ZFSet}_{m+1}$ で $\bar{\ell}(\kappa_{i})$ は「$V_{\kappa}$ の中で強到達不能」な順序数で、$\kappa$ 未満である（$\bar{\ell}$ は順序数を順序数に送る：「順序数」は $\Delta_{0}$ で $V_{\kappa}$ は \term[推移的]{set:transitive-set}）。\ref{set:inaccessible-model.2} より $V_{\kappa}=H(\kappa)$ であるから、\ref{set:inaccessible-absolute} により、それらは $\mathsf{ZFSet}_{m+1}$ でも強到達不能であり、$\kappa$ と合わせて $n+1$ 個になる。
+
+後半：$\mathsf{ZFSet}_{n}:\mathsf{Type}(n+1)$ を作るのに使う宇宙は $\mathsf{Type}\,0,\dots,\mathsf{Type}(n+1)$ であり、\ref{logic:con-lean-zfc} と同じ議論による。
+
+::: hypcheck
+- Step 2 の同値はメタ理論での論理式についての帰納法（各 $\varphi$ ごとに Lean の証明を作る図式）である。
+- Step 3 で $\mathsf{ZFSet}_{m+1}$ の中の $\ZFC$ の定理（\ref{set:inaccessible-absolute}）を使えるのは、\ref{logic:zfset-zfc} による。
+:::
+:::
+
+## 等無矛盾性 {#logic:sec-zl-equiconsistency}
+
+::: corollary Lean と到達不能基数の等無矛盾性 {#logic:lean-equiconsistency keywords="equiconsistency of Lean with ZFC plus finitely many inaccessibles" index="等無矛盾性（Lean）|とうむむじゅんせいりーん"}
+次の二つは同値である（メタ理論は原始帰納的算術程度）。
+1. 宇宙をすべてもつ Lean の型理論（三つの公理を含む）は無矛盾である。
+2. 理論 $\ZFC+\{\text{「強到達不能基数が } n \text{ 個ある」}:n\in\omega\}$ は無矛盾である。
+:::
+
+::: intuition
+Lean の宇宙を一段ふやすことと、集合論に到達不能基数を一つ足すことは、無矛盾性の強さについてほぼ同じ働きをする。下から（本ページ）と上から（前ページ）の両方の向きで押さえると、Lean 全体の強さは「到達不能基数が好きなだけ有限個ある $\ZFC$」とちょうど同じになる。
+:::
+
+::: proof
+**Step 1.** 【主張：1 ⇒ 2】 2 の理論から $\bot$ が導けたとすると、導出に使う公理は有限個なので、ある $n$ について $\ZFC$ ＋「強到達不能基数が $n$ 個ある」$\vdash\bot$ である。\ref{logic:zfset-n-inaccessibles} より Lean（の宇宙 $\mathsf{Type}\,0,\dots,\mathsf{Type}(n+1)$ を使う部分）から $\mathsf{False}$ の項が得られ、1 に反する。
+
+**Step 2.** 【主張：2 ⇒ 1】 Lean の型の導出で $\mathsf{False}$ の閉じた項が得られたとすると、その導出に現れる宇宙の段は有限個である。前ページの健全性（\ref[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model}）によれば、宇宙を有限個に制限した断片は、到達不能基数を有限個仮定した $\ZFC$ の中にモデルをもつので、その理論は矛盾し、2 に反する。
+
+::: hypcheck
+- Step 2 は前ページの上界に依存する。宇宙の段の数と必要な到達不能基数の個数の正確な対応（$\pm1$ のずれ）は前ページの定式化によるが、この系の主張は有限個であることしか使わない。
+- 宇宙変数を含む定理（宇宙多相）の扱いは、各段を具体的な数に置き換えた例ごとに考えればよい。
+:::
+:::
+
+::: supplement
+**文献の述べ方.** Lean の型理論が $\ZFC+\{$「$n$ 個の到達不能基数がある」$:n<\omega\}$ と等無矛盾であることは、Carneiro の修士論文『The Type Theory of Lean』（2019 年とされる）に述べられているとされる（未確認）。そこでの宇宙の数と到達不能基数の数の対応の細部は確認していない。Werner（1997 年とされる）は Coq の体系について同種の結果を示したとされる（未確認）。
+
+**一段上げると何が増えるか.** \ref{logic:zfset-universe} の証明で、宇宙の各条件の源は次のとおりだった：推移性と対・和集合は持ち上げの計算、冪集合は $\mathsf{Prop}$ の非可述性、置換は選択と「添字の型が同じ宇宙に残る」こと。到達不能基数の強極限性・正則性は、それぞれ冪集合・置換での閉包から出てくる（\ref{logic:universe-inaccessible} の Step 4, 5）。
+:::
+
+## 問題 {#logic:sec-zl-problems}
+
+::: problem ★ 基本：二通りの単集合 {#logic:prob-zl-two-singletons}
+$x\defeq\mathsf{mk}\,\mathsf{1}_{u}\,(\lambda\_.\,\varnothing)$ と $y\defeq\mathsf{mk}\,\mathsf{2}_{u}\,(\lambda\_.\,\varnothing)$ について $x\approx y$ を示し、$[x]=[y]$ を結論せよ。また $\varnothing\approx x$ でないことを示せ。
+:::
+
+::: solution
+$x\approx y$ の第一の連言：$\mathsf{1}_{u}$ の元 $a$ に対し、$\mathsf{2}_{u}$ のどちらの元 $b$ をとっても $\varnothing\approx\varnothing$（反射律）である。第二の連言：$\mathsf{2}_{u}$ の各元 $b$ に $\mathsf{1}_{u}$ の唯一の元 $a$ をとれば同じく成り立つ。よって $x\approx y$ であり、\ref{logic:zfset-basic.2}（$\mathsf{sound}$）から $[x]=[y]$ である。$\varnothing\approx x$ と仮定すると、第二の連言から $x$ の添字 $\star:\mathsf{1}_{u}$ に対して $\varnothing$ の添字、すなわち $\mathsf{0}_{u}$ の元が存在することになり、$\mathsf{0}_{u}$ に元がないことに反する。
+:::
+
+::: problem ★ 基本：自分自身を元にもつ集合はない {#logic:prob-zl-no-self-member}
+任意の $X:\mathsf{ZFSet}_{u}$ について $X\notin X$ を、\ref{logic:zfset-zfc} の Step 2 の $\in$-帰納法を使って示せ。排中律は要るか。
+:::
+
+::: solution
+$P(X)\defeq X\notin X$ に $\in$-帰納法を使う。$X$ の各元 $W$ について $W\notin W$ と仮定し、$X\in X$ とすると、$W\defeq X$ は $X$ の元なので仮定から $X\notin X$ となり矛盾する。よって $X\notin X$ である。これは否定の導入（$X\in X$ を仮定して $\mathsf{False}$ を導く）だけを使うので、排中律は要らない。
+:::
+
+::: problem ★★ 標準：全体集合はない {#logic:prob-zl-no-universal-set}
+$\forall Z,\ Z\in V$ となる $V:\mathsf{ZFSet}_{u}$ は存在しないことを示せ。一方、$\mathsf{ZFSet}_{u+1}$ では $\mathsf{ZFSet}_{u}$ の元の持ち上げをすべて元にもつ集合 $\mathbb{U}$ がある（\ref{logic:pset-lift}）。$\mathsf{mk}\,\mathsf{PSet}_{u}\,\mathrm{id}$ という式がなぜ $\mathsf{PSet}_{u}$ の元にならないかを、宇宙の段で説明せよ。
+:::
+
+::: solution
+$V$ があるとし、分出（\ref{logic:zfset-constructions.4}）で $R\defeq\{Z\in V\mid Z\notin Z\}$ を作る。$R\in V$ なので、分出の性質から $R\in R\iff(R\in V\land R\notin R)\iff R\notin R$ となり矛盾する（ラッセルの議論）。後半：$\mathsf{mk}$ の第一引数は $\mathsf{Type}\,u$ の元でなければならないが、$\mathsf{PSet}_{u}$ は $\mathsf{Type}(u+1)$ の元であり（\ref{logic:pset} の intuition）、宇宙は累積的でない（\ref[Lean の宇宙]{logic:lean-sorts}）ので $\mathsf{Type}\,u$ の元ではない。$\mathsf{PSet}_{u+1}$ の構成子なら $\mathsf{Type}(u+1)$ の型を添字に使えるので、$\mathsf{mk}\,\mathsf{PSet}_{u}\,\ell$ は $\mathsf{PSet}_{u+1}$ の元になる。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

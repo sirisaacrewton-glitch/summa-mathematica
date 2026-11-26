@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lean の核の型理論 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/05-proof-theory/10-lean-type-theory/01-lean-core.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# Lean の核の型理論 {#logic:page-lean-core keywords="type theory of Lean 4, Lean kernel, calculus of inductive constructions, universe levels, Sort, Prop, Type, impredicativity, imax, non-cumulative universes, inductive types, recursor, iota reduction, definitional equality, proof irrelevance, structure eta, subsingleton elimination, large elimination, strict positivity"}
+
+定理証明支援系 Lean 4 では、証明は項として書かれ、その項の型が証明したい主張になっているかどうかを、小さな検査プログラム（**核**、カーネル）が確かめる。核が実装している体系は、帰納型と非可述的な命題の宇宙をもつ依存型理論で、帰納的構成の体系（calculus of inductive constructions、CIC）の一変種と説明されることが多い。本ページでは、この体系の規則を数学の対象として述べる：宇宙 $\mathsf{Sort}\,u$ の階層と、その最下段 $\mathsf{Prop}$ が非可述的であること（\ref{logic:lean-sorts}, \ref{logic:lean-pi-universe}）、帰納型と再帰子（\ref{logic:lean-inductive}, \ref{logic:lean-recursor}）、定義的等価の規則（\ref{logic:lean-defeq-rules}）、そして $\mathsf{Prop}$ の帰納型から一般の型への除去の制限（\ref{logic:lean-subsingleton-elimination}）である。前の系列のマルティン＝レーフ型理論（\ref{logic:page-dependent-types}, \ref{logic:page-identity-types}）との最大の違いは**証明の無関係性**で、そのために Lean では恒等の証明の一意性が成り立ち（\ref{logic:lean-uip}）、一価性公理とは両立しない（\ref{logic:lean-univalence-inconsistent}）。また、除去の制限が証明の無関係性から強制されることも示す（\ref{logic:lean-large-elim-or-inconsistent}）。次ページ \see{logic:page-lean-axioms} では、この核に加える三つの公理を扱う。
+
+> 資料：参考書なし（標準的に説明される内容を本サイトで組み立てた）。Lean 4 の定数の名前と型、宇宙レベルの扱い、帰納型の条件、部分単集合除去の正確な条件、定義的等価の規則の一覧は記憶によるもので、**Lean 4 の実装・文書とは照合していない**。規則の体系的な記述として M. Carneiro の修士論文 *The Type Theory of Lean*（2019 年とされる。未確認）がある。
+
+## 記法と定義の確認 {#logic:sec-lc-notation}
+
+::: notation
+- 判断 $\Gamma\vdash a:A$、文脈、構造規則（弱化・代入・変換）は \ref{logic:dt-judgments}, \ref{logic:dt-structural-rules} のとおり。Π 型の導入・除去・β は \ref{logic:pi-type}、帰納原理と計算規則の考え方は \ref{logic:dt-inductive-types}、恒等型と道帰納法は \ref{logic:identity-type} のとおり。宇宙の必要性とジラールのパラドックスは \ref{logic:dt-universe-remark}、非可述的な量化は \ref{logic:system-f} を参照する。
+- Lean では型も項であり、「$A$ は型である」は「$A:\mathsf{Sort}\,u$ となるレベル $u$ がある」ことで表す。したがって判断は $\Gamma\vdash a:A$ と $\Gamma\vdash a\equiv b$ の二種類で足りる。
+- $\equiv$ を本系列では**定義的等価**と呼ぶ（Lean の文書の definitional equality）。前の系列の判断上の等しさ（\ref{logic:dt-judgments}）に当たる。$=$ は Lean の等号の型 $\mathsf{Eq}$（\ref{logic:lean-inductive} の例）で、命題としての等しさである。項の定義には $\defeq$ を使う。
+- Π 型を $\prod_{x:A}B$ と書く（Lean の記法では `(x : A) → B`、命題のときは `∀ x : A, B`）。$B$ が $x$ に依存しないとき $A\to B$ と書く。命題について $\forall x{:}A.\,P$ と書くこともあるが、同じ Π 型である。
+- Lean の定数（型・構成子・再帰子・公理）はサンセリフ体で $\mathsf{Nat}$, $\mathsf{Eq.refl}$, $\mathsf{Nat.rec}$ のように書く。本文中で Lean の綴りそのものを示すときは `Nat.rec` のように書く。
+- 本ページの主張は、核の規則を形式体系とみたときの主張である（メタ理論は有限の記号操作）。モデルについての主張は後のページ \see[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model} で扱う。
+:::
+
+## 宇宙の階層 {#logic:sec-lc-sorts}
+
+::: definition 宇宙レベル {#logic:lean-universe-levels keywords="universe levels, level variables, max, imax, universe polymorphism" index="宇宙レベル|うちゅうれべる, imax|あいまっくす, レベル変数|れべるへんすう"}
+**宇宙レベル**（単にレベルとも）は、**レベル変数** $u,v,w,\dots$ と次の規則で作られる式である。
+1. $0$ はレベルである。
+2. $\ell$ がレベルなら $\ell+1$ もレベルである。
+3. $\ell_{1},\ell_{2}$ がレベルなら $\max(\ell_{1},\ell_{2})$ と $\mathrm{imax}(\ell_{1},\ell_{2})$ もレベルである。
+
+レベル変数への自然数の割り当て $\rho$ のもとで、レベル $\ell$ の値 $[\![\ell]\!]_{\rho}\in\mathbb{N}$ を、$0$ は $0$、$\ell+1$ は $[\![\ell]\!]_{\rho}+1$、$\max$ は大きい方として定め、$\mathrm{imax}$ は次で定める。
+$$
+[\![\mathrm{imax}(\ell_{1},\ell_{2})]\!]_{\rho}\defeq\begin{cases}0&([\![\ell_{2}]\!]_{\rho}=0\text{ のとき}),\\ \max([\![\ell_{1}]\!]_{\rho},[\![\ell_{2}]\!]_{\rho})&(\text{それ以外}).\end{cases}
+$$
+二つのレベルが**等しい**（$\ell_{1}=\ell_{2}$）とは、すべての割り当て $\rho$ で値が等しいことをいう。$\ell_{1}\le\ell_{2}$ も同様にすべての割り当てでの大小で定める。
+:::
+
+::: intuition
+レベルは「変数を含んでよい自然数の式」である。変数があるのは、一つの定義を任意の宇宙について使えるようにするため（宇宙多相）である。$\mathrm{imax}$ は「二つ目が $0$ なら $0$、そうでなければ大きい方」という、少しだけ変わった最大値で、Π 型の宇宙（\ref{logic:lean-pi-universe}）を一つの式で書くために使う。
+:::
+
+::: example
+$\mathrm{imax}(u,0)=0$ であり、$\mathrm{imax}(u,v+1)=\max(u,v+1)$ である（$v+1$ の値は $1$ 以上なので常に後の場合になる）。$\max(u,u)=u$ である。一方 $\mathrm{imax}(u,v)$ と $\max(u,v)$ は等しくない：$u$ に $1$、$v$ に $0$ を割り当てると値が $0$ と $1$ になる。
+:::
+
+::: lemma imax の性質 {#logic:lean-imax-properties keywords="properties of imax, imax associativity" index="imax の性質|あいまっくすのせいしつ"}
+自然数 $a,b,c$ について $\mathrm{imax}(a,b)$ を上の式で定めると、次が成り立つ。したがって、同じ形のレベルの等式・不等式も成り立つ。
+1. $\mathrm{imax}(a,b)=0$ であることと $b=0$ であることは同値である。
+2. $b\le\mathrm{imax}(a,b)\le\max(a,b)$ である。
+3. $\mathrm{imax}(0,b)=b$、$\mathrm{imax}(a,a)=a$ である。
+4. $\mathrm{imax}(a,\mathrm{imax}(b,c))=\mathrm{imax}(\max(a,b),c)$ である。
+:::
+
+::: proof
+1 から 3 は $b=0$ かどうかで場合を分ける。$b=0$ の場合、定義から $\mathrm{imax}(a,0)=0$ であり、1 の両辺はともに成り立ち、2 は $0\le0\le a$ となる。3 の前半は $\mathrm{imax}(0,0)=0=b$、後半は $a=b=0$ なので $\mathrm{imax}(0,0)=0=a$ である。$b\ge1$ の場合、$\mathrm{imax}(a,b)=\max(a,b)\ge b\ge1$ なので 1 の両辺はともに偽であり、2 は $b\le\max(a,b)$ から従い、3 は $\max(0,b)=b$、$\max(a,a)=a$ から従う。
+
+4 は $c=0$ かどうかで分ける。$c=0$ の場合、$\mathrm{imax}(b,0)=0$ なので左辺は $\mathrm{imax}(a,0)=0$ であり、右辺も $\mathrm{imax}(\max(a,b),0)=0$ である。$c\ge1$ の場合、$\mathrm{imax}(b,c)=\max(b,c)\ge1$ なので左辺は $\max(a,\max(b,c))$ であり、右辺は $\max(\max(a,b),c)$ である。最大値の結合律から両辺は等しい。
+
+レベルの等式はすべての割り当てでの値の等式なので、各割り当てで上の計算を使えば、同じ形のレベルの等式が得られる。
+:::
+
+::: definition ソート {#logic:lean-sorts keywords="Sort u, Prop, Type u, universe hierarchy of Lean" index="ソート|そーと, Prop|ぷろっぷ, Type|たいぷ, 命題の宇宙|めいだいのうちゅう"}
+各レベル $\ell$ に型 $\mathsf{Sort}\,\ell$（**ソート**）があり、次の規則に従う。
+1. （ソートの型）$\vdash\mathsf{Sort}\,\ell:\mathsf{Sort}\,(\ell+1)$。
+2. （レベルの等しさ）$\ell=\ell'$（\ref{logic:lean-universe-levels}）なら $\mathsf{Sort}\,\ell\equiv\mathsf{Sort}\,\ell'$。
+
+$\mathsf{Prop}\defeq\mathsf{Sort}\,0$、$\mathsf{Type}\,\ell\defeq\mathsf{Sort}\,(\ell+1)$ と書き、$\mathsf{Type}\,0$ を $\mathsf{Type}$ と略す。$p:\mathsf{Prop}$ のとき $p$ を（Lean の意味の）命題、$h:p$ を $p$ の証明という。$A:\mathsf{Sort}\,\ell$ となる $A$ を型という。
+:::
+
+::: intuition
+宇宙は下から $\mathsf{Prop}:\mathsf{Type}\,0:\mathsf{Type}\,1:\cdots$ と並ぶ。$\mathsf{Type}\,0$ には自然数や関数の型のような普通のデータの型が入り、その一つ下に命題だけを集めた $\mathsf{Prop}$ がある。命題を独立の宇宙に分けるのは、命題には「証明がどれであるかを気にしない」という特別な規則（証明の無関係性、\ref{logic:lean-defeq-rules.6}）を課すためである。
+:::
+
+::: example
+1. 自然数の型 $\mathsf{Nat}$ は $\mathsf{Nat}:\mathsf{Type}$（$=\mathsf{Sort}\,1$）である。命題 $0=1$ は $(0=1):\mathsf{Prop}$ である（偽だが命題ではある）。
+2. $\mathsf{Prop}:\mathsf{Type}$、$\mathsf{Type}:\mathsf{Type}\,1$ である（規則 1 で $\ell=0,1$ とする）。
+3. $\mathsf{Type}\,u\to\mathsf{Type}\,v$ は、次節の規則で $\mathsf{Sort}\,(\mathrm{imax}(u+2,v+2))=\mathsf{Sort}\,(\max(u,v)+2)=\mathsf{Type}\,(\max(u,v)+1)$ に入る。
+:::
+
+::: remark 宇宙は累積的でない {#logic:lean-noncumulative keywords="non-cumulative universes, ULift, PLift" index="非累積的（宇宙）|ひるいせきてきうちゅう, ULift|ゆーりふと"}
+Lean の規則には「$A:\mathsf{Sort}\,\ell$ なら $A:\mathsf{Sort}\,(\ell+1)$」という規則（**累積性**）がない。たとえば $\mathsf{Nat}:\mathsf{Type}\,0$ だが、$\mathsf{Nat}:\mathsf{Type}\,1$ は導けない。これは「型は定義的等価を除いて一意に決まる」というメタ定理（型の一意性）と、$\mathsf{Sort}\,\ell\equiv\mathsf{Sort}\,\ell'$ なら $\ell=\ell'$ というメタ定理によるが、どちらも本ページでは証明しない（規則の帰納法による長い議論が要る）。
+
+上の宇宙で使いたいときは、包む構造を使う：`ULift.{r,s} (α : Type s) : Type (max s r)` は構成子 $\mathsf{up}:\alpha\to\mathsf{ULift}\,\alpha$ と射影 $\mathsf{down}$ をもち、`PLift (α : Sort u) : Type u` は命題や型を一段上のデータの型に包む。どちらも構造なので、構造の η（\ref{logic:lean-defeq-rules.7}）と ι から $\mathsf{down}(\mathsf{up}\,a)\equiv a$、$\mathsf{up}(\mathsf{down}\,x)\equiv x$ である。
+:::
+
+## Π 型の宇宙と Prop の非可述性 {#logic:sec-lc-pi}
+
+::: definition Π 型の宇宙の規則 {#logic:lean-pi-universe keywords="typing rule for Pi types in Lean, imax rule, impredicative Prop" index="Π 型の宇宙の規則|ぱいがたのうちゅうのきそく"}
+Π 型の規則は次のとおりである。
+1. （形成）$\Gamma\vdash A:\mathsf{Sort}\,u$ と $\Gamma,x{:}A\vdash B:\mathsf{Sort}\,v$ から $\Gamma\vdash\prod_{x:A}B:\mathsf{Sort}\,(\mathrm{imax}(u,v))$。
+2. （導入・除去・β）\ref{logic:pi-type} と同じ：$\Gamma,x{:}A\vdash b:B$ から $\lambda x{:}A.\,b:\prod_{x:A}B$、$f:\prod_{x:A}B$ と $a:A$ から $f\,a:B[a/x]$、$(\lambda x{:}A.\,b)\,a\equiv b[a/x]$。
+3. （変換）$\Gamma\vdash t:A$、$\Gamma\vdash B:\mathsf{Sort}\,w$、$A\equiv B$ から $\Gamma\vdash t:B$。
+:::
+
+::: intuition
+「$B$ が命題なら、$A$ がどんなに大きな型でも $\prod_{x:A}B$ は命題」、「$B$ が命題でなければ、$\prod_{x:A}B$ は $A$ と $B$ の大きい方の宇宙に入る」の二つを一つの式にしたのが $\mathrm{imax}$ である。前者が $\mathsf{Prop}$ の**非可述性**で、「すべての命題 $p$ について …」という命題が、自分自身を含む命題全体を走る量化になっている。
+:::
+
+::: proposition Prop の非可述性 {#logic:lean-prop-impredicative keywords="impredicativity of Prop, quantification over all propositions" index="非可述性（Prop）|ひかじゅつせいぷろっぷ"}
+1. $\Gamma\vdash A:\mathsf{Sort}\,u$（$u$ は任意）と $\Gamma,x{:}A\vdash B:\mathsf{Prop}$ なら、$\Gamma\vdash\prod_{x:A}B:\mathsf{Prop}$ である。
+2. とくに $\vdash\prod_{p:\mathsf{Prop}}p:\mathsf{Prop}$ であり、$\vdash\prod_{\alpha:\mathsf{Type}\,u}\prod_{x:\alpha}x=x:\mathsf{Prop}$ である。
+3. $\Gamma,x{:}A\vdash B:\mathsf{Sort}\,(w+1)$ なら、$\prod_{x:A}B$ は $\mathsf{Sort}\,(\max(u,w+1))$ に入る。この宇宙は $A$ の宇宙 $\mathsf{Sort}\,u$ と $B$ の宇宙 $\mathsf{Sort}\,(w+1)$ のどちらより低くもない。
+:::
+
+::: proof
+1 は形成規則（\ref{logic:lean-pi-universe.1}）で $v=0$ とした場合で、\ref{logic:lean-imax-properties.1} から $\mathrm{imax}(u,0)=0$ なので、$\mathsf{Sort}\,(\mathrm{imax}(u,0))\equiv\mathsf{Prop}$（\ref{logic:lean-sorts.2}）であり、変換規則から $\prod_{x:A}B:\mathsf{Prop}$ である。
+
+2 の前半では $A=\mathsf{Prop}:\mathsf{Sort}\,1$ であり、$p:\mathsf{Prop}$ のもとで $B=p:\mathsf{Prop}$ なので、1 から従う。後半では、内側の $\prod_{x:\alpha}x=x$ が 1 によって命題になり（$\alpha:\mathsf{Sort}\,(u+1)$、$x=x:\mathsf{Prop}$）、外側も $A=\mathsf{Type}\,u:\mathsf{Sort}\,(u+2)$ に対して 1 が使える。
+
+3 では、$w+1$ の値は常に $1$ 以上なので $\mathrm{imax}(u,w+1)=\max(u,w+1)$ である。\ref{logic:lean-imax-properties.2} から、これは $u$ 以上かつ $w+1$ 以上である。
+:::
+
+::: example
+**多相的な恒等関数の型.** $\alpha:\mathsf{Sort}\,u$ のもとで $\alpha\to\alpha:\mathsf{Sort}\,(\mathrm{imax}(u,u))=\mathsf{Sort}\,u$ である（\ref{logic:lean-imax-properties.3}）。外側の $A=\mathsf{Sort}\,u$ は $\mathsf{Sort}\,(u+1)$ に入るので、
+$$
+\textstyle\prod_{\alpha:\mathsf{Sort}\,u}\alpha\to\alpha\ :\ \mathsf{Sort}\,(\mathrm{imax}(u+1,u))
+$$
+となる。$u$ に $0$ を割り当てると $\mathrm{imax}(1,0)=0$ で、$\prod_{p:\mathsf{Prop}}p\to p$ は命題になる。$u$ に $1$ 以上を割り当てると $\max(u+1,u)=u+1$ である。$u$ が変数のままではこのどちらとも決められないので、$\mathrm{imax}(u+1,u)$ を $\max$ と後者だけの式に書き直すことはできない（$u$ に $0$ と $1$ を割り当てた値が $0$ と $2$ になるが（他の変数には $0$ を割り当てる）、$\max$ と後者だけで作った式 $\ell$ で値が $0$ になるのは $\ell$ が変数と $0$ と $\max$ だけでできているときで、そのとき $u$ に $1$ を割り当てた値は $1$ 以下だからである）。これが、宇宙多相のために $\mathrm{imax}$ という演算をレベルの式に入れる理由である。
+:::
+
+::: supplement
+**前提を変えると.** すべての宇宙が非可述的な体系（たとえば $\mathsf{Type}:\mathsf{Type}$）はジラールのパラドックスによって矛盾する（\ref{logic:dt-universe-remark}）。また、非可述的な宇宙が二段ある体系（$\mathsf{Prop}$ に加えて $\mathsf{Type}\,0$ も非可述的にした体系）も矛盾することが知られている（ジラールによる体系 U の矛盾とされる。未確認）。Lean のように非可述性を最下段の $\mathsf{Prop}$ だけに限り、しかも $\mathsf{Prop}$ の証明を区別しない（証明の無関係性）体系は、到達不能基数を使った集合論のモデルをもつので、それらが無矛盾なら無矛盾である（後のページ \see[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model}）。
+
+**類似の定理.** \ref{logic:system-f} の多相型 $\forall X.\,X\to X$ は、すべての型を走る量化で作られた型で、$\mathsf{Prop}$ の非可述性と同じ形をしている。System F の強正規化（\ref{logic:f-strong-normalization}）で非可述的な量化を扱うために還元可能性候補の全体を走る定義が要ったことも、同じ非可述性の現れである。
+
+**高い視点から.** 集合論の言葉で言えば、$\mathsf{Prop}$ を二元集合 $\{0,1\}$（偽と真）と解釈すると、$\prod_{x:A}B(x)$ は「すべての $x$ で $B(x)=1$ なら $1$、そうでなければ $0$」となり、$A$ がどれほど大きくても値は $\{0,1\}$ に収まる。これが $\mathrm{imax}(u,0)=0$ の意味である。どれほど大きな範囲を走る量化でも値が二つの真理値のどちらかに収まるので、非可述性は矛盾を生まない（\see[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model}）。
+:::
+
+## 帰納型と再帰子 {#logic:sec-lc-inductive}
+
+::: definition 帰納型の宣言 {#logic:lean-inductive keywords="inductive types in Lean, parameters, indices, constructors, strict positivity, universe constraint for constructors, inductive families" index="帰納型（Lean）|きのうがたりーん, パラメータ（帰納型）|ぱらめーたきのうがた, 添字（帰納型）|そえじきのうがた, 構成子|こうせいし, 厳密陽性|げんみつようせい, フィールド（構成子）|ふぃーるどこうせいし"}
+**帰納型**（帰納的な型の族）$T$ の宣言は、次のデータからなる。
+- **パラメータ** $\Delta_{P}=(p_{1}{:}P_{1},\dots,p_{n}{:}P_{n})$ と**添字** $\Delta_{I}=(i_{1}{:}I_{1},\dots,i_{m}{:}I_{m})$、ソート $\mathsf{Sort}\,\ell$ で、$T:\prod_{\Delta_{P}}\prod_{\Delta_{I}}\mathsf{Sort}\,\ell$ となるもの。
+- **構成子** $c_{1},\dots,c_{k}$ で、それぞれ
+$$
+c_{j}:\textstyle\prod_{\Delta_{P}}\prod_{(b_{1}:B_{1})}\cdots\prod_{(b_{r}:B_{r})}T\,\vec{p}\,\vec{t}
+$$
+の形の型をもつもの（$\vec{t}$ は添字に入る項で、$b$ に依存してよい）。$b_{1},\dots,b_{r}$ をその構成子の**フィールド**という。
+
+宣言は次の条件を満たすときに受け入れられる。
+1. （型の正しさ）$T$ を定数として加えた環境で、各構成子の型が正しく型付けされ、結論のパラメータの部分はそのまま $\vec{p}$ である。
+2. （**厳密陽性**）各フィールドの型 $B_{s}$ は、$T$ を含まないか、$\prod_{\vec{y}:\vec{Y}}T\,\vec{p}\,\vec{t}'$ の形で $\vec{Y}$ と $\vec{t}'$ が $T$ を含まないかのどちらかである。後者のフィールドを**再帰的なフィールド**という。
+3. （宇宙の条件）$T$ が $\mathsf{Prop}$ に入らないとき（$\ell$ の値が常に $1$ 以上のとき）、各フィールドの型 $B_{s}:\mathsf{Sort}\,\ell_{s}$ について $\ell_{s}\le\ell$ である。$T$ が $\mathsf{Prop}$ に入るときは、この条件を課さない。
+:::
+
+::: intuition
+帰納型は「構成子を有限回使って作られるものだけからなる型」である。パラメータは族全体で固定された引数、添字は構成子ごとに変わってよい引数である。厳密陽性は「$T$ の元を受け取る関数」を構成子の引数にしないための条件で（\ref{logic:lean-positivity-necessary}）、宇宙の条件は「自分より大きな型の元をしまい込まない」ための条件である。$\mathsf{Prop}$ だけは例外で、どんな大きな型の元を引数にとる命題も作れる。これも非可述性の現れである。
+:::
+
+::: example
+Lean の基本的な帰納型（パラメータは括弧の中、添字は `:` の後）。
+1. $\mathsf{Nat}:\mathsf{Type}$：構成子 $\mathsf{zero}:\mathsf{Nat}$、$\mathsf{succ}:\mathsf{Nat}\to\mathsf{Nat}$。$\mathsf{succ}$ のフィールドは再帰的である。$\mathsf{Bool}:\mathsf{Type}$ は構成子 $\mathsf{false}$, $\mathsf{true}$ をもつ。
+2. $\mathsf{False}:\mathsf{Prop}$ は構成子をもたず、$\mathsf{True}:\mathsf{Prop}$ は構成子 $\mathsf{True.intro}$（$\mathsf{trivial}$ とも書く）だけをもつ。
+3. パラメータ $(a\ b:\mathsf{Prop})$ の $\mathsf{And}\,a\,b$（$a\wedge b$）は構成子 $\mathsf{And.intro}:a\to b\to a\wedge b$ をもち、$\mathsf{Or}\,a\,b$（$a\vee b$）は $\mathsf{Or.inl}:a\to a\vee b$、$\mathsf{Or.inr}:b\to a\vee b$ をもつ。
+4. パラメータ $\{\alpha:\mathsf{Sort}\,u\}(P:\alpha\to\mathsf{Prop})$ の $\mathsf{Exists}\,P$（$\exists x,P\,x$）は構成子 $\mathsf{Exists.intro}:\prod_{w:\alpha}P\,w\to\exists x,P\,x$ をもつ。$\alpha$ がどの宇宙にあっても $\mathsf{Prop}$ に入る（条件 3 を課さない例）。
+5. **等号** $\mathsf{Eq}$：パラメータ $\{\alpha:\mathsf{Sort}\,u\}(a:\alpha)$、添字 $\alpha$ で $\mathsf{Eq}\,a:\alpha\to\mathsf{Prop}$、構成子 $\mathsf{Eq.refl}:\mathsf{Eq}\,a\,a$（フィールドなし）。$\mathsf{Eq}\,a\,b$ を $a=b$ と書き、$\mathsf{Eq.refl}\,a$ を $\mathsf{rfl}$ とも書く。恒等型（\ref{logic:identity-type}）を $\mathsf{Prop}$ に置いたものである。
+6. **到達可能性** $\mathsf{Acc}$：パラメータ $\{\alpha:\mathsf{Sort}\,u\}(r:\alpha\to\alpha\to\mathsf{Prop})$、添字 $\alpha$、構成子
+$$
+\mathsf{Acc.intro}:\textstyle\prod_{x:\alpha}\Bigl(\prod_{y:\alpha}r\,y\,x\to\mathsf{Acc}\,r\,y\Bigr)\to\mathsf{Acc}\,r\,x.
+$$
+二つ目のフィールドは再帰的で、$\mathsf{Acc}\,r\,x$ は「$x$ から $r$ を逆にたどる列はすべて有限で止まる」ことを表す。整礎な再帰はこの型で作られる。
+:::
+
+::: definition 再帰子と ι 簡約 {#logic:lean-recursor keywords="recursor, motive, minor premise, major premise, iota reduction, large elimination" index="再帰子|さいきし, 動機（再帰子）|どうきさいきし, 小前提|しょうぜんてい, 主前提|しゅぜんてい, ι 簡約|いおたかんやく, 大きな除去|おおきなじょきょ"}
+\ref{logic:lean-inductive} の帰納型 $T$ に対して、定数 $T.\mathsf{rec}$（**再帰子**）が次の型で加えられる。
+$$
+T.\mathsf{rec}:\textstyle\prod_{\Delta_{P}}\prod_{M}\ \prod_{m_{1}}\cdots\prod_{m_{k}}\ \prod_{\Delta_{I}}\prod_{t:T\,\vec{p}\,\vec{\imath}}M\,\vec{\imath}\,t.
+$$
+1. $M:\prod_{\Delta_{I}}T\,\vec{p}\,\vec{\imath}\to\mathsf{Sort}\,w$ を**動機**（motive）という。$w$ は新しいレベル変数である。ただし $T$ が $\mathsf{Prop}$ に入り、部分単集合除去（\see{logic:lean-subsingleton-elimination}）の条件を満たさないときは $w=0$ に固定する（動機は命題に値をとるものに限る）。$w$ を任意にとれることを**大きな除去**という。
+2. $m_{j}$ は構成子 $c_{j}$ に対応する**小前提**で、その型は
+$$
+\textstyle\prod_{\vec{b}:\vec{B}}\ \prod_{(\text{再帰的な }b_{s})}\Bigl(\prod_{\vec{y}}M\,\vec{t}'\,(b_{s}\,\vec{y})\Bigr)\to M\,\vec{t}\,(c_{j}\,\vec{p}\,\vec{b})
+$$
+である（再帰的なフィールドごとに、その値についての「帰納法の仮定」を受け取る）。最後の引数 $t$ を**主前提**という。
+3. （**ι 簡約**）主前提が構成子の形のとき、次の定義的等価が成り立つ。
+$$
+T.\mathsf{rec}\,\vec{p}\,M\,\vec{m}\,\vec{t}\,(c_{j}\,\vec{p}\,\vec{b})\equiv m_{j}\,\vec{b}\,\bigl(\lambda\vec{y}.\,T.\mathsf{rec}\,\vec{p}\,M\,\vec{m}\,\vec{t}'\,(b_{s}\,\vec{y})\bigr)_{s}.
+$$
+:::
+
+::: intuition
+再帰子は帰納原理（\ref{logic:dt-inductive-types}）そのもので、「すべての $t$ について $M\,t$ を示す（作る）には、各構成子の場合を、再帰的なフィールドについての仮定のもとで示せばよい」と言う。ι 簡約は「構成子で作った元に再帰子を使うと、対応する場合の値に計算が進む」という計算規則である。動機の値が命題なら帰納法による証明、型なら再帰による定義になる。
+:::
+
+::: example
+1. $\mathsf{Nat.rec}:\prod_{M:\mathsf{Nat}\to\mathsf{Sort}\,w}M\,\mathsf{zero}\to\bigl(\prod_{n:\mathsf{Nat}}M\,n\to M\,(\mathsf{succ}\,n)\bigr)\to\prod_{t:\mathsf{Nat}}M\,t$ であり、ι 簡約は $\mathsf{Nat.rec}\,M\,z\,s\,\mathsf{zero}\equiv z$、$\mathsf{Nat.rec}\,M\,z\,s\,(\mathsf{succ}\,n)\equiv s\,n\,(\mathsf{Nat.rec}\,M\,z\,s\,n)$ である。
+2. **加法.** $\mathrm{add}\defeq\lambda n\,m{:}\mathsf{Nat}.\,\mathsf{Nat.rec}\,(\lambda\_.\,\mathsf{Nat})\,n\,(\lambda k\,r.\,\mathsf{succ}\,r)\,m$ と定める。$1\defeq\mathsf{succ}\,\mathsf{zero}$ とすると、定義の展開（δ）、β、ι によって
+$$
+\mathrm{add}\,n\,1\equiv\mathsf{Nat.rec}\,(\lambda\_.\,\mathsf{Nat})\,n\,(\lambda k\,r.\,\mathsf{succ}\,r)\,(\mathsf{succ}\,\mathsf{zero})\equiv\mathsf{succ}\,(\mathrm{add}\,n\,\mathsf{zero})\equiv\mathsf{succ}\,n
+$$
+となる（最後は ι の一つ目の規則による）。
+3. $\mathsf{Eq.rec}:\prod_{M:\prod_{b:\alpha}a=b\to\mathsf{Sort}\,w}M\,a\,\mathsf{rfl}\to\prod_{b:\alpha}\prod_{h:a=b}M\,b\,h$ であり、ι 簡約は $\mathsf{Eq.rec}\,M\,m\,a\,\mathsf{rfl}\equiv m$ である。これは基点付き道帰納法（\ref{logic:identity-type} の後の注意）と同じ形である。動機を $M\,b\,h\defeq(P\,a\to P\,b)$ とすれば、等しいものの置き換え（輸送）$a=b\to P\,a\to P\,b$ が得られる。
+4. $\mathsf{False.rec}:\prod_{M:\mathsf{False}\to\mathsf{Sort}\,w}\prod_{t:\mathsf{False}}M\,t$ には小前提がない。これが爆発律（偽から何でも出る）である。
+:::
+
+::: theorem 厳密陽性は必要 {#logic:lean-positivity-necessary keywords="strict positivity is necessary, negative inductive types are inconsistent" index="厳密陽性の必要性|げんみつようせいのひつようせい"}
+条件 \ref{logic:lean-inductive.2} を外して、次の型を加えたとする：$\mathsf{Bad}:\mathsf{Prop}$、構成子 $\mathsf{mk}:(\mathsf{Bad}\to\mathsf{False})\to\mathsf{Bad}$、および場合分けの規則
+$$
+\mathsf{Bad.cases}:\textstyle\prod_{M:\mathsf{Bad}\to\mathsf{Prop}}\Bigl(\prod_{g:\mathsf{Bad}\to\mathsf{False}}M\,(\mathsf{mk}\,g)\Bigr)\to\prod_{t:\mathsf{Bad}}M\,t
+$$
+（ι 簡約つき）。すると $\mathsf{False}$ の閉じた項が作れる。$\mathsf{Bad}$ を $\mathsf{Type}$ に置いても同じである。
+:::
+
+::: intuition
+$\mathsf{Bad}$ の元は「$\mathsf{Bad}$ の否定の証明」を包んだものなので、包みを開けて自分自身に適用すると矛盾が出る。型なしラムダ計算の $(\lambda x.\,x\,x)(\lambda x.\,x\,x)$ と同じ自己適用である。帰納法の仮定さえ使わない、ただの場合分けで矛盾するので、負の位置に型が現れること自体が許されない。
+:::
+
+::: proof
+**Step 1（包みを開ける関数）.** 【主張：$\mathrm{out}(\mathsf{mk}\,g)\equiv g$ となる $\mathrm{out}:\mathsf{Bad}\to(\mathsf{Bad}\to\mathsf{False})$ がある】 動機を定数の族 $M\defeq\lambda\_.\,(\mathsf{Bad}\to\mathsf{False})$ とする。$\mathsf{Bad}\to\mathsf{False}$ は $\mathrm{imax}(0,0)=0$ から命題なので、$M:\mathsf{Bad}\to\mathsf{Prop}$ である。小前提を $\lambda g.\,g$ として $\mathrm{out}\defeq\mathsf{Bad.cases}\,M\,(\lambda g.\,g)$ とおくと、ι 簡約と β から $\mathrm{out}(\mathsf{mk}\,g)\equiv(\lambda g.\,g)\,g\equiv g$ となる。
+
+**Step 2（自己適用）.** 【主張：$\mathrm{nb}\defeq\lambda b{:}\mathsf{Bad}.\,\mathrm{out}\,b\,b$ は $\mathsf{Bad}\to\mathsf{False}$ の項である】 $b:\mathsf{Bad}$ のもとで $\mathrm{out}\,b:\mathsf{Bad}\to\mathsf{False}$ なので、それを $b$ に適用した $\mathrm{out}\,b\,b$ は $\mathsf{False}$ の項である。λ で抽象すれば主張の型になる。
+
+**Step 3（矛盾）.** 【主張：$\mathrm{nb}\,(\mathsf{mk}\,\mathrm{nb})$ は $\mathsf{False}$ の閉じた項である】 Step 2 から $\mathsf{mk}\,\mathrm{nb}:\mathsf{Bad}$ であり、それに $\mathrm{nb}$ を適用すれば $\mathsf{False}$ の項になる。この項は閉じている（自由変数をもたない）。
+
+$\mathsf{Bad}:\mathsf{Type}$ の場合も、動機 $M$ は命題に値をとるので同じ規則で $\mathrm{out}$ が作れ、証明はそのまま通る。
+
+::: hypcheck
+- **厳密陽性を外したこと**：$\mathsf{mk}$ のフィールドの型 $\mathsf{Bad}\to\mathsf{False}$ は、$\mathsf{Bad}$ を矢印の左（負の位置）に含むので、\ref{logic:lean-inductive.2} に反する。条件を守る限り、この自己適用は作れない。
+- **ι 簡約**：実は矛盾を出すのに ι 簡約は使っていない（Step 3 の型付けには $\mathrm{out}$ の型だけを使った）。ι 簡約を使うと $\mathrm{nb}(\mathsf{mk}\,\mathrm{nb})\equiv\mathrm{out}(\mathsf{mk}\,\mathrm{nb})(\mathsf{mk}\,\mathrm{nb})\equiv\mathrm{nb}(\mathsf{mk}\,\mathrm{nb})$ となり、この項の簡約が止まらないこともわかる。
+- **大きな除去**：使っていない。動機は命題に値をとる。したがって、命題の帰納型にも厳密陽性は必要である。
+:::
+:::
+
+::: supplement
+**前提を変えると.** 厳密ではないが陽性の出現（たとえば $\mathsf{mk}:((\mathsf{Bad}\to\mathsf{Prop})\to\mathsf{Prop})\to\mathsf{Bad}$ のように、矢印の左の左に現れるもの）も、非可述的な $\mathsf{Prop}$ と組み合わせると矛盾することが知られている（T. Coquand と C. Paulin による例とされる。未確認）。宇宙の条件 \ref{logic:lean-inductive.3} を外して $\mathsf{Type}$ の元を $\mathsf{Type}$ の帰納型の構成子に入れることを許すと、ジラールのパラドックスと同じ議論で矛盾するとされる（未確認）。
+
+**一般化.** Lean では、複数の型を同時に定める相互帰納型や、構成子の引数に他の帰納型の中で自分自身が現れる入れ子の帰納型も宣言できる。核はこれらを上の形に翻訳して検査するとされる（細部は未確認）。構造的再帰や整礎再帰で書かれた定義も、最終的には再帰子（と $\mathsf{Acc.rec}$）を使う項に翻訳される。
+:::
+
+## 定義的等価 {#logic:sec-lc-defeq}
+
+::: definition 定義的等価の規則 {#logic:lean-defeq-rules keywords="definitional equality in Lean, beta, delta, zeta, iota, eta, proof irrelevance, structure eta" index="定義的等価|ていぎてきとうか, δ 簡約|でるたかんやく, ζ 簡約|ぜーたかんやく, η 規則（Lean）|いーたきそくりーん, 証明の無関係性|しょうめいのむかんけいせい, 構造の η|こうぞうのいーた"}
+**定義的等価** $\Gamma\vdash s\equiv t$ は、同値関係であり、すべての項の構成（適用・λ・Π・let。束縛の下も含む）と両立し、次の規則を含む最小の関係である。
+1. （β）$(\lambda x{:}A.\,b)\,a\equiv b[a/x]$。
+2. （δ）定義 $c\defeq e$（レベル変数 $\vec{u}$ をもつ）について $c.\{\vec{\ell}\}\equiv e[\vec{\ell}/\vec{u}]$。公理には δ はない。
+3. （ζ）$(\mathsf{let}\ x\defeq v;\ b)\equiv b[v/x]$。
+4. （ι）再帰子の計算（\ref{logic:lean-recursor.3}）。商型の計算規則（次ページ \see{logic:lean-quot}）も同じ種類の規則である。
+5. （η）$\Gamma\vdash f:\prod_{x:A}B$ で $x$ が $f$ に自由に現れないとき、$\lambda x{:}A.\,f\,x\equiv f$。
+6. （**証明の無関係性**）$\Gamma\vdash p:\mathsf{Prop}$、$\Gamma\vdash h:p$、$\Gamma\vdash h':p$ なら $h\equiv h'$。
+7. （**構造の η**）$S$ が構造（構成子が一つで、添字がなく、再帰的なフィールドのない帰納型）で、フィールドの射影を $\pi_{1},\dots,\pi_{r}$ とするとき、$\Gamma\vdash s:S\,\vec{p}$ なら $s\equiv S.\mathsf{mk}\,\vec{p}\,(\pi_{1}s)\cdots(\pi_{r}s)$。
+8. （レベル）$\ell=\ell'$ なら $\mathsf{Sort}\,\ell\equiv\mathsf{Sort}\,\ell'$ であり、定数のレベル引数についても同様である。
+:::
+
+::: intuition
+β・δ・ζ・ι は「計算を進めれば同じになる」規則、η と構造の η は「関数や組は、その成分で決まる」規則、証明の無関係性は「命題の証明はどれでも同じ」という規則である。最後の三つは項の**型**を見て初めて使えるので、定義的等価の判定は型を知っていなければできない。ここで述べたのは規則から理想的に定まる関係で、Lean の核が実際に判定に使う算法とは一致しない点がある（後のページ \see[定義的等価の性質]{logic:page-lean-defeq}）。
+:::
+
+::: example
+1. \ref{logic:lean-recursor} の例の加法で、$\mathrm{add}\,n\,\mathsf{zero}\equiv n$ は δ・β・ι で成り立つ。一方、$n$ が変数のとき $\mathrm{add}\,\mathsf{zero}\,n$ は、主前提 $n$ が構成子の形でないので ι 簡約が進まない。$\mathrm{add}\,\mathsf{zero}\,n=n$ は、命題としての等式として $\mathsf{Nat.rec}$ による帰納法で示す（\ref{logic:prob-it-add-zero} と同じ）。
+2. 組の型 $\alpha\times\beta$ は構造（構成子 $\mathsf{Prod.mk}$、射影 $\mathsf{fst}$, $\mathsf{snd}$）なので、$p:\alpha\times\beta$ について $p\equiv(\mathsf{fst}\,p,\mathsf{snd}\,p)$ が定義的に成り立ち、$\mathsf{rfl}:p=(\mathsf{fst}\,p,\mathsf{snd}\,p)$ である。前の系列の体系では、この等式は Σ 型の帰納原理による命題としてしか示せなかった（\ref{logic:sigma-eta}）。
+3. 部分型 $\{x:\alpha\mathrel{/\!/}P\,x\}$（構造 $\mathsf{Subtype}$、フィールド $\mathsf{val}:\alpha$ と $\mathsf{property}:P\,\mathsf{val}$）について、$h,h':P\,a$ なら証明の無関係性から $\langle a,h\rangle\equiv\langle a,h'\rangle$ である。部分集合の元の等しさが値だけで決まる。
+:::
+
+::: remark 組み込みの拡張
+Lean 4 の核は、上の規則に加えて、自然数を十進の数字で表した定数とその四則演算、文字列の定数を特別に扱う（大きな自然数の計算を高速に行う）とされる（未確認）。これは上の規則から導かれる等価を速く判定するためのもので、等価の範囲を本質的には変えないと説明されるが、本サイトでは確かめていない。
+:::
+
+::: theorem 恒等の証明の一意性（Lean） {#logic:lean-uip keywords="uniqueness of identity proofs holds in Lean, axiom K from proof irrelevance" index="恒等の証明の一意性（Lean）|こうとうのしょうめいのいちいせいりーん, 公理 K（Lean）|こうりけいりーん"}
+$\alpha:\mathsf{Sort}\,u$、$a,b:\alpha$ とする。
+1. $h,h':a=b$ なら $h\equiv h'$ であり、とくに $\mathsf{rfl}:h=h'$ である。
+2. （公理 K）動機 $C:a=a\to\mathsf{Sort}\,w$ と $c:C\,\mathsf{rfl}$ から、$\prod_{h:a=a}C\,h$ の項が作れる。
+:::
+
+::: intuition
+Lean の等号は命題（$\mathsf{Prop}$ の元）なので、その証明はどれも区別されない。したがって「$a$ と $b$ がどのように等しいか」という情報は残らず、等号は集合論の等号と同じく「等しいかどうか」だけを表す。前の系列のホモトピー的な見方（等しさは道であり、道どうしが異なりうる）は Lean の等号には当てはまらない。
+:::
+
+::: proof
+**Step 1（証明は区別されない）.** 【主張：$h\equiv h'$】 $\mathsf{Eq}$ は $\mathsf{Prop}$ に入る帰納型なので $(a=b):\mathsf{Prop}$ である。$h$ と $h'$ はどちらもこの命題の証明なので、証明の無関係性（\ref{logic:lean-defeq-rules.6}）から $h\equiv h'$ である。
+
+**Step 2（命題としての等式）.** 【主張：$\mathsf{rfl}:h=h'$】 $\mathsf{Eq.refl}\,h:h=h$ である。Step 1 と定義的等価の両立性から $(h=h)\equiv(h=h')$ なので、変換規則によって $\mathsf{Eq.refl}\,h:h=h'$ である。
+
+**Step 3（公理 K）.** 【主張：$\lambda h.\,c:\prod_{h:a=a}C\,h$】 $h:a=a$ のもとで、Step 1 から $\mathsf{rfl}\equiv h$ なので、両立性から $C\,\mathsf{rfl}\equiv C\,h$ である。変換規則から $c:C\,h$ であり、$h$ について λ で抽象すれば主張の項になる。
+
+::: hypcheck
+- **等号が $\mathsf{Prop}$ に入ること**：Step 1 で使った。等号を $\mathsf{Type}$ に置く体系（マルティン＝レーフ型理論の恒等型）では、主張 1 は規則から証明できない（\ref{logic:uip-not-provable}）。
+- **証明の無関係性**：Step 1・Step 3 で使った。これが定義的でなく命題としての公理（$\prod_{p:\mathsf{Prop}}\prod_{h,h':p}h=h'$）であっても、1 の後半と 2 は輸送（\ref{logic:lean-recursor} の例 3）を使って示せる。
+- **大きな除去**：2 の動機 $C$ は任意のソートに値をとってよい。Step 3 は再帰子を使わず、変換規則だけで済んでいる。
+:::
+:::
+
+::: corollary 一価性公理と両立しない {#logic:lean-univalence-inconsistent keywords="univalence is inconsistent with Lean's proof irrelevance" index="一価性公理と証明の無関係性|いっかせいこうりとしょうめいのむかんけいせい"}
+Lean の核の規則に、$\mathsf{Eq}$ についての一価性公理（\tref{logic:univalence-axiom} を $\mathsf{Type}$ と Lean の等号で述べたもの）を加えると、$\mathsf{False}$ の項が作れる。
+:::
+
+::: proof
+**Step 1（一価性からの不等式）.** 【主張：$\neg\bigl(\mathrm{ua}(e_{\mathrm{neg}})=\mathsf{rfl}\bigr)$ の項がある】 \ref{logic:universe-not-set} の証明は、Π 型・Σ 型（Lean では構造 $\mathsf{Sigma}$ と $\mathsf{Prod}$）、等号の除去（$\mathsf{Eq.rec}$。大きな除去が使える）、二元型（$\mathsf{Bool}$）の大きな除去（\ref{logic:two-distinct}）、一価性公理だけを使う。それらはすべて Lean の規則にあるので、同じ項が Lean で書ける。$\neg q$ は $q\to\mathsf{False}$ の略である。
+
+**Step 2（一意性からの等式）.** 【主張：$\mathrm{ua}(e_{\mathrm{neg}})=\mathsf{rfl}$ の項がある】 $\mathrm{ua}(e_{\mathrm{neg}})$ と $\mathsf{rfl}$ はどちらも $\mathsf{Bool}=\mathsf{Bool}$ の証明なので、\ref{logic:lean-uip.1} から従う。
+
+**Step 3.** Step 1 の項を Step 2 の項に適用すれば $\mathsf{False}$ の項になる。
+
+::: hypcheck
+- **証明の無関係性**：Step 2 で使った。これを持たないマルティン＝レーフ型理論では、一価性公理は単体的集合のモデルをもつことが知られている（\ref{logic:page-hott} の補足）。
+- **Step 1 の書き直し**：\ref{logic:universe-not-set} の各段を Lean の規則で書き直せることは、各段で使った規則を一つずつ照らし合わせて確かめた（同値の型は Σ 型、$\mathrm{happly}$ と $\mathrm{ap}$ は $\mathsf{Eq.rec}$ で定まる）。形式的な書き直しは本ページでは行っていない。
+:::
+:::
+
+## Prop からの除去の制限 {#logic:sec-lc-subsingleton}
+
+::: definition 部分単集合除去 {#logic:lean-subsingleton-elimination keywords="subsingleton elimination, large elimination from Prop, syntactic subsingletons" index="部分単集合除去|ぶぶんたんしゅうごうじょきょ, 大きな除去（Prop）|おおきなじょきょぷろっぷ"}
+$\mathsf{Prop}$ に入る帰納型 $T$ が次のどちらかを満たすとき、$T$ は**部分単集合除去**を許すといい、その再帰子の動機は任意のソートに値をとってよい（大きな除去。\ref{logic:lean-recursor.1}）。
+1. $T$ は構成子をもたない。
+2. $T$ は構成子をちょうど一つもち、そのフィールド $b_{s}$ はどれも次のどちらかである。
+   - $b_{s}$ の型が命題である（$B_{s}:\mathsf{Prop}$）。
+   - $b_{s}$ が、構成子の結論 $T\,\vec{p}\,\vec{t}$ の添字 $\vec{t}$ の一つとして、変数のまま現れる。
+
+それ以外の $\mathsf{Prop}$ の帰納型の再帰子は、命題に値をとる動機しか許さない。名前の「**部分単集合**」（subsingleton）は、高々一つの元しかもたない集合（型）のことである。
+:::
+
+::: intuition
+証明の無関係性のもとでは、命題の証明から「どの構成子で作られたか」「フィールドに何が入っていたか」を取り出せてはいけない（取り出せると、等しいはずの二つの証明から違う値が出てしまう。\ref{logic:lean-large-elim-or-inconsistent}）。条件 2 は、構成子が一つしかなく、フィールドの中身が証明（どれでも同じ）か、型を見れば分かるデータ（添字）だけである場合で、そのときは取り出しても情報は増えない。
+:::
+
+::: table 部分単集合除去の例 {#logic:table-subsingleton-examples}
+| 命題の帰納型 | 構成子の数 | フィールド | 大きな除去 |
+|---|---|---|---|
+| $\mathsf{False}$ | 0 | なし | :yes: |
+| $\mathsf{True}$ | 1 | なし | :yes: |
+| $a\wedge b$ | 1 | $a$ と $b$ の証明（命題） | :yes: |
+| $a=b$（$\mathsf{Eq}$） | 1 | なし（$a$ はパラメータ） | :yes: |
+| $\mathsf{Acc}\,r\,x$ | 1 | $x$（添字に現れる）と、命題に値をとる関数 | :yes: |
+| $a\vee b$ | 2 | — | :no: |
+| $\exists x,P\,x$ | 1 | $w:\alpha$（命題でなく、添字にも現れない） | :no: |
+:::
+
+::: theorem 二つの構成子をもつ命題の大きな除去は矛盾する {#logic:lean-large-elim-or-inconsistent keywords="large elimination for Or contradicts proof irrelevance" index="大きな除去と証明の無関係性|おおきなじょきょとしょうめいのむかんけいせい"}
+$\mathsf{Or}$ の再帰子に $\mathsf{Type}$ に値をとる動機を許し、ι 簡約もそのまま成り立つとする。すると $\mathsf{False}$ の閉じた項が作れる。
+:::
+
+::: intuition
+$\mathsf{True}\vee\mathsf{True}$ には「左から来た証明」と「右から来た証明」があり、大きな除去はそれを $\mathsf{true}$ と $\mathsf{false}$ に振り分けられる。ところが証明の無関係性によって二つの証明は等しいので、$\mathsf{true}=\mathsf{false}$ が出てしまう。
+:::
+
+::: proof
+**Step 1（振り分ける関数）.** 【主張：$f(\mathsf{Or.inl}\,\mathsf{trivial})\equiv\mathsf{true}$、$f(\mathsf{Or.inr}\,\mathsf{trivial})\equiv\mathsf{false}$ となる $f:\mathsf{True}\vee\mathsf{True}\to\mathsf{Bool}$ がある】 仮定した再帰子を、定数の動機 $\lambda\_.\,\mathsf{Bool}$（$\mathsf{Bool}:\mathsf{Type}$ なので許される）と小前提 $\lambda\_.\,\mathsf{true}$, $\lambda\_.\,\mathsf{false}$ に使って $f$ を定める。ι 簡約と β から主張の二つの等価が成り立つ。
+
+**Step 2（二つの証明は等しい）.** 【主張：$\mathsf{Or.inl}\,\mathsf{trivial}\equiv\mathsf{Or.inr}\,\mathsf{trivial}$】 どちらも命題 $\mathsf{True}\vee\mathsf{True}$ の証明なので、証明の無関係性から従う。
+
+**Step 3（$\mathsf{true}=\mathsf{false}$）.** 【主張：$\mathsf{rfl}:\mathsf{true}=\mathsf{false}$】 Step 1・Step 2 と両立性から、$\mathsf{true}\equiv f(\mathsf{Or.inl}\,\mathsf{trivial})\equiv f(\mathsf{Or.inr}\,\mathsf{trivial})\equiv\mathsf{false}$ である。ゆえに $(\mathsf{true}=\mathsf{true})\equiv(\mathsf{true}=\mathsf{false})$ であり、変換規則から $\mathsf{rfl}:\mathsf{true}=\mathsf{false}$ となる。
+
+**Step 4（矛盾）.** 【主張：$\mathsf{true}=\mathsf{false}$ から $\mathsf{False}$ の項が作れる】 $\mathsf{Bool}$ は $\mathsf{Type}$ の帰納型なので大きな除去が使え、$g:\mathsf{Bool}\to\mathsf{Prop}$ を $g\,\mathsf{true}\equiv\mathsf{True}$、$g\,\mathsf{false}\equiv\mathsf{False}$ となるように定められる。等号の輸送（\ref{logic:lean-recursor} の例 3。動機 $\lambda b\,\_.\,g\,b$）で、$\mathsf{trivial}:g\,\mathsf{true}$ を Step 3 の等式に沿って運ぶと、$g\,\mathsf{false}\equiv\mathsf{False}$ の項が得られる。
+
+::: hypcheck
+- **大きな除去**：Step 1 で、命題 $\mathsf{True}\vee\mathsf{True}$ から $\mathsf{Type}$ の $\mathsf{Bool}$ へ値をとる関数を作るのに使った。これが \ref{logic:lean-subsingleton-elimination} で禁じられている部分である。
+- **証明の無関係性**：Step 2 で使った。これが定義的でなく命題としての公理であっても、Step 3 を「$\mathsf{Or.inl}\,\mathsf{trivial}=\mathsf{Or.inr}\,\mathsf{trivial}$ に $f$ を適用する（$\mathsf{Eq.rec}$ による合同）」に替えれば同じ結論が出る。逆に、証明の無関係性をもたないマルティン＝レーフ型理論では、和型 $\mathsf{1}+\mathsf{1}$ に大きな除去があっても矛盾しない（$\mathsf{inl}$ と $\mathsf{inr}$ は等しくない。\ref{logic:two-distinct}）。
+- **構成子が二つであること**：Step 1 で二つの小前提に違う値を与えるのに使った。
+:::
+:::
+
+::: supplement
+**類似の定理.** 構成子が一つでも、命題でないフィールドが添字に現れない $\exists x,P\,x$ に大きな除去を許すと、やはり矛盾する（\ref{logic:prob-lc-exists-large}）。したがって、$\exists x,P\,x$ の証明から証人 $x$ を取り出す関数は核の規則だけでは作れず、それを可能にするのが次ページの選択公理 \see{logic:lean-choice} である。前の系列の型理論的選択公理（\tref{logic:type-theoretic-choice}）が証明できたのは、存在を Σ 型で読み、証人を取り出せたからであった。
+
+**部分単集合除去が安全な理由.** 条件 2 を満たす命題では、同じ型をもつ二つの「構成子の形の証明」は、命題のフィールド（証明の無関係性で等しい）と添字に現れるフィールド（型が同じなら同じ）しか持たないので、小前提に渡される値が同じになる。そのため、大きな除去と証明の無関係性が食い違わない。ここでは「型が同じなら添字が同じ」（帰納型の適用についての単射性）を確かめずに述べたので、これは説明にとどまる。厳密な正当化は集合論のモデルで与えられる（\see[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model}）。一方、$\mathsf{Acc}$ や $\mathsf{Eq}$ の大きな除去は、定義的等価の判定の算法に難しさを持ち込む（\see[定義的等価の性質]{logic:page-lean-defeq}）。
+
+**高い視点から.** 集合論の言葉で言えば、命題は高々一元の集合で、大きな除去が許されるのは、元が一つしかないことが構文から見てとれる型である。名前の「部分単集合除去」（subsingleton elimination）はこれに由来する。ホモトピー型理論の言葉では、$\mathsf{Prop}$ の各元は命題（\ref{logic:h-levels}）であり、$\exists$ は Σ 型の命題への切り詰めに当たる。
+:::
+
+## 問題 {#logic:sec-lc-problems}
+
+::: problem ★ 基本：ソートの計算 {#logic:prob-lc-sort-computation}
+$u,v$ をレベル変数とする。型 $\prod_{\alpha:\mathsf{Sort}\,u}\prod_{\beta:\mathsf{Sort}\,v}\alpha\to\beta$ が入るソートを $\mathrm{imax}$ を使って求め、$v$ に $0$ を割り当てた場合と $1$ 以上を割り当てた場合に分けて簡単にせよ。
+:::
+
+::: solution
+内側から計算する。$\alpha\to\beta$ は $\mathsf{Sort}\,(\mathrm{imax}(u,v))$ に入る。$\beta$ についての Π では、$\mathsf{Sort}\,v:\mathsf{Sort}\,(v+1)$ なので $\mathsf{Sort}\,(\mathrm{imax}(v+1,\mathrm{imax}(u,v)))$ となり、$\alpha$ についての Π で $\mathsf{Sort}\,(\mathrm{imax}(u+1,\mathrm{imax}(v+1,\mathrm{imax}(u,v))))$ となる。\ref{logic:lean-imax-properties.4} を二回使うと、このレベルは
+$$
+\mathrm{imax}(\max(u+1,v+1),\mathrm{imax}(u,v))=\mathrm{imax}(\max(u+1,v+1,u),v)=\mathrm{imax}(\max(u,v)+1,v)
+$$
+に等しい。$v$ に $0$ を割り当てるとこの値は $0$ であり、型は命題になる（$\beta$ が命題を走るので、全体は「任意の命題 $\beta$ について $\alpha\to\beta$」という命題の族の量化である）。$v$ に $1$ 以上を割り当てると値は $\max(u,v)+1$ である。
+:::
+
+::: problem ★ 基本：存在の大きな除去は矛盾する {#logic:prob-lc-exists-large}
+$\mathsf{Exists}$ の再帰子に $\mathsf{Type}$ に値をとる動機を許し、ι 簡約も成り立つとする。$\exists n{:}\mathsf{Nat},\mathsf{True}$ の二つの証明を使って $\mathsf{False}$ の項を作れ。
+:::
+
+::: solution
+仮定した再帰子を動機 $\lambda\_.\,\mathsf{Nat}$ と小前提 $\lambda w\,\_.\,w$ に使い、$\mathrm{wit}:(\exists n{:}\mathsf{Nat},\mathsf{True})\to\mathsf{Nat}$ を定める。ι 簡約から $\mathrm{wit}(\mathsf{Exists.intro}\,n\,\mathsf{trivial})\equiv n$ である。$e_{0}\defeq\mathsf{Exists.intro}\,0\,\mathsf{trivial}$ と $e_{1}\defeq\mathsf{Exists.intro}\,1\,\mathsf{trivial}$ はどちらも同じ命題の証明なので、証明の無関係性から $e_{0}\equiv e_{1}$ であり、ゆえに $0\equiv\mathrm{wit}\,e_{0}\equiv\mathrm{wit}\,e_{1}\equiv1$ となる。したがって $\mathsf{rfl}:0=1$ である。あとは \ref{logic:lean-large-elim-or-inconsistent} の Step 4 と同じく、$\mathsf{Nat}$ の大きな除去で $g\,0\equiv\mathsf{True}$、$g\,(\mathsf{succ}\,n)\equiv\mathsf{False}$ となる $g:\mathsf{Nat}\to\mathsf{Prop}$ を作り、$\mathsf{trivial}:g\,0$ を $0=1$ に沿って運べば $\mathsf{False}$ の項が得られる。
+:::
+
+::: problem ★ 基本：部分単集合除去の判定 {#logic:prob-lc-subsingleton-check}
+次の $\mathsf{Prop}$ の帰納型が部分単集合除去を許すかどうかを、\ref{logic:lean-subsingleton-elimination} の条件で判定せよ。
+1. $P:\mathsf{Nat}\to\mathsf{Prop}$、構成子 $\mathsf{mk}:\prod_{n:\mathsf{Nat}}P\,n$。
+2. $Q:\mathsf{Prop}$、構成子 $\mathsf{mk}:\mathsf{Nat}\to Q$。
+3. パラメータ $(a:\mathsf{Prop})$ の $R\,a:\mathsf{Prop}$、構成子 $\mathsf{mk}:a\to a\to R\,a$。
+:::
+
+::: solution
+1 の場合、構成子は一つで、フィールド $n$ は結論 $P\,n$ の添字に変数のまま現れるので、条件 2 を満たし、部分単集合除去を許す。実際、$P\,n$ の証明から $n$ を取り出しても、それは型から読める情報である。
+
+2 の場合、フィールドの型 $\mathsf{Nat}$ は命題でなく、$Q$ には添字がないので条件 2 を満たさず、大きな除去は許されない。許すと、\ref{logic:prob-lc-exists-large} と同じく $\mathsf{mk}\,0\equiv\mathsf{mk}\,1$ から $0=1$ が出る。
+
+3 の場合、構成子は一つで、二つのフィールドの型はどちらも命題 $a$ なので条件 2 を満たし、部分単集合除去を許す。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
