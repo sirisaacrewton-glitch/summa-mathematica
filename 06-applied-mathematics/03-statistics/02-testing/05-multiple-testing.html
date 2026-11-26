@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多重検定 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/02-testing/05-multiple-testing.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 多重検定 {#stat:page-multiple-testing keywords="multiple hypotheses, family-wise error rate, Bonferroni correction via the union bound, Holm's step-down procedure controls FWER under arbitrary dependence, false discovery rate, Benjamini-Hochberg step-up procedure, FDR = (m_0/m) alpha under independence (leave-one-out proof), p-hacking and garden of forking paths"}
+
+1 つの検定の有意水準を 5% に保っても、100 個の検定を同時に行えば、すべての帰無仮説が正しくても平均 5 個は「有意」になる。遺伝子の網羅的な解析や、多数の指標を比べる研究では、この**多重性**を考慮しないと偽の発見があふれる。このページでは、「1 つでも誤って棄却する確率」（**族単位の誤り率**）を抑えるボンフェローニ法とホルム法、「棄却したもののうち誤りの割合の期待値」（**偽発見率**）を抑えるベンジャミニ–ホッホベルク法を扱い、それぞれの保証を証明する。
+
+## 記法と定義の確認 {#stat:sec-mt-notation}
+
+::: notation
+- 検定と p 値、帰無仮説のもとでの不等式 $P(p\le u)\le u$ は \ref{stat:hypothesis-test}, \ref{stat:p-value}, \ref{stat:p-value-validity}。
+- 帰無仮説 $H_{1},\dots,H_{m}$ とその p 値 $p_{1},\dots,p_{m}$ を考える。真の帰無仮説の添字の集合を $I_{0}$、$m_{0}\defeq\abs{I_{0}}$ とする（$I_{0}$ は未知の真のパラメータで決まる）。$i\in I_{0}$ について $P(p_{i}\le u)\le u$（$u\in[0,1]$）を仮定する。
+- 小さい順に並べた p 値を $p_{(1)}\le\dots\le p_{(m)}$ とし、$H_{(j)}$ を対応する仮説とする。体系は $\ZFC$。
+:::
+
+## 族単位の誤り率 {#stat:sec-mt-fwer}
+
+::: definition 族単位の誤り率と偽発見率 {#stat:fwer-fdr keywords="R = number of rejections, V = number of true nulls rejected; FWER = P(V >= 1); FDR = E[V / max(R, 1)]; FDR <= FWER" index="多重検定|たじゅうけんてい, 族単位の誤り率|ぞくたんいのあやまりりつ, 偽発見率|ぎはっけんりつ" refname="族単位の誤り率と偽発見率"}
+棄却する仮説の集合を決める手続きについて、棄却した数を $R$、そのうち真の帰無仮説の数を $V$ とする。
+$$
+\mathrm{FWER}\defeq P(V\ge1),\qquad\mathrm{FDR}\defeq E\Bigl[\frac{V}{\max(R,1)}\Bigr]
+$$
+をそれぞれ**族単位の誤り率**、**偽発見率**という。$\frac{V}{\max(R,1)}\le1_{\{V\ge1\}}$ なので $\mathrm{FDR}\le\mathrm{FWER}$。
+:::
+
+::: intuition
+族単位の誤り率は「一度でも冤罪を出す確率」、偽発見率は「有罪判決のうち冤罪の割合の平均」である。前者は厳しく、少数の重要な結論を守るのに向く。後者は緩く、多数の候補から「有望なもの」を拾い出す探索的な研究に向く。
+:::
+
+::: theorem ボンフェローニ法とホルム法 {#stat:bonferroni-holm keywords="Bonferroni: reject H_i when p_i <= alpha/m; Holm: reject H_(1), ..., H_(k-1) where k is the first index with p_(k) > alpha/(m - k + 1); both have FWER <= alpha under arbitrary dependence; Holm rejects at least as much as Bonferroni" index="ボンフェローニ法|ぼんふぇろーにほう, ホルム法|ほるむほう" refname="ボンフェローニ法とホルム法"}
+p 値の間の依存関係にかかわらず、次の手続きは $\mathrm{FWER}\le\alpha$ をみたす。
+1. （ボンフェローニ）$p_{i}\le\alpha/m$ となる $H_{i}$ をすべて棄却する。
+2. （ホルム）$p_{(j)}>\frac{\alpha}{m-j+1}$ となる最小の $j$ を $k$ とし（なければ $k\defeq m+1$）、$H_{(1)},\dots,H_{(k-1)}$ を棄却する。
+また、ホルム法はボンフェローニ法が棄却するものをすべて棄却する。
+:::
+
+::: intuition
+ボンフェローニ法は、誤りの可能性 $m$ 個に水準 $\alpha$ を等分する。ホルム法は、最も小さい p 値から順に調べ、1 つ棄却するごとに「残りの候補の数」で割り直す。棄却された仮説はもう誤りの候補として数えなくてよいので、その分だけ後の基準を緩められる。
+:::
+
+::: proof
+**Step 1（ボンフェローニ）.** 和の確率の評価と p 値の仮定から
+$$
+P(V\ge1)=P\Bigl(\bigcup_{i\in I_{0}}\{p_{i}\le\alpha/m\}\Bigr)\le\sum_{i\in I_{0}}P(p_{i}\le\alpha/m)\le m_{0}\frac\alpha m\le\alpha.
+$$
+
+**Step 2（ホルム：誤りが起きる条件）.** 【主張：ホルム法で $V\ge1$ なら $\min_{i\in I_{0}}p_{i}\le\alpha/m_{0}$】$m_{0}\ge1$ としてよい。真の帰無仮説のうち p 値が最小のものが、並べた順で $j_{0}$ 番目にあるとする（同順位は任意に順序づける）。$V\ge1$ なら、ホルム法は先頭から連続して棄却するので $H_{(j_{0})}$ も棄却され、$p_{(j_{0})}\le\frac{\alpha}{m-j_{0}+1}$。$H_{(1)},\dots,H_{(j_{0}-1)}$ はすべて偽の帰無仮説なので $j_{0}-1\le m-m_{0}$、すなわち $m-j_{0}+1\ge m_{0}$。よって $p_{(j_{0})}\le\alpha/m_{0}$。
+
+**Step 3（ホルム：確率）.** Step 2 と Step 1 と同じ評価で $P(V\ge1)\le\sum_{i\in I_{0}}P(p_{i}\le\alpha/m_{0})\le\alpha$。
+
+**Step 4（比較）.** ボンフェローニ法が $H_{(j)}$ を棄却すれば $p_{(i)}\le p_{(j)}\le\alpha/m\le\frac{\alpha}{m-i+1}$（$i\le j$）なので、ホルム法の $k$ は $j$ より大きく、$H_{(j)}$ も棄却する。
+:::
+
+## 偽発見率 {#stat:sec-mt-fdr}
+
+::: theorem ベンジャミニ–ホッホベルク法 {#stat:benjamini-hochberg keywords="BH: k = max{j : p_(j) <= j alpha / m}, reject all H_i with p_i <= k alpha / m; if each true-null p-value is super-uniform and independent of all other p-values, FDR <= m_0 alpha / m, with equality for uniform p-values; leave-one-out proof" index="ベンジャミニ–ホッホベルク法|べんじゃみにほっほべるくほう" refname="ベンジャミニ–ホッホベルク法"}
+$k\defeq\max\{j:p_{(j)}\le j\alpha/m\}$（なければ $k\defeq0$）とし、$p_{i}\le k\alpha/m$ となる $H_{i}$ をすべて棄却する（棄却数は $R=k$）。各 $i\in I_{0}$ について $p_{i}$ が他の p 値の組 $(p_{j})_{j\ne i}$ と独立なら、
+$$
+\mathrm{FDR}\le\frac{m_{0}}m\alpha\le\alpha.
+$$
+$i\in I_{0}$ の $p_{i}$ が一様分布なら等号が成り立つ。
+:::
+
+::: intuition
+小さい方から $j$ 番目の p 値を、偶然なら期待される大きさ $j/m$ の $\alpha$ 倍と比べる。p 値の並びが直線 $j\alpha/m$ の下に潜り込む最後の位置までを棄却する。棄却数が多いほど基準が緩くなる「自己調整」があり、本当の効果が多いときには多くを拾え、少ないときにはボンフェローニに近い厳しさになる。
+:::
+
+::: proof
+**Step 1（棄却集合の記述）.** 【主張：棄却数は $R=k$】$p_{i}\le k\alpha/m$ となる $i$ の数を数える。$p_{(k)}\le k\alpha/m$ なので少なくとも $k$ 個。$k+1$ 個以上なら $p_{(k+1)}\le k\alpha/m<(k+1)\alpha/m$ となり $k$ の最大性に反する。
+
+**Step 2（1 つ取り替えた手続き）.** 【主張：$i$ を固定し、$p_{i}$ を $0$ に替えた p 値の組での棄却数を $R_{i}$ とすると、$\{H_{i}\text{ を棄却}\}\cap\{R=r\}=\{p_{i}\le r\alpha/m\}\cap\{R_{i}=r\}$（$r\ge1$）】$R_{i}$ は $(p_{j})_{j\ne i}$ だけの関数。
+
+（$\subseteq$）$H_{i}$ が棄却され $R=r$ なら $p_{i}\le r\alpha/m$。$p_{i}$ を $0$ に替えると、小さい方から $r$ 個の値は（$p_{i}$ がその中にあったので）どれも $\le p_{(r)}\le r\alpha/m$ のままで、$r$ 番目より後の順序統計量は変わらず、$j>r$ で $p_{(j)}>j\alpha/m$ のまま。よって $R_{i}=r$。
+
+（$\supseteq$）$p_{i}\le r\alpha/m$ かつ $R_{i}=r$ とする。取り替えた組の小さい方から $r$ 個は $0$（$=p_{i}$ の位置）と、$r\alpha/m$ 以下の $r-1$ 個の値。$0$ を $p_{i}\le r\alpha/m$ に戻しても、$r\alpha/m$ 以下の値が $r$ 個あるので $p_{(r)}\le r\alpha/m$。1 つの値を増やすと順序統計量は減らないので、$j>r$ で $p_{(j)}\ge$（取り替えた組の $j$ 番目）$>j\alpha/m$。よって $R=r$ で、$p_{i}\le r\alpha/m$ から $H_{i}$ は棄却される。
+
+**Step 3（期待値の計算）.** $V=\sum_{i\in I_{0}}1_{\{H_{i}\text{ を棄却}\}}$ なので、Step 2 から
+$$
+\mathrm{FDR}=\sum_{i\in I_{0}}\sum_{r=1}^{m}\frac1rP\bigl(p_{i}\le r\alpha/m,\ R_{i}=r\bigr)=\sum_{i\in I_{0}}\sum_{r=1}^{m}\frac1rP(p_{i}\le r\alpha/m)P(R_{i}=r)
+$$
+（$p_{i}$ と $R_{i}$ の独立性）。$P(p_{i}\le r\alpha/m)\le r\alpha/m$ を代入すると $\le\sum_{i\in I_{0}}\frac\alpha m\sum_{r}P(R_{i}=r)=\frac{m_{0}\alpha}m$（$R_{i}\ge1$：取り替えた組では $p_{(1)}=0\le\alpha/m$）。一様分布なら各不等号は等号。
+:::
+
+::: example 多重検定の比較 {#stat:multiple-testing-example}
+$m=5$, $\alpha=0.05$ で p 値が $0.001,0.012,0.014,0.04,0.2$ とする。ボンフェローニ（基準 $0.01$）は 1 個を棄却。ホルムの基準は順に $0.01,0.0125,0.0167,0.025,0.05$ で、$0.001\le0.01$, $0.012\le0.0125$, $0.014\le0.0167$, $0.04>0.025$ なので 3 個を棄却。ベンジャミニ–ホッホベルクの基準は $0.01,0.02,0.03,0.04,0.05$ で、$p_{(4)}=0.04\le0.04$ が条件をみたす最大の $j$ なので 4 個を棄却。
+:::
+
+::: remark
+**p ハッキングと分岐する道.** 研究者がデータを見ながら、外れ値の扱い・説明変数の選び方・データ収集の打ち切り時期などを変えて、有意になる分析を探すと、それは暗黙のうちに多数の検定を行って最小の p 値を報告していることになる。\ref{stat:p-value-validity} は検定がデータより前に固定されていることを前提にしていたので、この場合の実際の第 1 種の誤りの確率は名目の $\alpha$ を大きく超えうる（Simmons–Nelson–Simonsohn, Psychological Science, 2011 のシミュレーション研究）。事前登録（分析計画をデータ収集前に公開する）は、この前提を回復する制度的な手段である。
+:::
+
+::: hypcheck
+- **依存関係（ボンフェローニ・ホルム）**：和の確率の評価だけを使ったので、p 値がどんな依存関係にあってもよい。
+- **独立性（ベンジャミニ–ホッホベルク）**：Step 3 で $p_{i}$（$i\in I_{0}$）と $R_{i}$ の独立性に使った。正の依存（PRDS と呼ばれる条件）のもとでも同じ保証が成り立つことが知られている（ベンジャミニ–イェクティエリ、ここでは証明しない）。任意の依存関係では、$\alpha$ を $\alpha/\sum_{j\le m}\frac1j$ に替えれば保証される（同上）。
+- **各 p 値の妥当性**：すべての手続きで $P(p_{i}\le u)\le u$（$i\in I_{0}$）を使った。
+:::
+
+## 問題 {#stat:sec-mt-problems}
+
+::: problem {#stat:prob-mt-independent-fwer}
+$m$ 個の独立な検定をそれぞれ水準 $\alpha$ で行い、すべての帰無仮説が正しいとき、$\mathrm{FWER}=1-(1-\alpha)^{m}$ を示せ（p 値は一様分布とする）。$m=20$, $\alpha=0.05$ で値を求めよ。
+:::
+
+::: solution
+$P(V=0)=\prod P(p_{i}>\alpha)=(1-\alpha)^{m}$。$1-0.95^{20}\approx0.64$。
+:::
+
+::: problem {#stat:prob-mt-bh-bonferroni}
+ベンジャミニ–ホッホベルク法はボンフェローニ法が棄却するものをすべて棄却することを示せ。
+:::
+
+::: solution
+ボンフェローニ法が $H_{i}$ を棄却すれば $p_{(1)}\le p_{i}\le\alpha/m$ なので $k\ge1$ で、$p_{i}\le\alpha/m\le k\alpha/m$ から $H_{i}$ も棄却される。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ボンフェローニ法とホルム法の保証には、p 値の分布の形も独立性も使っていない。ベンジャミニ–ホッホベルク法の証明では、偽の帰無仮説の p 値については何も仮定していない（真の帰無仮説の p 値と他の p 値の独立性だけ）。議論は Lehmann–Romano『Testing Statistical Hypotheses』第 9 章、BH 法の取り替えの議論は Benjamini–Hochberg（1995, Journal of the Royal Statistical Society B）以降の簡約化された証明に沿う。
+
+**前提を変えると.**
+- **閉検定手続き**：すべての共通部分仮説 $\bigcap_{i\in J}H_{i}$ を水準 $\alpha$ で検定し、$H_{i}$ を含むすべての共通部分が棄却されたときに $H_{i}$ を棄却すると、FWER は $\alpha$ 以下になる（マーカス–ペリッツ–ガブリエル）。ホルム法は、共通部分をボンフェローニで検定した閉検定手続きである。
+- **q 値**：各仮説について、それを棄却する最小の FDR 水準を q 値と呼び、p 値の FDR 版として報告に使う。
+- **ベイズ的な解釈**：仮説が真である事前確率 $\pi_{0}$ を置くと、偽発見率は「棄却したものが実は真である事後確率」と結びつき、局所偽発見率という考え方につながる。
+
+**高い視点から：誤りの尺度の選択.** 多重検定の手続きは、「何を誤りとみなすか」（FWER か FDR か）を先に決めると、それを守る範囲で最も多く棄却するように設計される。ホルム法の段階的な基準も BH 法の直線の基準も、p 値の順序統計量と単調な境界の比較で、どちらも「棄却したものは誤りの候補から外す」という同じ考えを、異なる誤りの尺度に合わせて実装している。比喩で言えば、多重検定は網で魚を捕るときの網目の調整で、FWER は「狙っていない魚を 1 匹でも捕ったら失格」、FDR は「捕った魚のうち狙っていない魚が平均 5% 以下なら合格」というルールである。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-mt-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

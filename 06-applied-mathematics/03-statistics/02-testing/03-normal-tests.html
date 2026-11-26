@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>正規母集団の検定 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/02-testing/03-normal-tests.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 正規母集団の検定 {#stat:page-normal-tests keywords="duality between tests and confidence sets, one-sample t test (two-sided exact size, one-sided level via monotonicity), paired t test, two-sample t test with pooled variance and its t distribution with m + n - 2 degrees of freedom, chi-square test for a variance, F distribution and the F test for equal variances, Welch's approximation, robustness to non-normality"}
+
+正規分布からの標本では、検定統計量の分布が $t$ 分布・$\chi^{2}$ 分布・$F$ 分布で正確に書けるので、大きさがちょうど $\alpha$ の検定が作れる。このページでは、平均についての 1 標本・対応のある・2 標本の **$t$ 検定**と、分散についての検定を作る。また、検定と信頼区間は同じものを別の向きから見たものであること（**双対性**）を示す。
+
+## 記法と定義の確認 {#stat:sec-nt-notation}
+
+::: notation
+- 前のページと推定の系列の用語は \ref{stat:hypothesis-test}, \ref{stat:p-value}, \ref{stat:confidence-interval}。
+- 正規標本での $\bar X$ と $S^{2}$ の独立性と分布は \ref{stat:normal-sample-theorem}、分布の定義と性質は \ref{stat:chi-square-t}, \ref{stat:chi-square-density}, \ref{stat:t-density}。$t_{k,\alpha}$, $\chi_{k,\alpha}^{2}$ は上側 $\alpha$ 点。
+- 独立な確率変数の組を分けて作った関数どうしは独立である（\ref{prb:independence-criteria}）。体系は $\ZFC$。
+:::
+
+## 検定と信頼区間の双対性 {#stat:sec-nt-duality}
+
+::: proposition 検定と信頼集合の双対性 {#stat:test-ci-duality keywords="if for each theta_0 the set A(theta_0) is the acceptance region of a level-alpha test of H_0: theta = theta_0, then C(X) = {theta_0 : X in A(theta_0)} has coverage >= 1 - alpha; conversely a 1 - alpha confidence set gives level-alpha tests by rejecting when theta_0 is not in C(X)" index="検定と信頼区間の双対性|けんていとしんらいくかんのそうついせい, 受容域|じゅようき" refname="検定と信頼集合の双対性"}
+1. 各 $\theta_{0}\in\Theta$ について、$H_{0}:\theta=\theta_{0}$ の有意水準 $\alpha$ の（乱択でない）検定があり、その受容域（棄却しない集合）を $A(\theta_{0})$ とする。$C(x)\defeq\{\theta_{0}:x\in A(\theta_{0})\}$ とおくと、すべての $\theta$ で $P_{\theta}(\theta\in C(X))\ge1-\alpha$。
+2. 逆に、すべての $\theta$ で $P_{\theta}(\theta\in C(X))\ge1-\alpha$ となる集合値の関数 $C$（各 $\theta_{0}$ で $\{x:\theta_{0}\in C(x)\}$ が可測）について、「$\theta_{0}\notin C(X)$ なら棄却」は $H_{0}:\theta=\theta_{0}$ の有意水準 $\alpha$ の検定。
+:::
+
+::: intuition
+「$\theta_{0}$ はデータと矛盾しない（棄却されない）」という判定を、すべての $\theta_{0}$ について並べたものが信頼集合である。表（データ $x$ とパラメータ $\theta_{0}$ の組で、受容されるところに印をつけたもの）を、$\theta_{0}$ ごとに縦に読めば検定、$x$ ごとに横に読めば信頼集合になる。
+:::
+
+::: proof
+**Step 1（1）.** 定義から $\{\theta\in C(X)\}=\{X\in A(\theta)\}$ で、その確率は $1-P_{\theta}(\text{棄却})\ge1-\alpha$。
+
+**Step 2（2）.** 棄却する事象は $\{\theta_{0}\notin C(X)\}$ で、$\theta=\theta_{0}$ のもとでの確率は $1-P_{\theta_{0}}(\theta_{0}\in C(X))\le\alpha$。
+:::
+
+## $t$ 検定 {#stat:sec-nt-t-tests}
+
+::: theorem 1 標本の t 検定 {#stat:one-sample-t-test keywords="for an i.i.d. N(m, sigma^2) sample and T = sqrt(n)(bar X - m_0)/S: rejecting H_0: m = m_0 when |T| >= t_{n-1, alpha/2} has size exactly alpha; rejecting H_0: m <= m_0 when T >= t_{n-1, alpha} has level alpha" index="t 検定|てぃーけんてい, 1 標本 t 検定|いちひょうほんてぃーけんてい" refname="1 標本の t 検定"}
+$N(m,\sigma^{2})$（両方未知）からの標本（$n\ge2$）について $T\defeq\sqrt n(\bar X-m_{0})/S$ とする。
+1. （両側）「$\abs T\ge t_{n-1,\alpha/2}$ なら $H_{0}:m=m_{0}$ を棄却」は、$H_{0}$ のもとで（$\sigma$ によらず）棄却の確率がちょうど $\alpha$。
+2. （片側）「$T\ge t_{n-1,\alpha}$ なら $H_{0}:m\le m_{0}$ を棄却」は有意水準 $\alpha$。
+:::
+
+::: intuition
+$t$ 統計量は「平均のずれ」を「推定された標準誤差」で測った量で、帰無仮説のもとでは未知の $\sigma$ によらない分布（$t_{n-1}$）をもつ。片側の帰無仮説 $m\le m_{0}$ では、真の平均が $m_{0}$ より小さいほど $T$ は小さくなりやすいので、境界 $m=m_{0}$ が最も棄却されやすい場合になる。
+:::
+
+::: proof
+**Step 1（1）.** $m=m_{0}$ なら $T\sim t_{n-1}$（\ref{stat:normal-sample-theorem} の 4）。$t_{n-1}$ は対称で連続（\ref{stat:t-density}）なので $P(\abs T\ge t_{n-1,\alpha/2})=\alpha$。
+
+**Step 2（2：比較）.** 【主張：$m\le m_{0}$ なら $P_{m}(T\ge c)\le P(t_{n-1}\ge c)$】$T_{m}\defeq\sqrt n(\bar X-m)/S\sim t_{n-1}$ で、$T=T_{m}+\sqrt n(m-m_{0})/S\le T_{m}$（$S>0$ a.s.）。よって $\{T\ge c\}\subseteq\{T_{m}\ge c\}$。$c=t_{n-1,\alpha}$ とする。
+:::
+
+::: corollary 対応のある t 検定 {#stat:paired-t-test keywords="for pairs (X_i, Y_i) with differences D_i = X_i - Y_i i.i.d. N(delta, tau^2), the one-sample t test applied to D tests H_0: delta = 0" index="対応のある t 検定|たいおうのあるてぃーけんてい" refname="対応のある t 検定"}
+組 $(X_{i},Y_{i})$（$i=1,\dots,n$）が独立で、差 $D_{i}\defeq X_{i}-Y_{i}$ が $N(\delta,\tau^{2})$ にしたがうとき、$D_{1},\dots,D_{n}$ に \ref{stat:one-sample-t-test} を使った検定は、$H_{0}:\delta=0$ の大きさ $\alpha$ の検定である。
+:::
+
+::: intuition
+同じ個体を 2 回測るなら、個体ごとの差をとれば個体差という大きな雑音が消え、差だけの 1 標本の問題になる。
+:::
+
+::: proof
+**Step 1（帰着）.** $D_{i}$ は独立同分布な正規確率変数なので、\ref{stat:one-sample-t-test} の仮定をそのままみたす。$X_{i}$ と $Y_{i}$ の間の相関は $\tau^{2}$ に吸収され、正規性の仮定は差 $D_{i}$ に対してだけ必要である。
+:::
+
+::: theorem 2 標本の t 検定（等分散） {#stat:two-sample-t-test keywords="independent samples X_1..X_m ~ N(mu_1, sigma^2), Y_1..Y_n ~ N(mu_2, sigma^2); pooled variance S_p^2 = ((m-1) S_X^2 + (n-1) S_Y^2)/(m+n-2); T = (bar X - bar Y - (mu_1 - mu_2)) / (S_p sqrt(1/m + 1/n)) ~ t_{m+n-2}" index="2 標本 t 検定|にひょうほんてぃーけんてい, プールした分散|ぷーるしたぶんさん" refname="2 標本の t 検定（等分散）"}
+$X_{1},\dots,X_{m}\sim N(\mu_{1},\sigma^{2})$ と $Y_{1},\dots,Y_{n}\sim N(\mu_{2},\sigma^{2})$（$m,n\ge2$、すべて独立、分散は共通で未知）とし、
+$$
+S_{p}^{2}\defeq\frac{(m-1)S_{X}^{2}+(n-1)S_{Y}^{2}}{m+n-2},\qquad T\defeq\frac{\bar X-\bar Y-(\mu_{1}-\mu_{2})}{S_{p}\sqrt{\frac1m+\frac1n}}
+$$
+とすると $T\sim t_{m+n-2}$。特に「$\abs{T_{0}}\ge t_{m+n-2,\alpha/2}$ なら $H_{0}:\mu_{1}=\mu_{2}$ を棄却」（$T_{0}$ は $\mu_{1}-\mu_{2}=0$ とした $T$）は大きさ $\alpha$。
+:::
+
+::: intuition
+2 つの標本の平均の差を、2 つの標本から合わせて推定した共通の標準偏差で測る。自由度は、2 つの標本でそれぞれ平均の推定に 1 つずつ使った残りの $m+n-2$ である。
+:::
+
+::: proof
+**Step 1（4 つの統計量の独立性）.** 【主張：$\bar X$, $S_{X}^{2}$, $\bar Y$, $S_{Y}^{2}$ は独立】\ref{stat:normal-sample-theorem} の 3 から $\bar X$ と $S_{X}^{2}$ は独立、$\bar Y$ と $S_{Y}^{2}$ も独立。$(\bar X,S_{X}^{2})$ は $X$ たちの関数、$(\bar Y,S_{Y}^{2})$ は $Y$ たちの関数で、2 つの組は独立（\ref{prb:independence-criteria}）。4 つの同時分布は直積に分かれる。
+
+**Step 2（分子）.** $\bar X-\bar Y\sim N\bigl(\mu_{1}-\mu_{2},\sigma^{2}(\frac1m+\frac1n)\bigr)$（独立な正規の和）なので、$Z\defeq\frac{\bar X-\bar Y-(\mu_{1}-\mu_{2})}{\sigma\sqrt{1/m+1/n}}\sim N(0,1)$。
+
+**Step 3（分母）.** $V\defeq\frac{(m+n-2)S_{p}^{2}}{\sigma^{2}}=\frac{(m-1)S_{X}^{2}}{\sigma^{2}}+\frac{(n-1)S_{Y}^{2}}{\sigma^{2}}$ は独立な $\chi_{m-1}^{2}$ と $\chi_{n-1}^{2}$ の和なので $\chi_{m+n-2}^{2}$（\ref{stat:chi-square-density}）。Step 1 から $Z$ と $V$ は独立。
+
+**Step 4（結論）.** $T=Z/\sqrt{V/(m+n-2)}$ なので、定義（\ref{stat:chi-square-t}）から $t_{m+n-2}$。検定の大きさは \ref{stat:one-sample-t-test} の Step 1 と同じ。
+:::
+
+## 分散の検定 {#stat:sec-nt-variance}
+
+::: proposition 分散の χ² 検定と F 検定 {#stat:variance-tests keywords="chi-square test: reject H_0: sigma^2 <= sigma_0^2 when (n-1) S^2 / sigma_0^2 >= chi^2_{n-1, alpha}, level alpha; F distribution F(a, b) as the law of (U/a)/(V/b); under equal variances S_X^2 / S_Y^2 ~ F(m-1, n-1)" index="F 分布|えふぶんぷ, F 検定|えふけんてい, 分散の検定|ぶんさんのけんてい" refname="分散の χ² 検定と F 検定"}
+1. 正規標本で「$\frac{(n-1)S^{2}}{\sigma_{0}^{2}}\ge\chi_{n-1,\alpha}^{2}$ なら $H_{0}:\sigma^{2}\le\sigma_{0}^{2}$ を棄却」は有意水準 $\alpha$。
+2. 独立な $U\sim\chi_{a}^{2}$, $V\sim\chi_{b}^{2}$ の比 $\frac{U/a}{V/b}$ の分布を **$F$ 分布** $F(a,b)$ という。\ref{stat:two-sample-t-test} の設定で分散が $\sigma_{1}^{2},\sigma_{2}^{2}$ のとき、$\sigma_{1}^{2}=\sigma_{2}^{2}$ なら $S_{X}^{2}/S_{Y}^{2}\sim F(m-1,n-1)$。
+:::
+
+::: intuition
+分散の比較は、ばらつきの大きさの比を見る。正規標本では、標本分散を真の分散で割ったものが $\chi^{2}$ 分布になるので、その比は真の分散の比だけで決まる $F$ 分布になる。
+:::
+
+::: proof
+**Step 1（1）.** $V\defeq\frac{(n-1)S^{2}}{\sigma^{2}}\sim\chi_{n-1}^{2}$ で、$\sigma^{2}\le\sigma_{0}^{2}$ なら $\frac{(n-1)S^{2}}{\sigma_{0}^{2}}=\frac{\sigma^{2}}{\sigma_{0}^{2}}V\le V$。よって棄却の確率は $P(V\ge\chi_{n-1,\alpha}^{2})=\alpha$ 以下。
+
+**Step 2（2）.** $\frac{S_{X}^{2}}{S_{Y}^{2}}=\frac{U/(m-1)}{V/(n-1)}$、$U\defeq\frac{(m-1)S_{X}^{2}}{\sigma^{2}}\sim\chi_{m-1}^{2}$, $V\defeq\frac{(n-1)S_{Y}^{2}}{\sigma^{2}}\sim\chi_{n-1}^{2}$ は独立（\ref{stat:two-sample-t-test} の Step 1）。
+:::
+
+::: remark
+**ウェルチの方法.** 2 標本で分散が等しいと仮定できないとき、$\frac{\bar X-\bar Y}{\sqrt{S_{X}^{2}/m+S_{Y}^{2}/n}}$ は正確な $t$ 分布にしたがわない（ベーレンス–フィッシャー問題）。ウェルチの方法は、この統計量を自由度を推定した $t$ 分布で近似するもので、近似の質についての主張は数値実験や漸近展開によるもの（ここでは証明しない）である。ただし $m,n\to\infty$ では、中心極限定理と \ref{stat:slutsky} から統計量は $N(0,1)$ に法則収束し、漸近的には正しい。
+:::
+
+::: hypcheck
+- **正規性**：$t$ 統計量の分布が「ちょうど」$t$ 分布になることに使った。平均の検定は、大標本では中心極限定理によって正規性からのずれに強い（$S\to\sigma$ とスルツキー）。分散の検定（$\chi^{2}$, $F$）は大標本でも正規性に敏感で、尖度が正規分布と違うと大きさが $\alpha$ からずれる。
+- **等分散**：2 標本 t 検定の Step 3 で、2 つの $\chi^{2}$ を同じ $\sigma^{2}$ で割って足すのに使った。等分散でなければ $V$ は $\chi^{2}$ 分布にならず、$T$ は $t$ 分布にしたがわない（このときの扱いはウェルチの方法の注を参照）。
+- **独立性**：Step 1 で 2 つの標本の独立性を使った。同じ個体の前後比較なら対応のある t 検定を使う。
+:::
+
+## 問題 {#stat:sec-nt-problems}
+
+::: problem {#stat:prob-nt-t-ci}
+\ref{stat:test-ci-duality} の 1 を両側 t 検定に使うと、\ref{stat:t-interval} の t 区間が得られることを確かめよ。
+:::
+
+::: solution
+受容域は $A(m_{0})=\{\abs{\sqrt n(\bar x-m_{0})/s}<t_{n-1,\alpha/2}\}$ で、$m_{0}\in C(x)\iff\abs{\bar x-m_{0}}<t_{n-1,\alpha/2}s/\sqrt n$。境界を含めるかどうかの違いだけで t 区間に一致する（連続分布なので確率は同じ）。
+:::
+
+::: problem {#stat:prob-nt-f-reciprocal}
+$F\sim F(a,b)$ なら $1/F\sim F(b,a)$ を示せ。
+:::
+
+::: solution
+$F=\frac{U/a}{V/b}$ なら $1/F=\frac{V/b}{U/a}$ で、$V\sim\chi_{b}^{2}$, $U\sim\chi_{a}^{2}$ は独立。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 双対性の命題は正規性も独立性も使わない。$t$ 検定の大きさの計算には $t$ 分布の密度の式は不要で、対称性と連続性だけを使った。議論は Casella–Berger『Statistical Inference』第 8・9 章の流れに沿う。
+
+**前提を変えると.**
+- **分散分析**：$k$ 群の平均が等しいかの検定は、群間と群内の平方和の比が $F(k-1,N-k)$ にしたがうことによる（コクランの定理の応用）。2 標本 t 検定の $T^{2}$ は $F(1,m+n-2)$ で、$k=2$ の場合にあたる。
+- **ノンパラメトリック検定**：正規性を仮定しない順位検定（ウィルコクソンの順位和検定など）は、帰無仮説のもとで順位の分布が組合せ的に決まることを使い、分布によらず大きさを保証する。
+- **最適性**：1 標本の両側 t 検定は、不偏検定の中で一様最強力（UMPU）であることが知られている（ここでは証明しない）。
+
+**高い視点から：群の作用と不変性.** $t$ 統計量は、データの平行移動と正の定数倍（位置と尺度の変換）で不変な量である。未知の $\sigma$ のような「邪魔なパラメータ」は、この変換群の作用で消え、検定は変換で不変な統計量の上の問題に帰着する。比喩で言えば、$t$ 検定は物差しの目盛りの単位（$\sigma$）を知らなくても、「ずれが物差しの何目盛り分か」を測ることで判断する方法である。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-nt-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
