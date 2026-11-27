@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>選好と効用 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="econ:page-preferences-utility" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 選好と効用 {#econ:page-preferences-utility keywords="preference relations, completeness and transitivity (rationality), strict preference and indifference, utility representation, ordinal utility and monotone transformations, utility on countable sets, continuous and monotone preferences on R^n_+ have a continuous utility (diagonal construction), lexicographic preferences have no utility representation, convex preferences and quasi-concave utility"}
+
+経済学のモデルは「人は自分にとってより好ましいものを選ぶ」という仮定から出発する。ただし「好ましさ」を最初から数値（効用）で与えるのではなく、2 つの選択肢を比べる**選好関係**として与え、どんな条件のもとでそれが数値で表せるかを問う。このページでは、選好が数値で表せる条件（可算な場合と、連続で単調な場合）を証明し、表せない典型例（辞書式選好）を示す。効用の数値そのものには意味がなく、順序だけが意味をもつ（**序数的効用**）ことも、この構成から自然に分かる。
+
+## 記法と定義の確認 {#econ:sec-pu-notation}
+
+::: notation
+- $X$ は選択肢の集合（消費集合）。$\mathbb{R}_{+}^{n}\defeq\{x\in\mathbb{R}^{n}:x_{i}\ge0\}$、$x\ge y$ は各成分で $x_{i}\ge y_{i}$、$x\gg y$ は各成分で $x_{i}>y_{i}$、$e\defeq(1,\dots,1)$。
+- 区間の連結性は \ref{top:intermediate-value}。体系は $\ZFC$。
+:::
+
+## 選好関係 {#econ:sec-pu-preference}
+
+::: definition 選好関係 {#econ:preference-relation keywords="binary relation x >~ y on X; complete: x >~ y or y >~ x; transitive; rational = complete + transitive; strict preference x > y iff x >~ y and not y >~ x; indifference x ~ y" index="選好関係|せんこうかんけい, 合理的な選好|ごうりてきなせんこう, 無差別|むさべつ" refname="選好関係"}
+$X$ 上の 2 項関係 $\succsim$（「$x\succsim y$」は「$x$ は $y$ と少なくとも同じくらい好ましい」と読む）が、
+1. （**完備性**）すべての $x,y$ で $x\succsim y$ または $y\succsim x$、
+2. （**推移性**）$x\succsim y$ かつ $y\succsim z$ なら $x\succsim z$
+をみたすとき、**合理的な選好関係**という。$x\succ y$（**強い選好**）は「$x\succsim y$ かつ $y\succsim x$ でない」、$x\sim y$（**無差別**）は「$x\succsim y$ かつ $y\succsim x$」。
+:::
+
+::: intuition
+完備性は「どの 2 つでも比べられる」、推移性は「好みが循環しない」ことである。推移性が破れると、少しずつお金を払って交換を繰り返させ、元の物に戻すことで際限なく搾り取れる（マネーポンプ）。経済学の合理性の仮定は、この 2 つ以上のことを要求していない。
+:::
+
+::: definition 効用関数 {#econ:utility-function keywords="u: X -> R represents >~ if x >~ y iff u(x) >= u(y); if u represents >~ and f is strictly increasing then f o u also represents >~ (ordinal utility)" index="効用関数|こうようかんすう, 序数的効用|じょすうてきこうよう" refname="効用関数"}
+関数 $u:X\to\mathbb{R}$ が、すべての $x,y$ で $x\succsim y\iff u(x)\ge u(y)$ をみたすとき、$u$ は $\succsim$ を**表現する**といい、$u$ を**効用関数**という。$u$ が $\succsim$ を表現し、$f:\mathbb{R}\to\mathbb{R}$ が狭義増加なら、$f\circ u$ も $\succsim$ を表現する（$f(u(x))\ge f(u(y))\iff u(x)\ge u(y)$）。したがって効用の値の差や比には意味がなく、順序だけが意味をもつ（**序数的効用**）。
+:::
+
+::: intuition
+効用関数は「好みの順位表」を数直線に貼りつけたものである。順位さえ保てば、目盛りをどう伸び縮みさせてもよい。効用を表現する関数があれば、選好は自動的に合理的である（実数の順序が完備で推移的だから）。問題はその逆である。
+:::
+
+## 効用表現の存在 {#econ:sec-pu-existence}
+
+::: proposition 可算な選択肢の効用表現 {#econ:utility-countable keywords="every rational preference on a countable set has a utility representation u(x) = sum over n with x > x_n of 2^{-n}" index="効用表現の存在（可算）|こうようひょうげんのそんざい" refname="可算な選択肢の効用表現"}
+$X$ が可算なら、$X$ 上のすべての合理的な選好関係は効用関数で表現できる。
+:::
+
+::: proof
+**Step 1（構成）.** $X=\{x_{1},x_{2},\dots\}$ と番号をつけ、$u(x)\defeq\sum_{n:x\succ x_{n}}2^{-n}$（$\le1$ に収束）とする。
+
+**Step 2（$x\succsim y\Rightarrow u(x)\ge u(y)$）.** 【主張：$y\succ x_{n}$ なら $x\succ x_{n}$】$x\succsim y\succ x_{n}$ とする。$x\succsim x_{n}$ は推移性から。もし $x_{n}\succsim x$ なら $x_{n}\succsim x\succsim y$ から $x_{n}\succsim y$ となり $y\succ x_{n}$ に反する。よって $x\succ x_{n}$ で、$u(y)$ の和の添字の集合は $u(x)$ の添字の集合に含まれる。
+
+**Step 3（$x\succ y\Rightarrow u(x)>u(y)$）.** $y=x_{m}$ とすると、$m$ は $u(x)$ の和に現れるが $u(y)$ の和には現れない（$y\succ y$ ではない）。Step 2 と合わせて $u(x)\ge u(y)+2^{-m}$。
+
+**Step 4（逆向き）.** $u(x)\ge u(y)$ なら Step 3 の対偶から $y\succ x$ ではなく、完備性から $x\succsim y$。
+:::
+
+::: definition 連続性と単調性 {#econ:continuous-monotone-preference keywords="continuous preference: upper contour sets {y : y >~ x} and lower contour sets {y : x >~ y} are closed; monotone: x >> y implies x > y" index="連続な選好|れんぞくなせんこう, 単調な選好|たんちょうなせんこう" refname="連続性と単調性"}
+$X=\mathbb{R}_{+}^{n}$ 上の合理的な選好関係について、
+1. すべての $x$ で**上方集合** $\{y:y\succsim x\}$ と**下方集合** $\{y:x\succsim y\}$ が閉集合のとき、**連続**という。
+2. $x\gg y$ なら $x\succ y$ のとき、**単調**という。
+:::
+
+::: intuition
+連続性は「ほんの少しだけ違う束は、ほぼ同じくらい好ましい」こと、単調性は「すべての財が多い方が好ましい」ことである。
+:::
+
+::: theorem 連続で単調な選好の効用表現 {#econ:utility-existence-continuous keywords="a continuous monotone rational preference on R^n_+ is represented by the continuous utility u(x) = the unique t with t e ~ x (diagonal construction)" index="効用表現の存在（連続）|こうようひょうげんのそんざい, ドブリューの定理|どぶりゅーのていり" refname="連続で単調な選好の効用表現"}
+$\mathbb{R}_{+}^{n}$ 上の合理的な選好関係 $\succsim$ が連続かつ単調なら、各 $x$ について $te\sim x$ となる $t\ge0$ がただ一つあり、$u(x)\defeq t$ は $\succsim$ を表現する連続関数である。
+:::
+
+::: intuition
+すべての束を、対角線 $\{te:t\ge0\}$（どの財も同じ量 $t$ だけ持つ束）の上の、それと無差別な点に対応させ、その $t$ を効用とする。地図の上のすべての地点の「標高」を、基準の坂道の上で同じ標高の点までの距離で測るようなものである。
+:::
+
+::: proof
+**Step 1（2 つの閉集合）.** 【主張：$A^{+}\defeq\{t\ge0:te\succsim x\}$, $A^{-}\defeq\{t\ge0:x\succsim te\}$ は $[0,\infty)$ の空でない閉集合で、和集合は $[0,\infty)$】閉性は連続性（上方・下方集合が閉で、$t\mapsto te$ が連続）から。和集合が全体であることは完備性から。$t>\max_{i}x_{i}$ なら $te\gg x$ で単調性から $te\succ x$、よって $A^{+}\ne\emptyset$。$x\succsim0$ を示す：$x+\varepsilon e\gg0$ から $x+\varepsilon e\succ0$ で、$\varepsilon\to0$ として上方集合 $\{y:y\succsim0\}$ の閉性から $x\succsim0$。よって $0\in A^{-}$。
+
+**Step 2（存在）.** $[0,\infty)$ は連結なので、空でない閉集合 2 つの和で表すと交わる（交わらなければ連結性に反する）。$t\in A^{+}\cap A^{-}$ なら $te\sim x$。
+
+**Step 3（一意性）.** $t_{1}<t_{2}$ なら $t_{2}e\gg t_{1}e$ で $t_{2}e\succ t_{1}e$ なので、両方が $x$ と無差別にはなれない（推移性）。
+
+**Step 4（表現）.** $x\sim u(x)e$, $y\sim u(y)e$ と推移性から $x\succsim y\iff u(x)e\succsim u(y)e$。単調性から、これは $u(x)\ge u(y)$ と同値（$u(x)<u(y)$ なら $u(y)e\succ u(x)e$）。
+
+**Step 5（連続性）.** $\{x:u(x)\ge a\}=\{x:x\succsim ae\}$（$a\ge0$）、$\{x:u(x)\le b\}=\{x:be\succsim x\}$ は閉集合（$a<0$, $b<0$ なら全体と空集合）。上下の閉集合の逆像がすべて閉なので $u$ は連続。
+:::
+
+::: proposition 辞書式選好は表現できない {#econ:lexicographic-preference keywords="the lexicographic order on R^2 (first coordinate first, then second) is rational, not continuous, and has no utility representation" index="辞書式選好|じしょしきせんこう" refname="辞書式選好は表現できない"}
+$\mathbb{R}^{2}$ 上の辞書式選好（$x\succsim y\iff x_{1}>y_{1}$、または $x_{1}=y_{1}$ かつ $x_{2}\ge y_{2}$）は合理的だが、効用関数で表現できない。
+:::
+
+::: proof
+**Step 1（区間の対応）.** 【主張：効用 $u$ があれば、$x_{1}\mapsto I(x_{1})\defeq(u(x_{1},0),u(x_{1},1))$ は空でない開区間で、異なる $x_{1}$ の区間は交わらない】$(x_{1},1)\succ(x_{1},0)$ なので区間は空でない。$a<b$ なら $(b,0)\succ(a,1)$ なので $u(b,0)>u(a,1)$、すなわち $I(a)$ は $I(b)$ の左にあり交わらない。
+
+**Step 2（矛盾）.** 各区間から有理数を 1 つ選ぶと、交わらないので $\mathbb{R}$ から $\mathbb{Q}$ への単射が得られ、$\mathbb{R}$ が非可算であることに反する。
+:::
+
+::: proposition 凸な選好と準凹な効用 {#econ:convex-quasiconcave keywords="a preference represented by u is convex (upper contour sets convex) iff u is quasi-concave: u(lambda x + (1 - lambda) y) >= min(u(x), u(y))" index="凸な選好|とつなせんこう, 準凹関数|じゅんおうかんすう" refname="凸な選好と準凹な効用"}
+$X$ を凸集合、$u$ を $\succsim$ を表現する効用関数とする。すべての上方集合 $\{y:y\succsim x\}$ が凸（**凸な選好**）であることと、$u$ が**準凹**、すなわちすべての $x,y$ と $\lambda\in[0,1]$ で $u(\lambda x+(1-\lambda)y)\ge\min(u(x),u(y))$ であることは同値。
+:::
+
+::: proof
+**Step 1（凸 ⇒ 準凹）.** $u(x)\ge u(y)$ としてよい。$x,y$ はともに $y$ の上方集合にあるので、凸性から $\lambda x+(1-\lambda)y\succsim y$、すなわち $u(\lambda x+(1-\lambda)y)\ge u(y)=\min$。
+
+**Step 2（準凹 ⇒ 凸）.** $y,z\succsim x$ なら $u(\lambda y+(1-\lambda)z)\ge\min(u(y),u(z))\ge u(x)$。
+:::
+
+::: intuition
+凸な選好は「極端な組み合わせより、ほどほどに混ぜた組み合わせを好む」ことである。パン 10 個かミルク 10 本かより、パン 5 個とミルク 5 本を好む。無差別曲線が原点に向かって凸に曲がるのはこのためである。
+:::
+
+::: hypcheck
+- **完備性と推移性**：効用表現の存在のどちらの証明にも使った。現実の人の選択は推移性を破ることがあり（選択肢の提示の仕方への依存など）、それは行動経済学の主題である。
+- **連続性**：上方・下方集合の閉性（Step 1）に使った。辞書式選好は連続でない（下方集合 $\{y:(1,0)\succsim y\}$ は $(1,0)$ に収束する点列 $(1-\frac1k,5)$ を含むが、極限の $(1,5)$ を含まない）。
+- **単調性**：対角線の上で順序が数の順序と一致すること（Step 3, 4）に使った。単調性がなくても、連続な合理的選好は連続な効用で表現できる（ドブリューの定理。証明はより込み入り、ここでは証明しない）。
+:::
+
+## 問題 {#econ:sec-pu-problems}
+
+::: problem {#econ:prob-pu-cobb-douglas}
+$u(x_{1},x_{2})=x_{1}^{a}x_{2}^{1-a}$（$0<a<1$）が表現する選好は、$v=a\log x_{1}+(1-a)\log x_{2}$（$x\gg0$ の上）でも表現されることを示せ。
+:::
+
+::: solution
+$v=\log u$ で、$\log$ は狭義増加（\ref{econ:utility-function}）。
+:::
+
+::: problem {#econ:prob-pu-diagonal}
+$u(x_{1},x_{2})=\min(x_{1},x_{2})$ の選好について、\ref{econ:utility-existence-continuous} の構成で得られる効用関数を求めよ。
+:::
+
+::: solution
+$te\sim x\iff\min(t,t)=\min(x_{1},x_{2})$ なので $t=\min(x_{1},x_{2})$。元の効用そのものになる。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 連続な効用の構成では、選好の凸性を使っていない。議論は Mas-Colell–Whinston–Green『Microeconomic Theory』第 1・3 章の流れに沿う。
+
+**前提を変えると.**
+- **期待効用**：くじ（確率分布）の上の選好が、完備性・推移性・連続性に加えて独立性公理をみたすと、期待値の形 $\sum p_{i}u(x_{i})$ で表現される（フォン・ノイマン–モルゲンシュテルンの定理）。このときの効用は線形変換を除いて一意（基数的）になる。
+- **社会的な選好**：個人の選好を集めて社会の選好を作ると、合理性と民主的な条件を同時にみたすことはできない（アローの不可能性定理、社会科学の分野で扱う予定）。
+- **限定合理性**：推移性や完備性を弱めた選択の理論（満足化、参照点依存など）が行動経済学で研究されている。
+
+**高い視点から：順序構造の実数への埋め込み.** 効用表現の問題は、全前順序集合を実数の順序に埋め込めるかという順序論の問題で、可分性（可算な稠密部分集合の存在）がその本質的な条件である（辞書式順序は可分でない）。連続性はこの可分性を位相の言葉で保証する。比喩で言えば、効用関数は「好みの階段」に高さの数字を書き込むことで、階段に段差の無限に細かい部分（辞書式選好の縦の線）があると、数直線の上には収まりきらない。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{econ:sec-pu-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
