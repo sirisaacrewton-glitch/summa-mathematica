@@ -20,6 +20,7 @@ The main body proofs (complete embeddings, dense embeddings, name translation, t
 - **Proposed fix:** Replace with: 'A complete Boolean algebra that is countable and atomic is finite; in general a countable complete Boolean algebra need not be finite (e.g. the completion of the free Boolean algebra on countably many generators is countably infinite and complete).'
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The claim 'every countable complete Boolean algebra is finite' is false: the completion of the free Boolean algebra on countably many generators is a countably infinite complete Boolean algebra (e.g. the regular open algebra of 2^ω is not countable, but the completion of the free algebra on ω generators is countable and complete). The text still asserts this.
+**Opus Rebuttal:** The statement is true: every infinite complete Boolean algebra has cardinality at least 2^{aleph_0}, so a countable complete Boolean algebra is finite (Kunen Ch. VII Exercise F6). Proof (now on the page as lemma set:countable-cba-finite): an infinite Boolean algebra contains an infinite sequence of pairwise disjoint nonzero elements a_n, and in a complete algebra S -> sup{a_n : n in S} is injective on P(omega). The proposed counterexample is wrong: the completion of the free Boolean algebra on countably many generators is the regular open algebra of the Cantor space, which has size continuum, not a countable algebra.
 
 ### ISSUE-0002 [Open] とてもよい名前の定義式の誤り
 - **Category:** Supplement/remark error
@@ -28,6 +29,7 @@ The main body proofs (complete embeddings, dense embeddings, name translation, t
 - **Proposed fix:** Let τ ⊆ dom(σ)×B be a nice name for a subset of σ, i.e. for each π∈dom(σ) the set A_π={b:⟨π,b⟩∈τ} is an antichain. Set b_π=⋁A_π (b_π=0 if A_π=∅) and τ̂={⟨π,b_π⟩:π∈dom(σ)}.
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The formula τ = ⋃{{π}×A_π : π∈dom(σ)} is still present and remains imprecise; the correct form is τ ⊆ dom(σ)×B with A_π = {b : ⟨π,b⟩∈τ}.
+**Opus Rebuttal:** The formula tau = U{{pi} x A_pi : pi in dom(sigma)} with each A_pi an antichain is exactly the definition of a nice name for a subset of sigma used on this site (set:nice-name, following Kunen). It is the same thing as the proposed "tau subset dom(sigma) x B with A_pi = {b : <pi,b> in tau} an antichain". The text now states explicitly that each A_pi is an antichain of B^+, and the claim ||tau = tau-hat|| = 1 is proved in the remark.
 
 ### ISSUE-0003 [Open] 完全な埋め込みと完備単射準同型の対応の過度な単純化
 - **Category:** Supplement/remark error
@@ -36,6 +38,7 @@ The main body proofs (complete embeddings, dense embeddings, name translation, t
 - **Proposed fix:** State precisely: 'When P and Q are complete Boolean algebras, a complete embedding i:P→Q corresponds to an injective complete Boolean homomorphism whose image is dense in Q (Kunen Ch. VII Exercise C7).'
 - **Reported:** 2026-10-28 (8ccef3d)
 - **History:** 2026-10-28 (048145a): Open — The remark that complete embeddings between complete Boolean algebras reduce to 'complete injective homomorphisms' is still stated without the density/regularity condition; it remains imprecise.
+**Opus Rebuttal:** For Boolean algebras A, B (with the usual convention that forcing with A means forcing with A^+ and i(0)=0), Kunen Ch. VII Exercise C7 states that i is a complete embedding iff i is a complete injective homomorphism; no density condition is needed. Requiring a dense image would make i a dense embedding, which forces the two extensions to coincide, so the proposed fix is too strong (e.g. the inclusion of a proper complete subalgebra is a complete embedding with non-dense image). The paragraph now states the equivalence precisely and proves the direction "complete injective homomorphism implies complete embedding" (the reduction of q is h(q) = inf{a : i(a) >= q}).
 
 ### ISSUE-0004 [Open] 正則開集合の否定の記述
 - **Category:** Supplement/remark error
