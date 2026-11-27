@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>極値分布 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/05-time-series-extremes/03-extreme-values.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 極値分布 {#stat:page-extreme-values keywords="distribution of the sample maximum F^n, Poisson-type criterion n(1 - F(u_n)) -> tau iff P(M_n <= u_n) -> e^{-tau}, Gumbel limit for exponential maxima, Frechet limit for Pareto maxima, reversed Weibull limit for uniform maxima, Mills ratio bounds, Gumbel limit for normal maxima with b_n ~ sqrt(2 log n), max-stable distributions, Fisher-Tippett-Gnedenko theorem, return periods"}
+
+平均ではなく**最大値**に関心がある場面は多い。百年に一度の洪水の水位、建物が受ける最大の風圧、保険会社が支払う最大の請求額などである。中心極限定理が「和を正規化すると正規分布に近づく」ことを述べるのと同じように、最大値を適当に正規化すると、少数の型の分布（**極値分布**：グンベル・フレシェ・ワイブル）に近づく。このページでは、最大値の極限を調べる簡単な判定法を証明し、指数・パレート・一様・正規の各分布について極限を具体的に求める。
+
+## 記法と定義の確認 {#stat:sec-ev-notation}
+
+::: notation
+- $X_{1},X_{2},\dots$ は分布関数 $F$ の独立同分布な確率変数、$M_{n}\defeq\max(X_{1},\dots,X_{n})$。法則収束は \ref{prb:convergence-in-distribution}。
+- $\Phi$, $\varphi$ は標準正規分布の分布関数と密度。部分積分は \ref{calc:substitution-parts}。
+- 体系は $\ZFC$。
+:::
+
+## 最大値の分布と判定法 {#stat:sec-ev-criterion}
+
+::: lemma 最大値の分布と判定法 {#stat:maximum-criterion keywords="P(M_n <= x) = F(x)^n; for tau in [0, infinity) and thresholds u_n, n(1 - F(u_n)) -> tau iff P(M_n <= u_n) -> e^{-tau}" index="最大値の分布|さいだいちのぶんぷ, 極値|きょくち" refname="最大値の分布と判定法"}
+1. $P(M_{n}\le x)=F(x)^{n}$。
+2. $\tau\in[0,\infty)$ と実数列 $u_{n}$ について、$n(1-F(u_{n}))\to\tau\iff P(M_{n}\le u_{n})\to e^{-\tau}$。
+:::
+
+::: intuition
+しきい値 $u_{n}$ を超える観測の数は、成功確率 $p_{n}=1-F(u_{n})$ の 2 項分布にしたがう。$np_{n}\to\tau$ なら、それは平均 $\tau$ のポアソン分布に近く、「1 つも超えない」確率は $e^{-\tau}$ に近い。最大値の問題は、まれな超過の数を数える問題に帰着する。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$P(M_{n}\le x)=F(x)^{n}$】$\{M_{n}\le x\}=\bigcap_{i}\{X_{i}\le x\}$ と独立性。
+
+**Step 2（$\Rightarrow$）.** $p_{n}\defeq1-F(u_{n})$ とする。$np_{n}\to\tau$ なら $p_{n}\to0$。$0\le p\le\frac12$ で $-p-p^{2}\le\log(1-p)\le-p$（$\log(1-p)=-\sum_{k}p^{k}/k$ の評価）なので、$n\log(1-p_{n})=-np_{n}+O(np_{n}^{2})\to-\tau$。指数関数の連続性から $F(u_{n})^{n}\to e^{-\tau}$。
+
+**Step 3（$\Leftarrow$）.** $F(u_{n})^{n}\to e^{-\tau}>0$ なら $n\log(1-p_{n})\to-\tau$。$\log(1-p)\le-p$ から $np_{n}\le-n\log(1-p_{n})$ は有界で、$p_{n}\to0$。すると Step 2 の評価で $np_{n}+n\log(1-p_{n})=O(np_{n}^{2})\to0$ なので $np_{n}\to\tau$。
+:::
+
+## 3 つの型の極限 {#stat:sec-ev-limits}
+
+::: theorem 極値分布の例 {#stat:extreme-value-examples keywords="exponential(1): M_n - log n => Gumbel exp(-e^{-x}); Pareto with tail x^{-alpha}: M_n / n^{1/alpha} => Frechet exp(-x^{-alpha}); uniform(0, 1): n(M_n - 1) => reversed Weibull e^{x} on x <= 0" index="グンベル分布|ぐんべるぶんぷ, フレシェ分布|ふれしぇぶんぷ, ワイブル分布（極値）|わいぶるぶんぷ, 極値分布|きょくちぶんぷ" refname="極値分布の例"}
+1. （指数分布、$1-F(x)=e^{-x}$）すべての $x\in\mathbb{R}$ で $P(M_{n}-\log n\le x)\to\exp(-e^{-x})$（**グンベル分布**）。
+2. （パレート分布、$1-F(x)=x^{-\alpha}$（$x\ge1$）、$\alpha>0$）$x>0$ で $P(M_{n}/n^{1/\alpha}\le x)\to\exp(-x^{-\alpha})$、$x\le0$ では $0$（**フレシェ分布**）。
+3. （一様分布 $U(0,1)$）$x\le0$ で $P(n(M_{n}-1)\le x)\to e^{x}$、$x>0$ では $1$（**ワイブル型**の極値分布）。
+:::
+
+::: intuition
+3 つの型は分布の右の裾の形で決まる。指数的に減る裾（指数・正規・ガンマなど）では最大値は $\log n$ 程度の速さでゆっくり大きくなり、ゆらぎは一定の幅に収まる（グンベル）。べき的に減る重い裾では最大値は $n^{1/\alpha}$ の速さで大きくなり、比で見たゆらぎが残る（フレシェ）。上限のある裾では最大値は上限に張りつき、上限からの距離が $1/n$ の尺度で決まる（ワイブル）。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$u_{n}=x+\log n$ で $n(1-F(u_{n}))=e^{-x}$】$u_{n}\defeq x+\log n$（$n$ が大きければ $u_{n}>0$）について $n(1-F(u_{n}))=ne^{-x-\log n}=e^{-x}$。\ref{stat:maximum-criterion} の 2（$\tau=e^{-x}$）。
+
+**Step 2（2）.** $x>0$ について $u_{n}\defeq xn^{1/\alpha}\ge1$（$n$ が大きいとき）で $n(1-F(u_{n}))=nx^{-\alpha}n^{-1}=x^{-\alpha}$。$x\le0$ なら $M_{n}\ge1>0\ge xn^{1/\alpha}$ なので確率は $0$。
+
+**Step 3（3）.** $x\le0$ について $u_{n}\defeq1+x/n\in[0,1]$（$n\ge-x$ のとき）で $n(1-F(u_{n}))=n\cdot(-x/n)=-x$。$x>0$ なら $u_{n}>1\ge M_{n}$ で確率は $1$。
+:::
+
+::: lemma ミルズ比の評価 {#stat:mills-ratio keywords="for x > 0: (1/x - 1/x^3) phi(x) <= 1 - Phi(x) <= phi(x)/x; hence 1 - Phi(x) ~ phi(x)/x as x -> infinity" index="ミルズ比|みるずひ, 正規分布の裾|せいきぶんぷのすそ" refname="ミルズ比の評価"}
+$x>0$ について $\Bigl(\frac1x-\frac1{x^{3}}\Bigr)\varphi(x)\le1-\Phi(x)\le\frac{\varphi(x)}x$。特に $x\to\infty$ で $\frac{1-\Phi(x)}{\varphi(x)/x}\to1$。
+:::
+
+::: intuition
+正規分布の裾の確率は、その点の密度を点の位置で割ったものでよく近似される。密度が $e^{-x^{2}/2}$ と急速に減るので、裾の確率のほとんどは境界のすぐ近くにある。
+:::
+
+::: proof
+**Step 1（部分積分）.** $\varphi'(t)=-t\varphi(t)$ なので、$\int_{x}^{\infty}\varphi(t)dt=\int_{x}^{\infty}\frac1t\cdot t\varphi(t)dt=\frac{\varphi(x)}x-\int_{x}^{\infty}\frac{\varphi(t)}{t^{2}}dt$（\ref{calc:substitution-parts}、境界項は $\frac{\varphi(t)}t\to0$）。最後の積分は非負なので上からの評価が得られる。
+
+**Step 2（もう一度）.** 同様に $\int_{x}^{\infty}\frac{\varphi(t)}{t^{2}}dt=\frac{\varphi(x)}{x^{3}}-\int_{x}^{\infty}\frac{3\varphi(t)}{t^{4}}dt\le\frac{\varphi(x)}{x^{3}}$。Step 1 に代入して下からの評価。
+:::
+
+::: theorem 正規分布の最大値 {#stat:normal-maximum keywords="for standard normal samples, with b_n defined by n(1 - Phi(b_n)) = 1, P(b_n (M_n - b_n) <= x) -> exp(-e^{-x}) (Gumbel); b_n ~ sqrt(2 log n)" index="正規分布の最大値|せいきぶんぷのさいだいち" refname="正規分布の最大値"}
+$X_{i}\sim N(0,1)$ とし、$n\ge2$ について $1-\Phi(b_{n})=\frac1n$ で $b_{n}$ を定める（$1-\Phi$ は連続で狭義減少なので一意）。このとき
+1. すべての $x$ で $P(b_{n}(M_{n}-b_{n})\le x)\to\exp(-e^{-x})$。
+2. $b_{n}/\sqrt{2\log n}\to1$。
+:::
+
+::: intuition
+正規分布の裾は指数分布よりさらに軽いので、最大値は $\sqrt{2\log n}$ とゆっくり増え、そのゆらぎの幅は $1/\sqrt{2\log n}$ と狭まっていく。正規化すると指数分布と同じグンベル型になる。
+:::
+
+::: proof
+**Step 1（$b_{n}\to\infty$）.** $1-\Phi(b_{n})=\frac1n\to0$ なので $b_{n}\to\infty$。
+
+**Step 2（しきい値の比）.** 【主張：$u_{n}\defeq b_{n}+x/b_{n}$ について $n(1-\Phi(u_{n}))\to e^{-x}$】$n(1-\Phi(u_{n}))=\frac{1-\Phi(u_{n})}{1-\Phi(b_{n})}$。$u_{n},b_{n}\to\infty$ なので \ref{stat:mills-ratio} からこの比は $\frac{\varphi(u_{n})/u_{n}}{\varphi(b_{n})/b_{n}}$ との比が $1$ に収束する。後者は
+$$
+\frac{b_{n}}{u_{n}}\exp\Bigl(-\frac{u_{n}^{2}-b_{n}^{2}}2\Bigr)=\frac{b_{n}}{u_{n}}\exp\Bigl(-x-\frac{x^{2}}{2b_{n}^{2}}\Bigr)\to e^{-x}.
+$$
+
+**Step 3（1）.** $\{b_{n}(M_{n}-b_{n})\le x\}=\{M_{n}\le u_{n}\}$（$b_{n}>0$）なので、\ref{stat:maximum-criterion} の 2 から。
+
+**Step 4（2）.** \ref{stat:mills-ratio} から $\log n=-\log(1-\Phi(b_{n}))=\frac{b_{n}^{2}}2+\log b_{n}+\frac12\log(2\pi)+o(1)$。両辺を $b_{n}^{2}/2$ で割ると、$\frac{2\log n}{b_{n}^{2}}\to1$。
+:::
+
+::: remark
+**最大値の増え方の遅さ.** 正規分布では最大値は $\sqrt{2\log n}$ 程度にしかならない：$n=10^{6}$ でも $\sqrt{2\log10^{6}}\approx5.3$（標準偏差の単位）。「ありえないほどの外れ値」が観測されたら、分布の裾が正規分布より重い可能性を疑うべきである。
+:::
+
+## 極値分布の分類 {#stat:sec-ev-classification}
+
+::: definition 最大安定分布 {#stat:max-stable keywords="a nondegenerate distribution G is max-stable if for every n there are a_n > 0, b_n with G(a_n x + b_n)^n = G(x); Gumbel, Frechet and Weibull distributions are max-stable" index="最大安定分布|さいだいあんていぶんぷ" refname="最大安定分布"}
+退化していない分布関数 $G$ が、すべての $n$ について $a_{n}>0$, $b_{n}$ をもち $G(a_{n}x+b_{n})^{n}=G(x)$ をみたすとき、**最大安定**であるという。例えば $G(x)=\exp(-e^{-x})$ は $G(x+\log n)^{n}=G(x)$、$G(x)=\exp(-x^{-\alpha})$（$x>0$）は $G(n^{1/\alpha}x)^{n}=G(x)$ をみたす。
+:::
+
+::: intuition
+最大安定とは「$n$ 個の独立なコピーの最大値が、尺度と位置を変えれば元と同じ分布になる」ことである。正規化した最大値の極限分布は、さらに最大をとっても型が変わらないはずなので、最大安定でなければならない。
+:::
+
+::: remark
+**フィッシャー–ティペット–グネデンコの定理.** 正規化した最大値 $(M_{n}-b_{n})/a_{n}$ が退化しない分布 $G$ に法則収束するなら、$G$ は最大安定で、位置と尺度を除いてグンベル型・フレシェ型・ワイブル型のどれかである。これらは 1 つの族 $G_{\xi}(x)=\exp(-(1+\xi x)^{-1/\xi})$（一般化極値分布、$\xi=0$ はグンベル）にまとめられる（ここでは証明しない）。実務では、各年の最大値（年最大値）にこの族を当てはめ、「$T$ 年に一度」の水準（再現レベル）を $G^{-1}(1-1/T)$ で推定する。
+:::
+
+::: hypcheck
+- **独立同分布**：$P(M_{n}\le x)=F(x)^{n}$（\ref{stat:maximum-criterion} の 1）に使った。依存のある系列では、極値どうしが群れて現れる効果（極値指数）を補正する必要がある。
+- **極限が存在しない分布**：ポアソン分布や幾何分布のような整数値の分布では、どのように正規化しても最大値は退化しない極限をもたない（裾の確率の比 $\frac{1-F(k)}{1-F(k-1)}$ が $1$ に近づかないため。ここでは証明しない）。
+- **裾の形だけが効く**：判定法には $1-F(u_{n})$ だけが現れるので、分布の中心部の形は極限に影響しない。
+:::
+
+## 問題 {#stat:sec-ev-problems}
+
+::: problem {#stat:prob-ev-gumbel-mean}
+グンベル分布 $\exp(-e^{-x})$ の最頻値が $0$ であることと、$P(\text{値}\le0)=e^{-1}\approx0.37$ を確かめよ。
+:::
+
+::: solution
+密度 $g(x)=e^{-x}\exp(-e^{-x})$、$\log g=-x-e^{-x}$ の導関数 $-1+e^{-x}$ は $x=0$ で $0$ で符号が正から負に変わる。$G(0)=e^{-1}$。
+:::
+
+::: problem {#stat:prob-ev-return-period}
+年最大値が独立に分布 $G$ にしたがうとき、1 年の超過確率が $\frac1T$ の水準を $T$ 年間で一度も超えない確率を求め、$T\to\infty$ の極限を述べよ。
+:::
+
+::: solution
+$(1-\frac1T)^{T}\to e^{-1}\approx0.37$。「100 年に一度の洪水」は、100 年の間に約 63% の確率で少なくとも一度起こる。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 判定法とすべての例は、分布関数の裾の計算だけで示し、特性関数も一般の分類定理も使っていない。議論は Embrechts–Klüppelberg–Mikosch『Modelling Extremal Events』第 3 章、de Haan–Ferreira『Extreme Value Theory』第 1 章の流れに沿う。
+
+**前提を変えると.**
+- **最大値の吸引域**：分布がフレシェ型の吸引域に属するのは、裾 $1-F$ が指数 $-\alpha$ で正則変動するとき、かつそのときに限る（グネデンコ。ここでは証明しない）。パレート分布はその典型である（\ref[裾の重い分布]{stat:page-heavy-tails}）。
+- **しきい値超過**：大きなしきい値 $u$ を超えた分の分布 $P(X-u>y\mid X>u)$ は、一般化パレート分布で近似される（ピッカンズ–バルケマ–ド・ハーン）。年最大値より多くのデータを使えるので実務でよく使われる。
+- **最小値**：$\min X_{i}=-\max(-X_{i})$ なので、最小値の理論は符号を変えるだけで得られる。材料の強度（最も弱い所で壊れる）のモデルとしてワイブル分布が使われるのはこのためである。
+
+**高い視点から：まれな事象のポアソン近似.** 極値理論の核心は「しきい値を超える観測の数はポアソン分布に近い」という事実で、最大値の分布は「超過が 0 回」の確率にすぎない。正規化の定数 $a_{n},b_{n}$ は、平均 1 回だけ超過が起きるしきい値の近くを拡大する尺度である。比喩で言えば、極値理論は、毎年記録を更新する高さの跳躍を観察して、「来年の記録」ではなく「記録の伸び方の型」を予測する理論で、その型は選手の平均的な実力ではなく、ごくまれな好調の起こりやすさ（分布の裾）だけで決まる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-ev-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
