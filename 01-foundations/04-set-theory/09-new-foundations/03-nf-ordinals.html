@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NF の整列順序と順序数 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/04-set-theory/09-new-foundations/03-nf-ordinals.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# NF の整列順序と順序数 {#set:page-nf-ordinals keywords="well-orderings in NF, ordinals in NF, T operation on ordinals, Burali-Forti paradox in NF"}
+
+$\ZF$ では順序数の全体は集合にならず、それを集合とみなすとブラリ＝フォルティの矛盾が生じる。$\mathsf{NF}$ では順序数を「整列順序の同型類」として定義でき、順序数の全体 $\mathrm{On}$ も集合になる。それでも矛盾が起きないのは、$\alpha$ 未満の順序数を並べた順序の型が $\alpha$ そのものではなく、T 演算で型を上げた $T^{4}\alpha$ になるからである。このページでは、$\mathsf{NF}$ での整列順序の扱い、順序数と T 演算を定め、ブラリ＝フォルティの議論が $T^{4}\Omega<\Omega$ という定理に変わることを示す。前のページ（\ref{set:page-nf-axioms}）の続きで、議論はすべて $\mathsf{NF}$ の中で行う。
+
+> 資料なしの標準的な内容とされるもの（未確認）。$T^{4}$ の「4」はこのサイトの順序対の約束による計算で、文献とは照合していない。
+
+## 記法と定義の確認 {#set:sec-nfo-notation}
+
+::: notation
+- 前のページの $\mathsf{NF}$ の公理（\ref{set:nf}）、単集合写像（\ref{set:nf-singleton-image}）、フレーゲ流の基数と T 演算（\ref{set:nf-frege-cardinal}, \ref{set:nf-t-operation}, \ref{set:nf-t-basic}）を使う。
+- 集合論の言語・論理式は \ref{set:first-order-language}、層別化は \ref{set:stratified-formula}、定義された項を含む式の層別化の判定は \ref{set:stratified-defined-terms} の意味で用いる。とくに、パラメータのない定数（$V$, $\varnothing$, $\N$ など）は出現ごとに別の型を与えてよい。
+- 順序対は $\langle x,y\rangle=\{\{x\},\{x,y\}\}$（\ref{set:ordered-pair}）、関係・関数・単射・全射は \ref{set:relation}, \ref{set:function}, \ref{set:injection-surjection} と同じ論理式で定める。$A\approx B$, $A\preccurlyeq B$ は \ref{set:cardinality-order} と同じ論理式で定める。像は $f[A]=\{y\mid\exists x\,(x\in A\land\langle x,y\rangle\in f)\}$ と書く。
+- **このページの議論はすべて $\mathsf{NF}$ の中で行う**（補足の中で他の体系に触れるときはそう明記する）。$\ZF$ の定理は $\mathsf{NF}$ でそのまま使えない。$\ZF$ の証明を流用するときは、作る集合がすべて層別化された論理式で定義されることを確かめる。
+- $\lvert A\rvert$ はこのページではフレーゲ流の基数（\ref{set:nf-frege-cardinal}）を表し、$\ZF$ の濃度（\ref{set:cardinality}）とは別物である。$\N$ はフレーゲ流の自然数の集合（\ref{set:nf-natural-numbers}）を表す。
+:::
+
+## 順序数とブラリ＝フォルティの議論 {#set:sec-nf-ordinals}
+
+$\mathsf{NF}$ では、関係 $R$ の型が場の元の型より 3 高い（順序対が 2、集合が 1）。空でない 1 元の順序も場から復元できるように、整列順序を反射的な形で扱う。
+
+::: definition NF の反射的な整列順序 {#set:nf-well-order keywords="reflexive well-ordering in NF"}
+関係 $R$ が反射的な整列順序であるとは、$R\subseteq\mathrm{fld}\,R\times\mathrm{fld}\,R$ で、$R$ が $\mathrm{fld}\,R$ 上で反射律・反対称律・推移律を満たす全順序であり、$\mathrm{fld}\,R$ の空でない任意の部分集合が $R$-最小元をもつことをいう。次の記法を用いる。
+- $\langle\mathrm{fld}\,R,R^{<}\rangle$, $R^{<}=R\setminus\mathrm{id}_{V}$ は \ref{set:well-order} の意味の整列順序である。
+- $x\in\mathrm{fld}\,R$ について、$P_{x}=\{y\mid\langle y,x\rangle\in R\land y\neq x\}$ とし、$R_{x}=R\cap(P_{x}\times P_{x})$（$x$ の前の部分）とおく。
+- $R\cong S$ は、$\mathrm{fld}\,R$ から $\mathrm{fld}\,S$ への全単射 $f$ で $\langle x,y\rangle\in R\leftrightarrow\langle f(x),f(y)\rangle\in S$ となるものがあることをいう。$s(R)=s(S)$ で層別化される。
+:::
+
+::: intuition
+整列順序を、「$x$ は $y$ 以下」という反射的な関係として扱う。こうすると 1 元だけの順序も $\{\langle a,a\rangle\}$ として場から元が読み取れ、関係だけで順序の形が決まる。$R_{x}$ は「$x$ より前の部分」を取り出した順序である。
+:::
+
+::: lemma 整列順序の基本定理の移植 {#set:nf-well-order-facts}
+$R,S$ を反射的な整列順序とする。
+1. $x\,R^{<}\,y$ ならば $(R_{y})_{x}=R_{x}$。
+2. $f\colon R\cong S$ ならば、$x\in\mathrm{fld}\,R$ について $f\restr{\mathrm{fld}\,R_{x}}\colon R_{x}\cong S_{f(x)}$。
+3. $x\in\mathrm{fld}\,R$ について $R\not\cong R_{x}$。
+4. $R\cong S$、ある $y$ について $R\cong S_{y}$、ある $x$ について $R_{x}\cong S$ のうち、ちょうど一つが成り立つ。
+:::
+
+::: proof
+それぞれ $\ZF$ の \ref{set:well-order-basic-lemmas.2}, \ref{set:iso-preserves-initial-segment}, \ref{set:well-order-no-initial-iso}, \ref{set:well-order-trichotomy} を $\langle\mathrm{fld}\,R,R^{<}\rangle$, $\langle\mathrm{fld}\,S,S^{<}\rangle$ に適用した主張である。それらの証明（と、途中で使う \ref{set:well-order-increasing}, \ref{set:downward-closed-initial-segment}, \ref{set:order-isomorphism-basic}）が $\mathsf{NF}$ でそのまま通ることを確かめる。
+
+**Step 1（使う公理）.** 【主張：$\ZF$ の証明が使う集合の存在は、外延性と次の集合の存在だけである】 証明を読むと、使われる構成は、始切片 $\{y\in A\mid yRx\}$、逆像 $f^{-1}[Y]$、$\{x\in A\mid f(x)\,R\,x\}$、差 $A\setminus X$、直積 $A\times B$ と、比較定理の
+$$
+\{z\in A\times B\mid\exists v\,\exists w\,(z=\langle v,w\rangle\land\langle A_{v},R\rangle\cong\langle B_{w},S\rangle)\}
+$$
+（\eqref{set:eq-trichotomy-f}）、および関数の合成・逆・制限だけである。選択公理・置換公理・超限再帰は使わない（各定理の前提条件の使用箇所の欄による）。$\ZF$ では直積の存在に置換公理（または冪集合公理）を使うが、$\mathsf{NF}$ では \ref{set:nf-basic-constructions.5} で直接作れる。
+
+**Step 2（層別化）.** 【主張：Step 1 の構成はすべて層別化された式で定義される】 $A=\mathrm{fld}\,R$, $B=\mathrm{fld}\,S$ の元の型を $0$ とすると、$s(A)=s(B)=s(X)=s(Y)=s(A_{v})=s(B_{w})=1$、関係と写像 $R,S,f,h$ の型は $3$ である。始切片は $\langle y,x\rangle\in R$ で $s(x)=s(y)=0$、逆像は $\exists u(u\in Y\land\langle x,u\rangle\in f)$ で $s(u)=0$、$\{x\in A\mid f(x)Rx\}$ は $\exists u(\langle x,u\rangle\in f\land\langle u,x\rangle\in R)$ で $s(u)=0$ である。比較定理の集合では、$\langle A_{v},R\rangle\cong\langle B_{w},S\rangle$ が「$h\subseteq A_{v}\times B_{w}$ で順序を保つ全単射」の存在なので、$s(v)=s(w)=0$, $s(A_{v})=s(B_{w})=1$, $s(h)=3$ で層別化される。合成・逆・制限は \ref{set:nf-basic-constructions.6} である。
+
+ゆえに $\ZF$ の証明は、分出公理の代わりに層別化された内包公理を使って、一字一句 $\mathsf{NF}$ の中で行える。反射的な形と狭義の形の行き来（$R^{<}=R\setminus\mathrm{id}_{V}$、$R=R^{<}\cup\mathrm{id}_{\mathrm{fld}\,R}$）も層別化された構成である。
+
+::: hypcheck
+- **Step 2 の型の割り当てが一つの証明の中で整合すること**：$R$ と $S$ を同じ型で扱うので、$R\cong S$ のように両者を比べる式が層別化される。型の違う整列順序（たとえば $R$ と $R^{\iota}$）を直接比べるには、次の定義の T 演算を経由する。
+:::
+:::
+
+::: definition NF の順序数 {#set:nf-ordinal keywords="ordinal in NF, Frege-Russell ordinal, order type, NO" index="NF の順序数|えぬえふのじゅんじょすう"}
+反射的な整列順序 $R$ に対し $\mathrm{ot}(R)=\{S\mid S\text{ は反射的な整列順序で }S\cong R\}$ を $R$ の**順序数**といい、順序数全体の集合を $\mathrm{NO}$ と書く。$R\in\alpha$, $S\in\beta$ について、ある $y\in\mathrm{fld}\,S$ で $R\cong S_{y}$ となるとき $\alpha<\beta$ と書き、$\alpha\le\beta$ を $\alpha<\beta\lor\alpha=\beta$ とする。$\le_{\mathrm{NO}}=\{\langle\alpha,\beta\rangle\mid\alpha,\beta\in\mathrm{NO}\land\alpha\le\beta\}$ とおく。
+:::
+
+::: intuition
+基数と同じく、「同じ形の整列順序全体」を順序数とする（フレーゲ＝ラッセル流）。$\ZF$ の順序数（\ref{set:ordinal}）は各同型類の代表を一つ選んだものだった。$\mathsf{NF}$ では順序数全体 $\mathrm{NO}$ も、その上の大小関係 $\le_{\mathrm{NO}}$ も集合である（$\alpha\le\beta$ は $s(\alpha)=s(\beta)$ で層別化される）。
+:::
+
+::: theorem 順序数は整列される {#set:nf-ordinals-well-ordered keywords="NO is well-ordered" index="順序数の整列性（NF）|じゅんじょすうのせいれつせい"}
+1. $<$ は代表の選び方によらない。
+2. $\alpha=\mathrm{ot}(R)$ ならば、$\beta<\alpha$ となる $\beta$ はちょうど $\mathrm{ot}(R_{x})$（$x\in\mathrm{fld}\,R$）であり、$x\,R^{<}\,y$ のとき $\mathrm{ot}(R_{x})<\mathrm{ot}(R_{y})$ である。
+3. $<$ は $\mathrm{NO}$ 上の狭義の全順序であり、$\le_{\mathrm{NO}}$ は反射的な整列順序である。
+:::
+
+::: intuition
+すべての順序数を並べると、それ自身が一つの整列順序になる。順序数 $\alpha$ より小さい順序数は、$\alpha$ の代表の各元の「前の部分」の形としてちょうど一回ずつ現れる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$R\cong R'$, $S\cong S'$ のとき、$R\cong S_{y}$ なら $R'\cong S'_{g(y)}$】 $g\colon S\cong S'$ とすると、\ref{set:nf-well-order-facts.2} より $S_{y}\cong S'_{g(y)}$ であり、同型の合成・逆（\ref{set:nf-equinumerous.2} と同じ議論）から $R'\cong R\cong S_{y}\cong S'_{g(y)}$ が従う。
+
+**Step 2（2）.** 【主張：$\beta<\alpha\iff\exists x\,(\beta=\mathrm{ot}(R_{x}))$、および $x\,R^{<}\,y\Rightarrow\mathrm{ot}(R_{x})<\mathrm{ot}(R_{y})$】 $\mathrm{ot}(S)=\mathrm{ot}(S')\iff S\cong S'$ は \ref{set:nf-cardinal-basic.2} と同じ議論で示せる。$\beta<\alpha$ なら $S\in\beta$ について $S\cong R_{x}$ となる $x$ があり、$\beta=\mathrm{ot}(R_{x})$ である。逆は定義そのものである。$x\,R^{<}\,y$ なら \ref{set:nf-well-order-facts.1} より $R_{x}=(R_{y})_{x}$ なので、$\mathrm{ot}(R_{x})<\mathrm{ot}(R_{y})$ である。
+
+**Step 3（全順序）.** 【主張：$<$ は非反射律・推移律・三分律を満たす】 非反射律は \ref{set:nf-well-order-facts.3}、三分律は \ref{set:nf-well-order-facts.4} による。推移律：$R\cong S_{y}$ かつ $h\colon S\cong U_{z}$ なら、\ref{set:nf-well-order-facts.2} と \ref{set:nf-well-order-facts.1} より $S_{y}\cong(U_{z})_{h(y)}=U_{h(y)}$ なので $R\cong U_{h(y)}$ である。
+
+**Step 4（最小元）.** 空でない $X\subseteq\mathrm{NO}$ と $\alpha\in X$, $R\in\alpha$ をとり、$Y=\{x\in\mathrm{fld}\,R\mid\mathrm{ot}(R_{x})\in X\}$ とおく。【主張：$Y$ は存在し、$X$ は $<$-最小元をもつ】 $s(x)=0$ とすると $s(R_{x})=3$, $s(\mathrm{ot}(R_{x}))=4$, $s(X)=5$, $s(R)=3$ で層別化される。$Y=\varnothing$ なら、$\gamma<\alpha$ となる $\gamma\in X$ は Step 2 より $\mathrm{ot}(R_{x})$（$x\in Y$）の形になるので存在せず、$\alpha$ が最小元である。$Y\neq\varnothing$ なら $R$-最小元 $x_{0}$ をとり、$\alpha_{0}=\mathrm{ot}(R_{x_{0}})\in X$ とおく。$\gamma\in X$, $\gamma<\alpha_{0}$ なら、推移律で $\gamma<\alpha$ なので $\gamma=\mathrm{ot}(R_{x})$, $x\in Y$ であり、Step 2 と三分律から $x\,R^{<}\,x_{0}$ となって $x_{0}$ の最小性に反する。ゆえに $\alpha_{0}$ が最小元である。
+
+Step 3・4 より $\le_{\mathrm{NO}}$ は反射的な整列順序である（反対称性は非反射律と推移律から従う）。
+
+::: hypcheck
+- **\ref{set:nf-well-order-facts}**：Step 1〜3 のすべてで使った。とくに三分律が全順序性の本質である。
+- **層別化された内包公理**：Step 4 で $Y$ を作るのに使った。$X$ はパラメータとして型 $5$ をもつ。
+:::
+:::
+
+$\mathsf{NF}$ では整列順序 $R$ を、元を一つずつ包んだ順序に写して型を上げることができる。
+
+::: definition 順序数の T 演算 {#set:nf-ordinal-t keywords="T operation on ordinals" index="順序数の T 演算|じゅんじょすうのてぃーえんざん"}
+関係 $R$ に対し $R^{\iota}=\{\langle\{x\},\{y\}\rangle\mid\langle x,y\rangle\in R\}$ とし、順序数 $\alpha$ と $R\in\alpha$ に対し $T\alpha=\mathrm{ot}(R^{\iota})$ と定める。$R^{\iota^{k}}$, $T^{k}\alpha$ は $k$ 回くり返したものである。
+:::
+
+::: intuition
+整列順序の各元を単集合で包むと、形は同じで型が一つ高い整列順序ができる。その形が $T\alpha$ である。基数の T 演算（\ref{set:nf-t-operation}）の順序数版である。
+:::
+
+::: lemma 順序数の T 演算の性質 {#set:nf-ordinal-t-basic}
+1. $R$ が反射的な整列順序なら $R^{\iota}$ もそうであり、$\mathrm{fld}\,R^{\iota}=\iota[\mathrm{fld}\,R]$、$\langle\{x\},\{y\}\rangle\in R^{\iota}\iff\langle x,y\rangle\in R$ である。
+2. $T\alpha$ は代表の選び方によらず、$T^{k}\alpha=\mathrm{ot}(R^{\iota^{k}})$ である。
+3. $\alpha<\beta\iff T\alpha<T\beta$。とくに $\alpha\le\beta\iff T\alpha\le T\beta$ である。
+:::
+
+::: proof
+**1.** $R^{\iota}$ の定義は \ref{set:nf-equinumerous} の Step 3 と同じく層別化される。$\{x\}=\{x'\}\iff x=x'$ なので、$\iota$ は $\mathrm{fld}\,R$ と $\mathrm{fld}\,R^{\iota}$ の間で順序を保って一対一に対応し（ただしこの対応自体は集合として作らない）、反射的・反対称・推移・全順序の条件は元についての条件なのでそのまま移る。最小元の条件は、空でない $Z\subseteq\mathrm{fld}\,R^{\iota}$ に対し $Z'=\{x\mid\{x\}\in Z\}$（$s(Z)=s(x)+2$ で層別化される）をとり、その $R$-最小元 $x_{0}$ について $\{x_{0}\}$ が $Z$ の $R^{\iota}$-最小元になることから従う。
+
+**2.** $f\colon R\cong S$ なら $f^{\iota}\colon R^{\iota}\cong S^{\iota}$ である（\ref{set:nf-equinumerous} の Step 3 と同じ構成）。$T^{k}$ の式は定義を $k$ 回適用したものである。
+
+**3.** $f\colon R\cong S_{y}$ なら $f^{\iota}\colon R^{\iota}\cong(S_{y})^{\iota}=(S^{\iota})_{\{y\}}$ なので $T\alpha<T\beta$ である。逆向きは、$\alpha=\beta$, $\beta<\alpha$ の場合にそれぞれ $T\alpha=T\beta$, $T\beta<T\alpha$ となることと、\ref{set:nf-ordinals-well-ordered.3} の三分律から従う。
+:::
+
+::: theorem 始切片の順序型 {#set:nf-ordinal-segment-type keywords="order type of the ordinals below alpha is T^4 alpha" index="順序数の始切片の型（NF）|じゅんじょすうのしせっぺんのかた"}
+$\alpha\in\mathrm{NO}$ について、$\alpha$ より小さい順序数全体に $\le_{\mathrm{NO}}$ を制限した順序 $(\le_{\mathrm{NO}})_{\alpha}$ の順序数は $T^{4}\alpha$ である。
+:::
+
+::: intuition
+$\ZF$ では「$\alpha$ より小さい順序数を並べると、その形は $\alpha$ そのもの」である。$\mathsf{NF}$ でも形は同じだが、並べた順序数の型は $\alpha$ の場の元の型より 4 高い（元 → 順序対で 2、関係で 1、同型類で 1）。型を合わせて比べると、答えは $\alpha$ ではなく $T^{4}\alpha$ になる。
+:::
+
+::: proof
+$R\in\alpha$ をとり、$\mathrm{fld}\,R$ の元の型を $0$ とする。
+
+**Step 1（型の勘定）.** 【主張：$F=\{\langle\iota^{4}x,\mathrm{ot}(R_{x})\rangle\mid x\in\mathrm{fld}\,R\}$ は層別化された式で定まる】 $\iota^{4}x=\{\{\{\{x\}\}\}\}$ は $s(\iota^{4}x)=4$、$R_{x}$ は関係なので型 $3$、$\mathrm{ot}(R_{x})$ は型 $4$ である。順序対の二つの成分がともに型 $4$ なので、$F$ の定義は（$s(R)=3$ として）層別化される。
+
+**Step 2（全単射）.** 【主張：$F$ は $\mathrm{fld}\,R^{\iota^{4}}=\iota^{4}[\mathrm{fld}\,R]$ から $\{\beta\mid\beta<\alpha\}$ への全単射】 \ref{set:nf-ordinals-well-ordered.2} より、値 $\mathrm{ot}(R_{x})$ は $\alpha$ より小さく、$\alpha$ より小さい順序数はすべてこの形である。$x\neq y$ なら三分律より $x\,R^{<}\,y$ か $y\,R^{<}\,x$ であり、同じく \ref{set:nf-ordinals-well-ordered.2} から $\mathrm{ot}(R_{x})\neq\mathrm{ot}(R_{y})$ となるので単射である。
+
+**Step 3（順序の保存）.** 【主張：$F\colon R^{\iota^{4}}\cong(\le_{\mathrm{NO}})_{\alpha}$】 \ref{set:nf-ordinal-t-basic.1} を 4 回使うと $\langle\iota^{4}x,\iota^{4}y\rangle\in R^{\iota^{4}}\iff\langle x,y\rangle\in R$ である。Step 2 の議論より $\langle x,y\rangle\in R\iff\mathrm{ot}(R_{x})\le\mathrm{ot}(R_{y})$ である。ゆえに $F$ は順序を保つ全単射である。
+
+以上より $\mathrm{ot}((\le_{\mathrm{NO}})_{\alpha})=\mathrm{ot}(R^{\iota^{4}})=T^{4}\alpha$ である（\ref{set:nf-ordinal-t-basic.2}）。
+
+::: hypcheck
+- **層別化**：Step 1 で、$x$ に $\iota^{4}x$ を対応させることで型を 4 上げ、$\mathrm{ot}(R_{x})$ と同じ型にそろえた。$x\mapsto\mathrm{ot}(R_{x})$ そのものは型が 4 ずれるので、内包公理では作れない。
+- **\ref{set:nf-ordinals-well-ordered.2}**：Step 2・3。
+:::
+:::
+
+::: theorem ブラリ＝フォルティの議論の NF 版 {#set:nf-burali-forti keywords="Burali-Forti paradox in NF, T Omega < Omega" index="ブラリ＝フォルティのパラドックス（NF）|ぶらりふぉるてぃのぱらどっくす"}
+$\Omega=\mathrm{ot}(\le_{\mathrm{NO}})$ とおくと $\Omega\in\mathrm{NO}$ であり、$T^{4}\Omega<\Omega$、さらに $T\Omega<\Omega$ である。
+:::
+
+::: intuition
+すべての順序数の集合 $\mathrm{NO}$ は整列されているので、それ自身の順序数 $\Omega$ をもつ。$\ZF$ の議論では「$\Omega$ より小さい順序数の並びの形は $\Omega$」と「その並びは全体の真の始切片なので $\Omega$ より小さい」から矛盾が出た（\ref{set:burali-forti}）。$\mathsf{NF}$ では前者が「形は $T^{4}\Omega$」に変わるので、結論は矛盾ではなく $T^{4}\Omega<\Omega$ になる。カントールの定理が $T\lvert V\rvert<\lvert V\rvert$ を与えたのと同じ現象である。
+:::
+
+::: proof
+**Step 1.** 【主張：$\Omega\in\mathrm{NO}$】 \ref{set:nf-ordinals-well-ordered.3} より $\le_{\mathrm{NO}}$ は反射的な整列順序であり、$\Omega=\mathrm{ot}(\le_{\mathrm{NO}})$ はその順序数である。
+
+**Step 2.** 【主張：$T^{4}\Omega<\Omega$】 $\Omega\in\mathrm{NO}=\mathrm{fld}\,(\le_{\mathrm{NO}})$ なので、$<$ の定義（$S=\le_{\mathrm{NO}}\in\Omega$, $y=\Omega$）より $\mathrm{ot}((\le_{\mathrm{NO}})_{\Omega})<\Omega$ である。\ref{set:nf-ordinal-segment-type} より左辺は $T^{4}\Omega$ である。
+
+**Step 3.** 【主張：$T\Omega<\Omega$】 $T\Omega<\Omega$ でないと仮定すると、三分律より $\Omega\le T\Omega$ である。\ref{set:nf-ordinal-t-basic.3} により $T$ を施すと $T\Omega\le T^{2}\Omega$ なので $\Omega\le T^{2}\Omega$ であり、これにもう一度 $T$ を二回施すと $T^{2}\Omega\le T^{4}\Omega$ となる。ゆえに $\Omega\le T^{4}\Omega$ となり、Step 2 に反する。
+
+::: hypcheck
+- **\ref{set:nf-ordinals-well-ordered}**：Step 1 で $\mathrm{NO}$ が整列されること、Step 3 で三分律。
+- **\ref{set:nf-ordinal-segment-type}**：Step 2。$\ZF$ の議論との違いはすべてここにある。
+:::
+:::
+
+::: supplement
+**ずれの大きさ.** $T^{4}$ の「4」は、本ページがクラトフスキーの順序対（型を 2 上げる）を使ったことによる。$\mathsf{NF}$ では無限公理（\see[NF における無限公理]{set:nf-infinity}）のもとで型を上げない順序対（クワインの順序対）が作れるとされ、それを使う文献ではずれが $T^{2}$ の形で述べられることが多いとされる（未確認）。いずれにせよ、$T$ が順序数の上で恒等的でないという結論は変わらない。
+
+**類似.** 基数でも、$\lvert V\rvert$ 未満の基数を並べた順序の形を調べると同じ種類のずれが現れる。\ref{set:nf-cantor-universal} と本定理は、どちらも「全体についての対角線論法・自己言及は、T 演算のずれとして現れる」という一つの原理の現れである。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NFU の無矛盾性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/04-set-theory/09-new-foundations/04-nfu-consistency.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# NFU の無矛盾性 {#set:page-nfu-consistency keywords="NFU, New Foundations with urelements, consistency of NFU, Jensen, Boffa, automorphism model, urelements, atoms"}
+
+\ref[NF]{set:nf} は全体集合をもつ集合論だが、その無矛盾性は長い間わからなかった（\see[NF の無矛盾性]{set:page-nf-consistency}）。ところが外延性の公理を「元をもつもの」だけに制限し、元をもたない**原子**を許すと、事情は一変する。この体系 $\mathsf{NFU}$ は、$\ZFC$ のモデル $\mathcal{M}$ と、その自己同型 $j$ と、$j(\alpha)<\alpha$ となる順序数 $\alpha$ があれば、$V_{\alpha}$ の上に所属関係を「$j$ で一段ずらして」入れ直すだけでモデルが作れる。本ページではこの構成（イェンセンの結果を、ボッファが自己同型の形に整理したものとされる）を証明つきで述べ、そのような $\mathcal{M},j,\alpha$ がエーレンフォイヒト–モストフスキのモデル（\ref{model:em-model}）から得られることを示す。結論は「$\ZFC$ が無矛盾なら $\mathsf{NFU}$ に\term[無限公理]{set:nfu-inf-ac}と\term[選択公理]{set:nfu-inf-ac}を加えた体系も無矛盾」である（\ref{set:nfu-consistent}）。NF では\term[選択公理]{set:nfu-inf-ac}が否定される（\see[スペッカーの定理]{set:specker-not-ac}）ので、原子を許すかどうかで\term[選択公理]{set:nfu-inf-ac}との関係がまったく変わる。
+
+## 記法と定義の確認 {#set:sec-nfu-notation}
+
+::: notation
+- **型と層別化.** 型つき集合論 $\mathsf{TST}$（\ref[TST]{set:tst}）と、論理式の層別化（\ref[層別化された論理式]{set:stratified-formula}）は \ref[型つき集合論 TST と層別化]{set:page-typed-set-theory} のとおりとする。本ページで使う形を確認しておく：論理式 $\varphi$ の**層別化**とは、$\varphi$ に現れる変数から整数への写像 $s$ で、$\varphi$ の中の原子論理式 $u\in v$ のそれぞれについて $s(v)=s(u)+1$、$u=v$ のそれぞれについて $s(u)=s(v)$ となるものである。束縛変数は、互いに、また自由変数とも名前が重ならないように α 同値で取り替えておく（一つの変数には一つの値しか割り当てないので、これは必要な約束である）。値に定数を足しても層別化のままなので、$s$ の値は 0 以上としてよい。
+- **NF.** $\mathsf{NF}$（\ref[NF]{set:nf}）は、外延性の公理と、層別化された論理式についての内包公理からなる（\ref[NF の公理と初歩]{set:page-nf-axioms}）。
+- **累積階層.** 累積階層 $R(\beta)$（\ref{set:cumulative-hierarchy}）を、本ページでは $V_{\beta}$ と書く。ランク $\rank(x)$ は \ref{set:rank} の意味である。
+- **二つの段.** 本ページの議論は二つの段に分かれる。モデルを作る側（メタ理論）は $\ZFC$ である。その中で、$\ZFC$（または $\ZF$）の集合モデル $\mathcal{M}=(M,E)$ を扱う。$\mathcal{M}$ は整礎とは限らず、$E$ は $\in$ とは限らない二項関係である。$\mathcal{M}$ の中の概念には「$\mathcal{M}$ の」と付ける。たとえば $\mathcal{M}$ の順序数 $\beta,\gamma$ について $\beta<\gamma$ は $\mathcal{M}\models\beta\in\gamma$ を意味し、$V^{\mathcal{M}}_{\beta}\defeq\{x\in M:\mathcal{M}\models x\in V_{\beta}\}$ とおく。$a\in M$ の**外延**を $\mathrm{ext}(a)\defeq\{x\in M:x\mathrel{E}a\}$ と書く。
+- **自己同型.** $\mathcal{M}$ の自己同型とは、全単射 $j\colon M\to M$ で、任意の $x,y\in M$ について $x\mathrel{E}y\iff j(x)\mathrel{E}j(y)$ となるものである。$k\in\Z$ について $j^{k}$ は $j$ の $k$ 回の合成（$k<0$ なら $j^{-1}$ の $-k$ 回の合成）を表す。
+:::
+
+## NFU の公理 {#set:sec-nfu-axioms}
+
+::: definition NFU {#set:nfu keywords="NFU, New Foundations with urelements, urelement, atom" index="NFU|えぬえふゆー, 原子（NFU）|げんし, アトム|あとむ, ウアエレメント|うあえれめんと"}
+言語 $\mathcal{L}_{S}\defeq\{\in,S\}$（$S$ は 1 項関係記号で、$S(x)$ を「$x$ は集合である」と読む）の理論 **NFU** は、次の公理からなる。
+1. （元をもつのは集合だけ） $\forall x\,\forall y\,\bigl(y\in x\to S(x)\bigr)$。
+2. （集合の外延性） $\forall x\,\forall y\,\Bigl(S(x)\land S(y)\land\forall z\,(z\in x\leftrightarrow z\in y)\to x=y\Bigr)$。
+3. （層別化された内包公理） $\mathcal{L}_{S}$ の論理式 $\varphi(x,p_{1},\dots,p_{m})$ が層別化をもつとき（$S(v)$ の形の原子論理式は層別化に条件を課さない）、
+$$
+\forall p_{1}\cdots\forall p_{m}\,\exists y\,\Bigl(S(y)\land\forall x\,\bigl(x\in y\leftrightarrow\varphi\bigr)\Bigr).
+$$
+
+$S(x)$ を満たさない対象を**原子**という。
+:::
+
+::: intuition
+NFU は「NF から、外延性を集合に限ったもの」である。原子は元をもたず、元をもたないという点では空集合と区別できないが、外延性が適用されないので、空集合とは別の対象として何個でも存在しうる。NF は NFU に「すべての対象は集合である」$\forall x\,S(x)$ を加えた体系と同じである（このとき 1 は自明になり、2 と 3 は NF の公理になる）。
+:::
+
+::: example
+- 層別化された論理式 $x=x$ から、全体集合 $V\defeq\{x\mid x=x\}$ が存在する。$V$ は集合なので $V\in V$ である。
+- $\neg\,x=x$ から、元をもたない集合 $\varnothing$ が存在し、集合の外延性からそのような集合はただ一つである。原子は $\varnothing$ と同じく元をもたないが、$\neg S(a)$ なので $\varnothing$ とは異なる。
+- $\neg S(x)$ は層別化をもつ（条件がない）ので、原子全体の集合 $\{x\mid\neg S(x)\}$ も存在する。
+- $\neg\,x\in x$ は層別化をもたない（$s(x)=s(x)+1$ が要る）ので、ラッセルの集合の存在は公理から出てこない。実際、それが存在すれば \ref{set:russell-paradox} と同じ議論で矛盾する。
+:::
+
+NFU の中で使う順序対・関数は、通常どおりクラトフスキーの順序対（\ref{set:ordered-pair}）で定める。$\mathcal{L}_{S}$ の論理式で次のように書く：
+$$
+\begin{aligned}
+\sigma(z,x)&\defeq S(z)\land\forall w\,(w\in z\leftrightarrow w=x),\\
+\tau(z,x,y)&\defeq S(z)\land\forall w\,(w\in z\leftrightarrow w=x\lor w=y),\\
+\pi(p,x,y)&\defeq\exists u\,\exists v\,\bigl(\sigma(u,x)\land\tau(v,x,y)\land\tau(p,u,v)\bigr).
+\end{aligned}
+$$
+$\sigma(z,x)$ は「$z=\{x\}$」、$\pi(p,x,y)$ は「$p=\langle x,y\rangle$」を表す。$\pi$ は $s(x)=s(y)=t$, $s(u)=s(v)=t+1$, $s(p)=t+2$ で層別化される。内包公理と集合の外延性から、NFU では $\{x\}$, $\{x,y\}$, $\langle x,y\rangle$ がただ一つ存在する。
+
+::: definition NFU の無限公理と選択公理 {#set:nfu-inf-ac keywords="axiom of infinity in NFU, axiom of choice in NFU" index="NFU の無限公理|えぬえふゆーのむげんこうり, NFU の選択公理|えぬえふゆーのせんたくこうり"}
+次の二つの $\mathcal{L}_{S}$ の文を考える。
+1. **NFU の無限公理** $\mathrm{Inf}$：集合 $f$ で、$f$ の元はどれも順序対であり、$f$ は全体 $V$ を定義域とする単射な関数で、値域が $V$ 全体ではないものが存在する。すなわち、$\pi$ を使って「$\forall p\in f\,\exists x\,\exists y\,\pi(p,x,y)$」「各 $x$ についてちょうど一つの $y$ で $\langle x,y\rangle\in f$」「$\langle x,y\rangle,\langle x',y\rangle\in f$ なら $x=x'$」「$\langle x,y\rangle\in f$ となる $x$ がない $y$ がある」を並べた文である。
+2. **NFU の選択公理** $\mathrm{AC}$：任意の集合 $X$ について、$X$ の元がどれも空でない集合で、相異なる二つの元が共通の元をもたないならば、集合 $C$ で、$X$ の各元 $A$ と $C$ の共通の元がちょうど一つであるものが存在する。
+:::
+
+::: intuition
+\term[無限公理]{set:nfu-inf-ac}は「宇宙がデデキント無限である（自分の真部分へ単射できる）」こと、\term[選択公理]{set:nfu-inf-ac}は「互いに素な空でない集合の族には代表元の集合がある」ことを言う。どちらも層別化された文である（無限公理では $x,y$ を型 $t$、順序対を型 $t+2$、$f$ を型 $t+3$ に、選択公理では共通の元を型 $t$、$A$ と $C$ を型 $t+1$、$X$ を型 $t+2$ にすればよい）。NFU の無限公理・選択公理には他の形もあるが、本ページではこの形を採る。
+:::
+
+## 自己同型による NFU のモデル {#set:sec-nfu-model}
+
+以下この節では、メタ理論 $\ZFC$ の中で、次の状況を仮定する。
+
+> **(★)** $\mathcal{M}=(M,E)$ は $\ZF$ のモデル、$j$ は $\mathcal{M}$ の自己同型、$\alpha$ は $\mathcal{M}$ の順序数で $j(\alpha)<\alpha$ を満たす。
+
+::: lemma 自己同型の基本性質 {#set:nfu-automorphism-basic keywords="automorphism of a model of set theory"}
+$\mathcal{M}=(M,E)$ を $\ZF$ のモデル、$j$ をその自己同型とする。
+1. $j^{k}$（$k\in\Z$）も自己同型であり、任意の $\in$ の論理式 $\theta(v_{1},\dots,v_{n})$ と $a_{1},\dots,a_{n}\in M$ について、$\mathcal{M}\models\theta[\vec{a}]\iff\mathcal{M}\models\theta[j(\vec{a})]$ である。
+2. $\mathcal{M}$ で（パラメータなしで）定義される演算 $F$ について、$j(F^{\mathcal{M}}(a))=F^{\mathcal{M}}(j(a))$ である。とくに、$j$ は $\mathcal{M}$ の順序数を順序数に写して大小を保つ。また $j(V_{\beta})=V_{j(\beta)}$（両辺は $\mathcal{M}$ の中で $V_{\beta}$, $V_{j(\beta)}$ を表す元）、$j(\beta+1)=j(\beta)+1$, $j(\omega)=\omega$, $j(\beta+\gamma)=j(\beta)+j(\gamma)$ である。
+3. $a\in M$ について $\mathrm{ext}(j(a))=j[\mathrm{ext}(a)]$ である。とくに $j$ は $V^{\mathcal{M}}_{\beta}$ を $V^{\mathcal{M}}_{j(\beta)}$ の上へ全単射に写す。
+4. $\alpha$ が $\mathcal{M}$ の順序数で $j(\alpha)<\alpha$ なら、任意の $k\in\Z$ について $j^{k+1}(\alpha)<j^{k}(\alpha)$ である。
+:::
+
+::: proof
+1. 全単射の合成と逆写像は全単射で、$x\mathrel{E}y\iff j(x)\mathrel{E}j(y)$ を繰り返し使えば $j^{k}$ も $E$ を保つ。自己同型は $\mathcal{M}$ から $\mathcal{M}$ への同型写像なので、\ref{logic:isomorphism-invariance} より充足を保つ。
+2. $F$ が論理式 $\theta(x,y)$ で定義される（$\mathcal{M}\models\forall x\,\exists!y\,\theta$）とする。$b=F^{\mathcal{M}}(a)$ なら $\mathcal{M}\models\theta[a,b]$ であり、1 より $\mathcal{M}\models\theta[j(a),j(b)]$ となるので、$j(b)=F^{\mathcal{M}}(j(a))$ である。「$x$ は順序数」「$x\in y$」も論理式なので順序数と大小が保たれ、$V_{\beta}$, $\beta+1$, $\omega$, 順序数の和は $\ZF$ で定義される演算なので残りが従う。
+3. $x\mathrel{E}a\iff j(x)\mathrel{E}j(a)$ であり、$j$ は全射なので、$j(a)$ の元はすべて $j(x)$（$x\mathrel{E}a$）の形である。$V_{\beta}$ に当てはめれば後半を得る。
+4. 1 を $j^{k}$ と論理式 $v_{1}\in v_{2}$ に使うと、$j(\alpha)<\alpha$ から $j^{k}(j(\alpha))<j^{k}(\alpha)$ を得る。
+:::
+
+::: construction 自己同型モデル {#set:nfu-model-construction keywords="Boffa model, automorphism model of NFU" index="自己同型モデル|じこどうけいもでる"}
+(★) のもとで、$\mathcal{L}_{S}$ 構造 $\mathcal{N}=\mathcal{N}(\mathcal{M},j,\alpha)$ を次で定める。
+- 対象の集まりは $N\defeq V^{\mathcal{M}}_{\alpha}$ である。
+- $S_{\mathcal{N}}(y)\iff y\in V^{\mathcal{M}}_{j(\alpha)+1}$ とする。
+- $x\in_{\mathcal{N}}y\iff\bigl(j(x)\mathrel{E}y\ \text{かつ}\ S_{\mathcal{N}}(y)\bigr)$ とする。
+
+$j(\alpha)+1\le\alpha$ なので、累積階層の単調性（\ref{set:r-alpha-basic.2} を $\mathcal{M}$ の中で使う）から $V^{\mathcal{M}}_{j(\alpha)+1}\subseteq V^{\mathcal{M}}_{\alpha}$ であり、$\mathcal{N}$ の集合はすべて $\mathcal{N}$ の対象である。$V^{\mathcal{M}}_{\alpha}\setminus V^{\mathcal{M}}_{j(\alpha)+1}$ の元が $\mathcal{N}$ の原子である。
+:::
+
+::: intuition
+$\mathcal{M}$ の中で $y\subseteq V_{j(\alpha)}$ である $y$ を「$V_{\alpha}$ の部分集合 $j^{-1}(y)$ の名前」と読み直したものが $\mathcal{N}$ である。$V_{\alpha}$ の部分集合は $V_{\alpha}$ より一段上（$V_{\alpha+1}$）にあるが、$j$ で一段下へ縮めると $V_{j(\alpha)+1}\subseteq V_{\alpha}$ に収まる。こうして「型を一つ上げる」操作が $j$ で吸収され、全体集合 $V_{\alpha}$ の部分集合がまた $V_{\alpha}$ の元になる。
+:::
+
+::: lemma 集合と部分集合の対応 {#set:nfu-model-extension keywords="extensions in the automorphism model"}
+(★) のもとで次が成り立つ。$x\in_{\mathcal{N}}y$ となる $x$ 全体を $\mathrm{ext}_{\mathcal{N}}(y)$ と書く。
+1. $S_{\mathcal{N}}(y)$ なら、$\mathcal{M}\models j^{-1}(y)\subseteq V_{\alpha}$ であり、$\mathrm{ext}_{\mathcal{N}}(y)=\mathrm{ext}(j^{-1}(y))$ である。
+2. $a\in M$ が $\mathcal{M}\models a\subseteq V_{\alpha}$ を満たせば、$j(a)$ は $\mathcal{N}$ の集合で、$\mathrm{ext}_{\mathcal{N}}(j(a))=\mathrm{ext}(a)$ である。
+3. $\mathcal{N}$ の集合 $y,y'$ について、$\mathrm{ext}_{\mathcal{N}}(y)=\mathrm{ext}_{\mathcal{N}}(y')$ なら $y=y'$ である。
+:::
+
+::: proof
+1. $S_{\mathcal{N}}(y)$ は $\mathcal{M}\models y\in V_{j(\alpha)+1}$、すなわち $\mathcal{M}\models y\subseteq V_{j(\alpha)}$ を意味する（$\mathcal{M}$ の中で $V_{\beta+1}=\mathcal{P}(V_{\beta})$）。\ref{set:nfu-automorphism-basic.1} を $j^{-1}$ に使えば $\mathcal{M}\models j^{-1}(y)\subseteq V_{\alpha}$ を得る（$j^{-1}(j(\alpha))=\alpha$）。$x\in M$ について $j(x)\mathrel{E}y\iff x\mathrel{E}j^{-1}(y)$ であり（$j^{-1}$ が $E$ を保つ）、$j^{-1}(y)$ の元はすべて $V^{\mathcal{M}}_{\alpha}$ に属するので、$\mathrm{ext}_{\mathcal{N}}(y)=\mathrm{ext}(j^{-1}(y))$ である。
+2. $\mathcal{M}\models a\subseteq V_{\alpha}$ に $j$ を施すと $\mathcal{M}\models j(a)\subseteq V_{j(\alpha)}$ となり、$j(a)\in V^{\mathcal{M}}_{j(\alpha)+1}$ である。1 を $y=j(a)$ に使えばよい。
+3. 1 より $\mathrm{ext}(j^{-1}(y))=\mathrm{ext}(j^{-1}(y'))$ であり、$\mathcal{M}$ は外延性の公理を満たすので $j^{-1}(y)=j^{-1}(y')$、したがって $y=y'$ である。
+:::
+
+::: intuition
+$\mathcal{N}$ の集合は、$\mathcal{M}$ の「$V_{\alpha}$ の部分集合」とちょうど一対一に対応する。$\mathcal{M}$ の部分集合 $a\subseteq V_{\alpha}$ に対応する $\mathcal{N}$ の集合は $j(a)$ である。
+:::
+
+$\mathcal{N}$ の論理式の真偽を $\mathcal{M}$ の論理式の真偽に移すのが次の補題である。$\mathcal{M}$ の元 $j^{k}(\alpha)$ をパラメータとして使うので、変数 $o_{k}$（$k\in\Z$）を用意し、$o_{k}$ にはつねに $j^{k}(\alpha)$ を割り当てる。
+
+::: lemma 翻訳補題 {#set:nfu-translation keywords="translation lemma for stratified formulas" index="翻訳補題（NFU）|ほんやくほだい"}
+(★) を仮定する。$\varphi$ を $\mathcal{L}_{S}$ の論理式、$s$ をその層別化で値が $0,\dots,n_{0}$ のものとし、変数 $w$ について $k(w)\defeq n_{0}-s(w)$ とおく。$\in$ の論理式 $\varphi^{\ast}$ を、$\varphi$ の中の
+- $u\in v$ を $u\in v\land v\in V_{o_{k(v)+1}+1}$ に、
+- $S(v)$ を $v\in V_{o_{k(v)+1}+1}$ に、
+- $\forall w$ を $\forall w\in V_{o_{k(w)}}$ に、$\exists w$ を $\exists w\in V_{o_{k(w)}}$ に
+
+置き換えて作る（$u=v$ はそのまま）。このとき、$\varphi$ の変数への $N$ の元の割り当て $a$ について、$a^{\ast}(w)\defeq j^{k(w)}(a(w))$ とおくと
+$$
+\mathcal{N}\models\varphi[a]\iff\mathcal{M}\models\varphi^{\ast}[a^{\ast}]
+$$
+が成り立つ（右辺では $o_{k}$ に $j^{k}(\alpha)$ を割り当てる）。
+:::
+
+::: proof
+$\varphi$ の構成に関する帰納法で示す。部分論理式の層別化は $s$ の制限である。
+
+**Step 1（原子論理式 $u\in v$）.** 【主張：$a(u)\in_{\mathcal{N}}a(v)\iff\mathcal{M}\models a^{\ast}(u)\in a^{\ast}(v)\land a^{\ast}(v)\in V_{j^{k(v)+1}(\alpha)+1}$】 $x\defeq a(u)$, $y\defeq a(v)$, $m\defeq k(v)$ とおく。層別化から $s(v)=s(u)+1$ なので $k(u)=m+1$ である。定義より $x\in_{\mathcal{N}}y$ は「$j(x)\mathrel{E}y$ かつ $\mathcal{M}\models y\in V_{j(\alpha)+1}$」である。\ref{set:nfu-automorphism-basic.1} を $j^{m}$ に使うと、これは「$j^{m+1}(x)\mathrel{E}j^{m}(y)$ かつ $\mathcal{M}\models j^{m}(y)\in V_{j^{m+1}(\alpha)+1}$」と同値である（\ref{set:nfu-automorphism-basic.2} より $j^{m}$ は $V_{j(\alpha)+1}$ を $V_{j^{m+1}(\alpha)+1}$ に写す）。$j^{m+1}(x)=a^{\ast}(u)$, $j^{m}(y)=a^{\ast}(v)$ なので主張が成り立つ。
+
+**Step 2（原子論理式 $u=v$ と $S(v)$）.** 【主張：この二つの形でも同値が成り立つ】 $u=v$ の場合、$s(u)=s(v)$ なので $k(u)=k(v)$ であり、$j^{k(u)}$ は単射なので $a(u)=a(v)\iff a^{\ast}(u)=a^{\ast}(v)$ である。$S(v)$ の場合は、Step 1 の後半と同じく $j^{k(v)}$ を施せば $a(v)\in V^{\mathcal{M}}_{j(\alpha)+1}\iff a^{\ast}(v)\in V^{\mathcal{M}}_{j^{k(v)+1}(\alpha)+1}$ である。
+
+**Step 3（量化子）.** 【主張：$\varphi=\forall w\,\psi$ で $\psi$ について同値が成り立つなら、$\varphi$ についても成り立つ】 $k\defeq k(w)$ とおく。$\mathcal{N}\models\forall w\,\psi[a]$ は「すべての $c\in V^{\mathcal{M}}_{\alpha}$ について $\mathcal{N}\models\psi[a(w\mapsto c)]$」であり、帰納法の仮定からこれは「すべての $c\in V^{\mathcal{M}}_{\alpha}$ について $\mathcal{M}\models\psi^{\ast}[a^{\ast}(w\mapsto j^{k}(c))]$」と同値である。\ref{set:nfu-automorphism-basic.3} より $c\mapsto j^{k}(c)$ は $V^{\mathcal{M}}_{\alpha}$ から $V^{\mathcal{M}}_{j^{k}(\alpha)}$ への全単射なので、これは「すべての $d\in V^{\mathcal{M}}_{j^{k}(\alpha)}$ について $\mathcal{M}\models\psi^{\ast}[a^{\ast}(w\mapsto d)]$」、すなわち $\mathcal{M}\models\forall w\in V_{o_{k}}\,\psi^{\ast}[a^{\ast}]$ と同値である。$\exists$ も同様であり、論理結合子 $\neg,\land,\dots$ の場合は帰納法の仮定からただちに従う。
+:::
+
+::: theorem 自己同型モデルは NFU を満たす {#set:nfu-automorphism-model keywords="Jensen's consistency proof of NFU, Boffa model, automorphism model satisfies NFU" index="NFU のモデル|えぬえふゆーのもでる, イェンセンのモデル|いぇんせんのもでる, ボッファのモデル|ぼっふぁのもでる" refname="NFU の自己同型モデル"}
+(★) を仮定する。
+1. $\mathcal{N}(\mathcal{M},j,\alpha)\models\mathsf{NFU}$ である。
+2. さらに $\omega<\alpha$ なら、$\mathcal{N}\models\mathrm{Inf}$ である。
+3. さらに $\mathcal{M}\models\ZFC$ なら、$\mathcal{N}\models\mathrm{AC}$ である。
+:::
+
+::: intuition
+$\ZF$ のモデルに、ある順序数を真に小さくする自己同型があれば、その順序数までの累積階層の段 $V_{\alpha}$ を、所属関係を $j$ で一段ずらして読み直すことで NFU のモデルにできる。$V_{\alpha}$ が無限なら\term[無限公理]{set:nfu-inf-ac}が、もとのモデルで選択公理が成り立てば\term[選択公理]{set:nfu-inf-ac}が、新しいモデルでも成り立つ。
+:::
+
+::: proof
+**Step 1（公理 1 と 2）.** 【主張：$\mathcal{N}$ は \ref{set:nfu.1} と \ref{set:nfu.2} を満たす】 $x\in_{\mathcal{N}}y$ の定義に $S_{\mathcal{N}}(y)$ が含まれるので 1 が成り立つ。2 は \ref{set:nfu-model-extension.3} そのものである。
+
+**Step 2（内包公理）.** 【主張：層別化された $\varphi(x,\vec{p})$ とパラメータ $\vec{b}\in N$ について、$\{x\in N:\mathcal{N}\models\varphi[x,\vec{b}]\}$ を外延とする $\mathcal{N}$ の集合がある】 層別化 $s$（値 $0,\dots,n_{0}$）をとり、$k\defeq k(x)=n_{0}-s(x)$ とおく。\ref{set:nfu-translation} より、$x\in N$ について $\mathcal{N}\models\varphi[x,\vec{b}]$ は $\mathcal{M}\models\varphi^{\ast}[j^{k}(x),\vec{b}^{\ast}]$ と同値である（$\vec{b}^{\ast}$ は $p_{l}$ に $j^{k(p_{l})}(b_{l})$ を割り当てたもの）。$\mathcal{M}$ の分出公理より、$A\in M$ で
+$$
+\mathrm{ext}(A)=\{z\in V^{\mathcal{M}}_{j^{k}(\alpha)}:\mathcal{M}\models\varphi^{\ast}[z,\vec{b}^{\ast}]\}
+$$
+となるものがある。$B\defeq j^{-k}(A)$ とおくと、\ref{set:nfu-automorphism-basic.3} より $\mathrm{ext}(B)=\{x\in V^{\mathcal{M}}_{\alpha}:j^{k}(x)\in\mathrm{ext}(A)\}=\{x\in N:\mathcal{N}\models\varphi[x,\vec{b}]\}$ であり、$\mathcal{M}\models B\subseteq V_{\alpha}$ である。\ref{set:nfu-model-extension.2} より、$y\defeq j(B)$ は $\mathcal{N}$ の集合で、その外延は求めるものである。
+
+**Step 3（$\mathcal{N}$ の単集合と順序対）.** 【主張：$x,y\in N$ について、$\mathcal{N}\models\pi[p,x,y]$ となる $p$ はただ一つで、それは $j^{2}(\langle x,y\rangle^{\mathcal{M}})$ である】 $\langle x,y\rangle^{\mathcal{M}}$ は $\mathcal{M}$ の中のクラトフスキーの順序対である。\ref{set:nfu-model-extension} の 2・3 より、$\mathcal{N}\models\sigma[z,x]$ となる $z$ は外延が $\{x\}$ の $\mathcal{N}$ の集合、すなわち $z=j(\{x\}^{\mathcal{M}})$ だけであり、同様に $\mathcal{N}\models\tau[z,x,y]$ となる $z$ は $j(\{x,y\}^{\mathcal{M}})$ だけである。これらは $V^{\mathcal{M}}_{j(\alpha)+1}\subseteq N$ に属するので、$\mathcal{N}\models\pi[p,x,y]$ となる $p$ は、外延が $\{j(\{x\}^{\mathcal{M}}),j(\{x,y\}^{\mathcal{M}})\}=\mathrm{ext}\bigl(j(\langle x,y\rangle^{\mathcal{M}})\bigr)$（\ref{set:nfu-automorphism-basic.2}）の $\mathcal{N}$ の集合、すなわち $p=j\bigl(j(\langle x,y\rangle^{\mathcal{M}})\bigr)$ だけである。
+
+**Step 4（$\mathrm{Inf}$）.** 【主張：$\omega<\alpha$ なら $\mathcal{N}\models\mathrm{Inf}$】 $\mathcal{M}$ の中で $\omega\subseteq V_{\omega}\subseteq V_{\alpha}$ なので、$\mathcal{M}$ の中で $g\colon V_{\alpha}\to V_{\alpha}$ を「$n\in\omega$ なら $g(n)=n+1$、それ以外は $g(x)=x$」と定める。$g$ は単射で、$0$ は値域に入らない。$G\defeq j^{2}(g)$ とおくと、Step 3 より $\mathrm{ext}(G)=\{j^{2}(\langle x,g(x)\rangle):x\in N\}$ は $\mathcal{N}$ の順序対 $\langle x,g(x)\rangle_{\mathcal{N}}$ 全体である。$\langle x,g(x)\rangle\in V_{\alpha+2}$ なので $j^{2}(\langle x,g(x)\rangle)\in V_{j^{2}(\alpha)+2}$ であり、\ref{set:nfu-automorphism-basic.4} より $j^{2}(\alpha)+2\le j(\alpha)+1\le\alpha$ なので $\mathcal{M}\models G\subseteq V_{\alpha}$ である。よって $F\defeq j(G)$ は $\mathcal{N}$ の集合で、$\mathcal{N}$ の中で $\langle x,y\rangle\in F$ となるのは $y=g(x)$ のときに限る（Step 3 の一意性と、$\mathcal{M}$ の順序対の特徴付け \ref{set:ordered-pair-characterization}）。$\mathcal{N}$ の全体は $N$ そのものなので、$g$ の性質がそのまま「$F$ は $V$ 上の単射な関数で、$0$ は値でない」に移る。
+
+**Step 5（$\mathrm{AC}$）.** 【主張：$\mathcal{M}\models\ZFC$ なら $\mathcal{N}\models\mathrm{AC}$】 $X$ を $\mathcal{N}$ の集合で、$\mathcal{N}$ の中で\term[選択公理]{set:nfu-inf-ac}の仮定を満たすものとする。$A\defeq j^{-1}(X)$, $B\defeq j^{-1}(A)$ とおく。\ref{set:nfu-model-extension.1} より $\mathrm{ext}(A)=\mathrm{ext}_{\mathcal{N}}(X)$ であり、その各元 $a$ は $\mathcal{N}$ の空でない集合で、$\mathrm{ext}_{\mathcal{N}}(a)=\mathrm{ext}(j^{-1}(a))$ である。\ref{set:nfu-automorphism-basic.3} より $\mathrm{ext}(B)=\{j^{-1}(a):a\in\mathrm{ext}(A)\}$ なので、$\mathcal{M}$ の中で $B$ は空でない集合の族で、相異なる元は共通の元をもたず、$\bigcup B\subseteq V_{\alpha}$ である。$\mathcal{M}\models\ZFC$ なので、選択関数（\ref{set:ac-equivalences.2}）$h$ をとり、$C\defeq\{h(b):b\in B\}$ とおくと、$\mathcal{M}$ の中で $C\subseteq V_{\alpha}$ であり、各 $b\in B$ について $C\cap b=\{h(b)\}$ である（他の $b'$ の $h(b')$ は $b'$ に属し、$b$ とは共通の元がない）。$c\defeq j(C)$ は $\mathcal{N}$ の集合で、$X$ の $\mathcal{N}$ の元 $a$ について $\mathrm{ext}_{\mathcal{N}}(c)\cap\mathrm{ext}_{\mathcal{N}}(a)=\mathrm{ext}(C)\cap\mathrm{ext}(j^{-1}(a))$ はちょうど一つの元からなる。
+
+::: hypcheck
+- **$j(\alpha)<\alpha$**：\ref{set:nfu-model-construction} で $V_{j(\alpha)+1}\subseteq V_{\alpha}$ を得るのに使い、Step 2 で作った $j(B)$ が $N$ に属すること、Step 4 で $j^{2}(\alpha)+2\le\alpha$ に使った。$j(\alpha)=\alpha$ なら $\mathcal{N}$ の集合が $V_{\alpha+1}$ に入り、$N$ の外に出てしまうので構成が成り立たない。$j(\alpha)>\alpha$ の場合は $j^{-1}$ に取り替えれば $j^{-1}(\alpha)<\alpha$ となる。
+- **層別化**：Step 2 で、変数ごとに $j$ を施す回数 $k(w)$ をそろえるのに使った（\ref{set:nfu-translation} の Step 1 で $k(u)=k(v)+1$ が要る）。層別化をもたない論理式では成り立たない：$\neg\,x\in x$ を外延とする集合が $\mathcal{N}$ にあれば、\ref{set:russell-paradox} と同じ議論で矛盾する。
+- **$\mathcal{M}$ の公理**：Step 2 で分出公理、\ref{set:nfu-model-extension} で外延性の公理と $V_{\beta+1}=\mathcal{P}(V_{\beta})$、Step 4 で無限公理と置換公理（$g$ を作る）を使った。1・2 だけなら $\ZF$ の一部で足りる。選択公理は Step 5 だけで使う。
+- **$\omega<\alpha$**：Step 4 で $\omega\subseteq V_{\alpha}$ に使った。$\alpha$ が $\mathcal{M}$ の自然数なら $\mathcal{M}$ の中で $V_{\alpha}$ は有限であり、$\mathcal{N}$ では\term[無限公理]{set:nfu-inf-ac}は成り立たない（$\mathcal{M}$ の中の有限集合から自分の真部分集合への単射はない）。
+- **$\mathcal{M}$ の整礎性**：使わなかった。$\mathcal{M}$ は超準的でよい。実際、(★) を満たす $\mathcal{M}$ はつねに整礎でない（\ref{set:nfu-automorphism-basic.4} より $\alpha>j(\alpha)>j^{2}(\alpha)>\cdots$ が $E$ についての無限下降列になる）。
+:::
+:::
+
+::: proposition 自己同型モデルには原子がある {#set:nfu-atoms-exist keywords="atoms in the automorphism model, parity of ordinals"}
+(★) のもとで $j(\alpha)+1<\alpha$ であり、したがって $\mathcal{N}(\mathcal{M},j,\alpha)$ には原子がある。
+:::
+
+::: proof
+$\ZF$ の中で、超限再帰により順序数 $\beta$ の偶奇 $P(\beta)\in\{0,1\}$ を「$\beta$ が $0$ か極限順序数なら $P(\beta)=0$、$P(\beta+1)=1-P(\beta)$」で定める。$P$ は $\mathcal{M}$ で定義される演算なので、\ref{set:nfu-automorphism-basic.2} より $P(j(\beta))=j(P(\beta))=P(\beta)$ である（$j(0)=0$, $j(1)=1$）。もし $j(\alpha)+1=\alpha$ なら、$P(\alpha)=1-P(j(\alpha))=1-P(\alpha)$ となって矛盾する。$j(\alpha)+1\le\alpha$ と合わせて $j(\alpha)+1<\alpha$ である。このとき $\alpha$ の元 $j(\alpha)+1$ は $V^{\mathcal{M}}_{\alpha}$ に属するが $V^{\mathcal{M}}_{j(\alpha)+1}$ には属さない（$\mathcal{M}$ の中で順序数 $\gamma$ は $V_{\gamma+1}\setminus V_{\gamma}$ に属する）ので、$\mathcal{N}$ の原子である。
+:::
+
+::: remark
+もし原子のない $\mathcal{N}$ が作れたら、それは $\mathsf{NF}$ に\term[選択公理]{set:nfu-inf-ac}を加えた体系のモデルになり、NF の中で選択公理が否定されること（\see[スペッカーの定理]{set:specker-not-ac}）と矛盾する。上の命題は、自己同型による構成ではこれが偶奇という初等的な理由で避けられないことを示している。
+:::
+
+## 自己同型をもつモデルの存在 {#set:sec-nfu-em}
+
+::: theorem 順序数を動かす自己同型 {#set:nfu-model-exists keywords="model of ZFC with an automorphism moving an ordinal down" index="順序数を動かす自己同型|じゅんじょすうをうごかすじこどうけい"}
+$\ZFC$ がモデルをもつならば、$\ZFC$ のモデル $\mathcal{M}=(M,E)$、その自己同型 $j$、$\mathcal{M}$ の順序数 $\alpha$ で、$\omega<\alpha$ かつ $j(\alpha)<\alpha$ となるものが存在する。
+:::
+
+::: intuition
+識別不能列をもつモデルでは、列の順番をずらす写像がモデルの自己同型に延びる。列の元を順序数に置き換えておけば、ずらす向きを選ぶことで「順序数を一つ前の順序数に写す」自己同型が得られる。
+:::
+
+::: proof
+メタ理論 $\ZFC$ の中で議論する。$\mathcal{L}=\{\in\}$ とし、$\ZFC$ のスコーレム化 $\mathcal{L}^{\mathrm{Sk}}$, $\ZFC^{\mathrm{Sk}}$（\ref{model:skolemization}）を考える。
+
+**Step 1（EM モデル）.** 【主張：$\ZFC^{\mathrm{Sk}}$ のモデル $\mathcal{M}$（$\mathcal{L}^{\mathrm{Sk}}$ 構造）と、$\mathcal{L}^{\mathrm{Sk}}$ について識別不能な列 $(a_{i})_{i\in\Z}$ で、$\Z$ の順序自己同型が $\mathcal{M}$ の $\mathcal{L}^{\mathrm{Sk}}$ 構造としての自己同型に延びるものがある】 $\ZFC$ のモデルは無限である（$0,1,2,\dots$ が相異なる）ので、それを \ref{model:skolemization.1} で拡大すれば $\ZFC^{\mathrm{Sk}}$ の無限モデルを得る。$\ZFC^{\mathrm{Sk}}$ を $\mathcal{L}^{\mathrm{Sk}}$ の理論とみて、\ref{model:em-model} を $I=\Z$ に使えばよい。$\mathcal{M}$ を $\mathcal{L}$ に制限したものは $\ZFC$ のモデルである。
+
+**Step 2（順序数への写像）.** 【主張：$\mathcal{L}^{\mathrm{Sk}}$ の論理式（パラメータなし）で定義される写像 $F$ で、$\mathcal{M}$ の元に $\mathcal{M}$ の順序数を対応させ、$i\mapsto F(a_{i})$ が狭義増加か狭義減少であるものがある】 $\rho(x)\defeq\rank(x)$ とおく（$\mathcal{M}$ は基礎の公理を満たすので、すべての元がランクをもつ。\ref{set:foundation-equivalents}）。$\rho(x_{1})<\rho(x_{2})$, $\rho(x_{1})=\rho(x_{2})$, $\rho(x_{1})>\rho(x_{2})$ のちょうど一つが $(a_{0},a_{1})$ で成り立ち、識別不能性からすべての $i<i'$ について $(a_{i},a_{i'})$ で同じものが成り立つ。最初と最後の場合は $F\defeq\rho$ とすればよい。真ん中の場合、すべての $a_{i}$ のランクは同じ $\beta$ である。論理式 $\psi(y,w)\defeq$「$y$ が順序数なら、$w$ は $V_{y+1}$ の整列順序である」について、$\ZFC\vdash\forall y\,\exists w\,\psi$（\tref{set:ax-choice}）なので、スコーレム関数 $f_{\psi}$ は $\mathcal{M}\models\forall y\,\psi(y,f_{\psi}(y))$ を満たす。$F(x)$ を「整列順序 $f_{\psi}(\rho(x))$ における $x$ の始切片の順序型」（\ref{set:ordinal-type}）と定める（$x\in V_{\rho(x)+1}$ なので意味をもつ）。$W\defeq f_{\psi}(\beta)$ はすべての $a_{i}$ に共通で、整列集合の相異なる元の始切片は同型でない（\ref{set:well-order-no-initial-iso}）ので、$F(a_{i})$ は相異なる。ふたたび識別不能性から、$F(a_{0})<F(a_{1})$ か $F(a_{0})>F(a_{1})$ のどちらかがすべての $i<i'$ で同じく成り立つ。
+
+**Step 3（自己同型）.** 【主張：$\mathcal{M}$ の自己同型 $j$ と順序数 $\alpha_{0}$ で $j(\alpha_{0})<\alpha_{0}$ となるものがある】 $F(a_{i})$ が増加なら $\sigma(i)\defeq i-1$、減少なら $\sigma(i)\defeq i+1$ とおき、$j\defeq\hat{\sigma}$（Step 1 の自己同型）とする。$F$ は $\mathcal{L}^{\mathrm{Sk}}$ の論理式で定義され、$j$ は $\mathcal{L}^{\mathrm{Sk}}$ 構造の自己同型なので、\ref{logic:isomorphism-invariance} より $j(F(a))=F(j(a))$ である。$\alpha_{0}\defeq F(a_{0})$ とおくと、$j(\alpha_{0})=F(a_{\sigma(0)})<F(a_{0})=\alpha_{0}$ である。$j$ は $\in$ を保つので、$\mathcal{L}$ に制限した $\ZFC$ のモデルの自己同型でもある。
+
+**Step 4（$\omega$ より大きくする）.** 【主張：$\alpha\defeq\omega+\alpha_{0}$ は $\omega<\alpha$ と $j(\alpha)<\alpha$ を満たす】 \ref{set:nfu-automorphism-basic.2} より $j(\alpha)=\omega+j(\alpha_{0})$ である。順序数の和は右の引数について狭義増加（\ref{set:ordinal-addition-laws.6}、$\mathcal{M}$ の中で成り立つ）なので、$j(\alpha_{0})<\alpha_{0}$ から $j(\alpha)<\alpha$ を、$0\le j(\alpha_{0})<\alpha_{0}$ から $\omega=\omega+0<\omega+\alpha_{0}=\alpha$ を得る。
+
+::: hypcheck
+- **$\ZFC$ のモデル**：Step 1 で、\ref{model:em-model} の前提「無限モデルをもつ」を満たすのに使った。
+- **選択公理（メタ理論）**：スコーレム化（\ref{model:skolemization.1}）と \ref{model:em-model} が選択公理を使う。
+- **選択公理（$\mathcal{M}$ の中）**：Step 2 の真ん中の場合で、$V_{\beta+1}$ の整列順序を得るのに使った。ランクが列に沿って変わる場合は不要である。
+- **基礎の公理（$\mathcal{M}$ の中）**：Step 2 でランク $\rho$ を全体で定義するのに使った。
+- **スコーレム関数を言語に含めること**：Step 2 の $F$ は $\mathcal{L}$ だけでは定義できない（$V_{\beta+1}$ の整列順序は一般に $\in$ だけでは定義できない）。そのため $\ZFC^{\mathrm{Sk}}$ そのものに EM の定理を使い、$\mathcal{L}^{\mathrm{Sk}}$ 構造の自己同型を得た。
+:::
+:::
+
+::: theorem NFU の無矛盾性 {#set:nfu-consistent keywords="consistency of NFU, Con(ZFC) implies Con(NFU + Inf + AC), Jensen 1969" index="NFU の無矛盾性|えぬえふゆーのむむじゅんせい" refname="NFU の無矛盾性"}
+$\ZFC$ が無矛盾ならば、$\mathsf{NFU}+\mathrm{Inf}+\mathrm{AC}$ も無矛盾である。この含意はメタ理論 $\ZFC$ で証明できる。
+:::
+
+::: intuition
+ZFC に矛盾がなければ、全体集合をもち、\term[無限公理]{set:nfu-inf-ac}と\term[選択公理]{set:nfu-inf-ac}を満たす集合論 NFU にも矛盾はない。NF と違って、NFU の無矛盾性はふつうの集合論の無矛盾性に帰着できる。
+:::
+
+::: proof
+**Step 1.** 【主張：$\ZFC$ のモデルがある】 $\ZFC$ は可算言語の無矛盾な理論なので、モデル存在定理（\tref{logic:model-existence}）よりモデルをもつ。
+
+**Step 2.** 【主張：$\mathsf{NFU}+\mathrm{Inf}+\mathrm{AC}$ のモデルがある】 \ref{set:nfu-model-exists} より、$\ZFC$ のモデル $\mathcal{M}$、自己同型 $j$、順序数 $\alpha$ で $\omega<\alpha$, $j(\alpha)<\alpha$ となるものがある。\ref{set:nfu-automorphism-model} より、$\mathcal{N}(\mathcal{M},j,\alpha)$ は $\mathsf{NFU}+\mathrm{Inf}+\mathrm{AC}$ のモデルである。
+
+**Step 3.** 【主張：$\mathsf{NFU}+\mathrm{Inf}+\mathrm{AC}$ は無矛盾である】 モデルをもつ理論から矛盾は導けない（\tref{logic:soundness}）。
+
+::: hypcheck
+- **$\ZFC$ の無矛盾性**：Step 1 でモデルを得るのに使った。
+- **メタ理論**：Step 1 のモデル存在定理と、\ref{set:nfu-model-exists} の中の EM の構成を、メタ理論 $\ZFC$ の中で行う。
+- **$\ZFC$ の全体は要らない**：\ref{set:nfu-automorphism-model} の hypcheck のとおり、$\mathcal{M}$ に使うのは分出・外延性・冪・無限・置換の一部、基礎、選択だけである。より弱い集合論から出発しても同じ議論がかなりの部分で通る（下の補足）。
+:::
+:::
+
+::: supplement
+**歴史.** NFU の無矛盾性はイェンセン（1969 年ごろとされる、未確認）が、ラムゼーの定理を使って示したとされる。自己同型 $j$ と $j(\alpha)<\alpha$ を使う上の形はボッファによるとされ（未確認）、ホームズの教科書などで標準的な説明になっているとされる（未確認）。
+
+**NFU の強さ.** 上の証明は $\ZFC$ を使ったが、NFU は $\ZFC$ よりずっと弱い体系から無矛盾性が示せるとされる。たとえば NFU（\term[無限公理]{set:nfu-inf-ac}なし）は弱い算術に対して無矛盾、$\mathsf{NFU}+\mathrm{Inf}+\mathrm{AC}$ はマックレーン集合論（分出を有界な論理式に制限したツェルメロ集合論）と等無矛盾であるとされるが、細部は未確認である。逆に、NFU に「カントール的な集合についての公理」を加えると、大きな基数と同程度の強さになるとされる（未確認）。
+
+**型の曖昧性との関係.** $\mathsf{TST}$ の標準モデルは、集合 $X$ とその冪 $\mathcal{P}(X)$, $\mathcal{P}(\mathcal{P}(X))$, … を型とする（\ref[TST の標準モデル]{set:tst-standard-model}）。自己同型モデルでは、$V_{\alpha}\supseteq V_{j(\alpha)+1}\supseteq V_{j^{2}(\alpha)+2}\supseteq\cdots$ という入れ子が、型 0, 1, 2, … を一つの $V_{\alpha}$ の中に畳み込んでいる。型を一つ上げる写像（\ref[型の持ち上げ]{set:type-raising}）の役を $j$ が演じ、$j$ が自己同型であることが、型をずらしても成り立つ文は変わらないという**型の曖昧性**（\ref[型の曖昧性]{set:typical-ambiguity}）を実現している。NF の無矛盾性をこの方向から攻めるのが、スペッカーの曖昧性定理の考え方である（\see[NF の無矛盾性]{set:page-nf-consistency}）。
+
+**$\mathcal{N}$ で $j$ は見えない.** $j$ は $\mathcal{M}$ の中で定義できず、$\mathcal{M}$ の集合で $j\restr{V_{\alpha}}$ を表すものもない（\ref{set:prob-nfu-j-not-set}）。$\mathcal{N}$ の内包公理が層別化された論理式に限られるのは、まさに「$j$ を何回施すか」を変数ごとにそろえられる論理式だけが $\mathcal{M}$ の論理式に翻訳できるからである（\ref{set:nfu-translation}）。
+:::
+
+## 問題 {#set:sec-nfu-problems}
+
+::: problem ★ 基本：自己同型モデルの全体集合 {#set:prob-nfu-universe}
+(★) のもとで、$\mathcal{N}(\mathcal{M},j,\alpha)$ の全体集合 $V_{\mathcal{N}}$（外延が $N$ 全体の $\mathcal{N}$ の集合）を $\mathcal{M}$ の言葉で求めよ。また $\mathcal{N}\models V\in V$ を、$\mathcal{M}$ の中の順序数の大小に帰着させて直接確かめよ。
+:::
+
+::: solution
+\ref{set:nfu-model-extension.2} を $a=V_{\alpha}$ に使うと、$V_{\mathcal{N}}=j(V_{\alpha})$ であり、\ref{set:nfu-automorphism-basic.2} よりこれは $V_{j(\alpha)}$（を表す $\mathcal{M}$ の元）である。定義より $V_{\mathcal{N}}\in_{\mathcal{N}}V_{\mathcal{N}}$ は「$j(V_{j(\alpha)})\mathrel{E}V_{j(\alpha)}$ かつ $V_{j(\alpha)}\in V_{j(\alpha)+1}$」である。後半は $V_{j(\alpha)}\subseteq V_{j(\alpha)}$ から成り立つ。前半は $V_{j^{2}(\alpha)}\in V_{j(\alpha)}$ であり、これは \ref{set:nfu-automorphism-basic.4} の $j^{2}(\alpha)<j(\alpha)$ と \ref{set:r-alpha-basic.3} から成り立つ。ゆえに $\mathcal{N}\models V\in V$ である。
+:::
+
+::: problem ★ 基本：原子全体の集合 {#set:prob-nfu-atoms-set}
+(★) のもとで、$\mathcal{N}$ の中の集合 $\{x\mid\neg S(x)\}$ に当たる $\mathcal{M}$ の元を求め、それが $\mathcal{N}$ の空集合 $\varnothing_{\mathcal{N}}$ と異なることを示せ。
+:::
+
+::: solution
+$\mathcal{N}$ の原子全体は $N\setminus V^{\mathcal{M}}_{j(\alpha)+1}$ であり、これは $\mathcal{M}$ の集合 $D\defeq V_{\alpha}\setminus V_{j(\alpha)+1}$ の外延である。\ref{set:nfu-model-extension.2} より、求める $\mathcal{N}$ の集合は $j(D)=V_{j(\alpha)}\setminus V_{j^{2}(\alpha)+1}$ である。一方 $\varnothing_{\mathcal{N}}=j(\varnothing)=\varnothing$ である。\ref{set:nfu-atoms-exist} より $D\neq\varnothing$ なので $j(D)\neq\varnothing$ であり、二つは異なる。
+:::
+
+::: problem ★★ 標準：$j$ は $\mathcal{M}$ の集合で表せない {#set:prob-nfu-j-not-set}
+(★) のもとで、$\mathcal{M}$ の元 $h$ で、すべての $x\in V^{\mathcal{M}}_{\alpha}$ について $\mathcal{M}\models h(x)=j(x)$（$h$ は $\mathcal{M}$ の中で $V_{\alpha}$ 上の関数）となるものは存在しないことを示せ。（ヒント：ラッセルの議論）
+:::
+
+::: solution
+そのような $h$ があったとする。$\mathcal{M}$ の分出公理で
+$$
+R\defeq\{x\in V_{\alpha}:\neg\,\bigl(h(x)\in x\land x\in V_{j(\alpha)+1}\bigr)\}
+$$
+を作る。$h(x)=j(x)$ なので、$\mathrm{ext}(R)=\{x\in N:\neg\,x\in_{\mathcal{N}}x\}$ である。\ref{set:nfu-model-extension.2} より $r\defeq j(R)$ は $\mathcal{N}$ の集合で、$\mathrm{ext}_{\mathcal{N}}(r)=\mathrm{ext}(R)$ である。$r\in N$ なので、$r\in_{\mathcal{N}}r\iff r\in\mathrm{ext}(R)\iff\neg\,r\in_{\mathcal{N}}r$ となり矛盾する（\ref{set:russell-paradox} と同じ議論）。ゆえに $h$ は存在しない。とくに $j$ は $\mathcal{M}$ の中でパラメータを使っても定義できない（定義できれば、置換公理で $h$ が作れる）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

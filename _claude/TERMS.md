@@ -344,6 +344,13 @@
 | jump / gap（cut of a linear order） | 跳躍／隙間 | | 仮（2026-11-27）。model:order-cut |
 | convex set（linear order） | 凸集合 | 区間 | 仮（2026-11-27）。model:convex-set |
 | Dedekind completion | デデキント完備化 | | 仮（2026-11-27）。model:dedekind-completion-order |
+| stratified formula | 層別化された論理式 | 層化された（既存の 01-axioms-overview） | 仮（2026-11-27）。「層化」は sheafification と重なるので本系列では層別化。set:stratified-formula |
+| universal set | 全体集合 | 普遍集合 | 仮（2026-11-27）。set:nf-universal-set |
+| typed set theory / typical ambiguity / type raising | 型つき集合論／型の曖昧性／型の持ち上げ | | 仮（2026-11-27） |
+| Frege cardinal / T operation | フレーゲ流の基数／T 演算 | | 仮（2026-11-27） |
+| Cantorian / strongly Cantorian | カントール的／強カントール的 | | 仮（2026-11-27）。set:cantorian-set |
+| urelement (atom) | 原子 | アトム、ウアエレメント | 仮（2026-11-27）。set:nfu |
+| tangled type theory | 絡み合う型理論 | | 仮（2026-11-27）。set:ttt |
 | type family / induction principle | 型の族 / 帰納原理 | | 仮。logic:page-dependent-types |
 | universe (type theory) | 宇宙 | | 集合論・圏論の「宇宙」と同じ語。logic:page-dependent-types |
 | identity type / path / path induction | 恒等型 / 道 / 道帰納法 | 同一性型 | 仮。日本語の本に用例なし。logic:page-identity-types |

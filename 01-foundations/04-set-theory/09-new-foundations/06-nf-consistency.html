@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NF の無矛盾性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/04-set-theory/09-new-foundations/06-nf-consistency.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# NF の無矛盾性 {#set:page-nf-consistency keywords="consistency of NF, Specker's ambiguity theorem, tangled type theory, TTT, Holmes, Lean formalization"}
+
+$\mathsf{NF}$ が無矛盾かどうかは長い間の未解決問題だった。$\mathsf{NF}$ では選択公理が否定され（\ref{set:specker-not-ac}）、原子を許す $\mathsf{NFU}$ のように $\ZFC$ の中で素朴にモデルを作る方法（\ref[NFU の無矛盾性]{set:nfu-consistent}）はそのままでは使えない。このページでは、問題を型理論の言葉に移す二つの帰着を証明する。一つはスペッカーによる「$\mathsf{NF}$ が無矛盾であることと、$\mathsf{TST}$ に型の曖昧性の図式を加えた理論が無矛盾であることは同値」という定理、もう一つはホームズによる「$\mathsf{NF}$ と絡み合う型理論 $\mathsf{TTT}$ は等無矛盾」という定理である。最後に、ホームズが $\mathsf{TTT}$ のモデルを作って $\mathsf{NF}$ の無矛盾性を示したとされること、その証明が Lean で形式的に検証されたとされることを、事実として紹介する。
+
+## 記法と定義の確認 {#set:sec-nfcon-notation}
+
+::: notation
+- **このページの議論はすべてメタ理論 $\ZFC$ の中で行う。** 理論 $\mathsf{S}$ が**無矛盾**であることを $\mathrm{Con}(\mathsf{S})$ と書く。完全性定理（\ref{logic:completeness}、多ソートの場合は \ref[多ソートの一階論理の健全性と完全性]{set:many-sorted-completeness}）により、$\mathrm{Con}(\mathsf{S})$ は「$\mathsf{S}$ がモデルをもつ」と同値なので、無矛盾性の間の含意はすべてモデルの構成で示す。
+- 型つき集合論 $\mathsf{TST}$（\ref[TST]{set:tst}）とその構造 $M=\langle D_{n},E_{n}\rangle_{n\in\omega}$（\ref[TST の構造]{set:tst-structure}）、型の持ち上げ $\varphi^{+}$ と型をずらした構造 $M^{+}=\langle D_{n+1},E_{n+1}\rangle_{n}$（\ref[型の持ち上げ]{set:type-raising}）、およびずらした構造での充足
+$$
+M\models\varphi^{+}[s]\iff M^{+}\models\varphi[s^{-}]
+$$
+（\ref[ずらした構造での充足]{set:shift-satisfaction}）を使う。型の曖昧性の図式 $\mathrm{Amb}$ は、$\mathsf{TST}$ の各文 $\sigma$ について $\sigma\leftrightarrow\sigma^{+}$ を公理とする図式である（\ref[型の曖昧性の図式]{set:typical-ambiguity}）。
+- 集合論の言語の論理式 $\varphi$ の層別化 $s$（\ref[層別化された論理式]{set:stratified-formula}）は、束縛変数の名前を互いに、また自由変数と重ならないように付け替えたうえで、各変数に整数を割り当てるものである。$\mathsf{TST}$ の論理式 $\psi$ の型を消した論理式 $\psi^{\circ}$ は層別化され、型を消すことで $\mathsf{TST}$ の公理は $\mathsf{NF}$ の公理に移る（\ref[層別化された論理式と TST の論理式]{set:stratified-tst-translation}）。
+- $\mathsf{NF}$ は外延性の公理と層別化された内包公理からなる（\ref[NF]{set:nf}）。
+- モデル理論からは、コンパクト性定理（\ref{logic:compactness}）、スコーレム化とスコーレム包（\ref{model:skolemization}, \ref{model:skolem-hull}）、識別不能列の存在とエーレンフォイヒト–モストフスキのモデル（\ref{model:indiscernibles-exist}, \ref{model:em-model}）を使う。
+:::
+
+## 整数を型にもつ型理論と型をずらす自己同型 {#set:sec-nfcon-tzt}
+
+$\mathsf{NF}$ のモデルを型理論のモデルから作るには、型を $0,1,2,\dots$ ではなく整数全体で添字づけ、型を一つずらす同型を用意すればよい。これは $\mathsf{NFU}$ のモデルを自己同型から作った構成（\ref[NFU の自己同型モデル]{set:nfu-automorphism-model}）と同じ発想である。
+
+::: definition TZT {#set:tzt keywords="TZT, typed set theory with integer types" index="TZT|てぃーぜっとてぃー, 整数型の型理論|せいすうかたのかたりろん"}
+$\mathsf{TZT}$ は、$\mathsf{TST}$ の定義（\ref[TST]{set:tst}）で型の範囲を\term[自然数]{set:natural-number}から整数全体 $\Z$ に替えた多ソートの理論である。すなわち、各 $n\in\Z$ について型 $n$ の変数があり、原子論理式は $x^{n}=y^{n}$ と $x^{n}\in y^{n+1}$ であり、公理は各 $n\in\Z$ についての外延性の公理と内包公理である。構造は $M=\langle D_{n},E_{n}\rangle_{n\in\Z}$（$D_{n}\neq\varnothing$, $E_{n}\subseteq D_{n}\times D_{n+1}$）であり、$\varphi^{+}$, $M^{+}$, $\mathrm{Amb}$ も $\mathsf{TST}$ と同じに定める。$\mathsf{TZT}$ の $\mathrm{Amb}$ を $\mathrm{Amb}_{\Z}$ と書く。
+:::
+
+::: intuition
+$\mathsf{TST}$ では一番下の型 $0$ があり、そこだけ特別である。$\mathsf{TZT}$ では型が上にも下にも無限に続くので、どの型も同じ立場にある。型を一つずらすことが言語の対称性になる。
+:::
+
+::: definition 型をずらす自己同型 {#set:type-shifting-automorphism keywords="type-shifting automorphism of a model of TZT" index="型をずらす自己同型|かたをずらすじこどうけい"}
+$\mathsf{TZT}$ の構造 $M=\langle D_{n},E_{n}\rangle_{n\in\Z}$ について、全単射の族 $\sigma_{n}\colon D_{n}\to D_{n+1}$（$n\in\Z$）で、任意の $n$ と $x\in D_{n}$, $y\in D_{n+1}$ について
+$$
+x\mathrel{E_{n}}y\iff\sigma_{n}(x)\mathrel{E_{n+1}}\sigma_{n+1}(y)
+$$
+を満たすものを、$M$ の**型をずらす自己同型**という。$\sigma^{(0)}=\mathrm{id}_{D_{0}}$、$k\ge0$ について $\sigma^{(k+1)}=\sigma_{k}\circ\sigma^{(k)}$ と $\sigma^{(-k-1)}=\sigma_{-k-1}^{-1}\circ\sigma^{(-k)}$ と定めると、各 $k\in\Z$ について $\sigma^{(k)}\colon D_{0}\to D_{k}$ は全単射である。
+:::
+
+::: intuition
+$\sigma$ は $M$ と $M^{+}$ の同型にほかならない。型 $0$ の対象 $x$ を、型 $k$ に持ち上げたものが $\sigma^{(k)}(x)$ である。
+:::
+
+::: construction 自己同型から作る NF の構造 {#set:nf-from-automorphism keywords="model of NF from a type-shifting automorphism" index="型をずらす自己同型による NF のモデル|かたをずらすじこどうけいによるえぬえふのもでる"}
+$M$ を $\mathsf{TZT}$ の構造、$\sigma$ をその型をずらす自己同型とする。集合論の言語の構造 $N=N(M,\sigma)$ を、対象の集まりを $D_{0}$ とし、$a,b\in D_{0}$ について
+$$
+a\in_{N}b\iff a\mathrel{E_{0}}\sigma_{0}(b)
+$$
+と定めて作る。
+:::
+
+::: lemma 翻訳補題 {#set:nf-shift-translation keywords="translation lemma for stratified formulas in N(M, sigma)" index="翻訳補題（NF）|ほんやくほだい"}
+$M,\sigma,N$ を \ref{set:nf-from-automorphism} のとおりとする。
+1. $a,b\in D_{0}$ と $k\in\Z$ について、$a\in_{N}b\iff\sigma^{(k)}(a)\mathrel{E_{k}}\sigma^{(k+1)}(b)$ である。
+2. $\varphi$ を集合論の言語の論理式、$s$ をその層別化とし、$\varphi$ の各変数 $x$ を型 $s(x)$ の変数 $x^{s(x)}$ に置き換えた $\mathsf{TZT}$ の論理式を $\varphi^{s}$ とする。$\varphi$ の自由変数への $D_{0}$ の元の割り当て $a$ に対し、$a^{s}(x^{s(x)})=\sigma^{(s(x))}(a(x))$ とおくと、次が成り立つ。
+$$
+N\models\varphi[a]\iff M\models\varphi^{s}[a^{s}]
+$$
+:::
+
+::: proof
+**Step 1（1）.** 【主張：所属は $\sigma$ でどの型へ持ち上げても保たれる】 $k=0$ のときは $\sigma^{(1)}=\sigma_{0}$ なので定義そのものである。$k\ge0$ で成り立てば、型をずらす自己同型の条件を $x=\sigma^{(k)}(a)$, $y=\sigma^{(k+1)}(b)$ に使って $\sigma^{(k)}(a)\mathrel{E_{k}}\sigma^{(k+1)}(b)\iff\sigma^{(k+1)}(a)\mathrel{E_{k+1}}\sigma^{(k+2)}(b)$ となるので、$k+1$ でも成り立つ。負の $k$ についても、同じ条件を $x=\sigma^{(k-1)}(a)$, $y=\sigma^{(k)}(b)$ に使えば $k$ から $k-1$ へ下りられる。
+
+**Step 2（2 の原子論理式）.** 【主張：$x\in y$ と $x=y$ で同値が成り立つ】 $x\in y$ の場合、層別化の条件より $s(y)=s(x)+1$ であり、$\varphi^{s}$ は $x^{k}\in y^{k+1}$（$k=s(x)$）である。1 より $a(x)\in_{N}a(y)\iff\sigma^{(k)}(a(x))\mathrel{E_{k}}\sigma^{(k+1)}(a(y))$ であり、右辺は $M\models(x^{k}\in y^{k+1})[a^{s}]$ である。$x=y$ の場合は $s(x)=s(y)=k$ であり、$\sigma^{(k)}$ が単射なので $a(x)=a(y)\iff\sigma^{(k)}(a(x))=\sigma^{(k)}(a(y))$ である。
+
+**Step 3（2 の量化子）.** 【主張：$\exists x\,\psi$ で同値が成り立つ】 $\lnot$, $\land$ では両辺が同じ形で組み立てられるので同値は保たれる。$\varphi=\exists x\,\psi$ とし、$k=s(x)$ とする。$N\models\varphi[a]$ は、ある $d\in D_{0}$ について $N\models\psi[a(x\mapsto d)]$ となることであり、帰納法の仮定よりそれは $M\models\psi^{s}[a^{s}(x^{k}\mapsto\sigma^{(k)}(d))]$ と同値である。$\sigma^{(k)}$ は $D_{0}$ から $D_{k}$ への全単射なので、$d$ が $D_{0}$ を動くとき $\sigma^{(k)}(d)$ は $D_{k}$ 全体を動く。ゆえにこれは $M\models(\exists x^{k}\,\psi^{s})[a^{s}]$ と同値である。
+:::
+
+::: theorem 型をずらす自己同型から NF のモデル {#set:nf-model-from-tzt keywords="a model of TZT with a type-shifting automorphism yields a model of NF" index="NF のモデルの構成|えぬえふのもでるのこうせい" refname="型をずらす自己同型による NF のモデル"}
+$M$ が $\mathsf{TZT}$ のモデルで、型をずらす自己同型 $\sigma$ をもつならば、$N(M,\sigma)\models\mathsf{NF}$ である。
+:::
+
+::: intuition
+型 $0$ の対象だけを残し、「$a$ が $b$ に属する」を「$a$ が、$b$ を型 $1$ に持ち上げたものに属する」と読み替えると、型の区別が消えて $\mathsf{NF}$ のモデルになる。層別化された論理式は、各変数をその層の値の型に持ち上げて読めば $\mathsf{TZT}$ の論理式になるので、$\mathsf{TZT}$ の内包公理がそのまま $\mathsf{NF}$ の内包公理を与える。
+:::
+
+::: proof
+**Step 1（外延性）.** 【主張：$N\models$ 外延性】 $a,b\in D_{0}$ が $\in_{N}$ について同じ元をもつとする。定義より、任意の $x\in D_{0}$ について $x\mathrel{E_{0}}\sigma_{0}(a)\iff x\mathrel{E_{0}}\sigma_{0}(b)$ である。$\sigma_{0}(a),\sigma_{0}(b)\in D_{1}$ なので、$M$ の型 $1$ の外延性の公理より $\sigma_{0}(a)=\sigma_{0}(b)$ であり、$\sigma_{0}$ は単射なので $a=b$ である。
+
+**Step 2（内包公理）.** 【主張：$N\models$ 層別化された内包公理】 $\varphi$ を層別化された論理式とし、$y$ は $\varphi$ に自由に現れないとする。$\varphi$ の層別化 $s$ を一つとり、$s(y)=s(x)+1$ と延ばす（$y$ は $\varphi$ に現れないので条件に反しない）。$k=s(x)$ とおき、$\varphi$ の $x$ 以外の自由変数への $D_{0}$ の元の割り当て $a$ を固定する。$M$ の型 $k$ の内包公理
+$$
+\exists y^{k+1}\,\forall x^{k}\,\bigl(x^{k}\in y^{k+1}\leftrightarrow\varphi^{s}\bigr)
+$$
+をパラメータ $a^{s}$ で使い、$e\in D_{k+1}$ をとる。$b=(\sigma^{(k+1)})^{-1}(e)\in D_{0}$ とおく。任意の $d\in D_{0}$ について、\ref{set:nf-shift-translation.1} より
+$$
+d\in_{N}b\iff\sigma^{(k)}(d)\mathrel{E_{k}}e\iff M\models\varphi^{s}[a^{s}(x^{k}\mapsto\sigma^{(k)}(d))]
+$$
+であり、\ref{set:nf-shift-translation.2} より右端は $N\models\varphi[a(x\mapsto d)]$ と同値である。ゆえに $b$ が求める集合である。
+
+::: hypcheck
+- **$\sigma$ が型をずらす自己同型であること**：Step 1 で $\sigma_{0}$ の単射性、Step 2 で各 $\sigma^{(k)}$ の全射性と所属の保存（\ref{set:nf-shift-translation}）に使った。
+- **型が整数全体であること**：本質的ではない。層別化の値は $0$ 以上にずらせる（\ref[層別化のずらし]{set:stratification-shift}）ので、$\mathsf{TST}$ の構造に $M\cong M^{+}$ を与える全単射 $\sigma_{n}$（$n\ge0$）があれば、$k\ge0$ の $\sigma^{(k)}$ だけで同じ構成ができる。$\mathsf{TZT}$ を使うのは、上にも下にも型が続くので型をずらす操作が言語の対称性になり、次節の議論が見通しよくなるからである。
+- **層別化**：Step 2 で $\varphi^{s}$ を作るのに使った。層別化されない式（たとえば $x\notin x$）は $\varphi^{s}$ を作れず、内包公理を与えない。
+:::
+:::
+
+## スペッカーの曖昧性定理 {#set:sec-nfcon-specker}
+
+::: lemma NF のモデルから TST+Amb のモデル {#set:nf-model-gives-tst-amb keywords="a model of NF gives a model of TST + Amb" index="NF から TST+Amb|えぬえふからてぃーえすてぃーあんぶ"}
+$V\models\mathsf{NF}$ とし、$V$ の対象の集まりを $D$、所属関係を $E$ とする。すべての $n$ について $D_{n}=D$, $E_{n}=E$ とした構造 $M_{V}=\langle D,E\rangle_{n\in\omega}$ は $\mathsf{TST}+\mathrm{Amb}$ のモデルである。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathsf{TST}$ の論理式 $\psi$ と割り当て $a$ について、$M_{V}\models\psi[a]\iff V\models\psi^{\circ}[a^{\circ}]$】 $\psi^{\circ}$ は型を消した論理式、$a^{\circ}$ は対応する割り当てである。$M_{V}$ ではどの型も同じ $D$ を動き、所属も同じ $E$ なので、論理式の構成についての帰納法で直ちに従う。
+
+**Step 2.** 【主張：$M_{V}\models\mathsf{TST}$】 $\mathsf{TST}$ の公理の型を消したものは $\mathsf{NF}$ の公理である（外延性は外延性に、内包公理は層別化された内包公理に移る。\ref[層別化された論理式と TST の論理式]{set:stratified-tst-translation}）。Step 1 より $M_{V}$ は $\mathsf{TST}$ の公理を満たす。
+
+**Step 3.** 【主張：$M_{V}\models\mathrm{Amb}$】 文 $\sigma$ と $\sigma^{+}$ は型の添字が違うだけなので、型を消すと（束縛変数の名前を除いて）同じ論理式 $\sigma^{\circ}$ になる。Step 1 より $M_{V}\models\sigma\iff V\models\sigma^{\circ}\iff M_{V}\models\sigma^{+}$ である。
+:::
+
+::: lemma TST+Amb から TZT+Amb へ {#set:tzt-amb-consistent keywords="Con(TST + Amb) implies Con(TZT + Amb)" index="TZT と曖昧性|てぃーぜっとてぃーとあいまいせい"}
+$\mathrm{Con}(\mathsf{TST}+\mathrm{Amb})$ ならば $\mathrm{Con}(\mathsf{TZT}+\mathrm{Amb}_{\Z})$ である。
+:::
+
+::: proof
+コンパクト性定理（多ソート版）により、$\mathsf{TZT}+\mathrm{Amb}_{\Z}$ の有限部分集合 $\Gamma$ がモデルをもつことを示せばよい。
+
+**Step 1.** 【主張：$\Gamma$ を持ち上げると $\mathsf{TST}+\mathrm{Amb}$ の部分集合になる】 $\Gamma$ に現れる型がすべて $-k$ 以上であるような $k\ge0$ をとる。各文を $k$ 回持ち上げた $\Gamma^{+k}=\{\gamma^{+k}\mid\gamma\in\Gamma\}$ は、型が $0$ 以上なので $\mathsf{TST}$ の文の集合である。型 $n$ の外延性・内包公理は型 $n+k\ge0$ の同じ公理に、$\sigma\leftrightarrow\sigma^{+}$ は $\sigma^{+k}\leftrightarrow(\sigma^{+k})^{+}$ に移るので、$\Gamma^{+k}\subseteq\mathsf{TST}+\mathrm{Amb}$ である。
+
+**Step 2.** 【主張：$\Gamma$ はモデルをもつ】 仮定より $\mathsf{TST}+\mathrm{Amb}$ のモデル $M=\langle D_{n},E_{n}\rangle_{n\in\omega}$ がある。$\mathsf{TZT}$ の構造 $M'$ を、$n\ge-k$ では $D'_{n}=D_{n+k}$, $E'_{n}=E_{n+k}$、$n<-k$ では $D'_{n}$ を一点集合 $\{\ast\}$、$E'_{n}=\varnothing$ と定める。型が $-k$ 以上の文 $\gamma$ について、$M'\models\gamma\iff M\models\gamma^{+k}$ である（\ref[ずらした構造での充足]{set:shift-satisfaction} と同じ帰納法。$\gamma$ は $-k$ 未満の型に触れない）。ゆえに $M'\models\Gamma$ である。
+:::
+
+$\mathsf{TZT}+\mathrm{Amb}_{\Z}$ のモデルから型をずらす自己同型をもつモデルを得るには、モデル理論の次の事実を使う。
+
+::: fact 特殊モデルの存在と一意性 {#set:special-model-fact keywords="special models, existence and uniqueness" index="特殊モデル|とくしゅもでる"}
+可算な（多ソートでもよい）言語の完全な理論 $\mathsf{S}$ が無限モデルをもつとする。このとき、ある無限\term[基数]{set:cardinal} $\lambda$ について、濃度 $\lambda$ の $\mathsf{S}$ の**特殊モデル**が存在する。また、同じ濃度の\term[初等的に同値]{model:elementary-equivalence}な二つの特殊モデルは同型である（Chang–Keisler『Model Theory』第 5 章。特殊モデルは飽和の度合いが増える初等鎖の和として定義される。\ref{model:page-saturated-models} の補足も参照。多ソートの言語でも同じ証明が通るとされる）。
+:::
+
+::: lemma 型をずらす自己同型をもつモデル {#set:tzt-amb-automorphism keywords="TZT + Amb has a model with a type-shifting automorphism" index="型をずらす自己同型の存在|かたをずらすじこどうけいのそんざい"}
+$\mathrm{Con}(\mathsf{TZT}+\mathrm{Amb}_{\Z})$ ならば、$\mathsf{TZT}$ のモデルで型をずらす自己同型をもつものが存在する。
+:::
+
+::: proof
+**Step 1.** 【主張：完全な拡大 $\mathsf{S}$ をとると、$M\models\mathsf{S}$ なら $M^{+}\models\mathsf{S}$】 $\mathsf{TZT}+\mathrm{Amb}_{\Z}$ を含む完全な理論 $\mathsf{S}$ をとる。$\mathsf{TZT}$ のモデルは空でない型を無限個もつので無限であり、$\mathsf{S}$ は無限モデルをもつ（各型そのものも無限であることは \ref{set:prob-nfcon-tzt-infinite} で確かめる）。$M\models\mathsf{S}$ と文 $\gamma$ について、$M^{+}\models\gamma\iff M\models\gamma^{+}$（\ref[ずらした構造での充足]{set:shift-satisfaction} を $\mathsf{TZT}$ に移したもの）であり、$\gamma\leftrightarrow\gamma^{+}\in\mathsf{S}$ なので $M\models\gamma^{+}\iff M\models\gamma$ である。ゆえに $M^{+}\equiv M$ であり、$M^{+}\models\mathsf{S}$ である。
+
+**Step 2.** 【主張：特殊モデル $M$ と $M^{+}$ は同型】 \ref{set:special-model-fact} より $\mathsf{S}$ の特殊モデル $M$ をとる。$M^{+}$ は $M$ と同じ対象を、型の名前を $n+1\mapsto n$ と付け替えて見たものである。型の名前の付け替えは言語の記号の付け替えなので、特殊モデルであることも濃度も変わらない。Step 1 より $M^{+}\equiv M$ であり、\ref{set:special-model-fact} より同型 $f\colon M\to M^{+}$ がある。$f$ は各 $n$ について $D_{n}$ から $M^{+}$ の型 $n$ の対象の集まり $D_{n+1}$ への全単射 $f_{n}$ で、$x\mathrel{E_{n}}y\iff f_{n}(x)\mathrel{E_{n+1}}f_{n+1}(y)$ を満たす。すなわち $\sigma_{n}=f_{n}$ が型をずらす自己同型である。
+
+::: hypcheck
+- **$\mathrm{Amb}_{\Z}$**：Step 1 で $M\equiv M^{+}$ を得るのに使った。$\mathrm{Amb}_{\Z}$ がなければ、型をずらすと真偽の変わる文がありえ、$M\cong M^{+}$ は望めない。
+- **特殊モデルの事実**：Step 2 の同型の存在に使った。これが本ページで証明しない部分である。
+:::
+:::
+
+::: theorem スペッカーの曖昧性定理 {#set:specker-ambiguity keywords="Specker's ambiguity theorem, Con(NF) iff Con(TST + Amb)" index="スペッカーの曖昧性定理|すぺっかーのあいまいせいていり, 型の曖昧性|かたのあいまいせい" refname="スペッカーの曖昧性定理"}
+$\mathrm{Con}(\mathsf{NF})\iff\mathrm{Con}(\mathsf{TST}+\mathrm{Amb})$ である。
+:::
+
+::: intuition
+$\mathsf{NF}$ は「型の区別をすべて忘れた」理論であり、$\mathsf{TST}+\mathrm{Amb}$ は「型の区別はあるが、どの文も型をずらして真偽が変わらない」理論である。両者は同じくらい危ない：一方が矛盾すれば他方も矛盾する。
+:::
+
+::: proof
+**Step 1（⇒）.** 【主張：$\mathrm{Con}(\mathsf{NF})$ なら $\mathrm{Con}(\mathsf{TST}+\mathrm{Amb})$】 $\mathsf{NF}$ のモデル $V$ をとれば、\ref{set:nf-model-gives-tst-amb} より $M_{V}$ が $\mathsf{TST}+\mathrm{Amb}$ のモデルである。
+
+**Step 2（⇐）.** 【主張：$\mathrm{Con}(\mathsf{TST}+\mathrm{Amb})$ なら $\mathrm{Con}(\mathsf{NF})$】 \ref{set:tzt-amb-consistent} より $\mathsf{TZT}+\mathrm{Amb}_{\Z}$ は無矛盾であり、\ref{set:tzt-amb-automorphism} より型をずらす自己同型 $\sigma$ をもつ $\mathsf{TZT}$ のモデル $M$ がある。\ref{set:nf-model-from-tzt} より $N(M,\sigma)$ は $\mathsf{NF}$ のモデルである。
+
+::: hypcheck
+- **完全性定理**：無矛盾性とモデルの存在を行き来するのに、両方の向きで使った。
+- **特殊モデルの事実**（\ref{set:special-model-fact}）：Step 2 だけで使った。Step 1 は事実を使わずに完結している。
+- 選択公理（メタ理論 $\ZFC$ の）は、完全性定理と特殊モデルの構成に使う。
+:::
+:::
+
+::: supplement
+**帰属.** この定理はスペッカーによるもの（1962 年の論文「Typical ambiguity」とされる。未確認）である。証明の中心は、$\mathsf{TZT}$ の型をずらす同型から $\mathsf{NF}$ を作る \ref{set:nf-model-from-tzt} にある。$\mathrm{Amb}$ は「型をずらす同型がある」ことの一階の影であり、特殊モデル（あるいは飽和モデル）の一意性がその影から本物の同型を取り出す。
+
+**NFU との類似.** $\mathsf{NFU}$ のモデルの構成（\ref[NFU の自己同型モデル]{set:nfu-automorphism-model}）では、$\ZFC$ のモデルの自己同型 $j$ で $j(\alpha)<\alpha$ となるものが「型をずらす」役を果たした。そこでは $V_{\alpha}$ の外にはみ出す部分を原子として捨てられたが、$\mathsf{NF}$ では外延性がすべての対象に及ぶので捨てられない。$\mathsf{NF}$ で必要なのは、ずれがちょうど一つの型の全体をもう一つの型の全体に重ねる同型であり、これが $\mathrm{Amb}$ という強い条件になる。
+:::
+
+## 絡み合う型理論 {#set:sec-nfcon-ttt}
+
+ホームズは、型の間の所属を「隣り合う型」に限らず「小さい型から大きい型へ」に広げた型理論を考え、その無矛盾性が $\mathsf{NF}$ の無矛盾性と同値であることを示したとされる。
+
+::: definition 絡み合う型理論 TTT {#set:ttt keywords="tangled type theory, TTT, Holmes" index="絡み合う型理論|からみあうかたりろん, TTT|てぃーてぃーてぃー"}
+$\lambda$ を極限順序数とする。
+1. 言語：各\term[順序数]{set:ordinal} $\alpha<\lambda$ について型 $\alpha$ の変数 $x^{\alpha},y^{\alpha},\dots$ があり、原子論理式は $x^{\alpha}=y^{\alpha}$ と、$\alpha<\beta$ となる任意の $\alpha,\beta$ についての $x^{\alpha}\in y^{\beta}$ である。
+2. 型の埋め込み：狭義単調な写像 $s\colon\omega\to\lambda$ と $\mathsf{TST}$ の論理式 $\varphi$ について、$\varphi$ の型 $n$ の変数 $x^{n}$ をそれぞれ型 $s(n)$ の変数 $x^{s(n)}$ に置き換えた論理式を $\varphi^{s}$ とする（$x^{n}\in y^{n+1}$ は $x^{s(n)}\in y^{s(n+1)}$ になる）。
+3. 公理：$\mathsf{TST}$ の各公理 $\varphi$ と、各狭義単調な $s\colon\omega\to\lambda$ についての $\varphi^{s}$ の全体を $\mathsf{TTT}_{\lambda}$ とし、**絡み合う型理論**という。
+
+構造は $P=\langle D_{\alpha},E_{\alpha\beta}\rangle_{\alpha<\beta<\lambda}$（$D_{\alpha}\neq\varnothing$, $E_{\alpha\beta}\subseteq D_{\alpha}\times D_{\beta}$）である。$s$ に対し $\mathsf{TST}$ の構造 $P_{s}=\langle D_{s(n)},E_{s(n)s(n+1)}\rangle_{n\in\omega}$ を考えると、論理式の構成についての帰納法から、$\mathsf{TST}$ の論理式 $\varphi$ について $P\models\varphi^{s}[a]\iff P_{s}\models\varphi[a_{s}]$（$a_{s}(x^{n})=a(x^{s(n)})$）が成り立つ。とくに、$P\models\mathsf{TTT}_{\lambda}$ であることと、すべての狭義単調な $s$ について $P_{s}\models\mathsf{TST}$ であることは同値である。
+:::
+
+::: intuition
+型が整列順序 $\lambda$ に沿って並び、どの増加列 $s(0)<s(1)<\cdots$ を選んでも、その型だけを取り出せば $\mathsf{TST}$ のモデルになっている。同じ型の対象が、いろいろな $\mathsf{TST}$ のモデルの中で違う段に「絡み合って」使われる。
+:::
+
+::: lemma NF のモデルから TTT のモデル {#set:ttt-from-nf keywords="a model of NF gives a model of TTT" index="NF から TTT|えぬえふからてぃーてぃーてぃー"}
+$V\models\mathsf{NF}$ とし、対象の集まりを $D$、所属関係を $E$ とする。すべての $\alpha<\beta<\lambda$ について $D_{\alpha}=D$, $E_{\alpha\beta}=E$ とした構造は $\mathsf{TTT}_{\lambda}$ のモデルである。
+:::
+
+::: proof
+狭義単調な $s$ について、$P_{s}$ はすべての型が $D$ で所属がすべて $E$ の $\mathsf{TST}$ の構造、すなわち \ref{set:nf-model-gives-tst-amb} の $M_{V}$ である。$M_{V}\models\mathsf{TST}$ なので、\ref{set:ttt} の最後の同値より $P\models\mathsf{TTT}_{\lambda}$ である。
+:::
+
+逆向きには、型の並びから識別不能列を取り出す。そのために、\ref{model:em-model} を、識別不能列が与えられた列の性質を受け継ぐ形に強める。
+
+::: lemma 与えられた列を受け継ぐ EM モデル {#set:em-from-sequence keywords="Ehrenfeucht-Mostowski model realizing the properties of a given sequence" index="EM モデル（列を受け継ぐ）|いーえむもでる"}
+（AC）$\mathcal{L}$ を言語、$\mathcal{M}$ を $\mathcal{L}$ 構造、$(b_{p})_{p\in\omega}$ を $\mathcal{M}$ の相異なる元の列とする。$\Theta$ を、$\mathcal{L}$ の論理式 $\theta(x_{1},\dots,x_{n})$（$n\ge1$）で、$p_{1}<\dots<p_{n}$ となる任意の添字について $\mathcal{M}\models\theta(b_{p_{1}},\dots,b_{p_{n}})$ となるものの全体とする。このとき $\mathcal{L}$ 構造 $\mathcal{N}\equiv\mathcal{M}$ と、$\mathcal{N}$ の元の列 $(a_{i})_{i\in\Z}$ と、$\mathcal{N}$ の自己同型 $h$ で、次を満たすものが存在する。
+1. 任意の $\theta\in\Theta$ と $i_{1}<\dots<i_{n}$ について $\mathcal{N}\models\theta(a_{i_{1}},\dots,a_{i_{n}})$ である。
+2. 任意の $i\in\Z$ について $h(a_{i})=a_{i+1}$ である。
+:::
+
+::: proof
+**Step 1（スコーレム化）.** 【主張：$\mathcal{M}$ をスコーレム理論のモデルに拡大できる】 $T=\mathrm{Th}(\mathcal{M})$ とし、\ref{model:skolemization} の $\mathcal{L}^{\mathrm{Sk}}$, $T^{\mathrm{Sk}}$ をとる。\ref{model:skolemization.1} より $\mathcal{M}$ は $T^{\mathrm{Sk}}$ のモデル $\mathcal{M}^{\mathrm{Sk}}$ に拡大できる。$\Theta$ の論理式は $\mathcal{L}$ の論理式なので、$\mathcal{M}^{\mathrm{Sk}}$ でも列 $(b_{p})$ の増加な組で成り立つ。
+
+**Step 2（識別不能列）.** 【主張：$\Theta$ を満たす $\mathcal{L}^{\mathrm{Sk}}$ の識別不能列 $(a_{i})_{i\in\Z}$ をもつ $T^{\mathrm{Sk}}$ のモデル $\mathcal{M}_{1}$ がある】 新しい定数 $c_{i}$（$i\in\Z$）について、\ref{model:indiscernibles-exist} の証明の $\Sigma$（$T^{\mathrm{Sk}}$ と、$c_{i}$ が相異なることと、$\mathcal{L}^{\mathrm{Sk}}$ の論理式についての識別不能性）に、$\theta(c_{i_{1}},\dots,c_{i_{n}})$（$\theta\in\Theta$, $i_{1}<\dots<i_{n}$）を加えた $\Sigma'$ を考える。$\Sigma'$ の有限部分集合 $\Sigma_{0}$ がモデルをもつことは、\ref{model:indiscernibles-exist} の証明で、無限モデルの元の列として $\mathcal{M}^{\mathrm{Sk}}$ の中の $b_{0},b_{1},\dots$（$b_{p}\prec b_{q}\iff p<q$）をとれば同じ議論で示せる。実際、ラムゼーの定理で得る等質集合 $H$ は $\{b_{p}\}$ の部分集合なので、$H$ から $\prec$ について増加にとった組は $(b_{p})$ の増加な組であり、$\theta(c_{\vec{i}})$ の形の文も真になる。コンパクト性定理より $\Sigma'$ はモデル $\mathcal{M}_{1}$ をもち、$a_{i}=c_{i}^{\mathcal{M}_{1}}$ とおけばよい。
+
+**Step 3（EM モデルと自己同型）.** 【主張：スコーレム包の上で、添字のずらしが自己同型に延びる】 $\mathcal{N}^{\ast}=\mathrm{Hull}(\{a_{i}\mid i\in\Z\})\preccurlyeq\mathcal{M}_{1}$ とする（\ref{model:skolem-hull}）。$i\mapsto i+1$ は $(\Z,<)$ の順序自己同型なので、\ref{model:em-model} の証明の Step 2（項の添字を写す）と同じ議論で、$h(t(a_{\vec{i}}))=t(a_{\vec{i}+1})$ が $\mathcal{N}^{\ast}$ の自己同型を定める。$\mathcal{N}=\mathcal{N}^{\ast}\restr{\mathcal{L}}$ とおく。$\mathcal{N}^{\ast}\preccurlyeq\mathcal{M}_{1}\models T^{\mathrm{Sk}}\supseteq T$ なので $\mathcal{N}\models\mathrm{Th}(\mathcal{M})$、すなわち $\mathcal{N}\equiv\mathcal{M}$ である。1 は $\mathcal{M}_{1}$ で成り立ち、$\mathcal{N}^{\ast}\preccurlyeq\mathcal{M}_{1}$ なので $\mathcal{N}$ でも成り立つ。$h$ は $\mathcal{L}$ 構造としても自己同型であり、2 を満たす。
+:::
+
+::: theorem TTT と NF の等無矛盾性 {#set:ttt-equiconsistent keywords="Con(TTT) iff Con(NF), Holmes" index="TTT と NF の等無矛盾性|てぃーてぃーてぃーとえぬえふのとうむむじゅんせい" refname="TTT と NF の等無矛盾性"}
+任意の極限順序数 $\lambda$ について、$\mathrm{Con}(\mathsf{TTT}_{\lambda})\iff\mathrm{Con}(\mathsf{NF})$ である。
+:::
+
+::: intuition
+型が整列順序に沿って絡み合っていれば、ラムゼーの定理（識別不能列）で型の無限列を「どの型も区別できない」ように選び直せ、それを整数で並べてずらすと型をずらす自己同型が得られる。逆に $\mathsf{NF}$ のモデルからは、すべての型を全体に重ねるだけで $\mathsf{TTT}$ のモデルになる。
+:::
+
+::: proof
+**Step 1（⇐）.** 【主張：$\mathrm{Con}(\mathsf{NF})$ なら $\mathrm{Con}(\mathsf{TTT}_{\lambda})$】 \ref{set:ttt-from-nf} による。
+
+以下 $P=\langle D_{\alpha},E_{\alpha\beta}\rangle$ を $\mathsf{TTT}_{\lambda}$ のモデルとし、$\mathrm{Con}(\mathsf{NF})$ を示す。
+
+**Step 2（一ソートの構造に直す）.** 【主張：型も対象とする一ソートの構造 $\mathcal{M}$ に、型の増加列ごとに $\mathsf{TST}$ の公理を表す文が成り立つ】 言語 $\mathcal{L}=\{\mathrm{Ty},\mathrm{Ob},\prec,\mathrm{E}\}$（$\mathrm{Ty}$ は 1 項、他は 2 項）の構造 $\mathcal{M}$ を、対象を「型 $\alpha<\lambda$」と「各 $D_{\alpha}$ の互いに交わらない写し」の合併とし、$\mathrm{Ty}(t)$ は $t$ が型であること、$\mathrm{Ob}(x,t)$ は $x$ が $D_{t}$ の写しに属すること、$\prec$ は型の順序、$\mathrm{E}(x,y)$ は $x\in D_{\alpha}$, $y\in D_{\beta}$, $\alpha<\beta$, $x\mathrel{E_{\alpha\beta}}y$ となることとして作る。$\mathsf{TST}$ の文 $\varphi$ で型が $0,\dots,k$ のものについて、$\varphi^{\ast}(t_{0},\dots,t_{k})$ を、型 $n$ の量化子を $\mathrm{Ob}(\cdot,t_{n})$ に制限し、$x^{n}\in y^{n+1}$ を $\mathrm{E}(x,y)$ に置き換えた $\mathcal{L}$ の論理式とする。$t_{0}\prec\dots\prec t_{k}$ となる型 $\alpha_{0}<\dots<\alpha_{k}$ について、$\mathcal{M}\models\varphi^{\ast}(\alpha_{0},\dots,\alpha_{k})$ は、$s(n)=\alpha_{n}$（$n\le k$）となる $s$ について $P_{s}\models\varphi$ と同値である。ゆえに $\mathsf{TST}$ の公理 $\varphi$ について、$\theta_{\varphi}(x_{0},\dots,x_{k})\defeq\bigwedge_{n\le k}\mathrm{Ty}(x_{n})\land\varphi^{\ast}(x_{0},\dots,x_{k})$ は型の増加な組で常に成り立つ。
+
+**Step 3（識別不能な型の列）.** 【主張：型の列 $(a_{i})_{i\in\Z}$ と、それを一つずらす自己同型をもつ $\mathcal{N}\equiv\mathcal{M}$ がある】 $\lambda\ge\omega$ なので、型の列 $b_{p}=p$（$p\in\omega$）がとれる。\ref{set:em-from-sequence} をこの列に使うと、$\Theta$ は $\mathrm{Ty}(x_{1})$, $x_{1}\prec x_{2}$ と Step 2 の $\theta_{\varphi}$ をすべて含むので、$\mathcal{N}\equiv\mathcal{M}$、$\mathcal{N}$ の列 $(a_{i})_{i\in\Z}$、自己同型 $h$ で、各 $a_{i}$ が型、$a_{i}\prec a_{j}$（$i<j$）、すべての $\mathsf{TST}$ の公理 $\varphi$ と $i_{0}<\dots<i_{k}$ について $\mathcal{N}\models\varphi^{\ast}(a_{i_{0}},\dots,a_{i_{k}})$、$h(a_{i})=a_{i+1}$ となるものがある。
+
+**Step 4（TZT のモデルと型をずらす自己同型）.** 【主張：$Q=\langle D'_{n},E'_{n}\rangle_{n\in\Z}$ は型をずらす自己同型をもつ $\mathsf{TZT}$ のモデル】 $D'_{n}=\{x\in N\mid\mathcal{N}\models\mathrm{Ob}(x,a_{n})\}$, $E'_{n}=\{\langle x,y\rangle\in D'_{n}\times D'_{n+1}\mid\mathcal{N}\models\mathrm{E}(x,y)\}$ とおく。$D'_{n}\neq\varnothing$ は「各型に対象がある」という $\mathcal{M}$ で真な文が $\mathcal{N}$ でも真であることから従う。$\mathsf{TZT}$ の公理 $\gamma$ で型が $m,\dots,m+k$ のものは、$\mathsf{TST}$ の公理 $\varphi$ を $m$ だけずらしたもの（$m<0$ なら下にずらしたもの）であり、$Q\models\gamma\iff\mathcal{N}\models\varphi^{\ast}(a_{m},\dots,a_{m+k})$ である。Step 3 より右辺は真なので $Q\models\mathsf{TZT}$ である。$h$ は $\mathrm{Ob}$ と $\mathrm{E}$ を保ち $h(a_{n})=a_{n+1}$ なので、$h$ を $D'_{n}$ に制限した $\sigma_{n}$ は $D'_{n}$ から $D'_{n+1}$ への全単射であり（逆は $h^{-1}$ の制限）、$x\mathrel{E'_{n}}y\iff\sigma_{n}(x)\mathrel{E'_{n+1}}\sigma_{n+1}(y)$ を満たす。
+
+**Step 5.** 【主張：$\mathrm{Con}(\mathsf{NF})$】 \ref{set:nf-model-from-tzt} より $N(Q,\sigma)\models\mathsf{NF}$ である。
+
+::: hypcheck
+- **$\lambda\ge\omega$**（極限順序数であること）：Step 3 で無限の型の列 $(b_{p})$ をとるのに使った。型が有限個しかない型理論からはこの議論は通らない。
+- **任意の $\alpha<\beta$ の間の所属**：Step 2 で、型の**任意の**増加な組で $\mathsf{TST}$ の公理が成り立つことを使った。$\mathsf{TST}$ のように隣り合う型の間の所属しかないと、識別不能列 $(a_{i})$ の増加な組 $a_{0}<a_{2}<a_{4}<\cdots$ でも公理が成り立つという $\Theta$ の条件が得られない。
+- **ラムゼーの定理**：\ref{set:em-from-sequence} の Step 2 を通して使った。型の並びから「どの増加な組も同じ文を満たす」部分列を取り出すのがこの証明の本質である。
+:::
+:::
+
+::: supplement
+**帰属.** $\mathsf{TTT}$ と \ref{set:ttt-equiconsistent} はホームズによるもの（1995 年の論文とされる。未確認）である。Step 2〜5 の識別不能列による議論は、ラムゼーの定理で $\mathsf{TST}+\mathrm{Amb}$ の有限部分のモデルを作り、スペッカーの曖昧性定理 \tref{set:specker-ambiguity} に帰着させる形でも書ける：有限個の文 $\sigma_{1},\dots,\sigma_{r}$ について、型の $(k+1)$ 個組 $\alpha_{0}<\dots<\alpha_{k}$ を「各 $\sigma_{j}$ が $P_{s}$ で真か偽か」で $2^{r}$ 色に塗り分け、無限の等質集合 $H$ をとると、$H$ の元を順に型に使った $P_{s}$ では $\sigma_{j}$ と $\sigma_{j}^{+}$ の真偽が一致する。本ページの証明は、この方法では避けられない特殊モデルの事実を使わずに済む。
+
+**原子を許す場合.** 外延性を集合に制限した $\mathsf{TTT}$ の変種と $\mathsf{NFU}$ の関係も同様に論じられ、そちらは容易にモデルが作れるとされる（未確認）。
+:::
+
+## ホームズによる NF の無矛盾性 {#set:sec-nfcon-holmes}
+
+::: fact NF の無矛盾性 {#set:nf-consistent keywords="consistency of NF, Holmes, Lean formalization, Wilshaw" index="NF の無矛盾性|えぬえふのむむじゅんせい" refname="NF の無矛盾性"}
+ある極限順序数 $\lambda$ について、$\mathsf{TTT}_{\lambda}$ のモデルが $\ZFC$ の中で構成できる（ホームズの証明とされる）。したがって \ref{set:ttt-equiconsistent} より、$\ZFC$ が無矛盾なら $\mathsf{NF}$ も無矛盾である。この証明は、ホームズとウィルショー（Wilshaw）によって定理証明支援系 Lean の上で形式的に検証された（2024 年ごろとされる）。
+:::
+
+::: intuition
+$\mathsf{NF}$ そのもののモデルを直接作るのは難しいが、型がたくさんある $\mathsf{TTT}$ のモデルなら、型ごとに集合を積み上げる形で作る余地がある。ホームズはそれを実行したとされ、その長く込み入った議論が計算機で一行ずつ確かめられたとされる。
+:::
+
+::: supplement
+**構成の考え方（概略。細部は未確認）.** ホームズの構成は、各型 $\alpha$ の対象を、それより下の型の対象の集まりとして型ごとに積み上げ、型の間の所属 $E_{\alpha\beta}$ が下の型の取り方によらず整合するように、対象の「置換による対称性」を管理するものとされる。置換で動かない（ある意味で小さな支えをもつ）対象だけを残すことで、$\mathsf{TTT}$ の内包公理が成り立つ程度に豊かで、しかも整合性が保てる程度に小さな型の集まりを作るとされる。本サイトではこの構成を扱わない。
+
+**歴史（年号はいずれも未確認）.** $\mathsf{NF}$ はクワインが 1937 年に導入したとされる。スペッカーは選択公理の否定（1953 年とされる。\ref{set:specker-not-ac}）と曖昧性定理（1962 年とされる。\ref{set:specker-ambiguity}）を示し、イェンセンは原子を許す $\mathsf{NFU}$ の無矛盾性を示した（1969 年とされる。\ref[NFU の無矛盾性]{set:nfu-consistent}）。ホームズは $\mathsf{TTT}$ を導入し（1995 年とされる）、のちに $\mathsf{TTT}$ のモデルの構成を発表したとされる。その証明は長く検証が難しいとされていたが、Lean による形式化で確かめられたとされる。
+
+**強さ.** ホームズの構成が $\ZFC$ よりかなり弱い体系の中で行えるかどうか、$\mathsf{NF}$ の無矛盾性の強さが正確にどこにあるかなどの細部は、本サイトでは確かめていない。$\mathsf{NF}$ は無限公理を証明する（\ref{set:nf-infinity}）ので、$\mathsf{NF}$ のモデルからは \ref{set:nf-model-gives-tst-amb} により型 $0$ が無限な $\mathsf{TST}$ のモデルが得られる。
+:::
+
+## 問題 {#set:sec-nfcon-problems}
+
+::: problem ★ 基本：構成したモデルの全体集合 {#set:prob-nfcon-universal-set}
+$M$ を $\mathsf{TZT}$ のモデル、$\sigma$ を型をずらす自己同型、$N=N(M,\sigma)$ とする。$\mathsf{TZT}$ の内包公理で得る $u\in D_{1}$（$D_{0}$ のすべての元を $E_{0}$ について元にもつもの）について、$v=\sigma_{0}^{-1}(u)$ は $N$ の全体集合であり、$N\models v\in v$ であることを示せ。
+:::
+
+::: solution
+内包公理 $\exists y^{1}\,\forall x^{0}\,(x^{0}\in y^{1}\leftrightarrow x^{0}=x^{0})$ より $u$ がある。$v=\sigma_{0}^{-1}(u)\in D_{0}$ とおくと、任意の $a\in D_{0}$ について $a\in_{N}v\iff a\mathrel{E_{0}}\sigma_{0}(v)=u$ であり、右辺は常に真である。ゆえに $v$ は $N$ のすべての対象を元にもち、とくに $v$ 自身も元にもつので $N\models v\in v$ である。$\mathsf{TZT}$ の型 $1$ の対象 $u$ は型 $0$ の対象を元にもつだけで「自分を元にもつ」ことはありえないが、$\sigma_{0}^{-1}$ で型 $0$ に下ろした $v$ を同じ型の対象と比べることで、型の区別が消える。
+:::
+
+::: problem ★★ 標準：TZT のモデルの型はすべて無限 {#set:prob-nfcon-tzt-infinite}
+$M=\langle D_{n},E_{n}\rangle_{n\in\Z}$ を $\mathsf{TZT}$ のモデルとする。どの $D_{n}$ も無限集合であることを示せ。
+:::
+
+::: solution
+**Step 1.** 【主張：$D_{n}$ が有限なら $\lvert D_{n+1}\rvert=2^{\lvert D_{n}\rvert}$】 型 $n+1$ の外延性より、$D_{n+1}$ の元はその $E_{n}$ についての元の集合（$D_{n}$ の部分集合）で決まるので、$\lvert D_{n+1}\rvert\le2^{\lvert D_{n}\rvert}$ である。逆に $D_{n}$ の部分集合 $\{c_{1},\dots,c_{j}\}$ は、パラメータ $c_{1},\dots,c_{j}$ をもつ論理式 $x^{n}=c_{1}\lor\dots\lor x^{n}=c_{j}$ で定義されるので、内包公理によりそれをちょうど元にもつ $D_{n+1}$ の元がある（$j=0$ なら $x^{n}\neq x^{n}$ を使う）。ゆえに $\lvert D_{n+1}\rvert\ge2^{\lvert D_{n}\rvert}$ である。
+
+**Step 2.** 【主張：有限の型があると矛盾する】 $D_{n}$ が有限で $\lvert D_{n}\rvert=m$ とする。$D_{n-1}$ も有限である（$D_{n-1}$ が無限なら、Step 1 の後半の議論で $D_{n}$ は $D_{n-1}$ の有限部分集合ごとに異なる元をもち、無限になる）。Step 1 より $m=2^{\lvert D_{n-1}\rvert}$ であり、同様に $\lvert D_{n-1}\rvert=2^{\lvert D_{n-2}\rvert}$、… と下に続く。$D_{n-j}\neq\varnothing$ なので $\lvert D_{n-j}\rvert\ge1$ であり、$m$ は $1$ の上に $2$ の冪を $j$ 回重ねた数以上である。これがすべての $j$ について成り立つことはありえない。ゆえにどの $D_{n}$ も無限である。
+
+（$\mathsf{TST}$ のモデルでも同じ議論で、型 $0$ が有限なら上の型はすべて有限になる。$\mathsf{TZT}$ では下にも型が続くことが、無限を強いている。）
+:::
+
+::: problem ★ 基本：TTT から TST へ {#set:prob-nfcon-ttt-tst}
+$P$ を $\mathsf{TTT}_{\lambda}$ のモデルとする。$P_{s}$（$s(n)=n$）が $\mathsf{TST}$ のモデルであることを確かめよ。また、$s(n)=2n$ とした $P_{s}$ も $\mathsf{TST}$ のモデルであることを確かめ、$\mathsf{TST}$ のモデルの族としての $\mathsf{TTT}$ のモデルの性質を一言で述べよ。
+:::
+
+::: solution
+$\lambda$ は極限順序数なので $\omega\le\lambda$ であり、$s(n)=n$ と $s(n)=2n$ はどちらも $\omega$ から $\lambda$ への狭義単調な写像である。\ref{set:ttt} の最後の同値より、$P\models\mathsf{TTT}_{\lambda}$ なら任意の狭義単調な $s$ について $P_{s}\models\mathsf{TST}$ であるから、どちらも $\mathsf{TST}$ のモデルである。$s(n)=2n$ の場合、$P_{s}$ の型 $n$ の所属は $E_{2n,2n+2}$ であり、型 $2n+1$ は使われない。$\mathsf{TTT}$ のモデルとは、「型の増加列をどう選んでも $\mathsf{TST}$ のモデルが取り出せる」ような、型の間の所属関係の族である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

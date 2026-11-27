@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>型つき集合論 TST と層別化 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/04-set-theory/09-new-foundations/01-typed-set-theory.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 型つき集合論 TST と層別化 {#set:page-typed-set-theory keywords="typed set theory, TST, theory of types, stratification, stratified formula, typical ambiguity, type raising"}
+
+ラッセルの議論（\ref{set:russell-paradox}）は、素朴な内包の原理のどこが危ういかを教える。$\ZF$ はその答えとして「既にある集合の中からしか切り出さない」という制限（分出公理）を採った。もう一つの答えが**型**による制限である：対象を型 $0,1,2,\dots$ に分け、「型 $n$ の対象は型 $n+1$ の対象の元になれる」とだけ約束すると、$x\in x$ という式はそもそも書けなくなる。本ページではこの考えを一階の理論 $\mathsf{TST}$（型つき集合論）として定式化し、$\ZFC$ の中にそのモデル（標準モデル）を作る。続いて、型を一斉に $1$ 上げる操作と、それが示唆する**型の曖昧性**を調べ、最後に、型を消した一つの言語の中で「型を矛盾なく割り振れる」論理式を**層別化された論理式**として定義する。層別化された論理式だけに内包を許す体系が次のページのクワインの $\mathsf{NF}$ である。
+
+## 記法と定義の確認 {#set:sec-tst-notation}
+
+::: notation
+- 集合論の言語・論理式・自由変数は \ref{set:first-order-language}, \ref{set:free-bound-variable} の意味で用いる。一階の構造・割り当て・充足関係は \ref{logic:structure}, \ref{logic:assignment}, \ref{logic:satisfaction}、自然演繹による導出は \ref{logic:deduction-system} の意味である。
+- 冪集合 $\mathcal{P}(X)$ は \ref{set:power-set}、順序対 $\langle x,y\rangle=\{\{x\},\{x,y\}\}$ は \ref{set:ordered-pair} の意味である。
+- **どの体系の中で議論しているか**を各所で明記する。$\mathsf{TST}$ の公理から何かを導く議論は「$\mathsf{TST}$ の中の議論」である。モデルを作る議論（\ref{set:sec-tst-standard}）は、メタ理論 $\ZFC$ の中で行う。論理式の形についての議論（層別化）は構文についての議論であり、どの集合論の公理も使わない。
+- 本ページでは、$\mathsf{TST}$ の変数の右肩の数字は**型**を表し、冪ではない。
+:::
+
+## TST の言語と公理 {#set:sec-tst-axioms}
+
+::: definition 型つき集合論 TST {#set:tst keywords="typed set theory, TST, simple theory of types" index="型つき集合論|かたつきしゅうごうろん"}
+**型つき集合論** $\mathsf{TST}$ は、次の言語と公理からなる多ソートの一階の理論である。
+1. 言語：各自然数 $n$（型）について、型 $n$ の変数 $x^{n},y^{n},z^{n},\dots$ が可算無限個ある。原子論理式は $x^{n}=y^{n}$ と $x^{n}\in y^{n+1}$ の形のものだけである（型の異なる変数の間の等号や、$x^{n}\in y^{m}$ で $m\neq n+1$ のものは論理式ではない）。論理式は原子論理式から $\lnot$, $\land$, $\exists x^{n}$ で作り、$\lor$, $\to$, $\leftrightarrow$, $\forall x^{n}$ は \ref{set:formula-abbreviations} と同じ略記とする。
+2. 外延性の公理：各 $n$ について
+$$
+\forall x^{n+1}\,\forall y^{n+1}\,\bigl(\forall z^{n}\,(z^{n}\in x^{n+1}\leftrightarrow z^{n}\in y^{n+1})\to x^{n+1}=y^{n+1}\bigr).
+$$
+3. **内包公理**（図式）：各 $n$ と、$y^{n+1}$ を自由変数として含まない各論理式 $\varphi$ について、次の論理式の全称閉包：
+$$
+\exists y^{n+1}\,\forall x^{n}\,\bigl(x^{n}\in y^{n+1}\leftrightarrow\varphi\bigr).
+$$
+:::
+
+::: intuition
+型 $0$ の対象は「個体」、型 $1$ の対象は個体の集合、型 $2$ の対象は個体の集合の集合、…と考える。どの型でも、**一つ下の型の対象についての任意の性質**から集合が作れる（内包公理には分出公理のような「既にある集合の中から」という制限がない）。その代わり、「$x$ は $x$ 自身の元である」は型が合わないので**言えない**。ラッセルの議論はこうして文法の段階で封じられる。
+:::
+
+::: example
+- 型 $n+1$ の**全体集合** $V^{n+1}=\{x^{n}\mid x^{n}=x^{n}\}$ と空集合 $\varnothing^{n+1}=\{x^{n}\mid x^{n}\neq x^{n}\}$ が、内包公理と外延性の公理によりただ一つずつ存在する。型 $n+1$ の対象 $a$ の**補集合** $\{x^{n}\mid x^{n}\notin a\}$ も存在する。
+- 包含 $a^{n+1}\subseteq b^{n+1}$ は $\forall z^{n}(z^{n}\in a^{n+1}\to z^{n}\in b^{n+1})$ の略記であり、$a^{n+1}$ の冪集合 $\mathcal{P}(a)=\{b^{n+1}\mid b^{n+1}\subseteq a^{n+1}\}$ は型 $n+2$ の対象である。
+- 型 $n$ の $u$ の単集合 $\{u\}=\{x^{n}\mid x^{n}=u\}$ は型 $n+1$、二つの型 $n$ の対象の順序対 $\langle u,v\rangle=\{\{u\},\{u,v\}\}$ は型 $n+2$ である。したがって型 $n$ の対象の間の関係（順序対の集合）は型 $n+3$ の対象になる。**型の異なる対象を成分とする順序対はこの方法では作れない**。
+:::
+
+::: remark 型 0 と無限公理 {#set:tst-type-zero}
+外延性の公理は型 $n+1\ge1$ の対象についてだけ述べる。型 $0$ の対象は元をもたない（$x\in y^{0}$ という式がない）ので、型 $0$ の外延性は意味をもたない。$\mathsf{TST}$ は型 $0$ の対象の個数について何も決めない（\ref{set:tst-standard-model} の後の例）。型 $0$ が無限であるという公理（たとえば「型 $0$ の対象の間の単射で全射でないものがある」。この関係は型 $3$ の対象として書ける）を加えた体系を $\mathsf{TSTI}$ と書くことがある。
+:::
+
+## 標準モデル {#set:sec-tst-standard}
+
+この節の議論は**メタ理論 $\ZFC$ の中**で行う。
+
+::: definition TST の構造 {#set:tst-structure keywords="structure for TST" index="TST の構造|てぃーえすてぃーのこうぞう"}
+$\mathsf{TST}$ の言語の**構造** $M$ とは、空でない集合の列 $D_{0},D_{1},D_{2},\dots$ と関係 $E_{n}\subseteq D_{n}\times D_{n+1}$（$n\in\omega$）の組である。割り当ては型 $n$ の変数に $D_{n}$ の元を対応させるものとし、$x^{n}\in y^{n+1}$ を $E_{n}$、$=$ を各 $D_{n}$ の上の本当の等号で解釈して、充足関係 $M\models\varphi[s]$ を \ref{logic:satisfaction} と同じ再帰で定める（$\exists x^{n}$ は $D_{n}$ を動く）。
+:::
+
+::: intuition
+一つの議論領域の代わりに、型ごとの議論領域の列を考える。$D_{n}$ が「型 $n$ の対象の全体」、$E_{n}$ が「型 $n$ の対象が型 $n+1$ の対象の元である」の解釈である。
+:::
+
+::: fact 多ソートの一階論理の健全性と完全性 {#set:many-sorted-completeness keywords="many-sorted first-order logic, soundness, completeness"}
+自然演繹（\ref{logic:deduction-system}）の規則を、量化子の規則が変数の型を保つように多ソートの言語に拡張すると、健全性定理（\ref{logic:soundness}）と完全性定理（\ref{logic:completeness}）がそのまま成り立つ。各ソートを一つの述語 $S_{n}(x)$ で表して一ソートの理論に翻訳すれば、一ソートの場合に帰着できる（多ソート論理を扱う標準的な論理学の教科書にある。本サイトでは証明しない）。
+:::
+
+::: definition 標準モデル {#set:tst-standard-model keywords="standard model of TST, natural model" index="標準モデル（TST）|ひょうじゅんもでる"}
+空でない集合 $X$ に対し、
+$$
+D_{0}=X,\qquad D_{n+1}=\mathcal{P}(D_{n}),\qquad E_{n}=\{\langle a,b\rangle\in D_{n}\times D_{n+1}\mid a\in b\}
+$$
+で定まる構造を $X$ 上の**標準モデル**といい、$M_{X}$ と書く。
+:::
+
+::: intuition
+型 $0$ の対象を $X$ の元とし、型 $n+1$ の対象を「型 $n$ の対象の**任意の**集まり」とする。所属は本当の所属である。これが $\mathsf{TST}$ の意図された解釈である。
+:::
+
+::: theorem 標準モデルは TST のモデルである {#set:tst-standard-model-sound keywords="consistency of TST" index="TST の無矛盾性|てぃーえすてぃーのむむじゅんせい"}
+（$\ZFC$ の中で）任意の空でない集合 $X$ について $M_{X}\models\mathsf{TST}$ である。したがって $\mathsf{TST}$ は無矛盾である。
+:::
+
+::: intuition
+型 $n+1$ の対象として $D_{n}$ の部分集合を**すべて**用意しておけば、どんな性質で切り出した集まりも必ず $D_{n+1}$ に入っている。外延性は、本当の集合どうしの外延性から来る。
+:::
+
+::: proof
+**Step 1（列の存在）.** 【主張：列 $\langle D_{n}\mid n\in\omega\rangle$ は集合として存在する】 $\omega$ 上の再帰（\ref{set:recursion-on-ordinal}）を、初期値 $X$ と演算 $Y\mapsto\mathcal{P}(Y)$ に適用すればよい。各 $D_{n}$ は $X\neq\varnothing$ から空でない（$D_{n+1}$ は少なくとも $\varnothing$ を含む）。$E_{n}$ は $D_{n}\times D_{n+1}$ から分出で切り出せる。
+
+**Step 2（外延性）.** 【主張：$a,b\in D_{n+1}$ が同じ $E_{n}$-前者をもつなら $a=b$】 $a\in D_{n+1}=\mathcal{P}(D_{n})$ なので $a\subseteq D_{n}$ であり、$a$ の $E_{n}$-前者全体 $\{c\in D_{n}\mid c\in a\}$ は $a$ そのものである。$b$ についても同様なので、仮定は $a$ と $b$ が同じ元をもつことを意味する。ゆえに $\ZFC$ の外延性の公理（\tref{set:ax-extensionality}）より $a=b$ である。
+
+**Step 3（内包公理）.** 内包公理の例 $\exists y^{n+1}\forall x^{n}(x^{n}\in y^{n+1}\leftrightarrow\varphi)$ と、残りの自由変数への割り当て $s$ をとる。【主張：$Y=\{c\in D_{n}\mid M_{X}\models\varphi[s(x^{n}\mapsto c)]\}$ は $D_{n+1}$ の元で、$y^{n+1}$ の値として例を満たす】 構造 $M_{X}$ は集合なので、その充足関係は $\ZFC$ の中で論理式の構成に関する再帰で定義される。よって $Y$ は分出で作れる集合であり、$Y\subseteq D_{n}$ だから $Y\in D_{n+1}$ である。$\varphi$ は $y^{n+1}$ を自由変数として含まないので、\ref{logic:coincidence} により $y^{n+1}$ の値を $Y$ に変えても $\varphi$ の真偽は変わらない。ゆえに各 $c\in D_{n}$ について、$c\,E_{n}\,Y$ すなわち $c\in Y$ であることは $M_{X}\models\varphi[s(x^{n}\mapsto c)]$ と同値である。
+
+**Step 4（無矛盾性）.** 【主張：$\mathsf{TST}$ は無矛盾である】 $\{x\}$ のような空でない集合をとれば Step 1〜3 によりモデル $M_{X}$ が存在する。多ソートの健全性定理（\ref{set:many-sorted-completeness}）より、モデルをもつ理論は無矛盾である。
+
+::: hypcheck
+- **$X\neq\varnothing$**：Step 1 で各 $D_{n}$ が空でないことに使った。一階の構造の議論領域は空でない約束である（\ref{logic:nonempty-domain}）。
+- **冪集合の公理**：Step 1 で $D_{n+1}=\mathcal{P}(D_{n})$ を作るのに使った。これがこの構成の本質であり、$D_{n+1}$ を $\mathcal{P}(D_{n})$ の真部分集合にすると Step 3 の $Y$ が $D_{n+1}$ に入る保証がなくなる。
+- **置換公理**：Step 1 の $\omega$ 上の再帰で列を一つの集合にまとめるのに使った。
+- **分出公理**：Step 3 で $Y$ を作るのに使った。充足関係が $\ZFC$ で定義できることが要点である。
+- **選択公理は使わない**。$X$ が無限なら $M_{X}$ は $\mathsf{TSTI}$（\ref{set:tst-type-zero}）のモデルでもある。
+:::
+:::
+
+::: example
+- $X=\{a\}$（1 元）なら $D_{1}=\{\varnothing,\{a\}\}$ は 2 元、$D_{2}$ は 4 元、$D_{3}$ は 16 元である。$X$ が 2 元なら $D_{0}$, $D_{1}$, $D_{2}$ は 2, 4, 16 元である。
+- 型 $0$ にちょうど一つの対象があるという文
+$$
+\sigma_{1}\;:\equiv\;\exists x^{0}\,\forall y^{0}\,(y^{0}=x^{0})
+$$
+は $M_{\{a\}}$ で真、$M_{\{a,b\}}$（$a\neq b$）で偽である。健全性より、$\mathsf{TST}$ は $\sigma_{1}$ も $\lnot\sigma_{1}$ も証明しない。
+:::
+
+::: supplement
+**標準でないモデル.** $D_{n+1}$ が $\mathcal{P}(D_{n})$ の一部しか含まないモデルもある（完全性定理により、$\mathsf{TST}$ は可算なモデルをもつ。そこでは $D_{1}$ が可算なので、$D_{0}$ が無限なら $D_{1}$ は $\mathcal{P}(D_{0})$ の一部にすぎない）。二階論理のヘンキン意味論と同じ状況である。
+
+**強さ.** $\mathsf{TSTI}$ は、分出を有界な論理式に制限したツェルメロの集合論（マックレーンの集合論と呼ばれるもの）と同じ強さであるとされる（未確認）。上の証明が示すのは、$\ZFC$ が $\mathsf{TSTI}$ の無矛盾性を証明するということだけである。
+:::
+
+## 型の持ち上げと型の曖昧性 {#set:sec-tst-ambiguity}
+
+::: definition 型の持ち上げ {#set:type-raising keywords="type raising, type shift" index="型の持ち上げ|かたのもちあげ"}
+1. $\mathsf{TST}$ の論理式 $\varphi$ の各変数 $x^{n}$ を $x^{n+1}$ に（同時に）置き換えたものを $\varphi^{+}$ と書き、$\varphi$ の**型の持ち上げ**という。$\varphi^{+}$ を $k$ 回くり返したものを $\varphi^{+k}$ と書く。
+2. 構造 $M=\langle D_{n},E_{n}\rangle_{n}$ に対し、型を一つずらした構造 $M^{+}=\langle D_{n+1},E_{n+1}\rangle_{n}$ を考える。割り当て $s$ に対し $s^{-}(x^{n})=s(x^{n+1})$ と定める。
+:::
+
+::: intuition
+$\varphi^{+}$ は「$\varphi$ と同じことを一つ上の型で言った文」である。たとえば $\sigma_{1}$ が「個体はちょうど一つ」なら、$\sigma_{1}^{+}$ は「個体の集合はちょうど一つ」である。$x^{n}\mapsto x^{n+1}$ は変数の間の単射なので、異なる変数が一つにつぶれることはない。
+:::
+
+::: lemma ずらした構造での充足 {#set:shift-satisfaction}
+任意の構造 $M$、割り当て $s$、論理式 $\varphi$ について
+$$
+M\models\varphi^{+}[s]\iff M^{+}\models\varphi[s^{-}].
+$$
+特に、$M$ が $\mathsf{TST}$ のモデルならば $M^{+}$ も $\mathsf{TST}$ のモデルである。
+:::
+
+::: proof
+**Step 1（原子論理式）.** 【主張：原子論理式で成り立つ】 $\varphi$ が $x^{n}\in y^{n+1}$ なら、$\varphi^{+}$ は $x^{n+1}\in y^{n+2}$ である。$M\models\varphi^{+}[s]$ は $s(x^{n+1})\,E_{n+1}\,s(y^{n+2})$ のことであり、$M^{+}$ の型 $n$ の所属は $E_{n+1}$ なので、これは $s^{-}(x^{n})\,E_{n+1}\,s^{-}(y^{n+1})$、すなわち $M^{+}\models\varphi[s^{-}]$ と同じである。等号の場合も同様である。
+
+**Step 2（論理結合子と量化子）.** 【主張：$\lnot$, $\land$, $\exists$ で保たれる】 $\lnot$ と $\land$ は帰納法の仮定からすぐ従う。$\exists x^{n}\psi$ の場合、$M\models(\exists x^{n}\psi)^{+}[s]$ は「ある $c\in D_{n+1}$ について $M\models\psi^{+}[s(x^{n+1}\mapsto c)]$」であり、帰納法の仮定でこれは「ある $c\in D_{n+1}$ について $M^{+}\models\psi[s^{-}(x^{n}\mapsto c)]$」と同値である。$M^{+}$ の型 $n$ の議論領域は $D_{n+1}$ なので、これは $M^{+}\models\exists x^{n}\psi[s^{-}]$ にほかならない。ここで $(s(x^{n+1}\mapsto c))^{-}=s^{-}(x^{n}\mapsto c)$ を使った。
+
+**Step 3（モデルであること）.** 【主張：$M\models\mathsf{TST}$ なら $M^{+}\models\mathsf{TST}$】 外延性の公理の型 $n$ の例を持ち上げると型 $n+1$ の例になる。内包公理の例 $\exists y^{n+1}\forall x^{n}(x^{n}\in y^{n+1}\leftrightarrow\varphi)$ を持ち上げると $\exists y^{n+2}\forall x^{n+1}(x^{n+1}\in y^{n+2}\leftrightarrow\varphi^{+})$ であり、$\varphi^{+}$ は $y^{n+2}$ を自由変数として含まない（含むなら $\varphi$ が $y^{n+1}$ を含む）ので、これも内包公理の例である。よって $\mathsf{TST}$ の各公理 $\alpha$ について $M\models\alpha^{+}$ であり、Step 1・2 より $M^{+}\models\alpha$ である。
+:::
+
+::: example
+標準モデルをずらすと $M_{X}^{+}=M_{\mathcal{P}(X)}$ である。$M_{\{a\}}\models\sigma_{1}$ だが $M_{\{a\}}^{+}=M_{\{\varnothing,\{a\}\}}$ では型 $0$ が 2 元なので $\sigma_{1}$ は偽であり、補題より $M_{\{a\}}\models\lnot\sigma_{1}^{+}$ である。
+:::
+
+::: theorem 持ち上げは証明可能性を保つ {#set:type-raising-provability keywords="type raising preserves provability" index="型の持ち上げと証明|かたのもちあげとしょうめい"}
+$\mathsf{TST}$ の論理式 $\varphi$ について、$\mathsf{TST}\vdash\varphi$ ならば $\mathsf{TST}\vdash\varphi^{+}$ である。
+:::
+
+::: intuition
+$\mathsf{TST}$ の公理も論理の規則も「型の番号の付け方」に依存しない形をしているので、ある定理の証明の型を全部一つ上げれば、上げた定理の証明になる。型 $0,1,2$ で証明した定理は、型 $5,6,7$ でもそのまま使える。
+:::
+
+::: proof
+**Step 1（変数の付け替え）.** 導出 $D$ の中のすべての論理式を持ち上げたものを $D^{+}$ と書く。【主張：$x^{n}\mapsto x^{n+1}$ は変数の単射で、自由変数・代入と可換である】 $(x,n)\mapsto(x,n+1)$ は単射なので、$\mathrm{FV}(\varphi^{+})$ は $\mathrm{FV}(\varphi)$ の像であり、$(\varphi[y^{n}/x^{n}])^{+}=\varphi^{+}[y^{n+1}/x^{n+1}]$ が成り立つ（論理式の構成に関する帰納法、\ref{logic:formula-induction}）。
+
+**Step 2（規則の保存）.** 【主張：$D$ が導出なら $D^{+}$ も導出で、未解消の仮定は持ち上げた $\mathrm{A}(D)^{+}$ である】 導出の構成に関する帰納法による。命題結合子の規則は論理式の形だけで決まるので、持ち上げても同じ規則の例である。量化子の規則の例（たとえば $\forall x^{n}$ の導入で、$x^{n}$ が未解消の仮定に自由に現れないという条件）は、Step 1 の単射性と可換性により、$\forall x^{n+1}$ の同じ規則の例に写る。等号の規則も同様である。
+
+**Step 3（公理の保存）.** 【主張：$\mathsf{TST}$ の公理を持ち上げると $\mathsf{TST}$ の公理になる】 これは \ref{set:shift-satisfaction} の Step 3 で確かめた。
+
+ゆえに、$\mathsf{TST}$ の公理を未解消の仮定とする $\varphi$ の導出 $D$ があれば、$D^{+}$ は $\mathsf{TST}$ の公理を未解消の仮定とする $\varphi^{+}$ の導出である。
+
+::: hypcheck
+- **公理が持ち上げで閉じていること**：Step 3。これが本質で、たとえば $\mathsf{TST}$ に $\sigma_{1}$ を公理として加えた理論では、$\sigma_{1}^{+}$ は公理でないので結論が成り立たない（上の例より $\mathsf{TST}+\sigma_{1}\vdash\lnot\sigma_{1}^{+}$）。
+- **持ち上げが変数の単射であること**：Step 1・2 で量化子の規則の付帯条件を保つのに使った。
+:::
+:::
+
+::: proof 別証明（意味論による）
+$\mathsf{TST}\vdash\varphi$ とし、$\mathsf{TST}$ の任意のモデル $M$ と割り当て $s$ をとる。\ref{set:shift-satisfaction} より $M^{+}$ も $\mathsf{TST}$ のモデルなので、健全性（\ref{set:many-sorted-completeness}）より $M^{+}\models\varphi[s^{-}]$ であり、同じ補題より $M\models\varphi^{+}[s]$ である。ゆえに $\varphi^{+}$ は $\mathsf{TST}$ のすべてのモデルで真であり、完全性（\ref{set:many-sorted-completeness}）より $\mathsf{TST}\vdash\varphi^{+}$ である。
+:::
+
+::: definition 型の曖昧性の図式 {#set:typical-ambiguity keywords="typical ambiguity, ambiguity scheme, Amb" index="型の曖昧性|かたのあいまいせい, 曖昧性の図式|あいまいせいのずしき"}
+$\mathsf{TST}$ の各文 $\sigma$ について $\sigma\leftrightarrow\sigma^{+}$ を公理とする図式を**型の曖昧性の図式** $\mathrm{Amb}$ という。$\mathsf{TST}+\mathrm{Amb}$ は、どの文も型を一つずらしても真偽が変わらないと主張する理論である。
+:::
+
+::: intuition
+\ref{set:type-raising-provability} は「$\mathsf{TST}$ で**証明できる**文は型をずらしても証明できる」と言う。$\mathrm{Amb}$ はそれを強めて、「**どの**文も型をずらしても真偽が同じ」と要求する。型の番号に意味がない、つまり型の区別は記法上の便宜にすぎないという考え方を公理にしたものである。
+:::
+
+::: example
+- $\mathsf{TST}\vdash\sigma_{1}\to\lnot\sigma_{1}^{+}$ である。実際、$\mathsf{TST}$ の中で議論すると、$\varnothing^{1}$ と $V^{1}$ はともに型 $1$ の対象で、型 $0$ の対象 $a$ が一つでもあれば $a\in V^{1}$, $a\notin\varnothing^{1}$ なので外延性から異なる。型 $0$ の変数の議論領域は空でない（$\exists x^{0}(x^{0}=x^{0})$ は論理的に正しい）ので、型 $1$ には少なくとも二つの対象があり、$\sigma_{1}^{+}$ は偽である。実は $\lnot\sigma_{1}^{+}$ は $\sigma_{1}$ なしで $\mathsf{TST}$ から証明できる。
+- ゆえに $\mathsf{TST}+\mathrm{Amb}\vdash\lnot\sigma_{1}$ である。他方、$M_{\{a\}}\models\sigma_{1}\land\lnot\sigma_{1}^{+}$ なので、$\mathrm{Amb}$ の例 $\sigma_{1}\leftrightarrow\sigma_{1}^{+}$ は $\mathsf{TST}$ から証明できない。$\mathrm{Amb}$ は $\mathsf{TST}$ に本当に新しい情報を加える。
+:::
+
+::: supplement
+**NF との関係.** スペッカーは、$\mathsf{NF}$（次のページ）が無矛盾であることと $\mathsf{TST}+\mathrm{Amb}$ が無矛盾であることが同値であると示したとされる（\see[スペッカーの曖昧性定理]{set:specker-ambiguity}）。型を消した理論 $\mathsf{NF}$ は、型の区別が無意味だという $\mathrm{Amb}$ の考えを、記法そのものに組み込んだものと見られる。
+
+**名前の由来.** 「型の曖昧性」（typical ambiguity）はホワイトヘッドとラッセルの『プリンキピア・マテマティカ』で、型の添字を省いて書く慣習を正当化するために用いられた考えに遡るとされる（未確認）。
+
+**$\mathrm{Amb}$ のもとでの帰結.** 上の例と同じ考え方で、$\mathsf{TST}+\mathrm{Amb}$ は「型 $0$ がちょうど $k$ 個の対象をもつ」という文 $\sigma_{k}$ をどの $k\ge1$ についても否定する（\ref{set:prob-tst-sigma2} は $k=2$ の場合）。
+:::
+
+## 層別化された論理式 {#set:sec-stratified}
+
+ここからは型のない**集合論の言語**（\ref{set:first-order-language}）に戻る。この節の議論は論理式の形についての議論であり、どの集合論の公理も使わない。
+
+::: definition 層別化された論理式 {#set:stratified-formula keywords="stratified formula, stratification" index="層別化|そうべつか, 層別化された論理式|そうべつかされたろんりしき, 層化された論理式|そうかされたろんりしき"}
+集合論の言語の論理式 $\varphi$ を考える。束縛変数の名前を付け替えて、異なる量化子は異なる変数を束縛し、束縛変数は自由変数と重ならないようにしておく。$\varphi$ に現れる変数の集合から $\Z$ への写像 $s$ が次を満たすとき、$s$ を $\varphi$ の**層別化**という。
+1. $\varphi$ の原子部分論理式 $x\in y$ のそれぞれについて $s(y)=s(x)+1$。
+2. $\varphi$ の原子部分論理式 $x=y$ のそれぞれについて $s(x)=s(y)$。
+
+層別化をもつ論理式を**層別化された論理式**という。
+:::
+
+::: intuition
+層別化とは、変数に型を「後から」割り振ることである。所属 $x\in y$ では $y$ の型が $x$ の型より一つ大きく、等号の両辺は同じ型になるように割り振れれば、その論理式は $\mathsf{TST}$ の論理式として読める（次の命題）。型は整数でよく、負になってもよい。束縛変数を付け替えておくのは、同じ名前の変数が二か所で別々に束縛されているとき、それぞれに別の型を与えてよいからである。
+:::
+
+::: example
+- $x\subseteq y$、すなわち $\forall z\,(z\in x\to z\in y)$ は層別化される：$s(z)=0$, $s(x)=s(y)=1$。
+- $x\in x$ と $x\notin x$ は層別化されない：$s(x)=s(x)+1$ は解をもたない。
+- $x\in y\land y\in x$ は層別化されない：$s(y)=s(x)+1$ と $s(x)=s(y)+1$ から $0=2$ となる。
+- $x=\{x\}$、すなわち $\forall z\,(z\in x\leftrightarrow z=x)$ は層別化されない：$s(x)=s(z)+1$ と $s(z)=s(x)$ は同時には成り立たない。
+- $z=\langle x,y\rangle$ を $\{\{x\},\{x,y\}\}$ の定義に従って書き下した論理式は、$s(x)=s(y)=n$, $s(z)=n+2$ で層別化される。逆に、どの層別化でも $s(x)=s(y)$ でなければならない。
+- $\langle x,y\rangle\in f\land y\in x$（「$f(x)$ が $x$ の元」の一部）は層別化されない：順序対から $s(x)=s(y)$、所属から $s(x)=s(y)+1$ となる。カントールの対角集合 $\{x\mid x\notin f(x)\}$ が次のページで作れない理由がこれである。
+:::
+
+::: lemma 層別化のずらし {#set:stratification-shift}
+$s$ が $\varphi$ の層別化ならば、任意の整数 $c$ について $s+c$ も層別化である。特に、層別化された論理式は値がすべて $0$ 以上の層別化をもつ。
+:::
+
+::: proof
+条件 1・2 はどちらも二つの値の差だけについての条件なので、すべての値に同じ $c$ を足しても保たれる。$\varphi$ の変数は有限個なので $s$ の最小値 $m$ があり、$c=-m$ とすれば値は $0$ 以上になる。
+:::
+
+::: proposition 層別化された論理式と TST の論理式 {#set:stratified-tst-translation keywords="stratified formulas are type-erased TST formulas"}
+1. $\varphi$ が層別化された論理式で、$s$ が値 $0$ 以上の層別化ならば、$\varphi$ の各変数 $x$ を型 $s(x)$ の変数 $x^{s(x)}$ に置き換えた $\varphi^{s}$ は $\mathsf{TST}$ の論理式である。
+2. 逆に、$\mathsf{TST}$ の論理式 $\psi$ の型つき変数を、型のない変数に単射的に付け替えて得られる論理式 $\psi^{\circ}$ は層別化される。
+3. 内包公理の例 $\exists y\,\forall x\,(x\in y\leftrightarrow\varphi)$（$y$ は $\varphi$ に自由に現れない）が層別化されることと、$\varphi$ が層別化されることは同値である。このとき、型を付けたものは $\mathsf{TST}$ の内包公理の例である。
+:::
+
+::: proof
+**Step 1（1 の証明）.** 【主張：$\varphi^{s}$ の原子論理式はすべて $\mathsf{TST}$ の原子論理式である】 原子部分論理式 $x\in y$ は $x^{s(x)}\in y^{s(x)+1}$ になり、$x=y$ は $x^{s(x)}=y^{s(x)}$ になる。どちらも $\mathsf{TST}$ の原子論理式の形である。量化子 $\exists x$ は $\exists x^{s(x)}$ になる。束縛変数を付け替えてあるので、同じ変数が二つの型をもつことはない。
+
+**Step 2（2 の証明）.** 【主張：$s(x^{\circ})=n$（$x^{n}$ の付け替え先が $x^{\circ}$）は $\psi^{\circ}$ の層別化である】 付け替えが単射なので $s$ は矛盾なく定義される。$\psi$ の原子論理式 $x^{n}\in y^{n+1}$ からは $s(y^{\circ})=n+1=s(x^{\circ})+1$、$x^{n}=y^{n}$ からは $s(x^{\circ})=s(y^{\circ})$ が得られる。
+
+**Step 3（3 の証明）.** 【主張：$\varphi$ の層別化 $s$ は $s(y)=s(x)+1$ と置いて例全体の層別化に延びる】 例の中の新しい原子論理式は $x\in y$ だけであり、$y$ は $\varphi$ に現れないので、$s(y)$ を自由に決めてよい。逆に例全体の層別化を $\varphi$ の変数に制限すれば $\varphi$ の層別化である。値を $0$ 以上にずらし（\ref{set:stratification-shift}）、1 で型を付けると $\exists y^{n+1}\forall x^{n}(x^{n}\in y^{n+1}\leftrightarrow\varphi^{s})$（$n=s(x)$）となり、$\mathsf{TST}$ の内包公理の例である。
+:::
+
+数学で使う論理式は、定義された記号（$\varnothing$, $\{x\}$, $\langle x,y\rangle$, $\mathcal{P}(a)$ など）を含む略記である。略記を含む式の層別化は、略記を書き下した論理式で判定する。次の補題はその判定を簡単にする。
+
+::: lemma 定義された項と層別化 {#set:stratified-defined-terms keywords="stratification of defined terms, type offset"}
+$\theta(y,z_{1},\dots,z_{k})$ を層別化された論理式とし、その層別化 $r$ を一つ固定する。$t(z_{1},\dots,z_{k})$ を「$\theta(y,\vec{z})$ を満たすただ一つの $y$」の略記とする。論理式 $\varphi$ の中の $t$ の各出現を、新しい変数 $y_{i}$ と $\theta(y_{i},\vec{z})$ の写し（束縛変数は新しくとる）で書き下したものを $\varphi^{*}$ とする。$\varphi$ の変数と各出現 $y_{i}$ に整数 $s$ を割り当てて、原子論理式の条件 1・2 を満たし、さらに各出現について
+$$
+s(y_{i})-s(z_{j})=r(y)-r(z_{j})\qquad(j=1,\dots,k)
+$$
+が成り立つようにできれば、$\varphi^{*}$ は層別化される。とくに $k=0$（パラメータのない定数）のときは、各出現に**互いに無関係な**型を与えてよい。
+:::
+
+::: proof
+**Step 1（写しへの延長）.** 【主張：$\theta(y_{i},\vec{z})$ の写しの束縛変数 $w$ に $s(w)=r(w)+s(y_{i})-r(y)$ と置けば、写しの中の条件が満たされる】 写しの変数への $s$ は $r$ に定数 $s(y_{i})-r(y)$ を足したものであり、\ref{set:stratification-shift} と同じ理由で原子論理式の条件を保つ。ただし写しの中では $\vec{z}$ と $y_{i}$ が自由に現れるので、それらの値が整合することを確かめる必要がある：$y_{i}$ については定義どおり $r(y)+s(y_{i})-r(y)=s(y_{i})$、$z_{j}$ については仮定 $s(y_{i})-s(z_{j})=r(y)-r(z_{j})$ から $r(z_{j})+s(y_{i})-r(y)=s(z_{j})$ である。
+
+**Step 2（全体）.** 【主張：$\varphi^{*}$ は層別化される】 写しごとに束縛変数を新しくとったので、写しどうしで $s$ の値が衝突することはない。$\varphi^{*}$ の原子論理式は、$\varphi$ の原子論理式で $t$ の出現を $y_{i}$ に置き換えたものと、写しの中のものだけなので、Step 1 と仮定から条件 1・2 がすべて満たされる。
+
+$k=0$ の場合は最後の条件が空なので、各 $s(y_{i})$ を自由に選べる。
+:::
+
+::: example
+- $V=\{x\mid x=x\}$ は $\theta(y)\equiv\forall w\,(w\in y)$ で定義される定数なので、$V\in V$ は層別化される（二つの出現に型 $0$ と $1$ を与える）。
+- 単集合 $\{z\}$ は $\theta(y,z)\equiv\forall w\,(w\in y\leftrightarrow w=z)$ で定義され、ずれは $r(y)-r(z)=1$ である。順序対 $\langle z_{1},z_{2}\rangle$ のずれは両方の成分について $2$ なので、成分は同じ型でなければならない。
+- 像 $\{\{x\}\mid x\in a\}$ は $a$ からのずれが $1$ である（元 $\{x\}$ の型が $s(x)+1$、集合 $a$ の型も $s(x)+1$）。
+:::
+
+## ラッセルの議論と型 {#set:sec-tst-russell}
+
+::: proposition ラッセルの論理式は層別化されない {#set:russell-unstratified keywords="Russell's paradox is unstratified"}
+1. ラッセルの内包公理の例 $\exists y\,\forall x\,(x\in y\leftrightarrow x\notin x)$ は層別化されず、型をどう付けても $\mathsf{TST}$ の論理式にならない。
+2. （$\mathsf{TST}$ の中で）各型 $n$ について全体集合 $V^{n+1}$ が存在し、型 $n+1$ のどの対象も型 $n+1$ の補集合をもつ。
+3. それでも $\mathsf{TST}$ は無矛盾である。
+:::
+
+::: intuition
+$\mathsf{TST}$ にはどの型にも「その型のすべてを集めた集合」がある。$\ZF$ でラッセルの議論が全体集合の存在を否定したのは、その全体集合から $\{x\mid x\notin x\}$ を切り出せたからだった。型があるとこの切り出しの式が書けないので、全体集合があっても矛盾は起こらない。
+:::
+
+::: proof
+**Step 1（1 の証明）.** 【主張：$x\notin x$ は層別化されない】 原子部分論理式 $x\in x$ に条件 1 を当てると $s(x)=s(x)+1$ となり、解がない。\ref{set:stratified-tst-translation.3} より例全体も層別化されず、\ref{set:stratified-tst-translation.2} より $\mathsf{TST}$ の論理式の型を消したものにもならない。
+
+**Step 2（2 の証明）.** 【主張：$V^{n+1}$ と補集合が存在する】 内包公理を $\varphi\equiv x^{n}=x^{n}$ と $\varphi\equiv x^{n}\notin a^{n+1}$ に適用すればよい（どちらも $y^{n+1}$ を含まない）。
+
+**Step 3（3 の証明）.** 【主張：$\mathsf{TST}$ は無矛盾】 \ref{set:tst-standard-model-sound} による。標準モデル $M_{X}$ では $V^{n+1}$ の値は $D_{n}$ そのものである。
+:::
+
+対角線論法そのものは型の中でも生き残る。ただし、比べられる二つのものは同じ型でなければならない。
+
+::: theorem 型つきのカントールの定理 {#set:tst-cantor keywords="Cantor's theorem in TST, typed Cantor" index="型つきのカントールの定理|かたつきのかんとーるのていり"}
+（$\mathsf{TST}$ の中で）型 $n+1$ の対象 $a$ について、$\iota[a]=\{\{x\}\mid x\in a\}$ と $\mathcal{P}(a)=\{b\mid b\subseteq a\}$ はどちらも型 $n+2$ の対象である。$\iota[a]$ から $\mathcal{P}(a)$ への単射は存在するが、全射は存在しない。
+:::
+
+::: intuition
+型の世界では、$a$ の元（型 $n$）と $a$ の部分集合（型 $n+1$）を直接対応させる写像は書けない。比べられるのは、$a$ の元を単集合にして一つ型を上げた $\iota[a]$ と、$\mathcal{P}(a)$ である。カントールの議論はこの形でそのまま通り、「単集合の集まりは部分集合の集まりより真に小さい」を示す。
+:::
+
+::: proof
+以下、型 $n+1$ の対象の間の写像は、型 $n+3$ の順序対を元とする型 $n+4$ の対象である。
+
+**Step 1（単射）.** 【主張：$\iota[a]\subseteq\mathcal{P}(a)$ であり、包含写像は単射である】 $\{x\}\in\iota[a]$ なら $x\in a$ より $\{x\}\subseteq a$ である。包含写像 $\{\langle u,u\rangle\mid u\in\iota[a]\}$ は内包公理で作れる（$u$ は型 $n+1$）。
+
+**Step 2（対角集合）.** $f$ を $\iota[a]$ から $\mathcal{P}(a)$ への写像とし、
+$$
+D=\{x^{n}\in a\mid\forall b^{n+1}\,(\langle\{x\},b\rangle\in f\to x\notin b)\}
+\label{set:eq-tst-cantor-diagonal}
+$$
+とおく。【主張：$D$ は型 $n+1$ の対象として存在し、$D\in\mathcal{P}(a)$ である】 $x$ は型 $n$、$\{x\}$ と $b$ は型 $n+1$、順序対は型 $n+3$、$f$ は型 $n+4$ なので、条件は $\mathsf{TST}$ の論理式であり、内包公理が使える。$f$ は写像なので、$x\in a$ のとき条件は「$x\notin f(\{x\})$」と同値である。
+
+**Step 3（全射でない）.** 【主張：$f(\{d\})=D$ となる $d\in a$ はない】 そのような $d$ があれば、$d\in D\iff d\notin f(\{d\})\iff d\notin D$ となり矛盾する。$\iota[a]$ の元はすべて $\{d\}$（$d\in a$）の形なので、$D$ は $f$ の像に入らない。
+
+::: hypcheck
+- **内包公理**：Step 2 で $D$ を作るのに使った。条件の中で $x$ が二か所（$\{x\}$ の中と $x\notin b$）に現れるが、どちらも型 $n$ の変数として正しく型が付く。これが元のカントールの定理との違いで、$f$ の定義域を $a$ ではなく $\iota[a]$ にしたので型が合う。
+- **$f$ が写像であること**：Step 2 の言い換え。
+- 型 $0$ の大きさについての仮定は使わない。
+:::
+:::
+
+::: supplement
+**元の形のカントールの定理は書けない.** 「$a$ から $\mathcal{P}(a)$ への全射はない」を書くには、型 $n$ の $x$ と型 $n+1$ の $f(x)$ を成分とする順序対が要るが、$\mathsf{TST}$ にはそのような順序対がない。本定理の「$\iota[a]$ は $\mathcal{P}(a)$ より小さい」が、型のある世界でのカントールの定理の正しい形である。次のページでは、型を消した $\mathsf{NF}$ で同じ形の定理を示し（\see[NF におけるカントールの定理]{set:nf-cantor-theorem}）、$a$ を全体集合にとって $\lvert\iota[V]\rvert<\lvert V\rvert$ を得る。
+
+**型の高さの違う写像.** 型 $n+1$ の $a$ について、$x\mapsto\{x\}$ という対応は型 $n$ と型 $n+1$ をつなぐので、$\mathsf{TST}$ の対象としての写像にはならない。$\mathsf{NF}$ でも、全体集合上の単集合写像は集合にならない（\see[単集合写像は集合でない]{set:nf-iota-not-set}）。
+:::
+
+## 問題 {#set:sec-tst-problems}
+
+::: problem ★ 基本：層別化の判定 {#set:prob-tst-stratify}
+次の論理式が層別化されるかどうかを判定し、層別化されるものには層別化を一つ与えよ。
+- (a) $\exists z\,(z\in x\land z\in y)$
+- (b) $x\in y\land y\in z\land x\in z$
+- (c) $\forall z\,(z\in x\to z\subseteq x)$（$x$ は推移的）
+- (d) $\exists u\,(u=\{x\}\land u\in x)$
+:::
+
+::: solution
+(a) 層別化される：$s(z)=0$, $s(x)=s(y)=1$ である。
+
+(b) 層別化されない。$s(y)=s(x)+1$, $s(z)=s(y)+1$ から $s(z)=s(x)+2$ だが、$x\in z$ から $s(z)=s(x)+1$ となり、二つは同時には成り立たない。
+
+(c) 層別化されない。$z\subseteq x$ を書き下すと $\forall w(w\in z\to w\in x)$ なので $s(z)=s(w)+1$ かつ $s(x)=s(w)+1$、すなわち $s(z)=s(x)$ である。一方 $z\in x$ から $s(x)=s(z)+1$ となり矛盾する。推移的集合の概念（\ref{set:transitive-set}）は層別化されない。
+
+(d) 層別化されない。$u=\{x\}$ のずれから $s(u)=s(x)+1$、$u\in x$ から $s(x)=s(u)+1$ となり $0=2$ を得る（この式は $x\in x$ と同値である）。
+:::
+
+::: problem ★ 基本：型 0 が 2 元のとき {#set:prob-tst-sigma2}
+$\sigma_{2}$ を「型 $0$ にちょうど二つの対象がある」という $\mathsf{TST}$ の文とする。$\mathsf{TST}\vdash\sigma_{2}\to\lnot\sigma_{2}^{+}$ を示し、$\mathsf{TST}+\mathrm{Amb}\vdash\lnot\sigma_{2}$ を結論せよ。
+:::
+
+::: solution
+$\mathsf{TST}$ の中で議論する。$\sigma_{2}$ を仮定し、型 $0$ の相異なる対象 $a,b$ で、型 $0$ の対象はすべて $a$ か $b$ に等しいものをとる。内包公理で型 $1$ の対象 $\varnothing^{1}$, $\{a\}$, $\{b\}$, $V^{1}$ を作る。外延性により、これらは互いに異なる：たとえば $\{a\}$ と $\{b\}$ は $a$ を含むかどうかで異なり、$\{a\}$ と $V^{1}$ は $b$ を含むかどうかで異なる（他の組も同様）。ゆえに型 $1$ には少なくとも三つの対象があり、$\sigma_{2}^{+}$（型 $1$ にちょうど二つ）は偽である。よって $\mathsf{TST}\vdash\sigma_{2}\to\lnot\sigma_{2}^{+}$ である。$\mathrm{Amb}$ の例 $\sigma_{2}\leftrightarrow\sigma_{2}^{+}$ と合わせると、$\sigma_{2}$ から $\sigma_{2}^{+}$ と $\lnot\sigma_{2}^{+}$ が出て矛盾するので、$\mathsf{TST}+\mathrm{Amb}\vdash\lnot\sigma_{2}$ である。
+:::
+
+::: problem ★★ 標準：層別化の一意性 {#set:prob-tst-stratification-unique}
+論理式 $\varphi$ の変数を頂点とし、原子部分論理式 $x\in y$ や $x=y$ があるとき $x$ と $y$ を辺で結んだグラフを考える。このグラフが\term[連結]{graph:connectivity}で $\varphi$ が層別化されるなら、$\varphi$ の層別化は定数の差を除いてただ一つであることを示せ。\term[連結]{graph:connectivity}でない場合はどうか。
+:::
+
+::: solution
+$s,s'$ を二つの層別化とし、$d=s'-s$ とおく。辺で結ばれた $x,y$ について、$x\in y$ なら $s(y)-s(x)=1=s'(y)-s'(x)$、$x=y$ なら $s(y)-s(x)=0=s'(y)-s'(x)$ なので、どちらの場合も $d(x)=d(y)$ である。グラフが\term[連結]{graph:connectivity}なら任意の二頂点は辺の列で結ばれるので、$d$ は定数である。
+
+\term[連結]{graph:connectivity}でない場合、各\term[連結成分]{graph:connectivity}の上では同じ議論で $d$ は定数だが、成分ごとに別の定数を足してもよい。たとえば $x\in y\land u\in v$ では $(x,y)$ と $(u,v)$ の型を独立にずらせる。成分ごとにずらしても条件 1・2 は保たれる（条件は同じ成分の中の二頂点についてだけ述べるから）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
