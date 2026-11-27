@@ -337,6 +337,13 @@
 | subject reduction | 部分簡約 | 主部簡約 | 仮（2026-11-26）。logic:subject-reduction-fails |
 | pre-set (Aczel) | 前集合 | | 仮（2026-11-26）。logic:pset |
 | global choice | 大域的選択 | | 仮（2026-11-26）。logic:definable-global-choice |
+| order type（線形順序） | 順序型（じゅんじょがた） | | 仮（2026-11-27）。model:linear-order-type。記号 otp |
+| scattered order | 散在的順序 | 散乱的 | 仮（2026-11-27）。model:scattered-order |
+| condensation / finite condensation | 凝縮／有限凝縮 | | 仮（2026-11-27）。model:condensation |
+| Hausdorff rank | ハウスドルフ階数 | | 仮（2026-11-27） |
+| jump / gap（cut of a linear order） | 跳躍／隙間 | | 仮（2026-11-27）。model:order-cut |
+| convex set（linear order） | 凸集合 | 区間 | 仮（2026-11-27）。model:convex-set |
+| Dedekind completion | デデキント完備化 | | 仮（2026-11-27）。model:dedekind-completion-order |
 | type family / induction principle | 型の族 / 帰納原理 | | 仮。logic:page-dependent-types |
 | universe (type theory) | 宇宙 | | 集合論・圏論の「宇宙」と同じ語。logic:page-dependent-types |
 | identity type / path / path induction | 恒等型 / 道 / 道帰納法 | 同一性型 | 仮。日本語の本に用例なし。logic:page-identity-types |

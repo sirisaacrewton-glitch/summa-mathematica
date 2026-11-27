@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>可算線形順序と実数直線 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/02-model-theory/05-linear-orders/02-countable-orders.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 可算線形順序と実数直線 {#model:page-countable-orders keywords="countable linear orders, universality of the rationals, back-and-forth, Cantor's theorem, countable dense linear orders, endpoints, characterization of the real line, separable, Suslin problem, number of countable order types"}
+
+有理数の順序の型 $\eta$ は、可算線形順序の世界の中心にある。どんな可算線形順序も $\eta$ に埋め込め（\ref{model:countable-embeds-eta}）、端点のない可算稠密線形順序はすべて $\eta$ と同型になる（\ref{model:cantor-back-and-forth}）。どちらも、有限の部分同型を一歩ずつ延ばしていく**往復論法**で示される。その帰結として、可算な稠密線形順序の型は端点の有無で決まる 4 つ（と $0,1$）しかない（\ref{model:eta-endpoints}）。前のページのデデキント完備化（\ref{model:dedekind-completion-order}）と組み合わせると、実数直線の順序の型 $\lambda$ が「端点がなく、デデキント完備で、可算な稠密部分集合をもつ」ことで特徴付けられる（\ref{model:real-line-characterization}）。最後の条件を弱めてよいかというススリンの問題は $\ZFC$ から決まらない。一方、可算線形順序の型は全部でちょうど $2^{\aleph_{0}}$ 個ある（\ref{model:continuum-many-countable-types}）。
+
+> 資料：参考書なし（標準的に知られている内容を本サイトで組み立てた）。歴史的な帰属は本文で「とされる」と書いたものを含め、原典と照合していない。
+
+## 記法と定義の確認 {#model:sec-co-notation}
+
+::: notation
+- 線形順序・順序埋め込み $\hookrightarrow$・順序型 $\operatorname{otp}$・逆順序 $\alpha^{\ast}$ は \ref{model:order-embedding}, \ref{model:linear-order-type}、順序和と積は \ref{model:order-sum}, \ref{model:order-product}、$\omega,\zeta,\eta,\lambda$ は \ref{model:standard-order-types} のとおりである。単調な写像が埋め込みであること（\ref{model:order-preserving-embedding}）を断りなく使う。
+- 稠密・端点・「$X$ で稠密な部分集合」は \ref{model:dense-order}、開区間 $(a,b)$ は \ref{model:convex-set}、デデキント完備とデデキント完備化は \ref{model:dedekind-complete-order}, \ref{model:dedekind-completion-order} のとおりである。空でない端点のない稠密線形順序は $\mathrm{DLO}$（\ref{model:dlo}）のモデルである。
+- **可算**・**有限**は \ref{set:finite-set} の意味である。可算無限な集合 $A$ には全単射 $\omega\to A$ がある（$A$ は $\omega$ の無限部分集合と対等で、それは $\omega$ と同型である：\ref{set:finite-basic.4}, \ref{set:type-subset}）。$\omega\times\omega$ は $\omega$ と対等である（\ref{set:kappa-times-kappa}）。$\Q$ は可算無限である（標準的な事実）。
+- 議論は $\ZF$ で行い、選択公理（AC）を使うところは明記する。往復論法では、可算集合の数え上げを一つ固定して「番号が最小のものを選ぶ」ことで、選択公理を避ける。$\omega$ 上の再帰（\ref{set:recursion-on-ordinal}）を使う。
+- 線形順序 $A,B$ の**有限部分同型**とは、定義域が $A$ の有限部分集合で値が $B$ にある写像 $p$ で、$x,y\in\dom p$ について $x<y\iff p(x)<p(y)$ を満たすものをいう（言語 $\{<\}$ の部分同型 \ref{model:partial-isomorphism} で定義域が有限のもの）。
+:::
+
+## 往復論法 {#model:sec-co-back-and-forth}
+
+::: lemma 一歩の延長 {#model:order-extension-step keywords="one-point extension of a finite partial isomorphism into a dense order" index="往復論法|おうふくろんぽう"}
+$A$ を線形順序、$B$ を空でない端点のない稠密線形順序、$p$ を $A$ から $B$ への有限部分同型とする。任意の $a\in A$ について、$p\cup\{(a,b)\}$ が有限部分同型になる $b\in B$ が存在する。
+:::
+
+::: intuition
+すでに対応させた有限個の点の間で $a$ がどの「すき間」にいるかを見て、$B$ の対応するすき間から点を一つ選べばよい。$B$ は稠密で端がないので、どのすき間も空でない。
+:::
+
+::: proof
+$a\in\dom p$ なら $b\defeq p(a)$ とすればよい。$a\notin\dom p$ とし、$L\defeq\{x\in\dom p\mid x<a\}$, $R\defeq\{x\in\dom p\mid a<x\}$ とおく。三分律より $\dom p=L\cup R$ である。
+
+**Step 1（すき間の確保）.** 【主張：$p[L]$ のどの元より大きく、$p[R]$ のどの元より小さい $b\in B$ がある】 $L,R$ は有限なので、空でなければ最大元・最小元をもつ（\ref{model:finite-linear-orders} の証明の Step 1）。
+- $L,R$ がともに空でないとき、$\ell\defeq\max L<r\defeq\min R$ なので $p(\ell)<p(r)$ であり、稠密性から $p(\ell)<b<p(r)$ となる $b$ がある。
+- $L\ne\varnothing=R$ のとき、$B$ に最大元がないので $p(\max L)<b$ となる $b$ がある。$L=\varnothing\ne R$ のときも、最小元がないことから同様である。
+- $L=R=\varnothing$ のとき、$B$ は空でないので任意の $b$ をとる。
+
+$x\in L$ なら $x\le\max L$ なので $p(x)\le p(\max L)<b$ であり、$x\in R$ についても同様に $b<p(x)$ である。
+
+**Step 2（部分同型であること）.** 【主張：$p'\defeq p\cup\{(a,b)\}$ は有限部分同型である】 $b\notin p[\dom p]$（Step 1 から $b$ は $p$ のどの値とも異なる）なので $p'$ は単射な写像である。$\dom p$ の 2 元の間では $p$ と同じである。$x\in\dom p$ と $a$ については、$x<a\iff x\in L\iff p(x)<b$ が Step 1 から成り立つ。
+
+::: hypcheck
+- **$B$ が稠密**：Step 1 の $L,R$ がともに空でない場合。**$B$ に端点がない**：$L,R$ の一方だけが空の場合。**$B$ が空でない**：$\dom p=\varnothing$ の場合。どれを外しても主張は偽になる（たとえば $B=\Z$, $p=\{(0,0),(2,1)\}$, $a=1$ では $0$ と $1$ の間に整数がない）。
+- $A$ については線形順序であることしか使っていない。
+:::
+:::
+
+::: theorem 可算線形順序は η に埋め込める {#model:countable-embeds-eta keywords="every countable linear order embeds into the rationals, universality of eta" index="η の普遍性|いーたのふへんせい, 可算線形順序|かさんせんけいじゅんじょ"}
+可算な線形順序はすべて $\eta$ に埋め込める。すなわち、可算な線形順序 $A$ について順序埋め込み $A\to\Q$ が存在する。この証明に選択公理は要らない。
+:::
+
+::: intuition
+有理数の中には、どんな可算な並び方も（形を保ったまま）入っている。可算な順序数 $\omega^{2}$, $\omega^{\omega}$ や $\zeta\cdot\omega$、$\omega^{\ast}+\omega$ なども、すべて $\Q$ の部分集合として実現できる。
+:::
+
+::: proof
+単射 $\iota\colon A\to\omega$ と全単射 $k\mapsto q_{k}$（$\omega\to\Q$）を固定する。
+
+**Step 1（有限部分同型の列）.** 【主張：有限部分同型 $p_{n}$（$n\in\omega$）で、$p_{n}\subseteq p_{n+1}$ かつ $\dom p_{n}=\{a\in A\mid\iota(a)<n\}$ となるものが再帰で定まる】 $p_{0}\defeq\varnothing$ とする。$p_{n}$ が定まったとき、$n\notin\iota[A]$ なら $p_{n+1}\defeq p_{n}$ とする。$n=\iota(a)$ なら、\ref{model:order-extension-step} より $p_{n}\cup\{(a,q_{k})\}$ が有限部分同型になる $k$ があるので、そのような最小の $k$ をとり $p_{n+1}\defeq p_{n}\cup\{(a,q_{k})\}$ とする。これは $\omega$ 上の再帰（\ref{set:recursion-on-ordinal}）である。
+
+**Step 2（和集合）.** 【主張：$f\defeq\bigcup_{n}p_{n}$ は順序埋め込み $A\to\Q$ である】 $p_{n}$ は増加列なので $f$ は写像であり、各 $a\in A$ は $\dom p_{\iota(a)+1}$ に属するので $\dom f=A$ である。$a,a'\in A$ は $n\defeq\max(\iota(a),\iota(a'))+1$ について $\dom p_{n}$ に属し、$p_{n}$ が部分同型なので $a<a'\iff f(a)<f(a')$ である。
+
+::: hypcheck
+- **$A$ が可算**：Step 1 で $\iota$ を使って点を一つずつ処理した。非可算な $A$（たとえば $\R$）は可算な $\Q$ に単射で入らないので、主張は偽である。
+- **$\Q$ が稠密で端点がなく空でない**：Step 1 で \ref{model:order-extension-step} を使うため。
+- **選択公理**：使っていない。各段で選ぶ $q_{k}$ は「番号が最小のもの」として一意に決まる。
+:::
+:::
+
+::: theorem カントールの同型定理（往復論法） {#model:cantor-back-and-forth keywords="Cantor's isomorphism theorem, back-and-forth argument, countable dense linear orders without endpoints are isomorphic" index="カントールの同型定理|かんとーるのどうけいていり, 往復論法|おうふくろんぽう"}
+$A,B$ を空でない端点のない可算稠密線形順序とする。$A$ から $B$ への任意の有限部分同型 $p$ は、同型 $A\cong B$ に延長できる。とくに $A\cong B$、すなわち $\operatorname{otp}(A)=\operatorname{otp}(B)=\eta$ である。この証明に選択公理は要らない。
+:::
+
+::: intuition
+端がなく、どの 2 点の間にも点がある可算な並びは、有理数の並びと区別できない。左から右への対応と右から左への対応を交互に延ばすことで、両方の点を漏れなく対応させる。
+:::
+
+::: proof
+**Step 1（数え上げ）.** 【主張：$A,B$ は可算無限である】 $A$ が有限なら、空でない有限集合として最大元をもつ（\ref{model:finite-linear-orders} の証明の Step 1）が、$A$ には最大元がない。ゆえに $A$ は無限で、可算なので可算無限である。$B$ も同様である。全単射 $n\mapsto a_{n}$（$\omega\to A$）と $n\mapsto b_{n}$（$\omega\to B$）を固定する。
+
+**Step 2（往復の列）.** 【主張：有限部分同型の増加列 $p=p_{0}\subseteq p_{1}\subseteq\cdots$ で、$a_{n}\in\dom p_{2n+1}$ かつ $b_{n}\in p_{2n+2}[\dom p_{2n+2}]$ となるものが再帰で定まる】 $p_{2n+1}\defeq p_{2n}\cup\{(a_{n},b_{k})\}$ とし、$k$ はこれが有限部分同型になる最小の番号とする（\ref{model:order-extension-step} より存在する）。$p_{2n+2}$ は逆向きに作る：$p_{2n+1}^{-1}$ は $B$ から $A$ への有限部分同型で、$A$ も空でない端点のない稠密線形順序なので、\ref{model:order-extension-step} より $p_{2n+1}^{-1}\cup\{(b_{n},a_{k})\}$ が有限部分同型になる $k$ がある。その最小の $k$ について $p_{2n+2}\defeq p_{2n+1}\cup\{(a_{k},b_{n})\}$ とおく。
+
+**Step 3（極限）.** 【主張：$F\defeq\bigcup_{n}p_{n}$ は $p$ を延長する同型 $A\cong B$ である】 増加列の和なので $F$ は写像であり、Step 2 より定義域は $A$ 全体、値域は $B$ 全体である。$A$ の 2 元はある $p_{n}$ の定義域に入るので、$F$ は順序を保つ。ゆえに $F$ は全射な順序埋め込み、すなわち同型である。$p=p_{0}\subseteq F$ である。
+
+最後の主張は、$B=\Q$ にとれば得られる（$\Q$ は空でない端点のない可算稠密線形順序である）。
+
+::: hypcheck
+- **端点がないこと**：Step 1（無限であること）と、Step 2 の延長（\ref{model:order-extension-step}）で両側に使った。端点の有無が違えば同型でない（$\eta$ と $1+\eta$）。
+- **稠密**：Step 2 の延長で両側に使った。$\zeta$ は可算で端点がないが稠密でなく、$\zeta\not\cong\eta$ である。
+- **可算**：Step 1 の数え上げ。$\eta$ と $\lambda$ はどちらも空でない端点のない稠密線形順序だが、濃度が違うので同型でない。
+- **選択公理**：使っていない（数え上げを固定し、最小の番号を選ぶ）。
+:::
+:::
+
+::: supplement
+**モデル理論の証明.** 同じ定理を、$\mathrm{DLO}$ の量化子消去とライル–ナルジェフスキの定理から導く証明が別の系列にある（\see{model:cantor-dlo}）。本ページの証明は往復の一歩（\ref{model:order-extension-step}）だけを使い、選択公理も使わない。
+
+**EF ゲームとの関係.** \ref{model:order-extension-step} は、エーレンフォイヒト–フライッセゲーム（\ref{model:ef-game}）で受け手が、空でない端点のない稠密線形順序の間ではつねに応じられることを言っている。ゆえにそのような二つの順序は、どの $n$ についてもゲーム $G_{n}$ で受け手が勝ち、初等的同値である（\ref{model:ef-theorem}。言語 $\{<\}$ は有限な関係言語である）。これは \ref{model:dlo-complete} の別証明になる。可算性は、$\omega$ 回続くゲームで受け手が勝つ（同型になる）ために使われる。
+
+**歴史.** 端点のない可算稠密線形順序が $\Q$ と同型であることはカントールによるとされ（1895 年とされる。未確認）、カントールの証明は一方向に延ばしていく形だったとも言われる。往復を交互に行う形はハウスドルフらによるとされる（未確認）。
+
+**非可算への一般化.** 濃度 $\aleph_{1}$ の端点のない稠密線形順序は同型とは限らない。たとえば $\eta\cdot\omega_{1}$ と $\eta\cdot\omega_{1}^{\ast}$ はどちらもそのような順序だが、前者には狭義増加で上に有界でない長さ $\omega_{1}$ の列 $((\alpha,0))_{\alpha<\omega_{1}}$ があり、後者には狭義増加な長さ $\omega_{1}$ の列がそもそもない（列のブロックの番号は $\omega_{1}$ の中で増えない列になり、整列性からいずれ一定になるので、残りの非可算個の項が一つの可算なブロックに入ってしまう）。往復論法が非可算でも通るのは、「可算な部分集合 $L<R$ の間につねに点がある」順序（$\eta_{1}$ 集合と呼ばれるもの）どうしで、濃度がともに $\aleph_{1}$ のときであるとされる（ハウスドルフによるとされる。本サイトでは扱わない）。
+:::
+
+## 端点の有無と η の変形 {#model:sec-co-endpoints}
+
+::: theorem 可算稠密線形順序の分類 {#model:eta-endpoints keywords="countable dense linear orders are classified by their endpoints, eta, 1+eta, eta+1, 1+eta+1" index="可算稠密線形順序の分類|かさんちゅうみつせんけいじゅんじょのぶんるい"}
+$X$ を 2 元以上の可算稠密線形順序とする。$X$ の順序型は、
+$$
+\eta,\qquad1+\eta,\qquad\eta+1,\qquad1+\eta+1
+$$
+のちょうど一つであり、どれになるかは $X$ が最小元をもつか、最大元をもつかで決まる（最小元だけをもつなら $1+\eta$、最大元だけをもつなら $\eta+1$、両方をもつなら $1+\eta+1$）。
+:::
+
+::: intuition
+可算で稠密な並びは、両端に点があるかないかの 4 通りしかない。端点を取り除くと、残りは必ず有理数と同じ形をしている。
+:::
+
+::: proof
+**Step 1（内部が空でない）.** 【主張：$X$ から端点を除いた $X^{\circ}$ は空でない】 $X$ の 2 元 $a<b$ をとり、稠密性から $a<c<b$ となる $c$ をとる。$c$ は最小元でも最大元でもないので $c\in X^{\circ}$ である。
+
+**Step 2（内部は η）.** 【主張：$X^{\circ}$ は端点のない稠密線形順序で、型は $\eta$ である】 *稠密*：$x<y$ が $X^{\circ}$ の元なら、$x<z<y$ となる $z\in X$ は $X$ の端点でないので $z\in X^{\circ}$ である。*最大元がない*：$x\in X^{\circ}$ は $X$ の最大元でないので $x<y$ となる $y\in X$ がある。$y\in X^{\circ}$ ならよい。$y$ が $X$ の最大元なら、稠密性から $x<z<y$ となる $z$ をとると、$z\in X^{\circ}$ かつ $x<z$ である。最小元についても同様である。$X^{\circ}$ は可算なので、\ref{model:cantor-back-and-forth} より $\operatorname{otp}(X^{\circ})=\eta$ である。
+
+**Step 3（端点を付け直す）.** 【主張：$X$ は $X^{\circ}$ の前後に端点を付けたものと同型である】 たとえば $X$ が最小元 $m$ だけをもつとき、$X=\{m\}\cup X^{\circ}$ で $m$ は $X^{\circ}$ のどの元よりも小さいので、$(0,\ast)\mapsto m$, $(1,x)\mapsto x$ は $1+X^{\circ}$ から $X$ への同型である（$\ast$ は 1 元順序の元）。他の場合も同様である。Step 2 と \ref{model:order-sum-basic.2} から主張の型が得られる。
+
+**Step 4（4 つは互いに異なる）.** 【主張：4 つの型はどの二つも異なる】 同型は最小元を最小元に、最大元を最大元に写す。$\eta$ には端点がなく、$1+\eta$ は最小元だけを、$\eta+1$ は最大元だけを、$1+\eta+1$ は両方をもつ。ゆえにどの二つも同型でない。
+
+::: hypcheck
+- **2 元以上**：Step 1。0 元・1 元の線形順序も稠密で、型は $0$ と $1$ である。
+- **稠密**：Step 1, 2。**可算**：Step 2 で \ref{model:cantor-back-and-forth} を使うため。
+- 選択公理は使っていない。
+:::
+:::
+
+::: corollary 可算稠密な型は 6 個 {#model:countable-dense-types}
+可算な稠密線形順序の型は、$0,1,\eta,1+\eta,\eta+1,1+\eta+1$ の 6 個である。
+:::
+
+::: proof
+0 元・1 元の線形順序の型は $0$, $1$ で（\ref{model:finite-linear-orders}）、2 元以上なら \ref{model:eta-endpoints} による。6 個の型が互いに異なることは、元の個数と端点の有無から分かる。
+:::
+
+::: corollary η の吸収 {#model:eta-absorption keywords="eta absorbs sums: eta + eta = eta, eta times any countable order is eta, eta + 1 + eta = eta" index="η の吸収|いーたのきゅうしゅう"}
+1. 空でない可算な線形順序 $I$ について、$\eta\cdot I=\sum_{i\in I}\eta$ の型は $\eta$ である。とくに $\eta+\eta=\eta\cdot2=\eta$、$\eta\cdot\eta=\eta$、$\eta\cdot\omega=\eta\cdot\zeta=\eta$ である。
+2. $\eta+1+\eta=\eta$、$\eta^{\ast}=\eta$ である。
+3. 一方 $2\cdot\eta\ne\eta$ である。とくに $\eta\cdot1=\eta\cdot2$ なので、積の左の簡約律は成り立たない。
+:::
+
+::: proof
+**(1)** $\eta\cdot I$ を、台集合 $I\times\Q$ に辞書式順序（$I$ の成分を優先）を入れたもので表す。$I\hookrightarrow\omega$ と $\Q\approx\omega$ と $\omega\times\omega\approx\omega$ から、台集合は可算である。$I\ne\varnothing$ なので空でない。*稠密*：$(i,q)<(j,r)$ とする。$i=j$ なら $q<s<r$ となる $s$ について $(i,s)$ が間にあり、$i<j$ なら $(i,q+1)$ が間にある。*端点がない*：$(i,q-1)<(i,q)<(i,q+1)$ である。ゆえに \ref{model:cantor-back-and-forth} より型は $\eta$ である。
+
+**(2)** $\eta+1+\eta$ を、$\{0\}\times\Q\cup\{(1,0)\}\cup\{2\}\times\Q$ の順序和で表す。可算で空でなく、端点がない（両側のブロックに端点がない）。稠密性は、同じブロックの 2 点なら $\Q$ の稠密性、$(0,q)<(j,r)$（$j\ge1$）なら $(0,q+1)$、$(1,0)<(2,r)$ なら $(2,r-1)$ が間にあることから従う。ゆえに型は $\eta$ である。$\eta^{\ast}=\eta$ は $x\mapsto-x$ による。
+
+**(3)** $2\cdot\eta=\sum_{q\in\Q}2$ では、$(q,0)$ と $(q,1)$ の間に元がないので稠密でなく、稠密な $\eta$ と同型でない。$\eta\cdot1=\eta$（\ref{model:order-type-arithmetic.1}）と (1) の $\eta\cdot2=\eta$ から、$\eta\cdot1=\eta\cdot2$ である。
+
+::: hypcheck
+- **$I$ が可算**：(1) で台集合の可算性に使った。$I=\R$ なら $\eta\cdot I$ は非可算で $\eta$ と異なる。**$I$ が空でない**：$\eta\cdot0=0$ である。
+- 選択公理は使っていない（$\omega\times\omega\approx\omega$ は具体的な全単射で与えられる）。
+:::
+:::
+
+## 実数直線の特徴付け {#model:sec-co-reals}
+
+::: theorem 実数直線の順序による特徴付け {#model:real-line-characterization keywords="order-theoretic characterization of the real line, Cantor's characterization of the continuum, separable Dedekind complete dense linear order" index="実数直線の特徴付け（順序）|じっすうちょくせんのとくちょうづけじゅんじょ"}
+線形順序 $X$ について、次は同値である。
+1. $\operatorname{otp}(X)=\lambda$、すなわち $X\cong(\R,<)$。
+2. $X$ は空でなく、端点をもたず、デデキント完備で、$X$ で稠密な可算部分集合をもつ。
+:::
+
+::: intuition
+実数直線は「端がなく、切れ目がなく、可算個の点でどこでも近似できる」並びとして、順序だけで特徴付けられる。可算個の近似点は有理数と同じ形をしており（カントールの同型定理）、残りの点は切れ目を埋める点として一通りに決まる（デデキント完備化の一意性）。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2）.** 【主張：$\R$ は 2 の条件を満たす】 記法の項（\ref{model:sec-ot-notation}）にあげた実数の性質から、$\R$ は空でなく端点をもたずデデキント完備で、$\Q$ は $\R$ で稠密な可算部分集合である。同型はこれらの性質を保つ。
+
+**Step 2（稠密部分集合は η）.** 【主張：2 の $D$ は空でない端点のない可算稠密線形順序で、$D\cong\Q$ である】 $X\ne\varnothing$ なので $x\in X$ をとり、端点がないので $y<x<z$ となる $y,z$ をとる。$D$ は $X$ で稠密なので $y<d<x$ となる $d\in D$ があり、$D\ne\varnothing$ である。$d\in D$ について、$d<x'$ となる $x'\in X$ をとり、$d<d'<x'$ となる $d'\in D$ をとれば、$d$ は $D$ の最大元でない。最小元についても同様である。$d<d'$ が $D$ の元なら、$X$ での稠密性から $d<d''<d'$ となる $d''\in D$ がある。ゆえに \ref{model:cantor-back-and-forth} より同型 $g\colon\Q\cong D$ がある。
+
+**Step 3（X は完備化）.** 【主張：$X\cong\R$】 $e\defeq g$（を $\Q\to X$ と見たもの）は順序埋め込みで、$e[\Q]=D$ は $X$ で稠密である。$X$ はデデキント完備で端点をもたないので、$(X,e)$ は $\Q$ のデデキント完備化の条件（\ref{model:dedekind-completion-order.1}）を満たす。一方、\ref{model:lambda-completion-eta} より $(\R,\text{包含})$ も $\Q$ の完備化である。一意性（\ref{model:dedekind-completion-order.2}）から $X\cong\R$ である。
+
+::: hypcheck
+- **空でない**：Step 2 で $D\ne\varnothing$ を得るため。空の線形順序は端点がなく完備で、空集合が稠密部分集合になる。
+- **端点がない**：Step 2 で $D$ が端点をもたないこと、Step 3 で完備化の条件。外すと $[0,1]$ が反例になる（\ref{model:real-line-endpoints}）。
+- **デデキント完備**：Step 3 で完備化の条件。外すと $\Q$ や $\R\setminus\{0\}$ が反例になる。
+- **可算な稠密部分集合**：Step 2, 3。可算鎖条件に弱めてよいかがススリンの問題である（\ref{model:suslin-order-fact}）。また、可算性を外すと、端点がなく稠密でデデキント完備だが $\lambda$ でない順序がある。たとえば $(1+\lambda+1)\cdot\lambda$（$\R$ の各点を閉区間 $[0,1]$ で置き換えたもの）は、上に有界な集合の上限を「第 1 成分の上限 $x^{\ast}$ をとり、$x^{\ast}$ が達成されればそのブロックの中で上限をとり、達成されなければ $(x^{\ast},0)$」と求められるので完備であるが、各 $x\in\R$ の開区間 $((x,0),(x,1))$ が互いに交わらない空でない開区間を非可算個与えるので、可算な稠密部分集合をもたない（問題 \ref{model:prob-co-omega1-reals} の考え方）。
+- **公理**：選択公理は使っていない（\ref{model:cantor-back-and-forth} と完備化はどちらも $\ZF$ で成り立つ）。
+:::
+:::
+
+::: supplement
+**位相による言い換え.** 2 の条件は、順序位相の言葉で「空でなく、端点がなく、連結で、可分」と言い換えられる。集合論の系列にはこの形での証明（往復論法と上限による直接の構成）がある（\see{set:reals-order-characterization}）。本ページの証明は、デデキント完備化の一意性に仕事を任せている。
+
+**帰属.** この特徴付けはカントールによるとされる（1895 年の論文とされる。未確認）。
+:::
+
+::: corollary 端点つきの実数直線 {#model:real-line-endpoints keywords="lambda with endpoints, closed interval, characterization of [0,1]"}
+$X$ を 2 元以上の稠密でデデキント完備な線形順序で、$X$ で稠密な可算部分集合をもつものとする。$X$ の型は $\lambda$, $1+\lambda$, $\lambda+1$, $1+\lambda+1$ のちょうど一つで、どれになるかは端点の有無で決まる。たとえば $\operatorname{otp}([0,1])=1+\lambda+1$ である。
+:::
+
+::: proof
+$D$ を $X$ で稠密な可算部分集合、$X^{\circ}$ を $X$ から端点を除いたものとする。\ref{model:eta-endpoints} の証明の Step 1, 2 と同じく、$X^{\circ}$ は空でなく端点をもたない。
+
+**Step 1（完備性の遺伝）.** 【主張：$X^{\circ}$ はデデキント完備である】 $S\subseteq X^{\circ}$ が空でなく $u\in X^{\circ}$ で上に有界とする。$X$ での上限 $s$ をとると、$s\le u$ なので $s$ は $X$ の最大元でなく、$t\in S$ について $t\le s$ で $t$ は最小元でないので $s$ も最小元でない。ゆえに $s\in X^{\circ}$ であり、$s$ は $X^{\circ}$ での上限でもある。
+
+**Step 2（稠密部分集合）.** 【主張：$D\cap X^{\circ}$ は $X^{\circ}$ で稠密な可算部分集合である】 $x<y$ が $X^{\circ}$ の元なら、$x<d<y$ となる $d\in D$ があり、$d$ は端点でないので $d\in D\cap X^{\circ}$ である。
+
+Step 1, 2 と \ref{model:real-line-characterization} より $\operatorname{otp}(X^{\circ})=\lambda$ であり、\ref{model:eta-endpoints} の Step 3, 4 と同じく、端点を付け直して主張の型を得る。$[0,1]$ は両端点をもち、$\Q\cap[0,1]$ が稠密な可算部分集合で、デデキント完備性は $\R$ から受け継ぐ（Step 1 と同じ議論）。
+:::
+
+## ススリンの問題 {#model:sec-co-suslin}
+
+\ref{model:real-line-characterization} の条件「$X$ で稠密な可算部分集合をもつ」を、次の弱い条件に取り替えてよいかが問題になる：**互いに交わらない空でない開区間の族は、どれも可算である**（可算鎖条件）。可算な稠密部分集合 $D$ をもてば可算鎖条件が成り立つ。実際、$D$ の数え上げを固定し、互いに交わらない空でない開区間 $(a,b)$ の各々に、$(a,b)$ に属する $D$ の元で番号最小のものを対応させると（$a<b$ で開区間が空でないので、$a<c<b$ となる $c$ と $a<d<c$ となる $d\in D$ がある）、この対応は単射なので族は可算である。逆が成り立つかどうかは、次のように決まらない。
+
+::: fact ススリンの問題の独立性 {#model:suslin-order-fact keywords="Suslin problem, Suslin's hypothesis, independence, ccc linear order" index="ススリンの問題|すすりんのもんだい"}
+次の主張（ススリン仮説の順序版）は、$\ZFC$ が無矛盾なら $\ZFC$ から証明も反証もできない：空でなく、端点をもたず、稠密でデデキント完備な線形順序で、互いに交わらない空でない開区間の族がすべて可算であるものは、$\lambda$ と同型である。
+:::
+
+::: supplement
+問いはススリンによって 1920 年ごろに提出されたとされる（未確認）。独立性の証明（ススリン線の存在は $\mathbf{V}=\mathbf{L}$ から、ススリン仮説はマーティンの公理と連続体仮説の否定から従う、という形）は集合論の系列にある（\see{set:suslin-independence}, \see{set:sh-reals}）。本ページの範囲を超えるので証明しない。
+:::
+
+## 可算順序型の個数 {#model:sec-co-count}
+
+::: theorem 可算順序型は連続体濃度個 {#model:continuum-many-countable-types keywords="there are continuum many countable order types" index="可算順序型の個数|かさんじゅんじょがたのこすう"}
+可算線形順序の同型類の集合を考える（どの可算線形順序も $\omega$ の部分集合の上の線形順序と同型なので、そのような線形順序全体を同型で割ったもの $\mathcal{T}$ をとる）。
+1. $\{2,3\}^{\omega}$（$\omega$ から $\{2,3\}$ への写像全体）から $\mathcal{T}$ への単射がある。とくに可算順序型は無数にあり、その個数は $2^{\aleph_{0}}$ 以上である。
+2. （AC）$\mathcal{T}$ の濃度はちょうど $2^{\aleph_{0}}$ である。
+:::
+
+::: intuition
+可算な並び方は有理数の中に収まるが（\ref{model:countable-embeds-eta}）、その形は連続体と同じだけある。$\eta$ の塊の間に長さ $2$ か $3$ の有限な鎖を順に挟めば、挟んだ長さの列（$2$ と $3$ の無限列）を並びから読み取れる。
+:::
+
+::: proof
+**Step 1（構成）.** 【主張：$s\in\{2,3\}^{\omega}$ について $A_{s}\defeq\sum_{n\in\omega}\bigl(\eta+s(n)\bigr)$ は可算線形順序である】 $A_{s}$ の台集合は $\omega\times\bigl(\{0\}\times\Q\cup\{1\}\times3\bigr)$ の部分集合であり、$\omega\times\omega\approx\omega$ と $\Q\approx\omega$ から可算である。各 $n$ の部分 $\eta+s(n)$ を**第 $n$ ブロック**、その中の $s(n)$ 個の点を**第 $n$ 鎖**と呼ぶ。$A_{s}$ を $\omega$ の部分集合の上の順序に写す同型は、台集合から $\omega$ への具体的な単射で与えられる。
+
+**Step 2（有限区間の同値関係）.** 【主張：$x\sim y$ を「$x$ と $y$ の間（両端を含む閉区間）が有限」で定めると、$A_{s}$ の $\sim$ 類のうち 2 元以上のものは、ちょうど各 $n$ の第 $n$ 鎖である】 $\sim$ は反射的・対称的で、推移的でもある（$x\le y\le z$ なら $[x,z]=[x,y]\cup[y,z]$、他の並び方でも閉区間は二つの閉区間に含まれる）。第 $n$ 鎖の 2 点の間は鎖の中の点だけで有限である。一方、$\eta$ の部分の点 $x$ と他の任意の点 $y\ne x$ の間には、$x$ を含む $\eta$ の部分が端点をもたないことから $x$ と同じ $\eta$ の部分の点が無限個ある。また第 $n$ 鎖の点と第 $m$ 鎖の点（$n<m$）の間には第 $m$ ブロックの $\eta$ の部分全体がある。ゆえに $\eta$ の部分の点は 1 元の類をなし、第 $n$ 鎖はちょうど一つの類で、その元の個数は $s(n)\ge2$ である。
+
+**Step 3（列の読み取り）.** 【主張：$A_{s}\cong A_{t}$ なら $s=t$】 同型 $F\colon A_{s}\to A_{t}$ は閉区間を閉区間に全単射で写すので、$x\sim y\iff F(x)\sim F(y)$ であり、$\sim$ 類を同じ元の個数の $\sim$ 類に写す。Step 2 より、$F$ は第 $n$ 鎖を $A_{t}$ のある第 $\varphi(n)$ 鎖に写し、$\varphi\colon\omega\to\omega$ は全単射である。第 $n$ 鎖が第 $m$ 鎖より前にあることと $n<m$ は同値で、$F$ は順序を保つので、$\varphi$ は $\omega$ の自己同型である。整列集合の自己同型は恒等写像なので（\ref{set:well-order-iso-unique}）、$\varphi(n)=n$ であり、$s(n)=\lvert\text{第 }n\text{ 鎖}\rvert=t(n)$ である。
+
+**Step 4（上からの評価）.** 【主張：（AC）$\mathcal{T}$ は $\mathcal{P}(\omega)$ に単射で入る】 $\omega$ の部分集合 $S$ の上の線形順序 $<$ に、$\{(x,y)\in S\times S\mid x<y\ \text{または}\ x=y\}\subseteq\omega\times\omega$ を対応させると、対角成分から $S$ が、それ以外から $<$ が読み取れるので、この対応は単射である。$\omega\times\omega\approx\omega$ と合わせて、そのような線形順序全体は $\mathcal{P}(\omega)$ に単射で入る。選択公理で各同型類から代表を一つずつ選べば、$\mathcal{T}$ も $\mathcal{P}(\omega)$ に単射で入る。
+
+Step 1〜3 より $s\mapsto[A_{s}]$ は単射 $\{2,3\}^{\omega}\to\mathcal{T}$ であり、$\{2,3\}^{\omega}$ は特性関数によって $\mathcal{P}(\omega)$ と対等である。Step 4 と\ref{set:schroder-bernstein}から、AC のもとで $\lvert\mathcal{T}\rvert=\lvert\mathcal{P}(\omega)\rvert=2^{\aleph_{0}}$ である。
+
+::: hypcheck
+- **$\eta$ が端点をもたないこと**：Step 2 で、鎖と鎖の間、$\eta$ の点と他の点の間が無限であることに使った。端点があると、鎖が隣の $\eta$ の端点と有限の閉区間でつながってしまう。
+- **鎖の長さを $2$ 以上にしたこと**：Step 2 で鎖を $\eta$ の点（1 元の類）と区別するため。長さ $1$ を許すと、長さ $1$ の鎖は $\eta$ の点と見分けられない。
+- **整列集合の剛性**：Step 3 で鎖の順番がずれないことに使った。
+- **選択公理**：Step 4 で代表を選ぶところだけで使った。1 は $\ZF$ で成り立つ。
+:::
+:::
+
+::: supplement
+**比べてみると.** 可算順序数（可算な整列集合の型）は $\omega_{1}$ 個あり（\see{set:aleph}）、$\aleph_{1}\le2^{\aleph_{0}}$ である。可算な稠密線形順序の型は 6 個しかない（\ref{model:countable-dense-types}）。稠密な部分を含まない可算線形順序（散在的順序）だけに限っても、型は $2^{\aleph_{0}}$ 個あるとされる（\see[散在的順序とハウスドルフの定理]{model:page-scattered-orders}）。
+
+**モデル理論から見ると.** $\mathcal{T}$ の各元は言語 $\{<\}$ の可算構造の同型類である。本定理は、線形順序の理論の可算モデルの同型類が $2^{\aleph_{0}}$ 個あることを言っている。完全な理論 $\mathrm{Th}(\Z,<)$ の可算モデルだけでも $2^{\aleph_{0}}$ 個あることが知られているとされる（$\zeta\cdot I$ の形の順序。未確認）。
+:::
+
+## 問題 {#model:sec-co-problems}
+
+::: problem ★ 基本：有理数の区間の型 {#model:prob-co-rationals-intervals}
+次の型を求めよ：$\Q\cap[0,1]$、$\Q\cap[0,1)$、$\Q\setminus\{0\}$、二進有理数全体 $\{m/2^{k}\mid m\in\Z,\ k\in\omega\}$。
+:::
+
+::: solution
+どれも $\Q$ の部分集合なので可算で、2 元以上である。
+- $\Q\cap[0,1]$：稠密（$x<y$ なら $(x+y)/2$ が間にある）で、最小元 $0$ と最大元 $1$ をもつ。\ref{model:eta-endpoints} より型は $1+\eta+1$ である。
+- $\Q\cap[0,1)$：稠密で最小元 $0$ をもち、最大元をもたない（$x<1$ なら $x<(x+1)/2<1$）。型は $1+\eta$ である。
+- $\Q\setminus\{0\}$：稠密である（$x<y$ の間に無限個の有理数があり、そのうち $0$ でないものがある）。端点をもたない。型は $\eta$ である。これは $\eta+\eta=\eta$（\ref{model:eta-absorption}）の具体例である：負の部分と正の部分はどちらも型 $\eta$ をもつ。
+- 二進有理数：$x<y$ なら $(x+y)/2$ も二進有理数で、$x\pm1$ も二進有理数なので、稠密で端点がない。型は $\eta$ である。
+:::
+
+::: problem ★ 基本：ω₁ は λ に埋め込めない {#model:prob-co-omega1-reals}
+最小の非可算順序数 $\omega_{1}$ は $\lambda$ に埋め込めないことを、選択公理を使わずに示せ。（$\omega_{1}$ は $\ZF$ で存在する：\see{set:hartogs}。）
+:::
+
+::: solution
+順序埋め込み $f\colon\omega_{1}\to\R$ があったとする。$\Q$ の数え上げ $k\mapsto q_{k}$ を固定する。各 $\alpha<\omega_{1}$ について $f(\alpha)<f(\alpha+1)$ なので、その間に有理数があり（記法の項の実数の性質）、その中で番号最小のものを $r_{\alpha}$ とする。$\alpha<\beta$ なら $\alpha+1\le\beta$ なので
+$$
+r_{\alpha}<f(\alpha+1)\le f(\beta)<r_{\beta}
+$$
+であり、$\alpha\mapsto r_{\alpha}$ は単射 $\omega_{1}\to\Q$ である。$\Q$ は可算なので $\omega_{1}$ が可算になり、矛盾する。$r_{\alpha}$ は番号最小のものとして一意に決まるので、選択公理は使っていない。
+
+（同じ議論で、$\R$ の中の互いに交わらない空でない開区間の族は可算であり、$\lambda$ に埋め込める整列集合・逆整列集合はすべて可算であることが分かる。）
+:::
+
+::: problem ★ 基本：η の等質性 {#model:prob-co-eta-homogeneous}
+$a<b$ と $c<d$ を有理数とする。$\Q$ の自己同型 $F$ で $F(a)=c$, $F(b)=d$ となるものがあることを示せ。また $\Z$ では同じことが成り立たないことを示せ。
+:::
+
+::: solution
+$p\defeq\{(a,c),(b,d)\}$ は $\Q$ から $\Q$ への有限部分同型である（$a<b$ かつ $c<d$）。\ref{model:cantor-back-and-forth} を $A=B=\Q$ に使うと、$p$ は同型 $F\colon\Q\cong\Q$ に延長でき、$F(a)=c$, $F(b)=d$ である。
+
+$\Z$ では、自己同型は閉区間を閉区間に全単射で写すので、$b-a$ 個の元をもつ $(a,b]$ を $(F(a),F(b)]$ に写し、$F(b)-F(a)=b-a$ となる。ゆえに $(a,b)=(0,1)$, $(c,d)=(0,2)$ を写す自己同型はない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

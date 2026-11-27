@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>線形順序のゲームと順序和の合成定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/02-model-theory/05-linear-orders/04-ef-linear-orders.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 線形順序のゲームと順序和の合成定理 {#model:page-ef-linear-orders keywords="Ehrenfeucht-Fraisse games for linear orders, n-equivalence of finite linear orders, composition theorem for ordered sums, Feferman-Vaught, n-equivalence of ordinals, omega^n, Mostowski-Tarski"}
+
+エーレンフォイヒト–フライッセゲーム（\ref{model:ef-game}）は、線形順序の一階の性質を調べるのに特に向いている。線形順序の和では、点を選ぶ手がどの成分で行われたかを見れば、ゲームを成分ごとのゲームに分けられるからである。このページでは、まず有限線形順序の $n$ 同値を完全に決定し（\ref{model:finite-order-n-equivalence}）、次に順序和の $n$ 同値類が各成分の $n$ 同値類と添字の順序だけで決まることを示す（\ref{model:order-sum-composition}）。応用として、順序数 $\omega^{n}\cdot\delta+\gamma$ の $n$ 同値を示し（\ref{model:omega-power-n-equivalence}）、どの整列順序も、量化子の深さ $n$ の文については $\omega^{n}\cdot2$ 未満の順序数と区別できないことを導く（\ref{model:ordinal-below-omega-omega}）。
+
+> 資料：本ページは特定の教科書の記述によらず、標準的な議論に従って組み立てた。人名の帰属は本文で「とされる」と断った。
+
+## 記法と定義の確認 {#model:sec-efl-notation}
+
+::: notation
+- 言語は $\{<\}$（2 項関係記号 1 個）とし、線形順序（\ref{set:total-order}）をこの言語の構造とみなす。量化子の深さ $\mathrm{qr}$ と $\equiv_{n}$ は \ref{model:quantifier-rank}、部分同型は \ref{model:partial-isomorphism}、ゲーム $G_{n}(\mathcal{M},\vec{a};\mathcal{N},\vec{b})$ と攻め手・受け手は \ref{model:ef-game} のとおり。
+- **$L\sim_{n}M$** は、受け手が $G_{n}(L,M)$ に勝つことを表す。$(L,\vec{a})\sim_{n}(M,\vec{b})$ も同様。このページでは空の順序も扱い、両方が空のとき攻め手は元を選べないので受け手の勝ち、片方だけが空で $n\ge1$ のときは攻め手が空でない側の元を選ぶと受け手が応じられないので攻め手の勝ちとする。$\sim_{0}$ はつねに成り立つ。
+- 空でない $L,M$ について、\ref{model:ef-theorem} から $L\sim_{n}M\iff L\equiv_{n}M$ である。ゆえに $\sim_{n}$ は同値関係であり（空の順序は $n\ge1$ では自分だけと $\sim_{n}$）、$m\le n$ なら $L\sim_{n}M$ から $L\sim_{m}M$ が従い、すべての $n$ で $L\sim_{n}M$ なら $L\equiv M$ である。同型な順序は $\sim_{n}$ である。
+- 順序和 $\sum_{i\in I}L_{i}$、$L+M$、積 $L\cdot I$（「$I$ 個の $L$ を $I$ の順に並べたもの」）、逆順序 $L^{*}$ は \ref[一般の順序和]{model:order-sum}・\ref[順序型の積]{model:order-product} と \ref{model:page-scattered-orders} の記法のとおり。$\omega,\omega^{*},\zeta,\eta$ も同じ。
+- 順序数は $\in$ による整列順序として線形順序とみなす。順序数の和・積・冪は \ref{set:ordinal-addition}・\ref{set:ordinal-multiplication}・\ref{set:ordinal-exponentiation} のとおりで、順序数の和 $\alpha+\beta$ は線形順序の和 $\alpha+\beta$ と同型、積 $\alpha\cdot\beta$ は「$\beta$ 個の $\alpha$」と同型である（どちらも定義から）。
+- 線形順序 $L$ の元 $a$ について $L_{<a}\defeq\{x\in L\mid x<a\}$, $L_{>a}\defeq\{x\in L\mid a<x\}$ とおく。
+- 体系は $\ZFC$ とする。ただしこのページの議論に選択公理は要らない（\ref{model:ef-theorem} を使う部分を除き、受け手の戦略は有限回の選択で組み立てられる）。
+:::
+
+## 有限線形順序の $n$ 同値 {#model:sec-efl-finite}
+
+元の個数が $p$ の線形順序を、その個数と同じ記号 $p$ で表す。\ref{model:linear-order-game} は「$p,q\ge2^{n}-1$ なら $p\sim_{n}q$」を示した。ここでは、この評価がちょうど最良であることを、攻め手の戦略で示す。
+
+**位置と隙間.** $p=\{1,\dots,p\}$ に仮想の端点 $0$ と $p+1$ を加える（$q$ も同様）。ゲームの途中で、選ばれた点と仮想の端点を大きさの順に並べたものを $u_{0}=0<u_{1}<\dots<u_{r}=p+1$、相手側で対応するものを $v_{0}=0<v_{1}<\dots<v_{r}=q+1$ とする（ここまでの対応が部分同型なら、対応する点は同じ順に並ぶ）。隣り合う $u_{s},u_{s+1}$ と $v_{s},v_{s+1}$ を**対応する隙間**と呼び、その長さを $u_{s+1}-u_{s}$, $v_{s+1}-v_{s}$ とする。
+
+::: lemma 攻め手の二分戦略 {#model:finite-order-spoiler keywords="Spoiler's strategy on finite linear orders: unequal gaps of length less than 2^k are detected in k moves" index="攻め手の二分戦略|せめてのにぶんせんりゃく"}
+有限線形順序のゲームで、残りの手番が $k$ 回の局面を考える。ここまでの対応が部分同型であり、ある対応する隙間の長さ $d,d'$ が $d\neq d'$ かつ $\min(d,d')<2^{k}$ を満たすなら、攻め手は残り $k$ 回で勝つ。
+:::
+
+::: intuition
+長さの違う二つの隙間は、短いほうの長さが $2^{k}$ 未満なら、$k$ 回の「二分探索」で見破れる。攻め手は長いほうの隙間に点を打ち、受け手が短いほうの隙間のどこに応じても、どちらかの半分で再び長さの食い違いが、半分の大きさで残るようにする。
+:::
+
+::: proof
+$k$ についての帰納法による。$k=0$ では、隙間の長さはつねに $1$ 以上なので $\min(d,d')<1$ となることはなく、主張は空虚に正しい。$k\ge1$ とし、$d<d'$ としてよい（$d'<d$ なら二つの順序の役割を入れ替える）。ゆえに $d<2^{k}$ かつ $d'\ge2$ である。
+
+**Step 1.** 【主張：攻め手が長いほうの隙間に打つ点 $v$ と、受け手の応じ方の制限】攻め手は長さ $d'$ の隙間の中の点 $v\defeq v_{s}+e_{1}$、ただし $e_{1}\defeq\min(2^{k-1},d'-1)$ を選び、$e_{2}\defeq d'-e_{1}$ とおく。$1\le e_{1}\le d'-1$ なので $v_{s}<v<v_{s+1}$ であり、$v$ は実際の元である。受け手の応答 $u$ が $u_{s}<u<u_{s+1}$ を満たさなければ、$u_{s}$ か $u_{s+1}$ のうち実際の元であるものとの大小か等号が、$v$ と $v_{s},v_{s+1}$ の関係と食い違う。選ばれた点の対応はゲームの終わりまで残るので、最後の対応は部分同型でなく、攻め手が勝つ。特に $d=1$ なら隙間に元がなく、攻め手が勝つ。
+
+**Step 2.** 【主張：$u_{s}<u<u_{s+1}$ のとき、新しい隙間の組のどちらかで、長さが異なり短いほうが $2^{k-1}$ 未満になる】$d_{1}\defeq u-u_{s}$, $d_{2}\defeq u_{s+1}-u$ とおく。$d_{1},d_{2}\ge1$, $d_{1}+d_{2}=d$ である。
+- $d_{1}<2^{k-1}$ の場合：$d_{1}\neq e_{1}$ なら第 1 の組（$d_{1}$ と $e_{1}$）が条件を満たす。$d_{1}=e_{1}$ と仮定すると、$e_{1}<2^{k-1}$ なので $e_{1}=d'-1$ であり、$d_{1}=d'-1\ge d$ となって $d_{2}\ge1$ に反する。
+- $d_{1}\ge2^{k-1}$ の場合：$d<2^{k}$ から $d_{2}=d-d_{1}<2^{k-1}$ である。$e_{1}=2^{k-1}$ なら $e_{1}\le d_{1}$ なので $e_{2}=d'-e_{1}\ge d'-d_{1}>d-d_{1}=d_{2}$ となり、第 2 の組が条件を満たす。$e_{1}=d'-1<2^{k-1}$ なら $e_{1}<d_{1}$ であり、第 1 の組が条件を満たす（短いほうは $e_{1}<2^{k-1}$）。
+
+**Step 3.** 【主張：攻め手は残り $k$ 回で勝つ】Step 2 の局面では、新しい点を加えた対応は（Step 1 の条件のもとで）部分同型であり、新しい隙間は隣り合う点の組なので対応する隙間である。残りの手番は $k-1$ 回で、帰納法の仮定から攻め手は勝つ。
+
+::: hypcheck
+- **$\min(d,d')<2^{k}$**：Step 2 の $d_{1}\ge2^{k-1}$ の場合に $d_{2}<2^{k-1}$ を導くのに使った。外すと偽：$d,d'\ge2^{k}$ なら \ref{model:linear-order-game} の応じ方で受け手が勝つ。
+- **$d\neq d'$**：Step 2 の $e_{2}>d_{2}$ に $d'>d$ として使った。等しい隙間は受け手が平行移動で応じられる。
+:::
+:::
+
+::: theorem 有限線形順序の $n$ 同値 {#model:finite-order-n-equivalence keywords="finite linear orders p and q are n-equivalent iff p=q or both are at least 2^n - 1" index="有限線形順序の n 同値|ゆうげんせんけいじゅんじょのえぬどうち"}
+空でない有限線形順序 $p,q$ と $n\ge0$ について、$p\equiv_{n}q$ であるための必要十分条件は、$p=q$ であるか、$p,q\ge2^{n}-1$ であることである。
+:::
+
+::: intuition
+量化子の深さ $n$ の文は、有限の順序の元の個数を $2^{n}-2$ までは正確に数えられるが、それを超えると「十分多い」としか言えない。
+:::
+
+::: proof
+**十分性.** $p=q$ なら同型なので $\equiv_{n}$ である。$p,q\ge2^{n}-1$ なら、\ref{model:linear-order-game} と \ref{model:ef-theorem} から $p\equiv_{n}q$ である。
+
+**必要性（対偶）.** $p\neq q$ かつ $\min(p,q)<2^{n}-1$ とする。手番の始まる前の局面では、仮想の端点だけからなる対応する隙間の長さは $p+1\neq q+1$ で、$\min(p+1,q+1)<2^{n}$ である。空の対応は部分同型なので、\ref{model:finite-order-spoiler}（$k=n$）から攻め手が $G_{n}(p,q)$ に勝つ。\ref{model:ef-theorem} から $p\not\equiv_{n}q$ である。
+:::
+
+::: corollary 有限順序の $n$ 同値類の個数 {#model:finite-order-classes}
+空でない有限線形順序は、$\equiv_{n}$ についてちょうど $2^{n}-1$ 個の類に分かれる：元の個数が $1,2,\dots,2^{n}-2$ のものがそれぞれ一つの類をなし、$2^{n}-1$ 以上のものが一つの類をなす。
+:::
+
+::: example
+$n=2$ では、元の個数 $1$、$2$、$3$ 以上の 3 類である。$1$ と $2$ は「異なる 2 元がある」$\exists x\,\exists y\,x<y$ で区別され、$2$ と $3$ は \ref{model:prob-ef-two-three} の「真ん中の元がある」で区別される。
+:::
+
+## 順序和の合成定理 {#model:sec-efl-composition}
+
+順序和の $n$ 同値類を、成分の $n$ 同値類から計算する。そのために、各成分の類を記号で書き込んだ添字の順序を使う。
+
+::: lemma $n$ 同値類は有限個 {#model:n-classes-finite keywords="for each n there are finitely many n-equivalence classes of linear orders" index="n 同値類の有限性|えぬどうちるいのゆうげんせい"}
+各 $n\ge1$ について、$\mathrm{qr}\le n$ の $\{<\}$ の文 $\psi_{1},\dots,\psi_{N_{n}}$ で、$\mathrm{qr}\le n$ のすべての文がどれかと論理的に同値になるものがある。空でない $L$ について $\tau_{n}(L)\defeq\{j\le N_{n}\mid L\models\psi_{j}\}$ とし、$\tau_{n}(\varnothing)\defeq\ast$（$\{1,\dots,N_{n}\}$ の部分集合でない記号）とおく。このとき $L\sim_{n}M\iff\tau_{n}(L)=\tau_{n}(M)$ であり、$\tau_{n}$ の値の集合 $T_{n}$ は有限である。$n=0$ では $\sim_{0}$ がつねに成り立つので、$\tau_{0}$ を定数とし、$T_{0}$ を 1 元集合とする。
+:::
+
+::: proof
+$\psi_{j}$ の存在は \ref{model:finitely-many-formulas}（$k=0$）である。空でない $L,M$ について、$\tau_{n}(L)=\tau_{n}(M)$ なら、$\mathrm{qr}\le n$ の任意の文はある $\psi_{j}$ と同値なので $L,M$ で真偽が一致し、$L\equiv_{n}M$ である。逆も定義から従う。\ref{model:ef-theorem} から $\equiv_{n}$ は $\sim_{n}$ と同じである。空の順序は（$n\ge1$ なので）空の順序とだけ $\sim_{n}$ であり、記号 $\ast$ で区別すればよい。$T_{n}\subseteq\mathcal{P}(\{1,\dots,N_{n}\})\cup\{\ast\}$ は有限である。
+:::
+
+::: definition ラベル付きの添字順序 {#model:labelled-index-order keywords="labelled index order (I,<,P_t) recording n-classes of the summands" index="ラベル付きの添字順序|らべるつきのそえじじゅんじょ"}
+線形順序の族 $(L_{i})_{i\in I}$ と $n$ について、言語 $\{<\}\cup\{P_{t}\mid t\in T_{n}\}$（$P_{t}$ は 1 項関係記号）の構造
+$$
+I^{(n)}\defeq\bigl(I,<,(P_{t})_{t\in T_{n}}\bigr),\qquad P_{t}\defeq\{i\in I\mid\tau_{n}(L_{i})=t\}
+$$
+を、族の**ラベル付きの添字順序**と呼ぶ。各 $i$ はちょうど一つの $P_{t}$ に属する。
+:::
+
+::: intuition
+添字の各点に「その位置に置かれた成分の $n$ 同値類」を色として塗ったものである。和を $n$ 手のゲームで調べるには、どの位置にどの色の成分があるかだけが分かればよい。
+:::
+
+::: theorem 順序和の合成定理 {#model:order-sum-composition keywords="composition theorem for ordered sums: the n-class of a sum is determined by the n-theory of the labelled index order, Feferman-Vaught type theorem" index="順序和の合成定理|じゅんじょわのごうせいていり, 合成定理|ごうせいていり" refname="順序和の合成定理"}
+1. （添字を固定した場合）添字の順序 $I$ を固定する。すべての $i\in I$ で $L_{i}\sim_{n}M_{i}$（空でない順序どうしでは $L_{i}\equiv_{n}M_{i}$ と同じ）なら、$\sum_{i\in I}L_{i}\sim_{n}\sum_{i\in I}M_{i}$ である。特に、$I=2$ の場合として $L_{0}\sim_{n}M_{0}$, $L_{1}\sim_{n}M_{1}$ なら $L_{0}+L_{1}\sim_{n}M_{0}+M_{1}$ であり、$I=\omega$ の場合として、すべての $k$ で $L_{k}\sim_{n}M_{k}$ なら $\sum_{k\in\omega}L_{k}\sim_{n}\sum_{k\in\omega}M_{k}$、とくに $L\sim_{n}M$ なら $L\cdot\omega\sim_{n}M\cdot\omega$ である。
+2. （一般の場合）$(L_{i})_{i\in I}$, $(M_{j})_{j\in J}$ を線形順序の族、$I^{(n)},J^{(n)}$ をそのラベル付きの添字順序とする。受け手が（言語 $\{<\}\cup\{P_{t}\}$ の）ゲーム $G_{n}(I^{(n)},J^{(n)})$ に勝つならば、$\sum_{i\in I}L_{i}\sim_{n}\sum_{j\in J}M_{j}$ である。したがって、和の $\sim_{n}$ 類は、ラベル付きの添字順序の $\mathrm{qr}\le n$ の理論（\ref{model:ef-theorem} によりそのゲームの勝敗）だけで決まる。
+:::
+
+::: intuition
+和の上の $n$ 手のゲームは、「どの成分に打つか」という添字の上のゲームと、「成分の中のどこに打つか」という成分ごとのゲームに分けられる。添字の上で負けず、同じ色の成分どうしで負けなければ、和の上でも負けない。
+:::
+
+::: proof
+まず (2) を示す。$\Sigma\defeq\sum_{i\in I}L_{i}$, $\Sigma'\defeq\sum_{j\in J}M_{j}$ とし、$\sigma$ を受け手の $G_{n}(I^{(n)},J^{(n)})$ での必勝戦略とする。
+
+**Step 1.** 【主張：受け手の応じ方が定まる】受け手は、和のゲームと並行して、添字のゲーム（$\sigma$ に従う）と、添字の組 $(i,j)$ ごとの成分のゲーム $G_{n}(L_{i},M_{j})$ を進める。攻め手が $\Sigma$ の元 $(i,x)$ を選んだとする（$\Sigma'$ の場合は対称）。受け手は添字のゲームで攻め手が $i$ を選んだとみなし、$\sigma$ の応答 $j$ を得る。$\sigma$ は必勝戦略なので、ゲームの終わりの対応は部分同型で $P_{t}$ を保ち、特に $i$ と $j$ は同じ $P_{t}$ に属する。この性質は後の手によらないので、すでにこの時点で $\tau_{n}(L_{i})=\tau_{n}(M_{j})$、すなわち $L_{i}\sim_{n}M_{j}$（\ref{model:n-classes-finite}）である。受け手は組 $(i,j)$ の成分のゲームの必勝戦略を一つ選び（この組が初めて現れたとき）、その中で攻め手が $x$ を選んだとみなして応答 $y$ を得て、$(j,y)$ で応じる。
+
+**Step 2.** 【主張：成分のゲームは規則どおりに進む】同じ組 $(i,j)$ の成分のゲームの手は、和のゲームの手の一部なので $n$ 回以下である。また、添字のゲームの最後の対応は等号を保つので、$i$ が同じなら $j$ も同じであり、その逆も成り立つ。ゆえに和のゲームで $i$ 成分に打たれた手は、すべて同じ組 $(i,j)$ の成分のゲームの手になる。手が $n$ 回より少なければ、残りの手を任意に補ったと考えればよい（終わりの対応が部分同型なら、その一部も部分同型である）。
+
+**Step 3.** 【主張：終わりの対応は部分同型である】和のゲームの $s$ 番目の組を $(i_{s},x_{s})\mapsto(j_{s},y_{s})$ とする。$i_{s}\neq i_{t}$ なら、添字のゲームの対応が部分同型なので $j_{s}\neq j_{t}$ で、$i_{s}<i_{t}\iff j_{s}<j_{t}$ である。和の順序はまず添字で比べるので、$(i_{s},x_{s})<(i_{t},x_{t})\iff(j_{s},y_{s})<(j_{t},y_{t})$ となり、どちらも等しくない。$i_{s}=i_{t}$ なら $j_{s}=j_{t}$ で、$x_{s},x_{t}$ と $y_{s},y_{t}$ は同じ成分のゲームの手なので、$x_{s}<x_{t}\iff y_{s}<y_{t}$, $x_{s}=x_{t}\iff y_{s}=y_{t}$ である。和の中で同じ成分の元は成分の順序で比べるので、ここでも順序と等号が保たれる。ゆえに受け手が勝つ。
+
+後半：$\mathrm{qr}\le n$ の理論が一致するラベル付きの添字順序どうしは、\ref{model:ef-theorem}（言語 $\{<\}\cup\{P_{t}\}$ は $T_{n}$ が有限なので有限な関係言語）から受け手が $G_{n}$ に勝つので、前半から和は $\sim_{n}$ である。
+
+**(1) の証明.** $J=I$, $M_{j}$ を $M_{i}$ とした二つの族のラベル付きの添字順序は、$\tau_{n}(L_{i})=\tau_{n}(M_{i})$（\ref{model:n-classes-finite}）なので同じ構造である。受け手は添字のゲームで攻め手が選んだのと同じ点を選べば勝つので、(2) から従う。$I=2$, $I=\omega$ はその特別な場合であり、$L\cdot\omega$ はすべての $L_{k}$ を $L$、$M_{k}$ を $M$ とした場合である。
+
+::: hypcheck
+- **受け手が添字のゲームに勝つこと**：Step 1 で $L_{i}\sim_{n}M_{j}$ を得るのと、Step 3 で異なる成分の間の順序を保つのに使った。ラベル（$P_{t}$）を保つことが本質で、$\{<\}$ だけのゲームでは不十分：$I=J=2$ で $L_{0}=L_{1}=1$, $M_{0}=1$, $M_{1}=2$ とすると添字は同型だが、和は $2$ と $3$ で $\not\sim_{2}$（\ref{model:finite-order-n-equivalence}）。
+- **$T_{n}$ が有限**（\ref{model:n-classes-finite}）：(2) の後半で \ref{model:ef-theorem} を使うためだけに使った。前半（ゲームの形）はそれを使わない。
+- **選択公理**：成分のゲームの必勝戦略は、1 回のゲームの中で高々 $n$ 組についてだけ選べばよいので、選択公理は要らない。
+:::
+:::
+
+::: corollary 合成定理の帰結 {#model:order-sum-composition-cor keywords="n-equivalence is a congruence for sums, products and reversal" index="n 同値と和・積|えぬどうちとわ・せき"}
+1. $L\sim_{n}L'$, $M\sim_{n}M'$ なら $L+M\sim_{n}L'+M'$ である。
+2. $L\sim_{n}M$ かつ $I\sim_{n}J$ なら $L\cdot I\sim_{n}M\cdot J$ である。
+3. $L\sim_{n}M$ なら $L^{*}\sim_{n}M^{*}$ である。
+:::
+
+::: proof
+**(1)** \ref{model:order-sum-composition.1} の $I=2$ の場合である。
+
+**(2)** $t\defeq\tau_{n}(L)=\tau_{n}(M)$ とおくと、$I^{(n)}$ では $P_{t}=I$、他の $P_{t'}$ は空であり、$J^{(n)}$ も同様である。$G_{n}(I,J)$ での受け手の必勝戦略は、最後の対応が $<$ と等号を保ち、$P_{t}$（全体）と $P_{t'}$（空）も自動的に保つので、$G_{n}(I^{(n)},J^{(n)})$ の必勝戦略でもある。\ref{model:order-sum-composition.2} から従う。
+
+**(3)** $L^{*}$ と $M^{*}$ の元の集合は $L,M$ と同じで、対応が $<$ を保つことと $>$ を保つことは同じである。ゆえに $G_{n}(L,M)$ の必勝戦略がそのまま $G_{n}(L^{*},M^{*})$ の必勝戦略になる。
+:::
+
+次の補題は、1 手目で選ばれた点で順序を二つに切り、残りのゲームを切れた二つの部分のゲームに帰着させる。
+
+::: lemma 切断による分解 {#model:split-game keywords="splitting lemma: (A,a) and (B,b) are n-equivalent if the initial and final segments are" index="切断による分解|せつだんによるぶんかい"}
+線形順序 $A,B$ と $a\in A$, $b\in B$ について、$A_{<a}\sim_{n}B_{<b}$ かつ $A_{>a}\sim_{n}B_{>b}$ なら、受け手は $G_{n}(A,a;B,b)$ に勝つ。したがって、すべての $a\in A$ にこの性質をもつ $b\in B$ があり、すべての $b\in B$ にこの性質をもつ $a\in A$ があれば、$A\sim_{n+1}B$ である。
+:::
+
+::: proof
+受け手は二つのゲーム $G_{n}(A_{<a},B_{<b})$ と $G_{n}(A_{>a},B_{>b})$ の必勝戦略を並行して使う。攻め手が $A_{<a}$（$B_{<b}$）の元を選べば前者の戦略で、$A_{>a}$（$B_{>b}$）の元を選べば後者の戦略で応じ、$a$（$b$）を選べば $b$（$a$）で応じる。それぞれのゲームの手は $n$ 回以下である。終わりの対応は、同じ部分の中では各ゲームの部分同型、異なる部分の間では「$A_{<a}<\{a\}<A_{>a}$ と $B_{<b}<\{b\}<B_{>b}$」の並びで順序が決まるので、$a\mapsto b$ を含めて部分同型である。後半は、攻め手の 1 手目に対してこの $b$（または $a$）で応じれば、残りが $G_{n}(A,a;B,b)$ になることから従う。
+:::
+
+::: supplement
+**歴史と一般化.** 直積や和の理論を成分の理論から計算する定理は、一般に**フェファーマン＝ヴォートの定理**と呼ばれるとされる（未確認）。線形順序の和に対する上の形は、シェラハらの「合成法」の出発点とされる（未確認）。
+
+**逆は成り立たない.** 和が $\sim_{n}$ でも、ラベル付きの添字順序が $\sim_{n}$ とは限らない。たとえば $\omega$ は $1\cdot\omega$（添字 $\omega$、成分 $1$）とも $\sum_{i\in1}\omega$（添字 $1$、成分 $\omega$）とも書け、二つのラベル付きの添字順序は $n\ge2$ で $\sim_{n}$ でない（添字 $\omega$ と $1$ は「異なる 2 元がある」$\exists x\,\exists y\,x<y$ で区別される）。
+
+**似た定理.** 合成定理は「$n$ 同値類どうしの和」という演算 $\tau_{n}(L)\oplus\tau_{n}(M)\defeq\tau_{n}(L+M)$ が well-defined であることを言う。$T_{n}$ は有限なので、これは有限の半群（結合律は和の結合律から）であり、有限オートマトンの理論とつながる。線形順序の理論の決定可能性はこの観点から証明されるとされる（未確認。\see[線形順序の理論の決定可能性]{model:linear-order-theory-decidable}）。
+:::
+
+## 順序数の $n$ 同値 {#model:sec-efl-ordinals}
+
+合成定理と切断による分解を使って、順序数の $n$ 同値を調べる。まず、順序数の中の点で切ったときの二つの部分の型を求める。
+
+::: lemma 順序数の切断 {#model:ordinal-cut}
+順序数 $a<\alpha$ について、$\alpha_{<a}=a$ であり、$\alpha_{>a}$ は $a+1+\varepsilon=\alpha$ となる順序数 $\varepsilon$（ただ一つ存在する）と同型である。
+:::
+
+::: proof
+$\alpha_{<a}=\{x\in\alpha\mid x\in a\}=a$ である（$a\subseteq\alpha$）。$a+1\le\alpha$ なので、\ref{set:ordinal-addition-laws.9} から $(a+1)+\varepsilon=\alpha$ となる $\varepsilon$ がただ一つある。\ref{set:ordinal-addition-structure.1} から $\alpha=(a+1)\cup\{a+1+\eta\mid\eta<\varepsilon\}$ であり、$x\in a+1$ は $x\le a$ と同じなので、$\alpha_{>a}=\{a+1+\eta\mid\eta<\varepsilon\}$ である。\ref{set:ordinal-addition-structure.2} から $\eta\mapsto a+1+\eta$ は狭義増加なので、$\varepsilon$ から $\alpha_{>a}$ への同型である。
+:::
+
+::: theorem $\omega^{n}\cdot\delta+\gamma$ の $n$ 同値 {#model:omega-power-n-equivalence keywords="omega^n times delta plus gamma is n-equivalent to omega^n times delta' plus gamma for delta, delta' at least 1" index="順序数の n 同値|じゅんじょすうのえぬどうち"}
+$n\in\omega$、順序数 $\delta,\delta'\ge1$ と任意の順序数 $\gamma$ について
+$$
+\omega^{n}\cdot\delta+\gamma\ \sim_{n}\ \omega^{n}\cdot\delta'+\gamma
+$$
+である。
+:::
+
+::: intuition
+量化子の深さ $n$ の文から見ると、$\omega^{n}$ のブロックを何個（1 個以上）並べても区別がつかない。深さ $n$ の質問では「$\omega^{n}$ の大きさのブロックが 2 つ目に入ったかどうか」まで追いきれないからである。末尾の $\gamma$ は共通なので、そのまま付け加えてよい。
+:::
+
+::: proof
+$n$ についての帰納法で示す。$n=0$ では $\sim_{0}$ はつねに成り立つ。$n\ge1$ とし、$n-1$ のときの主張を仮定する。$\theta\defeq\omega^{n-1}$ とおくと $\omega^{n}=\theta\cdot\omega$ である（\ref{set:ordinal-exponentiation} の後者の場合）。
+
+**Step 1.** 【主張：$a<\omega^{n}\cdot\delta$ を $a=\theta\cdot\mu+\gamma_{0}$（$\gamma_{0}<\theta$）と書くと、$\mu+1<\omega\cdot\delta$ である】書き方は \ref{set:ordinal-multiplication-laws.9}（$\theta>0$）による。$\mu\ge\omega\cdot\delta$ なら、積の単調性（\ref{set:ordinal-multiplication-laws.6}）と結合律から $a\ge\theta\cdot\mu\ge\theta\cdot\omega\cdot\delta=\omega^{n}\cdot\delta$ となり矛盾するので、$\mu<\omega\cdot\delta$ である。$\mu=\omega\cdot\rho+k$（$k<\omega$）と書くと、$\rho\ge\delta$ なら $\mu\ge\omega\cdot\delta$ となるので $\rho<\delta$ である。ゆえに $\mu+1=\omega\cdot\rho+(k+1)<\omega\cdot\rho+\omega=\omega\cdot(\rho+1)\le\omega\cdot\delta$ である。ここで不等号は和の右の引数についての狭義増加（\ref{set:ordinal-addition-laws.6}）、等号は \ref{set:ordinal-multiplication-laws.4}、最後の $\le$ は $\rho+1\le\delta$ と積の右の引数についての増加（\ref{set:ordinal-multiplication-laws.6}）による。
+
+**Step 2.** 【主張：$a$ で切った後ろの部分は $T_{0}+\theta\cdot\nu$（$\nu\ge1$）と同型である。ここで $T_{0}$ は $\gamma_{0}+1+T_{0}=\theta$ となる順序数で、$\gamma_{0}$ だけで決まる】Step 1 と \ref{set:ordinal-addition-laws.9} から $(\mu+1)+\nu=\omega\cdot\delta$ となる $\nu$ があり、$\mu+1\neq\omega\cdot\delta$ なので $\nu\ge1$ である。左分配律（\ref{set:ordinal-multiplication-laws.3}）と結合律から
+$$
+\begin{aligned}
+\omega^{n}\cdot\delta&=\theta\cdot(\mu+1)+\theta\cdot\nu=\theta\cdot\mu+\theta+\theta\cdot\nu\\
+&=\theta\cdot\mu+\gamma_{0}+1+T_{0}+\theta\cdot\nu=a+1+(T_{0}+\theta\cdot\nu)
+\end{aligned}
+$$
+である。\ref{model:ordinal-cut} の $\varepsilon$ の一意性から、$(\omega^{n}\cdot\delta)_{>a}\cong T_{0}+\theta\cdot\nu$ となる。
+
+**Step 3.** 【主張：$\omega^{n}\cdot\delta\sim_{n}\omega^{n}$】\ref{model:split-game} を $A=\omega^{n}\cdot\delta$, $B=\omega^{n}$（$\sim_{n-1}$ について）に当てはめる。$a=\theta\cdot\mu+\gamma_{0}\in A$ に対し、$\mu=0$ なら $b\defeq\gamma_{0}$、$\mu\ge1$ なら $b\defeq\theta+\gamma_{0}$ とおく。$b<\theta\cdot2\le\omega^{n}$ なので $b\in B$ である。前の部分：$\mu=0$ なら $a=b$ である。$\mu\ge1$ なら $a=\theta\cdot\mu+\gamma_{0}$ と $b=\theta\cdot1+\gamma_{0}$ は帰納法の仮定から $\sim_{n-1}$ である。後ろの部分：Step 2 を $A$ と $B$（$\delta=1$ の場合）に当てはめると、それぞれ $T_{0}+\theta\cdot\nu$ と $T_{0}+\theta\cdot\nu'$（$\nu,\nu'\ge1$、$T_{0}$ は共通）である。帰納法の仮定（$\gamma=0$）から $\theta\cdot\nu\sim_{n-1}\theta\cdot\nu'$ であり、\ref{model:order-sum-composition-cor.1} から後ろの部分も $\sim_{n-1}$ である。逆に $b\in B$ に対しては $a\defeq b\in A$（$\omega^{n}\le\omega^{n}\cdot\delta$）をとると、前の部分は等しく、後ろの部分は同じく $T_{0}+\theta\cdot\nu$ と $T_{0}+\theta\cdot\nu'$ の形で $\sim_{n-1}$ である。\ref{model:split-game} から $A\sim_{n}B$ である。
+
+**Step 4.** 【主張：一般の場合】Step 3 から $\omega^{n}\cdot\delta\sim_{n}\omega^{n}\sim_{n}\omega^{n}\cdot\delta'$ であり、$\sim_{n}$ は同値関係である。$\gamma\sim_{n}\gamma$ と \ref{model:order-sum-composition-cor.1} から、$\gamma$ を後ろに加えても $\sim_{n}$ が保たれる。
+
+::: hypcheck
+- **$\delta,\delta'\ge1$**：Step 1 で $\omega\cdot\delta$ が $\mu+1$ より大きいこと（したがって $\nu\ge1$）を導くのに使った。外すと偽：$\delta=0$ なら $\omega^{n}\cdot0+\gamma=\gamma$ で、たとえば $n=1$, $\gamma=0$ では空の順序と $\omega$ は $\not\sim_{1}$ である。
+- **$n$ と $\omega^{n}$ の指数が一致していること**：Step 3 で帰納法の仮定を指数 $n-1$、深さ $n-1$ で使った。深さを上げると偽：$\omega^{k}$ と $\omega^{k+1}$ は深さ $2k+2$ で区別される（\ref{model:limit-formulas}）。
+- **選択公理**：使っていない（順序数の算術は $\ZF$ で行える）。
+:::
+:::
+
+::: corollary $\omega^{k}$ の $n$ 同値 {#model:omega-k-n-equivalence keywords="omega^k and omega^k' are n-equivalent for k, k' at least n" index="ωのべきの n 同値|おめがのべきのえぬどうち"}
+順序数 $k,k'\ge n$ について $\omega^{k}\sim_{n}\omega^{k'}$ である。特に有限の $k,k'\ge n$ について $\omega^{k}\equiv_{n}\omega^{k'}$ である。
+:::
+
+::: proof
+\ref{set:ordinal-addition-laws.9} から $k=n+\kappa$ となる $\kappa$ があり、\ref{set:ordinal-exponentiation-laws.1} から $\omega^{k}=\omega^{n}\cdot\omega^{\kappa}$ である。$\omega^{\kappa}\ge1$（\ref{set:ordinal-exponentiation-basic.2}）なので、\ref{model:omega-power-n-equivalence}（$\gamma=0$）から $\omega^{k}\sim_{n}\omega^{n}$ である。$k'$ についても同様であり、推移律から従う。
+:::
+
+::: corollary 整列順序は $\omega^{\omega}$ 未満の順序数と $n$ 同値 {#model:ordinal-below-omega-omega keywords="every well-order is n-equivalent to an ordinal below omega^n times 2, hence below omega^omega" index="整列順序の n 同値類|せいれつじゅんじょのえぬどうちるい"}
+空でない整列順序 $W$ と $n\in\omega$ について、$W\equiv_{n}\beta$ となる順序数 $\beta$ で $0<\beta<\omega^{n}\cdot2$ を満たすものがある。特に $0<\beta<\omega^{\omega}$ にとれる。ただし $\beta$ は $n$ に依存し、すべての $n$ について共通の $\beta<\omega^{\omega}$ がとれるとは限らない（\see{model:omega-omega-remainder} の後の例：$W=\omega^{\omega}$）。
+:::
+
+::: intuition
+深さを $n$ に固定すれば、どんなに大きな整列順序も、$\omega^{n}\cdot2$ より小さい順序数と見分けがつかない。巨大な順序数の「大きさ」は、深さ $n$ の文からは $\omega^{n}$ の何倍かという部分が見えず、その余りだけが見える。
+:::
+
+::: proof
+$W$ はある順序数 $\alpha$ と同型である（\ref{set:ordinal-type}）。\ref{set:ordinal-multiplication-laws.9} から $\alpha=\omega^{n}\cdot\delta+\gamma$（$\gamma<\omega^{n}$）と書ける。$\delta=0$ なら $\beta\defeq\alpha=\gamma<\omega^{n}$ とする。$\delta\ge1$ なら、\ref{model:omega-power-n-equivalence} から $\alpha\sim_{n}\omega^{n}+\gamma\defeq\beta$ であり、$\beta<\omega^{n}+\omega^{n}=\omega^{n}\cdot2$ である。どちらの場合も $\beta>0$ である（前者は $W\neq\varnothing$ から、後者は $\omega^{n}\ge1$ から）。$W$ と $\beta$ はともに空でないので、\ref{model:ef-theorem} から $\sim_{n}$ は $\equiv_{n}$ と同じである。最後に $\omega^{n}\cdot2\le\omega^{n}\cdot\omega=\omega^{n+1}<\omega^{\omega}$ である（\ref{set:ordinal-exponentiation-basic.3}）。
+:::
+
+::: supplement
+**有限個の代表.** \ref{model:n-classes-finite} から整列順序の $\sim_{n}$ 類は有限個であり、上の系はその代表を $\omega^{n}\cdot2$ 未満の順序数から選べることを言う。ゆえに「$\mathrm{qr}\le n$ の文 $\varphi$ がある整列順序で成り立つか」は「$\omega^{n}\cdot2$ 未満のある順序数で成り立つか」と同じであり、これが整列順序の理論の決定可能性の出発点になる（\see[整列順序の理論の決定可能性]{model:well-order-theory-decidable}）。
+:::
+
+次に、$n$ を固定しない初等的同値を調べる。まず、深さを上げると $\omega^{k}$ どうしが区別できることを、極限点を表す論理式で確かめる。
+
+::: proposition 極限点の論理式 {#model:limit-formulas keywords="formulas Lim_j defining positive multiples of omega^j in ordinals; omega^omega is not elementarily equivalent to any smaller ordinal" index="極限点の論理式|きょくげんてんのろんりしき"}
+論理式 $\mathrm{Lim}_{j}(x)$ を
+$$
+\begin{aligned}
+\mathrm{Lim}_{0}(x)&\defeq\exists y\,(y<x),\\
+\mathrm{Lim}_{j+1}(x)&\defeq\exists y\,(y<x)\wedge\forall y\,\bigl(y<x\to\exists z\,(y<z\wedge z<x\wedge\mathrm{Lim}_{j}(z))\bigr)
+\end{aligned}
+$$
+で定める（$\mathrm{qr}(\mathrm{Lim}_{j})=2j+1$）。
+1. 順序数 $\alpha$ と $x\in\alpha$ について、$\alpha\models\mathrm{Lim}_{j}[x]$ であることと、ある順序数 $\xi\ge1$ で $x=\omega^{j}\cdot\xi$ となることは同値である。
+2. 文 $\sigma_{k}\defeq\exists x\,\mathrm{Lim}_{k}(x)$（$\mathrm{qr}=2k+2$）は、順序数 $\alpha$ で成り立つことと $\omega^{k}<\alpha$ が同値である。
+3. 有限の $k$ について $\omega^{k}\not\equiv_{2k+2}\omega^{k+1}$ である。また $\omega^{\omega}$ は $\omega^{\omega}$ 未満のどの順序数とも初等的同値でない。
+:::
+
+::: proof
+**(1)** $j$ についての帰納法による。$j=0$ では、$\mathrm{Lim}_{0}[x]$ は $x>0$、すなわち $x=\omega^{0}\cdot x$ で $x\ge1$ ということである。$j$ で成り立つとして $j+1$ を示す。$\theta\defeq\omega^{j}$ とおき、$x>0$ を $x=\theta\cdot\mu+r$（$r<\theta$）と書く。帰納法の仮定から、$\mathrm{Lim}_{j+1}[x]$ は「$x>0$ で、どの $y<x$ についても $y<z<x$ となる $\theta$ の正の倍数 $z$ がある」ことである。
+
+**Step 1.** 【主張：$r>0$ または $\mu$ が後続順序数なら、$\mathrm{Lim}_{j+1}[x]$ は成り立たない】$r>0$ のとき $y\defeq\theta\cdot\mu<x$ とおく。$y<\theta\cdot\mu'<x$ なら、$\theta\cdot\mu<\theta\cdot\mu'$ から $\mu<\mu'$、$\theta\cdot\mu'<\theta\cdot\mu+r<\theta\cdot(\mu+1)$ から $\mu'<\mu+1$ となり、矛盾する（\ref{set:ordinal-multiplication-laws.6}）。$r=0$ で $\mu=\mu_{0}+1$ のとき $y\defeq\theta\cdot\mu_{0}<x$ とおくと、$\theta\cdot\mu_{0}<\theta\cdot\mu'<\theta\cdot(\mu_{0}+1)$ となる $\mu'$ はない。
+
+**Step 2.** 【主張：$r=0$ で $\mu$ が極限順序数なら、$x$ は $\omega^{j+1}$ の正の倍数で、$\mathrm{Lim}_{j+1}[x]$ が成り立つ】$\mu=\omega\cdot\xi+k$（$k<\omega$）と書くと、$\mu$ が極限なので $k=0$、$\mu\neq0$ なので $\xi\ge1$ である。ゆえに $x=\theta\cdot\omega\cdot\xi=\omega^{j+1}\cdot\xi$ である。$y<x$ を $y=\theta\cdot\mu_{1}+r_{1}$（$r_{1}<\theta$）と書くと $\mu_{1}<\mu$ であり、$\mu$ が極限なので $\mu_{1}+1<\mu$ である。$z\defeq\theta\cdot(\mu_{1}+1)$ は $\theta$ の正の倍数で、$y<z<x$ である。
+
+**Step 3.** 【主張：(1) の $j+1$ の場合】$x=\omega^{j+1}\cdot\xi$（$\xi\ge1$）なら、$x=\theta\cdot(\omega\cdot\xi)+0$ である。$\omega\cdot\xi$ は $0$ でなく、後続順序数でもない：$\omega\cdot\xi=\zeta+1$ と仮定して $\zeta=\omega\cdot\xi_{1}+k$（$k<\omega$）と書くと $\omega\cdot\xi+0=\omega\cdot\xi_{1}+(k+1)$ となり、割り算の一意性（\ref{set:ordinal-multiplication-laws.9}）から $0=k+1$ となって矛盾する。ゆえに $\omega\cdot\xi$ は極限順序数で、Step 2 から $\mathrm{Lim}_{j+1}[x]$ が成り立つ。逆に $\mathrm{Lim}_{j+1}[x]$ が成り立てば、Step 1 から $r=0$ で $\mu$ は後続順序数でなく、$x>0$ から $\mu\neq0$ なので $\mu$ は極限順序数であり、Step 2 から $x$ は $\omega^{j+1}$ の正の倍数である。
+
+**(2)** (1) から、$\sigma_{k}$ は「$\alpha$ に $\omega^{k}$ の正の倍数がある」ことである。最小の正の倍数は $\omega^{k}\cdot1=\omega^{k}$ なので（\ref{set:ordinal-multiplication-laws.6}）、これは $\omega^{k}\in\alpha$、すなわち $\omega^{k}<\alpha$ と同値である。
+
+**(3)** (2) から $\sigma_{k}$ は $\omega^{k+1}$ で成り立ち（$\omega^{k}<\omega^{k+1}$）、$\omega^{k}$ で成り立たない。$\alpha<\omega^{\omega}$ なら、$\omega^{\omega}=\sup_{k}\omega^{k}$ なのである $k$ で $\alpha<\omega^{k}$ となり、$\sigma_{k}$ は $\alpha$ で偽、$\omega^{\omega}$ で真である。
+:::
+
+::: proposition $\omega^{\omega}$ の倍数の吸収 {#model:omega-omega-remainder keywords="omega^omega times delta plus gamma is elementarily equivalent to omega^omega plus gamma; every ordinal is elementarily equivalent to one below omega^omega times 2" index="ωのω乗の倍数の吸収|おめがのおめがじょうのばいすうのきゅうしゅう"}
+順序数 $\delta,\delta'\ge1$ と $\gamma$ について、$\omega^{\omega}\cdot\delta+\gamma\equiv\omega^{\omega}\cdot\delta'+\gamma$ である。したがって、すべての順序数は $\omega^{\omega}\cdot2$ 未満のある順序数と初等的同値である。
+:::
+
+::: proof
+$n\in\omega$ を任意にとる。$n+\omega=\omega$（\ref{set:ordinal-arithmetic-counterexamples.1}）と \ref{set:ordinal-exponentiation-laws.1} から $\omega^{\omega}=\omega^{n+\omega}=\omega^{n}\cdot\omega^{\omega}$ である。ゆえに積の結合律から $\omega^{\omega}\cdot\delta+\gamma=\omega^{n}\cdot(\omega^{\omega}\cdot\delta)+\gamma$ であり、$\delta'$ についても同様である。$\omega^{\omega}\cdot\delta,\ \omega^{\omega}\cdot\delta'\ge1$ なので、\ref{model:omega-power-n-equivalence} から両者は $\sim_{n}$ である。$n$ は任意なので初等的同値である。後半：順序数 $\alpha$ を $\alpha=\omega^{\omega}\cdot\delta+\gamma$（$\gamma<\omega^{\omega}$）と書き、$\delta=0$ なら $\alpha$ 自身、$\delta\ge1$ なら $\omega^{\omega}+\gamma<\omega^{\omega}\cdot2$ をとればよい。
+:::
+
+::: example
+$\omega^{\omega}\equiv\omega^{\omega}\cdot2$ だが、両者は同型でない（$\omega^{\omega}\cdot2$ には始切片が $\omega^{\omega}$ と同型な元 $\omega^{\omega}$ があり、$\omega^{\omega}$ にはない）。一方 \ref{model:limit-formulas.3} から、$\omega^{\omega}$ は $\omega^{\omega}$ 未満のどの順序数とも初等的同値でない。したがって「すべての整列順序はある $\omega^{\omega}$ 未満の順序数と初等的同値である」という主張は成り立たず、正しいのは $n$ を固定した \ref{model:ordinal-below-omega-omega} と、$\omega^{\omega}\cdot2$ 未満とした \ref{model:omega-omega-remainder} である。
+:::
+
+::: fact 順序数の初等的同値の分類 {#model:ordinal-elementary-classification keywords="Mostowski-Tarski classification of ordinals up to elementary equivalence" index="順序数の初等的同値の分類|じゅんじょすうのしょとうてきどうちのぶんるい"}
+順序数 $\alpha,\beta$ を $\alpha=\omega^{\omega}\cdot\delta+\gamma$, $\beta=\omega^{\omega}\cdot\delta'+\gamma'$（$\gamma,\gamma'<\omega^{\omega}$）と書く。$\alpha\equiv\beta$ であるための必要十分条件は、$\gamma=\gamma'$ であり、かつ「$\delta=\delta'=0$」か「$\delta,\delta'\ge1$」であることである。（モストフスキとタルスキによるとされる（未確認）。十分性は \ref{model:omega-omega-remainder} で示した。必要性、すなわち $\omega^{\omega}\cdot2$ 未満の異なる順序数が初等的同値でないことは、カントール標準形の各係数を \ref{model:limit-formulas} のような論理式で読み取ることで示されるが、本サイトでは証明しない。）
+:::
+
+::: supplement
+**深さと指数の関係.** \ref{model:omega-k-n-equivalence} は $\omega^{k}\sim_{k}\omega^{k+1}$ を、\ref{model:limit-formulas.3} は $\omega^{k}\not\equiv_{2k+2}\omega^{k+1}$ を与える。区別に必要な深さのちょうどの値はここでは決めない。
+
+**高い視点.** 合成定理は「$\sim_{n}$ は和と両立する同値関係である」という代数的な事実で、$\sim_{n}$ 類の集合 $T_{n}$ は和について有限の半群をなす。$\omega^{n}\cdot\delta$ の類が $\delta\ge1$ によらないことは、この半群の中で「$\omega$ 回の和」という操作の繰り返しが有限回で止まる（$x+x=x$ となる元に達する）ことの一つの現れと見ることができる。
+:::
+
+## 問題 {#model:sec-efl-problems}
+
+::: problem ★ 基本：$\omega$ と $\omega\cdot2$ {#model:prob-efl-omega-two}
+$\omega\sim_{2}\omega\cdot2$ を \ref{model:split-game} で示し、$\omega\not\equiv_{3}\omega\cdot2$ を $\mathrm{qr}=3$ の文で示せ。
+:::
+
+::: solution
+*$\sim_{2}$.* \ref{model:split-game} を $n=1$ で使う。$\sim_{1}$ は「両方空か、両方空でない」ことである：両方空でなければ、攻め手が選んだ 1 点に相手側の任意の 1 点で応じると、1 組の対応はつねに部分同型である。$\omega\cdot2$ の点 $a$ の前の部分は $a=0$ のときだけ空で、後ろの部分はつねに空でない。$\omega$ でも同じである。ゆえに $a=0$ には $0$、$a\neq0$ には $1$ で応じ（逆向きも同様）、前後の部分が $\sim_{1}$ になる。
+
+*$\not\equiv_{3}$.* 文 $\exists x\,\bigl(\exists y\,(y<x)\wedge\forall y\,(y<x\to\exists z\,(y<z\wedge z<x))\bigr)$ は「極限点がある」を表し、$\mathrm{qr}=3$ である。$\omega\cdot2$ では点 $\omega$ が極限点で真、$\omega$ では $0$ 以外のすべての点に直前の点があるので偽である。
+:::
+
+::: problem ★ 基本：$n$ 同値な小さい順序数 {#model:prob-efl-small-ordinal}
+$\omega^{3}\cdot2+\omega+5$ と $\sim_{2}$ である順序数を $\omega^{2}\cdot2$ 未満から一つ求めよ。
+:::
+
+::: solution
+$\omega^{3}\cdot2=\omega^{2}\cdot(\omega\cdot2)$ なので、$\omega^{3}\cdot2+\omega+5=\omega^{2}\cdot(\omega\cdot2)+(\omega+5)$ で、$\omega+5<\omega^{2}$ である。\ref{model:omega-power-n-equivalence}（$n=2$, $\delta=\omega\cdot2$, $\delta'=1$, $\gamma=\omega+5$）から、これは $\omega^{2}+\omega+5$ と $\sim_{2}$ であり、$\omega^{2}+\omega+5<\omega^{2}\cdot2$ である。
+:::
+
+::: problem ★★ 標準：$\zeta$ と $\zeta+\zeta$ {#model:prob-efl-zeta}
+$\zeta\equiv\zeta+\zeta$ を示せ。
+:::
+
+::: solution
+\ref{model:linear-order-game} の証明を、無限の隔たりを許して繰り返す。$\zeta+\zeta$ の 2 点の隔たりを、同じブロックなら差の絶対値、異なるブロックなら $\infty$ と定め、$\zeta$ の隔たりは差の絶対値とする。両端に仮想の点 $-\infty,+\infty$ を加え、それらと他の点との隔たりも $\infty$ とする。隔たり $d,d'$ が「$\ell$ について合う」とは、$d=d'$ であるか、$d,d'\ge2^{\ell}$（$\infty$ を含む）であることとする。$x\le y\le z$ なら $d(x,z)=d(x,y)+d(y,z)$（$\infty$ を含む和）が両方の順序で成り立つことに注意する。
+
+受け手は、$i$ 回の手の後、仮想の点を含めた選ばれた点の間で (1) 大小が一致し、(2) すべての隔たりが $n-i$ について合う、という不変条件を保つ。$i=0$ では仮想の点どうしの隔たりがともに $\infty$ なので成り立つ。攻め手が一方の順序で、選ばれた点の中で直前の $a_{s}$ と直後の $a_{t}$ の間に点 $a$ を選んだとし、$m\defeq n-i-1$ とおく。$d(a_{s},a_{t})=d(b_{s},b_{t})$（有限）なら、$a_{s},a_{t}$ と $b_{s},b_{t}$ はそれぞれ同じブロックにあり、$b\defeq b_{s}+(a-a_{s})$ で応じる。そうでなければ両方とも $2^{m+1}$ 以上である。$d(a_{s},a)<2^{m}$ なら $a_{s}$ は実際の点で、$b\defeq b_{s}+(a-a_{s})$（$b_{s}$ と同じブロック）で応じる。$d(a,a_{t})<2^{m}$ なら同様に $b_{t}$ から測って応じる。両方 $2^{m}$ 以上なら、$b_{s},b_{t}$ からの隔たりがともに $2^{m}$ 以上の点 $b$ を間にとる（$b_{s}$ が実際の点なら $b_{s}+2^{m}$ か、$b_{s}$ と $b_{t}$ が同じブロックならその中点付近、$b_{s}=-\infty$ なら $b_{t}-2^{m}$ か任意の点）。いずれでも $b$ は $b_{s},b_{t}$ の真の間にあり、$a$ と $a_{s},a_{t}$ の隔たりと $b$ と $b_{s},b_{t}$ の隔たりは $m$ について合う。他の点との隔たりは、上の加法性と \ref{model:linear-order-game} の証明と同じ議論で $m$ について合う。$i=n$ で (1) から対応は部分同型である。ゆえにすべての $n$ で $\zeta\sim_{n}\zeta+\zeta$ であり、$\zeta\equiv\zeta+\zeta$ である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

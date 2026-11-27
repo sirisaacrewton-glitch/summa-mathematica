@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>順序型とその演算 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/02-model-theory/05-linear-orders/01-order-types.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 順序型とその演算 {#model:page-order-types keywords="order type, linear order, order embedding, reverse order, ordered sum, lexicographic product, omega, zeta, eta, lambda, arithmetic of order types, convex set, cut, gap, jump, Dedekind complete, Dedekind completion"}
+
+整列集合の順序型は順序数で表され、その和と積が順序数の算術であった（\ref{set:page-natural-numbers}）。本ページでは整列していない線形順序まで範囲を広げ、**順序型**を「同型なら同じ」とみる線形順序の類として扱う。整数・有理数・実数の順序の型 $\zeta$・$\eta$・$\lambda$ はその代表例であり、和 $\alpha+\beta$・一般の和 $\sum_{i\in I}\alpha_{i}$・積 $\alpha\cdot\beta$・逆順序 $\alpha^{\ast}$ によって多くの型が作れる。順序数の場合と同じく結合律と左分配律は成り立つが、可換性・右分配律・簡約律は成り立たない（\ref{model:order-type-arithmetic}, \ref{model:order-arithmetic-counterexamples}）。後半では、線形順序の「切れ目」を切断で分類し、端点のない稠密線形順序に切れ目を埋めた**デデキント完備化**が一意に存在することを示す（\ref{model:dedekind-completion-order}）。これにより、実数の順序の型 $\lambda$ は有理数の順序の型 $\eta$ だけから決まる。次のページ（\see{model:page-countable-orders}）では、$\eta$ と $\lambda$ を順序の性質だけで特徴付ける。
+
+> 資料：参考書なし（標準的に知られている内容を本サイトで組み立てた）。線形順序の体系的な教科書として J. G. Rosenstein『Linear Orderings』（1982 年とされる）が知られているが、本ページはその記述と照合していない。
+
+## 記法と定義の確認 {#model:sec-ot-notation}
+
+::: notation
+- 本系列は $\ZF$ で議論し、選択公理（AC）を使う箇所は明記する。
+- 順序は**狭義**の全順序（\ref{set:total-order}：非反射律・推移律・三分律）で考え、$x\le y$ は「$x<y$ または $x=y$」の略記とする。順序同型 $\cong$ は \ref{set:order-isomorphism} の意味で、その基本性質（\ref{set:order-isomorphism-basic}）を断りなく使う。
+- 整列集合・順序数・整列集合の順序型 $\operatorname{type}(A)$ は \ref{set:well-order}, \ref{set:ordinal}, \ref{set:order-type} のとおりである。順序数の和・積は \ref{set:ordinal-addition}, \ref{set:ordinal-multiplication} で、整列集合の順序和・辞書式積（\ref{set:well-order-sum-product-def}）の型として定義されている。順序数の算術の反例（\ref{set:ordinal-arithmetic-counterexamples}）も使う。
+- モデル理論の言葉では、線形順序とは言語 $\{<\}$ の構造で \ref{model:dlo} の公理 1, 2 を満たすもののことである。ただし本系列では、順序型の算術のために空集合も線形順序として許す（モデル理論の構造として扱うときは空でないものに限る）。
+- $\N$, $\Z$, $\Q$, $\R$ にはいつもの順序を入れる。$\omega$ は自然数全体の集合（\ref{set:omega}）で、$(\omega,\in)$ と $(\N,<)$ は同じものである。実数の順序について次の標準的な性質を使う（\see{calc:reals-basic}）：上に有界な空でない部分集合は上限をもつ、$r<r'$ なら $r<q<r'$ となる $q\in\Q$ がある、最小元も最大元もない。
+- 写像 $f$ の像を $f[S]$ と書く。
+:::
+
+## 線形順序と順序型 {#model:sec-ot-linear-orders}
+
+::: definition 順序埋め込み {#model:order-embedding keywords="order embedding, order-preserving map, linear order" index="順序埋め込み|じゅんじょうめこみ"}
+線形順序とは、集合 $A$ とその上の狭義の全順序（\ref{set:total-order}）$<_{A}$ の組 $(A,<_{A})$ のことである。混乱のおそれがなければ $(A,<_{A})$ を単に $A$、$<_{A}$ を $<$ と書く。
+
+線形順序 $A,B$ について、写像 $f\colon A\to B$ が**順序埋め込み**であるとは、すべての $x,y\in A$ について
+$$
+x<y\iff f(x)<f(y)
+$$
+が成り立つことをいう。順序埋め込み $A\to B$ があるとき「$A$ は $B$ に埋め込める」といい、$A\hookrightarrow B$ と書く。全射な順序埋め込みは順序同型（\ref{set:order-isomorphism}）にほかならない。
+:::
+
+::: intuition
+順序埋め込みは、$A$ の元の並び方をそのまま $B$ の中に写すことである。像 $f[A]$ に $B$ の順序を制限したものは $A$ と同型になる。
+:::
+
+::: lemma 単調な写像は埋め込み {#model:order-preserving-embedding}
+線形順序 $A,B$ と写像 $f\colon A\to B$ について、「$x<y$ ならば $f(x)<f(y)$」が成り立てば、$f$ は順序埋め込みであり、とくに単射である。
+:::
+
+::: proof
+$f(x)<f(y)$ と仮定する。三分律より $x=y$, $x<y$, $y<x$ のいずれかが成り立つ。$x=y$ なら $f(x)<f(x)$ となって非反射律に反する。$y<x$ なら仮定より $f(y)<f(x)$ となり、$f(x)<f(y)$ と推移律から $f(x)<f(x)$ が出て、やはり矛盾する。ゆえに $x<y$ である。単射性：$x\ne y$ なら $x<y$ か $y<x$ なので $f(x)\ne f(y)$ である。
+:::
+
+::: definition 順序型 {#model:linear-order-type keywords="order type of a linear order" index="順序型|じゅんじょがた, 逆順序|ぎゃくじゅんじょ"}
+線形順序 $A$ の**順序型** $\operatorname{otp}(A)$ とは、$A$ と同型な線形順序の全体のことである。すなわち $\operatorname{otp}(A)=\operatorname{otp}(B)$ は $A\cong B$ の言い換えである。順序型をギリシャ文字 $\alpha,\beta,\gamma,\dots$ で表す。$\alpha=\operatorname{otp}(A)$, $\beta=\operatorname{otp}(B)$ のとき、$A\hookrightarrow B$ を $\alpha\hookrightarrow\beta$ とも書く（代表のとり方によらない）。
+
+線形順序 $A=(A,<)$ の**逆順序**とは、同じ集合に逆の順序を入れた $A^{\ast}\defeq(A,>)$ のことであり、$\operatorname{otp}(A)^{\ast}\defeq\operatorname{otp}(A^{\ast})$ と書く。
+:::
+
+::: intuition
+順序型は「元の名前を忘れて、並び方だけを見たもの」である。逆順序は並びを逆向きに読んだものである。
+:::
+
+同型な線形順序の全体は（空でない限り）集合にならない真のクラスであるが、本系列で順序型について述べることはすべて「$\operatorname{otp}(A)=\operatorname{otp}(B)$」すなわち $A\cong B$ の形の主張に言い換えられる。順序型そのものを集合として扱いたいときは、スコットのトリック（\see{set:scott-trick}）で同型類から階数最小の部分を取り出せばよい。整列集合 $A$ については、$A$ と同型な順序数はただ一つで（\ref{set:ordinal-type}）、$\operatorname{otp}(A)$ をその順序数 $\operatorname{type}(A)$ と同一視する。
+
+::: definition 標準的な順序型 {#model:standard-order-types keywords="omega, omega star, zeta, eta, lambda, finite order types" index="ω*|おめがすたー, ζ|ぜーた, η|いーた, λ|らむだ"}
+次の記号を使う。
+1. 自然数 $n$ を（順序数として）型 $n=\operatorname{otp}(n,\in)$ とみる。$0$ は空の線形順序の型である。
+2. $\omega\defeq\operatorname{otp}(\N,<)$、$\omega^{\ast}$ はその逆順序の型（負の整数全体 $\{\dots,-2,-1\}$ の型）。
+3. $\zeta\defeq\operatorname{otp}(\Z,<)$、$\eta\defeq\operatorname{otp}(\Q,<)$、$\lambda\defeq\operatorname{otp}(\R,<)$。
+:::
+
+::: intuition
+$\omega$ は「最初があって終わりのない」並び、$\omega^{\ast}$ はその逆、$\zeta$ は両方向に終わりのない飛び飛びの並び、$\eta$ はどの 2 点の間にも点がある可算な並び、$\lambda$ はさらに切れ目のない並びである。
+:::
+
+::: lemma 有限線形順序 {#model:finite-linear-orders keywords="finite linear orders are determined by their size" index="有限線形順序|ゆうげんせんけいじゅんじょ"}
+$n\in\omega$ とする。$n$ 元からなる線形順序はすべて $(n,\in)$ と同型である。とくに $n^{\ast}=n$ であり、有限な線形順序の型は元の個数だけで決まる。
+:::
+
+::: proof
+$A$ を線形順序とし、全単射 $p\colon n\to A$ があるとする。
+
+**Step 1（有限部分集合の最小元）.** 【主張：$A$ の空でない有限部分集合は最小元と最大元をもつ】 $k\in\omega$ についての帰納法で、$k+1$ 元の部分集合 $S$ が最小元と最大元をもつことを示す。$k=0$ なら $S$ は単集合で、その元が最小かつ最大である。$k$ で成り立つとし、全単射 $q\colon k+2\to S$ をとる。$S'\defeq q[k+1]$ は $k+1$ 元なので最小元 $m'$ と最大元 $M'$ をもつ。$x\defeq q(k+1)$ とおくと $S=S'\cup\{x\}$ であり、三分律から $m'$ と $x$ の小さいほうが $S$ の最小元、$M'$ と $x$ の大きいほうが $S$ の最大元である。
+
+**Step 2（整列性）.** 【主張：$A$ は整列集合である】 $A$ の空でない部分集合 $S$ は有限である（\ref{set:finite-basic.3}）ので、Step 1 より最小元をもつ。
+
+**Step 3（型の決定）.** 【主張：$A\cong(n,\in)$】 Step 2 と \ref{set:ordinal-type} より、$A\cong\gamma$ となる順序数 $\gamma$ がある。$\gamma\approx A\approx n$ である。$\omega\le\gamma$ なら $\omega\subseteq\gamma$ から $\omega$ が $n$ に単射で入り、$n$ が有限であること（\ref{set:finite-basic.4}）に反する。ゆえに $\gamma\in\omega$ である。$\gamma$ と $n$ はどちらも基数（\ref{set:omega-cardinal}）で対等なので、$\gamma=\lvert\gamma\rvert=\lvert n\rvert=n$ である。
+
+最後に、$(n,\ni)$ も $n$ 元の線形順序なので $(n,\in)$ と同型であり、$n^{\ast}=n$ である。
+
+::: hypcheck
+- **$A$ が有限であること**：Step 2 で部分集合の有限性に、Step 3 で $\gamma<\omega$ を示すのに使った。無限なら主張は偽である（$\omega$ と $\omega^{\ast}$ はどちらも可算無限だが、$\omega$ には最小元があり $\omega^{\ast}$ にはないので同型でない）。
+- **公理**：$\omega$ 上の帰納法（Step 1）と置換公理（\ref{set:ordinal-type} を通じて）。選択公理は使わない。
+:::
+:::
+
+::: example
+- $\zeta^{\ast}=\zeta$（$x\mapsto-x$）、$\eta^{\ast}=\eta$、$\lambda^{\ast}=\lambda$ である。一方 $\omega^{\ast}\ne\omega$ である：$\omega$ には最小元があるが $\omega^{\ast}$ にはなく、同型は最小元を最小元に写すからである。
+- 埋め込める関係 $\hookrightarrow$ は反射的かつ推移的だが、$\alpha\hookrightarrow\beta$ と $\beta\hookrightarrow\alpha$ から $\alpha=\beta$ は出ない。実際、$x\mapsto\frac{1}{2}\bigl(1+\frac{x}{1+\lvert x\rvert}\bigr)$ は $\Q$ から $\Q\cap(0,1)$ への順序埋め込みなので $\Q\hookrightarrow\Q\cap[0,1]$ であり、包含写像により $\Q\cap[0,1]\hookrightarrow\Q$ である。しかし $\Q\cap[0,1]$ には最小元があり $\Q$ にはないので、二つは同型でない。整列集合どうしなら、相互に埋め込めれば同型である（\ref{set:type-subset} から両方向の $\le$ が出る）。
+:::
+
+## 順序和 {#model:sec-ot-sums}
+
+::: definition 順序和 {#model:order-sum keywords="ordered sum of linear orders, sum of order types" index="順序和（線形順序）|じゅんじょわせんけいじゅんじょ"}
+$I$ を線形順序、$(A_{i})_{i\in I}$ を線形順序の族とする。**順序和** $\sum_{i\in I}A_{i}$ とは、集合
+$$
+\{(i,a)\mid i\in I,\ a\in A_{i}\}
+$$
+に、次の順序を入れたものである：$(i,a)<(j,b)$ とは、$i<j$ であるか、$i=j$ かつ $a<_{A_{i}}b$ であることをいう。$I$ を $\{0<1\}$ にとった和を $A_{0}+A_{1}$ と書き、同様に $A_{0}+A_{1}+\dots+A_{n-1}$ と書く。順序型については $\sum_{i\in I}\operatorname{otp}(A_{i})\defeq\operatorname{otp}\bigl(\sum_{i\in I}A_{i}\bigr)$, $\alpha+\beta\defeq\operatorname{otp}(A+B)$ と定める。
+:::
+
+::: intuition
+$\sum_{i\in I}A_{i}$ は、$I$ の各点 $i$ を線形順序 $A_{i}$ で置き換えて、$I$ の順に並べたものである。$\alpha+\beta$ は「$\alpha$ を並べ、その後ろに $\beta$ を並べる」ことである。
+:::
+
+::: lemma 順序和の基本性質 {#model:order-sum-basic}
+$I$ を線形順序、$(A_{i})_{i\in I}$, $(B_{i})_{i\in I}$ を線形順序の族とする。
+1. $\sum_{i\in I}A_{i}$ は線形順序である。各 $i$ について $\{i\}\times A_{i}$ は $A_{i}$ と同型な部分順序である。
+2. 同型の族 $(f_{i}\colon A_{i}\cong B_{i})_{i\in I}$ が与えられれば、$(i,a)\mapsto(i,f_{i}(a))$ は同型 $\sum_{i\in I}A_{i}\cong\sum_{i\in I}B_{i}$ である。また同型 $g\colon J\cong I$ があれば、$(j,a)\mapsto(g(j),a)$ は同型 $\sum_{j\in J}A_{g(j)}\cong\sum_{i\in I}A_{i}$ である。
+3. （AC）各 $i$ で $A_{i}\cong B_{i}$ ならば $\sum_{i\in I}A_{i}\cong\sum_{i\in I}B_{i}$ である。$I$ が有限なら選択公理は要らない。したがって $\alpha+\beta$ は代表のとり方によらず、$\sum_{i\in I}\alpha_{i}$ も（AC のもとで）代表によらない。
+:::
+
+::: proof
+**(1)** 非反射律：$(i,a)<(i,a)$ なら $i<i$ か $a<a$ となり、$I$ または $A_{i}$ の非反射律に反する。推移律：$(i,a)<(j,b)<(k,c)$ とすると $i\le j\le k$ である。$i<k$ なら定義から $(i,a)<(k,c)$ である。$i=k$ なら $i=j=k$ であり、$a<b<c$ から $a<c$ が出る。三分律：$i\ne j$ なら $I$ の三分律で比べられ、$i=j$ なら $A_{i}$ の三分律で比べられる。$\{i\}\times A_{i}$ の上では $(i,a)<(i,b)\iff a<b$ なので、$a\mapsto(i,a)$ は同型である。
+
+**(2)** $(i,a)\mapsto(i,f_{i}(a))$ は逆写像 $(i,b)\mapsto(i,f_{i}^{-1}(b))$ をもつので全単射である。$(i,a)<(j,a')$ の定義の二つの場合は、それぞれ $(i,f_{i}(a))<(j,f_{j}(a'))$ の二つの場合に対応する（$f_{i}$ が順序を保つことによる）。$g$ についても同様で、$j<j'\iff g(j)<g(j')$ を使う。
+
+**(3)** AC により同型 $f_{i}\colon A_{i}\cong B_{i}$ を各 $i$ について一つずつ選べば (2) が使える。$I$ が有限なら、有限個の選択は選択公理なしにできる（\ref{set:finite-choice}）。
+
+::: hypcheck
+- **選択公理**：(3) で無限個の同型を同時に選ぶところだけで使った。同型の族が具体的に与えられている場合（以下の定理の証明はすべてそうである）には要らない。
+:::
+:::
+
+::: example
+- $\omega^{\ast}+\omega=\zeta$ である。$\omega^{\ast}$ を $(\N,>)$ で表すと、$(0,n)\mapsto-n-1$, $(1,n)\mapsto n$ は $\omega^{\ast}+\omega$ から $\Z$ への全単射で、順序を保つ。
+- $1+\eta$ は最小元をもち $\eta$ はもたないので $1+\eta\ne\eta$ である。
+- $\sum_{n\in\omega}n$（長さ $0,1,2,\dots$ の有限な列をこの順に並べたもの）は整列集合で、型は $\omega$ である（各元の前にある元は有限個なので、\ref{set:type-of-initial-segment} により各元の位置は自然数になる）。
+:::
+
+## 積 {#model:sec-ot-products}
+
+::: definition 積 {#model:order-product keywords="product of order types, lexicographic product, antilexicographic order" index="積（順序型）|せきじゅんじょがた"}
+線形順序 $A,B$ の**積** $A\cdot B$ とは、定数の族の順序和
+$$
+A\cdot B\defeq\sum_{b\in B}A
+$$
+のことである。すなわち $A\cdot B$ の台集合は $B\times A$ で、$(b,a)<(b',a')$ とは、$b<b'$ であるか、$b=b'$ かつ $a<a'$ であることをいう。順序型については $\operatorname{otp}(A)\cdot\operatorname{otp}(B)\defeq\operatorname{otp}(A\cdot B)$ と定める。
+:::
+
+::: intuition
+**$\alpha\cdot\beta$ は「$\beta$ 個の $\alpha$ を、$\beta$ の順に並べたもの」である**（右の因子が並べる場所、左の因子が並べる中身）。たとえば $\omega\cdot2=\omega+\omega$（$\omega$ を 2 個並べる）であり、$2\cdot\omega$ は「$2$ 元の列を $\omega$ 個並べたもの」で $\omega$ に等しい。
+:::
+
+積の型は代表によらない：$f\colon A\cong A'$, $g\colon B\cong B'$ なら $(b,a)\mapsto(g(b),f(a))$ が同型 $A\cdot B\cong A'\cdot B'$ である（\ref{model:order-sum-basic.2} と同じ確かめ方。同型を一つずつ選ぶだけなので選択公理は要らない）。
+
+::: proposition 順序数の算術との一致 {#model:ordinal-arithmetic-agrees}
+順序数 $\alpha,\beta$ について、順序型としての和 $\alpha+\beta$ と積 $\alpha\cdot\beta$ は、順序数の和（\ref{set:ordinal-addition}）と積（\ref{set:ordinal-multiplication}）に一致する。
+:::
+
+::: proof
+順序数の和 $\alpha+\beta$ は、整列集合の順序和 $\alpha\oplus\beta$（台集合 $\alpha\times\{0\}\cup\beta\times\{1\}$）の型である（\ref{set:well-order-sum-product-def}）。$(0,\xi)\mapsto(\xi,0)$, $(1,\eta)\mapsto(\eta,1)$ は、本ページの $\alpha+\beta$（台集合 $\{0\}\times\alpha\cup\{1\}\times\beta$）から $\alpha\oplus\beta$ への全単射で、どちらの順序も「まず $0,1$ の成分を比べ、等しければ順序数の成分を比べる」ので同型である。順序数の積 $\alpha\cdot\beta$ は $\beta\otimes\alpha$ の型で、これは $\beta\times\alpha$ に第 1 成分を優先する辞書式順序を入れたもの（\ref{set:ordinal-multiplication}）であり、本ページの $\alpha\cdot\beta=\sum_{\xi\in\beta}\alpha$ と台集合も順序も同じである。
+:::
+
+::: example
+- $n\cdot\omega=\omega$（$n\ge1$）、$\omega\cdot2=\omega+\omega\ne\omega$（\ref{model:ordinal-arithmetic-agrees} と \ref{set:ordinal-arithmetic-counterexamples}）。
+- $\omega\cdot\omega^{\ast}$ は「$\omega$ を $\omega^{\ast}$ 個並べたもの」で、最小元をもたない。$\omega^{\ast}\cdot\omega$ は「$\omega^{\ast}$ を $\omega$ 個並べたもの」で、最大元をもたない。
+- $\eta\cdot2=\eta+\eta$, $2\cdot\eta$（$\eta$ の各点を 2 点で置き換えたもの）はどちらも可算である。$2\cdot\eta$ では各ブロックの 2 点の間に元がないので、$2\cdot\eta$ は稠密でない（稠密の定義は \ref{model:dense-order}）。$\eta\cdot2\cong\eta$ であることは次のページで示す（\see{model:eta-absorption}）。
+:::
+
+## 算術の法則 {#model:sec-ot-arithmetic}
+
+::: theorem 順序型の算術 {#model:order-type-arithmetic keywords="associativity of ordered sums, generalized associativity, left distributive law, reverse of a sum" index="順序型の算術|じゅんじょがたのさんじゅつ, 一般結合律（順序和）|いっぱんけつごうりつじゅんじょわ, 左分配律（順序型）|ひだりぶんぱいりつじゅんじょがた"}
+$A,B,C$ を線形順序とする。次の同型が、具体的な写像で（選択公理なしに）成り立つ。
+1. （$0$ と $1$ の性質）$0+A\cong A+0\cong A$、$1\cdot A\cong A\cdot1\cong A$、$0\cdot A$ と $A\cdot0$ は空である。
+2. （一般結合律）$J$ を線形順序、各 $j\in J$ について $I_{j}$ を線形順序、$(A_{j,i})_{i\in I_{j}}$ を線形順序の族とし、$K\defeq\sum_{j\in J}I_{j}$ とおく。このとき
+$$
+\sum_{j\in J}\ \sum_{i\in I_{j}}A_{j,i}\ \cong\ \sum_{(j,i)\in K}A_{j,i}.
+$$
+とくに $(A+B)+C\cong A+(B+C)$ である。
+3. （積の結合律）$(A\cdot B)\cdot C\cong A\cdot(B\cdot C)$。
+4. （左分配律）線形順序 $I$ と族 $(B_{i})_{i\in I}$ について $A\cdot\sum_{i\in I}B_{i}\cong\sum_{i\in I}A\cdot B_{i}$。とくに $A\cdot(B+C)\cong A\cdot B+A\cdot C$。
+5. （逆順序）$\bigl(\sum_{i\in I}A_{i}\bigr)^{\ast}=\sum_{i\in I^{\ast}}A_{i}^{\ast}$（台集合も順序も同じ）。とくに $(A+B)^{\ast}\cong B^{\ast}+A^{\ast}$、$(A\cdot B)^{\ast}=A^{\ast}\cdot B^{\ast}$、$A^{\ast\ast}=A$。
+
+順序型で書けば、$\alpha+0=0+\alpha=\alpha$, $\alpha\cdot1=1\cdot\alpha=\alpha$, $(\alpha+\beta)+\gamma=\alpha+(\beta+\gamma)$, $(\alpha\cdot\beta)\cdot\gamma=\alpha\cdot(\beta\cdot\gamma)$, $\alpha\cdot(\beta+\gamma)=\alpha\cdot\beta+\alpha\cdot\gamma$, $(\alpha+\beta)^{\ast}=\beta^{\ast}+\alpha^{\ast}$, $(\alpha\cdot\beta)^{\ast}=\alpha^{\ast}\cdot\beta^{\ast}$ である。
+:::
+
+::: intuition
+和も積も「並べる」操作なので、括弧の付け方は並び方を変えない（結合律）。$\alpha\cdot(\beta+\gamma)$ は $\beta+\gamma$ 個の $\alpha$ を並べることで、これは $\beta$ 個並べた後に $\gamma$ 個並べることと同じである（左分配律）。並びを逆から読むと、和の順番が入れ替わる。
+:::
+
+::: proof
+**Step 1（$0$ と $1$）.** 【主張：(1) が成り立つ】 $A+0$ の台集合は $\{0\}\times A$ なので、$(0,a)\mapsto a$ が同型 $A+0\cong A$ である。$0+A$ も同様に $(1,a)\mapsto a$ による。$A\cdot1=\sum_{b\in1}A$ の台集合は $\{0\}\times A$ で、$(0,a)\mapsto a$ が同型である。$1\cdot A=\sum_{a\in A}1$ の台集合は $A\times\{0\}$ で、$(a,0)\mapsto a$ が同型である。$0\cdot A=\sum_{a\in A}0$ と $A\cdot0=\sum_{b\in0}A$ の台集合は空である。
+
+**Step 2（一般結合律）.** 【主張：$\Phi(j,(i,a))\defeq((j,i),a)$ は (2) の同型である】 左辺の台集合は $j\in J$, $i\in I_{j}$, $a\in A_{j,i}$ についての $(j,(i,a))$ 全体、右辺の台集合は同じ条件の $((j,i),a)$ 全体なので、$\Phi$ は全単射である。順序を比べる。左辺では $(j,(i,a))<(j',(i',a'))$ は
+- $j<j'$、または
+- $j=j'$ かつ「$i<i'$、または $i=i'$ かつ $a<a'$」
+
+のことである。右辺では $((j,i),a)<((j',i'),a')$ は「$(j,i)<(j',i')$ in $K$、または $(j,i)=(j',i')$ かつ $a<a'$」で、$K$ の順序の定義から「$j<j'$、または $j=j'$ かつ $i<i'$、または $j=j'$ かつ $i=i'$ かつ $a<a'$」と同じである。ゆえに二つの条件は一致し、$\Phi$ は同型である。$(A+B)+C$ は $J=\{0<1\}$, $I_{0}=\{0<1\}$, $I_{1}=\{0\}$ の場合、$A+(B+C)$ は $I_{0}=\{0\}$, $I_{1}=\{0<1\}$ の場合で、どちらの $K$ も 3 元の線形順序なので、\ref{model:order-sum-basic.2} の後半で添字を付け替えれば同型である。
+
+**Step 3（積の結合律）.** 【主張：$(A\cdot B)\cdot C\cong A\cdot(B\cdot C)$】 定義から $(A\cdot B)\cdot C=\sum_{c\in C}\sum_{b\in B}A$ であり、Step 2 を $J=C$, $I_{c}=B$, $A_{c,b}=A$ に使うと、これは $\sum_{(c,b)\in K}A$ と同型である。ここで $K=\sum_{c\in C}B=B\cdot C$ なので、右辺は $A\cdot(B\cdot C)$ にほかならない。
+
+**Step 4（左分配律）.** 【主張：$A\cdot\sum_{i\in I}B_{i}\cong\sum_{i\in I}A\cdot B_{i}$】 右辺は $\sum_{i\in I}\sum_{b\in B_{i}}A$ であり、Step 2 を $J=I$, $I_{i}=B_{i}$, $A_{i,b}=A$ に使うと $\sum_{(i,b)\in K}A$ と同型である。$K=\sum_{i\in I}B_{i}$ なので、これは $A\cdot\sum_{i\in I}B_{i}$ である。
+
+**Step 5（逆順序）.** 【主張：$\bigl(\sum_{i\in I}A_{i}\bigr)^{\ast}$ と $\sum_{i\in I^{\ast}}A_{i}^{\ast}$ は台集合も順序も等しい】 台集合はどちらも $\{(i,a)\mid i\in I,\ a\in A_{i}\}$ である。左辺で $(i,a)$ が $(j,b)$ より小さいとは、もとの和で $(j,b)<(i,a)$、すなわち「$j<i$、または $j=i$ かつ $b<a$」のことである。右辺で $(i,a)$ が $(j,b)$ より小さいとは、「$I^{\ast}$ で $i$ が $j$ より小さい（$j<i$）、または $i=j$ かつ $A_{i}^{\ast}$ で $a$ が $b$ より小さい（$b<a$）」のことで、同じ条件である。$(A+B)^{\ast}$ は $I=\{0<1\}$ の場合で、$I^{\ast}$ は $1$ が先の 2 元の順序なので、添字を付け替えて $B^{\ast}+A^{\ast}$ と同型になる。$(A\cdot B)^{\ast}=\sum_{b\in B^{\ast}}A^{\ast}=A^{\ast}\cdot B^{\ast}$ である。$A^{\ast\ast}=A$ は逆の逆が元の順序であることによる。
+
+::: hypcheck
+- **線形順序であること**：各 Step で、和が線形順序であること（\ref{model:order-sum-basic.1}）と、全単射が順序の条件を両方向に保てば同型であることを使った。
+- **選択公理**：使っていない。どの同型も $(j,(i,a))\mapsto((j,i),a)$ のように具体的に書ける。
+- **左右の非対称**：Step 4 で、和をとる側（右の因子）だけを分解した。右の分配 $(\beta+\gamma)\cdot\alpha=\beta\cdot\alpha+\gamma\cdot\alpha$ は、並べる中身を分ける操作で、並べ方が入れ替わるので一般には成り立たない（\ref{model:order-arithmetic-counterexamples}）。
+:::
+:::
+
+::: counterexample 順序型の算術の反例 {#model:order-arithmetic-counterexamples keywords="non-commutativity of sums and products of order types, failure of cancellation" index="順序型の和の非可換性|じゅんじょがたのわのひかかんせい, 簡約律の失敗|かんやくりつのしっぱい"}
+1. （和は可換でない）$1+\omega=\omega\ne\omega+1$。また $\omega^{\ast}+\omega=\zeta\ne\omega+\omega^{\ast}$。
+2. （積は可換でない）$2\cdot\omega=\omega\ne\omega\cdot2$。
+3. （右分配律は成り立たない）$(1+1)\cdot\omega=\omega\ne\omega+\omega=1\cdot\omega+1\cdot\omega$。
+4. （簡約律は成り立たない）右の簡約：$0+\omega=1+\omega$ だが $0\ne1$。左の簡約：$\omega^{\ast}+0=\omega^{\ast}+1$ だが $0\ne1$。積の右の簡約：$1\cdot\omega=2\cdot\omega$ だが $1\ne2$。
+:::
+
+::: intuition
+順序数では左の簡約律（$\alpha+\beta=\alpha+\gamma\Rightarrow\beta=\gamma$）が成り立ったが（\ref{set:ordinal-addition-laws.6}）、逆順序を許すと、$1+\omega=\omega$ を逆から読んだ $\omega^{\ast}+1=\omega^{\ast}$ によって左の簡約律も壊れる。
+:::
+
+::: proof
+**(1)** 前半は \ref{model:ordinal-arithmetic-agrees} と \ref{set:ordinal-arithmetic-counterexamples.1} による。後半：$\omega^{\ast}+\omega=\zeta$ は順序和の例で示した。$\omega+\omega^{\ast}$ には最小元 $(0,0)$ があるが、$\zeta$ には最小元がない。同型は最小元を最小元に写すので、二つは同型でない。
+
+**(2)(3)** \ref{model:ordinal-arithmetic-agrees} と \ref{set:ordinal-arithmetic-counterexamples.2}, \ref[3]{set:ordinal-arithmetic-counterexamples.3} による。
+
+**(4)** 右の簡約と積の右の簡約は (1)(2) と $0+\omega=\omega$, $1\cdot\omega=\omega$（\ref{model:order-type-arithmetic.1}）から従う。左の簡約：(1) の $1+\omega=\omega$ に \ref{model:order-type-arithmetic.5} を使うと
+$$
+\omega^{\ast}+1=\omega^{\ast}+1^{\ast}=(1+\omega)^{\ast}=\omega^{\ast}
+$$
+となる（$1^{\ast}=1$ は \ref{model:finite-linear-orders}）。$\omega^{\ast}+0=\omega^{\ast}$ と合わせて、主張が成り立つ。
+:::
+
+::: supplement
+**積の左の簡約.** 積の左の簡約律（$\alpha\ne0$, $\alpha\cdot\beta=\alpha\cdot\gamma\Rightarrow\beta=\gamma$）も線形順序では成り立たない。たとえば $\eta\cdot1=\eta\cdot2$ である（\see{model:eta-absorption}）。順序数では左の簡約律が成り立つ（\ref{set:ordinal-multiplication-laws.6}）。
+
+**基数との関係.** 順序型 $\alpha=\operatorname{otp}(A)$ に濃度 $\lvert A\rvert$ を対応させると、和は基数の和、積は基数の積に写る（台集合が $\{(i,a)\}$ や $B\times A$ だから）。基数の算術は可換なので（\see{set:cardinal-sum-product}）、非可換性は並べ方の情報から生じている。
+
+**一般化.** 一般結合律（\ref{model:order-type-arithmetic.2}）は、「線形順序の線形順序による和」がふたたび線形順序による和になるという形をしている。散在的順序の分解（\see[散在的順序とハウスドルフの定理]{model:page-scattered-orders}）では、任意の線形順序を、より単純な順序の和として表すことを考える。
+:::
+
+## 区間・切断・デデキント完備化 {#model:sec-ot-cuts}
+
+::: definition 凸集合・区間 {#model:convex-set keywords="convex subset, interval, initial segment, final segment" index="凸集合（線形順序）|とつしゅうごうせんけいじゅんじょ, 区間|くかん"}
+$X$ を線形順序とする。$a,b\in X$ について、**開区間** $(a,b)\defeq\{x\in X\mid a<x<b\}$、**閉区間** $[a,b]\defeq\{x\in X\mid a\le x\le b\}$、半直線 $(\leftarrow,a)\defeq\{x\mid x<a\}$, $(a,\rightarrow)\defeq\{x\mid a<x\}$ と書き、$[a,b)$, $(\leftarrow,a]$ なども同様に定める。部分集合 $C\subseteq X$ が**凸**であるとは、$a,b\in C$, $a<x<b$ ならば $x\in C$ となることをいう。$L\subseteq X$ が下に閉じているとは、$x\in L$, $y<x$ ならば $y\in L$ となることをいう（上に閉じている、も同様）。
+:::
+
+::: intuition
+凸集合は「途中に穴のない」部分集合で、2 点を含めばその間の点もすべて含む。区間や半直線は凸であるが、凸集合は端の点をもたなくてもよい（$\Q$ の中の $\{q\mid q^{2}<2\}$ は凸だが、どの区間とも一致しない）。
+:::
+
+::: definition 稠密・端点 {#model:dense-order keywords="dense linear order, endpoints, dense subset" index="稠密（線形順序）|ちゅうみつせんけいじゅんじょ, 端点|たんてん"}
+線形順序 $X$ が**稠密**であるとは、$a<b$ ならば $a<c<b$ となる $c\in X$ があることをいう。$X$ の最小元・最大元を**端点**という。部分集合 $D\subseteq X$ が **$X$ で稠密**であるとは、$X$ の元 $a<b$ について $a<d<b$ となる $d\in D$ があることをいう。
+:::
+
+::: intuition
+稠密とは「隣り合う 2 点がない」こと、$D$ が $X$ で稠密とは「$X$ のどの 2 点の間にも $D$ の点がある」ことである。$X$ で稠密な部分集合をもつ $X$ は稠密である。$\Q$ は $\R$ で稠密である。
+:::
+
+端点のない稠密線形順序で空でないものは、\ref{model:dlo} の理論 $\mathrm{DLO}$ のモデルにほかならない。空集合と 1 元の線形順序も（条件が空虚に成り立つので）稠密である。
+
+::: definition 切断・跳躍・隙間 {#model:order-cut keywords="cut of a linear order, jump, gap" index="切断（線形順序）|せつだんせんけいじゅんじょ, 跳躍|ちょうやく, 隙間|すきま"}
+線形順序 $X$ の**切断**とは、$X$ の下に閉じた部分集合 $L$ とその補集合 $R\defeq X\setminus L$ の組 $(L,R)$ のことである（このとき $L$ のどの元も $R$ のどの元より小さい）。$L$ と $R$ がともに空でない切断を**真の切断**という。真の切断 $(L,R)$ は、
+- $L$ に最大元があり $R$ に最小元があるとき**跳躍**、
+- $L$ に最大元がなく $R$ に最小元もないとき**隙間**
+
+と呼ぶ。
+:::
+
+::: intuition
+切断は $X$ を「左右に切り分ける場所」である。跳躍は隣り合う 2 点の間を切った場所、隙間は点のないところを切った場所である。$\Q$ を $\sqrt{2}$ のところで切ると隙間になる。それ以外の切断（一方の側にだけ端がある）は、ちょうど 1 点のところを切った場所である。
+:::
+
+::: definition デデキント完備 {#model:dedekind-complete-order keywords="Dedekind complete linear order, supremum, infimum" index="デデキント完備（線形順序）|ででぎんとかんびせんけいじゅんじょ"}
+線形順序 $X$ が**デデキント完備**であるとは、上に有界な空でない部分集合がすべて上限（最小の上界）をもつことをいう。
+:::
+
+::: intuition
+上から押さえられた集合には、ちょうどその「天井」にあたる点がある、ということである。$\R$ はデデキント完備で、$\Q$ はそうでない。
+:::
+
+::: lemma 切断による言い換え {#model:cut-dense-complete keywords="dense iff no jumps, Dedekind complete iff no gaps"}
+$X$ を線形順序とする。
+1. $X$ が稠密であることと、$X$ に跳躍がないことは同値である。
+2. $X$ がデデキント完備であることと、$X$ に隙間がないことは同値である。
+3. $X$ がデデキント完備であることと、下に有界な空でない部分集合がすべて下限をもつことは同値である。
+:::
+
+::: proof
+**Step 1（(1)）.** 【主張：稠密 $\iff$ 跳躍がない】 跳躍 $(L,R)$ があれば、$m\defeq\max L$, $m'\defeq\min R$ について $m<m'$ であり、$m<c<m'$ となる $c$ は $L$ にも $R$ にも属しえない（$L$ の元は $m$ 以下、$R$ の元は $m'$ 以上）ので存在せず、$X$ は稠密でない。逆に $a<b$ で $(a,b)=\varnothing$ なら、$L\defeq(\leftarrow,a]$ は下に閉じていて、$x\notin L$ なら $a<x$ なので $b\le x$ となり、$R=[b,\rightarrow)$ である。ゆえに $(L,R)$ は跳躍である。
+
+**Step 2（完備なら隙間がない）.** 【主張：$X$ がデデキント完備なら、真の切断 $(L,R)$ は隙間でない】 $L$ は空でなく、$R$ の任意の元で上に有界なので、上限 $s$ をもつ。$s\in L$ なら $s$ は $L$ の最大元である。$s\in R$ なら、$R$ の各元は $L$ の上界なので $s$ 以上であり、$s$ は $R$ の最小元である。いずれにせよ隙間でない。
+
+**Step 3（隙間がなければ完備）.** 【主張：隙間がなければ、上に有界な空でない $S$ は上限をもつ】 $S$ に最大元があればそれが上限である。そうでないとし、$S$ の上界全体を $U$、$L\defeq X\setminus U$ とおく。$x\in L$ なら $x<s$ となる $s\in S$ があり、$y<x$ なら $y<s$ なので $y\in L$ である。ゆえに $L$ は下に閉じている。$S$ に最大元がないので $S\subseteq L$ であり、$L\ne\varnothing$ である。$S$ は有界なので $U\ne\varnothing$ である。$(L,U)$ は隙間でないので、$L$ に最大元があるか $U$ に最小元がある。$L$ の最大元 $m$ があったとすると、$m<s$ となる $s\in S\subseteq L$ があって矛盾する。ゆえに $U$ に最小元があり、それが $S$ の上限である。
+
+**Step 4（(3)）.** 【主張：上限の条件と下限の条件は同値である】 $(L,R)$ が $X$ の切断であることと $(R,L)$ が $X^{\ast}$ の切断であることは同値で、隙間は隙間に対応する。(2) より、$X$ がデデキント完備 $\iff$ $X$ に隙間がない $\iff$ $X^{\ast}$ に隙間がない $\iff$ $X^{\ast}$ がデデキント完備である。最後の条件は、$X$ で下に有界な空でない部分集合が下限をもつことである。
+
+::: hypcheck
+- Step 3 で「$S$ に最大元がない」場合に分けたのは、$S\subseteq L$ を得るためである。最大元があれば上限は明らかなので、場合分けで仮定は失われない。
+- 選択公理は使っていない。
+:::
+:::
+
+::: example
+- $\omega$ と $\zeta$ はデデキント完備である：$\Z$ の上に有界な空でない部分集合は最大元をもつ。どちらも稠密でない。
+- $\Q$ は稠密だがデデキント完備でない：$L\defeq\{q\in\Q\mid q<0\ \text{または}\ q^{2}<2\}$ とおくと $(L,\Q\setminus L)$ は隙間である。
+- $\R$ は稠密でデデキント完備である（記法の項の性質）。
+- $\omega+\omega^{\ast}$ は $(\{0\}\times\omega,\{1\}\times\omega)$ という隙間をもつ（問題 \ref{model:prob-ot-omega-omegastar}）。
+:::
+
+::: theorem デデキント完備化 {#model:dedekind-completion-order keywords="Dedekind completion of a dense linear order, completion by cuts, uniqueness of completion" index="デデキント完備化|ででぎんとかんびか"}
+$A$ を空でない端点のない稠密線形順序とする。
+1. （存在）デデキント完備で端点のない線形順序 $C$ と順序埋め込み $e\colon A\to C$ で、$e[A]$ が $C$ で稠密なものが存在する。
+2. （一意性）$(C',e')$ も 1 の条件を満たすなら、同型 $F\colon C\cong C'$ で $F\circ e=e'$ となるものがただ一つ存在する。
+
+1 の $(C,e)$ を $A$ の**デデキント完備化**と呼び、$C$ を $\overline{A}$ と書く。$C$ は稠密である。
+:::
+
+::: intuition
+$A$ の隙間をすべて点で埋め、それ以外には何も加えないものが完備化である。「$A$ の点で両側から挟める」という条件のおかげで、新しい点は $A$ のどこに入るかで決まってしまうので、完備化は一通りしかない。
+:::
+
+::: proof
+**Step 1（構成）.** 【主張：$C\defeq\{L\subseteq A\mid L\ne\varnothing,\ L\ne A,\ L\text{ は下に閉じていて最大元をもたない}\}$ に $L<L'\iff L\subsetneq L'$ で順序を入れると線形順序である】 非反射律と推移律は $\subsetneq$ の性質である。三分律：$L\not\subseteq L'$ とし、$a\in L\setminus L'$ をとる。$b\in L'$ なら、$a\le b$ とすると $L'$ が下に閉じていることから $a\in L'$ となるので、$b<a$ であり、$L$ が下に閉じていることから $b\in L$ である。ゆえに $L'\subseteq L$ であり、$L\ne L'$ なので $L'<L$ である。
+
+**Step 2（埋め込み）.** 【主張：$e(a)\defeq(\leftarrow,a)$ は $A$ から $C$ への順序埋め込みである】 $A$ に最小元がないので $e(a)\ne\varnothing$、$a\notin e(a)$ なので $e(a)\ne A$ である。下に閉じていることは推移律による。$t<a$ なら稠密性より $t<t'<a$ となる $t'$ があるので、$e(a)$ は最大元をもたない。ゆえに $e(a)\in C$ である。$a<b$ なら推移律より $e(a)\subseteq e(b)$ で、$a\in e(b)\setminus e(a)$ なので $e(a)<e(b)$ である。\ref{model:order-preserving-embedding} より $e$ は順序埋め込みである。
+
+**Step 3（像の稠密性）.** 【主張：$L<L'$ なら $L<e(b)<L'$ となる $b\in A$ がある】 $a\in L'\setminus L$ をとり、$L'$ が最大元をもたないので $a<b$ となる $b\in L'$ をとる。$x\in L$ なら、Step 1 と同じ議論で $x<a$ なので $L\subseteq e(a)\subsetneq e(b)$ であり、$L<e(b)$ である。$L'$ は下に閉じているので $e(b)\subseteq L'$ であり、$b\in L'\setminus e(b)$ なので $e(b)<L'$ である。
+
+**Step 4（端点がない）.** 【主張：$C$ は最小元も最大元ももたない】 $L\in C$ とする。$a\in L$ をとると、$e(a)\subseteq L$ かつ $a\in L\setminus e(a)$ なので $e(a)<L$ である。また $b\in A\setminus L$ をとり、$A$ に最大元がないので $b<b'$ となる $b'$ をとる。$L\subseteq e(b)$（Step 1 の議論）かつ $b\in e(b')\setminus L$ なので $L<e(b')$ である。
+
+**Step 5（完備性）.** 【主張：$C$ はデデキント完備である】 $S\subseteq C$ が空でなく、$M\in C$ で上に有界とし、$U\defeq\bigcup S$ とおく。$U$ は空でない集合の和なので空でなく、$U\subseteq M\ne A$ である。下に閉じた集合の和は下に閉じている。$U$ が最大元 $m$ をもつとすると、$m\in L$ となる $L\in S$ があり、$L$ には $m$ より大きい元があって $U$ に属するので矛盾する。ゆえに $U\in C$ である。$U$ は $S$ の各元を含むので上界であり、$S$ の上界 $L'$ は $S$ の各元を含むので $U\subseteq L'$ である。よって $U$ は $S$ の上限である。Step 2〜5 で 1 が示された。$C$ が稠密であることは Step 3 から従う。
+
+**Step 6（写像 $F$ の定義）.** 【主張：$x\in C$ について $F(x)\defeq\sup_{C'}\{e'(a)\mid a\in A,\ e(a)<x\}$ が定まる】 $C$ に最小元がないので $y<x$ となる $y$ があり、$e[A]$ の稠密性から $y<e(a_{1})<x$ となる $a_{1}$ がある。ゆえに上限をとる集合は空でない。同様に $x<e(a_{2})$ となる $a_{2}$ があり、$e(a)<x$ なら $a<a_{2}$（$e$ は順序埋め込み）なので $e'(a)<e'(a_{2})$ である。ゆえに集合は上に有界で、$C'$ のデデキント完備性から上限が存在する。
+
+**Step 7（$F$ の性質）.** 【主張：$F\circ e=e'$ であり、$F$ は順序埋め込みである】 $b\in A$ とする。$e(a)<e(b)$ なら $a<b$ なので $e'(a)<e'(b)$ であり、$e'(b)$ は上界である。$u<e'(b)$ なら、$e'[A]$ の稠密性から $u<e'(a)<e'(b)$ となる $a$ があり、$a<b$ なので $e'(a)$ は上限をとる集合に属し、$u$ は上界でない。ゆえに $F(e(b))=e'(b)$ である。次に $x<y$ とする。Step 3 にあたる性質（$e[A]$ の稠密性）を 2 回使うと $x<e(a_{1})<e(a_{2})<y$ となる $a_{1},a_{2}$ がある。$e(a)<x$ なら $a<a_{1}$ なので $F(x)\le e'(a_{1})$ であり、$e'(a_{2})$ は $F(y)$ の集合に属するので $F(y)\ge e'(a_{2})>e'(a_{1})$ である。ゆえに $F(x)<F(y)$ であり、\ref{model:order-preserving-embedding} より $F$ は順序埋め込みである。
+
+**Step 8（固定する写像は恒等）.** 【主張：$H\colon C\to C$ が「$x<y\Rightarrow H(x)<H(y)$」と $H\circ e=e$ を満たせば $H=\mathrm{id}$ である】 $H(x)\ne x$ となる $x$ があったとする。$x<H(x)$ なら、$x<e(a)<H(x)$ となる $a$ がとれる。$x<e(a)$ なので $H(x)<H(e(a))=e(a)$ となり、$e(a)<H(x)$ に反する。$H(x)<x$ の場合も、$H(x)<e(a)<x$ となる $a$ をとれば $e(a)=H(e(a))<H(x)$ となって矛盾する。
+
+**Step 9（同型と一意性）.** 【主張：$F$ は同型で、条件を満たす同型はこれだけである】 $(C,e)$ と $(C',e')$ の役割を入れ替えて Step 6, 7 を行い、順序埋め込み $G\colon C'\to C$ で $G\circ e'=e$ となるものを得る。$G\circ F$ は順序を保ち $G\circ F\circ e=G\circ e'=e$ なので、Step 8 より $G\circ F=\mathrm{id}_{C}$ である。同様に $F\circ G=\mathrm{id}_{C'}$ である。ゆえに $F$ は全単射で、同型である。$F'$ も $F'\circ e=e'$ を満たす同型なら、$G\circ F'$ は順序を保ち $e$ を固定するので恒等写像であり、$F'=F$ である。
+
+::: hypcheck
+- **$A$ が空でない**：Step 6 で $C$ が空でないことを通じて使う（空なら $C=\varnothing$ で、主張は空虚に成り立つが完備化として意味がない）。
+- **$A$ に端点がない**：Step 2 で $e(a)\ne\varnothing$、Step 4 で $C$ に最大元がないことに使った。たとえば $A=[0,1]\cap\Q$ では $e(0)=\varnothing\notin C$ となる（端点のある場合は、端点を除いて完備化してから付け直せばよい）。
+- **$A$ が稠密**：Step 2 で $e(a)$ が最大元をもたないことに使った。稠密でないと跳躍の左側の点 $a$ で $e(a')$（$a'$ は $a$ の直後の元）が最大元 $a$ をもってしまう。
+- **$C'$ のデデキント完備性**：Step 6 の上限の存在。**$e'[A]$ の稠密性**：Step 7 の $F\circ e=e'$。**$C$ に端点がないこと**：Step 6 で集合が空でなく有界であること。
+- **公理**：冪集合の公理（$C\subseteq\mathcal{P}(A)$）、分出公理、和集合の公理（Step 5）。選択公理は使っていない。
+:::
+:::
+
+::: corollary λ は η の完備化 {#model:lambda-completion-eta keywords="the real line is the Dedekind completion of the rationals" index="実数直線の順序型|じっすうちょくせんのじゅんじょがた"}
+包含写像 $\Q\to\R$ は $\Q$ のデデキント完備化である。とくに $\lambda$ は $\eta$ だけから決まる：$\Q$ と同型な $A$ のデデキント完備化 $\overline{A}$ の型はつねに $\lambda$ である。
+:::
+
+::: proof
+$\Q$ は空でなく、端点のない稠密線形順序である（\ref{model:dlo}）。記法の項にあげた実数の性質から、$\R$ はデデキント完備で端点をもたず、$\Q$ は $\R$ で稠密である。ゆえに $(\R,\text{包含})$ は \ref{model:dedekind-completion-order.1} の条件を満たし、\ref{model:dedekind-completion-order.2} より $\overline{\Q}\cong\R$ である。$g\colon A\cong\Q$ なら、$(\overline{\Q},e\circ g)$ は $A$ について 1 の条件を満たすので、一意性より $\overline{A}\cong\overline{\Q}\cong\R$ である。
+:::
+
+::: supplement
+**端点や跳躍がある場合.** 一般の線形順序 $X$ でも、真の切断のうち隙間であるものに新しい点を一つずつ加えると、デデキント完備な線形順序が得られる（跳躍は埋めない）。たとえば $\zeta$ や $\omega$ はすでに完備で、$\omega+\omega^{\ast}$ の完備化は $\omega+1+\omega^{\ast}$ である。半順序集合に対しては、同じ考えを切断（上界の上界をとる操作で閉じた集合）で行うマクニール完備化が知られている（本サイトでは扱わない）。
+
+**集合論のページとの関係.** 切断による完備化の構成そのものはススリン問題のページでも行っている（\see{set:dedekind-cuts}）。本ページでは一意性（\ref{model:dedekind-completion-order.2}）を加え、$\lambda$ が $\eta$ から決まることを示した。
+
+**モデル理論から見ると.** $(\Q,<)$ と $(\R,<)$ はどちらも $\mathrm{DLO}$ のモデルで、初等的同値である（\ref{model:dlo-complete}）。デデキント完備性は一階の文で表せない性質で、同型でない（濃度の違う）二つのモデルを区別する。
+:::
+
+## 問題 {#model:sec-ot-problems}
+
+::: problem ★ 基本：n·ζ と ζ·n {#model:prob-ot-n-zeta}
+$n\ge1$ を自然数とする。$n\cdot\zeta=\zeta$ を示せ。また $\zeta\cdot2\ne\zeta$ を示せ。
+:::
+
+::: solution
+*$n\cdot\zeta=\zeta$.* $n\cdot\zeta=\sum_{k\in\Z}n$ の台集合は $\Z\times n$ で、$(k,i)<(k',i')$ は「$k<k'$、または $k=k'$ かつ $i<i'$」である。$\Phi(k,i)\defeq nk+i$ とおく。整数の割り算（任意の $m\in\Z$ は $m=nk+i$, $0\le i<n$ とただ一通りに書ける）により $\Phi$ は $\Z\times n$ から $\Z$ への全単射である。$k<k'$ なら $nk+i\le nk+n-1<nk+n\le nk'\le nk'+i'$ であり、$k=k'$, $i<i'$ なら $nk+i<nk+i'$ である。ゆえに $\Phi$ は順序を保ち、\ref{model:order-preserving-embedding} より同型である。
+
+*$\zeta\cdot2\ne\zeta$.* $\zeta\cdot2=\zeta+\zeta$ では、$(0,0)<(1,0)$ の間に $(0,m)$（$m>0$）が無限個ある。$\Z$ では任意の 2 点の間の元は有限個である。同型は開区間を開区間に全単射で写すので、二つは同型でない。
+:::
+
+::: problem ★ 基本：ω·ζ と ζ·ω {#model:prob-ot-omega-zeta}
+$\omega\cdot\zeta$ と $\zeta\cdot\omega$ が同型でないことを示せ。
+:::
+
+::: solution
+$x$ の**直前の元**とは、$y<x$ で $(y,x)=\varnothing$ となる $y$ のことである。同型は直前の元をもつ元を、直前の元をもつ元に写す。
+
+$\zeta\cdot\omega=\sum_{n\in\omega}\zeta$ では、どの元 $(n,k)$ にも直前の元 $(n,k-1)$ がある。
+
+$\omega\cdot\zeta=\sum_{k\in\Z}\omega$ では、元 $(k,0)$ に直前の元がない。実際、$y<(k,0)$ なら $y=(k',m)$, $k'<k$ であり、$(k',m+1)$ が $y$ と $(k,0)$ の間にある。
+
+ゆえに二つは同型でない。（どちらも可算で端点をもたないので、この種の局所的な性質で区別するしかない。）
+:::
+
+::: problem ★ 基本：ω+ω* の切断 {#model:prob-ot-omega-omegastar}
+$X\defeq\omega+\omega^{\ast}$ の真の切断をすべて求め、跳躍と隙間に分類せよ。$X$ は稠密か、デデキント完備か。
+:::
+
+::: solution
+$\omega^{\ast}$ を $(\N,>)$ で表し、$X$ の元を $(0,m)$（前半）と $(1,m)$（後半。$m$ が大きいほど前）で表す。下に閉じた集合 $L$ は、前半に含まれるなら $\{0\}\times k$（$k\in\omega$）か前半全体 $\{0\}\times\omega$ であり、後半と交わるなら前半全体と後半の上に閉じていない部分 $\{(1,m)\mid m\ge k\}$（$k\in\omega$）の和である。真の切断は次のとおりである。
+- $L=\{0\}\times k$（$k\ge1$）：$L$ の最大元 $(0,k-1)$、$R$ の最小元 $(0,k)$ があり、跳躍である。
+- $L=\{0\}\times\omega\cup\{(1,m)\mid m\ge k\}$（$k\ge1$）：$L$ の最大元 $(1,k)$、$R$ の最小元 $(1,k-1)$ があり、跳躍である。
+- $L=\{0\}\times\omega$：$L$ に最大元はなく、$R=\{1\}\times\omega$ に（$\omega^{\ast}$ に最小元がないので）最小元もない。隙間である。
+
+跳躍があるので $X$ は稠密でなく（\ref{model:cut-dense-complete.1}）、隙間があるのでデデキント完備でない（\ref{model:cut-dense-complete.2}）。実際、前半 $\{0\}\times\omega$ は後半の任意の元で上に有界だが、上限をもたない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

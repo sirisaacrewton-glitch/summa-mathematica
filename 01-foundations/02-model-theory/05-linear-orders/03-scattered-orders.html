@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>散在的順序とハウスドルフの定理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/02-model-theory/05-linear-orders/03-scattered-orders.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 散在的順序とハウスドルフの定理 {#model:page-scattered-orders keywords="scattered linear order, condensation, finite condensation, Hausdorff's theorem on scattered orders, Hausdorff rank, dense sum of scattered orders"}
+
+線形順序には二つの両極端がある。一方は $\eta$（有理数の順序）のように、どの二点の間にも点がある稠密な順序であり、他方は整列順序のように、どこを見ても「次の点」「前の点」がはっきりした順序である。このページでは、$\eta$ を部分順序として含まない線形順序を**散在的**と呼び（\ref{model:scattered-order}）、次の二つの構造定理を示す。第一に、任意の線形順序は、散在的な順序を稠密な順序に沿って並べた和に分解される（\ref{model:dense-sum-of-scattered}）。第二に、散在的な順序は、1 点の順序から出発して「整列順序に沿った和」と「逆整列順序に沿った和」を繰り返して作られるものにちょうど一致する（\ref{model:hausdorff-scattered}）。後者から、散在的な順序に順序数の値をとる階数が定まり、可算の散在的な順序について、始部分（下に閉じた部分集合）が可算個しかないという特徴付けが得られる（\ref{model:scattered-countable-cuts}）。
+
+> 資料：本ページは特定の教科書の記述によらず、標準的な議論に従って組み立てた。用語と結果の範囲は Rosenstein『Linear Orderings』のものとされるが、細部は未確認である。
+
+## 記法と定義の確認 {#model:sec-scat-notation}
+
+::: notation
+- 線形順序（狭義の全順序）は \ref{set:total-order}、順序同型は \ref{set:order-isomorphism} のとおり。線形順序 $L$ の部分集合には制限した順序を入れ、**部分順序**と呼ぶ。単射で順序を保つ写像を**埋め込み**といい、$L$ から $M$ への埋め込みがあることを $L\hookrightarrow M$ と書く。順序型の約束は \ref[順序型]{model:linear-order-type} のとおりで、同型な順序を同じ記号で表す。
+- 順序和と積：$\sum_{i\in I}L_{i}$ は、添字の順序 $I$ と線形順序の族 $(L_{i})_{i\in I}$ について、集合 $\{(i,x)\mid i\in I,\ x\in L_{i}\}$ に「まず $i$ を $I$ で比べ、等しければ $x$ を $L_{i}$ で比べる」順序を入れたものである（\ref[一般の順序和]{model:order-sum}）。$L+M$ は $I=2$ の場合、積 $L\cdot I$ はすべての $L_{i}$ が $L$ の場合であり、**$L\cdot I$ は「$I$ 個の $L$ を $I$ の順に並べたもの」**である（\ref[順序型の積]{model:order-product}。順序数の積 \ref{set:ordinal-multiplication} と同じ向き）。$L^{*}$ は $L$ の順序を逆にしたもの。
+- 標準的な順序型：$\omega$（自然数）、$\omega^{*}$、$\zeta=\omega^{*}+\omega$（整数）、$\eta$（有理数）、$\lambda$（実数）。和と積の結合律などの算術の法則は \ref[順序型の算術]{model:order-type-arithmetic} のとおりで、このページでは $(\sum_{i\in I}L_{i})^{*}=\sum_{i\in I^{*}}L_{i}^{*}$ と、和の部分が凸（下の定義）であることだけを使う。
+- 区間：$x\le y$ のとき $[x,y]\defeq\{z\in L\mid x\le z\le y\}$ とし、$x,y$ の大小を問わず、$x$ と $y$ の間の閉区間 $[\min(x,y),\max(x,y)]$ を $[x,y]$ と書くこともある。部分集合 $C\subseteq L$ が**凸**とは、$x,z\in C$ と $x<y<z$ から $y\in C$ が従うことをいう。部分集合 $A,B$ について $A<B$ は「$A$ のどの元も $B$ のどの元より小さい」ことを表す。
+- 稠密：線形順序 $D$ が「2 元以上をもち、$x<y$ ならば $x<z<y$ となる $z\in D$ がある」とき、このページでは $D$ を 2 元以上の稠密な順序と呼ぶ。端点のない稠密線形順序は \ref{model:dlo}、可算なものが $\eta$ に限ることは \ref{model:cantor-dlo} である。
+- 体系は $\ZFC$ とし、選択公理を使う箇所は hypcheck に明記する。
+:::
+
+## 散在的順序 {#model:sec-scat-def}
+
+まず、「$\eta$ が埋め込める」という条件を、部分集合の稠密さで言い換える。
+
+::: lemma 稠密な部分順序は $\eta$ を含む {#model:dense-subset-eta keywords="a linear order embeds the rationals iff it has a dense suborder with at least two points" index="稠密な部分順序|ちゅうみつなぶぶんじゅんじょ"}
+線形順序 $L$ について、次は同値である。
+1. $\eta\hookrightarrow L$。
+2. $L$ の部分順序で、2 元以上の稠密な順序であるものがある。
+:::
+
+::: proof
+**1 ⇒ 2.** 埋め込み $f\colon\eta\to L$ の像 $f[\mathbb{Q}]$ は $\eta$ と同型なので、2 元以上の稠密な順序である。
+
+**2 ⇒ 1.** 2 元以上の稠密な部分順序 $D$ をとる。
+
+**Step 1.** 【主張：$D$ の部分集合 $D'$ で、空でなく、稠密で端点をもたないものがある】$a<b$ となる $a,b\in D$ をとり、$D'\defeq\{d\in D\mid a<d<b\}$ とおく。$D$ の稠密さから $D'\neq\varnothing$ である。$x<y$ が $D'$ の元なら、$D$ の稠密さで $x<z<y$ となる $z\in D$ があり、$a<z<b$ なので $z\in D'$ である。$x\in D'$ なら $a<x$ から $a<z<x$ となる $z\in D$ があり、$z\in D'$ である。ゆえに $x$ は $D'$ の最小元でない。最大元でないことも同様である。
+
+**Step 2.** 【主張：$D'$ は可算で端点のない稠密な部分順序 $E$ を含む】選択関数 $c$ を $D'$ の空でない部分集合全体の上にとる。$E_{0}\defeq\{c(D')\}$ とし、有限集合 $E_{k}$ から $E_{k+1}$ を、$E_{k}$ に次の点を加えたものと定める：$E_{k}$ の各元 $x<y$ について $c(\{z\in D'\mid x<z<y\})$、各元 $x$ について $c(\{z\in D'\mid z<x\})$ と $c(\{z\in D'\mid x<z\})$。Step 1 からこれらの集合は空でない。$E\defeq\bigcup_{k}E_{k}$ とおくと、各 $E_{k}$ は有限なので $E$ は可算である。$E$ の 2 元 $x<y$ はある $E_{k}$ に入るので、その間の点が $E_{k+1}\subseteq E$ に入る。端点がないことも同様である。
+
+**Step 3.** 【主張：$\eta\hookrightarrow L$】$E$ は空でない可算な端点のない稠密線形順序なので、\ref{model:cantor-dlo} より $E\cong\eta$ である。包含写像 $E\to L$ と合わせて $\eta\hookrightarrow L$ を得る。
+
+::: hypcheck
+- **前提「2 元以上」**：Step 1 で $a<b$ をとるのに使った。1 元の順序は定義の上では稠密だが、$\eta$ を含まない。
+- **選択公理**：Step 2 の選択関数 $c$ と、\ref{model:cantor-dlo}（その証明が使う選択公理）で使った。$L$ が可算なら、$L$ を $\omega$ で番号付けして「番号最小の元を選ぶ」とすれば Step 2 の選択関数は要らない。
+:::
+:::
+
+::: definition 散在的順序 {#model:scattered-order keywords="scattered linear order" index="散在的順序|さんざいてきじゅんじょ, 散在的|さんざいてき"}
+線形順序 $L$ が**散在的**であるとは、$\eta\hookrightarrow L$ でないことをいう。\ref{model:dense-subset-eta} により、これは「$L$ の部分順序で 2 元以上の稠密なものがない」ことと同値である。
+:::
+
+::: intuition
+散在的な順序とは、どこを拡大しても有理数のような「すき間のない部分」が現れない順序である。点がまばらに散らばっていて、どの部分を取り出しても、ある二点の間に何もない箇所が必ず見つかる。
+:::
+
+::: example
+- **整列順序は散在的である。** $D$ を整列順序 $W$ の 2 元以上の稠密な部分順序とし、$a<b$ を $D$ の元とする。$\{d\in D\mid a<d\}$ は $b$ を含み空でないので最小元 $m$ をもつ。稠密さから $a<d<m$ となる $d\in D$ があるが、これは $m$ の最小性に反する。ゆえに $W$ は散在的である。特に有限順序、$\omega$、すべての順序数は散在的である。
+- 逆整列順序（$W^{*}$ の形の順序）も散在的である（$\eta^{*}\cong\eta$ なので、$\eta\hookrightarrow W^{*}$ と $\eta\hookrightarrow W$ は同値）。
+- $\zeta=\omega^{*}+\omega$ は散在的だが、整列順序でも逆整列順序でもない（下の \ref{model:scattered-closure.3} から）。
+- $\eta$、$\lambda$、$\eta+1$、$\omega\cdot\eta$ は散在的でない。$\omega\cdot\eta$ は「$\eta$ 個の $\omega$ を並べたもの」で、各ブロックの先頭の点を集めると $\eta$ と同型な部分順序になる。
+:::
+
+::: proposition 散在的順序の閉包性 {#model:scattered-closure keywords="closure properties of scattered orders: suborders, reverse, sums over scattered index" index="散在的順序の閉包性|さんざいてきじゅんじょのへいほうせい"}
+1. 散在的な順序の部分順序は散在的である。$L\hookrightarrow M$ で $M$ が散在的なら $L$ も散在的である。
+2. $L$ が散在的であることと $L^{*}$ が散在的であることは同値である。
+3. 添字の順序 $I$ が散在的で、すべての $L_{i}$（$i\in I$）が散在的なら、$\sum_{i\in I}L_{i}$ は散在的である。特に散在的な $L,M$ について $L+M$ は散在的であり、散在的な $L,I$ について $L\cdot I$ は散在的である。
+:::
+
+::: intuition
+散在的な順序は「部分をとる」「向きを逆にする」「散在的な並べ方で散在的な順序をつなぐ」ことで閉じている。最後の性質は、和の中に $\eta$ が入ったとすると、$\eta$ がどこか一つのブロックの中に入り込むか、ブロックの並び方そのものに $\eta$ が現れるかのどちらかになることから来る。
+:::
+
+::: proof
+**(1)** $\eta\hookrightarrow L$ と $L\hookrightarrow M$ を合成すると $\eta\hookrightarrow M$ となる。部分順序は包含写像で埋め込まれる。
+
+**(2)** $x\mapsto-x$ は $\eta$ から $\eta^{*}$ への同型なので、$\eta\hookrightarrow L$ と $\eta\cong\eta^{*}\hookrightarrow L^{*}$ は同値である。
+
+**(3)** $\Sigma\defeq\sum_{i\in I}L_{i}$ とし、射影 $\pi(i,x)\defeq i$ を考える。和の順序の定義から、$(i,x)\le(j,y)$ ならば $i\le j$ である。$\eta\hookrightarrow\Sigma$ と仮定し、その像を $D$ とする。$D$ は $\eta$ と同型である。
+
+**Step 1.** 【主張：$\pi$ が $D$ 上で単射でないなら、ある $L_{i}$ に $\eta$ が埋め込める】$d<d'$ が $D$ の元で $\pi(d)=\pi(d')=i$ とする。$d\le e\le d'$ となる $e\in D$ について $i=\pi(d)\le\pi(e)\le\pi(d')=i$ なので $\pi(e)=i$ である。ゆえに $D\cap[d,d']$ は $\{i\}\times L_{i}$ に含まれる。$D\cong\eta$ の閉区間 $D\cap[d,d']$ は 2 元以上の稠密な順序なので、\ref{model:dense-subset-eta} により $\eta\hookrightarrow\{i\}\times L_{i}\cong L_{i}$ となり、$L_{i}$ が散在的であることに反する。
+
+**Step 2.** 【主張：$\pi$ が $D$ 上で単射なら、$I$ に $\eta$ が埋め込める】$d<d'$ なら $\pi(d)\le\pi(d')$ であり、単射なので $\pi(d)<\pi(d')$ である。ゆえに $\pi\restr{D}$ は埋め込みで、$\eta\cong D\hookrightarrow I$ となり、$I$ が散在的であることに反する。
+
+どちらの場合も矛盾するので、$\Sigma$ は散在的である。$L+M$ は $I=2$、$L\cdot I$ はすべての $L_{i}$ が $L$ の場合で、有限順序 $2$ は散在的なので後半が従う。
+
+::: hypcheck
+- **$L_{i}$ が散在的**：Step 1 で使った。外すと偽（$I=1$, $L_{0}=\eta$）。
+- **$I$ が散在的**：Step 2 で使った。外すと偽：$\sum_{q\in\eta}1\cong\eta$ は各ブロックが 1 点（散在的）でも散在的でない。
+- **選択公理**：Step 1 で \ref{model:dense-subset-eta} を通して使う。
+:::
+:::
+
+## 凝縮と稠密な和への分解 {#model:sec-scat-condensation}
+
+::: definition 凝縮 {#model:condensation keywords="condensation of a linear order, convex equivalence relation, condensation map" index="凝縮|ぎょうしゅく"}
+線形順序 $L$ 上の同値関係 $\sim$ で、すべての同値類が凸であるものを $L$ の**凝縮**という。$x$ の類を $[x]$ と書き、類全体 $L/{\sim}$ に $[x]<[y]\iff[x]\neq[y]$ かつ $x<y$ で順序を入れる（次の補題で、これが代表元によらない線形順序であることを示す）。
+:::
+
+::: intuition
+凝縮は、線形順序をいくつかの「かたまり」に区切って、各かたまりを 1 点とみなすことである。かたまりが凸（途中に穴がない）なので、かたまり同士にも自然な前後関係が入る。
+:::
+
+::: lemma 凝縮による和の表示 {#model:condensation-sum keywords="a linear order is the sum of the classes of a condensation" index="凝縮による和の表示|ぎょうしゅくによるわのひょうじ"}
+$\sim$ を $L$ の凝縮とする。
+1. 異なる類 $C,C'$ について、$C<C'$ か $C'<C$ のどちらか一方が成り立つ。したがって $L/{\sim}$ の順序は代表元によらずに定まり、線形順序である。
+2. $x\mapsto([x],x)$ は $L$ から $\sum_{C\in L/{\sim}}C$ への同型である。
+:::
+
+::: proof
+**(1)** $x\in C$, $y\in C'$ で $x<y$ とし、$x'\in C$, $y'\in C'$ が $y'<x'$ を満たすと仮定する。$y<x'$ なら $x<y<x'$ で、$C$ の凸性から $y\in C$ となり $C\cap C'=\varnothing$ に反する。$x'<y$ なら $y'<x'<y$ で、$C'$ の凸性から $x'\in C'$ となりやはり矛盾する。$x'=y$ は $C\cap C'=\varnothing$ に反する。ゆえに $x'<y'$ であり、$C<C'$ が成り立つ。$C<C'$ と $C'<C$ が同時に成り立たないことは非対称律から従う。したがって $[x]<[y]$ の真偽は代表元によらず、三分律と推移律は $L$ から受け継がれる。
+
+**(2)** 写像は全単射である（逆写像は $(C,x)\mapsto x$）。$x<y$ のとき、$[x]=[y]$ なら和の中で同じブロックの中を $x<y$ で比べ、$[x]\neq[y]$ なら (1) より $[x]<[y]$ である。いずれでも $([x],x)<([y],y)$ となる。
+:::
+
+::: definition 有限凝縮と散在凝縮 {#model:finite-scattered-condensation keywords="finite condensation c_F, scattered condensation c_S" index="有限凝縮|ゆうげんぎょうしゅく, 散在凝縮|さんざいぎょうしゅく"}
+線形順序 $L$ の元 $x,y$ について、
+- $x\sim_{F}y$ とは、$x$ と $y$ の間の閉区間 $[x,y]$ が有限集合であることをいう（**有限凝縮**）。
+- $x\sim_{S}y$ とは、$[x,y]$ が散在的であることをいう（**散在凝縮**）。
+:::
+
+::: intuition
+有限凝縮は「有限歩で行き来できる点」を一つにまとめ、散在凝縮は「間に有理数のような部分をはさまない点」を一つにまとめる。前者は離散的な鎖を、後者は散在的なかたまりを取り出す操作である。
+:::
+
+::: proposition 有限凝縮・散在凝縮は凝縮 {#model:finite-scattered-condensation-basic keywords="finite and scattered condensations are condensations; classes of the finite condensation are finite, omega, omega*, zeta" index="有限凝縮の類|ゆうげんぎょうしゅくのるい"}
+1. $\sim_{F}$ と $\sim_{S}$ は $L$ の凝縮である。
+2. $\sim_{F}$ の各類の順序型は、有限、$\omega$、$\omega^{*}$、$\zeta$ のいずれかである。
+:::
+
+::: proof
+**(1)** 反射律は $[x,x]=\{x\}$ が有限かつ散在的であることから、対称律は定義の対称性から従う。
+
+*推移律.* $x\sim y$, $y\sim z$ とする（$\sim$ は $\sim_{F}$ または $\sim_{S}$）。$y$ が $x,z$ の間にあるとき、たとえば $x\le y\le z$ なら、$[x,z]=[x,y]\cup[y,z]$ であり、順序としては $[x,z]\cong[x,y]+\{w\mid y<w\le z\}$ である。後者は $[y,z]$ の部分順序である。有限集合の和は有限であり、散在的な順序の部分順序と二つの和は \ref{model:scattered-closure.1}・\ref[3]{model:scattered-closure.3} により散在的である。$y$ が $x,z$ の間にないとき、$[x,z]$ は $[x,y]$ か $[y,z]$ に含まれ、その部分集合として有限（散在的）である。
+
+*凸性.* $x\sim z$ で $x<y<z$ なら $[x,y]\subseteq[x,z]$ なので、部分集合として有限（散在的）であり、$x\sim y$ となる。
+
+**(2)** $C$ を $\sim_{F}$ の類とし、$a\in C$ を一つ固定する。$C^{+}\defeq\{x\in C\mid a\le x\}$, $C^{-}\defeq\{x\in C\mid x<a\}$ とおく。
+
+**Step 1.** 【主張：$C^{+}$ は整列順序で、型は $1$ 以上の有限順序数か $\omega$ である】$x\in C^{+}$ について $\{y\in C^{+}\mid y<x\}\subseteq[a,x]$ は有限である。空でない $S\subseteq C^{+}$ について $x\in S$ をとると、$S\cap[a,x]$ は空でない有限集合なので最小元をもち、それは $S$ の最小元である。ゆえに $C^{+}$ は整列順序で、ある順序数 $\gamma$ と同型である（\ref{set:ordinal-type}）。$\gamma$ の各元 $\xi$ は始切片 $\{y\mid y<x\}$ の型なので有限、すなわち $\xi\in\omega$ である。ゆえに $\gamma\subseteq\omega$ であり、$\gamma\le\omega$ となる。$a\in C^{+}$ なので $\gamma\ge1$ である。
+
+**Step 2.** 【主張：$C^{-}$ の型は有限か $\omega^{*}$ である】$C^{-}$ の逆順序に Step 1 と同じ議論を当てはめる（$x\in C^{-}$ について $\{y\in C^{-}\mid x<y\}\subseteq[x,a]$ は有限）と、$(C^{-})^{*}$ の型は有限順序数か $\omega$ である。
+
+**Step 3.** 【主張：$C$ の型は有限、$\omega$、$\omega^{*}$、$\zeta$ のいずれか】$C\cong C^{-}+C^{+}$ である。$m,n$ を有限とすると、組み合わせは $m+n$（有限）、$m+\omega$、$\omega^{*}+n$、$\omega^{*}+\omega=\zeta$ である。$m+\omega=\omega$ は \ref{set:ordinal-arithmetic-counterexamples.1} から従い、$\omega^{*}+n=(n^{*}+\omega)^{*}\cong(n+\omega)^{*}=\omega^{*}$ である（有限順序は逆にしても同じ型）。
+:::
+
+::: example
+- $L=\omega+\omega^{*}$ の $\sim_{F}$ の類は $\omega$ と $\omega^{*}$ の二つで、$L/{\sim_{F}}\cong2$ である。$\omega$ の元 $m$ と $\omega^{*}$ の元の間には $\omega$ の $m$ より大きい元が無限個あるので、二つは別の類になる。
+- $L=\zeta\cdot\eta$（$\eta$ 個の $\zeta$）の $\sim_{F}$ の類は各ブロックの $\zeta$ で、$L/{\sim_{F}}\cong\eta$ である。$\sim_{S}$ の類も同じブロックである：異なるブロックの 2 点の間には、$\eta$ の開区間（2 元以上の稠密な順序）を添字とするブロックが並び、各ブロックから 1 点ずつ選ぶと $\eta$ が埋め込まれる。
+- $L=\eta+\omega$ では、$\eta$ の部分の各点は単独で $\sim_{S}$ の類をなし、$\omega$ の部分全体が一つの類になる。$\eta$ の点 $q$ と $\omega$ の点 $n$ の間の区間は $\eta$ の区間 $\{r\mid q\le r\}$ を含むので散在的でない。ゆえに $L/{\sim_{S}}\cong\eta+1$ で、これは 2 元以上の稠密な順序である。
+:::
+
+::: theorem 散在的な順序の稠密な和への分解 {#model:dense-sum-of-scattered keywords="every linear order is a dense sum of scattered orders" index="稠密な和への分解|ちゅうみつなわへのぶんかい"}
+任意の線形順序 $L$ について次が成り立つ。
+1. $\sim_{S}$ の各類は散在的である。
+2. $L/{\sim_{S}}$ は 1 元以下か、2 元以上の稠密な順序である。
+3. $L$ の凝縮で各類が散在的なものは、すべて $\sim_{S}$ より細かい（各類が $\sim_{S}$ のある類に含まれる）。
+4. $L$ が散在的であることと、$L/{\sim_{S}}$ が 1 元以下であることは同値である。
+
+特に、$D\defeq L/{\sim_{S}}$ とおくと $L\cong\sum_{d\in D}L_{d}$（$L_{d}$ は散在的、$D$ は 1 元以下か稠密）と表せる。
+:::
+
+::: intuition
+どんな線形順序も、「散在的なかたまり」を「稠密な並び方」で並べたものとして書ける。かたまりをできるだけ大きくとると、かたまりの並び方には隣り合う二つがなくなる。隣り合うかたまりがあったとすると、それらを合わせても散在的なので、一つのかたまりにまとめられるからである。
+:::
+
+::: proof
+**Step 1.** 【主張：$\sim_{S}$ の類 $C$ は散在的である】$\eta\hookrightarrow C$ と仮定し、その像を $E$ とする。$E$ の 2 元 $a<b$ をとる。$a\sim_{S}b$ なので $[a,b]$ は散在的である。一方 $E\cap[a,b]$ は $\eta$ の閉区間と同型で、2 元以上の稠密な順序である。これは \ref{model:dense-subset-eta} により $\eta\hookrightarrow[a,b]$ を意味し、矛盾する。
+
+**Step 2.** 【主張：$L/{\sim_{S}}$ に隣り合う 2 つの類はない】類 $C<C'$ で、その間に類がないものがあると仮定する。$x\in C$, $y\in C'$ をとる。$x<z<y$ となる $z$ の類は $C$ か $C'$ である（類は凸で、間に他の類がない）。ゆえに $[x,y]\subseteq C\cup C'$ であり、順序として $[x,y]\cong([x,y]\cap C)+([x,y]\cap C')$ となる。右辺の二つの成分は Step 1 から散在的な順序の部分順序なので散在的であり、\ref{model:scattered-closure.3} によりその和も散在的である。ゆえに $x\sim_{S}y$ となり、$C\neq C'$ に反する。これで (2) が示された（2 元以上で隣り合う類がないことが稠密の定義である）。
+
+**Step 3.** 【主張：(3) と (4)】$\approx$ を各類が散在的な凝縮とし、$x\approx y$ とする。類の凸性から $[x,y]$ は $x$ の $\approx$ 類に含まれ、\ref{model:scattered-closure.1} により散在的である。ゆえに $x\sim_{S}y$ となり、(3) が従う。(4)：$L$ が散在的なら、すべての区間は散在的なので類は一つ（$L=\varnothing$ なら 0 個）である。逆に類が 1 個以下なら $L$ はその類（または空）であり、Step 1 から散在的である。
+
+最後の表示は \ref{model:condensation-sum.2} を $\sim_{S}$ に当てはめたものである。
+
+::: hypcheck
+- **選択公理**：Step 1 で \ref{model:dense-subset-eta} を通して使う。
+- **類の凸性**：Step 2 で $[x,y]\subseteq C\cup C'$ を、Step 3 で $[x,y]$ が一つの類に含まれることを導くのに使った。凸でない同値関係では和への表示（\ref{model:condensation-sum}）自体が意味をもたない。
+- **稠密な部分の端点**：$L/{\sim_{S}}$ は端点をもちうる（上の例の $\eta+1$）。したがって (2) の稠密な順序は \ref{model:dlo} の意味の端点のない順序とは限らない。
+:::
+:::
+
+::: supplement
+**非散在的な順序の形.** (4) から、$L$ が散在的でなければ $D=L/{\sim_{S}}$ は 2 元以上の稠密な順序で、\ref{model:dense-subset-eta} から $\eta\hookrightarrow D$ となる。各類の代表元を選ぶと $\eta\hookrightarrow L$ がもう一度得られる。可算な線形順序はすべて $\eta$ に埋め込める（\ref[可算順序の η への埋め込み]{model:countable-embeds-eta}）ので、可算な非散在的順序 $L$ と $\eta$ は互いに埋め込み合う。
+
+**有限凝縮の反復.** $\sim_{F}$ で凝縮した $L/{\sim_{F}}$ にもう一度 $\sim_{F}$ をとる、という操作を超限回繰り返すこと（極限では和集合で凝縮する）もでき、散在的な順序はこの反復でいつか 1 点になり、非散在的な順序はならないことが知られている。止まるまでの回数が次節のハウスドルフ階数と並ぶもう一つの階数で、両者の関係は文献によって定義の細部が異なる（未確認）。
+:::
+
+## ハウスドルフの定理 {#model:sec-scat-hausdorff}
+
+散在的な順序の例は、整列順序と逆整列順序を「並べてつなぐ」ことで作られた。実はすべての散在的な順序がこうして作られる。
+
+::: definition ハウスドルフの階層 {#model:hausdorff-hierarchy keywords="Hausdorff hierarchy of scattered orders, well-ordered sums and reverse well-ordered sums, Hausdorff rank" index="ハウスドルフの階層|はうすどるふのかいそう, ハウスドルフ階数|はうすどるふかいすう"}
+線形順序のクラス $\mathcal{H}_{\alpha}$（$\alpha$ は順序数）を次で定める。
+1. $L\in\mathcal{H}_{0}$ とは、$L$ が 1 元以下であることをいう。
+2. $\alpha>0$ のとき、$L\in\mathcal{H}_{\alpha}$ とは、$L$ の凸な部分集合への分割 $\{L_{i}\}_{i\in I}$ で、添字の順序 $I$ が整列順序か逆整列順序であり、$i<j$ ならば $L_{i}<L_{j}$ となり、各 $L_{i}$ がある $\beta<\alpha$ について $\mathcal{H}_{\beta}$ に属するものがあることをいう（このとき $L\cong\sum_{i\in I}L_{i}$ である）。
+
+$\mathcal{H}\defeq\bigcup_{\alpha}\mathcal{H}_{\alpha}$ とおく。$L\in\mathcal{H}$ のとき、$L\in\mathcal{H}_{\alpha}$ となる最小の $\alpha$ を $L$ の**ハウスドルフ階数**といい、$\operatorname{rk}_{H}(L)$ と書く。
+:::
+
+::: intuition
+$\mathcal{H}$ は、点（と空集合）から出発して、「順序数に沿って並べる」「逆向きの順序数に沿って並べる」という二つの操作を何度でも繰り返して作れる順序の全体である。ハウスドルフ階数は、そのために必要な入れ子の深さである。
+:::
+
+::: remark 定義の正当性 {#model:hausdorff-hierarchy-legit}
+2 の条件は $L$ の凸な部分集合が $\mathcal{H}_{\beta}$（$\beta<\alpha$）に属するかどうかだけで決まる。そこで $L$ を固定すれば、「$L$ の凸部分集合 $C$ が $\mathcal{H}_{\alpha}$ に属するか」は、集合 $\{C\subseteq L\mid C\text{ は凸}\}$ に値をとる $\alpha$ についての超限再帰（\ref{set:transfinite-recursion}）で定まり、$L\in\mathcal{H}_{\alpha}$ は $L$ と $\alpha$ についての集合論の論理式で表される。また、$\beta\le\alpha$ なら $\mathcal{H}_{\beta}\subseteq\mathcal{H}_{\alpha}$ である（$\alpha>0$ では 1 元の添字 $I=1$ による自明な分割を使う）。
+:::
+
+::: lemma 階層の基本性質 {#model:hausdorff-hierarchy-basic keywords="the Hausdorff hierarchy is closed under isomorphism, suborders, and well-ordered sums; its members are scattered" index="ハウスドルフの階層の基本性質|はうすどるふのかいそうのきほんせいしつ"}
+1. $L\in\mathcal{H}_{\alpha}$ で $L\cong L'$ なら $L'\in\mathcal{H}_{\alpha}$ である。
+2. $L\in\mathcal{H}_{\alpha}$ で $S\subseteq L$ なら $S\in\mathcal{H}_{\alpha}$ である。
+3. $I$ が整列順序か逆整列順序で、各 $L_{i}$ が $\mathcal{H}$ に属するなら、$\sum_{i\in I}L_{i}\in\mathcal{H}$ である。特に $L,M\in\mathcal{H}$ なら $L+M\in\mathcal{H}$ である。
+4. $\mathcal{H}$ の元はすべて散在的である。
+:::
+
+::: proof
+**(1)** $\alpha$ についての帰納法による。$\alpha=0$ は元の個数が同型で保たれることから従う。$\alpha>0$ では、同型 $f$ で分割 $\{L_{i}\}$ を $\{f[L_{i}]\}$ に移すと、凸性・ブロックの順序・各ブロックの属する段（帰納法の仮定）がすべて保たれる。
+
+**(2)** $\alpha$ についての帰納法による。$\alpha=0$ では $S$ も 1 元以下である。$\alpha>0$ で $\{L_{i}\}_{i\in I}$ を $L$ の分割とする。$I'\defeq\{i\in I\mid S\cap L_{i}\neq\varnothing\}$ とおくと、$I'$ は $I$ の部分順序なので整列順序（逆整列順序）である。$\{S\cap L_{i}\}_{i\in I'}$ は $S$ の凸な部分集合への分割で、$i<j$ なら $S\cap L_{i}<S\cap L_{j}$ である。$L_{i}\in\mathcal{H}_{\beta_{i}}$（$\beta_{i}<\alpha$）なら、帰納法の仮定から $S\cap L_{i}\in\mathcal{H}_{\beta_{i}}$ である。ゆえに $S\in\mathcal{H}_{\alpha}$ である。
+
+**(3)** $\beta_{i}\defeq\operatorname{rk}_{H}(L_{i})$ とし、$\alpha\defeq\sup\{\beta_{i}+1\mid i\in I\}$ とおく（置換公理で集合になる）。$\{\{i\}\times L_{i}\}_{i\in I}$ は和の凸な部分集合への分割で、(1) から $\{i\}\times L_{i}\in\mathcal{H}_{\beta_{i}}$、$\beta_{i}<\alpha$ である。ゆえに和は $\mathcal{H}_{\alpha}$ に属する。$L+M$ は $I=2$ の場合である。
+
+**(4)** $\alpha$ についての帰納法による。1 元以下の順序は散在的である。$\alpha>0$ では $L\cong\sum_{i\in I}L_{i}$ で、$I$ は整列順序か逆整列順序なので散在的（\ref{model:scattered-order} の下の例）、各 $L_{i}$ は帰納法の仮定から散在的である。\ref{model:scattered-closure.3} から $L$ は散在的である。
+:::
+
+次の補題は、ハウスドルフの定理の証明で類を整列和に分けるのに使う。
+
+::: lemma 整列した共終部分集合 {#model:well-ordered-cofinal keywords="every linear order has a well-ordered cofinal subset" index="共終な整列部分集合|きょうしゅうなせいれつぶぶんしゅうごう"}
+（AC）$L$ を線形順序、$a\in L$ とし、$L_{\ge a}\defeq\{x\in L\mid a\le x\}$ とおく。$L_{\ge a}$ の整列した部分順序 $W$ で、最小元が $a$ であり、共終である（すべての $x\in L_{\ge a}$ に $x\le w$ となる $w\in W$ がある）ものが存在する。
+:::
+
+::: proof
+整列可能定理（\ref{set:well-ordering-theorem}）から、$L_{\ge a}$ を $\{c_{\nu}\mid\nu<\mu\}$（$\mu$ は順序数、$c_{0}=a$、$\nu\mapsto c_{\nu}$ は全単射）と並べる。$\nu$ が**記録**であるとは、すべての $\nu'<\nu$ について $c_{\nu'}<c_{\nu}$ となることとし、$W\defeq\{c_{\nu}\mid\nu\text{ は記録}\}$ とおく。
+
+**Step 1.** 【主張：$W$ は整列順序で、最小元は $a$ である】記録 $\nu<\nu'$ について、$\nu'$ が記録なので $c_{\nu}<c_{\nu'}$ である。ゆえに $\nu\mapsto c_{\nu}$ は記録全体（順序数の部分集合で整列）から $W$ への順序同型で、$W$ は整列順序である。$0$ は空虚に記録で、$c_{0}=a$ は $L_{\ge a}$ の最小元なので $W$ の最小元でもある。
+
+**Step 2.** 【主張：$W$ は $L_{\ge a}$ で共終である】$x=c_{\nu}\in L_{\ge a}$ とし、$c_{\nu_{0}}\ge x$ となる最小の $\nu_{0}$ をとる（$\nu$ 自身が候補なので存在する）。$\nu'<\nu_{0}$ なら最小性から $c_{\nu'}<x\le c_{\nu_{0}}$ なので、$\nu_{0}$ は記録である。ゆえに $c_{\nu_{0}}\in W$ で $x\le c_{\nu_{0}}$ となる。
+:::
+
+::: theorem ハウスドルフの定理（散在的順序） {#model:hausdorff-scattered keywords="Hausdorff's theorem: scattered orders are exactly those generated from 0 and 1 by well-ordered and reverse well-ordered sums" index="ハウスドルフの定理|はうすどるふのていり" refname="ハウスドルフの定理（散在的順序）"}
+線形順序 $L$ について、$L$ が散在的であることと $L\in\mathcal{H}$ であることは同値である。
+:::
+
+::: intuition
+散在的な順序は、例外なく「点を順序数か逆向きの順序数に沿って並べる」ことの繰り返しで組み立てられる。逆に、こうして組み立てた順序には有理数のような稠密な部分が現れない。
+:::
+
+::: proof
+⇐ は \ref{model:hausdorff-hierarchy-basic.4} である。⇒ を示す。$L$ を散在的とし、$x\approx y$ を「$[x,y]\in\mathcal{H}$」で定める。
+
+**Step 1.** 【主張：$\approx$ は凝縮である】反射律は $[x,x]\in\mathcal{H}_{0}$、対称律は定義から従う。推移律：$x\approx y\approx z$ とする。$x\le y\le z$ なら $[x,z]\cong[x,y]+\{w\mid y<w\le z\}$ で、後者は $[y,z]$ の部分順序なので \ref{model:hausdorff-hierarchy-basic.2} から $\mathcal{H}$ に属し、\ref{model:hausdorff-hierarchy-basic.3} から和も $\mathcal{H}$ に属する。他の並び方では $[x,z]$ が $[x,y]$ か $[y,z]$ に含まれ、\ref{model:hausdorff-hierarchy-basic.2} から従う。凸性も $[x,y]\subseteq[x,z]$ と \ref{model:hausdorff-hierarchy-basic.2} から従う。
+
+**Step 2.** 【主張：$\approx$ の各類 $C$ は $\mathcal{H}$ に属する】$a\in C$ を固定し、$C^{+}\defeq\{x\in C\mid a\le x\}$ とおく。\ref{model:well-ordered-cofinal} を $C$ と $a$ に当てはめ、$C^{+}$ の共終な整列部分順序 $W=\{w_{\xi}\mid\xi<\kappa\}$（$\kappa$ は順序数、$\xi\mapsto w_{\xi}$ は増加、$w_{0}=a$）をとる。$P_{0}\defeq\{a\}$、$\xi>0$ について
+$$
+P_{\xi}\defeq\{x\in C^{+}\mid x\le w_{\xi},\ \text{すべての }\zeta<\xi\text{ について }w_{\zeta}<x\}
+$$
+とおく。$x\in C^{+}$ に対して $x\le w_{\xi}$ となる最小の $\xi$（共終性から存在）をとると、$x\in P_{\xi}$ である（$\xi=0$ なら $a\le x\le a$）。ゆえに $\{P_{\xi}\}$ は $C^{+}$ を覆う。$\xi<\xi'$, $x\in P_{\xi}$, $x'\in P_{\xi'}$ なら $x\le w_{\xi}<x'$ なので、$P_{\xi}$ は互いに素で $P_{\xi}<P_{\xi'}$ である。各 $P_{\xi}$ は凸で、$[a,w_{\xi}]$ に含まれる。$a\approx w_{\xi}$（同じ類）なので $[a,w_{\xi}]\in\mathcal{H}$ であり、\ref{model:hausdorff-hierarchy-basic.2} から $P_{\xi}\in\mathcal{H}$ である。空の $P_{\xi}$ を除いた添字も整列順序なので、\ref{model:hausdorff-hierarchy-basic.3} から $C^{+}\in\mathcal{H}$ となる。逆順序 $C^{*}$ と $a$ に同じ議論を当てはめると、$\{x\in C\mid x\le a\}$ は逆整列順序に沿った $\mathcal{H}$ の元の和になり、$\mathcal{H}$ に属する。その部分集合 $C^{-}\defeq\{x\in C\mid x<a\}$ も \ref{model:hausdorff-hierarchy-basic.2} から $\mathcal{H}$ に属する。最後に $C\cong C^{-}+C^{+}\in\mathcal{H}$ である。
+
+**Step 3.** 【主張：$L/{\approx}$ に隣り合う 2 つの類はない】類 $C<C'$ の間に類がないとし、$x\in C$, $y\in C'$ をとる。\ref{model:dense-sum-of-scattered} の Step 2 と同様に $[x,y]\cong([x,y]\cap C)+([x,y]\cap C')$ であり、Step 2 と \ref{model:hausdorff-hierarchy-basic.2}・\ref[3]{model:hausdorff-hierarchy-basic.3} から $[x,y]\in\mathcal{H}$ となる。これは $x\approx y$ を意味し、$C\neq C'$ に反する。
+
+**Step 4.** 【主張：類は 1 個以下で、$L\in\mathcal{H}$】類が 2 個以上なら、Step 3 から $L/{\approx}$ は 2 元以上の稠密な順序で、\ref{model:dense-subset-eta} から埋め込み $e\colon\eta\to L/{\approx}$ がある。各 $q$ について類 $e(q)$ の代表元 $r(q)$ を選ぶと、類の順序の定義（\ref{model:condensation-sum.1}）から $r$ は埋め込み $\eta\to L$ になり、$L$ が散在的であることに反する。ゆえに類は 1 個以下で、$L$ は空（$\mathcal{H}_{0}$）か一つの類であり、Step 2 から $L\in\mathcal{H}$ である。
+
+::: hypcheck
+- **$L$ が散在的**：Step 4 だけで使った。Step 1〜3 は任意の線形順序で成り立ち、非散在的な $L$ では $\approx$ が $L$ の「$\mathcal{H}$ に属するかたまり」への稠密な分解を与える。
+- **選択公理**：Step 2 の \ref{model:well-ordered-cofinal}（整列可能定理）、Step 4 の代表元の選択と \ref{model:dense-subset-eta} で使った。
+- **逆整列和**：Step 2 の $C^{-}$ で使った。整列和だけでは $\omega^{*}$ が作れない（整列順序の整列和は整列順序である）ので、逆整列和は外せない。
+:::
+:::
+
+::: supplement
+**歴史.** この定理は Hausdorff によるとされ（1908 年ごろとされるが未確認）、散在的順序の理論の出発点になった。
+
+**似た定理.** 整列順序の整列和は整列順序である（\ref{set:well-order-sum-product} の一般化）。ハウスドルフの定理は、「整列」と「逆整列」を交互に許すと、散在的な順序の全体に達することを言っている。
+
+**前提を変えると.** 添字に $\zeta$ を許して $\zeta$ 和の階層を作る流儀もある。$\zeta$ は $\omega^{*}+\omega$ なので、どちらの流儀でも $\mathcal{H}$ の全体は変わらないが、階数の値は流儀によって変わる（たとえば $\zeta$ の階数は下の \ref{model:hausdorff-rank-low} では $2$、$\zeta$ 和の流儀では $1$）。
+
+**高い視点.** \ref{model:dense-sum-of-scattered} とハウスドルフの定理を合わせると、任意の線形順序は「稠密な部分」と「整列・逆整列の部分」の二種類の部品を交互に入れ子にしたものとして理解できる。可算の場合、稠密な部分は端点の有無を除いて $\eta$ に限る（\ref[η の端点による分類]{model:eta-endpoints}）。
+:::
+
+::: proposition 低い階数 {#model:hausdorff-rank-low keywords="Hausdorff rank at most 1 iff well-ordered or reverse well-ordered; rank of zeta is 2" index="ハウスドルフ階数の例|はうすどるふかいすうのれい"}
+1. $\operatorname{rk}_{H}(L)\le1$ であることと、$L$ が整列順序か逆整列順序であることは同値である。
+2. $\zeta$ と $\omega+\omega^{*}$ のハウスドルフ階数は $2$ である。
+:::
+
+::: proof
+**(1)** $L\in\mathcal{H}_{1}$ とは、$L$ が 1 元以下の凸集合 $L_{i}$ に分割され、添字 $I$ が整列順序か逆整列順序で $i<j\Rightarrow L_{i}<L_{j}$ となることである。空のブロックを除けば、$L$ は $I$ の部分順序と同型になるので、整列順序か逆整列順序である。逆に $L$ が整列順序（逆整列順序）なら、$I\defeq L$, $L_{x}\defeq\{x\}$ が条件を満たす。
+
+**(2)** $\zeta$ には最小元がない（ゆえに整列順序でない）し、最大元もない（逆整列順序でない）。(1) から階数は $2$ 以上である。$\zeta=\omega^{*}+\omega$ は $\mathcal{H}_{1}$ の元の $I=2$ による和なので、階数は $2$ 以下である。$\omega+\omega^{*}$ は部分順序 $\omega^{*}$ が最小元をもたず、$\omega$ が最大元をもたないので、整列順序でも逆整列順序でもない。上と同じく階数は $2$ である。
+:::
+
+## 可算な散在的順序 {#model:sec-scat-countable}
+
+ハウスドルフの定理によって、散在的な順序について階数による帰納法が使えるようになる。その応用として、可算な散在的順序を「始部分の個数」で特徴付ける。ここで線形順序 $L$ の**始部分**とは、$x\in X$, $y<x$ から $y\in X$ が従う部分集合 $X\subseteq L$ のことである（空集合と $L$ 自身も含める）。
+
+::: theorem 可算な散在的順序の始部分 {#model:scattered-countable-cuts keywords="a countable linear order is scattered iff it has only countably many initial segments (cuts)" index="可算な散在的順序の始部分|かさんなさんざいてきじゅんじょのしぶぶん"}
+可算な線形順序 $L$ について、次は同値である。
+1. $L$ は散在的である。
+2. $L$ の始部分は可算個しかない。
+
+散在的でない可算な $L$ の始部分は、ちょうど $2^{\aleph_{0}}$ 個ある。
+:::
+
+::: intuition
+可算な順序の「切れ目」の数は、散在的なら数えられるほどしかなく、有理数のような部分が少しでもあれば実数と同じだけある。有理数の切れ目は実数一つ一つに対応するからである。
+:::
+
+::: proof
+**2 ⇒ 1（対偶）.** $L$ が散在的でないとし、埋め込み $f\colon\eta\to L$ をとる。$\eta=(\mathbb{Q},<)$ として、実数 $r$ ごとに $X_{r}\defeq\{q\in\mathbb{Q}\mid q<r\}$ とおき、$\hat{X}_{r}\defeq\{y\in L\mid\text{ある }q\in X_{r}\text{ で }y\le f(q)\}$ とおく。$\hat{X}_{r}$ は始部分である。
+
+**Step 1.** 【主張：$r\neq r'$ なら $\hat{X}_{r}\neq\hat{X}_{r'}$】$r<r'$ とし、$r<q_{0}<r'$ となる有理数 $q_{0}$ をとる。$f(q_{0})\in\hat{X}_{r'}$ である。$f(q_{0})\in\hat{X}_{r}$ と仮定すると、ある $q<r$ で $f(q_{0})\le f(q)$ となるが、$f$ は埋め込みなので $q_{0}\le q<r$ となり $r<q_{0}$ に反する。
+
+ゆえに始部分は $2^{\aleph_{0}}$ 個以上ある。$L$ の部分集合は $2^{\aleph_{0}}$ 個しかないので、ちょうど $2^{\aleph_{0}}$ 個であり、特に非可算である。
+
+**1 ⇒ 2.** \ref{model:hausdorff-scattered} から $L\in\mathcal{H}$ である。$\alpha$ についての帰納法で「可算な $L\in\mathcal{H}_{\alpha}$ の始部分は可算個」を示す。$\alpha=0$ では始部分は 2 個以下である。
+
+**Step 2.** 【主張：$\alpha>0$ で $L\cong\sum_{i\in I}L_{i}$ のとき、始部分 $X$ は、$I$ の始部分 $K$ と、$K$ が最大元 $k$ をもつ場合の $L_{k}$ の空でない始部分 $Y$ で決まる】空の $L_{i}$ を除き、$I$ は可算としてよい（$L$ を $\omega$ で番号付けし、各 $i$ に $L_{i}$ の元のうち番号最小のものを対応させると、$I$ から $L$ への単射になる）。$K\defeq\{i\in I\mid X\cap L_{i}\neq\varnothing\}$ とおく。$X$ は始部分なので $K$ も始部分である。$i\in K$ が $K$ の最大元でなければ、$i<j$ となる $j\in K$ と $x\in X\cap L_{j}$ があり、$L_{i}$ の元はすべて $x$ より小さいので $L_{i}\subseteq X$ である。ゆえに
+$$
+X=\bigcup\{L_{i}\mid i\in K,\ i\neq\max K\}\cup(X\cap L_{\max K})
+$$
+であり（最大元がなければ第 2 項はない）、$X$ は $K$ と $Y\defeq X\cap L_{\max K}$ で決まる。$Y$ は $L_{\max K}$ の始部分である。
+
+**Step 3.** 【主張：その組は可算個しかない】$I$ が整列順序なら、$I$ の始部分は $\{j\mid j<i\}$（$i\in I$）か $I$ 自身なので、$\lvert I\rvert+1$ 個で可算である。$I$ が逆整列順序なら、始部分 $K$ の補集合は $I^{*}$ の始部分なので、やはり可算個である。各 $L_{i}$ は可算で、ある $\beta<\alpha$ について $\mathcal{H}_{\beta}$ に属するので、帰納法の仮定から始部分は可算個である。ゆえに組 $(K,Y)$ は、可算個の $K$ と可算個の $Y$ の組で、可算集合の可算和として可算である。
+
+::: hypcheck
+- **$L$ が可算**：Step 2 で $I$ を可算にし、Step 3 で帰納法の仮定を各 $L_{i}$ に使うのに使った。外すと偽：非可算の整列順序 $\omega_{1}$ は散在的だが、始部分は $\aleph_{1}$ 個ある。
+- **選択公理**：\ref{model:hausdorff-scattered} と、Step 3 の可算集合の可算和が可算であること（可算選択公理）で使った。
+- **2 ⇒ 1** は $\mathbb{Q}$ が $\mathbb{R}$ で稠密であることだけを使い、$L$ の可算性は「ちょうど $2^{\aleph_{0}}$ 個」の上からの評価にだけ使った。
+:::
+:::
+
+::: proposition 可算な散在的順序型は $2^{\aleph_{0}}$ 個 {#model:countable-scattered-continuum keywords="there are continuum many countable scattered order types" index="可算な散在的順序型の個数|かさんなさんざいてきじゅんじょがたのこすう"}
+互いに同型でない可算な散在的順序が $2^{\aleph_{0}}$ 個ある。可算な線形順序の型も $2^{\aleph_{0}}$ 個なので、可算な散在的順序型の個数はちょうど $2^{\aleph_{0}}$ である。
+:::
+
+::: proof
+数列 $s\colon\omega\to\{1,2\}$ ごとに
+$$
+L_{s}\defeq\sum_{k\in\omega}\bigl(\omega+s(k)+\omega^{*}\bigr)
+$$
+とおく。$L_{s}$ は可算で、\ref{model:scattered-closure.3} により散在的である（各ブロックは散在的な順序の和）。
+
+**Step 1.** 【主張：$L_{s}$ の $\sim_{F}$ の類は、順に $\omega,\ s(0),\ \zeta,\ s(1),\ \zeta,\ s(2),\dots$ である】第 $k$ ブロックの三つの部分を $A_{k}\cong\omega$, $B_{k}\cong s(k)$, $C_{k}\cong\omega^{*}$ とする。各部分の中の 2 点の間は有限である。$A_{k}$ の点 $x$ と $B_{k}$ の点の間には、$x$ より大きい $A_{k}$ の点が無限個あるので、別の類である。$B_{k}$ の点と $C_{k}$ の点 $y$ の間には、$y$ より小さい $C_{k}$ の点が無限個あるので、別の類である。$C_{k}$ の点 $y$ と $A_{k+1}$ の点 $z$ の間には、$y$ 以上の $C_{k}$ の点（有限個）と $z$ 以下の $A_{k+1}$ の点（有限個）しかないので、同じ類である。$C_{k}+A_{k+1}\cong\omega^{*}+\omega=\zeta$ であり、離れたブロックの点の間には無限個の点がある。
+
+**Step 2.** 【主張：$L_{s}\cong L_{t}$ なら $s=t$】$\sim_{F}$ は順序だけで定義されるので、同型 $g\colon L_{s}\to L_{t}$ は $\sim_{F}$ の類を類に移し、類の順序と各類の型を保つ。Step 1 から、$L_{s}/{\sim_{F}}$ の有限な類を順に並べたものは $\omega$ 型の列で、その $k$ 番目の元の個数は $s(k)$ である。$g$ はこれを $L_{t}$ の対応する列に移すので、$s(k)=t(k)$ がすべての $k$ で成り立つ。
+
+$s$ は $2^{\aleph_{0}}$ 通りあるので、型も $2^{\aleph_{0}}$ 個以上ある。可算な線形順序は $\omega$ 上の 2 項関係と同型なので、型は $2^{\aleph_{0}}$ 個以下である。
+:::
+
+::: example
+可算な散在的順序の例：すべての可算順序数（$\omega^{2}$, $\omega^{\omega}$, $\varepsilon_{0}$ など）とその逆、$\zeta\cdot\omega$（$\omega$ 個の $\zeta$）、$\zeta^{n}=\zeta\cdot\zeta\cdots\zeta$、$\omega\cdot\zeta$（$\zeta$ 個の $\omega$）。いずれも \ref{model:scattered-closure.3} から散在的である。一方、$\zeta\cdot\eta$ や $\omega\cdot\eta$ は散在的でない。
+:::
+
+::: fact ラヴァーの定理（フレッセの予想） {#model:laver-fraisse keywords="Laver's theorem, Fraisse's conjecture: countable scattered orders are well-quasi-ordered by embeddability" index="ラヴァーの定理|らゔぁーのていり, フレッセの予想|ふれっせのよそう"}
+可算な散在的順序の全体は、埋め込み可能性 $\hookrightarrow$ について**整擬順序**をなす：可算な散在的順序の無限列 $L_{0},L_{1},\dots$ には、$i<j$ かつ $L_{i}\hookrightarrow L_{j}$ となる $i,j$ が必ずある。とくに、$L_{i+1}\hookrightarrow L_{i}$ だが $L_{i}\not\hookrightarrow L_{i+1}$ となる無限列（狭義の降下列）や、どの二つも互いに埋め込めない無限個の可算散在的順序の族はない。（Laver による。フレッセが予想したとされる。本サイトでは証明しない。）
+:::
+
+::: supplement
+**可算な散在的順序の階数.** 可算な散在的順序のハウスドルフ階数は可算順序数であり、すべての可算順序数が階数として現れることが知られている（未確認。証明はここでは扱わない）。
+
+**非可算の場合.** 非可算な散在的順序には $\omega_{1}$ や $\omega_{1}^{*}$ のように可算でない添字の和が必要になる。非可算の線形順序の構造の研究は、ススリンの問題のような集合論の独立命題とつながる（\see{set:page-suslin-problem}）。
+:::
+
+## 問題 {#model:sec-scat-problems}
+
+::: problem ★ 基本：散在的かどうか {#model:prob-scat-examples}
+次の順序が散在的かどうかを判定せよ：(a) $\eta\cdot\omega$（$\omega$ 個の $\eta$）、(b) $\omega^{*}\cdot\omega$（$\omega$ 個の $\omega^{*}$）、(c) $\zeta\cdot\omega^{*}$。
+:::
+
+::: solution
+(a) 散在的でない。最初のブロック $\{0\}\times\eta$ が $\eta$ と同型な部分順序である。
+
+(b) 散在的である。添字 $\omega$ も各ブロック $\omega^{*}$ も散在的（\ref{model:scattered-order} の下の例）なので、\ref{model:scattered-closure.3} から和は散在的である。
+
+(c) 散在的である。添字 $\omega^{*}$ と各ブロック $\zeta$ が散在的なので、(b) と同じく \ref{model:scattered-closure.3} から従う。
+:::
+
+::: problem ★ 基本：散在凝縮の計算 {#model:prob-scat-condensation}
+$L=\omega+\eta+\omega^{*}$ の散在凝縮 $L/{\sim_{S}}$ の順序型を求め、\ref{model:dense-sum-of-scattered.2} と矛盾しないことを確かめよ。
+:::
+
+::: solution
+$\omega$ の部分の 2 点の間は $\omega$ の有限区間なので散在的であり、$\omega$ の部分は一つの類に含まれる。$\omega$ の点 $m$ と $\eta$ の点 $q$ の間の区間は $\eta$ の区間 $\{r\mid r\le q\}$ を含み、これは 2 元以上の稠密な順序なので散在的でない。ゆえに $\omega$ の部分はちょうど一つの類である。同様に $\omega^{*}$ の部分も一つの類であり、$\eta$ の各点は単独で類をなす（$\eta$ の 2 点の間に $\eta$ の区間がある）。したがって $L/{\sim_{S}}\cong1+\eta+1$ である。これは端点をもつが、2 元以上で隣り合う元がないので、\ref{model:dense-sum-of-scattered.2} の「2 元以上の稠密な順序」に当てはまる。
+:::
+
+::: problem ★ 基本：階数の計算 {#model:prob-scat-rank}
+$\zeta\cdot\omega$（$\omega$ 個の $\zeta$）のハウスドルフ階数が $2$ であることを示せ。
+:::
+
+::: solution
+各ブロック $\zeta$ を $\omega^{*}$ と $\omega$ に分けると、$\zeta\cdot\omega=\sum_{k\in\omega}\zeta$ は凸な部分集合の列 $\omega^{*},\omega,\omega^{*},\omega,\dots$ に分割される。すなわち $\zeta\cdot\omega\cong\sum_{j\in\omega}M_{j}$（$M_{2k}=\omega^{*}$, $M_{2k+1}=\omega$）であり、添字 $\omega$ は整列順序、各 $M_{j}$ は \ref{model:hausdorff-rank-low.1} から $\mathcal{H}_{1}$ に属する。ゆえに $\zeta\cdot\omega\in\mathcal{H}_{2}$ である。一方、$\zeta\cdot\omega$ は最小元をもたない（最初のブロック $\zeta$ に最小元がない）ので整列順序でなく、最大元ももたないので逆整列順序でもない。\ref{model:hausdorff-rank-low.1} から階数は $2$ 以上である。したがって階数はちょうど $2$ である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
