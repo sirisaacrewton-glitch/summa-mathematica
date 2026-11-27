@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>共役事前分布 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/04-bayes/02-conjugate-priors.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 共役事前分布 {#stat:page-conjugate-priors keywords="conjugate families, beta prior for Bernoulli and binomial data, posterior mean as a weighted average (shrinkage), posterior predictive distribution, Laplace's rule of succession (k+1)/(n+2), gamma prior for Poisson data and the negative binomial predictive, normal prior for a normal mean with known variance (precisions add), flat-prior limit and agreement with the z interval, constant-risk Bayes estimator for a binomial proportion"}
+
+事後分布の計算は一般には積分を含み、閉じた形にならない。しかし、尤度と相性のよい事前分布の族を選ぶと、事後分布が同じ族に入り、パラメータを更新する簡単な式で済む。このような族を**共役事前分布**という。このページでは、ベルヌーイ（2 項）・ポアソン・正規の 3 つの基本的なモデルについて共役事前分布を求め、事後平均が「事前の推測」と「データの推定値」の重みつき平均（縮小）になること、次の観測の**予測分布**が計算できることを示す。
+
+## 記法と定義の確認 {#stat:sec-cp-notation}
+
+::: notation
+- 前のページの定義と結果 \ref{stat:prior-posterior}, \ref{stat:bayes-formula}, \ref{stat:bayes-estimator-posterior-loss}, \ref{stat:credible-interval} を使う。
+- ガンマ関数とその関数等式 $\Gamma(x+1)=x\Gamma(x)$、ベータ関数 $B(x,y)=\frac{\Gamma(x)\Gamma(y)}{\Gamma(x+y)}$ は \ref{calc:gamma-basic}, \ref{calc:beta-function}。
+- $\propto$ は「$\theta$ によらない正の定数倍を除いて等しい」ことを表す。事後密度は $\theta$ の関数として $\pi(\theta)f(x\mid\theta)$ に比例し、積分が $1$ になるという条件で定数が決まる。体系は $\ZFC$。
+:::
+
+## ベータ–2 項モデル {#stat:sec-cp-beta}
+
+::: definition 共役事前分布とベータ分布 {#stat:conjugate-prior keywords="a family of priors is conjugate to a model if every posterior is again in the family; beta distribution Beta(a, b) with density theta^{a-1}(1-theta)^{b-1}/B(a, b) on (0, 1), mean a/(a+b)" index="共役事前分布|きょうやくじぜんぶんぷ, ベータ分布|べーたぶんぷ" refname="共役事前分布とベータ分布"}
+事前分布の族 $\mathcal{F}$ が、すべての事前分布 $\pi\in\mathcal{F}$ とすべてのデータについて事後分布も $\mathcal{F}$ に入るとき、$\mathcal{F}$ はそのモデルの**共役事前分布**の族であるという。$a,b>0$ について $(0,1)$ 上の密度 $\frac{\theta^{a-1}(1-\theta)^{b-1}}{B(a,b)}$ の分布を**ベータ分布** $\mathrm{Beta}(a,b)$ という（平均は $\frac{B(a+1,b)}{B(a,b)}=\frac a{a+b}$）。
+:::
+
+::: intuition
+ベータ事前分布 $\mathrm{Beta}(a,b)$ は「すでに $a$ 回の成功と $b$ 回の失敗を見たかのような」事前の知識と読める。データの成功と失敗の数をそれに足すだけで事後分布になる。
+:::
+
+::: theorem ベータ–2 項モデル {#stat:beta-binomial keywords="Bernoulli(theta) data with k successes in n trials and Beta(a, b) prior give the Beta(a + k, b + n - k) posterior; posterior mean (a + k)/(a + b + n) is a weighted average of a/(a+b) and k/n; predictive probability of success (a + k)/(a + b + n); Laplace's rule of succession (k+1)/(n+2) for a = b = 1" index="ベータ–2 項モデル|べーたにこうもでる, ラプラスの継続の法則|らぷらすのけいぞくのほうそく, 予測分布|よそくぶんぷ" refname="ベータ–2 項モデル"}
+$\vartheta\sim\mathrm{Beta}(a,b)$ とし、$\vartheta=\theta$ のもとで $X_{1},\dots,X_{n+1}$ を成功確率 $\theta$ の独立なベルヌーイ確率変数とする（同時密度 $\pi(\theta)\prod\theta^{x_{i}}(1-\theta)^{1-x_{i}}$）。$x=(x_{1},\dots,x_{n})$ の成功の数を $k$ とすると、
+1. $(X_{1},\dots,X_{n})=x$ のもとでの $\vartheta$ の事後分布は $\mathrm{Beta}(a+k,b+n-k)$。
+2. 事後平均は
+$$
+\frac{a+k}{a+b+n}=\frac{a+b}{a+b+n}\cdot\frac a{a+b}+\frac n{a+b+n}\cdot\frac kn.
+$$
+3. 予測確率は $P(X_{n+1}=1\mid X_{1..n}=x)=\frac{a+k}{a+b+n}$。特に $a=b=1$（一様事前分布）なら $\frac{k+1}{n+2}$（**ラプラスの継続の法則**）。
+:::
+
+::: intuition
+ベータ事前分布は「仮想的な成功 $a$ 回・失敗 $b$ 回」に相当し、データの成功と失敗を足すだけで事後分布になる。事後平均は事前の推測と観測された割合を、仮想の試行数と実際の試行数で重みをつけた平均である。
+:::
+
+::: proof
+**Step 1（1）.** 事後密度は $\theta$ の関数として $\theta^{a-1}(1-\theta)^{b-1}\cdot\theta^{k}(1-\theta)^{n-k}=\theta^{a+k-1}(1-\theta)^{b+n-k-1}$ に比例し、積分が $1$ になる定数は $1/B(a+k,b+n-k)$。
+
+**Step 2（2）.** ベータ分布の平均と、右辺の通分による恒等式。
+
+**Step 3（3）.** 【主張：$P(X_{n+1}=1\mid X_{1..n}=x)=\frac{m(x,1)}{m(x)}$、$m$ は周辺確率】離散なデータなので条件付き確率は比で計算できる。$m(x)=\int_{0}^{1}\frac{\theta^{a-1}(1-\theta)^{b-1}}{B(a,b)}\theta^{k}(1-\theta)^{n-k}d\theta=\frac{B(a+k,b+n-k)}{B(a,b)}$、同様に $m(x,1)=\frac{B(a+k+1,b+n-k)}{B(a,b)}$。$B(s+1,t)=\frac{\Gamma(s+1)\Gamma(t)}{\Gamma(s+t+1)}=\frac{s}{s+t}B(s,t)$ から比は $\frac{a+k}{a+b+n}$。
+:::
+
+::: example 一定のリスクをもつベイズ推定量 {#stat:binomial-minimax-example}
+$n$ 回の試行の成功の数 $K$ から $\theta$ を 2 乗損失で推定する。$a=b=\frac{\sqrt n}2$ のベイズ推定量 $\delta(K)=\frac{K+\sqrt n/2}{n+\sqrt n}$ の頻度論のリスクは
+$$
+E_{\theta}[(\delta-\theta)^{2}]=\frac{n\theta(1-\theta)+\frac n4(1-2\theta)^{2}}{(n+\sqrt n)^{2}}=\frac{n/4}{(n+\sqrt n)^{2}}=\frac1{4(1+\sqrt n)^{2}}
+$$
+で $\theta$ によらない（偏り $\frac{\sqrt n(1/2-\theta)}{n+\sqrt n}$ と分散 $\frac{n\theta(1-\theta)}{(n+\sqrt n)^{2}}$ を足して整理する）。最尤推定量 $K/n$ のリスク $\frac{\theta(1-\theta)}n$ と比べると、$\theta$ が $\frac12$ に近いと小さく、$0$ や $1$ に近いと大きい。リスクが一定のベイズ推定量はミニマックス推定量であることが知られている（ここでは証明しない）。
+:::
+
+## ガンマ–ポアソンモデル {#stat:sec-cp-gamma}
+
+::: theorem ガンマ–ポアソンモデル {#stat:gamma-poisson keywords="Poisson(lambda) data with Gamma(alpha, beta) prior (density beta^alpha lambda^{alpha-1} e^{-beta lambda}/Gamma(alpha)) give the Gamma(alpha + sum x_i, beta + n) posterior; posterior mean (alpha + sum x)/(beta + n); predictive distribution of a new count is negative binomial" index="ガンマ–ポアソンモデル|がんまぽあそんもでる, ガンマ分布|がんまぶんぷ, 負の 2 項分布|ふのにこうぶんぷ" refname="ガンマ–ポアソンモデル"}
+$\alpha,\beta>0$ について $\mathrm{Gamma}(\alpha,\beta)$ を $(0,\infty)$ 上の密度 $\frac{\beta^{\alpha}\lambda^{\alpha-1}e^{-\beta\lambda}}{\Gamma(\alpha)}$ の分布とする（平均 $\alpha/\beta$）。$\vartheta\sim\mathrm{Gamma}(\alpha,\beta)$、$\vartheta=\lambda$ のもとで $X_{1},X_{2},\dots$ を平均 $\lambda$ の独立なポアソン確率変数とし、$s\defeq x_{1}+\dots+x_{n}$ とすると、
+1. 事後分布は $\mathrm{Gamma}(\alpha+s,\beta+n)$、事後平均は $\frac{\alpha+s}{\beta+n}$。
+2. $\alpha'\defeq\alpha+s$, $\beta'\defeq\beta+n$ とすると、新しい観測の予測分布は
+$$
+P(X_{n+1}=y\mid X_{1..n}=x)=\frac{\Gamma(\alpha'+y)}{\Gamma(\alpha')\,y!}\Bigl(\frac{\beta'}{\beta'+1}\Bigr)^{\alpha'}\Bigl(\frac1{\beta'+1}\Bigr)^{y}\qquad(y=0,1,\dots)
+$$
+（負の 2 項分布）。
+:::
+
+::: intuition
+ガンマ事前分布は「仮想的に $\beta$ 回観測して合計 $\alpha$ 個数えた」ことに相当する。予測分布は、ポアソン分布の平均がさらにゆらぐ分だけ、ポアソン分布より裾が広い負の 2 項分布になる。
+:::
+
+::: proof
+**Step 1（1）.** 事後密度は $\lambda^{\alpha-1}e^{-\beta\lambda}\cdot\lambda^{s}e^{-n\lambda}=\lambda^{\alpha+s-1}e^{-(\beta+n)\lambda}$ に比例する。
+
+**Step 2（2）.** 【主張：予測確率は事後分布で尤度を平均したもの】離散データの条件付き確率の比 $\frac{m(x,y)}{m(x)}$ を書くと、$\frac{m(x,y)}{m(x)}=\int\frac{e^{-\lambda}\lambda^{y}}{y!}\pi(\lambda\mid x)d\lambda$（分子の被積分関数を事後密度と新しい尤度の積に分ける）。$\int_{0}^{\infty}\lambda^{\alpha'+y-1}e^{-(\beta'+1)\lambda}d\lambda=\frac{\Gamma(\alpha'+y)}{(\beta'+1)^{\alpha'+y}}$（$u=(\beta'+1)\lambda$ と置換）から、$\frac{\beta'^{\alpha'}}{\Gamma(\alpha')y!}\cdot\frac{\Gamma(\alpha'+y)}{(\beta'+1)^{\alpha'+y}}$ が主張の式。
+:::
+
+## 正規–正規モデル {#stat:sec-cp-normal}
+
+::: theorem 正規平均の共役事前分布 {#stat:normal-normal keywords="N(mu, sigma^2) data with known sigma^2 and N(mu_0, tau_0^2) prior give the normal posterior with precision 1/tau_n^2 = 1/tau_0^2 + n/sigma^2 and mean mu_n = tau_n^2 (mu_0/tau_0^2 + n bar x / sigma^2); credible interval mu_n +- z tau_n; flat-prior limit gives bar x +- z sigma/sqrt(n)" index="正規–正規モデル|せいきせいきもでる, 精度|せいど" refname="正規平均の共役事前分布"}
+$\sigma^{2}$ を既知とし、$\vartheta\sim N(\mu_{0},\tau_{0}^{2})$、$\vartheta=\mu$ のもとで $X_{1},\dots,X_{n}$ を $N(\mu,\sigma^{2})$ の独立な確率変数とする。このとき事後分布は $N(\mu_{n},\tau_{n}^{2})$、
+$$
+\frac1{\tau_{n}^{2}}=\frac1{\tau_{0}^{2}}+\frac n{\sigma^{2}},\qquad\mu_{n}=\tau_{n}^{2}\Bigl(\frac{\mu_{0}}{\tau_{0}^{2}}+\frac{n\bar x}{\sigma^{2}}\Bigr).
+$$
+等裾の信用度 $1-\alpha$ の信用区間は $\mu_{n}\pm z_{\alpha/2}\tau_{n}$ で、$\tau_{0}\to\infty$ の極限で $\bar x\pm z_{\alpha/2}\sigma/\sqrt n$（\ref{stat:t-interval} の $\sigma$ 既知の場合の信頼区間と同じ数値）になる。
+:::
+
+::: intuition
+分散の逆数（**精度**）は情報の量で、事後の精度は事前の精度とデータの精度の和になる。事後平均は、事前平均と標本平均を、それぞれの精度で重みをつけた平均である。データが増えるほどデータの重みが大きくなる。
+:::
+
+::: proof
+**Step 1（平方完成）.** 事後密度の対数は $\mu$ の関数として
+$$
+-\frac{(\mu-\mu_{0})^{2}}{2\tau_{0}^{2}}-\sum_{i}\frac{(x_{i}-\mu)^{2}}{2\sigma^{2}}+\text{定数}=-\frac12\Bigl(\frac1{\tau_{0}^{2}}+\frac n{\sigma^{2}}\Bigr)\mu^{2}+\Bigl(\frac{\mu_{0}}{\tau_{0}^{2}}+\frac{n\bar x}{\sigma^{2}}\Bigr)\mu+\text{定数}=-\frac{(\mu-\mu_{n})^{2}}{2\tau_{n}^{2}}+\text{定数}.
+$$
+これは $N(\mu_{n},\tau_{n}^{2})$ の密度の対数と定数しか違わず、どちらも積分が $1$ なので一致する。
+
+**Step 2（区間と極限）.** 事後分布が正規なので、等裾の区間は $\mu_{n}\pm z_{\alpha/2}\tau_{n}$。$\tau_{0}\to\infty$ で $\tau_{n}^{2}\to\sigma^{2}/n$, $\mu_{n}\to\bar x$。
+:::
+
+::: hypcheck
+- **共役性はモデルと事前分布の組の性質**：同じベータ分布も、ポアソンのデータに対しては共役でない。
+- **$\sigma^{2}$ が既知**：正規–正規モデルの平方完成（Step 1）で使った。$\sigma^{2}$ も未知なら、$(\mu,\sigma^{2})$ に正規–逆ガンマ分布を置くと共役になり、$\mu$ の周辺事後分布は $t$ 分布になる（ここでは証明しない）。
+- **数値の一致と解釈**：平坦な事前分布の極限で 2 種類の区間の数値が一致しても、確率の意味は異なる（\ref{stat:credible-interval} の後の説明）。
+:::
+
+## 問題 {#stat:sec-cp-problems}
+
+::: problem {#stat:prob-cp-sunrise}
+一様事前分布のもとで、$n$ 回続けて成功したとき次も成功する予測確率を求めよ。
+:::
+
+::: solution
+$k=n$, $a=b=1$ で $\frac{n+1}{n+2}$（ラプラスの「日の出の問題」）。
+:::
+
+::: problem {#stat:prob-cp-normal-shrink}
+$\sigma^{2}=4$, $n=4$, $\bar x=3$、事前分布 $N(0,1)$ のとき、事後平均と事後分散を求めよ。
+:::
+
+::: solution
+$\frac1{\tau_{n}^{2}}=1+\frac44=2$、$\tau_{n}^{2}=\frac12$、$\mu_{n}=\frac12(0+\frac{4\cdot3}4)=1.5$。標本平均 $3$ が事前平均 $0$ の方へ半分縮められる（事前とデータの精度が等しいため）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 各モデルの計算は、事後密度が尤度と事前密度の積に比例することだけを使い、正規化定数の計算は分布の族の既知の定数に任せた。議論は Gelman ほか『Bayesian Data Analysis』第 2 章の流れに沿う。
+
+**前提を変えると.**
+- **指数型分布族の共役事前分布**：$f(x\mid\theta)=h(x)\exp(\langle\eta,T(x)\rangle-A(\eta))$ に対し、$\pi(\eta)\propto\exp(\langle\eta,\chi\rangle-\nu A(\eta))$ の族は共役で、更新は $\chi\mapsto\chi+\sum T(x_{i})$, $\nu\mapsto\nu+n$ である（上の 3 例はこの特別な場合）。
+- **事前分布の頑健性**：共役事前分布は計算の便宜で選ばれることが多い。裾の軽い事前分布は、データが事前の推測と大きく食い違うときに過度に縮めるので、裾の重い事前分布（コーシー分布など）を使うことがある。
+- **階層モデル**：事前分布のパラメータにさらに分布を置くと、多数の群の平均を互いに縮め合う推定（経験ベイズ・階層ベイズ）が得られ、ジェームズ–スタイン推定量と同じ形の縮小が現れる。
+
+**高い視点から：十分統計量と次元の固定.** 共役事前分布が存在するのは、データの情報が固定次元の十分統計量（成功の数、合計）にまとめられるモデルである。事後分布の更新は、その十分統計量を事前分布のパラメータに「足す」操作になり、学習は有限次元のパラメータ空間の上の移動で表される。比喩で言えば、共役事前分布は「同じ型の器」で、データを注ぐたびに中身の量（パラメータ）だけが変わり、器の形（分布の族）は変わらない。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-cp-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

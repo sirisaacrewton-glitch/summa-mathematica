@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ベイズの定理と事後分布 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/04-bayes/01-bayes-theorem.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ベイズの定理と事後分布 {#stat:page-bayes-theorem keywords="prior and posterior distributions, Bayes formula for densities, posterior as conditional distribution of the parameter given the data, marginal likelihood, base rate fallacy, loss functions, frequentist risk and Bayes risk, Bayes estimators minimize posterior expected loss, posterior mean under squared loss, posterior median under absolute loss, credible intervals versus confidence intervals, improper priors"}
+
+これまでの統計学（頻度論）では、パラメータ $\theta$ は未知の定数で、確率はデータの側だけにあった。**ベイズ統計**では、$\theta$ についての不確かさも確率分布（**事前分布**）で表し、データを観測した後の $\theta$ の条件付き分布（**事後分布**）を推論の基礎にする。事後分布はベイズの定理で計算でき、推定・区間・予測はすべて事後分布の要約として与えられる。このページでは、密度の言葉でベイズの公式を正確に述べて証明し、損失関数を最小にするという意味で事後平均・事後中央値が最適であることを示す。
+
+## 記法と定義の確認 {#stat:sec-bt-notation}
+
+::: notation
+- 統計モデルと尤度は \ref{stat:statistical-model}, \ref{stat:maximum-likelihood}。条件付き期待値とその性質は \ref{prb:conditional-expectation}, \ref{prb:conditional-properties}。フビニ–トネリの定理は \ref{meas:fubini}。
+- パラメータ空間 $\Theta\subseteq\mathbb{R}^{k}$ に $\sigma$ 有限測度 $\nu$（ルベーグ測度または数え上げ測度）を、データの空間 $\mathcal{X}$ に $\sigma$ 有限測度 $\mu$ を固定する。$f(x\mid\theta)$ は $P_{\theta}$ の $\mu$ に関する密度で、$(\theta,x)$ について可測とする。
+- 体系は $\ZFC$。
+:::
+
+## 事前分布と事後分布 {#stat:sec-bt-posterior}
+
+::: definition 事前分布・事後分布 {#stat:prior-posterior keywords="prior density pi(theta) with respect to nu; joint density pi(theta) f(x|theta); marginal density m(x) = int pi(theta) f(x|theta) nu(d theta); posterior density pi(theta|x) = pi(theta) f(x|theta) / m(x) where m(x) > 0" index="事前分布|じぜんぶんぷ, 事後分布|じごぶんぷ, 周辺尤度|しゅうへんゆうど, ベイズ統計|べいずとうけい" refname="事前分布・事後分布"}
+$\nu$ に関する確率密度 $\pi(\theta)$ を**事前分布**という。確率変数の組 $(\vartheta,X)$ で、同時密度（$\nu\otimes\mu$ に関する）が $\pi(\theta)f(x\mid\theta)$ のものを考える（$\vartheta$ がパラメータ、$X$ がデータ）。
+$$
+m(x)\defeq\int_{\Theta}\pi(\theta)f(x\mid\theta)\nu(d\theta),\qquad\pi(\theta\mid x)\defeq\frac{\pi(\theta)f(x\mid\theta)}{m(x)}\quad(m(x)>0)
+$$
+を**周辺尤度**（データの周辺密度）、**事後分布**（の密度）という。$m(x)=0$ の $x$ では $\pi(\cdot\mid x)\defeq\pi$ と約束する。
+:::
+
+::: intuition
+事後分布は「事前の信念」に「データの出やすさ（尤度）」を掛けて、合計が $1$ になるように割り直したものである。同じデータでも事前分布が違えば事後分布は違うが、データが増えると尤度の影響が支配的になる（\ref[事後分布の一致性]{stat:page-posterior-consistency}）。
+:::
+
+::: theorem ベイズの公式 {#stat:bayes-formula keywords="m is the density of X; m(X) > 0 a.s.; for every measurable g >= 0 on Theta x X, E[g(theta, X) | X] = int g(theta, X) pi(theta | X) nu(d theta) a.s.; in particular P(theta in A | X) = int_A pi(theta | X) nu(d theta)" index="ベイズの公式|べいずのこうしき, ベイズの定理|べいずのていり" refname="ベイズの公式"}
+1. $X$ の密度は $m$ で、$m(X)>0$（a.s.）。
+2. $\Theta\times\mathcal{X}$ 上の非負可測関数 $g$ について、$G(x)\defeq\int_{\Theta}g(\theta,x)\pi(\theta\mid x)\nu(d\theta)$ とおくと、$E[g(\vartheta,X)\mid X]=G(X)$（a.s.）。特に可測な $A\subseteq\Theta$ について $P(\vartheta\in A\mid X)=\int_{A}\pi(\theta\mid X)\nu(d\theta)$ で、事後分布は $X$ を与えたときの $\vartheta$ の条件付き分布である。
+:::
+
+::: intuition
+同時分布を「データの値で切る」と、その切り口の上のパラメータの分布が事後分布である。密度で書けば、同時密度をデータの周辺密度で割るだけで、その正しさはフビニの定理で積分を入れ替えて確かめられる。
+:::
+
+::: proof
+**Step 1（1）.** フビニ–トネリの定理（\ref{meas:fubini}）から、可測な $B\subseteq\mathcal{X}$ について $P(X\in B)=\int_{B}\int_{\Theta}\pi f\,d\nu\,d\mu=\int_{B}m\,d\mu$。$P(m(X)=0)=\int_{\{m=0\}}m\,d\mu=0$。
+
+**Step 2（2）.** 【主張：$B\subseteq\mathcal{X}$ について $E[g(\vartheta,X)1_{B}(X)]=E[G(X)1_{B}(X)]$】トネリの定理から
+$$
+E[g(\vartheta,X)1_{B}(X)]=\int_{B}\Bigl(\int_{\Theta}g(\theta,x)\pi(\theta)f(x\mid\theta)\nu(d\theta)\Bigr)\mu(dx)=\int_{B\cap\{m>0\}}G(x)m(x)\mu(dx)
+$$
+（$m(x)>0$ では内側の積分は $m(x)G(x)$、$m(x)=0$ では $\nu$-a.e. に $\pi(\theta)f(x\mid\theta)=0$ なので $0$）。Step 1 から右辺は $E[G(X)1_{B}(X)]$。$G(X)$ は $X$ の可測関数なので、これは条件付き期待値の定義（非負の場合は単調収束で可積分の場合に帰着する、\ref{prb:conditional-expectation}）。
+:::
+
+::: example 検査の陽性と事前確率 {#stat:base-rate-example}
+有病率 1% の病気の検査で、病気の人の 99% が陽性、病気でない人の 5% も陽性になるとする（$\Theta=\{0,1\}$、$\nu$ は数え上げ測度）。陽性だった人が病気である事後確率は
+$$
+\frac{0.01\times0.99}{0.01\times0.99+0.99\times0.05}=\frac{0.0099}{0.0594}=\frac16\approx0.17.
+$$
+検査の精度が高くても、事前確率（有病率）が小さいと、陽性の大部分は偽陽性である（「基準率の無視」と呼ばれる誤りの例）。
+:::
+
+## ベイズ推定量 {#stat:sec-bt-estimators}
+
+::: definition 損失とベイズリスク {#stat:bayes-risk keywords="loss function L(theta, a) >= 0; risk R(theta, delta) = E_theta L(theta, delta(X)); Bayes risk r(delta) = int R(theta, delta) pi(theta) nu(d theta) = E L(theta, delta(X)); Bayes estimator minimizes r" index="損失関数|そんしつかんすう, ベイズリスク|べいずりすく, ベイズ推定量|べいずすいていりょう" refname="損失とベイズリスク"}
+**損失関数** $L:\Theta\times\mathbb{R}\to[0,\infty]$（可測）と推定量 $\delta$（データの可測関数）について、$R(\theta,\delta)\defeq E_{\theta}[L(\theta,\delta(X))]$ を**リスク**、
+$$
+r(\delta)\defeq\int_{\Theta}R(\theta,\delta)\pi(\theta)\nu(d\theta)=E[L(\vartheta,\delta(X))]
+$$
+を**ベイズリスク**という（等号はトネリの定理）。$r$ を最小にする $\delta$ を**ベイズ推定量**という。
+:::
+
+::: intuition
+頻度論のリスク $R(\theta,\delta)$ は $\theta$ ごとに違う関数で、どの $\theta$ でも最良の推定量は一般には存在しない。ベイズリスクは事前分布で重みをつけて平均した 1 つの数なので、最小化が意味をもつ。
+:::
+
+::: theorem 事後期待損失の最小化 {#stat:bayes-estimator-posterior-loss keywords="if delta*(x) minimizes a -> int L(theta, a) pi(theta | x) nu(d theta) for every x (measurably), then delta* is a Bayes estimator; under squared loss the posterior mean, under absolute loss a posterior median" index="事後平均|じごへいきん, 事後中央値|じごちゅうおうち, 事後期待損失|じごきたいそんしつ" refname="事後期待損失の最小化"}
+1. 推定量 $\delta^{*}$ が、各 $x$ で $a\mapsto\rho(x,a)\defeq\int L(\theta,a)\pi(\theta\mid x)\nu(d\theta)$（**事後期待損失**）を最小にするなら、すべての推定量 $\delta$ で $r(\delta^{*})\le r(\delta)$。
+2. $\Theta\subseteq\mathbb{R}$、$L(\theta,a)=(\theta-a)^{2}$、$E[\vartheta^{2}]<\infty$ なら、**事後平均** $\delta^{*}(x)\defeq\int\theta\pi(\theta\mid x)\nu(d\theta)$ はベイズ推定量で、ベイズリスクの最小値は事後分散の期待値。
+3. $L(\theta,a)=\abs{\theta-a}$、$E\abs\vartheta<\infty$ なら、事後分布の中央値（を可測に選んだもの）はベイズ推定量。
+:::
+
+::: intuition
+ベイズリスクは「データについての平均」の中に「事後分布についての平均」が入れ子になったものなので、データの値ごとに事後期待損失を最小にすれば全体も最小になる。2 乗損失では平均、絶対値損失では中央値が最適になる。
+:::
+
+::: proof
+**Step 1（1）.** \ref{stat:bayes-formula} の 2 を $g(\theta,x)=L(\theta,\delta(x))$ に使うと、$r(\delta)=E[L(\vartheta,\delta(X))]=E[\rho(X,\delta(X))]\ge E[\rho(X,\delta^{*}(X))]=r(\delta^{*})$。
+
+**Step 2（2）.** 【主張：分布 $Q$ が 2 次モーメントをもてば $\int(\theta-a)^{2}Q(d\theta)$ は $a=\int\theta\,Q(d\theta)$ でだけ最小】$c\defeq\int\theta\,dQ$ とすると $\int(\theta-a)^{2}dQ=\int(\theta-c)^{2}dQ+(c-a)^{2}$。$E[\vartheta^{2}]<\infty$ なら、\ref{stat:bayes-formula} の 2 から $E[\int\theta^{2}\pi(\theta\mid X)d\nu]=E[\vartheta^{2}]<\infty$ で、a.s. に事後分布は 2 次モーメントをもつ（もたない零集合では任意の値を割り当てる）。1 を使う。最小値は $E[\int(\theta-\delta^{*}(X))^{2}\pi(\theta\mid X)d\nu]$、すなわち事後分散の期待値。
+
+**Step 3（3）.** 【主張：分布関数 $F$ の分布 $Q$（1 次モーメント有限）について、$F(m)\ge\frac12$, $F(m-)\le\frac12$ をみたす $m$（中央値）は $a\mapsto\int\abs{\theta-a}dQ$ を最小にする】$a>m$ なら $\abs{\theta-a}-\abs{\theta-m}$ は $\theta\le m$ で $a-m$、$\theta\ge a$ で $-(a-m)$、間では $\ge-(a-m)$ なので、積分すると $\ge(a-m)(F(m)-(1-F(m)))\ge0$。$a<m$ も対称な議論（$F(m-)\le\frac12$ を使う）。可測に選ぶには、例えば $\inf\{t:F_{x}(t)\ge\frac12\}$（$F_{x}$ は事後分布の分布関数）をとる（$\{x:F_{x}(t)\ge\frac12\}$ が可測なので、$t$ を有理数に制限して可測性が分かる）。1 を使う。
+:::
+
+::: definition 信用区間 {#stat:credible-interval keywords="a set C(x) with posterior probability int_{C(x)} pi(theta | x) nu(d theta) >= 1 - alpha is a 1 - alpha credible set; equal-tailed credible interval; highest posterior density region; differs in meaning from confidence intervals" index="信用区間|しんようくかん, 最高事後密度区間|さいこうじごみつどくかん" refname="信用区間"}
+各 $x$ について $\int_{C(x)}\pi(\theta\mid x)\nu(d\theta)\ge1-\alpha$ となる集合 $C(x)$ を、信用度 $1-\alpha$ の**信用集合**（区間なら**信用区間**）という。事後分布の $\frac\alpha2$ 点と $1-\frac\alpha2$ 点の間を**等裾の信用区間**、$\{\theta:\pi(\theta\mid x)\ge k\}$ の形のものを**最高事後密度区域**という。
+:::
+
+::: intuition
+信用区間は「データを見た後で、$\theta$ がこの区間にある確率は 95%」と読める。これは、ベイズの立場で $\theta$ が確率変数だからである。頻度論の区間（\ref{stat:confidence-interval}）は「手続きが 95% の確率で当たる」と読み、計算された区間について $\theta$ が入る確率を語らない。両者は数値が一致することもある（\ref[共役事前分布]{stat:page-conjugate-priors} の正規分布の例）が、意味は異なる。
+:::
+
+::: remark
+**非正則な事前分布.** $\int\pi\,d\nu=\infty$ の「事前分布」（例えば $\mathbb{R}$ 上の一様な $\pi\equiv1$）でも、$m(x)<\infty$ なら $\pi(\theta\mid x)$ は確率密度として定義でき、実際によく使われる。ただし、これは本ページの意味の条件付き分布ではなく（同時分布が確率測度でない）、\ref{stat:bayes-formula} の正当化はそのままでは使えない。
+:::
+
+::: hypcheck
+- **密度の存在と同時可測性**：ベイズの公式の Step 2 でトネリの定理を使うのに要った。
+- **$E[\vartheta^{2}]<\infty$**：事後平均が有限でベイズリスクが有限になるために使った。これがないと、2 乗損失のベイズリスクはすべての推定量で無限大になりうる。
+- **損失関数の選択**：最適なベイズ推定量は損失関数に依存する（2 乗なら平均、絶対値なら中央値、0–1 損失の極限なら事後最頻値）。
+:::
+
+## 問題 {#stat:sec-bt-problems}
+
+::: problem {#stat:prob-bt-two-tests}
+\ref{stat:base-rate-example} で、独立な 2 回目の検査も陽性だったときの事後確率を求めよ。
+:::
+
+::: solution
+1 回目の事後確率 $\frac16$ を事前確率として、$\frac{\frac16\cdot0.99}{\frac16\cdot0.99+\frac56\cdot0.05}=\frac{0.99}{0.99+0.25}\approx0.80$。
+:::
+
+::: problem {#stat:prob-bt-map}
+一様な事前分布（$\Theta$ が有界で $\pi$ が定数）のとき、事後分布の最頻値（事後密度の最大点）が最尤推定量に一致することを示せ。
+:::
+
+::: solution
+$\pi(\theta\mid x)\propto f(x\mid\theta)$（比例定数は $x$ だけによる）なので、$\theta$ についての最大点は同じ。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** ベイズの公式は、$\Theta$ や $\mathcal{X}$ が $\mathbb{R}^{k}$ である必要はなく、$\sigma$ 有限な測度空間と同時可測な密度があれば成り立つ。議論は Robert『The Bayesian Choice』第 1・2 章、Berger『Statistical Decision Theory and Bayesian Analysis』第 4 章の流れに沿う。
+
+**前提を変えると.**
+- **許容性**：ベイズリスクが有限なベイズ推定量（ほぼ一意なもの）は許容的である、すなわちすべての $\theta$ でリスクが小さくない他の推定量で、どこかで真に小さいものは存在しない（ここでは証明しない）。
+- **ミニマックス推定量**：$\sup_{\theta}R(\theta,\delta)$ を最小にする推定量は、「最も不利な事前分布」のベイズ推定量として得られることが多い。
+- **完全クラス定理**：適当な条件のもとで、許容的な推定量はすべてベイズ推定量（またはその極限）である（ワルドの完全クラス定理、ここでは証明しない）。頻度論の最適性もベイズの言葉で特徴づけられる。
+
+**高い視点から：条件付けとしての学習.** ベイズの更新は、積空間 $\Theta\times\mathcal{X}$ の上の 1 つの確率測度を、データの値で「切る」操作（条件付け）にすぎない。事前分布と尤度は、この同時分布を 2 つの因子に分けた表現で、事後分布と周辺尤度は、同じ同時分布を逆の順に分けた表現である（$\pi(\theta)f(x\mid\theta)=m(x)\pi(\theta\mid x)$）。比喩で言えば、ベイズ統計は、同時分布という 1 枚の地図を、パラメータの側から見るかデータの側から見るかの違いで、観測は地図の上の 1 本の線（$X=x$）に注目して、その線の上での $\theta$ の分布を読み取ることである。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-bt-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
