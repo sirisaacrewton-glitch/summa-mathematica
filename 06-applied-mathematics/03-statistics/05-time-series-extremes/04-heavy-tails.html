@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>裾の重い分布 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/05-time-series-extremes/04-heavy-tails.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 裾の重い分布 {#stat:page-heavy-tails keywords="heavy-tailed distributions, regularly varying tails with index alpha, Pareto distribution and existence of moments E X^k < infinity iff k < alpha, regularly varying tails have no exponential moments, one big jump principle P(X_1 + X_2 > x) ~ 2 P(X > x) ~ P(max > x), comparison with exponential tails, maximum likelihood estimation of the Pareto tail index and its asymptotic normality, Hill estimator, stable laws"}
+
+保険の巨額請求、株価の暴落、都市の人口、地震のエネルギーなど、現実のデータには正規分布や指数分布よりはるかに裾の重い分布が多い。裾がべき関数 $x^{-\alpha}$ のように減る分布では、高次のモーメント（ときには分散や平均さえ）が存在せず、和や平均の振る舞いが大きく変わる。このページでは、**正則変動する裾**をもつ分布を定義し、モーメントの存在範囲、「和が大きくなるのは 1 つの項が大きいときである」という **1 回の大きな跳び**の原理、そして裾の指数の推定を証明する。
+
+## 記法と定義の確認 {#stat:sec-ht-notation}
+
+::: notation
+- $\bar F(x)\defeq1-F(x)=P(X>x)$ を裾の関数とする。$f(x)\sim g(x)$ は $f(x)/g(x)\to1$（$x\to\infty$）を表す。
+- 期待値の裾による表示は \ref{prb:tail-formula}、大数の強法則・中心極限定理は \ref{prb:strong-law}, \ref{prb:clt}、\ref{stat:delta-method}。極値分布は \ref{stat:extreme-value-examples}。
+- 体系は $\ZFC$。
+:::
+
+## 正則変動する裾 {#stat:sec-ht-regular-variation}
+
+::: definition 正則変動する裾と重い裾 {#stat:regularly-varying-tail keywords="tail F-bar is regularly varying with index alpha > 0 if F-bar(t x)/F-bar(x) -> t^{-alpha} for every t > 0; heavy-tailed if E e^{epsilon X} = infinity for every epsilon > 0; Pareto distribution F-bar(x) = x^{-alpha} for x >= 1" index="裾の重い分布|すそのおもいぶんぷ, 正則変動|せいそくへんどう, パレート分布|ぱれーとぶんぷ, 裾の指数|すそのしすう" refname="正則変動する裾と重い裾"}
+1. すべての $x$ で $\bar F(x)>0$ で、すべての $t>0$ について $\frac{\bar F(tx)}{\bar F(x)}\to t^{-\alpha}$（$x\to\infty$）となるとき、裾は指数 $\alpha>0$ で**正則変動**するという。
+2. すべての $\varepsilon>0$ で $E[e^{\varepsilon X}]=\infty$ のとき、$X$（の分布）は**裾が重い**という。
+3. $\bar F(x)=x^{-\alpha}$（$x\ge1$）、$\bar F(x)=1$（$x<1$）の分布を指数 $\alpha$ の**パレート分布**という。
+:::
+
+::: intuition
+正則変動とは「裾が、大きな尺度で見るとべき関数 $x^{-\alpha}$ のように振る舞う」ことである。裾を 2 倍先で見ると確率はほぼ $2^{-\alpha}$ 倍になり、この比は尺度によらない。指数分布の裾 $e^{-x}$ では、2 倍先の確率の比は $e^{-x}\to0$ で、尺度とともにどんどん小さくなる。
+:::
+
+::: proposition モーメントと指数モーメント {#stat:heavy-tail-moments keywords="for the Pareto distribution E X^k < infinity iff k < alpha, and E X = alpha/(alpha - 1) for alpha > 1; every distribution with a regularly varying tail is heavy-tailed" index="パレート分布のモーメント|ぱれーとぶんぷのもーめんと" refname="モーメントと指数モーメント"}
+1. 指数 $\alpha$ のパレート分布では、$k>0$ について $E[X^{k}]<\infty\iff k<\alpha$ で、そのとき $E[X^{k}]=\frac{\alpha}{\alpha-k}$。
+2. 裾が正則変動する分布は裾が重い。
+:::
+
+::: intuition
+$k$ 次のモーメントの有限性は、$x^{k}$ の増え方と裾 $x^{-\alpha}$ の減り方の競争で決まる。裾がべき的に減るだけなら、指数関数的に増える $e^{\varepsilon x}$ には必ず負ける。
+:::
+
+::: proof
+**Step 1（1）.** 密度は $\alpha x^{-\alpha-1}$（$x>1$）なので $E[X^{k}]=\int_{1}^{\infty}\alpha x^{k-\alpha-1}dx$。これは $k-\alpha-1<-1$、すなわち $k<\alpha$ のときだけ有限で、値は $\frac{\alpha}{\alpha-k}$。
+
+**Step 2（2：裾の下からの評価）.** 【主張：定数 $c>0$ と $x_{0}$ があって、$k\ge0$ で $\bar F(2^{k}x_{0})\ge c\,2^{-k(\alpha+1)}$】$\frac{\bar F(2x)}{\bar F(x)}\to2^{-\alpha}>2^{-\alpha-1}$ なので、$x_{0}$ を大きくとれば $x\ge x_{0}$ で $\bar F(2x)\ge2^{-\alpha-1}\bar F(x)$。帰納法で $\bar F(2^{k}x_{0})\ge2^{-k(\alpha+1)}\bar F(x_{0})$、$c\defeq\bar F(x_{0})>0$。
+
+**Step 3（2：結論）.** $\varepsilon>0$ について $E[e^{\varepsilon X}]\ge e^{\varepsilon2^{k}x_{0}}P(X>2^{k}x_{0})\ge c\exp\bigl(\varepsilon2^{k}x_{0}-k(\alpha+1)\log2\bigr)\to\infty$（$k\to\infty$、$x_{0}>0$ ととってよい）。
+:::
+
+## 1 回の大きな跳び {#stat:sec-ht-one-big-jump}
+
+::: theorem 1 回の大きな跳び {#stat:one-big-jump keywords="for i.i.d. nonnegative X_1, X_2 with regularly varying tail of index alpha > 0, P(X_1 + X_2 > x) ~ 2 P(X > x) ~ P(max(X_1, X_2) > x); in contrast for exponential tails P(X_1 + X_2 > x) = (1 + x) e^{-x}" index="1 回の大きな跳び|いっかいのおおきなとび, 劣指数分布|れつしすうぶんぷ" refname="1 回の大きな跳び"}
+$X_{1},X_{2}$ を独立同分布、$X_{i}\ge0$、裾が指数 $\alpha>0$ で正則変動するとすると、
+$$
+P(X_{1}+X_{2}>x)\sim2\bar F(x)\sim P(\max(X_{1},X_{2})>x)\qquad(x\to\infty).
+$$
+一方、指数分布（$\bar F(x)=e^{-x}$）では $P(X_{1}+X_{2}>x)=(1+x)e^{-x}$ で、$2\bar F(x)$ との比は $\infty$ に発散する。
+:::
+
+::: intuition
+裾の重い分布では、和が大きな値をとるのは「片方がほぼ全部をまかなう」ときである。2 つとも中くらいに大きいことは、片方だけがとても大きいことより、はるかに起こりにくい。裾の軽い指数分布では逆に、2 つとも中くらいに大きくなる起こり方の方が多く、和の裾は個々の裾より太る。保険では、損失の合計が巨額になるのは 1 件の巨大な請求による、ということを意味する。
+:::
+
+::: proof
+**Step 1（最大値）.** $P(\max>x)=1-F(x)^{2}=2\bar F(x)-\bar F(x)^{2}\sim2\bar F(x)$（$\bar F(x)\to0$）。
+
+**Step 2（下からの評価）.** $X_{i}\ge0$ なので $\{\max>x\}\subseteq\{X_{1}+X_{2}>x\}$、よって $\liminf\frac{P(X_{1}+X_{2}>x)}{2\bar F(x)}\ge1$。
+
+**Step 3（上からの評価）.** 【主張：$0<\delta<\frac12$ について $\limsup\frac{P(X_{1}+X_{2}>x)}{\bar F(x)}\le2(1-\delta)^{-\alpha}$】$X_{1}+X_{2}>x$ なら、$X_{1}>(1-\delta)x$ か $X_{2}>(1-\delta)x$ か、さもなければ両方が $>\delta x$（片方が $\le(1-\delta)x$ のまま和が $x$ を超えるには、他方が $>\delta x$ でなければならない）。よって
+$$
+P(X_{1}+X_{2}>x)\le2\bar F((1-\delta)x)+\bar F(\delta x)^{2}.
+$$
+$\bar F(x)$ で割ると、第 1 項は $2(1-\delta)^{-\alpha}$ に、第 2 項は $\frac{\bar F(\delta x)}{\bar F(x)}\cdot\bar F(\delta x)\to\delta^{-\alpha}\cdot0=0$ に収束する。$\delta\to0$ として Step 2 と合わせる。
+
+**Step 4（指数分布）.** 和の密度はたたみ込み $\int_{0}^{s}e^{-u}e^{-(s-u)}du=se^{-s}$ で、$P(X_{1}+X_{2}>x)=\int_{x}^{\infty}se^{-s}ds=(1+x)e^{-x}$。比 $\frac{1+x}2\to\infty$。
+:::
+
+## 裾の指数の推定 {#stat:sec-ht-estimation}
+
+::: proposition パレート分布の裾の指数の推定 {#stat:pareto-index-estimation keywords="for Pareto data with known scale 1, log X is exponential with rate alpha; the MLE alpha-hat = n / sum log X_i is consistent and sqrt(n)(alpha-hat - alpha) => N(0, alpha^2)" index="裾の指数の推定|すそのしすうのすいてい" refname="パレート分布の裾の指数の推定"}
+指数 $\alpha$ のパレート分布からの標本について、
+1. $Y\defeq\log X$ は平均 $1/\alpha$ の指数分布にしたがう。
+2. $\alpha$ の最尤推定量は $\hat\alpha_{n}=\frac{n}{\sum_{i}\log X_{i}}$ で、$\hat\alpha_{n}\to\alpha$（a.s.）、$\sqrt n(\hat\alpha_{n}-\alpha)\Rightarrow N(0,\alpha^{2})$。
+:::
+
+::: intuition
+パレート分布の対数は指数分布になるので、裾の指数の推定は指数分布の平均の推定に帰着する。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$P(\log X>y)=e^{-\alpha y}$】$y\ge0$ で $P(\log X>y)=P(X>e^{y})=e^{-\alpha y}$。
+
+**Step 2（最尤推定量）.** 尤度は $\prod\alpha x_{i}^{-\alpha-1}$、対数尤度 $n\log\alpha-(\alpha+1)\sum\log x_{i}$ の導関数 $\frac n\alpha-\sum\log x_{i}$ は $\alpha=\hat\alpha_{n}$ で $0$ で、正から負に変わる。
+
+**Step 3（極限）.** $\bar Y_{n}=\frac1n\sum\log X_{i}\to\frac1\alpha$（大数の強法則）で $\hat\alpha_{n}=1/\bar Y_{n}\to\alpha$。$\operatorname{Var}(Y)=\frac1{\alpha^{2}}$ なので中心極限定理から $\sqrt n(\bar Y_{n}-\frac1\alpha)\Rightarrow N(0,\frac1{\alpha^{2}})$。$g(t)=1/t$, $g'(1/\alpha)=-\alpha^{2}$ に \ref{stat:delta-method} を使うと漸近分散は $\alpha^{4}\cdot\frac1{\alpha^{2}}=\alpha^{2}$。
+:::
+
+::: remark
+**ヒルの推定量.** 実際のデータでは裾だけがパレート型で、分布の中心部はわからない。そこで大きい方から $k$ 個の順序統計量 $X_{(1)}\ge\dots\ge X_{(k+1)}$ だけを使い、$\hat\alpha^{-1}\defeq\frac1k\sum_{i\le k}\log\frac{X_{(i)}}{X_{(k+1)}}$ で裾の指数を推定する（ヒルの推定量）。これは、しきい値 $X_{(k+1)}$ を超えた部分がほぼパレート分布にしたがうことを使った、\ref{stat:pareto-index-estimation} の局所版である。$k\to\infty$, $k/n\to0$ で一致性をもつ（ここでは証明しない）。$k$ の選び方は、偏り（中心部の影響）と分散のトレードオフになる。
+:::
+
+::: hypcheck
+- **非負性**：1 回の大きな跳びの Step 2（最大値が和以下）に使った。符号のある確率変数でも、左の裾が右の裾より軽ければ同じ結論が成り立つ。
+- **独立性**：最大値の分布（Step 1）と上からの評価の積 $\bar F(\delta x)^{2}$ に使った。依存があると、大きな値が同時に起こりやすくなり（裾の従属性）、結論は変わりうる。
+- **正則変動**：Step 3 の比の極限に使った。より一般に、$P(X_{1}+X_{2}>x)\sim2\bar F(x)$ をみたす分布を**劣指数分布**といい、対数正規分布やワイブル分布（形状パラメータ $<1$）も含む。
+:::
+
+## 問題 {#stat:sec-ht-problems}
+
+::: problem {#stat:prob-ht-pareto-variance}
+指数 $\alpha=1.5$ のパレート分布の平均と分散を求めよ。
+:::
+
+::: solution
+平均 $\frac{1.5}{0.5}=3$。$E[X^{2}]$ は $2>\alpha$ なので無限（\ref{stat:heavy-tail-moments}）、したがって分散は無限。標本分散は収束せず、中心極限定理（\ref{prb:clt}）は使えない。
+:::
+
+::: problem {#stat:prob-ht-pareto-max}
+指数 $\alpha<1$ のパレート分布の標本で、最大値 $M_{n}$ について $M_{n}/n\to\infty$（確率収束、すなわち任意の $K$ で $P(M_{n}/n\le K)\to0$）を、\ref{stat:extreme-value-examples} の 2 を使って示せ。
+:::
+
+::: solution
+$\varepsilon>0$ を任意にとる。$n^{1-1/\alpha}\to0$ なので、十分大きい $n$ で $Kn^{1-1/\alpha}\le\varepsilon$、よって $P(M_{n}/n\le K)=P(M_{n}/n^{1/\alpha}\le Kn^{1-1/\alpha})\le P(M_{n}/n^{1/\alpha}\le\varepsilon)\to\exp(-\varepsilon^{-\alpha})$。$\varepsilon\to0$ で右辺は $0$。平均が無限の分布では、最大値ひとつが標本の大きさより速く大きくなる。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 1 回の大きな跳びの証明は 2 項の和で行ったが、帰納法で $n$ 項の和 $P(S_{n}>x)\sim n\bar F(x)$ にもそのまま拡がる。議論は Embrechts–Klüppelberg–Mikosch『Modelling Extremal Events』第 1・2 章、Foss–Korshunov–Zachary『An Introduction to Heavy-Tailed and Subexponential Distributions』第 2 章の流れに沿う。
+
+**前提を変えると.**
+- **安定分布**：裾の指数 $\alpha\in(0,2)$ の独立同分布の和は、$n^{1/\alpha}$ で正規化すると正規分布ではなく指数 $\alpha$ の安定分布に法則収束する（一般化中心極限定理。ここでは証明しない）。コーシー分布（$\alpha=1$）では、標本平均が 1 個の観測と同じ分布をもち、平均をとっても精度が上がらない。
+- **破産確率**：裾の重い請求額の保険では、破産確率は初期資本 $u$ について指数的にではなく、べき的にしか減らない（ルンドベリの指数的な評価が成り立たない）。
+- **金融のリスク指標**：分散が無限、あるいは裾が重い損益分布では、分散や標準偏差に基づくリスク管理は危険を過小評価する。期待ショートフォールなど裾に着目した指標が使われる。
+
+**高い視点から：尺度不変性.** 正則変動はべき関数の「尺度を変えても形が同じ」という性質の確率論版で、指数 $\alpha$ はその自己相似性の次元にあたる。べき則は、富の分布（パレート）、単語の頻度（ジップ）、ネットワークの次数分布など、成長と選択の過程から広く現れる。比喩で言えば、裾の軽い世界は「平均的な人が積み重なって全体ができる」世界で、裾の重い世界は「ごく少数の巨人が全体を左右する」世界であり、後者では平均や分散という「平均的な人」の言葉が意味を失う。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-ht-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

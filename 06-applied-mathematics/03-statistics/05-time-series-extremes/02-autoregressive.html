@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>自己回帰モデル | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/05-time-series-extremes/02-autoregressive.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 自己回帰モデル {#stat:page-autoregressive keywords="weakly stationary processes, autocovariance function, white noise, mean-square law of large numbers for stationary sequences with vanishing autocovariance, AR(1) model X_t = phi X_{t-1} + epsilon_t, causal stationary solution as an L^2 series, uniqueness, autocovariance sigma^2 phi^|h| / (1 - phi^2), least squares estimator of phi and its consistency, optimal h-step prediction phi^h X_t, random walk and unit roots"}
+
+気温・株価の収益率・経済指標のように、時間の順に並んだデータ（**時系列**）では、観測が互いに独立でない。今日の値は昨日の値に依存する。このページでは、時間をずらしても統計的な性質が変わらない**弱定常過程**の枠組みを導入し、最も基本的なモデルである **1 次の自己回帰モデル** AR(1) $X_{t}=\varphi X_{t-1}+\varepsilon_{t}$ について、定常な解の存在と一意性、自己共分散、係数の推定量の一致性、そして最良の予測を証明する。独立な標本についての大数の法則が、依存のある時系列でどう修正されるかが要点である。
+
+## 記法と定義の確認 {#stat:sec-ar-notation}
+
+::: notation
+- 確率変数の $L^{2}$ 空間とその完備性は \ref{meas:riesz-fischer}、大数の強法則は \ref{prb:strong-law}、独立性は \ref{prb:independence-criteria}。回帰の系列と大標本理論の結果 \ref{stat:least-squares-estimator}, \ref{stat:continuous-mapping-probability} も使う。
+- 時刻は整数 $t\in\mathbb{Z}$。体系は $\ZFC$。
+:::
+
+## 弱定常過程 {#stat:sec-ar-stationary}
+
+::: definition 弱定常過程とホワイトノイズ {#stat:weakly-stationary keywords="(X_t) with E X_t^2 < infinity, constant mean m and Cov(X_t, X_{t+h}) = gamma(h) depending only on h; autocovariance function gamma, autocorrelation rho(h) = gamma(h)/gamma(0); white noise: uncorrelated, mean 0, variance sigma^2" index="弱定常過程|じゃくていじょうかてい, 自己共分散関数|じこきょうぶんさんかんすう, 自己相関|じこそうかん, ホワイトノイズ|ほわいとのいず, 時系列|じけいれつ" refname="弱定常過程とホワイトノイズ"}
+1. 確率変数の列 $(X_{t})_{t\in\mathbb{Z}}$ が、すべての $t$ で $E[X_{t}^{2}]<\infty$、$E[X_{t}]=m$（$t$ によらない）、$\operatorname{Cov}(X_{t},X_{t+h})=\gamma(h)$（$h$ だけによる）をみたすとき**弱定常**であるという。$\gamma$ を**自己共分散関数**、$\rho(h)\defeq\gamma(h)/\gamma(0)$ を**自己相関関数**という。
+2. 平均 $0$、分散 $\sigma^{2}$ で互いに無相関な弱定常過程を**ホワイトノイズ**という。
+:::
+
+::: intuition
+弱定常とは「いつ観測を始めても、平均・ばらつき・時間差 $h$ の相関が同じ」ことである。自己共分散関数 $\gamma(h)$ は、時間差 $h$ だけ離れた値がどれだけ連動するかを表す。
+:::
+
+::: proposition 弱定常過程の平均二乗の大数の法則 {#stat:stationary-lln keywords="if (X_t) is weakly stationary with gamma(h) -> 0 as h -> infinity, then the sample mean converges to m in L^2: Var(bar X_n) <= (1/n) sum_{|h| < n} |gamma(h)|" index="大数の法則（弱定常過程）|たいすうのほうそく" refname="弱定常過程の平均二乗の大数の法則"}
+$(X_{t})$ が弱定常で $\gamma(h)\to0$（$h\to\infty$）なら、$\bar X_{n}\defeq\frac1n\sum_{t=1}^{n}X_{t}$ について $E[(\bar X_{n}-m)^{2}]\le\frac1n\sum_{\abs h<n}\abs{\gamma(h)}\to0$。
+:::
+
+::: intuition
+独立でなくても、離れた時刻の値どうしの相関が消えていくなら、標本平均の分散は $0$ に近づく。相関が強く長く残るほど、平均の精度は独立な場合より悪くなる。
+:::
+
+::: proof
+**Step 1（分散の計算）.** $E[(\bar X_{n}-m)^{2}]=\frac1{n^{2}}\sum_{s,t=1}^{n}\gamma(t-s)$。$t-s=h$ となる組は $n-\abs h$ 個以下なので、絶対値は $\le\frac1n\sum_{\abs h<n}\abs{\gamma(h)}$。
+
+**Step 2（チェザロ平均）.** $\gamma(h)=\gamma(-h)$ なので右辺は $\frac1n(\abs{\gamma(0)}+2\sum_{h=1}^{n-1}\abs{\gamma(h)})$ で、$\abs{\gamma(h)}\to0$ の算術平均も $0$ に収束する。
+:::
+
+## AR(1) モデル {#stat:sec-ar-ar1}
+
+::: theorem AR(1) の定常解 {#stat:ar1-stationary-solution keywords="for white noise epsilon and |phi| < 1, X_t = sum_{k >= 0} phi^k epsilon_{t-k} converges in L^2, solves X_t = phi X_{t-1} + epsilon_t, is weakly stationary with gamma(h) = sigma^2 phi^{|h|}/(1 - phi^2), and is the unique weakly stationary solution" index="自己回帰モデル|じこかいきもでる, AR(1)|えーあーるわん, 定常解|ていじょうかい" refname="AR(1) の定常解"}
+$(\varepsilon_{t})_{t\in\mathbb{Z}}$ を分散 $\sigma^{2}>0$ のホワイトノイズ、$\abs\varphi<1$ とする。
+1. 各 $t$ で級数 $X_{t}\defeq\sum_{k=0}^{\infty}\varphi^{k}\varepsilon_{t-k}$ は $L^{2}$ で収束する。
+2. $X_{t}=\varphi X_{t-1}+\varepsilon_{t}$（a.s.）で、$(X_{t})$ は平均 $0$ の弱定常過程、$\gamma(h)=\frac{\sigma^{2}\varphi^{\abs h}}{1-\varphi^{2}}$。
+3. $\sup_{t}E[Y_{t}^{2}]<\infty$ で $Y_{t}=\varphi Y_{t-1}+\varepsilon_{t}$ をみたす任意の $(Y_{t})$ について $Y_{t}=X_{t}$（a.s.）。
+:::
+
+::: intuition
+AR(1) は「今日の値は昨日の値の $\varphi$ 倍に新しい衝撃を加えたもの」で、繰り返し代入すると、今日の値は過去の衝撃の重みつき和 $\sum\varphi^{k}\varepsilon_{t-k}$ になる。$\abs\varphi<1$ なら古い衝撃の影響は指数関数的に薄れ、過程は定常に落ち着く。相関も時間差について指数関数的に減衰する。
+:::
+
+::: proof
+**Step 1（1）.** 部分和 $X_{t}^{(K)}\defeq\sum_{k<K}\varphi^{k}\varepsilon_{t-k}$ について、無相関性から $E[(X_{t}^{(L)}-X_{t}^{(K)})^{2}]=\sigma^{2}\sum_{K\le k<L}\varphi^{2k}\to0$（$K,L\to\infty$）。$L^{2}$ の完備性（\ref{meas:riesz-fischer}）から収束する。
+
+**Step 2（2：方程式）.** $X_{t}^{(K+1)}=\varphi X_{t-1}^{(K)}+\varepsilon_{t}$ で、$K\to\infty$ とすると両辺は $L^{2}$ で $X_{t}$ と $\varphi X_{t-1}+\varepsilon_{t}$ に収束する。$L^{2}$ の極限は a.s. に一意。
+
+**Step 3（2：モーメント）.** 内積の $L^{2}$ 連続性から、平均は部分和の平均 $0$ の極限で $0$。$h\ge0$ で $\operatorname{Cov}(X_{t},X_{t+h})=\lim\sum_{k,j}\varphi^{k}\varphi^{j}E[\varepsilon_{t-k}\varepsilon_{t+h-j}]=\sigma^{2}\sum_{k\ge0}\varphi^{k}\varphi^{k+h}=\frac{\sigma^{2}\varphi^{h}}{1-\varphi^{2}}$（$t-k=t+h-j$ の項だけが残る）。$t$ によらないので弱定常。
+
+**Step 4（3）.** 【主張：$E[(Y_{t}-X_{t}^{(K)})^{2}]\to0$】方程式を $K$ 回代入すると $Y_{t}=\varphi^{K}Y_{t-K}+X_{t}^{(K)}$。$E[(\varphi^{K}Y_{t-K})^{2}]\le\varphi^{2K}\sup_{s}E[Y_{s}^{2}]\to0$。よって $Y_{t}$ は $X_{t}$ と同じ $L^{2}$ 極限で、$Y_{t}=X_{t}$（a.s.）。
+:::
+
+::: definition 推定と予測の設定 {#stat:ar1-iid-setting keywords="for estimation and prediction assume the epsilon_t are i.i.d. with mean 0 and variance sigma^2; then X_{t-1} is a measurable function of (epsilon_s)_{s <= t-1} and epsilon_t is independent of the past of X" index="AR(1) の推定|えーあーるわんのすいてい" refname="推定と予測の設定"}
+以下では $\varepsilon_{t}$ を独立同分布（平均 $0$、分散 $\sigma^{2}>0$）とし、$X_{t}$ を \ref{stat:ar1-stationary-solution} の定常解とする。$X_{s}$（$s\le t-1$）は、部分和の部分列の a.s. 極限として $(\varepsilon_{u})_{u\le t-1}$ の可測関数（零集合を除いて）にとれるので、$\varepsilon_{t}$ は $(X_{s})_{s\le t-1}$ と独立である。データ $X_{0},X_{1},\dots,X_{n}$ から $\varphi$ を
+$$
+\hat\varphi_{n}\defeq\frac{\sum_{t=1}^{n}X_{t}X_{t-1}}{\sum_{t=1}^{n}X_{t-1}^{2}}
+$$
+（$X_{t}$ を $X_{t-1}$ に回帰した推定量、\ref{stat:least-squares-estimator}）で推定する。
+:::
+
+::: intuition
+AR(1) の係数の推定は、「昨日の値」を説明変数とする原点を通る回帰である。ただし説明変数そのものが確率的で互いに依存しているので、独立な標本の理論はそのままは使えない。
+:::
+
+::: theorem 最小二乗推定量の一致性 {#stat:ar1-consistency keywords="for the stationary AR(1) with i.i.d. innovations, (1/n) sum epsilon_t X_{t-1} -> 0 in L^2, (1/n) sum X_{t-1}^2 -> gamma(0) in probability, and hence phi-hat_n -> phi in probability" index="自己回帰係数の一致推定|じこかいきけいすうのいっちすいてい" refname="最小二乗推定量の一致性"}
+\ref{stat:ar1-iid-setting} の設定で、$\hat\varphi_{n}\xrightarrow{P}\varphi$。
+:::
+
+::: intuition
+推定量の誤差は「新しい衝撃と昨日の値の積の平均」を「昨日の値の 2 乗の平均」で割ったものである。新しい衝撃は過去と独立なので分子は $0$ に近づき、分母は過程の分散に近づく。
+:::
+
+::: proof
+**Step 1（誤差の表示）.** $X_{t}=\varphi X_{t-1}+\varepsilon_{t}$ を代入して $\hat\varphi_{n}-\varphi=\frac{A_{n}}{B_{n}}$、$A_{n}\defeq\frac1n\sum_{t=1}^{n}\varepsilon_{t}X_{t-1}$、$B_{n}\defeq\frac1n\sum_{t=1}^{n}X_{t-1}^{2}$。
+
+**Step 2（分子）.** 【主張：$E[A_{n}^{2}]=\sigma^{2}\gamma(0)/n$】$s<t$ なら $\varepsilon_{t}$ は $(X_{t-1},\varepsilon_{s},X_{s-1})$ と独立なので $E[\varepsilon_{t}X_{t-1}\varepsilon_{s}X_{s-1}]=E[\varepsilon_{t}]E[X_{t-1}\varepsilon_{s}X_{s-1}]=0$（可積分性：$\varepsilon_{s}$ と $X_{s-1}$ は独立なので $E[(\varepsilon_{s}X_{s-1})^{2}]=\sigma^{2}\gamma(0)$、コーシー–シュワルツ）。対角項は $E[\varepsilon_{t}^{2}X_{t-1}^{2}]=\sigma^{2}\gamma(0)$。
+
+**Step 3（分母）.** 【主張：$B_{n}\xrightarrow{P}\gamma(0)=\frac{\sigma^{2}}{1-\varphi^{2}}$】$X_{t}^{2}=\varphi^{2}X_{t-1}^{2}+2\varphi X_{t-1}\varepsilon_{t}+\varepsilon_{t}^{2}$ を $t=1,\dots,n$ で足すと、$\sum_{t=1}^{n}X_{t}^{2}=\sum_{t=1}^{n}X_{t-1}^{2}+X_{n}^{2}-X_{0}^{2}$ なので
+$$
+(1-\varphi^{2})B_{n}=\frac1n\sum_{t=1}^{n}\varepsilon_{t}^{2}+2\varphi A_{n}-\frac{X_{n}^{2}-X_{0}^{2}}n.
+$$
+右辺の第 1 項は大数の強法則で $\sigma^{2}$ に（a.s.）、第 2 項は Step 2 から $0$ に（$L^{2}$）、第 3 項は $E\abs{X_{n}^{2}-X_{0}^{2}}\le2\gamma(0)$ から $0$ に（$L^{1}$）収束する。
+
+**Step 4（結論）.** $\gamma(0)>0$ なので、\ref{stat:continuous-mapping-probability}（$(a,b)\mapsto a/b$ は $b\ne0$ で連続）から $A_{n}/B_{n}\xrightarrow{P}0/\gamma(0)=0$。
+:::
+
+::: proposition AR(1) の最良予測 {#stat:ar1-prediction keywords="for the stationary AR(1) with i.i.d. innovations, the best mean-square predictor of X_{t+h} given (X_s)_{s <= t} is phi^h X_t, with error variance sigma^2 (1 - phi^{2h})/(1 - phi^2)" index="時系列の予測|じけいれつのよそく" refname="AR(1) の最良予測"}
+\ref{stat:ar1-iid-setting} の設定で、$h\ge1$ と、$(X_{s})_{s\le t}$ の可測関数で 2 乗可積分な任意の $g$ について
+$$
+E[(X_{t+h}-g)^{2}]\ge E[(X_{t+h}-\varphi^{h}X_{t})^{2}]=\sigma^{2}\frac{1-\varphi^{2h}}{1-\varphi^{2}}.
+$$
+:::
+
+::: intuition
+$h$ 期先の値は「今の値の $\varphi^{h}$ 倍」と「これから起こる衝撃の和」に分かれる。後者は今までの情報と独立で予測できないので、前者が最良の予測で、後者の分散が避けられない予測誤差になる。
+:::
+
+::: proof
+**Step 1（予測誤差の表示）.** 方程式を $h$ 回代入すると $X_{t+h}=\varphi^{h}X_{t}+e$、$e\defeq\sum_{j<h}\varphi^{j}\varepsilon_{t+h-j}$。$e$ は $\varepsilon_{t+1},\dots,\varepsilon_{t+h}$ の関数で、$(X_{s})_{s\le t}$ と独立、平均 $0$、分散 $\sigma^{2}\sum_{j<h}\varphi^{2j}=\sigma^{2}\frac{1-\varphi^{2h}}{1-\varphi^{2}}$。
+
+**Step 2（直交性）.** $E[(X_{t+h}-g)^{2}]=E[e^{2}]+2E[e(\varphi^{h}X_{t}-g)]+E[(\varphi^{h}X_{t}-g)^{2}]$ で、独立性から中央の項は $2E[e]E[\varphi^{h}X_{t}-g]=0$。
+:::
+
+::: hypcheck
+- **$\abs\varphi<1$**：級数の収束（Step 1）と一意性（Step 4）に使った。$\varphi=1$（ランダムウォーク）では弱定常な解は存在せず（分散が時間とともに増える）、最小二乗推定量の振る舞いも変わる（単位根の問題：$n(\hat\varphi_{n}-1)$ が正規でない極限をもつ。ここでは証明しない）。
+- **$\varepsilon_{t}$ の独立同分布性**：一致性の Step 2（独立性による交差項の消去）と Step 3（強法則）、予測の Step 2 に使った。定常解の存在と自己共分散には、無相関なホワイトノイズで十分である。
+- **定常性**：一致性の Step 3 で $E[X_{n}^{2}]=\gamma(0)$ が有界なことに使った。
+:::
+
+## 問題 {#stat:sec-ar-problems}
+
+::: problem {#stat:prob-ar-acf}
+AR(1) で $\varphi=0.8$ のとき、自己相関 $\rho(h)$ が $0.1$ を下回る最小の $h$ を求めよ。
+:::
+
+::: solution
+$\rho(h)=0.8^{h}$。$0.8^{10}\approx0.107$, $0.8^{11}\approx0.086$ なので $h=11$。
+:::
+
+::: problem {#stat:prob-ar-mean-variance}
+AR(1) の標本平均 $\bar X_{n}$ について、$n\operatorname{Var}(\bar X_{n})\to\frac{\sigma^{2}}{(1-\varphi)^{2}}$ を示し、独立な標本の場合（$\gamma(0)=\frac{\sigma^{2}}{1-\varphi^{2}}$）と比べよ。
+:::
+
+::: solution
+$n\operatorname{Var}(\bar X_{n})=\sum_{\abs h<n}(1-\frac{\abs h}n)\gamma(h)\to\sum_{h\in\mathbb{Z}}\gamma(h)=\frac{\sigma^{2}}{1-\varphi^{2}}\cdot\frac{1+\varphi}{1-\varphi}=\frac{\sigma^{2}}{(1-\varphi)^{2}}$（$\sum\abs{\gamma}<\infty$ なので優収束）。独立な場合の $\gamma(0)$ との比は $\frac{1+\varphi}{1-\varphi}$ で、$\varphi>0$ なら正の相関のために平均の推定は不正確になる（$\varphi=0.8$ なら 9 倍）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 定常解の構成には正規性も独立性も使わず、無相関性だけを使った。一致性の証明は、$\hat\varphi_{n}$ の分母についての恒等式（Step 3）で、2 乗の過程の大数の法則を直接示すことを避けた。議論は Brockwell–Davis『Time Series: Theory and Methods』第 3・8 章の流れに沿う。
+
+**前提を変えると.**
+- **漸近正規性**：$\sqrt n(\hat\varphi_{n}-\varphi)\Rightarrow N(0,1-\varphi^{2})$（マルチンゲール差の中心極限定理による。ここでは証明しない）。
+- **ARMA モデル**：$p$ 次の自己回帰と $q$ 次の移動平均を組み合わせた ARMA$(p,q)$ では、特性多項式 $1-\varphi_{1}z-\dots-\varphi_{p}z^{p}$ の根がすべて単位円の外にあることが、定常で因果的な解の存在の条件になる。
+- **スペクトル表現**：弱定常過程の自己共分散は、$[-\pi,\pi]$ 上の有限測度（スペクトル測度）のフーリエ係数である（ヘルグロッツの定理）。AR(1) のスペクトル密度は $\frac{\sigma^{2}}{2\pi\abs{1-\varphi e^{-i\omega}}^{2}}$。
+
+**高い視点から：シフト作用素と線形フィルタ.** 時系列の時間をずらす作用素 $B$（$BX_{t}=X_{t-1}$）を使うと、AR(1) は $(1-\varphi B)X=\varepsilon$ と書け、定常解は $X=(1-\varphi B)^{-1}\varepsilon=\sum\varphi^{k}B^{k}\varepsilon$ という幾何級数（ノイマン級数）である。$\abs\varphi<1$ は、作用素ノルムが $1$ のシフトに対してこの級数が収束する条件にすぎない。比喩で言えば、AR(1) は「こだまの響く部屋」で、新しい音（衝撃）は毎回 $\varphi$ 倍に弱まりながら響き続け、部屋の音は過去のすべての音の残響の重ね合わせになる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-ar-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

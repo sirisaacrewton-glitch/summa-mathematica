@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ポアソン過程 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/05-time-series-extremes/01-poisson-process.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# ポアソン過程 {#stat:page-poisson-process keywords="Poisson process constructed from i.i.d. exponential interarrival times, arrival times S_n with gamma distribution, joint density lambda^n e^{-lambda s_n} on the ordered simplex, counting process N(t), independent Poisson increments, finiteness of N(t), conditional uniformity of arrival times given N(t) = n (order statistics of uniforms), memorylessness of the exponential distribution, estimation of the intensity N(t)/t"}
+
+客の到着・故障の発生・放射性崩壊のように、ランダムな時刻に起こる出来事を数える最も基本的なモデルが**ポアソン過程**である。このページでは、出来事の間隔が独立な指数分布にしたがうという構成から出発し、一定の時間内の出来事の数がポアソン分布にしたがうこと、重ならない時間帯の出来事の数が独立であること、出来事の数を知ったときの時刻が一様分布の順序統計量のように振る舞うことを証明する。これらは保険数理（請求の到着）や待ち行列の基礎になる。
+
+## 記法と定義の確認 {#stat:sec-pp-notation}
+
+::: notation
+- 指数分布・ポアソン分布は \ref{prb:distribution-examples}、独立性とその判定は \ref{prb:independence}, \ref{prb:independence-criteria}、大数の強法則は \ref{prb:strong-law}。
+- 多重積分の変数変換は \ref{meas:change-of-variables}、フビニ–トネリの定理は \ref{meas:fubini}。
+- 体系は $\ZFC$。
+:::
+
+## 構成と到着時刻 {#stat:sec-pp-construction}
+
+::: definition ポアソン過程 {#stat:poisson-process keywords="T_1, T_2, ... i.i.d. exponential with rate lambda > 0; arrival times S_n = T_1 + ... + T_n; counting process N(t) = #{n >= 1 : S_n <= t}" index="ポアソン過程|ぽあそんかてい, 到着時刻|とうちゃくじこく, 計数過程|けいすうかてい, 強度|きょうど" refname="ポアソン過程"}
+$\lambda>0$ とし、$T_{1},T_{2},\dots$ を独立で、どれも密度 $\lambda e^{-\lambda t}$（$t>0$）の指数分布にしたがう確率変数とする。$S_{0}\defeq0$, $S_{n}\defeq T_{1}+\dots+T_{n}$（**到着時刻**）、
+$$
+N(t)\defeq\#\{n\ge1:S_{n}\le t\}\qquad(t\ge0)
+$$
+とおく。$(N(t))_{t\ge0}$ を**強度** $\lambda$ の**ポアソン過程**という。
+:::
+
+::: intuition
+指数分布は「記憶をもたない」待ち時間の分布で、すでに $s$ だけ待ったことは残りの待ち時間に影響しない（$P(T>s+t\mid T>s)=e^{-\lambda t}=P(T>t)$）。どの瞬間にも過去と無関係に「単位時間あたり $\lambda$ の割合」で出来事が起こる、という状況を表している。
+:::
+
+::: lemma 到着時刻の同時密度 {#stat:arrival-times-density keywords="(S_1, ..., S_n) has density lambda^n e^{-lambda s_n} on 0 < s_1 < ... < s_n; S_n has the gamma density lambda^n s^{n-1} e^{-lambda s}/(n-1)!; S_n -> infinity a.s. so N(t) is finite" index="到着時刻の同時密度|とうちゃくじこくのどうじみつど" refname="到着時刻の同時密度"}
+1. $(S_{1},\dots,S_{n})$ は集合 $\{0<s_{1}<\dots<s_{n}\}$ の上で密度 $\lambda^{n}e^{-\lambda s_{n}}$ をもち、その外で $0$。
+2. $S_{n}\to\infty$（a.s.）。したがって各 $t$ で $N(t)<\infty$（a.s.）。
+:::
+
+::: intuition
+到着時刻の同時密度は $e^{-\lambda s_{n}}$ で、最後の時刻 $s_{n}$ だけに依存し、途中の時刻の配置にはよらない。この「途中の配置について一様」という性質が、増分の独立性や条件付き一様性のもとになっている。
+:::
+
+::: proof
+**Step 1（1）.** $(T_{1},\dots,T_{n})$ は独立性から $(0,\infty)^{n}$ の上で密度 $\lambda^{n}e^{-\lambda(t_{1}+\dots+t_{n})}$ をもつ。線形写像 $\Phi(t)\defeq(t_{1},t_{1}+t_{2},\dots,t_{1}+\dots+t_{n})$ は $(0,\infty)^{n}$ を $\{0<s_{1}<\dots<s_{n}\}$ の上に全単射に写し、行列は対角成分 $1$ の下三角行列で行列式 $1$。変数変換の公式（\ref{meas:change-of-variables}）から、$S=\Phi(T)$ の密度は $\lambda^{n}e^{-\lambda s_{n}}$（$t_{1}+\dots+t_{n}=s_{n}$）。
+
+**Step 2（2）.** 大数の強法則（\ref{prb:strong-law}）から $S_{n}/n\to E[T_{1}]=1/\lambda>0$（a.s.）なので $S_{n}\to\infty$。$S_{n}$ は単調増加なので、$S_{n}\le t$ となる $n$ は有限個。
+:::
+
+## 増分の独立性とポアソン分布 {#stat:sec-pp-increments}
+
+::: theorem ポアソン過程の増分 {#stat:poisson-increments keywords="for 0 = t_0 < t_1 < ... < t_r the increments N(t_j) - N(t_{j-1}) are independent and Poisson distributed with means lambda (t_j - t_{j-1}); in particular N(t) ~ Poisson(lambda t)" index="独立増分|どくりつぞうぶん, ポアソン分布（ポアソン過程）|ぽあそんぶんぷ" refname="ポアソン過程の増分"}
+$0=t_{0}<t_{1}<\dots<t_{r}$、$\Delta_{j}\defeq t_{j}-t_{j-1}$ とすると、非負整数 $k_{1},\dots,k_{r}$ について
+$$
+P\bigl(N(t_{j})-N(t_{j-1})=k_{j}\ (j=1,\dots,r)\bigr)=\prod_{j=1}^{r}e^{-\lambda\Delta_{j}}\frac{(\lambda\Delta_{j})^{k_{j}}}{k_{j}!}.
+$$
+すなわち、増分は独立で、それぞれ平均 $\lambda\Delta_{j}$ のポアソン分布にしたがう。特に $N(t)$ は平均 $\lambda t$ のポアソン分布にしたがう。
+:::
+
+::: intuition
+時間を細かく刻むと、各小区間で出来事が起こる確率は長さに比例して小さく、互いに独立に起こる。数が多く確率の小さい独立な試行の成功の数は、ポアソン分布で近似される（少数の法則）。ポアソン過程はその極限そのものである。
+:::
+
+::: proof
+**Step 1（事象の書き直し）.** 【主張：$K\defeq k_{1}+\dots+k_{r}$ とすると、事象は「$(S_{1},\dots,S_{K+1})$ が集合 $R\times(t_{r},\infty)$ に入る」ことと同値】ここで $R$ は $\{0<s_{1}<\dots<s_{K}\}$ のうち、各 $j$ で区間 $(t_{j-1},t_{j}]$ にちょうど $k_{j}$ 個の $s_{i}$ がある点の集合（$s_{K}\le t_{r}$ を含む）。実際、$N(t_{j})=k_{1}+\dots+k_{j}$（すべての $j$）は「$t_{j}$ 以下の到着時刻がちょうど $k_{1}+\dots+k_{j}$ 個」と同値で、$j=r$ の条件は $S_{K}\le t_{r}<S_{K+1}$ を含む。
+
+**Step 2（積分）.** \ref{stat:arrival-times-density} の 1（$n=K+1$）とトネリの定理から、確率は
+$$
+\int_{R}\lambda^{K}\Bigl(\int_{t_{r}}^{\infty}\lambda e^{-\lambda s_{K+1}}ds_{K+1}\Bigr)ds_{1}\cdots ds_{K}=\lambda^{K}e^{-\lambda t_{r}}\,\operatorname{vol}(R).
+$$
+（$s_{K}\le t_{r}<s_{K+1}$ なので、$s_{K+1}$ の範囲は $(t_{r},\infty)$ 全体。）
+
+**Step 3（体積）.** 【主張：$\operatorname{vol}(R)=\prod_{j}\frac{\Delta_{j}^{k_{j}}}{k_{j}!}$】$R$ の点は、各区間 $(t_{j-1},t_{j}]$ の中の $k_{j}$ 個の増加列を並べたものなので、$R$ は区間ごとの集合 $\{t_{j-1}<u_{1}<\dots<u_{k_{j}}\le t_{j}\}$ の直積（境界は測度 $0$）。後者の体積は、立方体 $(t_{j-1},t_{j}]^{k_{j}}$ を座標の並べ替え $k_{j}!$ 通りで（測度 $0$ の集合を除き）等しい体積の部分に分けたものの 1 つなので $\Delta_{j}^{k_{j}}/k_{j}!$。
+
+**Step 4（結論）.** $e^{-\lambda t_{r}}=\prod_{j}e^{-\lambda\Delta_{j}}$ と $\lambda^{K}=\prod\lambda^{k_{j}}$ を分配する。同時確率関数が各成分のポアソン確率関数の積なので、増分は独立（\ref{prb:independence-criteria}）。
+:::
+
+::: theorem 到着時刻の条件付き一様性 {#stat:poisson-conditional-uniform keywords="given N(t) = n, the arrival times (S_1, ..., S_n) have density n!/t^n on 0 < s_1 < ... < s_n < t, i.e. they are distributed as the order statistics of n i.i.d. uniforms on (0, t)" index="条件付き一様性|じょうけんつきいちようせい, 順序統計量|じゅんじょとうけいりょう" refname="到着時刻の条件付き一様性"}
+$N(t)=n$（$n\ge1$）という条件のもとで、$(S_{1},\dots,S_{n})$ の条件付き分布は、集合 $\{0<s_{1}<\dots<s_{n}<t\}$ の上の密度 $\frac{n!}{t^{n}}$ の分布、すなわち $(0,t)$ 上の独立な一様分布 $n$ 個を小さい順に並べたもの（順序統計量）の分布に等しい。
+:::
+
+::: intuition
+出来事の数が $n$ 個とわかっていれば、それらが区間のどこで起きたかについては、どの配置も同じくらいもっともらしい。ポアソン過程の到着時刻は「時間の上に一様に、独立にばらまかれた点」である。
+:::
+
+::: proof
+**Step 1（同時確率）.** 可測な $A\subseteq\{0<s_{1}<\dots<s_{n}<t\}$ について、$\{(S_{1},\dots,S_{n})\in A,\ N(t)=n\}=\{(S_{1},\dots,S_{n})\in A,\ S_{n+1}>t\}$。\ref{stat:arrival-times-density} から確率は $\int_{A}\lambda^{n}\int_{t}^{\infty}\lambda e^{-\lambda s}ds\,d s_{1..n}=\lambda^{n}e^{-\lambda t}\operatorname{vol}(A)$。
+
+**Step 2（条件付け）.** $P(N(t)=n)=e^{-\lambda t}\frac{(\lambda t)^{n}}{n!}$（\ref{stat:poisson-increments}）で割ると $\frac{n!}{t^{n}}\operatorname{vol}(A)$。順序統計量の分布については、$(U_{1},\dots,U_{n})$（独立な一様分布）を並べ替えたものが $A$ に入る確率は、$n!$ 通りの並べ方の和で $n!\cdot\frac{\operatorname{vol}(A)}{t^{n}}$（同順位は確率 $0$）。
+:::
+
+## 強度の推定 {#stat:sec-pp-estimation}
+
+::: proposition 強度の推定 {#stat:poisson-intensity-estimation keywords="observing the process on [0, t], the likelihood is lambda^{N(t)} e^{-lambda t}; the MLE lambda-hat = N(t)/t is unbiased with variance lambda/t and consistent as t -> infinity; it is also N(t)/t -> lambda a.s." index="強度の推定|きょうどのすいてい" refname="強度の推定"}
+区間 $[0,t]$ で過程を観測するとき、
+1. 観測された到着時刻 $0<s_{1}<\dots<s_{n}\le t$（$n=N(t)$）の尤度は $\lambda^{n}e^{-\lambda t}$ で、最尤推定量は $\hat\lambda_{t}\defeq N(t)/t$。
+2. $E[\hat\lambda_{t}]=\lambda$, $\operatorname{Var}(\hat\lambda_{t})=\lambda/t$ で、$t\to\infty$ で $\hat\lambda_{t}\to\lambda$（a.s.）。
+:::
+
+::: intuition
+観測区間で数えた出来事の数を区間の長さで割るのが、強度の自然な推定である。出来事の時刻の配置は強度について何も語らない（条件付き一様性）ので、数だけが十分統計量になる。
+:::
+
+::: proof
+**Step 1（1）.** \ref{stat:poisson-conditional-uniform} の Step 1 から、$\{N(t)=n\}$ の上での $(S_{1},\dots,S_{n})$ の（部分確率の）密度は $\lambda^{n}e^{-\lambda t}$。$\lambda$ の関数として $n\log\lambda-\lambda t$ は $\lambda=n/t$ で最大（$n=0$ なら $\lambda\to0$ が上限で、$\hat\lambda=0$ と約束する）。
+
+**Step 2（2）.** $N(t)$ は平均と分散が $\lambda t$ のポアソン分布。概収束：$S_{N(t)}\le t<S_{N(t)+1}$ から $\frac{N(t)}{S_{N(t)+1}}<\frac{N(t)}t\le\frac{N(t)}{S_{N(t)}}$（$N(t)\ge1$）。$t\to\infty$ で $N(t)\to\infty$（a.s.：各 $S_{n}$ は有限）なので、$S_{n}/n\to1/\lambda$（\ref{stat:arrival-times-density} の Step 2）から両端は $\lambda$ に収束する。
+:::
+
+::: hypcheck
+- **指数分布の待ち時間**：同時密度の形 $\lambda^{n}e^{-\lambda s_{n}}$（\ref{stat:arrival-times-density}）は、指数分布の密度が $e^{-\lambda t}$ の形であることから来ており、増分の独立性もこれによる。他の分布の待ち時間（再生過程）では、増分は一般に独立でなく、ポアソン分布にもならない。
+- **待ち時間の独立同分布性**：同時密度の計算と大数の法則に使った。
+- **一定の強度**：時刻によって強度が変わる場合は、時間の変換 $\Lambda(t)=\int_{0}^{t}\lambda(s)ds$ で一定の強度に帰着する（非斉次ポアソン過程）。
+:::
+
+## 問題 {#stat:sec-pp-problems}
+
+::: problem {#stat:prob-pp-memoryless}
+指数分布の無記憶性 $P(T>s+t\mid T>s)=P(T>t)$ を示し、これをみたす $(0,\infty)$ 値の分布（$P(T>t)$ が連続）は指数分布に限ることを示せ。
+:::
+
+::: solution
+$P(T>t)=e^{-\lambda t}$ なら比は $e^{-\lambda t}$。逆に $G(t)\defeq P(T>t)$ が $G(s+t)=G(s)G(t)$ をみたし連続、$G(0)=1$、$G$ は非増加で $\to0$ なら、$G(1)=e^{-\lambda}$（$\lambda>0$）とおいて有理数で $G(q)=e^{-\lambda q}$、連続性ですべての $t$ で成り立つ。
+:::
+
+::: problem {#stat:prob-pp-two-intervals}
+強度 $2$ のポアソン過程で、$[0,1]$ に出来事がなく $[1,3]$ にちょうど 3 個起こる確率を求めよ。
+:::
+
+::: solution
+独立性から $e^{-2}\cdot e^{-4}\frac{4^{3}}{3!}=\frac{32}3e^{-6}\approx0.026$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 増分の独立性の証明は、到着時刻の同時密度と単体の体積の計算だけを使い、マルコフ性や確率過程の一般論を使っていない。議論は Resnick『Adventures in Stochastic Processes』第 4 章、Durrett『Probability: Theory and Examples』第 3.7 節の流れに沿う。
+
+**前提を変えると.**
+- **同値な特徴づけ**：「$N(0)=0$、独立定常増分、$P(N(h)=1)=\lambda h+o(h)$, $P(N(h)\ge2)=o(h)$」をみたす計数過程は、強度 $\lambda$ のポアソン過程と同じ分布をもつ（ここでは証明しない）。
+- **間引きと重ね合わせ**：各出来事を確率 $p$ で独立に残すと強度 $p\lambda$ のポアソン過程になり、独立なポアソン過程の和は強度の和のポアソン過程になる（ここでは証明しない）。
+- **複合ポアソン過程**：各出来事に独立同分布の大きさ（保険の請求額）を付けて足し合わせた $\sum_{n\le N(t)}Y_{n}$ は、保険数理の破産理論（ルンドベリ）の基本モデルである。
+
+**高い視点から：ランダムな点の配置.** ポアソン過程は、時間軸の上の「点過程」で、重ならない領域の点の数が独立にポアソン分布にしたがう、という性質で特徴づけられる（ポアソン点過程、ポアソン・ランダム測度）。この見方は空間の上にもそのまま拡がり、星の配置・森林の木・通信網の基地局などのモデルになる。比喩で言えば、ポアソン過程は「時間の上に雨粒が降る様子」で、どの区間に落ちる雨粒の数も、他の区間に何粒落ちたかとは無関係で、雨の強さ（強度）と区間の長さだけで決まる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-pp-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
