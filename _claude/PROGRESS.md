@@ -1990,11 +1990,11 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 
 | ID | フォルダ / ファイル | 題（案） | 主なラベル | 状態 |
 |---|---|---|---|---|
-| LO-01 | 01-foundations/02-model-theory/05-linear-orders/01-order-types.html | 順序型とその演算 | model:page-order-types | 執筆中 |
-| LO-02 | 〃/02-countable-orders.html | 可算線形順序と実数直線 | model:page-countable-orders | 執筆中 |
-| LO-03 | 〃/03-scattered-orders.html | 散在的順序とハウスドルフの定理 | model:page-scattered-orders | 執筆中 |
-| LO-04 | 〃/04-ef-linear-orders.html | 線形順序のゲームと順序和の合成定理 | model:page-ef-linear-orders | 執筆中 |
-| LO-05 | 〃/05-decidability.html | 整列順序と線形順序の理論の決定可能性 | model:page-linear-order-decidability | 執筆中 |
+| LO-01 | 01-foundations/02-model-theory/05-linear-orders/01-order-types.html | 順序型とその演算 | model:page-order-types | 完了 |
+| LO-02 | 〃/02-countable-orders.html | 可算線形順序と実数直線 | model:page-countable-orders | 完了 |
+| LO-03 | 〃/03-scattered-orders.html | 散在的順序とハウスドルフの定理 | model:page-scattered-orders | 完了 |
+| LO-04 | 〃/04-ef-linear-orders.html | 線形順序のゲームと順序和の合成定理 | model:page-ef-linear-orders | 完了 |
+| LO-05 | 〃/05-decidability.html | 整列順序と線形順序の理論の決定可能性 | model:page-linear-order-decidability | 完了 |
 
 ## Lean の型理論の割り当て（2026-11-26 ユーザー承認：「一系列ずつ進める」。資料なし（ユーザー指示「標準的な内容やっておいて」）。文献の細部は本文で未確認と明記する）
 

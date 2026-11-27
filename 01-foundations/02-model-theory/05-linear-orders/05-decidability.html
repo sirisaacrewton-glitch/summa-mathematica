@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>整列順序と線形順序の理論の決定可能性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/02-model-theory/05-linear-orders/05-decidability.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 整列順序と線形順序の理論の決定可能性 {#model:page-linear-order-decidability keywords="decidability of the theory of well-orders, decidable theory of linear orders, Th(omega,<), Th(Z,<), Th(Q,<), discrete linear order, n-types are finite, interpretation in (N,<), Lauchli-Leonard theorem, monadic second-order theory, Buchi, Rabin"}
+
+文 $\sigma$ が与えられたとき、「すべての整列順序で $\sigma$ が成り立つか」をアルゴリズムで判定できるだろうか。整列順序は一階の文では特徴づけられない（\ref{model:prob-lod-wo-not-elementary}）ので、公理を並べて証明を探すという方法はそのままでは使えない。本ページでは、前ページまでのゲームと順序和の結果を、計算の言葉に置き換えてこの問いに答える。
+
+方針は三段からなる。(1) 量化子の深さ $n$ を固定すると、線形順序は**有限個**の $n$ 同値類にしか分かれず、その類は計算できる有限個の文の真偽で見分けられる（\ref{model:n-types-finite}）。(2) 離散順序のゲーム（\ref{model:discrete-order-game}）から $(\omega,<)$・$(\Z,<)$ の理論の有限な公理化が得られ、それらは決定可能である（\ref{model:omega-zeta-axioms}）。さらに、$1$ から和と $\omega$ 個・$\omega^{\ast}$ 個の並べ方で作れる順序はすべて $(\omega,<)$ の中に定義でき、その理論も決定可能になる（\ref{model:order-term-decidable}）。(3) 順序和の合成定理によって、$\omega^{\omega}$ 未満の順序数の $n$ 同値類は有限回の計算で出つくし、整列順序の理論が決定可能になる（\ref{model:well-order-theory-decidable}）。線形順序全体の理論の決定可能性（ラウクリ＝レナードの定理とされる）は事実として述べ、証明の概略を示す（\tref{model:linear-order-theory-decidable}）。
+
+> 資料：本ページは特定の教科書の記述によらず、標準的な議論に従って組み立てた。人名と年代の帰属のうち確かめていないものは本文で「とされる」「未確認」と明記する。
+
+## 記法と定義の確認 {#model:sec-lod-notation}
+
+::: notation
+- **線形順序**は言語 $\{<\}$ の構造 $(M,<)$ で、$<$ が狭義の全順序（非反射・推移的・任意の二元が比較可能）であるものとする。この三条件を表す文（\ref{model:dlo.1}・\ref[2]{model:dlo.2} の文）の集合を $\mathrm{LO}$ と書く。一階論理の構造の領域は空でない（\ref{logic:nonempty-domain}）ので、本ページの線形順序・整列順序はすべて空でない。
+- 順序型、順序和 $\sum_{i\in I}A_{i}$（線形順序 $I$ で添字づけた和）、$\alpha+\beta$、積 $\alpha\cdot\beta$ は \ref[順序和]{model:order-sum}・\ref[順序型の積]{model:order-product} のとおりで、$\alpha\cdot\beta$ は「$\beta$ 個の $\alpha$ を $\beta$ の順に並べたもの」$\sum_{j\in\beta}\alpha$ である。とくに $\alpha\cdot\omega=\sum_{i\in\omega}\alpha$、$\alpha\cdot\omega^{\ast}=\sum_{i\in\omega^{\ast}}\alpha$。順序型の記号は $\omega$（$\N$）・$\omega^{\ast}$（$\omega$ の逆順序）・$\zeta$（$\Z$）・$\eta$（$\mathbb{Q}$）・$\lambda$（$\R$）とする。整列順序の順序型は順序数（\ref{set:order-type}）で、順序数の和・積・冪は \ref{set:ordinal-addition}・\ref{set:ordinal-multiplication}・\ref{set:ordinal-exponentiation} のとおり。
+- 構造 $\mathcal{M}$ の理論 $\Th(\mathcal{M})$ は $\mathcal{M}$ で真な文の全体、構造のクラス $\mathbf{K}$ の理論 $\Th(\mathbf{K})$ は $\mathbf{K}$ のすべての構造で真な文の全体とする。文の集合 $T$ の帰結 $\mathrm{Cn}(T)\defeq\{\sigma:T\models\sigma\}$ が $\Th(\mathcal{M})$ に等しいとき、$T$ は $\Th(\mathcal{M})$ を**公理化する**という。$\mathrm{Cn}(T)$ が完全（\ref{logic:complete-theory}）であるとは、任意の文 $\sigma$ で $T\models\sigma$ または $T\models\neg\sigma$ となることである。
+- 量化子の深さ $\mathrm{qr}$、$n$ 同値 $\equiv_{n}$、部分同型、エーレンフォイヒト–フライッセゲーム $G_{n}$ は \ref{model:quantifier-rank}・\ref{model:partial-isomorphism}・\ref{model:ef-game} のとおりで、受け手が $G_{n}(\mathcal{M},\mathcal{N})$ に勝つことと $\mathcal{M}\equiv_{n}\mathcal{N}$ は同値である（\ref{model:ef-theorem}）。
+- 文は有限の記号列なので文字列に符号化でき（\ref{comp:encoding}）、文の集合が**決定可能**であるとは、その符号の集合が決定可能（\ref{comp:recognizable-decidable}）であることをいう。アルゴリズムは高水準の手順で述べ、チャーチ–チューリングの提唱（\ref{comp:church-turing}）によってチューリング機械で実現できるものとみなす。
+- **前ページから使う結果.** 本ページは次の二つを前ページの結果として使う（前ページでの正確な形と異なる場合も、本ページで使うのはここに書いた形だけである）。
+  1. \ref[順序和の合成定理]{model:order-sum-composition}：添字の線形順序 $I$ を固定し、各 $i\in I$ について線形順序 $A_{i},B_{i}$ が $A_{i}\equiv_{n}B_{i}$ を満たすなら、$\sum_{i\in I}A_{i}\equiv_{n}\sum_{i\in I}B_{i}$ である。本ページで使うのは $I$ が $2$ 点の順序・$\omega$・$\omega^{\ast}$ の場合だけである（$\omega^{\ast}$ は補足でだけ使う）。「和の $n$ 同値類から計算できる」という計算の部分は前ページに求めず、本ページで示す（\ref{model:well-order-theory-decidable} の Step 1）。
+  2. \ref[整列順序は ω^ω 未満の順序数と n 同値]{model:ordinal-below-omega-omega}：空でない整列順序 $W$ と $n$ について、$W\equiv_{n}\alpha$ となる順序数 $\alpha$（$0<\alpha<\omega^{n}\cdot2<\omega^{\omega}$）がある。$\alpha$ は $n$ に依存し、すべての $n$ に共通の $\alpha<\omega^{\omega}$ がとれるとは限らない（$W=\omega^{\omega}$ が反例。\see{model:omega-omega-remainder}）。このページで使うのは $n$ ごとのこの形だけである。
+:::
+
+## n 同値類の有限性 {#model:sec-lod-types}
+
+前ページの論理式の有限性（\ref{model:finitely-many-formulas}）は「同値を除いて有限個」という主張だった。決定可能性に使うには、代表の論理式を**計算で書き出せる**ことが要る。その証明を計算の形に書き直す。
+
+::: lemma 論理式の計算できる代表系 {#model:formula-representatives keywords="computable list of representatives of formulas of bounded quantifier rank" index="論理式の代表系|ろんりしきのだいひょうけい"}
+有限な関係言語 $L$ を固定する。各 $n,k\ge0$ について、論理式の有限集合 $\Phi_{n,k}$ で次を満たすものが、$(n,k)$ から計算できる。
+1. $\Phi_{n,k}$ の元は、量化子の深さが $n$ 以下で、自由変数が $x_{1},\dots,x_{k}$ の中にある。
+2. 量化子の深さが $n$ 以下で自由変数が $x_{1},\dots,x_{k}$ の中にある任意の論理式は、$\Phi_{n,k}$ のある元と論理的に同値である。
+:::
+
+::: proof
+論理式の有限なリスト $B=(\beta_{1},\dots,\beta_{p})$ に対し、$\{0,1\}^{p}$ の部分集合 $\mathcal{S}$ ごとに
+$$
+\mathrm{dnf}_{\mathcal{S}}(B)\defeq\bigvee_{s\in\mathcal{S}}\ \bigwedge_{j\le p}\beta_{j}^{s(j)}
+$$
+とおく。ここで $\beta^{1}\defeq\beta$、$\beta^{0}\defeq\neg\beta$ で、空の選言は $\bot$ とする。$\mathrm{Bool}(B)\defeq\{\mathrm{dnf}_{\mathcal{S}}(B):\mathcal{S}\subseteq\{0,1\}^{p}\}$ は $2^{2^{p}}$ 個の論理式からなり、$B$ から書き出せる。
+
+**Step 1（真理値表）.** 【主張：$B$ の元から $\bot$ と $\to$ で作った任意の論理式 $\chi$ は、$\mathrm{Bool}(B)$ のある元と同値であり、その元は $\chi$ から計算できる】 $\mathcal{S}_{\chi}$ を、「$\beta_{j}$ に真理値 $s(j)$ を与えたとき $\chi$ が真になる」ような $s$ の全体とする（$\chi$ の構成に沿って真理値を計算すれば決まる）。任意の構造と割り当てで、$\beta_{j}$ たちの実際の真理値の組を $s_{0}$ とすると、$\bigwedge_{j}\beta_{j}^{s(j)}$ が真になるのは $s=s_{0}$ のときだけである。ゆえに $\mathrm{dnf}_{\mathcal{S}_{\chi}}(B)$ が真であることは $s_{0}\in\mathcal{S}_{\chi}$、すなわち $\chi$ が真であることと同値である。
+
+**Step 2（構成）.** $A_{k}$ を、変数 $x_{1},\dots,x_{k}$ だけを使う原子論理式（$\bot$、$x_{i}=x_{j}$、$R(x_{i_{1}},\dots,x_{i_{r}})$）の有限リストとする。$n$ に関する再帰で
+$$
+\Phi_{0,k}\defeq\mathrm{Bool}(A_{k}),\qquad\Phi_{n+1,k}\defeq\mathrm{Bool}\bigl(A_{k}\cup\{\exists x_{k+1}\,\psi:\psi\in\Phi_{n,k+1}\}\bigr)
+$$
+と定める。各段は有限のリストから有限のリストを書き出す操作なので、$\Phi_{n,k}$ は $(n,k)$ から計算できる。条件 1 は $n$ に関する帰納法で確かめられる（$\mathrm{Bool}$ は量化子の深さを増やさず、$\exists x_{k+1}$ が一つ増やす）。
+
+**Step 3（条件 2）.** 【主張：$\mathrm{qr}(\varphi)\le n$ で自由変数が $x_{1},\dots,x_{k}$ の中にある $\varphi$ は、$\Phi_{n,k}$ のある元と同値である】 $n$ に関する帰納法で、すべての $k$ について同時に示す。$\varphi$ は、原子論理式と、$\forall y\,\psi$（$\mathrm{qr}(\psi)\le n-1$）の形の部分論理式から $\bot$ と $\to$ で作られる。$n=0$ なら後者はなく、Step 1 から従う。$n\ge1$ のとき、$\forall y\,\psi$ の束縛変数を、$\psi$ に現れない変数への付け替え（\ref{logic:fresh-renaming}）を内側から繰り返して $x_{k+1}$ にそろえる（論理的同値は保たれる）。こうして $\forall y\,\psi$ は $\neg\exists x_{k+1}\neg\psi'$ と同値になり、$\neg\psi'$ は自由変数が $x_{1},\dots,x_{k+1}$ の中にある $\mathrm{qr}\le n-1$ の論理式である。帰納法の仮定から $\neg\psi'$ はある $\chi\in\Phi_{n-1,k+1}$ と同値で、同値な論理式を $\exists x_{k+1}$ で束ねても同値なので、$\forall y\,\psi$ は $\neg\exists x_{k+1}\chi$ と同値である。ゆえに $\varphi$ は、$A_{k}\cup\{\exists x_{k+1}\chi:\chi\in\Phi_{n-1,k+1}\}$ の元から $\bot$ と $\to$ で作った論理式と同値であり、Step 1 によって $\Phi_{n,k}$ のある元と同値になる。
+:::
+
+::: definition 順序の n 型 {#model:order-n-type keywords="n-type of a structure, Hintikka type" index="n 型（構造の）|えぬがたこうぞうの"}
+言語 $\{<\}$ の構造 $\mathcal{M}$ について、$\mathcal{M}$ の **$n$ 型**を $\tau_{n}(\mathcal{M})\defeq\{\varphi\in\Phi_{n,0}:\mathcal{M}\models\varphi\}$ と定める（$\Phi_{n,0}$ は \ref{model:formula-representatives} の文の有限集合）。
+:::
+
+::: intuition
+$n$ 型は、構造に「深さ $n$ までの質問」を有限個のリストにしてすべて尋ね、その答え（はい・いいえの列）を記録したものである。深さ $n$ の質問はどれもリストのどれかと同じ意味なので、この記録で深さ $n$ までの性質がすべて決まる。
+:::
+
+::: proposition n 同値類の有限性 {#model:n-types-finite keywords="finitely many n-equivalence classes, n-types are finite and computable" index="n 同値類の有限性|えぬどうちるいのゆうげんせい"}
+言語 $\{<\}$ の構造 $\mathcal{M},\mathcal{N}$ と $n\ge0$ について、次が成り立つ。
+1. $\mathcal{M}\equiv_{n}\mathcal{N}$ であることと $\tau_{n}(\mathcal{M})=\tau_{n}(\mathcal{N})$ であることは同値である。
+2. $\equiv_{n}$ の同値類は $2^{\lvert\Phi_{n,0}\rvert}$ 個以下で、とくに有限個である。
+3. $\mathcal{M}$ の理論が決定可能なら、$\tau_{n}(\mathcal{M})$ は $n$ から計算できる。
+:::
+
+::: intuition
+量化子の深さを決めれば、線形順序（一般に有限な関係言語の構造）は有限個の箱にしか分けられず、どの箱に入るかは有限個の文の真偽を調べれば分かる。
+:::
+
+::: proof
+1 の ⇒：$\Phi_{n,0}$ の元は $\mathrm{qr}\le n$ の文なので、$\mathcal{M}\equiv_{n}\mathcal{N}$ なら両者で真偽が一致し、$\tau_{n}(\mathcal{M})=\tau_{n}(\mathcal{N})$ である。⇐：$\mathrm{qr}\le n$ の文 $\sigma$ は、\ref{model:formula-representatives.2} によりある $\varphi\in\Phi_{n,0}$ と同値である。$\mathcal{M}\models\sigma\iff\varphi\in\tau_{n}(\mathcal{M})$ であり、$\mathcal{N}$ についても同様なので、型が等しければ $\sigma$ の真偽は一致する。
+
+2：1 から、同値類は $\Phi_{n,0}$ の部分集合（型）と単射に対応する。
+
+3：$\Phi_{n,0}$ を書き出し（\ref{model:formula-representatives}）、各元が $\Th(\mathcal{M})$ に属するかを判定すればよい。
+:::
+
+::: remark 類の個数の大きさ
+$\lvert\Phi_{n+1,k}\rvert$ は $\lvert\Phi_{n,k+1}\rvert$ の二重指数で増えるので、上の上界は $n$ について指数の塔になる。本ページのアルゴリズムは原理的に有限で終わることだけを示すもので、実用的な速さは考えない。
+:::
+
+## 離散順序のゲームと (ω,<)・(ℤ,<) の理論 {#model:sec-lod-discrete}
+
+前ページまでの線形順序のゲーム（\ref{model:linear-order-game}）は有限順序についてのものだった。そこで使った「距離が $2^{m}$ 以上なら区別できない」という考えは、元のすぐ次の元がつねにある順序（離散順序）にそのまま広がる。
+
+::: definition 離散線形順序と距離 {#model:discrete-order keywords="discrete linear order, immediate successor, distance in a discrete order" index="離散線形順序|りさんせんけいじゅんじょ"}
+線形順序 $(M,<)$ の元 $x<y$ で、$x<z<y$ となる $z$ がないとき、$y$ を $x$ の直後の元、$x$ を $y$ の直前の元という。最大元以外のすべての元が直後の元をもち、最小元以外のすべての元が直前の元をもつとき、$M$ は離散である、または $M$ は**離散線形順序**であるという。直後の元を $S(x)$、その $j$ 回の繰り返しを $S^{j}(x)$ と書く。
+
+$M$ に仮想の端点 $-\infty,+\infty$ を加えた $\hat{M}\defeq\{-\infty\}\cup M\cup\{+\infty\}$ の上で、$u\le v$ の距離 $d(u,v)\in\N\cup\{\infty\}$ を次で定める。
+1. $u,v\in M$ のとき、$v=S^{j}(u)$ となる $j$ があればその $j$、なければ $\infty$。
+2. $d(-\infty,v)$（$v\in M\cup\{+\infty\}$）は、$M$ に最小元 $\min M$ があれば $1+d(\min M,v)$、なければ $\infty$。$d(u,+\infty)$（$u\in M$）は、最大元があれば $1+d(u,\max M)$、なければ $\infty$。ここで $d(\min M,+\infty)$ は 2 の後半で定めたものとする。$d(u,u)\defeq0$。
+
+$x\in\N\cup\{\infty\}$ と $x'$ が $m$ について合うとは、$x=x'$ であるか、$x,x'\ge2^{m}$ であることをいう（$\infty$ はすべての自然数より大きいとする）。
+:::
+
+::: intuition
+離散順序では、二つの元の間に「何歩あるか」が数えられ、歩数が有限でなければ距離は無限大とする。$\omega$ では最小元から $k$ 番目の元の、左端からの距離が $k+1$ になる。$n$ 回のゲームでは、$2^{n}$ 歩以上離れた二点は「十分遠い」としか見分けられない。
+:::
+
+$S^{j}$ は狭義単調に増えるので、1 の $j$ はあればただ一つである。$M=\{1,\dots,p\}$ なら $d(-\infty,+\infty)=p+1$ で、\ref{model:linear-order-game} の証明の距離と一致する。
+
+::: lemma 距離の加法性 {#model:discrete-distance-additive keywords="additivity of distance in discrete orders" index="距離の加法性（離散順序）|きょりのかほうせいりさんじゅんじょ"}
+$M$ を離散線形順序とし、$u\le v\le w$ を $\hat{M}$ の元とする。このとき $d(u,w)=d(u,v)+d(v,w)$ である（$\infty$ を含む和は $\infty$ とする）。
+:::
+
+::: proof
+**Step 1.** 【主張：$x,z\in M$ で $d(x,z)=K<\infty$ なら、区間 $\{y:x\le y\le z\}$ は $\{S^{j}(x):j\le K\}$ に等しい】 $K$ に関する帰納法。$K=0$ なら $x=z$ で明らか。$K\ge1$ なら $z'\defeq S^{K-1}(x)$ は $z$ の直前の元である。$x\le y\le z$ で $y\ne z$ なら $y<z$ で、$z'<y<z$ となる元はないので $y\le z'$ である。帰納法の仮定から $y$ は $S^{j}(x)$（$j\le K-1$）の形になる。
+
+**Step 2.** 【主張：$u,v,w\in M$ なら加法性が成り立つ】 $d(u,v)=k$, $d(v,w)=l$ がともに有限なら $w=S^{l}(S^{k}(u))=S^{k+l}(u)$ で、$d(u,w)=k+l$ である。逆に $d(u,w)=K$ が有限なら、Step 1 から $v=S^{j}(u)$（$j\le K$）と書け、$S^{K}(u)=S^{K-j}(v)$ より $d(u,v)=j$, $d(v,w)=K-j$ である。ゆえに一方が $\infty$ なら $d(u,w)=\infty$ であり、どちらの場合も等式が成り立つ。
+
+**Step 3（仮想の端点）.** $u=-\infty$ のとき、最小元がなければ $d(-\infty,v)=d(-\infty,w)=\infty$ で、両辺は $\infty$ である。最小元 $\mu$ があれば、$d(-\infty,\cdot)=1+d(\mu,\cdot)$ なので、等式は $d(\mu,w)=d(\mu,v)+d(v,w)$ に帰着する（$v=-\infty$ のときは $d(-\infty,-\infty)=0$ で自明）。$w=+\infty$ の場合も、最大元の有無で同様に $M$ の中の等式に帰着する。
+:::
+
+::: lemma 区間の中の点 {#model:discrete-gap-points keywords="points at prescribed distance in a gap of a discrete order" index="区間の中の点（離散順序）|くかんのなかのてんりさんじゅんじょ"}
+$M$ を離散線形順序、$u<v$ を $\hat{M}$ の元とし、$D\defeq d(u,v)$ とおく。
+1. $u\in M$ であるか $M$ に最小元があり、自然数 $k$ が $1\le k<D$ を満たすなら、$u<b<v$, $d(u,b)=k$ となる $b\in M$ がある。
+2. $v\in M$ であるか $M$ に最大元があり、$1\le k<D$ なら、$u<b<v$, $d(b,v)=k$ となる $b\in M$ がある。
+3. $m\ge0$ で $D\ge2^{m+1}$ なら、$u<b<v$, $d(u,b)\ge2^{m}$, $d(b,v)\ge2^{m}$ となる $b\in M$ がある。
+:::
+
+::: proof
+1：まず $u\in M$ とする。$j<k$ について、$S^{j}(u)$ が存在して $d(S^{j}(u),v)=D-j$ であることを $j$ に関する帰納法で示す（$j=0$ は定義どおり）。$D-j\ge2$ なので $S^{j}(u)$ は最大元でない（最大元なら $v=+\infty$ で距離は $1$）。離散性から $S^{j+1}(u)$ があり、加法性（\ref{model:discrete-distance-additive}）から $d(S^{j+1}(u),v)=D-j-1$ である。$b\defeq S^{k}(u)$ とおくと、$d(b,v)=D-k\ge1$ より $b<v$ である。$u=-\infty$ で最小元 $\mu$ があれば、$d(-\infty,\mu)=1$ なので、$k=1$ なら $b=\mu$、$k\ge2$ なら $\mu$ から $k-1$ 歩進めばよい（$d(\mu,v)=D-1>k-1$）。
+
+2：1 を逆順序に適用する。
+
+3：$D$ が有限なら、$d(-\infty,\cdot)$ が有限になるのは最小元があるときだけなので 1 の条件が満たされ、$k=2^{m}$ として 1 を使えば $d(b,v)=D-2^{m}\ge2^{m}$ となる。$D=\infty$ のとき、1 の条件が満たされれば $k=2^{m}$ で 1 を使い、$d(b,v)=\infty$ となる。満たされなければ $u=-\infty$ で最小元がないので、どの $b$ でも $d(-\infty,b)=\infty$ である。このとき 2 の条件が満たされれば $k=2^{m}$ で 2 を使い、満たされなければ $v=+\infty$ で最大元もないので、任意の $b\in M$ をとればよい。
+:::
+
+::: theorem 離散順序のゲーム {#model:discrete-order-game keywords="Ehrenfeucht-Fraisse game for discrete linear orders, omega is n-equivalent to omega plus zeta times L" index="離散順序のゲーム|りさんじゅんじょのげーむ"}
+$M,N$ を離散線形順序とし、次を仮定する。
+1. $M$ に最小元があることと $N$ に最小元があることは同値であり、最大元についても同様である。
+2. $d_{M}(-\infty,+\infty)$ と $d_{N}(-\infty,+\infty)$ は $n$ について合う。
+
+このとき受け手は $G_{n}(M,N)$ に勝ち、$M\equiv_{n}N$ である。
+:::
+
+::: intuition
+すぐ次の元がいつもある順序どうしは、端の有無が同じで、全体の長さがどちらも十分長い（または同じ）なら、$n$ 回の追及では区別できない。とくに「最小元があって最大元がない離散順序」はすべて $\omega$ と同じ文を満たす。
+:::
+
+::: proof
+選ばれた点の列に仮想の端点を加え、$a_{-1}=-\infty$, $a_{0}=+\infty$, $a_{1},\dots,a_{i}$ と $b_{-1}=-\infty$, $b_{0}=+\infty$, $b_{1},\dots,b_{i}$ と書く。距離は $\hat{M}$, $\hat{N}$ のものとする。
+
+**Step 1（不変条件）.** 【主張：$i$ 回の手番の後、(I) すべての $s,t$ で $a_{s}<a_{t}\iff b_{s}<b_{t}$ かつ $a_{s}=a_{t}\iff b_{s}=b_{t}$、(II) $a_{s}\le a_{t}$ となるすべての $s,t$ で $d(a_{s},a_{t})$ と $d(b_{s},b_{t})$ が $n-i$ について合う、を受け手は保てる】 $i=0$ では (I) は明らかで、(II) は仮定 2 である。以下 Step 2〜4 で、$i<n$ で (I)(II) が成り立つとき、攻め手の $(i+1)$ 回目の手に応じて保てることを示す。仮定 1・2 は $M$ と $N$ について対称なので、攻め手が $M$ の元 $a$ を選んだ場合だけを考えればよい。$a$ がすでに選ばれた $a_{u}$ なら $b_{u}$ で応じればよい。そうでなければ、選ばれた点（仮想の端点を含む）の中で $a$ の直前の $a_{s}$ と直後の $a_{t}$ をとる。(I) より $b_{s}<b_{t}$ の間に他の選ばれた点はない。$m\defeq n-i-1$、$k\defeq d(a_{s},a)$, $l\defeq d(a,a_{t})$、$D\defeq d(a_{s},a_{t})=k+l$、$D'\defeq d(b_{s},b_{t})$ とおく。(II) より $D$ と $D'$ は $m+1$ について合う。
+
+**Step 2（左の近くの点）.** 【主張：$k<2^{m}$ なら、$b_{s}<b<b_{t}$ で $d(b_{s},b)=k$、かつ $l$ と $d(b,b_{t})$ が $m$ について合う $b$ がある】 $k$ は有限なので、$a_{s}\in M$ であるか、$a_{s}=-\infty$ で $M$ に最小元がある。後者なら $b_{s}=-\infty$ で、仮定 1 から $N$ にも最小元がある。前者なら (I) から $b_{s}\in N$ である。$D=D'$ なら $k<D$、そうでなければ $D'\ge2^{m+1}>k$ なので、いずれも $k<D'$ であり、\ref{model:discrete-gap-points.1} の $b$ がとれる。$d(b,b_{t})=D'-k$ である。$D=D'$ ならこれは $l$ に等しく、そうでなければ $D,D'\ge2^{m+1}$ なので、$l=D-k$ と $D'-k$ はともに $2^{m}$ より大きい。
+
+**Step 3（右の近くの点と遠い点）.** 【主張：$l<2^{m}$ の場合、および $k,l\ge2^{m}$ の場合も、$k$ と $d(b_{s},b)$、$l$ と $d(b,b_{t})$ がそれぞれ $m$ について合う $b$ が $b_{s}<b<b_{t}$ にある】 $l<2^{m}$ の場合は Step 2 を左右逆にして \ref{model:discrete-gap-points.2} を使う。$k,l\ge2^{m}$ なら $D\ge2^{m+1}$ なので、$D'$ も $2^{m+1}$ 以上である（$m+1$ について合うから）。\ref{model:discrete-gap-points.3} の $b$ は $d(b_{s},b),d(b,b_{t})\ge2^{m}$ を満たし、$k,l$ と $m$ について合う。
+
+**Step 4（不変条件の保存）.** 【主張：Step 2・3 の $b$ で応じると、$i+1$ で (I)(II) が成り立つ】 $b$ は $b_{s}$ と $b_{t}$ の真の間にあり、$a$ も $a_{s}$ と $a_{t}$ の真の間にあるので、(I) が保たれる。$a_{u}\le a_{s}$ となる選ばれた点については、加法性（\ref{model:discrete-distance-additive}）から $d(a_{u},a)=d(a_{u},a_{s})+k$、$d(b_{u},b)=d(b_{u},b_{s})+d(b_{s},b)$ である。各項は $m$ について合う（前の項は $m+1$ について合うので $m$ についても合う）。和は、すべての項が等しければ等しく、そうでなければどちらの和も $2^{m}$ 以上なので、$m$ について合う。$a_{u}\ge a_{t}$ も同様で、新しい点を含まない組は $m+1$ について合うので $m$ についても合う。
+
+以上から受け手は $n$ 回後まで (I) を保ち、そのとき $a_{s}\mapsto b_{s}$（$s\ge1$）は等号と順序を保つので部分同型である。ゆえに受け手が勝ち、\ref{model:ef-theorem} から $M\equiv_{n}N$ である。
+
+::: hypcheck
+- **離散性**：\ref{model:discrete-gap-points} で、指定した距離の点を $S$ の繰り返しで作るのに使った（Step 2・3）。離散でないと、たとえば $\omega$ と $\omega+\omega$ は最小元があって最大元がないが、後者には直前の元をもたない最小元以外の元があり、$\mathrm{qr}=3$ の文で区別される。
+- **仮定 1**：Step 2 で、$a_{s}=-\infty$ のときに $N$ 側でも左端から数えられることに使った。外すと $\omega$ と $\omega^{\ast}$（ともに無限で離散）が反例になる（最小元の有無は $\mathrm{qr}=2$ の文）。
+- **仮定 2**：Step 1 の $i=0$ で使った。外すと元の個数 $2$ と $3$ の順序が反例になる（\ref{model:prob-ef-two-three}）。
+:::
+:::
+
+::: supplement
+**前ページとの関係.** $M,N$ が有限で元の個数が $2^{n}-1$ 以上なら、仮定 1・2 が満たされ、\ref{model:linear-order-game}（前ページの \see[有限線形順序の n 同値]{model:finite-order-n-equivalence}）が特別な場合として得られる。
+
+**$\omega+\zeta\cdot L$.** 最小元があり最大元がない離散順序は、$\omega$ の後に $\zeta$ の複製を線形順序 $L$ の順に並べた $\omega+\zeta\cdot L$（$L$ は空でもよい）の形をしていることが、元を「有限歩で行き来できる」同値関係で分けると分かる。上の定理はそれらがすべて $\omega$ と初等的同値であることを示しており、整列でない $\omega+\zeta$ も $\omega$ と同じ文を満たす（\ref{model:prob-lod-wo-not-elementary}）。
+:::
+
+離散性・端点の有無は一階の文で書ける。$\mathrm{Disc}$ を次の二つの文とする：
+$$
+\begin{aligned}
+&\forall x\,\bigl(\exists y\,x<y\to\exists y\,(x<y\wedge\neg\exists z\,(x<z\wedge z<y))\bigr),\\
+&\forall x\,\bigl(\exists y\,y<x\to\exists y\,(y<x\wedge\neg\exists z\,(y<z\wedge z<x))\bigr).
+\end{aligned}
+$$
+また $\mathrm{Min}\defeq\exists x\,\forall y\,\neg\,y<x$、$\mathrm{NoMin}\defeq\neg\mathrm{Min}$、$\mathrm{NoMax}\defeq\forall x\,\exists y\,x<y$ とし、
+$$
+T_{\omega}\defeq\mathrm{LO}\cup\mathrm{Disc}\cup\{\mathrm{Min},\mathrm{NoMax}\},\qquad T_{\zeta}\defeq\mathrm{LO}\cup\mathrm{Disc}\cup\{\mathrm{NoMin},\mathrm{NoMax}\}
+$$
+とおく。
+
+::: theorem (ω,<)・(ℤ,<)・(ℚ,<) の理論の公理化 {#model:omega-zeta-axioms keywords="axiomatization of Th(N,<), Th(Z,<), Th(Q,<); completeness of the theory of discrete orders with least element" index="(ω,<) の理論の公理化|おめがのりろんのこうりか, (ℤ,<) の理論の公理化|せいすうのじゅんじょのりろんのこうりか"}
+1. $T_{\omega}$ は $\Th(\omega,<)$ を公理化し、$\mathrm{Cn}(T_{\omega})$ は完全である。
+2. $T_{\zeta}$ は $\Th(\Z,<)$ を公理化し、$\mathrm{Cn}(T_{\zeta})$ は完全である。
+3. $\mathrm{DLO}$（\ref{model:dlo}）は $\Th(\mathbb{Q},<)=\Th(\R,<)$ を公理化し、$\mathrm{Cn}(\mathrm{DLO})$ は完全である。
+
+いずれも有限個の文による公理化である。
+:::
+
+::: intuition
+自然数の順序について一階で言えることは、「最小元があり、最大元がなく、各元にすぐ次の元があり、最小元以外にはすぐ前の元がある」から全部導ける。整数・有理数についても同様の短い公理の一覧がある。
+:::
+
+::: proof
+**Step 1.** 【主張：$T_{\omega}$ の任意のモデル $M$ について $M\equiv(\omega,<)$ である】 $M$ は離散で、最小元をもち、最大元をもたない。$(\omega,<)$ も同じ性質をもつ。最大元がないので $d_{M}(\mu,+\infty)=\infty$（$\mu$ は最小元）であり、$d_{M}(-\infty,+\infty)=\infty=d_{\omega}(-\infty,+\infty)$ となる。\ref{model:discrete-order-game} の仮定がすべての $n$ で満たされるので、すべての $n$ で $M\equiv_{n}\omega$ であり、文はどれもある量化子の深さをもつので $M\equiv\omega$ である。
+
+**Step 2.** 【主張：1 が成り立つ】 $(\omega,<)\models T_{\omega}$ なので、$T_{\omega}\models\sigma$ なら $\sigma\in\Th(\omega,<)$ である。逆に $\sigma\in\Th(\omega,<)$ なら、Step 1 から $T_{\omega}$ のすべてのモデルで $\sigma$ が真なので $T_{\omega}\models\sigma$ である。ゆえに $\mathrm{Cn}(T_{\omega})=\Th(\omega,<)$ で、構造の理論は完全（$\sigma$ か $\neg\sigma$ の一方が真）なので $\mathrm{Cn}(T_{\omega})$ も完全である。
+
+**Step 3.** 【主張：2・3 が成り立つ】 $T_{\zeta}$ のモデルは離散で、最小元も最大元ももたないので $d(-\infty,+\infty)=\infty$ であり、$(\Z,<)$ も同じ性質をもつ。Step 1・2 と同じ議論で 2 を得る。3 は \ref{model:dlo-complete} から、$\mathrm{Cn}(\mathrm{DLO})$ が完全で、$(\mathbb{Q},<)$ と $(\R,<)$ はともに $\mathrm{DLO}$ のモデルなので、$\mathrm{Cn}(\mathrm{DLO})=\Th(\mathbb{Q},<)=\Th(\R,<)$ である。
+
+::: hypcheck
+- **$\mathrm{Min}$ と $\mathrm{NoMax}$**：Step 1 で \ref{model:discrete-order-game} の仮定 1 を満たすのに使った。外すと $\omega$ と $\omega+\omega^{\ast}$ が $\mathrm{LO}\cup\mathrm{Disc}\cup\{\mathrm{Min}\}$ のモデルで、最大元の有無で区別される。
+- **$\mathrm{NoMax}$ の別の役割**：$d(-\infty,+\infty)=\infty$（モデルが無限であること）も $\mathrm{NoMax}$ から従った。最小元と最大元をもつ無限離散順序の理論は、「元が $k$ 個以上ある」という無限個の文が必要になる（\ref{model:prob-lod-omega-omegastar}）。
+:::
+:::
+
+完全な理論が「機械的に公理を書き出せる」なら、証明を順に探すことで決定できる。ここで使う証明体系は一階論理の\term[自然演繹]{logic:deduction-system}である。
+
+::: lemma 完全で公理化された理論は決定可能 {#model:complete-axiomatized-decidable keywords="a complete theory with a decidable set of axioms is decidable" index="完全な理論の決定可能性|かんぜんなりろんのけっていかのうせい"}
+有限な言語の文の集合 $T$ が決定可能で、$\mathrm{Cn}(T)$ が完全なら、$\mathrm{Cn}(T)$ は決定可能である。
+:::
+
+::: proof
+完全性定理（\ref{logic:completeness}）から、$T\models\sigma$ と $T\vdash\sigma$（\ref{logic:derivability}）は同値である。導出は有限の対象なので、有限の記号列としてすべて順に並べられる。各記号列について「導出であり、未解消の仮定がすべて $T$ に属し、結論が $\sigma$ または $\neg\sigma$ である」ことは、規則の当てはめを一つずつ確かめ、仮定について $T$ の判定機を呼ぶことで機械的に判定できる。そこで、記号列を順に調べ、結論が $\sigma$ の導出が見つかれば「属する」、$\neg\sigma$ の導出が見つかれば「属さない」と答えて止まる手順を考える。$\mathrm{Cn}(T)$ が完全なので、どちらかの導出は必ずあり、手順は止まる。$T$ が\term[無矛盾]{logic:derivability}なら $\sigma$ と $\neg\sigma$ の両方が導出されることはないので、答えは正しい。$T$ が矛盾するなら $\mathrm{Cn}(T)$ はすべての文からなり、手順の代わりに常に「属する」と答えればよい（どちらの場合かは決まっているので、場合ごとに判定機がある）。
+:::
+
+::: corollary 基本的な順序の理論の決定可能性 {#model:basic-order-theories-decidable keywords="Th(N,<), Th(Z,<), Th(Q,<), Th(R,<) are decidable" index="(ω,<) の理論の決定可能性|おめがのりろんのけっていかのうせい"}
+$\Th(\omega,<)$、$\Th(\omega^{\ast},<)$、$\Th(\Z,<)$、$\Th(\mathbb{Q},<)$、$\Th(\R,<)$ は決定可能である。
+:::
+
+::: proof
+\ref{model:omega-zeta-axioms} の公理系は有限集合なので決定可能であり、\ref{model:complete-axiomatized-decidable} から $\Th(\omega,<)$、$\Th(\Z,<)$、$\Th(\mathbb{Q},<)=\Th(\R,<)$ は決定可能である。$\Th(\omega^{\ast},<)$ については、文 $\sigma$ の中の $x<y$ をすべて $y<x$ に置き換えた文を $\sigma^{\ast}$ とすると、$(\omega^{\ast},<)\models\sigma\iff(\omega,<)\models\sigma^{\ast}$ であり（\ref{logic:isomorphism-invariance} を $\omega^{\ast}$ と $\omega$ の逆順序の恒等写像に使う）、$\sigma\mapsto\sigma^{\ast}$ は計算できる。
+:::
+
+## (ω,<) への帰着：順序の項 {#model:sec-lod-terms}
+
+整列順序の理論を扱うには、$\omega^{2}$, $\omega^{3}+\omega$ など多くの順序の理論を一様に判定する必要がある。これらは $(\omega,<)$ の中に、自然数の組とその上の定義可能な順序として埋め込める。
+
+::: definition 順序の項 {#model:order-term keywords="order terms built from 1 by sums and omega, omega-star repetitions" index="順序の項|じゅんじょのこう, 整列項|せいれつこう"}
+**順序の項**を、$\mathsf{1}$ から始めて、項 $e,f$ から $(e+f)$, $(e\cdot\omega)$, $(e\cdot\omega^{\ast})$ を作る操作で得られる記号列とする。項 $e$ の表す線形順序 $\lVert e\rVert$ を
+$$
+\lVert\mathsf{1}\rVert\defeq1,\quad\lVert e+f\rVert\defeq\lVert e\rVert+\lVert f\rVert,\quad\lVert e\cdot\omega\rVert\defeq\sum_{i\in\omega}\lVert e\rVert,\quad\lVert e\cdot\omega^{\ast}\rVert\defeq\sum_{i\in\omega^{\ast}}\lVert e\rVert
+$$
+で定める。$\cdot\,\omega^{\ast}$ を使わない項を**整列項**という。
+:::
+
+::: intuition
+順序の項は、1 点から始めて「二つを前後に並べる」「同じものを自然数の向きに無限に並べる」「同じものを逆向きに無限に並べる」の三つの操作だけで作った順序の設計図である。逆向きの並べ方を使わない設計図からは、ちょうど $\omega^{\omega}$ 未満の順序数ができる（\ref{model:ordinal-terms}）。
+:::
+
+::: example
+$\mathsf{1}\cdot\omega$ は $\omega$、$\mathsf{1}\cdot\omega^{\ast}+\mathsf{1}\cdot\omega$ は $\zeta$、$(\mathsf{1}\cdot\omega)\cdot\omega$ は $\omega\cdot\omega=\omega^{2}$、$(\mathsf{1}\cdot\omega)\cdot\omega^{\ast}$ は $\omega\cdot\omega^{\ast}$（$\omega$ の複製を逆向きに並べたもの）を表す。
+:::
+
+::: lemma 整列項と ω^ω 未満の順序数 {#model:ordinal-terms keywords="ordinals below omega^omega are denoted by terms" index="整列項と順序数|せいれつこうとじゅんじょすう"}
+整列項 $e$ の表す順序は整列順序で、その順序型 $\alpha$ は $0<\alpha<\omega^{\omega}$ を満たす。逆に、$0<\alpha<\omega^{\omega}$ となる任意の順序数は、ある整列項の表す順序の順序型である。
+:::
+
+::: proof
+**Step 1.** 【主張：$\omega^{\omega}$ は $\omega^{k}$（$k<\omega$）の上限で、$\alpha<\omega^{\omega}$ はある $k$ で $\alpha<\omega^{k}$ となることと同値である】 冪の定義（\ref{set:ordinal-exponentiation}）で極限の段は上限をとるので $\omega^{\omega}=\sup_{k<\omega}\omega^{k}$ であり、上限より小さい順序数はある $\omega^{k}$ より小さい。
+
+**Step 2.** 【主張：整列項の表す順序は、型が $0<\alpha<\omega^{\omega}$ の整列順序である】 項の構成に関する帰納法。$\mathsf{1}$ は型 $1$。$\lVert e\rVert$, $\lVert f\rVert$ の型を $\alpha,\beta$ とし、Step 1 から $\alpha,\beta<\omega^{k}$ となる $k$ をとる。$\lVert e+f\rVert$ は型 $\alpha+\beta$ の整列順序（\ref{set:ordinal-addition}）で、$\alpha+\beta<\omega^{k}+\omega^{k}=\omega^{k}\cdot2\le\omega^{k+1}$ である（和・積の単調性、\ref{set:ordinal-addition-laws}・\ref{set:ordinal-multiplication-laws}）。$\lVert e\cdot\omega\rVert$ は、$\omega\times\alpha$ に第 1 成分を優先する辞書式順序を入れたもので、型は $\alpha\cdot\omega$（\ref{set:ordinal-multiplication}）である。$\alpha\cdot\omega\le\omega^{k}\cdot\omega=\omega^{k+1}<\omega^{k+2}$ となる（積の単調性と冪の法則 \ref{set:ordinal-exponentiation-laws.1}）。どの型も $1$ 以上である。
+
+**Step 3.** 【主張：$0<\alpha<\omega^{k}$ なら $\alpha$ はある整列項の型である】 $k$ に関する帰納法。まず $\omega^{j}$ は項 $t_{0}\defeq\mathsf{1}$, $t_{j+1}\defeq t_{j}\cdot\omega$ の型である（$\omega^{j+1}=\omega^{j}\cdot\omega$）。$k=0$ では $0<\alpha<1$ となる $\alpha$ はない。$0<\alpha<\omega^{k+1}$ とする。割り算（\ref{set:ordinal-multiplication-laws.9}）で $\alpha=\omega^{k}\cdot c+\rho$（$\rho<\omega^{k}$）と書くと、$c\ge\omega$ なら $\alpha\ge\omega^{k}\cdot\omega=\omega^{k+1}$ となるので $c<\omega$ である。$\omega^{k}\cdot c$ は $\omega^{k}$ を $c$ 回足したもの（$\gamma\cdot(\delta+1)=\gamma\cdot\delta+\gamma$、\ref{set:ordinal-recursive-characterization}）なので、$c\ge1$ なら $t_{k}+\dots+t_{k}$（$c$ 個）の型である。$\rho>0$ なら帰納法の仮定で $\rho$ を表す項 $r$ をとり、後ろに $+r$ を足す。$c=0$ なら $\alpha=\rho<\omega^{k}$ で、帰納法の仮定から従う。
+:::
+
+$(\N,<)$ の中に順序の項を書き込む。$\theta_{j}(x)$ を「$x$ は小さい方から $j$ 番目（$0$ から数える）の元」を表す文として
+$$
+\theta_{0}(x)\defeq\forall y\,\neg\,y<x,\qquad\theta_{j+1}(x)\defeq\exists y\,\bigl(\theta_{j}(y)\wedge y<x\wedge\neg\exists z\,(y<z\wedge z<x)\bigr)
+$$
+と定める。$(\N,<)\models\theta_{j}[a]\iff a=j$ である（$j$ に関する帰納法）。変数の組 $\vec{x}=(x_{1},\dots,x_{d})$ について $Z(\vec{x})\defeq\bigwedge_{l\le d}\theta_{0}(x_{l})$ とおく。
+
+::: lemma 順序の項の書き込み {#model:order-term-interpretation keywords="interpretation of order terms in (N,<)" index="順序の項の書き込み|じゅんじょのこうのかきこみ"}
+各順序の項 $e$ について、次数 $d_{e}\ge1$ と、言語 $\{<\}$ の論理式 $\delta_{e}(\vec{x})$, $\pi_{e}(\vec{x},\vec{y})$（$\vec{x},\vec{y}$ は長さ $d_{e}$ の変数の組）が $e$ から計算でき、
+$$
+D_{e}\defeq\{\vec{a}\in\N^{d_{e}}:(\N,<)\models\delta_{e}[\vec{a}]\},\qquad\vec{a}\prec_{e}\vec{b}\iff(\N,<)\models\pi_{e}[\vec{a},\vec{b}]
+$$
+とおくと、$(D_{e},\prec_{e})$ は $\lVert e\rVert$ と同型な線形順序である。
+:::
+
+::: proof
+項の構成に関する再帰で定め、同時に同型を帰納法で確かめる。
+- $e=\mathsf{1}$ のとき、$d_{e}\defeq1$、$\delta_{e}(x)\defeq\theta_{0}(x)$、$\pi_{e}\defeq\bot$ と定める。$D_{e}=\{0\}$ は 1 点の順序である。
+- $e=f+g$：$d_{e}\defeq1+d_{f}+d_{g}$ とし、組を $(t,\vec{x},\vec{y})$（$\vec{x}$ は長さ $d_{f}$、$\vec{y}$ は長さ $d_{g}$）と書いて
+$$
+\begin{aligned}
+\delta_{e}\defeq\ &(\theta_{0}(t)\wedge\delta_{f}(\vec{x})\wedge Z(\vec{y}))\vee(\theta_{1}(t)\wedge Z(\vec{x})\wedge\delta_{g}(\vec{y})),\\
+\pi_{e}\defeq\ &t<t'\vee(t=t'\wedge\theta_{0}(t)\wedge\pi_{f}(\vec{x},\vec{x}'))\\
+&\vee(t=t'\wedge\theta_{1}(t)\wedge\pi_{g}(\vec{y},\vec{y}'))
+\end{aligned}
+$$
+とする。$D_{e}$ は $\{0\}\times D_{f}\times\{\vec{0}\}$ と $\{1\}\times\{\vec{0}\}\times D_{g}$ の和集合で、$\prec_{e}$ は前者を後者の前に置き、それぞれの中では $\prec_{f}$, $\prec_{g}$ で並べる。これは $2$ 点の順序で添字づけた和 $(D_{f},\prec_{f})+(D_{g},\prec_{g})$ と同型で、帰納法の仮定から $\lVert f\rVert+\lVert g\rVert$ と同型である。
+- $e=f\cdot\omega$：$d_{e}\defeq1+d_{f}$、組を $(t,\vec{x})$ と書き、$\delta_{e}\defeq\delta_{f}(\vec{x})$、$\pi_{e}\defeq t<t'\vee(t=t'\wedge\pi_{f}(\vec{x},\vec{x}'))$ とする。$(D_{e},\prec_{e})$ は $\N\times D_{f}$ に「第 1 成分を優先し、同じなら $\prec_{f}$」の順序を入れたもので、$\sum_{i\in\omega}(D_{f},\prec_{f})$ と同型である。
+- $e=f\cdot\omega^{\ast}$：上の $t<t'$ を $t'<t$ に替える。$\sum_{i\in\omega^{\ast}}(D_{f},\prec_{f})$ と同型である。
+
+和の同型は、各成分の同型写像を並べたものが和の同型写像になることから従う。各段は前の段の論理式を書き並べるだけなので、$e$ から計算できる。
+:::
+
+::: lemma 論理式の翻訳 {#model:order-term-translation keywords="translation of formulas along an interpretation" index="論理式の翻訳（解釈）|ろんりしきのほんやくかいしゃく"}
+順序の項 $e$ と言語 $\{<\}$ の論理式 $\varphi(x_{1},\dots,x_{k})$ から、各 $x_{i}$ を長さ $d_{e}$ の変数の組 $\vec{x}_{i}$ に置き換えた論理式 $\varphi^{e}(\vec{x}_{1},\dots,\vec{x}_{k})$ が計算でき、$h\colon(D_{e},\prec_{e})\to\lVert e\rVert$ を \ref{model:order-term-interpretation} の同型写像とすると、すべての $\vec{a}_{1},\dots,\vec{a}_{k}\in D_{e}$ について
+$$
+(\N,<)\models\varphi^{e}[\vec{a}_{1},\dots,\vec{a}_{k}]\iff\lVert e\rVert\models\varphi[h(\vec{a}_{1}),\dots,h(\vec{a}_{k})]
+$$
+が成り立つ。とくに文 $\sigma$ について $(\N,<)\models\sigma^{e}\iff\lVert e\rVert\models\sigma$ である。
+:::
+
+::: proof
+$\varphi$ の構成に関する再帰で、$(x_{i}=x_{j})^{e}\defeq\bigwedge_{l\le d_{e}}x_{i,l}=x_{j,l}$、$(x_{i}<x_{j})^{e}\defeq\pi_{e}(\vec{x}_{i},\vec{x}_{j})$、$\bot^{e}\defeq\bot$、$(\varphi\to\psi)^{e}\defeq\varphi^{e}\to\psi^{e}$、$(\forall x_{i}\,\varphi)^{e}\defeq\forall\vec{x}_{i}\,(\delta_{e}(\vec{x}_{i})\to\varphi^{e})$ と定める（$\delta_{e},\pi_{e}$ の束縛変数は、必要なら付け替えて $\vec{x}_{i}$ と衝突しないようにする）。同値は $\varphi$ に関する帰納法で示す。原子論理式では、$h$ が単射で順序を保つことから、組の等号は点の等号に、$\pi_{e}$ は $\lVert e\rVert$ の順序に対応する。$\to$ は両辺に帰納法の仮定を使う。$\forall x_{i}$ では、$\vec{x}_{i}$ が $D_{e}$ 全体を動くことと $h$ が全射であることから、「$D_{e}$ のすべての組で $\varphi^{e}$」と「$\lVert e\rVert$ のすべての点で $\varphi$」が対応する。
+:::
+
+::: theorem 順序の項の理論の一様な決定可能性 {#model:order-term-decidable keywords="uniform decidability of the theories of orders denoted by terms; Th(alpha) decidable for alpha below omega^omega" index="順序の項の理論の決定可能性|じゅんじょのこうのりろんのけっていかのうせい"}
+順序の項 $e$ と文 $\sigma$ を入力として、$\lVert e\rVert\models\sigma$ かどうかを判定するアルゴリズムがある。とくに、$0<\alpha<\omega^{\omega}$ となる各順序数 $\alpha$ について $\Th(\alpha,<)$ は決定可能である。
+:::
+
+::: intuition
+$\omega^{2}$ や $\zeta+\omega^{3}$ のような順序は、自然数の組を辞書式に並べたものとして自然数の順序の中に書けるので、それについての問いは自然数の順序についての問いに翻訳でき、自然数の順序の理論は判定できる。
+:::
+
+::: proof
+\ref{model:order-term-translation} の $\sigma^{e}$ を計算し、\ref{model:basic-order-theories-decidable} の $\Th(\omega,<)$ の判定機に渡す。$(\N,<)\models\sigma^{e}\iff\lVert e\rVert\models\sigma$ なので、答えは正しい。後半は、\ref{model:ordinal-terms} で $\alpha$ を表す整列項 $e$ を一つ固定し、この判定に $e$ を入力すればよい。
+:::
+
+## 整列順序の理論 {#model:sec-lod-well-orders}
+
+::: theorem 整列順序の理論の決定可能性 {#model:well-order-theory-decidable keywords="the theory of well-orders is decidable, Mostowski-Tarski" index="整列順序の理論の決定可能性|せいれつじゅんじょのりろんのけっていかのうせい"}
+$\mathbf{WO}$ を（空でない）整列順序全体のクラスとする。
+1. $\Th(\mathbf{WO})$ は決定可能である。
+2. 文 $\sigma$ が与えられたとき、$\sigma$ を満たす整列順序があるかどうかは決定可能である。
+3. 任意の整列順序 $W$ について $\Th(W)$ は決定可能であり、整列順序の完全な理論 $\Th(W)$ は可算個しかない。
+:::
+
+::: intuition
+整列順序についての一階の文が「すべての整列順序で正しいか」は機械的に判定できる。量化子の深さを決めると整列順序は有限個の箱に分かれ、各箱から見本を一つずつ取り出して調べれば済み、その見本の集まりが計算で求められるからである。
+:::
+
+::: proof
+文 $\sigma$ をとり、$n\defeq\mathrm{qr}(\sigma)$ とする。
+
+**Step 1（閉包の計算）.** 【主張：整列項の有限集合 $R_{n}$ で、「任意の整列項 $g$ について、$\tau_{n}(\lVert g\rVert)=\tau_{n}(\lVert r\rVert)$ となる $r\in R_{n}$ がある」を満たすものが、$n$ から計算できる】 次の手順を考える。$R\defeq\{\mathsf{1}\}$ から始め、各段で、すべての $e,f\in R$ について $e+f$ と $e\cdot\omega$ を作り、その $n$ 型を計算する。型は \ref{model:n-types-finite.3} と \ref{model:order-term-decidable} によって計算できる。$R$ のどの元とも型が異なるものがあれば、新しく現れた型ごとにその型をもつ項を一つずつ $R$ に加えて次の段へ進み、なければ止まって $R_{n}\defeq R$ とする。$R$ の元の型はいつも互いに異なり、止まらない段では $R$ の元が一つ以上増え、型は有限個（\ref{model:n-types-finite.2}）なので、手順は有限回で止まる。
+
+**Step 2（閉包の正しさ）.** 【主張：止まったときの $R_{n}$ は Step 1 の性質をもつ】 整列項 $g$ の構成に関する帰納法。$g=\mathsf{1}\in R_{n}$ は明らか。$g=e+f$ とし、帰納法の仮定から $\tau_{n}(\lVert e\rVert)=\tau_{n}(\lVert r\rVert)$, $\tau_{n}(\lVert f\rVert)=\tau_{n}(\lVert r'\rVert)$ となる $r,r'\in R_{n}$ をとる。\ref{model:n-types-finite.1} から $\lVert e\rVert\equiv_{n}\lVert r\rVert$, $\lVert f\rVert\equiv_{n}\lVert r'\rVert$ で、\ref[順序和の合成定理]{model:order-sum-composition}（2 点の添字）から $\lVert e+f\rVert\equiv_{n}\lVert r+r'\rVert$ である。手順は最後の段で $r+r'$ を調べて新しい型がないことを確かめて止まったので、$r+r'$ の型はある $r''\in R_{n}$ の型に等しく、$\tau_{n}(\lVert g\rVert)=\tau_{n}(\lVert r''\rVert)$ である。$g=e\cdot\omega$ も、合成定理を添字 $\omega$ で使えば同様である。
+
+**Step 3（整列順序への移行）.** 【主張：任意の整列順序 $W$ に対し、$W\equiv_{n}\lVert r\rVert$ となる $r\in R_{n}$ がある】 \ref[整列順序は ω^ω 未満の順序数と n 同値]{model:ordinal-below-omega-omega} から、ある順序数 $0<\alpha<\omega^{\omega}$ で $W\equiv_{n}\alpha$ となるものがあり、\ref{model:ordinal-terms} から $\alpha$ はある整列項 $g$ の型である。$\alpha$ と $\lVert g\rVert$ は同型で、同型な順序は同じ文を満たす（\ref{logic:isomorphism-invariance}）ので $W\equiv_{n}\alpha\equiv\lVert g\rVert$ である。ゆえに Step 2 の $r$ について $W\equiv_{n}\lVert g\rVert\equiv_{n}\lVert r\rVert$ である。
+
+**Step 4（判定）.** 【主張：1・2・3 が成り立つ】 $R_{n}$ の各元の表す順序は整列順序である（\ref{model:ordinal-terms}）。Step 3 から、$\sigma$ がすべての整列順序で真であることは、$\sigma$ が $R_{n}$ のすべての元の表す順序で真であることと同値で、後者は \ref{model:order-term-decidable} で判定できる。ゆえに 1 が成り立つ。同様に「ある $r\in R_{n}$ で真」を判定すれば 2 になる。3 では、$W\equiv\lVert g\rVert$ となる整列項 $g$（Step 3）を固定すると $\Th(W)=\Th(\lVert g\rVert)$ は \ref{model:order-term-decidable} で決定可能である。整列項は有限の記号列なので可算個しかなく、$\Th(W)$ はそのどれかの $\Th(\lVert g\rVert)$ に等しいので、可算個しかない。
+
+::: hypcheck
+- **合成定理**（前ページ）：Step 2 で、和と $\omega$ 個の並べ方の $n$ 型が成分の $n$ 型だけで決まることに使った。これがないと、閉包の手順が「新しい型が出ない」ことを確かめて止まっても、より大きな項で新しい型が出ないとは言えない。
+- **$\omega^{\omega}$ 未満への帰着**（前ページ）：Step 3 で使った。これがないと、Step 1〜2 で決定できるのは $\omega^{\omega}$ 未満の順序数全体の理論だけである。
+- **$\Th(\omega,<)$ の決定可能性**：Step 1 の型の計算と Step 4 の判定で、\ref{model:order-term-decidable} を通して使った。
+- **型の有限性**：Step 1 の停止に使った。手順は止まることは保証されるが、止まるまでの段数の上界は与えていない。それでも、止まったことは有限の計算で確かめられるので、判定の手順としては十分である。
+- 選択公理は使っていない（整列順序の順序型、順序数の割り算・冪の性質は $\ZF$ で示されるものだけを使った）。
+:::
+:::
+
+::: supplement
+**同じ方法で得られること.** 閉包の手順で $e\cdot\omega^{\ast}$ も作り、合成定理を添字 $\omega^{\ast}$ でも使えば、順序の項の表す順序全体のクラスの理論も決定可能になる。このクラスは $\omega,\omega^{\ast}$ と有限和から作れる可算な散在的順序の一部である（\see[散在的順序]{model:page-scattered-orders}）。
+
+**公理化について.** 整列順序の理論は、線形順序の公理に「定義可能な空でない部分集合は最小元をもつ」という図式（論理式ごとに一つの公理）を加えたもので公理化されるとされる（ドナー＝モストフスキ＝タルスキの結果とされる。未確認）。本ページの証明はこの公理化を使わず、ゲームと計算だけで判定の手順を与えた。
+
+**歴史.** 整列順序の理論の決定可能性と、$\omega^{\omega}$ 未満の順序数への帰着は、モストフスキとタルスキによるとされる（未確認）。
+:::
+
+## 線形順序全体の理論 {#model:sec-lod-linear-orders}
+
+線形順序全体のクラス $\mathbf{LO}$ の理論は $\Th(\mathbf{LO})=\mathrm{Cn}(\mathrm{LO})$ で、有限個の公理をもつ。半分は簡単に分かる。
+
+::: proposition 線形順序の理論の認識可能性 {#model:lo-theory-recognizable keywords="the theory of linear orders is recursively enumerable" index="線形順序の理論の認識可能性|せんけいじゅんじょのりろんのにんしきかのうせい"}
+$\Th(\mathbf{LO})$ は認識可能である。
+:::
+
+::: proof
+完全性定理（\ref{logic:completeness}）から $\sigma\in\Th(\mathbf{LO})\iff\mathrm{LO}\vdash\sigma$ である。\ref{model:complete-axiomatized-decidable} の証明と同じく導出を順に調べ、結論が $\sigma$ で未解消の仮定が $\mathrm{LO}$ に属する導出が見つかれば受理する手順は、$\sigma\in\Th(\mathbf{LO})$ のときに限って止まって受理する。
+:::
+
+したがって $\Th(\mathbf{LO})$ の決定可能性は、「$\neg\sigma$ を満たす線形順序がある」ことを有限の計算で確かめられるかどうかにかかっている。有限順序だけを相手にすれば、これはゲームから直ちに分かる。
+
+::: proposition 有限線形順序の理論の決定可能性 {#model:finite-orders-theory-decidable keywords="the theory of finite linear orders is decidable" index="有限線形順序の理論|ゆうげんせんけいじゅんじょのりろん"}
+有限線形順序全体のクラス $\mathbf{Fin}$ について、$\Th(\mathbf{Fin})$ は決定可能である。$\mathrm{qr}(\sigma)=n$ の文 $\sigma$ が $\Th(\mathbf{Fin})$ に属することは、$\sigma$ が元の個数 $1,2,\dots,\max\{1,2^{n}-1\}$ の線形順序で真であることと同値である。
+:::
+
+::: proof
+元の個数が等しい有限線形順序は同型である（小さい順に対応させればよい）。元の個数が $2^{n}-1$ 以上の有限線形順序はすべて互いに $\equiv_{n}$ である（\ref{model:linear-order-game} と \ref{model:ef-theorem}）。ゆえに、個数が $\max\{1,2^{n}-1\}$ 以上のものは個数 $\max\{1,2^{n}-1\}$ のものと $\sigma$ の真偽が一致し、それ未満の個数は列挙した中にある。有限構造での文の真偽は、量化子を領域の全体にわたる有限の連言・選言として計算できるので、判定は有限の手順で終わる。
+:::
+
+::: fact ラウクリ＝レナードの定理 {#model:linear-order-theory-decidable keywords="the theory of linear orders is decidable, Lauchli-Leonard theorem, Ehrenfeucht" index="ラウクリ＝レナードの定理|らうくりれなーどのていり, 線形順序の理論の決定可能性|せんけいじゅんじょのりろんのけっていかのうせい" refname="ラウクリ＝レナードの定理"}
+線形順序全体の理論 $\Th(\mathbf{LO})$ は決定可能である。同じことだが、文 $\sigma$ を満たす線形順序があるかどうかは決定可能である。
+:::
+
+::: intuition
+「線形順序についての一階の主張が、あらゆる線形順序で正しいか」は機械的に判定できる。反例があるかどうかを、有限の手順で作れる「見本の順序」だけを調べて決められるからである。
+:::
+
+::: supplement
+**帰属.** この結果は、エーレンフォイヒトが発表し、ラウクリとレナードが証明を公表したとされる（年代を含めて未確認）。ラビンの二分木のモナディック二階理論の決定可能性からも導かれるとされる（未確認）。
+
+**証明の概略.** 整列順序の場合（\ref{model:well-order-theory-decidable}）と同じ形で進む。
+1. 順序の項に、有限個の項 $e_{1},\dots,e_{k}$ から**シャッフル** $\mathrm{sh}(e_{1},\dots,e_{k})$ を作る操作を加える。これは $\eta$ を $k$ 色に塗り分けて各色を稠密にし、色 $j$ の点を $\lVert e_{j}\rVert$ の複製で置き換えた順序である（塗り分け方によらず同型になることは、往復論法で示せる）。
+2. 任意の線形順序は、各 $n$ について、この拡張した項の表すある順序と $\equiv_{n}$ になる（重い結果。散在的順序の分解 \see[凝縮]{model:condensation} と、稠密な和の $n$ 型がシャッフルで実現されることを使う）。
+3. 拡張した項の表す順序の理論は一様に決定可能である（シャッフルは本ページの $(\N,<)$ への書き込みの範囲を超えるので、別の方法による。どの方法をとるかは文献によって異なるとされ、本ページでは確かめていない）。
+4. 合成定理をシャッフルにも広げて、閉包の手順で $n$ 型の見本を計算する。
+
+本ページで証明したのは 4 の和と $\omega$ 個の並べ方の部分（整列順序の場合）と、1・3 の一部（$\cdot\omega^{\ast}$ までの項）である。2 とシャッフルの合成定理は証明していない。
+
+**有限順序との対比.** $\Th(\mathbf{LO})\subsetneq\Th(\mathbf{Fin})$ である。実際、「最大元がある」は $\mathbf{Fin}$ では真だが $\omega$ で偽である。
+:::
+
+## モナディック二階の理論 {#model:sec-lod-monadic}
+
+一階の論理式に「部分集合の上を動く変数」を加えたものを**モナディック二階論理**という。整列性（「空でない部分集合は最小元をもつ」）や有限性はこの論理で書けるので、一階論理より真に強い。それでも、順序についてのいくつかの理論は決定可能なままである。以下は本ページで証明しない（どれも本ページの結果の論理の依存には入らない）。
+
+::: supplement
+- **ビュヒの定理**：$(\omega,<)$ のモナディック二階理論は決定可能である。証明は、論理式を無限語を読むオートマトン（ビュヒ・オートマトン）に翻訳して行う。有限語のオートマトンによる加法の理論の判定（\see{comp:presburger}）と同じ考え方である（ビュヒによる、とされる）。
+- **ラビンの定理**：二分木（二つの後者関数をもつ無限二分木）のモナディック二階理論は決定可能である（ラビンによる、とされる）。$\eta$ は二分木の中に順序として書き込めるので、可算線形順序全体のモナディック二階理論も決定可能になるとされる（未確認）。
+- **実数直線**：$(\R,<)$ のモナディック二階理論は決定不能であるとされる。シェラハが連続体仮説の下で示し、のちに仮定を外す方向の結果が得られたとされる（詳細は未確認）。
+:::
+
+## 問題 {#model:sec-lod-problems}
+
+::: problem ★ 基本：整列性は一階で書けない {#model:prob-lod-wo-not-elementary}
+言語 $\{<\}$ の文の集合 $\Sigma$ で、「$\Sigma$ のモデル全体＝整列順序全体」となるものはないことを示せ。（ヒント：$\omega+\zeta$ を考える。）
+:::
+
+::: solution
+そのような $\Sigma$ があったとする。$(\omega,<)$ は整列順序なので $\Sigma\subseteq\Th(\omega,<)$ である。$\omega+\zeta$ は線形順序で、離散であり（各元は $\omega$ の部分か $\zeta$ の部分で直後・直前の元をもち、直前の元をもたないのは最小元 $0$ だけ）、最小元をもち最大元をもたないので $T_{\omega}$ のモデルである。\ref{model:omega-zeta-axioms.1} から $\omega+\zeta\models\Th(\omega,<)$、とくに $\omega+\zeta\models\Sigma$ となる。しかし $\omega+\zeta$ の $\zeta$ の部分は最小元をもたない空でない部分集合なので、$\omega+\zeta$ は整列順序でない。これは $\Sigma$ の性質に反する。
+:::
+
+::: problem ★ 基本：両端のある無限離散順序 {#model:prob-lod-omega-omegastar}
+$T\defeq\mathrm{LO}\cup\mathrm{Disc}\cup\{\mathrm{Min},\mathrm{Max}\}\cup\{\varepsilon_{k}:k\ge1\}$（$\mathrm{Max}\defeq\exists x\,\forall y\,\neg\,x<y$、$\varepsilon_{k}$ は「相異なる元が $k$ 個以上ある」）が $\Th(\omega+\omega^{\ast},<)$ を公理化し、この理論が決定可能であることを示せ。
+:::
+
+::: solution
+$\omega+\omega^{\ast}$ は離散で、最小元と最大元をもち、無限なので $T$ のモデルである。$T$ の任意のモデル $M$ は離散で両端をもち、すべての $\varepsilon_{k}$ を満たすので無限である。両端をもつ離散順序で $d(-\infty,+\infty)$ が有限なら、\ref{model:discrete-distance-additive} の Step 1 から領域は最小元から最大元までの有限個の元からなるので、$M$ では $d(-\infty,+\infty)=\infty$ である。ゆえに \ref{model:discrete-order-game} の仮定がすべての $n$ で $M$ と $\omega+\omega^{\ast}$ について満たされ、$M\equiv\omega+\omega^{\ast}$ である。\ref{model:omega-zeta-axioms} の証明の Step 2 と同じ議論で $\mathrm{Cn}(T)=\Th(\omega+\omega^{\ast},<)$ は完全である。$T$ は決定可能な文の集合（与えられた文が有限個の公理のどれかか、$\varepsilon_{k}$ の形かを調べればよい）なので、\ref{model:complete-axiomatized-decidable} から決定可能である。
+:::
+
+::: problem ★★ 標準：2 同値類を数える {#model:prob-lod-two-types}
+線形順序の $\equiv_{2}$ の同値類はちょうど $6$ 個であり、それぞれ「元が $1$ 個」「元が $2$ 個」と、「元が $3$ 個以上で、最小元の有無・最大元の有無が指定されたもの」（4 通り）であることを示せ。
+:::
+
+::: solution
+**区別できること.** 「元が $2$ 個以上」$\exists x\,\exists y\,x<y$、「最小元がある」$\exists x\,\forall y\,\neg\,y<x$、「最大元がある」（同様）、「両側に元がある元がある」$\exists x\,(\exists y\,y<x\wedge\exists y\,x<y)$ はすべて $\mathrm{qr}=2$ である。元が $1$ 個・$2$ 個の順序はそれぞれ最初の文と最後の文の真偽で他と区別され、元が $3$ 個以上の順序はすべて最後の文を満たし（$3$ 個以上の元 $u<v<w$ の $v$）、最小元・最大元の文で 4 通りに分かれる。
+
+**区別できないこと.** 同じ組に属する $M,N$ で受け手が $G_{2}$ に勝つことを示す。元 $x$ の「形」を（$x$ より小さい元があるか、$x$ より大きい元があるか）の組とする。攻め手が 1 回目に $M$ の $x$ を選んだら、受け手は $N$ の同じ形の元を選ぶ。そのような元があることは次から分かる：形 $(\text{なし},\text{なし})$ は元が $1$ 個のときだけ、形 $(\text{なし},\text{あり})$ は最小元があって元が $2$ 個以上のときだけ、形 $(\text{あり},\text{なし})$ は最大元があって $2$ 個以上のときだけ現れる。形 $(\text{あり},\text{あり})$ は元が $3$ 個以上のときにちょうど現れる（最小元も最大元もなければどの元もこの形で、そうでなければ $3$ 個以上の中間の元がこの形）。2 回目に攻め手がどちらかの順序の元 $y$ を選んだら、受け手は、$y$ が 1 回目の元より小さい・等しい・大きいのどれであるかに合わせて、もう一方の順序で同じ関係にある元を選ぶ（形が同じなので、小さい元・大きい元があるかどうかは一致する）。2 回後の対応は等号と順序を保つので部分同型であり、\ref{model:ef-theorem} から $M\equiv_{2}N$ である。
+:::
+
+::: supplement
+\ref{model:prob-lod-two-types} の 6 個の類は、\ref{model:well-order-theory-decidable} の Step 1 の手順を $n=2$ で（型の代わりにこの 6 個の類で）行うと、整列順序については「$1$ 個」「$2$ 個」「$3$ 個以上で最大元あり（$3$, $\omega+1$ など）」「$3$ 個以上で最大元なし（$\omega$ など）」の 4 個が現れて止まることに対応する。整列順序には必ず最小元があるので、残りの 2 個は現れない。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
