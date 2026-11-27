@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>集合論のモデルと無矛盾性の上界 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/05-proof-theory/10-lean-type-theory/04-lean-set-model.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 集合論のモデルと無矛盾性の上界 {#logic:page-lean-set-model keywords="set-theoretic model of Lean, consistency strength of Lean, inaccessible cardinals, proof irrelevant model, Prop as {0,1}, universes as V_kappa, soundness of the set model"}
+
+Lean の型理論は、どれだけ強い集合論で正しさを保証できるのか。本ページでは、強到達不能基数 $\kappa_{0}<\kappa_{1}<\cdots<\kappa_{n-1}$ がある $\ZFC$ の中で、Lean の型理論（宇宙を $\mathsf{Sort}\,n$ までに制限した断片）の**集合論的モデル**を作る。命題の宇宙 $\mathsf{Prop}$ は真理値の集合 $\{0,1\}$ に、$\mathsf{Sort}\,(u+1)$ は累積階層の段 $V_{\kappa_{u}}$ に解釈し、証明はすべて空集合 $\varnothing$ に解釈する。関数を「値が $\varnothing$ でない所だけのグラフ」で表すと、命題の上の Π 型が自動的に $\{0,1\}$ の値をとる（\ref{logic:trimmed-function-basic}）。この工夫のもとで、型付けと理想の定義的等価がすべて保たれること（**健全性**、\ref{logic:set-model-soundness}）を示し、その帰結として「$\ZFC$＋$n$ 個の到達不能基数が無矛盾なら、この断片は無矛盾」を得る（\ref{logic:lean-consistency-upper-bound}）。
+
+> 資料なし。Lean 4 の規則（宇宙の規則、帰納型の形、商型と選択の定数の型）は記憶による記述で、Lean 4 の実装・文書とは照合していない。この種のモデルは Carneiro の修士論文 *The Type Theory of Lean*（2019 年とされる）や、B. Werner の論文「Sets in Types, Types in Sets」（1997 年とされる）で扱われた内容とされる（未確認）。宇宙の数と到達不能基数の数の対応の細部（ずれが 1 あるかどうかなど）は、文献とは照合していない（未確認）。本ページの帰納型の形は、Lean の帰納型の一般形を簡単にしたものである。
+
+## 記法と定義の確認 {#logic:sec-lsm-notation}
+
+::: notation
+- Lean の宇宙（\ref[Lean の宇宙]{logic:lean-sorts}）、Π 型の宇宙の規則 $\mathsf{Sort}\,(\mathrm{imax}\,u\,v)$（\ref[Π 型の宇宙の規則]{logic:lean-pi-universe}）、帰納型と再帰子（\ref[帰納型と再帰子]{logic:lean-inductive}）、部分単集合除去（\ref[部分単集合除去]{logic:lean-subsingleton-elimination}）は \ref[Lean の核の型理論]{logic:page-lean-core} のとおり。$\mathrm{imax}\,u\,0=0$、$v\ge1$ なら $\mathrm{imax}\,u\,v=\max(u,v)$ である。
+- 命題外延性 $\mathsf{propext}$、商型 $\mathsf{Quot}$ と $\mathsf{Quot.sound}$、選択 $\mathsf{Classical.choice}$ は \ref[三つの公理と古典論理]{logic:page-lean-axioms}（\ref[命題外延性]{logic:lean-propext}, \ref[商型]{logic:lean-quot}, \ref[選択]{logic:lean-choice}）のとおり。
+- 型付けと理想の定義的等価 $\equiv$ の規則は \ref{logic:ideal-defeq} の一覧を使う。$\mathsf{Acc}$, $\mathsf{Eq}$ の再帰子の形は \ref{logic:ldq-acc-eq} のとおり。
+- 到達不能基数は強到達不能基数（\ref{set:inaccessible}）を指す。累積階層の段 $R(\alpha)$（\ref{set:cumulative-hierarchy}）を本ページでは $V_{\alpha}$ と書く。集合の\term[階数]{set:rank}を $\operatorname{rank}$ と書く。
+- 順序数 $0=\varnothing$, $1=\{\varnothing\}$, $2=\{0,1\}$ を使う。$1$ は「ただ一つの証明 $\varnothing$ をもつ真な命題」、$0$ は「証明のない偽な命題」の役をする。
+- メタ理論は $\ZFC$ に「強到達不能基数 $\kappa_{0}<\cdots<\kappa_{n-1}$ がある」を加えた理論 $\ZFC_{n}$ である（$n\ge1$）。選択公理はモデルの中の選択関数（\ref{logic:set-model-axioms}）と、到達不能基数の基本性質に使う。
+:::
+
+## 断片と宇宙の解釈 {#logic:sec-lsm-universes}
+
+::: definition 宇宙を制限した断片 {#logic:lean-fragment keywords="fragment of Lean with universes bounded by n" index="宇宙を制限した断片|うちゅうをせいげんしただんぺん"}
+$n\ge1$ とする。**断片 $\mathrm{Lean}_{n}$** とは、宇宙のレベルがすべて具体的な自然数で、現れる宇宙 $\mathsf{Sort}\,\ell$ がすべて $\ell\le n$ を満たす導出だけを許す体系である。宇宙について多相な定数は、レベルに具体的な数を代入した各例ごとに一つの定数とみなす。環境（定義・帰納型・公理の宣言の列）の各宣言も、$\mathrm{Lean}_{n}$ で型が付くものとする。
+:::
+
+::: intuition
+$\mathsf{Sort}\,n$ は型として現れてよいが、その型 $\mathsf{Sort}\,(n+1)$ は現れない。つまり $\mathrm{Lean}_{n}$ は「$\mathsf{Prop}$ と $\mathsf{Type}\,0,\dots,\mathsf{Type}\,(n-1)$ の $n+1$ 段の宇宙だけを使う Lean」である。実際の Lean の一つの証明が使う宇宙は有限個なので、各証明はどれかの $\mathrm{Lean}_{n}$ に入る（\ref{logic:lean-consistency-upper-bound} の補足）。
+:::
+
+::: definition モデルの宇宙 {#logic:set-model-universes keywords="interpretation of universes, Prop as 2, Sort (u+1) as V_kappa_u" index="モデルの宇宙|もでるのうちゅう"}
+$U_{0}\defeq2=\{0,1\}$、$1\le\ell\le n$ について $U_{\ell}\defeq V_{\kappa_{\ell-1}}$ とおく。
+:::
+
+::: intuition
+命題は「偽（$0$）か真（$1$）か」だけを覚えておき、証明の中身は忘れる。$\mathsf{Type}\,u$ は「$\kappa_{u}$ 段目までに作られる集合全体」で、到達不能基数の段まで行けば、関数の集合や帰納的な構成をしても外に出ない。
+:::
+
+::: lemma 到達不能基数の段の閉包性 {#logic:inaccessible-closure keywords="closure properties of V_kappa for inaccessible kappa" index="到達不能基数の段の閉包性|とうたつふのうきすうのだんのへいほうせい"}
+$\kappa$ を到達不能基数とする。
+1. $x\in V_{\kappa}$ なら $\lvert x\rvert<\kappa$ である。また $y\subseteq x\in V_{\kappa}$ なら $y\in V_{\kappa}$ である。
+2. $A\in V_{\kappa}$ で、各 $a\in A$ について $B_{a}\in V_{\kappa}$ なら、$\bigcup_{a\in A}B_{a}$, $A\times\bigcup_{a\in A}B_{a}$, $\mathcal{P}\bigl(A\times\bigcup_{a\in A}B_{a}\bigr)$ はどれも $V_{\kappa}$ に属する。
+3. $2\in V_{\kappa}$ であり、$\kappa'<\kappa$ なら $V_{\kappa'}\in V_{\kappa}$ である。とくに $\ell<\ell'\le n$ なら $U_{\ell}\in U_{\ell'}$ で、$U_{\ell}\subseteq U_{\ell'}$ である。
+:::
+
+::: proof
+1. \ref{set:h-kappa-eq-r-kappa} から $V_{\kappa}=H(\kappa)$ なので、$x\in V_{\kappa}$ の推移閉包の濃度は $\kappa$ 未満で、$x$ はその部分集合だから $\lvert x\rvert<\kappa$ である。後半は、$y\subseteq x$ なら $\operatorname{rank}y\le\operatorname{rank}x<\kappa$ であることによる。
+
+2. 各 $B_{a}$ の\term[階数]{set:rank}は $\kappa$ 未満で、添字の集合 $A$ の濃度は主張 1 から $\kappa$ 未満である。$\kappa$ は正則なので、$\beta\defeq\sup_{a\in A}\operatorname{rank}B_{a}<\kappa$ である。ゆえに $\bigcup_{a}B_{a}\subseteq V_{\beta}$ で、これは $V_{\beta+1}$ に属する。$\gamma\defeq\max(\operatorname{rank}A,\beta)$ とおくと、$V_{\gamma}$ の元二つの順序対は $V_{\gamma+2}$ に属するので、$A\times\bigcup_{a}B_{a}\in V_{\gamma+3}$、その冪集合は $V_{\gamma+4}$ に属する。$\kappa$ は極限順序数なので $\gamma+4<\kappa$ である。
+
+3. $2\subseteq V_{2}$ から $2\in V_{3}\subseteq V_{\kappa}$ である。$V_{\kappa'}\subseteq V_{\kappa'}$ から $V_{\kappa'}\in V_{\kappa'+1}\subseteq V_{\kappa}$ である。$U_{0}=2\subseteq V_{\kappa_{0}}$ であり、$\ell\ge1$ では $\kappa_{\ell-1}<\kappa_{\ell'-1}$ と累積階層の単調性を使えばよい。
+
+::: hypcheck
+- **正則性**：2 で、$\kappa$ 未満個の $\kappa$ 未満の\term[階数]{set:rank}の上限が $\kappa$ 未満であることに使った。
+- **強極限性**：1 で \ref{set:h-kappa-eq-r-kappa} を通じて使った。弱到達不能なだけでは、たとえば $V_{\kappa}$ の元 $\mathcal{P}(\omega)$ の濃度 $2^{\aleph_{0}}$ が $\kappa$ 以上になりうる。
+- **選択公理**：\ref{set:h-kappa-eq-r-kappa} が $\ZFC$ で示されている。
+:::
+:::
+
+## 切り詰めたグラフと解釈 {#logic:sec-lsm-interpretation}
+
+::: definition 切り詰めたグラフ {#logic:trimmed-function keywords="trimmed graph of a function, application with default empty set" index="切り詰めたグラフ|きりつめたぐらふ"}
+集合 $X$ 上の関数 $g$ に対し、その**切り詰めたグラフ**を
+$$
+\Lambda(X,g)\defeq\{(a,g(a)):a\in X,\ g(a)\neq\varnothing\}
+$$
+と定める。各 $a\in X$ に集合 $F(a)$ が与えられたとき、
+$$
+\hat{\Pi}(X,F)\defeq\bigl\{\Lambda(X,g):g\text{ は }X\text{ 上の関数で、すべての }a\in X\text{ で }g(a)\in F(a)\bigr\}
+$$
+とおく。集合 $f$, $a$ に対し、$(a,v)\in f$ となる $v$ がただ一つあるとき $f\cdot a\defeq v$、そうでないとき $f\cdot a\defeq\varnothing$ と定める（集合の適用）。
+:::
+
+::: intuition
+関数を、値が $\varnothing$ の所を捨てたグラフで覚える。値が $\varnothing$ の所は「書いていなければ $\varnothing$」と読む。証明はすべて $\varnothing$ なので、命題に値をとる関数（証明の族）は何も書かれていない空のグラフ $\varnothing$ になり、それ自身が証明 $\varnothing$ と一致する。
+:::
+
+::: lemma 切り詰めたグラフの基本性質 {#logic:trimmed-function-basic keywords="basic properties of trimmed graphs, Pi over propositions collapses to {0,1}"}
+$X$ を集合、$g$, $g'$ を $X$ 上の関数、$F$ を $X$ 上の集合値の族とする。
+1. $a\in X$ なら $\Lambda(X,g)\cdot a=g(a)$ である。とくに $\Lambda(X,g)=\Lambda(X,g')$ なら $g=g'$ である。
+2. $f\in\hat{\Pi}(X,F)$ なら $\Lambda\bigl(X,\ a\mapsto f\cdot a\bigr)=f$ である。
+3. すべての $a\in X$ で $F(a)\in2$ なら、$\hat{\Pi}(X,F)\in2$ であり、$\hat{\Pi}(X,F)=1$ となるのはすべての $a$ で $F(a)=1$ のときに限る。
+:::
+
+::: proof
+1. $g(a)\neq\varnothing$ なら $(a,g(a))$ は $\Lambda(X,g)$ の元で、第一成分が $a$ の元はほかにないので $\Lambda(X,g)\cdot a=g(a)$ である。$g(a)=\varnothing$ なら第一成分が $a$ の元はないので、定義から $\Lambda(X,g)\cdot a=\varnothing=g(a)$ である。後半は、両辺に $\cdot a$ を当てればよい。
+
+2. $f=\Lambda(X,g)$ と書けば、1 から $f\cdot a=g(a)$ なので、左辺は $\Lambda(X,g)=f$ である。
+
+3. ある $a$ で $F(a)=0=\varnothing$ なら、$g(a)\in F(a)$ となる $g$ はないので $\hat{\Pi}(X,F)=\varnothing=0$ である。すべての $a$ で $F(a)=1=\{\varnothing\}$ なら、条件を満たす $g$ は $g(a)=\varnothing$ となるものただ一つで、その切り詰めたグラフは $\varnothing$ なので、$\hat{\Pi}(X,F)=\{\varnothing\}=1$ である。
+:::
+
+::: definition 集合論的モデルでの項の解釈 {#logic:set-model-interpretation keywords="interpretation of raw terms in the set model, environments" index="集合論的モデル（Lean の）|しゅうごうろんてきもでるりーんの"}
+環境 $\rho$ は、有限個の変数に集合を対応させる関数である。項 $t$ と環境 $\rho$（$t$ の自由変数を含む）に対し、集合 $\llbracket t\rrbracket_{\rho}$ を項の構成に関する再帰で次のように定める。
+1. $\llbracket x\rrbracket_{\rho}\defeq\rho(x)$、$\llbracket\mathsf{Sort}\,\ell\rrbracket_{\rho}\defeq U_{\ell}$。
+2. $\llbracket f\,a\rrbracket_{\rho}\defeq\llbracket f\rrbracket_{\rho}\cdot\llbracket a\rrbracket_{\rho}$。
+3. $\llbracket\lambda x{:}A.\,b\rrbracket_{\rho}\defeq\Lambda\bigl(\llbracket A\rrbracket_{\rho},\ a\mapsto\llbracket b\rrbracket_{\rho[x\mapsto a]}\bigr)$。
+4. $\llbracket\textstyle\prod_{x:A}B\rrbracket_{\rho}\defeq\hat{\Pi}\bigl(\llbracket A\rrbracket_{\rho},\ a\mapsto\llbracket B\rrbracket_{\rho[x\mapsto a]}\bigr)$。
+5. $\llbracket\mathsf{let}\ x\defeq a\ \mathsf{in}\ b\rrbracket_{\rho}\defeq\llbracket b\rrbracket_{\rho[x\mapsto\llbracket a\rrbracket_{\rho}]}$。
+6. 定数 $c$ には、環境の宣言の順に集合 $\llbracket c\rrbracket$ を定める：定義 $c\defeq t$ なら $\llbracket c\rrbracket\defeq\llbracket t\rrbracket_{\varnothing}$、帰納型・商型・公理の定数は \ref{logic:set-model-inductive} と \ref{logic:set-model-axioms} で定める。
+
+文脈については $\llbracket\cdot\rrbracket\defeq\{\varnothing\}$（空の環境だけ）、$\llbracket\Gamma,x{:}A\rrbracket\defeq\{\rho[x\mapsto a]:\rho\in\llbracket\Gamma\rrbracket,\ a\in\llbracket A\rrbracket_{\rho}\}$ とおく。
+:::
+
+::: intuition
+解釈は型の情報を見ずに、項の形だけで決まる（3・4 の $\Lambda$ と $\hat{\Pi}$ は、置換公理でとれる集合である）。命題かどうかで場合を分けなくても、\ref{logic:trimmed-function-basic.3} のおかげで、命題の上の Π は自動的に真理値になる。型の付かない項にも何かの集合が対応するが、それは使わない。
+:::
+
+::: lemma 代入と解釈 {#logic:set-model-substitution keywords="substitution lemma for the set model"}
+項 $t$, $a$ と環境 $\rho$ について、$\llbracket t[a/x]\rrbracket_{\rho}=\llbracket t\rrbracket_{\rho[x\mapsto\llbracket a\rrbracket_{\rho}]}$ である（束縛変数は $a$ の自由変数と衝突しないように名前を替えておく）。また $\llbracket t\rrbracket_{\rho}$ は $\rho$ の、$t$ に自由に現れる変数での値だけで決まる。
+:::
+
+::: proof
+後半は、定義の各項目が自由変数の値しか参照しないことから、$t$ の構成に関する帰納法で従う。前半も $t$ の構成に関する帰納法で示す。$t=x$ なら両辺は $\llbracket a\rrbracket_{\rho}$ である。$t$ が $x$ 以外の変数・宇宙・定数なら代入で変わらず、両辺は等しい。適用なら帰納法の仮定を両側に使えばよい。$t=\lambda y{:}A.\,b$ なら、$y\neq x$ で $y$ は $a$ に自由に現れないので $t[a/x]=\lambda y{:}A[a/x].\,b[a/x]$ である。帰納法の仮定（すべての環境について成り立つ形）を、$A$ と、各 $c$ について環境 $\rho[y\mapsto c]$ での $b$ に使うと、後半の主張（$y$ は $a$ に現れないので $\llbracket a\rrbracket_{\rho[y\mapsto c]}=\llbracket a\rrbracket_{\rho}$）とあわせて、$\Lambda$ の二つの引数が一致する。Π と let も同様である。
+:::
+
+## 帰納型を解釈した集合 {#logic:sec-lsm-inductive}
+
+本ページでは、帰納型を次の形に限る（\ref[帰納型と再帰子]{logic:lean-inductive} の一般形の特別な場合）。パラメータ $\vec{p}$ と添字 $\vec{i}{:}\vec{J}$ をもつ型 $I\,\vec{p}:\prod_{\vec{i}:\vec{J}}\mathsf{Sort}\,\ell$ で、各構成子が
+$$
+c_{j}:\prod_{\vec{z}:\vec{Z}_{j}}\ \prod_{w_{1}:\prod_{\vec{y}:\vec{D}_{j1}}I\,\vec{p}\,\vec{t}_{j1}}\cdots\prod_{w_{r_{j}}:\cdots}I\,\vec{p}\,\vec{s}_{j}
+$$
+の形をもつもの（$\vec{Z}_{j}$, $\vec{D}_{jk}$, $\vec{t}_{jk}$, $\vec{s}_{j}$ は $\vec{p}$ と $\vec{z}$ だけに依存し、$I$ を含まない）である。$\vec{z}$ を**非再帰的な引数**、$w_{k}$ を**再帰的な引数**という。$\ell\ge1$ なら、$\vec{Z}_{j}$ と $\vec{D}_{jk}$ の各型は $\mathsf{Sort}\,u$（$u\le\ell$）に属するとする。再帰子は動機 $M:\prod_{\vec{i}}I\,\vec{p}\,\vec{i}\to\mathsf{Sort}\,v$ と各構成子の小前提 $m_{j}$ から $I.\mathsf{rec}:\prod_{\vec{i}}\prod_{h}M\,\vec{i}\,h$ を作り、ι 規則は
+$$
+I.\mathsf{rec}\,\vec{m}\,(c_{j}\,\vec{z}\,\vec{w})\equiv m_{j}\,\vec{z}\,\vec{w}\,\bigl(\lambda\vec{y}.\,I.\mathsf{rec}\,\vec{m}\,(w_{k}\,\vec{y})\bigr)_{k}
+$$
+である。$\ell=0$ で $v\ge1$（命題から型への除去）が許されるのは、次の条件（SS）のときとする：構成子は高々一つで、その非再帰的な引数のうち命題でないものは、それぞれ $\vec{s}_{j}$ のどれかの成分にそのまま（変数として）現れる。
+
+以下、パラメータの値 $\vec{\pi}$ を固定し、項を解釈した集合に $\vec{\pi}$ を代入したものを $\llbracket\vec{Z}_{j}\rrbracket$ などと略す。$\llbracket\vec{Z}_{j}\rrbracket$ は依存する組 $\vec{\zeta}$（$\zeta_{1}\in\llbracket Z_{1}\rrbracket$, $\zeta_{2}\in\llbracket Z_{2}\rrbracket_{[z_{1}\mapsto\zeta_{1}]}$, …）全体の集合を表す。
+
+::: lemma 帰納的な不動点 {#logic:inductive-fixed-point keywords="least fixed point for strictly positive inductive types inside V_kappa" index="帰納的な不動点|きのうてきなふどうてん"}
+$\ell\ge1$、$\kappa\defeq\kappa_{\ell-1}$ とする。添字の値 $\iota\in\llbracket\vec{J}\rrbracket$ ごとの集合を並べた族 $X=(X_{\iota})$ に対し
+$$
+\Phi(X)_{\iota}\defeq\bigl\{(j,\vec{\zeta},\vec{\omega}):\vec{\zeta}\in\llbracket\vec{Z}_{j}\rrbracket,\ \llbracket\vec{s}_{j}\rrbracket(\vec{\zeta})=\iota,\ \omega_{k}\in\hat{\Pi}\bigl(\llbracket\vec{D}_{jk}\rrbracket(\vec{\zeta}),\ \vec{y}\mapsto X_{\llbracket\vec{t}_{jk}\rrbracket(\vec{\zeta},\vec{y})}\bigr)\bigr\}
+$$
+とおき、$X^{0}\defeq\varnothing$（どの成分も空）、$X^{\alpha+1}\defeq\Phi(X^{\alpha})$、極限 $\lambda$ で $X^{\lambda}\defeq\bigcup_{\alpha<\lambda}X^{\alpha}$（成分ごと）と定める。このとき、ある正則基数 $\lambda<\kappa$ で $\Phi(X^{\lambda})=X^{\lambda}$ となり、すべての $\iota$ で $X^{\lambda}_{\iota}\in V_{\kappa}$ である。
+:::
+
+::: intuition
+帰納型の元は「構成子の名前、非再帰的な引数、再帰的な引数（より前に作られた元への関数）」の組である。空から始めて組を作り足していくと、各構成子の分岐の数が $\kappa$ 未満なので、$\kappa$ より手前の段で作り足すものがなくなり、全体も $V_{\kappa}$ の元になる。
+:::
+
+::: proof
+**Step 1.** 【主張：$\alpha\le\beta$ なら $X^{\alpha}\subseteq X^{\beta}$（成分ごと）】 $\Phi$ は単調である（$X\subseteq X'$ なら $\hat{\Pi}$ の値の範囲が広がるだけなので $\Phi(X)\subseteq\Phi(X')$）。これと $X^{0}=\varnothing$ から、$\beta$ についての帰納法で $\alpha<\beta$ なら $X^{\alpha}\subseteq X^{\alpha+1}\subseteq X^{\beta}$ が従う。
+
+**Step 2.** 【主張：分岐の数の上限 $\mu$ は $\kappa$ 未満】 非再帰的な引数の型・再帰的な引数の束縛変数の型は $U_{u}$（$u\le\ell$）の元に解釈され、$U_{u}\subseteq V_{\kappa}$ である（\ref{logic:inaccessible-closure.3}）。\ref{logic:inaccessible-closure.2} を引数の個数だけ繰り返すと、組の集合 $\llbracket\vec{Z}_{j}\rrbracket$ と $\llbracket\vec{D}_{jk}\rrbracket(\vec{\zeta})$ は $V_{\kappa}$ に属する。\ref{logic:inaccessible-closure.1} からそれらの濃度は $\kappa$ 未満で、$\kappa$ の正則性から $\mu\defeq\sup_{j,k,\vec{\zeta}}\lvert\llbracket\vec{D}_{jk}\rrbracket(\vec{\zeta})\rvert$ は $\kappa$ 未満である。同様に、すべての $\vec{\zeta}$ と $\vec{y}$ の\term[階数]{set:rank}の上限 $\beta_{0}$ も $\kappa$ 未満である。
+
+**Step 3.** 【主張：$\lambda\defeq(\mu+\aleph_{0})^{+}$ で $\Phi(X^{\lambda})=X^{\lambda}$】 $\lambda$ は無限基数の後続基数なので正則であり（選択公理）、$\kappa$ は非可算な極限基数なので $\lambda<\kappa$ である。$(j,\vec{\zeta},\vec{\omega})\in\Phi(X^{\lambda})_{\iota}$ とする。各 $\omega_{k}$ の値は $\mu$ 個以下で、それぞれある $X^{\alpha}$（$\alpha<\lambda$）に属する。$\lambda$ の正則性から、それらの $\alpha$ と有限個の $k$ にわたる上限 $\alpha^{\ast}$ は $\lambda$ 未満で、Step 1 から $\omega_{k}\in\hat{\Pi}(\dots X^{\alpha^{\ast}}\dots)$ となる。ゆえに組は $X^{\alpha^{\ast}+1}\subseteq X^{\lambda}$ に属する。逆の包含は Step 1 からである。
+
+**Step 4.** 【主張：$X^{\alpha}$ の元の\term[階数]{set:rank}は $\beta_{0}+\omega\cdot(\alpha+1)$ 未満】 $\alpha$ についての帰納法で示す。$X^{\alpha+1}$ の元 $(j,\vec{\zeta},\vec{\omega})$ では、$\omega_{k}$ のグラフの元は $(\vec{y},x)$（$x\in X^{\alpha}$）の形なので、その\term[階数]{set:rank}は $\beta_{0}$ と $\operatorname{rank}x$ の大きい方に有限の数を足したもの以下である。組を作る操作も有限回の対の形成なので、元の $\operatorname{rank}$ は $\beta_{0}+\omega\cdot(\alpha+1)$ に有限の数を足したもの以下で、$\beta_{0}+\omega\cdot(\alpha+2)$ 未満である。極限の段は和集合なので、上限がそのまま保たれる。
+
+Step 3・4 から $X^{\lambda}_{\iota}\subseteq V_{\beta_{0}+\omega\cdot(\lambda+1)}$ である。$\beta_{0}$, $\lambda<\kappa$ で $\kappa$ は非可算基数なので、$\beta_{0}+\omega\cdot(\lambda+1)<\kappa$ であり、$X^{\lambda}_{\iota}\in V_{\kappa}$ を得る。
+
+::: hypcheck
+- **到達不能性**：Step 2（閉包性と正則性）と Step 3（$\kappa$ が極限基数であること）で使った。たとえば $\kappa=\aleph_{1}$ では、可算分岐の木の型（分岐を表す関数の引数の型が $\mathbb{N}$）の閉包の段は $\aleph_{1}$ になり、$V_{\aleph_{1}}$ の元にならない。
+- **強正性**：$\Phi$ の定義で、$X$ は $\hat{\Pi}$ の値の側にしか現れないので単調になる（Step 1）。$I$ が関数の引数の型の側に現れる型（たとえば $(I\to\mathsf{Bool})\to I$）は許されていない。
+- **選択公理**：Step 3 で後続基数の正則性に使った。
+:::
+:::
+
+::: construction 帰納型と再帰子の解釈 {#logic:set-model-inductive keywords="interpretation of inductive types, constructors and recursors; subsingleton elimination in the set model" index="帰納型を解釈した集合|きのうがたのかいしゃく"}
+1. （$\ell\ge1$）$X\defeq X^{\lambda}$（\ref{logic:inductive-fixed-point}）として、$\llbracket I\,\vec{\pi}\,\iota\rrbracket\defeq X_{\iota}$、$\llbracket c_{j}\,\vec{\pi}\,\vec{\zeta}\,\vec{\omega}\rrbracket\defeq(j,\vec{\zeta},\vec{\omega})$ とする。$e\in X_{\iota}$ の段を $e\in X^{\alpha+1}$ となる最小の $\alpha$ とし、段についての再帰で
+$$
+G(j,\vec{\zeta},\vec{\omega})\defeq\llbracket m_{j}\rrbracket\cdot\vec{\zeta}\cdot\vec{\omega}\cdot\Bigl(\Lambda\bigl(\llbracket\vec{D}_{jk}\rrbracket(\vec{\zeta}),\ \vec{y}\mapsto G(\omega_{k}\cdot\vec{y})\bigr)\Bigr)_{k}
+$$
+と定め（$\omega_{k}\cdot\vec{y}$ の段は $e$ の段より小さい）、$\llbracket I.\mathsf{rec}\,\vec{m}\,\iota\,h\rrbracket\defeq G(\llbracket h\rrbracket)$ とする（$\llbracket h\rrbracket\notin X_{\iota}$ なら $\varnothing$）。
+2. （$\ell=0$）添字の値の集合 $S\subseteq\llbracket\vec{J}\rrbracket$ についての作用素
+$$
+\Psi(S)\defeq\bigl\{\llbracket\vec{s}_{j}\rrbracket(\vec{\zeta}):\vec{\zeta}\in\llbracket\vec{Z}_{j}\rrbracket,\ \text{すべての }k\text{ と }\vec{y}\in\llbracket\vec{D}_{jk}\rrbracket(\vec{\zeta})\text{ で }\llbracket\vec{t}_{jk}\rrbracket(\vec{\zeta},\vec{y})\in S\bigr\}
+$$
+を空集合から超限回繰り返し（各段で和集合をとる）、止まった所を $S$ とする（止まる理由：$S$ は条件の「$\in S$」の部分にだけ正に現れるので、$S\subseteq S'$ なら $\Psi(S)\subseteq\Psi(S')$ である。ゆえに段の列 $S^{\alpha}$ は超限帰納法で増加列になる。どの $\alpha<\lvert\llbracket\vec{J}\rrbracket\rvert^{+}$ でも $S^{\alpha+1}\neq S^{\alpha}$ だとすると、各 $\alpha$ に $S^{\alpha+1}\setminus S^{\alpha}$ の元（$\llbracket\vec{J}\rrbracket$ の整列順序で最小のもの）を対応させる写像は単射で、$\lvert\llbracket\vec{J}\rrbracket\rvert^{+}$ から $\llbracket\vec{J}\rrbracket$ への単射になり矛盾する。したがって、ある段で $\Psi(S^{\alpha})=S^{\alpha}$ となり、以後は変わらない。$S\subseteq\llbracket\vec{J}\rrbracket$ なので $S\in V_{\kappa}$ でもある）。$\llbracket I\,\vec{\pi}\,\iota\rrbracket\defeq1$（$\iota\in S$ のとき）、$\defeq0$（そうでないとき）、構成子の値は $\varnothing$ とする。再帰子は、$v=0$ なら値 $\varnothing$ とする。$v\ge1$（条件（SS））なら、$\iota\in S$ に対し、命題でない非再帰的な引数を $\iota$ の対応する成分に、命題の引数を $\varnothing$ にした組 $\vec{\zeta}(\iota)$ をとり、$\iota$ が $S$ に入る段についての再帰で
+$$
+G(\iota)\defeq\llbracket m\rrbracket\cdot\vec{\zeta}(\iota)\cdot\vec{\varnothing}\cdot\Bigl(\Lambda\bigl(\llbracket\vec{D}_{k}\rrbracket(\vec{\zeta}(\iota)),\ \vec{y}\mapsto G(\llbracket\vec{t}_{k}\rrbracket(\vec{\zeta}(\iota),\vec{y}))\bigr)\Bigr)_{k}
+$$
+と定め、$\llbracket I.\mathsf{rec}\,m\,\iota\,h\rrbracket\defeq G(\iota)$ とする。
+:::
+
+::: intuition
+型の値をとる帰納型は、構成子の組の集合そのものに解釈し、再帰子は「組を作った順に値を決める」整礎な再帰に解釈する。命題の帰納型は、どの添字で「導出できるか」だけを覚える。命題から型への除去では、証明の中身は忘れているが、条件（SS）のおかげで、構成子の引数のうち計算に必要なもの（命題でないもの）は添字から読み戻せる。
+:::
+
+::: example
+1. $\mathsf{Nat}$ では、$\mathsf{zero}$ は $(0,(),())$ に、$\mathsf{succ}\,e$ は $(1,(),(\{(\varnothing,e)\}))$ に解釈される（再帰的な引数は、空の組 $()=\varnothing$ だけを\term[定義域]{set:relation}とする切り詰めたグラフである）。$X^{k}$ はちょうど $k$ 個の元をもち、$\omega$ 段で閉じる。再帰子は通常の原始再帰である。
+2. $\mathsf{Eq}\,a$（\ref{logic:ldq-acc-eq.2}）では、構成子 $\mathsf{Eq.refl}$ に引数がないので $\Psi(S)=\{\llbracket a\rrbracket\}$ で、$S=\{\llbracket a\rrbracket\}$ となる。ゆえに $\llbracket\mathsf{Eq}\,a\,b\rrbracket=1$ となるのは $\llbracket a\rrbracket=\llbracket b\rrbracket$ のときに限る。条件（SS）は満たされ、$G(\llbracket a\rrbracket)=\llbracket m\rrbracket$ である。
+3. $\mathsf{Acc}\,R$（\ref{logic:ldq-acc-eq.1}）では、$S$ は関係 $\{(y,x):\llbracket R\rrbracket\cdot y\cdot x=1\}$ の**整礎部分**（そこから下る無限列のない元の全体）になる。命題でない引数 $x$ は添字そのものなので条件（SS）が満たされ、$G$ は整礎部分の上の整礎な再帰である。
+4. $\mathsf{False}$（構成子のない命題）では $S=\varnothing$ で、$\llbracket\mathsf{False}\rrbracket=0$ である。
+:::
+
+::: proposition 帰納型を解釈した集合の正しさ {#logic:set-model-inductive-sound keywords="soundness of the interpretation of inductive types, iota rule holds in the set model"}
+\ref{logic:set-model-inductive} の解釈で、パラメータ・引数・小前提が型どおりの値をとる（各値がその型を解釈した集合に属する）とき、次が成り立つ。
+1. 構成子の値は $\llbracket I\,\vec{\pi}\,\llbracket\vec{s}_{j}\rrbracket(\vec{\zeta})\rrbracket$ に属し、$\llbracket I\,\vec{\pi}\,\iota\rrbracket\in U_{\ell}$ である。
+2. 再帰子の値は $\llbracket M\rrbracket\cdot\iota\cdot\llbracket h\rrbracket$ に属する。
+3. ι 規則の両辺の値は等しい。
+4. 構造体（構成子が一つで、添字も再帰的な引数もない型）では、構造の η の両辺の値は等しい。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】 $\ell\ge1$ なら、$X=\Phi(X)$ なので、型どおりの $\vec{\zeta}$, $\vec{\omega}$ から作った組は $X_{\llbracket\vec{s}_{j}\rrbracket(\vec{\zeta})}$ に属し、\ref{logic:inductive-fixed-point} から $X_{\iota}\in V_{\kappa_{\ell-1}}=U_{\ell}$ である。$\ell=0$ なら、再帰的な引数 $\omega_{k}$ は $\hat{\Pi}$ の元で、\ref{logic:trimmed-function-basic.3} からそれがあるのは各 $\llbracket\vec{t}_{jk}\rrbracket(\vec{\zeta},\vec{y})$ が $S$ に入るときに限る。ゆえに $\llbracket\vec{s}_{j}\rrbracket(\vec{\zeta})\in\Psi(S)=S$ で、構成子の値 $\varnothing$ は $1$ に属する。
+
+**Step 2.** 【主張：$\ell\ge1$ での 2 と 3】 段についての帰納法で $G(e)\in\llbracket M\rrbracket\cdot\iota\cdot e$ を示す。$e=(j,\vec{\zeta},\vec{\omega})$ のとき、帰納法の仮定から各 $\Lambda(\dots,\vec{y}\mapsto G(\omega_{k}\cdot\vec{y}))$ は小前提の第 3 群の引数の型を解釈した集合に属する（\ref{logic:trimmed-function-basic.1}）。小前提 $\llbracket m_{j}\rrbracket$ は Π 型を解釈した集合の元なので、引数を順に適用した値は $\llbracket M\rrbracket\cdot\iota\cdot e$ に属する。ι 規則の左辺の値は定義から $G(j,\vec{\zeta},\vec{\omega})$ で、右辺の値は $\llbracket m_{j}\rrbracket\cdot\vec{\zeta}\cdot\vec{\omega}$ を $\llbracket\lambda\vec{y}.\,I.\mathsf{rec}\,\vec{m}\,(w_{k}\,\vec{y})\rrbracket=\Lambda(\dots,\vec{y}\mapsto G(\omega_{k}\cdot\vec{y}))$ に適用したものなので、両者は一致する。
+
+**Step 3.** 【主張：$\ell=0$, $v=0$ での 2 と 3】 $\iota\in S$ なら $\llbracket M\rrbracket\cdot\iota\cdot\varnothing=1$ であることを、$\iota$ が $S$ に入る段についての帰納法で示す。$\iota=\llbracket\vec{s}_{j}\rrbracket(\vec{\zeta})$ で前提の添字が前の段にあるとき、帰納法の仮定から小前提の第 3 群の引数の型を解釈した集合は $1$ で、小前提の型を解釈した集合は $1$（空でない）なので、\ref{logic:trimmed-function-basic.3} から $\llbracket M\rrbracket\cdot\iota\cdot\varnothing=1$ である。よって値 $\varnothing$ はその元である。ι 規則の両辺はどちらも証明（命題の元）なので値は $\varnothing$ で等しい。
+
+**Step 4.** 【主張：$\ell=0$, $v\ge1$ での 2 と 3】 $\iota\in S$ がある段で $\Psi$ によって入ったとき、その証人 $\vec{\zeta}'$ は $\vec{\zeta}(\iota)$ に等しい。実際、命題でない引数 $\zeta'_{q}$ は条件（SS）から $\iota$ の対応する成分に等しく、命題の引数は $1$ の元なので $\varnothing$ である。ゆえに $G(\iota)$ の定義に現れる $\llbracket\vec{t}_{k}\rrbracket(\vec{\zeta}(\iota),\vec{y})$ は前の段で $S$ に入っており、再帰は整礎である。型の正しさは Step 2 と同じ帰納法で示せる。ι 規則では、左辺の主前提 $c\,\vec{z}\,\vec{w}$ の添字 $\iota=\llbracket\vec{s}\rrbracket(\llbracket\vec{z}\rrbracket)$ について、Step 1 から $\iota\in S$ で、いま示したことから $\vec{\zeta}(\iota)$ は $\llbracket\vec{z}\rrbracket$ の命題でない成分と一致する。命題の成分と $\vec{w}$ の値はどちらも $\varnothing$ なので、左辺の値 $G(\iota)$ は右辺の値に等しい。
+
+**Step 5.** 【主張：4 が成り立つ】 $\ell\ge1$ の構造体では $X$ の元はすべて $(0,\vec{\zeta},())$ の形で、射影 $\pi_{q}$（小前提 $\lambda\vec{z}.\,z_{q}$ の再帰子）の値は $\zeta_{q}$ である。ゆえに $\llbracket\mathsf{mk}\,(\pi_{1}s)\cdots\rrbracket_{\rho}=(0,\vec{\zeta},())=\llbracket s\rrbracket_{\rho}$ である。$\ell=0$ なら両辺は証明で、ともに $\varnothing$ である。
+
+::: hypcheck
+- **条件（SS）**：Step 4 で、証人 $\vec{\zeta}'$ が添字から一意に決まることに使った。条件がないと、たとえば $\exists x,\,P(x)$ の証明から証人 $x$ を取り出す再帰子は、どの証人を返すべきかがモデルで決まらない（証明の中身を忘れているため）。これが、Lean が命題から型への除去を制限する理由のモデル側からの説明になる。
+- **$X=\Phi(X)$**：Step 1 と Step 2 で、$X=\Phi(X)$ を使った。
+- **小前提の型**：Step 2・3 で、小前提の解釈がその型を解釈した集合の元であることを使った。これは \ref{logic:set-model-soundness} の帰納法の仮定から供給される。
+:::
+:::
+
+## 三つの公理の解釈 {#logic:sec-lsm-axioms}
+
+::: proposition 公理の解釈 {#logic:set-model-axioms keywords="propext, Quot, Quot.sound and Classical.choice hold in the set model" index="商型を解釈した集合|しょうがたのかいしゃく, 選択の解釈|せんたくのかいしゃく"}
+次の解釈のもとで、各定数の値はその型を解釈した集合に属し、$\mathsf{Quot.lift}$ の ι 規則の両辺の値は等しい。
+1. $\mathsf{propext}$, $\mathsf{Quot.sound}$, $\mathsf{Quot.ind}$ の値は $\varnothing$ とする（どれも命題の証明である）。
+2. $u\ge1$ のとき、$\llbracket\mathsf{Quot}\,r\rrbracket$ を、$\llbracket\alpha\rrbracket$ 上の関係 $\{(a,b):\llbracket r\rrbracket\cdot a\cdot b=1\}$ が生成する同値関係 $E_{r}$ による同値類の集合とし、$\llbracket\mathsf{Quot.mk}\,r\,a\rrbracket\defeq[a]_{E_{r}}$ とする。$\llbracket\mathsf{Quot.lift}\,f\,h\,q\rrbracket$ は、$q$ が同値類で $a\mapsto\llbracket f\rrbracket\cdot a$ が $q$ の上で一定ならその値、そうでなければ $\varnothing$ とする。$u=0$ のときは $\llbracket\mathsf{Quot}\,r\rrbracket\defeq\llbracket\alpha\rrbracket$、$\llbracket\mathsf{Quot.mk}\,r\,a\rrbracket\defeq\varnothing$、$\llbracket\mathsf{Quot.lift}\,f\,h\,q\rrbracket\defeq\llbracket f\rrbracket\cdot\varnothing$ とする。
+3. $F$ を、空でない $V_{\kappa_{n-1}}$ の元に対して定義された選択関数（$F(X)\in X$）とし、$\llbracket\mathsf{Classical.choice}\rrbracket\defeq\Lambda\bigl(U_{u},\ X\mapsto\Lambda(\llbracket\mathsf{Nonempty}\,X\rrbracket,\ \_\mapsto F(X))\bigr)$ とする（$u$ は定数のレベル）。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathsf{propext}$ の型を解釈した集合は $1$】 \ref{logic:set-model-inductive} の 2 から、$\llbracket a\leftrightarrow b\rrbracket=1$ は「$\llbracket a\to b\rrbracket=1$ かつ $\llbracket b\to a\rrbracket=1$」と同じで、\ref{logic:trimmed-function-basic.3} から $\llbracket a\to b\rrbracket=1$ は「$\llbracket a\rrbracket=0$ または $\llbracket b\rrbracket=1$」と同じである。ゆえに $a,b\in2$ で $\llbracket a\leftrightarrow b\rrbracket=1$ なら $a=b$ で、\ref{logic:set-model-inductive} の例 2 から $\llbracket\mathsf{Eq}\,a\,b\rrbracket=1$ である。すべての $a$, $b$ でこれが成り立つので、\ref{logic:trimmed-function-basic.3} から型全体の解釈は $1$ であり、値 $\varnothing$ はその元である。
+
+**Step 2.** 【主張：$\mathsf{Quot.lift}$ の値は型どおりで、ι 規則が成り立つ（$u\ge1$）】 $h$ の型 $\prod_{a,b}r\,a\,b\to\mathsf{Eq}\,(f\,a)\,(f\,b)$ の解釈が空でない（$h$ の値がその元である）ことは、\ref{logic:trimmed-function-basic.3} と例 2 から「$\llbracket r\rrbracket\cdot a\cdot b=1$ なら $\llbracket f\rrbracket\cdot a=\llbracket f\rrbracket\cdot b$」と同じである。この性質は反射・対称・推移で閉じた関係でも保たれるので、$a\mapsto\llbracket f\rrbracket\cdot a$ は $E_{r}$ の各同値類の上で一定である。ゆえに $q\mapsto\llbracket\mathsf{Quot.lift}\,f\,h\,q\rrbracket$ は各同値類にその一定値を対応させ、値は $\llbracket\beta\rrbracket$ に属する。$q=[a]$ のとき値は $\llbracket f\rrbracket\cdot a$ なので、ι 規則 $\mathsf{Quot.lift}\,f\,h\,(\mathsf{Quot.mk}\,r\,a)\equiv f\,a$ の両辺の値は等しい。各同値類は $\llbracket\alpha\rrbracket$ の部分集合なので\term[階数]{set:rank}が $\gamma\defeq\operatorname{rank}\llbracket\alpha\rrbracket$ 以下で、同値類の集合は $V_{\gamma+2}$ に属する。$\llbracket\alpha\rrbracket\in U_{u}=V_{\kappa_{u-1}}$ で $\kappa_{u-1}$ は極限順序数なので、同値類の集合も $U_{u}$ に属する。
+
+**Step 3.** 【主張：$\mathsf{Quot.sound}$ と $\mathsf{Quot.ind}$ の型を解釈した集合は $1$】 $\llbracket r\rrbracket\cdot a\cdot b=1$ なら $(a,b)\in E_{r}$ なので $[a]=[b]$ で、例 2 から $\llbracket\mathsf{Eq}\,(\mathsf{Quot.mk}\,r\,a)\,(\mathsf{Quot.mk}\,r\,b)\rrbracket=1$ である。$\mathsf{Quot.ind}$ では、すべての $a$ で $\llbracket\beta\rrbracket\cdot[a]=1$ なら、どの同値類 $q$ も $[a]$ の形なので $\llbracket\beta\rrbracket\cdot q=1$ である。どちらも \ref{logic:trimmed-function-basic.3} で全体の解釈が $1$ になる。$u=0$ の場合を確かめる。このとき $\llbracket\alpha\rrbracket\in2$ で、その元は（あれば）$\varnothing$ だけである。$\mathsf{Quot.lift}\,f\,h\,q$ の $q$ は $\llbracket\mathsf{Quot}\,r\rrbracket=\llbracket\alpha\rrbracket$ の元なので、$q$ があるなら $\llbracket\alpha\rrbracket=1$ で $q=\varnothing$ であり、値 $\llbracket f\rrbracket\cdot\varnothing$ は $\llbracket f\rrbracket\colon\llbracket\alpha\rrbracket\to\llbracket\beta\rrbracket$ により $\llbracket\beta\rrbracket$ に属する。ι 規則の左辺 $\mathsf{Quot.lift}\,f\,h\,(\mathsf{Quot.mk}\,r\,a)$ の値は $\llbracket f\rrbracket\cdot\varnothing$、右辺 $f\,a$ の値は $\llbracket f\rrbracket\cdot\llbracket a\rrbracket=\llbracket f\rrbracket\cdot\varnothing$ なので、両辺は等しい。$\mathsf{Quot.sound}$ では、$\mathsf{Quot.mk}\,r\,a$ と $\mathsf{Quot.mk}\,r\,b$ の値がともに $\varnothing$ なので、例 2 から $\mathsf{Eq}$ の解釈は $1$ である。$\mathsf{Quot.ind}$ では、すべての $a\in\llbracket\alpha\rrbracket$ で $\llbracket\beta\rrbracket\cdot\llbracket\mathsf{Quot.mk}\,r\,a\rrbracket=\llbracket\beta\rrbracket\cdot\varnothing=1$ と仮定すると、$\llbracket\mathsf{Quot}\,r\rrbracket$ の元 $q$ はどれも $\varnothing$ なので $\llbracket\beta\rrbracket\cdot q=1$ である。ゆえに、どちらの型の解釈も \ref{logic:trimmed-function-basic.3} から $1$ になる。
+
+**Step 4.** 【主張：$\mathsf{Classical.choice}$ の値は型どおり】 $\mathsf{Nonempty}\,X$ は構成子 $\mathsf{intro}:X\to\mathsf{Nonempty}\,X$ だけをもつ命題なので、\ref{logic:set-model-inductive} の 2 から $\llbracket\mathsf{Nonempty}\,X\rrbracket=1$ となるのは $X\neq\varnothing$ のときに限る。$X=\varnothing$ なら内側の $\Lambda(0,\dots)=\varnothing$ は $\hat{\Pi}(0,\dots)=\{\varnothing\}$ に属する。$X\neq\varnothing$ なら、定数の型が $\mathrm{Lean}_{n}$ に入ることから $u\le n-1$ で $X\in U_{u}\subseteq V_{\kappa_{n-1}}$ なので $F(X)$ が定まり、$F(X)\in X$ である（$u=0$ では $X=1$ で $F(X)=\varnothing$）。ゆえに値は $\hat{\Pi}\bigl(U_{u},\ X\mapsto\hat{\Pi}(\llbracket\mathsf{Nonempty}\,X\rrbracket,\ \_\mapsto X)\bigr)$ に属する。
+
+::: hypcheck
+- **選択公理（メタ理論の）**：Step 4 で選択関数 $F$ の存在に使った。$\mathsf{Classical.choice}$ は「型ごとに一つの元を一斉に選ぶ」大域的な選択なので、モデルでも一つの選択関数で一斉に選ぶ必要がある。$V_{\kappa_{n-1}}$ は集合なので、$\ZFC$ の選択公理で足りる。
+- **証明の無関係性（モデルの側）**：Step 1・3 で、命題が $2$ の元に解釈されることを使った。命題外延性がモデルで自明に成り立つのは、命題を真理値で解釈したからである。
+- **$\mathsf{Quot.lift}$ の前提 $h$**：Step 2 で、$f$ が同値類の上で一定であることに使った。前提がなければ、ι 規則と値の型どおりさが両立しない。
+:::
+:::
+
+## 健全性 {#logic:sec-lsm-soundness}
+
+::: theorem 集合論的モデルの健全性 {#logic:set-model-soundness keywords="soundness of the set-theoretic model of Lean" index="集合論的モデルの健全性|しゅうごうろんてきもでるのけんぜんせい" refname="Lean の集合論的モデルの健全性"}
+（$\ZFC_{n}$ で）環境が $\mathrm{Lean}_{n}$ で型付けされているとする。$\mathrm{Lean}_{n}$ の導出について、次が成り立つ。
+1. $\Gamma\vdash t:A$ なら、すべての $\rho\in\llbracket\Gamma\rrbracket$ で $\llbracket t\rrbracket_{\rho}\in\llbracket A\rrbracket_{\rho}$ である。
+2. $\Gamma\vdash s\equiv t$ なら、すべての $\rho\in\llbracket\Gamma\rrbracket$ で $\llbracket s\rrbracket_{\rho}=\llbracket t\rrbracket_{\rho}$ である。
+:::
+
+::: intuition
+Lean で型が付く項は、集合として型を解釈した集合の中に入り、定義的に等しい項は同じ集合になる。型理論で証明できることは、到達不能基数のある集合論の中で本当に成り立つ。
+:::
+
+::: proof
+導出についての同時帰納法で示す。宣言の型付けも導出の一部なので、各定数の解釈についての主張（\ref{logic:set-model-inductive-sound}・\ref{logic:set-model-axioms}・定義の場合）は、その宣言の導出についての帰納法の仮定から得られる。
+
+**Step 1.** 【主張：変数・宇宙・定数の規則で 1 が成り立つ】 変数 $x{:}A\in\Gamma$ なら、$\llbracket\Gamma\rrbracket$ の定義から $\rho(x)\in\llbracket A\rrbracket_{\rho}$ である（$A$ は $x$ より前の変数にしか依存しないので、\ref{logic:set-model-substitution} の後半で環境を制限してよい）。$\mathsf{Sort}\,\ell:\mathsf{Sort}\,(\ell+1)$（$\ell+1\le n$）では \ref{logic:inaccessible-closure.3} から $U_{\ell}\in U_{\ell+1}$ である。定義された定数 $c\defeq t:A$ では、宣言の導出に帰納法の仮定を使えば $\llbracket t\rrbracket_{\varnothing}\in\llbracket A\rrbracket_{\varnothing}$ である。帰納型・商型・公理の定数は \ref{logic:set-model-inductive-sound.1}・\ref[2]{logic:set-model-inductive-sound.2} と \ref{logic:set-model-axioms} による。
+
+**Step 2.** 【主張：Π の形成で、宇宙の規則が保たれる】 $\Gamma\vdash A:\mathsf{Sort}\,u$, $\Gamma,x{:}A\vdash B:\mathsf{Sort}\,v$ とし、$\rho\in\llbracket\Gamma\rrbracket$ をとる。帰納法の仮定から $\llbracket A\rrbracket_{\rho}\in U_{u}$ で、各 $a\in\llbracket A\rrbracket_{\rho}$ について $\llbracket B\rrbracket_{\rho[x\mapsto a]}\in U_{v}$ である。$v=0$ なら \ref{logic:trimmed-function-basic.3} から $\llbracket\prod_{x:A}B\rrbracket_{\rho}\in2=U_{0}=U_{\mathrm{imax}\,u\,0}$ である。$v\ge1$ なら $w\defeq\max(u,v)$, $\kappa\defeq\kappa_{w-1}$ とおく。\ref{logic:inaccessible-closure.3} から $\llbracket A\rrbracket_{\rho}$ と各 $\llbracket B\rrbracket_{\rho[x\mapsto a]}$ は $V_{\kappa}$ に属する。$\hat{\Pi}$ の元は $\llbracket A\rrbracket_{\rho}\times\bigcup_{a}\llbracket B\rrbracket_{\rho[x\mapsto a]}$ の部分集合なので、$\hat{\Pi}$ はその冪集合の部分集合であり、\ref{logic:inaccessible-closure.2}・\ref[1]{logic:inaccessible-closure.1} から $V_{\kappa}=U_{w}$ に属する。
+
+**Step 3.** 【主張：$\lambda$・適用・let・変換の規則で 1 が成り立つ】 $\lambda$ では、帰納法の仮定から各 $a$ で $\llbracket b\rrbracket_{\rho[x\mapsto a]}\in\llbracket B\rrbracket_{\rho[x\mapsto a]}$ なので、$\Lambda$ の定義から $\llbracket\lambda x{:}A.\,b\rrbracket_{\rho}\in\hat{\Pi}(\dots)=\llbracket\prod_{x:A}B\rrbracket_{\rho}$ である。適用 $f\,a$ では、$\llbracket f\rrbracket_{\rho}=\Lambda(\llbracket A\rrbracket_{\rho},g)$（$g(c)\in\llbracket B\rrbracket_{\rho[x\mapsto c]}$）と $\llbracket a\rrbracket_{\rho}\in\llbracket A\rrbracket_{\rho}$ から、\ref{logic:trimmed-function-basic.1} により $\llbracket f\,a\rrbracket_{\rho}=g(\llbracket a\rrbracket_{\rho})\in\llbracket B\rrbracket_{\rho[x\mapsto\llbracket a\rrbracket_{\rho}]}$ であり、\ref{logic:set-model-substitution} からこれは $\llbracket B[a/x]\rrbracket_{\rho}$ である。let も代入の補題から同様である。変換規則は、帰納法の仮定 2 から $\llbracket A\rrbracket_{\rho}=\llbracket B\rrbracket_{\rho}$ となることによる。
+
+**Step 4.** 【主張：同値・合同・β・δ・ζ・η で 2 が成り立つ】 同値律は集合の等号の性質である。合同は、解釈が部分項を解釈した集合だけで決まる（束縛の下では、すべての $a\in\llbracket A\rrbracket_{\rho}$ での本体の値が等しければ $\Lambda$ と $\hat{\Pi}$ が等しい）ことによる。β では、$a$ の型が $A$ なので $\llbracket a\rrbracket_{\rho}\in\llbracket A\rrbracket_{\rho}$ で、\ref{logic:trimmed-function-basic.1} と \ref{logic:set-model-substitution} から $\llbracket(\lambda x{:}A.\,b)\,a\rrbracket_{\rho}=\llbracket b\rrbracket_{\rho[x\mapsto\llbracket a\rrbracket_{\rho}]}=\llbracket b[a/x]\rrbracket_{\rho}$ である。δ は定数の解釈の定義、ζ は代入の補題による。η では、$f$ の型が $\prod_{x:A}B$ なので、帰納法の仮定 1 から $\llbracket f\rrbracket_{\rho}\in\hat{\Pi}(\llbracket A\rrbracket_{\rho},\dots)$ で、\ref{logic:trimmed-function-basic.2} から $\llbracket\lambda x{:}A.\,f\,x\rrbracket_{\rho}=\Lambda(\llbracket A\rrbracket_{\rho},\ c\mapsto\llbracket f\rrbracket_{\rho}\cdot c)=\llbracket f\rrbracket_{\rho}$ である。
+
+**Step 5.** 【主張：証明の無関係性・ι・構造の η で 2 が成り立つ】 $\Gamma\vdash P:\mathsf{Prop}$ と $\Gamma\vdash p:P$, $\Gamma\vdash q:P$ なら、帰納法の仮定 1 から $\llbracket P\rrbracket_{\rho}\in2$ で、$\llbracket p\rrbracket_{\rho}$, $\llbracket q\rrbracket_{\rho}$ は $\llbracket P\rrbracket_{\rho}\subseteq\{\varnothing\}$ の元なので、どちらも $\varnothing$ である。ι と構造の η は \ref{logic:set-model-inductive-sound.3}・\ref[4]{logic:set-model-inductive-sound.4} と \ref{logic:set-model-axioms}（$\mathsf{Quot.lift}$）による。K 様の簡約を規則として含める場合も、それは証明の無関係性と ι から導けるので（\ref{logic:k-like-derivable}）、両辺の値は等しい。
+
+::: hypcheck
+- **到達不能基数**：Step 1（$U_{\ell}\in U_{\ell+1}$）と Step 2（Π の閉包性）、および帰納型の閉包（\ref{logic:inductive-fixed-point}）で使った。$\mathrm{Lean}_{n}$ の宇宙 $\mathsf{Sort}\,1,\dots,\mathsf{Sort}\,n$ に $\kappa_{0},\dots,\kappa_{n-1}$ を一つずつ使っている。
+- **切り詰めたグラフ**：Step 2 の $v=0$ の場合と Step 5 で、命題の上の Π が真理値になることに使った。普通のグラフで関数を表すと、命題に値をとる関数の集合が $\{0,1\}$ に入らず、非可述的な規則 $\mathrm{imax}\,u\,0=0$ が保たれない。
+- **断片の制限 $\ell\le n$**：Step 1 で $\mathsf{Sort}\,\ell:\mathsf{Sort}\,(\ell+1)$ を $\ell+1\le n$ の範囲でだけ使った。
+- **非累積性**：使っていない。モデルでは $U_{\ell}\subseteq U_{\ell+1}$ だが、Lean に累積性の規則がないことはモデルの妨げにならない（モデルの方が多くを満たすだけである）。
+:::
+:::
+
+::: supplement
+**型付けされていない項.** 解釈は型の付かない項にも集合を与えるが、健全性は型の付く項についてだけ述べている。前ページの理想の定義的等価の決定不能性（\ref{logic:defeq-undecidable}）とは独立に、モデルは「導出がある」ものだけを正しく解釈する。
+
+**モデルで成り立つこと.** このモデルでは命題外延性・関数外延性・排中律がすべて成り立つ（命題が真理値なので）。ゆえに、これらの否定は Lean で証明できない。一方、一価性公理（\ref{logic:page-hott}）は「同値な型は等しい」と言うので、たとえば $\mathsf{Bool}$ 上の二つの恒等でない自己同値から矛盾を導けるとされ、証明の無関係性をもつ Lean とは両立しないとされる（未確認）。
+:::
+
+## 無矛盾性の上界 {#logic:sec-lsm-consistency}
+
+::: corollary 無矛盾性の上界 {#logic:lean-consistency-upper-bound keywords="consistency of Lean relative to ZFC plus inaccessible cardinals, upper bound of consistency strength" index="無矛盾性の上界（Lean）|むむじゅんせいのじょうかいりーん" refname="Lean の無矛盾性の上界"}
+$n\ge1$ とする。
+1. $\ZFC_{n}$ は「$\mathrm{Lean}_{n}$（三つの公理を含む）で、空の文脈で $\mathsf{False}$ の型をもつ閉項は導出できない」を証明する。
+2. $\ZFC_{n}$ が無矛盾なら、$\mathrm{Lean}_{n}$ は無矛盾である。
+:::
+
+::: intuition
+Lean の $n+1$ 段の宇宙で矛盾が出るなら、$n$ 個の到達不能基数を仮定した集合論でも矛盾が出る。つまり Lean の論理の強さは、集合論に到達不能基数を宇宙の数だけ足したもの以下である。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】 $\ZFC_{n}$ の中で、空の文脈で $\vdash t:\mathsf{False}$ の導出があると仮定する。\ref{logic:set-model-soundness.1} から $\llbracket t\rrbracket_{\varnothing}\in\llbracket\mathsf{False}\rrbracket=0=\varnothing$（\ref{logic:set-model-inductive} の例 4）となり、矛盾する。この議論は導出を有限の記号列として扱い、解釈 $\llbracket\cdot\rrbracket$ を $\ZFC_{n}$ のクラス関数として定めたもので、$\ZFC_{n}$ の中の証明である。
+
+**Step 2.** 【主張：2 が成り立つ】 $\mathrm{Lean}_{n}$ が矛盾するとし、$\mathsf{False}$ の閉項の導出 $d$ を一つとる。「$d$ は $\mathrm{Lean}_{n}$ の導出で、結論が $\vdash t:\mathsf{False}$ である」は、$d$ を具体的に与えれば有限の手続きで確かめられる性質で、算術の真な $\Sigma$ 文で書ける。$\ZFC$ は $\omega$ の上で算術の公理を証明するので、\ref{pt:q-sigma-completeness} からこの文を証明する。一方 Step 1 から $\ZFC_{n}$ はその否定を含む文を証明するので、$\ZFC_{n}$ は矛盾する。対偶をとれば 2 を得る。
+
+::: hypcheck
+- **健全性**：Step 1 で使った。
+- **$\Sigma$ 完全性**：Step 2 で、実際にある導出を $\ZFC_{n}$ の中で「ある」と認めるのに使った。この論法はメタ理論として算術しか使わない。
+- **型を制限した断片**：Step 1 は $\mathrm{Lean}_{n}$ の導出についてだけ成り立つ。宇宙を無制限に使う Lean 全体については、下の補足の形でしか言えない。
+:::
+:::
+
+::: supplement
+**Lean 全体について.** Lean の一つの証明が実際に使う宇宙のレベルは有限個である。宇宙の変数を含む宣言も、変数に具体的な数を代入した各例で型が付く（導出の中の宇宙の変数への代入で導出が保たれる）ので、各証明はある $\mathrm{Lean}_{n}$ の導出に直せる（この代入の性質は本ページでは確かめていない）。ゆえに、Lean 全体の無矛盾性は「すべての $n$ について $\ZFC_{n}$ が無矛盾」から従う。Carneiro は、$n$ 個の宇宙をもつ Lean と $n$ 個程度の到達不能基数をもつ $\ZFC$ の無矛盾性の強さを比べたとされる（番号の対応の細部は未確認）。
+
+**下界.** 逆向きに、型理論の中に $\ZFC$ のモデルを作る構成（\see[型理論の中の ZFC]{logic:page-zfc-in-lean}）では、宇宙を一段上げるごとに到達不能基数が一つ増えるとされ、上界と合わせて無矛盾性の強さが等しいことが述べられる。
+
+**前提を変えると.** 選択の公理 $\mathsf{Classical.choice}$ を外しても、モデルは変わらず使える（その定数を解釈しないだけである）。到達不能基数をまったく使わずに $\ZFC$ だけで $\mathrm{Lean}_{n}$ の無矛盾性を示すことは、$n$ が大きければできない。$\mathrm{Lean}_{n}$ の中で $\ZFC$ のモデルが作れるとされる（\see[型理論の中の ZFC]{logic:page-zfc-in-lean}）ので、それができれば $\ZFC$ が自分の無矛盾性を証明することになり、第二不完全性定理に反するからである（どの $n$ から成り立つかは未確認）。
+:::
+
+## 問題 {#logic:sec-lsm-problems}
+
+::: problem ★ 基本：命題の上の Π {#logic:prob-lsm-pi-prop}
+$\llbracket\mathsf{Nat}\rrbracket=X$ とし、$P$ を $\mathsf{Nat}$ 上の命題の族とする。$\llbracket\prod_{x:\mathsf{Nat}}P\,x\rrbracket$ が $1$ になる条件を述べよ。また、普通のグラフ（値が $\varnothing$ の所も残すもの）で関数を表した場合に、この集合が $2$ に属さないことを示せ。
+:::
+
+::: solution
+\ref{logic:trimmed-function-basic.3} から、すべての $e\in X$ で $\llbracket P\rrbracket\cdot e=1$ のとき、そのときに限り $1$ である。普通のグラフで表すと、すべての $e$ で値が $1$ のとき、関数の集合はただ一つの関数 $\{(e,\varnothing):e\in X\}$ からなる。これは $X\neq\varnothing$ なので空でない集合で、$\varnothing$ と異なるので、関数の集合は $\{\{(e,\varnothing):e\in X\}\}\neq\{\varnothing\}=1$ である。また空でもないので $0$ でもない。ゆえに $2$ に属さず、Π 型の宇宙の規則 $\mathrm{imax}\,u\,0=0$（命題の上の Π は命題）がモデルで成り立たない。
+:::
+
+::: problem ★ 基本：Acc の解釈 {#logic:prob-lsm-acc}
+$\alpha=\mathsf{Nat}$、$R\,y\,x\defeq\mathsf{Eq}\,y\,(\mathsf{succ}\,x)$ とする。$\llbracket\mathsf{Acc}\,R\,\bar{0}\rrbracket=0$ であることを示せ。これを使って、前ページの文脈 $\Delta=h{:}\mathsf{Acc}\,R\,\bar{0}$（\ref{logic:halting-loop-term}）がモデルで空であること、すなわち $\llbracket\Delta\rrbracket=\varnothing$ を確かめよ。
+:::
+
+::: solution
+例 3 から、$\llbracket\mathsf{Acc}\,R\rrbracket$ の $S$ は関係 $\{(y,x):y=x+1\}$ の整礎部分である（$\llbracket\mathsf{succ}\,x\rrbracket$ は $x$ の次の元で、例 2 から $\llbracket\mathsf{Eq}\,y\,(\mathsf{succ}\,x)\rrbracket=1$ は $y$ が $x$ の次の元であることと同じ）。$0$ からは $0,1,2,\dots$ と下る（関係で前にある元をたどる）無限列があるので、$0$ は整礎部分に入らない。厳密には、$\Psi$ の各段 $S^{\alpha}$ について「$k\in S^{\alpha}$ なら $k+1\in S^{\beta}$（$\beta<\alpha$）」が $\Psi$ の定義から従い、ここから段の無限降下列ができるので、どの $k$ も $S$ に入らない。ゆえに $\llbracket\mathsf{Acc}\,R\,\bar{0}\rrbracket=0=\varnothing$ で、$\llbracket\Delta\rrbracket=\{\varnothing[h\mapsto a]:a\in\varnothing\}=\varnothing$ である。前ページで、この文脈での定義的等価の判定にモデルが使えないと述べたのはこのためである。
+:::
+
+::: problem ★★ 標準：命題外延性と関数外延性 {#logic:prob-lsm-funext}
+関数外延性 $\prod_{f,g:\prod_{x:A}B}\bigl(\prod_{x:A}\mathsf{Eq}\,(f\,x)\,(g\,x)\bigr)\to\mathsf{Eq}\,f\,g$ の型を解釈した集合が $1$ であることを、\ref{logic:trimmed-function-basic} を使って直接示せ（$A$, $B$ は型、$B$ は $x$ に依存してよい）。
+:::
+
+::: solution
+\ref{logic:trimmed-function-basic.3} から、すべての $f,g\in\llbracket\prod_{x:A}B\rrbracket_{\rho}$ について「すべての $a\in\llbracket A\rrbracket_{\rho}$ で $\llbracket\mathsf{Eq}\,(f\,x)\,(g\,x)\rrbracket_{\rho[x\mapsto a]}=1$ なら $\llbracket\mathsf{Eq}\,f\,g\rrbracket=1$」を示せばよい。例 2 から前提は $f\cdot a=g\cdot a$（すべての $a$）と同じで、結論は $f=g$ と同じである。$f=\Lambda(X,\phi)$, $g=\Lambda(X,\psi)$（$X\defeq\llbracket A\rrbracket_{\rho}$）と書くと、\ref{logic:trimmed-function-basic.1} から $\phi(a)=f\cdot a=g\cdot a=\psi(a)$ なので $\phi=\psi$ で、$f=g$ である。Lean では関数外延性は商型から導かれる（\ref[商型からの関数外延性]{logic:lean-funext-from-quot}）ので、モデルで成り立つことはそちらからも従う。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

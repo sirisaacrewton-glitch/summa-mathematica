@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>選択公理と大域的選択 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/05-proof-theory/10-lean-type-theory/06-global-choice.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 選択公理と大域的選択 {#logic:page-global-choice keywords="global choice, Hilbert epsilon operator, Classical.choice, Classical.epsilon, definable well-ordering of the universe, V=HOD, V=L, NBG with global choice, conservativity, Morse-Kelley"}
+
+Lean の選択の公理 $\mathsf{choice}:\mathsf{Nonempty}\,\alpha\to\alpha$（\ref[選択の公理]{logic:lean-choice}）は、集合論の \ref{set:ax-choice} よりも形の上ではずっと強い。集合論の選択公理は「各集合ごとに選択関数が**存在する**」と言うだけだが、$\mathsf{choice}$ は一つの項として、宇宙の**すべての**空でない型から一斉に元を選ぶ。これはヒルベルトの ε 記号（\ref{logic:hilbert-epsilon}）そのものであり（\ref{logic:epsilon-spec}）、前ページの集合のモデル $\mathsf{ZFSet}_{u}$ では**大域的選択**、すなわち空でないすべての集合から元を選ぶ一つの関数を与える（\ref{logic:zfset-nbg-gc}）。一方、$\ZFC$ の中では大域的選択は一般に論理式で書けない。大域的な整列順序が（パラメータなしの）論理式で定義できることは $\mathbf{V}=\mathbf{HOD}$ と同値であり（\ref{logic:vhod-definable-wo}）、$\mathbf{V}=\mathbf{L}$ ならそれが成り立つが（\ref{logic:vl-implies-vhod}）、$\ZFC$ からは証明できない（\ref{logic:zfc-no-definable-gc}）。クラスを対象にもつ NBG に大域的選択を加えても、集合についての定理は $\ZFC$ と変わらない（\ref{logic:nbg-gc-conservative}）。本ページはこれらを並べて、Lean の選択が無矛盾性の強さを上げない理由を集合論の側から見る。
+
+> 資料なし（標準的な内容を本サイトで組み立てた）。Lean 4 の `Classical.choice`・`Classical.epsilon` などの名前と型は記憶によるもので、Lean 4 の実装・文書とは照合していない。大域的選択の保存性などの文献の帰属は未確認である（本文で個別に記す）。
+
+## 記法と定義の確認 {#logic:sec-gc-notation}
+
+::: notation
+- **型理論の側**：宇宙 $\mathsf{Sort}\,u$ と $\mathsf{Prop}$（\ref[Lean の宇宙]{logic:lean-sorts}）、定義的等価と証明の無関係性（\ref[定義的等価の規則]{logic:lean-defeq-rules}。同じ命題の二つの証明は定義的に等しい）、$\mathsf{Nonempty}\,\alpha:\mathsf{Prop}$（$\alpha$ の元から作られる命題）、選択 $\mathsf{choice}$（\ref[選択の公理]{logic:lean-choice}）、命題外延性 $\mathsf{propext}$（\ref[命題外延性]{logic:lean-propext}）、関数外延性 $\mathsf{funext}$（\ref[商型からの関数外延性]{logic:lean-funext-from-quot}）、排中律 $\mathsf{em}$（\ref[ディアコネスクの定理]{logic:diaconescu}）を使う。部分型 $\{x:\alpha\mid q\,x\}$ の元は組 $\langle x,h\rangle$（$h:q\,x$）で、第一成分を $.1$、第二成分を $.2$ と書く。
+- **前ページ**：前集合と集合の型 $\mathsf{ZFSet}_{u}$（\ref{logic:zfset}）、論理式の翻訳 $\varphi^{Z}$（\ref{logic:zf-translation}）、$\mathsf{ZFSet}_{u}$ が $\ZFC$ のモデルであること（\ref{logic:zfset-zfc}）。
+- **集合論の側**：体系は $\ZF$（基礎の公理を含む）で、選択公理を使う箇所は明記する。クラスとクラス関数は論理式の略記である（\ref{set:class}, \ref{set:class-function}）。選択関数（\ref{set:choice-function}）、選択公理の同値な形（\ref{set:ac-equivalences}）、ランク（\ref{set:rank}, \ref{set:rank-basic}）、整列集合の順序型（\ref{set:ordinal-type}）を使う。累積階層は集合論の系列の $R(\alpha)$（\ref{set:cumulative-hierarchy}）を $V_{\alpha}$ と書く。
+- $\mathbf{OD}$, $\mathbf{HOD}$, $\mathrm{Enod}$ は \ref{set:od}, \ref{set:hod}, \ref{set:od-enumeration} のとおり。構成可能集合の整列順序 $<_{L}$ は \ref{set:l-well-order} のとおり。NBG とモース＝ケリーの集合論 MK は \ref{set:nbg-mk} のとおり。
+:::
+
+## ヒルベルトの ε と Lean の選択 {#logic:sec-gc-epsilon}
+
+::: lemma ε の型は空でない {#logic:epsilon-nonempty keywords="nonemptiness of the epsilon subtype" index="ε の存在|いぷしろんのそんざい"}
+$\alpha:\mathsf{Sort}\,u$ が $\mathsf{Nonempty}\,\alpha$ を満たすとき、任意の $p:\alpha\to\mathsf{Prop}$ について
+$$
+\mathsf{Nonempty}\,\bigl\{x:\alpha\bigm|(\exists y,\ p\,y)\to p\,x\bigr\}
+$$
+が成り立つ（排中律を使う）。
+:::
+
+::: proof
+示す主張は命題なので、$\mathsf{em}(\exists y,\ p\,y)$ で場合分けしてよい。$\exists y,\ p\,y$ の場合、その $y$ を取り出すと $\langle y,\lambda\_.\,h\rangle$（$h:p\,y$）が部分型の元である。$\lnot\exists y,\ p\,y$ の場合、$\mathsf{Nonempty}\,\alpha$ から $x:\alpha$ を取り出すと、$(\exists y,\ p\,y)\to p\,x$ は前提が偽なので成り立ち（$\mathsf{False}$ の除去）、$x$ が部分型の元を与える。
+:::
+
+::: definition ヒルベルトの ε {#logic:hilbert-epsilon keywords="Hilbert epsilon operator, indefinite description, Classical.epsilon" index="ヒルベルトの ε|ひるべるとのいぷしろん, ε 記号|いぷしろんきごう, 不定記述|ふていきじゅつ"}
+$\alpha:\mathsf{Sort}\,u$, $h:\mathsf{Nonempty}\,\alpha$, $p:\alpha\to\mathsf{Prop}$ に対し、\ref{logic:epsilon-nonempty} の証明を $h'$ として
+$$
+\varepsilon_{h}\,p\defeq(\mathsf{choice}\,h').1\ :\ \alpha
+$$
+と定める。$\varepsilon_{h}\,p$ を「$p$ を満たすものがあれば、そのうちの一つ」と読み、**ヒルベルトの ε 記号**と呼ぶ。
+:::
+
+::: intuition
+$\varepsilon\,p$ は「$p$ を満たすもの」を名指す記号で、そういうものがなければ $\alpha$ の何かを指す。どれを指すかは指定しないが、$p$ を決めれば一つに決まる。選択関数が「集合から一つ選ぶ」のに対して、ε は「性質を満たすものから一つ選ぶ」形の選択である。
+:::
+
+::: theorem ε の基本性質 {#logic:epsilon-spec keywords="epsilon specification, extensional epsilon, choice and epsilon are interdefinable" index="ε の基本性質|いぷしろんのきほんせいしつ, ε の外延性|いぷしろんのがいえんせい"}
+$\alpha:\mathsf{Sort}\,u$ と $h:\mathsf{Nonempty}\,\alpha$ について、次が成り立つ。
+1. （臨界公理）$(\exists y,\ p\,y)\to p(\varepsilon_{h}\,p)$。
+2. （外延性）$(\forall x,\ p\,x\leftrightarrow q\,x)\to\varepsilon_{h}\,p=\varepsilon_{h}\,q$。
+3. （証明によらない）$h_{1},h_{2}:\mathsf{Nonempty}\,\alpha$ なら $\varepsilon_{h_{1}}\,p\equiv\varepsilon_{h_{2}}\,p$（定義的に等しい）。
+4. （選択の復元）逆に、1 を満たす操作 $\varepsilon$ が与えられれば、$\mathsf{choice}'\,h\defeq\varepsilon_{h}(\lambda\_.\,\mathsf{True})$ は $\mathsf{Nonempty}\,\alpha\to\alpha$ の項である。
+:::
+
+::: intuition
+Lean の選択は、ヒルベルトの ε 記号と同じものである。ε は「性質を満たすものがあれば、それを満たす一つを返す」操作で、同じ外延をもつ性質には同じものを返す。返す値は、空でないことの証明の違いにはよらず、型 $\alpha$ と性質 $p$ だけで決まる。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】 $\mathsf{choice}\,h'$ は部分型 $\{x\mid(\exists y,\ p\,y)\to p\,x\}$ の元なので、その第二成分 $(\mathsf{choice}\,h').2$ が $(\exists y,\ p\,y)\to p(\varepsilon_{h}\,p)$ の証明である。
+
+**Step 2.** 【主張：2 が成り立つ】 仮定と $\mathsf{propext}$ から各 $x$ について $p\,x=q\,x$ であり、$\mathsf{funext}$ から $p=q$ となる。$\varepsilon_{h}$ は $p$ の関数なので、等式の代入で $\varepsilon_{h}\,p=\varepsilon_{h}\,q$ を得る。
+
+**Step 3.** 【主張：3, 4 が成り立つ】 $h_{1},h_{2}$ は同じ命題の証明なので、証明の無関係性により $h_{1}\equiv h_{2}$ である。\ref{logic:epsilon-nonempty} の証明 $h'$ も同様に一つの命題の証明なので、$\mathsf{choice}\,h'_{1}\equiv\mathsf{choice}\,h'_{2}$ となる。4 は、$\varepsilon_{h}(\lambda\_.\,\mathsf{True})$ が型 $\alpha$ をもつ項であることそのものである（1 は値についての性質で、項を作ることには使わない）。
+
+::: hypcheck
+- **排中律**：ε の定義（\ref{logic:epsilon-nonempty}）で使った。これは $\mathsf{choice}$ から導かれる（\ref[ディアコネスクの定理]{logic:diaconescu}）ので、ε は $\mathsf{choice}$ と命題外延性・関数外延性から作られる。
+- **命題外延性と関数外延性**：Step 2 だけで使った。これらがないと、外延の同じ二つの性質 $p$, $q$ について $\varepsilon p$ と $\varepsilon q$ が一致する保証はない（ε 計算では、外延性を別の公理として加えるかどうかで体系が分かれる）。
+- **証明の無関係性**：Step 3 で使った。これは Lean の定義的等価の規則であり、公理ではない。
+:::
+:::
+
+::: proposition 型理論での選択関数 {#logic:lean-choice-functions keywords="type-theoretic axiom of choice in Prop, choice functions from Classical.choice" index="型理論の選択公理（Prop）|かたりろんのせんたくこうりぷろっぷ"}
+$I:\mathsf{Sort}\,u$, $B:I\to\mathsf{Sort}\,v$ とする。
+1. $(\forall i,\ \mathsf{Nonempty}(B\,i))\to\mathsf{Nonempty}\bigl(\prod_{i:I}B\,i\bigr)$。
+2. $R:\prod_{i:I}B\,i\to\mathsf{Prop}$ について、$(\forall i,\ \exists b,\ R\,i\,b)\to\exists f:\prod_{i:I}B\,i,\ \forall i,\ R\,i\,(f\,i)$。
+3. 一つの項 $\lambda\alpha\,h.\,\mathsf{choice}\,h:\prod_{\alpha:\mathsf{Sort}\,u}\mathsf{Nonempty}\,\alpha\to\alpha$ が、宇宙 $\mathsf{Sort}\,u$ のすべての空でない型から同時に元を選ぶ。
+:::
+
+::: proof
+1 は $\lambda i.\,\mathsf{choice}(h\,i)$ が $\prod_{i}B\,i$ の元であることからわかる。2 は、$\exists b,\ R\,i\,b$ から $\mathsf{Nonempty}(B\,i)$ を得て $f\,i\defeq\varepsilon(R\,i)$ とおけば、\ref{logic:epsilon-spec.1} から各 $i$ で $R\,i\,(f\,i)$ が成り立つ。3 は $\mathsf{choice}$ の型そのものである。
+:::
+
+::: supplement
+**Σ 型との違い.** 存在を Σ 型 $\sum_{b}R\,i\,b$ で表すマルティン＝レーフ型理論では、2 の形の選択は公理なしに証明できる（\ref{logic:type-theoretic-choice}）。Lean の $\exists$ は $\mathsf{Prop}$ の中にあり、証明から証拠を取り出して型の元を作ることは許されない（\ref[部分単集合除去]{logic:lean-subsingleton-elimination}）ので、2 には $\mathsf{choice}$ が要る。
+
+**ε 計算.** 一階論理に ε 項と臨界公理 \ref{logic:epsilon-spec.1} を加えた体系は、元の一階論理の保存拡大であることが知られている（第一 ε 定理。ヒルベルトとベルナイスの『数学の基礎』第 2 巻によるとされる。未確認）。この意味で、ε は一階論理の中では「何も新しいことを言わない」。
+:::
+
+## 集合論の大域的選択 {#logic:sec-gc-set-theory}
+
+$\ZFC$ ではクラスは論理式の略記なので、「すべての空でない集合から元を選ぶクラス関数がある」は、論理式を量化するので一つの文として書けない。書けるのは、論理式を一つ固定するごとの次の文である。
+
+::: definition 定義可能な大域的選択と大域的整列順序 {#logic:definable-global-choice keywords="definable global choice function, definable global well-ordering of V" index="大域的選択|たいいきてきせんたく, 大域的整列順序|たいいきてきせいれつじゅんじょ"}
+$\psi(x,y,\vec{p})$ を集合論の論理式とし、パラメータ $\vec{p}$ を固定する。
+1. $\psi$ が（$\vec{p}$ をパラメータとして）**大域的選択関数を定める**とは、$\psi$ が $\mathbf{V}$ 上のクラス関数 $\mathbf{G}$ を定め（\ref{set:class-function}）、すべての空でない集合 $x$ について $\mathbf{G}(x)\in x$ となることをいう。
+2. $\psi$ が**大域的整列順序を定める**とは、$x\lhd y\defeq\psi(x,y,\vec{p})$ が $\mathbf{V}$ 上の狭義の全順序であり、空でないすべての**集合**が $\lhd$-最小元をもつことをいう。
+
+各 $\psi$ について、これらは（$\vec{p}$ を自由変数とする）一つの論理式で表される。パラメータのない $\psi$ で 2 が成り立つとき、$\mathbf{V}$ は**定義可能な整列順序をもつ**という。
+:::
+
+::: intuition
+「全宇宙を一度に整列する方法」を、具体的な一つの式で書いたものが定義可能な大域的整列順序である。集合論の選択公理は集合ごとに整列順序が「ある」と言うだけで、それらを一つの式でまとめて与えるとは言っていない。
+:::
+
+::: proposition 大域的選択と大域的整列順序 {#logic:gc-iff-gwo keywords="global choice iff global well-ordering, definable" index="大域的選択と大域的整列順序|たいいきてきせんたくとたいいきてきせいれつじゅんじょ"}
+（$\ZF$）各論理式 $\psi(x,y,\vec{p})$ について、論理式 $\psi'(x,y,\vec{p})$ が（$\psi$ から具体的に）作れて、次が成り立つ。
+1. $\psi$ が大域的整列順序を定めるなら、$\psi'$ は大域的選択関数を定める。
+2. $\psi$ が大域的選択関数を定めるなら、$\psi'$ は大域的整列順序を定める。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】 $\mathbf{G}(x)\defeq$「$x$ の $\lhd$-最小元」（$x\neq\varnothing$）、$\mathbf{G}(\varnothing)\defeq\varnothing$ とおく。仮定から空でない集合には $\lhd$-最小元があり、全順序なのでそれは一意である。これを $\psi$ で書いた論理式が $\psi'$ である。
+
+**Step 2.** 【主張：2 の仮定のもとで選択公理が成り立つ】 $\varnothing$ を元にもたない集合族 $\mathcal{F}$ について、$\mathbf{G}\restr{\mathcal{F}}$ は置換公理により集合であり、$\mathcal{F}$ の選択関数である。よって \ref{set:ac-equivalences.2} が成り立ち、\ref{set:ac-equivalences.1}（すべての集合は整列可能）を得る。
+
+**Step 3.** 【主張：各順序数 $\beta$ に $V_{\beta}$ の整列順序 $R_{\beta}$ が定義できる】 $V_{\beta}$ の整列順序の全体 $W_{\beta}\subseteq\mathcal{P}(V_{\beta}\times V_{\beta})$ は分出で集合になり、Step 2 から空でない。$R_{\beta}\defeq\mathbf{G}(W_{\beta})$ とおけば、$R_{\beta}\in W_{\beta}$ であり、$\beta\mapsto R_{\beta}$ は $\psi$ と $\vec{p}$ で定義される。
+
+**Step 4.** 【主張：$\lhd$ は大域的整列順序】 $x\lhd y$ を「$\rank(x)<\rank(y)$、または $\rank(x)=\rank(y)\defeq\beta$ かつ $(x,y)\in R_{\beta+1}$」と定め、これを $\psi'$ とする。ランクの等しい $x,y$ は $V_{\beta+1}$ に属する（\ref{set:rank-basic.1}）ので $R_{\beta+1}$ で比べられ、ランクの異なるものはランクで比べられるので、$\lhd$ は狭義の全順序である（推移律はランクが等しいかどうかで場合分けして確かめる）。空でない集合 $S$ について、$\beta\defeq\min\{\rank(x):x\in S\}$ とし、$S_{\beta}\defeq\{x\in S:\rank(x)=\beta\}\subseteq V_{\beta+1}$ の $R_{\beta+1}$-最小元をとると、それが $S$ の $\lhd$-最小元である。
+
+::: hypcheck
+- **基礎の公理**：Step 4 で、すべての集合がランクをもつことを使った。
+- **置換公理**：Step 2 で $\mathbf{G}\restr{\mathcal{F}}$ を集合にするのに使った。
+- 選択公理は仮定していない。2 の仮定（定義可能な大域的選択関数）から $\ZF$ で導いた（Step 2）。
+- Step 4 の $\lhd$ では、各 $x$ の始切片 $\{y:y\lhd x\}$ が $V_{\rank(x)+1}$ に含まれる集合であり、空でないクラスも最小元をもつ（\ref{logic:prob-gc-set-like}）。
+:::
+:::
+
+::: theorem 定義可能な整列順序と V=HOD {#logic:vhod-definable-wo keywords="V=HOD iff there is a parameter-free definable well-ordering of the universe" index="V=HOD|ぶいいこーるえいちおーでぃー, 定義可能な整列順序|ていぎかのうなせいれつじゅんじょ" refname="V=HOD と定義可能な整列順序"}
+（$\ZF$）
+1. パラメータのない論理式 $\psi_{\mathrm{HOD}}$ が具体的に作れて、$\mathbf{V}=\mathbf{HOD}$ ならば $\psi_{\mathrm{HOD}}$ は大域的整列順序を定める。
+2. パラメータのない各論理式 $\psi$ について、$\psi$ が大域的整列順序を定めるならば $\mathbf{V}=\mathbf{HOD}$。
+
+とくに $\mathbf{V}=\mathbf{HOD}$ は「$\mathbf{V}$ はパラメータなしで定義可能な整列順序をもつ」と（論理式の図式として）同値である。
+:::
+
+::: intuition
+宇宙全体を整列する式がパラメータなしで書けるのは、すべての集合が順序数から定義できるとき、そしてそのときに限る。整列順序があれば、各集合は「何番目の元か」という順序数で名指しでき、逆にすべての集合が順序数で名指しできれば、名指しに使う順序数の大小で整列できる。
+:::
+
+::: proof
+**Step 1.** 【主張：1 が成り立つ】 $\mathbf{V}=\mathbf{HOD}$ なら $\mathbf{V}=\mathbf{OD}$（$\mathbf{HOD}\subseteq\mathbf{OD}$）なので、\ref{set:od-enumeration} から各 $x$ に $o(x)\defeq\min\{\xi:\mathrm{Enod}(\xi)=x\}$ が定まる。$o$ は単射なので、$x\lhd y\defeq o(x)<o(y)$ は狭義の全順序であり、空でない集合 $S$ の元のうち $o$ の値が最小のものが $\lhd$-最小元である（$\mathbf{ON}$ は整列されている）。$\mathrm{Enod}$ はパラメータなしで定義されるので、この $\lhd$ を書いた論理式が $\psi_{\mathrm{HOD}}$ である。
+
+**Step 2.** 【主張：2 の仮定のもとで、各 $x$ は順序数 $\alpha,\xi$ から定義される】 $x$ を任意にとり、$\alpha\defeq\rank(x)+1$ とすると $x\in V_{\alpha}$（\ref{set:rank-basic.1}）。$\lhd_{\alpha}\defeq\{(y,z)\in V_{\alpha}^{2}:\psi(y,z)\}$ は分出で集合になり、仮定から $V_{\alpha}$ の整列順序である。\ref{set:ordinal-type} から順序同型 $\pi:(V_{\alpha},\lhd_{\alpha})\cong(\theta,\in)$ がただ一つあり、$\xi\defeq\pi(x)$ とおく。すると $x$ は論理式 $\chi(\alpha,\xi,z)$「$z\in V_{\alpha}$ であり、$\psi$ で定まる $V_{\alpha}$ の整列順序の順序数への同型が $z$ を $\xi$ に送る」を満たすただ一つの $z$ である。$\psi$ にパラメータがないので、$\chi$ のパラメータは順序数 $\alpha,\xi$ だけである。
+
+**Step 3.** 【主張：$\mathbf{V}=\mathbf{HOD}$】 Step 2 と \ref{set:od-from-formula} から、すべての $x$ は $\mathbf{OD}$ に属する。すると任意の $x$ について $\operatorname{trcl}(x)\subseteq\mathbf{V}=\mathbf{OD}$ なので、\ref{set:hod} の定義から $x\in\mathbf{HOD}$ である。
+
+::: hypcheck
+- **パラメータがないこと**：Step 2 で、$\chi$ が順序数以外のパラメータを含まないために使った。$\psi$ が集合 $p$ をパラメータにもつと、同じ議論は「各集合は順序数と $p$ から定義される」までしか言えず、$\mathbf{V}=\mathbf{HOD}$ は従わない（たとえば $\mathbf{V}=\mathbf{L}[a]$ で $a\notin\mathbf{OD}$ の場合、$<_{L[a]}$ は $a$ をパラメータとして定義されるが $\mathbf{V}\neq\mathbf{HOD}$ となる。この例の無矛盾性は強制法による事実で、本サイトでは示していない）。
+- **全順序と最小元**：Step 2 で $\lhd_{\alpha}$ が集合 $V_{\alpha}$ の整列順序になることにだけ使った。クラスについての最小元の条件は要らない。
+- **置換公理**：\ref{set:ordinal-type} の中で使われる。
+- 選択公理は使っていない（1 の整列順序は $\mathrm{Enod}$ から定義され、2 は整列順序を仮定する）。
+:::
+:::
+
+::: corollary V=L なら V=HOD {#logic:vl-implies-vhod keywords="V=L implies V=HOD, definable well-ordering of L" index="V=L と V=HOD|ぶいいこーるえるとぶいいこーるえいちおーでぃー"}
+（$\ZF$）$\mathbf{V}=\mathbf{L}$ ならば、$<_{L}$ はパラメータなしで定義可能な大域的整列順序であり、$\mathbf{V}=\mathbf{HOD}$ が成り立つ。したがってまた、パラメータなしで定義可能な大域的選択関数がある。
+:::
+
+::: proof
+$<_{L}$ は $\mathbf{L}$ の階層 $L_{\alpha}$ と各段の整列順序 $\lhd_{\alpha}$ から再帰で定義され、パラメータを含まない（\ref{set:l-well-order}）。\ref{set:l-well-order-basic} より $<_{L}$ は $\mathbf{L}$ を整列するので、$\mathbf{V}=\mathbf{L}$ のもとでは大域的整列順序である。\ref{logic:vhod-definable-wo.2} から $\mathbf{V}=\mathbf{HOD}$ を得て、\ref{logic:gc-iff-gwo.1} から大域的選択関数を得る。
+:::
+
+::: fact V≠HOD の無矛盾性 {#logic:v-neq-hod-consistent keywords="consistency of V not equal HOD, Cohen real is not ordinal definable" index="V≠HOD の無矛盾性|ぶいのっといこーるえいちおーでぃーのむむじゅんせい"}
+1. $\ZFC$ が無矛盾ならば、$\ZFC+\mathbf{V}\neq\mathbf{HOD}$ も無矛盾である。たとえばコーエン実数を一つ加えた強制拡大では、加えた実数は順序数定義可能でない（強制法の \term[半順序]{set:forcing-poset}が多くの自己同型をもち、順序数から定義される性質を保つことによる）。
+2. $\ZFC$ が無矛盾ならば、「集合のパラメータを許しても、$\mathbf{V}$ の整列順序を定義する論理式はない」（各論理式 $\psi$ について「どの $p$ についても $\psi(\cdot,\cdot,p)$ は大域的整列順序を定めない」）ことも無矛盾であるとされる（真のクラスの強制法による。未確認）。
+
+（1 は Jech『Set Theory』など強制法の標準的な教科書で扱われる。2 の出典は確認していない。）
+:::
+
+::: corollary ZFC は定義可能な大域的選択を証明しない {#logic:zfc-no-definable-gc keywords="ZFC does not prove the existence of a definable global choice function" index="大域的選択の非証明性|たいいきてきせんたくのひしょうめいせい"}
+$\ZFC$ が無矛盾ならば、パラメータのないどの論理式 $\psi$ についても、$\ZFC$ は「$\psi$ は大域的選択関数を定める」を証明しない。
+:::
+
+::: proof
+$\ZFC$ がそれを証明したとすると、\ref{logic:gc-iff-gwo.2} から $\ZFC$ は「$\psi'$ は大域的整列順序を定める」を証明し（$\psi'$ もパラメータをもたない）、\ref{logic:vhod-definable-wo.2} から $\ZFC\vdash\mathbf{V}=\mathbf{HOD}$ となる。これは \ref{logic:v-neq-hod-consistent.1} に反する。
+:::
+
+::: supplement
+**大域的選択は「一つの文」ではない.** 上の系は、「大域的選択」を $\ZFC$ の言語で書こうとすると、論理式ごとの無限個の主張に分かれ、そのどれも証明できないことを示している。$\mathbf{V}=\mathbf{HOD}$ や $\mathbf{V}=\mathbf{L}$ は、それを一つの文で保証する追加の公理である。Lean の $\mathsf{choice}$ は、型を量化できる型理論の中で、この量化を一つの項にまとめている。
+:::
+
+## NBG と大域的選択 {#logic:sec-gc-nbg}
+
+クラスを対象として扱う集合論 NBG（\ref{set:nbg-mk}）では、大域的選択を一つの公理として書ける。
+
+::: definition 大域的選択の公理 {#logic:nbg-global-choice keywords="axiom of global choice in NBG, NBG+GC" index="大域的選択の公理|たいいきてきせんたくのこうり, NBG+GC|えぬびーじーぷらすじーしー"}
+NBG の言語で、次の文を**大域的選択の公理**（GC）という：クラス $F$ があって、$F$ は $\mathbf{V}$ 上の関数（順序対のクラスで、各集合 $x$ に対し $\langle x,y\rangle\in F$ となる $y$ がただ一つ）であり、空でないすべての集合 $x$ について $F(x)\in x$ である。
+:::
+
+::: intuition
+クラスを量化できる体系では、「すべての空でない集合から一斉に元を選ぶ関数がある」をそのまま一つの公理として書ける。NBG の置換公理（クラス関数による集合の像は集合）から、GC は各集合族の選択関数を与えるので、NBG+GC は選択公理を含む。
+:::
+
+::: fact 大域的選択の保存性 {#logic:nbg-gc-conservative keywords="NBG plus global choice is conservative over ZFC, Felgner" index="大域的選択の保存性|たいいきてきせんたくのほぞんせい"}
+NBG+GC は $\ZFC$ の保存拡大である：集合の変数だけを含む文 $\varphi$ について、NBG+GC $\vdash\varphi$ ならば $\ZFC\vdash\varphi$。（Felgner（1971 年とされる）による結果とされる。未確認。）
+:::
+
+::: supplement
+**証明の考え方（概略）.** $\ZFC$ のモデル $\mathbf{M}$ をとり、条件を「ある $\alpha$ について $V_{\alpha}$ の空でない元の上の選択関数」、順序を延長とする強制法を考える。条件の長さ $<\lambda$ の減少列は和をとれば条件になるので、この強制法はどの $\lambda$ についても $\lambda$-閉であり、新しい集合を加えない。ジェネリックな対象の和 $\mathbf{G}$ は大域的選択関数で、$\mathbf{M}$ の集合と、$\mathbf{G}$ をパラメータとして定義されるクラスを合わせると NBG+GC のモデルになる。集合は変わらないので、集合についての文の真偽も変わらない。真のクラスの強制法の細部（強制定理が成り立つこと）は本サイトでは扱っていない。
+
+**前提を変えると.** NBG ではクラスの内包が集合を動く量化子に限られる。内包を任意の論理式に許す MK（モース＝ケリー）は $\mathrm{Con}(\ZF)$ を証明するので（\ref{set:nbg-mk.2}）、MK+GC は $\ZFC$ の保存拡大ではない。保存性を壊すのは内包の強さであって、GC ではない。
+:::
+
+## Lean の選択は大域的選択 {#logic:sec-gc-lean}
+
+前ページの $\mathsf{ZFSet}_{u}$ で、クラスを述語 $\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ と読むと、大域的選択はそのまま定理になる。
+
+::: theorem ZFSet のクラスと大域的選択 {#logic:zfset-nbg-gc keywords="ZFSet with predicates as classes satisfies Morse-Kelley with global choice" index="ZFSet のクラス|ぜっとえふせっとのくらす"}
+集合を $\mathsf{ZFSet}_{u}$ の元、クラスを $\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ の元、集合 $X$ がクラス $C$ に属することを $C\,X$ と解釈する。このとき Lean で次が証明できる。
+1. 集合については $\ZFC$ の公理が成り立つ。
+2. （クラスの外延性）$(\forall X,\ C\,X\leftrightarrow D\,X)\to C=D$。
+3. （内包）NBG・MK の言語の任意の論理式 $\varphi(X)$ について、$\forall X\,(C\,X\leftrightarrow\varphi(X))$ となるクラス $C$ がある。
+4. （置換）$F:\mathsf{ZFSet}_{u}\to\mathsf{ZFSet}_{u}$ と集合 $A$ について、像 $\{F(X):X\in A\}$ は集合である。とくにクラス関数（関数的なクラス）による集合の像は集合である。
+5. （大域的選択）関数 $c:\mathsf{ZFSet}_{u}\to\mathsf{ZFSet}_{u}$ があって、空でないすべての $X$ について $c(X)\in X$ である。対応するクラス $F\,W\defeq\exists X,\ W=\langle X,c(X)\rangle$ は GC の条件を満たす。
+:::
+
+::: intuition
+Lean の中に作った集合の世界では、「集合の性質」をすべてクラスとみなせ、空でないすべての集合から一斉に元を選ぶ関数 $c$ が一つの項として書ける。集合論で一つの文として書けなかった大域的選択が、ここでは選択の公理の直接の帰結になる。
+:::
+
+::: proof
+**Step 1.** 【主張：1〜3 が成り立つ】 1 は \ref{logic:zfset-zfc} である。2 は $\mathsf{propext}$ で各 $X$ について $C\,X=D\,X$ とし、$\mathsf{funext}$ で $C=D$ とすればよい。3 は、$\varphi$ を論理式の翻訳（\ref{logic:zf-translation}）を二種類の変数に広げて Lean の命題に移し（クラスの変数は $\mathsf{ZFSet}_{u}\to\mathsf{Prop}$ を動く）、$C\defeq\lambda X.\,\varphi^{Z}(X)$ とおけばよい。クラスを量化する論理式でも、$\prod_{C:\mathsf{ZFSet}_{u}\to\mathsf{Prop}}$ は $\mathsf{Prop}$ に属する（$\mathsf{Prop}$ の非可述性）ので、$\varphi^{Z}$ は命題である。
+
+**Step 2.** 【主張：4 が成り立つ】 $A=[\mathsf{mk}\,\alpha\,A_{0}]$ として、\ref{logic:zfset-constructions.6} を $\beta\defeq\alpha$ と $b\mapsto F([A_{0}(b)])$ に使えば、元がちょうど $F([A_{0}(b)])$ である集合 $Y$ が得られ、これが像である（$A$ の元は $[A_{0}(b)]$ の形）。関数的なクラス $R$ による像は、各 $b$ について $R$ で対応する唯一の値を、\ref{logic:zfset-zfc} の Step 6 と同様に $\mathsf{choice}$ で選んで作る。
+
+**Step 3.** 【主張：5 が成り立つ】 $\mathsf{ZFSet}_{u}$ は $[\varnothing]$ をもつので空でない。そこで \ref{logic:hilbert-epsilon} を使って $c(X)\defeq\varepsilon(\lambda W.\,W\in X)$ とおく。$X$ が空でなければ $\exists W,\ W\in X$ なので、\ref{logic:epsilon-spec.1} から $c(X)\in X$ である。クラス $F$ について、各 $X$ に $\langle X,c(X)\rangle$ が $F$ に属し、$\langle X,V\rangle$ が $F$ に属すれば順序対の特徴付け（\ref{set:ordered-pair-characterization}。1 により $\mathsf{ZFSet}_{u}$ で成り立つ）から $V=c(X)$ となるので、$F$ は関数で $F(X)=c(X)$ である。
+
+::: hypcheck
+- **選択**：Step 2（関係から関数を作る部分と、\ref{logic:zfset-constructions.6}）と Step 3（ε）で使った。
+- **命題外延性・関数外延性**：Step 1 のクラスの外延性で使った。
+- **$\mathsf{Prop}$ の非可述性**：Step 1 の 3 で、クラスを量化する内包（MK の内包）を述語として作るのに使った。NBG の内包（集合だけを量化する論理式）なら、量化は $\mathsf{ZFSet}_{u}$ の上だけなので、$\mathsf{ZFSet}_{u}:\mathsf{Type}(u+1)$ 上の量化が $\mathsf{Prop}$ に入るという同じ規則で足りる。
+:::
+:::
+
+::: corollary MK+GC の無矛盾性 {#logic:con-lean-mk-gc keywords="Con(Lean) implies Con(MK + GC)" index="MK の無矛盾性と Lean|えむけーのむむじゅんせいとりーん"}
+宇宙 $\mathsf{Type}\,0,\mathsf{Type}\,1$ をもつ Lean の型理論が無矛盾ならば、MK+GC（したがって NBG+GC）は無矛盾である。
+:::
+
+::: proof
+\ref{logic:con-lean-zfc} と同じく、MK+GC の導出を、\ref{logic:zfset-nbg-gc} の解釈で Lean の項に移す（二種類の変数をもつ一階論理の導出についての帰納法で、各規則の扱いは \ref{logic:zf-translation-sound} と同じである）。MK+GC が矛盾すれば $\mathsf{False}$ の項が得られる。
+:::
+
+::: supplement
+**大域的選択は強さを足さない.** Lean の選択は大域的選択だが、Lean 全体の無矛盾性の強さは「$\ZFC$ ＋有限個の到達不能基数」と同じである（\ref{logic:lean-equiconsistency}）。前ページの集合のモデル（\ref[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model}）では、$\mathsf{Sort}(u+1)$ は集合 $V_{\kappa_{u}}$ と解釈されるので、$\mathsf{choice}$ の解釈に要るのは集合 $V_{\kappa_{u}}$ の空でない元の上の選択関数一つであり、これは $\ZFC$ の選択公理で存在する。**宇宙を外から集合として見ると、大域的選択は局所的な選択になる。** これは集合論の \ref{logic:nbg-gc-conservative} の証明（集合の大きさの近似を貼り合わせる）と同じ構図である。
+
+**MK と ZFC の差.** \ref{logic:con-lean-mk-gc} の MK は $\mathrm{Con}(\ZF)$ を証明し（\ref{set:nbg-mk.2}）、これは（$\ZFC$ が無矛盾なら）$\ZFC$ では証明できない集合についての文なので、MK は $\ZFC$ より強い。これは Lean の断片が $\ZFC$ より強いこと（\ref{logic:con-lean-zfc} の補足）と合っている：$\mathsf{ZFSet}_{u}$ の「クラス」は一段上の型 $\mathsf{ZFSet}_{u}\to\mathsf{Prop}:\mathsf{Type}(u+1)$ の元であり、到達不能基数 $\kappa$ について $V_{\kappa+1}$ を $V_{\kappa}$ のクラス全体と見るのと同じである。
+:::
+
+## 問題 {#logic:sec-gc-problems}
+
+::: problem ★ 基本：外延の等しい性質の ε {#logic:prob-gc-epsilon-ext}
+$\alpha$ が空でない型のとき、$\varepsilon(\lambda x.\,\mathsf{True})=\varepsilon(\lambda x.\,x=x)$ を示せ。どの公理を使ったか。
+:::
+
+::: solution
+各 $x$ について $\mathsf{True}\leftrightarrow(x=x)$ が成り立つ（右向きは $\mathsf{Eq}$ の反射律、左向きは $\mathsf{True}$ の構成子）。\ref{logic:epsilon-spec.2} から主張を得る。使った公理は、\ref{logic:epsilon-spec.2} の証明の $\mathsf{propext}$ と $\mathsf{funext}$（$\mathsf{funext}$ は商型から導かれる）、および ε の定義に使う $\mathsf{choice}$ と（\ref{logic:epsilon-nonempty} の）排中律である。
+:::
+
+::: problem ★ 基本：V=OD と V=HOD {#logic:prob-gc-od-hod}
+（$\ZF$）$\mathbf{V}=\mathbf{OD}$ と $\mathbf{V}=\mathbf{HOD}$ が同値であることを示せ。
+:::
+
+::: solution
+$\mathbf{V}=\mathbf{HOD}$ なら、$\mathbf{HOD}\subseteq\mathbf{OD}$（\ref{set:hod}）から $\mathbf{V}=\mathbf{OD}$ である。逆に $\mathbf{V}=\mathbf{OD}$ なら、任意の $x$ について $x\in\mathbf{OD}$ かつ $\operatorname{trcl}(x)\subseteq\mathbf{V}=\mathbf{OD}$ なので、\ref{set:hod} の定義から $x\in\mathbf{HOD}$ である。
+:::
+
+::: problem ★★ 標準：ランクで作った整列順序 {#logic:prob-gc-set-like}
+\ref{logic:gc-iff-gwo} の証明の Step 4 で作った $\lhd$ について、(i) 各 $x$ の始切片 $\{y:y\lhd x\}$ は集合であること、(ii) 空でないすべてのクラスが $\lhd$-最小元をもつことを示せ。
+:::
+
+::: solution
+(i) $y\lhd x$ なら $\rank(y)\le\rank(x)$ なので、\ref{set:rank-basic.1} から $y\in V_{\rank(x)+1}$ である。よって始切片は $V_{\rank(x)+1}$ の部分クラスで、分出により集合である。(ii) 空でないクラス $\mathbf{C}$ について、$\beta\defeq\min\{\rank(x):x\in\mathbf{C}\}$（順序数の空でないクラスの最小元）とおくと、$\mathbf{C}_{\beta}\defeq\{x\in\mathbf{C}:\rank(x)=\beta\}$ は $V_{\beta+1}$ の部分クラスなので空でない集合である。その $\lhd$-最小元（大域的整列順序の定義から存在する）を $m$ とすると、$\mathbf{C}$ の元 $y$ は $\rank(y)>\beta$ なら $m\lhd y$、$\rank(y)=\beta$ なら $y\in\mathbf{C}_{\beta}$ なので $m\lhd y$ または $m=y$ である。よって $m$ は $\mathbf{C}$ の $\lhd$-最小元である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

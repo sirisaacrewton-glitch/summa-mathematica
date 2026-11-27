@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>三つの公理と古典論理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/05-proof-theory/10-lean-type-theory/02-lean-axioms.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 三つの公理と古典論理 {#logic:page-lean-axioms keywords="axioms of Lean 4, propositional extensionality, propext, quotient types, Quot, Quot.sound, function extensionality from quotients, Classical.choice, Nonempty, Diaconescu's theorem, excluded middle from choice, classical decidability, Decidable"}
+
+前ページ（\ref{logic:page-lean-core}）の核の規則だけでは、Lean で普通の数学を行うには足りない。Lean 4 の標準のライブラリは、核にさらに三つの公理を加える：命題は論理的に同値なら等しいという**命題外延性**（\ref{logic:lean-propext}）、商型の構成子と、関係で結ばれた元の像が等しいという公理（\ref{logic:lean-quot}, \ref{logic:lean-quot-sound}）、空でない型から元を一つ取り出す**選択**（\ref{logic:lean-choice}）である。本ページでは、商型の計算規則と関数の η から**関数外延性**が証明できること（\ref{logic:lean-funext-from-quot}）、選択と命題外延性と関数外延性から**排中律**が証明できること（\tref{logic:diaconescu}）、そしてその結果、どんな命題にも（計算できない）判定が与えられること（\ref{logic:lean-prop-decidable}）を示す。前の系列では関数外延性は証明できず（\ref{logic:funext-independent}）、排中律も直観主義論理では導けなかった。Lean の数学が古典論理で行えるのは、これら三つの公理による。
+
+> 資料：参考書なし（標準的に説明される内容を本サイトで組み立てた）。公理と定数の名前・型（`propext`、`Quot`、`Quot.sound`、`Classical.choice`、`Nonempty`、`Decidable` など）と、標準ライブラリでの証明の進め方は記憶によるもので、**Lean 4 の実装・文書とは照合していない**。
+
+## 記法と定義の確認 {#logic:sec-la-notation}
+
+::: notation
+- 宇宙 $\mathsf{Sort}\,u$、$\mathsf{Prop}$、Π 型の規則、帰納型と再帰子、定義的等価 $\equiv$（証明の無関係性・関数の η を含む）は前ページのとおり（\ref{logic:lean-sorts}, \ref{logic:lean-pi-universe}, \ref{logic:lean-inductive}, \ref{logic:lean-recursor}, \ref{logic:lean-defeq-rules}）。部分単集合除去の制限は \ref{logic:lean-subsingleton-elimination} のとおりで、とくに $\vee$ と $\exists$ の再帰子は命題に値をとる動機しか許さない。
+- $a=b$ は Lean の等号 $\mathsf{Eq}$ で、大きな除去をもつ。そこから次が作れる（いずれも $\mathsf{Eq.rec}$ で定める。作り方は \ref{logic:path-operations} と同じ）：対称性 $\mathsf{Eq.symm}$、推移性 $\mathsf{Eq.trans}$、関数の適用 $\mathsf{congrArg}\,f:a=b\to f\,a=f\,b$、輸送 $\mathsf{Eq.mp}:(A=B)\to A\to B$（$A,B:\mathsf{Sort}\,u$）。
+- $\neg p\defeq(p\to\mathsf{False})$。$a\leftrightarrow b$ は構造 $\mathsf{Iff}$（フィールド $\mathsf{mp}:a\to b$ と $\mathsf{mpr}:b\to a$）で、命題である。$a\ne b\defeq\neg(a=b)$。
+- 部分型 $\{x:\alpha\mathrel{/\!/}P\,x\}$ は構造 $\mathsf{Subtype}$ で、元は $\langle x,h\rangle$、射影は $\mathsf{val}$ と $\mathsf{property}$ である（\ref{logic:lean-defeq-rules} の例 3）。
+- 本ページの「公理」は、型だけが与えられ定義（δ で展開される中身）をもたない定数である。定理がどの公理に依存するかは、Lean では命令 `#print axioms` で調べられるとされる（未確認）。
+:::
+
+## 命題外延性 {#logic:sec-la-propext}
+
+::: axiom 命題外延性 {#logic:lean-propext keywords="propositional extensionality, propext" index="命題外延性|めいだいがいえんせい, propext|ぷろっぷえくすと"}
+次の型の定数 $\mathsf{propext}$ を加える。
+$$
+\mathsf{propext}:\textstyle\prod_{a,b:\mathsf{Prop}}(a\leftrightarrow b)\to a=b.
+$$
+:::
+
+::: intuition
+「論理的に同値な命題は、命題として同じものである」と言う公理である。命題を真理値（真か偽か）とみる立場では当然の原理で、これによって $\mathsf{Prop}$ の元は「どう証明されるか」でなく「真か偽か」だけで区別されるようになる。逆向き $a=b\to(a\leftrightarrow b)$ は公理なしで輸送から得られる。
+:::
+
+::: proposition 命題外延性の帰結 {#logic:lean-propext-consequences keywords="true propositions equal True, propositional equality is logical equivalence" index="命題外延性の帰結|めいだいがいえんせいのきけつ"}
+$a,b,p:\mathsf{Prop}$ とする。
+1. $a=b$ と $a\leftrightarrow b$ は論理的に同値であり、命題外延性のもとで $(a=b)=(a\leftrightarrow b)$ である。
+2. $h:p$ なら $p=\mathsf{True}$ である。
+3. $n:\neg p$ なら $p=\mathsf{False}$ である。
+4. $a\leftrightarrow b$ なら、任意の $P:\mathsf{Prop}\to\mathsf{Sort}\,u$ について $P\,a\to P\,b$ の項がある。
+:::
+
+::: proof
+1 の「$a=b$ なら $a\leftrightarrow b$」は、$e:a=b$ について $\mathsf{Eq.mp}\,e:a\to b$ と $\mathsf{Eq.mp}\,(\mathsf{Eq.symm}\,e):b\to a$ を組にすればよい（公理は使わない）。逆は $\mathsf{propext}$ そのものである。二つの命題 $a=b$ と $a\leftrightarrow b$ が論理的に同値なので、それにもう一度 $\mathsf{propext}$ を使えば $(a=b)=(a\leftrightarrow b)$ となる。
+
+2 では、$p\leftrightarrow\mathsf{True}$ の二つの向きを $\lambda\_.\,\mathsf{trivial}$ と $\lambda\_.\,h$ で与え、$\mathsf{propext}$ を使う。3 では、$p\to\mathsf{False}$ は $n$ そのもの、$\mathsf{False}\to p$ は $\mathsf{False.rec}$ で与えられるので、$\mathsf{propext}$ から $p=\mathsf{False}$ となる。4 は、$\mathsf{propext}$ で $a=b$ を得て、動機 $\lambda x\,\_.\,P\,x$ の輸送を使えばよい。
+:::
+
+::: remark 公理は計算を止める {#logic:lean-axioms-block-reduction keywords="axioms block reduction, canonicity fails with propext" index="正準性の破れ|せいじゅんせいのやぶれ"}
+$h:(\mathsf{True}\wedge\mathsf{True})\leftrightarrow\mathsf{True}$ をとり、
+$$
+t\defeq\mathsf{Eq.rec}\,(\lambda x\,\_.\,\mathsf{Nat})\,0\,\mathsf{True}\,(\mathsf{propext}\,h):\mathsf{Nat}
+$$
+とおく（動機は定数の $\mathsf{Nat}$）。ι 簡約（\ref{logic:lean-recursor.3}）は主前提が構成子 $\mathsf{rfl}$ の形のときにしか使えないが、$\mathsf{propext}\,h$ は公理の適用で、δ で展開できる中身をもたない。したがって、どの簡約規則も $t$ を数字 $0$ の形に進めない。前の系列の体系や公理を使わない Lean の項では、閉じた $\mathsf{Nat}$ の項は計算で数字になる（**正準性**）ことが期待されるが、公理を加えるとこの性質は失われる。$t\equiv0$ そのものが規則から導けないかどうかは、主前提の型の両辺が異なる（$\mathsf{True}\wedge\mathsf{True}$ と $\mathsf{True}$）ことに関わる微妙な問題で、本ページでは扱わない（\see[定義的等価の性質]{logic:page-lean-defeq}）。
+:::
+
+## 商型 {#logic:sec-la-quot}
+
+::: definition 商型 {#logic:lean-quot keywords="quotient types in Lean, Quot, Quot.mk, Quot.lift, Quot.ind, computation rule for quotients" index="商型|しょうがた, Quot|くおっと"}
+$\alpha:\mathsf{Sort}\,u$ と関係 $r:\alpha\to\alpha\to\mathsf{Prop}$ について、次の定数と規則が核に組み込まれている（帰納型の宣言ではない）。$\mathsf{Quot.mk}\,r\,a$ を $[a]$ と略す。
+1. （形成）$\mathsf{Quot}\,r:\mathsf{Sort}\,u$。
+2. （導入）$\mathsf{Quot.mk}\,r:\alpha\to\mathsf{Quot}\,r$。
+3. （持ち上げ）$\beta:\mathsf{Sort}\,v$ について
+$$
+\mathsf{Quot.lift}:\textstyle\prod_{f:\alpha\to\beta}\Bigl(\prod_{a,b:\alpha}r\,a\,b\to f\,a=f\,b\Bigr)\to\mathsf{Quot}\,r\to\beta.
+$$
+4. （帰納法）$\beta:\mathsf{Quot}\,r\to\mathsf{Prop}$ について $\mathsf{Quot.ind}:\bigl(\prod_{a:\alpha}\beta\,[a]\bigr)\to\prod_{q:\mathsf{Quot}\,r}\beta\,q$。
+5. （計算）$\mathsf{Quot.lift}\,f\,h\,[a]\equiv f\,a$。
+:::
+
+::: intuition
+$\mathsf{Quot}\,r$ は「$\alpha$ の元を、$r$ で結ばれたものどうしを同じとみなして見たもの」である。$r$ を保つ関数だけが商の上の関数に降り（持ち上げ）、命題は代表元について示せばよい（帰納法）。計算規則 5 によって、商の上の関数を代表元で計算できる。ただし、ここまでの規則だけでは「$r$ で結ばれた元の像が等しい」ことは出てこないので、それを次の公理で加える。
+:::
+
+::: axiom 商の健全性 {#logic:lean-quot-sound keywords="Quot.sound, soundness of quotients" index="Quot.sound|くおっとさうんど, 商の健全性|しょうのけんぜんせい"}
+次の型の定数 $\mathsf{Quot.sound}$ を加える。
+$$
+\mathsf{Quot.sound}:\textstyle\prod_{a,b:\alpha}r\,a\,b\to[a]=[b].
+$$
+:::
+
+::: example
+1. **整数.** $\alpha\defeq\mathsf{Nat}\times\mathsf{Nat}$、$r\,(m,n)\,(m',n')\defeq(m+n'=m'+n)$ とすると、$\mathsf{Quot}\,r$ は「$m-n$」の全体として整数を表す。符号の反転は $(m,n)\mapsto[(n,m)]$ を持ち上げて定まる（$r$ を保つことは等式 $m+n'=m'+n$ の両辺を入れ替えればよい）。
+2. **順序のない組.** $\alpha\times\alpha$ 上の関係 $r\,(a,b)\,(c,d)\defeq(c=b\wedge d=a)$ による商では、$\mathsf{Quot.sound}$ から $[(a,b)]=[(b,a)]$ である（\ref{logic:prob-la-unordered-pair}）。
+:::
+
+## 商型から関数外延性へ {#logic:sec-la-funext}
+
+::: theorem 商型から関数外延性 {#logic:lean-funext-from-quot keywords="function extensionality from quotient types, funext in Lean" index="関数外延性（Lean）|かんすうがいえんせいりーん"}
+$\alpha:\mathsf{Sort}\,u$、$\beta:\alpha\to\mathsf{Sort}\,v$、$f,g:\prod_{x:\alpha}\beta\,x$ とする。$h:\prod_{x:\alpha}f\,x=g\,x$ なら $f=g$ である。すなわち、次の型の項がある。
+$$
+\mathsf{funext}:\textstyle\Bigl(\prod_{x:\alpha}f\,x=g\,x\Bigr)\to f=g.
+$$
+:::
+
+::: intuition
+関数の型を「各点で等しい」という関係で割った商を考える。商の元を各点で評価する写像は、関係を保つので商の上に降りる。$f$ と $g$ は商の中では等しい（公理 $\mathsf{Quot.sound}$）ので、その評価写像の値も等しく、評価写像の値は η によって $f$ と $g$ そのものに戻る。
+:::
+
+::: proof
+**Step 1（関数の型の商）.** 【主張：関係 $R\,k\,k'\defeq\prod_{x:\alpha}k\,x=k'\,x$ による商 $Q\defeq\mathsf{Quot}\,R$ が作れる】 $F\defeq\prod_{x:\alpha}\beta\,x$ とおくと $F:\mathsf{Sort}\,(\mathrm{imax}(u,v))$ である。$R\,k\,k'$ は等号の Π なので命題であり（\ref{logic:lean-prop-impredicative.1}）、$R:F\to F\to\mathsf{Prop}$ となる。\ref{logic:lean-quot.1} から $Q$ が作れる。
+
+**Step 2（評価写像）.** 【主張：$\mathrm{app}:Q\to F$ で、各 $x$ について $\mathrm{app}\,q\,x\equiv\mathsf{Quot.lift}\,(\lambda k.\,k\,x)\,\_\,q$ となるものがある】 $x:\alpha$ を固定する。$\lambda k.\,k\,x:F\to\beta\,x$ は $R$ を保つ：$R\,k\,k'$ の証明 $e$ について $e\,x:k\,x=k'\,x$ だからである。したがって \ref{logic:lean-quot.3}（$\beta$ を $\beta\,x$ とする）から $\mathrm{ev}_{x}\defeq\mathsf{Quot.lift}\,(\lambda k.\,k\,x)\,(\lambda k\,k'\,e.\,e\,x):Q\to\beta\,x$ が定まる。$\mathrm{app}\defeq\lambda q\,x.\,\mathrm{ev}_{x}\,q$ とおけばよい。
+
+**Step 3（代表元に戻る）.** 【主張：$k:F$ について $\mathrm{app}\,[k]\equiv k$】 β と商の計算規則（\ref{logic:lean-quot.5}）から
+$$
+\mathrm{app}\,[k]\equiv\lambda x.\,\mathrm{ev}_{x}\,[k]\equiv\lambda x.\,(\lambda k.\,k\,x)\,k\equiv\lambda x.\,k\,x
+$$
+であり、関数の η（\ref{logic:lean-defeq-rules.5}）から $\lambda x.\,k\,x\equiv k$ である。
+
+**Step 4（結論）.** 【主張：$f=g$】 仮定 $h$ は $R\,f\,g$ の証明なので、$\mathsf{Quot.sound}\,h:[f]=[g]$ である。$\mathsf{congrArg}\,\mathrm{app}$ を適用すると $\mathrm{app}\,[f]=\mathrm{app}\,[g]$ を得る。Step 3 から、この命題は $f=g$ と定義的に等価なので、変換規則によって $f=g$ の証明になる。
+
+::: hypcheck
+- **公理 $\mathsf{Quot.sound}$**：Step 4 で使った。これがないと、商の中で $[f]$ と $[g]$ が等しいことが出ない。
+- **商の計算規則**：Step 3 で使った。これが命題としての等式でしか成り立たないなら、Step 4 の最後で変換規則の代わりに等式の書き換えが要るが、結論は同じである。
+- **関数の η**：Step 3 の最後で使った。η がないと、得られるのは $(\lambda x.\,f\,x)=(\lambda x.\,g\,x)$ までである。
+- **使わなかった公理**：命題外延性と選択は使っていない。$\beta$ が $x$ に依存してもよいのは、Step 2 で $x$ を固定してから持ち上げたからである。
+:::
+:::
+
+::: supplement
+**前提を変えると.** マルティン＝レーフ型理論（\ref{logic:page-identity-types}）では関数外延性は規則から証明できない（\ref{logic:funext-independent}）。Lean で証明できるのは、商型という「等しさを増やす」構成を、計算規則つきで核に入れたからである。ホモトピー型理論では、一価性公理から関数外延性が導かれる（\ref{logic:page-hott}）。
+
+**類似の定理.** 同じ方法で、商型と η だけから「各点で等しい依存関数は等しい」以外の外延性も出る。たとえば構造の η（\ref{logic:lean-defeq-rules.7}）と組み合わせると、組の型の元は成分で決まる。
+:::
+
+::: proposition 商の普遍性 {#logic:lean-quot-universal keywords="universal property of quotients, lift is unique" index="商の普遍性|しょうのふへんせい"}
+$\beta:\mathsf{Sort}\,v$ とする。
+1. $f:\alpha\to\beta$ が $r$ を保つ（証明 $h$）なら、$\lambda a.\,\mathsf{Quot.lift}\,f\,h\,[a]\equiv f$ である。
+2. 任意の $g:\mathsf{Quot}\,r\to\beta$ について、$g\circ\mathsf{Quot.mk}\,r$ は $r$ を保ち（その証明を $h_{g}$ とする）、$g=\mathsf{Quot.lift}\,(g\circ\mathsf{Quot.mk}\,r)\,h_{g}$ である。
+
+したがって、$\mathsf{Quot}\,r\to\beta$ の元は、$r$ を保つ $\alpha\to\beta$ の元と一対一に対応する。
+:::
+
+::: proof
+1 は計算規則（\ref{logic:lean-quot.5}）と η から従う。
+
+2 の前半では、$r\,a\,b$ の証明 $e$ について、$\mathsf{Quot.sound}\,e:[a]=[b]$ に $\mathsf{congrArg}\,g$ を適用すると $g\,[a]=g\,[b]$ が得られる。これが $h_{g}$ である。後半では、$\ell\defeq\mathsf{Quot.lift}\,(g\circ\mathsf{Quot.mk}\,r)\,h_{g}$ とおき、$\prod_{q}g\,q=\ell\,q$ を $\mathsf{Quot.ind}$ で示す。$q=[a]$ の場合、計算規則から $\ell\,[a]\equiv g\,[a]$ なので $\mathsf{rfl}$ が証明になる。最後に \ref{logic:lean-funext-from-quot} を使えば $g=\ell$ である。
+
+1 と 2 から、$f\mapsto\mathsf{Quot.lift}\,f\,h$ と $g\mapsto g\circ\mathsf{Quot.mk}\,r$ は互いに逆の対応である（1 は一方の合成が恒等であること、2 は他方の合成が恒等であることを言う）。
+:::
+
+::: theorem 商型の完全性 {#logic:lean-quot-exact keywords="Quot.exact, effectiveness of quotients by equivalence relations" index="商型の完全性|しょうがたのかんぜんせい, 商の効果性|しょうのこうかせい"}
+$r$ が同値関係（反射的・対称的・推移的）なら、$a,b:\alpha$ について $[a]=[b]$ から $r\,a\,b$ が従う。
+:::
+
+::: intuition
+商の中で等しくなるのは、もともと関係で結ばれていた元だけで、それ以上のものは潰れない、という主張である。集合論で同値類をとった場合には当たり前のことだが、型理論では「関係 $r\,a\,\cdot$ そのもの」を商の上の命題の族に持ち上げる必要があり、そこで命題外延性を使う。
+:::
+
+::: proof
+$a$ を固定する。
+
+**Step 1（命題の族の持ち上げ）.** 【主張：$P\,[x]\equiv r\,a\,x$ となる $P:\mathsf{Quot}\,r\to\mathsf{Prop}$ がある】 \ref{logic:lean-quot.3} を $\beta\defeq\mathsf{Prop}$、$f\defeq\lambda x.\,r\,a\,x$ に使う。そのためには、$r\,x\,y$ のとき $r\,a\,x=r\,a\,y$ を示せばよい。$r\,a\,x$ なら推移性で $r\,a\,y$ であり、$r\,a\,y$ なら対称性で得た $r\,y\,x$ と推移性で $r\,a\,x$ である。ゆえに $r\,a\,x\leftrightarrow r\,a\,y$ であり、命題外延性（\ref{logic:lean-propext}）から $r\,a\,x=r\,a\,y$ となる。こうして持ち上げた $P$ について、計算規則から $P\,[x]\equiv r\,a\,x$ である。
+
+**Step 2（等式を命題の等式に移す）.** 【主張：$e:[a]=[b]$ なら $(r\,a\,a)=(r\,a\,b)$】 $\mathsf{congrArg}\,P\,e:P\,[a]=P\,[b]$ であり、Step 1 からこれは $(r\,a\,a)=(r\,a\,b)$ と定義的に等価である。
+
+**Step 3（結論）.** 【主張：$r\,a\,b$】 反射性から $r\,a\,a$ の証明があり、Step 2 の等式に沿って $\mathsf{Eq.mp}$ で運べば $r\,a\,b$ の証明が得られる。
+
+::: hypcheck
+- **同値関係であること**：反射性は Step 3、対称性と推移性は Step 1 で使った。$r$ が同値関係でないと結論は偽になりうる：$\alpha=\mathsf{Bool}$、$r\,x\,y\defeq(x=\mathsf{false}\wedge y=\mathsf{true})$ とすると、$\mathsf{Quot.sound}$ から $[\mathsf{false}]=[\mathsf{true}]$、その対称から $[\mathsf{true}]=[\mathsf{false}]$ だが、$r\,\mathsf{true}\,\mathsf{false}$ は成り立たない。一般の $r$ については次の系のとおりである。
+- **命題外延性**：Step 1 で、命題に値をとる関数 $\lambda x.\,r\,a\,x$ が $r$ を保つ（命題の**等式**を返す）ことを示すのに使った。
+- **$\mathsf{Quot.sound}$**：使っていない（完全性は健全性の逆向きの主張である）。選択も使っていない。
+:::
+:::
+
+::: corollary 商の等しさは同値閉包 {#logic:lean-quot-eqvgen keywords="Quot.mk equal iff EqvGen, equivalence closure" index="同値閉包（商型）|どうちへいほうしょうがた"}
+$r$ の同値閉包を、構成子 $\mathsf{rel}:r\,x\,y\to E\,x\,y$、$\mathsf{refl}:E\,x\,x$、$\mathsf{symm}:E\,x\,y\to E\,y\,x$、$\mathsf{trans}:E\,x\,y\to E\,y\,z\to E\,x\,z$ をもつ命題の帰納型 $E:\alpha\to\alpha\to\mathsf{Prop}$ とする（Lean の `EqvGen` に当たる）。任意の $r$ について、$[a]=[b]$ と $E\,a\,b$ は論理的に同値である。
+:::
+
+::: proof
+$E\,a\,b\Rightarrow[a]=[b]$ は、$E$ の再帰子（動機 $\lambda x\,y\,\_.\,[x]=[y]$ は命題に値をとる）による帰納法で示す。$\mathsf{rel}$ の場合は $\mathsf{Quot.sound}$、$\mathsf{refl}$ の場合は $\mathsf{rfl}$、$\mathsf{symm}$ と $\mathsf{trans}$ の場合は帰納法の仮定に $\mathsf{Eq.symm}$ と $\mathsf{Eq.trans}$ を使えばよい。
+
+逆は \ref{logic:lean-quot-exact} の証明を $r\,a\,x$ の代わりに $E\,a\,x$ で繰り返す。Step 1 で示すべきことは「$r\,x\,y$ なら $E\,a\,x\leftrightarrow E\,a\,y$」であり、$E\,a\,x$ と $\mathsf{rel}$ から作った $E\,x\,y$ に $\mathsf{trans}$ を使えば $E\,a\,y$ が得られ、逆向きは $\mathsf{symm}$ を挟めば同様に得られる。Step 3 の反射性は $\mathsf{refl}$ で与えられる。
+:::
+
+## 選択 {#logic:sec-la-choice}
+
+::: definition 空でないこと {#logic:lean-nonempty keywords="Nonempty, inhabited as a proposition" index="Nonempty|のんえんぷてぃ, 空でない型|からでないかた"}
+$\alpha:\mathsf{Sort}\,u$ について、命題の帰納型 $\mathsf{Nonempty}\,\alpha:\mathsf{Prop}$ を構成子 $\mathsf{Nonempty.intro}:\alpha\to\mathsf{Nonempty}\,\alpha$ で定める。$\mathsf{Nonempty}\,\alpha$ の証明があるとき、$\alpha$ は**空でない**という。
+:::
+
+::: intuition
+$\mathsf{Nonempty}\,\alpha$ は「$\alpha$ に元がある」という命題で、どの元があるかは忘れている。フィールドの型 $\alpha$ は命題でなく添字にも現れないので、部分単集合除去は許されず（\ref{logic:lean-subsingleton-elimination}）、核の規則だけでは $\mathsf{Nonempty}\,\alpha$ の証明から $\alpha$ の元を取り出せない。$\mathsf{Nonempty}\,\alpha$ は $\exists x{:}\alpha,\mathsf{True}$ と論理的に同値である（どちらの向きも、再帰子を命題の動機で使えば作れる）。
+:::
+
+::: axiom 選択 {#logic:lean-choice keywords="Classical.choice, axiom of choice in Lean, global choice" index="選択（Lean）|せんたくりーん, Classical.choice|くらしかるちょいす"}
+次の型の定数 $\mathsf{choice}$（Lean の綴りでは `Classical.choice`）を加える。
+$$
+\mathsf{choice}:\textstyle\prod_{\alpha:\mathsf{Sort}\,u}\mathsf{Nonempty}\,\alpha\to\alpha.
+$$
+:::
+
+::: intuition
+空でない型からは元を一つ取り出せる、という公理である。証明の無関係性によって $\mathsf{Nonempty}\,\alpha$ の証明はどれも同じなので、$\mathsf{choice}$ の値は実質的に型 $\alpha$ だけで決まる。つまりこれは、すべての空でない型に一斉に元を割り当てる**大域的な**選択関数で、集合論の選択公理（\tref{set:ax-choice}。空でない集合を元とする集合ごとに、選択関数の**存在**を言う）より形の上では強い（\see[選択公理と大域的選択]{logic:page-global-choice}）。
+:::
+
+::: proposition 不定記述 {#logic:lean-indefinite-description keywords="indefinite description, Classical.choose, Classical.choose_spec" index="不定記述|ふていきじゅつ"}
+$\alpha:\mathsf{Sort}\,u$、$P:\alpha\to\mathsf{Prop}$、$h:\exists x,P\,x$ について、$\mathsf{choose}\,h:\alpha$ と $\mathsf{choose\_spec}\,h:P\,(\mathsf{choose}\,h)$ が定義できる。さらに、$h,h':\exists x,P\,x$ なら $\mathsf{choose}\,h\equiv\mathsf{choose}\,h'$ である。
+:::
+
+::: proof
+**Step 1.** 【主張：$h$ から $\mathsf{Nonempty}\,\{x:\alpha\mathrel{/\!/}P\,x\}$ の証明が作れる】 $\mathsf{Exists}$ の再帰子を、命題に値をとる定数の動機 $\lambda\_.\,\mathsf{Nonempty}\,\{x\mathrel{/\!/}P\,x\}$ で使う（部分単集合除去の制限にかからない）。小前提は $\lambda w\,p.\,\mathsf{Nonempty.intro}\,\langle w,p\rangle$ である。
+
+**Step 2.** 【主張：$\mathsf{choose}\,h$ と $\mathsf{choose\_spec}\,h$ が定義できる】 Step 1 の証明を $n_{h}$ として $s\defeq\mathsf{choice}\,n_{h}:\{x\mathrel{/\!/}P\,x\}$ とおき、$\mathsf{choose}\,h\defeq\mathsf{val}\,s$、$\mathsf{choose\_spec}\,h\defeq\mathsf{property}\,s$ と定める。$\mathsf{property}\,s:P\,(\mathsf{val}\,s)$ なので型が合う。
+
+最後の主張は、$n_{h}$ と $n_{h'}$ が同じ命題の証明で、証明の無関係性から $n_{h}\equiv n_{h'}$ であることから、両立性によって従う。
+:::
+
+::: proposition 命題の形の選択原理 {#logic:lean-skolem keywords="choice principle with Prop-valued existence, Skolem functions in Lean" index="命題の形の選択原理|めいだいのかたちのせんたくげんり"}
+$\alpha:\mathsf{Sort}\,u$、$\beta:\alpha\to\mathsf{Sort}\,v$、$R:\prod_{x:\alpha}\beta\,x\to\mathsf{Prop}$ について、次の型の項がある。
+$$
+\Bigl(\textstyle\prod_{x:\alpha}\exists y{:}\beta\,x,R\,x\,y\Bigr)\to\exists f{:}\textstyle\prod_{x:\alpha}\beta\,x,\ \prod_{x:\alpha}R\,x\,(f\,x).
+$$
+:::
+
+::: proof
+$H:\prod_{x}\exists y,R\,x\,y$ とする。\ref{logic:lean-indefinite-description} から $f\defeq\lambda x.\,\mathsf{choose}\,(H\,x)$ とおけば、$\lambda x.\,\mathsf{choose\_spec}\,(H\,x):\prod_{x}R\,x\,(f\,x)$ である。$\mathsf{Exists.intro}\,f\,(\lambda x.\,\mathsf{choose\_spec}\,(H\,x))$ が求める項である。
+:::
+
+::: supplement
+**類似の定理.** 前の系列の型理論的選択公理（\tref{logic:type-theoretic-choice}）は、$\exists$ を Σ 型で読むので公理なしで証明できた。上の命題では $\exists$ が命題（証人を取り出せない）なので、$\mathsf{choice}$ が要る。集合論の選択公理と同じ形の主張は、Lean では上の命題である。
+
+**前提を変えると.** $\mathsf{choice}$ を加えない体系では、$\mathsf{Nonempty}\,\alpha\to\alpha$ の項は一般には作れないとされる（それを確かめるには、選択が成り立たないモデルが要る。本サイトでは扱わない）。
+:::
+
+## ディアコネスクの定理 {#logic:sec-la-diaconescu}
+
+::: theorem ディアコネスクの定理 {#logic:diaconescu keywords="Diaconescu's theorem, Diaconescu-Goodman-Myhill, choice implies excluded middle, Classical.em" index="ディアコネスクの定理|でぃあこねすくのていり, 排中律（Lean）|はいちゅうりつりーん" refname="ディアコネスクの定理"}
+選択（\ref{logic:lean-choice}）、命題外延性（\ref{logic:lean-propext}）、関数外延性（\ref{logic:lean-funext-from-quot}）のもとで、任意の $p:\mathsf{Prop}$ について $p\vee\neg p$ である。
+:::
+
+::: intuition
+命題 $p$ を使って、$\mathsf{Prop}$ 上の二つの述語「$x$ は真、または $p$」「$x$ は偽、または $p$」を作り、選択でそれぞれを満たす命題 $u,v$ を選ぶ。$p$ が成り立てば二つの述語は同じものになるので、（大域的な）選択は同じ命題を選び $u=v$ となる。$p$ が成り立たなければ $u$ は真、$v$ は偽で、$u\ne v$ である。$u=v$ かどうかを調べれば $p$ が決まる…のではなく、「$u\ne v$ か $p$ か」が命題として言え、それが排中律を与える。
+:::
+
+::: proof
+$p:\mathsf{Prop}$ を固定する。
+
+**Step 1（二つの命題を選ぶ）.** 【主張：$U\,u$ と $V\,v$ を満たす $u,v:\mathsf{Prop}$ がある。ここで $U\,x\defeq(x=\mathsf{True})\vee p$、$V\,x\defeq(x=\mathsf{False})\vee p$】 $U,V:\mathsf{Prop}\to\mathsf{Prop}$ である。$\mathsf{Or.inl}\,\mathsf{rfl}:U\,\mathsf{True}$ なので $h_{U}\defeq\mathsf{Exists.intro}\,\mathsf{True}\,(\mathsf{Or.inl}\,\mathsf{rfl}):\exists x,U\,x$ であり、同様に $h_{V}:\exists x,V\,x$ が作れる。\ref{logic:lean-indefinite-description} から $u\defeq\mathsf{choose}\,h_{U}$、$v\defeq\mathsf{choose}\,h_{V}$ とおけば、$\mathsf{choose\_spec}$ から $U\,u$ と $V\,v$ の証明が得られる。
+
+**Step 2（$u\ne v$ または $p$）.** 【主張：$u\ne v\vee p$】 示すべきことは命題なので、$U\,u$ と $V\,v$ の証明に $\mathsf{Or}$ の再帰子を（命題の動機で）使って場合を分けてよい。どちらかが $\mathsf{Or.inr}$ で $p$ の証明を含む場合、$\mathsf{Or.inr}$ でその証明を返せばよい。両方が $\mathsf{Or.inl}$ の場合、$u=\mathsf{True}$ と $v=\mathsf{False}$ である。このとき $u=v$ を仮定すると、推移性と対称性から $\mathsf{True}=\mathsf{False}$ となり、$\mathsf{trivial}:\mathsf{True}$ をこれに沿って $\mathsf{Eq.mp}$ で運べば $\mathsf{False}$ の証明になる。ゆえに $u\ne v$ であり、$\mathsf{Or.inl}$ で返せばよい。
+
+**Step 3（述語の等しさ）.** 【主張：$p$ なら $U=V$】 $h_{p}:p$ を仮定する。各 $x:\mathsf{Prop}$ について $U\,x$ と $V\,x$ はどちらも $\mathsf{Or.inr}\,h_{p}$ で証明できるので $U\,x\leftrightarrow V\,x$ であり、命題外延性から $U\,x=V\,x$ となる。これがすべての $x$ について言えるので、関数外延性から $U=V$ である。
+
+**Step 4（選ばれる命題の一致）.** 【主張：$p$ なら $u=v$】 一般に、$P,P':\mathsf{Prop}\to\mathsf{Prop}$ と $e:P=P'$ について
+$$
+\textstyle\prod_{h:\exists x,P\,x}\ \prod_{h':\exists x,P'\,x}\mathsf{choose}\,h=\mathsf{choose}\,h'
+$$
+を $e$ についての $\mathsf{Eq.rec}$ で示す（$P$ と $h$ を固定し、動機は $\lambda P'\,\_.\,\prod_{h'}\mathsf{choose}\,h=\mathsf{choose}\,h'$）。$e$ が $\mathsf{rfl}$（$P'\equiv P$）の場合、$h$ と $h'$ は同じ命題 $\exists x,P\,x$ の証明なので、\ref{logic:lean-indefinite-description} の最後の主張から $\mathsf{choose}\,h\equiv\mathsf{choose}\,h'$ であり、$\mathsf{rfl}$ が証明になる。これを Step 3 の $U=V$ と $h_{U}$, $h_{V}$ に使えば $u=v$ である。
+
+**Step 5（結論）.** 【主張：$p\vee\neg p$】 Step 2 で場合を分ける。$p$ の場合は $\mathsf{Or.inl}$ で $p\vee\neg p$ を得る。$u\ne v$ の場合、$p$ を仮定すると Step 4 から $u=v$ となって $u\ne v$ と矛盾するので、$\neg p$ である。$\mathsf{Or.inr}$ で $p\vee\neg p$ を得る。
+
+::: hypcheck
+- **選択**：Step 1 で $u,v$ を選ぶのに使い、Step 4 で、選択の値が「存在の証明」ではなく述語だけで決まることを使った。後者は証明の無関係性による。
+- **命題外延性**：Step 3 で、$U\,x$ と $V\,x$ が同値であることを等式にするのに使った。
+- **関数外延性**：Step 3 で、各点の等式から述語の等式 $U=V$ を得るのに使った。Lean ではこれは \ref{logic:lean-funext-from-quot} で $\mathsf{Quot.sound}$ から得られるので、結局三つの公理すべてを使っている。
+- **$\vee$ の除去が命題に限られること**：Step 2 と Step 5 の場合分けはどちらも命題を示しているので、部分単集合除去の制限（\ref{logic:lean-subsingleton-elimination}）にかからない。
+- **選ぶ型**：$\mathsf{choice}$ は $\{x:\mathsf{Prop}\mathrel{/\!/}U\,x\}$ のような、$\mathsf{Prop}$ の部分型にしか使っていない。
+:::
+:::
+
+::: supplement
+**類似の定理.** 同じ形の定理は、トポスでは「選択公理を満たすトポスはブール的である」（R. Diaconescu による。1975 年とされる。未確認）、直観主義的な集合論では「選択公理から排中律が従う」（N. Goodman と J. Myhill による。未確認）として知られている。前の系列の \tref{logic:type-theoretic-choice} は直観主義的な体系で証明できる選択原理だが、排中律を導かない（\see{logic:excluded-middle-not-derivable}）。違いは、そこでは存在が Σ 型（証人を含む）で読まれ、選択関数が「存在の証明」に依存してよいのに対し、ここでの $\mathsf{choice}$ は証明を区別しない（Step 4）ことにある。
+
+**前提を変えると.** Step 4 の「選択の値は述語だけで決まる」は、命題外延性と関数外延性がないと使えない（$U$ と $V$ は式として異なる）。外延性のない体系では、選択と排中律の関係はこの形では成り立たない。
+
+**高い視点から.** $\mathsf{Prop}$ 上の述語 $U$ は「$\mathsf{Prop}$ の部分集合」であり、選択はその元を一つ選ぶ。Step 2 と Step 4 は、$\{\mathsf{True},\mathsf{False}\}$ を $p$ で割った商（$p$ が成り立てば二点が同一視され、成り立たなければ別のまま）について、選択によって各同値類から代表を選ぶ写像（商写像の右逆）を作ると、商が自明かどうか、すなわち $p$ が成り立つかどうかが決まってしまう、という議論である。選択関数の存在が「商写像が右逆をもつ」ことを要求し、それが論理を古典的にする。
+:::
+
+::: corollary 命題の二値性 {#logic:lean-prop-complete keywords="propositional completeness, every proposition is True or False, double negation elimination" index="命題の二値性|めいだいのにちせい, 二重否定の除去（Lean）|にじゅうひていのじょきょりーん"}
+三つの公理のもとで、任意の $p:\mathsf{Prop}$ について次が成り立つ。
+1. $p=\mathsf{True}\vee p=\mathsf{False}$。
+2. $\neg\neg p\to p$。
+:::
+
+::: proof
+\tref{logic:diaconescu} から $p\vee\neg p$ である。$p$ の場合は \ref{logic:lean-propext-consequences.2} から $p=\mathsf{True}$、$\neg p$ の場合は \ref{logic:lean-propext-consequences.3} から $p=\mathsf{False}$ となるので、1 が成り立つ。2 では $k:\neg\neg p$ を仮定し、$p\vee\neg p$ で場合を分ける。$p$ の場合はそのまま返し、$\neg p$ の場合は $k$ をそれに適用すると $\mathsf{False}$ の証明が得られるので、$\mathsf{False.rec}$ で $p$ を得る。
+:::
+
+## 決定可能性の古典化 {#logic:sec-la-decidable}
+
+::: definition 決定可能性の型 {#logic:lean-decidable keywords="Decidable, decision procedure, if-then-else" index="Decidable|でしだぶる, 決定可能性の型|けっていかのうせいのかた"}
+$p:\mathsf{Prop}$ について、帰納型 $\mathsf{Decidable}\,p:\mathsf{Type}$ を構成子 $\mathsf{isFalse}:\neg p\to\mathsf{Decidable}\,p$ と $\mathsf{isTrue}:p\to\mathsf{Decidable}\,p$ で定める（**決定可能性の型**）。$\mathsf{Decidable}\,p$ は $\mathsf{Type}$ に入るので大きな除去をもち、$d:\mathsf{Decidable}\,p$ と $a,b:\alpha$ から「$p$ なら $a$、そうでなければ $b$」を $\mathsf{Decidable.rec}$ で定められる（Lean の `if p then a else b`）。
+:::
+
+::: intuition
+$\mathsf{Decidable}\,p$ の元は「$p$ が成り立つか成り立たないかの答えと、その証明」の組で、$\mathsf{Bool}$ の値に正しさの証明を添えたものに当たる。命題 $p\vee\neg p$ と違って型なので、答えに応じて計算を分けることができる。
+:::
+
+::: proposition 決定可能性の型の基本性質 {#logic:lean-decidable-basic keywords="Decidable implies excluded middle instance, Decidable is a subsingleton" index="決定可能性の型の一意性|けっていかのうせいのかたのいちいせい"}
+$p:\mathsf{Prop}$ とする。公理を使わずに次が成り立つ。
+1. $\mathsf{Decidable}\,p\to p\vee\neg p$ の項がある。
+2. $d,d':\mathsf{Decidable}\,p$ なら $d=d'$ である。
+:::
+
+::: proof
+1 は $\mathsf{Decidable.rec}$（命題の動機 $\lambda\_.\,p\vee\neg p$）で、$\mathsf{isTrue}\,h$ を $\mathsf{Or.inl}\,h$ に、$\mathsf{isFalse}\,n$ を $\mathsf{Or.inr}\,n$ に送ればよい。
+
+2 は $d$ と $d'$ について順に場合を分ける（動機 $\lambda d.\,\prod_{d'}d=d'$ は命題に値をとる）。両方が $\mathsf{isTrue}$ の場合、$\mathsf{isTrue}\,h$ と $\mathsf{isTrue}\,h'$ について $h\equiv h'$（証明の無関係性）なので $\mathsf{rfl}$ が証明になる。両方が $\mathsf{isFalse}$ の場合も同じである。$\mathsf{isTrue}\,h$ と $\mathsf{isFalse}\,n$ の場合、$n\,h:\mathsf{False}$ なので $\mathsf{False.rec}$ で任意の命題が得られる。逆の組み合わせも同じである。
+:::
+
+::: theorem すべての命題の古典的な決定 {#logic:lean-prop-decidable keywords="Classical.propDecidable, classical decidability, noncomputable" index="古典的な決定|こてんてきなけってい"}
+三つの公理のもとで、次の型の項 $\mathsf{propDecidable}$ がある。
+$$
+\mathsf{propDecidable}:\textstyle\prod_{p:\mathsf{Prop}}\mathsf{Decidable}\,p.
+$$
+とくに、任意の型 $\alpha$ について $\prod_{a,b:\alpha}\mathsf{Decidable}\,(a=b)$ の項があり、任意の命題で場合分けした定義ができる。
+:::
+
+::: intuition
+排中律によって「$p$ か $\neg p$ か」は命題としては言えるが、命題からは $\mathsf{Type}$ の値を取り出せない（\ref{logic:lean-subsingleton-elimination}）。そこで「$\mathsf{Decidable}\,p$ に元がある」という命題を排中律から示し、選択で元を取り出す。こうして得た判定は、どちらの答えかを計算で知ることはできない（計算できない判定）。
+:::
+
+::: proof
+**Step 1.** 【主張：$\mathsf{Nonempty}\,(\mathsf{Decidable}\,p)$】 \tref{logic:diaconescu} から $p\vee\neg p$ である。示すべきことは命題なので、$\mathsf{Or}$ の再帰子を命題の動機で使い、$p$ の証明 $h$ を $\mathsf{Nonempty.intro}\,(\mathsf{isTrue}\,h)$ に、$\neg p$ の証明 $n$ を $\mathsf{Nonempty.intro}\,(\mathsf{isFalse}\,n)$ に送ればよい。
+
+**Step 2.** 【主張：$\mathsf{propDecidable}\,p\defeq\mathsf{choice}\,(\cdots)$ が求める項である】 Step 1 の証明に $\mathsf{choice}$（\ref{logic:lean-choice}）を使えば $\mathsf{Decidable}\,p$ の元が得られ、$p$ について λ で抽象すればよい。等号についての主張は、$p$ に $a=b$ を代入すれば得られる。
+
+::: hypcheck
+- **排中律**：Step 1 で使った（したがって三つの公理すべてに依存する）。
+- **選択**：Step 2 で、命題から $\mathsf{Type}$ の元を取り出すのに使った。部分単集合除去の制限によって、この段は選択なしには行えない。
+:::
+:::
+
+::: supplement
+**計算できないこと.** $\mathsf{propDecidable}\,p$ は公理 $\mathsf{choice}$ の適用なので、どの簡約規則でも $\mathsf{isTrue}\,\_$ や $\mathsf{isFalse}\,\_$ の形にならない（\ref{logic:lean-axioms-block-reduction} と同じ理由）。Lean は、このような定義からは実行できるコードを作れないので、`noncomputable` と印を付けることを求めるとされる（未確認）。たとえば「計算可能な関数 $f:\mathsf{Nat}\to\mathsf{Bool}$ について $\exists n,f\,n=\mathsf{true}$ かどうか」にも $\mathsf{propDecidable}$ で判定が与えられるが、これを計算する手続きはありえない（停止問題の決定不能性。\see{comp:atm-undecidable}）。
+
+**古典的な判定と構成的な判定の一致.** \ref{logic:lean-decidable-basic.2} から、ある命題 $p$ に構成的な判定 $d$（公理を使わずに作った $\mathsf{Decidable}\,p$ の元）があれば、$\mathsf{propDecidable}\,p=d$ である。したがって、二つの判定で場合分けした定義は、命題としては同じ値をとる。定義的には一般に異なるので、計算の結果を $\mathsf{rfl}$ で確かめたいときは構成的な判定を使う。
+:::
+
+::: fact 公理の独立性と無矛盾性 {#logic:lean-axioms-independent keywords="independence of propext, funext and excluded middle from the Lean kernel; consistency of Lean's axioms" index="Lean の公理の独立性|りーんのこうりのどくりつせい"}
+次のことが知られているとされる（本サイトでは確かめていない）。
+1. 前ページの核の規則だけからは、命題外延性も、（商型の公理を除いた場合の）関数外延性も、排中律も証明できない。
+2. 核の規則に三つの公理を加えた体系は、$\ZFC$ に十分な数の到達不能基数を加えた理論が無矛盾なら無矛盾である（後のページ \see[集合論のモデルと無矛盾性の上界]{logic:page-lean-set-model}）。
+:::
+
+## 問題 {#logic:sec-la-problems}
+
+::: problem ★ 基本：真な命題と True {#logic:prob-la-true-and}
+命題外延性を使って、任意の $a:\mathsf{Prop}$ について $(a\wedge\mathsf{True})=a$ を示せ。また、$h:a$ のとき $(a\to b)=b$ を示せ。
+:::
+
+::: solution
+前半は $\mathsf{propext}$ に $(a\wedge\mathsf{True})\leftrightarrow a$ を与えればよい。左から右へは $\mathsf{And}$ の第一の射影（$\mathsf{And}$ は部分単集合除去を許すので射影が作れる。命題を返すだけなら命題の動機でも足りる）で $a$ を得て、右から左へは $x:a$ を $\mathsf{And.intro}\,x\,\mathsf{trivial}$ に送る。後半は $(a\to b)\leftrightarrow b$ を示せばよい。$k:a\to b$ なら $k\,h:b$ であり、$y:b$ なら $\lambda\_.\,y:a\to b$ である。ゆえに $\mathsf{propext}$ から $(a\to b)=b$ となる。
+:::
+
+::: problem ★ 基本：順序のない組 {#logic:prob-la-unordered-pair}
+$\alpha:\mathsf{Type}$ とし、$\alpha\times\alpha$ 上の関係 $r\,(a,b)\,(c,d)\defeq(c=b\wedge d=a)$ による商を $\mathrm{UP}\defeq\mathsf{Quot}\,r$ とする。
+1. $[(a,b)]=[(b,a)]$ を示せ。
+2. $f:\alpha\to\alpha\to\beta$ が $\prod_{a,b}f\,a\,b=f\,b\,a$ を満たすとき、$\bar f\,[(a,b)]\equiv f\,a\,b$ となる $\bar f:\mathrm{UP}\to\beta$ を作れ。
+:::
+
+::: solution
+1 では、$r\,(a,b)\,(b,a)$ は $b=b\wedge a=a$ なので $\mathsf{And.intro}\,\mathsf{rfl}\,\mathsf{rfl}$ が証明であり、$\mathsf{Quot.sound}$ から $[(a,b)]=[(b,a)]$ である。
+
+2 では、$g\,(a,b)\defeq f\,a\,b$ が $r$ を保つことを示し、$\bar f\defeq\mathsf{Quot.lift}\,g\,\_$ とおく。$r\,(a,b)\,(c,d)$、すなわち $c=b$ と $d=a$ を仮定すると、書き換えによって $g\,(c,d)=f\,b\,a$ であり、仮定から $f\,b\,a=f\,a\,b=g\,(a,b)$ となる。よって $g\,(a,b)=g\,(c,d)$ である。計算規則から $\bar f\,[(a,b)]\equiv g\,(a,b)\equiv f\,a\,b$ である。
+:::
+
+::: problem ★ 基本：二重否定の除去と排中律 {#logic:prob-la-dne-em}
+公理を使わずに、「任意の命題 $p$ について $\neg\neg p\to p$」から「任意の命題 $p$ について $p\vee\neg p$」が導けることを示せ。
+:::
+
+::: solution
+$\neg\neg(p\vee\neg p)$ は公理なしで証明できる：$k:\neg(p\vee\neg p)$ のとき、$\lambda x{:}p.\,k\,(\mathsf{Or.inl}\,x):\neg p$ であり、これを $\mathsf{Or.inr}$ で包んで $k$ に渡せば $\mathsf{False}$ の証明になる。したがって $\lambda k.\,k\,(\mathsf{Or.inr}\,(\lambda x.\,k\,(\mathsf{Or.inl}\,x))):\neg\neg(p\vee\neg p)$ である（\ref{logic:page-dependent-types} の例と同じ項）。仮定の二重否定の除去を命題 $p\vee\neg p$ に使えば $p\vee\neg p$ が得られる。逆向き（排中律から二重否定の除去）は \ref{logic:lean-prop-complete.2} の証明のとおりである。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -327,6 +327,16 @@
 | strict cartesian closed functor | 厳密なデカルト閉関手 | | 仮。logic:page-lambek |
 | dependent function type (Pi type) / dependent pair type (Sigma type) | Π 型（依存関数型） / Σ 型（依存対型） | 依存積 / 依存和 | 仮。日本語の本に用例なし。logic:page-dependent-types |
 | judgmental (definitional) equality | 判断上の等しさ | 定義的等しさ | 仮。logic:page-dependent-types |
+| definitional equality（Lean の系列） | 定義的等価（ていぎてきとうか） | 判断上の等しさ | 仮（2026-11-26）。Lean の系列（logic:page-lean-core）でだけ使い、記法の項で判断上の等しさとの対応を書いた。理想／算法の定義的等価（ideal / algorithmic） |
+| universe level / sort | 宇宙レベル／ソート | | 仮（2026-11-26）。logic:lean-sorts |
+| recursor / motive / minor premise / major premise | 再帰子／動機／小前提／主前提 | | 仮（2026-11-26）。logic:lean-recursor |
+| proof irrelevance | 証明の無関係性 | | 仮（2026-11-26） |
+| subsingleton elimination | 部分単集合除去 | | 仮（2026-11-26）。logic:lean-subsingleton-elimination |
+| propositional extensionality | 命題外延性 | | 仮（2026-11-26） |
+| quotient type | 商型 | | 仮（2026-11-26） |
+| subject reduction | 部分簡約 | 主部簡約 | 仮（2026-11-26）。logic:subject-reduction-fails |
+| pre-set (Aczel) | 前集合 | | 仮（2026-11-26）。logic:pset |
+| global choice | 大域的選択 | | 仮（2026-11-26）。logic:definable-global-choice |
 | type family / induction principle | 型の族 / 帰納原理 | | 仮。logic:page-dependent-types |
 | universe (type theory) | 宇宙 | | 集合論・圏論の「宇宙」と同じ語。logic:page-dependent-types |
 | identity type / path / path induction | 恒等型 / 道 / 道帰納法 | 同一性型 | 仮。日本語の本に用例なし。logic:page-identity-types |

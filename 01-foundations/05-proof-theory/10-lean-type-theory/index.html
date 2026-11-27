@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lean の型理論と無矛盾性の強さ | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/05-proof-theory/10-lean-type-theory/index.html" data-kind="dir">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# Lean の型理論と無矛盾性の強さ（The Type Theory of Lean and Its Consistency Strength）
+
+定理証明支援系 Lean 4 の核にある依存型理論を、数学の対象として調べる。宇宙の階層と非可述的な命題の宇宙、帰納型と定義的等価、命題外延性・商型・選択の三つの公理と、そこから関数外延性・排中律が導かれること。定義的等価の決定不能性と、型検査の算法での推移性・部分簡約の破れ。到達不能基数を使った集合論のモデル（無矛盾性の上界）と、型理論の中に作る ZFC のモデル（下界）、大域的選択との関係。資料なしの標準的な内容（Carneiro『The Type Theory of Lean』、Werner「Sets in Types, Types in Sets」の内容とされるもの）で、文献の細部は本文で未確認と明記する。
+
+<p class="mn-msc">MSC2020: 03B38, 03F25, 03E55, 68V15</p>
+
+## 前提知識
+
+- [証明論と型理論 › 型理論](../../../01-foundations/05-proof-theory/09-type-theory/index.html)（全体、8 ページ）：依存型理論（Π 型・Σ 型・帰納型・宇宙）と恒等型
+- [集合論 › 基礎事項](../../../01-foundations/04-set-theory/01-basics/index.html)（全体、13 ページ）：ZFC の公理・順序数・基数・到達不能基数
+- [集合論 › 相対無矛盾性の初歩](../../../01-foundations/04-set-theory/04-consistency-proofs/index.html)（全体、6 ページ）：証明・主張で使う：V_κ が ZFC のモデルになること（κ が到達不能のとき）
+- [集合論 › 構成可能集合](../../../01-foundations/04-set-theory/06-constructible-sets/index.html)（全体、4 ページ）：証明・主張で使う：L の整列順序（§6）
+- [計算理論 › 計算可能性理論](../../../01-foundations/03-computation/02-computability/index.html)（全体、13 ページ）：証明・主張で使う：決定不能性（§3）
+
+## 目次
+
+<ol class="mn-dirtoc">
+<li value="1"><a href="01-lean-core.html">§1 Lean の核の型理論</a><ul class="mn-dirtoc-items"><li><span class="mn-dirtoc-kind">定義 1.1</span> <span class="mn-dirtoc-title">宇宙レベル</span></li><li><span class="mn-dirtoc-kind">補題 1.2</span> <span class="mn-dirtoc-title">imax の性質</span></li><li><span class="mn-dirtoc-kind">定義 1.3</span> <span class="mn-dirtoc-title">ソート</span></li><li><span class="mn-dirtoc-kind">定義 1.5</span> <span class="mn-dirtoc-title">Π 型の宇宙の規則</span></li><li><span class="mn-dirtoc-kind">命題 1.6</span> <span class="mn-dirtoc-title">Prop の非可述性</span></li><li><span class="mn-dirtoc-kind">定義 1.7</span> <span class="mn-dirtoc-title">帰納型の宣言</span></li><li><span class="mn-dirtoc-kind">定義 1.8</span> <span class="mn-dirtoc-title">再帰子と ι 簡約</span></li><li><span class="mn-dirtoc-kind">定理 1.9</span> <span class="mn-dirtoc-title">厳密陽性は必要</span></li><li><span class="mn-dirtoc-kind">定義 1.10</span> <span class="mn-dirtoc-title">定義的等価の規則</span></li><li><span class="mn-dirtoc-kind">定理 1.12</span> <span class="mn-dirtoc-title">恒等の証明の一意性（Lean）</span></li><li><span class="mn-dirtoc-kind">系 1.13</span> <span class="mn-dirtoc-title">一価性公理と両立しない</span></li><li><span class="mn-dirtoc-kind">定義 1.14</span> <span class="mn-dirtoc-title">部分単集合除去</span></li></ul></li>
+<li value="2"><a href="02-lean-axioms.html">§2 三つの公理と古典論理</a><ul class="mn-dirtoc-items"><li><span class="mn-dirtoc-kind">命題 2.2</span> <span class="mn-dirtoc-title">命題外延性の帰結</span></li><li><span class="mn-dirtoc-kind">定義 2.4</span> <span class="mn-dirtoc-title">商型</span></li><li><span class="mn-dirtoc-kind">定理 2.6</span> <span class="mn-dirtoc-title">商型から関数外延性</span></li><li><span class="mn-dirtoc-kind">命題 2.7</span> <span class="mn-dirtoc-title">商の普遍性</span></li><li><span class="mn-dirtoc-kind">定理 2.8</span> <span class="mn-dirtoc-title">商型の完全性</span></li><li><span class="mn-dirtoc-kind">系 2.9</span> <span class="mn-dirtoc-title">商の等しさは同値閉包</span></li><li><span class="mn-dirtoc-kind">定義 2.10</span> <span class="mn-dirtoc-title">空でないこと</span></li><li><span class="mn-dirtoc-kind">命題 2.12</span> <span class="mn-dirtoc-title">不定記述</span></li><li><span class="mn-dirtoc-kind">命題 2.13</span> <span class="mn-dirtoc-title">命題の形の選択原理</span></li><li><span class="mn-dirtoc-kind">定理 2.14</span> <span class="mn-dirtoc-title">ディアコネスクの定理</span></li><li><span class="mn-dirtoc-kind">系 2.15</span> <span class="mn-dirtoc-title">命題の二値性</span></li><li><span class="mn-dirtoc-kind">定義 2.16</span> <span class="mn-dirtoc-title">決定可能性の型</span></li></ul></li>
+<li value="3"><a href="03-lean-defeq.html">§3 定義的等価の性質</a><ul class="mn-dirtoc-items"><li><span class="mn-dirtoc-kind">定義 3.1</span> <span class="mn-dirtoc-title">理想の定義的等価</span></li><li><span class="mn-dirtoc-kind">定義 3.2</span> <span class="mn-dirtoc-title">到達可能性と等号の再帰子</span></li><li><span class="mn-dirtoc-kind">命題 3.3</span> <span class="mn-dirtoc-title">K 様の簡約は導ける</span></li><li><span class="mn-dirtoc-kind">命題 3.4</span> <span class="mn-dirtoc-title">Acc の再帰子の展開</span></li><li><span class="mn-dirtoc-kind">定義 3.5</span> <span class="mn-dirtoc-title">検査器の簡約</span></li><li><span class="mn-dirtoc-kind">定義 3.6</span> <span class="mn-dirtoc-title">算法の定義的等価の模型</span></li><li><span class="mn-dirtoc-kind">補題 3.7</span> <span class="mn-dirtoc-title">模型の基本性質</span></li><li><span class="mn-dirtoc-kind">命題 3.8</span> <span class="mn-dirtoc-title">模型の健全性</span></li><li><span class="mn-dirtoc-kind">定理 3.9</span> <span class="mn-dirtoc-title">算法の定義的等価は推移的でない</span></li><li><span class="mn-dirtoc-kind">定理 3.10</span> <span class="mn-dirtoc-title">算法の型付けで部分簡約は成り立たない</span></li><li><span class="mn-dirtoc-kind">命題 3.12</span> <span class="mn-dirtoc-title">停止すれば定義的に等しい</span></li><li><span class="mn-dirtoc-kind">命題 3.13</span> <span class="mn-dirtoc-title">検査器はこの等しさを判定できない</span></li></ul></li>
+<li value="4"><a href="04-lean-set-model.html">§4 集合論のモデルと無矛盾性の上界</a><ul class="mn-dirtoc-items"><li><span class="mn-dirtoc-kind">定義 4.1</span> <span class="mn-dirtoc-title">宇宙を制限した断片</span></li><li><span class="mn-dirtoc-kind">定義 4.2</span> <span class="mn-dirtoc-title">モデルの宇宙</span></li><li><span class="mn-dirtoc-kind">補題 4.3</span> <span class="mn-dirtoc-title">到達不能基数の段の閉包性</span></li><li><span class="mn-dirtoc-kind">定義 4.4</span> <span class="mn-dirtoc-title">切り詰めたグラフ</span></li><li><span class="mn-dirtoc-kind">補題 4.5</span> <span class="mn-dirtoc-title">切り詰めたグラフの基本性質</span></li><li><span class="mn-dirtoc-kind">定義 4.6</span> <span class="mn-dirtoc-title">集合論的モデルでの項の解釈</span></li><li><span class="mn-dirtoc-kind">補題 4.7</span> <span class="mn-dirtoc-title">代入と解釈</span></li><li><span class="mn-dirtoc-kind">補題 4.8</span> <span class="mn-dirtoc-title">帰納的な不動点</span></li><li><span class="mn-dirtoc-kind">命題 4.10</span> <span class="mn-dirtoc-title">帰納型を解釈した集合の正しさ</span></li><li><span class="mn-dirtoc-kind">命題 4.11</span> <span class="mn-dirtoc-title">公理の解釈</span></li><li><span class="mn-dirtoc-kind">定理 4.12</span> <span class="mn-dirtoc-title">集合論的モデルの健全性</span></li><li><span class="mn-dirtoc-kind">系 4.13</span> <span class="mn-dirtoc-title">無矛盾性の上界</span></li></ul></li>
+<li value="5"><a href="05-zfc-in-lean.html">§5 型理論の中の ZFC</a><ul class="mn-dirtoc-items"><li><span class="mn-dirtoc-kind">定義 5.1</span> <span class="mn-dirtoc-title">前集合</span></li><li><span class="mn-dirtoc-kind">定義 5.2</span> <span class="mn-dirtoc-title">外延的同値と所属</span></li><li><span class="mn-dirtoc-kind">補題 5.3</span> <span class="mn-dirtoc-title">外延的同値は同値関係</span></li><li><span class="mn-dirtoc-kind">補題 5.4</span> <span class="mn-dirtoc-title">所属と外延性</span></li><li><span class="mn-dirtoc-kind">定義 5.5</span> <span class="mn-dirtoc-title">ZFSet</span></li><li><span class="mn-dirtoc-kind">補題 5.6</span> <span class="mn-dirtoc-title">ZFSet の基本性質</span></li><li><span class="mn-dirtoc-kind">定義 5.7</span> <span class="mn-dirtoc-title">論理式の翻訳</span></li><li><span class="mn-dirtoc-kind">補題 5.8</span> <span class="mn-dirtoc-title">翻訳は導出を保つ</span></li><li><span class="mn-dirtoc-kind">補題 5.9</span> <span class="mn-dirtoc-title">集合の構成</span></li><li><span class="mn-dirtoc-kind">定理 5.10</span> <span class="mn-dirtoc-title">ZFSet は ZFC のモデル</span></li><li><span class="mn-dirtoc-kind">系 5.11</span> <span class="mn-dirtoc-title">ZFC の無矛盾性は Lean の無矛盾性から従う</span></li><li><span class="mn-dirtoc-kind">定義 5.12</span> <span class="mn-dirtoc-title">持ち上げと下の段の集合全体</span></li></ul></li>
+<li value="6"><a href="06-global-choice.html">§6 選択公理と大域的選択</a><ul class="mn-dirtoc-items"><li><span class="mn-dirtoc-kind">補題 6.1</span> <span class="mn-dirtoc-title">ε の型は空でない</span></li><li><span class="mn-dirtoc-kind">定義 6.2</span> <span class="mn-dirtoc-title">ヒルベルトの ε</span></li><li><span class="mn-dirtoc-kind">定理 6.3</span> <span class="mn-dirtoc-title">ε の基本性質</span></li><li><span class="mn-dirtoc-kind">命題 6.4</span> <span class="mn-dirtoc-title">型理論での選択関数</span></li><li><span class="mn-dirtoc-kind">定義 6.5</span> <span class="mn-dirtoc-title">定義可能な大域的選択と大域的整列順序</span></li><li><span class="mn-dirtoc-kind">命題 6.6</span> <span class="mn-dirtoc-title">大域的選択と大域的整列順序</span></li><li><span class="mn-dirtoc-kind">定理 6.7</span> <span class="mn-dirtoc-title">定義可能な整列順序と V=HOD</span></li><li><span class="mn-dirtoc-kind">系 6.8</span> <span class="mn-dirtoc-title">V=L なら V=HOD</span></li><li><span class="mn-dirtoc-kind">系 6.10</span> <span class="mn-dirtoc-title">ZFC は定義可能な大域的選択を証明しない</span></li><li><span class="mn-dirtoc-kind">定義 6.11</span> <span class="mn-dirtoc-title">大域的選択の公理</span></li><li><span class="mn-dirtoc-kind">定理 6.13</span> <span class="mn-dirtoc-title">ZFSet のクラスと大域的選択</span></li><li><span class="mn-dirtoc-kind">系 6.14</span> <span class="mn-dirtoc-title">MK+GC の無矛盾性</span></li></ul></li>
+</ol>
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn/guides.js?v=c0a814f8"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

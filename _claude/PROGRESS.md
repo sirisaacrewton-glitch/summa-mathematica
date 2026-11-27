@@ -1992,6 +1992,19 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | KR-01 | 06-algorithmic-randomness/01-prefix-free-complexity | 接頭辞なし複雑性とクラフトの不等式 | 完了 |
 | KR-02 | 06-algorithmic-randomness/02-martin-lof | マルチン＝レーフのランダムネスとレヴィン–シュノアの定理 | 完了 |
 
+## Lean の型理論の割り当て（2026-11-26 ユーザー承認：「一系列ずつ進める」。資料なし（ユーザー指示「標準的な内容やっておいて」）。文献の細部は本文で未確認と明記する）
+
+| ID | フォルダ / ファイル | 題（案） | 主なラベル | 状態 |
+|---|---|---|---|---|
+| LN-01 | 01-foundations/05-proof-theory/10-lean-type-theory/01-lean-core.html | Lean の核の型理論（宇宙・非可述的な Prop・帰納型・定義的等価） | logic:page-lean-core | 完了 |
+| LN-02 | 〃/02-lean-axioms.html | 三つの公理（命題外延性・商型・選択）と関数外延性・排中律 | logic:page-lean-axioms | 完了 |
+| LN-03 | 〃/03-lean-defeq.html | 定義的等価の性質（決定不能性・推移性と部分簡約の破れ） | logic:page-lean-defeq | 完了 |
+| LN-04 | 〃/04-lean-set-model.html | 集合論のモデルと無矛盾性の上界 | logic:page-lean-set-model | 完了 |
+| LN-05 | 〃/05-zfc-in-lean.html | 型理論の中の ZFC のモデルと下界 | logic:page-zfc-in-lean | 完了 |
+| LN-06 | 〃/06-global-choice.html | 選択公理と大域的選択 | logic:page-global-choice | 完了 |
+
+続く予定：モデル理論 05「線形順序」（5）、集合論 09「全体集合をもつ集合論」（5）。
+
 ## 二階算術・逆数学の割り当て（2026-10-02 作成。資料：田中一之『逆数学と2階算術』、テキスト `<和書>/_text/tanaka-reverse-math-ja.txt`。記号は Simpson の標準に合わせる）
 
 | ID | フォルダ / ファイル | 題（案） | 田中 | 状態 |
