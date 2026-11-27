@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NF では選択公理が成り立たない | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/04-set-theory/09-new-foundations/05-specker.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# NF では選択公理が成り立たない {#set:page-nf-specker keywords="Specker's theorem, NF disproves the axiom of choice, axiom of infinity in NF, NF refutes AC"}
+
+$\mathsf{NF}$ では全体集合 $V$ が集合であり、$\mathcal{P}(V)=V$ が成り立つ。このページでは、この一見無害な事実と、型を一つ上げる $T$ 演算（\ref[T 演算]{set:nf-t-operation}）を組み合わせると、$V$ が整列できないこと、すなわち**選択公理が偽であること**が $\mathsf{NF}$ の中で証明できることを示す（スペッカーの定理）。その帰結として、$\mathsf{NF}$ では無限公理が定理になる。原子を許す $\mathsf{NFU}$ では選択公理が無矛盾である（\ref[NFU の無矛盾性]{set:nfu-consistent}）ので、この定理は「すべての対象が集合である」ことに強く依存している。
+
+## 記法と定義の確認 {#set:sec-specker-notation}
+
+::: notation
+- **このページの議論はすべて $\mathsf{NF}$ の中で行う**（\ref[NF]{set:nf}）。集合を作るときは、定義の式が層別化される（\ref[層別化された論理式]{set:stratified-formula}）ことをその場で確かめる。補足で $\mathsf{NFU}$ に触れるときはそう明記する。
+- $\lvert A\rvert$ はフレーゲ流の基数、$\mathrm{NC}$ は基数全体の集合、$\le$, $<$ は基数の大小である（\ref[フレーゲ流の基数]{set:nf-frege-cardinal}）。$\lvert A\rvert$ は $A$ より型が一つ高く、$\kappa\le\lambda$ は $\kappa$ と $\lambda$ が同じ型のとき層別化される。$A\approx B$, $A\preccurlyeq B$ は対等・単射の存在である。
+- $\iota[A]=\{\{x\}\mid x\in A\}$ は $A$ の単集合の像（\ref[単集合の像]{set:nf-singleton-image}）、$T\lvert A\rvert=\lvert\iota[A]\rvert$ は $T$ 演算である。基数の集合 $X$ に対し $T[X]=\{T\kappa\mid\kappa\in X\}$ と書く。$\mu\in T[\mathrm{NC}]$ は「ある $A$ について $\iota[A]\in\mu$」と書けるので層別化され、$T[\mathrm{NC}]$ は集合である。
+- 前のページから次の形で使う：
+  - **(T1)** $T\kappa$ は代表によらず、$\kappa\le\lambda\iff T\kappa\le T\lambda$、$\kappa=\lambda\iff T\kappa=T\lambda$ が成り立つ（\ref[T 演算の基本性質]{set:nf-t-basic}）。
+  - **(T2)** $A\preccurlyeq B\iff\iota[A]\preccurlyeq\iota[B]$ であり、その単射は $\langle x,y\rangle\mapsto\langle\{x\},\{y\}\rangle$ で行き来できる（\ref[対等と単集合の像]{set:nf-equinumerous}）。
+  - **(C)** 任意の $A$ について $T\lvert A\rvert<\lvert\mathcal{P}(A)\rvert$ である（\ref[NF におけるカントールの定理]{set:nf-cantor-theorem}）。
+  - **(V)** $\mathcal{P}(V)=V$ であり、$\lvert V\rvert$ は最大の基数である（\ref[全体集合]{set:nf-universal-set}）。
+  - **(W)** $\mathsf{NF}$ の整列順序についても、$\ZF$ と同じ比較定理（二つの整列順序の一方は他方と同型か、他方の真の始切片と同型）が成り立つ（\ref[整列順序の基本定理の移植]{set:nf-well-order-facts}）。
+- \ref{set:schroder-bernstein} は $\mathsf{NF}$ でも成り立つ。単射 $f\colon A\to B$, $g\colon B\to A$ から全単射を作る集合 $C$ を、$\{X\subseteq A\mid(A\setminus g[B])\cup g[f[X]]\subseteq X\}$ の共通部分として定めれば、$X$, $A$, $g[f[X]]$ はみな同じ型なので層別化された式で定まり、あとは $\ZF$ と同じ議論になる。とくに基数の $\le$ は反対称的である。
+:::
+
+## 冪 $2^{\mu}$ と $T$ 演算 {#set:sec-specker-exp}
+
+$\ZF$ では $2^{\lvert A\rvert}=\lvert\mathcal{P}(A)\rvert$ と冪を定めるが、$\mathsf{NF}$ では $\lvert\mathcal{P}(A)\rvert$ は $\lvert A\rvert$ より型が一つ高いので、この対応は層別化されない。型が合うのは $T\lvert A\rvert=\lvert\iota[A]\rvert$ と $\lvert\mathcal{P}(A)\rvert$ の組である。そこで冪を $T$ の像の上でだけ定める。まず $T$ の像がどんな形かを調べる。
+
+::: lemma T の像は始切片 {#set:nf-t-image keywords="image of T is the initial segment below T|V|" index="T の像|てぃーのぞう"}
+1. 基数 $\mu$ と集合 $B$ について、$\mu\le T\lvert B\rvert$ ならば、ある $A\subseteq B$ について $\mu=T\lvert A\rvert$ である。
+2. $T[\mathrm{NC}]=\{\mu\in\mathrm{NC}\mid\mu\le T\lvert V\rvert\}$ である。
+:::
+
+::: intuition
+$T$ で写した先の基数は、$T\lvert V\rvert$ 以下の基数ちょうど全部である。$\iota[B]$ の部分集合はどれも単集合の集まりなので、ある $A$ の $\iota[A]$ の形をしている。だから「$T$ の値より小さい基数」はまた $T$ の値になる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\mu\le T\lvert B\rvert$ なら $\mu=T\lvert A\rvert$ となる $A\subseteq B$ がある】 $Z\in\mu$ と単射 $h\colon Z\to\iota[B]$ をとる。
+$$
+A=\{x\mid x\in B\land\{x\}\in h[Z]\}
+$$
+とおく。$x$ の型を $0$ とすると $s(B)=1$、$s(\{x\})=1$、$s(h[Z])=2$ で層別化されるので $A$ は存在する。$h[Z]$ の元はどれも $\iota[B]$ の元、つまりある $x\in B$ の単集合であり、その $x$ は $A$ に属する。ゆえに $h[Z]=\iota[A]$ であり、$h$ は $Z$ から $\iota[A]$ への全単射なので $\mu=\lvert Z\rvert=\lvert\iota[A]\rvert=T\lvert A\rvert$ である。
+
+**Step 2（2）.** 【主張：$T[\mathrm{NC}]$ は $T\lvert V\rvert$ 以下の基数全体】 任意の $A$ について $\iota[A]\subseteq\iota[V]$ なので $T\lvert A\rvert\le T\lvert V\rvert$ である。逆に $\mu\le T\lvert V\rvert$ なら、Step 1 を $B=V$ に適用して $\mu\in T[\mathrm{NC}]$ を得る。
+:::
+
+::: definition NF の基数の冪 {#set:nf-cardinal-power keywords="cardinal exponentiation in NF, 2^{T|A|} = |P(A)|" index="基数の冪（NF）|きすうのべき"}
+$\mu\in T[\mathrm{NC}]$ とし、$\mu=T\lvert A\rvert$ と書く。このとき
+$$
+2^{\mu}=\lvert\mathcal{P}(A)\rvert
+$$
+と定める。すなわち $2^{T\lvert A\rvert}=\lvert\mathcal{P}(A)\rvert$ である。$\mu\notin T[\mathrm{NC}]$ のとき $2^{\mu}$ は定めない。
+:::
+
+::: intuition
+$\mu$ 個の元をもつ集合の部分集合の個数を、型が合う形で数えたものである。$\mu=T\lvert A\rvert$ のとき、$\mu$ 個の元をもつ代表として $\iota[A]$ がとれ、その「中身」$A$ の部分集合全体 $\mathcal{P}(A)$ は $\iota[A]$ と同じ型にある。
+:::
+
+::: proposition 冪の基本性質 {#set:nf-cardinal-power-basic keywords="properties of 2^mu in NF" index="冪の基本性質（NF）|べきのきほんせいしつ"}
+1. $2^{\mu}$ は $\mu=T\lvert A\rvert$ と書く $A$ の選び方によらない。また $\{\langle\mu,\nu\rangle\mid\mu\in T[\mathrm{NC}]\land\nu=2^{\mu}\}$ は集合である。
+2. $\mu\in T[\mathrm{NC}]$ ならば $\mu<2^{\mu}$ である。
+3. $\mu,\mu'\in T[\mathrm{NC}]$, $\mu\le\mu'$ ならば $2^{\mu}\le2^{\mu'}$ である。
+4. $\mu\in T[\mathrm{NC}]$ ならば $T\mu\in T[\mathrm{NC}]$ であり、$2^{T\mu}=T(2^{\mu})$ である。
+5. $\lvert V\rvert=2^{T\lvert V\rvert}$ であり、$T\lvert V\rvert<\lvert V\rvert$ である。さらに $T\lvert V\rvert=2^{T(T\lvert V\rvert)}$ である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$2^{\mu}$ は代表によらず、冪の対応は集合である】 $T\lvert A\rvert=T\lvert A'\rvert$ なら (T1) より $\lvert A\rvert=\lvert A'\rvert$ であり、全単射 $f\colon A\to A'$ から $X\mapsto f[X]$ が $\mathcal{P}(A)$ から $\mathcal{P}(A')$ への全単射になる（$X$ と $f[X]$ は同じ型なので層別化された式で作れる）。ゆえに $\lvert\mathcal{P}(A)\rvert=\lvert\mathcal{P}(A')\rvert$ である。対応の式「$\exists A\,(\iota[A]\in\mu\land\mathcal{P}(A)\in\nu)$」は、$A$ の型を $1$ とすると $s(\iota[A])=s(\mathcal{P}(A))=2$, $s(\mu)=s(\nu)=3$ で層別化される。$\mu$ と $\nu$ が同じ型なので、順序対 $\langle\mu,\nu\rangle$ の集合として内包公理で作れる。
+
+**Step 2（2・3）.** 【主張：$\mu<2^{\mu}$ で、冪は単調】 $\mu=T\lvert A\rvert$ なら (C) より $\mu=T\lvert A\rvert<\lvert\mathcal{P}(A)\rvert=2^{\mu}$ である。$\mu=T\lvert A\rvert\le\mu'=T\lvert A'\rvert$ なら (T1) より単射 $f\colon A\to A'$ があり、$X\mapsto f[X]$ は $\mathcal{P}(A)$ から $\mathcal{P}(A')$ への単射なので $2^{\mu}\le2^{\mu'}$ である。
+
+**Step 3（4）.** 【主張：$2^{T\mu}=T(2^{\mu})$】 $\mu=T\lvert A\rvert$ とすると $T\mu=T\lvert\iota[A]\rvert$ なので $T\mu\in T[\mathrm{NC}]$ であり、$2^{T\mu}=\lvert\mathcal{P}(\iota[A])\rvert$ である。一方 $T(2^{\mu})=\lvert\iota[\mathcal{P}(A)]\rvert$ である。対応 $\{X\}\mapsto\iota[X]$（$X\subseteq A$）は、$s(\{X\})=s(\iota[X])$ なので層別化された式で定まる集合であり、$\iota[\mathcal{P}(A)]$ から $\mathcal{P}(\iota[A])$ への全単射である。実際、$\iota[A]$ の部分集合はどれも $\{x\mid\{x\}\in Y\}$ を $X$ として $\iota[X]$ と書け（全射）、$\iota[X]=\iota[X']$ なら $X=X'$ である（単射）。ゆえに $2^{T\mu}=T(2^{\mu})$ である。
+
+**Step 4（5）.** 【主張：$\lvert V\rvert=2^{T\lvert V\rvert}$ と $T\lvert V\rvert=2^{T(T\lvert V\rvert)}$】 定義と (V) より $2^{T\lvert V\rvert}=\lvert\mathcal{P}(V)\rvert=\lvert V\rvert$ である。(C) を $A=V$ に使うと $T\lvert V\rvert<\lvert\mathcal{P}(V)\rvert=\lvert V\rvert$ を得る。さらに $T\lvert V\rvert\in T[\mathrm{NC}]$ なので 4 が使え、$2^{T(T\lvert V\rvert)}=T(2^{T\lvert V\rvert})=T\lvert V\rvert$ である。
+
+::: hypcheck
+- **(C)**：Step 2 の $\mu<2^{\mu}$ と、Step 4 の $T\lvert V\rvert<\lvert V\rvert$ に使った。
+- **(V) の $\mathcal{P}(V)=V$**：Step 4 だけで使った。すべての対象が集合であることがここに効いている。原子を許す $\mathsf{NFU}$ では $\mathcal{P}(V)$ は集合全体であって $V$ とは限らず、$\lvert V\rvert=2^{T\lvert V\rvert}$ は一般には成り立たない。
+- **$\mu\in T[\mathrm{NC}]$ の仮定**：$2^{\mu}$ を定義するのに要る。4 では $\mu\in T[\mathrm{NC}]$ を仮定したので $2^{\mu}$ が定まり、$T\mu$ の側は自動的に $T[\mathrm{NC}]$ に入る。
+- 選択公理は使っていない。
+:::
+:::
+
+::: supplement
+**$T$ の像と $2^{\mu}$ の関係.** \ref{set:nf-t-image} より $T[\mathrm{NC}]$ は $T\lvert V\rvert$ 以下の基数の全体なので、$2^{\mu}$ が定義されるのは $\mu\le T\lvert V\rvert$ のときちょうどである。5 の $\lvert V\rvert=2^{T\lvert V\rvert}$ は「冪が定義される最大の基数の冪が、最大の基数そのもの」という形をしている。$\mathsf{NFU}$ では一般に $\lvert\mathcal{P}(V)\rvert\le\lvert V\rvert$ しかいえない（\ref{set:prob-specker-nfu-power} も参照）。
+:::
+
+## 選択公理と基数の整列 {#set:sec-specker-wo}
+
+::: definition NF の選択公理 {#set:nf-ac keywords="axiom of choice in NF, well-orderability of V" index="選択公理（NF）|せんたくこうり"}
+$\mathsf{NF}$ において、**NF の選択公理**とは「任意の集合は整列可能である」という文（\tref{set:ax-choice} と同じ文）をいう。$\mathsf{NF}$ では任意の集合は $V$ の部分集合であり、$V$ の整列順序を部分集合に制限すれば整列順序になるので、これは「$V$ は整列可能である」という一つの文と同値である。
+:::
+
+::: intuition
+すべての対象を一列に（超限的に）並べられる、という主張である。$V$ が集合なので、「一つの集合 $V$ の整列」だけを考えれば足りる。
+:::
+
+::: lemma 選択公理のもとで基数は整列される {#set:nf-ac-cardinals-wellordered keywords="under AC the cardinals of NF are well-ordered" index="基数の整列（NF）|きすうのせいれつ"}
+$V$ が整列可能であると仮定する。このとき次が成り立つ。
+1. 任意の基数 $\kappa,\lambda$ について $\kappa\le\lambda$ または $\lambda\le\kappa$ である。
+2. 基数の空でない任意の集合は $\le$ についての最小元をもつ。
+3. 基数の任意の集合 $X$ は上限 $\sup X$（$X$ のすべての元以上の基数のうち最小のもの）をもつ。
+:::
+
+::: proof
+$V$ の整列順序 $W$ を一つとり、$x\in V$ について $W$ で $x$ より前の元の全体を $\mathrm{seg}(x)=\{y\mid\langle y,x\rangle\in W\land y\neq x\}$ と書く。
+
+**Step 1.** 【主張：任意の基数は $\lvert V\rvert$ であるか、ある $x$ について $\lvert\mathrm{seg}(x)\rvert$ である】 $\kappa=\lvert A\rvert$ とする。$A\subseteq V$ なので、$W$ を $A$ に制限したものは $A$ の整列順序である。これと $W$ に (W) の比較定理を使う。$A$ が $V$ と順序同型なら $\lvert A\rvert=\lvert V\rvert$ である。$A$ がある $\mathrm{seg}(x)$ と同型なら $\lvert A\rvert=\lvert\mathrm{seg}(x)\rvert$ である。$V$ が $A$ のある真の始切片と同型なら $V\preccurlyeq A\preccurlyeq V$ であり、シュレーダー＝ベルンシュタインの定理より $\lvert A\rvert=\lvert V\rvert$ である。
+
+**Step 2（1）.** 【主張：基数は比較可能】 $\lvert V\rvert$ は最大の基数なので、$\kappa=\lvert\mathrm{seg}(x)\rvert$, $\lambda=\lvert\mathrm{seg}(y)\rvert$ の場合を考えればよい。$W$ は全順序なので $x$ が $y$ 以前であるか $y$ が $x$ 以前であり、前者なら $\mathrm{seg}(x)\subseteq\mathrm{seg}(y)$ より $\kappa\le\lambda$、後者なら $\lambda\le\kappa$ である。
+
+**Step 3（2）.** 【主張：空でない基数の集合 $X$ は最小元をもつ】 $X=\{\lvert V\rvert\}$ なら $\lvert V\rvert$ が最小元である。そうでなければ Step 1 より
+$$
+S=\{x\mid\lvert\mathrm{seg}(x)\rvert\in X\}
+$$
+は空でない。式は $s(x)=0$, $s(\mathrm{seg}(x))=1$, $s(\lvert\mathrm{seg}(x)\rvert)=2$, $s(X)=3$、$W$ の元 $\langle y,x\rangle$ の型が $2$ なので $s(W)=3$ で層別化されるので $S$ は存在する。$S$ の $W$ についての最小元 $x_{0}$ をとる。$X$ の任意の元 $\kappa$ は、$\lvert V\rvert$ であるか、ある $x\in S$ について $\lvert\mathrm{seg}(x)\rvert$ であり、後者では $x_{0}$ が $x$ 以前なので $\lvert\mathrm{seg}(x_{0})\rvert\le\kappa$ である。ゆえに $\lvert\mathrm{seg}(x_{0})\rvert$ が $X$ の最小元である。
+
+**Step 4（3）.** 【主張：上限が存在する】 $X$ の上界全体 $\{\lambda\in\mathrm{NC}\mid\forall\kappa\in X\,(\kappa\le\lambda)\}$ は層別化された式で定まり、$\lvert V\rvert$ を含むので空でない。2 よりその最小元が $\sup X$ である。
+
+::: hypcheck
+- **$V$ の整列可能性**：Step 1〜3 のすべてで使った。とくに Step 1 で、任意の集合を $W$ の始切片と比べるのに使う。
+- **比較定理 (W)**：Step 1 で使った。$\mathsf{NF}$ でも、比較定理の証明で作る集合が層別化されることを確かめてある。
+- **基数の反対称性**：最小元・上限の一意性と、Step 1 の最後の場合に使った。
+:::
+:::
+
+## 対数とその不動点 {#set:sec-specker-log}
+
+この節と次の節では、**$V$ が整列可能であると仮定し**、\ref{set:nf-ac-cardinals-wellordered} により基数の最小元・上限が存在することを自由に使う。冪 $2^{\mu}$ の「逆」に当たる操作を、最小元を使って全域的に定める。
+
+::: definition 対数 {#set:nf-log keywords="logarithm of a cardinal in NF" index="対数（基数）|たいすう"}
+$V$ が整列可能であるとする。基数 $\kappa$ に対し
+$$
+\log\kappa=\min\{\lambda\in T[\mathrm{NC}]\mid\kappa\le2^{\lambda}\}
+$$
+と定める。\ref{set:nf-cardinal-power-basic.5} より $\lambda=T\lvert V\rvert$ がこの集合に属するので（$\kappa\le\lvert V\rvert=2^{T\lvert V\rvert}$）、集合は空でなく、最小元が存在する。$\log\kappa=\kappa$ となる $\kappa$ を $\log$ の不動点という。
+:::
+
+::: intuition
+$\log\kappa$ は「冪をとると $\kappa$ に届く最小の基数」である。冪はどの基数にも定義されるわけではない（$T[\mathrm{NC}]$ の上だけ）が、$\log$ は最小元をとるのですべての基数で定義され、しかも $T$ と可換になる。不動点とは、それより小さいどの基数の冪もまだ $\kappa$ に届かない基数、つまり冪について「閉じている」基数である。
+:::
+
+::: lemma 対数の基本性質 {#set:nf-log-basic keywords="properties of log in NF" index="対数の性質（NF）|たいすうのせいしつ"}
+$V$ が整列可能であるとする。
+1. $\log\kappa\in T[\mathrm{NC}]$ かつ $\kappa\le2^{\log\kappa}$ である。$\{\langle\kappa,\log\kappa\rangle\mid\kappa\in\mathrm{NC}\}$ は集合である。
+2. $\kappa\le\kappa'$ ならば $\log\kappa\le\log\kappa'$ である。
+3. $\kappa\in T[\mathrm{NC}]$ ならば $\log\kappa\le\kappa$ である。
+4. 任意の基数 $\kappa$ について $\log(T\kappa)=T(\log\kappa)$ である。
+:::
+
+::: proof
+**Step 1（1〜3）.** 【主張：$\log$ は集合で、単調で、$T[\mathrm{NC}]$ の上では増やさない】 1 の前半は定義そのものである。定義の式は $\kappa$, $\lambda$, $2^{\lambda}$ がみな同じ型で、\ref{set:nf-cardinal-power-basic.1} より冪の対応が集合なので層別化される。$\kappa\le\kappa'$ なら $\kappa'\le2^{\lambda}$ となる $\lambda$ は $\kappa\le2^{\lambda}$ も満たすので、最小元を比べて $\log\kappa\le\log\kappa'$ である。$\kappa\in T[\mathrm{NC}]$ なら \ref{set:nf-cardinal-power-basic.2} より $\kappa<2^{\kappa}$ なので、$\lambda=\kappa$ が候補に入り $\log\kappa\le\kappa$ である。
+
+**Step 2（4 の $\le$）.** 【主張：$\log(T\kappa)\le T(\log\kappa)$】 $\lambda_{0}=\log\kappa$ とおく。$\lambda_{0}\in T[\mathrm{NC}]$ なので \ref{set:nf-cardinal-power-basic.4} より $T\lambda_{0}\in T[\mathrm{NC}]$, $2^{T\lambda_{0}}=T(2^{\lambda_{0}})$ である。$\kappa\le2^{\lambda_{0}}$ と (T1) から $T\kappa\le T(2^{\lambda_{0}})=2^{T\lambda_{0}}$ となり、$T\lambda_{0}$ は $\log(T\kappa)$ の候補である。
+
+**Step 3（4 の $\ge$）.** 【主張：$\log(T\kappa)\ge T(\log\kappa)$】 $\mu=\log(T\kappa)$ とおく。Step 2 より $\mu\le T\lambda_{0}$ なので、\ref{set:nf-t-image.1} より $\mu=T\nu$ となる基数 $\nu$ があり、(T1) より $\nu\le\lambda_{0}$ である。$\lambda_{0}\le T\lvert V\rvert$ なので $\nu\in T[\mathrm{NC}]$ であり（\ref{set:nf-t-image.2}）、$2^{\nu}$ が定まる。\ref{set:nf-cardinal-power-basic.4} より $T(2^{\nu})=2^{T\nu}=2^{\mu}\ge T\kappa$ であり、(T1) より $2^{\nu}\ge\kappa$ である。ゆえに $\nu$ は $\log\kappa$ の候補であり、$\nu\ge\lambda_{0}$ である。$\nu\le\lambda_{0}$ と合わせて $\nu=\lambda_{0}$、すなわち $\log(T\kappa)=T\lambda_{0}$ である。
+
+::: hypcheck
+- **$V$ の整列可能性**：$\log$ を最小元で定めるのに使った（\ref{set:nf-ac-cardinals-wellordered.2}）。
+- **$T[\mathrm{NC}]$ が始切片であること**（\ref{set:nf-t-image}）：Step 3 で、$T\lambda_{0}$ 以下の $\mu$ を $T\nu$ と書き、さらに $\nu$ にも冪が定義されることを示すのに使った。ここが「最大の候補」ではなく「最小の候補」で $\log$ を定めた理由である：最大の候補をとると、$T\kappa$ の候補が $T$ の像に入る保証がない。
+:::
+:::
+
+::: lemma 対数の最大の不動点はカントール的 {#set:nf-log-fixed-point keywords="greatest fixed point of log, T sigma = sigma" index="対数の不動点|たいすうのふどうてん"}
+$V$ が整列可能であるとする。$\log$ の不動点全体を $F$ とし、$\sigma=\sup F$ とおく。
+1. $\sigma\in F$ であり、$\sigma$ は $\log$ の最大の不動点である。また $\sigma\le T\lvert V\rvert$ である。
+2. $T\sigma=\sigma$ である。
+:::
+
+::: intuition
+冪について閉じた基数のうち最大のものは、$T$ で動かない。$\log$ が $T$ と可換なので、$T$ は不動点を不動点に移し、しかも不動点の全体を「ずらさずに」保つ。最大の不動点は、この意味で $T$ から見て特別な点として固定される。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$\sigma$ は不動点で $\sigma\le T\lvert V\rvert$】 $F$ は \ref{set:nf-log-basic.1} より層別化された式で定まる集合である。$\log0=0$（$0\in T[\mathrm{NC}]$ で $0\le2^{0}$）なので $0\in F$ であり、$F$ は空でない。$F$ の元は $\log$ の値なので $T[\mathrm{NC}]$ に属し、\ref{set:nf-t-image.2} より $T\lvert V\rvert$ 以下である。ゆえに $\sigma=\sup F\le T\lvert V\rvert$ であり、\ref{set:nf-log-basic.3} より $\log\sigma\le\sigma$ である。一方、$\kappa\in F$ なら $\kappa\le\sigma$ と単調性から $\kappa=\log\kappa\le\log\sigma$ なので、$\log\sigma$ は $F$ の上界であり、$\sigma\le\log\sigma$ である。よって $\log\sigma=\sigma$ である。
+
+**Step 2（$T\sigma\le\sigma$）.** 【主張：$T\sigma$ も不動点なので $T\sigma\le\sigma$】 \ref{set:nf-log-basic.4} より $\log(T\sigma)=T(\log\sigma)=T\sigma$ であり、$T\sigma\in F$ である。$\sigma$ は $F$ の最大元なので $T\sigma\le\sigma$ である。
+
+**Step 3（$\sigma\le T\sigma$）.** 【主張：$\sigma=T\tau$ と書くと $\tau$ も不動点】 $\sigma\in T[\mathrm{NC}]$ なので $\sigma=T\tau$ となる基数 $\tau$ がある。\ref{set:nf-log-basic.4} より $T(\log\tau)=\log(T\tau)=\log\sigma=\sigma=T\tau$ であり、(T1) より $\log\tau=\tau$、すなわち $\tau\in F$ である。ゆえに $\tau\le\sigma$ であり、(T1) より $\sigma=T\tau\le T\sigma$ である。
+
+Step 2・3 と基数の反対称性より $T\sigma=\sigma$ である。
+
+::: hypcheck
+- **$\log$ と $T$ の可換性**（\ref{set:nf-log-basic.4}）：Step 2・3 の両方で使った。
+- **上限の存在**（\ref{set:nf-ac-cardinals-wellordered.3}）：$\sigma$ を定めるのに使った。
+- **層別化**：主張 $T\sigma=\sigma$ そのものは層別化されない文（$T\sigma$ は $\sigma$ より型が一つ高い）だが、証明では内包公理を層別化されない式に使っていない。使ったのは集合 $F$（層別化された式で定まる）と、個々の基数についての推論だけである。
+:::
+:::
+
+## 冪の塔 {#set:sec-specker-tower}
+
+最大の不動点 $\sigma$ から冪を繰り返しとっていく。$\sigma$ が $T$ で動かないので、この「塔」は $T$ で自分自身に移る。一方で塔は $T\lvert V\rvert$ をどこかで飛び越える。その飛び越える場所を $T$ で写すと、塔の一段ずれた場所に来てしまう、というのが証明の筋である。
+
+::: definition 冪の塔 {#set:nf-power-tower keywords="power tower from sigma" index="冪の塔|べきのとう"}
+$V$ が整列可能であるとし、$\sigma$ を \ref{set:nf-log-fixed-point} の最大の不動点とする。基数の集合 $X$ が「閉じている」とは、$\sigma\in X$ であり、$X$ の元 $\kappa$ で $\kappa\le T\lvert V\rvert$ を満たすものについて常に $2^{\kappa}\in X$ となることをいう。閉じた集合すべての共通部分を $U$ と書き、**冪の塔**と呼ぶ。さらに
+- $U_{0}=\{\kappa\in U\mid\kappa\le T\lvert V\rvert\}$、
+- $U_{\mathrm{ev}}$：$\sigma$ を含み、元 $\kappa$ で $\kappa\le T\lvert V\rvert$ かつ $2^{\kappa}\le T\lvert V\rvert$ を満たすものについて常に $2^{2^{\kappa}}$ を含む基数の集合すべての共通部分、
+- $U_{\mathrm{od}}=\{2^{\kappa}\mid\kappa\in U_{\mathrm{ev}}\land\kappa\le T\lvert V\rvert\}$
+
+と定める。どの定義の式も、基数・その冪・$T\lvert V\rvert$ がみな同じ型で現れるので層別化される。
+:::
+
+::: intuition
+$U$ は $\sigma,\ 2^{\sigma},\ 2^{2^{\sigma}},\dots$ を、冪が定義できる間（$T\lvert V\rvert$ 以下の間）並べたものである。$U_{\mathrm{ev}}$ はそのうち偶数段目（$\sigma$ から冪を偶数回とったもの）、$U_{\mathrm{od}}$ は奇数段目にあたる。自然数で段数を数える代わりに、偶数段・奇数段を集合として直接定めている。
+:::
+
+::: lemma 冪の塔の基本性質 {#set:nf-power-tower-basic keywords="basic properties of the power tower" index="冪の塔の性質|べきのとうのせいしつ"}
+$V$ が整列可能であるとする。
+1. $U$ の元はすべて $\sigma$ 以上である。$U$ の元で $\sigma$ でないものは、ある $\mu\in U_{0}$ について $2^{\mu}$ の形をしている。
+2. $\kappa\in U_{0}$ ならば、$U$ の元で $\kappa<\lambda<2^{\kappa}$ を満たす $\lambda$ は存在しない。とくに $\kappa<\kappa'$ を満たす $\kappa,\kappa'\in U_{0}$ について $2^{\kappa}\le\kappa'$ かつ $2^{\kappa}<2^{\kappa'}$ である。
+3. $\kappa\in U$ ならば $T\kappa\in U_{0}$ である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$U$ の元は $\sigma$ 以上で、$\sigma$ 以外は冪の形】 $\{\kappa\in\mathrm{NC}\mid\sigma\le\kappa\}$ は閉じている（$\sigma\le\kappa$ なら $\sigma\le\kappa<2^{\kappa}$）ので、$U$ はこれに含まれる。また $\{\sigma\}\cup\{2^{\mu}\mid\mu\in U_{0}\}$ は $U$ の部分集合で、閉じている（その元 $\kappa\le T\lvert V\rvert$ は $U_{0}$ に属するので $2^{\kappa}$ も入る）。ゆえに $U$ はこれと一致する。
+
+**Step 2（2）.** 【主張：$U$ の中で $\kappa$ と $2^{\kappa}$ の間に元はない】 $\kappa\in U_{0}$ と $\kappa<\lambda<2^{\kappa}$ を満たす $\lambda\in U$ の組があったとし、そのような $\lambda$ の最小のもの $\lambda_{0}$ と、その組の相手 $\kappa_{0}$ をとる（そのような $\lambda$ 全体は層別化された式で定まる集合である）。$\sigma\le\kappa_{0}<\lambda_{0}$ なので $\lambda_{0}\neq\sigma$ であり、Step 1 より $\lambda_{0}=2^{\mu}$, $\mu\in U_{0}$ と書ける。
+- $\mu<\kappa_{0}$ の場合、$\mu<\kappa_{0}<2^{\mu}$ なので、$\kappa_{0}$ は相手 $\mu$ との組で条件を満たし、$\kappa_{0}<\lambda_{0}$ である。これは $\lambda_{0}$ の最小性に反する。
+- $\mu=\kappa_{0}$ の場合、$\lambda_{0}=2^{\kappa_{0}}$ となり $\lambda_{0}<2^{\kappa_{0}}$ に反する。
+- $\kappa_{0}<\mu$ の場合、$\kappa_{0}<\mu<2^{\mu}=\lambda_{0}<2^{\kappa_{0}}$ なので、$\mu$ は相手 $\kappa_{0}$ との組で条件を満たし、$\mu<\lambda_{0}$ である。これも最小性に反する。
+
+どの場合も矛盾するので、前半が成り立つ。$\kappa<\kappa'$ が $U_{0}$ にあれば、前半より $\kappa'<2^{\kappa}$ ではないので $2^{\kappa}\le\kappa'<2^{\kappa'}$ である（\ref{set:nf-ac-cardinals-wellordered.1} の比較可能性を使う）。
+
+**Step 3（3）.** 【主張：$Z=\{\kappa\in\mathrm{NC}\mid T\kappa\in U\}$ は閉じている】 $Z$ の式は、$A\in\kappa$, $\iota[A]\in\mu$, $\mu\in U$ と書くと $s(A)=1$, $s(\kappa)=s(\iota[A])=2$, $s(\mu)=3$, $s(U)=4$ で層別化されるので、$Z$ は集合である。$T\sigma=\sigma\in U$（\ref{set:nf-log-fixed-point.2}）なので $\sigma\in Z$ である。$\kappa\in Z$, $\kappa\le T\lvert V\rvert$ とする。$T\kappa\in U$ であり、$T\kappa\in T[\mathrm{NC}]$ なので $T\kappa\le T\lvert V\rvert$ である。ゆえに $U$ が閉じていることから $2^{T\kappa}\in U$ であり、\ref{set:nf-cardinal-power-basic.4} より $T(2^{\kappa})=2^{T\kappa}\in U$、すなわち $2^{\kappa}\in Z$ である。よって $Z$ は閉じており、$U\subseteq Z$ である。$T\kappa\le T\lvert V\rvert$ は常に成り立つので、$T\kappa\in U_{0}$ である。
+
+::: hypcheck
+- **基数の整列**：Step 2 で最小の $\lambda_{0}$ をとるのと、比較可能性に使った。
+- **$T\sigma=\sigma$**：Step 3 の出発点 $\sigma\in Z$ に使った。$\sigma$ の代わりに $T$ で動く基数から塔を作ると、3 は一般に成り立たない。
+- **層別化の注意**：Step 3 で「$\{\kappa\in U\mid T\kappa\in U\}$ についての帰納法」を直接使うと、$U$ が二つの異なる型で現れて層別化されない。そこで $U$ が一度しか現れない集合 $Z$ を作り、$U$ の最小性と比べた。
+:::
+:::
+
+::: lemma 塔の偶奇 {#set:nf-power-tower-parity keywords="even and odd levels of the power tower" index="塔の偶奇|とうのぐうき"}
+$V$ が整列可能であるとする。
+1. $U=U_{\mathrm{ev}}\cup U_{\mathrm{od}}$ かつ $U_{\mathrm{ev}}\cap U_{\mathrm{od}}=\varnothing$ である。
+2. $\kappa\in U_{\mathrm{ev}}$, $\kappa\le T\lvert V\rvert$ ならば $2^{\kappa}\in U_{\mathrm{od}}$ であり、$\kappa\in U_{\mathrm{od}}$, $\kappa\le T\lvert V\rvert$ ならば $2^{\kappa}\in U_{\mathrm{ev}}$ である。
+3. $\kappa\in U_{\mathrm{ev}}$ ならば $T\kappa\in U_{\mathrm{ev}}$ であり、$\kappa\in U_{\mathrm{od}}$ ならば $T\kappa\in U_{\mathrm{od}}$ である。
+:::
+
+::: intuition
+塔の各段は偶数段か奇数段のどちらか一方であり、冪をとると偶奇が入れ替わる。そして $T$ は塔の段の偶奇を保つ。$T$ が「段数を保つ」ことまでは主張しない（それは層別化されない主張である）が、偶奇だけなら集合として扱える。
+:::
+
+::: proof
+**Step 1（2 と $U_{\mathrm{ev}},U_{\mathrm{od}}\subseteq U$）.** 【主張：冪で偶奇が入れ替わる】 $U$ は $U_{\mathrm{ev}}$ の定義の条件を満たす（$\kappa,2^{\kappa}\le T\lvert V\rvert$ なら $2^{\kappa}\in U$, $2^{2^{\kappa}}\in U$）ので $U_{\mathrm{ev}}\subseteq U$ であり、したがって $U_{\mathrm{od}}\subseteq U$ である。2 の前半は $U_{\mathrm{od}}$ の定義である。$\kappa\in U_{\mathrm{od}}$, $\kappa\le T\lvert V\rvert$ なら $\kappa=2^{\mu}$, $\mu\in U_{\mathrm{ev}}$, $\mu\le T\lvert V\rvert$ と書け、$2^{\mu}\le T\lvert V\rvert$ なので $U_{\mathrm{ev}}$ の定義より $2^{\kappa}=2^{2^{\mu}}\in U_{\mathrm{ev}}$ である。
+
+**Step 2（1 の合併）.** 【主張：$U=U_{\mathrm{ev}}\cup U_{\mathrm{od}}$】 $U_{\mathrm{ev}}\cup U_{\mathrm{od}}$ は $\sigma$ を含み、Step 1 の 2 によって閉じている。ゆえに $U\subseteq U_{\mathrm{ev}}\cup U_{\mathrm{od}}$ であり、Step 1 と合わせて等号が成り立つ。
+
+**Step 3（1 の共通部分）.** 【主張：$U_{\mathrm{ev}}\cap U_{\mathrm{od}}=\varnothing$】 共通部分が空でないとし、その最小元 $\kappa$ をとる。$U_{\mathrm{od}}$ の元は $2^{\mu}$（$\mu\in U$）の形なので $\mu<2^{\mu}$ と \ref{set:nf-power-tower-basic.1} より $\sigma$ より大きく、$\kappa\neq\sigma$ である。$U_{\mathrm{ev}}$ についても Step 1 の \ref{set:nf-power-tower-basic.1} と同じ議論で、$\sigma$ 以外の元は $2^{2^{\mu}}$（$\mu\in U_{\mathrm{ev}}$, $\mu,2^{\mu}\le T\lvert V\rvert$）の形である。ゆえに $\kappa=2^{2^{\mu}}=2^{\nu}$（$\nu\in U_{\mathrm{ev}}$, $\nu\le T\lvert V\rvert$）と書ける。$2^{\mu}$ と $\nu$ はともに $U_{0}$ に属し、\ref{set:nf-power-tower-basic.2} より冪は $U_{0}$ の上で狭義単調なので、$2^{\mu}=\nu$ である。すると $\nu$ は $U_{\mathrm{od}}$（$2^{\mu}$ の形）と $U_{\mathrm{ev}}$ の両方に属し、$\nu<2^{\nu}=\kappa$ となって $\kappa$ の最小性に反する。
+
+**Step 4（3）.** 【主張：$T$ は偶奇を保つ】 $Z_{\mathrm{ev}}=\{\kappa\mid T\kappa\in U_{\mathrm{ev}}\}$ とおく（層別化は \ref{set:nf-power-tower-basic} の Step 3 と同じ）。$T\sigma=\sigma$ より $\sigma\in Z_{\mathrm{ev}}$ である。$\kappa\in Z_{\mathrm{ev}}$ で $\kappa,2^{\kappa}\le T\lvert V\rvert$ なら、$T\kappa\in U_{\mathrm{ev}}$ で、$T\kappa\le T\lvert V\rvert$、$2^{T\kappa}=T(2^{\kappa})\le T\lvert V\rvert$ なので $2^{2^{T\kappa}}\in U_{\mathrm{ev}}$ である。\ref{set:nf-cardinal-power-basic.4} を二度使うと $T(2^{2^{\kappa}})=2^{2^{T\kappa}}$ なので $2^{2^{\kappa}}\in Z_{\mathrm{ev}}$ である。ゆえに $U_{\mathrm{ev}}\subseteq Z_{\mathrm{ev}}$ である。$\kappa\in U_{\mathrm{od}}$ なら $\kappa=2^{\mu}$, $\mu\in U_{\mathrm{ev}}$ と書け、$T\mu\in U_{\mathrm{ev}}$, $T\mu\le T\lvert V\rvert$ なので $T\kappa=2^{T\mu}\in U_{\mathrm{od}}$ である。
+
+::: hypcheck
+- **冪の狭義単調性**（\ref{set:nf-power-tower-basic.2}）：Step 3 で $2^{2^{\mu}}=2^{\nu}$ から $2^{\mu}=\nu$ を出すのに使った。冪は一般の基数の上では単射とは限らない（$\ZFC$ でも $2^{\aleph_{0}}=2^{\aleph_{1}}$ は無矛盾である）が、塔の上では単射になる。
+- **$T\sigma=\sigma$**：Step 4 の出発点に使った。
+:::
+:::
+
+::: lemma 塔は T|V| を飛び越える {#set:nf-power-tower-crossing keywords="the power tower crosses T|V|" index="塔の交差|とうのこうさ"}
+$V$ が整列可能であるとする。$U_{0}$ は最大元 $c$ をもち、$T\lvert V\rvert<2^{c}$ である。
+:::
+
+::: intuition
+塔は $T\lvert V\rvert$ 以下にとどまり続けることができない。とどまり続けるなら、塔の上限が冪について閉じた基数、つまり $\log$ の不動点になり、それは $\sigma$ より大きいので $\sigma$ の最大性に反する。
+:::
+
+::: proof
+$U_{0}$ は $\sigma$ を含む（\ref{set:nf-log-fixed-point.1}）ので空でない。$u=\sup U_{0}$ とおくと、$u\le T\lvert V\rvert$ である。
+
+**Step 1.** 【主張：$u\in U_{0}$ である】 $u\notin U_{0}$ と仮定して矛盾を導く。$\mu\in U_{0}$ をとる。$\mu<u$ であり、$u$ は上限なので $\mu<\mu'$ となる $\mu'\in U_{0}$ がある。\ref{set:nf-power-tower-basic.2} より $2^{\mu}\le\mu'\le T\lvert V\rvert$ なので $2^{\mu}\in U_{0}$ であり、$2^{\mu}<u$ である。次に $\lambda\in T[\mathrm{NC}]$, $\lambda<u$ とすると、$\lambda$ は $U_{0}$ の上界でないので $\lambda<\mu$ となる $\mu\in U_{0}$ があり、$2^{\lambda}\le2^{\mu}<u$ である。ゆえに $u\le2^{\lambda}$ となる $\lambda\in T[\mathrm{NC}]$ はどれも $u$ 以上であり、$\log u\ge u$ である。$u\le T\lvert V\rvert$ なので \ref{set:nf-log-basic.3} より $\log u\le u$ であり、$u$ は $\log$ の不動点である。一方、前半を $\mu=\sigma$ に使うと $\sigma<2^{\sigma}<u$ なので、$u$ は $\sigma$ より大きい不動点になり、\ref{set:nf-log-fixed-point.1} に反する。
+
+**Step 2.** 【主張：$c=u$ について $T\lvert V\rvert<2^{c}$】 Step 1 より $c=u$ は $U_{0}$ の最大元である。$c\le T\lvert V\rvert$ なので $2^{c}\in U$ であり、$2^{c}>c$ なので $2^{c}\notin U_{0}$、すなわち $2^{c}\le T\lvert V\rvert$ ではない。比較可能性より $T\lvert V\rvert<2^{c}$ である。
+
+::: hypcheck
+- **$\sigma$ の最大性**：Step 1 の矛盾に使った。$\sigma$ の代わりに任意の不動点から塔を作ると、塔の上限が別の不動点になって止まりうる。
+- **上限と比較可能性**（選択公理）：$u$ の存在と Step 2 に使った。
+:::
+:::
+
+## スペッカーの定理 {#set:sec-specker-main}
+
+::: theorem スペッカーの定理 {#set:specker-not-ac keywords="Specker's theorem, NF refutes the axiom of choice, V is not well-orderable in NF" index="スペッカーの定理|すぺっかーのていり, 選択公理の否定（NF）|せんたくこうりのひてい" refname="スペッカーの定理"}
+$\mathsf{NF}$ において、$V$ は整列可能でない。すなわち $\mathsf{NF}$ は選択公理（\ref{set:nf-ac}）の否定を証明する。
+:::
+
+::: intuition
+すべての対象が集合であるような全体集合 $V$ は、一列に並べることができない。並べられるとすると基数が整列され、冪の塔と $T$ 演算の間に「$T$ で写すと塔の段の偶奇が保たれるのに、同じ段が一段ずれる」という食い違いが起きる。
+:::
+
+::: proof
+$V$ が整列可能であると仮定して矛盾を導く。$\sigma$, $U$, $U_{0}$, $U_{\mathrm{ev}}$, $U_{\mathrm{od}}$ を \ref{set:nf-power-tower} のとおりとし、$c$ を \ref{set:nf-power-tower-crossing} の $U_{0}$ の最大元とする。$c\le T\lvert V\rvert<2^{c}$ である。
+
+**Step 1.** 【主張：$Tc\in U_{0}$ であり、$2^{Tc}\le T\lvert V\rvert$ と $2^{Tc}\le c$ が成り立つ】 \ref{set:nf-power-tower-basic.3} より $Tc\in U_{0}$ である。$c\le T\lvert V\rvert$ と (T1) から $Tc\le T(T\lvert V\rvert)$ であり、冪の単調性と \ref{set:nf-cardinal-power-basic.5} より $2^{Tc}\le2^{T(T\lvert V\rvert)}=T\lvert V\rvert$ である。$U$ は閉じているので $2^{Tc}\in U$、したがって $2^{Tc}\in U_{0}$ であり、$c$ の最大性から $2^{Tc}\le c$ である。
+
+**Step 2（$c=T\lvert V\rvert$ の場合）.** 【主張：$c=2^{Tc}$】 \ref{set:nf-cardinal-power-basic.5} より $2^{Tc}=2^{T(T\lvert V\rvert)}=T\lvert V\rvert=c$ である。
+
+**Step 3（$c<T\lvert V\rvert$ の場合）.** 【主張：$c=2^{Tc}$】 $T\lvert V\rvert<2^{c}$ と (T1)、\ref{set:nf-cardinal-power-basic.4} から $T(T\lvert V\rvert)<T(2^{c})=2^{Tc}$ である。Step 1 より $2^{Tc}\le T\lvert V\rvert$ なので $2^{2^{Tc}}$ が定まり、冪の単調性と \ref{set:nf-cardinal-power-basic.5} より
+$$
+T\lvert V\rvert=2^{T(T\lvert V\rvert)}\le2^{2^{Tc}}
+$$
+である。ゆえに $2^{Tc}\le c<T\lvert V\rvert\le2^{2^{Tc}}$ となる。$2^{Tc}\in U_{0}$ なので、\ref{set:nf-power-tower-basic.2} より $U$ の元で $2^{Tc}$ と $2^{2^{Tc}}$ の間に真に入るものはない。$c\in U$ なので $c=2^{Tc}$ である。
+
+**Step 4.** 【主張：偶奇が矛盾する】 Step 2・3 より、どちらの場合も $c=2^{Tc}$ である。$Tc\in U_{0}$ は \ref{set:nf-power-tower-parity.1} より $U_{\mathrm{ev}}$ か $U_{\mathrm{od}}$ のちょうど一方に属する。
+- $Tc\in U_{\mathrm{ev}}$ の場合、\ref{set:nf-power-tower-parity.2} より $c=2^{Tc}\in U_{\mathrm{od}}$ であり、\ref{set:nf-power-tower-parity.3} より $Tc\in U_{\mathrm{od}}$ となって、$U_{\mathrm{ev}}\cap U_{\mathrm{od}}=\varnothing$ に反する。
+- $Tc\in U_{\mathrm{od}}$ の場合、同様に $c=2^{Tc}\in U_{\mathrm{ev}}$ であり、$Tc\in U_{\mathrm{ev}}$ となって矛盾する。
+
+いずれも矛盾するので、$V$ は整列可能でない。
+
+::: hypcheck
+- **$\mathcal{P}(V)=V$**（\ref{set:nf-cardinal-power-basic.5} を通して）：Step 1 の $2^{T(T\lvert V\rvert)}=T\lvert V\rvert$、Step 2、Step 3 の不等式、さらに $\log$ の定義（$T\lvert V\rvert$ が候補であること）に使った。これを外すと結論は偽になりうる：$\mathsf{NFU}$ では選択公理が無矛盾である（\ref[NFU の無矛盾性]{set:nfu-consistent}）。
+- **NF におけるカントールの定理 (C)**：$\mu<2^{\mu}$ として、塔が狭義に増えること、塔の偶奇が分かれることの根底にある。
+- **選択公理の仮定**：基数の最小元・上限・比較可能性（\ref{set:nf-ac-cardinals-wellordered}）を通して、$\log$ の定義、$\sigma$ の存在、塔の性質、Step 3 の比較のすべてに使った。
+- **外延性**：基数・冪の等式の判定に使う。無限公理は使っていない（$V$ が有限でもこの証明はそのまま通る）。
+:::
+:::
+
+::: supplement
+**元の証明との関係.** スペッカーの元の証明（1953 年とされる）は、基数をその冪で結んだ木（スペッカー木と呼ばれるもの）の高さを比べる議論であるとされる（未確認）。本ページの証明は、$\log$ の最大の不動点と冪の塔を使って同じ考え方を組み直したもので、組み立て方は本サイトのものである。$T\lvert V\rvert$ が「$2^{\lambda}=\lvert V\rvert$ となる $\lambda$ の最大のもの」であること（\ref{set:prob-specker-max-log}）が、どちらの証明でも出発点になる。
+
+**証明のどこで層別化が効くか.** $T$ は集合ではない（\ref[単集合写像は集合でない]{set:nf-iota-not-set}）。そのため「塔の $n$ 段目を $T$ で写すと $n$ 段目に行く」という主張を帰納法で示すことはできない（帰納法の式に $T$ が入ると層別化されない）。証明は、$T$ を $\{\kappa\mid T\kappa\in U\}$ のような「$T$ が一度だけ現れる」集合に閉じ込めて、偶奇という粗い情報だけを $T$ で運ぶ。$T$ は段数そのものは保たなくてよいが、偶奇は保つ。この食い違いの余地が、$\mathsf{NF}$ の中で選択公理を否定する余地になっている。
+
+**NFU では.** 同じ議論を $\mathsf{NFU}$（\ref[NFU]{set:nfu}）で行うと、使えなくなるのは $\lvert V\rvert=2^{T\lvert V\rvert}$ だけである。したがって $\mathsf{NFU}$ に選択公理を加えた体系では、$\lvert\mathcal{P}(V)\rvert<\lvert V\rvert$、つまり原子が「集合より多い」ことが従う（\ref{set:prob-specker-nfu-power}）。逆に、$\mathsf{NFU}$ に選択公理を加えた体系は $\ZFC$ が無矛盾なら無矛盾である（\ref[NFU の無矛盾性]{set:nfu-consistent}）。
+
+**選択関数の形.** \ref{set:ac-equivalences} の選択関数の形・選択集合の形から整列可能性を導くツェルメロの議論も、層別化された式だけで書けるので $\mathsf{NF}$ でそのまま通るとされ、したがって $\mathsf{NF}$ はそれらの形の選択公理も否定するとされる（本サイトでは $\mathsf{NF}$ の中での細部を確かめていない）。
+:::
+
+## NF における無限公理 {#set:sec-specker-infinity}
+
+$\mathsf{NF}$ の自然数 $\N$（\ref[フレーゲ流の自然数]{set:nf-natural-numbers}）は、$V$ が有限なら途中で $\varnothing$ になりうる。スペッカーの定理から、そうならないことが従う。集合 $A$ が**有限**であるとは $\lvert A\rvert\in\N$ であることとする。
+
+::: lemma 有限集合は整列可能 {#set:nf-finite-wellorderable keywords="finite sets are well-orderable in NF" index="有限集合の整列（NF）|ゆうげんしゅうごうのせいれつ"}
+$n\in\N$ とすると、$n$ の元はどれも整列可能である。とくに有限集合は整列可能である。
+:::
+
+::: proof
+論理式 $\varphi(n)$ を「$n$ の任意の元 $X$ について、$X$ を整列する関係 $R$ が存在する」とする。$X$ の元の型を $0$ とすると $s(X)=1$, $s(n)=2$, $s(R)=3$ で層別化されるので、層別化された帰納法（\ref[自然数の基本性質]{set:nf-natural-numbers-basic}）が使える。
+
+**Step 1.** 【主張：$\varphi(0)$】 $0=\{\varnothing\}$ であり、$\varnothing$ は空の関係で整列される。
+
+**Step 2.** 【主張：$\varphi(k)$ ならば $\varphi(S(k))$】 $S(k)$ の元は $X=A\cup\{x\}$（$A\in k$, $x\notin A$）の形である。帰納法の仮定より $A$ を整列する $R$ がある。$R'=R\cup\{\langle a,x\rangle\mid a\in A\}$ とおく（$a$ と $x$ は同じ型なので層別化される）と、$R'$ は $x$ を最後に置いた $X$ の整列順序である。実際、$X$ の空でない部分集合 $Y$ について、$Y\cap A\neq\varnothing$ なら $R$ での $Y\cap A$ の最小元が $Y$ の最小元であり、$Y=\{x\}$ なら $x$ が最小元である。
+
+帰納法より、すべての $n\in\N$ について $\varphi(n)$ が成り立つ。
+:::
+
+::: theorem NF における無限公理 {#set:nf-infinity keywords="NF proves the axiom of infinity, V is infinite" index="無限公理（NF）|むげんこうり" refname="NF における無限公理"}
+$\mathsf{NF}$ において次が成り立つ。
+1. $V$ は有限でない。
+2. 任意の $n\in\N$ について $n\neq\varnothing$ であり、$S(n)\neq\varnothing$ である。とくに $S$ は $\N$ の上で単射で、$0$ はどの $S(n)$ とも異なる。
+:::
+
+::: intuition
+すべての集合の集まりは無限に多くの元をもつ。$\mathsf{ZF}$ では無限公理を別に仮定するが、$\mathsf{NF}$ では「有限なら一列に並べられる」ことと、スペッカーの定理「一列に並べられない」の組み合わせから、無限公理が定理として出てくる。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$V$ は有限でない】 $V$ が有限なら、\ref{set:nf-finite-wellorderable} より $V$ は整列可能であり、\ref{set:specker-not-ac} に反する。
+
+**Step 2（2）.** 【主張：$n\in\N$ なら $n\neq\varnothing$】 $\varphi(n)$ を $n\neq\varnothing$ として層別化された帰納法を使う。$0=\{\varnothing\}\neq\varnothing$ である。$k\neq\varnothing$ とし、$A\in k$ をとる。$\lvert A\rvert=k\in\N$ なので $A$ は有限であり、Step 1 より $A\neq V$ である。$x\notin A$ をとれば $A\cup\{x\}\in S(k)$ なので $S(k)\neq\varnothing$ である。
+
+ゆえに任意の $n\in\N$ について $n\neq\varnothing$ であり、$S(n)\in\N$ なので $S(n)\neq\varnothing$ でもある。前のページの結果（\ref[自然数の基本性質]{set:nf-natural-numbers-basic}：$S(m)=S(n)\neq\varnothing$ なら $m=n$、および $S(\kappa)\neq0$）から、$S$ は $\N$ の上で単射であり、$0$ はどの $S(n)$ とも異なる。
+
+::: hypcheck
+- **スペッカーの定理**：Step 1 で使った。これがこの証明の重い部分である。
+- **層別化された帰納法**：\ref{set:nf-finite-wellorderable} と Step 2 で使った。どちらの式にも $T$ は現れない。
+:::
+:::
+
+::: supplement
+**ペアノの公理.** 2 により、$\langle\N,0,S\rangle$ は層別化された式についての帰納法をもつペアノの体系になる。ただし帰納法が使えるのは層別化された式だけであり、たとえば「すべての $n\in\N$ について $Tn=n$」は層別化されないので、この方法では証明できない（前のページの補足を参照）。
+
+**無限公理の強さ.** $V$ が無限であることから、$\N$ が無限であること、$\N$ と $\iota[\N]$ の関係など、さらに細かい性質が議論される。それらの細部は本サイトでは扱わない。
+:::
+
+## 問題 {#set:sec-specker-problems}
+
+::: problem ★ 基本：T|V| は |V| の最大の対数 {#set:prob-specker-max-log}
+$\mathsf{NF}$ において（選択公理は仮定しない）、$2^{\lambda}=\lvert V\rvert$ を満たす $\lambda\in T[\mathrm{NC}]$ の全体を $L$ とする。$T\lvert V\rvert\in L$ であり、$L$ の任意の元 $\lambda$ について $\lambda\le T\lvert V\rvert$ であることを示せ。
+:::
+
+::: solution
+\ref{set:nf-cardinal-power-basic.5} より $2^{T\lvert V\rvert}=\lvert V\rvert$ なので $T\lvert V\rvert\in L$ である。$\lambda\in L$ なら $\lambda\in T[\mathrm{NC}]$ なので、\ref{set:nf-t-image.2} より $\lambda\le T\lvert V\rvert$ である。直接に言えば、$\lambda=T\lvert A\rvert$ と書くと $\iota[A]\subseteq\iota[V]$ なので $\lambda\le T\lvert V\rvert$ である。
+
+この問題は選択公理を使わない。一方、$\log\lvert V\rvert$ は $L$ の**最小**元なので、$\log\lvert V\rvert=T\lvert V\rvert$ かどうかはわからない。本文の証明が $\log$ を最大ではなく最小で定めたのは、$T$ と可換にするためである（\ref{set:nf-log-basic} の hypcheck）。
+:::
+
+::: problem ★ 基本：層別化の確かめ {#set:prob-specker-stratified-check}
+$U$ を \ref{set:nf-power-tower} の冪の塔とする。$Z=\{\kappa\mid T\kappa\in U\}$ の定義の式は層別化されるが、$Y=\{\kappa\mid\kappa\in U\land T\kappa\in U\}$ の定義の式は層別化されないことを確かめよ。
+:::
+
+::: solution
+$T\kappa\in U$ は、$\exists A\,\exists\mu\,(A\in\kappa\land\iota[A]\in\mu\land\mu\in U)$ と書ける。$s(A)=0$ とすると $s(\kappa)=1$、$s(\iota[A])=1$ より $s(\mu)=2$、$s(U)=3$ となり、矛盾なく値が決まるので $Z$ の式は層別化される。$Y$ の式では、さらに $\kappa\in U$ から $s(U)=s(\kappa)+1=2$ が要求され、$s(U)=3$ と食い違う。同じ変数 $U$ に二つの値を与えることはできないので、$Y$ の式は層別化されない。本文ではこのため、$Y$ を使う帰納法の代わりに、$Z$ が「閉じている」ことを示して $U\subseteq Z$ を得た。
+:::
+
+::: problem ★★ 標準：NFU と選択公理 {#set:prob-specker-nfu-power}
+$\mathsf{NFU}$（\ref[NFU]{set:nfu}）において、$\mathcal{P}(A)$ を $A$ の部分集合（集合であるもの）の全体とし、基数・$T$・$2^{T\lvert A\rvert}=\lvert\mathcal{P}(A)\rvert$ を $\mathsf{NF}$ と同様に定める。$\mathsf{NFU}$ でも $V$ が整列可能なら $\lvert\mathcal{P}(V)\rvert<\lvert V\rvert$ であることを示せ。ただし、本ページの $\mathsf{NF}$ での議論のうち、$\lvert V\rvert=2^{T\lvert V\rvert}$ 以外の部分（カントールの定理、\ref{set:nf-t-image}、冪の性質 1〜4、基数の整列）は $\mathsf{NFU}$ でも同じ証明で成り立つことを認めてよい。
+:::
+
+::: solution
+$\mathcal{P}(V)\subseteq V$ なので $\lvert\mathcal{P}(V)\rvert\le\lvert V\rvert$ である。$\lvert\mathcal{P}(V)\rvert=\lvert V\rvert$ と仮定すると、$2^{T\lvert V\rvert}=\lvert\mathcal{P}(V)\rvert=\lvert V\rvert$ となり、\ref{set:nf-cardinal-power-basic.5} の結論が $\mathsf{NFU}$ でも成り立つ。前半 $T\lvert V\rvert<\lvert V\rvert$ は (C) から、後半 $T\lvert V\rvert=2^{T(T\lvert V\rvert)}$ は 4 から従う。本文の \ref{set:nf-log} から \ref{set:specker-not-ac} までの証明が $\mathcal{P}(V)=V$ を使うのは、この 5 を通してだけなので、同じ議論で $V$ が整列可能であることと矛盾する。ゆえに $\lvert\mathcal{P}(V)\rvert\neq\lvert V\rvert$ であり、$\lvert\mathcal{P}(V)\rvert<\lvert V\rvert$ である。
+
+$\mathsf{NFU}$ に選択公理を加えた体系は $\ZFC$ が無矛盾なら無矛盾である（\ref[NFU の無矛盾性]{set:nfu-consistent}）ので、その体系では原子の全体が集合の全体より多い。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

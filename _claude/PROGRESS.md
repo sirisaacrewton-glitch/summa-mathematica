@@ -2018,6 +2018,17 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | KR-01 | 06-algorithmic-randomness/01-prefix-free-complexity | 接頭辞なし複雑性とクラフトの不等式 | 完了 |
 | KR-02 | 06-algorithmic-randomness/02-martin-lof | マルチン＝レーフのランダムネスとレヴィン–シュノアの定理 | 完了 |
 
+## 全体集合をもつ集合論の割り当て（2026-11-27 ユーザー承認：「一系列ずつ進める」の 3 番目。資料なし。文献の細部は本文で未確認と明記する）
+
+| ID | フォルダ / ファイル | 題（案） | 主なラベル | 状態 |
+|---|---|---|---|---|
+| NF-01 | 01-foundations/04-set-theory/09-new-foundations/01-typed-set-theory.html | 型つき集合論 TST と層別化 | set:page-typed-set-theory | 完了 |
+| NF-02 | 〃/02-nf-axioms.html | NF の公理と初歩 | set:page-nf-axioms | 完了 |
+| NF-02b | 〃/03-nf-ordinals.html | NF の整列順序と順序数（02 が約 42,000 字になったので順序数の節を分けた） | set:page-nf-ordinals | 完了 |
+| NF-03 | 〃/04-nfu-consistency.html | NFU の無矛盾性 | set:page-nfu-consistency | 完了 |
+| NF-04 | 〃/05-specker.html | NF では選択公理が成り立たない（証明は本サイトの組み立て。反映時に検算） | set:page-nf-specker | 完了 |
+| NF-05 | 〃/06-nf-consistency.html | NF の無矛盾性 | set:page-nf-consistency | 完了 |
+
 ## 線形順序の割り当て（2026-11-26 ユーザー承認：「一系列ずつ進める」の 2 番目。資料なし。文献の細部は本文で未確認と明記する）
 
 | ID | フォルダ / ファイル | 題（案） | 主なラベル | 状態 |

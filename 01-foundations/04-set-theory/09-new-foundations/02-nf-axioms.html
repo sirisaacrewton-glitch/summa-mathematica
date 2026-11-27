@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NF の公理と初歩 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="01-foundations/04-set-theory/09-new-foundations/02-nf-axioms.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# NF の公理と初歩 {#set:page-nf-axioms keywords="New Foundations, NF, Quine, stratified comprehension, universal set, Frege cardinal, T operation, Cantorian set, strongly Cantorian set"}
+
+クワインの **NF**（New Foundations）は、外延性の公理と、**層別化された**論理式（\ref{set:stratified-formula}）についての内包公理だけからなる集合論である。前のページの型つき集合論 $\mathsf{TST}$ から型の添字を消し、型が矛盾なく付けられる式だけに内包を許したものと言える。$x=x$ は層別化されるので、$\mathsf{NF}$ には**全体集合** $V$ があり、$V\in V$ である。本ページでは、全体集合と補集合、単集合写像、フレーゲ流の基数と自然数、型を一つ上げる **T 演算**を導入し、カントールの定理が $\mathsf{NF}$ でどう姿を変えるかを調べる（ブラリ＝フォルティの議論は次のページ \see{set:page-nf-ordinals} で扱う）。どちらの議論も矛盾にはならず、代わりに「T 演算は恒等写像ではない」という結論を与える。
+
+## 記法と定義の確認 {#set:sec-nf-notation}
+
+::: notation
+- 集合論の言語・論理式は \ref{set:first-order-language}、層別化は \ref{set:stratified-formula}、定義された項を含む式の層別化の判定は \ref{set:stratified-defined-terms} の意味で用いる。とくに、パラメータのない定数（$V$, $\varnothing$, $\N$ など）は出現ごとに別の型を与えてよい。
+- 順序対は $\langle x,y\rangle=\{\{x\},\{x,y\}\}$（\ref{set:ordered-pair}）、関係・関数・単射・全射は \ref{set:relation}, \ref{set:function}, \ref{set:injection-surjection} と同じ論理式で定める。$A\approx B$, $A\preccurlyeq B$ は \ref{set:cardinality-order} と同じ論理式で定める。像は $f[A]=\{y\mid\exists x\,(x\in A\land\langle x,y\rangle\in f)\}$ と書く。
+- **このページの議論はすべて $\mathsf{NF}$ の中で行う**（補足の中で他の体系に触れるときはそう明記する）。$\ZF$ の定理は $\mathsf{NF}$ でそのまま使えない。$\ZF$ の証明を流用するときは、作る集合がすべて層別化された論理式で定義されることを確かめる。
+- $\lvert A\rvert$ はこのページではフレーゲ流の基数（\ref{set:nf-frege-cardinal}）を表し、$\ZF$ の濃度（\ref{set:cardinality}）とは別物である。$\N$ はフレーゲ流の自然数の集合（\ref{set:nf-natural-numbers}）を表す。
+:::
+
+## NF の公理 {#set:sec-nf-axioms}
+
+::: definition NF（New Foundations） {#set:nf keywords="New Foundations, NF, Quine's set theory, stratified comprehension" index="ニューファウンデーションズ|にゅーふぁうんでーしょんず, クワインの集合論|くわいんのしゅうごうろん, 層別化された内包公理|そうべつかされたないほうこうり"}
+$\mathsf{NF}$ は、集合論の言語の次の公理からなる理論である。
+1. 外延性の公理 $\forall x\,\forall y\,\bigl(\forall z\,(z\in x\leftrightarrow z\in y)\to x=y\bigr)$。
+2. **層別化された内包公理**（図式。以下では単に**内包公理**ともいう）：$y$ を自由変数として含まない、層別化された各論理式 $\varphi$ について、次の論理式の全称閉包。
+$$
+\exists y\,\forall x\,\bigl(x\in y\leftrightarrow\varphi\bigr)
+$$
+:::
+
+::: intuition
+「型が矛盾なく付けられる性質なら、それを満たすもの全体は集合である」という公理である。分出公理と違って、既にある集合の中から切り出す必要はない。\ref{set:stratified-tst-translation.3} より、内包公理の例は $\mathsf{TST}$ の内包公理の例から型を消したものにちょうど一致する。$\mathsf{NF}$ は「どの型の議論も同じ」とみて型の区別を捨てた $\mathsf{TST}$ である。
+:::
+
+::: definition 内包による集合の記法 {#set:nf-abstraction keywords="set abstraction in NF" index="集合の内包的記法（NF）|しゅうごうのないほうてききほう"}
+$\varphi$ が層別化されているとき、内包公理が存在を保証する $y$ は外延性の公理によりただ一つである。これを $\{x\mid\varphi\}$ と書く。
+:::
+
+::: intuition
+層別化された性質 $\varphi$ を満たすもの全体を、一つの集合として名前で呼べるようにする記法である。$\ZF$ の $\{x\in z\mid\varphi\}$（\ref{set:separation-notation}）と違い、母集合 $z$ は要らないが、$\varphi$ が層別化されていることが条件になる。
+:::
+
+::: example
+パラメータを含む例：$\varphi\equiv x\notin a$ は $s(x)=0$, $s(a)=1$ で層別化されるので、各 $a$ について $\{x\mid x\notin a\}$ が存在する。層別化されない例：$\varphi\equiv x\notin x$ や $\varphi\equiv x\in a\land a\in x$ には内包公理を使えない。
+:::
+
+::: proposition 基本的な構成 {#set:nf-basic-constructions keywords="basic set constructions in NF"}
+次の集合が存在する（$A,B,a,b,R,S,f$ は任意の集合）。
+1. $\varnothing=\{x\mid x\neq x\}$ と $V=\{x\mid x=x\}$。
+2. $-A=\{x\mid x\notin A\}$、$A\cap B$、$A\cup B$、$A\setminus B$。
+3. $\{a\}$、$\{a,b\}$、$\bigcup A=\{x\mid\exists y\,(x\in y\land y\in A)\}$、$\bigcap A=\{x\mid\forall y\,(y\in A\to x\in y)\}$。
+4. $\mathcal{P}(A)=\{x\mid x\subseteq A\}$。
+5. $\langle a,b\rangle$ と $A\times B=\{z\mid\exists x\,\exists y\,(x\in A\land y\in B\land z=\langle x,y\rangle)\}$。
+6. 関係 $R$ の定義域・値域・場 $\mathrm{fld}\,R=\mathrm{dom}\,R\cup\mathrm{ran}\,R$、逆 $R^{-1}$、合成 $S\circ R$、像 $R[A]$、制限 $R\restr{A}$。
+7. 恒等写像 $\mathrm{id}_{A}=\{\langle x,x\rangle\mid x\in A\}$。とくに $\mathrm{id}_{V}$ も集合である。
+:::
+
+::: proof
+どれも定義の論理式が層別化されることを確かめればよい。外延性により、得られる集合はそれぞれ通常の意味のものである。
+
+**Step 1（1〜4）.** 【主張：1〜4 の定義の式は層別化される】 $x=x$, $x\neq x$ は $s(x)=0$ で層別化される。2 では $s(x)=0$, $s(A)=s(B)=1$。3 の $\{a\}$ は $x=a$ なので $s(x)=s(a)=0$、$\bigcup A$ は $s(x)=0$, $s(y)=1$, $s(A)=2$（$\bigcap A$ も同じ）。4 の $x\subseteq A$ は $\forall z(z\in x\to z\in A)$ なので $s(z)=0$, $s(x)=s(A)=1$ である。
+
+**Step 2（5〜7）.** 【主張：順序対・直積・関係の演算の式も層別化される】 \ref{set:stratified-defined-terms} の後の例のとおり、$z=\langle x,y\rangle$ は $s(x)=s(y)=n$, $s(z)=n+2$ で層別化される。5 は $s(A)=s(B)=n+1$ とすればよい。6 の像 $R[A]$ は $s(x)=s(y)=n$, $s(A)=n+1$, $s(R)=n+3$、合成 $S\circ R=\{\langle x,z\rangle\mid\exists y(\langle x,y\rangle\in R\land\langle y,z\rangle\in S)\}$ は $s(R)=s(S)=n+3$ で層別化され、他も同様である。7 の $\langle x,x\rangle$ は成分の型が等しいので問題ない。
+:::
+
+::: supplement
+**$\ZF$ と同じ形の式.** 6 の関係の演算は、$\ZF$ では既にある集合（たとえば $\bigcup\bigcup R$）から分出で切り出すが、$\mathsf{NF}$ では直接内包で作れる。どちらでも同じ論理式で特徴づけられるので、関係・関数についての $\ZF$ の初歩的な事実（\ref{set:function-basic}, \ref{set:injection-surjection-basic} など）のうち、証明が上のような層別化された構成しか使わないものは $\mathsf{NF}$ でもそのまま成り立つ。
+:::
+
+## 全体集合とブール代数 {#set:sec-nf-universal}
+
+::: theorem 全体集合 {#set:nf-universal-set keywords="universal set, V in V, complement, Boolean algebra of sets" index="全体集合|ぜんたいしゅうごう, 普遍集合|ふへんしゅうごう"}
+1. すべての集合を元とする集合 $V$ が存在し、$V\in V$ である。
+2. $\mathcal{P}(V)=V$ かつ $\bigcup V=V$ である。
+3. 任意の集合 $A$ は補集合 $-A$ をもち、$-(-A)=A$、$A\cup(-A)=V$、$A\cap(-A)=\varnothing$、$-(A\cup B)=(-A)\cap(-B)$、$-(A\cap B)=(-A)\cup(-B)$ が成り立つ。すなわち集合の全体は、$\cup,\cap,-,\varnothing,V$ について補元をもつブール代数の法則をすべて満たす。
+:::
+
+::: intuition
+$\mathsf{NF}$ では「すべての集合の集まり」が本当に集合であり、それ自身もすべての集合の一つなので自分自身の元になる。どの集合にも補集合があるので、集合の世界全体が一つの大きなブール代数（\see{set:boolean-algebra}）になる。$\ZF$ では $V$ も補集合も集合にならない（\ref{set:russell-paradox}）。
+:::
+
+::: proof
+**Step 1（1 の証明）.** 【主張：$V$ が存在し $V\in V$】 \ref{set:nf-basic-constructions.1} より $V=\{x\mid x=x\}$ が存在する。任意の $x$ について $x=x$ なので $x\in V$ である。$V$ も集合なので、とくに $V\in V$ である。
+
+**Step 2（2 の証明）.** 【主張：$\mathcal{P}(V)=V$, $\bigcup V=V$】 任意の $x$ は $x\subseteq V$ を満たすので $x\in\mathcal{P}(V)$ であり、$\mathcal{P}(V)\subseteq V$ は自明である。外延性より $\mathcal{P}(V)=V$ である。また任意の $x$ について $x\in\{x\}\in V$ なので $x\in\bigcup V$ であり、$\bigcup V=V$ となる。
+
+**Step 3（3 の証明）.** 【主張：補集合の法則が成り立つ】 $-A$ の存在は \ref{set:nf-basic-constructions.2} による。各等式は、両辺の元であることがそれぞれ同値であることを示せばよい。たとえば $x\in-(-A)\iff\lnot(x\notin A)\iff x\in A$ であり、$x\in-(A\cup B)\iff\lnot(x\in A\lor x\in B)\iff x\notin A\land x\notin B\iff x\in(-A)\cap(-B)$ である（ド・モルガンの法則）。ゆえに外延性より各等式が成り立つ。他の法則も同様に、元についての命題論理の法則に帰着する。
+
+::: hypcheck
+- **層別化された内包公理**：Step 1 で $V$ を、Step 3 で $-A$ を作るのに使った（$x\notin A$ は $s(A)=s(x)+1$ で層別化される）。
+- **外延性の公理**：Step 2・3 で等式を示すのに使った。
+:::
+:::
+
+::: corollary NF は ZF と両立しない {#set:nf-not-zf keywords="NF refutes foundation and separation" index="NF と基礎の公理|えぬえふときそのこうり"}
+1. $\mathsf{NF}$ では \ref{set:ax-foundation} が成り立たない：$\{V\}$ は空でないが、$\in$-極小元をもたない。
+2. $\mathsf{NF}$ では、$\forall x\,(x\in R\leftrightarrow x\notin x)$ を満たす集合 $R$ は存在しない。とくに \ref{set:ax-comprehension} の例 $\exists y\,\forall x\,(x\in y\leftrightarrow x\in V\land x\notin x)$ は $\mathsf{NF}$ で否定される。
+:::
+
+::: proof
+**1.** $\{V\}$ の唯一の元は $V$ であり、$V\in V\cap\{V\}$ なので $V$ は $\{V\}$ の $\in$-極小元でない。
+
+**2.** そのような $R$ があれば、$x=R$ を代入して $R\in R\leftrightarrow R\notin R$ となり矛盾する。この議論は論理だけを使う。分出公理の例の $y$ は、$x\in V$ が常に真なので、まさにそのような $R$ である。
+:::
+
+::: supplement
+**ラッセルの議論の行き先.** $\ZF$ ではラッセルの議論が「全体集合はない」を示した（\ref{set:russell-paradox}）。$\mathsf{NF}$ では全体集合が**ある**ので、同じ議論は「全体集合から $x\notin x$ で切り出すことはできない」、つまり分出公理が一般には成り立たないことを示す。$\mathsf{NF}$ と $\ZF$ は、どちらかがもう一方を含む関係にはない。
+:::
+
+## 単集合写像 {#set:sec-nf-singletons}
+
+::: definition 単集合の像 {#set:nf-singleton-image keywords="singleton image, iota, unit subsets, P1" index="単集合の像|たんしゅうごうのぞう, 単集合写像|たんしゅうごうしゃぞう"}
+集合 $x$ の単集合 $\{x\}$ を $\iota x$ とも書く。集合 $A$ に対し
+$$
+\iota[A]=\{u\mid\exists x\,(x\in A\land u=\{x\})\}
+$$
+を $A$ の**単集合の像**という（$A$ の元の単集合全体。$\mathcal{P}_{1}(A)$ とも書く）。$u=\{x\}$ は $s(u)=s(x)+1$、$x\in A$ は $s(A)=s(x)+1$ なので、この式は層別化され、$\iota[A]$ は存在する。
+:::
+
+::: intuition
+$\iota[A]$ は $A$ と「同じ形」をしているが、各元を一つずつ包んだので、型が一つ上がっている。$A$ の元と $\iota[A]$ の元を結ぶ対応 $x\mapsto\{x\}$ は、成分の型が一つずれているので、順序対の集合としては一般に作れない。次の命題がそれを確かめる。
+:::
+
+::: proposition 単集合写像は集合でない {#set:nf-iota-not-set keywords="the singleton map on V is not a set" index="単集合写像|たんしゅうごうしゃぞう"}
+すべての $x,w$ について $\langle x,w\rangle\in j\leftrightarrow w=\{x\}$ を満たす集合 $j$ は存在しない。
+:::
+
+::: proof
+そのような $j$ があったとして矛盾を導く。
+
+**Step 1.** 【主張：$R=\{x\mid\lnot\exists w\,(\langle x,w\rangle\in j\land w\subseteq x)\}$ は存在する】 $\langle x,w\rangle$ から $s(x)=s(w)=0$、$w\subseteq x$ もこれと矛盾せず（$w$ と $x$ は同じ型）、$s(j)=3$ とすれば層別化される。
+
+**Step 2.** 【主張：任意の $x$ について $x\in R\leftrightarrow x\notin x$】 $j$ の性質より、$\langle x,w\rangle\in j$ となる $w$ は $\{x\}$ だけである。ゆえに $\exists w(\langle x,w\rangle\in j\land w\subseteq x)$ は $\{x\}\subseteq x$、すなわち $x\in x$ と同値である。
+
+Step 2 は \ref{set:nf-not-zf.2} に反する。
+
+::: hypcheck
+- **$j$ の存在の仮定**：Step 2 で、層別化されない $x\in x$ を、層別化された $\exists w(\langle x,w\rangle\in j\land w\subseteq x)$ に書き換えるのに使った。$j$ があると、$x$ の型を一つ上げた $\{x\}$ を $x$ と同じ型で扱えてしまう。これが矛盾の源である。
+:::
+:::
+
+::: supplement
+**別証明.** $j$ が集合なら、$j$ は $V$ から $\iota[V]$ への全単射になり、\ref{set:nf-cantor-universal} に反する。
+
+**$A$ が小さいときは.** 特定の集合 $A$ の上では $\{\langle x,\{x\}\rangle\mid x\in A\}$ が集合になることがある（たとえば $A=\{a\}$ なら $\{\langle a,\{a\}\rangle\}$）。そのような $A$ を強カントール的という（\ref{set:cantorian-set}）。
+:::
+
+## フレーゲ流の基数と自然数 {#set:sec-nf-cardinals}
+
+::: lemma 対等と単集合の像 {#set:nf-equinumerous}
+1. $A\approx B$ と $A\preccurlyeq B$ は、$s(A)=s(B)$ として層別化される論理式である。
+2. $\approx$ は反射律・対称律・推移律を満たし、$\preccurlyeq$ は反射律と推移律を満たす。
+3. $A\approx B\iff\iota[A]\approx\iota[B]$ かつ $A\preccurlyeq B\iff\iota[A]\preccurlyeq\iota[B]$ である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$A\approx B$ は層別化される】 $A\approx B$ は「$f\subseteq A\times B$ で、$f$ は関数で単射かつ全射」となる $f$ の存在であり、$f$ の元は $A$, $B$ の元を成分とする順序対である。$A$, $B$ の元の型を $n$ とすると $s(A)=s(B)=n+1$, $s(f)=n+3$ で層別化される。$\preccurlyeq$ も同じである。
+
+**Step 2（2）.** 【主張：反射律・対称律・推移律】 恒等写像 $\mathrm{id}_{A}$、逆写像 $f^{-1}$、合成 $g\circ f$ は \ref{set:nf-basic-constructions} で存在し、それぞれ全単射（単射）であることは $\ZF$ のときと同じ元についての議論で確かめられる（\ref{set:injection-surjection-basic}）。
+
+**Step 3（3 の ⇒）.** 【主張：$f\colon A\to B$ が単射（全単射）なら、$f^{\iota}=\{\langle\{x\},\{y\}\rangle\mid\langle x,y\rangle\in f\}$ は $\iota[A]\to\iota[B]$ の単射（全単射）である】 $f^{\iota}$ の定義は $s(x)=s(y)=n$, $s(\{x\})=s(\{y\})=n+1$, $s(f)=n+3$ で層別化される。$\{x\}=\{x'\}$ なら外延性より $x=x'$ なので、$f^{\iota}(\{x\})=\{f(x)\}$ と値が一意に決まり、$f$ の単射性・全射性がそのまま移る。
+
+**Step 4（3 の ⇐）.** 【主張：$g\colon\iota[A]\to\iota[B]$ が単射（全単射）なら、$g_{\iota}=\{\langle x,y\rangle\mid\langle\{x\},\{y\}\rangle\in g\}$ は $A\to B$ の単射（全単射）である】 層別化は Step 3 と同じである。$x\in A$ について $g(\{x\})\in\iota[B]$ はある $y\in B$ の単集合 $\{y\}$ であり、その $y$ は一意なので、$g_{\iota}$ は $A$ 上の関数で $g_{\iota}(x)=y$ である。単射性・全射性も同様に移る。
+:::
+
+::: definition フレーゲ流の基数 {#set:nf-frege-cardinal keywords="Frege cardinal, Frege-Russell cardinal number, cardinal number in NF, NC" index="フレーゲ流の基数|ふれーげりゅうのきすう, フレーゲ＝ラッセルの基数|ふれーげらっせるのきすう"}
+集合 $A$ に対し、$A$ と対等な集合全体
+$$
+\lvert A\rvert=\{B\mid B\approx A\}
+$$
+を $A$ の**基数**（フレーゲ流の基数）という。ある $A$ について $\kappa=\lvert A\rvert$ となる集合 $\kappa$ を基数といい、基数全体の集合を $\mathrm{NC}=\{\kappa\mid\exists A\,(\kappa=\lvert A\rvert)\}$ と書く。基数の大小を $\lvert A\rvert\le\lvert B\rvert:\iff A\preccurlyeq B$、$\lvert A\rvert<\lvert B\rvert:\iff A\preccurlyeq B\land A\not\approx B$ で定める。
+:::
+
+::: intuition
+「$3$ とは、3 元集合全体の集まりである」というフレーゲとラッセルの考えをそのまま定義にしたものである。$\ZF$ では対等な集合全体は（$A=\varnothing$ のときを除き）集合にならないので、代表の順序数を選んで濃度を定めた（\ref{set:cardinality}）。$\mathsf{NF}$ では \ref{set:nf-equinumerous.1} により内包公理が使え、この集まりが集合になる。
+:::
+
+::: theorem 基数の基本性質 {#set:nf-cardinal-basic keywords="Frege cardinals exist in NF" index="基数の存在（NF）|きすうのそんざい"}
+1. 任意の $A$ について $\lvert A\rvert$ は存在し、$A\in\lvert A\rvert$ である。$\lvert A\rvert$ は $A$ より型が一つ高い（$s(\lvert A\rvert)=s(A)+1$）。
+2. $\lvert A\rvert=\lvert B\rvert\iff A\approx B$ である。
+3. $\mathrm{NC}$ は集合である。
+4. 基数の大小 $\le$, $<$ は代表の選び方によらない。
+:::
+
+::: intuition
+同じ大きさの集合を一つの集合にまとめたものが基数であり、二つの集合の基数が等しいことは、両者が一対一に対応することと同じである。基数全体も一つの集合になる。
+:::
+
+::: proof
+**Step 1（1・3）.** 【主張：定義の式は層別化される】 $B\approx A$ は $s(B)=s(A)$ で層別化されるので（\ref{set:nf-equinumerous.1}）、$\lvert A\rvert$ が存在し、$s(\lvert A\rvert)=s(A)+1$ である。$A\approx A$ なので $A\in\lvert A\rvert$ である。$\kappa=\lvert A\rvert$ は $\forall B(B\in\kappa\leftrightarrow B\approx A)$ なので $s(\kappa)=s(A)+1$ で層別化され、$\mathrm{NC}$ も存在する。
+
+**Step 2（2・4）.** 【主張：$\lvert A\rvert=\lvert B\rvert\iff A\approx B$】 $\lvert A\rvert=\lvert B\rvert$ なら $A\in\lvert A\rvert=\lvert B\rvert$ より $A\approx B$ である。逆に $A\approx B$ なら、$\approx$ の対称律・推移律（\ref{set:nf-equinumerous.2}）より任意の $C$ について $C\approx A\iff C\approx B$ であり、外延性より $\lvert A\rvert=\lvert B\rvert$ となる。4 は、$A\approx A'$, $B\approx B'$ のとき $A\preccurlyeq B\iff A'\preccurlyeq B'$ が全単射との合成から従うことによる。
+:::
+
+::: definition フレーゲ流の自然数 {#set:nf-natural-numbers keywords="natural numbers in NF, Frege natural numbers, successor" index="フレーゲ流の自然数|ふれーげりゅうのしぜんすう"}
+1. $0=\{\varnothing\}$ とし、集合 $\kappa$ に対し $S(\kappa)=\{A\cup\{x\}\mid A\in\kappa\land x\notin A\}$ と定める。$1=S(0)$, $2=S(1)$, … と書く。
+2. $0\in N$ かつ $\forall k\,(k\in N\to S(k)\in N)$ を満たす集合 $N$ を「帰納的」であるといい、すべての帰納的な集合に属する $n$ の全体
+$$
+\N=\{n\mid\forall N\,(N\text{ は帰納的}\to n\in N)\}
+$$
+の元を**自然数**という。
+:::
+
+::: intuition
+$0$ は空集合だけからなる基数、$S(\kappa)$ は「$\kappa$ 個の元をもつ集合に新しい元を一つ足した集合」全体である。$S(\kappa)$ の定義の式は $s(A)=s(x)+1$, $s(\kappa)=s(A)+1$ で層別化され、$S(\kappa)$ は $\kappa$ と同じ型をもつ。$\N$ の定義の式も $s(N)=s(n)+1$ で層別化される。
+:::
+
+::: lemma 一元を足し引きする補題 {#set:nf-successor-lemma}
+1. $x\notin A$, $y\notin B$, $A\approx B$ ならば $A\cup\{x\}\approx B\cup\{y\}$。
+2. $x\notin A$ で $C\approx A\cup\{x\}$ ならば、$y\notin B$, $C=B\cup\{y\}$, $B\approx A$ となる $B,y$ がある。
+3. $A\cup\{x\}=B\cup\{y\}$, $x\notin A$, $y\notin B$ ならば $A\approx B$。
+:::
+
+::: proof
+**1.** 全単射 $f\colon A\to B$ に $\langle x,y\rangle$ を加えた $f\cup\{\langle x,y\rangle\}$ は、$x\notin A$, $y\notin B$ より $A\cup\{x\}$ から $B\cup\{y\}$ への全単射である。
+
+**2.** 全単射 $g\colon C\to A\cup\{x\}$ をとり、$y=g^{-1}(x)$, $B=C\setminus\{y\}$ とおく。$g\restr{B}$ は $B$ から $A$ への全単射であり、$C=B\cup\{y\}$, $y\notin B$ である。
+
+**3.** $x=y$ なら $A=(A\cup\{x\})\setminus\{x\}=B$ である。$x\neq y$ なら、$y\in A\cup\{x\}$ より $y\in A$、同様に $x\in B$ であり、$A\setminus\{y\}=B\setminus\{x\}$ が成り立つ（どちらも $A\cup\{x\}$ から $x,y$ を除いたもの）。ゆえに、$A\setminus\{y\}$ 上で恒等写像、$y\mapsto x$ とする写像が $A$ から $B$ への全単射である。
+
+どの構成も層別化された式による（関数の合併・制限・逆）。
+:::
+
+::: proposition 自然数の基本性質 {#set:nf-natural-numbers-basic keywords="Peano axioms for Frege natural numbers"}
+1. $x\notin A$ ならば $S(\lvert A\rvert)=\lvert A\cup\{x\}\rvert$ である。また $S(\varnothing)=\varnothing$ であり、基数 $\kappa$ について $S(\kappa)$ は $\varnothing$ か基数である。
+2. 任意の $\kappa$ について $S(\kappa)\neq0$ である。
+3. $0\in\N$ であり、$n\in\N$ ならば $S(n)\in\N$ である。
+4. （**層別化された帰納法**）$\varphi(n)$ を層別化された論理式（パラメータを含んでよい）とする。$\varphi(0)$ と $\forall k\in\N\,(\varphi(k)\to\varphi(S(k)))$ が成り立てば、$\forall n\in\N\,\varphi(n)$ が成り立つ。
+5. 各 $n\in\N$ は $\varnothing$ であるか基数である。
+6. $m,n\in\N$ で $S(m)=S(n)\neq\varnothing$ ならば $m=n$ である。
+:::
+
+::: proof
+**Step 1（1）.** 【主張：$x\notin A$ なら $S(\lvert A\rvert)=\lvert A\cup\{x\}\rvert$】 $C\in S(\lvert A\rvert)$ なら $C=A'\cup\{x'\}$, $A'\approx A$, $x'\notin A'$ であり、\ref{set:nf-successor-lemma.1} より $C\approx A\cup\{x\}$ である。逆に $C\approx A\cup\{x\}$ なら \ref{set:nf-successor-lemma.2} より $C=B\cup\{y\}$, $B\approx A$, $y\notin B$ と書けるので $C\in S(\lvert A\rvert)$ である。外延性より等式が従う。$S(\varnothing)=\varnothing$ は $A\in\varnothing$ となる $A$ がないことによる。基数 $\kappa=\lvert A_{0}\rvert$ について $S(\kappa)\neq\varnothing$ なら、元 $A\cup\{x\}$（$A\in\kappa$, $x\notin A$）がとれ、$\kappa=\lvert A\rvert$ なので前半より $S(\kappa)=\lvert A\cup\{x\}\rvert$ は基数である。
+
+**Step 2（2・3）.** 【主張：$S(\kappa)\neq0$、$\N$ は $0$ を含み $S$ で閉じる】 $\varnothing\in0$ だが、$S(\kappa)$ の元 $A\cup\{x\}$ は $x$ を含むので空でなく、$\varnothing\notin S(\kappa)$ である。ゆえに外延性より $S(\kappa)\neq0$ である。$0$ はすべての帰納的な集合に属するので $0\in\N$ である。$n\in\N$ なら、任意の帰納的な集合 $N$ について $n\in N$ より $S(n)\in N$ なので $S(n)\in\N$ である。
+
+**Step 3（4）.** 【主張：$X=\{k\mid k\in\N\land\varphi(k)\}$ は存在し、帰納的である】 $\varphi$ は層別化されており、$k\in\N$ の $\N$ は定数なので（\ref{set:stratified-defined-terms}）、定義の式は層別化される。仮定 $\varphi(0)$ と Step 2 より $0\in X$ である。$k\in X$ なら $k\in\N$ と $\varphi(k)$ から $\varphi(S(k))$ と $S(k)\in\N$ が従い、$S(k)\in X$ である。ゆえに $X$ は帰納的であり、$\N$ の定義より $\N\subseteq X$、すなわち $\forall n\in\N\,\varphi(n)$ が成り立つ。
+
+**Step 4（5）.** 【主張：4 を $\varphi(n)\equiv n=\varnothing\lor\exists A\,(n=\lvert A\rvert)$ に適用できる】 $n=\lvert A\rvert$ は $s(n)=s(A)+1$ で層別化される（\ref{set:nf-cardinal-basic.1}）。$0=\{\varnothing\}=\lvert\varnothing\rvert$ である（$B\approx\varnothing$ なら全単射の定義域が空なので $B=\varnothing$）。$k$ が $\varnothing$ か基数なら、1 より $S(k)$ も $\varnothing$ か基数である。ゆえに 4 より主張が従う。
+
+**Step 5（6）.** 【主張：$S(m)=S(n)\neq\varnothing$ なら $m=n$】 元 $C\in S(m)=S(n)$ をとり、$C=A\cup\{x\}$（$A\in m$, $x\notin A$）、$C=B\cup\{y\}$（$B\in n$, $y\notin B$）と書く。\ref{set:nf-successor-lemma.3} より $A\approx B$ である。$m$, $n$ は空でないので 5 より基数であり、$A\in m$ から $m=\lvert A\rvert$、同様に $n=\lvert B\rvert$ である。ゆえに \ref{set:nf-cardinal-basic.2} より $m=n$ である。
+
+::: hypcheck
+- **層別化**：Step 3 で集合 $X$ を作るのに使った。帰納法は層別化された $\varphi$ についてしか保証されない。層別化されない性質についての帰納法は $\mathsf{NF}$ の公理からは出てこない（下の補足）。
+- **$S(m)\neq\varnothing$ の仮定**：Step 5 で $C$ をとるのに使った。外すと、$m,n$ がともに「新しい元を足せない」基数なら $S(m)=S(n)=\varnothing$ となり、$m=n$ は保証されない。
+- **外延性の公理**：Step 1・2 で等式・不等式を示すのに使った。
+:::
+:::
+
+::: supplement
+**$\varnothing\in\N$ かどうか.** 自然数 $n$ が $\varnothing$ になるのは、$n$ 個の元をもつ集合が $V$ だけで、元を足せなくなったとき、つまり $V$ が有限のときである。\tref{set:peano} の「後者は単射」を 6 の仮定なしで言うには $\varnothing\notin\N$ が要る。$\mathsf{NF}$ では $V$ が無限であることが証明できる（スペッカー。\see[NF における無限公理]{set:nf-infinity}）が、その証明は選択公理の否定を経由する重いものである。
+
+**$\ZF$ との比較.** $\ZF$ の自然数（\ref{set:natural-number}）は順序数として一つずつ集合を選んだものであり、フレーゲ流の自然数 $n$ は「$n$ 元集合全体」である。$\ZF$ では後者は集合にならない。
+:::
+
+## T 演算 {#set:sec-nf-t}
+
+::: definition T 演算 {#set:nf-t-operation keywords="T operation, T operator on cardinals" index="T 演算|てぃーえんざん"}
+基数 $\kappa$ と $A\in\kappa$ に対し、$T\kappa=\lvert\iota[A]\rvert$ と定める。すなわち $T\lvert A\rvert=\lvert\iota[A]\rvert$ である。
+:::
+
+::: intuition
+$T$ は「同じ大きさの集合を、元を一つずつ包んで型を一つ上げてから測り直す」操作である。直感的には $\iota[A]$ と $A$ は同じ大きさに見えるが、両者をつなぐ $x\mapsto\{x\}$ は一般に集合ではない（\ref{set:nf-iota-not-set}）ので、$T\kappa=\kappa$ とは限らない。実際 $T\lvert V\rvert\neq\lvert V\rvert$ である（\ref{set:nf-cantor-universal}）。$\mu=T\kappa$ は $\exists A\,(A\in\kappa\land\iota[A]\in\mu)$ と書け、$s(\mu)=s(\kappa)+1$ で層別化される。$\kappa\mapsto T\kappa$ は型を一つ上げるので、$\{\langle\kappa,T\kappa\rangle\mid\kappa\in\mathrm{NC}\}$ の定義の式は層別化されず、内包公理からは集合として得られない。
+:::
+
+::: proposition T 演算の基本性質 {#set:nf-t-basic keywords="properties of the T operation"}
+1. $T\kappa$ は代表 $A\in\kappa$ の選び方によらない。
+2. 基数 $\kappa,\lambda$ について $\kappa\le\lambda\iff T\kappa\le T\lambda$、$\kappa=\lambda\iff T\kappa=T\lambda$ である。
+3. $T0=0$ であり、基数 $\kappa$ について $S(\kappa)\neq\varnothing$ ならば $T(S(\kappa))=S(T\kappa)$ である。
+4. メタの各自然数 $k$ について、$k$ 回 $S$ を施した項 $\underline{k}=S(\cdots S(0)\cdots)$ は、$\underline{k}\neq\varnothing$ と $T\underline{k}=\underline{k}$ を満たす（$k$ ごとに別の定理である）。
+5. $n\in\N$, $n\neq\varnothing$ ならば $Tn\in\N$ である。
+:::
+
+::: proof
+**Step 1（1・2）.** 【主張：$T$ は代表によらず、大小を保ち、かつ反映する】 $A,B\in\kappa$ なら $A\approx B$ なので \ref{set:nf-equinumerous.3} より $\iota[A]\approx\iota[B]$ であり、\ref{set:nf-cardinal-basic.2} より $\lvert\iota[A]\rvert=\lvert\iota[B]\rvert$ である。2 は \ref{set:nf-equinumerous.3} の同値 $A\preccurlyeq B\iff\iota[A]\preccurlyeq\iota[B]$ と $A\approx B\iff\iota[A]\approx\iota[B]$ をそのまま基数の言葉に直したものである。
+
+**Step 2（3）.** 【主張：$T(S(\kappa))=S(T\kappa)$】 $\iota[\varnothing]=\varnothing$ なので $T0=\lvert\varnothing\rvert=0$ である。$S(\kappa)\neq\varnothing$ なら、$A\in\kappa$, $x\notin A$ がとれ、\ref{set:nf-natural-numbers-basic.1} より $S(\kappa)=\lvert A\cup\{x\}\rvert$ である。$\iota[A\cup\{x\}]=\iota[A]\cup\{\{x\}\}$ であり、$\{x\}\in\iota[A]$ なら $x\in A$ となるので $\{x\}\notin\iota[A]$ である。ゆえに再び \ref{set:nf-natural-numbers-basic.1} より
+$$
+T(S(\kappa))=\lvert\iota[A]\cup\{\{x\}\}\rvert=S(\lvert\iota[A]\rvert)=S(T\kappa)
+$$
+である。
+
+**Step 3（4）.** 【主張：各 $k$ について $\underline{k}=\lvert E_{k}\rvert$, $E_{k}=\{\iota^{i}\varnothing\mid i<k\}$ であり、$T\underline{k}=\underline{k}$】 $\iota^{i}\varnothing$ は $\varnothing$ を $i$ 回包んだ集合で、$i<j$ なら $\iota^{i}\varnothing\neq\iota^{j}\varnothing$ である（$\iota$ は単射で、$\iota^{j-i}\varnothing\neq\varnothing$）。$k$ についてのメタの帰納法で示す。$k=0$ では $\underline{0}=0=\lvert\varnothing\rvert$ である。$\underline{k}=\lvert E_{k}\rvert$ なら $\iota^{k}\varnothing\notin E_{k}$ なので、\ref{set:nf-natural-numbers-basic.1} より $\underline{k+1}=S(\lvert E_{k}\rvert)=\lvert E_{k+1}\rvert\neq\varnothing$ である。さらに 3 より $T\underline{k+1}=S(T\underline{k})=S(\underline{k})=\underline{k+1}$ となる。
+
+**Step 4（5）.** 【主張：$\varphi(n)\equiv(n\neq\varnothing\to Tn\in\N)$ に層別化された帰納法が使える】 $Tn\in\N$ は $\exists\mu(\mu=Tn\land\mu\in\N)$ であり、$s(\mu)=s(n)+1$ とすれば、$\N$ の二つの出現（$n\in\N$ と $\mu\in\N$）に別々の型を与えて層別化できる（\ref{set:stratified-defined-terms}）。$T0=0\in\N$ である。$\varphi(k)$ を仮定し $S(k)\neq\varnothing$ とすると、$S(\varnothing)=\varnothing$ より $k\neq\varnothing$ なので $Tk\in\N$ であり、$k$ は基数だから（\ref{set:nf-natural-numbers-basic.5}）3 より $T(S(k))=S(Tk)\in\N$ である。ゆえに \ref{set:nf-natural-numbers-basic.4} より主張が従う。
+
+::: hypcheck
+- **$S(\kappa)\neq\varnothing$**：Step 2 で $A$, $x$ をとるのに使った。
+- **層別化**：Step 4 で帰納法を使うために $\varphi$ の層別化を確かめた。$\N$ の出現ごとに型を変えられることが要点である。
+:::
+:::
+
+::: supplement
+**$Tn=n$ は帰納法で示せない.** 4 は具体的な $k$ ごとの定理の列である。一つの文「$\forall n\in\N\,(Tn=n)$」は、$Tn$ の型が $n$ より一つ高いので層別化されず、層別化された帰納法を適用できない。この文を公理として加えたものは、ロッサーの**数え上げの公理**と呼ばれるとされる。$\mathsf{NF}$ でこれが証明できるかどうかは本ページでは扱わない（未確認）。
+
+**$T$ と冪.** $A$ の部分集合の全体 $\mathcal{P}(A)$ は $\iota[A]$ と同じ型であり、$\mathcal{P}(A)$ と $\{0,1\}^{A}$ の対応は型が合わない。このため $\mathsf{NF}$ では $2^{\lvert A\rvert}$ ではなく $2^{T\lvert A\rvert}=\lvert\mathcal{P}(A)\rvert$ の形で冪を定めるのが自然になる（\see[スペッカーの定理]{set:specker-not-ac}）。
+:::
+
+## カントールの定理 {#set:sec-nf-cantor}
+
+::: theorem NF におけるカントールの定理 {#set:nf-cantor-theorem keywords="Cantor's theorem in NF, |P1(X)| < |P(X)|" index="カントールの定理（NF）|かんとーるのていり" refname="NF におけるカントールの定理"}
+任意の集合 $A$ について $\lvert\iota[A]\rvert<\lvert\mathcal{P}(A)\rvert$、すなわち $T\lvert A\rvert<\lvert\mathcal{P}(A)\rvert$ である。さらに、$\iota[A]$ から $\mathcal{P}(A)$ への全射は存在しない。
+:::
+
+::: intuition
+カントールの定理を、型が合う形で述べたものである。$A$ の元を直接 $A$ の部分集合に対応させる写像の代わりに、$A$ の元の単集合を部分集合に対応させる写像を考えると、対角線論法がそのまま通る。$\mathsf{TST}$ での同じ定理（\ref{set:tst-cantor}）の型を消したものに当たる。
+:::
+
+::: proof
+**Step 1（$\preccurlyeq$）.** 【主張：$\iota[A]\subseteq\mathcal{P}(A)$ であり、$\iota[A]\preccurlyeq\mathcal{P}(A)$】 $\{x\}\in\iota[A]$ なら $x\in A$ より $\{x\}\subseteq A$ である。恒等写像 $\mathrm{id}_{\iota[A]}$ は $\iota[A]$ から $\mathcal{P}(A)$ への単射である。
+
+**Step 2（対角集合）.** $g\colon\iota[A]\to\mathcal{P}(A)$ を写像とし、
+$$
+D=\{x\mid x\in A\land\forall B\,(\langle\{x\},B\rangle\in g\to x\notin B)\}
+\label{set:eq-nf-cantor-diagonal}
+$$
+とおく。【主張：$D$ は存在し $D\in\mathcal{P}(A)$】 $s(x)=0$ とすると、$s(\{x\})=s(B)=1$（順序対の成分は同じ型）、$s(A)=1$、$s(g)=4$ で、$x\notin B$ も $s(B)=s(x)+1$ と整合するので、式は層別化される。$D\subseteq A$ は定義から明らかである。$g$ は写像なので、$x\in A$ について条件は $x\notin g(\{x\})$ と同値である。
+
+**Step 3（全射でない）.** 【主張：$g(\{d\})=D$ となる $d\in A$ はない】 そのような $d$ があれば、$d\in D\iff d\notin g(\{d\})\iff d\notin D$ となり矛盾する。$\iota[A]$ の元はすべて $\{d\}$（$d\in A$）の形なので、$g$ は全射でない。
+
+全単射も全射なので $\iota[A]\not\approx\mathcal{P}(A)$ であり、Step 1 と合わせて $\lvert\iota[A]\rvert<\lvert\mathcal{P}(A)\rvert$ である。
+
+::: hypcheck
+- **層別化された内包公理**：Step 2 で $D$ を作るのに使った。条件の中の $x$ の二つの出現（$\{x\}$ の中と $x\notin B$）は同じ型 $0$ で整合する。
+- **$g$ の定義域が $\iota[A]$ であること**：Step 2 の層別化の要点である。定義域を $A$ にすると、$\langle x,B\rangle\in g$ から $s(x)=s(B)$ となり、$x\notin B$ の $s(B)=s(x)+1$ と矛盾して層別化されない。
+- 選択公理・無限公理は使わない。
+:::
+:::
+
+::: corollary T|V| < |V| {#set:nf-cantor-universal keywords="|iota V| < |V|, V is not Cantorian" index="全体集合の基数|ぜんたいしゅうごうのきすう"}
+$\lvert\iota[V]\rvert<\lvert\mathcal{P}(V)\rvert=\lvert V\rvert$、すなわち $T\lvert V\rvert<\lvert V\rvert$ である。とくに $V$ と $\iota[V]$ は対等でなく、$T$ は恒等的でない。
+:::
+
+::: proof
+\ref{set:nf-cantor-theorem} を $A=V$ に適用し、\ref{set:nf-universal-set.2} の $\mathcal{P}(V)=V$ を使えばよい。$\lvert\iota[V]\rvert=\lvert V\rvert$ なら $\lvert\iota[V]\rvert<\lvert V\rvert$ に反するので、$\iota[V]\not\approx V$ である。
+:::
+
+::: supplement
+**元の形のカントールの定理は偽である.** $\ZF$ の \ref{set:cantor-strict}「$\lvert A\rvert<\lvert\mathcal{P}(A)\rvert$」は、$A=V$ のとき $\mathcal{P}(V)=V$ なので $\mathsf{NF}$ では成り立たない。$\ZF$ の証明の対角集合 $\{x\in A\mid x\notin f(x)\}$ は、$\langle x,f(x)\rangle\in f$ から $s(x)=s(f(x))$、$x\notin f(x)$ から $s(f(x))=s(x)+1$ となって層別化されない。
+
+**カントールの逆説の行き先.** $\mathsf{NF}$ では $V$ がすべての集合を含むので、任意の $A$ について $A\preccurlyeq V$（包含写像）であり、$\lvert V\rvert$ は最大の基数である。素朴集合論ではこれとカントールの定理から「最大の基数より大きい基数」が出て矛盾した。$\mathsf{NF}$ では、カントールの定理が $T\lvert V\rvert<\lvert V\rvert$ という無害な形に変わる。
+:::
+
+## カントール的集合 {#set:sec-nf-cantorian}
+
+::: definition カントール的集合と強カントール的集合 {#set:cantorian-set keywords="Cantorian set, strongly Cantorian set" index="カントール的集合|かんとーるてきしゅうごう, 強カントール的集合|きょうかんとーるてきしゅうごう"}
+1. $A\approx\iota[A]$、すなわち $T\lvert A\rvert=\lvert A\rvert$ のとき、$A$ は**カントール的**であるという。
+2. $\iota\restr{A}=\{\langle x,\{x\}\rangle\mid x\in A\}$ が集合として存在するとき、すなわち
+$$
+\exists j\,\forall p\,\bigl(p\in j\leftrightarrow\exists x\,(x\in A\land p=\langle x,\{x\}\rangle)\bigr)
+$$
+のとき、$A$ は**強カントール的**であるという。
+:::
+
+::: intuition
+カントール的とは、$A$ と $\iota[A]$ がたまたま同じ大きさであること、強カントール的とは、その対応として標準的な $x\mapsto\{x\}$ そのものが使えることである。2 の論理式は層別化されないが、これは $A$ の性質を述べる文であって、内包公理で集合を作るのに使うわけではないので構わない。強カントール的な集合の上では、型を一つ上げる操作を集合 $\iota\restr{A}$ で行えるので、型の制約が実質的に消える。
+:::
+
+::: proposition カントール的集合の基本性質 {#set:cantorian-basic keywords="properties of strongly Cantorian sets"}
+1. 強カントール的な集合はカントール的である。
+2. $V$ はカントール的でない。
+3. 具体的に並べた有限集合 $\{a_{1},\dots,a_{k}\}$ は強カントール的である。
+4. 強カントール的な集合の部分集合は強カントール的である。
+5. $A$ が強カントール的ならば $\mathcal{P}(A)$ も強カントール的である。
+6. $A$ が強カントール的ならば $R_{A}=\{x\in A\mid x\notin x\}$ は集合として存在し、$R_{A}\notin A$ である。
+:::
+
+::: proof
+以下、$A$ が強カントール的なとき $j_{A}=\iota\restr{A}$ と書く。$j_{A}$ は $A$ 上の関数で、$j_{A}(x)=\{x\}$ である。
+
+**Step 1（1・2）.** 【主張：$j_{A}$ は $A$ から $\iota[A]$ への全単射】 値は $\iota[A]$ に入り、$\{x\}=\{x'\}$ なら $x=x'$ なので単射、$\iota[A]$ の元はすべて $\{x\}$（$x\in A$）なので全射である。ゆえに 1 が従う。2 は \ref{set:nf-cantor-universal} そのものである。
+
+**Step 2（3・4）.** 【主張：有限集合と部分集合の上で $\iota$ の制限が作れる】 3 は $\{\langle a_{1},\{a_{1}\}\rangle,\dots,\langle a_{k},\{a_{k}\}\rangle\}$ が対と合併を有限回使って作れることによる（$k$ ごとに一つの定理）。4 では $B\subseteq A$ について
+$$
+j_{B}=\{p\mid p\in j_{A}\land\exists x\,\exists w\,(p=\langle x,w\rangle\land x\in B)\}
+$$
+とおく。$s(x)=s(w)=0$, $s(p)=2$, $s(B)=1$, $s(j_{A})=3$ で層別化され、$j_{B}=\iota\restr{B}$ である。
+
+**Step 3（5）.** 【主張：$\iota\restr{\mathcal{P}(A)}=k\circ h$ と、二つの層別化された集合の合成で書ける】 まず
+$$
+h=\{\langle B,C\rangle\mid B\subseteq A\land C=j_{A}[B]\}
+$$
+とおく。$j_{A}[B]=\{w\mid\exists x(x\in B\land\langle x,w\rangle\in j_{A})\}$ の元 $w$ は $x$ と同じ型なので $s(C)=s(B)$ であり、$h$ は層別化された式で定まる。$B\subseteq A$ のとき $j_{A}[B]=\{\{x\}\mid x\in B\}=\iota[B]$ なので、$h(B)=\iota[B]$ である。次に
+$$
+k=\{\langle\iota[B],\{B\}\rangle\mid B\subseteq A\}
+$$
+とおく。$s(\iota[B])=s(B)+1=s(\{B\})$ なので層別化される。$\iota[B]=\iota[B']$ なら $B=B'$（$x\in B\iff\{x\}\in\iota[B]$）なので $k$ は関数である。よって $(k\circ h)(B)=k(\iota[B])=\{B\}$ であり、$k\circ h=\iota\restr{\mathcal{P}(A)}$ は集合である。
+
+**Step 4（6）.** 【主張：$R_{A}$ は層別化された式で定義できる】 $x\in A$ について、$x\in x\iff\{x\}\subseteq x\iff\exists w\,(\langle x,w\rangle\in j_{A}\land w\subseteq x)$ である。最後の式は $s(x)=s(w)$ で層別化されるので、
+$$
+R_{A}=\{x\mid x\in A\land\lnot\exists w\,(\langle x,w\rangle\in j_{A}\land w\subseteq x)\}
+$$
+が存在し、$R_{A}=\{x\in A\mid x\notin x\}$ である。$R_{A}\in A$ なら $R_{A}\in R_{A}\iff R_{A}\notin R_{A}$ となって矛盾するので、$R_{A}\notin A$ である。
+
+::: hypcheck
+- **強カントール性**：Step 3 で $j_{A}[B]$ により $\iota[B]$ を $B$ と同じ型で表し、Step 4 で $x\in x$ を層別化された式に書き換えるのに使った。$A=V$ では使えない：$R_{V}$ が存在すれば \ref{set:nf-not-zf.2} に反する。
+- **$\iota$ の単射性**（外延性）：Step 1 と Step 3 の $k$ が関数であること。
+:::
+:::
+
+::: supplement
+**分出の回復.** Step 4 の書き換えは一般化でき、強カントール的な集合の中では、層別化されない論理式でも、変数がその集合の元を動く限り分出ができる（変数ごとに $j_{A}$ で型をずらせる）ことが知られているとされる。強カントール的な集合は、$\mathsf{NF}$ の中で $\ZF$ のように振る舞う「小さな」集合の候補である。
+
+**$\N$ はどうか.** $\N$ がカントール的であることは、$V$ が無限であること（\see[NF における無限公理]{set:nf-infinity}）を使って示せるとされる。強カントール的であることは、上で触れた数え上げの公理と同値であるとされる（未確認）。
+:::
+
+## 有限公理化可能性 {#set:sec-nf-finite-axiom}
+
+::: fact NF の有限公理化 {#set:nf-finite-axiomatization keywords="finite axiomatizability of NF, Hailperin" index="NF の有限公理化|えぬえふのゆうげんこうりか"}
+$\mathsf{NF}$ は有限個の公理で公理化できる。すなわち、層別化された内包公理の有限個の例と外延性の公理から、層別化された内包公理のすべての例が証明できる。これはハイルパリンによる（1944 年とされる）。
+:::
+
+::: intuition
+$\mathsf{NBG}$ のクラスの内包が有限個の「演算」の公理から得られる（\ref{set:nbg-mk}）のと同じ考え方で、補集合・合併・直積・像・単集合の像のような基本的な構成だけを公理にしておけば、層別化された論理式の構成に沿って任意の内包が組み立てられる。層別化では各部分式の型がそろっているので、型を調整する操作（単集合の像など）を有限個用意すれば足りる。
+:::
+
+::: supplement
+**この後の道筋.** $\mathsf{NF}$ では選択公理の否定が証明され、その帰結として $V$ は無限である（\see[スペッカーの定理]{set:specker-not-ac}）。$\mathsf{NF}$ の外延性を集合だけに制限し原子を許した体系 $\mathsf{NFU}$ は、$\ZFC$ の中でモデルが作れる（\see[NFU の無矛盾性]{set:page-nfu-consistency}）。$\mathsf{NF}$ 自身の無矛盾性は \see[NF の無矛盾性]{set:page-nf-consistency} で扱う。
+:::
+
+## 問題 {#set:sec-nf-problems}
+
+::: problem ★ 基本：全体集合の計算 {#set:prob-nf-universal}
+$\mathsf{NF}$ で次を示せ。
+- (a) $-V=\varnothing$ かつ $-\varnothing=V$。
+- (b) $\bigcap V=\varnothing$。
+- (c) $\{x\mid x\subseteq x\}=V$（この内包が使えることも確かめよ）。
+- (d) $\iota[V]\neq V$。
+:::
+
+::: solution
+(a) $x\in-V\iff x\notin V$ であり、$x\in V$ は常に真なので、$-V$ は元をもたず、外延性より $-V=\varnothing$ である。$-\varnothing=V$ も同様である。
+
+(b) $x\in\bigcap V\iff\forall y\,(y\in V\to x\in y)$ である。$y=\varnothing$ とおくと $x\in\varnothing$ が要求されるが、これは偽なので、$\bigcap V$ は元をもたず $\bigcap V=\varnothing$ である。
+
+(c) $x\subseteq x$ は $\forall z\,(z\in x\to z\in x)$ であり、$s(z)=0$, $s(x)=1$ で層別化されるので内包が使える。この式は論理的に真なので、集合はすべての $x$ を含み、$V$ に等しい。
+
+(d) $\iota[V]$ の元はすべて単集合で、元を一つもつ。$\varnothing\in V$ だが $\varnothing$ は元をもたないので $\varnothing\notin\iota[V]$ である。ゆえに $\iota[V]\neq V$ である。
+:::
+
+::: problem ★ 基本：1 は単集合の全体 {#set:prob-nf-one}
+$\mathsf{NF}$ で $1=S(0)=\iota[V]$ を示し、$T1=1$ を \ref{set:nf-t-basic} の 4 を使わずに直接確かめよ。
+:::
+
+::: solution
+$0=\{\varnothing\}$ なので、$S(0)$ の元は $\varnothing\cup\{x\}=\{x\}$（$x\notin\varnothing$、すなわち任意の $x$）である。ゆえに $S(0)=\{\{x\}\mid x\in V\}=\iota[V]$ である。$T1$ を計算するには代表を一つとればよい。$\{\varnothing\}\in1$ なので $T1=\lvert\iota[\{\varnothing\}]\rvert=\lvert\{\{\varnothing\}\}\rvert$ である。$\{\{\varnothing\}\}$ は単集合なので $1$ の元であり、\ref{set:nf-cardinal-basic.2} より $\lvert\{\{\varnothing\}\}\rvert=\lvert\{\varnothing\}\rvert=1$ である。ゆえに $T1=1$ である。
+:::
+
+::: problem ★★ 標準：強カントール的集合の閉包性 {#set:prob-nf-sc-closure}
+$A,B$ が強カントール的なとき、$A\cup B$ と $\iota[A]$ も強カントール的であることを示せ。
+:::
+
+::: solution
+$j_{A}=\iota\restr{A}$, $j_{B}=\iota\restr{B}$ とする。$j_{A}\cup j_{B}$ は集合であり、その元はちょうど $\langle x,\{x\}\rangle$（$x\in A\cup B$）なので、$\iota\restr{(A\cup B)}=j_{A}\cup j_{B}$ である。
+
+$\iota[A]$ については、$u=\{x\}$（$x\in A$）に対し $\{u\}=\{\{x\}\}=j_{A}[u]$ であることを使う。$j_{A}[u]=\{w\mid\exists x(x\in u\land\langle x,w\rangle\in j_{A})\}$ は $u$ と同じ型をもつので、
+$$
+j'=\{\langle u,C\rangle\mid u\in\iota[A]\land C=j_{A}[u]\}
+$$
+は層別化された式で定まる（$s(u)=s(C)$）。$u=\{x\}$ のとき $j_{A}[u]=\{\{x\}\}=\{u\}$ なので、$j'=\iota\restr{\iota[A]}$ である。ゆえに $\iota[A]$ は強カントール的である。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
