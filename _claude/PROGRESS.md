@@ -1992,6 +1992,16 @@ SCOPE.md §3 の到達目標（多様体上のストークス、ガウス＝ボ�
 | KR-01 | 06-algorithmic-randomness/01-prefix-free-complexity | 接頭辞なし複雑性とクラフトの不等式 | 完了 |
 | KR-02 | 06-algorithmic-randomness/02-martin-lof | マルチン＝レーフのランダムネスとレヴィン–シュノアの定理 | 完了 |
 
+## 全体集合をもつ集合論の割り当て（2026-11-27 ユーザー承認：「一系列ずつ進める」の 3 番目。資料なし。文献の細部は本文で未確認と明記する）
+
+| ID | フォルダ / ファイル | 題（案） | 主なラベル | 状態 |
+|---|---|---|---|---|
+| NF-01 | 01-foundations/04-set-theory/09-new-foundations/01-typed-set-theory.html | 型つき集合論 TST と層別化 | set:page-typed-set-theory | 執筆中 |
+| NF-02 | 〃/02-nf-axioms.html | NF の公理と初歩 | set:page-nf-axioms | 執筆中 |
+| NF-03 | 〃/03-nfu-consistency.html | NFU の無矛盾性 | set:page-nfu-consistency | 執筆中 |
+| NF-04 | 〃/04-specker.html | NF では選択公理が成り立たない | set:page-nf-specker | 執筆中 |
+| NF-05 | 〃/05-nf-consistency.html | NF の無矛盾性 | set:page-nf-consistency | 執筆中 |
+
 ## 線形順序の割り当て（2026-11-26 ユーザー承認：「一系列ずつ進める」の 2 番目。資料なし。文献の細部は本文で未確認と明記する）
 
 | ID | フォルダ / ファイル | 題（案） | 主なラベル | 状態 |
