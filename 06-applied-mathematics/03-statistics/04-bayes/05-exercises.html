@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>演習：ベイズ統計 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/04-bayes/05-exercises.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 演習：ベイズ統計 {#stat:page-exercises-bayes keywords="exercises, Monty Hall via Bayes formula, posterior median for an exponential posterior, beta posterior and credible probability, gamma-Poisson update, consistency for two hypotheses, Bayes factor computation, Metropolis-Hastings on three states, Gibbs sampler on a 2 x 2 table"}
+
+この系列の各ページの内容を使う演習を、ページの順に並べた。各ページの末尾の「問題」はそのページの内容の確認で、ここに集めたのは計算練習や、二つ以上のページの道具を組み合わせるものである。難易度は ★（基本）・★★（標準）・★★★（発展）で示す。
+
+## 記法と定義の確認 {#stat:sec-esb-notation}
+
+::: notation
+- 記号と用語は、各節の見出しの下に示した対応するページの約束に従う。
+:::
+
+## ベイズの定理と事後分布 {#stat:sec-bt-exercises}
+
+対応するページ：\ref{stat:page-bayes-theorem}
+
+::: problem ★ 基本：3 つの扉 {#stat:ex-bt-monty-hall}
+3 つの扉の 1 つに賞品があり（一様な事前分布）、参加者が扉 1 を選んだ後、賞品の場所を知る司会者が、残りのうち賞品のない扉を開ける（両方とも空なら等確率で選ぶ）。扉 3 が開けられたとき、賞品が扉 2 にある事後確率を求めよ。
+:::
+
+::: solution
+$\theta\in\{1,2,3\}$ を賞品の場所、データを「扉 3 が開いた」とする。尤度は $\theta=1$ で $\frac12$、$\theta=2$ で $1$、$\theta=3$ で $0$。事後分布は $\frac13(\frac12,1,0)$ を正規化した $(\frac13,\frac23,0)$。扉 2 に替えるべきである。
+:::
+
+::: problem ★★ 標準：事後中央値 {#stat:ex-bt-exponential-median}
+事後分布が平均 $1/\lambda$ の指数分布のとき、2 乗損失と絶対値損失のベイズ推定値を求め、比べよ。
+:::
+
+::: solution
+2 乗損失では事後平均 $\frac1\lambda$。絶対値損失では中央値 $m$：$1-e^{-\lambda m}=\frac12$ から $m=\frac{\log2}\lambda\approx\frac{0.69}\lambda$（\ref{stat:bayes-estimator-posterior-loss}）。右に裾の長い分布では中央値は平均より小さい。
+:::
+
+## 共役事前分布 {#stat:sec-cp-exercises}
+
+対応するページ：\ref{stat:page-conjugate-priors}
+
+::: problem ★ 基本：ベータ事後分布の確率 {#stat:ex-cp-beta-probability}
+一様事前分布で 10 回中 9 回成功した。事後分布と、$\theta>\frac12$ の事後確率を求めよ。
+:::
+
+::: solution
+事後分布は $\mathrm{Beta}(10,2)$、密度 $110\theta^{9}(1-\theta)$（$1/B(10,2)=\frac{11!}{9!\,1!}=110$）。$P(\theta\le\frac12)=110\int_{0}^{1/2}(\theta^{9}-\theta^{10})d\theta=110\bigl(\frac{2^{-10}}{10}-\frac{2^{-11}}{11}\bigr)=\frac{11}{1024}-\frac{10}{2048}=\frac{12}{2048}\approx0.0059$。よって $P(\theta>\frac12\mid x)\approx0.994$。
+:::
+
+::: problem ★★ 標準：ガンマ–ポアソンの逐次更新 {#stat:ex-cp-sequential}
+ガンマ–ポアソンモデルで、データを 1 個ずつ観測して事後分布を更新した結果が、一度に全部を使った更新と一致することを示せ。
+:::
+
+::: solution
+1 個の観測 $x$ による更新は $(\alpha,\beta)\mapsto(\alpha+x,\beta+1)$（\ref{stat:gamma-poisson}）。$n$ 回続けると $(\alpha+\sum x_{i},\beta+n)$ で、一度の更新と同じ。一般に、独立なデータでは、前の事後分布を次の事前分布とする逐次更新は一括の更新と一致する（尤度が積に分かれるため）。
+:::
+
+## 事後分布の一致性 {#stat:sec-pc-exercises}
+
+対応するページ：\ref{stat:page-posterior-consistency}
+
+::: problem ★ 基本：ベイズ因子の計算 {#stat:ex-pc-bayes-factor}
+$H_{0}:\theta=\frac12$ 対 $H_{1}:\theta\sim\mathrm{Beta}(1,1)$ で、10 回中 9 回成功したときのベイズ因子 $B_{01}$ を求めよ。
+:::
+
+::: solution
+$H_{0}$ の尤度は $\binom{10}9 2^{-10}$、$H_{1}$ の周辺尤度は $\binom{10}9B(10,2)=\binom{10}9\frac1{110}$。$B_{01}=\frac{110}{1024}\approx0.107$。データは $H_{1}$ を約 9.3 倍支持する。
+:::
+
+::: problem ★★ 標準：2 つの単純仮説の一致性 {#stat:ex-pc-two-normals}
+$N(0,1)$ と $N(1,1)$ のどちらかが真で（事前確率 $\frac12$ ずつ）、実際は $N(0,1)$ のとき、誤った方の事後オッズの対数の $\frac1n$ 倍の極限を求めよ。
+:::
+
+::: solution
+$\frac1n\log\frac{\pi(1\mid x)}{\pi(0\mid x)}=\frac1n\sum\bigl(x_{i}-\frac12\bigr)\to-\frac12$（大数の強法則）。これは $-H(N(0,1)\mid N(1,1))=-\frac12$ に等しい（\ref{stat:posterior-consistency-finite}）。
+:::
+
+## マルコフ連鎖モンテカルロ法 {#stat:sec-mc-exercises}
+
+対応するページ：\ref{stat:page-mcmc}
+
+::: problem ★ 基本：3 状態のメトロポリス法 {#stat:ex-mc-three-states}
+$S=\{1,2,3\}$ を円に並べ、両隣に確率 $\frac12$ ずつ提案する。$\pi=(\frac16,\frac13,\frac12)$ のときのメトロポリス–ヘイスティングスの遷移行列を求め、$\pi P=\pi$ を確かめよ。
+:::
+
+::: solution
+$p_{12}=\frac12$, $p_{13}=\frac12$, $p_{21}=\frac12\cdot\frac12=\frac14$, $p_{23}=\frac12$, $p_{31}=\frac12\cdot\frac13=\frac16$, $p_{32}=\frac12\cdot\frac23=\frac13$。対角は $p_{11}=0$, $p_{22}=\frac14$, $p_{33}=\frac12$。$\pi P$ の第 1 成分 $\frac13\cdot\frac14+\frac12\cdot\frac16=\frac16$、第 2 成分 $\frac16\cdot\frac12+\frac13\cdot\frac14+\frac12\cdot\frac13=\frac13$、第 3 成分は残り $\frac12$。
+:::
+
+::: problem ★★ 標準：2×2 表のギブス・サンプラー {#stat:ex-mc-gibbs-table}
+$S=\{0,1\}^{2}$ 上の $\pi(0,0)=\pi(1,1)=\frac{1-\varepsilon}2$, $\pi(0,1)=\pi(1,0)=\frac\varepsilon2$（$0<\varepsilon<1$）について、無作為走査のギブス・サンプラーで $(0,0)$ から $(1,1)$ へ 2 段で移る確率を求め、$\varepsilon\to0$ での振る舞いを述べよ。
+:::
+
+::: solution
+$(0,0)$ から座標を 1 つ引き直して $(1,0)$ か $(0,1)$ に移る確率は $\frac12\varepsilon+\frac12\varepsilon=\varepsilon$（条件付き分布で値が変わる確率は $\frac{\varepsilon/2}{(1-\varepsilon)/2+\varepsilon/2}=\varepsilon$）。そこから $(1,1)$ へは、変わっていない方の座標を選び（確率 $\frac12$）、それが $1$ になる確率は $1-\varepsilon$。よって 2 段で $(1,1)$ に移る確率は $\varepsilon\cdot\frac12(1-\varepsilon)$。$\varepsilon\to0$ では 2 つの峰の間の移動が極めて遅くなり、連鎖は正しい定常分布をもつが、混合は非常に遅い（\ref{stat:gibbs-sampler} の収束の速さについての注意）。
+:::
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>事後分布の一致性 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/03-statistics/04-bayes/03-posterior-consistency.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 事後分布の一致性 {#stat:page-posterior-consistency keywords="frequentist behaviour of the posterior, posterior consistency for a finite parameter space under identifiability, posterior odds and log likelihood ratios, concentration of the beta posterior around the true proportion, Doob and Schwartz consistency theorems, Bernstein-von Mises theorem, Bayes factors, Lindley's paradox for a point null hypothesis"}
+
+ベイズ統計の結論は事前分布に依存する。では、事前分布の選び方の違いは、データが増えれば消えるのか。このページでは、データが真の値 $\theta_{0}$ の分布から独立に生成されている（頻度論の立場）とき、事後分布が $\theta_{0}$ のまわりに集中していくこと（**事後分布の一致性**）を、有限個のパラメータの場合とベータ–2 項モデルについて証明する。一方で、点の帰無仮説を検定する場面では、事前分布の影響がデータが増えても消えず、p 値とベイズの結論が大きく食い違いうること（**リンドレーの逆説**）を示す。
+
+## 記法と定義の確認 {#stat:sec-pc-notation}
+
+::: notation
+- 前のページまでの定義と例 \ref{stat:prior-posterior}, \ref{stat:beta-binomial}, \ref{stat:normal-normal} を使う。
+- 推定の系列の補題 \ref{stat:information-inequality-general}, \ref{stat:upper-strong-law} を使う。大数の強法則は \ref{prb:strong-law}。
+- このページでは、データ $X_{1},X_{2},\dots$ は真の値 $\theta_{0}$ の分布 $P_{\theta_{0}}$ からの独立同分布な列とし（パラメータは確率変数ではなく固定）、事後分布 $\pi(\cdot\mid X_{1..n})$ はデータの関数として扱う。「a.s.」は $P_{\theta_{0}}$ についてである。体系は $\ZFC$。
+:::
+
+## 有限なパラメータ空間 {#stat:sec-pc-finite}
+
+::: theorem 事後分布の一致性（有限なパラメータ空間） {#stat:posterior-consistency-finite keywords="Theta finite, prior positive at theta_0, identifiable model with densities: the posterior probability of theta_0 tends to 1 almost surely under P_theta0; posterior odds of theta_j against theta_0 decay exponentially at rate given by the Kullback-Leibler divergence" index="事後分布の一致性|じごぶんぷのいっちせい" refname="事後分布の一致性（有限なパラメータ空間）"}
+$\Theta=\{\theta_{0},\theta_{1},\dots,\theta_{K}\}$（有限）、事前確率 $\pi_{j}\defeq\pi(\theta_{j})$ で $\pi_{0}>0$ とし、各 $P_{\theta_{j}}$ は $\sigma$ 有限測度に関する密度 $f(\cdot\mid\theta_{j})$ をもち、$j\ne0$ なら $P_{\theta_{j}}\ne P_{\theta_{0}}$ とする。このとき、$P_{\theta_{0}}$-a.s. に
+$$
+\pi(\theta_{0}\mid X_{1..n})\to1\qquad(n\to\infty).
+$$
+さらに、$\pi_{j}>0$ の $j\ne0$ について $\limsup_{n}\frac1n\log\frac{\pi(\theta_{j}\mid X_{1..n})}{\pi(\theta_{0}\mid X_{1..n})}\le E_{\theta_{0}}\Bigl[\log\frac{f(X\mid\theta_{j})}{f(X\mid\theta_{0})}\Bigr]<0$。
+:::
+
+::: intuition
+事後オッズは「事前オッズ × 尤度比」で、対数尤度比は $n$ 個の独立な項の和である。真の値に対しては 1 項あたり平均して負の値（相対エントロピーの分だけ）が足されるので、偽の値の事後オッズは指数関数的に小さくなる。事前確率がどれほど小さくても $0$ でなければ、この指数的な減衰に勝てない。
+:::
+
+::: proof
+**Step 1（事後オッズ）.** 【主張：事後オッズは事前オッズと尤度比の積】$P_{\theta_{0}}$-a.s. にすべての $i$ で $f(X_{i}\mid\theta_{0})>0$。$m_{j}(x)\defeq\log\frac{f(x\mid\theta_{j})}{f(x\mid\theta_{0})}\in[-\infty,\infty)$ とすると、事後分布の定義（\ref{stat:prior-posterior}）から
+$$
+\frac{\pi(\theta_{j}\mid X_{1..n})}{\pi(\theta_{0}\mid X_{1..n})}=\frac{\pi_{j}}{\pi_{0}}\exp\Bigl(\sum_{i\le n}m_{j}(X_{i})\Bigr).
+$$
+
+**Step 2（減衰の速さ）.** \ref{stat:information-inequality-general} から $E_{\theta_{0}}[m_{j}^{+}]<\infty$ で $c_{j}\defeq E_{\theta_{0}}[m_{j}]\in[-\infty,0)$。\ref{stat:upper-strong-law} の 1 から $\limsup_{n}\frac1n\sum_{i\le n}m_{j}(X_{i})\le c_{j}<0$（a.s.）。$\pi_{j}>0$ なら Step 1 から主張の評価、$\pi_{j}=0$ なら事後確率は $0$。
+
+**Step 3（結論）.** Step 2 から各 $j\ne0$ で事後オッズは $0$ に収束する（a.s.）。$\pi(\theta_{0}\mid\cdot)=\bigl(1+\sum_{j\ne0}\frac{\pi(\theta_{j}\mid\cdot)}{\pi(\theta_{0}\mid\cdot)}\bigr)^{-1}$ で、有限和なので $\to1$。
+:::
+
+## ベータ事後分布の集中 {#stat:sec-pc-beta}
+
+::: proposition ベータ事後分布の集中 {#stat:beta-posterior-concentration keywords="for Bernoulli(theta_0) data and a Beta(a, b) prior, the posterior mean tends to theta_0 a.s., the posterior variance is at most 1/(4(a + b + n + 1)), and the posterior probability of {|theta - theta_0| > epsilon} tends to 0 a.s." index="事後分布の集中|じごぶんぷのしゅうちゅう" refname="ベータ事後分布の集中"}
+$X_{1},X_{2},\dots$ が成功確率 $\theta_{0}\in[0,1]$ の独立なベルヌーイ確率変数で、事前分布が $\mathrm{Beta}(a,b)$ なら、事後分布 $\Pi_{n}\defeq\mathrm{Beta}(a+K_{n},b+n-K_{n})$（$K_{n}$ は成功の数）について、
+1. 事後平均 $\hat\theta_{n}\defeq\frac{a+K_{n}}{a+b+n}\to\theta_{0}$（a.s.）。
+2. 事後分散は $\frac1{4(a+b+n+1)}$ 以下。
+3. 任意の $\varepsilon>0$ で $\Pi_{n}(\{\theta:\abs{\theta-\theta_{0}}>\varepsilon\})\to0$（a.s.）。
+:::
+
+::: intuition
+事後平均は大数の法則で真の値に近づき、事後分布の幅は試行数に反比例して縮む。中心が正しい位置に近づき、幅が $0$ に縮むので、事後分布は真の値に集中する。
+:::
+
+::: proof
+**Step 1（1）.** 大数の強法則から $K_{n}/n\to\theta_{0}$（a.s.）で、$\hat\theta_{n}=\frac{a/n+K_{n}/n}{(a+b)/n+1}\to\theta_{0}$。
+
+**Step 2（2）.** 【主張：$\mathrm{Beta}(\alpha,\beta)$ の分散は $\frac{\alpha\beta}{(\alpha+\beta)^{2}(\alpha+\beta+1)}\le\frac1{4(\alpha+\beta+1)}$】2 次のモーメントは $\frac{B(\alpha+2,\beta)}{B(\alpha,\beta)}=\frac{\alpha(\alpha+1)}{(\alpha+\beta)(\alpha+\beta+1)}$（$B(s+1,t)=\frac s{s+t}B(s,t)$ を 2 回）、平均の 2 乗を引いて整理する。$\alpha\beta\le\frac{(\alpha+\beta)^{2}}4$。$\alpha+\beta=a+b+n$。
+
+**Step 3（3）.** 1 から a.s. に十分大きい $n$ で $\abs{\hat\theta_{n}-\theta_{0}}<\varepsilon/2$。そのとき $\{\abs{\theta-\theta_{0}}>\varepsilon\}\subseteq\{\abs{\theta-\hat\theta_{n}}>\varepsilon/2\}$ で、チェビシェフの不等式と 2 から $\Pi_{n}$ による確率は $\le\frac{4}{\varepsilon^{2}}\cdot\frac1{4(a+b+n+1)}\to0$。
+:::
+
+::: remark
+**一般のパラメータ空間.** 連続なパラメータ空間でも、適当な条件のもとで事後分布は一致する（事前分布についてほとんどすべての $\theta_{0}$ での一致性：ドゥーブの定理、真の値のまわりの相対エントロピー近傍に正の事前確率があり、検定が存在する場合：シュヴァルツの定理）。さらに正則なモデルでは、事後分布は $N(\hat\theta_{n},\frac1{nI(\theta_{0})})$（$\hat\theta_{n}$ は最尤推定量）に全変動距離で近づく（ベルンシュタイン–フォン・ミーゼスの定理）。これらはここでは証明しない。最後の定理は、大標本では信用区間と信頼区間がほぼ一致することの根拠である。ただし無限次元のパラメータ（ノンパラメトリックなモデル）では、事後分布が一致しない例がある（ダイアコニス–フリードマン）。
+:::
+
+## リンドレーの逆説 {#stat:sec-pc-lindley}
+
+::: proposition リンドレーの逆説 {#stat:lindley-paradox keywords="point null H_0: mu = 0 with prior mass 1/2 and N(0, tau^2) under H_1; for N(mu, sigma^2) data with fixed z = sqrt(n) bar x / sigma, the Bayes factor B_01 = sqrt(1 + n tau^2/sigma^2) exp(-z^2 n tau^2 / (2(sigma^2 + n tau^2))) tends to infinity, so the posterior probability of H_0 tends to 1 while the p-value stays fixed" index="リンドレーの逆説|りんどれーのぎゃくせつ, ベイズ因子|べいずいんし" refname="リンドレーの逆説"}
+$N(\mu,\sigma^{2})$（$\sigma^{2}$ 既知）の標本で、事前分布を「確率 $\frac12$ で $\mu=0$、確率 $\frac12$ で $\mu\sim N(0,\tau^{2})$」とする。$z\defeq\sqrt n\bar x/\sigma$ とすると、$H_{0}:\mu=0$ の事後オッズは
+$$
+\frac{P(H_{0}\mid\bar x)}{P(H_{1}\mid\bar x)}=B_{01}\defeq\sqrt{1+\frac{n\tau^{2}}{\sigma^{2}}}\,\exp\Bigl(-\frac{z^{2}}2\cdot\frac{n\tau^{2}}{\sigma^{2}+n\tau^{2}}\Bigr).
+$$
+特に $z$ を固定して（例えば $z=1.96$、両側 p 値 $0.05$）$n\to\infty$ とすると $B_{01}\to\infty$ で、$P(H_{0}\mid\bar x)\to1$。
+:::
+
+::: intuition
+p 値が 0.05 のまま標本が大きくなるということは、標本平均が $0$ から $1.96\sigma/\sqrt n$ という、どんどん小さな距離だけ離れていることを意味する。対立仮説のもとで $\mu$ は事前分布 $N(0,\tau^{2})$ の幅に広がっているので、そんな小さな値の $\mu$ はほとんど期待されず、「ちょうど $0$」の方がよく説明できてしまう。p 値とベイズ因子は、異なる問いに答えている。
+:::
+
+::: proof
+**Step 1（十分統計量への帰着）.** 【主張：$H_{0}$ のもとで $\bar X\sim N(0,\sigma^{2}/n)$、$H_{1}$ のもとで $N(0,\tau^{2}+\sigma^{2}/n)$】尤度は $\mu$ について $\bar x$ だけを通して $\exp(-\frac{n(\bar x-\mu)^{2}}{2\sigma^{2}})$ に比例する（\ref{stat:sample-mean-variance} の Step 2 の分解）ので、事後オッズは $\bar x$ の密度の比で計算してよい。$H_{0}$ のもとで $\bar X\sim N(0,\sigma^{2}/n)$。$H_{1}$ のもとでは $\bar X=\mu+(\bar X-\mu)$ が独立な $N(0,\tau^{2})$ と $N(0,\sigma^{2}/n)$ の和なので $N(0,\tau^{2}+\sigma^{2}/n)$。
+
+**Step 2（比の計算）.** 事前オッズは $1$ なので、事後オッズは 2 つの正規密度の比
+$$
+\frac{(\sigma^{2}/n)^{-1/2}e^{-\bar x^{2}n/(2\sigma^{2})}}{(\tau^{2}+\sigma^{2}/n)^{-1/2}e^{-\bar x^{2}/(2(\tau^{2}+\sigma^{2}/n))}}=\sqrt{1+\frac{n\tau^{2}}{\sigma^{2}}}\exp\Bigl(-\frac{\bar x^{2}}2\Bigl(\frac n{\sigma^{2}}-\frac{n}{n\tau^{2}+\sigma^{2}}\Bigr)\Bigr)
+$$
+で、$\bar x^{2}=z^{2}\sigma^{2}/n$ を代入すると指数は $-\frac{z^{2}}2\bigl(1-\frac{\sigma^{2}}{n\tau^{2}+\sigma^{2}}\bigr)=-\frac{z^{2}}2\cdot\frac{n\tau^{2}}{\sigma^{2}+n\tau^{2}}$。
+
+**Step 3（極限）.** $z$ を固定すると指数の部分は $e^{-z^{2}/2}$ に収束し、平方根の部分は $\infty$ に発散する。
+:::
+
+::: hypcheck
+- **$\pi_{0}>0$**：有限な場合の一致性の Step 1 で $\pi_{0}$ で割った。真の値に事前確率 $0$ を与えると、どれだけデータがあっても事後確率は $0$ のままである（「クロムウェルの法則」）。
+- **識別可能性**：情報不等式で $c_{j}<0$ を得るのに使った。識別できない 2 つの値の事後オッズは事前オッズのまま変わらない。
+- **点の帰無仮説への正の事前確率**：リンドレーの逆説の前提。連続な事前分布のもとで $\mu=0$ の事後確率は常に $0$ なので、点の仮説の検定では事前分布の置き方が結論を強く左右する。
+:::
+
+## 問題 {#stat:sec-pc-problems}
+
+::: problem {#stat:prob-pc-two-coins}
+表の確率が $0.5$ と $0.6$ の 2 枚の硬貨のどちらかを、事前確率 $\frac12$ ずつで選んで投げ続ける。実際は $0.6$ の硬貨のとき、誤った硬貨の事後オッズが減衰する指数の速さを求めよ。
+:::
+
+::: solution
+\ref{stat:posterior-consistency-finite} の速さは $E_{0.6}\bigl[\log\frac{f(X\mid0.5)}{f(X\mid0.6)}\bigr]=0.6\log\frac{0.5}{0.6}+0.4\log\frac{0.5}{0.4}\approx-0.0201$（相対エントロピーの符号を変えたもの。$\limsup$ の評価で、実際には強法則から極限が等号で成り立つ）。オッズが $\frac1{100}$ になるにはおよそ $\log100/0.0201\approx229$ 回が必要。
+:::
+
+::: problem {#stat:prob-pc-lindley-numbers}
+\ref{stat:lindley-paradox} で $\tau=\sigma$, $z=1.96$ のとき、$n=100$ と $n=10000$ での $P(H_{0}\mid\bar x)$ を概算せよ。
+:::
+
+::: solution
+$n=100$：$\sqrt{101}\approx10.05$、指数 $\approx e^{-1.92\cdot\frac{100}{101}}\approx0.149$、$B_{01}\approx1.50$、$P(H_{0}\mid\bar x)=\frac{B_{01}}{1+B_{01}}\approx0.60$。$n=10000$：$\sqrt{10001}\approx100$、指数 $\approx e^{-1.92}\approx0.147$、$B_{01}\approx14.7$、$P\approx0.94$。p 値はどちらも $0.05$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 有限な場合の一致性では、対数尤度比の可積分性を仮定していない（一般形の情報不等式と上からの大数の法則で、$-\infty$ になりうる場合も扱った）。議論は Ghosal–van der Vaart『Fundamentals of Nonparametric Bayesian Inference』第 6 章、リンドレーの逆説は Lindley（1957, Biometrika）の設定による。
+
+**前提を変えると.**
+- **モデルの誤特定**：真の分布がモデルに含まれないと、事後分布は（相対エントロピーの意味で）真の分布に最も近いモデルの点に集中する。有限な場合は上の証明で $\theta_{0}$ をその点に置き換えればよい。
+- **事前分布の影響の消え方**：正則なモデルでは事前分布の影響は $O(1/n)$ の速さで消え（事後平均と最尤推定量の差）、ベルンシュタイン–フォン・ミーゼスの定理の主要項には現れない。リンドレーの逆説は、点の仮説という「正則でない」事前分布で、この消え方が起きない例である。
+- **ベイズ因子とBIC**：$\log B_{01}$ はラプラス近似で $-\frac12(\text{尤度比統計量})+\frac{d}2\log n+O(1)$ と書け、これが情報量規準 BIC の根拠になる（$d$ は次元の差）。
+
+**高い視点から：尤度原理と頻度論の性質.** 事後分布はデータを尤度を通してしか見ない（尤度原理）が、その頻度論的な性質（一致性・被覆確率）は、データを生成する真の分布についての大数の法則から出てくる。一致性は、ベイズ推論が「十分なデータのもとでは事前の主観に依存しない」ことの数学的な保証で、リンドレーの逆説は、その保証が点の仮説の検定のような場面では成り立たないことの警告である。比喩で言えば、事前分布は議論の出発点の「思い込み」で、証拠が積み重なれば普通は誰でも同じ結論に至るが、「ちょうど 0 か」のような鋭い問いでは、思い込みの置き方が最後まで結論を左右しうる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{stat:sec-pc-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
