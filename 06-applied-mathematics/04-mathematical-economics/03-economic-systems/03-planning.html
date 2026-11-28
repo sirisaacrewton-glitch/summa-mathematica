@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>計画経済の数理 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/04-mathematical-economics/03-economic-systems/03-planning.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 計画経済の数理 {#econ:page-planning keywords="planned economy, Leontief input-output model, productive nonnegative matrix, Neumann series, Hawkins-Simon condition, Leontief inverse, embodied labor, linear programming, weak duality, conic Caratheodory theorem, closedness of finitely generated cones, Farkas lemma, strong duality, complementary slackness, shadow prices as marginal values of resources, Kantorovich, Lange model of market socialism, indeterminacy under linear technology, socialist calculation debate, Hayek"}
+
+市場を使わずに、中央の計画当局が何をどれだけ作るかを決める経済を**計画経済**という。計画には二つの数学的な問題がある。(1) 各産業の生産物が他の産業の原材料になる経済で、最終的に欲しい量を作るには各産業がどれだけ生産すればよいか（**産業連関分析**、レオンチェフ）。(2) 限られた資源のもとで、最も価値の高い生産の組み合わせは何か（**線形計画法**、カントロヴィチ）。このページでは、(1) 産業連関の行列が「生産的」であることの特徴づけと、そのとき任意の最終需要が非負の生産で賄えること、(2) 線形計画法の**双対定理**（ファルカスの補題から完全に証明する）と、双対変数が資源の**影の価格**であること、(3) 計画当局が影の価格を示せば、各企業は利潤の符号だけで正しい活動を選べるが、線形の技術のもとでは量までは決まらないこと（ランゲの市場社会主義の論点）、を証明する。数学が示すのは「必要な情報がすべて集まれば計算できる」ことであり、情報と誘因の問題（ハイエクの批判）は補足で扱う。
+
+## 記法と定義の確認 {#econ:sec-pl-notation}
+
+::: notation
+- ベクトルと行列の不等式は成分ごと：$x\ge0$ はすべての成分が $0$ 以上、$x\gg0$ はすべての成分が正。行ベクトル $y$ と列ベクトル $x$ の積を $yx$ または $y\cdot x$ と書く。
+- ノイマン級数は \ref{fa:neumann-series}：ノルム空間上の有界作用素 $T$ で $\norm T<1$ なら $I-T$ は可逆で $(I-T)^{-1}=\sum_{t\ge0}T^{t}$（ここでは $\mathbb{R}^{n}$ 上の行列に使う）。
+- 有界閉集合上の連続関数の最小値の存在（\ref{top:extreme-value}）を、$\mathbb{R}^{m}$ の中で使う。
+:::
+
+## 産業連関分析 {#econ:sec-pl-input-output}
+
+::: definition 産業連関モデル {#econ:input-output-model keywords="n industries; input coefficient matrix A >= 0, a_ij = amount of good i needed to produce one unit of good j; gross output x, final demand d, x = Ax + d; A is productive if x >> Ax for some x >= 0; labor coefficients a_0" index="産業連関分析|さんぎょうれんかんぶんせき, 投入係数|とうにゅうけいすう, レオンチェフ逆行列|れおんちぇふぎゃくぎょうれつ, 生産的な行列|せいさんてきなぎょうれつ" refname="産業連関モデル"}
+$n$ 個の産業があり、産業 $j$ が生産物を 1 単位作るのに産業 $i$ の生産物を $a_{ij}\ge0$ 単位使うとする。$A\defeq(a_{ij})$ を**投入係数行列**という。各産業の総生産を $x\in\mathbb{R}^{n}$、家計や政府が最終的に使う量（**最終需要**）を $d$ とすると、需給の釣り合いは $x=Ax+d$。ある $x\ge0$ で $x\gg Ax$ となるとき、$A$ は**生産的**であるという。各産業の 1 単位あたりの直接の労働投入を行ベクトル $a_{0}\ge0$ で表す。
+:::
+
+::: intuition
+鉄を作るには石炭が、石炭を掘るには鉄の機械が要る。最終的に車を 1 台作るには、直接の部品だけでなく、部品を作るための部品、そのための部品……が必要で、その合計が $d+Ad+A^{2}d+\dots$ である。「生産的」とは、この連鎖が無限に膨らまずに収まること、すなわち、どこかで全産業が自分の使う以上を作れることである。
+:::
+
+::: theorem 生産的な行列の特徴づけ {#econ:productive-matrix keywords="for A >= 0 the following are equivalent: A is productive; sum_t A^t converges; I - A is invertible with (I - A)^{-1} >= 0; then for every final demand d >= 0 the unique solution of x = Ax + d is x = (I - A)^{-1} d >= 0" index="ホーキンス–サイモン条件|ほーきんすさいもんじょうけん, 生産的な行列の特徴づけ|せいさんてきなぎょうれつのとくちょうづけ" refname="生産的な行列の特徴づけ"}
+$A\ge0$ を $n$ 次正方行列とする。次は同値である。
+1. $A$ は生産的。
+2. $\sum_{t\ge0}A^{t}$ が収束する。
+3. $I-A$ は可逆で $(I-A)^{-1}\ge0$。
+
+このとき、任意の $d\ge0$ について $x=Ax+d$ の解はただ一つで、$x=(I-A)^{-1}d=\sum_{t\ge0}A^{t}d\ge0$。$(I-A)^{-1}$ を**レオンチェフ逆行列**という。
+:::
+
+::: intuition
+生産的なら、ある生産の組で全産業が「使う量の $\theta$ 倍（$\theta<1$）」しか消費しないので、その組で測った大きさで連鎖の各段が $\theta$ 倍に縮み、等比級数として収束する。収束すれば、級数の和が逆行列で、非負の行列の和なので非負である。
+:::
+
+::: proof
+**Step 1（1 ⇒ 2：重みつきの最大ノルム）.** 【主張：$x\gg Ax$, $x\ge0$ なら、$\norm v_{x}\defeq\max_{i}\abs{v_{i}}/x_{i}$ についての作用素ノルムが $\norm A_{x}\le\theta\defeq\max_{i}(Ax)_{i}/x_{i}<1$】$x\gg Ax\ge0$ から $x\gg0$ なので $\norm\cdot_{x}$ はノルムで、$\theta<1$。任意の $v$ について $\abs{v_{j}}\le\norm v_{x}x_{j}$ なので、$A\ge0$ から
+$$
+\abs{(Av)_{i}}\le\sum_{j}a_{ij}\abs{v_{j}}\le\norm v_{x}(Ax)_{i}\le\theta\norm v_{x}x_{i}.
+$$
+よって $\norm{Av}_{x}\le\theta\norm v_{x}$。\ref{fa:neumann-series} から $\sum_{t}A^{t}$ は収束する（作用素ノルムで、したがって成分ごとに）。
+
+**Step 2（2 ⇒ 3）.** $S_{T}\defeq\sum_{t=0}^{T}A^{t}$ とすると $(I-A)S_{T}=I-A^{T+1}$。級数が収束するので $A^{T+1}\to0$ で、極限 $S$ は $(I-A)S=I$ をみたす。正方行列なので $S=(I-A)^{-1}$。各 $S_{T}\ge0$ なので $S\ge0$。
+
+**Step 3（3 ⇒ 1）.** $e\defeq(1,\dots,1)^{\top}$, $x\defeq(I-A)^{-1}e\ge0$ とすると $x-Ax=e\gg0$。
+
+**Step 4（解）.** $I-A$ が可逆なので $x=Ax+d$ の解はただ一つ $(I-A)^{-1}d$ で、$(I-A)^{-1}\ge0$, $d\ge0$ から非負。級数の表示は Step 2 から。
+:::
+
+::: corollary 体化労働 {#econ:embodied-labor keywords="if A is productive the row vector lambda = a_0 (I - A)^{-1} >= 0 is the unique solution of lambda = lambda A + a_0: the total (direct and indirect) labor embodied in one unit of each good; lambda >> 0 if a_0 >> 0" index="体化労働|たいかろうどう, 労働価値|ろうどうかち" refname="体化労働"}
+$A$ が生産的なら、$\lambda=\lambda A+a_{0}$ をみたす行ベクトル $\lambda$ はただ一つで $\lambda=a_{0}(I-A)^{-1}=\sum_{t\ge0}a_{0}A^{t}\ge0$。$\lambda_{j}$ は財 $j$ の 1 単位に直接・間接に含まれる労働の総量（**体化労働**）である。$a_{0}\gg0$ なら $\lambda\gg0$。
+:::
+
+::: intuition
+財 1 単位の労働の総量は、直接の労働 $a_{0}$ に、原材料に含まれる労働 $\lambda A$ を足したもので、原材料の労働もまた同じ式で決まる。この自己参照の式は、レオンチェフ逆行列で一度に解ける。
+:::
+
+::: proof
+**Step 1（一意性と表示）.** 【主張：$\lambda(I-A)=a_{0}$ の解は $a_{0}(I-A)^{-1}$ ただ一つ】\ref{econ:productive-matrix} の 3 から $I-A$ は可逆。非負性は $(I-A)^{-1}\ge0$ から、級数の表示は Step 2 の $S$ から。
+
+**Step 2（正値性）.** $(I-A)^{-1}=I+A+\dots\ge I$ なので $\lambda\ge a_{0}\gg0$。
+:::
+
+## 線形計画法と双対定理 {#econ:sec-pl-lp}
+
+::: definition 線形計画問題と双対問題 {#econ:linear-program keywords="primal: maximize c x subject to B x <= r, x >= 0 (activity levels x, resource constraints r); dual: minimize y r subject to y B >= c, y >= 0 (resource prices y); feasible, optimal; weak duality" index="線形計画法|せんけいけいかくほう, 双対問題|そうついもんだい, 主問題|しゅもんだい, 影の価格|かげのかかく" refname="線形計画問題と双対問題"}
+$B$ を $m\times n$ 行列、$r\in\mathbb{R}^{m}$（資源の量）、$c$ を $n$ 次元の行ベクトル（各活動の 1 単位の価値）とする。
+- **主問題**：$Bx\le r$, $x\ge0$ のもとで $cx$ を最大にする。$x\in\mathbb{R}^{n}$ は各活動の水準、$B$ の第 $j$ 列は活動 $j$ の 1 単位が使う資源。
+- **双対問題**：$yB\ge c$, $y\ge0$ のもとで $yr$ を最小にする。$y$ は $m$ 次元の行ベクトルで、各資源の価格。
+
+制約をみたす点を**許容解**、最適値を達成する許容解を**最適解**という。
+:::
+
+::: intuition
+主問題は「限られた資源でどの活動をどれだけ行うか」、双対問題は「資源にどんな値段をつければ、どの活動も資源の費用以上の価値を生まないか、そのうえで資源全体の評価額を最小にするか」である。双対定理は、二つの問題の答えが一致することを主張する。
+:::
+
+::: lemma 弱双対性 {#econ:lp-weak-duality keywords="for feasible x and y, c x <= y B x <= y r; if equality holds both are optimal" index="弱双対性|じゃくそうついせい" refname="弱双対性"}
+$x$ が主問題の、$y$ が双対問題の許容解なら $cx\le yBx\le yr$。特に $cx=yr$ なら、$x$ と $y$ はそれぞれ最適解である。
+:::
+
+::: intuition
+資源の価格で評価すると、どの活動も価値以上の費用がかかるので、活動の価値の合計は使った資源の評価額以下で、それは手持ちの資源全体の評価額以下である。
+:::
+
+::: proof
+**Step 1（不等式）.** 【主張：$cx\le yBx\le yr$】$yB\ge c$ と $x\ge0$ から $cx\le(yB)x$。$Bx\le r$ と $y\ge0$ から $y(Bx)\le yr$。
+
+**Step 2（最適性）.** 任意の主問題の許容解 $x'$ について Step 1 から $cx'\le yr=cx$。双対問題も同様。
+:::
+
+::: lemma 有限生成の錐は閉 {#econ:finitely-generated-cone-closed keywords="conic Caratheodory: every nonnegative combination of columns of B is a nonnegative combination of linearly independent columns; hence the cone {B x : x >= 0} is a finite union of images of orthants under injective linear maps and is closed" index="カラテオドリの定理（錐）|からておどりのていり, 有限生成の錐|ゆうげんせいせいのすい" refname="有限生成の錐は閉"}
+$B$ を $m\times n$ 行列とする。
+1. （錐のカラテオドリの定理）$b=Bx$（$x\ge0$）なら、$B$ の列のうち一次独立なものの非負結合で $b$ を表せる。
+2. $K\defeq\{Bx:x\ge0\}$ は $\mathbb{R}^{m}$ の閉集合である。
+:::
+
+::: intuition
+非負結合に使う列が一次従属なら、その従属関係の分だけ係数をずらして、どれかの係数を $0$ にできる。こうして列を減らすと、一次独立な列だけが残る。一次独立な列で作った錐は、座標の向きの錐（直交錐）を線形に埋め込んだもので、明らかに閉じている。
+:::
+
+::: proof
+**Step 1（1）.** $b=\sum_{j\in J}\lambda_{j}B_{j}$（$\lambda_{j}>0$、$B_{j}$ は第 $j$ 列）と、使う列の数 $\abs J$ が最小になるように書く。【主張：$\{B_{j}\}_{j\in J}$ は一次独立】従属なら $\sum_{j\in J}\mu_{j}B_{j}=0$ となる $\mu\ne0$ があり、$-\mu$ に替えてもよいので、ある $\mu_{j}>0$ としてよい。$s\defeq\min\{\lambda_{j}/\mu_{j}:\mu_{j}>0\}>0$ とすると、$\lambda_{j}-s\mu_{j}\ge0$ がすべての $j$ で成り立ち、最小を達成する $j$ で $0$。$b=\sum_{j}(\lambda_{j}-s\mu_{j})B_{j}$ はより少ない列で $b$ を表し、$\abs J$ の最小性に反する。
+
+**Step 2（2）.** 一次独立な列の集合 $J$ について $K_{J}\defeq\{\sum_{j\in J}\lambda_{j}B_{j}:\lambda\ge0\}$ とすると、1 から $K=\bigcup_{J}K_{J}$（有限個の和集合）。【主張：$K_{J}$ は閉】$\Lambda:\mathbb{R}^{J}\to\mathbb{R}^{m}$, $\lambda\mapsto\sum_{j}\lambda_{j}B_{j}$ は単射な線形写像なので、像の上で逆写像 $\Lambda^{-1}$ は線形、したがって連続（有限次元）。$K_{J}$ の点列 $\Lambda(\lambda^{(k)})\to b$ をとると、$b$ は閉部分空間 $\Lambda(\mathbb{R}^{J})$ に入り、$\lambda^{(k)}=\Lambda^{-1}(\Lambda(\lambda^{(k)}))\to\Lambda^{-1}(b)$。$\lambda^{(k)}\ge0$ なので極限も $\ge0$ で、$b\in K_{J}$。有限個の閉集合の和集合は閉。
+:::
+
+::: lemma ファルカスの補題 {#econ:farkas-lemma keywords="exactly one of: there is z >= 0 with M z <= q; there is w >= 0 with w M >= 0 and w q < 0; proof by projecting q onto the closed convex cone {M z + s : z, s >= 0}" index="ファルカスの補題|ふぁるかすのほだい" refname="ファルカスの補題"}
+$M$ を $m\times k$ 行列、$q\in\mathbb{R}^{m}$ とする。次のうちちょうど一方が成り立つ。
+1. $Mz\le q$ となる $z\ge0$ がある。
+2. $wM\ge0$ かつ $wq<0$ となる行ベクトル $w\ge0$ がある。
+:::
+
+::: intuition
+1 が成り立たないとは、$q$ が「$Mz$ に非負のベクトルを足したもの」の作る錐の外にあることである。錐の外の点と錐の最も近い点を結べば、その方向の超平面が点と錐を分ける。その超平面の法線が 2 の $w$ である。
+:::
+
+::: proof
+**Step 1（両方は成り立たない）.** 両方成り立つなら、$0\le(wM)z=w(Mz)\le wq<0$ となり矛盾（$w\ge0$ と $Mz\le q$ から $w(Mz)\le wq$）。
+
+**Step 2（錐）.** $K\defeq\{Mz+s:z\ge0,\ s\ge0\}=\{[M\ I]u:u\ge0\}$ は、\ref{econ:finitely-generated-cone-closed} から閉で、凸な錐（非負結合で閉じている）。1 が成り立たないことは $q\notin K$ と同値（$Mz\le q\iff q=Mz+s$, $s\ge0$）。
+
+**Step 3（最も近い点）.** 【主張：$q\notin K$ なら $\abs{k_{0}-q}$ を最小にする $k_{0}\in K$ がある】$0\in K$ なので、最小は $K\cap\bar B(q,\abs q)$ の上でとればよく、これは有界閉集合。距離は連続なので \ref{top:extreme-value} から最小点がある。
+
+**Step 4（分離）.** $w\defeq(k_{0}-q)^{\top}\ne0$ とする。【主張：すべての $k\in K$ で $w k\ge0$、かつ $wq<0$】任意の $k\in K$ と $0<t\le1$ について $k_{0}+t(k-k_{0})\in K$（凸）なので
+$$
+\abs{k_{0}+t(k-k_{0})-q}^{2}\ge\abs{k_{0}-q}^{2},\quad\text{展開して}\quad2t\,w(k-k_{0})+t^{2}\abs{k-k_{0}}^{2}\ge0.
+$$
+$t$ で割って $t\to0$ とすると $w(k-k_{0})\ge0$。$k=0$ と $k=2k_{0}$（錐なので $K$ に入る）を代入すると $wk_{0}=0$、したがって $wk\ge0$。$wq=w(k_{0}-w^{\top})=-\abs w^{2}<0$。
+
+**Step 5（2 の成立）.** $K$ は $M$ の各列 $M_{j}$（$z=e_{j}$, $s=0$）と各単位ベクトル $e_{i}$（$z=0$, $s=e_{i}$）を含むので、Step 4 から $wM_{j}\ge0$ かつ $w_{i}\ge0$。すなわち $w\ge0$, $wM\ge0$, $wq<0$。
+:::
+
+::: theorem 線形計画法の双対定理 {#econ:lp-strong-duality keywords="if both the primal and the dual linear programs are feasible, both have optimal solutions and the optimal values are equal; complementary slackness y*(r - B x*) = 0 and (y* B - c) x* = 0" index="双対定理（線形計画）|そうついていり, 相補性条件|そうほせいじょうけん" refname="線形計画法の双対定理"}
+主問題と双対問題がともに許容解をもつなら、両方に最適解 $x^{*},y^{*}$ があり、$cx^{*}=y^{*}r$。さらに、許容解 $x,y$ がともに最適であることと、**相補性条件**
+$$
+y(r-Bx)=0,\qquad(yB-c)x=0
+$$
+が成り立つことは同値である。
+:::
+
+::: intuition
+資源に正の価格がつくのは、その資源を使い切っている場合だけで、余っている資源の価格は $0$ である。実行される活動は、価値がちょうど資源の費用に等しいものだけで、価値が費用を下回る活動は行われない。
+:::
+
+::: proof
+**Step 1（ファルカスの補題を適用する系）.** 【主張：$Bx\le r$, $-yB\le-c$, $yr-cx\le0$, $x\ge0$, $y\ge0$ をみたす $(x,y)$ がある】ないと仮定する。変数 $z=(x,y^{\top})$ についてこれは $Mz\le q$ の形で、\ref{econ:farkas-lemma} から、$u\ge0$（$m$ 次元）、$v\ge0$（$n$ 次元）、$t\ge0$ で
+$$
+uB-tc\ge0,\qquad-Bv+tr\ge0,\qquad ur-cv<0
+$$
+となるものがある（$M$ の $x$ に対応する列から第 1 式、$y$ に対応する列から第 2 式、$wq<0$ から第 3 式）。
+
+**Step 2（$t>0$ の場合）.** $u/t$ は双対問題の、$v/t$ は主問題の許容解で、第 3 式から $(u/t)r<c(v/t)$。これは \ref{econ:lp-weak-duality} に反する。
+
+**Step 3（$t=0$ の場合）.** $uB\ge0$, $Bv\le0$, $ur<cv$。許容解 $x_{0},y_{0}$ をとる。$ur<0$ なら、$s\ge0$ について $y_{0}+su$ は双対問題の許容解で、その目的関数 $y_{0}r+s\,ur\to-\infty$。しかし弱双対性から $\ge cx_{0}$ であり矛盾。$ur\ge0$ なら $cv>0$ で、$x_{0}+sv$ は主問題の許容解（$B(x_{0}+sv)\le r$）、目的関数 $\to+\infty$ となり、弱双対性 $\le y_{0}r$ に反する。
+
+**Step 4（最適性）.** Step 1 の $(x,y)$ は $cx\ge yr$ をみたし、弱双対性と合わせて $cx=yr$。\ref{econ:lp-weak-duality} から両方とも最適。
+
+**Step 5（相補性）.** 許容解 $x,y$ について、弱双対性の証明の二つの不等式の差は $yr-yBx=y(r-Bx)\ge0$ と $yBx-cx=(yB-c)x\ge0$。両方が最適なら（Step 4 から最適値は等しく）$cx=yr$ で、二つの非負の差の和が $0$ なので両方 $0$。逆に両方 $0$ なら $cx=yr$ で、弱双対性から両方最適。
+:::
+
+::: corollary 影の価格 {#econ:shadow-price keywords="if y* is an optimal dual solution at resources r, the optimal value function V satisfies V(r') <= V(r) + y*(r' - r) for every r' with feasible primal; y* is a supergradient of the concave function V, the marginal value of resources" index="影の価格|かげのかかく, 資源の限界価値|しげんのげんかいかち" refname="影の価格"}
+資源 $r$ のもとで主問題と双対問題がともに許容解をもつとし、$y^{*}$ を双対問題の最適解、$V(r)$ を主問題の最適値とする。主問題が許容解をもつ任意の $r'$ について、$V(r')\le V(r)+y^{*}(r'-r)$。特に、$r$ の第 $i$ 成分だけを $\varepsilon>0$ 増やしたときの最適値の増分は $y_{i}^{*}\varepsilon$ 以下、減らしたときの減少は $y_{i}^{*}\varepsilon$ 以上である。
+:::
+
+::: intuition
+双対問題の制約 $yB\ge c$ は資源の量 $r$ を含まないので、$r$ を変えても $y^{*}$ は許容解のままである。弱双対性から、新しい資源での最大の価値は $y^{*}$ で評価した資源の額を超えない。資源 $i$ を 1 単位増やしても、価値は高々 $y_{i}^{*}$ しか増えない。
+:::
+
+::: proof
+**Step 1（$r'$ でも双対の許容解）.** 双対問題の制約は $r$ によらないので、$y^{*}$ は $r'$ の双対問題の許容解。$r'$ の主問題が許容解をもつので、\ref{econ:lp-strong-duality} から最適値 $V(r')$ が存在し、弱双対性から $V(r')\le y^{*}r'$。
+
+**Step 2（等式との組み合わせ）.** \ref{econ:lp-strong-duality} から $V(r)=y^{*}r$。引くと $V(r')-V(r)\le y^{*}(r'-r)$。後半は $r'=r\pm\varepsilon e_{i}$ を代入する（$r-\varepsilon e_{i}$ で主問題が許容解をもつ場合）。
+:::
+
+## 価格による分権化：ランゲのモデル {#econ:sec-pl-lange}
+
+::: theorem 影の価格による分権化と、量の不決定 {#econ:lange-decentralization keywords="given optimal shadow prices y*, every activity used at the optimum earns zero profit c_j - (y* B)_j = 0 and no activity earns positive profit; conversely an x that uses only zero-profit activities, satisfies the resource constraints and leaves only zero-priced resources unused is optimal; but zero-profit rules alone do not pin down quantities" index="ランゲのモデル|らんげのもでる, 市場社会主義|しじょうしゃかいしゅぎ, 分権化|ぶんけんか" refname="影の価格による分権化と、量の不決定"}
+主問題と双対問題がともに許容解をもつとし、$y^{*}$ を双対問題の最適解とする。活動 $j$ の、価格 $y^{*}$ のもとでの 1 単位あたりの**利潤**を $\pi_{j}\defeq c_{j}-(y^{*}B)_{j}$ とする。
+1. すべての $j$ で $\pi_{j}\le0$。主問題の任意の最適解 $x^{*}$ で、$x_{j}^{*}>0$ なら $\pi_{j}=0$。
+2. 逆に、主問題の許容解 $x$ が「$\pi_{j}<0$ の活動を使わない」かつ「$y_{i}^{*}>0$ の資源を使い切る」をみたすなら、$x$ は最適解である。
+3. 1 の条件（利潤が $0$ の活動だけを使う）だけでは $x$ は決まらない：例えば $m=n=1$, $B=(1)$, $c=(1)$, $r=1$ では $y^{*}=1$, $\pi_{1}=0$ で、すべての $x_{1}\in[0,1]$ が「利潤 $0$ の活動だけを使う」が、最適解は $x_{1}=1$ だけである。
+:::
+
+::: intuition
+計画当局が資源の価格を発表し、各工場長に「利潤が負の活動はやめ、利潤が $0$ の活動だけを行え」と指示すれば、正しい活動の種類が選ばれる。これがランゲの市場社会主義の考え方である。しかし線形の技術では、利潤が $0$ の活動をどれだけ行っても利潤は $0$ のままなので、価格だけでは「どれだけ作るか」が決まらない。量を決めるには、資源の需給を釣り合わせるという別の情報が要る。
+:::
+
+::: proof
+**Step 1（1）.** $y^{*}$ は双対問題の許容解なので $y^{*}B\ge c$、すなわち $\pi\le0$。\ref{econ:lp-strong-duality} の相補性条件 $(y^{*}B-c)x^{*}=0$ は $\sum_{j}(-\pi_{j})x_{j}^{*}=0$ で、各項が非負なので、$x_{j}^{*}>0$ なら $\pi_{j}=0$。
+
+**Step 2（2）.** 仮定から $(y^{*}B-c)x=-\sum_{j}\pi_{j}x_{j}=0$、$y^{*}(r-Bx)=\sum_{i}y_{i}^{*}(r-Bx)_{i}=0$。相補性条件が成り立つので、\ref{econ:lp-strong-duality} から $x$ は最適。
+
+**Step 3（3）.** 双対問題は $y\ge1$, $y\ge0$ のもとで $y$ を最小にするので $y^{*}=1$、$\pi_{1}=1-1=0$。主問題は $x_{1}\le1$ のもとで $x_{1}$ を最大にするので最適解は $x_{1}=1$ だけ。
+:::
+
+::: hypcheck
+- **$A\ge0$**：Step 1 の不等式 $\abs{(Av)_{i}}\le\norm v_{x}(Ax)_{i}$ と、$(I-A)^{-1}\ge0$（Step 2）に使った。
+- **閉性（\ref{econ:finitely-generated-cone-closed}）**：ファルカスの補題の Step 3（最も近い点の存在）に本質的に使った。無限次元や、無限個の生成元をもつ錐では閉性が崩れ、双対定理には「双対ギャップ」が生じうる。
+- **両方の問題の許容性**：双対定理の Step 3 で、非有界な方向を排除するのに使った。一方だけが許容解をもつなら、その問題は非有界である。
+- **技術の線形性（ランゲのモデル）**：量の不決定（3）の原因。技術が狭義凸（収穫逓減）なら、価格のもとでの利潤最大の量は一つに決まりうる。
+:::
+
+## 問題 {#econ:sec-pl-problems}
+
+::: problem {#econ:prob-pl-two-sector}
+$A=\begin{pmatrix}0.2&0.4\\0.3&0.1\end{pmatrix}$ が生産的であることを確かめ、最終需要 $d=(10,20)^{\top}$ を賄う総生産を求めよ。
+:::
+
+::: solution
+$x=(1,1)^{\top}$ で $Ax=(0.6,0.4)^{\top}\ll x$ なので生産的。$I-A=\begin{pmatrix}0.8&-0.4\\-0.3&0.9\end{pmatrix}$、行列式 $0.72-0.12=0.6$、$(I-A)^{-1}=\frac1{0.6}\begin{pmatrix}0.9&0.4\\0.3&0.8\end{pmatrix}\ge0$。$x=(I-A)^{-1}d=\frac1{0.6}(9+8,\ 3+16)^{\top}=(\frac{85}3,\frac{95}3)^{\top}$。
+:::
+
+::: problem {#econ:prob-pl-diet}
+2 種類の資源（労働 $r_{1}=10$、土地 $r_{2}=6$）と 2 つの活動（小麦：労働 1・土地 1 で価値 3、牧畜：労働 2・土地 1 で価値 4）の主問題と双対問題を解き、相補性条件を確かめよ。
+:::
+
+::: solution
+主問題：$x_{1}+2x_{2}\le10$, $x_{1}+x_{2}\le6$, $x\ge0$ で $3x_{1}+4x_{2}$ を最大化。頂点 $(6,0),(2,4),(0,5)$ の値は $18,22,20$ で最適解は $x^{*}=(2,4)$、値 $22$。双対問題：$y_{1}+y_{2}\ge3$, $2y_{1}+y_{2}\ge4$, $y\ge0$ で $10y_{1}+6y_{2}$ を最小化。両方の制約を等号にすると $y^{*}=(1,2)$、値 $22$。二つの値が等しいので、\ref{econ:lp-weak-duality} から両方最適。両方の資源を使い切り（$y^{*}\gg0$ と整合）、両方の活動の利潤は $3-3=0$, $4-4=0$。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 生産的な行列の特徴づけは、$A$ の既約性もペロン–フロベニウスの定理も使わない（重みつきのノルムで済む）。$A$ が生産的であることは、$I-A$ のすべての首座小行列式が正であること（**ホーキンス–サイモン条件**）とも同値である（Hawkins–Simon, Econometrica 17 (1949)、ここでは証明しない）。
+
+**計算の問題（事実）.** 線形計画問題は、楕円体法によって入力の大きさの多項式時間で解ける（Khachiyan, 1979）。単体法は実用上速いが、最悪の場合は指数時間かかる例がある（Klee–Minty, 1972）。線形計画法は、ソ連のカントロヴィチ（1939）と米国のダンツィク・クープマンスらによって独立に発展し、カントロヴィチとクープマンスは 1975 年のノーベル経済学賞を受けた。
+
+**経済計算論争（論争であり、数学では決着しない）.** ミーゼス (1920) は、生産手段の市場がなければ価格がなく、合理的な計算ができないと主張した。ランゲ (1936–37) は、計画当局が試行錯誤で価格を調整すれば（上の分権化の定理と、ワルラスの模索過程）市場と同じ結果が得られると反論した。ハイエク, "The Use of Knowledge in Society", Am. Econ. Rev. 35 (1945) は、問題は計算ではなく、生産に必要な知識（技術 $B$ や価値 $c$ そのもの）が多数の人に分散していて、中央に集められないことだと論じた。さらに、工場長が利潤の規則に従う誘因（\ref{econ:page-asymmetric-information} のモラルハザード）の問題もある。計算能力の向上でこの論争が決着したかどうかについては、意見が分かれている（これは推測を含む評価である）。
+
+**高い視点から：双対性は価格の起源.** 双対定理は、「量の最適化」と「価格の最適化」が同じ問題の表裏であることを示す。市場経済で価格が分権化の道具になること（第二基本定理）と、計画経済で影の価格が計画の道具になることは、同じ双対性の二つの使い方である。圏論的に言えば、資源の制約という「射」の向きを逆にしたものが価格であり、ファルカスの補題は「点が錐に入らないことの証人は、超平面（価格）である」という、凸幾何の基本的な双対性である。比喩で言えば、計画当局が全員の手元の情報を集められるなら、価格は計算の途中で現れる補助変数にすぎない。集められないなら、価格は情報を運ぶ唯一の手段になる。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{econ:sec-pl-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
