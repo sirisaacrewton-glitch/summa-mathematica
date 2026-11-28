@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>情報の非対称 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/04-mathematical-economics/02-market-failures/04-asymmetric-information.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 情報の非対称 {#econ:page-asymmetric-information keywords="asymmetric information, adverse selection, Akerlof market for lemons, unraveling of the market, competitive price equals buyers' expected value given the sellers who sell, moral hazard, principal-agent problem, incentive compatibility constraint, participation constraint, optimal contract with a risk-averse agent, agency cost via Jensen's inequality, trade-off between insurance and incentives"}
+
+厚生経済学の基本定理は、取引する財の性質を全員が知っていることを前提にしていた。実際には、中古車の売り手は車の状態を買い手より詳しく知り、保険の加入者は自分の健康や注意の度合いを保険会社より詳しく知っている。このような**情報の非対称**は、二つの典型的な非効率を生む。(1) 取引の前に隠された性質（タイプ）があると、価格が「平均的な品質」しか反映できず、良い品質のものから市場を去っていく（**逆選択**）。アカロフのレモン市場では、すべての取引が互いに得であるにもかかわらず、市場が完全に崩壊する。(2) 取引の後に隠された行動があると、行動を促すために報酬を成果に連動させる必要があり、危険を嫌う人に危険を負わせる費用が生じる（**モラルハザード**）。このページではこの二つを証明する。
+
+## 記法と定義の確認 {#econ:sec-ai-notation}
+
+::: notation
+- $\theta$ は売り手の財の品質（売り手だけが知る）で、$[0,1]$ に値をとる確率変数。$E[\theta\mid\theta\le p]$ は $P(\theta\le p)>0$ のときの条件付き期待値。
+- 依頼人（プリンシパル）が代理人（エージェント）に仕事を任せ、代理人の行動は観察できず、成果だけが観察できる状況を扱う。
+- 凸関数についてのイェンセンの不等式（狭義凸なら、値が 1 点に集中しない限り狭義の不等号）を、二点分布の場合に使う：$\phi$ が狭義凸で $0<\lambda<1$, $a\ne b$ なら $\lambda\phi(a)+(1-\lambda)\phi(b)>\phi(\lambda a+(1-\lambda)b)$。これは狭義凸性の定義そのものである。
+:::
+
+## 逆選択：レモン市場 {#econ:sec-ai-lemons}
+
+::: definition レモン市場 {#econ:lemons-market keywords="sellers own goods of quality theta in [0, 1] known only to them, valued theta by sellers and beta theta by buyers with beta > 1; at price p the sellers with theta <= p sell; competitive buyers pay the expected value: an equilibrium price p > 0 satisfies p = beta E[theta | theta <= min(p, 1)]" index="レモン市場|れもんしじょう, 逆選択|ぎゃくせんたく, 情報の非対称|じょうほうのひたいしょう" refname="レモン市場"}
+多数の売り手がそれぞれ品質 $\theta$ の財を 1 つ持ち、$\theta$ の分布（全体での割合）は $[0,1]$ 上の確率分布 $\mu$ で表される。売り手にとっての財の価値は $\theta$、買い手にとっては $\beta\theta$（$\beta>1$）で、買い手は品質を観察できない。
+1. 価格 $p\ge0$ のもとで売りに出るのは $\theta\le p$ の売り手である（$\theta=p$ の売り手は売っても売らなくても同じなので、売るとしておく）。
+2. 買い手は多数いて互いに競争するので、価格は「売りに出ている財の、買い手にとっての期待価値」に等しくなる。$p>0$ で $\mu([0,\min(p,1)])>0$ かつ $p=\beta\,E_{\mu}[\theta\mid\theta\le\min(p,1)]$ をみたすものを**取引のある均衡価格**という。
+:::
+
+::: intuition
+買い手は品質を見分けられないので、平均的な品質に見合う額しか払わない。すると、平均より良い財を持つ売り手は「安すぎる」と感じて売るのをやめ、残った財の平均品質はさらに下がる。この悪循環が止まらなければ、市場は消える。
+:::
+
+::: theorem 市場の崩壊 {#econ:lemons-unraveling keywords="if beta E[theta | theta <= q] < q for all q in (0, 1] with mu([0, q]) > 0, there is no equilibrium price with trade, although every trade would create surplus (beta - 1) theta; for the uniform distribution this holds iff beta < 2" index="市場の崩壊|しじょうのほうかい, アカロフの定理|あかろふのていり" refname="市場の崩壊"}
+\ref{econ:lemons-market} の設定で、$\mu([0,q])>0$ となるすべての $q\in(0,1]$ について $\beta\,E_{\mu}[\theta\mid\theta\le q]<q$ が成り立ち、かつ $\beta E_{\mu}[\theta]<1$ とする。このとき取引のある均衡価格は存在しない。一方、品質 $\theta>0$ の財が売り手から買い手に移ると余剰 $(\beta-1)\theta>0$ が生じるので、すべての取引が成立する配分と比べて、余剰 $(\beta-1)E_{\mu}[\theta]$ が失われる（$\mu\ne\delta_{0}$ なら正）。
+:::
+
+::: intuition
+価格 $p$ で売りに出る財の価値は、買い手にとって平均 $\beta E[\theta\mid\theta\le p]$ で、仮定からこれは常に $p$ より小さい。どの正の価格でも、買い手は「払う額に見合わない」と判断するので、正の価格では売買が釣り合わない。
+:::
+
+::: proof
+**Step 1（$0<p\le1$ の場合）.** 【主張：$p\in(0,1]$ は均衡価格でない】$\mu([0,p])>0$ なら、仮定から $\beta E_{\mu}[\theta\mid\theta\le p]<p$ で、均衡の等式が成り立たない。$\mu([0,p])=0$ なら均衡の定義の条件をみたさない。
+
+**Step 2（$p>1$ の場合）.** $\min(p,1)=1$ なので、均衡の等式は $p=\beta E_{\mu}[\theta]$ となるが、仮定から右辺 $<1<p$。
+
+**Step 3（失われる余剰）.** 取引がなければ余剰は $0$。全員が取引すれば余剰は $\int(\beta-1)\theta\,d\mu=(\beta-1)E_{\mu}[\theta]$。$\mu\ne\delta_{0}$ なら $\mu(\{\theta>0\})>0$ なので、これは正（非負の関数の積分が $0$ なら、ほとんど至るところ $0$）。
+:::
+
+::: example 一様分布 {#econ:lemons-uniform}
+$\mu$ が $[0,1]$ 上の一様分布なら $E[\theta\mid\theta\le q]=\frac q2$、$E[\theta]=\frac12$。仮定は $\frac{\beta q}2<q$ と $\frac\beta2<1$、すなわち $\beta<2$ と同値である。$1<\beta<2$ なら、買い手はどの財にも売り手より 1 倍を超える価値を認めているのに、取引は一つも成立せず、余剰 $\frac{\beta-1}2$ が失われる。$\beta=2$ なら $(0,1]$ のすべての $p$ が均衡価格になり、$\beta>2$ なら $p=\frac\beta2>1$ が均衡価格で、全員が売る。
+:::
+
+## モラルハザード：依頼人と代理人 {#econ:sec-ai-moral-hazard}
+
+::: definition 依頼人–代理人問題 {#econ:principal-agent keywords="risk-neutral principal, risk-averse agent with utility u(w) - k e, effort e in {0, 1} unobservable; output high with probability p_1 if e = 1 and p_0 < p_1 if e = 0; contract (w_H, w_L); participation constraint and incentive compatibility constraint; first-best wage w* with u(w*) = U0 + k" index="モラルハザード|もらるはざーど, 依頼人–代理人問題|いらいにんだいりにんもんだい, プリンシパル–エージェント問題|ぷりんしぱるえーじぇんともんだい, 誘因両立制約|ゆういんりょうりつせいやく, 参加制約|さんかせいやく" refname="依頼人–代理人問題"}
+代理人は努力 $e\in\{0,1\}$ を選び、成果は「高」または「低」で、高になる確率は $e=1$ なら $p_{1}$、$e=0$ なら $p_{0}$（$0\le p_{0}<p_{1}<1$）である。依頼人は成果だけを観察し、成果に応じた賃金 $(w_{H},w_{L})$ を支払う（**契約**）。代理人の効用は $u(w)-ke$（$k>0$ は努力の費用）で、$u:\mathbb{R}\to\mathbb{R}$ は連続・狭義増加・狭義凹で $u(\mathbb{R})=\mathbb{R}$ とする（例：$u(w)=w-e^{-w}$）。代理人は、他の仕事で得られる効用 $U_{0}$ 以上でなければ契約しない。依頼人は危険に中立で、期待賃金を最小にして努力 $e=1$ を引き出したい。
+1. （**参加制約**）$p_{1}u(w_{H})+(1-p_{1})u(w_{L})-k\ge U_{0}$。
+2. （**誘因両立制約**）$p_{1}u(w_{H})+(1-p_{1})u(w_{L})-k\ge p_{0}u(w_{H})+(1-p_{0})u(w_{L})$。
+3. 努力が観察できる場合の最適な賃金（**ファーストベスト**）を、$u(w^{*})=U_{0}+k$ となる一定の賃金 $w^{*}$ とする。
+:::
+
+::: intuition
+努力が見えるなら、依頼人は「努力したら一定額を払う」と約束すればよく、代理人は危険を負わない。努力が見えないと、成果に応じて払うしかない。しかし成果は運にも左右されるので、代理人は自分の努力と関係のない危険を負わされ、その危険の埋め合わせを要求する。
+:::
+
+::: theorem 誘因と保険のトレードオフ {#econ:moral-hazard-cost keywords="any contract satisfying participation and incentive constraints has w_H > w_L and expected wage strictly greater than the first-best wage w*; the cost-minimizing contract makes both constraints bind: u(w_H) = U0 + k + (1 - p_1) k/(p_1 - p_0), u(w_L) = U0 + k - p_1 k/(p_1 - p_0)" index="エージェンシー・コスト|えーじぇんしーこすと, セカンドベスト|せかんどべすと" refname="誘因と保険のトレードオフ"}
+\ref{econ:principal-agent} の設定で、$\Delta\defeq p_{1}-p_{0}$, $\phi\defeq u^{-1}$ とする。
+1. 参加制約と誘因両立制約をみたす契約では $w_{H}>w_{L}$ で、期待賃金 $p_{1}w_{H}+(1-p_{1})w_{L}$ は $w^{*}$ より真に大きい。
+2. 二つの制約のもとで期待賃金を最小にする契約は
+$$
+u(w_{H})=U_{0}+k+\frac{(1-p_{1})k}{\Delta},\qquad u(w_{L})=U_{0}+k-\frac{p_{1}k}{\Delta}
+$$
+で与えられ、二つの制約はどちらも等号で成り立つ。
+:::
+
+::: intuition
+努力を引き出すには、成果が高いときと低いときの効用の差が $k/\Delta$ 以上必要である。危険を嫌う代理人にとって、平均は同じでもばらつきのある賃金は一定の賃金より価値が低いので、同じ期待効用を保証するには、より多くの期待賃金が要る。依頼人にとって最も安いのは、差を必要最小限にし、期待効用を参加の最低線にぴったり合わせることである。
+:::
+
+::: proof
+**Step 1（効用で書き直す）.** 【主張：$U_{H}\defeq u(w_{H})$, $U_{L}\defeq u(w_{L})$, $A\defeq p_{1}U_{H}+(1-p_{1})U_{L}$, $D\defeq U_{H}-U_{L}$ とすると、参加制約は $A\ge U_{0}+k$、誘因両立制約は $D\ge k/\Delta$】誘因両立制約は移項すると $(p_{1}-p_{0})(U_{H}-U_{L})\ge k$。また $U_{H}=A+(1-p_{1})D$, $U_{L}=A-p_{1}D$。
+
+**Step 2（$\phi$ の性質）.** 【主張：$\phi=u^{-1}:\mathbb{R}\to\mathbb{R}$ は狭義増加・狭義凸】$u$ は $\mathbb{R}$ から $\mathbb{R}$ への狭義増加な全単射なので逆関数 $\phi$ があり狭義増加。$a\ne b$, $0<\lambda<1$ とし、$x=\phi(a)$, $y=\phi(b)$ とおくと、$u$ の狭義凹性から $u(\lambda x+(1-\lambda)y)>\lambda a+(1-\lambda)b$。両辺に狭義増加な $\phi$ を施して $\lambda\phi(a)+(1-\lambda)\phi(b)>\phi(\lambda a+(1-\lambda)b)$。
+
+**Step 3（1）.** Step 1 から $D\ge k/\Delta>0$ なので $U_{H}>U_{L}$、$u$ の単調性から $w_{H}>w_{L}$。期待賃金は $p_{1}\phi(U_{H})+(1-p_{1})\phi(U_{L})$ で、$U_{H}\ne U_{L}$ と $0<p_{1}<1$ と Step 2 の狭義凸性から、これは $\phi(A)$ より真に大きい。$A\ge U_{0}+k$ と $\phi$ の単調性から $\phi(A)\ge\phi(U_{0}+k)=w^{*}$。
+
+**Step 4（2：期待賃金を $A,D$ の関数として見る）.** 期待賃金を $c(A,D)\defeq p_{1}\phi(A+(1-p_{1})D)+(1-p_{1})\phi(A-p_{1}D)$ とする。
+- $D$ を固定すると、$c$ は $A$ について狭義増加（$\phi$ が狭義増加）。
+- $A$ を固定すると、$g(D)\defeq c(A,D)$ は凸（凸関数とアフィン写像の合成の正の係数の和）で、Step 2 の議論から $g(D)\ge\phi(A)=g(0)$。【主張：$g$ は $[0,\infty)$ で非減少】$0\le D_{1}<D_{2}$ とすると $D_{1}=\lambda\cdot0+(1-\lambda)D_{2}$（$\lambda=1-D_{1}/D_{2}$）で、凸性から $g(D_{1})\le\lambda g(0)+(1-\lambda)g(D_{2})\le\lambda g(D_{2})+(1-\lambda)g(D_{2})=g(D_{2})$。
+
+**Step 5（2：最小点）.** 許容集合は $\{A\ge U_{0}+k,\ D\ge k/\Delta\}$。任意の許容点 $(A,D)$ について、Step 4 から $c(A,D)\ge c(U_{0}+k,D)\ge c(U_{0}+k,k/\Delta)$。よって $(A,D)=(U_{0}+k,k/\Delta)$ が最小点で、Step 1 の式に代入すると主張の $U_{H},U_{L}$ を得る。どちらの制約も等号で成り立つ。
+:::
+
+::: hypcheck
+- **$\beta E[\theta\mid\theta\le q]<q$（レモン市場）**：Step 1 と Step 2 で使った唯一の本質的な仮定。$\beta>1$ は「取引が効率的である」ことの主張（Step 3）だけに使った。
+- **買い手の競争（価格 ＝ 期待価値）**：均衡の定義に組み込んだ。買い手が一人で価格を決めるなら、別の均衡の定義が必要になる。
+- **代理人の狭義凹性**：Step 2（$\phi$ の狭義凸性）を通して、期待賃金が $w^{*}$ を真に上回ること（Step 3）に使った。代理人が危険に中立（$u$ が線形）なら、Step 3 は等号になり、モラルハザードの費用は消える（「代理人に事業を売ってしまう」契約で最善が達成される）。
+- **$u(\mathbb{R})=\mathbb{R}$**：最適な契約の $U_{L}$ が $u$ の値域に入ることを保証するために置いた。賃金が負になりうること（代理人が罰金を払う）を許している。代理人の責任に上限（**有限責任**）がある場合は、別の分析が必要である。
+- **$p_{1}<1$**：Step 3 の狭義の不等号に使った。$p_{1}=1$ なら成果が努力を完全に明かすので、ファーストベストが達成できる。
+:::
+
+## 問題 {#econ:sec-ai-problems}
+
+::: problem {#econ:prob-ai-lemons-floor}
+品質が $[a,1]$（$0<a<1$）上の一様分布に従うとき、$\beta\in(1,2)$ でも取引のある均衡価格が必ず存在することを示し、それを求めよ。
+:::
+
+::: solution
+$q\in[a,1]$ で $E[\theta\mid\theta\le q]=\frac{a+q}2$、$E[\theta]=\frac{a+1}2$。$p<a$ では $\mu([0,p])=0$ なので均衡価格でない。
+- $a\le\frac{2-\beta}\beta$ のとき：$p\in[a,1]$ での均衡の等式 $p=\beta\frac{a+p}2$ を解くと $p=\frac{\beta a}{2-\beta}$ で、$\beta>1$ から $p>a$、条件から $p\le1$。売られるのは品質が $p$ 以下の財だけで、より良い財は市場から退出したまま（部分的な崩壊）。
+- $a>\frac{2-\beta}\beta$ のとき：$p>1$ での等式 $p=\beta\frac{a+1}2$ の右辺は $1$ を超えるので、これが均衡価格で、全員が売る。
+
+品質に正の下限があると、悪循環が下限の近くで止まる。
+:::
+
+::: problem {#econ:prob-ai-cara}
+$u(w)=-e^{-rw}$（$r>0$）は $u(\mathbb{R})=\mathbb{R}$ をみたさない。それでも \ref{econ:moral-hazard-cost} の 2 の式が意味をもつ（右辺が値域 $(-\infty,0)$ に入る）ための条件を書け。
+:::
+
+::: solution
+$U_{H}=U_{0}+k+\frac{(1-p_{1})k}\Delta<0$ が必要十分（$U_{L}<U_{H}$ なので $U_{L}<0$ は自動的）。このとき定理の証明は、$\phi$ を $(-\infty,0)$ 上の関数として同じに進む（Step 4 の $g$ の定義域を、$A+(1-p_{1})D<0$ となる $D$ に制限する）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** レモン市場の定理は、分布 $\mu$ の連続性を使わない。依頼人–代理人の定理は $u$ の微分可能性を使わない（凸性の議論だけ）。
+
+**前提を変えると.**
+- **シグナリング**：良い品質の売り手（能力の高い労働者）が、悪い品質の売り手には費用の高い行動（保証・学歴）で自分を区別できるなら、逆選択は部分的に解消する（Spence, Q. J. Econ. 87 (1973)、ここでは証明しない）。ただし、シグナルそのものは社会的には無駄な費用でありうる。
+- **スクリーニング**：情報を持たない側が、選択肢のメニュー（免責額の異なる保険など）を示して自己選択させる。競争的な保険市場では均衡が存在しないことがある（Rothschild–Stiglitz, Q. J. Econ. 90 (1976)、ここでは証明しない）。
+- **連続的な努力と一次条件**：努力が連続のとき、誘因両立制約を一次条件で置き換える方法（first-order approach）は一般には正しくなく、追加の条件（尤度比の単調性と分布関数の凸性など）が必要である（Rogerson, Econometrica 53 (1985)、ここでは証明しない）。
+- **市場の非効率性**：情報の非対称がある経済の競争均衡は、政府が同じ情報の制約のもとでも改善できるという意味で、一般に「制約付きでも」効率的でない（Greenwald–Stiglitz, Q. J. Econ. 101 (1986)、ここでは証明しない）。
+
+**出典.** レモン市場は Akerlof, "The Market for 'Lemons'", Q. J. Econ. 84 (1970)。依頼人–代理人の二値モデルは Holmström, Bell J. Econ. 10 (1979) や Grossman–Hart, Econometrica 51 (1983) の簡単な場合で、標準的な教科書（Mas-Colell–Whinston–Green『Microeconomic Theory』第 13・14 章）の扱いに沿う。
+
+**高い視点から：情報も資源である.** 第一基本定理では、価格が財についての情報をすべて運んだ。情報の非対称は、価格という一次元の信号では運べない情報が残っている状態である。レモン市場では価格が品質の平均しか運べず、平均への引き寄せが良い財を追い出す（悪貨が良貨を駆逐する、というグレシャムの法則と同じ形）。モラルハザードでは、成果という不完全な信号から努力を推し量るために、保険（危険の分担）という別の便益を犠牲にする。比喩で言えば、市場はすりガラス越しの取引で、ガラスが曇るほど、正直な売り手と勤勉な働き手から順に損をする。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{econ:sec-ai-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
