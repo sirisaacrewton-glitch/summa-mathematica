@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>体制の内生的な変容 | Summa Mathematica</title>
+<link rel="icon" href="../../../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="../../../assets/apple-touch-icon.png">
+<link rel="stylesheet" href="../../../vendor/katex/katex.min.css?v=a4b0d354">
+<link rel="stylesheet" href="../../../style.css?v=d1bc9f2e">
+<script>try{var t=localStorage.getItem("mn-theme");if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body data-root="../../../" data-page="06-applied-mathematics/04-mathematical-economics/03-economic-systems/05-endogenous-change.html" data-kind="page">
+<!-- ページ原稿（Markdown）。この script 要素の中だけを編集してください。外側は tools/build.js が自動生成します。 -->
+<script type="text/markdown" id="source">
+# 体制の内生的な変容 {#econ:page-endogenous-change keywords="endogenous change of economic systems, Schumpeter creative destruction, Aghion-Howitt quality ladder model, incumbent rents end at the next innovation, value of an exponential stream, research arbitrage, growth rate lambda n log gamma, incumbents' incentive to block innovation, Meltzer-Richard median voter model, single-peaked preferences, median voter theorem, inequality raises the voted tax rate, self-destruction versus self-transformation, comparison of economic systems: provable, empirical, contested"}
+
+経済の体制は、外から加わる衝撃だけでなく、体制の内部で生まれるものによっても変わる。シュンペーター『資本主義・社会主義・民主主義』(1942) は、資本主義の成功そのもの（革新の官僚化、既存の制度への支持の侵食）が資本主義を別の体制に移行させると論じた。マルクスは、利潤率の低下が資本主義を崩壊させると論じた（前のページで、その一つの機構が実質賃金一定のもとでは働かないことを見た、\ref{econ:okishio-theorem}）。
+
+このページでは、「体制が内部から変わる」ことを、数学的に扱える二つの機構に分けて証明する。
+
+1. **創造的破壊**：革新が利潤の源泉である経済では、次の革新が今の利潤を消す。既存の企業の価値は、社会全体の研究が盛んなほど小さくなり、既存の企業には革新を妨げる誘因が生じる（アギヨン–ハウイットのモデルを簡単にしたもの）。
+2. **再分配の内生化**：所得が集中すると、多数決で選ばれる再分配の水準が上がる（メルツァー–リチャードの中位投票者モデル）。これは、資本主義が投票を通じて修正資本主義に「自己変容」する機構である。
+
+最後に、モデルの中で示せる「自壊」と「自己変容」の違いと、それが現実の体制について何を言い、何を言わないかを、**証明できること・実証・論争**に分けて整理する。
+
+## 記法と定義の確認 {#econ:sec-ch-notation}
+
+::: notation
+- $N(t)$ は \ref{stat:poisson-process} の計数過程で、\ref{stat:poisson-increments} から強度 $\mu$ のとき $N(t)$ は平均 $\mu t$ のポアソン分布にしたがう。指数分布 $\mathrm{Exp}(\mu)$ は密度 $\mu e^{-\mu t}$（$t>0$）。
+- 税の仕組みと各人の効用 $V_{i}(\tau)$ は \ref{econ:linear-income-tax}, \ref{econ:laffer-curve}。
+- $r>0$ は割引率。「自壊」「自己変容」はこのページの最後の節で定義する。
+:::
+
+## 創造的破壊 {#econ:sec-ch-creative-destruction}
+
+::: lemma 指数分布の寿命をもつ収益の現在価値 {#econ:exponential-annuity keywords="if a flow pi per unit time lasts until an exponential time tau with rate mu, its expected present value at discount rate r is pi/(r + mu); E e^{-r tau} = mu/(mu + r)" index="創造的破壊（現在価値）|そうぞうてきはかい" refname="指数分布の寿命をもつ収益の現在価値"}
+$\tau\sim\mathrm{Exp}(\mu)$（$\mu>0$）、$r>0$, $\pi\ge0$ とすると
+$$
+E\Bigl[\int_{0}^{\tau}\pi e^{-rt}dt\Bigr]=\frac\pi{r+\mu}.
+$$
+:::
+
+::: intuition
+収益が途切れる危険は、割引率を $\mu$ だけ上げるのと同じ効果をもつ。次の革新の到来が速い（$\mu$ が大きい）ほど、今の独占の価値は小さい。
+:::
+
+::: proof
+**Step 1（ラプラス変換）.** 【主張：$E[e^{-r\tau}]=\frac\mu{\mu+r}$】$\int_{0}^{\infty}e^{-rt}\mu e^{-\mu t}dt=\frac\mu{\mu+r}$。
+
+**Step 2（積分）.** $\int_{0}^{\tau}\pi e^{-rt}dt=\frac\pi r(1-e^{-r\tau})$ なので、期待値は $\frac\pi r\bigl(1-\frac\mu{\mu+r}\bigr)=\frac\pi{r+\mu}$。
+:::
+
+::: definition 品質のはしごのモデル {#econ:quality-ladder keywords="labor L split into production L - n and research n; innovations arrive as a Poisson process with rate lambda n; each innovation multiplies productivity by gamma > 1 and transfers monopoly to the innovator; productivity-adjusted profit kappa (L - n), research wage omega; research arbitrage omega = lambda gamma V with V = kappa (L - n)/(r + lambda n)" index="品質のはしご|ひんしつのはしご, アギヨン–ハウイットのモデル|あぎよんはうぃっとのもでる, 研究の裁定条件|けんきゅうのさいていじょうけん" refname="品質のはしごのモデル"}
+次を仮定する（Aghion–Howitt, Econometrica 60 (1992) を簡単にしたもの）。
+1. 労働 $L>0$ が生産 $L-n$ と研究 $n\in[0,L)$ に分かれ、革新は強度 $\lambda n$（$\lambda>0$）のポアソン過程の到着時刻に起こる。
+2. 各革新は生産性を $\gamma>1$ 倍にし、革新した者が次の革新までその財を独占する。生産性で割った単位で、独占の利潤の流れは $\kappa(L-n)$（$\kappa>0$）、研究 1 単位の費用は $\omega>0$。
+3. 独占の価値（生産性で割った単位）は $V\defeq\frac{\kappa(L-n)}{r+\lambda n}$（\ref{econ:exponential-annuity} で $\mu=\lambda n$）。
+4. （**研究の裁定条件**）研究への参入が自由なので、研究 1 単位の費用は、それが生む期待価値に等しい：$\omega=\lambda\gamma V$（研究 1 単位は強度 $\lambda$ で革新を生み、その価値は次の生産性の水準で測るので $\gamma$ 倍）。
+:::
+
+::: intuition
+研究者は、成功すれば独占の地位を得るが、その地位は次の研究者の成功で奪われる。研究が盛んなほど、得た地位は早く奪われる。研究の量は、研究の費用と、成功したときの（いずれ奪われる）地位の価値が釣り合うところで決まる。
+:::
+
+::: theorem 創造的破壊の均衡 {#econ:creative-destruction keywords="the research arbitrage has a unique solution n* = (lambda gamma kappa L - omega r)/(lambda(omega + gamma kappa)) when positive; expected log productivity grows at rate g = lambda n* log gamma; n* rises with gamma and L, falls with r; the incumbent's value kappa(L - n)/(r + lambda n) strictly decreases in aggregate research n and in lambda, so incumbents gain from blocking innovation" index="創造的破壊|そうぞうてきはかい, 内生的成長|ないせいてきせいちょう, 既得権益|きとくけんえき" refname="創造的破壊の均衡"}
+\ref{econ:quality-ladder} の設定で、$\lambda\gamma\kappa L>\omega r$ とする。
+1. 裁定条件をみたす $n\in(0,L)$ はただ一つで $n^{*}=\dfrac{\lambda\gamma\kappa L-\omega r}{\lambda(\omega+\gamma\kappa)}$。
+2. 生産性の水準を $A_{t}=A_{0}\gamma^{N(t)}$（$N$ は強度 $\lambda n^{*}$ のポアソン過程）とすると、$E[\log A_{t}]=\log A_{0}+\lambda n^{*}t\log\gamma$。
+3. $n^{*}$ は $\gamma$ と $L$ について増加、$r$ について減少する。
+4. 既存の独占企業の価値 $V(n,\lambda)=\frac{\kappa(L-n)}{r+\lambda n}$ は、$n$ についても $\lambda$ についても狭義減少である。特に、もし既存の企業が革新の到来を止められる（$\lambda n$ を $0$ にできる）なら、その価値は $\frac{\kappa(L-n)}r$ に上がる。
+:::
+
+::: intuition
+成長の源泉（研究）と、既存の利潤の消滅は、同じ一つの過程の表と裏である。経済全体が成長するほど、個々の企業の独占は短命になる。だから既存の企業は、自分の地位を守るために、規制や参入の妨害によって革新を止めようとする誘因をもつ。この誘因が政治の力を得ると、成長そのものが止まる。体制が自分の成功の源泉を自分で抑え込む、という形の「内部からの変容」である。
+:::
+
+::: proof
+**Step 1（1）.** 裁定条件 $\omega=\lambda\gamma\frac{\kappa(L-n)}{r+\lambda n}$ は、$r+\lambda n>0$ を掛けて $\omega r+\omega\lambda n=\lambda\gamma\kappa L-\lambda\gamma\kappa n$ と同値で、これは $n$ の 1 次方程式 $\lambda(\omega+\gamma\kappa)n=\lambda\gamma\kappa L-\omega r$。解は主張の $n^{*}$ ただ一つで、仮定から $n^{*}>0$。$n^{*}<L$ は $\lambda\gamma\kappa L-\omega r<\lambda\omega L+\lambda\gamma\kappa L$ から。
+
+**Step 2（2）.** $N(t)$ は平均 $\lambda n^{*}t$ のポアソン分布にしたがう（\ref{stat:poisson-increments}）ので、$E[\log A_{t}]=\log A_{0}+E[N(t)]\log\gamma$。
+
+**Step 3（3）.** $n^{*}=\frac{\gamma\kappa L-\omega r/\lambda}{\omega+\gamma\kappa}$ と書くと、$r$ について減少、$L$ について増加は明らか。$\gamma$ で微分すると、分子は $\kappa L(\omega+\gamma\kappa)-\kappa(\gamma\kappa L-\omega r/\lambda)=\kappa\omega(L+r/\lambda)>0$。
+
+**Step 4（4）.** $\frac{\partial V}{\partial n}=\frac{-\kappa(r+\lambda n)-\kappa(L-n)\lambda}{(r+\lambda n)^{2}}<0$、$\frac{\partial V}{\partial\lambda}=-\frac{\kappa(L-n)n}{(r+\lambda n)^{2}}<0$（$n>0$, $n<L$）。革新が止まれば、\ref{econ:exponential-annuity} の $\mu$ が $0$ になり、収益は永続するので価値は $\frac{\kappa(L-n)}r$。
+:::
+
+## 再分配の内生化 {#econ:sec-ch-meltzer-richard}
+
+::: definition 中位投票者と単峰的な選好 {#econ:single-peaked keywords="preferences over tax rates tau in [0, 1] are single-peaked if each voter's utility strictly increases up to a peak and strictly decreases after it; a Condorcet winner beats every alternative in pairwise majority voting; the median voter" index="単峰的選好|たんぽうてきせんこう, 中位投票者|ちゅういとうひょうしゃ, コンドルセ勝者|こんどるせしょうしゃ" refname="中位投票者と単峰的な選好"}
+奇数人 $n=2k+1$ の投票者が税率 $\tau\in[0,1]$ について選好をもつとする。
+1. 投票者 $i$ の効用 $V_{i}$ が、ある $\tau_{i}\in[0,1]$（**峰**）について $[0,\tau_{i}]$ で狭義増加、$[\tau_{i},1]$ で狭義減少のとき、$i$ の選好は**単峰的**であるという。
+2. 峰を小さい順に並べたときの $k+1$ 番目の値を $\tau_{\mathrm{med}}$ とする（**中位投票者**の峰）。
+3. $\tau^{\circ}$ が、他のどの $\tau'$ との一対一の多数決でも過半数の支持を得る（$V_{i}(\tau^{\circ})>V_{i}(\tau')$ となる $i$ が $k+1$ 人以上）とき、$\tau^{\circ}$ を**コンドルセ勝者**という。
+:::
+
+::: intuition
+一次元の争点で、各人に一番好きな値があり、そこから離れるほど嫌になるなら、真ん中の人の好きな値はどの対案にも勝つ。真ん中より右の対案には左側の過半数が、左の対案には右側の過半数が反対するからである。
+:::
+
+::: theorem 中位投票者定理 {#econ:median-voter-theorem keywords="with single-peaked preferences and an odd number of voters, the median peak is the unique Condorcet winner" index="中位投票者定理|ちゅういとうひょうしゃていり" refname="中位投票者定理"}
+\ref{econ:single-peaked} の設定で全員の選好が単峰的なら、$\tau_{\mathrm{med}}$ はコンドルセ勝者であり、コンドルセ勝者はこれ以外にない。
+:::
+
+::: intuition
+中位投票者は、自分より左の人たちと右の人たちのちょうど境目にいる。どちらの方向に動かしても、反対側の過半数が反対する。
+:::
+
+::: proof
+**Step 1（右の対案に勝つ）.** $\tau'>\tau_{\mathrm{med}}$ とする。峰が $\tau_{\mathrm{med}}$ 以下の投票者は $k+1$ 人以上いる。そのような $i$ では $\tau_{i}\le\tau_{\mathrm{med}}<\tau'$ で、$V_{i}$ は $[\tau_{i},1]$ で狭義減少なので $V_{i}(\tau_{\mathrm{med}})>V_{i}(\tau')$。
+
+**Step 2（左の対案に勝つ）.** $\tau'<\tau_{\mathrm{med}}$ なら、峰が $\tau_{\mathrm{med}}$ 以上の $k+1$ 人以上が、同様に $\tau_{\mathrm{med}}$ を選ぶ。
+
+**Step 3（一意性）.** 他の $\tau^{\circ}\ne\tau_{\mathrm{med}}$ は、Step 1・2 から $\tau_{\mathrm{med}}$ との対決で過半数を得られないので、コンドルセ勝者でない。
+:::
+
+::: theorem メルツァー–リチャードの定理 {#econ:meltzer-richard keywords="in the linear income tax economy with voting over tau in [0, 1], preferences are single-peaked with peak tau(w^2) = (m_2 - w^2)/(2 m_2 - w^2) for w^2 < m_2 and 0 otherwise; the voted tax rate is the median voter's peak, (k - 1)/(2k - 1) with k = m_2/w_med^2 > 1, increasing in the ratio of the mean of w^2 to the median's w^2 (inequality)" index="メルツァー–リチャードの定理|めるつぁーりちゃーどのていり, 再分配の政治経済学|さいぶんぱいのせいじけいざいがく" refname="メルツァー–リチャードの定理"}
+\ref{econ:linear-income-tax} の経済で、人数 $n$ は奇数、税率 $\tau\in[0,1]$ を多数決で選ぶとする。$w_{\mathrm{med}}^{2}$ を $w_{i}^{2}$ の中央値とする。
+1. 各人の選好 $V_{i}$（\ref{econ:laffer-curve} の 3）は $[0,1]$ 上で単峰的で、峰は $w_{i}^{2}<m_{2}$ なら $\tau(w_{i}^{2})\defeq\dfrac{m_{2}-w_{i}^{2}}{2m_{2}-w_{i}^{2}}\in(0,\frac12]$、$w_{i}^{2}\ge m_{2}$ なら $0$。
+2. コンドルセ勝者は $\tau^{\circ}=\tau(w_{\mathrm{med}}^{2})$（$w_{\mathrm{med}}^{2}\ge m_{2}$ なら $0$）。$k\defeq m_{2}/w_{\mathrm{med}}^{2}>1$ なら $\tau^{\circ}=\dfrac{k-1}{2k-1}$ で、これは $k$ について狭義増加。
+:::
+
+::: intuition
+平均より能力の低い人は、税で集めて一律に配る仕組みから得をするので、正の税率を望む。所得の分布が右に歪んでいる（少数の高所得者が平均を引き上げる）と、中位の人は平均より貧しく、多数決は正の税率を選ぶ。所得の集中が進んで平均と中位の差が開くほど、選ばれる税率は上がる。
+:::
+
+::: proof
+**Step 1（効用の 2 次式）.** 【主張：$V_{i}(\tau)=\frac{w_{i}^{2}}2(1-\tau)^{2}+m_{2}(\tau-\tau^{2})$、$V'_{i}(\tau)=(m_{2}-w_{i}^{2})+\tau(w_{i}^{2}-2m_{2})$】\ref{econ:laffer-curve} の 3 を展開・微分する。
+
+**Step 2（$w_{i}^{2}<m_{2}$）.** $V'_{i}$ は $\tau$ の 1 次式で、傾き $w_{i}^{2}-2m_{2}<0$、$V'_{i}(0)=m_{2}-w_{i}^{2}>0$。零点 $\tau(w_{i}^{2})=\frac{m_{2}-w_{i}^{2}}{2m_{2}-w_{i}^{2}}$ は $(0,\frac12]$ に入る（$2(m_{2}-w_{i}^{2})\le2m_{2}-w_{i}^{2}$）。$V'_{i}$ は零点の左で正、右で負なので、$V_{i}$ は $[0,\tau(w_{i}^{2})]$ で狭義増加、$[\tau(w_{i}^{2}),1]$ で狭義減少。
+
+**Step 3（$w_{i}^{2}\ge m_{2}$）.** $\tau\in(0,1]$ で $V'_{i}(\tau)=(m_{2}-w_{i}^{2})(1-\tau)-\tau m_{2}<0$（第 1 項 $\le0$、第 2 項 $<0$）。よって $V_{i}$ は $[0,1]$ で狭義減少で、峰は $0$。
+
+**Step 4（峰の単調性）.** 【主張：峰は $w_{i}^{2}$ について非増加】$x\in[0,m_{2})$ で $\tau(x)=\frac{m_{2}-x}{2m_{2}-x}$ の導関数は $\frac{-(2m_{2}-x)+(m_{2}-x)}{(2m_{2}-x)^{2}}=\frac{-m_{2}}{(2m_{2}-x)^{2}}<0$。$x\ge m_{2}$ では峰は $0$ で、$x\uparrow m_{2}$ の極限 $\tau(m_{2})=0$ と連続につながる。
+
+**Step 5（2）.** Step 4 から、峰の中央値は $w_{i}^{2}$ の中央値をもつ人の峰 $\tau(w_{\mathrm{med}}^{2})$ に等しい（峰を $w_{i}^{2}$ の逆順に並べると、中央の位置は同じ人である。同じ峰をもつ人が複数いても、峰の値の中央値は変わらない）。\ref{econ:median-voter-theorem} から、これがコンドルセ勝者。$k>1$ なら分子と分母を $w_{\mathrm{med}}^{2}$ で割って $\frac{k-1}{2k-1}$、$\frac{d}{dk}\frac{k-1}{2k-1}=\frac1{(2k-1)^{2}}>0$。
+:::
+
+## 自壊と自己変容 {#econ:sec-ch-collapse-transformation}
+
+::: definition 自壊と自己変容（モデルの中での定義） {#econ:collapse-vs-transformation keywords="model-internal definitions: a system self-destructs if an endogenous variable drives it out of the region where its defining institutions are viable (no equilibrium of the same institutional type exists); it self-transforms if endogenous change shifts the equilibrium to a different institutional configuration that still exists" index="自壊|じかい, 自己変容|じこへんよう, 体制の変容|たいせいのへんよう" refname="自壊と自己変容（モデルの中での定義）"}
+経済のモデルが、制度のパラメータ $\theta$（税率・所有の形態・規制など）と、その制度のもとでの均衡の集合 $\mathcal E(\theta,s)$ をもつとする。$s$ は技術や分布のような状態変数で、時間とともに体制の内部の過程によって変わる。
+1. $s$ の内生的な変化によって、ある時点から先で $\mathcal E(\theta,s)=\emptyset$（その制度のもとでの均衡がなくなる）となるとき、制度 $\theta$ は**自壊**するという。
+2. $s$ の内生的な変化が、制度を決める過程（投票など）を通じて $\theta$ を $\theta'$ に動かし、$\mathcal E(\theta',s)\ne\emptyset$ であり続けるとき、体制は**自己変容**するという。
+:::
+
+::: intuition
+自壊とは、体制がその形のままでは立ち行かなくなることで、自己変容とは、体制が形を変えて立ち行き続けることである。この区別はモデルの中でしか厳密にならない。現実の体制について「自壊した」と言うには、どの制度の、どの均衡が、なぜなくなったかを特定する必要がある。
+:::
+
+::: remark
+このページの二つの機構を、この定義に当てはめる。
+- **メルツァー–リチャード**：所得の集中（$k$ の上昇、状態変数 $s$ の変化）が、投票を通じて税率 $\theta=\tau$ を上げる。均衡はどの $\tau\in[0,1]$ でも存在するので、これは**自己変容**の例である（自由放任 $\tau=0$ から修正資本主義 $\tau>0$ へ）。
+- **創造的破壊**：革新が既存の利潤を消すこと自体は、均衡の一部であって自壊ではない。既存の企業が政治の力で革新を止める（$\lambda\to0$）と、均衡は成長のない状態に移る。これを「成長する資本主義の自壊」と呼ぶか「停滞した体制への自己変容」と呼ぶかは、どの制度の性質をその体制の定義に含めるかによる。
+- \ref{econ:okishio-theorem} は、マルクスの「利潤率の低下による自壊」の一つの機構が、実質賃金一定のもとでは働かないことを示す。自壊の主張には、別の機構（実質賃金の上昇、需要の不足など）が必要である。
+:::
+
+::: hypcheck
+- **指数分布（創造的破壊）**：現在価値の陽な式（\ref{econ:exponential-annuity}）に使った。到来の時刻が指数分布でないと、価値は到来の分布のラプラス変換で表され、結論の定性的な形（研究が盛んなほど価値が小さい）は、到来が確率的に早まる限り保たれる。
+- **$\lambda\gamma\kappa L>\omega r$**：正の研究の量が均衡で選ばれる条件。成り立たなければ $n^{*}=0$ で成長は止まる。
+- **単峰性と奇数の投票者**：中位投票者定理の前提。争点が多次元になると、コンドルセ勝者は一般には存在しない（循環が起きる）。
+- **全員が投票する・投票が所得の税率だけを決める**：メルツァー–リチャードの定理の前提。投票率が所得とともに上がる、政治献金がある、などの場合は、決定的な投票者は中位の所得の人より豊かになりうる。
+- **線形の税と準線形の効用**：峰の陽な式に使った。
+:::
+
+## 問題 {#econ:sec-ch-problems}
+
+::: problem {#econ:prob-ch-lognormal}
+$w_{i}^{2}$ の分布が対数正規分布 $\log w^{2}\sim N(\mu,\sigma^{2})$ に近いとき（人数が非常に多いとき）、平均と中央値の比 $k$ と、メルツァー–リチャードの税率を $\sigma$ で表せ。
+:::
+
+::: solution
+対数正規分布の平均は $e^{\mu+\sigma^{2}/2}$、中央値は $e^{\mu}$ なので $k=e^{\sigma^{2}/2}$。税率は $\frac{e^{\sigma^{2}/2}-1}{2e^{\sigma^{2}/2}-1}$ で、$\sigma\to0$ で $0$、$\sigma\to\infty$ で $\frac12$（税収最大の税率）に近づく。不平等が大きいほど、多数決はラッファー曲線の頂点に近い税率を選ぶ。（人数が有限の場合からの極限は、ここでは厳密に扱っていない。）
+:::
+
+::: problem {#econ:prob-ch-blocking}
+\ref{econ:creative-destruction} で、既存の企業が費用 $F$ を払えば革新を永久に止められるとする。止める誘因があるのは $F$ がいくら以下のときか。そのとき社会が失うものは何か。
+:::
+
+::: solution
+止めると価値は $\frac{\kappa(L-n^{*})}r$、止めなければ $\frac{\kappa(L-n^{*})}{r+\lambda n^{*}}$（研究の量 $n^{*}$ を所与として）。差 $\kappa(L-n^{*})\bigl(\frac1r-\frac1{r+\lambda n^{*}}\bigr)=\frac{\kappa(L-n^{*})\lambda n^{*}}{r(r+\lambda n^{*})}$ が $F$ 以上なら止める誘因がある。社会は、生産性の期待成長率 $\lambda n^{*}\log\gamma$ を失う（生産性の対数の期待値の伸びが $0$ になる）。止めることで生まれる既存の企業の利益と、社会が失う成長は、比べる単位が違う（前者は一社の現在価値、後者は経済全体の成長率）。
+:::
+
+::: supplement
+**使わなかった前提・本質的でない前提.** 中位投票者定理は、効用の連続性も、峰の具体的な形も使わない（単峰性だけ）。
+
+**証明できること・実証・論争の整理.**
+
+| 主張 | 種類 | 根拠 |
+|---|---|---|
+| 革新が盛んなほど既存の独占の価値は小さい | 証明（モデルの中） | \ref{econ:creative-destruction} の 4 |
+| 所得の集中は多数決の税率を上げる | 証明（モデルの中） | \ref{econ:meltzer-richard} |
+| 実質賃金一定なら技術変化は利潤率を下げない | 証明（モデルの中） | \ref{econ:okishio-theorem} |
+| 国の間で、不平等が大きいほど再分配が大きい | 実証：支持は弱い・混在しているという評価が一般的（むしろ不平等の小さい国ほど再分配が大きいという「ロビン・フッドの逆説」が指摘されている） | 個別の研究で結論が分かれる |
+| 既得権益が革新を妨げ、国の盛衰を左右する | 論争：歴史的な事例に基づく議論（Acemoglu–Robinson『Why Nations Fail』(2012) など） | 因果の識別は難しい |
+| AI のような革新が資本主義の現在の形を保てなくする | 論争・推測：前提（自動化の範囲・速度、所得の分配、政治の反応）によって結論が変わる | \ref[AI と仕事]{econ:page-ai-tasks}（予定）でモデルを扱う |
+
+**前提を変えると（ここでは証明しない）.**
+- **シュンペーターの逆 U 字**：競争が強まると、競争から逃れるための革新は増えるが、革新の後の利潤が減るので研究の誘因は減る。両者の効果で、競争と革新の関係は逆 U 字になりうる（Aghion–Bloom–Blundell–Griffith–Howitt, Q. J. Econ. 120 (2005)）。
+- **多次元の争点**：税率と規制のように争点が二つ以上になると、多数決の結果は議題の順序に依存しうる（マッケルヴィーの混沌定理）。
+- **ピケティの $r>g$**：資本の収益率が経済の成長率を上回り続けると、資本所得の比重が増えて不平等が拡大する、という主張（Piketty『Capital in the Twenty-First Century』(2014)）。その長期の予測と機構については、批判と論争が続いている。
+
+**高い視点から：フィードバックの閉じた系.** このページの二つの機構は、どちらも「状態 $s$ が制度 $\theta$ のもとで変わり、$\theta$ が $s$ に応じて変わる」という閉じたフィードバックの系の一部である。メルツァー–リチャードでは、不平等 → 再分配 → 不平等の緩和、という負のフィードバック（安定化）が働きうる。創造的破壊と既得権益では、成功 → 既得権益 → 革新の抑制 → 停滞、という正のフィードバック（固定化）が働きうる。体制が「自壊しやすいか」は、どちらのフィードバックが強いかという量の問題で、モデルの構造だけからは決まらない。比喩で言えば、体制は自分で舵を切る船で、舵を切る仕組み（投票、ロビー活動）そのものが、船の進んだ結果によって変わる。転覆する（自壊）か、別の航路に移る（自己変容）かは、舵の効き方による。
+:::
+
+計算練習と、ほかのページの結果と組み合わせる演習は \ref[演習]{econ:sec-ch-exercises} にまとめた。
+</script>
+<noscript>このサイトの表示には JavaScript が必要です。</noscript>
+<script src="../../../vendor/katex/katex.min.js?v=03dce885"></script>
+<script src="../../../vendor/marked.min.js?v=e04ae0bf"></script>
+<script src="../../../config.js?v=0cfb52e7"></script>
+<script src="../../../auth-state.js?v=2ff2f569"></script>
+<script src="../../../site-core.js?v=b5ace0d0"></script>
+<script src="../../../site-index.js"></script>
+<script src="../../../search.js?v=c13d04d8"></script>
+<script src="../../../site.js?v=8daec3f2"></script>
+<script src="../../../learn/manifest.js?v=930301b0"></script>
+<script src="../../../learn.js?v=ea558dd8"></script>
+</body>
+</html>
